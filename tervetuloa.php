@@ -27,14 +27,15 @@ if (!isset($tee) or $tee == '') {
 
 	// haetaan kaikki yritykset, jonne t‰m‰ k‰ytt‰j‰ p‰‰see
 	$query  = "	SELECT distinct yhtio.yhtio, yhtio.nimi
-				from kuka
-				join yhtio using (yhtio)
-				where kuka='$kukarow[kuka]'";
+				FROM kuka
+				JOIN yhtio using (yhtio)
+				WHERE kuka = '$kukarow[kuka]'";
 	$kukres = mysql_query($query) or pupe_error($query);
 
 	while ($kukrow = mysql_fetch_array($kukres)) {
 
-		$query = "	SELECT count(*) FROM lasku
+		$query = "	SELECT count(*)
+					FROM lasku
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila = 'H' and tila!='D'
 					ORDER BY erpcm";
 		$result = mysql_query($query) or pupe_error($query);

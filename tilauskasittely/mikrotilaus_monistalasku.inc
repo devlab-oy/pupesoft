@@ -40,7 +40,7 @@ if ($tee == "file") {
 			$hyvit = trim($rivi[2]);
 			$slask = trim($rivi[3]);
 			$krahd = trim($rivi[4]);
-			
+
 			$query = "	SELECT tunnus
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -64,6 +64,7 @@ if ($tee == "file") {
 
 				$korjaaalvit[$row["tunnus"]]  = $alvik;
 				$suoraanlasku[$row["tunnus"]] = $slask;
+				$korjaarahdit[$row["tunnus"]] = $krahd;
 			}
 		}
 

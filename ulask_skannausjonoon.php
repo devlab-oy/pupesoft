@@ -32,7 +32,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 		die ("<font class='error'>".t("Liitetiedosto on liian suuri")."! (mysql: $varirow[1]) </font>");
 	}
 
-	// Katotaan, ettei samalla nimellä oo jko samaa laskua jonossa
+	// Katotaan, ettei samalla nimellä oo jo samaa laskua jonossa
 	if (file_exists($dir."/".$_FILES['userfile']['name']) and $_FILES['userfile']['size'] == filesize($dir."/".$_FILES['userfile']['name'])) {
 		die ("<font class='error'>".t("Lasku on jo käsittelyjonossa")."!</font>");
 	}
@@ -45,7 +45,6 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 		while (file_exists($dir."/".$filename)) {
 			$filename = $kala."_".$_FILES['userfile']['name'];
-
 			$kala++;
 		}
 

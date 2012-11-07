@@ -766,7 +766,7 @@
 
 		$query_ale_lisa = generoi_alekentta('M');
 
-		if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
+		if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "U") {
 			$tyyppilisa = " and tilausrivi.tyyppi in ('L' $deletedlisa) ";
 		}
 		else {

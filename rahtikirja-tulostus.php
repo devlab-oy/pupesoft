@@ -209,6 +209,7 @@
 
 		$kopiotulostuksen_otsikot = array();
 
+		$kaikki_lotsikot_per_toimitus = '';
 		while ($rakir_row = mysql_fetch_assoc($rakir_res)) {
 			// muutama muuttuja tarvitaan
 			$pakkaus       		= array();
@@ -570,6 +571,7 @@
 				foreach ($lotsikot as $doit) {
 					if (!isset($nayta_pdf)) echo "$doit ";
 					$kaikki_lotsikot .= $doit.", ";
+					$kaikki_lotsikot_per_toimitus .= $doit . ", ";
 				}
 
 				$kaikki_lotsikot = substr($kaikki_lotsikot ,0 ,-2);
@@ -586,7 +588,7 @@
 						require("tilauskasittely/rahtikirja_pdf.inc");
 					}
 
-					if ($toitarow['erittely'] != '') {
+					if ($toitarow['erittely'] == 'k') {
 						require("tilauskasittely/rahtikirja_erittely_pdf.inc");
 					}
 
@@ -713,9 +715,17 @@
 					}
 				}
 			}
-			if (!isset($nayta_pdf)) echo "<br>";
+			if (!isset($nayta_pdf) and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) echo "<br>";
 		} // end while haetaan kaikki distinct rahtikirjat..
 
+
+		if ($toitarow['erittely'] == 't') {
+			$kaikki_lotsikot_per_toimitus = substr($kaikki_lotsikot_per_toimitus ,0 ,-2);//poistetaan pilkku ja välilyönti viimosen perästä
+			$otunnukset_temp = $otunnukset;
+			$otunnukset = $kaikki_lotsikot_per_toimitus;
+			require("tilauskasittely/rahtikirja_erittely_pdf.inc");
+			$otunnukset = $otunnukset_temp;
+		}
 		// poistetaan lukko
 		$query = "UNLOCK TABLES";
 		$res   = pupe_query($query);

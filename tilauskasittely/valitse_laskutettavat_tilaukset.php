@@ -1099,13 +1099,13 @@
 				require "inc/laskutyyppi.inc";
 
 				$toimitusselite = "";
-				if ($tilrow["chn"] == '100') $toimitusselite = t("Paperilasku, tulostuspalvelu");
+				if ($tilrow["chn"] == '100') $toimitusselite = t("Verkkolasku, tulostuspalvelu");
 				if ($tilrow["chn"] == '010') $toimitusselite = t("Verkkolasku");
 				if ($tilrow["chn"] == '020') $toimitusselite = t("Itella Pupevoice: Vienti-Verkkolasku");
 				if ($tilrow["chn"] == '111') $toimitusselite = t("Itella EDI: EIH-1.4 sähköinen lasku");
 				if ($tilrow["chn"] == '112') $toimitusselite = t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin");
 				if ($tilrow["chn"] == '666') $toimitusselite = t("Sähköposti");
-				if ($tilrow["chn"] == '667') $toimitusselite = t("Sisäinen, käsitellään manuaalisesti");
+				if ($tilrow["chn"] == '667') $toimitusselite = t("Paperilasku, käsitellään manuaalisesti");
 				if ($tilrow["chn"] == '999') $toimitusselite = t("Laskutuskielto, laskutusta ei tehdä");
 
 				$teksti = "";

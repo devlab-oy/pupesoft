@@ -1,15 +1,5 @@
 <?php
 
-// jos php-gd on installoitu niin loidataab barcode library
-if (in_array("gd", get_loaded_extensions())) {
-	require_once("barcode/barcode.php");
-	require_once("barcode/c39object.php");
-
-	//viivakoodien tulostamista varten
-	define ("__TRACE_ENABLED__", false);
-	define ("__DEBUG_ENABLED__", false);
-}
-
 require_once("pdflib/phppdflib.class.php");
 
 $norm["height"] 			= 10;
@@ -488,7 +478,7 @@ if (!function_exists('alku_kerayslista')) {
 				$kala = 560;
 			}
 
-			//viivakoodin arvo
+			// Viivakoodi
 			if ($yhtiorow['kerayserat'] == 'K' and $tyyppi == 'KERAYSERA' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
 				$barcode = strlen($kerayseran_numero) < 6 ? str_pad((int) $kerayseran_numero, 6, "0", STR_PAD_LEFT) : $kerayseran_numero;
 			}
@@ -496,40 +486,27 @@ if (!function_exists('alku_kerayslista')) {
 				$barcode  = $laskurow["tunnus"];
 			}
 
-			//luodaan viivakoodiolio
-			unset($obj);
-			if (class_exists("C39Object")) {
-				$obj = new C39Object($width, $height, $style, $barcode);
-			}
+			$data = viivakoodi(trim($barcode), "code128", 70, 10, "");
+			$image = $pdf->jfif_embed($data);
+			$pdf->image_place($image, 801, 460, $thispage, array("scale" => 0.5));
 
-			if ($obj) {
-				$obj->SetFont($font);
-				$obj->DrawObject($xres);
-
-				//flushataan pdf ja saadaam filenimi johon se tallennettiin
-				$nimi1 = $obj->FlushObject();
-
-				//keksitään uudelle failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
-
-				passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-
-				if ($fh = @fopen($nimi2, "r")) {
-					$data = fread($fh, filesize($nimi2));
-					fclose($fh);
-					$image = $pdf->png_embed($data);
-
-					if ($image) {
-						$placement = $pdf->image_place($image, 805, 440, $thispage);
-					}
+			// Tehdään asiakasnumero-viivakoodi
+			if ($kukarow['yhtio'] == 'hair' and $asrow["asiakasnro"] > 0) {
+				if ($laskurow['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
+					$bottom_barcode = 582;
+					$bottom_barcode_text = 578;
+				}
+				else {
+					$bottom_barcode = 605;
+					$bottom_barcode_text = 600;
 				}
 
-				unset($obj);
+				$data = viivakoodi(trim($asrow["asiakasnro"]), "code128", 70, 10, "");
+				$image = $pdf->jfif_embed($data);
+				$pdf->image_place($image, $bottom_barcode, 475, $thispage, array("scale" => 0.5));
 
-				//dellataan tmp filet kuleksimasta
-				system("rm -f $nimi1 $nimi2");
+				$oikpos = $pdf->strlen(t("Asnro")." ".$asrow["asiakasnro"], $norm);
+				$pdf->draw_text(580-$oikpos, $bottom_barcode_text, t("Asnro")." ".$asrow["asiakasnro"], $thispage, $norm);
 			}
 		}
 
@@ -633,44 +610,17 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 			$pdf->draw_text(430, 761, tv1dateconv($laskurow["toimaika"]), 	$thispage, $boldi);
 		}
 
-		//viivakoodin arvo
-		$barcode  = $laskurow["tunnus"];
-
-		if (class_exists("c39object")) {
-			//luodaan viivakoodiolio
-			$obj = "";
-			$obj = new C39Object($width, $height, $style, $barcode);
-
-			if ($obj) {
-				$obj->SetFont($font);
-				$obj->DrawObject($xres);
-
-				//flushataan pdf ja saadaam filenimi johon se tallennettiin
-				$nimi1 = $obj->FlushObject();
-
-				//keksitään uudelle failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
-
-				passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-
-				if ($fh = fopen($nimi2, "r")) {
-					$data = fread($fh, filesize($nimi2));
-					fclose($fh);
-					$image = $pdf->png_embed($data);
-
-					if ($image) {
-						$placement = $pdf->image_place($image, 805, 440, $thispage);
-					}
-				}
-
-				unset($obj);
-
-				//dellataan tmp filet kuleksimasta
-				system("rm -f $nimi1 $nimi2");
-			}
+		// Viivakoodi
+		if ($yhtiorow['kerayserat'] == 'K' and $tyyppi == 'KERAYSERA' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
+			$barcode = strlen($kerayseran_numero) < 6 ? str_pad((int) $kerayseran_numero, 6, "0", STR_PAD_LEFT) : $kerayseran_numero;
 		}
+		else {
+			$barcode  = $laskurow["tunnus"];
+		}
+
+		$data = viivakoodi(trim($barcode), "code128", 70, 10, "");
+		$image = $pdf->jfif_embed($data);
+		$pdf->image_place($image, 801, 460, $thispage, array("scale" => 0.5));
 
 		$kala = 715;
 
@@ -1394,5 +1344,3 @@ if (!function_exists('print_pdf_kerayslista')) {
 		}
 	}
 }
-
-?>

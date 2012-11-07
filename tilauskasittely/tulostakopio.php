@@ -1683,7 +1683,7 @@
 
 					// Aloitellaan lomakkeen teko
 					$params_tyomaarays = tyomaarays_alku($params_tyomaarays);
-					
+
 					if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "") {
 						// Ekan sivun otsikot
 						$params_tyomaarays['kala'] -= $params_tyomaarays['rivinkorkeus']*3;

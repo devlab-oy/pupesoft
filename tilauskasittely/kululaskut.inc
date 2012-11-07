@@ -202,6 +202,7 @@ if ($tee_kululaskut == "liita") {
 					osto_kulu_alv 		= '{$osto_kulu_alv}',
 					osto_rahti_alv 		= '{$osto_rahti_alv}',
 					osto_rivi_kulu_alv	= '{$osto_rivi_kulu_alv}',
+					laatija				= '$kukarow[kuka]',
 					luontiaika	 		= now(),
 					tila         		= 'K'";
 		$result = pupe_query($query);

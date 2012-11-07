@@ -18800,7 +18800,7 @@ if (!function_exists('tarkista_varaston_hyllypaikka')) {
 
 		# parse options
 		foreach($options as $key => $value) {
-			if (!empty($key) and !empty($value) and in_array($key, $acceptable_options)) {
+			if (!empty($key) and in_array($key, $acceptable_options)) {
 				$query_lisa[] = "$key = '{$value}'";
 			}
 		}

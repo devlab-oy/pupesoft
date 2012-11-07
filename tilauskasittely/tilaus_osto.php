@@ -208,7 +208,7 @@
 										erikoisale = 0
 										where yhtio = '$kukarow[yhtio]' and
 										tunnus = '$row[tunnus]'";
-				$result = pupe_query($query);
+				$erikoisale_result = pupe_query($query);
 			}
 
 			// katotaan ollaanko haluttu optimoida johonki varastoon
@@ -790,9 +790,23 @@
 			// katotaan miten halutaan sortattavan
 			$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
-			$query_ale_lisa = generoi_alekentta("O");
+			$query_ale_lisa = generoi_alekentta("O", '', 'ei_erikoisale');
 
 			$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
+
+			$tilausrivit_query = "	SELECT tunnus
+									FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$kukarow['kesken']}'";
+			$tilausrivit_result = pupe_query($tilausrivit_query);
+
+			while($tilausrivi_row = mysql_fetch_assoc($tilausrivit_result)) {
+				$tilausrivi_update_query = "UPDATE tilausrivi
+											SET erikoisale = '{$erikoisale}'
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$tilausrivi_row['tunnus']}'";
+				pupe_query($tilausrivi_update_query);
+			}
 
 			//Listataan tilauksessa olevat tuotteet
 			$query = "	SELECT tilausrivi.nimitys,
@@ -863,9 +877,24 @@
 				$tilaus_result = pupe_query($tilaus_query);
 				$tilaus_row = mysql_fetch_assoc($tilaus_result);
 
+				$tilaus_otsikko_query = "	SELECT erikoisale
+											FROM lasku
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$kukarow['kesken']}'";
+				$tilaus_otsikko_result = pupe_query($tilaus_otsikko_query);
+				$tilaus_otsikko_row = mysql_fetch_assoc($tilaus_otsikko_result);
+
 				while ($prow = mysql_fetch_array ($presult)) {
+					if($tilaus_otsikko_row['erikoisale'] != $prow['ale3']) {
+						//ostotilauksen muokkausta varten
+						//erikoisale ja ale3 yhdistetään tilaus valmis kohdassa. tästä syystä rivihinnat menee plörinäks jos tilausta tullaan muokkaamaan.
+						//erikoisale tiedetään otsikolta ja sen perusteella voidaan laskea ale3 prosentti sekä oikea rivihinta ilman erikoisalennusta
+						$ale3 = ((100 - $prow['ale3'])/100) / ((100 - $tilaus_otsikko_row['erikoisale'])/100);
+						$prow['rivihinta'] = $prow['rivihinta'] / $ale3;
+						$prow['ale3'] = (1 - $ale3) * 100;
+					}
 					$divnolla++;
-					$erikoisale_maara = ($prow['hinta'] * ($tilaus_row['erikoisale'] / 100));
+					$erikoisale_maara = ($prow['rivihinta'] * ($tilaus_row['erikoisale'] / 100));
 					$erikoisale_summa += ($erikoisale_maara * -1);
 					$yhteensa += $prow["rivihinta"];
 					$paino_yhteensa += ($prow["tilattu"]*$prow["tuotemassa"]);
@@ -1248,16 +1277,22 @@
 					$_colspan = $backspan1 - 1;
 					echo "<td>
 						<td class='back' colspan='$_colspan'></td>
-						<td colspan='3' class='spec'>".t('Erikoisalennus')." ".$laskurow['erikoisale']."%</td>
-						<td align='right' class='spec'>".sprintf("%.2f", $erikoisale_summa)."</td>
+						<td colspan='3' class='spec'>".t('Tilauksen arvo yhteensä')."</td>
+						<td align='right' class='spec'>".sprintf("%.2f", $yhteensa)."</td>
 						<td class='spec'>$laskurow[valkoodi]</td>
 						</td>
 						</tr>";
 					$_colspan = $backspan1 + 4;
 					echo "<tr>
 						<td class='back' colspan='$_colspan'></td>
+						<td colspan='3' class='spec'>".t('Erikoisalennus')." ".$laskurow['erikoisale']."%</td>
+						<td align='right' class='spec'>".sprintf("%.2f", $erikoisale_summa)."</td>
+						<td class='spec'>$laskurow[valkoodi]</td>
+						</tr>";
+					echo "<tr>
+						<td class='back' colspan='$_colspan'></td>
 						<td colspan='3' class='spec'>".t("Tilauksen arvo").":</td>
-						<td align='right' class='spec'>".sprintf("%.2f", $yhteensa)."</td>
+						<td align='right' class='spec'>".sprintf("%.2f", $yhteensa + $erikoisale_summa)."</td>
 						<td class='spec'>$laskurow[valkoodi]</td>
 						</tr>";
 				}

@@ -238,7 +238,7 @@ if ($kollityht > 0) {
 
 		}
 
-		//echo "<hr>data:<pre>".print_r($delisprintFileFormat, true)."</pre>";
+		echo "<hr>data:<pre>".var_dump($delisprintFileFormat)."</pre><br>";
 
 		unset($aineisto);
 		foreach($delisprintFileFormat as $p) {
@@ -247,6 +247,8 @@ if ($kollityht > 0) {
 			}
 			$aineisto.=$parcelOrder[$p];
 		}
+
+		echo "<br><hr>Aineisto:<br><pre>{$aineisto}</pre><br>";
 
 		// Muunnetaan merkistö Windows ANSI
 		iconv("ISO-8859-1", "Windows-1252", $aineisto);

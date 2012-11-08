@@ -107,6 +107,6 @@ if ($kollityht > 0) {
 
 		$sanoma .= "{$kollityht};";
 		$sanoma .= "{$pakkaus[0]};";
-		$sanoma .= "{$rahtikirjanro};";
+		$sanoma .= "EE0{$rahtikirjanro};";
 	}
 }

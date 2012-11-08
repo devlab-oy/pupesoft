@@ -1436,6 +1436,40 @@
 											perheid2		= '$perheid2',
 											tunnus 			= '$rivitunnus',
 											nimitys 		= '$trow[nimitys]',
+											jaksotettu		= '$jaksotettu'
+
+											ON DUPLICATE KEY UPDATE
+
+											hyllyalue 		= '$myy_hyllyalue[$indeksi]',
+											hyllynro 		= '$myy_hyllynro[$indeksi]',
+											hyllytaso 		= '$myy_hyllytaso[$indeksi]',
+											hyllyvali 		= '$myy_hyllyvali[$indeksi]',
+											tilaajanrivinro = '$rivinumero',
+											laatija 		= '$kukarow[kuka]',
+											laadittu 		= $vanharivilaadittu,
+											yhtio 			= '$kukarow[yhtio]',
+											tuoteno 		= '$myy_tuoteno[$indeksi]',
+											varattu 		= '$varattu',
+											yksikko 		= '$trow[yksikko]',
+											kpl 			= '0',
+											kpl2			= '$kpl2',
+											tilkpl 			= '$tilattu',
+											{$query_ale_lrivi}
+											{$query_erikoisale_lisa}
+											alv 			= '$lis_alv',
+											netto			= '$lis_netto',
+											hinta 			= '$lis_hinta',
+											kerayspvm 		= '$kerayspvm',
+											otunnus 		= '$kukarow[kesken]',
+											tyyppi 			= '$rivityyppi',
+											toimaika 		= '$toimaika',
+											kommentti 		= '$kommentti',
+											var 			= '',
+											try				= '$trow[try]',
+											osasto			= '$trow[osasto]',
+											perheid			= '$perheid',
+											perheid2		= '$perheid2',
+											nimitys 		= '$trow[nimitys]',
 											jaksotettu		= '$jaksotettu'";
 
 								if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
@@ -2279,6 +2313,41 @@
 						perheid			= '$perheid',
 						perheid2		= '$perheid2',
 						tunnus 			= '$rivitunnus',
+						nimitys 		= '$trow[nimitys]',
+						jaksotettu		= '$jaksotettu'
+						
+						ON DUPLICATE KEY UPDATE
+
+						hyllyalue 		= '$p_hyllyalue',
+						hyllynro 		= '$p_hyllynro',
+						hyllyvali 		= '$p_hyllyvali',
+						hyllytaso 		= '$p_hyllytaso',
+						tilaajanrivinro = '$rivinumero',
+						laatija 		= '$kukarow[kuka]',
+						laadittu 		= $vanharivilaadittu,
+						yhtio 			= '$kukarow[yhtio]',
+						tuoteno 		= '$trow[tuoteno]',
+						varattu 		= '$varattu',
+						yksikko 		= '$trow[yksikko]',
+						kpl 			= '0',
+						kpl2			= '$kpl2',
+						tilkpl 			= '$kpl',
+						jt				= '$jt',
+						{$query_insert_ale_lisa}
+						{$query_erikoisale_lisa}
+						alv 			= '$lis_alv',
+						netto			= '$lis_netto',
+						hinta 			= '$lis_hinta',
+						kerayspvm 		= '$kerayspvm',
+						otunnus 		= '$kukarow[kesken]',
+						tyyppi 			= '$rivityyppi',
+						toimaika 		= '$toimaika',
+						kommentti 		= '$kommentti',
+						var 			= '$var',
+						try				= '$trow[try]',
+						osasto			= '$trow[osasto]',
+						perheid			= '$perheid',
+						perheid2		= '$perheid2',
 						nimitys 		= '$trow[nimitys]',
 						jaksotettu		= '$jaksotettu'";
 

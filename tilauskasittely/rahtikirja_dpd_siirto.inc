@@ -271,12 +271,12 @@ if ($kollityht > 0) {
 		if ($dpd_delisprint_host != "" and $dpd_delisprint_user != "" and $dpd_delisprint_pass != "" and $dpd_delisprint_path != "") {
 			// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
 			// palautetaan $palautus ja $syy
-			$ftphost = $dpd_delisprint_host;
-			$ftpuser = $dpd_delisprint_user;
-			$ftppass = $dpd_delisprint_pass;
-			$ftppath = $dpd_delisprint_path;
-			$ftpfile = realpath($filenimi);
-			require ("inc/ftp-send.inc");
+			// $ftphost = $dpd_delisprint_host;
+			// $ftpuser = $dpd_delisprint_user;
+			// $ftppass = $dpd_delisprint_pass;
+			// $ftppath = $dpd_delisprint_path;
+			// $ftpfile = realpath($filenimi);
+			// require ("inc/ftp-send.inc");
 		}
 	}
 	else {

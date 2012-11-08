@@ -6,10 +6,16 @@
  * Kustomointi: Mikko Nousiainen mikko@datamonitor.fi
  *************************************************************/
 
+echo "<br>kollityht: $kollityht<br><br>";
+
 //jos on laitettu kollikentt‰‰n 0 niin ei yritet‰ luoda siirtotiedostoa
 if ($kollityht > 0) {
 
+	echo "dpd_delisprint_path: $dpd_delisprint_path<br>";
+
 	if (($dpd_delisprint_host != "" and $dpd_delisprint_user != "" and $dpd_delisprint_pass != "" and $dpd_delisprint_path != "") or $dpd_delisprint_path != "") {
+
+		echo "p‰‰stiin iffin sis‰lle.<br>";
 
 		if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 

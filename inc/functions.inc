@@ -13205,7 +13205,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 				$vaktuotetiedot[] = "$vakecho";
 			}
 
-			if (isset($tuotepainot)) {
+			if (isset($tuotepainot) and $rakirkilot > 0) {
 				$vaktuotetiedot[] = "";
 				$vaktuotetiedot[] = "TOTAL GROSS MASS: $rakirkilot kg";
 			}

@@ -2435,7 +2435,7 @@
 
 				echo "<td class='toggleable_row_rows' id='{$til_row['rivit']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$til_row['rivit']} / {$til_row['keratyt']}</td>";
 
-				if (trim($lahto_row['sscc_ulkoinen']) != '') {
+				if (trim($lahto_row['sscc_ulkoinen']) != '' and trim($lahto_row['sscc_ulkoinen']) != 0) {
 					echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 					echo "<button type='button'>{$lahto_row['sscc_ulkoinen']}</button>";
 					echo "</td>";

@@ -65,7 +65,7 @@
 	// 1 = maanantai, 7 = sunnuntai
 	$weekday = date("N");
 	$weekday = $weekday-$ajopaiva;
-$weekday = 1;
+
 	if ($weekday <= 0 OR $weekday == 6 OR $weekday == 7) {
 		// tällä hetkellä aineiston saa ainoastaan ma-pe päiviltä
 		echo "\n\nTätä skriptiä voi ajaa vain arkipäiviltä!\n\n";
@@ -240,7 +240,7 @@ $weekday = 1;
 		global $path_xauxi, $yhtiorow, $tuoterajaukset, $toimirajaus;
 
 		echo "TULOSTETAAN xauxi...\n";
-/*
+
 		//viedään nimityksen sijaan lyhytkuvaus -Satu 8.2.12
 		$query = "	SELECT 	tuote.tuoteno AS tuoteno,
 							tuote.lyhytkuvaus AS tuotenimi,
@@ -306,7 +306,6 @@ $weekday = 1;
 		}
 
 		fclose($fp);
-		*/
 	}
 
 	function xlto($tanaan) {
@@ -318,7 +317,7 @@ $weekday = 1;
 		//jätetää täst aineistost ostoehdotus EI:t pois -satu 17-2-12
 
 		echo "TULOSTETAAN xlt0...\n";
-/*
+
 		$query = "	SELECT
 						tilausrivi.tuoteno tuoteno,
 						DATE_FORMAT(tilausrivi.laskutettuaika,'%Y%m%d') luonti,
@@ -383,14 +382,13 @@ $weekday = 1;
 		}
 
 		fclose($fp);
-		*/
 	}
 
 	function xswp($tanaan, $korvatut) {
 		global $path_wswp, $yhtiorow, $tuoterajaukset, $toimirajaus;
 
 		echo "TULOSTETAAN xswp...\n";
-/*
+
 		$query = " SELECT korvaavat.id,
 				   tuote.tuoteno,
 				   korvaavat.jarjestys,
@@ -477,14 +475,13 @@ $weekday = 1;
 		}
 		if ($korvatut != "") return $xf02loppulause;
 		else fclose($fp);
-		*/
 	}
 
 	function xvni($tanaan) {
 		global $path_xvni, $yhtiorow, $tuoterajaukset, $toimirajaus;
 
 		echo "TULOSTETAAN XVNI...\n";
-/*
+
 		$qxvni = "	SELECT toimi.toimittajanro AS toimittaja, toimi.nimi nimi, SUBSTRING(toimi.nimi, 1, 18) lyhytnimi
 					FROM toimi
 					WHERE toimi.yhtio = '$yhtiorow[yhtio]'
@@ -553,14 +550,13 @@ $weekday = 1;
 		}
 
 		fclose($fp);
-		*/
 	}
 
 	function xf04($tanaan) {
 		global $path_xf04, $yhtiorow, $tuoterajaukset, $toimirajaus;
 
 		echo "TULOSTETAAN xf04...\n";
-/*
+
 		// jos kirjaimet on A-I niin homma toimii, jos on enemmän niin homma kusee.
 
 		$qxf04 = "	SELECT tuote.tuoteno as tuoteno, tuote.yksikko as yksikko , tuote.try as try,
@@ -648,7 +644,6 @@ $weekday = 1;
 		}
 
 		fclose($fp);
-		*/
 	}
 
 	function xf01($tanaan) {
@@ -789,7 +784,7 @@ $weekday = 1;
 
 		fclose($fp);
 	}
-/*
+
 	function xf02($tanaan, $xf02loppulause) {
 		global $path_xf02, $yhtiorow, $tuoterajaukset, $toimirajaus;
 
@@ -936,7 +931,7 @@ $weekday = 1;
 
 		fclose($fp);
 	}
-*/
+
 	function create_headers($fp, array $cols) {
 		$data = implode("\t", $cols) . "\n";
 		fwrite($fp, $data);

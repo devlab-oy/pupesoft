@@ -26,8 +26,11 @@ echo "<div class='main'>
 
 	<ul>
 	<li><a href='alusta.php' class='button'>",t("ASN / Suuntalava"),"</a></li>
-	<li><a href='ostotilaus.php?uusi' class='button'>",t("Ostotilaus"),"</a>
-	<a href='ostotilaus.php' class='button'><font style='color: red'>$kesken</font></a></li>
+	<li><a href='ostotilaus.php?uusi' class='button'>",t("Ostotilaus"),"</a>";
+
+if ($kesken != '') echo "<a href='ostotilaus.php' class='button'><font style='color: red'>$kesken</font></a>";
+
+echo "</li>
 
 	<br>
 	<li><a href='suuntalavat.php' class='button'>",t("Suuntalavat"),"</a></li>

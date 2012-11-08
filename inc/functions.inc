@@ -13131,8 +13131,8 @@ if (!function_exists("palauta_vak_tiedot")) {
 					$vakecho = "";
 					if (trim($edrow["lipukkeet"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[lipukkeet]";
 					if (trim($edrow["pakkausryhma"]) != "") $vakecho .= ", ".t("Pakkausryhmä", $kieli)." $edrow[pakkausryhma]";
-					if (trim($edrow["leimahduspiste"]) != "") $vaktuotetiedot[] = t("Leimahduspiste", $kieli)." {$edrow['leimahduspiste']}";
-					if (trim($edrow["meria_saastuttava"]) != "") $vaktuotetiedot[] = t("Meriä saastuttava", $kieli)." {$edrow['meria_saastuttava']}";
+					if (trim($edrow["leimahduspiste"]) != "" and $taulu == 'vak_imdg') $vaktuotetiedot[] = t("Leimahduspiste", $kieli)." {$edrow['leimahduspiste']}";
+					if (trim($edrow["meria_saastuttava"]) != "" and $taulu == 'vak_imdg') $vaktuotetiedot[] = t("Meriä saastuttava", $kieli)." {$edrow['meria_saastuttava']}";
 
 					// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
 					if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
@@ -13189,8 +13189,8 @@ if (!function_exists("palauta_vak_tiedot")) {
 			$vakecho = "";
 			if (trim($edrow["lipukkeet"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[lipukkeet]";
 			if (trim($edrow["pakkausryhma"]) != "") $vakecho .= ", ".t("Pakkaus", $kieli)." $edrow[pakkausryhma]";
-			if (trim($edrow["leimahduspiste"]) != "") $vaktuotetiedot[] = t("Leimahduspiste", $kieli)." {$edrow['leimahduspiste']}";
-			if (trim($edrow["meria_saastuttava"]) != "") $vaktuotetiedot[] = t("Meriä saastuttava", $kieli)." {$edrow['meria_saastuttava']}";
+			if (trim($edrow["leimahduspiste"]) != "" and $taulu == 'vak_imdg') $vaktuotetiedot[] = t("Leimahduspiste", $kieli)." {$edrow['leimahduspiste']}";
+			if (trim($edrow["meria_saastuttava"]) != "" and $taulu == 'vak_imdg') $vaktuotetiedot[] = t("Meriä saastuttava", $kieli)." {$edrow['meria_saastuttava']}";
 
 			// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
 			if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {

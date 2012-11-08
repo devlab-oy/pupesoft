@@ -411,20 +411,30 @@
 			$result = pupe_query($query);
 
 			if($myyntitilausrivi_row = mysql_fetch_assoc($result)) {
-				//poistetaan myös myyntitilausrivi
-				$query = "	UPDATE tilausrivi
-							SET tyyppi = 'D'
+				//tarkistetaan onko myyntitilausriviä kerätty toimitettu tai laskutettu
+				$query = "	SELECT *
+							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tyyppi = 'L'
+							AND ('B' ,'C', 'D', 'J', 'V', 'X')
 							AND tunnus = '{$myyntitilausrivi_row['tilausrivitunnus']}'";
 				$result = pupe_query($query);
+				if(mysql_num_rows($result) == 0) {
+					//poistetaan myös myyntitilausrivi
+					$query = "	UPDATE tilausrivi
+								SET tyyppi = 'D'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$myyntitilausrivi_row['tilausrivitunnus']}'";
+					$result = pupe_query($query);
 
-				//poistetaan linkki
-				$query = "	DELETE
-							FROM tilausrivin_lisatiedot
-							WHERE tilausrivilinkki = '{$rivitunnus}'";
-				$result = pupe_query($query);
+					//poistetaan linkki
+					$query = "	DELETE
+								FROM tilausrivin_lisatiedot
+								WHERE tilausrivilinkki = '{$rivitunnus}'";
+					$result = pupe_query($query);
 
-				echo "<font class='error'>".t("Poistetaan rivi myös myyntitilaukselta")." {$myyntitilausrivi_row['vanha_otunnus']}</font><br/><br/>";
+					echo "<font class='error'>".t("Poistetaan rivi myös myyntitilaukselta")." {$myyntitilausrivi_row['vanha_otunnus']}</font><br/><br/>";
+				}
 			}
 			$query = "	UPDATE tilausrivi
 						SET tyyppi = 'D'

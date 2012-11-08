@@ -49,7 +49,7 @@ if (isset($submit) and trim($submit) != '') {
 		else {
 			# P‰ivitet‰‰n tilausrivin m‰‰r‰ ja splitataan rivi
 			$ok = paivita_tilausrivin_kpl($tilausrivi, ($row['varattu'] - $maara));
-			$uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $maara, false, true);
+			$uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $maara, TRUE, TRUE);
 
 			# Redirect alustaan vai suuntalavan_tuotteet
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";

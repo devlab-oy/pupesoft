@@ -14,7 +14,7 @@ if(!isset($tee)) $tee = '';
 # Uusi suuntalava
 # form.php / uusi
 if (isset($uusi)) {
-	$title = "Uusi suuntalava";
+	$title = t("Uusi suuntalava");
 
 	# Haetaan tyypit
 	$query = "	SELECT *
@@ -121,7 +121,7 @@ if (isset($uusi)) {
 # P‰ivitet‰‰n suuntalava
 # form.php / update
 else if (isset($muokkaa) and is_numeric($muokkaa)) {
-	$title = "Suuntalavan muokkaus";
+	$title = t("Suuntalavan muokkaus");
 
 	# Tyyppi
 	$query = "	SELECT *

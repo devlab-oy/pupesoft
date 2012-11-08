@@ -154,7 +154,6 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "TV_LISATIETO") 		$ulos .= "<option value='TV_LISATIETO' $avain_sel[TV_LISATIETO]>			".t("Tilausvahvistuksen lis‰tiedot")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "INVEN_LAJI") 		$ulos .= "<option value='INVEN_LAJI' $avain_sel[INVEN_LAJI]>				".t("Inventoinnin laji")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "HAE_JA_SELAA") 		$ulos .= "<option value='HAE_JA_SELAA' $avain_sel[HAE_JA_SELAA]>			".t("Hae ja selaa -ohjelman parametrit")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "DYNAAMINEN_PUU") 	$ulos .= "<option value='DYNAAMINEN_PUU' $avain_sel[DYNAAMINEN_PUU]>		".t("Dynaamisen puun p‰‰kategoriat")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PUUTEKOMM") 		$ulos .= "<option value='PUUTEKOMM' $avain_sel[PUUTEKOMM]>					".t("Puuterivin kommentti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_TEEMA") 	$ulos .= "<option value='EXTRANET_TEEMA' $avain_sel[EXTRANET_TEEMA]>		".t("Extranet ulkoasuteema")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA") 	$ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>		".t("Yll‰pitosopimuksen rivien kent‰t")."</option>";
@@ -368,6 +367,32 @@
 
 		$ulos .= "</select></td>";
 		$jatko = 0;
+	}
+
+	if ($avain_sel["TOIMEHTO"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3") {
+
+		$sel1 = '';
+		$sel2 = '';
+
+		if ($trow[$i] == 'LAHETTAJAN_SOPIMUS') {
+			$sel1 = 'SELECTED';
+		}
+		elseif ($trow[$i] == 'VASTAANOTTAJAN_SOPIMUS') {
+			$sel2 = 'SELECTED';
+		}
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("K‰ytet‰‰n toimitustavan/asiakkaan oletusrahtisopimusta")."</option>";
+		$ulos .= "<option value='LAHETTAJAN_SOPIMUS' $sel1>".t("K‰ytet‰‰n l‰hett‰j‰n rahtisopimusta")."</option>";
+		$ulos .= "<option value='VASTAANOTTAJAN_SOPIMUS' $sel2>".t("K‰ytet‰‰n vastaanottajan rahtisopimusta")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+		$jatko = 0;
+	}
+
+	if ($avain_sel["TOIMEHTO"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_4") {
+		$tyyppi = 0;
+		$jatko  = 0;
 	}
 
 	if (($avain_sel["KARHUVIESTI"] == "SELECTED" or $avain_sel["TV_LISATIETO"] == "SELECTED") and (mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark_2" or mysql_field_name($result, $i) == "selitetark_3")) {

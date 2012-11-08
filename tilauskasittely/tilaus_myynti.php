@@ -94,6 +94,8 @@ if (!isset($lisax)) 				$lisax = '';
 if (!isset($etayhtio_totaalisumma)) $etayhtio_totaalisumma = 0;
 if (!isset($nayta_sostolisateksti)) $nayta_sostolisateksti = "";
 if (!isset($sarjanumero_dropdown)) 	$sarjanumero_dropdown = "";
+if (!isset($kommentti_select)) 		$kommentti_select = '';
+if (!isset($yksi_suoratoimittaja)) 	$yksi_suoratoimittaja = '';
 
 // Setataan lopetuslinkki, jotta pääsemme takaisin tilaukselle jos käydään jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -935,9 +937,21 @@ if (isset($tyhjenna)) {
 	$omalle_tilaukselle = "";
 }
 
-if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
-	and $kateinen != '' and ($kukarow["kassamyyja"] != '' or (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")
-	and $kertakassa != '')) and $kukarow['extranet'] == '') {
+if ($tee == "VALMIS"
+	and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
+	and $kateinen != ''
+	and $kukarow['extranet'] == ''
+	and (
+		$kukarow["kassamyyja"] != ''
+		or (
+			(
+				$kukarow["dynaaminen_kassamyynti"] != ""
+				or $yhtiorow["dynaaminen_kassamyynti"] != ""
+			)
+			and $kertakassa != ''
+		)
+	)
+) {
 
 	if (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and isset($kertakassa) and $kertakassa == 'EI_KASSAMYYNTIA') {
 		$kassamyyja_kesken 	= "";
@@ -4503,6 +4517,12 @@ if ($tee == '') {
 			$vak_chk_array = array();
 
 			while ($vakrow = mysql_fetch_assoc($result)) {
+				// poimitaan samalla suoratoimitustoimittaja, jos yhtiöparametreissa on sallittu suoratoimitukset vain yhdeltä toimittajalta
+				if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C'))) {
+					if ($vakrow["toimittajan_tunnus"]) {
+						$yksi_suoratoimittaja = $vakrow["toimittajan_tunnus"]; // jos tilauksella oli jo monta suoratoimittajaa, niin voi voi. vain viimeinen muistetaan ja sallitaan jatkossa. (backwards compatibility)
+					}
+				}
 				if ($vakrow["vakkoodi"] != "0" and $vakrow["vakkoodi"] != "" and $vakrow["var"] != "P" and $vakrow["var"] != "J") {
 					$vak_chk_array[$vakrow["tuoteno"]] = $vakrow["tuoteno"];
 				}

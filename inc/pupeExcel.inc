@@ -20,18 +20,19 @@ class pupeExcel {
 					excelrivi int(11) default null,
 					excelsarake int(11) default null,
 					type char(1) default null,
-					value varchar(256),
+					value varchar(100),
 					string_id int(11) default null,
 					style text default null)";
 		$result = pupe_query($query, $this->_exceldblink);
 
 		// Tehdään Excel stringejä varten temporary tietokantataulu
 		$query = "	CREATE temporary table excel_sharedstrings (
+					string_key varchar(100) not null,
 					string text default null,
 					id int(11) not null AUTO_INCREMENT,
 					times_used int(11) not null,
 					PRIMARY KEY (id),
-					UNIQUE KEY stringind (string(256)))";
+					UNIQUE KEY string_key_ind (string_key));";
 		$result = pupe_query($query, $this->_exceldblink);
 	}
 
@@ -106,16 +107,19 @@ class pupeExcel {
 
 		if ($string == "") $string = NULL;
 		else $string = xmlentities($string);
+		
+		$string_key = md5($string);
 
 		$query = "	INSERT INTO excel_data SET
 					excelrivi 	= $excelrivi,
 					excelsarake = $excelsarake,
 					type 		= 'S',
-					value 		= '$string',
+					value 		= '$string_key',
 					style 		= '".mysql_real_escape_string(serialize($style))."'";
 		$result = pupe_query($query, $this->_exceldblink);
 
 		$query = "	INSERT INTO excel_sharedstrings SET
+					string_key  = '$string_key',
 					string 		= '$string',
 					times_used 	= 1
 					ON DUPLICATE KEY UPDATE times_used = times_used + 1";
@@ -140,9 +144,9 @@ class pupeExcel {
 		$sheetData 	   = simplexml_load_file($sheetDataFile);
 		$sharedStrings = simplexml_load_file($sharedStringsFile);
 
-		// Päivitetään exel dataan string_id:t
+		// Päivitetään excel dataan string_id:t
 		$query = "	UPDATE excel_data
-					JOIN excel_sharedstrings ON (excel_sharedstrings.string = excel_data.value)
+					JOIN excel_sharedstrings ON (excel_sharedstrings.string_key = excel_data.value)
 					SET excel_data.string_id = (excel_sharedstrings.id-1)
 					WHERE excel_data.type = 'S'";
 		$result = pupe_query($query, $this->_exceldblink);
@@ -249,6 +253,12 @@ class pupeExcel {
 		$xlsxfile = md5(uniqid(rand(),true)).".xlsx";
 
 		exec("cd /tmp/{$foldername}; find . -name .DS_Store -delete; /usr/bin/zip -r /tmp/{$xlsxfile} *; rm -rf /tmp/{$foldername};");
+
+		$query = "DROP TABLE excel_sharedstrings;";
+		$result = pupe_query($query, $this->_exceldblink);
+
+		$query = "DROP TABLE excel_data;";
+		$result = pupe_query($query, $this->_exceldblink);
 
 		return $xlsxfile;
 	}

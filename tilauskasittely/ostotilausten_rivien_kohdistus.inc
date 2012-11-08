@@ -91,9 +91,6 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
 	}
 	$trow = mysql_fetch_assoc($result);
 
-	$query = "	DELETE from tilausrivi
-				WHERE tunnus = '$riviid' and yhtio='$kukarow[yhtio]'";
-	$result = pupe_query($query);
 
 	// Tehd‰‰n pari juttua jos tuote on sarjanuerosaurannassa
 	if ($trow["sarjanumeroseuranta"] != '') {

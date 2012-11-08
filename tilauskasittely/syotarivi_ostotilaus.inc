@@ -122,6 +122,7 @@
 
 		echo "$varaosavirhe</td>";
 		echo "<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Lisää")."'></td>";
+		echo "<td class='back'><input type='submit' name='poista' value='".t("Poista")."'/></td></tr>";
 
 		if ($toim == "HAAMU" or $tuoteno == "99" or $yhtiorow["nimityksen_muutos_tilauksella"] == "Y") {
 			echo "	<tr><th align='left' colspan='7'>".t("Nimitys")."</th></tr>

@@ -1264,6 +1264,59 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	$nappikeikka = str_replace('\n','',$nappikeikka);
 }
 
+//tämä on naimisissa olevien osto ja myyntitilaus rivien saapumisten kautta poistamista varten
+if($poista == 'Poista') {
+	$query = "	SELECT tilausrivin_lisatiedot.tilausrivitunnus
+				FROM tilausrivin_lisatiedot
+				JOIN tilausrivi
+				ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+				AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki
+				JOIN lasku
+				ON lasku.yhtio = tilausrivin_lisatiedot.yhtio
+				AND lasku.tunnus = tilausrivi.otunnus
+				WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivin_lisatiedot.tilausrivilinkki = '{$lisatty_tun}'
+				AND tilausrivi.tyyppi = 'O'
+				AND lasku.tila = 'O'
+				AND lasku.alatila NOT IN ('X')";
+	$result = pupe_query($query);
+	if($tilausrivin_lisatiedot_row = mysql_fetch_assoc($result)) {
+		//tilaukset on naitettu. poistetaan myynti jos ei kerätty, toimitettu tai laskutettu
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'
+					AND tyyppi = 'L'
+					AND alatila IN ('B' ,'C', 'D', 'J', 'V', 'X')";
+		$result = pupe_query($query);
+		if(mysql_num_rows($result) == 0) {
+			$query = "	UPDATE tilausrivi
+					SET tyyppi = 'D'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'";
+			$result = pupe_query($query);
+		}
+	}
+
+	$query = "	SELECT *
+				FROM lasku
+				JOIN tilausrivi
+				ON tilausrivi.yhtio = lasku.yhtio
+				AND tilausrivi.otunnus = lasku.tunnus
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.tunnus = '{$lisatty_tun}'
+				AND lasku.tila = 'O'
+				AND lasku.alatila IN ('X')";
+	$result = pupe_query($query);
+	if(mysql_num_rows($result) == 0) {
+		$query = "	UPDATE tilausrivi
+					SET tyyppi = 'D'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$lisatty_tun}'";
+		$result = pupe_query($query);
+	}
+}
+
 echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 nappikeikka = \"$nappikeikka\";
 document.getElementById('toimnapit').innerHTML = nappikeikka;

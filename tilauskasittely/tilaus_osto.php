@@ -161,40 +161,33 @@
 			$query = "	SELECT *
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND otunnus = '{$kukarow['kesken']}'
-						LIMIT 1";
+						AND otunnus = '{$kukarow['kesken']}'";
 			$result = pupe_query($query);
-			$tilausrivi_row = mysql_fetch_assoc($result);
-
-			$query = "	SELECT *
-						FROM tilausrivin_lisatiedot
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tilausrivilinkki = '{$tilausrivi_row['tunnus']}'";
-			$tilausrivi_lisatiedot_result = pupe_query($query);
-			if($tilausrivi_lisatiedot_row = mysql_fetch_assoc($tilausrivi_lisatiedot_result)) {
-				//osto ja myynti on naimisissa keskenään.
-				//myyntitilaus poistetaan vain jos sitä ei ole kerätty, toimitettu tai laskutettu
+			while($tilausrivi_row = mysql_fetch_assoc($result)) {
 				$query = "	SELECT *
-							FROM lasku
+							FROM tilausrivin_lisatiedot
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tila = 'L'
-							AND alatila NOT IN ('B' ,'C', 'D', 'J', 'V', 'X')
-							AND tunnus = '{$tilausrivi_lisatiedot_row['vanha_otunnus']}'";
-				$result = pupe_query($query);
-				if(mysql_num_rows($result) == 0) {
-					$query = "	UPDATE tilausrivi
-								SET tyyppi = 'D'
+							AND tilausrivilinkki = '{$tilausrivi_row['tunnus']}'";
+				$tilausrivi_lisatiedot_result = pupe_query($query);
+				if($tilausrivi_lisatiedot_row = mysql_fetch_assoc($tilausrivi_lisatiedot_result)) {
+					//osto ja myynti on naimisissa keskenään.
+					//myyntitilaus poistetaan vain jos sitä ei ole kerätty, toimitettu tai laskutettu
+					$query = "	SELECT *
+								FROM lasku
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND otunnus = '{$tilausrivi_lisatiedot_row['vanha_otunnus']}'";
-					$result = pupe_query($query);
-
-					$query = "	UPDATE lasku
-								SET tila = 'D'
-								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tila = 'L'
+								AND alatila NOT IN ('B' ,'C', 'D', 'J', 'V', 'X')
 								AND tunnus = '{$tilausrivi_lisatiedot_row['vanha_otunnus']}'";
 					$result = pupe_query($query);
+					if(mysql_num_rows($result) == 0) {
+						$query = "	UPDATE tilausrivi
+									SET tyyppi = 'D'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$tilausrivi_lisatiedot_row['vanha_otunnus']}'";
+						$result = pupe_query($query);
 
-					echo "<font class='message'>".t("Ostotilaukseen liitetty myyntitilaus mitätöitiin myös")."!<br><br></font>";
+						echo "<font class='message'>".t("Ostotilaukseen liitetyt myyntitilausrivit mitätöitiin myös")."!<br><br></font>";
+					}
 				}
 			}
 

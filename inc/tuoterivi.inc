@@ -349,7 +349,7 @@
 
 	// ei piirretä ellei yhtiöparametri ohjeista katsomaan täältä
 	if (mysql_field_name($result, $i) == "suoratoimitus") {
-		if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W'))) {
+		if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J'))) {
 
 			$sel = array_fill_keys(array('S', 'U', 'X'), '');
 			$sel[$trow[$i]] = " SELECTED";
@@ -357,7 +357,7 @@
 			$ulos = "<td><select name='$nimi'".js_alasvetoMaxWidth($nimi, 300).">
 				<option value=''>".t("Myyntitilaukselta ei voi luoda ostorivejä tästä tuotteesta")."</option>";
 
-			if ($yhtiorow["tee_osto_myyntitilaukselta"] == "W"){
+			if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('W', 'J'))){
 				$ulos .= "<option value='S' {$sel['S']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta varastoon tai asiakkaalle")."</option>
 						  <option value='U' {$sel['U']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta asiakkaalle")."</option>
 						  <option value='X' {$sel['X']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta varastoon")."</option>";

@@ -889,6 +889,7 @@
 								$limit";
 				}
 				else {
+					//pit‰‰ tarkistaa, ett‰ automaattisessa rivien poiminnassa olemassa olevalle tilaukselle ei ole asetettu poikkeavaa toimitusosoitetta,
 					$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.jt $lisavarattu jt,
 								lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
 								lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
@@ -899,7 +900,13 @@
 								tilausrivi.kerayspvm
 								FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 								JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-								JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (lasku.tila != 'N' or lasku.alatila != '') $laskulisa $summarajauslisa)
+								JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio
+								and lasku.tunnus = tilausrivi.otunnus
+								and (lasku.tila != 'N' or lasku.alatila != '') $laskulisa $summarajauslisa
+								and lasku.toim_osoite = '{$laskurow['toim_osoite']}'
+								and lasku.toim_postino = '{$laskurow['toim_postino']}'
+								and lasku.toim_postitp = '{$laskurow['toim_postitp']}'
+								and lasku.toim_maa = '{$laskurow['toim_maa']}')
 								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
 								$toimittajalisa
 								WHERE tilausrivi.yhtio 	= '$kukarow[yhtio]'

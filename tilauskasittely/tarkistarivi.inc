@@ -683,13 +683,13 @@
 
 				// ...kielletään tilaamasta varastoon jos yhtiöparametri ohjaa katsomaan tuotteelta ja siellä ei ole sallittu...
 				if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W'))
-					and !in_array($trow['suoratoimitus'], array('', 'U'))) { 				// vain S ja X sallivat tilauksen varastoon
+					and !in_array($trow['suoratoimitus'], array('S', 'X'))) { 				// vain S ja X sallivat tilauksen varastoon
 					$tmp_varastoon = 0;
 				}
 
 				// ...kielletään tilaamasta asiakkaalle jos yhtiöparametri ohjaa katsomaan tuotteelta ja siellä ei ole sallittu...
 				if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('W'))
-				 	and !in_array($trow['suoratoimitus'], array('', 'X'))) {				// vain S ja U sallivat tilauksen asiakkaalle
+				 	and !in_array($trow['suoratoimitus'], array('S', 'U'))) {				// vain S ja U sallivat tilauksen asiakkaalle
 					$tmp_asiakkaalle = 0;
 				}
 

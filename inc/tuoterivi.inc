@@ -347,7 +347,7 @@
 		$jatko = 0;
 	}
 
-// ei piirretä ellei yhtiöparametri ohjeista katsomaan täältä
+	// ei piirretä ellei yhtiöparametri ohjeista katsomaan täältä
 	if (mysql_field_name($result, $i) == "suoratoimitus") {
 		if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W'))) {
 
@@ -361,7 +361,6 @@
 				$ulos .= "<option value='S' {$sel['S']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta varastoon tai asiakkaalle")."</option>
 						  <option value='U' {$sel['U']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta asiakkaalle")."</option>
 						  <option value='X' {$sel['X']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta varastoon")."</option>";
-
 			}
 			else {
 				$ulos .= "<option value='S' {$sel['S']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta varastoon")."</option>";

@@ -1777,9 +1777,9 @@ if ($kukarow["extranet"] == "" and $tee == 'jyvita') {
 	require("jyvita_riveille.inc");
 }
 
-//Lis‰t‰‰n t‰n asiakkaan valitut JT-rivit t‰lle tilaukselle
+// Lis‰t‰‰n t‰n asiakkaan valitut JT-rivit t‰lle tilaukselle
 if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == "") or (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and (int) $kukarow['kesken'] != 0 and $kaytiin_otsikolla == "NOJOO!" and ($tee == '' or $tee == 'OTSIK') and $toim == 'EXTRANET')) {
-	$tilaus_on_jo 	= "KYLLA";
+	$tilaus_on_jo = "KYLLA";
 
 	// Halutaan poimia heti kaikki jt-rivit extranet-tilauksille ensimm‰isell‰ kerralla
 	if (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and (int) $kukarow['kesken'] != 0 and $kaytiin_otsikolla == "NOJOO!" and ($tee == '' or $tee == 'OTSIK') and $toim == 'EXTRANET') {

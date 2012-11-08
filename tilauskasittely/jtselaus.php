@@ -53,6 +53,7 @@
 
 	// JT-selaus päivitysoikeus, joko JT-selaus päivitysoikeus tai tullaan keikalta ja kaikki saa toimittaa JT-rivejä
 	$jtselaus_paivitys_oikeus = FALSE;
+
 	if ($oikeurow['paivitys'] == '1' or (strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE and in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A')) )) {
 		$jtselaus_paivitys_oikeus = TRUE;
 	}
@@ -113,7 +114,9 @@
 			die("Asiakastietojasi ei löydy!");
 		}
 	}
-	elseif ($tilaus_on_jo != '') {
+
+	// Tilaus pitää tosiaan löytyä ja olla $kukarow[kesken]issä
+	if ($tilaus_on_jo != '') {
 		$query  = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -122,8 +125,8 @@
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
-			$asiakas = mysql_fetch_assoc($result);
-			$asiakasmaa = $asiakas["toim_maa"];
+			$tilaus_on_jo_row = mysql_fetch_assoc($result);
+			$asiakasmaa = $tilaus_on_jo_row["toim_maa"];
 		}
 		else {
 			die("Tilausta ei löydy!");
@@ -725,8 +728,8 @@
 			$tilausrivilisa .= " and tilausrivi.tunnus in (".implode(",", $suoratoimitus_rivit).") ";
 		}
 
-		if ($tilaus_on_jo == "KYLLA" and $toim == 'SIIRTOLISTA' and $laskurow['clearing'] != '') {
-		 	$laskulisa .= " and lasku.clearing = '$laskurow[clearing]' ";
+		if ($tilaus_on_jo == "KYLLA" and $toim == 'SIIRTOLISTA' and $tilaus_on_jo_row['clearing'] != '') {
+		 	$laskulisa .= " and lasku.clearing = '$tilaus_on_jo_row[clearing]' ";
 		}
 
 		if ($tuoteryhma != '') {
@@ -866,98 +869,94 @@
 
 			$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
-			if($tilaus_on_jo != '') {
-				//haetaan vain tuoteperheiden isät tai sellaset tuotteet jotka eivät kuulu tuoteperheisiin
-				if ($toim == "ENNAKKO") {
-					$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.varattu jt,
-								lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
-								lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
-								tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
-								lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
-								tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta
-								FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-								JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa $summarajauslisa)
-								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
-								$toimittajalisa
-								WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
-								and tilausrivi.tyyppi 			= 'E'
-								and tilausrivi.laskutettuaika 	= '0000-00-00'
-								and tilausrivi.varattu 			> 0
-								and ((tilausrivi.tunnus = tilausrivi.perheid and tilausrivi.perheid2 = 0) or (tilausrivi.tunnus = tilausrivi.perheid2) or (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0))
-								$tilausrivilisa
-								$order
-								$limit";
-				}
-				else {
-					//pitää tarkistaa, että automaattisessa rivien poiminnassa olemassa olevalle tilaukselle ei ole asetettu poikkeavaa toimitusosoitetta,
-					$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.jt $lisavarattu jt,
-								lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
-								lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
-								tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
-								lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
-								tilausrivin_lisatiedot.tilausrivilinkki,
-								tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
-								tilausrivi.kerayspvm
-								FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-								JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-								JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio
+			// haetaan vain tuoteperheiden isät tai sellaset tuotteet jotka eivät kuulu tuoteperheisiin
+			if ($toim == "ENNAKKO") {
+				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.varattu jt,
+							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
+							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
+							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
+							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
+							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta
+							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
+							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa $summarajauslisa)
+							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
+							$toimittajalisa
+							WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
+							and tilausrivi.tyyppi 			= 'E'
+							and tilausrivi.laskutettuaika 	= '0000-00-00'
+							and tilausrivi.varattu 			> 0
+							and ((tilausrivi.tunnus = tilausrivi.perheid and tilausrivi.perheid2 = 0) or (tilausrivi.tunnus = tilausrivi.perheid2) or (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0))
+							$tilausrivilisa
+							$order
+							$limit";
+			}
+			elseif ($tilaus_on_jo != '') {
+				//pitää tarkistaa, että automaattisessa rivien poiminnassa olemassa olevalle tilaukselle ei ole asetettu poikkeavaa toimitusosoitetta,
+				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.jt $lisavarattu jt,
+							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
+							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
+							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
+							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
+							tilausrivin_lisatiedot.tilausrivilinkki,
+							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
+							tilausrivi.kerayspvm
+							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
+							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio
 								and lasku.tunnus = tilausrivi.otunnus
 								and (lasku.tila != 'N' or lasku.alatila != '') $laskulisa $summarajauslisa
-								and lasku.toim_osoite = '{$laskurow['toim_osoite']}'
-								and lasku.toim_postino = '{$laskurow['toim_postino']}'
-								and lasku.toim_postitp = '{$laskurow['toim_postitp']}'
-								and lasku.toim_maa = '{$laskurow['toim_maa']}')
-								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
-								$toimittajalisa
-								WHERE tilausrivi.yhtio 	= '$kukarow[yhtio]'
-								and tilausrivi.tyyppi in ('L','G')
-								and tilausrivi.var 				= 'J'
-								and tilausrivi.keratty 			= ''
-								and tilausrivi.uusiotunnus 		= 0
-								and tilausrivi.kpl 				= 0
-								and tilausrivi.jt $lisavarattu	> 0
-								and ((tilausrivi.tunnus=tilausrivi.perheid and tilausrivi.perheid2=0) or (tilausrivi.tunnus=tilausrivi.perheid2) or (tilausrivi.perheid=0 and tilausrivi.perheid2=0))
-								$tilausrivilisa
-								$order
-								$limit";
-				}
+								and lasku.toim_osoite	= '{$tilaus_on_jo_row['toim_osoite']}'
+								and lasku.toim_postino	= '{$tilaus_on_jo_row['toim_postino']}'
+								and lasku.toim_postitp 	= '{$tilaus_on_jo_row['toim_postitp']}'
+								and lasku.toim_maa 		= '{$tilaus_on_jo_row['toim_maa']}')
+							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
+							$toimittajalisa
+							WHERE tilausrivi.yhtio 	= '$kukarow[yhtio]'
+							and tilausrivi.tyyppi in ('L','G')
+							and tilausrivi.var 				= 'J'
+							and tilausrivi.keratty 			= ''
+							and tilausrivi.uusiotunnus 		= 0
+							and tilausrivi.kpl 				= 0
+							and tilausrivi.jt $lisavarattu	> 0
+							and ((tilausrivi.tunnus=tilausrivi.perheid and tilausrivi.perheid2=0) or (tilausrivi.tunnus=tilausrivi.perheid2) or (tilausrivi.perheid=0 and tilausrivi.perheid2=0))
+							$tilausrivilisa
+							$order
+							$limit";
 			}
 			else {
 				//manuaalinen jt-rivien poiminta
 				//eriävä toimitusosoite hyväksytään mutta siitä ilmoitetaan
 				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.jt $lisavarattu jt,
-								lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
-								lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
-								tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
-								lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
-								tilausrivin_lisatiedot.tilausrivilinkki,
-								tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
-								tilausrivi.kerayspvm,
-								lasku.toim_nimi,
-								lasku.toim_nimitark,
-								lasku.toim_osoite,
-								lasku.toim_postino,
-								lasku.toim_postitp,
-								lasku.toim_maa
-								FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-								JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-								JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (lasku.tila != 'N' or lasku.alatila != '') $laskulisa $summarajauslisa)
-								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
-								$toimittajalisa
-								WHERE tilausrivi.yhtio 	= '$kukarow[yhtio]'
-								and tilausrivi.tyyppi in ('L','G')
-								and tilausrivi.var 				= 'J'
-								and tilausrivi.keratty 			= ''
-								and tilausrivi.uusiotunnus 		= 0
-								and tilausrivi.kpl 				= 0
-								and tilausrivi.jt $lisavarattu	> 0
-								and ((tilausrivi.tunnus=tilausrivi.perheid and tilausrivi.perheid2=0) or (tilausrivi.tunnus=tilausrivi.perheid2) or (tilausrivi.perheid=0 and tilausrivi.perheid2=0))
-								$tilausrivilisa
-								$order
-								$limit";
+							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
+							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
+							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
+							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
+							tilausrivin_lisatiedot.tilausrivilinkki,
+							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
+							tilausrivi.kerayspvm,
+							lasku.toim_nimitark,
+							lasku.toim_osoite,
+							lasku.toim_postino,
+							lasku.toim_postitp,
+							lasku.toim_maa
+							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
+							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (lasku.tila != 'N' or lasku.alatila != '') $laskulisa $summarajauslisa)
+							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
+							$toimittajalisa
+							WHERE tilausrivi.yhtio 	= '$kukarow[yhtio]'
+							and tilausrivi.tyyppi in ('L','G')
+							and tilausrivi.var 				= 'J'
+							and tilausrivi.keratty 			= ''
+							and tilausrivi.uusiotunnus 		= 0
+							and tilausrivi.kpl 				= 0
+							and tilausrivi.jt $lisavarattu	> 0
+							and ((tilausrivi.tunnus=tilausrivi.perheid and tilausrivi.perheid2=0) or (tilausrivi.tunnus=tilausrivi.perheid2) or (tilausrivi.perheid=0 and tilausrivi.perheid2=0))
+							$tilausrivilisa
+							$order
+							$limit";
 			}
 			$isaresult = pupe_query($query);
-
 			$jtseluas_rivienmaara = mysql_num_rows($isaresult);
 
 			if (mysql_num_rows($isaresult) > 0) {
@@ -1724,7 +1723,7 @@
 							}
 
 							if ($automaaginen == '') {
-								if($laskurow['toim_osoite'] != $jtrow['toim_osoite'] and $laskurow['toim_postino'] != $jtrow['toim_postino'] and $laskurow['toim_postitp'] != $jtrow['toim_postitp']) {
+								if ($tilaus_on_jo_row['toim_osoite'] != $jtrow['toim_osoite'] and $tilaus_on_jo_row['toim_postino'] != $jtrow['toim_postino'] and $tilaus_on_jo_row['toim_postitp'] != $jtrow['toim_postitp']) {
 									$toimitus_osoite = $jtrow['toim_osoite'] . ' ' . $jtrow['toim_postino'] . ' ' . $jtrow['toim_postino'];
 									echo "<td><font class='error'>".t('Huom! Jälkitoimitusrivillä on eri toimitusosoite.') . ' ' . $toimitus_osoite . "</font></td>";
 								}

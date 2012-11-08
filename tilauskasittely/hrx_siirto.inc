@@ -108,5 +108,32 @@ if ($kollityht > 0) {
 		$sanoma .= "{$kollityht};";
 		$sanoma .= "{$pakkaus[0]};";
 		$sanoma .= "EE0{$rahtikirjanro};";
+
+		if ($hrx_path != '') {
+			if (substr($hrx_path,-1) != '/') {
+				$hrx_path .= '/';
+			}
+			$filenimi = $hrx_path."hrx-import-".md5(uniqid(rand(),true)).".dat";
+		}
+		else {
+			$filenimi = "/tmp/hrx-import-".md5(uniqid(rand(),true)).".dat";
+		}
+
+		//kirjoitetaan faili levylle..
+		if (file_put_contents($filenimi, $sanoma) === FALSE) {
+			echo "<br><font class='error'>",t("Tiedoston kirjoitus epäonnistui"),"!</font><br>";
+		}
+
+		if ($hrx_host != "" and $hrx_user != "" and $hrx_pass != "" and $hrx_path != "") {
+			// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
+			// palautetaan $palautus ja $syy
+			// $ftphost = $hrx_host;
+			// $ftpuser = $hrx_user;
+			// $ftppass = $hrx_pass;
+			// $ftppath = $hrx_path;
+			// $ftpfile = realpath($filenimi);
+			// require ("inc/ftp-send.inc");
+		}
+
 	}
 }

@@ -333,34 +333,38 @@
 					}
 					else {
 
-						$query = "	SELECT komento
-									FROM kirjoittimet
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$reittietikettitulostin}'";
-						$kirjoitin_res = pupe_query($query);
-						$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
+						if (trim($reittietikettitulostin) != "") {
+							$query = "	SELECT komento
+										FROM kirjoittimet
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$reittietikettitulostin}'";
+							$kirjoitin_res = pupe_query($query);
+							$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 
-						// Tulostetaan Pupen oma kollitarra
-						// $params = array(
-				 	// 		'tilriv' => $row['tunnus'],//tilausnumero
-				 	// 		'pakkaus_kirjain' => excel_column_name($keraysera_row['pakkausnro']),
-				 	// 		'sscc' => $keraysera_row['sscc'],
-				 	// 		'toimitustapa' => $row['toimitustapa'],
-				 	// 		'rivit' => $keraysera_row['rivimaara'],//tilausrivien m‰‰r‰
-				 	// 		'paino' => $pakkaus_info_row['tuotemassa'],
-				 	// 		'tilavuus' => $pakkaus_info_row['kuutiot'],
-				 	// 		'lask_nimi' => $rakir_row['toim_nimi'],
-				 	// 		'lask_nimitark' => $rakir_row['toim_nimitark'],
-				 	// 		'lask_osoite' => $rakir_row['toim_osoite'],
-				 	// 		'lask_postino' => $rakir_row['toim_postino'],
-				 	// 		'lask_postitp' => $rakir_row['toim_postitp'],
-				 	// 		'lask_viite' => $row['viesti'],
-				 	// 		'lask_merkki' => $row['ohjausmerkki'],
-				 	// 		'reittietikettitulostin' => $kirjoitin_row['komento'],
-				 	// 	);
+							// Tulostetaan Pupen oma kollitarra
+							$params = array(
+					 			'tilriv' => $row['tunnus'],//tilausnumero
+					 			'pakkaus_kirjain' => excel_column_name($keraysera_row['pakkausnro']),
+					 			'sscc' => $keraysera_row['sscc'],
+					 			'toimitustapa' => $row['toimitustapa'],
+					 			'rivit' => $keraysera_row['rivimaara'],//tilausrivien m‰‰r‰
+					 			'paino' => $pakkaus_info_row['tuotemassa'],
+					 			'tilavuus' => $pakkaus_info_row['kuutiot'],
+					 			'lask_nimi' => $rakir_row['toim_nimi'],
+					 			'lask_nimitark' => $rakir_row['toim_nimitark'],
+					 			'lask_osoite' => $rakir_row['toim_osoite'],
+					 			'lask_postino' => $rakir_row['toim_postino'],
+					 			'lask_postitp' => $rakir_row['toim_postitp'],
+					 			'lask_viite' => $row['viesti'],
+					 			'lask_merkki' => $row['ohjausmerkki'],
+					 			'reittietikettitulostin' => $kirjoitin_row['komento'],
+					 		);
 
-					 	// tulosta_reittietiketti($params);
+						 	tulosta_reittietiketti($params);
+						}
 
+						/*
+					 	# HRX
 						// haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
 						$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
 									FROM varastopaikat
@@ -412,6 +416,7 @@
 						tulosta_hrx($params);
 
 						$monesko_laatikko++;
+						*/
 					}
 				}
 			}

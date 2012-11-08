@@ -312,7 +312,7 @@ if(!function_exists("tuotetarkista")) {
 
 		// ei piirretä ellei yhtiöparametri ohjeista katsomaan täältä
 		if (mysql_field_name($result, $i) == "suoratoimitus") {
-			if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W'))) {
+			if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J'))) {
 				if (!in_array($t[$i], array('S','U','X',''))) {
 					$virhe[$i] = t("Suoratoimitustieto virheellinen");
 					$errori = 1;

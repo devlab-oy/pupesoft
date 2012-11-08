@@ -504,8 +504,8 @@
 
 			$ulos  = "<td><select name='$nimi'>";
 
-			$st_opt   = (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('X', 'Y', 'V', 'W', 'Z', 'A', 'C'))) ? '1' : '0'; // eka merkki = varastoon
-			$st_opt  .= (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'Q', 'B', 'C')))      ? '1' : '0'; // toka merkki = asiakkaalle
+			$st_opt   = (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('X', 'Y', 'V', 'W', 'I', 'J', 'Z', 'A', 'C'))) ? '1' : '0';  // eka merkki = varastoon
+			$st_opt  .= (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'Q', 'B', 'C')))      ? '1' : '0';       // toka merkki = asiakkaalle
 
 			switch ($st_opt) {
 				case '11': // sallittu molemmille

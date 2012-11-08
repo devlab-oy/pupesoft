@@ -4518,7 +4518,7 @@ if ($tee == '') {
 
 			while ($vakrow = mysql_fetch_assoc($result)) {
 				// poimitaan samalla suoratoimitustoimittaja, jos yhtiöparametreissa on sallittu suoratoimitukset vain yhdeltä toimittajalta
-				if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C'))) {
+				if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J'))) {
 					if ($vakrow["toimittajan_tunnus"]) {
 						$yksi_suoratoimittaja = $vakrow["toimittajan_tunnus"]; // jos tilauksella oli jo monta suoratoimittajaa, niin voi voi. vain viimeinen muistetaan ja sallitaan jatkossa. (backwards compatibility)
 					}

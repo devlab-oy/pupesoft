@@ -2,11 +2,11 @@
 
 // Kutsutaanko CLI:stä
 if (php_sapi_name() != 'cli') {
-	die ("Ajo ainoastaan cronista / komentoriviltä!");
+	die (t("Ajo ainoastaan cronista / komentoriviltä!"));
 }
 
 if (!isset($argv[1])) {
-	die ("Anna yhtio parametriksi!");
+	die (t("Anna yhtio parametriksi!"));
 }
 
 $pupe_root_polku = dirname(__FILE__);
@@ -25,8 +25,8 @@ $kukarow['yhtio'] = $argv[1];
 $kukarow['kuka'] = "crond";
 $yhtiorow = hae_yhtion_parametrit($argv[1]);
 
-if ($yhtiorow["epakurantoinnin_erityiskasittely"] != 'Z') {
-	die("Tämä toiminto on käytettävissä vain, jos yhtiöparametri epakurantoinnin_erityiskasittely on 'Z'");
+if ($yhtiorow["epakurantoinnin_myyntihintaleikkuri"] != 'Z') {
+	die(t("Tämä toiminto on käytettävissä vain, jos yhtiöparametri epakurantoinnin_myyntihintaleikkuri on 'Z'"));
 }
 
 // hae nollasaldoiset zeniorpartsit, tarvitaan tuoteno ja alkuperäinen hinta

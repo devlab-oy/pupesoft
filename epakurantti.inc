@@ -28,6 +28,7 @@
 					tuote.kustp,
 					tuote.kohde,
 					tuote.projekti,
+					tuote.myyntihinta,
 					round(if (tuote.epakurantti100pvm = '0000-00-00',
 							if (tuote.epakurantti75pvm = '0000-00-00',
 								if (tuote.epakurantti50pvm = '0000-00-00',
@@ -293,27 +294,33 @@
 				$set_kehahin = "kehahin   = '{$uusi_keskihankintahinta}',
 								muutospvm = now(),
 								muuttaja  = '{$kukarow["kuka"]}', ";
+
+			case "pois" :
+				$pvm25  = "0000-00-00";
+				$pvm50  = "0000-00-00";
+				$pvm75  = "0000-00-00";
+				$pvm100 = "0000-00-00";
 				break;
 
 			case "paalle" :
-				if ($pvm100 == "0000-00-00"){
+				if ($pvm100 == "0000-00-00") {
 					$pvm100 = "now()";
 				}
 				// 100% epäkurantiksi tulevalle asetetaan 75% mukainen hinta, siksi ei jaettavaa vähennetä
 			case "75paalle" :
-				if ($pvm75 == "0000-00-00"){
+				if ($pvm75 == "0000-00-00") {
 					$pvm75 = "now()";
 				}
 				$zenior_jaettava--;
 
-			case "50paalle" :
-				if ($pvm50 == "0000-00-00"){
+			case "puolipaalle" :
+				if ($pvm50 == "0000-00-00") {
 					$pvm50 = "now()";
 				}
 				$zenior_jaettava--;
 
 			case "25paalle" :
-				if ($pvm25 == "0000-00-00"){
+				if ($pvm25 == "0000-00-00") {
 					$pvm25 = "now()";
 				}
 				$zenior_jaettava--;
@@ -321,7 +328,7 @@
 				break;
 		}
 
-		if ($yhtiorow["epakurantoinnin_erityiskasittely"] == 'Z') {
+		if ($yhtiorow["epakurantoinnin_myyntihintaleikkuri"] == 'Z') {
 
 			if ($tuoterow["epakurantti25pvm"] == "0000-00-00") { // oltiin nollassa, eka epäkurantoituminen
 				$zenior_jakaja = 4;
@@ -344,6 +351,24 @@
 				$set_zenior = "myyntihinta = myyntihinta * " . ($zenior_jaettava / $zenior_jakaja) . ", ";
 			}
 
+			$z_query = "SELECT	laji,
+								selitetark
+						FROM tuotteen_avainsanat
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND tuoteno = '{$tuoterow["tuoteno"]}'
+						AND laji 	= 'zeniorparts';";
+			$z_result = pupe_query($z_query);
+
+			if (mysql_num_rows($z_result) == 0) {
+				$z_row_found = 0;
+				$on_jo_epakurantti = 0;  // Tämä on epäkurantoitu ennen zeniorparts-toiminnon käyttöönottoa. Poistetaan hinnastot mutta talteen otettava tuote.myyntihinta saattaa olla käsin muutettu
+			}
+			else {
+				$z_row_found = 1;
+				$z_row = mysql_fetch_assoc($z_result);
+				$z_orig_hinta = floatval($z_row["selitetark"]) + 0;
+			}
+
 			if ($on_jo_epakurantti == 0) {
 				$set_zenior .= "ostoehdotus = 'E', nettohinta = 0, myymalahinta = 0, ";
 
@@ -356,15 +381,7 @@
 				$z_query = "DELETE FROM asiakasalennus WHERE yhtio = '{$kukarow["yhtio"]}' AND tuoteno = '{$tuoterow["tuoteno"]}';";
 				$z_result = pupe_query($z_query);
 
-				// lisätään tuotteen_avainsana zeniorparts jollei sitä jo ole. otetaan muuttamaton hinta talteen
-				$z_query = "SELECT laji
-							FROM tuotteen_avainsanat
-							WHERE yhtio = '{$kukarow["yhtio"]}'
-							AND tuoteno = '{$tuoterow["tuoteno"]}'
-							AND laji 	= 'zeniorparts';";
-				$z_result = pupe_query($z_query);
-
-				if (mysql_num_rows($z_result) == 0) {
+				if ($z_row_found == 0) {
 					$z_query = "INSERT INTO tuotteen_avainsanat	SET
 								yhtio      = '{$kukarow["yhtio"]}',
 								tuoteno    = '{$tuoterow["tuoteno"]}',
@@ -374,15 +391,31 @@
 					$z_result = pupe_query($z_query);
 				}
 			}
+			elseif (($tee == 'pois' or $tee == 'peru') and $z_row_found != 0) {
+				$set_zenior = "myyntihinta = {$z_orig_hinta}, ";
+
+				$t_query = "DELETE FROM tuotteen_avainsanat
+							WHERE
+								yhtio       = '{$kukarow["yhtio"]}'
+								AND laji    = 'zeniorparts'
+								AND tuoteno = '{$tuoterow["tuoteno"]}';";
+				$t_result = pupe_query($t_query);
+
+			}
 		}
 
+		if ($pvm25  != "now()") { $pvm25  = "'{$pvm25}'" ; }
+		if ($pvm50  != "now()") { $pvm50  = "'{$pvm50}'" ; }
+		if ($pvm75  != "now()") { $pvm75  = "'{$pvm75}'" ; }
+		if ($pvm100 != "now()") { $pvm100 = "'{$pvm100}'"; }
+		
 		$query = "	UPDATE tuote SET
 					$set_zenior
 					$set_kehahin
 					epakurantti25pvm  =  {$pvm25},
 					epakurantti50pvm  =  {$pvm50},
 					epakurantti75pvm  =  {$pvm75},
-					epakurantti100pvm = {$pvm100}
+					epakurantti100pvm =  {$pvm100}
 					WHERE yhtio = '{$kukarow["yhtio"]}'
 					AND	tuoteno = '{$tuoterow["tuoteno"]}';";
 		$result = pupe_query($query);

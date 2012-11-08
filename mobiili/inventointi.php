@@ -65,9 +65,6 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi) {
 	$hylly = explode('-', $tuotepaikka);
 
-	# DEBUG!
-	if($varmistuskoodi == 9999) return true;
-
 	# Jos ei annettu varmistuskoodia ja keksissä on koodi, käytetään keksin koodia
 	if ($varmistuskoodi == '' and isset($_COOKIE['_varmistuskoodi']) and $tuotepaikka == $_COOKIE['_tuotepaikka']) {
 		$varmistuskoodi = $_COOKIE['_varmistuskoodi'];
@@ -76,7 +73,8 @@ function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi) {
 	if ($varmistuskoodi == '') {
 		return false;
 	}else {
-		return tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $varmistuskoodi);
+		$options = array('varmistuskoodi' => $varmistuskoodi);
+		return tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $options);
 	}
 }
 

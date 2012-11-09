@@ -46,10 +46,6 @@
 		list($komento,$raja,$emailok,$alkupp,$alkukk,$alkuvv,$loppupp,$loppukk,$loppuvv) = explode('#', $muutparametrit);
 	}
 
-	if ($tee == "tulosta" and $komento == "" and $ytunnus == "") {
-		echo "<font class='error'>".t('VALITSE TULOSTIN' , $kieli)."!!!</font><br><br>";
-		$tee = "";
-	}
 
 	if ($tee == "tulosta" and $raja == "") {
 		echo "<font class='error'>".t('RAJA PUUTTUU' , $kieli)."!!!</font><br><br>";
@@ -168,6 +164,7 @@
 		$query = "	SELECT *
 					FROM kirjoittimet
 					WHERE yhtio = '$kukarow[yhtio]'
+					AND komento != 'email'
 					ORDER BY kirjoitin";
 		$kires = mysql_query($query) or pupe_error($query);
 
@@ -175,7 +172,7 @@
 			echo "<option value='$kirow[komento]'>$kirow[kirjoitin]</option>";
 		}
 
-		echo "</select></td></tr>";
+		echo "</select> ".t("Kirjoittimelle tulostetaan vuosisopimukset jos sähköpostiosoitetta ei ole järjestelmässä")."</td></tr>";
 
 		echo "<tr><th>".t('Syötä ostoraja' , $kieli).":</th>";
 		echo "<td><input type='text' name='raja' value='10000' size='10'> $yhtiorow[valkoodi] valitulla ajanjaksolla</td></tr>";
@@ -286,19 +283,37 @@
 			$aswhere = "";
 		}
 
-		$query = "	SELECT asiakas.tunnus, asiakas.email asiakas_email, asiakas.ytunnus, asiakas.asiakasnro, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp, sum(arvo) arvo, kuka.eposti myyja_eposti
+		$query = "	SELECT asiakas.tunnus,
+					asiakas.email asiakas_email,
+					asiakas.ytunnus,
+					asiakas.asiakasnro,
+					asiakas.nimi,
+					asiakas.nimitark,
+					asiakas.osoite,
+					asiakas.postino,
+					asiakas.postitp,
+					ifnull(kuka.eposti, '')   myyja_eposti,
+					sum(arvo)     arvo
 					FROM lasku USE INDEX (yhtio_tila_tapvm)
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-					JOIN kuka ON (kuka.yhtio = asiakas.yhtio AND kuka.myyja = asiakas.myyjanro)
+					LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio AND kuka.myyja = asiakas.myyjanro)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
 					and lasku.alatila = 'X'
 					and lasku.tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'
 					and lasku.tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}'
-					and asiakas.myyjanro != 0
 					$aswhere
-					GROUP BY asiakas.tunnus
-					HAVING arvo > {$params['raja']}";
+					GROUP BY asiakas.tunnus,
+					asiakas_email,
+					asiakas.ytunnus,
+					asiakas.asiakasnro,
+					asiakas.nimi,
+					asiakas.nimitark,
+					asiakas.osoite,
+					asiakas.postino,
+					asiakas.postitp,
+					myyja_eposti
+					HAVING sum(arvo) > {$params['raja']}";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$asiakkaat = array();
@@ -322,7 +337,7 @@
 			$group = "osasto, try";
 			$order = "osasto, try";
 		}
-		$query = "	SELECT {$select},
+		$query = "	SELECT {$select}
 						sum(if (tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'		and tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}', tilausrivi.rivihinta, 0)) va,
 						sum(if (tapvm >= '{$params['edalkupvm']}'											and tapvm <= '{$params['edloppupvm']}', tilausrivi.rivihinta, 0)) ed,
 						sum(if (tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'		and tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}', tilausrivi.kpl, 0)) kplva,
@@ -377,40 +392,39 @@
 			$tiedostot = generoi_pdf_tiedostot($data_array, $params, $kieli);
 		}
 
-		if($komento == 'email') {
-			switch ($laheta_sahkopostit) {
-				case 'ajajalle':
-					$email = $kukarow['eposti'];
-					luo_zip_ja_laheta($tiedostot, $email);
-					break;
+		switch ($laheta_sahkopostit) {
+			case 'ajajalle':
+				$email = $kukarow['eposti'];
+				luo_zip_ja_laheta($tiedostot, $email);
+				break;
 
-				case 'asiakkaalle':
-					foreach($data_array as $data) {
-						$email = $data['asiakasrow']['asiakas_email'];
-						$tiedosto = $data['tiedosto'];
-
+			case 'asiakkaalle':
+				foreach($data_array as $data) {
+					$email = $data['asiakasrow']['asiakas_email'];
+					$tiedosto = $data['tiedosto'];
+					if($email != '') {
 						laheta_email($email, array($tiedosto));
-
-						unlink($tiedosto);
 					}
-					break;
-
-				case 'asiakkaan_myyjalle':
-					foreach($data_array as $data) {
-						$email = $data['myyja_eposti'];
-						luo_zip_ja_laheta($tiedostot, $email);
+					else {
+						tulosta_raportit(array($tiedosto), $komento);
 					}
-					break;
 
-				default:
-					$email = $kukarow['eposti'];
+					unlink($tiedosto);
+				}
+				break;
+
+			case 'asiakkaan_myyjalle':
+				foreach($data_array as $data) {
+					$email = $data['myyja_eposti'];
 					luo_zip_ja_laheta($tiedostot, $email);
+				}
+				break;
 
-					break;
-			}
-		}
-		else {
-			tulosta_raportit($tiedostot, $komento);
+			default:
+				$email = $kukarow['eposti'];
+				luo_zip_ja_laheta($tiedostot, $email);
+
+				break;
 		}
 	}
 
@@ -537,9 +551,9 @@
 
 		$params = array(
 			"to"		 => $email_address,
-			"subject"	 => $yhtiorow['nimi'] . " - " . t('Ostotilaus' , $kieli) . ' ' . date("d.m.Y"),
+			"subject"	 => $yhtiorow['nimi'] . " - " . t('Vuosisopimusraportti' , $kieli) . ' ' . date("d.m.Y"),
 			"ctype"		 => "html",
-			"body"		 => t('Liitteenä löytyy ostoseuranta raportit' , $kieli),
+			"body"		 => t('Liitteenä löytyy vuosisopimusraportit' , $kieli),
 			"attachements" => array()
 		);
 
@@ -553,7 +567,8 @@
 				$ctype = 'excel';
 			}
 			else {
-				$ctype = '';
+				//ctypessä pitää olla jotain muute sitä ei lähetetä. tässä laitetaan oletukseksi zippi
+				$ctype = 'zip';
 			}
 			$liitetiedosto =  array(
 				'filename' => $liitetiedosto_path,

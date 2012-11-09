@@ -155,7 +155,7 @@
 			$brutto_keskihankintahinta 	 = $tuoterow["kehahin"];
 
 			// Tehd‰‰n selkokielinen selite
-			$epakurantti_selite = "Ep‰kuranttimuutos: ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("p‰ivitet‰‰n")." ";
+			$epakurantti_selite = t("Ep‰kuranttimuutos") . ": ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("p‰ivitet‰‰n")." ";
 
 			// Lasketaan uusi keskihankintahinta
 			if ($tee == "paalle") {
@@ -366,7 +366,7 @@
 			else {
 				$z_row_found = 1;
 				$z_row = mysql_fetch_assoc($z_result);
-				$z_orig_hinta = floatval($z_row["selitetark"]) + 0;
+				$z_orig_hinta = floatval($z_row["selitetark"]) || $tuoterow["myyntihinta"];
 			}
 
 			if ($on_jo_epakurantti == 0) {
@@ -408,7 +408,7 @@
 		if ($pvm50  != "now()") { $pvm50  = "'{$pvm50}'" ; }
 		if ($pvm75  != "now()") { $pvm75  = "'{$pvm75}'" ; }
 		if ($pvm100 != "now()") { $pvm100 = "'{$pvm100}'"; }
-		
+
 		$query = "	UPDATE tuote SET
 					$set_zenior
 					$set_kehahin

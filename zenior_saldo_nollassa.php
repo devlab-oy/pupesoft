@@ -29,16 +29,19 @@ if ($yhtiorow["epakurantoinnin_myyntihintaleikkuri"] != 'Z') {
 	die(t("Tämä toiminto on käytettävissä vain, jos yhtiöparametri epakurantoinnin_myyntihintaleikkuri on 'Z'"));
 }
 
-// hae nollasaldoiset zeniorpartsit, tarvitaan tuoteno ja alkuperäinen hinta
+// hae nollasaldoiset zeniorpartsit, tarvitaan tuoteno ja avainsanalle tallennettu alkuperäinen hinta
 
 $query  = "	SELECT
-					a.tuoteno,
-					a.selitetark as orig_myyntihinta,
- 					sum(p.saldo) as saldosumma
-			FROM tuotteen_avainsanat a
-			JOIN tuotepaikat p ON (a.yhtio = p.yhtio AND a.tuoteno = p.tuoteno)
-			WHERE a.yhtio = '{$kukarow["yhtio"]}'
-				AND laji = 'zeniorparts'
+					t.tuoteno,
+					a.selitetark        as orig_myyntihinta,
+                    MAX(t.myyntihinta)  as varahinta,
+ 					SUM(p.saldo)        as saldosumma
+			FROM tuote                  t
+            JOIN tuotteen_avainsanat    a ON (t.yhtio = a.yhtio AND t.tuoteno = a.tuoteno)
+			JOIN tuotepaikat            p ON (a.yhtio = p.yhtio AND a.tuoteno = p.tuoteno)
+			WHERE
+                    t.yhtio = '{$kukarow["yhtio"]}'
+			  AND   a.laji  = 'zeniorparts'
 			GROUP BY 1, 2
 			HAVING saldosumma = 0;";
 
@@ -46,8 +49,9 @@ $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
 
-	$row["orig_myyntihinta"] = floatval($row["orig_myyntihinta"]) + 0;
-
+    // jos talteenotettu hinta ei ole nollaa isompi, otetaan viimeisin myyntihinta
+	$hinta = floatval($row["orig_myyntihinta"]) || $row["varahinta"];
+    $selite = t("Epäkuranttimuutos") . ": ".t("Tuote")." {$row["tuoteno"]} ".t("päivitetään kurantiksi");
 
 	$t_query = "UPDATE tuote
 				SET
@@ -56,7 +60,7 @@ while ($row = mysql_fetch_assoc($result)) {
 					epakurantti50pvm  = '0000-00-00',
 					epakurantti75pvm  = '0000-00-00',
 					epakurantti100pvm = '0000-00-00',
-					myyntihinta       = {$row["orig_myyntihinta"]}
+					myyntihinta       = {$hinta}
 				WHERE
 					yhtio = '{$kukarow["yhtio"]}'
 					AND tuoteno = '{$row["tuoteno"]}';";
@@ -69,5 +73,18 @@ while ($row = mysql_fetch_assoc($result)) {
 					AND tuoteno = '{$row["tuoteno"]}';";
 	$t_result = pupe_query($t_query);
 
+    $t_query = "INSERT INTO tapahtuma
+                SET
+                    yhtio   	= '{$kukarow["yhtio"]}',
+                    tuoteno 	= '{$row["tuoteno"]}',
+                    laji    	= 'Epäkurantti',
+                    kpl     	= '0',
+                    hinta   	= 0,
+                    kplhinta	= 0,
+                    selite  	= '$selite',
+                    laatija    	= '{$kukarow["kuka"]}',
+                    laadittu 	= now()";
+
+    $t_result = pupe_query($t_query);
 }
 ?>

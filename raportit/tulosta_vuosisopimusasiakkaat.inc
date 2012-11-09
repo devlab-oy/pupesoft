@@ -110,35 +110,28 @@ function rivi_kaikki($firstpage, $laji = '', $rows = array()) {
 		}
 
 		if ($laji == 'osasto') {
-			// tehdään avainsana query
-			$tryre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
-			$tryro = mysql_fetch_array($tryre);
 			$asananumero = $row["osasto"];
+			$asananimitys = $row["osasto_nimitys"];
 		}
 		else {
-			// tehdään avainsana query
-			$tryre = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
-			$tryro = mysql_fetch_array($tryre);
 			$asananumero = $row["try"];
+			$asananimitys= $row["tuoteryhma_nimitys"];
 		}
 
 		if ($edosasto != $row["osasto"] and $laji == "") {
 			$edosasto = $row["osasto"];
-
-			$tryre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
-			$osrow = mysql_fetch_array($tryre);
 
 			if ($edosasto != "" and $lask > 1) {
 				$kala = $kala - 20;
 				$lask++;
 			}
 
-			$pdf->draw_text(30, $kala, "Osasto $row[osasto] - $osrow[selitetark]", $firstpage, $norm);
+			$pdf->draw_text(30, $kala, "Osasto $row[osasto] - $row[osasto_nimitys]", $firstpage, $norm);
 			$kala = $kala - 20;
 			$lask++;
 		}
 
-		$pdf->draw_text(30,  $kala, $asananumero." - ".$tryro["selitetark"],	$firstpage, $norm);
+		$pdf->draw_text(30,  $kala, $asananumero." - ".$asananimitys,	$firstpage, $norm);
 
 		$oikpos = $pdf->strlen(sprintf("%.0f", $row["kplva"]), $norm);
 		$pdf->draw_text(330-$oikpos, $kala, sprintf("%.0f", $row["kplva"]), 	$firstpage, $norm);

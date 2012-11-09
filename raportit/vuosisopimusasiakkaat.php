@@ -1,11 +1,18 @@
 <?php
 
+	// Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
+	//apache_setenv('no-gzip', 1);
+	ini_set('zlib.output_compression', 0);
+	ini_set('implicit_flush', 1);
+	ob_implicit_flush(1);
+
 	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
 
 	require "../inc/parametrit.inc";
 	require "tulosta_vuosisopimusasiakkaat.inc";
 	require_once 'tulosta_vuosisopimusasiakkaat_excel.inc';
+	require('inc/ProgressBar.class.php');
 
 	if($asiakas_tarkistus == 1) {
 		$ajax_params = array(
@@ -74,12 +81,24 @@
 			'loppupp' => $loppupp,
 			'raja' => $raja
 		);
-		$asiakkaat = hae_asiakkaat($params);
+		$asiakkaat = hae_asiakkaat($params, $laheta_sahkopostit);
+		echo t('löytyi') . ' '.count($asiakkaat) . '<br/><br/>';
 
 		flush();
 
 		$edalkupvm  = date("Y-m-d", mktime(0, 0, 0, $alkukk,  $alkupp,  $alkuvv - 1));
 		$edloppupvm = date("Y-m-d", mktime(0, 0, 0, $loppukk, $loppupp, $loppuvv - 1));
+
+		$tryre = t_avainsana("OSASTO");
+		$osastot = array();
+		while ($tryro = mysql_fetch_array($tryre)) {
+			$osastot[$tryro['selite']] = $tryro['selitetark'];
+		}
+		$tryre = t_avainsana("TRY");
+		$tuoteryhmat = array();
+		while ($tryro = mysql_fetch_array($tryre)) {
+			$tuoteryhmat[$tryro['selite']] = $tryro['selitetark'];
+		}
 
 		$params = array(
 			'alkuvv' => $alkuvv,
@@ -90,11 +109,17 @@
 			'loppupp' => $loppupp,
 			'edalkupvm' => $edalkupvm,
 			'edloppupvm' => $edloppupvm,
+			'tuoteryhmat' => $tuoteryhmat,
+			'osastot' => $osastot,
 		);
 
+		echo t('Haetaan myyntitiedot') . '<br/>';
 		$data_array = array();
+		$bar = new ProgressBar();
+		$bar->initialize(count($asiakkaat)-2);
 		foreach($asiakkaat as $asiakas) {
-			$tilaukset_ilman_tuoteryhmia = hae_tilaukset($params, $asiakas['tunnus'], 'ilman_tuoteryhmia');
+			$bar->increase();
+			$tilaukset = hae_tilaukset($params, $asiakas['tunnus']);
 			
 			$summa_array = array(
 				'sumkpled' => 0,
@@ -102,14 +127,12 @@
 				'sumed' => 0,
 				'sumva' => 0,
 			);
-			foreach($tilaukset_ilman_tuoteryhmia as $tilaus) {
+			foreach($tilaukset['osastoittain'] as $tilaus) {
 				$summa_array['sumkpled'] += $tilaus['kpled'];
 				$summa_array['sumkplva'] += $tilaus['kplva'];
 				$summa_array['sumed'] += $tilaus['ed'];
 				$summa_array['sumva'] += $tilaus['va'];
 			}
-
-			$tilaukset_tuoteryhmilla = hae_tilaukset($params, $asiakas['tunnus'], '');
 
 			$summa_array2 = array(
 				'sumkpled' => 0,
@@ -117,7 +140,7 @@
 				'sumed' => 0,
 				'sumva' => 0,
 			);
-			foreach ($tilaukset_tuoteryhmilla as $tilaus) {
+			foreach ($tilaukset['tuoteryhmittain'] as $tilaus) {
 				$summa_array2['sumkpled'] += $tilaus['kpled'];
 				$summa_array2['sumkplva'] += $tilaus['kplva'];
 				$summa_array2['sumed'] += $tilaus['ed'];
@@ -126,13 +149,13 @@
 
 			$data_array[] = array(
 				'asiakasrow' => $asiakas,
-				'tilaukset_ilman_try' => $tilaukset_ilman_tuoteryhmia,
+				'tilaukset_ilman_try' => $tilaukset['osastoittain'],
 				'summat_ilman_try' => $summa_array,
-				'tilaukset_try' => $tilaukset_tuoteryhmilla,
+				'tilaukset_try' => $tilaukset['tuoteryhmittain'],
 				'summat_try' => $summa_array2,
 			);
 		}
-
+		
 		kasittele_tilaukset($data_array, htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $komento, $params, $generoi_excel, $kieli);
 
 		echo "<br>".t('Kaikki valmista' , $kieli).".</font>";
@@ -172,7 +195,7 @@
 			echo "<option value='$kirow[komento]'>$kirow[kirjoitin]</option>";
 		}
 
-		echo "</select> ".t("Kirjoittimelle tulostetaan vuosisopimukset jos sähköpostiosoitetta ei ole järjestelmässä")."</td></tr>";
+		echo "</select></td></tr>";
 
 		echo "<tr><th>".t('Syötä ostoraja' , $kieli).":</th>";
 		echo "<td><input type='text' name='raja' value='10000' size='10'> $yhtiorow[valkoodi] valitulla ajanjaksolla</td></tr>";
@@ -201,7 +224,6 @@
 
 		echo "<br><input type='submit' value='".t('Tulosta',$kieli)."' onclick='if(tarkista()){document.vuosiasiakkaat_form.submit();} else{return false;}'></form>";
 
-		ob_start();
 		?>
 	<script>
 				function tarkista() {
@@ -264,13 +286,9 @@
 				}
 	</script>
 		<?php
-
-		$js = ob_get_clean();
-
-		echo $js;
 	}
 
-	function hae_asiakkaat($params) {
+	function hae_asiakkaat($params, $laheta_sahkopostit) {
 		global $kukarow;
 
 		//valittu asiakas
@@ -283,6 +301,18 @@
 			$aswhere = "";
 		}
 
+		if ($laheta_sahkopostit == 'asiakkaan_myyjalle') {
+			$select = "kuka.eposti myyja_eposti,";
+			$join = "	JOIN asiakas ON ( asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myyjanro != 0)
+						JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.myyja = asiakas.myyjanro)";
+			$group = ",myyja_eposti";
+		}
+		else {
+			$select = "";
+			$join = "JOIN asiakas ON ( asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus )";
+			$group = "";
+		}
+
 		$query = "	SELECT asiakas.tunnus,
 					asiakas.email asiakas_email,
 					asiakas.ytunnus,
@@ -292,11 +322,10 @@
 					asiakas.osoite,
 					asiakas.postino,
 					asiakas.postitp,
-					ifnull(kuka.eposti, '')   myyja_eposti,
+					{$select}
 					sum(arvo)     arvo
 					FROM lasku USE INDEX (yhtio_tila_tapvm)
-					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-					LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio AND kuka.myyja = asiakas.myyjanro)
+					{$join}
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
 					and lasku.alatila = 'X'
@@ -311,8 +340,8 @@
 					asiakas.nimitark,
 					asiakas.osoite,
 					asiakas.postino,
-					asiakas.postitp,
-					myyja_eposti
+					asiakas.postitp
+					{$group}
 					HAVING sum(arvo) > {$params['raja']}";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -327,16 +356,10 @@
 	function hae_tilaukset($params, $asiakas_tunnus, $tyyppi) {
 		global $kukarow;
 
-		if($tyyppi == 'ilman_tuoteryhmia') {
-			$select = "tuote.osasto,";
-			$group = "osasto";
-			$order = "osasto";
-		}
-		else {
-			$select = "tuote.osasto, tuote.try,";
-			$group = "osasto, try";
-			$order = "osasto, try";
-		}
+		$select = "tuote.osasto, tuote.try,";
+		$group = "osasto, try";
+		$order = "osasto, try";
+		
 		$query = "	SELECT {$select}
 						sum(if (tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'		and tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}', tilausrivi.rivihinta, 0)) va,
 						sum(if (tapvm >= '{$params['edalkupvm']}'											and tapvm <= '{$params['edloppupvm']}', tilausrivi.rivihinta, 0)) ed,
@@ -355,31 +378,28 @@
 						ORDER BY {$order}";
 		$result = pupe_query($query);
 
-		$tilaukset = array();
+		$tilaukset_tuoteryhmittain = array();
+		$tilaukset_osastoittain = array();
 		while($row = mysql_fetch_assoc($result)) {
+
 			if($row['osasto'] < 10000) {
-				if($tyyppi == 'ilman_tuoteryhmia') {
-					$tryre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
-					$tryro = mysql_fetch_array($tryre);
-					$row['asananumero'] = $row['osasto'];
-					$row['tryro_selitetark'] = $tryro["selitetark"];
-				}
-				else {
-					$tryre = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
-					$tryro = mysql_fetch_array($tryre);
-					$row['asananumero'] = $row['try'];
-					$row['tryro_selitetark'] = $tryro["selitetark"];
+				$tilaukset_osastoittain[$row['osasto']]['va'] += $row['va'];
+				$tilaukset_osastoittain[$row['osasto']]['ed'] += $row['ed'];
+				$tilaukset_osastoittain[$row['osasto']]['kplva'] += $row['kplva'];
+				$tilaukset_osastoittain[$row['osasto']]['kpled'] += $row['kpled'];
+				$tilaukset_osastoittain[$row['osasto']]['osasto'] = $row['osasto'];
+				$tilaukset_osastoittain[$row['osasto']]['osasto_nimitys'] = $params['osastot'][$row['osasto']];
 
-					$osre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
-					$osrow = mysql_fetch_array($osre);
-
-					$row['osasto_selite'] = $osrow['selitetark'];
-				}
-
-				$tilaukset[] = $row;
+				$row['tuoteryhma_nimitys'] = $params['tuoteryhmat'][$row['try']];
+				$row['osasto_nimitys'] = $params['osastot'][$row['osasto']];
+				$tilaukset_tuoteryhmittain[] = $row;
 			}
 		}
-		return $tilaukset;
+		
+		return array(
+			'osastoittain'		 => $tilaukset_osastoittain,
+			'tuoteryhmittain'	 => $tilaukset_tuoteryhmittain
+			);
 	}
 
 	function kasittele_tilaukset($data_array, $laheta_sahkopostit, $komento, $params, $generoi_excel, $kieli) {
@@ -440,7 +460,13 @@
 
 		$pdf_tiedostot = array();
 		$i = 0;
+		echo '<br/>'. t('Tehdään pdf tiedostot') . '<br/>';
+		$bar2 = new ProgressBar();
+		$bar2->initialize(count($data_array)-2);
 		foreach ($data_array as &$data) {
+
+
+			$bar2->increase();
 			$pdf = new pdffile();
 			$pdf->set_default('margin-top', 	0);
 			$pdf->set_default('margin-bottom', 	0);
@@ -456,7 +482,7 @@
 			// kirjotetaan header
 			$firstpage = alku("osasto");
 
-			$firstpage = rivi_kaikki($firstpage, 'osasto', $data['tilaukset_ilman_try']);
+			$firstpage = rivi_kaikki($firstpage, 'osasto', $data['tilaukset_ilman_try'], $params);
 
 			$sumkpled = $data['summat_ilman_try']['sumkpled'];
 			$sumkplva = $data['summat_ilman_try']['sumkplva'];
@@ -493,9 +519,14 @@
 
 	function generoi_excel_tiedostot(&$data_array, $params, $kieli) {
 		global $yhtiorow;
+
+		echo '<br/>'. t('Tehdään excel tiedostot') . '<br/>';
+		$bar2 = new ProgressBar();
+		$bar2->initialize(count($data_array)-2);
 		$excel_tiedostot = array();
 		$i = 0;
 		foreach ($data_array as &$data) {
+			$bar2->increase();
 			$temp_data = array(
 				'osastoittain' => $data['tilaukset_ilman_try'],
 				'tuoteryhmittain' => $data['tilaukset_try']

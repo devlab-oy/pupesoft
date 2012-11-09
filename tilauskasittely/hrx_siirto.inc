@@ -96,10 +96,10 @@ if ($kollityht > 0) {
 		}
 
 		if (mysql_num_rows($yhres) > 0) {
-			while ($yhrow = mysql_fetch_assoc($yhres)) {
-				$sanoma .= substr(trim($yhrow['nimi']), 0, 25).";";
-				$sanoma .= substr(trim($yhrow['puh']), 0, 25).";";
-			}
+			$yhrow = mysql_fetch_assoc($yhres);
+
+			$sanoma .= substr(trim($yhrow['nimi']), 0, 25).";";
+			$sanoma .= substr(trim($yhrow['puh']), 0, 25).";";
 		}
 		else {
 			$sanoma .= ";;";

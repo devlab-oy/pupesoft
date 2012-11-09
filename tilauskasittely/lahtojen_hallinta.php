@@ -2189,23 +2189,6 @@
 
 			$wherelisa = "AND ({$wherelisa})";
 
-			$query = "	SELECT lahdot.tunnus AS 'lahdon_tunnus',
-						lahdot.pvm AS 'lahdon_pvm',
-						SUBSTRING(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
-						SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
-						SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
-						avainsana.selitetark_3 AS 'prioriteetti',
-						toimitustapa.selite AS 'toimitustapa',
-						toimitustapa.lahdon_selite
-						FROM lasku
-						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
-						JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
-						JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
-						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-						AND lasku.tunnus IN ({$tilaukset})";
-			$result = pupe_query($query);
-			$info_row = mysql_fetch_assoc($result);
-
 			$query = "	SELECT lasku.tunnus AS 'tilauksen_tunnus',
 						lasku.vanhatunnus AS 'tilauksen_vanhatunnus',
 						IF(lasku.tilaustyyppi = '', 'N', lasku.tilaustyyppi) AS 'tilauksen_tilaustyyppi',
@@ -2221,18 +2204,30 @@
 						kerayserat.sscc_ulkoinen,
 						kerayserat.pakkausnro,
 						IF(lasku.toimitustavan_lahto_siirto = 0, '', lasku.toimitustavan_lahto_siirto) AS toimitustavan_lahto_siirto,
+						lahdot.tunnus AS 'lahdon_tunnus',
+						lahdot.pvm AS 'lahdon_pvm',
+						SUBSTRING(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
+						SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
+						SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
+						avainsana.selitetark_3 AS 'prioriteetti',
+						toimitustapa.selite AS 'toimitustapa',
+						toimitustapa.lahdon_selite,
 						GROUP_CONCAT(DISTINCT kerayserat.tila) AS 'tilat',
 						COUNT(kerayserat.tunnus) AS 'keraysera_rivi_count',
 						SUM(IF((kerayserat.tila = 'T' OR kerayserat.tila = 'R'), 1, 0)) AS 'keraysera_rivi_valmis'
 						FROM lasku
 						JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
+						JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
+						JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 						LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus and kerayserat.tila != 'Ö')
 						LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tunnus IN ({$tilaukset})
 						{$wherelisa}
-						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14";
+						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23";
 			$lahto_res = pupe_query($query);
+			$lahto_row = mysql_fetch_assoc($lahto_res);
 
 			if (!isset($child_row_select_status)) $child_row_select_status = "";
 			if (!isset($child_row_select_prio)) $child_row_select_prio = "";
@@ -2257,14 +2252,14 @@
 			echo "</tr>";
 
 			echo "<tr>";
-			echo "<td class='data'>{$info_row['lahdon_tunnus']}</td>";
-			echo "<td class='data'>{$info_row['prioriteetti']}</td>";
-			echo "<td class='data'>{$info_row['lahdon_selite']}</td>";
-			echo "<td class='data'>{$info_row['toimitustapa']}</td>";
-			echo "<td class='data'>",tv1dateconv($info_row['lahdon_pvm']),"</td>";
-			echo "<td class='data'>{$info_row['viimeinen_tilausaika']}</td>";
-			echo "<td class='data'>{$info_row['lahdon_kellonaika']}</td>";
-			echo "<td class='data'>{$info_row['kerailyn_aloitusaika']}</td>";
+			echo "<td class='data'>{$lahto_row['lahdon_tunnus']}</td>";
+			echo "<td class='data'>{$lahto_row['prioriteetti']}</td>";
+			echo "<td class='data'>{$lahto_row['lahdon_selite']}</td>";
+			echo "<td class='data'>{$lahto_row['toimitustapa']}</td>";
+			echo "<td class='data'>",tv1dateconv($lahto_row['lahdon_pvm']),"</td>";
+			echo "<td class='data'>{$lahto_row['viimeinen_tilausaika']}</td>";
+			echo "<td class='data'>{$lahto_row['lahdon_kellonaika']}</td>";
+			echo "<td class='data'>{$lahto_row['kerailyn_aloitusaika']}</td>";
 			echo "</tr>";
 
 			echo "<tr><td class='back'>&nbsp;</td></tr>";
@@ -2274,6 +2269,8 @@
 			echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";
 
 			$priorities = array();
+
+			mysql_data_seek($lahto_res, 0);
 
 			while ($lahto_row = mysql_fetch_assoc($lahto_res)) {
 				$priorities[$lahto_row['prioriteetti']] = $lahto_row['prioriteetti'];

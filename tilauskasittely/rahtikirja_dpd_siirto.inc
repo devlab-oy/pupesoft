@@ -97,22 +97,24 @@ if ($kollityht > 0) {
 			$r = mysql_field_name($rakir_res, $i);
 			$v = $rakir_row[$r];
 
-			if ($r == "kateinen" and $v != "") {
-				$koko_summa += $rakir_row["summa"];
+			//	Korvaavuksia ja näppäilyä
+			if($r == "jv" and $v != "") {
+				$parcelOrder["jv_maara"] 		= $yhteensa;
+				$parcelOrder["jv_valkoodi"] 	= $yhtiorow["valkoodi"];
+				$parcelOrder["jv_pankkitili"] 	= $yhtiorow["pankkitili1"];
+				$parcelOrder["jv_viite"] 		= $viite;
 			}
 
 			$parcelOrder[$r] = $v;
 		}
 
-		if ($koko_summa != 0) {
+		if (isset($parcelOrder["jv_maara"]) and trim($parcelOrder["jv_maara"]) != "") {
 			$parcelOrder["kateinen"] = t("Käteinen");
-			$parcelOrder["summa"] = $koko_summa;
-			$parcelOrder["valkoodi"] = $rakir_row["valkoodi"];
 		}
 		else {
 			$parcelOrder["kateinen"] = "";
-			$parcelOrder["summa"] = "";
-			$parcelOrder["valkoodi"] = "";
+			$parcelOrder["jv_summa"] = "";
+			$parcelOrder["jv_valkoodi"] = "";
 		}
 
 		//	Haetaan asiakastiedot
@@ -236,8 +238,8 @@ if ($kollityht > 0) {
 				"yhteyshenkilo_puh",
 				"kollit",
 				"lahetystapa",
-				"summa",
-				"valkoodi",
+				"jv_summa",
+				"jv_valkoodi",
 				"kateinen",
 				"rahtikirjanro",
 			);

@@ -12937,7 +12937,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 				$nimityskuvaus = "nimi_ja_kuvaus";
 			}
 
-			$vakselect = "	concat({$taulu}.yk_nro, {$taulu}.name_and_description, {$taulu}.lipukkeet, {$taulu}.pakkausryhma) vakkoodi,
+			$vakselect = "	concat({$taulu}.yk_nro, {$taulu}.name_and_description, {$taulu}.lipukkeet, {$taulu}.pakkausryhma) {$vak_kentta},
 							concat('UN', {$taulu}.yk_nro) yk_nro,
 							{$taulu}.name_and_description nimitys,
 							{$taulu}.lipukkeet,
@@ -12948,7 +12948,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 			$vakjoin   = "JOIN {$taulu} ON tuote.yhtio = {$taulu}.yhtio and tuote.{$vak_kentta} = {$taulu}.tunnus";
 		}
 		else {
-			$vakselect = "	tuote.vakkoodi vakkoodi,
+			$vakselect = "	tuote.vakkoodi {$vak_kentta},
 							'' yk_nro,
 							'' nimitys,
 							'' lipukkeet,

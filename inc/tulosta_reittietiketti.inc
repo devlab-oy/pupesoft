@@ -362,61 +362,6 @@
 
 						 	tulosta_reittietiketti($params);
 						}
-
-						/*
-					 	# HRX
-						// haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
-						$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
-									FROM varastopaikat
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$row['varasto']}'";
-						$tempr = pupe_query($query);
-						$postirow_varasto = mysql_fetch_array($tempr);
-
-						if ($postirow_varasto['nimi'] != "") {
-							$lahettaja_nimi = $postirow_varasto['nimi'];
-							$lahettaja_nimitark = $postirow_varasto['nimitark'];
-							$lahettaja_osoite = $postirow_varasto['osoite'];
-							$lahettaja_postino = $postirow_varasto['postino'];
-							$lahettaja_postitp = $postirow_varasto['postitp'];
-							$lahettaja_maa = $postirow_varasto['maa'];
-						}
-						else {
-							$lahettaja_nimi = $row['yhtio_nimi'];
-							$lahettaja_nimitark = "";
-							$lahettaja_osoite = $row['yhtio_osoite'];
-							$lahettaja_postino = $row['yhtio_postino'];
-							$lahettaja_postitp = $row['yhtio_postitp'];
-							$lahettaja_maa = $row['yhtio_maa'];
-						}
-
-						// Tulostetaan Pupen oma kollitarra
-						$params = array(
-				 			'tilriv' => $row['tunnus'],//tilausnumero
-				 			'pakkaus_kirjain' => excel_column_name($keraysera_row['pakkausnro']),
-				 			'sscc' => $keraysera_row['sscc'],
-				 			'toimitustapa' => $row['toimitustapa'],
-				 			'toim_nimi' => $rakir_row['toim_nimi'],
-				 			'toim_nimitark' => $rakir_row['toim_nimitark'],
-				 			'toim_osoite' => $rakir_row['toim_osoite'],
-				 			'toim_postino' => $rakir_row['toim_postino'],
-				 			'toim_postitp' => $rakir_row['toim_postitp'],
-				 			'lahettaja_nimi' => $lahettaja_nimi,
-				 			'lahettaja_nimitark' => $lahettaja_nimitark,
-				 			'lahettaja_osoite' => $lahettaja_osoite,
-				 			'lahettaja_postino' => $lahettaja_postino,
-				 			'lahettaja_postitp' => $lahettaja_postitp,
-				 			'lahettaja_maa' => $lahettaja_maa,
-				 			'reittietikettitulostin' => $kirjoitin_row['komento'],
-				 			'monesko_laatikko' => $monesko_laatikko,
-				 			'montako_laatikkoa_yht' => count($eran_sscct),
-				 			'pakkauskoodi' => $pakkauskoodit_row['koodi'],
-				 		);
-
-						tulosta_hrx($params);
-
-						$monesko_laatikko++;
-						*/
 					}
 				}
 			}

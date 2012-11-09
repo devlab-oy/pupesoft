@@ -2587,71 +2587,74 @@
 				echo "</td>";
 				echo "</tr>";
 
-				$query = "	SELECT tilausrivi.tuoteno,
-							kerayserat.otunnus,
-							tuote.nimitys,
-							ROUND(IFNULL(kerayserat.kpl, tilausrivi.varattu), 0) AS 'suunniteltu',
-							tilausrivi.yksikko,
-							CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS hyllypaikka,
-							kerayserat.laatija AS keraaja,
-							tilausrivi.kerattyaika,
-							ROUND(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', IFNULL(kerayserat.kpl_keratty, tilausrivi.varattu), 0), 0) AS 'keratyt'
-							FROM kerayserat
-							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J') {$ei_lapsia_lisa})
-							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-							AND kerayserat.sscc = '{$lahto_row['sscc']}'
-							ORDER BY kerayserat.otunnus, tilausrivi.tuoteno";
-				$rivi_res = pupe_query($query);
+				if ($lahto_row['sscc'] != '') {
 
-				echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}' id='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-				echo "<td colspan='{$colspan_child}' class='back' style='display:none;'>";
-				echo "<div class='toggleable_row_child_div_sscc' id='toggleable_row_sscc_{$lahto_row['sscc']}__{$x}' style='display:none;'>";
+					$query = "	SELECT tilausrivi.tuoteno,
+								kerayserat.otunnus,
+								tuote.nimitys,
+								ROUND(IFNULL(kerayserat.kpl, tilausrivi.varattu), 0) AS 'suunniteltu',
+								tilausrivi.yksikko,
+								CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS hyllypaikka,
+								kerayserat.laatija AS keraaja,
+								tilausrivi.kerattyaika,
+								ROUND(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', IFNULL(kerayserat.kpl_keratty, tilausrivi.varattu), 0), 0) AS 'keratyt'
+								FROM kerayserat
+								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J') {$ei_lapsia_lisa})
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+								AND kerayserat.sscc = '{$lahto_row['sscc']}'
+								ORDER BY kerayserat.otunnus, tilausrivi.tuoteno";
+					$rivi_res = pupe_query($query);
 
-				echo "<table style='width:100%;'>";
+					echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}' id='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
+					echo "<td colspan='{$colspan_child}' class='back' style='display:none;'>";
+					echo "<div class='toggleable_row_child_div_sscc' id='toggleable_row_sscc_{$lahto_row['sscc']}__{$x}' style='display:none;'>";
 
-				echo "<tr>";
-				echo "<th>",t("Tilausnumero"),"</th>";
-				echo "<th>",t("Tuotenumero"),"</th>";
-				echo "<th>",t("Nimitys"),"</th>";
-				echo "<th>",t("Suunniteltu m‰‰r‰"),"</th>";
-				echo "<th>",t("Ker‰tty m‰‰r‰"),"</th>";
-				echo "<th>",t("Poikkeava m‰‰r‰"),"</th>";
-				echo "<th>",t("Yksikkˆ"),"</th>";
-				echo "<th>",t("Hyllypaikka"),"</th>";
-				echo "<th>",t("Ker‰‰j‰"),"</th>";
-				echo "</tr>";
-
-				$lopetus_url = trim($lopetus) != '' ? $lopetus."/SPLIT/{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=lahto//tilaukset={$tilaukset}" : "{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=lahto//tilaukset={$tilaukset}";
-
-				while ($rivi_row = mysql_fetch_assoc($rivi_res)) {
+					echo "<table style='width:100%;'>";
 
 					echo "<tr>";
-					echo "<td class='tumma'>{$rivi_row['otunnus']}</td>";
-					echo "<td class='tumma'><a href='{$palvelin2}tuvar.php?toim=&tee=Z&tuoteno=".urlencode($rivi_row["tuoteno"])."&lopetus={$lopetus_url}'>{$rivi_row['tuoteno']}</a></td>";
-					echo "<td class='tumma'>{$rivi_row['nimitys']}</td>";
-					echo "<td class='tumma'>{$rivi_row['suunniteltu']}</td>";
-					echo "<td class='tumma'>{$rivi_row['keratyt']}</td>";
+					echo "<th>",t("Tilausnumero"),"</th>";
+					echo "<th>",t("Tuotenumero"),"</th>";
+					echo "<th>",t("Nimitys"),"</th>";
+					echo "<th>",t("Suunniteltu m‰‰r‰"),"</th>";
+					echo "<th>",t("Ker‰tty m‰‰r‰"),"</th>";
+					echo "<th>",t("Poikkeava m‰‰r‰"),"</th>";
+					echo "<th>",t("Yksikkˆ"),"</th>";
+					echo "<th>",t("Hyllypaikka"),"</th>";
+					echo "<th>",t("Ker‰‰j‰"),"</th>";
+					echo "</tr>";
 
-					echo "<td class='tumma'>";
+					$lopetus_url = trim($lopetus) != '' ? $lopetus."/SPLIT/{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=lahto//tilaukset={$tilaukset}" : "{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=lahto//tilaukset={$tilaukset}";
 
-					if ($rivi_row['kerattyaika'] != '0000-00-00 00:00:00' and $rivi_row['keratyt'] - $rivi_row['suunniteltu'] != 0) {
-						echo ($rivi_row['keratyt'] - $rivi_row['suunniteltu']);
+					while ($rivi_row = mysql_fetch_assoc($rivi_res)) {
+
+						echo "<tr>";
+						echo "<td class='tumma'>{$rivi_row['otunnus']}</td>";
+						echo "<td class='tumma'><a href='{$palvelin2}tuvar.php?toim=&tee=Z&tuoteno=".urlencode($rivi_row["tuoteno"])."&lopetus={$lopetus_url}'>{$rivi_row['tuoteno']}</a></td>";
+						echo "<td class='tumma'>{$rivi_row['nimitys']}</td>";
+						echo "<td class='tumma'>{$rivi_row['suunniteltu']}</td>";
+						echo "<td class='tumma'>{$rivi_row['keratyt']}</td>";
+
+						echo "<td class='tumma'>";
+
+						if ($rivi_row['kerattyaika'] != '0000-00-00 00:00:00' and $rivi_row['keratyt'] - $rivi_row['suunniteltu'] != 0) {
+							echo ($rivi_row['keratyt'] - $rivi_row['suunniteltu']);
+						}
+
+						echo "</td>";
+
+						echo "<td class='tumma'>",t_avainsana("Y", "", " and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite"),"</td>";
+						echo "<td class='tumma'>{$rivi_row['hyllypaikka']}</td>";
+						echo "<td class='tumma'>{$rivi_row['keraaja']}</td>";
+						echo "</tr>";
 					}
 
-					echo "</td>";
+					echo "</table>";
 
-					echo "<td class='tumma'>",t_avainsana("Y", "", " and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite"),"</td>";
-					echo "<td class='tumma'>{$rivi_row['hyllypaikka']}</td>";
-					echo "<td class='tumma'>{$rivi_row['keraaja']}</td>";
+					echo "</div>";
+					echo "</td>";
 					echo "</tr>";
 				}
-
-				echo "</table>";
-
-				echo "</div>";
-				echo "</td>";
-				echo "</tr>";
 
 				$x++;
 			}

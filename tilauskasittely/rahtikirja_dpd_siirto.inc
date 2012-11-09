@@ -222,9 +222,9 @@ if ($kollityht > 0) {
 			# Vastaanottajan puhelinnumero
 			# Pakkausten m‰‰r‰
 			# L‰hetystapa
-			# Loppusumma jos k‰teisell‰, muuten ei mit‰‰n
-			# Valuutta EUR jos k‰teisell‰, muuten ei mit‰‰n
-			# Jos maksuehto on k‰teinen, laitetaan t("K‰teinen")
+			# Loppusumma jos j‰lkivaatimus, muuten ei mit‰‰n
+			# Valuutta jos j‰lkivaatimus, muuten ei mit‰‰n
+			# Jos maksuehto on j‰lkivaatimus, laitetaan t("K‰teinen")
 			# Rahtikirjanro
 			$delisprintFileFormat = array(
 				"rahtikirjanro",

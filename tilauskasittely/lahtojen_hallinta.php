@@ -2436,44 +2436,32 @@
 				echo "<td class='toggleable_row_locality' id='{$lahto_row['asiakas_toim_postitp']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['asiakas_toim_postitp']}</td>";
 
 				if ($lahto_row['sscc'] != '') {
-
-					$query = "	SELECT keraysvyohyke.nimitys AS 'keraysvyohyke',
-								tuoteperhe.ohita_kerays AS 'ohitakerays',
-								COUNT(kerayserat.tunnus) AS 'rivit',
-								SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
-								FROM tilausrivi
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-								JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
-								JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
-								JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus AND kerayserat.sscc = '{$lahto_row['sscc']}' AND kerayserat.nro = '{$lahto_row['erat']}')
-								LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tuoteperhe.tuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi = 'P' AND tuoteperhe.ohita_kerays != '')
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
-								AND tilausrivi.tyyppi != 'D'
-								AND tilausrivi.var not in ('P','J')
-								{$ei_lapsia_lisa}
-								GROUP BY 1,2
-								HAVING ohitakerays IS NULL";
+					$joinilisa = "	JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus AND kerayserat.sscc = '{$lahto_row['sscc']}' AND kerayserat.nro = '{$lahto_row['erat']}')";
+					$selectilisa = "COUNT(kerayserat.tunnus) AS 'rivit',";
 				}
 				else {
-					$query = "	SELECT keraysvyohyke.nimitys AS 'keraysvyohyke',
-								tuoteperhe.ohita_kerays AS 'ohitakerays',
-								COUNT(tilausrivi.tunnus) AS 'rivit',
-								SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
-								FROM tilausrivi
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-								JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
-								JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
-								LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tuoteperhe.tuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi = 'P' AND tuoteperhe.ohita_kerays != '')
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
-								AND tilausrivi.tyyppi != 'D'
-								AND tilausrivi.var not in ('P','J')
-								{$ei_lapsia_lisa}
-								GROUP BY 1,2
-								HAVING ohitakerays IS NULL";
+					$joinilisa = "";
+					$selectilisa = "COUNT(tilausrivi.tunnus) AS 'rivit',";
 				}
 
+				$query = "	SELECT keraysvyohyke.nimitys AS 'keraysvyohyke',
+							tuoteperhe.ohita_kerays AS 'ohitakerays',
+							{$selectilisa}
+							SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt',
+							ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg'
+							FROM tilausrivi
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+							JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+							JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
+							{$joinilisa}
+							LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tuoteperhe.tuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi = 'P' AND tuoteperhe.ohita_kerays != '')
+							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
+							AND tilausrivi.tyyppi != 'D'
+							AND tilausrivi.var not in ('P','J')
+							{$ei_lapsia_lisa}
+							GROUP BY 1,2
+							HAVING ohitakerays IS NULL";
 				$til_res = pupe_query($query);
 				$til_row = mysql_fetch_assoc($til_res);
 
@@ -2483,21 +2471,16 @@
 
 				echo "<td class='toggleable_row_rows' id='{$til_row['rivit']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$til_row['rivit']} / {$til_row['keratyt']}</td>";
 
+				echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>";
+
 				if (trim($lahto_row['sscc_ulkoinen']) != '') {
-					echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 					echo "<button type='button'>{$lahto_row['sscc_ulkoinen']}</button>";
-					echo "</td>";
 				}
-				else {
-					echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-
-
-					if ($lahto_row['sscc'] != '') {
-						echo "<button type='button'>{$lahto_row['sscc']}</button>";
-					}
-
-					echo "</td>";
+				elseif ($lahto_row['sscc'] != '') {
+					echo "<button type='button'>{$lahto_row['sscc']}</button>";
 				}
+
+				echo "</td>";
 
 				if ($lahto_row['pakkausnro'] != '') {
 
@@ -2529,19 +2512,7 @@
 				}
 				else {
 					echo "<td class='data toggleable_row_package' id='!__{$lahto_row['tilauksen_tunnus']}__{$x}'></td>";
-
-					$query = "	SELECT ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg'
-								FROM tilausrivi
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
-								AND tilausrivi.tyyppi != 'D'
-								AND tilausrivi.var not in ('P','J')
-								{$ei_lapsia_lisa}";
-					$paino_res = pupe_query($query);
-					$paino_row = mysql_fetch_assoc($paino_res);
-
-					echo "<td class='toggleable_row_weight' id='{$paino_row['kg']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$paino_row['kg']}</td>";
+					echo "<td class='toggleable_row_weight' id='{$til_row['kg']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$til_row['kg']}</td>";
 				}
 
 				echo "</tr>";

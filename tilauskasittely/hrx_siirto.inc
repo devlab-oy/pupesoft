@@ -106,8 +106,8 @@ if ($kollityht > 0) {
 		}
 
 		$sanoma .= "{$kollityht};";
-		$sanoma .= "{$pakkaus[0]};";
-		$sanoma .= "EE0{$rahtikirjanro};";
+		$sanoma .= substr(trim($pakkaus[0]), 0, 3);
+		$sanoma .= substr("EE0".trim($rahtikirjanro), 0, 10);
 
 		if ($hrx_path != '') {
 			if (substr($hrx_path,-1) != '/') {

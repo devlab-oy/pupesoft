@@ -1778,11 +1778,28 @@ if ($kukarow["extranet"] == "" and $tee == 'jyvita') {
 }
 
 // Lisätään tän asiakkaan valitut JT-rivit tälle tilaukselle
-if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == "") or (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and (int) $kukarow['kesken'] != 0 and $kaytiin_otsikolla == "NOJOO!" and ($tee == '' or $tee == 'OTSIK') and $toim == 'EXTRANET')) {
+if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == "")
+	or ((
+			(($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and $toim == 'EXTRANET')
+			or ($yhtiorow['jt_automatiikka'] == 'M' or $yhtiorow['jt_automatiikka'] == 'K')
+		)
+		and (int) $kukarow['kesken'] > 0
+		and $kaytiin_otsikolla == "NOJOO!"
+		and $tee == ''
+	)
+) {
+
 	$tilaus_on_jo = "KYLLA";
 
 	// Halutaan poimia heti kaikki jt-rivit extranet-tilauksille ensimmäisellä kerralla
-	if (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and (int) $kukarow['kesken'] != 0 and $kaytiin_otsikolla == "NOJOO!" and ($tee == '' or $tee == 'OTSIK') and $toim == 'EXTRANET') {
+	if ((
+			(($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and $toim == 'EXTRANET')
+			or ($yhtiorow['jt_automatiikka'] == 'M' or $yhtiorow['jt_automatiikka'] == 'K')
+		)
+		and (int) $kukarow['kesken'] > 0
+		and $kaytiin_otsikolla == "NOJOO!"
+		and $tee == ''
+	) {
 
 		if (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
 			$varasto = array((int) $laskurow["varasto"]);
@@ -1800,10 +1817,11 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 			$vtresult = pupe_query($query);
 			$vtrow = mysql_fetch_assoc($vtresult);
 
-			$varasto = $vtrow['tunnukset'];
+			$varasto = explode(",", $vtrow['tunnukset']);
 		}
 
 		jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varasto, "", "", "tosi_automaaginen", "JATKA", "automaattinen_poiminta");
+		echo "<br>";
 
 		$tyhjenna 	= "JOO";
 		$tee 		= "";

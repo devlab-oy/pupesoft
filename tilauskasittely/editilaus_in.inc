@@ -1798,7 +1798,7 @@ while ($tietue = fgets($fd)) {
 				// jos terminaalitoimitus niin EI tehd‰ tilaus-valmista...
 				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
 
-					if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
+					if (in_array($yhtiorow['jt_automatiikka'], array('Y','W','K'))) {
 						//lis‰t‰‰n tilaukseen ne jt-rivit jotka riitt‰v‰t kaikille
 						$edi_ulos .= "\n";
 						jt_toimita_editilaus($laskurow["ytunnus"], $laskurow["liitostunnus"], $laskurow["maa"]);

@@ -1723,10 +1723,10 @@
 								$jt_rivilaskuri++;
 							}
 
-							if ($automaaginen == '') {
-								if ($tilaus_on_jo_row['toim_osoite'] != $jtrow['toim_osoite'] and $tilaus_on_jo_row['toim_postino'] != $jtrow['toim_postino'] and $tilaus_on_jo_row['toim_postitp'] != $jtrow['toim_postitp']) {
+							if ($automaaginen == '' and $tilaus_on_jo != "") {
+								if ($tilaus_on_jo_row['toim_osoite'] != $jtrow['toim_osoite'] or $tilaus_on_jo_row['toim_postino'] != $jtrow['toim_postino'] or $tilaus_on_jo_row['toim_postitp'] != $jtrow['toim_postitp']) {
 									$toimitus_osoite = $jtrow['toim_osoite'] . ' ' . $jtrow['toim_postino'] . ' ' . $jtrow['toim_postino'];
-									echo "<td><font class='error'>".t('Huom! Jälkitoimitusrivillä on eri toimitusosoite.') . ' ' . $toimitus_osoite . "</font></td>";
+									echo "<td class='back'><font class='error'>".t('Huom! Jälkitoimitusrivillä on eri toimitusosoite.') . ' ' . $toimitus_osoite . "</font></td>";
 								}
 								echo "</tr>";
 							}

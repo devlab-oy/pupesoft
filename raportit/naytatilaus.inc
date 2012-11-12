@@ -520,12 +520,11 @@
 				echo "<tr><th colspan='6'>".t("Saapumiseen liitetyt ostolaskut:")."</th></tr>";
 				echo "<tr><td colspan='6'>";
 
+				$laskakak = 1;
+
 				while ($muutkeikrow = mysql_fetch_assoc($muutkeikres)) {
-					$ebid = $muutkeikrow['ebid'];
-
-					$laskakak = 1;
-
-					echo $laskakak.": <a href='{$palvelin2}raportit.php?toim=laskuhaku&tee=T&summa1=$muutkeikrow[tunnus]&lopetus=$lopetus'>$muutkeikrow[summa]</a> ".ebid($muutkeikrow['tunnus'])."<br>";
+					echo $laskakak.": <a href='{$palvelin2}raportit.php?toim=laskuhaku&tee=T&summa1=$muutkeikrow[tunnus]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//asiakasid=$asiakasid//toimittajaid=$toimittajaid//laskunro=$laskunro//lasku_yhtio=$lasku_yhtio//tunnus=$tunnus//ytunnus=$ytunnus//nimi=$nimi//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl/SPLIT/$lopetus'>$muutkeikrow[summa]</a> ".ebid($muutkeikrow['tunnus'])."<br>";
+					$laskakak++;
 				}
 
 				echo "</td></tr>";
@@ -1959,4 +1958,3 @@
 			}
 		}
 	}
-?>

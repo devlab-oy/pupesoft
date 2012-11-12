@@ -299,7 +299,7 @@ if ($tee != '') {
 	$alku += 0;
 
 	if (isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
-		$tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus) ";
+		$tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu='') ";
 	}
 	else {
 		$tiliointilisa = '';

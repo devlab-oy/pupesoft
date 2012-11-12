@@ -857,6 +857,9 @@
 
 	// Onko nagios monitor asennettu?
 	if (file_exists("/home/optiscan/optiscan.log")) {
+		// Noticet veks lokista
+		$fleur = preg_replace("/Notice:.*\n(\n)?/", "", $fleur);
+
 		file_put_contents("/home/optiscan/optiscan.log", "------------------------START------------------------\n$kukarow[kuka]: {$lines[0]}\npupe: ".trim($response)."\n$fleur------------------------STOP-------------------------\n\n", FILE_APPEND);
 	}
 

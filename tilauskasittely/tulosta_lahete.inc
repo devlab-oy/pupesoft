@@ -563,10 +563,10 @@ if (!function_exists('alku_lahete')) {
 
 						$data = viivakoodi(trim($v), "code128", 100, 10, "");
 						$image = $pdf->jfif_embed($data);
-						$pdf->image_place($image, $pohja-10, $oikpos, $thispage, array("scale" => 0.5));
+						$pdf->image_place($image, $pohja-15, $oikpos, $thispage, array("scale" => 0.5));
 
-						$kala  = $kala - 5;
-						$pohja = $pohja - 5;
+						$kala  = $kala - 10;
+						$pohja = $pohja - 10;
 					}
 				}
 				else {

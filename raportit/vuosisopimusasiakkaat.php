@@ -543,8 +543,7 @@
 			$excel->set_summat_osastoittain($data['summat_ilman_try']);
 			$excel->set_summat_tuoteryhmittain($data['summat_try']);
 
-			$excel_tiedosto_nimi = $excel->generoi();
-			$excel_tiedostot[] = '/tmp/' . $excel_tiedosto_nimi;
+			$excel_tiedostot[] = $excel->generoi();
 			$data['tiedosto'] = $excel_tiedostot[$i];
 
 			unset($excel);

@@ -205,8 +205,8 @@ else {
 	// muuten rahtikulut valuutassa laskettuna kuluprosentin mukaan (laskurow.rahti on kuluprosentti, laskurow.summa on kohdistettujen rivien summa)
 
 	// jos erikoislale niin otetaan sitä kanssa huomioon
-	if ($laskurow['erikoisale']<>0) {
-		$erikoisale = 1-($laskurow['erikoisale']/100);
+	if ($laskurow['erikoisale_saapuminen']<>0) {
+		$erikoisale = 1-($laskurow['erikoisale_saapuminen']/100);
 	}
 	else {
 		$erikoisale = 1;

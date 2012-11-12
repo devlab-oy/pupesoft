@@ -624,7 +624,7 @@ if ($tila == 'tee_siirto') {
 					// Siiretään rivi tälle keikalle
 					$query = "	UPDATE tilausrivi USE INDEX (uusiotunnus_index)
 								SET uusiotunnus = '$otunnus',
-								erikoisale 		= '$laskurow[erikoisale]',
+								erikoisale_saapuminen 		= '$laskurow[erikoisale_saapuminen]',
 								kerattyaika 	= now(),
 								keratty 		= '$kukarow[kuka]'
 								$kpl_lisa
@@ -754,7 +754,7 @@ if ($tila == 'tee_kohdistus') {
 		}
 
 		$query = "	UPDATE tilausrivi use index (PRIMARY)
-					SET uusiotunnus = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale = 0
+					SET uusiotunnus = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale_saapuminen = 0
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus in (".implode(",", $tunnukset2).")";
 		$result = pupe_query($query);
@@ -776,7 +776,7 @@ if ($tila == 'tee_kohdistus') {
 					SET uusiotunnus = '$otunnus',
 					kerattyaika = now(),
 					keratty = '$kukarow[kuka]',
-					erikoisale = '$laskurow[erikoisale]'
+					erikoisale_saapuminen = '$laskurow[erikoisale_saapuminen]'
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus in (".implode(",", $tunnukset2).")";
 		$result = pupe_query($query);
@@ -785,7 +785,7 @@ if ($tila == 'tee_kohdistus') {
 					SET uusiotunnus = '$otunnus',
 					kerattyaika = now(),
 					keratty = '$kukarow[kuka]',
-					erikoisale = '$laskurow[erikoisale]'
+					erikoisale_saapuminen = '$laskurow[erikoisale_saapuminen]'
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND perheid2 in (".implode(",", $tunnukset2).")
 					AND perheid2 > 0";
@@ -1309,7 +1309,7 @@ if ($tila == '') {
 		<th>".t("Näytä vain kohdistamattomat").":</th><td><INPUT type='radio' $chk2 name='nayta_kohdistetut' value='eitod' onclick='submit()'></td>
 		</tr>
 		<tr>
-		<th>".t("Erikoisalennus")."</th><td><span id='keikan_erikoisale'>".($laskurow["erikoisale"]*1)."</span>%</td>
+		<th>".t("Erikoisalennus")."</th><td><span id='keikan_erikoisale'>".($laskurow["erikoisale_saapuminen"]*1)."</span>%</td>
 		<th>".t("Kohdistettava summa")."</th><td style='text-align:right'><span id='kohdistettava_summa'>$kohdistettava_summa</span> $kulurow[valkoodi]</td>
 		<th>".t("Näytä kaikki yhdellä sivulla").":</th><td><INPUT type='checkbox' $chk3 name='nayta_kaikki' value='kaikki' onclick='submit()'></td>
 		</tr>

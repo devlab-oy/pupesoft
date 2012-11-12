@@ -193,24 +193,6 @@
 				exit;
 			}
 
-			//lasketaan erikoisalennus ale3 kentt‰‰n koska saapumisen erikoisale k‰ytt‰‰ tilausrivin erikoisalea
-			$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and tyyppi='O'";
-			$result = pupe_query($query);
-			while($row = mysql_fetch_assoc($result)) {
-				if($row['ale3'] != 0) {
-					$ale_prosentti = 100 - ((1 - ($row['ale3'] / 100)) * (1 - ($row['erikoisale'] / 100)) * 100);
-				}
-				else {
-					$ale_prosentti = $row['erikoisale'];
-				}
-				$query = "	UPDATE tilausrivi set
-										ale3 = '$ale_prosentti',
-										erikoisale = 0
-										where yhtio = '$kukarow[yhtio]' and
-										tunnus = '$row[tunnus]'";
-				$erikoisale_result = pupe_query($query);
-			}
-
 			// katotaan ollaanko haluttu optimoida johonki varastoon
 			if ($laskurow["varasto"] != 0) {
 
@@ -872,27 +854,12 @@
 				$divnolla		= 0;
 				$erikoisale_summa = 0;
 
-				//haetaan erikoisale otsikoilta koska se nollataan tietyss‰ pisteess‰ rivilt‰
+				//haetaan erikoisale otsikoilta
 				$tilaus_query = "SELECT erikoisale FROM lasku WHERE yhtio ='{$kukarow['yhtio']}' AND tunnus = '{$kukarow['kesken']}'";
 				$tilaus_result = pupe_query($tilaus_query);
 				$tilaus_row = mysql_fetch_assoc($tilaus_result);
 
-				$tilaus_otsikko_query = "	SELECT erikoisale
-											FROM lasku
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tunnus = '{$kukarow['kesken']}'";
-				$tilaus_otsikko_result = pupe_query($tilaus_otsikko_query);
-				$tilaus_otsikko_row = mysql_fetch_assoc($tilaus_otsikko_result);
-
 				while ($prow = mysql_fetch_array ($presult)) {
-					if($tilaus_otsikko_row['erikoisale'] != $prow['ale3'] and $prow['erikoisale'] == '0') {
-						//ostotilauksen muokkausta varten
-						//erikoisale ja ale3 yhdistet‰‰n tilaus valmis kohdassa. t‰st‰ syyst‰ rivihinnat menee plˆrin‰ks jos tilausta tullaan muokkaamaan.
-						//erikoisale tiedet‰‰n otsikolta ja sen perusteella voidaan laskea ale3 prosentti sek‰ oikea rivihinta ilman erikoisalennusta
-						$ale3 = ((100 - $prow['ale3'])/100) / ((100 - $tilaus_otsikko_row['erikoisale'])/100);
-						$prow['rivihinta'] = $prow['rivihinta'] / $ale3;
-						$prow['ale3'] = (1 - $ale3) * 100;
-					}
 					$divnolla++;
 					$erikoisale_maara = ($prow['rivihinta'] * ($tilaus_row['erikoisale'] / 100));
 					$erikoisale_summa += ($erikoisale_maara * -1);

@@ -822,8 +822,10 @@
 
 		$ulos .= "<option value=''>".t("Asiakkaan JT-rivej‰ ei kohdisteta automaattisesti")."</option>";
 		$ulos .= "<option value='Y' $sel[Y]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti sis‰‰ntulevalle EDI-tilaukselle")."</option>";
-		$ulos .= "<option value='X' $sel[X]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti myyntitilaukselle")."</option>";
-		$ulos .= "<option value='W' $sel[W]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti myyntitilaukselle ja sis‰‰ntulevalle EDI-tilaukselle")."</option>";
+		$ulos .= "<option value='X' $sel[X]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti Extranet-myyntitilaukselle")."</option>";
+		$ulos .= "<option value='W' $sel[W]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti Extranet-myyntitilaukselle ja sis‰‰ntulevalle EDI-tilaukselle")."</option>";
+		$ulos .= "<option value='M' $sel[M]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti myyntitilaukselle")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti myyntitilaukselle ja sis‰‰ntulevalle EDI-tilaukselle")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

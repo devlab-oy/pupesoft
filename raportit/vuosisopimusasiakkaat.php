@@ -353,7 +353,7 @@
 		return $asiakkaat;
 	}
 
-	function hae_tilaukset($params, $asiakas_tunnus, $tyyppi) {
+	function hae_tilaukset($params, $asiakas_tunnus) {
 		global $kukarow;
 
 		$select = "tuote.osasto, tuote.try,";

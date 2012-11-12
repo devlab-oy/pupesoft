@@ -26,7 +26,7 @@ class vuosisopimus_asiakkaat_excel {
 
 		$this->rivit_osastoittain();
 		$this->move_seuraavalle_riville();
-		$this->summat('tuoteryhmittain');
+		$this->summat('osastoittain');
 
 		$this->move_seuraavalle_riville();
 		$this->move_seuraavalle_riville();
@@ -34,7 +34,6 @@ class vuosisopimus_asiakkaat_excel {
 
 		$this->rivit_tuoteryhmittain();
 		$this->move_seuraavalle_riville();
-		$this->summat('osastoittain');
 
 		return $this->excel->close();
 	}
@@ -83,7 +82,7 @@ class vuosisopimus_asiakkaat_excel {
 		$this->move_seuraavalle_riville();
 
 		foreach ($this->tilaus_rivit['osastoittain'] as $rivi) {
-			$this->print_rivi($rivi);
+			$this->print_rivi($rivi, 'osastoittain');
 			$this->move_seuraavalle_riville();
 		}
 	}
@@ -100,10 +99,10 @@ class vuosisopimus_asiakkaat_excel {
 			if ($edellinen_rivi != $rivi['osasto']) {
 				$this->move_seuraavalle_riville();
 				$this->move_seuraavalle_riville();
-				$this->write_solu("Osasto {$rivi['osasto']} - ".$rivi['osasto_selite']);
+				$this->write_solu("Osasto {$rivi['osasto']} - ".$rivi['osasto_nimitys']);
 				$this->move_seuraavalle_riville();
 			}
-			$this->print_rivi($rivi);
+			$this->print_rivi($rivi, 'tuoteryhmittain');
 			$this->move_seuraavalle_riville();
 			$edellinen_rivi = $rivi['osasto'];
 		}
@@ -125,19 +124,27 @@ class vuosisopimus_asiakkaat_excel {
 		$this->write_solu(t('Indeksi', $this->kieli));
 	}
 
-	private function print_rivi(array $rivi) {
+	private function print_rivi(array $rivi, $tyyppi) {
 		$indeksi = 0;
 		if ($rivi['ed'] != 0) {
 			$indeksi = round($rivi['va'] / $rivi['ed'], 2) * 100;
 		}
 
-		//$this->write_solu('$asananumero." - ".$tryro["selitetark"]');
-		$this->write_solu($rivi['asananumero'].' - '.$rivi['tryro_selitetark']);
+		if($tyyppi == 'osastoittain') {
+			$numero = $rivi['osasto'];
+			$nimitys = $rivi['osasto_nimitys'];
+		}
+		else {
+			$numero = $rivi['try'];
+			$nimitys = $rivi['tuoteryhma_nimitys'];
+		}
+
+		$this->write_solu($numero . ' - ' . $nimitys);
 		$this->add_tyhja_kolumni(2);
-		$this->write_solu($rivi['kplva']);
-		$this->write_solu($rivi['kpled']);
-		$this->write_solu($rivi['va']);
-		$this->write_solu($rivi['ed']);
+		$this->write_numero_solu($rivi['kplva']);
+		$this->write_numero_solu($rivi['kpled']);
+		$this->write_numero_solu($rivi['va']);
+		$this->write_numero_solu($rivi['ed']);
 		$this->write_numero_solu($indeksi);
 	}
 
@@ -150,8 +157,8 @@ class vuosisopimus_asiakkaat_excel {
 		}
 
 		$sum_indeksi = 0;
-		if ($temp['ed'] != 0) {
-			$sum_indeksi = round($temp['va'] / $temp['ed'], 2) * 100;
+		if ($temp['sumed'] != 0) {
+			$sum_indeksi = round($temp['sumva'] / $temp['sumed'], 2) * 100;
 		}
 
 		$this->add_tyhja_kolumni(2);

@@ -327,6 +327,22 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "ostotilauksen_tuloste") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array_fill_keys(array($trow[$i]), 'selected') + array_fill_keys(array('A', 'B', 'C'), '');
+
+		$ulos .= "<option value = ''>".t("Tulostetaan nimitykset ja toimituspäivä")."</option>";
+		$ulos .= "<option value = 'A' {$sel['A']}>".t("Tulosta nimitykset, piilotetaan toimituspäivä")."</option>";
+		$ulos .= "<option value = 'B' {$sel['B']}>".t("Piilota nimitykset, tulosta toimituspäivä")."</option>";
+		$ulos .= "<option value = 'C' {$sel['C']}>".t("Piilota toimituspäivä ja nimitykset")."</option>";
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "ostolaskujen_paivays") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

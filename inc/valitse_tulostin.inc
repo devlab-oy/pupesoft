@@ -69,7 +69,6 @@
 	$valittu = "";
 
 	if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
-		echo "<tr><td>".t("Tulosta nimitykset ostotilaukselle")."</td><td><input type='checkbox' name='nimitykset'></td></tr>";
 		$mista = 'toimi';
 		$editsql = "	SELECT *
 						FROM toimi

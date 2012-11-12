@@ -66,6 +66,7 @@ if (!function_exists('jt_toimita_editilaus')) {
 		}
 
 		if ($asiakasid > 0 and count($varastosta) > 0) {
+			$sahkoinen_myyntitilaus = 1;
 			require('jtselaus.php');
 		}
 	}

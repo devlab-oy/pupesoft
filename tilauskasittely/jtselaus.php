@@ -890,7 +890,7 @@
 							$order
 							$limit";
 			}
-			elseif ($tilaus_on_jo != '') {
+			elseif ($tilaus_on_jo != '' and ($automaattinen_poiminta != '' or $sahkoinen_myyntitilaus == 1)) {
 				//pit‰‰ tarkistaa, ett‰ automaattisessa rivien poiminnassa olemassa olevalle tilaukselle ei ole asetettu poikkeavaa toimitusosoitetta,
 				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.jt $lisavarattu jt,
 							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}

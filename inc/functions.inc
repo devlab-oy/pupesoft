@@ -12937,7 +12937,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 				$nimityskuvaus = "nimi_ja_kuvaus";
 			}
 
-			$vakselect = "	concat({$taulu}.yk_nro, {$taulu}.name_and_description, {$taulu}.lipukkeet, {$taulu}.pakkausryhma, {$taulu}.meria_saastuttava, {$taulu}.leimahduspiste) {$vak_kentta},
+			$vakselect = "	concat({$taulu}.yk_nro, {$taulu}.name_and_description, {$taulu}.lipukkeet, {$taulu}.pakkausryhma, tuote.meria_saastuttava, tuote.leimahduspiste) {$vak_kentta},
 							concat('UN', {$taulu}.yk_nro) yk_nro,
 							{$taulu}.{$nimityskuvaus} nimitys,
 							{$taulu}.lipukkeet,

@@ -527,7 +527,7 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 									luottokortti
 									FROM kassalipas
 									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND kassalipas = '{$laskurow['kassalipas']}'";
+									AND tunnus = '{$laskurow['kassalipas']}'";
 			$kassalipas_result = pupe_query($kassalipas_query);
 			
 			$kassalippaat = mysql_fetch_assoc($kassalipas_result);

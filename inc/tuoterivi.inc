@@ -689,6 +689,17 @@
 
 	}
 
+	if (mysql_field_name($result, $i) == "meria_saastuttava") {
+
+		$sel = trim($trow[$i]) == 'K' ? ' selected' : '';
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value=''>".t("Ei")."</option>";
+		$ulos .= "<option value='K'{$sel}>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+
+	}
 
 	if (mysql_field_name($result, $i) == "ostoehdotus") {
 

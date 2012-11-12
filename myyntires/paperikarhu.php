@@ -654,9 +654,7 @@
 	loppu($firstpage,$loppusumma);
 
 	//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-	list($usec, $sec) = explode(' ', microtime());
-	mt_srand((float) $sec + ((float) $usec * 100000));
-	$pdffilenimi = "/tmp/karhu-$kukarow[yhtio]-".date("Ymd")."-".$laskutiedot['laskunro']."_finvoice.pdf";
+	$pdffilenimi = "/tmp/karhu_$kukarow[yhtio]_".date("Ymd")."_".$laskutiedot['laskunro'].".pdf";
 
 	//kirjoitetaan pdf faili levylle..
 	$fh = fopen($pdffilenimi, "w");
@@ -716,8 +714,8 @@
 
 		require ('tilauskasittely/verkkolasku_finvoice.inc');
 
-		$finvoice_file_path = "$pupe_root_polku/dataout/karhu-$kukarow[yhtio]-".date("Ymd")."-".$laskutiedot['laskunro']."_finvoice.xml";
-		$tootfinvoice	= fopen($finvoice_file_path, 'w');
+		$finvoice_file_path = "$pupe_root_polku/dataout/karhu_$kukarow[yhtio]_".date("Ymd")."_".$laskutiedot['laskunro'].".xml";
+		$tootfinvoice		= fopen($finvoice_file_path, 'w');
 
 		$pankkitiedot 	= $yhtiorow;
 		$tyyppi			= '';
@@ -774,12 +772,12 @@
 			'tilauspaiva' => date("Y-m-d"),
 			'alv' => 0,
 			'rivihinta' => 0,
+			'rivihinta_verollinen' => 0,
 		);
 
 		$vatamount = 0;
-		$totalvat  = 0;
 
-		finvoice_rivi($tootfinvoice, $tilrow, $laskurow, $vatamount, $totalvat);
+		finvoice_rivi($tootfinvoice, $tilrow, $laskurow, $vatamount);
 
 		finvoice_lasku_loppu($tootfinvoice, $laskurow, $pankkitiedot, $masrow);
 
@@ -790,10 +788,10 @@
 
 		//Finvoice
 		$files_out['files'][0]		 = base64_encode(file_get_contents($finvoice_file_path));
-		$files_out['filenames'][0]	 = $finvoice_file_path;
+		$files_out['filenames'][0]	 = "Maksukehotus_".date("Ymd")."_".$laskutiedot['laskunro'].".xml";
 		//PDF‰
 		$files_out['files'][1]		 = base64_encode(file_get_contents($pdffilenimi));
-		$files_out['filenames'][1]	 = $pdffilenimi;
+		$files_out['filenames'][1]	 = "Maksukehotus_".date("Ymd")."_".$laskutiedot['laskunro'].".pdf";
 
 		// Tehd‰‰n validaatio Application Requestille
 		$axml = new DomDocument('1.0');
@@ -888,7 +886,8 @@
 		// itse print komento...
 		$query = "	SELECT komento
 					from kirjoittimet
-					where yhtio='{$kukarow['yhtio']}' and tunnus = '{$kukarow['kirjoitin']}'";
+					where yhtio = '{$kukarow['yhtio']}'
+					and tunnus = '{$kukarow['kirjoitin']}'";
 		$kires = pupe_query($query);
 
 		if (mysql_num_rows($kires) == 1) {

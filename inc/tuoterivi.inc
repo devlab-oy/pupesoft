@@ -78,7 +78,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "tuotetyyppi") {
- 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('A', 'B', 'R', 'K', 'M'), '');
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('A', 'B', 'R', 'K', 'M', 'N'), '');
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
@@ -347,17 +347,31 @@
 		$jatko = 0;
 	}
 
+	// ei piirretä ellei yhtiöparametri ohjeista katsomaan täältä
 	if (mysql_field_name($result, $i) == "suoratoimitus") {
-		$sele = "";
+		if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J'))) {
 
-		if ($trow[$i] == 'S') {
-			$sele = "SELECTED";
+			$sel = array_fill_keys(array('S', 'U', 'X'), '');
+			$sel[$trow[$i]] = " SELECTED";
+
+			$ulos = "<td><select name='$nimi'".js_alasvetoMaxWidth($nimi, 300).">
+				<option value=''>".t("Myyntitilaukselta ei voi luoda ostorivejä tästä tuotteesta")."</option>";
+
+			if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('W', 'J'))){
+				$ulos .= "<option value='S' {$sel['S']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta varastoon tai asiakkaalle")."</option>
+						  <option value='U' {$sel['U']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta asiakkaalle")."</option>
+						  <option value='X' {$sel['X']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta varastoon")."</option>";
+			}
+			else {
+				$ulos .= "<option value='S' {$sel['S']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta varastoon")."</option>";
+			}
+
+			$ulos .= "</select></td>";
+			$jatko = 0;
 		}
-
-		$ulos = "<td><select name='$nimi'".js_alasvetoMaxWidth($nimi, 300).">
-			<option value=''>".t("Oletus")."</option>
-			<option value='S' $sele>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta jos yhtiön parametreissä se on sallittu")."</option>";
-		$jatko = 0;
+		else {
+			$tyyppi = 0;
+		}
 	}
 
 	if (mysql_field_name($result, $i) == "hinnastoon") {
@@ -622,11 +636,12 @@
 
 	if (mysql_field_name($result, $i) == "yksin_kerailyalustalle") {
 
- 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('K', 'T'), '');
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('K', 'E'), '');
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value=''>".t("Ei")."</option>";
-		$ulos .= "<option value='K'{$sel['K']}>".t("Kyllä")."</option>";
+		$ulos .= "<option value='K'{$sel['K']}>".t("Kyllä")." - ".t("Ehdoton")."</option>";
+		$ulos .= "<option value='E'{$sel['E']}>".t("Kyllä")." - ".t("Ehdollinen")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

@@ -130,12 +130,12 @@ if (mysql_num_rows($result) > 1) {
 
 	foreach ($sovellukset as $key => $val) {
 		$sel = '';
-		if ($sovellus == $key) $sel = "SELECTED";
+		if (isset($sovellus) and $sovellus == $key) $sel = "SELECTED";
 
 		echo "<option value='$key' $sel>$val</option>";
 
 		// sovellus on tyhj‰ kun kirjaudutaan sis‰‰n, ni otetaan eka..
-		if ($sovellus == '') $sovellus = $key;
+		if (!isset($sovellus) or $sovellus == '') $sovellus = $key;
 	}
 
 	echo "</select></form><br><br>";

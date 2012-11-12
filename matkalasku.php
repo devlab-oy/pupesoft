@@ -1199,6 +1199,11 @@ if ($tee == "TALLENNA") {
 						$ext = $path_parts['extension'];
 						if (strtoupper($ext) == "JPEG") $ext = "jpg";
 
+						if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
+							$errormsg .= "<font class='error'>".t("Ainoastaan .jpg .gif .png .pdf tiedostot sallittuja")."!</font>";
+							break;
+						}
+
 						$query = "SHOW variables like 'max_allowed_packet'";
 						$result = pupe_query($query);
 						$varirow = mysql_fetch_row($result);
@@ -1217,7 +1222,7 @@ if ($tee == "TALLENNA") {
 			}
 
 			if ($errormsg != "") {
-				echo "<font class='error'>$errormsg</font><br>";
+				echo "<br><font class='error'>".t("VIRHE").": $errormsg</font><br><br>";
 			}
 		}
 

@@ -274,14 +274,14 @@
 				}
 
 				if (isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
-					$tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus) ";
+					$tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu='') ";
 					$th_lisa .= $lisa;
 				}
 				else {
 					$tiliointilisa = '';
 				}
 
-				$query = "	SELECT lasku.tapvm, lasku.erpcm, lasku.summa, lasku.valkoodi, lasku.vienti,
+				$query = "	SELECT DISTINCT lasku.tapvm, lasku.erpcm, lasku.summa, lasku.valkoodi, lasku.vienti,
 							concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti', lasku.ebid, lasku.tila, lasku.tunnus,
 							if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
 							round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) kotisumma

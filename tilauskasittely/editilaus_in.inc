@@ -47,6 +47,7 @@ if (!function_exists('jt_toimita_editilaus')) {
 		$tilaus_on_jo			    	= "KYLLA";
 		$from_varastoon_inc 	    	= "editilaus_in.inc";
 		$ei_tehdastoimitus_tuotteita	= "EI";
+		$automaattinen_poiminta			= "JOO";
 
 		if ($asiakasmaa != '') {
 			$asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
@@ -66,7 +67,6 @@ if (!function_exists('jt_toimita_editilaus')) {
 		}
 
 		if ($asiakasid > 0 and count($varastosta) > 0) {
-			$sahkoinen_myyntitilaus = 1;
 			require('jtselaus.php');
 		}
 	}

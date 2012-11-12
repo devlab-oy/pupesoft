@@ -48,6 +48,7 @@
 	if(!isset($varastosta))  			$varastosta = "";
 	if(!isset($ytunnus)) 	 			$ytunnus = "";
 	if(!isset($myyja))					$myyja = "";
+	if(!isset($automaattinen_poiminta))	$automaattinen_poiminta = "";
 
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
@@ -890,7 +891,7 @@
 							$order
 							$limit";
 			}
-			elseif ($tilaus_on_jo != '' and ($automaattinen_poiminta != '' or $sahkoinen_myyntitilaus == 1)) {
+			elseif ($tilaus_on_jo != '' and $automaattinen_poiminta != '') {
 				//pit‰‰ tarkistaa, ett‰ automaattisessa rivien poiminnassa olemassa olevalle tilaukselle ei ole asetettu poikkeavaa toimitusosoitetta,
 				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.jt $lisavarattu jt,
 							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}

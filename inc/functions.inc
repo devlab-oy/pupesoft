@@ -5263,10 +5263,10 @@ if (!function_exists("generoi_alekentta_php")) {
 			for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
 				if ($alepostfix == 1) {
 					if ($row["ale{$alepostfix}"] != 0) {
-						$ale["ale{$alepostfix}"] = round((1 - (1 - $row["ale{$alepostfix}"] / 100) * (1 - $row["erikoisale"] / 100) * (1 - $row["erikoisale"] / 100)) * 100, 2);
+						$ale["ale{$alepostfix}"] = round((1 - (1 - $row["ale{$alepostfix}"] / 100) * (1 - $row["erikoisale"] / 100) * (1 - $row["erikoisale_saapuminen"] / 100)) * 100, 2);
 					}
 					else {
-						$ale["ale{$alepostfix}"] = round((1 - (1 - $row["erikoisale"] / 100) * (1 - $row["erikoisale"] / 100)) * 100, 2);
+						$ale["ale{$alepostfix}"] = round((1 - (1 - $row["erikoisale"] / 100) * (1 - $row["erikoisale_saapuminen"] / 100)) * 100, 2);
 					}
 				}
 				else {

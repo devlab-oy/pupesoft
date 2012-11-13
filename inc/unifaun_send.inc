@@ -783,7 +783,21 @@ class Unifaun {
 
 		$pakkaustiedot['syvyys'] = $pakkaustiedot['syvyys'] < 0.25 ? 0.25 : $pakkaustiedot['syvyys'];
 		$pakkaustiedot['leveys'] = $pakkaustiedot['leveys'] < 0.25 ? 0.25 : $pakkaustiedot['leveys'];
-		$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < 0.25 ? 0.25 : $pakkaustiedot['korkeus'];
+
+		/*
+		Otamme pakkauksen kaksi mittaa (pohjan mitat) syvyys ja leveys, korkeuden laskemme tilavuudesta jakamalla tilavuuden pohjan alalla.
+		Teoreettisesti ajatelle näin saisimme tarkimmin viedyksi rahtitietoihin kollin mitat.
+		Pohjan alahan ei muutu, mutta pakkausta puukotetaan matalammaksi (pahvilaatikon reunoja leikataan/viikataan matalammaksi)
+		tai lavapakkausta rakennetaan alhaalta ylöspäin niin korkealle kuin tavaraa on laittaa.
+		*/
+		if ($pakkaustiedot['kuutiot'] > 0) {
+			$pakkaustiedot['korkeus'] = $pakkaustiedot['kuutiot'] / ($pakkaustiedot['syvyys'] * $pakkaustiedot['leveys']);
+
+			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < 0.25 ? 0.25 : round($pakkaustiedot['korkeus'], 2);
+		}
+		else {
+			$pakkaustiedot['korkeus'] = 0.25;
+		}
 
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['syvyys'])); # Length
 		$uni_par_val->addAttribute('n', "length");

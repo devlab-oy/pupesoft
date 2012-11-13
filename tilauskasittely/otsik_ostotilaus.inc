@@ -461,7 +461,7 @@
 		}
 
 		//Erikoisalennuksen desimaalipilkku
-		$erikoisale = str_replace (",", ".", $erikoisale);
+		$erikoisale = (float) str_replace(",", ".", $erikoisale);
 
 		$query .= "	lasku SET
 					alatila 			= '$alatila',

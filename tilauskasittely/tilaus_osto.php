@@ -782,6 +782,7 @@
 			// katotaan miten halutaan sortattavan
 			$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
+			//"ei_erikoisale" koska rivill‰ ei haluta v‰hent‰‰ erikoisalea hinnasta, vaan se n‰ytet‰‰n erikseen yhteenvedossa
 			$query_ale_lisa = generoi_alekentta("O", '', 'ei_erikoisale');
 
 			$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
@@ -867,14 +868,9 @@
 				$divnolla		= 0;
 				$erikoisale_summa = 0;
 
-				//haetaan erikoisale otsikoilta
-				$tilaus_query = "SELECT erikoisale FROM lasku WHERE yhtio ='{$kukarow['yhtio']}' AND tunnus = '{$kukarow['kesken']}'";
-				$tilaus_result = pupe_query($tilaus_query);
-				$tilaus_row = mysql_fetch_assoc($tilaus_result);
-
 				while ($prow = mysql_fetch_array ($presult)) {
 					$divnolla++;
-					$erikoisale_maara = ($prow['rivihinta'] * ($tilaus_row['erikoisale'] / 100));
+					$erikoisale_maara = ($prow['rivihinta'] * ($laskurow['erikoisale'] / 100));
 					$erikoisale_summa += ($erikoisale_maara * -1);
 					$yhteensa += $prow["rivihinta"];
 					$paino_yhteensa += ($prow["tilattu"]*$prow["tuotemassa"]);

@@ -73,19 +73,20 @@ class vahvistamattomat_ostorivit_excel {
 		$this->write_solu($rivi['toim_tuoteno'] . ' (' . $rivi['tuoteno'] . ')');
 		$this->write_aika_solu($rivi['toimaika']);
 		$this->write_solu($rivi['tilkpl'] . '/' . $rivi['ulkkpl'] . ' ' . $rivi['omyks'] . '/' . $rivi['toyks']);
-		$this->write_solu($rivi['hinta']);
+		$this->write_numero_solu($rivi['hinta']);
 		if($rivi['ale1'] != 0) {
-			$this->write_solu($rivi['ale1'] * 1);
+			$this->write_numero_solu($rivi['ale1'] * 1);
 		}
 		else {
 			$this->write_numero_solu(0);
 		}
-		$this->write_solu($rivi['rivihinta']);
+		$this->write_numero_solu($rivi['rivihinta']);
 	}
 
 	private function loppu() {
 		$this->write_solu(t('Yhteensä', $this->kieli));
-		$this->write_solu($this->rivit['total_rivihinta']);
+		$this->add_tyhja_kolumni(5);
+		$this->write_numero_solu($this->rivit['total_rivihinta']);
 	}
 
 	private function write_solu($data) {

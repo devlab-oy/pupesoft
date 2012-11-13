@@ -362,7 +362,7 @@
 
 	if (!function_exists('print_pdf')) {
 		function print_pdf () {
-			global $pdf, $kukarow, $yhtiorow, $komento, $kieli, $tee, $tulosta_ostotilaus_ulos;
+			global $pdf, $kukarow, $yhtiorow, $komento, $kieli, $tee;
 
 			if ($komento["Ostotilaus"] != '' or $tee == 'NAYTATILAUS') {
 				//keksitään uudelle failille joku varmasti uniikki nimi:
@@ -381,15 +381,7 @@
 					$kutsu = "Ostotilaus";
 
 					require("../inc/sahkoposti.inc");
-					$tulosta_ostotilaus_ulos .= t("Vahvistamattomat rivit tulostuu")."...<br>";
-				}
-				elseif ($tee == 'NAYTATILAUS') {
-           			//Työnnetään tuo pdf vaan putkeen!
-           			echo file_get_contents($pdffilenimi);
-           		}
-				elseif ($komento["Ostotilaus"] != '') {
-					$line = exec("$komento[Ostotilaus] $pdffilenimi");
-				    $tulosta_ostotilaus_ulos .= t("Vahvistamattomat rivit tulostuu")."...<br>";
+					echo t("Vahvistamattomat rivit lähetetty sähköpostiin")."...<br><br>";
 				}
 
            		$tee = "";
@@ -422,11 +414,4 @@
 	//kutsutaan lopuksi vielä print_pdf funktiota
 	$pdffilenimi = print_pdf();
 
-
 	system("rm -f $pdffilenimi");
-
-	if ($silent == "") {
-		echo $tulosta_ostotilaus_ulos;
-	}
-
-?>

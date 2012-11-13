@@ -152,7 +152,7 @@
 	}
 
 	if ($tee == "TULOSTAPDF") {
-		if($tulosta_exceliin == 'on') {
+		if ($tulosta_exceliin == 'EXCEL') {
 			$komento["Ostotilaus"] = "email";
 			require_once 'tulosta_vahvistamattomista_ostoriveista_excel.inc';
 
@@ -177,6 +177,7 @@
 				)
 			);
 			pupesoft_sahkoposti($params);
+			echo t("Vahvistamattomat rivit lähetetty sähköpostiin")."...<br><br>";
 		}
 		else {
 			$komento["Ostotilaus"] = "email";
@@ -252,7 +253,8 @@
 
 		echo "<td><select name='nayta_rivit' onchange='submit();'>";
 		echo "<option value=''>",t("Kaikki avoimet rivit"),"</option>";
-		echo "<option value='vahvistamattomat' {$select}>",t("Vain vahvistamattomia rivejä"),"</option></td>";
+		echo "<option value='vahvistamattomat' {$select}>",t("Vain vahvistamattomia rivejä"),"</option>";
+		echo "</select></td>";
 
 		echo "</form></td></tr></table><br>";
 
@@ -282,10 +284,18 @@
 				<input type='hidden' name='keikka' value = '{$keikka}'>
 				<input type='hidden' name='tee' value = 'TULOSTAPDF'>";
 
-		echo "<tr><th>".t('Tulosta tiedot exceliin')."</th><td><input type='checkbox' name='tulosta_exceliin' /></td></tr>";
+		echo "<tr><th>".t('Tiedostomuoto').":</th>";
+		
+		$sel = "";
+		if (isset($tulosta_exceliin) and $tulosta_exceliin != "") $sel = "SELECTED";
+		
+		echo "<td><select name='tulosta_exceliin'>";
+		echo "<option value=''>",t("PDF"),"</option>";
+		echo "<option value='EXCEL' $sel>",t("Excel"),"</option>";
+		echo "</select></td>";
 
-		echo "<tr><th>",t("Tulosta vahvistamattomat rivit"),": </th>
-				<td><input type='Submit' value='",t("Tulosta"),"'></form></td></tr></table><br>";
+		echo "<tr><th>",t("Lähetä vahvistamattomat rivit sähköpostiin"),": </th>
+				<td><input type='Submit' value='",t("Lähetä"),"'></form></td></tr></table><br>";
 
 
 		//Haetaan kaikki tilausrivit

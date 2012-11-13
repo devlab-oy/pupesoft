@@ -790,7 +790,7 @@ class Unifaun {
 		Pohjan alahan ei muutu, mutta pakkausta puukotetaan matalammaksi (pahvilaatikon reunoja leikataan/viikataan matalammaksi)
 		tai lavapakkausta rakennetaan alhaalta ylöspäin niin korkealle kuin tavaraa on laittaa.
 		*/
-		if ($pakkaustiedot['kuutiot'] > 0 and $pakkaustiedot['syvyys'] > 0 and $pakkaustiedot['leveys'] > 0) {
+		if ($pakkaustiedot['kuutiot'] > 0) {
 			$pakkaustiedot['korkeus'] = $pakkaustiedot['kuutiot'] / ($pakkaustiedot['syvyys'] * $pakkaustiedot['leveys']);
 
 			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < 0.25 ? 0.25 : round($pakkaustiedot['korkeus'], 2);

@@ -326,8 +326,15 @@
 				else echo "<td valign='top'><a href='../crm/asiakasmemo.php?asiakasid=$row[asiakastunnus]'>$row[tuoteno]</a></td>";
 
 				echo "<td valign='top'>$row[nimitys]</td>";
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY".preg_replace("/&mul_osasto\[\]\=[^&]*/i", "", $ulisa)."&mul_osasto[]=$row[osasto]&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>$row[osasto]</a></td>";
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY".preg_replace("/&mul_(osasto|try)\[\]\=[^&]*/i", "", $ulisa)."&mul_osasto[]=$row[osasto]&mul_try[]=$row[try]&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>$row[try]</a></td>";
+				
+				if (!$asiakasanalyysi) {
+					echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY".preg_replace("/&mul_osasto\[\]\=[^&]*/i", "", $ulisa)."&mul_osasto[]=$row[osasto]&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>$row[osasto]</a></td>";
+					echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY".preg_replace("/&mul_(osasto|try)\[\]\=[^&]*/i", "", $ulisa)."&mul_osasto[]=$row[osasto]&mul_try[]=$row[try]&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>$row[try]</a></td>";
+				}
+				else {
+					echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY".preg_replace("/&mul_asiakasosasto\[\]\=[^&]*/i", "", $ulisa)."&mul_asiakasosasto[]=$row[osasto]&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>$row[osasto]</a></td>";
+					echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY".preg_replace("/&mul_(asiakasosasto|asiakasryhma)\[\]\=[^&]*/i", "", $ulisa)."&mul_asiakasosasto[]=$row[osasto]&mul_asiakasryhma[]=$row[try]&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>$row[try]</a></td>";
+				}
 
 				if (!$asiakasanalyysi and $lisatiedot == "TARK") {
 					echo "<td valign='top'>$row[tuotemerkki]</td>";

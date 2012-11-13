@@ -8,6 +8,7 @@
 
 	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
+	$usemastertoo = 1;
 
 	require "../inc/parametrit.inc";
 	require "tulosta_vuosisopimusasiakkaat.inc";
@@ -120,7 +121,7 @@
 		foreach($asiakkaat as $asiakas) {
 			$bar->increase();
 			$tilaukset = hae_tilaukset($params, $asiakas['tunnus']);
-			
+
 			$summa_array = array(
 				'sumkpled' => 0,
 				'sumkplva' => 0,
@@ -155,7 +156,7 @@
 				'summat_try' => $summa_array2,
 			);
 		}
-		
+
 		kasittele_tilaukset($data_array, htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $komento, $params, $generoi_excel, $kieli);
 
 		echo "<br>".t('Kaikki valmista' , $kieli).".</font>";
@@ -232,7 +233,7 @@
 					if(!tarkista_tulostin()) {
 						ok = false;
 					}
-					
+
 					if(!tarkista_lahettaja() && ok != false) {
 						ok = false;
 					}
@@ -359,7 +360,7 @@
 		$select = "tuote.osasto, tuote.try,";
 		$group = "osasto, try";
 		$order = "osasto, try";
-		
+
 		$query = "	SELECT {$select}
 						sum(if (tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'		and tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}', tilausrivi.rivihinta, 0)) va,
 						sum(if (tapvm >= '{$params['edalkupvm']}'											and tapvm <= '{$params['edloppupvm']}', tilausrivi.rivihinta, 0)) ed,
@@ -395,7 +396,7 @@
 				$tilaukset_tuoteryhmittain[] = $row;
 			}
 		}
-		
+
 		return array(
 			'osastoittain'		 => $tilaukset_osastoittain,
 			'tuoteryhmittain'	 => $tilaukset_tuoteryhmittain
@@ -500,7 +501,7 @@
 			$firstpage = alku();
 
 			$firstpage = rivi_kaikki($firstpage , '' , $data['tilaukset_try']);
-			
+
 			$sumkpled = $data['summat_try']['sumkpled'];
 			$sumkplva = $data['summat_try']['sumkplva'];
 			$sumed = $data['summat_try']['sumed'];
@@ -555,7 +556,7 @@
 
 	function luo_zip_ja_laheta($tiedostot, $email_address) {
 		global $yhtiorow, $kieli;
-		
+
 		$maaranpaa = '/tmp/Ostoseuranta_raportit.zip';
 		$ylikirjoita = true;//ihan varmuuden vuoks
 		if(luo_zip($tiedostot, $maaranpaa, $ylikirjoita)) {
@@ -613,7 +614,7 @@
 
 	function tulosta_raportit($tiedostot, $komento) {
 		global $kieli;
-		
+
 		echo t("Tulostetaan asiakkaan ostoseuranta tulostimeen {$komento}", $kieli);
 
 		foreach ($tiedostot as $tiedosto) {

@@ -161,7 +161,12 @@
 	        }
 	    }
 
-		$updatelisa = $otunnus == 0 ? ", suuntalava = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale_saapuminen=0 " : "$suuntalava_querylisa , kerattyaika = now(), keratty = '{$kukarow['kuka']}', erikoisale_saapuminen = '{$laskurow['erikoisale_saapuminen']}' ";
+		if ($otunnus == 0) {
+			$updatelisa = ", suuntalava = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale = 0, erikoisale_saapuminen = 0 ";
+		}
+		else {
+			$updatelisa = "$suuntalava_querylisa , kerattyaika = now(), keratty = '{$kukarow['kuka']}', erikoisale = '{$laskurow['erikoisale']}', erikoisale_saapuminen = '{$laskurow['erikoisale_saapuminen']}' ";
+		}
 
 	    // Haetaan rivit ennen päivitystä
 	    $vanhathinnat = array();

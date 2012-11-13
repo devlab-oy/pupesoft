@@ -5261,13 +5261,9 @@ if (!function_exists("generoi_alekentta_php")) {
 			$ale = array();
 
 			for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
+				// Lasketaan ale1 -kenttään erikoislannukset mukaan
 				if ($alepostfix == 1) {
-					if ($row["ale{$alepostfix}"] != 0) {
-						$ale["ale{$alepostfix}"] = round((1 - (1 - $row["ale{$alepostfix}"] / 100) * (1 - $row["erikoisale"] / 100) * (1 - $row["erikoisale_saapuminen"] / 100)) * 100, 2);
-					}
-					else {
-						$ale["ale{$alepostfix}"] = round((1 - (1 - $row["erikoisale"] / 100) * (1 - $row["erikoisale_saapuminen"] / 100)) * 100, 2);
-					}
+					$ale["ale{$alepostfix}"] = round((1 - (1 - $row["ale{$alepostfix}"] / 100) * (1 - $row["erikoisale"] / 100) * (1 - $row["erikoisale_saapuminen"] / 100)) * 100, 2);
 				}
 				else {
 					$ale["ale{$alepostfix}"] = round($row["ale{$alepostfix}"], 2);
@@ -8978,8 +8974,8 @@ if (!function_exists("hae_rahtimaksu")) {
 			}
 
 			//erikoisalennus lasketaan vain riveille joilla EI ole NETTOHINTAA
-			if ($laskurow['erikoisale_saapuminen'] != 0) {
-				$apu1 = round($laskurow['erikoisale_saapuminen']/100,2);	// erikoisale prosentti
+			if ($laskurow['erikoisale'] != 0) {
+				$apu1 = round($laskurow['erikoisale']/100,2);	// erikoisale prosentti
 				$apu2 = round($myht*$apu1,2); 					// erikoisalen määrä
 				$apu3 = round((1-$apu1)*$myht,2);				// loppusumma
 

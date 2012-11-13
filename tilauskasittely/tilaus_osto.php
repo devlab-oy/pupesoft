@@ -786,18 +786,21 @@
 
 			$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
 
-			$tilausrivit_query = "	SELECT tunnus
-									FROM tilausrivi
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND otunnus = '{$kukarow['kesken']}'";
-			$tilausrivit_result = pupe_query($tilausrivit_query);
+			//jos tullaan otsikolta niin p‰ivitet‰‰n tilausriveille erikoisale
+			if(isset($erikoisale)) {
+				$tilausrivit_query = "	SELECT tunnus
+										FROM tilausrivi
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND otunnus = '{$kukarow['kesken']}'";
+				$tilausrivit_result = pupe_query($tilausrivit_query);
 
-			while($tilausrivi_row = mysql_fetch_assoc($tilausrivit_result)) {
-				$tilausrivi_update_query = "UPDATE tilausrivi
-											SET erikoisale = '{$erikoisale}'
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tunnus = '{$tilausrivi_row['tunnus']}'";
-				pupe_query($tilausrivi_update_query);
+				while($tilausrivi_row = mysql_fetch_assoc($tilausrivit_result)) {
+					$tilausrivi_update_query = "UPDATE tilausrivi
+												SET erikoisale = '{$laskurow['erikoisale']}'
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus = '{$tilausrivi_row['tunnus']}'";
+					pupe_query($tilausrivi_update_query);
+				}
 			}
 
 			//Listataan tilauksessa olevat tuotteet

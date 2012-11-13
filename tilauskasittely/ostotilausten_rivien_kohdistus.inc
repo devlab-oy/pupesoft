@@ -840,6 +840,15 @@ if ($tila == 'tee_kohdistus') {
 		}
 	}
 
+	if (is_array($rivi_erikoisale)) {
+		// ale3
+		foreach ($rivi_erikoisale as $tunnus => $ale) {
+			$ale  = str_replace(",",".", $ale);
+			$query  = "UPDATE tilausrivi set erikoisale='$ale' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and erikoisale<>'$ale'";
+			$result = pupe_query($query);
+		}
+	}
+
 	// katotaan päivitetäänkö toimitettuaikoja
 	if (is_array($rivi_toimitettuaika_vv)) {
 		foreach ($rivi_toimitettuaika_vv as $tunnus => $toimitettuvv) {
@@ -1052,6 +1061,7 @@ if ($tila == '') {
 	}
 
 	$kennim_array[] = t('Alv');
+	$kennim_array[] = t('Oston E-ale');
 	$kennim_array[] = t('Rivihinta');
 	$kennim_array[] = t('+Alv -Ale');
 	#$kennim_array[] = t('Extrakulu');
@@ -1198,6 +1208,7 @@ if ($tila == '') {
 				tuote.kehahin keskihinta,
 				tuotteen_toimittajat.ostohinta,
 				tuotteen_toimittajat.valuutta,
+				tilausrivi.erikoisale,
 				tilausrivi.yksikko tilyksikko,
 				if(tuotteen_toimittajat.toim_yksikko!='', tuotteen_toimittajat.toim_yksikko, tilausrivi.yksikko) toimyksikko,
 				tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.hyllyvali,
@@ -1483,6 +1494,9 @@ if ($tila == '') {
 		echo "</th>";
 	}
 
+	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a></th>";
+	$pointteri++;
+	
 	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a><br>";
 	$pointteri++;
 	echo "$kennim_array[$pointteri]</th>";
@@ -1526,6 +1540,9 @@ if ($tila == '') {
 
 		echo "</td>";
 	}
+
+	echo "<td><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
+	$pointteri++;
 
 	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'><br>";
 	$pointteri++;
@@ -1881,6 +1898,8 @@ if ($tila == '') {
 			}
 
 		}
+
+		echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_erikoisale[$rivirow[rivitunnus]]' value='". (float) $rivirow["erikoisale"]."' style='text-align:right'></$td>";
 
 		echo "<$td $class valign='top' align='right'>". (float) $rivirow["rivihinta"]."<br>". (float) $rivirow["alerivihinta"]."</$td>";
 		//echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_kuluhinta[$rivirow[rivitunnus]]' value='$rivirow[kuluhinta]' style='text-align:right'><br>$yhtiorow[valkoodi]</$td>";

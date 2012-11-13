@@ -177,7 +177,7 @@
 
 				$pdf->draw_text(430, 750, t("Toimitusaika", $kieli), $thispage, $pieni);
 
-				if ($yhtiorow['ostotilauksen_tuloste'] == '' or $yhtiorow['ostotilauksen_tuloste'] == 'B') {
+				if ($yhtiorow['ostotilaustyyppi'] == '0' or $yhtiorow['ostotilaustyyppi'] == 'B') {
 					$pdf->draw_text(430, 740, tv1dateconv($laskurow["toimaika"]), $thispage, $boldi);
 				}
 
@@ -397,7 +397,7 @@
 					}
 				}
 
-				if ($yhtiorow['ostotilauksen_tuloste'] == '' or $yhtiorow['ostotilauksen_tuloste'] == 'B') {
+				if ($yhtiorow['ostotilaustyyppi'] == '0' or $yhtiorow['ostotilaustyyppi'] == 'B') {
 					$pdf->draw_text(300, $kala, tv1dateconv($row["toimaika"]), $thispage, $norm);
 				}
 
@@ -433,7 +433,7 @@
 				$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
 				$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
 
-            	if ($yhtiorow['ostotilauksen_tuloste'] == '' or $yhtiorow['ostotilauksen_tuloste'] == 'A') {
+            	if ($yhtiorow['ostotilaustyyppi'] == '0' or (isset($nimitykset) and $nimitykset != "")) {
 
 	 				//Käännetään nimitys
 					$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
@@ -700,6 +700,7 @@
 						'row'						=> '',
 						'sivu'						=> 1,
 						'tee'						=> $tee,
+						'nimitykset'				=> $nimitykset,
 						'thispage'					=> NULL,
 						'toim'						=> $toim,
 						'rivinumerot'				=> $rivinumerot,

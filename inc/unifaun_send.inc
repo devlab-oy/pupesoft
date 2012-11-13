@@ -793,7 +793,7 @@ class Unifaun {
 		if ($pakkaustiedot['kuutiot'] > 0 and $pakkaustiedot['syvyys'] > 0 and $pakkaustiedot['leveys'] > 0) {
 			$pakkaustiedot['korkeus'] = $pakkaustiedot['kuutiot'] / ($pakkaustiedot['syvyys'] * $pakkaustiedot['leveys']);
 
-			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < 0.25 ? 0.25 : $pakkaustiedot['korkeus'];
+			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < 0.25 ? 0.25 : round($pakkaustiedot['korkeus'], 2);
 		}
 		else {
 			$pakkaustiedot['korkeus'] = 0.25;

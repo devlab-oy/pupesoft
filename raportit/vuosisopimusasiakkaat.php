@@ -188,7 +188,7 @@
 		$query = "	SELECT *
 					FROM kirjoittimet
 					WHERE yhtio = '$kukarow[yhtio]'
-					AND komento != 'email'
+					AND komento not in ('email','EDI')
 					ORDER BY kirjoitin";
 		$kires = mysql_query($query) or pupe_error($query);
 

@@ -249,11 +249,9 @@ if ($kollityht > 0) {
 		echo "<hr>data:<pre>".var_dump($delisprintFileFormat)."</pre><br>";
 
 		unset($aineisto);
+
 		foreach($delisprintFileFormat as $p) {
-			if(isset($aineisto)) {
-				$aineisto .=";";
-			}
-			$aineisto.=$parcelOrder[$p];
+			$aineisto .= $parcelOrder[$p].";";
 		}
 
 		echo "<br><hr>Aineisto:<br><pre>{$aineisto}</pre><br>";

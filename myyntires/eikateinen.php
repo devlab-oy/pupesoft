@@ -331,7 +331,8 @@ function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
 					AND tunnus IN ({$tasmaysrow['ltunnukset']})";
 		$result = pupe_query($query);
 
-		echo t("Vapautettiin kassojen %s päivän %s tosite.", '', $tasmaysrow['selite'], $paiva);
+		echo "<font class='error'>".t("Vapautettiin kassojen %s päivän %s tosite.", '', $tasmaysrow['selite'], $paiva)."<br/><br/>";
+		echo t("Sinun on täsmäytettävä päivän käteismyynnit uudelleen käteismyynnit ohjelmasta") . "</font>";
 	}
 }
 

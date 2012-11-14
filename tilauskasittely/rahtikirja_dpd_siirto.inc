@@ -186,6 +186,7 @@ if ($kollityht > 0) {
 					and otsikkonro 		= '$rahtikirjanro'
 					and rahtikirjanro 	= '$rahtikirjanro'
 					and pakkaus 		= '$pakkaus[0]'";
+		echo "<br><pre>$query</pre><br><br>";
 		//and pakkauskuvaus = '$row[selitetark]'";
 		$rakires = mysql_query($query) or pupe_error($query);
 		$rakirow = mysql_fetch_array($rakires);

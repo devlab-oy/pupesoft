@@ -1164,7 +1164,7 @@ if (!function_exists("saldo_myytavissa")) {
 									and tilausrivi.tyyppi in ('L','G','V')
 									and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
 									and tilausrivi.tuoteno = '$tuoteno'
-									and tilausrivi.varattu > 0
+									and tilausrivi.varattu != 0
 									$varaako_jt_saldoa
 									and tilausrivi.hyllyalue = '$row[hyllyalue]'
 									and tilausrivi.hyllynro  = '$row[hyllynro]'

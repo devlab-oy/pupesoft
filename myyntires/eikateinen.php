@@ -44,7 +44,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	tarkista_pyoristys_erotukset($laskurow, $tunnus);
 
 	if($toim == 'KATEINEN') {
-		vapauta_kateistasmaytys($_kassalipas, $tapahtumapaiva);
+		vapauta_kateistasmaytys($_kassalipas, $tapahtumapaiva, $laskurow);
 	}
 
 	if (empty($mehtorow) and empty($laskurow)) {
@@ -285,7 +285,7 @@ function tarkista_pyoristys_erotukset($laskurow, $tunnus) {
 	}
 }
 
-function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
+function vapauta_kateistasmaytys($kassalipasrow, $paiva, $laskurow) {
 	global $kukarow, $yhtiorow;
 
 	// Katsotaan onko kassalippaan tämän päivän kassa jo täsmäytetty
@@ -302,24 +302,69 @@ function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
 	$tasmays_result = pupe_query($tasmays_query);
 	$tasmaysrow = mysql_fetch_assoc($tasmays_result);
 
-	// Jos on, niin poistetaan täsmäytys
+	// Jos on, niin yliviivataan täsmäytys
 	if ($tasmaysrow["ltunnukset"] != "") {
-		$query = "	UPDATE tiliointi
-					SET korjattu = '{$kukarow['kuka']}',
+		//Jos käyttäjällä ei ole oikeus muutosite (tositteiden muutos) ohjelmaan, ei käyttäjä voi täsmäyttää uudestaan kassalipasta.
+		if(1 == 1) {
+			$params = array(
+				'kassalipas' => $kassalipasrow,
+				'paiva' => $paiva,
+				'tasmaytykset' => $tasmaysrow,
+				'laskurow' => $laskurow,
+			);
+			uudelleen_tasmayta_kassalipas($params);
+		}
+		else {
+			echo "<font class='error'>".t("Sinulla ei ole oikeutta uudelleen täsmäyttää kassalipasta")."</font><br/><br/>";
+		}
+
+		$query = "	UPDATE tiliointi SET
+					korjattu = '{$kukarow['kuka']}',
 					korjausaika  = NOW()
 					WHERE yhtio  = '{$kukarow['yhtio']}'
 					AND ltunnus IN ({$tasmaysrow['ltunnukset']})
 					AND korjattu = '";
 		$result = pupe_query($query);
 
-		$query = "	UPDATE lasku
-					SET tila = 'D', comments=CONCAT(comments, ' {$kukarow['kuka']} mitätöi tositteen')
+		$query = "	UPDATE lasku SET
+					comments = '{$kukarow['kuka']} täsmäsi kassalippaan {$kassalipasrow['nimi']} päivän {$paiva} uudelleen'
+					sisviesti1 = CONCAT(comments, ' {$kukarow['kuka']} mitätöi tositteen')
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus IN ({$tasmaysrow['ltunnukset']})";
 		$result = pupe_query($query);
 
 		echo t("Vapautettiin kassojen %s päivän %s tosite.", '', $tasmaysrow['selite'], $paiva);
 	}
+}
+
+function uudelleen_tasmayta_kassalipas($params) {
+	global $kukarow;
+
+	$tasmatykset_query = "	SELECT sum(summa) summa
+							FROM tiliointi
+							WHERE yhtio = '{$kukarow['yhtio']}',
+							AND ltunnus IN ({$params['tasmaytykset']['ltunnukset']})";
+	$tasmaytykset_result = pupe_query($tasmatykset_query);
+	$tasmaytykset_row = mysql_fetch_assoc($tasmaytykset_result);
+
+	echo_kassalipas_tasmaytys($params['kassalipas'], $params['paiva'], $tasmaytykset_row['summa'], $params['laskurow']['summa']);
+}
+
+function echo_kassalipas_tasmaytys($kassalipas, $paiva, $summa, $uuden_laskun_summa) {
+	echo "<font class='message'>".t("Uudelleen täsmäytä kassalipas")."</font><br/><br/>";
+	echo "<form method='post' autocomplete='off'>";
+	echo "<input name='kassalipas' type='hidden' value='{$kassalipas['tunnus']}' />";
+	echo "<input name='paiva' type='hidden' value='{$paiva}' />";
+	echo "<input name='uudelleen_tasmayta' type='hidden' value='1' />";
+
+	echo "<table>";
+	echo "<tr><th>".t("Kassalipas")."</th><td>{$kassalipas['nimi']}</td></tr>";
+	echo "<tr><th>".t("Täsmäytys päivämäärä")."</th><td>{$paiva}</td></tr>";
+	echo "<tr><th>".t("Edellinen kassalippaan täsmäytyksen summa")."</th><td>{$summa}</td></tr>";
+	echo "<tr><th>".t("Uusi kassalippaan täsmäytyksen summa")."</th><td><input type='text' name='tasmaytyksen_summa' value='$summa + $uuden_laskun_summa'/></td></tr>";
+	echo "</table>";
+
+	echo "</form>";
 }
 
 function hae_lasku2($laskuno, $toim) {

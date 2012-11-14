@@ -699,8 +699,6 @@
 			//Jos ostoehdotus on kyll‰, siirret‰‰n myyntilukuja. Siirret‰‰n kaikkien tuotteiden myyntiluvut kuitenkin.
 			//Myynnit vaan "normaaleist" varastoist, tsekataa vaa varastopaikat-taulusta tyyppi '':st‰ myydyt
 			//Jos asiakkuuksilla palautetaan tavaraa (toimittajapalautus), ei oteta niit‰ palautuksia myyntilukuihin mukaan. Katotaan t‰‰ kauppatapahtuman luonteella
-/*			if ($tuoterow['ostoehdotus'] == '') {
-*/
 				$Q2 = "	SELECT round(SUM(tilausrivi.kpl), 0) myyty
 				       	FROM tilausrivi
 					   	JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.kauppatapahtuman_luonne != '21')
@@ -740,11 +738,7 @@
 				if ($myyntipvm < 0) {
 					$myyntipvm = '0';
 				}
-/*			}
-			else {
-				$myyntipvm = '0';
-			}
-*/
+
 			//avoimet ostokappaleet
 			$Q3 = "	SELECT round(SUM(tilausrivi.varattu),0) as tilauksessa, tilausrivin_lisatiedot.tilausrivitunnus
 				   	FROM tilausrivi

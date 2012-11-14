@@ -1160,11 +1160,12 @@ if (!function_exists("saldo_myytavissa")) {
 									ifnull(sum(if (tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty,
 									ifnull(sum(tilausrivi.varattu),0) varattu
 									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
 									WHERE tilausrivi.yhtio = '$yhtiolisa'
 									and tilausrivi.tyyppi in ('L','G','V')
 									and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
 									and tilausrivi.tuoteno = '$tuoteno'
-									and tilausrivi.varattu != 0
+									and (tilausrivi.varattu > 0 or (tilausrivi.varattu < 0 and lasku.tilaustyyppi = 'R'))
 									$varaako_jt_saldoa
 									and tilausrivi.hyllyalue = '$row[hyllyalue]'
 									and tilausrivi.hyllynro  = '$row[hyllynro]'

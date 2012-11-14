@@ -210,7 +210,7 @@ function tee_kirjanpito_muutokset($params) {
 				FROM tiliointi
 				WHERE yhtio	 = '$kukarow[yhtio]'
 				AND ltunnus	 = '{$params['tunnus']}'
-				AND tilino	 IN '{$vanhatili}'
+				AND tilino	 IN {$vanhatili}
 				AND korjattu = ''";
 	$result = pupe_query($query);
 
@@ -309,7 +309,7 @@ function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
 					korjausaika  = NOW()
 					WHERE yhtio  = '{$kukarow['yhtio']}'
 					AND ltunnus IN ({$tasmaysrow['ltunnukset']})
-					AND korjattu = '";
+					AND korjattu = ''";
 		$result = pupe_query($query);
 
 		$query = "	UPDATE lasku

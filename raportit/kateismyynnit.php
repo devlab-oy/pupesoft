@@ -11,7 +11,7 @@
                                 $(document).ready(function(){
                                     update_summa(\"tasmaytysform\");
                                   });
-                                
+
 				function disableDates() {
 					if (document.getElementById('tasmays').checked != true) {
 						document.getElementById('pp').disabled = true;
@@ -893,7 +893,7 @@
 		$query = "	UPDATE lasku
 					SET
 						comments   = '$comments<br>".t("Alkukassa yhteensä").": $pohjakassa<br>$comments_yht',
-						sisviesti2 = concat_ws('##', '$kassa_json', sisviesti2) 
+						sisviesti2 = concat_ws('##', '$kassa_json', sisviesti2)
 					WHERE yhtio  = '$kukarow[yhtio]'
 					AND tunnus = $laskuid";
 		$result = pupe_query($query);
@@ -2159,18 +2159,19 @@
 
 function get_pohjakassa($row) {
 	global $kukarow;
-	
+
 	if (isset($row["pohjakassa"])) {
 		return ($row);
 	}
 
 	$like = "%{\"loppukassa\":{%\"" . $row["kassanimi"] . "\"%}%}%";
-	
-	$pk_query = "SELECT tunnus, tapvm, sisviesti2 
-					FROM lasku 
+
+	$pk_query = "SELECT tunnus, tapvm, sisviesti2
+					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					 	AND tila = 'X'
-						AND sisviesti2 LIKE '$like' 
+                        AND tapvm >= date_sub(current_date, interval 7 day)
+						AND sisviesti2 LIKE '$like'
 					ORDER BY tapvm DESC
 					LIMIT 1;";
 	$pk_result = pupe_query($pk_query);

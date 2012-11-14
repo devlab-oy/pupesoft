@@ -28,6 +28,8 @@ if ($kollityht > 0) {
 
 			$rahtikirjanro = $logyrow["rahtikirjanro"];
 
+			echo "rkirnro logy: $rahtikirjanro<br>";
+
 			$logyq = "	UPDATE rahtikirjanumero
 						SET kayttaja = '$kukarow[kuka]',
 						kaytettyaika = now()
@@ -37,9 +39,11 @@ if ($kollityht > 0) {
 		}
 		elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 			$rahtikirjanro = $lotsikot[0];
+			echo "rkirnro lotsikot: $rahtikirjanro<br>";
 		}
 		else {
 			$rahtikirjanro = $rivi["rahtikirjanro"];
+			echo "rkirnro rivi: $rahtikirjanro<br>";
 		}
 
 		if ($phpnimi == "rahtikirja_custom.php") {

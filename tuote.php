@@ -926,10 +926,10 @@
 			echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
 
 			//korvaavat tuotteet
-			$query  = "SELECT * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
-			$korvaresult = pupe_query($query);
+			require "korvaavat.class.php";
+			$korvaavat = new Korvaavat($tuoteno);
 
-			if (mysql_num_rows($korvaresult) > 0) {
+			if (count($korvaavat->tuotteet()) > 0) {
 				// Varastosaldot ja paikat
 				echo "<font class='message'>".t("Korvaavat tuotteet")."</font><hr>";
 
@@ -939,18 +939,11 @@
 				echo "<th>".t("Myytävissä")."</th>";
 				echo "</tr>";
 
-				// tuote löytyi, joten haetaan sen id...
-				$row    = mysql_fetch_assoc($korvaresult);
-				$id		= $row['id'];
-
-				$query = "SELECT * FROM korvaavat WHERE id='$id' AND tuoteno<>'$tuoteno' AND yhtio='$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
-				$korva2result = pupe_query($query);
-
-				while ($row = mysql_fetch_assoc($korva2result)) {
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+				foreach ($korvaavat->tuotteet() as $tuote) {
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
 					echo "<tr>";
-					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
+					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($tuote["tuoteno"])."&lopetus=$lopetus'>$tuote[tuoteno]</a></td>";
 					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
 					echo "</tr>";
 				}
@@ -961,36 +954,31 @@
 			echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
 
 			//vastaavat tuotteet
-			$query  = "SELECT * FROM vastaavat WHERE tuoteno='$tuoteno' AND yhtio='$kukarow[yhtio]'";
-			$vastaresult = pupe_query($query);
+			require "vastaavat.class.php";
+			$vastaavat = new Vastaavat($tuoteno);
 
-			if (mysql_num_rows($vastaresult) > 0) {
-				// Varastosaldot ja paikat
+			if (count($vastaavat->tuotteet()) > 0) {
+
 				echo "<font class='message'>".t("Vastaavat tuotteet")."</font><hr>";
 
 				echo "<table>";
+				echo "<tr><th colspan='2'>Ketju $id</th></tr>";
 				echo "<tr>";
 				echo "<th>".t("Tuotenumero")."</th>";
 				echo "<th>".t("Myytävissä")."</th>";
 				echo "</tr>";
 
-				// tuote löytyi, joten haetaan sen id...
-				$row    = mysql_fetch_assoc($vastaresult);
-				$id		= $row['id'];
-
-				$query = "SELECT * FROM vastaavat WHERE id='$id' AND tuoteno<>'$tuoteno' AND yhtio='$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
-				$vasta2result = pupe_query($query);
-
-				while ($row = mysql_fetch_assoc($vasta2result)) {
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+				// Loopataan ketjun tuotteet
+				foreach ($vastaavat->tuotteet() as $tuote) {
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
 					echo "<tr>";
-					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
+					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($tuote["tuoteno"])."&lopetus=$lopetus'>$tuote[tuoteno]</a></td>";
 					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
 					echo "</tr>";
 				}
-
 				echo "</table>";
+
 			}
 
 			echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";

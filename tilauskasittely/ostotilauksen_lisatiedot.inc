@@ -14,7 +14,7 @@ if ($tee == "update") {
 
 	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
 
-	list (,,,,,,,$llrow,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
+	list (,,,,,,,,$llrow,,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
 
 	// Tsekki tehdään vain jos vaihto-omaisuus laskuja on liitetty keikkaan!
 	if ($llrow["volasku"] > 0 and abs($rahti_etu) > abs($llrow['vosumma_valuutassa'])) {
@@ -94,7 +94,7 @@ if ($tee == "") {
 
 	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
 
-	list (,,,,,,,$llrow,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
+	list (,,,,,,,,$llrow,,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
 
 	// haetaan toimittajan tiedot
 	$query  = "SELECT * FROM toimi WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[liitostunnus]'";

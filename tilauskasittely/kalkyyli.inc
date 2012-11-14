@@ -14,7 +14,7 @@ else {
 	exit;
 }
 
-list(,,,$kohok,,,,$lisok,,$sarjanrook,,,,,,$varok) = tsekit($laskurow, 0);
+list(,,,$kohok,,,,$lisok,,$sarjanrook,,,,,,$varok) = tsekit($laskurow, 0, 0);
 
 if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 

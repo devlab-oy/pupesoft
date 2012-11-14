@@ -14,7 +14,7 @@ else {
 	exit;
 }
 
-list(,,,$kohok,,,,$lisok,,$sarjanrook,,,,,,$varok) = tsekit($laskurow, 0);
+list(,,,$kohok,,,,$lisok,,$sarjanrook,,,,,,$varok) = tsekit($laskurow, 0, 0);
 
 if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 	if ($tee == "varma") {

@@ -366,7 +366,7 @@
 			else {
 				$z_row_found = 1;
 				$z_row = mysql_fetch_assoc($z_result);
-				$z_orig_hinta = floatval($z_row["selitetark"]) || $tuoterow["myyntihinta"];
+				$z_orig_hinta = (floatval($z_row["selitetark"]) > 0) ? floatval($z_row["selitetark"]) : $tuoterow["myyntihinta"];
 			}
 
 			if ($on_jo_epakurantti == 0) {

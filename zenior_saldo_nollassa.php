@@ -50,7 +50,7 @@ $result = pupe_query($query);
 while ($row = mysql_fetch_assoc($result)) {
 
     // jos talteenotettu hinta ei ole nollaa isompi, otetaan viimeisin myyntihinta
-	$hinta = floatval($row["orig_myyntihinta"]) || $row["varahinta"];
+    $hinta = (floatval($row["orig_myyntihinta"]) > 0) ? floatval($row["orig_myyntihinta"]) : $row["varahinta"];
     $selite = t("Ep‰kuranttimuutos") . ": ".t("Tuote")." {$row["tuoteno"]} ".t("p‰ivitet‰‰n kurantiksi");
 
 	$t_query = "UPDATE tuote

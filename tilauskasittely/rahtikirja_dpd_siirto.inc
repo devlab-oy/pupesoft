@@ -30,14 +30,17 @@ if ($kollityht > 0) {
 
 			echo "rkirnro logy: $rahtikirjanro<br>";
 
-			$logyq = "	UPDATE rahtikirjanumero
-						SET kayttaja = '$kukarow[kuka]',
-						kaytettyaika = now()
-						WHERE yhtio = '$kukarow[yhtio]'
-						and rahtikirjanro = '$logyrow[rahtikirjanro]'";
-			$logyres = pupe_query($logyq);
+			if ($rahtikirjanro != "") {
+				$logyq = "	UPDATE rahtikirjanumero
+							SET kayttaja = '$kukarow[kuka]',
+							kaytettyaika = now()
+							WHERE yhtio = '$kukarow[yhtio]'
+							and rahtikirjanro = '$logyrow[rahtikirjanro]'";
+				$logyres = pupe_query($logyq);
+			}
 		}
-		elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
+
+		if ($rahtikirjanro == "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 			$rahtikirjanro = $lotsikot[0];
 			echo "rkirnro lotsikot: $rahtikirjanro<br>";
 		}

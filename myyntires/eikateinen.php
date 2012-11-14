@@ -14,6 +14,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	$mehtorow = hae_maksuehto($maksuehto);
 	$laskurow = hae_lasku($tunnus);
 	$konsrow  = hae_asiakas($laskurow);
+	$kassalipasrow = hae_kassalipas($kassalipas);
 
 	$tapahtumapaiva  = date('Y-m-d', mktime(0,0,0,$tapahtumapaiva_kk,$tapahtumapaiva_pp,$tapahtumapaiva_vv));
 
@@ -44,7 +45,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	tarkista_pyoristys_erotukset($laskurow, $tunnus);
 
 	if($toim == 'KATEINEN') {
-		vapauta_kateistasmaytys($_kassalipas, $tapahtumapaiva);
+		vapauta_kateistasmaytys($kassalipasrow, $tapahtumapaiva);
 	}
 
 	if (empty($mehtorow) and empty($laskurow)) {
@@ -192,6 +193,18 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 	}
 
 	return $myysaatili;
+}
+
+function hae_kassalipas($kassalipas_tunnus) {
+	global $kukarow;
+	$query = "	SELECT *
+				FROM kassalipas
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$kassalipas_tunnus}'";
+
+	$result = pupe_query($query);
+
+	return mysql_fetch_assoc($result);
 }
 
 function tee_kirjanpito_muutokset($params) {

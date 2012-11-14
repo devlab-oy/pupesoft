@@ -3135,13 +3135,13 @@
 	}
 
 #####
-	if (mysql_field_name($result, $i) == 'korvaavuusketjun_tuotteet') {
+	if (mysql_field_name($result, $i) == 'korvaavuusketjun_jarjestys') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
 		$sel = $trow[$i] == 'K' ? ' selected' : '';
 
 		$ulos .= "<option value = ''>".t("Korvaavaksi tuotteeksi kelpaa korvaavuusketjun kaikki tuotteet")."</option>";
-		$ulos .= "<option value = 'K' $sel>".t("Korvaaviksi tuotteiksi kelpaa korvaavuusketjussa j‰rjestykselt‰‰n pienimm‰t tuotteet")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Korvaaviksi tuotteeksi kelpaa korvaavuusketjussa j‰rjestykselt‰‰n pienemm‰t tuotteet")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3154,6 +3154,18 @@
 
 		$ulos .= "<option value = ''>".t("Jos korvaavuusketjun kaikki tuotteet on loppu, lis‰t‰‰n syˆtetty tuote puutteeksi/j‰lkitoimitukseen")."</option>";
 		$ulos .= "<option value = 'K' $sel>".t("Jos korvaavuusketjun kaikki tuotteet on loppu, lis‰t‰‰n korvaavuusketjun ensimm‰inen tuote puutteeksi/j‰lkitoimitukseen")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'vastaavuusketjun_jarjestys') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Vastaavaksi tuotteiksi kelpaa vastaavuusketjun kaikki tuotteet")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Vastaavaksi tuotteeksi kelpaa vastaavuusketjun j‰rjestykselt‰‰n pienemm‰t tuotteet")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

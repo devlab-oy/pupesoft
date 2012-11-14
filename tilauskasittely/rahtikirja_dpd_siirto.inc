@@ -67,8 +67,8 @@ if ($kollityht > 0) {
 			Arvotaan lähetystapa
 		*/
 
-		// jos maksuehto on käteinen, laitetaan NP,NN,CD
-		if ($rakir_row['kateinen'] != "") {
+		// jos maksuehto on jv, laitetaan NP,NN,CD
+		if ($rakir_row['jv'] != "") {
 			$parcelOrder["lahetystapa"] = "NP,NN,CD";
 		}
 		else {
@@ -104,9 +104,8 @@ if ($kollityht > 0) {
 			$r = mysql_field_name($rakir_res, $i);
 			$v = $rakir_row[$r];
 
-			//	Korvaavuksia ja näppäilyä
-			if($r == "jv" and $v != "") {
-				$parcelOrder["jv_maara"] 		= $yhteensa;
+			if ($r == "jv" and $v != "") {
+				$parcelOrder["jv_summa"] 		= $yhteensa;
 				$parcelOrder["jv_valkoodi"] 	= $yhtiorow["valkoodi"];
 				$parcelOrder["jv_pankkitili"] 	= $yhtiorow["pankkitili1"];
 				$parcelOrder["jv_viite"] 		= $viite;
@@ -115,7 +114,7 @@ if ($kollityht > 0) {
 			$parcelOrder[$r] = $v;
 		}
 
-		if (isset($parcelOrder["jv_maara"]) and trim($parcelOrder["jv_maara"]) != "") {
+		if (isset($parcelOrder["jv_summa"]) and trim($parcelOrder["jv_summa"]) != "") {
 			$parcelOrder["kateinen"] = t("Käteinen");
 		}
 		else {

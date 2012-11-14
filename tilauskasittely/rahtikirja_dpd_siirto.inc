@@ -44,7 +44,7 @@ if ($kollityht > 0) {
 			$rahtikirjanro = $lotsikot[0];
 			echo "rkirnro lotsikot: $rahtikirjanro<br>";
 		}
-		else {
+		elseif ($rahtikirjanro == "") {
 			$rahtikirjanro = $rivi["rahtikirjanro"];
 			echo "rkirnro rivi: $rahtikirjanro<br>";
 		}

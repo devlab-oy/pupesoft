@@ -261,15 +261,11 @@ if ($kollityht > 0) {
 		// Muunnetaan merkistö Windows ANSI
 		iconv("ISO-8859-1", "Windows-1252", $aineisto);
 
-		if ($dpd_delisprint_path != '') {
-			if (substr($dpd_delisprint_path,-1) != '/') {
-				$dpd_delisprint_path .= '/';
-			}
-			$filenimi = $dpd_delisprint_path."dpdimport-".md5(uniqid(rand(),true)).".dat";
+		if (substr($dpd_delisprint_path,-1) != '/') {
+			$dpd_delisprint_path .= '/';
 		}
-		else {
-			$filenimi = "/tmp/dpdimport-".md5(uniqid(rand(),true)).".dat";
-		}
+
+		$filenimi = $dpd_delisprint_path."dpdimport-".md5(uniqid(rand(),true)).".dat";
 
 		//kirjoitetaan faili levylle..
 		if (file_put_contents($filenimi, $aineisto) === FALSE) {
@@ -279,12 +275,12 @@ if ($kollityht > 0) {
 		if ($dpd_delisprint_host != "" and $dpd_delisprint_user != "" and $dpd_delisprint_pass != "" and $dpd_delisprint_path != "") {
 			// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
 			// palautetaan $palautus ja $syy
-			// $ftphost = $dpd_delisprint_host;
-			// $ftpuser = $dpd_delisprint_user;
-			// $ftppass = $dpd_delisprint_pass;
-			// $ftppath = $dpd_delisprint_path;
-			// $ftpfile = realpath($filenimi);
-			// require ("inc/ftp-send.inc");
+			$ftphost = $dpd_delisprint_host;
+			$ftpuser = $dpd_delisprint_user;
+			$ftppass = $dpd_delisprint_pass;
+			$ftppath = $dpd_delisprint_path;
+			$ftpfile = realpath($filenimi);
+			require ("inc/ftp-send.inc");
 		}
 	}
 	else {

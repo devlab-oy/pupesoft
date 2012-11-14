@@ -109,15 +109,11 @@ if ($kollityht > 0) {
 		$sanoma .= substr(trim($pakkaus[0]), 0, 3);
 		$sanoma .= substr("EE0".trim($rahtikirjanro), 0, 10);
 
-		if ($hrx_path != '') {
-			if (substr($hrx_path,-1) != '/') {
-				$hrx_path .= '/';
-			}
-			$filenimi = $hrx_path."hrx-import-".md5(uniqid(rand(),true)).".dat";
+		if (substr($hrx_path,-1) != '/') {
+			$hrx_path .= '/';
 		}
-		else {
-			$filenimi = "/tmp/hrx-import-".md5(uniqid(rand(),true)).".dat";
-		}
+
+		$filenimi = $hrx_path."hrx-import-".md5(uniqid(rand(),true)).".dat";
 
 		//kirjoitetaan faili levylle..
 		if (file_put_contents($filenimi, $sanoma) === FALSE) {
@@ -127,12 +123,12 @@ if ($kollityht > 0) {
 		if ($hrx_host != "" and $hrx_user != "" and $hrx_pass != "" and $hrx_path != "") {
 			// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
 			// palautetaan $palautus ja $syy
-			// $ftphost = $hrx_host;
-			// $ftpuser = $hrx_user;
-			// $ftppass = $hrx_pass;
-			// $ftppath = $hrx_path;
-			// $ftpfile = realpath($filenimi);
-			// require ("inc/ftp-send.inc");
+			$ftphost = $hrx_host;
+			$ftpuser = $hrx_user;
+			$ftppass = $hrx_pass;
+			$ftppath = $hrx_path;
+			$ftpfile = realpath($filenimi);
+			require ("inc/ftp-send.inc");
 		}
 
 	 	# TULOSTETAAN LIPPULAPPUSET

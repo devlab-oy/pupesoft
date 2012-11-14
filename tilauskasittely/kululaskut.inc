@@ -140,13 +140,13 @@ if ($tee_kululaskut == "liita") {
 		else {
 			$liitasumma = abs($liitasumma);
 		}
-
-		$verosumma 		= (float) $liitasumma;
-		$verotonsumma 	= (float) round(($oslasrow["summa"]-$alvisumma)*($verosumma/$oslasrow["summa"]), 2);
+		
+		$verosumma		= (float) round($liitasumma * ($oslasrow["summa"]/($oslasrow["summa"]-$alvisumma)), 2);
+		$verotonsumma	= (float) $liitasumma;
 	}
 	elseif (abs($summa_kaytettavissa-$oslasrow["arvo"]) >= 0.01) {
-		$verosumma 		= (float) $summa_kaytettavissa;
-		$verotonsumma 	= (float) round(($oslasrow["summa"]-$alvisumma)*($verosumma/$oslasrow["summa"]), 2);
+		$verosumma		= (float) round($liitasumma * ($oslasrow["summa"]/($oslasrow["summa"]-$alvisumma)), 2);
+		$verotonsumma	= (float) $liitasumma;
 	}
 	else {
 		//Tässä on ostolaskun verollinen summa (Tarvitaan alvillisissa vaihto-omaisuuslaskuissa)
@@ -746,7 +746,7 @@ if ($silent == "") {
 					$alvilisa = "and summa > 0";
 				}
 
-				//Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
+				// Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
 				$query = "	SELECT sum(summa) summa
 							from tiliointi
 							where yhtio	= '$kukarow[yhtio]'

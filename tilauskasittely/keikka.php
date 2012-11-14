@@ -246,6 +246,8 @@ if (!function_exists("tsekit")) {
 					sum(if(ostores_lasku.tila != 'H' and lasku.vienti not in ('C','F','I','J','K','L'), 1, 0)) kulasku_ok,
 					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.arvo * lasku.vienti_kurssi, 0)), 2) vosumma,
 					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.arvo, 0)), 2) vosumma_valuutassa,
+					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.summa * lasku.vienti_kurssi, 0)), 2) voverosumma,
+					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.summa, 0)), 2) voverosumma_valuutassa,
 					round(sum(if(lasku.vienti not in ('C','F','I','J','K','L'), lasku.arvo * lasku.vienti_kurssi, 0)),2) kusumma,
 					round(sum(if(lasku.vienti not in ('C','F','I','J','K','L'), lasku.arvo, 0)),2) kusumma_valuutassa
 					FROM lasku use index (yhtio_tila_laskunro)
@@ -541,7 +543,7 @@ if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' a
 		$options = array('reservipaikka' => 'K');
 		$hyllypaikka_ok = tarkista_varaston_hyllypaikka($suuntalavan_hyllyalue, $suuntalavan_hyllynro, $suuntalavan_hyllyvali, $suuntalavan_hyllytaso, $options);
 
-		# Jos hyllypaikka on ok, tarkistetaan että siellä ei ole tuotteita
+		# Hyllypaikkaa ei löydy tai se ei ole reservipaikka
 		if (!$hyllypaikka_ok) {
 			echo "<font class='error'>".t("Hyllypaikkaa ei löydy tai se ei ole reservipaikka")."</font></br>";
 
@@ -550,36 +552,16 @@ if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' a
 			$tee = 'vie_koko_suuntalava';
 		}
 		else {
-			$query = "SELECT *
-						FROM tuotepaikat
-						WHERE yhtio		= '{$kukarow['yhtio']}'
-						AND hyllyalue	= '$suuntalavan_hyllyalue'
-						AND hyllynro	= '$suuntalavan_hyllynro'
-						AND hyllyvali	= '$suuntalavan_hyllyvali'
-						AND hyllytaso	= '$suuntalavan_hyllytaso'";
-			$result = pupe_query($query);
-			$tuotepaikat = mysql_num_rows($result);
+			# OK, päivitetään tilausrivien hyllypaikat
+			$paivitetyt_rivit = paivita_hyllypaikat($suuntalavan_tunnus,
+													$suuntalavan_hyllyalue,
+													$suuntalavan_hyllynro,
+													$suuntalavan_hyllyvali,
+													$suuntalavan_hyllytaso);
 
-			# Onko paikalla tuotteita
-			if ($tuotepaikat > 0) {
-				echo "<font class='error'>".t("Tuotepaikalla on jotain tuotteita")."!</font><br>";
-				# Takaisin samaan näkymään
-				$toiminto = 'suuntalavat';
-				$tee = 'vie_koko_suuntalava';
-			}
-			else {
-
-				# OK, päivitetään tilausrivien hyllypaikat
-				$paivitetyt_rivit = paivita_hyllypaikat($suuntalavan_tunnus,
-														$suuntalavan_hyllyalue,
-														$suuntalavan_hyllynro,
-														$suuntalavan_hyllyvali,
-														$suuntalavan_hyllytaso);
-
-				if ($paivitetyt_rivit > 0) {
-					echo "<br />",t("Päivitettiin suuntalavan tuotteet paikalle")," {$suuntalavan_hyllyalue} {$suuntalavan_hyllynro} {$suuntalavan_hyllyvali} {$suuntalavan_hyllytaso}<br />";
-					$vietiinko_koko_suuntalava = 'joo';
-				}
+			if ($paivitetyt_rivit > 0) {
+				echo "<br />",t("Päivitettiin suuntalavan tuotteet paikalle")," {$suuntalavan_hyllyalue} {$suuntalavan_hyllynro} {$suuntalavan_hyllyvali} {$suuntalavan_hyllytaso}<br />";
+				$vietiinko_koko_suuntalava = 'joo';
 			}
 		}
 	}

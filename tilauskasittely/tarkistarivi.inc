@@ -402,7 +402,7 @@
 		$selpaikkamyytavissa = 0;
 
 		// Katsotaan onko tälle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
-		if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C')) and $yksi_suoratoimittaja != '') {
+		if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J')) and $yksi_suoratoimittaja != '') {
 			$where_yksi_suoratoimittaja = " AND toimi.tunnus = {$yksi_suoratoimittaja} ";
 		}
 		else {
@@ -415,7 +415,8 @@
 						JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
 						WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 						and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
-						$where_yksi_suoratoimittaja";
+						$where_yksi_suoratoimittaja
+						ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)";
 			$toimpaikres  = pupe_query($query);
 
 			if (mysql_num_rows($toimpaikres) > 0) {
@@ -673,7 +674,7 @@
 				$paikatlask++;
 			}
 
-			while ($krow  = mysql_fetch_assoc($toimpaikres)) {
+			while ($krow = mysql_fetch_assoc($toimpaikres)) {
 				$sel1 = "";
 				$sel2 = "";
 
@@ -682,14 +683,14 @@
 				$tmp_asiakkaalle = 1;
 
 				// ...kielletään tilaamasta varastoon jos yhtiöparametri ohjaa katsomaan tuotteelta ja siellä ei ole sallittu...
-				if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W'))
-					and !in_array($trow['suoratoimitus'], array('', 'U'))) { 				// vain S ja X sallivat tilauksen varastoon
+				if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J'))
+					and !in_array($trow['suoratoimitus'], array('S', 'X'))) { 				// vain S ja X sallivat tilauksen varastoon
 					$tmp_varastoon = 0;
 				}
 
 				// ...kielletään tilaamasta asiakkaalle jos yhtiöparametri ohjaa katsomaan tuotteelta ja siellä ei ole sallittu...
-				if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('W'))
-				 	and !in_array($trow['suoratoimitus'], array('', 'X'))) {				// vain S ja U sallivat tilauksen asiakkaalle
+				if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('W', 'J'))
+				 	and !in_array($trow['suoratoimitus'], array('S', 'U'))) {				// vain S ja U sallivat tilauksen asiakkaalle
 					$tmp_asiakkaalle = 0;
 				}
 
@@ -701,7 +702,7 @@
 					)
 					and ( // onko suoratoimitus yleensäkään sallittu
 						in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'X', 'Y', 'A', 'B', 'C'))
-						or (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W')) and ($tmp_varastoon == 1 or $tmp_asiakkaalle == 1))
+						or (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J')) and ($tmp_varastoon == 1 or $tmp_asiakkaalle == 1))
 					)
 				) {
 					// piirretäänkö oletukseksi tilata suoratoimituksena varastoon? ...
@@ -729,7 +730,7 @@
 						$paikatlask++;
 					}
 
-					if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1) {
+					if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1) {
 						$title = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
 						$paikat .= "<option value='!!!$krow[liitostunnus]' title='$title' $sel2>$title</option>";
 						$paikatlask++;
@@ -793,7 +794,7 @@
 		(
 			$yhtiorow['tuoteperhe_suoratoimitus'] == 'E'
 			or ($kukarow['extranet'] == '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'M'))
-		and in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'W', 'Y', 'B', 'C'))
+		and in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'W', 'J', 'Y', 'B', 'C'))
 		and $trow["ei_saldoa"] != ""
 		and $row["tyyppi"] == "L"
 		and $kpl_st > 0
@@ -820,7 +821,8 @@
 					FROM tuotteen_toimittajat use index (yhtio_tuoteno)
 					JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
 					WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-					and tuotteen_toimittajat.tuoteno in ($perheen_tuotteet)";
+					and tuotteen_toimittajat.tuoteno in ($perheen_tuotteet)
+					ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)";
 		$toimpaikres  = pupe_query($query);
 
 		$paikat = "<option value=''>".t("Jätä jälkitoimitukseen")."</option>".$paikat;

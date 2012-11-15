@@ -122,8 +122,8 @@
 	}
 	else {
 
-		if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
-			$yhtiorow['karayksesta_rahtikirjasyottoon'] = '';
+		if ($yhtiorow['kerayserat'] == 'K') {
+			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != 'Y') $yhtiorow['karayksesta_rahtikirjasyottoon'] = '';
 		}
 		else {
 			$query = "	SELECT toimitustapa.tunnus
@@ -1787,7 +1787,7 @@
 						}
 					}
 
-					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+					if ($yhtiorow['kerayserat'] == 'K' and $toim == "" and $yhtiorow['karayksesta_rahtikirjasyottoon'] != 'Y') {
 						$query = "	UPDATE lasku
 									SET alatila = 'B'
 									WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1805,16 +1805,26 @@
 			$rivit   = '';
 
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
+
+				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+					$wherelisa = "AND tunnus IN ({$tilausnumeroita_backup})";
+				}
+				else {
+					$wherelisa = "AND tunnus = '{$id}'";
+				}
+
 				$query = "	SELECT tunnus
 							FROM lasku
-							WHERE lasku.yhtio 	= '$kukarow[yhtio]'
-							and lasku.tila 		= 'L'
-							and lasku.alatila 	= 'C'
-							and tunnus = '$id'";
+							WHERE lasku.yhtio 	= '{$kukarow['yhtio']}'
+							AND lasku.tila 		= 'L'
+							AND lasku.alatila 	= 'C'
+							{$wherelisa}";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {
 					$rahtikirjaan = 'mennaan';
+					$_tilnrot = explode(",", $tilausnumeroita_backup);
+					$id = $_tilnrot[0];
 				}
 				else {
 					$tilausnumeroita = '';
@@ -3166,7 +3176,8 @@
 		}
 
 		if (isset($rahtikirjaan) and $rahtikirjaan == 'mennaan') {
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}rahtikirja.php?toim=lisaa&id=$id&rakirno=$id&tunnukset=$tilausnumeroita&mista=keraa.php'>";
+			$muutoslisa = ($yhtiorow['kerayserat'] == 'K' and $toim == "" and $yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y') ? 'yes' : '';
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}rahtikirja.php?toim=lisaa&id=$id&rakirno=$id&tunnukset=$tilausnumeroita&mista=keraa.php&muutos={$muutoslisa}'>";
 		}
 
 		require ("inc/footer.inc");

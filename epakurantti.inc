@@ -351,12 +351,12 @@
 				$set_zenior = "myyntihinta = myyntihinta * " . ($zenior_jaettava / $zenior_jakaja) . ", ";
 			}
 
-			$z_query = "SELECT	laji,
-								selitetark
+			$z_query = "SELECT laji, selitetark
 						FROM tuotteen_avainsanat
 						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND kieli 	= '{$yhtiorow["kieli"]}'
 						AND tuoteno = '{$tuoterow["tuoteno"]}'
-						AND laji 	= 'zeniorparts';";
+						AND laji 	= 'zeniorparts'";
 			$z_result = pupe_query($z_query);
 
 			if (mysql_num_rows($z_result) == 0) {
@@ -372,18 +372,25 @@
 			if ($on_jo_epakurantti == 0) {
 				$set_zenior .= "ostoehdotus = 'E', nettohinta = 0, myymalahinta = 0, ";
 
-				$z_query = "DELETE FROM hinnasto WHERE yhtio = '{$kukarow["yhtio"]}' AND tuoteno = '{$tuoterow["tuoteno"]}';";
+				$z_query = "DELETE FROM hinnasto
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tuoteno = '{$tuoterow["tuoteno"]}'";
 				$z_result = pupe_query($z_query);
 
-				$z_query = "DELETE FROM asiakashinta WHERE yhtio = '{$kukarow["yhtio"]}' AND tuoteno = '{$tuoterow["tuoteno"]}';";
+				$z_query = "DELETE FROM asiakashinta
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tuoteno = '{$tuoterow["tuoteno"]}'";
 				$z_result = pupe_query($z_query);
 
-				$z_query = "DELETE FROM asiakasalennus WHERE yhtio = '{$kukarow["yhtio"]}' AND tuoteno = '{$tuoterow["tuoteno"]}';";
+				$z_query = "DELETE FROM asiakasalennus
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tuoteno = '{$tuoterow["tuoteno"]}'";
 				$z_result = pupe_query($z_query);
 
 				if ($z_row_found == 0) {
 					$z_query = "INSERT INTO tuotteen_avainsanat	SET
 								yhtio      = '{$kukarow["yhtio"]}',
+								kieli	   = '{$yhtiorow["kieli"]}',
 								tuoteno    = '{$tuoterow["tuoteno"]}',
 								laji       = 'zeniorparts',
 								selite     = 'K',
@@ -395,10 +402,10 @@
 				$set_zenior = "myyntihinta = {$z_orig_hinta}, ";
 
 				$t_query = "DELETE FROM tuotteen_avainsanat
-							WHERE
-								yhtio       = '{$kukarow["yhtio"]}'
-								AND laji    = 'zeniorparts'
-								AND tuoteno = '{$tuoterow["tuoteno"]}';";
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND kieli 	= '{$yhtiorow["kieli"]}'
+							AND laji    = 'zeniorparts'
+							AND tuoteno = '{$tuoterow["tuoteno"]}'";
 				$t_result = pupe_query($t_query);
 
 			}
@@ -417,20 +424,20 @@
 					epakurantti75pvm  =  {$pvm75},
 					epakurantti100pvm =  {$pvm100}
 					WHERE yhtio = '{$kukarow["yhtio"]}'
-					AND	tuoteno = '{$tuoterow["tuoteno"]}';";
+					AND	tuoteno = '{$tuoterow["tuoteno"]}'";
 		$result = pupe_query($query);
 
 		///* Tehdään tapahtuma *///
 		$query = "	INSERT into tapahtuma set
-					yhtio   	= '{$kukarow["yhtio"]}',
-					tuoteno 	= '{$tuoterow["tuoteno"]}',
-					laji    	= 'Epäkurantti',
-					kpl     	= '$tuotteen_saldo',
-					hinta   	= round($keskihankintahinta_muutos, 6),
-					kplhinta	= round($keskihankintahinta_muutos, 6),
-					selite  	= '$epakurantti_selite',
-					laatija    	= '{$kukarow["kuka"]}',
-					laadittu 	= now()";
+					yhtio    = '{$kukarow["yhtio"]}',
+					tuoteno  = '{$tuoterow["tuoteno"]}',
+					laji     = 'Epäkurantti',
+					kpl      = '$tuotteen_saldo',
+					hinta    = round($keskihankintahinta_muutos, 6),
+					kplhinta = round($keskihankintahinta_muutos, 6),
+					selite   = '$epakurantti_selite',
+					laatija  = '{$kukarow["kuka"]}',
+					laadittu = now()";
 		$result = pupe_query($query);
 
 		// otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
@@ -576,19 +583,19 @@
 
     		// Lisätään saldo uudella keharilla
 		    $query = "	INSERT into tapahtuma set
-    					yhtio   	= '$kukarow[yhtio]',
-    					tuoteno 	= '$tuoterow[tuoteno]',
-    					laji    	= 'tulo',
-    					kpl     	= {$plussa},
-    					hinta   	= {$uusi_keskihankintahinta},
-    					kplhinta	= {$uusi_keskihankintahinta},
-    					selite  	= '{$epakurantti_selite}',
-    					hyllyalue   = '{$paikatrow['hyllyalue']}',
-    					hyllynro    = '{$paikatrow['hyllynro']}',
-    					hyllyvali   = '{$paikatrow['hyllyvali']}',
-    					hyllytaso   = '{$paikatrow['hyllytaso']}',
-    					laatija    	= '$kukarow[kuka]',
-    					laadittu 	= '$luontiaika2'";
+    					yhtio     = '$kukarow[yhtio]',
+    					tuoteno   = '$tuoterow[tuoteno]',
+    					laji      = 'tulo',
+    					kpl       = {$plussa},
+    					hinta     = {$uusi_keskihankintahinta},
+    					kplhinta  = {$uusi_keskihankintahinta},
+    					selite    = '{$epakurantti_selite}',
+    					hyllyalue = '{$paikatrow['hyllyalue']}',
+    					hyllynro  = '{$paikatrow['hyllynro']}',
+    					hyllyvali = '{$paikatrow['hyllyvali']}',
+    					hyllytaso = '{$paikatrow['hyllytaso']}',
+    					laatija   = '$kukarow[kuka]',
+    					laadittu  = '$luontiaika2'";
     		$result = pupe_query($query);
 		}
 
@@ -738,5 +745,3 @@
 					laadittu = now()";
 		$result = pupe_query($query);
 	}
-
-?>

@@ -110,7 +110,7 @@ if ($kollityht > 0) {
 
 		$sanoma .= "{$kollityht};";
 		$sanoma .= substr(trim($pakkaus[0]), 0, 3).";";
-		$sanoma .= substr("EE0".trim($rahtikirjanro), 0, 10).";";
+		$sanoma .= substr(trim($rahtikirjanro), 0, 10).";";
 
 		if (substr($hrx_path,-1) != '/') {
 			$hrx_path .= '/';
@@ -165,7 +165,7 @@ if ($kollityht > 0) {
 		for ($i = 1; $i <= $kollityht; $i++) {
 			// Tulostetaan Pupen oma kollitarra
 			$params = array(
-	 			'tilriv' => "EE0{$rahtikirjanro}",
+	 			'tilriv' => "{$rahtikirjanro}",
 	 			'toimitustapa' => $laskurow['toimitustapa'],
 	 			'toim_nimi' => $rakir_row['toim_nimi'],
 	 			'toim_nimitark' => $rakir_row['toim_nimitark'],

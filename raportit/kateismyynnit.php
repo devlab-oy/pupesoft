@@ -2327,8 +2327,6 @@ function populoi_kassalipas_muuttujat_kassakohtaisesti($_post) {
 		}
 	}
 
-	
-	
 	return $kassalippaat;
 
 	/*

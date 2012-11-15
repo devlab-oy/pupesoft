@@ -10,52 +10,57 @@ else {
 }
 
 if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
-
-	$laskurow = hae_lasku($tunnus);
-	$mehtorow = hae_maksuehto($laskurow['maksuehto']);
-	$konsrow  = hae_asiakas($laskurow);
-	$kassalipasrow = hae_kassalipas($kassalipas);
-
 	$tapahtumapaiva  = date('Y-m-d', mktime(0,0,0,$tapahtumapaiva_kk,$tapahtumapaiva_pp,$tapahtumapaiva_vv));
 
-	$params = array(
-		'konsrow'		 => $konsrow,
-		'mehtorow'		 => $mehtorow,
-		'laskurow'		 => $laskurow,
-		'maksuehto'		 => $maksuehto,
-		'tunnus'		 => $tunnus,
-		'toim'			 => $toim,
-		'tapahtumapaiva' => $tapahtumapaiva,
-		'kassalipas'	 => $kassalipas
-	);
+	$tilikausi = tarkista_saako_laskua_muuttaa($tapahtumapaiva);
+	if(empty($tilikausi)) {
+		$laskurow = hae_lasku($tunnus);
+		$mehtorow = hae_maksuehto($laskurow['maksuehto']);
+		$konsrow  = hae_asiakas($laskurow);
+		$kassalipasrow = hae_kassalipas($kassalipas);
 
-	$myysaatili  = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
-	$mehtorow = hae_maksuehto($maksuehto);
-	$_kassalipas = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow);
+		$params = array(
+			'konsrow'		 => $konsrow,
+			'mehtorow'		 => $mehtorow,
+			'laskurow'		 => $laskurow,
+			'maksuehto'		 => $maksuehto,
+			'tunnus'		 => $tunnus,
+			'toim'			 => $toim,
+			'tapahtumapaiva' => $tapahtumapaiva,
+			'kassalipas'	 => $kassalipas
+		);
 
-	$params = array(
-		'laskurow'		 => $laskurow,
-		'tunnus'		 => $tunnus,
-		'myysaatili'	 => $myysaatili,
-		'toim'			 => $toim,
-		'_kassalipas'	 => $_kassalipas
-	);
+		$myysaatili  = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
+		$mehtorow = hae_maksuehto($maksuehto);
+		$_kassalipas = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow);
 
-	tee_kirjanpito_muutokset($params);
-	yliviivaa_alet_ja_pyoristykset($tunnus);
-	tarkista_pyoristys_erotukset($laskurow, $tunnus);
+		$params = array(
+			'laskurow'		 => $laskurow,
+			'tunnus'		 => $tunnus,
+			'myysaatili'	 => $myysaatili,
+			'toim'			 => $toim,
+			'_kassalipas'	 => $_kassalipas
+		);
 
-	if($toim == 'KATEINEN') {
-		vapauta_kateistasmaytys($kassalipasrow, $tapahtumapaiva);
+		tee_kirjanpito_muutokset($params);
+		yliviivaa_alet_ja_pyoristykset($tunnus);
+		tarkista_pyoristys_erotukset($laskurow, $tunnus);
+
+		if($toim == 'KATEINEN') {
+			vapauta_kateistasmaytys($kassalipasrow, $tapahtumapaiva);
+		}
+
+		if (empty($mehtorow) and empty($laskurow)) {
+			$laskuno 	= 0;
+			$tunnus 	= 0;
+			$maksuehto 	= 0;
+		}
+
+		$laskuno = 0;
 	}
-
-	if (empty($mehtorow) and empty($laskurow)) {
-		$laskuno 	= 0;
-		$tunnus 	= 0;
-		$maksuehto 	= 0;
+	else {
+		echo "<font class='error'>".t("Tilikausi on päättynyt {$tilikausi['tilikausi_alku']}. Et voi merkitä laskua maksetuksi {$tapahtumapaiva}")."</font>";
 	}
-
-	$laskuno = 0;
 }
 
 if ((int) $laskuno != 0) {
@@ -327,7 +332,9 @@ function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
 		$result = pupe_query($query);
 
 		$query = "	UPDATE lasku
-					SET tila = 'U', alatila = 'X', comments=CONCAT(comments, ' {$kukarow['kuka']} mitätöi tositteen')
+					SET tila = 'U',
+					alatila = 'X',
+					comments=CONCAT(comments, ' {$kukarow['kuka']} mitätöi tositteen')
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus IN ({$tasmaysrow['ltunnukset']})";
 		$result = pupe_query($query);
@@ -568,6 +575,25 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 	}
 
 	return $myysaatili;
+}
+
+function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {
+	global $kukarow;
+
+	$query = "	SELECT tilikausi_alku
+				FROM yhtio
+				WHERE yhtio = '{$kukarow['yhtio']}'";
+	$result = pupe_query($query);
+
+	$tilikausi_alku = mysql_fetch_assoc($result);
+
+	if(strtotime($tilikausi_alku['tilikausi_alku']) < strtotime($tapahtumapaiva)) {
+		return false;
+	}
+	else {
+		return $tilikausi_alku;
+	}
+	
 }
 
 require ("inc/footer.inc");

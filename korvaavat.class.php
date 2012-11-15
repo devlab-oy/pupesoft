@@ -8,6 +8,9 @@ class Korvaavat {
 	function __construct($tuoteno) {
 		global $kukarow;
 
+		// Tuotenumero on pakko olla
+		if (empty($tuoteno)) exit("Korvaavat ketjun haku tarvitsee tuotenumeron");
+
 		// Haetaan haetun tuotteen tiedot korvaavuusketjusta
 		$query = "SELECT * FROM korvaavat WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuoteno}' LIMIT 1";
 		$tuote_result = pupe_query($query);

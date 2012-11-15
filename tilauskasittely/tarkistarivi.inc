@@ -834,7 +834,7 @@
 	if (($row["var"] == 'J' or $row["var"] == 'P') and $row['tuoteno'] != '' and !in_array($row["var2"], array("OK", "PK"))) {
 
 		//vastaavat tuotteet
-		$query  = "SELECT * FROM vastaavat WHERE tuoteno = '$row[tuoteno]' AND yhtio = '$kukarow[yhtio]'";
+		$query  = "SELECT * FROM vastaavat WHERE tuoteno = '$row[tuoteno]' AND yhtio = '$kukarow[yhtio]' ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno";
 		$vastaresult = pupe_query($query);
 
 		if (mysql_num_rows($vastaresult) > 0) {
@@ -865,11 +865,14 @@
 			$vrow    = mysql_fetch_array($vastaresult);
 			$id		= $vrow['id'];
 
+			// Haetaan vastaavat ketju
 			$query = "SELECT * FROM vastaavat WHERE id='$id' AND tuoteno<>'$row[tuoteno]' AND yhtio='$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
+
 			$vasta2result = pupe_query($query);
 
 			while ($vrow = mysql_fetch_array($vasta2result)) {
 
+				$vaihtoehtoinen = ($vrow['vaihtoehtoinen'] == 'K') ? '<font color=#F00>Vaihtoehtoinen</font>' : '';
 				list(, , $vmyytavissa) = saldo_myytavissa($vrow["tuoteno"]);
 
 				if ($vmyytavissa > 0) {
@@ -886,7 +889,7 @@
 					list($V_hinta, $V_netto, $V_ale, $V_alehinta_alv, $V_alehinta_val) = alehinta($laskurow, $tvrow, $row['tilkpl'], '', '', '');
 
 					 $vastaavat_html .= 	"<tr class='aktiivi'>"
-					 			."<td>{$vrow["tuoteno"]}</td>"
+					 			."<td>{$vrow["tuoteno"]} $vaihtoehtoinen</td>"
 								."<td>{$tvrow["nimitys"]}</td>"
 					 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
 					 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>"

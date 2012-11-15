@@ -14,14 +14,16 @@ class Vastaavat {
 	function __construct($tuoteno) {
 		global $kukarow;
 
-		// Haetaan haetun tuotteen tiedot korvaavuusketjusta
-		$query = "SELECT * FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuoteno}' LIMIT 1";
-		$tuote_result = pupe_query($query);
-		$tuote = mysql_fetch_assoc($tuote_result);
+		if (!empty($tuoteno)) {
+			// Haetaan haetun tuotteen tiedot korvaavuusketjusta
+			$query = "SELECT * FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuoteno}' LIMIT 1";
+			$tuote_result = pupe_query($query);
+			$tuote = mysql_fetch_assoc($tuote_result);
 
-		// Ketju ja tuote talteen
-		$this->id = $tuote['id'];
-		$this->tuote = $tuote;
+			// Ketju ja tuote talteen
+			$this->id = $tuote['id'];
+			$this->tuote = $tuote;
+		}
 	}
 
 	/* Hakee kaikkien ketjujen id:t joihin haettu tuote kuuluu.
@@ -52,7 +54,7 @@ class Vastaavat {
 
 			// Tsekataan tarvittavat parametrit
 			if($options['vastaavuusketjun_jarjestys'] == 'K') {
-				$conditions = "HAVING jarjestys > {$this->tuote['jarjestys']}";
+				$conditions = "HAVING jarjestys >= {$this->tuote['jarjestys']}";
 			}
 		}
 

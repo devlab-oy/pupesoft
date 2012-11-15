@@ -3197,4 +3197,19 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
+
+	}
+
+	if (mysql_field_name($result, $i) == 'epakurantoinnin_myyntihintaleikkuri') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel['Z'] = $trow[$i] == 'Z' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Hintaa ei leikata")."</option>";
+		$ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Myyntihintaa leikataan 25% per taso")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+
 	}

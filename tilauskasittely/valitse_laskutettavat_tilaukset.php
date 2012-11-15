@@ -1072,7 +1072,7 @@
 					lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
 					$ketjutus_group
-					ORDER BY lasku.ytunnus, lasku.nimi";
+					ORDER BY lasku.nimi";
 		$tilre = pupe_query($query);
 
 		if (mysql_num_rows($tilre) > 0) {

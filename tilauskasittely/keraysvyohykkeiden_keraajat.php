@@ -211,7 +211,7 @@
 		echo "<br /><font class='error'>",t("VIRHE: Et valinnut mit‰‰n rajausta"),"!</font><br /><br />";
 	}
 
-	if (!isset($tilat)) $tilat = array('aloittamatta' => ' checked', 'aloitettu' => ' checked', 'keratty' => ' checked');
+	if (!isset($tilat)) $tilat = array('aloittamatta' => ' checked', 'aloitettu' => ' checked');
 	if (!isset($volyymisuure)) $volyymisuure = "rivit";
 	if (!isset($ajankohta)) $ajankohta = "present";
 	if (!isset($future_date_pp_alku)) $future_date_pp_alku = date("d",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
@@ -226,7 +226,7 @@
 	if (!isset($past_date_pp_loppu)) $past_date_pp_loppu = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 	if (!isset($past_date_kk_loppu)) $past_date_kk_loppu = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 	if (!isset($past_date_vv_loppu)) $past_date_vv_loppu = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-	if (!isset($nayta_valinnat) or count($nayta_valinnat) == 1) $nayta_valinnat = array('aloittamatta', 'aloitettu', 'keratty');
+	if (!isset($nayta_valinnat) or count($nayta_valinnat) == 1) $nayta_valinnat = array('aloittamatta', 'aloitettu');
 
 	$wherelisa = "";
 	$kerayserat_tilalisa = "";
@@ -266,7 +266,7 @@
 				JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 				JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-				JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
+				JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T') AND lahdot.pvm >= '".date("Y-m-d")." 00:00:00' AND lahdot.pvm <= '".date("Y-m-d")." 23:59:59')
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				{$wherelisa}
 				GROUP BY keraysvyohyke.nimitys

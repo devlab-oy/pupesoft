@@ -1088,6 +1088,17 @@ if (!function_exists('rivi_kerayslista')) {
 
 					$pdf->draw_text(42, $kala+5, $pakkaus_kirjain, $thispage, $iso_boldi);
 
+					$kala -= 10;
+
+					$query = "	SELECT CONCAT(pakkaus, ' ', pakkauskuvaus) pakkaus
+								FROM pakkaus
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$row['pakkaus']}'";
+					$pak_nimi_res = pupe_query($query);
+					$pak_nimi_row = mysql_fetch_assoc($pak_nimi_res);
+
+					$pdf->draw_text(42, $kala, trim($pak_nimi_row['pakkaus']), $thispage, $norm);
+
 					if ($row['kommentti'] == '') {
 						$kala -= 20;
 					}

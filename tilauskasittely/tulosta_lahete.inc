@@ -1703,13 +1703,13 @@ if (!function_exists('rivi_lahete')) {
 				// tulosta_lahete.inc
 				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
 					if ($yhtiorow['alv_kasittely'] == '') {
-						$return["summa"] += $row['rivihinta'];
-						$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["summa"] += ($row['hinta'] * $row['tilkpl']);
+						$return["arvo"]  += (($row['hinta'] * $row['tilkpl']) / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
 
 					}
 					else {
-						$return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
-						$return["arvo"]  += $row['rivihinta'];
+						$return["summa"] += (($row['hinta'] * $row['tilkpl']) * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["arvo"]  += ($row['hinta'] * $row['tilkpl']);
 					}
 				}
 				else {

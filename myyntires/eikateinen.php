@@ -11,8 +11,8 @@ else {
 
 if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 
-	$mehtorow = hae_maksuehto($maksuehto);
 	$laskurow = hae_lasku($tunnus);
+	$mehtorow = hae_maksuehto($laskurow['maksuehto']);
 	$konsrow  = hae_asiakas($laskurow);
 	$kassalipasrow = hae_kassalipas($kassalipas);
 
@@ -30,6 +30,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	);
 
 	$myysaatili  = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
+	$mehtorow = hae_maksuehto($maksuehto);
 	$_kassalipas = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow);
 
 	$params = array(

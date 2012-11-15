@@ -1070,7 +1070,7 @@
 								FROM lasku
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tapvm = '$vv-$kk-$pp'
-								AND tila = 'D'
+								AND tila = 'U'
 								AND comments != ''
 								AND sisviesti2 != ''
 								ORDER BY luontiaika DESC

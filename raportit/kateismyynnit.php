@@ -634,6 +634,8 @@
 		$kustp 			  = "";
 		$loppukassa_array = array();
 
+		$kassalippaat_array = populoi_kassalipas_muuttujat_kassakohtaisesti($_POST);
+
 		foreach ($_POST as $kentta => $arvo) {
 
 			if (stristr($kentta, "pohjakassa")) {
@@ -684,6 +686,7 @@
 				$maksutapa = t("Pankkikortti");
 
 				list ($maksutapa_devnull, $tilino, $kassalipas) = explode("#", $arvo);
+
 
 				// Haetaan kassalipastiedot tietokannasta
 				$query = "SELECT * FROM kassalipas WHERE yhtio = '$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND nimi = '$kassalipas'";
@@ -889,7 +892,7 @@
 		$loppukassa = str_replace(".",",",sprintf('%.2f',$loppukassa));
 		$comments_yht .= "$loppukassa<br>";
 
-		$kassa_json = json_encode(array("loppukassa" => $loppukassa_array, "date" => "{$vv}-{$kk}-{$pp}"));
+		$kassa_json = json_encode($kassalippaat_array);
 		$query = "	UPDATE lasku
 					SET
 						comments   = '$comments<br>".t("Alkukassa yhteensä").": $pohjakassa<br>$comments_yht',
@@ -1060,6 +1063,25 @@
 					ORDER BY kassa, kassanimi, tyyppi, lasku.tapvm, lasku.laskunro";
 		$result = pupe_query($query);
 
+		//haetaan viimeisin käteistäsmäytys joka on poistettu.
+		//sisviesti2 käytetään formin esitäytössä
+		$tasmaytys_query = "	SELECT comments,
+								sisviesti2
+								FROM lasku
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tapvm = '$vv-$kk-$pp'
+								AND tila = 'D'
+								AND comments != ''
+								AND sisviesti2 != ''
+								ORDER BY luontiaika DESC
+								LIMIT 1";
+		$tasmaytys_result = pupe_query($tasmaytys_query);
+		$tasmaytys_row = mysql_fetch_assoc($tasmaytys_result);
+
+		$tasmaytys_json_array = explode('##' , $tasmaytys_row['sisviesti2']);
+
+		$tasmaytys_array = json_decode($tasmaytys_json_array[0], true);
+
 		$i = 1;
 
 		if (mysql_num_rows($result) == 0) {
@@ -1145,7 +1167,7 @@
 
 				echo "' align='left' class='tumma' width='300px' nowrap>$row[kassanimi] ".t("alkukassa").":</td>";
 				$pohja = $row["pohjakassa"];
-				echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='pohjakassa$i' name='pohjakassa$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");' value='{$pohja}'></td>";
+				echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='pohjakassa$i' name='pohjakassa$i' size='10' autocomplete='off' value='{$tasmaytys_array[$row['kassanimi']]['pohjakassa']}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 
 				if ($tilityskpl > 1) {
 					for ($yy = 1; $yy < $tilityskpl; $yy++) {
@@ -1251,13 +1273,15 @@
 								echo "'";
 								echo "' class='tumma' width='300px' nowrap>$kateismaksuekotus ".t("yhteensä").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("Näytä / Piilota")."</a></td>";
 								echo "<input type='hidden' name='maksutapa$i' id='maksutapa$i' value='$solu#$tilinumero[kateinen]#$edkassanimi'>";
-								echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+								echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' value='{$tasmaytys_array[$edkassanimi]['solu'.$i]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 
 								if ($tilityskpl > 1) {
 									$y = $i;
+									$temp_indeksi = $i + 1;
 									for ($yy = 1; $yy < $tilityskpl; $yy++) {
 										$y .= $i;
-										echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+										echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' value='{$tasmaytys_array[$edkassanimi]['solu'.$temp_indeksi]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+										$temp_indeksi++;
 									}
 								}
 
@@ -1274,12 +1298,14 @@
 										echo "9";
 									}
 								echo "' width='300px' nowrap>$edkassanimi ".t("käteisotto kassasta").":</td><td class='tumma' align='center'>";
-								echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+								echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' value='{$tasmaytys_array[$edkassanimi]['kateisotto'.$i]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 								if ($tilityskpl > 1) {
 									$y = $i;
+									$temp_indeksi = $i + 1;
 									for ($yy = 1; $yy < $tilityskpl; $yy++) {
 										$y .= $i;
-										echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateisotto$y' name='kateisotto$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+										echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateisotto$y' name='kateisotto$y' size='10' autocomplete='off' value='{$tasmaytys_array[$edkassanimi]['kateisotto'.$temp_indeksi]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+										$temp_indeksi++;
 									}
 								}
 								echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td></tr>";
@@ -1292,12 +1318,14 @@
 										echo "9";
 									}
 								echo "' align='left' class='tumma' width='300px' nowrap>$edkassanimi ".t("käteistilitys pankkiin kassasta").":</td>";
-								echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$i' name='kateistilitys$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+								echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$i' name='kateistilitys$i' size='10' autocomplete='off' value='{$tasmaytys_array[$edkassanimi]['kateistilitys'.$i]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 								if ($tilityskpl > 1) {
 									$y = $i;
+									$temp_indeksi = $i + 1;
 									for ($yy = 1; $yy < $tilityskpl; $yy++) {
 										$y .= $i;
-										echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$y' name='kateistilitys$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+										echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$y' name='kateistilitys$y' size='10' autocomplete='off' value='{$tasmaytys_array[$edkassanimi]['kateistilitys'.$temp_indeksi]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+										$temp_indeksi++;
 									}
 								}
 								echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td></tr>";
@@ -1338,6 +1366,7 @@
 								}
 							echo "' align='left' class='tumma' width='300px' nowrap>$row[kassanimi] ".t("alkukassa").":</td>";
 							$pohja = $row["pohjakassa"];
+							$pohja = $tasmaytys_array[$edkassanimi]['pohjakassa'];
 							echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='pohjakassa$i' name='pohjakassa$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");' value='{$pohja}'></td>";
 							if ($tilityskpl > 1) {
 								for ($yy = 1; $yy < $tilityskpl; $yy++) {
@@ -1436,12 +1465,15 @@
 
 				echo "<input type='hidden' name='maksutapa$i' value='$solu#$tilinumero[kateinen]#$edkassanimi'>";
 
-				echo "<td class='tumma' align='center' width='100px' nowrap><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+				$temp_indeksi = 1;
+				echo "<td class='tumma' align='center' width='100px' nowrap><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off'  value='{$tasmaytys_array[$edkassanimi]['solu'.$temp_indeksi]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 				if ($tilityskpl > 1) {
 					$y = $i;
+					$temp_indeksi = $temp_indeksi + 1;
 					for ($yy = 1; $yy < $tilityskpl; $yy++) {
 						$y .= $i;
-						echo "<td class='tumma' align='center' width='100px' nowrap><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+						echo "<td class='tumma' align='center' width='100px' nowrap><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' value='{$tasmaytys_array[$edkassanimi]['solu'.$temp_indeksi]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+						$temp_indeksi++;
 					}
 				}
 				echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
@@ -1457,12 +1489,15 @@
 					echo "9";
 				}
 				echo "' width='300px' nowrap>$edkassanimi ".t("käteisotto kassasta").": </td><td class='tumma' align='center' nowrap>";
-				echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+				$temp_indeksi = 1;
+				echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' value='{$tasmaytys_array[$edkassanimi]['kateisotto'.$temp_indeksi]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 				if ($tilityskpl > 1) {
 					$y = $i;
+					$temp_indeksi = $temp_indeksi + 1;
 					for ($yy = 1; $yy < $tilityskpl; $yy++) {
 						$y .= $i;
-						echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateisotto$y' name='kateisotto$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+						echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateisotto$y' name='kateisotto$y' size='10' autocomplete='off' value='{$tasmaytys_array[$edkassanimi]['kateisotto'.$temp_indeksi]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+						$temp_indeksi++;
 					}
 				}
 				echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td></tr>";
@@ -1475,12 +1510,15 @@
 					echo "9";
 				}
 				echo "' align='left' class='tumma' width='300px' nowrap>$edkassanimi ".t("käteistilitys pankkiin kassasta").":</td>";
-				echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$i' name='kateistilitys$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+				$temp_indeksi = 1;
+				echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$i' name='kateistilitys$i' size='10' autocomplete='off' value='{$tasmaytys_array[$edkassanimi]['kateistilitys'.$temp_indeksi]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 				if ($tilityskpl > 1) {
 					$y = $i;
+					$temp_indeksi = $temp_indeksi + 1;
 					for ($yy = 1; $yy < $tilityskpl; $yy++) {
 						$y .= $i;
-						echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$y' name='kateistilitys$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+						echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$y' name='kateistilitys$y' size='10' autocomplete='off' value='{$tasmaytys_array[$edkassanimi]['kateistilitys'.$temp_indeksi]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+						$temp_indeksi++;
 					}
 				}
 				echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td></tr>";
@@ -2183,5 +2221,195 @@ function get_pohjakassa($row) {
 		$row["pohjakassa"] = $pk["loppukassa"][$row["kassanimi"]];
 	}
 	return $row;
+}
+
+function populoi_kassalipas_muuttujat_kassakohtaisesti($_post) {
+	//Nämä kommentit pyrkii selkeyttämään code reviewsille mitä tässä funktiossa on yritettty hakea. saa poistaa
+
+	/*
+	 * $_post
+	 *
+	 * array(61) {
+  ["rivipointer1"]=>
+  string(0) ""
+  ["tyyppi_pohjakassa1"]=>
+  string(11) "Kassalipas2"
+  ["pohjakassa1"]=>
+  string(1) "1"
+  ["maksutapa1"]=>
+  string(25) "kateinen#1905#Kassalipas2"
+  ["solu1"]=>
+  string(1) "2"
+  ["solu11"]=>
+  string(1) "3"
+  ["solu111"]=>
+  string(1) "4"
+  ["erotus1"]=>
+  string(2) "38"
+  ["soluerotus1"]=>
+  string(6) "-29.00"
+  ["kateisotto1"]=>
+  string(1) "5"
+  ["kateisotto11"]=>
+  string(1) "6"
+  ["kateisotto111"]=>
+  string(1) "7"
+  ["kateistilitys1"]=>
+  string(1) "8"
+  ["kateistilitys11"]=>
+  string(1) "9"
+  ["kateistilitys111"]=>
+  string(2) "10"
+  ["yht_lopkas1"]=>
+  string(3) "-35"
+  ["rivipointer2"]=>
+  string(0) ""
+  ["tyyppi_pohjakassa2"]=>
+  string(11) "Kassalipas7"
+  ["pohjakassa2"]=>
+  string(2) "11"
+  ["maksutapa2"]=>
+  string(25) "kateinen#1905#Kassalipas7"
+  ["solu2"]=>
+  string(2) "12"
+  ["solu22"]=>
+  string(2) "13"
+  ["solu222"]=>
+  string(2) "14"
+  ["kateisotto2"]=>
+  string(2) "15"
+  ["kateisotto22"]=>
+  string(2) "16"
+  ["kateisotto222"]=>
+  string(2) "17"
+  ["kateistilitys2"]=>
+  string(2) "18"
+  ["kateistilitys22"]=>
+  string(2) "19"
+  ["kateistilitys222"]=>
+  string(2) "20"
+  ["yht_lopkas2"]=>
+  string(3) "-55"
+  ["erotus2"]=>
+  string(2) "84"
+  ["soluerotus2"]=>
+  string(6) "-45.00"
+  ["loppukassa2"]=>
+  string(6) "-90.00"
+}
+	 *
+	 */
+	
+	$kassalippaat = array();
+	$kassalippaan_indeksi = null;
+	$monisoluisen_indeksi_array = null;
+	foreach ($_post as $kentan_nimi => $kentan_arvo) {
+		if(stristr($kentan_nimi, 'tyyppi_pohjakassa')) {
+			preg_match_all('!\d+!', $kentan_nimi, $kassalippaan_indeksi);
+			$kassalippaan_nimi = $_post['tyyppi_pohjakassa' . $kassalippaan_indeksi[0][0]];
+			foreach($_post as $etsi_kassalipas_nimi => $etsi_kassalipas_arvo) {
+				//etsitään kassalippaalle kuuluvat tilitys arvot
+				if(strstr($etsi_kassalipas_nimi , $kassalippaan_indeksi[0][0])) {
+					if(!stristr($etsi_kassalipas_nimi, 'solu') and !stristr($etsi_kassalipas_nimi, 'kateisotto') and !stristr($etsi_kassalipas_nimi, 'kateistilitys')) {
+						//yksisoluiset halutaan tallentaa ilman perästä löytyvää indeksiä
+						$kassalippaat[$kassalippaan_nimi][preg_replace("/[0-9]/", "", $etsi_kassalipas_nimi)] = $etsi_kassalipas_arvo;
+					}
+					else {
+						//monisoluisiin halutaan 1, 11 ,111 indeksin sijaan 1, 2, 3 jne.
+						preg_match_all('!\d+!', $etsi_kassalipas_nimi, $monisoluisen_indeksi_array);
+						$monisoluisen_indeksi = strlen($monisoluisen_indeksi_array[0][0]);
+
+						$solun_nimi = preg_replace("/[0-9]/", "", $etsi_kassalipas_nimi) . $monisoluisen_indeksi;
+						$kassalippaat[$kassalippaan_nimi][$solun_nimi] = $etsi_kassalipas_arvo;
+					}
+				}
+			}
+		}
+	}
+
+	
+	
+	return $kassalippaat;
+
+	/*
+	 * $kassalippaat
+	 *
+	 * 
+	 * array(2) {
+  ["Kassalipas2"]=>
+  array(16) {
+    ["rivipointer"]=>
+    string(0) ""
+    ["tyyppi_pohjakassa"]=>
+    string(11) "Kassalipas2"
+    ["pohjakassa"]=>
+    string(1) "1"
+    ["maksutapa"]=>
+    string(25) "kateinen#1905#Kassalipas2"
+    ["solu1"]=>
+    string(1) "2"
+    ["solu2"]=>
+    string(1) "3"
+    ["solu3"]=>
+    string(1) "4"
+    ["erotus"]=>
+    string(2) "38"
+    ["soluerotus"]=>
+    string(6) "-29.00"
+    ["kateisotto1"]=>
+    string(1) "5"
+    ["kateisotto2"]=>
+    string(1) "6"
+    ["kateisotto3"]=>
+    string(1) "7"
+    ["kateistilitys1"]=>
+    string(1) "8"
+    ["kateistilitys2"]=>
+    string(1) "9"
+    ["kateistilitys3"]=>
+    string(2) "10"
+    ["yht_lopkas"]=>
+    string(3) "-35"
+  }
+  ["Kassalipas7"]=>
+  array(17) {
+    ["rivipointer"]=>
+    string(0) ""
+    ["tyyppi_pohjakassa"]=>
+    string(11) "Kassalipas7"
+    ["pohjakassa"]=>
+    string(2) "11"
+    ["maksutapa"]=>
+    string(25) "kateinen#1905#Kassalipas7"
+    ["solu1"]=>
+    string(2) "12"
+    ["solu2"]=>
+    string(2) "13"
+    ["solu3"]=>
+    string(2) "14"
+    ["kateisotto1"]=>
+    string(2) "15"
+    ["kateisotto2"]=>
+    string(2) "16"
+    ["kateisotto3"]=>
+    string(2) "17"
+    ["kateistilitys1"]=>
+    string(2) "18"
+    ["kateistilitys2"]=>
+    string(2) "19"
+    ["kateistilitys3"]=>
+    string(2) "20"
+    ["yht_lopkas"]=>
+    string(3) "-55"
+    ["erotus"]=>
+    string(2) "84"
+    ["soluerotus"]=>
+    string(6) "-45.00"
+    ["loppukassa"]=>
+    string(6) "-90.00"
+  }
+}
+
+	 */
 }
 ?>

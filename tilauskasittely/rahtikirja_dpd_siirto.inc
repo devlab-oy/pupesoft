@@ -62,7 +62,7 @@ if ($kollityht > 0) {
 		//	Luodaan meidän tiedostorakenne parcelOrder arrayhin ja pukataan se tonne aineistoon sitten laakista
 		$parcelOrder=array();
 		$parcelOrder["rahtikirjanro"] = $rahtikirjanro;
-		$parcelOrder["tilausnumero"] = $laskurow['tunnus'];
+		$parcelOrder["tilausnumero"] = $lotsikot[0];
 
 		/*
 			Arvotaan lähetystapa

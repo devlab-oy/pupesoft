@@ -2470,7 +2470,7 @@
 
 				echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 
-				if (trim($lahto_row['sscc_ulkoinen']) != '') {
+				if (trim($lahto_row['sscc_ulkoinen']) != '' and trim($lahto_row['sscc_ulkoinen']) != 0) {
 					echo "<button type='button'>{$lahto_row['sscc_ulkoinen']}</button>";
 				}
 				elseif ($lahto_row['sscc'] != '') {

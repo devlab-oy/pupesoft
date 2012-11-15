@@ -2209,7 +2209,7 @@
 						SUBSTRING(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
 						SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
 						SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
-						avainsana.selitetark_3 AS 'prioriteetti',
+						avainsana.selitetark_3 AS 'prioriteetti_info',
 						toimitustapa.selite AS 'toimitustapa',
 						toimitustapa.lahdon_selite,
 						GROUP_CONCAT(DISTINCT kerayserat.tila) AS 'tilat',
@@ -2253,7 +2253,7 @@
 
 			echo "<tr>";
 			echo "<td class='data'>{$lahto_row['lahdon_tunnus']}</td>";
-			echo "<td class='data'>{$lahto_row['prioriteetti']}</td>";
+			echo "<td class='data'>{$lahto_row['prioriteetti_info']}</td>";
 			echo "<td class='data'>{$lahto_row['lahdon_selite']}</td>";
 			echo "<td class='data'>{$lahto_row['toimitustapa']}</td>";
 			echo "<td class='data'>",tv1dateconv($lahto_row['lahdon_pvm']),"</td>";

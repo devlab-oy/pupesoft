@@ -326,7 +326,7 @@ function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
 		$result = pupe_query($query);
 
 		$query = "	UPDATE lasku
-					SET tila = 'D', comments=CONCAT(comments, ' {$kukarow['kuka']} mitätöi tositteen')
+					SET tila = 'U', alatila = 'X', comments=CONCAT(comments, ' {$kukarow['kuka']} mitätöi tositteen')
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus IN ({$tasmaysrow['ltunnukset']})";
 		$result = pupe_query($query);

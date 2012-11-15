@@ -62,6 +62,7 @@ if ($kollityht > 0) {
 		//	Luodaan meid‰n tiedostorakenne parcelOrder arrayhin ja pukataan se tonne aineistoon sitten laakista
 		$parcelOrder=array();
 		$parcelOrder["rahtikirjanro"] = $rahtikirjanro;
+		$parcelOrder["tilausnumero"] = $laskurow['tunnus'];
 
 		/*
 			Arvotaan l‰hetystapa
@@ -234,7 +235,7 @@ if ($kollityht > 0) {
 			# Jos maksuehto on j‰lkivaatimus, laitetaan t("K‰teinen")
 			# Rahtikirjanro
 			$delisprintFileFormat = array(
-				"rahtikirjanro",
+				"tilausnumero",
 				"viite",
 				"yhteyshenkilo_nimi",
 				"toim_nimi",
@@ -259,6 +260,11 @@ if ($kollityht > 0) {
 
 		foreach($delisprintFileFormat as $p) {
 			$aineisto .= $parcelOrder[$p].";";
+
+			// tehd‰‰n ylim‰‰r‰inen ; koska formaatissa on l‰hiosoite 2 mit‰ ei ole pupessa
+			if ($p == "toim_osoite") {
+				$aineisto .= ";";
+			}
 		}
 
 		echo "<br><hr>Aineisto:<br><pre>{$aineisto}</pre><br>";

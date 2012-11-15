@@ -8,9 +8,9 @@
 	echo "<script type='text/javascript' language='JavaScript'>
 
 			<!--
-                                $(document).ready(function(){
-                                    update_summa(\"tasmaytysform\");
-                                  });
+				$(document).ready(function(){
+					update_summa(\"tasmaytysform\");
+				});
 
 				function disableDates() {
 					if (document.getElementById('tasmays').checked != true) {
@@ -2155,33 +2155,33 @@
 
 	echo "</form>";
 
-	require ("inc/footer.inc");
+	function get_pohjakassa($row) {
+		global $kukarow;
 
-function get_pohjakassa($row) {
-	global $kukarow;
+		if (isset($row["pohjakassa"])) {
+			return ($row);
+		}
 
-	if (isset($row["pohjakassa"])) {
-		return ($row);
-	}
+		$like = "%{\"loppukassa\":{%\"" . $row["kassanimi"] . "\"%}%}%";
 
-	$like = "%{\"loppukassa\":{%\"" . $row["kassanimi"] . "\"%}%}%";
-
-	$pk_query = "SELECT tunnus, tapvm, sisviesti2
-					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]'
-					 	AND tila = 'X'
-                        AND tapvm >= date_sub(current_date, interval 7 day)
+		$pk_query = "	SELECT tunnus, tapvm, sisviesti2
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tila = 'X'
+						AND tapvm >= date_sub(current_date, interval 7 day)
 						AND sisviesti2 LIKE '$like'
-					ORDER BY tapvm DESC
-					LIMIT 1;";
-	$pk_result = pupe_query($pk_query);
+						ORDER BY tapvm DESC
+						LIMIT 1";
+		$pk_result = pupe_query($pk_query);
 
-	if (mysql_num_rows($pk_result) == 1) {
-		$pk_row = mysql_fetch_assoc($pk_result);
-		$pk_t = explode("##", $pk_row["sisviesti2"]);
-		$pk = json_decode($pk_t[0], TRUE);
-		$row["pohjakassa"] = $pk["loppukassa"][$row["kassanimi"]];
+		if (mysql_num_rows($pk_result) == 1) {
+			$pk_row = mysql_fetch_assoc($pk_result);
+			$pk_t = explode("##", $pk_row["sisviesti2"]);
+			$pk = json_decode($pk_t[0], TRUE);
+			$row["pohjakassa"] = $pk["loppukassa"][$row["kassanimi"]];
+		}
+
+		return $row;
 	}
-	return $row;
-}
-?>
+
+	require ("inc/footer.inc");

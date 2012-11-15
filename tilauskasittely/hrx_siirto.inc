@@ -66,7 +66,7 @@ if ($kollityht > 0) {
 
 		$sanoma  = "Mercantile Group As;";
 		$sanoma .= substr(trim($rakir_row['toim_nimi'].' '.$rakir_row['toim_nimitark']), 0, 30).";";
-		$sanoma .= substr(trim($rakir_row['toim_osoite']), 0, 25).";";
+		$sanoma .= substr(trim($rakir_row['toim_osoite']), 0, 25).";;"; #kaksi ;-merkkiä koska "osoite 2"-kenttää ei ole pupessa
 		$sanoma .= substr(trim($rakir_row['toim_postino'].' '.$rakir_row['toim_postitp']), 0, 25).";";
 		$sanoma .= substr(trim($rakir_row['toim_maa']), 0, 25).";";
 

@@ -94,7 +94,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 
 				$result = mysql_query($query) or pupe_error($query);
 
-				$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
+				$bool = setcookie("pupesoft_session", $session, time()+43200, "/"); // 12 tuntia voimassa
 
 				if ($bool === FALSE) {
 					$errormsg = t("Selaimesi ei ilmeisesti tue cookieta",$browkieli).".";

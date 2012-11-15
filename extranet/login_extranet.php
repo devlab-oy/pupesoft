@@ -52,7 +52,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 				}
 				$result = mysql_query($query) or pupe_error($query);
 
-				$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH));
+				$bool = setcookie("pupesoft_session", $session, time()+43200, "/");
 
 				if ($location != "") {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$location'>";

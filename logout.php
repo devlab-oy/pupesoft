@@ -7,7 +7,7 @@
 	$query = "UPDATE kuka set session='', kesken='' where session='$session'";
 	$result = mysql_query($query) or pupe_error($query);
 
-	$bool = setcookie("pupesoft_session", "", time()-43200, parse_url($palvelin, PHP_URL_PATH));
+	$bool = setcookie("pupesoft_session", "", time()-43200, "/");
 
 	echo "<html>
 		<head>

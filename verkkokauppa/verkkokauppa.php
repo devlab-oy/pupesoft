@@ -51,7 +51,7 @@ if ($_REQUEST["tee"] == "login") {
 						AND oletus_asiakas	!= ''";
 			$result = pupe_query($query);
 
-			$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH));
+			$bool = setcookie("pupesoft_session", $session, time()+43200, "/");
 
 			if ($location != "") {
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$location}'>";

@@ -341,11 +341,15 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$saakopoistaa = TRUE;
 				break;
-			case "toimitustavan_lahdot":	
-				$saakopoistaa = TRUE;
-			case "lahdot":
+			case "toimitustavan_lahdot":
 				$pakolliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS");
 				$wherelliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS", "VIIMEINEN_TILAUSAIKA", "KERAILYN_ALOITUSAIKA", "TERMINAALIALUE", "ASIAKASLUOKKA", "VARASTO");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
+				break;
+			case "lahdot":
+				$pakolliset = array("PVM", "LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS");
+				$wherelliset = array("PVM", "LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS", "VIIMEINEN_TILAUSAIKA", "KERAILYN_ALOITUSAIKA", "TERMINAALIALUE", "ASIAKASLUOKKA", "VARASTO");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "rahtikirjanumero":

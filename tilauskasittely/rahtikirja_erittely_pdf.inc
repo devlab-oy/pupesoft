@@ -145,7 +145,7 @@
 				$kala2 -= 15;
 			}
 			else {
-				$tilausnumerot = wordwrap($tilaukset, 50, "\n");
+				$tilausnumerot = wordwrap($laskurow['tunnus'], 50, "\n");
 
 				foreach (explode("\n", $tilausnumerot) as $tilausnumero) {
 					$pdf->draw_text(62, $kala2, $tilausnumero, $firstpage, $kirj);

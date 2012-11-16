@@ -80,11 +80,11 @@ if ($kollityht > 0) {
 		$sanoma .= str_pad($v_maa, 25, " ");
 
 		$query = "	SELECT nimi, titteli, email, puh, gsm, fax
-					FROM laskun_lisatiedot
-					JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = laskun_lisatiedot.yhtio AND yhteyshenkilo.tunnus = laskun_lisatiedot.yhteyshenkilo_tekninen AND yhteyshenkilo.tyyppi = 'A')
-					WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-					AND otunnus IN ({$otunnukset})
-					AND yhteyshenkilo_tekninen > 0
+					FROM lasku
+					JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = lasku.yhtio AND yhteyshenkilo.tunnus = lasku.tilausyhteyshenkilo AND yhteyshenkilo.tyyppi = 'A')
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					AND lasku.tunnus IN ({$otunnukset})
+					AND lasku.tilausyhteyshenkilo > 0
 					LIMIT 1";
 		$yhres = pupe_query($query);
 

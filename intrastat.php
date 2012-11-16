@@ -313,7 +313,7 @@
 						<th>".t("Laskutusarvo")."</th>
 						<th>".t("Ostolaskun valuutta")."</th>
 						<th>".t("Tilastoarvo")."</th>
-						<th>".t("Statsin valuutta")."</th>
+						<th>".t("Yhtiön valuutta")."</th>
 						<th>".t("Tullinimikkeen nimitys")."</th>
 						</tr>";
 				}
@@ -356,7 +356,7 @@
 						$worksheet->write($excelrivi, 18, t("Laskutusarvo"), $format_bold);
 						$worksheet->write($excelrivi, 19, t("Ostolaskun valuutta"), $format_bold);
 						$worksheet->write($excelrivi, 20, t("Tilastoarvo"), $format_bold);
-						$worksheet->write($excelrivi, 21, t("Statsin valuutta"), $format_bold);
+						$worksheet->write($excelrivi, 21, t("Yhtiön valuutta"), $format_bold);
 						$worksheet->write($excelrivi, 22, t("Tullinimikkeen nimitys"), $format_bold);
 					}
 					else {
@@ -547,6 +547,7 @@
 					$ee_pvm = date("d.m.Y");
 					$ee_ilmoitus = ((($row["maamaara"] == $maa or $row["maamaara"] == '') and $row["maalahetys"] != $maa) ? 'S' : 'L');
 					$ee_rivi = sprintf('%05d', $lask);
+                    $ee_maatxt = t_maanimi($row["maalahetys"], 'ee');
 
 					$tilastoarvot .= "
 						<td>$ee_pvm</td>
@@ -556,7 +557,7 @@
 						<td>{$yhtiorow["ytunnus"]}</td>
 						<td>$ee_rivi</td>
 						<td>{$row["toim_ehto"]}</td>
-						<td>{$row["maalahetys"]}</td>
+						<td>{$ee_maatxt}</td>
 
 						<td>{$row["kuljetusmuoto"]}</td>
 						<td>{$row["maalahetys"]}</td>
@@ -621,7 +622,7 @@
 						$worksheet->write($excelrivi, 7, $row["toim_ehto"]);
 						$worksheet->write($excelrivi, 8, $row["maalahetys"]);
 						$worksheet->write($excelrivi, 9, $row["kuljetusmuoto"]);
-						$worksheet->write($excelrivi, 10, $row["maalahetys"]);
+						$worksheet->write($excelrivi, 10, $ee_maatxt);
 						$worksheet->write($excelrivi, 11, $row["kauppatapahtuman_luonne"]);
 						$worksheet->write($excelrivi, 12, $row["alkuperamaa"]);
 						$worksheet->write($excelrivi, 13, $row["maamaara"]);

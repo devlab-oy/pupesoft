@@ -2221,37 +2221,40 @@
 
 		return $row;
 	}
-	return $row;
-}
 
-function populoi_kassalipas_muuttujat_kassakohtaisesti($_post) {
-	$kassalippaat = array();
-	$kassalippaan_indeksi = null;
-	$monisoluisen_indeksi_array = null;
-	foreach ($_post as $kentan_nimi => $kentan_arvo) {
-		if(stristr($kentan_nimi, 'tyyppi_pohjakassa')) {
-			preg_match_all('!\d+!', $kentan_nimi, $kassalippaan_indeksi);
-			$kassalippaan_nimi = $_post['tyyppi_pohjakassa' . $kassalippaan_indeksi[0][0]];
-			foreach($_post as $etsi_kassalipas_nimi => $etsi_kassalipas_arvo) {
-				//etsitään kassalippaalle kuuluvat tilitys arvot
-				if(strstr($etsi_kassalipas_nimi , $kassalippaan_indeksi[0][0])) {
-					if(!stristr($etsi_kassalipas_nimi, 'solu') and !stristr($etsi_kassalipas_nimi, 'kateisotto') and !stristr($etsi_kassalipas_nimi, 'kateistilitys')) {
-						//yksisoluiset halutaan tallentaa ilman perästä löytyvää indeksiä
-						$kassalippaat[$kassalippaan_nimi][preg_replace("/[0-9]/", "", $etsi_kassalipas_nimi)] = $etsi_kassalipas_arvo;
-					}
-					else {
-						//monisoluisiin halutaan 1, 11 ,111 indeksin sijaan 1, 2, 3 jne.
-						preg_match_all('!\d+!', $etsi_kassalipas_nimi, $monisoluisen_indeksi_array);
-						$monisoluisen_indeksi = strlen($monisoluisen_indeksi_array[0][0]);
+	function populoi_kassalipas_muuttujat_kassakohtaisesti($_post) {
+		$kassalippaat = array();
+		$kassalippaan_indeksi = null;
+		$monisoluisen_indeksi_array = null;
 
-						$solun_nimi = preg_replace("/[0-9]/", "", $etsi_kassalipas_nimi) . $monisoluisen_indeksi;
-						$kassalippaat[$kassalippaan_nimi][$solun_nimi] = $etsi_kassalipas_arvo;
+		foreach ($_post as $kentan_nimi => $kentan_arvo) {
+			if (stristr($kentan_nimi, 'tyyppi_pohjakassa')) {
+				preg_match_all('!\d+!', $kentan_nimi, $kassalippaan_indeksi);
+				$kassalippaan_nimi = $_post['tyyppi_pohjakassa' . $kassalippaan_indeksi[0][0]];
+
+				foreach($_post as $etsi_kassalipas_nimi => $etsi_kassalipas_arvo) {
+
+					//etsitään kassalippaalle kuuluvat tilitys arvot
+					if (strstr($etsi_kassalipas_nimi , $kassalippaan_indeksi[0][0])) {
+
+						if (!stristr($etsi_kassalipas_nimi, 'solu') and !stristr($etsi_kassalipas_nimi, 'kateisotto') and !stristr($etsi_kassalipas_nimi, 'kateistilitys')) {
+							//yksisoluiset halutaan tallentaa ilman perästä löytyvää indeksiä
+							$kassalippaat[$kassalippaan_nimi][preg_replace("/[0-9]/", "", $etsi_kassalipas_nimi)] = $etsi_kassalipas_arvo;
+						}
+						else {
+							//monisoluisiin halutaan 1, 11 ,111 indeksin sijaan 1, 2, 3 jne.
+							preg_match_all('!\d+!', $etsi_kassalipas_nimi, $monisoluisen_indeksi_array);
+							$monisoluisen_indeksi = strlen($monisoluisen_indeksi_array[0][0]);
+
+							$solun_nimi = preg_replace("/[0-9]/", "", $etsi_kassalipas_nimi) . $monisoluisen_indeksi;
+							$kassalippaat[$kassalippaan_nimi][$solun_nimi] = $etsi_kassalipas_arvo;
+						}
 					}
 				}
 			}
 		}
+
+		return $kassalippaat;
 	}
 
-	return $kassalippaat;
-}
-?>
+require ("inc/footer.inc");

@@ -18,20 +18,24 @@ if ($tee == "laheta" and $tunnukset != "") {
 
 			echo t("Uudelleenlähetetään tilausvahvistus")." ($laskurow[tilausvahvistus]): $laskurow[nimi]<br>";
 
-			// LÄHETETÄÄN TILAUSVAHVISTUS
-			$params_tilausvahvistus = array(
-			'tee'						=> $tee,
-			'toim'						=> $toim,
-			'kieli'						=> $kieli,
-			'komento'					=> $komento,
-			'laskurow'					=> $laskurow,
-			'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
-			'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
-			);
+			if (trim($laskurow['tilausvahvistus']) != "") {
+				//
+				// LÄHETETÄÄN TILAUSVAHVISTUS
+				//
+				// tulostetaan tässä, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
+				$params_tilausvahvistus = array(
+				'tee'						=> "",
+				'toim'						=> "",
+				'kieli'						=> "",
+				'komento'					=> "",
+				'laskurow'					=> $laskurow,
+				'naytetaanko_rivihinta'		=> "",
+				'extranet_tilausvahvistus'	=> "",
+				);
 
-			laheta_tilausvahvistus($params_tilausvahvistus);
+				laheta_tilausvahvistus($params_tilausvahvistus);
+			}
 		}
-
 	}
 	else {
 		print "<font class='error'>".t("Tilauksia ei löytynyt").": $tunnukset!</font><br>";

@@ -79,10 +79,10 @@ if ($kollityht > 0) {
 
 		$query = "	SELECT yhteyshenkilo.nimi, yhteyshenkilo.titteli, yhteyshenkilo.email, yhteyshenkilo.puh, yhteyshenkilo.gsm, yhteyshenkilo.fax
 					FROM lasku
-					JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = lasku.yhtio AND yhteyshenkilo.tunnus = lasku.tilausyhteyshenkilo AND yhteyshenkilo.tyyppi = 'A')
+					JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = lasku.yhtio AND yhteyshenkilo.nimi = lasku.tilausyhteyshenkilo AND yhteyshenkilo.tyyppi = 'A')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus IN ({$otunnukset})
-					AND lasku.tilausyhteyshenkilo > 0
+					AND lasku.tilausyhteyshenkilo != ''
 					LIMIT 1";
 		$yhres = pupe_query($query);
 

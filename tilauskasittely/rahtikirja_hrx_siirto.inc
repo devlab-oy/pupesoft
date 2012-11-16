@@ -64,11 +64,17 @@ if ($kollityht > 0) {
 			$laskurow = mysql_fetch_assoc($laskures);
 		}
 
-		$sanoma  = "Mercantile Group As;";
-		$sanoma .= substr(trim($rakir_row['toim_nimi'].' '.$rakir_row['toim_nimitark']), 0, 30).";";
-		$sanoma .= substr(trim($rakir_row['toim_osoite']), 0, 25).";;"; #kaksi ;-merkkiä koska "osoite 2"-kenttää ei ole pupessa
-		$sanoma .= substr(trim($rakir_row['toim_postino'].' '.$rakir_row['toim_postitp']), 0, 25).";";
-		$sanoma .= substr(trim($rakir_row['toim_maa']), 0, 25).";";
+		$y_nimi = "Mercantile Group As";
+		$v_nimi = substr(trim($rakir_row['toim_nimi'].' '.$rakir_row['toim_nimitark']), 0, 30);
+		$v_osoite = substr(trim($rakir_row['toim_osoite']), 0, 50);
+		$v_postino_postitp = substr(trim($rakir_row['toim_postino'].' '.$rakir_row['toim_postitp']), 0, 25);
+		$v_maa = substr(trim($rakir_row['toim_maa']), 0, 25);
+
+		$sanoma  = str_pad($y_nimi, 19, " ");
+		$sanoma .= str_pad($v_nimi, 30, " ");
+		$sanoma .= str_pad($v_osoite, 50, " "); #kaksi kenttää yhdistetty samaksi (osoite 1 ja osoite 2)
+		$sanoma .= str_pad($v_postino_postitp, 25, " ");
+		$sanoma .= str_pad($v_maa, 25, " ");
 
 		$query = "	SELECT nimi, titteli, email, puh, gsm, fax
 					FROM laskun_lisatiedot
@@ -98,19 +104,21 @@ if ($kollityht > 0) {
 			}
 		}
 
+		$yh_nimi = "";
+		$yh_puh = "";
+
 		if (mysql_num_rows($yhres) > 0) {
 			$yhrow = mysql_fetch_assoc($yhres);
 
-			$sanoma .= substr(trim($yhrow['nimi']), 0, 25).";";
-			$sanoma .= substr(trim($yhrow['puh']), 0, 25).";";
-		}
-		else {
-			$sanoma .= ";;";
+			$yh_nimi = substr(trim($yhrow['nimi']), 0, 25);
+			$yh_puh = substr(trim($yhrow['puh']), 0, 25);
 		}
 
-		$sanoma .= "{$kollityht};";
-		$sanoma .= substr(trim($pakkaus[0]), 0, 3).";";
-		$sanoma .= substr(trim($rahtikirjanro), 0, 10).";";
+		$sanoma .= str_pad($yh_nimi, 25, " ");
+		$sanoma .= str_pad($yh_puh, 25, " ");
+		$sanoma .= str_pad($kollityht, 6, " ");
+		$sanoma .= str_pad(substr(trim($pakkaus[0]), 0, 3), 3, " ");
+		$sanoma .= str_pad(substr(trim($rahtikirjanro), 0, 10), 10, " ");
 
 		if (substr($hrx_path,-1) != '/') {
 			$hrx_path .= '/';

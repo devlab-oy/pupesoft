@@ -317,11 +317,11 @@ function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
 						FROM lasku
 						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
 						AND tiliointi.ltunnus = lasku.tunnus
-						AND tiliointi.selite LIKE '%$kassalipasrow[nimi]%'
+						AND tiliointi.selite LIKE '$kassalipasrow[nimi] %'
 						AND tiliointi.korjattu = '')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						AND lasku.tila = 'X'
-						AND lasku.tapvm = '$paiva'";
+						AND lasku.tila 	  = 'X'
+						AND lasku.tapvm   = '$paiva'";
 	$tasmays_result = pupe_query($tasmays_query);
 	$tasmaysrow = mysql_fetch_assoc($tasmays_result);
 
@@ -336,14 +336,14 @@ function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
 		$result = pupe_query($query);
 
 		$query = "	UPDATE lasku
-					SET tila = 'U',
+					SET tila = 'D',
 					alatila  = 'X',
-					comments = CONCAT(comments, ' {$kukarow['kuka']} mitätöi tositteen')
+					comments = CONCAT(comments, ' {$kukarow['kuka']} mitätöi tositteen eikateinen.php ohjelmassa')
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus IN ({$tasmaysrow['ltunnukset']})";
 		$result = pupe_query($query);
 
-		echo "<font class='error'>".t("Vapautettiin kassojen %s päivän %s tosite.", '', $tasmaysrow['selite'], $paiva)."<br/><br/>";
+		echo "<font class='error'>".t("Vapautettiin kassojen %s päivän %s tosite.", '', $kassalipasrow['nimi'], $paiva)."<br/><br/>";
 		echo t("Sinun on täsmäytettävä päivän käteismyynnit uudelleen käteismyynnit ohjelmasta") . "</font>";
 	}
 }

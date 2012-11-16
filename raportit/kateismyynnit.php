@@ -52,7 +52,6 @@
 					var edpointer2 = 1;
 					var pointer = 1;
 					var pointer2 = 1;
-					var kala = '';
 					var kassa = 0;
 					var loppukas = 0;
 					var yht_alku = 0;
@@ -67,8 +66,6 @@
 						if (obj.elements[i].value == '') {
 							obj.elements[i].value = 0;
 						}
-
-						//kala = kala+'\\n '+i+'. NIMI: '+obj.elements[i].id+' VALUE: '+obj.elements[i].value;
 
 						if (obj.elements[i].id.substring(0,11) == ('rivipointer')) {
 							var len = obj.elements[i].id.length;
@@ -331,11 +328,11 @@
 							FROM lasku
 							JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
 							AND tiliointi.ltunnus = lasku.tunnus
-							AND tiliointi.selite LIKE '%$row[nimi]%'
+							AND tiliointi.selite LIKE '$row[nimi] %'
 							AND tiliointi.korjattu = '')
-							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							AND lasku.tila = 'X'
-							AND lasku.tapvm = '$vv-$kk-$pp'";
+							WHERE lasku.yhtio 	= '$kukarow[yhtio]'
+							AND lasku.tila 		= 'X'
+							AND lasku.tapvm 	= '$vv-$kk-$pp'";
 		$tasmays_result = pupe_query($tasmays_query);
 		$tasmaysrow = mysql_fetch_assoc($tasmays_result);
 
@@ -1054,10 +1051,9 @@
 					JOIN maksuehto ON (maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen != '')
 					LEFT JOIN tiliointi ON (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.korjattu = '' and tiliointi.tilino in ($myyntisaamiset_tilit))
 					LEFT JOIN kassalipas ON (kassalipas.yhtio=lasku.yhtio and kassalipas.tunnus=lasku.kassalipas)
-					WHERE
-					lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tila = 'U'
-					and lasku.alatila = 'X'
+					WHERE lasku.yhtio	= '$kukarow[yhtio]'
+					and lasku.tila 		= 'U'
+					and lasku.alatila	= 'X'
 					$lisa
 					$kassat
 					ORDER BY kassa, kassanimi, tyyppi, lasku.tapvm, lasku.laskunro";
@@ -1065,12 +1061,11 @@
 
 		//haetaan viimeisin käteistäsmäytys joka on poistettu.
 		//sisviesti2 käytetään formin esitäytössä
-		$tasmaytys_query = "	SELECT comments,
-								sisviesti2
+		$tasmaytys_query = "	SELECT comments, sisviesti2
 								FROM lasku
 								WHERE yhtio 	= '{$kukarow['yhtio']}'
 								AND tapvm 		= '$vv-$kk-$pp'
-								AND tila 		= 'U'
+								AND tila 		= 'D'
 								AND alatila		= 'X'
 								AND comments   != ''
 								AND sisviesti2 != ''

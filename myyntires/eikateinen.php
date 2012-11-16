@@ -13,7 +13,8 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	$tapahtumapaiva  = date('Y-m-d', mktime(0,0,0,$tapahtumapaiva_kk,$tapahtumapaiva_pp,$tapahtumapaiva_vv));
 
 	$tilikausi = tarkista_saako_laskua_muuttaa($tapahtumapaiva);
-	if(empty($tilikausi)) {
+
+	if (empty($tilikausi)) {
 		$laskurow = hae_lasku($tunnus);
 		$mehtorow = hae_maksuehto($laskurow['maksuehto']);
 		$konsrow  = hae_asiakas($laskurow);
@@ -31,7 +32,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		);
 
 		$myysaatili  = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
-		$mehtorow = hae_maksuehto($maksuehto);
+		$mehtorow 	 = hae_maksuehto($maksuehto);
 		$_kassalipas = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow);
 
 		$params = array(
@@ -57,9 +58,10 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		}
 
 		$laskuno = 0;
+		echo "<br>";
 	}
 	else {
-		echo "<font class='error'>".t("Tilikausi on päättynyt {$tilikausi['tilikausi_alku']}. Et voi merkitä laskua maksetuksi {$tapahtumapaiva}")."</font>";
+		echo "<font class='error'>".t("Tilikausi on päättynyt %s. Et voi merkitä laskua maksetuksi päivälle %s", "", $tilikausi['tilikausi_alku'], $tapahtumapaiva)."!</font>";
 	}
 }
 
@@ -144,6 +146,9 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 						where yhtio = '{$kukarow['yhtio']}'
 						and tunnus  = '{$params['tunnus']}'";
 		$result = pupe_query($query);
+
+		echo "<font class='message'>".t("Muutettin laskun")." {$params['laskurow']['laskunro']} ".t("maksuehdoksi")." ".t_tunnus_avainsanat($params['mehtorow'], "teksti", "MAKSUEHTOKV")."!</font><br>";
+
 	}
 	else {
 		// korjaillaan eräpäivät ja kassa-alet
@@ -181,7 +186,7 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 		$result = pupe_query($query);
 
 		if (mysql_affected_rows() > 0) {
-			echo "<font class='message'>".t("Muutettin laskun")." {$params['laskurow']['laskunro']} ".t("maksuehdoksi")." ".t_tunnus_avainsanat($params['mehtorow'], "teksti", "MAKSUEHTOKV")." ".t("ja merkattiin maksu avoimeksi").".</font><br>";
+			echo "<font class='message'>".t("Muutettin laskun")." {$params['laskurow']['laskunro']} ".t("maksuehdoksi")." ".t_tunnus_avainsanat($params['mehtorow'], "teksti", "MAKSUEHTOKV")." ".t("ja merkattiin maksu avoimeksi")."!</font><br>";
 		}
 		else {
 			echo "<font class='error'>".t("Laskua")." {$params['laskurow']['laskunro']} ".t("ei pystytty muuttamaan")."!</font><br>";
@@ -268,7 +273,7 @@ function yliviivaa_alet_ja_pyoristykset($tunnus) {
 	$result = pupe_query($query);
 
 	if (mysql_affected_rows() > 0) {
-		echo "<font class='message'>".t("Poistettiin pyöristys- ja kassa-alekirjaukset")." (".mysql_affected_rows()." ".t("kpl").").</font><br><br>";
+		echo "<font class='message'>".t("Poistettiin pyöristys- ja kassa-alekirjaukset")." (".mysql_affected_rows()." ".t("kpl").").</font><br>";
 	}
 }
 
@@ -551,7 +556,7 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$laskurow['kassalipas']}'";
 			$kassalipas_result = pupe_query($kassalipas_query);
-			
+
 			$kassalippaat = mysql_fetch_assoc($kassalipas_result);
 
 			if(!empty($kassalippaat)) {
@@ -578,22 +583,15 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 }
 
 function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {
-	global $kukarow;
+	global $kukarow, $yhtiorow;
 
-	$query = "	SELECT tilikausi_alku
-				FROM yhtio
-				WHERE yhtio = '{$kukarow['yhtio']}'";
-	$result = pupe_query($query);
-
-	$tilikausi_alku = mysql_fetch_assoc($result);
-
-	if(strtotime($tilikausi_alku['tilikausi_alku']) < strtotime($tapahtumapaiva)) {
+	if (strtotime($yhtiorow['tilikausi_alku']) < strtotime($tapahtumapaiva) and strtotime($yhtiorow['tilikausi_loppu']) > strtotime($tapahtumapaiva)) {
 		return false;
 	}
 	else {
 		return $tilikausi_alku;
 	}
-	
+
 }
 
 require ("inc/footer.inc");

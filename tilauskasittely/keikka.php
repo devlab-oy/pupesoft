@@ -1278,7 +1278,10 @@ if($poista == 'Poista') {
 				AND tilausrivin_lisatiedot.tilausrivilinkki = '{$lisatty_tun}'
 				AND tilausrivi.tyyppi = 'O'
 				AND lasku.tila = 'O'
-				AND lasku.alatila NOT IN ('X')";
+				AND lasku.alatila NOT IN ('X')
+				AND tilausrivi.kerattyaika = '0000-00-00 00:00:00'
+				AND tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
+				AND tilausrivi.laskutettuaika = '0000-00-00 00:00:00'";
 	$result = pupe_query($query);
 	if($tilausrivin_lisatiedot_row = mysql_fetch_assoc($result)) {
 		//tilaukset on naitettu. poistetaan myynti jos ei kerätty, toimitettu tai laskutettu
@@ -1286,8 +1289,7 @@ if($poista == 'Poista') {
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'
-					AND tyyppi = 'L'
-					AND alatila IN ('B' ,'C', 'D', 'J', 'V', 'X')";
+					AND tyyppi = 'L'";
 		$result = pupe_query($query);
 		if(mysql_num_rows($result) == 0) {
 			$query = "	UPDATE tilausrivi

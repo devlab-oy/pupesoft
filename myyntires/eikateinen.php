@@ -46,7 +46,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		yliviivaa_alet_ja_pyoristykset($tunnus);
 		tarkista_pyoristys_erotukset($laskurow, $tunnus);
 
-		if($toim == 'KATEINEN') {
+		if ($toim == 'KATEINEN') {
 			vapauta_kateistasmaytys($kassalipasrow, $tapahtumapaiva);
 		}
 
@@ -337,8 +337,8 @@ function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
 
 		$query = "	UPDATE lasku
 					SET tila = 'U',
-					alatila = 'X',
-					comments=CONCAT(comments, ' {$kukarow['kuka']} mitätöi tositteen')
+					alatila  = 'X',
+					comments = CONCAT(comments, ' {$kukarow['kuka']} mitätöi tositteen')
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus IN ({$tasmaysrow['ltunnukset']})";
 		$result = pupe_query($query);

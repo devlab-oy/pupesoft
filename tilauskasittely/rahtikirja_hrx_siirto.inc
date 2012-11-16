@@ -68,7 +68,8 @@ if ($kollityht > 0) {
 		$v_nimi = substr(trim($rakir_row['toim_nimi'].' '.$rakir_row['toim_nimitark']), 0, 30);
 		$v_osoite = substr(trim($rakir_row['toim_osoite']), 0, 50);
 		$v_postino_postitp = substr(trim($rakir_row['toim_postino'].' '.$rakir_row['toim_postitp']), 0, 25);
-		$v_maa = substr(trim($rakir_row['toim_maa']), 0, 25);
+
+		$v_maa = substr(t_maanimi($rakir_row['toim_maa'], $yhtiorow['kieli']), 0, 25);
 
 		$sanoma  = str_pad($y_nimi, 19, " ");
 		$sanoma .= str_pad($v_nimi, 30, " ");

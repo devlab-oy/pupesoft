@@ -71,8 +71,6 @@ if ($kollityht > 0) {
 
 		$v_maa = substr(t_maanimi($rakir_row['toim_maa'], $kukarow['kieli']), 0, 25);
 
-		echo "v_maa: $v_maa ($rakir_row[toim_maa] ja $kukarow[kieli])<br>";
-
 		$sanoma  = str_pad($y_nimi, 19, " ");
 		$sanoma .= str_pad($v_nimi, 30, " ");
 		$sanoma .= str_pad($v_osoite, 50, " "); #kaksi kenttää yhdistetty samaksi (osoite 1 ja osoite 2)

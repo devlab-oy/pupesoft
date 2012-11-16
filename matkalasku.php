@@ -56,7 +56,7 @@ if ($tee == "UUSI") {
 		(tai hakusanalla päivärahat yyyy)
 	*/
 
-	//	Tarkastetaan että päivärahat löytyy
+	//	Tarkastetaan että päivärahat löytyy. Puolipäivä rahat löytyy päivärahan kanssa samaltariviltä
 	$query = "	SELECT tuote.tuoteno
 				FROM tuote
 				JOIN tili ON tili.yhtio = tuote.yhtio and tili.tilino = tuote.tilino
@@ -68,19 +68,7 @@ if ($tee == "UUSI") {
 				LIMIT 1";
 	$result1 = pupe_query($query);
 
-	//	Tarkastetaan että osapäivärahat löytyy
-	$query = "	SELECT tuote.tuoteno
-				FROM tuote
-				JOIN tili ON tili.yhtio = tuote.yhtio and tili.tilino = tuote.tilino
-				WHERE tuote.yhtio = '$kukarow[yhtio]'
-				and tuote.tuotetyyppi = 'A'
-				and tuote.tuoteno like 'PPR%'
-				and tuote.status != 'P'
-				and tuote.tilino != ''
-				LIMIT 1";
-	$result2 = pupe_query($query);
-
-	if (mysql_num_rows($result1) == 0 or mysql_num_rows($result2) == 0) {
+	if (mysql_num_rows($result1) == 0) {
 		echo "<font class='error'>".t("VIRHE: Viranomaistuotteet puuttuu")."!</font>";
 		$tee = "";
 	}
@@ -1147,8 +1135,7 @@ if ($tee == "TUO_KALENTERISTA") {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuotetyyppi = 'A'
 						and status != 'P'
-						and vienti = '$row[maa]'
-						and tuoteno NOT LIKE ('PPR%')";
+						and vienti = '$row[maa]'";
 			$tres = pupe_query($query);
 
 			if (mysql_num_rows($tres) > 0) {
@@ -1589,18 +1576,6 @@ if ($tee == "MUOKKAA") {
 			foreach ($a as $viranomaistyyppi) {
 
 				$tyyppi_nimi = "";
-				$lisat = "";
-
-				switch ($viranomaistyyppi) {
-					case "A":
-						$tyyppi_nimi = "Päiväraha";
-						$lisat = " and left(tuote.tuoteno, 3) != 'PPR' ";
-						break;
-					case "B":
-						$tyyppi_nimi = "Muu kulu";
-						$lisat = "";
-						break;
-				}
 
 				$query = "	SELECT tuote.tuoteno, tuote.nimitys, tuote.vienti,
 							IF(tuote.vienti = '$yhtiorow[maa]' or tuote.nimitys like '%ateria%', 1, if(tuote.vienti != '', 2, 3)) sorttaus
@@ -1610,7 +1585,6 @@ if ($tee == "MUOKKAA") {
 							and tuote.tuotetyyppi = '$viranomaistyyppi'
 							and tuote.status != 'P'
 							and tuote.tilino != ''
-							$lisat
 							ORDER BY sorttaus, tuote.nimitys";
 				$tres = pupe_query($query);
 				$valinta = "";

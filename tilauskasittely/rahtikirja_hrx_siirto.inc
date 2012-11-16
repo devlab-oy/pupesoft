@@ -116,7 +116,7 @@ if ($kollityht > 0) {
 
 		$sanoma .= str_pad($yh_nimi, 25, " ");
 		$sanoma .= str_pad($yh_puh, 25, " ");
-		$sanoma .= str_pad($kollityht, 6, " ");
+		$sanoma .= str_pad($kollityht, 6, "0", STR_PAD_LEFT);
 		$sanoma .= str_pad(substr(trim($pakkaus[0]), 0, 3), 3, " ");
 		$sanoma .= str_pad(substr(trim($rahtikirjanro), 0, 10), 10, " ");
 

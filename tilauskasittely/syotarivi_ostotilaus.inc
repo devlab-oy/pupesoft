@@ -123,6 +123,7 @@
 		echo "$varaosavirhe</td>";
 		echo "<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Lis‰‰")."'></td>";
 
+		//n‰ytet‰‰n poista nappi vain kun ollaan navigoitu ostotilaus riville saapumisen kohdista rivin kautta ja kun tilausrivi on esit‰ytetty
 		if($saapuminen_ostorivin_muokkaus == 1 and !empty($rivitunnus)) {
 			echo "<td class='back'><input type='submit' name='poista' value='".t("Poista")."'/></td></tr>";
 		}

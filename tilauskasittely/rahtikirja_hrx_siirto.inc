@@ -79,7 +79,7 @@ if ($kollityht > 0) {
 		$sanoma .= str_pad($v_postino_postitp, 25, " ");
 		$sanoma .= str_pad($v_maa, 25, " ");
 
-		$query = "	SELECT nimi, titteli, email, puh, gsm, fax
+		$query = "	SELECT yhteyshenkilo.nimi, yhteyshenkilo.titteli, yhteyshenkilo.email, yhteyshenkilo.puh, yhteyshenkilo.gsm, yhteyshenkilo.fax
 					FROM lasku
 					JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = lasku.yhtio AND yhteyshenkilo.tunnus = lasku.tilausyhteyshenkilo AND yhteyshenkilo.tyyppi = 'A')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'

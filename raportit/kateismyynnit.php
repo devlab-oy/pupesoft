@@ -1068,10 +1068,10 @@
 		$tasmaytys_query = "	SELECT comments,
 								sisviesti2
 								FROM lasku
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tapvm = '$vv-$kk-$pp'
-								AND tila = 'U'
-								AND comments != ''
+								WHERE yhtio 	= '{$kukarow['yhtio']}'
+								AND tapvm 		= '$vv-$kk-$pp'
+								AND tila 		= 'X'
+								AND comments   != ''
 								AND sisviesti2 != ''
 								ORDER BY luontiaika DESC
 								LIMIT 1";
@@ -1079,7 +1079,6 @@
 		$tasmaytys_row = mysql_fetch_assoc($tasmaytys_result);
 
 		$tasmaytys_json_array = explode('##' , $tasmaytys_row['sisviesti2']);
-
 		$tasmaytys_array = json_decode($tasmaytys_json_array[0], true);
 
 		$i = 1;

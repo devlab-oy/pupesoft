@@ -9583,7 +9583,7 @@ if (!function_exists("t_maanimi")) {
             $kieli = 'fi';
         }
         // onko $maa jo haettu kertaalleen?
-        if (isset($maat{$maa})) {
+        if (isset($maat[$maa])) {
             return($maat[$maa]);
         }
 

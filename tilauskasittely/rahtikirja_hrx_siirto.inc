@@ -132,8 +132,6 @@ if ($kollityht > 0) {
 			echo "<br><font class='error'>",t("Tiedoston kirjoitus epäonnistui"),"!</font><br>";
 		}
 
-		echo "aineisto:<br>$sanoma<br>";
-
 		if ($hrx_host != "" and $hrx_user != "" and $hrx_pass != "" and $hrx_path != "") {
 			// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
 			// palautetaan $palautus ja $syy

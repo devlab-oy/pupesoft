@@ -6,16 +6,10 @@
  * Kustomointi: Mikko Nousiainen mikko@datamonitor.fi
  *************************************************************/
 
-echo "<br>kollityht: $kollityht<br><br>";
-
 //jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($kollityht > 0) {
 
-	echo "dpd_delisprint_path: $dpd_delisprint_path<br>";
-
 	if (($dpd_delisprint_host != "" and $dpd_delisprint_user != "" and $dpd_delisprint_pass != "" and $dpd_delisprint_path != "") or $dpd_delisprint_path != "") {
-
-		echo "päästiin iffin sisälle.<br>";
 
 		if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 
@@ -27,8 +21,6 @@ if ($kollityht > 0) {
 			$logyrow = mysql_fetch_assoc($logyres);
 
 			$rahtikirjanro = $logyrow["rahtikirjanro"];
-
-			echo "rkirnro logy: $rahtikirjanro<br>";
 
 			if ($rahtikirjanro != "") {
 				$logyq = "	UPDATE rahtikirjanumero
@@ -42,11 +34,9 @@ if ($kollityht > 0) {
 
 		if ($rahtikirjanro == "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 			$rahtikirjanro = $lotsikot[0];
-			echo "rkirnro lotsikot: $rahtikirjanro<br>";
 		}
 		elseif ($rahtikirjanro == "") {
 			$rahtikirjanro = $rivi["rahtikirjanro"];
-			echo "rkirnro rivi: $rahtikirjanro<br>";
 		}
 
 		if ($phpnimi == "rahtikirja_custom.php") {
@@ -189,7 +179,6 @@ if ($kollityht > 0) {
 					and otsikkonro 		= '$rahtikirjanro'
 					and rahtikirjanro 	= '$rahtikirjanro'
 					and pakkaus 		= '$pakkaus[0]'";
-		echo "<br><pre>$query</pre><br><br>";
 		//and pakkauskuvaus = '$row[selitetark]'";
 		$rakires = mysql_query($query) or pupe_error($query);
 		$rakirow = mysql_fetch_array($rakires);
@@ -211,8 +200,6 @@ if ($kollityht > 0) {
 
 			$parcelOrder[$r] = $v;
 		}
-
-		//echo "<hr>data:<pre>".print_r($parcelOrder, true)."</pre>";
 
 		//	Luodaan aineostoformaatti
 		if(!is_array($delisprintFileFormat)) {
@@ -254,8 +241,6 @@ if ($kollityht > 0) {
 
 		}
 
-		echo "<hr>data:<pre>".var_dump($delisprintFileFormat)."</pre><br>";
-
 		unset($aineisto);
 
 		foreach($delisprintFileFormat as $p) {
@@ -266,8 +251,6 @@ if ($kollityht > 0) {
 				$aineisto .= ";";
 			}
 		}
-
-		echo "<br><hr>Aineisto:<br><pre>{$aineisto}</pre><br>";
 
 		// Muunnetaan merkistö Windows ANSI
 		iconv("ISO-8859-1", "Windows-1252", $aineisto);

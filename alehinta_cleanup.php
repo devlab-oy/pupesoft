@@ -811,4 +811,29 @@
 	// 13. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus) (Vain ykköstason alennus voidaan tallentaa tähän)
 	# Ei siivottavaa
 
+
+	#############################################################################################
+	#POISTETAAN ERÄÄNTYNEET:
+	#############################################################################################
+
+	$query = "	DELETE FROM asiakashinta
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND loppupvm > '0000-00-00'
+				AND loppupvm < current_date";
+	$result = pupe_query($query);
+
+	$query = "	DELETE FROM hinnasto
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND loppupvm > '0000-00-00'
+				AND loppupvm < current_date";
+	$result = pupe_query($query);
+
+	$query = "	DELETE FROM asiakasalennus
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND loppupvm > '0000-00-00'
+				AND loppupvm < current_date";
+	$result = pupe_query($query);
+	
+	echo "Valmis!";
+
 ?>

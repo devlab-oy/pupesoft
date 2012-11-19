@@ -112,6 +112,7 @@
 			'edloppupvm' => $edloppupvm,
 			'tuoteryhmat' => $tuoteryhmat,
 			'osastot' => $osastot,
+			'ytunnus' => $ytunnus,
 		);
 
 		echo t('Haetaan myyntitiedot') . '<br/>';
@@ -157,7 +158,7 @@
 			);
 		}
 
-		kasittele_tilaukset($data_array, htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $komento, $params, $generoi_excel, $kieli);
+		kasittele_tilaukset($data_array, $laheta_sahkopostit, $komento, $params, $generoi_excel, $kieli);
 
 		echo "<br>".t('Kaikki valmista' , $kieli).".</font>";
 
@@ -173,7 +174,7 @@
 		if (!isset($loppukk)) $loppukk = date("m");
 		if (!isset($loppuyy)) $loppuvv = date("Y");
 
-		echo "<font class='message'>".t('Jos asiakkaalla tai sen myyjällä ei ole sähköpostia, raportit lähetetään sähköpostiin tai tulostetaan haluamaasi tulostimeen riippuen tulostimen valinnasta' , $kieli).".</font><br><br>";
+		echo "<font class='message'>".t('Jos asiakkaalla ei ole sähköpostia, raportit tulostetaan haluamaasi tulostimeen' , $kieli).".</font><br><br>";
 
 		echo "<form name='vuosiasiakkaat_form' method='post'>";
 		echo "<input type='hidden' name='tee' value='tulosta'>";
@@ -204,7 +205,7 @@
 		echo "<tr>";
 		echo "<th>".t('Lähetä sähköpostit', $kieli).":</th>";
 		echo "<td>
-				<input type='radio' name='laheta_sahkopostit' value='ajajalle'>".t('Ohjelman ajajalle' , $kieli)."<br>
+				<input type='radio' name='laheta_sahkopostit' value='ajajalle' checked='checked'>".t('Ohjelman ajajalle' , $kieli)."<br>
 				<input type='radio' name='laheta_sahkopostit' value='asiakkaalle'>".t('Asiakkaalle',$kieli)."<br>
 				<input type='radio' name='laheta_sahkopostit' value='asiakkaan_myyjalle'>".t('Asiakkaan myyjälle',$kieli)."<br>
 			</td>";
@@ -241,12 +242,11 @@
 				}
 
 				function tarkista_tulostin() {
-					if(($('input[name=laheta_sahkopostit]:checked').val() == 'asiakkaalle' || $('input[name=laheta_sahkopostit]:checked').val() == 'asiakkaan_myyjalle') && $('select[name=komento]').val() != 'email') {
-						alert('Asiakkaalle tai asiakkaan myyjälle raportteja lähetettäessä pitää tulostimeksi olla valittuna email');
+					if($('input[name=laheta_sahkopostit]:checked').val() == 'asiakkaalle' && $('select[name=komento]').val() == '') {
+						alert('Asiakkaalle raportteja lähetettäessä pitää olla valittuna printteri, johon sähköpostittomat raportit tulostetaan.');
 						return false;
 					}
 					else {
-
 						return true;
 					}
 				}
@@ -416,7 +416,14 @@
 		switch ($laheta_sahkopostit) {
 			case 'ajajalle':
 				$email = $kukarow['eposti'];
-				luo_zip_ja_laheta($tiedostot, $email);
+
+				if(empty($params['ytunnus'])) {
+					luo_zip_ja_laheta($tiedostot, $email);
+				}
+				else {
+					//jos ytunnus on annettu tiedämme, että generoidaan vain yksi raportti
+					laheta_email($email, $tiedostot);
+				}
 				break;
 
 			case 'asiakkaalle':
@@ -437,14 +444,27 @@
 			case 'asiakkaan_myyjalle':
 				foreach($data_array as $data) {
 					$email = $data['myyja_eposti'];
-					luo_zip_ja_laheta($tiedostot, $email);
+
+					if($params['ytunnus'] == '') {
+						luo_zip_ja_laheta($tiedostot, $email);
+					}
+					else {
+						//jos ytunnus on annettu tiedämme, että generoidaan vain yksi raportti
+						laheta_email($email, $tiedostot);
+					}
+					
 				}
 				break;
 
 			default:
 				$email = $kukarow['eposti'];
-				luo_zip_ja_laheta($tiedostot, $email);
 
+				if(empty($params['ytunnus'])) {
+					luo_zip_ja_laheta($tiedostot, $email);
+				}
+				else {
+					laheta_email($email, $tiedostot);
+				}
 				break;
 		}
 	}

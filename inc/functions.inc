@@ -15327,7 +15327,7 @@ if (!function_exists("tee_keraysera")) {
 			// $mediaanilkm = 1;
 
 			// jos mediaanien lukumäärä on vähintään yhtä suuri kuin annettu minimi
-			if (1 == 2 and $mediaanilkm >= key($min_max[0])) {
+			if ($mediaanilkm >= key($min_max[0])) {
 
 				// jos mediaanien lukumäärä ylittää sallitun maksimin, käytetään maksimin askelväliä
 				if ($mediaanilkm > key($min_max[1])) {

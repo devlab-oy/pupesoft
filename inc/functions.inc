@@ -13132,6 +13132,11 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 					$vakecho = "";
 
+					// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
+					if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
+						$vakecho .= ", LTD QTY";
+					}
+
 					if ($taulu == 'vak_imdg') {
 						if (trim($edrow["luokka"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[luokka]";
 					}
@@ -13145,11 +13150,6 @@ if (!function_exists("palauta_vak_tiedot")) {
 					if ($taulu == 'vak_imdg') {
 						if (trim($edrow["meria_saastuttava"]) != "") $vaktuotetiedot[] = t("Meriä saastuttava", $kieli);
 						else $vaktuotetiedot[] = t("Ei meriä saastuttava", $kieli);
-					}
-
-					// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
-					if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
-						$vakecho .= ", LTD QTY";
 					}
 
 					if ($tyyppi == "DGD" and isset($tuotepainot)) {
@@ -13201,6 +13201,11 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 			$vakecho = "";
 
+			// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
+			if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
+				$vakecho .= ", LTD QTY";
+			}
+
 			if ($taulu == 'vak_imdg') {
 				if (trim($edrow["luokka"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[luokka]";
 			}
@@ -13214,11 +13219,6 @@ if (!function_exists("palauta_vak_tiedot")) {
 			if ($taulu == 'vak_imdg') {
 				if (trim($edrow["meria_saastuttava"]) != "") $vaktuotetiedot[] = t("Meriä saastuttava", $kieli);
 				else $vaktuotetiedot[] = t("Ei meriä saastuttava", $kieli);
-			}
-
-			// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
-			if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
-				$vakecho .= ", LTD QTY";
 			}
 
 			if ($tyyppi == "DGD" and isset($tuotepainot)) {

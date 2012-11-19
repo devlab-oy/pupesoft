@@ -576,6 +576,7 @@
 
 			// Vastaavat tuotteet array
 			$vastaavat_tuotteet = array();
+			$kommentti_lisa = "";
 
 			// Vastaavien automaattinen myynti, eli haetaanko vastaavat
 			if ($korvaavat_kiellot == "VASTAAVAT") {
@@ -591,6 +592,11 @@
 
 				list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
 				list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
+
+				// Kommenti jos tuote on loppu, joka tilanteessa?
+				if ($krmyytavissa == 0) {
+					$kommentti_lisa = t("Tuote {$krow2[tuoteno]} on tilapäisesti loppu. ");
+				}
 
 				$if_ale_korva_isa_chk1 = $korva_isa_hinta;
 				$if_ale_korva_isa_chk2 = $korva_hinta;
@@ -619,6 +625,13 @@
 
 						// Lisätään vain yksi löydetty tuote myytäväksi
 						if (count($kaikkituotteet) <= 1) {
+
+							// Vastaavista kommentti riville
+							if ($krow2[tyyppi] == 'vastaava') {
+								$kommentti_lisa .= t("Toimitetaan vastaava tuote $krow2[tuoteno].");
+							}
+
+							// Lisätään tuote
 							$kaikkituotteet[] = strtoupper($krow2["tuoteno"]);
 						}
 					}
@@ -1335,6 +1348,9 @@
 									if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]") === FALSE) {
 										$kommentti .= " ".t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]";
 									}
+
+									// Kommentin lisäkommentit, esim. vastaavista
+									$kommentti .= "<br>". $kommentti_lisa;
 
 									// oletetaan, että meillä on $edi_tyyppi muuttuja viritetty editilaus_in.inc failista
 									if ((int) $rivinumero != 0 and $edi_tyyppi != "" and $korvaavan_isaa_myyty == 1) {

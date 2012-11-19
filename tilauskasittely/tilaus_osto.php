@@ -393,7 +393,12 @@
 			}
 			$tilausrivirow = mysql_fetch_array($result);
 
-			//jos myynti ja osto on naitettu keskenään niin poistetaan myös myyntirivi
+			$query = "	DELETE
+						FROM tilausrivi
+						WHERE tunnus = '$rivitunnus'";
+			$result = pupe_query($query);
+
+			//jos myynti ja osto on naitettu keskenään niin asetetaan myyntiviri delete tilaan
 			$query = "	SELECT *
 						FROM tilausrivin_lisatiedot
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -456,11 +461,13 @@
 			if($myyntitilausrivi_row = mysql_fetch_assoc($result)) {
 				//tarkistetaan onko myyntitilausriviä kerätty toimitettu tai laskutettu
 				$query = "	SELECT *
-							FROM lasku
+							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tyyppi = 'L'
-							AND ('B' ,'C', 'D', 'J', 'V', 'X')
-							AND tunnus = '{$myyntitilausrivi_row['tilausrivitunnus']}'";
+							AND kerattyaika = '0000-00-00 00:00:00'
+							AND toimitettuaika = '0000-00-00 00:00:00'
+							AND laskutettuaika = '0000-00-00 00:00:00'
+							AND tunnus = {$myyntitilausrivi_row['tilausrivitunnus']}" ;
 				$result = pupe_query($query);
 				if(mysql_num_rows($result) == 0) {
 					//poistetaan myös myyntitilausrivi
@@ -477,6 +484,9 @@
 					$result = pupe_query($query);
 
 					echo "<font class='error'>".t("Poistetaan rivi myös myyntitilaukselta")." {$myyntitilausrivi_row['vanha_otunnus']}</font><br/><br/>";
+				}
+				else {
+					echo "<font class='error'>".t("Myyntitilaus rivi on keratty, toimitettu tai laskutettu")."</font><br/><br/>";
 				}
 			}
 			$query = "	UPDATE tilausrivi
@@ -641,10 +651,54 @@
 					$alv = $kayttajan_alv;
 				}
 
+				//rivitunnus nollataan lisaarivissa
+				$rivitunnus_temp = $rivitunnus;
 				if ($kpl != "") {
 					require ('lisaarivi.inc');
 				}
 
+				//tarkistetaan onko osto ja myyntitilaus rivit naitettu keskenään ja päivitetään myös myyntitilausrivi. rivi löytyy jo kannasta tyypilla D
+				$query = "	SELECT *
+							FROM tilausrivin_lisatiedot
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivilinkki = '{$rivitunnus_temp}'";
+				$result = pupe_query($query);
+
+				if($myyntitilausrivi_row = mysql_fetch_assoc($result)) {
+					//tarkistetaan, että myyntitilausriviä ei ole keratty, toimitettu, tai laskutettu
+					$query = "	SELECT *
+								FROM tilausrivi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tyyppi = 'L'
+								AND kerattyaika = '0000-00-00 00:00:00'
+								AND toimitettuaika = '0000-00-00 00:00:00'
+								AND laskutettuaika = '0000-00-00 00:00:00'
+								AND tunnus = {$myyntitilausrivi_row['tilausrivitunnus']}" ;
+					$result = pupe_query($query);
+					if(mysql_num_rows($result) == 0) {
+						//päivitetään myyntitilausrivi
+						//try
+						//osasto
+						//nimitys
+						$query = "	UPDATE tilausrivi
+									SET tuoteno = '{$tuoteno}',
+									tyyppi = 'L',
+									tilkpl = '{$kpl}',
+									varattu = '{$kpl}',
+									hinta = '{$hinta}',
+									alv = '{$alv}',
+									ale1 = '{$ale1}',
+									ale2 = '{$ale2}',
+									ale3 = '{$ale3}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$myyntitilausrivi_row['tilausrivitunnus']}'";
+						pupe_query($query);
+					}
+					else {
+						echo "<font class='error'>".t("Myyntitilaus rivi on keratty, toimitettu tai laskutettu")."</font><br/><br/>";
+					}
+				}
+				
 				$hinta 	= '';
 				$netto 	= '';
 				$var 	= '';

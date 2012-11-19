@@ -169,6 +169,8 @@ if ($kollityht > 0) {
 			$lahettaja_maa = $row['yhtio_maa'];
 		}
 
+		$lahettaja_maa_nimi = maa($lahettaja_maa, $kukarow['kieli']);
+
 		for ($i = 1; $i <= $kollityht; $i++) {
 			// Tulostetaan Pupen oma kollitarra
 			$params = array(
@@ -185,6 +187,7 @@ if ($kollityht > 0) {
 	 			'lahettaja_postino' => $lahettaja_postino,
 	 			'lahettaja_postitp' => $lahettaja_postitp,
 	 			'lahettaja_maa' => $lahettaja_maa,
+	 			'lahettaja_maa_nimi' => $lahettaja_maa_nimi,
 	 			'reittietikettitulostin' => $kirjoitin,
 	 			'monesko_laatikko' => $i,
 	 			'montako_laatikkoa_yht' => $kollityht,

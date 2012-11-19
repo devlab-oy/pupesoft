@@ -13642,6 +13642,7 @@ if (!function_exists('tulosta_hrx')) {
 		$y_postino 	= trim($lahettaja_postino);
 		$y_postitp 	= trim($lahettaja_postitp);
 		$y_maa 		= trim($lahettaja_maa);
+		$y_maa_nimi = trim($lahettaja_maa_nimi);
 
 		$viivakoodi1  = ">6";
 		$viivakoodi1 .= substr($tilriv,0,1);
@@ -13708,10 +13709,10 @@ if (!function_exists('tulosta_hrx')) {
 					{RC006;{$ot_lahettaja}|}
 
 				 	{PC007;0070,0535,1,1,A,00,B|}
-					{RC007;Mercantile Group As|}
+					{RC007;{$y_nimi}|}
 
 				 	{PC008;0070,0580,1,1,A,00,B|}
-					{RC008;Pärnu mnt 549 Laagri Eesti|}
+					{RC008;{$y_osoite} {$y_postino} {$y_postitp} {$y_maa_nimi}|}
 
 				 	*** VAAKAVIIVA ***
 				 	{LC;0070,0600,0920,0600,0,2|}

@@ -1100,6 +1100,14 @@ if (!function_exists('rivi_kerayslista')) {
 					}
 				}
 
+				if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
+					if ($row["kommentti"] != '') {
+						$row["kommentti"] .= "\n";
+					}
+
+					$row['kommentti'] .= t("Tilausnumero")." {$row['otunnus']}";
+				}
+
 				// Trimmataan uudestaan
 				$row["kommentti"] = trim($row["kommentti"]);
 

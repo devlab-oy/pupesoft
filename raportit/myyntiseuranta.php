@@ -1508,6 +1508,37 @@
 								}
 							}
 
+							if ($piilota_kappaleet == "") {
+								//KPL
+								if ($ajotapa == 'tilausjaauki' or $ajotapa == 'tilausauki') {
+									$query .= "sum(if(lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59' and tilausrivi.uusiotunnus = 0, tilausrivi.varattu+tilausrivi.jt, 0)) myykpllaskuttamattanyt, ";
+								}
+
+								if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
+									$query .= "	sum(if(lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59', if(tilausrivi.uusiotunnus = 0, tilausrivi.varattu+tilausrivi.jt, tilausrivi.kpl), 0)) myykplnyt, ";
+								}
+								elseif ($ajotapa != 'tilausauki') {
+									$query .= "	sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.kpl, 0)) myykplnyt, ";
+								}
+
+								if ($ajotapa == 'tilausjaauki') {
+									$query .= " sum(if(lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59' and tilausrivi.uusiotunnus = 0, tilausrivi.varattu+tilausrivi.jt, 0)) +
+												sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.kpl, 0)) myykplyhtnyt, ";
+								}
+
+								//KPLED
+								if ($piiloed == "") {
+									if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
+										$query .= "	sum(if(lasku.luontiaika >= '{$vvaa}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvll}-{$kkl}-{$ppl} 23:59:59', if(tilausrivi.uusiotunnus = 0, tilausrivi.varattu+tilausrivi.jt, tilausrivi.kpl), 0)) myykpled,
+													round(sum(if(lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59', if(tilausrivi.uusiotunnus = 0, tilausrivi.varattu+tilausrivi.jt, tilausrivi.kpl), 0)) / sum(if(lasku.luontiaika >= '{$vvaa}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvll}-{$kkl}-{$ppl} 23:59:59', if(tilausrivi.kpl = 0, tilausrivi.varattu+tilausrivi.jt, tilausrivi.kpl), 0)), 2) myykplind, ";
+									}
+									elseif ($ajotapa != 'tilausauki')  {
+										$query .= "	sum(if(tilausrivi.laskutettuaika >= '{$vvaa}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvll}-{$kkl}-{$ppl}', tilausrivi.kpl, 0)) myykpled,
+													round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.kpl, 0)) / sum(if(tilausrivi.laskutettuaika >= '{$vvaa}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvll}-{$kkl}-{$ppl}', tilausrivi.kpl, 0)), 2) myykplind, ";
+									}
+								}
+							}
+
 							$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));
 						}
 

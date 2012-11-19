@@ -1217,13 +1217,21 @@ if ($tee == 'MONISTA') {
 							break;
 						case 'varattu':
 							if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
-								$uusikpl = ($rivirow["kpl"] + $rivirow["jt"] + $rivirow["varattu"]) * -1;
+								$uusikpl = ($rivirow["kpl"] + $rivirow["varattu"]) * -1;
 								$rvalues .= ", '{$uusikpl}'";
 
 							}
 							else {
-								$uusikpl = ($rivirow["kpl"] + $rivirow["jt"] + $rivirow["varattu"]);
+								$uusikpl = ($rivirow["kpl"] + $rivirow["varattu"]);
 								$rvalues .= ", '{$uusikpl}'";
+							}
+							break;
+						case 'jt':
+							if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
+								$rvalues .= ", '".($rivirow["jt"] * -1)."'";
+							}
+							else {
+								$rvalues .= ", '".($rivirow["jt"])."'";
 							}
 							break;
 						case 'tilkpl':

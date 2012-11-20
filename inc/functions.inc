@@ -13634,9 +13634,6 @@ if (!function_exists('tulosta_hrx')) {
 
 		extract($params);
 
-		$from = array('Ä','ä','Ö','ö');
-		$to = array('A','a','O','o');
-
 		$y_nimi 	= trim($lahettaja_nimi.' '.$lahettaja_nimitark);
 		$y_osoite 	= trim($lahettaja_osoite);
 		$y_postino 	= trim($lahettaja_postino);
@@ -13651,17 +13648,7 @@ if (!function_exists('tulosta_hrx')) {
 
 		$viivakoodi1 = $tilriv;
 
-		// $viivakoodi2  = ">6";
-		// $viivakoodi2 .= substr($sscc,0,1);
-		// $viivakoodi2 .= ">5";
-		// $viivakoodi2 .= substr($sscc,1);
-
 		$ot_toimosoite = t("Toimitusosoite", $yhtiorow['kieli'])." / Delivery address";
-
-		// $toim_nimi = str_replace($from, $to, trim($toim_nimi.' '.$toim_nimitark));
-		// $toim_osoite = str_replace($from, $to, $toim_osoite);
-		// $toim_postino = str_replace($from, $to, $toim_postino);
-		// $toim_postitp = str_replace($from, $to, $toim_postitp);
 
 		$ot_lahettaja = t("Lähettäjä", $yhtiorow['kieli'])." / Consignor";
 
@@ -13753,6 +13740,48 @@ if (!function_exists('tulosta_hrx')) {
 
 		if (trim($reittietikettitulostin) != '' and $reittietikettitulostin != 'email') {
 			$line = exec(" echo \"$sivu\" | $reittietikettitulostin");
+		}
+	}
+}
+
+if (!function_exists('tulosta_oma_tarra')) {
+	function tulosta_oma_tarra($params) {
+		global $kukarow, $yhtiorow;
+
+		extract($params);
+
+		$toimosoite_nimi = trim($toim_nimi.' '.$toim_nimitark);
+
+		$ot_tilaus = t("Tilaus", $yhtiorow['kieli']);
+
+		$sivu = "	*** ETIKETIN KOKO ***
+					{D1530,1040,1490|}
+					{AX;+000,+000,+00|}
+					{AY;+10,0|}
+					{C|}
+
+				 	*** TOIMITUSOSOITE ***
+				 	{PC000;0070,0200,1,1,A,00,B|}
+					{RC000;{$toimosoite_nimi}|}
+
+				 	{PC001;0070,0250,1,1,A,00,B|}
+					{RC001;{$toim_osoite}|}
+
+				 	{PC002;0070,0330,1,1,A,00,B|}
+					{RC002;{$toim_postino} {$toim_postitp}|}
+
+				 	{PC003;0070,0380,1,1,A,00,B|}
+					{RC003;{$ot_tilaus} {$tilriv}|}
+
+				 	{PC004;0070,0430,1,1,A,00,B|}
+					{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
+
+					*** TULOSTUS  ***
+					{XS;I,0001,0002C3210|}
+					".chr(12);
+
+		if (trim($komento) != '' and $komento != 'email') {
+			$line = exec(" echo \"$sivu\" | $komento");
 		}
 	}
 }

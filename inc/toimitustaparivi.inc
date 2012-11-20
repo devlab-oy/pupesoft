@@ -572,7 +572,7 @@
 		$ulos .= "<option value='' 		  $sel1>".t("Normaali")."</option>";
 		$ulos .= "<option value='intrade' $sel2>".t("Intrade")."</option>";
 		$ulos .= "<option value='tiivistetty' $sel3>".t("Tiivistetty")."</option>";
-		$ulos .= "<option value='oma_tarra' $sel4>".t("Oma tarra")."</option>";
+		if ($yhtiorow['kerayserat'] == 'K') $ulos .= "<option value='oma_tarra' $sel4>".t("Oma tarra")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

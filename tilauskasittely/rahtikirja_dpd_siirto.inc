@@ -176,7 +176,7 @@ if ($kollityht > 0) {
 					min(pakkauskuvaustark) pakkauskuvaustark
 					from rahtikirjat use index (otsikko_index)
 					where yhtio 		= '{$kukarow['yhtio']}'
-					and otsikkonro 		= '{$rahtikirjanro}'
+					#and otsikkonro 		= '{$rahtikirjanro}'
 					and rahtikirjanro 	= '{$rahtikirjanro}'";
 		//and pakkauskuvaus = '$row[selitetark]'";
 		$rakires = mysql_query($query) or pupe_error($query);

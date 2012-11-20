@@ -1105,7 +1105,18 @@ if (!function_exists('rivi_kerayslista')) {
 						$row["kommentti"] .= "\n";
 					}
 
-					$row['kommentti'] .= t("Tilausnumero")." {$row['otunnus']}";
+					$row['kommentti'] .= t("Tilausnumero", $kieli)." {$row['otunnus']}";
+
+					//etsit‰‰n myyj‰n nimi
+					$query  = "	SELECT kuka.nimi
+								FROM lasku
+								JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja AND kuka.yhtio = lasku.yhtio)
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.tunnus = '{$row['otunnus']}'";
+					$myyresult = pupe_query($query);
+					$myyrow = mysql_fetch_assoc($myyresult);
+
+					$row['kommentti'] .= "\n".t("Myyj‰", $kieli).": {$myyrow['nimi']}";
 				}
 
 				// Trimmataan uudestaan

@@ -175,10 +175,9 @@ if ($kollityht > 0) {
 					sum(lavametri) lavametri,
 					min(pakkauskuvaustark) pakkauskuvaustark
 					from rahtikirjat use index (otsikko_index)
-					where yhtio 		= '$kukarow[yhtio]'
-					and otsikkonro 		= '$rahtikirjanro'
-					and rahtikirjanro 	= '$rahtikirjanro'
-					and pakkaus 		= '$pakkaus[0]'";
+					where yhtio 		= '{$kukarow['yhtio']}'
+					and otsikkonro 		= '{$rahtikirjanro}'
+					and rahtikirjanro 	= '{$rahtikirjanro}'";
 		//and pakkauskuvaus = '$row[selitetark]'";
 		$rakires = mysql_query($query) or pupe_error($query);
 		$rakirow = mysql_fetch_array($rakires);

@@ -1,7 +1,6 @@
 <?php
 
 	// Enabloidaan, ett‰ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
-	//apache_setenv('no-gzip', 1);
 	ini_set('zlib.output_compression', 0);
 	ini_set('implicit_flush', 1);
 	ob_implicit_flush(1);
@@ -15,7 +14,7 @@
 	require_once 'tulosta_vuosisopimusasiakkaat_excel.inc';
 	require('inc/ProgressBar.class.php');
 
-	if($asiakas_tarkistus == 1) {
+	if ($asiakas_tarkistus == 1) {
 		$ajax_params = array(
 			'ytunnus' => $ytunnus,
 			'asiakasid' => $asiakasid,
@@ -35,7 +34,7 @@
 		exit;
 	}
 
-	echo "<font class='head'>".t('Vuosisopimusasiakkaat' , $kieli)."</font><hr>";
+	echo "<font class='head'>".t('Vuosisopimusasiakkaat')."</font><hr>";
 
 	if ($ytunnus != "" and $asiakasid == "") {
 		if ($muutparametrit == '') {
@@ -206,21 +205,21 @@
 		echo "<td>
 				<input type='radio' name='laheta_sahkopostit' value='ajajalle'>".t('Ohjelman ajajalle' , $kieli)."<br>
 				<input type='radio' name='laheta_sahkopostit' value='asiakkaalle'>".t('Asiakkaalle',$kieli)."<br>
-				<input type='radio' name='laheta_sahkopostit' value='asiakkaan_myyjalle'>".t('Asiakkaan myyj‰lle',$kieli)."<br>
+				<input type='radio' name='laheta_sahkopostit' value='asiakkaan_myyjalle'>".t('Asiakkaan vastuumyyj‰lle',$kieli)."<br>
 			</td>";
 		echo "</tr>";
 		echo "<tr><th>".t('Asiakasnumero',$kieli).":</th>";
 		echo "<td><input type='text' name='ytunnus' size='10'> ".t('aja vain t‰m‰ asiakas',$kieli)." (".t('tyhj‰',$kieli)."=".t('kaikki',$kieli).")</td></tr>";
 		echo "<tr><th>".t('Alku p‰iv‰m‰‰r‰',$kieli).":</th>";
 		echo "<td>";
-		echo "<input type='text' name='alkupp' value='$alkupp' size='10'>";
-		echo "<input type='text' name='alkukk' value='$alkukk' size='10'>";
-		echo "<input type='text' name='alkuvv' value='$alkuvv' size='10'> pp kk vvvv</td></tr>";
+		echo "<input type='text' name='alkupp' value='$alkupp' size='3'>";
+		echo "<input type='text' name='alkukk' value='$alkukk' size='3'>";
+		echo "<input type='text' name='alkuvv' value='$alkuvv' size='5'> ".t("(pp-kk-vvvv)")."</td></tr>";
 		echo "<tr><th>".t('Loppu p‰iv‰m‰‰r‰',$kieli).":</th>";
 		echo "<td>";
-		echo "<input type='text' name='loppupp' value='$loppupp' size='10'>";
-		echo "<input type='text' name='loppukk' value='$loppukk' size='10'>";
-		echo "<input type='text' name='loppuvv' value='$loppuvv' size='10'> pp kk vvvv</td></tr>";
+		echo "<input type='text' name='loppupp' value='$loppupp' size='3'>";
+		echo "<input type='text' name='loppukk' value='$loppukk' size='3'>";
+		echo "<input type='text' name='loppuvv' value='$loppuvv' size='5'> ".t("(pp-kk-vvvv)")."</td></tr>";
 		echo "</table>";
 
 		echo "<br><input type='submit' value='".t('Tulosta',$kieli)."' onclick='if(tarkista()){document.vuosiasiakkaat_form.submit();} else{return false;}'></form>";
@@ -381,9 +380,10 @@
 
 		$tilaukset_tuoteryhmittain = array();
 		$tilaukset_osastoittain = array();
-		while($row = mysql_fetch_assoc($result)) {
 
-			if($row['osasto'] < 10000) {
+		while ($row = mysql_fetch_assoc($result)) {
+
+			if ($row['osasto'] < 10000) {
 				$tilaukset_osastoittain[$row['osasto']]['va'] += $row['va'];
 				$tilaukset_osastoittain[$row['osasto']]['ed'] += $row['ed'];
 				$tilaukset_osastoittain[$row['osasto']]['kplva'] += $row['kplva'];
@@ -579,7 +579,6 @@
 	function laheta_email($email_address, array $liitetiedostot_path = array()) {
 		global $yhtiorow, $kieli;
 
-
 		$params = array(
 			"to"		 => $email_address,
 			"subject"	 => $yhtiorow['nimi'] . " - " . t('Vuosisopimusraportti' , $kieli) . ' ' . date("d.m.Y"),
@@ -666,6 +665,6 @@
 		}
 	}
 
-	require ("../inc/footer.inc");
+	require ("inc/footer.inc");
 
 ?>

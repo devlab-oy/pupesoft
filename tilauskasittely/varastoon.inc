@@ -387,7 +387,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	$ohinta = round($tilrivirow['hinta']*$ale_lisa_apu_kala*$tuorow['tuotekerroin']*$laskurow['vienti_kurssi']*$tilrivirow['varattu'], 6); // tuotteen rivihinta OLETUSVALUUTASSA
 
 	// ennen varastoon vientiä tallennetaan alkuperäinen ostohinta talteen
-	if ($toiminto == "kalkyyli" and $tee == "varastoon" and $tiliointirow['hinta_alkuperainen'] == 0) {
+	if ($toiminto == "kalkyyli" and $tee == "varastoon" and $tilrivirow['hinta_alkuperainen'] == 0) {
 		$query  = "	UPDATE tilausrivi SET
 					hinta_alkuperainen = '{$ohinta}'
 					WHERE yhtio = '{$kukarow['yhtio']}'

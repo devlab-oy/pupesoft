@@ -20,6 +20,21 @@
 		unset($tee);
 	}
 
+	if($toim == 'TARJOUS' and $tee == 'MITATOI_TARJOUS_KAIKKI') {
+
+		$query = "	UPDATE lasku
+					SET tila = 'D'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus IN {$tunnukset}";
+		pupe_query($query);
+
+		$query = "	UPDATE tilausrivi
+					SET tyyppi = 'D'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND otunnus IN {$tunnukset}";
+		pupe_query($query);
+	}
+
 	if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and $yhtiorow["ennakkotilausten_toimitus"] == "M") {
 
 		$toimita_ennakko = explode(",", $toimita_ennakko);
@@ -575,6 +590,10 @@
 						return false;
 					}
 				}
+
+				$(document).ready(function() {
+					$('form[name=hakuformi]').next().after($('#mitatoi_kaikki').html());
+				});
 			</script>";
 
 		echo "<br><form method='post'>
@@ -1392,6 +1411,7 @@
 
 			$lisattu_tunnusnippu  = array();
 			$toimitettavat_ennakot  = array();
+			$nakyman_tunnukset = array();
 
 			while ($row = mysql_fetch_assoc($result)) {
 
@@ -1955,6 +1975,9 @@
 						echo "</form></td>";
 					}
 
+					//laitetaan tunnukset talteen mitatoi_tarjous_kaikki toiminnallisuutta varten
+					$nakyman_tunnukset[] = $row['tunnus'];
+
 					if ($whiletoim == "ENNAKKO" and $yhtiorow["ennakkotilausten_toimitus"] == "M") {
 
 						$toimitettavat_ennakot[] = $row["tunnus"];
@@ -1972,6 +1995,17 @@
 			}
 
 			echo "</table>";
+
+			//tämä formi laitetaan javascriptillä ylempänä kohdilleen
+			$tunnukset = implode(',', $nakyman_tunnukset);
+			echo "<div id='mitatoi_kaikki' style='display:none'>";
+			echo "<form method='POST' name='mitatoi_kaikki_formi' action='muokkaatilaus.php' onSubmit='return verify();'>";
+			echo "<input type='hidden' name='toim' value='$toim' />";
+			echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS_KAIKKI' />";
+			echo "<input type='hidden' name='tunnukset' value='($tunnukset)' />";
+			echo "<input type='submit' value='".t("Mitätöi kaikki")."'/>";
+			echo "</form>";
+			echo "</div>";
 
 			if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 				if (is_array($sumrow)) {

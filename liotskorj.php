@@ -16,7 +16,7 @@
 				liitos.arvo liarvo,
 				sum(tiliointi.summa) alvit
 				FROM lasku
-				JOIN tiliointi USE INDEX (tositerivit_index) ON (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino = (select alv from yhtio where yhtio.yhtio=tiliointi.yhtio LIMIT 1) and tiliointi.korjattu = '' AND if(lasku.summa > 0, tiliointi.summa, tiliointi.summa*-1) > 0)
+				LEFT JOIN tiliointi USE INDEX (tositerivit_index) ON (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino = (select alv from yhtio where yhtio.yhtio=tiliointi.yhtio LIMIT 1) and tiliointi.korjattu = '' AND if(lasku.summa > 0, tiliointi.summa, tiliointi.summa*-1) > 0)
 				JOIN lasku AS liitos ON liitos.yhtio = lasku.yhtio AND liitos.vanhatunnus = lasku.tunnus AND liitos.tila = 'K'
 				WHERE lasku.yhtio IN (select yhtio from yhtio)
 				AND lasku.tila IN ('H','Y','M','P','Q')
@@ -27,19 +27,16 @@
 
 	while ($laskurow = mysql_fetch_assoc($laskures)) {
 
-		// Tässä tapauksessa lisumma on liitetty veroton summa on
-		if ($laskurow["lisumma"] != $laskurow["laskusumma"]) {
-			$arvo = $laskurow["laskusumma"]-$laskurow["alvit"];
+		$arvo 	  = $laskurow["laskusumma"]-$laskurow["alvit"];
+		$liipros  = $laskurow["lisumma"] / $laskurow["laskusumma"];
+		$sumarvio = round($laskurow["laskusumma"] * $liipros, 2);
+		$arvarvio = round($arvo * $liipros, 2);
 
-			$liipros = $laskurow["lisumma"] / $arvo;
+		if ($laskurow["lisumma"] != $sumarvio or $laskurow["liarvo"] != $arvarvio) {
 
-			$sumarvio = round($laskurow["laskusumma"] * $liipros, 2);
-			$arvarvio = round($arvo * $liipros, 2);
-
-			$query = " UPDATE lasku SET summa=$sumarvio, arvo=$arvarvio, muuttaja='liitoskorj' where tunnus={$laskurow["litunnus"]} and muuttaja!='liitoskorj'";
+			$query = " UPDATE lasku SET summa=$sumarvio, arvo=$arvarvio, muuttaja='liitosko' where tunnus={$laskurow["litunnus"]} and muuttaja!='liitosko'";
 			$result = mysql_query($query) or pupe_error($query);
-			
-			echo "Paivitetaan lasku: {$laskurow["litunnus"]}, ",mysql_affected_rows(),"\n";
 
+			echo "Paivitetaan lasku: {$laskurow["litunnus"]}, ",mysql_affected_rows(),"\n";
 		}
 	}

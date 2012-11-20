@@ -925,7 +925,7 @@
 
 			echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
 
-			//korvaavat tuotteet
+			// Korvaavat tuotteet
 			require "korvaavat.class.php";
 			$korvaavat = new Korvaavat($tuoteno);
 
@@ -953,12 +953,12 @@
 
 			echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
 
-			//vastaavat tuotteet
+			// Vastaavat tuotteet
 			require "vastaavat.class.php";
 			$vastaavat = new Vastaavat($tuoteno);
 
-			if (count($vastaavat->tuotteet()) > 0) {
-
+			// Yhdessä ketjussa
+			if (count($vastaavat->ketjut()) == 1) {
 				echo "<font class='message'>".t("Vastaavat tuotteet")."</font><hr>";
 
 				echo "<table>";
@@ -968,7 +968,7 @@
 				echo "<th>".t("Myytävissä")."</th>";
 				echo "</tr>";
 
-				// Loopataan ketjun tuotteet
+				// Haetaan ketjun tuotteet
 				foreach ($vastaavat->tuotteet() as $tuote) {
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
@@ -978,7 +978,31 @@
 					echo "</tr>";
 				}
 				echo "</table>";
+			}
+			// Jos tuote kuulu useampaan kuin yhteen vastaavuusketjuun
+			else if(count($vastaavat->ketjut()) > 1) {
+				echo "<font class='message'>".t("Vastaavat tuotteet")."</font><hr>";
 
+				// Ketjujen id:t
+				foreach($vastaavat->ketjut() as $ketju) {
+					echo "<table>";
+					echo "<tr><th colspan='2'>Ketju $ketju.</th></tr>";
+					echo "<tr>";
+					echo "<th>".t("Tuotenumero")."</th>";
+					echo "<th>".t("Myytävissä")."</th>";
+					echo "</tr>";
+
+					// Haetaan ketjun tuotteet ketjun id:llä
+					foreach($vastaavat->find_by_ketju($ketju) as $tuote) {
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+
+						echo "<tr>";
+						echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($tuote["tuoteno"])."&lopetus=$lopetus'>$tuote[tuoteno]</a></td>";
+						echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
+						echo "</tr>";
+					}
+					echo "</table>";
+				}
 			}
 
 			echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";

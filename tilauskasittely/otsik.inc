@@ -1438,6 +1438,22 @@
 
 			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
 
+			if($comments_temp = explode('<_toimaikapdf_>', $srow['comments'])) {
+				if($comments_temp[1] == 'true') {
+					$naytetaanko_pdf_sel = "checked='CHECKED'";
+				}
+				else {
+					$naytetaanko_pdf_sel = "";
+				}
+			}
+			else {
+				$naytetaanko_pdf_sel = "checked='CHECKED'";
+			}
+
+			if($toim == 'TARJOUS') {
+				echo t("Näytetäänkö tarjouksella")."<input type='checkbox' name='naytetaanko_tarjouksella' $naytetaanko_pdf_sel /><br/>";
+			}
+
 			if ($toim == "YLLAPITO") {
 				echo t("Ei käytössä");
 			}
@@ -2487,6 +2503,11 @@
 				echo "<option value = '$yhteysrow[nimi]' $sela>$yhteysrow[nimi]</option>";
 			}
 
+			//toimitusaikapdf osioin poisto commentseista
+			if($comments_temp = explode('<_toimaikapdf_>', $srow['comments'])) {
+				$srow['comments'] = $comments_temp[0];
+			}
+
 			echo "</select> ";
 			if (tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
 				echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tilaus','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]&tyhthenkilo=K');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
@@ -3039,6 +3060,31 @@
 
 		$label = !isset($label) ? "" : $label;
 		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
+
+		if($naytetaanko_tarjouksella != 'on') {
+			//yliajetaan vanhat valinnat
+			$comments_temp = explode('<_toimaikapdf_>', $comments);
+			if(!empty($comments_temp)) {
+				$comments = $comments_temp[0];
+			}
+			else {
+				$comments = $comments;
+			}
+
+			$comments = $comments . '<_toimaikapdf_>false<_toimaikapdf_>';
+		}
+		else {
+			//yliajetaan vanhat valinnat
+			$comments_temp = explode('<_toimaika_>', $comments);
+			if(!empty($comments_temp)) {
+				$comments = $comments_temp[0];
+			}
+			else {
+				$comments = $comments;
+			}
+			
+			$comments = $comments . '<_toimaikapdf_>true<__toimaikapdf__>';
+		}
 
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',

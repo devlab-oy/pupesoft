@@ -178,10 +178,22 @@ if (!function_exists('alku_tarjous')) {
 				}
 			}
 
+			$naytetaanko_toimitusaika = explode('<_toimaikapdf_>' , $laskurow['comments']);
+
+			if(!empty($naytetaanko_toimitusaika)) {
+				if($naytetaanko_toimitusaika[1] == 'true') {
+					$naytetaanko_toimitusaika = true;
+				}
+				else {
+					$naytetaanko_toimitusaika = false;
+				}
+			}
+
 			if ($useita == "JOO") {
 				$pdf_tarjous->draw_text(430, 782, t("Useita", $kieli), 	$page_tarjous[$sivu], $norm);
 			}
 			elseif ($laskurow["toimvko"] != '') {
+
 				$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
 				$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["toimaika"]));
@@ -190,10 +202,14 @@ if (!function_exists('alku_tarjous')) {
 					$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
 				}
 
-				$pdf_tarjous->draw_text(430, 782, $taika, 								$page_tarjous[$sivu], $norm);
+				if($naytetaanko_toimitusaika == true) {
+					$pdf_tarjous->draw_text(430, 782, $taika, 								$page_tarjous[$sivu], $norm);
+				}
 			}
 			else {
-				$pdf_tarjous->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]), 	$page_tarjous[$sivu], $norm);
+				if($naytetaanko_toimitusaika == true) {
+					$pdf_tarjous->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]), 	$page_tarjous[$sivu], $norm);
+				}
 			}
 
 			$pdf_tarjous->draw_rectangle(779, 300, 758, 580, $page_tarjous[$sivu], $rectparam);
@@ -1187,7 +1203,9 @@ if (!function_exists('loppu_tarjous')) {
 
 			if ($yhtiorow['tarjoustyyppi'] == 1) {
 
-				list($page_tarjous, $sivu, $kala) = alvierittely($pdf_tarjous, $page_tarjous, $sivu, $laskurow, $total_uudet, '', $verolliset_verottomat_hinnat, $kala);
+				if($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
+					list($page_tarjous, $sivu, $kala) = alvierittely($pdf_tarjous, $page_tarjous, $sivu, $laskurow, $total_uudet, '', $verolliset_verottomat_hinnat, $kala);
+				}
 
 				if ($kala-165 <= 60) {
 					list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0, $total_uudet, $total_vanhat);

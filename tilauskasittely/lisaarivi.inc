@@ -594,8 +594,10 @@
 				list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
 				// Kommenti jos tuote on loppu, joka tilanteessa?
-				if ($krmyytavissa == 0) {
-					$kommentti_lisa = t("Tuote {$krow2[tuoteno]} on tilapäisesti loppu. ");
+				if ($krmyytavissa == 0 and $krow2[status] != 'P') {
+					if (stripos($kommentti_lisa, t("Tuote {$krow2[tuoteno]} on tilapäisesti loppu.")) === FALSE) {
+						$kommentti_lisa .= t("Tuote {$krow2[tuoteno]} on tilapäisesti loppu.")."<br>";
+					}
 				}
 
 				$if_ale_korva_isa_chk1 = $korva_isa_hinta;
@@ -627,8 +629,8 @@
 						if (count($kaikkituotteet) <= 1) {
 
 							// Vastaavista kommentti riville
-							if ($krow2[tyyppi] == 'vastaava') {
-								$kommentti_lisa .= t("Toimitetaan vastaava tuote $krow2[tuoteno].");
+							if ($krow2['tyyppi'] == 'vastaava') {
+								$kommentti_lisa .= " ".t("Toimitetaan vastaava tuote $krow2[tuoteno].");
 							}
 
 							// Lisätään tuote

@@ -169,36 +169,7 @@ if ($kollityht > 0) {
 			}
 		}
 
-		$query ="	SELECT sum(kollit) kollit,
-					sum(kilot) kilot,
-					sum(kuutiot) kuutiot,
-					sum(lavametri) lavametri,
-					min(pakkauskuvaustark) pakkauskuvaustark
-					from rahtikirjat use index (otsikko_index)
-					where yhtio 		= '{$kukarow['yhtio']}'
-					#and otsikkonro 		= '{$rahtikirjanro}'
-					and rahtikirjanro 	= '{$rahtikirjanro}'";
-		//and pakkauskuvaus = '$row[selitetark]'";
-		$rakires = mysql_query($query) or pupe_error($query);
-		$rakirow = mysql_fetch_array($rakires);
-
-		for($i=0;$i<mysql_num_fields($rakires);$i++) {
-			$r = mysql_field_name($rakires, $i);
-			$v = $rakirow[$i];
-
-			//	Korvaavuksia ja näppäilyä
-			if($r == "kilot") {
-				$k = round(($rakirow[$i]/$rakirow["kollit"]), 1);
-				if($rakirow["kollit"] == 2) {
-					$v = str_replace('.', ',', $k)."/".str_replace('.', ',', $k);
-				}
-				else {
-					$v = str_replace('.', ',', $k);
-				}
-			}
-
-			$parcelOrder[$r] = $v;
-		}
+		$parcelOrder["kollit"] = $kollityht;
 
 		//	Luodaan aineostoformaatti
 		if(!is_array($delisprintFileFormat)) {

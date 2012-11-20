@@ -688,6 +688,7 @@ if ($silent == "") {
 		// haetaan vaihto-omaisuus, rahti ja raaka-aine laskuja (kotimaa, ei-eu, eu) HUOMAA LIMIT!
 		$query = "	SELECT lasku.*, (select min(tunnus) from tiliointi where lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu='') tiliointi
 					FROM lasku use index (kohdistus_index)
+					join lasku liitos on (liitos.yhtio=lasku.yhtio and liitos.vanhatunnus=lasku.tunnus and liitos.summa <> lasku.summa)
 					WHERE lasku.yhtio='$kukarow[yhtio]'
 					and lasku.tila in ('H','Y','M','P','Q')
 					$vientitilat

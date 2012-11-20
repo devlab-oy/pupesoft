@@ -1105,7 +1105,7 @@ if (!function_exists('rivi_kerayslista')) {
 						$row["kommentti"] .= "\n";
 					}
 
-					$row['kommentti'] .= t("Tilausnumero", $kieli)." {$row['otunnus']}";
+					$row['kommentti'] .= t("Tilausnumero", $kieli).": {$row['otunnus']}";
 
 					//etsit‰‰n myyj‰n nimi
 					$query  = "	SELECT kuka.nimi

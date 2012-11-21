@@ -222,7 +222,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 	// luetaan tiedosto loppuun...
 	foreach ($taulunrivit as $rivinumero => $rivi) {
 
-		// n‰in k‰sitell‰‰n korvaavat taulu
+		// n‰in k‰sitell‰‰n korvaavat taulu (ja vastaavat)
 		if ($table == "korvaavat" or $table == "vastaavat") {
 
 			$haku = '';
@@ -236,12 +236,26 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
 			if ($haku == "") continue;
 
-			$fquery = "	SELECT distinct id
-						FROM $table
-						WHERE tuoteno in ($haku)
-						and yhtio = '{$kukarow['yhtio']}'";
+			// Tarkistetaan onko ketjun tuotteita jo miss‰‰n ketjussa
+			// Tuote voi kuulua useampaan vastaavuusketjuun, kunhan se ei ole p‰‰tuote
+			if ($table == "vastaavat") {
+				$fquery = "	SELECT distinct id
+							FROM $table
+							WHERE tuoteno in ($haku)
+							AND jarjestys = 1
+							and yhtio = '{$kukarow['yhtio']}'";
+			}
+			// Korvaavissa tuote voi kuulu vain yhteen ketjuun
+			else {
+				$fquery = "	SELECT distinct id
+							FROM $table
+							WHERE tuoteno in ($haku)
+							and yhtio = '{$kukarow['yhtio']}'";
+			}
+
 			$hresult = pupe_query($fquery);
 
+			// Tuotteita ei ole miss‰‰n ketjussa
 			if (mysql_num_rows($hresult) == 0) {
 				$fquery = "	SELECT max(id)
 							FROM $table
@@ -252,16 +266,20 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 				$id = $frow[0] + 1;
 				#echo t("Ei viel‰ miss‰‰n")," $id!<br>";
 			}
+			// Tuotteita lˆytyy yhdest‰ ketjusta
 			elseif (mysql_num_rows($hresult) == 1) {
 				$frow =  mysql_fetch_array($hresult);
 				$id = $frow[0];
 				#echo t("Lˆytyi")," $id!<br>";
 			}
+			// Tuotteita on useassa ketjussa
 			else {
 				echo t("Joku tuotteista")," ($haku) ",t("on jo useassa ketjussa! Korjaa homma"),"!<br>";
 				$id = 0;
 			}
 
+			// Lis‰t‰‰n ketju
+			// Joko uudeksi (max+1) tai lˆydettyyn ketjuun (id)
 			if ($id > 0) {
 				if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
 					$alku 		= "INSERT into $table SET yhtio = '{$kukarow['yhtio']}'";
@@ -315,8 +333,8 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
 									// Korvaavat p‰‰tuotteeksi, ellei j‰rjestyst‰ ole annettu
 									if ($table == 'korvaavat' and $jarjestys == 0) {
-											$jarjestys = 1;
-										}
+										$jarjestys = 1;
+									}
 
 									// P‰ivitet‰‰n j‰rjestyksi‰ jonossa +1, mutta ei kosketa j‰rjestys=0 riveihin
 									$uquery = "UPDATE $table SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()

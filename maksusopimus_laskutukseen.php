@@ -166,7 +166,7 @@
 					$query .= "jaksotettu ='".($laskurow[$i]*-1)."',";
 				}
 				// ja kaikki muut paitsi tunnus sellaisenaan
-				elseif (mysql_field_name($stresult,$i)!='tunnus') {
+				elseif (mysql_field_name($stresult,$i)!='tunnus' and mysql_field_name($stresult,$i)!='viesti') {
 					$query .= mysql_field_name($stresult,$i)."='".$laskurow[$i]."',";
 				}
 				elseif (mysql_field_name($stresult,$i)=='viesti') {

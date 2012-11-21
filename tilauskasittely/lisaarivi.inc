@@ -2041,7 +2041,7 @@
 					elseif ($kutsuja == "EDITILAUS") {
 						if (stripos($kommentti, t("Tuote Loppu.")) === FALSE) {
 							// Tilausrivin systeemikommentti
-							$kommentti .= " ".t("Tuote Loppu.");
+							$kommentti .= " ".t("Tuote loppu.");
 						}
 					}
 				}
@@ -2223,7 +2223,9 @@
 
 				if (mysql_num_rows($ediresult) > 0) {
 
-					$edivastaavattuotteet = "";
+					$edi_vastaavat_tuotteet = array();
+					$edi_vaihtoehtoiset_tuotteet = array();
+
 					$vrow = mysql_fetch_assoc($ediresult);
 
 					$query = "	SELECT *
@@ -2245,23 +2247,28 @@
 										AND tuoteno = '$edirow[tuoteno]'";
 							$tvresult = pupe_query($tvsql);
 							$tvrow = mysql_fetch_assoc($tvresult);
-							$edivastaavattuotteet .= "$edirow[tuoteno] (".hintapyoristys($tvrow["myyntihinta"])." $laskurow[valkoodi] $vmyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")."), ";
+
+							// Jos tuote on vaihtoehtoinen
+							if ($edirow['vaihtoehtoinen']) {
+								$edi_vaihtoehtoiset_tuotteet[] = "$edirow[tuoteno] (".hintapyoristys($tvrow["myyntihinta"])." $laskurow[valkoodi] $vmyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite").")";
+							}
+							else {
+								$edi_vastaavat_tuotteet[] = "$edirow[tuoteno] (".hintapyoristys($tvrow["myyntihinta"])." $laskurow[valkoodi] $vmyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite").")";
+							}
 						}
 					}
 
-					if ($edivastaavattuotteet != "") {
+					// Jos vastaavia lˆytyi, lis‰t‰‰n kommentit
+					if (!empty($edi_vastaavat_tuotteet)) {
+						if ($kommentti != "") $kommentti .= "\n";
+						$kommentti .= t("Voit tilata vastaavaa tuotetta")." ".implode(", ", $edi_vastaavat_tuotteet).".";
+					}
 
-						if ($kommentti != "") {
-							 $edivastaavattuotteet_alku = "\n";
-						}
-						else {
-							$edivastaavattuotteet_alku = "";
-						}
-
-						$edivastaavattuotteet = $edivastaavattuotteet_alku.t("Voit tilata vastaavaa tuotetta")." ".$edivastaavattuotteet;
-
-						// poistetaan viimeinen pilkku ja lis‰t‰‰n piste siisteyden lis‰‰miseksi.
-						$kommentti .= substr($edivastaavattuotteet, 0, -2).".";
+					// Jos vaihtoehtoisia lˆyty lis‰t‰‰n nekin kommentteihin
+					if (!empty($edi_vaihtoehtoiset_tuotteet)) {
+						if ($kommentti != "") $kommentti .= "\n";
+						$kommentti .= t("Voit tilata vaihtoehtoista tuotetta")." ".implode(", ", $edi_vaihtoehtoiset_tuotteet).".";
+						$kommentti .= " ".t("Tarkista soveltuvuus.");
 					}
 				}
 			}
@@ -2306,7 +2313,7 @@
 				}
 			}
 
-			####
+			// Korvaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
 			if ($yhtiorow["korvaavusketjun_puutekasittely"] == "K") {
 				$query = "SELECT id
 			              FROM korvaavat

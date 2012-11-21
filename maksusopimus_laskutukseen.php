@@ -26,6 +26,11 @@
 
 			$laskurow = mysql_fetch_array($stresult);
 
+			//	Lasku voi mennä myös kaukomaille, joten haetaan tämän asiakkaan kieli..
+			$query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+			$kielires = pupe_query($query);
+			$kielirow = mysql_fetch_array($kielires);
+
 			if ($debug==1) echo t("Perusotsikko löytyi")." $laskurow[nimi]<br>";
 
 			// Onko sopimuksella vielä jotain ennakkolaskutettavaa
@@ -164,6 +169,10 @@
 				elseif (mysql_field_name($stresult,$i)!='tunnus') {
 					$query .= mysql_field_name($stresult,$i)."='".$laskurow[$i]."',";
 				}
+				elseif (mysql_field_name($stresult,$i)=='viesti') {
+					$viesti 	= t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"],2)."% ";
+					$query .= "viesti ='".$viesti."',";
+				}
 			}
 
 			$query = substr($query,0,-1);
@@ -244,33 +253,29 @@
 			$sumrow = mysql_fetch_array($result);
 
 			$query = "	SELECT
-						sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) summa,
+						tuoteno,
+						nimitys,
+						if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0) summa,
 						if (tilausrivi.alv >= 600 or tilausrivi.alv < 500, tilausrivi.alv, 0) alv
 						FROM lasku
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu + tilausrivi.jt) > 0 and tilausrivi.jaksotettu = lasku.jaksotettu)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.jaksotettu = '$tunnus'
-						GROUP BY lasku.jaksotettu, alv";
+						and lasku.jaksotettu = '$tunnus'";
 			$sresult = pupe_query($query);
 			$tot = 0;
-
-			//	Lasku voi mennä myös kaukomaille, joten haetaan tämän asiakkaan kieli..
-			$query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-			$kielires = pupe_query($query);
-			$kielirow = mysql_fetch_array($kielires);
 
 			if ($kielirow["kieli"] == "") {
 				$kielirow["kieli"]="fi";
 			}
-
-			$nimitys 		= t($posrow["kuvaus"], $kielirow["kieli"]);
-			$rivikommentti 	= t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"],2)."% ";
 
 			if ($posrow["lisatiedot"] != "") {
 				$rivikommentti .= "\n ".$posrow["lisatiedot"];
 			}
 
 			if (mysql_num_rows($sresult) == 0) {
+				$nimitys 		= t($posrow["kuvaus"], $kielirow["kieli"]);
+				$rivikommentti 	= t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"],2)."% ";
+				
 				echo "<font class = 'error'>".t("VIRHE: Ennakkolaskulla ei ole yhtään jaksotettua tilausriviä!")." $tunnus</font><br>";
 				echo "<font class = 'message'>".t("Käy tekemässä ennakkolasku manuaalisesti. Ennakkolaskulle perustetun laskun tunnus on")." $id</font><br>";
 				echo "<font class = 'message'>".t("Ennakkolaskutuksen tuotenumero on")." $yhtiorow[ennakkomaksu_tuotenumero]</font><br><br>";
@@ -281,12 +286,13 @@
 			}
 			else {
 				while($row = mysql_fetch_array($sresult)) {
+					$nimitys = $row['tuoteno'].' - '.$row['nimitys'];
 
 					// $summa on verollinen tai veroton riippuen yhtiön myyntihinnoista
 					$summa = $row["summa"]/$sumrow["jaksotettavaa"] * $posrow["summa"];
 
-					$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values
-								('$summa', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now())";
+					$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, laatija, laadittu) values
+								('$summa', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$kukarow[kuka]', now())";
 					$addtil = pupe_query($query);
 
 					if ($debug==1) echo t("Lisättiin ennakkolaskuun rivi")." $summa $row[alv] otunnus $id<br>";

@@ -29,11 +29,208 @@
 	13.		EE1300	VAT refundable - (EE1300=EE400+EE410-EE500+EE1000-EE1100)
 	*/
 
-	$oletus_verokanta = 20;
+	$oletus_verokanta = 23;
 
 	// Sallittu erotus on luku kuinka paljon sallitaan ALV-ilmoitus erotus poikkeavan
 	if (!isset($alv_laskelman_sallittu_erotus)) {
 		$alv_laskelman_sallittu_erotus = 1;
+	}
+
+	if (isset($tee) and $tee == 'erittele') {
+
+		$alvv			 = $vv;
+		$alvk			 = $kk;
+		$alvp			 = 0;
+		$tiliointilisa 	 = '';
+		$alkupvm  		 = date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
+		$loppupvm 		 = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
+		$kerroin 		 = " * -1";
+
+		$maalisa	 	 = '';
+		$eetasolisa	 	 = '';
+		$vainveroton 	 = '';
+		$tuotetyyppilisa = '';
+		$cleantaso 		 = $taso;
+
+		if ($ryhma == '1') {
+			$taso = "ee100";
+			$eetasolisa = " or alv_taso like '%ee110%'";
+			$tiliointilisa = " and tiliointi.vero = 23 ";
+		}
+		elseif ($ryhma == '1.1') {
+			$taso = "ee110";
+			$tiliointilisa = " and tiliointi.vero = 23 ";
+		}
+		elseif ($ryhma == '2') {
+			$taso = "ee100";
+			$eetasolisa = " or alv_taso like '%ee110%'";
+			$tiliointilisa = " and tiliointi.vero = 9 ";
+		}
+		elseif ($ryhma == '2.1') {
+			$taso = "ee110";
+			$tiliointilisa = " and tiliointi.vero = 9 ";
+		}
+		elseif ($ryhma == '3') {
+			$taso = "ee300";
+			$eetasolisa  = " or alv_taso like '%ee100%'
+							 or alv_taso like '%ee110%'
+							 or alv_taso like '%ee310%'
+							 or alv_taso like '%ee320%'";
+			$vainveroton = " and tiliointi.vero = 0 ";
+		}
+		elseif ($ryhma == '3.1') {
+			$taso = "ee310";
+		}
+		elseif ($ryhma == '3.1.1') {
+			$tuotetyyppilisa = " AND tuote.tuotetyyppi != 'K' ";
+			$taso = 'ee310';
+		}
+		elseif ($ryhma == '3.2') {
+			$taso = 'ee320';
+		}
+		elseif ($ryhma == '5') {
+			$taso = 'ee500';
+			$eetasolisa = " or alv_taso like '%ee510%'
+							or alv_taso like '%ee520%'";
+			$kerroin = "";
+		}
+		elseif ($ryhma == '5.1') {
+			$taso = 'ee510';
+			$kerroin = "";
+		}
+		elseif ($ryhma == '5.2') {
+			$taso = 'ee520';
+			$kerroin = "";
+		}
+
+		$query = "	SELECT
+					ifnull(group_concat(if(alv_taso like '%ee100%' or alv_taso like '%ee110%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit100,
+					ifnull(group_concat(if(alv_taso not like '%ee100%' and alv_taso not like '%ee110%', concat(\"'\",tilino,\"'\"), NULL)), '') tilitMUU
+					FROM tili
+					WHERE yhtio = '$kukarow[yhtio]'
+					and (alv_taso like '%$taso%' $eetasolisa)";
+		$tilires = pupe_query($query);
+		$tilirow = mysql_fetch_assoc($tilires);
+
+		if ($tilirow['tilit100'] != '' or $tilirow['tilitMUU'] != '') {
+
+			echo "<table>";
+			echo "<tr>";
+			echo "<br><font class='head'>".t("Arvonlisäveroerittely kaudelta")." $alvv-$alvk " . t("taso") . " $ryhma</font><hr>";
+
+			$query = "	SELECT if(lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) maa,
+						if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
+						tiliointi.vero,
+						tiliointi.tilino,
+						tili.nimi,
+						group_concat(lasku.tunnus) ltunnus,
+						sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) $kerroin bruttosumma,
+						sum(round(tiliointi.summa, 2)) $kerroin nettosumma,
+						sum(round(tiliointi.summa * tiliointi.vero / 100, 2)) $kerroin verot,
+						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) $kerroin bruttosumma_valuutassa,
+						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi), 2)) $kerroin nettosumma_valuutassa,
+						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) $kerroin verot_valuutassa,
+						count(*) kpl
+						FROM tiliointi
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
+						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						AND tiliointi.korjattu = ''
+						AND tiliointi.tapvm >= '$alkupvm'
+						AND tiliointi.tapvm <= '$loppupvm'
+						$maalisa
+						$tiliointilisa
+						AND (";
+
+			if ($tilirow["tilit100"] != "") $query .= "	(tiliointi.tilino in ($tilirow[tilit100]) $vainveroton)";
+			if ($tilirow["tilit100"] != "" and $tilirow["tilitMUU"] != "") $query .= " or ";
+			if ($tilirow["tilitMUU"] != "") $query .= " tiliointi.tilino in ($tilirow[tilitMUU])";
+
+			$query .= "	)
+						GROUP BY 1, 2, 3, 4, 5
+						ORDER BY maa, valuutta, vero, tilino, nimi";
+			$result = pupe_query($query);
+
+			echo "<table><tr>";
+			echo "<th valign='top'>" . t("Maa") . "</th>";
+			echo "<th valign='top'>" . t("Val") . "</th>";
+			echo "<th valign='top'>" . t("Vero") . "</th>";
+			echo "<th valign='top'>" . t("Tili") . "</th>";
+			echo "<th valign='top'>" . t("Nimi") . "</th>";
+			echo "<th valign='top'>" . t("Veroton summa") . "</th>";
+			echo "<th valign='top'>" . t("Verot") . "</th>";
+			echo "<th valign='top'>" . t("Veroton summa valuutassa") . "</th>";
+			echo "<th valign='top'>" . t("Verot valuutassa") . "</th>";
+			echo "<th valign='top'>" . t("Kpl") . "</th>";
+			echo "</tr>";
+
+			$verosum  = 0.0;
+			$kplsum   = 0;
+			$verotot  = 0.0;
+			$kpltot   = 0;
+			$kantasum = 0.0;
+			$kantatot = 0.0;
+
+			while ($trow = mysql_fetch_assoc($result)) {
+
+				// Vaihtuiko verokanta?
+				if (isset($edvero) and ($edvero != $trow["vero"] or $edmaa != $trow["maa"])) {
+					echo "<tr>
+							<td colspan='5' align='right' class='spec'>".t("Yhteensä").":</td>
+							<td align = 'right' class='spec'>".sprintf('%.2f', $kantasum)."</td>
+							<td align = 'right' class='spec'>".sprintf('%.2f', $verosum)."</td>
+							<td colspan='2' class='spec'></td>
+							<td align = 'right' class='spec'>$kplsum</td></tr>";
+
+					$verosum 	= 0.0;
+					$kplsum 	= 0;
+					$kantasum	= 0.0;
+				}
+
+				echo "<tr>";
+				echo "<td valign='top'>$trow[maa]</td>";
+				echo "<td valign='top'>$trow[valuutta]</td>";
+				echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
+				echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
+				echo "<td valign='top'>$trow[nimi]</td>";
+				echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['nettosumma']),"</td>";
+				echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot']),"</td>";
+
+				if (strtoupper($trow["maa"]) != strtoupper($yhtiorow["maa"])) {
+					echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['nettosumma_valuutassa']),"</td>";
+					echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot_valuutassa']),"</td>";
+				}
+				else {
+					echo "<td valign='top' align='right'></td>";
+					echo "<td valign='top' align='right'></td>";
+				}
+
+				echo "<td valign='top' align='right' nowrap>$trow[kpl]</td>";
+				echo "</tr>";
+
+				$verosum  += $trow['verot'];
+				$kplsum   += $trow['kpl'];
+				$verotot  += $trow['verot'];
+				$kpltot   += $trow['kpl'];
+				$kantasum += $trow['nettosumma'];
+				$kantatot += $trow['nettosumma'];
+				$edvero    = $trow["vero"];
+				$edmaa 	   = $trow["maa"];
+			}
+
+			echo "<tr><td colspan='5' align='right' class='spec'>".t("Yhteensä").":</td>
+					<td align = 'right' class='spec'>".sprintf('%.2f', $kantasum)."</td>
+					<td align = 'right' class='spec'>".sprintf('%.2f', $verosum)."</td>
+					<td colspan = '2' class='spec'></td>
+					<td align = 'right' class='spec'>$kplsum</td></tr>";
+
+			echo "<tr><td colspan='5' align='right' class='spec'>".t("Verokannat yhteensä").":</td>
+					<td align = 'right' class='spec'>".sprintf('%.2f', $kantatot)."</td>
+					<td align = 'right' class='spec'>".sprintf('%.2f', $verotot)."</td>
+					<td colspan = '2' class='spec'></td>
+					<td align = 'right' class='spec'>$kpltot</td></tr>";
+			echo "</table><br>";
+		}
 	}
 
 	function laskeveroja ($taso, $tulos) {
@@ -253,10 +450,10 @@
 			echo "<tr><th>",t("Ilmoitettava kausi"),"</th><th>".substr($startmonth,0,4)."/".substr($startmonth,5,2)."</th></tr>";
 
 			// Verollinen myynti
-			echo "<tr class='aktiivi'><td>1) 20% määraga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee100["23.00"])."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; 1.1) 20% määraga maksustatav kauba või teenuse omatarve</td><td align='right'>".sprintf('%.2f', $ee110["23.00"])."</td></tr>";
-			echo "<tr class='aktiivi'><td>2) 9% määraga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee100["9.00"])."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; 2.1) 9% määraga maksustatav kauba voi teenuse omatarve</td><td align='right'>".sprintf('%.2f', $ee110["9.00"])."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=1&vv=$vv&kk=$kk'>1)</a> 20% määraga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee100["23.00"])."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=1.1&vv=$vv&kk=$kk'>1.1)</a> 20% määraga maksustatav kauba või teenuse omatarve</td><td align='right'>".sprintf('%.2f', $ee110["23.00"])."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=2&vv=$vv&kk=$kk'>2)</a> 9% määraga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee100["9.00"])."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=2.1&vv=$vv&kk=$kk'>2.1)</a> 9% määraga maksustatav kauba voi teenuse omatarve</td><td align='right'>".sprintf('%.2f', $ee110["9.00"])."</td></tr>";
 
 			// Väärät alvikannat
 			foreach ($ee100 as $eekey => $eeval) {
@@ -267,18 +464,18 @@
 			}
 
 			// Veroton myynti
-			echo "<tr class='aktiivi'><td>3) 0% määraga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee300)."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; 3.1) Kauba ühendusesisene käive ja teise liikmesriigi maksukohustuslase / piiratud maksukohustuslase osutatud teenuste käive kokku, sh</td><td align='right'>".sprintf('%.2f', $ee310)."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; &raquo; 3.1.1) Kauba ühendusesisene käive</td><td align='right'>".sprintf('%.2f', $ee311)."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; 3.2) Kauba eksport, sh</td><td align='right'>".sprintf('%.2f', $ee320)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=3&vv=$vv&kk=$kk'>3)</a> 0% määraga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee300)."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=3.1&vv=$vv&kk=$kk'>3.1)</a> Kauba ühendusesisene käive ja teise liikmesriigi maksukohustuslase / piiratud maksukohustuslase osutatud teenuste käive kokku, sh</td><td align='right'>".sprintf('%.2f', $ee310)."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; &raquo; <a href = '?tee=erittele&ryhma=3.1.1&vv=$vv&kk=$kk'>3.1.1)</a> Kauba ühendusesisene käive</td><td align='right'>".sprintf('%.2f', $ee311)."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=3.2&vv=$vv&kk=$kk'>3.2)</a> Kauba eksport, sh</td><td align='right'>".sprintf('%.2f', $ee320)."</td></tr>";
 			echo "<tr class='aktiivi'><td>&raquo; &raquo; 3.2.1) Käibemaksutagastusega müük reisijale</td><td align='right'>".sprintf('%.2f', $ee321)."</td></tr>";
 
 			echo "<tr class='aktiivi'><td>4) Käibemaks kokku (20% lahtrist 1 + 9% lahtrist 2) +</td><td align='right'>".sprintf('%.2f', $ee400)."</td></tr>";
 			echo "<tr class='aktiivi'><td>&raquo; 4.1) Impordilt tasumisele kuuluv käibemaks +</td><td align='right'>".sprintf('%.2f', $ee410)."</td></tr>";
 
-			echo "<tr class='aktiivi'><td>5) Kokku sisendkäibemaksusumma, mis on seadusega lubatud maha arvata, sh -</td><td align='right'>".sprintf('%.2f', $ee500)."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; 5.1) Impordilt tasutud või tasumisele kuuluv käibemaks</td><td align='right'>".sprintf('%.2f', $ee510)."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; 5.2) Põhivara soetamiselt tasutud või tasumisele kuuluv käibemaks</td><td align='right'>".sprintf('%.2f', $ee520)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=5&vv=$vv&kk=$kk'>5)</a> Kokku sisendkäibemaksusumma, mis on seadusega lubatud maha arvata, sh -</td><td align='right'>".sprintf('%.2f', $ee500)."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=5.1&vv=$vv&kk=$kk'>5.1)</a> Impordilt tasutud või tasumisele kuuluv käibemaks</td><td align='right'>".sprintf('%.2f', $ee510)."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=5.2&vv=$vv&kk=$kk'>5.2)</a> Põhivara soetamiselt tasutud või tasumisele kuuluv käibemaks</td><td align='right'>".sprintf('%.2f', $ee520)."</td></tr>";
 
 			echo "<tr class='aktiivi'><td>6) Kauba ühendusesisene soetamine ja teise liikmesriigi maksukohustuslaselt saadud teenused kokku, sh</td><td align='right'>".sprintf('%.2f', $ee600)."</td></tr>";
 			echo "<tr class='aktiivi'><td>&raquo; 6.1) Kauba ühendusesisene soetamine</td><td align='right'>".sprintf('%.2f', $ee610)."</td></tr>";

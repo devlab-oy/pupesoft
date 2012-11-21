@@ -1,76 +1,10 @@
+
 <?php
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Vastaavien yll‰pito")."</font><hr>";
-
-echo "<form method='get' name='etsituote' autocomplete='off'>
-      ".t("Etsi tuotetta")." <input type='text' name='tuoteno'>
-      <input type='submit' value='".t("Hae")."'>
-      </form><br><br>";
-
-if (!isset($tee)) $tee = '';
-
-function poista_tuote_ketjusta($tunnus) {
-    global $kukarow;
-
-    if (empty($tunnus)) exit("tunnus on tyhj‰!");
-
-    // Poistetaan vastaava ketjusta
-    $query = "DELETE FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
-    $result = pupe_query($query);
-}
-
-if ($tee == 'del') poista_tuote_ketjusta($tunnus);
-
-if ($tee == 'muutaprio') {
-    //haetaan poistettavan tuotteen id.. k‰ytt‰j‰st‰v‰llist‰..
-    $query  = "SELECT * FROM vastaavat WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
-    $result = pupe_query($query);
-    $row    = mysql_fetch_array($result);
-    $id     = $row['id'];
-
-    if ($prio != 0 and $prio != $row['jarjestys']) {
-        # Siirret‰‰n ketjun muita eteenp‰in, jarjestys + 1
-        $query = "UPDATE vastaavat SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
-                    WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND tunnus!=$tunnus AND jarjestys >= $prio";
-        $result = pupe_query($query);
-    }
-
-    //muutetaan prio..
-    $query  = "     UPDATE vastaavat SET
-                    jarjestys = '$prio',
-                    muutospvm = now(),
-                    muuttaja = '$kukarow[kuka]'
-                    WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
-    $result = pupe_query($query);
-
-    // Jos setattu vaihetoehtoiseksi?
-    if ($vaihtoehtoinen == 'true' and $row['vaihtoehtoinen'] != 'K') {
-        $query = "UPDATE vastaavat SET vaihtoehtoinen='K' WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
-        $result = pupe_query($query);
-    }
-    else if ($vaihtoehtoinen != true and $row['vaihtoehtoinen'] == 'K') {
-        $query = "UPDATE vastaavat SET vaihtoehtoinen='' WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
-        $result = pupe_query($query);
-    }
-}
-
-if ($tee == 'add') {
-
-    // tutkitaan onko lis‰tt‰v‰ tuote oikea tuote...
-    if (!hae_tuote($vastaava)) {
-        echo "<font class='error'>".t("Lis‰ys ei onnistu! Tuotetta")." $vastaava ".t("ei lˆydy")."!</font><br><br>";
-    }
-    // Lis‰t‰‰n haluttuun ketjuun
-    else if (!empty($ketju_id)) {
-        lisaa_tuote($tuoteno, $vastaava, $ketju_id);
-    }
-    else {
-        lisaa_tuote($tuoteno, $vastaava);
-    }
-}
-
+/** Lis‰‰ tuotteen ketjuun
+ */
 function lisaa_tuote($tuoteno = '', $vastaava, $ketju_id = '') {
     global $kukarow;
 
@@ -82,6 +16,13 @@ function lisaa_tuote($tuoteno = '', $vastaava, $ketju_id = '') {
         // Jos ketju on setattu, lis‰t‰‰n tuote haluttuun ketjuun
         if ($ketju_id != '') {
 
+            // Tarkistetaan ett‰ tuote ei ole miss‰‰n ketjussa p‰‰tuotteena
+            $paatuote = false;
+            if (onko_paatuote($vastaava)) {
+                $paatuote = true;
+                echo "<font class='error'>".t("Lis‰ys ei onnistu! Tuote")." $vastaava ".t("on p‰‰tuotteena jossain toisessa ketjussa")."!</font><br><br>";
+            }
+
             // Tarkistetaan ett‰ tuote ei jo ole kyseisess‰ ketjussa
             $query = "SELECT * FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$vastaava}' AND id='{$ketju_id}'";
             $result = pupe_query($query);
@@ -91,7 +32,7 @@ function lisaa_tuote($tuoteno = '', $vastaava, $ketju_id = '') {
                 echo "<font class='error'>".t("Lis‰ys ei onnistu! Tuote")." $vastaava ".t("on jo ketjussa")." $ketju_id!</font><br><br>";
             }
             // Lis‰t‰‰n tuote haluttuun ketjuun
-            else {
+            elseif ($paatuote == false) {
                 $query  = "INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
                             VALUES ('$ketju_id', '{$tuote['tuoteno']}', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
                 $result = pupe_query($query);
@@ -100,18 +41,21 @@ function lisaa_tuote($tuoteno = '', $vastaava, $ketju_id = '') {
         //
         elseif ($tuoteno != '' and $ketju_id == '') {
 
+            // Etsit‰‰n is‰ tuotetta (haettu tuoteno)
             $query  = "SELECT * FROM vastaavat WHERE tuoteno = '$tuoteno' AND yhtio = '$kukarow[yhtio]'";
             $result = pupe_query($query);
 
-            // katotaan onko is‰ tuote lis‰ttty..
             if (mysql_num_rows($result) != 0) {
                 //jos on, otetaan ID luku talteen...
                 $row    = mysql_fetch_array($result);
                 $fid    = $row['id'];
             }
 
-            //katotaan onko vastaava jo lis‰tty
-            $query  = "SELECT * FROM vastaavat WHERE tuoteno = '$vastaava' AND yhtio = '$kukarow[yhtio]'";
+            // Etsit‰‰n lis‰tt‰v‰‰ tuotetta
+            // Vastaavissa tarkistetaan vain ett‰ tuote ei ole p‰‰tuotteena miss‰‰n toisessa ketjussa.
+            // Jos is‰tuotetta ei lˆytynyt eik‰ lis‰tt‰v‰ tuote ole miss‰‰n ketjussa p‰‰tuotteena,
+            // voidaan tuotteista tehd‰ uusi ketju
+            $query  = "SELECT * FROM vastaavat WHERE tuoteno = '$vastaava' AND yhtio = '$kukarow[yhtio]' AND jarjestys='1'";
             $result = pupe_query($query);
 
             if (mysql_num_rows($result) != 0) {
@@ -176,6 +120,8 @@ function lisaa_tuote($tuoteno = '', $vastaava, $ketju_id = '') {
     }
 }
 
+/** Hakee tuotteen tiedot
+ */
 function hae_tuote($tuoteno) {
     global $kukarow;
 
@@ -189,6 +135,8 @@ function hae_tuote($tuoteno) {
     return $tuote;
 }
 
+/** Hakee vastaavat tuoteketjun
+ */
 function hae_vastaavat_ketjut($tuoteno) {
     global $kukarow;
 
@@ -212,9 +160,96 @@ function hae_vastaavat_ketjut($tuoteno) {
     return $ketjut;
 }
 
+/** Tarkistaa onko tuote mink‰‰n ketjun p‰‰tuotteena
+ */
+function onko_paatuote($tuoteno) {
+
+    // Haetaan kaikki tuotteen ketjut
+    $ketjut = hae_vastaavat_ketjut($tuoteno);
+
+    // Loopataan ketjut l‰pi
+    foreach ($ketjut as $id => $ketju) {
+        if ($tuoteno == $ketju[0]['tuoteno']) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+echo "<font class='head'>".t("Vastaavien yll‰pito")."</font><hr>";
+
+echo "<form method='get' name='etsituote' autocomplete='off'>
+      ".t("Etsi tuotetta")." <input type='text' name='tuoteno'>
+      <input type='submit' value='".t("Hae")."'>
+      </form><br><br>";
+
+if (!isset($tee)) $tee = '';
+
+// Poistetaan vastaava ketjusta
+if ($tee == 'del') {
+    $query = "DELETE FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
+    $result = pupe_query($query);
+}
+
+if ($tee == 'muutaprio') {
+    //haetaan poistettavan tuotteen id.. k‰ytt‰j‰st‰v‰llist‰..
+    $query  = "SELECT * FROM vastaavat WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
+    $row    = mysql_fetch_array($result);
+    $id     = $row['id'];
+
+    // Tarkistetaan onko 'seuraava' ketjun p‰‰tuote p‰‰tuotteena jossakin toisessa ketjussa?
+    if (onko_paatuote($row['tuoteno'])) {
+        echo "yritettiin muuttaa tuotteen {$row['tuoteno']} jarjestyst‰<br>";
+        echo "<font class='error'>".t("Prioriteettia ei voida muuttaa. Ketjun p‰‰tuote on jossakin toisessa ketjussa")."!</font><br><br>";
+
+    }
+    else {
+        if ($prio != 0 and $prio != $row['jarjestys']) {
+            # Siirret‰‰n ketjun muita eteenp‰in, jarjestys + 1
+            $query = "UPDATE vastaavat SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
+                        WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND tunnus!=$tunnus AND jarjestys >= $prio";
+            $result = pupe_query($query);
+        }
+
+        //muutetaan prio..
+        $query  = "     UPDATE vastaavat SET
+                        jarjestys = '$prio',
+                        muutospvm = now(),
+                        muuttaja = '$kukarow[kuka]'
+                        WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
+        $result = pupe_query($query);
+
+        // Jos setattu vaihetoehtoiseksi?
+        if ($vaihtoehtoinen == 'true' and $row['vaihtoehtoinen'] != 'K') {
+            $query = "UPDATE vastaavat SET vaihtoehtoinen='K' WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
+            $result = pupe_query($query);
+        }
+        else if ($vaihtoehtoinen != true and $row['vaihtoehtoinen'] == 'K') {
+            $query = "UPDATE vastaavat SET vaihtoehtoinen='' WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
+            $result = pupe_query($query);
+        }
+    }
+}
+
+if ($tee == 'add') {
+
+    // tutkitaan onko lis‰tt‰v‰ tuote oikea tuote...
+    if (!hae_tuote($vastaava)) {
+        echo "<font class='error'>".t("Lis‰ys ei onnistu! Tuotetta")." $vastaava ".t("ei lˆydy")."!</font><br><br>";
+    }
+    // Lis‰t‰‰n haluttuun ketjuun
+    else if (!empty($ketju_id)) {
+        lisaa_tuote($tuoteno, $vastaava, $ketju_id);
+    }
+    else {
+        lisaa_tuote($tuoteno, $vastaava);
+    }
+}
+
 if ($tuoteno != '') {
-    // $query  = "SELECT * FROM vastaavat WHERE tuoteno = '$tuoteno' AND yhtio = '$kukarow[yhtio]'";
-    // $result = pupe_query($query);
+
     echo "<font class='head'>".t("Tuotenumero").": $tuoteno</font><hr>";
 
     $tuote = hae_tuote($tuoteno);
@@ -225,7 +260,6 @@ if ($tuoteno != '') {
     }
     else {
         $ketjut = hae_vastaavat_ketjut($tuoteno);
-
         // Jos ketjuja ei lˆytynyt
         if (!$ketjut) {
             echo "<br><font class='message'>".t("Tuotteella ei ole vastaavia tuotteita")."!</font>";

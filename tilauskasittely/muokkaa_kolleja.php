@@ -4,7 +4,45 @@
 
 	echo "<font class='head'>",t("Muokkaa kolleja"),"</font><hr>";
 
-	if (isset($checkbox_parent) and is_array($checkbox_parent) and count($checkbox_parent) == 1) {
+	if (!isset($tee)) $tee = "";
+
+	if ($tee == 'muuta') {
+
+		$query = "	SELECT kerayserat.nro,
+					kerayserat.otunnus,
+					kerayserat.pakkausnro,
+					IFNULL(pakkaus.pakkaus, 'MUU KOLLI') pakkaus,
+					IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) sscc,
+					lasku.ohjausmerkki
+					FROM kerayserat
+					JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
+					LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+					WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+					AND kerayserat.otunnus IN ({$otunnukset})
+					GROUP BY 1,2,3,4,5,6";
+		$keraysera_res = pupe_query($query);
+
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>Kolli</th>";
+		echo "<th>SSCC</th>";
+		echo "<th>Ohjausmerkki</th>";
+		echo "</tr>";
+
+		while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
+
+			echo "<tr>";
+			echo "<td>$keraysera_row[pakkaus]</td>";
+			echo "<td>$keraysera_row[sscc]</td>";
+			echo "<td>$keraysera_row[ohjausmerkki]</td>";
+			echo "</tr>";
+		}
+
+		echo "</table>";
+
+	}
+
+	if ($tee == '' and isset($checkbox_parent) and is_array($checkbox_parent) and count($checkbox_parent) == 1) {
 
 		$lahto = (int) $checkbox_parent[0];
 
@@ -18,7 +56,7 @@
 		$tunnus_row = mysql_fetch_assoc($tunnus_res);
 
 		if ($tunnus_row['tunnukset'] == '') {
-			echo "<font class='message'>".t("Yhtään kerättyä tilausta ei löytynyt").".</font><br><br>";
+			echo "<font class='message'>",t("Yhtään kerättyä tilausta ei löytynyt"),".</font><br><br>";
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -53,7 +91,7 @@
 		$rakir_res = pupe_query($query);
 
 		if (mysql_num_rows($rakir_res) == 0) {
-			if (!isset($nayta_pdf)) echo "<font class='message'>".t("Yhtään tulostettavaa rahtikirjaa ei löytynyt").".</font><br><br>";
+			echo "<font class='message'>",t("Yhtään tulostettavaa rahtikirjaa ei löytynyt"),".</font><br /><br />";
 		}
 		else {
 
@@ -88,17 +126,17 @@
 				}
 
 				if ($rakir_row['jv'] != '') {
-					$jvehto = " having jv!='' ";
+					$jvehto = "and maksuehto.jv != ''";
 				}
 				else {
-					$jvehto = " having jv='' ";
+					$jvehto = "and maksuehto.jv = ''";
 				}
 
 				// haetaan tälle rahtikirjalle kuuluvat tunnukset
-				$query = "	SELECT rahtikirjat.rahtikirjanro, rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.asiakkaan_tilausnumero
+				$query = "	SELECT GROUP_CONCAT(lasku.tunnus) otunnus, GROUP_CONCAT(rahtikirjat.tunnus) rtunnus
 							FROM rahtikirjat
 							JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B' {$ltunnukset_lisa})
-							LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+							LEFT JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus {$jvehto})
 							WHERE rahtikirjat.yhtio	= '{$kukarow[yhtio]}'
 							and rahtikirjat.tulostettu	= '0000-00-00 00:00:00'
 							and rahtikirjat.toimitustapa	= '$toimitustapa'
@@ -106,13 +144,21 @@
 							$asiakaslisa
 							and rahtikirjat.merahti			= '$rakir_row[merahti]'
 							and rahtikirjat.rahtisopimus	= '$rakir_row[rahtisopimus]'
-							$jvehto
 							ORDER BY lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus, lasku.tunnus";
-				$res   = pupe_query($query);
+				$res = pupe_query($query);
+
+				echo "<form method='post' action=''>";
+
+				echo "<input type='hidden' name='tee' value='muuta' />";
+				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
+				echo "<input type='hidden' name='checkbox_parent[]' value='{$lahto}' />";
+
+				$lopetus_url = $lopetus."/SPLIT/{$palvelin2}tilauskasittely/muokkaa_kolleja.php////select_varasto={$select_varasto}//tee=//checkbox_parent[]={$lahto}";
+
+				echo "<input type='hidden' name='lopetus' value='{$lopetus_url}' />";
 
 				echo "<table style='width:100%'>";
 				echo "<tr>";
-				echo "<th>Rahtikirjanro</th>";
 				echo "<th>Asiakas</th>";
 				echo "<th>Osoite</th>";
 				echo "<th>Kollilkm</th>";
@@ -120,26 +166,15 @@
 				echo "<th>Tilavuus</th>";
 				echo "</tr>";
 
+				$otunnukset = $tunnukset = "";
+
 				while ($rivi = mysql_fetch_assoc($res)) {
 
-					// Kopiotulostuksen tulostetut otsikot
-					$kopiotulostuksen_otsikot[$rivi["otunnus"]] = $rivi["otunnus"];
-
 					// otetaan kaikki otsikkonumerot ja rahtikirjanumerot talteen... tarvitaan myöhemmin hauissa
-					$otunnukset   .= "'$rivi[otunnus]',";
-					$tunnukset    .= "'$rivi[rtunnus]',";
-
-					// otsikkonumerot talteen, nämä printataan paperille
-					if (!in_array($rivi['otunnus'], $lotsikot)) {
-						$lotsikot[] 	= $rivi['otunnus'];
-						$astilnrot[]	= $rivi['asiakkaan_tilausnumero'];
-					}
-					// otetaan jokuvaan rtunnus talteen uniikisi numeroksi
-					// tarvitaan postin rahtikirjoissa
-					$rtunnus = $rivi["rtunnus"];
+					$otunnukset = $rivi['otunnus'];
+					$tunnukset = $rivi['rtunnus'];
 
 					echo "<tr>";
-					echo "<td>$rivi[rtunnus]</td>";
 					echo "<td>$rakir_row[toim_nimi] $rakir_row[toim_nimitark]</td>";
 					echo "<td>$rakir_row[toim_osoite] $rakir_row[toim_postino] $rakir_row[toim_postitp]</td>";
 
@@ -148,7 +183,7 @@
 								SUM(kuutiot) kuutiot
 								FROM rahtikirjat
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$rivi['rtunnus']}'";
+								AND tunnus IN ({$rivi['rtunnus']})";
 					$summaukset_res = pupe_query($query);
 					$summaukset_row = mysql_fetch_assoc($summaukset_res);
 
@@ -158,7 +193,17 @@
 
 					echo "</tr>";
 				}
+
+				echo "<tr>";
+				echo "<th colspan='6'>";
+				echo "<input type='submit' value='Muuta' />";
+				echo "<input type='hidden' name='tunnukset' value='{$tunnukset}' />";
+				echo "<input type='hidden' name='otunnukset' value='{$otunnukset}' />";
+				echo "</th>";
+				echo "</tr>";
+
 				echo "</table>";
+				echo "</form>";
 				echo "<br />";
 			}
 

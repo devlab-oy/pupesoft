@@ -17926,7 +17926,7 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 				$aliquery = "	SELECT {$vakselect}
 								sum(kerayserat.kpl * tuote.tuotemassa * 0.95) as massa
 								FROM tilausrivi
-								JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus and kerayserat.sscc = {$row['sscc']})
+								JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus and kerayserat.sscc = '{$row['sscc']}')
 								JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi != '')
 								{$vakjoin}
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'

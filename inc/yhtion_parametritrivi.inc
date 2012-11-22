@@ -3134,7 +3134,6 @@
 		$jatko = 0;
 	}
 
-#####
 	if (mysql_field_name($result, $i) == 'korvaavuusketjun_jarjestys') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3147,7 +3146,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == 'korvaavusketjun_puutekasittely') {
+	if (mysql_field_name($result, $i) == 'korvaavuusketjun_puutekasittely') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
 		$sel = $trow[$i] == 'K' ? ' selected' : '';
@@ -3170,7 +3169,6 @@
 
 		$jatko = 0;
 	}
-#####
 
 	if (mysql_field_name($result, $i) == 'ostolaskun_kulutilit') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

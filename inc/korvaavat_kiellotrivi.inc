@@ -14,6 +14,8 @@
 
 		$ulos = "<td><select name='$nimi'>";
 
+		$ulos .= "<option value='*' $sel>".t("Kaikki tuoteryhm‰t")."</option>";
+
 		while ($srow = mysql_fetch_array($sresult)) {
 			$sel = '';
 			if ($trow[$i] == $srow["selite"]) {
@@ -26,7 +28,6 @@
 		if ($trow[$i] == "*") {
 			$sel = "selected";
 		}
-		$ulos .= "<option value='*' $sel>".t("Kaikki tuoteryhm‰t")."</option>";
 
 		$ulos .= "</select></td>";
 		$jatko = 0;
@@ -38,6 +39,8 @@
 
 		$ulos = "<td><select name='$nimi'>";
 
+		$ulos .= "<option value='*' $sel>".t("Kaikki osastot")."</option>";
+
 		while ($srow = mysql_fetch_array($sresult)) {
 			$sel = '';
 			if ($trow[$i] == $srow["selite"]) {
@@ -50,7 +53,6 @@
 		if ($trow[$i] == "*") {
 			$sel = "selected";
 		}
-		$ulos .= "<option value='*' $sel>".t("Kaikki osastot")."</option>";
 
 		$ulos .= "</select></td>";
 		$jatko = 0;
@@ -58,12 +60,16 @@
 
 	if (mysql_field_name($result, $i) == "laji") {
 
-		if ($trow[$i] == "O") $osel = "SELECTED";
-		else $ksel = "SELECTED";
+		// Vaihtoehdot
+		$selected = array('K' => '', 'O' => '', 'Q' => '', 'X' => '');
+		$selected[$trow[$i]] = "SELECTED";
 
 		$ulos = "<td><select name='$nimi'>";
-		$ulos .= "<option value='K' $ksel>".t("Korvaavat kielto")."</option>";
-		$ulos .= "<option value='O' $osel>".t("Osatoimitus kielto")."</option>";
+		$ulos .= "<option value='K' $selected[K]>".t("Korvaavia tuotteita ei myyd‰")."</option>";
+		$ulos .= "<option value='O' $selected[O]>".t("Korvaavia tuotteita myyd‰‰n, mik‰li korvaavuusketjusta lˆytyy tilattu m‰‰r‰")."</option>";
+		$ulos .= "<option value='Q' $selected[Q]>".t("Korvaavia tuotteita myyd‰‰n, mik‰li yksitt‰ist‰ korvaavaa lˆytyy tilattu m‰‰r‰‰")."</option>";
+		$ulos .= "<option value='X' $selected[X]>".t("Korvaavia ja Vastaavia tuotteita myyd‰‰n, mik‰li yksitt‰ist‰ tuotetta lˆytyy tilattu m‰‰r‰‰")."</option>";
+
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

@@ -13738,6 +13738,8 @@ if (!function_exists('tulosta_hrx')) {
 					{XS;I,0001,0002C3210|}
 					".chr(12);
 
+		echo "Ollaan funkkarin sisällä!<br>sanoma:<br><pre>$sivu</pre><br>";
+
 		if (trim($reittietikettitulostin) != '' and $reittietikettitulostin != 'email') {
 			$line = exec(" echo \"$sivu\" | $reittietikettitulostin");
 		}

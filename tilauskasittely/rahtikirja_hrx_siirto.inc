@@ -3,11 +3,7 @@
 //jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($kollityht > 0) {
 
-	echo "Kolliyht $kollityht<br>";
-
 	if (($hrx_host != "" and $hrx_user != "" and $hrx_pass != "" and $hrx_path != "") or $hrx_path != "") {
-
-		echo "hrx_path: $hrx_path<br>";
 
 		/*
 		Kenttien sisällöt ja kiinteät pituudet ovat:
@@ -175,8 +171,6 @@ if ($kollityht > 0) {
 
 		$lahettaja_maa_nimi = maa($lahettaja_maa, $kukarow['kieli']);
 
-		echo "Aletaan looppaamaan tarroja... yhteensä $kollityht kpl<br>";
-
 		for ($i = 1; $i <= $kollityht; $i++) {
 			// Tulostetaan Pupen oma kollitarra
 			$params = array(
@@ -199,8 +193,6 @@ if ($kollityht > 0) {
 	 			'montako_laatikkoa_yht' => $kollityht,
 	 			'pakkauskoodi' => $pakkaus[0],
 	 		);
-
-			echo "i: $i<br>params:<br><pre>",var_dump($params),"</pre><br>";
 
 			tulosta_hrx($params);
 		}

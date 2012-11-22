@@ -1547,8 +1547,14 @@ if (!function_exists('loppu')) {
 
 		$pdf_lasku->draw_text(404, 55 + $tileja + $barcode_korkeus, t("Y-tunnus", $kieli).": ".tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
 		$pdf_lasku->draw_text(404, 45 + $tileja + $barcode_korkeus, t("Kotipaikka", $kieli).": $y_kotipaikka",	$thispage, $pieni);
-		$pdf_lasku->draw_text(404, 35 + $tileja + $barcode_korkeus, t("Enn.per.rek", $kieli),					$thispage, $pieni);
-		$pdf_lasku->draw_text(404, 25 + $tileja + $barcode_korkeus, t("Alv.rek", $kieli),						$thispage, $pieni);
+		
+		if (strtolower($y_maa) == 'fi') {
+			$pdf_lasku->draw_text(404, 35 + $tileja + $barcode_korkeus, t("Enn.per.rek", $kieli),					$thispage, $pieni);
+			$pdf_lasku->draw_text(404, 25 + $tileja + $barcode_korkeus, t("Alv.rek", $kieli),						$thispage, $pieni);
+		}
+		else {
+			$pdf_lasku->draw_text(404, 35 + $tileja + $barcode_korkeus, t("Ovt-tunnus", $kieli).": ".$laskurow["ovttunnus"],				$thispage, $pieni);
+		}
 
 		// Viivakoodin piirtaminen
 		if ($piirra_viivakoodi) {

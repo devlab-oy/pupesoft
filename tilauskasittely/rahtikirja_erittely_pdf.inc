@@ -21,7 +21,7 @@
 
 	if (!function_exists('uusi_sivu_erittely')) {
 		function uusi_sivu_erittely ($laskurow) {
-			global $yhtiorow, $kukarow, $pdf, $kieli, $iso, $toitarow;
+			global $yhtiorow, $kukarow, $pdf, $kieli, $iso, $toitarow, $kirj;
 
 			if (!isset($pdf)) {
 				//PDF parametrit
@@ -138,16 +138,16 @@
 			   					AND laskun_lisatiedot.yhteyshenkilo_tekninen > 0
 			   					LIMIT 1";
 			   		$yhres = pupe_query($query);
-
-			   		if (mysql_num_rows($yhres) == 0) {
-			   			$query = "	SELECT '2' O, '' nimi,
-			   						IF(puhelin != '', puhelin, IF(gsm != '', gsm, '')) puh
-			   						FROM asiakas
-			   						WHERE yhtio = '{$kukarow['yhtio']}'
-			   						AND tunnus = '{$laskurow['liitostunnus']}'";
-			   			$yhres = pupe_query($query);
-			   		}
 			   	}
+
+				if (mysql_num_rows($yhres) == 0) {
+		   			$query = "	SELECT '2' O, '' nimi,
+		   						IF(puhelin != '', puhelin, IF(gsm != '', gsm, '')) puh
+		   						FROM asiakas
+		   						WHERE yhtio = '{$kukarow['yhtio']}'
+		   						AND tunnus = '{$laskurow['liitostunnus']}'";
+		   			$yhres = pupe_query($query);
+		   		}
 
 			   	if (mysql_num_rows($yhres) > 0) {
 			   		$yhrow = mysql_fetch_assoc($yhres);

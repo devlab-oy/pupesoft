@@ -324,23 +324,30 @@
 		$rivityyppi = 'L'; // Myyntitilausrivi
 	}
 
-	if ($kpl > 0 and $trow['myynti_era'] > 0 and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'EXTRANET')) {
+	if ($kpl > 0 and (($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') or $trow['minimi_era'] > 0) and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'EXTRANET')) {
 		$org_kpl = $kpl;
 
-		if ($kpl < $trow['myynti_era']) {
-			$kpl = $trow['myynti_era'];
+		if ($kpl < $trow['minimi_era']) {
+			$kpl = $trow['minimi_era'];
 		}
-		else {
-			(int) $kokonaisluku = number_format($kpl / $trow['myynti_era'],0,'','');
-			(float) $jakojaannos = fmod($kpl,$trow['myynti_era']);
 
-			$test = $kokonaisluku * $trow['myynti_era'];
-			if ($kpl > $test) {
-				$test = ($kokonaisluku + 1) * $trow['myynti_era'];
+		if ($yhtiorow['myyntiera_pyoristys'] == 'K') {
+			if ($kpl < $trow['myynti_era']) {
+				$kpl = $trow['myynti_era'];
 			}
-			$kpl = (float) $test;
+			else {
+				(int) $kokonaisluku = number_format($kpl / $trow['myynti_era'],0,'','');
+				(float) $jakojaannos = fmod($kpl,$trow['myynti_era']);
+
+				$test = $kokonaisluku * $trow['myynti_era'];
+				if ($kpl > $test) {
+					$test = ($kokonaisluku + 1) * $trow['myynti_era'];
+				}
+				$kpl = (float) $test;
+			}
 		}
-		$myyntierahuomatus = TRUE;
+
+		if ($org_kpl != $kpl) $myyntierahuomatus = TRUE;
 	}
 
 	if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
@@ -386,7 +393,8 @@
 			}
 
 		}
-		$ostoerahuomatus = TRUE;
+
+		if ($org_kpl != $kpl) $ostoerahuomatus = TRUE;
 	}
 
 	$toimittamatta = $kpl; //N‰in paljon ollaan toimittamassa
@@ -526,7 +534,7 @@
 			}
 
 			// Otetaan alkuper‰isen tuotteen hinta talteen
-			list($korva_isa_hinta, , $korva_isa_ale_kaikki, , ) = alehinta($laskurow, $trow, $kpl, '', '', '');
+			list($korva_isa_hinta, , $korva_isa_ale_kaikki, , ) = alehinta($laskurow, $trow, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
 			// Tehd‰‰n homma siten, ett‰ etsit‰‰n kaikki korvaavat jo t‰ss‰ vaiheessa arrayseen
 			$query = "	SELECT *
@@ -548,7 +556,7 @@
 				while ($krow2 = mysql_fetch_assoc($kres2)) {
 
 					list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
-					list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '');
+					list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
 					$if_ale_korva_isa_chk1 = $korva_isa_hinta;
 					$if_ale_korva_isa_chk2 = $korva_hinta;
@@ -1254,7 +1262,7 @@
 									$ale_kaikki_array['ale'.$alepostfix] = ${'ale'.$alepostfix};
 								}
 
-								list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale_kaikki_array);
+								list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
 								list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 
@@ -1848,7 +1856,7 @@
 					$alemaara = $kpl;
 				}
 
-				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array);
+				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array,'','', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 				list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 			}
 

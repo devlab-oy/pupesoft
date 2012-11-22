@@ -685,7 +685,7 @@
 
 				$edketjutus = $row["ketjutuskentta"];
 			}
-			
+
 			echo "</table><br>";
 
 			echo "<table>";
@@ -819,8 +819,8 @@
 							where yhtio='$kukarow[yhtio]' and tunnus='$ekarow[varasto]'
 							order by alkuhyllyalue,alkuhyllynro";
 			}
-			$prires= pupe_query($query);
-			$prirow= mysql_fetch_array($prires);
+			$prires = pupe_query($query);
+			$prirow = mysql_fetch_array($prires);
 
 			$query = "	SELECT *
 						FROM kirjoittimet
@@ -831,7 +831,11 @@
 
 			while ($kirrow = mysql_fetch_array($kirre)) {
 				$sel = "";
-				if (($yhtiorow["verkkolasku_lah"] == "" or $ekarow["chn"] == "667") and (($kirrow["tunnus"] == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) or $kirrow["tunnus"] == $kukarow["kirjoitin"])) {
+
+				if (($yhtiorow["verkkolasku_lah"] == "" or $ekarow["chn"] == "667") and
+					(($kirrow["tunnus"] == $kukarow["kirjoitin"]) or
+					($kirrow["tunnus"]  == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) or
+					($kirrow["tunnus"]  == $yhtiorow["lasku_tulostin"] and $kukarow["kirjoitin"] == 0 and $prirow["printteri5"] == 0))) {
 					$sel = "SELECTED";
 				}
 
@@ -842,7 +846,6 @@
 
 			if ($yhtiorow["sad_lomake_tyyppi"] == "T" and $ekarow["vienti"] == "K") {
 				echo "<tr><th>".t("Tulosta SAD-lomake").":</th><td colspan='3'><select name='valittu_sadtulostin'>";
-
 				echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
 				mysql_data_seek($kirre,0);
@@ -1069,7 +1072,7 @@
 					lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
 					$ketjutus_group
-					ORDER BY lasku.ytunnus, lasku.nimi";
+					ORDER BY lasku.nimi";
 		$tilre = pupe_query($query);
 
 		if (mysql_num_rows($tilre) > 0) {
@@ -1096,13 +1099,13 @@
 				require "inc/laskutyyppi.inc";
 
 				$toimitusselite = "";
-				if ($tilrow["chn"] == '100') $toimitusselite = t("Paperilasku, tulostuspalvelu");
+				if ($tilrow["chn"] == '100') $toimitusselite = t("Verkkolasku, tulostuspalvelu");
 				if ($tilrow["chn"] == '010') $toimitusselite = t("Verkkolasku");
 				if ($tilrow["chn"] == '020') $toimitusselite = t("Itella Pupevoice: Vienti-Verkkolasku");
 				if ($tilrow["chn"] == '111') $toimitusselite = t("Itella EDI: EIH-1.4 sähköinen lasku");
 				if ($tilrow["chn"] == '112') $toimitusselite = t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin");
 				if ($tilrow["chn"] == '666') $toimitusselite = t("Sähköposti");
-				if ($tilrow["chn"] == '667') $toimitusselite = t("Sisäinen, käsitellään manuaalisesti");
+				if ($tilrow["chn"] == '667') $toimitusselite = t("Paperilasku, käsitellään manuaalisesti");
 				if ($tilrow["chn"] == '999') $toimitusselite = t("Laskutuskielto, laskutusta ei tehdä");
 
 				$teksti = "";

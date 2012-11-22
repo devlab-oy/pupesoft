@@ -463,7 +463,9 @@
 				l.yhtio_toimipaikka, l.valkoodi, l.maksuehto, l.maa,
 				$ikalaskenta
 				max(kk.pvm) as kpvm,
-				count(distinct kl.ktunnus) as karhuttu
+				count(distinct kl.ktunnus) as karhuttu,
+				l.laskunro laskunro,
+				l.myyja myyja
 				FROM lasku l
 				LEFT JOIN karhu_lasku kl on (l.tunnus = kl.ltunnus $kjoinlisa)
 				LEFT JOIN karhukierros kk on (kk.tunnus = kl.ktunnus AND kk.tyyppi = '')
@@ -480,13 +482,15 @@
 	$query = "	SELECT *
 				FROM maksuehto
 				LEFT JOIN pankkiyhteystiedot ON (pankkiyhteystiedot.yhtio = maksuehto.yhtio AND pankkiyhteystiedot.tunnus = maksuehto.pankkiyhteystiedot)
-				WHERE maksuehto.yhtio='$kukarow[yhtio]' AND maksuehto.tunnus = '$laskutiedot[maksuehto]'";
+				WHERE maksuehto.yhtio = '$kukarow[yhtio]'
+				AND maksuehto.tunnus  = '$laskutiedot[maksuehto]'";
 	$maksuehtoresult = pupe_query($query);
 	$maksuehtotiedot = mysql_fetch_assoc($maksuehtoresult);
 
 	$query = "	SELECT *
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' AND tunnus = '$laskutiedot[liitostunnus]'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus  = '$laskutiedot[liitostunnus]'";
 	$asiakasresult = pupe_query($query);
 	$asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
@@ -650,9 +654,7 @@
 	loppu($firstpage,$loppusumma);
 
 	//keksitään uudelle failille joku varmasti uniikki nimi:
-	list($usec, $sec) = explode(' ', microtime());
-	mt_srand((float) $sec + ((float) $usec * 100000));
-	$pdffilenimi = "/tmp/karhukirje-".md5(uniqid(mt_rand(), true)).".pdf";
+	$pdffilenimi = "/tmp/karhu_$kukarow[yhtio]_".date("Ymd")."_".$laskutiedot['laskunro'].".pdf";
 
 	//kirjoitetaan pdf faili levylle..
 	$fh = fopen($pdffilenimi, "w");
@@ -661,6 +663,150 @@
 
 	if ($nayta_pdf == 1) {
 		echo file_get_contents($pdffilenimi);
+	}
+
+	if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] == 'Lähetä Maventaan') {
+
+		if (!function_exists("vlas_dateconv")) {
+			function vlas_dateconv($date) {
+				//kääntää mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
+				return substr($date, 0, 4).substr($date, 5, 2).substr($date, 8, 2);
+			}
+		}
+
+		if (!function_exists("pp")) {
+			function pp($muuttuja, $round = "", $rmax = "", $rmin = "") {
+				if (strlen($round) > 0) {
+					if (strlen($rmax) > 0 and $rmax < $round) {
+						$round = $rmax;
+					}
+					if (strlen($rmin) > 0 and $rmin > $round) {
+						$round = $rmin;
+					}
+					return $muuttuja = number_format($muuttuja, $round, ",", "");
+				}
+				else {
+					return $muuttuja	 = str_replace(".", ",", $muuttuja);
+				}
+			}
+		}
+
+		if (!function_exists("spyconv")) {
+			function spyconv ($spy) {
+				return $spy = sprintf("%020.020s",$spy);
+			}
+		}
+
+		// Täytetään api_keys, näillä kirjaudutaan Maventaan
+		$api_keys = array();
+		$api_keys["user_api_key"]	 = $yhtiorow['maventa_api_avain'];
+		$api_keys["vendor_api_key"]	 = $yhtiorow['maventa_ohjelmisto_api_avain'];
+
+		// Vaihtoehtoinen company_uuid
+		if ($yhtiorow['maventa_yrityksen_uuid'] != "") {
+			$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
+		}
+
+		// Testaus
+		#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+		// Tuotanto
+		$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+
+		require ('tilauskasittely/verkkolasku_finvoice.inc');
+
+		$finvoice_file_path = "$pupe_root_polku/dataout/karhu_$kukarow[yhtio]_".date("Ymd")."_".$laskutiedot['laskunro'].".xml";
+		$tootfinvoice		= fopen($finvoice_file_path, 'w');
+
+		$pankkitiedot 	= $yhtiorow;
+		$tyyppi			= '';
+		$silent			= '';
+		$toimaikarow['mint'] = date("Y-m-d");
+		$toimaikarow['maxt'] = date("Y-m-d");
+
+		// Otetaan ekan laskun tiedot
+		$query = "	SELECT *
+					FROM lasku
+					WHERE tunnus in ($ltunnukset)
+					and yhtio = '$kukarow[yhtio]'
+					and tila = 'U'
+					LIMIT 1";
+		$result_temp = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($result_temp);
+
+		$laskurow["chn"] = "100";
+		$laskurow["verkkotunnus"] = "PRINT";
+		$laskurow["arvo"]  = 0;
+		$laskurow["summa"] = 0;
+		$laskurow["tapvm"] = date("Y-m-d");
+		$laskurow["erpcm"] = date("Y-m-d");
+		$laskurow["kapvm"] = date("Y-m-d");
+
+		$alvrow = array(
+			'rivihinta'		 => 0,
+			'alv'			 => 23,
+			'alvrivihinta'	 => 0
+		);
+
+		$masrow = array(
+			'teksti' => 'Heti',
+			'kassa_alepros' => 0
+		);
+
+		$myyrow = array(
+			'nimi' => ''
+		);
+
+		finvoice_otsik($tootfinvoice, $laskurow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", $silent);
+		finvoice_alvierittely($tootfinvoice, $laskurow, $alvrow);
+		finvoice_otsikko_loput($tootfinvoice, $laskurow, $masrow);
+
+		$tilrow = array(
+			'tuoteno' => 1,
+			'nimitys' => 'Tyhjä',
+			'kpl' => 0,
+			'tilkpl' => 0,
+			'hinta' => 0,
+			'hintapyoristys' => 0,
+			'otunnus' => 0,
+			'toimitettuaika' => date("Y-m-d"),
+			'tilauspaiva' => date("Y-m-d"),
+			'alv' => 0,
+			'rivihinta' => 0,
+			'rivihinta_verollinen' => 0,
+		);
+
+		$vatamount = 0;
+
+		finvoice_rivi($tootfinvoice, $tilrow, $laskurow, $vatamount);
+
+		finvoice_lasku_loppu($tootfinvoice, $laskurow, $pankkitiedot, $masrow);
+
+		fclose($tootfinvoice);
+
+		$files_out['files'] = array();
+		$files_out['filenames'] = array();
+
+		//Finvoice
+		$files_out['files'][0]		 = base64_encode(file_get_contents($finvoice_file_path));
+		$files_out['filenames'][0]	 = "Maksukehotus_".date("Ymd")."_".$laskutiedot['laskunro'].".xml";
+		//PDFä
+		$files_out['files'][1]		 = base64_encode(file_get_contents($pdffilenimi));
+		$files_out['filenames'][1]	 = "Maksukehotus_".date("Ymd")."_".$laskutiedot['laskunro'].".pdf";
+
+		// Tehdään validaatio Application Requestille
+		$axml = new DomDocument('1.0');
+		$axml->encoding = 'UTF-8';
+		$axml->loadXML(file_get_contents($finvoice_file_path));
+
+		$return_value = $client->invoice_put_finvoice($api_keys, $files_out);
+
+		if (stristr($return_value->status, 'OK')) {
+			echo "".t("Karhukirje lähetettiin Maventaan")."\n<br>";
+		}
+		else {
+			echo '<font class="error">'.t("Karhukirjeen lähetys maventaan epäonnistui")." ({$return_value->status})</font>\n<br>";
+			throw new Exception("Maventa Error.");
+		}
 	}
 
 	// jos halutaan eKirje sekä configuraatio on olemassa niin
@@ -735,8 +881,8 @@
 		}
 	}
 
-	// tulostetaan jos ei lähetetä ekirjettä
-	if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu') {
+	// tulostetaan jos ei lähetetä ekirjettä eikä maventaan
+	if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and $_REQUEST['maventa_laheta'] != 'Lähetä Maventaan') {
 		// itse print komento...
 		$query = "	SELECT komento
 					from kirjoittimet

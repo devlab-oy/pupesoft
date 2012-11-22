@@ -15,16 +15,16 @@
 
 	if (!isset($ftpget_email)) $ftpget_email = "development@devlab.fi"; 			# kenelle meilataan jos on ongelma
 	if (!isset($ftpget_emailfrom)) $ftpget_emailfrom = "development@devlab.fi"; 	# mill‰ osoitteella meili l‰hetet‰‰n
-	 
+
 	// ja operaattori komentorivilt‰
-	$operaattori = $argv[1]; 
+	$operaattori = $argv[1];
 	// itella, servinet, yms
 	// pit‰‰ olla m‰‰ritettyn‰ salasanat.inc:iss‰ tai sitten t‰m‰ menee puihin.
-	
+
 	if ($operaattori == "") {
 		mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q"), "Tilausten sis‰‰nluvussa ongelma, ei operaattoria valittuna. Tutki asia!", "From: ".mb_encode_mimeheader("Pupesoft", "ISO-8859-1", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
 		die;
-	} 
+	}
 
 	# jos lukkofaili lˆytyy, mutta se on yli 15 minsaa vanha niin dellatan se
 	if (@fopen($tmpfile, "r") !== FALSE) {
@@ -68,7 +68,7 @@
 		// haetaan filet active modella
 		if ($changedir) {
 
-			if ($debug != '') {
+			if (isset($debug) and $debug != '') {
 				fwrite($filehandle, "Successfully changed working directory to $ftpget_path[$operaattori]!\n");
 				fwrite($filehandle, "Changing to passive mode.\n");
 			}
@@ -122,6 +122,8 @@
 			ftp_close($conn_id);
 		}
 
+		$palautus = 0;
+
 		// mik‰ feilas?
 		if ($conn_id === FALSE) {
 			$palautus = 1;
@@ -164,6 +166,6 @@
 	}
 	else {
 		mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q"), "Tilausten sis‰‰nluvussa saattaa olla ongelma. Jokin tarvittavista tiedoista on v‰‰rin (operaattori: $operaattori)", "From: ".mb_encode_mimeheader("Pupesoft", "ISO-8859-1", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
-		
+
 	}
 ?>

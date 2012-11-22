@@ -481,7 +481,7 @@
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 			// N‰ytet‰‰n muuten vaan sopivia tilauksia
 			echo "<br><br>";
-			echo "<form method='post'>";
+			echo "<form method='post' name='hakuformi'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='asiakastiedot' value='$asiakastiedot'>";
 			echo "<input type='hidden' name='limit' value='$limit'>";
@@ -500,6 +500,10 @@
 			echo "</form>";
 			echo "<br>";
 
+			// kursorinohjausta
+			$formi  = "hakuformi";
+			$kentta = "etsi";
+
 			// pvm 30 pv taaksep‰in
 			$dd = date("d",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 			$mm = date("m",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
@@ -509,15 +513,23 @@
 			$myyntitili_haku = "";
 
 			if ($toim == "MYYNTITILITOIMITA") {
-				$myyntitili_haku = "or tilausrivi.tuoteno like '%$etsi%'";
+				$myyntitili_haku = " or tilausrivi.tuoteno like '%$etsi%' ";
 			}
 
-			if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%' or kuka1.nimi like '%$etsi%' or  kuka2.nimi like '%$etsi%' $myyntitili_haku)";
-			if (is_numeric($etsi)) $haku="and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%' $myyntitili_haku)";
+			if ($kukarow["yhtio"] == "savt") {
+				$myyntitili_haku .= " or lasku.viesti like '%$etsi%' ";
+			}
+
+			if (is_string($etsi))  {
+				$haku = " and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%' or kuka1.nimi like '%$etsi%' or kuka2.nimi like '%$etsi%' $myyntitili_haku) ";
+			}
+			if (is_numeric($etsi)) {
+				$haku = " and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%' $myyntitili_haku) ";
+			}
 
 			if ($toim == 'YLLAPITO' and $etsi != "" and $haku != "") {
-				$haku = substr($haku, 0, -1); // Poistetaan vika sulku $hausta
-				$haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%$etsi%' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%$etsi%' or lasku.asiakkaan_tilausnumero like '%$etsi%')";
+				$haku = substr($haku, 0, -2); // Poistetaan vika sulku $hausta
+				$haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%$etsi%' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%$etsi%' or lasku.asiakkaan_tilausnumero like '%$etsi%') ";
 			}
 
 			$seuranta = "";
@@ -546,7 +558,7 @@
 			$assel2 = "CHECKED";
 		}
 		else {
-			$asiakasstring = " concat(lasku.ytunnus, '<br>', lasku.nimi) ";
+			$asiakasstring = " concat_ws('<br>', lasku.ytunnus, lasku.nimi, lasku.nimitark) ";
 			$assel1 = "CHECKED";
 			$assel2 = "";
 		}

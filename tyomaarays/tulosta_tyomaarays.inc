@@ -1,11 +1,5 @@
 <?php
 
-//viivakoodien tulostamista varten
-define ('__TRACE_ENABLED__', false);
-define ('__DEBUG_ENABLED__', false);
-
-require_once("barcode/barcode.php");
-require_once("barcode/c39object.php");
 require_once("pdflib/phppdflib.class.php");
 
 $norm["height"] 		= 10;
@@ -338,41 +332,9 @@ if (!function_exists('tyomaarays_alku')) {
 		}
 
 		//viivakoodin arvo
-		$barcode  = $laskurow["tunnus"];
-
-		//luodaan viivakoodiolio
-		$obj = "";
-		$obj = new C39Object($width, $height, $style, $barcode);
-
-		if ($obj) {
-			$obj->SetFont($font);
-			$obj->DrawObject($xres);
-
-			//flushataan pdf ja saadaam filenimi johon se tallennettiin
-			$nimi1 = $obj->FlushObject();
-
-			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
-
-			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-
-			if ($fh = @fopen($nimi2, "r")) {
-				$data = fread($fh, filesize($nimi2));
-				fclose($fh);
-				$image = $pdf->png_embed($data);
-
-				if ($image) {
-					$placement = $pdf->image_place($image, 805, 440, $thispage);
-				}
-			}
-
-			unset($obj);
-
-			//dellataan tmp filet kuleksimasta
-			system("rm -f $nimi1 $nimi2");
-		}
+		$data = viivakoodi($laskurow["tunnus"], "code128", 150, 30, "");
+		$image = $pdf->jfif_embed($data);
+		$pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
 
 		// Luodaan palautettavat
 		$return = compact(array_keys($params));
@@ -462,41 +424,9 @@ if (!function_exists('tyomaarays_uusi_sivu')) {
 		}
 
 		//viivakoodin arvo
-		$barcode  = $laskurow["tunnus"];
-
-		//luodaan viivakoodiolio
-		$obj = "";
-		$obj = new C39Object($width, $height, $style, $barcode);
-
-		if ($obj) {
-			$obj->SetFont($font);
-			$obj->DrawObject($xres);
-
-			//flushataan pdf ja saadaam filenimi johon se tallennettiin
-			$nimi1 = $obj->FlushObject();
-
-			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
-
-			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-
-			if ($fh = @fopen($nimi2, "r")) {
-				$data = fread($fh, filesize($nimi2));
-				fclose($fh);
-				$image = $pdf->png_embed($data);
-
-				if ($image) {
-					$placement = $pdf->image_place($image, 805, 440, $thispage);
-				}
-			}
-
-			unset($obj);
-
-			//dellataan tmp filet kuleksimasta
-			system("rm -f $nimi1 $nimi2");
-		}
+		$data = viivakoodi($laskurow["tunnus"], "code128", 150, 30, "");
+		$image = $pdf->jfif_embed($data);
+		$pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
 
 		$kala = 710;
 
@@ -516,11 +446,13 @@ if (!function_exists('tyomaarays_rivi_otsikot')) {
 
 		$pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
 
-		if ($tuotetyyppi == "2 Tyˆt") {
-			$pdf->draw_text(25,  $kala+35, t("Tyˆt ja palvelut", $kieli),			$thispage, $boldi);
-		}
-		else {
-			$pdf->draw_text(25,  $kala+35, t("Osat ja tarvikkeet", $kieli),		$thispage, $boldi);
+		if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "E") {
+			if ($tuotetyyppi == "2 Tyˆt") {
+				$pdf->draw_text(25,  $kala+35, t("Tyˆt ja palvelut", $kieli),			$thispage, $boldi);
+			}
+			else {
+				$pdf->draw_text(25,  $kala+35, t("Osat ja tarvikkeet", $kieli),		$thispage, $boldi);
+			}
 		}
 
 		if ($tyyppi == "") {
@@ -589,7 +521,7 @@ if (!function_exists('tyomaarays_rivi')) {
 			$pdf->draw_line($x, $y, $thispage, $rectparam);
 		}
 
-		//jos ollaan liian pitk‰ll‰ tehd‰‰n uusi otsikko...
+		// jos ollaan liian pitk‰ll‰ tehd‰‰n uusi otsikko...
 		if ($kala < 95) {
 			$sivu++;
 			$uudehko = "ON";
@@ -606,10 +538,10 @@ if (!function_exists('tyomaarays_rivi')) {
 			$page[$sivu] = $thispage;
 		}
 		else {
-			$uudehko 	 = "";
+			$uudehko = "";
 		}
 
-		if ($row["tuotetyyppi"] != $edtuotetyyppi or $uudehko == "ON") {
+		if (($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "E" and $row["tuotetyyppi"] != $edtuotetyyppi) or $uudehko == "ON") {
 			$kala -= $rivinkorkeus*3;
 
 			if ($kala < 95) {
@@ -857,16 +789,42 @@ if (!function_exists('tyomaarays_rivi')) {
 			}
 		}
 
-		// Trimmataan uudestaan
-		$row["kommentti"] = trim($row["kommentti"]);
+		if (trim($row["kommentti"]) != "") {
+			$row["kommentti"] = wordwrap(trim($row["kommentti"]), 90, "\n");
 
-		if (($tyyppi == "" or $tyyppi == "O") and $row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 45, 80, 480, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
-		}
-		elseif ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 125, 80, 580, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
+			$kommentit = explode("\n", $row["kommentti"]);
+
+			foreach ($kommentit as $kommentti) {
+
+				if ($kala < 95) {
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = tyomaarays_loppu($return);
+					$return = tyomaarays_uusi_sivu($return);
+
+					$params = tyomaarays_rivi_otsikot($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$page[$sivu] = $thispage;
+				}
+
+
+				if (($tyyppi == "" or $tyyppi == "O") and $row["kommentti"] != '') {
+					$pdf->draw_text(45, $kala, trim($kommentti), $thispage, $norm);
+				}
+				elseif ($row["kommentti"] != '') {
+					$pdf->draw_text(125, $kala, trim($kommentti), $thispage, $norm);
+				}
+
+				$kala = $kala - 10;
+			}
+
+			$kala = $kala - 10;
 		}
 
 		$perheid  = $row["perheid"];

@@ -2,6 +2,7 @@
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
+$usemastertoo = 1;
 
 if (isset($_POST["tee"])) {
 	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
@@ -268,7 +269,7 @@ if ($tee == '') {
 
 
 			$excelsarake = 0;
-			$worksheet->write($excelrivi, $excelsarake, t("Edustaja"),		$format_bold);
+			$worksheet->write($excelrivi, $excelsarake++, t("Edustaja"),	$format_bold);
 			$worksheet->write($excelrivi, $excelsarake++, t("Yhtio"),		$format_bold);
 			$worksheet->write($excelrivi, $excelsarake++, t("Paikka"),		$format_bold);
 			$worksheet->write($excelrivi, $excelsarake++, t("Postino"),		$format_bold);
@@ -311,7 +312,7 @@ if ($tee == '') {
 						<td>$row[pvmalku]</td>";
 
 				$excelsarake = 0;
-				$worksheet->write($excelrivi, $excelsarake, $row["kukanimi"]);
+				$worksheet->write($excelrivi, $excelsarake++, $row["kukanimi"]);
 				$worksheet->write($excelrivi, $excelsarake++, $row["yhtio"]);
 				$worksheet->write($excelrivi, $excelsarake++, $row["postitp"]);
 				$worksheet->write($excelrivi, $excelsarake++, $row["postino"]);

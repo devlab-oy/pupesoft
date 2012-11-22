@@ -2,6 +2,15 @@
 
 	require ("inc/parametrit.inc");
 
+	echo " <!-- Enabloidaan shiftillä checkboxien chekkaus //-->
+			<script src='inc/checkboxrange.js'></script>
+
+			<script language='javascript' type='text/javascript'>
+				$(document).ready(function(){
+					$(\".shift\").shiftcheckbox();
+				});
+			</script>";
+
 	// Muutetaanko jonkun muun oikeuksia??
 	if ($selkuka != '') {
 		$query = "	SELECT nimi, kuka, tunnus
@@ -144,9 +153,9 @@
 		$sovellus_rajaus = " and sovellus like 'Extranet%' ";
 	}
 	else {
-		$sovellus_rajaus = " and sovellus not like 'Extranet%' ";	
+		$sovellus_rajaus = " and sovellus not like 'Extranet%' ";
 	}
-	
+
 	$query = "	SELECT distinct sovellus
 				FROM oikeu
 				where yhtio = '$kukarow[yhtio]'
@@ -179,14 +188,14 @@
 
 	$query = "	SELECT *
 				FROM oikeu
-				WHERE kuka = ''	
-				and yhtio = '$kukarow[yhtio]' 
+				WHERE kuka = ''
+				and yhtio = '$kukarow[yhtio]'
 				$sovellus_rajaus";
-	
+
 	if ($sovellus != '') {
 		$query .= " and sovellus='$sovellus'";
 	}
-	
+
 	$query .= "	ORDER BY sovellus, jarjestys, jarjestys2";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -215,8 +224,9 @@
 			<input type='hidden' name='toim' value='$toim'>
 			<input type='hidden' name='selkuka' value='$selkukarow[tunnus]'>";
 
-	while ($orow=mysql_fetch_array($result)) {
+	$lask = 1;
 
+	while ($orow=mysql_fetch_array($result)) {
 
 		if ($vsove != $orow['sovellus']) {
 			echo "<tr><td class='back colspan='5'><br></td></tr>";
@@ -263,12 +273,13 @@
 		}
 
 		echo "	".t("$orow[nimitys]")."</td>
-				<td align='center'><input type='checkbox' $checked 	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='valittu[]'></td>
-				<td align='center'><input type='checkbox' $paivit  	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='paivitys[]'></td>
-				<td align='center'><input type='checkbox' $luk  	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='lukot[]'></td>
+				<td align='center'><input type='checkbox' class='A".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $checked value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='valittu[]'></td>
+				<td align='center'><input type='checkbox' class='B".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $paivit  value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='paivitys[]'></td>
+				<td align='center'><input type='checkbox' class='C".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $luk  	  value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='lukot[]'></td>
 				</tr>";
 
 		$vsove = $orow['sovellus'];
+		$lask++;
 	}
 	echo "<tr>
 			<th colspan='3'>".t("Ruksaa kaikki")."</th>

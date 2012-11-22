@@ -94,6 +94,8 @@ if (!isset($lisax)) 				$lisax = '';
 if (!isset($etayhtio_totaalisumma)) $etayhtio_totaalisumma = 0;
 if (!isset($nayta_sostolisateksti)) $nayta_sostolisateksti = "";
 if (!isset($sarjanumero_dropdown)) 	$sarjanumero_dropdown = "";
+if (!isset($kommentti_select)) 		$kommentti_select = '';
+if (!isset($yksi_suoratoimittaja)) 	$yksi_suoratoimittaja = '';
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -230,6 +232,7 @@ if ($tee == 'AKTIVOI') {
 		if (tarkista_oikeus("kayttajat.php", "", "1")) {
 			echo "<br><form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
 				<input type='hidden' name='selkuka' value='{$row['kuka']}'>
+				<input type='hidden' name='toim' value='{$toim}'>
 				<input type='hidden' name='tee' value='DELKESKEN'>
 				<input type='submit' value='* ",t("Vapauta k‰ytt‰j‰n")," $row[nimi] ($row[kuka]). ",t("keskenoleva tilaus")," *'>
 				</form>";
@@ -934,9 +937,21 @@ if (isset($tyhjenna)) {
 	$omalle_tilaukselle = "";
 }
 
-if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
-	and $kateinen != '' and ($kukarow["kassamyyja"] != '' or (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")
-	and $kertakassa != '')) and $kukarow['extranet'] == '') {
+if ($tee == "VALMIS"
+	and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
+	and $kateinen != ''
+	and $kukarow['extranet'] == ''
+	and (
+		$kukarow["kassamyyja"] != ''
+		or (
+			(
+				$kukarow["dynaaminen_kassamyynti"] != ""
+				or $yhtiorow["dynaaminen_kassamyynti"] != ""
+			)
+			and $kertakassa != ''
+		)
+	)
+) {
 
 	if (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and isset($kertakassa) and $kertakassa == 'EI_KASSAMYYNTIA') {
 		$kassamyyja_kesken 	= "";
@@ -1306,19 +1321,19 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		}
 		else {
 
-			//Luodaan valituista riveist‰ suoraan normaali ostotilaus
+			// Luodaan valituista riveist‰ suoraan normaali ostotilaus
 			if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and $yhtiorow["tee_osto_myyntitilaukselta"] != '') {
 				require("tilauksesta_ostotilaus.inc");
 
-				//	Jos halutaan tehd‰ tilauksesta ostotilauksia, niin tehd‰‰n kaikista ostotilaus
+				// Jos halutaan tehd‰ tilauksesta ostotilauksia, niin tehd‰‰n kaikista ostotilaus
 				if ($tee_osto != "") {
-					$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'KAIKKI');
+					$tilauksesta_ostotilaus = tilauksesta_ostotilaus($kukarow["kesken"],'KAIKKI');
 
 					// P‰ivitet‰‰n tilaukselle, ett‰ sit‰ ei osatoimiteta jos koko tilauksesta tehtiin ostotilaus
 					$query  = "	UPDATE lasku set
 								osatoimitus = 'o'
 								where yhtio = '$kukarow[yhtio]'
-								and tunnus = '$kukarow[kesken]'";
+								and tunnus  = '$kukarow[kesken]'";
 					$result = pupe_query($query);
 				}
 				else {
@@ -4494,6 +4509,12 @@ if ($tee == '') {
 			$vak_chk_array = array();
 
 			while ($vakrow = mysql_fetch_assoc($result)) {
+				// poimitaan samalla suoratoimitustoimittaja, jos yhtiˆparametreissa on sallittu suoratoimitukset vain yhdelt‰ toimittajalta
+				if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J'))) {
+					if ($vakrow["toimittajan_tunnus"]) {
+						$yksi_suoratoimittaja = $vakrow["toimittajan_tunnus"]; // jos tilauksella oli jo monta suoratoimittajaa, niin voi voi. vain viimeinen muistetaan ja sallitaan jatkossa. (backwards compatibility)
+					}
+				}
 				if ($vakrow["vakkoodi"] != "0" and $vakrow["vakkoodi"] != "" and $vakrow["var"] != "P" and $vakrow["var"] != "J") {
 					$vak_chk_array[$vakrow["tuoteno"]] = $vakrow["tuoteno"];
 				}

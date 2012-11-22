@@ -12,49 +12,6 @@
 	if (!isset($tiliote))	$tiliote = "";
 	if (!isset($tilino))	$tilino = "";
 
-	$query = "	SELECT tunnus
-				FROM tiliotedata
-				WHERE perheid > 0";
-	$tiliotedataresult = mysql_query($query) or pupe_error($query);
-
-	if (mysql_num_rows($tiliotedataresult) == 0) {
-
-		$query = "	SELECT yhtio, tunnus, left(tieto,3) tietotyyppi
-					FROM tiliotedata
-					WHERE tyyppi != '3'
-					ORDER BY yhtio, tunnus";
-		$tiliotedataresult = mysql_query($query) or pupe_error($query);
-
-		$perheid = 0;
-
-		while ($tiliotedatarow = mysql_fetch_array($tiliotedataresult)) {
-
-			if ($tiliotedatarow["tietotyyppi"] != "T11" and $tiliotedatarow["tietotyyppi"] != "T81") {
-				$perheid = $tiliotedatarow["tunnus"];
-			}
-
-			$query = "	UPDATE tiliotedata SET perheid = $perheid
-						WHERE tunnus = $tiliotedatarow[tunnus]";
-			$kuitetaan_result = mysql_query($query) or pupe_error($query);
-		}
-
-		$query = "	SELECT yhtio, tunnus, kuitattu, kuitattuaika
-					FROM tiliotedata
-					WHERE kuitattu != ''
-					and tunnus = perheid";
-		$tiliotedataresult = mysql_query($query) or pupe_error($query);
-
-		while ($tiliotedatarow = mysql_fetch_array($tiliotedataresult)) {
-
-			$query = "	UPDATE tiliotedata
-						SET kuitattu = '$tiliotedatarow[kuitattu]',
-						kuitattuaika = '$tiliotedatarow[kuitattuaika]'
-						WHERE yhtio = '$tiliotedatarow[yhtio]'
-						and perheid = $tiliotedatarow[tunnus]";
-			$kuitetaan_result = mysql_query($query) or pupe_error($query);
-		}
-	}
-
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);
 		exit;
@@ -70,7 +27,7 @@
 					$kuitataan_lisa
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND perheid = '$kuitattava_tiliotedata_tunnus'";
-		$kuitetaan_result = mysql_query($query) or pupe_error($query);
+		$kuitetaan_result = pupe_query($query);
 	}
 
 	//Olemme tulossa takasin suorituksista
@@ -80,7 +37,7 @@
 					WHERE tunnus = $mtili
 					and yhtio = '$kukarow[yhtio]'
 					and kaytossa = ''";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo "<font class='error'>".t("Tili katosi")."</font><br>";
@@ -101,8 +58,9 @@
 		if ($tee == 'X') {
 			// Pyyntö seuraavasta tiliotteesta
 			$query = "	SELECT *
-						FROM tiliotedata
-						WHERE alku > '$pvm'
+						FROM tiliotedata use index (yhtio_tilino_alku)
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND alku > '$pvm'
 						AND tilino = '$tilino'
 						AND tyyppi = '1'
 						ORDER BY tunnus
@@ -112,8 +70,9 @@
 		elseif ($tee == 'XX') {
 			// Pyyntö edellisestä tiliotteesta
 			$query = "	SELECT *
-						FROM tiliotedata
-						WHERE alku < '$pvm'
+						FROM tiliotedata use index (yhtio_tilino_alku)
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND alku < '$pvm'
 						AND tilino = '$tilino'
 						AND tyyppi = '1'
 						ORDER BY tunnus desc
@@ -123,8 +82,9 @@
 		elseif ($tee == 'XS') {
 			// Pyyntö seuraavasta viiteaineistosta
 			$query = "	SELECT *
-						FROM tiliotedata
-						WHERE alku > '$pvm'
+						FROM tiliotedata use index (yhtio_tilino_alku)
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND alku > '$pvm'
 						AND tilino = '$tilino'
 						AND tyyppi = '3'
 						ORDER BY tunnus
@@ -134,8 +94,9 @@
 		elseif ($tee == 'XXS') {
 			// Pyyntö seuraavasta viiteaineistosta
 			$query = "	SELECT *
-						FROM tiliotedata
-						WHERE alku < '$pvm'
+						FROM tiliotedata use index (yhtio_tilino_alku)
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND alku < '$pvm'
 						AND tilino = '$tilino'
 						AND tyyppi = '3'
 						ORDER BY tunnus desc
@@ -143,7 +104,7 @@
 			$tyyppi = 3;
 		}
 
-		$tiliotedataresult = mysql_query($query) or pupe_error($query);
+		$tiliotedataresult = pupe_query($query);
 
 		if (mysql_num_rows($tiliotedataresult) == 0) {
 			$tee = '';
@@ -175,10 +136,14 @@
 	if ($tee == 'S') {
 
 		if ($tyyppi == '3') {
-			$query = "	SELECT tiliotedata.*, ifnull(kuka.nimi, tiliotedata.kuitattu) kukanimi
+			$query = "	SELECT tiliotedata.*,
+						ifnull(kuka.nimi, tiliotedata.kuitattu) kukanimi
 						FROM tiliotedata
 						LEFT JOIN kuka ON (kuka.yhtio = tiliotedata.yhtio AND kuka.kuka = tiliotedata.kuitattu)
-						WHERE alku = '$pvm' and tilino = '$tilino' and tyyppi ='$tyyppi'
+						WHERE tiliotedata.yhtio = '{$kukarow['yhtio']}'
+						and tiliotedata.alku = '$pvm'
+						and tiliotedata.tilino = '$tilino'
+						and tiliotedata.tyyppi = '$tyyppi'
 						ORDER BY tieto";
 		}
 		else {
@@ -189,14 +154,18 @@
 				$tjarjlista = "sorttauskentta,";
 			}
 
-			$query = "	SELECT tiliotedata.*, ifnull(kuka.nimi, tiliotedata.kuitattu) kukanimi, if(left(tieto,3) in ('T40','T50','T60','T70') or kuitattu!='', 2, 1) sorttauskentta
+			$query = "	SELECT tiliotedata.*,
+						ifnull(kuka.nimi, tiliotedata.kuitattu) kukanimi,
+						if(left(tieto, 3) in ('T40','T50','T60','T70') or kuitattu != '', 2, 1) sorttauskentta
 						FROM tiliotedata
 						LEFT JOIN kuka ON (kuka.yhtio = tiliotedata.yhtio AND kuka.kuka = tiliotedata.kuitattu)
-						WHERE alku = '$pvm' and tilino = '$tilino' and tyyppi ='$tyyppi'
+						WHERE tiliotedata.yhtio = '{$kukarow['yhtio']}'
+						and tiliotedata.alku = '$pvm'
+						and tiliotedata.tilino = '$tilino'
+						and tiliotedata.tyyppi = '$tyyppi'
 						ORDER BY $tjarjlista perheid, tunnus";
 		}
-
-		$tiliotedataresult = mysql_query($query) or pupe_error($query);
+		$tiliotedataresult = pupe_query($query);
 
 		// Lopetusmuuttujaa varten, muuten ylikirjoittuu
 		$lopp_pvm    = $pvm;
@@ -251,7 +220,7 @@
 					FROM yriti
 					WHERE yhtio  = '$kukarow[yhtio]'
 					and kaytossa = '' ";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Sinulla ei ole yhtään pankkitiliä")."</font><hr>";
@@ -313,7 +282,7 @@
 					$querylisa
 					GROUP BY alku, tili, laji
 					ORDER BY alku DESC, tiliotedata.tilino, laji";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Sopivia pankkiainestoja ei löytynyt")."</font><hr>";

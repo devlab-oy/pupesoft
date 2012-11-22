@@ -38,7 +38,7 @@ class Vastaavat {
 	}
 
 	/* Hakee kaikkien ketjujen id:t joihin haettu tuote kuuluu.
-	*/
+	 */
 	function ketjut() {
 		global $kukarow;
 		$this->ketjut = array();

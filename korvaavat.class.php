@@ -22,7 +22,6 @@ class Korvaavat {
 	}
 
 	/** Haetaan koko korvaavuusketju
-	 *
 	 */
 	function tuotteet($options = array()) {
 		global $kukarow;
@@ -33,7 +32,10 @@ class Korvaavat {
 		if (!empty($options)) {
 			// Tsekataan tarvittavat parametrit
 			if($options['korvaavuusketjun_jarjestys'] == 'K') {
-				if ($this->tuote['jarjestys'] == 0) $this->tuote['jarjestys'] = 9999;
+				if ($this->tuote['jarjestys'] == 0) {
+					$this->tuote['jarjestys'] = 9999;
+				}
+
 				$conditions = "HAVING jarjestys <= {$this->tuote['jarjestys']}";
 			}
 		}
@@ -46,7 +48,7 @@ class Korvaavat {
 						WHERE korvaavat.yhtio='{$kukarow['yhtio']}'
 						AND id={$this->id}
 						$conditions
-						ORDER BY jarjestys, tuoteno";
+						ORDER BY jarjestys desc, tuoteno";
 			$result = pupe_query($query);
 
 			while ($tuote = mysql_fetch_assoc($result)) {
@@ -57,6 +59,8 @@ class Korvaavat {
 		return $tuotteet;
 	}
 
+	/** Hakee ketjun päätuotteen
+	 */
 	function paatuote() {
 		global $kukarow;
 

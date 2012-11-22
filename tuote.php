@@ -939,7 +939,8 @@
 				echo "<th>".t("Myytävissä")."</th>";
 				echo "</tr>";
 
-				foreach ($korvaavat->tuotteet() as $tuote) {
+				// Listataan korvaavat ketju
+				foreach (array_reverse($korvaavat->tuotteet()) as $tuote) {
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
 					echo "<tr>";
@@ -1007,11 +1008,11 @@
 
 			echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
 
-			//Tuotemuutoksia halutaan näyttää, mikäli niitä on.
+			// Tuotemuutoksia halutaan näyttää, mikäli niitä on.
 			$lista = hae_tuotemuutokset($tuoteno);
 
 			if (count($lista) > 0) {
-				// tuotemuutoksia.
+				// Tuotemuutoksia.
 				echo "<font class='message'>".t("Tuotenumeromuutoksia")."</font><hr>";
 
 				echo "<table>";

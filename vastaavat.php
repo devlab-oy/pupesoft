@@ -167,9 +167,9 @@ function onko_paatuote($tuoteno) {
     // Haetaan kaikki tuotteen ketjut
     $ketjut = hae_vastaavat_ketjut($tuoteno);
 
-    // Loopataan ketjut läpi
+    // Loopataan ketjut läpi ja tarkistetaan päätuote
     foreach ($ketjut as $id => $ketju) {
-        if ($tuoteno == $ketju[0]['tuoteno']) {
+        if (strtoupper($tuoteno) == strtoupper($ketju[0]['tuoteno'])) {
             return true;
         }
     }

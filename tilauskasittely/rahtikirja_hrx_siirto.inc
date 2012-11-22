@@ -165,12 +165,12 @@ if ($kollityht > 0) {
 			$lahettaja_maa = $postirow_varasto['maa'];
 		}
 		else {
-			$lahettaja_nimi = $row['yhtio_nimi'];
+			$lahettaja_nimi = $yhtiorow['nimi'];
 			$lahettaja_nimitark = "";
-			$lahettaja_osoite = $row['yhtio_osoite'];
-			$lahettaja_postino = $row['yhtio_postino'];
-			$lahettaja_postitp = $row['yhtio_postitp'];
-			$lahettaja_maa = $row['yhtio_maa'];
+			$lahettaja_osoite = $yhtiorow['osoite'];
+			$lahettaja_postino = $yhtiorow['postino'];
+			$lahettaja_postitp = $yhtiorow['postitp'];
+			$lahettaja_maa = $yhtiorow['maa'];
 		}
 
 		$lahettaja_maa_nimi = maa($lahettaja_maa, $kukarow['kieli']);

@@ -46,6 +46,7 @@
 								FROM pakkaus
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$pak}'";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$pak_res = pupe_query($query);
 					$pak_row = mysql_fetch_assoc($pak_res);
 				}
@@ -83,6 +84,7 @@
 								FROM rahtikirjat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND otsikkonro = '{$check_row['otunnus']}'";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$rahtikirjat_res = pupe_query($query);
 
 					while ($rahtikirjat_row = mysql_fetch_assoc($rahtikirjat_res)) {

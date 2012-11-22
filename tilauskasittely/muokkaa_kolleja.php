@@ -127,7 +127,9 @@
 									kuutio = kuutiot + {$kuutiot},
 									lavametri = lavametri + {$lavametrit}
 									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND otsikkonro = '{$toisen_row['otunnus']}'";
+									AND otsikkonro = '{$toisen_row['otunnus']}'
+									AND pakkaus = '{$pak_row['pakkaus']}'
+									AND pakkauskuvaus = '{$pak_row['pakkauskuvaus']}'";
 						echo "<pre>",str_replace("\t", "", $query),"</pre>";
 						// $updres = pupe_query($query);
 					}

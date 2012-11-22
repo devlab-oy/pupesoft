@@ -119,6 +119,9 @@
 					if ($rahtikirjanro == "") $rahtikirjanro = $rahtikirjarivit[$otun]['otsikkonro'];
 
 					if ($toisen_sscc != "") {
+
+						if ($kilot == 0 and $kuutiot == 0 and $lavametrit == 0) continue;
+
 						$query = "	UPDATE rahtikirjat SET
 									kilot = kilot + {$kilot},
 									kuutio = kuutiot + {$kuutiot},
@@ -164,8 +167,6 @@
 
 				echo "<br>";
 			}
-
-
 		}
 
 		$tee = '';

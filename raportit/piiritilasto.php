@@ -42,7 +42,7 @@
 
 	echo "<tr><th>".t("Raporttityyppi")."</th>";
 	echo "<td colspan='3'><select name='rappari'>";
-	echo "<option value='PITIBU' $sel[PITIBU]>".t("Piiritilasto/budjettivertailu")."</option>";
+	echo "<option value='PITIBU' $sel[PITIBU]>".t("Piiritilasto/tavoitevertailu")."</option>";
 	echo "<option value='PIMY' $sel[PIMY]>".t("Piirimyynnit")."</option>";
 	echo "<option value='PIMYAS' $sel[PIMYAS]>".t("Piirimyynnit asiakkaittain")."</option>";
 	echo "</select></td></tr>";

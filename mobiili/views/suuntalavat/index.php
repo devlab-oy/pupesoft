@@ -9,7 +9,7 @@
 	<div class='search'>
 		<form action='suuntalavat.php' method='get'>
 			<table>
-				<tr><th><label for='hae'><?= t("Hae suuntalava:") ?></label></th>
+				<tr><th><label for='hae'><?php echo t("Hae suuntalava:") ?></label></th>
 				<td><input id='hae' name='hae' type='text' /></td>
 				<td><input type='submit' value='Hae' class='button'/></td>
 			</tr>
@@ -19,10 +19,10 @@
 
 	<table>
 		<tr>
-			<th><?= t("SSCC") ?></th>
-			<th><?= t("Ker.vyöhyk.") ?></th>
-			<th><?= t("Rivit") ?></th>
-			<th><?= t("Tyyppi") ?></th>
+			<th><?php echo t("SSCC") ?></th>
+			<th><?php echo t("Ker.vyöhyk.") ?></th>
+			<th><?php echo t("Rivit") ?></th>
+			<th><?php echo t("Tyyppi") ?></th>
 		</tr>
 
 		<?php foreach($suuntalavat as $lava): ?>
@@ -31,9 +31,9 @@
 				<a href='suuntalavat.php?muokkaa=<?php echo $lava['tunnus'] ?>'>
 					<?php echo $lava['sscc'] ?></a>
 			</td>
-			<td><?= $lava['keraysvyohyke'] ?></td>
-			<td><?= $lava['rivit'] ?></td>
-			<td><?= $lava['tyyppi'] ?></td>
+			<td><?php echo $lava['keraysvyohyke'] ?></td>
+			<td><?php echo $lava['rivit'] ?></td>
+			<td><?php echo $lava['tyyppi'] ?></td>
 		<tr>
 		<?php endforeach ?>
 	</table>

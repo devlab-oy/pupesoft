@@ -177,11 +177,11 @@
 	        $vanhathinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"]);
 	    }
 
-	    // poistetaan myös netto = X, jos räplätään ruksia
+		// Viedään varastoon (varastoon=1) kun räplätään ruksia
 	    $query = "  UPDATE tilausrivi use index (yhtio_otunnus) SET
 	                uusiotunnus = '{$otunnus}',
-	                netto = ''
-	                $updatelisa
+					varastoon = 1
+	                {$updatelisa}
 	                WHERE yhtio = '{$kukarow['yhtio']}'
 	                AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
 	                AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
@@ -382,18 +382,17 @@
 
 		# Toiminta funktioitu
 		# päivitetään lapset
-		$kaikki_ok = paivita_tilausrivin_kpl($tunnus, $uuden_rivin_kpl, $otunnus, true);
+		$kaikki_ok = paivita_tilausrivin_kpl($tunnus, $uuden_rivin_kpl, $otunnus, TRUE);
 
 		echo json_encode(array('paivitetaanko' => $kaikki_ok));
 
 	}
 	elseif ($_POST['ajax_toiminto'] == 'rivi_kpl_splittaus') {
-		$tunnus = $_POST['tunnus'];
-		$otunnus = $_POST['otunnus'];
+		$tunnus 		 = $_POST['tunnus'];
+		$otunnus 		 = $_POST['otunnus'];
 		$uuden_rivin_kpl = $_POST['uuden_rivin_kpl'];
 
-		$uuden_rivin_id = splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, true);
-
+		$uuden_rivin_id = splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, FALSE);
 		$hinnat = laske_hinta($laskurow, $uuden_rivin_id);
 
 		$rivi['rivihinta'] = $hinnat['rivihinta'];

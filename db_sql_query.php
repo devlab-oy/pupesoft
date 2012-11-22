@@ -99,6 +99,7 @@
 
 			//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 			$useslave = 1;
+			$usemastertoo = 1;
 
 			require ("inc/connect.inc");
 
@@ -179,23 +180,13 @@ $order";
 			echo "<font class='message'><pre>$sqlhaku</pre><br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("rivi‰").".</font><br><br>";
 
 			if (mysql_num_rows($result) > 0) {
-
-				if (include('Spreadsheet/Excel/Writer.php')) {
+				if (include('inc/pupeExcel.inc')) {
 
 					function tee_excel ($result) {
 						global $excelrivi, $excelnimi;
 
-						// keksit‰‰n failille joku varmasti uniikki nimi:
-						list($usec, $sec) = explode(' ', microtime());
-						mt_srand((float) $sec + ((float) $usec * 100000));
-						$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-						$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-						$workbook->setVersion(8);
-						$worksheet = $workbook->addWorksheet('Sheet 1');
-
-						$format_bold = $workbook->addFormat();
-						$format_bold->setBold();
+						$worksheet 	 = new pupeExcel();
+						$format_bold = array("bold" => TRUE);
 
 						$excelrivi = 0;
 						$talis = 0;
@@ -206,15 +197,14 @@ $order";
 						$worksheet->write($excelrivi, $i+$talis, "TOIMINTO", $format_bold);
 						$excelrivi++;
 
-						return(array($workbook, $worksheet, $excelrivi));
+						return(array($worksheet, $excelrivi));
 					}
 
-					function sulje_excel ($filelask) {
-						global $workbook, $excelnimi, $table;
+					function sulje_excel ($worksheet, $filelask) {
+						global $excelnimi, $table;
 
-						// We need to explicitly close the workbook
-						$workbook->close();
-
+						// We need to explicitly close the worksheet
+						$excelnimi = $worksheet->close();
 						$loprivi = $filelask*65000;
 						$alkrivi = ($loprivi-65000)+1;
 
@@ -222,7 +212,7 @@ $order";
 						echo "<tr><th>".t("Tallenna tulos")." (".t("Rivit")." $alkrivi-$loprivi):</th>";
 						echo "<form method='post' class='multisubmit'>";
 						echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-						echo "<input type='hidden' name='kaunisnimi' value='SQLhaku_".$table."_".$filelask.".xls'>";
+						echo "<input type='hidden' name='kaunisnimi' value='SQLhaku_".$table."_".$filelask.".xlsx'>";
 						echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 						echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 						echo "</table><br>";
@@ -231,16 +221,16 @@ $order";
 					$lask = 0;
 					$filelask = 1;
 
-					list($workbook, $worksheet, $excelrivi) = tee_excel($result);
+					list($worksheet, $excelrivi) = tee_excel($result);
 
 					while ($row = mysql_fetch_array($result)) {
 						$lask++;
 
 						if ($lask % 65000 == 0) {
-							sulje_excel($filelask);
+							sulje_excel($worksheet, $filelask);
 							$filelask++;
 
-							list($workbook, $worksheet, $excelrivi) = tee_excel($result);
+							list($worksheet, $excelrivi) = tee_excel($result);
 						}
 
 						$talis = 0;
@@ -258,7 +248,7 @@ $order";
 						$excelrivi++;
 					}
 
-					sulje_excel($filelask);
+					sulje_excel($worksheet, $filelask);
 				}
 			}
 		}

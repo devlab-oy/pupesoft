@@ -7,7 +7,6 @@
 	echo "<form name='inve' method='post' enctype='multipart/form-data' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
-
 	// Monivalintalaatikot (osasto, try tuotemerkki...)
 	// Määritellään mitkä latikot halutaan mukaan
 	$monivalintalaatikot = array("OSASTO", "TRY");
@@ -45,6 +44,25 @@
 	<input type='text' size='6' maxlength='5' name='lhyllyvali'>
 				<input type='text' size='6' maxlength='5' name='lhyllytaso'>";
 	echo "</td></tr>";
+
+	if ($yhtiorow['kerayserat'] != '') {
+		# Haetaan keraysvyohykkeet
+		$query = "SELECT tunnus, nimitys
+					FROM keraysvyohyke
+					WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
+		$kresult = pupe_query($query);
+
+		# Keräysvyöhyke dropdown
+		echo "<tr><th>",t("Keräysvyöhyke"),"</th>";
+		echo "<td><select name='keraysvyohyke'>";
+		echo "<option value=''>",t("Valitse"),"</option>";
+			while ($krow = mysql_fetch_assoc($kresult)) {
+				echo "<option value='{$krow['tunnus']}'>{$krow['nimitys']}</option>";
+			}
+
+		echo "</select></td></tr>";
+	}
+
 
 	echo "<tr><td class='back'>",t("ja/tai"),"...</td></tr>";
 
@@ -150,8 +168,8 @@
 			</tr>";
 
 	if ($piilotaToim_tuoteno != "") {
-			$checkPiilotaToim_tuoteno = "CHECKED";
-		}
+		$checkPiilotaToim_tuoteno = "CHECKED";
+	}
 
 	echo "<tr><th>".t("Älä tulosta toimittajan tuotenumeroa listauksiin:")."</th>
 		<td><input type='checkbox' name='piilotaToim_tuoteno' value='Y' $checkPiilotaToim_tuoteno></td>
@@ -177,17 +195,20 @@
 
 	echo "</td></tr>";
 
-	$query = "SELECT count(tunnus) AS cnt FROM varaston_hyllypaikat WHERE yhtio = '{$kukarow['yhtio']}'";
-	$cnt_chk_res = pupe_query($query);
-	$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
+	if ($yhtiorow['kerayserat'] != '') {
 
-	if ($cnt_chk_row['cnt'] > 0) {
-		echo "<tr><th>",t("Reservipaikka"),"</th>";
-		echo "<td><select name='reservipaikka'>";
-		echo "<option value=''>",t("Valitse"),"</option>";
-		echo "<option value='E'>",t("Ei"),"</pre>";
-		echo "<option value='K'>",t("Kyllä"),"</pre>";
-		echo "</select></td></tr>";
+		$query = "SELECT count(tunnus) AS cnt FROM varaston_hyllypaikat WHERE yhtio = '{$kukarow['yhtio']}'";
+		$cnt_chk_res = pupe_query($query);
+		$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
+
+		if ($cnt_chk_row['cnt'] > 0) {
+			echo "<tr><th>",t("Reservipaikka"),"</th>";
+			echo "<td><select name='reservipaikka'>";
+			echo "<option value=''>",t("Valitse"),"</option>";
+			echo "<option value='E'>",t("Ei"),"</option>";
+			echo "<option value='K'>",t("Kyllä"),"</option>";
+			echo "</select></td></tr>";
+		}
 	}
 
 	echo "<tr><th>",t("Järjestä lista:"),"</th>";
@@ -497,11 +518,14 @@
 
 		$joinlisa = "";
 
-		if (isset($reservipaikka) and $yhtiorow["varastopaikkojen_maarittely"] != '') {
+		# Resrvipaikka ja keräysvyöhyke rajaus vain jos keräyserät parametri on asetettu.
+		if ($yhtiorow["varastopaikkojen_maarittely"] != '' and (isset($reservipaikka) or isset($keraysvyohyke) and $yhtiorow["kerayserat"] != '')) {
 			$ressulisa = $reservipaikka != '' ? "varaston_hyllypaikat.reservipaikka = '".mysql_real_escape_string($reservipaikka)."' AND " : "";
+			$vyohykelisa = $keraysvyohyke != '' ? "varaston_hyllypaikat.keraysvyohyke = '".mysql_real_escape_string($keraysvyohyke)."' AND " : "";
 
 			$joinlisa = " JOIN varaston_hyllypaikat ON (
 							{$ressulisa}
+							{$vyohykelisa}
 							varaston_hyllypaikat.yhtio = tuotepaikat.yhtio
 							AND varaston_hyllypaikat.hyllyalue = tuotepaikat.hyllyalue
 							AND varaston_hyllypaikat.hyllynro = tuotepaikat.hyllynro

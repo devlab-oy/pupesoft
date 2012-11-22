@@ -14,7 +14,7 @@ if ($tee == "VALMIS") {
 
 	if (empty($row['viite'])) {
 		echo "<br><font class='error'>".t('VIRHE: Viite on tyhjä, tämä on pakollinen kenttä')."!</font><br><br>";
-		
+
 		$tee = 'MUOKKAA';
 	}
 	else {
@@ -1274,26 +1274,26 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 	//myyntihinta = kokopäivärahan hinta
 	//malli = puoli/osapäivärahan nimitys
 	//myymalahinta = puoli/osapäivärahan hinta
-	$query = "SELECT
-		tilausrivi.tunnus,
-		tilausrivi.alv,
-		tilausrivi.kpl,
-		tuote.nimitys,
-		tuote.myyntihinta,
-		tuote.malli,
-		tuote.myymalahinta,
-		tuote.vienti
+	$query = "	SELECT
+				tilausrivi.tunnus,
+				tilausrivi.alv,
+				tilausrivi.kpl,
+				tuote.nimitys,
+				tuote.myyntihinta,
+				tuote.malli,
+				tuote.myymalahinta,
+				tuote.vienti
 				FROM tilausrivi
-				JOIN tuote
-				ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' AND tilausrivi.tunnus = '$rivitunnus'";
-
+				JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				AND tilausrivi.tunnus  = '$rivitunnus'";
 	$result = pupe_query($query);
 	$row = mysql_fetch_assoc($result);
 
 	$query_ale_lisa = generoi_alekentta('M');
 	$ilmaiset_lounaat = (int) trim($ilmaiset_lounaat);
-	if($row['vienti'] == 'FI') {
+
+	if ($row['vienti'] == 'FI') {
 		if ($ilmaiset_lounaat >= 1) {
 			//Tällöin kotimaan päiväraha muutetaan osapäivärahaksi
 			$rivihinta = $row['kpl'] * $row['myymalahinta'];
@@ -1312,7 +1312,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 			//Ulkomaanpäivä raha muutetaan puolipäivärahaksi
 			$rivihinta = $row['kpl'] * $row['myymalahinta'];
 			$tilausrivi_uusi_hinta = $row['myymalahinta'];
-			$tilausrivi_uusi_nimitys = $row['malli'];
+			$tilausrivi_uusi_nimitys = $row['nimitys']." (".t("Nolla-arvolla").")";
 		}
 		else {
 			$rivihinta = $row['kpl'] * $row['myyntihinta'];
@@ -1320,34 +1320,38 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 			$tilausrivi_uusi_nimitys = $row['nimitys'];
 		}
 	}
+
 	$query = "	UPDATE tilausrivi
-				SET nimitys ='{$tilausrivi_uusi_nimitys}',
-				hinta = '{$tilausrivi_uusi_hinta}',
-				rivihinta = '{$rivihinta}',
-				erikoisale = '{$ilmaiset_lounaat}'
+				SET nimitys = '{$tilausrivi_uusi_nimitys}',
+				hinta 		= '{$tilausrivi_uusi_hinta}',
+				rivihinta 	= '{$rivihinta}',
+				erikoisale 	= '{$ilmaiset_lounaat}'
 				WHERE tunnus = '{$row['tunnus']}'";
 	$result = pupe_query($query);
 
 	//tilausrivit on nyt kondiksessa, loopataan tilauksen rivit läpi, jotta saadaan tiliointiin rivien summa
-	$query = "SELECT tilausrivi.rivihinta
+	$query = "	SELECT tilausrivi.rivihinta
 				FROM tilausrivi
 				JOIN tuote
 				ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' AND tilausrivi.otunnus = '$tilausnumero'";
+				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				AND tilausrivi.otunnus = '$tilausnumero'";
 	$result = pupe_query($query);
 	$rows = mysql_fetch_assoc($result);
 
 	$summa = 0;
+
 	foreach ($rows as $row) {
 		$summa += $row['rivihinta'];
 	}
 
-	$query = "UPDATE tiliointi
-		WHERE tiliointi.ltunnus = '" . $tilausnumero . "'
-			SET summa='" . $summa . "'";
+	$query = "	UPDATE tiliointi
+				WHERE ltunnus = '{$tilausnumero}'
+				SET summa = '{$summa}'";
 
-	$tee = 'MUOKKAA';
-	$kuivat = 'JOO';
+	$tee 		= 'MUOKKAA';
+	$tapa 		= '';
+	$kuivat 	= '';
 	$rivitunnus = '';
 }
 
@@ -1577,7 +1581,7 @@ if ($tee == "MUOKKAA") {
 				}
 			}
 			else {
-				if ($tyyppi != "") {
+				if ($tyyppi != "" and $tuoteno != "") {
 					$a = array($tyyppi);
 				}
 				else {
@@ -1609,7 +1613,7 @@ if ($tee == "MUOKKAA") {
 					else {
 						$onchange = "submit();";
 					}
-					
+
 					if ($viranomaistyyppi == "A") {
 						$valinta = "<tr><th>".t("Päiväraha")."</th>";
 					}
@@ -1945,7 +1949,7 @@ if ($tee == "MUOKKAA") {
 				$tilino	= "";
 			}
 
-			echo "<td colspan='2'><input type='text' name='tilino' value = '$tilino' size='20'></td>";
+			echo "<td colspan='1'><input type='text' name='tilino' value = '$tilino' size='20'></td>";
 		}
 
 		echo "<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'></td>";
@@ -2005,42 +2009,47 @@ if ($tee == "MUOKKAA") {
 		echo "<th>" . t("Ilmaiset lounaat") . "</th>";
 		echo "</tr>";
 
-		$query2 = 'SELECT count(*)
-		FROM tilausrivi
-		WHERE tilausrivi.yhtio = "' . $kukarow['yhtio'] . '"
-		AND tilausrivi.otunnus = ' . $tilausnumero . '
-		GROUP BY tilausrivi.perheid2';
+		$query2 = "	SELECT count(*)
+					FROM tilausrivi
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND otunnus = '{$tilausnumero}'
+					GROUP BY perheid2";
 		$result2 = pupe_query($query2);
 
-		$summa = 0;
+		$summa 		= 0;
 		$tapahtumia = 1;
-		$aikajana = array();
-		$eka_rivi = null;
+		$aikajana 	= array();
+		$eka_rivi 	= null;
+
 		while ($row = mysql_fetch_assoc($result)) {
 			if ($eka_rivi == null) {
 				$eka_rivi = $row;
 			}
-			if($row['tunnus'] == $row['perheid2']) {
+
+			if ($row['tunnus'] == $row['perheid2']) {
 				$tilausrivien_lkm1 = mysql_fetch_row($result2);
-				$tilausrivien_lkm = (int)$tilausrivien_lkm1[0];
+				$tilausrivien_lkm = (int) $tilausrivien_lkm1[0];
 			}
 
 			$rowTemp = $row;//tämä sen takia, että viimenen rivi on tallessa myöhempää käyttöä varten
+
 			if(!isset($aikajana['ensimmainen_aika']))  {
 				$aikaTemp = new Datetime($row['kerattyaika']);
 				$aikajana['ensimmainen_aika'] = $aikaTemp->format('d-m-Y H:i');
 			}
+
 			echo_matkalasku_row($row, $kukarow, $laskurow, $yhtiorow, $tee, $lopetus, $toim, $tilausnumero, $PHP_SELF, $tapahtumia, $tilausrivien_lkm);
+
 			$summa += $row["rivihinta"];
 			$tapahtumia++;
 		}
+
 		$row = $rowTemp;
 
 		$aikaTemp = new Datetime($row['toimitettuaika']);
 		$aikajana['viimeinen_aika'] = $aikaTemp->format('d-m-Y H:i');
 
 		echo_kommentit($eka_rivi, $toim, $kukarow, $aikajana);
-
 		echo_summa($summa);
 
 		echo "</table>";
@@ -2117,7 +2126,6 @@ if ($tee == "MUOKKAA") {
 		echo "</form>";
 	}
 	*/
-
 
 	if ($id > 0) {
 		echo "<iframe src='view.php?id=$id' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
@@ -2434,7 +2442,7 @@ function echo_matkalasku_row($row, $kukarow, $laskurow, $yhtiorow, $tee, $lopetu
 
 	echo_ilmaiset_lounaat($lopetus, $toim, $tilausnumero, $row);
 
-	if($row['tunnus'] == $row['perheid2']) {
+	if ($row['tunnus'] == $row['perheid2']) {
 		echo_nappulat($laskurow, $tee, $lopetus, $toim, $tilausnumero, $row['perhe'], $row['perheid2']);
 	}
 
@@ -2503,18 +2511,18 @@ function echo_ilmaiset_lounaat($lopetus, $toim, $tilausnumero, $row) {
 
 	echo "<td>";
 	echo "<form autocomplete='off' method='post'>
-						<input type='hidden' value='TARKISTA_ILMAISET_LOUNAAT' name='tee'>
-						<input type='hidden' value='$lopetus' name='lopetus'>
-						<input type='hidden' value='$toim' name='toim'>
-						<input type='hidden' value='$tilausnumero' name='tilausnumero'>
-						<input type='hidden' value='MUOKKAA' name='tapa'>
-						<input type='hidden' value='{$row['tunnus']}' name='rivitunnus'>
-						<input type='hidden' value='{$row['perheid2']}' name='perheid2'>";
+		  	<input type='hidden' value='TARKISTA_ILMAISET_LOUNAAT' name='tee'>
+		  	<input type='hidden' value='$lopetus' name='lopetus'>
+		  	<input type='hidden' value='$toim' name='toim'>
+		  	<input type='hidden' value='$tilausnumero' name='tilausnumero'>
+		  	<input type='hidden' value='MUOKKAA' name='tapa'>
+		  	<input type='hidden' value='{$row['tunnus']}' name='rivitunnus'>
+		  	<input type='hidden' value='{$row['perheid2']}' name='perheid2'>";
 
 	echo "<select name='ilmaiset_lounaat' onchange='submit();' align='right'>";
 	foreach ($ilmaiset_lounaat_kpl as $lounas) {
 		if ($lounas == 2) {
-			if($lounas == $selected_lounas) {
+			if ($lounas == $selected_lounas) {
 				echo "<option selected='selected' value='$lounas'>$lounas tai enemmän</option>";
 			}
 			else {
@@ -2582,7 +2590,9 @@ function echo_kommentit($row, $toim, $kukarow, $aikajana) {
 	}
 
 	if ($row["kommentti"] != "") {
-		echo "<tr class='aktiivi'><td colspan='6' style='font-style:italic'>$row[kommentti]</td></tr>";
+		echo "<tr class='aktiivi'>";
+		echo '<td></td>';
+		echo "<td colspan='8' style='font-style:italic'>$row[kommentti]</td></tr>";
 	}
 
 	if ($toim == "SUPER") {

@@ -569,10 +569,6 @@
 			require 'vastaavat.class.php';
 			$vastaavat = new Vastaavat($korvaavat->paatuote());
 
-			// Tsekataan onko useampia vastaavuusketjuja
-			if (count($vastaavat->ketjut()) > 1) {
-				echo "<font class='error'>Tuote ({$korvaavat->paatuote()}) löytyi useasta vastaavuusketjusta, käytetään ensimmäistä.</font>";
-			}
 
 			// Vastaavat tuotteet array
 			$vastaavat_tuotteet = array();
@@ -580,8 +576,20 @@
 
 			// Vastaavien automaattinen myynti, eli haetaanko vastaavat
 			if ($korvaavat_kiellot == "VASTAAVAT") {
+
 				$options = array('vastaavuusketjun_jarjestys' => $yhtiorow['vastaavuusketjun_jarjestys']);
-				$vastaavat_tuotteet = $vastaavat->tuotteet($options);
+
+				// Useampi vastaavuusketju mergetetään yhdeksi
+				if (count($vastaavat->ketjut()) > 1) {
+
+					// Haetaan kaikki kaikki vastaavat tuotteet
+					foreach ($vastaavat->ketjut() as $ketju) {
+						$vastaavat_tuotteet = array_merge($vastaavat_tuotteet, $vastaavat->find_by_ketju($ketju));
+					}
+				}
+				else {
+					$vastaavat_tuotteet = $vastaavat->tuotteet($options);
+				}
 			}
 
 			// Yhdistetään korvaavat ja vastaavat (ja vaihtoehtoiset?) ketjut
@@ -594,7 +602,7 @@
 				list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
 				// Kommenti jos tuote on loppu, joka tilanteessa?
-				if ($krmyytavissa == 0 and $krow2[status] != 'P') {
+				if ($krmyytavissa == 0 and $krow2[status] != 'P' and $krow2[tyyppi] == 'korvaava') {
 					if (stripos($kommentti_lisa, t("Tuote {$krow2[tuoteno]} on tilapäisesti loppu.")) === FALSE) {
 						$kommentti_lisa .= t("Tuote {$krow2[tuoteno]} on tilapäisesti loppu.")."<br>";
 					}
@@ -637,6 +645,13 @@
 							$kaikkituotteet[] = strtoupper($krow2["tuoteno"]);
 						}
 					}
+
+					// Jos tilatulla tuotteella on saldoa toimitetaan se aina ensin loppuun
+					if (strtoupper($krow2[tuoteno]) == strtoupper($tuoteno) and $krmyytavissa > 0) {
+						$kaikkituotteet = array(); // Nollataan array ja tilataan vaan tilattu
+						$kaikkituotteet[] = strtoupper($krow2["tuoteno"]);
+					}
+
 				}
 
 				// Asiakas saa aina halvemman hinnan mukaan tuotteen, mik‰li alkuper‰inen tuote on P toistuva tai puute.

@@ -60,11 +60,23 @@ class Vastaavat {
 
 		$tuotteet = array();
 
+		$conditions = '';
+		if (!empty($options)) {
+			// Heitetään nolla järjestykset ketjun viimeiseksti
+			if ($this->tuote['jarjestys'] == 0) $this->tuote['jarjestys'] = 9999;
+
+			// Tsekataan tarvittavat parametrit
+			if($options['vastaavuusketjun_jarjestys'] == 'K') {
+				$conditions = "HAVING jarjestys >= {$this->tuote['jarjestys']}";
+			}
+		}
+
 		$query = "SELECT 'vastaava' as tyyppi, if(jarjestys=0, 9999, jarjestys) jarjestys, vaihtoehtoinen, tuote.*
 					FROM vastaavat
 					JOIN tuote ON vastaavat.yhtio=tuote.yhtio AND vastaavat.tuoteno=tuote.tuoteno
 					WHERE vastaavat.yhtio='{$kukarow['yhtio']}'
 					AND id='{$id}'
+					AND vaihtoehtoinen = '{$this->tyyppi}'
 					ORDER BY jarjestys, tuoteno";
 		$result = pupe_query($query);
 
@@ -76,7 +88,7 @@ class Vastaavat {
 
 	}
 
-	/** Palauttaa halutun ketjun tuotteet tai yhdistetyn ketjun kaikista ketjuista
+	/** Palauttaa halutun ketjun tuotteet
 	 */
 	function tuotteet($options = array()) {
 		global $kukarow;

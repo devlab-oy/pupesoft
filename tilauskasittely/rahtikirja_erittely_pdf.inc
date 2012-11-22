@@ -21,7 +21,7 @@
 
 	if (!function_exists('uusi_sivu_erittely')) {
 		function uusi_sivu_erittely ($laskurow) {
-			global $yhtiorow, $kukarow, $pdf, $kieli, $iso, $toitarow;
+			global $yhtiorow, $kukarow, $pdf, $kieli, $iso, $toitarow, $kirj;
 
 			if (!isset($pdf)) {
 				//PDF parametrit

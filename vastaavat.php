@@ -192,6 +192,24 @@ if ($tee == 'del') {
     $result = pupe_query($query);
 }
 
+if ($tee == 'vaihtoehtoinen') {
+    //haetaan poistettavan tuotteen id.. käyttäjästävällistä..
+    $query  = "SELECT * FROM vastaavat WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
+    $row    = mysql_fetch_array($result);
+    $id     = $row['id'];
+
+    // Jos setattu vaihetoehtoiseksi?
+    if ($vaihtoehtoinen == 'true' and $row['vaihtoehtoinen'] != 'K') {
+        $query = "UPDATE vastaavat SET vaihtoehtoinen='K' WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
+        $result = pupe_query($query);
+    }
+    else if ($vaihtoehtoinen != true and $row['vaihtoehtoinen'] == 'K') {
+        $query = "UPDATE vastaavat SET vaihtoehtoinen='' WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
+        $result = pupe_query($query);
+    }
+}
+
 if ($tee == 'muutaprio') {
     //haetaan poistettavan tuotteen id.. käyttäjästävällistä..
     $query  = "SELECT * FROM vastaavat WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
@@ -220,16 +238,6 @@ if ($tee == 'muutaprio') {
                         muuttaja = '$kukarow[kuka]'
                         WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
         $result = pupe_query($query);
-
-        // Jos setattu vaihetoehtoiseksi?
-        if ($vaihtoehtoinen == 'true' and $row['vaihtoehtoinen'] != 'K') {
-            $query = "UPDATE vastaavat SET vaihtoehtoinen='K' WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
-            $result = pupe_query($query);
-        }
-        else if ($vaihtoehtoinen != true and $row['vaihtoehtoinen'] == 'K') {
-            $query = "UPDATE vastaavat SET vaihtoehtoinen='' WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
-            $result = pupe_query($query);
-        }
     }
 }
 
@@ -299,12 +307,15 @@ if ($tuoteno != '') {
                     echo "<form method='post' autocomplete='off'>
                         <td><input size='5' type='text' name='prio' value='$tuote[jarjestys]'>
                         <input type='hidden' name='tunnus' value='$tuote[tunnus]'>
-                        <input type='hidden' name='tee' value='muutaprio'></td>";
-
-                    $checked = ($tuote['vaihtoehtoinen'] == 'K') ? 'checked' : '';
-                    echo "<td><input type='checkbox' name='vaihtoehtoinen' value='true' onclick='submit()' $checked></td>
+                        <input type='hidden' name='tee' value='muutaprio'></td>
                         </form>";
 
+                    $checked = ($tuote['vaihtoehtoinen'] == 'K') ? 'checked' : '';
+                    echo "<td><form method='post'>
+                        <input type='hidden' name='tunnus' value='$tuote[tunnus]'>
+                        <input type='hidden' name='tee' value='vaihtoehtoinen'>
+                        <input type='checkbox' name='vaihtoehtoinen' value='true' onclick='submit()' $checked>
+                        </form></td>";
 
                     echo"<form method='post'>
                         <td class='back'>

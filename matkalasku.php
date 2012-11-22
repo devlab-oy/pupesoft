@@ -56,7 +56,7 @@ if ($tee == "UUSI") {
 		(tai hakusanalla päivärahat yyyy)
 	*/
 
-	//	Tarkastetaan että päivärahat löytyy. Puolipäivä rahat löytyy päivärahan kanssa samaltariviltä
+	//	Tarkastetaan että päivärahat löytyy. Puolipäivä rahat löytyy päivärahan kanssa samalta riviltä
 	$query = "	SELECT tuote.tuoteno
 				FROM tuote
 				JOIN tili ON tili.yhtio = tuote.yhtio and tili.tilino = tuote.tilino
@@ -226,7 +226,7 @@ if ($tee != "") {
 							where yhtio 	= '$kukarow[yhtio]'
 							and tuoteno 	= '$tuoteno'
 							and tuotetyyppi = '$tyyppi'
-							and status != 'P'";
+							and status 	   != 'P'";
 				$tres = pupe_query($query);
 
 				if (mysql_num_rows($tres) != 1) {
@@ -363,11 +363,11 @@ if ($tee != "") {
 								//Osapäivärahan tiedot löytyvät $trow malli ja myymalahinta
 								$osapaivat++;
 
-								$tuoteno_array[1]	= $puolipaivatuoteno;
-								$kpl_array[1]		= $osapaivat;
-								$hinta_array[1]		= $trow['myymalahinta'];
-								$nimitys_array[1]	= $trow['malli'];
-								$varri_array[1] 	= "2";	 // Kotimaan osapäiväraha
+								$tuoteno_array[1] = $puolipaivatuoteno;
+								$kpl_array[1]	  = $osapaivat;
+								$hinta_array[1]	  = $trow['myymalahinta'];
+								$nimitys_array[1] = $trow['malli'];
+								$varri_array[1]   = "2";	 // Kotimaan osapäiväraha
 
 								$selite .= "<br>$puolipaivatuoteno - {$trow['malli']} $osapaivat kpl á ".(float) round($trow['myymalahinta'], 2);
 							}
@@ -383,10 +383,10 @@ if ($tee != "") {
 								Mikäli työmatkaan käytetty kokonaisaika jää alle 10 tunnin, suoritetaan päiväraha kotimaan matkojen säännösten ja määrien mukaisesti.
 								Eli tässä tapauksessa: "Työmatkan kestoaika yli 6 tuntia --> osapäivärahakorvaus"
 								*/
-								
+
 								$trow["myyntihinta"] = $trow['myymalahinta'];
 								$trow["nimitys"] .= " (".t($trow['malli']).")";
-								
+
 								// Ulkomaan osapäiväraha
 								$varri = "4";
 
@@ -405,7 +405,7 @@ if ($tee != "") {
 								Suomeen palattaessa palkansaajalla on oikeus puoleen viimeksi päättyneeltä matkavuorokaudelta maksetusta ulkomaanpäivärahasta,
 								jos työmatkaan käytetty aika ylittää viimeisen ulkomaan alueella tai sieltä lähteneessä laivassa tai lentokoneessa päättyneen täyden matkavuorokauden yli kahdella tunnilla.
 								*/
-								
+
 								$puolipaivatuoteno = 'P' . $tuoteno;
 
 								$puolipaivat++;
@@ -482,7 +482,7 @@ if ($tee != "") {
 				if ($errori == "") {
 
 					ksort($tuoteno_array);
-					
+
 					$summa = 0;
 					foreach ($tuoteno_array as $indeksi => $lisaa_tuoteno) {
 
@@ -586,7 +586,7 @@ if ($tee != "") {
 										toimitettuaika = '$_loppuaika'";
 
 									$insres = pupe_query($query);
-									
+
 									$perhe_id = ($perhe_id == null) ? mysql_insert_id() : $perhe_id;
 									$lisatty_tun = mysql_insert_id();
 
@@ -1273,10 +1273,10 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 				JOIN tuote
 				ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' AND tilausrivi.tunnus = '$rivitunnus'";
-	
+
 	$result = pupe_query($query);
 	$row = mysql_fetch_assoc($result);
-	
+
 	$query_ale_lisa = generoi_alekentta('M');
 	$ilmaiset_lounaat = (int) trim($ilmaiset_lounaat);
 	if($row['vienti'] == 'FI') {
@@ -1313,7 +1313,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 				erikoisale = '{$ilmaiset_lounaat}'
 				WHERE tunnus = '{$row['tunnus']}'";
 	$result = pupe_query($query);
-	
+
 	//tilausrivit on nyt kondiksessa, loopataan tilauksen rivit läpi, jotta saadaan tiliointiin rivien summa
 	$query = "SELECT tilausrivi.rivihinta
 				FROM tilausrivi
@@ -1322,16 +1322,16 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' AND tilausrivi.otunnus = '$tilausnumero'";
 	$result = pupe_query($query);
 	$rows = mysql_fetch_assoc($result);
-	
+
 	$summa = 0;
 	foreach ($rows as $row) {
 		$summa += $row['rivihinta'];
 	}
-	
+
 	$query = "UPDATE tiliointi
 		WHERE tiliointi.ltunnus = '" . $tilausnumero . "'
 			SET summa='" . $summa . "'";
-	
+
 	$tee = 'MUOKKAA';
 	$kuivat = 'JOO';
 	$rivitunnus = '';
@@ -1369,15 +1369,15 @@ if ($tee == "MUOKKAA") {
 	if ($kuivat != "JOO") {
 		//rivitunnus = yhtäkuin ensimmäisen rivin tunnus sekä kaikkien haettavien perheid2. haemme ne rivit ja poistamme ne
 		if (!empty($rivitunnus)) {
-			
+
 			if ($perheid2 > 0) {
 				$tapahtumarow = hae_ensimmainen_matkalaskurivi($kukarow, $tilausnumero, $perheid2);
 			}
-			
+
 			if ($rivitunnus > 0) {
 				$tilausrivi = hae_kaikki_matkalaskurivit($kukarow, $tilausnumero, $rivitunnus);
 			}
-			
+
 			poista_edelliset_matkalaskurivit($rivitunnus, $kukarow);
 
 			//	Poistetaan myös vastaava tiliöinti
@@ -1575,8 +1575,6 @@ if ($tee == "MUOKKAA") {
 
 			foreach ($a as $viranomaistyyppi) {
 
-				$tyyppi_nimi = "";
-
 				$query = "	SELECT tuote.tuoteno, tuote.nimitys, tuote.vienti,
 							IF(tuote.vienti = '$yhtiorow[maa]' or tuote.nimitys like '%ateria%', 1, if(tuote.vienti != '', 2, 3)) sorttaus
 							FROM tuote
@@ -1597,8 +1595,14 @@ if ($tee == "MUOKKAA") {
 					else {
 						$onchange = "submit();";
 					}
+					
+					if ($viranomaistyyppi == "A") {
+						$valinta = "<tr><th>".t("Päiväraha")."</th>";
+					}
+					else {
+						$valinta = "<tr><th>".t("Muu kulu")."</th>";
+					}
 
-					$valinta = "<tr><th>$tyyppi_nimi</th>";
 					$valinta .= "<td>";
 					$valinta .= "<select style=\"width: 350px\" name='tuoteno' $extra onchange=\"$onchange\">";
 
@@ -1971,7 +1975,7 @@ if ($tee == "MUOKKAA") {
 				and tilausrivi.tyyppi  = 'M'
 				ORDER BY tilausrivi.perheid2, tilausrivi.tunnus";
 	$result = pupe_query($query);
-	
+
 	if (mysql_num_rows($result) > 0) {
 		echo "<br><font class='message'>" . t("Kulurivit") . "</font><hr>";
 		echo "<table>";
@@ -1986,14 +1990,14 @@ if ($tee == "MUOKKAA") {
 		echo "<th>" . t("Pvm") . "</th>";
 		echo "<th>" . t("Ilmaiset lounaat") . "</th>";
 		echo "</tr>";
-		
+
 		$query2 = 'SELECT count(*)
 		FROM tilausrivi
 		WHERE tilausrivi.yhtio = "' . $kukarow['yhtio'] . '"
 		AND tilausrivi.otunnus = ' . $tilausnumero . '
 		GROUP BY tilausrivi.perheid2';
 		$result2 = pupe_query($query2);
-		
+
 		$summa = 0;
 		$tapahtumia = 1;
 		$aikajana = array();
@@ -2006,7 +2010,7 @@ if ($tee == "MUOKKAA") {
 				$tilausrivien_lkm1 = mysql_fetch_row($result2);
 				$tilausrivien_lkm = (int)$tilausrivien_lkm1[0];
 			}
-			
+
 			$rowTemp = $row;//tämä sen takia, että viimenen rivi on tallessa myöhempää käyttöä varten
 			if(!isset($aikajana['ensimmainen_aika']))  {
 				$aikaTemp = new Datetime($row['kerattyaika']);
@@ -2017,10 +2021,10 @@ if ($tee == "MUOKKAA") {
 			$tapahtumia++;
 		}
 		$row = $rowTemp;
-		
+
 		$aikaTemp = new Datetime($row['toimitettuaika']);
 		$aikajana['viimeinen_aika'] = $aikaTemp->format('d-m-Y H:i');
-		
+
 		echo_kommentit($eka_rivi, $toim, $kukarow, $aikajana);
 
 		echo_summa($summa);
@@ -2399,12 +2403,12 @@ function echo_matkalasku_row($row, $kukarow, $laskurow, $yhtiorow, $tee, $lopetu
 	$row["nimitys"] = t_tuotteen_avainsanat($row, 'nimitys', $kukarow["kieli"]);
 
 	echo '<tr class="aktiivi">';
-	
+
 	if($row['tunnus'] == $row['perheid2']) {
 		$riviTemp++;
 		echo '<td rowspan="'.$tilausrivien_lkm.'">' . ($riviTemp) . '</td>';
 	}
-	
+
 	if ($laskurow["tilaustyyppi"] != "M" and $row["tuoteno"] == "") {
 		echo_checks($kukarow, $yhtiorow, $row, $PHP_SELF, $tee, $lopetus, $toim, $tilausnumero, $edrivi);
 	}
@@ -2419,7 +2423,7 @@ function echo_matkalasku_row($row, $kukarow, $laskurow, $yhtiorow, $tee, $lopetu
 	if($row['tunnus'] == $row['perheid2']) {
 		echo_nappulat($laskurow, $tee, $lopetus, $toim, $tilausnumero, $row['perhe'], $row['perheid2']);
 	}
-	
+
 	echo '</tr>';
 }
 
@@ -2470,7 +2474,7 @@ function echo_checks($kukarow, $yhtiorow, $row, $PHP_SELF, $tee, $lopetus, $toim
 
 function echo_td($row) {
 	$matkapaiva = new DateTime($row['kerattyaika']);
-	
+
 	echo "<td>$row[kustannuspaikka]</td>";
 	echo "<td align='right'>$row[kpl]</td>";
 	echo "<td align='right'>" . number_format($row["hinta"], 2, ', ', ' ') . "</td>";
@@ -2654,9 +2658,9 @@ function hae_kaikki_matkalaskurivit($kukarow, $tilausnumero, $rivitunnus) {
 		WHERE tilausrivi.yhtio ="' . $kukarow['yhtio'] . '"
 		AND tilausrivi.perheid2 ="' . $rivitunnus . '"
 		ORDER BY tilausrivi.kerattyaika';
-	
+
 	$result = pupe_query($query);
-	
+
 	//puukko
 	//laiteaan ekan rivin tiedot talteen koska niitä tietoja käytetään myöhemmin funkkarin jälkeen. ajat pitää kuintekin tulla ensimmäisestä ja viimeisestä matkalaskun päivämäärästä
 	$eka_matkalasku = null;
@@ -2666,9 +2670,9 @@ function hae_kaikki_matkalaskurivit($kukarow, $tilausnumero, $rivitunnus) {
 		}
 		$rowTemp = $row;//laiteaan viimonen matkalaskurivi talteen
 	}
-	
+
 	$rowTemp['kerattyaika'] = $eka_matkalasku['kerattyaika'];
-	
+
 	return $rowTemp;
 }
 

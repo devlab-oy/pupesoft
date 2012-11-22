@@ -12,25 +12,34 @@
 
 			if ($pak != "") {
 
+				$toisen_sscc = "";
+
+				if (strpos($pak, '####') !== FALSE) list($pak, $toisen_sscc) = explode('####', $pak);
+
 				if ($pak == 'muu_kolli') $pak = 999;
 
-				echo "$sscc -> $pak<br>";
+				echo "$sscc -> $pak (toisen sscc: $toisen_sscc)<br>";
 
-				$query = "LOCK TABLES avainsana WRITE";
-				$lock_res = pupe_query($query);
+				if ($toisen_sscc == "") {
+					$query = "LOCK TABLES avainsana WRITE";
+					$lock_res = pupe_query($query);
 
-				$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-				$selite_result = pupe_query($query);
-				$selite_row = mysql_fetch_assoc($selite_result);
+					$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
+					$selite_result = pupe_query($query);
+					$selite_row = mysql_fetch_assoc($selite_result);
 
-				$uusi_sscc = is_numeric($selite_row['selite']) ? (int) $selite_row['selite'] + 1 : 1;
+					$uusi_sscc = is_numeric($selite_row['selite']) ? (int) $selite_row['selite'] + 1 : 1;
 
-				$query = "UPDATE avainsana SET selite = '{$uusi_sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-				$update_res = pupe_query($query);
+					$query = "UPDATE avainsana SET selite = '{$uusi_sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
+					$update_res = pupe_query($query);
 
-				// poistetaan lukko
-				$query = "UNLOCK TABLES";
-				$unlock_res = pupe_query($query);
+					// poistetaan lukko
+					$query = "UNLOCK TABLES";
+					$unlock_res = pupe_query($query);
+				}
+				else {
+					$uusi_sscc = $toisen_sscc;
+				}
 
 				if ($pak != 999) {
 					$query = "	SELECT *
@@ -43,6 +52,16 @@
 				else {
 					$pak_row['pakkaus'] = t("MUU KOLLI");
 					$pak_row['pakkauskuvaus'] = "";
+				}
+
+				if ($toisen_sscc != "") {
+					$query = "	SELECT otunnus
+								FROM kerayserat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND (sscc = '{$toisen_sscc}' or sscc_ulkoinen = '{$toisen_sscc}')";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+					$toisen_res = pupe_query($query);
+					$toisen_row = mysql_fetch_assoc($toisen_res);
 				}
 
 				$query = "	SELECT DISTINCT otunnus
@@ -97,32 +116,44 @@
 				foreach ($otunnukset as $otun) {
 					if ($rahtikirjanro == "") $rahtikirjanro = $rahtikirjarivit[$otun]['otsikkonro'];
 
-					$query = "	INSERT INTO rahtikirjat SET
-								kilot = '{$kilot}',
-								kollit = '1',
-								kuutiot = '{$kuutiot}',
-								lavametri = '{$lavametrit}',
-								merahti = '{$rahtikirjarivit[$otun]['merahti']}',
-								pakkaus = '{$pak_row['pakkaus']}',
-								pakkauskuvaus = '{$pak_row['pakkauskuvaus']}',
-								pakkauskuvaus_tark = '{$rahtikirjarivit[$otun]['pakkauskuvaus_tark']}',
-								poikkeava = '{$rahtikirjarivit[$otun]['poikkeava']}',
-								rahtisopimus = '{$rahtikirjarivit[$otun]['rahtisopimus']}',
-								otsikkonro = '{$otun}',
-								pakkaustieto_tunnukset = '{$rahtikirjarivit[$otun]['pakkaustieto_tunnukset']}',
-								toimitustapa = '{$rahtikirjarivit[$otun]['toimitustapa']}',
-								viitelah = '{$rahtikirjarivit[$otun]['viitelah']}',
-								viitevas = '{$rahtikirjarivit[$otun]['viitevas']}',
-								viesti = '{$rahtikirjarivit[$otun]['viesti']}',
-								tulostuspaikka = '{$rahtikirjarivit[$otun]['tulostuspaikka']}',
-								tulostustapa = '{$rahtikirjarivit[$otun]['tulostustapa']}',
-								tulostettu = '{$rahtikirjarivit[$otun]['tulostettu']}',
-								rahtikirjanro = '{$rahtikirjanro}',
-								sscc_ulkoinen = '{$rahtikirjarivit[$otun]['sscc_ulkoinen']}',
-								tyhjanrahtikirjan_otsikkotiedot = '{$rahtikirjarivit[$otun]['tyhjanrahtikirjan_otsikkotiedot']}',
-								yhtio = '{$kukarow['yhtio']}'";
-					echo "<pre>",str_replace("\t", "", $query),"</pre>";
-					// $insres = pupe_query($query);
+					if ($toisen_sscc != "") {
+						$query = "	UPDATE rahtikirjat SET
+									kilot = kilot + {$kilot},
+									kuutio = kuutiot + {$kuutiot},
+									lavametri = lavametri + {$lavametrit}
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otsikkonro = '{$toisen_row['otunnus']}'";
+						echo "<pre>",str_replace("\t", "", $query),"</pre>";
+						// $updres = pupe_query($query);
+					}
+					else {
+						$query = "	INSERT INTO rahtikirjat SET
+									kilot = '{$kilot}',
+									kollit = '1',
+									kuutiot = '{$kuutiot}',
+									lavametri = '{$lavametrit}',
+									merahti = '{$rahtikirjarivit[$otun]['merahti']}',
+									pakkaus = '{$pak_row['pakkaus']}',
+									pakkauskuvaus = '{$pak_row['pakkauskuvaus']}',
+									pakkauskuvaus_tark = '{$rahtikirjarivit[$otun]['pakkauskuvaus_tark']}',
+									poikkeava = '{$rahtikirjarivit[$otun]['poikkeava']}',
+									rahtisopimus = '{$rahtikirjarivit[$otun]['rahtisopimus']}',
+									otsikkonro = '{$otun}',
+									pakkaustieto_tunnukset = '{$rahtikirjarivit[$otun]['pakkaustieto_tunnukset']}',
+									toimitustapa = '{$rahtikirjarivit[$otun]['toimitustapa']}',
+									viitelah = '{$rahtikirjarivit[$otun]['viitelah']}',
+									viitevas = '{$rahtikirjarivit[$otun]['viitevas']}',
+									viesti = '{$rahtikirjarivit[$otun]['viesti']}',
+									tulostuspaikka = '{$rahtikirjarivit[$otun]['tulostuspaikka']}',
+									tulostustapa = '{$rahtikirjarivit[$otun]['tulostustapa']}',
+									tulostettu = '{$rahtikirjarivit[$otun]['tulostettu']}',
+									rahtikirjanro = '{$rahtikirjanro}',
+									sscc_ulkoinen = '{$rahtikirjarivit[$otun]['sscc_ulkoinen']}',
+									tyhjanrahtikirjan_otsikkotiedot = '{$rahtikirjarivit[$otun]['tyhjanrahtikirjan_otsikkotiedot']}',
+									yhtio = '{$kukarow['yhtio']}'";
+						echo "<pre>",str_replace("\t", "", $query),"</pre>";
+						// $insres = pupe_query($query);
+					}
 
 					$kilot = 0;
 					$kuutiot = 0;
@@ -180,18 +211,20 @@
 
 			echo "<optgroup label='Keräyserässä'>";
 
-			$query = "	SELECT CONCAT(IFNULL(pakkaus.pakkaus, 'Yksin keräilyalustalle'), ' ', IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc)) pak
+			$query = "	SELECT CONCAT(IFNULL(pakkaus.pakkaus, 'Yksin keräilyalustalle'), ' ', IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc)) pak,
+						IFNULL(kerayserat.pakkaus, 'muu_kolli') pakkaus,
+						IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) sscc
 						FROM kerayserat
 						LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 						AND kerayserat.otunnus IN ({$otunnukset})
 						AND kerayserat.sscc != '{$keraysera_row['sscc']}'
 						AND kerayserat.sscc_ulkoinen != '{$keraysera_row['sscc']}'
-						GROUP BY 1";
+						GROUP BY 1,2,3";
 			$pak_res = pupe_query($query);
 
 			while ($pak_row = mysql_fetch_assoc($pak_res)) {
-				echo "<option value=''>{$pak_row['pak']}</option>";
+				echo "<option value='{$pak_row['pakkaus']}####{$pak_row['sscc']}'>{$pak_row['pak']}</option>";
 			}
 
 			echo "</optgroup>";

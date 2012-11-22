@@ -10,6 +10,10 @@ if(!function_exists("asiakasalennustarkista")) {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu!");
 			}
+
+			if(trim($t[$i]) > 100) {
+				$virhe[$i] = t("Alennus ei voi olla yli 100") . "%";
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "ytunnus") {

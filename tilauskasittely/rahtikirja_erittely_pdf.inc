@@ -268,7 +268,7 @@
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus in ($otunnukset)
-					GROUP BY toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, ytunnus, liitostunnus
+					GROUP BY nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, ytunnus, liitostunnus
 					ORDER BY ytunnus, tunnus";
 	}
 

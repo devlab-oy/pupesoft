@@ -177,6 +177,26 @@
 
 			echo "<td><select name='uusi_pakkaus[{$keraysera_row['sscc']}]'>";
 			echo "<option value=''>Valitse</option>";
+
+			echo "<optgroup label='Keräyserässä'>";
+
+			$query = "	SELECT CONCAT(IFNULL(pakkaus.pakkaus, 'Yksin keräilyalustalle'), ' ', IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc)) pak
+						FROM kerayserat
+						LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+						AND kerayserat.otunnus IN ({$otunnukset})
+						AND kerayserat.sscc != '{$keraysera_row['sscc']}'
+						AND kerayserat.sscc_ulkoinen != '{$keraysera_row['sscc']}'
+						GROUP BY 1";
+			$pak_res = pupe_query($query);
+
+			while ($pak_row = mysql_fetch_assoc($pak_res)) {
+				echo "<option value=''>{$pak_row['pak']}</option>";
+			}
+
+			echo "</optgroup>";
+
+			echo "<optgroup label='Pakkaukset'>";
 			echo "<option value='muu_kolli'>Yksin keräilyalustalle</option>";
 
 			$query = "	SELECT *
@@ -189,6 +209,7 @@
 				echo "<option value='{$pak_row['tunnus']}'>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
 			}
 
+			echo "</optgroup>";
 			echo "</select></td>";
 
 			echo "</tr>";

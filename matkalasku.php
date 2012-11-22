@@ -1312,7 +1312,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 			//Ulkomaanpäivä raha muutetaan puolipäivärahaksi
 			$rivihinta = $row['kpl'] * $row['myymalahinta'];
 			$tilausrivi_uusi_hinta = $row['myymalahinta'];
-			$tilausrivi_uusi_nimitys = $row['nimitys']." (".t("Nolla-arvolla").")";
+			$tilausrivi_uusi_nimitys = $row['malli'];
 		}
 		else {
 			$rivihinta = $row['kpl'] * $row['myyntihinta'];
@@ -1348,6 +1348,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 	$query = "	UPDATE tiliointi
 				WHERE ltunnus = '{$tilausnumero}'
 				SET summa = '{$summa}'";
+	// Puuttuuko resultti?
 
 	$tee 		= 'MUOKKAA';
 	$tapa 		= '';

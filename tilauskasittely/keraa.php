@@ -1842,15 +1842,17 @@
 
 				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 					$wherelisa = "AND lasku.tunnus IN ({$tilausnumeroita_backup})";
+					$joinlisa = "JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.nouto = '')";
 				}
 				else {
 					$wherelisa = "AND lasku.tunnus = '{$id}'";
+					$joinlisa = "";
 				}
 
 				# toimitustapa ei saa olla nouto.
 				$query = "	SELECT lasku.tunnus
 							FROM lasku
-							JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.nouto = '')
+							{$joinlisa}
 							WHERE lasku.yhtio 	= '{$kukarow['yhtio']}'
 							AND lasku.tila 		= 'L'
 							AND lasku.alatila 	= 'C'

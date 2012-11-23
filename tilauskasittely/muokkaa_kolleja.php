@@ -7,7 +7,8 @@
 	if (!isset($tee)) $tee = "";
 	if (!isset($checkbox_parent)) $checkbox_parent = array();
 	if (!isset($lopetus)) $lopetus = "";
-	if (!isset($lahto)) $lahto = "";
+
+	$lahto = isset($checkbox_parent[0]) ? (int) $checkbox_parent[0] : "";
 
 	echo "<br />";
 
@@ -274,8 +275,6 @@
 	}
 
 	if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
-
-		$lahto = (int) $checkbox_parent[0];
 
 		$query = "	SELECT GROUP_CONCAT(tunnus) AS tunnukset
 					FROM lasku

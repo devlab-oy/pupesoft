@@ -25,7 +25,7 @@ if (!function_exists('alku_dgd')) {
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(262), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($yhtiorow["osoite"], mm_pt(15), mm_pt(258), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($yhtiorow["postino"]." ".$yhtiorow["postitp"], mm_pt(15), mm_pt(254), 'LATIN1');
-		$pdf->pages[$sivu]->drawText(maa($yhtiorow["maa"]), mm_pt(15), mm_pt(250), 'LATIN1');
+		$pdf->pages[$sivu]->drawText(maa($yhtiorow["maa"], $kieli), mm_pt(15), mm_pt(250), 'LATIN1');
 
 		// Rakirno
 		$query = "	SELECT r2.rahtikirjanro, group_concat(DISTINCT r2.otsikkonro) otsikkonro
@@ -51,7 +51,7 @@ if (!function_exists('alku_dgd')) {
 		$pdf->pages[$sivu]->drawText($laskurow["toim_nimi"], mm_pt(15), mm_pt(242), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($laskurow["toim_osoite"], mm_pt(15), mm_pt(238), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($laskurow["toim_postino"]." ".$laskurow["toim_postitp"], mm_pt(15), mm_pt(234), 'LATIN1');
-		$pdf->pages[$sivu]->drawText(maa($laskurow["toim_maa"]), mm_pt(15), mm_pt(230), 'LATIN1');
+		$pdf->pages[$sivu]->drawText(maa($laskurow["toim_maa"], $kieli), mm_pt(15), mm_pt(230), 'LATIN1');
 
 		// Ruksit
 		$pdf->pages[$sivu]->drawLine(mm_pt(15), mm_pt(202), mm_pt(55), mm_pt(197));

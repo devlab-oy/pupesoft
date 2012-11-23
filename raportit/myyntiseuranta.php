@@ -1488,6 +1488,10 @@
 								$query .= " sum(0) '".substr($i,0,4).substr($i,4,2)."_tavoiteindnyt', ";
 							}
 
+							if ($piilota_kappaleet == "") {
+								$query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.kpl,0)) '".substr($i,0,4).substr($i,4,2)."_kpl', ";
+							}
+
 							if ($ajotapa == 'tilausjaauki') {
 								$query .= " sum(if(lasku.luontiaika >= '{$alku} 00:00:00' and lasku.luontiaika <= '{$loppu} 23:59:59' and tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) +
 											sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.rivihinta, 0)) '".substr($i,0,4).substr($i,4,2)."_myyntiyht', ";
@@ -1508,17 +1512,7 @@
 								}
 
 								if ($piilota_kappaleet == "") {
-									$kuukausi = substr($i,4,2);
-									$vuosi = substr($i,0,4);
-									$query .= "SUM(IF( (MONTH(tilausrivi.laskutettuaika) = '{$kuukausi}' AND YEAR(tilausrivi.laskutettuaika) = '{$vuosi}') , tilausrivi.kpl,0)) {$vuosi}{$kuukausi}_kpl, ";
-									$vuosi--;
-									$query .= "SUM(IF( (MONTH(tilausrivi.laskutettuaika) = '{$kuukausi}' AND YEAR(tilausrivi.laskutettuaika) = '{$vuosi}') , tilausrivi.kpl,0)) {$vuosi}{$kuukausi}_kpl, ";
-								}
-							}
-							else {
-								if ($piilota_kappaleet == "") {
-									$kuukausi = substr($i,4,2);
-									$query .= "SUM(IF(MONTH(tilausrivi.laskutettuaika) = '{$kuukausi}', tilausrivi.kpl,0)) 2012{$kuukausi}_kpl, ";
+									$query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku_ed}' and tilausrivi.laskutettuaika <= '{$loppu_ed}', tilausrivi.kpl,0)) '".(substr($i,0,4)-1).substr($i,4,2)."_kpl', ";
 								}
 							}
 

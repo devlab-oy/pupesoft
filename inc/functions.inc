@@ -13124,18 +13124,21 @@ if (!function_exists("palauta_vak_tiedot")) {
 					if ($tyyppi == "DGD") $nimitykset = explode("###", wordwrap($edrow["nimitys"], 50, "###"));
 					else $nimitykset = explode("###", wordwrap($edrow["nimitys"], 90, "###"));
 
-					$vaktuotetiedot[] = "$edrow[yk_nro], $nimitykset[0]";
+					// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
+					if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
+						$vaktuotetiedot[] = "{$edrow['yk_nro']}, LTD QTY";
+					}
+					else {
+						$vaktuotetiedot[] = $edrow['yk_nro'];
+					}
+
+					$vaktuotetiedot[] = $nimitykset[0];
 
 					for ($i = 1; $i<count($nimitykset); $i++) {
 						$vaktuotetiedot[] = "$nimitykset[$i]";
 					}
 
 					$vakecho = "";
-
-					// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
-					if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
-						$vakecho .= ", LTD QTY";
-					}
 
 					if ($taulu == 'vak_imdg') {
 						if (trim($edrow["luokka"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[luokka]";
@@ -13147,9 +13150,8 @@ if (!function_exists("palauta_vak_tiedot")) {
 					if (trim($edrow["pakkausryhma"]) != "") $vakecho .= ", ".t("Pakkausryhmä", $kieli)." $edrow[pakkausryhma]";
 					if (trim($edrow["leimahduspiste"]) != "" and $taulu == 'vak_imdg') $vaktuotetiedot[] = t("Leimahduspiste", $kieli)." {$edrow['leimahduspiste']}";
 
-					if ($taulu == 'vak_imdg') {
-						if (trim($edrow["meria_saastuttava"]) != "") $vaktuotetiedot[] = t("Meriä saastuttava", $kieli);
-						else $vaktuotetiedot[] = t("Ei meriä saastuttava", $kieli);
+					if ($taulu == 'vak_imdg' and trim($edrow["meria_saastuttava"]) != "") {
+						$vaktuotetiedot[] = t("Meriä saastuttava", $kieli);
 					}
 
 					if ($tyyppi == "DGD" and isset($tuotepainot)) {
@@ -13193,18 +13195,21 @@ if (!function_exists("palauta_vak_tiedot")) {
 			if ($tyyppi == "DGD") $nimitykset = explode("###", wordwrap($edrow["nimitys"], 50, "###"));
 			else $nimitykset = explode("###", wordwrap($edrow["nimitys"], 90, "###"));
 
-			$vaktuotetiedot[] = "$edrow[yk_nro], $nimitykset[0]";
+			// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
+			if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
+				$vaktuotetiedot[] = "{$edrow['yk_nro']}, LTD QTY";
+			}
+			else {
+				$vaktuotetiedot[] = $edrow['yk_nro'];
+			}
+
+			$vaktuotetiedot[] = $nimitykset[0];
 
 			for ($i = 1; $i<count($nimitykset); $i++) {
 				$vaktuotetiedot[] = "$nimitykset[$i]";
 			}
 
 			$vakecho = "";
-
-			// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
-			if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
-				$vakecho .= ", LTD QTY";
-			}
 
 			if ($taulu == 'vak_imdg') {
 				if (trim($edrow["luokka"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[luokka]";
@@ -13216,9 +13221,8 @@ if (!function_exists("palauta_vak_tiedot")) {
 			if (trim($edrow["pakkausryhma"]) != "") $vakecho .= ", ".t("Pakkaus", $kieli)." $edrow[pakkausryhma]";
 			if (trim($edrow["leimahduspiste"]) != "" and $taulu == 'vak_imdg') $vaktuotetiedot[] = t("Leimahduspiste", $kieli)." {$edrow['leimahduspiste']}";
 
-			if ($taulu == 'vak_imdg') {
-				if (trim($edrow["meria_saastuttava"]) != "") $vaktuotetiedot[] = t("Meriä saastuttava", $kieli);
-				else $vaktuotetiedot[] = t("Ei meriä saastuttava", $kieli);
+			if ($taulu == 'vak_imdg' and trim($edrow["meria_saastuttava"]) != "") {
+				$vaktuotetiedot[] = t("Meriä saastuttava", $kieli);
 			}
 
 			if ($tyyppi == "DGD" and isset($tuotepainot)) {

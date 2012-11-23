@@ -699,49 +699,43 @@
 			//Jos ostoehdotus on kyll‰, siirret‰‰n myyntilukuja. Siirret‰‰n kaikkien tuotteiden myyntiluvut kuitenkin.
 			//Myynnit vaan "normaaleist" varastoist, tsekataa vaa varastopaikat-taulusta tyyppi '':st‰ myydyt
 			//Jos asiakkuuksilla palautetaan tavaraa (toimittajapalautus), ei oteta niit‰ palautuksia myyntilukuihin mukaan. Katotaan t‰‰ kauppatapahtuman luonteella
-			if ($tuoterow['ostoehdotus'] == '') {
+			$Q2 = "	SELECT round(SUM(tilausrivi.kpl), 0) myyty
+			       	FROM tilausrivi
+				   	JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.kauppatapahtuman_luonne != '21')
+			       	JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '')
+				   	JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+				   		AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+				   		AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+				   		AND varastopaikat.tyyppi = '')
+			       	WHERE tilausrivi.yhtio 		= '$yhtiorow[yhtio]'
+			       	AND tilausrivi.tyyppi 		= 'L'
+			  	   	AND tilausrivi.tuoteno 		= '$tuoterow[tuoteno]'
+			       	AND tilausrivi.toimitettuaika >= '$tanaan 00:00:00'
+				   	AND tilausrivi.toimitettuaika <= '$tanaan 23:59:59'";
+			$q2r =  mysql_query($Q2) or pupe_error($Q2);
+			$myyntirow = mysql_fetch_assoc($q2r);
 
-				$Q2 = "	SELECT round(SUM(tilausrivi.kpl), 0) myyty
-				       	FROM tilausrivi
-					   	JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.kauppatapahtuman_luonne != '21')
-				       	JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '')
-					   	JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-					   		AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-					   		AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-					   		AND varastopaikat.tyyppi = '')
-				       	WHERE tilausrivi.yhtio 		= '$yhtiorow[yhtio]'
-				       	AND tilausrivi.tyyppi 		= 'L'
-				  	   	AND tilausrivi.tuoteno 		= '$tuoterow[tuoteno]'
-				       	AND tilausrivi.toimitettuaika >= '$tanaan 00:00:00'
-					   	AND tilausrivi.toimitettuaika <= '$tanaan 23:59:59'";
-				$q2r =  mysql_query($Q2) or pupe_error($Q2);
-				$myyntirow = mysql_fetch_assoc($q2r);
+			$Q2 = "	SELECT round(SUM(tilausrivi.varattu), 0) myyty2
+			       	FROM tilausrivi
+				   	JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.kauppatapahtuman_luonne != '21')
+			       	JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '')
+				   	JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+				   		AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+				   		AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+				   		AND varastopaikat.tyyppi = '')
+			       	WHERE tilausrivi.yhtio 	= '$yhtiorow[yhtio]'
+			       	AND tilausrivi.tyyppi 	= 'L'
+			  	   	AND tilausrivi.tuoteno 	= '$tuoterow[tuoteno]'
+			  	   	AND tilausrivi.varattu != 0
+			       	AND tilausrivi.toimitettuaika >= '$tanaan 00:00:00'
+				   	AND tilausrivi.toimitettuaika <= '$tanaan 23:59:59'";
+			$q2r2 =  mysql_query($Q2) or pupe_error($Q2);
+			$myyntirow2 = mysql_fetch_assoc($q2r2);
 
-				$Q2 = "	SELECT round(SUM(tilausrivi.varattu), 0) myyty2
-				       	FROM tilausrivi
-					   	JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.kauppatapahtuman_luonne != '21')
-				       	JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '')
-					   	JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-					   		AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-					   		AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-					   		AND varastopaikat.tyyppi = '')
-				       	WHERE tilausrivi.yhtio 	= '$yhtiorow[yhtio]'
-				       	AND tilausrivi.tyyppi 	= 'L'
-				  	   	AND tilausrivi.tuoteno 	= '$tuoterow[tuoteno]'
-				  	   	AND tilausrivi.varattu != 0
-				       	AND tilausrivi.toimitettuaika >= '$tanaan 00:00:00'
-					   	AND tilausrivi.toimitettuaika <= '$tanaan 23:59:59'";
-				$q2r2 =  mysql_query($Q2) or pupe_error($Q2);
-				$myyntirow2 = mysql_fetch_assoc($q2r2);
+			// tarkistetaan ettei laitetan negatiivia arvoja
+			$myyntipvm = $myyntirow['myyty'] + $myyntirow2['myyty2'];
 
-				// tarkistetaan ettei laitetan negatiivia arvoja
-				$myyntipvm = $myyntirow['myyty'] + $myyntirow2['myyty2'];
-
-				if ($myyntipvm < 0) {
-					$myyntipvm = '0';
-				}
-			}
-			else {
+			if ($myyntipvm < 0) {
 				$myyntipvm = '0';
 			}
 

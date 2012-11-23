@@ -168,8 +168,8 @@
 			</tr>";
 
 	if ($piilotaToim_tuoteno != "") {
-			$checkPiilotaToim_tuoteno = "CHECKED";
-		}
+		$checkPiilotaToim_tuoteno = "CHECKED";
+	}
 
 	echo "<tr><th>".t("Älä tulosta toimittajan tuotenumeroa listauksiin:")."</th>
 		<td><input type='checkbox' name='piilotaToim_tuoteno' value='Y' $checkPiilotaToim_tuoteno></td>

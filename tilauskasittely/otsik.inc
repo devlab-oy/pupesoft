@@ -383,6 +383,11 @@
 		}
 	}
 
+	if (isset($jatka) and ($erikoisale > 100 or $erikoisale < 0)) {
+		echo "<font class='error'>".t("Erikoisale pit‰‰ olla alle 100% yli 0%")."</font><br/><br/>";
+		unset($jatka);
+	}
+
 	// tehd‰‰n oikeellisuus
 	if ($toim == "YLLAPITO") {
 

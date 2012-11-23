@@ -822,8 +822,10 @@
 
 		$ulos .= "<option value=''>".t("Asiakkaan JT-rivej‰ ei kohdisteta automaattisesti")."</option>";
 		$ulos .= "<option value='Y' $sel[Y]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti sis‰‰ntulevalle EDI-tilaukselle")."</option>";
-		$ulos .= "<option value='X' $sel[X]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti myyntitilaukselle")."</option>";
-		$ulos .= "<option value='W' $sel[W]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti myyntitilaukselle ja sis‰‰ntulevalle EDI-tilaukselle")."</option>";
+		$ulos .= "<option value='X' $sel[X]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti Extranet-myyntitilaukselle")."</option>";
+		$ulos .= "<option value='W' $sel[W]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti Extranet-myyntitilaukselle ja sis‰‰ntulevalle EDI-tilaukselle")."</option>";
+		$ulos .= "<option value='M' $sel[M]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti myyntitilaukselle")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti myyntitilaukselle ja sis‰‰ntulevalle EDI-tilaukselle")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3007,6 +3009,18 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'ennakkolaskun_tyyppi') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'M' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Normaali ennakkolasku");
+		$ulos .= "<option value = 'E' $sel>".t("Ennakkolaskulle jokainen rivi erikseen");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'raaka_aineet_valmistusmyynti') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3195,4 +3209,19 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
+
+	}
+
+	if (mysql_field_name($result, $i) == 'epakurantoinnin_myyntihintaleikkuri') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel['Z'] = $trow[$i] == 'Z' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Hintaa ei leikata")."</option>";
+		$ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Myyntihintaa leikataan 25% per taso")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+
 	}

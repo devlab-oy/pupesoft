@@ -1791,12 +1791,29 @@ if ($kukarow["extranet"] == "" and $tee == 'jyvita') {
 	require("jyvita_riveille.inc");
 }
 
-//Lisätään tän asiakkaan valitut JT-rivit tälle tilaukselle
-if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == "") or (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and (int) $kukarow['kesken'] != 0 and $kaytiin_otsikolla == "NOJOO!" and ($tee == '' or $tee == 'OTSIK') and $toim == 'EXTRANET')) {
-	$tilaus_on_jo 	= "KYLLA";
+// Lisätään tän asiakkaan valitut JT-rivit tälle tilaukselle
+if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == "")
+	or ((
+			(($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and $toim == 'EXTRANET')
+			or ($yhtiorow['jt_automatiikka'] == 'M' or $yhtiorow['jt_automatiikka'] == 'K')
+		)
+		and (int) $kukarow['kesken'] > 0
+		and $kaytiin_otsikolla == "NOJOO!"
+		and $tee == ''
+	)
+) {
+
+	$tilaus_on_jo = "KYLLA";
 
 	// Halutaan poimia heti kaikki jt-rivit extranet-tilauksille ensimmäisellä kerralla
-	if (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and (int) $kukarow['kesken'] != 0 and $kaytiin_otsikolla == "NOJOO!" and ($tee == '' or $tee == 'OTSIK') and $toim == 'EXTRANET') {
+	if ((
+			(($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and $toim == 'EXTRANET')
+			or ($yhtiorow['jt_automatiikka'] == 'M' or $yhtiorow['jt_automatiikka'] == 'K')
+		)
+		and (int) $kukarow['kesken'] > 0
+		and $kaytiin_otsikolla == "NOJOO!"
+		and $tee == ''
+	) {
 
 		if (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
 			$varasto = array((int) $laskurow["varasto"]);
@@ -1814,10 +1831,11 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 			$vtresult = pupe_query($query);
 			$vtrow = mysql_fetch_assoc($vtresult);
 
-			$varasto = $vtrow['tunnukset'];
+			$varasto = explode(",", $vtrow['tunnukset']);
 		}
 
 		jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varasto, "", "", "tosi_automaaginen", "JATKA", "automaattinen_poiminta");
+		echo "<br>";
 
 		$tyhjenna 	= "JOO";
 		$tee 		= "";
@@ -3993,6 +4011,14 @@ if ($tee == '') {
 				$trow["alv"] = $laskurow["alv"];
 			}
 
+			// jälkitoimitus muiden mukana
+			if ($jt_muidenmukana == 'KYLLA') {
+				$kerayspvm = date('Y-m-d', strtotime('now + 1 month'));
+			}
+			elseif ($jt_muidenmukana == 'EI') {
+				$kerayspvm = $laskurow["kerayspvm"];
+			}
+
 			if ($tuoteno != '' and $kpl != 0) {
 				require ('lisaarivi.inc');
 			}
@@ -6014,8 +6040,28 @@ if ($tee == '') {
 									<input type='hidden' name='tila' 			value = 'MUUTA'>
 									<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
 									<input type='hidden' name='var' 			value = 'J'>
-									<input type='Submit' value='".t("Jälkitoim")."'>
+									<input type='hidden' name='jt_muidenmukana' value = 'EI'>
+									<input type='Submit' value='" . t("Jälkitoim") . "'>
 									</form> ";
+
+						if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+							echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
+									<input type='hidden' name='toim' 			value = '$toim'>
+									<input type='hidden' name='lopetus' 		value = '$lopetus'>
+									<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+									<input type='hidden' name='projektilla' 	value = '$projektilla'>
+									<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+									<input type='hidden' name='mista' 			value = '$mista'>
+									<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+									<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
+									<input type='hidden' name='menutila' 		value = '$menutila'>
+									<input type='hidden' name='tila' 			value = 'MUUTA'>
+									<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
+									<input type='hidden' name='var' 			value = 'J'>
+                                    <input type='hidden' name='jt_muidenmukana' value = 'KYLLA'>
+									<input type='Submit' value='" . t("Jälkitoim, muiden mukana") . "'>
+									</form> ";
+						}
 					}
 
 					if ($row["jt"] != 0 and $yhtiorow["puute_jt_oletus"] == "J") {
@@ -6032,7 +6078,7 @@ if ($tee == '') {
 								<input type='hidden' name='tila' 			value = 'MUUTA'>
 								<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
 								<input type='hidden' name='var' 			value = 'P'>
-								<input type='Submit' value='".t("Puute")."'>
+								<input type='Submit' value='" . t("Puute") . "'>
 								</form> ";
 					}
 
@@ -6050,6 +6096,43 @@ if ($tee == '') {
 								<input type='hidden' name='tila' 			value = 'OOKOOAA'>
 								<input type='Submit' value='".t("Hyväksy")."'>
 								</form> ";
+					}
+
+					if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm'])) {
+						echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
+									<input type='hidden' name='toim' 			value = '$toim'>
+									<input type='hidden' name='lopetus' 		value = '$lopetus'>
+									<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+									<input type='hidden' name='projektilla' 	value = '$projektilla'>
+									<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+									<input type='hidden' name='mista' 			value = '$mista'>
+									<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+									<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
+									<input type='hidden' name='menutila' 		value = '$menutila'>
+									<input type='hidden' name='tila' 			value = 'MUUTA'>
+									<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
+									<input type='hidden' name='var' 			value = 'J'>
+									<input type='hidden' name='jt_muidenmukana' value = 'EI'>
+									<input type='Submit' value='" . t("Jälkitoim"). "'>
+									</form> ";
+					}
+					elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $row['var'] == 'J' and strtotime($row['kerayspvm']) == strtotime($laskurow['kerayspvm'])){
+						echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
+									<input type='hidden' name='toim' 			value = '$toim'>
+									<input type='hidden' name='lopetus' 		value = '$lopetus'>
+									<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+									<input type='hidden' name='projektilla' 	value = '$projektilla'>
+									<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+									<input type='hidden' name='mista' 			value = '$mista'>
+									<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+									<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
+									<input type='hidden' name='menutila' 		value = '$menutila'>
+									<input type='hidden' name='tila' 			value = 'MUUTA'>
+									<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
+									<input type='hidden' name='var' 			value = 'J'>
+                                    <input type='hidden' name='jt_muidenmukana' value = 'KYLLA'>
+									<input type='Submit' value='" . t("Jälkitoim, muiden mukana"). "'>
+									</form> ";
 					}
 				}
 				elseif ($row["laskutettuaika"] != '0000-00-00') {

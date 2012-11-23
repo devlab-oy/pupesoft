@@ -408,6 +408,7 @@
 							$asiakaslisa
 							and rahtikirjat.merahti			= '$rakir_row[merahti]'
 							and rahtikirjat.rahtisopimus	= '$rakir_row[rahtisopimus]'
+							and rahtikirjat.kollit != 0
 							HAVING kollit != 0
 							ORDER BY lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus, lasku.tunnus";
 				$res = pupe_query($query);

@@ -140,9 +140,11 @@ function hae_tuote($tuoteno) {
 function hae_vastaavat_ketjut($tuoteno) {
     global $kukarow;
 
+    // Haetaan ketjut johon tuote kuuluu
     $query = "SELECT id FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuoteno}'";
     $result = pupe_query($query);
 
+    // Haetaan ketjujen tuotteet
     $ketjut = array();
     while ($ketju = mysql_fetch_array($result)) {
         $ketju_query = "SELECT * FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND id='{$ketju['id']}'
@@ -219,26 +221,24 @@ if ($tee == 'muutaprio') {
 
     // Tarkistetaan onko 'seuraava' ketjun p‰‰tuote p‰‰tuotteena jossakin toisessa ketjussa?
     if (onko_paatuote($row['tuoteno'])) {
-        echo "yritettiin muuttaa tuotteen {$row['tuoteno']} jarjestyst‰<br>";
-        echo "<font class='error'>".t("Prioriteettia ei voida muuttaa. Ketjun p‰‰tuote on jossakin toisessa ketjussa")."!</font><br><br>";
+        echo "<font class='error'>".t("Huom! Muutit p‰‰tuotetta tai tuote on p‰‰tuotteena jossakin toisessa ketjussa")."!</font><br><br>";
 
     }
-    else {
-        if ($prio != 0 and $prio != $row['jarjestys']) {
-            # Siirret‰‰n ketjun muita eteenp‰in, jarjestys + 1
-            $query = "UPDATE vastaavat SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
-                        WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND tunnus!=$tunnus AND jarjestys >= $prio";
-            $result = pupe_query($query);
-        }
 
-        //muutetaan prio..
-        $query  = "     UPDATE vastaavat SET
-                        jarjestys = '$prio',
-                        muutospvm = now(),
-                        muuttaja = '$kukarow[kuka]'
-                        WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
+    // Siirret‰‰n ketjun muita eteenp‰in, jarjestys + 1
+    if ($prio != 0 and $prio != $row['jarjestys']) {
+        $query = "UPDATE vastaavat SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
+                    WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND tunnus!=$tunnus AND jarjestys >= $prio";
         $result = pupe_query($query);
     }
+
+    // muutetaan prioriteetti
+    $query  = "     UPDATE vastaavat SET
+                    jarjestys = '$prio',
+                    muutospvm = now(),
+                    muuttaja = '$kukarow[kuka]'
+                    WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
 }
 
 if ($tee == 'add') {

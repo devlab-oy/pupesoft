@@ -80,6 +80,12 @@ if(!function_exists("asiakastarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "erikoisale") {
+			if (trim($t[$i]) > 100 or trim($t[$i]) < 0) {
+				$virhe[$i] = t("Erikoisale pitää olla alle 100% yli 0%");
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "asiakasnro") {
 			if ($asiakasnro_select != '') {
 				// Jos selectoitu drop downista niin katotaan, että tämä on vielä vapaa

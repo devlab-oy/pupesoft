@@ -1841,14 +1841,14 @@
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
 
 				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
-					$wherelisa = "AND tunnus IN ({$tilausnumeroita_backup})";
+					$wherelisa = "AND lasku.tunnus IN ({$tilausnumeroita_backup})";
 				}
 				else {
-					$wherelisa = "AND tunnus = '{$id}'";
+					$wherelisa = "AND lasku.tunnus = '{$id}'";
 				}
 
 				# toimitustapa ei saa olla nouto.
-				$query = "	SELECT tunnus
+				$query = "	SELECT lasku.tunnus
 							FROM lasku
 							JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.nouto = '')
 							WHERE lasku.yhtio 	= '{$kukarow['yhtio']}'
@@ -2373,6 +2373,9 @@
 						echo "</tr>";
 					}
 
+					mysql_data_seek($result, 0);
+
+					$otsik_row = mysql_fetch_assoc($result);
 				}
 				else {
 
@@ -3199,7 +3202,7 @@
 					echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa toimitetuksi")."'></form>";
 				}
 
-				if ($otsik_row["tulostustapa"] != "X" and $yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y') {
+				if ($otsik_row["tulostustapa"] != "X" and $otsik_row['nouto'] == '' and $yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y') {
 					echo "<br><br><font class='message'>".t("Siirryt automaattisesti rahtikirjan syöttöön")."!</font>";
 				}
 				elseif ($otsik_row["tulostustapa"] != "X" and $yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $keraysklontti === FALSE) {

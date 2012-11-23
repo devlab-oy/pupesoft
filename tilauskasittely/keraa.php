@@ -1584,6 +1584,7 @@
 											tulostuspaikka 	= '{$laskurow['varasto']}',
 											toimitustapa 	= '{$laskurow['toimitustapa']}',
 											yhtio 			= '{$kukarow['yhtio']}',
+											merahti			= '{$laskurow['kohdistettu']}',
 											viesti			= '$asiakkaan_kuljetusohje'
 											{$tulostettulisa}";
 							$ker_res = pupe_query($query_ker);

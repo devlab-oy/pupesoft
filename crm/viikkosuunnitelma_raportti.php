@@ -279,20 +279,8 @@ if ($tee == '') {
 			$worksheet->write($excelrivi, $excelsarake++, t("Pvm"), 		$format_bold);
 
 			if ($vstk == "Asiakaskäynti") {
-				echo "<th>".t("Kampanjat")."</th>
-						<th>".t("PvmKäyty")."</th>
-						<th>".t("Km")."</th>
-						<th>".t("Lähtö")."</th>
-						<th>".t("Paluu")."</th>
-						<th>".t("PvRaha")."</th>
-						<th>".t("Kommentit")."</th>";
+				echo "<th>".t("Kommentit")."</th>";
 
-				$worksheet->write($excelrivi, $excelsarake++, t("Kampanjat"),	$format_bold);
-				$worksheet->write($excelrivi, $excelsarake++, t("PvmKäyty"),	$format_bold);
-				$worksheet->write($excelrivi, $excelsarake++, t("Km"),			$format_bold);
-				$worksheet->write($excelrivi, $excelsarake++, t("Lähtö"),		$format_bold);
-				$worksheet->write($excelrivi, $excelsarake++, t("Paluu"),		$format_bold);
-				$worksheet->write($excelrivi, $excelsarake++, t("PvRaha"),		$format_bold);
 				$worksheet->write($excelrivi, $excelsarake++, t("Kommentit"),	$format_bold);
 
 			}
@@ -322,20 +310,8 @@ if ($tee == '') {
 				$worksheet->write($excelrivi, $excelsarake++, $row["pvmalku"]);
 
 				if ($vstk == "Asiakaskäynti") {
-					echo "	<td>$row[kentta02]</td>
-							<td>$row[pvmalku]</td>
-							<td>$row[kentta03]</td>
-							<td>$row[aikaalku]</td>
-							<td>$row[aikaloppu]</td>
-							<td>$row[kentta04]</td>
-							<td>$row[kentta01]</td>";
-
-					$worksheet->write($excelrivi, $excelsarake++, $row["kentta02"]);
-					$worksheet->write($excelrivi, $excelsarake++, $row["pvmalku"]);
-					$worksheet->write($excelrivi, $excelsarake++, $row["kentta03"]);
-					$worksheet->write($excelrivi, $excelsarake++, $row["aikaalku"]);
-					$worksheet->write($excelrivi, $excelsarake++, $row["aikaloppu"]);
-					$worksheet->write($excelrivi, $excelsarake++, $row["kentta04"])        ;
+					echo "	<td>$row[kentta01]</td>";
+							
 					$worksheet->write($excelrivi, $excelsarake++, $row["kentta01"]);
 				}
 

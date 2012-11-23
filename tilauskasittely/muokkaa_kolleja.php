@@ -7,16 +7,44 @@
 	if (!isset($tee)) $tee = "";
 	if (!isset($checkbox_parent)) $checkbox_parent = array();
 	if (!isset($lopetus)) $lopetus = "";
+	if (!isset($select_varasto)) $select_varasto = 0;
 
 	$lahto = isset($checkbox_parent[0]) ? (int) $checkbox_parent[0] : "";
 
 	echo "<br />";
 
 	echo "<form method='post' action='?tee=&lopetus={$lopetus}'>";
-	echo "<table><tr>";
+	echo "<table>";
+
+	echo "<tr><th>",t("Valitse varasto"),"</th><td>&nbsp;";
+	echo "<select name='select_varasto' id='select_varasto'>";
+	echo "<option value=''>",t("Valitse"),"</option>";
+
+	$query = "	SELECT tunnus, nimitys
+				FROM varastopaikat
+				WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+				ORDER BY tyyppi, nimitys";
+	$varastores = pupe_query($query);
+
+	while ($varastorow = mysql_fetch_assoc($varastores)) {
+
+		$sel = $select_varasto == $varastorow['tunnus'] ? " selected" : ($kukarow['oletus_varasto'] == $varastorow['tunnus'] ? " selected" : "");
+
+		if ($select_varasto == 0 and $sel != "" and $kukarow['oletus_varasto'] == $varastorow['tunnus']) {
+			$select_varasto = $kukarow['oletus_varasto'];
+		}
+
+		echo "<option value='{$varastorow['tunnus']}'{$sel}>{$varastorow['nimitys']}</option>";
+	}
+
+	echo "</select>";
+	echo "</td></tr>";
+
+	echo "<tr>";
 	echo "<th>",t("Etsi rahtikirjoja lähdön tunnuksella"),"</th>";
 	echo "<td><input type='text' name='checkbox_parent[]' value='{$lahto}' /> <input type='submit' value='",t("Etsi"),"' /></td>";
-	echo "</tr></table>";
+	echo "</tr>";
+	echo "</table>";
 	echo "</form>";
 
 	echo "<br />";
@@ -303,23 +331,6 @@
 
 	if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
 
-		$query = "	SELECT GROUP_CONCAT(tunnus) AS tunnukset
-					FROM lasku
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tila IN ('L','G')
-					AND alatila = 'B'
-					AND toimitustavan_lahto = '{$lahto}'";
-		$tunnus_res = pupe_query($query);
-		$tunnus_row = mysql_fetch_assoc($tunnus_res);
-
-		if ($tunnus_row['tunnukset'] == '') {
-			echo "<font class='message'>",t("Yhtään kerättyä tilausta ei löytynyt"),".</font><br><br>";
-			require ("inc/footer.inc");
-			exit;
-		}
-
-		$ltunnukset_lisa = "and lasku.tunnus in ({$tunnus_row['tunnukset']})";
-
 		$query = "	SELECT toimitustapa.*
 					FROM lahdot
 					JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
@@ -331,12 +342,10 @@
 		$toimitustapa = $toitarow['selite'];
 
 		// haetaan kaikki distinct rahtikirjat..
-		$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
-					lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
-					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja,
-					asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
+		$query = "	SELECT DISTINCT lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
+					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, GROUP_CONCAT(DISTINCT lasku.tunnus) ltunnukset
 					FROM rahtikirjat
-					JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B' {$ltunnukset_lisa})
+					JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B' AND lasku.toimitustavan_lahto = '{$lahto}')
 					LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 					LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
 					LEFT JOIN rahtisopimukset on lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus
@@ -344,6 +353,8 @@
 					and rahtikirjat.tulostettu	= '0000-00-00 00:00:00'
 					and rahtikirjat.toimitustapa	= '{$toimitustapa}'
 					and rahtikirjat.tulostuspaikka	= '{$select_varasto}'
+					GROUP BY lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
+					rahtikirjat.merahti, rahtikirjat.rahtisopimus, jv
 					ORDER BY lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus, lasku.tunnus";
 		$rakir_res = pupe_query($query);
 
@@ -390,9 +401,12 @@
 				}
 
 				// haetaan tälle rahtikirjalle kuuluvat tunnukset
-				$query = "	SELECT GROUP_CONCAT(DISTINCT lasku.tunnus) otunnus, GROUP_CONCAT(DISTINCT rahtikirjat.tunnus) rtunnus
+				$query = "	SELECT GROUP_CONCAT(DISTINCT lasku.tunnus) otunnus,
+							GROUP_CONCAT(DISTINCT rahtikirjat.tunnus) rtunnus,
+							GROUP_CONCAT(DISTINCT rahtikirjat.rahtikirjanro SEPARATOR ', ') rahtikirjanrot,
+							SUM(kollit) kollit
 							FROM rahtikirjat
-							JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B' {$ltunnukset_lisa})
+							JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B' AND lasku.tunnus IN ({$rakir_row['ltunnukset']}))
 							LEFT JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus {$jvehto})
 							WHERE rahtikirjat.yhtio	= '{$kukarow[yhtio]}'
 							and rahtikirjat.tulostettu	= '0000-00-00 00:00:00'
@@ -401,8 +415,11 @@
 							$asiakaslisa
 							and rahtikirjat.merahti			= '$rakir_row[merahti]'
 							and rahtikirjat.rahtisopimus	= '$rakir_row[rahtisopimus]'
+							HAVING kollit != 0
 							ORDER BY lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus, lasku.tunnus";
 				$res = pupe_query($query);
+
+				if (mysql_num_rows($res) == 0) continue;
 
 				echo "<form method='post' action=''>";
 
@@ -423,6 +440,8 @@
 				echo "<tr>";
 				echo "<th>Asiakas</th>";
 				echo "<th>Osoite</th>";
+				echo "<th>Rahtikirjanumerot</th>";
+				echo "<th>Rahdinmaksaja</th>";
 				echo "<th>Kollilkm</th>";
 				echo "<th>Paino</th>";
 				echo "<th>Tilavuus</th>";
@@ -439,6 +458,16 @@
 					echo "<tr>";
 					echo "<td>$rakir_row[toim_nimi] $rakir_row[toim_nimitark]</td>";
 					echo "<td>$rakir_row[toim_osoite] $rakir_row[toim_postino] $rakir_row[toim_postitp]</td>";
+
+					if ($rakir_row['merahti'] == 'K') {
+						$rahdinmaksaja = t("Lähettäjä");
+					}
+					else {
+						$rahdinmaksaja = t("Vastaanottaja"); //tämä on defaultti
+					}
+
+					echo "<td>{$rivi['rahtikirjanrot']}</td>";
+					echo "<td>{$rahdinmaksaja}</td>";
 
 					$query = "	SELECT SUM(kollit) kollit,
 								ROUND(SUM(kilot), 2) kilot,
@@ -457,7 +486,7 @@
 				}
 
 				echo "<tr>";
-				echo "<th colspan='6'>";
+				echo "<th colspan='7'>";
 				echo "<input type='submit' value='Muuta' />";
 				echo "<input type='hidden' name='tunnukset' value='{$tunnukset}' />";
 				echo "<input type='hidden' name='otunnukset' value='{$otunnukset}' />";

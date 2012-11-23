@@ -787,23 +787,6 @@
 
 			$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
 
-			//jos tullaan otsikolta niin p‰ivitet‰‰n tilausriveille erikoisale
-			if(isset($erikoisale)) {
-				$tilausrivit_query = "	SELECT tunnus
-										FROM tilausrivi
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND otunnus = '{$kukarow['kesken']}'";
-				$tilausrivit_result = pupe_query($tilausrivit_query);
-
-				while($tilausrivi_row = mysql_fetch_assoc($tilausrivit_result)) {
-					$tilausrivi_update_query = "UPDATE tilausrivi
-												SET erikoisale = '{$laskurow['erikoisale']}'
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tunnus = '{$tilausrivi_row['tunnus']}'";
-					pupe_query($tilausrivi_update_query);
-				}
-			}
-
 			//Listataan tilauksessa olevat tuotteet
 			$query = "	SELECT tilausrivi.nimitys,
 						concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
@@ -870,10 +853,9 @@
 
 				while ($prow = mysql_fetch_array ($presult)) {
 					$divnolla++;
-					$erikoisale_maara = ($prow['rivihinta'] * ($laskurow['erikoisale'] / 100));
-					$erikoisale_summa += ($erikoisale_maara * -1);
-					$yhteensa += $prow["rivihinta"];
-					$paino_yhteensa += ($prow["tilattu"]*$prow["tuotemassa"]);
+					$erikoisale_summa += (($prow['rivihinta'] * ($laskurow['erikoisale'] / 100)) * -1);
+					$yhteensa 		  += $prow["rivihinta"];
+					$paino_yhteensa   += ($prow["tilattu"]*$prow["tuotemassa"]);
 
 					$class = "";
 
@@ -1249,7 +1231,7 @@
 						</form>
 						</td>";
 
-				if($laskurow['erikoisale'] > 0) {
+				if ($laskurow['erikoisale'] > 0) {
 					$_colspan = $backspan1 - 1;
 					echo "<td>
 						<td class='back' colspan='$_colspan'></td>

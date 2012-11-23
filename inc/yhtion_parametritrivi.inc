@@ -3009,6 +3009,18 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'ennakkolaskun_tyyppi') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'M' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Normaali ennakkolasku");
+		$ulos .= "<option value = 'E' $sel>".t("Ennakkolaskulle jokainen rivi erikseen");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'raaka_aineet_valmistusmyynti') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

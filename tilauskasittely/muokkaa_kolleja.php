@@ -114,7 +114,7 @@
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$rahtikirjat_row['tunnus']}'";
 						echo "<pre>",str_replace("\t", "", $query),"</pre>";
-						// $delres = pupe_query($query);
+						$delres = pupe_query($query);
 					}
 				}
 
@@ -126,7 +126,7 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND (sscc = '{$sscc}' or sscc_ulkoinen = '{$sscc}')";
 				echo "<pre>",str_replace("\t", "", $query),"</pre>";
-				// $updres = pupe_query($query);
+				$updres = pupe_query($query);
 
 				$rahtikirjanro = "";
 
@@ -137,16 +137,43 @@
 
 						if ($kilot == 0 and $kuutiot == 0 and $lavametrit == 0) continue;
 
-						$query = "	UPDATE rahtikirjat SET
-									kilot = kilot + {$kilot},
-									kuutio = kuutiot + {$kuutiot},
-									lavametri = lavametri + {$lavametrit}
+						// Tarkistetaan aluksi montako riviä kyseisellä rahtikirjalla on
+						// Jos rivejä on > 1, päivitetään vaan ensimmäistä löytyvää riviä
+						$query = "	SELECT tunnus
+									FROM rahtikirjat
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND otsikkonro = '{$toisen_row['otunnus']}'
 									AND pakkaus = '{$pak_row['pakkaus']}'
 									AND pakkauskuvaus = '{$pak_row['pakkauskuvaus']}'";
-						echo "<pre>",str_replace("\t", "", $query),"</pre>";
-						// $updres = pupe_query($query);
+						$row_count_chk_res = pupe_query($query);
+
+						if (mysql_num_rows($row_count_chk_res) > 1) {
+
+							$row_count_chk_row = mysql_fetch_assoc($row_count_chk_res);
+
+							echo "Löytyi monta riviä rahtikirjalta. Päivitetään vain yhtä riviä (rivin tunnus {$row_count_chk_row['tunnus']})<br><br>";
+
+							$query = "	UPDATE rahtikirjat SET
+										kilot = kilot + {$kilot},
+										kuutio = kuutiot + {$kuutiot},
+										lavametri = lavametri + {$lavametrit}
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$row_count_chk_row['tunnus']}'";
+							echo "<pre>",str_replace("\t", "", $query),"</pre>";
+							$updres = pupe_query($query);
+						}
+						else {
+							$query = "	UPDATE rahtikirjat SET
+										kilot = kilot + {$kilot},
+										kuutio = kuutiot + {$kuutiot},
+										lavametri = lavametri + {$lavametrit}
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND otsikkonro = '{$toisen_row['otunnus']}'
+										AND pakkaus = '{$pak_row['pakkaus']}'
+										AND pakkauskuvaus = '{$pak_row['pakkauskuvaus']}'";
+							echo "<pre>",str_replace("\t", "", $query),"</pre>";
+							$updres = pupe_query($query);
+						}
 					}
 					else {
 						$query = "	INSERT INTO rahtikirjat SET
@@ -174,7 +201,7 @@
 									tyhjanrahtikirjan_otsikkotiedot = '{$rahtikirjarivit[$otun]['tyhjanrahtikirjan_otsikkotiedot']}',
 									yhtio = '{$kukarow['yhtio']}'";
 						echo "<pre>",str_replace("\t", "", $query),"</pre>";
-						// $insres = pupe_query($query);
+						$insres = pupe_query($query);
 					}
 
 					$kilot = 0;

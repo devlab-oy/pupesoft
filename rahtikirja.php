@@ -701,7 +701,7 @@
 			$updateres = pupe_query($query);
 
 			//Ainostaan tulostusaluuen mukaan splittaantuneet tilaukset yhdistet‰‰n
-			if ($yhtiorow["splittauskielto"] == "" and strpos($tunnukset,',') !== false and $yhtiorow['pakkaamolokerot'] != '') {
+			if ($yhtiorow["splittauskielto"] == "" and strpos($tunnukset,',') !== false and $yhtiorow['pakkaamolokerot'] != '' and $yhtiorow['kerayserat'] == '') {
 
 				$otsikko_tunnarit = explode(',',$tunnukset);
 				sort($otsikko_tunnarit);

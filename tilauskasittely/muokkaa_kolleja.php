@@ -5,6 +5,20 @@
 	echo "<font class='head'>",t("Muokkaa kolleja"),"</font><hr>";
 
 	if (!isset($tee)) $tee = "";
+	if (!isset($checkbox_parent)) $checkbox_parent = array();
+	if (!isset($lopetus)) $lopetus = "";
+	if (!isset($lahto)) $lahto = "";
+
+	echo "<br />";
+
+	echo "<form method='post' action='?tee=&lopetus={$lopetus}'>";
+	echo "<table><tr>";
+	echo "<th>",t("Etsi rahtikirjoja lähdön tunnuksella"),"</th>";
+	echo "<td><input type='text' name='checkbox_parent[]' value='{$lahto}' /> <input type='submit' value='",t("Etsi"),"' /></td>";
+	echo "</tr></table>";
+	echo "</form>";
+
+	echo "<br />";
 
 	if ($tee == 'paivita') {
 
@@ -259,7 +273,7 @@
 		echo "</form>";
 	}
 
-	if ($tee == '' and isset($checkbox_parent) and is_array($checkbox_parent) and count($checkbox_parent) == 1) {
+	if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {
 
 		$lahto = (int) $checkbox_parent[0];
 
@@ -370,7 +384,12 @@
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='checkbox_parent[]' value='{$lahto}' />";
 
-				$lopetus_url = $lopetus."/SPLIT/{$palvelin2}tilauskasittely/muokkaa_kolleja.php////select_varasto={$select_varasto}//tee=//checkbox_parent[]={$lahto}";
+				if ($lopetus != "") {
+					$lopetus_url = $lopetus."/SPLIT/{$palvelin2}tilauskasittely/muokkaa_kolleja.php////select_varasto={$select_varasto}//tee=//checkbox_parent[]={$lahto}";
+				}
+				else {
+					$lopetus_url = "{$palvelin2}tilauskasittely/muokkaa_kolleja.php////select_varasto={$select_varasto}//tee=//checkbox_parent[]={$lahto}";
+				}
 
 				echo "<input type='hidden' name='lopetus' value='{$lopetus_url}' />";
 

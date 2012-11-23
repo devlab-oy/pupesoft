@@ -343,7 +343,7 @@
 
 		// haetaan kaikki distinct rahtikirjat..
 		$query = "	SELECT DISTINCT lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
-					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, GROUP_CONCAT(DISTINCT lasku.tunnus) ltunnukset
+					rahtikirjat.merahti, rahtikirjat.rahtisopimus, GROUP_CONCAT(DISTINCT lasku.tunnus) ltunnukset
 					FROM rahtikirjat
 					JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B' AND lasku.toimitustavan_lahto = '{$lahto}')
 					LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
@@ -354,7 +354,7 @@
 					and rahtikirjat.toimitustapa	= '{$toimitustapa}'
 					and rahtikirjat.tulostuspaikka	= '{$select_varasto}'
 					GROUP BY lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
-					rahtikirjat.merahti, rahtikirjat.rahtisopimus, jv
+					rahtikirjat.merahti, rahtikirjat.rahtisopimus
 					ORDER BY lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus, lasku.tunnus";
 		$rakir_res = pupe_query($query);
 
@@ -393,13 +393,6 @@
 									and lasku.toim_postitp		= '$rakir_row[toim_postitp]' ";
 				}
 
-				if ($rakir_row['jv'] != '') {
-					$jvehto = "and maksuehto.jv != ''";
-				}
-				else {
-					$jvehto = "and maksuehto.jv = ''";
-				}
-
 				// haetaan tälle rahtikirjalle kuuluvat tunnukset
 				$query = "	SELECT GROUP_CONCAT(DISTINCT lasku.tunnus) otunnus,
 							GROUP_CONCAT(DISTINCT rahtikirjat.tunnus) rtunnus,
@@ -407,7 +400,7 @@
 							SUM(kollit) kollit
 							FROM rahtikirjat
 							JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B' AND lasku.tunnus IN ({$rakir_row['ltunnukset']}))
-							LEFT JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus {$jvehto})
+							LEFT JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
 							WHERE rahtikirjat.yhtio	= '{$kukarow[yhtio]}'
 							and rahtikirjat.tulostettu	= '0000-00-00 00:00:00'
 							and rahtikirjat.toimitustapa	= '$toimitustapa'

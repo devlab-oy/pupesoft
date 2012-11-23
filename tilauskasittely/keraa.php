@@ -1847,8 +1847,10 @@
 					$wherelisa = "AND tunnus = '{$id}'";
 				}
 
+				# toimitustapa ei saa olla nouto.
 				$query = "	SELECT tunnus
 							FROM lasku
+							JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.nouto = '')
 							WHERE lasku.yhtio 	= '{$kukarow['yhtio']}'
 							AND lasku.tila 		= 'L'
 							AND lasku.alatila 	= 'C'

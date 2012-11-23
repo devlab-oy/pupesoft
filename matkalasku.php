@@ -354,6 +354,14 @@ if ($tee != "") {
 
 						$ylitunnit = $tunnit - ($paivat * 24);
 
+						//var = 1 Kotimaan kokopäiväraha
+						//var = 2 Kotimaan osapäiväraha
+						//var = 3 Kotimaan puolitettu kokopäiväraha
+						//var = 4 Kotimaan puolitettu osapäiväraha
+						//var = 5 Ulkomaan kokopäiväraha
+						//var = 6 Ulkomaan puolitettu päiväraha
+						//var = 7 Ulkomaan kahteenkertaan puolitettu päiväraha
+
 						// Kotimaan matkat
 						if ($trow["vienti"] == "FI") {
 
@@ -371,40 +379,57 @@ if ($tee != "") {
 								Kun matkaan käytetty aika ylittää viimeisen täyden matkavuorokauden vähintään 2 tunnilla --> osapäiväraha
 								*/
 
-								$tuoteno_osat = explode("-", $tuoteno);
-								$puolipaivatuoteno = "P".array_shift($tuoteno_osat)."-".array_pop($tuoteno_osat);
-
 								//Osapäivärahan tiedot löytyvät $trow malli ja myymalahinta
 								$osapaivat++;
 
-								$tuoteno_array[1] = $puolipaivatuoteno;
+								$tuoteno_array[1] = $tuoteno;
 								$kpl_array[1]	  = $osapaivat;
 								$hinta_array[1]	  = $trow['myymalahinta'];
 								$nimitys_array[1] = $trow['malli'];
 								$varri_array[1]   = "2";	 // Kotimaan osapäiväraha
 
-								$selite .= "<br>$puolipaivatuoteno - {$trow['malli']} $osapaivat kpl á ".(float) round($trow['myymalahinta'], 2);
+								$selite .= "<br>$osapaiva_tuoteno - {$trow['malli']} $osapaivat kpl á ".(float) round($trow['myymalahinta'], 2);
 							}
 						}
 						// Ulkomaanmatkat
 						elseif ($trow["vienti"] != "FI") {
 
 							// Ulkomaan kokopäiväraha
-							$varri = "3";
+							$varri = "5";
 
 							if ($ylitunnit > 6 and $ylitunnit < 10 and $paivat == 0) {
+								/*Palkansaajalla on oikeus kysymyksessä olevaa maata varten vahvistettuun päivärahaan,
+								 * jos ulkomaille tehty työmatka on kestänyt vähintään 10 tuntia.
+								 * Mikäli työmatkaan käytetty kokonaisaika jää alle 10 tunnin,
+								 * suoritetaan päiväraha kotimaan matkojen säännösten ja määrien mukaisesti.
+								 */
+								//Kotimaan matkojen säännöstö
 								/*
-								Mikäli työmatkaan käytetty kokonaisaika jää alle 10 tunnin, suoritetaan päiväraha kotimaan matkojen säännösten ja määrien mukaisesti.
-								Eli tässä tapauksessa: "Työmatkan kestoaika yli 6 tuntia --> osapäivärahakorvaus"
-								*/
+								 *	Työmatkan kestoajasta riippuen päivärahan enimmäismäärät ovat:
+									Työmatkan kestoaika 	Päivärahan enimmäismäärä
+									euro
+									yli 6 tuntia (osapäiväraha) 	16,00
+									yli 10 tuntia (kokopäiväraha) 	36,00
+									kun matkaan käytetty aika ylittää
+									viimeisen täyden matkavuorokauden
+									- vähintään 2 tunnilla 	16,00
+									- yli 6 tunnilla 	36,00
 
-								$trow["myyntihinta"] = $trow['myymalahinta'];
-								$trow["nimitys"] .= " (".t($trow['malli']).")";
+									Jos palkansaaja jonakin matkavuorokautena saa ilmaisen tai matkalipun hintaan sisältyneen ruoan,
+								 * päivärahan enimmäismäärä on puolet 1 momentin mukaisista määristä.
+								 * Ilmaisella ruoalla tarkoitetaan kokopäivärahan kysymyksessä ollen kahta ja osapäivärahan kysymyksessä ollen yhtä ilmaista ateriaa.
+								 */
+								//eli yli 6 alle 10 tarkoittaa puolitettua ulkomaanpäivärahaa
 
-								// Ulkomaan osapäiväraha
-								$varri = "4";
+								$puolipaivat++;
 
-								$paivat++;
+								$tuoteno_array[1]	= $tuoteno;
+								$kpl_array[1]		= $puolipaivat;
+								$hinta_array[1]		= round($trow['myyntihinta']/2, 2);
+								$nimitys_array[1]	= $trow['nimitys'] . " " .t("Puolitettu korvaus");
+								$varri_array[1] 	= "6";	 // Ulkomaan puolipäiväraha
+
+								$selite .= "<br>$tuoteno - {$nimitys_array[1]} $puolipaivat kpl á ".(float) $hinta_array[1];
 							}
 							elseif ($ylitunnit >= 10) {
 								/*
@@ -419,18 +444,17 @@ if ($tee != "") {
 								Suomeen palattaessa palkansaajalla on oikeus puoleen viimeksi päättyneeltä matkavuorokaudelta maksetusta ulkomaanpäivärahasta,
 								jos työmatkaan käytetty aika ylittää viimeisen ulkomaan alueella tai sieltä lähteneessä laivassa tai lentokoneessa päättyneen täyden matkavuorokauden yli kahdella tunnilla.
 								*/
-
-								$puolipaivatuoteno = 'P' . $tuoteno;
+								//Eli ei osapäiväraha vaan puolitettu korvaus ulkomaanpäivärahasta -> puolipäiväraha
 
 								$puolipaivat++;
 
-								$tuoteno_array[1]	= $puolipaivatuoteno;
+								$tuoteno_array[1]	= $tuoteno;
 								$kpl_array[1]		= $puolipaivat;
-								$hinta_array[1]		= round($trow['myymalahinta'], 2);
-								$nimitys_array[1]	= $trow['malli'];
-								$varri_array[1] 	= "5";	 // Ulkomaan puolipäiväraha
+								$hinta_array[1]		= round($trow['myyntihinta']/2, 2);
+								$nimitys_array[1]	= $trow['nimitys'] . " " .t("Puolitettu korvaus");
+								$varri_array[1] 	= "6";	 // Ulkomaan puolipäiväraha
 
-								$selite .= "<br>$puolipaivatuoteno - {$trow['malli']} $puolipaivat kpl á ".(float) round($trow['myymalahinta'], 2);
+								$selite .= "<br>$tuoteno - {$nimitys_array[1]} $puolipaivat kpl á ".(float) $hinta_array[1];
 							}
 						}
 
@@ -500,11 +524,6 @@ if ($tee != "") {
 					$summa = 0;
 					foreach ($tuoteno_array as $indeksi => $lisaa_tuoteno) {
 
-						//puolipäiväraha
-						if($indeksi == 1) {
-							$lisaa_tuoteno = substr($lisaa_tuoteno, 1);
-						}
-
 						//	Haetaan tuotteen tiedot
 						$query = "	SELECT *
 									FROM tuote
@@ -567,6 +586,8 @@ if ($tee != "") {
 										}
 									}
 
+									$ilmaiset_lounaat = tarkista_loytyyko_paivalle_matkalasku($_alkuaika, $tilausnumero);
+									
 									$query = "	INSERT into tilausrivi set
 										hyllyalue   = '0',
 										hyllynro    = '0',
@@ -581,6 +602,7 @@ if ($tee != "") {
 										kpl 		= '1',
 										tilkpl 		= '1',
 										ale1 		= '0',
+										erikoisale	= '{$ilmaiset_lounaat}',
 										alv 		= '$vero',
 										netto		= 'N',
 										hinta 		= '$hinta',
@@ -637,6 +659,8 @@ if ($tee != "") {
 								$_alkuaika = $_alkuaika;
 								$_loppuaika = $loppuaika;
 
+								$ilmaiset_lounaat = tarkista_loytyyko_paivalle_matkalasku($_alkuaika, $tilausnumero);
+
 								$query = "	INSERT into tilausrivi set
 										hyllyalue   = '0',
 										hyllynro    = '0',
@@ -651,6 +675,7 @@ if ($tee != "") {
 										kpl 		= '1',
 										tilkpl 		= '1',
 										ale1 		= '0',
+										erikoisale	= '{$ilmaiset_lounaat}',
 										alv 		= '$vero',
 										netto		= 'N',
 										hinta 		= '$hinta',
@@ -772,6 +797,15 @@ if ($tee != "") {
 					//	Fiksataan ostovelka
 					korjaa_ostovelka($tilausnumero);
 				}
+
+				//koska poista edelliset matkalasku rivit update tyyppi D
+				//siivotaan deleted tilausrivit pois
+				$query = "	DELETE
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND otunnus = '{$tilausnumero}'
+							AND tyyppi = 'D'";
+				pupe_query($query);
 
 				return $errori;
 			}
@@ -1267,17 +1301,27 @@ if ($tee == "TALLENNA") {
 }
 
 if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
-	//Tarkistetaan onko tuote rivi, jota muokataan kotimaan päiväraha vai ulkomaan päiväraha
-
 	//sovittu jonin kanssa seuraavasti
 	//nimitys = kokopäivärahan nimitys
 	//myyntihinta = kokopäivärahan hinta
-	//malli = puoli/osapäivärahan nimitys
-	//myymalahinta = puoli/osapäivärahan hinta
+	//malli = osapäivärahan nimitys
+	//myymalahinta = osapäivärahan hinta
+
+	//var = 1 Kotimaan kokopäiväraha
+	//var = 2 Kotimaan osapäiväraha
+	//var = 3 Kotimaan puolitettu kokopäiväraha
+	//var = 4 Kotimaan puolitettu osapäiväraha
+	//var = 5 Ulkomaan kokopäiväraha
+	//var = 6 Ulkomaan puolitettu päiväraha
+	//var = 7 Ulkomaan kahteenkertaan puolitettu päiväraha
 	$query = "	SELECT
 				tilausrivi.tunnus,
 				tilausrivi.alv,
 				tilausrivi.kpl,
+				tilausrivi.nimitys tilausrivi_nimitys,
+				tilausrivi.hinta,
+				tilausrivi.var,
+				tilausrivi.rivihinta,
 				tuote.nimitys,
 				tuote.myyntihinta,
 				tuote.malli,
@@ -1293,31 +1337,100 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 	$query_ale_lisa = generoi_alekentta('M');
 	$ilmaiset_lounaat = (int) trim($ilmaiset_lounaat);
 
-	if ($row['vienti'] == 'FI') {
-		if ($ilmaiset_lounaat >= 1) {
-			//Tällöin kotimaan päiväraha muutetaan osapäivärahaksi
-			$rivihinta = $row['kpl'] * $row['myymalahinta'];
-			$tilausrivi_uusi_hinta = $row['myymalahinta'];
-			$tilausrivi_uusi_nimitys = $row['malli'];
+	if($row['vienti'] == 'FI') {
+		if($ilmaiset_lounaat >= 1) {
+			if($row['var'] == 1) {
+				//kotimaan kokopäiväraha ----> kotimaan puolitettu kokopäiväraha
+				$rivihinta = $row['kpl'] * ($row['myyntihinta'] / 2);
+				$tilausrivi_uusi_hinta = ($row['myyntihinta'] / 2);
+				$tilausrivi_uusi_nimitys = $row['tilausrivi_nimitys'] . ' ' . t("Puolitettu korvaus");
+				$tilausrivi_uusi_var = 3;
+			}
+			else if($row['var'] == 2) {
+				//kotimaan osapäiväraha ----> kotimaan puolitettu osapäiväraha
+				$rivihinta = $row['kpl'] * ($row['myymalahinta'] / 2);
+				$tilausrivi_uusi_hinta = ($row['myymalahinta'] / 2);
+				$tilausrivi_uusi_nimitys = $row['tilausrivi_nimitys'] . ' ' . t("Puolitettu korvaus");
+				$tilausrivi_uusi_var = 4;
+			}
+			else {
+				//pidetään tiedot ennallaan
+				$rivihinta = $row['rivihinta'];
+				$tilausrivi_uusi_hinta = $row['hinta'];
+				$tilausrivi_uusi_nimitys = $row['tilausrivi_nimitys'];
+				$tilausrivi_uusi_var = $row['var'];
+			}
 		}
 		else {
-			//Kotimaan päiväraha on kokopäivän päiväraha
-			$rivihinta = $row['kpl'] * $row['myyntihinta'];
-			$tilausrivi_uusi_hinta = $row['myyntihinta'];
-			$tilausrivi_uusi_nimitys = $row['nimitys'];
+			if($row['var'] == 3) {
+				//kotimaan puolitettu kokopäiväraha ----> kotimaan kokopäiväraha
+				$rivihinta = $row['kpl'] * ($row['myyntihinta']);
+				$tilausrivi_uusi_hinta = ($row['myyntihinta']);
+				$tilausrivi_uusi_nimitys = $row['nimitys'];
+				$tilausrivi_uusi_var = 1;
+			}
+			else if($row['var'] == 4) {
+				//kotimaan puolitettu osapäiväraha ----> kotimaan puolitettu osapäiväraha
+				$rivihinta = $row['kpl'] * ($row['myymalahinta']);
+				$tilausrivi_uusi_hinta = ($row['myymalahinta']);
+				$tilausrivi_uusi_nimitys = $row['malli'];
+				$tilausrivi_uusi_var = 2;
+			}
+			else {
+				//pidetään tiedot ennallaan
+				$rivihinta = $row['rivihinta'];
+				$tilausrivi_uusi_hinta = $row['hinta'];
+				$tilausrivi_uusi_nimitys = $row['tilausrivi_nimitys'];
+				$tilausrivi_uusi_var = $row['var'];
+			}
 		}
 	}
 	else {
-		if ($ilmaiset_lounaat >= 2){
-			//Ulkomaanpäivä raha muutetaan puolipäivärahaksi
-			$rivihinta = $row['kpl'] * $row['myymalahinta'];
-			$tilausrivi_uusi_hinta = $row['myymalahinta'];
-			$tilausrivi_uusi_nimitys = $row['malli'];
+		if($ilmaiset_lounaat >= 2) {
+			if($row['var'] == 5) {
+				//ulkomaan kokopäiväraha ----> ulkomaan puolitettu kokopäiväraha
+				$rivihinta = $row['kpl'] * ($row['myyntihinta'] / 2);
+				$tilausrivi_uusi_hinta = ($row['myyntihinta'] / 2);
+				$tilausrivi_uusi_nimitys = $row['tilausrivi_nimitys'] . ' ' . t("Puolitettu korvaus");
+				$tilausrivi_uusi_var = 6;
+			}
+			else if($row['var'] == 6) {
+				//ulkomaan puolitettu päiväraha ----> ulkomaan kahteen kertaan puolitettu päiväraha
+				$rivihinta = $row['kpl'] * ($row['hinta'] / 2);
+				$tilausrivi_uusi_hinta = ($row['hinta'] / 2);
+				$tilausrivi_uusi_nimitys = $row['nimitys'] . ' ' . t("Kahteen kertaan puolitettu korvaus");
+				$tilausrivi_uusi_var = 7;
+			}
+			else {
+				//pidetään tiedot ennallaan
+				$rivihinta = $row['rivihinta'];
+				$tilausrivi_uusi_hinta = $row['hinta'];
+				$tilausrivi_uusi_nimitys = $row['tilausrivi_nimitys'];
+				$tilausrivi_uusi_var = $row['var'];
+			}
 		}
 		else {
-			$rivihinta = $row['kpl'] * $row['myyntihinta'];
-			$tilausrivi_uusi_hinta = $row['myyntihinta'];
-			$tilausrivi_uusi_nimitys = $row['nimitys'];
+			if($row['var'] == 6) {
+				//ulkomaan puolitettu kokopäiväraha ----> ulkomaan kokopäiväraha
+				$rivihinta = $row['kpl'] * ($row['myyntihinta']);
+				$tilausrivi_uusi_hinta = ($row['myyntihinta']);
+				$tilausrivi_uusi_nimitys = $row['nimitys'];
+				$tilausrivi_uusi_var = 5;
+			}
+			else if($row['var'] == 7) {
+				//ulkomaan kahteen kertaan puolitettu päiväraha ----> ulkomaan puolitettu päiväraha
+				$rivihinta = $row['kpl'] * ($row['myyntihinta'] / 2);
+				$tilausrivi_uusi_hinta = ($row['myyntihinta'] / 2);
+				$tilausrivi_uusi_nimitys = $row['nimitys'] . ' ' . t('Puolitettu korvaus');
+				$tilausrivi_uusi_var = 6;
+			}
+			else {
+				//pidetään tiedot ennallaan
+				$rivihinta = $row['rivihinta'];
+				$tilausrivi_uusi_hinta = $row['hinta'];
+				$tilausrivi_uusi_nimitys = $row['tilausrivi_nimitys'];
+				$tilausrivi_uusi_var = $row['var'];
+			}
 		}
 	}
 
@@ -1325,7 +1438,8 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 				SET nimitys = '{$tilausrivi_uusi_nimitys}',
 				hinta 		= '{$tilausrivi_uusi_hinta}',
 				rivihinta 	= '{$rivihinta}',
-				erikoisale 	= '{$ilmaiset_lounaat}'
+				erikoisale 	= '{$ilmaiset_lounaat}',
+				var			= '{$tilausrivi_uusi_var}'
 				WHERE tunnus = '{$row['tunnus']}'";
 	$result = pupe_query($query);
 
@@ -1335,20 +1449,30 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 				JOIN tuote
 				ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-				AND tilausrivi.otunnus = '$tilausnumero'";
+				AND tilausrivi.otunnus = '$tilausnumero'
+				AND tilausrivi.tyyppi != 'D'";
 	$result = pupe_query($query);
-	$rows = mysql_fetch_assoc($result);
 
 	$summa = 0;
-
-	foreach ($rows as $row) {
-		$summa += $row['rivihinta'];
+	while($row = mysql_fetch_assoc($result)) {
+		$summa += (float) $row['rivihinta'];
 	}
 
 	$query = "	UPDATE tiliointi
-				WHERE ltunnus = '{$tilausnumero}'
-				SET summa = '{$summa}'";
-	// Puuttuuko resultti?
+				SET summa = '{$summa}'
+				WHERE ltunnus = '{$tilausnumero}'";
+	pupe_query($query);
+
+	korjaa_ostovelka($tilausnumero);
+
+	//koska poista edelliset matkalasku rivit update tyyppi D
+	//siivotaan deleted tilausrivit pois
+	$query = "	DELETE
+				FROM tilausrivi
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus = '{$tilausnumero}'
+				AND tyyppi = 'D'";
+	pupe_query($query);
 
 	$tee 		= 'MUOKKAA';
 	$tapa 		= '';
@@ -1416,7 +1540,8 @@ if ($tee == "MUOKKAA") {
 				$vero = $tilausrivi["tiliointialv"];
 				$hinta = round($tilausrivi["hinta"], 2);
 				$kommentti = $tilausrivi["kommentti"];
-				$rivitunnus = $tilausrivi["tunnus"];
+				$rivitunnus = '';
+				$perheid2 = '';
 				$kustp = $tilausrivi["kustp"];
 				$kohde = $tilausrivi["kohde"];
 				$projekti = $tilausrivi["projekti"];
@@ -2617,10 +2742,13 @@ function echo_summa($summa) {
 	echo "</tr>";
 }
 
-function poista_edelliset_matkalaskurivit($rivitunnus, $kukurow) {
-	$query = 'DELETE FROM tilausrivi WHERE tilausrivi.yhtio ="' . $kukurow['yhtio'] . '" AND tilausrivi.perheid2="' . $rivitunnus . '"';
+function poista_edelliset_matkalaskurivit($rivitunnus, $kukarow) {
+	$query = "	UPDATE tilausrivi
+				SET tyyppi = 'D'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND perheid2 = '{$rivitunnus}'";
 
-	$result = pupe_query($query);
+	pupe_query($query);
 }
 
 function poista_tiliointi($kukarow, $tilausnumero) {
@@ -2699,6 +2827,31 @@ function hae_kaikki_matkalaskurivit($kukarow, $tilausnumero, $rivitunnus) {
 	$rowTemp['kerattyaika'] = $eka_matkalasku['kerattyaika'];
 
 	return $rowTemp;
+}
+
+function tarkista_loytyyko_paivalle_matkalasku($alkuaika, $tilausnumero) {
+	//tarkistetaan löytyykö käyttäjälle matkapäivä tilasta D
+	global $kukarow;
+
+	$alkuaika_date = date('Y-m-d', strtotime($alkuaika));
+	
+	$query = "	SELECT *
+				FROM tilausrivi
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus = {$tilausnumero}
+				AND DATE(kerattyaika) = '{$alkuaika_date}'
+				AND tyyppi = 'D'";
+	$result = pupe_query($query);
+
+	if($tilausrivi_row = mysql_fetch_assoc($result)) {
+
+		$query = "DELETE FROM tilausrivi WHERE tilausrivi.yhtio ='{$kukarow['yhtio']}' AND tilausrivi.tunnus = '{$tilausrivi_row['tunnus']}'";
+		$result = pupe_query($query);
+
+		return $tilausrivi_row['erikoisale'];
+	}
+
+	return 0;
 }
 
 require ("inc/footer.inc");

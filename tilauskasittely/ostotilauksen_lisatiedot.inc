@@ -26,6 +26,18 @@ if ($tee == "update") {
 			$nappikeikalla = '';
 		}
 	}
+	
+	if ((float) $erikoisale_saapuminen < 0 or (float) $erikoisale_saapuminen > 100) {
+		echo "<font class='message'>".t("VIRHE: Erikoisale pit‰‰ olla alle 100% ja yli 0%")."!</font><br><br>";
+
+		$tee = "";
+		$toiminto = "lisatiedot";
+
+		if ($nappikeikalla == 'ollaan') {
+			$nappikeikalle = 'menossa';
+			$nappikeikalla = '';
+		}
+	}
 }
 
 if ($tee == "update") {

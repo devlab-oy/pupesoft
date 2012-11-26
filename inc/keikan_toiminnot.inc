@@ -162,10 +162,10 @@
 	    }
 
 		if ($otunnus == 0) {
-			$updatelisa = ", suuntalava = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale = 0, erikoisale_saapuminen = 0 ";
+			$updatelisa = ", suuntalava = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale_saapuminen = 0 ";
 		}
 		else {
-			$updatelisa = "$suuntalava_querylisa , kerattyaika = now(), keratty = '{$kukarow['kuka']}', erikoisale = '{$laskurow['erikoisale']}', erikoisale_saapuminen = '{$laskurow['erikoisale_saapuminen']}' ";
+			$updatelisa = "$suuntalava_querylisa , kerattyaika = now(), keratty = '{$kukarow['kuka']}', erikoisale_saapuminen = '{$laskurow['erikoisale_saapuminen']}' ";
 		}
 
 	    // Haetaan rivit ennen päivitystä
@@ -336,11 +336,17 @@
 		$otunnus 		= $_POST['otunnus'];
 		$monesko_kentta = $_POST['monesko_kentta'];
 
+		if ($monesko_kentta == "E") {
+			$aleupd = " erikoisale = '{$ale}' ";
+		}
+		else {
+			$aleupd = " ale{$monesko_kentta} = '{$ale}' ";
+		}
+
 		$query  = "	UPDATE tilausrivi SET
-					ale{$monesko_kentta} = '{$ale}'
+					$aleupd
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$tunnus}'
-					AND ale{$monesko_kentta} <> '{$ale}'";
+					AND tunnus = '{$tunnus}'";
 		$result = pupe_query($query);
 
 		$hinnat = laske_hinta($laskurow, $tunnus);

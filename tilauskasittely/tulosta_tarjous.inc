@@ -180,13 +180,16 @@ if (!function_exists('alku_tarjous')) {
 
 			$naytetaanko_toimitusaika = explode('<_toimaikapdf_>' , $laskurow['comments']);
 
-			if(!empty($naytetaanko_toimitusaika)) {
+			if(!empty($naytetaanko_toimitusaika[1])) {
 				if($naytetaanko_toimitusaika[1] == 'true') {
 					$naytetaanko_toimitusaika = true;
 				}
 				else {
 					$naytetaanko_toimitusaika = false;
 				}
+			}
+			else {
+				$naytetaanko_toimitusaika = true;
 			}
 
 			if ($useita == "JOO") {
@@ -266,7 +269,14 @@ if (!function_exists('alku_tarjous')) {
 			}
 
 			if (trim($laskurow['comments']) != '') {
-				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
+				$comments_temp = explode('<_toimaikapdf_>', $laskurow['comments']);
+				if(!empty($comments_temp[1])) {
+					$comments = $comments_temp[0];
+				}
+				else {
+					$comments = $laskurow['comments'];
+				}
+				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $comments), 90, "\n###");
 			}
 
 			if (trim($laskurow['tilausyhteyshenkilo']) != '') {
@@ -291,6 +301,13 @@ if (!function_exists('alku_tarjous')) {
 			}
 
 			if (trim($laskurow['comments']) != '') {
+				$comments_temp = explode('<_toimaikapdf_>', $laskurow['comments']);
+				if(!empty($comments_temp[1])) {
+					$comments = $comments_temp[0];
+				}
+				else {
+					$comments = $laskurow['comments'];
+				}
 				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
 			}
 		}
@@ -962,6 +979,20 @@ if (!function_exists('tarjous_rivi_custom')) {
 	function tarjous_rivi_custom($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous, $sarjanutunnus, $row, $hinnat, $asiakasrow, $verolliset_verottomat_hinnat = "", $naytetaanko_rivihinta = '', $sivu = 1) {
 		global $yhtiorow, $kukarow, $norm, $pieni, $boldi;
 
+		$naytetaanko_toimitusaika = explode('<_toimaikapdf_>' , $laskurow['comments']);
+
+		if(!empty($naytetaanko_toimitusaika[1])) {
+			if($naytetaanko_toimitusaika[1] == 'true') {
+				$naytetaanko_toimitusaika = true;
+			}
+			else {
+				$naytetaanko_toimitusaika = false;
+			}
+		}
+		else {
+			$naytetaanko_toimitusaika = true;
+		}
+
 		$rivinkorkeus = 12;
 
 		if (trim($row["perhe_kommentti"]) != '') {
@@ -982,16 +1013,12 @@ if (!function_exists('tarjous_rivi_custom')) {
 			$vko .= ' - '.(date("W", mktime(0, 0, 0, $kk, $pp, $vv)) + 1);
 		}
 
-		$pdf_tarjous->draw_text(330, $kala, t("Vko", $kieli)." $vko", $page_tarjous[$sivu], $norm);
+		if($naytetaanko_toimitusaika == true) {
+			$pdf_tarjous->draw_text(330, $kala, t("Vko", $kieli)." $vko", $page_tarjous[$sivu], $norm);
+		}
 
-		if($naytetaanko_rivihinta == 'kokonaan_ilman_hintoja') {
-			$oikpos = $pdf_tarjous->strlen($row["tilkpl"], $norm);
-			$pdf_tarjous->draw_text(480-$oikpos, $kala, $row["tilkpl"], $page_tarjous[$sivu], $norm);
-		}
-		else {
-			$oikpos = $pdf_tarjous->strlen($row["tilkpl"], $norm);
-			$pdf_tarjous->draw_text(420-$oikpos, $kala, $row["tilkpl"], $page_tarjous[$sivu], $norm);
-		}
+		$oikpos = $pdf_tarjous->strlen($row["tilkpl"], $norm);
+		$pdf_tarjous->draw_text(420-$oikpos, $kala, $row["tilkpl"], $page_tarjous[$sivu], $norm);
 
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 		$pdf_tarjous->draw_text(438, $kala, $omyks, $page_tarjous[$sivu], $norm);

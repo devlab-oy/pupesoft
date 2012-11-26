@@ -1438,7 +1438,8 @@
 
 			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
 
-			if($comments_temp = explode('<_toimaikapdf_>', $srow['comments'])) {
+			$comments_temp = explode('<_toimaikapdf_>', $srow['comments']);
+			if(!empty($comments_temp[1])) {
 				if($comments_temp[1] == 'true') {
 					$naytetaanko_pdf_sel = "checked='CHECKED'";
 				}
@@ -1447,6 +1448,7 @@
 				}
 			}
 			else {
+				//vakiona n‰ytet‰‰n toimitusaika pdf:ll‰.
 				$naytetaanko_pdf_sel = "checked='CHECKED'";
 			}
 
@@ -3083,7 +3085,7 @@
 				$comments = $comments;
 			}
 			
-			$comments = $comments . '<_toimaikapdf_>true<__toimaikapdf__>';
+			$comments = $comments . '<_toimaikapdf_>true<_toimaikapdf_>';
 		}
 
 		$query .= "	lasku SET

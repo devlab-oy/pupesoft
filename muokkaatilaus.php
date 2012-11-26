@@ -186,6 +186,19 @@
 							return false;
 						}
 					}
+
+					function tarkista_mitatointi(count) {
+						msg = '".t("Oletko varma, että haluat mitätöidä ")."' + count + '".t(" tarjousta?")."';
+
+						if (confirm(msg)) {
+							return false;
+							//return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
+					}
 				-->
 				</script>";
 
@@ -592,7 +605,10 @@
 				}
 
 				$(document).ready(function() {
-					$('form[name=hakuformi]').next().after($('#mitatoi_kaikki').html());
+					var mitatoi_kaikki = $('#mitatoi_kaikki');
+					$('#mitatoi_kaikki').remove();
+					$(mitatoi_kaikki).css('display', 'block');
+					$('form[name=hakuformi]').next().after($(mitatoi_kaikki));
 				});
 			</script>";
 
@@ -1967,7 +1983,7 @@
 					echo "</form></td>";
 
 					if (($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER") and $deletarjous and $kukarow["mitatoi_tilauksia"] == "") {
-						echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return verify();'>";
+						echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(1);'>";
 						echo "<input type='hidden' name='toim' value='$whiletoim'>";
 						echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS'>";
 						echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
@@ -1996,16 +2012,18 @@
 
 			echo "</table>";
 
-			//tämä formi laitetaan javascriptillä ylempänä kohdilleen
-			$tunnukset = implode(',', $nakyman_tunnukset);
-			echo "<div id='mitatoi_kaikki' style='display:none'>";
-			echo "<form method='POST' name='mitatoi_kaikki_formi' action='muokkaatilaus.php' onSubmit='return verify();'>";
-			echo "<input type='hidden' name='toim' value='$toim' />";
-			echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS_KAIKKI' />";
-			echo "<input type='hidden' name='tunnukset' value='($tunnukset)' />";
-			echo "<input type='submit' value='".t("Mitätöi kaikki")."'/>";
-			echo "</form>";
-			echo "</div>";
+			if($toim == 'TARJOUS') {
+				//tämä formi laitetaan javascriptillä ylempänä kohdilleen
+				$tunnukset = implode(',', $nakyman_tunnukset);
+				echo "<div id='mitatoi_kaikki' style='display:none'>";
+				echo "<form method='POST' name='mitatoi_kaikki_formi' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(".count($nakyman_tunnukset).");'>";
+				echo "<input type='hidden' name='toim' value='$toim' />";
+				echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS_KAIKKI' />";
+				echo "<input type='hidden' name='tunnukset' value='($tunnukset)' />";
+				echo "<input type='submit' value='".t("Mitätöi kaikki näkymän tarjoukset")."'/>";
+				echo "</form>";
+				echo "</div>";
+			}
 
 			if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 				if (is_array($sumrow)) {

@@ -3,7 +3,7 @@
 </div>
 
 <div class='main'>
-	<b><?= t("Inventoitavia eriä ei ole") ?></b>
+	<b><?php echo t("Inventoitavia eriä ei ole") ?></b>
 </div>
 
 <div class='controls'>

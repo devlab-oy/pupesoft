@@ -262,10 +262,13 @@
 		'kalenteri'                       => 'Kalenteritietoja',
 		'kuka'                            => 'Käyttäjätietoja',
 		'kustannuspaikka'                 => 'Kustannuspaikat',
+		'lahdot'            			  => 'Lähdöt',
 		'liitetiedostot'                  => 'Liitetiedostot',
 		'maksuehto'                       => 'Maksuehto',
 		'pakkaus'                         => 'Pakkaustiedot',
 		'perusalennus'                    => 'Perusalennukset',
+		'puun_alkio_asiakas'              => 'Asiakas-segmenttiliitokset',
+		'puun_alkio_tuote'                => 'Tuote-segmenttiliitokset',
 		'rahtikirjanumero'				  => 'LOGY-rahtikirjanumerot',
 		'rahtimaksut'                     => 'Rahtimaksut',
 		'rahtisopimukset'                 => 'Rahtisopimukset',
@@ -276,9 +279,10 @@
 		'tili'                            => 'Tilikartta',
 		'todo'                            => 'Todo-lista',
 		'toimi'                           => 'Toimittaja',
+		'toimittajaalennus'               => 'Toimittajan alennukset',
+		'toimittajahinta'                 => 'Toimittajan hinnat',
 		'toimitustapa'                    => 'Toimitustavat',
 		'toimitustavan_lahdot'            => 'Toimitustavan lähdöt',
-		'lahdot'            			  => 'Lähdöt',
 		'tullinimike'                     => 'Tullinimikeet',
 		'tuote'                           => 'Tuote',
 		'tuotepaikat'                     => 'Tuotepaikat',
@@ -290,20 +294,7 @@
 		'vak'                             => 'VAK-tietoja',
 		'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
 		'yhteyshenkilo'                   => 'Yhteyshenkilöt',
-		'toimittajahinta'                 => 'Toimittajan hinnat',
-		'toimittajaalennus'               => 'Toimittajan alennukset',
 	);
-
-	// Lisätään dynaamiset tiedot
-	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
-	$dynaamiset_avainsanat = "";
-
-	while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
-		$taulut["puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])] = "Dynaaminen_".strtolower($dynaamiset_avainsanat_row['selite']);
-		if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
-			$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
-		}
-	}
 
 	// Yhtiökohtaisia
 	if ($kukarow['yhtio'] == 'mast') {
@@ -356,9 +347,9 @@
 		</tr>";
 	}
 
-	if (trim($dynaamiset_avainsanat) != '' and $table == $dynaamiset_avainsanat) {
+	if (in_array($table, array("puun_alkio_asiakas", "puun_alkio_tuote"))) {
 		echo "	<tr><th>",t("Valitse liitos"),":</th>
-				<td><select name='dynaamisen_taulun_liitos'>";
+					<td><select name='dynaamisen_taulun_liitos'>";
 
 		if ($table == 'puun_alkio_asiakas') {
 			echo "	<option value=''>",t("Asiakkaan tunnus"),"</option>

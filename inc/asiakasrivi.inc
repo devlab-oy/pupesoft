@@ -502,7 +502,7 @@
 		$ulos .= "<option value=''>".t("Ei oletustoimitusehtoa")."</option>";
 
 		while ($kirow = mysql_fetch_array($kires)) {
-			if ($kirow["selite"]." ".$kirow["selitetark"] == $trow[$i]) $select = 'SELECTED';
+			if (trim($kirow["selite"]." ".$kirow["selitetark"]) == $trow[$i]) $select = 'SELECTED';
 			else $select = '';
 
 			$ulos .= "<option value='$kirow[selite] $kirow[selitetark]' $select>$kirow[selite] $kirow[selitetark]</option>";
@@ -1118,16 +1118,16 @@
 
 	if (mysql_field_name($result, $i) == "keraysvahvistus_lahetys") {
 
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array();
-		$apu = $trow[$i];
-		$sel[$apu] = "selected";
+		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('E', 'o', 'k', 'L', 'M'), '');
 
 		$ulos .= "<option value=''>".t("Käytetään yhtiön oletusta")."</option>";
-		$ulos .= "<option value='E' $sel[E]>".t("Keräysvahvistusta/sähköisetä lähetettä ei lähetetä")."</option>";
-		$ulos .= "<option value='o' $sel[o]>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
-		$ulos .= "<option value='k' $sel[k]>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='E'{$sel['E']}>".t("Keräysvahvistusta/sähköisetä lähetettä ei lähetetä")."</option>";
+		$ulos .= "<option value='o'{$sel['o']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
+		$ulos .= "<option value='k'{$sel['k']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='L'{$sel['L']}>".t("Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='M'{$sel['M']}>".t("Keräysvahvistus/paperinen & sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

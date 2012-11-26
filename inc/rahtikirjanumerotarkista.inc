@@ -23,12 +23,14 @@ if(!function_exists("rahtikirjanumerotarkista")) {
 					$virhe[$i] = t("Rahtikirjanumero on jo perustettu")."!";
 				}
 				else {
-					//Oikeellisuustarkistus
-					if (strlen($t[$i]) != 12) {
-						$virhe[$i] = t("Rahtikirjanumero on oltava 12-merkkiä pitkä")."!";
-					}
-					elseif($t[$i] != mod10_tarkiste(substr($t[$i],0,-1))) {
-						$virhe[$i] = t("Rahtikirjanumeron tarkiste on virheellinen")."!";
+					if (strtoupper($yhtiorow['maa']) == 'FI') {
+						//Oikeellisuustarkistus LOGY
+						if (strlen($t[$i]) != 12) {
+							$virhe[$i] = t("Rahtikirjanumero on oltava 12-merkkiä pitkä")."!";
+						}
+						elseif($t[$i] != mod10_tarkiste(substr($t[$i],0,-1))) {
+							$virhe[$i] = t("Rahtikirjanumeron tarkiste on virheellinen")."!";
+						}
 					}
 				}
 			}

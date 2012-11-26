@@ -217,6 +217,7 @@
 			$piilota_kappaleet_sel 	= "";
 			$einollachk 			= "";
 			$naytaennakkochk 		= "";
+			$laskutuspaivachk		= "";
 
 			if ($ruksit[10]  != '') 		$ruk10chk  				= "CHECKED";
 			if ($ruksit[20]  != '') 		$ruk20chk  				= "CHECKED";
@@ -252,6 +253,7 @@
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
 			if ($vertailubu != '')			${"sel_".$vertailubu}	= "SELECTED";
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
+			if ($laskutuspaiva != '')		$laskutuspaivachk		= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
@@ -450,6 +452,10 @@
 				<th>",t("Näytä kaikki tuotetyypit"),"</th>
 				<td colspan='3'><input type='checkbox' name='naytakaikkityypit' {$naytakaikkityypitchk}></td>
 				<td class='back'></td>
+				</tr>
+				<th>",t("Näytä laskutuspäivä"),"</th>
+				<td colspan='3'><input type='checkbox' name='laskutuspaiva' {$laskutuspaivachk}></td>
+				<td class='back'>",t("(Toimii vain jos listataan tilauksittain tai laskuittain)"),"</td>
 				</tr>
 				<tr>
 				<th>",t("Näytä tuotteet statuksella"),"</th>";
@@ -1099,6 +1105,9 @@
 						if ($rajaus[$i] != "") {
 							$lisa .= " and lasku.laskunro = '{$rajaus[$i]}' ";
 						}
+
+						if ($laskutuspaiva != "") $select .= "lasku.tapvm laskutuspvm, ";
+
 						$laskugroups++;
 					}
 					//** Laskugrouppaukset loppu **//
@@ -1199,6 +1208,8 @@
 						if ($rajaus[$i] != "") {
 							$lisa .= " and lasku.tunnus IN ({$rajaus[$i]}) ";
 						}
+
+						if ($laskutuspaiva != "") $select .= "lasku.tapvm laskutuspvm, ";
 					}
 					//**  Tilauksittain loppu **//
 				}
@@ -1477,6 +1488,10 @@
 								$query .= " sum(0) '".substr($i,0,4).substr($i,4,2)."_tavoiteindnyt', ";
 							}
 
+							if ($piilota_kappaleet == "") {
+								$query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.kpl,0)) '".substr($i,0,4).substr($i,4,2)."_kpl', ";
+							}
+
 							if ($ajotapa == 'tilausjaauki') {
 								$query .= " sum(if(lasku.luontiaika >= '{$alku} 00:00:00' and lasku.luontiaika <= '{$loppu} 23:59:59' and tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) +
 											sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.rivihinta, 0)) '".substr($i,0,4).substr($i,4,2)."_myyntiyht', ";
@@ -1494,6 +1509,10 @@
 								if ($vertailubu != "") {
 									$query .= " sum(0) '".(substr($i,0,4)-1).substr($i,4,2)."_tavoiteed', ";
 									$query .= " sum(0) '".(substr($i,0,4)-1).substr($i,4,2)."_tavoiteinded', ";
+								}
+
+								if ($piilota_kappaleet == "") {
+									$query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku_ed}' and tilausrivi.laskutettuaika <= '{$loppu_ed}', tilausrivi.kpl,0)) '".(substr($i,0,4)-1).substr($i,4,2)."_kpl', ";
 								}
 							}
 
@@ -2216,6 +2235,10 @@
 									if ($ken_nimi == "tuoteno") {
 										$koskematon_tuoteno = $row["tuoteno"];
 										$row[$ken_nimi] = "<a href='../tuote.php?tee=Z&tuoteno=".urlencode($row[$ken_nimi])."'>{$row[$ken_nimi]}</a>";
+									}
+
+									if ($ken_nimi == "laskutuspvm") {
+										$row[$ken_nimi] = tv1dateconv($kentta);
 									}
 
 									// jos kyseessa on asiakasosasto, haetaan sen nimi

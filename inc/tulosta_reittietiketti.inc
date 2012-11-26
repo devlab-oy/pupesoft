@@ -135,8 +135,6 @@
 							GROUP BY 1,2,3,4,5";
 				$keraysera_res = pupe_query($query);
 
-				$monesko_laatikko = 1;
-
 				while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
 
 					$query = "	SELECT koodi

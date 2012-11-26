@@ -1418,6 +1418,7 @@
 							lasku.toimitustapa,
 							lasku.jaksotettu,
 							lasku.yhtio,
+							lasku.kohdistettu,
 							lasku.liitostunnus
 							FROM lasku
 							LEFT JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite)

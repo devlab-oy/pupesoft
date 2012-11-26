@@ -145,6 +145,19 @@
 							echo "<pre>",str_replace("\t", "", $query),"</pre>";
 							$delres = pupe_query($query);
 						}
+						else {
+							$query = "	UPDATE rahtikirjat SET
+										kilot = 0,
+										kollit = 0,
+										kuutiot = 0,
+										lavametri = 0,
+										pakkaus = '{$pak_row['pakkaus']}',
+										pakkauskuvaus = '{$pak_row['pakkauskuvaus']}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$rahtikirjat_row['tunnus']}'";
+							echo "<pre>",str_replace("\t", "", $query),"</pre>";
+							$updres = pupe_query($query);
+						}
 					}
 				}
 

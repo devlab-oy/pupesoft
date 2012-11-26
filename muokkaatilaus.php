@@ -191,8 +191,7 @@
 						msg = '".t("Oletko varma, että haluat mitätöidä ")."' + count + '".t(" tarjousta?")."';
 
 						if (confirm(msg)) {
-							return false;
-							//return true;
+							return true;
 						}
 						else {
 							skippaa_tama_submitti = true;

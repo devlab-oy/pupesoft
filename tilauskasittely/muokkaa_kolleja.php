@@ -204,9 +204,12 @@
 						}
 					}
 					else {
+
+						$_kolli_lkm = ($kilot == 0 and $kuutiot == 0) ? 0 : 1;
+
 						$query = "	INSERT INTO rahtikirjat SET
 									kilot = '{$kilot}',
-									kollit = '1',
+									kollit = '{$_kolli_lkm}',
 									kuutiot = '{$kuutiot}',
 									lavametri = '{$lavametrit}',
 									merahti = '{$rahtikirjarivit[$otun]['merahti']}',

@@ -44,31 +44,32 @@ if ($tee == "update") {
 	}
 
 	// Hoidetaan pilkut pisteiksi....
-	$rahti_etu 		= str_replace ( ",", ".", $rahti_etu);
-	$rahti 			= str_replace ( ",", ".", $rahti);
-	$rahti_huolinta = str_replace ( ",", ".", $rahti_huolinta);
-	$erikoisale_saapuminen 	= str_replace ( ",", ".", $erikoisale_saapuminen);
-	$bruttopaino 	= str_replace ( ",", ".", $bruttopaino);
+	$rahti_etu 				= str_replace (",", ".", $rahti_etu);
+	$rahti 					= str_replace (",", ".", $rahti);
+	$rahti_huolinta 		= str_replace (",", ".", $rahti_huolinta);
+	$erikoisale_saapuminen 	= str_replace (",", ".", $erikoisale_saapuminen);
+	$bruttopaino 			= str_replace (",", ".", $bruttopaino);
 
 	$toimaika 		= $vv."-".$kk."-".$pp;
 	$ultilno 		= tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
 	$query = "	UPDATE lasku
-				SET maa_lahetys = '$maa_lahetys',
-				maa_maara 		= '$maa_maara',
+				SET maa_lahetys 		= '$maa_lahetys',
+				maa_maara 				= '$maa_maara',
 				kauppatapahtuman_luonne = '$ktapahtuman_luonne',
-				kuljetusmuoto 	= '$kuljetusmuoto',
-				bruttopaino 	= '$bruttopaino',
-				rahti_huolinta 	= '$rahti_huolinta',
-				rahti_etu 		= '$rahti_etu',
-				rahti_etu_alv 	= '$rahti_etu_alv',
-				rahti 			= '$rahti',
-				erikoisale_saapuminen 		= '$erikoisale_saapuminen',
-				toimaika 		= '$toimaika',
-				kohdistettu 	= '$kohdistettu',
-				comments	 	= '$kommentti',
-				ultilno 		= '$ultilno'
-				WHERE tunnus = '$otunnus' and yhtio = '$kukarow[yhtio]'";
+				kuljetusmuoto 			= '$kuljetusmuoto',
+				bruttopaino 			= '$bruttopaino',
+				rahti_huolinta 			= '$rahti_huolinta',
+				rahti_etu 				= '$rahti_etu',
+				rahti_etu_alv 			= '$rahti_etu_alv',
+				rahti 					= '$rahti',
+				erikoisale_saapuminen 	= '$erikoisale_saapuminen',
+				toimaika 				= '$toimaika',
+				kohdistettu 			= '$kohdistettu',
+				comments	 			= '$kommentti',
+				ultilno 				= '$ultilno'
+				WHERE tunnus = '$otunnus'
+				and yhtio 	 = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	$query_erikoisale = "	UPDATE tilausrivi

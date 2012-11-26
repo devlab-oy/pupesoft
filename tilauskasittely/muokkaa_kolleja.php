@@ -183,7 +183,7 @@
 
 							$query = "	UPDATE rahtikirjat SET
 										kilot = kilot + {$kilot},
-										kuutio = kuutiot + {$kuutiot},
+										kuutiot = kuutiot + {$kuutiot},
 										lavametri = lavametri + {$lavametrit}
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row_count_chk_row['tunnus']}'";
@@ -193,7 +193,7 @@
 						else {
 							$query = "	UPDATE rahtikirjat SET
 										kilot = kilot + {$kilot},
-										kuutio = kuutiot + {$kuutiot},
+										kuutiot = kuutiot + {$kuutiot},
 										lavametri = lavametri + {$lavametrit}
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND otsikkonro = '{$toisen_row['otunnus']}'

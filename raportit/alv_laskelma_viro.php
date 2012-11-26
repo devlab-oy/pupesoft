@@ -29,7 +29,7 @@
 	13.		EE1300	VAT refundable - (EE1300=EE400+EE410-EE500+EE1000-EE1100)
 	*/
 
-	$oletus_verokanta = 23;
+	$oletus_verokanta = 20;
 
 	// Sallittu erotus on luku kuinka paljon sallitaan ALV-ilmoitus erotus poikkeavan
 	if (!isset($alv_laskelman_sallittu_erotus)) {
@@ -55,11 +55,11 @@
 		if ($ryhma == '1') {
 			$taso = "ee100";
 			$eetasolisa = " or alv_taso like '%ee110%'";
-			$tiliointilisa = " and tiliointi.vero = 23 ";
+			$tiliointilisa = " and tiliointi.vero = 20 ";
 		}
 		elseif ($ryhma == '1.1') {
 			$taso = "ee110";
-			$tiliointilisa = " and tiliointi.vero = 23 ";
+			$tiliointilisa = " and tiliointi.vero = 20 ";
 		}
 		elseif ($ryhma == '2') {
 			$taso = "ee100";
@@ -398,7 +398,7 @@
 			$ee321 = 0;
 
 			//4. VAT from sales: ($ee100*20%)+($ee200*9%)
-			$ee400 = round(($ee100["23.00"] * 0.23) + ($ee100["9.00"] * 0.09), 2);
+			$ee400 = round(($ee100["20.00"] * 0.20) + ($ee100["9.00"] * 0.09), 2);
 
 			//4.1. VAT payable upon the import of the goods (Ei implementoitu)
 			$ee410 = 0;
@@ -450,17 +450,17 @@
 			echo "<tr><th>",t("Ilmoitettava kausi"),"</th><th>".substr($startmonth,0,4)."/".substr($startmonth,5,2)."</th></tr>";
 
 			// Verollinen myynti
-			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=1&vv=$vv&kk=$kk'>1)</a> 20% m‰‰raga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee100["23.00"])."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=1.1&vv=$vv&kk=$kk'>1.1)</a> 20% m‰‰raga maksustatav kauba vıi teenuse omatarve</td><td align='right'>".sprintf('%.2f', $ee110["23.00"])."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=1&vv=$vv&kk=$kk'>1)</a> 20% m‰‰raga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee100["20.00"])."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=1.1&vv=$vv&kk=$kk'>1.1)</a> 20% m‰‰raga maksustatav kauba vıi teenuse omatarve</td><td align='right'>".sprintf('%.2f', $ee110["20.00"])."</td></tr>";
 			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=2&vv=$vv&kk=$kk'>2)</a> 9% m‰‰raga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee100["9.00"])."</td></tr>";
 			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=2.1&vv=$vv&kk=$kk'>2.1)</a> 9% m‰‰raga maksustatav kauba voi teenuse omatarve</td><td align='right'>".sprintf('%.2f', $ee110["9.00"])."</td></tr>";
 
 			// V‰‰r‰t alvikannat
 			foreach ($ee100 as $eekey => $eeval) {
-				if ($eekey != "23.00" and $eekey != "9.00") echo "<tr><td>XXX ".($eekey * 1)."% m‰‰raga maksustatavad toimingud ja tehingud</td><td align='right'>".sprintf('%.2f', $eeval)."</td></tr>";
+				if ($eekey != "20.00" and $eekey != "9.00") echo "<tr><td>XXX ".($eekey * 1)."% m‰‰raga maksustatavad toimingud ja tehingud</td><td align='right'>".sprintf('%.2f', $eeval)."</td></tr>";
 			}
 			foreach ($ee110 as $eekey => $eeval) {
-				if ($eekey != "23.00" and $eekey != "9.00") echo "<tr><td>XXX ".($eekey * 1)."% m‰‰raga maksustatav kauba voi teenuse omatarve</td><td align='right'>".sprintf('%.2f', $eeval)."</td></tr>";
+				if ($eekey != "20.00" and $eekey != "9.00") echo "<tr><td>XXX ".($eekey * 1)."% m‰‰raga maksustatav kauba voi teenuse omatarve</td><td align='right'>".sprintf('%.2f', $eeval)."</td></tr>";
 			}
 
 			// Veroton myynti

@@ -5235,7 +5235,13 @@ if (!function_exists("generoi_alekentta_php")) {
 
 		// Ei erikoisaletta
 		if ($ei_erikoisale != "") {
-			$row["erikoisale"] = 0;
+			$row["erikoisale"] 			  = 0;
+			$row["erikoisale_saapuminen"] = 0;
+		}
+
+		// Jos tyyppi on eri ku O = osto, niin silloin nollataan aina tämä
+		if ($tyyppi != 'O')  {
+			$row["erikoisale_saapuminen"] = 0;
 		}
 
 		if ($tyyppi == 'M') {
@@ -5253,12 +5259,7 @@ if (!function_exists("generoi_alekentta_php")) {
 
 			for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
 				if ($alepostfix == 1) {
-					if ($row["ale{$alepostfix}"] != 0) {
-						$ale["ale{$alepostfix}"] = round((1 - (1 - $row["ale{$alepostfix}"] / 100) * (1 - $row["erikoisale"] / 100)) * 100, 2);
-					}
-					else {
-						$ale["ale{$alepostfix}"] = round($row["erikoisale"], 2);
-					}
+					$ale["ale{$alepostfix}"] = round((1 - (1 - $row["ale{$alepostfix}"] / 100) * (1 - $row["erikoisale"] / 100) * (1 - $row["erikoisale_saapuminen"] / 100)) * 100, 2);
 				}
 				else {
 					$ale["ale{$alepostfix}"] = round($row["ale{$alepostfix}"], 2);
@@ -5273,6 +5274,7 @@ if (!function_exists("generoi_alekentta_php")) {
 			}
 
 			$ale *= (1 - $row["erikoisale"] / 100);
+			$ale *= (1 - $row["erikoisale_saapuminen"] / 100);
 
 			$ale = round((1 - $ale) * 100, 2);
 		}
@@ -5284,6 +5286,7 @@ if (!function_exists("generoi_alekentta_php")) {
 			}
 
 			$ale *= (1 - $row["erikoisale"] / 100);
+			$ale *= (1 - $row["erikoisale_saapuminen"] / 100);
 
 			$ale = round($ale, 4);
 		}
@@ -5322,21 +5325,19 @@ if (!function_exists("generoi_alekentta_select")) {
 			}
 		}
 		elseif ($tapa == 'yhteen') {
-			$query_1 = $query_2 = '';
+			$query = '';
 
 			for ($i = 1; $i <= $maara; $i++) {
-
-				if ($i == 1) {
-					$query_1 = "{$prefix}.ale{$i}";
-					$query_2 = "if({$prefix}.ale{$i}=0, 1, {$prefix}.ale{$i})";
-				}
-				else {
-					$query_1 .= " + {$prefix}.ale{$i}";
-					$query_2 .= " * if({$prefix}.ale{$i}=0, 1, {$prefix}.ale{$i})";
-				}
+				$query = "(1-{$prefix}.ale{$i}/100)*";
 			}
 
-			$return = "round((1 - (1 - ({$query_1} + {$prefix}.erikoisale - ({$query_2} * if({$prefix}.erikoisale=0, 1, {$prefix}.erikoisale) / 100)) / 100)) * 100, 2)";
+			$query .= "(1-{$prefix}.erikoisale/100)";
+
+			if ($tyyppi == 'O')  {
+				$query .= "*(1-{$prefix}.erikoisale_saapuminen/100)";
+			}
+
+			$return = "round((1-$query)*100, 2)";
 		}
 
 		return $return;
@@ -5373,6 +5374,10 @@ if (!function_exists("generoi_alekentta")) {
 
 		if ($ei_erikoisale == "") {
 			$ale .= "* (1 - {$prefix}.erikoisale / 100)";
+
+			if ($tyyppi == 'O') {
+				$ale .= "* (1 - {$prefix}.erikoisale_saapuminen / 100)";
+			}
 		}
 
 		$return = "if ({$prefix}.netto='N', 1, {$ale})";

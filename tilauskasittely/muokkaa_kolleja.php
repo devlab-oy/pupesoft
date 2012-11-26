@@ -205,6 +205,8 @@
 					}
 					else {
 
+						if ($kilot == 0 and $kuutiot == 0 and $lavametrit == 0) continue;
+
 						$_kolli_lkm = ($kilot == 0 and $kuutiot == 0) ? 0 : 1;
 
 						$query = "	INSERT INTO rahtikirjat SET

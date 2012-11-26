@@ -5322,21 +5322,19 @@ if (!function_exists("generoi_alekentta_select")) {
 			}
 		}
 		elseif ($tapa == 'yhteen') {
-			$query_1 = $query_2 = '';
+			$query = '';
 
 			for ($i = 1; $i <= $maara; $i++) {
-
-				if ($i == 1) {
-					$query_1 = "{$prefix}.ale{$i}";
-					$query_2 = "if({$prefix}.ale{$i}=0, 1, {$prefix}.ale{$i})";
-				}
-				else {
-					$query_1 .= " + {$prefix}.ale{$i}";
-					$query_2 .= " * if({$prefix}.ale{$i}=0, 1, {$prefix}.ale{$i})";
-				}
+				$query = "(1-{$prefix}.ale{$i}/100)*";
 			}
 
-			$return = "round((1 - (1 - ({$query_1} + {$prefix}.erikoisale - ({$query_2} * if({$prefix}.erikoisale=0, 1, {$prefix}.erikoisale) / 100)) / 100)) * 100, 2)";
+			$query .= "(1-{$prefix}.erikoisale/100)";
+
+			if ($tyyppi == 'O')  {
+				$query .= "*(1-{$prefix}.erikoisale_saapuminen/100)";
+			}
+
+			$return = "round((1-$query)*100, 2)";
 		}
 
 		return $return;
@@ -5373,6 +5371,10 @@ if (!function_exists("generoi_alekentta")) {
 
 		if ($ei_erikoisale == "") {
 			$ale .= "* (1 - {$prefix}.erikoisale / 100)";
+
+			if ($tyyppi == 'O') {
+				$ale .= "* (1 - {$prefix}.erikoisale_saapuminen / 100)";
+			}
 		}
 
 		$return = "if ({$prefix}.netto='N', 1, {$ale})";

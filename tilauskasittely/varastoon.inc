@@ -82,12 +82,8 @@ if ($kauttalaskutus == '') {
 
 	$varastoon_msg .= "	<th valign='top'>".t("Tuoteno")."</th>
 						<th valign='top'>".t("M‰‰r‰")." ".t("sis").".<br>".t("M‰‰r‰")." ".t("ulk").".</th>";
-
-	for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-		$varastoon_msg .= " <th valign='top'>".t("Alennus")."{$alepostfix}</th>";
-	}
-
 	$varastoon_msg .= "	<th valign='top'>".t("Ostohinta")." ".t("ulk").".<br>".t("Ostohinta")." ".t("sis").".</th>
+						<th valign='top'>".t("Alennukset")."</th>
 						<th valign='top'>".t("Osuus")."<br>".t("rahdista")."</th>
 						<th valign='top'>".t("Rahti")."</th>";
 
@@ -106,9 +102,11 @@ if ($kauttalaskutus == '') {
 	$varastoon_msg .= "</tr>";
 }
 
+$ale_query_select_lisa = generoi_alekentta_select('yhteen', 'O');
+
 if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) {
 	// virallinen laskenta, heetaan ihan kaikki rivit uudestaan (varattu=0) kaikki pit‰‰ olla viety varastoon jo ennen t‰t‰..
-	$query = "	SELECT tilausrivi.*, tilausrivi.kpl varattu
+	$query = "	SELECT tilausrivi.*, tilausrivi.kpl varattu, {$ale_query_select_lisa} alennuksetyht
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -144,9 +142,9 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus) ";
 	}
 
-	// tavallinen laskenta.. VARATTU PITƒƒ OLLA > 0 ja varastoon-kentt‰ 1!
+	// tavallinen laskenta.. VARATTU PITƒƒ OLLA != 0 ja varastoon-kentt‰ 1!
 	// jos varastoon-kent‰ss‰ on 0 niin t‰t‰ rivi‰ ei haluttu viel‰ vied‰ varastoon
-	$query = "	SELECT tilausrivi.*
+	$query = "	SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -180,7 +178,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 	}
 
 	// N‰ytet‰‰n ruudulla
-	$query = "	SELECT tilausrivi.*
+	$query = "	SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -236,14 +234,7 @@ if ((($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" a
 }
 else {
 	// muuten rahtikulut valuutassa laskettuna kuluprosentin mukaan (laskurow.rahti on kuluprosentti, laskurow.summa on kohdistettujen rivien summa)
-
-	// jos erikoislale niin otetaan sit‰ kanssa huomioon
-	if ($laskurow['erikoisale']<>0) {
-		$erikoisale = 1-($laskurow['erikoisale']/100);
-	}
-	else {
-		$erikoisale = 1;
-	}
+	$query_ale_lisa = generoi_alekentta('O');
 
 	if ($toiminto == "kaikkiok") {
 		$maara_peruste = "and tilausrivi.varattu = 0 and tilausrivi.kpl != 0";
@@ -253,7 +244,7 @@ else {
 	}
 
 	// lasketaan nyt varastoon viet‰vien rivien summa yhteens‰
-	$query    = "	SELECT sum((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * $erikoisale) summa
+	$query    = "	SELECT sum((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa}) summa
 					FROM tilausrivi use index (uusiotunnus_index)
 					LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '{$laskurow["liitostunnus"]}' and tuotteen_toimittajat.yhtio = tilausrivi.yhtio and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno)
 					WHERE tilausrivi.uusiotunnus = '$otunnus'
@@ -898,13 +889,9 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	}
 
 	$varastoon_msg .= "	<td valign='top'>$tilrivirow[tuoteno]</td>
-						<td align='right' valign='top'>$tilrivirow[varattu]<br>".sprintf('%.2f', $tilrivirow['varattu']*$tuorow['tuotekerroin'])."</td>";
-
-	for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-		$varastoon_msg .= "<td align='right' valign='top'>".$tilrivirow["ale{$alepostfix}"]."%</td>";
-	}
-
-	$varastoon_msg .= "<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta'])."<br>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta']*$tuorow['tuotekerroin'])."</td>
+						<td align='right' valign='top'>$tilrivirow[varattu]<br>".sprintf('%.2f', $tilrivirow['varattu']*$tuorow['tuotekerroin'])."</td>
+						<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta'])."<br>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta']*$tuorow['tuotekerroin'])."</td>
+						<td align='right' valign='top'>".$tilrivirow["alennuksetyht"]."%</td>
 						<td align='right' valign='top'>".sprintf('%.6f', $osuus)."</td>
 						<td align='right' valign='top'>".sprintf('%.6f', $osuus*$rahtikulut)."</td>";
 

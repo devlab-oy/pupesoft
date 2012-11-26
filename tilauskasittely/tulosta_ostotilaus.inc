@@ -425,8 +425,9 @@
 				$pdf->draw_text(475-$oikpos, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
 
 				if ($row["ale1"] != 0) {
-					$oikpos = $pdf->strlen(($row["ale1"]*1)."%", $norm);
-					$pdf->draw_text(510-$oikpos, $kala, ($row["ale1"]*1)."%", $thispage, $norm);
+					$ale_prosentti = generoi_alekentta_php($row, 'O', 'plain');
+					$oikpos = $pdf->strlen(($ale_prosentti*1)."%", $norm);
+					$pdf->draw_text(510-$oikpos, $kala, $ale_prosentti."%", $thispage, $norm);
 				}
 
 				$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);

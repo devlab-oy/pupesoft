@@ -1572,6 +1572,16 @@
 							if ($laskurow['tulostustapa'] == 'H' and ($laskurow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $laskurow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
 								$tulostettulisa = " , tulostettu = now() ";
 							}
+							
+							// tehdään vain ekalle tilaukselle kollit ym, muihin nollaksi. Lisäksi sama rahtikirjanumero kaikille.
+							if ($rahtikirjanumero == '') {
+								$rahtikirjanumero = $laskurow['tunnus'];
+							}
+							else {
+								$keraysera_row['kollit'] = 0;
+								$kilot = 0;
+								$kuutiot = 0;
+							}
 
 							// Insertöidään aina rahtikirjan tiedot per tilaus
 							$query_ker  = "	INSERT INTO rahtikirjat SET
@@ -1580,7 +1590,7 @@
 											kuutiot 		= '{$kuutiot}',
 											pakkauskuvaus 	= '{$keraysera_row['pakkauskuvaus']}',
 											pakkaus 		= '{$keraysera_row['pakkaus']}',
-											rahtikirjanro 	= '{$laskurow['tunnus']}',
+											rahtikirjanro 	= '{$rahtikirjanumero}',
 											otsikkonro 		= '{$laskurow['tunnus']}',
 											tulostuspaikka 	= '{$laskurow['varasto']}',
 											toimitustapa 	= '{$laskurow['toimitustapa']}',

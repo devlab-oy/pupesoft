@@ -635,11 +635,16 @@
 
 				if ($rakir_row['toimitusvahvistus'] != '') {
 
-					$tulostauna = "";
-
 					if ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
-						$tulostauna = "KYLLA";
+						$desadv_version = "una";
 						$rakir_row["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+					}
+					elseif ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
+						$desadv_version = "fi0089";
+						$rakir_row["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+					}
+					else {
+						$desadv_version = "";
 					}
 
 					if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {

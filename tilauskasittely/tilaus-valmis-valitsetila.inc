@@ -363,11 +363,17 @@
 			$otunnukset		= $laskurow["tunnus"];
 			$tunnukset		= 0;
 			$rahtikirjanro	= 0;
-			$tulostauna		= "";
 
 			if ($asirow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
-				$tulostauna = "KYLLA";
+				$desadv_version = "una";
 				$asirow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+			}
+			elseif ($asirow["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
+				$desadv_version = "fi0089";
+				$asirow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+			}
+			else {
+				$desadv_version = "";
 			}
 
 			if (@include("tilauskasittely/$asirow[toimitusvahvistus]")) {
@@ -379,5 +385,3 @@
 	if (!isset($silent) or $silent == "") {
 		echo $tilaus_valmis_message;
 	}
-
-?>

@@ -138,11 +138,13 @@
 						$kuutiot += $rahtikirjat_row['kuutiot'];
 						$lavametrit += $rahtikirjat_row['lavametri'];
 
-						$query = "	DELETE FROM rahtikirjat
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$rahtikirjat_row['tunnus']}'";
-						echo "<pre>",str_replace("\t", "", $query),"</pre>";
-						$delres = pupe_query($query);
+						if ($toisen_sscc == "") {
+							$query = "	DELETE FROM rahtikirjat
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$rahtikirjat_row['tunnus']}'";
+							echo "<pre>",str_replace("\t", "", $query),"</pre>";
+							$delres = pupe_query($query);
+						}
 					}
 				}
 

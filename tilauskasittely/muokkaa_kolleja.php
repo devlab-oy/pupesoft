@@ -212,7 +212,7 @@
 									merahti = '{$rahtikirjarivit[$otun]['merahti']}',
 									pakkaus = '{$pak_row['pakkaus']}',
 									pakkauskuvaus = '{$pak_row['pakkauskuvaus']}',
-									pakkauskuvaus_tark = '{$rahtikirjarivit[$otun]['pakkauskuvaus_tark']}',
+									pakkauskuvaustark = '{$rahtikirjarivit[$otun]['pakkauskuvaus_tark']}',
 									poikkeava = '{$rahtikirjarivit[$otun]['poikkeava']}',
 									rahtisopimus = '{$rahtikirjarivit[$otun]['rahtisopimus']}',
 									otsikkonro = '{$otun}',

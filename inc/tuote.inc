@@ -9,9 +9,13 @@
 		$otsikko = 'Viranomaistuotteet';
 		$rajauslisa = " and tuote.tuotetyyppi IN ('A','B') ";
 	}
-	else {
-		$otsikko = 'Tuotteet';
-		$rajauslisa = " and tuote.tuotetyyppi NOT IN ('A','B') ";
+	elseif ($laji == "K") {
+		$otsikko = 'Palvelutuotteet';
+		$rajauslisa = " and tuote.tuotetyyppi = 'K' ";
+    }
+    else {
+        $otsikko = 'Tuotteet';
+        $rajauslisa = " and tuote.tuotetyyppi NOT IN ('A','B') ";
 	}
 
 	if ($nayta_poistetut == "") {

@@ -14,8 +14,8 @@
 		$rajauslisa = " and tuote.tuotetyyppi = 'K' ";
     }
     else {
-        $otsikko = 'Tuotteet';
-        $rajauslisa = " and tuote.tuotetyyppi NOT IN ('A','B') ";
+		$otsikko = 'Tuotteet';
+		$rajauslisa = " and tuote.tuotetyyppi NOT IN ('A','B') ";
 	}
 
 	if ($nayta_poistetut == "") {

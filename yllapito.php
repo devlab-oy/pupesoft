@@ -352,7 +352,7 @@
 						}
 
 						if (mysql_field_type($result,$i) == 'real') {
-							$t[$i] = $t[$i] != "NULL" ? (float) str_replace(",", ".", $t[$i]) : $t[$i];
+							$t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
 
 							$query .= ", ". mysql_field_name($result,$i)." = {$t[$i]} ";
 						}
@@ -392,7 +392,7 @@
 						}
 
 						if (mysql_field_type($result,$i) == 'real') {
-							$t[$i] = $t[$i] != "NULL" ? (float) str_replace(",", ".", $t[$i]) : $t[$i];
+							$t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
 
 							$query .= ", ". mysql_field_name($result,$i)." = {$t[$i]} ";
 						}

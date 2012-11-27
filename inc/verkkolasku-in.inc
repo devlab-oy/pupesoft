@@ -1391,6 +1391,8 @@
 							if (!isset($rtuoteno[$i]['lisakulu'])) $rtuoteno[$i]['lisakulu'] = 0;
 							if (!isset($rtuoteno[$i]['kulu'])) $rtuoteno[$i]['kulu'] = 0;
 
+							if ((float) $rtuoteno[$i]["rivihinta"] == 0) $summa_valuutassa = 0;
+
 							$asn_hinta = round($summa_valuutassa/$rtuoteno[$i]['kpl'], 2);
 
 							#echo "Lasketaan nettohintaa...<br>";
@@ -1859,4 +1861,3 @@
 			}
 		}
 	}
-?>

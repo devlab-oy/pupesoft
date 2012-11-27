@@ -1827,7 +1827,10 @@
 		else {
 			echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa lähtö"),"</button>&nbsp;";
 			echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
-			echo "<button type='button' id='muokkaa_kolleja'>",t("Muokkaa kolleja"),"</button>&nbsp;";
+
+			if (tarkista_oikeus('tilauskasittely/muokkaa_kolleja.php')) {
+				echo "<button type='button' id='muokkaa_kolleja'>",t("Muokkaa kolleja"),"</button>&nbsp;";
+			}
 		}
 
 		if ($valittu_lahto == "" and isset($tilaukset) and $tilaukset != "") {

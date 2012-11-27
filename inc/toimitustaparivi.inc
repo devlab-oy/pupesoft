@@ -553,12 +553,16 @@
 		$sel1 = '';
 		$sel2 = '';
 		$sel3 = '';
+		$sel4 = '';
 
 		if ($trow[$i] == 'intrade') {
 			$sel2 = 'selected';
 		}
 		elseif ($trow[$i] == 'tiivistetty') {
 			$sel3 = 'selected';
+		}
+		elseif ($trow[$i] == 'oslap_lamposiirto') {
+			$sel4 = 'selected';
 		}
 		else {
 			$sel1 = 'selected';
@@ -568,6 +572,7 @@
 		$ulos .= "<option value='' 		  $sel1>".t("Normaali")."</option>";
 		$ulos .= "<option value='intrade' $sel2>".t("Intrade")."</option>";
 		$ulos .= "<option value='tiivistetty' $sel3>".t("Tiivistetty")."</option>";
+		if ($yhtiorow['kerayserat'] == 'K') $ulos .= "<option value='oslap_lamposiirto' $sel4>".t("Lämpösiirto")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -746,7 +751,7 @@
 		$ulos .= "<option value='' $chk2>".t("Toimitustavalle ei tulosteta rahtikirjaerittelyä")."</option>";
 		$ulos .= "<option value='t' $chk3>".t("Toimitustavalle tulostetaan rahtikirjaerittely")."</option>";
 		$ulos .= "<option value='k' $chk1>".t("Toimitustavalle tulostetaan rahtikirjaerittely per asiakas")."</option>";
-		
+
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

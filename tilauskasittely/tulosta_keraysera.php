@@ -28,6 +28,7 @@
 	if (!isset($tee)) $tee = '';
 	if (!isset($keraajalist)) $keraajalist = '';
 	if (!isset($select_varasto)) $select_varasto = '';
+	if (!isset($keraajanro)) $keraajanro = '';
 
 	if ($tee == 'tee_arpajaiset') {
 		if (isset($palaa)) {
@@ -41,7 +42,6 @@
 			$tee = "uusi_pakkaus";
 		}
 	}
-
 
 	if ($tee == '') {
 		echo "<form method='post'>";

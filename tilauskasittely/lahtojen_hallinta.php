@@ -1644,6 +1644,26 @@
 						$('#napitformi').submit();
 					});
 
+					$('#muokkaa_kolleja').on('click', function() {
+
+						if ($('input[name^=\"checkbox_parent\"]:checked').length > 1) {
+							alert('",t("Voit muokata vain yhden lähdön kolleja kerrallaan"),".');
+						}
+						else if ($('input[name^=\"checkbox_parent\"]:checked').length == 0) {
+							alert('",t("Lähtö täytyy valita"),".');
+						}
+						else {
+							$('input[name^=\"checkbox_parent\"]:checked').each(function() {
+								$('#muokkaa_kolleja').after('<input type=\"hidden\" name=\"checkbox_parent[]\" value=\"'+$(this).val()+'\">');
+							});
+
+							$('#muokkaa_kolleja').after('<input type=\"hidden\" name=\"lopetus\" value=\"{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=\">');
+							$('#napitformi').attr('action', '{$palvelin2}tilauskasittely/muokkaa_kolleja.php');
+							$('#napitformi').submit();
+						}
+
+					});
+
 					$('#tulosta_rahtikirjat').on('click', function() {
 
 						var lahdot = '';
@@ -1807,6 +1827,10 @@
 		else {
 			echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa lähtö"),"</button>&nbsp;";
 			echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
+
+			if (tarkista_oikeus('tilauskasittely/muokkaa_kolleja.php')) {
+				echo "<button type='button' id='muokkaa_kolleja'>",t("Muokkaa kolleja"),"</button>&nbsp;";
+			}
 		}
 
 		if ($valittu_lahto == "" and isset($tilaukset) and $tilaukset != "") {
@@ -2470,7 +2494,7 @@
 
 				echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 
-				if (trim($lahto_row['sscc_ulkoinen']) != '') {
+				if (trim($lahto_row['sscc_ulkoinen']) != '' and trim($lahto_row['sscc_ulkoinen']) != 0) {
 					echo "<button type='button'>{$lahto_row['sscc_ulkoinen']}</button>";
 				}
 				elseif ($lahto_row['sscc'] != '') {

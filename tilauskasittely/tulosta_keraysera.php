@@ -43,11 +43,6 @@
 		}
 	}
 
-	if ($tee == "selaa" and (int) $keraajanro == 0 and $keraajalist == "") {
-		echo "<font class='error'>",t("Valitse ker‰‰j‰"),"!</font><br>";
-		$tee = '';
-	}
-
 	if ($tee == '') {
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='selaa' />";
@@ -59,14 +54,11 @@
 					WHERE yhtio 	= '{$kukarow['yhtio']}'
 					AND extranet 	= ''
 					AND (keraajanro > 0 OR kuka = '{$kukarow['kuka']}')
-					AND keraysvyohyke != ''
-					AND keraajanro != 0";
+					AND keraysvyohyke != ''";
 		$kuresult = pupe_query($query);
 
 		echo "<tr><th>",t("Ker‰‰j‰"),"</th><td><input type='text' size='5' name='keraajanro'> ",t("tai")," ";
 		echo "<select name='keraajalist'>";
-
-		echo "<option value=''>",t("Valitse ker‰‰j‰"),"</option>";
 
 		while ($kurow = mysql_fetch_assoc($kuresult)) {
 

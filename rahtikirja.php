@@ -431,17 +431,26 @@
 
 		// jos ollaan muokkaamassa rivejä poistetaan eka vanhat rahtikirjatiedot..
 		if ($tutkimus > 0) {
+
+			if (strpos($tunnukset, ',') !== FALSE) {
+				$tunnuslisa = $tunnukset;
+			}
+			else {
+				$tunnuslisa = $otsikkonro;
+			}
+
 			if (isset($muutos) and $muutos == 'yes') {
-				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$otsikkonro' and rahtikirjanro='$rakirno'";
+
+				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro IN ({$tunnuslisa}) and rahtikirjanro='$rakirno'";
 				$result = pupe_query($query);
 
 				// merkataan tilaus takaisin kerätyksi, paitsi jos se on vientitilaus jolle vientitiedot on syötetty
-				$query = "UPDATE lasku set alatila='C' where yhtio='$kukarow[yhtio]' and tunnus='$otsikkonro' and alatila!='E'";
+				$query = "UPDATE lasku set alatila='C' where yhtio='$kukarow[yhtio]' and tunnus IN ({$tunnuslisa}) and alatila!='E'";
 				$result = pupe_query($query);
 
 				//Voi käydä niin, että rahtikirja on jo tulostunut. Poistetaan mahdolliset tulostusflagit
 				$query = "	UPDATE tilausrivi set toimitettu = '', toimitettuaika = ''
-							where otunnus = '$otsikkonro' and yhtio = '$kukarow[yhtio]' and var not in ('P','J') and tyyppi='$tila'";
+							where otunnus IN ({$otsikkonro}) and yhtio = '$kukarow[yhtio]' and var not in ('P','J') and tyyppi='$tila'";
 				$result = pupe_query($query);
 
 				//	Poistetaan kaikki lavaeloitukset
@@ -456,7 +465,7 @@
 				if ($pakrow["veloitukset"]!="") {
 					$query = "	DELETE from tilausrivi
 								where yhtio = '$kukarow[yhtio]'
-								and otunnus = '$otsikkonro'
+								and otunnus IN ({$tunnuslisa})
 								and tuoteno IN ($pakrow[veloitukset])";
 					$delres = pupe_query($query);
 				}
@@ -559,7 +568,7 @@
 								SET tyyppi='D',
 								kommentti = concat(kommentti, ' $kukarow[kuka] muutti rahtikuluja rahtikirjan syötössä.')
 								WHERE yhtio='$kukarow[yhtio]'
-								and otunnus='$otsikkonro'
+								and otunnus IN ({$tunnuslisa})
 								and tuoteno='$yhtiorow[rahti_tuotenumero]'
 								and uusiotunnus=0
 								and tyyppi != 'D'";
@@ -573,7 +582,7 @@
 								SET tyyppi='D',
 								kommentti = concat(kommentti, ' $kukarow[kuka] muutti käsittelykuluja rahtikirjan syötössä.')
 								WHERE yhtio='$kukarow[yhtio]'
-								and otunnus='$otsikkonro'
+								and otunnus IN ({$tunnuslisa})
 								and tuoteno='$yhtiorow[kasittelykulu_tuotenumero]'
 								and uusiotunnus=0
 								and tyyppi != 'D'";

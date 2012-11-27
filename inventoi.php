@@ -1262,7 +1262,7 @@
 
 				echo "</td>";
 
-				echo "<td>{$tuoterow['inventointiaika']}</td>";
+				echo "<td>".tv1dateconv($tuoterow['inventointiaika'], "P")."</td>";
 
 				if ($tuoterow["sarjanumeroseuranta"] != "S") {
 					echo "<td valign='top'>$tuoterow[saldo]</td><td valign='top'>$hylrow[ennpois]/$hylrow[keratty]</td><td valign='top'>".$hyllyssa."</td>";

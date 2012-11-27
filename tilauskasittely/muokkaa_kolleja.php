@@ -61,8 +61,6 @@
 
 				if ($pak == 'muu_kolli') $pak = 999;
 
-				echo "$sscc -> $pak (toisen sscc: $toisen_sscc)<br>";
-
 				if ($toisen_sscc == "") {
 					$query = "LOCK TABLES avainsana WRITE";
 					$lock_res = pupe_query($query);
@@ -89,7 +87,6 @@
 								FROM pakkaus
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$pak}'";
-					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$pak_res = pupe_query($query);
 					$pak_row = mysql_fetch_assoc($pak_res);
 				}
@@ -103,7 +100,6 @@
 								FROM kerayserat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND (sscc = '{$toisen_sscc}' or sscc_ulkoinen = '{$toisen_sscc}')";
-					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$toisen_res = pupe_query($query);
 					$toisen_row = mysql_fetch_assoc($toisen_res);
 				}
@@ -112,14 +108,12 @@
 							FROM kerayserat
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND (sscc = '{$sscc}' or sscc_ulkoinen = '{$sscc}')";
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$check_res = pupe_query($query);
 
 				$rahtikirjarivit = $otunnukset = array();
 				$kilot = $kuutiot = $lavametrit = 0;
 
 				while ($check_row = mysql_fetch_assoc($check_res)) {
-					echo "otunnus: $check_row[otunnus]<br>";
 
 					$otunnukset[] = $check_row['otunnus'];
 
@@ -127,11 +121,9 @@
 								FROM rahtikirjat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND otsikkonro = '{$check_row['otunnus']}'";
-					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$rahtikirjat_res = pupe_query($query);
 
 					while ($rahtikirjat_row = mysql_fetch_assoc($rahtikirjat_res)) {
-						echo "<pre>",var_dump($rahtikirjat_row),"</pre>";
 						$rahtikirjarivit[$rahtikirjat_row['otsikkonro']] = $rahtikirjat_row;
 
 						$kilot += $rahtikirjat_row['kilot'];
@@ -142,7 +134,6 @@
 							$query = "	DELETE FROM rahtikirjat
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$rahtikirjat_row['tunnus']}'";
-							echo "<pre>",str_replace("\t", "", $query),"</pre>";
 							$delres = pupe_query($query);
 						}
 						else {
@@ -155,7 +146,6 @@
 										pakkauskuvaus = '{$pak_row['pakkauskuvaus']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$rahtikirjat_row['tunnus']}'";
-							echo "<pre>",str_replace("\t", "", $query),"</pre>";
 							$updres = pupe_query($query);
 						}
 					}
@@ -168,7 +158,6 @@
 							muutospvm = now()
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND (sscc = '{$sscc}' or sscc_ulkoinen = '{$sscc}')";
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$updres = pupe_query($query);
 
 				$rahtikirjanro = "";
@@ -194,15 +183,12 @@
 
 							$row_count_chk_row = mysql_fetch_assoc($row_count_chk_res);
 
-							echo "Löytyi monta riviä rahtikirjalta. Päivitetään vain yhtä riviä (rivin tunnus {$row_count_chk_row['tunnus']})<br><br>";
-
 							$query = "	UPDATE rahtikirjat SET
 										kilot = kilot + {$kilot},
 										kuutiot = kuutiot + {$kuutiot},
 										lavametri = lavametri + {$lavametrit}
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row_count_chk_row['tunnus']}'";
-							echo "<pre>",str_replace("\t", "", $query),"</pre>";
 							$updres = pupe_query($query);
 						}
 						else {
@@ -214,7 +200,6 @@
 										AND otsikkonro = '{$toisen_row['otunnus']}'
 										AND pakkaus = '{$pak_row['pakkaus']}'
 										AND pakkauskuvaus = '{$pak_row['pakkauskuvaus']}'";
-							echo "<pre>",str_replace("\t", "", $query),"</pre>";
 							$updres = pupe_query($query);
 						}
 					}
@@ -246,7 +231,6 @@
 									sscc_ulkoinen = '{$rahtikirjarivit[$otun]['sscc_ulkoinen']}',
 									tyhjanrahtikirjan_otsikkotiedot = '{$rahtikirjarivit[$otun]['tyhjanrahtikirjan_otsikkotiedot']}',
 									yhtio = '{$kukarow['yhtio']}'";
-						echo "<pre>",str_replace("\t", "", $query),"</pre>";
 						$insres = pupe_query($query);
 					}
 
@@ -254,8 +238,6 @@
 					$kuutiot = 0;
 					$lavametrit = 0;
 				}
-
-				echo "<br>";
 			}
 		}
 
@@ -284,11 +266,10 @@
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<th>Kolli</th>";
-		echo "<th>SSCC</th>";
-		echo "<th>Ohjausmerkki</th>";
-		echo "<th>Otunnus</th>";
-		echo "<th>Uusi pakkaus</th>";
+		echo "<th>",t("Kolli"),"</th>";
+		echo "<th>",t("SSCC"),"</th>";
+		echo "<th>",t("Ohjausmerkki"),"</th>";
+		echo "<th>",t("Uusi pakkaus"),"</th>";
 		echo "</tr>";
 
 		while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
@@ -297,7 +278,6 @@
 			echo "<td>$keraysera_row[pakkaus]</td>";
 			echo "<td>$keraysera_row[sscc]</td>";
 			echo "<td>$keraysera_row[ohjausmerkki]</td>";
-			echo "<td>$keraysera_row[otunnus]</td>";
 
 			echo "<td><select name='uusi_pakkaus[{$keraysera_row['sscc']}]'>";
 			echo "<option value=''>Valitse</option>";
@@ -322,8 +302,8 @@
 
 			echo "</optgroup>";
 
-			echo "<optgroup label='Pakkaukset'>";
-			echo "<option value='muu_kolli'>Yksin keräilyalustalle</option>";
+			echo "<optgroup label='",t("Pakkaukset"),"'>";
+			echo "<option value='muu_kolli'>",t("Yksin keräilyalustalle"),"</option>";
 
 			$query = "	SELECT *
 						FROM pakkaus
@@ -341,7 +321,7 @@
 			echo "</tr>";
 		}
 
-		echo "<tr><th colspan='5'><input type='submit' value='Tee' /></th></tr>";
+		echo "<tr><th colspan='5'><input type='submit' value='",t("Tee"),"' /></th></tr>";
 
 		echo "</table>";
 		echo "</form>";
@@ -450,13 +430,13 @@
 
 				echo "<table style='width:100%'>";
 				echo "<tr>";
-				echo "<th>Asiakas</th>";
-				echo "<th>Osoite</th>";
-				echo "<th>Rahtikirjanumerot</th>";
-				echo "<th>Rahdinmaksaja</th>";
-				echo "<th>Kollilkm</th>";
-				echo "<th>Paino</th>";
-				echo "<th>Tilavuus</th>";
+				echo "<th>",t("Asiakas"),"</th>";
+				echo "<th>",t("Osoite"),"</th>";
+				echo "<th>",t("Rahtikirjanumerot"),"</th>";
+				echo "<th>",t("Rahdinmaksaja"),"</th>";
+				echo "<th>",t("Pakkauksien lukumäärä"),"</th>";
+				echo "<th>",t("Paino"),"</th>";
+				echo "<th>",t("Tilavuus"),"</th>";
 				echo "</tr>";
 
 				$otunnukset = $tunnukset = "";
@@ -499,7 +479,7 @@
 
 				echo "<tr>";
 				echo "<th colspan='7'>";
-				echo "<input type='submit' value='Muuta' />";
+				echo "<input type='submit' value='",t("Muuta"),"' />";
 				echo "<input type='hidden' name='tunnukset' value='{$tunnukset}' />";
 				echo "<input type='hidden' name='otunnukset' value='{$otunnukset}' />";
 				echo "</th>";

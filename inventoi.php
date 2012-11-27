@@ -1090,7 +1090,7 @@
 		echo "<tr><td colspan='7' class='back'>".t("Syˆt‰ joko hyllyss‰ oleva m‰‰r‰, tai lis‰tt‰v‰ m‰‰r‰ + etuliitteell‰, tai v‰hennett‰v‰ m‰‰r‰ - etuliitteell‰")."</td></tr>";
 
 		echo "<tr>";
-		echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Varastosaldo")."</th><th>".t("Ennpois")."/".t("Ker‰tty")."</th><th>".t("Hyllyss‰")."</th><th>".t("Laskettu hyllyss‰")."</th>";
+		echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("Varastosaldo")."</th><th>".t("Ennpois")."/".t("Ker‰tty")."</th><th>".t("Hyllyss‰")."</th><th>".t("Laskettu hyllyss‰")."</th>";
 		echo "</tr>";
 
 		$rivilask = 0;
@@ -1261,6 +1261,8 @@
 				}
 
 				echo "</td>";
+
+				echo "<td>{$tuoterow['inventointiaika']}</td>";
 
 				if ($tuoterow["sarjanumeroseuranta"] != "S") {
 					echo "<td valign='top'>$tuoterow[saldo]</td><td valign='top'>$hylrow[ennpois]/$hylrow[keratty]</td><td valign='top'>".$hyllyssa."</td>";

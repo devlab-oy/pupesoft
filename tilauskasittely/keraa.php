@@ -1793,7 +1793,7 @@
 							if ($oslarow['osoitelappu'] == 'intrade') {
 								require('osoitelappu_intrade_pdf.inc');
 							}
-							elseif ($oslarow['osoitelappu'] == 'oma_tarra' and $yhtiorow['kerayserat'] == 'K' and $toim == "") {
+							elseif ($oslarow['osoitelappu'] == 'oslap_lamposiirto' and $yhtiorow['kerayserat'] == 'K' and $toim == "") {
 
 								$query = "	SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
 											FROM kerayserat
@@ -1822,7 +1822,7 @@
 								 			'toim_postitp' => $laskurow['toim_postitp'],
 								 		);
 
-										tulosta_oma_tarra($params);
+										tulosta_oslap_lamposiirto($params);
 									}
 								}
 							}

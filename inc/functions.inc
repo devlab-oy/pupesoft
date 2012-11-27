@@ -13750,8 +13750,8 @@ if (!function_exists('tulosta_hrx')) {
 	}
 }
 
-if (!function_exists('tulosta_oma_tarra')) {
-	function tulosta_oma_tarra($params) {
+if (!function_exists('tulosta_oslap_lamposiirto')) {
+	function tulosta_oslap_lamposiirto($params) {
 		global $kukarow, $yhtiorow;
 
 		extract($params);

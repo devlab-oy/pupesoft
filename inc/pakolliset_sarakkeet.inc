@@ -9,7 +9,7 @@
 // m‰‰ritell‰‰n pakolliset sarakkeet
 if (!function_exists("pakolliset_sarakkeet")) {
 	function pakolliset_sarakkeet($table, $otsikot = "") {
-		global $kukarow, $yhtiorow, $table_tarkenne;
+		global $kukarow, $yhtiorow;
 
 		$pakolliset		= array();
 		$kielletyt		= array();
@@ -303,21 +303,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$saakopoistaa = TRUE;
 				break;
 			case "puun_alkio" :
-				$pakolliset = array("TUNTEMATON_TAULU");
-				$kielletyt = array();
-
-				if (trim($table_tarkenne) != '') {
-
-					$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite = '$table_tarkenne' ");
-
-					if (mysql_num_rows($dynaamiset_avainsanat_result) == 1) {
-						$pakolliset = array("KIELI", "PUUN_TUNNUS", "LIITOS");
-						$kielletyt = array("LAJI", "LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-						$wherelliset = array("KIELI", "PUUN_TUNNUS", "LIITOS", "JARJESTYS");
-						$saakopoistaa = TRUE;
-					}
-				}
-
+				$pakolliset = array("KIELI", "PUUN_TUNNUS", "LIITOS");
+				$kielletyt = array("LAJI", "LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$wherelliset = array("KIELI", "PUUN_TUNNUS", "LIITOS", "JARJESTYS");
+				$saakopoistaa = TRUE;
 				break;
 			case "auto_vari" :
 				$pakolliset = array("MERKKI", "VARIKOODI", "VARINIMI","VARINUMERO");

@@ -151,19 +151,19 @@ if ($tee == "VSRALVYV") {
 			switch ($kvarttaali) {
 				case 1:
 					$alkupvm = "$vuosi-01-01";
-					$loppupvm = "$vuosi-04-01";
+					$loppupvm = "$vuosi-03-31";
 					break;
 				case 2:
 					$alkupvm = "$vuosi-04-01";
-					$loppupvm = "$vuosi-07-01";
+					$loppupvm = "$vuosi-06-30";
 					break;
 				case 3:
 					$alkupvm = "$vuosi-07-01";
-					$loppupvm = "$vuosi-10-01";
+					$loppupvm = "$vuosi-09-30";
 					break;
 				case 4:
 					$alkupvm = "$vuosi-10-01";
-					$loppupvm = ($vuosi+1)."-01-01";
+					$loppupvm = "$vuosi-12-31";
 					break;
 				default:
 					die("Kohdekausi on v‰‰r‰!!!");
@@ -171,7 +171,7 @@ if ($tee == "VSRALVYV") {
 		}
 		elseif ($kuukausi != '') {
 			$alkupvm = "$vuosi-$kuukausi-01";
-			$loppupvm = date("Y-m-d", mktime(0, 0, 0, $kuukausi+1, 1, $vuosi));
+			$loppupvm = date("Y-m-d", mktime(0, 0, 0, $kuukausi+1, 0, $vuosi));
 		}
 
 		echo "<br><hr>";
@@ -215,7 +215,7 @@ if ($tee == "VSRALVYV") {
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'U'
 					and lasku.tapvm >= '$alkupvm'
-					and lasku.tapvm < '$loppupvm'
+					and lasku.tapvm <= '$loppupvm'
 					and lasku.vienti = 'E'
 					GROUP BY 1,2,3,4
 					ORDER BY tav_pal DESC, tuote.tuotetyyppi, lasku.ytunnus, asiakas.nimi ";

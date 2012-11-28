@@ -333,10 +333,7 @@
 					if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 						echo "<font class='message'>".t("Valmistus siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
 
-						if ($toim == "VALMISTAASIAKKAALLE") {
-							// Tilausvahvistukset muuttavat tätä niin otetaan talteen
-							$laskurow_tvorig = $laskurow;
-
+						if ($toim == "VALMISTAASIAKKAALLE" and trim($laskurow['tilausvahvistus']) != "") {
 							//
 							// LÄHETETÄÄN TILAUSVAHVISTUS
 							//

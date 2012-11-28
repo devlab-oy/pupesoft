@@ -1,5 +1,14 @@
 <?php
 	require ("inc/parametrit.inc");
+	
+	echo " <!-- Enabloidaan shiftillä checkboxien chekkaus //-->
+			<script src='inc/checkboxrange.js'></script>
+
+			<script language='javascript' type='text/javascript'>
+				$(document).ready(function(){
+					$(\".shift\").shiftcheckbox();
+				});
+			</script>";
 
 	echo "<font class='head'>".t("Käyttäjäprofiilit").":</font><hr>";
 
@@ -359,7 +368,9 @@
 				<input type='hidden' name='tee' value='PAIVITA'>
 				<input type='hidden' name='sovellus' value='$sovellus'>
 				<input type='hidden' name='profiili' value='$profiili'>";
-
+		
+		$lask = 1;
+		
 		while ($orow=mysql_fetch_assoc($result)) {
 
 
@@ -405,12 +416,15 @@
 			}
 
 			echo "	".t("$orow[nimitys]")."</td>
-					<td align='center'><input type='checkbox' $checked 	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='valittu[]'></td>
-					<td align='center'><input type='checkbox' $paivit  	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='paivitys[]'></td>
+					<td align='center'><input type='checkbox' class='A".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $checked 	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='valittu[]'></td>
+					<td align='center'><input type='checkbox' class='B".str_pad($lask,6,0,STR_PAD_LEFT)." shift' $paivit  	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='paivitys[]'></td>
 					</tr>";
 
 			$vsove = $orow['sovellus'];
+			$lask++;
+		
 		}
+		
 		echo "<tr>
 				<th colspan='3'>".t("Ruksaa kaikki")."</th>
 				<td align='center'><input type='checkbox' name='val' onclick='toggleAll(this);'></td>

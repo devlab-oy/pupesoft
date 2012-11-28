@@ -1022,10 +1022,10 @@ if ($tee == 'P' or $tee == 'E') {
 						var maara = $('#maara').val();
 
 						$('#tiliointirivi_hr_'+maara).show();
+						$('#tiliointirivi_'+maara).show();
 
 						maara++;
 
-						$('#tiliointirivi_'+maara).show();
 
 						$('#maara').val(maara);
 					});
@@ -1748,7 +1748,7 @@ if ($tee == 'P' or $tee == 'E') {
 							and kaytossa != 'E'
 							ORDER BY koodi+0, koodi, nimi";
 			$vresult = pupe_query($query);
-				
+
 			if (mysql_num_rows($vresult) > 0) {
 
 				echo "<select name='iprojekti[$i]'>";
@@ -1770,10 +1770,7 @@ if ($tee == 'P' or $tee == 'E') {
 			echo "<td valign='top'>" . alv_popup('ivero['.$i.']', $ivero[$i]);
 			echo "$ivirhe[$i]";
 			echo "</td></tr>";
-
-			if ($maara > 1 and $i+1 != $maara) {
-				echo "<tr id='tiliointirivi_hr_{$i}' style='display:none;'><td colspan='4'><hr></td></tr>";
-			}
+			echo "<tr id='tiliointirivi_hr_{$i}' style='display:none;'><td colspan='4'><hr></td></tr>";
 		}
 
 		echo "<tr><td colspan='4'><a href='#' id='lisaa_uusi_tiliointirivi'>",t("Lisää tiliöintirivi"),"</a></td></tr>";

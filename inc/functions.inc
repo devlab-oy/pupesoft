@@ -9753,6 +9753,44 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 	}
 }
 
+// funktio palauttaa maan nimen tekstimuodossa halutulla kielellä, tai jos ei löydy niin suomeksi
+if (!function_exists("t_maanimi")) {
+   function t_maanimi($maa, $kieli = 'fi') {
+        static $maat = array();
+
+        $maa   = trim(strtoupper($maa));
+        $kieli = trim(strtolower($kieli));
+
+        if (!in_array($kieli, array('fi', 'se', 'en', 'ee'))) {
+            $kieli = 'fi';
+        }
+        // onko $maa jo haettu kertaalleen?
+        if (isset($maat[$maa])) {
+            return($maat[$maa]);
+        }
+
+        $query = "	SELECT {$kieli} AS haettu, fi
+            		FROM sanakirja
+            		WHERE fi LIKE BINARY '{$maa} - %'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) > 0) {
+            $row = mysql_fetch_assoc($result);
+
+            $maa_txt = $row{"haettu"};
+
+            if ($maa_txt == "") {
+                $maa_txt = $row{"fi"};
+            }
+
+            $maat[$maa] = substr($maa_txt, 5);
+            return($maat[$maa]);
+        }
+
+        return "";
+    }
+}
+
 if (!function_exists("jt_toimita")) {
 	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $jtrivit_paikat, $automaaginen, $tee, $automaattinen_poiminta = '', $tuotenumero = '', $huomioi_pvm = '') {
 		global $yhtiorow, $kukarow, $oikeurow;
@@ -19823,45 +19861,6 @@ if (!function_exists('koontilahete_check')) {
 
 		return $komento;
 	}
-}
-
-// funktio palauttaa maan nimen tekstimuodossa halutulla kielellä, tai jos ei löydy niin suomeksi
-if (!function_exists("t_maanimi")) {
-   function t_maanimi($maa, $kieli = 'fi') {
-        static $maat = array();
-
-        $maa   = trim(strtoupper($maa));
-        $kieli = trim(strtolower($kieli));
-
-        if (!in_array($kieli, array('fi', 'se', 'en', 'ee'))) {
-            $kieli = 'fi';
-        }
-        // onko $maa jo haettu kertaalleen?
-        if (isset($maat[$maa])) {
-            return($maat[$maa]);
-        }
-
-        $query = "SELECT {$kieli} AS haettu, fi
-            FROM sanakirja
-            WHERE fi LIKE BINARY '{$maa} - %'";
-
-        $result = pupe_query($query);
-
-        if (mysql_num_rows($result) > 0) {
-            $row = mysql_fetch_assoc($result);
-
-            $maa_txt = $row{"haettu"};
-
-            if ($maa_txt == "") {
-                $maa_txt = $row{"fi"};
-            }
-
-            $maat[$maa] = substr($maa_txt, 5);
-            return($maat[$maa]);
-        }
-
-        return "";
-    }
 }
 
 if (!function_exists('triangulation')) {

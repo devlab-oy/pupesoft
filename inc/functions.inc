@@ -9555,10 +9555,9 @@ if (!function_exists("t_maanimi")) {
             return($maat[$maa]);
         }
 
-        $query = "SELECT {$kieli} AS haettu, fi
-            FROM sanakirja
-            WHERE fi LIKE BINARY '{$maa} - %'";
-
+        $query = "	SELECT {$kieli} AS haettu, fi
+            		FROM sanakirja
+            		WHERE fi LIKE BINARY '{$maa} - %'";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) > 0) {

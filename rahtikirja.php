@@ -2729,7 +2729,7 @@
 					# jos kollit on 0 ja 1 välissä, pyöristetään se 1
 					if ($kollit[$i] > 0 and $kollit[$i] < 1) $kollit[$i] = 1;
 					# jos kollimäärällä on jakojäännös, pyöristetään se seuraavaan kokonaislukuun
-					elseif (fmod($kollit[$i], 1) != 0) $kollit[$i] = round($kollit[$i]);
+					elseif (fmod((float) $kollit[$i], 1) != 0) $kollit[$i] = round($kollit[$i]);
 				}
 			}
 

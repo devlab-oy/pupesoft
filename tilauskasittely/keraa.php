@@ -1563,7 +1563,7 @@
 					}
 
 					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
-						$query = "	SELECT kerayserat.pakkaus,
+						$query = "	SELECT kerayserat.pakkaus as kerayseran_pakkaus,
 									IFNULL(pakkaus.pakkaus, 'MUU KOLLI') pakkaus,
 									IFNULL(pakkaus.pakkauskuvaus, 'MUU KOLLI') pakkauskuvaus,
 									IFNULL(pakkaus.oma_paino, 0) oma_paino,
@@ -1596,16 +1596,12 @@
 							}
 
 							if (count($chk_pakkaukset) > 0) {
-echo "<pre>" . var_dump($chk_pakkaukset) . "</pre><br>";
 								$counter = 0;
 
-								foreach ($chk_pakkaukset[$keraysera_row['pakkaus']] as $_pak_arr) {
+								foreach ($chk_pakkaukset[$keraysera_row['kerayseran_pakkaus']] as $_pak_arr) {
 
-									foreach ($_pak_arr as $_pak_nro => $_arr) {
-										echo "paknro: " . $_pak_nro . "<br>";
-										echo "lasktun: " . $laskurow['tunnus'] . "<br>";
-										if (in_array($laskurow['tunnus'], $_arr)) $counter += (1 / count($_arr));
-										echo "counter: " . $counter . "<br>";
+									foreach ($_pak_arr as $_pak_nro => $_tunn) {
+										if ($laskurow['tunnus'] == $_tunn) $counter += (1 / count($_pak_arr));
 									}
 								}
 
@@ -1629,11 +1625,9 @@ echo "<pre>" . var_dump($chk_pakkaukset) . "</pre><br>";
 											merahti			= '{$laskurow['kohdistettu']}',
 											viesti			= '$asiakkaan_kuljetusohje'
 											{$tulostettulisa}";
-											echo "<pre>" . $query_ker . "</pre>";
 							$ker_res = pupe_query($query_ker);
 						}
-						
-exit;
+
 						if ($laskurow['tulostustapa'] == 'E' and
 							(($laskurow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") or
 							($laskurow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != ""))) {

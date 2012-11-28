@@ -952,7 +952,7 @@
 					if ($toimitustaparow['osoitelappu'] == 'intrade') {
 						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 					}
-					elseif ($toimitustaparow['osoitelappu'] == 'oslap_lamposiirto' and $yhtiorow['kerayserat'] == 'K' and $toim == "") {
+					elseif ($toimitustaparow['osoitelappu'] == 'oslap_lamposiirto' and $yhtiorow['kerayserat'] == 'K') {
 
 						$query = "	SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
 									FROM kerayserat

@@ -928,6 +928,16 @@
 					$lisa .= " and {$array[$i]} = '{$haku[$i]}' ";
 				}
 			}
+			else if(trim($array[$i]) == 'ytunnus') {
+				if(stristr($haku[$i], '-')) {
+					$haku_temp = str_replace('-', '', $haku[$i]);
+					$lisa .= " and ({$array[$i]} = '{$haku[$i]}' or {$array[$i]} = '{$haku_temp}' )";
+				}
+				else {
+					$haku_temp = substr_replace($haku[$i], '-', -1 ,0);
+					$lisa .= " and ({$array[$i]} = '{$haku[$i]}' or {$array[$i]} = '{$haku_temp}' )";
+				}
+			}
 			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
 				list($a, $b) = explode("/", $haku[$i]);
 

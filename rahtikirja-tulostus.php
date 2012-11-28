@@ -1243,7 +1243,7 @@
 
 			echo "</select></td></tr>";
 
-			echo "<tr><td>",t("DGD-lomake"),"</td><td>";
+			echo "<tr><th>",t("DGD-lomake"),"</th><td>";
 			echo "<select name='rakirsyotto_dgd_tulostin'>";
 			echo "<option value=''>",t("Ei tulosteta"),"</option>";
 

@@ -994,7 +994,7 @@
 			}
 
 			// Tulostetaan terminaaliosoitelappu
-			if ($rakirsyotto_termoslapp_tulostin != "" and $termoslapp != '' and $termoslappkpl > 0) {
+			if ($rakirsyotto_termoslapp_tulostin != "" and $termoslapp != '' and $termoslappkpl > 0 and $toimitustaparow['osoitelappu'] != 'oslap_lamposiirto') {
 
 				if (isset($dgdlle_tunnukset) and $dgdlle_tunnukset != "") {
 					$terminaaliosoitelaput = explode(",", $dgdlle_tunnukset);

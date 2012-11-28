@@ -1463,7 +1463,7 @@
 				echo "<option value=''></option>";
 
 				foreach ($DAY_ARRAY as $di => $day) {
-					if ($srow["toimvko"] == $di) {
+					if (date('N', strtotime($srow["toimaika"])) == $di) {
 						$sel = "SELECTED";
 					}
 					else {
@@ -2726,7 +2726,7 @@
 
 			$toimvkopva = $toimvkopva == '' ? 7 : $toimvkopva;
 
-			if ($toimvko < $nyviikko and $toimvko != date("W", strtotime($apuro["toimaika"]))) {
+			if ($toimvko < $nyviikko) {
 				$nyvuosi += 1;
 			}
 
@@ -2735,8 +2735,6 @@
 			$toimvv  = date("Y",strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
 			$toimkk	 = date("m",strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
 			$toimpp  = date("d",strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
-
-			$toimvko = $toimvkopva;
 		}
 		else {
 			$toimvko	= "";
@@ -3028,12 +3026,15 @@
 			$kurssi = $apukurssi;
 		}
 
-		//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
-		if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
-			$toimpp = $kerpp;
-			$toimkk = $kerkk;
-			$toimvv = $kervv;
-			$toimvko = $keraysvko;
+		if($toim != 'TARJOUS') {
+			//Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
+			//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
+			if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
+				$toimpp = $kerpp;
+				$toimkk = $kerkk;
+				$toimvv = $kervv;
+				$toimvko = $keraysvko;
+			}
 		}
 
 		if (($voimaika_vv == "" or !is_numeric($voimaika_vv)) or ($voimaika_kk == "" or !is_numeric($voimaika_kk)) or ($voimaika_pp == "" or !is_numeric($voimaika_pp))) {

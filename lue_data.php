@@ -2104,7 +2104,8 @@ if (!$cli and !isset($api_kentat)) {
 		'tuotteen_avainsanat'             => 'Tuotteen avainsanat',
 		'tuotteen_orginaalit'             => 'Tuotteiden originaalit',
 		'tuotteen_toimittajat'            => 'Tuotteen toimittajat',
-		'vak'                             => 'VAK-tietoja',
+		'vak'                             => 'VAK/ADR-tietoja',
+		'vak_imdg'                        => 'VAK/IMDG-tietoja',
 		'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
 		'yhteyshenkilo'                   => 'Yhteyshenkilöt',
 	);

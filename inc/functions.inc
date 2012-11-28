@@ -6427,11 +6427,14 @@ if (!function_exists("tulosta_ytunnus")) {
 				$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
 			}
 		}
-		else {
+		elseif (strtoupper($maa) == 'SE') {
 			if (substr(trim(strtoupper($ytunnus)),0,2) != strtoupper($maa) and trim(strtoupper($maa)) != trim(strtoupper($yhtiorow["maa"])) and trim(strtoupper($maa)) != "") {
 				$ytunnus = strtoupper($maa)."-".$ytunnus;
 			}
 
+			$uytunnus = $ytunnus;
+		}
+		else {
 			$uytunnus = $ytunnus;
 		}
 

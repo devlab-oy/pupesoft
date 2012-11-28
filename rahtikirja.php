@@ -952,6 +952,39 @@
 					if ($toimitustaparow['osoitelappu'] == 'intrade') {
 						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 					}
+					elseif ($toimitustaparow['osoitelappu'] == 'oslap_lamposiirto' and $yhtiorow['kerayserat'] == 'K' and $toim == "") {
+
+						$query = "	SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
+									FROM kerayserat
+									LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+									AND kerayserat.otunnus IN (".implode(",", $osoitelaput).")
+									GROUP BY 1,2,3
+									ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
+						$pak_chk_res = pupe_query($query);
+
+						$pak_num = mysql_num_rows($pak_chk_res);
+
+						while ($pak_chk_row = mysql_fetch_assoc($pak_chk_res)) {
+
+							for ($i = 1; $i <= $oslappkpl; $i++) {
+
+								$params = array(
+						 			'tilriv' => $pak_chk_row['otunnus'],
+						 			'komento' => $oslapp,
+						 			'pakkauskoodi' => $pak_chk_row['pakkaus'],
+						 			'montako_laatikkoa_yht' => $pak_num,
+						 			'toim_nimi' => $laskurow['toim_nimi'],
+						 			'toim_nimitark' => $laskurow['toim_nimitark'],
+						 			'toim_osoite' => $laskurow['toim_osoite'],
+						 			'toim_postino' => $laskurow['toim_postino'],
+						 			'toim_postitp' => $laskurow['toim_postitp'],
+						 		);
+
+								tulosta_oslap_lamposiirto($params);
+							}
+						}
+					}
 					else {
 						require ("tilauskasittely/osoitelappu_pdf.inc");
 					}

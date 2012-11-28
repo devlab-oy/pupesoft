@@ -233,6 +233,7 @@
 					lasku.mapvm,
 					lasku.erpcm,
 					yriti.nimi maksu_tili,
+					date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy,
 					round(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) poimittusumma_eur,
 					round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) summa_eur
 					FROM lasku
@@ -261,7 +262,7 @@
 			echo "</tr>";
 			echo "<tr class='aktiivi'>";
 			echo "<th>",t("Maksuaineisto"),"</th>";
-			echo "<td>",tv1dateconv($row['popvm'], 'PITKA', ''),"</td>";
+			echo "<td>SEPA-$kukarow[yhtio]-".$row['popvm_dmy'].".xml</td>";
 			echo "</tr>";
 			echo "</table>";
 			echo "<br />";

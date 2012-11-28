@@ -140,13 +140,13 @@ if ($tee_kululaskut == "liita") {
 		else {
 			$liitasumma = abs($liitasumma);
 		}
-
-		$verosumma 		= (float) $liitasumma;
-		$verotonsumma 	= (float) $liitasumma;
+		
+		$verosumma		= (float) round($liitasumma * ($oslasrow["summa"]/($oslasrow["summa"]-$alvisumma)), 2);
+		$verotonsumma	= (float) $liitasumma;
 	}
 	elseif (abs($summa_kaytettavissa-$oslasrow["arvo"]) >= 0.01) {
-		$verosumma 		= (float) $summa_kaytettavissa;
-		$verotonsumma 	= (float) $summa_kaytettavissa;
+		$verosumma		= (float) round($liitasumma * ($oslasrow["summa"]/($oslasrow["summa"]-$alvisumma)), 2);
+		$verotonsumma	= (float) $liitasumma;
 	}
 	else {
 		//Tässä on ostolaskun verollinen summa (Tarvitaan alvillisissa vaihto-omaisuuslaskuissa)
@@ -181,30 +181,30 @@ if ($tee_kululaskut == "liita") {
 
 		// meillä on laskurow haettuna ylhäällä, tehdään liitosotsikko
 		$query = "	INSERT into lasku set
-					yhtio        = '$kukarow[yhtio]',
-					laskunro     = '$laskurow[laskunro]',
-					ytunnus	     = '$oslasrow[ytunnus]',
-					nimi         = '$oslasrow[nimi]',
-					tapvm        = '$oslasrow[tapvm]',
-					valkoodi     = '$oslasrow[valkoodi]',
-					maksu_kurssi = '$oslasrow[maksu_kurssi]',
-					vienti_kurssi= '$oslasrow[vienti_kurssi]',
-					toimitusehto = '$oslasrow[toimitusehto]',
-					vanhatunnus  = '$oslasrow[tunnus]',
-					arvo 		 = '$verotonsumma',
-					viite		 = '$oslasrow[viite]',
-					summa        = '$verosumma',
-					vienti       = '$oslasrow[vienti]',
-					liitostunnus = '$oslasrow[liitostunnus]',
-					osto_kulu	 = '{$osto_kulu}',
-					osto_rahti   = '{$osto_rahti}',
-					osto_rivi_kulu = '{$osto_rivi_kulu}',
-					osto_kulu_alv = '{$osto_kulu_alv}',
-					osto_rahti_alv = '{$osto_rahti_alv}',
-					osto_rivi_kulu_alv = '{$osto_rivi_kulu_alv}',
-					luontiaika	 = now(),
-					laatija		 = '$kukarow[kuka]',
-					tila         = 'K'";
+					yhtio        		= '$kukarow[yhtio]',
+					laskunro     		= '$laskurow[laskunro]',
+					ytunnus	     		= '$oslasrow[ytunnus]',
+					nimi         		= '$oslasrow[nimi]',
+					tapvm        		= '$oslasrow[tapvm]',
+					valkoodi     		= '$oslasrow[valkoodi]',
+					maksu_kurssi 		= '$oslasrow[maksu_kurssi]',
+					vienti_kurssi		= '$oslasrow[vienti_kurssi]',
+					toimitusehto 		= '$oslasrow[toimitusehto]',
+					vanhatunnus  		= '$oslasrow[tunnus]',
+					arvo 		 		= '$verotonsumma',
+					viite		 		= '$oslasrow[viite]',
+					summa        		= '$verosumma',
+					vienti       		= '$oslasrow[vienti]',
+					liitostunnus 		= '$oslasrow[liitostunnus]',
+					osto_kulu	 		= '{$osto_kulu}',
+					osto_rahti   		= '{$osto_rahti}',
+					osto_rivi_kulu 		= '{$osto_rivi_kulu}',
+					osto_kulu_alv 		= '{$osto_kulu_alv}',
+					osto_rahti_alv 		= '{$osto_rahti_alv}',
+					osto_rivi_kulu_alv	= '{$osto_rivi_kulu_alv}',
+					laatija				= '$kukarow[kuka]',
+					luontiaika	 		= now(),
+					tila         		= 'K'";
 		$result = pupe_query($query);
 
 		if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($oslasrow['vienti'] == 'C' or $oslasrow['vienti'] == 'F' or $oslasrow['vienti'] == 'I') and ($osto_kulu != 0 or $osto_rahti != 0 or $osto_rivi_kulu != 0)) {
@@ -734,7 +734,7 @@ if ($silent == "") {
 					$alvilisa = "and summa > 0";
 				}
 
-				//Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
+				// Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
 				$query = "	SELECT sum(summa) summa
 							from tiliointi
 							where yhtio	= '$kukarow[yhtio]'

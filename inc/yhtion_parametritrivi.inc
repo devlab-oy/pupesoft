@@ -207,7 +207,7 @@
 		$ulos .= "<option value = '8'  $sel[8]>".t("Ruotsin laskupohja")."</option>";
 		$ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)");
 		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)");
-				
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -721,17 +721,25 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array();
-		$sel[$trow[$i]] = "SELECTED";
+		$sel = array_fill_keys(array('A', 'B', 'C', 'I', 'J', 'Q', 'U', 'V', 'W', 'X', 'Y', 'Z'), '');
+		$sel[$trow[$i]] = " SELECTED";
 
 		$ulos .= "<option value=''>".t("Myyntitilaukselta ei voi luoda ostorivej‰")."</option>";
-		$ulos .= "<option value='X' $sel[X]>".t("Myyntitilaukselta voi luoda ostorivej‰ varastoon")."</option>";
-		$ulos .= "<option value='U' $sel[U]>".t("Myyntitilaukselta voi luoda ostorivej‰ asiakkaalle")."</option>";
-		$ulos .= "<option value='Y' $sel[Y]>".t("Myyntitilaukselta voi luoda ostorivej‰ asiakkaalle ja varastoon")."</option>";
-		$ulos .= "<option value='V' $sel[V]>".t("Myyntitilaukselta voi luoda ostorivej‰ varastoon, jos se on tuotteen takana sallittu")."</option>";
-		$ulos .= "<option value='W' $sel[W]>".t("Myyntitilaukselta voi luoda ostorivej‰ asiakkaalle ja varastoon, jos se on tuotteen takana sallittu")."</option>";
-		$ulos .= "<option value='Z' $sel[Z]>".t("Myyntitilauksen voi siirt‰‰ varaston ostotilaukseksi")."</option>";
-		$ulos .= "<option value='Q' $sel[Q]>".t("Myyntitilauksen voi siirt‰‰ ostotilaukseksi, joka toimitetaan suoraan asiakkaalle")."</option>";
+		$ulos .= "<option value='X' {$sel['X']}>".t("Myyntitilaukselta voi luoda ostorivej‰ varastoon")."</option>";
+		$ulos .= "<option value='U' {$sel['U']}>".t("Myyntitilaukselta voi luoda ostorivej‰ asiakkaalle")."</option>";
+		$ulos .= "<option value='Y' {$sel['Y']}>".t("Myyntitilaukselta voi luoda ostorivej‰ asiakkaalle ja varastoon")."</option>";
+		$ulos .= "<option value='A' {$sel['A']}>".t("Myyntitilaukselta voi luoda yhden toimittajan ostorivej‰ varastoon")."</option>";
+		$ulos .= "<option value='B' {$sel['B']}>".t("Myyntitilaukselta voi luoda yhden toimittajan ostorivej‰ asiakkaalle")."</option>";
+		$ulos .= "<option value='C' {$sel['C']}>".t("Myyntitilaukselta voi luoda yhden toimittajan ostorivej‰ asiakkaalle ja varastoon")."</option>";
+
+		$ulos .= "<option value='V' {$sel['V']}>".t("Myyntitilaukselta voi luoda ostorivej‰ varastoon, jos se on tuotteen takana sallittu")."</option>";
+		$ulos .= "<option value='W' {$sel['W']}>".t("Myyntitilaukselta voi luoda ostorivej‰ asiakkaalle ja varastoon, jos se on tuotteen takana sallittu")."</option>";
+
+		$ulos .= "<option value='I' {$sel['I']}>".t("Myyntitilaukselta voi luoda yhden toimittajan ostorivej‰ varastoon, jos se on tuotteen takana sallittu")."</option>";
+		$ulos .= "<option value='J' {$sel['J']}>".t("Myyntitilaukselta voi luoda yhden toimittajan ostorivej‰ asiakkaalle ja varastoon, jos se on tuotteen takana sallittu")."</option>";
+
+		$ulos .= "<option value='Z' {$sel['Z']}>".t("Myyntitilauksen voi siirt‰‰ varaston ostotilaukseksi")."</option>";
+		$ulos .= "<option value='Q' {$sel['Q']}>".t("Myyntitilauksen voi siirt‰‰ ostotilaukseksi, joka toimitetaan suoraan asiakkaalle")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3156,4 +3164,31 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'ei_alennuksia_lapsituotteille') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'X' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Tuoteperheiden lapsituotteille lasketaan asiakashinta ja -alennus")."</option>";
+		$ulos .= "<option value = 'X' $sel>".t("Tuoteperheiden lapsituotteille ei lasketa asiakashintoja eik‰ -alennuksia")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+
+	}
+
+	if (mysql_field_name($result, $i) == 'epakurantoinnin_myyntihintaleikkuri') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel['Z'] = $trow[$i] == 'Z' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Hintaa ei leikata")."</option>";
+		$ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Myyntihintaa leikataan 25% per taso")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+
 	}

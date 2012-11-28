@@ -106,21 +106,23 @@ elseif ($laskurow["tilaustyyppi"] == 'E') {
 				and tyyppi in ('L','E')";
 	$result = pupe_query($query);
 
-	//
-	// LƒHETETƒƒN TILAUSVAHVISTUS
-	//
-	// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
-	$params_tilausvahvistus = array(
-	'tee'						=> $tee,
-	'toim'						=> $toim,
-	'kieli'						=> $kieli,
-	'komento'					=> $komento,
-	'laskurow'					=> $laskurow,
-	'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
-	'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
-	);
+	if (trim($laskurow['tilausvahvistus']) != "") {
+		//
+		// LƒHETETƒƒN TILAUSVAHVISTUS
+		//
+		// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
+		$params_tilausvahvistus = array(
+		'tee'						=> $tee,
+		'toim'						=> $toim,
+		'kieli'						=> $kieli,
+		'komento'					=> $komento,
+		'laskurow'					=> $laskurow,
+		'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
+		'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
+		);
 
-	laheta_tilausvahvistus($params_tilausvahvistus);
+		laheta_tilausvahvistus($params_tilausvahvistus);
+	}
 }
 elseif ($laskurow["tilaustyyppi"] == '0') {
 		// Yll‰pitosopimus
@@ -1316,21 +1318,24 @@ else {
 			// loopataan kaikki yhdest‰ tilauksesta syntyneet l‰hetteet
 			// jos halutaan tilausvahvistus aluper‰isest‰ tilauksesta
 			if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
-				//
-				// LƒHETETƒƒN TILAUSVAHVISTUS
-				//
-				// T‰ss‰ haarassa tulostetaan tilausvahvistus KOKO tilauksesta
-				$params_tilausvahvistus = array(
-				'tee'						=> $tee,
-				'toim'						=> $toim,
-				'kieli'						=> $kieli,
-				'komento'					=> $komento,
-				'laskurow'					=> $laskurow,
-				'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
-				'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
-				);
 
-				laheta_tilausvahvistus($params_tilausvahvistus);
+				if (trim($laskurow['tilausvahvistus']) != "") {
+					//
+					// LƒHETETƒƒN TILAUSVAHVISTUS
+					//
+					// T‰ss‰ haarassa tulostetaan tilausvahvistus KOKO tilauksesta
+					$params_tilausvahvistus = array(
+					'tee'						=> $tee,
+					'toim'						=> $toim,
+					'kieli'						=> $kieli,
+					'komento'					=> $komento,
+					'laskurow'					=> $laskurow,
+					'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
+					'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
+					);
+
+					laheta_tilausvahvistus($params_tilausvahvistus);
+				}
 
 				///* T‰ss‰ katotaan onko l‰hetteell‰ tosiaan mit‰‰n ker‰tt‰v‰‰ *///
 
@@ -1353,24 +1358,23 @@ else {
 					$result = pupe_query($query);
 					$laskurow = mysql_fetch_assoc($result);
 
-					// Tilausvahvistukset muuttavat t‰t‰ niin otetaan talteen
-					$laskurow_tvorig = $laskurow;
+					if (trim($laskurow['tilausvahvistus']) != "") {
+						//
+						// LƒHETETƒƒN TILAUSVAHVISTUS
+						//
+						// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
+						$params_tilausvahvistus = array(
+						'tee'						=> $tee,
+						'toim'						=> $toim,
+						'kieli'						=> $kieli,
+						'komento'					=> $komento,
+						'laskurow'					=> $laskurow,
+						'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
+						'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
+						);
 
-					//
-					// LƒHETETƒƒN TILAUSVAHVISTUS
-					//
-					// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
-					$params_tilausvahvistus = array(
-					'tee'						=> $tee,
-					'toim'						=> $toim,
-					'kieli'						=> $kieli,
-					'komento'					=> $komento,
-					'laskurow'					=> $laskurow,
-					'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
-					'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
-					);
-
-					laheta_tilausvahvistus($params_tilausvahvistus);
+						laheta_tilausvahvistus($params_tilausvahvistus);
+					}
 
 					///* T‰ss‰ katotaan onko l‰hetteell‰ tosiaan mit‰‰n ker‰tt‰v‰‰ *///
 					$kutsuja = "tilaus-valmis.inc";

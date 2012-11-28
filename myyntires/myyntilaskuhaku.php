@@ -13,8 +13,6 @@
 	if (!isset($summa2)) $summa2 = '';
 	if (!isset($alku)) $alku = 0;
 	if (!isset($pvm)) $pvm = '';
-	if (!isset($itila)) $itila = '';
-	if (!isset($ialatila)) $ialatila = '';
 
 	if (!function_exists("kuka_kayttaja")) {
 		function kuka_kayttaja($keta_haetaan) {
@@ -281,14 +279,14 @@
 
 			if ($alku > 0) {
 				$siirry = $alku - 50;
-				echo "<a href = '?tee={$tee}&pvm={$pvm}&summa1={$summa1}&summa2={$summa2}&alku={$siirry}&itila={$itila}&ialatila={$ialatila}'>",t("Edelliset"),"</a> ";
+				echo "<a href = '?tee={$tee}&pvm={$pvm}&summa1={$summa1}&summa2={$summa2}&alku={$siirry}'>",t("Edelliset"),"</a> ";
 			}
 			else {
 				echo t("Edelliset")," ";
 			}
 
 			$siirry = $alku + 50;
-			echo "<a href = '?tee={$tee}&pvm={$pvm}&summa1={$summa1}&summa2={$summa2}&alku={$siirry}&itila={$itila}&ialatila={$ialatila}'>",t("Seuraavat"),"</a> ";
+			echo "<a href = '?tee={$tee}&pvm={$pvm}&summa1={$summa1}&summa2={$summa2}&alku={$siirry}'>",t("Seuraavat"),"</a> ";
 			echo "<br /><br />";
 
 			$toim = "";

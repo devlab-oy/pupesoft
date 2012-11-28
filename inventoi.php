@@ -50,66 +50,45 @@
 			$name	= strtoupper($path_parts['filename']);
 			$ext	= strtoupper($path_parts['extension']);
 
-			if ($ext != "TXT" and $ext != "CSV" and $ext != "XLS") {
-				die ("<font class='error'><br>".t("Ainoastaan .txt, .csv tai .xls tiedostot sallittuja")."!</font>");
-			}
-
 			if ($_FILES['userfile']['size']==0) {
 				die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
 			}
 
-			if (strtoupper($ext)=="XLS") {
-				require_once ('excel_reader/reader.php');
+			$retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT","DATAIMPORT"));
 
-				// ExcelFile
-				$data = new Spreadsheet_Excel_Reader();
+			if ($retval !== TRUE) {
+				die ("<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font>");
+			}
 
-				// Set output Encoding.
-				$data->setOutputEncoding('CP1251');
-				$data->setRowColOffset(0);
-				$data->read($_FILES['userfile']['tmp_name']);
-			}
-			else {
-				$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
-			}
+			$excelrivit = pupeFileReader($_FILES['userfile']['tmp_name'], $ext);
 
 			$tuote = array();
 			$maara = array();
+			$selis = array();
+			$lajis = array();
 
-			if (strtoupper($ext) == "XLS") {
-				for ($excei = 0; $excei < $data->sheets[0]['numRows']; $excei++) {
-					// luetaan rivi tiedostosta..
-					$tuo		= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][0]));
-					$hyl		= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][1]));
-					$maa		= str_replace(",", ".", trim($data->sheets[0]['cells'][$excei][2]));
-					$lisaselite	= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][3]));
+			for ($excei = 0; $excei < count($excelrivit); $excei++) {
+				// luetaan rivi tiedostosta..
+				$tuo		= mysql_real_escape_string(trim($excelrivit[$excei][0]));
+				$hyl		= mysql_real_escape_string(trim($excelrivit[$excei][1]));
+				$maa		= str_replace(",", ".", trim($excelrivit[$excei][2]));
+				$lisaselite	= mysql_real_escape_string(trim($excelrivit[$excei][3]));
+				$inven_laji = "";
 
-					if ($tuo != '' and $hyl != '' and $maa != '') {
-						$hylp = explode("-", $hyl);
-						$tuote[] = $tuo."###".$hylp[0]."###".$hylp[1]."###".$hylp[2]."###".$hylp[3];
-						$maara[] = $maa;
-					}
-				}
-			}
-			else {
-				// luetaan tiedosto alusta loppuun...
-				while ($rivi = fgets($file)) {
-
-					// luetaan rivi tiedostosta..
-					$rivi		= explode("\t", trim($rivi));
-					$tuo		= mysql_real_escape_string(trim($rivi[0]));
-					$hyl		= mysql_real_escape_string(trim($rivi[1]));
-					$maa		= str_replace(",", ".", trim($rivi[2]));
-					$lisaselite	= mysql_real_escape_string(trim($rivi[3]));
-
-					if ($tuo != '' and $hyl != '' and $maa != '') {
-						$hylp = explode("-", $hyl);
-						$tuote[] = $tuo."###".$hylp[0]."###".$hylp[1]."###".$hylp[2]."###".$hylp[3];
-						$maara[] = $maa;
-					}
+				if (strpos($lisaselite, "/") !== FALSE) {
+					list($inven_laji, $lisaselite) = explode("/", $lisaselite);
+					$inven_laji = trim($inven_laji);
+					$lisaselite = trim($lisaselite);
 				}
 
-				fclose($file);
+				if ($tuo != '' and $hyl != '' and $maa != '') {
+					$hylp = explode("-", $hyl);
+
+					$tuote[] = $tuo."###".$hylp[0]."###".$hylp[1]."###".$hylp[2]."###".$hylp[3];
+					$maara[] = $maa;
+					$selis[] = $lisaselite;
+					$lajis[] = $inven_laji;
+				}
 			}
 
 			if (count($tuote) > 0) {
@@ -167,6 +146,11 @@
 				$kpl		= str_replace(",", ".", $maara[$i]);
 				$poikkeama  = 0;
 				$skp		= 0;
+
+				if ($fileesta == "ON") {
+					$inven_laji = $lajis[$i];
+					$lisaselite = $selis[$i];
+				}
 
 				if ($kpl != '' and is_numeric($kpl)) {
 
@@ -1128,7 +1112,7 @@
 			echo "<tr><td colspan='7' class='back'>".t("Syˆt‰ joko hyllyss‰ oleva m‰‰r‰, tai lis‰tt‰v‰ m‰‰r‰ + etuliitteell‰, tai v‰hennett‰v‰ m‰‰r‰ - etuliitteell‰")."</td></tr>";
 
 			echo "<tr>";
-			echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Varastosaldo")."</th><th>".t("Ennpois")."/".t("Ker‰tty")."</th><th>".t("Hyllyss‰")."</th><th>".t("Laskettu hyllyss‰")."</th>";
+			echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("Varastosaldo")."</th><th>".t("Ennpois")."/".t("Ker‰tty")."</th><th>".t("Hyllyss‰")."</th><th>".t("Laskettu hyllyss‰")."</th>";
 			echo "</tr>";
 
 			$rivilask = 0;
@@ -1299,6 +1283,7 @@
 					}
 
 					echo "</td>";
+					echo "<td>".tv1dateconv($tuoterow['inventointiaika'], "P")."</td>";
 
 					if ($tuoterow["sarjanumeroseuranta"] != "S") {
 						echo "<td valign='top'>$tuoterow[saldo]</td><td valign='top'>$hylrow[ennpois]/$hylrow[keratty]</td><td valign='top'>".$hyllyssa."</td>";
@@ -1519,9 +1504,9 @@
 				<br><br>
 				<font class='head'>".t("Inventoi tiedostosta")."</font><hr>
 				<table>
-				<tr><th colspan='4'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
+				<tr><th colspan='4'>".t("Tiedostomuoto").".</th></tr>
 				<tr>";
-		echo "	<td>".t("Tuoteno")." / ".t("EAN")."</td><td>".t("Hyllyalue-Hyllynro-Hyllyv‰li-Hyllytaso")."</td><td>".t("M‰‰r‰")."</td><td>".t("Selite")."</td>";
+		echo "	<td>".t("Tuoteno")." / ".t("EAN")."</td><td>".t("Hyllyalue-Hyllynro-Hyllyv‰li-Hyllytaso")."</td><td>".t("M‰‰r‰")."</td><td>".t("Laji")." / ".t("Selite")."</td>";
 		echo "	</tr>";
 
 		echo "	<tr><td class='back'><br></td></tr>";

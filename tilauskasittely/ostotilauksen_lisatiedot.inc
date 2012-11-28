@@ -12,12 +12,10 @@ if ($tee == "update") {
 	$result = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array ($result);
 
-	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
-
-	list (,,,,,,,$llrow,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
+	list (,,,,,,,,$llrow,,,,,,,) = tsekit($laskurow, 0, 0);
 
 	// Tsekki tehd‰‰n vain jos vaihto-omaisuus laskuja on liitetty keikkaan!
-	if ($llrow["volasku"] != 0 and abs($rahti_etu) > abs($llrow['vosumma_valuutassa'])) {
+	if ($llrow["volasku"] > 0 and abs($rahti_etu) > abs($llrow['vosumma_valuutassa'])) {
 		echo "<font class='message'>".t("VIRHE: Eturahti ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br><br>";
 
 		$tee = "";
@@ -92,9 +90,7 @@ if ($tee == "") {
 	$result = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array ($result);
 
-	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
-
-	list (,,,,,,,$llrow,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
+	list (,,,,,,,,$llrow,,,,,,,) = tsekit($laskurow, 0, 0);
 
 	// haetaan toimittajan tiedot
 	$query  = "SELECT * FROM toimi WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[liitostunnus]'";
@@ -102,10 +98,10 @@ if ($tee == "") {
 	$toimittaja = mysql_fetch_array($result);
 
 	// katotaan paljonko on kohdistamatta
-	$jaljella = sprintf("%.2f", $llrow["vosumma_valuutassa"] - $laskurow["summa"]);
+	$jaljella = sprintf("%.2f", $llrow["voverosumma_valuutassa"] - $laskurow["summa"]);
 
 	// kaunistellaan
-	if ($llrow["vosumma_valuutassa"] == "") $llrow["vosumma_valuutassa"] = "0.00";
+	if ($llrow["voverosumma_valuutassa"] == "") $llrow["voverosumma_valuutassa"] = "0.00";
 
 	// n‰ytet‰‰n viel‰ laskun tiedot, ettei kohdisteta p‰in berberi‰
 	echo "<table>";
@@ -125,7 +121,7 @@ if ($tee == "") {
 			<td>$laskurow[nimi]</td>
 			<td>$laskurow[tapvm]</td>
 			<td>$laskurow[toimitusehto]</td>
-			<td>$llrow[vosumma_valuutassa] $laskurow[valkoodi]</td>
+			<td>$llrow[voverosumma_valuutassa] $laskurow[valkoodi]</td>
 			<td>$laskurow[summa] $laskurow[valkoodi]</td>
 			<td>$jaljella $laskurow[valkoodi]</td></tr>";
 	echo "</table><br>";

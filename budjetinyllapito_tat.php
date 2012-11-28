@@ -339,19 +339,19 @@
 
 	// Ohjelman headerit
 	if ($toim == "TUOTE") {
-		echo "<font class='head'>".t("Budjetin ylläpito tuote")."</font><hr>";
+		echo "<font class='head'>".t("Tuotteiden myyntitavoitteet")."</font><hr>";
 
 		$budj_taulu = "budjetti_tuote";
 		$budj_sarak = "tuoteno";
 	}
 	elseif ($toim == "TOIMITTAJA") {
-		echo "<font class='head'>".t("Budjetin ylläpito toimittaja")."</font><hr>";
+		echo "<font class='head'>".t("Toimittajien ostotavoitteet")."</font><hr>";
 
 		$budj_taulu = "budjetti_toimittaja";
 		$budj_sarak = "toimittajan_tunnus";
 	}
 	elseif ($toim == "ASIAKAS") {
-		echo "<font class='head'>".t("Budjetin ylläpito asiakas")."</font><hr>";
+		echo "<font class='head'>".t("Asiakkaiden myyntitavoitteet")."</font><hr>";
 
 		$budj_taulu = "budjetti_asiakas";
 		$budj_sarak = "asiakkaan_tunnus";
@@ -459,7 +459,7 @@
 			echo "<br><font class='error'>".t("HUOM: Maksimirivimäärä ylittyi, rivejä ei näytetä ruudulla. Rivit tallennetaan suoraan tietokantaan")."!<br><br></font>";
 		}
 		else {
-			echo "<font class='error'>".t("HUOM: Excel-tiedoston luvut eivät vielä tallennettu tietokantaan")."!<br>".t("Klikkaa")." '",t("Tallenna budjettiluvut"),"' ".t("tallentaaksesi luvut")."!</font><br><br></font>";
+			echo "<font class='error'>".t("HUOM: Excel-tiedoston luvut eivät vielä tallennettu tietokantaan")."!<br>".t("Klikkaa")." '",t("Tallenna tavoiteluvut"),"' ".t("tallentaaksesi luvut")."!</font><br><br></font>";
 		}
 
 		$liitostunnukset = substr($liitostunnukset, 0, -1);
@@ -477,7 +477,7 @@
 		}
 
 		if (isset($poikkeus_haku) and $poikkeus_haku != "try" and $poikkeus_haku != "osasto" and $poikkeus_haku != "kummatkin") {
-			echo "<font class='error'>".t("VIRHE: Budjetinluonnissa on tapahtunut virhe, keskeytetään prosessi")."!<br><br></font>";
+			echo "<font class='error'>".t("VIRHE: Tavoitelukujen tallennuksessa on tapahtunut virhe, keskeytetään prosessi")."!<br><br></font>";
 			$tee = "";
 		}
 	}
@@ -878,9 +878,9 @@
 		echo "</select></td>";
 		echo "</tr>";
 
-		// Budjetin aikaväli
+		// Tavoitteiden aikaväli
 		echo "<tr>";
-		echo "<th>".t("Anna budjetin aikaväli (kk-vuosi)")."</th>";
+		echo "<th>".t("Tavoitteiden aikaväli (kk-vuosi)")."</th>";
 		echo "	<td>
 				<input type='text' name='alkukk' value='$alkukk' size='3'>-
 				<input type='text' name='alkuvv' value='$alkuvv' size='4'>
@@ -894,7 +894,7 @@
 
 			// indeksi vai euromäärä
 			echo "<tr>";
-			echo "<th>".t("Anna budjetin käsittelytyyppi")."</th>";
+			echo "<th>".t("Tavoitelukujen käsittelytyyppi")."</th>";
 			echo "<td>";
 
 			if ($budj_kohtelu == "indeksi") {
@@ -911,16 +911,16 @@
 			}
 
 			echo "<select name='budj_kohtelu' onchange='submit()';>";
-			echo "<option value = 'euro'>".t("Budjetti syötetään euroilla")."</option>";
-			echo "<option value = 'indeksi' $bkcheck>".t("Budjetti syötetään indekseillä")."</option>";
-			if ($toim == "TUOTE") echo "<option value = 'maara' $bkcheckb>".t("Budjetti syötetään määrillä")."</option>";
+			echo "<option value = 'euro'>".t("Tavoitteet syötetään euroilla")."</option>";
+			echo "<option value = 'indeksi' $bkcheck>".t("Tavoitteet syötetään indekseillä")."</option>";
+			if ($toim == "TUOTE") echo "<option value = 'maara' $bkcheckb>".t("Tavoitteet syötetään määrillä")."</option>";
 			echo "</td>";
 			echo "</tr>";
 		}
 
 		// Millä tasolla budjetti tehdään
 		echo "<tr>";
-		echo "<th>".t("Budjettiluku")."</th>";
+		echo "<th>".t("Tavoiteluku")."</th>";
 		echo "<td>";
 
 		if ($budjetointi_taso == "joka_kk_sama") {
@@ -937,9 +937,9 @@
 		}
 
 		echo "<select name='budjetointi_taso' onchange='submit()';>";
-		echo "<option value = 'kuukausittain'>".t("Kuukausittain")."</option>";
-		echo "<option value = 'joka_kk_sama' $btcheck1>".t("Jokaiselle kuukaudelle sama arvo")."</option>";
-		if ($budj_kohtelu != "indeksi") echo "<option value = 'summa_jaetaan' $btcheck2>".t("Budjettiluku jaetaan kuukausille tasan")."</option>";
+		echo "<option value = 'kuukausittain'>".t("Tavoiteluku syötetään per kuukausi")."</option>";
+		echo "<option value = 'joka_kk_sama' $btcheck1>".t("Syötetty tavoiteluku tallennetaan jokaiselle kuukaudelle")."</option>";
+		if ($budj_kohtelu != "indeksi") echo "<option value = 'summa_jaetaan' $btcheck2>".t("Syötetty tavoiteluku jaetaan kuukausille tasan")."</option>";
 		echo "</select>";
 		echo "</td>";
 		echo "</tr>";
@@ -947,7 +947,7 @@
 		if ($toim == "TUOTE") {
 			// Tuoteosasto tai ryhmätason budjetti.
 			echo "<tr>";
-			echo "<th>".t("Anna kokonaisbudjetti osastolle tai tuoteryhmälle")."</th>";
+			echo "<th>".t("Anna kokonaistavoitteet osastolle tai tuoteryhmälle")."</th>";
 
 			$scheck = ($summabudjetti != "") ? "CHECKED": "";
 			echo "<td><input type='checkbox' name='summabudjetti' $scheck></td>";
@@ -992,7 +992,7 @@
 
 			// Tuoteosasto tai ryhmätason budjetti.
 			echo "<tr>";
-			echo "<th>".t("Anna kokonaisbudjetti valituille asiakkaille")."</th>";
+			echo "<th>".t("Anna kokonaistavoitteet valituille asiakkaille")."</th>";
 
 			$scheck = ($summabudjetti != "") ? "CHECKED": "";
 			echo "<td><input type='checkbox' name='summabudjetti' $scheck></td>";
@@ -1032,13 +1032,13 @@
 		$tcheck = ($onko_ilman_budjettia != "") ? "CHECKED" : "";
 
 		echo "<tr>";
-		echo "<th>".t("Näytä vain rivit, joilla ei ole budjettia")."</th>";
+		echo "<th>".t("Näytä vain rivit, joilla ei ole tavoitetta")."</th>";
 		echo "<td><input type='checkbox' name='onko_ilman_budjettia' $tcheck></td>";
 		echo "</tr>";
 
 		if ($toim == "ASIAKAS" or $toim == "TOIMITTAJA") {
 
-			echo "<tr><th>",t("Budjetointitaso"),"</th><td>";
+			echo "<tr><th>",t("Tavoitetaso"),"</th><td>";
 
 			$btcheck1 = "";
 			$btcheck2 = "";
@@ -1053,9 +1053,9 @@
 			}
 
 			echo "<select name='osastotryttain' onchange='submit()';>";
-			echo "<option value = ''>".t("Kokonaisbudjetti")."</option>";
-			echo "<option value = 'tuoteryhmittain' $btcheck1>".t("Tuoteryhmäkohtainen budjetti")."</option>";
-			echo "<option value = 'osastoittain' $btcheck2>".t("Osastokohtainen budjetti")."</option>";
+			echo "<option value = ''>".t("Asiakkaan kokonaistavoite")."</option>";
+			echo "<option value = 'tuoteryhmittain' $btcheck1>".t("Asiakkaan tuoteryhmäkohtainen tavoite")."</option>";
+			echo "<option value = 'osastoittain' $btcheck2>".t("Asiakkaan osastokohtainen tavoite")."</option>";
 			echo "</select>";
 
 
@@ -1079,16 +1079,16 @@
 		}
 
 		echo "<tr>";
-		echo "<th>".t("Lue budjettiluvut tiedostosta")."</th>";
+		echo "<th>".t("Lue tavoiteluvut tiedostosta")."</th>";
 		echo "<td><input type='file' name='userfile'></td>";
 		echo "</tr>";
 
 		echo "</table><br>";
 
-		echo t("Budjettiluvun voi poistaa huutomerkillä (!)"),"<br />";
+		echo t("Tavoiteluvun voi poistaa huutomerkillä (!)"),"<br />";
 		echo "<br />";
 
-		echo "<input type='submit' name='submit_button' id='submit_button' value='",t("Hae budjetti"),"' /><br>";
+		echo "<input type='submit' name='submit_button' id='submit_button' value='",t("Hae tavoitteet"),"' /><br>";
 		echo "</form>";
 	}
 
@@ -1153,11 +1153,11 @@
 		// Kokonaisbudjetti-tarkastukset
 		if (($toim == "TUOTE" or $toim == "ASIAKAS") and $summabudjetti == "on") {
 			if ($budj_kohtelu == "indeksi" and $budjetointi_taso != "joka_kk_sama") {
-				echo "<font class='error'>".t("VIRHE: Kokonaisbudjetin voi syöttää indeksiluvulla vain budjetoimalla jokaiselle kuukaudelle saman arvon!")."</font><br>";
+				echo "<font class='error'>".t("VIRHE: Kokonaistavoitteet voi syöttää indeksiluvulla vain valitsemalla jokaiselle kuukaudelle saman arvon!")."</font><br>";
 				$tee = "";
 			}
 			if ($budjetointi_taso == "kuukausittain") {
-				echo "<font class='error'>".t("VIRHE: Kokonaisbudjettia ei voida syöttää kuukausittain aikavälillä!")."</font><br>";
+				echo "<font class='error'>".t("VIRHE: Kokonaistavoitteet ei voida syöttää kuukausittain aikavälillä!")."</font><br>";
 				$tee = "";
 			}
 		}
@@ -1317,7 +1317,7 @@
 
 		$result = pupe_query($query);
 
-		echo "<br><font class='message'>".t("Budjettiluvut")."</font><br>";
+		echo "<br><font class='message'>".t("Tavoiteluvut")."</font><br>";
 		echo "<hr />";
 
 		if (isset($osastotryttain) and $osastotryttain == "tuoteryhmittain") {
@@ -1367,7 +1367,7 @@
 			echo "<input type='hidden' name='myyntiennustekerroin' value='$myyntiennustekerroin'>";
 			echo "<input type='hidden' name='naytamyyntiennuste' value='$naytamyyntiennuste'>";
 
-			echo "<input type='submit' name='tallennus' id='tallennus' value='",t("Tallenna budjettiluvut"),"' />";
+			echo "<input type='submit' name='tallennus' id='tallennus' value='",t("Tallenna tavoiteluvut"),"' />";
 			echo "<br><br>";
 
 			echo "<table>";
@@ -1468,7 +1468,7 @@
 			$excelsarake++;
 
 			if ($sarakkeet > 24) {
-				echo "<font class='error'>".t("VIRHE: Ei voi tehdä yli 2 vuoden budjettia")." !!!</font><br>";
+				echo "<font class='error'>".t("VIRHE: Tavoitelukuja ei voi syöttää yli 2 vuoden aikavälille")."!</font><br>";
 				die();
 			}
 		}
@@ -1549,18 +1549,18 @@
 
 		if ($rivimaara < $maxrivimaara) {
 			echo "</table>";
-			echo "<br><input type='submit' name='tallenna_budjetti' id='tallenna_budjetti' value='",t("Tallenna budjettiluvut"),"' />";
+			echo "<br><input type='submit' name='tallenna_budjetti' id='tallenna_budjetti' value='",t("Tallenna tavoiteluvut"),"' />";
 			echo "</form>";
 		}
 
-		echo "<br><br><font class='message'>".t("Budjettiluvut Excel muodossa")."</font><br>";
+		echo "<br><br><font class='message'>".t("Tavoiteluvut Excel muodossa")."</font><br>";
 
 		echo "<hr>";
 
 		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-		echo "<input type='hidden' name='kaunisnimi' value='Budjettimatriisi_$toim.xlsx'>";
+		echo "<input type='hidden' name='kaunisnimi' value='Tavoitematriisi_$toim.xlsx'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 		echo "<input type='submit' value='",t("Hae tiedosto"),"'>";
 		echo "</form>";

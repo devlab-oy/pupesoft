@@ -1202,7 +1202,8 @@ if ($tila == '') {
 				tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.hyllyvali,
 				tuote.keraysvyohyke,
 				tilausrivi.netto as netto_x,
-				tilausrivin_lisatiedot.suoratoimitettuaika
+				tilausrivin_lisatiedot.suoratoimitettuaika,
+				lasku.comments
 				FROM lasku
 				JOIN tilausrivi use index ($tilriindex) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$uusilisa}otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
 				LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -1743,7 +1744,18 @@ if ($tila == '') {
 
 		echo "<$td $class valign='top'>";
 		if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") echo "$rivirow[keikka]<br>";
-		echo "$rivirow[otunnus]</$td>";
+
+		// tooltip jos ostotilauksella on kommentti
+		if ($rivirow["comments"] != '') {
+			echo "
+			<div id='div_comment_$rivirow[rivitunnus]' class='popup' style='width: 400px;'>
+			{$rivirow["comments"]}
+			</div>
+			<a class='tooltip' id='comment_$rivirow[rivitunnus]'>$rivirow[otunnus]</a></$td>";
+		}
+		else {
+			echo "$rivirow[otunnus]</$td>";
+		}
 		echo "<$td $class valign='top' nowrap>";
 
 		// tehd‰‰n pop-up divi jos keikalla on kommentti...

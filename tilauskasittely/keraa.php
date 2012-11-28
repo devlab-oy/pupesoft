@@ -1580,7 +1580,7 @@
 											kuutiot 		= '{$kuutiot}',
 											pakkauskuvaus 	= '{$keraysera_row['pakkauskuvaus']}',
 											pakkaus 		= '{$keraysera_row['pakkaus']}',
-											rahtikirjanro 	= '{$id}',
+											rahtikirjanro 	= '{$laskurow['tunnus']}',
 											otsikkonro 		= '{$laskurow['tunnus']}',
 											tulostuspaikka 	= '{$laskurow['varasto']}',
 											toimitustapa 	= '{$laskurow['toimitustapa']}',

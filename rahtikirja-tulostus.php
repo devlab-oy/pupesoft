@@ -575,6 +575,14 @@
 				while ($pak = mysql_fetch_assoc($pakka)) {
 
 					if ($pak["kilot"] > 0 or $pak["kollit"] > 0) {
+
+						if ($yhtiorow['kerayserat'] == 'K' and $pak["kollit"] != 0) {
+							# jos kollit on 0 ja 1 välissä, pyöristetään se 1
+							if ($pak["kollit"] > 0 and $pak["kollit"] < 1) $pak["kollit"] = 1;
+							# jos kollimäärällä on jakojäännös, pyöristetään se seuraavaan kokonaislukuun
+							elseif (fmod((float) $pak["kollit"], 1) != 0) $pak["kollit"] = round($pak["kollit"]);
+						}
+
 						$kilot[]     			= $pak["kilot"];
 						$kollit[]    			= $pak["kollit"];
 						$pakkaus[]   			= $pak["pakkaus"];

@@ -552,6 +552,10 @@
 				 	$assrow["laskutus_maa"]		   = $assrow["maa"];
 				}
 
+				if($naytetaanko_tarjouksella != 'on') {
+					$toimpvm = '0000-00-00';
+				}
+
 				$query = "	UPDATE lasku
 							SET liitostunnus 	= '$assrow[tunnus]',
 							ytunnus				= '$assrow[ytunnus]',
@@ -1438,17 +1442,11 @@
 
 			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
 
-			$comments_temp = explode('<_toimaikapdf_>', $srow['comments']);
-			if(!empty($comments_temp[1])) {
-				if($comments_temp[1] == 'true') {
-					$naytetaanko_pdf_sel = "checked='CHECKED'";
-				}
-				else {
-					$naytetaanko_pdf_sel = "";
-				}
+			if(!checkdate($toimkk, $toimpp, $toimvv)) {
+				//Kyseessä on tarjouksen toimitusajan piilottamiseen pdf:ltä käytettävä toiminnallisuus toimaika = 0000-00-00 jos se on haluttu piilottaa
+				$naytetaanko_pdf_sel = "";
 			}
 			else {
-				//vakiona näytetään toimitusaika pdf:llä.
 				$naytetaanko_pdf_sel = "checked='CHECKED'";
 			}
 
@@ -2505,11 +2503,6 @@
 				echo "<option value = '$yhteysrow[nimi]' $sela>$yhteysrow[nimi]</option>";
 			}
 
-			//toimitusaikapdf osioin poisto commentseista
-			if($comments_temp = explode('<_toimaikapdf_>', $srow['comments'])) {
-				$srow['comments'] = $comments_temp[0];
-			}
-
 			echo "</select> ";
 			if (tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
 				echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tilaus','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]&tyhthenkilo=K');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
@@ -3046,12 +3039,15 @@
 			$kurssi = $apukurssi;
 		}
 
-		//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
-		if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
-			$toimpp = $kerpp;
-			$toimkk = $kerkk;
-			$toimvv = $kervv;
-			$toimvko = $keraysvko;
+		if($toim != 'TARJOUS') {
+			//Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
+			//Päivämäärävertailu (toivo5ttukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
+			if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
+				$toimpp = $kerpp;
+				$toimkk = $kerkk;
+				$toimvv = $kervv;
+				$toimvko = $keraysvko;
+			}
 		}
 
 		if (($voimaika_vv == "" or !is_numeric($voimaika_vv)) or ($voimaika_kk == "" or !is_numeric($voimaika_kk)) or ($voimaika_pp == "" or !is_numeric($voimaika_pp))) {
@@ -3064,28 +3060,9 @@
 		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
 
 		if($naytetaanko_tarjouksella != 'on') {
-			//yliajetaan vanhat valinnat
-			$comments_temp = explode('<_toimaikapdf_>', $comments);
-			if(!empty($comments_temp)) {
-				$comments = $comments_temp[0];
-			}
-			else {
-				$comments = $comments;
-			}
-
-			$comments = $comments . '<_toimaikapdf_>false<_toimaikapdf_>';
-		}
-		else {
-			//yliajetaan vanhat valinnat
-			$comments_temp = explode('<_toimaika_>', $comments);
-			if(!empty($comments_temp)) {
-				$comments = $comments_temp[0];
-			}
-			else {
-				$comments = $comments;
-			}
-			
-			$comments = $comments . '<_toimaikapdf_>true<_toimaikapdf_>';
+			$toimvv = '0000';
+			$toimkk = '00';
+			$toimpp = '00';
 		}
 
 		$query .= "	lasku SET

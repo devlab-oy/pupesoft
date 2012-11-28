@@ -178,15 +178,8 @@ if (!function_exists('alku_tarjous')) {
 				}
 			}
 
-			$naytetaanko_toimitusaika = explode('<_toimaikapdf_>' , $laskurow['comments']);
-
-			if(!empty($naytetaanko_toimitusaika[1])) {
-				if($naytetaanko_toimitusaika[1] == 'true') {
-					$naytetaanko_toimitusaika = true;
-				}
-				else {
-					$naytetaanko_toimitusaika = false;
-				}
+			if($laskurow['toimaika'] == '0000-00-00') {
+				$naytetaanko_toimitusaika = false;
 			}
 			else {
 				$naytetaanko_toimitusaika = true;
@@ -269,13 +262,6 @@ if (!function_exists('alku_tarjous')) {
 			}
 
 			if (trim($laskurow['comments']) != '') {
-				$comments_temp = explode('<_toimaikapdf_>', $laskurow['comments']);
-				if(!empty($comments_temp[1])) {
-					$comments = $comments_temp[0];
-				}
-				else {
-					$comments = $laskurow['comments'];
-				}
 				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $comments), 90, "\n###");
 			}
 
@@ -301,13 +287,6 @@ if (!function_exists('alku_tarjous')) {
 			}
 
 			if (trim($laskurow['comments']) != '') {
-				$comments_temp = explode('<_toimaikapdf_>', $laskurow['comments']);
-				if(!empty($comments_temp[1])) {
-					$comments = $comments_temp[0];
-				}
-				else {
-					$comments = $laskurow['comments'];
-				}
 				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $comments), 90, "\n###");
 			}
 		}
@@ -979,15 +958,8 @@ if (!function_exists('tarjous_rivi_custom')) {
 	function tarjous_rivi_custom($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous, $sarjanutunnus, $row, $hinnat, $asiakasrow, $verolliset_verottomat_hinnat = "", $naytetaanko_rivihinta = '', $sivu = 1) {
 		global $yhtiorow, $kukarow, $norm, $pieni, $boldi;
 
-		$naytetaanko_toimitusaika = explode('<_toimaikapdf_>' , $laskurow['comments']);
-
-		if(!empty($naytetaanko_toimitusaika[1])) {
-			if($naytetaanko_toimitusaika[1] == 'true') {
-				$naytetaanko_toimitusaika = true;
-			}
-			else {
-				$naytetaanko_toimitusaika = false;
-			}
+		if($laskurow['toimaika'] == '0000-00-00') {
+			$naytetaanko_toimitusaika = false;
 		}
 		else {
 			$naytetaanko_toimitusaika = true;

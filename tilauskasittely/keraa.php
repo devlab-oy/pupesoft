@@ -1792,7 +1792,7 @@
 							)
 						) {
 
-							$komento = koontilahete_check($laskurow, $komento);
+							list($komento, $koontilahete_arr, $koontilahete_tilausrivit_arr) = koontilahete_check($laskurow, $komento);
 
 							if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {
 
@@ -1817,20 +1817,37 @@
 								$sellahetetyyppi = (!isset($sellahetetyyppi)) ? "" : $sellahetetyyppi;
 								$kieli = (!isset($kieli)) ? "" : $kieli;
 
-								$params = array(
-									'laskurow'					=> $laskurow,
-									'sellahetetyyppi' 			=> $sellahetetyyppi,
-									'extranet_tilausvahvistus' 	=> "",
-									'naytetaanko_rivihinta'		=> "",
-									'tee'						=> $tee,
-									'toim'						=> $toim,
-									'komento' 					=> $komento,
-									'lahetekpl'					=> $lahetekpl,
-									'kieli' 					=> $kieli,
-									'koontilahete'				=> $koontilahete,
+								if (count($koontilahete_arr) == 0) $koontilahete_arr[$laskurow['tunnus']] = 0;
+
+								foreach ($koontilahete_arr as $alk_til => $koontilahete) {
+
+									$query = "	SELECT lasku.*, if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) email, asiakas.keraysvahvistus_lahetys
+												FROM lasku
+												LEFT JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
+												WHERE lasku.tunnus in ({$alk_til})
+												and lasku.yhtio = '{$kukarow['yhtio']}'
+												and lasku.alatila in ('C','D')";
+									$alk_til_res = pupe_query($query);
+									$laskurow = mysql_fetch_assoc($alk_til_res);
+
+									$koontilahete_tilausrivit = isset($koontilahete_tilausrivit_arr[$alk_til]) ? $koontilahete_tilausrivit_arr[$alk_til] : '';
+
+									$params = array(
+										'laskurow'					=> $laskurow,
+										'sellahetetyyppi' 			=> $sellahetetyyppi,
+										'extranet_tilausvahvistus' 	=> "",
+										'naytetaanko_rivihinta'		=> "",
+										'tee'						=> $tee,
+										'toim'						=> $toim,
+										'komento' 					=> $komento,
+										'lahetekpl'					=> $lahetekpl,
+										'kieli' 					=> $kieli,
+										'koontilahete'				=> $koontilahete,
+										'koontilahete_tilausrivit'	=> $koontilahete_tilausrivit,
 									);
 
-								pupesoft_tulosta_lahete($params);
+									pupesoft_tulosta_lahete($params);
+								}
 
 								if ($lahete_tulostus_paperille > 0) echo "<br>".t("Tulostettiin %s paperilähetettä", "", $lahete_tulostus_paperille).".";
 								if ($lahete_tulostus_emailiin > 0) echo "<br>".t("Lähetettiin %s sähköistä lähetettä", "", $lahete_tulostus_emailiin).".";

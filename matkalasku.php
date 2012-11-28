@@ -19,12 +19,12 @@ if ($tee == "VALMIS") {
 	}
 	else {
 		$query = "	UPDATE lasku SET
-				alatila = ''
-				WHERE yhtio 	 = '$kukarow[yhtio]'
-				and tunnus 		 = '$tilausnumero'
-				and tila		 = 'H'
-				and tilaustyyppi = 'M'
-				and alatila 	 = 'M'";
+					alatila = ''
+					WHERE yhtio 	 = '$kukarow[yhtio]'
+					and tunnus 		 = '$tilausnumero'
+					and tila		 = 'H'
+					and tilaustyyppi = 'M'
+					and alatila 	 = 'M'";
 		$updres = pupe_query($query);
 
 		$tee = "";
@@ -180,7 +180,7 @@ if ($tee == "UUSI") {
 	}
 	else {
 		echo "<font class='error'>".t("VIRHE: Anna asiakkaan nimi")."</font><br>";
-		$tee="";
+		$tee = "";
 	}
 }
 
@@ -522,6 +522,7 @@ if ($tee != "") {
 					ksort($tuoteno_array);
 
 					$summa = 0;
+					
 					foreach ($tuoteno_array as $indeksi => $lisaa_tuoteno) {
 
 						//	Haetaan tuotteen tiedot
@@ -587,40 +588,39 @@ if ($tee != "") {
 									}
 
 									$ilmaiset_lounaat = tarkista_loytyyko_paivalle_matkalasku($_alkuaika, $tilausnumero);
-									
-									$query = "	INSERT into tilausrivi set
-										hyllyalue   = '0',
-										hyllynro    = '0',
-										hyllytaso   = '0',
-										hyllyvali   = '0',
-										laatija 	= '$kukarow[kuka]',
-										laadittu 	= now(),
-										yhtio 		= '$kukarow[yhtio]',
-										tuoteno 	= '$lisaa_tuoteno',
-										varattu 	= '0',
-										yksikko 	= '$trow[yksikko]',
-										kpl 		= '1',
-										tilkpl 		= '1',
-										ale1 		= '0',
-										erikoisale	= '{$ilmaiset_lounaat}',
-										alv 		= '$vero',
-										netto		= 'N',
-										hinta 		= '$hinta',
-										rivihinta 	= '$hinta',
-										otunnus 	= '$tilausnumero',
-										tyyppi 		= 'M',
-										toimaika 	= '',
-										kommentti 	= '" . mysql_real_escape_string($kommentti) . "',
-										var 		= '$var',
-										try			= '$trow[try]',
-										osasto		= '$trow[osasto]',
-										perheid		= '$perheid',
-										perheid2	= '$perheid2',
-										tunnus 		= '$rivitunnus',
-										nimitys 	= '$nimitys',
-										kerattyaika = '$_alkuaika',
-										toimitettuaika = '$_loppuaika'";
 
+									$query = "	INSERT into tilausrivi set
+												hyllyalue   = '0',
+												hyllynro    = '0',
+												hyllytaso   = '0',
+												hyllyvali   = '0',
+												laatija 	= '$kukarow[kuka]',
+												laadittu 	= now(),
+												yhtio 		= '$kukarow[yhtio]',
+												tuoteno 	= '$lisaa_tuoteno',
+												varattu 	= '0',
+												yksikko 	= '$trow[yksikko]',
+												kpl 		= '1',
+												tilkpl 		= '1',
+												ale1 		= '0',
+												erikoisale	= '{$ilmaiset_lounaat}',
+												alv 		= '$vero',
+												netto		= 'N',
+												hinta 		= '$hinta',
+												rivihinta 	= '$hinta',
+												otunnus 	= '$tilausnumero',
+												tyyppi 		= 'M',
+												toimaika 	= '',
+												kommentti 	= '" . mysql_real_escape_string($kommentti) . "',
+												var 		= '$var',
+												try			= '$trow[try]',
+												osasto		= '$trow[osasto]',
+												perheid		= '$perheid',
+												perheid2	= '$perheid2',
+												tunnus 		= '$rivitunnus',
+												nimitys 	= '$nimitys',
+												kerattyaika = '$_alkuaika',
+												toimitettuaika = '$_loppuaika'";
 									$insres = pupe_query($query);
 
 									$perhe_id = ($perhe_id == null) ? mysql_insert_id() : $perhe_id;
@@ -628,17 +628,19 @@ if ($tee != "") {
 
 									//	Jos meillä on splitattu rivi niin pidetään nippu kasassa
 									if (count($tuoteno_array) > 1) {
-										$query = " 	UPDATE tilausrivi SET perheid = '$perhe_id'
-											WHERE yhtio = '$kukarow[yhtio]'
-											and tunnus = '$lisatty_tun'";
+										$query = " 	UPDATE tilausrivi 
+													SET perheid = '$perhe_id'
+													WHERE yhtio = '$kukarow[yhtio]'
+													and tunnus = '$lisatty_tun'";
 										$updres = pupe_query($query);
 									}
 
 									if ((int) $perheid2 == 0) {
 										$perheid2 = $lisatty_tun;
-										$query = " 	UPDATE tilausrivi SET perheid2 = '$lisatty_tun'
-											WHERE yhtio = '$kukarow[yhtio]'
-											and tunnus = '$lisatty_tun'";
+										$query = " 	UPDATE tilausrivi 
+													SET perheid2 = '$lisatty_tun'
+													WHERE yhtio = '$kukarow[yhtio]'
+													and tunnus = '$lisatty_tun'";
 										$updres = pupe_query($query);
 									}
 
@@ -662,38 +664,37 @@ if ($tee != "") {
 								$ilmaiset_lounaat = tarkista_loytyyko_paivalle_matkalasku($_alkuaika, $tilausnumero);
 
 								$query = "	INSERT into tilausrivi set
-										hyllyalue   = '0',
-										hyllynro    = '0',
-										hyllytaso   = '0',
-										hyllyvali   = '0',
-										laatija 	= '$kukarow[kuka]',
-										laadittu 	= now(),
-										yhtio 		= '$kukarow[yhtio]',
-										tuoteno 	= '{$trow['tuoteno']}',
-										varattu 	= '0',
-										yksikko 	= '$trow[yksikko]',
-										kpl 		= '1',
-										tilkpl 		= '1',
-										ale1 		= '0',
-										erikoisale	= '{$ilmaiset_lounaat}',
-										alv 		= '$vero',
-										netto		= 'N',
-										hinta 		= '$hinta',
-										rivihinta 	= '$hinta',
-										otunnus 	= '$tilausnumero',
-										tyyppi 		= 'M',
-										toimaika 	= '',
-										kommentti 	= '" . mysql_real_escape_string($kommentti) . "',
-										var 		= '$var',
-										try			= '$trow[try]',
-										osasto		= '$trow[osasto]',
-										perheid		= '$perheid',
-										perheid2	= '$perheid2',
-										tunnus 		= '$rivitunnus',
-										nimitys 	= '$nimitys',
-										kerattyaika = '$_alkuaika',
-										toimitettuaika = '$_loppuaika'";
-
+											hyllyalue   = '0',
+											hyllynro    = '0',
+											hyllytaso   = '0',
+											hyllyvali   = '0',
+											laatija 	= '$kukarow[kuka]',
+											laadittu 	= now(),
+											yhtio 		= '$kukarow[yhtio]',
+											tuoteno 	= '{$trow['tuoteno']}',
+											varattu 	= '0',
+											yksikko 	= '$trow[yksikko]',
+											kpl 		= '1',
+											tilkpl 		= '1',
+											ale1 		= '0',
+											erikoisale	= '{$ilmaiset_lounaat}',
+											alv 		= '$vero',
+											netto		= 'N',
+											hinta 		= '$hinta',
+											rivihinta 	= '$hinta',
+											otunnus 	= '$tilausnumero',
+											tyyppi 		= 'M',
+											toimaika 	= '',
+											kommentti 	= '" . mysql_real_escape_string($kommentti) . "',
+											var 		= '$var',
+											try			= '$trow[try]',
+											osasto		= '$trow[osasto]',
+											perheid		= '$perheid',
+											perheid2	= '$perheid2',
+											tunnus 		= '$rivitunnus',
+											nimitys 	= '$nimitys',
+											kerattyaika = '$_alkuaika',
+											toimitettuaika = '$_loppuaika'";
 									$insres = pupe_query($query);
 
 									$rivitunnus = 0;
@@ -1125,8 +1126,7 @@ if ($tee == "UUDELLEENKASITTELE" and $toim == "SUPER") {
 
 	echo "<font class='message'>".t("Poistetaan vanhat tiliöinnit ja laskut").".</font><br><br>";
 
-	$query = "	DELETE
-				FROM tilausrivi
+	$query = "	DELETE FROM tilausrivi
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND otunnus = '$tilausnumero'
 				AND tyyppi = 'M'";
@@ -1223,8 +1223,7 @@ if ($tee == "POIMI_KALENTERISTA") {
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 
-		$query = " 	DELETE
-					FROM tiliointi
+		$query = " 	DELETE FROM tiliointi
 					WHERE yhtio='$kukarow[yhtio]' and ltunnus = '$tilausnumero'";
 		$result = pupe_query($query);
 
@@ -1337,16 +1336,16 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 	$query_ale_lisa = generoi_alekentta('M');
 	$ilmaiset_lounaat = (int) trim($ilmaiset_lounaat);
 
-	if($row['vienti'] == 'FI') {
-		if($ilmaiset_lounaat >= 1) {
-			if($row['var'] == 1) {
+	if ($row['vienti'] == 'FI') {
+		if ($ilmaiset_lounaat >= 1) {
+			if ($row['var'] == 1) {
 				//kotimaan kokopäiväraha ----> kotimaan puolitettu kokopäiväraha
 				$rivihinta = $row['kpl'] * ($row['myyntihinta'] / 2);
 				$tilausrivi_uusi_hinta = ($row['myyntihinta'] / 2);
 				$tilausrivi_uusi_nimitys = $row['tilausrivi_nimitys'] . ' ' . t("Puolitettu korvaus");
 				$tilausrivi_uusi_var = 3;
 			}
-			else if($row['var'] == 2) {
+			elseif ($row['var'] == 2) {
 				//kotimaan osapäiväraha ----> kotimaan puolitettu osapäiväraha
 				$rivihinta = $row['kpl'] * ($row['myymalahinta'] / 2);
 				$tilausrivi_uusi_hinta = ($row['myymalahinta'] / 2);
@@ -1362,14 +1361,14 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 			}
 		}
 		else {
-			if($row['var'] == 3) {
+			if ($row['var'] == 3) {
 				//kotimaan puolitettu kokopäiväraha ----> kotimaan kokopäiväraha
 				$rivihinta = $row['kpl'] * ($row['myyntihinta']);
 				$tilausrivi_uusi_hinta = ($row['myyntihinta']);
 				$tilausrivi_uusi_nimitys = $row['nimitys'];
 				$tilausrivi_uusi_var = 1;
 			}
-			else if($row['var'] == 4) {
+			elseif ($row['var'] == 4) {
 				//kotimaan puolitettu osapäiväraha ----> kotimaan puolitettu osapäiväraha
 				$rivihinta = $row['kpl'] * ($row['myymalahinta']);
 				$tilausrivi_uusi_hinta = ($row['myymalahinta']);
@@ -1386,15 +1385,15 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 		}
 	}
 	else {
-		if($ilmaiset_lounaat >= 2) {
-			if($row['var'] == 5) {
+		if ($ilmaiset_lounaat >= 2) {
+			if ($row['var'] == 5) {
 				//ulkomaan kokopäiväraha ----> ulkomaan puolitettu kokopäiväraha
 				$rivihinta = $row['kpl'] * ($row['myyntihinta'] / 2);
 				$tilausrivi_uusi_hinta = ($row['myyntihinta'] / 2);
 				$tilausrivi_uusi_nimitys = $row['tilausrivi_nimitys'] . ' ' . t("Puolitettu korvaus");
 				$tilausrivi_uusi_var = 6;
 			}
-			else if($row['var'] == 6) {
+			elseif ($row['var'] == 6) {
 				//ulkomaan puolitettu päiväraha ----> ulkomaan kahteen kertaan puolitettu päiväraha
 				$rivihinta = $row['kpl'] * ($row['hinta'] / 2);
 				$tilausrivi_uusi_hinta = ($row['hinta'] / 2);
@@ -1410,14 +1409,14 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 			}
 		}
 		else {
-			if($row['var'] == 6) {
+			if ($row['var'] == 6) {
 				//ulkomaan puolitettu kokopäiväraha ----> ulkomaan kokopäiväraha
 				$rivihinta = $row['kpl'] * ($row['myyntihinta']);
 				$tilausrivi_uusi_hinta = ($row['myyntihinta']);
 				$tilausrivi_uusi_nimitys = $row['nimitys'];
 				$tilausrivi_uusi_var = 5;
 			}
-			else if($row['var'] == 7) {
+			elseif ($row['var'] == 7) {
 				//ulkomaan kahteen kertaan puolitettu päiväraha ----> ulkomaan puolitettu päiväraha
 				$rivihinta = $row['kpl'] * ($row['myyntihinta'] / 2);
 				$tilausrivi_uusi_hinta = ($row['myyntihinta'] / 2);
@@ -1454,7 +1453,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 	$result = pupe_query($query);
 
 	$summa = 0;
-	while($row = mysql_fetch_assoc($result)) {
+	while ($row = mysql_fetch_assoc($result)) {
 		$summa += (float) $row['rivihinta'];
 	}
 
@@ -1467,8 +1466,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 
 	//koska poista edelliset matkalasku rivit update tyyppi D
 	//siivotaan deleted tilausrivit pois
-	$query = "	DELETE
-				FROM tilausrivi
+	$query = "	DELETE FROM tilausrivi
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND otunnus = '{$tilausnumero}'
 				AND tyyppi = 'D'";
@@ -1497,7 +1495,7 @@ if ($tee == "MUOKKAA") {
 	}
 
 	if ($poistakuva > 0) {
-		$query = "	DELETE from liitetiedostot
+		$query = "	DELETE FROM liitetiedostot
 					WHERE yhtio 		= '$kukarow[yhtio]'
 					and liitos			= 'lasku'
 					and liitostunnus	= '$tilausnumero'
@@ -2157,9 +2155,9 @@ if ($tee == "MUOKKAA") {
 				$tilausrivien_lkm = (int) $tilausrivien_lkm1[0];
 			}
 
-			$rowTemp = $row;//tämä sen takia, että viimenen rivi on tallessa myöhempää käyttöä varten
+			$rowTemp = $row; //tämä sen takia, että viimenen rivi on tallessa myöhempää käyttöä varten
 
-			if(!isset($aikajana['ensimmainen_aika']))  {
+			if (!isset($aikajana['ensimmainen_aika']))  {
 				$aikaTemp = new Datetime($row['kerattyaika']);
 				$aikajana['ensimmainen_aika'] = $aikaTemp->format('d-m-Y H:i');
 			}
@@ -2834,7 +2832,7 @@ function tarkista_loytyyko_paivalle_matkalasku($alkuaika, $tilausnumero) {
 	global $kukarow;
 
 	$alkuaika_date = date('Y-m-d', strtotime($alkuaika));
-	
+
 	$query = "	SELECT *
 				FROM tilausrivi
 				WHERE yhtio = '{$kukarow['yhtio']}'

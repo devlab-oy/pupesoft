@@ -432,7 +432,7 @@
 		// jos ollaan muokkaamassa rivejä poistetaan eka vanhat rahtikirjatiedot..
 		if ($tutkimus > 0) {
 
-			if (strpos($tunnukset, ',') !== FALSE) {
+			if ($yhtiorow['kerayserat'] == 'K' and strpos($tunnukset, ',') !== FALSE) {
 				$tunnuslisa = $tunnukset;
 				$rakirnolisa = $tunnukset;
 			}
@@ -2726,6 +2726,13 @@
 				if ($roror['kuutiot']  > 0)				$kuutiot[$i]			= $roror['kuutiot'];
 				if ($roror['lavametri'] > 0)			$lavametri[$i]			= $roror['lavametri'];
 				if ($roror['pakkauskuvaustark'] != '')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
+
+				if ($yhtiorow['kerayserat'] == 'K' and $kollit[$i] != '' and $kollit[$i] != 0) {
+					# jos kollit on 0 ja 1 v‰liss‰, pyˆristet‰‰n se 1
+					if ($kollit[$i] > 0 and $kollit[$i] < 1) $kollit[$i] = 1;
+					# jos kollim‰‰r‰ll‰ on jakoj‰‰nnˆs, pyˆristet‰‰n se seuraavaan kokonaislukuun
+					elseif (fmod((float) $kollit[$i], 1) != 0) $kollit[$i] = round($kollit[$i]);
+				}
 			}
 
 			echo "<tr>";

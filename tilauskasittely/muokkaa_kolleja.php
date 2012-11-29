@@ -51,6 +51,26 @@
 
 	if ($tee == 'paivita') {
 
+		$muutetaan_pakkausta = $siirretaan_pakkausta = false;
+
+		foreach ($uusi_pakkaus as $sscc => $pak) {
+			if ($pak != "") {
+				if (strpos($pak, '####') !== FALSE) $siirretaan_pakkausta = true;
+				else $muutetaan_pakkausta = true;
+			}
+		}
+
+		if ($muutetaan_pakkausta and $siirretaan_pakkausta) {
+			echo "<font class='error'>",t("Et voi muuttaa pakkauksia ja siirt‰‰ pakkauksia samaan aikaan"),".</font><br /><br />";
+			$tee = 'muuta';
+
+			reset($uusi_pakkaus);
+			unset($sscc, $pak);
+		}
+	}
+
+	if ($tee == 'paivita') {
+
 		foreach ($uusi_pakkaus as $sscc => $pak) {
 
 			if ($pak != "") {
@@ -242,7 +262,7 @@
 
 		$lopetus = "{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=";
 
-		echo "<form method='post' action='?tee=paivita&select_varasto={$select_varasto}&checkbox_parent[]={$checkbox_parent[0]}&lopetus={$lopetus}'>";
+		echo "<form method='post' action='?tee=paivita&select_varasto={$select_varasto}&checkbox_parent[]={$checkbox_parent[0]}&otunnukset={$otunnukset}&lopetus={$lopetus}'>";
 
 		echo "<table>";
 		echo "<tr>";

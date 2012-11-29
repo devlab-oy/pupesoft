@@ -2728,10 +2728,10 @@
 				if ($roror['pakkauskuvaustark'] != '')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
 
 				if ($yhtiorow['kerayserat'] == 'K' and $kollit[$i] != '' and $kollit[$i] != 0) {
-					# jos kollit on 0 ja 1 vÃ¤lissÃ¤, pyÃ¶ristetÃ¤Ã¤n se 1
+					# jos kollit on 0 ja 1 välissä, pyöristetään se 1
 					if ($kollit[$i] > 0 and $kollit[$i] < 1) $kollit[$i] = 1;
 
-					# pyÃ¶ristetÃ¤Ã¤n seuraavaan kokonaislukuun
+					# pyöristetään seuraavaan kokonaislukuun
 					$kollit[$i] = round($kollit[$i]);
 				}
 			}

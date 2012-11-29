@@ -1397,6 +1397,28 @@
 		if ($tee == 'P' and $real_submit == 'yes') {
 			if ($keraamaton > 0) {
 
+				$chk_pakkaukset = array();
+
+				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+
+					$query = "	SELECT kerayserat.pakkaus,
+								kerayserat.pakkausnro,
+								group_concat(distinct kerayserat.otunnus) otunnukset
+								FROM kerayserat
+								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+								AND kerayserat.nro = '{$id}'
+								AND kerayserat.otunnus IN ({$tilausnumeroita})
+								AND kerayserat.tila = 'K'
+								GROUP BY 1,2
+								ORDER BY kerayserat.pakkausnro";
+					$chk_pak_res = pupe_query($query);
+
+					while ($chk_pak_row = mysql_fetch_assoc($chk_pak_res)) {
+						$chk_pakkaukset[$chk_pak_row['pakkaus']][$chk_pak_row['pakkausnro']] = explode(",", $chk_pak_row['otunnukset']);
+					}
+				}
+
 				if ($toim == "VASTAANOTA_REKLAMAATIO") {
 					$hakualatila = 'C';
 				}
@@ -1541,7 +1563,7 @@
 					}
 
 					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
-						$query = "	SELECT
+						$query = "	SELECT kerayserat.pakkaus as kerayseran_pakkaus,
 									IFNULL(pakkaus.pakkaus, 'MUU KOLLI') pakkaus,
 									IFNULL(pakkaus.pakkauskuvaus, 'MUU KOLLI') pakkauskuvaus,
 									IFNULL(pakkaus.oma_paino, 0) oma_paino,
@@ -1554,10 +1576,10 @@
 									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 									WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
-									AND kerayserat.nro 		= '$id'
+									AND kerayserat.nro 		= '{$id}'
 									AND kerayserat.otunnus 	= '{$laskurow['tunnus']}'
 									AND kerayserat.tila 	= 'K'
-									GROUP BY 1,2,3
+									GROUP BY 1,2,3,4,5
 									ORDER BY kerayserat.pakkausnro";
 						$keraysera_res = pupe_query($query);
 
@@ -1573,6 +1595,21 @@
 								$tulostettulisa = " , tulostettu = now() ";
 							}
 
+							if (count($chk_pakkaukset) > 0) {
+								$counter = 0;
+
+								foreach ($chk_pakkaukset[$keraysera_row['kerayseran_pakkaus']] as $_pak_arr) {
+
+									foreach ($_pak_arr as $_pak_nro => $_tunn) {
+										if ($laskurow['tunnus'] == $_tunn) $counter += (1 / count($_pak_arr));
+									}
+								}
+
+								if ($counter != 0) {
+									$keraysera_row['kollit'] = $counter;
+								}
+							}
+
 							// Insertöidään aina rahtikirjan tiedot per tilaus
 							$query_ker  = "	INSERT INTO rahtikirjat SET
 											kollit 			= '{$keraysera_row['kollit']}',
@@ -1580,7 +1617,7 @@
 											kuutiot 		= '{$kuutiot}',
 											pakkauskuvaus 	= '{$keraysera_row['pakkauskuvaus']}',
 											pakkaus 		= '{$keraysera_row['pakkaus']}',
-											rahtikirjanro 	= '{$id}',
+											rahtikirjanro 	= '{$laskurow['tunnus']}',
 											otsikkonro 		= '{$laskurow['tunnus']}',
 											tulostuspaikka 	= '{$laskurow['varasto']}',
 											toimitustapa 	= '{$laskurow['toimitustapa']}',

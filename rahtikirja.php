@@ -432,16 +432,18 @@
 		// jos ollaan muokkaamassa rivejä poistetaan eka vanhat rahtikirjatiedot..
 		if ($tutkimus > 0) {
 
-			if (strpos($tunnukset, ',') !== FALSE) {
+			if ($yhtiorow['kerayserat'] == 'K' and strpos($tunnukset, ',') !== FALSE) {
 				$tunnuslisa = $tunnukset;
+				$rakirnolisa = $tunnukset;
 			}
 			else {
 				$tunnuslisa = $otsikkonro;
+				$rakirnolisa = $rakirno;
 			}
 
 			if (isset($muutos) and $muutos == 'yes') {
 
-				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro IN ({$tunnuslisa}) and rahtikirjanro='$rakirno'";
+				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro IN ({$tunnuslisa}) and rahtikirjanro IN ({$rakirnolisa})";
 				$result = pupe_query($query);
 
 				// merkataan tilaus takaisin kerätyksi, paitsi jos se on vientitilaus jolle vientitiedot on syötetty
@@ -952,6 +954,39 @@
 					if ($toimitustaparow['osoitelappu'] == 'intrade') {
 						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 					}
+					elseif ($toimitustaparow['osoitelappu'] == 'oslap_lamposiirto' and $yhtiorow['kerayserat'] == 'K') {
+
+						$query = "	SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
+									FROM kerayserat
+									LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+									AND kerayserat.otunnus IN (".implode(",", $osoitelaput).")
+									GROUP BY 1,2,3
+									ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
+						$pak_chk_res = pupe_query($query);
+
+						$pak_num = mysql_num_rows($pak_chk_res);
+
+						while ($pak_chk_row = mysql_fetch_assoc($pak_chk_res)) {
+
+							for ($i = 1; $i <= $oslappkpl; $i++) {
+
+								$params = array(
+						 			'tilriv' => $pak_chk_row['otunnus'],
+						 			'komento' => $oslapp,
+						 			'pakkauskoodi' => $pak_chk_row['pakkaus'],
+						 			'montako_laatikkoa_yht' => $pak_num,
+						 			'toim_nimi' => $laskurow['toim_nimi'],
+						 			'toim_nimitark' => $laskurow['toim_nimitark'],
+						 			'toim_osoite' => $laskurow['toim_osoite'],
+						 			'toim_postino' => $laskurow['toim_postino'],
+						 			'toim_postitp' => $laskurow['toim_postitp'],
+						 		);
+
+								tulosta_oslap_lamposiirto($params);
+							}
+						}
+					}
 					else {
 						require ("tilauskasittely/osoitelappu_pdf.inc");
 					}
@@ -961,7 +996,7 @@
 			}
 
 			// Tulostetaan terminaaliosoitelappu
-			if ($rakirsyotto_termoslapp_tulostin != "" and $termoslapp != '' and $termoslappkpl > 0) {
+			if ($rakirsyotto_termoslapp_tulostin != "" and $termoslapp != '' and $termoslappkpl > 0 and $toimitustaparow['osoitelappu'] != 'oslap_lamposiirto') {
 
 				if (isset($dgdlle_tunnukset) and $dgdlle_tunnukset != "") {
 					$terminaaliosoitelaput = explode(",", $dgdlle_tunnukset);
@@ -2691,6 +2726,14 @@
 				if ($roror['kuutiot']  > 0)				$kuutiot[$i]			= $roror['kuutiot'];
 				if ($roror['lavametri'] > 0)			$lavametri[$i]			= $roror['lavametri'];
 				if ($roror['pakkauskuvaustark'] != '')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
+
+				if ($yhtiorow['kerayserat'] == 'K' and $kollit[$i] != '' and $kollit[$i] != 0) {
+					# jos kollit on 0 ja 1 välissä, pyöristetään se 1
+					if ($kollit[$i] > 0 and $kollit[$i] < 1) $kollit[$i] = 1;
+
+					# pyöristetään seuraavaan kokonaislukuun
+					$kollit[$i] = round($kollit[$i]);
+				}
 			}
 
 			echo "<tr>";

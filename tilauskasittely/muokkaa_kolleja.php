@@ -61,7 +61,7 @@
 		}
 
 		if ($muutetaan_pakkausta and $siirretaan_pakkausta) {
-			echo "<font class='error'>",t("Et voi muuttaa pakkauksia ja siirtää pakkauksia samaan aikaan"),".</font><br /><br />";
+			echo "<font class='error'>",t("Et voi muuttaa ja siirtää pakkauksia samaan aikaan"),".</font><br /><br />";
 			$tee = 'muuta';
 
 			reset($uusi_pakkaus);

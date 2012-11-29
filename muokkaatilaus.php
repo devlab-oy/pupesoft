@@ -20,17 +20,21 @@
 		unset($tee);
 	}
 
-	if($toim == 'TARJOUS' and $tee == 'MITATOI_TARJOUS_KAIKKI') {
+	if ($toim == 'TARJOUS' and $tee == 'MITATOI_TARJOUS_KAIKKI' and $tunnukset != "") {
 
 		$query = "	UPDATE lasku
-					SET tila = 'D'
+					SET tila = 'D',
+					alatila  = 'T',
+					comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) mitätöi tilauksen ohjelmassa muokkaatilaus.php 1')
 					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tila    = 'T'
 					AND tunnus IN {$tunnukset}";
 		pupe_query($query);
 
 		$query = "	UPDATE tilausrivi
 					SET tyyppi = 'D'
 					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tyyppi  = 'T'
 					AND otunnus IN {$tunnukset}";
 		pupe_query($query);
 	}
@@ -266,11 +270,11 @@
 		}
 
 		if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $kukarow["kesken"] != 0 and $tilausnumero != "") {
-			$query_tarjous = "	UPDATE 	lasku
-								SET		alatila = tila,
-								 		tila = 'D',
-										muutospvm = now(),
-										comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ohjelmassa muokkaatilaus.php now()')
+			$query_tarjous = "	UPDATE lasku
+								SET alatila = tila,
+								tila = 'D',
+								muutospvm = now(),
+								comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) mitätöi tilauksen ohjelmassa muokkaatilaus.php 2')
 								WHERE	yhtio = '$kukarow[yhtio]'
 								AND		tunnus = $tilausnumero";
 			$result_tarjous = pupe_query($query_tarjous);
@@ -2011,19 +2015,6 @@
 
 			echo "</table>";
 
-			if($toim == 'TARJOUS') {
-				//tämä formi laitetaan javascriptillä ylempänä kohdilleen
-				$tunnukset = implode(',', $nakyman_tunnukset);
-				echo "<div id='mitatoi_kaikki' style='display:none'>";
-				echo "<form method='POST' name='mitatoi_kaikki_formi' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(".count($nakyman_tunnukset).");'>";
-				echo "<input type='hidden' name='toim' value='$toim' />";
-				echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS_KAIKKI' />";
-				echo "<input type='hidden' name='tunnukset' value='($tunnukset)' />";
-				echo "<input type='submit' value='".t("Mitätöi kaikki näkymän tarjoukset")."'/>";
-				echo "</form>";
-				echo "</div>";
-			}
-
 			if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 				if (is_array($sumrow)) {
 					echo "<br><table>";
@@ -2077,6 +2068,18 @@
 					echo "<tr><th>".t("Tallenna lista").":</th>";
 					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
 					echo "</table></form><br>";
+				}
+
+				if ($toim == 'TARJOUS') {
+					//tämä formi laitetaan javascriptillä ylempänä kohdilleen
+					$tunnukset = implode(',', $nakyman_tunnukset);
+
+					echo "<form method='POST' name='mitatoi_kaikki_formi' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(".count($nakyman_tunnukset).");'>";
+					echo "<input type='hidden' name='toim' value='$toim' />";
+					echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS_KAIKKI' />";
+					echo "<input type='hidden' name='tunnukset' value='($tunnukset)' />";
+					echo "<input type='submit' value='".t("Mitätöi kaikki näkymän tarjoukset")."'/>";
+					echo "</form>";
 				}
 
 				if ($whiletoim == "ENNAKKO" and $yhtiorow["ennakkotilausten_toimitus"] == "M" and count($toimitettavat_ennakot) > 0) {

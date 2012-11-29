@@ -2724,13 +2724,6 @@
 				if ($roror['kuutiot']  > 0)				$kuutiot[$i]			= $roror['kuutiot'];
 				if ($roror['lavametri'] > 0)			$lavametri[$i]			= $roror['lavametri'];
 				if ($roror['pakkauskuvaustark'] != '')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
-
-				if ($yhtiorow['kerayserat'] == 'K' and $kollit[$i] != '' and $kollit[$i] != 0) {
-					# jos kollit on 0 ja 1 välissä, pyöristetään se 1
-					if ($kollit[$i] > 0 and $kollit[$i] < 1) $kollit[$i] = 1;
-					# jos kollimäärällä on jakojäännös, pyöristetään se seuraavaan kokonaislukuun
-					elseif (fmod((float) $kollit[$i], 1) != 0) $kollit[$i] = round($kollit[$i]);
-				}
 			}
 
 			echo "<tr>";

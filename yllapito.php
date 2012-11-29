@@ -1311,6 +1311,12 @@
 
 			for ($i=1; $i < mysql_num_fields($result); $i++) {
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
+
+					// Ei näytetä henkilötunnuksen loppuosaa selausnäkymässä
+					if (stripos(mysql_field_name($result, $i), "ytunnus") !== FALSE) {
+						$trow[$i] = tarkistahetu($trow[$i]);
+					}
+
 					if ($i == 1) {
 						if (trim($trow[1]) == '' or (is_numeric($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhjä*");
 

@@ -280,9 +280,9 @@
 			echo "<td>$keraysera_row[ohjausmerkki]</td>";
 
 			echo "<td><select name='uusi_pakkaus[{$keraysera_row['sscc']}]'>";
-			echo "<option value=''>Valitse</option>";
+			echo "<option value=''>",t("Valitse"),"</option>";
 
-			echo "<optgroup label='Keräyserässä'>";
+			echo "<optgroup label='",t("Keräyserässä"),"'>";
 
 			$query = "	SELECT CONCAT(IFNULL(pakkaus.pakkaus, 'Yksin keräilyalustalle'), ' ', IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc)) pak,
 						IFNULL(kerayserat.pakkaus, 'muu_kolli') pakkaus,

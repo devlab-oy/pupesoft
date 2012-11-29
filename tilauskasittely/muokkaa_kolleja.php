@@ -232,19 +232,12 @@
 
 	if ($tee == 'muuta') {
 
-		$query = "	SELECT kerayserat.nro,
-					kerayserat.pakkausnro,
-					IFNULL(pakkaus.pakkaus, 'MUU KOLLI') pakkaus,
-					IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) sscc,
-					lasku.ohjausmerkki,
-					GROUP_CONCAT(DISTINCT kerayserat.otunnus) otunnus
+		$query = "	SELECT DISTINCT IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) sscc
 					FROM kerayserat
-					JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
-					LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 					WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 					AND kerayserat.otunnus IN ({$otunnukset})
-					GROUP BY 1,2,3,4,5
-					ORDER BY sscc";
+					GROUP BY 1
+					ORDER BY 1";
 		$keraysera_res = pupe_query($query);
 
 		$lopetus = "{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=";
@@ -255,16 +248,25 @@
 		echo "<tr>";
 		echo "<th>",t("Kolli"),"</th>";
 		echo "<th>",t("SSCC"),"</th>";
-		echo "<th>",t("Ohjausmerkki"),"</th>";
 		echo "<th>",t("Uusi pakkaus"),"</th>";
 		echo "</tr>";
 
 		while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
 
+			$query = "	SELECT IFNULL(pakkaus.pakkaus, 'MUU KOLLI') pakkaus,
+						GROUP_CONCAT(DISTINCT kerayserat.otunnus) otunnus
+						FROM kerayserat
+						LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+						AND kerayserat.otunnus IN ({$otunnukset})
+						AND kerayserat.sscc = '{$keraysera_row['sscc']}'
+						GROUP BY 1";
+			$info_res = pupe_query($query);
+			$info_row = mysql_fetch_assoc($info_res);
+
 			echo "<tr>";
-			echo "<td>$keraysera_row[pakkaus]</td>";
+			echo "<td>$info_row[pakkaus]</td>";
 			echo "<td>$keraysera_row[sscc]</td>";
-			echo "<td>$keraysera_row[ohjausmerkki]</td>";
 
 			echo "<td><select name='uusi_pakkaus[{$keraysera_row['sscc']}]'>";
 			echo "<option value=''>",t("Valitse"),"</option>";
@@ -280,7 +282,8 @@
 						AND kerayserat.otunnus IN ({$otunnukset})
 						AND kerayserat.sscc != '{$keraysera_row['sscc']}'
 						AND kerayserat.sscc_ulkoinen != '{$keraysera_row['sscc']}'
-						GROUP BY 1,2,3";
+						GROUP BY 1,2,3
+						ORDER BY sscc";
 			$pak_res = pupe_query($query);
 
 			while ($pak_row = mysql_fetch_assoc($pak_res)) {

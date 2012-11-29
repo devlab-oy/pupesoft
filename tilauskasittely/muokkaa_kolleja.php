@@ -62,21 +62,7 @@
 				if ($pak == 'muu_kolli') $pak = 999;
 
 				if ($toisen_sscc == "") {
-					$query = "LOCK TABLES avainsana WRITE";
-					$lock_res = pupe_query($query);
-
-					$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-					$selite_result = pupe_query($query);
-					$selite_row = mysql_fetch_assoc($selite_result);
-
-					$uusi_sscc = is_numeric($selite_row['selite']) ? (int) $selite_row['selite'] + 1 : 1;
-
-					$query = "UPDATE avainsana SET selite = '{$uusi_sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-					$update_res = pupe_query($query);
-
-					// poistetaan lukko
-					$query = "UNLOCK TABLES";
-					$unlock_res = pupe_query($query);
+					$uusi_sscc = $sscc;
 				}
 				else {
 					$uusi_sscc = $toisen_sscc;
@@ -257,7 +243,8 @@
 					LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 					WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 					AND kerayserat.otunnus IN ({$otunnukset})
-					GROUP BY 1,2,3,4,5";
+					GROUP BY 1,2,3,4,5
+					ORDER BY sscc";
 		$keraysera_res = pupe_query($query);
 
 		$lopetus = "{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=";
@@ -406,7 +393,6 @@
 							$asiakaslisa
 							and rahtikirjat.merahti			= '$rakir_row[merahti]'
 							and rahtikirjat.rahtisopimus	= '$rakir_row[rahtisopimus]'
-							and rahtikirjat.kollit != 0
 							HAVING kollit != 0
 							ORDER BY lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus, lasku.tunnus";
 				$res = pupe_query($query);

@@ -38,6 +38,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 			'laskurow'		 => $laskurow,
 			'tunnus'		 => $tunnus,
 			'myysaatili'	 => $myysaatili,
+			'tapahtumapaiva' => $tapahtumapaiva,
 			'toim'			 => $toim,
 			'_kassalipas'	 => $_kassalipas
 		);
@@ -136,11 +137,9 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 
 	if ($params['toim'] == 'KATEINEN') {
 		$query	 = "	UPDATE lasku set
+						erpcm      = '{$params['tapahtumapaiva']}',
 						mapvm      = '{$params['tapahtumapaiva']}',
 						maksuehto  = '{$params['maksuehto']}',
-						erpcm      = '{$params['tapahtumapaiva']}',
-						kapvm      = '{$params['tapahtumapaiva']}',
-						tapvm	   = '{$params['tapahtumapaiva']}',
 						kassalipas = '{$params['kassalipas']}'
 						where yhtio = '{$kukarow['yhtio']}'
 						and tunnus  = '{$params['tunnus']}'";
@@ -223,10 +222,12 @@ function tee_kirjanpito_muutokset($params) {
 	if ($params['toim'] == 'KATEINEN') {
 		$uusitili  = $params['_kassalipas'];
 		$vanhatili = '(' . $params['myysaatili'] . ')';
+		$tapvmlisa = ", tapvm = '{$params['tapahtumapaiva']}' ";
 	}
 	else {
 		$uusitili  = $params['myysaatili'];
 		$vanhatili = '('.implode(',', $params['_kassalipas']).')';
+		$tapvmlisa = "";
 	}
 
 	$query = "	SELECT tunnus
@@ -243,9 +244,12 @@ function tee_kirjanpito_muutokset($params) {
 		// Tehdään kopio alkuperöisestöä, niin jää treissi miten oli alunperin kirjattu.
 		kopioitiliointi($vanharow['tunnus'], $kukarow['kuka']);
 
+
+
 		$query = "	UPDATE tiliointi
 					SET tilino = '{$uusitili}',
 					summa = '{$params['laskurow']['summa']}'
+					{$tapvmlisa}
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and tunnus	= '{$vanharow['tunnus']}'";
 		$result = pupe_query($query);

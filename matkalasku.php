@@ -1227,7 +1227,7 @@ if ($tee != "") {
 											muuttaja			= '$kukarow[kuka]'";
 								$updres = pupe_query($query);
 
-								korjaa_ostovelka($tilausnumero);
+								korjaa_ostovelka($tilausnumero, $lisatty_tun, $isa);
 							}
 						}
 					}
@@ -1673,7 +1673,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 				AND tilausrivitunnus = '{$tiliointi_tilausrivi_row['tilausrivitunnus']}'";
 	pupe_query($query);
 
-	korjaa_ostovelka($tilausnumero, $tiliointi_tilausrivi_row['tilausrivitunnus']);
+	korjaa_ostovelka($tilausnumero, $tiliointi_tilausrivi_row['tilausrivitunnus'], $lisatty_tiliointi_tunnus);
 
 	//koska poista edelliset matkalasku rivit update tyyppi D
 	//siivotaan deleted tilausrivit pois

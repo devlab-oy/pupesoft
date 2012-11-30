@@ -290,6 +290,7 @@
 						kerayserat.kpl as tilkpl,
 						kerayserat.kpl as varattu,
 						kerayserat.tunnus as ker_tunnus,
+						kerayserat.pakkaus,
 						kerayserat.pakkausnro,
 						{$sorttauskentta}
 						FROM kerayserat

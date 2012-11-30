@@ -1,11 +1,11 @@
 <?php
 	require('inc/parametrit.inc');
 
-	echo "<font class='head'>Sampo Factoring</font><hr><br>";
+	echo "<font class='head'>Danskebank Factoring</font><hr><br>";
 
 	if ($tee == "") {
 
-		echo "<font class='message'>Luodaan Sampo Factoring siirtolista kaikista lähettämättömistä factoring laskuista.</font><br><br>";
+		echo "<font class='message'>Luodaan Danskebank Factoring siirtolista kaikista lähettämättömistä factoring laskuista.</font><br><br>";
 
 		// haetaan kaikki sampo factoroidut laskut jota ei ole vielä liitetty mihinkään siirtolistalle
 		$query = "	SELECT count(*) kpl, sum(arvo) arvo, sum(summa) summa
@@ -274,13 +274,13 @@
 
 			if ($kirrow["komento"] == 'email') {
 
-				$subject = "$yhtiorow[nimi] - Sampofactoring";
+				$subject = "$yhtiorow[nimi] - Danskebankfactoring";
 				$liite = array();
 				$kutsu = array();
 				$ctype = array();
 
 				$liite[0] = $tempfile1.".pdf";
-				$kutsu[0] = "Sampofactoring-otsikko";
+				$kutsu[0] = "Danskebankfactoring-otsikko";
 				$ctype[0] = "pdf";
 
 				system("ps2pdf -sPAPERSIZE=a4 $tempfile1.ps $liite[0]");
@@ -295,7 +295,7 @@
 
 			if ($kirrow["komento"] == 'email') {
 				$liite[1] = $tempfile2.".pdf";
-				$kutsu[1] = "Sampofactoring-laskut";
+				$kutsu[1] = "Danskebankfactoring-laskut";
 				$ctype[1] = "pdf";
 
 				system("ps2pdf -sPAPERSIZE=a4 $tempfile2.ps $liite[1]");

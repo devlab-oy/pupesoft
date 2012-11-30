@@ -481,7 +481,7 @@
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 			// N‰ytet‰‰n muuten vaan sopivia tilauksia
 			echo "<br><br>";
-			echo "<form method='post'>";
+			echo "<form method='post' name='hakuformi'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='asiakastiedot' value='$asiakastiedot'>";
 			echo "<input type='hidden' name='limit' value='$limit'>";
@@ -499,6 +499,10 @@
 			echo "<input type='Submit' value = '".t("Etsi")."'>";
 			echo "</form>";
 			echo "<br>";
+
+			// kursorinohjausta
+			$formi  = "hakuformi";
+			$kentta = "etsi";
 
 			// pvm 30 pv taaksep‰in
 			$dd = date("d",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
@@ -524,8 +528,8 @@
 			}
 
 			if ($toim == 'YLLAPITO' and $etsi != "" and $haku != "") {
-				$haku = substr($haku, 0, -1); // Poistetaan vika sulku $hausta
-				$haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%$etsi%' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%$etsi%' or lasku.asiakkaan_tilausnumero like '%$etsi%')";
+				$haku = substr($haku, 0, -2); // Poistetaan vika sulku $hausta
+				$haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%$etsi%' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%$etsi%' or lasku.asiakkaan_tilausnumero like '%$etsi%') ";
 			}
 
 			$seuranta = "";

@@ -68,9 +68,7 @@ echo "
 
 echo "
 <body>
-<table class='main' border='0'>
-<tr>
-<td><div class='header'><h1>",t("SISÄÄNKIRJAUTUMINEN", $browkieli),"</h1></div>";
+<div class='header'><h1>",t("SISÄÄNKIRJAUTUMINEN", $browkieli),"</h1></div>";
 
 if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 
@@ -114,8 +112,8 @@ else {
 	echo "<table class='login'>
 			<form name='login' target='_top' action='' method='post'>
 
-			<tr><td>",t("Käyttäjätunnus",$browkieli),":</td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
-			<tr><td>",t("Salasana",$browkieli),":</td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
+			<tr><th>",t("Käyttäjätunnus",$browkieli),":</th><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
+			<tr><th>",t("Salasana",$browkieli),":</th><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
 		</table>";
 
 	if (isset($return['error']) and $return['error'] != "") {

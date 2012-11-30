@@ -99,10 +99,10 @@ if (isset($submit) and trim($submit) != '') {
 					# Jos viimeinen rivi ja m‰‰r‰‰ pienennetty, pudotetaan toinen rivi pois lavalta.
 					# Koska viimeist‰ rivii viedess‰ vied‰‰n kaikkilavan rivit varastoon
 					if ($viimeinen) {
-						splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), false, true);
+						splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, TRUE);
 					}
 					else {
-						splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), false, false);
+						splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, FALSE);
 					}
 
 					# Alkuper‰inen vied‰‰n varastoon, splitattu j‰‰ j‰ljelle

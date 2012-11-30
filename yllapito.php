@@ -352,7 +352,7 @@
 						}
 
 						if (mysql_field_type($result,$i) == 'real') {
-							$t[$i] = $t[$i] != "NULL" ? (float) str_replace(",", ".", $t[$i]) : $t[$i];
+							$t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
 
 							$query .= ", ". mysql_field_name($result,$i)." = {$t[$i]} ";
 						}
@@ -392,7 +392,7 @@
 						}
 
 						if (mysql_field_type($result,$i) == 'real') {
-							$t[$i] = $t[$i] != "NULL" ? (float) str_replace(",", ".", $t[$i]) : $t[$i];
+							$t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
 
 							$query .= ", ". mysql_field_name($result,$i)." = {$t[$i]} ";
 						}
@@ -1311,6 +1311,12 @@
 
 			for ($i=1; $i < mysql_num_fields($result); $i++) {
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
+
+					// Ei näytetä henkilötunnuksen loppuosaa selausnäkymässä
+					if (stripos(mysql_field_name($result, $i), "ytunnus") !== FALSE) {
+						$trow[$i] = tarkistahetu($trow[$i]);
+					}
+
 					if ($i == 1) {
 						if (trim($trow[1]) == '' or (is_numeric($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhjä*");
 

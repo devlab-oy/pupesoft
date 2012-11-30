@@ -431,17 +431,28 @@
 
 		// jos ollaan muokkaamassa rivejä poistetaan eka vanhat rahtikirjatiedot..
 		if ($tutkimus > 0) {
+
+			if ($yhtiorow['kerayserat'] == 'K' and strpos($tunnukset, ',') !== FALSE) {
+				$tunnuslisa = $tunnukset;
+				$rakirnolisa = $tunnukset;
+			}
+			else {
+				$tunnuslisa = $otsikkonro;
+				$rakirnolisa = $rakirno;
+			}
+
 			if (isset($muutos) and $muutos == 'yes') {
-				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$otsikkonro' and rahtikirjanro='$rakirno'";
+
+				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro IN ({$tunnuslisa}) and rahtikirjanro IN ({$rakirnolisa})";
 				$result = pupe_query($query);
 
 				// merkataan tilaus takaisin kerätyksi, paitsi jos se on vientitilaus jolle vientitiedot on syötetty
-				$query = "UPDATE lasku set alatila='C' where yhtio='$kukarow[yhtio]' and tunnus='$otsikkonro' and alatila!='E'";
+				$query = "UPDATE lasku set alatila='C' where yhtio='$kukarow[yhtio]' and tunnus IN ({$tunnuslisa}) and alatila!='E'";
 				$result = pupe_query($query);
 
 				//Voi käydä niin, että rahtikirja on jo tulostunut. Poistetaan mahdolliset tulostusflagit
 				$query = "	UPDATE tilausrivi set toimitettu = '', toimitettuaika = ''
-							where otunnus = '$otsikkonro' and yhtio = '$kukarow[yhtio]' and var not in ('P','J') and tyyppi='$tila'";
+							where otunnus IN ({$otsikkonro}) and yhtio = '$kukarow[yhtio]' and var not in ('P','J') and tyyppi='$tila'";
 				$result = pupe_query($query);
 
 				//	Poistetaan kaikki lavaeloitukset
@@ -456,7 +467,7 @@
 				if ($pakrow["veloitukset"]!="") {
 					$query = "	DELETE from tilausrivi
 								where yhtio = '$kukarow[yhtio]'
-								and otunnus = '$otsikkonro'
+								and otunnus IN ({$tunnuslisa})
 								and tuoteno IN ($pakrow[veloitukset])";
 					$delres = pupe_query($query);
 				}
@@ -559,7 +570,7 @@
 								SET tyyppi='D',
 								kommentti = concat(kommentti, ' $kukarow[kuka] muutti rahtikuluja rahtikirjan syötössä.')
 								WHERE yhtio='$kukarow[yhtio]'
-								and otunnus='$otsikkonro'
+								and otunnus IN ({$tunnuslisa})
 								and tuoteno='$yhtiorow[rahti_tuotenumero]'
 								and uusiotunnus=0
 								and tyyppi != 'D'";
@@ -573,7 +584,7 @@
 								SET tyyppi='D',
 								kommentti = concat(kommentti, ' $kukarow[kuka] muutti käsittelykuluja rahtikirjan syötössä.')
 								WHERE yhtio='$kukarow[yhtio]'
-								and otunnus='$otsikkonro'
+								and otunnus IN ({$tunnuslisa})
 								and tuoteno='$yhtiorow[kasittelykulu_tuotenumero]'
 								and uusiotunnus=0
 								and tyyppi != 'D'";
@@ -701,7 +712,7 @@
 			$updateres = pupe_query($query);
 
 			//Ainostaan tulostusaluuen mukaan splittaantuneet tilaukset yhdistetään
-			if ($yhtiorow["splittauskielto"] == "" and strpos($tunnukset,',') !== false and $yhtiorow['pakkaamolokerot'] != '') {
+			if ($yhtiorow["splittauskielto"] == "" and strpos($tunnukset,',') !== false and $yhtiorow['pakkaamolokerot'] != '' and $yhtiorow['kerayserat'] == '') {
 
 				$otsikko_tunnarit = explode(',',$tunnukset);
 				sort($otsikko_tunnarit);
@@ -873,33 +884,52 @@
 
 			if ($rakirsyotto_lahete_tulostin != '' and $komento != "" and $lahetekpl > 0) {
 
-				if (isset($dgdlle_tunnukset) and $dgdlle_tunnukset != "") {
-					$lahetteet = explode(",", $dgdlle_tunnukset);
+				$query = "	SELECT if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) email, asiakas.keraysvahvistus_lahetys
+							FROM asiakas
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$laskurow['liitostunnus']}'";
+				$asiakas_chk_res = pupe_query($query);
+				$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
+
+				// Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty
+				if ($asiakas_chk_row["keraysvahvistus_lahetys"] == 'L' or ($yhtiorow["keraysvahvistus_lahetys"] == 'L' and $asiakas_chk_row["keraysvahvistus_lahetys"] == '')) {
+
+					$laskurow["email"] = $asiakas_chk_row["email"];
+					$laskurow["keraysvahvistus_lahetys"] = $asiakas_chk_row["keraysvahvistus_lahetys"];
+
+					$komento = koontilahete_check($laskurow, $komento);
 				}
-				else {
-					$lahetteet = array($laskurow["tunnus"]);
-				}
 
-				foreach ($lahetteet as $index => $laskutunnus) {
+				if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {
 
-					// Haetaan laskun kaikki tiedot uudestaan koska haluamme lähetteen per yhdistetty rahtikirja
-					$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$laskutunnus'";
-					$lasresult = pupe_query($query);
-					$laskurow = mysql_fetch_assoc($lasresult);
+					if (isset($dgdlle_tunnukset) and $dgdlle_tunnukset != "") {
+						$lahetteet = explode(",", $dgdlle_tunnukset);
+					}
+					else {
+						$lahetteet = array($laskurow["tunnus"]);
+					}
 
-					$params = array(
-						'laskurow'					=> $laskurow,
-						'sellahetetyyppi' 			=> $sellahetetyyppi,
-						'extranet_tilausvahvistus' 	=> "",
-						'naytetaanko_rivihinta'		=> "",
-						'tee'						=> $tee,
-						'toim'						=> $toim,
-						'komento' 					=> $komento,
-						'lahetekpl'					=> $lahetekpl,
-						'kieli' 					=> $kieli
-						);
+					foreach ($lahetteet as $index => $laskutunnus) {
 
-					pupesoft_tulosta_lahete($params);
+						// Haetaan laskun kaikki tiedot uudestaan koska haluamme lähetteen per yhdistetty rahtikirja
+						$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$laskutunnus'";
+						$lasresult = pupe_query($query);
+						$laskurow = mysql_fetch_assoc($lasresult);
+
+						$params = array(
+							'laskurow'					=> $laskurow,
+							'sellahetetyyppi' 			=> $sellahetetyyppi,
+							'extranet_tilausvahvistus' 	=> "",
+							'naytetaanko_rivihinta'		=> "",
+							'tee'						=> $tee,
+							'toim'						=> $toim,
+							'komento' 					=> $komento,
+							'lahetekpl'					=> $lahetekpl,
+							'kieli' 					=> $kieli
+							);
+
+						pupesoft_tulosta_lahete($params);
+					}
 				}
 			}
 
@@ -924,6 +954,39 @@
 					if ($toimitustaparow['osoitelappu'] == 'intrade') {
 						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 					}
+					elseif ($toimitustaparow['osoitelappu'] == 'oslap_lamposiirto' and $yhtiorow['kerayserat'] == 'K') {
+
+						$query = "	SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
+									FROM kerayserat
+									LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+									AND kerayserat.otunnus IN (".implode(",", $osoitelaput).")
+									GROUP BY 1,2,3
+									ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
+						$pak_chk_res = pupe_query($query);
+
+						$pak_num = mysql_num_rows($pak_chk_res);
+
+						while ($pak_chk_row = mysql_fetch_assoc($pak_chk_res)) {
+
+							for ($i = 1; $i <= $oslappkpl; $i++) {
+
+								$params = array(
+						 			'tilriv' => $pak_chk_row['otunnus'],
+						 			'komento' => $oslapp,
+						 			'pakkauskoodi' => $pak_chk_row['pakkaus'],
+						 			'montako_laatikkoa_yht' => $pak_num,
+						 			'toim_nimi' => $laskurow['toim_nimi'],
+						 			'toim_nimitark' => $laskurow['toim_nimitark'],
+						 			'toim_osoite' => $laskurow['toim_osoite'],
+						 			'toim_postino' => $laskurow['toim_postino'],
+						 			'toim_postitp' => $laskurow['toim_postitp'],
+						 		);
+
+								tulosta_oslap_lamposiirto($params);
+							}
+						}
+					}
 					else {
 						require ("tilauskasittely/osoitelappu_pdf.inc");
 					}
@@ -933,7 +996,7 @@
 			}
 
 			// Tulostetaan terminaaliosoitelappu
-			if ($rakirsyotto_termoslapp_tulostin != "" and $termoslapp != '' and $termoslappkpl > 0) {
+			if ($rakirsyotto_termoslapp_tulostin != "" and $termoslapp != '' and $termoslappkpl > 0 and $toimitustaparow['osoitelappu'] != 'oslap_lamposiirto') {
 
 				if (isset($dgdlle_tunnukset) and $dgdlle_tunnukset != "") {
 					$terminaaliosoitelaput = explode(",", $dgdlle_tunnukset);
@@ -2069,6 +2132,20 @@
 
 			$merahti = $meapu2row["merahti"];
 
+			// Onko toimitusehdon takana määritelty rahdinmaksaja? Tämä yliajaa toimitustavan takana olevan.
+			$toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = trim('$otsik[toimitusehto]') ");
+
+			if (mysql_num_rows($toimehto_tresult) > 0) {
+				$toimehto_row = mysql_fetch_assoc($toimehto_tresult);
+
+				if ($toimehto_row["selitetark_3"] == "LAHETTAJAN_SOPIMUS") {
+					$merahti = "K";
+				}
+				elseif ($toimehto_row["selitetark_3"] == "VASTAANOTTAJAN_SOPIMUS") {
+					$merahti = "";
+				}
+			}
+
 			if ($merahti != $ed_merahti) {
 				echo "<font class='error'>".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!</font><br><br>";
 			}
@@ -2649,6 +2726,14 @@
 				if ($roror['kuutiot']  > 0)				$kuutiot[$i]			= $roror['kuutiot'];
 				if ($roror['lavametri'] > 0)			$lavametri[$i]			= $roror['lavametri'];
 				if ($roror['pakkauskuvaustark'] != '')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
+
+				if ($yhtiorow['kerayserat'] == 'K' and $kollit[$i] != '' and $kollit[$i] != 0) {
+					# jos kollit on 0 ja 1 välissä, pyöristetään se 1
+					if ($kollit[$i] > 0 and $kollit[$i] < 1) $kollit[$i] = 1;
+
+					# pyöristetään seuraavaan kokonaislukuun
+					$kollit[$i] = round($kollit[$i]);
+				}
 			}
 
 			echo "<tr>";

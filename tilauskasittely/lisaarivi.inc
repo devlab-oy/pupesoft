@@ -713,7 +713,7 @@
 					}
 
 					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
-								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.prio,
 								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
 								varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, '' era
 					 			FROM tuote
@@ -784,6 +784,7 @@
 					$zzrow[$zzrowlask]["hyllynro"]		= $zrow["hyllynro"];
 					$zzrow[$zzrowlask]["hyllyvali"]		= $zrow["hyllyvali"];
 					$zzrow[$zzrowlask]["hyllytaso"]		= $zrow["hyllytaso"];
+					$zzrow[$zzrowlask]["prio"]			= $zrow["prio"] == 0 ? PHP_INT_MAX : $zrow["prio"];
 					$zzrow[$zzrowlask]['erikoistoimitus_alarajasumma']  = $zrow['erikoistoimitus_alarajasumma'];
 
 					if ($lisaarivi_debug==1) echo "Myyt‰viss‰ $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $myytavissa kappaletta<br>";
@@ -796,6 +797,28 @@
 					$zzrowlask++;
 				}
 
+				// Sortataan varastopaikat prio, myyt‰viss‰ j‰rkk‰‰n
+				if (!function_exists('zzrowprio')) {
+					function zzrowprio($a, $b) {
+						if ($a["prio"] < $b["prio"]) {
+							return -1;
+						}
+						elseif ($a["prio"] > $b["prio"]) {
+							return 1;
+						}
+						elseif ($a["myytavissa"] < $b["myytavissa"]) {
+							return 1;
+						}
+						elseif ($a["myytavissa"] > $b["myytavissa"]) {
+							return -1;
+						}
+						else {
+							return 0;
+						}
+					}
+				}
+
+				// Sortataan varastopaikat oletus, prio, myyt‰viss‰ j‰rkk‰‰n
 				if (!function_exists('zzrowcmp')) {
 					function zzrowcmp($a, $b) {
 						if (strcmp($a["oletus"], $b["oletus"]) < 0) {
@@ -803,6 +826,12 @@
 						}
 						elseif (strcmp($a["oletus"], $b["oletus"]) > 0) {
 							return -1;
+						}
+						elseif ($a["prio"] < $b["prio"]) {
+							return -1;
+						}
+						elseif ($a["prio"] > $b["prio"]) {
+							return 1;
 						}
 						elseif ($a["myytavissa"] < $b["myytavissa"]) {
 							return 1;
@@ -818,102 +847,137 @@
 
 				if (!function_exists('chk_varaston_saldo')) {
 					function chk_varaston_saldo($arr, $kpl) {
-						/*
-						- Pit‰iskˆ eka kattoa lˆytyykˆ kaikki joltain yhdelt‰ paikalta?
-						- Katotaan miss‰ oletuspaikka, riitt‰‰kˆ oletuspaikan varaston saldo?
-						- Riitt‰‰kˆ jonkun toisen varaston saldo?
-						- Jos ei niin splitataan.
-						*/
+						global $varasto;
 
-						$chk_yksi_paikka = FALSE;
+						reset($arr);
 
-						// Pit‰iskˆ eka kattoa lˆytyykˆ kaikki joltain yhdelt‰ paikalta?
+						// Katotaan miss‰ varastossa "oletuspaikka" on.
+						// T‰ss‰ tulee zzrowcmp funkkarin sorttauksen mukaan eka paikka
+						$chk_oletus_var = $arr[0]['varasto'];
+
+						$chk_saldo 	   = 0;
+						$checked_saldo = false;
+
+						// Loopataaan tuotepaikat
 						foreach ($arr as $indx => $chk_row) {
-							if ($chk_row['myytavissa'] >= $kpl) {
-								unset($arr[$indx]);
-								array_unshift($arr, $chk_row);
-								$chk_yksi_paikka = TRUE;
-								break;
+
+							// riitt‰‰kˆ "parhaimman" varaston saldo (K‰ytet‰‰n vain jos "paras" varasto on sallittu)
+							if ($chk_row['varasto'] == $chk_oletus_var and (!isset($varasto) or in_array($chk_row['varasto'], $varasto))) {
+								$chk_saldo += $chk_row['myytavissa'];
+
+								if ($chk_saldo >= $kpl) {
+									$checked_saldo = true;
+									break;
+								}
 							}
 						}
 
-						if (!$chk_yksi_paikka) {
+						reset($arr);
 
-							$chk_oletus_var = '';
+						// "Parhaassa" varastossa oli yhteens‰ riitt‰v‰sti saldoa
+						if ($checked_saldo) {
 
-							reset($arr);
+							$var_paras = array();
 
-							// Katotaan miss‰ oletuspaikka
-							$chk_oletus_var = $arr[0]['varasto'];
-
-							$chk_saldo = 0;
-							$checked_saldo = false;
-
-							// riitt‰‰kˆ oletuspaikan varaston saldo?
 							foreach ($arr as $indx => $chk_row) {
+								// Otetaan "parhaimman" varaston sis‰ll‰ olevat tuotepaikat talteen
+								if ($chk_row['varasto'] == $chk_oletus_var and (!isset($varasto) or in_array($chk_row['varasto'], $varasto))) {
+									$var_paras[] = $chk_row;
+									unset($arr[$indx]);
+								}
+							}
 
-								if ($chk_row['varasto'] == $chk_oletus_var) {
-									$chk_saldo += $chk_row['myytavissa'];
+							$chk_yksi_paikka = FALSE;
 
-									if ($chk_saldo >= $kpl) {
-										$checked_saldo = true;
-										break;
-									}
+							// koitetaan lˆyt‰‰ onko kaikki myyt‰viss‰ yhdelt‰ paikalta
+							foreach ($var_paras as $indx => $chk_row) {
+
+								// Jos oli tarpeeksi myyt‰viss‰ kappaleita, siirret‰‰n se jonon ensimm‰iseksi
+								if ($chk_row['myytavissa'] >= $kpl) {
+									unset($var_paras[$indx]);
+									array_unshift($var_paras, $chk_row);
+									$chk_yksi_paikka = TRUE;
+									break;
+								}
+							}
+
+							// jos ei lˆydy vain yht‰ paikkaa miss‰ riitt‰‰ saldo, sortataan varastopaikat prioriteetti j‰rkk‰‰n
+							if (!$chk_yksi_paikka) {
+								// Sortataan varastopaikat prioriteetti j‰rkk‰‰n
+								usort($var_paras, "zzrowprio");
+							}
+
+							// Laitetaan parhaimman varaston paikat k‰rkeen
+							$arr = array_merge($var_paras, $arr);
+						}
+						else {
+
+							// Riitt‰‰kˆ jonkun toisen varaston saldo?
+							$chk_distinct_varasto = array();
+
+							// loopataan distinct varasto
+							foreach ($arr as $indx => $chk_row) {
+								// Ei oteta "parasta" varastoa mukaan, koska tid‰mme, ett‰ siin‰ ei t‰ss‰ tapauksessa ole riitt‰v‰sti kamaa
+								if (!isset($chk_distinct_varasto[$chk_row['varasto']]) and $chk_row['varasto'] != $chk_oletus_var) {
+									$chk_distinct_varasto[$chk_row['varasto']] = $chk_row['varasto'];
 								}
 							}
 
 							reset($arr);
 
-							if ($checked_saldo) {
+							foreach ($chk_distinct_varasto as $varastosta) {
+
+								$varaston_saldo = 0;
+								$varasto_set 	= '';
+
 								foreach ($arr as $indx => $chk_row) {
-									if ($chk_row['varasto'] == $chk_oletus_var) {
-										unset($arr[$indx]);
-										array_unshift($arr, $chk_row);
+
+									// Onko loopattavassa varastossa tarpeeksi myyt‰viss‰ olevia kappaleita
+									if ($varastosta == $chk_row['varasto'] and (!isset($varasto) or in_array($chk_row['varasto'], $varasto))) {
+										$varaston_saldo += $chk_row['myytavissa'];
+
+										if ($varaston_saldo >= $kpl) {
+											$varasto_set = $chk_row['varasto'];
+											break;
+										}
 									}
 								}
-							}
-							else {
 
-								// Riitt‰‰kˆ jonkun toisen varaston saldo?
-								$chk_distinct_varasto = array();
+								// Jos lˆytyi jokin varasto miss‰ on tarpeeksi myyt‰viss‰ olevia kappaleita
+								if ($varasto_set != '') {
+									reset($arr);
 
-								// loopataan distinct varasto
-								foreach ($arr as $indx => $chk_row) {
-									if (!isset($chk_distinct_varasto[$chk_row['varasto']])) {
-										$chk_distinct_varasto[$chk_row['varasto']] = $chk_row['varasto'];
-									}
-								}
-
-								reset($arr);
-
-								unset($chk_distinct_varasto[$chk_oletus_var]);
-
-								foreach ($chk_distinct_varasto as $varasto) {
-
-									$varaston_saldo = 0;
-									$varasto_set = '';
+									$var_varasto = array();
 
 									foreach ($arr as $indx => $chk_row) {
-										if ($varasto == $chk_row['varasto']) {
-											$varaston_saldo += $chk_row['myytavissa'];
 
-											if ($varaston_saldo >= $kpl) {
-												$varasto_set = $chk_row['varasto'];
-												break;
-											}
+										// Otetaan kaikki varastopaikat talteen mitk‰ kuuluvat varastoon jossa on tarpeeksi myyt‰viss‰ olevia kappaleita
+										if ($chk_row['varasto'] == $varasto_set) {
+											$var_varasto[] = $chk_row;
+											unset($arr[$indx]);
 										}
 									}
 
-									if ($varasto_set != '') {
-										reset($arr);
+									$chk_yksi_paikka = FALSE;
 
-										foreach ($arr as $indx => $chk_row) {
-											if ($chk_row['varasto'] == $varasto_set) {
-												unset($arr[$indx]);
-												array_unshift($arr, $chk_row);
-											}
+									// koitetaan lˆyt‰‰ onko kaikki myyt‰viss‰ yhdelt‰ paikalta
+									foreach ($var_varasto as $indx => $chk_row) {
+										if ($chk_row['myytavissa'] >= $kpl) {
+											unset($var_varasto[$indx]);
+											array_unshift($var_varasto, $chk_row);
+											$chk_yksi_paikka = TRUE;
+											break;
 										}
 									}
+
+									// Jos ei lˆytynyt yht‰ paikkaa mist‰ oltaisiin voitu myyd‰ kaikki
+									if (!$chk_yksi_paikka) {
+										// Sortataan varastopaikat prioriteetti j‰rkk‰‰n
+										usort($var_varasto, "zzrowprio");
+									}
+
+									$arr = array_merge($var_varasto, $arr);
+									break;
 								}
 							}
 						}
@@ -922,7 +986,7 @@
 					}
 				}
 
-				// sortataan varastopaikkojen saldot by ostajan maa
+				// Sortataan tuotepaikat
 				$oma_maa = array();
 				$muu_maa = array();
 
@@ -936,17 +1000,25 @@
 					}
 				}
 
-				// sortataan ostajan maan varastopaikat saldo j‰rkk‰‰n
-				usort($oma_maa, "zzrowcmp");
-				// sortataan muiden maiden varastopaikat saldo j‰rkk‰‰n
-				usort($muu_maa, "zzrowcmp");
+				// sortataan ostajan maan varastopaikat "oletus, prio, myyt‰viss‰"-j‰rkk‰‰n
+				if (count($oma_maa) > 0) usort($oma_maa, "zzrowcmp");
+
+				// sortataan muiden maiden varastopaikat "oletus, prio, myyt‰viss‰"-j‰rkk‰‰n
+				if (count($muu_maa) > 0) usort($muu_maa, "zzrowcmp");
 
 				if ($yhtiorow['varaston_splittaus'] == 'K') {
-					// sortataan ostajan maan varastopaikat saldo j‰rkk‰‰n
-					$oma_maa = chk_varaston_saldo($oma_maa, $kpl);
+					/*
+					Jos $yhtiorow['varaston_splittaus'] parametri on 'K' (yritet‰‰nkˆ myyd‰ p‰‰asiassa yhdest‰ varastosta tuotetta)
+					a) Katotaan miss‰ oletuspaikka, riitt‰‰kˆ oletuspaikan varaston saldo (jos on oikeus varastoon jossa oletus on). Jos, katotaan ensin lˆytyykˆ tarvittava m‰‰r‰ joltain yhdelt‰ tietylt‰ paikalta.
+					b) Riitt‰‰kˆ jonkun toisen varaston saldo (ne mihin on oikeus). Jos, katotaan ensin lˆytyykˆ tarvittava m‰‰r‰ joltain yhdelt‰ tietylt‰ paikalta.
+					c) Jos a) tai b) ei natsaa niin palautetaan paikat saman kaavan mukaan kuin tapauksessa 1.
+					*/
 
-					// sortataan muiden maiden varastopaikat saldo j‰rkk‰‰n
-					$muu_maa = chk_varaston_saldo($muu_maa, $kpl);
+					// sortataan ostajan maan varastopaikat
+					if (count($oma_maa) > 0) $oma_maa = chk_varaston_saldo($oma_maa, $kpl);
+
+					// sortataan muiden maiden varastopaikat
+					if (count($muu_maa) > 0) $muu_maa = chk_varaston_saldo($muu_maa, $kpl);
 				}
 
 				// yhdistet‰‰n arrayt
@@ -2515,4 +2587,3 @@
 			$tilrivinumero		= "";
 		}
 	}
-?>

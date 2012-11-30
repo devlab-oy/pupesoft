@@ -13263,46 +13263,12 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 		$query = "  SELECT distinct r1.tunnus, r1.pakkaus, r1.pakkauskuvaus, r1.kollit, round(r1.kilot,1) kilot
 					FROM rahtikirjat r1
-					LEFT JOIN rahtikirjat r2 ON (r1.yhtio = r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro != 0)
 					WHERE r1.otsikkonro in ($otunnus)
 					and r1.yhtio = '$kukarow[yhtio]'";
 		$riresult2 = pupe_query($query);
 
 		//* Limited Quantity tiedot *//
 		//Inner packagings placed in shrink-wrapped or stretch-wrapped trays a Maximum net quantity
-		/*
-		$limited_qty = array(
-		"LQ0"	=> "0",
-		"LQ1"	=> "120",
-		"LQ2"	=> "1000",
-		"LQ3"	=> "0",
-		"LQ4"	=> "1000",
-		"LQ5"	=> "1000",
-		"LQ6"	=> "1000",
-		"LQ7"	=> "5000",
-		"LQ8"	=> "500",
-		"LQ9"	=> "3000",
-		"LQ10"	=> "500",
-		"LQ11"	=> "500",
-		"LQ12"	=> "1000",
-		"LQ13"	=> "1000",
-		"LQ14"	=> "25",
-		"LQ15"	=> "100",
-		"LQ16"	=> "125",
-		"LQ17"	=> "100",
-		"LQ18"	=> "500",
-		"LQ19"	=> "5000",
-		"LQ20"	=> "0",
-		"LQ21"	=> "0",
-		"LQ22"	=> "500",
-		"LQ23"	=> "1000",
-		"LQ24"	=> "2000",
-		"LQ25"	=> "1000",
-		"LQ26"	=> "500",
-		"LQ27"	=> "6000",
-		"LQ28"	=> "3000");
-		*/
-
 		//Combination packagings a Maximum net quantity
 		$limited_qty = array(
 		"LQ0"	=> "0",
@@ -13338,28 +13304,11 @@ if (!function_exists("palauta_vak_tiedot")) {
 		$vakrakirtiedot = array();
 		$vaktuotetiedot = array();
 		$rakirkilot = 0;
+		$tuotepainot = 0;
+		$tuotepainot_yht = 0;
 
-		if (mysql_num_rows($riresult1) > 1) {
+		if (mysql_num_rows($riresult1) > 0 and mysql_num_rows($riresult2) > 0) {
 
-			$vakkoodicount = 1;
-
-			while ($row = mysql_fetch_assoc($riresult1)) {
-				if (isset($edvaki) and $row[$vak_kentta] != $edvaki) {
-					$vakkoodicount++;
-				}
-
-				$edvaki = $row[$vak_kentta];
-			}
-
-			if ($vakkoodicount > 1) {
-				$tuotepainot = 0;
-				$tuotepainot_yht = 0;
-			}
-
-			mysql_data_seek($riresult1, 0);
-		}
-
-		if (mysql_num_rows($riresult1) > 1 and mysql_num_rows($riresult2) > 0) {
 			while ($row = mysql_fetch_assoc($riresult2)) {
 
 				$query = "	SELECT *
@@ -13376,10 +13325,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 					if ($tyyppi == "DGD") {
 
 						$vakkirakirri = "$row[kollit]###$row[kollit] x $pakkaus_en containing:###";
-
-						if (!isset($tuotepainot)) {
-							$vakkirakirri .= round($row["kilot"]);
-						}
+						$vakkirakirri .= round($row["kilot"]);
 
 						$vakrakirtiedot[] = $vakkirakirri;
 					}
@@ -13394,15 +13340,41 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 		if (mysql_num_rows($riresult1) > 0) {
 
-			$edrow   	 = "";
-			$max_ltq_til = "";
+			$edrow = "";
+			$max_ltq_til = 0;
+			$wordwrap_mitta = $tyyppi == 'DGD' ? 50 : 90;
 
-			while ($row = mysql_fetch_assoc($riresult1)) {
+			$num_rows = mysql_num_rows($riresult1);
+			$i_rows = 1;
 
-				if (isset($edrow[$vak_kentta]) and $row[$vak_kentta] != $edrow[$vak_kentta]) {
+			$row = mysql_fetch_assoc($riresult1);
 
-					if ($tyyppi == "DGD") $nimitykset = explode("###", wordwrap($edrow["nimitys"], 50, "###"));
-					else $nimitykset = explode("###", wordwrap($edrow["nimitys"], 90, "###"));
+			do {
+
+				$eramaara = ceil($row["kpl"]/$row["era"]);
+
+				$vaktuotetiedot[] = "$eramaara ".t("pakkausta", $kieli).", ".t("kukin", $kieli)." ".(float) $row['era']." x $row[tilavuus] (".t($row["materiaali"], $kieli).")";
+
+				// Mikä on toistaiseksi suurin vakmäärä
+				$ltq_yks = preg_replace("/[^a-z]/", "", strtolower($row["tilavuus"]));
+
+				$ltq_til = (float) preg_replace("/[^0-9,\.]/", "", str_replace(",", ".", $row["tilavuus"]));
+
+				// Käytetään vain millilitroja ja grammoja
+				if ($ltq_yks == 'l' or $ltq_yks == 'kg') {
+					$ltq_til = $ltq_til*1000;
+				}
+
+				if ($ltq_til > $max_ltq_til) $max_ltq_til = $ltq_til;
+
+				$tuotepainot += round($row["tuotepaino"]);
+				$tuotepainot_yht += round($row["tuotepaino"]);
+
+				if ($num_rows == $i_rows or (isset($edrow[$vak_kentta]) and $row[$vak_kentta] != $edrow[$vak_kentta])) {
+
+					if ($num_rows == $i_rows and $edrow == "") $edrow = $row;
+
+					$nimitykset = explode("###", wordwrap($edrow["nimitys"], $wordwrap_mitta, "###"));
 
 					// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
 					if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
@@ -13414,7 +13386,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 					$vaktuotetiedot[] = $nimitykset[0];
 
-					for ($i = 1; $i<count($nimitykset); $i++) {
+					for ($i = 1; $i < count($nimitykset); $i++) {
 						$vaktuotetiedot[] = "$nimitykset[$i]";
 					}
 
@@ -13434,7 +13406,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 						$vaktuotetiedot[] = t("Meriä saastuttava", $kieli);
 					}
 
-					if ($tyyppi == "DGD" and isset($tuotepainot)) {
+					if ($tyyppi == "DGD" and $tuotepainot > 0) {
 						$vakecho .= "###".round($tuotepainot);
 					}
 
@@ -13448,77 +13420,15 @@ if (!function_exists("palauta_vak_tiedot")) {
 					$tuotepainot = 0;
 				}
 
-				$eramaara = ceil($row["kpl"]/$row["era"]);
-
-				$vaktuotetiedot[] = "$eramaara ".t("pakkausta", $kieli).", ".t("kukin", $kieli)." ".(float) $row['era']." x $row[tilavuus] (".t($row["materiaali"], $kieli).")";
-
-				// Mikä on toistaiseksi suurin vakmäärä
-				$ltq_yks = preg_replace("/[^a-z]/", "", strtolower($row["tilavuus"]));
-
-				$ltq_til = (float) preg_replace("/[^0-9,\.]/", "", str_replace(",", ".", $row["tilavuus"]));
-
-				// Käytetään vain millilitroja ja grammoja
-				if ($ltq_yks == 'l' or $ltq_yks == 'kg') {
-					$ltq_til = $ltq_til*1000;
-				}
-
-				if ($ltq_til > $max_ltq_til) $max_ltq_til = $ltq_til;
-
-				if (isset($tuotepainot)) {
-					$tuotepainot += round($row["tuotepaino"]);
-					$tuotepainot_yht += round($row["tuotepaino"]);
-				}
-
 				$edrow = $row;
+				$i_rows++;
 			}
+			while ($row = mysql_fetch_assoc($riresult1));
 
-			if ($tyyppi == "DGD") $nimitykset = explode("###", wordwrap($edrow["nimitys"], 50, "###"));
-			else $nimitykset = explode("###", wordwrap($edrow["nimitys"], 90, "###"));
-
-			// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
-			if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
-				$vaktuotetiedot[] = "{$edrow['yk_nro']}, LTD QTY";
-			}
-			else {
-				$vaktuotetiedot[] = $edrow['yk_nro'];
-			}
-
-			$vaktuotetiedot[] = $nimitykset[0];
-
-			for ($i = 1; $i<count($nimitykset); $i++) {
-				$vaktuotetiedot[] = "$nimitykset[$i]";
-			}
-
-			$vakecho = "";
-
-			if ($taulu == 'vak_imdg') {
-				if (trim($edrow["luokka"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[luokka]";
-			}
-			else {
-				if (trim($edrow["lipukkeet"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[lipukkeet]";
-			}
-
-			if (trim($edrow["pakkausryhma"]) != "") $vakecho .= ", ".t("Pakkaus", $kieli)." $edrow[pakkausryhma]";
-			if (trim($edrow["leimahduspiste"]) != "" and $taulu == 'vak_imdg') $vaktuotetiedot[] = t("Leimahduspiste", $kieli)." {$edrow['leimahduspiste']}";
-
-			if ($taulu == 'vak_imdg' and trim($edrow["meria_saastuttava"]) != "") {
-				$vaktuotetiedot[] = t("Meriä saastuttava", $kieli);
-			}
-
-			if ($tyyppi == "DGD" and isset($tuotepainot)) {
-				$vakecho .= "###$tuotepainot";
-			}
-
-			if ($vakecho != "") {
-				$vaktuotetiedot[] = "$vakecho";
-			}
-
-			if (isset($tuotepainot) and $rakirkilot > 0) {
-				$vaktuotetiedot[] = "";
-				$vaktuotetiedot[] = "TOTAL GROSS MASS: $rakirkilot kg";
+			if ($rakirkilot > 0) {
+				$vaktuotetiedot[] = "TOTAL GROSS MASS: {$rakirkilot} kg";
 			}
 		}
-
 
 		return array($vakrakirtiedot, $vaktuotetiedot);
 	}

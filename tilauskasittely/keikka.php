@@ -831,7 +831,8 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				$row_keikat = explode(',', $row['keikat']);
 			}
 
-			$query = "	SELECT count(*) num,
+			$query = "	SELECT tunnus, laskunro,
+						count(*) num,
 						sum(if(vienti in ('C','F','I','J','K','L'), 1, 0)) volasku,
 						sum(if(vienti not in ('C','F','I','J','K','L'), 1, 0)) kulasku,
 						sum(if(vienti in ('C','F','I','J','K','L'), arvo * vienti_kurssi, 0)) vosumma,
@@ -840,7 +841,8 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 						WHERE yhtio 	= '$kukarow[yhtio]'
 						AND tila 		= 'K'
 						AND vanhatunnus > 0
-						AND laskunro 	IN ({$row['keikat']})";
+						AND laskunro 	IN ({$row['keikat']})
+						GROUP BY 1,2";
 			$laskuja_result = pupe_query($query);
 
 			$summat_row = array(
@@ -852,9 +854,20 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 			$oliko_ok = ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') ? false : true;
 
+			if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+				$oliko_ok = false;
+				$pitaisi_kayda_nama_tunnukset_lapi = explode(",", $row['keikat']);
+			}
+			else {
+				$oliko_ok = true;
+				$pitaisi_kayda_nama_tunnukset_lapi = array();
+			}
+
 			while ($laskuja_row = mysql_fetch_assoc($laskuja_result)) {
 
 				if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+
+					if (in_array($laskuja_row['laskunro'], $pitaisi_kayda_nama_tunnukset_lapi)) unset($pitaisi_kayda_nama_tunnukset_lapi[array_search($laskuja_row['laskunro'], $pitaisi_kayda_nama_tunnukset_lapi)]);
 
 					$query = "	SELECT ROUND(SUM(summa), 2) summa
 								FROM lasku
@@ -876,7 +889,6 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 								and mapvm 		= '0000-00-00'";
 					$kohdistettu_chk_res = pupe_query($query);
 					$kohdistettu_chk_row = mysql_fetch_assoc($kohdistettu_chk_res);
-
 
 					/*
 					Battle of the languages: laske tämä laskutoimitus 6059.69 - 6059.70
@@ -903,6 +915,12 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				$summat_row['kulasku'] += $laskuja_row['kulasku'];
 				$summat_row['vosumma'] += $laskuja_row['vosumma'];
 				$summat_row['kusumma'] += $laskuja_row['kusumma'];
+			}
+
+			if (count($pitaisi_kayda_nama_tunnukset_lapi) > 0) {
+				foreach ($pitaisi_kayda_nama_tunnukset_lapi as $pitais_kayda_tun) {
+					unset($row_keikat[$pitais_kayda_tun]);
+				}
 			}
 
 			if (!$oliko_ok or count($row_keikat) == 0) continue;

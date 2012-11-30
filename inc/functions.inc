@@ -13869,7 +13869,7 @@ if (!function_exists('tulosta_oslap_lamposiirto')) {
 					{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
 
 					*** TULOSTUS  ***
-					{XS;I,0001,0002C3210|}
+					{XS;I,0001,0002C3010|}
 					".chr(12);
 
 		if (trim($komento) != '' and $komento != 'email') {

@@ -604,7 +604,7 @@ if (!function_exists('rivi_lasku')) {
 		}
 		
 		// Laskupohjissa 13 ja 14 ei näytetä aleja
-		if (($yhtiorow['myynnin_alekentat'] > 1 or $row['erikoisale'] > 0) and $laskutyyppi != 13 and $laskutyyppi == 14) {
+		if (($yhtiorow['myynnin_alekentat'] > 1 or $row['erikoisale'] > 0) and $laskutyyppi != 13 and $laskutyyppi != 14) {
 
 			$alekomm = "";
 
@@ -719,13 +719,13 @@ if (!function_exists('rivi_lasku')) {
 		if ($laskutyyppi == 1) {
 			list($thispage, $kala, $summa, $arvo) = rivi_plain($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
-		elseif ($laskutyyppi == 2 or $laskutyyppi == 12) {
+		elseif ($laskutyyppi == 2 or $laskutyyppi == 12 or $laskutyyppi == 14) {
 			list($thispage, $kala, $summa, $arvo) = rivi_perhe($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
 		elseif ($laskutyyppi == 4 or $laskutyyppi == 8) {
 			list($thispage, $kala, $summa, $arvo) = rivi_plain_2($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
-		elseif ($laskutyyppi == 13 or $laskutyyppi == 14) {
+		elseif ($laskutyyppi == 13) {
 			list($thispage, $kala, $summa, $arvo) = rivi_viro($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
 		else {
@@ -1450,7 +1450,12 @@ if (!function_exists('rivi_perhe')) {
 		}
 
 		if ($lisataa == 0) {
-			list($thispage, $kala, $summa, $arvo) = rivi_original($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
+			if ($laskutyyppi == 14) {
+				list($thispage, $kala, $summa, $arvo) = rivi_viro($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);			
+			}
+			else {
+				list($thispage, $kala, $summa, $arvo) = rivi_original($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
+			}
 		}
 
 		return array($thispage, $kala, $summa, $arvo);

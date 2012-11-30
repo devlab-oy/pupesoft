@@ -964,7 +964,7 @@
 								$trow  = mysql_fetch_assoc($rhire);
 
 								$hinta = $tjvrow['jvkulu']; // jv kulu
-								$nimitys = "Jälkivaatimuskulu";
+								$nimitys = t("Jälkivaatimuskulu", $kieli);
 								$kommentti = "";
 
 								list($jvhinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
@@ -1065,7 +1065,7 @@
 							$trow      = mysql_fetch_assoc($rhire);
 							$otunnus   = $laskurow['tunnus'];
 							$nimitys   = "$pvm $laskurow[toimitustapa]";
-							$kommentti = t("Rahtikirja").": $rahtikirjanrot";
+							$kommentti = t("Rahtikirja", $kieli).": $rahtikirjanrot";
 
 							$ale_lisa_insert_query_1 = $ale_lisa_insert_query_2 = '';
 

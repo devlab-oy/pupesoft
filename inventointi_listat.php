@@ -822,7 +822,7 @@
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
 			mt_srand((float) $sec + ((float) $usec * 100000));
-			$filenimi = "/tmp/Inventointilista-".md5(uniqid(mt_rand(), true)).".txt";
+			$filenimi = "/tmp/".t("Inventointilista")."-".md5(uniqid(mt_rand(), true)).".txt";
 			$fh = fopen($filenimi, "w+");
 
 			$pp = date('d');
@@ -843,7 +843,7 @@
 			$listanro = $lrow["listanro"]+1;
 			$listaaika = date("Y-m-d H:i:s");
 
-			$ots  = t("Inventointilista")." $kutsu\tSivu <SIVUNUMERO>\nListanumero: $listanro\t\t$yhtiorow[nimi]\t\t$pp.$kk.$vv - $kello\n\n";
+			$ots  = t("Inventointilista")." $kutsu\t".t("Sivu")." <SIVUNUMERO>\n".t("Listanumero").": $listanro\t\t$yhtiorow[nimi]\t\t$pp.$kk.$vv - $kello\n\n";
 			$ots .= sprintf ('%-28.14s', 	t("Paikka"));
 			$ots .= sprintf ('%-21.21s', 	t("Tuoteno"));
 
@@ -1044,7 +1044,7 @@
 								$siires = pupe_query($query);
 								$siirow = mysql_fetch_array($siires);
 
-								$fnlina22 = " / Lis‰varusteena: {$siirow['tuoteno']} {$siirow['sarjanumero']}";
+								$fnlina22 = " / ".t("Lis‰varusteena").": {$siirow['tuoteno']} {$siirow['sarjanumero']}";
 							}
 							else {
 								$fnlina22 = "";
@@ -1087,7 +1087,7 @@
 					system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
 
 					$liite = $filenimi.".pdf";
-					$kutsu = "Inventointilista_$listanro";
+					$kutsu = t("Inventointilista")."_$listanro";
 
 					require("inc/sahkoposti.inc");
 				}

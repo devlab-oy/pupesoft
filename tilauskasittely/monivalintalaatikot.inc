@@ -399,9 +399,23 @@
 
 		$laskumyyjat = substr($laskumyyjat, 0, -1);
 
+		//myyjittain valittu, ei näin?
+//		if (trim($laskumyyjat) != '') {
+//			$lisa_haku_laskumyyja = " and kuka.myyja in ($laskumyyjat) ";
+//			$lisa .= " and tuote.myyjanro in ($laskumyyjat) ";
+//		}
 		if (trim($laskumyyjat) != '') {
+			$query = "	SELECT tunnus
+						FROM kuka
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND myyja IN ({$laskumyyjat})";
+			$result = pupe_query($query);
+			$myyjat = array();
+			while($row = mysql_fetch_assoc($result)) {
+				$myyjat[] = $row['tunnus'];
+			}
 			$lisa_haku_laskumyyja = " and kuka.myyja in ($laskumyyjat) ";
-			$lisa .= " and tuote.myyjanro in ($laskumyyjat) ";
+			$lisa .= " and lasku.myyja in (".implode(',', $myyjat).") ";
 		}
 	}
 

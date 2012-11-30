@@ -18580,6 +18580,15 @@ if (!function_exists('splittaa_tilausrivi')) {
 					break;
 				case 'tunnus':
 					break;
+				case 'hinta_alkuperainen':
+					if ($rivi['hinta_alkuperainen'] != 0) {
+						$_tmp = ($rivi['hinta_alkuperainen'] / $rivi['varattu']) * $uuden_rivin_kpl;
+						$query .= " hinta_alkuperainen = {$_tmp},";
+					}
+					else {
+						$query .= " hinta_alkuperainen = 0,";
+					}
+					break;
 				case 'suuntalava':
 
 					if ($pois_suuntalavalta) {

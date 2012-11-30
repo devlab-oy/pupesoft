@@ -552,7 +552,7 @@
 				 	$assrow["laskutus_maa"]		   = $assrow["maa"];
 				}
 
-				if($naytetaanko_tarjouksella != 'on') {
+				if($naytetaanko_tarjouksella != 'on' and $toim == 'TARJOUS') {
 					$toimpvm = '0000-00-00';
 				}
 
@@ -1442,15 +1442,14 @@
 
 			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
 
-			if(!checkdate($toimkk, $toimpp, $toimvv)) {
-				//Kyseessä on tarjouksen toimitusajan piilottamiseen pdf:ltä käytettävä toiminnallisuus toimaika = 0000-00-00 jos se on haluttu piilottaa
-				$naytetaanko_pdf_sel = "";
-			}
-			else {
-				$naytetaanko_pdf_sel = "checked='CHECKED'";
-			}
-
 			if($toim == 'TARJOUS') {
+				if(!checkdate($toimkk, $toimpp, $toimvv)) {
+					//Kyseessä on tarjouksen toimitusajan piilottamiseen pdf:ltä käytettävä toiminnallisuus toimaika = 0000-00-00 jos se on haluttu piilottaa
+					$naytetaanko_pdf_sel = "";
+				}
+				else {
+					$naytetaanko_pdf_sel = "checked='CHECKED'";
+				}
 				echo t("Näytetäänkö tarjouksella")."<input type='checkbox' name='naytetaanko_tarjouksella' $naytetaanko_pdf_sel /><br/>";
 			}
 
@@ -3059,7 +3058,7 @@
 		$label = !isset($label) ? "" : $label;
 		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
 
-		if($naytetaanko_tarjouksella != 'on') {
+		if($naytetaanko_tarjouksella != 'on' and $toim == "TARJOUS") {
 			$toimvv = '0000';
 			$toimkk = '00';
 			$toimpp = '00';

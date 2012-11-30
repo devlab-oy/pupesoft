@@ -24,19 +24,19 @@ if ($tee == 'PERUSTA') {
 		$paivaraha 	= (float) $hinta[$riviindex];
 		$tilino		= (int) $tilille[$riviindex];
 
-		$tuotenimitys = "Ulkomaanpäiväraha ".$annettuvuosi." ".trim(preg_replace("/[^a-z\,\.\-\(\) åäöÅÄÖ]/i", "", $maannimi[$riviindex]));
+		$tuotenimitys = "Ulkomaanpäiväraha ".$annettuvuosi." ".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "", $maannimi[$riviindex]));
 
 		if (trim($maa[$riviindex]) == '' and $erikoisehto[$riviindex] == 'K') {
-			$tuoteno = "PR-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
+			$tuoteno = "PR-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
 		}
 		elseif (trim($maa[$riviindex]) != '' and $erikoisehto[$riviindex] == '') {
 			$tuoteno = "PR-".$maa[$riviindex]."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
 		}
 		elseif (trim($maa[$riviindex]) != '' and $erikoisehto[$riviindex] == 'K') {
-			$tuoteno = "PR-".$maa[$riviindex]."-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
+			$tuoteno = "PR-".$maa[$riviindex]."-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
 		}
 		else {
-			$tuoteno = "PR-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
+			$tuoteno = "PR-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
 		}
 
 		$query  = "	INSERT INTO tuote SET

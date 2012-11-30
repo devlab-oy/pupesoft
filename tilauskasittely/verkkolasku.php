@@ -2360,8 +2360,8 @@
 								$tilrow["rivihinta_verollinen"]	= hintapyoristys($tilrow["rivihinta_verollinen"]);
 								$vatamount 			 			= hintapyoristys($vatamount);
 
-								$tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['kommentti']);
-								$tilrow['nimitys']   = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['nimitys']);
+								$tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['kommentti']);
+								$tilrow['nimitys']   = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['nimitys']);
 
 								// Otetaan seuraavan rivin otunnus
 								if ($rivilaskuri < $rivimaara) {

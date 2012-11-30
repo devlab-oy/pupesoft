@@ -1463,7 +1463,7 @@
 				echo "<option value=''></option>";
 
 				foreach ($DAY_ARRAY as $di => $day) {
-					if (date('N', strtotime($srow["toimaika"])) == $di) {
+					if ($srow["toimvko"] == $di) {
 						$sel = "SELECTED";
 					}
 					else {
@@ -2735,6 +2735,8 @@
 			$toimvv  = date("Y",strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
 			$toimkk	 = date("m",strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
 			$toimpp  = date("d",strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
+
+			$toimvko = $toimvkopva;
 		}
 		else {
 			$toimvko	= "";

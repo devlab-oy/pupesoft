@@ -693,6 +693,10 @@
 									$values .= ", '{$rivihintalisa}'";
 								}
 								break;
+							case 'hinta_alkuperainen':
+								$hinta_alkuperainenlisa = ($tilausrivirow['hinta_alkuperainen'] / ($tilausrivirow['kpl']+$tilausrivirow['varattu'])) * $kappaleerotus;
+								$values .= ", '{$hinta_alkuperainenlisa}'";
+								break;
 							default:
 								$values .= ", '".$tilausrivirow[$fieldname]."'";
 						}
@@ -706,11 +710,14 @@
 					$splitlisa2 = $tilausrivirow['kpl'] > 0 ? ", kpl = '{$rtuoteno[$i]['kpl']}'" : ", kpl = 0 ";
 					$rivihintalisa = $tilausrivirow['kpl'] > 0 ? ", rivihinta = '".(($tilausrivirow['rivihinta'] / $tilausrivirow['kpl']) * $rtuoteno[$i]['kpl'])."'" : ", rivihinta = 0";
 
+					$hinta_alkuperainenlisa = ($tilausrivirow['hinta_alkuperainen'] / ($tilausrivirow['kpl']+$tilausrivirow['varattu'])) * $rtuoteno[$i]['kpl'];
+
 					// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 					$query = "	UPDATE tilausrivi SET
 								{$splitlisa}
 								{$splitlisa2}
 								{$rivihintalisa}
+								, hinta_alkuperainen = '{$hinta_alkuperainenlisa}'
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '{$tilausrivirow['tunnus']}'";
 					$upres = pupe_query($query);
@@ -989,6 +996,10 @@
 							$fields .= ", ".$fieldname;
 
 							switch ($fieldname) {
+								case 'hinta_alkuperainen':
+									$hinta_alkuperainenlisa = ($tilausrivirow['hinta_alkuperainen'] / ($tilausrivirow['kpl']+$tilausrivirow['varattu'])) * $ylimaaraista;
+									$values .= ", '{$hinta_alkuperainenlisa}'";
+									break;
 								case 'tilkpl':
 								case 'varattu':
 									$values .= ", '{$ylimaaraista}'";
@@ -1205,6 +1216,10 @@
 							$fields .= ", ".$fieldname;
 
 							switch ($fieldname) {
+								case 'hinta_alkuperainen':
+									$hinta_alkuperainenlisa = ($tilausrivirow['hinta_alkuperainen'] / ($tilausrivirow['kpl']+$tilausrivirow['varattu'])) * $positiivinen_arvo;
+									$values .= ", '{$hinta_alkuperainenlisa}'";
+									break;
 								case 'varattu':
 									if ($split_row['kpl'] == 0) {
 										$values .= ", '{$positiivinen_arvo}'";
@@ -1257,12 +1272,15 @@
 
 						$komm_lisa = $split_row['kpl'] + $split_row['varattu'];
 
+						$hinta_alkuperainenlisa = ($tilausrivirow['hinta_alkuperainen'] / ($split_row['kpl']+$split_row['varattu'])) * $erotus;
+
 						// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 						$query = "	UPDATE tilausrivi SET
 									{$splitlisa}
 									{$splitlisa2}
 									{$rivihintalisa}
-									kommentti = concat(kommentti,' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}')
+									kommentti = concat(kommentti,' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}'),
+									hinta_alkuperainen = '{$hinta_alkuperainenlisa}'
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '{$split_row['tunnus']}'";
 						#echo "<pre>",str_replace("\t", "", $query),"</pre>";

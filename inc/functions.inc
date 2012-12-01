@@ -13859,7 +13859,7 @@ if (!function_exists('tulosta_oslap_mg')) {
 				$tarrakoko = "{D1530,1040,1490|}";
 			}
 			else {
-				$tarrakoko = "{D1530,0400,0590|}";
+				$tarrakoko = "{D1530,0590,0400|}";
 			}
 
 			$sivu = "	*** ETIKETIN KOKO ***

@@ -13901,6 +13901,8 @@ if (!function_exists('tulosta_oslap_mg')) {
 
 		if (trim($komento) != '' and $komento != 'email') {
 			$line = exec("echo \"$sivu\" | $komento");
+
+			echo t("Osoitelappu tulostuu")."...<br>";
 		}
 	}
 }

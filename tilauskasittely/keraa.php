@@ -1881,7 +1881,7 @@
 						}
 					}
 
-					if ($yhtiorow['kerayserat'] == 'K' and $toim == "" and !($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' and $laskurow['nouto'] == '')) {
+					if ($yhtiorow['kerayserat'] == 'K' and $toim == "" and $yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y') {
 						$query = "	UPDATE lasku
 									SET alatila = 'B'
 									WHERE yhtio = '{$kukarow['yhtio']}'

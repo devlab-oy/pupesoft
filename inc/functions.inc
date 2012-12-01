@@ -13882,25 +13882,25 @@ if (!function_exists('tulosta_oslap_mg')) {
 			}
 			else {
 				$sivu = "	*** ETIKETIN KOKO ***
-							{D1530,0590,0400|}
+							{D0420,0590,0400|}
 							{AX;+000,+000,+00|}
 							{AY;+10,0|}
 							{C|}
 
 						 	*** TOIMITUSOSOITE ***
-						 	{PC000;0030,0100,1,1,A,00,B|}
+						 	{PC000;0030,0050,1,1,A,00,B|}
 							{RC000;{$toimosoite_nimi}|}
 
-						 	{PC001;0030,0150,1,1,A,00,B|}
+						 	{PC001;0030,0100,1,1,A,00,B|}
 							{RC001;{$toim_osoite}|}
 
-						 	{PC002;0030,0230,1,1,A,00,B|}
+						 	{PC002;0030,0180,1,1,A,00,B|}
 							{RC002;{$toim_postino} {$toim_postitp}|}
 
-						 	{PC003;0030,0280,1,1,A,00,B|}
+						 	{PC003;0030,0230,1,1,A,00,B|}
 							{RC003;{$ot_tilaus} {$tilriv}|}
 
-						 	{PC004;0030,0330,1,1,A,00,B|}
+						 	{PC004;0030,0280,1,1,A,00,B|}
 							{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
 							";
 			}

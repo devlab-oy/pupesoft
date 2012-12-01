@@ -1898,18 +1898,21 @@
 			$content = '';
 			$rivit   = '';
 
-			if (($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' and $laskurow['nouto'] == '') or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
+			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
 
 				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 					$wherelisa = "AND lasku.tunnus IN ({$tilausnumeroita_backup})";
+					$joinlisa  = "JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.nouto = '')";
 				}
 				else {
 					$wherelisa = "AND lasku.tunnus = '{$id}'";
+					$joinlisa  = "";
 				}
 
 				# toimitustapa ei saa olla nouto.
 				$query = "	SELECT lasku.tunnus
 							FROM lasku
+							{$joinlisa}
 							WHERE lasku.yhtio 	= '{$kukarow['yhtio']}'
 							AND lasku.tila 		= 'L'
 							AND lasku.alatila 	= 'C'

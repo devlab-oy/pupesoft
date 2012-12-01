@@ -1724,7 +1724,10 @@
 
 						if ($yhtiorow["vak_erittely"] == "K" and $yhtiorow["kerayserat"] == "K" and $vakadrkpl > 0 and $vakadr_tulostin !='' and $toim == "") {
 							//haetaan lähetteen tulostuskomento
-							$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$vakadr_tulostin'";
+							$query   = "SELECT *
+										from kirjoittimet
+										where yhtio	= '$kukarow[yhtio]'
+										and tunnus	= '$vakadr_tulostin'";
 							$kirres  = pupe_query($query);
 							$kirrow  = mysql_fetch_assoc($kirres);
 							$vakadr_komento = $kirrow['komento'];
@@ -1734,7 +1737,10 @@
 
 						if ($valittu_tulostin != "") {
 							//haetaan lähetteen tulostuskomento
-							$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$valittu_tulostin'";
+							$query   = "SELECT *
+										from kirjoittimet
+										where yhtio	= '$kukarow[yhtio]'
+										and tunnus	= '$valittu_tulostin'";
 							$kirres  = pupe_query($query);
 							$kirrow  = mysql_fetch_assoc($kirres);
 							$komento = $kirrow['komento'];
@@ -1744,10 +1750,15 @@
 
 						if ($valittu_oslapp_tulostin != "") {
 							//haetaan osoitelapun tulostuskomento
-							$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$valittu_oslapp_tulostin'";
+							$query  = "	SELECT *
+										from kirjoittimet
+										where yhtio	= '$kukarow[yhtio]'
+										and tunnus	= '$valittu_oslapp_tulostin'";
 							$kirres = pupe_query($query);
 							$kirrow = mysql_fetch_assoc($kirres);
+							
 							$oslapp = $kirrow['komento'];
+							$oslapp_mediatyyppi = $kirrow['mediatyyppi'];
 						}
 
 						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0)
@@ -1820,7 +1831,7 @@
 							if ($oslarow['osoitelappu'] == 'intrade') {
 								require('osoitelappu_intrade_pdf.inc');
 							}
-							elseif ($oslarow['osoitelappu'] == 'oslap_lamposiirto' and $yhtiorow['kerayserat'] == 'K' and $toim == "") {
+							elseif ($oslarow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K' and $toim == "") {
 
 								$query = "	SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
 											FROM kerayserat
@@ -1840,6 +1851,7 @@
 										$params = array(
 								 			'tilriv' => $pak_chk_row['otunnus'],
 								 			'komento' => $oslapp,
+											'mediatyyppi' => $oslapp_mediatyyppi,
 								 			'pakkauskoodi' => $pak_chk_row['pakkaus'],
 								 			'montako_laatikkoa_yht' => $pak_num,
 								 			'toim_nimi' => $laskurow['toim_nimi'],
@@ -1849,7 +1861,7 @@
 								 			'toim_postitp' => $laskurow['toim_postitp'],
 								 		);
 
-										tulosta_oslap_lamposiirto($params);
+										tulosta_oslap_mg($params);
 									}
 								}
 							}

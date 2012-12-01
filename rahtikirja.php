@@ -858,25 +858,41 @@
 				}
 
 				//haetaan lähetteen tulostuskomento
-				$query   = "SELECT * from kirjoittimet where yhtio = '$kukarow[yhtio]' and tunnus = '$apuprintteri'";
+				$query   = "SELECT *
+							from kirjoittimet
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$apuprintteri'";
 				$kirres  = pupe_query($query);
 				$kirrow  = mysql_fetch_assoc($kirres);
 				$komento = $kirrow['komento'];
 
 				//haetaan osoitelapun tulostuskomento
-				$query  = "SELECT * from kirjoittimet where yhtio = '$kukarow[yhtio]' and tunnus = '$rakirsyotto_oslapp_tulostin'";
+				$query  = "	SELECT *
+							from kirjoittimet
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$rakirsyotto_oslapp_tulostin'";
 				$kirres = pupe_query($query);
 				$kirrow = mysql_fetch_assoc($kirres);
+
 				$oslapp = $kirrow['komento'];
+				$oslapp_mediatyyppi = $kirrow['mediatyyppi'];
 
 				//haetaan terminaaliosoitelapun tulostuskomento
-				$query  = "SELECT * from kirjoittimet where yhtio = '$kukarow[yhtio]' and tunnus = '$rakirsyotto_termoslapp_tulostin'";
+				$query  = "	SELECT *
+							from kirjoittimet
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$rakirsyotto_termoslapp_tulostin'";
 				$kirres = pupe_query($query);
 				$kirrow = mysql_fetch_assoc($kirres);
+
 				$termoslapp = $kirrow['komento'];
+				$termooslapp_mediatyyppi = $kirrow['mediatyyppi'];
 
 				//haetaan DGD-lomakkeen tulostuskomento
-				$query  = "SELECT * from kirjoittimet where yhtio = '$kukarow[yhtio]' and tunnus = '$rakirsyotto_dgd_tulostin'";
+				$query  = "	SELECT *
+							from kirjoittimet
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$rakirsyotto_dgd_tulostin'";
 				$kirres = pupe_query($query);
 				$kirrow = mysql_fetch_assoc($kirres);
 				$dgdkomento = $kirrow['komento'];
@@ -887,7 +903,7 @@
 				$query = "	SELECT if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) email, asiakas.keraysvahvistus_lahetys
 							FROM asiakas
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$laskurow['liitostunnus']}'";
+							AND tunnus  = '{$laskurow['liitostunnus']}'";
 				$asiakas_chk_res = pupe_query($query);
 				$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
 
@@ -954,7 +970,7 @@
 					if ($toimitustaparow['osoitelappu'] == 'intrade') {
 						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 					}
-					elseif ($toimitustaparow['osoitelappu'] == 'oslap_lamposiirto' and $yhtiorow['kerayserat'] == 'K') {
+					elseif ($toimitustaparow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
 
 						$query = "	SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
 									FROM kerayserat
@@ -974,6 +990,7 @@
 								$params = array(
 						 			'tilriv' => $pak_chk_row['otunnus'],
 						 			'komento' => $oslapp,
+									'mediatyyppi' => $oslapp_mediatyyppi,
 						 			'pakkauskoodi' => $pak_chk_row['pakkaus'],
 						 			'montako_laatikkoa_yht' => $pak_num,
 						 			'toim_nimi' => $laskurow['toim_nimi'],
@@ -983,7 +1000,7 @@
 						 			'toim_postitp' => $laskurow['toim_postitp'],
 						 		);
 
-								tulosta_oslap_lamposiirto($params);
+								tulosta_oslap_mg($params);
 							}
 						}
 					}
@@ -996,7 +1013,7 @@
 			}
 
 			// Tulostetaan terminaaliosoitelappu
-			if ($rakirsyotto_termoslapp_tulostin != "" and $termoslapp != '' and $termoslappkpl > 0 and $toimitustaparow['osoitelappu'] != 'oslap_lamposiirto') {
+			if ($rakirsyotto_termoslapp_tulostin != "" and $termoslapp != '' and $termoslappkpl > 0 and $toimitustaparow['osoitelappu'] != 'oslap_mg') {
 
 				if (isset($dgdlle_tunnukset) and $dgdlle_tunnukset != "") {
 					$terminaaliosoitelaput = explode(",", $dgdlle_tunnukset);

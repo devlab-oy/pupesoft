@@ -143,7 +143,9 @@
 
 		if ($komento != "PDF_RUUDULLE") {
 			// haetaan printterille tulostuskomento
-			$query = "SELECT * from kirjoittimet where tunnus = '$kirjoitin_tunnus'";
+			$query = "	SELECT * 
+						from kirjoittimet 
+						where tunnus = '$kirjoitin_tunnus'";
 			$pres  = pupe_query($query);
 			$print = mysql_fetch_assoc($pres);
 
@@ -156,10 +158,14 @@
 		if ($valittu_rakiroslapp_tulostin != '') {
 			//haetaan osoitelapun tulostuskomento
 			if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE) {
-				$query  = "SELECT * from kirjoittimet where tunnus = '$valittu_rakiroslapp_tulostin'";
+				$query  = "	SELECT * 
+							from kirjoittimet 
+							where tunnus = '$valittu_rakiroslapp_tulostin'";
 				$kirres = pupe_query($query);
 				$kirrow = mysql_fetch_assoc($kirres);
+
 				$oslapp = $kirrow['komento'];
+				$oslapp_mediatyyppi = $kirrow['mediatyyppi'];
 			}
 		}
 
@@ -964,7 +970,7 @@
 						if ($toitarow['osoitelappu'] == 'intrade') {
 							require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 						}
-						elseif ($toimitustaparow['osoitelappu'] == 'oslap_lamposiirto' and $yhtiorow['kerayserat'] == 'K') {
+						elseif ($toimitustaparow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
 
 							$query = "	SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
 										FROM kerayserat
@@ -991,6 +997,7 @@
 									$params = array(
 							 			'tilriv' => $pak_chk_row['otunnus'],
 							 			'komento' => $oslapp,
+										'mediatyyppi' => $oslapp_mediatyyppi,
 							 			'pakkauskoodi' => $pak_chk_row['pakkaus'],
 							 			'montako_laatikkoa_yht' => $pak_num,
 							 			'toim_nimi' => $laskurow['toim_nimi'],
@@ -1000,7 +1007,7 @@
 							 			'toim_postitp' => $laskurow['toim_postitp'],
 							 		);
 
-									tulosta_oslap_lamposiirto($params);
+									tulosta_oslap_mg($params);
 								}
 							}
 						}

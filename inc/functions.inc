@@ -13836,8 +13836,8 @@ if (!function_exists('tulosta_hrx')) {
 	}
 }
 
-if (!function_exists('tulosta_oslap_lamposiirto')) {
-	function tulosta_oslap_lamposiirto($params) {
+if (!function_exists('tulosta_oslap_mg')) {
+	function tulosta_oslap_mg($params) {
 		global $kukarow, $yhtiorow;
 
 		extract($params);
@@ -13846,34 +13846,64 @@ if (!function_exists('tulosta_oslap_lamposiirto')) {
 
 		$ot_tilaus = t("Tilaus", $yhtiorow['kieli']);
 
-		$sivu = "	*** ETIKETIN KOKO ***
-					{D1530,1040,1490|}
-					{AX;+000,+000,+00|}
-					{AY;+10,0|}
-					{C|}
+		if (in_array($mediatyyppi, array('LSN149X104','LSN59X40','LS149X104','LS59X40'))) {
 
-				 	*** TOIMITUSOSOITE ***
-				 	{PC000;0070,0200,1,1,A,00,B|}
-					{RC000;{$toimosoite_nimi}|}
+			if (in_array($mediatyyppi, array('LSN149X104','LSN59X40'))) {
+				$nauha = "2";
+			}
+			else {
+				$nauha = "0";
+			}
 
-				 	{PC001;0070,0250,1,1,A,00,B|}
-					{RC001;{$toim_osoite}|}
+			if (in_array($mediatyyppi, array('LSN149X104','LS149X104'))) {
+				$tarrakoko = "{D1530,1040,1490|}";
+			}
+			else {
+				$tarrakoko = "{D1530,0400,0590|}";
+			}
 
-				 	{PC002;0070,0330,1,1,A,00,B|}
-					{RC002;{$toim_postino} {$toim_postitp}|}
+			$sivu = "	*** ETIKETIN KOKO ***
+						{$tarrakoko}
+						{AX;+000,+000,+00|}
+						{AY;+10,0|}
+						{C|}
 
-				 	{PC003;0070,0380,1,1,A,00,B|}
-					{RC003;{$ot_tilaus} {$tilriv}|}
+					 	*** TOIMITUSOSOITE ***
+					 	{PC000;0070,0200,1,1,A,00,B|}
+						{RC000;{$toimosoite_nimi}|}
 
-				 	{PC004;0070,0430,1,1,A,00,B|}
-					{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
+					 	{PC001;0070,0250,1,1,A,00,B|}
+						{RC001;{$toim_osoite}|}
 
-					*** TULOSTUS  ***
-					{XS;I,0001,0002C3010|}
-					".chr(12);
+					 	{PC002;0070,0330,1,1,A,00,B|}
+						{RC002;{$toim_postino} {$toim_postitp}|}
+
+					 	{PC003;0070,0380,1,1,A,00,B|}
+						{RC003;{$ot_tilaus} {$tilriv}|}
+
+					 	{PC004;0070,0430,1,1,A,00,B|}
+						{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
+
+						*** TULOSTUS  ***
+						{XS;I,0001,0002C3{$nauha}10|}
+						".chr(12);
+		}
+		else {
+			$sivu  = "\n\n\n";
+			$sivu .= "          ---------------------------------------------------\n";
+			$sivu .= "          {$toimosoite_nimi}\n\n";
+            $sivu .= "          {$toim_osoite}\n";
+			$sivu .= "          {$toim_postino} {$toim_postitp}\n";
+            $sivu .= "          {$ot_tilaus} {$tilriv}\n";
+            $sivu .= "          {$montako_laatikkoa_yht} {$pakkauskoodi}\n";
+			$sivu .= "          ---------------------------------------------------";
+		}
+
+		echo "<pre>$sivu</pre><br>";
+		exit;
 
 		if (trim($komento) != '' and $komento != 'email') {
-			$line = exec(" echo \"$sivu\" | $komento");
+			$line = exec("echo \"$sivu\" | $komento");
 		}
 	}
 }

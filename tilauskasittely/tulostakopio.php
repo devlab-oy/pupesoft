@@ -2097,19 +2097,19 @@
 				$kappaleet = $kappaleet == 0 ? 1 : $kappaleet;
 				$oslappkpl = $tee == 'NAYTATILAUS' ? 1 : $kappaleet;
 
-				$query = "  SELECT GROUP_CONCAT(DISTINCT if (tunnusnippu>0, concat(tunnusnippu,'/',tunnus),tunnus) ORDER BY tunnus SEPARATOR ', ') tunnukset
-							FROM lasku
-							WHERE yhtio		= '$kukarow[yhtio]'
-							and tila		= 'L'
-							and kerayslista = '$laskurow[kerayslista]'
-							and kerayslista != 0";
-				$toimresult = pupe_query($query);
-				$toimrow = mysql_fetch_assoc($toimresult);
-
-				$tilausnumeroita = $toimrow["tunnukset"];
-
 				if ($oslapp != '' or $tee == 'NAYTATILAUS') {
+					
+					$query = "  SELECT GROUP_CONCAT(DISTINCT if (tunnusnippu>0, concat(tunnusnippu,'/',tunnus),tunnus) ORDER BY tunnus SEPARATOR ', ') tunnukset
+								FROM lasku
+								WHERE yhtio		= '$kukarow[yhtio]'
+								and tila		= 'L'
+								and kerayslista = '$laskurow[kerayslista]'
+								and kerayslista != 0";
+					$toimresult = pupe_query($query);
+					$toimrow = mysql_fetch_assoc($toimresult);
 
+					$tilausnumeroita = $toimrow["tunnukset"];
+						
 					$query = "	SELECT osoitelappu
 								FROM toimitustapa
 								WHERE yhtio = '$kukarow[yhtio]'
@@ -2137,7 +2137,7 @@
 									FROM kerayserat
 									LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-									AND kerayserat.otunnus IN ({$tilausnumeroita})
+									AND kerayserat.otunnus = '{$laskurow['tunnus']}'
 									GROUP BY 1,2,3
 									ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
 						$pak_chk_res = pupe_query($query);

@@ -243,14 +243,15 @@ if ($kollityht > 0) {
 			$dpd_ds_path .= '/';
 		}
 
-		$filenimi = $dpd_ds_path."dpdimport-".md5(uniqid(rand(),true)).".dat";
-
-		//kirjoitetaan faili levylle..
-		if (file_put_contents($filenimi, $aineisto) === FALSE) {
-			echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
-		}
-
+		// Jos siirretään FTP:llä niin $dpd_ds_path on remote pathi ja jos ei siirretä niin $dpd_ds_path on local pathi
 		if ($dpd_ds_host != "" and $dpd_ds_user != "" and $dpd_ds_pass != "" and $dpd_ds_path != "") {
+
+			$filenimi = "/tmp/dpdimport-".md5(uniqid(rand(),true)).".dat";
+
+			if (file_put_contents($filenimi, $aineisto) === FALSE) {
+				echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
+			}
+
 			// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
 			// palautetaan $palautus ja $syy
 			$ftphost = $dpd_ds_host;
@@ -258,7 +259,16 @@ if ($kollityht > 0) {
 			$ftppass = $dpd_ds_pass;
 			$ftppath = $dpd_ds_path;
 			$ftpfile = realpath($filenimi);
+
 			require ("inc/ftp-send.inc");
+		}
+		else {
+			//kirjoitetaan faili levylle..
+			$filenimi = $dpd_ds_path."dpdimport-".md5(uniqid(rand(),true)).".dat";
+
+			if (file_put_contents($filenimi, $aineisto) === FALSE) {
+				echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
+			}
 		}
 	}
 	else {

@@ -1721,6 +1721,7 @@
 					$lahete_tulostus_paperille 	= 0;
 					$lahete_tulostus_emailiin 	= 0;
 					$laheteprintterinimi 		= "";
+					$onko_nouto 				= "";
 
 					while ($laskurow = mysql_fetch_assoc($lasresult)) {
 
@@ -1728,6 +1729,7 @@
 						$komento		= "";
 						$oslapp			= "";
 						$vakadr_komento = "";
+						$onko_nouto		= $laskurow['nouto'];
 
 						if ($yhtiorow["vak_erittely"] == "K" and $yhtiorow["kerayserat"] == "K" and $vakadrkpl > 0 and $vakadr_tulostin !='' and $toim == "") {
 							//haetaan lähetteen tulostuskomento
@@ -1821,7 +1823,7 @@
 							}
 						}
 
-						if (($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' and $laskurow['nouto'] == '') or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
+						if (($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' and $onko_nouto == '') or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
 							$valittu_oslapp_tulostin 	= "";
 							$oslapp 					= '';
 							$oslappkpl 					= 0;
@@ -1881,7 +1883,7 @@
 						}
 					}
 
-					if ($yhtiorow['kerayserat'] == 'K' and $toim == "" and ($yhtiorow['karayksesta_rahtikirjasyottoon'] != 'Y' or $laskurow['nouto'] != '')) {
+					if ($yhtiorow['kerayserat'] == 'K' and $toim == "" and ($yhtiorow['karayksesta_rahtikirjasyottoon'] != 'Y' or $onko_nouto != '')) {
 						$query = "	UPDATE lasku
 									SET alatila = 'B'
 									WHERE yhtio = '{$kukarow['yhtio']}'

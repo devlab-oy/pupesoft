@@ -13899,9 +13899,6 @@ if (!function_exists('tulosta_oslap_mg')) {
 			$sivu .= "          ---------------------------------------------------";
 		}
 
-		echo "<pre>$sivu</pre><br>";
-		exit;
-
 		if (trim($komento) != '' and $komento != 'email') {
 			$line = exec("echo \"$sivu\" | $komento");
 		}

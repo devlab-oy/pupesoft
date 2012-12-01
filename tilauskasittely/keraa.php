@@ -126,22 +126,8 @@
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != 'Y') {
 				$yhtiorow['karayksesta_rahtikirjasyottoon'] = '';
 			}
-			else {
-				// Nouto keississä ei mennä rahtikirjan syöttöön (paisti jos on vientiä)
-				$query = "	SELECT toimitustapa.tunnus
-							FROM lasku
-							JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa)
-							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							and lasku.tunnus  = '$id'
-							and ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) == 0) {
-					$yhtiorow['karayksesta_rahtikirjasyottoon'] = '';
-				}
-			}
 		}
-		else {
+		elseif (isset($id) and $id > 0) {
 			// Nouto keississä ei mennä rahtikirjan syöttöön (paisti jos on vientiä)
 			$query = "	SELECT toimitustapa.tunnus
 						FROM toimitustapa, lasku, maksuehto
@@ -1719,9 +1705,13 @@
 				if ($toim != 'VASTAANOTA_REKLAMAATIO') {
 					// Tulostetaan uusi lähete jos käyttäjä valitsi drop-downista printterin
 					// Paitsi jos tilauksen tila päivitettiin sellaiseksi, että lähetettä ei kuulu tulostaa
-					$query = "	SELECT lasku.*, if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) email, asiakas.keraysvahvistus_lahetys
+					$query = "	SELECT lasku.*,
+								if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) email,
+								asiakas.keraysvahvistus_lahetys,
+								toimitustapa.nouto
 								FROM lasku
 								LEFT JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
+								LEFT JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite)
 								WHERE lasku.tunnus in ($tilausnumeroita)
 								and lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.alatila in ('C','D')";
@@ -1831,7 +1821,7 @@
 							}
 						}
 
-						if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
+						if (($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' and $laskurow['nouto'] == '') or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
 							$valittu_oslapp_tulostin 	= "";
 							$oslapp 					= '';
 							$oslappkpl 					= 0;
@@ -1891,7 +1881,7 @@
 						}
 					}
 
-					if ($yhtiorow['kerayserat'] == 'K' and $toim == "" and $yhtiorow['karayksesta_rahtikirjasyottoon'] != 'Y') {
+					if ($yhtiorow['kerayserat'] == 'K' and $toim == "" and !($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' and $laskurow['nouto'] == '')) {
 						$query = "	UPDATE lasku
 									SET alatila = 'B'
 									WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1908,21 +1898,18 @@
 			$content = '';
 			$rivit   = '';
 
-			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
+			if (($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' and $laskurow['nouto'] == '') or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
 
 				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 					$wherelisa = "AND lasku.tunnus IN ({$tilausnumeroita_backup})";
-					$joinlisa = "JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.nouto = '')";
 				}
 				else {
 					$wherelisa = "AND lasku.tunnus = '{$id}'";
-					$joinlisa = "";
 				}
 
 				# toimitustapa ei saa olla nouto.
 				$query = "	SELECT lasku.tunnus
 							FROM lasku
-							{$joinlisa}
 							WHERE lasku.yhtio 	= '{$kukarow['yhtio']}'
 							AND lasku.tila 		= 'L'
 							AND lasku.alatila 	= 'C'
@@ -3193,7 +3180,7 @@
 
 				echo "<tr>";
 
-				if ($toim != 'VASTAANOTA_REKLAMAATIO' and ($yhtiorow['karayksesta_rahtikirjasyottoon'] == '' or $otsik_row["tulostustapa"] == "X") and ($otsik_row['pakkaamo'] == 0 or $yhtiorow['pakkaamolokerot'] == '')) {
+				if ($toim != 'VASTAANOTA_REKLAMAATIO' and ($yhtiorow['karayksesta_rahtikirjasyottoon'] == '' or $otsik_row["tulostustapa"] == "X" or $otsik_row["nouto"] != "") and ($otsik_row['pakkaamo'] == 0 or $yhtiorow['pakkaamolokerot'] == '')) {
 					echo "<th>".t("Osoitelappu").":</th>";
 
 					echo "<th colspan='$spanni'>";

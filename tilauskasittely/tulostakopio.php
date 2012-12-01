@@ -2099,7 +2099,10 @@
 
 				$query = "  SELECT GROUP_CONCAT(DISTINCT if (tunnusnippu>0, concat(tunnusnippu,'/',tunnus),tunnus) ORDER BY tunnus SEPARATOR ', ') tunnukset
 							FROM lasku
-							WHERE yhtio='$kukarow[yhtio]' and tila='L' and kerayslista='$laskurow[kerayslista]' and kerayslista != 0";
+							WHERE yhtio		= '$kukarow[yhtio]'
+							and tila		= 'L'
+							and kerayslista = '$laskurow[kerayslista]'
+							and kerayslista != 0";
 				$toimresult = pupe_query($query);
 				$toimrow = mysql_fetch_assoc($toimresult);
 
@@ -2107,16 +2110,63 @@
 
 				if ($oslapp != '' or $tee == 'NAYTATILAUS') {
 
-					$query = "SELECT osoitelappu FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
+					$query = "	SELECT osoitelappu
+								FROM toimitustapa
+								WHERE yhtio = '$kukarow[yhtio]'
+								and selite  = '$laskurow[toimitustapa]'";
 					$oslares = pupe_query($query);
 					$oslarow = mysql_fetch_assoc($oslares);
 
 					if ($oslarow['osoitelappu'] == 'intrade') {
 						require('osoitelappu_intrade_pdf.inc');
 					}
+					elseif ($oslarow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
+
+						// Yritetään komennon avulla löytää oikea tulostin....
+						$query  = "	SELECT mediatyyppi
+									FROM kirjoittimet
+									WHERE yhtio	= '$kukarow[yhtio]'
+									AND komento	= '".mysql_real_escape_string($oslapp)."'
+									LIMIT 1";
+						$kirres = pupe_query($query);
+						$kirrow = mysql_fetch_assoc($kirres);
+
+						$oslapp_mediatyyppi = $kirrow['mediatyyppi'];
+
+						$query = "	SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
+									FROM kerayserat
+									LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+									AND kerayserat.otunnus IN ({$tilausnumeroita})
+									GROUP BY 1,2,3
+									ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
+						$pak_chk_res = pupe_query($query);
+
+						$pak_num = mysql_num_rows($pak_chk_res);
+
+						while ($pak_chk_row = mysql_fetch_assoc($pak_chk_res)) {
+
+							for ($i = 1; $i <= $oslappkpl; $i++) {
+
+								$params = array(
+						 			'tilriv' => $pak_chk_row['otunnus'],
+						 			'komento' => $oslapp,
+									'mediatyyppi' => $oslapp_mediatyyppi,
+						 			'pakkauskoodi' => $pak_chk_row['pakkaus'],
+						 			'montako_laatikkoa_yht' => $pak_num,
+						 			'toim_nimi' => $laskurow['toim_nimi'],
+						 			'toim_nimitark' => $laskurow['toim_nimitark'],
+						 			'toim_osoite' => $laskurow['toim_osoite'],
+						 			'toim_postino' => $laskurow['toim_postino'],
+						 			'toim_postitp' => $laskurow['toim_postitp'],
+						 		);
+
+								tulosta_oslap_mg($params);
+							}
+						}
+					}
 					else {
 						require ("osoitelappu_pdf.inc");
-
 					}
 				}
 				$tee = '';

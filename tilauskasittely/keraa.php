@@ -3173,7 +3173,7 @@
 
 				echo "<tr>";
 
-				if ($toim != 'VASTAANOTA_REKLAMAATIO' and ($yhtiorow['karayksesta_rahtikirjasyottoon'] == '' or $otsik_row["tulostustapa"] == "X") and ($otsik_row['pakkaamo'] == 0 or $yhtiorow['pakkaamolokerot'] == '')) {
+				if ($toim != 'VASTAANOTA_REKLAMAATIO' and ($yhtiorow['karayksesta_rahtikirjasyottoon'] == '' or $otsik_row["tulostustapa"] == "X" or $otsik_row["nouto"] != "") and ($otsik_row['pakkaamo'] == 0 or $yhtiorow['pakkaamolokerot'] == '')) {
 					echo "<th>".t("Osoitelappu").":</th>";
 
 					echo "<th colspan='$spanni'>";

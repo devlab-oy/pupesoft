@@ -13915,25 +13915,25 @@ if (!function_exists('tulosta_oslap_mg')) {
 
 				echo t("Osoitelappu tulostuu")."...<br>";
 			}
-		}
-		else {
-			$sivu  = "\n\n\n";
-			$sivu .= "          --------------------------------------------------\n";
-			$sivu .= "          {$toimosoite_nimi}\n\n";
-            $sivu .= "          {$toim_osoite}\n";
-			$sivu .= "          {$toim_postino} {$toim_postitp}\n";
-            $sivu .= "          {$ot_tilaus} {$tilriv}\n";
-            $sivu .= "          {$montako_laatikkoa_yht} {$pakkauskoodi}\n";
-			$sivu .= "          --------------------------------------------------";
+			else {
+				$sivu  = "\n\n\n";
+				$sivu .= "          --------------------------------------------------\n";
+				$sivu .= "          {$toimosoite_nimi}\n\n";
+	            $sivu .= "          {$toim_osoite}\n";
+				$sivu .= "          {$toim_postino} {$toim_postitp}\n";
+	            $sivu .= "          {$ot_tilaus} {$tilriv}\n";
+	            $sivu .= "          {$montako_laatikkoa_yht} {$pakkauskoodi}\n";
+				$sivu .= "          --------------------------------------------------";
 
-			$tempfile = tempnam("/tmp", "oslap");
-			file_put_contents($tempfile, $sivu);
+				$tempfile = tempnam("/tmp", "oslap");
+				file_put_contents($tempfile, $sivu);
 
-			$line = exec("a2ps -o $tempfile.ps -R --medium=A4 --chars-per-line=80 --columns=1 --margin=1 --borders=0 $tempfile");
+				$line = exec("a2ps -o $tempfile.ps -R --medium=A4 --chars-per-line=80 --columns=1 --margin=1 --borders=0 $tempfile");
 
-			$line = exec("$komento $tempfile.ps");
+				$line = exec("$komento $tempfile.ps");
 
-			echo t("Osoitelappu tulostuu")."...<br>";
+				echo t("Osoitelappu tulostuu")."...<br>";
+			}
 		}
 	}
 }

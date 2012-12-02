@@ -4,29 +4,33 @@ if (@include_once("pdflib/phppdflib.class.php"));
 else include_once("phppdflib.class.php");
 
 if ($kieli == '') {
-	$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
+	$querykiel = "	SELECT kieli
+					FROM asiakas
+					WHERE yhtio = '$kukarow[yhtio]'
+					and ytunnus = '$laskurow[ytunnus]'";
 	$kielresult = pupe_query($querykiel);
 	$kielrow = mysql_fetch_assoc($kielresult);
+
 	$kieli = strtolower($kielrow['kieli']);
 }
 
-$norm["height"] 		= 10;
-$norm["font"] 			= "Times-Roman";
+$norm["height"] 	   = 10;
+$norm["font"] 		   = "Times-Roman";
 
-$pieni["height"] 		= 8;
-$pieni["font"] 			= "Times-Roman";
+$pieni["height"] 	   = 8;
+$pieni["font"] 		   = "Times-Roman";
 
-$boldi["height"] 		= 10;
-$boldi["font"] 			= "Times-Bold";
+$boldi["height"] 	   = 10;
+$boldi["font"] 		   = "Times-Bold";
 
-$pieni_boldi["height"] 	= 8;
-$pieni_boldi["font"] 	= "Times-Bold";
+$pieni_boldi["height"] = 8;
+$pieni_boldi["font"]   = "Times-Bold";
 
-$iso["height"] 			= 14;
-$iso["font"] 			= "Helvetica-Bold";
+$iso["height"] 		   = 14;
+$iso["font"] 		   = "Helvetica-Bold";
 
-$rectparam["width"] 	= 0.3;
-$rivinkorkeus			= 15;
+$rectparam["width"]    = 0.3;
+$rivinkorkeus		   = 15;
 
 //muutamat funktiot...
 if (!function_exists('alku_lahete')) {
@@ -654,7 +658,7 @@ if (!function_exists('uusi_sivu_lahete')) {
 
 		// Luodaan muuttujat
 		extract($params);
-		
+
 		$lahetetyyppi_avainsana = t_avainsana("LAHETETYYPPI", "", " and selite='$lahetetyyppi'", "", "", "selitetark_2");
 
 		$thispage = $pdf->new_page("a4");
@@ -784,14 +788,14 @@ if (!function_exists('uusi_sivu_lahete')) {
 			// $pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 						$thispage, $pieni);
 			// $pdf->draw_text(310, 761, $asrow["asiakasnro"], 							$thispage, $norm);
 			$pdf->draw_text(430, 771, t("P‰iv‰ys", $kieli), 							$thispage, $pieni);
-			
+
 			if ($lahetetyyppi_avainsana == 1) { # Ei kellonaikaa
 				$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"], "pitka"), 	$thispage, $norm);
 			}
 			else {
 				$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"]), 	$thispage, $norm);
 			}
-			
+
 			# viivakoodi
 			$data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
 			$image = $pdf->jfif_embed($data);
@@ -1268,6 +1272,12 @@ if (!function_exists('rivi_lahete')) {
 
 		// Trimmataan
 		$row["kommentti"] = trim($row["kommentti"]);
+
+		// Otetaan yhteens‰kommentti pois l‰hetteelt‰ (t‰m‰ tieto lˆytyy rivilt‰ jos tilaus on laskutettu, mutta l‰hetteell‰ sit‰ ei voi n‰ytt‰‰)
+		$row["kommentti"] = preg_replace("/ ".t("yhteens‰", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+		$row["kommentti"] = preg_replace("/ ".t("yhteens‰", $asrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+		$row["kommentti"] = preg_replace("/ ".t("yhteens‰").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+		$row["kommentti"] = preg_replace("/ "."yhteens‰".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
 
 		//Kommentissa voi olla jotain sanoja jotka pit‰‰ k‰‰‰nt‰‰:
 		if ($kieli != $yhtiorow["kieli"]) {

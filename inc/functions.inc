@@ -17082,7 +17082,10 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		$otunnus = $laskurow["tunnus"];
 
 		//hatetaan asiakkaan lähetetyyppi
-		$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
+		$query = "  SELECT luokka, puhelin,
+					if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
+					asiakasnro as asiakasnro_aito,
+					kieli
 					FROM asiakas
 					WHERE tunnus = '$laskurow[liitostunnus]' and yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);

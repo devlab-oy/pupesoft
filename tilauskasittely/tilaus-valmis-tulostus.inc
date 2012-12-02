@@ -197,7 +197,12 @@
 		require_once ("tulosta_lahete_kerayslista.inc");
 
 		//haetaan asiakkaan tiedot
-		$query = "  SELECT luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro, kerayserat
+		$query = "  SELECT luokka,
+					puhelin,
+					if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
+					asiakasnro as asiakasnro_aito,
+					kerayserat,
+					kieli
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 		$riresult = mysql_query($query) or pupe_error($query);

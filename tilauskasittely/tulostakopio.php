@@ -1913,7 +1913,12 @@
 				$tilausnumeroita = $otunnus;
 
 				//haetaan asiakkaan tiedot
-				$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
+				$query = "  SELECT luokka,
+							puhelin,
+							if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
+							asiakasnro as asiakasnro_aito,
+							kerayserat,
+							kieli
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = pupe_query($query);
@@ -2098,7 +2103,7 @@
 				$oslappkpl = $tee == 'NAYTATILAUS' ? 1 : $kappaleet;
 
 				if ($oslapp != '' or $tee == 'NAYTATILAUS') {
-					
+
 					$query = "  SELECT GROUP_CONCAT(DISTINCT if (tunnusnippu>0, concat(tunnusnippu,'/',tunnus),tunnus) ORDER BY tunnus SEPARATOR ', ') tunnukset
 								FROM lasku
 								WHERE yhtio		= '$kukarow[yhtio]'
@@ -2109,7 +2114,7 @@
 					$toimrow = mysql_fetch_assoc($toimresult);
 
 					$tilausnumeroita = $toimrow["tunnukset"];
-						
+
 					$query = "	SELECT osoitelappu
 								FROM toimitustapa
 								WHERE yhtio = '$kukarow[yhtio]'

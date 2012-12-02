@@ -2066,7 +2066,10 @@
 		else {
 			echo "<font class='head'>".t("Syötä rahtikirjan tiedot")."</font><hr>";
 
-			$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$id'";
+			$query = "	SELECT * 
+						from lasku 
+						where yhtio = '$kukarow[yhtio]' 
+						and tunnus  = '$id'";
 			$resul = pupe_query($query);
 
 			if (mysql_num_rows($resul) == 0) {
@@ -2297,10 +2300,19 @@
 
 			echo "<input value='$rahtisopimus' type='text' name='rahtisopimus' size='20'></td></tr>";
 
+			$varastolisa = "";
+			
+			// Jos laskulle on valittu lähtö, niin tulostuspaikkaa EI voi vaihtaa, silloin homma menee jumiin.
+			if ($otsik["toimitustavan_lahto"] > 0) {
+				$varastolisa = " and tunnus = {$otsik["varasto"]} ";
+			}
+
 			// haetaan kaikki varastot
 			$query  = "	SELECT tunnus, nimitys
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND tyyppi != 'P'
+						{$varastolisa}
 						ORDER BY tyyppi, nimitys";
 			$result = pupe_query($query);
 
@@ -2311,10 +2323,14 @@
 
 				echo "<td><select name='tulostuspaikka'>";
 
-				$query = "SELECT tulostuspaikka from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$id' limit 1";
+				$query = "	SELECT tulostuspaikka 
+							FROM rahtikirjat 
+							WHERE yhtio		= '$kukarow[yhtio]' 
+							AND otsikkonro	= '$id' 
+							LIMIT 1";
 				$rarrr = pupe_query($query);
 
-				if (mysql_num_rows($rarrr)==1) {
+				if (mysql_num_rows($rarrr) == 1) {
 					$roror          = mysql_fetch_assoc($rarrr);
 					$tulostuspaikka = $roror['tulostuspaikka'];
 				}

@@ -13926,7 +13926,7 @@ if (!function_exists('tulosta_oslap_mg')) {
             $sivu .= "          {$montako_laatikkoa_yht} {$pakkauskoodi}\n";
 			$sivu .= "          --------------------------------------------------";
 
-			$tempfile = tmpfile();
+			$tempfile = tempnam("/tmp", "oslap");
 			file_put_contents($tempfile, $sivu);
 
 			$line = exec("a2ps -o $tempfile.ps -R --medium=A4 --chars-per-line=80 --columns=1 --margin=1 --borders=0 $tempfile");

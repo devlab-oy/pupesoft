@@ -243,6 +243,9 @@
 		}
 	}
 
+	// Ei kaaduta erroriin jos jostain syystä tullaan tyhjällä
+	if ($otunnukset == "") $otunnukset = 0;
+
 	// Haetaan tulostetut tilaukset
 	if ($toitarow['erittely'] == 'k') {
 		$query = "	SELECT asiakkaan_tilausnumero, nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_ovttunnus, toim_postitp, tunnus, ytunnus

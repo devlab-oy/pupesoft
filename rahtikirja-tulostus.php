@@ -143,8 +143,8 @@
 
 		if ($komento != "PDF_RUUDULLE") {
 			// haetaan printterille tulostuskomento
-			$query = "	SELECT * 
-						from kirjoittimet 
+			$query = "	SELECT *
+						from kirjoittimet
 						where tunnus = '$kirjoitin_tunnus'";
 			$pres  = pupe_query($query);
 			$print = mysql_fetch_assoc($pres);
@@ -158,8 +158,8 @@
 		if ($valittu_rakiroslapp_tulostin != '') {
 			//haetaan osoitelapun tulostuskomento
 			if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE) {
-				$query  = "	SELECT * 
-							from kirjoittimet 
+				$query  = "	SELECT *
+							from kirjoittimet
 							where tunnus = '$valittu_rakiroslapp_tulostin'";
 				$kirres = pupe_query($query);
 				$kirrow = mysql_fetch_assoc($kirres);
@@ -411,8 +411,8 @@
 		}
 
 		$kopiotulostuksen_otsikot = array();
-
 		$kaikki_lotsikot_per_toimitus = '';
+
 		while ($rakir_row = mysql_fetch_assoc($rakir_res)) {
 			// muutama muuttuja tarvitaan
 			$pakkaus       		= array();
@@ -786,7 +786,7 @@
 					$kaikki_lotsikot_per_toimitus .= $doit . ", ";
 				}
 
-				$kaikki_lotsikot = substr($kaikki_lotsikot ,0 ,-2);
+				$kaikki_lotsikot = substr($kaikki_lotsikot, 0, -2);
 
 				if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
 
@@ -1020,14 +1020,14 @@
 			if (!isset($nayta_pdf) and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) echo "<br>";
 		} // end while haetaan kaikki distinct rahtikirjat..
 
-
-		if ($toitarow['erittely'] == 't') {
-			$kaikki_lotsikot_per_toimitus = substr($kaikki_lotsikot_per_toimitus ,0 ,-2);//poistetaan pilkku ja välilyönti viimosen perästä
+		if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "") {
+			$kaikki_lotsikot_per_toimitus = substr($kaikki_lotsikot_per_toimitus ,0 ,-2); //poistetaan pilkku ja välilyönti viimosen perästä
 			$otunnukset_temp = $otunnukset;
 			$otunnukset = $kaikki_lotsikot_per_toimitus;
 			require("tilauskasittely/rahtikirja_erittely_pdf.inc");
 			$otunnukset = $otunnukset_temp;
 		}
+
 		// poistetaan lukko
 		$query = "UNLOCK TABLES";
 		$res   = pupe_query($query);

@@ -40,7 +40,20 @@
 
 			if ($toitarow['erittely'] != 'k') {
 				$pdf->draw_text(302, 797, $toitarow['selite'], $firstpage, $kirj);
-				$pdf->draw_text(302, 782, date("d.m.Y H:i:s"), $firstpage, $kirj);
+
+				if (isset($laskurow["toimitustavan_lahto"]) and $laskurow["toimitustavan_lahto"] > 0) {
+					$query = "	SELECT pvm, lahdon_kellonaika
+								FROM lahdot
+								WHERE yhtio = '{$kukarow["yhtio"]}'
+								AND tunnus = '{$laskurow["toimitustavan_lahto"]}'";
+					$chk_res = pupe_query($query);
+					$chk_row = mysql_fetch_assoc($chk_res);
+
+					$pdf->draw_text(302, 782, tv1dateconv($chk_row["pvm"]." ".$chk_row["lahdon_kellonaika"]), $firstpage, $kirj);
+				}
+				else {
+					$pdf->draw_text(302, 782, date("d.m.Y H:i:s"), $firstpage, $kirj);
+				}
 			}
 
 			return array(780, $firstpage);
@@ -267,11 +280,12 @@
 					toim_postitp,
 					ytunnus,
 					liitostunnus,
+					toimitustavan_lahto,
 					group_concat(tunnus) tunnus
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus in ($otunnukset)
-					GROUP BY nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, ytunnus, liitostunnus
+					GROUP BY nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, ytunnus, liitostunnus, toimitustavan_lahto
 					ORDER BY ytunnus, tunnus";
 	}
 

@@ -580,16 +580,18 @@
 				//tulostetaan failit ja valitaan sopivat printterit
 				if ($laskurow["varasto"] == '') {
 					$query = "	SELECT *
-								from varastopaikat
-								where yhtio='$kukarow[yhtio]' AND tyyppi != 'P'
-								order by alkuhyllyalue,alkuhyllynro
-								limit 1";
+								FROM varastopaikat
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tyyppi != 'P'
+								ORDER BY alkuhyllyalue,alkuhyllynro
+								LIMIT 1";
 				}
 				else {
 					$query = "	SELECT *
-								from varastopaikat
-								where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
-								order by alkuhyllyalue,alkuhyllynro";
+								FROM varastopaikat
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus  = '$laskurow[varasto]'
+								ORDER BY alkuhyllyalue,alkuhyllynro";
 				}
 				$prires = mysql_query($query) or pupe_error($query);
 
@@ -597,7 +599,7 @@
 					$prirow = mysql_fetch_array($prires);
 
 					if (!isset($valittu_tulostin) or $valittu_tulostin == "oletukselle") {
-						$apuprintteri = $prirow['printteri1']; // läheteprintteri
+						$apuprintteri = $prirow['printteri0']; // keräyslistaprintteri
 					}
 					else {
 						$apuprintteri = $valittu_tulostin;

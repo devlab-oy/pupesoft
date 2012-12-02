@@ -13842,86 +13842,96 @@ if (!function_exists('tulosta_oslap_mg')) {
 
 		extract($params);
 
-		$toimosoite_nimi = trim($toim_nimi.' '.$toim_nimitark);
+		if (trim($komento) != '' and $komento != 'email') {
 
-		$ot_tilaus = t("Tilaus", $yhtiorow['kieli']);
+			$toimosoite_nimi = trim($toim_nimi.' '.$toim_nimitark);
 
-		if (in_array($mediatyyppi, array('LSN149X104','LSN59X40','LS149X104','LS59X40'))) {
+			$ot_tilaus = t("Tilaus", $yhtiorow['kieli']);
 
-			if (in_array($mediatyyppi, array('LSN149X104','LSN59X40'))) {
-				$nauha = "2";
+			if (in_array($mediatyyppi, array('LSN149X104','LSN59X40','LS149X104','LS59X40'))) {
+
+				if (in_array($mediatyyppi, array('LSN149X104','LSN59X40'))) {
+					$nauha = "2";
+				}
+				else {
+					$nauha = "0";
+				}
+
+				if (in_array($mediatyyppi, array('LSN149X104','LS149X104'))) {
+
+					$sivu = "	*** ETIKETIN KOKO ***
+								{D1530,1040,1490|}
+								{AX;+000,+000,+00|}
+								{AY;+10,0|}
+								{C|}
+
+							 	*** TOIMITUSOSOITE ***
+							 	{PC000;0070,0200,1,1,A,00,B|}
+								{RC000;{$toimosoite_nimi}|}
+
+							 	{PC001;0070,0250,1,1,A,00,B|}
+								{RC001;{$toim_osoite}|}
+
+							 	{PC002;0070,0330,1,1,A,00,B|}
+								{RC002;{$toim_postino} {$toim_postitp}|}
+
+							 	{PC003;0070,0380,1,1,A,00,B|}
+								{RC003;{$ot_tilaus} {$tilriv}|}
+
+							 	{PC004;0070,0430,1,1,A,00,B|}
+								{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
+								";
+				}
+				else {
+					$sivu = "	*** ETIKETIN KOKO ***
+								{D0420,0590,0400|}
+								{AX;+000,+000,+00|}
+								{AY;+10,0|}
+								{C|}
+
+							 	*** TOIMITUSOSOITE ***
+							 	{PC000;0030,0050,1,1,A,00,B|}
+								{RC000;{$toimosoite_nimi}|}
+
+							 	{PC001;0030,0100,1,1,A,00,B|}
+								{RC001;{$toim_osoite}|}
+
+							 	{PC002;0030,0180,1,1,A,00,B|}
+								{RC002;{$toim_postino} {$toim_postitp}|}
+
+							 	{PC003;0030,0230,1,1,A,00,B|}
+								{RC003;{$ot_tilaus} {$tilriv}|}
+
+							 	{PC004;0030,0280,1,1,A,00,B|}
+								{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
+								";
+				}
+
+				$sivu .= "	*** TULOSTUS  ***
+							{XS;I,0001,0002C3{$nauha}10|}
+							".chr(12);
+
+				$line = exec("echo \"$sivu\" | $komento");
+
+				echo t("Osoitelappu tulostuu")."...<br>";
 			}
-			else {
-				$nauha = "0";
-			}
-
-			if (in_array($mediatyyppi, array('LSN149X104','LS149X104'))) {
-
-				$sivu = "	*** ETIKETIN KOKO ***
-							{D1530,1040,1490|}
-							{AX;+000,+000,+00|}
-							{AY;+10,0|}
-							{C|}
-
-						 	*** TOIMITUSOSOITE ***
-						 	{PC000;0070,0200,1,1,A,00,B|}
-							{RC000;{$toimosoite_nimi}|}
-
-						 	{PC001;0070,0250,1,1,A,00,B|}
-							{RC001;{$toim_osoite}|}
-
-						 	{PC002;0070,0330,1,1,A,00,B|}
-							{RC002;{$toim_postino} {$toim_postitp}|}
-
-						 	{PC003;0070,0380,1,1,A,00,B|}
-							{RC003;{$ot_tilaus} {$tilriv}|}
-
-						 	{PC004;0070,0430,1,1,A,00,B|}
-							{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
-							";
-			}
-			else {
-				$sivu = "	*** ETIKETIN KOKO ***
-							{D0420,0590,0400|}
-							{AX;+000,+000,+00|}
-							{AY;+10,0|}
-							{C|}
-
-						 	*** TOIMITUSOSOITE ***
-						 	{PC000;0030,0050,1,1,A,00,B|}
-							{RC000;{$toimosoite_nimi}|}
-
-						 	{PC001;0030,0100,1,1,A,00,B|}
-							{RC001;{$toim_osoite}|}
-
-						 	{PC002;0030,0180,1,1,A,00,B|}
-							{RC002;{$toim_postino} {$toim_postitp}|}
-
-						 	{PC003;0030,0230,1,1,A,00,B|}
-							{RC003;{$ot_tilaus} {$tilriv}|}
-
-						 	{PC004;0030,0280,1,1,A,00,B|}
-							{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
-							";
-			}
-
-			$sivu .= "	*** TULOSTUS  ***
-						{XS;I,0001,0002C3{$nauha}10|}
-						".chr(12);
 		}
 		else {
 			$sivu  = "\n\n\n";
-			$sivu .= "          ---------------------------------------------------\n";
+			$sivu .= "          --------------------------------------------------\n";
 			$sivu .= "          {$toimosoite_nimi}\n\n";
             $sivu .= "          {$toim_osoite}\n";
 			$sivu .= "          {$toim_postino} {$toim_postitp}\n";
             $sivu .= "          {$ot_tilaus} {$tilriv}\n";
             $sivu .= "          {$montako_laatikkoa_yht} {$pakkauskoodi}\n";
-			$sivu .= "          ---------------------------------------------------";
-		}
+			$sivu .= "          --------------------------------------------------";
 
-		if (trim($komento) != '' and $komento != 'email') {
-			$line = exec("echo \"$sivu\" | $komento");
+			$tempfile = tmpfile();
+			file_put_contents($tempfile, $sivu);
+
+			$line = exec("a2ps -o $tempfile.ps -R --medium=A4 --chars-per-line=80 --columns=1 --margin=1 --borders=0 $tempfile");
+
+			$line = exec("$komento $tempfile.ps");
 
 			echo t("Osoitelappu tulostuu")."...<br>";
 		}

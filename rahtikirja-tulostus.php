@@ -197,6 +197,7 @@
 					etaisyydet READ,
 					kirjoittimet READ,
 					kuka READ,
+					lahdot READ,
 					lasku WRITE,
 					laskun_lisatiedot READ,
 					liitetiedostot READ,

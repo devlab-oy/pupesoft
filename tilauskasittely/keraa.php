@@ -3278,9 +3278,8 @@
 			}
 		}
 
-		if (isset($rahtikirjaan) and $rahtikirjaan == 'mennaan') {
-			$muutoslisa = ($yhtiorow['kerayserat'] == 'K' and $toim == "" and $yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y') ? 'yes' : '';
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}rahtikirja.php?toim=lisaa&id=$id&rakirno=$id&tunnukset=$tilausnumeroita&mista=keraa.php&muutos={$muutoslisa}'>";
+		if (isset($rahtikirjaan) and $rahtikirjaan == 'mennaan') {			
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}rahtikirja.php?toim=lisaa&id=$id&rakirno=$id&tunnukset=$tilausnumeroita&mista=keraa.php'>";
 		}
 
 		require ("inc/footer.inc");

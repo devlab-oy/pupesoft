@@ -178,6 +178,11 @@
 		$tila = 'L';
 	}
 
+	// Jos kerayserät on päällä ja tilaus on jäänyt tänne, niin triggeröidään muutos-muuttuja koska keröyksessä tilaukselle on jo auto-insertöity rahtikirjan tiedot.
+	if ($yhtiorow['kerayserat'] == 'K' and $tila == "L") {
+		$muutos = 'yes';
+	}
+
 	if ($toimtila != '') {
 		$tila = $toimtila;
 	}
@@ -2066,9 +2071,9 @@
 		else {
 			echo "<font class='head'>".t("Syötä rahtikirjan tiedot")."</font><hr>";
 
-			$query = "	SELECT * 
-						from lasku 
-						where yhtio = '$kukarow[yhtio]' 
+			$query = "	SELECT *
+						from lasku
+						where yhtio = '$kukarow[yhtio]'
 						and tunnus  = '$id'";
 			$resul = pupe_query($query);
 
@@ -2301,7 +2306,7 @@
 			echo "<input value='$rahtisopimus' type='text' name='rahtisopimus' size='20'></td></tr>";
 
 			$varastolisa = "";
-			
+
 			// Jos laskulle on valittu lähtö, niin tulostuspaikkaa EI voi vaihtaa, silloin homma menee jumiin.
 			if ($otsik["toimitustavan_lahto"] > 0) {
 				$varastolisa = " and tunnus = {$otsik["varasto"]} ";
@@ -2310,7 +2315,7 @@
 			// haetaan kaikki varastot
 			$query  = "	SELECT tunnus, nimitys
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]' 
+						WHERE yhtio = '$kukarow[yhtio]'
 						AND tyyppi != 'P'
 						{$varastolisa}
 						ORDER BY tyyppi, nimitys";
@@ -2323,10 +2328,10 @@
 
 				echo "<td><select name='tulostuspaikka'>";
 
-				$query = "	SELECT tulostuspaikka 
-							FROM rahtikirjat 
-							WHERE yhtio		= '$kukarow[yhtio]' 
-							AND otsikkonro	= '$id' 
+				$query = "	SELECT tulostuspaikka
+							FROM rahtikirjat
+							WHERE yhtio		= '$kukarow[yhtio]'
+							AND otsikkonro	= '$id'
 							LIMIT 1";
 				$rarrr = pupe_query($query);
 

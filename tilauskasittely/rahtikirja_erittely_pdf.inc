@@ -49,7 +49,7 @@
 					$chk_res = pupe_query($query);
 					$chk_row = mysql_fetch_assoc($chk_res);
 
-					$pdf->draw_text(302, 782, tv1dateconv($chk_row["pvm"]." ".$chk_row["lahdon_kellonaika"]), $firstpage, $kirj);
+					$pdf->draw_text(302, 782, tv1dateconv($chk_row["pvm"]." ".$chk_row["lahdon_kellonaika"], "P"), $firstpage, $kirj);
 				}
 				else {
 					$pdf->draw_text(302, 782, date("d.m.Y H:i:s"), $firstpage, $kirj);
@@ -91,13 +91,15 @@
 			static $edytunnus, $kala1;
 
 			$otsikot = FALSE;
+			$summatmenijo = FALSE;
 
 			// Uusi sivu
 			if (!isset($pdf) or $kala < 150 or ($toitarow['erittely'] == 'k' and isset($edytunnus) and $edytunnus != $laskurow['ytunnus'])) {
 
 				if ($kala < 150) {
-					// Piiretään edelliselle sivulle sopivan kokonen laatikko
-					$pdf->draw_rectangle($kala1, 60, $kala-22, 540,	$firstpage, $rectparam);
+					// Piiretään edelliselle sivulle summatiedot
+					list($kala, $kollityht, $kilotyht, $lavametriyht) = loppu_erittely($kala1, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht);
+					$summatmenijo = TRUE;
 				}
 				elseif ($toitarow['erittely'] == 'k' and isset($edytunnus) and $edytunnus != $laskurow['ytunnus']) {
 					// Piiretään edelliselle sivulle summatiedot
@@ -109,7 +111,7 @@
 			}
 
 			// Asiakas vaihtuu, uudet otsikkotiedot
-			if ($toitarow['erittely'] != 'k' and isset($edytunnus) and $edytunnus != $laskurow['ytunnus']) {
+			if (!$summatmenijo and $toitarow['erittely'] != 'k' and isset($edytunnus) and $edytunnus != $laskurow['ytunnus']) {
 				// Piiretään sivulle summatiedot
 				list($kala, $kollityht, $kilotyht, $lavametriyht) = loppu_erittely($kala1, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht);
 				$otsikot = TRUE;
@@ -291,44 +293,47 @@
 
 	$result = mysql_query($query) or pupe_error($query);
 
-	$kala		  = 780;
-	$firstpage 	  = 0;
-	$kollityht	  = 0;
-	$kilotyht	  = 0;
-	$lavametriyht = 0;
-	$rivimaara 	  = mysql_num_rows($result);
-	$lask 		  = 0;
-	$vikarivi	  = FALSE;
+	if (mysql_num_rows($result) > 0) {
 
-	while ($laskurow = mysql_fetch_assoc($result)) {
-		$lask++;
-		if ($lask == $rivimaara) $vikarivi = TRUE;
+		$kala		  = 780;
+		$firstpage 	  = 0;
+		$kollityht	  = 0;
+		$kilotyht	  = 0;
+		$lavametriyht = 0;
+		$rivimaara 	  = mysql_num_rows($result);
+		$lask 		  = 0;
+		$vikarivi	  = FALSE;
 
-		list($kala, $firstpage, $kollityht, $kilotyht, $lavametriyht) = rivi_erittely($laskurow, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht, $vikarivi);
-	}
+		while ($laskurow = mysql_fetch_assoc($result)) {
+			$lask++;
+			if ($lask == $rivimaara) $vikarivi = TRUE;
 
-	//keksitään uudelle failille joku varmasti uniikki nimi:
-	$pdffilenimi = "/tmp/rahtikirjaerittely-".md5(uniqid(rand(),true)).".pdf";
+			list($kala, $firstpage, $kollityht, $kilotyht, $lavametriyht) = rivi_erittely($laskurow, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht, $vikarivi);
+		}
 
-	//kirjoitetaan pdf faili levylle..
-	$fh = fopen($pdffilenimi, "w");
-	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
-	fclose($fh);
+		//keksitään uudelle failille joku varmasti uniikki nimi:
+		$pdffilenimi = "/tmp/rahtikirjaerittely-".md5(uniqid(rand(),true)).".pdf";
 
-	if ($tee == 'NAYTATILAUS') {
-		//Työnnetään tuo pdf vaan putkeen!
-		echo file_get_contents($pdffilenimi);
-	}
-	else {
-		if ($kirjoitin == "email") {
-			$liite = $pdffilenimi;
-			$kutsu = "PDF-erittely";
-			require("inc/sahkoposti.inc");
+		//kirjoitetaan pdf faili levylle..
+		$fh = fopen($pdffilenimi, "w");
+		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+		fclose($fh);
+
+		if ($tee == 'NAYTATILAUS') {
+			//Työnnetään tuo pdf vaan putkeen!
+			echo file_get_contents($pdffilenimi);
 		}
 		else {
-			//itse print komento...
-			$line = exec("$kirjoitin $pdffilenimi");
+			if ($kirjoitin == "email") {
+				$liite = $pdffilenimi;
+				$kutsu = "PDF-erittely";
+				require("inc/sahkoposti.inc");
+			}
+			else {
+				//itse print komento...
+				$line = exec("$kirjoitin $pdffilenimi");
+			}
 		}
-	}
 
-	system("rm -f $pdffilenimi");
+		system("rm -f $pdffilenimi");
+	}

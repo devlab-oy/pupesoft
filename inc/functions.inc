@@ -13404,8 +13404,6 @@ if (!function_exists("palauta_vak_tiedot")) {
 					$tuotepainot_yht = $return_params['tuotepainot_yht'];
 					$vaktuotetiedot = $return_params['vaktuotetiedot'];
 					$max_ltq_til = $return_params['max_ltq_til'];
-
-					$eramaara = ceil($row["kpl"]/$row["era"]);
 				}
 
 				if ($num_rows == $i_rows or (isset($edrow[$vak_kentta]) and $row[$vak_kentta] != $edrow[$vak_kentta])) {
@@ -13460,7 +13458,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 				if (isset($edrow[$vak_kentta]) and $row[$vak_kentta] != $edrow[$vak_kentta]) {
 					$params = array(
-						'row' => $edrow,
+						'row' => $row,
 						'kieli' => $kieli,
 						'vaktuotetiedot' => $vaktuotetiedot,
 						'max_ltq_til' => $max_ltq_til,
@@ -13475,8 +13473,6 @@ if (!function_exists("palauta_vak_tiedot")) {
 					$tuotepainot_yht = $return_params['tuotepainot_yht'];
 					$vaktuotetiedot = $return_params['vaktuotetiedot'];
 					$max_ltq_til = $return_params['max_ltq_til'];
-
-					$eramaara = ceil($row["kpl"]/$row["era"]);
 				}
 
 				$edrow = $row;

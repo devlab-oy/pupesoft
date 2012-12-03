@@ -375,7 +375,7 @@
 			$extra = "";
 		}
 
-		function il_topmyydyt ($top, $where, $rajauslisa, $invaamatta, $extra) {
+		function il_topmyydyt ($top, $where, $rajauslisatuote, $invaamatta, $extra) {
 			global $kukarow, $kutsu;
 
 			$tuotenoarray = array();
@@ -413,7 +413,7 @@
 			}
 		}
 
-		function il_varvaikutus ($varastonarvo, $varastoonvaikutus, $where, $rajauslisa, $invaamatta, $extra) {
+		function il_varvaikutus ($varastonarvo, $varastoonvaikutus, $where, $rajauslisalisa, $invaamatta, $extra) {
 			global $kukarow, $kutsu;
 
 			$tuotenoarray = array();
@@ -614,11 +614,11 @@
 			}
 
 			if ($top > 0) {
-				$where .= il_topmyydyt($top, $where, $rajauslisa, $invaamatta, $extra);
+				$where .= il_topmyydyt($top, $where, $rajauslisatuote, $invaamatta, $extra);
 			}
 
 			if ($varastoonvaikutus > 0 or $varastonarvo > 0) {
-				$where .= il_varvaikutus($varastonarvo, $varastoonvaikutus, $where, $rajauslisa, $invaamatta, $extra);
+				$where .= il_varvaikutus($varastonarvo, $varastoonvaikutus, $where, $rajauslisatuote, $invaamatta, $extra);
 			}
 
 			if ($jarjestys == 'tuoteno') {

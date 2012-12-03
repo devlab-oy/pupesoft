@@ -56,7 +56,7 @@
 		if ($otunnukset != "") {
 			require("tilauskasittely/rahtikirja_erittely_pdf.inc");
 
-			echo t("Rahtikirjaerittely tulsotuu")."...<br><br>";
+			echo t("Rahtikirjaerittely tulostuu")."...<br><br>";
 		}
 
 		$tee = "";
@@ -427,7 +427,10 @@
 		echo "<td><select name='kirjoitin'>";
 
 		while ($kirrow = mysql_fetch_array($kirre)) {
-			echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
+			if ($kirjoitin == $kirrow['komento']) $sel = " selected ";
+			else $sel = "";
+
+			echo "<option value='$kirrow[komento]' $sel>$kirrow[kirjoitin]</option>";
 		}
 
 		echo "</select></td></tr>";

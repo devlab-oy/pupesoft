@@ -1903,6 +1903,9 @@
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
 
 				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+					// Jos nyt jostain syystä, esim back-nappuloinnin takia tulee tyhjänä niin ei kuolla erroriin
+					if ($tilausnumeroita_backup == "") $tilausnumeroita_backup = 0;
+
 					$wherelisa = "AND lasku.tunnus IN ({$tilausnumeroita_backup})";
 					$joinlisa  = "JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.nouto = '')";
 				}
@@ -3278,7 +3281,7 @@
 			}
 		}
 
-		if (isset($rahtikirjaan) and $rahtikirjaan == 'mennaan') {			
+		if (isset($rahtikirjaan) and $rahtikirjaan == 'mennaan') {
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}rahtikirja.php?toim=lisaa&id=$id&rakirno=$id&tunnukset=$tilausnumeroita&mista=keraa.php'>";
 		}
 

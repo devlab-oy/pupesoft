@@ -638,7 +638,7 @@
 			$karhuja = (int) $karhuja;
 
             // Halutaanko vain luottovakuutetut asiakkaat
-            $luottovakuutuslisa = ($luottovakuutettu == "K") ? " JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.luottovakuutettu = 'K') " : "";
+            $luottovakuutuslisa = ($luottovakuutettu == "K") ? " asiakas.luottovakuutettu = 'K' " : "";
 
 			if ($karhuja > 0) {
 
@@ -670,6 +670,7 @@
 				$query = "	SELECT
 							lasku.liitostunnus,
 							lasku.ytunnus,
+							if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
 							lasku.maa,
 							lasku.valkoodi,
 							max(lasku.tunnus) tunnus,
@@ -684,11 +685,12 @@
 							sum(lasku.summa) laskusumma,
 							sum(lasku.summa_valuutassa) laskusumma_valuutassa,";
 
-				$groupby = "GROUP BY 1,2,3,4";
+				$groupby = "GROUP BY 1,2,3,4,5";
 			}
 			else {
 				$query = "	SELECT
 							lasku.ytunnus,
+							if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
 							lasku.maa,
 							lasku.valkoodi,
 							lasku.tunnus,
@@ -703,7 +705,7 @@
 							lasku.summa laskusumma,
 							lasku.summa_valuutassa laskusumma_valuutassa,";
 
-				$groupby = "GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14";
+				$groupby = "GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15";
 			}
 
 			$query .= "	sum(tiliointi.summa) tiliointiavoinsaldo,
@@ -712,7 +714,7 @@
 						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
 						FROM lasku $indeksi
 						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$pvm' {$tiliointilisa})
-						$luottovakuutuslisa
+						JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus $luottovakuutuslisa)
 						WHERE lasku.yhtio		= '$kukarow[yhtio]'
 						and (lasku.mapvm		> '$pvm' or lasku.mapvm = '0000-00-00')
 						$paivamaaralisa
@@ -744,6 +746,7 @@
 			echo "<thead>";
 			echo "<tr>
 					<th>".t("Ytunnus")."</th>
+					<th>".t("Asiakasnro")."</th>
 					<th>".t("Nimi")."</th>
 					<th>".t("Maa")."</th>
 					<th>".t("Laskunro")."</th>
@@ -757,6 +760,7 @@
 					</tr>
 					<tr>
 					<td><input type='text' class='search_field' name='search_ytunnus'></td>
+					<td><input type='text' class='search_field' name='search_asiakasnro'></td>
 					<td><input type='text' class='search_field' name='search_nimi'></td>
 					<td><input type='text' class='search_field' name='search_maa'></td>
 					<td><input type='text' class='search_field' name='search_laskunro'></td>
@@ -795,6 +799,7 @@
 
 					echo "<tr class='aktiivi'>";
 					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=".tarkistahetu($trow["ytunnus"])."&asiakasid=$trow[liitostunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>".tarkistahetu($trow["ytunnus"])."</a></td>";
+					echo "<td>$trow[asiakasnro]</td>";
 					echo "<td>$trow[nimi]</td>";
 					echo "<td>$trow[maa]</td>";
 					echo "<td>$trow[maksutieto]</td>";
@@ -876,10 +881,16 @@
 			// Ei listata kohdistamattomia mikäli ollaan haettu karhuttuja laskuja
 			if (trim($karhuja) == '' or $karhuja == 0) {
 				//Listataan vielä kohdistamattomat
-				$query = "	SELECT asiakas.tunnus, asiakas.ytunnus, nimi_maksaja, asiakas.maa, viite, kirjpvm,
+				$query = "	SELECT asiakas.tunnus,
+							asiakas.ytunnus,
+							asiakas.asiakasnro,
+							suoritus.nimi_maksaja,
+							asiakas.maa,
+							suoritus.viite,
+							suoritus.kirjpvm,
 							tiliointi.summa tiliointisumma,
 							tiliointi.summa_valuutassa tiliointisumma_valuutassa,
-							round(suoritus.summa * if(suoritus.kurssi = 0, 1, kurssi), 2) * -1 suoritussumma,
+							round(suoritus.summa * if(suoritus.kurssi = 0, 1, suoritus.kurssi), 2) * -1 suoritussumma,
 							tiliointi.ltunnus,
 							suoritus.summa * -1 summa,
 							suoritus.valkoodi
@@ -900,9 +911,14 @@
 
 						$suoritussummatotal += $trow["suoritussumma"];
 
-						if ($trow["tunnus"] != NULL) echo "<td><a name='a_$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=".tarkistahetu($trow["ytunnus"])."&asiakasid=$trow[tunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///a_$trow[tunnus]'>".tarkistahetu($trow["ytunnus"])."</a></td>";
-						else echo "<td>*".t("ei asiakasta")."*</td>";
-
+						if ($trow["tunnus"] != NULL) {
+							echo "<td><a name='a_$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=".tarkistahetu($trow["ytunnus"])."&asiakasid=$trow[tunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///a_$trow[tunnus]'>".tarkistahetu($trow["ytunnus"])."</a></td>";
+							echo "<td>$trow[asiakasnro]</td>";
+						}
+						else {
+							echo "<td>*".t("ei asiakasta")."*</td>";
+							echo "<td></td>";
+						}
 						echo "<td>$trow[nimi_maksaja]</td>";
 						echo "<td>$trow[maa]</td>";
 						echo "<td>$trow[viite]</td>";
@@ -973,7 +989,7 @@
 
 	        foreach ($summa as $val => $sum) {
 				echo "<tr>";
-				echo "<th colspan='8'>".t("Avoimet yhteensä").":</th>";
+				echo "<th colspan='9'>".t("Avoimet yhteensä").":</th>";
 				echo "<td class='tumma' align='right' nowrap name='avoimet_yhteensa' id='avoimet_yhteensa_$val'>".sprintf("%.2f", $sum)."</td>";				// tässä kirjanpidosta osasuoritukset poistettuna
 				echo "<td class='tumma' align='right' nowrap>$val</td>";
 				echo "</tr>";
@@ -983,7 +999,7 @@
 
 			foreach ($suoritussumma as $val => $sum) {
 	        	echo "<tr>";
-				echo "<th colspan='8'>".t("Kohdistamattomat suoritukset yhteensä").":</th>";
+				echo "<th colspan='9'>".t("Kohdistamattomat suoritukset yhteensä").":</th>";
 				echo "<td class='tumma' align='right' nowrap name='avoimet_yhteensa' id='avoimet_suoriyhteensa_$val'>".sprintf("%.2f", $sum)."</td>";
 				echo "<td class='tumma' align='right' nowrap>$val</td>";
 				echo "</tr>";
@@ -993,7 +1009,7 @@
 
 			foreach ($kaikkival as $val) {
 	        	echo "<tr>";
-				echo "<th colspan='8'>".t("Erotus avoimet - kohdistamattomat").":</th>";
+				echo "<th colspan='9'>".t("Erotus avoimet - kohdistamattomat").":</th>";
 				echo "<td class='tumma' align='right' nowrap name='avoimet_yhteensa' id='avoimet_yseroyhteensa_$val'>".sprintf("%.2f", ($summa[$val] + $suoritussumma[$val]))."</td>"; // tässä kirjanpidosta osasuoritukset poistettuna
 				echo "<td class='tumma' align='right' nowrap>$val</td>";
 				echo "</tr>";
@@ -1017,22 +1033,22 @@
 				$erotus 		= $summatotal + $suoritussummatotal - $trow["saldo"];
 				$erotus 		= sprintf("%.2f", $erotus);
 
-				echo "<tr><td class='back' colspan='10'><br></td></tr>";
+				echo "<tr><td class='back' colspan='11'><br></td></tr>";
 
 		        echo "<tr>";
-				echo "<th colspan='8'>".t("Erotus avoimet - kohdistamattomat", "", $tili).":</th>";
+				echo "<th colspan='9'>".t("Erotus avoimet - kohdistamattomat", "", $tili).":</th>";
 				echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f",$summatotal + $suoritussummatotal)."</td>";
 				echo "<td class='tumma' align='right' nowrap>$yhtiorow[valkoodi]</td>";
 				echo "</tr>";
 
 		        echo "<tr>";
-				echo "<th colspan='8'>".t("Kirjanpidon tili %s yhteensä", "", $tili).":</th>";
+				echo "<th colspan='9'>".t("Kirjanpidon tili %s yhteensä", "", $tili).":</th>";
 				echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f",$trow["saldo"])."</td>";
 				echo "<td class='tumma' align='right' nowrap>$yhtiorow[valkoodi]</td>";
 				echo "</tr>";
 
 		        echo "<tr>";
-				echo "<th colspan='8'>".t("Erotus avoimet - kohdistamattomat - kirjanpito").":</th>";
+				echo "<th colspan='9'>".t("Erotus avoimet - kohdistamattomat - kirjanpito").":</th>";
 				echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f",$erotus)."</td>";
 				echo "<td class='tumma' align='right' nowrap>$yhtiorow[valkoodi]</td>";
 				echo "</tr>";

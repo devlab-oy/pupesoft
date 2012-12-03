@@ -299,7 +299,7 @@
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array_fill_keys(array($trow[$i], 'selected')) + array_fill_keys(array('0','A','B','C'), '');
+		$sel = array_fill_keys(array($trow[$i]), 'selected') + array_fill_keys(array('0','A','B','C'), '');
 
 		$ulos .= "<option value = '0' {$sel[0]}>".t("Normaali ostotilauspohja");
 		$ulos .= "<option value = 'A' {$sel['A']}>".t("Tulosta nimitykset, piilotetaan toimituspäivä")."</option>";

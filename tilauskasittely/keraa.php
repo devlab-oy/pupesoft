@@ -1883,7 +1883,7 @@
 						}
 					}
 
-					if ($yhtiorow['kerayserat'] == 'K' and $toim == "" and ($yhtiorow['karayksesta_rahtikirjasyottoon'] != 'Y' or $onko_nouto != '')) {
+					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 						$query = "	UPDATE lasku
 									SET alatila = 'B'
 									WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1906,11 +1906,11 @@
 					// Jos nyt jostain syystä, esim back-nappuloinnin takia tulee tyhjänä niin ei kuolla erroriin
 					if ($tilausnumeroita_backup == "") $tilausnumeroita_backup = 0;
 
-					$wherelisa = "AND lasku.tunnus IN ({$tilausnumeroita_backup})";
-					$joinlisa  = "JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.nouto = '')";
+					$wherelisa = " AND lasku.alatila = 'B' AND lasku.tunnus IN ({$tilausnumeroita_backup}) ";
+					$joinlisa  = " JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.nouto = '') ";
 				}
 				else {
-					$wherelisa = "AND lasku.tunnus = '{$id}'";
+					$wherelisa = " AND lasku.alatila = 'C' AND lasku.tunnus = '{$id}' ";
 					$joinlisa  = "";
 				}
 
@@ -1918,9 +1918,8 @@
 				$query = "	SELECT lasku.tunnus
 							FROM lasku
 							{$joinlisa}
-							WHERE lasku.yhtio 	= '{$kukarow['yhtio']}'
-							AND lasku.tila 		= 'L'
-							AND lasku.alatila 	= 'C'
+							WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+							AND lasku.tila    = 'L'
 							{$wherelisa}";
 				$result = pupe_query($query);
 

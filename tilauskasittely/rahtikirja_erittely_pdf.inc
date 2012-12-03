@@ -93,9 +93,9 @@
 			$otsikot = FALSE;
 
 			// Uusi sivu
-			if (!isset($pdf) or $kala < 100 or ($toitarow['erittely'] == 'k' and isset($edytunnus) and $edytunnus != $laskurow['ytunnus'])) {
+			if (!isset($pdf) or $kala < 150 or ($toitarow['erittely'] == 'k' and isset($edytunnus) and $edytunnus != $laskurow['ytunnus'])) {
 
-				if ($kala < 100) {
+				if ($kala < 150) {
 					// Piiretään edelliselle sivulle sopivan kokonen laatikko
 					$pdf->draw_rectangle($kala1, 60, $kala-22, 540,	$firstpage, $rectparam);
 				}

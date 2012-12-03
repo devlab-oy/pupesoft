@@ -399,11 +399,6 @@
 
 		$laskumyyjat = substr($laskumyyjat, 0, -1);
 
-		//myyjittain valittu, ei näin?
-//		if (trim($laskumyyjat) != '') {
-//			$lisa_haku_laskumyyja = " and kuka.myyja in ($laskumyyjat) ";
-//			$lisa .= " and tuote.myyjanro in ($laskumyyjat) ";
-//		}
 		if (trim($laskumyyjat) != '') {
 			$query = "	SELECT tunnus
 						FROM kuka

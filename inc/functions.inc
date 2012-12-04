@@ -13261,10 +13261,14 @@ if (!function_exists("palauta_vak_tiedot")) {
 					ORDER BY 1,2,3,4,5,6,7,8,9,10,11,12";
 		$riresult1 = pupe_query($query);
 
-		$query = "  SELECT distinct r1.tunnus, r1.pakkaus, r1.pakkauskuvaus, r1.kollit, round(r1.kilot,1) kilot
+		$query = "  SELECT distinct r1.tunnus,
+					r1.pakkaus,
+					r1.pakkauskuvaus,
+					TRIM(TRAILING '.' FROM TRIM(TRAILING '0' FROM r1.kollit)) AS kollit,
+					round(r1.kilot,1) kilot
 					FROM rahtikirjat r1
 					WHERE r1.otsikkonro in ($otunnus)
-					and r1.yhtio = '$kukarow[yhtio]'";
+					AND r1.yhtio = '$kukarow[yhtio]'";
 		$riresult2 = pupe_query($query);
 
 		//* Limited Quantity tiedot *//

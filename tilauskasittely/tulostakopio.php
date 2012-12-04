@@ -1877,12 +1877,10 @@
 
 			if ($toim == "DGD") {
 
-				$otunnus = $laskurow["tunnus"];
-
 				require_once("tilauskasittely/tulosta_dgd.inc");
 
 				$params_dgd = array(
-				'kieli'			=> $kieli,
+				'kieli'			=> 'en',
 				'laskurow'		=> $laskurow,
 				'page'			=> NULL,
 				'pdf'			=> NULL,

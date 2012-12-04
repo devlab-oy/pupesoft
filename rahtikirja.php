@@ -1057,7 +1057,6 @@
 
 			// Tulostetaan DGD
 			if ($rakirsyotto_dgd_tulostin != "" and $dgdkomento != '' and $dgdkpl > 0) {
-				$tunnus = $laskurow["tunnus"];
 
 				if ($dgdkpl > 0 and $dgdkpl != '' and $dgdkomento != 'email') {
 					$dgdkomento .= " -#$dgdkpl ";

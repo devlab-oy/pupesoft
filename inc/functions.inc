@@ -13831,19 +13831,19 @@ if (!function_exists('tulosta_oslap_mg')) {
 								{C|}
 
 							 	*** TOIMITUSOSOITE ***
-							 	{PC000;0070,0200,1,1,A,00,B|}
+							 	{PC000;0070,0200,1,1,B,00,B|}
 								{RC000;{$toimosoite_nimi}|}
 
-							 	{PC001;0070,0250,1,1,A,00,B|}
+							 	{PC001;0070,0250,1,1,B,00,B|}
 								{RC001;{$toim_osoite}|}
 
-							 	{PC002;0070,0330,1,1,A,00,B|}
+							 	{PC002;0070,0330,1,1,B,00,B|}
 								{RC002;{$toim_postino} {$toim_postitp}|}
 
-							 	{PC003;0070,0380,1,1,A,00,B|}
+							 	{PC003;0070,0380,1,1,B,00,B|}
 								{RC003;{$ot_tilaus} {$tilriv}|}
 
-							 	{PC004;0070,0430,1,1,A,00,B|}
+							 	{PC004;0070,0430,1,1,B,00,B|}
 								{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
 								";
 				}
@@ -13855,19 +13855,19 @@ if (!function_exists('tulosta_oslap_mg')) {
 								{C|}
 
 							 	*** TOIMITUSOSOITE ***
-							 	{PC000;0030,0050,1,1,A,00,B|}
+							 	{PC000;0030,0050,1,1,B,00,B|}
 								{RC000;{$toimosoite_nimi}|}
 
-							 	{PC001;0030,0100,1,1,A,00,B|}
+							 	{PC001;0030,0100,1,1,B,00,B|}
 								{RC001;{$toim_osoite}|}
 
-							 	{PC002;0030,0180,1,1,A,00,B|}
+							 	{PC002;0030,0180,1,1,B,00,B|}
 								{RC002;{$toim_postino} {$toim_postitp}|}
 
-							 	{PC003;0030,0230,1,1,A,00,B|}
+							 	{PC003;0030,0230,1,1,B,00,B|}
 								{RC003;{$ot_tilaus} {$tilriv}|}
 
-							 	{PC004;0030,0280,1,1,A,00,B|}
+							 	{PC004;0030,0280,1,1,B,00,B|}
 								{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
 								";
 				}

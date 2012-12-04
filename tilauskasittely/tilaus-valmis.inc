@@ -1427,7 +1427,7 @@ else {
 				}
 			}
 
-			// Varmistetaan, että joakisella tilauksella on lähtö
+			// Varmistetaan, että jokaisella tilauksella on lähtö
 			if ($yhtiorow['kerayserat'] == 'K') {
 				foreach ($tilausnumerot as $tilausnumero) {
 					$query = "	SELECT *

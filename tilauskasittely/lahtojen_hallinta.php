@@ -728,6 +728,12 @@
 							// Otetaan eka lähtö
 							$valitu_lahto = array_shift($lahdot);
 
+							$query = "	UPDATE rahtikirjat
+										SET toimitustapa = '{$row['toimitustapa']}'
+										WHERE yhtio    = '{$kukarow['yhtio']}'
+										AND otsikkonro = '{$row['tunnus']}'";
+							$upd_res = pupe_query($query);
+
 							$query = "	UPDATE lasku
 										SET toimitustavan_lahto    = '{$valitu_lahto["tunnus"]}',
 										toimitustavan_lahto_siirto = '{$lahto}'

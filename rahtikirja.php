@@ -2223,11 +2223,19 @@
 
 			echo "<tr><th align='left'>".t("Vienti")."</th><td>$vientit</td>";
 
+			$toimtapalisa = "";
+
+			// Jos laskulle on valittu lähtö, niin toimitustapaa EI voi vaihtaa, silloin homma menee jumiin.
+			if ($otsik["toimitustavan_lahto"] > 0) {
+				$toimtapalisa = " and selite = '{$otsik["toimitustapa"]}' ";
+			}
+
 			// haetaan kaikki toimitustavat
 			$query  = "	SELECT *
 						FROM toimitustapa
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tulostustapa != 'X'
+						{$toimtapalisa}
 						order by jarjestys, selite";
 			$result = pupe_query($query);
 

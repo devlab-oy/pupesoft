@@ -108,7 +108,7 @@
 							FROM lahdot
 							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
 							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
-							AND lahdot.tunnus = '{$valittu_lahto}'";
+							AND lahdot.tunnus  = '{$valittu_lahto}'";
 				$old_res = pupe_query($query);
 				$old_row = mysql_fetch_assoc($old_res);
 
@@ -117,15 +117,15 @@
 							FROM lahdot
 							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
 							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
-							AND lahdot.tunnus = '{$uusi_lahto}'";
+							AND lahdot.tunnus  = '{$uusi_lahto}'";
 				$new_res = pupe_query($query);
 				$new_row = mysql_fetch_assoc($new_res);
 
 				//haetaan kirjoittimen tiedot
 				$query = "	SELECT *
 							FROM kirjoittimet
-							WHERE yhtio='{$kukarow['yhtio']}'
-							AND tunnus='{$reittietikettitulostin}'";
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus  = '{$reittietikettitulostin}'";
 				$kirjoitin_res = pupe_query($query);
 				$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 
@@ -157,11 +157,11 @@
 						}
 					}
 
-					if ($tila_chk_row['tila'] == 'T' and $old_row['liitostunnus'] != $new_row['liitostunnus']) {
+					if ($old_row['liitostunnus'] != $new_row['liitostunnus']) {
 						$query = "	UPDATE rahtikirjat
 									SET toimitustapa = '{$new_row['selite']}'
-									WHERE yhtio 		= '{$kukarow['yhtio']}'
-									AND rahtikirjanro 	= '{$tilausnumero}'";
+									WHERE yhtio    = '{$kukarow['yhtio']}'
+									AND otsikkonro = '{$tilausnumero}'";
 						$upd_res = pupe_query($query);
 					}
 

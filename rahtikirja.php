@@ -964,56 +964,58 @@
 					$osoitelaput = array($laskurow["tunnus"]);
 				}
 
-				foreach ($osoitelaput as $index => $laskutunnus) {
+				if ($toimitustaparow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
 
-					$query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$laskutunnus'";
-					$osresult   = pupe_query($query);
-					$laskurow = mysql_fetch_assoc($osresult);
+					$query = "	SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
+								FROM kerayserat
+								LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+								AND kerayserat.otunnus IN (".implode(",", $osoitelaput).")
+								GROUP BY 1,2,3
+								ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
+					$pak_chk_res = pupe_query($query);
 
-					$tunnus = $laskurow["tunnus"];
+					$pak_num = mysql_num_rows($pak_chk_res);
 
-					if ($toimitustaparow['osoitelappu'] == 'intrade') {
-						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
-					}
-					elseif ($toimitustaparow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
+					while ($pak_chk_row = mysql_fetch_assoc($pak_chk_res)) {
 
-						$query = "	SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
-									FROM kerayserat
-									LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
-									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-									AND kerayserat.otunnus IN (".implode(",", $osoitelaput).")
-									GROUP BY 1,2,3
-									ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
-						$pak_chk_res = pupe_query($query);
+						for ($i = 1; $i <= $oslappkpl; $i++) {
 
-						$pak_num = mysql_num_rows($pak_chk_res);
+							$params = array(
+					 			'tilriv' => $pak_chk_row['otunnus'],
+					 			'komento' => $oslapp,
+								'mediatyyppi' => $oslapp_mediatyyppi,
+					 			'pakkauskoodi' => $pak_chk_row['pakkaus'],
+					 			'montako_laatikkoa_yht' => $pak_num,
+					 			'toim_nimi' => $laskurow['toim_nimi'],
+					 			'toim_nimitark' => $laskurow['toim_nimitark'],
+					 			'toim_osoite' => $laskurow['toim_osoite'],
+					 			'toim_postino' => $laskurow['toim_postino'],
+					 			'toim_postitp' => $laskurow['toim_postitp'],
+					 		);
 
-						while ($pak_chk_row = mysql_fetch_assoc($pak_chk_res)) {
-
-							for ($i = 1; $i <= $oslappkpl; $i++) {
-
-								$params = array(
-						 			'tilriv' => $pak_chk_row['otunnus'],
-						 			'komento' => $oslapp,
-									'mediatyyppi' => $oslapp_mediatyyppi,
-						 			'pakkauskoodi' => $pak_chk_row['pakkaus'],
-						 			'montako_laatikkoa_yht' => $pak_num,
-						 			'toim_nimi' => $laskurow['toim_nimi'],
-						 			'toim_nimitark' => $laskurow['toim_nimitark'],
-						 			'toim_osoite' => $laskurow['toim_osoite'],
-						 			'toim_postino' => $laskurow['toim_postino'],
-						 			'toim_postitp' => $laskurow['toim_postitp'],
-						 		);
-
-								tulosta_oslap_mg($params);
-							}
+							tulosta_oslap_mg($params);
 						}
 					}
-					else {
-						require ("tilauskasittely/osoitelappu_pdf.inc");
-					}
+				}
+				else {
+					foreach ($osoitelaput as $index => $laskutunnus) {
 
-					unset($tunnus);
+						$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$laskutunnus'";
+						$osresult = pupe_query($query);
+						$laskurow = mysql_fetch_assoc($osresult);
+
+						$tunnus = $laskurow["tunnus"];
+
+						if ($toimitustaparow['osoitelappu'] == 'intrade') {
+							require('tilauskasittely/osoitelappu_intrade_pdf.inc');
+						}
+						else {
+							require ("tilauskasittely/osoitelappu_pdf.inc");
+						}
+
+						unset($tunnus);
+					}
 				}
 			}
 

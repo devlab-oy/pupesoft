@@ -27,7 +27,7 @@
 	$filename = $argv[2];
 
 	//TESTAUSTA VARTEN
-	$filename = '/tmp/customers(1297).xml';
+	$filename = '/tmp/customers.xml';
 	$yhtio = 'atarv';
 
 	// Haetaan yhtiön tiedot
@@ -70,10 +70,10 @@
 					'valuutta' => (string)$asiakas->Currency,
 					'kieli' => (string)$asiakas->LanguageId,
 					'max_luotto' => (float)$asiakas->CreditMax,
-					'ytunnus' => (string)$asiakas->VATNum,
-					'osoite' => (string)$asiakas->Street,
+					'ytunnus' => str_replace('-', '', (string)$asiakas->VATNum),
+					'osoite' => utf8_decode((string)$asiakas->Street),
 					'postino' => (string)$asiakas->ZipCode,
-					'kaupunki' => (string)$asiakas->City,
+					'kaupunki' => utf8_decode((string)$asiakas->City),
 					'maa' => (string)$asiakas->Country,
 					'puhelin' => (string)$asiakas->Phone,
 					'fax' => (string)$asiakas->TeleFax,
@@ -105,7 +105,8 @@
 		$query = "	SELECT *
 					FROM asiakas
 					WHERE yhtio = '{$yhtio}'
-					AND asiakasnro = '{$asiakas['asiakasnro']}'
+					AND asiakasnro = '{$asiakas['asiakasnumero']}'
+					AND ytunnus = '{$asiakas['ytunnus']}'
 					AND laji != 'P'";
 		$result = pupe_query($query);
 
@@ -118,13 +119,15 @@
 	}
 
 	function luo_asiakas($asiakas, $yhtio) {
+		$maksuehto = tarkista_maksuehto($asiakas['maksuehto'], $yhtio);
+		$toimitustapa = hae_toimitustapa($yhtio);
 		$query = "	INSERT INTO asiakas
 					SET yhtio = '{$yhtio}',
 					ytunnus = '{$asiakas['ytunnus']}',
 					nimi = '{$asiakas['nimi']}',
 					osoite = '{$asiakas['osoite']}',
 					postino = '{$asiakas['postino']}',
-					postitp = '{$asiakas['postitp']}',
+					postitp = '{$asiakas['kaupunki']}',
 					maa = '{$asiakas['maa']}',
 					kansalaisuus = '{$asiakas['maa']}',
 					puhelin = '{$asiakas['puhelin']}',
@@ -132,11 +135,12 @@
 					fax = '{$asiakas['fax']}',
 					kieli = '".strtolower($asiakas['kieli'])."',
 					valkoodi = '{$asiakas['valuutta']}',
-					maksuehto = '{$asiakas['maksuehto']}',
+					maksuehto = '{$maksuehto['tunnus']}',
+					toimitustapa = '{$toimitustapa['selite']}',
 					luottoraja = '{$asiakas['max_luotto']}',
 					kustannuspaikka = '{$asiakas['kustp']}',
-					laatija = 'konversio',
-					laadittu = NOW(),
+					laatija = 'futur',
+					luontiaika = NOW(),
 					asiakasnro = '{$asiakas['asiakasnumero']}'";
 
 		pupe_query($query);
@@ -147,12 +151,14 @@
 
 	function paivita_asiakas($asiakas, $yhtio, $olemassa_oleva_result) {
 		$olemassa_oleva_asiakas_row = mysql_fetch_assoc($olemassa_oleva_result);
+		$maksuehto = tarkista_maksuehto($asiakas['maksuehto'], $yhtio);
+		$toimitustapa = hae_toimitustapa($yhtio);
 		$query = "	UPDATE asiakas
 					SET ytunnus = '{$asiakas['ytunnus']}',
 					nimi = '{$asiakas['nimi']}',
 					osoite = '{$asiakas['osoite']}',
 					postino = '{$asiakas['postino']}',
-					postitp = '{$asiakas['postitp']}',
+					postitp = '{$asiakas['kaupunki']}',
 					maa = '{$asiakas['maa']}',
 					kansalaisuus = '{$asiakas['maa']}',
 					puhelin = '{$asiakas['puhelin']}',
@@ -160,10 +166,11 @@
 					fax = '{$asiakas['fax']}',
 					kieli = '".strtolower($asiakas['kieli'])."',
 					valkoodi = '{$asiakas['valuutta']}',
-					maksuehto = '{$asiakas['maksuehto']}',
+					maksuehto = '{$maksuehto['tunnus']}',
+					toimitustapa = '{$toimitustapa['selite']}',
 					luottoraja = '{$asiakas['max_luotto']}',
 					kustannuspaikka = '{$asiakas['kustp']}',
-					muuttaja = 'konversio',
+					muuttaja = 'futur',
 					muutospvm = NOW()
 					WHERE yhtio = '{$yhtio}'
 					AND tunnus = '{$olemassa_oleva_asiakas_row['tunnus']}'";
@@ -171,5 +178,38 @@
 
 		echo t("Asiakas").' '.$asiakas['nimi'].' '.$asiakas['asiakasnro'].' '.t("päivitettiin");
 		echo "<br/>";
+	}
+
+	function tarkista_maksuehto($maksuehto, $yhtio) {
+		$query = "	SELECT *
+					FROM maksuehto
+					WHERE yhtio = '{$yhtio}'
+					AND tunnus = '{$maksuehto}'";
+		$result = pupe_query($query);
+
+		if(mysql_num_rows($result) > 0) {
+			return mysql_fetch_assoc($result);
+		}
+		else {
+			$query = "	SELECT *
+						FROM maksuehto
+						WHERE yhtio = '{$yhtio}'
+						AND teksti LIKE '%heti%'
+						LIMIT 1";
+			$result = pupe_query($query);
+
+			return mysql_fetch_assoc($result);
+		}
+	}
+
+	function hae_toimitustapa($yhtio) {
+		$query = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '{$yhtio}'
+					AND selite LIKE '%Oletus%'
+					LIMIT 1";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
 	}
 ?>

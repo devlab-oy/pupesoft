@@ -27,7 +27,7 @@
 	$filename = $argv[2];
 
 	//TESTAUSTA VARTEN
-	$filename = '/tmp/KPAM_myynti(1332).xml';
+	$filename = '/tmp/KPAM_myynti(1340).xml';
 	$yhtio = 'atarv';
 
 	// Haetaan yhtiön tiedot
@@ -57,7 +57,7 @@
 		echo $kasitellyt_tilaukset['tilausnumero_count'] . t(" tilausta luotiin ja niihin ") . $kasitellyt_tilaukset['tiliointi_count'] . t(" tiliöintiä");
 
 		//Testausta varten
-		poista_tilaukset_ja_tilioinnit($kasitellyt_tilaukset, $yhtio);
+		//poista_tilaukset_ja_tilioinnit($kasitellyt_tilaukset, $yhtio);
 	}
 	die();
 
@@ -72,7 +72,7 @@
 						'asiakasnumero' => (string)$myyntilasku->AccountNum,
 						'siirtopaiva' => (string)$myyntilasku->TransDate,
 						'tapahtumapaiva' => (string)$myyntilasku->DocumentDate,
-						'asiakkaan_nimi' => (string)$myyntilasku->Txt,
+						'asiakkaan_nimi' => utf8_decode((string)$myyntilasku->Txt),
 						'summa' => (float)$myyntilasku->AmountCurDebit,
 						'valuutta' => (string)$myyntilasku->Currency,
 						'kurssi' => (float)$myyntilasku->ExchRate,
@@ -86,7 +86,7 @@
 						'tilinumero' => (string)$myyntilasku->AccountNum,
 						'siirtopaiva' => (string)$myyntilasku->TransDate,
 						'tapahtumapaiva' => (string)$myyntilasku->DocumentDate,
-						'asiakkaan_nimi' => (string)$myyntilasku->Txt,
+						'asiakkaan_nimi' => utf8_decode((string)$myyntilasku->Txt),
 						'summa' => ((string)$myyntilasku->AmountCurDebit == '') ? (float)($myyntilasku->AmountCurCredit * -1) : (float)$myyntilasku->AmountCurDebit,
 						'valuutta' => (string)$myyntilasku->Currency,
 						'kurssi' => (string)$myyntilasku->ExchRate,
@@ -138,7 +138,7 @@
 	function luo_myyntiotsikko($myyntilasku, $yhtio) {
 		$asiakas = tarkista_asiakas_olemassa($myyntilasku['asiakasnumero'], $yhtio);
 
-		if(!empty($asiakas)) {
+		if($asiakas['asiakasnro'] == 'kaato_asiakas') {
 			//asiakasta ei löytynyt juodumme käyttämään kaato-asiakasta
 			$tilausnumero = luo_myyntitilausotsikko('', $asiakas['tunnus']);
 			if($tilausnumero) {
@@ -152,9 +152,22 @@
 
 			echo t("Laskulle").' '.$tilausnumero.' '.t("jouduttiin liittämään kaato-asiakas, koska laskun asiakasta ei löytynyt tietokannasta.");
 			echo "<br/>";
+			echo "<pre>";
+			echo $myyntilasku['asiakkaan_nimi'];
+			echo "<br/>";
+			echo $myyntilasku['asiakasnumero'];
+			echo "</pre>";
 		}
 		else {
 			$tilausnumero = luo_myyntitilausotsikko('', $asiakas['tunnus']);
+
+			echo t("Laskulle").' '.$tilausnumero.' '.t("ei lisätty kaatoasiakasta.");
+			echo "<br/>";
+			echo "<pre>";
+			echo $myyntilasku['asiakkaan_nimi'];
+			echo "<br/>";
+			echo $myyntilasku['asiakasnumero'];
+			echo "</pre>";
 		}
 
 		if($tilausnumero == null) {

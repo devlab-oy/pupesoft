@@ -28,7 +28,7 @@
 
 	//TESTAUSTA VARTEN
 	$filename = '/tmp/KPAM_myynti(1332).xml';
-	$yhtio = 'artr';
+	$yhtio = 'atarv';
 
 	// Haetaan yhtiön tiedot
 	$yhtiorow = hae_yhtion_parametrit($yhtio);
@@ -55,6 +55,9 @@
 		$kasitellyt_tilaukset = kasittele_myyntilasku_data($myyntilasku_data, $yhtio);
 
 		echo $kasitellyt_tilaukset['tilausnumero_count'] . t(" tilausta luotiin ja niihin ") . $kasitellyt_tilaukset['tiliointi_count'] . t(" tiliöintiä");
+
+		//Testausta varten
+		poista_tilaukset_ja_tilioinnit($kasitellyt_tilaukset, $yhtio);
 	}
 	die();
 
@@ -104,16 +107,20 @@
 	function kasittele_myyntilasku_data($myyntilaskut, $yhtio) {
 		$tilausnumero_count = 0;
 		$tiliointi_count = 0;
+		$tilausnumerot = array();
+		$tiliointi_tunnukset = array();
 		foreach($myyntilaskut as $myyntilasku) {
-			$tilausnumero = luo_myyntitilausotsikko('', $myyntilasku['asiakasnumero']);
+			$tilausnumero = luo_myyntiotsikko($myyntilasku, $yhtio);
 
 			if($tilausnumero) {
+				$tilausnumerot[] = $tilausnumero;
 				paivita_tilauksen_tiedot($tilausnumero, $myyntilasku, $yhtio);
 				$tilausnumero_count++;
 
 				foreach($myyntilasku['tilioinnit'] as $tiliointi) {
-					$success = tee_tiliointi($tilausnumero,$tiliointi, $yhtio);
-					if($success) {
+					$tiliointi_tunnus = tee_tiliointi($tilausnumero,$tiliointi, $yhtio);
+					if($tiliointi_tunnus) {
+						$tiliointi_tunnukset[] = $tiliointi_tunnus;
 						$tiliointi_count++;
 					}
 				}
@@ -123,18 +130,109 @@
 		return array(
 			'tilausnumero_count' => $tilausnumero_count,
 			'tiliointi_count' => $tiliointi_count,
+			'tilausnumerot' => $tilausnumerot,
+			'tiliointi_tunnukset' => $tiliointi_tunnukset,
 		);
+	}
+
+	function luo_myyntiotsikko($myyntilasku, $yhtio) {
+		$asiakas = tarkista_asiakas_olemassa($myyntilasku['asiakasnumero'], $yhtio);
+
+		if(!empty($asiakas)) {
+			//asiakasta ei löytynyt juodumme käyttämään kaato-asiakasta
+			$tilausnumero = luo_myyntitilausotsikko('', $asiakas['tunnus']);
+			if($tilausnumero) {
+				$query = "	UPDATE lasku
+							SET comments = '".t("Laskun asiakasta ei löytynyt, käytimme laskun konversioon väliaikaista kaato-asiakasta. Korjaa tämä lasku mahdollisimman pian. Alkuperäisen laskun tiedot löytyvät sisviesti2")."',
+								sisviesti2 = '".json_encode($myyntilasku)."'
+							WHERE yhtio = '{$yhtio}'
+							AND tunnus = '{$tilausnumero}'";
+				pupe_query($query);
+			}
+
+			echo t("Laskulle").' '.$tilausnumero.' '.t("jouduttiin liittämään kaato-asiakas, koska laskun asiakasta ei löytynyt tietokannasta.");
+			echo "<br/>";
+		}
+		else {
+			$tilausnumero = luo_myyntitilausotsikko('', $asiakas['tunnus']);
+		}
+
+		if($tilausnumero == null) {
+			$joonakse_debug = 1;
+		}
+		
+		return $tilausnumero;
+	}
+
+	function tarkista_asiakas_olemassa($asiakasnumero, $yhtio) {
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$yhtio}'
+					AND asiakasnro = '{$asiakasnumero}'
+					AND laji != 'P'
+					LIMIT 1";
+		$result = pupe_query($query);
+		if(mysql_num_rows($result) == 0) {
+			//asiakasta ei olemassa, luomme kaato_asiakkaan
+			$asiakas = luo_kaato_asiakas($yhtio);
+
+			return $asiakas;
+		}
+
+		return mysql_fetch_assoc($result);
+	}
+
+	function luo_kaato_asiakas($yhtio) {
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$yhtio}'
+					AND asiakasnro = 'kaato_asiakas'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			//kaato-asiakkaan maksuehdoksi laitetaan heti-maksuehto, koska tarvitsemme validin maksuehdon
+			$query_maksuehto = "SELECT *
+								FROM maksuehto
+								WHERE yhtio = '{$yhtio}'
+								AND teksti LIKE '%heti%'
+								ORDER BY luontiaika DESC
+								LIMIT 1";
+			$result_maksuehto = pupe_query($query_maksuehto);
+			$maksuehto_row = mysql_fetch_assoc($result_maksuehto);
+			//kaato-asiakkaan toimitustavaksi laitetaan nouto, koska tarvitsemme validin toimitustavan
+			$query_toimitustapa = "	SELECT *
+									FROM toimitustapa
+									WHERE yhtio = '{$yhtio}'
+									AND selite LIKE '%Oletus%'
+									LIMIT 1";
+			$result_toimitustapa = pupe_query($query_toimitustapa);
+			$toimitustapa_row = mysql_fetch_assoc($result_toimitustapa);
+			//kaato-asiakasta ei ole olemassa, luodaan kaato-asiakas
+			$query2 = "	INSERT INTO asiakas
+						SET yhtio = '{$yhtio}',
+						nimi ='Kaato asiakas',
+						asiakasnro = 'kaato_asiakas',
+						maksuehto = '{$maksuehto_row['tunnus']}',
+						toimitustapa = '{$toimitustapa_row['tunnus']}',
+						laatija = 'konversio',
+						luontiaika = NOW()";
+			pupe_query($query2);
+		}
+
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
 	}
 
 	function paivita_tilauksen_tiedot($tilausnumero, $myyntilasku, $yhtio) {
 		$query = "	UPDATE lasku
-					SET nimi = '{$myyntilasku['asiakkaan_nimi']}'
+					SET nimi = '{$myyntilasku['asiakkaan_nimi']}',
 					tapvm = '{$myyntilasku['tapahtumapaiva']}',
 					summa = '{$myyntilasku['summa']}',
 					maksuehto = '{$myyntilasku['maksuehto']}',
 					erpcm = '{$myyntilasku['erapaiva']}',
 					viite = '{$myyntilasku['viite']}',
-					tila = 'U',
+					tila = 'U'
 					WHERE yhtio = '{$yhtio}'
 					AND tunnus = '{$tilausnumero}'";
 		pupe_query($query);
@@ -154,9 +252,9 @@
 						yhtio = '{$yhtio}'";
 			pupe_query($query);
 
-			return true;
+			return mysql_insert_id();
 		}
-		return false;
+		return null;
 	}
 
 	function tarkista_tilinumero($tilinumero, $yhtio) {
@@ -173,5 +271,23 @@
 		else {
 			return array();
 		}
+	}
+
+	function poista_tilaukset_ja_tilioinnit($kasitellyt_tilaukset, $yhtio) {
+		$query = "	DELETE
+					FROM lasku
+					WHERE yhtio = '{$yhtio}'
+					AND tunnus IN (".implode(',', $kasitellyt_tilaukset['tilausnumerot']).")";
+//		echo $query;
+//		echo "<br/><br/>";
+		pupe_query($query);
+
+		$query2 = "	DELETE
+					FROM tiliointi
+					WHERE yhtio = '{$yhtio}'
+					AND tunnus IN (".implode(',', $kasitellyt_tilaukset['tiliointi_tunnukset']).")";
+//		echo $query2;
+//
+		pupe_query($query2);
 	}
 ?>

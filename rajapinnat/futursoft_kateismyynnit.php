@@ -27,8 +27,8 @@
 	$filename = $argv[2];
 
 	//TESTAUSTA VARTEN
-	$filename = '/tmp/KPAM_myynti(1332).xml';
-	$yhtio = 'artr';
+	$filename = '/tmp/KPAM_kateis(1327).xml';
+	$yhtio = 'atarv';
 
 	// Haetaan yhtiön tiedot
 	$yhtiorow = hae_yhtion_parametrit($yhtio);
@@ -52,32 +52,42 @@
 		$xml = simplexml_load_file($filename);
 		$kateismyynti_data = parsi_xml_tiedosto($xml);
 
-		$kasitellyt_tilaukset = kasittele_kateismyynnit_data($kateismyynti_data, $yhtio);
+		echo count($kateismyynti_data).' '.t("kateismyyntiä löytyi");
 
-		echo $kasitellyt_tilaukset['tilausnumero_count'] . t(" tilausta luotiin ja niihin ") . $kasitellyt_tilaukset['tiliointi_count'] . t(" tiliöintiä");
+		$kasitellyt_kateismyynnit = kasittele_kateismyynnit_data($kateismyynti_data, $yhtio);
+
+		echo $kasitellyt_kateismyynnit['tilausnumero_count'] . t(" tilausta luotiin ja niihin ") . $kasitellyt_kateismyynnit['tiliointi_count'] . t(" tiliöintiä");
+
+		//Testaamista varten
+		poista_tilaukset_ja_tilioinnit($kasitellyt_kateismyynnit, $yhtio);
 	}
 	die();
 
 	function parsi_xml_tiedosto(SimpleXMLElement $xml) {
+		//i ja indeksi on sitä varten, että aineistosta saadaan yhteen kuuluvat käteismyynti tiliöinnit eriytettyä muista
 		$data = array();
 		if ($xml !== FALSE) {
+			$i = 1;
+			$indeksi = 0;
 			foreach($xml->LedgerJournalTable->LedgerJournalTrans as $kateismyynti) {
-				$data[] = array(
-					'tilinumero' => (string)$kateismyynti->AccountNum,
-					'selite' => (string)$kateismyynti->Txt,
+				$data[$indeksi][] = array(
 					'siirtopaiva' => (string)$kateismyynti->TransDate,
 					'tapahtumapaiva' => (string)$kateismyynti->DocumentDate,
-					'asiakkaan_nimi' => (string)$kateismyynti->Txt,
-					'summa' => ((string)$kateismyynti->AmountCurDebit == '') ? (string)$kateismyynti->AmountCurCredit : (string)$kateismyynti->AmountCurDebit,
-					'valuutta' => (string)$kateismyynti->Currency,
+					'tapahtuman_tunnus' => (string)$kateismyynti->Invoice,
+					'tilinumero' => (string)$kateismyynti->AccountNum,
+					'selite' => utf8_decode((string)$kateismyynti->Txt),
+					'summa' => ((string)$kateismyynti->AmountCurDebit == '') ? (float)$kateismyynti->AmountCurCredit : (float)$kateismyynti->AmountCurDebit,
+					'valkoodi' => (string)$kateismyynti->Currency,
 					'kurssi' => (string)$kateismyynti->ExchRate,
+					'alv_ryhma' => (string)$kateismyynti->TaxGroup,
 					'alv' => ((string)$kateismyynti->TaxItemGroup == '') ? 0 : (string)$kateismyynti->TaxItemGroup,
 					'alv_maara' => (string)$kateismyynti->FixedTaxAmount,
 					'kustp' => (string)$kateismyynti->Dim2,
-					'maksuehto' => (string)$kateismyynti->Payment,
-					'erapaiva' => (string)$kateismyynti->Due,
-					'viite' => (string)$kateismyynti->PaymId,
 				);
+				if($i % 2 == 0) {
+					$indeksi++;
+				}
+				$i++;
 			}
 		}
 
@@ -85,52 +95,146 @@
 	}
 
 	function kasittele_kateismyynnit_data($kateismyynnit, $yhtio) {
-		$tiliointi_count = 0;
-		foreach($kateismyynnit as $kateismyynti) {
-			$success = tee_tiliointi($tilausnumero,$tiliointi, $yhtio);
-			if($success) {
-				$tiliointi_count++;
+		$kateismyynti_count = 0;
+		$tilausnumero_count = 0;
+		$tiliointi_idt = array();
+		$tilausnumerot = array();
+		foreach($kateismyynnit as $kateismyynnin_osat) {
+			$tilausnumero = luo_myyntiotsikko($kateismyynnin_osat, $yhtio);
+
+			if($tilausnumero) {
+				$tilausnumerot[] = $tilausnumero;
+				paivita_tilauksen_tiedot($tilausnumero, $kateismyynnin_osat, $yhtio);
+				$tilausnumero_count++;
+
+				foreach($kateismyynnin_osat as $kateismyynti) {
+					$tiliointi_tunnus = tee_tiliointi($tilausnumero, $kateismyynti, $yhtio);
+					if($tiliointi_tunnus) {
+						$tiliointi_idt[] = $tiliointi_tunnus;
+						$kateismyynti_count++;
+					}
+				}
 			}
 		}
 
 		return array(
-			'tiliointi_count' => $tiliointi_count,
+			'tiliointi_idt' => $tiliointi_idt,
+			'kateismyynti_count' => $kateismyynti_count,
+			'tilausnumerot' => $tilausnumerot,
+			'tilausnumero_count' => $tilausnumero_count,
 		);
 	}
 
-	function tee_tiliointi($tilausnumero, $tiliointi, $yhtio) {
-		$tili = tarkista_tilinumero($tiliointi['tilinumero'], $yhtio);
+	function luo_myyntiotsikko($kateismyynnin_osat, $yhtio) {
+		$asiakas = luo_kaato_asiakas($yhtio);
 
-		if(!empty($tili)) {
+		$tilausnumero = luo_myyntitilausotsikko('', $asiakas['tunnus']);
+
+		return $tilausnumero;
+	}
+
+	function luo_kaato_asiakas($yhtio) {
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$yhtio}'
+					AND asiakasnro = 'kaato_asiakas'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			//kaato-asiakkaan maksuehdoksi laitetaan käteinen, koska tarvitsemme validin maksuehdon
+			$query_maksuehto = "SELECT *
+								FROM maksuehto
+								WHERE yhtio = '{$yhtio}'
+								AND teksti LIKE '%Käteinen%'
+								ORDER BY luontiaika DESC
+								LIMIT 1";
+			$result_maksuehto = pupe_query($query_maksuehto);
+			$maksuehto_row = mysql_fetch_assoc($result_maksuehto);
+			//kaato-asiakkaan toimitustavaksi laitetaan nouto, koska tarvitsemme validin toimitustavan
+			$query_toimitustapa = "	SELECT *
+									FROM toimitustapa
+									WHERE yhtio = '{$yhtio}'
+									AND selite LIKE '%Nouto%'
+									LIMIT 1";
+			$result_toimitustapa = pupe_query($query_toimitustapa);
+			$toimitustapa_row = mysql_fetch_assoc($result_toimitustapa);
+			//kaato-asiakasta ei ole olemassa, luodaan kaato-asiakas
+			$query2 = "	INSERT INTO asiakas
+						SET yhtio = '{$yhtio}',
+						nimi ='Kaato asiakas',
+						asiakasnro = 'kaato_asiakas',
+						maksuehto = '{$maksuehto_row['tunnus']}',
+						toimitustapa = '{$toimitustapa_row['tunnus']}'
+						laatija = 'konversio',
+						luontiaika = NOW()";
+			pupe_query($query2);
+		}
+
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+
+	function paivita_tilauksen_tiedot($tilausnumero, $kateismyynti, $yhtio) {
+		$query = "	UPDATE lasku
+					SET tapvm = '".date('Y-m-d', strtotime($kateismyynti[0]['tapahtumapaiva']))."',
+					summa = '{$kateismyynti[0]['summa']}',
+					tila = 'U'
+					WHERE yhtio = '{$yhtio}'
+					AND tunnus = '{$tilausnumero}'";
+		pupe_query($query);
+	}
+
+	function tee_tiliointi($tilausnumero, $kateismyynti, $yhtio) {
+		$kassalipas = tarkista_tilinumero($kateismyynti['kustp'], $yhtio);
+
+		if(!empty($kassalipas)) {
 			$query = "	INSERT INTO tiliointi
-						SET tilino = '{$tiliointi['tilinumero']}',
-						selite = '{$tiliointi['selite']}',
-						tapvm = '{$tiliointi['tapahtumapaiva']}',
-						summa = '{$tiliointi['summa']}',
-						vero = '{$tiliointi['alv']}',
-						kustp = '{$tiliointi['kustp']}',
+						SET tilino = '{$kassalipas['kassa']}',
+						selite = '{$kateismyynti['selite']}',
+						tapvm = '{$kateismyynti['tapahtumapaiva']}',
+						summa = '{$kateismyynti['summa']}',
+						vero = '{$kateismyynti['alv']}',
+						kustp = '{$kateismyynti['kustp']}',
 						ltunnus = '{$tilausnumero}',
 						yhtio = '{$yhtio}'";
 			pupe_query($query);
 
-			return true;
+			return mysql_insert_id();
 		}
-		return false;
+		return null;
 	}
 
-	function tarkista_tilinumero($tilinumero, $yhtio) {
+	function tarkista_tilinumero($kustannuspaikka, $yhtio) {
 		$query = "	SELECT *
-					FROM tili
+					FROM kassalipas
 					WHERE yhtio = '{$yhtio}'
-					AND tilino = '{$tilinumero}'";
+					AND kustp = '{$kustannuspaikka}'";
 		$result = pupe_query($query);
 
-		$tilinumero_row = mysql_fetch_assoc($result);
-		if($tilinumero_row) {
-			return $tilinumero_row;
+		$kassalipas_row = mysql_fetch_assoc($result);
+		if($kassalipas_row) {
+			return $kassalipas_row;
 		}
 		else {
 			return array();
 		}
+	}
+
+	function poista_tilaukset_ja_tilioinnit($kasitellyt_tilaukset, $yhtio) {
+		$query = "	DELETE
+					FROM lasku
+					WHERE yhtio = '{$yhtio}'
+					AND tunnus IN (".implode(',', $kasitellyt_tilaukset['tilausnumerot']).")";
+		echo $query;
+		echo "<br/><br/>";
+		//pupe_query($query);
+
+		$query2 = "	DELETE
+					FROM tiliointi
+					WHERE yhtio = '{$yhtio}'
+					AND tunnus IN (".implode(',', $kasitellyt_tilaukset['tiliointi_idt']).")";
+		echo $query2;
+		//pupe_query($query2);
 	}
 ?>

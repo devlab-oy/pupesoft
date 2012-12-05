@@ -213,6 +213,22 @@
 				}
 			}
 		}
+
+		$hyvaksyja_maksimisumma = (int) $hyvaksyja_maksimisumma;
+
+		if ($hyvaksyja_maksimisumma != 0) {
+			$query = "	SELECT tunnus
+						FROM dynaaminen_puu
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji = 'kuka'";
+			$respuu = pupe_query($query);
+
+			if (mysql_num_rows($respuu) == 0) {
+				echo "<font class='error'>",t("Maksimisumma vaatii, että organisaatiopuu on käytössä"),"!</font><br><br>";
+				$jatka = 1; // ei perusteta
+				unset($submit_button);
+			}
+		}
 	}
 
 	// Perustetaan uusi käyttäjä
@@ -774,7 +790,7 @@
 					echo "</select>";
 					echo "</td></tr>";
 
-					echo "<tr><th align='left'>",t("Hierarkia ja esimiehet"),":</th><td>";
+					echo "<tr><th align='left'>",t("Organisaatiopuu"),":</th><td>";
 
 					$monivalintalaatikot = array('DYNAAMINEN_KUKA');
 					$monivalintalaatikot_normaali = array();

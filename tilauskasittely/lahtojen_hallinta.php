@@ -1825,17 +1825,21 @@
 		echo "<tr>";
 		echo "<td class='back'>";
 
-		if ($tee == 'lahto' and trim($tilaukset) != '') {
-			echo "<button type='button' id='man_aloitus'>",t("Man. aloitus"),"</button>&nbsp;";
-			echo "<button type='button' id='vaihda_prio'>",t("Vaihda prio"),"</button>&nbsp;";
-			echo "<button type='button' id='siirra_lahtoon'>",t("Siirrä lähtöön"),"</button>";
-		}
-		else {
-			echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa lähtö"),"</button>&nbsp;";
-			echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
+		$onko_paivitysoikeuksia_ohjelmaan = tarkista_oikeus('tilauskasittely/lahtojen_hallinta.php', '', 1);
 
-			if (tarkista_oikeus('tilauskasittely/muokkaa_kolleja.php')) {
-				echo "<button type='button' id='muokkaa_kolleja'>",t("Muokkaa kolleja"),"</button>&nbsp;";
+		if ($onko_paivitysoikeuksia_ohjelmaan) {
+			if ($tee == 'lahto' and trim($tilaukset) != '') {
+				echo "<button type='button' id='man_aloitus'>",t("Man. aloitus"),"</button>&nbsp;";
+				echo "<button type='button' id='vaihda_prio'>",t("Vaihda prio"),"</button>&nbsp;";
+				echo "<button type='button' id='siirra_lahtoon'>",t("Siirrä lähtöön"),"</button>";
+			}
+			else {
+				echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa lähtö"),"</button>&nbsp;";
+				echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
+
+				if (tarkista_oikeus('tilauskasittely/muokkaa_kolleja.php')) {
+					echo "<button type='button' id='muokkaa_kolleja'>",t("Muokkaa kolleja"),"</button>&nbsp;";
+				}
 			}
 		}
 

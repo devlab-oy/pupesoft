@@ -18671,6 +18671,8 @@ if (!function_exists("kopioitiliointi")) {
 
 			$query  = substr($query,0,-1);
 			$result = pupe_query($query);
+
+			return mysql_insert_id();
 		}
 	}
 }

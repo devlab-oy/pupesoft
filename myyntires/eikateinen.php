@@ -2,7 +2,7 @@
 
 require ("../inc/parametrit.inc");
 
-if($toim == 'KATEINEN') {
+if ($toim == 'KATEINEN') {
 	echo "<font class='head'>".t("Lasku halutaankin maksaa käteisellä")."</font><hr>";
 }
 else {
@@ -12,8 +12,15 @@ else {
 if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	$laskupvmerror   = FALSE;
 
-	$tapahtumapaiva  = date('Y-m-d', mktime(0,0,0,$tapahtumapaiva_kk,$tapahtumapaiva_pp,$tapahtumapaiva_vv));
-	$laskurow 		 = hae_lasku($tunnus);
+	if ($toim == 'KATEINEN') {
+		$tapahtumapaiva  = date('Y-m-d', mktime(0,0,0,$tapahtumapaiva_kk,$tapahtumapaiva_pp,$tapahtumapaiva_vv));
+	}
+	else {
+		$tapahtumapaiva  = date('Y-m-d');
+	}
+
+	// Haetaan laskun tiedot
+	$laskurow = hae_lasku($tunnus);
 
 	if (strtotime($tapahtumapaiva) < strtotime($laskurow['tapvm'])) {
 		$laskupvmerror = TRUE;
@@ -254,7 +261,9 @@ function tee_kirjanpito_muutokset($params) {
 		$tilid = kopioitiliointi($vanharow['tunnus'], "");
 
 		$query = "	UPDATE tiliointi
-					SET summa = summa * -1
+					SET summa = summa * -1,
+					laatija = '{$kukarow['kuka']}',
+					laadittu = now()
 					{$tapvmlisa}
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and tunnus	= '{$tilid}'";
@@ -265,7 +274,9 @@ function tee_kirjanpito_muutokset($params) {
 
 		$query = "	UPDATE tiliointi
 					SET tilino = '{$uusitili}',
-					summa = '{$params['laskurow']['summa']}'
+					summa = '{$params['laskurow']['summa']}',
+					laatija = '{$kukarow['kuka']}',
+					laadittu = now()
 					{$tapvmlisa}
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and tunnus	= '{$tilid}'";

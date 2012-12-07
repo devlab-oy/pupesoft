@@ -73,7 +73,6 @@
 
 	if (mysql_num_rows($result) > 0) {
 
-
 		$query = "	SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 					FROM kuka
 					WHERE kuka.yhtio = '$kukarow[yhtio]'
@@ -104,9 +103,25 @@
 				$class = " class='tumma' ";
 			}
 
-			for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
-				echo "<td valign='top' $class>{$row[$i]}</td>";
+			echo "<td valign='top' $class>{$row['tunnus']}</td>";
+			echo "<td valign='top' $class>{$row['laskunro']}</td>";
+			echo "<td valign='top' $class>{$row['asiakas']}</td>";
+			echo "<td valign='top' $class>{$row['summa']}</td>";
+			echo "<td valign='top' $class>{$row['tilausviite']}";
+
+			$query = "	SELECT DISTINCT kommentti
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND otunnus = '$row[tunnus]'
+						and tyyppi  = 'L'
+						AND kommentti != ''";
+			$kommres = pupe_query($query);
+
+			while ($kommrow = mysql_fetch_assoc($kommres)) {
+				echo "<br>{$kommrow['kommentti']}";
 			}
+
+			echo "</td>";
 
 			echo "<td valign='top' $class><a name='$row[tunnus]'>";
 

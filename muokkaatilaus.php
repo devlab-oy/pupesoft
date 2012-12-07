@@ -606,13 +606,6 @@
 						return false;
 					}
 				}
-
-				$(document).ready(function() {
-					var mitatoi_kaikki = $('#mitatoi_kaikki');
-					$('#mitatoi_kaikki').remove();
-					$(mitatoi_kaikki).css('display', 'block');
-					$('form[name=hakuformi]').next().after($(mitatoi_kaikki));
-				});
 			</script>";
 
 		echo "<br><form method='post'>
@@ -2070,8 +2063,7 @@
 					echo "</table></form><br>";
 				}
 
-				if ($toim == 'TARJOUS') {
-					//tämä formi laitetaan javascriptillä ylempänä kohdilleen
+				if ($toim == 'TARJOUS' and tarkista_oikeus('tilaus_myynti.php', 'TARJOUS', 1)) {
 					$tunnukset = implode(',', $nakyman_tunnukset);
 
 					echo "<form method='POST' name='mitatoi_kaikki_formi' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(".count($nakyman_tunnukset).");'>";

@@ -1154,13 +1154,13 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
 		echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus_clean])</td></tr>";
 		echo "<tr><td colspan='2'>$trow[osoite] $trow[osoitetark], $trow[maa]-$trow[postino] $trow[postitp], $trow[maa] $fakta</td></tr>";
-		
+
 		$mlaskulias = "";
-		
+
 		if ($trow["tyyppi"] == "K") {
 			$mlaskulias = "!!!KAYTTAJA!!!true";
 		}
-		
+
 		echo "<tr><td><a href='yllapito.php?toim=toimi{$mlaskulias}&tunnus=$toimittajaid&lopetus=ulask.php////tee=$tee//toimittajaid=$toimittajaid//maara=$maara//iframe=$iframe//skannattu_lasku=$skannattu_lasku//tultiin=$tultiin'>".t("Muuta toimittajan tietoja")."</a></td></tr>";
 		echo "</table>";
 		echo "</td>";
@@ -1475,21 +1475,36 @@ if ($tee == 'P' or $tee == 'E') {
 					if (!isset($osto_rahti)) $osto_rahti = '';
 
 					echo "<td>",t("Rahdit"),"</td>";
-					echo "<td><input type='text' name='osto_rahti' id='osto_rahti' tabindex='20' value='{$osto_rahti}' />";
+					echo "<td>";
+					echo "<select name='osto_rahti_alv_verollisuus'>";
+					echo "<option value=''>",t("Verollinen arvo"),"</option>";
+					echo "<option value='X'>",t("Veroton arvo"),"</option>";
+					echo "</select>&nbsp;";
+					echo "<input type='text' name='osto_rahti' id='osto_rahti' tabindex='20' value='{$osto_rahti}' />";
 					echo "&nbsp;".alv_popup('osto_rahti_alv', $osto_rahti_alv)."</td>";
 					break;
 				case '2':
 					if (!isset($osto_kulu)) $osto_kulu = '';
 
 					echo "<td>",t("Kulut"),"</td>";
-					echo "<td><input type='text' name='osto_kulu' id='osto_kulu' tabindex='21' value='{$osto_kulu}' />";
+					echo "<td>";
+					echo "<select name='osto_kulu_alv_verollisuus'>";
+					echo "<option value=''>",t("Verollinen arvo"),"</option>";
+					echo "<option value='X'>",t("Veroton arvo"),"</option>";
+					echo "</select>&nbsp;";
+					echo "<input type='text' name='osto_kulu' id='osto_kulu' tabindex='21' value='{$osto_kulu}' />";
 					echo "&nbsp;".alv_popup('osto_kulu_alv', $osto_kulu_alv)."</td>";
 					break;
 				case '3':
 					if (!isset($osto_rivi_kulu)) $osto_rivi_kulu = '';
 
 					echo "<td>",t("Rivikohtaiset kulut"),"</td>";
-					echo "<td><input type='text' name='osto_rivi_kulu' id='osto_rivi_kulu' tabindex='22' value='{$osto_rivi_kulu}' />";
+					echo "<td>";
+					echo "<select name='osto_rivi_kulu_alv_verollisuus'>";
+					echo "<option value=''>",t("Verollinen arvo"),"</option>";
+					echo "<option value='X'>",t("Veroton arvo"),"</option>";
+					echo "</select>&nbsp;";
+					echo "<input type='text' name='osto_rivi_kulu' id='osto_rivi_kulu' tabindex='22' value='{$osto_rivi_kulu}' />";
 					echo "&nbsp;".alv_popup('osto_rivi_kulu_alv', $osto_rivi_kulu_alv)."</td>";
 					break;
 			}
@@ -1931,6 +1946,18 @@ if ($tee == 'I') {
 	$osto_rahti_alv = (float) $osto_rahti_alv;
 	$osto_kulu_alv = (float) $osto_kulu_alv;
 	$osto_rivi_kulu_alv = (float) $osto_rivi_kulu_alv;
+
+	if (isset($osto_kulu_alv_verollisuus) and $osto_kulu_alv_verollisuus == 'X') {
+		$osto_kulu = $osto_kulu * (1 + ($osto_kulu_alv / 100));
+	}
+
+	if (isset($osto_rahti_alv_verollisuus) and $osto_rahti_alv_verollisuus == 'X') {
+		$osto_rahti = $osto_rahti * (1 + ($osto_rahti_alv / 100));
+	}
+
+	if (isset($osto_rivi_kulu_alv_verollisuus) and $osto_rivi_kulu_alv_verollisuus == 'X') {
+		$osto_rivi_kulu = $osto_rivi_kulu * (1 + ($osto_rivi_kulu_alv / 100));
+	}
 
 	// Kirjoitetaan lasku
 	$query = "	INSERT into lasku set
@@ -2738,5 +2765,3 @@ if (strlen($tee) == 0) {
 if (strpos($_SERVER['SCRIPT_NAME'], "ulask.php")  !== FALSE) {
 	require ("inc/footer.inc");
 }
-
-?>

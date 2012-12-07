@@ -20,6 +20,25 @@
 		unset($tee);
 	}
 
+	if ($toim == 'TARJOUS' and $tee == 'MITATOI_TARJOUS_KAIKKI' and $tunnukset != "") {
+
+		$query = "	UPDATE lasku
+					SET tila = 'D',
+					alatila  = 'T',
+					comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) mitätöi tilauksen ohjelmassa muokkaatilaus.php 1')
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tila    = 'T'
+					AND tunnus IN {$tunnukset}";
+		pupe_query($query);
+
+		$query = "	UPDATE tilausrivi
+					SET tyyppi = 'D'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tyyppi  = 'T'
+					AND otunnus IN {$tunnukset}";
+		pupe_query($query);
+	}
+
 	if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and $yhtiorow["ennakkotilausten_toimitus"] == "M") {
 
 		$toimita_ennakko = explode(",", $toimita_ennakko);
@@ -171,6 +190,18 @@
 							return false;
 						}
 					}
+
+					function tarkista_mitatointi(count) {
+						msg = '".t("Oletko varma, että haluat mitätöidä ")."' + count + '".t(" tarjousta?")."';
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
+					}
 				-->
 				</script>";
 
@@ -239,11 +270,11 @@
 		}
 
 		if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $kukarow["kesken"] != 0 and $tilausnumero != "") {
-			$query_tarjous = "	UPDATE 	lasku
-								SET		alatila = tila,
-								 		tila = 'D',
-										muutospvm = now(),
-										comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ohjelmassa muokkaatilaus.php now()')
+			$query_tarjous = "	UPDATE lasku
+								SET alatila = tila,
+								tila = 'D',
+								muutospvm = now(),
+								comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) mitätöi tilauksen ohjelmassa muokkaatilaus.php 2')
 								WHERE	yhtio = '$kukarow[yhtio]'
 								AND		tunnus = $tilausnumero";
 			$result_tarjous = pupe_query($query_tarjous);
@@ -1392,6 +1423,7 @@
 
 			$lisattu_tunnusnippu  = array();
 			$toimitettavat_ennakot  = array();
+			$nakyman_tunnukset = array();
 
 			while ($row = mysql_fetch_assoc($result)) {
 
@@ -1947,13 +1979,16 @@
 					echo "</form></td>";
 
 					if (($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER") and $deletarjous and $kukarow["mitatoi_tilauksia"] == "") {
-						echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return verify();'>";
+						echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(1);'>";
 						echo "<input type='hidden' name='toim' value='$whiletoim'>";
 						echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS'>";
 						echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
 						echo "<input type='submit' name='$aputoim1' value='".t("Mitätöi")."'>";
 						echo "</form></td>";
 					}
+
+					//laitetaan tunnukset talteen mitatoi_tarjous_kaikki toiminnallisuutta varten
+					$nakyman_tunnukset[] = $row['tunnus'];
 
 					if ($whiletoim == "ENNAKKO" and $yhtiorow["ennakkotilausten_toimitus"] == "M") {
 
@@ -2026,6 +2061,17 @@
 					echo "<tr><th>".t("Tallenna lista").":</th>";
 					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
 					echo "</table></form><br>";
+				}
+
+				if ($toim == 'TARJOUS' and tarkista_oikeus('tilaus_myynti.php', 'TARJOUS', 1)) {
+					$tunnukset = implode(',', $nakyman_tunnukset);
+
+					echo "<form method='POST' name='mitatoi_kaikki_formi' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(".count($nakyman_tunnukset).");'>";
+					echo "<input type='hidden' name='toim' value='$toim' />";
+					echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS_KAIKKI' />";
+					echo "<input type='hidden' name='tunnukset' value='($tunnukset)' />";
+					echo "<input type='submit' value='".t("Mitätöi kaikki näkymän tarjoukset")."'/>";
+					echo "</form>";
 				}
 
 				if ($whiletoim == "ENNAKKO" and $yhtiorow["ennakkotilausten_toimitus"] == "M" and count($toimitettavat_ennakot) > 0) {

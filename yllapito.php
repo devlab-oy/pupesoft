@@ -928,6 +928,9 @@
 					$lisa .= " and {$array[$i]} = '{$haku[$i]}' ";
 				}
 			}
+			else if(trim($array[$i]) == 'ytunnus') {
+				$lisa .= " and REPLACE({$array[$i]}, '-', '') = REPLACE('{$haku[$i]}', '-', '') ";
+			}
 			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
 				list($a, $b) = explode("/", $haku[$i]);
 

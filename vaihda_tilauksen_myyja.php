@@ -48,6 +48,20 @@
 			<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
 	echo "</tr>";
 
+	$rukchk = "";
+	if ($sopparit  != '') $rukchk = "CHECKED";
+
+	echo "<tr><th>".t("Piilota ylläpitosopimukset")."</th>
+			<td colspan='3'><input type='checkbox' name='sopparit' value='YLLARI' $rukchk></td>";
+	echo "</tr>";
+
+
+	$soplisa = "";
+
+	if ($sopparit != "") {
+		$soplisa = " AND lasku.clearing != 'sopimus' ";
+	}
+
 	$query = "	SELECT
 				lasku.tunnus,
 				lasku.laskunro,
@@ -63,6 +77,7 @@
 				and lasku.alatila = 'X'
 				and lasku.tapvm  >= '$vva-$kka-$ppa'
 				and lasku.tapvm  <= '$vvl-$kkl-$ppl'
+				{$soplisa}
 				ORDER BY 1";
 	$result = pupe_query($query);
 

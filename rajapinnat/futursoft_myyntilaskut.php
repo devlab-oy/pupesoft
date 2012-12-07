@@ -69,6 +69,7 @@
 					//Myyntilasku otsikko
 					$lasku_numero = (string)$myyntilasku->Invoice;
 					$data[$lasku_numero] = array(
+						'laskunro' => preg_replace( '/[^0-9]/', '', $lasku_numero),
 						'asiakasnumero' => (string)$myyntilasku->AccountNum,
 						'siirtopaiva' => (string)$myyntilasku->TransDate,
 						'tapahtumapaiva' => (string)$myyntilasku->DocumentDate,
@@ -114,14 +115,19 @@
 
 			if($tilausnumero) {
 				$tilausnumerot[] = $tilausnumero;
-				paivita_tilauksen_tiedot($tilausnumero, $myyntilasku, $yhtio);
 				$tilausnumero_count++;
 
 				foreach($myyntilasku['tilioinnit'] as $tiliointi) {
-					$tiliointi_tunnus = tee_tiliointi($tilausnumero,$tiliointi, $yhtio);
+					$tiliointi_tunnus = tee_tiliointi($tilausnumero, $tiliointi, $yhtio);
 					if($tiliointi_tunnus) {
 						$tiliointi_tunnukset[] = $tiliointi_tunnus;
 						$tiliointi_count++;
+						echo t("Tilaukselle").' '.$tilausnumero.' '.t("tehtiin tiliöinti").' '.$tiliointi_tunnus;
+						echo "<br/>";
+					}
+					else {
+						echo t("Tilaukselle").' '.$tilausnumero.' '.t("EI TEHTY TILIÖINTIÄ");
+						echo "<br/>";
 					}
 				}
 			}
@@ -137,10 +143,41 @@
 
 	function luo_myyntiotsikko($myyntilasku, $yhtio) {
 		$asiakas = tarkista_asiakas_olemassa($myyntilasku['asiakasnumero'], $yhtio);
+		$yhtio_row = hae_yhtio($yhtio);
+
+		$query = "	INSERT INTO lasku
+					SET yhtio = '{$yhtio}',
+					yhtio_nimi = '{$yhtio_row['nimi']}',
+					yhtio_osoite = '{$yhtio_row['osoite']}',
+					yhtio_postino = '{$yhtio_row['postino']}',
+					yhtio_postitp = '{$yhtio_row['postitp']}',
+					yhtio_maa = '{$yhtio_row['maa']}',
+					nimi = '{$asiakas['nimi']}',
+					osoite = '{$asiakas['osoite']}',
+					postino = '{$asiakas['postino']}',
+					postitp = '{$asiakas['postitp']}',
+					maa = '{$asiakas['maa']}',
+					toim_nimi = '{$asiakas['nimi']}',
+					toim_osoite = '{$asiakas['osoite']}',
+					toim_postino = '{$asiakas['postino']}',
+					toim_postitp = '{$asiakas['postitp']}',
+					toim_maa = '{$asiakas['maa']}',
+					valkoodi = '{$myyntilasku['valuutta']}',
+					summa = '{$myyntilasku['summa']}',
+					laatija = 'konversio',
+					luontiaika = NOW(),
+					viite = '{$myyntilasku['viite']}',
+					laskunro = '{$myyntilasku['laskunro']}',
+					maksuehto = '{$myyntilasku['maksuehto']}',
+					tapvm = '{$myyntilasku['tapahtumapaiva']}',
+					erpcm = '{$myyntilasku['erapaiva']}',
+					tila = 'U',
+					alatila = 'X'";
+		pupe_query($query);
+		$tilausnumero = mysql_insert_id();
 
 		if($asiakas['asiakasnro'] == 'kaato_asiakas') {
-			//asiakasta ei löytynyt juodumme käyttämään kaato-asiakasta
-			$tilausnumero = luo_myyntitilausotsikko('', $asiakas['tunnus']);
+
 			if($tilausnumero) {
 				$query = "	UPDATE lasku
 							SET comments = '".t("Laskun asiakasta ei löytynyt, käytimme laskun konversioon väliaikaista kaato-asiakasta. Korjaa tämä lasku mahdollisimman pian. Alkuperäisen laskun tiedot löytyvät sisviesti2")."',
@@ -150,7 +187,7 @@
 				pupe_query($query);
 			}
 
-			echo t("Laskulle").' '.$tilausnumero.' '.t("jouduttiin liittämään kaato-asiakas, koska laskun asiakasta ei löytynyt tietokannasta.");
+			echo t("Laskulle").' '.$tilausnumero.' laskunumero '.$myyntilasku['laskunro'].' '.t("jouduttiin liittämään kaato-asiakas, koska laskun asiakasta ei löytynyt tietokannasta.");
 			echo "<br/>";
 			echo "<pre>";
 			echo $myyntilasku['asiakkaan_nimi'];
@@ -159,19 +196,14 @@
 			echo "</pre>";
 		}
 		else {
-			$tilausnumero = luo_myyntitilausotsikko('', $asiakas['tunnus']);
 
-			echo t("Laskulle").' '.$tilausnumero.' '.t("ei lisätty kaatoasiakasta.");
+			echo t("Laskulle").' '.$tilausnumero.' laskunumero '.$myyntilasku['laskunro'].' '.t("ei lisätty kaatoasiakasta.");
 			echo "<br/>";
 			echo "<pre>";
 			echo $myyntilasku['asiakkaan_nimi'];
 			echo "<br/>";
 			echo $myyntilasku['asiakasnumero'];
 			echo "</pre>";
-		}
-
-		if($tilausnumero == null) {
-			$joonakse_debug = 1;
 		}
 		
 		return $tilausnumero;
@@ -232,23 +264,7 @@
 			pupe_query($query2);
 		}
 
-		$result = pupe_query($query);
-
 		return mysql_fetch_assoc($result);
-	}
-
-	function paivita_tilauksen_tiedot($tilausnumero, $myyntilasku, $yhtio) {
-		$query = "	UPDATE lasku
-					SET nimi = '{$myyntilasku['asiakkaan_nimi']}',
-					tapvm = '{$myyntilasku['tapahtumapaiva']}',
-					summa = '{$myyntilasku['summa']}',
-					maksuehto = '{$myyntilasku['maksuehto']}',
-					erpcm = '{$myyntilasku['erapaiva']}',
-					viite = '{$myyntilasku['viite']}',
-					tila = 'U'
-					WHERE yhtio = '{$yhtio}'
-					AND tunnus = '{$tilausnumero}'";
-		pupe_query($query);
 	}
 
 	function tee_tiliointi($tilausnumero, $tiliointi, $yhtio) {
@@ -267,7 +283,11 @@
 
 			return mysql_insert_id();
 		}
-		return null;
+		else {
+			echo t("Tilinumeroa").' '.$tiliointi['tilinumero'].' '.t("EI LÖYTYNYT");
+			echo "<br/>";
+			return null;
+		}
 	}
 
 	function tarkista_tilinumero($tilinumero, $yhtio) {
@@ -291,16 +311,25 @@
 					FROM lasku
 					WHERE yhtio = '{$yhtio}'
 					AND tunnus IN (".implode(',', $kasitellyt_tilaukset['tilausnumerot']).")";
-//		echo $query;
-//		echo "<br/><br/>";
 		pupe_query($query);
 
 		$query2 = "	DELETE
 					FROM tiliointi
 					WHERE yhtio = '{$yhtio}'
 					AND tunnus IN (".implode(',', $kasitellyt_tilaukset['tiliointi_tunnukset']).")";
-//		echo $query2;
-//
 		pupe_query($query2);
+	}
+
+	function hae_yhtio($yhtio) {
+		$query = "	SELECT *
+					FROM yhtio
+					WHERE yhtio = '{$yhtio}'";
+		$result = pupe_query($query);
+
+		if(mysql_num_rows($result) == 0) {
+			return null;
+		}
+
+		return mysql_fetch_assoc($result);
 	}
 ?>

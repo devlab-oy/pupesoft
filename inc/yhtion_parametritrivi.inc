@@ -298,13 +298,14 @@
 
 	if (mysql_field_name($result, $i) == "ostotilaustyyppi") {
 
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$apu = (int)$trow[$i];
-		$sel = array();
-		$sel[$apu] = "selected";
+		$sel = array_fill_keys(array($trow[$i]), 'selected') + array_fill_keys(array('0','A','B','C'), '');
 
-		$ulos .= "<option value = '0' $sel[0]>".t("Normaali ostotilauspohja");
+		$ulos .= "<option value = '0' {$sel[0]}>".t("Normaali ostotilauspohja");
+		$ulos .= "<option value = 'A' {$sel['A']}>".t("Tulosta nimitykset, piilotetaan toimituspäivä")."</option>";
+		$ulos .= "<option value = 'B' {$sel['B']}>".t("Piilota nimitykset, tulosta toimituspäivä")."</option>";
+		$ulos .= "<option value = 'C' {$sel['C']}>".t("Piilota toimituspäivä ja nimitykset")."</option>";
 		#$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty ostotilauspohja");
 		$ulos .= "</select></td>";
 

@@ -55,7 +55,14 @@ else {
 		$ulos .= "OLININ_PI:" . sprintf ('%-36.36s', $tilausrivirow['tuoteno']) . "1" . "\n";
 		$ulos .= "OLIN21_QT:" . sprintf("%013.4f", (float) $tilausrivirow['varattu']) . "\n";
 		$ulos .= "OLINCONIV:" . sprintf("%015.2f", (float) $tilausrivirow['ostohinta']) . " " . $laskurow['valkoodi'] . " " . $tilausrivirow['yksikko'] . "\n";
-		$ulos .= "OLIN2__DT:" . tv2dateconv($tilausrivirow['toimaika']) . "\n";
+
+		if ($yhtiorow['ostotilaustyyppi'] == 0 or $yhtiorow['ostotilaustyyppi'] == 'B') {
+			$ulos .= "OLIN2__DT:" . tv2dateconv($tilausrivirow['toimaika']) . "\n";
+		}
+		else {
+			$ulos .= "OLIN2__DT:\n";
+		}
+
 		$ulos .= "OLIN__END:" . $rivino . "\n";
 		fputs($toot,$ulos);
 		$rivino++;
@@ -96,5 +103,3 @@ $lopetus = "";
 
 $nimi  = "";
 $ulos  = "";
-
-?>

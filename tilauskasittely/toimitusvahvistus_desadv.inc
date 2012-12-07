@@ -420,7 +420,7 @@
 					asiakas.postino asiakaspostino,
 					asiakas.maa asiakasmaa,
 					asiakas.ovttunnus asiakasovttunnus,
-					asiakas.ovttunnus asiakastoim_ovttunnus,
+					lasku.toim_ovttunnus asiakastoim_ovttunnus,
 					lasku.toim_nimi asiakastoim_nimi,
 					lasku.toim_nimitark asiakastoim_nimitark,
 					lasku.toim_osoite asiakastoim_osoite,

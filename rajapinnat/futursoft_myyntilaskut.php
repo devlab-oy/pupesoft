@@ -59,6 +59,9 @@
 		//Testausta varten
 		//poista_tilaukset_ja_tilioinnit($kasitellyt_tilaukset, $yhtio);
 	}
+	else {
+		echo t("Tiedosto ei ole olemassa");
+	}
 	die();
 
 	function parsi_xml_tiedosto(SimpleXMLElement $xml) {

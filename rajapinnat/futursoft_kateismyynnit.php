@@ -27,7 +27,7 @@
 	$filename = $argv[2];
 
 	//TESTAUSTA VARTEN
-	$filename = '/tmp/KPAM_kateis(1327).xml';
+	$filename = '/tmp/KPAM_kateis(1334).xml';
 	$yhtio = 'atarv';
 
 	// Haetaan yhtiön tiedot
@@ -53,13 +53,17 @@
 		$kateismyynti_data = parsi_xml_tiedosto($xml);
 
 		echo count($kateismyynti_data).' '.t("kateismyyntiä löytyi");
+		echo "<br/>";
 
 		$kasitellyt_kateismyynnit = kasittele_kateismyynnit_data($kateismyynti_data, $yhtio);
 
 		echo $kasitellyt_kateismyynnit['tilausnumero_count'] . t(" tilausta luotiin ja niihin ") . $kasitellyt_kateismyynnit['tiliointi_count'] . t(" tiliöintiä");
 
 		//Testaamista varten
-		poista_tilaukset_ja_tilioinnit($kasitellyt_kateismyynnit, $yhtio);
+		//poista_tilaukset_ja_tilioinnit($kasitellyt_kateismyynnit, $yhtio);
+	}
+	else {
+		echo t("Tiedosto ei ole olemassa");
 	}
 	die();
 
@@ -104,14 +108,19 @@
 
 			if($tilausnumero) {
 				$tilausnumerot[] = $tilausnumero;
-				paivita_tilauksen_tiedot($tilausnumero, $kateismyynnin_osat, $yhtio);
 				$tilausnumero_count++;
+
+				echo t("Käteislasku").' '.$tilausnumero.' '.t("luotiin");
+				echo "<br/>";
 
 				foreach($kateismyynnin_osat as $kateismyynti) {
 					$tiliointi_tunnus = tee_tiliointi($tilausnumero, $kateismyynti, $yhtio);
 					if($tiliointi_tunnus) {
 						$tiliointi_idt[] = $tiliointi_tunnus;
 						$kateismyynti_count++;
+
+						echo t("Käteislaskulle").' '.$tilausnumero.' '.t("luotiin tiliöinti").' '.$tiliointi_tunnus;
+						echo "<br/>";
 					}
 				}
 			}
@@ -127,10 +136,35 @@
 
 	function luo_myyntiotsikko($kateismyynnin_osat, $yhtio) {
 		$asiakas = luo_kaato_asiakas($yhtio);
+		$yhtio_row = hae_yhtio($yhtio);
 
-		$tilausnumero = luo_myyntitilausotsikko('', $asiakas['tunnus']);
+		$query = "	INSERT INTO lasku
+					SET yhtio = '{$yhtio}',
+					yhtio_nimi = '{$yhtio_row['nimi']}',
+					yhtio_osoite = '{$yhtio_row['osoite']}',
+					yhtio_postino = '{$yhtio_row['postino']}',
+					yhtio_postitp = '{$yhtio_row['postitp']}',
+					yhtio_maa = '{$yhtio_row['maa']}',
+					nimi = '{$asiakas['nimi']}',
+					osoite = '{$asiakas['osoite']}',
+					postino = '{$asiakas['postino']}',
+					postitp = '{$asiakas['postitp']}',
+					maa = '{$asiakas['maa']}',
+					toim_nimi = '{$asiakas['nimi']}',
+					toim_osoite = '{$asiakas['osoite']}',
+					toim_postino = '{$asiakas['postino']}',
+					toim_postitp = '{$asiakas['postitp']}',
+					toim_maa = '{$asiakas['maa']}',
+					valkoodi = '{$kateismyynnin_osat[0]['valuutta']}',
+					summa = '{$kateismyynnin_osat[0]['summa']}',
+					laatija = 'konversio',
+					luontiaika = NOW(),
+					tapvm = '{$kateismyynnin_osat[0]['tapahtumapaiva']}',
+					tila = 'U',
+					alatila = 'X'";
+		pupe_query($query);
 
-		return $tilausnumero;
+		return mysql_insert_id();
 	}
 
 	function luo_kaato_asiakas($yhtio) {
@@ -170,39 +204,42 @@
 			pupe_query($query2);
 		}
 
-		$result = pupe_query($query);
-
 		return mysql_fetch_assoc($result);
-	}
-
-	function paivita_tilauksen_tiedot($tilausnumero, $kateismyynti, $yhtio) {
-		$query = "	UPDATE lasku
-					SET tapvm = '".date('Y-m-d', strtotime($kateismyynti[0]['tapahtumapaiva']))."',
-					summa = '{$kateismyynti[0]['summa']}',
-					tila = 'U'
-					WHERE yhtio = '{$yhtio}'
-					AND tunnus = '{$tilausnumero}'";
-		pupe_query($query);
 	}
 
 	function tee_tiliointi($tilausnumero, $kateismyynti, $yhtio) {
 		$kassalipas = tarkista_tilinumero($kateismyynti['kustp'], $yhtio);
 
-		if(!empty($kassalipas)) {
-			$query = "	INSERT INTO tiliointi
-						SET tilino = '{$kassalipas['kassa']}',
-						selite = '{$kateismyynti['selite']}',
-						tapvm = '{$kateismyynti['tapahtumapaiva']}',
-						summa = '{$kateismyynti['summa']}',
-						vero = '{$kateismyynti['alv']}',
-						kustp = '{$kateismyynti['kustp']}',
-						ltunnus = '{$tilausnumero}',
-						yhtio = '{$yhtio}'";
-			pupe_query($query);
+		if(empty($kassalipas)) {
+			if($yhtio == 'atarv') {
+				//kustp 2000 on yleinen fail-safe kustannuspaikka
+				$kassalipas = tarkista_tilinumero('2000', $yhtio);
 
-			return mysql_insert_id();
+				echo t("Kassalippasta ei ole olemassa").' '.$kassalipas['kassa'].' '.t("tiliöinti tehdään yleiselle kassalippaalle kustp 2000 tili 18110");
+				echo "<br/>";
+			}
+			else {
+				echo t("Kassalippasta ei ole olemassa").' '.$kassalipas['kassa'].' '.t("tiliöintiä ei voitu perustaa");
+				echo "<br/>";
+
+				return null;
+			}
 		}
-		return null;
+		$query = "	INSERT INTO tiliointi
+					SET tilino = '{$kassalipas['kassa']}',
+					selite = '{$kateismyynti['selite']}',
+					tapvm = '{$kateismyynti['tapahtumapaiva']}',
+					summa = '{$kateismyynti['summa']}',
+					vero = '{$kateismyynti['alv']}',
+					kustp = '{$kateismyynti['kustp']}',
+					ltunnus = '{$tilausnumero}',
+					yhtio = '{$yhtio}'";
+		pupe_query($query);
+
+		echo t("Tiliöinti laskulle").' '.$tilausnumero.' '.t("luotiin kassalipas:").' '.$kassalipas['kassa'];
+		echo "<br/>";
+
+		return mysql_insert_id();
 	}
 
 	function tarkista_tilinumero($kustannuspaikka, $yhtio) {
@@ -236,5 +273,18 @@
 					AND tunnus IN (".implode(',', $kasitellyt_tilaukset['tiliointi_idt']).")";
 		echo $query2;
 		//pupe_query($query2);
+	}
+
+	function hae_yhtio($yhtio) {
+		$query = "	SELECT *
+					FROM yhtio
+					WHERE yhtio = '{$yhtio}'";
+		$result = pupe_query($query);
+
+		if(mysql_num_rows($result) == 0) {
+			return null;
+		}
+
+		return mysql_fetch_assoc($result);
 	}
 ?>

@@ -56,6 +56,9 @@
 
 		echo $kasitellyt_asiakkaat['asiakas_count'] . t(" asiakas luotiin / päivitettiin");
 	}
+	else {
+		echo t("Tiedosto ei ole olemassa");
+	}
 	die();
 
 	function parsi_xml_tiedosto(SimpleXMLElement $xml) {

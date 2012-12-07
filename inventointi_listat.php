@@ -413,7 +413,7 @@
 			}
 		}
 
-		function il_varvaikutus ($varastonarvo, $varastoonvaikutus, $where, $rajauslisalisa, $invaamatta, $extra) {
+		function il_varvaikutus ($varastonarvo, $varastoonvaikutus, $where, $rajauslisatuote, $invaamatta, $extra) {
 			global $kukarow, $kutsu;
 
 			$tuotenoarray = array();

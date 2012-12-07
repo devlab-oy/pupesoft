@@ -157,7 +157,7 @@
 					toim_maa = '{$asiakas['maa']}',
 					valkoodi = '{$kateismyynnin_osat[0]['valuutta']}',
 					summa = '{$kateismyynnin_osat[0]['summa']}',
-					laatija = 'konversio',
+					laatija = 'futursoft',
 					luontiaika = NOW(),
 					tapvm = '{$kateismyynnin_osat[0]['tapahtumapaiva']}',
 					tila = 'U',

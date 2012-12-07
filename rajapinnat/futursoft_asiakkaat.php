@@ -173,7 +173,7 @@
 					toimitustapa = '{$toimitustapa['selite']}',
 					luottoraja = '{$asiakas['max_luotto']}',
 					kustannuspaikka = '{$asiakas['kustp']}',
-					muuttaja = 'futur',
+					muuttaja = 'futursoft',
 					muutospvm = NOW()
 					WHERE yhtio = '{$yhtio}'
 					AND tunnus = '{$olemassa_oleva_asiakas_row['tunnus']}'";

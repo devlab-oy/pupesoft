@@ -17,14 +17,15 @@
 		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR."/Users/joonas/Dropbox/Sites/pupesoft".PATH_SEPARATOR."/usr/share/pear");
 	}
 
+//	TESTAUSTA VARTEN
 //	if ($argv[1] == "" or $argv[2] == "") {
 //		echo "\nUsage: php ".basename($argv[0])." yhtio tiedosto.txt\n\n";
 //		die;
 //	}
-
-	// Parametrit
-	$yhtio = pupesoft_cleanstring($argv[1]);
-	$filename = $argv[2];
+//
+//	// Parametrit
+//	$yhtio = pupesoft_cleanstring($argv[1]);
+//	$filename = $argv[2];
 
 	//TESTAUSTA VARTEN
 	$filename = '/tmp/KPAM_myynti(1340).xml';
@@ -75,13 +76,13 @@
 						'laskunro' => preg_replace( '/[^0-9]/', '', $lasku_numero),
 						'asiakasnumero' => (string)$myyntilasku->AccountNum,
 						'siirtopaiva' => (string)$myyntilasku->TransDate,
-						'tapahtumapaiva' => (string)$myyntilasku->DocumentDate,
+						'tapahtumapaiva' => date('Y-m-d', strtotime((string)$myyntilasku->DocumentDate)),
 						'asiakkaan_nimi' => utf8_decode((string)$myyntilasku->Txt),
 						'summa' => (float)$myyntilasku->AmountCurDebit,
 						'valuutta' => (string)$myyntilasku->Currency,
 						'kurssi' => (float)$myyntilasku->ExchRate,
 						'maksuehto' => (string)$myyntilasku->Payment,
-						'erapaiva' => (string)$myyntilasku->Due,
+						'erapaiva' => date('Y-m-d', strtotime((string)$myyntilasku->Due)),
 						'viite' => (string)$myyntilasku->PaymId,
 					);
 				}
@@ -89,18 +90,23 @@
 					$data[$lasku_numero]['tilioinnit'][] = array(
 						'tilinumero' => (string)$myyntilasku->AccountNum,
 						'siirtopaiva' => (string)$myyntilasku->TransDate,
-						'tapahtumapaiva' => (string)$myyntilasku->DocumentDate,
+						'tapahtumapaiva' => date('Y-m-d', strtotime((string)$myyntilasku->DocumentDate)),
 						'asiakkaan_nimi' => utf8_decode((string)$myyntilasku->Txt),
-						'summa' => ((string)$myyntilasku->AmountCurDebit == '') ? (float)($myyntilasku->AmountCurCredit * -1) : (float)$myyntilasku->AmountCurDebit,
+						'summa' => ((string)$myyntilasku->AmountCurDebit == '') ? ((float)$myyntilasku->AmountCurCredit * -1) : (float)$myyntilasku->AmountCurDebit,
 						'valuutta' => (string)$myyntilasku->Currency,
 						'kurssi' => (string)$myyntilasku->ExchRate,
 						'alv' => ((string)$myyntilasku->TaxItemGroup == '') ? 0 : (float)$myyntilasku->TaxItemGroup,
 						'alv_maara' => (float)$myyntilasku->FixedTaxAmount,
 						'kustp' => (string)$myyntilasku->Dim2,
 						'maksuehto' => (string)$myyntilasku->Payment,
-						'erapaiva' => (string)$myyntilasku->Due,
+						'erapaiva' => date('Y-m-d', strtotime((string)$myyntilasku->Due)),
 						'viite' => (string)$myyntilasku->PaymId,
 					);
+
+					//laitetaan vero myös laskuotsikolle
+					if(!isset($data[$lasku_numero]['alv'])) {
+						$data[$lasku_numero]['alv'] = ((string)$myyntilasku->TaxItemGroup == '') ? 0 : (float)$myyntilasku->TaxItemGroup;
+					}
 				}
 			}
 		}
@@ -167,24 +173,41 @@
 					toim_maa = '{$asiakas['maa']}',
 					valkoodi = '{$myyntilasku['valuutta']}',
 					summa = '{$myyntilasku['summa']}',
-					laatija = 'konversio',
+					summa_valuutassa = '{$myyntilasku['summa']}',
+					vienti_kurssi = 1,
+					laatija = 'futursoft',
 					luontiaika = NOW(),
 					viite = '{$myyntilasku['viite']}',
 					laskunro = '{$myyntilasku['laskunro']}',
 					maksuehto = '{$myyntilasku['maksuehto']}',
 					tapvm = '{$myyntilasku['tapahtumapaiva']}',
 					erpcm = '{$myyntilasku['erapaiva']}',
+					lapvm = '{$myyntilasku['tapahtumapaiva']}',
+					toimaika = '{$myyntilasku['tapahtumapaiva']}',
+					kerayspvm = '{$myyntilasku['tapahtumapaiva']}',
+					alv = '{$myyntilasku['alv']}',
 					tila = 'U',
 					alatila = 'X'";
 		pupe_query($query);
 		$tilausnumero = mysql_insert_id();
+
+		//tehdään myyntisaamiset tiliöinti
+		$myyntisaamiset_array = array(
+			'tilinumero' => $yhtio_row['myyntisaamiset'],
+			'tapahtumapaiva' => $myyntilasku['tapahtumapaiva'],
+			'summa' => (abs($myyntilasku['summa'])),
+			'alv' => $myyntilasku['alv'],
+			'kustp' => 0,
+
+		);
+		tee_tiliointi($tilausnumero, $myyntisaamiset_array, $yhtio);
 
 		if($asiakas['asiakasnro'] == 'kaato_asiakas') {
 
 			if($tilausnumero) {
 				$query = "	UPDATE lasku
 							SET comments = '".t("Laskun asiakasta ei löytynyt, käytimme laskun konversioon väliaikaista kaato-asiakasta. Korjaa tämä lasku mahdollisimman pian. Alkuperäisen laskun tiedot löytyvät sisviesti2")."',
-								sisviesti2 = '".json_encode($myyntilasku)."'
+								sisviesti2 = '".@json_encode($myyntilasku)."'
 							WHERE yhtio = '{$yhtio}'
 							AND tunnus = '{$tilausnumero}'";
 				pupe_query($query);
@@ -281,6 +304,9 @@
 						vero = '{$tiliointi['alv']}',
 						kustp = '{$tiliointi['kustp']}',
 						ltunnus = '{$tilausnumero}',
+						laatija = 'futursoft',
+						laadittu = NOW(),
+						selite = '".t("Futursoft konversioajo")."',
 						yhtio = '{$yhtio}'";
 			pupe_query($query);
 

@@ -557,6 +557,10 @@
 				 	$assrow["laskutus_maa"]		   = $assrow["maa"];
 				}
 
+				if($naytetaanko_tarjouksella != 'on' and $toim == 'TARJOUS') {
+					$toimpvm = '0000-00-00';
+				}
+
 				$query = "	UPDATE lasku
 							SET liitostunnus 	= '$assrow[tunnus]',
 							ytunnus				= '$assrow[ytunnus]',
@@ -1441,6 +1445,17 @@
 			echo "</td></tr>";
 
 			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
+
+			if($toim == 'TARJOUS') {
+				if(!checkdate($toimkk, $toimpp, $toimvv)) {
+					//Kyseessä on tarjouksen toimitusajan piilottamiseen pdf:ltä käytettävä toiminnallisuus toimaika = 0000-00-00 jos se on haluttu piilottaa
+					$naytetaanko_pdf_sel = "";
+				}
+				else {
+					$naytetaanko_pdf_sel = "checked='CHECKED'";
+				}
+				echo t("Näytetäänkö tarjouksella")."<input type='checkbox' name='naytetaanko_tarjouksella' $naytetaanko_pdf_sel /><br/>";
+			}
 
 			if ($toim == "YLLAPITO") {
 				echo t("Ei käytössä");
@@ -3032,12 +3047,15 @@
 			$kurssi = $apukurssi;
 		}
 
-		//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
-		if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
-			$toimpp = $kerpp;
-			$toimkk = $kerkk;
-			$toimvv = $kervv;
-			$toimvko = $keraysvko;
+		if($toim != 'TARJOUS') {
+			//Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
+			//Päivämäärävertailu (toivo5ttukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
+			if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
+				$toimpp = $kerpp;
+				$toimkk = $kerkk;
+				$toimvv = $kervv;
+				$toimvko = $keraysvko;
+			}
 		}
 
 		if (($voimaika_vv == "" or !is_numeric($voimaika_vv)) or ($voimaika_kk == "" or !is_numeric($voimaika_kk)) or ($voimaika_pp == "" or !is_numeric($voimaika_pp))) {
@@ -3055,6 +3073,12 @@
 
 		$label = !isset($label) ? "" : $label;
 		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
+
+		if($naytetaanko_tarjouksella != 'on' and $toim == "TARJOUS") {
+			$toimvv = '0000';
+			$toimkk = '00';
+			$toimpp = '00';
+		}
 
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',

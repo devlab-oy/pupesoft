@@ -136,9 +136,9 @@ if ($tee == '') {
 	echo "	<th>",t("Näytä viikkosuunnitelmat")," </th><td colspan='3'><input type='radio' name='vstk' value='Viikkosuunnitelma' {$sel11}></td></tr>
 			<tr><th>",t("Näytä asiakaskäynnit")," </th><td colspan='3'><input type='radio' name='vstk' value='Asiakaskäynti' {$sel22}></td></tr>";
 
-	if (!isset($valitut)) $valitut = "";
-
 	if (isset($kalen)) {
+		if (!isset($valitut)) $valitut = "";
+
 		foreach($kalen as $tama) {
 			$valitut .= "$tama,";
 		}
@@ -170,7 +170,7 @@ if ($tee == '') {
 
 			<table width='100%'><tr>
 			<td><input type='checkbox' name='kalen[]' value = '{$kukarow['kuka']}' {$checked}></td>
-			<td>Oma</td></tr>";
+			<td>",t("Oma"),"</td></tr>";
 
 	$query = "	SELECT kuka.tunnus, kuka.nimi, kuka.kuka
 				FROM kuka, oikeu

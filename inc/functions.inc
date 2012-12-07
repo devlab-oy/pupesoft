@@ -16279,6 +16279,7 @@ if (!function_exists("kopioitiliointi")) {
 
 			for ($i=0; $i<mysql_num_fields($result); $i++) {
 				$kennimi = mysql_field_name($result, $i);
+
 				if ($kennimi != 'tunnus') {
 					if ($viivaaja != '') {
 						if ($kennimi == 'korjattu') {
@@ -16299,6 +16300,8 @@ if (!function_exists("kopioitiliointi")) {
 
 			$query  = substr($query,0,-1);
 			$result = pupe_query($query);
+
+			return mysql_insert_id();
 		}
 	}
 }

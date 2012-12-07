@@ -20,7 +20,7 @@ $seurday  = date("j",mktime(0, 0, 0, $kuu, $paiva+1,  $year));
 $seurmonth= date("n",mktime(0, 0, 0, $kuu, $paiva+1,  $year));
 $seuryear = date("Y",mktime(0, 0, 0, $kuu, $paiva+1,  $year));
 
-if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=>'Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu');
+if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 if (!isset($AIKA_ARRAY)) $AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00");
 
 function days_in_month($kuu, $year) {

@@ -964,7 +964,7 @@
 								$trow  = mysql_fetch_assoc($rhire);
 
 								$hinta = $tjvrow['jvkulu']; // jv kulu
-								$nimitys = "Jälkivaatimuskulu";
+								$nimitys = t("Jälkivaatimuskulu", $kieli);
 								$kommentti = "";
 
 								list($jvhinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
@@ -1064,7 +1064,7 @@
 							$trow      = mysql_fetch_assoc($rhire);
 							$otunnus   = $laskurow['tunnus'];
 							$nimitys   = "$pvm $laskurow[toimitustapa]";
-							$kommentti = t("Rahtikirja").": $rahtikirjanrot";
+							$kommentti = t("Rahtikirja", $kieli).": $rahtikirjanrot";
 
 							$ale_lisa_insert_query_1 = $ale_lisa_insert_query_2 = '';
 
@@ -2360,8 +2360,8 @@
 								$tilrow["rivihinta_verollinen"]	= hintapyoristys($tilrow["rivihinta_verollinen"]);
 								$vatamount 			 			= hintapyoristys($vatamount);
 
-								$tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['kommentti']);
-								$tilrow['nimitys']   = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['nimitys']);
+								$tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['kommentti']);
+								$tilrow['nimitys']   = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['nimitys']);
 
 								// Otetaan seuraavan rivin otunnus
 								if ($rivilaskuri < $rivimaara) {

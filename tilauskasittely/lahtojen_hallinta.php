@@ -4,9 +4,11 @@
 
 	require ("../inc/parametrit.inc");
 
+	$onko_paivitysoikeuksia_ohjelmaan = tarkista_oikeus('tilauskasittely/lahtojen_hallinta.php', '', 1);
+
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
-	if (isset($man_aloitus)) {
+	if (isset($man_aloitus) and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_child) and count($checkbox_child) > 0) {
 
@@ -30,7 +32,7 @@
 		}
 	}
 
-	if (isset($vaihda_prio)) {
+	if (isset($vaihda_prio) and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_child) and (is_array($checkbox_child) or is_string(trim($checkbox_child)))) {
 
@@ -89,7 +91,7 @@
 		}
 	}
 
-	if (isset($siirra_lahtoon)) {
+	if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_child) and (is_array($checkbox_child) or is_string(trim($checkbox_child)))) {
 
@@ -475,7 +477,7 @@
 		}
 	}
 
-	if (isset($muokkaa_lahto)) {
+	if (isset($muokkaa_lahto) and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_parent) and ((is_array($checkbox_parent) and count($checkbox_parent) > 0) or is_string($checkbox_parent))) {
 
@@ -605,7 +607,7 @@
 		}
 	}
 
-	if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto > 0) {
+	if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto > 0 and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_parent) and ((is_array($checkbox_parent) and count($checkbox_parent) > 0) or is_string($checkbox_parent))) {
 
@@ -1825,17 +1827,19 @@
 		echo "<tr>";
 		echo "<td class='back'>";
 
-		if ($tee == 'lahto' and trim($tilaukset) != '') {
-			echo "<button type='button' id='man_aloitus'>",t("Man. aloitus"),"</button>&nbsp;";
-			echo "<button type='button' id='vaihda_prio'>",t("Vaihda prio"),"</button>&nbsp;";
-			echo "<button type='button' id='siirra_lahtoon'>",t("Siirrä lähtöön"),"</button>";
-		}
-		else {
-			echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa lähtö"),"</button>&nbsp;";
-			echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
+		if ($onko_paivitysoikeuksia_ohjelmaan) {
+			if ($tee == 'lahto' and trim($tilaukset) != '') {
+				echo "<button type='button' id='man_aloitus'>",t("Man. aloitus"),"</button>&nbsp;";
+				echo "<button type='button' id='vaihda_prio'>",t("Vaihda prio"),"</button>&nbsp;";
+				echo "<button type='button' id='siirra_lahtoon'>",t("Siirrä lähtöön"),"</button>";
+			}
+			else {
+				echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa lähtö"),"</button>&nbsp;";
+				echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
 
-			if (tarkista_oikeus('tilauskasittely/muokkaa_kolleja.php')) {
-				echo "<button type='button' id='muokkaa_kolleja'>",t("Muokkaa kolleja"),"</button>&nbsp;";
+				if (tarkista_oikeus('tilauskasittely/muokkaa_kolleja.php')) {
+					echo "<button type='button' id='muokkaa_kolleja'>",t("Muokkaa kolleja"),"</button>&nbsp;";
+				}
 			}
 		}
 
@@ -2077,7 +2081,13 @@
 					echo "<td class='center toggleable_parent_row_stopped' id='!__{$row['lahdon_tunnus']}X__{$y}'>&nbsp;</td>";
 				}
 
-				echo "<td><input type='checkbox' class='checkall_parent' name='checkbox_parent[]' id='{$row['lahdon_tunnus']}' value='{$row['lahdon_tunnus']}'></td>";
+				echo "<td>";
+
+				if ($onko_paivitysoikeuksia_ohjelmaan) {
+					echo "<input type='checkbox' class='checkall_parent' name='checkbox_parent[]' id='{$row['lahdon_tunnus']}' value='{$row['lahdon_tunnus']}'>";
+				}
+
+				echo "</td>";
 
 				echo "<td class='toggleable center toggleable_parent_row_departure' id='{$row['lahdon_tunnus']}__{$y}'>";
 				echo "<form method='post'>";
@@ -2307,7 +2317,14 @@
 			}
 
 			echo "<tr class='header_row_{$row['lahdon_tunnus']}__{$y}' id='header_row_{$row['lahdon_tunnus']}__{$y}'>";
-			echo "<th><input type='checkbox' class='checkall_child'></th>";
+
+			echo "<th>";
+
+			if ($onko_paivitysoikeuksia_ohjelmaan) {
+				echo "<input type='checkbox' class='checkall_child'>";
+			}
+
+			echo "</th>";
 
 			echo "<th class='sort_row_by' id='row_status__{$row['lahdon_tunnus']}__{$y}'>",t("Status")," <img class='row_direction_status' />";
 			echo "<br />";
@@ -2408,7 +2425,13 @@
 
 				echo "<tr class='toggleable_row_tr' id='toggleable_row_tr_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 
-				echo "<td><input type='checkbox' class='checkbox_{$lahto_row['tilauksen_tunnus']}' name='checkbox_child[{$lahto_row['tilauksen_tunnus']}]' value='{$lahto_row['tilauksen_tunnus']}' id='checkbox_{$lahto_row['tilauksen_tunnus']}__{$x}'></td>";
+				echo "<td>";
+
+				if ($onko_paivitysoikeuksia_ohjelmaan) {
+					echo "<input type='checkbox' class='checkbox_{$lahto_row['tilauksen_tunnus']}' name='checkbox_child[{$lahto_row['tilauksen_tunnus']}]' value='{$lahto_row['tilauksen_tunnus']}' id='checkbox_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
+				}
+
+				echo "</td>";
 
 				$status = $status_text = '';
 

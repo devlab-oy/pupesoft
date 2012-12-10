@@ -359,6 +359,7 @@
 
 					if ($desadv_version == "fi0089" and ($desadv_kollitrow["kilot"] != 0 or $desadv_kollitrow["kuutiot"] != 0)) {
 
+						// Pakkauksen bruttopaino
 						if ($desadv_kollitrow["kilot"] != 0) {
 							$desadv_message .= "MEA+AAE+AAA+KGM:{$desadv_kollitrow["kilot"]}'";
 							$x++;

@@ -399,7 +399,7 @@
 		$laskumyyjat = substr($laskumyyjat, 0, -1);
 
 		if (trim($laskumyyjat) != '') {
-			$lisa .= " and lasku.myyja in (".implode(',', $laskumyyjat).") ";
+			$lisa .= " and lasku.myyja in ($laskumyyjat) ";
 		}
 	}
 
@@ -1565,7 +1565,7 @@
 				$sel = '';
 
 				if (count($mul_laskumyyja) > 0) {
-					if (in_array(trim($sxrow['myyja']), $mul_laskumyyja)) {
+					if (in_array(trim($sxrow['tunnus']), $mul_laskumyyja)) {
 						$sel = 'SELECTED';
 					}
 				}

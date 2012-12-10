@@ -2081,7 +2081,13 @@
 					echo "<td class='center toggleable_parent_row_stopped' id='!__{$row['lahdon_tunnus']}X__{$y}'>&nbsp;</td>";
 				}
 
-				echo "<td><input type='checkbox' class='checkall_parent' name='checkbox_parent[]' id='{$row['lahdon_tunnus']}' value='{$row['lahdon_tunnus']}'></td>";
+				echo "<td>";
+
+				if ($onko_paivitysoikeuksia_ohjelmaan) {
+					echo "<input type='checkbox' class='checkall_parent' name='checkbox_parent[]' id='{$row['lahdon_tunnus']}' value='{$row['lahdon_tunnus']}'>";
+				}
+
+				echo "</td>";
 
 				echo "<td class='toggleable center toggleable_parent_row_departure' id='{$row['lahdon_tunnus']}__{$y}'>";
 				echo "<form method='post'>";
@@ -2311,7 +2317,14 @@
 			}
 
 			echo "<tr class='header_row_{$row['lahdon_tunnus']}__{$y}' id='header_row_{$row['lahdon_tunnus']}__{$y}'>";
-			echo "<th><input type='checkbox' class='checkall_child'></th>";
+
+			echo "<th>";
+
+			if ($onko_paivitysoikeuksia_ohjelmaan) {
+				echo "<input type='checkbox' class='checkall_child'>";
+			}
+
+			echo "</th>";
 
 			echo "<th class='sort_row_by' id='row_status__{$row['lahdon_tunnus']}__{$y}'>",t("Status")," <img class='row_direction_status' />";
 			echo "<br />";
@@ -2412,7 +2425,13 @@
 
 				echo "<tr class='toggleable_row_tr' id='toggleable_row_tr_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 
-				echo "<td><input type='checkbox' class='checkbox_{$lahto_row['tilauksen_tunnus']}' name='checkbox_child[{$lahto_row['tilauksen_tunnus']}]' value='{$lahto_row['tilauksen_tunnus']}' id='checkbox_{$lahto_row['tilauksen_tunnus']}__{$x}'></td>";
+				echo "<td>";
+
+				if ($onko_paivitysoikeuksia_ohjelmaan) {
+					echo "<input type='checkbox' class='checkbox_{$lahto_row['tilauksen_tunnus']}' name='checkbox_child[{$lahto_row['tilauksen_tunnus']}]' value='{$lahto_row['tilauksen_tunnus']}' id='checkbox_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
+				}
+
+				echo "</td>";
 
 				$status = $status_text = '';
 

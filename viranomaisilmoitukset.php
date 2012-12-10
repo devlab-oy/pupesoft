@@ -56,7 +56,7 @@
 
 		// Haetaan EU-vientilaskujen summat per koodi, ytunnus, maa (Huom, "koodi" on t-funktioitu piirtovaiheessa)
 		$query = "	SELECT
-					if (tuote.tuotetyyppi = 'K', 'Palvelu', if (lasku.kolmikantakauppa != '', 'Kolmikanta', 'Tavara')) koodi,
+					if (lasku.kolmikantakauppa != '', 'Kolmikanta', if (tuote.tuotetyyppi = 'K', 'Palvelu', 'Tavara')) koodi,
 					lasku.ytunnus,
 					if (lasku.maa = '', asiakas.maa, lasku.maa) maa,
 					if (lasku.maa = '', 'X', '') asiakkaan_maa,
@@ -77,8 +77,7 @@
 					AND lasku.tapvm >= '$alkupvm'
 					AND lasku.tapvm <= '$loppupvm'
 					AND lasku.vienti = 'E'
-					GROUP BY 1, 2, 3, 4
-					ORDER BY koodi DESC, lasku.maa, lasku.ytunnus, asiakas.nimi ";
+					GROUP BY 1, 2, 3, 4";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -90,7 +89,7 @@
 			echo "<th>".t("Maatunnus")."</th>";
 			echo "<th>".t("Ytunnus")."</th>";
 			echo "<th>".t("Asiakas")."</th>";
-			echo "<th>".t("Arvo")."</th>";
+			echo "<th>".t("Myynti")."</th>";
 			echo "<th>".t("Laskuja")."</th>";
 			echo "</tr>";
 
@@ -101,8 +100,96 @@
 			$tietue_rivi = 0;
 			$tietue_rivitiedot = "";
 
-			while ($row = mysql_fetch_array($result)) {
+			// T‰h‰n ker‰t‰‰n raportin data
+			$yhteenvetoilmoitus_array = array();
 
+			// Myynnit
+			while ($row = mysql_fetch_array($result)) {
+				$array_key = $row["koodi"].$row["ytunnus"].$row["maa"];
+				$yhteenvetoilmoitus_array[$array_key]["koodi"] = $row["koodi"];
+				$yhteenvetoilmoitus_array[$array_key]["ytunnus"] = $row["ytunnus"];
+				$yhteenvetoilmoitus_array[$array_key]["maa"] = $row["maa"];
+				$yhteenvetoilmoitus_array[$array_key]["asiakkaan_maa"] = $row["asiakkaan_maa"];
+				$yhteenvetoilmoitus_array[$array_key]["nimi"] = $row["nimi"];
+				$yhteenvetoilmoitus_array[$array_key]["laskuja"] = $row["laskuja"];
+				$yhteenvetoilmoitus_array[$array_key]["summa"] = $row["summa"];
+				$yhteenvetoilmoitus_array[$array_key]["kale"] = 0;
+			}
+
+			// Tavaramyynnin k‰teisalennukset
+			list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi311", 0, TRUE);
+
+			if (is_resource($ttres)) {
+				while ($trow = mysql_fetch_assoc($ttres)) {
+					$bruttosumma = round($kakerroinlisa * $trow['bruttosumma'], 2);
+					if ($bruttosumma != 0) {
+						$array_key = "Tavara".$trow["ytunnus"].$trow["maa"];
+						$yhteenvetoilmoitus_array[$array_key]["koodi"] = "Tavara";
+						$yhteenvetoilmoitus_array[$array_key]["ytunnus"] = $trow["ytunnus"];
+						$yhteenvetoilmoitus_array[$array_key]["maa"] = $trow["maa"];
+						$yhteenvetoilmoitus_array[$array_key]["asiakkaan_maa"] = "";
+						$yhteenvetoilmoitus_array[$array_key]["nimi"] = $trow["laskunimi"];
+						$yhteenvetoilmoitus_array[$array_key]["summa"] += $bruttosumma;
+						$yhteenvetoilmoitus_array[$array_key]["laskuja"] += 1;
+						$yhteenvetoilmoitus_array[$array_key]["kale"] += 1;
+					}
+				}
+			}
+
+			// Palvelumyynnin k‰teisalennukset
+			list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi312", 0, TRUE);
+
+			if (is_resource($ttres)) {
+				while ($trow = mysql_fetch_assoc($ttres)) {
+					$bruttosumma = round($kakerroinlisa * $trow['bruttosumma'], 2);
+					if ($bruttosumma != 0) {
+						$array_key = "Palvelu".$trow["ytunnus"].$trow["maa"];
+						$yhteenvetoilmoitus_array[$array_key]["koodi"] = "Palvelu";
+						$yhteenvetoilmoitus_array[$array_key]["ytunnus"] = $trow["ytunnus"];
+						$yhteenvetoilmoitus_array[$array_key]["maa"] = $trow["maa"];
+						$yhteenvetoilmoitus_array[$array_key]["asiakkaan_maa"] = "";
+						$yhteenvetoilmoitus_array[$array_key]["nimi"] = $trow["laskunimi"];
+						$yhteenvetoilmoitus_array[$array_key]["summa"] += $bruttosumma;
+						$yhteenvetoilmoitus_array[$array_key]["laskuja"] += 1;
+						$yhteenvetoilmoitus_array[$array_key]["kale"] += 1;
+					}
+				}
+			}
+
+			// Kolmikantamyynnin k‰teisalennukset
+			list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "kolmikanta", 0, TRUE);
+
+			if (is_resource($ttres)) {
+				while ($trow = mysql_fetch_assoc($ttres)) {
+					$bruttosumma = round($kakerroinlisa * $trow['bruttosumma'], 2);
+					if ($bruttosumma != 0) {
+						$array_key = "Kolmikanta".$trow["ytunnus"].$trow["maa"];
+						$yhteenvetoilmoitus_array[$array_key]["koodi"] = "Kolmikanta";
+						$yhteenvetoilmoitus_array[$array_key]["ytunnus"] = $trow["ytunnus"];
+						$yhteenvetoilmoitus_array[$array_key]["maa"] = $trow["maa"];
+						$yhteenvetoilmoitus_array[$array_key]["asiakkaan_maa"] = "";
+						$yhteenvetoilmoitus_array[$array_key]["nimi"] = $trow["laskunimi"];
+						$yhteenvetoilmoitus_array[$array_key]["summa"] += $bruttosumma;
+						$yhteenvetoilmoitus_array[$array_key]["laskuja"] += 1;
+						$yhteenvetoilmoitus_array[$array_key]["kale"] += 1;
+					}
+				}
+			}
+
+			// Sortataan multidimensoinen array. Pit‰‰ ensiksi tehd‰ sortattavista keyst‰ omat arrayt
+			$apusort_jarj1 = $apusort_jarj2 = $apusort_jarj3 = array();
+
+			foreach ($yhteenvetoilmoitus_array as $apusort_key => $apusort_row) {
+			    $apusort_jarj1[$apusort_key] = $apusort_row['koodi'];
+				$apusort_jarj2[$apusort_key] = $apusort_row['maa'];
+				$apusort_jarj3[$apusort_key] = $apusort_row['ytunnus'];
+			}
+
+			// Sortataan taulukko koodi, maa, ytunnus j‰rjestykseen
+			array_multisort($apusort_jarj1, SORT_DESC, $apusort_jarj2, SORT_ASC, $apusort_jarj3, SORT_ASC, $yhteenvetoilmoitus_array);
+
+			// Piirret‰‰n data ruudulle
+			foreach ($yhteenvetoilmoitus_array as $row) {
 				echo "<tr class='aktiivi'>";
 				echo "<td>".t($row["koodi"])."</td>";
 				echo "<td>{$row["maa"]}</td>";
@@ -120,6 +207,14 @@
 				}
 				elseif ($row["maa"] != "" and $row["asiakkaan_maa"] == "X") {
 					echo "<td class='back'><font class='info'>".t("HUOM: Maa haettu asiakkaan tiedoista")."</font></td>";
+				}
+
+				if ($row["kale"] != 0 and $row["kale"] != $row["laskuja"]) {
+					echo "<td class='back'><font class='info'>".t("HUOM: Myynniss‰ on huomioitu %s kassa-alennus(ta)", $kukarow["kieli"], $row["kale"]).".</font></td>";
+				}
+
+				if ($row["kale"] != 0 and $row["kale"] == $row["laskuja"]) {
+					echo "<td class='back'><font class='info'>".t("HUOM: Kassa-alennus", $kukarow["kieli"], $row["kale"]).".</font></td>";
 				}
 
 				echo "</tr>";

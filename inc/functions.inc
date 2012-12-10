@@ -12787,7 +12787,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 			$ryhma = 'fi306';
 		}
 
-		if ($ryhma == 'fi311' or $ryhma == 'fi312') {
+		if ($ryhma == 'fi311' or $ryhma == 'fi312' or $ryhma == 'kolmikanta') {
 			$kerroin = " * -1 ";
 		}
 
@@ -12809,8 +12809,9 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 		else {
 			// Hetaan yhteisömyynti, palvelut ja tuotteet erikseen jotta osataan splitata kassa-alennus tavaramyyntiin ja palvelumyyntIin
 			$query = "	SELECT
-						sum(if(tuote.tuotetyyppi='K',  tilausrivi.rivihinta, 0)) palvelut,
-						sum(if(tuote.tuotetyyppi!='K', tilausrivi.rivihinta, 0)) tavarat,
+						sum(if(lasku.kolmikantakauppa != '', tilausrivi.rivihinta, 0)) kolmikanta,
+						sum(if(lasku.kolmikantakauppa =  '' and tuote.tuotetyyppi  = 'K', tilausrivi.rivihinta, 0)) palvelut,
+						sum(if(lasku.kolmikantakauppa =  '' and tuote.tuotetyyppi != 'K', tilausrivi.rivihinta, 0)) tavara,
 						sum(tilausrivi.rivihinta) yhteensa,
 						group_concat(DISTINCT tiliointi.tunnus) tilioinnit
 						FROM tiliointi
@@ -12835,10 +12836,13 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 
 				// Palvelut ja tuotteet erikseen
 				if ($ryhma == 'fi311') {
-					$kakerroinlisa = $ktrow["tavarat"]/$ktrow["yhteensa"];
+					$kakerroinlisa = $ktrow["tavara"]/$ktrow["yhteensa"];
 				}
 				elseif ($ryhma == 'fi312') {
 					$kakerroinlisa = $ktrow["palvelut"]/$ktrow["yhteensa"];
+				}
+				elseif ($ryhma == 'kolmikanta') {
+					$kakerroinlisa = $ktrow["kolmikanta"]/$ktrow["yhteensa"];
 				}
 
 				$selec = "	if(lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) maa,
@@ -12850,7 +12854,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 
 				if ($yhteenvetolilmo) {
 					$selec = "	lasku.ytunnus ytunnus,
-								if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
+								if(lasku.toim_maa = '', lasku.maa, lasku.toim_maa) maa,
 								max(lasku.nimi) laskunimi, ";
 					$group = "	ytunnus, maa";
 				}

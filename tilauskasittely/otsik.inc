@@ -2533,6 +2533,7 @@
 
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>".t("keräyslista")." + ".t("valmistus")."</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>".t("lasku")."</td></tr>";
+			echo "<tr><td>".t("Sisäinen viesti").":</td><td><textarea name='sisviesti3' rows='2' cols='40'>$srow[sisviesti3]</textarea></td><td></td></tr>";
 			echo "</table><br>";
 
 			echo "<table>";
@@ -3130,6 +3131,7 @@
 					sisainen 							= '$sisainen',
 					sisviesti1 							= '$sisviesti1',
 					sisviesti2							= '$sisviesti2',
+					sisviesti3							= '$sisviesti3',
 					splittauskielto						= '$splittauskielto',
 					tilaustyyppi						= '$tilaustyyppi',
 					tilausvahvistus 					= '$tilausvahvistus',

@@ -3014,7 +3014,7 @@
 	if (mysql_field_name($result, $i) == 'ennakkolaskun_tyyppi') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = $trow[$i] == 'M' ? ' selected' : '';
+		$sel = $trow[$i] == 'E' ? ' selected' : '';
 
 		$ulos .= "<option value = ''>".t("Normaali ennakkolasku");
 		$ulos .= "<option value = 'E' $sel>".t("Ennakkolaskulle jokainen rivi erikseen");

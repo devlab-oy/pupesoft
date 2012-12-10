@@ -557,6 +557,10 @@
 				 	$assrow["laskutus_maa"]		   = $assrow["maa"];
 				}
 
+				if($naytetaanko_tarjouksella != 'on' and $toim == 'TARJOUS') {
+					$toimpvm = '0000-00-00';
+				}
+
 				$query = "	UPDATE lasku
 							SET liitostunnus 	= '$assrow[tunnus]',
 							ytunnus				= '$assrow[ytunnus]',
@@ -1442,6 +1446,17 @@
 			echo "</td></tr>";
 
 			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
+
+			if($toim == 'TARJOUS') {
+				if(!checkdate($toimkk, $toimpp, $toimvv)) {
+					//Kyseessä on tarjouksen toimitusajan piilottamiseen pdf:ltä käytettävä toiminnallisuus toimaika = 0000-00-00 jos se on haluttu piilottaa
+					$naytetaanko_pdf_sel = "";
+				}
+				else {
+					$naytetaanko_pdf_sel = "checked='CHECKED'";
+				}
+				echo t("Näytetäänkö tarjouksella")."<input type='checkbox' name='naytetaanko_tarjouksella' $naytetaanko_pdf_sel /><br/>";
+			}
 
 			if ($toim == "YLLAPITO") {
 				echo t("Ei käytössä");
@@ -3047,6 +3062,12 @@
 
 		$label = !isset($label) ? "" : $label;
 		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
+
+		if($naytetaanko_tarjouksella != 'on' and $toim == "TARJOUS") {
+			$toimvv = '0000';
+			$toimkk = '00';
+			$toimpp = '00';
+		}
 
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',

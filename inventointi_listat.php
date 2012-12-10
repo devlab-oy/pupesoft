@@ -375,7 +375,7 @@
 			$extra = "";
 		}
 
-		function il_topmyydyt ($top, $where, $rajauslisatuote, $invaamatta, $extra) {
+		function il_topmyydyt ($top, $where, $rajauslisa, $rajauslisatuote, $invaamatta, $extra) {
 			global $kukarow, $kutsu;
 
 			$tuotenoarray = array();
@@ -614,7 +614,7 @@
 			}
 
 			if ($top > 0) {
-				$where .= il_topmyydyt($top, $where, $rajauslisatuote, $invaamatta, $extra);
+				$where .= il_topmyydyt($top, $where, $rajauslisa, $rajauslisatuote, $invaamatta, $extra);
 			}
 
 			if ($varastoonvaikutus > 0 or $varastonarvo > 0) {

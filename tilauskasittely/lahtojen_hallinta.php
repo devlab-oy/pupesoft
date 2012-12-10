@@ -4,9 +4,11 @@
 
 	require ("../inc/parametrit.inc");
 
+	$onko_paivitysoikeuksia_ohjelmaan = tarkista_oikeus('tilauskasittely/lahtojen_hallinta.php', '', 1);
+
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
-	if (isset($man_aloitus)) {
+	if (isset($man_aloitus) and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_child) and count($checkbox_child) > 0) {
 
@@ -30,7 +32,7 @@
 		}
 	}
 
-	if (isset($vaihda_prio)) {
+	if (isset($vaihda_prio) and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_child) and (is_array($checkbox_child) or is_string(trim($checkbox_child)))) {
 
@@ -89,7 +91,7 @@
 		}
 	}
 
-	if (isset($siirra_lahtoon)) {
+	if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_child) and (is_array($checkbox_child) or is_string(trim($checkbox_child)))) {
 
@@ -475,7 +477,7 @@
 		}
 	}
 
-	if (isset($muokkaa_lahto)) {
+	if (isset($muokkaa_lahto) and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_parent) and ((is_array($checkbox_parent) and count($checkbox_parent) > 0) or is_string($checkbox_parent))) {
 
@@ -605,7 +607,7 @@
 		}
 	}
 
-	if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto > 0) {
+	if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto > 0 and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_parent) and ((is_array($checkbox_parent) and count($checkbox_parent) > 0) or is_string($checkbox_parent))) {
 
@@ -1824,8 +1826,6 @@
 		echo "<table>";
 		echo "<tr>";
 		echo "<td class='back'>";
-
-		$onko_paivitysoikeuksia_ohjelmaan = tarkista_oikeus('tilauskasittely/lahtojen_hallinta.php', '', 1);
 
 		if ($onko_paivitysoikeuksia_ohjelmaan) {
 			if ($tee == 'lahto' and trim($tilaukset) != '') {

@@ -74,7 +74,6 @@
 	$lisa_haku_tme 			 = "";
 	$lisa_haku_malli 		 = "";
 	$lisa_haku_mallitarkenne = "";
-	$lisa_haku_laskumyyja  	 = "";
 	$lisa_haku_asiakastila 	 = "";
 	$lisa_haku_myyja		 = "";
 	$lisa_haku_asiakasmyyja  = "";
@@ -400,17 +399,7 @@
 		$laskumyyjat = substr($laskumyyjat, 0, -1);
 
 		if (trim($laskumyyjat) != '') {
-			$query = "	SELECT tunnus
-						FROM kuka
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND myyja IN ({$laskumyyjat})";
-			$result = pupe_query($query);
-			$myyjat = array();
-			while($row = mysql_fetch_assoc($result)) {
-				$myyjat[] = $row['tunnus'];
-			}
-			$lisa_haku_laskumyyja = " and kuka.myyja in ($laskumyyjat) ";
-			$lisa .= " and lasku.myyja in (".implode(',', $myyjat).") ";
+			$lisa .= " and lasku.myyja in (".implode(',', $laskumyyjat).") ";
 		}
 	}
 
@@ -1562,7 +1551,7 @@
 			echo "<tr>";
 
 			// tehdään query
-			$query = "	SELECT DISTINCT myyja, nimi
+			$query = "	SELECT DISTINCT myyja, nimi, tunnus
 						FROM kuka
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND myyja > 0
@@ -1581,7 +1570,7 @@
 					}
 				}
 
-				echo "<option value='$sxrow[myyja]' $sel>$sxrow[myyja] $sxrow[nimi]</option>";
+				echo "<option value='$sxrow[tunnus]' $sel>$sxrow[myyja] $sxrow[nimi]</option>";
 			}
 
 			echo "</select></td>";

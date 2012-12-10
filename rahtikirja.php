@@ -446,10 +446,19 @@
 				$rakirnolisa = $rakirno;
 			}
 
-			if (isset($muutos) and $muutos == 'yes') {
+			if ($yhtiorow['kerayserat'] == 'K' and strpos($tunnukset, ',') !== FALSE) {
+							$tunnuslisa = $tunnukset;
+							$rakirnolisa = $tunnukset;
+						}
+						else {
+							$tunnuslisa = $otsikkonro;
+							$rakirnolisa = "'".$rakirno."'";
+						}
 
-				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro IN ({$tunnuslisa}) and rahtikirjanro IN ('{$rakirnolisa}')";
-				$result = pupe_query($query);
+						if (isset($muutos) and $muutos == 'yes') {
+
+							$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro IN ({$tunnuslisa}) and rahtikirjanro IN ({$rakirnolisa})";
+							$result = pupe_query($query);
 
 				// merkataan tilaus takaisin kerätyksi, paitsi jos se on vientitilaus jolle vientitiedot on syötetty
 				$query = "UPDATE lasku set alatila='C' where yhtio='$kukarow[yhtio]' and tunnus IN ({$tunnuslisa}) and alatila!='E'";

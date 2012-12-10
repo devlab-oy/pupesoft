@@ -2745,7 +2745,7 @@
 
 			$toimvkopva = $toimvkopva == '' ? 7 : $toimvkopva;
 
-			if ($toimvko < $nyviikko and $toimvko != date("W", strtotime($apuro["toimaika"]))) {
+			if ($toimvko < $nyviikko) {
 				$nyvuosi += 1;
 			}
 
@@ -2768,7 +2768,7 @@
 
 			$keraysvkopva = $keraysvkopva == '' ? 7 : $keraysvkopva;
 
-			if ($keraysvko < $nyviikko and $keraysvko != date("W", strtotime($apuro["kerayspvm"]))) {
+			if ($keraysvko < $nyviikko) {
 				$nyvuosi += 1;
 			}
 
@@ -3049,7 +3049,7 @@
 
 		if($toim != 'TARJOUS') {
 			//Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
-			//Päivämäärävertailu (toivo5ttukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
+			//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
 			if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
 				$toimpp = $kerpp;
 				$toimkk = $kerkk;

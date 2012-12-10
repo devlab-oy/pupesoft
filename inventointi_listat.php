@@ -413,7 +413,7 @@
 			}
 		}
 
-		function il_varvaikutus ($varastonarvo, $varastoonvaikutus, $where, $rajauslisatuote, $invaamatta, $extra) {
+		function il_varvaikutus ($varastonarvo, $varastoonvaikutus, $where, $rajauslisa, $rajauslisatuote, $invaamatta, $extra) {
 			global $kukarow, $kutsu;
 
 			$tuotenoarray = array();
@@ -618,7 +618,7 @@
 			}
 
 			if ($varastoonvaikutus > 0 or $varastonarvo > 0) {
-				$where .= il_varvaikutus($varastonarvo, $varastoonvaikutus, $where, $rajauslisatuote, $invaamatta, $extra);
+				$where .= il_varvaikutus($varastonarvo, $varastoonvaikutus, $where, $rajauslisa, $rajauslisatuote, $invaamatta, $extra);
 			}
 
 			if ($jarjestys == 'tuoteno') {

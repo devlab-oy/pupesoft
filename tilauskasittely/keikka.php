@@ -1528,7 +1528,7 @@ if ($poista == 'Poista') {
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'
-					AND tyyppi = 'L'";
+					AND tila = 'L'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {

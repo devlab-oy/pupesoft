@@ -443,7 +443,7 @@
 			}
 			else {
 				$tunnuslisa = $otsikkonro;
-				$rakirnolisa = $rakirno;
+				$rakirnolisa = "'".$rakirno."'";
 			}
 
 			if (isset($muutos) and $muutos == 'yes') {

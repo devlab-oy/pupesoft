@@ -385,11 +385,13 @@
 						$x++;
 
 						// PIA - additional product identification
-						$desadv_message .= "PIA+5+".substr(str_replace(array("+",":","'"), " ", $tuotteet_row['tuoteno']), 0, 35).":SA'";
+						$tuotenumero = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", " ", $tuotteet_row['tuoteno']);
+						$desadv_message .= "PIA+5+".substr($tuotenumero, 0, 35).":SA'";
 						$x++;
 
 						// IMD - additional information of the article
-						$desadv_message .= "IMD+F+8+:::".substr(str_replace(array("+",":","'"), " ", $tuotteet_row['nimitys']), 0, 256)."'";
+						$tuotteen_nimitys = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", " ", $tuotteet_row['nimitys']);
+						$desadv_message .= "IMD+F+8+:::".substr($tuotteen_nimitys, 0, 256)."'";
 						$x++;
 
 						// QTY - quantity
@@ -397,6 +399,25 @@
 						// tarvitaan varmaan laittaa eri uniitteja???? UN/ECE recommendation number 20
 						$desadv_message .= "QTY+12:".round($tuotteet_row['varattu'], 0).":PCE'";
 						$x++;
+
+						// RFF - buyer's order number
+						// CO = buyer's order number
+						if ($desadv_version == "fi0089") {
+							# In line level RFF+CO the order line number has to be like we send in our orders 10, 20, 30 etc. instead of 1, 2, 3Ö
+							# RFF+CO: 116100531:10'
+							if ($desadv_laskurow['asiakkaan_tilausnumero'] != '') {
+								$_i = $i * 10;
+								$desadv_message .= "RFF+CO:".substr($desadv_laskurow["asiakkaan_tilausnumero"], 0, 35).":{$_i}'";
+								$x++;
+							}
+
+							// DTM - despatch and/or delivery date/time
+							// 171 = tilausp‰iv‰
+							list($date, $time) = explode(" ", $desadv_laskurow['luontiaika']);
+							list($year, $month, $day) = explode("-", $date);
+							$desadv_message .= "DTM+171:{$year}{$month}{$day}:102'";
+							$x++;
+						}
 					}
 
 					$kokonais_pakettimaara++;

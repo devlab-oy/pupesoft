@@ -1157,7 +1157,7 @@
 							<td><a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]&lopetus=$lopetus'>$jtrow[tunnus]</a>$keikka</td>
 							<td>$tyyppi</td>
 							<td>".tv1dateconv($jtrow["laadittu"])."</td>
-							<td>".tv1dateconv($jtrow["toimaika"])."$vahvistettu</td>
+							<td>".tv1dateconv($jtrow["pvm"])."$vahvistettu</td>
 							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
 							<td align='right'>".sprintf('%.2f', $myyta)."</td>
 							</tr>";

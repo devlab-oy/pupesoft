@@ -338,7 +338,7 @@
 					unset($desadv_kollitres);
 
 					if ((int) $rahtikirjanro != 0) {
-						$query = "	SELECT SUM(kollit) kollit, SUM(kuutiot) kuutiot, SUM(kilot) kilot
+						$query = "	SELECT ROUND(SUM(kollit), 0) kollit, SUM(kuutiot) kuutiot, SUM(kilot) kilot
 									FROM rahtikirjat USE INDEX (otsikko_index)
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND otsikkonro = '{$desadv_laskurow['laskutunnus']}'
@@ -357,21 +357,17 @@
 					$desadv_message .= "PAC+{$desadv_kollitrow['kollit']}++PK:6'";
 					$x++;
 
-					if ($desadv_version == "fi0089" and ($desadv_kollitrow["kilot"] != 0 or $desadv_kollitrow["kuutiot"] != 0)) {
+					if ($desadv_version == "fi0089") {
 
 						// Pakkauksen bruttopaino
-						if ($desadv_kollitrow["kilot"] != 0) {
-							$desadv_message .= "MEA+AAE+AAA+KGM:{$desadv_kollitrow["kilot"]}'";
-							$x++;
-						}
+						$desadv_message .= "MEA+AAE+AAA+KGM:{$desadv_kollitrow["kilot"]}'";
+						$x++;
 
 						// Pakkauksen tilavuus
 						// m3 => litrat
-						if ($desadv_kollitrow["kuutiot"] != 0) {
-							$pakkauksen_tilavuus_litroina = round($desadv_kollitrow["kuutiot"] * 1000);
-							$desadv_message .= "MEA+AAE+ABJ+LTR:{$pakkauksen_tilavuus_litroina}'";
-							$x++;
-						}
+						$pakkauksen_tilavuus_litroina = round($desadv_kollitrow["kuutiot"] * 1000);
+						$desadv_message .= "MEA+AAE+ABJ+LTR:{$pakkauksen_tilavuus_litroina}'";
+						$x++;
 					}
 
 					// LIN - line item

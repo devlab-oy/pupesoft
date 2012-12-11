@@ -390,7 +390,7 @@
 
 	        $query = "	SELECT tuote.tuoteno, sum(rivihinta) summa
 	        			FROM tilausrivi use index (yhtio_tyyppi_osasto_try_laskutettuaika)
-	        			JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
+	        			JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $rajauslisatuote
 						JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $rajauslisa $invaamatta $extra
 	        			WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 	        			and tilausrivi.tyyppi = 'L'

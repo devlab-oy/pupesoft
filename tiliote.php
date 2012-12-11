@@ -120,7 +120,7 @@
 		}
 		else {
 			// T‰m‰ oli tiliote tai viiteaineisto
-			$query= "LOCK TABLE tiliotedata WRITE, yriti READ, yhtio READ";
+			$query= "LOCK TABLE tiliotedata WRITE, yriti READ, yhtio READ, sanakirja WRITE";
 			$tiliotedataresult = pupe_query($query);
 
 			// Etsit‰‰n aineistonumero

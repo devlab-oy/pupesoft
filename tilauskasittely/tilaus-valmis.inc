@@ -52,7 +52,35 @@ if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] 
 	ob_end_clean();
 }
 
-if ($luottorajavirhe != '') {
+$maksupositio_chk = false;
+
+// Jos ennakkolaskun automatisointi on päällä (asiakas > yhtiön oletus), tarkistetaan onko maksupositioita
+if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen) and $laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or $laskurow['alatila'] == 'B') and ($tilausvalmis_asiakas_row['ennakkolaskun_automatisointi'] == 'X' or ($tilausvalmis_asiakas_row['ennakkolaskun_automatisointi'] == '' and $yhtiorow['ennakkolaskun_automatisointi'] == 'X'))) {
+
+	$query = "	SELECT *
+				FROM maksupositio
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus = '{$laskurow['tunnus']}'
+				AND uusiotunnus = 0";
+	$maksupositio_chk_res = pupe_query($query);
+
+	if (mysql_num_rows($maksupositio_chk_res) > 0) $maksupositio_chk = true;
+}
+
+if ($maksupositio_chk) {
+
+	$query = "	UPDATE lasku SET
+				alatila = 'B'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$laskurow['tunnus']}'";
+	$myyntikielto_res = pupe_query($query);
+
+	echo "<font class='error'>",t("Tilaus laitetaan odottamaan, kunnes ennakkolaskut ovat maksettu"),".</font><br/><br/>";
+
+	// Laitetaan lopetus tyhjäksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
+	$lopetus = "";
+}
+elseif ($luottorajavirhe != '') {
 	if ($kutsuja == "EDITILAUS" or $kukarow["extranet"] != "") {
 		$alatila = "F";
 	}
@@ -1543,5 +1571,3 @@ $result = pupe_query($query);
 if (!isset($silent) or $silent == "") {
 	echo $tilaus_valmis_ulos;
 }
-
-?>

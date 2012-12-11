@@ -546,9 +546,32 @@
 			$tee = "";
 		}
 
-
 		if ($tee == "loppulaskuta") {
 			loppulaskuta($tunnus);
+			$tee = "";
+		}
+
+		if ($tee == "vapauta_tilaus_keraykseen") {
+
+			$vapauta_tilaus_keraykseen = true;
+
+			$query = "	UPDATE lasku SET
+						alatila = ''
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tunnus}'";
+			$upd_res = pupe_query($query);
+
+			$kukarow['kesken'] = $tunnus;
+
+			$query = "	SELECT *
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tunnus}'";
+			$laskures = pupe_query($query);
+			$laskurow = mysql_fetch_assoc($laskures);
+
+			require('tilauskasittely/tilaus-valmis.inc');
+
 			$tee = "";
 		}
 
@@ -663,6 +686,14 @@
 						</table>
 						</td>";
 
+				$query = "	SELECT tunnus
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tila = 'N'
+							AND alatila = 'B'
+							AND tunnus = '{$row['jaksotettu']}'";
+				$tila_chk_res = pupe_query($query);
+
 				// loppulaskutetaan maksusopimus
 				if ($row["yhteensa_kpl"] - $row["laskutettu_kpl"] <= 1) {
 					// tarkastetaan onko kaikki jo toimitettu ja tämä on good to go
@@ -717,10 +748,40 @@
 							<input type='submit' name = 'submit' value='".t("Laskuta kaikki ennakot")."'>
 							</form>";
 
+					if (mysql_num_rows($tila_chk_res) > 0) {
+
+						echo "<br />";
+
+						$msg = t("Oletko varma, että haluat vapauttaa tilauksen keräykseen")."? {$row['jaksotettu']}";
+
+						echo "<form method='post' name='case' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"{$msg}\");'>
+								<input type='hidden' name='toim' value='{$toim}'>
+								<input type='hidden' name='tunnus' value='{$row['jaksotettu']}'>
+								<input type='hidden' name='tee' value='vapauta_tilaus_keraykseen'>
+								<input type='submit' name = 'submit' value='",t("Vapauta tilaus keräykseen"),"'>
+								</form>";
+					}
+
 					echo "</td>";
 				}
 				else {
-					echo "<td class='back'><font class='error'>".t("Ei valmis")."</font></td>";
+					echo "<td class='back'><font class='error'>".t("Ei valmis")."</font>";
+
+					if (mysql_num_rows($tila_chk_res) > 0) {
+
+						echo "<br />";
+
+						$msg = t("Oletko varma, että haluat vapauttaa tilauksen keräykseen")."? {$row['jaksotettu']}";
+
+						echo "<form method='post' name='case' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"{$msg}\");'>
+								<input type='hidden' name='toim' value='{$toim}'>
+								<input type='hidden' name='tunnus' value='{$row['jaksotettu']}'>
+								<input type='hidden' name='tee' value='vapauta_tilaus_keraykseen'>
+								<input type='submit' name = 'submit' value='",t("Vapauta tilaus keräykseen"),"'>
+								</form>";
+					}
+
+					echo "</td>";
 				}
 
 				echo "</tr>";
@@ -732,4 +793,3 @@
 
 		require("inc/footer.inc");
 	}
-?>

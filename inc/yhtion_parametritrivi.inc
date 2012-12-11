@@ -3155,6 +3155,18 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'ennakkolaskun_automatisointi') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == "X" ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Saa toimittaa vaikka ennakkolaskuja ei ole maksettu")."</option>";
+		$ulos .= "<option value = 'X' {$sel}>".t("Saa toimittaa vasta kun ennakkolaskut on maksettu")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'tositteen_tilioinnit') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

@@ -941,6 +941,7 @@ if ($tila == '') {
 	// jos kysess‰ on kotimainen vaihto-omaisuuslasku, pit‰‰ lis‰t‰ tuotteen hintaan alvi, jos ostolaskuilla on alvia!
 	if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
 
+		// Lasketaan verokanta
 		if ($kulurow["arvo"] != 0) $simualv = round(100 * (($kulurow["summa"]/$kulurow["arvo"])-1),2);
 		else $simualv = 0;
 
@@ -948,7 +949,8 @@ if ($tila == '') {
 			$alvti = 0;
 			$alvit = 0;
 		}
-		elseif (in_array($simualv, array(8,12,17,22))) {
+		// Onko miell‰ oletuksista poikkeava alvi. Verokantoja ennen viimeisint‰ alv-muutosta.
+		elseif (in_array($simualv, array(23, 13, 9))) {
 			$alvti = $simualv;
 			$alvit = $simualv;
 		}

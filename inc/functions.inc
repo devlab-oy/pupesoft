@@ -12412,7 +12412,7 @@ if (!function_exists("pupe_DataTables")) {
 							var rivi_kpl_alkuperainen 	= parseFloat($('#rivi_kpl_alkuperainen_'+tun).val());
 							var rivi_hinta_alkup		= parseFloat($('#rivihintaalkuperainen_'+tun).val());
 							var alerivi_hinta_alkup		= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
-							var kpl 					= parseFloat(this.value);
+							var kpl 					= parseFloat(this.value.replace(',','.'));
 
 							// JOS HINTA * KPL ON ENEMMÄN KUIN 10,2 DESIMAALIA, NIIN HERJATAAN
 							if ((rivi_hinta_value * kpl) > 9999999999.99) {
@@ -12558,7 +12558,7 @@ if (!function_exists("pupe_DataTables")) {
 							var otunnus 			= $('input[name=\"otunnus\"]').val();
 							var rivi_ale_alkup		= parseFloat($('#rivialealkuperainen'+monesko+'_'+tun).val());
 							var alerivi_hinta_alkup	= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
-							var ale 				= parseFloat(this.value);
+							var ale 				= parseFloat(this.value.replace(',','.'));
 
 							if (rivi_ale_alkup != ale) {
 								$.post('{$_SERVER['SCRIPT_NAME']}',

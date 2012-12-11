@@ -39,30 +39,31 @@
 	echo "</td></tr>";
 
 	echo "<tr><th>".t("ja loppuvarastopaikka:")."</th>";
-	echo "<td>	<input type='text' size='6' maxlength='5' name='lhyllyalue'>
-	<input type='text' size='6' maxlength='5' name='lhyllynro'>
-	<input type='text' size='6' maxlength='5' name='lhyllyvali'>
-				<input type='text' size='6' maxlength='5' name='lhyllytaso'>";
+	echo "<td><input type='text' size='6' maxlength='5' name='lhyllyalue'>
+			<input type='text' size='6' maxlength='5' name='lhyllynro'>
+			<input type='text' size='6' maxlength='5' name='lhyllyvali'>
+			<input type='text' size='6' maxlength='5' name='lhyllytaso'>";
 	echo "</td></tr>";
 
 	if ($yhtiorow['kerayserat'] != '') {
 		# Haetaan keraysvyohykkeet
-		$query = "SELECT tunnus, nimitys
+		$query = "	SELECT tunnus, nimitys
 					FROM keraysvyohyke
-					WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND nimitys != ''";
 		$kresult = pupe_query($query);
 
 		# Keräysvyöhyke dropdown
 		echo "<tr><th>",t("Keräysvyöhyke"),"</th>";
 		echo "<td><select name='keraysvyohyke'>";
 		echo "<option value=''>",t("Valitse"),"</option>";
-			while ($krow = mysql_fetch_assoc($kresult)) {
-				echo "<option value='{$krow['tunnus']}'>{$krow['nimitys']}</option>";
-			}
+
+		while ($krow = mysql_fetch_assoc($kresult)) {
+			echo "<option value='{$krow['tunnus']}'>{$krow['nimitys']}</option>";
+		}
 
 		echo "</select></td></tr>";
 	}
-
 
 	echo "<tr><td class='back'>",t("ja/tai"),"...</td></tr>";
 
@@ -561,7 +562,7 @@
 					$join 		= " JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' {$rajauslisa} {$invaamatta} {$extra} ";
 					$lefttoimi 	= " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno ";
 				}
-				$where .= " and tuote.tuotemerkki = '$tuotemerkki' ";
+				$where .= " and tuote.tuotemerkki = '$tuotemerkki' {$rajauslisatuote}";
 			}
 
 			if ($ahyllyalue != '' and $lhyllyalue != '') {

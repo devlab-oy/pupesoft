@@ -289,7 +289,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus in ($otunnukset)
 					GROUP BY nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, ytunnus, liitostunnus, toimitustavan_lahto
-					ORDER BY ytunnus, tunnus";
+					ORDER BY ytunnus, liitostunnus, tunnus";
 	}
 
 	$result = mysql_query($query) or pupe_error($query);

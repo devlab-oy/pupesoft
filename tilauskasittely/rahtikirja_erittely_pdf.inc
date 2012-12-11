@@ -88,7 +88,7 @@
 	if (!function_exists('rivi_erittely')) {
 		function rivi_erittely ($laskurow, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht, $vikarivi) {
 			global $yhtiorow, $kukarow, $pdf, $kieli, $rectparam, $norm, $kirj, $iso, $toitarow;
-			static $edytunnus, $kala1;
+			static $edytunnus, $kala1, $edliitostunnus;
 
 			$otsikot = FALSE;
 			$summatmenijo = FALSE;
@@ -111,7 +111,7 @@
 			}
 
 			// Asiakas vaihtuu, uudet otsikkotiedot
-			if (!$summatmenijo and $toitarow['erittely'] != 'k' and isset($edytunnus) and $edytunnus != $laskurow['ytunnus']) {
+			if (!$summatmenijo and $toitarow['erittely'] != 'k' and ((isset($edytunnus) and $edytunnus != $laskurow['ytunnus']) or (isset($edliitostunnus) and $edliitostunnus != $laskurow['liitostunnus']))) {
 				// Piiret‰‰n sivulle summatiedot
 				list($kala, $kollityht, $kilotyht, $lavametriyht) = loppu_erittely($kala1, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht);
 				$otsikot = TRUE;
@@ -253,6 +253,7 @@
 			}
 
 			$edytunnus = $laskurow['ytunnus'];
+			$edliitostunnus = $laskurow['liitostunnus'];
 
 			return array($kala, $firstpage, $kollityht, $kilotyht, $lavametriyht);
 		}

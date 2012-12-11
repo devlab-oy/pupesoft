@@ -556,7 +556,7 @@ if (isset($nappikeikalla) and $nappikeikalla == 'ollaan' and $toiminto != 'kohdi
 	$toiminto = "kohdista";
 }
 
-if ($toiminto == "kohdista") {
+if ($toiminto == "kohdista" and $poista != 'Poista') {
 	require('ostotilausten_rivien_kohdistus.inc');
 }
 
@@ -1507,19 +1507,12 @@ function hae_yhteenveto_tiedot($toimittajaid = null) {
 }
 
 // Tämä on naimisissa olevien osto ja myyntitilaus rivien saapumisten kautta poistamista varten
-if ($poista == 'Poista') {
+if ($toiminto == "kohdista" and $poista == 'Poista') {
+	//ostotilauksen tilausrivi on poistettu jo tässä vaiheessa, rivitunnus on tallessa formissa ja tilausrivin_lisatiedot taulusta löytyy oston ja myynnin yhdistävä linkki
 	$query = "	SELECT tilausrivin_lisatiedot.tilausrivitunnus
 				FROM tilausrivin_lisatiedot
-				JOIN tilausrivi ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki
-				JOIN lasku ON lasku.yhtio = tilausrivin_lisatiedot.yhtio AND lasku.tunnus = tilausrivi.otunnus
 				WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-				AND tilausrivin_lisatiedot.tilausrivilinkki = '{$lisatty_tun}'
-				AND tilausrivi.tyyppi = 'O'
-				AND lasku.tila = 'O'
-				AND lasku.alatila != 'X'
-				AND tilausrivi.kerattyaika = '0000-00-00 00:00:00'
-				AND tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
-				AND tilausrivi.laskutettuaika = '0000-00-00 00:00:00'";
+				AND tilausrivin_lisatiedot.tilausrivilinkki = '{$rivitunnus}'";
 	$result = pupe_query($query);
 
 	if ($tilausrivin_lisatiedot_row = mysql_fetch_assoc($result)) {
@@ -1543,19 +1536,24 @@ if ($poista == 'Poista') {
 	$query = "	SELECT lasku.tunnus
 				FROM lasku
 				JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tilausrivi.tunnus = '{$lisatty_tun}'
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.tunnus = '{$rivitunnus}'
 				AND lasku.tila = 'O'
 				AND lasku.alatila = 'X'";
 	$result = pupe_query($query);
 
-	if (mysql_num_rows($result) == 0) {
+	if (mysql_num_rows($result) != 0) {
 		$query = "	UPDATE tilausrivi
 					SET tyyppi = 'D'
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus  = '{$lisatty_tun}'";
+					AND tunnus  = '{$rivitunnus}'";
 		$result = pupe_query($query);
 	}
+
+	$tee = 'TI';
+	$tyhjenna = true;
+	unset($rivitunnus);
+	require('ostotilausten_rivien_kohdistus.inc');
 }
 
 echo "<SCRIPT LANGUAGE=JAVASCRIPT>

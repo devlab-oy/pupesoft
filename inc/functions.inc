@@ -10957,23 +10957,14 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 			// Ei feilata vaikka rahtiveloitus tai kuljetusvakuutus ei löydy tilaukselta
 			if (count($invoice_ei_loydy) > 0) {
 				foreach ($invoice_ei_loydy as $ei_loydytuoteno => $ei_loydy) {
+
 					if ($ei_loydy['tilattumaara'] == 0 or strtoupper($ei_loydytuoteno) == "A-100" or strtoupper($ei_loydytuoteno) == "A-200") {
 						// oletetaan että tämä on kuljetusvakuutus tms., joten laitetaan se "löytyviin" että vertailu-check hyväksyy nämä OK:na
 						$loytyy_kummastakin[$ei_loydytuoteno] = $ei_loydy;
 						$purchaseorder[$ei_loydytuoteno] = $ei_loydy;
 
 						// poistetaan se ei löydetyistä
-						array_pop($invoice_ei_loydy);
-					}
-				}
-
-				$erot = '';
-
-				foreach ($loytyy_kummastakin as $tuoteno => $null) {
-
-					if ($invoice[$tuoteno]['tilattumaara'] > 0 and ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or $invoice[$tuoteno]['nettohinta'] != $purchaseorder[$tuoteno]['nettohinta'])) {
-						// löytyi ero
-						$erot = 'joo';
+						unset($invoice_ei_loydy[$ei_loydytuoteno]);
 					}
 				}
 			}

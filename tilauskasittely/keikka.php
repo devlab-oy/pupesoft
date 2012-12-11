@@ -556,7 +556,7 @@ if (isset($nappikeikalla) and $nappikeikalla == 'ollaan' and $toiminto != 'kohdi
 	$toiminto = "kohdista";
 }
 
-if ($toiminto == "kohdista") {
+if ($toiminto == "kohdista" and $poista != 'Poista') {
 	require('ostotilausten_rivien_kohdistus.inc');
 }
 
@@ -1504,6 +1504,56 @@ function hae_yhteenveto_tiedot($toimittajaid = null) {
 		$laskut_osittain_viety,
 		$row_vaihto,
 	);
+}
+
+// Tämä on naimisissa olevien osto ja myyntitilaus rivien saapumisten kautta poistamista varten
+if ($toiminto == "kohdista" and $poista == 'Poista') {
+	//ostotilauksen tilausrivi on poistettu jo tässä vaiheessa, rivitunnus on tallessa formissa ja tilausrivin_lisatiedot taulusta löytyy oston ja myynnin yhdistävä linkki
+	$query = "	SELECT tilausrivin_lisatiedot.tilausrivitunnus
+				FROM tilausrivin_lisatiedot
+				WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivin_lisatiedot.tilausrivilinkki = '{$rivitunnus}'";
+	$result = pupe_query($query);
+
+	if ($tilausrivin_lisatiedot_row = mysql_fetch_assoc($result)) {
+		//tilaukset on naitettu. poistetaan myynti jos ei kerätty, toimitettu tai laskutettu
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'
+					AND tila = 'L'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			$query = "	UPDATE tilausrivi
+						SET tyyppi = 'D'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'";
+			$result = pupe_query($query);
+		}
+	}
+
+	$query = "	SELECT lasku.tunnus
+				FROM lasku
+				JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.tunnus = '{$rivitunnus}'
+				AND lasku.tila = 'O'
+				AND lasku.alatila = 'X'";
+	$result = pupe_query($query);
+
+	if (mysql_num_rows($result) != 0) {
+		$query = "	UPDATE tilausrivi
+					SET tyyppi = 'D'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus  = '{$rivitunnus}'";
+		$result = pupe_query($query);
+	}
+
+	$tee = 'TI';
+	$tyhjenna = true;
+	unset($rivitunnus);
+	require('ostotilausten_rivien_kohdistus.inc');
 }
 
 echo "<SCRIPT LANGUAGE=JAVASCRIPT>

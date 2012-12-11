@@ -160,6 +160,8 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
 	//rivien splittausvaihtoehtot näkyviin
 	$automatiikka = 'ON';
 
+	$saapuminen_ostorivin_muokkaus = 1;
+
 	require('syotarivi_ostotilaus.inc');
 	require('../inc/footer.inc');
 	exit;

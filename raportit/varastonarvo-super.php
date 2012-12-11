@@ -214,7 +214,14 @@
 				$sel = 'checked';
 			}
 
-			echo "<br><br><input type='checkbox' name='variaatiosummaus' value='ON' $sel/>".t("N‰yt‰ tuotteet variaation, v‰rin ja koon mukaan");
+			$sel2 = '';
+			if($tuotteen_myyntihinta != '') {
+				$sel2 = 'checked';
+			}
+
+
+			echo "<br/><br/><input type='checkbox' name='variaatiosummaus' value='ON' $sel/>".t("N‰yt‰ tuotteet variaation, v‰rin ja koon mukaan");
+			echo "<br/><br/><input type='checkbox' name='tuotteen_myyntihinta' $sel2 />".t('N‰yt‰ tuotteen myyntihinta (summaustaso pit‰‰ olla tuotteittain)');
 		}
 
 		echo "</td>";
@@ -337,6 +344,7 @@
 		if (!isset($kaikkikoot)) $kaikkikoot = "";
 		if (!isset($summaustaso)) $summaustaso = "";
 		if (!isset($variaatiosummaus)) $variaatiosummaus = "";
+		if (!isset($tuotteen_myyntihinta)) $tuotteen_myyntihinta = "";
 		if (!isset($ylaraja)) $ylaraja = "";
 
 		################## Jos summaustaso on paikka, otetaan paikat mukaan selectiin ##################
@@ -491,6 +499,7 @@
 					tuote.yksikko,
 					tuote.nimitys,
 					tuote.kehahin,
+					tuote.myyntihinta,
 					if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin_nyt,
 					tuote.epakurantti25pvm,
 					tuote.epakurantti50pvm,
@@ -521,6 +530,7 @@
 					tuote.yksikko,
 					tuote.nimitys,
 					tuote.kehahin,
+					tuote.myyntihinta,
 					if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin_nyt,
 					tuote.epakurantti25pvm,
 					tuote.epakurantti50pvm,
@@ -653,6 +663,10 @@
 
 		$worksheet->writeString($excelrivi, $excelsarake, t("Saldo"), 				$format_bold);
 		$excelsarake++;
+		if(($summaustaso == 'T' or $summaustaso == 'S') and !empty($tuotteen_myyntihinta)) {
+			$worksheet->writeString($excelrivi, $excelsarake, t("Myyntihinta"), 	$format_bold);
+			$excelsarake++;
+		}
 		$worksheet->writeString($excelrivi, $excelsarake, t("Kehahin"), 			$format_bold);
 		$excelsarake++;
 		$worksheet->writeString($excelrivi, $excelsarake, t("Varastonarvo"), 		$format_bold);
@@ -1199,6 +1213,10 @@
 
 				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$muutoskpl));
 				$excelsarake++;
+				if(($summaustaso == 'T' or $summaustaso == 'S') and !empty($tuotteen_myyntihinta)) {
+					$worksheet->writeNumber($excelrivi, $excelsarake, $row['myyntihinta']);
+					$excelsarake++;
+				}
 				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$kehasilloin));
 				$excelsarake++;
 				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$muutoshinta));

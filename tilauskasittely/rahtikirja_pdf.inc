@@ -71,7 +71,7 @@
 			$rakir_row['toim_nimi']    = $rakir_row['nimi'];
 		}
 	}
-	
+
 	if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 
 		$logyq = "	SELECT min(rahtikirjanro) rahtikirjanro
@@ -82,7 +82,7 @@
 		$logyrow = mysql_fetch_assoc($logyres);
 
 		$rahtikirjanro = $logyrow["rahtikirjanro"];
-		
+
 		$logyq = "	UPDATE rahtikirjanumero
 					SET kayttaja = '$kukarow[kuka]',
 					kaytettyaika = now()
@@ -447,21 +447,16 @@
 		$pdf->draw_text(486,  529, "Tilavuus, m3",										$firstpage, $norm);
 		$pdf->draw_text(486,  523, "Tilavuus, m3",										$firstpage, $norm);
 
-		//pyöristetään kiloja
-		if ($kilot[0] != '') {
-			$kilot[0] = round($kilot[0],2);
+		foreach ($kilot as &$arvoround) {
+			$arvoround = round($arvoround,2);
 		}
-		if ($kilot[1] != '') {
-			$kilot[1] = round($kilot[1],2);
+
+		foreach ($kollit as &$arvoround) {
+			$arvoround = round($arvoround);
 		}
-		if ($kilot[2] != '') {
-			$kilot[2] = round($kilot[2],2);
-		}
-		if ($kilot[3] != '') {
-			$kilot[3] = round($kilot[3],2);
-		}
-		if ($kilot[4] != '') {
-			$kilot[4] = round($kilot[4],2);
+
+		foreach ($kuutiot as &$arvoround) {
+			$arvoround = round($arvoround,4);
 		}
 
 		//kollit

@@ -466,10 +466,10 @@
 							AND tyyppi = 'L'
 							AND kerattyaika = '0000-00-00 00:00:00'
 							AND toimitettuaika = '0000-00-00 00:00:00'
-							AND laskutettuaika = '0000-00-00 00:00:00'
-							AND tunnus = {$myyntitilausrivi_row['tilausrivitunnus']}" ;
+							AND laskutettuaika = '0000-00-00'
+							AND tunnus = '{$myyntitilausrivi_row['tilausrivitunnus']}'";
 				$result = pupe_query($query);
-				if(mysql_num_rows($result) == 0) {
+				if(mysql_num_rows($result) != 0) {
 					//poistetaan myös myyntitilausrivi
 					$query = "	UPDATE tilausrivi
 								SET tyyppi = 'D'
@@ -480,7 +480,8 @@
 					//poistetaan linkki
 					$query = "	DELETE
 								FROM tilausrivin_lisatiedot
-								WHERE tilausrivilinkki = '{$rivitunnus}'";
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivilinkki = '{$rivitunnus}'";
 					$result = pupe_query($query);
 
 					echo "<font class='error'>".t("Poistetaan rivi myös myyntitilaukselta")." {$myyntitilausrivi_row['vanha_otunnus']}</font><br/><br/>";

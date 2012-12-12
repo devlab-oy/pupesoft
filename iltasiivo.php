@@ -35,7 +35,7 @@
 		if ($aja != "run") {
 			echo "<br><form method='post'>";
 			echo "<input type='hidden' name='aja' value='run'>";
-			echo "<input type='submit' value='",t("Aja iltasiivo"),"!'>";
+			echo "<input type='submit' value='",t("Aja iltasiivo"),"'>";
 			echo "</form>";
 		}
 

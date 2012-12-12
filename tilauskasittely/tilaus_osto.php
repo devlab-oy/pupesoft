@@ -49,6 +49,26 @@
 		$tee = "AKTIVOI";
 	}
 
+	// Katostaan, että tilaus on vielä samassa tilassa jossa se oli kun se klikattiin auku muokkaatilaus-ohjelmassa
+	if ($tee == 'AKTIVOI' and $mista == "muokkaatilaus") {
+		$query = "	SELECT tila, alatila
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus  = '$tilausnumero'
+					AND tila 	= '$orig_tila'
+					AND alatila = '$orig_alatila'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) != 1) {
+				echo "<font class='error'>".t("Tilauksen tila on vaihtunut. Ole hyvä avaa tilaus uudestaan").".</font><br>";
+
+				// poistetaan aktiiviset tilaukset jota tällä käyttäjällä oli
+				$query = "UPDATE kuka SET kesken='' WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
+				$result = pupe_query($query);
+				exit;
+		}
+	}
+
 	if ($tee == 'AKTIVOI') {
 		// katsotaan onko muilla aktiivisena
 		$query = "SELECT * from kuka where yhtio='$kukarow[yhtio]' and kesken='$tilausnumero' and kesken!=0";
@@ -66,7 +86,6 @@
 			// poistetaan aktiiviset tilaukset jota tällä käyttäjällä oli
 			$query = "UPDATE kuka SET kesken='' WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
 			$result = pupe_query($query);
-
 			exit;
 		}
 		else {

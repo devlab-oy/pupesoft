@@ -214,6 +214,26 @@ if ($tee == 'DELKESKEN') {
 	}
 }
 
+// Katostaan, ett‰ tilaus on viel‰ samassa tilassa jossa se oli kun se klikattiin auku muokkaatilaus-ohjelmassa
+if ($tee == 'AKTIVOI' and $mista == "muokkaatilaus") {
+	$query = "	SELECT tila, alatila
+				FROM lasku
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus  = '$tilausnumero'
+				AND tila 	= '$orig_tila'
+				AND alatila = '$orig_alatila'";
+	$result = pupe_query($query);
+
+	if (mysql_num_rows($result) != 1) {
+			echo "<font class='error'>".t("Tilauksen tila on vaihtunut. Ole hyv‰ avaa tilaus uudestaan").".</font><br>";
+
+			// poistetaan aktiiviset tilaukset jota t‰ll‰ k‰ytt‰j‰ll‰ oli
+			$query = "UPDATE kuka SET kesken='' WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
+			$result = pupe_query($query);
+			exit;
+	}
+}
+
 // aktivoidaan saatu id
 if ($tee == 'AKTIVOI') {
 	// katsotaan onko muilla aktiivisena
@@ -4306,11 +4326,11 @@ if ($tee == '') {
 								and tuote.tuoteno = '{$tuote['tuoteno']}'
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 				}
-				
+
 				$varresult = pupe_query($query);
-				
+
 				$myytavissa_sum = 0;
-				
+
 				if (mysql_num_rows($varresult) > 0) {
 
 					// katotaan jos meill‰ on tuotteita varaamassa saldoa joiden varastopaikkaa ei en‰‰ ole olemassa...
@@ -4340,15 +4360,15 @@ if ($tee == '') {
 							}
 
 							if ($myytavissa != 0) {
-								
+
 								echo "<tr>";
 								echo "<th nowrap>";
 								echo "<a class='tooltip' id='$id2'>$saldorow[nimitys]</a> $saldorow[tyyppi]";
 								echo "<div id='div_$id2' class='popup' style='width: 300px'>($saldorow[hyllyalue]-$saldorow[hyllynro]-$saldorow[hyllyvali]-$saldorow[hyllytaso])</div>";
 								echo "</th>";
 
-								echo "<td align='right' nowrap>";						
-								echo sprintf("%.2f", $myytavissa)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");							
+								echo "<td align='right' nowrap>";
+								echo sprintf("%.2f", $myytavissa)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
 								echo " {$tuote['yksikko']}</td></tr>";
 							}
 

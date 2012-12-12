@@ -15055,6 +15055,7 @@ if (!function_exists("tee_keraysera")) {
 					avainsana as avainsana_kieli READ,
 					lasku as vanha_lasku READ,
 					varaston_tulostimet as vanha_varaston_tulostimet READ,
+					kuka as kuka2 READ,
 					yhtio READ";
 		$result = pupe_query($query);
 
@@ -15103,11 +15104,13 @@ if (!function_exists("tee_keraysera")) {
 									AND lahdot1.aktiivi IN ('', 'T')
 									AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
 									AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != ''))
+					LEFT JOIN kuka ON (kuka.yhtio = lasku1.yhtio and kuka.kesken = lasku1.tunnus)
 					WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
 					AND lasku1.tila = 'N'
 					AND lasku1.alatila = 'A'
 					AND lasku1.vakisin_kerays = ''
 					AND lasku1.varasto = '{$varasto}'
+					AND kuka.tunnus is null
 					GROUP BY 1,2,3,4,5,6)
 					UNION
 					(SELECT SQL_NO_CACHE
@@ -15124,11 +15127,13 @@ if (!function_exists("tee_keraysera")) {
 					JOIN keraysvyohyke AS keraysvyohyke2 ON (keraysvyohyke2.yhtio = lasku2.yhtio AND keraysvyohyke2.tunnus IN ({$keraysvyohyke}) AND keraysvyohyke2.tunnus = vh2.keraysvyohyke)
 					JOIN toimitustapa AS toimitustapa2 ON (toimitustapa2.yhtio = lasku2.yhtio AND toimitustapa2.selite = lasku2.toimitustapa)
 					JOIN lahdot AS lahdot2 ON (lahdot2.yhtio = lasku2.yhtio AND lahdot2.tunnus = lasku2.toimitustavan_lahto)
+					LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 					WHERE lasku2.yhtio = '{$kukarow['yhtio']}'
 					AND lasku2.tila = 'N'
 					AND lasku2.alatila = 'A'
 					AND lasku2.vakisin_kerays != ''
 					AND lasku2.varasto = '{$varasto}'
+					AND kuka2.tunnus is null
 					GROUP BY 1,2,3,4,5,6)
 					ORDER BY 1,2,3,4,5,6";
 		$res = pupe_query($query);
@@ -15231,6 +15236,7 @@ if (!function_exists("tee_keraysera")) {
 						JOIN tuote AS tuote1 ON (tuote1.yhtio = tilausrivi1.yhtio AND tuote1.tuoteno = tilausrivi1.tuoteno)
 						JOIN keraysvyohyke AS keraysvyohyke1 ON (keraysvyohyke1.yhtio = lasku1.yhtio AND keraysvyohyke1.tunnus = '{$keraysvyohyke}')
 						JOIN toimitustapa AS toimitustapa1 ON (toimitustapa1.yhtio = lasku1.yhtio AND toimitustapa1.selite = lasku1.toimitustapa)
+						LEFT JOIN kuka ON (kuka.yhtio = lasku1.yhtio and kuka.kesken = lasku1.tunnus)
 						JOIN lahdot AS lahdot3
 						ON (lahdot3.yhtio = toimitustapa1.yhtio
 						AND lahdot3.liitostunnus = toimitustapa1.tunnus
@@ -15242,6 +15248,7 @@ if (!function_exists("tee_keraysera")) {
 						AND lasku1.alatila 			= 'A'
 						AND lasku1.vakisin_kerays 	= ''
 						AND lasku1.varasto 			= '{$varasto}'
+						AND kuka.tunnus is null
 						GROUP BY 1,2,3,4,5,6
 						ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
 		}
@@ -15264,11 +15271,13 @@ if (!function_exists("tee_keraysera")) {
 						JOIN keraysvyohyke AS keraysvyohyke2 ON (keraysvyohyke2.yhtio = lasku2.yhtio AND keraysvyohyke2.tunnus = '{$keraysvyohyke}')
 						JOIN toimitustapa AS toimitustapa2 ON (toimitustapa2.yhtio = lasku2.yhtio AND toimitustapa2.selite = lasku2.toimitustapa)
 						JOIN lahdot AS lahdot3 ON (lahdot3.yhtio = lasku2.yhtio AND lahdot3.tunnus = lasku2.toimitustavan_lahto)
+						LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 						WHERE lasku2.yhtio 			= '{$kukarow['yhtio']}'
 						AND lasku2.tila 			= 'N'
 						AND lasku2.alatila 			= 'A'
 						AND lasku2.vakisin_kerays  != ''
 						AND lasku2.varasto	 		= '{$varasto}'
+						AND kuka2.tunnus is null
 						GROUP BY 1,2,3,4,5,6
 						ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
 		}

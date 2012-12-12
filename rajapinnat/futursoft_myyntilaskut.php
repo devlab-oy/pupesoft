@@ -21,13 +21,13 @@
 	$tiedosto_polku = '/tmp/KPAM_myynti(1340).xml';
 	$yhtio = 'atarv';
 
-//	$futursoft_kansio = "/home/merca-autoasi/";
-//	$futursoft_kansio_valmis = "/home/merca-autoasi/ok/";
-//	$futursoft_kansio_error = "/home/merca-autoasi/error/";
+	$futursoft_kansio = "/home/merca-autoasi/";
+	$futursoft_kansio_valmis = "/home/merca-autoasi/ok/";
+	$futursoft_kansio_error = "/home/merca-autoasi/error/";
 
-	$futursoft_kansio = "/tmp/merca-autoasi/";
-	$futursoft_kansio_valmis = "/tmp/merca-autoasi/ok/";
-	$futursoft_kansio_error = "/tmp/merca-autoasi/error/";
+//	$futursoft_kansio = "/tmp/merca-autoasi/";
+//	$futursoft_kansio_valmis = "/tmp/merca-autoasi/ok/";
+//	$futursoft_kansio_error = "/tmp/merca-autoasi/error/";
 
 	if(!is_dir($futursoft_kansio)) {
 		mkdir($futursoft_kansio);

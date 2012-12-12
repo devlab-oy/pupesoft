@@ -1334,7 +1334,7 @@
 						$seurantalisa
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.tila in ('L','N')
+						and lasku.tila = 'N'
 						and lasku.alatila in ('','T','U')
 						$haku
 						HAVING extra = '' or extra is null
@@ -1993,10 +1993,13 @@
 					if ($whiletoim == "PROJEKTI") {
 						echo "	<input type='hidden' name='projektilla' value='$row[tunnusnippu]'>";
 					}
+
 					echo "	<input type='hidden' name='lopetus' 	 value='{$palvelin2}muokkaatilaus.php////toim=$toim//asiakastiedot=$asiakastiedot//limit=$limit//etsi=$etsi'>
 							<input type='hidden' name='mista'		 value='muokkaatilaus'>
 							<input type='hidden' name='toim'		 value='$aputoim1'>
 							<input type='hidden' name='tee'			 value='AKTIVOI'>
+							<input type='hidden' name='orig_tila'	 value='{$row["tila"]}'>
+							<input type='hidden' name='orig_alatila' value='{$row["alatila"]}'>
 							<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
 
 					if ($toim == "VASTAANOTA_REKLAMAATIO") {

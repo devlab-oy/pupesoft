@@ -235,8 +235,10 @@
 						ok = false;
 					}
 
-					if(!tarkista_lahettaja() && ok != false) {
-						ok = false;
+					if(ok != false) {
+						if(!tarkista_lahettaja()) {
+							ok = false;
+						}
 					}
 					return ok;
 				}
@@ -258,7 +260,7 @@
 							type: 'POST',
 							url: 'vuosisopimusasiakkaat.php?asiakas_tarkistus=1&no_head=yes',
 							data: {
-								'ytunnus': '',
+								'ytunnus': $('input[name=ytunnus]').val(),
 								'asiakasid': '',
 								'raja': $('input[name=raja]').val(),
 								'alkuvv': $('input[name=alkuvv]').val(),
@@ -293,10 +295,20 @@
 		global $kukarow;
 
 		//valittu asiakas
-		if ($params['ytunnus'] != '' and $params['asiakasid'] != "") {
-			$asnum = $params['ytunnus'];
-			echo "vain asiakas ytunnus: {$params['ytunnus']}...<br> ";
-			$aswhere = "and lasku.liitostunnus = '{$params['asiakasid']}'";
+		if ($params['ytunnus'] != '') {
+			$query = "	SELECT *
+						FROM asiakas
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND asiakasnro = '{$params['ytunnus']}'";
+			$result = pupe_query($query);
+
+			if($asiakas_row = mysql_fetch_assoc($result)) {
+				$aswhere = "and lasku.liitostunnus = '{$asiakas_row['tunnus']}'";
+			}
+			else {
+				$aswhere = "";
+				echo t("Asiakasta ei löytynyt");
+			}
 		}
 		else {
 			$aswhere = "";

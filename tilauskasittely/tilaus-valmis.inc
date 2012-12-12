@@ -52,30 +52,31 @@ if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] 
 	ob_end_clean();
 }
 
-$maksupositio_chk = false;
+// otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
+$query = "	SELECT *
+			FROM maksuehto
+			WHERE yhtio = '{$kukarow['yhtio']}'
+			AND tunnus = '{$laskurow['maksuehto']}'";
+$maksuehto_result = pupe_query($query);
+$maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 
-// Jos ennakkolaskun automatisointi on päällä (asiakas > yhtiön oletus), tarkistetaan onko maksupositioita
-if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen) and $laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or $laskurow['alatila'] == 'B') and ($tilausvalmis_asiakas_row['ennakkolaskun_automatisointi'] == 'X' or ($tilausvalmis_asiakas_row['ennakkolaskun_automatisointi'] == '' and $yhtiorow['ennakkolaskun_automatisointi'] == 'X'))) {
+// Jos ennakkolaskun automatisointi on päällä (asiakas > yhtiön oletus) ja maksuehtona on "osamaksu", laitetaan tilaus holdiin
+if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
+	and $maksuehtorow['jaksotettu'] != ''
+	and $laskurow['tila'] == 'N'
+	and ($laskurow['alatila'] == '' or $laskurow['alatila'] == 'B')
+	and ($tilausvalmis_asiakas_row['ennakkolaskun_automatisointi'] == 'X' or ($tilausvalmis_asiakas_row['ennakkolaskun_automatisointi'] == '' and $yhtiorow['ennakkolaskun_automatisointi'] == 'X'))) {
 
-	$query = "	SELECT *
-				FROM maksupositio
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND otunnus = '{$laskurow['tunnus']}'
-				AND uusiotunnus = 0";
-	$maksupositio_chk_res = pupe_query($query);
+	if ($laskurow['alatila'] == '') {
+		$query = "	UPDATE lasku SET
+					alatila = 'B'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$laskurow['tunnus']}'
+					AND tila = 'N'";
+		$myyntikielto_res = pupe_query($query);
 
-	if (mysql_num_rows($maksupositio_chk_res) > 0) $maksupositio_chk = true;
-}
-
-if ($maksupositio_chk) {
-
-	$query = "	UPDATE lasku SET
-				alatila = 'B'
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$laskurow['tunnus']}'";
-	$myyntikielto_res = pupe_query($query);
-
-	echo "<font class='error'>",t("Tilaus laitetaan odottamaan, kunnes ennakkolaskut ovat maksettu"),".</font><br/><br/>";
+		echo "<font class='error'>",t("Tilaus laitetaan odottamaan, kunnes ennakkolaskut ovat maksettu"),".</font><br/><br/>";
+	}
 
 	// Laitetaan lopetus tyhjäksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
 	$lopetus = "";
@@ -286,19 +287,11 @@ else {
 		$laskurow['hyvak2'] = $kukarow["kuka"];
 	}
 
-	// otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
-	$query = "	SELECT *
-				FROM maksuehto
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND tunnus = '$laskurow[maksuehto]'";
-	$result = pupe_query($query);
-
 	$kateinen = "";
 	$jaksotettu = "";
 	$itsetulostus = "";
 
-	if (mysql_num_rows($result) == 1) {
-		$maksuehtorow = mysql_fetch_assoc($result);
+	if (mysql_num_rows($maksuehto_result) == 1) {
 
 		// jos kyseessä on käteiskauppaa
 		if ($maksuehtorow['kateinen'] != '') {

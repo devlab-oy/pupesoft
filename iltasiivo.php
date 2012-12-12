@@ -199,7 +199,7 @@
 		while ($pos_chk_row = mysql_fetch_assoc($pos_chk_result)) {
 
 			$query = "	SELECT maksupositio.otunnus,
-						sum(if (uusiolasku_ux.mapvm != '0000-00-00', 1, 0)) laskutettu_ux_kpl,
+						sum(if(ifnull(uusiolasku_ux.mapvm, '0000-00-00') != '0000-00-00', 1, 0)) laskutettu_ux_kpl,
 						count(*) yhteensa_kpl
 						FROM maksupositio
 						LEFT JOIN lasku uusiolasku ON (maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus = uusiolasku.tunnus)
@@ -207,7 +207,7 @@
 						WHERE maksupositio.yhtio = '{$kukarow['yhtio']}'
 						and maksupositio.otunnus = '{$pos_chk_row['jaksotettu']}'
 						GROUP BY 1
-						HAVING (yhteensa_kpl - 1) = laskutettu_ux_kpl
+						HAVING (yhteensa_kpl - laskutettu_ux_kpl) = 1
 						ORDER BY 1, maksupositio.tunnus";
 			$posres = mysql_query($query) or die($query);
 

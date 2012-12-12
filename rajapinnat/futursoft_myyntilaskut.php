@@ -17,55 +17,98 @@
 		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR."/Users/joonas/Dropbox/Sites/pupesoft".PATH_SEPARATOR."/usr/share/pear");
 	}
 
-//	TESTAUSTA VARTEN
-//	if ($argv[1] == "" or $argv[2] == "") {
-//		echo "\nUsage: php ".basename($argv[0])." yhtio tiedosto.txt\n\n";
-//		die;
-//	}
-//
-//	// Parametrit
-//	$yhtio = pupesoft_cleanstring($argv[1]);
-//	$filename = $argv[2];
-
 	//TESTAUSTA VARTEN
-	$filename = '/tmp/KPAM_myynti(1340).xml';
+	$tiedosto_polku = '/tmp/KPAM_myynti(1340).xml';
 	$yhtio = 'atarv';
 
-	// Haetaan yhtiön tiedot
-	$yhtiorow = hae_yhtion_parametrit($yhtio);
+//	$futursoft_kansio = "/home/merca-autoasi/";
+//	$futursoft_kansio_valmis = "/home/merca-autoasi/ok/";
+//	$futursoft_kansio_error = "/home/merca-autoasi/error/";
 
-	// Haetaan käyttäjän tiedot
-	$query = "	SELECT *
-				FROM kuka
-				WHERE yhtio = '$yhtio'
-				AND kuka = 'admin'";
-	$result = pupe_query($query);
+	$futursoft_kansio = "/tmp/merca-autoasi/";
+	$futursoft_kansio_valmis = "/tmp/merca-autoasi/ok/";
+	$futursoft_kansio_error = "/tmp/merca-autoasi/error/";
 
-	if (mysql_num_rows($result) == 0) {
-		die("User admin not found");
+	if(!is_dir($futursoft_kansio)) {
+		mkdir($futursoft_kansio);
+	}
+	if(!is_dir($futursoft_kansio_valmis)) {
+		mkdir($futursoft_kansio_valmis);
+	}
+	if(!is_dir($futursoft_kansio_error)) {
+		mkdir($futursoft_kansio_error);
 	}
 
-	// Adminin oletus, mutta kuka konversio
-	$kukarow = mysql_fetch_assoc($result);
+	$kukarow = hae_kayttaja($yhtio);
 	$kukarow["kuka"] = "konversio";
 
-	if (file_exists($filename)) {
-		$xml = simplexml_load_file($filename);
-		$myyntilasku_data = parsi_xml_tiedosto($xml);
+	$tiedostot = lue_tiedostot($futursoft_kansio);
 
-		$kasitellyt_tilaukset = kasittele_myyntilasku_data($myyntilasku_data, $yhtio);
+	if(!empty($tiedostot)) {
+		foreach($tiedostot as $tiedosto) {
+			$tiedosto_polku = $futursoft_kansio.$tiedosto;
+			if (file_exists($tiedosto_polku)) {
+				$xml = simplexml_load_file($tiedosto_polku);
+				if(!$xml) {
+					//file read failure, siirretään tiedosto error kansioon
+					siirra_tiedosto_kansioon($tiedosto_polku, $futursoft_kansio_error);
 
-		echo $kasitellyt_tilaukset['tilausnumero_count'] . t(" tilausta luotiin ja niihin ") . $kasitellyt_tilaukset['tiliointi_count'] . t(" tiliöintiä");
+					die(t("Tiedoston {$tiedosto_polku} lukeminen epäonnistui"));
+				}
+				$myyntilasku_data = parsi_xml_tiedosto($xml, $yhtio);
 
-		//Testausta varten
-		//poista_tilaukset_ja_tilioinnit($kasitellyt_tilaukset, $yhtio);
+				$kasitellyt_tilaukset = kasittele_myyntilasku_data($myyntilasku_data, $yhtio);
+
+				echo $kasitellyt_tilaukset['tilausnumero_count'] . t(" tilausta luotiin ja niihin ") . $kasitellyt_tilaukset['tiliointi_count'] . t(" tiliöintiä");
+
+				siirra_tiedosto_kansioon($tiedosto_polku, $futursoft_kansio_valmis);
+
+				//Testausta varten
+				//poista_tilaukset_ja_tilioinnit($kasitellyt_tilaukset, $yhtio);
+			}
+			else {
+				die(t("Tiedostoa ei ole olemassa"));
+			}
+		}
 	}
 	else {
-		echo t("Tiedosto ei ole olemassa");
+		echo t("Yhtään tiedostoa ei löytynyt");
 	}
 	die();
 
-	function parsi_xml_tiedosto(SimpleXMLElement $xml) {
+	function lue_tiedostot($polku) {
+		$tiedostot = array();
+		if ($handle = opendir($polku)) {
+			while (false !== ($tiedosto = readdir($handle))) {
+				if ($tiedosto != "." && $tiedosto != "..") {
+					if(is_file($polku.$tiedosto)) {
+						if(stristr($tiedosto, 'myynti')) {
+							$tiedostot[] = $tiedosto;
+						}
+					}
+				}
+			}
+			closedir($handle);
+		}
+
+		return $tiedostot;
+	}
+
+	function siirra_tiedosto_kansioon($tiedosto_polku, $kansio) {
+		$tiedosto_array = explode('.', $tiedosto_polku);
+		if(!empty($tiedosto_array)) {
+			$tiedosto_array2 = explode('/',$tiedosto_array[0]);
+			$hakemiston_syvyys = count($tiedosto_array2);
+
+			$uusi_filename = $tiedosto_array2[$hakemiston_syvyys - 1].'_'.date('YmdHis').'.'.$tiedosto_array[1];
+		}
+		$komento = 'cp "'.$tiedosto_polku.'" "'.$kansio.$uusi_filename.'"';
+		exec($komento);
+
+		exec('rm "'.$tiedosto_polku.'"');
+	}
+
+	function parsi_xml_tiedosto(SimpleXMLElement $xml, $yhtio) {
 		$data = array();
 		if ($xml !== FALSE) {
 			foreach($xml->LedgerJournalTable->LedgerJournalTrans as $myyntilasku) {
@@ -81,7 +124,7 @@
 						'summa' => (float)$myyntilasku->AmountCurDebit,
 						'valuutta' => (string)$myyntilasku->Currency,
 						'kurssi' => (float)$myyntilasku->ExchRate,
-						'maksuehto' => (string)$myyntilasku->Payment,
+						'maksuehto' => konvertoi_maksuehto($myyntilasku->Payment, $yhtio),
 						'erapaiva' => date('Y-m-d', strtotime((string)$myyntilasku->Due)),
 						'viite' => (string)$myyntilasku->PaymId,
 					);
@@ -98,7 +141,7 @@
 						'alv' => ((string)$myyntilasku->TaxItemGroup == '') ? 0 : (float)$myyntilasku->TaxItemGroup,
 						'alv_maara' => (float)$myyntilasku->FixedTaxAmount,
 						'kustp' => (string)$myyntilasku->Dim2,
-						'maksuehto' => (string)$myyntilasku->Payment,
+						'maksuehto' => konvertoi_maksuehto($myyntilasku->Payment, $yhtio),
 						'erapaiva' => date('Y-m-d', strtotime((string)$myyntilasku->Due)),
 						'viite' => (string)$myyntilasku->PaymId,
 					);
@@ -114,6 +157,39 @@
 		return $data;
 	}
 
+	function konvertoi_maksuehto($maksuehto, $yhtio) {
+		$maksuehto = (string)$maksuehto;
+		
+		if($yhtio == 'atarv') {
+			//selitteellä ei tehdä mitään, debuggausta varten
+			$maksuehto_array = array(
+				'931' => array('id' => '1494','selite' => '14 pv -3% 60 pv netto'),
+				'934' => array('id' => '1496','selite' => '60 pv netto'),
+				'933' => array('id' => '1500','selite' => '45 pv netto'),
+				'908' => array('id' => '1513','selite' => 'Lasku 30 pv'),
+				'912' => array('id' => '1514','selite' => '14 pv -2% 30 pv netto'),
+				'907' => array('id' => '1515','selite' => 'Lasku 21 pv'),
+				'906' => array('id' => '1520','selite' => 'Lasku 14 pv'),
+				'932' => array('id' => '1525','selite' => '30 pv -2% 60 pv netto'),
+				'904' => array('id' => '1535','selite' => 'Lasku 7pv'),
+				'936' => array('id' => '1538','selite' => '90 pv netto'),
+				'901' => array('id' => '1551','selite' => 'Käteinen'),
+				'909' => array('id' => '2019','selite' => 'Lasku 14 pv netto, 7 pv - 2 %'),
+			);
+
+			if(array_key_exists($maksuehto, $maksuehto_array)) {
+				return $maksuehto_array[$maksuehto]['id'];
+			}
+			else {
+				echo t("Maksuehdolle").' '.$maksuehto.' '.t("ei löytynyt paria. Käytetään alkuperäistä maksuehtoa");
+				return $maksuehto;
+			}
+		}
+		else {
+			return $maksuehto;
+		}
+	}
+
 	function kasittele_myyntilasku_data($myyntilaskut, $yhtio) {
 		$tilausnumero_count = 0;
 		$tiliointi_count = 0;
@@ -127,12 +203,14 @@
 				$tilausnumero_count++;
 
 				foreach($myyntilasku['tilioinnit'] as $tiliointi) {
-					$tiliointi_tunnus = tee_tiliointi($tilausnumero, $tiliointi, $yhtio);
-					if($tiliointi_tunnus) {
-						$tiliointi_tunnukset[] = $tiliointi_tunnus;
-						$tiliointi_count++;
-						echo t("Tilaukselle").' '.$tilausnumero.' '.t("tehtiin tiliöinti").' '.$tiliointi_tunnus;
-						echo "<br/>";
+					$tiliointi_tunnukset = tee_tiliointi($tilausnumero, $tiliointi, $yhtio);
+					if($tiliointi_tunnukset) {
+						foreach($tiliointi_tunnukset as $tunnus) {
+							$tiliointi_tunnukset[] = $tunnus;
+							$tiliointi_count++;
+							echo t("Tilaukselle").' '.$tilausnumero.' '.t("tehtiin tiliöinti").' '.$tunnus;
+							echo "<br/>";
+						}
 					}
 					else {
 						echo t("Tilaukselle").' '.$tilausnumero.' '.t("EI TEHTY TILIÖINTIÄ");
@@ -207,7 +285,7 @@
 			if($tilausnumero) {
 				$query = "	UPDATE lasku
 							SET comments = '".t("Laskun asiakasta ei löytynyt, käytimme laskun konversioon väliaikaista kaato-asiakasta. Korjaa tämä lasku mahdollisimman pian. Alkuperäisen laskun tiedot löytyvät sisviesti2")."',
-								sisviesti2 = '".@json_encode($myyntilasku)."'
+							sisviesti2 = '".@json_encode($myyntilasku)."'
 							WHERE yhtio = '{$yhtio}'
 							AND tunnus = '{$tilausnumero}'";
 				pupe_query($query);
@@ -294,23 +372,64 @@
 	}
 
 	function tee_tiliointi($tilausnumero, $tiliointi, $yhtio) {
+		$tiliointi_tunnukset = array();
 		$tili = tarkista_tilinumero($tiliointi['tilinumero'], $yhtio);
 
 		if(!empty($tili)) {
-			$query = "	INSERT INTO tiliointi
-						SET tilino = '{$tiliointi['tilinumero']}',
-						tapvm = '{$tiliointi['tapahtumapaiva']}',
-						summa = '{$tiliointi['summa']}',
-						vero = '{$tiliointi['alv']}',
-						kustp = '{$tiliointi['kustp']}',
-						ltunnus = '{$tilausnumero}',
-						laatija = 'futursoft',
-						laadittu = NOW(),
-						selite = '".t("Futursoft konversioajo")."',
-						yhtio = '{$yhtio}'";
-			pupe_query($query);
+			if(!empty($tiliointi['alv']) and !empty($tiliointi['alv_maara'])) {
+				//tehdään alv tiliöinti ja tiliöinti - alv
+				$alviton_summa = $tiliointi['summa'] - $tiliointi['alv_maara'];
+				$yhtio_row = hae_yhtio($yhtio);
 
-			return mysql_insert_id();
+				$query = "	INSERT INTO tiliointi
+							SET tilino = '{$tiliointi['tilinumero']}',
+							tapvm = '{$tiliointi['tapahtumapaiva']}',
+							summa = '{$alviton_summa}',
+							vero = '{$tiliointi['alv']}',
+							kustp = '{$tiliointi['kustp']}',
+							ltunnus = '{$tilausnumero}',
+							laatija = 'futursoft',
+							laadittu = NOW(),
+							selite = '".t("Futursoft konversioajo")."',
+							yhtio = '{$yhtio}'";
+				pupe_query($query);
+
+				$tiliointi_tunnukset[] = mysql_insert_id();
+
+				$query = "	INSERT INTO tiliointi
+							SET tilino = '{$yhtio_row['alv']}',
+							tapvm = '{$tiliointi['tapahtumapaiva']}',
+							summa = '{$tiliointi['alv_maara']}',
+							vero = '{$tiliointi['alv']}',
+							kustp = '{$tiliointi['kustp']}',
+							ltunnus = '{$tilausnumero}',
+							laatija = 'futursoft',
+							laadittu = NOW(),
+							selite = '".t("Futursoft konversioajo")."',
+							yhtio = '{$yhtio}'";
+				pupe_query($query);
+
+				$tiliointi_tunnukset[] = mysql_insert_id();
+			}
+			else {
+				//tehdään tiliöinti sellaisenaan
+				$query = "	INSERT INTO tiliointi
+							SET tilino = '{$tiliointi['tilinumero']}',
+							tapvm = '{$tiliointi['tapahtumapaiva']}',
+							summa = '{$tiliointi['summa']}',
+							vero = '{$tiliointi['alv']}',
+							kustp = '{$tiliointi['kustp']}',
+							ltunnus = '{$tilausnumero}',
+							laatija = 'futursoft',
+							laadittu = NOW(),
+							selite = '".t("Futursoft konversioajo")."',
+							yhtio = '{$yhtio}'";
+				pupe_query($query);
+
+				$tiliointi_tunnukset[] = mysql_insert_id();
+			}
+
+			return $tiliointi_tunnukset;
 		}
 		else {
 			echo t("Tilinumeroa").' '.$tiliointi['tilinumero'].' '.t("EI LÖYTYNYT");
@@ -359,6 +478,21 @@
 			return null;
 		}
 
+		return mysql_fetch_assoc($result);
+	}
+
+	function hae_kayttaja($yhtio) {
+		// Haetaan käyttäjän tiedot
+		$query = "	SELECT *
+					FROM kuka
+					WHERE yhtio = '$yhtio'
+					AND kuka = 'admin'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			die("User admin not found");
+		}
+		// Adminin oletus, mutta kuka konversio
 		return mysql_fetch_assoc($result);
 	}
 ?>

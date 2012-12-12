@@ -17,49 +17,93 @@
 		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR."/Users/joonas/Dropbox/Sites/pupesoft".PATH_SEPARATOR."/usr/share/pear");
 	}
 
-//	if ($argv[1] == "" or $argv[2] == "") {
-//		echo "\nUsage: php ".basename($argv[0])." yhtio tiedosto.txt\n\n";
-//		die;
-//	}
-
-	// Parametrit
-	$yhtio = pupesoft_cleanstring($argv[1]);
-	$filename = $argv[2];
-
 	//TESTAUSTA VARTEN
-	$filename = '/tmp/customers.xml';
+	$tiedosto_polku = '/tmp/customers.xml';
 	$yhtio = 'atarv';
 
-	// Haetaan yhtiön tiedot
-	$yhtiorow = hae_yhtion_parametrit($yhtio);
+	//	$futursoft_kansio = "/home/merca-autoasi/";
+	//	$futursoft_kansio_valmis = "/home/merca-autoasi/ok/";
+	//	$futursoft_kansio_error = "/home/merca-autoasi/error/";
 
-	// Haetaan käyttäjän tiedot
-	$query = "	SELECT *
-				FROM kuka
-				WHERE yhtio = '$yhtio'
-				AND kuka = 'admin'";
-	$result = pupe_query($query);
+	$futursoft_kansio = "/tmp/merca-autoasi/";
+	$futursoft_kansio_valmis = "/tmp/merca-autoasi/ok/";
+	$futursoft_kansio_error = "/tmp/merca-autoasi/error/";
 
-	if (mysql_num_rows($result) == 0) {
-		die("User admin not found");
+	if(!is_dir($futursoft_kansio)) {
+		mkdir($futursoft_kansio);
+	}
+	if(!is_dir($futursoft_kansio_valmis)) {
+		mkdir($futursoft_kansio_valmis);
+	}
+	if(!is_dir($futursoft_kansio_error)) {
+		mkdir($futursoft_kansio_error);
 	}
 
-	// Adminin oletus, mutta kuka konversio
-	$kukarow = mysql_fetch_assoc($result);
+	$kukarow = hae_kayttaja($yhtio);
 	$kukarow["kuka"] = "konversio";
 
-	if (file_exists($filename)) {
-		$xml = simplexml_load_file($filename);
-		$asiakas_data = parsi_xml_tiedosto($xml);
+	$tiedostot = lue_tiedostot($futursoft_kansio);
 
-		$kasitellyt_asiakkaat = kasittele_asiakkaat_data($asiakas_data, $yhtio);
+	if(!empty($tiedostot)) {
+		foreach($tiedostot as $tiedosto) {
+			$tiedosto_polku = $futursoft_kansio.$tiedosto;
+				if (file_exists($tiedosto_polku)) {
+				$xml = simplexml_load_file($tiedosto_polku);
+				if(!$xml) {
+					//file read failure, siirretään tiedosto error kansioon
+					siirra_tiedosto_kansioon($tiedosto_polku, $futursoft_kansio_error);
 
-		echo $kasitellyt_asiakkaat['asiakas_count'] . t(" asiakas luotiin / päivitettiin");
+					die(t("Tiedoston {$tiedosto_polku} lukeminen epäonnistui"));
+				}
+				$asiakas_data = parsi_xml_tiedosto($xml);
+
+				$kasitellyt_asiakkaat = kasittele_asiakkaat_data($asiakas_data, $yhtio);
+
+				echo $kasitellyt_asiakkaat['asiakas_count'] . t(" asiakas luotiin / päivitettiin");
+
+				siirra_tiedosto_kansioon($tiedosto_polku, $futursoft_kansio_valmis);
+			}
+			else {
+				echo t("Tiedosto ei ole olemassa");
+			}
+		}
 	}
 	else {
-		echo t("Tiedosto ei ole olemassa");
+		echo t("Yhtään tiedostoa ei löytynyt");
 	}
 	die();
+	
+	function lue_tiedostot($polku) {
+		$tiedostot = array();
+		if ($handle = opendir($polku)) {
+			while (false !== ($tiedosto = readdir($handle))) {
+				if ($tiedosto != "." && $tiedosto != "..") {
+					if(is_file($polku.$tiedosto)) {
+						if(stristr($tiedosto, 'customers')) {
+							$tiedostot[] = $tiedosto;
+						}
+					}
+				}
+			}
+			closedir($handle);
+		}
+
+		return $tiedostot;
+	}
+
+	function siirra_tiedosto_kansioon($tiedosto_polku, $kansio) {
+		$tiedosto_array = explode('.', $tiedosto_polku);
+		if(!empty($tiedosto_array)) {
+			$tiedosto_array2 = explode('/',$tiedosto_array[0]);
+			$hakemiston_syvyys = count($tiedosto_array2);
+
+			$uusi_filename = $tiedosto_array2[$hakemiston_syvyys - 1].'_'.date('YmdHis').'.'.$tiedosto_array[1];
+		}
+		$komento = 'cp "'.$tiedosto_polku.'" "'.$kansio.$uusi_filename.'"';
+		exec($komento);
+
+		exec('rm "'.$tiedosto_polku.'"');
+	}
 
 	function parsi_xml_tiedosto(SimpleXMLElement $xml) {
 		$data = array();
@@ -79,7 +123,7 @@
 					'kaupunki' => utf8_decode((string)$asiakas->City),
 					'maa' => (string)$asiakas->Country,
 					'puhelin' => (string)$asiakas->Phone,
-					'fax' => (string)$asiakas->TeleFax,
+					'fax' => (string)$asiakas->Telefax,
 					'maksuehto' => (string)$asiakas->PaymTermId,
 					'status' => (string)$asiakas->StatusCode,
 					'vero_ryhma' => (string)$asiakas->TaxGroup,
@@ -213,6 +257,21 @@
 					LIMIT 1";
 		$result = pupe_query($query);
 
+		return mysql_fetch_assoc($result);
+	}
+	
+	function hae_kayttaja($yhtio) {
+		// Haetaan käyttäjän tiedot
+		$query = "	SELECT *
+					FROM kuka
+					WHERE yhtio = '$yhtio'
+					AND kuka = 'admin'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			die("User admin not found");
+		}
+		// Adminin oletus, mutta kuka konversio
 		return mysql_fetch_assoc($result);
 	}
 ?>

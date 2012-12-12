@@ -17,55 +17,99 @@
 		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR."/Users/joonas/Dropbox/Sites/pupesoft".PATH_SEPARATOR."/usr/share/pear");
 	}
 
-//	if ($argv[1] == "" or $argv[2] == "") {
-//		echo "\nUsage: php ".basename($argv[0])." yhtio tiedosto.txt\n\n";
-//		die;
-//	}
-
-	// Parametrit
-	$yhtio = pupesoft_cleanstring($argv[1]);
-	$filename = $argv[2];
-
 	//TESTAUSTA VARTEN
-	$filename = '/tmp/KPAM_kateis(1334).xml';
+	$tiedosto_polku = '/tmp/KPAM_kateis(1334).xml';
 	$yhtio = 'atarv';
+	
+	//	$futursoft_kansio = "/home/merca-autoasi/";
+	//	$futursoft_kansio_valmis = "/home/merca-autoasi/ok/";
+	//	$futursoft_kansio_error = "/home/merca-autoasi/error/";
 
-	// Haetaan yhtiön tiedot
-	$yhtiorow = hae_yhtion_parametrit($yhtio);
+	$futursoft_kansio = "/tmp/merca-autoasi/";
+	$futursoft_kansio_valmis = "/tmp/merca-autoasi/ok/";
+	$futursoft_kansio_error = "/tmp/merca-autoasi/error/";
 
-	// Haetaan käyttäjän tiedot
-	$query = "	SELECT *
-				FROM kuka
-				WHERE yhtio = '$yhtio'
-				AND kuka = 'admin'";
-	$result = pupe_query($query);
-
-	if (mysql_num_rows($result) == 0) {
-		die("User admin not found");
+	if(!is_dir($futursoft_kansio)) {
+		mkdir($futursoft_kansio);
+	}
+	if(!is_dir($futursoft_kansio_valmis)) {
+		mkdir($futursoft_kansio_valmis);
+	}
+	if(!is_dir($futursoft_kansio_error)) {
+		mkdir($futursoft_kansio_error);
 	}
 
-	// Adminin oletus, mutta kuka konversio
-	$kukarow = mysql_fetch_assoc($result);
+	$kukarow = hae_kayttaja($yhtio);
 	$kukarow["kuka"] = "konversio";
 
-	if (file_exists($filename)) {
-		$xml = simplexml_load_file($filename);
-		$kateismyynti_data = parsi_xml_tiedosto($xml);
+	$tiedostot = lue_tiedostot($futursoft_kansio);
 
-		echo count($kateismyynti_data).' '.t("kateismyyntiä löytyi");
-		echo "<br/>";
+	if(!empty($tiedostot)) {
+		foreach($tiedostot as $tiedosto) {
+			$tiedosto_polku = $futursoft_kansio.$tiedosto;
+			if (file_exists($tiedosto_polku)) {
+				$xml = simplexml_load_file($tiedosto_polku);
+				if(!$xml) {
+					//file read failure, siirretään tiedosto error kansioon
+					siirra_tiedosto_kansioon($tiedosto_polku, $futursoft_kansio_error);
 
-		$kasitellyt_kateismyynnit = kasittele_kateismyynnit_data($kateismyynti_data, $yhtio);
+					die(t("Tiedoston {$tiedosto_polku} lukeminen epäonnistui"));
+				}
+				$kateismyynti_data = parsi_xml_tiedosto($xml);
 
-		echo $kasitellyt_kateismyynnit['tilausnumero_count'] . t(" tilausta luotiin ja niihin ") . $kasitellyt_kateismyynnit['tiliointi_count'] . t(" tiliöintiä");
+				echo count($kateismyynti_data).' '.t("kateismyyntiä löytyi");
+				echo "<br/>";
 
-		//Testaamista varten
-		//poista_tilaukset_ja_tilioinnit($kasitellyt_kateismyynnit, $yhtio);
+				$kasitellyt_kateismyynnit = kasittele_kateismyynnit_data($kateismyynti_data, $yhtio);
+
+				echo $kasitellyt_kateismyynnit['tilausnumero_count'] . t(" tilausta luotiin ja niihin ") . $kasitellyt_kateismyynnit['tiliointi_count'] . t(" tiliöintiä");
+
+				siirra_tiedosto_kansioon($tiedosto_polku, $futursoft_kansio_valmis);
+
+				//Testaamista varten
+				//poista_tilaukset_ja_tilioinnit($kasitellyt_kateismyynnit, $yhtio);
+			}
+			else {
+				echo t("Tiedosto ei ole olemassa");
+			}
+		}
 	}
 	else {
-		echo t("Tiedosto ei ole olemassa");
+		echo t("Yhtään tiedostoa ei löytynyt");
 	}
 	die();
+
+	function lue_tiedostot($polku) {
+		$tiedostot = array();
+		if ($handle = opendir($polku)) {
+			while (false !== ($tiedosto = readdir($handle))) {
+				if ($tiedosto != "." && $tiedosto != "..") {
+					if(is_file($polku.$tiedosto)) {
+						if(stristr($tiedosto, 'kateis')) {
+							$tiedostot[] = $tiedosto;
+						}
+					}
+				}
+			}
+			closedir($handle);
+		}
+
+		return $tiedostot;
+	}
+
+	function siirra_tiedosto_kansioon($tiedosto_polku, $kansio) {
+		$tiedosto_array = explode('.', $tiedosto_polku);
+		if(!empty($tiedosto_array)) {
+			$tiedosto_array2 = explode('/',$tiedosto_array[0]);
+			$hakemiston_syvyys = count($tiedosto_array2);
+
+			$uusi_filename = $tiedosto_array2[$hakemiston_syvyys - 1].'_'.date('YmdHis').'.'.$tiedosto_array[1];
+		}
+		$komento = 'cp "'.$tiedosto_polku.'" "'.$kansio.$uusi_filename.'"';
+		exec($komento);
+
+		exec('rm "'.$tiedosto_polku.'"');
+	}
 
 	function parsi_xml_tiedosto(SimpleXMLElement $xml) {
 		//i ja indeksi on sitä varten, että aineistosta saadaan yhteen kuuluvat käteismyynti tiliöinnit eriytettyä muista
@@ -114,12 +158,14 @@
 				echo "<br/>";
 
 				foreach($kateismyynnin_osat as $kateismyynti) {
-					$tiliointi_tunnus = tee_tiliointi($tilausnumero, $kateismyynti, $yhtio);
-					if($tiliointi_tunnus) {
-						$tiliointi_idt[] = $tiliointi_tunnus;
-						$kateismyynti_count++;
+					$tiliointi_tunnukset = tee_tiliointi($tilausnumero, $kateismyynti, $yhtio);
+					if($tiliointi_tunnukset) {
+						foreach($tiliointi_tunnukset as $tunnus) {
+							$tiliointi_idt[] = $tunnus;
+							$kateismyynti_count++;
+						}
 
-						echo t("Käteislaskulle").' '.$tilausnumero.' '.t("luotiin tiliöinti").' '.$tiliointi_tunnus;
+						echo t("Käteislaskulle").' '.$tilausnumero.' '.t("luotiin tiliöinti").' '.$tunnus;
 						echo "<br/>";
 					}
 				}
@@ -209,37 +255,78 @@
 
 	function tee_tiliointi($tilausnumero, $kateismyynti, $yhtio) {
 		$kassalipas = tarkista_tilinumero($kateismyynti['kustp'], $yhtio);
+		$tiliointi_tunnukset = array();
 
 		if(empty($kassalipas)) {
 			if($yhtio == 'atarv') {
 				//kustp 2000 on yleinen fail-safe kustannuspaikka
 				$kassalipas = tarkista_tilinumero('2000', $yhtio);
 
-				echo t("Kassalippasta ei ole olemassa").' '.$kassalipas['kassa'].' '.t("tiliöinti tehdään yleiselle kassalippaalle kustp 2000 tili 18110");
+				echo t("Kassalippasta kustannuspaikalle").' '.$kateismyynti['kustp'].' '.t("ei ole olemassa").' '.$kassalipas['kassa'].' '.t("tiliöinti tehdään yleiselle kassalippaalle kustp 2000 tili 18110");
 				echo "<br/>";
 			}
 			else {
-				echo t("Kassalippasta ei ole olemassa").' '.$kassalipas['kassa'].' '.t("tiliöintiä ei voitu perustaa");
+				echo t("Kassalippasta kustannuspaikalle").' '.$kateismyynti['kustp'].' '.t("ei ole olemassa").' '.$kassalipas['kassa'].' '.t("tiliöintiä ei voitu perustaa");
 				echo "<br/>";
 
 				return null;
 			}
 		}
-		$query = "	INSERT INTO tiliointi
-					SET tilino = '{$kassalipas['kassa']}',
-					selite = '{$kateismyynti['selite']}',
-					tapvm = '{$kateismyynti['tapahtumapaiva']}',
-					summa = '{$kateismyynti['summa']}',
-					vero = '{$kateismyynti['alv']}',
-					kustp = '{$kateismyynti['kustp']}',
-					ltunnus = '{$tilausnumero}',
-					yhtio = '{$yhtio}'";
-		pupe_query($query);
+		if(!empty($kateismyynti['alv']) and !empty($kateismyynti['alv_maara'])) {
+			//tehdään alv tiliöinti ja tiliöinti - alv
+			$alviton_summa = $kateismyynti['summa'] - $kateismyynti['alv_maara'];
+			$yhtio_row = hae_yhtio($yhtio);
+
+			$query = "	INSERT INTO tiliointi
+						SET tilino = '{$kassalipas['kassa']}',
+						tapvm = '{$kateismyynti['tapahtumapaiva']}',
+						summa = '{$alviton_summa}',
+						vero = '{$kateismyynti['alv']}',
+						kustp = '{$kateismyynti['kustp']}',
+						ltunnus = '{$tilausnumero}',
+						laatija = 'futursoft',
+						laadittu = NOW(),
+						selite = '{$kateismyynti['selite']}',
+						yhtio = '{$yhtio}'";
+			pupe_query($query);
+
+			$tiliointi_tunnukset[] = mysql_insert_id();
+
+			$query = "	INSERT INTO tiliointi
+						SET tilino = '{$yhtio_row['alv']}',
+						tapvm = '{$kateismyynti['tapahtumapaiva']}',
+						summa = '{$kateismyynti['alv_maara']}',
+						vero = '{$kateismyynti['alv']}',
+						kustp = '{$kateismyynti['kustp']}',
+						ltunnus = '{$tilausnumero}',
+						laatija = 'futursoft',
+						laadittu = NOW(),
+						selite = '".t("Alv tiliöinti")."',
+						yhtio = '{$yhtio}'";
+			pupe_query($query);
+
+			$tiliointi_tunnukset[] = mysql_insert_id();
+		}
+		else {
+			//tehdään kate tiliöinti
+			$query = "	INSERT INTO tiliointi
+						SET tilino = '{$kassalipas['kassa']}',
+						selite = '{$kateismyynti['selite']}',
+						tapvm = '{$kateismyynti['tapahtumapaiva']}',
+						summa = '{$kateismyynti['summa']}',
+						vero = '{$kateismyynti['alv']}',
+						kustp = '{$kateismyynti['kustp']}',
+						ltunnus = '{$tilausnumero}',
+						yhtio = '{$yhtio}'";
+			pupe_query($query);
+
+			$tiliointi_tunnukset[] = mysql_insert_id();
+		}
 
 		echo t("Tiliöinti laskulle").' '.$tilausnumero.' '.t("luotiin kassalipas:").' '.$kassalipas['kassa'];
 		echo "<br/>";
 
-		return mysql_insert_id();
+		return $tiliointi_tunnukset;
 	}
 
 	function tarkista_tilinumero($kustannuspaikka, $yhtio) {
@@ -285,6 +372,21 @@
 			return null;
 		}
 
+		return mysql_fetch_assoc($result);
+	}
+
+	function hae_kayttaja($yhtio) {
+		// Haetaan käyttäjän tiedot
+		$query = "	SELECT *
+					FROM kuka
+					WHERE yhtio = '$yhtio'
+					AND kuka = 'admin'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			die("User admin not found");
+		}
+		// Adminin oletus, mutta kuka konversio
 		return mysql_fetch_assoc($result);
 	}
 ?>

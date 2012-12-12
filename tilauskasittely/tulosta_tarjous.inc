@@ -1684,7 +1684,9 @@ if (!function_exists('tulosta_tarjous')) {
 		}
 
 		// Lopputekstit
-		list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 1, $total_uudet, $total_vanhat, $verolliset_verottomat_hinnat, $total_brutto, $kala, $vikanrivin_sivu, $naytetaanko_rivihinta);
+		if($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
+			list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 1, $total_uudet, $total_vanhat, $verolliset_verottomat_hinnat, $total_brutto, $kala, $vikanrivin_sivu, $naytetaanko_rivihinta);
+		}
 
 		// Piirret‰‰n sivut
 		if ($yhtiorow['tarjoustyyppi'] == 1) {

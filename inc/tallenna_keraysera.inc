@@ -77,10 +77,9 @@
 							$tilausrivit .= "$tilriv,";
 							$kappaleet += $kpl;
 
-							$query = "	SELECT round((tuote.tuotemassa * (tilausrivi.kpl+tilausrivi.varattu)), 2) as paino, round(((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) * (tilausrivi.kpl+tilausrivi.varattu)), 4) as tilavuus, tilausrivi.otunnus, kuka.kesken
+							$query = "	SELECT round((tuote.tuotemassa * (tilausrivi.kpl+tilausrivi.varattu)), 2) as paino, round(((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) * (tilausrivi.kpl+tilausrivi.varattu)), 4) as tilavuus, tilausrivi.otunnus
 										FROM tilausrivi
 										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-										LEFT JOIN kuka use index (yhtio_kesken) ON (kuka.yhtio = tilausrivi.yhtio and kuka.kesken = tilausrivi.otunnus)
 										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 										AND tilausrivi.tunnus = '{$tilriv}'";
 							$paino_res = pupe_query($query);

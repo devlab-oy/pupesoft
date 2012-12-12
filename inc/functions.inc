@@ -15115,7 +15115,7 @@ if (!function_exists("tee_keraysera")) {
 					AND lasku1.alatila = 'A'
 					AND lasku1.vakisin_kerays = ''
 					AND lasku1.varasto = '{$varasto}'
-					AND kuka.kesken != lasku1.tunnus
+					AND kuka.tunnus is null
 					GROUP BY 1,2,3,4,5,6)
 					UNION
 					(SELECT SQL_NO_CACHE
@@ -15138,7 +15138,7 @@ if (!function_exists("tee_keraysera")) {
 					AND lasku2.alatila = 'A'
 					AND lasku2.vakisin_kerays != ''
 					AND lasku2.varasto = '{$varasto}'
-					AND kuka2.kesken != lasku2.tunnus
+					AND kuka2.tunnus is null
 					GROUP BY 1,2,3,4,5,6)
 					ORDER BY 1,2,3,4,5,6";
 		$res = pupe_query($query);
@@ -15253,7 +15253,7 @@ if (!function_exists("tee_keraysera")) {
 						AND lasku1.alatila 			= 'A'
 						AND lasku1.vakisin_kerays 	= ''
 						AND lasku1.varasto 			= '{$varasto}'
-						AND kuka.kesken 		   != lasku1.tunnus
+						AND kuka.tunnus is null
 						GROUP BY 1,2,3,4,5,6
 						ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
 		}
@@ -15282,7 +15282,7 @@ if (!function_exists("tee_keraysera")) {
 						AND lasku2.alatila 			= 'A'
 						AND lasku2.vakisin_kerays  != ''
 						AND lasku2.varasto	 		= '{$varasto}'
-						AND kuka2.kesken 		   != lasku2.tunnus
+						AND kuka2.tunnus is null
 						GROUP BY 1,2,3,4,5,6
 						ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
 		}

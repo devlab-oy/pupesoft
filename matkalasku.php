@@ -737,9 +737,6 @@ if ($tee != "") {
 												muutospvm			= now(),
 												muuttaja			= '$kukarow[kuka]'";
 									$updres = pupe_query($query);
-
-									//	Fiksataan ostovelka
-									korjaa_ostovelka($tilausnumero, $lisatty_tun, $isa);
 								}
 							}
 							else {
@@ -898,15 +895,15 @@ if ($tee != "") {
 											muutospvm			= now(),
 											muuttaja			= '$kukarow[kuka]'";
 								$updres = pupe_query($query);
-
-								//	Fiksataan ostovelka
-								korjaa_ostovelka($tilausnumero, $lisatty_tun, $isa);
 							}
 						}
 						else {
 							echo "<font class='error'>".t("VIRHE: Viranomaistuote puuttuu")." (1) $lisaa_tuoteno</font><br>";
 						}
 					}
+
+					//tehd‰‰n koko matkalaskusta yksi ostovelka tiliˆinti
+					korjaa_ostovelka($tilausnumero);
 				}
 
 				//koska poista edelliset matkalasku rivit update tyyppi D
@@ -921,7 +918,7 @@ if ($tee != "") {
 				return $errori;
 			}
 
-			function korjaa_ostovelka ($tilausnumero, $tilausrivi_tunnus, $isa) {
+			function korjaa_ostovelka ($tilausnumero) {
 				global $yhtiorow, $kukarow, $toim, $muokkauslukko, $laskurow;
 
 				if ($muokkauslukko or $tilausnumero != $laskurow["tunnus"]) {
@@ -938,18 +935,13 @@ if ($tee != "") {
 					return false;
 				}
 
-				//haetaan tiliointirivi tilausrivikohtaisesti
+				//haetaan tiliˆinti tilauskohtaisesti
 				$query = "	SELECT sum((-1*tiliointi.summa)) summa, count(*) kpl
 							FROM tiliointi
-							JOIN tilausrivin_lisatiedot
-							ON (tilausrivin_lisatiedot.yhtio = tiliointi.yhtio AND tilausrivin_lisatiedot.tiliointirivitunnus = tiliointi.tunnus)
-							JOIN tilausrivi
-							ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
 							WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
 							AND tiliointi.ltunnus  = '$tilausnumero'
 							AND tiliointi.korjattu = ''
-							AND tiliointi.tilino  != '$yhtiorow[ostovelat]'
-							AND tilausrivi.tunnus = '{$tilausrivi_tunnus}'";
+							AND tiliointi.tilino  != '$yhtiorow[ostovelat]'";
 				$summares = pupe_query($query);
 				$summarow = mysql_fetch_assoc($summares);
 
@@ -974,15 +966,10 @@ if ($tee != "") {
 				//	Onko meill‰ jo ostovelkatiliˆinti vai perustetaanko uusi?
 				$query = "	SELECT tiliointi.tunnus
 							FROM tiliointi
-							JOIN tilausrivin_lisatiedot
-							ON (tilausrivin_lisatiedot.yhtio = tiliointi.yhtio AND tilausrivin_lisatiedot.tiliointirivitunnus = tiliointi.tunnus)
-							JOIN tilausrivi
-							ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
 							WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
 							and tiliointi.ltunnus  = '$tilausnumero'
 							and tiliointi.tilino   = '$yhtiorow[ostovelat]'
-							and tiliointi.korjattu = ''
-							and tilausrivi.tunnus = '{$tilausrivi_tunnus}'";
+							and tiliointi.korjattu = ''";
 				$velkares = pupe_query($query);
 
 				if (mysql_num_rows($velkares) == 1) {
@@ -1017,7 +1004,7 @@ if ($tee != "") {
 								tapvm 		= '$laskurow[tapvm]',
 								vero 		= 0,
 								tosite 		= '$tositenro',
-								aputunnus	= '{$isa}',
+								selite		= '".t("Ostovelka")."',
 								laatija 	= '$kukarow[kuka]',
 								laadittu 	= now()";
 					$updres = pupe_query($query);
@@ -1227,7 +1214,7 @@ if ($tee != "") {
 											muuttaja			= '$kukarow[kuka]'";
 								$updres = pupe_query($query);
 
-								korjaa_ostovelka($tilausnumero, $lisatty_tun, $isa);
+								korjaa_ostovelka($tilausnumero);
 							}
 						}
 					}
@@ -1461,6 +1448,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 				tilausrivi.var,
 				tilausrivi.rivihinta,
 				tilausrivi.otunnus,
+				tilausrivi.erikoisale,
 				tuote.nimitys,
 				tuote.myyntihinta,
 				tuote.malli,
@@ -1505,19 +1493,28 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 			}
 		}
 		else {
-			if ($row['var'] == 3) {
-				//kotimaan puolitettu kokop‰iv‰raha ----> kotimaan kokop‰iv‰raha
-				$rivihinta = $row['kpl'] * ($row['myyntihinta']);
-				$tilausrivi_uusi_hinta = ($row['myyntihinta']);
-				$tilausrivi_uusi_nimitys = $row['nimitys'];
-				$tilausrivi_uusi_var = 1;
-			}
-			elseif ($row['var'] == 4) {
-				//kotimaan puolitettu osap‰iv‰raha ----> kotimaan puolitettu osap‰iv‰raha
-				$rivihinta = $row['kpl'] * ($row['myymalahinta']);
-				$tilausrivi_uusi_hinta = ($row['myymalahinta']);
-				$tilausrivi_uusi_nimitys = $row['malli'];
-				$tilausrivi_uusi_var = 2;
+			if($row['erikoisale'] >= 1) {
+				if ($row['var'] == 3) {
+					//kotimaan puolitettu kokop‰iv‰raha ----> kotimaan kokop‰iv‰raha
+					$rivihinta = $row['kpl'] * ($row['myyntihinta']);
+					$tilausrivi_uusi_hinta = ($row['myyntihinta']);
+					$tilausrivi_uusi_nimitys = $row['nimitys'];
+					$tilausrivi_uusi_var = 1;
+				}
+				elseif ($row['var'] == 4) {
+					//kotimaan puolitettu osap‰iv‰raha ----> kotimaan puolitettu osap‰iv‰raha
+					$rivihinta = $row['kpl'] * ($row['myymalahinta']);
+					$tilausrivi_uusi_hinta = ($row['myymalahinta']);
+					$tilausrivi_uusi_nimitys = $row['malli'];
+					$tilausrivi_uusi_var = 2;
+				}
+				else {
+					//pidet‰‰n tiedot ennallaan
+					$rivihinta = $row['rivihinta'];
+					$tilausrivi_uusi_hinta = $row['hinta'];
+					$tilausrivi_uusi_nimitys = $row['tilausrivi_nimitys'];
+					$tilausrivi_uusi_var = $row['var'];
+				}
 			}
 			else {
 				//pidet‰‰n tiedot ennallaan
@@ -1529,7 +1526,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 		}
 	}
 	else {
-		if ($ilmaiset_lounaat >= 2) {
+		if (($row['erikoisale'] < 2) and $ilmaiset_lounaat >= 2) {
 			if ($row['var'] == 5) {
 				//ulkomaan kokop‰iv‰raha ----> ulkomaan puolitettu kokop‰iv‰raha
 				$rivihinta = $row['kpl'] * ($row['myyntihinta'] / 2);
@@ -1553,19 +1550,28 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 			}
 		}
 		else {
-			if ($row['var'] == 6) {
-				//ulkomaan puolitettu kokop‰iv‰raha ----> ulkomaan kokop‰iv‰raha
-				$rivihinta = $row['kpl'] * ($row['myyntihinta']);
-				$tilausrivi_uusi_hinta = ($row['myyntihinta']);
-				$tilausrivi_uusi_nimitys = $row['nimitys'];
-				$tilausrivi_uusi_var = 5;
-			}
-			elseif ($row['var'] == 7) {
-				//ulkomaan kahteen kertaan puolitettu p‰iv‰raha ----> ulkomaan puolitettu p‰iv‰raha
-				$rivihinta = $row['kpl'] * ($row['myyntihinta'] / 2);
-				$tilausrivi_uusi_hinta = ($row['myyntihinta'] / 2);
-				$tilausrivi_uusi_nimitys = $row['nimitys'] . ' ' . t('Puolitettu korvaus');
-				$tilausrivi_uusi_var = 6;
+			if($row['erikoisale'] >= 2) {
+				if ($row['var'] == 6) {
+					//ulkomaan puolitettu kokop‰iv‰raha ----> ulkomaan kokop‰iv‰raha
+					$rivihinta = $row['kpl'] * ($row['myyntihinta']);
+					$tilausrivi_uusi_hinta = ($row['myyntihinta']);
+					$tilausrivi_uusi_nimitys = $row['nimitys'];
+					$tilausrivi_uusi_var = 5;
+				}
+				elseif ($row['var'] == 7) {
+					//ulkomaan kahteen kertaan puolitettu p‰iv‰raha ----> ulkomaan puolitettu p‰iv‰raha
+					$rivihinta = $row['kpl'] * ($row['myyntihinta'] / 2);
+					$tilausrivi_uusi_hinta = ($row['myyntihinta'] / 2);
+					$tilausrivi_uusi_nimitys = $row['nimitys'] . ' ' . t('Puolitettu korvaus');
+					$tilausrivi_uusi_var = 6;
+				}
+				else {
+					//pidet‰‰n tiedot ennallaan
+					$rivihinta = $row['rivihinta'];
+					$tilausrivi_uusi_hinta = $row['hinta'];
+					$tilausrivi_uusi_nimitys = $row['tilausrivi_nimitys'];
+					$tilausrivi_uusi_var = $row['var'];
+				}
 			}
 			else {
 				//pidet‰‰n tiedot ennallaan
@@ -1673,7 +1679,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 				AND tilausrivitunnus = '{$tiliointi_tilausrivi_row['tilausrivitunnus']}'";
 	pupe_query($query);
 
-	korjaa_ostovelka($tilausnumero, $tiliointi_tilausrivi_row['tilausrivitunnus'], $lisatty_tiliointi_tunnus);
+	korjaa_ostovelka($tilausnumero);
 
 	//koska poista edelliset matkalasku rivit update tyyppi D
 	//siivotaan deleted tilausrivit pois

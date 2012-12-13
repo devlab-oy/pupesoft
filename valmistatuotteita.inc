@@ -849,7 +849,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 				$varastosta = array(kuuluukovarastoon($tilrivirow["hyllyalue"], $tilrivirow["hyllynro"]));
 
 				// Toimitetaan vain valmistettua is‰tuotetta, ei KAIKKIA firman j‰lkitoimitusrivej‰
-				jt_toimita("", "", $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", "", $isatuoteno);
+				jt_toimita("", "", $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", "", $isatuoteno, '', "TULLAAN_VALMISTUKSESTA");
 
 				//	Laitetaan tavarat liikkeelle jos sallitaan!
 				if (($jtoikeudetrow["paivitys"] == 1 and ($yhtiorow["automaattinen_jt_toimitus_valmistus"] == "T" or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "S" or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "V")) or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "J") {
@@ -946,5 +946,3 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 	echo "<br>";
 }
-
-?>

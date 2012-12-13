@@ -2047,22 +2047,13 @@
 			echo "</td>";
 			echo "<th>",t("Valitse tilaustyyppi"),":</th><td><select name='tutyyppi' onchange='submit()'>";
 
-			$sela = $selb = $selc = "";
-
-			if ($tutyyppi == "NORMAA") {
-				$sela = "SELECTED";
-			}
-			if ($tutyyppi == "ENNAKK") {
-				$selb = "SELECTED";
-			}
-			if ($tutyyppi == "JTTILA") {
-				$selc = "SELECTED";
-			}
+			$sel = array($tutyyppi => 'selected') + array('NORMAA' => '', 'ENNAKK' => '', 'JTTILA' => '', 'VALMISTUS' => '');
 
 			echo "<option value='KAIKKI'>",t("Näytä kaikki"),"</option>";
-			echo "<option value='NORMAA' {$sela}>",t("Näytä normaalitilaukset"),"</option>";
-			echo "<option value='ENNAKK' {$selb}>",t("Näytä ennakkotilaukset"),"</option>";
-			echo "<option value='JTTILA' {$selc}>",t("Näytä jt-tilaukset"),"</option>";
+			echo "<option value='NORMAA' {$sel['NORMAA']}>",t("Näytä normaalitilaukset"),"</option>";
+			echo "<option value='ENNAKK' {$sel['ENNAKK']}>",t("Näytä ennakkotilaukset"),"</option>";
+			echo "<option value='JTTILA' {$sel['JTTILA']}>",t("Näytä jt-tilaukset"),"</option>";
+			echo "<option value='VALMISTUS' {$sel['VALMISTUS']}>",t("Näytä jt-tilaukset valmistuksesta"),"</option>";
 
 			echo "</select></td></tr>";
 
@@ -2145,6 +2136,9 @@
 				}
 				elseif ($tutyyppi == "JTTILA") {
 					$haku .= " AND lasku.clearing = 'JT-TILAUS' ";
+				}
+				elseif ($tutyyppi == "VALMISTUS") {
+					$haku .= " AND lasku.sisviesti2 = 'Tehty valmistuksen kautta' ";
 				}
 			}
 

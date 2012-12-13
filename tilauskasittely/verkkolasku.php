@@ -957,14 +957,14 @@
 						// lis‰t‰‰n n‰ille tilauksille jvkulut
 						$virhe = 0;
 
-						//haetaan ekan otsikon tiedot
+						//haetaan vikan otsikon tiedot
 						$query = "  SELECT lasku.*, maksuehto.jv
 									FROM lasku, maksuehto
 									WHERE lasku.yhtio = '$kukarow[yhtio]'
 									AND lasku.tunnus in ($otsikot)
 									AND lasku.yhtio = maksuehto.yhtio
 									AND lasku.maksuehto = maksuehto.tunnus
-									ORDER BY lasku.tunnus
+									ORDER BY lasku.tunnus DESC
 									LIMIT 1";
 						$otsre = pupe_query($query);
 						$laskurow = mysql_fetch_assoc($otsre);
@@ -1030,13 +1030,13 @@
 					$query   = "SELECT group_concat(distinct lasku.tunnus) tunnukset
 								FROM lasku, rahtikirjat, maksuehto
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
-								and lasku.tunnus in ($tunnukset)
-								and lasku.rahtivapaa = ''
-								and lasku.kohdistettu = 'K'
-								and lasku.yhtio = rahtikirjat.yhtio
-								and lasku.tunnus = rahtikirjat.otsikkonro
-								and lasku.yhtio = maksuehto.yhtio
-								and lasku.maksuehto = maksuehto.tunnus
+								AND lasku.tunnus in ($tunnukset)
+								AND lasku.rahtivapaa = ''
+								AND lasku.kohdistettu = 'K'
+								AND lasku.yhtio = rahtikirjat.yhtio
+								AND lasku.tunnus = rahtikirjat.otsikkonro
+								AND lasku.yhtio = maksuehto.yhtio
+								AND lasku.maksuehto = maksuehto.tunnus
 								GROUP BY lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, maksuehto.jv";
 					$result  = pupe_query($query);
 
@@ -1051,28 +1051,28 @@
 						// lis‰t‰‰n n‰ille tilauksille rahtikulut
 						$virhe = 0;
 
-						//haetaan ekan otsikon tiedot
+						//haetaan vikan otsikon tiedot
 						$query = "  SELECT lasku.*, maksuehto.jv
 									FROM lasku, maksuehto
-									WHERE lasku.yhtio='$kukarow[yhtio]'
-									and lasku.tunnus in ($otsikot)
-									and lasku.yhtio = maksuehto.yhtio
-									and lasku.maksuehto = maksuehto.tunnus
-									order by lasku.tunnus
-									limit 1";
+									WHERE lasku.yhtio = '$kukarow[yhtio]'
+									AND lasku.tunnus in ($otsikot)
+									AND lasku.yhtio = maksuehto.yhtio
+									AND lasku.maksuehto = maksuehto.tunnus
+									ORDER BY lasku.tunnus DESC
+									LIMIT 1";
 						$otsre = pupe_query($query);
 						$laskurow = mysql_fetch_assoc($otsre);
 
 						if (mysql_num_rows($otsre) != 1) $virhe++;
 
 						//summataan kaikki painot yhteen
-						$query = "SELECT sum(kilot) kilot FROM rahtikirjat WHERE yhtio='$kukarow[yhtio]' and otsikkonro in ($otsikot)";
+						$query = "SELECT sum(kilot) kilot FROM rahtikirjat WHERE yhtio='$kukarow[yhtio]' AND otsikkonro in ($otsikot)";
 						$pakre = pupe_query($query);
 						$pakka = mysql_fetch_assoc($pakre);
 						if (mysql_num_rows($pakre)!=1) $virhe++;
 
 						//haetaan v‰h‰n infoa rahtikirjoista
-						$query = "SELECT distinct date_format(tulostettu, '%d.%m.%Y') pvm, rahtikirjanro from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro in ($otsikot)";
+						$query = "SELECT DISTINCT date_format(tulostettu, '%d.%m.%Y') pvm, rahtikirjanro FROM rahtikirjat WHERE yhtio='$kukarow[yhtio]' AND otsikkonro in ($otsikot)";
 						$rahre = pupe_query($query);
 						if (mysql_num_rows($rahre)==0) $virhe++;
 
@@ -1438,11 +1438,13 @@
 
 									if ($kv_vaktuote == "") $kv_vaktuote = $row["kv_tuotenumero"];
 
-									// haetaan otsikon tiedot
+									// haetaan vikan otsikon tiedot
 									$query = "  SELECT lasku.*
 												FROM lasku
 												WHERE lasku.yhtio = '$kukarow[yhtio]'
-												AND lasku.tunnus IN ({$row['tunnus']})";
+												AND lasku.tunnus IN ({$row['tunnus']})
+												ORDER BY lasku.tunnus DESC
+												LIMIT 1";
 									$otsre = pupe_query($query);
 									$laskurow = mysql_fetch_assoc($otsre);
 
@@ -1527,7 +1529,7 @@
 
 								$kv_komm = t("Kuljetusvakuutus muodostuu tilauksista", $kieli).": ".substr($kv_tilaukset, 0, -2);
 
-								// laskurow-valuut tosta edellisesta while loopista. Siin‰ on vikan otsikon tiedot.
+								// laskurow-valuu tosta edellisesta while loopista. Siin‰ on vikan otsikon tiedot.
 								// lis‰t‰‰n kuljetusvakuutus
 								$query = "  INSERT into tilausrivi set
 											hyllyalue       = '',

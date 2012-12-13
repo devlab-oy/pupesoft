@@ -16,18 +16,11 @@
 		require("/Users/joonas/Dropbox/Sites/pupesoft/tilauskasittely/luo_myyntitilausotsikko.inc");
 		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR."/Users/joonas/Dropbox/Sites/pupesoft".PATH_SEPARATOR."/usr/share/pear");
 	}
-
-	//TESTAUSTA VARTEN
-//	$tiedosto_polku = '/tmp/KPAM_myynti(1340).xml';
-
+	
 	$yhtio = 'atarv';
 	$futursoft_kansio = "/home/merca-autoasi/";
 	$futursoft_kansio_valmis = "/home/merca-autoasi/ok/";
 	$futursoft_kansio_error = "/home/merca-autoasi/error/";
-
-//	$futursoft_kansio = "/tmp/merca-autoasi/";
-//	$futursoft_kansio_valmis = "/tmp/merca-autoasi/ok/";
-//	$futursoft_kansio_error = "/tmp/merca-autoasi/error/";
 
 	if(!is_dir($futursoft_kansio)) {
 		mkdir($futursoft_kansio);
@@ -38,6 +31,7 @@
 	if(!is_dir($futursoft_kansio_error)) {
 		mkdir($futursoft_kansio_error);
 	}
+	system('chmod -R 777 "'.$futursoft_kansio.'"');
 
 	$kukarow = hae_kayttaja($yhtio);
 	$kukarow["kuka"] = "konversio";

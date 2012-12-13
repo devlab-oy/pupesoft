@@ -17,17 +17,10 @@
 		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR."/Users/joonas/Dropbox/Sites/pupesoft".PATH_SEPARATOR."/usr/share/pear");
 	}
 
-	//TESTAUSTA VARTEN
-	$tiedosto_polku = '/tmp/customers.xml';
 	$yhtio = 'atarv';
-
 	$futursoft_kansio = "/home/merca-autoasi/";
 	$futursoft_kansio_valmis = "/home/merca-autoasi/ok/";
 	$futursoft_kansio_error = "/home/merca-autoasi/error/";
-
-//	$futursoft_kansio = "/tmp/merca-autoasi/";
-//	$futursoft_kansio_valmis = "/tmp/merca-autoasi/ok/";
-//	$futursoft_kansio_error = "/tmp/merca-autoasi/error/";
 
 	if(!is_dir($futursoft_kansio)) {
 		mkdir($futursoft_kansio);
@@ -39,6 +32,8 @@
 		mkdir($futursoft_kansio_error);
 	}
 
+	system('chmod -R 777 "'.$futursoft_kansio.'"');
+	
 	$kukarow = hae_kayttaja($yhtio);
 	$kukarow["kuka"] = "konversio";
 
@@ -102,7 +97,7 @@
 		$komento = 'cp "'.$tiedosto_polku.'" "'.$kansio.$uusi_filename.'"';
 		exec($komento);
 
-		exec('rm "'.$tiedosto_polku.'"');
+		system('rm "'.$tiedosto_polku.'"');
 	}
 
 	function parsi_xml_tiedosto(SimpleXMLElement $xml) {

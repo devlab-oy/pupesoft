@@ -17,9 +17,6 @@
 		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR."/Users/joonas/Dropbox/Sites/pupesoft".PATH_SEPARATOR."/usr/share/pear");
 	}
 
-	//TESTAUSTA VARTEN
-//	$tiedosto_polku = '/tmp/KPAM_myynti(1340).xml';
-
 	$yhtio = 'atarv';
 	$futursoft_kansio = "/home/merca-autoasi/";
 	$futursoft_kansio_valmis = "/home/merca-autoasi/ok/";

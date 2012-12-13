@@ -18,16 +18,12 @@
 	}
 
 	//TESTAUSTA VARTEN
-	$tiedosto_polku = '/tmp/KPAM_kateis(1334).xml';
+//	$tiedosto_polku = '/tmp/KPAM_myynti(1340).xml';
+
 	$yhtio = 'atarv';
-	
 	$futursoft_kansio = "/home/merca-autoasi/";
 	$futursoft_kansio_valmis = "/home/merca-autoasi/ok/";
 	$futursoft_kansio_error = "/home/merca-autoasi/error/";
-
-//	$futursoft_kansio = "/tmp/merca-autoasi/";
-//	$futursoft_kansio_valmis = "/tmp/merca-autoasi/ok/";
-//	$futursoft_kansio_error = "/tmp/merca-autoasi/error/";
 
 	if(!is_dir($futursoft_kansio)) {
 		mkdir($futursoft_kansio);
@@ -38,6 +34,8 @@
 	if(!is_dir($futursoft_kansio_error)) {
 		mkdir($futursoft_kansio_error);
 	}
+
+	system('chmod -R 777 "'.$futursoft_kansio.'"');
 
 	$kukarow = hae_kayttaja($yhtio);
 	$kukarow["kuka"] = "konversio";
@@ -118,10 +116,11 @@
 			$i = 1;
 			$indeksi = 0;
 			foreach($xml->LedgerJournalTable->LedgerJournalTrans as $kateismyynti) {
+				$lasku_numero = (string)$kateismyynti->Invoice;
 				$data[$indeksi][] = array(
 					'siirtopaiva' => (string)$kateismyynti->TransDate,
 					'tapahtumapaiva' => (string)$kateismyynti->DocumentDate,
-					'tapahtuman_tunnus' => (string)$kateismyynti->Invoice,
+					'laskunro' => preg_replace( '/[^0-9]/', '', $lasku_numero),
 					'tilinumero' => (string)$kateismyynti->AccountNum,
 					'selite' => utf8_decode((string)$kateismyynti->Txt),
 					'summa' => ((string)$kateismyynti->AmountCurDebit == '') ? (float)$kateismyynti->AmountCurCredit : (float)$kateismyynti->AmountCurDebit,
@@ -148,7 +147,9 @@
 		$tiliointi_idt = array();
 		$tilausnumerot = array();
 		foreach($kateismyynnit as $kateismyynnin_osat) {
-			$tilausnumero = luo_myyntiotsikko($kateismyynnin_osat, $yhtio);
+			$kassalipas_row = hae_kassalipas($kateismyynnin_osat, $yhtio);
+			
+			$tilausnumero = luo_myyntiotsikko($kateismyynnin_osat, $kassalipas_row, $yhtio);
 
 			if($tilausnumero) {
 				$tilausnumerot[] = $tilausnumero;
@@ -158,7 +159,7 @@
 				echo "<br/>";
 
 				foreach($kateismyynnin_osat as $kateismyynti) {
-					$tiliointi_tunnukset = tee_tiliointi($tilausnumero, $kateismyynti, $yhtio);
+					$tiliointi_tunnukset = tee_tiliointi($tilausnumero, $kateismyynti, $kassalipas_row, $yhtio);
 					if($tiliointi_tunnukset) {
 						foreach($tiliointi_tunnukset as $tunnus) {
 							$tiliointi_idt[] = $tunnus;
@@ -180,9 +181,32 @@
 		);
 	}
 
-	function luo_myyntiotsikko($kateismyynnin_osat, $yhtio) {
+	function hae_kassalipas($kateismyynnin_osat, $yhtio) {
+		$kassalipas = tarkista_tilinumero($kateismyynnin_osat[0]['kustp'], $yhtio);
+
+		if(empty($kassalipas)) {
+			if($yhtio == 'atarv') {
+				//kustp 2000 on atarv yleinen fail-safe kustannuspaikka
+				$kassalipas = tarkista_tilinumero('2000', $yhtio);
+
+				echo t("Kassalippasta kustannuspaikalle").' '.$kateismyynnin_osat[0]['kustp'].' '.t("ei ole olemassa").' '.$kassalipas['kassa'].' '.t("tiliöinti tehdään yleiselle kassalippaalle kustp 2000 tili 18110");
+				echo "<br/>";
+			}
+			else {
+				echo t("Kassalippasta kustannuspaikalle").' '.$kateismyynnin_osat[0]['kustp'].' '.t("ei ole olemassa").' '.$kassalipas['kassa'].' '.t("tiliöintiä ei voitu perustaa");
+				echo "<br/>";
+
+				return null;
+			}
+		}
+
+		return $kassalipas;
+	}
+
+	function luo_myyntiotsikko($kateismyynnin_osat, $kassalipas_row, $yhtio) {
 		$asiakas = luo_kaato_asiakas($yhtio);
 		$yhtio_row = hae_yhtio($yhtio);
+		$maksuehto_row = hae_kateis_maksuehto($yhtio);
 
 		$query = "	INSERT INTO lasku
 					SET yhtio = '{$yhtio}',
@@ -201,11 +225,21 @@
 					toim_postino = '{$asiakas['postino']}',
 					toim_postitp = '{$asiakas['postitp']}',
 					toim_maa = '{$asiakas['maa']}',
-					valkoodi = '{$kateismyynnin_osat[0]['valuutta']}',
-					summa = '{$kateismyynnin_osat[0]['summa']}',
+					ytunnus = '{$asiakas['ytunnus']}',
+					valkoodi = '{$kateismyynnin_osat[1]['valuutta']}',
+					summa = '{$kateismyynnin_osat[1]['summa']}',
+					summa_valuutassa = '{$kateismyynnin_osat[1]['summa']}',
+					vienti_kurssi = '{$kateismyynnin_osat[1]['kurssi']}',
 					laatija = 'futursoft',
 					luontiaika = NOW(),
-					tapvm = '{$kateismyynnin_osat[0]['tapahtumapaiva']}',
+					laskunro = '{$kateismyynnin_osat[1]['laskunro']}',
+					maksuehto = '{$maksuehto_row['tunnus']}',
+					tapvm = '{$kateismyynnin_osat[1]['tapahtumapaiva']}',
+					lapvm = '{$kateismyynnin_osat[1]['tapahtumapaiva']}',
+					toimaika = '{$kateismyynnin_osat[1]['tapahtumapaiva']}',
+					kerayspvm = '{$kateismyynnin_osat[1]['tapahtumapaiva']}',
+					alv = '{$kateismyynnin_osat[1]['alv']}',
+					kassalipas = '{$kassalipas_row['tunnus']}',
 					tila = 'U',
 					alatila = 'X'";
 		pupe_query($query);
@@ -253,25 +287,8 @@
 		return mysql_fetch_assoc($result);
 	}
 
-	function tee_tiliointi($tilausnumero, $kateismyynti, $yhtio) {
-		$kassalipas = tarkista_tilinumero($kateismyynti['kustp'], $yhtio);
+	function tee_tiliointi($tilausnumero, $kateismyynti, $kassalipas,$yhtio) {
 		$tiliointi_tunnukset = array();
-
-		if(empty($kassalipas)) {
-			if($yhtio == 'atarv') {
-				//kustp 2000 on yleinen fail-safe kustannuspaikka
-				$kassalipas = tarkista_tilinumero('2000', $yhtio);
-
-				echo t("Kassalippasta kustannuspaikalle").' '.$kateismyynti['kustp'].' '.t("ei ole olemassa").' '.$kassalipas['kassa'].' '.t("tiliöinti tehdään yleiselle kassalippaalle kustp 2000 tili 18110");
-				echo "<br/>";
-			}
-			else {
-				echo t("Kassalippasta kustannuspaikalle").' '.$kateismyynti['kustp'].' '.t("ei ole olemassa").' '.$kassalipas['kassa'].' '.t("tiliöintiä ei voitu perustaa");
-				echo "<br/>";
-
-				return null;
-			}
-		}
 		if(!empty($kateismyynti['alv']) and !empty($kateismyynti['alv_maara'])) {
 			//tehdään alv tiliöinti ja tiliöinti - alv
 			$alviton_summa = $kateismyynti['summa'] - $kateismyynti['alv_maara'];
@@ -330,10 +347,19 @@
 	}
 
 	function tarkista_tilinumero($kustannuspaikka, $yhtio) {
+		//haetaan kustannuspaikan tiedot
+		$query = "	SELECT *
+					FROM kustannuspaikka
+					WHERE yhtio = '{$yhtio}'
+					AND koodi = '{$kustannuspaikka}'";
+		$result = pupe_query($query);
+		$kustannuspaikka_row = mysql_fetch_assoc($result);
+
+		//haetaan kustannuspaikan kassalippaan tiedot
 		$query = "	SELECT *
 					FROM kassalipas
 					WHERE yhtio = '{$yhtio}'
-					AND kustp = '{$kustannuspaikka}'";
+					AND kustp = '{$kustannuspaikka_row['tunnus']}'";
 		$result = pupe_query($query);
 
 		$kassalipas_row = mysql_fetch_assoc($result);
@@ -387,6 +413,22 @@
 			die("User admin not found");
 		}
 		// Adminin oletus, mutta kuka konversio
+		return mysql_fetch_assoc($result);
+	}
+
+	function hae_kateis_maksuehto($yhtio) {
+		$query = "	SELECT *
+					FROM maksuehto
+					WHERE yhtio = '{$yhtio}'
+					AND kateinen != ''
+					AND kaytossa = ''
+					AND teksti LIKE '%Käteinen%'";
+		$result = pupe_query($query);
+
+		if(mysql_num_rows($result) == 0) {
+			return null;
+		}
+
 		return mysql_fetch_assoc($result);
 	}
 ?>

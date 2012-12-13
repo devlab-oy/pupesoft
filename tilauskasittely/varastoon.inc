@@ -208,10 +208,12 @@ if ($laskurow["vienti_kurssi"] != 1 and $kurssirow["vientikurssi"] != 0) {
 	$laskurow["vienti_kurssi"] = $kurssirow["vientikurssi"];
 }
 
-// Onko miellä oletuksesta poikkeava alvi (esim alvimuutoksen yhteydessä)
-$simualv = round(100 * (($kurssirow["summa"]/$kurssirow["arvo"])-1),2);
+// Lasketaan verokanta
+if ($kurssirow["arvo"] != 0) $simualv = round(100 * (($kurssirow["summa"]/$kurssirow["arvo"])-1),2);
+else $simualv = 0;
 
-if (in_array($simualv, array(8,12,17,22))) {
+// Onko miellä oletuksista poikkeava alvi. Verokantoja ennen viimeisintä alv-muutosta.
+if (in_array($simualv, array(23, 13, 9))) {
 	$simualv = (float) $simualv;
 }
 else {

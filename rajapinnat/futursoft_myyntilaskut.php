@@ -18,9 +18,9 @@
 	}
 
 	//TESTAUSTA VARTEN
-	$tiedosto_polku = '/tmp/KPAM_myynti(1340).xml';
-	$yhtio = 'atarv';
+//	$tiedosto_polku = '/tmp/KPAM_myynti(1340).xml';
 
+	$yhtio = 'atarv';
 	$futursoft_kansio = "/home/merca-autoasi/";
 	$futursoft_kansio_valmis = "/home/merca-autoasi/ok/";
 	$futursoft_kansio_error = "/home/merca-autoasi/error/";
@@ -105,7 +105,7 @@
 		$komento = 'cp "'.$tiedosto_polku.'" "'.$kansio.$uusi_filename.'"';
 		exec($komento);
 
-		exec('rm "'.$tiedosto_polku.'"');
+		system('rm "'.$tiedosto_polku.'"');
 	}
 
 	function parsi_xml_tiedosto(SimpleXMLElement $xml, $yhtio) {
@@ -121,7 +121,7 @@
 						'siirtopaiva' => (string)$myyntilasku->TransDate,
 						'tapahtumapaiva' => date('Y-m-d', strtotime((string)$myyntilasku->DocumentDate)),
 						'asiakkaan_nimi' => utf8_decode((string)$myyntilasku->Txt),
-						'summa' => (float)$myyntilasku->AmountCurDebit,
+						'summa' => ((string)$myyntilasku->AmountCurDebit == '') ? ((float)$myyntilasku->AmountCurCredit * -1) : (float)$myyntilasku->AmountCurDebit,
 						'valuutta' => (string)$myyntilasku->Currency,
 						'kurssi' => (float)$myyntilasku->ExchRate,
 						'maksuehto' => konvertoi_maksuehto($myyntilasku->Payment, $yhtio),
@@ -178,15 +178,15 @@
 			);
 
 			if(array_key_exists($maksuehto, $maksuehto_array)) {
-				return $maksuehto_array[$maksuehto]['id'];
+				return (int)$maksuehto_array[$maksuehto]['id'];
 			}
 			else {
 				echo t("Maksuehdolle").' '.$maksuehto.' '.t("ei löytynyt paria. Käytetään alkuperäistä maksuehtoa");
-				return $maksuehto;
+				return (int)$maksuehto;
 			}
 		}
 		else {
-			return $maksuehto;
+			return (int)$maksuehto;
 		}
 	}
 
@@ -249,6 +249,7 @@
 					toim_postino = '{$asiakas['postino']}',
 					toim_postitp = '{$asiakas['postitp']}',
 					toim_maa = '{$asiakas['maa']}',
+					ytunnus = '{$asiakas['ytunnus']}',
 					valkoodi = '{$myyntilasku['valuutta']}',
 					summa = '{$myyntilasku['summa']}',
 					summa_valuutassa = '{$myyntilasku['summa']}',
@@ -276,7 +277,6 @@
 			'summa' => (abs($myyntilasku['summa'])),
 			'alv' => $myyntilasku['alv'],
 			'kustp' => 0,
-
 		);
 		tee_tiliointi($tilausnumero, $myyntisaamiset_array, $yhtio);
 
@@ -361,6 +361,7 @@
 						SET yhtio = '{$yhtio}',
 						nimi ='Kaato asiakas',
 						asiakasnro = 'kaato_asiakas',
+						ytunnus = 'kaato_asiakas',
 						maksuehto = '{$maksuehto_row['tunnus']}',
 						toimitustapa = '{$toimitustapa_row['tunnus']}',
 						laatija = 'konversio',
@@ -368,6 +369,8 @@
 			pupe_query($query2);
 		}
 
+		$result = pupe_query($query);
+		
 		return mysql_fetch_assoc($result);
 	}
 

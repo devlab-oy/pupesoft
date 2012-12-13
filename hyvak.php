@@ -10,18 +10,19 @@
 
 	enable_ajax();
 
-	if (!isset($tee)) 			$tee = "";
-	if (!isset($tila)) 			$tila = "";
-	if (!isset($keikalla)) 		$keikalla = "";
-	if (!isset($kutsuja)) 		$kutsuja = "";
-	if (!isset($tunnus))		$tunnus = "";
-	if (!isset($nayta)) 		$nayta = "";
-	if (!isset($iframe)) 		$iframe = "";
-	if (!isset($iframe_id)) 	$iframe_id = "";
-	if (!isset($naytalisa)) 	$naytalisa = "";
-	if (!isset($ok)) 			$ok = "";
-	if (!isset($toimittajaid)) 	$toimittajaid = "";
-	if (!isset($livesearch_tee)) $livesearch_tee = "";
+	if (!isset($tee)) 			   $tee = "";
+	if (!isset($tila)) 			   $tila = "";
+	if (!isset($keikalla)) 		   $keikalla = "";
+	if (!isset($kutsuja)) 		   $kutsuja = "";
+	if (!isset($tunnus))		   $tunnus = "";
+	if (!isset($nayta)) 		   $nayta = "";
+	if (!isset($iframe)) 		   $iframe = "";
+	if (!isset($iframe_id)) 	   $iframe_id = "";
+	if (!isset($naytalisa)) 	   $naytalisa = "";
+	if (!isset($ok)) 			   $ok = "";
+	if (!isset($toimittajaid)) 	   $toimittajaid = "";
+	if (!isset($livesearch_tee))   $livesearch_tee = "";
+	if (!isset($saako_hyvaksya))   $saako_hyvaksya = FALSE;
 
 	if ($livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
@@ -881,7 +882,8 @@
 					concat_ws('@', laatija, luontiaika) kuka,
 					round(summa * vienti_kurssi, 2) kotisumma
 					FROM lasku
-					WHERE tunnus='$tunnus' and yhtio = '$kukarow[yhtio]'";
+					WHERE tunnus = '$tunnus'
+					and yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -892,6 +894,12 @@
 		}
 
 		$laskurow = mysql_fetch_assoc($result);
+
+		// Saa hyväksyä jos saa hyväksyä minkä summaisia vain.
+		// Saa hyväksyä jos laskun summa on pienempi ku hyvaksyja_maksimisumma
+		if ($kukarow['hyvaksyja_maksimisumma'] == 0 or $kukarow['hyvaksyja_maksimisumma'] >= $laskurow['summa']) {
+			$saako_hyvaksya = TRUE;
+		}
 
 		//	Tarkistetaan onko tälläistä laskua tältä toimittajalta jo kierrossa
 		if ($laskurow["laskunro"] != "") {
@@ -1054,6 +1062,7 @@
 		}
 
 		echo "<br><table>";
+
 		// Mahdollisuus antaa kommentti
 		echo "	<form name='kommentti' method='post'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
@@ -1077,43 +1086,6 @@
 
 		echo "<br><table>";
 		echo "<tr>";
-
-		if ($laskurow['hyvaksyja_nyt'] == $kukarow['kuka']) {
-			$query = "	SELECT hyvaksyja_maksimisumma, hierarkia
-			          	FROM kuka
-			          	WHERE yhtio = '$kukarow[yhtio]'
-						and hyvaksyja = 'o'
-						and kuka = '$laskurow[hyvaksyja_nyt]'
-			          	ORDER BY nimi";
-			$vresult = pupe_query($query);
-			$hierarkiarow = mysql_fetch_assoc($vresult);
-
-			$loytyyko_esimies = '';
-			$hierarkia = $hierarkiarow['hierarkia'];
-
-			if ($hierarkiarow['hyvaksyja_maksimisumma'] > 0) {
-				for ($i = 1; $i < 5; $i++) {
-
-					if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak'.$i]) {
-
-						for ($x = ($i+1); $x < 6; $x++) {
-
-							if ($laskurow['hyvak'.$x] != '') {
-								$hyvaksyja_maksimisumma = $hierarkiarow['hyvaksyja_maksimisumma'];
-								break;
-							}
-							else {
-								unset($hyvaksyja_maksimisumma);
-							}
-						}
-					}
-				}
-			}
-			else {
-				$hyvaksyja_maksimisumma = 0;
-				$loytyyko_esimies = 'joo';
-			}
-		}
 
 		// Jos laskua hyvaksyy ensimmäinen henkilö ja laskulla on annettu mahdollisuus hyvksyntälistan muutokseen näytetään se!";
 		if ($onko_eka_hyvaksyja and $laskurow['hyvaksynnanmuutos'] != '') {
@@ -1159,29 +1131,29 @@
 			echo "<tr><td>";
 
 			// Täytetään 4 hyväksyntäkenttää (ensimmäinen on jo käytössä)
-			for ($i=2; $i<6; $i++) {
+			for ($i = 2; $i < 6; $i++) {
 
-				while ($vrow=mysql_fetch_assoc($vresult)) {
+				while ($vrow = mysql_fetch_assoc($vresult)) {
 					$sel = "";
 
 					if ($hyvak[$i] == $vrow['kuka']) {
 						$sel = "selected";
 
-						if (isset($loytyyko_esimies) and $loytyyko_esimies == '' and isset($hyvaksyja_maksimisumma) and $hyvaksyja_maksimisumma != 0 and $hyvaksyja_maksimisumma > $laskurow['summa'] and $hierarkia != '') {
+						if (!$saako_hyvaksya and $kukarow['hierarkia'] != '') {
 							$query = "	SELECT parent.tunnus tunnus
 										FROM dynaaminen_puu AS node
 										JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
 										JOIN kuka ON (kuka.yhtio = node.yhtio AND kuka.hierarkia = parent.tunnus and kuka.kuka = '$vrow[kuka]')
-										WHERE node.tunnus IN ($hierarkia)
+										WHERE node.tunnus IN ({$kukarow['hierarkia']})
 										AND node.laji = 'kuka'
 										AND node.yhtio = '$kukarow[yhtio]'
-										AND parent.tunnus NOT IN ($hierarkia)
+										AND parent.tunnus NOT IN ({$kukarow['hierarkia']})
 										AND parent.lft > 1
 										GROUP BY parent.tunnus
 										ORDER BY parent.lft";
 							$esimies_result = pupe_query($query);
 
-							if (mysql_num_rows($esimies_result) != 0) $loytyyko_esimies = 'joo';
+							if (mysql_num_rows($esimies_result) > 0) $saako_hyvaksya = TRUE;
 						}
 					}
 
@@ -1189,17 +1161,13 @@
 				}
 
 				// Käydään sama data läpi uudestaan
-				if (!mysql_data_seek ($vresult, 0)) {
-					echo "mysql_data_seek failed!";
-
-					require ("inc/footer.inc");
-					exit;
-				}
+				mysql_data_seek($vresult, 0);
 
 				echo "$i. <select name='hyvak[$i]'>
 				      <option value=''>".t("Ei kukaan")."</option>
 				      $ulos
 				      </select><br>";
+
 				$ulos = "";
 			}
 
@@ -1214,7 +1182,7 @@
 			echo "<td class='back' valign='top'><table>";
 			echo "<tr><th>".t("Hyväksyjä")."</th><th>".t("Hyväksytty")."</th><th></th></tr>";
 
-			for ($i=1; $i<6; $i++) {
+			for ($i = 1; $i < 6; $i++) {
 				$hyind = "hyvak".$i;
 				$htind = "h".$i."time";
 
@@ -1227,21 +1195,21 @@
 					$vresult = pupe_query($query);
 					$vrow = mysql_fetch_assoc($vresult);
 
-					if (isset($loytyyko_esimies) and $loytyyko_esimies == '' and isset($hyvaksyja_maksimisumma) and $hyvaksyja_maksimisumma != 0 and $hyvaksyja_maksimisumma > $laskurow['summa'] and $hierarkia != '') {
+					if (!$saako_hyvaksya and $kukarow['hierarkia'] != '') {
 						$query = "	SELECT parent.tunnus tunnus
 									FROM dynaaminen_puu AS node
 									JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
 									JOIN kuka ON (kuka.yhtio = node.yhtio AND kuka.hierarkia = parent.tunnus and kuka.kuka = '$vrow[kuka]')
-									WHERE node.tunnus IN ($hierarkia)
+									WHERE node.tunnus IN ({$kukarow['hierarkia']})
 									AND node.laji = 'kuka'
 									AND node.yhtio = '$kukarow[yhtio]'
-									AND parent.tunnus NOT IN ($hierarkia)
+									AND parent.tunnus NOT IN ({$kukarow['hierarkia']})
 									AND parent.lft > 1
 									GROUP BY parent.tunnus
 									ORDER BY parent.lft";
 						$esimies_result = pupe_query($query);
 
-						if (mysql_num_rows($esimies_result) != 0) $loytyyko_esimies = 'joo';
+						if (mysql_num_rows($esimies_result) > 0) $saako_hyvaksya = TRUE;
 					}
 
 					echo "<tr><td>$i. $vrow[nimi]</td><td>";
@@ -1365,7 +1333,7 @@
 
 			if ($ok == 1) {
 
-				if (!isset($loytyyko_esimies) or (isset($loytyyko_esimies) and trim($loytyyko_esimies) != '')) {
+				if (!isset($saako_hyvaksya) or (isset($saako_hyvaksya) and trim($saako_hyvaksya) != '')) {
 					echo "<form method='post'>
 							<input type='hidden' name = 'tunnus' value='$tunnus'>
 							<input type='hidden' name = 'tee' value='H'>
@@ -1425,7 +1393,7 @@
 			// Kevennetyn käyttöliittymä alkaa tästä
 			echo "<table><tr>";
 
-			if (!isset($loytyyko_esimies) or (isset($loytyyko_esimies) and trim($loytyyko_esimies) != '')) {
+			if (!isset($saako_hyvaksya) or (isset($saako_hyvaksya) and trim($saako_hyvaksya) != '')) {
 				echo "<form method='post'>
 						<input type='hidden' name = 'tunnus' value='$tunnus'>
 						<input type='hidden' name = 'tee' value='H'>

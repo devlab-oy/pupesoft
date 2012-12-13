@@ -262,7 +262,7 @@ if (!function_exists('alku_tarjous')) {
 			}
 
 			if (trim($laskurow['comments']) != '') {
-				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $comments), 90, "\n###");
+				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
 			}
 
 			if (trim($laskurow['tilausyhteyshenkilo']) != '') {
@@ -287,7 +287,7 @@ if (!function_exists('alku_tarjous')) {
 			}
 
 			if (trim($laskurow['comments']) != '') {
-				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $comments), 90, "\n###");
+				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
 			}
 		}
 

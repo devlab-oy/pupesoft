@@ -6753,12 +6753,13 @@ if ($tee == '') {
 				// Etsitään asiakas
 				$query = "	SELECT laskunsummapyoristys
 							FROM asiakas
-							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+							WHERE tunnus = '$laskurow[liitostunnus]'
+							and yhtio	 = '$kukarow[yhtio]'";
 				$asres = pupe_query($query);
 				$asrow = mysql_fetch_assoc($asres);
 
 				//Käsin syötetty summa johon lasku pyöristetään
-				if (abs($laskurow["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
+				if ($laskurow["hinta"] <> 0 and abs($laskurow["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
 					$summa = sprintf("%.2f",$laskurow["hinta"]);
 				}
 

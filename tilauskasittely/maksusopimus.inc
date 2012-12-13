@@ -374,9 +374,9 @@
 				$todellinen_osuus = round($row["summa"] / $jaksotettavaa * 100, 4);
 
 				if ($row["osuus"] != $todellinen_osuus) {
-					$maposupdate_query = "	UPDATE maksupositio SET 
-											osuus = '$todellinen_osuus' 
-											WHERE yhtio = '$kukarow[yhtio]' 
+					$maposupdate_query = "	UPDATE maksupositio SET
+											osuus = '$todellinen_osuus'
+											WHERE yhtio = '$kukarow[yhtio]'
 											AND tunnus = '$row[tunnus]'";
 					$maposupdate = mysql_query($maposupdate_query) or pupe_error($maposupdate_query);
 
@@ -470,7 +470,7 @@
 
 				}
 				else {
-										
+
 					echo "<tr><td>$i</td>";
 					echo "<td>$row[osuus]</td>";
 
@@ -501,11 +501,11 @@
 			$ihakaikki_veroton  = $loput_veroton + $jaksotettavaa_veroton;
 
 			//Käsin syötetty summa johon lasku pyöristetään
-			if (abs($laskurow["hinta"]-$ihakaikki_verolli) <= 0.5) {
+			if ($laskurow["hinta"] <> 0 and abs($laskurow["hinta"]-$ihakaikki_verolli) <= 0.5) {
 				$ihakaikki_verolli = sprintf("%.2f",$laskurow["hinta"]);
 			}
 			//Käsin syötetty summa johon lasku pyöristetään
-			if (abs($laskurow["hinta"]-$loput_verolli-$jaksotettavaa_verolli) <= 0.5) {
+			if ($laskurow["hinta"] <> 0 and abs($laskurow["hinta"]-$loput_verolli-$jaksotettavaa_verolli) <= 0.5) {
 				$jaksotettavaa_verolli = $laskurow["hinta"]-$loput_verolli;
 			}
 

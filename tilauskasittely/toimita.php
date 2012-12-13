@@ -473,7 +473,7 @@
 		$asrow = mysql_fetch_assoc($asres);
 
 		//Käsin syötetty summa johon lasku pyöristetään
-		if (abs($row["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
+		if ($row["hinta"] <> 0 and abs($row["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
 			$summa = sprintf("%.2f",$row["hinta"]);
 		}
 

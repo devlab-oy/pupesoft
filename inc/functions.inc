@@ -13512,7 +13512,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 				if ($num_rows == $i_rows and $edrow_ei_ollut_tyhjaa) {
 					$params = array(
 						'row' => $row,
-						'edrow' => $edrow,
+						'edrow' => $row,
 						'max_ltq_til' => $max_ltq_til,
 						'limited_qty' => $limited_qty,
 						'vaktuotetiedot' => $vaktuotetiedot,

@@ -13375,39 +13375,10 @@ if (!function_exists("palauta_vak_tiedot")) {
 				}
 			}
 
-			$edrow = "";
-			$max_ltq_til = 0;
-			$wordwrap_mitta = $tyyppi == 'DGD' ? 50 : 90;
+			if (!function_exists('piirra_vak_rivi_loppu')) {
+				function piirra_vak_rivi_loppu($params) {
 
-			$num_rows = mysql_num_rows($riresult1);
-			$i_rows = 1;
-
-			$row = mysql_fetch_assoc($riresult1);
-
-			do {
-
-				if (!isset($edrow[$vak_kentta]) or $row[$vak_kentta] == $edrow[$vak_kentta]) {
-					$params = array(
-						'row' => $row,
-						'kieli' => $kieli,
-						'vaktuotetiedot' => $vaktuotetiedot,
-						'max_ltq_til' => $max_ltq_til,
-						'tuotepainot' => $tuotepainot,
-						'tuotepainot_yht' => $tuotepainot_yht,
-						'limited_qty' => $limited_qty,
-					);
-
-					$return_params = piirra_vak_rivi($params);
-
-					$tuotepainot = $return_params['tuotepainot'];
-					$tuotepainot_yht = $return_params['tuotepainot_yht'];
-					$vaktuotetiedot = $return_params['vaktuotetiedot'];
-					$max_ltq_til = $return_params['max_ltq_til'];
-				}
-
-				if ($num_rows == $i_rows or (isset($edrow[$vak_kentta]) and $row[$vak_kentta] != $edrow[$vak_kentta])) {
-
-					if ($num_rows == $i_rows and $edrow == "") $edrow = $row;
+					extract($params);
 
 					$nimitykset = explode("###", wordwrap($edrow["nimitys"], $wordwrap_mitta, "###"));
 
@@ -13453,6 +13424,65 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 					$vaktuotetiedot[] = "";
 					$tuotepainot = 0;
+
+					return array(
+						'vaktuotetiedot' => $vaktuotetiedot,
+						'tuotepainot' => $tuotepainot,
+						'max_ltq_til' => $max_ltq_til,
+					);
+				}
+			}
+
+			$edrow = "";
+			$max_ltq_til = 0;
+			$wordwrap_mitta = $tyyppi == 'DGD' ? 50 : 90;
+
+			$num_rows = mysql_num_rows($riresult1);
+			$i_rows = 1;
+
+			$row = mysql_fetch_assoc($riresult1);
+
+			do {
+
+				if (!isset($edrow[$vak_kentta]) or $row[$vak_kentta] == $edrow[$vak_kentta]) {
+					$params = array(
+						'row' => $row,
+						'kieli' => $kieli,
+						'vaktuotetiedot' => $vaktuotetiedot,
+						'max_ltq_til' => $max_ltq_til,
+						'tuotepainot' => $tuotepainot,
+						'tuotepainot_yht' => $tuotepainot_yht,
+						'limited_qty' => $limited_qty,
+					);
+
+					$return_params = piirra_vak_rivi($params);
+
+					$tuotepainot = $return_params['tuotepainot'];
+					$tuotepainot_yht = $return_params['tuotepainot_yht'];
+					$vaktuotetiedot = $return_params['vaktuotetiedot'];
+					$max_ltq_til = $return_params['max_ltq_til'];
+				}
+
+				if ($num_rows == $i_rows or (isset($edrow[$vak_kentta]) and $row[$vak_kentta] != $edrow[$vak_kentta])) {
+
+					if ($num_rows == $i_rows and $edrow == "") $edrow = $row;
+
+					$params = array(
+						'row' => $row,
+						'edrow' => $edrow,
+						'max_ltq_til' => $max_ltq_til,
+						'limited_qty' => $limited_qty,
+						'vaktuotetiedot' => $vaktuotetiedot,
+						'tuotepainot' => $tuotepainot,
+						'taulu' => $taulu,
+						'kieli' => $kieli,
+						'tyyppi' => $tyyppi,
+						'wordwrap_mitta' => $wordwrap_mitta,
+					);
+
+					$return_params = piirra_vak_rivi_loppu($params);
+
+					extract($return_params);
 				}
 
 				if (isset($edrow[$vak_kentta]) and $row[$vak_kentta] != $edrow[$vak_kentta]) {
@@ -13472,6 +13502,25 @@ if (!function_exists("palauta_vak_tiedot")) {
 					$tuotepainot_yht = $return_params['tuotepainot_yht'];
 					$vaktuotetiedot = $return_params['vaktuotetiedot'];
 					$max_ltq_til = $return_params['max_ltq_til'];
+				}
+
+				if ($num_rows == $i_rows) {
+					$params = array(
+						'row' => $row,
+						'edrow' => $edrow,
+						'max_ltq_til' => $max_ltq_til,
+						'limited_qty' => $limited_qty,
+						'vaktuotetiedot' => $vaktuotetiedot,
+						'tuotepainot' => $tuotepainot,
+						'taulu' => $taulu,
+						'kieli' => $kieli,
+						'tyyppi' => $tyyppi,
+						'wordwrap_mitta' => $wordwrap_mitta,
+					);
+
+					$return_params = piirra_vak_rivi_loppu($params);
+
+					extract($return_params);
 				}
 
 				$edrow = $row;

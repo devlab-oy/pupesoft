@@ -713,16 +713,18 @@
 						echo "<td class='back'>";
 						echo "<font class='error'>".t("Ei valmis")."</font>";
 
-						echo "<br />";
+						if (mysql_num_rows($tila_chk_res) > 0) {
+							echo "<br />";
 
-						$msg = t("Oletko varma, että haluat vapauttaa tilauksen keräykseen")."? {$row['jaksotettu']}";
+							$msg = t("Oletko varma, että haluat vapauttaa tilauksen keräykseen")."? {$row['jaksotettu']}";
 
-						echo "<form method='post' name='case' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"{$msg}\");'>
-								<input type='hidden' name='toim' value='{$toim}'>
-								<input type='hidden' name='tunnus' value='{$row['jaksotettu']}'>
-								<input type='hidden' name='tee' value='vapauta_tilaus_keraykseen'>
-								<input type='submit' name = 'submit' value='",t("Vapauta tilaus keräykseen"),"'>
-								</form>";
+							echo "<form method='post' name='case' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"{$msg}\");'>
+									<input type='hidden' name='toim' value='{$toim}'>
+									<input type='hidden' name='tunnus' value='{$row['jaksotettu']}'>
+									<input type='hidden' name='tee' value='vapauta_tilaus_keraykseen'>
+									<input type='submit' name = 'submit' value='",t("Vapauta tilaus keräykseen"),"'>
+									</form>";
+						}
 
 						echo "</td>";
 					}

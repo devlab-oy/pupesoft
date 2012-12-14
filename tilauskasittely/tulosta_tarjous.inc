@@ -561,11 +561,11 @@ if (!function_exists('tarjous_rivi_otsikot')) {
 			$pdf_tarjous->draw_text(25,  $kala+5, t("Tuotenimi", $kieli),		$page_tarjous, $norm);
 
 			if(trim($naytetaanko_rivihinta == 'kokonaan_ilman_hintoja')) {
-				$pdf_tarjous->draw_text(380, $kala+15, t("Tilattu", $kieli),		$page_tarjous, $norm);
+				$pdf_tarjous->draw_text(380, $kala+15, t("Määrä", $kieli),			$page_tarjous, $norm);
 				$pdf_tarjous->draw_text(450, $kala+15, t("Alennus", $kieli),		$page_tarjous, $norm);
 			}
 			else {
-				$pdf_tarjous->draw_text(330, $kala+15, t("Tilattu", $kieli),		$page_tarjous, $norm);
+				$pdf_tarjous->draw_text(330, $kala+15, t("Määrä", $kieli),			$page_tarjous, $norm);
 				$pdf_tarjous->draw_text(380, $kala+15, t("Yks.hinta", $kieli),		$page_tarjous, $norm);
 				$pdf_tarjous->draw_text(450, $kala+15, t("Alennus", $kieli),		$page_tarjous, $norm);
 			}

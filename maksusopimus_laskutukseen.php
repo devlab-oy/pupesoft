@@ -710,7 +710,21 @@
 					$tarkrow = mysql_fetch_assoc($tarkres);
 
 					if ($tarkrow["tilaok"] <> $tarkrow["toimituksia"] or $tarkrow["toimittamatta"] > 0) {
-						echo "<td class='back'><font class='error'>".t("Ei valmis")."</font></td>";
+						echo "<td class='back'>";
+						echo "<font class='error'>".t("Ei valmis")."</font>";
+
+						echo "<br />";
+
+						$msg = t("Oletko varma, että haluat vapauttaa tilauksen keräykseen")."? {$row['jaksotettu']}";
+
+						echo "<form method='post' name='case' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"{$msg}\");'>
+								<input type='hidden' name='toim' value='{$toim}'>
+								<input type='hidden' name='tunnus' value='{$row['jaksotettu']}'>
+								<input type='hidden' name='tee' value='vapauta_tilaus_keraykseen'>
+								<input type='submit' name = 'submit' value='",t("Vapauta tilaus keräykseen"),"'>
+								</form>";
+
+						echo "</td>";
 					}
 					else {
 						$msg = t("Oletko varma, että haluat LOPPULASKUTTAA tilauksen")." $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: ".t_tunnus_avainsanat($posrow, "teksti", "MAKSUEHTOKV");

@@ -121,13 +121,14 @@
 						'laskunro' => preg_replace( '/[^0-9]/', '', $lasku_numero),
 						'tilinumero' => (string)$kateismyynti->AccountNum,
 						'selite' => utf8_decode((string)$kateismyynti->Txt),
-						'summa' => ((string)$kateismyynti->AmountCurDebit == '') ? (float)$kateismyynti->AmountCurCredit : (float)$kateismyynti->AmountCurDebit,
+						'summa' => ((string)$kateismyynti->AmountCurDebit == '') ? ((float)$kateismyynti->AmountCurCredit * -1) : (float)$kateismyynti->AmountCurDebit,
 						'valkoodi' => (string)$kateismyynti->Currency,
 						'kurssi' => (string)$kateismyynti->ExchRate,
 						'alv_ryhma' => (string)$kateismyynti->TaxGroup,
 						'alv' => ((string)$kateismyynti->TaxItemGroup == '') ? 0 : (string)$kateismyynti->TaxItemGroup,
 						'alv_maara' => (string)$kateismyynti->FixedTaxAmount,
 						'kustp' => (string)$kateismyynti->Dim2,
+						'onko_kortti' => false,//käytetään tee_tiliointi funkkarissa, jotta saadaan kustannuspaikan takaa tulevan kassalippaan tilino oikein
 					);
 				}
 				else if(stristr($tyyppi, 'kortti')) {
@@ -137,13 +138,14 @@
 						'laskunro' => preg_replace( '/[^0-9]/', '', $lasku_numero),
 						'tilinumero' => (string)$kateismyynti->AccountNum,
 						'selite' => utf8_decode((string)$kateismyynti->Txt),
-						'summa' => ((string)$kateismyynti->AmountCurDebit == '') ? (float)$kateismyynti->AmountCurCredit : (float)$kateismyynti->AmountCurDebit,
+						'summa' => ((string)$kateismyynti->AmountCurDebit == '') ? ((float)$kateismyynti->AmountCurCredit * -1) : (float)$kateismyynti->AmountCurDebit,
 						'valkoodi' => (string)$kateismyynti->Currency,
 						'kurssi' => (string)$kateismyynti->ExchRate,
 						'alv_ryhma' => (string)$kateismyynti->TaxGroup,
 						'alv' => ((string)$kateismyynti->TaxItemGroup == '') ? 0 : (string)$kateismyynti->TaxItemGroup,
 						'alv_maara' => (string)$kateismyynti->FixedTaxAmount,
 						'kustp' => (string)$kateismyynti->Dim2,
+						'onko_kortti' => true,//käytetään tee_tiliointi funkkarissa, jotta saadaan kustannuspaikan takaa tulevan kassalippaan tilino oikein
 					);
 				}
 				else {
@@ -248,6 +250,7 @@
 					maksuehto = '{$maksuehto_row['tunnus']}',
 					tapvm = '{$kateismyynnin_osat[1]['tapahtumapaiva']}',
 					lapvm = '{$kateismyynnin_osat[1]['tapahtumapaiva']}',
+					mapvm = '{$kateismyynnin_osat[1]['tapahtumapaiva']}',
 					toimaika = '{$kateismyynnin_osat[1]['tapahtumapaiva']}',
 					kerayspvm = '{$kateismyynnin_osat[1]['tapahtumapaiva']}',
 					alv = '{$kateismyynnin_osat[1]['alv']}',
@@ -299,15 +302,23 @@
 		return mysql_fetch_assoc($result);
 	}
 
-	function tee_tiliointi($tilausnumero, $kateismyynti, $kassalipas,$yhtio) {
+	function tee_tiliointi($tilausnumero, $kateismyynti, $kassalipas, $yhtio) {
 		$tiliointi_tunnukset = array();
 		if(!empty($kateismyynti['alv']) and !empty($kateismyynti['alv_maara'])) {
+			if($kateismyynti['onko_kortti']) {
+				$kassalippaan_tilinumero = $kassalipas['kateistilitys'];
+			}
+			else {
+				$kassalippaan_tilinumero = $kassalipas['kateistilitys'];
+			}
+			
 			//tehdään alv tiliöinti ja tiliöinti - alv
-			$alviton_summa = $kateismyynti['summa'] - $kateismyynti['alv_maara'];
+			//aineistoon merkataan AmountCurCredit miinus merkkikseksi ja FixedTaxAmount plus merkkiseksi, katelaskentojen takia. siitä syystä vähän oudolta näyttää
+			$alviton_summa = $kateismyynti['summa'] + $kateismyynti['alv_maara'];
 			$yhtio_row = hae_yhtio($yhtio);
 
 			$query = "	INSERT INTO tiliointi
-						SET tilino = '{$kassalipas['kassa']}',
+						SET tilino = '{$kassalippaan_tilinumero}',
 						tapvm = '{$kateismyynti['tapahtumapaiva']}',
 						summa = '{$alviton_summa}',
 						vero = '{$kateismyynti['alv']}',
@@ -324,11 +335,12 @@
 
 			$tiliointi_tunnukset[] = mysql_insert_id();
 
+			$alv_maara = $kateismyynti['alv_maara'] * -1;
 			$query = "	INSERT INTO tiliointi
 						SET tilino = '{$yhtio_row['alv']}',
 						tapvm = '{$kateismyynti['tapahtumapaiva']}',
-						summa = '{$kateismyynti['alv_maara']}',
-						vero = '{$kateismyynti['alv']}',
+						summa = '{$alv_maara}',
+						vero = 0,
 						kustp = '{$kateismyynti['kustp']}',
 						ltunnus = '{$tilausnumero}',
 						laatija = 'futursoft',
@@ -343,9 +355,18 @@
 			$tiliointi_tunnukset[] = mysql_insert_id();
 		}
 		else {
+			if(stristr($kateismyynti['selite'], 'käteiskassa')) {
+				$kassalippaan_tilinumero = $kassalipas['kassa'];
+			}
+			else if(stristr($kateismyynti['selite'], 'korttimyynti')) {
+				$kassalippaan_tilinumero = $kassalipas['pankkikortti'];
+			}
+			else {
+				$kassalippaan_tilinumero = $kateismyynti['tilinumero'];
+			}
 			//tehdään kate tiliöinti
 			$query = "	INSERT INTO tiliointi
-						SET tilino = '{$kassalipas['kassa']}',
+						SET tilino = '{$kassalippaan_tilinumero}',
 						selite = '{$kateismyynti['selite']}',
 						tapvm = '{$kateismyynti['tapahtumapaiva']}',
 						summa = '{$kateismyynti['summa']}',

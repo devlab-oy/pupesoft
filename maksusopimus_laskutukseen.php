@@ -711,7 +711,7 @@
 
 					if ($tarkrow["tilaok"] <> $tarkrow["toimituksia"] or $tarkrow["toimittamatta"] > 0) {
 						echo "<td class='back'>";
-						echo "<font class='error'>".t("Ei valmis")."</font>";
+						echo "<font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole vielä toimitettu").".</font>";
 
 						if (mysql_num_rows($tila_chk_res) > 0) {
 							echo "<br />";
@@ -781,7 +781,7 @@
 					echo "</td>";
 				}
 				else {
-					echo "<td class='back'><font class='error'>".t("Ei valmis")."</font>";
+					echo "<td class='back'><font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole vielä toimitettu").".</font>";
 
 					if (mysql_num_rows($tila_chk_res) > 0) {
 

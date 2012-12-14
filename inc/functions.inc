@@ -13442,6 +13442,8 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 			$row = mysql_fetch_assoc($riresult1);
 
+			$edrow_ei_ollut_tyhjaa = true;
+
 			do {
 
 				if (!isset($edrow[$vak_kentta]) or $row[$vak_kentta] == $edrow[$vak_kentta]) {
@@ -13465,7 +13467,10 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 				if ($num_rows == $i_rows or (isset($edrow[$vak_kentta]) and $row[$vak_kentta] != $edrow[$vak_kentta])) {
 
-					if ($num_rows == $i_rows and $edrow == "") $edrow = $row;
+					if ($num_rows == $i_rows and $edrow == "") {
+						$edrow = $row;
+						$edrow_ei_ollut_tyhjaa = false;
+					}
 
 					$params = array(
 						'row' => $row,
@@ -13504,7 +13509,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 					$max_ltq_til = $return_params['max_ltq_til'];
 				}
 
-				if ($num_rows == $i_rows) {
+				if ($num_rows == $i_rows and $edrow_ei_ollut_tyhjaa) {
 					$params = array(
 						'row' => $row,
 						'edrow' => $edrow,

@@ -13187,6 +13187,100 @@ if (!function_exists("hintapyoristys")) {
 	}
 }
 
+if (!function_exists('piirra_vak_rivi')) {
+	function piirra_vak_rivi($params) {
+		global $kukarow;
+
+		extract($params);
+
+		$eramaara = ceil($row["kpl"]/$row["era"]);
+
+		$vaktuotetiedot[] = "$eramaara ".t("pakkausta", $kieli).", ".t("kukin", $kieli)." ".(float) $row['era']." x $row[tilavuus] (".t($row["materiaali"], $kieli).")";
+
+		// Mikä on toistaiseksi suurin vakmäärä
+		$ltq_yks = preg_replace("/[^a-z]/", "", strtolower($row["tilavuus"]));
+
+		$ltq_til = (float) preg_replace("/[^0-9,\.]/", "", str_replace(",", ".", $row["tilavuus"]));
+
+		// Käytetään vain millilitroja ja grammoja
+		if ($ltq_yks == 'l' or $ltq_yks == 'kg') {
+			$ltq_til = $ltq_til*1000;
+		}
+
+		if ($ltq_til > $max_ltq_til) $max_ltq_til = $ltq_til;
+
+		$tuotepainot += round($row["tuotepaino"]);
+		$tuotepainot_yht += round($row["tuotepaino"]);
+
+		$return_params = array(
+			'tuotepainot' => $tuotepainot,
+			'tuotepainot_yht' => $tuotepainot_yht,
+			'vaktuotetiedot' => $vaktuotetiedot,
+			'max_ltq_til' => $max_ltq_til,
+		);
+
+		return $return_params;
+	}
+}
+
+if (!function_exists('piirra_vak_rivi_loppu')) {
+	function piirra_vak_rivi_loppu($params) {
+
+		extract($params);
+
+		$nimitykset = explode("###", wordwrap($edrow["nimitys"], $wordwrap_mitta, "###"));
+
+		// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
+		if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
+			$vaktuotetiedot[] = "{$edrow['yk_nro']}, LTD QTY";
+		}
+		else {
+			$vaktuotetiedot[] = $edrow['yk_nro'];
+		}
+
+		$vaktuotetiedot[] = $nimitykset[0];
+
+		for ($i = 1; $i < count($nimitykset); $i++) {
+			$vaktuotetiedot[] = "$nimitykset[$i]";
+		}
+
+		$vakecho = "";
+
+		if ($taulu == 'vak_imdg') {
+			if (trim($edrow["luokka"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[luokka]";
+		}
+		else {
+			if (trim($edrow["lipukkeet"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[lipukkeet]";
+		}
+
+		if (trim($edrow["pakkausryhma"]) != "") $vakecho .= ", ".t("Pakkausryhmä", $kieli)." $edrow[pakkausryhma]";
+		if (trim($edrow["leimahduspiste"]) != "" and $taulu == 'vak_imdg') $vaktuotetiedot[] = t("Leimahduspiste", $kieli)." {$edrow['leimahduspiste']}";
+
+		if ($taulu == 'vak_imdg' and trim($edrow["meria_saastuttava"]) != "") {
+			$vaktuotetiedot[] = t("Meriä saastuttava", $kieli);
+		}
+
+		if ($tyyppi == "DGD" and $tuotepainot > 0) {
+			$vakecho .= "###".round($tuotepainot);
+		}
+
+		$max_ltq_til = 0;
+
+		if ($vakecho != "") {
+			$vaktuotetiedot[] = "$vakecho";
+		}
+
+		$vaktuotetiedot[] = "";
+		$tuotepainot = 0;
+
+		return array(
+			'vaktuotetiedot' => $vaktuotetiedot,
+			'tuotepainot' => $tuotepainot,
+			'max_ltq_til' => $max_ltq_til,
+		);
+	}
+}
+
 if (!function_exists("palauta_vak_tiedot")) {
 	function palauta_vak_tiedot ($otunnus, $kieli = '', $tyyppi = '', $laji = '') {
 		global $kukarow, $yhtiorow;
@@ -13338,100 +13432,6 @@ if (!function_exists("palauta_vak_tiedot")) {
 		}
 
 		if (mysql_num_rows($riresult1) > 0) {
-
-			if (!function_exists('piirra_vak_rivi')) {
-				function piirra_vak_rivi($params) {
-					global $kukarow;
-
-					extract($params);
-
-					$eramaara = ceil($row["kpl"]/$row["era"]);
-
-					$vaktuotetiedot[] = "$eramaara ".t("pakkausta", $kieli).", ".t("kukin", $kieli)." ".(float) $row['era']." x $row[tilavuus] (".t($row["materiaali"], $kieli).")";
-
-					// Mikä on toistaiseksi suurin vakmäärä
-					$ltq_yks = preg_replace("/[^a-z]/", "", strtolower($row["tilavuus"]));
-
-					$ltq_til = (float) preg_replace("/[^0-9,\.]/", "", str_replace(",", ".", $row["tilavuus"]));
-
-					// Käytetään vain millilitroja ja grammoja
-					if ($ltq_yks == 'l' or $ltq_yks == 'kg') {
-						$ltq_til = $ltq_til*1000;
-					}
-
-					if ($ltq_til > $max_ltq_til) $max_ltq_til = $ltq_til;
-
-					$tuotepainot += round($row["tuotepaino"]);
-					$tuotepainot_yht += round($row["tuotepaino"]);
-
-					$return_params = array(
-						'tuotepainot' => $tuotepainot,
-						'tuotepainot_yht' => $tuotepainot_yht,
-						'vaktuotetiedot' => $vaktuotetiedot,
-						'max_ltq_til' => $max_ltq_til,
-					);
-
-					return $return_params;
-				}
-			}
-
-			if (!function_exists('piirra_vak_rivi_loppu')) {
-				function piirra_vak_rivi_loppu($params) {
-
-					extract($params);
-
-					$nimitykset = explode("###", wordwrap($edrow["nimitys"], $wordwrap_mitta, "###"));
-
-					// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
-					if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
-						$vaktuotetiedot[] = "{$edrow['yk_nro']}, LTD QTY";
-					}
-					else {
-						$vaktuotetiedot[] = $edrow['yk_nro'];
-					}
-
-					$vaktuotetiedot[] = $nimitykset[0];
-
-					for ($i = 1; $i < count($nimitykset); $i++) {
-						$vaktuotetiedot[] = "$nimitykset[$i]";
-					}
-
-					$vakecho = "";
-
-					if ($taulu == 'vak_imdg') {
-						if (trim($edrow["luokka"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[luokka]";
-					}
-					else {
-						if (trim($edrow["lipukkeet"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[lipukkeet]";
-					}
-
-					if (trim($edrow["pakkausryhma"]) != "") $vakecho .= ", ".t("Pakkausryhmä", $kieli)." $edrow[pakkausryhma]";
-					if (trim($edrow["leimahduspiste"]) != "" and $taulu == 'vak_imdg') $vaktuotetiedot[] = t("Leimahduspiste", $kieli)." {$edrow['leimahduspiste']}";
-
-					if ($taulu == 'vak_imdg' and trim($edrow["meria_saastuttava"]) != "") {
-						$vaktuotetiedot[] = t("Meriä saastuttava", $kieli);
-					}
-
-					if ($tyyppi == "DGD" and $tuotepainot > 0) {
-						$vakecho .= "###".round($tuotepainot);
-					}
-
-					$max_ltq_til = 0;
-
-					if ($vakecho != "") {
-						$vaktuotetiedot[] = "$vakecho";
-					}
-
-					$vaktuotetiedot[] = "";
-					$tuotepainot = 0;
-
-					return array(
-						'vaktuotetiedot' => $vaktuotetiedot,
-						'tuotepainot' => $tuotepainot,
-						'max_ltq_til' => $max_ltq_til,
-					);
-				}
-			}
 
 			$edrow = "";
 			$max_ltq_til = 0;

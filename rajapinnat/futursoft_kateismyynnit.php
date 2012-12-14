@@ -110,28 +110,46 @@
 		//i ja indeksi on sitä varten, että aineistosta saadaan yhteen kuuluvat käteismyynti tiliöinnit eriytettyä muista
 		$data = array();
 		if ($xml !== FALSE) {
-			$i = 1;
-			$indeksi = 0;
 			foreach($xml->LedgerJournalTable->LedgerJournalTrans as $kateismyynti) {
 				$lasku_numero = (string)$kateismyynti->Invoice;
-				$data[$indeksi][] = array(
-					'siirtopaiva' => (string)$kateismyynti->TransDate,
-					'tapahtumapaiva' => (string)$kateismyynti->DocumentDate,
-					'laskunro' => preg_replace( '/[^0-9]/', '', $lasku_numero),
-					'tilinumero' => (string)$kateismyynti->AccountNum,
-					'selite' => utf8_decode((string)$kateismyynti->Txt),
-					'summa' => ((string)$kateismyynti->AmountCurDebit == '') ? (float)$kateismyynti->AmountCurCredit : (float)$kateismyynti->AmountCurDebit,
-					'valkoodi' => (string)$kateismyynti->Currency,
-					'kurssi' => (string)$kateismyynti->ExchRate,
-					'alv_ryhma' => (string)$kateismyynti->TaxGroup,
-					'alv' => ((string)$kateismyynti->TaxItemGroup == '') ? 0 : (string)$kateismyynti->TaxItemGroup,
-					'alv_maara' => (string)$kateismyynti->FixedTaxAmount,
-					'kustp' => (string)$kateismyynti->Dim2,
-				);
-				if($i % 2 == 0) {
-					$indeksi++;
+				$indeksi = (string)$kateismyynti->Dim2;
+				$tyyppi = utf8_decode((string)$kateismyynti->Txt);
+				if(stristr($tyyppi, 'käteis')) {
+					$data[$indeksi.'_1'][] = array(
+						'siirtopaiva' => (string)$kateismyynti->TransDate,
+						'tapahtumapaiva' => (string)$kateismyynti->DocumentDate,
+						'laskunro' => preg_replace( '/[^0-9]/', '', $lasku_numero),
+						'tilinumero' => (string)$kateismyynti->AccountNum,
+						'selite' => utf8_decode((string)$kateismyynti->Txt),
+						'summa' => ((string)$kateismyynti->AmountCurDebit == '') ? (float)$kateismyynti->AmountCurCredit : (float)$kateismyynti->AmountCurDebit,
+						'valkoodi' => (string)$kateismyynti->Currency,
+						'kurssi' => (string)$kateismyynti->ExchRate,
+						'alv_ryhma' => (string)$kateismyynti->TaxGroup,
+						'alv' => ((string)$kateismyynti->TaxItemGroup == '') ? 0 : (string)$kateismyynti->TaxItemGroup,
+						'alv_maara' => (string)$kateismyynti->FixedTaxAmount,
+						'kustp' => (string)$kateismyynti->Dim2,
+					);
 				}
-				$i++;
+				else if(stristr($tyyppi, 'kortti')) {
+					$data[$indeksi.'_2'][] = array(
+						'siirtopaiva' => (string)$kateismyynti->TransDate,
+						'tapahtumapaiva' => (string)$kateismyynti->DocumentDate,
+						'laskunro' => preg_replace( '/[^0-9]/', '', $lasku_numero),
+						'tilinumero' => (string)$kateismyynti->AccountNum,
+						'selite' => utf8_decode((string)$kateismyynti->Txt),
+						'summa' => ((string)$kateismyynti->AmountCurDebit == '') ? (float)$kateismyynti->AmountCurCredit : (float)$kateismyynti->AmountCurDebit,
+						'valkoodi' => (string)$kateismyynti->Currency,
+						'kurssi' => (string)$kateismyynti->ExchRate,
+						'alv_ryhma' => (string)$kateismyynti->TaxGroup,
+						'alv' => ((string)$kateismyynti->TaxItemGroup == '') ? 0 : (string)$kateismyynti->TaxItemGroup,
+						'alv_maara' => (string)$kateismyynti->FixedTaxAmount,
+						'kustp' => (string)$kateismyynti->Dim2,
+					);
+				}
+				else {
+					echo t("Aineisto on virheellinen emme voi jatkaa. Sallitut kortti- ja käteismyynti. Debug: {$tyyppi}");
+					die('Virheellinen aineisto');
+				}
 			}
 		}
 
@@ -162,9 +180,6 @@
 							$tiliointi_idt[] = $tunnus;
 							$kateismyynti_count++;
 						}
-
-						echo t("Käteislaskulle").' '.$tilausnumero.' '.t("luotiin tiliöinti").' '.$tunnus;
-						echo "<br/>";
 					}
 				}
 			}
@@ -275,7 +290,7 @@
 						nimi ='Kaato asiakas',
 						asiakasnro = 'kaato_asiakas',
 						maksuehto = '{$maksuehto_row['tunnus']}',
-						toimitustapa = '{$toimitustapa_row['tunnus']}'
+						toimitustapa = '{$toimitustapa_row['tunnus']}',
 						laatija = 'konversio',
 						luontiaika = NOW()";
 			pupe_query($query2);
@@ -304,6 +319,9 @@
 						yhtio = '{$yhtio}'";
 			pupe_query($query);
 
+			echo t("Tiliöinti")." ".mysql_insert_id()." ".t("luotiin laskulle").' '.$tilausnumero;
+			echo "<br/>";
+
 			$tiliointi_tunnukset[] = mysql_insert_id();
 
 			$query = "	INSERT INTO tiliointi
@@ -318,6 +336,9 @@
 						selite = '".t("Alv tiliöinti")."',
 						yhtio = '{$yhtio}'";
 			pupe_query($query);
+
+			echo t("Tiliöinti")." ".mysql_insert_id()." ".t("luotiin laskulle").' '.$tilausnumero;
+			echo "<br/>";
 
 			$tiliointi_tunnukset[] = mysql_insert_id();
 		}
@@ -334,11 +355,11 @@
 						yhtio = '{$yhtio}'";
 			pupe_query($query);
 
+			echo t("Tiliöinti")." ".mysql_insert_id()." ".t("luotiin laskulle").' '.$tilausnumero;
+			echo "<br/>";
+
 			$tiliointi_tunnukset[] = mysql_insert_id();
 		}
-
-		echo t("Tiliöinti laskulle").' '.$tilausnumero.' '.t("luotiin kassalipas:").' '.$kassalipas['kassa'];
-		echo "<br/>";
 
 		return $tiliointi_tunnukset;
 	}

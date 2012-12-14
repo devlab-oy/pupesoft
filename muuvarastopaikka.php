@@ -31,6 +31,13 @@
 		enable_ajax();
 	}
 
+	if (strtolower($toim) == 'oletusvarasto' and $kukarow['oletus_varasto'] != '' and $kukarow['oletus_varasto'] != 0) {
+		$oletusvarasto_chk = $kukarow['oletus_varasto'];
+	}
+	else {
+		$oletusvarasto_chk = '';
+	}
+
 	if (strpos($_SERVER['SCRIPT_NAME'], "muuvarastopaikka.php")  !== FALSE) {
 		echo "<font class='head'>".t("Tuotteen varastopaikat")."</font><hr>";
 	}
@@ -967,6 +974,9 @@
 
 		if (mysql_num_rows($paikatresult1) > 0) {
 			while ($saldorow = mysql_fetch_array ($paikatresult1)) {
+
+				if ($oletusvarasto_chk != '' and kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"], $oletusvarasto_chk) == 0) continue;
+
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
 				if ($saldorow["inventointilista_aika"] > 0) {
@@ -1003,6 +1013,9 @@
 
 		if (mysql_num_rows($paikatresult2) > 0) {
 			while ($saldorow = mysql_fetch_array ($paikatresult2)) {
+
+				if ($oletusvarasto_chk != '' and kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"], $oletusvarasto_chk) == 0) continue;
+
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
 				if ($saldorow["inventointilista_aika"] > 0) {
@@ -1141,6 +1154,9 @@
 			mysql_data_seek($paikatresult1, 0);
 
 			while ($saldorow = mysql_fetch_array ($paikatresult1)) {
+
+				if ($oletusvarasto_chk != '' and kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"], $oletusvarasto_chk) == 0) continue;
+
 				if ($saldorow["tunnus"] == $oletusrow["tunnus"]) {
 					$checked = "CHECKED";
 				}
@@ -1153,8 +1169,15 @@
 				echo "<tr><td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td><td align='right'>$saldorow[saldo]</td><td align='right'>$hyllyssa</td><td align='right'>$myytavissa</td>";
 
 				if (kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"])) {
-					echo "<td><input type = 'radio' name='oletus' value='$saldorow[tunnus]' $checked></td>
-						<td><input type='text' size='6' name='halyraja2[$saldorow[tunnus]]'    value='$saldorow[halytysraja]'></td>
+
+					echo "<td>";
+
+					if ($oletusvarasto_chk == '' or ($oletusvarasto_chk != '' and kuuluukovarastoon($oletusrow["hyllyalue"], $oletusrow["hyllynro"], $oletusvarasto_chk) != 0)) {
+						echo "<input type = 'radio' name='oletus' value='$saldorow[tunnus]' $checked>";
+					}
+
+					echo "</td>";
+					echo "<td><input type='text' size='6' name='halyraja2[$saldorow[tunnus]]'    value='$saldorow[halytysraja]'></td>
 						<td><input type='text' size='6' name='tilausmaara2[$saldorow[tunnus]]' value='$saldorow[tilausmaara]'></td>
 						<td><input type='text' size='6' name='prio2[{$saldorow['tunnus']}]' value='{$saldorow['prio']}'></td>";
 				}
@@ -1196,9 +1219,13 @@
 
 			echo "<option value=''>",t("Valitse varasto"),"</option>";
 
+			$varastopaikkalisa = $oletusvarasto_chk != '' ? "AND tunnus = '{$oletusvarasto_chk}'" : "";
+
 			$query = "	SELECT tunnus, nimitys
 						FROM varastopaikat
-						WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tyyppi != 'P'
+						{$varastopaikkalisa}
 						ORDER BY tyyppi, nimitys";
 			$varastores = pupe_query($query);
 

@@ -271,7 +271,7 @@ if (!function_exists('alku_tarjous')) {
 		}
 		else {
 			if (trim($laskurow['tilausyhteyshenkilo']) != '') {
-				$komm .= "\n".t("Tarjouksen pyytäjä", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
+				$komm .= "\n".t("Tarjousyhteyshenkilö", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
 			}
 
 			if (trim($laskurow['asiakkaan_tilausnumero']) != '') {

@@ -268,7 +268,7 @@
 		$myyntisaamiset_array = array(
 			'tilinumero' => $yhtio_row['myyntisaamiset'],
 			'tapahtumapaiva' => $myyntilasku['tapahtumapaiva'],
-			'summa' => (abs($myyntilasku['summa'])),
+			'summa' => $myyntilasku['summa'],
 			'alv' => $myyntilasku['alv'],
 			'kustp' => 0,
 		);
@@ -372,10 +372,20 @@
 		$tiliointi_tunnukset = array();
 		$tili = tarkista_tilinumero($tiliointi['tilinumero'], $yhtio);
 
+		if($tiliointi['summa'] == 139.11) {
+			$shit = "fit";
+		}
+
 		if(!empty($tili)) {
 			if(!empty($tiliointi['alv']) and !empty($tiliointi['alv_maara'])) {
 				//tehdään alv tiliöinti ja tiliöinti - alv
-				$alviton_summa = $tiliointi['summa'] + $tiliointi['alv_maara'];
+				if($tiliointi['summa'] < 0) {
+					$alviton_summa = $tiliointi['summa'] + $tiliointi['alv_maara'];
+				}
+				else {
+					$alviton_summa = $tiliointi['summa'] - $tiliointi['alv_maara'];
+				}
+
 				$yhtio_row = hae_yhtio($yhtio);
 
 				$query = "	INSERT INTO tiliointi
@@ -393,7 +403,12 @@
 
 				$tiliointi_tunnukset[] = mysql_insert_id();
 
-				$alv_maara = $tiliointi['alv_maara'] * -1;
+				if($tiliointi['summa'] < 0) {
+					$alv_maara = $tiliointi['alv_maara'] * -1;
+				}
+				else {
+					$alv_maara = $tiliointi['alv_maara'];
+				}
 				$query = "	INSERT INTO tiliointi
 							SET tilino = '{$yhtio_row['alv']}',
 							tapvm = '{$tiliointi['tapahtumapaiva']}',

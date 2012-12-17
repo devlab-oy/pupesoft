@@ -271,11 +271,11 @@ if (!function_exists('alku_tarjous')) {
 		}
 		else {
 			if (trim($laskurow['tilausyhteyshenkilo']) != '') {
-				$komm .= "\n".t("Tilaaja", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
+				$komm .= "\n".t("Tarjouksen pyytäjä", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
 			}
 
 			if (trim($laskurow['asiakkaan_tilausnumero']) != '') {
-				$komm .= "\n".t("Tilauksenne", $kieli).":###".$laskurow['asiakkaan_tilausnumero'];
+				$komm .= "\n".t("Tarjouksenne", $kieli).":###".$laskurow['asiakkaan_tilausnumero'];
 			}
 
 			if (trim($laskurow['kohde']) != '') {
@@ -283,7 +283,7 @@ if (!function_exists('alku_tarjous')) {
 			}
 
 			if (trim($laskurow['viesti']) != '') {
-				$komm .= "\n".t("Tilausviite", $kieli).":###".$laskurow['viesti'];
+				$komm .= "\n".t("Tarjousviite", $kieli).":###".$laskurow['viesti'];
 			}
 
 			if (trim($laskurow['comments']) != '') {

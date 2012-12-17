@@ -28,7 +28,7 @@
 			'raja' => $raja
 		);
 
-		$asiakkaat = hae_asiakkaat($ajax_params);
+		$asiakkaat = hae_asiakkaat($ajax_params, '');
 
 		echo json_encode(count($asiakkaat));
 
@@ -40,13 +40,6 @@
 	if ($ytunnus != "" and $asiakasid == "") {
 		if ($muutparametrit == '') {
 			$muutparametrit = "$komento#$raja#$emailok#$alkupp#$alkukk#$alkuvv#$loppupp#$loppukk#$loppuvv#";
-		}
-
-		require ("inc/asiakashaku.inc");
-
-		//jos tulee yksi asiakas tieto
-		if ($monta != 1) {
-			$tee = '';
 		}
 	}
 
@@ -65,8 +58,7 @@
 		$tee = "";
 	}
 
-	if ($tee == "tulosta") {
-
+	if($tee == "tulosta") {
 		// haetaan aluksi sopivat asiakkaat
 		// viimeisen 12 kuukauden myynti pitää olla yli $rajan
 		echo "<font class='message'>".t('Haetaan sopivia asiakkaita' , $kieli)." (".t('myynti', $kieli)." $alkupvm - $loppupvm ".t('yli' , $kieli)." $raja)... ";
@@ -83,8 +75,17 @@
 			'raja' => $raja
 		);
 		$asiakkaat = hae_asiakkaat($params, $laheta_sahkopostit);
-		echo t('löytyi') . ' '.count($asiakkaat) . '<br/><br/>';
 
+		if(!empty($asiakkaat)) {
+			echo t('löytyi') . ' '.count($asiakkaat) . '<br/><br/>';
+		}
+		else {
+			echo "<font class='error'>".t("Asiakasta ei löytynyt") . "</font><br/><br/>";
+			$tee = "";
+		}
+	}
+
+	if ($tee == "tulosta") {
 		flush();
 
 		$edalkupvm  = date("Y-m-d", mktime(0, 0, 0, $alkukk,  $alkupp,  $alkuvv - 1));
@@ -118,7 +119,7 @@
 		echo t('Haetaan myyntitiedot') . '<br/>';
 		$data_array = array();
 		$bar = new ProgressBar();
-		$bar->initialize(count($asiakkaat)-2);
+		$bar->initialize(count($asiakkaat)-1);
 		foreach($asiakkaat as $asiakas) {
 			$bar->increase();
 			$tilaukset = hae_tilaukset($params, $asiakas['tunnus']);
@@ -307,7 +308,8 @@
 			}
 			else {
 				$aswhere = "";
-				echo t("Asiakasta ei löytynyt");
+				
+				return false;
 			}
 		}
 		else {
@@ -495,7 +497,7 @@
 		$i = 0;
 		echo '<br/>'. t('Tehdään pdf tiedostot') . '<br/>';
 		$bar2 = new ProgressBar();
-		$bar2->initialize(count($data_array)-2);
+		$bar2->initialize(count($data_array)-1);
 		foreach ($data_array as &$data) {
 
 
@@ -538,7 +540,7 @@
 			$sumkplva = $data['summat_try']['sumkplva'];
 			$sumed = $data['summat_try']['sumed'];
 			$sumva = $data['summat_try']['sumva'];
-			$asiakas_numero = $data['asiakasrow']['tunnus'];
+			$asiakas_numero = $data['asiakasrow']['asiakasnro'];
 			// kirjotetaan footer ja palautetaan luodun tiedoston polku
 			$pdf_tiedostot[] = loppu($firstpage);
 
@@ -555,7 +557,7 @@
 
 		echo '<br/>'. t('Tehdään excel tiedostot') . '<br/>';
 		$bar2 = new ProgressBar();
-		$bar2->initialize(count($data_array)-2);
+		$bar2->initialize(count($data_array)-1);
 		$excel_tiedostot = array();
 		$i = 0;
 		foreach ($data_array as &$data) {
@@ -621,8 +623,9 @@
 		);
 
 		foreach ($liitetiedostot_path as $liitetiedosto_path) {
-			$mime_type = mime_content_type($liitetiedosto_path);
-			$mime_type = explode('/' , $mime_type);
+			$tiedosto_nimi = explode('/', $liitetiedosto_path);
+			$hakemiston_syvyys = count($tiedosto_nimi);
+			$tiedosto_nimi = $tiedosto_nimi[$hakemiston_syvyys - 1];
 			if(stristr(mime_content_type($liitetiedosto_path), 'pdf')) {
 				$ctype = 'pdf';
 			}
@@ -635,7 +638,7 @@
 			}
 			$liitetiedosto =  array(
 				'filename' => $liitetiedosto_path,
-				'newfilename' => t('Ostotilaus', $kieli) . '.' .$mime_type[1],
+				'newfilename' => t($tiedosto_nimi, $kieli),
 				'ctype' => $ctype,
 			);
 

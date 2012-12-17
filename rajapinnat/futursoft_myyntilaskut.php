@@ -375,7 +375,7 @@
 		if(!empty($tili)) {
 			if(!empty($tiliointi['alv']) and !empty($tiliointi['alv_maara'])) {
 				//tehdään alv tiliöinti ja tiliöinti - alv
-				$alviton_summa = $tiliointi['summa'] - $tiliointi['alv_maara'];
+				$alviton_summa = $tiliointi['summa'] + $tiliointi['alv_maara'];
 				$yhtio_row = hae_yhtio($yhtio);
 
 				$query = "	INSERT INTO tiliointi
@@ -393,10 +393,11 @@
 
 				$tiliointi_tunnukset[] = mysql_insert_id();
 
+				$alv_maara = $tiliointi['alv_maara'] * -1;
 				$query = "	INSERT INTO tiliointi
 							SET tilino = '{$yhtio_row['alv']}',
 							tapvm = '{$tiliointi['tapahtumapaiva']}',
-							summa = '{$tiliointi['alv_maara']}',
+							summa = '{$alv_maara}',
 							vero = '{$tiliointi['alv']}',
 							kustp = '{$tiliointi['kustp']}',
 							ltunnus = '{$tilausnumero}',

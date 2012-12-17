@@ -208,6 +208,18 @@
 
 		}
 
+		// Jos valmistuksessa käytetään tilakoodeja asetetaan keräysajankohta tulevaisuuteen.
+		// Valmistus ei varaa saldoja ennenkuin työ on valmistuslinjalla.
+		if ($yhtiorow['valmistuksessa_kaytetaan_tilakoodeja'] == 'K' AND $toim == 'VALMISTAVARASTOON') {
+			$kerpp = '1';
+			$kerkk = '1';
+			$kervv = '2099';
+
+			$toimpp = '1';
+			$toimkk = '1';
+			$toimvv = '2099';
+		}
+
 		echo "<tr><th>".t("Toivottu keräysajankohta").": </th><td valign='middle'>
 				<input type='text' name='kerpp' value='$kerpp' size='3'>
 				<input type='text' name='kerkk' value='$kerkk' size='3'>
@@ -388,6 +400,10 @@
 		if ($kukarow["kesken"] == 0) {
 			$query = "INSERT into ";
 			$postquery = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
+
+			// Jos valmistuksessa käytetään tilakoodeja, setataan valmistuksen_tila oletusarvoksi
+			// OV = Odottaa Valmistusta
+			if ($yhtiorow['valmistuksessa_kaytetaan_tilakoodeja'] == 'K') $postquery .= ", valmistuksen_tila = 'OV'";
 
 			$query2 = "INSERT into ";
 			$postquery2 = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";

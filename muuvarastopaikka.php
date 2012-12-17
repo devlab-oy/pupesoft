@@ -919,6 +919,7 @@
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='E'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
+		echo "<input type = 'hidden' name = 'toim' value = '{$toim}' />";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 
 		echo "<th>$tuoteno - ".t_tuotteen_avainsanat($trow, 'nimitys')."</th>";
@@ -930,6 +931,7 @@
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tee' value='S'>";
+		echo "<input type = 'hidden' name = 'toim' value = '{$toim}' />";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 		echo "<td>";
 		echo "<input type='Submit' value='".t("Seuraava tuote")."'>";
@@ -943,6 +945,7 @@
 
 		echo "	<form name = 'valinta' method='post'>
 				<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>
+				<input type='hidden' name='toim' value='{$toim}' />
 				<input type = 'hidden' name = 'tee' value ='N'>
 				<tr>
 				<th>".t("Lähettävä")."<br>".t("varastopaikka").":</th>
@@ -1127,6 +1130,7 @@
 		// Tehdään käyttöliittymä paikkojen muutoksille (otetus tai pois)
 		echo "	<form name = 'valinta' method='post'>
 				<input type = 'hidden' name = 'tee' value ='MUUTA'>
+				<input type = 'hidden' name = 'toim' value = '{$toim}' />
 				<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>";
 
 		echo "<table>";
@@ -1205,6 +1209,7 @@
 
 		echo "<table><form name = 'valinta' method='post'>
 				<input type='hidden' name='tee' value='UUSIPAIKKA'>
+				<input type = 'hidden' name = 'toim' value = '{$toim}' />
 				<input type='hidden' name='tuoteno' value='$tuoteno'>
 				<tr><th>".t("Lisää uusi varastopaikka")."</th></tr>
 				<tr><td>
@@ -1245,6 +1250,7 @@
 
 		echo "<br><hr><form name = 'valinta' method='post'>
 				<input type='hidden' name='tee' value=''>
+				<input type = 'hidden' name = 'toim' value = '{$toim}' />
 				<input type = 'submit' value = '".t("Palaa tuotteen valintaan")."'>";
 	}
 
@@ -1252,6 +1258,7 @@
 		// Tällä ollaan, jos olemme vasta valitsemassa tuotetta
 		echo "<form name = 'valinta' method='post'>
 				<input type='hidden' name='tee' value='M'>
+				<input type = 'hidden' name = 'toim' value = '{$toim}' />
 				<table>
 				<tr><th>".t("Anna tuotenumero")."</th><td>".livesearch_kentta("valinta", "TUOTEHAKU", "tuoteno", 210)."</td></tr>
 				</table><br>
@@ -1265,4 +1272,3 @@
 	if ($kutsuja == '') {
 		require "inc/footer.inc";
 	}
-?>

@@ -201,9 +201,9 @@
 
 		echo "<td>
 				<select name='summaustaso'>
-				<option value='T'   $sel3>".t("Varastonarvo tuotteittain")."</option>
 				<option value='S'   $sel1>".t("Varastonarvo varastoittain/tuotteittain")."</option>
 				<option value='P'   $sel2>".t("Varastonarvo varastopaikoittain")."</option>
+				<option value='T'   $sel3>".t("Varastonarvo tuotteittain")."</option>
 				<option value='TRY' $sel4>".t("Varastonarvo tuoteryhmittäin")."</option>
 				</select>";
 
@@ -1356,10 +1356,13 @@
 				echo "<font class='error'>",t("Huom. Bruttovarastonarvo historiasta on arvio"),"!</font><br/>";
 
 				if (count($varastot) > 0) {
-					echo "<font class='error'>",t("Huom. Varastonarvo historiasta on arvio, jos rajaat raporttia varastoittain."),"</font><br/>";
+					echo "<font class='error'>",t("Huom. Varastonarvo historiassa on arvio, jos rajaat raporttia varastoittain.")," ",t("Aja raportti ilman varastorajauksia."),"</font><br/>";
 				}
-				if ($summaustaso != "T") {
-					echo "<font class='error'>",t("Huom. Varastonarvo historiasta on arvio, jos summaustaso ei ole tuotteittain."),"</font><br/>";
+				elseif ($summaustaso == "S") {
+					echo "<font class='error'>",t("Huom. Varastonarvo yhteensä on oikein, mutta varastokohtainen varastonarvo historiasta on arvio.")," ",t("Aja raportti tuotteittain/tuoteryhmittäin."),"</font><br/>";
+				}
+				elseif ($summaustaso == "P") {
+					echo "<font class='error'>",t("Huom. Varastonarvo yhteensä on oikein, mutta varastopaikkakohtainen varastonarvo historiasta on arvio.")," ",t("Aja raportti tuotteittain/tuoteryhmittäin."),"</font><br/>";
 				}
 
 				echo "<br/>";

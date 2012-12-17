@@ -141,14 +141,18 @@
 
 				$xmldata = file_get_contents($file);
 
+				// poistetaan nonprintable merkit
+				$xmldata = preg_replace("/[^\x20-\xFF\n]/", "", $xmldata);
+
 				// Jos data ei oo UTF-8 muodossa niin laitetaan se siihen
 				if (mb_detect_encoding($xmldata, 'UTF-8', true) === FALSE) {
         			$xmldata = utf8_encode($xmldata);
         		}
 
 				//	T‰m‰ siksi ett‰ haluamme k‰ytt‰‰ paikallista kuvausta eik‰ ladata kuvausta verkosta!
-				$save = file_put_contents($file, preg_replace("/^.*?<Invoice>/ms", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/teccom-invoice.xsl\"?>\n<Invoice>", $xmldata));
+				$xmldata = preg_replace("/^.*?<Invoice>/ms", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/teccom-invoice.xsl\"?>\n<Invoice>", $xmldata);
 
+				$save = file_put_contents($file, $xmldata);
 				$path_parts = pathinfo($file);
 
 				rename($file, "{$laskut}/teccominvoice_{$path_parts['basename']}");

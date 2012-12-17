@@ -194,6 +194,7 @@
 		$sel1 = "";
 		$sel2 = "";
 		$sel3 = "";
+		$sel4 = "";
 
 		if (isset($summaustaso) and $summaustaso == "S") {
 			$sel1 = "SELECTED";
@@ -213,12 +214,11 @@
 
 		echo "<td>
 				<select name='summaustaso'>
+				<option value='T'   $sel3>".t("Varastonarvo tuotteittain")."</option>
 				<option value='S'   $sel1>".t("Varastonarvo varastoittain/tuotteittain")."</option>
 				<option value='P'   $sel2>".t("Varastonarvo varastopaikoittain")."</option>
-				<option value='T'   $sel3>".t("Varastonarvo tuotteittain")."</option>
 				<option value='TRY' $sel4>".t("Varastonarvo tuoteryhmittäin")."</option>
 				</select>";
-
 
 		if ($yhtiorow['tuotteiden_jarjestys_raportoinnissa'] == 'V') {
 

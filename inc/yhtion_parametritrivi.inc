@@ -3155,13 +3155,13 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == 'ennakkolaskun_automatisointi') {
+	if (mysql_field_name($result, $i) == 'maksusopimus_toimitus') {
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
 		$sel = $trow[$i] == "X" ? "selected" : "";
 
-		$ulos .= "<option value = ''>".t("Saa toimittaa vaikka ennakkolaskuja ei ole maksettu")."</option>";
-		$ulos .= "<option value = 'X' {$sel}>".t("Saa toimittaa vasta kun ennakkolaskut on maksettu")."</option>";
+		$ulos .= "<option value = ''>".t("Tavaran voi toimittaa vaikka ennakkolaskuja ei ole maksettu")."</option>";
+		$ulos .= "<option value = 'X' {$sel}>".t("Tavaran voi toimittaa vasta kun ennakkolaskut on maksettu")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

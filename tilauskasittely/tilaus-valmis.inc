@@ -65,7 +65,7 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
 	and $maksuehtorow['jaksotettu'] != ''
 	and $laskurow['tila'] == 'N'
 	and ($laskurow['alatila'] == '' or $laskurow['alatila'] == 'B')
-	and ($tilausvalmis_asiakas_row['ennakkolaskun_automatisointi'] == 'X' or ($tilausvalmis_asiakas_row['ennakkolaskun_automatisointi'] == '' and $yhtiorow['ennakkolaskun_automatisointi'] == 'X'))) {
+	and ($tilausvalmis_asiakas_row['maksusopimus_toimitus'] == 'X' or ($tilausvalmis_asiakas_row['maksusopimus_toimitus'] == '' and $yhtiorow['maksusopimus_toimitus'] == 'X'))) {
 
 	if ($laskurow['alatila'] == '') {
 		$query = "	UPDATE lasku SET

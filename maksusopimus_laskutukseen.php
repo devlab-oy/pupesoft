@@ -558,7 +558,9 @@
 			$query = "	UPDATE lasku SET
 						alatila = ''
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$tunnus}'";
+						AND tunnus  = '{$tunnus}'
+						AND tila    = 'N'
+						AND alatila = 'B'";
 			$upd_res = pupe_query($query);
 
 			$kukarow['kesken'] = $tunnus;

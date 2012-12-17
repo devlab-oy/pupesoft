@@ -372,10 +372,6 @@
 		$tiliointi_tunnukset = array();
 		$tili = tarkista_tilinumero($tiliointi['tilinumero'], $yhtio);
 
-		if($tiliointi['summa'] == 139.11) {
-			$shit = "fit";
-		}
-
 		if(!empty($tili)) {
 			if(!empty($tiliointi['alv']) and !empty($tiliointi['alv_maara'])) {
 				//tehdään alv tiliöinti ja tiliöinti - alv

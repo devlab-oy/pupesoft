@@ -1124,8 +1124,8 @@
 		$sel = array_fill_keys(array($trow[$i]), 'selected') + array('S' => '', 'X' => '');
 
 		$ulos .= "<option value = ''>".t("Yhtiön oletus")."</option>";
-		$ulos .= "<option value = 'S' {$sel['S']}>".t("Tavaran voi toimittaa vaikka ennakkolaskuja ei ole maksettu")."</option>";
-		$ulos .= "<option value = 'X' {$sel['X']}>".t("Tavaran voi toimittaa vasta kun ennakkolaskut on maksettu")."</option>";
+		$ulos .= "<option value = 'S' {$sel['S']}>".t("Tilauksen voi toimittaa vaikka ennakkolaskuja ei ole maksettu")."</option>";
+		$ulos .= "<option value = 'X' {$sel['X']}>".t("Tilauksen voi toimittaa vasta kun ennakkolaskut on maksettu")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -3160,8 +3160,8 @@
 
 		$sel = $trow[$i] == "X" ? "selected" : "";
 
-		$ulos .= "<option value = ''>".t("Tavaran voi toimittaa vaikka ennakkolaskuja ei ole maksettu")."</option>";
-		$ulos .= "<option value = 'X' {$sel}>".t("Tavaran voi toimittaa vasta kun ennakkolaskut on maksettu")."</option>";
+		$ulos .= "<option value = ''>".t("Tilauksen voi toimittaa vaikka ennakkolaskuja ei ole maksettu")."</option>";
+		$ulos .= "<option value = 'X' {$sel}>".t("Tilauksen voi toimittaa vasta kun ennakkolaskut on maksettu")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

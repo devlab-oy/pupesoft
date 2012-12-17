@@ -1378,8 +1378,18 @@
 			echo "<td align='right'>".sprintf("%.2f",$bvarvo)."</td></tr>";
 			echo "</table><br>";
 
+			// Katsotaan ollaanko ottamassa varastonarvo historiaan
 			if ("$vv-$kk-$pp" != date("Y-m-d")) {
-				echo "<font class='error'>",t("Huom. Bruttovarastonarvo on arvio"),"!</font><br/><br/>";
+				echo "<font class='error'>",t("Huom. Bruttovarastonarvo historiasta on arvio"),"!</font><br/>";
+
+				if (count($varastot) > 0) {
+					echo "<font class='error'>",t("Huom. Varastonarvo historiasta on arvio, jos rajaat raporttia varastoittain."),"</font><br/>";
+				}
+				if ($summaustaso != "T") {
+					echo "<font class='error'>",t("Huom. Varastonarvo historiasta on arvio, jos summaustaso ei ole tuotteittain."),"</font><br/>";
+				}
+
+				echo "<br/>";
 			}
 		}
 

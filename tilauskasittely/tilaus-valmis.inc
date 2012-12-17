@@ -61,7 +61,36 @@ if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] 
 	ob_end_clean();
 }
 
-if ($luottorajavirhe != '') {
+// otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
+$query = "	SELECT *
+			FROM maksuehto
+			WHERE yhtio = '{$kukarow['yhtio']}'
+			AND tunnus = '{$laskurow['maksuehto']}'";
+$maksuehto_result = pupe_query($query);
+$maksuehtorow = mysql_fetch_assoc($maksuehto_result);
+
+// Jos ennakkolaskun automatisointi on päällä (asiakas > yhtiön oletus) ja maksuehtona on "osamaksu", laitetaan tilaus holdiin
+if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
+	and $maksuehtorow['jaksotettu'] != ''
+	and $laskurow['tila'] == 'N'
+	and ($laskurow['alatila'] == '' or $laskurow['alatila'] == 'B')
+	and ($tilausvalmis_asiakas_row['maksusopimus_toimitus'] == 'X' or ($tilausvalmis_asiakas_row['maksusopimus_toimitus'] == '' and $yhtiorow['maksusopimus_toimitus'] == 'X'))) {
+
+	if ($laskurow['alatila'] == '') {
+		$query = "	UPDATE lasku SET
+					alatila = 'B'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$laskurow['tunnus']}'
+					AND tila = 'N'";
+		$myyntikielto_res = pupe_query($query);
+
+		echo "<font class='error'>",t("Tilaus laitetaan odottamaan, kunnes ennakkolaskut ovat maksettu"),".</font><br/><br/>";
+	}
+
+	// Laitetaan lopetus tyhjäksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
+	$lopetus = "";
+}
+elseif ($luottorajavirhe != '') {
 	if ($kutsuja == "EDITILAUS" or $kukarow["extranet"] != "") {
 		$alatila = "F";
 	}
@@ -267,19 +296,11 @@ else {
 		$laskurow['hyvak2'] = $kukarow["kuka"];
 	}
 
-	// otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
-	$query = "	SELECT *
-				FROM maksuehto
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND tunnus = '$laskurow[maksuehto]'";
-	$result = pupe_query($query);
-
 	$kateinen = "";
 	$jaksotettu = "";
 	$itsetulostus = "";
 
-	if (mysql_num_rows($result) == 1) {
-		$maksuehtorow = mysql_fetch_assoc($result);
+	if (mysql_num_rows($maksuehto_result) == 1) {
 
 		// jos kyseessä on käteiskauppaa
 		if ($maksuehtorow['kateinen'] != '') {
@@ -1607,5 +1628,3 @@ $result = pupe_query($query);
 if (!isset($silent) or $silent == "") {
 	echo $tilaus_valmis_ulos;
 }
-
-?>

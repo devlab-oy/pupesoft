@@ -1090,7 +1090,8 @@
 						tuoteno
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND otunnus = '{$tilaus_tunnus}'";
+						AND otunnus = '{$tilaus_tunnus}'
+						AND var = 'J'";
 			$result = pupe_query($query);
 
 			$tunnukset = array();

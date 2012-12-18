@@ -162,6 +162,9 @@
 			$_x++;
 		}
 
+		$sarakkeet["SARAKE{$_x}"] = t("myynti 12kk")."\t";
+		$_x++;
+
 		// $sarakkeet["SARAKE30"] = t("myynti")." $kausi2\t";
 		// $sarakkeet["SARAKE31"] = t("myynti")." $kausi3\t";
 		// $sarakkeet["SARAKE32"] = t("myynti")." $kausi4\t";
@@ -170,6 +173,9 @@
 			$sarakkeet["SARAKE{$_x}"] = t("myynti")." ".${"kuukausied{$i}"}."\t";
 			$_x++;
 		}
+
+		$sarakkeet["SARAKE{$_x}"] = t("myynti 24kk")."\t";
+		$_x++;
 
 		// $sarakkeet["SARAKE34"] = t("myynti")." $kausied2\t";
 		// $sarakkeet["SARAKE35"] = t("myynti")." $kausied3\t";
@@ -1389,12 +1395,15 @@
 
 					$_x_k = $_x;
 
+					$myydyt_kappaleet_yhteensa = 0;
+
 					//Myydyt kappaleet
 					for ($i = 1; $i < 13; $i++) {
 
 						if ($valitut["SARAKE{$_x}"] != '') {
 							$rivi .= str_replace(".",",",$laskurow["kpl{$i}"])."\t";
 							$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["kpl{$i}"]);
+							$myydyt_kappaleet_yhteensa += $laskurow["kpl{$i}"];
 							$excelsarake++;
 						}
 
@@ -1430,11 +1439,18 @@
 
 					}
 
+					$rivi .= str_replace(".",",",$myydyt_kappaleet_yhteensa)."\t";
+					$worksheet->writeNumber($excelrivi, $excelsarake, $myydyt_kappaleet_yhteensa);
+					$excelsarake++;
+
+					$_x++;
+
 					for ($i = 1; $i < 13; $i++) {
 
 						if ($valitut["SARAKE{$_x}"] != '') {
 							$rivi .= str_replace(".",",",$laskurow["EDkpl{$i}"])."\t";
 							$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["EDkpl{$i}"]);
+							$myydyt_kappaleet_yhteensa += $laskurow["EDkpl{$i}"];
 							$excelsarake++;
 						}
 
@@ -1468,6 +1484,12 @@
 						// 	$excelsarake++;
 						// }
 					}
+
+					$rivi .= str_replace(".",",",$myydyt_kappaleet_yhteensa)."\t";
+					$worksheet->writeNumber($excelrivi, $excelsarake, $myydyt_kappaleet_yhteensa);
+					$excelsarake++;
+
+					$_x++;
 
 					//Kulutetut kappaleet
 					for ($i = 1; $i < 13; $i++) {

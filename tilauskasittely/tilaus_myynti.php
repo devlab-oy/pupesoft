@@ -7575,6 +7575,21 @@ if ($tee == '') {
 					echo "<br><br>".t("Kuittikopio").":<br><select name='valittu_kopio_tulostin'>";
 					echo "<option value=''>".t("Ei kuittikopiota")."</option>";
 
+					// Tarkistetaan onko asiakkaalla sähköpostiosoitteet setattu
+					$query = "	SELECT IF(lasku_email != '', lasku_email, email) AS email
+								FROM asiakas
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$laskurow['liitostunnus']}'
+								AND (email != '' or lasku_email != '')";
+					$asiakasemail_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($asiakasemail_chk_res) != 0) {
+
+						$asiakasemail_chk_row = mysql_fetch_assoc($asiakasemail_chk_res);
+
+						echo "<option value='asiakasemail{$asiakasemail_chk_row['email']}'>",t("Asiakkaan sähköpostiin"),": {$asiakasemail_chk_row['email']}</option>";
+					}
+
 					$querykieli = "	SELECT *
 									FROM kirjoittimet
 									WHERE yhtio = '$kukarow[yhtio]'

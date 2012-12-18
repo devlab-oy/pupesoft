@@ -2248,7 +2248,7 @@
 
 			for ($i = 1; $i < 13; $i++) {
 				echo "<tr>";
-				echo "<th>",date("m / Y", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y"))),"</th>";
+				echo "<th>",date("m / Y", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")))," <span style='float: right;font-weight: bold;'>",t("Kuukausi")," {$i}</span></th>";
 				echo "<td><input type='text' name='ppa{$i}' value='",${"ppa{$i}"},"' size='5' /></td>";
 				echo "<td><input type='text' name='kka{$i}' value='",${"kka{$i}"},"' size='5' /></td>";
 				echo "<td><input type='text' name='vva{$i}' value='",${"vva{$i}"},"' size='5' /></td>";

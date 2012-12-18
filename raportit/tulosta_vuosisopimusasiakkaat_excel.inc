@@ -20,6 +20,8 @@ class vuosisopimus_asiakkaat_excel {
 	}
 
 	public function generoi() {
+		global $pupe_root_polku;
+
 		$this->alku();
 
 		$this->add_tyhja_rivi(4);
@@ -37,7 +39,7 @@ class vuosisopimus_asiakkaat_excel {
 
 		$excel_file = '/tmp/' . $this->excel->close();
 
-		$new_excel_file = "/tmp/Ostoseuranta_{$this->asiakas['asiakasnro']}.xlsx";
+		$new_excel_file = $pupe_root_polku . '/dataout/' . "Ostoseuranta_{$this->asiakas['asiakasnro']}.xlsx";
 		exec("cp {$excel_file} {$new_excel_file}");
 
 		unlink($excel_file);

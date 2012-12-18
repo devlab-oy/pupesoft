@@ -456,17 +456,20 @@
 				break;
 
 			case 'asiakkaan_myyjalle':
+				//käydään data_array läpi jotta saamme raportin sille kuuluvan myyjän alle
+				$myyjien_tiedostot = array();
 				foreach($data_array as $data) {
-					$email = $data['myyja_eposti'];
-
+					$myyjien_tiedostot[$data['asiakasrow']['myyja_eposti']][] = $data['tiedosto'];
+				}
+				foreach($myyjien_tiedostot as $myyja_eposti => $tiedosto_array) {
+					$email = $myyja_eposti;
 					if($params['ytunnus'] == '') {
-						luo_zip_ja_laheta($tiedostot, $email);
+						luo_zip_ja_laheta($tiedosto_array, $email);
 					}
 					else {
 						//jos ytunnus on annettu tiedämme, että generoidaan vain yksi raportti
-						laheta_email($email, $tiedostot);
+						laheta_email($email, $tiedosto_array);
 					}
-					
 				}
 				break;
 
@@ -589,9 +592,9 @@
 	}
 
 	function luo_zip_ja_laheta($tiedostot, $email_address) {
-		global $yhtiorow, $kieli;
+		global $yhtiorow, $kieli, $pupe_root_polku;
 
-		$maaranpaa = '/tmp/Ostoseuranta_raportit.zip';
+		$maaranpaa = $pupe_root_polku . '/dataout/' . 'Ostoseuranta_raportit.zip';
 		$ylikirjoita = true;//ihan varmuuden vuoks
 		if(luo_zip($tiedostot, $maaranpaa, $ylikirjoita)) {
 			//lähetetään email
@@ -660,7 +663,7 @@
 		}
 	}
 
-	function luo_zip($tiedostot = array(), $maaranpaa = '', $ylikirjoita = false) {
+	function luo_zip($tiedostot = array(), $maaranpaa = '', $ylikirjoita = true) {
 		//if the zip file already exists and overwrite is false, return false
 		if (file_exists($maaranpaa) && !$ylikirjoita) {
 			return false;
@@ -686,7 +689,11 @@
 			}
 			//add the files
 			foreach ($validit_tiedostot as $tiedosto) {
-				$zip->addFile($tiedosto, $tiedosto);
+				//haetaan tiedoston nimi, jotta ei tule zipattua koko hakemisto rakennetta
+				$tiedosto_temp = explode('/', $tiedosto);
+				$hakemiston_syvyys = count($tiedosto_temp);
+				$tiedoston_nimi = $tiedosto_temp[$hakemiston_syvyys - 1];
+				$zip->addFile($tiedosto, $tiedoston_nimi);
 			}
 			//debug
 			//echo 'The zip archive contains ',$zip->numFiles,' files with a status of ',$zip->status;

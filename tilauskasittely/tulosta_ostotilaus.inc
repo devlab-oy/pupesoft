@@ -433,7 +433,7 @@
 				$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
 				$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
 
-            	if (isset($nimitykset) and $nimitykset != "") {
+            	if ((isset($nimitykset) and $nimitykset != "") or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A')) {
 
 	 				//K‰‰nnet‰‰n nimitys
 					$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);

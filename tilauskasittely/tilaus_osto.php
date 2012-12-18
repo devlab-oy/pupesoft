@@ -1201,8 +1201,6 @@
 					$kopiotoim = "OSTO";
 				}
 
-				$nimitykset = $yhtiorow['ostotilaustyyppi'] == 'A' ? 'JOO' : '';
-
 				echo "	<tr>
 						<th colspan='2' nowrap>".t("Näytä ostotilaus").":</th>
 						<td colspan='2' nowrap>
@@ -1211,7 +1209,6 @@
 						<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 						<input type='hidden' name='toim_nimitykset' value = '$toim_nimitykset'>
 						<input type='hidden' name='toim' 			value = '$kopiotoim'>
-						<input type='hidden' name='nimitykset' 		value = '{$nimitykset}'>
 						<input type='hidden' name='tee' 			value = 'TULOSTA'>
 						<input type='hidden' name='lopetus' 		value = '$tilost_lopetus//from=LASKUTATILAUS'>
 						<input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_tosto', 'tulosta_osto'); return false;\">

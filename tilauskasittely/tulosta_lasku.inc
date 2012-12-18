@@ -588,7 +588,7 @@ if (!function_exists('rivi_lasku')) {
 		if ($laskutyyppi == 10 or $laskutyyppi == 12) {
 			$row["hinta"] = 0;
 			$row["rivihinta"] = 0;
-			
+
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 				$row["ale{$alepostfix}"] = 0;
 			}
@@ -602,7 +602,7 @@ if (!function_exists('rivi_lasku')) {
 		else {
 			$kurssi = 1;
 		}
-		
+
 		// Laskupohjissa 13 ja 14 ei näytetä aleja
 		if (($yhtiorow['myynnin_alekentat'] > 1 or $row['erikoisale'] > 0) and $laskutyyppi != 13 and $laskutyyppi != 14) {
 
@@ -778,7 +778,7 @@ if (!function_exists('rivi_otsikot')) {
 			//toka rivi
 			$pdf_lasku->draw_text(35,  $kala-9, t("Tilausnumero", $kieli)."/".t("Lisätietoja", $kieli),		$thispage, $pieni);
 			$pdf_lasku->draw_text(390, $kala-9, t("Yksikkö", $kieli),			$thispage, $pieni);
-			$pdf_lasku->draw_text(440, $kala-9, t("Toimituspvm", $kieli),		$thispage, $pieni);				
+			$pdf_lasku->draw_text(440, $kala-9, t("Toimituspvm", $kieli),		$thispage, $pieni);
 		}
 		else {
 			//eka rivi
@@ -1451,7 +1451,7 @@ if (!function_exists('rivi_perhe')) {
 
 		if ($lisataa == 0) {
 			if ($laskutyyppi == 14) {
-				list($thispage, $kala, $summa, $arvo) = rivi_viro($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);			
+				list($thispage, $kala, $summa, $arvo) = rivi_viro($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 			}
 			else {
 				list($thispage, $kala, $summa, $arvo) = rivi_original($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
@@ -2460,18 +2460,27 @@ if (!function_exists("tulosta_lasku")) {
 
 			// Kuittikopio
 			if (isset($valittu_kopio_tulostin) and $valittu_kopio_tulostin != '') {
-				$querykieli = "	SELECT *
-								from kirjoittimet
-								where yhtio = '$kukarow[yhtio]'
-								and tunnus = '$valittu_kopio_tulostin'";
-				$kires = pupe_query($querykieli);
-				$kirow = mysql_fetch_assoc($kires);
 
-				if ($GLOBALS['silent'] == "") $GLOBALS['tulos_ulos'] .= t("Kuittikopio tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
+				$asiakasemail_kaytossa = substr($valittu_kopio_tulostin, 0, 12) == 'asiakasemail' ? true : false;
 
-				if ($kirow["komento"] == "email" and $kukarow["eposti"] != '') {
+				if (!$asiakasemail_kaytossa) {
+					$querykieli = "	SELECT *
+									from kirjoittimet
+									where yhtio = '$kukarow[yhtio]'
+									and tunnus = '$valittu_kopio_tulostin'";
+					$kires = pupe_query($querykieli);
+					$kirow = mysql_fetch_assoc($kires);
+				}
+				else {
+					$kirow = array('komento' => '');
+				}
+
+				if ($asiakasemail_kaytossa and $GLOBALS['silent'] == "") $GLOBALS['tulos_ulos'] .= t("Kuittikopio lähetetään sähköpostiin").": ".str_replace("asiakasemail", "", $valittu_kopio_tulostin)."<br>\n";
+				elseif ($GLOBALS['silent'] == "") $GLOBALS['tulos_ulos'] .= t("Kuittikopio tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
+
+				if ($asiakasemail_kaytossa or ($kirow["komento"] == "email" and $kukarow["eposti"] != '')) {
 					// lähetetään meili
-					$komento = "";
+					$komento = $asiakasemail_kaytossa ? $valittu_kopio_tulostin : "";
 
 					$kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
 

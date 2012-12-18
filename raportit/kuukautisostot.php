@@ -1606,28 +1606,32 @@
 						// }
 					}
 
-					if ($valitut["SARAKE45"] != '') {
+					if ($valitut["SARAKE{$_x}"] != '') {
 						$rivi .= str_replace(".",",",$row['tuotekerroin'])."\t";
 
 						$worksheet->writeNumber($excelrivi, $excelsarake, $row["tuotekerroin"]);
 						$excelsarake++;
 					}
 
-					if ($valitut["SARAKE46"] != '') {
+					$_x++;
+
+					if ($valitut["SARAKE{$_x}"] != '') {
 						$rivi .= str_replace(".",",",$ennp["ennakot"])."\t";
 
 						$worksheet->writeNumber($excelrivi, $excelsarake, $ennp["ennakot"]);
 						$excelsarake++;
 					}
 
-					if ($valitut["SARAKE47"] != '') {
+					$_x++;
+
+					if ($valitut["SARAKE{$_x}"] != '') {
 						$rivi .= "\"$row[aleryhma]\"\t";
 
 						$worksheet->writeString($excelrivi, $excelsarake, $row["aleryhma"]);
 						$excelsarake++;
 					}
 
-					if ($valitut["SARAKE47B"] != '') {
+					if ($valitut["SARAKE{$_x}B"] != '') {
 						$kehahin = 0;
 
 						//Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu))
@@ -1661,64 +1665,35 @@
 						$excelsarake++;
 					}
 
+					$_x++;
+
 					if ($asiakasosasto != '') {
-						if ($valitut["SARAKE48"] != '') {
-							$rivi .= str_replace(".",",",$asosrow['kpl1'])."\t";
 
-							$worksheet->writeNumber($excelrivi, $excelsarake, $asosrow['kpl1']);
-							$excelsarake++;
-						}
+						for ($i = 1; $i < 13; $i++) {
 
-						if ($valitut["SARAKE49"] != '') 	{
-							$rivi .= str_replace(".",",",$asosrow['kpl2'])."\t";
+							if ($valitut["SARAKE{$_x}"] != '') {
+								$rivi .= str_replace(".",",",$asosrow["kpl{$i}"])."\t";
 
-							$worksheet->writeNumber($excelrivi, $excelsarake, $asosrow['kpl2']);
-							$excelsarake++;
-						}
+								$worksheet->writeNumber($excelrivi, $excelsarake, $asosrow["kpl{$i}"]);
+								$excelsarake++;
+							}
 
-						if ($valitut["SARAKE50"] != '') {
-							$rivi .= str_replace(".",",",$asosrow['kpl3'])."\t";
-
-							$worksheet->writeNumber($excelrivi, $excelsarake, $asosrow['kpl3']);
-							$excelsarake++;
-						}
-
-						if ($valitut["SARAKE51"] != '') {
-							$rivi .= str_replace(".",",",$asosrow['kpl4'])."\t";
-
-							$worksheet->writeNumber($excelrivi, $excelsarake, $asosrow['kpl4']);
-							$excelsarake++;
-
+							$_x++;
 						}
 					}
 
 					if ($asiakasno != '') {
-						if ($valitut["SARAKE52"] != '') {
-							$rivi .= str_replace(".",",",$asrow['kpl1'])."\t";
 
-							$worksheet->writeNumber($excelrivi, $excelsarake, $asrow['kpl1']);
-							$excelsarake++;
-						}
+						for ($i = 1; $i < 13; $i++) {
 
-						if ($valitut["SARAKE53"] != '') {
-							$rivi .= str_replace(".",",",$asrow['kpl2'])."\t";
+							if ($valitut["SARAKE{$_x}"] != '') {
+								$rivi .= str_replace(".",",",$asrow["kpl{$i}"])."\t";
 
-							$worksheet->writeNumber($excelrivi, $excelsarake, $asrow['kpl2']);
-							$excelsarake++;
-						}
+								$worksheet->writeNumber($excelrivi, $excelsarake, $asrow["kpl{$i}"]);
+								$excelsarake++;
+							}
 
-						if ($valitut["SARAKE54"] != '') {
-							$rivi .= str_replace(".",",",$asrow['kpl3'])."\t";
-
-							$worksheet->writeNumber($excelrivi, $excelsarake, $asrow['kpl3']);
-							$excelsarake++;
-						}
-
-						if ($valitut["SARAKE55"] != '') {
-							$rivi .= str_replace(".",",",$asrow['kpl4'])."\t";
-
-							$worksheet->writeNumber($excelrivi, $excelsarake, $asrow['kpl4']);
-							$excelsarake++;
+							$_x++;
 						}
 					}
 
@@ -1751,7 +1726,7 @@
 						}
 					}
 
-					if ($valitut["SARAKE64"] != '') {
+					if ($valitut["SARAKE{$_x}"] != '') {
 						$query = "	SELECT count(*) kpl
 									FROM yhteensopivuus_tuote
 									JOIN yhteensopivuus_rekisteri on (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio and yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
@@ -1767,6 +1742,8 @@
 						$excelsarake++;
 					}
 
+					$_x++;
+
 					//Liitetäänkö myös tilauttu by varasto
 					if (is_resource($osvres)) {
 						mysql_data_seek($osvres, 0);
@@ -1776,12 +1753,16 @@
 
 							$worksheet->write($excelrivi, $excelsarake, $ennp["tilattu_".$vrow["tunnus"]]);
 							$excelsarake++;
+
+							$_x++;
 						}
 
 						$rivi .= str_replace(".",",",$ennp["tilattu_oletus"])."\t";
 
 						$worksheet->writeNumber($excelrivi, $excelsarake, $ennp["tilattu_oletus"]);
 						$excelsarake++;
+
+						$_x++;
 					}
 
 
@@ -1838,64 +1819,54 @@
 							$asresult = pupe_query($query);
 							$kasrow = mysql_fetch_assoc($asresult);
 
-							if ($valitut["SARAKE56"] != '') {
+							if ($valitut["SARAKE{$_x}"] != '') {
 								$rivi .= "\"$korvarow[tuoteno]\"\t";
 
 								$worksheet->writeString($excelrivi, $excelsarake, $korvarow["tuoteno"], $format_bold);
 								$excelsarake++;
 							}
 
-							if ($valitut["SARAKE57"] != '') {
+							$_x++;
+
+							if ($valitut["SARAKE{$_x}"] != '') {
 								$rivi .= str_replace(".",",",$korvasaldorow['saldo'])."\t";
 
 								$worksheet->writeNumber($excelrivi, $excelsarake, $korvasaldorow["saldo"]);
 								$excelsarake++;
 							}
 
-							if ($valitut["SARAKE58"] != '') {
+							$_x++;
+
+							if ($valitut["SARAKE{$_x}"] != '') {
 								$rivi .= str_replace(".",",",$prow['varattu'])."\t";
 
 								$worksheet->writeNumber($excelrivi, $excelsarake, $prow["varattu"]);
 								$excelsarake++;
 							}
 
-						    if ($valitut["SARAKE59"] != '') {
+							$_x++;
+
+						    if ($valitut["SARAKE{$_x}"] != '') {
 								$rivi .= str_replace(".",",",$prow['tilattu'])."\t";
 
 								$worksheet->writeNumber($excelrivi, $excelsarake, $prow["tilattu"]);
 								$excelsarake++;
 							}
 
-							if ($valitut["SARAKE60"] != '') {
-								$rivi .= str_replace(".",",",$kasrow['kpl1'])."\t";
+							$_x++;
 
-								$worksheet->writeNumber($excelrivi, $excelsarake, $kasrow["kpl1"]);
-								$excelsarake++;
-							}
+							for ($i = 1; $i < 13; $i++) {
+								if ($valitut["SARAKE{$_x}"] != '') {
+									$rivi .= str_replace(".",",",$kasrow["kpl{$i}"])."\t";
 
-							if ($valitut["SARAKE61"] != '') {
-								$rivi .= str_replace(".",",",$kasrow['kpl2'])."\t";
+									$worksheet->writeNumber($excelrivi, $excelsarake, $kasrow["kpl{$i}"]);
+									$excelsarake++;
+								}
 
-								$worksheet->writeNumber($excelrivi, $excelsarake, $kasrow["kpl2"]);
-								$excelsarake++;
-							}
-
-							if ($valitut["SARAKE62"] != '') {
-								$rivi .= str_replace(".",",",$kasrow['kpl3'])."\t";
-
-								$worksheet->writeNumber($excelrivi, $excelsarake, $kasrow["kpl3"]);
-								$excelsarake++;
-							}
-
-							if ($valitut["SARAKE63"] != '') {
-								$rivi .= str_replace(".",",",$kasrow['kpl4'])."\t";
-
-								$worksheet->writeNumber($excelrivi, $excelsarake, $kasrow["kpl4"]);
-								$excelsarake++;
+								$_x++;
 							}
 						}
 					}
-
 
 					$rivi .= "\r\n";
 					$excelrivi++;

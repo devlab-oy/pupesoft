@@ -112,7 +112,7 @@
 					'valuutta' => (string)$asiakas->Currency,
 					'kieli' => (string)$asiakas->LanguageId,
 					'max_luotto' => (float)$asiakas->CreditMax,
-					'ytunnus' => 'FI'.str_replace('-', '', (string)$asiakas->VATNum),
+					'ytunnus' => ((string)$asiakas->VATNum == '') ? '' : 'FI'.str_replace('-', '', (string)$asiakas->VATNum),
 					'osoite' => utf8_decode((string)$asiakas->Street),
 					'postino' => (string)$asiakas->ZipCode,
 					'kaupunki' => utf8_decode((string)$asiakas->City),

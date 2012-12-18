@@ -144,6 +144,10 @@
 					if(!isset($data[$lasku_numero]['alv'])) {
 						$data[$lasku_numero]['alv'] = ((string)$myyntilasku->TaxItemGroup == '') ? 0 : (float)$myyntilasku->TaxItemGroup;
 					}
+					//laitetaan kustp myös laskuotsikolle
+					if(!isset($data[$lasku_numero]['kustp'])) {
+						$data[$lasku_numero]['kustp'] = (string)$myyntilasku->Dim2;
+					}
 				}
 			}
 		}
@@ -270,7 +274,7 @@
 			'tapahtumapaiva' => $myyntilasku['tapahtumapaiva'],
 			'summa' => $myyntilasku['summa'],
 			'alv' => $myyntilasku['alv'],
-			'kustp' => 0,
+			'kustp' => $myyntilasku['kustp'],
 		);
 		tee_tiliointi($tilausnumero, $myyntisaamiset_array, $yhtio);
 
@@ -371,6 +375,7 @@
 	function tee_tiliointi($tilausnumero, $tiliointi, $yhtio) {
 		$tiliointi_tunnukset = array();
 		$tili = tarkista_tilinumero($tiliointi['tilinumero'], $yhtio);
+		$kustannuspaikka = hae_kustannuspaikka($tiliointi['kustp'], $yhtio);
 
 		if(!empty($tili)) {
 			if(!empty($tiliointi['alv']) and !empty($tiliointi['alv_maara'])) {
@@ -389,7 +394,7 @@
 							tapvm = '{$tiliointi['tapahtumapaiva']}',
 							summa = '{$alviton_summa}',
 							vero = '{$tiliointi['alv']}',
-							kustp = '{$tiliointi['kustp']}',
+							kustp = '{$kustannuspaikka['tunnus']}',
 							ltunnus = '{$tilausnumero}',
 							laatija = 'futursoft',
 							laadittu = NOW(),
@@ -409,8 +414,8 @@
 							SET tilino = '{$yhtio_row['alv']}',
 							tapvm = '{$tiliointi['tapahtumapaiva']}',
 							summa = '{$alv_maara}',
-							vero = '{$tiliointi['alv']}',
-							kustp = '{$tiliointi['kustp']}',
+							vero = '0',
+							kustp = '{$kustannuspaikka['tunnus']}',
 							ltunnus = '{$tilausnumero}',
 							laatija = 'futursoft',
 							laadittu = NOW(),
@@ -426,8 +431,8 @@
 							SET tilino = '{$tiliointi['tilinumero']}',
 							tapvm = '{$tiliointi['tapahtumapaiva']}',
 							summa = '{$tiliointi['summa']}',
-							vero = '{$tiliointi['alv']}',
-							kustp = '{$tiliointi['kustp']}',
+							vero = '0',
+							kustp = '{$kustannuspaikka['tunnus']}',
 							ltunnus = '{$tilausnumero}',
 							laatija = 'futursoft',
 							laadittu = NOW(),
@@ -503,5 +508,19 @@
 		}
 		// Adminin oletus, mutta kuka konversio
 		return mysql_fetch_assoc($result);
+	}
+
+	function hae_kustannuspaikka($kustannuspaikka_koodi, $yhtio) {
+		$query = "	SELECT *
+					FROM kustannuspaikka
+					WHERE yhtio = '{$yhtio}'
+					AND koodi = '{$kustannuspaikka_koodi}'";
+		$result = pupe_query($query);
+
+		if(mysql_num_rows($result) == 0) {
+			return null;
+		}
+		
+		return mysql_fetch_array($result);
 	}
 ?>

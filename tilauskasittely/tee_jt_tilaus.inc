@@ -1079,3 +1079,35 @@
 			}
 		}
 	}
+
+	if(!function_exists("hae_toimitettavat_tilausrivit")) {
+		function hae_toimitettavat_tilausrivit($tilaus_tunnus, $varastot) {
+			global $yhtiorow, $kukarow;
+			//T‰m‰n funktion tarkoitus on hakea jt-k‰sittelyn ollessa osatoimitus kiellossa kaikki tilauksen tilausrivit ja katsoa, onko kaikilla saldoa. Jos kaikilla on saldoa rivit voidaan toimittaa. Jos jollain ei ole saldoa, mit‰‰n tilauksen tilausrivi‰ ei toimiteta
+
+			//haetaan tilauksen kaikki rivit ja niiden tuotenumerot
+			$query = "	SELECT tunnus,
+						tuoteno
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND otunnus = '{$tilaus_tunnus}'";
+			$result = pupe_query($query);
+
+			$tunnukset = array();
+			while($tilausrivi_row = mysql_fetch_assoc($result)) {
+				//haetaan tuote kohtaisesti varasto saldo
+				//saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '');
+				//return array($saldo, $hyllyssa, $myytavissa, TRUE);
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tilausrivi_row['tuoteno'], '', $varastot, $kukarow['yhtio'], '', '', '', '', '', '', '');
+
+				if($saldo <= 0) {
+					return false;
+				}
+				else {
+					$tunnukset[] = $tilausrivi_row['tunnus'];
+				}
+			}
+
+			return $tunnukset;
+		}
+	}

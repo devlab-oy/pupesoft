@@ -1992,6 +1992,15 @@ function poista_edelliset_matkalaskurivit($tilausnumero, $rivitunnus, $kukarow) 
 				and ltunnus = '$tilausnumero'
 				and tunnus in ({$trow['tiliointirivitunnukset']})";
 	$result = pupe_query($query);
+	
+	// Yliviivataan ALV-tiliöinnit
+	$query = "	UPDATE tiliointi
+				SET korjattu = '$kukarow[kuka]',
+				korjausaika  = now()
+				WHERE yhtio = '$kukarow[yhtio]'
+				and ltunnus = '$tilausnumero'
+				and aputunnus in ({$trow['tiliointirivitunnukset']})";
+	$result = pupe_query($query);
 
 	// Poistetaan tilausrivin lisätiedot
 	$query = "	DELETE
@@ -2449,11 +2458,14 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 				//  Indeksi on 0 kun käsitellään kokopäivärahoja ja 1 kun käsitellään puolipäivärahoja
 				if ($indeksi == 0) {
 					for ($i = 0; $i <= $kpl_array[0] - 1; $i++) {
-						if($i == 0) {
+						if ($tyyppi == "B") {
+							$_alkuaika = $_loppuaika = date('Y-m-d H:i:s');
+						}							
+						elseif ($i == 0) {
 							$_alkuaika = $alkuaika;
 							$_loppuaika = date('Y-m-d H:i:s', strtotime($alkuaika . ' + 24 hours'));
 						}
-						if($i == ($kpl_array[0] - 1)) {
+						elseif ($i == ($kpl_array[0] - 1)) {
 							if(empty($kpl_array[1])) {
 								$_loppuaika = $loppuaika;
 							}

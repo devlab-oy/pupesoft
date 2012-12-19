@@ -1081,34 +1081,44 @@
 	}
 
 	if(!function_exists("hae_toimitettavat_tilausrivit")) {
-		function hae_toimitettavat_tilausrivit($tilaus_tunnus, $varastot) {
+		function hae_toimitettavat_tilausrivit($tilausrivi_tunnus, $tilaus_tunnus, $varastot, $jtspec) {
 			global $yhtiorow, $kukarow;
-			//T‰m‰n funktion tarkoitus on hakea jt-k‰sittelyn ollessa osatoimitus kiellossa kaikki tilauksen tilausrivit ja katsoa, onko kaikilla saldoa. Jos kaikilla on saldoa rivit voidaan toimittaa. Jos jollain ei ole saldoa, mit‰‰n tilauksen tilausrivi‰ ei toimiteta
+			//T‰m‰n funktion tarkoitus on hakea jt-k‰sittelyn ollessa osatoimitus kiellossa kaikki tilauksen tilausrivit ja katsoa,
+			//onko kaikilla saldoa.
+			//Jos kaikilla on saldoa, niin t‰ll‰ hetkell‰ k‰sittelyss‰ oleva rivi voidaan toimittaa.
+			//Jos jollain ei ole saldoa, mit‰‰n tilauksen tilausrivi‰ ei toimiteta
 
-			//haetaan tilauksen kaikki rivit ja niiden tuotenumerot
+			//haetaan tilauksen kaikki jt rivit ja niiden tuotenumerot
 			$query = "	SELECT tunnus,
-						tuoteno
+						tuoteno,
+						count(*) tuote_kpl
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND otunnus = '{$tilaus_tunnus}'
-						AND var = 'J'";
+						AND var = 'J'
+						GROUP BY tuoteno";
 			$result = pupe_query($query);
 
-			$tunnukset = array();
 			while($tilausrivi_row = mysql_fetch_assoc($result)) {
 				//haetaan tuote kohtaisesti varasto saldo
 				//saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '');
 				//return array($saldo, $hyllyssa, $myytavissa, TRUE);
-				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tilausrivi_row['tuoteno'], '', $varastot, $kukarow['yhtio'], '', '', '', '', '', '', '');
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tilausrivi_row['tuoteno'], $jtspec, $varastot, $kukarow['yhtio'], '', '', '', '', '', '', '');
 
-				if($saldo <= 0) {
+				//special case
+				//jos samaa tuotetta on useammalla eri tilausrivill‰
+				//niin katsotaan riitt‰‰kˆ myytavat tuotteet n‰ille kaikille.
+				//jos ei riit‰ ei toimiteta mit‰‰n
+				if($myytavissa < $tilausrivi_row['tuote_kpl']) {
 					return false;
 				}
-				else {
-					$tunnukset[] = $tilausrivi_row['tunnus'];
+
+				//jos kaikilla tilauksen tuotteita ei pystyt‰ toimittamaan emme toimita myˆsk‰‰n t‰t‰ rivi‰
+				if($myytavissa <= 0) {
+					return false;
 				}
 			}
 
-			return $tunnukset;
+			return $tilausrivi_tunnus;
 		}
 	}

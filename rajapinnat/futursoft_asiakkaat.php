@@ -113,6 +113,7 @@
 					'kieli' => (string)$asiakas->LanguageId,
 					'max_luotto' => (float)$asiakas->CreditMax,
 					'ytunnus' => ((string)$asiakas->VATNum == '') ? '' : 'FI'.str_replace('-', '', (string)$asiakas->VATNum),
+					'ovttunnus' => ((string)$asiakas->VATNum == '') ? '' : '0037'.str_replace('-', '', (string)$asiakas->VATNum),
 					'osoite' => utf8_decode((string)$asiakas->Street),
 					'postino' => (string)$asiakas->ZipCode,
 					'kaupunki' => utf8_decode((string)$asiakas->City),
@@ -166,6 +167,7 @@
 		$query = "	INSERT INTO asiakas
 					SET yhtio = '{$yhtio}',
 					ytunnus = '{$asiakas['ytunnus']}',
+					ovttunnus = '{$asiakas['ovttunnus']}',
 					nimi = '{$asiakas['nimi']}',
 					osoite = '{$asiakas['osoite']}',
 					postino = '{$asiakas['postino']}',
@@ -197,6 +199,7 @@
 		$toimitustapa = hae_toimitustapa($yhtio);
 		$query = "	UPDATE asiakas
 					SET ytunnus = '{$asiakas['ytunnus']}',
+					ovttunnus = '{$asiakas['ovttunnus']}',
 					nimi = '{$asiakas['nimi']}',
 					osoite = '{$asiakas['osoite']}',
 					postino = '{$asiakas['postino']}',

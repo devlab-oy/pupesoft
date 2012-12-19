@@ -303,6 +303,8 @@
 	}
 
 	function tee_tiliointi($tilausnumero, $kateismyynti, $kassalipas, $yhtio) {
+		$kustannuspaikka = hae_kustannuspaikka($kateismyynti['kustp'], $yhtio);
+
 		$tiliointi_tunnukset = array();
 		if(!empty($kateismyynti['alv']) and !empty($kateismyynti['alv_maara'])) {
 			if($kateismyynti['onko_kortti']) {
@@ -322,7 +324,7 @@
 						tapvm = '{$kateismyynti['tapahtumapaiva']}',
 						summa = '{$alviton_summa}',
 						vero = '{$kateismyynti['alv']}',
-						kustp = '{$kateismyynti['kustp']}',
+						kustp = '{$kustannuspaikka['tunnus']}',
 						ltunnus = '{$tilausnumero}',
 						laatija = 'futursoft',
 						laadittu = NOW(),
@@ -341,7 +343,7 @@
 						tapvm = '{$kateismyynti['tapahtumapaiva']}',
 						summa = '{$alv_maara}',
 						vero = 0,
-						kustp = '{$kateismyynti['kustp']}',
+						kustp = '{$kustannuspaikka['tunnus']}',
 						ltunnus = '{$tilausnumero}',
 						laatija = 'futursoft',
 						laadittu = NOW(),
@@ -371,7 +373,7 @@
 						tapvm = '{$kateismyynti['tapahtumapaiva']}',
 						summa = '{$kateismyynti['summa']}',
 						vero = '{$kateismyynti['alv']}',
-						kustp = '{$kateismyynti['kustp']}',
+						kustp = '{$kustannuspaikka['tunnus']}',
 						ltunnus = '{$tilausnumero}',
 						yhtio = '{$yhtio}'";
 			pupe_query($query);
@@ -469,5 +471,19 @@
 		}
 
 		return mysql_fetch_assoc($result);
+	}
+
+	function hae_kustannuspaikka($kustannuspaikka_koodi, $yhtio) {
+		$query = "	SELECT *
+					FROM kustannuspaikka
+					WHERE yhtio = '{$yhtio}'
+					AND koodi = '{$kustannuspaikka_koodi}'";
+		$result = pupe_query($query);
+
+		if(mysql_num_rows($result) == 0) {
+			return null;
+		}
+
+		return mysql_fetch_array($result);
 	}
 ?>

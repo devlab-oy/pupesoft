@@ -77,35 +77,51 @@ cd /tmp/${DBKANTA}
 # Lukitaan taulut, Flushataan binlogit, Otetaan masterin positio ylös, Kopioidaan mysql kanta ja lopuksi vapautetaan taulut.
 mysql -u ${DBKAYTTAJA} ${DBKANTA} --password=${DBSALASANA} -e "FLUSH TABLES WITH READ LOCK; FLUSH LOGS; SHOW MASTER STATUS; system cp -R ${MYSQLPOLKU}${DBKANTA}/ /tmp/; UNLOCK TABLES;" > /tmp/${DBKANTA}/pupesoft-backup.info
 
-echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-echo ": Copy done."
+# Jos backup onnistui!
+if [[ $? -eq 0 ]]; then
 
-# Pakataan failit
-tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *
+	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+	echo ": Copy done."
 
-echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-echo ": Bzip2 done."
+	# Pakataan failit
+	tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *
 
-if [ ! -z "${SALAUSAVAIN}" ]; then
+	# Jos pakkaus onnistui!
+	if [[ $? -eq 0 ]]; then
 
-	# Laitetaan salausavain fileen
-	echo "${SALAUSAVAIN}" > /root/salausavain
-
-	# Mcrypt ei osaa ylikirjottaa tiedostoa, joten poistetaan varmuuden vuoksi tehtävä file
-	rm -f "${BACKUPDIR}/${FILENAME}.nc"
-
-	# Salataan backup käyttäen Rijndael-256 algoritmia ja poistetaan salaamaton versio jos salaus onnistuu
-	checkcrypt=`mcrypt -a rijndael-256 -f /root/salausavain --unlink --quiet ${BACKUPDIR}/${FILENAME}`
-
-	if [[ $? != 0 ]]; then
-		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
-		echo
-	else
-		# Päivitetään oikeudet kuntoon
-		chmod 664 "${BACKUPDIR}/${FILENAME}.nc"		
 		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-		echo ": Encrypt done."
-	fi
+		echo ": Bzip2 done."
+
+		if [ ! -z "${SALAUSAVAIN}" ]; then
+
+			# Laitetaan salausavain fileen
+			echo "${SALAUSAVAIN}" > /root/salausavain
+
+			# Mcrypt ei osaa ylikirjottaa tiedostoa, joten poistetaan varmuuden vuoksi tehtävä file
+			rm -f "${BACKUPDIR}/${FILENAME}.nc"
+
+			# Salataan backup käyttäen Rijndael-256 algoritmia ja poistetaan salaamaton versio jos salaus onnistuu
+			checkcrypt=`mcrypt -a rijndael-256 -f /root/salausavain --unlink --quiet ${BACKUPDIR}/${FILENAME}`
+
+			if [[ $? -ne 0 ]]; then
+				echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
+				echo
+			else
+				# Päivitetään oikeudet kuntoon
+				chmod 664 "${BACKUPDIR}/${FILENAME}.nc"
+				echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+				echo ": Encrypt done."
+			fi
+		fi
+	else
+		# Jos pakkaus epäonnistui! Poistetaan rikkinäinen tiedosto.
+		rm -f ${BACKUPDIR}/${FILENAME}
+		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+		echo ": Bzip2 FAILED!"
+    fi
+else
+	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+	echo ": Database copy FAILED!"
 fi
 
 # Dellataan pois tempit
@@ -123,6 +139,14 @@ BACKUPFILET=""
 cd /
 
 # Pakataan tärkeät tiedostot
+if ls -A etc/cron.* &> /dev/null; then
+	BACKUPFILET="${BACKUPFILET} etc/cron.*"
+fi
+
+if [ -f "${PUPEPOLKU}/inc/salasanat.php" ]; then
+	BACKUPFILET="${BACKUPFILET} ${PUPEPOLKU}/inc/salasanat.php"
+fi
+
 if [ -f "etc/ssh/sshd_config" ]; then
 	BACKUPFILET="${BACKUPFILET} etc/ssh/sshd_config"
 fi
@@ -179,7 +203,23 @@ if [ -d etc/httpd/conf/ ]; then
 	BACKUPFILET="${BACKUPFILET} etc/httpd/conf/*"
 fi
 
-tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2  ${PUPEPOLKU}/inc/salasanat.php etc/cron.* ${BACKUPFILET}
+# Jos meillä on jotain pakattavaa, niin pakataan
+if [ ! -z "${BACKUPFILET}" ]; then
+	tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 ${BACKUPFILET}
+
+	# Jos pakkaus epäonnistui! Poistetaan rikkinäinen tiedosto.
+	if [[ $? -ne 0 ]]; then
+		rm -f ${BACKUPDIR}/${FILENAME}
+		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+		echo ": Copy FAILED."		
+	else
+		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+		echo ": Copy done."		
+	fi
+else
+	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+	echo ": Nothing to copy!"			
+fi
 
 if [ ! -z "${SALAUSAVAIN}" ]; then
 
@@ -189,7 +229,7 @@ if [ ! -z "${SALAUSAVAIN}" ]; then
 	# Salataan backup käyttäen Rijndael-256 algoritmia ja poistetaan salaamaton versio jos salaus onnistuu
 	checkcrypt=`mcrypt -a rijndael-256 -f /root/salausavain --unlink --quiet ${BACKUPDIR}/${FILENAME}`
 
-	if [[ $? != 0 ]]; then
+	if [[ $? -ne 0 ]]; then
 		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
 		echo
 	else
@@ -207,7 +247,7 @@ fi
 if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SAMBA" ]; then
 	checksamba=`mount -t cifs -o username=${REMOTEUSER},password=${REMOTEPASS} //${REMOTEHOST}/${REMOTEREMDIR} ${REMOTELOCALDIR}`
 
-	if [[ $? != 0 ]]; then
+	if [[ $? -ne 0 ]]; then
 		echo "Sambamount ei onnistunut!"
 		echo
 	else
@@ -243,7 +283,7 @@ find ${BACKUPDIR} -type f -mtime +${BACKUPPAIVAT} -delete
 if [ ! -z "${S3BUCKET}" ]; then
 	s3cmd --no-progress --delete-removed sync ${BACKUPDIR}/ s3://${S3BUCKET}
 	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-	echo ": S3 copy done."		
+	echo ": S3 copy done."
 fi
 
 echo -n `date "+%d.%m.%Y @ %H:%M:%S"`

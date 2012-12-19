@@ -638,7 +638,8 @@
 										and hyllytaso			= '$hyllytaso'";
 							$result = pupe_query($query);
 
-							if ($summa <> 0 and mysql_affected_rows() > 0) {
+							# Jos pävitettiin saldoa, tehdään kirjanpito. Vaikka summa olisi nolla. Muuten jälkilaskenta ei osaa korjata tätä, jos tiliöintejä ei tehdä.
+							if (mysql_affected_rows() > 0) {
 
 								$query = "	INSERT into lasku set
 											yhtio      = '$kukarow[yhtio]',

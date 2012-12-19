@@ -485,7 +485,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 			}
 		}
 		else {
-			if($row['erikoisale'] >= 1) {
+			if ($row['erikoisale'] >= 1) {
 				if ($row['var'] == 3) {
 					//kotimaan puolitettu kokop‰iv‰raha ----> kotimaan kokop‰iv‰raha
 					$rivihinta = $row['kpl'] * ($row['myyntihinta']);
@@ -542,7 +542,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 			}
 		}
 		else {
-			if($row['erikoisale'] >= 2) {
+			if ($row['erikoisale'] >= 2) {
 				if ($row['var'] == 6) {
 					//ulkomaan puolitettu kokop‰iv‰raha ----> ulkomaan kokop‰iv‰raha
 					$rivihinta = $row['kpl'] * ($row['myyntihinta']);
@@ -920,7 +920,7 @@ if ($tee == "MUOKKAA") {
 			foreach ($a as $viranomaistyyppi) {
 
 				$query = "	SELECT tuote.tuoteno, tuote.nimitys, tuote.vienti,
-							IF(tuote.vienti = '$yhtiorow[maa]' or tuote.nimitys like '%ateria%', 1, if(tuote.vienti != '', 2, 3)) sorttaus
+							if (tuote.vienti = '$yhtiorow[maa]' or tuote.nimitys like '%ateria%', 1, if (tuote.vienti != '', 2, 3)) sorttaus
 							FROM tuote
 							JOIN tili ON (tili.yhtio = tuote.yhtio and tili.tilino = tuote.tilino)
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -1302,9 +1302,9 @@ if ($tee == "MUOKKAA") {
 	$query = "	SELECT tilausrivi.*, tuotetyyppi,
 				if (tuote.tuotetyyppi='A' or tuote.tuotetyyppi='B', concat(date_format(kerattyaika, '%d.%m.%Y %k:%i'),' - ',date_format(toimitettuaika, '%d.%m.%Y %k:%i')), '') ajalla,
 				concat_ws('/',kustp.nimi,kohde.nimi,projekti.nimi) kustannuspaikka,
-				if(tilausrivi.perheid=0, tilausrivi.tunnus, (select max(tunnus) from tilausrivi t use index(yhtio_otunnus) where tilausrivi.yhtio = t.yhtio and tilausrivi.otunnus = t.otunnus and tilausrivi.perheid=t.perheid and tilausrivi.tyyppi=t.tyyppi)) viimonen,
-				if(tilausrivi.perheid=0, tilausrivi.tunnus, tilausrivi.perheid) perhe,
-				if(tilausrivi.perheid=0, 1,	(select count(*) from tilausrivi t use index(yhtio_otunnus) where tilausrivi.yhtio = t.yhtio and tilausrivi.otunnus = t.otunnus and tilausrivi.perheid=t.perheid and tilausrivi.tyyppi=t.tyyppi)) montako,
+				if (tilausrivi.perheid=0, tilausrivi.tunnus, (select max(tunnus) from tilausrivi t use index(yhtio_otunnus) where tilausrivi.yhtio = t.yhtio and tilausrivi.otunnus = t.otunnus and tilausrivi.perheid=t.perheid and tilausrivi.tyyppi=t.tyyppi)) viimonen,
+				if (tilausrivi.perheid=0, tilausrivi.tunnus, tilausrivi.perheid) perhe,
+				if (tilausrivi.perheid=0, 1,	(select count(*) from tilausrivi t use index(yhtio_otunnus) where tilausrivi.yhtio = t.yhtio and tilausrivi.otunnus = t.otunnus and tilausrivi.perheid=t.perheid and tilausrivi.tyyppi=t.tyyppi)) montako,
 				tiliointi.tilino tilino,
 				tilausrivin_lisatiedot.kulun_kohdemaa, kulun_kohdemaa
 				FROM tilausrivi use index(yhtio_otunnus)
@@ -1325,39 +1325,35 @@ if ($tee == "MUOKKAA") {
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>#</th>";
-		echo "<th>" . t("Kulu") . "</th>";
-		echo "<th>" . t("Kustannuspaikka") . "</th>";
-		echo "<th>" . t("Kpl") . "</th>";
- 		echo "<th>" . t("Hinta") . "</th>";
-		echo "<th>" . t("Alv") . "</th>";
-		echo "<th>" . t("Yhteens‰") . "</th>";
-		echo "<th>" . t("Pvm") . "</th>";
-		echo "<th>" . t("Ilmaiset lounaat") . "</th>";
+		echo "<th>".t("Kulu")."</th>";
+		echo "<th>".t("Kustannuspaikka")."</th>";
+		echo "<th>".t("Kpl")."</th>";
+ 		echo "<th>".t("Hinta")."</th>";
+		echo "<th>".t("Alv")."</th>";
+		echo "<th>".t("Yhteens‰")."</th>";
+		echo "<th>".t("Pvm")."</th>";
+		echo "<th>".t("Ilmaiset ateriat")."</th>";
 		echo "</tr>";
 
 		$query2 = "	SELECT count(*)
 					FROM tilausrivi
 					WHERE yhtio = '{$kukarow["yhtio"]}'
 					AND otunnus = '{$tilausnumero}'
-					GROUP BY perheid2";
+					GROUP BY perheid2
+					ORDER BY perheid2";
 		$result2 = pupe_query($query2);
 
 		$summa 		= 0;
 		$tapahtumia = 1;
 		$aikajana 	= array();
-		$eka_rivi 	= null;
+		$lask 		= 0;
 
 		while ($row = mysql_fetch_assoc($result)) {
-			if ($eka_rivi == null) {
-				$eka_rivi = $row;
-			}
 
 			if ($row['tunnus'] == $row['perheid2']) {
 				$tilausrivien_lkm1 = mysql_fetch_row($result2);
-				$tilausrivien_lkm = (int) $tilausrivien_lkm1[0];
+				$tilausrivien_lkm  = (int) $tilausrivien_lkm1[0];
 			}
-
-			$rowTemp = $row; //t‰m‰ sen takia, ett‰ viimenen rivi on tallessa myˆhemp‰‰ k‰yttˆ‰ varten
 
 			if (!isset($aikajana['ensimmainen_aika']))  {
 				$aikaTemp = new Datetime($row['kerattyaika']);
@@ -1368,14 +1364,19 @@ if ($tee == "MUOKKAA") {
 
 			$summa += $row["rivihinta"];
 			$tapahtumia++;
+			$lask++;
+
+			if ($tilausrivien_lkm == $lask) {
+				$aikaTemp = new Datetime($row['toimitettuaika']);
+				$aikajana['viimeinen_aika'] = $aikaTemp->format('d-m-Y H:i');
+
+				echo_kommentit($row, $toim, $kukarow, $aikajana);
+
+				unset($aikajana);
+				$lask = 0;
+			}
 		}
 
-		$row = $rowTemp;
-
-		$aikaTemp = new Datetime($row['toimitettuaika']);
-		$aikajana['viimeinen_aika'] = $aikaTemp->format('d-m-Y H:i');
-
-		echo_kommentit($eka_rivi, $toim, $kukarow, $aikajana);
 		echo_summa($summa);
 
 		echo "</table>";
@@ -1752,7 +1753,7 @@ function echo_matkalasku_row($row, $kukarow, $laskurow, $yhtiorow, $tee, $lopetu
 
 	echo '<tr class="aktiivi">';
 
-	if($row['tunnus'] == $row['perheid2']) {
+	if ($row['tunnus'] == $row['perheid2']) {
 		$riviTemp++;
 		echo '<td rowspan="'.$tilausrivien_lkm.'">' . ($riviTemp) . '</td>';
 	}
@@ -1771,6 +1772,7 @@ function echo_matkalasku_row($row, $kukarow, $laskurow, $yhtiorow, $tee, $lopetu
 		'kohde' => $_POST['kohde'],
 		'projekti' => $_POST['projekti']
 	);
+
 	echo_ilmaiset_lounaat($lopetus, $toim, $tilausnumero, $row, $kustannuspaikat);
 
 	if ($row['tunnus'] == $row['perheid2']) {
@@ -1841,39 +1843,45 @@ function echo_ilmaiset_lounaat($lopetus, $toim, $tilausnumero, $row, $kustannusp
 	$ilmaiset_lounaat_kpl = array(0, 1, 2);
 
 	echo "<td>";
-	echo "<form autocomplete='off' method='post'>
-		  	<input type='hidden' value='TARKISTA_ILMAISET_LOUNAAT' name='tee'>
-		  	<input type='hidden' value='$lopetus' name='lopetus'>
-		  	<input type='hidden' value='$toim' name='toim'>
-		  	<input type='hidden' value='$tilausnumero' name='tilausnumero'>
-		  	<input type='hidden' value='MUOKKAA' name='tapa'>
-		  	<input type='hidden' value='{$row['tunnus']}' name='rivitunnus'>
-		  	<input type='hidden' value='{$row['perheid2']}' name='perheid2'>
-			<input type='hidden' value='{$kustannuspaikat['kustp']}' name='kustp'>
-			<input type='hidden' value='{$kustannuspaikat['kohde']}' name='kohde'>
-			<input type='hidden' value='{$kustannuspaikat['projekti']}' name='projekti'>";
 
-	echo "<select name='ilmaiset_lounaat' onchange='submit();' align='right'>";
-	foreach ($ilmaiset_lounaat_kpl as $lounas) {
-		if ($lounas == 2) {
-			if ($lounas == $selected_lounas) {
-				echo "<option selected='selected' value='$lounas'>$lounas tai enemm‰n</option>";
+	if ($row['tuotetyyppi'] == 'A') {
+		echo "<form autocomplete='off' method='post'>
+			  	<input type='hidden' value='TARKISTA_ILMAISET_LOUNAAT' name='tee'>
+			  	<input type='hidden' value='$lopetus' name='lopetus'>
+			  	<input type='hidden' value='$toim' name='toim'>
+			  	<input type='hidden' value='$tilausnumero' name='tilausnumero'>
+			  	<input type='hidden' value='MUOKKAA' name='tapa'>
+			  	<input type='hidden' value='{$row['tunnus']}' name='rivitunnus'>
+			  	<input type='hidden' value='{$row['perheid2']}' name='perheid2'>
+				<input type='hidden' value='{$kustannuspaikat['kustp']}' name='kustp'>
+				<input type='hidden' value='{$kustannuspaikat['kohde']}' name='kohde'>
+				<input type='hidden' value='{$kustannuspaikat['projekti']}' name='projekti'>";
+
+
+		echo "<select name='ilmaiset_lounaat' onchange='submit();' align='right'>";
+
+		foreach ($ilmaiset_lounaat_kpl as $lounas) {
+			if ($lounas == 2) {
+				if ($lounas == $selected_lounas) {
+					echo "<option selected='selected' value='$lounas'>$lounas tai enemm‰n</option>";
+				}
+				else {
+					echo "<option value='$lounas'>$lounas tai enemm‰n</option>";
+				}
 			}
 			else {
-				echo "<option value='$lounas'>$lounas tai enemm‰n</option>";
+				if ($lounas == $selected_lounas) {
+					echo "<option selected='selected' value='$lounas'>$lounas</option>";
+				}
+				else {
+					echo "<option value='$lounas'>$lounas</option>";
+				}
 			}
 		}
-		else {
-			if ($lounas == $selected_lounas) {
-				echo "<option selected='selected' value='$lounas'>$lounas</option>";
-			}
-			else {
-				echo "<option value='$lounas'>$lounas</option>";
-			}
-		}
+		echo "</select>";
+		echo "</form>";
 	}
-	echo "</select>";
-	echo "</form>";
+
 	echo "</td>";
 }
 
@@ -1907,7 +1915,7 @@ function echo_nappulat($laskurow, $tee, $lopetus, $toim, $tilausnumero, $perhe, 
 	}
 }
 
-function echo_kommentit($row, $toim, $kukarow, $aikajana) {
+function echo_kommentit ($row, $toim, $kukarow, $aikajana) {
 	if ($row["tuotetyyppi"] == "A") {
 		echo "<tr class='aktiivi'>";
 		echo '<td></td>';
@@ -1931,8 +1939,9 @@ function echo_kommentit($row, $toim, $kukarow, $aikajana) {
 
 	if ($toim == "SUPER") {
 		$query = "	SELECT nimi
-								FROM tili
-								WHERE yhtio = '$kukarow[yhtio]' and tilino = '$row[tilino]'";
+					FROM tili
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tilino  = '$row[tilino]'";
 		$tilires = pupe_query($query);
 		$tilirow = mysql_fetch_assoc($tilires);
 
@@ -1993,6 +2002,15 @@ function poista_edelliset_matkalaskurivit($tilausnumero, $rivitunnus, $kukarow) 
 				and tunnus in ({$trow['tiliointirivitunnukset']})";
 	$result = pupe_query($query);
 
+	// Yliviivataan ALV-tiliˆinnit
+	$query = "	UPDATE tiliointi
+				SET korjattu = '$kukarow[kuka]',
+				korjausaika  = now()
+				WHERE yhtio = '$kukarow[yhtio]'
+				and ltunnus = '$tilausnumero'
+				and aputunnus in ({$trow['tiliointirivitunnukset']})";
+	$result = pupe_query($query);
+
 	// Poistetaan tilausrivin lis‰tiedot
 	$query = "	DELETE
 				FROM tilausrivin_lisatiedot
@@ -2011,7 +2029,7 @@ function hae_ensimmainen_matkalaskurivi($kukarow, $tilausnumero, $perheid2) {
 						kustp.tunnus kustp,
 						kohde.tunnus kohde,
 						projekti.tunnus projekti,
-						if(tuotetyyppi='A', tuote.vienti, tilausrivin_lisatiedot.kulun_kohdemaa) vienti
+						if (tuotetyyppi='A', tuote.vienti, tilausrivin_lisatiedot.kulun_kohdemaa) vienti
 						FROM tilausrivi use index (PRIMARY)
 						LEFT JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 						LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
@@ -2083,7 +2101,7 @@ function tarkista_loytyyko_paivalle_matkalasku($alkuaika, $tilausnumero) {
 				AND tyyppi = 'D'";
 	$result = pupe_query($query);
 
-	if($tilausrivi_row = mysql_fetch_assoc($result)) {
+	if ($tilausrivi_row = mysql_fetch_assoc($result)) {
 
 		$query = "DELETE FROM tilausrivi WHERE tilausrivi.yhtio ='{$kukarow['yhtio']}' AND tilausrivi.tunnus = '{$tilausrivi_row['tunnus']}'";
 		$result = pupe_query($query);
@@ -2396,8 +2414,6 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 
 		ksort($tuoteno_array);
 
-		$summa = 0;
-
 		foreach ($tuoteno_array as $indeksi => $lisaa_tuoteno) {
 
 			//	Haetaan tuotteen tiedot
@@ -2449,12 +2465,15 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 				//  Indeksi on 0 kun k‰sitell‰‰n kokop‰iv‰rahoja ja 1 kun k‰sitell‰‰n puolip‰iv‰rahoja
 				if ($indeksi == 0) {
 					for ($i = 0; $i <= $kpl_array[0] - 1; $i++) {
-						if($i == 0) {
+						if ($tyyppi == "B") {
+							$_alkuaika = $_loppuaika = date('Y-m-d H:i:s');
+						}
+						elseif ($i == 0) {
 							$_alkuaika = $alkuaika;
 							$_loppuaika = date('Y-m-d H:i:s', strtotime($alkuaika . ' + 24 hours'));
 						}
-						if($i == ($kpl_array[0] - 1)) {
-							if(empty($kpl_array[1])) {
+						elseif ($i == ($kpl_array[0] - 1)) {
+							if (empty($kpl_array[1])) {
 								$_loppuaika = $loppuaika;
 							}
 							else {
@@ -2464,15 +2483,15 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 
 						$ilmaiset_lounaat = tarkista_loytyyko_paivalle_matkalasku($_alkuaika, $tilausnumero);
 
-						if($trow["vienti"] == 'FI') {
-							if($ilmaiset_lounaat >= 1) {
+						if ($trow["vienti"] == 'FI') {
+							if ($ilmaiset_lounaat >= 1) {
 								$var = 3;
 								$hinta = $hinta / 2;
 								$nimitys = $nimitys.' '.t("Puolitettu korvaus");
 							}
 						}
 						else {
-							if($ilmaiset_lounaat >= 2) {
+							if ($ilmaiset_lounaat >= 2) {
 								$var = 6;
 								$hinta = $hinta / 2;
 								$nimitys = $nimitys.' '.t("Puolitettu korvaus");
@@ -2540,16 +2559,15 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 						}
 
 						$rivitunnus = 0;
-						$summa += $hinta;
 
 						$_alkuaika = $_loppuaika;
 						$_loppuaika = date('Y-m-d H:i:s', strtotime($_alkuaika . ' + 24 hours'));
 
-						//lis‰t‰‰n tiliointiin tilausrivikohtaisesti tiliˆintej‰
+						// lis‰t‰‰n tiliointiin tilausrivikohtaisesti tiliˆintej‰
 						// Netotetaan alvi
 						if ($vero != 0) {
-							$alv = round($summa - $summa / (1 + ($vero / 100)), 2);
-							$summa -= $alv;
+							$alv = round($hinta - $hinta / (1 + ($vero / 100)), 2);
+							$hinta -= $alv;
 						}
 
 						if ($kpexport != 1 and strtoupper($yhtiorow['maa']) == 'FI') $tositenro = 0; // Jos t‰t‰ ei tarvita
@@ -2617,7 +2635,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 				else {
 					//puolip‰iv‰rahat
 					//katsotaan oliko ensimm‰inen rivi suoraan puolip‰iv‰
-					if(isset($_alkuaika)) {
+					if (isset($_alkuaika)) {
 						$_alkuaika = $_alkuaika;
 					}
 					else {
@@ -2629,15 +2647,15 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 
 					$ilmaiset_lounaat = tarkista_loytyyko_paivalle_matkalasku($_alkuaika, $tilausnumero);
 
-					if($trow["vienti"] == 'FI') {
-						if($ilmaiset_lounaat >= 1) {
+					if ($trow["vienti"] == 'FI') {
+						if ($ilmaiset_lounaat >= 1) {
 							$var = 3;
 							$hinta = $hinta / 2;
 							$nimitys = $nimitys.' '.t("Puolitettu korvaus");
 						}
 					}
 					else {
-						if($ilmaiset_lounaat >= 2) {
+						if ($ilmaiset_lounaat >= 2) {
 							$var = 6;
 							$hinta = $hinta / 2;
 							$nimitys = $nimitys.' '.t("Puolitettu korvaus");
@@ -2679,10 +2697,9 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 					$insres = pupe_query($query);
 
 					$rivitunnus = 0;
-					$summa += $hinta;
 
 					$lisatty_tun = mysql_insert_id();
-					if($aseta_perheid2) {
+					if ($aseta_perheid2) {
 						$perhe_id = ($perhe_id == null) ? $lisatty_tun : $perhe_id;
 
 						//	Jos meill‰ on splitattu rivi niin pidet‰‰n nippu kasassa
@@ -2707,8 +2724,8 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 					//lis‰t‰‰n tiliointiin tilausrivikohtaisesti tiliˆintej‰
 					// Netotetaan alvi
 					if ($vero != 0) {
-						$alv = round($summa - $summa / (1 + ($vero / 100)), 2);
-						$summa -= $alv;
+						$alv = round($hinta - $hinta / (1 + ($vero / 100)), 2);
+						$hinta -= $alv;
 					}
 
 					if ($kpexport != 1 and strtoupper($yhtiorow['maa']) == 'FI') $tositenro = 0; // Jos t‰t‰ ei tarvita

@@ -1066,9 +1066,9 @@
 						$perheok = 0;
 
 						if($jtrow['jtkielto'] == 'Z') {
-							$palautettu_tunnus = hae_toimitettavat_tilausrivit($jtrow['tunnus'], $jtrow['otunnus'], $varastosta, $jtspec);
-							if(!empty($palautettu_tunnus)) {
-								$tunnukset = $palautettu_tunnus.",";
+							$voiko_toimittaa = hae_toimitettavat_tilausrivit($jtrow['otunnus'], $varastosta, $jtspec);
+							if($voiko_toimittaa) {
+								$tunnukset = $jtrow['tunnus'].",";
 							}
 						}
 						else {

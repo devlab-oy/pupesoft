@@ -1081,7 +1081,7 @@
 	}
 
 	if(!function_exists("hae_toimitettavat_tilausrivit")) {
-		function hae_toimitettavat_tilausrivit($tilausrivi_tunnus, $tilaus_tunnus, $varastot, $jtspec) {
+		function hae_toimitettavat_tilausrivit($tilaus_tunnus, $varastot, $jtspec) {
 			global $yhtiorow, $kukarow;
 			//Tämän funktion tarkoitus on hakea jt-käsittelyn ollessa osatoimitus kiellossa kaikki tilauksen tilausrivit ja katsoa,
 			//onko kaikilla saldoa.
@@ -1119,6 +1119,6 @@
 				}
 			}
 
-			return $tilausrivi_tunnus;
+			return true;
 		}
 	}

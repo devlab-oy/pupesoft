@@ -27,7 +27,7 @@
 			'raja' => $raja
 		);
 
-		$asiakkaat = hae_asiakkaat($ajax_params);
+		$asiakkaat = hae_asiakkaat($ajax_params, '');
 
 		echo json_encode(count($asiakkaat));
 
@@ -40,19 +40,11 @@
 		if ($muutparametrit == '') {
 			$muutparametrit = "$komento#$raja#$emailok#$alkupp#$alkukk#$alkuvv#$loppupp#$loppukk#$loppuvv#";
 		}
-
-		require ("inc/asiakashaku.inc");
-
-		//jos tulee yksi asiakas tieto
-		if ($monta != 1) {
-			$tee = '';
 		}
-	}
 
 	if (isset($muutparametrit) and $tee != '' and $asiakasid != '') {
 		list($komento,$raja,$emailok,$alkupp,$alkukk,$alkuvv,$loppupp,$loppukk,$loppuvv) = explode('#', $muutparametrit);
 	}
-
 
 	if ($tee == "tulosta" and $raja == "") {
 		echo "<font class='error'>".t('RAJA PUUTTUU' , $kieli)."!!!</font><br><br>";
@@ -65,7 +57,6 @@
 	}
 
 	if ($tee == "tulosta") {
-
 		// haetaan aluksi sopivat asiakkaat
 		// viimeisen 12 kuukauden myynti pitää olla yli $rajan
 		echo "<font class='message'>".t('Haetaan sopivia asiakkaita' , $kieli)." (".t('myynti', $kieli)." $alkupvm - $loppupvm ".t('yli' , $kieli)." $raja)... ";
@@ -82,8 +73,17 @@
 			'raja' => $raja
 		);
 		$asiakkaat = hae_asiakkaat($params, $laheta_sahkopostit);
-		echo t('löytyi') . ' '.count($asiakkaat) . '<br/><br/>';
 
+		if (!empty($asiakkaat)) {
+		echo t('löytyi') . ' '.count($asiakkaat) . '<br/><br/>';
+		}
+		else {
+			echo "<font class='error'>".t("Asiakasta ei löytynyt") . "</font><br/><br/>";
+			$tee = "";
+		}
+	}
+
+	if ($tee == "tulosta") {
 		flush();
 
 		$edalkupvm  = date("Y-m-d", mktime(0, 0, 0, $alkukk,  $alkupp,  $alkuvv - 1));
@@ -91,11 +91,18 @@
 
 		$tryre = t_avainsana("OSASTO");
 		$osastot = array();
+
+		// Tehdään temppidiiri jossa toimitaan, niin ei mene failit sekaisin jos on usea rappariajo samaan aikaan
+		$tmpdir = "/tmp/VSR_".md5(uniqid(rand(),true))."/";
+		mkdir($tmpdir);
+
 		while ($tryro = mysql_fetch_array($tryre)) {
 			$osastot[$tryro['selite']] = $tryro['selitetark'];
 		}
+
 		$tryre = t_avainsana("TRY");
 		$tuoteryhmat = array();
+
 		while ($tryro = mysql_fetch_array($tryre)) {
 			$tuoteryhmat[$tryro['selite']] = $tryro['selitetark'];
 		}
@@ -111,12 +118,16 @@
 			'edloppupvm' => $edloppupvm,
 			'tuoteryhmat' => $tuoteryhmat,
 			'osastot' => $osastot,
+			'ytunnus' => $ytunnus,
 		);
 
 		echo t('Haetaan myyntitiedot') . '<br/>';
+
 		$data_array = array();
+
 		$bar = new ProgressBar();
-		$bar->initialize(count($asiakkaat)-2);
+		$bar->initialize(count($asiakkaat)-1);
+
 		foreach($asiakkaat as $asiakas) {
 			$bar->increase();
 			$tilaukset = hae_tilaukset($params, $asiakas['tunnus']);
@@ -127,6 +138,7 @@
 				'sumed' => 0,
 				'sumva' => 0,
 			);
+
 			foreach($tilaukset['osastoittain'] as $tilaus) {
 				$summa_array['sumkpled'] += $tilaus['kpled'];
 				$summa_array['sumkplva'] += $tilaus['kplva'];
@@ -140,6 +152,7 @@
 				'sumed' => 0,
 				'sumva' => 0,
 			);
+
 			foreach ($tilaukset['tuoteryhmittain'] as $tilaus) {
 				$summa_array2['sumkpled'] += $tilaus['kpled'];
 				$summa_array2['sumkplva'] += $tilaus['kplva'];
@@ -156,9 +169,12 @@
 			);
 		}
 
-		kasittele_tilaukset($data_array, htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $komento, $params, $generoi_excel, $kieli);
+		kasittele_tilaukset($data_array, $laheta_sahkopostit, $komento, $params, $generoi_excel, $kieli);
 
 		echo "<br>".t('Kaikki valmista' , $kieli).".</font>";
+
+		// Poistetaan temppidirri
+		rmdir($tmpdir);
 
 	} // end tee == tulosta
 
@@ -172,7 +188,7 @@
 		if (!isset($loppukk)) $loppukk = date("m");
 		if (!isset($loppuyy)) $loppuvv = date("Y");
 
-		echo "<font class='message'>".t('Jos asiakkaalla tai sen myyjällä ei ole sähköpostia, raportit lähetetään sähköpostiin tai tulostetaan haluamaasi tulostimeen riippuen tulostimen valinnasta' , $kieli).".</font><br><br>";
+		echo "<font class='message'>".t('Jos asiakkaalla ei ole sähköpostia, raportit tulostetaan haluamaasi tulostimeen' , $kieli).".</font><br><br>";
 
 		echo "<form name='vuosiasiakkaat_form' method='post'>";
 		echo "<input type='hidden' name='tee' value='tulosta'>";
@@ -203,7 +219,7 @@
 		echo "<tr>";
 		echo "<th>".t('Lähetä sähköpostit', $kieli).":</th>";
 		echo "<td>
-				<input type='radio' name='laheta_sahkopostit' value='ajajalle'>".t('Ohjelman ajajalle' , $kieli)."<br>
+				<input type='radio' name='laheta_sahkopostit' value='ajajalle' checked='checked'>".t('Ohjelman ajajalle' , $kieli)."<br>
 				<input type='radio' name='laheta_sahkopostit' value='asiakkaalle'>".t('Asiakkaalle',$kieli)."<br>
 				<input type='radio' name='laheta_sahkopostit' value='asiakkaan_myyjalle'>".t('Asiakkaan vastuumyyjälle',$kieli)."<br>
 			</td>";
@@ -233,19 +249,20 @@
 						ok = false;
 					}
 
-					if(!tarkista_lahettaja() && ok != false) {
+					if (ok != false) {
+						if (!tarkista_lahettaja()) {
 						ok = false;
+					}
 					}
 					return ok;
 				}
 
 				function tarkista_tulostin() {
-					if(($('input[name=laheta_sahkopostit]:checked').val() == 'asiakkaalle' || $('input[name=laheta_sahkopostit]:checked').val() == 'asiakkaan_myyjalle') && $('select[name=komento]').val() != 'email') {
-						alert('Asiakkaalle tai asiakkaan myyjälle raportteja lähetettäessä pitää tulostimeksi olla valittuna email');
+					if ($('input[name=laheta_sahkopostit]:checked').val() == 'asiakkaalle' && $('select[name=komento]').val() == '') {
+						alert('Asiakkaalle raportteja lähetettäessä pitää olla valittuna printteri, johon sähköpostittomat raportit tulostetaan.');
 						return false;
 					}
 					else {
-
 						return true;
 					}
 				}
@@ -257,7 +274,7 @@
 							type: 'POST',
 							url: 'vuosisopimusasiakkaat.php?asiakas_tarkistus=1&no_head=yes',
 							data: {
-								'ytunnus': '',
+								'ytunnus': $('input[name=ytunnus]').val(),
 								'asiakasid': '',
 								'raja': $('input[name=raja]').val(),
 								'alkuvv': $('input[name=alkuvv]').val(),
@@ -292,10 +309,21 @@
 		global $kukarow;
 
 		//valittu asiakas
-		if ($params['ytunnus'] != '' and $params['asiakasid'] != "") {
-			$asnum = $params['ytunnus'];
-			echo "vain asiakas ytunnus: {$params['ytunnus']}...<br> ";
-			$aswhere = "and lasku.liitostunnus = '{$params['asiakasid']}'";
+		if ($params['ytunnus'] != '') {
+			$query = "	SELECT *
+						FROM asiakas
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND asiakasnro = '{$params['ytunnus']}'";
+			$result = pupe_query($query);
+
+			if ($asiakas_row = mysql_fetch_assoc($result)) {
+				$aswhere = "and lasku.liitostunnus = '{$asiakas_row['tunnus']}'";
+		}
+		else {
+			$aswhere = "";
+
+				return false;
+		}
 		}
 		else {
 			$aswhere = "";
@@ -416,7 +444,14 @@
 		switch ($laheta_sahkopostit) {
 			case 'ajajalle':
 				$email = $kukarow['eposti'];
+
+				if (empty($params['ytunnus'])) {
 				luo_zip_ja_laheta($tiedostot, $email);
+				}
+				else {
+					//jos ytunnus on annettu tiedämme, että generoidaan vain yksi raportti
+					laheta_email($email, $tiedostot);
+				}
 				break;
 
 			case 'asiakkaalle':
@@ -435,16 +470,32 @@
 				break;
 
 			case 'asiakkaan_myyjalle':
+				//käydään data_array läpi jotta saamme raportin sille kuuluvan myyjän alle
+				$myyjien_tiedostot = array();
 				foreach($data_array as $data) {
-					$email = $data['myyja_eposti'];
-					luo_zip_ja_laheta($tiedostot, $email);
+					$myyjien_tiedostot[$data['asiakasrow']['myyja_eposti']][] = $data['tiedosto'];
+				}
+				foreach($myyjien_tiedostot as $myyja_eposti => $tiedosto_array) {
+					$email = $myyja_eposti;
+					if ($params['ytunnus'] == '') {
+						luo_zip_ja_laheta($tiedosto_array, $email);
+					}
+					else {
+						//jos ytunnus on annettu tiedämme, että generoidaan vain yksi raportti
+						laheta_email($email, $tiedosto_array);
+					}
 				}
 				break;
 
 			default:
 				$email = $kukarow['eposti'];
-				luo_zip_ja_laheta($tiedostot, $email);
 
+				if (empty($params['ytunnus'])) {
+				luo_zip_ja_laheta($tiedostot, $email);
+				}
+				else {
+					laheta_email($email, $tiedostot);
+				}
 				break;
 		}
 	}
@@ -463,7 +514,7 @@
 		$i = 0;
 		echo '<br/>'. t('Tehdään pdf tiedostot') . '<br/>';
 		$bar2 = new ProgressBar();
-		$bar2->initialize(count($data_array)-2);
+		$bar2->initialize(count($data_array)-1);
 		foreach ($data_array as &$data) {
 
 
@@ -506,7 +557,7 @@
 			$sumkplva = $data['summat_try']['sumkplva'];
 			$sumed = $data['summat_try']['sumed'];
 			$sumva = $data['summat_try']['sumva'];
-			$asiakas_numero = $data['asiakasrow']['tunnus'];
+			$asiakas_numero = $data['asiakasrow']['asiakasnro'];
 			// kirjotetaan footer ja palautetaan luodun tiedoston polku
 			$pdf_tiedostot[] = loppu($firstpage);
 
@@ -523,7 +574,7 @@
 
 		echo '<br/>'. t('Tehdään excel tiedostot') . '<br/>';
 		$bar2 = new ProgressBar();
-		$bar2->initialize(count($data_array)-2);
+		$bar2->initialize(count($data_array)-1);
 		$excel_tiedostot = array();
 		$i = 0;
 		foreach ($data_array as &$data) {
@@ -557,8 +608,10 @@
 	function luo_zip_ja_laheta($tiedostot, $email_address) {
 		global $yhtiorow, $kieli;
 
-		$maaranpaa = '/tmp/Ostoseuranta_raportit.zip';
+		$maaranpaa = $GLOBALS['tmpdir'].'Ostoseuranta_raportit.zip';
+				
 		$ylikirjoita = true;//ihan varmuuden vuoks
+
 		if(luo_zip($tiedostot, $maaranpaa, $ylikirjoita)) {
 			//lähetetään email
 			laheta_email($email_address, array($maaranpaa));
@@ -588,8 +641,10 @@
 		);
 
 		foreach ($liitetiedostot_path as $liitetiedosto_path) {
-			$mime_type = mime_content_type($liitetiedosto_path);
-			$mime_type = explode('/' , $mime_type);
+			$tiedosto_nimi = explode('/', $liitetiedosto_path);
+			$hakemiston_syvyys = count($tiedosto_nimi);
+			$tiedosto_nimi = $tiedosto_nimi[$hakemiston_syvyys - 1];
+
 			if(stristr(mime_content_type($liitetiedosto_path), 'pdf')) {
 				$ctype = 'pdf';
 			}
@@ -600,14 +655,16 @@
 				//ctypessä pitää olla jotain muute sitä ei lähetetä. tässä laitetaan oletukseksi zippi
 				$ctype = 'zip';
 			}
+
 			$liitetiedosto =  array(
 				'filename' => $liitetiedosto_path,
-				'newfilename' => t('Ostotilaus', $kieli) . '.' .$mime_type[1],
+				'newfilename' => t($tiedosto_nimi, $kieli),
 				'ctype' => $ctype,
 			);
 
 			$params['attachements'][] = $liitetiedosto;
 		}
+
 		pupesoft_sahkoposti($params);
 	}
 
@@ -624,7 +681,7 @@
 		}
 	}
 
-	function luo_zip($tiedostot = array(), $maaranpaa = '', $ylikirjoita = false) {
+	function luo_zip($tiedostot = array(), $maaranpaa = '', $ylikirjoita = true) {
 		//if the zip file already exists and overwrite is false, return false
 		if (file_exists($maaranpaa) && !$ylikirjoita) {
 			return false;
@@ -650,7 +707,11 @@
 			}
 			//add the files
 			foreach ($validit_tiedostot as $tiedosto) {
-				$zip->addFile($tiedosto, $tiedosto);
+				//haetaan tiedoston nimi, jotta ei tule zipattua koko hakemisto rakennetta
+				$tiedosto_temp = explode('/', $tiedosto);
+				$hakemiston_syvyys = count($tiedosto_temp);
+				$tiedoston_nimi = $tiedosto_temp[$hakemiston_syvyys - 1];
+				$zip->addFile($tiedosto, $tiedoston_nimi);
 			}
 			//debug
 			//echo 'The zip archive contains ',$zip->numFiles,' files with a status of ',$zip->status;
@@ -666,5 +727,3 @@
 	}
 
 	require ("inc/footer.inc");
-
-?>

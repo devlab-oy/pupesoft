@@ -383,6 +383,11 @@
 		}
 	}
 
+	if (isset($jatka) and ($erikoisale > 100 or $erikoisale < 0)) {
+		echo "<font class='error'>".t("Erikoisale pitää olla alle 100% yli 0%")."</font><br/><br/>";
+		unset($jatka);
+	}
+
 	// tehdään oikeellisuus
 	if ($toim == "YLLAPITO") {
 
@@ -550,6 +555,10 @@
 				 	$assrow["laskutus_postino"]	   = $assrow["postino"];
 				 	$assrow["laskutus_postitp"]	   = $assrow["postitp"];
 				 	$assrow["laskutus_maa"]		   = $assrow["maa"];
+				}
+
+				if($naytetaanko_tarjouksella != 'on' and $toim == 'TARJOUS') {
+					$toimpvm = '0000-00-00';
 				}
 
 				$query = "	UPDATE lasku
@@ -1437,6 +1446,17 @@
 			echo "</td></tr>";
 
 			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
+
+			if($toim == 'TARJOUS') {
+				if(!checkdate($toimkk, $toimpp, $toimvv)) {
+					//Kyseessä on tarjouksen toimitusajan piilottamiseen pdf:ltä käytettävä toiminnallisuus toimaika = 0000-00-00 jos se on haluttu piilottaa
+					$naytetaanko_pdf_sel = "";
+				}
+				else {
+					$naytetaanko_pdf_sel = "checked='CHECKED'";
+				}
+				echo t("Näytetäänkö tarjouksella")."<input type='checkbox' name='naytetaanko_tarjouksella' $naytetaanko_pdf_sel /><br/>";
+			}
 
 			if ($toim == "YLLAPITO") {
 				echo t("Ei käytössä");
@@ -2509,6 +2529,7 @@
 
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>".t("keräyslista")." + ".t("valmistus")."</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>".t("lasku")."</td></tr>";
+			echo "<tr><td>".t("Sisäinen viesti").":</td><td><textarea name='sisviesti3' rows='2' cols='40'>$srow[sisviesti3]</textarea></td><td></td></tr>";
 			echo "</table><br>";
 
 			echo "<table>";
@@ -2721,7 +2742,7 @@
 
 			$toimvkopva = $toimvkopva == '' ? 7 : $toimvkopva;
 
-			if ($toimvko < $nyviikko and $toimvko != date("W", strtotime($apuro["toimaika"]))) {
+			if ($toimvko < $nyviikko) {
 				$nyvuosi += 1;
 			}
 
@@ -2744,7 +2765,7 @@
 
 			$keraysvkopva = $keraysvkopva == '' ? 7 : $keraysvkopva;
 
-			if ($keraysvko < $nyviikko and $keraysvko != date("W", strtotime($apuro["kerayspvm"]))) {
+			if ($keraysvko < $nyviikko) {
 				$nyvuosi += 1;
 			}
 
@@ -3023,12 +3044,15 @@
 			$kurssi = $apukurssi;
 		}
 
-		//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
-		if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
-			$toimpp = $kerpp;
-			$toimkk = $kerkk;
-			$toimvv = $kervv;
-			$toimvko = $keraysvko;
+		if($toim != 'TARJOUS') {
+			//Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
+			//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
+			if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
+				$toimpp = $kerpp;
+				$toimkk = $kerkk;
+				$toimvv = $kervv;
+				$toimvko = $keraysvko;
+			}
 		}
 
 		if (($voimaika_vv == "" or !is_numeric($voimaika_vv)) or ($voimaika_kk == "" or !is_numeric($voimaika_kk)) or ($voimaika_pp == "" or !is_numeric($voimaika_pp))) {
@@ -3039,6 +3063,12 @@
 
 		$label = !isset($label) ? "" : $label;
 		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
+
+		if($naytetaanko_tarjouksella != 'on' and $toim == "TARJOUS") {
+			$toimvv = '0000';
+			$toimkk = '00';
+			$toimpp = '00';
+		}
 
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',
@@ -3088,6 +3118,7 @@
 					sisainen 							= '$sisainen',
 					sisviesti1 							= '$sisviesti1',
 					sisviesti2							= '$sisviesti2',
+					sisviesti3							= '$sisviesti3',
 					splittauskielto						= '$splittauskielto',
 					tilaustyyppi						= '$tilaustyyppi',
 					tilausvahvistus 					= '$tilausvahvistus',

@@ -181,6 +181,7 @@
 		$sel1 = "";
 		$sel2 = "";
 		$sel3 = "";
+		$sel4 = "";
 
 		if (isset($summaustaso) and $summaustaso == "S") {
 			$sel1 = "SELECTED";
@@ -205,7 +206,6 @@
 				<option value='T'   $sel3>".t("Varastonarvo tuotteittain")."</option>
 				<option value='TRY' $sel4>".t("Varastonarvo tuoteryhmittäin")."</option>
 				</select>";
-
 
 		if ($yhtiorow['tuotteiden_jarjestys_raportoinnissa'] == 'V') {
 
@@ -1351,8 +1351,21 @@
 			echo "<td align='right'>".sprintf("%.2f",$bvarvo)."</td></tr>";
 			echo "</table><br>";
 
+			// Katsotaan ollaanko ottamassa varastonarvo historiaan
 			if ("$vv-$kk-$pp" != date("Y-m-d")) {
-				echo "<font class='error'>",t("Huom. Bruttovarastonarvo on arvio"),"!</font><br/><br/>";
+				echo "<font class='error'>",t("Huom. Bruttovarastonarvo historiasta on arvio"),"!</font><br/>";
+
+				if (count($varastot) > 0) {
+					echo "<font class='error'>",t("Huom. Varastonarvo historiassa on arvio, jos rajaat raporttia varastoittain.")," ",t("Aja raportti ilman varastorajauksia."),"</font><br/>";
+				}
+				elseif ($summaustaso == "S") {
+					echo "<font class='error'>",t("Huom. Varastonarvo yhteensä on oikein, mutta varastokohtainen varastonarvo historiasta on arvio.")," ",t("Aja raportti tuotteittain/tuoteryhmittäin."),"</font><br/>";
+				}
+				elseif ($summaustaso == "P") {
+					echo "<font class='error'>",t("Huom. Varastonarvo yhteensä on oikein, mutta varastopaikkakohtainen varastonarvo historiasta on arvio.")," ",t("Aja raportti tuotteittain/tuoteryhmittäin."),"</font><br/>";
+				}
+
+				echo "<br/>";
 			}
 		}
 

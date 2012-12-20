@@ -13,6 +13,8 @@
 
 */
 
+$useslave = 1;
+
 require ("../inc/parametrit.inc");
 
 if (!function_exists("luku")) {
@@ -22,7 +24,7 @@ if (!function_exists("luku")) {
 	}
 }
 
-if($toim == "TARJOUS") {
+if ($toim == "TARJOUS") {
 	$sallitut_tilat = "'T'";
 	$tarjouslisa = " LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=t.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=t.tunnus and tilausrivin_lisatiedot.positio != 'Optio'";
 	$tarjoussummalisa = " / count(distinct(otunnus))";
@@ -39,14 +41,12 @@ else {
 
 }
 
-
-
-if($tee == "LASKE") {
+if ($tee == "LASKE") {
 	echo "Suoritetaan kysely‰.. T‰ss‰ voi menn‰ hetkonen...<br>";
 }
 
-if($tee == "KORJAA") {
-	if($tunnusnippu>0) {
+if ($tee == "KORJAA") {
+	if ($tunnusnippu > 0) {
 		echo "<font class='message'>".t("Korjataan projektin seurannat")."</font><br>";
 		$query = "select GROUP_CONCAT(tunnus) tunnukset from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu=$tunnusnippu group by tunnusnippu";
 		$aresult = mysql_query($query) or pupe_error($query);
@@ -63,7 +63,7 @@ if($tee == "KORJAA") {
 	foreach($tunnukset as $tunnus) {
 		$query = "select tunnus from laskun_lisatiedot where otunnus=$tunnus";
 		$atarkres = mysql_query($query) or pupe_error($query);
-		if(mysql_num_rows($atarkres)>0) {
+		if (mysql_num_rows($atarkres)>0) {
 			$query = "UPDATE laskun_lisatiedot set seuranta = '$uusi_seuranta' where yhtio='$kukarow[yhtio]' and otunnus=$tunnus";
 			$updres = mysql_query($query) or pupe_error($query);
 		}
@@ -72,7 +72,7 @@ if($tee == "KORJAA") {
 			$updres = mysql_query($query) or pupe_error($query);
 		}
 
-		if(mysql_affected_rows()>0) {
+		if (mysql_affected_rows()>0) {
 			echo t("Korjattii tilaus")." $tunnus<br>";
 		}
 	}
@@ -81,7 +81,7 @@ if($tee == "KORJAA") {
 }
 
 //	Tarkastetaan ett‰ kaikilla on seurannat kun saavutaan t‰nne ensimm‰ist‰ kertaa..
-if($tee=="") {
+if ($tee=="") {
 	$query = "SELECT GROUP_CONCAT(distinct(selite) SEPARATOR '\',\'') seurannat from avainsana where yhtio='$kukarow[yhtio]' and laji='SEURANTA' group by laji";
 	$aresult = mysql_query($query) or pupe_error($query);
 	$arow = mysql_fetch_array($aresult);
@@ -93,7 +93,7 @@ if($tee=="") {
 			order by tunnusnippu, tunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
-	if(mysql_num_rows($result)>0) {
+	if (mysql_num_rows($result)>0) {
 
 		$aresult = t_avainsana("SEURANTA");
 
@@ -116,17 +116,17 @@ if($tee=="") {
 								<input type='hidden' name='tunnus' value='$row[tunnus]'>
 								<input type='hidden' name='tunnusnippu' value='$row[tunnusnippu]'>";
 			$lisa=$korjattu="";
-			if($row["tunnusnippu"] > 0) {
+			if ($row["tunnusnippu"] > 0) {
 
 				//	Voidaanko automaattikorjata
 				$query = "SELECT seuranta from laskun_lisatiedot where otunnus=$row[tunnusnippu]";
 				$tarkres = mysql_query($query) or pupe_error($query);
-				if(mysql_num_rows($tarkres)==1) {
+				if (mysql_num_rows($tarkres)==1) {
 					$tarkrow=mysql_fetch_array($tarkres);
-					if($tarkrow["seuranta"] != "") {
+					if ($tarkrow["seuranta"] != "") {
 						$query = "SELECT tunnus from laskun_lisatiedot where otunnus=$row[tunnus]";
 						$atarkres = mysql_query($query) or pupe_error($query);
-						if(mysql_num_rows($atarkres)>0) {
+						if (mysql_num_rows($atarkres)>0) {
 							$query = "UPDATE laskun_lisatiedot set seuranta = '$tarkrow[seuranta]' where yhtio='$kukarow[yhtio]' and otunnus=$row[tunnus]";
 							$updres = mysql_query($query) or pupe_error($query);
 						}
@@ -139,7 +139,7 @@ if($tee=="") {
 					}
 				}
 
-				if($toim != "TARJOUS") {
+				if ($toim != "TARJOUS") {
 					$lisa ="<td class='back'>HUOM: tilaus on osa projektia '$row[tunnusnippu]'!</td>";
 				}
 				echo "<a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$row[tunnus]&nippu=$row[tunnusnippu]&otunnus=$row[tunnus]'>$row[tunnus]</a>";
@@ -158,7 +158,7 @@ if($tee=="") {
 			require "inc/laskutyyppi.inc";
 			echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
 
-			if($korjattu != "") {
+			if ($korjattu != "") {
 				echo "<td>$korjattu</td>";
 			}
 			else {
@@ -171,7 +171,7 @@ if($tee=="") {
 	}
 }
 
-if($tee=="" or $tee=="LASKE") {
+if ($tee=="" or $tee=="LASKE") {
 	echo "<br><table>";
 	echo "<form method = 'post'>
 			<input type='hidden' name='tee' value='LASKE'>
@@ -181,7 +181,7 @@ if($tee=="" or $tee=="LASKE") {
 			<td><select name='alvv'>";
 
 	for ($i = date("Y")+1; $i >= date("Y")-6; $i--) {
-		if($alvv==$i) $sel = "selected";
+		if ($alvv==$i) $sel = "selected";
 		elseif ($i == date("Y") and $alvv=="") $sel = "selected";
 		else $sel = "";
 		echo "<option value='$i' $sel>$i</option>";
@@ -191,14 +191,14 @@ if($tee=="" or $tee=="LASKE") {
 	echo "<select name='alvk'>";
 	for ($i = 1; $i <= 12; $i++) {
 		$i = sprintf("%02s",$i);
-		if($alvk == $i) $sel = "selected";
+		if ($alvk == $i) $sel = "selected";
 		else $sel = "";
 		echo "<option value='$i' $sel>$i</option>";
 	}
 	echo "</select> - <select name='blvv'>";
 
 	for ($i = date("Y")+1; $i >= date("Y")-6; $i--) {
-		if($blvv==$i) $sel = "selected";
+		if ($blvv==$i) $sel = "selected";
 		elseif ($i == date("Y") and $blvv=="") $sel = "selected";
 		else $sel = "";
 		echo "<option value='$i' $sel>$i</option>";
@@ -207,7 +207,7 @@ if($tee=="" or $tee=="LASKE") {
 	echo "</select><select name='blvk'>";
 	for ($i = 1; $i <= 12; $i++) {
 		$i = sprintf("%02s",$i);
-		if($blvk == $i) $sel = "selected";
+		if ($blvk == $i) $sel = "selected";
 		elseif ($i == date("m") and $blvk == "") $sel = "selected";
 		else $sel = "";
 		echo "<option value='$i' $sel>$i</option>";
@@ -249,7 +249,7 @@ if($tee=="" or $tee=="LASKE") {
 	echo "</tr>";
 
 	$sel = "";
-	if($nayta_tilaukset == "JOO") $sel = "checked";
+	if ($nayta_tilaukset == "JOO") $sel = "checked";
 	echo "<tr><td>".t("N‰yt‰ tilaukset")."</td>";
 	echo "<td><input type = 'checkbox' name = 'nayta_tilaukset' value = 'JOO' $sel></td></tr>";
 
@@ -258,7 +258,7 @@ if($tee=="" or $tee=="LASKE") {
 
 	$lisa = "";
 
-	if($tee=="LASKE") {
+	if ($tee=="LASKE") {
 
 		$alvp = 1;
 		$blvp = cal_days_in_month(CAL_GREGORIAN, $blvk, $blvv);
@@ -283,7 +283,7 @@ if($tee=="" or $tee=="LASKE") {
 			$lisa  = "lasku.olmapvm <= '$blvv-$blvk-$blvp' and lasku.olmapvm >= '$alvv-$alvk-$alvp'";
 		}
 
-		if($tkausi == 0) {
+		if ($tkausi == 0) {
 			$alku_vv = $alvv;
 			$alku_kk = $alvk;
 			$alku_pp = $alvp;
@@ -307,7 +307,7 @@ if($tee=="" or $tee=="LASKE") {
 		$kk=$alku_kk-1;
 		$summasarake="";
 		$tunnukset="";
-		if($kuukausia > 0) {
+		if ($kuukausia > 0) {
 
 			$query_ale_lisa = generoi_alekentta('M','t');
 
@@ -317,7 +317,7 @@ if($tee=="" or $tee=="LASKE") {
 
 				$kk++;
 
-				if($kk > 12) {
+				if ($kk > 12) {
 					$kk = 1;
 					$vv++;
 				}
@@ -361,28 +361,28 @@ if($tee=="" or $tee=="LASKE") {
 						break;
 				}
 
-				if($kuukausia>12) {
+				if ($kuukausia>12) {
 					$sarake = str_replace("kuu","",$month)."_".substr($vv,2,4);
 				}
 				else {
 					$sarake = $month;
 				}
 
-				if($nayta_tilaukset!="") {
-					$tilaukset .= ", GROUP_CONCAT(distinct(if(left(lasku.luontiaika,7)>='$vv-".sprintf("%02s",$kk)."' and left(lasku.luontiaika,7)<='$vv-".sprintf("%02s",$kk)."', if(tunnusnippu>0,concat('*',lasku.tunnus),lasku.tunnus), NULL)))  tilaukset_$sarake\n";
+				if ($nayta_tilaukset!="") {
+					$tilaukset .= ", GROUP_CONCAT(distinct(if (left(lasku.luontiaika,7)>='$vv-".sprintf("%02s",$kk)."' and left(lasku.luontiaika,7)<='$vv-".sprintf("%02s",$kk)."', if (tunnusnippu>0,concat('*',lasku.tunnus),lasku.tunnus), NULL)))  tilaukset_$sarake\n";
 				}
 
-				$summasarake .= ", sum(if(left(lasku.luontiaika,7)>='$vv-".sprintf("%02s",$kk)."' and left(lasku.luontiaika,7)<='$vv-".sprintf("%02s",$kk)."',
-										if(lasku.tunnusnippu=0,
+				$summasarake .= ", sum(if (left(lasku.luontiaika,7)>='$vv-".sprintf("%02s",$kk)."' and left(lasku.luontiaika,7)<='$vv-".sprintf("%02s",$kk)."',
+										if (lasku.tunnusnippu=0,
 											(
-												SELECT sum(if(t.uusiotunnus=0,t.hinta * (t.varattu+t.jt) * {$query_ale_lisa},rivihinta))
+												SELECT sum(if (t.uusiotunnus=0,t.hinta * (t.varattu+t.jt) * {$query_ale_lisa},rivihinta))
 												FROM lasku l use index (yhtio_tunnusnippu, tila_index)
 												LEFT JOIN tilausrivi t ON t.yhtio=l.yhtio and t.otunnus=l.tunnus and t.tyyppi!='D' and tuoteno!='$yhtiorow[ennakkomaksu_tuotenumero]'
 												$tarjouslisa
 												WHERE l.yhtio=lasku.yhtio and l.tunnus=lasku.tunnus
 											),
 											(
-												SELECT sum(if(t.uusiotunnus=0,t.hinta * (t.varattu+t.jt) * {$query_ale_lisa},rivihinta)) $tarjoussummalisa
+												SELECT sum(if (t.uusiotunnus=0,t.hinta * (t.varattu+t.jt) * {$query_ale_lisa},rivihinta)) $tarjoussummalisa
 												FROM lasku l use index (yhtio_tunnusnippu, tila_index)
 												LEFT JOIN tilausrivi t ON t.yhtio=l.yhtio and t.otunnus=l.tunnus and t.tyyppi!='D' and tuoteno!='$yhtiorow[ennakkomaksu_tuotenumero]'
 												$tarjouslisa
@@ -397,7 +397,7 @@ if($tee=="" or $tee=="LASKE") {
 			$tunnukset=substr($tunnukset,0,-2);
 
 			$lisa="";
-			if($seuranta != "") {
+			if ($seuranta != "") {
 				$lisa .= " and seuranta = '$seuranta'";
 			}
 
@@ -418,7 +418,7 @@ if($tee=="" or $tee=="LASKE") {
 			$result = mysql_query($query) or pupe_error($query);
 			//echo "<pre>".str_replace("\t","",$query)."</pre><br><br>";
 
-			if(mysql_num_rows($result)>0) {
+			if (mysql_num_rows($result)>0) {
 				// tehd‰‰n otsikot
 				echo "<table cellpadding='2'><tr>";
 
@@ -436,18 +436,18 @@ if($tee=="" or $tee=="LASKE") {
 
 					$riviTotal=0;
 					foreach($sarakkeet as $sarake) {
-						if($sarake == "seuranta") {
+						if ($sarake == "seuranta") {
 							echo "<td>$laskurow[$sarake]</td>";
 						}
 						else {
 
 							$lisa="";
 
-							if($nayta_tilaukset != "") {
+							if ($nayta_tilaukset != "") {
 								$abu = explode(",", $laskurow["tilaukset_$sarake"]);
-								if(is_array($abu) and count($abu)>0) {
+								if (is_array($abu) and count($abu)>0) {
 									foreach($abu as $tabu) {
-										if($tabu{0} == "*") {
+										if ($tabu{0} == "*") {
 											$tabu=substr($tabu,1);
 											$lisa .= "<a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$tabu&nippu=$tabu&otunnus=$tabu'>$tabu</a> ";
 										}
@@ -459,14 +459,14 @@ if($tee=="" or $tee=="LASKE") {
 								}
 							}
 
-							if($lisa != "") {
+							if ($lisa != "") {
 								$lisa="<br><font class='info'>".trim($lisa)."</font>";
 							}
 
-							if(round($laskurow[$sarake], 2)>0) {
+							if (round($laskurow[$sarake], 2)>0) {
 								echo "<td><font class='message'>".luku($laskurow[$sarake])."$lisa</font></td>";
 							}
-							elseif(round($laskurow[$sarake], 2)<0) {
+							elseif (round($laskurow[$sarake], 2)<0) {
 								echo "<td><font class='error'>".luku($laskurow[$sarake])."$lisa !!!</font></td>";
 							}
 							else {
@@ -503,6 +503,4 @@ if($tee=="" or $tee=="LASKE") {
 	}
 }
 
-require ("../inc/footer.inc");
-
-?>
+require ("inc/footer.inc");

@@ -785,8 +785,6 @@ if ($kasitellaan_tiedosto) {
 										AND $dynaamisen_taulun_liitos = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
 							$asiakkaan_haku_res = pupe_query($query);
 
-							unset($taulunrivit[$taulu][$eriviindex]);
-
 							while ($asiakkaan_haku_row = mysql_fetch_assoc($asiakkaan_haku_res)) {
 
 								$rivi_array_x = array();
@@ -802,6 +800,8 @@ if ($kasitellaan_tiedosto) {
 								}
 
 								array_push($dynaamiset_rivit, $rivi_array_x);
+
+								unset($taulunrivit[$taulu][$eriviindex]);
 							}
 
 							$puun_alkio_index_plus++;
@@ -2101,7 +2101,8 @@ if (!$cli and !isset($api_kentat)) {
 		'tuotteen_avainsanat'             => 'Tuotteen avainsanat',
 		'tuotteen_orginaalit'             => 'Tuotteiden originaalit',
 		'tuotteen_toimittajat'            => 'Tuotteen toimittajat',
-		'vak'                             => 'VAK-tietoja',
+		'vak'                             => 'VAK/ADR-tietoja',
+		'vak_imdg'                        => 'VAK/IMDG-tietoja',
 		'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
 		'yhteyshenkilo'                   => 'Yhteyshenkilöt',
 	);

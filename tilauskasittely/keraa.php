@@ -22,6 +22,21 @@
 	if (!isset($rahtikirjaan)) $rahtikirjaan = '';
 	if (!isset($sorttaus)) $sorttaus = '';
 
+	if (isset($indexvas) and $indexvas == 1 and $tuvarasto == '') {
+		// jos käyttäjällä on oletusvarasto, valitaan se
+		if ($kukarow['oletus_varasto'] != 0) {
+			$tuvarasto = $kukarow['oletus_varasto'];
+		}
+		//	Varastorajaus jos käyttäjällä on joku varasto valittuna
+		elseif ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
+			// jos käyttäjällä on monta varastoa valittuna, valitaan ensimmäinen
+			$tuvarasto 	= strpos($kukarow['varasto'], ',') !== false ? array_shift(explode(",", $kukarow['varasto'])) : $kukarow['varasto'];
+		}
+		else {
+			$tuvarasto 	= "KAIKKI";
+		}
+	}
+
 	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
 		$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
@@ -1603,14 +1618,18 @@
 
 		while ($row = mysql_fetch_assoc($result)) {
 			$sel = '';
-			if (($row['tunnus'] == $tuvarasto) or ((isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0 and in_array($row['tunnus'], explode(",", $kukarow['varasto']))) and $tuvarasto=='')) {
+
+			if ($row['tunnus'] == $tuvarasto) {
 				$sel = 'selected';
 				$tuvarasto = $row['tunnus'];
 			}
-			echo "<option value='$row[tunnus]' $sel>$row[nimitys]";
+
+			echo "<option value='{$row['tunnus']}' {$sel}>{$row['nimitys']}";
+
 			if ($logistiikka_yhtio != '') {
-				echo " ($row[yhtio])";
+				echo " ({$row['yhtio']})";
 			}
+
 			echo "</option>";
 		}
 		echo "</select>";
@@ -2646,4 +2665,3 @@
 	}
 
 	require ("inc/footer.inc");
-?>

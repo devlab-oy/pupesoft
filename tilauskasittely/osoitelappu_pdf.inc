@@ -453,7 +453,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	//kolliluku
 	if ($rahtikirja_tulostus == "yep") {
 		$salakalapala -= 5;
-		$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), t("Kollim‰‰r‰").": ".$s." (".$kollityht.") ", $firstpage, $kirj);
+		$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), t("Kollim‰‰r‰").": ".$s." (".round($kollityht).") ", $firstpage, $kirj);
 	}
 	else {
 		$query = "	SELECT sum(kollit) kollit
@@ -464,7 +464,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 		if ((int) $pak["kollit"] > 0) {
 			$salakalapala -= 5;
-			$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), t("Kollim‰‰r‰").": ".$pak["kollit"], $firstpage, $kirj);
+			$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), t("Kollim‰‰r‰").": ".round($pak["kollit"]), $firstpage, $kirj);
 		}
 	}
 

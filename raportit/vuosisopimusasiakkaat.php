@@ -1,7 +1,6 @@
 <?php
 
 	// Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
-	//apache_setenv('no-gzip', 1);
 	ini_set('zlib.output_compression', 0);
 	ini_set('implicit_flush', 1);
 	ob_implicit_flush(1);
@@ -35,13 +34,13 @@
 		exit;
 	}
 
-	echo "<font class='head'>".t('Vuosisopimusasiakkaat' , $kieli)."</font><hr>";
+	echo "<font class='head'>".t('Vuosisopimusasiakkaat')."</font><hr>";
 
 	if ($ytunnus != "" and $asiakasid == "") {
 		if ($muutparametrit == '') {
 			$muutparametrit = "$komento#$raja#$emailok#$alkupp#$alkukk#$alkuvv#$loppupp#$loppukk#$loppuvv#";
 		}
-	}
+		}
 
 	if (isset($muutparametrit) and $tee != '' and $asiakasid != '') {
 		list($komento,$raja,$emailok,$alkupp,$alkukk,$alkuvv,$loppupp,$loppukk,$loppuvv) = explode('#', $muutparametrit);
@@ -76,7 +75,7 @@
 		$asiakkaat = hae_asiakkaat($params, $laheta_sahkopostit);
 
 		if (!empty($asiakkaat)) {
-			echo t('löytyi') . ' '.count($asiakkaat) . '<br/><br/>';
+		echo t('löytyi') . ' '.count($asiakkaat) . '<br/><br/>';
 		}
 		else {
 			echo "<font class='error'>".t("Asiakasta ei löytynyt") . "</font><br/><br/>";
@@ -129,7 +128,7 @@
 		$bar = new ProgressBar();
 		$bar->initialize(count($asiakkaat)-1);
 
-		foreach ($asiakkaat as $asiakas) {
+		foreach($asiakkaat as $asiakas) {
 			$bar->increase();
 			$tilaukset = hae_tilaukset($params, $asiakas['tunnus']);
 
@@ -173,7 +172,7 @@
 		kasittele_tilaukset($data_array, $laheta_sahkopostit, $komento, $params, $generoi_excel, $kieli);
 
 		echo "<br>".t('Kaikki valmista' , $kieli).".</font>";
-		
+
 		// Poistetaan temppidirri
 		rmdir($tmpdir);
 
@@ -222,38 +221,38 @@
 		echo "<td>
 				<input type='radio' name='laheta_sahkopostit' value='ajajalle' checked='checked'>".t('Ohjelman ajajalle' , $kieli)."<br>
 				<input type='radio' name='laheta_sahkopostit' value='asiakkaalle'>".t('Asiakkaalle',$kieli)."<br>
-				<input type='radio' name='laheta_sahkopostit' value='asiakkaan_myyjalle'>".t('Asiakkaan myyjälle',$kieli)."<br>
+				<input type='radio' name='laheta_sahkopostit' value='asiakkaan_myyjalle'>".t('Asiakkaan vastuumyyjälle',$kieli)."<br>
 			</td>";
 		echo "</tr>";
 		echo "<tr><th>".t('Asiakasnumero',$kieli).":</th>";
 		echo "<td><input type='text' name='ytunnus' size='10'> ".t('aja vain tämä asiakas',$kieli)." (".t('tyhjä',$kieli)."=".t('kaikki',$kieli).")</td></tr>";
 		echo "<tr><th>".t('Alku päivämäärä',$kieli).":</th>";
 		echo "<td>";
-		echo "<input type='text' name='alkupp' value='$alkupp' size='10'>";
-		echo "<input type='text' name='alkukk' value='$alkukk' size='10'>";
-		echo "<input type='text' name='alkuvv' value='$alkuvv' size='10'> pp kk vvvv</td></tr>";
+		echo "<input type='text' name='alkupp' value='$alkupp' size='3'>";
+		echo "<input type='text' name='alkukk' value='$alkukk' size='3'>";
+		echo "<input type='text' name='alkuvv' value='$alkuvv' size='5'> ".t("(pp-kk-vvvv)")."</td></tr>";
 		echo "<tr><th>".t('Loppu päivämäärä',$kieli).":</th>";
 		echo "<td>";
-		echo "<input type='text' name='loppupp' value='$loppupp' size='10'>";
-		echo "<input type='text' name='loppukk' value='$loppukk' size='10'>";
-		echo "<input type='text' name='loppuvv' value='$loppuvv' size='10'> pp kk vvvv</td></tr>";
+		echo "<input type='text' name='loppupp' value='$loppupp' size='3'>";
+		echo "<input type='text' name='loppukk' value='$loppukk' size='3'>";
+		echo "<input type='text' name='loppuvv' value='$loppuvv' size='5'> ".t("(pp-kk-vvvv)")."</td></tr>";
 		echo "</table>";
 
-		echo "<br><input type='submit' value='".t('Tulosta',$kieli)."' onclick='if (tarkista()){document.vuosiasiakkaat_form.submit();} else{return false;}'></form>";
+		echo "<br><input type='submit' value='".t('Tulosta',$kieli)."' onclick='if(tarkista()){document.vuosiasiakkaat_form.submit();} else{return false;}'></form>";
 
 		?>
 	<script>
 				function tarkista() {
 					var ok = true;
 
-					if (!tarkista_tulostin()) {
+					if(!tarkista_tulostin()) {
 						ok = false;
 					}
 
 					if (ok != false) {
 						if (!tarkista_lahettaja()) {
-							ok = false;
-						}
+						ok = false;
+					}
 					}
 					return ok;
 				}
@@ -269,7 +268,7 @@
 				}
 
 				function tarkista_lahettaja() {
-					if ($('input[name=laheta_sahkopostit]:checked').val() == 'asiakkaalle') {
+					if($('input[name=laheta_sahkopostit]:checked').val() == 'asiakkaalle') {
 						var ok;
 						$.ajax({
 							type: 'POST',
@@ -291,7 +290,7 @@
 							async:false
 						});
 
-						if (ok) {
+						if(ok) {
 							return true;
 						}
 						else {
@@ -319,12 +318,12 @@
 
 			if ($asiakas_row = mysql_fetch_assoc($result)) {
 				$aswhere = "and lasku.liitostunnus = '{$asiakas_row['tunnus']}'";
-			}
-			else {
-				$aswhere = "";
+		}
+		else {
+			$aswhere = "";
 
 				return false;
-			}
+		}
 		}
 		else {
 			$aswhere = "";
@@ -409,8 +408,8 @@
 
 		$tilaukset_tuoteryhmittain = array();
 		$tilaukset_osastoittain = array();
-		
-		while($row = mysql_fetch_assoc($result)) {
+
+		while ($row = mysql_fetch_assoc($result)) {
 
 			if ($row['osasto'] < 10000) {
 				$tilaukset_osastoittain[$row['osasto']]['va'] += $row['va'];
@@ -435,7 +434,7 @@
 	function kasittele_tilaukset($data_array, $laheta_sahkopostit, $komento, $params, $generoi_excel, $kieli) {
 		global $kukarow;
 
-		if ($generoi_excel == 'on') {
+		if($generoi_excel == 'on') {
 			$tiedostot = generoi_excel_tiedostot($data_array, $params, $kieli);
 		}
 		else {
@@ -447,7 +446,7 @@
 				$email = $kukarow['eposti'];
 
 				if (empty($params['ytunnus'])) {
-					luo_zip_ja_laheta($tiedostot, $email);
+				luo_zip_ja_laheta($tiedostot, $email);
 				}
 				else {
 					//jos ytunnus on annettu tiedämme, että generoidaan vain yksi raportti
@@ -459,7 +458,7 @@
 				foreach($data_array as $data) {
 					$email = $data['asiakasrow']['asiakas_email'];
 					$tiedosto = $data['tiedosto'];
-					if ($email != '') {
+					if($email != '') {
 						laheta_email($email, array($tiedosto));
 					}
 					else {
@@ -492,7 +491,7 @@
 				$email = $kukarow['eposti'];
 
 				if (empty($params['ytunnus'])) {
-					luo_zip_ja_laheta($tiedostot, $email);
+				luo_zip_ja_laheta($tiedostot, $email);
 				}
 				else {
 					laheta_email($email, $tiedostot);
@@ -611,9 +610,9 @@
 
 		$maaranpaa = $GLOBALS['tmpdir'].'Ostoseuranta_raportit.zip';
 				
-		$ylikirjoita = true; //ihan varmuuden vuoks
+		$ylikirjoita = true;//ihan varmuuden vuoks
 
-		if (luo_zip($tiedostot, $maaranpaa, $ylikirjoita)) {
+		if(luo_zip($tiedostot, $maaranpaa, $ylikirjoita)) {
 			//lähetetään email
 			laheta_email($email_address, array($maaranpaa));
 
@@ -633,7 +632,6 @@
 	function laheta_email($email_address, array $liitetiedostot_path = array()) {
 		global $yhtiorow, $kieli;
 
-
 		$params = array(
 			"to"		 => $email_address,
 			"subject"	 => $yhtiorow['nimi'] . " - " . t('Vuosisopimusraportti' , $kieli) . ' ' . date("d.m.Y"),
@@ -647,10 +645,10 @@
 			$hakemiston_syvyys = count($tiedosto_nimi);
 			$tiedosto_nimi = $tiedosto_nimi[$hakemiston_syvyys - 1];
 
-			if (stristr(mime_content_type($liitetiedosto_path), 'pdf')) {
+			if(stristr(mime_content_type($liitetiedosto_path), 'pdf')) {
 				$ctype = 'pdf';
 			}
-			else if (stristr(mime_content_type($liitetiedosto_path), 'xls')) {
+			else if(stristr(mime_content_type($liitetiedosto_path), 'xls')) {
 				$ctype = 'excel';
 			}
 			else {

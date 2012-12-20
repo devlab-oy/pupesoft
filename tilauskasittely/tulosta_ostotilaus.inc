@@ -176,7 +176,10 @@
 
 
 				$pdf->draw_text(430, 750, t("Toimitusaika", $kieli), $thispage, $pieni);
-				$pdf->draw_text(430, 740, tv1dateconv($laskurow["toimaika"]), $thispage, $boldi);
+
+				if ($yhtiorow['ostotilaustyyppi'] == '0' or $yhtiorow['ostotilaustyyppi'] == 'B') {
+					$pdf->draw_text(430, 740, tv1dateconv($laskurow["toimaika"]), $thispage, $boldi);
+				}
 
 				$pdf->draw_rectangle(737, 300, 716, 580, $thispage, $rectparam);
 				$pdf->draw_rectangle(737, 420, 716, 580, $thispage, $rectparam);
@@ -394,7 +397,9 @@
 					}
 				}
 
-				$pdf->draw_text(300, $kala, tv1dateconv($row["toimaika"]), $thispage, $norm);
+				if ($yhtiorow['ostotilaustyyppi'] == '0' or $yhtiorow['ostotilaustyyppi'] == 'B') {
+					$pdf->draw_text(300, $kala, tv1dateconv($row["toimaika"]), $thispage, $norm);
+				}
 
 				//	Tarkastetaan olisiko toimittajalla yksikkö!
 				$query = "	SELECT toim_yksikko
@@ -428,7 +433,7 @@
 				$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
 				$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
 
-	            if ($nimitykset != "") {
+            	if ((isset($nimitykset) and $nimitykset != "") or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A')) {
 
 	 				//Käännetään nimitys
 					$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
@@ -695,9 +700,9 @@
 						'row'						=> '',
 						'sivu'						=> 1,
 						'tee'						=> $tee,
+						'nimitykset'				=> $nimitykset,
 						'thispage'					=> NULL,
 						'toim'						=> $toim,
-						'nimitykset'				=> $nimitykset,
 						'rivinumerot'				=> $rivinumerot,
 						'laitetaanko_yhteensarivi'	=> 0,
 						'total'						=> 0,
@@ -727,4 +732,3 @@
 	if ($silent == "") {
 		echo $tulosta_ostotilaus_ulos;
 	}
-?>

@@ -33,6 +33,7 @@
 		<input type='hidden' name='lhyllyvali' value='$lhyllyvali'>
 		<input type='hidden' name='lhyllytaso' value='$lhyllytaso'>
 		<input type='hidden' name='naytasaldo' value='$naytasaldo'>
+		<input type='hidden' name='piilotaToim_tuoteno' value='$piilotaToim_tuoteno'>
 		<input type='hidden' name='toimittaja' value='$toimittaja'>
 		<input type='hidden' name='asiakasid' value='$asiakasid'>
 		<input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -69,7 +70,11 @@
 	$valittu = "";
 
 	if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
-		echo "<tr><td>".t("Tulosta nimitykset ostotilaukselle")."</td><td><input type='checkbox' name='nimitykset'></td></tr>";
+
+		$chk = ((isset($nimitykset) and $nimitykset != '') or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A')) ? 'checked' : '';
+
+		echo "<tr><td>",t("Tulosta nimitykset ostotilaukselle"),"</td><td><input type='checkbox' name='nimitykset' {$chk}></td></tr>";
+
 		$mista = 'toimi';
 		$editsql = "	SELECT *
 						FROM toimi
@@ -196,10 +201,18 @@
 		echo "</select></td></tr>";
 	}
 
-	if ($toim == "TARJOUS" or $toim == "TILAUSVAHVISTUS") {
+	if ($toim == "TILAUSVAHVISTUS") {
 		echo "<tr><td>",t("Näytetäänkö rivihinta"),"</td><td><select name='naytetaanko_rivihinta'>";
 		echo "<option value=''>",t("Näytetään rivihinta"),"</option>";
 		echo "<option value='ei_rivihintaa'>",t("Ei näytetä rivihintaa"),"</option>";
+		echo "</select></td></tr>";
+	}
+
+	if($toim == "TARJOUS") {
+		echo "<tr><td>",t("Näytetäänkö rivihinta"),"</td><td><select name='naytetaanko_rivihinta'>";
+		echo "<option value=''>",t("Näytetään hinnat"),"</option>";
+		echo "<option value='ei_rivihintaa'>",t("Ei näytetä rivihintaa"),"</option>";
+		echo "<option value='kokonaan_ilman_hintoja'>",t("Kokonaan ilman hintoja"),"</option>";
 		echo "</select></td></tr>";
 	}
 

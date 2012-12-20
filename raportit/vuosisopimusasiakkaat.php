@@ -47,7 +47,6 @@
 		list($komento,$raja,$emailok,$alkupp,$alkukk,$alkuvv,$loppupp,$loppukk,$loppuvv) = explode('#', $muutparametrit);
 	}
 
-
 	if ($tee == "tulosta" and $raja == "") {
 		echo "<font class='error'>".t('RAJA PUUTTUU' , $kieli)."!!!</font><br><br>";
 		$tee = "";
@@ -93,9 +92,15 @@
 
 		$tryre = t_avainsana("OSASTO");
 		$osastot = array();
+
+		// Tehdään temppidiiri jossa toimitaan, niin ei mene failit sekaisin jos on usea rappariajo samaan aikaan
+		$tmpdir = "/tmp/VSR_".md5(uniqid(rand(),true))."/";
+		mkdir($tmpdir);
+
 		while ($tryro = mysql_fetch_array($tryre)) {
 			$osastot[$tryro['selite']] = $tryro['selitetark'];
 		}
+
 		$tryre = t_avainsana("TRY");
 		$tuoteryhmat = array();
 
@@ -124,7 +129,7 @@
 		$bar = new ProgressBar();
 		$bar->initialize(count($asiakkaat)-1);
 
-		foreach($asiakkaat as $asiakas) {
+		foreach ($asiakkaat as $asiakas) {
 			$bar->increase();
 			$tilaukset = hae_tilaukset($params, $asiakas['tunnus']);
 
@@ -168,6 +173,9 @@
 		kasittele_tilaukset($data_array, $laheta_sahkopostit, $komento, $params, $generoi_excel, $kieli);
 
 		echo "<br>".t('Kaikki valmista' , $kieli).".</font>";
+		
+		// Poistetaan temppidirri
+		rmdir($tmpdir);
 
 	} // end tee == tulosta
 
@@ -401,6 +409,7 @@
 
 		$tilaukset_tuoteryhmittain = array();
 		$tilaukset_osastoittain = array();
+		
 		while($row = mysql_fetch_assoc($result)) {
 
 			if ($row['osasto'] < 10000) {
@@ -600,8 +609,9 @@
 	function luo_zip_ja_laheta($tiedostot, $email_address) {
 		global $yhtiorow, $kieli;
 
-		$maaranpaa = '/tmp/' . 'Ostoseuranta_raportit.zip';
-		$ylikirjoita = true;//ihan varmuuden vuoks
+		$maaranpaa = $GLOBALS['tmpdir'].'Ostoseuranta_raportit.zip';
+				
+		$ylikirjoita = true; //ihan varmuuden vuoks
 
 		if (luo_zip($tiedostot, $maaranpaa, $ylikirjoita)) {
 			//lähetetään email
@@ -636,6 +646,7 @@
 			$tiedosto_nimi = explode('/', $liitetiedosto_path);
 			$hakemiston_syvyys = count($tiedosto_nimi);
 			$tiedosto_nimi = $tiedosto_nimi[$hakemiston_syvyys - 1];
+
 			if (stristr(mime_content_type($liitetiedosto_path), 'pdf')) {
 				$ctype = 'pdf';
 			}
@@ -646,6 +657,7 @@
 				//ctypessä pitää olla jotain muute sitä ei lähetetä. tässä laitetaan oletukseksi zippi
 				$ctype = 'zip';
 			}
+
 			$liitetiedosto =  array(
 				'filename' => $liitetiedosto_path,
 				'newfilename' => t($tiedosto_nimi, $kieli),
@@ -654,6 +666,7 @@
 
 			$params['attachements'][] = $liitetiedosto;
 		}
+
 		pupesoft_sahkoposti($params);
 	}
 

@@ -266,7 +266,7 @@ function loppu ($firstpage, $sendemail = '') {
 	}
 
 	//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-	$pdffilenimi = '/tmp/'."Ostoseuranta_".$asiakas_numero.".pdf";
+	$pdffilenimi = $GLOBALS['tmpdir']."Ostoseuranta_".$asiakas_numero.".pdf";
 
 	//kirjoitetaan pdf faili levylle..
 	$fh = fopen($pdffilenimi, "w");

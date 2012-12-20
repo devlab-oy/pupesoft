@@ -36,8 +36,8 @@ class vuosisopimus_asiakkaat_excel {
 		$this->rivit_tuoteryhmittain();
 		$this->move_seuraavalle_riville();
 
-		$excel_file = '/tmp/' . $this->excel->close();
-		$new_excel_file = '/tmp/' . "Ostoseuranta_{$this->asiakas['asiakasnro']}.xlsx";
+		$excel_file = "/tmp/".$this->excel->close();
+		$new_excel_file = $GLOBALS['tmpdir']."Ostoseuranta_{$this->asiakas['asiakasnro']}.xlsx";
 
 		rename($excel_file, $new_excel_file);
 

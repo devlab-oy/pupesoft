@@ -307,12 +307,7 @@
 
 		$tiliointi_tunnukset = array();
 		if(!empty($kateismyynti['alv']) and !empty($kateismyynti['alv_maara'])) {
-			if($kateismyynti['onko_kortti']) {
-				$kassalippaan_tilinumero = $kassalipas['kateistilitys'];
-			}
-			else {
-				$kassalippaan_tilinumero = $kassalipas['kateistilitys'];
-			}
+			$kassalippaan_tilinumero = $kassalipas['kateistilitys'];
 			
 			//tehdään alv tiliöinti ja tiliöinti - alv
 			//aineistoon merkataan AmountCurCredit miinus merkkikseksi ja FixedTaxAmount plus merkkiseksi, katelaskentojen takia. siitä syystä vähän oudolta näyttää

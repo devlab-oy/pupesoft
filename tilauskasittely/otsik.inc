@@ -2071,6 +2071,35 @@
 				echo "</tr>";
 			}
 
+			if($toim == "TARJOUS" or $toim == "RIVISYOTTO") {
+				if($yhtiorow['lasku_otsikko_allekirjoitus'] == 'X') {
+					echo "<tr>";
+					echo "<td>".t("Allekirjoittaja")."</td>";
+					echo "<td><select name='allekirjoittaja'>";
+
+					$query = "	SELECT kuka.tunnus,
+								kuka.kuka,
+								kuka.nimi,
+								kuka.asema
+								FROM kuka
+								WHERE kuka.yhtio = '$kukarow[yhtio]'
+								AND kuka.nimi != ''
+								ORDER BY kuka.nimi";
+					$yresult = pupe_query($query);
+
+					echo "<option value=''>".t("Valitse allekirjoittaja")."</option>";
+
+					while($row = mysql_fetch_assoc($yresult)) {
+						$sel = "";
+						if ($row['tunnus'] == $srow['allekirjoittaja']) {
+							$sel = 'selected';
+						}
+						echo "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
+					}
+					echo "</select></td></tr>";
+				}
+			}
+
 			if (($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and ((trim($kantaasiakastunnus) != '' and trim($kantaasiakastunnus) != '0') or (trim($srow['kantaasiakastunnus']) != '' and trim($srow['kantaasiakastunnus']) != '0'))) {
 				if ($srow['kantaasiakastunnus'] != '') $kantaasiakastunnus = $srow['kantaasiakastunnus'];
 
@@ -3105,6 +3134,7 @@
 					maksuehto 							= '$maksuehto',
 					maksuteksti 						= '$maksuteksti',
 					myyja 								= '$myyja',
+					allekirjoittaja						= '$allekirjoittaja',
 					nimi 								= '$nimi',
 					nimitark 							= '$nimitark',
 					olmapvm								= '$voimaika_vv-$voimaika_kk-$voimaika_pp',

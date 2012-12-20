@@ -1318,6 +1318,24 @@
 		$jatko = 0;
 	}
 
+	if(mysql_field_name($result, $i) == "lasku_otsikko_allekirjoitus") {
+		$sela = $selb = "";
+
+		if ($trow[$i] == 'X') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value='' $sela>".t("Ei n‰ytet‰ allekirjoitusta lasku, l‰hete tai tarjous tulosteella")."</option>
+					<option value='X' $selb>".t("N‰ytet‰‰n allekirjoitus lasku, l‰hete ja tarjous tulosteella")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "lahete_tyyppi_tulostus") {
 
 		$sela = $selb = "";

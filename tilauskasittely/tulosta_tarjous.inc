@@ -1434,6 +1434,19 @@ if (!function_exists('loppu_tarjous')) {
 				$pdf_tarjous->draw_text(30,  $kuha-93, $myyrow["nimi"], $page_tarjous[$sivu], $boldi);
 				$pdf_tarjous->draw_text(217, $kuha-93, t("Puh", $kieli).": ". $myyrow['puhno'], $page_tarjous[$sivu], $boldi);
 				$pdf_tarjous->draw_text(404, $kuha-93, "Email: $myyrow[eposti]", $page_tarjous[$sivu], $boldi);
+
+				if($yhtiorow['lasku_otsikko_allekirjoitus'] == 'X') {
+					$allekirjoitus_query = "	SELECT nimi,
+												asema
+												FROM kuka
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus = '{$laskurow['allekirjoittaja']}'";
+					$allekirjoitus_result = pupe_query($allekirjoitus_query);
+					$allekirjoitus_row = mysql_fetch_assoc($allekirjoitus_result);
+
+					$pdf_tarjous->draw_text(30, $kuha-133, $allekirjoitus_row['nimi'], $page_tarjous[$sivu], $boldi);
+					$pdf_tarjous->draw_text(30, $kuha-143, $allekirjoitus_row['asema'], $page_tarjous[$sivu], $boldi);
+				}
 			}
 		}
 

@@ -3300,6 +3300,19 @@ if (!function_exists('loppu_lahete')) {
 			}
 		}
 
+		if($yhtiorow['lasku_otsikko_allekirjoitus'] == 'X') {
+			$allekirjoitus_query = "	SELECT nimi,
+										asema
+										FROM kuka
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$laskurow['allekirjoittaja']}'";
+			$allekirjoitus_result = pupe_query($allekirjoitus_query);
+			$allekirjoitus_row = mysql_fetch_assoc($allekirjoitus_result);
+
+			$pdf->draw_text(40, 95, $allekirjoitus_row['nimi'], $thispage, $norm);
+			$pdf->draw_text(40, 85, $allekirjoitus_row['asema'], $thispage, $norm);
+		}
+
 		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
 			$yhteystiedot_len = $pdf->strlen("$y_nimi, $y_osoite, $y_postino $y_postitp, $y_maa", $pieni);
 			$pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 55, "$y_nimi, $y_osoite, $y_postino $y_postitp, $y_maa", $thispage, $pieni);

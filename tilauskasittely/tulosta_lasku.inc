@@ -1481,6 +1481,19 @@ if (!function_exists('loppu')) {
 			}
 		}
 
+		if($yhtiorow['lasku_otsikko_allekirjoitus'] == 'X') {
+			$allekirjoitus_query = "	SELECT nimi,
+										asema
+										FROM kuka
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$laskurow['allekirjoittaja']}'";
+			$allekirjoitus_result = pupe_query($allekirjoitus_query);
+			$allekirjoitus_row = mysql_fetch_assoc($allekirjoitus_result);
+
+			$pdf_lasku->draw_text(30, 142+$vientikala+$barcode_korkeus, $allekirjoitus_row['nimi'], $thispage, $norm);
+			$pdf_lasku->draw_text(30, 132+$vientikala+$barcode_korkeus, $allekirjoitus_row['asema'], $thispage, $norm);
+		}
+
 		//yhteensärivi
 		$pdf_lasku->draw_rectangle(110+$vientikala+$barcode_korkeus, 20,  90+$vientikala+$barcode_korkeus, 580,	$thispage, $rectparam);
 		$pdf_lasku->draw_rectangle(110+$vientikala+$barcode_korkeus, 207, 90+$vientikala+$barcode_korkeus, 580,	$thispage, $rectparam);

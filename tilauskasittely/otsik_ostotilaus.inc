@@ -324,6 +324,33 @@
 				echo "<td colspan = '3'><input type='text' size='43' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'> (".t("Ostotilaus").")</td></tr>";
 			}
 
+			if($yhtiorow['lasku_otsikko_allekirjoitus'] == 'X') {
+				echo "<tr>";
+				echo "<td>".t("Allekirjoittaja")."</td>";
+				echo "<td colspan = '3'><select name='allekirjoittaja'>";
+
+				$query = "	SELECT kuka.tunnus,
+							kuka.kuka,
+							kuka.nimi,
+							kuka.asema
+							FROM kuka
+							WHERE kuka.yhtio = '$kukarow[yhtio]'
+							AND kuka.nimi != ''
+							ORDER BY kuka.nimi";
+				$yresult = pupe_query($query);
+
+				echo "<option value=''>".t("Valitse allekirjoittaja")."</option>";
+
+				while($row = mysql_fetch_assoc($yresult)) {
+					$sel = "";
+					if ($row['tunnus'] == $srow['allekirjoittaja']) {
+						$sel = 'selected';
+					}
+					echo "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
+				}
+				echo "</select></td></tr>";
+			}
+
 			echo "<tr><td>".t("Tilausviite").":</td><td colspan='3'>
 				<input type='text' size='61' name='viesti' value='$srow[viesti]'> (".t("Ostotilaus").")</td>";
 			echo "</tr>";
@@ -469,6 +496,7 @@
 					maa 				= '$maa',
 					maksuteksti 		= '$maksuteksti',
 					myyja 				= '$myyja',
+					allekirjoittaja		= '$allekirjoittaja',
 					nimi 				= '$nimi',
 					nimitark 			= '$nimitark',
 					osoite 				= '$osoite',

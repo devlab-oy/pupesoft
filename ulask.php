@@ -28,29 +28,26 @@ function listdir($start_dir = '.') {
 			if (strcmp($file, '.') == 0 or strcmp($file, '..') == 0 or substr($file, 0, 1) == ".") {
 				continue;
 			}
+
 			$filepath = $start_dir . '/' . $file;
 
 			if (is_dir($filepath)) {
 				$files = array_merge($files, listdir($filepath));
 			}
 			else {
-				if(strstr($file, "skip_")) {
-					array_push($ohitetut_laskut, $filepath);
-				}
-				else {
-					array_push($files, $filepath);
-				}
+				array_push($files, $filepath);
 			}
 		}
+
 		closedir($fh);
 
-		# Sortataan laskut ja mergetetään skipattujen kanssa, skipatut siis viimeiseksi
+		# Sortataan laskut ja mergetetään
 		sort($files);
-		$files = array_merge($files, $ohitetut_laskut);
 	}
 	else {
 		$files = false;
 	}
+
 	return $files;
 }
 
@@ -133,8 +130,8 @@ if ($tee == 'ohita_lasku') {
 	$ohitettava_lasku = realpath($skannatut_laskut_polku.$skannattu_lasku);
 	$path_parts = pathinfo($ohitettava_lasku);
 
-	# Nimetään ohitettu lasku "skip_" etuliitteellä
-	if (!rename($skannatut_laskut_polku.$skannattu_lasku, $skannatut_laskut_polku."skip_".$kukarow['kesken'].".".$path_parts['extension'])) {
+	# Nimetään ohitettu lasku "ZZ" etuliitteellä
+	if (!rename($skannatut_laskut_polku.$skannattu_lasku, $skannatut_laskut_polku."ZZ".$kukarow['kesken'].".".$path_parts['extension'])) {
 		echo "Ei pystytä nimeämään tiedostoa.<br>";
 		exit;
 	}

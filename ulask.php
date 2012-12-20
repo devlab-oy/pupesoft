@@ -136,6 +136,13 @@ if ($tee == 'ohita_lasku') {
 		exit;
 	}
 
+	# Nollataan kesken ollut
+	$query = "	UPDATE kuka SET
+				kesken = ''
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND kuka = '$kukarow[kuka]'";
+	$kesken_upd_res = pupe_query($query);
+
 	// Haetaan seuraava lasku
 	$silent = 'ei näytetä käyttöliittymää';
 	$skannattu_lasku = hae_skannattu_lasku($kukarow, $yhtiorow);

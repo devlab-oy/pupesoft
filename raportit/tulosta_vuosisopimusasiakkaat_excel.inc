@@ -20,7 +20,6 @@ class vuosisopimus_asiakkaat_excel {
 	}
 
 	public function generoi() {
-		global $pupe_root_polku;
 
 		$this->alku();
 

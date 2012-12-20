@@ -598,7 +598,7 @@
 	}
 
 	function luo_zip_ja_laheta($tiedostot, $email_address) {
-		global $yhtiorow, $kieli, $pupe_root_polku;
+		global $yhtiorow, $kieli;
 
 		$maaranpaa = '/tmp/' . 'Ostoseuranta_raportit.zip';
 		$ylikirjoita = true;//ihan varmuuden vuoks

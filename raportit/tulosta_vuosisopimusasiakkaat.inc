@@ -225,7 +225,7 @@ function rivi ($firstpage, $laji = '') {
 }
 
 function loppu ($firstpage, $sendemail = '') {
-	global $pdf, $kala, $norm, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi, $asiakas_numero, $pupe_root_polku;
+	global $pdf, $kala, $norm, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi, $asiakas_numero;
 
 	//kirjoitetaan yhteensärivit loppuun
 	$kala -= 15;

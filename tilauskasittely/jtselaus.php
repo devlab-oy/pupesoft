@@ -877,7 +877,8 @@
 							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
 							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
-							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta
+							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
+							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa $summarajauslisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
@@ -900,7 +901,8 @@
 							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
 							tilausrivin_lisatiedot.tilausrivilinkki,
 							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
-							tilausrivi.kerayspvm
+							tilausrivi.kerayspvm,
+							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio
@@ -939,7 +941,8 @@
 							lasku.toim_osoite,
 							lasku.toim_postino,
 							lasku.toim_postitp,
-							lasku.toim_maa
+							lasku.toim_maa,
+							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (lasku.tila != 'N' or lasku.alatila != '') $laskulisa $summarajauslisa)
@@ -1062,8 +1065,16 @@
 						unset($perherow);
 						$perheok = 0;
 
-						//Käsiteltävät rivitunnukset (isä ja mahdolliset lapset)
-						$tunnukset = $jtrow["tunnus"].",";
+						if($jtrow['jtkielto'] == 'Z') {
+							$voiko_toimittaa = hae_toimitettavat_tilausrivit($jtrow['otunnus'], $varastosta, $jtspec);
+							if($voiko_toimittaa) {
+								$tunnukset = $jtrow['tunnus'].",";
+							}
+						}
+						else {
+							//Käsiteltävät rivitunnukset (isä ja mahdolliset lapset)
+							$tunnukset = $jtrow["tunnus"].",";
+						}
 
 						if (isset($lapsires) and mysql_num_rows($lapsires) > 0) {
 							while ($perherow = mysql_fetch_assoc($lapsires)) {
@@ -1098,7 +1109,8 @@
 
 						$tunnukset = substr($tunnukset, 0, -1);
 
-						if ($jtrow["ei_saldoa"] == "") {
+						//jos tunnukset on tyhjä, tarkoittaa se, että tuotteella saattaa olla saldoa, mutta koska sen tilauksen jt:tä ei haluta osatoimittaa, ei myöskään tätä riviä haluta toimittaa
+						if ($jtrow["ei_saldoa"] == "" and $tunnukset !== false) {
 							foreach ($varastosta as $vara) {
 
 								$jt_saldopvm = "";

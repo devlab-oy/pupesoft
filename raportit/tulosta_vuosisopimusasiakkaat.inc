@@ -266,7 +266,7 @@ function loppu ($firstpage, $sendemail = '') {
 	}
 
 	//keksitään uudelle failille joku varmasti uniikki nimi:
-	$pdffilenimi = $pupe_root_polku . '/dataout/' . "Ostoseuranta_".$asiakas_numero.".pdf";
+	$pdffilenimi = '/tmp/'."Ostoseuranta_".$asiakas_numero.".pdf";
 
 	//kirjoitetaan pdf faili levylle..
 	$fh = fopen($pdffilenimi, "w");
@@ -275,5 +275,3 @@ function loppu ($firstpage, $sendemail = '') {
 
 	return $pdffilenimi;
 }
-
-?>

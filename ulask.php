@@ -22,12 +22,7 @@ function listdir($start_dir = '.') {
 
 	if (is_dir($start_dir)) {
 
-		$fh = opendir($start_dir);
-
-		while (($file = readdir($fh)) !== false) {
-			if (strcmp($file, '.') == 0 or strcmp($file, '..') == 0 or substr($file, 0, 1) == ".") {
-				continue;
-			}
+		foreach (explode("\n", trim(`ls $start_dir | sort`)) as $file) {
 
 			$filepath = $start_dir . '/' . $file;
 
@@ -38,11 +33,6 @@ function listdir($start_dir = '.') {
 				array_push($files, $filepath);
 			}
 		}
-
-		closedir($fh);
-
-		# Sortataan laskut
-		sort($files, "SORT_STRING");
 	}
 	else {
 		$files = false;

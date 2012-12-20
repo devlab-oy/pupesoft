@@ -383,6 +383,11 @@
 		}
 	}
 
+	if (isset($jatka) and ($erikoisale > 100 or $erikoisale < 0)) {
+		echo "<font class='error'>".t("Erikoisale pit‰‰ olla alle 100% yli 0%")."</font><br/><br/>";
+		unset($jatka);
+	}
+
 	// tehd‰‰n oikeellisuus
 	if ($toim == "YLLAPITO") {
 
@@ -2524,6 +2529,7 @@
 
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>".t("ker‰yslista")." + ".t("valmistus")."</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>".t("lasku")."</td></tr>";
+			echo "<tr><td>".t("Sis‰inen viesti").":</td><td><textarea name='sisviesti3' rows='2' cols='40'>$srow[sisviesti3]</textarea></td><td></td></tr>";
 			echo "</table><br>";
 
 			echo "<table>";
@@ -2736,7 +2742,7 @@
 
 			$toimvkopva = $toimvkopva == '' ? 7 : $toimvkopva;
 
-			if ($toimvko < $nyviikko and $toimvko != date("W", strtotime($apuro["toimaika"]))) {
+			if ($toimvko < $nyviikko) {
 				$nyvuosi += 1;
 			}
 
@@ -2759,7 +2765,7 @@
 
 			$keraysvkopva = $keraysvkopva == '' ? 7 : $keraysvkopva;
 
-			if ($keraysvko < $nyviikko and $keraysvko != date("W", strtotime($apuro["kerayspvm"]))) {
+			if ($keraysvko < $nyviikko) {
 				$nyvuosi += 1;
 			}
 
@@ -3040,7 +3046,7 @@
 
 		if($toim != 'TARJOUS') {
 			//Tarjous keisiss‰ halutaan ohittaa t‰m‰ checki koska toimaika = 0000-00-00 merkkaa, ett‰ tarjousta ei haluta pdf:ll‰ n‰kyviin
-			//P‰iv‰m‰‰r‰vertailu (toivo5ttuker‰yspvm ei saa olla suurempi kuin toivottutoimituspvm)
+			//P‰iv‰m‰‰r‰vertailu (toivottuker‰yspvm ei saa olla suurempi kuin toivottutoimituspvm)
 			if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
 				$toimpp = $kerpp;
 				$toimkk = $kerkk;
@@ -3112,6 +3118,7 @@
 					sisainen 							= '$sisainen',
 					sisviesti1 							= '$sisviesti1',
 					sisviesti2							= '$sisviesti2',
+					sisviesti3							= '$sisviesti3',
 					splittauskielto						= '$splittauskielto',
 					tilaustyyppi						= '$tilaustyyppi',
 					tilausvahvistus 					= '$tilausvahvistus',

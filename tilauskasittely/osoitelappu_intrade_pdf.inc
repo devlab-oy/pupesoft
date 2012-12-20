@@ -286,7 +286,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 	//kolliluku
 	if ($rahtikirja_tulostus == "yep") {
-		$pdf->draw_text(mm_pt(105), mm_pt(92), $kollityht, $firstpage, $norm);
+		$pdf->draw_text(mm_pt(105), mm_pt(92), round($kollityht), $firstpage, $norm);
 	}
 	else {
 		$query = "	SELECT sum(kollit) kollit
@@ -296,7 +296,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$pak = mysql_fetch_assoc($pakka);
 
 		if ((int) $pak["kollit"] > 0) {
-			$pdf->draw_text(mm_pt(105), mm_pt(92), $pak["kollit"], $firstpage, $norm);
+			$pdf->draw_text(mm_pt(105), mm_pt(92), round($pak["kollit"]), $firstpage, $norm);
 		}
 	}
 }

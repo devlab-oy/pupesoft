@@ -5,9 +5,9 @@
 
 	include "inc/parametrit.inc";
 
-	echo "$headerfont<b>Sisäiset työt:<hr>";
+	echo "$headerfont<b>".t("Sisäiset työt").":<hr>";
 
-	$MonthNames = array(1=>'Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu');
+	$MonthNames = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 	$CurDate = getdate();
 
 	if ($month == NULL) {

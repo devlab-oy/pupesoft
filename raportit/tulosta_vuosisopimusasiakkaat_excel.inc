@@ -20,6 +20,7 @@ class vuosisopimus_asiakkaat_excel {
 	}
 
 	public function generoi() {
+
 		$this->alku();
 
 		$this->add_tyhja_rivi(4);
@@ -35,12 +36,10 @@ class vuosisopimus_asiakkaat_excel {
 		$this->rivit_tuoteryhmittain();
 		$this->move_seuraavalle_riville();
 
-		$excel_file = '/tmp/' . $this->excel->close();
+		$excel_file = "/tmp/".$this->excel->close();
+		$new_excel_file = $GLOBALS['tmpdir']."Ostoseuranta_{$this->asiakas['asiakasnro']}.xlsx";
 
-		$new_excel_file = "/tmp/Ostoseuranta_{$this->asiakas['asiakasnro']}.xlsx";
-		exec("cp {$excel_file} {$new_excel_file}");
-
-		unlink($excel_file);
+		rename($excel_file, $new_excel_file);
 
 		return $new_excel_file;
 	}
@@ -116,13 +115,13 @@ class vuosisopimus_asiakkaat_excel {
 	}
 
 	private function print_headers($tyyppi = '') {
-		if($tyyppi == 'tuoteryhma') {
+		if ($tyyppi == 'tuoteryhma') {
 			$this->write_solu(t('Tuoteryhma:', $this->kieli));
 		}
 		else{
 			$this->write_solu(t('Osasto:', $this->kieli));
 		}
-		
+
 		$this->add_tyhja_kolumni(2);
 		$this->write_solu(t('Kpl', $this->kieli) . ' 2012');
 		$this->write_solu(t('Kpl', $this->kieli) . ' 2011');
@@ -137,7 +136,7 @@ class vuosisopimus_asiakkaat_excel {
 			$indeksi = round($rivi['va'] / $rivi['ed'], 2) * 100;
 		}
 
-		if($tyyppi == 'osastoittain') {
+		if ($tyyppi == 'osastoittain') {
 			$numero = $rivi['osasto'];
 			$nimitys = $rivi['osasto_nimitys'];
 		}
@@ -269,5 +268,3 @@ class vuosisopimus_asiakkaat_excel {
 	}
 
 }
-
-?>

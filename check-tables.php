@@ -41,6 +41,18 @@
 			echo "$query -> $chkro[Msg_text]\n";
 		}
 
+		// varmistetaan vielä indexien käytössäolo
+		$query = "show index from $table";
+		$chkre = mysql_query($query);
+
+		while ($chkro = mysql_fetch_array($chkre)) {
+			if (stripos($chkro["Comment"], "disabled") !== FALSE) {
+				$query = "alter table $table enable keys";
+				$chkre = mysql_query($query);
+				echo "$query\n";
+				break;
+			}
+		}
 	}
 
 	echo date("d.m.Y @ G:i:s").": Check tables. Done.\n\n";

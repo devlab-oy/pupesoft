@@ -25,12 +25,12 @@ if (!function_exists('alku_dgd')) {
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(262), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($yhtiorow["osoite"], mm_pt(15), mm_pt(258), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($yhtiorow["postino"]." ".$yhtiorow["postitp"], mm_pt(15), mm_pt(254), 'LATIN1');
-		$pdf->pages[$sivu]->drawText($yhtiorow["maa"], mm_pt(15), mm_pt(250), 'LATIN1');
+		$pdf->pages[$sivu]->drawText(maa($yhtiorow["maa"], $kieli), mm_pt(15), mm_pt(250), 'LATIN1');
 
 		// Rakirno
 		$query = "	SELECT r2.rahtikirjanro, group_concat(DISTINCT r2.otsikkonro) otsikkonro
 					FROM rahtikirjat r1
-					JOIN rahtikirjat r2 ON r1.yhtio=r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro!=0
+					JOIN rahtikirjat r2 ON r1.yhtio=r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro!=0 and r2.otsikkonro>0
 					WHERE r1.otsikkonro = '$laskurow[tunnus]'
 	            	AND r1.yhtio = '$kukarow[yhtio]'
 					GROUP BY 1";
@@ -51,7 +51,7 @@ if (!function_exists('alku_dgd')) {
 		$pdf->pages[$sivu]->drawText($laskurow["toim_nimi"], mm_pt(15), mm_pt(242), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($laskurow["toim_osoite"], mm_pt(15), mm_pt(238), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($laskurow["toim_postino"]." ".$laskurow["toim_postitp"], mm_pt(15), mm_pt(234), 'LATIN1');
-		$pdf->pages[$sivu]->drawText($laskurow["toim_maa"], mm_pt(15), mm_pt(230), 'LATIN1');
+		$pdf->pages[$sivu]->drawText(maa($laskurow["toim_maa"], $kieli), mm_pt(15), mm_pt(230), 'LATIN1');
 
 		// Ruksit
 		$pdf->pages[$sivu]->drawLine(mm_pt(15), mm_pt(202), mm_pt(55), mm_pt(197));
@@ -61,8 +61,8 @@ if (!function_exists('alku_dgd')) {
 		$pdf->pages[$sivu]->drawLine(mm_pt(58), mm_pt(197), mm_pt(101), mm_pt(202));
 
 		// 9 Additional handling information
-		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"]." ".$yhtiorow["puhelin"], mm_pt(105), mm_pt(202), 'LATIN1');
-		
+		$pdf->pages[$sivu]->drawText(t("Hätäpuhelinnumero", $kieli)." {$yhtiorow["puhelin"]}", mm_pt(105), mm_pt(202), 'LATIN1');
+
 
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(61), 'LATIN1');
 
@@ -136,7 +136,7 @@ if (!function_exists('uusi_sivu_dgd')) {
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(262), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($yhtiorow["osoite"], mm_pt(15), mm_pt(258), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($yhtiorow["postino"]." ".$yhtiorow["postitp"], mm_pt(15), mm_pt(254), 'LATIN1');
-		$pdf->pages[$sivu]->drawText($yhtiorow["maa"], mm_pt(15), mm_pt(250), 'LATIN1');
+		$pdf->pages[$sivu]->drawText(maa($yhtiorow["maa"]), mm_pt(15), mm_pt(250), 'LATIN1');
 
 		$pdf->pages[$sivu]->drawText($laskurow["rahtikirjanro"], mm_pt(110), mm_pt(263), 'LATIN1');
 
@@ -164,11 +164,35 @@ if (!function_exists('rivi_dgd')) {
 
 		$pdf->pages[$sivu]->setFont($norm, 8);
 
-		list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['otsikkonro'], $kieli, "DGD");
+		list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['tunnus'], $kieli, "DGD", "imdg");
 
 		$kollimaara_yht = 0;
 
 		foreach ($vakrakirtiedot as $vakrakirrivi) {
+
+			if (($sivu == 0 and $kala < 120) or ($sivu > 0 and $kala < 30)) {
+
+				$pdf->pages[$sivu]->drawText("Continues....", mm_pt(45), mm_pt($kala), 'LATIN1');
+
+				$sivu++;
+
+				// Luodaan palautettavat
+				$return = array();
+
+				foreach ($params as $key => $null) {
+					$return[$key] = ${$key};
+				}
+
+				$params = uusi_sivu_dgd($return);
+
+				// Luodaan muuttujat
+				foreach ($params as $key => $val) {
+					${$key} = $val;
+				}
+
+				$kala = 240;
+				$pdf->pages[$sivu]->setFont($norm, 8);
+			}
 
 			list($kollimaara, $teksti, $kilot) = explode("###", $vakrakirrivi);
 
@@ -214,8 +238,6 @@ if (!function_exists('rivi_dgd')) {
 				$kala = 240;
 				$pdf->pages[$sivu]->setFont($norm, 8);
 			}
-
-			$eramaara = $row["kpl"]/$row["era"];
 
 			$pdf->pages[$sivu]->drawText($vaktuoterivi, mm_pt(45), mm_pt($kala), 'LATIN1');
 
@@ -310,5 +332,3 @@ if (!function_exists('print_pdf_dgd')) {
 		}
 	}
 }
-
-?>

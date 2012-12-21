@@ -12,7 +12,11 @@
 
 		$ulos = "<td><select name='$nimi'>";
 
-		$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]'";
+		$query = "	SELECT *
+					from kirjoittimet
+					where yhtio = '$kukarow[yhtio]'
+					AND komento != 'EDI'
+					ORDER BY kirjoitin";
 		$kires = mysql_query($query) or pupe_error($query);
 
 		$ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
@@ -37,6 +41,7 @@
 		$ulos .= "<option value=''>".t("Normaalivarasto josta kaikki myyvät")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Erikoisvarasto josta voi myydä")."</option>";
 		$ulos .= "<option value='E' $sel[E]>".t("Erikoisvarasto josta automaattisesti ei myydä")."</option>";
+		$ulos .= "<option value='P' $sel[P]>".t("Poistettu varasto")."</option>";
 		$ulos .= "</select>";
 
 		$ulos .= "</select></td>";

@@ -56,6 +56,7 @@
 	$verkkolaskuvirheet_vaarat		= $verkkolaskut_error;
 	$verkkolaskuvirheet_poistetut	= $verkkolaskut_reject;
 
+
 	// ekotetaan javascripti‰ jotta saadaan pdf:‰t uuteen ikkunaan
 	js_openFormInNewWindow();
 
@@ -68,6 +69,19 @@
 
 	if (isset($tiedosto)) {
 		if ($tapa == 'U') {
+			rename($verkkolaskuvirheet_vaarat."/".$tiedosto, $verkkolaskuvirheet_kasittele."/".$tiedosto);
+			echo "<font class='message'>".t("Tiedosto k‰sitell‰‰n uudestaan")."</font><br>";
+		}
+
+		if ($tapa == 'U_JA_P') {
+			// P‰ivitet‰‰n toimittajan tunnus aineistoon, niin saadaan lasku reskontraan
+			if ($kumpivoice == "FINVOICE") {
+				$finkkari = simplexml_load_file($verkkolaskuvirheet_vaarat."/".$tiedosto);
+				$finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $tunnus);
+
+				file_put_contents($verkkolaskuvirheet_vaarat."/".$tiedosto, $finkkari->asXML());
+			}
+
 			rename($verkkolaskuvirheet_vaarat."/".$tiedosto, $verkkolaskuvirheet_kasittele."/".$tiedosto);
 			echo "<font class='message'>".t("Tiedosto k‰sitell‰‰n uudestaan")."</font><br>";
 		}
@@ -108,7 +122,7 @@
 						require("inc/verkkolasku-in-finvoice.inc");
 						$kumpivoice = "FINVOICE";
 					}
-					elseif (strpos($file, "_invoice") !== false){
+					elseif (strpos($file, "teccominvoice") !== false){
 						require("inc/verkkolasku-in-teccom.inc");
 						$kumpivoice = "TECCOM";
 					}
@@ -135,7 +149,17 @@
 
 						$laskuttajan_tilino 	= utf8_decode(array_shift($xml->xpath('Group2/FII[@e3035="BF"]/@eC078.3194')));
 					}
-					elseif ($kumpivoice = "FINVOICE") {
+					elseif ($kumpivoice == "TECCOM") {
+						$laskuttajan_osoite 	= utf8_decode($xml->InvoiceHeader->SellerParty->Address->Street1);
+						$laskuttajan_postitp 	= utf8_decode($xml->InvoiceHeader->SellerParty->Address->City);
+						$laskuttajan_postino 	= utf8_decode($xml->InvoiceHeader->SellerParty->Address->PostalCode);
+						$laskuttajan_maa 		= utf8_decode($xml->InvoiceHeader->SellerParty->Address->CountryCode);
+ 						$laskuttajan_tilino		= $lasku_toimittaja["ultilno"];
+						$laskuttajan_ovt		= $lasku_toimittaja["ovt_tunnus"];
+						$laskuttajan_vat		= $lasku_toimittaja["ytunnus"];
+
+					}
+					elseif ($kumpivoice == "FINVOICE") {
 						$laskuttajan_osoite 	= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerStreetName);
 						$laskuttajan_postitp 	= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerTownName);
 						$laskuttajan_postino 	= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerPostCodeIdentifier);
@@ -153,37 +177,187 @@
 						echo "<td>$yhtio<br>{$ostaja_asiakkaantiedot["nimi"]}<br><font class='error'>".t("HUOM: Laskun vastaanottaja ep‰selv‰")."!</font></td>";
 					}
 
-					echo "<td>";
+					echo "<td nowrap>";
 
 					// Olisiko toimittaja sittenkin jossain (v‰‰rin perustettu)
 					if ($lasku_toimittaja["tunnus"] == 0) {
-						$siivottu = preg_replace('/\b(oy|ab|ltd)\b/i', '', strtolower($laskuttajan_nimi));
-						$siivottu = preg_replace('/^\s*/', '', $siivottu);
-						$siivottu = preg_replace('/\s*$/', '', $siivottu);
 
-						$query = "	SELECT tunnus, nimi
-									FROM toimi
-									WHERE yhtio = '$yhtiorow[yhtio]'
-									and nimi like '%$siivottu%'
-									and tyyppi != 'P'";
-						$lahellaresult = mysql_query($query) or die ("$query<br><br>".mysql_error());
+						$laskuttajan_ovt  = trim($laskuttajan_ovt);
+						$laskuttajan_vat  = trim($laskuttajan_vat);
+						$laskuttajan_nimi = trim($laskuttajan_nimi);
+						$laskuttajan_toimittajanumero = trim($laskuttajan_toimittajanumero);
+
+						$toimittaja_array = array();
+
+						if ($laskuttajan_ovt != "") {
+							// 1 etsit‰‰n toimittaja ovttunnuksella
+							$query  = "	SELECT *
+										FROM toimi
+										WHERE ovttunnus = '$laskuttajan_ovt'
+										and ovttunnus not in ('','0')
+										and yhtio = '$yhtiorow[yhtio]'
+										and tyyppi != 'P'";
+							$result = pupe_query($query);
+
+							while ($trow = mysql_fetch_assoc($result)) {
+								$toimittaja_array[$trow["tunnus"]] = $trow;
+							}
+						}
+
+						if ($laskuttajan_ovt != "") {
+							// 2 etsit‰‰n toimittaja ovt-tunnuksella ilman tarkenteita
+							$yovt = substr($laskuttajan_ovt, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
+
+							$query  = "	SELECT *
+										FROM toimi
+										WHERE ovttunnus = '$yovt'
+										and ovttunnus not in ('','0')
+										and yhtio = '$yhtiorow[yhtio]'
+										and tyyppi != 'P'";
+							$result = pupe_query($query);
+
+							while ($trow = mysql_fetch_assoc($result)) {
+								$toimittaja_array[$trow["tunnus"]] = $trow;
+							}
+						}
+
+						if ($laskuttajan_vat != "") {
+							// 3 etsit‰‰n toimittaja vat-numerolla
+							$query  = "	SELECT *
+										FROM toimi
+										WHERE ovttunnus = '$laskuttajan_vat'
+										and ovttunnus not in ('','0')
+										and yhtio = '$yhtiorow[yhtio]'
+										and tyyppi != 'P'";
+							$result = pupe_query($query);
+
+							while ($trow = mysql_fetch_assoc($result)) {
+								$toimittaja_array[$trow["tunnus"]] = $trow;
+							}
+						}
+
+						if ($laskuttajan_vat != "") {
+							// 4 etsit‰‰n toimittaja vat-numerolla
+							$query  = "	SELECT *
+										FROM toimi
+										WHERE ytunnus = '$laskuttajan_vat'
+										and ytunnus not in ('','0')
+										and yhtio = '$yhtiorow[yhtio]'
+										and tyyppi != 'P'";
+							$result = pupe_query($query);
+
+							while ($trow = mysql_fetch_assoc($result)) {
+								$toimittaja_array[$trow["tunnus"]] = $trow;
+							}
+						}
+
+						if ($laskuttajan_ovt != "") {
+							// 5 etsit‰‰n toimittaja ytunnuksella
+							$yovt1 = substr(str_replace("0037", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
+							$yovt2 = (int) $yovt1; // ilman etunollaa
+
+							$query  = "	SELECT *
+										FROM toimi
+										WHERE ytunnus in ('$yovt1', '$yovt2')
+										and ytunnus not in ('','0')
+										and yhtio = '$yhtiorow[yhtio]'
+										and tyyppi != 'P'";
+							$result = pupe_query($query);
+
+							while ($trow = mysql_fetch_assoc($result)) {
+								$toimittaja_array[$trow["tunnus"]] = $trow;
+							}
+						}
+
+						if ($laskuttajan_vat != "") {
+							$intvat = preg_replace("/[^0-9]/", "", $laskuttajan_vat);
+							$intvat2 = (int) $intvat; // ilman etunollaa
+
+							// 6 etsit‰‰n toimittaja vat-numerolla ilman FI-etuliitett‰
+							$query  = "	SELECT *
+										FROM toimi
+										WHERE REPLACE(REPLACE(REPLACE(ytunnus,'FI',''),'fi',''),'-','') in ('$intvat', '$intvat2')
+										and ytunnus not in ('','0')
+										and yhtio = '$yhtiorow[yhtio]'
+										and tyyppi != 'P'";
+							$result = pupe_query($query);
+
+							while ($trow = mysql_fetch_assoc($result)) {
+								$toimittaja_array[$trow["tunnus"]] = $trow;
+							}
+						}
+
+						if ($laskuttajan_nimi != "") {
+							$siivottu = preg_replace('/\b(oy|ab|ltd)\b/i', '', strtolower($laskuttajan_nimi));
+							$siivottu = preg_replace('/^\s*/', '', $siivottu);
+							$siivottu = preg_replace('/\s*$/', '', $siivottu);
+
+
+							// 7 etsit‰‰n toimittaja nimell‰
+							$query = "	SELECT *
+										FROM toimi
+										WHERE yhtio = '$yhtiorow[yhtio]'
+										and nimi like '%$siivottu%'
+										and nimi not in ('','0')
+										and tyyppi != 'P'";
+							$result = pupe_query($query);
+
+							while ($trow = mysql_fetch_assoc($result)) {
+								$toimittaja_array[$trow["tunnus"]] = $trow;
+							}
+						}
+
+						if ($laskuttajan_nimi != "") {
+
+							$laskuttajan_nimi = str_replace(" ", "", $laskuttajan_nimi);
+
+							// 8 etsit‰‰n IBAN-numerolla. (Maventa special: Jos laskulta puuttuu ytunnus, niin IBAN-tyˆnnetaan laskun nimi-kentt‰‰n...)
+							$query = "	SELECT *
+										FROM toimi
+										WHERE yhtio = '$yhtiorow[yhtio]'
+										and ultilno = '$laskuttajan_nimi'
+										and ultilno not in ('','0')
+										and tyyppi != 'P'";
+							$result = pupe_query($query);
+
+							while ($trow = mysql_fetch_assoc($result)) {
+								$toimittaja_array[$trow["tunnus"]] = $trow;
+							}
+						}
 					}
 
 					if ($lasku_toimittaja["tunnus"] == 0) {
-						if (mysql_num_rows($lahellaresult) > 0) {
+						if (count($toimittaja_array) > 0) {
 
-							echo "<form action='".$palvelin2."yllapito.php' method='post'>
+							if ($kumpivoice == "FINVOICE") {
+								echo t("Valitse toimittaja ja k‰sittele lasku uudestaan").":<br>";
+								echo "<form method='post'>
+										<input type='hidden' name = 'tiedosto' value='$file'>
+										<input type='hidden' name = 'tapa' value='U_JA_P'>
+										<input type='hidden' name = 'kumpivoice' value='$kumpivoice'>
+										<select name='tunnus'>";
+
+								foreach ($toimittaja_array as $lahellarow) {
+									echo "<option value='$lahellarow[tunnus]'>$lahellarow[nimi] $lahellarow[nimitark]</option>";
+								}
+
+								echo "</select><input type='submit' value ='".t("K‰sittele uudestaan")."'></form><br><br>";
+							}
+
+							echo t("Muuta toimittajan tietoja").":<br>";
+							echo "<form action='{$palvelin2}yllapito.php' method='post'>
 									<input type = 'hidden' name = 'toim' value = 'toimi'>
 									<select name='tunnus'>";
 
-							while ($lahellarow = mysql_fetch_array($lahellaresult)) {
-								echo "<option value='$lahellarow[tunnus]'>$lahellarow[nimi]";
+							foreach ($toimittaja_array as $lahellarow) {
+								echo "<option value='$lahellarow[tunnus]'>$lahellarow[nimi] $lahellarow[nimitark]</option>";
 							}
 
-							echo "</select><input type='submit' value ='".t("P‰ivit‰ toimittaja")."'></form><br>";
+							echo "</select><input type='submit' value ='".t("P‰ivit‰")."'></form><br><br>";
 						}
 
-						echo "<form action='".$palvelin2."yllapito.php' method='post'>
+						echo t("Perusta uusi toimittaja").":<br>";
+						echo "<form action='{$palvelin2}yllapito.php' method='post'>
 								<input type = 'hidden' name = 'toim' value = 'toimi'>
 								<input type = 'hidden' name = 'uusi' value = '1'>
 								<input type = 'hidden' name = 't[1]' value = '$laskuttajan_nimi'>
@@ -195,15 +369,17 @@
 								<input type = 'hidden' name = 't[59]' value = '$laskuttajan_vat'>
 								<input type = 'hidden' name = 't[60]' value = '$laskuttajan_ovt'>
 								<input type = 'hidden' name = 'lopetus' value = '".$palvelin2."verkkolaskuvirheet.php////'>
-								<input type='submit' value = '".t("Perusta toimittaja")."'></form><br>";
+								<input type='submit' value = '".t("Perusta")."'></form><br><br>";
 					}
 					else {
+						echo t("K‰sittele lasku uudestaan").":<br>";
 						echo "<form method='post'>
 								<input type='hidden' name = 'tiedosto' value ='$file'>
 								<input type='hidden' name = 'tapa' value ='U'>
-								<input type='submit' value = '".t("K‰sittele uudestaan")."'></form><br>";
+								<input type='submit' value = '".t("K‰sittele uudestaan")."'></form><br><br>";
 					}
 
+					echo t("Hylk‰‰ lasku").":<br>";
 					echo "<form method='post'>
 							<input type='hidden' name = 'tiedosto' value ='$file'>
 							<input type='hidden' name = 'tapa' value ='P'>

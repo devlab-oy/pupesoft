@@ -18,7 +18,7 @@
 			require("inc/valitse_tulostin.inc");
 		}
 		elseif ($kappaleet > 0) {
-			if ($toim != "REKLAMAATIO" and $komento["Työmääräys"] != "email") {
+			if ($toim != "REKLAMAATIO" and $komento["Työmääräys"] != "email" and $tyomtyyppi != 'Z') {
 				$komento["Työmääräys"] .= " -# $kappaleet ";
 			}
 			elseif ($komento["Reklamaatio"] != "email") {
@@ -34,7 +34,12 @@
 		}
 
 		// Haetaan asiakkaan tiedot
-		$query = "  SELECT luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+		$query = "  SELECT luokka,
+					puhelin,
+					if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
+					asiakasnro as asiakasnro_aito,
+					kerayserat,
+					kieli
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 		$result = pupe_query($query);
@@ -146,6 +151,12 @@
 
 				// Aloitellaan lomakkeen teko
 				$params_tyomaarays = tyomaarays_alku($params_tyomaarays);
+
+				if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "") {
+					// Ekan sivun otsikot
+					$params_tyomaarays['kala'] -= $params_tyomaarays['rivinkorkeus']*3;
+					$params_tyomaarays = tyomaarays_rivi_otsikot($params_tyomaarays);
+				}
 
 				while ($row = mysql_fetch_assoc($riresult)) {
 					$params_tyomaarays["row"] = $row;

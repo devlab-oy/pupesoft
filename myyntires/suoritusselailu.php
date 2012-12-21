@@ -661,7 +661,7 @@
 			echo "<td valign='top'>".tilinumero_print($maksurow["tilino"])."</td>";
 
 			echo "<td valign='top'>$maksurow[viite]<br>$maksurow[viesti]</td>";
-			echo "<td valign='top'><a href='../muutosite.php?tee=E&tunnus=$maksurow[tltunnus]'>$maksurow[ttilino]</a></td>";
+			echo "<td valign='top'><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$maksurow[tltunnus]&lopetus=$PHP_SELF//////tila=$tila//tilino=$tilino//valuutta=$valuutta//haku[suoritus.nimi_maksaja]={$haku["suoritus.nimi_maksaja"]}//haku[suoritus.kirjpvm]={$haku["suoritus.kirjpvm"]}//haku[suoritus.summa]={$haku["suoritus.summa"]}//haku[suoritus.valkoodi]={$haku["suoritus.valkoodi"]}//haku[suoritus.tilino]={$haku["suoritus.tilino"]}//haku[suoritus.viite]={$haku["suoritus.viite"]}//haku[tiliointi.tilino]={$haku["tiliointi.tilino"]}'>$maksurow[ttilino]</a></td>";
 
 			// tehd‰‰n nappi kuitin tulostukseen
 			echo "<td valign='top' class='back'>";

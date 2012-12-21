@@ -70,7 +70,7 @@
 			$meili .= t("Viesti").":\n".str_replace("\r\n","\n", $row["kentta01"])."\n\n";
 			$meili .= "-----------------------\n\n";
 
-			$tulos = mail($email, mb_encode_mimeheader(t("Asiakasmemo")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <$kukarow[eposti]>\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+			$tulos = mail($email, mb_encode_mimeheader(t("Asiakasmemo")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <$kukarow[eposti]>\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
 
 			if ($row["tyyppi"] == "Lead") {
 				$eviesti = "$kukarow[nimi] lähetti leadin osoitteeseen: $email";
@@ -552,10 +552,10 @@
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {
-					echo "<td><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=ALENNUKSET&lopetus=$asmemo_lopetus'>".t("Näytä alennustaulukko")."</a></td>";
+					echo "<td><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=ALENNUKSET&lopetus=$asmemo_lopetus'>".t("Alennustaulukko")."</a></td>";
 				}
 				else {
-					echo "<td><u>".t("(Näytä alennustaulukko)")."</u></td>";
+					echo "<td><u>".t("Alennustaulukko")."</u></td>";
 				}
 
 				echo "</tr>";
@@ -583,7 +583,7 @@
         		}
 
 				echo "</select></form>";
-				echo "</td><td><a href='{$palvelin2}budjetinyllapito_tat.php?toim=ASIAKAS&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&submit_button=joo&alkuvv=".date("Y")."&alkukk=01&loppuvv=".date("Y")."&loppukk=12&lopetus=$asmemo_lopetus'>".t("Näytä asiakasbudjetti")."</a></td></tr>";
+				echo "</td><td><a href='{$palvelin2}budjetinyllapito_tat.php?toim=ASIAKAS&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&submit_button=joo&alkuvv=".date("Y")."&alkukk=01&loppuvv=".date("Y")."&loppukk=12&lopetus=$asmemo_lopetus'>".t("Asiakkaan myyntitavoitteet")."</a></td></tr>";
 
 				if ($yfakta != '' or $ytitteli != '' or $ynimi != '') {
 					echo "<tr><td colspan='2'>".t("Valittu yhteyshenkilö").": $ytitteli $ynimi</td><td colspan='2'>$yfakta</td></tr>";

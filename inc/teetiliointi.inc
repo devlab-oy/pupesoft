@@ -63,7 +63,7 @@
 	// Ei rikota rivinvaihtoja
 	$selite = str_ireplace("(br)", "<br>", $selite);
 
-	if ($paivitetaanko) {
+	if (isset($paivitetaanko) and $paivitetaanko) {
 
 		$query = "	SELECT *
 					FROM tiliointi

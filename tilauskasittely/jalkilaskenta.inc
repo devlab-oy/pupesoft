@@ -13,55 +13,6 @@ Palautetaan $jlerror, joka on 1, jos jotain epätavallista sattui
 
 $jalkilaskenta_debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
 
-if (!function_exists("kopioitiliointi")) {
-	function kopioitiliointi ($tunnus, $viivaaja) {
-		//Tehdään kopio tiliöinnistä $tunnus
-		//Jos $viivaajassa on jotain tehdään uusi vienti yliviivattuna
-
-		global $kukarow;
-
-		$query = "	SELECT *
-					FROM tiliointi
-					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus  = '$tunnus'";
-		$result = pupe_query($query);
-
-		if (mysql_num_rows($result) != 1) {
-			echo "Tiliöintirivi kateissa Systeemivirhe!";
-		}
-		else {
-			$tiliointirow = mysql_fetch_assoc($result);
-
-			$query = "INSERT into tiliointi set ";
-
-			for ($i=0; $i<mysql_num_fields($result); $i++) {
-
-				$kennimi = mysql_field_name($result, $i);
-
-				if ($kennimi != 'tunnus') {
-					if ($viivaaja != '') {
-						if ($kennimi == 'korjattu') {
-							$query .= "korjattu ='$viivaaja',";
-						}
-						elseif ($kennimi == 'korjausaika') {
-							$query .= "korjausaika = now(),";
-						}
-						else {
-							$query .= $kennimi." = '".$tiliointirow[$kennimi]."',";
-						}
-					}
-					else {
-						$query .= $kennimi." = '".$tiliointirow[$kennimi]."',";
-					}
-				}
-			}
-
-			$query  = substr($query,0,-1);
-			$result = pupe_query($query);
-		}
-	}
-}
-
 if (!function_exists("korjaalaskut")) {
 	function korjaalaskut($tuoteno, $kehahin, $alku, $loppu, $korjtunnus) {
 		global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text;

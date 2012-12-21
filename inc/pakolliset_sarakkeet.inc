@@ -9,7 +9,7 @@
 // määritellään pakolliset sarakkeet
 if (!function_exists("pakolliset_sarakkeet")) {
 	function pakolliset_sarakkeet($table, $otsikot = "") {
-		global $kukarow, $yhtiorow, $table_tarkenne;
+		global $kukarow, $yhtiorow;
 
 		$pakolliset		= array();
 		$kielletyt		= array();
@@ -36,6 +36,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("TUOTENO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO", "OLETUS");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM", "SALDO", "SALDO_VARATTU", "SALDOAIKA", "INVENTOINTIAIKA", "INVENTOINTIPOIKKEAMA", "INVENTOINTILISTA", "INVENTOINTILISTA_AIKA");
 				$joinattavat = array("TUOTENO" => "tuote");
+				$saakopoistaa = TRUE;
 				break;
 			case "budjetti" :
 				$pakolliset = array("KAUSI", "TASO", "SUMMA");
@@ -188,6 +189,18 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$eiyhtiota 	 = "EILAATIJAA";
 				$saakopoistaa = TRUE;
 				break;
+			case "rekisteritiedot_lisatiedot" :
+				$pakolliset  = array("VALMISTENUMERO");
+				$kielletyt   = array();
+				$eiyhtiota 	 = "EILAATIJAA";
+				$saakopoistaa = TRUE;
+				break;
+			case "yhteensopivuus_valmistenumero" :
+				$pakolliset  = array("TUOTENO", "VALMISTENUMERO");
+				$kielletyt   = array();
+				$eiyhtiota 	 = "EILAATIJAA";
+				$saakopoistaa = TRUE;
+				break;
 			case "tuotteen_orginaalit" :
 				$pakolliset  = array("TUOTENO", "ORIG_TUOTENO");
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
@@ -291,21 +304,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$saakopoistaa = TRUE;
 				break;
 			case "puun_alkio" :
-				$pakolliset = array("TUNTEMATON_TAULU");
-				$kielletyt = array();
-
-				if (trim($table_tarkenne) != '') {
-
-					$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite = '$table_tarkenne' ");
-
-					if (mysql_num_rows($dynaamiset_avainsanat_result) == 1) {
-						$pakolliset = array("KIELI", "PUUN_TUNNUS", "LIITOS");
-						$kielletyt = array("LAJI", "LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-						$wherelliset = array("KIELI", "PUUN_TUNNUS", "LIITOS", "JARJESTYS");
-						$saakopoistaa = TRUE;
-					}
-				}
-
+				$pakolliset = array("KIELI", "PUUN_TUNNUS", "LIITOS");
+				$kielletyt = array("LAJI", "LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$wherelliset = array("KIELI", "PUUN_TUNNUS", "LIITOS", "JARJESTYS");
+				$saakopoistaa = TRUE;
 				break;
 			case "auto_vari" :
 				$pakolliset = array("MERKKI", "VARIKOODI", "VARINIMI","VARINUMERO");
@@ -325,6 +327,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$saakopoistaa = TRUE;
 				break;
 			case "vak" :
+			case "vak_imdg" :
 				$pakolliset = array("YK_NRO");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("NIMI_JA_KUVAUS", "LUOKKA", "LUOKITUSKOODI", "PAKKAUSRYHMA", "LIPUKKEET", "ERITYISMAARAYKSET");
@@ -337,16 +340,35 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("VARASTO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO");
 				$wherelliset = array("VARASTO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
 				break;
 			case "toimitustavan_lahdot":
 				$pakolliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS");
-				$wherelliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "AKTIIVI", "LIITOSTUNNUS", "VIIMEINEN_TILAUSAIKA", "KERAILYN_ALOITUSAIKA", "TERMINAALIALUE");
+				$wherelliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS", "VIIMEINEN_TILAUSAIKA", "KERAILYN_ALOITUSAIKA", "TERMINAALIALUE", "ASIAKASLUOKKA", "VARASTO");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
+				break;
+			case "lahdot":
+				$pakolliset = array("PVM", "LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS");
+				$wherelliset = array("PVM", "LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS", "VIIMEINEN_TILAUSAIKA", "KERAILYN_ALOITUSAIKA", "TERMINAALIALUE", "ASIAKASLUOKKA", "VARASTO");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "rahtikirjanumero":
 				$pakolliset = array("RAHTIKIRJANRO");
 				$wherelliset = array();
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
+			case "pakkauskoodit":
+				$pakolliset = array("PAKKAUS", "RAHDINKULJETTAJA", "KOODI");
+				$wherelliset = array("PAKKAUS", "RAHDINKULJETTAJA", "KOODI");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
+				break;
+			case "rahdinkuljettajat":
+				$pakolliset = array("NIMI", "KOODI");
+				$wherelliset = array("NIMI", "KOODI", "NEUTRAALI");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
 				break;
 			default :
 				$pakolliset = array("TUNTEMATON_TAULU");

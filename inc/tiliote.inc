@@ -132,7 +132,7 @@
 										and alatila = 'K'
 										$kohdm_valkoodilisa";
 							$result = pupe_query($query);
-							
+
 							// tarkka 35 merkkiä <-> 35 merkkiä nimihaku ilman käteisalennusta
 							if (mysql_num_rows($result) != 1) {
 								"	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma')
@@ -157,7 +157,7 @@
 											and alatila = 'K'
 											$kohdm_valkoodilisa";
 								$result = pupe_query($query);
-								
+
 								if (mysql_num_rows($result) != 1) {
 									// tarkka 35 merkkiä <-> 35 merkkiä NIMI ja NIMITARK haku ilman käteisalennusta
 									$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
@@ -183,7 +183,7 @@
 											and alatila = 'K'
 											$kohdm_valkoodilisa";
 								$result = pupe_query($query);
-								
+
 								if (mysql_num_rows($result) != 1) {
 									// kokeillaan samalla kaavalla kun lum2 rivissä ilman käteisalennusta
 									$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
@@ -211,7 +211,7 @@
 											and alatila = 'K'
 											$kohdm_valkoodilisa";
 								$result = pupe_query($query);
-								
+
 								if (mysql_num_rows($result) != 1) {
 									$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
 												FROM lasku
@@ -239,11 +239,11 @@
 											WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'å','a'), 'ä','a'), 'ö','o'), 'Å','A'), 'Ä','A'), 'Ö','O') LIKE '%$maksaa%'
 											and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
 											and yhtio 	= '$yritirow[yhtio]'
-											and tila 	= 'Q'	
+											and tila 	= 'Q'
 												and alatila = 'K'
 											$kohdm_valkoodilisa";
 								$result = pupe_query($query);
-								
+
 								if (mysql_num_rows($result) != 1) {
 									$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
 												FROM lasku
@@ -415,6 +415,39 @@
 	switch ($tunnus) {
 
 		case 'T00' :
+
+			/*
+			// Tiliotteen perustietue (00)
+
+			Kenttä Tieto                             Pakollisuus Muoto Pituus    Sisältö
+			1      Aineistotunnus                    P              AN      1    T
+			2      Tietuetunnus                      P              AN      2    00
+			3      Tietueen pituus                   P               N      3
+			4      Versionumero                      P              AN      3    100
+			5      Tilinumero                        P              AN     14
+			6      Tiliotteen numero                 P               N      3
+			7      Tiliotekausi
+			7.1      Alkupäivä                       P               N      6    VVKKPP
+			7.2      Loppupäivä                      P               N      6    VVKKPP
+			8      Muodostumisaika
+			8.1      Päivä                                             N      6    VVKKPP
+			8.2      Kellonaika                                        N      4    HHMM
+			9      Asiakastunnus                     P              AN     17
+			10     Alkusaldon pvm                    P               N      6
+			11     Tiliotteen alkusaldo
+			11.1     Etumerkki                       P              AN      1
+			11.2     Määrä                           P               N     18    16 kok + 2 desim
+			12     Tiliotteen tietueiden lukumäärä   P               N      6
+			13     Tilin valuutan tunnus                            AN      3
+			14     Tilin nimi                                       AN     30
+			15     Tilin limiitti                    P               N     18    16 kok + 2 desim
+			16     Tilin omistajan nimi              P              AN     35
+			17     Yhteydenottotieto-1               P              AN     40    Pankin nimi
+			18     Yhteydenottotieto-2                              AN     40    Konttorin nro ja nimi
+			19     Pankkikohtaista tietoa-1                         AN     30    Konsernitili ja nro
+			20     Pankkikohtaista tietoa-2                         AN     30    Iban ja swif-tunnus
+			       YHTEENSÄ                                               322
+			*/
 
 			// Meillä on entinen tili auki
 			if ($tkesken == 1) {
@@ -638,6 +671,40 @@
 			break;
 
 		case 'T10' :
+
+			/*
+			// Tapahtuman perustietue (10, 80)
+
+			Kenttä  Tieto                  Pakollisuus Muoto Pituus   Sisältö
+			1       Aineistotunnus         P              AN      1   T
+			2       Tietuetunnus           P              AN      2   10, 80
+			3       Tietueen pituus        P               N      3
+			4       Tapahtuman numero      P               N      6   Juokseva nro
+			5       Arkistointitunnus                     AN     18
+			6       Kirjauspäivä           P               N      6   VVKKPP
+			7       Arvopäivä                              N      6   VVKKPP
+			8       Maksupäivä                             N      6   VVKKPP
+			9       Tapahtumatunnus        P              AN      1   1, 2, 3, 4
+			10      Kirjausselite
+			10,1    Koodi                  P              AN      3
+			10,2    Seliteteksti           P              AN     35
+			11      Tapahtuman rahamäärä
+			11,1    Etumerkki              P              AN      1
+			11,2    Määrä                  P               N     18   16kok+ 2desim
+			12      Kuittikoodi            P              AN      1
+			13      Välitystapa            P              AN      1
+			14      Saaja/Maksaja
+			14,1    Nimi                                  AN     35
+			14,2    Nimen lähde                           AN      1
+			15      Saajan tili
+			15,1    Tilinumero                            AN     14
+			15,2    Tili muuttunut -tieto                 AN      1   tyhjämerkki, *
+			16      Viite                                  N     20
+			17      Lomakkeen numero                      AN      8
+			18      Tasotunnus                            AN      1
+			        YHTEENSÄ                                    188
+			*/
+
 			$maksu			= 1;
 			$sisviite		= 0;
 			$vasta_arvo		= 0;
@@ -819,6 +886,92 @@
 			break;
 
 		case 'T11' :
+
+			/*
+			// Tapahtuman lisätietue (11, 81)
+
+			Kenttä     Tieto                                        Pakollisuus Muoto Pituus  Sisältö
+			1          Aineistotunnus                               P           AN    1       T
+			2          Tietuetunnus                                 P           AN    2       11, 81
+			3          Tietueen pituus                              N           3
+			4          Lisätiedon tyyppi                            P           AN    2
+			5          Lisätieto                                    P           AN    nnn
+			YHTEENSÄ                                                                  8 + nnn
+
+			Vapaa viesti, lisätiedon tyyppi = 00
+			5.1        Viesti-1                                     P           AN    35
+			5.2        Viesti-2                                                 AN    35
+			...
+			5.12       Viesti-12                                                AN    35
+			YHTEENSÄ                                                                  max 420
+
+			Kappalemäärätiedot, lisätiedon tyyppi = 01
+			5.1        Tapahtumien kappalemäärä                     P           N     8
+			YHTEENSÄ                                                                  8
+
+			Laskutapahtuman tiedot, lisätiedon tyyppi = 02
+			5.1        Asiakasnumero                                P           AN    10
+			5.2        Tyhjää                                       P           AN    1
+			5.3        Laskun numero                                P           AN    15
+			5.4        Tyhjää                                       P           AN    1
+			5.5        Laskun päiväys                               P           AN    6       VVKKPP
+			YHTEENSÄ                                                                  33
+
+			Korttitapahtuman tiedot, lisätiedon tyyppi = 03
+			5.1        Kortin numero                                P           AN    19
+			5.2        Tyhjää                                                   AN    1
+			5.3        Kaupan arkistoviite                                      AN    14
+			YHTEENSÄ                                                                  34
+
+			Korjaustapahtuman tiedot, lisätiedon tyyppi = 04
+			5.1        Korjattavan tapahtuman alkup.arkistointitun. P           AN    18
+			YHTEENSÄ                                                                  18
+
+			Valuuttatapahtuman tiedot, lisätiedon tyyppi = 05
+			5.1        Vasta-arvo
+			.1         Etumerkki                                    P           AN    1
+			.2         Määrä                                        P           N     18      16 kok + 2 desim
+			5.2        Tyhjää                                       P           AN    1
+			5.3        Valuutan ISO-koodi                           P           AN    3
+			5.4        Tyhjää                                       P           AN    1
+			5.5        Valuuttakurssi                               P           N     11      4 kok + 7 desim
+			5.6        Kurssiviite                                              AN    6
+			YHTEENSÄ                                                                  41
+
+			Toimeksiantajan tiedot, lisätiedon tyyppi = 06
+			5.1        Toimeksiantajan tieto-1                      P           AN    35
+			5.2        Toimeksiantajan tieto-2                                  AN    35
+			YHTEENSÄ                                                                  70
+
+			Pankin antamat lisätiedot, lisätiedon tyyppi = 07
+			5.1        Lisätieto-1                                  P           AN    35
+			5.2        Lisätieto-2                                              AN    35
+			...
+			5.12       Lisätieto-12                                             AN    35
+			YHTEENSÄ                                                                  max 420
+
+			Maksunaiheen tiedot, lisätiedon tyyppi = 08
+			5.1        Maksunaihekoodi                              P           N     3
+			5.2        Tyhjää                                       P           AN    1
+			5.3        Maksunaiheen selite                          P           AN    31
+			YHTEENSÄ                                                                  35
+
+			Nimitarkenteen tiedot, lisätiedon tyyppi = 09
+			5.1        Saajan/maksajan nimen tarkenne               P           AN    35
+			YHTEENSÄ                                                                  35
+
+			Euromaksualueen tilisiirron lisätyyppi, lisätiedon tyyppi = 11
+			5.1        Maksajan viite                               V           AN    35      Maksajan tapahtumalle antama yksilöivä viite (end-to-end ID), joka näkyy sekä ,maksajan että saajan tiliotteella
+			5.2        IBAN tilinumero                              V           AN    35      Saajan IBAN tilinumero maksajan tiliotteella
+			5.3        BIC-koodi                                    V           AN    35      Saajan pankin BIC- koodi maksajan tiliotteella
+			5.4        Saajan nimitarkenne                          V           AN    70      Maksajan antama saajan nimitarkenne sekä saajan että maksajan tiliotteella
+			5.5        Maksajan nimitarkenne                        V           AN    70      Maksajan antama maksajan nimitarkenne sekä saajan että maksajan tiliotteella
+			5.6        Maksajan tunniste                            V           AN    35      Maksajan tunnisteen selite (BIC, IBEI, BEI, EANGLN, UNSCHU, DUNS, BkPtyId, TaxIdNb, PrtyId) ja tunnisteen arvo.
+			5.7        Arkistointitunnus                            V           AN    35      SEPA arkistointitunnus täysimittaisena. Tieto on myös tapahtuman perustietueella (T10) kentässä Arkistointitunnus, mutta pituuserosta johtuen se on k
+			YHTEENSÄ   315
+
+			*/
+
 			$selite 	= '';
 			$tyyppi 	= substr($tietue, 6, 2);
 			$arvo 		= substr($tietue, 8, substr($tietue, 3, 3));
@@ -871,7 +1024,7 @@
 					}
 					break;
 
-				// ?
+				// Valuuttatapahtuman tiedot
 				case '05' :
 					$vasta_arvo	= sprintf('%.2f', substr($arvo, 0, 19)/100);
 					$vasta_kurssi = substr($arvo, 24, 11) * 1 / 10000000;
@@ -886,17 +1039,26 @@
 					$selite = t("Oma sisäinen viite").": ";
 					$selite .= trim(substr($arvo, 0, 35))."<br>\n";
 					$selite .= trim(substr($arvo, 35, 35));
-					$sisviite = trim(substr($arvo, 0, 35))*1;
+					$sisviite = trim(substr($arvo, 0, 35));
 
 					//Tämä on (kai) ongelma Analysten pankkisoftassa. Lisäävät joskus oman tunnuksen
 					//ekaan sisäinenviite kenttään, silloin meidän onkin toisessa.
 					if ((trim(substr($arvo, 35, 35))*1 != 0) and (trim(substr($arvo, 0, 35))*1 != 0)) {
-						$sisviite = trim(substr($arvo, 35, 35))*1;
+						$sisviite = trim(substr($arvo, 35, 35));
 					}
 
+					// sepa-aineistoon lisatään tähän kenttään merkillä '-' erotettuna timestamp,
+					// jotta saadaan uniikki EndToEndId. Tässä timestamp poistetaan.
+					$dash_pos = strpos($sisviite, "-");
+
+					if ($dash_pos !== FALSE) {
+						$sisviite = substr($sisviite, 0, $dash_pos);
+					}
+
+					$sisviite = (int) $sisviite;
 					break;
 
-				// ?
+				// Pankin antamat lisätiedot
 				case '07' :
 					for ($i = 0; $i < 13; $i++) {
 						$osa = trim(substr($arvo, $i*35, 35));
@@ -906,7 +1068,7 @@
 					}
 					break;
 
-				// ?
+				// Maksunaiheen tiedot
 				case '08' :
 					$selite = t("Maksuaihekoodi").": ".substr($arvo, 0, 3)."<br>\n";
 					$selite .= "Selite: ".trim(substr($arvo, 4, 31));
@@ -943,6 +1105,23 @@
 
 		case 'T40':
 
+			/*
+			// Saldotietue (40)
+
+			Kenttä     Tieto                PakollisuuMuoto Pituus  Sisältö
+			1          Aineistotunnus       P         AN    1       T
+			2          Tietuetunnus         P         AN    2       40
+			3          Tietueen pituus      P         N     3
+			4          Kirjauspäivä         P         N     6       VVKKPP
+			5          Kirjauspäivän loppusaldo
+			.1         Etumerkki            P         AN    1
+			.2         Määrä                P         N     18      16 kok + 2 desi
+			6          Käytettävissä oleva saldo
+			.1         Etumerkki            P         AN    1
+			.2         Määrä                P         N     18      16 kok + 2 desi
+			YHTEENSÄ                                        50
+			*/
+
 			echo "<tr><td class='back'></td></tr>";
 
 			echo "<tr>";
@@ -950,7 +1129,7 @@
 			if ($tee == 'S') echo "<td></td>";
 
 			echo "<td></td><td></td><td></td><td></td><td>".t("Saldo")." ".pankkipvm(substr($tietue,6,6))."</td>";
-			echo "<td style='text-align:right;'>". sprintf("%01.2f",((substr($tietue,31,19) / 100) - $tililimiitti))."</td></tr>";
+			echo "<td style='text-align:right;'>". sprintf("%01.2f",((substr($tietue,12,19) / 100)))."</td></tr>";
 
 			if ($tililimiitti != "") {
 				echo "<tr>";
@@ -984,6 +1163,30 @@
 			}
 			break;
 		case 'T50':
+
+			/*
+			// Kumulatiivinen perustietue (50)
+
+			Kenttä     Tieto             Pakollisuus Muoto PituusSisältö
+			1          Aineistotunnus    P           AN    1     T
+			2          Tietuetunnus      P           AN    2     50
+			3          Tietueen pituus   P           N     3
+			4          Jakson tunnus     P           AN    1     1, 2, 3, 4
+			5          Jaksopäivä        P           N     6     VVKKPP
+			6          Tapahtumat
+			6.1        Panot
+			6.1.1      Kappalemäärä      P           N     8
+			6.1.2      Summa
+			6.1.2.1    Etumerkki         P           AN    1
+			6.1.2.2    Määrä             P           N     18    16 kok + 2 desi
+			6.2        Otot
+			6.2.1      Kappalemäärä      P           N     8
+			6.2.2      Summa
+			6.2.2.1    Etumerkki         P           AN    1
+			6.2.2.2    Määrä             P           N     18    16 kok + 2 desi
+			YHTEENSÄ                                       67
+			*/
+
 			if (substr($tietue,6,1) == 1) $jakso = "päivän";
 			if (substr($tietue,6,1) == 2) $jakso = "tiliotteen";
 			if (substr($tietue,6,1) == 3) $jakso = "kuukauden";
@@ -997,7 +1200,13 @@
 			}
 			break;
 		case 'T60':
-			if (substr($tietue,6,3) == '200') { // Pankkikohtainen tieto! Tässä kuvataan Nordea
+			/*
+			// Erityistietue (60)
+				Pankkikohtainen tieto!
+			*/
+
+			// Tässä kuvataan Nordea
+			if (substr($tietue,6,3) == '200') {
 
 				$colspan = $tee == 'S' ? 7 : 6;
 
@@ -1035,6 +1244,24 @@
 			}
 			break;
 		case 'T70':
+
+			/*
+			// Tiedotetietue (70)
+
+			Kenttä     Tieto                   Pakollisuus Muoto Pituus  Sisältö
+			1          Aineistotunnus          P           AN    1       T
+			2          Tietuetunnus            P           AN    2       70
+			3          Tietueen pituus         P           N     3
+			4          Pankkiryhmän tunnus     P           AN    3
+			5          Tiedote
+			.1         Rivi-1                  P           AN    80
+			.2         Rivi-2                              AN    80
+			...
+			.6         Rivi-6                              AN    80
+			YHTEENSÄ                                             max 489
+
+			*/
+
 			if ($silent == "") { // Tietue sisältää tiliotteeseen liittyviä tiedotteita
 				echo "<tr><td class='back'></td></tr>";
 
@@ -1050,6 +1277,10 @@
 		case 'EOF':
 			break;
 		default:
+
+			/*
+				Kumulatiivinen korjaustietue (51)
+			*/
 			if (trim($tunnus) != '') {
 
 				$colspan = $tee == 'S' ? 7 : 6;

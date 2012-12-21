@@ -120,8 +120,15 @@
 						if (!$php_cli)  {
 							echo "<font class='error'>Verkkolaskun vastaanotossa virhe:</font><br>\n<pre>$laskuvirhe</pre><br>\n";
 						}
-
-						rename($laskut."/".$file, $errlaskut."/".$file);
+						$alku = $loppu = "";
+						list($alku,$loppu) = explode("####",$laskuvirhe);
+						
+						if (trim($loppu) == "ASN") {
+							// ei tehdä mitään vaan annetaan jäädä roikkumaan kansioon seuraavaan kierrokseen saakka, tai kunnes joku lukee postit.
+						}
+						else {
+							rename($laskut."/".$file, $errlaskut."/".$file);
+						}
 					}
 				}
 			}
@@ -135,7 +142,7 @@
 		}
 
 		# siivotaan yli 90 päivää vanhat aineistot
-		system("find $verkkolaskut_in -mtime +90 -delete");
+		system("find $verkkolaskut_in -type f -mtime +90 -delete");
 	}
 
 ?>

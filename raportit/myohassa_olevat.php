@@ -196,22 +196,15 @@
 		}
 		echo "</tr>";
 
-		if ($vain_excel != '' and @include('Spreadsheet/Excel/Writer.php')) {
-			//keksitään failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+		if ($vain_excel != '') {
 
-			$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-			$workbook->setVersion(8);
-			$worksheet =& $workbook->addWorksheet('Sheet 1');
+			include('inc/pupeExcel.inc');
 
-			$format_bold =& $workbook->addFormat();
-			$format_bold->setBold();
+			$worksheet 	 = new pupeExcel();
+			$format_bold = array("bold" => TRUE);
+			$excelrivi 	 = 0;
 
-			$excelrivi = 0;
-
-			if(isset($workbook)) {
+			if(isset($worksheet)) {
 				$excelsarake = 0;
 
 				if (isset($kayta_ostotilausta) and $kayta_ostotilausta != '') {
@@ -384,7 +377,7 @@
 					echo "<td>$myohastyneet_row[ytunnus]</td>";
 					echo "<td>$myohastyneet_row[nimi]</td>";
 
-					if (isset($workbook)) {
+					if (isset($worksheet)) {
 						$excelsarake = 0;
 
 						$worksheet->write($excelrivi, $excelsarake, $tulrow["tuoteno"], $format_bold);
@@ -404,7 +397,7 @@
 					$i = 0;
 					foreach ($kpl_pvm[$myohastyneet_row['tuoteno']] as $ostotoimitusaika => $ostovarattu) {
 						if ($i > 0) {
-							if (isset($workbook)) {
+							if (isset($worksheet)) {
 								$excelrivi++;
 								$excelsarake = 0;
 
@@ -430,7 +423,7 @@
 						echo "<td align='right'>$ostovarattu</td>";
 						echo "</tr>";
 
-						if (isset($workbook)) {
+						if (isset($worksheet)) {
 							$worksheet->write($excelrivi, $excelsarake, tv1dateconv($ostotoimitusaika), $format_bold);
 							$excelsarake++;
 							$worksheet->write($excelrivi, $excelsarake, $ostovarattu, $format_bold);
@@ -439,7 +432,7 @@
 						$i++;
 					}
 
-					if (isset($workbook)) {
+					if (isset($worksheet)) {
 						$excelrivi++;
 					}
 
@@ -485,7 +478,7 @@
 
 				echo "</tr>";
 
-				if(isset($workbook)) {
+				if(isset($worksheet)) {
 					$excelsarake = 0;
 
 					$worksheet->write($excelrivi, $excelsarake, $tulrow["ytunnus"], $format_bold);
@@ -527,16 +520,16 @@
 
 		echo "</table>";
 
-		if(isset($workbook)) {
+		if(isset($worksheet)) {
 
-			// We need to explicitly close the workbook
-			$workbook->close();
+			// We need to explicitly close the worksheet
+			$excelnimi = $worksheet->close();
 
 			echo "<br><table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";
 			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='supertee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='Myohassa_olevat.xls'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Myohassa_olevat.xlsx'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 			echo "<td valign='top' class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";

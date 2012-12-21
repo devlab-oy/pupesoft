@@ -5,7 +5,7 @@
 
 	require("../inc/parametrit.inc");
 
-	print "<font class='head'>".t("Maksuvalmius")."</font><hr>";
+	echo "<font class='head'>".t("Maksuvalmius")."</font><hr>";
 
 	if ($aika == 'pv') {
 		$sel1 = 'SELECTED';
@@ -32,13 +32,17 @@
 				<option value = 'kk' $sel3>".t("Kuukausi")."
 			</select></td>
 			</tr>
-			<tr>
-			<th>".t("Konserni")."</th>
-			<td><input type = 'checkbox' name = 'konserni' $sel4></td>
-			<td class='back'><input type = 'submit' value = '".t("Näytä")."'></td>
+			<tr>";
+
+	if ($yhtiorow["konserni"] != "") {
+		echo "<th>".t("Konserni")."</th>
+			<td><input type = 'checkbox' name = 'konserni' $sel4></td>";
+	}
+
+	echo "<td class='back'><input type = 'submit' value = '".t("Näytä")."'></td>
 			</tr>
 			</table>
-			</form>";
+			</form><br>";
 
 	if ($tee == "1") {
 
@@ -135,7 +139,7 @@
 			echo "<td>$rivi[olmapvm]</td>";
 			echo "<td align='right'>$rivi[myynti]</td>";
 			if ($aika == "pv") {
-				echo "<td align='right'><a href='../raportit.php?toim=laskuhaku&tee=M&pvm=$rivi[olmapvm]'>$rivi[osto]</a></td>";
+				echo "<td align='right'><a href='../raportit.php?toim=laskuhaku&tee=M&pvm=$rivi[olmapvm]&lopetus=$PHP_SELF////tee=$tee//aika=$aika//konserni=$konserni'>$rivi[osto]</a></td>";
 			}
 			else {
 				echo "<td align='right'>$rivi[osto]</td>";
@@ -149,5 +153,4 @@
 		echo "</table>";
 	}
 
-	require("../inc/footer.inc");
-?>
+	require("inc/footer.inc");

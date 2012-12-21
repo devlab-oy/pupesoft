@@ -296,7 +296,7 @@ if ($asiakasid > 0) {
 		if ($katteet_naytetaan) echo "/".t("kate");
 		if ($katteet_naytetaan) echo "/".t("kateprosentti");
 
-		echo "/".t("budjetti")."/".t("asiakaskäynnit").")</font>";
+		echo "/".t("tavoite")."/".t("asiakaskäynnit").")</font>";
 		echo "<hr>";
 
 		// 24 kk sitten
@@ -426,7 +426,7 @@ if ($asiakasid > 0) {
 			<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti]'></td>";
 			if ($katteet_naytetaan) $pylvaat .= "<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate]'></td>";
 			if ($katteet_naytetaan) $pylvaat .= "<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/green.png' height='$hkatepro' width='12' alt='".t("katepro")." $sumrow[katepro]'></td>";
-			$pylvaat .= "<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/yellow.png' height='$hbudj' width='12' alt='".t("budjetti")." $budjetti'></td>
+			$pylvaat .= "<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/yellow.png' height='$hbudj' width='12' alt='".t("tavoite")." $budjetti'></td>
 			<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/red.png' height='$haskay' width='12' alt='".t("asiakaskäynnit")." $askarow[kaynnit]'></td>
 			</tr></table>";
 

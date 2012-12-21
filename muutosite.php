@@ -4,6 +4,10 @@ if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == 'NAYTATILAUS') $nayta_pdf = 
 
 require ("inc/parametrit.inc");
 
+if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
+	require ("inc/tilioinnin_toiminnot.inc");
+}
+
 if (!isset($ok)) $ok = 0;
 if (!isset($tee)) $tee = "";
 if (!isset($tee2)) $tee2 = "";
@@ -1262,7 +1266,7 @@ if ($tee == 'E' or $tee == 'F') {
 			if ($keikrow["rahti"] != 0) echo "<tr><th>".t("Rahti")."</th><td>$keikrow[rahti]</td></tr>";
 			if ($keikrow["rahti_etu"] != 0) echo "<tr><th>".t("Eturahti")."</th><td>$keikrow[rahti_etu]</td></tr>";
 			if ($keikrow["rahti_huolinta"] != 0) echo "<tr><th>".t("Huolinta")."</th><td>$keikrow[rahti_huolinta]</td></tr>";
-			if ($keikrow["erikoisale"] != 0) echo "<tr><th>".t("Alennus")."</th><td>$keikrow[erikoisale]</td></tr>";
+			if ($keikrow["erikoisale_saapuminen"] != 0) echo "<tr><th>".t("Alennus")."</th><td>$keikrow[erikoisale_saapuminen]</td></tr>";
 			if ($keikrow["bruttopaino"] != 0) echo "<tr><th>".t("Paino")."</th><td>$keikrow[bruttopaino]</td></tr>";
 			echo "<tr><th>".t("Toimaika")."</th><td>".tv1dateconv($keikrow["toimaika"])."</td></tr>";
 			echo "<tr><th>".t("Kommentit")."</th><td>$keikrow[comments]</td></tr>";

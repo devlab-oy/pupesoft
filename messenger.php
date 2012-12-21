@@ -1,7 +1,7 @@
 <?php
 
 	require ("inc/parametrit.inc");
-	
+
 	$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 	$result = mysql_query($query) or pupe_error($query);
 	$konsyhtiot = "";
@@ -12,7 +12,7 @@
 	$konsyhtiot = " in (".substr($konsyhtiot, 0, -1).") ";
 
 	if (isset($messenger)) {
-		$query = "	INSERT INTO messenger 
+		$query = "	INSERT INTO messenger
 					SET yhtio='$kukarow[yhtio]', kuka='$kukarow[kuka]', vastaanottaja='$vastaanottaja', viesti='$message', status='$status', luontiaika=now()";
 		$messenger_result = mysql_query($query) or pupe_error($query);
 	}
@@ -52,9 +52,9 @@
 	echo "</select></th></tr>";
 	echo "<tr><td><textarea rows='20' cols='50' name='message'>";
 	echo "</textarea></td></tr>";
-	
+
 	echo "<tr><td class='back' align='right'><input type='submit' name='submit' value='".t("Lähetä")."'></td></tr>";
-	
+
 	echo "</form></table>";
 
 	if (!isset($kuka) or $kuka == "vastaanotettua") {
@@ -73,28 +73,28 @@
 				JOIN kuka ON (kuka.yhtio=messenger.yhtio AND kuka.kuka=messenger.kuka)
 				WHERE messenger.yhtio $konsyhtiot AND messenger.$kuka='$kukarow[kuka]' AND extranet='' ORDER BY messenger.luontiaika DESC LIMIT $kpl";
 	$result = mysql_query($query) or pupe_error($query);
-	
-	echo "<br>Näytä ";
+
+	echo "<br>".t("Näytä")." ";
 	echo "	<form method='post'>
 				<select name='kpl' onChange='javascript:submit()'>";
-					
+
 					$sel = "";
 					$y = 5;
-					
+
 					for ($i = 0; $i <= 3; $i++) {
-						
+
 						if ($y == $kpl) {
 							$sel = "selected";
 						}
 						else {
 							$sel = "";
 						}
-						
+
 						echo "<option value='$y' $sel>$y</option>";
 						$y = $y * 2;
 					}
 
- 	echo "		</select> ".t("viimeisintä")." 
+ 	echo "		</select> ".t("viimeisintä")."
 				<select name='kuka' onChange='javascript:submit()'>
 					<option value='vastaanotettua' $sel2>".t("vastaanotettua")."</option>
 					<option value='lähetettyä' $sel3>".t("lähetettyä")."</option>
@@ -103,13 +103,13 @@
 			</form><br><br>";
 
 	while ($row = mysql_fetch_array($result)) {
-		
+
 		echo "<div id='$row[tunnus]'>";
-		
+
 		if ($row["status"] == "") {
 			echo "<font color='red'>".t("Kuitattu")."</font> ";
 		}
-		
+
 		echo "<font class='info'>";
 
 		if ($kuka == "vastaanottaja") {

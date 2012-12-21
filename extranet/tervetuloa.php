@@ -106,15 +106,26 @@ if ($tee == '') {
 	if ($kukarow['saatavat'] <= 1) {
 		$query = "	SELECT ytunnus, tunnus
 					FROM asiakas
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]' LIMIT 1";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus  = '$kukarow[oletus_asiakas]'
+					LIMIT 1";
 		$result = pupe_query($query);
-		$sytunnusrow = mysql_fetch_array($result);
 
-		$sytunnus		= $sytunnusrow['ytunnus'];
-		$sliitostunnus	= $sytunnusrow['tunnus'];
-		$eiliittymaa = 'ON';
+		if (mysql_num_rows($result) == 1) {
+			$sytunnusrow = mysql_fetch_assoc($result);
 
-		require ("saatanat.php");
+			$sytunnus 	 	 = $sytunnusrow['ytunnus'];
+			$sliitostunnus	 = $sytunnusrow['liitostunnus'];
+			$eiliittymaa 	 = "ON";
+			$luottorajavirhe = "";
+			$jvvirhe 		 = "";
+			$ylivito 		 = "";
+			$trattavirhe 	 = "";
+			$laji 			 = "MA";
+			$grouppaus       = "";
+
+			require ("saatanat.php");
+		}
 	}
 
 	echo "<table width='100%'>";

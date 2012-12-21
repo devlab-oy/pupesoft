@@ -1,8 +1,6 @@
 <?php
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
-	$useslave = 1;
 
-	echo "<form method='post' action = '?$ulisa'>
+	echo "<form method='post' action='$PHP_SELF?$ulisa'>
 		<input type='hidden' name='lopetus' value='$lopetus'>
 		<input type='hidden' name='toim' value='$toim'>
 		<input type='hidden' name='tila' value='$tila'>
@@ -33,6 +31,7 @@
 		<input type='hidden' name='lhyllyvali' value='$lhyllyvali'>
 		<input type='hidden' name='lhyllytaso' value='$lhyllytaso'>
 		<input type='hidden' name='naytasaldo' value='$naytasaldo'>
+		<input type='hidden' name='piilotaToim_tuoteno' value='$piilotaToim_tuoteno'>
 		<input type='hidden' name='toimittaja' value='$toimittaja'>
 		<input type='hidden' name='asiakasid' value='$asiakasid'>
 		<input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -57,7 +56,11 @@
 		<input type='hidden' name='kertakassa' value='$kertakassa'>
 		<input type='hidden' name='otunnukset_array' value='$otunnukset_array'>
 		<input type='hidden' name='varastoonvaikutus' value='$varastoonvaikutus'>
-		<input type='hidden' name='varastonarvo' value='$varastonarvo'>";
+		<input type='hidden' name='varastonarvo' value='$varastonarvo'>
+		<input type='hidden' name='kerayseran_numero' value='$kerayseran_numero'>
+		<input type='hidden' name='kerayseran_tilaukset' value='$kerayseran_tilaukset'>
+		<input type='hidden' name='reservipaikka' value='{$reservipaikka}' />
+		<input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />";
 
 	if ($nappikeikalle == 'menossa') {
 		echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
@@ -69,8 +72,13 @@
 	$valittu = "";
 
 	if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
-		echo "<tr><td>".t("Tulosta nimitykset ostotilaukselle")."</td><td><input type='checkbox' name='nimitykset'></td></tr>";
+
+		$chk = ((isset($nimitykset) and $nimitykset != '') or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A')) ? 'checked' : '';
+
+		echo "<tr><th>",t("Tulosta nimitykset ostotilaukselle"),"</th><td><input type='checkbox' name='nimitykset' {$chk}></td></tr>";
+
 		$mista = 'toimi';
+
 		$editsql = "	SELECT *
 						FROM toimi
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -80,7 +88,7 @@
 	}
 
 	if ($toim == "LAHETE" and $yhtiorow["lahete_tyyppi_tulostus"] != '' and $otunnus != '') {
-		echo "<tr><td>".t("Tulosta")."</td><td><select name='sellahetetyyppi'>";
+		echo "<tr><th>".t("Tulosta")."</th><td><select name='sellahetetyyppi'>";
 
 		$lahetetyyppi = pupesoft_lahetetyyppi($otunnus);
 
@@ -98,14 +106,27 @@
 		$mista = 'asiakas';
 	}
 
-	if ($toim == "TILAUSVAHVISTUS" and $yhtiorow["tilausvahvistus_tyyppi_tulostus"] != '' and $otunnus != '') {
+	if ($toim == "TILAUSVAHVISTUS" and $yhtiorow["tilausvahvistus_tyyppi_tulostus"] == '' and $otunnus != '') {
 
-		$query2 = "	SELECT tilausvahvistus
+		$query2 = "	SELECT tilausvahvistus, liitostunnus
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus  = '$otunnus'";
 		$vresult2 = pupe_query($query2);
-		$row2 = mysql_fetch_array($vresult2);
+		$row2 = mysql_fetch_assoc($vresult2);
+
+		if (trim($row2['tilausvahvistus']) == "") {
+			$query2 = "	SELECT tilausvahvistus
+						FROM asiakas
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus  = '{$row2['liitostunnus']}'";
+			$vresult2 = pupe_query($query2);
+			$row2 = mysql_fetch_assoc($vresult2);
+		}
+
+		if (trim($row2['tilausvahvistus']) == "") {
+			$row2['tilausvahvistus'] = $yhtiorow['tilausvahvistustyyppi'];
+		}
 
 		$tuoteperheetyhdessa = FALSE;
 
@@ -157,83 +178,50 @@
 				$tuoteperheetyhdessa = TRUE;
 			}
 		}
-		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '7') !== FALSE) {
-			$naytatvale = 7; // jos meillä on tilausvahvistuksessa seiska, niin tehdään EAN tilausvahvistus
-			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
-				$tuoteperheetyhdessa = TRUE;
-			}
-		}
-		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
-			$naytatvale = 6; // jos meillä on tilausvahvistuksessa kutonen, niin tehdään customoitu tilausvahvistus
-			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
-				$tuoteperheetyhdessa = TRUE;
-			}
-		}
-		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '5') !== FALSE) {
-			$naytatvale = 5; // jos mellä on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
-			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
-				$tuoteperheetyhdessa = TRUE;
-			}
-		}
-		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '4') !== FALSE) {
-			$naytatvale = 4; // jos mellä on tilausvahvistuksessa nelonen, ei haluta nähdä alennuksia, näytetään tilausrivin hinta ja rivihinta
-			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
-				$tuoteperheetyhdessa = TRUE;
-			}
-		}
-		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '3') !== FALSE) {
-			$naytatvale = 3; // jos mellä on tilausvahvistuksessa kolmonen, ei haluta nähdä hintoja, pelkästään kpl-määrät
-			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
-				$tuoteperheetyhdessa = TRUE;
-			}
-		}
-		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '2') !== FALSE) {
-			$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
-			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
-				$tuoteperheetyhdessa = TRUE;
-			}
-		}
-		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '1') !== FALSE) {
-			$naytatvale = 1; // jos mellä on tilausvahvistuksessa ykkönen, halutaan nähä alet
-			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
-				$tuoteperheetyhdessa = TRUE;
-			}
-		}
 		else {
 			$naytatvale = 1; // halutaan nähä alet
 		}
 
 		$tvsel[$naytatvale] = "SELECTED";
 
-		echo "<tr><td>".t("Tyyppi")."</td><td><select name='seltvtyyppi'>";
+		echo "<tr><th>".t("Tyyppi")."</th><td><select name='seltvtyyppi'>";
 		echo "<option value = '1' $tvsel[1]>".t("Näytetään asiakkaan hinta ja alennus")."</option>";
 		echo "<option value = '2' $tvsel[2]>".t("Näytetään tuotteen myyntihinta ja alennusryhmä")."</option>";
 		echo "<option value = '3' $tvsel[3]>".t("Ei näytetä hintoja eikä alennuksia")."</option>";
 		echo "<option value = '4' $tvsel[4]>".t("Näytetään asiakkaan hinta")."</option>";
 		echo "<option value = '5' $tvsel[5]>".t("Haetaan hinnat toisesta pupesta")."</option>";
 		echo "<option value = '6' $tvsel[6]>".t("Näytetään asiakkaan hinta ja alennus, modifioitu tulostuspohja")."</option>";
-		echo "<option value = '7' $tvsel[7]>".t("EAN tilausvahvistus")."</option>";
+		echo "<option value = '7' $tvsel[7]>".t("Näytetään asiakkaan hinta ja alennus sekä EAN-viivakoodi")."</option>";
+		echo "<option value = '8' $tvsel[8]>".t("Näytetään bruttorivihinta ja EAN-viivakoodi")."</option>";
 		echo "</select></td></tr>";
 	}
 
 	if ($toim == "TARJOUS") {
-		echo "<tr><td>",t("Näytetäänkö verolliset vai verottomat hinnat"),"</td><td><select name='verolliset_verottomat_hinnat'>";
+		echo "<tr><th>",t("Näytetäänkö verolliset vai verottomat hinnat"),"</th><td><select name='verolliset_verottomat_hinnat'>";
 		echo "<option value=''>",t("Haetaan yhtiön parametreistä"),"</option>";
 		echo "<option value='verolliset'>",t("Verolliset"),"</option>";
 		echo "<option value='verottomat'>",t("Verottomat"),"</option>";
 		echo "</select></td></tr>";
 	}
 
-	if ($toim == "TARJOUS" or $toim == "TILAUSVAHVISTUS") {
-		echo "<tr><td>",t("Näytetäänkö rivihinta"),"</td><td><select name='naytetaanko_rivihinta'>";
+	if ($toim == "TILAUSVAHVISTUS") {
+		echo "<tr><th>",t("Näytetäänkö rivihinta"),"</th><td><select name='naytetaanko_rivihinta'>";
 		echo "<option value=''>",t("Näytetään rivihinta"),"</option>";
 		echo "<option value='ei_rivihintaa'>",t("Ei näytetä rivihintaa"),"</option>";
 		echo "</select></td></tr>";
 	}
 
-	echo "<tr><td>".t("Kpl")."</td><td><input type='text' name='kappaleet' size='3'></td></tr>";
+	if ($toim == "TARJOUS") {
+		echo "<tr><th>",t("Näytetäänkö rivihinta"),"</th><td><select name='naytetaanko_rivihinta'>";
+		echo "<option value=''>",t("Näytetään hinnat"),"</option>";
+		echo "<option value='ei_rivihintaa'>",t("Ei näytetä rivihintaa"),"</option>";
+		echo "<option value='kokonaan_ilman_hintoja'>",t("Kokonaan ilman hintoja"),"</option>";
+		echo "</select></td></tr>";
+	}
 
-	echo "<tr><td>".t("Valitse kieli")."</td>";
+	echo "<tr><th>".t("Kpl")."</th><td><input type='text' name='kappaleet' size='3'></td></tr>";
+
+	echo "<tr><th>".t("Valitse kieli")."</th>";
 
 	///* Haetaan asiakkaan kieli *///
 	if ($otunnus != '' or $laskunro != '') {
@@ -301,21 +289,34 @@
 			echo "<option value='$makkoodi' $sel[$makkoodi]>".t("$maa")."</option>";
 		}
 	}
+
 	echo "</select></td></tr>";
 
-	foreach($tulostimet as $tulostin) {
+	foreach ($tulostimet as $tulostin) {
 
 		if ($tulostin == 'Purkulista' and $yhtiorow['suuntalavat'] == 'S' and $toim != 'REKLAMAATIO') {
-			$query = "	SELECT tunnus, sscc
+
+			$valitut_suuntalavat = array();
+			$valitut_suuntalisa  = "";
+
+			if (isset($valitut_lavat) and $valitut_lavat != "") {
+				$valitut_suuntalavat = explode(",", $valitut_lavat);
+				$valitut_suuntalisa = " AND suuntalavat.tunnus in (".mysql_real_escape_string($valitut_lavat).")";
+			}
+
+			$query = "	SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc
 						FROM suuntalavat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tila = 'S'";
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
+						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+						AND suuntalavat.tila 	= 'S'
+						AND (suuntalavat.kaytettavyys = 'L' OR (suuntalavat.kaytettavyys = 'Y' AND suuntalavat_saapuminen.saapuminen = '{$otunnus}'))
+						{$valitut_suuntalisa}";
 			$suuntalavat_res = pupe_query($query);
 
 			if (mysql_num_rows($suuntalavat_res) == 0) continue;
 		}
 
-		echo "<tr><td>".t("Valitse")." '".t("$tulostin")."' ".t("tulostuspaikka")."</td>";
+		echo "<tr><th>".t("Valitse")." '".t("$tulostin")."' ".t("tulostuspaikka")."</th>";
 		echo "<td><select name='komento[$tulostin]'>";
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 		echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
@@ -324,7 +325,7 @@
 			echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
 		}
 
-		if (isset($editoimrow) and $editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != '' and $editoimrow["edi_kuvaus"] != '') {
+		if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and (preg_match("/(excel|wabco)/", $editoimrow['edi_kuvaus']) or ($editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != ''))) {
 			$rajaus = "";
 			$valittu = "edi";
 		}
@@ -361,7 +362,7 @@
 
 		if ($tulostin == 'Työmääräys' and $kukarow['hinnat'] == 0) {
 
-			echo "<tr><td rowspan='2'>".t("Työmääräystyyppi")."</td><td>";
+			echo "<tr><th rowspan='2'>".t("Työmääräystyyppi")."</th><td>";
 			echo "<select name='tyomtyyppi'>";
 
 			$sel = array();
@@ -385,10 +386,12 @@
 			$colspanni = 3;
 
 			if ($yhtiorow['suuntalavat'] == 'S' and $toim != 'REKLAMAATIO') {
-				echo "<tr><td>",t("Valitse suuntalavat"),"</td><td>";
+				echo "<tr><th>",t("Valitse suuntalavat"),"</th><td>";
 
 				while ($suuntalavat_row = mysql_fetch_assoc($suuntalavat_res)) {
-					echo "<input type='checkbox' name='suuntalavat[]' value='{$suuntalavat_row['tunnus']}' /> {$suuntalavat_row['sscc']}<br />";
+					$ched = (in_array($suuntalavat_row["tunnus"], $valitut_suuntalavat)) ? "CHECKED" : "";
+
+					echo "<input type='checkbox' name='suuntalavat[]' value='{$suuntalavat_row['tunnus']}' $ched> {$suuntalavat_row['sscc']}<br />";
 				}
 
 				echo "</td></tr>";
@@ -396,7 +399,7 @@
 				$colspanni = 4;
 			}
 
-			echo "<tr><td rowspan='$colspanni'>".t("Järjestele purkulista")."</td>";
+			echo "<tr><th rowspan='$colspanni'>".t("Järjestele purkulista")."</th>";
 
 			if ($yhtiorow['suuntalavat'] == 'S' and $toim != 'REKLAMAATIO') {
 				echo "<td><input type='radio' name='sorttaus' value='indeksi' checked='checked' />",t("hyllypaikan indeksin mukaan"),"</td></tr><tr>";
@@ -418,7 +421,7 @@
 				$span = 3;
 			}
 
-			echo "<tr><td rowspan='$span'>".t("Tulostettavat rivit")."</td><td><input type='radio' name='mitkarivit' value='kaikki'> ".t("kaikki rivit")."</td></tr>";
+			echo "<tr><th rowspan='$span'>".t("Tulostettavat rivit")."</th><td><input type='radio' name='mitkarivit' value='kaikki'> ".t("kaikki rivit")."</td></tr>";
 			echo "<tr><td><input type='radio' name='mitkarivit' value='viematta' CHECKED> ".t("saldoille viemättä olevat rivit")."</td></tr>";
 			echo "<tr><td><input type='radio' name='mitkarivit' value='viedyt'> ".t("saldoille viedyt rivit")."</td></tr>";
 			if ($yhtiorow['viivakoodi_purkulistaan'] == 'K') {
@@ -433,6 +436,8 @@
 
 	echo "</table><br><input type='submit' name='tulosta' value='".t("Tulosta")."'></form>";
 
-	//lopetetaan tähän, muuten esim rivit.inc nollaa kukarow[kesken] muuttujan ja moni muukin asia toimisi kovin heikosti...
-	require("footer.inc");
-	exit;
+	if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php") === FALSE) {
+		//lopetetaan tähän, muuten esim rivit.inc nollaa kukarow[kesken] muuttujan ja moni muukin asia toimisi kovin heikosti...
+		require("inc/footer.inc");
+		exit;
+	}

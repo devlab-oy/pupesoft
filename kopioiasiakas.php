@@ -13,7 +13,7 @@
 		$query = "	SELECT *
 					FROM asiakas
 					WHERE tunnus = '$id'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$trow = mysql_fetch_array($result);
 
 		// Tarkistetaan
@@ -40,7 +40,7 @@
 			}
 			$query .= ")";
 
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$uusiidee = mysql_insert_id();
 
 			//	Tämä funktio tekee myös oikeustarkistukset!
@@ -48,12 +48,12 @@
 
 			if (isset($tapahtumat) !== FALSE) {
 				$query = "SELECT ytunnus FROM asiakas WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$uusiidee'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$ytrow = mysql_fetch_array($result);
 
 
 				$query = "UPDATE kalenteri SET liitostunnus = '$uusiidee', asiakas = '$ytrow[ytunnus]' WHERE yhtio = '$kukarow[yhtio]' AND liitostunnus = '$id' ORDER BY tunnus;";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 
 			unset($tapahtumat);
@@ -75,7 +75,7 @@
 		$query = "	SELECT *
 					FROM asiakas
 					WHERE tunnus='$id' and yhtio='$kukarow[yhtio]'";
-		$result = mysql_query($query) or die ("Kysely ei onnistu $query");
+		$result = pupe_query($query);
 		$trow = mysql_fetch_array($result);
 		echo "<table>";
 
@@ -171,10 +171,23 @@
 
 	if ($tee == '') {
 
-	    pupe_DataTables(array(array($pupe_DataTables, 7, 7, true)));
+		$jarjestys = 'nimi';
 
-        $query = "	SELECT
-					asiakas.tunnus,
+		$array = explode(",", $kentat);
+		$count = count($array);
+
+		foreach ($haku as $ind => $val) {
+			if (strlen($val) > 0) {
+				$lisa .= " and $ind like '%$val%'";
+				$ulisa .= "&haku[$ind]=" . $val;
+			}
+		}
+
+		if (strlen($ojarj) > 0) {
+			$jarjestys = $ojarj;
+		}
+
+		$query = "	SELECT asiakas.tunnus,
 					concat(if(asiakas.nimi='', '**N/A**', asiakas.nimi), '<br>', asiakas.toim_nimi) nimi,
 					concat(asiakas.nimitark, '<br>', asiakas.toim_nimitark) nimitark,
 					concat(asiakas.postitp, '<br>', asiakas.toim_postitp) postitp,
@@ -183,49 +196,53 @@
 					asiakas.asiakasnro
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
-					AND laji != 'P'
-					ORDER by nimi";
-		$result = mysql_query ($query) or pupe_error("Kysely ei onnistu $query");
+					$lisa
+					$ryhma
+					ORDER BY $jarjestys
+					LIMIT 100";
+		$result = pupe_query($query);
 
-		echo "<table class='display dataTable' id='$pupe_DataTables'>";
-		echo "<thead>";
-		echo "<tr>";
-		echo "<th>".t("Nimi")."</th>";
-		echo "<th>".t("Nimitark")."</th>";
-		echo "<th>".t("Postitp")."</th>";
-		echo "<th>".t("Ytunnus")."</th>";
-		echo "<th>".t("Ovttunnus")."</th>";
-		echo "<th>".t("Asiakasnro")."</th>";
-		echo "<th>".t("Asiakastunnus")."</th>";
-		echo "</tr>";
-		echo "<tr>";
-		echo "<td><input type='text' class='search_field' name='search_nimi'></td>";
-		echo "<td><input type='text' class='search_field' name='search_nimitark'></td>";
-		echo "<td><input type='text' class='search_field' name='search_postitp'></td>";
-		echo "<td><input type='text' class='search_field' name='search_ytunnus'></td>";
-		echo "<td><input type='text' class='search_field' name='search_ovttunnus'></td>";
-		echo "<td><input type='text' class='search_field' name='search_asiakasnro'></td>";
-		echo "<td><input type='text' class='search_field' name='search_tunnus'></td>";
-		echo "</tr>";
-		echo "</thead>";
-		echo "<tbody>";
+		echo "<form action = '$PHP_SELF' method = 'post'>";
+		echo "<table><tr>";
 
-		while ($row = mysql_fetch_array($result)) {
-			echo "<tr class='aktiivi'>";
-			echo "<td><a href='$PHP_SELF?id=$row[tunnus]&tee=edit'>$row[nimi]</a></td>";
-			echo "<td>$row[nimitark]</td>";
-			echo "<td>$row[postitp]</td>";
-			echo "<td>$row[ytunnus]</td>";
-			echo "<td>$row[ovttunnus]</td>";
-			echo "<td>$row[asiakasnro]</td>";
-			echo "<td>$row[tunnus]</td>";
+		echo "<th valign='top' align='left'><a href = '?ojarj=nimi".$ulisa ."'>".t("Nimi")."</a>";
+		echo "<br><input type='text' name = 'haku[nimi]' value = '$haku[nimi]'>";
+		echo "</th>";
+
+		echo "<th valign='top' align='left'><a href = '?ojarj=nimitark".$ulisa ."'>".t("Nimitark")."</a>";
+		echo "<br><input type='text' name = 'haku[nimitark]' value = '$haku[nimitark]'>";
+		echo "</th>";
+
+		echo "<th valign='top' align='left'><a href = '?ojarj=postitp".$ulisa ."'>".t("Postitp")."</a>";
+		echo "<br><input type='text' name = 'haku[postitp]' value = '$haku[postitp]'>";
+		echo "</th>";
+
+		echo "<th valign='top' align='left'><a href = '?ojarj=ytunnus".$ulisa ."'>".t("Ytunnus")."</a>";
+		echo "<br><input type='text' name = 'haku[ytunnus]' value = '$haku[ytunnus]'>";
+		echo "</th>";
+
+		echo "<th valign='top' align='left'><a href = '?ojarj=ovttunnus".$ulisa ."'>".t("Ovttunnus")."</a>";
+		echo "<br><input type='text' name = 'haku[ovttunnus]' value = '$haku[ovttunnus]'>";
+		echo "</th>";
+
+		echo "<th valign='top' align='left'><a href = '?ojarj=asiakasnro".$ulisa ."'>".t("Asiakasnro")."</a>";
+		echo "<br><input type='text' name = 'haku[asiakasnro]' value = '$haku[asiakasnro]'>";
+		echo "</th>";
+
+		echo "<td valign='bottom' class='back'><input type='Submit' value = '".t("Etsi")."'></td></form></tr>";
+
+		while ($trow = mysql_fetch_assoc($result)) {
+			echo "<tr>";
+			echo "<td><a href='$PHP_SELF?id=$trow[tunnus]&tee=edit'>$trow[nimi]</a></td>";
+			echo "<td>$trow[nimitark]</td>";
+			echo "<td>$trow[postitp]</td>";
+			echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
+			echo "<td>$trow[ovttunnus]</td>";
+			echo "<td>$trow[asiakasnro]</td>";
+
 			echo "</tr>";
 		}
-
-		echo "</tbody>";
 		echo "</table>";
 	}
 
 	require ("inc/footer.inc");
-
-?>

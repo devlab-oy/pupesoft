@@ -97,8 +97,8 @@
 
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'
-					order by tyyppi, nimitys";
+					WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+					ORDER BY tyyppi, nimitys";
 		$vtresult = mysql_query($query) or pupe_error($query);
 
 		echo "<form method='post'>";
@@ -148,7 +148,7 @@
 
 			$query  = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 						ORDER BY tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
 
@@ -417,7 +417,7 @@
 		$aquery = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus='$clearing'";
+					and tunnus = '$clearing'";
 		$vtresult = mysql_query($aquery) or pupe_error($aquery);
 		$vtrow = mysql_fetch_array($vtresult);
 

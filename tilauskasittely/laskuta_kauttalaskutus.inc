@@ -52,7 +52,7 @@
 					yhtio      			= '$kukarow[yhtio]',
 					tila       			= 'N',
 					ytunnus	   			= '*',
-					alv	   				= '23',
+					alv	   				= '".alv_oletus()."',
 					laatija    			= 'verkkolas',
 					luontiaika 			= now()";
 		$result = mysql_query($query) or pupe_error($query);

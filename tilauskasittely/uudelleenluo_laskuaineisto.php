@@ -551,6 +551,7 @@
 							min(tilausrivi.tilaajanrivinro) tilaajanrivinro,
 							min(tilausrivi.laadittu) laadittu,
 							sum(tilausrivi.tilkpl) tilkpl,
+							sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
 							sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
 							group_concat(tilausrivi.tunnus) rivitunnukset,
 							group_concat(distinct tilausrivi.perheid) perheideet,
@@ -585,7 +586,9 @@
 								// lasketaan isätuotteen riville lapsien hinnat yhteen
 								$query = "	SELECT
 											sum(tilausrivi.rivihinta) rivihinta,
-											round(sum(tilausrivi.rivihinta) / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta
+											round(sum(tilausrivi.rivihinta) / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta,
+											sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
+											sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}) rivihinta_valuutassa
 											FROM tilausrivi
 											WHERE tilausrivi.yhtio 		= '$kukarow[yhtio]'
 											and tilausrivi.uusiotunnus 	= '$tilrow[uusiotunnus]'
@@ -594,8 +597,10 @@
 								$riresult = pupe_query($query);
 								$perherow = mysql_fetch_assoc($riresult);
 
-								$tilrow["hinta"] 		= $perherow["hinta"];
-								$tilrow["rivihinta"] 	= $perherow["rivihinta"];
+								$tilrow["hinta"] 				= $perherow["hinta"];
+								$tilrow["rivihinta"] 			= $perherow["rivihinta"];
+								$tilrow["rivihinta_verollinen"] = $perherow["rivihinta_verollinen"];
+								$tilrow["rivihinta_valuutassa"] = $perherow["rivihinta_valuutassa"];
 
 								// Nollataan alet, koska hinta lasketaan rivihinnasta jossa alet on jo huomioitu
 								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -720,13 +725,6 @@
 						$tilrow["hinta"] = laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"]);
 					}
 
-					// Verollinen Rivihinta. Lasketaan saman kaavan mukaan kuin laskutus.inc:ssä, eli pyöristetään kaikki kerralla lopuksi!
-					$totalvat = $tilrow["hinta"] * generoi_alekentta_php($tilrow, 'M', 'kerto') * $tilrow["kpl"];
-
-					if ($yhtiorow["alv_kasittely"] != '') {
-						$totalvat = $totalvat * (1 + ($tilrow["alv"] / 100));
-					}
-
 					// Yksikköhinta on laskulla aina veroton
 					if ($yhtiorow["alv_kasittely"] == '') {
 						$tilrow["hinta"] = $tilrow["hinta"] / (1 + $tilrow["alv"] / 100);
@@ -736,13 +734,13 @@
 					$vatamount = $tilrow['rivihinta'] * $tilrow['alv'] / 100;
 
 					// Pyöristetään ja formatoidaan lopuksi
-					$tilrow["hinta"] 	 = hintapyoristys($tilrow["hinta"]);
-					$tilrow["rivihinta"] = hintapyoristys($tilrow["rivihinta"]);
-					$totalvat			 = hintapyoristys($totalvat);
-					$vatamount 			 = hintapyoristys($vatamount);
+					$tilrow["hinta"] 	 			= hintapyoristys($tilrow["hinta"]);
+					$tilrow["rivihinta"] 			= hintapyoristys($tilrow["rivihinta"]);
+					$tilrow["rivihinta_verollinen"]	= hintapyoristys($tilrow["rivihinta_verollinen"]);
+					$vatamount 			 			= hintapyoristys($vatamount);
 
-					$tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['kommentti']);
-					$tilrow['nimitys'] 	 = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['nimitys']);
+					$tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['kommentti']);
+					$tilrow['nimitys'] 	 = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['nimitys']);
 
 					// Otetaan seuraavan rivin otunnus
 					if ($rivilaskuri < $rivimaara) {
@@ -772,13 +770,13 @@
 						elmaedi_rivi($tootedi, $tilrow, $rivinumero);
 					}
 					elseif ($lasrow["chn"] == "112") {
-						finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $totalvat, $laskutyyppi);
+						finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
 					}
 					elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
-						finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat, $laskutyyppi);
+						finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
 					}
 					else {
-						pupevoice_rivi($tootxml, $tilrow, $vatamount, $totalvat);
+						pupevoice_rivi($tootxml, $tilrow, $vatamount);
 					}
 
 					$rivilaskuri++;

@@ -17,18 +17,22 @@
 	if ($komento['Ostotilaus'] == 'edi') {
 
 		// haetaan toimittajan tiedot
-		$query    = "SELECT * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+		$query = "	SELECT *
+					FROM toimi
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus  = '$laskurow[liitostunnus]'";
 		$toimires = pupe_query($query);
 		$toimirow = mysql_fetch_array($toimires);
 
-		if (($toimirow['edi_palvelin']=='') or
-			($toimirow['edi_kayttaja']=='') or
-			($toimirow['edi_salasana']=='') or
-			($toimirow['edi_kuvaus']=='') or
-			($toimirow['edi_polku']=='')) {
+		if (!preg_match("/(excel|wabco)/", $toimirow['edi_kuvaus']) and ($toimirow['edi_palvelin'] == '' or $toimirow['edi_kayttaja'] == '' or $toimirow['edi_salasana'] == '' or $toimirow['edi_kuvaus'] == '' or $toimirow['edi_polku'] == '')) {
 			$tulosta_ostotilaus_ulos .= "<font class='error'>".t("Edi-tilauksen lähettämiseen tarvittavia tietoja ei ole syötetty")."! ".t("Tarkista toimittajan tiedot")."!</font>";
 		}
 		else {
+			// Otetaan ftp-palvelimen portti jos sellanen on setattu.
+			if (strpos($toimirow['edi_palvelin'], ":") !== FALSE) {
+				list($toimirow['edi_palvelin'], $toimirow['edi_portti']) = explode(":", $toimirow['edi_palvelin']);
+			}
+
 			require($toimirow['edi_kuvaus']);
 			$tee = '';
 		}
@@ -176,7 +180,10 @@
 
 
 				$pdf->draw_text(430, 750, t("Toimitusaika", $kieli), $thispage, $pieni);
-				$pdf->draw_text(430, 740, tv1dateconv($laskurow["toimaika"]), $thispage, $boldi);
+
+				if ($yhtiorow['ostotilaustyyppi'] == '0' or $yhtiorow['ostotilaustyyppi'] == 'B') {
+					$pdf->draw_text(430, 740, tv1dateconv($laskurow["toimaika"]), $thispage, $boldi);
+				}
 
 				$pdf->draw_rectangle(737, 300, 716, 580, $thispage, $rectparam);
 				$pdf->draw_rectangle(737, 420, 716, 580, $thispage, $rectparam);
@@ -394,7 +401,9 @@
 					}
 				}
 
-				$pdf->draw_text(300, $kala, tv1dateconv($row["toimaika"]), $thispage, $norm);
+				if ($yhtiorow['ostotilaustyyppi'] == '0' or $yhtiorow['ostotilaustyyppi'] == 'B') {
+					$pdf->draw_text(300, $kala, tv1dateconv($row["toimaika"]), $thispage, $norm);
+				}
 
 				//	Tarkastetaan olisiko toimittajalla yksikkö!
 				$query = "	SELECT toim_yksikko
@@ -421,14 +430,15 @@
 				$pdf->draw_text(475-$oikpos, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
 
 				if ($row["ale1"] != 0) {
-					$oikpos = $pdf->strlen(($row["ale1"]*1)."%", $norm);
-					$pdf->draw_text(510-$oikpos, $kala, ($row["ale1"]*1)."%", $thispage, $norm);
+					$ale_prosentti = generoi_alekentta_php($row, 'O', 'plain');
+					$oikpos = $pdf->strlen(($ale_prosentti*1)."%", $norm);
+					$pdf->draw_text(510-$oikpos, $kala, $ale_prosentti."%", $thispage, $norm);
 				}
 
 				$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
 				$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
 
-	            if ($nimitykset != "") {
+            	if ((isset($nimitykset) and $nimitykset != "") or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A')) {
 
 	 				//Käännetään nimitys
 					$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
@@ -695,9 +705,9 @@
 						'row'						=> '',
 						'sivu'						=> 1,
 						'tee'						=> $tee,
+						'nimitykset'				=> $nimitykset,
 						'thispage'					=> NULL,
 						'toim'						=> $toim,
-						'nimitykset'				=> $nimitykset,
 						'rivinumerot'				=> $rivinumerot,
 						'laitetaanko_yhteensarivi'	=> 0,
 						'total'						=> 0,
@@ -727,4 +737,3 @@
 	if ($silent == "") {
 		echo $tulosta_ostotilaus_ulos;
 	}
-?>

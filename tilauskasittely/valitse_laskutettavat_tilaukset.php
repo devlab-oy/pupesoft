@@ -106,7 +106,7 @@
 		$summa = $laskurow["loppusumma"];
 
 		//Käsin syötetty summa johon lasku pyöristetään
-		if (abs($laskurow["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
+		if ($laskurow["hinta"] <> 0 and abs($laskurow["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
 			$summa = sprintf("%.2f",$laskurow["hinta"]);
 		}
 
@@ -409,12 +409,13 @@
 
 			$toimitusselite = "";
 
-			if ($ekarow["chn"] == '100') $toimitusselite = t("Paperilasku");
-			if ($ekarow["chn"] == '010') $toimitusselite = t("eInvoice");
-			if ($ekarow["chn"] == '020') $toimitusselite = t("Vienti eInvoice");
-			if ($ekarow["chn"] == '111') $toimitusselite = t("Elma EDI-inhouse");
-			if ($ekarow["chn"] == '666') $toimitusselite = t("Sähköpostiin");
-			if ($ekarow["chn"] == '667') $toimitusselite = t("Sisäinen");
+			if ($ekarow["chn"] == '100') $toimitusselite = t("Verkkolasku, tulostuspalvelu");
+			if ($ekarow["chn"] == '010') $toimitusselite = t("Verkkolasku");
+			if ($ekarow["chn"] == '020') $toimitusselite = t("Vienti-Verkkolasku (EU)");
+			if ($ekarow["chn"] == '111') $toimitusselite = t("Itella EDI: EIH-1.4 sähköinen lasku");
+			if ($ekarow['chn'] == '112') $toimitusselite = t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin");
+			if ($ekarow["chn"] == '666') $toimitusselite = t("Sähköposti");
+			if ($ekarow["chn"] == '667') $toimitusselite = t("Paperilasku, tulostetaan manuaalisesti");
 
 			echo "<tr>";
 			echo "<th>".t("Ostaja:")."</th>";
@@ -1072,7 +1073,7 @@
 					lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
 					$ketjutus_group
-					ORDER BY lasku.ytunnus, lasku.nimi";
+					ORDER BY lasku.nimi";
 		$tilre = pupe_query($query);
 
 		if (mysql_num_rows($tilre) > 0) {

@@ -74,7 +74,6 @@
 	$lisa_haku_tme 			 = "";
 	$lisa_haku_malli 		 = "";
 	$lisa_haku_mallitarkenne = "";
-	$lisa_haku_laskumyyja  	 = "";
 	$lisa_haku_asiakastila 	 = "";
 	$lisa_haku_myyja		 = "";
 	$lisa_haku_asiakasmyyja  = "";
@@ -400,8 +399,7 @@
 		$laskumyyjat = substr($laskumyyjat, 0, -1);
 
 		if (trim($laskumyyjat) != '') {
-			$lisa_haku_laskumyyja = " and kuka.myyja in ($laskumyyjat) ";
-			$lisa .= " and tuote.myyjanro in ($laskumyyjat) ";
+			$lisa .= " and lasku.myyja in ($laskumyyjat) ";
 		}
 	}
 
@@ -593,12 +591,12 @@
 
 		if (trim($kohdet) != '') {
 			if ($mulselprefix == 'asiakas') {
-				$lisa_haku_kustp = " and asiakas.kohde in ($kustpt) ";
-				$lisa .= " and asiakas.kohde in ($kustpt) ";
+				$lisa_haku_kustp = " and asiakas.kohde in ($kohdet) ";
+				$lisa .= " and asiakas.kohde in ($kohdet) ";
 			}
 			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
-				$lisa_haku_kustp = " and (tuote.kohde in ($kustpt) or asiakas.kohde in ($kustpt)) ";
-				$lisa .= " and (tuote.kohde in ($kustpt) or asiakas.kohde in ($kustpt)) ";
+				$lisa_haku_kustp = " and (tuote.kohde in ($kohdet) or asiakas.kohde in ($kohdet)) ";
+				$lisa .= " and (tuote.kohde in ($kohdet) or asiakas.kohde in ($kohdet)) ";
 			}
 			else {
 				$lisa_haku_kohde = " and tiliointi.kohde in ($kohdet) ";
@@ -622,12 +620,12 @@
 
 		if (trim($projektit) != '') {
 			if ($mulselprefix == 'asiakas') {
-				$lisa_haku_kustp = " and asiakas.projekti in ($kustpt) ";
-				$lisa .= " and asiakas.projekti in ($kustpt) ";
+				$lisa_haku_kustp = " and asiakas.projekti in ($projektit) ";
+				$lisa .= " and asiakas.projekti in ($projektit) ";
 			}
 			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
-				$lisa_haku_kustp = " and (tuote.projekti in ($kustpt) or asiakas.projekti in ($kustpt)) ";
-				$lisa .= " and (tuote.projekti in ($kustpt) or asiakas.projekti in ($kustpt)) ";
+				$lisa_haku_kustp = " and (tuote.projekti in ($projektit) or asiakas.projekti in ($projektit)) ";
+				$lisa .= " and (tuote.projekti in ($projektit) or asiakas.projekti in ($projektit)) ";
 			}
 			else {
 				$lisa_haku_projekti = " and tiliointi.projekti in ($projektit) ";
@@ -1553,7 +1551,7 @@
 			echo "<tr>";
 
 			// tehdään query
-			$query = "	SELECT DISTINCT myyja, nimi
+			$query = "	SELECT DISTINCT myyja, nimi, tunnus
 						FROM kuka
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND myyja > 0
@@ -1567,12 +1565,12 @@
 				$sel = '';
 
 				if (count($mul_laskumyyja) > 0) {
-					if (in_array(trim($sxrow['myyja']), $mul_laskumyyja)) {
+					if (in_array(trim($sxrow['tunnus']), $mul_laskumyyja)) {
 						$sel = 'SELECTED';
 					}
 				}
 
-				echo "<option value='$sxrow[myyja]' $sel>$sxrow[myyja] $sxrow[nimi]</option>";
+				echo "<option value='$sxrow[tunnus]' $sel>$sxrow[myyja] $sxrow[nimi]</option>";
 			}
 
 			echo "</select></td>";

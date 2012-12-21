@@ -494,6 +494,42 @@
 		$jatko = 0;
 	}
 
+// ei näytetä jos yhtiö ei suoratoimita mitään
+
+	if (mysql_field_name($result, $i) == "suoratoimitus") {
+		if ($yhtiorow["tee_osto_myyntitilaukselta"] != '') {
+
+			$sel = array_fill_keys(array('U', 'X', '-'), '');
+			$sel[$trow[$i]] = " SELECTED";
+
+			$ulos  = "<td><select name='$nimi'>";
+
+			$st_opt   = (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('X', 'Y', 'V', 'W', 'I', 'J', 'Z', 'A', 'C'))) ? '1' : '0';  // eka merkki = varastoon
+			$st_opt  .= (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'Q', 'B', 'C')))      ? '1' : '0';       // toka merkki = asiakkaalle
+
+			switch ($st_opt) {
+				case '11': // sallittu molemmille
+					$ulos .= "<option value='' >"             .t("Suoratoimitukset sallittu asiakkaalle ja varastoon")."</option>";
+					$ulos .= "<option value='U' {$sel['U']} >".t("Suoratoimitukset sallittu asiakkaalle")."</option>";
+					$ulos .= "<option value='X' {$sel['X']} >".t("Suoratoimitukset sallittu varastoon")."</option>";
+					break;
+				case '10': // sallittu vain varastoon
+					$ulos .= "<option value='' >"             .t("Suoratoimitukset sallittu varastoon")."</option>";
+					break;
+				case '01': //sallittu vain asiakkaalle
+					$ulos .= "<option value='' >"             .t("Suoratoimitukset sallittu asiakkaalle")."</option>";
+					break;
+			}
+			$ulos .= "<option value='-' {$sel['-']} >".t("Suoratoimitukset kielletty")."</option>";
+			$ulos .= "</select></td>";
+
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 0;
+		}
+	}
+
 	if (mysql_field_name($result, $i) == "edi_kuvaus") {
 
 		$path_parts = pathinfo($trow[$i]);
@@ -502,8 +538,24 @@
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
+		$ulos .= "<option value='editilaus_out_teccom.inc' $sel[editilaus_out_teccom]>".t("TecCom sähköinen tilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_wabco.inc' $sel[editilaus_out_wabco]>".t("Wabco sähköinen tilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_excel.inc' $sel[editilaus_out_excel]>".t("Excel-ostotilaus")."</option>";
 		$ulos .= "<option value='editilaus_out_elma.inc' $sel[editilaus_out_elma]>".t("Elma-editilaus")."</option>";
-		$ulos .= "<option value='editilaus_out_teccom.inc' $sel[editilaus_out_teccom]>".t("TecCom-editilaus")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "asn_sanomat") {
+
+		$sel[$trow[$i]] = "selected";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Toimittajalta ei tule ASN-sanomia eikä laskuja")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Toimittaja lähettää ASN-sanoman ja TecCom-laskun")."</option>";
+		$ulos .= "<option value='S' $sel[S]>".t("Toimittaja lähettää vain ASN-sanoman")."</option>";
+		$ulos .= "<option value='L' $sel[L]>".t("Toimittaja lähettää vain TecCom-laskun")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

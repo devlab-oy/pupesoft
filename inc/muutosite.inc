@@ -12,47 +12,6 @@
 		}
 	}
 
-	if (!function_exists("kopioitiliointi")) {
-		function kopioitiliointi($tunnus, $viivaaja) {
-			//Tehdään kopio tiliöinnistä $tunnus
-			//Jos $viivaajassa on jotain tehdään uusi vienti yliviivattuna
-			global $kukarow;
-
-			$query = "SELECT * FROM tiliointi WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-			$result = pupe_query($query);
-
-			if (mysql_num_rows($result) != 1) {
-				echo "Tiliöintirivi kateissa. Systeemivirhe!";
-				exit;
-			}
-
-			$tiliointirow = mysql_fetch_assoc($result);
-			$query = "INSERT into tiliointi set ";
-
-			for ($i = 0; $i < mysql_num_fields($result); $i++) {
-				if (mysql_field_name($result, $i) != 'tunnus') {
-					if ($viivaaja != '') {
-						if (mysql_field_name($result, $i) == 'korjattu') {
-							$query .= "korjattu ='".$viivaaja."',";
-						}
-						elseif (mysql_field_name($result, $i) == 'korjausaika') {
-							$query .= "korjausaika = now(),";
-						}
-						else {
-							$query .= mysql_field_name($result,$i) . "='" . $tiliointirow[mysql_field_name($result,$i)] . "',";
-						}
-					}
-					else {
-						$query .= mysql_field_name($result,$i) . "='" . $tiliointirow[mysql_field_name($result,$i)] . "',";
-					}
-				}
-			}
-
-			$query = substr($query, 0, -1);
-			$result = pupe_query($query);
-		}
-	}
-
 	$query = "	SELECT *
 				FROM lasku
 				WHERE tunnus = '$tunnus'";
@@ -1205,6 +1164,18 @@
 		$osto_kulu_alv = (float) $osto_kulu_alv;
 		$osto_rivi_kulu_alv = (float) $osto_rivi_kulu_alv;
 
+		if (isset($osto_kulu_alv_verollisuus) and $osto_kulu_alv_verollisuus == 'X') {
+			$osto_kulu = $osto_kulu * (1 + ($osto_kulu_alv / 100));
+		}
+
+		if (isset($osto_rahti_alv_verollisuus) and $osto_rahti_alv_verollisuus == 'X') {
+			$osto_rahti = $osto_rahti * (1 + ($osto_rahti_alv / 100));
+		}
+
+		if (isset($osto_rivi_kulu_alv_verollisuus) and $osto_rivi_kulu_alv_verollisuus == 'X') {
+			$osto_rivi_kulu = $osto_rivi_kulu * (1 + ($osto_rivi_kulu_alv / 100));
+		}
+
 		$query = "	UPDATE lasku SET
 					osto_rahti = '{$osto_rahti}',
 					osto_kulu = '{$osto_kulu}',
@@ -1802,21 +1773,36 @@
 					case '1':
 						if ($yhtiorow['osto_rahti'] != '') {
 							echo "<th>",t("Vaihto-omaisuuslaskun rahdit"),"</th>";
-							echo "<td><input type='text' name='osto_rahti' value='{$trow['osto_rahti']}' />";
+							echo "<td>";
+							echo "<select name='osto_rahti_alv_verollisuus'>";
+							echo "<option value=''>",t("Verollinen arvo"),"</option>";
+							echo "<option value='X'>",t("Veroton arvo"),"</option>";
+							echo "</select>";
+							echo "<input type='text' name='osto_rahti' value='{$trow['osto_rahti']}' />";
 							echo "&nbsp;".alv_popup('osto_rahti_alv', $trow['osto_rahti_alv'])."</td>";
 						}
 						break;
 					case '2':
 						if ($yhtiorow['osto_rahti'] != '' and $yhtiorow['osto_kulu'] != '') {
 							echo "<th>",t("Vaihto-omaisuuslaskun kulut"),"</th>";
-							echo "<td><input type='text' name='osto_kulu' value='{$trow['osto_kulu']}' />";
+							echo "<td>";
+							echo "<select name='osto_kulu_alv_verollisuus'>";
+							echo "<option value=''>",t("Verollinen arvo"),"</option>";
+							echo "<option value='X'>",t("Veroton arvo"),"</option>";
+							echo "</select>";
+							echo "<input type='text' name='osto_kulu' value='{$trow['osto_kulu']}' />";
 							echo "&nbsp;".alv_popup('osto_kulu_alv', $trow['osto_kulu_alv'])."</td>";
 						}
 						break;
 					case '3':
 						if ($yhtiorow['osto_rahti'] != '' and $yhtiorow['osto_kulu'] != '' and $yhtiorow['osto_rivi_kulu'] != '') {
 							echo "<th>",t("Vaihto-omaisuuslaskun tuoterivikohtaiset kulut"),"</th>";
-							echo "<td><input type='text' name='osto_rivi_kulu' value='{$trow['osto_rivi_kulu']}' />";
+							echo "<td>";
+							echo "<select name='osto_rivi_kulu_alv_verollisuus'>";
+							echo "<option value=''>",t("Verollinen arvo"),"</option>";
+							echo "<option value='X'>",t("Veroton arvo"),"</option>";
+							echo "</select>";
+							echo "<input type='text' name='osto_rivi_kulu' value='{$trow['osto_rivi_kulu']}' />";
 							echo "&nbsp;".alv_popup('osto_rivi_kulu_alv', $trow['osto_rivi_kulu_alv'])."</td>";
 						}
 						break;
@@ -2112,5 +2098,3 @@
 	if ($phpnimi == 'muutosite.php') {
 		$tee = 'E'; // Estetään väärä käyttöliittymä
 	}
-
-?>

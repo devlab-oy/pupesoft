@@ -502,7 +502,7 @@
 		$ulos .= "<option value=''>".t("Ei oletustoimitusehtoa")."</option>";
 
 		while ($kirow = mysql_fetch_array($kires)) {
-			if ($kirow["selite"]." ".$kirow["selitetark"] == $trow[$i]) $select = 'SELECTED';
+			if (trim($kirow["selite"]." ".$kirow["selitetark"]) == $trow[$i]) $select = 'SELECTED';
 			else $select = '';
 
 			$ulos .= "<option value='$kirow[selite] $kirow[selitetark]' $select>$kirow[selite] $kirow[selitetark]</option>";
@@ -941,10 +941,12 @@
 		$ulos .= "<option value = '6' $sel[6]>".t("Normaali laskupohja (Ei näytetä tilausnumeroa/toimitusaikaa)")."</option>";
 		$ulos .= "<option value = '7' $sel[7]>".t("Normaali laskupohja (Näytetään tuotteen EAN koodi)")."</option>";
 		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1");
-		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
+		#$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3");
 		$ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)");
 		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)");
+		$ulos .= "<option value = '13' $sel[13]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja");
+		$ulos .= "<option value = '14' $sel[14]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)");
 
 		$ulos .= "</select></td>";
 
@@ -1116,17 +1118,31 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'maksusopimus_toimitus') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+		$sel = array_fill_keys(array($trow[$i]), 'selected') + array('S' => '', 'X' => '');
+
+		$ulos .= "<option value = ''>".t("Yhtiön oletus")."</option>";
+		$ulos .= "<option value = 'S' {$sel['S']}>".t("Tilauksen voi toimittaa vaikka ennakkolaskuja ei ole maksettu")."</option>";
+		$ulos .= "<option value = 'X' {$sel['X']}>".t("Tilauksen voi toimittaa vasta kun ennakkolaskut on maksettu")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "keraysvahvistus_lahetys") {
 
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array();
-		$apu = $trow[$i];
-		$sel[$apu] = "selected";
+		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('E', 'o', 'k', 'L', 'M'), '');
 
 		$ulos .= "<option value=''>".t("Käytetään yhtiön oletusta")."</option>";
-		$ulos .= "<option value='E' $sel[E]>".t("Keräysvahvistusta ei lähetetä")."</option>";
-		$ulos .= "<option value='o' $sel[o]>".t("Keräysvahvistus lähetetään asiakkaalle")."</option>";
+		$ulos .= "<option value='E'{$sel['E']}>".t("Keräysvahvistusta/sähköisetä lähetettä ei lähetetä")."</option>";
+		$ulos .= "<option value='o'{$sel['o']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
+		$ulos .= "<option value='k'{$sel['k']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='L'{$sel['L']}>".t("Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='M'{$sel['M']}>".t("Keräysvahvistus/paperinen & sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1145,4 +1161,22 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'kerayserat') {
+
+		if ($yhtiorow['kerayserat'] == 'A') {
+			$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+			$sel = trim($trow[$i]) == 'A' ? ' selected' : '';
+
+			$ulos .= "<option value = ''>".t("Keräyseriä ei käytetä")."</option>";
+			$ulos .= "<option value = 'A'{$sel}>".t("Keräyserät käytössä")."</option>";
+			$ulos .= "</select></td>";
+
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 0;
+		}
 	}

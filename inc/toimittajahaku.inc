@@ -176,17 +176,21 @@
 
 				echo "</table>";
 				echo "<br>";
-				echo "<table>";
-				echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>
-						<tr>
-						<input type='hidden' name='tunnus' value='$tunnus'>
-						<input type='hidden' name='tee' value='A'>
+
+				echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>";
+
+				if (isset($tunnus) and $tunnus > 0) echo "<input type='hidden' name='tunnus' value='$tunnus'>";
+				else echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
+
+				echo "	<input type='hidden' name='tee' value='A'>
 						<input type='hidden' name='lopetus' value='$lopetus'>";
+
+				echo "<table>";
 
 				$sel = array();
 				$sel[$laji]	= " selected";
 
-				echo "<th>".t("Laskuntyyppi")."</th>";
+				echo "<tr><th>".t("Laskuntyyppi")."</th>";
 				echo "<td><select name = 'laji'>
 						<option $sel[K] value = 'K'>".t("Kaikki")."
 						<option $sel[H] value = 'H'>".t("Hyväksyttävänä")."
@@ -274,14 +278,14 @@
 				}
 
 				if (isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
-					$tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus) ";
+					$tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu='') ";
 					$th_lisa .= $lisa;
 				}
 				else {
 					$tiliointilisa = '';
 				}
 
-				$query = "	SELECT lasku.tapvm, lasku.erpcm, lasku.summa, lasku.valkoodi, lasku.vienti,
+				$query = "	SELECT DISTINCT lasku.tapvm, lasku.erpcm, lasku.summa, lasku.valkoodi, lasku.vienti,
 							concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti', lasku.ebid, lasku.tila, lasku.tunnus,
 							if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
 							round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) kotisumma
@@ -339,7 +343,16 @@
 						echo "<td valign='top'>{$trow["tapvm"]}<br>{$trow["erpcm"]}</td>";
 					}
 					else {
-						echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//laji=$laji//tunnus=$tunnus'>{$trow["tapvm"]}</a><br>{$trow["erpcm"]}</td>";
+						$lopelisa = "$PHP_SELF////toim=$toim";
+
+						if (isset($tunnus) and $tunnus > 0)	$lopelisa .= "//tunnus=$tunnus";
+						else $lopelisa .= "//ytunnus=$ytunnus";
+
+						$lopelisa .= "//tee=$tee//laji=$laji//pp1=$pp1//kk1=$kk1//vv1=$vv1//pp2=$pp2//kk2=$kk2//vv2=$vv2";
+
+						if (isset($lopetus) and $lopetus != "") $lopelisa = "$lopetus/SPLIT/$lopelisa";
+
+						echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$lopelisa'>{$trow["tapvm"]}</a><br>{$trow["erpcm"]}</td>";
 					}
 
 					echo "<td valign='top' align='right'>$trow[summa]</td>";

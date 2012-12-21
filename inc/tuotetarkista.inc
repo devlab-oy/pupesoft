@@ -306,14 +306,18 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
-		if ($yhtiorow['kerayserat'] == 'K' and mysql_field_name($result, $i) == "keraysvyohyke" and $tem_eisaldoa == '' and $tem_tuotetyyppi != 'A' and $tem_tuotetyyppi != 'B') {
-			if (trim($t[$i]) == '') {
-				$virhe[$i] = t("Keräyserät ovat käytössä! Keräysvyöhyke ei saa olla tyhjä");
-			}
-		}
-
 		if (mysql_field_name($result, $i) == 'status') {
 			$tem_status = $t[$i];
+		}
+
+		// ei piirretä ellei yhtiöparametri ohjeista katsomaan täältä
+		if (mysql_field_name($result, $i) == "suoratoimitus") {
+			if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J'))) {
+				if (!in_array($t[$i], array('S','U','X',''))) {
+					$virhe[$i] = t("Suoratoimitustieto virheellinen");
+					$errori = 1;
+				}
+			}
 		}
 
 		//tehdään nää jutut tässä koska tämä on aina viimeinen sarake

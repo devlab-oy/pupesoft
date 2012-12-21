@@ -37,7 +37,7 @@
 
 	function weekday_name($day, $month, $year) {
 		// calculate weekday name
-		$days = array(t("Maanantai"), t("Tiistai"), t("Keskiviikko"), t("Torstai"), t("Perjantai"), t("Lauantai"),t("Sunnuntai"));
+		$days = array(t("Maanantai"), t("Tiistai"), t("Keskiviikko"), t("Torstai"), t("Perjantai"), t("Lauantai"), t("Sunnuntai"));
 		$nro = date("w", mktime(0, 0, 0, $month, $day, $year));
 		if ($nro==0) $nro=6;
 		else $nro--;

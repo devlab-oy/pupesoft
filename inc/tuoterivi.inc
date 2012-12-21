@@ -636,24 +636,27 @@
 
 	if (mysql_field_name($result, $i) == "yksin_kerailyalustalle") {
 
- 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('K', 'T'), '');
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('K', 'E'), '');
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value=''>".t("Ei")."</option>";
-		$ulos .= "<option value='K'{$sel['K']}>".t("Kyllä")."</option>";
+		$ulos .= "<option value='K'{$sel['K']}>".t("Kyllä")." - ".t("Ehdoton")."</option>";
+		$ulos .= "<option value='E'{$sel['E']}>".t("Kyllä")." - ".t("Ehdollinen")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "vakkoodi" and $yhtiorow["vak_kasittely"] != "") {
+	if ((mysql_field_name($result, $i) == "vakkoodi" or mysql_field_name($result, $i) == "vak_imdg_koodi") and $yhtiorow["vak_kasittely"] != "") {
 
 		$sel = array();
 		$sel[$trow[$i]] = ' selected';
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 
+		$query_taulu = mysql_field_name($result, $i) == "vak_imdg_koodi" ? "vak_imdg" : "vak";
+
 		$query = "	SELECT tunnus, concat_ws(' / ', yk_nro, substring(nimi_ja_kuvaus,1,70), luokka, luokituskoodi, pakkausryhma, lipukkeet, erityismaaraykset, rajoitetut_maarat_ja_poikkeusmaarat_1) nimi
-					FROM vak
+					FROM {$query_taulu}
 					WHERE yhtio = '{$kukarow['yhtio']}'";
 		$vak_res = pupe_query($query);
 
@@ -701,6 +704,17 @@
 
 	}
 
+	if (mysql_field_name($result, $i) == "meria_saastuttava") {
+
+		$sel = trim($trow[$i]) == 'K' ? ' selected' : '';
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value=''>".t("Ei")."</option>";
+		$ulos .= "<option value='K'{$sel}>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+
+	}
 
 	if (mysql_field_name($result, $i) == "ostoehdotus") {
 

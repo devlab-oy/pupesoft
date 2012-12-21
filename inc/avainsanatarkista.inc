@@ -97,6 +97,21 @@ if(!function_exists("avainsanatarkista")) {
 		if (mysql_field_name($result, $i) == "selitetark") {
 			$tem_selitetark = trim($t[$i]);
 
+			// Yritetään asettaa oletusverokanta
+			if (strtoupper($tem_laji) == "ALV" and trim($t[$i]) != "") {
+				$query = "	SELECT tunnus
+							FROM avainsana
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND laji = 'ALV'
+							AND selitetark != ''
+							AND tunnus != '$tunnus'";
+				$results = pupe_query($query);
+
+				if (mysql_num_rows($results) > 0) {
+					$virhe[$seliteind] = $virhe[$i] = t("Sinulla ei voi olla kuin yksi oletusverokanta!");
+				}
+			}
+
 			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL') {
 				$virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiä")."!";
 			}

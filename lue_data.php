@@ -785,8 +785,6 @@ if ($kasitellaan_tiedosto) {
 										AND $dynaamisen_taulun_liitos = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
 							$asiakkaan_haku_res = pupe_query($query);
 
-							unset($taulunrivit[$taulu][$eriviindex]);
-
 							while ($asiakkaan_haku_row = mysql_fetch_assoc($asiakkaan_haku_res)) {
 
 								$rivi_array_x = array();
@@ -802,6 +800,8 @@ if ($kasitellaan_tiedosto) {
 								}
 
 								array_push($dynaamiset_rivit, $rivi_array_x);
+
+								unset($taulunrivit[$taulu][$eriviindex]);
 							}
 
 							$puun_alkio_index_plus++;
@@ -1177,7 +1177,10 @@ if ($kasitellaan_tiedosto) {
 							}
 						}
 
-						if ((int) $tlength[$table_mysql.".".$otsikko] > 0 and strlen($taulunrivit[$taulu][$eriviindex][$r]) > $tlength[$table_mysql.".".$otsikko] and ($table_mysql != "tuotepaikat" and $otsikko != "OLETUS" and $taulunrivit[$taulu][$eriviindex][$r] != 'XVAIHDA')) {
+						if ((int) $tlength[$table_mysql.".".$otsikko] > 0 and strlen($taulunrivit[$taulu][$eriviindex][$r]) > $tlength[$table_mysql.".".$otsikko]
+							and !($table_mysql == "tuotepaikat"  and $otsikko == "OLETUS"  and $taulunrivit[$taulu][$eriviindex][$r] == 'XVAIHDA')
+							and !($table_mysql == "asiakashinta" and $otsikko == 'ASIAKAS' and $asiakkaanvalinta == '2')) {
+
 							lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE").": $otsikko ".t("kentässä on liian pitkä tieto")."!</font> {$taulunrivit[$taulu][$eriviindex][$r]}: ".strlen($taulunrivit[$taulu][$eriviindex][$r])." > ".$tlength[$table_mysql.".".$otsikko]."!<br>");
 							$hylkaa++; // ei päivitetä tätä riviä
 						}
@@ -1573,6 +1576,9 @@ if ($kasitellaan_tiedosto) {
 							elseif ($table_mysql=='tuotepaikat' and $otsikko == 'OLETUS') {
 								//echo t("Virhe rivillä").": $rivilaskuri Oletusta ei voi muuttaa!<br>";
 							}
+							elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
+								$query .= ", $otsikko = NULL ";
+							}
 							else {
 								if ($eilisataeikamuuteta == "") {
 									$query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
@@ -1610,6 +1616,9 @@ if ($kasitellaan_tiedosto) {
 								else {
 									$query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
 								}
+							}
+							elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
+								$query .= ", $otsikko = NULL ";
 							}
 							elseif ($eilisataeikamuuteta == "") {
 								$query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
@@ -2071,8 +2080,8 @@ if (!$cli and !isset($api_kentat)) {
 		'maksuehto'                       => 'Maksuehto',
 		'pakkaus'                         => 'Pakkaustiedot',
 		'perusalennus'                    => 'Perusalennukset',
-		'puun_alkio_asiakas'              => 'Asiakas-segmenttiliitoket',
-		'puun_alkio_tuote'                => 'Tuote-segmenttiliitoket',
+		'puun_alkio_asiakas'              => 'Asiakas-segmenttiliitokset',
+		'puun_alkio_tuote'                => 'Tuote-segmenttiliitokset',
 		'rahtikirjanumero'				  => 'LOGY-rahtikirjanumerot',
 		'rahtimaksut'                     => 'Rahtimaksut',
 		'rahtisopimukset'                 => 'Rahtisopimukset',
@@ -2095,7 +2104,8 @@ if (!$cli and !isset($api_kentat)) {
 		'tuotteen_avainsanat'             => 'Tuotteen avainsanat',
 		'tuotteen_orginaalit'             => 'Tuotteiden originaalit',
 		'tuotteen_toimittajat'            => 'Tuotteen toimittajat',
-		'vak'                             => 'VAK-tietoja',
+		'vak'                             => 'VAK/ADR-tietoja',
+		'vak_imdg'                        => 'VAK/IMDG-tietoja',
 		'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
 		'yhteyshenkilo'                   => 'Yhteyshenkilöt',
 	);

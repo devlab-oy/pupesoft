@@ -390,7 +390,7 @@
 			}
 
 			echo "</select></td></tr>";
-			echo "<tr><th colspan='5'><input type='submit' value='",t("Tee"),"' /></th></tr>";
+			echo "<tr><th><input type='submit' value='",t("Tee"),"' /></th></tr>";
 			echo "</table></form>";
 		}
 	}

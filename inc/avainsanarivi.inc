@@ -343,6 +343,17 @@
 		$jatko = 0;
 	}
 
+	if ($avain_sel["ALV"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {
+
+		$sel = trim($trow[$i]) != "" ? " SELECTED" : "";
+
+		$ulos  = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Tämä ei ole oletusverokanta")."</option>";
+		$ulos .= "<option value='o'{$sel}>".t("Tämä on oletusverokanta")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 	if ($avain_sel["ALVULK"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
 
 		$query = "	SELECT distinct koodi, nimi

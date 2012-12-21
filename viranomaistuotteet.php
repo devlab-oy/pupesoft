@@ -257,7 +257,7 @@ if ($tee == "synkronoi") {
 	echo t("Lis‰t‰‰n uudet viranomaistuotteet tietokantaan")."...<br>";
 
 	while ($rivi = fgets($file)) {
-		list($tuoteno, $nimitys, $alv, $kommentoitava, $kuvaus, $myyntihinta, $tuotetyyppi, $vienti) = explode("\t", trim($rivi));
+		list($tuoteno, $nimitys, $alv, $kommentoitava, $kuvaus, $myyntihinta, $tuotetyyppi, $vienti, $malli, $myymalahinta) = explode("\t", trim($rivi));
 
 		if (strpos($nimitys, "Ulkomaanp‰iv‰raha") !== FALSE) {
 			$tilino = $ulkomaantilinumero;
@@ -277,6 +277,8 @@ if ($tee == "synkronoi") {
 					status			= 'A',
 					tilino 			= '$tilino',
 					vienti          = '$vienti',
+					malli      	    = '$malli',
+					myymalahinta    = '$myymalahinta',
 					yhtio			= '$kukarow[yhtio]',
 					laatija			= '$kukarow[kuka]',
 					luontiaika		= now()
@@ -290,6 +292,8 @@ if ($tee == "synkronoi") {
 					status			= 'A',
 					tilino 			= '$tilino',
 					vienti          = '$vienti',
+					malli      	    = '$malli',
+					myymalahinta    = '$myymalahinta',
 					muuttaja		= '$kukarow[kuka]',
 					muutospvm		= now()";
 		$result = mysql_query($query) or pupe_error($query);

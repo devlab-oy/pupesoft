@@ -30,12 +30,12 @@
 	else {
 		require ("inc/parametrit.inc");
 
-		echo "<font class='head'>Iltasiivo</font><hr>";
+		echo "<font class='head'>",t("Iltasiivo"),"</font><hr>";
 
 		if ($aja != "run") {
 			echo "<br><form method='post'>";
 			echo "<input type='hidden' name='aja' value='run'>";
-			echo "<input type='submit' value='Aja iltasiivo!'>";
+			echo "<input type='submit' value='",t("Aja iltasiivo"),"'>";
 			echo "</form>";
 		}
 
@@ -55,10 +55,10 @@
 					having toimi.tunnus is null";
 		$result = mysql_query($query) or die($query);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 			$query = "DELETE from tuotteen_toimittajat where tunnus = '$row[toimtunnus]'";
 			$deler = mysql_query($query) or die($query);
-			$laskuri ++;
+			$laskuri++;
 		}
 
 		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri poistetun toimittajan tuoteliitosta.\n";
@@ -72,10 +72,10 @@
 					having tuote.tunnus is null";
 		$result = mysql_query($query) or die($query);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 			$query = "DELETE from tuotteen_toimittajat where tunnus = '$row[toimtunnus]'";
 			$deler = mysql_query($query) or die($query);
-			$laskuri ++;
+			$laskuri++;
 		}
 
 		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri poistetun tuotteen tuoteliitosta.\n";
@@ -93,25 +93,24 @@
 					AND tilausrivi.tunnus is null";
 		$result = mysql_query($query) or die($query);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")." (1)<br>";
 
 			//	Jos kyseessä on tunnusnippupaketti, halutaan säilyttää linkki tästä tehtyihin tilauksiin, tilaus merkataan vain toimitetuksi
 			if ($row["tunnusnippu"] > 0) {
 				$query = "UPDATE lasku set tila = 'L', alatila='X' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
 				$deler = mysql_query($query) or die($query);
-				$laskuri2 ++;
+				$laskuri2++;
 			}
 			else {
 				$query = "UPDATE lasku set alatila='$row[tila]', tila='D',  comments = '$komm' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
 				$deler = mysql_query($query) or die($query);
-				$laskuri ++;
+				$laskuri++;
 			}
 
 			//poistetaan TIETENKIN kukarow[kesken] ettei voi syöttää extranetissä rivejä tälle
 			$query = "UPDATE kuka set kesken = '' where yhtio = '$kukarow[yhtio]' and kesken = '$row[laskutunnus]'";
 			$deler = mysql_query($query) or die($query);
-
 		}
 
 		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri rivitöntä tilausta.\n";
@@ -130,17 +129,16 @@
 					having dellatut > 0 and kaikki = dellatut";
 		$result = mysql_query($query) or die($query);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")." (2)<br>";
 
 			$query = "UPDATE lasku set alatila='$row[tila]', tila='D',  comments = '$komm' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
 			$deler = mysql_query($query) or die($query);
-			$laskuri ++;
+			$laskuri++;
 
 			//poistetaan TIETENKIN kukarow[kesken] ettei voi syöttää extranetissä rivejä tälle
 			$query = "UPDATE kuka set kesken = '' where yhtio = '$kukarow[yhtio]' and kesken = '$row[laskutunnus]'";
 			$deler = mysql_query($query) or die($query);
-
 		}
 
 		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Mitätöitiin $laskuri tilausta joilla oli pelkkiä mitätöityjä rivejä.\n";
@@ -157,12 +155,12 @@
 					GROUP BY 1";
 		$result = mysql_query($query) or die($query);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")." (3)<br>";
 
 			$query = "UPDATE tilausrivi set tyyppi='D' where yhtio = '$kukarow[yhtio]' and otunnus = '$row[laskutunnus]' and var != 'P'";
 			$deler = mysql_query($query) or die($query);
-			$laskuri ++;
+			$laskuri++;
 		}
 
 		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Mitätöitiin $laskuri mitätöidyn tilauksen rivit. (Rivit jostain syystä ei dellattuja)\n";
@@ -179,13 +177,66 @@
 					AND tilausrivi.tunnus is null";
 		$result = mysql_query($query) or die($query);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 			$query = "UPDATE lasku set alatila='X' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
 			$deler = mysql_query($query) or die($query);
-			$laskuri ++;
+			$laskuri++;
 		}
 
 		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Arkistoitiin $laskuri ostotilausta.\n";
+
+		$laskuri = 0;
+
+		// Vapautetaan holdissa olevat tilaukset, jos niillä on maksupositioita ja ennakkolaskut ovat maksettu
+		// Holdissa olevat tilaukset ovat tilassa N B
+		$query = "	SELECT DISTINCT jaksotettu
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tila = 'N'
+					AND alatila = 'B'";
+		$pos_chk_result = mysql_query($query) or die($query);
+
+		while ($pos_chk_row = mysql_fetch_assoc($pos_chk_result)) {
+
+			$query = "	SELECT maksupositio.otunnus,
+						sum(if(ifnull(uusiolasku_ux.mapvm, '0000-00-00') != '0000-00-00', 1, 0)) laskutettu_ux_kpl,
+						count(*) yhteensa_kpl
+						FROM maksupositio
+						LEFT JOIN lasku uusiolasku ON (maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus = uusiolasku.tunnus)
+						LEFT JOIN lasku uusiolasku_ux ON (uusiolasku_ux.yhtio = uusiolasku.yhtio and uusiolasku_ux.tila = 'U' and uusiolasku_ux.alatila = 'X' and uusiolasku_ux.laskunro = uusiolasku.laskunro)
+						WHERE maksupositio.yhtio = '{$kukarow['yhtio']}'
+						and maksupositio.otunnus = '{$pos_chk_row['jaksotettu']}'
+						GROUP BY 1
+						HAVING (yhteensa_kpl - laskutettu_ux_kpl) = 1
+						ORDER BY 1, maksupositio.tunnus";
+			$posres = mysql_query($query) or die($query);
+
+			if (mysql_num_rows($posres) != 0) {
+
+				$silent = 'Nyt hiljaa, hiljaa hiivitään näin Kardemumman yössä';
+				$vapauta_tilaus_keraykseen = true;
+				$kukarow['kesken'] = $pos_chk_row['jaksotettu'];
+
+				$query = "	UPDATE lasku SET
+							alatila = ''
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$pos_chk_row['jaksotettu']}'";
+				$upd_res = pupe_query($query);
+
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$pos_chk_row['jaksotettu']}'";
+				$laskures = mysql_query($query) or die($query);
+				$laskurow = mysql_fetch_assoc($laskures);
+
+				require('tilauskasittely/tilaus-valmis.inc');
+
+				$laskuri++;
+			}
+		}
+
+		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Vapautettiin {$laskuri} myyntitilausta tulostusjonoon.\n";
 
 		$laskuri = 0;
 
@@ -204,12 +255,12 @@
 					AND liitosotsikko.tunnus is null";
 		$result = mysql_query($query) or die($query);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")."<br>";
 
 			$query = "UPDATE lasku set alatila = tila, tila = 'D', comments = '$komm' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
 			$deler = mysql_query($query) or die($query);
-			$laskuri ++;
+			$laskuri++;
 		}
 
 		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Mitätöitiin $laskuri tyhjää saapumista.\n";
@@ -224,7 +275,7 @@
 					GROUP BY perheid";
 		$result = mysql_query($query) or pupe_error($query);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 			$query = "	SELECT perheid
 						FROM tilausrivi
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'L' and laskutettuaika = '0000-00-00' and tunnus = '$row[perheid]'";
@@ -244,7 +295,7 @@
 			}
 		}
 
-		if ($lask+$lask2 > 0) {
+		if ($lask + $lask2 > 0) {
 			$iltasiivo .= date("d.m.Y @ G:i:s").": Tuhottiin $lask orpoa perhettä, ja $lask2 lapsetonta isää (eli perheid nollattiin)\n";
 		}
 
@@ -259,7 +310,7 @@
 					HAVING countti > 1";
 		$result = mysql_query($query) or pupe_error($query);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 			$lasktuote++;
 			$poistetaankpl = $row['countti']-1;
 
@@ -486,5 +537,3 @@
 		echo "</pre>";
 		require('inc/footer.inc');
 	}
-
-?>

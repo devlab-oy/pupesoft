@@ -1118,6 +1118,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'maksusopimus_toimitus') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+		$sel = array_fill_keys(array($trow[$i]), 'selected') + array('S' => '', 'X' => '');
+
+		$ulos .= "<option value = ''>".t("Yhtiön oletus")."</option>";
+		$ulos .= "<option value = 'S' {$sel['S']}>".t("Tilauksen voi toimittaa vaikka ennakkolaskuja ei ole maksettu")."</option>";
+		$ulos .= "<option value = 'X' {$sel['X']}>".t("Tilauksen voi toimittaa vasta kun ennakkolaskut on maksettu")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "keraysvahvistus_lahetys") {
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";

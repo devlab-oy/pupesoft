@@ -73,7 +73,7 @@
 
 	if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
 
-		$chk = ((isset($nimitykset) and $nimitykset != '') or (!isset($nimitykset) and ($yhtiorow['ostotilaustyyppi'] == 0 or $yhtiorow['ostotilaustyyppi'] == 'A'))) ? 'checked' : '';
+		$chk = ((isset($nimitykset) and $nimitykset != '') or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A')) ? 'checked' : '';
 
 		echo "<tr><th>",t("Tulosta nimitykset ostotilaukselle"),"</th><td><input type='checkbox' name='nimitykset' {$chk}></td></tr>";
 

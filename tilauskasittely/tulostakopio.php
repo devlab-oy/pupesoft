@@ -1985,7 +1985,12 @@
 								FROM kerayserat
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno {$lisa1})
-								JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+								JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio
+									AND vh.hyllyalue = tilausrivi.hyllyalue
+									AND vh.hyllynro = tilausrivi.hyllynro
+									AND vh.hyllyvali = tilausrivi.hyllyvali
+									AND vh.hyllytaso = tilausrivi.hyllytaso
+									AND vh.keraysvyohyke = kerayserat.keraysvyohyke)
 								WHERE kerayserat.otunnus IN ({$kerayseran_tilaukset})
 								AND kerayserat.yhtio   = '{$kukarow['yhtio']}'
 								ORDER BY sorttauskentta";

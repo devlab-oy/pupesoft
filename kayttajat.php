@@ -220,7 +220,8 @@
 			$query = "	SELECT tunnus
 						FROM dynaaminen_puu
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND laji = 'kuka'";
+						AND laji = 'kuka'
+						LIMIT 1";
 			$respuu = pupe_query($query);
 
 			if (mysql_num_rows($respuu) == 0) {

@@ -112,9 +112,12 @@
 		$sarakkeet["SARAKE6"] 	= t("halytysraja")."\t";
 		$sarakkeet["SARAKE6B"] 	= t("tilausmaara")."\t";
 		$sarakkeet["SARAKE7"] 	= t("tilauksessa")."\t";
+		$sarakkeet["SARAKE7A"] 	= t("saapuneet")."\t";
 		$sarakkeet["SARAKE7B"] 	= t("valmistuksessa")."\t";
 		$sarakkeet["SARAKE8"] 	= t("ennpois")."\t";
 		$sarakkeet["SARAKE9"] 	= t("jt")."\t";
+		$sarakkeet["SARAKE9A"]	= t("vapaa saldo")."\t";
+		$sarakkeet["SARAKE9B"]	= t("myytävissä")."\t";
 
 		// $sarakkeet["SARAKE10"] 	= t("Ostoehdotus")." $ehd_kausi_o1\t";
 		// $sarakkeet["SARAKE11"] 	= t("Ostoehdotus")." $ehd_kausi_o2\t";
@@ -610,7 +613,6 @@
 				$query = "	SELECT
 							tuote.yhtio,
 							tuote.tuoteno,
-							tuote.halytysraja,
 							tuote.tilausmaara,
 							tuote.tahtituote,
 							tuote.status,
@@ -639,14 +641,17 @@
 							tuote.tuotemassa,
 							$splisa,
 							tuote.lyhytkuvaus,
-							tuote.hinnastoon
+							tuote.hinnastoon,
+							SUM(tuotepaikat.halytysraja) AS halytysraja
 							FROM tuote
+							JOIN tuotepaikat ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
 							LEFT JOIN korvaavat ON tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno
 							$lisaa2
 							$abcjoin
 							WHERE tuote.$yhtiot
 							$lisaa
 							and tuote.ei_saldoa = ''
+							GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
 							ORDER BY id, tuote.tuoteno";
 			}
 			//Ajetaan raportti tuotteittain, varastopaikoittain
@@ -915,6 +920,7 @@
 				$query = "	SELECT
 							sum(if(tyyppi in ('W','M'), varattu, 0)) valmistuksessa,
 							sum(if(tyyppi = 'O', varattu, 0)) tilattu,
+							sum(if((tyyppi = 'O' and kpl = 0 and varattu != 0 and uusiotunnus != 0), varattu, 0)) saapuneet,
 							sum(if(tyyppi = 'E', varattu, 0)) ennakot, # toimittamattomat ennakot
 							sum(if(tyyppi in ('L','V') and var not in ('P','J','S'), varattu, 0)) ennpois,
 							sum(if(tyyppi in ('L','G') and var in ('J','S'), jt $lisavarattu, 0)) jt
@@ -1152,6 +1158,13 @@
 						$excelsarake++;
 					}
 
+					if ($valitut["SARAKE7A"] != '') {
+						$rivi .= str_replace(".",",",$ennp['saapuneet'])."\t";
+
+						$worksheet->writeNumber($excelrivi, $excelsarake, $ennp["saapuneet"]);
+						$excelsarake++;
+					}
+
 					if ($valitut["SARAKE7B"] != '') {
 						$rivi .= str_replace(".",",",$ennp['valmistuksessa'])."\t";
 
@@ -1170,6 +1183,30 @@
 						$rivi .= str_replace(".",",",$ennp['jt'])."\t";
 
 						$worksheet->writeNumber($excelrivi, $excelsarake, $ennp["jt"]);
+						$excelsarake++;
+					}
+
+					if ($valitut["SARAKE9A"] != '') {
+
+						$vapaa_saldo = $saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'];
+
+						if ($yhtiorow['varaako_jt_saldoa'] == 'K') $vapaa_saldo -= $ennp['jt'];
+
+						$rivi .= str_replace(".",",",$vapaa_saldo)."\t";
+
+						$worksheet->writeNumber($excelrivi, $excelsarake, $vapaa_saldo);
+						$excelsarake++;
+					}
+
+					if ($valitut["SARAKE9B"] != '') {
+
+						$myytavissa = $saldo['saldo'] - $ennp['ennpois'];
+
+						if ($yhtiorow['varaako_jt_saldoa'] == 'K') $myytavissa -= $ennp['jt'];
+
+						$rivi .= str_replace(".",",",$myytavissa)."\t";
+
+						$worksheet->writeNumber($excelrivi, $excelsarake, $myytavissa);
 						$excelsarake++;
 					}
 
@@ -1454,9 +1491,11 @@
 
 					}
 
-					$rivi .= str_replace(".",",",$myydyt_kappaleet_yhteensa)."\t";
-					$worksheet->writeNumber($excelrivi, $excelsarake, $myydyt_kappaleet_yhteensa);
-					$excelsarake++;
+					if ($valitut["SARAKE{$_x}"] != "") {
+						$rivi .= str_replace(".",",",$myydyt_kappaleet_yhteensa)."\t";
+						$worksheet->writeNumber($excelrivi, $excelsarake, $myydyt_kappaleet_yhteensa);
+						$excelsarake++;
+					}
 
 					$_x++;
 
@@ -1500,9 +1539,11 @@
 						// }
 					}
 
-					$rivi .= str_replace(".",",",$myydyt_kappaleet_yhteensa)."\t";
-					$worksheet->writeNumber($excelrivi, $excelsarake, $myydyt_kappaleet_yhteensa);
-					$excelsarake++;
+					if ($valitut["SARAKE{$_x}"] != "") {
+						$rivi .= str_replace(".",",",$myydyt_kappaleet_yhteensa)."\t";
+						$worksheet->writeNumber($excelrivi, $excelsarake, $myydyt_kappaleet_yhteensa);
+						$excelsarake++;
+					}
 
 					$_x++;
 

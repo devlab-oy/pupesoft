@@ -82,4 +82,43 @@
 		$jatko = 0;
 	}
 
-?>
+	if (mysql_field_name($result, $i) == "asiakasluokka") {
+		$vresult = t_avainsana("ASIAKASLUOKKA");
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300)."><option value=' '>".t("Ei luokkaa")."</option>";
+
+		while($row = mysql_fetch_array($vresult)) {
+			$sel = $row["selite"] == $trow[$i] ? " selected" : "";
+
+			$ulos .= "<option value='{$row['selite']}'{$sel}>{$row['selite']}";
+			if (trim($row['selitetark']) != "") $ulos .= " - {$row['selitetark']}";
+			$ulos .= "</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "alkupvm") {
+		$tyyppi = 1.5;
+	}
+
+	if (mysql_field_name($result, $i) == "varasto") {
+
+		$query = "	SELECT tunnus, nimitys
+					FROM varastopaikat
+					WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
+					ORDER BY tyyppi, nimitys";
+		$varastores = pupe_query($query);
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300)."><option value=''>".t("Valitse")."</option>";
+
+		while ($row = mysql_fetch_assoc($varastores)) {
+			$sel = $row["tunnus"] == $trow[$i] ? " selected" : "";
+
+			$ulos .= "<option value='{$row['tunnus']}'{$sel}>{$row['nimitys']}</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}

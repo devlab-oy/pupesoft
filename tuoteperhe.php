@@ -74,6 +74,10 @@
 					echo "<input type='hidden' name='kop_alekerr[$kop_index]' value='$kop_alekerr[$kop_index]'>";
 					#echo "<input type='hidden' name='kop_rivikom[$kop_index]' value='$kop_rivikom[$kop_index]'>";
 					echo "<input type='hidden' name='kop_fakta[$kop_index]' value='$kop_fakta[$kop_index]'>";
+
+					if ($toim == "PERHE") {
+						echo "<input type='hidden' name='kop_ohita_kerays[$kop_index]' value='$kop_ohita_kerays[$kop_index]'>";
+					}
 				}
 
 				echo "<td><input type='submit' value='".t("Kopioi")."'></td></tr>";
@@ -94,6 +98,13 @@
 			if (mysql_num_rows($result) == 1) {
 				foreach ($kop_tuoteno as $kop_index => $tuoteno) {
 					if ($tuoteno != $kop_isatuo) {
+
+						$insert_lisa = "";
+
+						if ($toim == "PERHE") {
+							$insert_lisa = "ohita_kerays = '{$kop_ohita_kerays[$kop_index]}',";
+						}
+
 						$query = "	INSERT into	tuoteperhe set
 									isatuoteno		= '$kop_isatuo',
 									tuoteno 		= '$kop_tuoteno[$kop_index]',
@@ -102,6 +113,7 @@
 									alekerroin 		= '$kop_alekerr[$kop_index]',
 									#rivikommentti	= '$kop_rivikom[$kop_index]',
 									fakta	 		= '$kop_fakta[$kop_index]',
+									{$insert_lisa}
 									yhtio 			= '$kukarow[yhtio]',
 									laatija			= '$kukarow[kuka]',
 									luontiaika		= now(),
@@ -305,6 +317,12 @@
 									WHERE tunnus='$tunnus' ";
 					}
 
+					$querylisa = "";
+
+					if ($toim == "PERHE") {
+						$querylisa = "ohita_kerays = '{$ohita_kerays}',";
+					}
+
 					$query  .= "	tuoteperhe set
 									isatuoteno		= '$isatuoteno',
 									tuoteno 		= '$tuoteno',
@@ -315,6 +333,7 @@
 									#rivikommentti 	= '$rivikommentti',
 									yhtio 			= '$kukarow[yhtio]',
 									tyyppi 			= '$hakutyyppi',
+									{$querylisa}
 									ei_nayteta		= '$ei_nayteta'
 									$postq";
 					$result = pupe_query($query);
@@ -645,7 +664,7 @@
 				if ($toim == "PERHE") {
 					echo "<th>".t("Lapset")."</th><th>".t("Nimitys")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Hintakerroin")."</th><th>".t("Alennuskerroin")."</th>";
 					#echo "<th>".t("Rivikommentti")."</th>";
-					echo "<th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><td class='back'></td></tr>";
+					echo "<th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>",t("Ohita ker‰ys"),"</th><td class='back'></td></tr>";
 
 				}
 				elseif ($toim == "LISAVARUSTE") {
@@ -681,6 +700,7 @@
 				$kop_alekerr = array();
 				$kop_rivikom = array();
 				$kop_fakta   = array();
+				$kop_ohita_kerays = array();
 
 				if ($tunnus == "") {
 					echo "	<form method='post' action='tuoteperhe.php' name='lisaa' autocomplete='off'>
@@ -710,6 +730,10 @@
 					}
 					else echo "<td></td><td></td>";
 
+					if ($toim == "PERHE") {
+						echo "<td></td>";
+					}
+
 					echo "	<td class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
 							</form>
 							</tr>";
@@ -735,6 +759,10 @@
 						#$kop_rivikom[$kop_index] = $prow['rivikommentti'];
 						$kop_fakta[$kop_index]   = $prow['fakta'];
 
+						if ($toim == "PERHE") {
+							$kop_ohita_kerays[$kop_index] = $prow['ohita_kerays'];
+						}
+
 						$kop_index++;
 					}
 
@@ -755,6 +783,11 @@
 
 						if ($toim != "VSUUNNITTELU") {
 							echo "<td align='right'>$tuoterow[kehahin]</td><td align='right'>".round($lapsiyht, 6)."</td>";
+						}
+
+						if ($toim == "PERHE") {
+							$chk_ohita_kerays = (isset($prow['ohita_kerays']) and trim($prow['ohita_kerays']) != '') ? t("Kyll‰") : t("Ei");
+							echo "<td>{$chk_ohita_kerays}</td>";
 						}
 
 						if ($toim == "RESEPTI") {
@@ -824,6 +857,11 @@
 							echo "<td>$tuoterow[kehahin]</td><td>".round($lapsiyht, 6)."</td>";
 						}
 
+						if ($toim == "PERHE") {
+							$chk_ohita_kerays = (isset($zrow['ohita_kerays']) and trim($zrow['ohita_kerays']) != '') ? " checked" : "";
+							echo "<td><input type='checkbox' name='ohita_kerays'{$chk_ohita_kerays}></td>";
+						}
+
 						if($toim == "RESEPTI") {
 							$sel1=$sel2="";
 
@@ -854,7 +892,7 @@
 						echo "<td class='back'></td>";
 					}
 					if ($toim == "PERHE") {
-						echo "<td class='back' colspan='3'></td>";
+						echo "<td class='back' colspan='2'></td>";
 					}
 
 					echo "<th align='right'>".t("Yhteens‰").":</th>
@@ -877,6 +915,10 @@
 					echo "<input type='hidden' name='kop_alekerr[$kop_index]' value='$kop_alekerr[$kop_index]'>";
 					#echo "<input type='hidden' name='kop_rivikom[$kop_index]' value='$kop_rivikom[$kop_index]'>";
 					echo "<input type='hidden' name='kop_fakta[$kop_index]' value='$kop_fakta[$kop_index]'>";
+
+					if ($toim == "PERHE") {
+						echo "<input type='hidden' name='kop_ohita_kerays[$kop_index]' value='$kop_ohita_kerays[$kop_index]'>";
+					}
 				}
 
 				echo "<input type='submit' value='".t("Kopioi")."'>";

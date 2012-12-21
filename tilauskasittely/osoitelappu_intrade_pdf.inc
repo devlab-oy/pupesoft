@@ -47,10 +47,12 @@ else {
 	$laskurow = $osoitelappurow;
 }
 
-$prikomento = explode('-#', $oslapp);
-
 // haetaan printterin osoitetiedot
-$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and trim(komento) like concat(trim('$prikomento[0]'),'%') and nimi!=''";
+$query = "	SELECT *
+			FROM kirjoittimet
+			WHERE yhtio = '{$kukarow['yhtio']}'
+			AND TRIM(komento) LIKE CONCAT(TRIM('{$oslapp}'),'%')
+			AND nimi != ''";
 $pres  = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($pres) > 0) {
@@ -63,50 +65,9 @@ if (mysql_num_rows($pres) > 0) {
 	$yhtiorow["puhelin"] = $print["puhelin"];
 }
 
-if (!function_exists('tarkiste')) {
-	function tarkiste($sscc) {
-		$kerroin = 3; // kerroin aluks 3
-		$summa   = 0; // summa nolla tietty
-
-		// loopataan luvut oikeelta vasemmalle
-		for ($i = 16; $i >= 0; $i--) {
-			$summa += $kerroin * (ord($sscc{$i})-48); // lis‰t‰‰n summaan ko. luku * kerroin (t‰‰ hanskaa kirjaimet )
-			$kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
-		}
-
-		$sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mik‰ pit‰‰ lis‰t‰, ett‰ p‰‰st‰‰n seuraavaan tasakymmeneen
-
-		return $sscc;
-	}
-}
-
-// tehd‰‰n SSCC :
-// (00)
-// 1
-// ean (8)
-// l‰hetenro (6) viimeist‰
-// kollityht (2)
-// tarkiste (1)
-
-$apu_kollityht = $kollityht;
-
-if ($kollityht > 100) {
-	$apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkki‰
-}
-elseif ($kollityht == 0) {
-	$apu_kollityht = 1;
-}
-
 if ($yhtiorow['ean'] == '') {
 	$yhtiorow['ean'] = $yhtiorow["ytunnus"];
 }
-
-$sscc = 1;
-$sscc .= sprintf("%-08.08s",$yhtiorow["ean"]);
-$sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
-$sscc .= sprintf('%02.02d', $apu_kollityht);
-$loppu = tarkiste($sscc);
-$sscc = $sscc.$loppu;
 
 //PDF:n luonti ja defaultit
 require_once("pdflib/phppdflib.class.php");
@@ -147,9 +108,72 @@ $iso["font"] = "Helvetica-Bold";
 $huge["height"] = 20;
 $huge["font"] = "Helvetica-Bold";
 
-$tulostakolli = 1; // tulostetaan aina yksi kappale???
+$uniq_pakkaukset = array();
 
-for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
+if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
+
+	$kaikki_ok = true;
+
+	if ($yhtiorow['kerayserat'] == 'A') {
+
+		$query = "	SELECT kerayserat
+					FROM asiakas
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$laskurow['liitostunnus']}'
+					AND kerayserat = 'A'";
+		$asiakas_chk_res = pupe_query($query);
+
+		if (mysql_num_rows($asiakas_chk_res) == 0) {
+			$kaikki_ok = false;
+		}
+	}
+
+	if ($kaikki_ok) {
+
+		$query = "	SELECT pakkausnro
+					FROM kerayserat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND otunnus = '{$laskurow['tunnus']}'
+					GROUP BY pakkausnro
+					ORDER BY pakkausnro ASC";
+		$pakkaus_chk_res = pupe_query($query);
+
+		$i = 1;
+
+		while ($pakkaus_chk_row = mysql_fetch_assoc($pakkaus_chk_res)) {
+			$uniq_pakkaukset[$i] = $pakkaus_chk_row['pakkausnro'];
+			$i++;
+		}
+
+		$oslappkpl = count($uniq_pakkaukset) > 0 ? count($uniq_pakkaukset) : $oslappkpl;
+	}
+}
+
+$kirjainlisa = '';
+
+for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
+
+	if (count($uniq_pakkaukset) == 0) {
+		$uniq_merkki = $tulostuskpl;
+	}
+	else {
+		$uniq_merkki = $uniq_pakkaukset[$tulostuskpl];
+		$kirjainlisa = " ".chr(64+$uniq_merkki);
+	}
+
+	// tehd‰‰n SSCC :
+	// (00)
+	// 1
+	// ean (8)
+	// l‰hetenro (6) viimeist‰
+	// tulostuskpl (2)
+	// tarkiste (1)
+	$sscc = 1;
+	$sscc .= sprintf("%-08.08s",$yhtiorow["ean"]);
+	$sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
+	$sscc .= sprintf('%02.02d', $uniq_merkki);
+	$loppu = tarkiste($sscc);
+	$sscc = $sscc.$loppu;
 
 	// tehd‰‰n pdf:n uusi sivu
 	$firstpage = $pdf->new_page("a5");
@@ -186,7 +210,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	}
 
 	$pdf->draw_text(mm_pt(22), mm_pt(65), "Asiakastilaus: ",	$firstpage, $norm);
-	$pdf->draw_text(mm_pt(50), mm_pt(65), "(400) $laskurow[asiakkaan_tilausnumero]",	$firstpage, $iso);
+	$pdf->draw_text(mm_pt(50), mm_pt(65), "(400) $laskurow[asiakkaan_tilausnumero]{$kirjainlisa}",	$firstpage, $iso);
 
 	//teh‰‰ t‰st‰ viel‰ kaunis kattella
 	$sscc = substr($sscc,0,4).substr($sscc,4,1).substr($sscc,5,8).substr($sscc,13,8).substr($sscc,21,1);
@@ -286,7 +310,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 	//kolliluku
 	if ($rahtikirja_tulostus == "yep") {
-		$pdf->draw_text(mm_pt(105), mm_pt(92), $kollityht, $firstpage, $norm);
+		$pdf->draw_text(mm_pt(105), mm_pt(92), round($kollityht), $firstpage, $norm);
 	}
 	else {
 		$query = "	SELECT sum(kollit) kollit
@@ -296,7 +320,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$pak = mysql_fetch_assoc($pakka);
 
 		if ((int) $pak["kollit"] > 0) {
-			$pdf->draw_text(mm_pt(105), mm_pt(92), $pak["kollit"], $firstpage, $norm);
+			$pdf->draw_text(mm_pt(105), mm_pt(92), round($pak["kollit"]), $firstpage, $norm);
 		}
 	}
 }
@@ -327,5 +351,3 @@ elseif ($oslapp != '' and $oslapp != 'edi') {
 //poistetaan tmp file samantien kuleksimasta...
 system("rm -f $pdffilenimi");
 $pdffilenimi = '';
-
-?>

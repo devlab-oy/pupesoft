@@ -740,10 +740,10 @@
 		$laskurow["tapvm"] = date("Y-m-d");
 		$laskurow["erpcm"] = date("Y-m-d");
 		$laskurow["kapvm"] = date("Y-m-d");
-
+		
 		$alvrow = array(
 			'rivihinta'		 => 0,
-			'alv'			 => 23,
+			'alv'			 => alv_oletus(),
 			'alvrivihinta'	 => 0
 		);
 
@@ -886,7 +886,8 @@
 		// itse print komento...
 		$query = "	SELECT komento
 					from kirjoittimet
-					where yhtio='{$kukarow['yhtio']}' and tunnus = '{$kukarow['kirjoitin']}'";
+					where yhtio = '{$kukarow['yhtio']}'
+					and tunnus = '{$kukarow['kirjoitin']}'";
 		$kires = pupe_query($query);
 
 		if (mysql_num_rows($kires) == 1) {

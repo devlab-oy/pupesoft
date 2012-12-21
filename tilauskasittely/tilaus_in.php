@@ -3,7 +3,7 @@
 require ("../inc/parametrit.inc");
 
 // tehd‰‰n tiedostolle uniikki nimi
-$filename = "../datain/$tyyppi-order-".md5(uniqid(rand(),true)).".txt";
+$filename = "$pupe_root_polku/datain/$tyyppi-order-".md5(uniqid(rand(),true)).".txt";
 
 if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
@@ -16,24 +16,24 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
 	echo "<font class='message'>".t("K‰sittelen")." $tyyppi ".t("tiedoston")."</font><br><br>";
 
-	if ($tyyppi=='multi') {
+	if ($tyyppi == 'multi') {
 		// tarvitaan $filename
-		require ("../inc/tilaus_in_multi.inc");
+		require ("inc/tilaus_in_multi.inc");
 	}
 
-	if ($tyyppi=='pos') {
+	if ($tyyppi == 'pos') {
 		// tarvitaan $filename
-		require ("../inc/tilaus_in.inc");
+		require ("inc/tilaus_in.inc");
 	}
 
-	if ($tyyppi=='edi') {
+	if ($tyyppi == 'edi') {
 		// tarvitaan $filename
 		echo "<pre>";
 		require ("editilaus_in.inc");
 		echo "</pre>";
 	}
 
-	if ($tyyppi=='futursoft') {
+	if ($tyyppi == 'futursoft') {
 		// tarvitaan $filename
 		echo "<pre>";
 		$edi_tyyppi = "futursoft";
@@ -41,7 +41,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 		echo "</pre>";
 	}
 
-	if ($tyyppi=='magento') {
+	if ($tyyppi == 'magento') {
 		// tarvitaan $filename
 		echo "<pre>";
 		$edi_tyyppi = "magento";
@@ -49,7 +49,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 		echo "</pre>";
 	}
 
-	if ($tyyppi=='edifact911') {
+	if ($tyyppi == 'edifact911') {
 		// tarvitaan $filename
 		echo "<pre>";
 		$edi_tyyppi = "edifact911";
@@ -57,9 +57,19 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 		echo "</pre>";
 	}
 
-	if ($tyyppi=='yct') {
+	if ($tyyppi == 'yct') {
 		// tarvitaan $filename
-		require ("../inc/tilaus_in.inc");
+		require ("inc/tilaus_in.inc");
+	}
+	
+	if ($tyyppi == 'asnui') {
+
+		if (copy($filename, $teccomkansio.'/'.$path_parts["basename"])) {
+			require ("sisaanlue_teccom_asn.php");		
+		}
+		else {
+			echo "Kopiointi ep‰onnistui!";
+		}
 	}
 }
 
@@ -83,7 +93,8 @@ else {
 		 		<option value='pos'>".t("Kassap‰‰te")."</option>
 		 		<option value='yct'>Yamaha Center</option>
 				<option value='edifact911'>Orders 91.1</option>
-		 		<option value='multi'>Useita asiakkaita</option>
+		 		<option value='multi'>".t("Useita asiakkaita")."</option>
+				<option value='asnui'>".t("ASN-sanoma")."</option>
 				</select>
 		 	</td>
 		 </tr>
@@ -94,6 +105,4 @@ else {
 		</form>";
 }
 
-require ("../inc/footer.inc");
-
-?>
+require ("inc/footer.inc");

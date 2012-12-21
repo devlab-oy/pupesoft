@@ -2,7 +2,7 @@
 
 require ("../inc/parametrit.inc");
 
-if($toim == 'KATEINEN') {
+if ($toim == 'KATEINEN') {
 	echo "<font class='head'>".t("Lasku halutaankin maksaa k‰teisell‰")."</font><hr>";
 }
 else {
@@ -10,12 +10,25 @@ else {
 }
 
 if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
-	$tapahtumapaiva  = date('Y-m-d', mktime(0,0,0,$tapahtumapaiva_kk,$tapahtumapaiva_pp,$tapahtumapaiva_vv));
+	$laskupvmerror   = FALSE;
+
+	if ($toim == 'KATEINEN') {
+		$tapahtumapaiva  = date('Y-m-d', mktime(0,0,0,$tapahtumapaiva_kk,$tapahtumapaiva_pp,$tapahtumapaiva_vv));
+	}
+	else {
+		$tapahtumapaiva  = date('Y-m-d');
+	}
+
+	// Haetaan laskun tiedot
+	$laskurow = hae_lasku($tunnus);
+
+	if (strtotime($tapahtumapaiva) < strtotime($laskurow['tapvm'])) {
+		$laskupvmerror = TRUE;
+	}
 
 	$tilikausi = tarkista_saako_laskua_muuttaa($tapahtumapaiva);
 
-	if (empty($tilikausi)) {
-		$laskurow = hae_lasku($tunnus);
+	if (empty($tilikausi) and !$laskupvmerror) {
 		$mehtorow = hae_maksuehto($maksuehto);
 		$konsrow  = hae_asiakas($laskurow);
 		$kassalipasrow = hae_kassalipas($kassalipas);
@@ -60,8 +73,11 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		$laskuno = 0;
 		echo "<br>";
 	}
+	elseif ($laskupvmerror) {
+		echo "<font class='error'>".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ on pienempi kuin laskun p‰iv‰m‰‰r‰ %s", "", $laskurow['tapvm'])."!</font>";
+	}
 	else {
-		echo "<font class='error'>".t("Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $tilikausi['tilikausi_alku'], $tapahtumapaiva)."!</font>";
+		echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $tilikausi['tilikausi_alku'], $tapahtumapaiva)."!</font>";
 	}
 }
 
@@ -241,17 +257,29 @@ function tee_kirjanpito_muutokset($params) {
 	if (mysql_num_rows($result) == 1) {
 		$vanharow = mysql_fetch_assoc($result);
 
-		// Tehd‰‰n kopio alkuperˆisestˆ‰, niin j‰‰ treissi miten oli alunperin kirjattu.
-		kopioitiliointi($vanharow['tunnus'], $kukarow['kuka']);
+		// Tehd‰‰n vastakirjaus alkuper‰iselle tiliˆinnille
+		$tilid = kopioitiliointi($vanharow['tunnus'], "");
 
+		$query = "	UPDATE tiliointi
+					SET summa = summa * -1,
+					laatija = '{$kukarow['kuka']}',
+					laadittu = now()
+					{$tapvmlisa}
+					WHERE yhtio	= '$kukarow[yhtio]'
+					and tunnus	= '{$tilid}'";
+		$result = pupe_query($query);
 
+		// Kopsataan alkuper‰inen ja p‰ivitet‰‰n siille uudet tiedot
+		$tilid = kopioitiliointi($vanharow['tunnus'], "");
 
 		$query = "	UPDATE tiliointi
 					SET tilino = '{$uusitili}',
-					summa = '{$params['laskurow']['summa']}'
+					summa = '{$params['laskurow']['summa']}',
+					laatija = '{$kukarow['kuka']}',
+					laadittu = now()
 					{$tapvmlisa}
 					WHERE yhtio	= '$kukarow[yhtio]'
-					and tunnus	= '{$vanharow['tunnus']}'";
+					and tunnus	= '{$tilid}'";
 		$result = pupe_query($query);
 
 		if (mysql_affected_rows() > 0) {

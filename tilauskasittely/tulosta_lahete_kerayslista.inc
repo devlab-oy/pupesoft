@@ -2,29 +2,29 @@
 
 require_once("pdflib/phppdflib.class.php");
 
-$norm["height"] 			= 10;
-$norm["font"] 				= "Times-Roman";
-
-$pieni["height"] 			= 8;
-$pieni["font"] 				= "Times-Roman";
-
-$boldi["height"] 			= 10;
-$boldi["font"] 				= "Times-Bold";
-
-$pieni_boldi["height"] 		= 8;
-$pieni_boldi["font"] 		= "Times-Bold";
-
-$keraaja_font["height"]		= 12;
-$keraaja_font["font"] 		= "Helvetica";
-
-$iso["height"] 				= 14;
-$iso["font"] 				= "Helvetica-Bold";
-
-$iso_boldi["height"] 		= 24;
-$iso_boldi["font"] 			= "Helvetica-Bold";
-
-$rectparam["width"] 		= 0.3;
-$rivinkorkeus				= 17;
+$norm["height"] 	    = 10;
+$norm["font"] 		    = "Times-Roman";
+                        
+$pieni["height"] 	    = 8;
+$pieni["font"] 		    = "Times-Roman";
+                        
+$boldi["height"] 	    = 10;
+$boldi["font"] 		    = "Times-Bold";
+                        
+$pieni_boldi["height"]  = 8;
+$pieni_boldi["font"]    = "Times-Bold";
+                        
+$keraaja_font["height"] = 12;
+$keraaja_font["font"]   = "Helvetica";
+                        
+$iso["height"] 		    = 14;
+$iso["font"] 		    = "Helvetica-Bold";
+                        
+$iso_boldi["height"]    = 24;
+$iso_boldi["font"] 	    = "Helvetica-Bold";
+                        
+$rectparam["width"]     = 0.3;
+$rivinkorkeus		    = 17;
 
 if (!function_exists('alku_kerayslista')) {
 	function alku_kerayslista ($params) {
@@ -891,7 +891,7 @@ if (!function_exists('rivi_kerayslista')) {
 
 				if ($laskurow['varasto'] == $laskurow['clearing'] AND $kohderow['kohde_hyllyalue'] != '' AND $kohderow['kohde_hyllynro'] != '' AND $kohderow['kohde_hyllyvali'] != '' AND $kohderow['kohde_hyllytaso'] != '') {
 					$varastopaikkakohde = $kohderow["kohde_hyllyalue"] . " " . $kohderow["kohde_hyllynro"] . " " . $kohderow["kohde_hyllyvali"] . " " . $kohderow["kohde_hyllytaso"];
-					$row['kommentti'] .= "\nVie paikalle ".$varastopaikkakohde;
+					$row['kommentti'] .= "\n".t("Vie paikalle", $kieli)." ".$varastopaikkakohde;
 				}
 
 				$pdf->draw_text(330, $kala, pdf_substr($trow["toim_tuoteno"], 80, $pdf, $norm), $thispage, $norm);
@@ -1118,6 +1118,12 @@ if (!function_exists('rivi_kerayslista')) {
 
 					$row['kommentti'] .= "\n".t("Myyjä", $kieli).": {$myyrow['nimi']}";
 				}
+				
+				// Otetaan yhteensäkommentti pois keröyslistalta (tämä tieto löytyy riviltä jos tilaus on laskutettu, mutta lähetteellä sitä ei voi näyttää)
+				$row["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+				$row["kommentti"] = preg_replace("/ ".t("yhteensä", $asrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+				$row["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+				$row["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
 
 				// Trimmataan uudestaan
 				$row["kommentti"] = trim($row["kommentti"]);

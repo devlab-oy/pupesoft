@@ -120,7 +120,7 @@
 		}
 		else {
 			// Tämä oli tiliote tai viiteaineisto
-			$query= "LOCK TABLE tiliotedata WRITE, yriti READ, yhtio READ";
+			$query= "LOCK TABLE tiliotedata WRITE, yriti READ, yhtio READ, sanakirja WRITE";
 			$tiliotedataresult = pupe_query($query);
 
 			// Etsitään aineistonumero
@@ -179,12 +179,24 @@
 					$yritiresult = pupe_query($query);
 
 					if (mysql_num_rows($yritiresult) != 1) {
-						echo "<font class='error'>Tiliä '$tilino' ei löytynyt!</font><br>\n";
+						// Kokeillaan 14 vikalla merkillä (Virossa esim on 18 merkkisiä tilinumeroita)
+						$query = "	SELECT *
+									FROM yriti
+									WHERE right(tilino,14) = '$tilino'
+									and kaytossa = ''";
+						$yritiresult = pupe_query($query);
+					}
+
+					if (mysql_num_rows($yritiresult) != 1) {
+						echo "<font class='error'>".t("Tiliä %s ei löytynyt", "", $tilino)."!</font><br>\n";
 						$xtyyppi = 0;
 						$virhe++;
 					}
 					else {
 						$yritirow = mysql_fetch_assoc($yritiresult);
+
+						// Korjataan vielä tämä jos ne jostain syystä on eri
+						$tilino = $yritirow['tilino'];
 
 						// Setataan kukarow-yhtiö
 						$kukarow["yhtio"] = $yritirow["yhtio"];

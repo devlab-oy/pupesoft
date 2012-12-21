@@ -732,7 +732,7 @@ while ($tietue = fgets($fd)) {
 
 		case 'OSTOTIL.OT_MAKSETTU' :
 			// jos Magenton tilaus on jo maksettu luottokortilla niin p‰ivitet‰‰n maksuehto
-			if ($edi_tyyppi == "magento" and $tieto == 'processing') {
+			if ($edi_tyyppi == "magento" and ($tieto == 'processing' or $tieto == 'complete')) {
 				$kukarow["kassamyyja"] = "";
 				$editilaus_kassalipas = "";
 
@@ -1719,7 +1719,7 @@ while ($tietue = fgets($fd)) {
 								tuoteno 	= '$virhetuoteno',
 								var			= 'P',
 								kpl 		= '0',
-								alv			= '23',
+								alv			= '".alv_oletus()."',
 								tilkpl 		= '$kpl',
 								otunnus 	= '$id',
 								tyyppi 		= '$editilaus_tyyppi',

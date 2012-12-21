@@ -61,7 +61,36 @@ if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] 
 	ob_end_clean();
 }
 
-if ($luottorajavirhe != '') {
+// otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
+$query = "	SELECT *
+			FROM maksuehto
+			WHERE yhtio = '{$kukarow['yhtio']}'
+			AND tunnus = '{$laskurow['maksuehto']}'";
+$maksuehto_result = pupe_query($query);
+$maksuehtorow = mysql_fetch_assoc($maksuehto_result);
+
+// Jos ennakkolaskun automatisointi on päällä (asiakas > yhtiön oletus) ja maksuehtona on "osamaksu", laitetaan tilaus holdiin
+if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
+	and $maksuehtorow['jaksotettu'] != ''
+	and $laskurow['tila'] == 'N'
+	and ($laskurow['alatila'] == '' or $laskurow['alatila'] == 'B')
+	and ($tilausvalmis_asiakas_row['maksusopimus_toimitus'] == 'X' or ($tilausvalmis_asiakas_row['maksusopimus_toimitus'] == '' and $yhtiorow['maksusopimus_toimitus'] == 'X'))) {
+
+	if ($laskurow['alatila'] == '') {
+		$query = "	UPDATE lasku SET
+					alatila = 'B'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$laskurow['tunnus']}'
+					AND tila = 'N'";
+		$myyntikielto_res = pupe_query($query);
+
+		echo "<font class='error'>",t("Tilaus laitetaan odottamaan, kunnes ennakkolaskut ovat maksettu"),".</font><br/><br/>";
+	}
+
+	// Laitetaan lopetus tyhjäksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
+	$lopetus = "";
+}
+elseif ($luottorajavirhe != '') {
 	if ($kutsuja == "EDITILAUS" or $kukarow["extranet"] != "") {
 		$alatila = "F";
 	}
@@ -267,19 +296,11 @@ else {
 		$laskurow['hyvak2'] = $kukarow["kuka"];
 	}
 
-	// otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
-	$query = "	SELECT *
-				FROM maksuehto
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND tunnus = '$laskurow[maksuehto]'";
-	$result = pupe_query($query);
-
 	$kateinen = "";
 	$jaksotettu = "";
 	$itsetulostus = "";
 
-	if (mysql_num_rows($result) == 1) {
-		$maksuehtorow = mysql_fetch_assoc($result);
+	if (mysql_num_rows($maksuehto_result) == 1) {
 
 		// jos kyseessä on käteiskauppaa
 		if ($maksuehtorow['kateinen'] != '') {
@@ -1427,7 +1448,7 @@ else {
 				}
 			}
 
-			// Varmistetaan, että joakisella tilauksella on lähtö
+			// Varmistetaan, että jokaisella tilauksella on lähtö
 			if ($yhtiorow['kerayserat'] == 'K') {
 				foreach ($tilausnumerot as $tilausnumero) {
 					$query = "	SELECT *
@@ -1593,81 +1614,6 @@ else {
 					}
 				}
 			}
-
-			if (in_array("U", $varasto_chk_array) and (in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "EXTRANET")) or $tilausvalmiskutsuja == 'EDITILAUS' or $tilausvalmiskutsuja == 'VARAOSASELAIN' or (in_array($toim, array("","ENNAKKO")) and $mista == "jtselaus"))) {
-				foreach ($tilausnumerot as $til_nro) {
-
-					// Jos tilauksista yksikin menee "Unikko"-järjestelmään, päivitetään kaikki tilaukset rahtivapaiksi
-					// Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
-					$query = "	UPDATE lasku
-								SET rahtivapaa = 'X',
-								kohdistettu = 'K'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus  = '{$til_nro}'";
-					$rahtivapaa_upd_res = pupe_query($query);
-
-					$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$til_nro}'";
-					$laskurow_edi_res = pupe_query($query);
-					$laskurow_edi = mysql_fetch_assoc($laskurow_edi_res);
-
-					// jos varaston ulkoinen järjestelmä on Unikko
-					if ($varasto_chk_array[$til_nro] == 'U') {
-						if ($laskurow_edi['tilaustyyppi'] == 7) {
-							$pupesoft_tilaustyyppi = 7;
-						}
-						elseif ($laskurow_edi['tilaustyyppi'] == 2) {
-							$pupesoft_tilaustyyppi = 2;
-						}
-						elseif ($laskurow_edi['tilaustyyppi'] == 8) {
-							$pupesoft_tilaustyyppi = 8;
-						}
-						else {
-							$pupesoft_tilaustyyppi = 1;
-						}
-
-						$query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow_edi['liitostunnus']}'";
-						$asiakas_chk_res = pupe_query($query);
-						$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
-
-						$query = "	SELECT *
-									FROM laskun_lisatiedot
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND otunnus = '{$laskurow_edi['tunnus']}'";
-						$lisatiedot_result = pupe_query($query);
-						$laskun_lisatiedot = mysql_fetch_assoc($lisatiedot_result);
-
-						$params = array(
-							'laskurow' => $laskurow_edi,
-							'lisatiedot' => $laskun_lisatiedot,
-							'asiakasrow' => $asiakas_chk_row,
-							'tilaustyyppi' => $pupesoft_tilaustyyppi,
-							#'toimitustapa' => $totarowx['herminator'],
-							'toim' => $toim,
-						);
-
-						if (file_exists("editilaus_out_futur.inc")) {
-							require("editilaus_out_futur.inc");
-						}
-						else if (file_exists("pupesoft/editilaus_out_futur.inc")) {
-							require("pupesoft/editilaus_out_futur.inc");
-						}
-						else {
-							require("tilauskasittely/editilaus_out_futur.inc");
-						}
-
-						if (editilaus_out_futur($params) === 0) {
-
-							$query = "	UPDATE lasku SET
-										tila = 'L',
-										alatila = 'A',
-										lahetepvm = now()
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND tunnus = '{$til_nro}'";
-							$upd_res = pupe_query($query);
-						}
-					}
-				}
-			}
 		}
 	} // end jos yksikin rivi kerätty else haara
 }
@@ -1682,5 +1628,3 @@ $result = pupe_query($query);
 if (!isset($silent) or $silent == "") {
 	echo $tilaus_valmis_ulos;
 }
-
-?>

@@ -1196,8 +1196,8 @@
 						if ((float) $rtuoteno[$i]["rivihinta"] != 0 or ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0)) {
 							$kustp = $oletuskust;
 
-							$selite = mysql_real_escape_string(utf8_decode($rtuoteno[$i]["riviinfo"]));
-							$tuote  = mysql_real_escape_string(utf8_decode($rtuoteno[$i]["tuoteno"]));
+							$selite = isset($rtuoteno[$i]["riviinfo"]) ? mysql_real_escape_string(utf8_decode($rtuoteno[$i]["riviinfo"])) : "";
+							$tuote  = isset($rtuoteno[$i]["tuoteno"])  ? mysql_real_escape_string(utf8_decode($rtuoteno[$i]["tuoteno"])) : "";
 
 							$query = "	SELECT tilino, kustp
 										FROM tiliointisaanto
@@ -1223,7 +1223,7 @@
 
 	 							// Hmm, mikään sääntö ei kelpaa
 								if (mysql_num_rows($result) == 0) {
-	 								if ($rtuoteno[$i]["tilinumero"] != "") {
+	 								if (isset($rtuoteno[$i]["tilinumero"]) and $rtuoteno[$i]["tilinumero"] != "") {
 										$tili = $rtuoteno[$i]["tilinumero"];
 									}
 									elseif ($oletustili > 0) {

@@ -1129,7 +1129,7 @@
 			if ($tee == 'S') echo "<td></td>";
 
 			echo "<td></td><td></td><td></td><td></td><td>".t("Saldo")." ".pankkipvm(substr($tietue,6,6))."</td>";
-			echo "<td style='text-align:right;'>". sprintf("%01.2f",((substr($tietue,31,19) / 100) - $tililimiitti))."</td></tr>";
+			echo "<td style='text-align:right;'>". sprintf("%01.2f",((substr($tietue,12,19) / 100)))."</td></tr>";
 
 			if ($tililimiitti != "") {
 				echo "<tr>";

@@ -37,7 +37,8 @@
 				group_concat(distinct if(trim(tilausyhteyshenkilo)='', NULL, trim(tilausyhteyshenkilo)) 		SEPARATOR ' / ') tilausyhteyshenkilo,
 				group_concat(distinct if(trim(asiakkaan_tilausnumero)='', NULL, trim(asiakkaan_tilausnumero)) 	SEPARATOR ' / ') asiakkaan_tilausnumero,
 				group_concat(distinct if(trim(kohde)='', NULL, trim(kohde)) 									SEPARATOR ' / ') kohde,
-				count(distinct toimitustapa) toimitustavat
+				count(distinct toimitustapa) toimitustavat,
+				count(tunnus) tilausmaara
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus in ($tunnukset)";
@@ -54,6 +55,42 @@
 		$pyoristys_valuutassa	= round($sumrow["pyoristys_valuutassa"], 2);
 		$kate					= round($sumrow["kate"], 2);
 		$bruttopaino			= round($sumrow["bruttopaino"], 2);
+
+		// EE keississä lasketaan veron määrää saman kaavan mukaan ku laskun tulostuksessa alvierittelyssä
+		// ja sit lopuksi summataan $summa+$alvinmaara jotta saadaan laskun verollinen loppusumma
+		// Tämä operaatiota ei tehdä _valuutassa summalle
+		// Tämä operaatio on tarpeellinen vain jos tilauksia on laskulla enemmän kuin yksi
+		if (strtoupper($yhtiorow['maa']) == 'EE' and $sumrow["tilausmaara"] > 1) {
+
+			$alvinmaara = 0;
+
+			//Haetaan kaikki alvikannat riveiltä
+			$alvquery = "	SELECT DISTINCT alv
+							FROM tilausrivi
+							WHERE yhtio  = '$kukarow[yhtio]'
+							and otunnus in ($tunnukset)
+							and tyyppi = 'L'
+							and alv < 500";
+			$alvresult = pupe_query($alvquery);
+
+			while ($alvrow = mysql_fetch_assoc($alvresult)) {
+
+				$aquery = "	SELECT
+							round(sum(tilausrivi.rivihinta * (tilausrivi.alv / 100)),2) alvrivihinta
+							FROM tilausrivi
+							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+							WHERE tilausrivi.otunnus in ($tunnukset)
+							and tilausrivi.yhtio	= '$kukarow[yhtio]'
+							and tilausrivi.alv		= '$alvrow[alv]'
+							and tilausrivi.tyyppi	= 'L'";
+				$aresult = pupe_query($aquery);
+				$arow = mysql_fetch_assoc($aresult);
+
+				$alvinmaara += $arow["alvrivihinta"];
+			}
+
+			$summa = $arvo+$alvinmaara;
+		}
 
 		// generoidaan vientikurssi
 		if ($sumrow["arvo_valuutassa_matikka"] == 0) {
@@ -273,13 +310,13 @@
 	}
 
 	//Siivotaan kommenteista kaikki kummalliset merkit pois
-	$comments 				= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $comments);
-	$viestit				= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $viestit);
-	$sisviestit1			= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit1);
-	$sisviestit2			= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit2);
-	$tilausyhteyshenkilo	= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $tilausyhteyshenkilo);
-	$asiakkaan_tilausnumero	= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $asiakkaan_tilausnumero);
-	$kohde					= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $kohde);
+	$comments 				= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $comments);
+	$viestit				= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $viestit);
+	$sisviestit1			= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit1);
+	$sisviestit2			= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit2);
+	$tilausyhteyshenkilo	= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $tilausyhteyshenkilo);
+	$asiakkaan_tilausnumero	= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $asiakkaan_tilausnumero);
+	$kohde					= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $kohde);
 
 	$fields = "yhtio";
 	$values = "'$kukarow[yhtio]'";

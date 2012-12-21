@@ -10957,23 +10957,14 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 			// Ei feilata vaikka rahtiveloitus tai kuljetusvakuutus ei löydy tilaukselta
 			if (count($invoice_ei_loydy) > 0) {
 				foreach ($invoice_ei_loydy as $ei_loydytuoteno => $ei_loydy) {
+
 					if ($ei_loydy['tilattumaara'] == 0 or strtoupper($ei_loydytuoteno) == "A-100" or strtoupper($ei_loydytuoteno) == "A-200") {
 						// oletetaan että tämä on kuljetusvakuutus tms., joten laitetaan se "löytyviin" että vertailu-check hyväksyy nämä OK:na
 						$loytyy_kummastakin[$ei_loydytuoteno] = $ei_loydy;
 						$purchaseorder[$ei_loydytuoteno] = $ei_loydy;
 
 						// poistetaan se ei löydetyistä
-						array_pop($invoice_ei_loydy);
-					}
-				}
-
-				$erot = '';
-
-				foreach ($loytyy_kummastakin as $tuoteno => $null) {
-
-					if ($invoice[$tuoteno]['tilattumaara'] > 0 and ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or $invoice[$tuoteno]['nettohinta'] != $purchaseorder[$tuoteno]['nettohinta'])) {
-						// löytyi ero
-						$erot = 'joo';
+						unset($invoice_ei_loydy[$ei_loydytuoteno]);
 					}
 				}
 			}
@@ -12421,7 +12412,7 @@ if (!function_exists("pupe_DataTables")) {
 							var rivi_kpl_alkuperainen 	= parseFloat($('#rivi_kpl_alkuperainen_'+tun).val());
 							var rivi_hinta_alkup		= parseFloat($('#rivihintaalkuperainen_'+tun).val());
 							var alerivi_hinta_alkup		= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
-							var kpl 					= parseFloat(this.value);
+							var kpl 					= parseFloat(this.value.replace(',','.'));
 
 							// JOS HINTA * KPL ON ENEMMÄN KUIN 10,2 DESIMAALIA, NIIN HERJATAAN
 							if ((rivi_hinta_value * kpl) > 9999999999.99) {
@@ -12567,7 +12558,7 @@ if (!function_exists("pupe_DataTables")) {
 							var otunnus 			= $('input[name=\"otunnus\"]').val();
 							var rivi_ale_alkup		= parseFloat($('#rivialealkuperainen'+monesko+'_'+tun).val());
 							var alerivi_hinta_alkup	= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
-							var ale 				= parseFloat(this.value);
+							var ale 				= parseFloat(this.value.replace(',','.'));
 
 							if (rivi_ale_alkup != ale) {
 								$.post('{$_SERVER['SCRIPT_NAME']}',
@@ -13067,7 +13058,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 			$ryhma = 'fi306';
 		}
 
-		if ($ryhma == 'fi311' or $ryhma == 'fi312') {
+		if ($ryhma == 'fi311' or $ryhma == 'fi312' or $ryhma == 'kolmikanta') {
 			$kerroin = " * -1 ";
 		}
 
@@ -13089,8 +13080,9 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 		else {
 			// Hetaan yhteisömyynti, palvelut ja tuotteet erikseen jotta osataan splitata kassa-alennus tavaramyyntiin ja palvelumyyntIin
 			$query = "	SELECT
-						sum(if(tuote.tuotetyyppi='K',  tilausrivi.rivihinta, 0)) palvelut,
-						sum(if(tuote.tuotetyyppi!='K', tilausrivi.rivihinta, 0)) tavarat,
+						sum(if(lasku.kolmikantakauppa != '', tilausrivi.rivihinta, 0)) kolmikanta,
+						sum(if(lasku.kolmikantakauppa =  '' and tuote.tuotetyyppi  = 'K', tilausrivi.rivihinta, 0)) palvelut,
+						sum(if(lasku.kolmikantakauppa =  '' and tuote.tuotetyyppi != 'K', tilausrivi.rivihinta, 0)) tavara,
 						sum(tilausrivi.rivihinta) yhteensa,
 						group_concat(DISTINCT tiliointi.tunnus) tilioinnit
 						FROM tiliointi
@@ -13115,10 +13107,13 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 
 				// Palvelut ja tuotteet erikseen
 				if ($ryhma == 'fi311') {
-					$kakerroinlisa = $ktrow["tavarat"]/$ktrow["yhteensa"];
+					$kakerroinlisa = $ktrow["tavara"]/$ktrow["yhteensa"];
 				}
 				elseif ($ryhma == 'fi312') {
 					$kakerroinlisa = $ktrow["palvelut"]/$ktrow["yhteensa"];
+				}
+				elseif ($ryhma == 'kolmikanta') {
+					$kakerroinlisa = $ktrow["kolmikanta"]/$ktrow["yhteensa"];
 				}
 
 				$selec = "	if(lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) maa,
@@ -13130,7 +13125,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 
 				if ($yhteenvetolilmo) {
 					$selec = "	lasku.ytunnus ytunnus,
-								if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
+								if(lasku.toim_maa = '', lasku.maa, lasku.toim_maa) maa,
 								max(lasku.nimi) laskunimi, ";
 					$group = "	ytunnus, maa";
 				}
@@ -13189,6 +13184,100 @@ if (!function_exists("hintapyoristys")) {
 		}
 
 		return $luku;
+	}
+}
+
+if (!function_exists('piirra_vak_rivi')) {
+	function piirra_vak_rivi($params) {
+		global $kukarow;
+
+		extract($params);
+
+		$eramaara = ceil($row["kpl"]/$row["era"]);
+
+		$vaktuotetiedot[] = "$eramaara ".t("pakkausta", $kieli).", ".t("kukin", $kieli)." ".(float) $row['era']." x $row[tilavuus] (".t($row["materiaali"], $kieli).")";
+
+		// Mikä on toistaiseksi suurin vakmäärä
+		$ltq_yks = preg_replace("/[^a-z]/", "", strtolower($row["tilavuus"]));
+
+		$ltq_til = (float) preg_replace("/[^0-9,\.]/", "", str_replace(",", ".", $row["tilavuus"]));
+
+		// Käytetään vain millilitroja ja grammoja
+		if ($ltq_yks == 'l' or $ltq_yks == 'kg') {
+			$ltq_til = $ltq_til*1000;
+		}
+
+		if ($ltq_til > $max_ltq_til) $max_ltq_til = $ltq_til;
+
+		$tuotepainot += round($row["tuotepaino"]);
+		$tuotepainot_yht += round($row["tuotepaino"]);
+
+		$return_params = array(
+			'tuotepainot' => $tuotepainot,
+			'tuotepainot_yht' => $tuotepainot_yht,
+			'vaktuotetiedot' => $vaktuotetiedot,
+			'max_ltq_til' => $max_ltq_til,
+		);
+
+		return $return_params;
+	}
+}
+
+if (!function_exists('piirra_vak_rivi_loppu')) {
+	function piirra_vak_rivi_loppu($params) {
+
+		extract($params);
+
+		$nimitykset = explode("###", wordwrap($edrow["nimitys"], $wordwrap_mitta, "###"));
+
+		// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
+		if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
+			$vaktuotetiedot[] = "{$edrow['yk_nro']}, LTD QTY";
+		}
+		else {
+			$vaktuotetiedot[] = $edrow['yk_nro'];
+		}
+
+		$vaktuotetiedot[] = $nimitykset[0];
+
+		for ($i = 1; $i < count($nimitykset); $i++) {
+			$vaktuotetiedot[] = "$nimitykset[$i]";
+		}
+
+		$vakecho = "";
+
+		if ($taulu == 'vak_imdg') {
+			if (trim($edrow["luokka"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[luokka]";
+		}
+		else {
+			if (trim($edrow["lipukkeet"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[lipukkeet]";
+		}
+
+		if (trim($edrow["pakkausryhma"]) != "") $vakecho .= ", ".t("Pakkausryhmä", $kieli)." $edrow[pakkausryhma]";
+		if (trim($edrow["leimahduspiste"]) != "" and $taulu == 'vak_imdg') $vaktuotetiedot[] = t("Leimahduspiste", $kieli)." {$edrow['leimahduspiste']}";
+
+		if ($taulu == 'vak_imdg' and trim($edrow["meria_saastuttava"]) != "") {
+			$vaktuotetiedot[] = t("Meriä saastuttava", $kieli);
+		}
+
+		if ($tyyppi == "DGD" and $tuotepainot > 0) {
+			$vakecho .= "###".round($tuotepainot);
+		}
+
+		$max_ltq_til = 0;
+
+		if ($vakecho != "") {
+			$vaktuotetiedot[] = "$vakecho";
+		}
+
+		$vaktuotetiedot[] = "";
+		$tuotepainot = 0;
+
+		return array(
+			'vaktuotetiedot' => $vaktuotetiedot,
+			'tuotepainot' => $tuotepainot,
+			'max_ltq_til' => $max_ltq_til,
+		);
 	}
 }
 
@@ -13261,48 +13350,18 @@ if (!function_exists("palauta_vak_tiedot")) {
 					ORDER BY 1,2,3,4,5,6,7,8,9,10,11,12";
 		$riresult1 = pupe_query($query);
 
-		$query = "  SELECT distinct r1.tunnus, r1.pakkaus, r1.pakkauskuvaus, r1.kollit, round(r1.kilot,1) kilot
+		$query = "  SELECT distinct r1.tunnus,
+					r1.pakkaus,
+					r1.pakkauskuvaus,
+					TRIM(TRAILING '.' FROM TRIM(TRAILING '0' FROM r1.kollit)) AS kollit,
+					round(r1.kilot,1) kilot
 					FROM rahtikirjat r1
-					LEFT JOIN rahtikirjat r2 ON (r1.yhtio = r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro != 0)
 					WHERE r1.otsikkonro in ($otunnus)
-					and r1.yhtio = '$kukarow[yhtio]'";
+					AND r1.yhtio = '$kukarow[yhtio]'";
 		$riresult2 = pupe_query($query);
 
 		//* Limited Quantity tiedot *//
 		//Inner packagings placed in shrink-wrapped or stretch-wrapped trays a Maximum net quantity
-		/*
-		$limited_qty = array(
-		"LQ0"	=> "0",
-		"LQ1"	=> "120",
-		"LQ2"	=> "1000",
-		"LQ3"	=> "0",
-		"LQ4"	=> "1000",
-		"LQ5"	=> "1000",
-		"LQ6"	=> "1000",
-		"LQ7"	=> "5000",
-		"LQ8"	=> "500",
-		"LQ9"	=> "3000",
-		"LQ10"	=> "500",
-		"LQ11"	=> "500",
-		"LQ12"	=> "1000",
-		"LQ13"	=> "1000",
-		"LQ14"	=> "25",
-		"LQ15"	=> "100",
-		"LQ16"	=> "125",
-		"LQ17"	=> "100",
-		"LQ18"	=> "500",
-		"LQ19"	=> "5000",
-		"LQ20"	=> "0",
-		"LQ21"	=> "0",
-		"LQ22"	=> "500",
-		"LQ23"	=> "1000",
-		"LQ24"	=> "2000",
-		"LQ25"	=> "1000",
-		"LQ26"	=> "500",
-		"LQ27"	=> "6000",
-		"LQ28"	=> "3000");
-		*/
-
 		//Combination packagings a Maximum net quantity
 		$limited_qty = array(
 		"LQ0"	=> "0",
@@ -13338,28 +13397,11 @@ if (!function_exists("palauta_vak_tiedot")) {
 		$vakrakirtiedot = array();
 		$vaktuotetiedot = array();
 		$rakirkilot = 0;
+		$tuotepainot = 0;
+		$tuotepainot_yht = 0;
 
-		if (mysql_num_rows($riresult1) > 1) {
+		if (mysql_num_rows($riresult1) > 0 and mysql_num_rows($riresult2) > 0) {
 
-			$vakkoodicount = 1;
-
-			while ($row = mysql_fetch_assoc($riresult1)) {
-				if (isset($edvaki) and $row[$vak_kentta] != $edvaki) {
-					$vakkoodicount++;
-				}
-
-				$edvaki = $row[$vak_kentta];
-			}
-
-			if ($vakkoodicount > 1) {
-				$tuotepainot = 0;
-				$tuotepainot_yht = 0;
-			}
-
-			mysql_data_seek($riresult1, 0);
-		}
-
-		if (mysql_num_rows($riresult1) > 1 and mysql_num_rows($riresult2) > 0) {
 			while ($row = mysql_fetch_assoc($riresult2)) {
 
 				$query = "	SELECT *
@@ -13376,10 +13418,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 					if ($tyyppi == "DGD") {
 
 						$vakkirakirri = "$row[kollit]###$row[kollit] x $pakkaus_en containing:###";
-
-						if (!isset($tuotepainot)) {
-							$vakkirakirri .= round($row["kilot"]);
-						}
+						$vakkirakirri .= round($row["kilot"]);
 
 						$vakrakirtiedot[] = $vakkirakirri;
 					}
@@ -13394,131 +13433,110 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 		if (mysql_num_rows($riresult1) > 0) {
 
-			$edrow   	 = "";
-			$max_ltq_til = "";
+			$edrow = "";
+			$max_ltq_til = 0;
+			$wordwrap_mitta = $tyyppi == 'DGD' ? 50 : 90;
 
-			while ($row = mysql_fetch_assoc($riresult1)) {
+			$num_rows = mysql_num_rows($riresult1);
+			$i_rows = 1;
+
+			$row = mysql_fetch_assoc($riresult1);
+
+			$edrow_ei_ollut_tyhjaa = true;
+
+			do {
+
+				if (!isset($edrow[$vak_kentta]) or $row[$vak_kentta] == $edrow[$vak_kentta]) {
+					$params = array(
+						'row' => $row,
+						'kieli' => $kieli,
+						'vaktuotetiedot' => $vaktuotetiedot,
+						'max_ltq_til' => $max_ltq_til,
+						'tuotepainot' => $tuotepainot,
+						'tuotepainot_yht' => $tuotepainot_yht,
+						'limited_qty' => $limited_qty,
+					);
+
+					$return_params = piirra_vak_rivi($params);
+
+					$tuotepainot = $return_params['tuotepainot'];
+					$tuotepainot_yht = $return_params['tuotepainot_yht'];
+					$vaktuotetiedot = $return_params['vaktuotetiedot'];
+					$max_ltq_til = $return_params['max_ltq_til'];
+				}
+
+				if ($num_rows == $i_rows or (isset($edrow[$vak_kentta]) and $row[$vak_kentta] != $edrow[$vak_kentta])) {
+
+					if ($num_rows == $i_rows and $edrow == "") {
+						$edrow = $row;
+						$edrow_ei_ollut_tyhjaa = false;
+					}
+
+					$params = array(
+						'row' => $row,
+						'edrow' => $edrow,
+						'max_ltq_til' => $max_ltq_til,
+						'limited_qty' => $limited_qty,
+						'vaktuotetiedot' => $vaktuotetiedot,
+						'tuotepainot' => $tuotepainot,
+						'taulu' => $taulu,
+						'kieli' => $kieli,
+						'tyyppi' => $tyyppi,
+						'wordwrap_mitta' => $wordwrap_mitta,
+					);
+
+					$return_params = piirra_vak_rivi_loppu($params);
+
+					extract($return_params);
+				}
 
 				if (isset($edrow[$vak_kentta]) and $row[$vak_kentta] != $edrow[$vak_kentta]) {
+					$params = array(
+						'row' => $row,
+						'kieli' => $kieli,
+						'vaktuotetiedot' => $vaktuotetiedot,
+						'max_ltq_til' => $max_ltq_til,
+						'tuotepainot' => $tuotepainot,
+						'tuotepainot_yht' => $tuotepainot_yht,
+						'limited_qty' => $limited_qty,
+					);
 
-					if ($tyyppi == "DGD") $nimitykset = explode("###", wordwrap($edrow["nimitys"], 50, "###"));
-					else $nimitykset = explode("###", wordwrap($edrow["nimitys"], 90, "###"));
+					$return_params = piirra_vak_rivi($params);
 
-					// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
-					if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
-						$vaktuotetiedot[] = "{$edrow['yk_nro']}, LTD QTY";
-					}
-					else {
-						$vaktuotetiedot[] = $edrow['yk_nro'];
-					}
-
-					$vaktuotetiedot[] = $nimitykset[0];
-
-					for ($i = 1; $i<count($nimitykset); $i++) {
-						$vaktuotetiedot[] = "$nimitykset[$i]";
-					}
-
-					$vakecho = "";
-
-					if ($taulu == 'vak_imdg') {
-						if (trim($edrow["luokka"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[luokka]";
-					}
-					else {
-						if (trim($edrow["lipukkeet"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[lipukkeet]";
-					}
-
-					if (trim($edrow["pakkausryhma"]) != "") $vakecho .= ", ".t("Pakkausryhmä", $kieli)." $edrow[pakkausryhma]";
-					if (trim($edrow["leimahduspiste"]) != "" and $taulu == 'vak_imdg') $vaktuotetiedot[] = t("Leimahduspiste", $kieli)." {$edrow['leimahduspiste']}";
-
-					if ($taulu == 'vak_imdg' and trim($edrow["meria_saastuttava"]) != "") {
-						$vaktuotetiedot[] = t("Meriä saastuttava", $kieli);
-					}
-
-					if ($tyyppi == "DGD" and isset($tuotepainot)) {
-						$vakecho .= "###".round($tuotepainot);
-					}
-
-					$max_ltq_til = 0;
-
-					if ($vakecho != "") {
-						$vaktuotetiedot[] = "$vakecho";
-					}
-
-					$vaktuotetiedot[] = "";
-					$tuotepainot = 0;
+					$tuotepainot = $return_params['tuotepainot'];
+					$tuotepainot_yht = $return_params['tuotepainot_yht'];
+					$vaktuotetiedot = $return_params['vaktuotetiedot'];
+					$max_ltq_til = $return_params['max_ltq_til'];
 				}
 
-				$eramaara = ceil($row["kpl"]/$row["era"]);
+				if ($num_rows == $i_rows and $edrow_ei_ollut_tyhjaa) {
+					$params = array(
+						'row' => $row,
+						'edrow' => $row,
+						'max_ltq_til' => $max_ltq_til,
+						'limited_qty' => $limited_qty,
+						'vaktuotetiedot' => $vaktuotetiedot,
+						'tuotepainot' => $tuotepainot,
+						'taulu' => $taulu,
+						'kieli' => $kieli,
+						'tyyppi' => $tyyppi,
+						'wordwrap_mitta' => $wordwrap_mitta,
+					);
 
-				$vaktuotetiedot[] = "$eramaara ".t("pakkausta", $kieli).", ".t("kukin", $kieli)." ".(float) $row['era']." x $row[tilavuus] (".t($row["materiaali"], $kieli).")";
+					$return_params = piirra_vak_rivi_loppu($params);
 
-				// Mikä on toistaiseksi suurin vakmäärä
-				$ltq_yks = preg_replace("/[^a-z]/", "", strtolower($row["tilavuus"]));
-
-				$ltq_til = (float) preg_replace("/[^0-9,\.]/", "", str_replace(",", ".", $row["tilavuus"]));
-
-				// Käytetään vain millilitroja ja grammoja
-				if ($ltq_yks == 'l' or $ltq_yks == 'kg') {
-					$ltq_til = $ltq_til*1000;
-				}
-
-				if ($ltq_til > $max_ltq_til) $max_ltq_til = $ltq_til;
-
-				if (isset($tuotepainot)) {
-					$tuotepainot += round($row["tuotepaino"]);
-					$tuotepainot_yht += round($row["tuotepaino"]);
+					extract($return_params);
 				}
 
 				$edrow = $row;
+				$i_rows++;
 			}
+			while ($row = mysql_fetch_assoc($riresult1));
 
-			if ($tyyppi == "DGD") $nimitykset = explode("###", wordwrap($edrow["nimitys"], 50, "###"));
-			else $nimitykset = explode("###", wordwrap($edrow["nimitys"], 90, "###"));
-
-			// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
-			if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
-				$vaktuotetiedot[] = "{$edrow['yk_nro']}, LTD QTY";
-			}
-			else {
-				$vaktuotetiedot[] = $edrow['yk_nro'];
-			}
-
-			$vaktuotetiedot[] = $nimitykset[0];
-
-			for ($i = 1; $i<count($nimitykset); $i++) {
-				$vaktuotetiedot[] = "$nimitykset[$i]";
-			}
-
-			$vakecho = "";
-
-			if ($taulu == 'vak_imdg') {
-				if (trim($edrow["luokka"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[luokka]";
-			}
-			else {
-				if (trim($edrow["lipukkeet"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[lipukkeet]";
-			}
-
-			if (trim($edrow["pakkausryhma"]) != "") $vakecho .= ", ".t("Pakkaus", $kieli)." $edrow[pakkausryhma]";
-			if (trim($edrow["leimahduspiste"]) != "" and $taulu == 'vak_imdg') $vaktuotetiedot[] = t("Leimahduspiste", $kieli)." {$edrow['leimahduspiste']}";
-
-			if ($taulu == 'vak_imdg' and trim($edrow["meria_saastuttava"]) != "") {
-				$vaktuotetiedot[] = t("Meriä saastuttava", $kieli);
-			}
-
-			if ($tyyppi == "DGD" and isset($tuotepainot)) {
-				$vakecho .= "###$tuotepainot";
-			}
-
-			if ($vakecho != "") {
-				$vaktuotetiedot[] = "$vakecho";
-			}
-
-			if (isset($tuotepainot) and $rakirkilot > 0) {
-				$vaktuotetiedot[] = "";
-				$vaktuotetiedot[] = "TOTAL GROSS MASS: $rakirkilot kg";
+			if ($rakirkilot > 0) {
+				$vaktuotetiedot[] = "TOTAL GROSS MASS: {$rakirkilot} kg";
 			}
 		}
-
 
 		return array($vakrakirtiedot, $vaktuotetiedot);
 	}
@@ -13836,44 +13854,104 @@ if (!function_exists('tulosta_hrx')) {
 	}
 }
 
-if (!function_exists('tulosta_oslap_lamposiirto')) {
-	function tulosta_oslap_lamposiirto($params) {
+if (!function_exists('tulosta_oslap_mg')) {
+	function tulosta_oslap_mg($params) {
 		global $kukarow, $yhtiorow;
 
 		extract($params);
 
-		$toimosoite_nimi = trim($toim_nimi.' '.$toim_nimitark);
-
-		$ot_tilaus = t("Tilaus", $yhtiorow['kieli']);
-
-		$sivu = "	*** ETIKETIN KOKO ***
-					{D1530,1040,1490|}
-					{AX;+000,+000,+00|}
-					{AY;+10,0|}
-					{C|}
-
-				 	*** TOIMITUSOSOITE ***
-				 	{PC000;0070,0200,1,1,A,00,B|}
-					{RC000;{$toimosoite_nimi}|}
-
-				 	{PC001;0070,0250,1,1,A,00,B|}
-					{RC001;{$toim_osoite}|}
-
-				 	{PC002;0070,0330,1,1,A,00,B|}
-					{RC002;{$toim_postino} {$toim_postitp}|}
-
-				 	{PC003;0070,0380,1,1,A,00,B|}
-					{RC003;{$ot_tilaus} {$tilriv}|}
-
-				 	{PC004;0070,0430,1,1,A,00,B|}
-					{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
-
-					*** TULOSTUS  ***
-					{XS;I,0001,0002C3210|}
-					".chr(12);
-
 		if (trim($komento) != '' and $komento != 'email') {
-			$line = exec(" echo \"$sivu\" | $komento");
+
+			$toimosoite_nimi = trim($toim_nimi.' '.$toim_nimitark);
+
+			$ot_tilaus = t("Tilaus", $yhtiorow['kieli']);
+
+			if (in_array($mediatyyppi, array('LSN149X104','LSN59X40','LS149X104','LS59X40'))) {
+
+				if (in_array($mediatyyppi, array('LSN149X104','LSN59X40'))) {
+					$nauha = "2";
+				}
+				else {
+					$nauha = "0";
+				}
+
+				if (in_array($mediatyyppi, array('LSN149X104','LS149X104'))) {
+
+					$sivu = "	*** ETIKETIN KOKO ***
+								{D1530,1040,1490|}
+								{AX;+000,+000,+00|}
+								{AY;+10,0|}
+								{C|}
+
+							 	*** TOIMITUSOSOITE ***
+							 	{PC000;0070,0200,1,1,I,00,B|}
+								{RC000;{$toimosoite_nimi}|}
+
+							 	{PC001;0070,0250,1,1,I,00,B|}
+								{RC001;{$toim_osoite}|}
+
+							 	{PC002;0070,0330,1,1,I,00,B|}
+								{RC002;{$toim_postino} {$toim_postitp}|}
+
+							 	{PC003;0070,0380,1,1,I,00,B|}
+								{RC003;{$ot_tilaus} {$tilriv}|}
+
+							 	{PC004;0070,0430,1,1,I,00,B|}
+								{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
+								";
+				}
+				else {
+					$sivu = "	*** ETIKETIN KOKO ***
+								{D0420,0590,0400|}
+								{AX;+000,+000,+00|}
+								{AY;+10,0|}
+								{C|}
+
+							 	*** TOIMITUSOSOITE ***
+							 	{PC000;0030,0050,1,1,I,00,B|}
+								{RC000;{$toimosoite_nimi}|}
+
+							 	{PC001;0030,0100,1,1,I,00,B|}
+								{RC001;{$toim_osoite}|}
+
+							 	{PC002;0030,0180,1,1,I,00,B|}
+								{RC002;{$toim_postino} {$toim_postitp}|}
+
+							 	{PC003;0030,0230,1,1,I,00,B|}
+								{RC003;{$ot_tilaus} {$tilriv}|}
+
+							 	{PC004;0030,0280,1,1,I,00,B|}
+								{RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
+								";
+				}
+
+				$sivu .= "	*** TULOSTUS  ***
+							{XS;I,0001,0002C3{$nauha}10|}
+							".chr(12);
+
+				$line = exec("echo \"$sivu\" | $komento");
+
+				echo t("Osoitelappu tulostuu")."...<br>";
+			}
+			else {
+				$sivu  = "\n\n\n";
+				$sivu .= "          --------------------------------------------------\n";
+				$sivu .= "          {$toimosoite_nimi}\n\n";
+	            $sivu .= "          {$toim_osoite}\n";
+				$sivu .= "          {$toim_postino} {$toim_postitp}\n";
+	            $sivu .= "          {$ot_tilaus} {$tilriv}\n";
+	            $sivu .= "          {$montako_laatikkoa_yht} {$pakkauskoodi}\n";
+				$sivu .= "          --------------------------------------------------";
+
+				$tempfile = tempnam("/tmp", "oslap");
+				file_put_contents($tempfile, $sivu);
+
+				$line = exec("a2ps -o $tempfile.ps -R --medium=A4 --chars-per-line=80 --columns=1 --margin=1 --borders=0 $tempfile");
+
+				$line = exec("$komento $tempfile.ps");
+
+				echo t("Osoitelappu tulostuu")."...<br>";
+			}
 		}
 	}
 }
@@ -15047,6 +15125,7 @@ if (!function_exists("tee_keraysera")) {
 					avainsana as avainsana_kieli READ,
 					lasku as vanha_lasku READ,
 					varaston_tulostimet as vanha_varaston_tulostimet READ,
+					kuka as kuka2 READ,
 					yhtio READ";
 		$result = pupe_query($query);
 
@@ -15095,11 +15174,13 @@ if (!function_exists("tee_keraysera")) {
 									AND lahdot1.aktiivi IN ('', 'T')
 									AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
 									AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != ''))
+					LEFT JOIN kuka ON (kuka.yhtio = lasku1.yhtio and kuka.kesken = lasku1.tunnus)
 					WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
 					AND lasku1.tila = 'N'
 					AND lasku1.alatila = 'A'
 					AND lasku1.vakisin_kerays = ''
 					AND lasku1.varasto = '{$varasto}'
+					AND kuka.tunnus is null
 					GROUP BY 1,2,3,4,5,6)
 					UNION
 					(SELECT SQL_NO_CACHE
@@ -15116,11 +15197,13 @@ if (!function_exists("tee_keraysera")) {
 					JOIN keraysvyohyke AS keraysvyohyke2 ON (keraysvyohyke2.yhtio = lasku2.yhtio AND keraysvyohyke2.tunnus IN ({$keraysvyohyke}) AND keraysvyohyke2.tunnus = vh2.keraysvyohyke)
 					JOIN toimitustapa AS toimitustapa2 ON (toimitustapa2.yhtio = lasku2.yhtio AND toimitustapa2.selite = lasku2.toimitustapa)
 					JOIN lahdot AS lahdot2 ON (lahdot2.yhtio = lasku2.yhtio AND lahdot2.tunnus = lasku2.toimitustavan_lahto)
+					LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 					WHERE lasku2.yhtio = '{$kukarow['yhtio']}'
 					AND lasku2.tila = 'N'
 					AND lasku2.alatila = 'A'
 					AND lasku2.vakisin_kerays != ''
 					AND lasku2.varasto = '{$varasto}'
+					AND kuka2.tunnus is null
 					GROUP BY 1,2,3,4,5,6)
 					ORDER BY 1,2,3,4,5,6";
 		$res = pupe_query($query);
@@ -15223,6 +15306,7 @@ if (!function_exists("tee_keraysera")) {
 						JOIN tuote AS tuote1 ON (tuote1.yhtio = tilausrivi1.yhtio AND tuote1.tuoteno = tilausrivi1.tuoteno)
 						JOIN keraysvyohyke AS keraysvyohyke1 ON (keraysvyohyke1.yhtio = lasku1.yhtio AND keraysvyohyke1.tunnus = '{$keraysvyohyke}')
 						JOIN toimitustapa AS toimitustapa1 ON (toimitustapa1.yhtio = lasku1.yhtio AND toimitustapa1.selite = lasku1.toimitustapa)
+						LEFT JOIN kuka ON (kuka.yhtio = lasku1.yhtio and kuka.kesken = lasku1.tunnus)
 						JOIN lahdot AS lahdot3
 						ON (lahdot3.yhtio = toimitustapa1.yhtio
 						AND lahdot3.liitostunnus = toimitustapa1.tunnus
@@ -15234,6 +15318,7 @@ if (!function_exists("tee_keraysera")) {
 						AND lasku1.alatila 			= 'A'
 						AND lasku1.vakisin_kerays 	= ''
 						AND lasku1.varasto 			= '{$varasto}'
+						AND kuka.tunnus is null
 						GROUP BY 1,2,3,4,5,6
 						ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
 		}
@@ -15256,11 +15341,13 @@ if (!function_exists("tee_keraysera")) {
 						JOIN keraysvyohyke AS keraysvyohyke2 ON (keraysvyohyke2.yhtio = lasku2.yhtio AND keraysvyohyke2.tunnus = '{$keraysvyohyke}')
 						JOIN toimitustapa AS toimitustapa2 ON (toimitustapa2.yhtio = lasku2.yhtio AND toimitustapa2.selite = lasku2.toimitustapa)
 						JOIN lahdot AS lahdot3 ON (lahdot3.yhtio = lasku2.yhtio AND lahdot3.tunnus = lasku2.toimitustavan_lahto)
+						LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku2.yhtio and kuka2.kesken = lasku2.tunnus)
 						WHERE lasku2.yhtio 			= '{$kukarow['yhtio']}'
 						AND lasku2.tila 			= 'N'
 						AND lasku2.alatila 			= 'A'
 						AND lasku2.vakisin_kerays  != ''
 						AND lasku2.varasto	 		= '{$varasto}'
+						AND kuka2.tunnus is null
 						GROUP BY 1,2,3,4,5,6
 						ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
 		}
@@ -17048,7 +17135,10 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		$otunnus = $laskurow["tunnus"];
 
 		//hatetaan asiakkaan lähetetyyppi
-		$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
+		$query = "  SELECT luokka, puhelin,
+					if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
+					asiakasnro as asiakasnro_aito,
+					kieli
 					FROM asiakas
 					WHERE tunnus = '$laskurow[liitostunnus]' and yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
@@ -18302,6 +18392,8 @@ if (!function_exists("kopioitiliointi")) {
 
 			$query  = substr($query,0,-1);
 			$result = pupe_query($query);
+
+			return mysql_insert_id();
 		}
 	}
 }

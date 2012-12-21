@@ -477,6 +477,10 @@
 	if ($laskurow["sisviesti1"] != "") {
 		$komm .= "\n".t("Kommentti")." 3:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 90, "\n###");
 	}
+	
+	if ($laskurow["sisviesti3"] != "" and $kukarow["extranet"] == "") {
+		$komm .= "\n".t("Sisäinen viesti").":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti3']), 90, "\n###");
+	}
 
 	if ($laskurow["noutaja"] != '') {
 		$komm .= "\n".t("Noutaja").":###$laskurow[noutaja]";

@@ -64,6 +64,7 @@
 
 	$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 	$monivalintalaatikot_normaali = array();
+	$noautosubmit = TRUE;
 
 	require ("tilauskasittely/monivalintalaatikot.inc");
 
@@ -167,12 +168,12 @@
 	else {
 		$c = "";
 	}
+
 	echo "<tr><th>",t("Jätä siirtolista kesken"),":</th><td><input type='checkbox' name = 'kesken' value='X' {$c}></td>";
-
 	echo "<tr><th>",t("Rivejä per siirtolista (tyhjä = 20)"),":</th><td><input type='text' size='8' value='{$olliriveja}' name='olliriveja'></td>";
-	echo "</table><br><input type = 'submit' value = '",t("Generoi siirtolista"),"'></form>";
+	echo "</table><br><input type = 'submit' name = 'generoi' value = '",t("Generoi siirtolista"),"'></form>";
 
-	if ($tee == 'M') {
+	if ($tee == 'M' and isset($generoi)) {
 
 		echo "<br /><br />";
 

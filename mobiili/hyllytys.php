@@ -10,10 +10,9 @@ elseif (@include_once("inc/parametrit.inc"));
 
 if (!isset($errors)) $errors = array();
 
-if (empty($ostotilaus) or empty($tilausrivi) or empty($saapuminen)) {
+if (empty($ostotilaus) or empty($tilausrivi)) {
     exit("Virheelliset parametrit");
 }
-
 # Haetaan tilausrivin ja laskun tiedot
 /* Ostotilausten_kohdistus rivi 847 - 895 */
 $query = "  SELECT
@@ -41,13 +40,20 @@ if (!$row) {
     exit("Virhe, riviä ei löydy");
 }
 
+# Tehdään tarvittaessa uusi saapuminen
+if (empty($saapuminen)) {
+    $toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
+    $toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
+    $saapuminen = uusi_saapuminen($toimittaja);
+
+    $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+    $updated = pupe_query($update_kuka);
+}
+
 # Kontrolleri
 if (isset($submit)) {
 
     switch($submit) {
-        case 'takaisin':
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}'>"; exit();
-            break;
         case 'ok':
             # Vahvista keräyspaikka
             echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?hyllytys&".http_build_query($url_array)."&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
@@ -77,6 +83,7 @@ $suuntalava = $row['suuntalava'] ? : "Ei ole";
 ######## UI ##########
 # Otsikko
 echo "<div class='header'>";
+echo "<button onclick='window.location.href=\"ostotilaus.php?ostotilaus={$ostotilaus}\"' class='button left'><img src='back2.png'></button>";
 echo "<h1>",t("HYLLYTYS")."</h1>";
 echo "</div>";
 
@@ -119,10 +126,9 @@ echo "<div class='main'>
 # Napit
 echo "
 <div class='controls'>
-<button type='submit' class='left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}'\">",t("OK"),"</button>
-<button name='submit' class='right' id='submit' value='kerayspaikka' onclick='submit();'>",t("KERÄYSPAIKKA"),"</button>
-<button type='submit' class='left' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'\">",t("SUUNTALAVALLE"),"</button>
-<button name='submit' class='right' id='submit' value='takaisin' onclick='submit();'>",t("TAKAISIN"),"</button>
+<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}'\">",t("OK"),"</button>
+<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("KERÄYSPAIKKA"),"</button>
+<button type='submit' class='button right' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'\">",t("SUUNTALAVALLE"),"</button>
 </div>
 </form>";
 

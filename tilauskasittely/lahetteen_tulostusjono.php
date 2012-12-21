@@ -11,8 +11,10 @@
 		exit;
 	}
 
-	$logistiikka_yhtio 		= '';
-	$logistiikka_yhtiolisa 	= '';
+	if (!isset($tuvarasto)) $tuvarasto = '';
+
+	$logistiikka_yhtio = '';
+	$logistiikka_yhtiolisa = '';
 	$lasku_yhtio_originaali = $kukarow['yhtio'];
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
@@ -93,7 +95,7 @@
 			echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 		}
 
-		require ("raportit/naytatilaus.inc");		
+		require ("raportit/naytatilaus.inc");
 		echo "<br><br><br>";
 		$tee2 = $vanha_tee2;
 
@@ -594,7 +596,7 @@
 		/*
 			Oletuksia
 		*/
-		if (isset($indexvas) and $indexvas == 1) {
+		if (isset($indexvas) and $indexvas == 1 and $tuvarasto == '') {
 
 			$karajaus = 1;
 
@@ -602,9 +604,14 @@
 				$karajaus = $yhtiorow["keraysaikarajaus"];
 			}
 
+			// jos käyttäjällä on oletusvarasto, valitaan se
+			if ($kukarow['oletus_varasto'] != 0) {
+				$tuvarasto = $kukarow['oletus_varasto'];
+			}
 			//	Varastorajaus jos käyttäjällä on joku varasto valittuna
-			if ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
-				$tuvarasto 	= $kukarow['varasto'];
+			elseif ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
+				// jos käyttäjällä on monta varastoa valittuna, valitaan ensimmäinen
+				$tuvarasto 	= strpos($kukarow['varasto'], ',') !== false ? array_shift(explode(",", $kukarow['varasto'])) : $kukarow['varasto'];
 			}
 			else {
 				$tuvarasto 	= "KAIKKI";
@@ -678,7 +685,7 @@
 		$query = "	SELECT lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue, count(*) kpl
 					FROM varastopaikat
 					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
-					WHERE varastopaikat.$logistiikka_yhtiolisa
+					WHERE varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.tyyppi != 'P'
 					GROUP BY lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue
 					ORDER BY varastopaikat.tyyppi, varastopaikat.nimitys, lasku.tulostusalue, varastopaikat.yhtio";
 		$result = mysql_query($query) or pupe_error($query);
@@ -708,7 +715,7 @@
 		$query = "	SELECT varastopaikat.maa, count(*) kpl
 					FROM varastopaikat
 					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
-					WHERE varastopaikat.maa != '' and varastopaikat.$logistiikka_yhtiolisa
+					WHERE varastopaikat.maa != '' and varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.tyyppi != 'P'
 					GROUP BY varastopaikat.maa
 					ORDER BY varastopaikat.maa";
 		$result = mysql_query($query) or pupe_error($query);

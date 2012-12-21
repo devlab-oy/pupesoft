@@ -289,7 +289,7 @@
 
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 						ORDER BY tyyppi, nimitys";
 			$vtresult = pupe_query($query);
 
@@ -314,7 +314,7 @@
 
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 						ORDER BY tyyppi, nimitys";
 			$vtresult = pupe_query($query);
 
@@ -1736,7 +1736,7 @@
 
 					// Aloitellaan lomakkeen teko
 					$params_tyomaarays = tyomaarays_alku($params_tyomaarays);
-					
+
 					if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "") {
 						// Ekan sivun otsikot
 						$params_tyomaarays['kala'] -= $params_tyomaarays['rivinkorkeus']*3;
@@ -1877,12 +1877,10 @@
 
 			if ($toim == "DGD") {
 
-				$otunnus = $laskurow["tunnus"];
-
 				require_once("tilauskasittely/tulosta_dgd.inc");
 
 				$params_dgd = array(
-				'kieli'			=> $kieli,
+				'kieli'			=> 'en',
 				'laskurow'		=> $laskurow,
 				'page'			=> NULL,
 				'pdf'			=> NULL,
@@ -1913,7 +1911,12 @@
 				$tilausnumeroita = $otunnus;
 
 				//haetaan asiakkaan tiedot
-				$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
+				$query = "  SELECT luokka,
+							puhelin,
+							if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
+							asiakasnro as asiakasnro_aito,
+							kerayserat,
+							kieli
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = pupe_query($query);
@@ -1976,12 +1979,18 @@
 								kerayserat.kpl as tilkpl,
 								kerayserat.kpl as varattu,
 								kerayserat.tunnus as ker_tunnus,
+								kerayserat.pakkaus,
 								kerayserat.pakkausnro,
 								{$sorttauskentta}
 								FROM kerayserat
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno {$lisa1})
-								JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+								JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio
+									AND vh.hyllyalue = tilausrivi.hyllyalue
+									AND vh.hyllynro = tilausrivi.hyllynro
+									AND vh.hyllyvali = tilausrivi.hyllyvali
+									AND vh.hyllytaso = tilausrivi.hyllytaso
+									AND vh.keraysvyohyke = kerayserat.keraysvyohyke)
 								WHERE kerayserat.otunnus IN ({$kerayseran_tilaukset})
 								AND kerayserat.yhtio   = '{$kukarow['yhtio']}'
 								ORDER BY sorttauskentta";
@@ -2096,26 +2105,76 @@
 				$kappaleet = $kappaleet == 0 ? 1 : $kappaleet;
 				$oslappkpl = $tee == 'NAYTATILAUS' ? 1 : $kappaleet;
 
-				$query = "  SELECT GROUP_CONCAT(DISTINCT if (tunnusnippu>0, concat(tunnusnippu,'/',tunnus),tunnus) ORDER BY tunnus SEPARATOR ', ') tunnukset
-							FROM lasku
-							WHERE yhtio='$kukarow[yhtio]' and tila='L' and kerayslista='$laskurow[kerayslista]' and kerayslista != 0";
-				$toimresult = pupe_query($query);
-				$toimrow = mysql_fetch_assoc($toimresult);
-
-				$tilausnumeroita = $toimrow["tunnukset"];
-
 				if ($oslapp != '' or $tee == 'NAYTATILAUS') {
 
-					$query = "SELECT osoitelappu FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
+					$query = "  SELECT GROUP_CONCAT(DISTINCT if (tunnusnippu>0, concat(tunnusnippu,'/',tunnus),tunnus) ORDER BY tunnus SEPARATOR ', ') tunnukset
+								FROM lasku
+								WHERE yhtio		= '$kukarow[yhtio]'
+								and tila		= 'L'
+								and kerayslista = '$laskurow[kerayslista]'
+								and kerayslista != 0";
+					$toimresult = pupe_query($query);
+					$toimrow = mysql_fetch_assoc($toimresult);
+
+					$tilausnumeroita = $toimrow["tunnukset"];
+
+					$query = "	SELECT osoitelappu
+								FROM toimitustapa
+								WHERE yhtio = '$kukarow[yhtio]'
+								and selite  = '$laskurow[toimitustapa]'";
 					$oslares = pupe_query($query);
 					$oslarow = mysql_fetch_assoc($oslares);
 
 					if ($oslarow['osoitelappu'] == 'intrade') {
 						require('osoitelappu_intrade_pdf.inc');
 					}
+					elseif ($oslarow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
+
+						// Yritetään komennon avulla löytää oikea tulostin....
+						$query  = "	SELECT mediatyyppi
+									FROM kirjoittimet
+									WHERE yhtio	= '$kukarow[yhtio]'
+									AND komento	= '".mysql_real_escape_string($oslapp)."'
+									LIMIT 1";
+						$kirres = pupe_query($query);
+						$kirrow = mysql_fetch_assoc($kirres);
+
+						$oslapp_mediatyyppi = $kirrow['mediatyyppi'];
+
+						$query = "	SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
+									FROM kerayserat
+									LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+									AND kerayserat.otunnus = '{$laskurow['tunnus']}'
+									GROUP BY 1,2,3
+									ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
+						$pak_chk_res = pupe_query($query);
+
+						$pak_num = mysql_num_rows($pak_chk_res);
+
+						while ($pak_chk_row = mysql_fetch_assoc($pak_chk_res)) {
+
+							for ($i = 1; $i <= $oslappkpl; $i++) {
+
+								$params = array(
+						 			'tilriv' => $pak_chk_row['otunnus'],
+						 			'komento' => $oslapp,
+									'mediatyyppi' => $oslapp_mediatyyppi,
+						 			'pakkauskoodi' => $pak_chk_row['pakkaus'],
+						 			'montako_laatikkoa_yht' => $pak_num,
+						 			'toim_nimi' => $laskurow['toim_nimi'],
+						 			'toim_nimitark' => $laskurow['toim_nimitark'],
+						 			'toim_osoite' => $laskurow['toim_osoite'],
+						 			'toim_postino' => $laskurow['toim_postino'],
+						 			'toim_postitp' => $laskurow['toim_postitp'],
+						 		);
+
+								tulosta_oslap_mg($params);
+							}
+						}
+					}
 					else {
 						require ("osoitelappu_pdf.inc");
-
 					}
 				}
 				$tee = '';

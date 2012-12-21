@@ -213,6 +213,23 @@
 				}
 			}
 		}
+
+		$hyvaksyja_maksimisumma = (int) $hyvaksyja_maksimisumma;
+
+		if ($hyvaksyja_maksimisumma != 0) {
+			$query = "	SELECT tunnus
+						FROM dynaaminen_puu
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji = 'kuka'
+						LIMIT 1";
+			$respuu = pupe_query($query);
+
+			if (mysql_num_rows($respuu) == 0) {
+				echo "<font class='error'>",t("Maksimisumma vaatii, että organisaatiopuu on käytössä"),"!</font><br><br>";
+				$jatka = 1; // ei perusteta
+				unset($submit_button);
+			}
+		}
 	}
 
 	// Perustetaan uusi käyttäjä
@@ -349,6 +366,7 @@
 						max_keraysera_alustat			= '{$max_keraysera_alustat}',
 						laatija							= '{$kukarow['kuka']}',
 						luontiaika						= now(),
+						budjetti						= '{$budjetti}',
 						yhtio 							= '{$yhtio}'";
 			$result = pupe_query($query);
 			$selkuka = mysql_insert_id();
@@ -552,7 +570,8 @@
 						keraysvyohyke					= '{$keraysvyohyke}',
 						max_keraysera_alustat			= '{$max_keraysera_alustat}',
 						muuttaja						= '{$kukarow['kuka']}',
-						muutospvm						= now()
+						muutospvm						= now(),
+						budjetti						= '{$budjetti}'
 						WHERE kuka	= '{$kuka}'
 						AND yhtio	= '{$yhtio}'";
 			$result = pupe_query($query);
@@ -772,7 +791,7 @@
 					echo "</select>";
 					echo "</td></tr>";
 
-					echo "<tr><th align='left'>",t("Hierarkia ja esimiehet"),":</th><td>";
+					echo "<tr><th align='left'>",t("Organisaatiopuu"),":</th><td>";
 
 					$monivalintalaatikot = array('DYNAAMINEN_KUKA');
 					$monivalintalaatikot_normaali = array();
@@ -922,7 +941,7 @@
 
 				$query  = "	SELECT *
 							FROM varastopaikat
-							WHERE yhtio = '{$kukarow['yhtio']}'
+							WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
 							ORDER BY tyyppi, nimitys";
 				$vares = pupe_query($query);
 
@@ -942,7 +961,7 @@
 
 				$query  = "	SELECT *
 							FROM varastopaikat
-							WHERE yhtio = '{$kukarow['yhtio']}'
+							WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
 							ORDER BY tyyppi, nimitys";
 				$vares = pupe_query($query);
 
@@ -1375,6 +1394,8 @@
 					}
 					echo "</td><td class='back'>",t("Ilman rajausta käyttäjä voi myydä kaikkiin piireihin"),"</td></tr>";
 				}
+
+				echo "<tr><th>".t('Käyttäjän myyntitavoite 12kk').":</th><td><input type='text' name='budjetti' value='{$krow['budjetti']}' size='12'></td></tr>";
 			}
 
 			echo "</table>";

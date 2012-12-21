@@ -37,7 +37,8 @@
 				group_concat(distinct if(trim(tilausyhteyshenkilo)='', NULL, trim(tilausyhteyshenkilo)) 		SEPARATOR ' / ') tilausyhteyshenkilo,
 				group_concat(distinct if(trim(asiakkaan_tilausnumero)='', NULL, trim(asiakkaan_tilausnumero)) 	SEPARATOR ' / ') asiakkaan_tilausnumero,
 				group_concat(distinct if(trim(kohde)='', NULL, trim(kohde)) 									SEPARATOR ' / ') kohde,
-				count(distinct toimitustapa) toimitustavat
+				count(distinct toimitustapa) toimitustavat,
+				count(tunnus) tilausmaara
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus in ($tunnukset)";
@@ -54,6 +55,42 @@
 		$pyoristys_valuutassa	= round($sumrow["pyoristys_valuutassa"], 2);
 		$kate					= round($sumrow["kate"], 2);
 		$bruttopaino			= round($sumrow["bruttopaino"], 2);
+
+		// EE keississä lasketaan veron määrää saman kaavan mukaan ku laskun tulostuksessa alvierittelyssä
+		// ja sit lopuksi summataan $summa+$alvinmaara jotta saadaan laskun verollinen loppusumma
+		// Tämä operaatiota ei tehdä _valuutassa summalle
+		// Tämä operaatio on tarpeellinen vain jos tilauksia on laskulla enemmän kuin yksi
+		if (strtoupper($yhtiorow['maa']) == 'EE' and $sumrow["tilausmaara"] > 1) {
+
+			$alvinmaara = 0;
+
+			//Haetaan kaikki alvikannat riveiltä
+			$alvquery = "	SELECT DISTINCT alv
+							FROM tilausrivi
+							WHERE yhtio  = '$kukarow[yhtio]'
+							and otunnus in ($tunnukset)
+							and tyyppi = 'L'
+							and alv < 500";
+			$alvresult = pupe_query($alvquery);
+
+			while ($alvrow = mysql_fetch_assoc($alvresult)) {
+
+				$aquery = "	SELECT
+							round(sum(tilausrivi.rivihinta * (tilausrivi.alv / 100)),2) alvrivihinta
+							FROM tilausrivi
+							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+							WHERE tilausrivi.otunnus in ($tunnukset)
+							and tilausrivi.yhtio	= '$kukarow[yhtio]'
+							and tilausrivi.alv		= '$alvrow[alv]'
+							and tilausrivi.tyyppi	= 'L'";
+				$aresult = pupe_query($aquery);
+				$arow = mysql_fetch_assoc($aresult);
+
+				$alvinmaara += $arow["alvrivihinta"];
+			}
+
+			$summa = $arvo+$alvinmaara;
+		}
 
 		// generoidaan vientikurssi
 		if ($sumrow["arvo_valuutassa_matikka"] == 0) {
@@ -168,14 +205,14 @@
 
 			$kieliind = "teksti_".$kielirow["kieli"];
 
-			if (trim($frow[$kieliind]) != "") $lisa_comments .= trim($frow[$kieliind])." \n";
-			else $lisa_comments .= trim($frow["teksti_fi"])." \n";
+			if (trim($frow[$kieliind]) != "" and stripos($sisviestit1, $frow[$kieliind]) === FALSE) $lisa_comments .= trim($frow[$kieliind])." \n";
+			elseif (stripos($sisviestit1, $frow["teksti_fi"]) === FALSE) $lisa_comments .= trim($frow["teksti_fi"])." \n";
 		}
 	}
 	if ($lasrow["vienti"] == 'E') {
 
-		if ($lasrow['kolmikantakauppa'] == "K") {
-			$lisa_comments .= "VAT 0% Triangulation.\n";
+		if ($lasrow['kolmikantakauppa'] != "") {
+			if (stripos($sisviestit1, "VAT 0% Triangulation.") === FALSE) $lisa_comments .= "VAT 0% Triangulation. \n";
 		}
 		else {
 			//	Tarkastetaan onko laskulla vain saldotonta kamaa, se muuttaa kommenttia..
@@ -187,16 +224,16 @@
 			$abulisares = pupe_query($query);
 
 			if (mysql_num_rows($abulisares) == 0) {
-				$lisa_comments .= "Reverse charge, intangible service. \n";
+				if (stripos($sisviestit1, "Reverse charge, intangible service.") === FALSE) $lisa_comments .= "Reverse charge, intangible service. \n";
 			}
 			else {
-				$lisa_comments .= "VAT 0% Intra community supply. \n";
+				if (stripos($sisviestit1, "VAT 0% Intra community supply.") === FALSE) $lisa_comments .= "VAT 0% Intra community supply. \n";
 			}
 		}
 	}
 
 	if ($lasrow["vienti"] == 'K') {
-		$lisa_comments .= "VAT 0% Export of goods outside the European Union. \n";
+		if (stripos($sisviestit1, "VAT 0% Export of goods outside the European Union.") === FALSE) $lisa_comments .= "VAT 0% Export of goods outside the European Union. \n";
 	}
 
 	if ($lasrow["vienti"] != '') {
@@ -232,14 +269,18 @@
 				$rahtirow_pakkaus .= ", ".$rahtirow["pakkauskuvaustark"];
 			}
 
-			$lisa_comments .= "$rahtirow[kollit] x ".trim($rahtirow_pakkaus).", ".t("yhteensä", $kielirow["kieli"])." $rahtirow[kilot] kg. \n";
+			$ralisvie = "$rahtirow[kollit] x ".trim($rahtirow_pakkaus).", ".t("yhteensä", $kielirow["kieli"])." $rahtirow[kilot] kg.";
+
+			if (stripos($sisviestit1, $ralisvie) === FALSE) $lisa_comments .= $ralisvie." \n";
 		}
 	}
 
 	//Laitetaan laskun viestikenttään talteen tiettyjä lisätietoja
 	if ($mehtorow["jv"] != '') {
-		$lisa_viestit 	.= t("Kuitti jälkivaatimuksesta", $kielirow["kieli"]);
-		$lisa_comments 	.= t("Kuitataan jälkivaatimuksella saaduksi. TÄTÄ LASKUA EI TULE MAKSAA!", $kielirow["kieli"])."\n";
+		$lisa_viestit  .= t("Kuitti jälkivaatimuksesta", $kielirow["kieli"]);
+		$jvlisvie = t("Kuitataan jälkivaatimuksella saaduksi. TÄTÄ LASKUA EI TULE MAKSAA!", $kielirow["kieli"]);
+
+		if (stripos($sisviestit1, $jvlisvie) === FALSE) $lisa_comments .= $jvlisvie." \n";
 	}
 
 	// Haetaan avainsanoista vakioviesti
@@ -255,27 +296,27 @@
 	if (mysql_num_rows($vakioviesti_result) == 1) {
 		$vakioviesti_row = mysql_fetch_assoc($vakioviesti_result);
 
-		$lisa_comments .= " $vakioviesti_row[selite]\n";
+		if (stripos($sisviestit1, $vakioviesti_row["selite"]) === FALSE) $lisa_comments .= $vakioviesti_row["selite"]." \n";
 	}
 
 	// Lisätään järjestelmän generoimat kommentit laskun kommenttikenttään
 	if ($lisa_comments != "") {
-		$sisviestit1 = $lisa_comments." ".$sisviestit1;
+		$sisviestit1 = trim($lisa_comments." ".$sisviestit1);
 	}
 
 	// Lisätään järjestelmän generoimat viestit laskun viestikenttään
 	if ($lisa_viestit != "") {
-		$viestit = $lisa_viestit." ".$viestit;
+		$viestit = trim($lisa_viestit." ".$viestit);
 	}
 
 	//Siivotaan kommenteista kaikki kummalliset merkit pois
-	$comments 				= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $comments);
-	$viestit				= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $viestit);
-	$sisviestit1			= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit1);
-	$sisviestit2			= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit2);
-	$tilausyhteyshenkilo	= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $tilausyhteyshenkilo);
-	$asiakkaan_tilausnumero	= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $asiakkaan_tilausnumero);
-	$kohde					= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $kohde);
+	$comments 				= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $comments);
+	$viestit				= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $viestit);
+	$sisviestit1			= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit1);
+	$sisviestit2			= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit2);
+	$tilausyhteyshenkilo	= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $tilausyhteyshenkilo);
+	$asiakkaan_tilausnumero	= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $asiakkaan_tilausnumero);
+	$kohde					= preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $kohde);
 
 	$fields = "yhtio";
 	$values = "'$kukarow[yhtio]'";

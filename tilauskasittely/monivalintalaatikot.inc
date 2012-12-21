@@ -74,7 +74,6 @@
 	$lisa_haku_tme 			 = "";
 	$lisa_haku_malli 		 = "";
 	$lisa_haku_mallitarkenne = "";
-	$lisa_haku_laskumyyja  	 = "";
 	$lisa_haku_asiakastila 	 = "";
 	$lisa_haku_myyja		 = "";
 	$lisa_haku_asiakasmyyja  = "";
@@ -93,6 +92,13 @@
 	$kieltolisa = isset($kieltolisa) ? trim($kieltolisa) : "";
 	$extra_poislisa = isset($extra_poislisa) ? trim($extra_poislisa) : "";
 	$avainlisa = isset($avainlisa) ? trim($avainlisa) : "";
+
+	if (!isset($piirivalinta) or $piirivalinta == 'lasku') {
+		$laskuvalintachk  	= "CHECKED";
+	}
+	else {
+		$asiakasvalintachk  = "CHECKED";
+	}
 
 	// Setataan muuttujat
 	if (!isset($mul_osasto)) 		$mul_osasto = array();
@@ -393,8 +399,7 @@
 		$laskumyyjat = substr($laskumyyjat, 0, -1);
 
 		if (trim($laskumyyjat) != '') {
-			$lisa_haku_laskumyyja = " and kuka.myyja in ($laskumyyjat) ";
-			$lisa .= " and tuote.myyjanro in ($laskumyyjat) ";
+			$lisa .= " and lasku.myyja in ($laskumyyjat) ";
 		}
 	}
 
@@ -530,8 +535,15 @@
 		$asiakaspiirit = substr($asiakaspiirit, 0, -1);
 
 		if (trim($asiakaspiirit) != '') {
-			$lisa_haku_asiakaspiiri = " and asiakas.piiri in ($asiakaspiirit) ";
-			$lisa .= " and asiakas.piiri in ($asiakaspiirit) ";
+
+			if (isset($piirivalinta) and $piirivalinta == "lasku") {
+				$lisa_haku_asiakaspiiri = " and lasku.piiri in ($asiakaspiirit) ";
+				$lisa .= " and lasku.piiri in ($asiakaspiirit) ";
+			}
+			else {
+				$lisa_haku_asiakaspiiri = " and asiakas.piiri in ($asiakaspiirit) ";
+				$lisa .= " and asiakas.piiri in ($asiakaspiirit) ";
+			}
 		}
 	}
 
@@ -549,7 +561,11 @@
 		$kustpt = substr($kustpt, 0, -1);
 
 		if (trim($kustpt) != '') {
-			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+			if ($mulselprefix == 'asiakas') {
+				$lisa_haku_kustp = " and asiakas.kustannuspaikka in ($kustpt) ";
+				$lisa .= " and asiakas.kustannuspaikka in ($kustpt) ";
+			}
+			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 				$lisa_haku_kustp = " and (tuote.kustp in ($kustpt) or asiakas.kustannuspaikka in ($kustpt)) ";
 				$lisa .= " and (tuote.kustp in ($kustpt) or asiakas.kustannuspaikka in ($kustpt)) ";
 			}
@@ -574,8 +590,18 @@
 		$kohdet = substr($kohdet, 0, -1);
 
 		if (trim($kohdet) != '') {
-			$lisa_haku_kohde = " and tiliointi.kohde in ($kohdet) ";
-			$lisa .= " and tiliointi.kohde in ($kohdet) ";
+			if ($mulselprefix == 'asiakas') {
+				$lisa_haku_kustp = " and asiakas.kohde in ($kohdet) ";
+				$lisa .= " and asiakas.kohde in ($kohdet) ";
+			}
+			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+				$lisa_haku_kustp = " and (tuote.kohde in ($kohdet) or asiakas.kohde in ($kohdet)) ";
+				$lisa .= " and (tuote.kohde in ($kohdet) or asiakas.kohde in ($kohdet)) ";
+			}
+			else {
+				$lisa_haku_kohde = " and tiliointi.kohde in ($kohdet) ";
+				$lisa .= " and tiliointi.kohde in ($kohdet) ";
+			}
 		}
 	}
 
@@ -593,8 +619,18 @@
 		$projektit = substr($projektit, 0, -1);
 
 		if (trim($projektit) != '') {
-			$lisa_haku_projekti = " and tiliointi.projekti in ($projektit) ";
-			$lisa .= " and tiliointi.projekti in ($projektit) ";
+			if ($mulselprefix == 'asiakas') {
+				$lisa_haku_kustp = " and asiakas.projekti in ($projektit) ";
+				$lisa .= " and asiakas.projekti in ($projektit) ";
+			}
+			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+				$lisa_haku_kustp = " and (tuote.projekti in ($projektit) or asiakas.projekti in ($projektit)) ";
+				$lisa .= " and (tuote.projekti in ($projektit) or asiakas.projekti in ($projektit)) ";
+			}
+			else {
+				$lisa_haku_projekti = " and tiliointi.projekti in ($projektit) ";
+				$lisa .= " and tiliointi.projekti in ($projektit) ";
+			}
 		}
 	}
 
@@ -1515,7 +1551,7 @@
 			echo "<tr>";
 
 			// tehdään query
-			$query = "	SELECT DISTINCT myyja, nimi
+			$query = "	SELECT DISTINCT myyja, nimi, tunnus
 						FROM kuka
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND myyja > 0
@@ -1529,12 +1565,12 @@
 				$sel = '';
 
 				if (count($mul_laskumyyja) > 0) {
-					if (in_array(trim($sxrow['myyja']), $mul_laskumyyja)) {
+					if (in_array(trim($sxrow['tunnus']), $mul_laskumyyja)) {
 						$sel = 'SELECTED';
 					}
 				}
 
-				echo "<option value='$sxrow[myyja]' $sel>$sxrow[myyja] $sxrow[nimi]</option>";
+				echo "<option value='$sxrow[tunnus]' $sel>$sxrow[myyja] $sxrow[nimi]</option>";
 			}
 
 			echo "</select></td>";
@@ -1576,7 +1612,9 @@
 					}
 				}
 
-				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite] $sxrow[selitetark]</option>";
+				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite]";
+				if ($sxrow["selite"] != $sxrow["selitetark"]) echo " $sxrow[selitetark]";
+				echo "</option>";
 			}
 
 			echo "</select></td>";
@@ -1761,7 +1799,9 @@
 					}
 				}
 
-				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite] $sxrow[selitetark]</option>";
+				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite]";
+				if ($sxrow["selite"] != $sxrow["selitetark"]) echo " $sxrow[selitetark]";
+				echo "</option>";
 			}
 
 			echo "</select></td>";
@@ -1803,7 +1843,9 @@
 					}
 				}
 
-				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite] $sxrow[selitetark]</option>";
+				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite]";
+				if ($sxrow["selite"] != $sxrow["selitetark"]) echo " $sxrow[selitetark]";
+				echo "</option>";
 			}
 
 			echo "</select></td>";
@@ -1845,7 +1887,9 @@
 					}
 				}
 
-				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite] $sxrow[selitetark]</option>";
+				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite]";
+				if ($sxrow["selite"] != $sxrow["selitetark"]) echo " $sxrow[selitetark]";
+				echo "</option>";
 			}
 
 			echo "</select></td>";
@@ -1858,7 +1902,12 @@
 					$ruksitchk = "CHECKED";
 				}
 
-				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[asiakaspiiri]' size='2' value='$jarjestys[asiakaspiiri]'> ".t("Asiakaspiireittäin")." <input type='checkbox' name='ruksit[asiakaspiiri]' value='asiakaspiiri' $ruksitchk></th></tr>";
+				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[asiakaspiiri]' size='2' value='$jarjestys[asiakaspiiri]'> ".t("Asiakaspiireittäin")." <input type='checkbox' name='ruksit[asiakaspiiri]' value='asiakaspiiri' $ruksitchk><br>";
+
+				echo "<input type='radio' name='piirivalinta' value='lasku' {$laskuvalintachk}>",t("Laskuilta");
+				echo "<input type='radio' name='piirivalinta' value='asiakas' {$asiakasvalintachk}>",t("Asiakkailta");
+
+				echo "</th></tr>";
 			}
 
 			echo "</table></div>";
@@ -1939,7 +1988,17 @@
 
 				echo "<tr>";
 
-				echo "<td nowrap style='padding:0px'><select id='mul_kustp[]' name='mul_kustp[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+				echo "<td nowrap style='padding:0px'>";
+
+				$multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+
+				if (in_array("kustp", $monivalintalaatikot_normaali)) {
+					$multiple_lisa = "";
+				}
+
+				echo "<select id='mul_kustp[]' name='mul_kustp[]' $multiple_lisa $autosubmit>";
+
+
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
 				lapsitasot(0, -1, "0,");
@@ -1980,7 +2039,7 @@
 
 				echo "<tr>";
 
-				echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' $tunnukset_save $autosubmit>";
+				echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' size='7' style='width: 100%;' $tunnukset_save $autosubmit>";
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
 				while ($sxrow = mysql_fetch_array ($sresult)){
@@ -2065,4 +2124,3 @@
 	}
 
 	echo "<div style='clear: both;'></div>";
-?>

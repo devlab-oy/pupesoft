@@ -39,7 +39,9 @@ if(!function_exists("tilitarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "oletus_alv" and trim($t[$i]) == "") {
-			$t[$i] = NULL;
+
+			// Jos on tyhjä niin laitetaan stringi NULL, joka tarkoittaa 'ei oletusta'
+			$t[$i] = "NULL";
 		}
 	}
 }

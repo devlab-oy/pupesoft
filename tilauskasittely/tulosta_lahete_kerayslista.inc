@@ -2,29 +2,29 @@
 
 require_once("pdflib/phppdflib.class.php");
 
-$norm["height"] 			= 10;
-$norm["font"] 				= "Times-Roman";
-
-$pieni["height"] 			= 8;
-$pieni["font"] 				= "Times-Roman";
-
-$boldi["height"] 			= 10;
-$boldi["font"] 				= "Times-Bold";
-
-$pieni_boldi["height"] 		= 8;
-$pieni_boldi["font"] 		= "Times-Bold";
-
-$keraaja_font["height"]		= 12;
-$keraaja_font["font"] 		= "Helvetica";
-
-$iso["height"] 				= 14;
-$iso["font"] 				= "Helvetica-Bold";
-
-$iso_boldi["height"] 		= 24;
-$iso_boldi["font"] 			= "Helvetica-Bold";
-
-$rectparam["width"] 		= 0.3;
-$rivinkorkeus				= 17;
+$norm["height"] 	    = 10;
+$norm["font"] 		    = "Times-Roman";
+                        
+$pieni["height"] 	    = 8;
+$pieni["font"] 		    = "Times-Roman";
+                        
+$boldi["height"] 	    = 10;
+$boldi["font"] 		    = "Times-Bold";
+                        
+$pieni_boldi["height"]  = 8;
+$pieni_boldi["font"]    = "Times-Bold";
+                        
+$keraaja_font["height"] = 12;
+$keraaja_font["font"]   = "Helvetica";
+                        
+$iso["height"] 		    = 14;
+$iso["font"] 		    = "Helvetica-Bold";
+                        
+$iso_boldi["height"]    = 24;
+$iso_boldi["font"] 	    = "Helvetica-Bold";
+                        
+$rectparam["width"]     = 0.3;
+$rivinkorkeus		    = 17;
 
 if (!function_exists('alku_kerayslista')) {
 	function alku_kerayslista ($params) {
@@ -262,16 +262,36 @@ if (!function_exists('alku_kerayslista')) {
 
 			$pdf->draw_rectangle(737, 300, 716, 580, $thispage, $rectparam);
 			$pdf->draw_rectangle(737, 420, 716, 580, $thispage, $rectparam);
-			$pdf->draw_text(310, 729, t("Myyjä", $kieli), 		$thispage, $pieni);
 
-			//etsitään myyjän nimi
-			$query  = "	SELECT nimi, kuka
-						FROM kuka
-						WHERE tunnus='$laskurow[myyja]' AND yhtio='$kukarow[yhtio]'";
-			$myyresult = mysql_query($query) or pupe_error($query);
-			$myyrow = mysql_fetch_assoc($myyresult);
+			if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
 
-			$pdf->draw_text(310, 719, $myyrow["nimi"], 										$thispage, $norm);
+				$pdf->draw_text(310, 729, t("Kerääjä", $kieli), 		$thispage, $pieni);
+
+				//etsitään myyjän nimi
+				$query  = "	SELECT kuka.nimi
+							FROM kerayserat
+							JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.laatija)
+							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+							AND kerayserat.nro = '{$kerayseran_numero}'
+							LIMIT 1";
+				$keraaja_res = pupe_query($query);
+				$keraaja_row = mysql_fetch_assoc($keraaja_res);
+
+				$pdf->draw_text(310, 719, $keraaja_row["nimi"], $thispage, $norm);
+
+			}
+			else {
+				$pdf->draw_text(310, 729, t("Myyjä", $kieli), 		$thispage, $pieni);
+
+				//etsitään myyjän nimi
+				$query  = "	SELECT nimi, kuka
+							FROM kuka
+							WHERE tunnus='$laskurow[myyja]' AND yhtio='$kukarow[yhtio]'";
+				$myyresult = mysql_query($query) or pupe_error($query);
+				$myyrow = mysql_fetch_assoc($myyresult);
+
+				$pdf->draw_text(310, 719, $myyrow["nimi"], 										$thispage, $norm);
+			}
 
 			$pdf->draw_text(430, 729, t("Tilauspvm", $kieli),							 	$thispage, $pieni);
 			$pdf->draw_text(430, 719, tv1dateconv($laskurow["luontiaika"], "pitka"), 		$thispage, $norm);
@@ -453,7 +473,7 @@ if (!function_exists('alku_kerayslista')) {
 				$kala = 560;
 			}
 
-			// viivakoodin arvo
+			// Viivakoodi
 			if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
 				$barcode = strlen($kerayseran_numero) < 6 ? str_pad((int) $kerayseran_numero, 6, "0", STR_PAD_LEFT) : $kerayseran_numero;
 			}
@@ -461,9 +481,28 @@ if (!function_exists('alku_kerayslista')) {
 				$barcode  = $laskurow["tunnus"];
 			}
 
-			$data = viivakoodi($barcode, "code128", 150, 30, "");
+			$data = viivakoodi(trim($barcode), "code128", 150, 30, "");
 			$image = $pdf->jfif_embed($data);
 			$pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+
+			// Tehdään asiakasnumero-viivakoodi
+			if ($kukarow['yhtio'] == 'hair' and $asrow["asiakasnro"] > 0) {
+				if ($laskurow['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
+					$bottom_barcode = 582;
+					$bottom_barcode_text = 578;
+				}
+				else {
+					$bottom_barcode = 605;
+					$bottom_barcode_text = 600;
+				}
+
+				$data = viivakoodi(trim($asrow["asiakasnro"]), "code128", 70, 10, "");
+				$image = $pdf->jfif_embed($data);
+				$pdf->image_place($image, $bottom_barcode, 475, $thispage, array("scale" => 0.5));
+
+				$oikpos = $pdf->strlen(t("Asnro")." ".$asrow["asiakasnro"], $norm);
+				$pdf->draw_text(580-$oikpos, $bottom_barcode_text, t("Asnro")." ".$asrow["asiakasnro"], $thispage, $norm);
+			}
 		}
 
 		// Luodaan palautettavat
@@ -553,7 +592,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 			$pdf->draw_text(430, 761, tv1dateconv($laskurow["toimaika"]), 	$thispage, $boldi);
 		}
 
-		// viivakoodin arvo
+		// Viivakoodi
 		if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
 			$barcode = strlen($kerayseran_numero) < 6 ? str_pad((int) $kerayseran_numero, 6, "0", STR_PAD_LEFT) : $kerayseran_numero;
 		}
@@ -561,7 +600,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 			$barcode  = $laskurow["tunnus"];
 		}
 
-		$data = viivakoodi($barcode, "code128", 150, 30, "");
+		$data = viivakoodi(trim($barcode), "code128", 150, 30, "");
 		$image = $pdf->jfif_embed($data);
 		$pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
 
@@ -852,7 +891,7 @@ if (!function_exists('rivi_kerayslista')) {
 
 				if ($laskurow['varasto'] == $laskurow['clearing'] AND $kohderow['kohde_hyllyalue'] != '' AND $kohderow['kohde_hyllynro'] != '' AND $kohderow['kohde_hyllyvali'] != '' AND $kohderow['kohde_hyllytaso'] != '') {
 					$varastopaikkakohde = $kohderow["kohde_hyllyalue"] . " " . $kohderow["kohde_hyllynro"] . " " . $kohderow["kohde_hyllyvali"] . " " . $kohderow["kohde_hyllytaso"];
-					$row['kommentti'] .= "\nVie paikalle ".$varastopaikkakohde;
+					$row['kommentti'] .= "\n".t("Vie paikalle", $kieli)." ".$varastopaikkakohde;
 				}
 
 				$pdf->draw_text(330, $kala, pdf_substr($trow["toim_tuoteno"], 80, $pdf, $norm), $thispage, $norm);
@@ -1061,6 +1100,31 @@ if (!function_exists('rivi_kerayslista')) {
 					}
 				}
 
+				if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
+					if ($row["kommentti"] != '') {
+						$row["kommentti"] .= "\n";
+					}
+
+					$row['kommentti'] .= t("Tilausnumero", $kieli).": {$row['otunnus']}";
+
+					//etsitään myyjän nimi
+					$query  = "	SELECT kuka.nimi
+								FROM lasku
+								JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja AND kuka.yhtio = lasku.yhtio)
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.tunnus = '{$row['otunnus']}'";
+					$myyresult = pupe_query($query);
+					$myyrow = mysql_fetch_assoc($myyresult);
+
+					$row['kommentti'] .= "\n".t("Myyjä", $kieli).": {$myyrow['nimi']}";
+				}
+				
+				// Otetaan yhteensäkommentti pois keröyslistalta (tämä tieto löytyy riviltä jos tilaus on laskutettu, mutta lähetteellä sitä ei voi näyttää)
+				$row["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+				$row["kommentti"] = preg_replace("/ ".t("yhteensä", $asrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+				$row["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+				$row["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+
 				// Trimmataan uudestaan
 				$row["kommentti"] = trim($row["kommentti"]);
 
@@ -1068,6 +1132,17 @@ if (!function_exists('rivi_kerayslista')) {
 					$pakkaus_kirjain = chr((64+$row['pakkausnro']));
 
 					$pdf->draw_text(42, $kala+5, $pakkaus_kirjain, $thispage, $iso_boldi);
+
+					$kala -= 10;
+
+					$query = "	SELECT CONCAT(pakkaus, ' ', pakkauskuvaus) pakkaus
+								FROM pakkaus
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$row['pakkaus']}'";
+					$pak_nimi_res = pupe_query($query);
+					$pak_nimi_row = mysql_fetch_assoc($pak_nimi_res);
+
+					$pdf->draw_text(42, $kala, trim($pak_nimi_row['pakkaus']), $thispage, $norm);
 
 					if ($row['kommentti'] == '') {
 						$kala -= 20;

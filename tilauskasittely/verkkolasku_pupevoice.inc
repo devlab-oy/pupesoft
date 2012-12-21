@@ -199,7 +199,7 @@ if (!function_exists('pupevoice_alvierittely')) {
 }
 
 if (!function_exists('pupevoice_rivi')) {
-	function pupevoice_rivi($tootxml, $tilrow, $vatamount, $totalvat) {
+	function pupevoice_rivi($tootxml, $tilrow, $vatamount) {
 		global $yhtiorow, $kukarow;
 
 		fputs($tootxml, "<Row>\n");
@@ -235,7 +235,7 @@ if (!function_exists('pupevoice_rivi')) {
 		xml_add("RowVatRatePercent",				$tilrow['alv'], 							$tootxml);
 		xml_add("RowVatAmount",						$vatamount, 								$tootxml); // veron m‰‰r‰
 		xml_add("RowTotalVatExcludedAmount",		$tilrow['rivihinta'],		 				$tootxml); // veroton rivihinta
-		xml_add("RowTotalVatIncludedAmount",		$totalvat, 									$tootxml); // verollinen rivihinta
+		xml_add("RowTotalVatIncludedAmount",		$tilrow["rivihinta_verollinen"], 			$tootxml); // verollinen rivihinta
 
 		// Jos t‰m‰ on t‰n tilauksen vika rivi
 		if ($tilrow['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $tilrow['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and $tilrow['seuraava_otunnus'] != $tilrow["otunnus"]) {
@@ -303,7 +303,7 @@ if (!function_exists('pupevoice_rivi')) {
 
 			if (trim($lisakomm) != "") {
 				// Siivotaan myˆs lis‰kommentti
-				$lisakomm = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
+				$lisakomm = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â‹¸ ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
 
 				$tilrow["kommentti"] = trim($lisakomm)."|".trim($tilrow["kommentti"]);
 			}

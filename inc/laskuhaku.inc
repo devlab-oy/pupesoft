@@ -3,8 +3,6 @@
 echo "<font class='head'>",t("Laskuhaku"),"</font><hr>";
 
 if (!isset($tee)) $tee = '';
-if (!isset($itila)) $itila = '';
-if (!isset($ialatila)) $ialatila = '';
 if (!isset($pvm)) $pvm = '';
 if (!isset($summa1)) $summa1 = '';
 if (!isset($summa2)) $summa2 = '';
@@ -12,13 +10,6 @@ if (!isset($summa2)) $summa2 = '';
 $index = "";
 $ehto  = "";
 $jarj  = "";
-
-// Q = laskuja tilansa mukaan
-if ($tee == 'Q') {
-	$index = " use index (tila_index) ";
-	$ehto = " lasku.tila = '{$itila}' and lasku.alatila = '{$ialatila}' ";
-	$jarj = " lasku.tapvm ";
-}
 
 // E = er‰‰ntyvi‰ laskuja pvm:n mukaan
 if ($tee == 'E') {
@@ -94,7 +85,7 @@ if ($tee == 'L') {
 	$index = " use index (yhtio_tila_laskunro) ";
 }
 
-if ($laskuntyyppi != "K") {
+if (isset($laskuntyyppi) and $laskuntyyppi != "" and $laskuntyyppi != "K") {
 	$ehto .= " AND lasku.tila = '$laskuntyyppi' ";
 }
 
@@ -114,6 +105,7 @@ if (($tee == 'S' or $tee == 'N' or $tee == 'V' or $tee == 'K' or $tee == 'W' or 
 }
 
 echo "<form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>";
+echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 echo "<input type = 'hidden' name = 'toim' value = 'laskuhaku'>";
 echo "<table>";
 
@@ -266,7 +258,7 @@ echo "<td><select name = 'laskuntyyppi'>
 		</select></td>
 		</tr>";
 
-$sel = array_fill_keys(array($tee), " selected") + array_fill_keys(array('S', 'N', 'V', 'W', 'K', 'L'), '');
+$sel = array_fill_keys(array($tee), " selected") + array_fill_keys(array('S', 'N', 'V', 'W', 'K', 'L', 'T', 'Q', 'E', 'M'), '');
 
 echo "<tr>";
 echo "<th>".t("Hakulaji")."</th>";
@@ -277,12 +269,37 @@ echo "<option value = 'V' {$sel['V']}>".t("Viitteell‰")."</option>";
 echo "<option value = 'W' {$sel['W']}>".t("Viestill‰")."</option>";
 echo "<option value = 'K' {$sel['K']}>".t("Kommentilla")."</option>";
 echo "<option value = 'L' {$sel['L']}>".t("Laskunumerolla")."</option>";
+
+// N‰ytet‰‰n vain jos on jo ennest‰‰n setattu
+if ($tee == "T") {
+	echo "<option value = 'T' {$sel['T']}>".t("Tunnuksella")."</option>";
+}
+
+// E = er‰‰ntyvi‰ laskuja pvm:n mukaan
+if ($tee == 'E') {
+	echo "<option value = 'E' {$sel['E']}>".t("Er‰p‰iv‰n mukaan")."</option>";
+}
+
+// M = maksettavia laskuja pvm:n mukaan
+if ($tee == 'M') {
+	echo "<option value = 'M' {$sel['M']}>".t("Oletusmaksup‰iv‰n mukaan")."</option>";
+}
+
 echo "</select></td></tr>";
 echo "<tr><th>".t("Haku")."</th><td><input type = 'text' name = 'summa1' value = '$summa1' size='13'> - <input type = 'text' name = 'summa2' value = '$summa2' size='13'></td>";
 echo "<td class='back'><input type = 'submit' value = '".t("Etsi")."'></td>";
 echo "</tr>";
 
 echo "</table>";
+
+if ($tee == 'E') {
+	echo "<input type = 'hidden' name = 'pvm' value = '$pvm'>";
+}
+
+if ($tee == 'M') {
+	echo "<input type = 'hidden' name = 'pvm' value = '$pvm'>";
+}
+
 echo "</form>";
 echo "<hr><br><br>";
 
@@ -299,7 +316,7 @@ if ($tee != '') {
 	$alku += 0;
 
 	if (isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
-		$tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus) ";
+		$tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu='') ";
 	}
 	else {
 		$tiliointilisa = '';
@@ -363,7 +380,10 @@ if ($tee != '') {
 			echo "<td valign='top'>{$trow["tapvm"]}<br>{$trow["erpcm"]}</td>";
 		}
 		else {
-			echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//summa1=$summa1//summa2=$summa2//alkuvv=$alkuvv//alkukk=$alkukk//alkupp=$alkupp//loppuvv=$loppuvv//loppukk=$loppukk//loppupp=$loppupp'>{$trow["tapvm"]}</a><br>{$trow["erpcm"]}</td>";
+			$lopelisa = "$PHP_SELF////toim=$toim//tee=$tee//laskuntyyppi=$laskuntyyppi//summa1=$summa1//summa2=$summa2//alkuvv=$alkuvv//alkukk=$alkukk//alkupp=$alkupp//loppuvv=$loppuvv//loppukk=$loppukk//loppupp=$loppupp//pvm=$pvm";
+			if (isset($lopetus) and $lopetus != "") $lopelisa = "$lopetus/SPLIT/$lopelisa";
+
+			echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$lopelisa'>{$trow["tapvm"]}</a><br>{$trow["erpcm"]}</td>";
 		}
 
 		echo "<td valign='top'>$trow[nimi]</td>";
@@ -409,7 +429,7 @@ if ($tee != '') {
 
 	if ($alku > 0) {
 		$siirry = $alku - 50;
-		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila&alkuvv=$alkuvv&alkukk=$alkukk&alkupp=$alkupp&loppuvv=$loppuvv&loppukk=$loppukk&loppupp=$loppupp'>".t("Edelliset")."</a> ";
+		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&alkuvv=$alkuvv&alkukk=$alkukk&alkupp=$alkupp&loppuvv=$loppuvv&loppukk=$loppukk&loppupp=$loppupp'>".t("Edelliset")."</a> ";
 	}
 	else {
 		echo t("Edelliset")." ";
@@ -417,12 +437,10 @@ if ($tee != '') {
 
 	if ($seraavako >= 50) {
 		$siirry = $alku + 50;
-		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila&alkuvv=$alkuvv&alkukk=$alkukk&alkupp=$alkupp&loppuvv=$loppuvv&loppukk=$loppukk&loppupp=$loppupp'>".t("Seuraavat")."</a> ";
+		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&alkuvv=$alkuvv&alkukk=$alkukk&alkupp=$alkupp&loppuvv=$loppuvv&loppukk=$loppukk&loppupp=$loppupp'>".t("Seuraavat")."</a> ";
 	}
 
 	echo "<br><br>";
 
  	$toim = "";
 }
-
-?>

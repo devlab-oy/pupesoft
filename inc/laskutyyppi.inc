@@ -78,17 +78,20 @@
 		case "N":
 			$laskutyyppi = "Myyntitilaus kesken";
 			switch($alatila) {
-				case "J":
-					$alatila = "JT poiminnassa";
+				case "A":
+					$alatila = "Tulostusjonossa";
+					break;
+				case "B":
+					$alatila = "Odottaa ennakkolaskun maksua";
 					break;
 				case "E":
 					$alatila = "Ennakko poiminnassa";
 					break;
-				case "A":
-					$alatila = "Tulostusjonossa";
-					break;
 				case "F":
 					$alatila = "Odottaa hyv‰ksynt‰‰";
+					break;
+				case "J":
+					$alatila = "JT poiminnassa";
 					break;
 				case "T":
 					$laskutyyppi = "Myyntitilaus";

@@ -9,13 +9,12 @@
 		// Voidaan esim. luoda lennossa uusia yhteyshenkilöitä
 		js_open_yllapito();
 
-
 		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 				<!--
 
-				function merahti_oletus() {
+				function merahti_oletus(kentta) {
 					// Toimitustapa alasvetovalikon id
-					var ttdd_id = document.getElementById('toimitustapa');
+					var ttdd_id = document.getElementById(kentta);
 
 					// Valitun toimitustavan tunnus
 					var val = ttdd_id.options[ttdd_id.selectedIndex].id;
@@ -42,7 +41,6 @@
 
 				//-->
 				</script>";
-
 	}
 
 	//tässä joko tehdään uutta otsikkoa tai muutetaan olemassa olevaa
@@ -200,7 +198,10 @@
 			unset($jatka);
 		}
 		elseif ($toimitustapa != "") {
-			$query = "SELECT tunnus FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
+			$query = "	SELECT tunnus
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						and selite  = '$toimitustapa'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -234,13 +235,21 @@
 
 	//	Tarkastetaan toimitustapa saadaanko laittaa jälkivaatimuksia
 	if (isset($jatka)) {
-		$query = "SELECT tunnus FROM maksuehto WHERE yhtio ='$kukarow[yhtio]' and tunnus = '$maksuehto' and jv != ''";
+		$query = "	SELECT tunnus
+					FROM maksuehto
+					WHERE yhtio ='$kukarow[yhtio]'
+					AND tunnus = '$maksuehto'
+					AND jv != ''";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 
 			//	Denial by toimitustapa
-			$query = "SELECT tunnus FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa' and jvkielto != ''";
+			$query = "	SELECT tunnus
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						and selite = '$toimitustapa'
+						and jvkielto != ''";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
@@ -372,6 +381,11 @@
 		else {
 			$erpcm_kasin = "KYLLA";
 		}
+	}
+
+	if (isset($jatka) and ($erikoisale > 100 or $erikoisale < 0)) {
+		echo "<font class='error'>".t("Erikoisale pitää olla alle 100% yli 0%")."</font><br/><br/>";
+		unset($jatka);
 	}
 
 	// tehdään oikeellisuus
@@ -541,6 +555,10 @@
 				 	$assrow["laskutus_postino"]	   = $assrow["postino"];
 				 	$assrow["laskutus_postitp"]	   = $assrow["postitp"];
 				 	$assrow["laskutus_maa"]		   = $assrow["maa"];
+				}
+
+				if($naytetaanko_tarjouksella != 'on' and $toim == 'TARJOUS') {
+					$toimpvm = '0000-00-00';
 				}
 
 				$query = "	UPDATE lasku
@@ -1058,7 +1076,6 @@
 				echo "<tr><th colspan='4'>".t("Tilauksen tiedot").":</th></tr>";
 			}
 
-
 			//Tutkitaan onko laskulla maksupositioita
 			$query = "	SELECT *
 						FROM maksupositio
@@ -1126,6 +1143,78 @@
 			}
 			echo "</td>";
 
+			// Valitun toimitustavan tietoja
+			$apuqu = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite  = '$srow[toimitustapa]'";
+			$meapu = pupe_query($apuqu);
+			$toimtapa_apuro = mysql_fetch_assoc($meapu);
+
+			// Tsekataan toimitusehtojuttuja
+			$toimehto_tresult = t_avainsana("TOIMEHTO");
+
+			$toimehtosel  = "";
+			$toimehtosel1 = "";
+			$toimehtosel2 = "";
+			$toimehtosel3 = "";
+			$toimehtoseltark  = "";
+			$toimehtoseltark1 = "";
+			$toimehtoseltark2 = "";
+			$toimehtoseltark3 = "";
+			$toimehtoseltark_3  = "";
+			$toimehtoseltark_31 = "";
+			$toimehtoseltark_32 = "";
+			$toimehtoseltark_33 = "";
+
+			// Valitaan sopivin toimitusehto
+			while ($row = mysql_fetch_assoc($toimehto_tresult)) {
+
+				// Tarkka mätsi
+				if ($srow["toimitusehto"] != "" and strtoupper($srow["toimitusehto"]) == strtoupper($row["selite"]." ".$row["selitetark"])) {
+					$toimehtosel1 = $row["tunnus"];
+					$toimehtoseltark1 = $row["selitetark"];
+					$toimehtoseltark_31 = $row["selitetark_3"];
+				}
+
+				// Alku mätsää
+				if ($srow["toimitusehto"] != "" and strtoupper(substr($srow["toimitusehto"], 0, 3)) == strtoupper($row["selite"])) {
+					$toimehtosel2 = $row["tunnus"];
+					$toimehtoseltark2 = substr($srow["toimitusehto"], 4);
+					$toimehtoseltark_32 = $row["selitetark_3"];
+				}
+
+				// Otetaan yhtiön oletus
+				if ($srow["toimitusehto"] == "" and strtoupper($yhtiorow['oletus_toimitusehto']) == strtoupper($row["selite"]." ".$row["selitetark"])) {
+					$toimehtosel3 = $row["tunnus"];
+					$toimehtoseltark3 = $row["selitetark"];
+					$toimehtoseltark_33 = $row["selitetark_3"];
+				}
+
+				if ($row["selitetark_3"] == "LAHETTAJAN_SOPIMUS") {
+					echo "<div style='display: none; visibility: hidden;' id='merahti_toimitusehto_$row[tunnus]'>K</div>";
+				}
+				else {
+					echo "<div style='display: none; visibility: hidden;' id='merahti_toimitusehto_$row[tunnus]'></div>";
+				}
+			}
+
+			if ($toimehtosel1 != "") {
+				$toimehtosel		= $toimehtosel1;
+				$toimehtoseltark	= $toimehtoseltark1;
+				$toimehtoseltark_3	= $toimehtoseltark_31;
+			}
+			elseif ($toimehtosel2 != "") {
+				$toimehtosel		= $toimehtosel2;
+				$toimehtoseltark	= $toimehtoseltark2;
+				$toimehtoseltark_3	= $toimehtoseltark_32;
+			}
+			elseif ($toimehtosel3 != "") {
+				$toimehtosel 		= $toimehtosel3;
+				$toimehtoseltark 	= $toimehtoseltark3;
+				$toimehtoseltark_3	= $toimehtoseltark_33;
+			}
+
 			$state_chk = '';
 
 			if (is_resource($rakre_chkres) and mysql_num_rows($rakre_chkres) > 0) {
@@ -1136,14 +1225,17 @@
 			$apu_rahdinmaksaja = $srow["kohdistettu"];
 
 			if ($apu_rahdinmaksaja == "O") {
-				$apuqu = "	SELECT *
-							FROM toimitustapa
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND selite  = '$srow[toimitustapa]'";
-				$meapu = pupe_query($apuqu);
-				$apuro = mysql_fetch_assoc($meapu);
 
-				$apu_rahdinmaksaja = $apuro['merahti'];
+				// Onko toimitusehdon takana määritelty rahdinmaksaja? Tämä yliajaa toimitustavan takana olevan.
+				if ($toimehtoseltark_3 == "LAHETTAJAN_SOPIMUS") {
+					$apu_rahdinmaksaja = "K";
+				}
+				elseif ($toimehtoseltark_3 == "VASTAANOTTAJAN_SOPIMUS") {
+					$apu_rahdinmaksaja = "";
+				}
+				else {
+					$apu_rahdinmaksaja = $toimtapa_apuro['merahti'];
+				}
 			}
 
 			$sel = array("K" => "", "V" => "");
@@ -1180,13 +1272,13 @@
 			$tresult = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($tresult)) {
-				echo "<div style='display: none; visibility: hidden;' id='merahti_ttapa_$row[tunnus]'>$row[merahti]</div>";
+				echo "<div style='display: none; visibility: hidden;' id='merahti_toimitustapa_$row[tunnus]'>$row[merahti]</div>";
 			}
 
 			mysql_data_seek($tresult, 0);
 
 			echo "<tr><td>".t("Toimitustapa").":</td>";
-			echo "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus();' {$state_chk}>";
+			echo "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus(\"toimitustapa\");' {$state_chk}>";
 
 			while ($row = mysql_fetch_assoc($tresult)) {
 
@@ -1195,7 +1287,7 @@
 					$sel = 'selected';
 				}
 
-				echo "<option id='ttapa_$row[tunnus]' value='$row[selite]' $sel>";
+				echo "<option id='toimitustapa_$row[tunnus]' value='$row[selite]' $sel>";
 				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
 				echo "</option>";
 			}
@@ -1325,26 +1417,45 @@
 				$vteksti=t("Vienti ei-EU");
 			}
 
-			echo "<td>".t("Vienti").":</td>";
+			echo "<td>".t("Vienti").":</td><td>";
 
 			if ($srow["alv"] == 99.99) {
-				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaan marginaalimyyntiä")."</td>";
+				echo "<input type='hidden' name='vienti' value=''>".t("Kotimaan marginaalimyyntiä");
 			}
 			elseif ($alv_velvollisuus != "") {
-				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaa")." ($srow[maa])</td>";
+				echo "<input type='hidden' name='vienti' value=''>".t("Kotimaa")." ($srow[maa])";
 			}
 			else {
-				echo "<td>
+				echo "
 					<select name='vienti'>
 					<option value=''  $sel1>".t("Kotimaa")."</option>
-					<option value='E' $sel2>".t("vienti EU")."</option>
+					<option value='E' $sel2>".t("Vienti EU")."</option>
 					<option value='K' $sel3>".t("Vienti ei-EU")."</option>
-					</select></td>";
+					</select>";
+
+				$sel = $srow['kolmikantakauppa'] != "" ? " selected" : "";
+
+
+				echo "<select name='kolmikantakauppa'>";
+				echo "<option value=''>",t("Normaali myynti"),"</option>";
+				echo "<option value='M'{$sel}>",t("Kolmikantakauppa"),"</option>";
+				echo "</select>";
 			}
 
-			echo "</tr>";
+			echo "</td></tr>";
 
 			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
+
+			if($toim == 'TARJOUS') {
+				if(!checkdate($toimkk, $toimpp, $toimvv)) {
+					//Kyseessä on tarjouksen toimitusajan piilottamiseen pdf:ltä käytettävä toiminnallisuus toimaika = 0000-00-00 jos se on haluttu piilottaa
+					$naytetaanko_pdf_sel = "";
+				}
+				else {
+					$naytetaanko_pdf_sel = "checked='CHECKED'";
+				}
+				echo t("Näytetäänkö tarjouksella")."<input type='checkbox' name='naytetaanko_tarjouksella' $naytetaanko_pdf_sel /><br/>";
+			}
 
 			if ($toim == "YLLAPITO") {
 				echo t("Ei käytössä");
@@ -1621,7 +1732,7 @@
 			$query  = "	SELECT *
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
-						$varastot_lisa_query
+						$varastot_lisa_query AND tyyppi != 'P'
 						order by tyyppi, nimitys";
 			$vares = pupe_query($query);
 
@@ -1643,7 +1754,7 @@
 			$tresult = t_avainsana("TV");
 
 			echo "<tr><td>".t("Tilausvahvistus").":</td>";
-			echo "<td><select name='tilausvahvistus'><option value=' '>".t("Ei vahvistusta")."</option>";
+			echo "<td><select name='tilausvahvistus' ".js_alasvetoMaxWidth($nimi, 300)."><option value=' '>".t("Ei vahvistusta")."</option>";
 
 			while($row = mysql_fetch_assoc($tresult)) {
 				$sel = "";
@@ -1710,62 +1821,20 @@
 			echo "<tr>";
 			echo "<td>".t("Toimitusehto").":</td><td>";
 
-			$tresult = t_avainsana("TOIMEHTO");
+			echo "<select name='toimitusehto' id = 'toimitusehto' onchange='toimehtoTarkenne(\"toimitusehto\"); merahti_oletus(\"toimitusehto\");' ".js_alasvetoMaxWidth("toimitusehto", 60).">";
 
-			echo "<select name='toimitusehto' onchange='toimehtoTarkenne(\"toimitusehto\");' ".js_alasvetoMaxWidth("toimitusehto", 60).">";
-
-			$toimehtosel  = "";
-			$toimehtosel1 = "";
-			$toimehtosel2 = "";
-			$toimehtosel3 = "";
-			$toimehtoseltark  = "";
-			$toimehtoseltark1 = "";
-			$toimehtoseltark2 = "";
-			$toimehtoseltark3 = "";
-
-			// Valitaan sopivin toimitusehto
-			while ($row = mysql_fetch_assoc($tresult)) {
-
-				// Tarkka mätsi
-				if ($srow["toimitusehto"] != "" and strtoupper($srow["toimitusehto"]) == strtoupper($row["selite"]." ".$row["selitetark"])) {
-					$toimehtosel1 = $row["tunnus"];
-					$toimehtoseltark1 = $row["selitetark"];
-				}
-
-				// Alku mätsää
-				if ($srow["toimitusehto"] != "" and strtoupper(substr($srow["toimitusehto"], 0, 3)) == strtoupper($row["selite"])) {
-					$toimehtosel2 = $row["tunnus"];
-					$toimehtoseltark2 = substr($srow["toimitusehto"], 4);
-				}
-
-				// Otetaan yhtiön oletus
-				if ($srow["toimitusehto"] == "" and strtoupper($yhtiorow['oletus_toimitusehto']) == strtoupper($row["selite"]." ".$row["selitetark"])) {
-					$toimehtosel3 = $row["tunnus"];
-					$toimehtoseltark3 = $row["selitetark"];
-				}
-			}
-
-			if ($toimehtosel1 != "") $toimehtosel = $toimehtosel1;
-			elseif ($toimehtosel2 != "") $toimehtosel = $toimehtosel2;
-			elseif ($toimehtosel3 != "") $toimehtosel = $toimehtosel3;
-
-			mysql_data_seek($tresult, 0);
+			mysql_data_seek($toimehto_tresult, 0);
 
 			echo "<option value=''></option>";
 
-			while ($row = mysql_fetch_assoc($tresult)) {
+			while ($row = mysql_fetch_assoc($toimehto_tresult)) {
 				$sel = "";
 				if ($toimehtosel == $row["tunnus"]) $sel = "SELECTED";
 
-				echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark] $row[selitetark_2]</option>";
+				echo "<option value='$row[selite]' id='toimitusehto_$row[tunnus]' $sel>$row[selite] - $row[selitetark] $row[selitetark_2]</option>";
 			}
 
 			echo "</select>";
-
-			if ($toimehtoseltark1 != "") $toimehtoseltark = $toimehtoseltark1;
-			elseif ($toimehtoseltark2 != "") $toimehtoseltark = $toimehtoseltark2;
-			elseif ($toimehtoseltark3 != "") $toimehtoseltark = $toimehtoseltark3;
-
 			echo " <input type='text' id='toimitusehtoLisa' name='kasitoimehto' value='$toimehtoseltark' size='20'>";
 			echo "</td>";
 
@@ -1784,7 +1853,7 @@
 
 				$tresult = t_avainsana("TOIMEHTO");
 
-				echo "<select name='toimitusehto2' onchange='toimehtoTarkenne(\"toimitusehto2\");' ".js_alasvetoMaxWidth("toimitusehto2", 60).">";
+				echo "<select name='toimitusehto2' id='toimitusehto2' onchange='toimehtoTarkenne(\"toimitusehto2\");' ".js_alasvetoMaxWidth("toimitusehto2", 60).">";
 
 				$toimehtosel  = "";
 				$toimehtosel1 = "";
@@ -1958,7 +2027,7 @@
 
 					echo "</select></td>";
 
-					echo "<td></td><td></td>";
+					echo "<td></td><td></td></tr>";
 				}
 			}
 
@@ -2464,6 +2533,7 @@
 
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>".t("keräyslista")." + ".t("valmistus")."</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>".t("lasku")."</td></tr>";
+			echo "<tr><td>".t("Sisäinen viesti").":</td><td><textarea name='sisviesti3' rows='2' cols='40'>$srow[sisviesti3]</textarea></td><td></td></tr>";
 			echo "</table><br>";
 
 			echo "<table>";
@@ -2676,7 +2746,7 @@
 
 			$toimvkopva = $toimvkopva == '' ? 7 : $toimvkopva;
 
-			if ($toimvko < $nyviikko and $toimvko != date("W", strtotime($apuro["toimaika"]))) {
+			if ($toimvko < $nyviikko) {
 				$nyvuosi += 1;
 			}
 
@@ -2699,7 +2769,7 @@
 
 			$keraysvkopva = $keraysvkopva == '' ? 7 : $keraysvkopva;
 
-			if ($keraysvko < $nyviikko and $keraysvko != date("W", strtotime($apuro["kerayspvm"]))) {
+			if ($keraysvko < $nyviikko) {
 				$nyvuosi += 1;
 			}
 
@@ -2819,13 +2889,21 @@
 		// jos kyseessä oli käteinen
 		if ($meapurow["kateinen"] != "") {
 			// haetaan toimitustavan tiedot tarkastuksia varten
-			$apuqu2 = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
+			$apuqu2 = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite = '$toimitustapa'";
 			$meapu2 = pupe_query($apuqu2);
 			$meapu2row = mysql_fetch_assoc($meapu2);
 
 			// ja toimitustapa ei ole nouto laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
 			if ($meapu2row["nouto"] == "") {
-				$apuqu = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and nouto != '' order by jarjestys limit 1";
+				$apuqu = "	SELECT *
+							FROM toimitustapa
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND nouto != ''
+							ORDER BY jarjestys
+							LIMIT 1";
 				$meapu = pupe_query($apuqu);
 				$apuro = mysql_fetch_assoc($meapu);
 
@@ -2868,7 +2946,7 @@
 			}
 		}
 
-		// jos ollaan valittu rahdinmaksajaksi oletus, haetaan oletusmaksaja toimitustavalta
+		// jos ollaan valittu rahdinmaksajaksi oletus, haetaan oletusmaksaja toimitusehdolta tai toimitustavalta
 		if ($maksaja == "O") {
 			$apuqu = "	SELECT *
 						FROM toimitustapa
@@ -2878,6 +2956,20 @@
 			$apuro = mysql_fetch_assoc($meapu);
 
 			$maksaja = $apuro['merahti'];
+
+			// Onko toimitusehdon takana määritelty rahdinmaksaja? Tämä yliajaa toimitustavan takana olevan.
+			$toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = '$toimitusehto' ");
+
+			if (mysql_num_rows($toimehto_tresult) > 0) {
+				$toimehto_row = mysql_fetch_assoc($toimehto_tresult);
+
+				if ($toimehto_row["selitetark_3"] == "LAHETTAJAN_SOPIMUS") {
+					$maksaja = "K";
+				}
+				elseif ($toimehto_row["selitetark_3"] == "VASTAANOTTAJAN_SOPIMUS") {
+					$maksaja = "";
+				}
+			}
 		}
 
 		// Marginaalimyyntispecial
@@ -2956,12 +3048,15 @@
 			$kurssi = $apukurssi;
 		}
 
-		//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
-		if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
-			$toimpp = $kerpp;
-			$toimkk = $kerkk;
-			$toimvv = $kervv;
-			$toimvko = $keraysvko;
+		if($toim != 'TARJOUS') {
+			//Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
+			//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
+			if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
+				$toimpp = $kerpp;
+				$toimkk = $kerkk;
+				$toimvv = $kervv;
+				$toimvko = $keraysvko;
+			}
 		}
 
 		if (($voimaika_vv == "" or !is_numeric($voimaika_vv)) or ($voimaika_kk == "" or !is_numeric($voimaika_kk)) or ($voimaika_pp == "" or !is_numeric($voimaika_pp))) {
@@ -2978,6 +3073,13 @@
 		if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
 
 		$label = !isset($label) ? "" : $label;
+		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
+
+		if($naytetaanko_tarjouksella != 'on' and $toim == "TARJOUS") {
+			$toimvv = '0000';
+			$toimkk = '00';
+			$toimpp = '00';
+		}
 
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',
@@ -3005,6 +3107,7 @@
 					ketjutus 							= '$ketjutus',
 					kohde								= '$kohde',
 					kohdistettu 						= '$maksaja',
+					kolmikantakauppa					= '{$kolmikantakauppa}',
 					kuljetus 							= '$kuljetus',
 					kuljetusmuoto						= '',
 					label								= '{$label}',
@@ -3028,6 +3131,7 @@
 					sisainen 							= '$sisainen',
 					sisviesti1 							= '$sisviesti1',
 					sisviesti2							= '$sisviesti2',
+					sisviesti3							= '$sisviesti3',
 					splittauskielto						= '$splittauskielto',
 					tilaustyyppi						= '$tilaustyyppi',
 					tilausvahvistus 					= '$tilausvahvistus',
@@ -3432,4 +3536,3 @@
 	}
 
 	unset($alv);
-?>

@@ -351,9 +351,14 @@
 							}
 						}
 
-						if (mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
+						if (mysql_field_type($result,$i) == 'real') {
+							$t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
 
-						$query .= ", ". mysql_field_name($result,$i)."='".trim($t[$i])."' ";
+							$query .= ", ". mysql_field_name($result,$i)." = {$t[$i]} ";
+						}
+						else {
+							$query .= ", ". mysql_field_name($result,$i)." = '".trim($t[$i])."' ";
+						}
 					}
 				}
 			}
@@ -386,9 +391,14 @@
 							}
 						}
 
-						if (mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
-						$query .= ", ". mysql_field_name($result,$i)."='".trim($t[$i])."' ";
+						if (mysql_field_type($result,$i) == 'real') {
+							$t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
 
+							$query .= ", ". mysql_field_name($result,$i)." = {$t[$i]} ";
+						}
+						else {
+							$query .= ", ". mysql_field_name($result,$i)." = '".trim($t[$i])."' ";
+						}
 					}
 				}
 
@@ -918,6 +928,9 @@
 					$lisa .= " and {$array[$i]} = '{$haku[$i]}' ";
 				}
 			}
+			else if(trim($array[$i]) == 'ytunnus') {
+				$lisa .= " and REPLACE({$array[$i]}, '-', '') = REPLACE('{$haku[$i]}', '-', '') ";
+			}
 			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
 				list($a, $b) = explode("/", $haku[$i]);
 
@@ -1301,6 +1314,12 @@
 
 			for ($i=1; $i < mysql_num_fields($result); $i++) {
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
+
+					// Ei näytetä henkilötunnuksen loppuosaa selausnäkymässä
+					if (stripos(mysql_field_name($result, $i), "ytunnus") !== FALSE) {
+						$trow[$i] = tarkistahetu($trow[$i]);
+					}
+
 					if ($i == 1) {
 						if (trim($trow[1]) == '' or (is_numeric($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhjä*");
 

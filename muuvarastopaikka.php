@@ -31,6 +31,13 @@
 		enable_ajax();
 	}
 
+	if (strtolower($toim) == 'oletusvarasto' and $kukarow['oletus_varasto'] != '' and $kukarow['oletus_varasto'] != 0) {
+		$oletusvarasto_chk = $kukarow['oletus_varasto'];
+	}
+	else {
+		$oletusvarasto_chk = '';
+	}
+
 	if (strpos($_SERVER['SCRIPT_NAME'], "muuvarastopaikka.php")  !== FALSE) {
 		echo "<font class='head'>".t("Tuotteen varastopaikat")."</font><hr>";
 	}
@@ -206,6 +213,17 @@
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+		}
+
+		if (count($prio2) > 0) {
+			foreach ($prio2 as $tunnus => $prio) {
+				$query = "	UPDATE tuotepaikat
+							SET prio = '{$prio}',
+							muuttaja	= '{$kukarow['kuka']}',
+							muutospvm	= now()
+							WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 		}
@@ -762,9 +780,17 @@
 		$ahyllytaso = trim($ahyllytaso);
 
 		//Tarkistetaan onko paikka validi
-		list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso);
+		$query = "	SELECT oletus
+					FROM tuotepaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$tuoteno'
+					and hyllyalue = '$ahyllyalue'
+					and hyllynro = '$ahyllynro'
+					and hyllytaso = '$ahyllytaso'
+					and hyllyvali = '$ahyllyvali'";
+		$result = mysql_query($query) or pupe_error($query);
 
-		if ($saldo === FALSE) {
+		if (mysql_num_rows($result) == 0) {
 			if (kuuluukovarastoon($ahyllyalue, $ahyllynro) != 0 and $ahyllyalue != '' and $ahyllynro != '' and $ahyllyvali != '' and $ahyllytaso != '' and $ahyllyalue != "!!M") {
 				echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
 
@@ -893,6 +919,7 @@
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='E'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
+		echo "<input type = 'hidden' name = 'toim' value = '{$toim}' />";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 
 		echo "<th>$tuoteno - ".t_tuotteen_avainsanat($trow, 'nimitys')."</th>";
@@ -904,6 +931,7 @@
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tee' value='S'>";
+		echo "<input type = 'hidden' name = 'toim' value = '{$toim}' />";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 		echo "<td>";
 		echo "<input type='Submit' value='".t("Seuraava tuote")."'>";
@@ -917,6 +945,7 @@
 
 		echo "	<form name = 'valinta' method='post'>
 				<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>
+				<input type='hidden' name='toim' value='{$toim}' />
 				<input type = 'hidden' name = 'tee' value ='N'>
 				<tr>
 				<th>".t("L‰hett‰v‰")."<br>".t("varastopaikka").":</th>
@@ -948,6 +977,9 @@
 
 		if (mysql_num_rows($paikatresult1) > 0) {
 			while ($saldorow = mysql_fetch_array ($paikatresult1)) {
+
+				if ($oletusvarasto_chk != '' and kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"], $oletusvarasto_chk) == 0) continue;
+
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
 				if ($saldorow["inventointilista_aika"] > 0) {
@@ -984,6 +1016,9 @@
 
 		if (mysql_num_rows($paikatresult2) > 0) {
 			while ($saldorow = mysql_fetch_array ($paikatresult2)) {
+
+				if ($oletusvarasto_chk != '' and kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"], $oletusvarasto_chk) == 0) continue;
+
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
 				if ($saldorow["inventointilista_aika"] > 0) {
@@ -1095,10 +1130,21 @@
 		// Tehd‰‰n k‰yttˆliittym‰ paikkojen muutoksille (otetus tai pois)
 		echo "	<form name = 'valinta' method='post'>
 				<input type = 'hidden' name = 'tee' value ='MUUTA'>
+				<input type = 'hidden' name = 'toim' value = '{$toim}' />
 				<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>";
 
 		echo "<table>";
-		echo "<tr><th>".t("Varastopaikka")."</th><th>".t("Saldo")."</th><th>",t("Hyllyss‰"),"</th><th>",t("Myyt‰viss‰"),"</th><th>".t("Oletuspaikka")."</th><th>".t("H‰lyraja")."</th><th>".t("Tilausm‰‰r‰")."</th><th>".t("Poista")."</th></tr>";
+		echo "<tr>";
+		echo "<th>",t("Varastopaikka"),"</th>";
+		echo "<th>",t("Saldo"),"</th>";
+		echo "<th>",t("Hyllyss‰"),"</th>";
+		echo "<th>",t("Myyt‰viss‰"),"</th>";
+		echo "<th>",t("Oletuspaikka"),"</th>";
+		echo "<th>",t("H‰lyraja"),"</th>";
+		echo "<th>",t("Tilausm‰‰r‰"),"</th>";
+		echo "<th>",t("Prio"),"</th>";
+		echo "<th>",t("Poista"),"</th>";
+		echo "</tr>";
 
 		if (mysql_num_rows($paikatresult1) > 0) {
 			$query = "	SELECT *
@@ -1112,6 +1158,9 @@
 			mysql_data_seek($paikatresult1, 0);
 
 			while ($saldorow = mysql_fetch_array ($paikatresult1)) {
+
+				if ($oletusvarasto_chk != '' and kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"], $oletusvarasto_chk) == 0) continue;
+
 				if ($saldorow["tunnus"] == $oletusrow["tunnus"]) {
 					$checked = "CHECKED";
 				}
@@ -1124,12 +1173,20 @@
 				echo "<tr><td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td><td align='right'>$saldorow[saldo]</td><td align='right'>$hyllyssa</td><td align='right'>$myytavissa</td>";
 
 				if (kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"])) {
-					echo "<td><input type = 'radio' name='oletus' value='$saldorow[tunnus]' $checked></td>
-						<td><input type='text' size='6' name='halyraja2[$saldorow[tunnus]]'    value='$saldorow[halytysraja]'></td>
-						<td><input type='text' size='6' name='tilausmaara2[$saldorow[tunnus]]' value='$saldorow[tilausmaara]'></td>";
+
+					echo "<td>";
+
+					if ($oletusvarasto_chk == '' or ($oletusvarasto_chk != '' and kuuluukovarastoon($oletusrow["hyllyalue"], $oletusrow["hyllynro"], $oletusvarasto_chk) != 0)) {
+						echo "<input type = 'radio' name='oletus' value='$saldorow[tunnus]' $checked>";
+					}
+
+					echo "</td>";
+					echo "<td><input type='text' size='6' name='halyraja2[$saldorow[tunnus]]'    value='$saldorow[halytysraja]'></td>
+						<td><input type='text' size='6' name='tilausmaara2[$saldorow[tunnus]]' value='$saldorow[tilausmaara]'></td>
+						<td><input type='text' size='6' name='prio2[{$saldorow['tunnus']}]' value='{$saldorow['prio']}'></td>";
 				}
 				else {
-					echo "<td></td><td></td><td></td>";
+					echo "<td></td><td></td><td></td><td></td>";
 				}
 
 				// Ei n‰ytet‰ boxia, jos sit‰ ei saa k‰ytt‰‰
@@ -1143,7 +1200,7 @@
 				echo "</tr>";
 			}
 		}
-		echo "<tr><td colspan='8'><input type = 'submit' value = '".t("P‰ivit‰")."'></td></table></form><br>";
+		echo "<tr><td colspan='9'><input type = 'submit' value = '".t("P‰ivit‰")."'></td></table></form><br>";
 
 		$ahyllyalue	= '';
 		$ahyllynro	= '';
@@ -1152,6 +1209,7 @@
 
 		echo "<table><form name = 'valinta' method='post'>
 				<input type='hidden' name='tee' value='UUSIPAIKKA'>
+				<input type = 'hidden' name = 'toim' value = '{$toim}' />
 				<input type='hidden' name='tuoteno' value='$tuoteno'>
 				<tr><th>".t("Lis‰‰ uusi varastopaikka")."</th></tr>
 				<tr><td>
@@ -1166,9 +1224,13 @@
 
 			echo "<option value=''>",t("Valitse varasto"),"</option>";
 
+			$varastopaikkalisa = $oletusvarasto_chk != '' ? "AND tunnus = '{$oletusvarasto_chk}'" : "";
+
 			$query = "	SELECT tunnus, nimitys
 						FROM varastopaikat
 						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tyyppi != 'P'
+						{$varastopaikkalisa}
 						ORDER BY tyyppi, nimitys";
 			$varastores = pupe_query($query);
 
@@ -1188,6 +1250,7 @@
 
 		echo "<br><hr><form name = 'valinta' method='post'>
 				<input type='hidden' name='tee' value=''>
+				<input type = 'hidden' name = 'toim' value = '{$toim}' />
 				<input type = 'submit' value = '".t("Palaa tuotteen valintaan")."'>";
 	}
 
@@ -1195,6 +1258,7 @@
 		// T‰ll‰ ollaan, jos olemme vasta valitsemassa tuotetta
 		echo "<form name = 'valinta' method='post'>
 				<input type='hidden' name='tee' value='M'>
+				<input type = 'hidden' name = 'toim' value = '{$toim}' />
 				<table>
 				<tr><th>".t("Anna tuotenumero")."</th><td>".livesearch_kentta("valinta", "TUOTEHAKU", "tuoteno", 210)."</td></tr>
 				</table><br>
@@ -1208,4 +1272,3 @@
 	if ($kutsuja == '') {
 		require "inc/footer.inc";
 	}
-?>

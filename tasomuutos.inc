@@ -200,7 +200,7 @@ if ($tee == "muutamuuta") {
 
 	if ($tee == "muutamuuta") {
 
-		echo "Muutetaan tasot<br><br>";
+		echo t("Muutetaan tasot")."<br><br>";
 
 		$query = "	SELECT *
 					FROM taso

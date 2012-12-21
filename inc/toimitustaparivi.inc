@@ -553,12 +553,16 @@
 		$sel1 = '';
 		$sel2 = '';
 		$sel3 = '';
+		$sel4 = '';
 
 		if ($trow[$i] == 'intrade') {
 			$sel2 = 'selected';
 		}
 		elseif ($trow[$i] == 'tiivistetty') {
 			$sel3 = 'selected';
+		}
+		elseif ($trow[$i] == 'oslap_mg') {
+			$sel4 = 'selected';
 		}
 		else {
 			$sel1 = 'selected';
@@ -568,6 +572,7 @@
 		$ulos .= "<option value='' 		  $sel1>".t("Normaali")."</option>";
 		$ulos .= "<option value='intrade' $sel2>".t("Intrade")."</option>";
 		$ulos .= "<option value='tiivistetty' $sel3>".t("Tiivistetty")."</option>";
+		if ($yhtiorow['kerayserat'] == 'K') $ulos .= "<option value='oslap_mg' $sel4>".t("Yksinkertainen, tulostusmedia valitaan kirjoittimen takaa")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -731,6 +736,7 @@
 		$ulos  = "<td><select name='$nimi'>";
 		$chk1 = '';
 		$chk2 = '';
+		$chk3 = '';
 
 		if ($trow[$i] == "k") {
 			$chk1 = 'selected';
@@ -738,9 +744,13 @@
 		if ($trow[$i] == "") {
 			$chk2 = 'selected';
 		}
+		if ($trow[$i] == "t") {
+			$chk3 = 'selected';
+		}
 
 		$ulos .= "<option value='' $chk2>".t("Toimitustavalle ei tulosteta rahtikirjaerittelyä")."</option>";
-		$ulos .= "<option value='k' $chk1>".t("Toimitustavalle tulostetaan rahtikirjaerittely")."</option>";
+		$ulos .= "<option value='t' $chk3>".t("Toimitustavalle tulostetaan rahtikirjaerittely")."</option>";
+		$ulos .= "<option value='k' $chk1>".t("Toimitustavalle tulostetaan rahtikirjaerittely per asiakas")."</option>";
 
 		$ulos .= "</select></td>";
 		$jatko = 0;

@@ -750,6 +750,30 @@ if ($tee == 'MONISTA') {
 							$values .= ", 'E'";
 							break;
 						}
+					# vientitiedot
+					case 'maa_maara':
+					case 'maa_lahetys':
+					case 'kuljetusmuoto':
+					case 'kauppatapahtuman_luonne':
+					case 'sisamaan_kuljetus':
+					case 'sisamaan_kuljetusmuoto':
+					case 'sisamaan_kuljetus_kansallisuus':
+					case 'kontti':
+					case 'aktiivinen_kuljetus':
+					case 'aktiivinen_kuljetus_kansallisuus':
+					case 'poistumistoimipaikka':
+					case 'poistumistoimipaikka_koodi':
+					case 'bruttopaino':
+					case 'lisattava_era':
+					case 'vahennettava_era':
+					case 'ultilno':
+						if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
+							$values .= ", '".$monistarow[$i]."'";
+						}
+						else {
+							$values .= ", ''";
+						}
+						break;
 					case 'tunnus':
 					case 'tapvm':
 					case 'kapvm':
@@ -787,13 +811,6 @@ if ($tee == 'MONISTA') {
 					case 'factoringsiirtonumero':
 					case 'laskutuspvm':
 					case 'maksuaika':
-					case 'maa_maara':
-					case 'kuljetusmuoto':
-					case 'kauppatapahtuman_luonne':
-					case 'sisamaan_kuljetus':
-					case 'sisamaan_kuljetusmuoto':
-					case 'poistumistoimipaikka':
-					case 'poistumistoimipaikka_koodi':
 						$values .= ", ''";
 						break;
 					case 'clearing':
@@ -1200,13 +1217,21 @@ if ($tee == 'MONISTA') {
 							break;
 						case 'varattu':
 							if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
-								$uusikpl = ($rivirow["kpl"] + $rivirow["jt"] + $rivirow["varattu"]) * -1;
+								$uusikpl = ($rivirow["kpl"] + $rivirow["varattu"]) * -1;
 								$rvalues .= ", '{$uusikpl}'";
 
 							}
 							else {
-								$uusikpl = ($rivirow["kpl"] + $rivirow["jt"] + $rivirow["varattu"]);
+								$uusikpl = ($rivirow["kpl"] + $rivirow["varattu"]);
 								$rvalues .= ", '{$uusikpl}'";
+							}
+							break;
+						case 'jt':
+							if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
+								$rvalues .= ", '".($rivirow["jt"] * -1)."'";
+							}
+							else {
+								$rvalues .= ", '".($rivirow["jt"])."'";
 							}
 							break;
 						case 'tilkpl':
@@ -1624,7 +1649,7 @@ if ($tee == 'MONISTA') {
 
 				require("tilauskasittely/tilaus-valmis.inc");
 			}
-		} # end for $monta
+		}
 	}
 	$tee = ''; //menn‰‰n alkuun
 }

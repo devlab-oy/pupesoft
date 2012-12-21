@@ -18616,6 +18616,22 @@ if (!function_exists('splittaa_tilausrivi')) {
 		$result = pupe_query($query);
 		$uusi_id = mysql_insert_id();
 
+		// tarkistetaan onko alkuper‰inen rivi asn_sanomat-taulussa
+		// jos on, lis‰t‰‰n uusi splitattu rivi kanssa sinne
+		$query = "	SELECT tunnus
+					FROM asn_sanomat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi LIKE '%{$tunnus}%'";
+		$chk_asn_res = pupe_query($query);
+
+		while ($chk_asn_row = mysql_fetch_assoc($chk_asn_res)) {
+			$query = "	UPDATE asn_sanomat SET
+						tilausrivi = CONCAT(tilausrivi, ',', '{$tunnus}')
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$chk_asn_row['tunnus']}'";
+			$upd_res = pupe_query($query);
+		}
+
 		// jos splitattava tilausrivi oli tuoteperheen is‰, pit‰‰ splitatulle tilausriville p‰ivitt‰‰ perheid kuntoon
 		if ($rivi['perheid'] != 0 and $rivi['tunnus'] == $rivi['perheid']) {
 

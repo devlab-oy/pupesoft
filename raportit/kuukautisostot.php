@@ -1698,7 +1698,7 @@
 			echo "<tr><th>".t("Tallenna raportti (xlsx)").":</th>";
 			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='Hälytysraportti.xlsx'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Kuukautisraportti.xlsx'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";
@@ -1713,7 +1713,7 @@
 			echo "<tr><th>".t("Tallenna raportti (txt)").":</th>";
 			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='Hälytysraportti.txt'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Kuukautisraportti.txt'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";
@@ -1722,7 +1722,7 @@
 			echo "<tr><th>".t("Tallenna raportti (csv)").":</th>";
 			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='Hälytysraportti.csv'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Kuukautisraportti.csv'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";
@@ -2399,7 +2399,7 @@
 			echo "</tr>";
 			echo "</table>";
 			echo "<br>
-				<input type='Submit' name='RAPORTOI' value = '".t("Aja hälytysraportti")."'>
+				<input type='Submit' name='RAPORTOI' value = '".t("Aja kuukautisraportti")."'>
 				</form>";
 		}
 

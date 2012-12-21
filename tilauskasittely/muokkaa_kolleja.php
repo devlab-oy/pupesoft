@@ -69,6 +69,33 @@
 		}
 	}
 
+	if ($tee == 'paivita_kaikki_yhteen') {
+
+		$uusi_pakkaus = array();
+
+		foreach ($uusi_pakkaus_kaikki_yhteen as $sscc => $pak) {
+
+			if ($pak != "") {
+
+				$query = "	SELECT DISTINCT IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) sscc
+							FROM kerayserat
+							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+							AND kerayserat.otunnus IN ({$otunnukset})
+							GROUP BY 1
+							ORDER BY 1";
+				$keraysera_res = pupe_query($query);
+
+				while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
+					$uusi_pakkaus[$keraysera_row['sscc']] = "{$pak}####{$sscc}";
+				}
+
+				$uusi_pakkaus[$sscc] = $pak;
+
+				$tee = 'paivita';
+			}
+		}
+	}
+
 	if ($tee == 'paivita') {
 
 		foreach ($uusi_pakkaus as $sscc => $pak) {
@@ -271,6 +298,8 @@
 		echo "<th>",t("Uusi pakkaus"),"</th>";
 		echo "</tr>";
 
+		$kaikki_yhteen_pakkaukseen_sscc = "";
+
 		while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
 
 			$query = "	SELECT IFNULL(pakkaus.pakkaus, 'MUU KOLLI') pakkaus,
@@ -329,12 +358,41 @@
 			echo "</select></td>";
 
 			echo "</tr>";
+
+			$kaikki_yhteen_pakkaukseen_sscc = $keraysera_row['sscc'];
 		}
 
 		echo "<tr><th colspan='5'><input type='submit' value='",t("Tee"),"' /></th></tr>";
-
 		echo "</table>";
 		echo "</form>";
+
+		if ($kaikki_yhteen_pakkaukseen_sscc != "") {
+			echo "<br /><br />";
+			echo "<form method='post' action='?tee=paivita_kaikki_yhteen&select_varasto={$select_varasto}&checkbox_parent[]={$checkbox_parent[0]}&otunnukset={$otunnukset}&lopetus={$lopetus}'>";
+
+			echo "<table>";
+			echo "<tr>";
+			echo "<th>",t("Kaikki pakkaukset yhteen"),"</th>";
+			echo "</tr>";
+
+			echo "<tr><td><select name='uusi_pakkaus_kaikki_yhteen[{$kaikki_yhteen_pakkaukseen_sscc}]'>";
+			echo "<option value=''>",t("Valitse"),"</option>";
+			echo "<option value='muu_kolli'>",t("Yksin keräilyalustalle"),"</option>";
+
+			$query = "	SELECT *
+						FROM pakkaus
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						ORDER BY pakkaus, pakkauskuvaus";
+			$pak_res = pupe_query($query);
+
+			while ($pak_row = mysql_fetch_assoc($pak_res)) {
+				echo "<option value='{$pak_row['tunnus']}'>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
+			}
+
+			echo "</select></td></tr>";
+			echo "<tr><th colspan='5'><input type='submit' value='",t("Tee"),"' /></th></tr>";
+			echo "</table></form>";
+		}
 	}
 
 	if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {

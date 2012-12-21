@@ -22,35 +22,22 @@ function listdir($start_dir = '.') {
 
 	if (is_dir($start_dir)) {
 
-		$fh = opendir($start_dir);
+		foreach (explode("\n", trim(`ls $start_dir | sort`)) as $file) {
 
-		while (($file = readdir($fh)) !== false) {
-			if (strcmp($file, '.') == 0 or strcmp($file, '..') == 0 or substr($file, 0, 1) == ".") {
-				continue;
-			}
 			$filepath = $start_dir . '/' . $file;
 
 			if (is_dir($filepath)) {
 				$files = array_merge($files, listdir($filepath));
 			}
 			else {
-				if(strstr($file, "skip_")) {
-					array_push($ohitetut_laskut, $filepath);
-				}
-				else {
-					array_push($files, $filepath);
-				}
+				array_push($files, $filepath);
 			}
 		}
-		closedir($fh);
-
-		# Sortataan laskut ja mergetetään skipattujen kanssa, skipatut siis viimeiseksi
-		sort($files);
-		$files = array_merge($files, $ohitetut_laskut);
 	}
 	else {
 		$files = false;
 	}
+
 	return $files;
 }
 
@@ -65,23 +52,26 @@ function hae_skannattu_lasku($kukarow, $yhtiorow, $palautus = '') {
 	// käydään läpi ensin käsiteltävät kuvat
 	$files = listdir($dir);
 
+	$query = "	SELECT kesken
+				FROM kuka
+				WHERE yhtio  = '$kukarow[yhtio]'
+				AND extranet = ''";
+	$kesken_chk_res = pupe_query($query);
+
 	$i = 0;
 
 	foreach ($files as $file) {
 		$path_parts = pathinfo($file);
 
-		$query = "	SELECT kesken
-					FROM kuka
-					WHERE yhtio = '$kukarow[yhtio]'";
-		$kesken_chk_res = pupe_query($query);
+		mysql_data_seek($kesken_chk_res, 0);
 
 		while ($kesken_chk_row = mysql_fetch_assoc($kesken_chk_res)) {
 			# Jos tiedosto on käyttäjällä kesken
-			if ($path_parts['filename'] == $kukarow['kesken']) {
+			if (is_numeric($path_parts['filename']) and $path_parts['filename'] == $kukarow['kesken']) {
 				return array('kesken' => "$path_parts[basename]");
 			}
 			# Jos tiedosto on jollain muulla käyttäjällä kesken
-			elseif ($path_parts['filename'] == $kesken_chk_row['kesken']) continue 2;
+			elseif (is_numeric($path_parts['filename']) and $path_parts['filename'] == $kesken_chk_row['kesken']) continue 2;
 		}
 
 		if ($palautus == '') {
@@ -133,11 +123,19 @@ if ($tee == 'ohita_lasku') {
 	$ohitettava_lasku = realpath($skannatut_laskut_polku.$skannattu_lasku);
 	$path_parts = pathinfo($ohitettava_lasku);
 
-	# Nimetään ohitettu lasku "skip_" etuliitteellä
-	if (!rename($skannatut_laskut_polku.$skannattu_lasku, $skannatut_laskut_polku."skip_".$kukarow['kesken'].".".$path_parts['extension'])) {
+	# Nimetään ohitettu lasku "ZZ" etuliitteellä
+	if (!rename($skannatut_laskut_polku.$skannattu_lasku, $skannatut_laskut_polku."ZZ".$kukarow['kesken'].".".$path_parts['extension'])) {
 		echo "Ei pystytä nimeämään tiedostoa.<br>";
 		exit;
 	}
+
+	# Nollataan kesken ollut
+	$query = "	UPDATE kuka SET
+				kesken = 0
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND kuka = '$kukarow[kuka]'";
+	$kesken_upd_res = pupe_query($query);
+	$kukarow['kesken'] = 0;
 
 	// Haetaan seuraava lasku
 	$silent = 'ei näytetä käyttöliittymää';
@@ -162,7 +160,6 @@ if ($tee == 'ohita_lasku') {
 
 		$skannattu_lasku = $kukarow['kesken'].".".$path_parts['extension'];
 	}
-
 	else {
 		$skannattu_lasku = '';
 		$iframe = '';

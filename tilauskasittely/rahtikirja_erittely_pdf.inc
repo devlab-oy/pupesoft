@@ -111,7 +111,7 @@
 			}
 
 			// Asiakas vaihtuu, uudet otsikkotiedot
-			if (!$summatmenijo and $toitarow['erittely'] != 'k' and ((isset($edytunnus) and $edytunnus != $laskurow['ytunnus']) or (isset($edliitostunnus) and $edliitostunnus != $laskurow['liitostunnus']))) {
+			if (!$summatmenijo and $toitarow['erittely'] != 'k' and isset($edliitostunnus) and $edliitostunnus != $laskurow['liitostunnus']) {
 				// Piiret‰‰n sivulle summatiedot
 				list($kala, $kollityht, $kilotyht, $lavametriyht) = loppu_erittely($kala1, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht);
 				$otsikot = TRUE;

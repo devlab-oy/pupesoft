@@ -538,8 +538,24 @@
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
+		$ulos .= "<option value='editilaus_out_teccom.inc' $sel[editilaus_out_teccom]>".t("TecCom sähköinen tilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_wabco.inc' $sel[editilaus_out_wabco]>".t("Wabco sähköinen tilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_excel.inc' $sel[editilaus_out_excel]>".t("Excel-ostotilaus")."</option>";
 		$ulos .= "<option value='editilaus_out_elma.inc' $sel[editilaus_out_elma]>".t("Elma-editilaus")."</option>";
-		$ulos .= "<option value='editilaus_out_teccom.inc' $sel[editilaus_out_teccom]>".t("TecCom-editilaus")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "asn_sanomat") {
+
+		$sel[$trow[$i]] = "selected";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Toimittajalta ei tule ASN-sanomia eikä laskuja")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Toimittaja lähettää ASN-sanoman ja TecCom-laskun")."</option>";
+		$ulos .= "<option value='S' $sel[S]>".t("Toimittaja lähettää vain ASN-sanoman")."</option>";
+		$ulos .= "<option value='L' $sel[L]>".t("Toimittaja lähettää vain TecCom-laskun")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

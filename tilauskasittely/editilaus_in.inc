@@ -47,6 +47,7 @@ if (!function_exists('jt_toimita_editilaus')) {
 		$tilaus_on_jo			    	= "KYLLA";
 		$from_varastoon_inc 	    	= "editilaus_in.inc";
 		$ei_tehdastoimitus_tuotteita	= "EI";
+		$automaattinen_poiminta			= "JOO";
 
 		if ($asiakasmaa != '') {
 			$asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
@@ -1058,6 +1059,31 @@ while ($tietue = fgets($fd)) {
 					$maksaja = "K";
 				}
 
+				$prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$arow['luokka']}'", "", "", "selitetark_3");
+
+				// Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
+				if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
+
+				// Oletuksena näin
+				$ohjausmerkki = $lopviesti;
+
+				if ($tilaustyyppilisa == 2) {
+					$ohjausmerkki = 'VARASTOTÄYDENNYS';
+				}
+				elseif (trim($ohjausmerkki) != "") {
+					$_ohjausmerkki = $ohjausmerkki;
+			 		$_ohjausmerkki = str_replace(array(" ", ",", ".", "-", "/", "+", ":"), "", $_ohjausmerkki);
+			 		$_ohjausmerkki = strtolower($_ohjausmerkki);
+					$_ohjausmerkki = str_replace(array("ä", "Ä"), "a", $_ohjausmerkki);
+					$_ohjausmerkki = str_replace(array("ö", "Ö"), "o", $_ohjausmerkki);
+
+					// FRSTTT = varastotayd joka on minimissään se mikä hyväksytään varastotäydennys tekstinä
+			 		if (metaphone($_ohjausmerkki, 6) == 'FRSTTT') {
+						$ohjausmerkki 	  = 'VARASTOTÄYDENNYS';
+						$tilaustyyppilisa = 2;
+					}
+				}
+
 				// Lisätään otsikko
 				$query = "	INSERT into lasku SET
 							aktiivinen_kuljetus					= '$suunnistus',
@@ -1073,7 +1099,7 @@ while ($tietue = fgets($fd)) {
 							erpcm								= '',
 							hinta								= '$editilaus_loppuhinta',
 							huolitsija 							= '',
-							hyvaksynnanmuutos 					= '',
+							hyvaksynnanmuutos 					= '{$arow['luokka']}',
 							jakelu 								= '',
 							jaksotettu							= '',
 							jtkielto							= '$arow[jtkielto]',
@@ -1097,6 +1123,7 @@ while ($tietue = fgets($fd)) {
 							myyja 			   					= '$edimyyja',
 							nimi 			   					= '$arow[nimi]',
 							nimitark 		   					= '$arow[nimitark]',
+							ohjausmerkki						= '{$ohjausmerkki}',
 							olmapvm								= '',
 							osatoimitus							= '',
 							osoite 			   					= '$arow[osoite]',
@@ -1104,6 +1131,7 @@ while ($tietue = fgets($fd)) {
 							piiri								= '$arow[piiri]',
 							postino 		   					= '$arow[postino]',
 							postitp 		   					= '$arow[postitp]',
+							prioriteettinro						= '{$prioriteettinro}',
 							rahtivapaa							= '$editilaus_rahtivapaa',
 							sisainen							= '$editilaus_sisainen',
 							sisviesti1         					= '$arow[sisviesti1]',
@@ -1216,7 +1244,7 @@ while ($tietue = fgets($fd)) {
 				$Xresult = pupe_query($query);
 
 				// HUOM: Laitetaan messu myyntiin jos asiakkaan nimi meidän kannassa on eri kuin tilaukselta tullut nimi
-				if ($lnimitark != "" and substr($lnimitark, 0, 7) != "Autoasi" and $arow["yhtio"] == "artr") {
+				if ($lnimitark != "" and substr($lnimitark, 0, 7) != "Autoasi" and $arow["yhtio"] == "artr" and gethostname() != 'demo.devlab.fi') {
 
 					$asnokonflikti = "";
 
@@ -1248,7 +1276,7 @@ while ($tietue = fgets($fd)) {
 						$mail .= "Asiakasnumero Pupesoftissa: $arow[asiakasnro]\n";
 						$mail .= "--$bound--\n";
 
-						$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sisäänluvussa", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
+						#$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sisäänluvussa", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
 					}
 				}
 			}
@@ -1345,8 +1373,8 @@ while ($tietue = fgets($fd)) {
 
 				$query = "	SELECT *
 							FROM tuote
-							WHERE yhtio = '{$kukarow["yhtio"]}'
-							and tuoteno = '{$tieto}'
+							WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+							and tuote.tuoteno = '{$tieto}'
 							{$kieltolisa}";
 				$result = mysql_query($query) or die($query);
 
@@ -1356,11 +1384,36 @@ while ($tietue = fgets($fd)) {
 					$tuoteerrortxt .= " $tieto";
 					$tuoteerror = 1;
 				}
-				else {
-					$trow = mysql_fetch_array($result);
-					$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
-					$tuoteno = $trow['tuoteno'];
-					$tuoteerror = 0; // tuote ok
+				else  {
+					$trow = mysql_fetch_assoc($result);
+
+					if ($trow['panttitili'] == 'K') {
+						$query = "	SELECT *
+									from tuoteperhe
+									where tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
+									and tuoteperhe.tuoteno = '{$trow["tuoteno"]}'
+									and tuoteperhe.ohita_kerays != ''";
+						$result = mysql_query($query) or die($query);
+
+                        // Runkotuotteita ei saa tilata suoraan!
+						if (mysql_num_rows($result) != 0) {
+							///* Lisätään tilaukselle kommentti *///
+							$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("on runko")."!\n";
+							$tuoteerrortxt .= " $tieto";
+							$tuoteno = $trow['tuoteno'];
+							$tuoteerror = 2;
+						}
+						else {
+							$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
+							$tuoteno = $trow['tuoteno'];
+							$tuoteerror = 0; // tuote ok
+						}
+					}
+					else {
+						$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
+						$tuoteno = $trow['tuoteno'];
+						$tuoteerror = 0; // tuote ok
+					}
 				}
 			}
 			break;
@@ -1536,7 +1589,7 @@ while ($tietue = fgets($fd)) {
 							$query	= "	SELECT GROUP_CONCAT(tunnus) tunnukset
 										FROM varastopaikat
 										WHERE yhtio = '$kukarow[yhtio]'
-										AND prioriteetti > 0";
+										AND prioriteetti > 0 AND tyyppi != 'P'";
 							$pres = pupe_query($query);
 							$prow = mysql_fetch_assoc($pres);
 
@@ -1646,17 +1699,24 @@ while ($tietue = fgets($fd)) {
 
 				} // end jos tuote on löydetty oikein
 				else {
-					// tuotenumero ei löytynyt, tehdään dummyrivi..
 
-					// Tilausrivin systeemikommentti
-					$kommentti .= t("Yritettiin tilata tuntematonta tuotetta").$tuoteerrortxt;
+					if ($tuoteerror == 2)  {
+					    // Tilausrivin systeemikommentti
+    					$kommentti   .= t("Yritettiin tilata pelkkää runkoa").$tuoteerrortxt;
+    					$virhetuoteno = $tuoteno;
+					}
+					else {
+					    // Tilausrivin systeemikommentti
+    					$kommentti   .= t("Yritettiin tilata tuntematonta tuotetta").$tuoteerrortxt;
+    					$virhetuoteno = "TUNTEMATON";
+					}
 
 					$query = "	INSERT into tilausrivi set
 								tilaajanrivinro = '$rivinumero',
 								laatija 	= 'edi',
 								laadittu 	= now(),
 								yhtio 		= '$kukarow[yhtio]',
-								tuoteno 	= 'TUNTEMATON',
+								tuoteno 	= '$virhetuoteno',
 								var			= 'P',
 								kpl 		= '0',
 								alv			= '".alv_oletus()."',
@@ -1738,7 +1798,7 @@ while ($tietue = fgets($fd)) {
 				// jos terminaalitoimitus niin EI tehdä tilaus-valmista...
 				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
 
-					if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
+					if (in_array($yhtiorow['jt_automatiikka'], array('Y','W','K'))) {
 						//lisätään tilaukseen ne jt-rivit jotka riittävät kaikille
 						$edi_ulos .= "\n";
 						jt_toimita_editilaus($laskurow["ytunnus"], $laskurow["liitostunnus"], $laskurow["maa"]);

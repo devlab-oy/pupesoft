@@ -227,25 +227,26 @@
 
 				echo "</select></td></tr>";
 			}
-			
+
 			if ($toim != "HAAMU") {
 				echo "<tr><td>".t("Tilaustyyppi").":</td>";
 				echo "<td><select name='tilaustyyppi'>";
-            	
+
 				$sel = array();
 				$sel[$srow["tilaustyyppi"]] = "selected";
-            	
+
 				echo "<option value='2' $sel[2]>".t("Normaalitilaus")."</option>";
 				echo "<option value='1' $sel[1]>".t("Pikalähetys")."</option>";
-				echo "<option value='3' $sel[3]>".t("Yölähetys")."</option>";
 				echo "</select></td>";
-				//visuaalista säätöä, "täytetään" turha väli
+
 				echo "<td>";
+				echo t("Erikoisalennus") . ':';
 				echo "</td>";
 				echo "<td>";
+				echo "<input type='text' name='erikoisale' value='{$srow['erikoisale']}'>";
 				echo "</td>";
 			}
-			
+
 			echo "<tr><td>".t("Kuljetus").": </td><td valign='middle'>";
 
 			$toimtapares = t_avainsana("TOIMITUSTAPA_OS");
@@ -279,7 +280,8 @@
 
 			$query  = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio='$kukarow[yhtio]'";
+						WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+						ORDER BY tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
 
 			while ($varow = mysql_fetch_array($vares)) {
@@ -347,7 +349,7 @@
 						AND uusiotunnus > 0
 						LIMIT 1";
 			$vresult = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($vresult) == 0) {
 				echo "<td class='back'>
 						<form method='post' autocomplete='off'>
@@ -458,6 +460,9 @@
 			$tilaustyyppi = "O";
 		}
 
+		//Erikoisalennuksen desimaalipilkku
+		$erikoisale = (float) str_replace(",", ".", $erikoisale);
+
 		$query .= "	lasku SET
 					alatila 			= '$alatila',
 					comments 			= '$comments',
@@ -496,10 +501,25 @@
 					viesti 				= '$viesti',
 					viikorkopros 		= '$yhtiorow[viivastyskorko]',
 					yhtio 				= '$kukarow[yhtio]',
-					ytunnus				= '$ytunnus'";
+					ytunnus				= '$ytunnus',
+					erikoisale			= '$erikoisale'";
 		$query .= $postquery;
 		$result = mysql_query($query) or pupe_error($query);
 		$id = mysql_insert_id();
+
+
+		// Jos erikoisalennus muuttuu
+		if ($laskurow["erikoisale"] != $erikoisale) {
+			// päivitetään erikoisale tilausriveille
+			$erikoisale_query_otunnus = (int) $kukarow['kesken'] != 0 ? $kukarow['kesken'] : $id;
+			$query_erikoisale = "	UPDATE tilausrivi
+									SET erikoisale = '{$erikoisale}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$erikoisale_query_otunnus}'
+									AND netto  != 'N'
+									AND tyyppi != 'D'";
+			$upd_erikoisale_res = pupe_query($query_erikoisale);
+		}
 
 		if ((int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
 			$query = "	UPDATE kuka

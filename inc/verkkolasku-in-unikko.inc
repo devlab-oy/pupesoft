@@ -46,6 +46,7 @@
 
 			$laskun_tilausviite				= "";
 			$kauttalaskutus					= "";
+			$laskun_toimitunnus				= 0;
 			$laskun_asiakkaan_tilausnumero	= "";
 			$toim_asiakkaantiedot	   		= "";
 			$toim_asiakkaantiedot	   		= "";

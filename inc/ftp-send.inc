@@ -76,7 +76,7 @@ else {
 	}
 
 	// jos login ok kokeillaan uploadata
-	if ($login_result) {
+	if (isset($login_result) and $login_result) {
 
 		// Tehd‰‰n NAMEFMT komento, jos kyseess‰ on iSeries/AS400 palvelin
 		if (isset($ftptype) and $ftptype == "AS400") {

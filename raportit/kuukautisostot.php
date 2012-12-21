@@ -15,12 +15,27 @@
 	}
 	else {
 
+		echo "	<script type='text/javascript'>
+
+					$(function() {
+
+						$('#ruksaa_kaikki').on('click', function() {
+
+							if ($(this).is(':checked')) $('.valitut_checkboxit').attr('checked', true);
+							else $('.valitut_checkboxit').attr('checked', false);
+
+						});
+					});
+
+				</script>";
+
 		echo "<font class='head'>",t("Kuukautisostot"),"</font><hr>";
 
 		$org_rajaus = $abcrajaus;
 		list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
 
 		if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
+		if (!isset($rappari)) $rappari = "";
 
 		list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
@@ -355,7 +370,7 @@
 			$rappari = $kukarow["kuka"]."##".$uusirappari;
 
 			foreach($valitut as $val) {
-				$query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='HALYRAP', selite='$rappari', selitetark='$val'";
+				$query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='KKOSTOT', selite='$rappari', selitetark='$val'";
 				$res = pupe_query($query);
 			}
 		}
@@ -364,11 +379,11 @@
 		if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
 			if ($rappari != '') {
-				$query = "DELETE FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='HALYRAP' and selite='$rappari'";
+				$query = "DELETE FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='KKOSTOT' and selite='$rappari'";
 				$res = pupe_query($query);
 
 				foreach($valitut as $val) {
-					$query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='HALYRAP', selite='$rappari', selitetark='$val'";
+					$query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='KKOSTOT', selite='$rappari', selitetark='$val'";
 					$res = pupe_query($query);
 				}
 			}
@@ -2264,7 +2279,7 @@
 			$query = "	SELECT selitetark
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
-						and laji	= 'HALYRAP'
+						and laji	= 'KKOSTOT'
 						and selite	= '$rappari'
 						and selitetark = 'TALLENNAPAIVAM'";
 			$sresult = pupe_query($query);
@@ -2294,7 +2309,7 @@
 					$query = "	SELECT selitetark
 								FROM avainsana
 								WHERE yhtio = '$kukarow[yhtio]'
-								and laji	= 'HALYRAP'
+								and laji	= 'KKOSTOT'
 								and selite	= '$rappari'
 								and selitetark = 'YHTIO##$prow[yhtio]'";
 					$sresult = pupe_query($query);
@@ -2333,7 +2348,7 @@
 			$query = "	SELECT selitetark
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
+						and laji = 'KKOSTOT'
 						and selite	= '$rappari'
 						and selitetark = 'PAIKOITTAIN'";
 			$sresult = pupe_query($query);
@@ -2351,7 +2366,7 @@
 			$query = "	SELECT selitetark
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
+						and laji = 'KKOSTOT'
 						and selite	= '$rappari'
 						and selitetark = 'POISTETUT'";
 			$sresult = pupe_query($query);
@@ -2368,7 +2383,7 @@
 			$query = "	SELECT selitetark
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
+						and laji = 'KKOSTOT'
 						and selite	= '$rappari'
 						and selitetark = 'POISTUVAT'";
 			$sresult = pupe_query($query);
@@ -2385,7 +2400,7 @@
 			$query = "	SELECT selitetark
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
+						and laji = 'KKOSTOT'
 						and selite	= '$rappari'
 						and selitetark = 'EI_OSTOEHD'";
 			$sresult = pupe_query($query);
@@ -2402,7 +2417,7 @@
 			$query = "	SELECT selitetark
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
+						and laji = 'KKOSTOT'
 						and selite	= '$rappari'
 						and selitetark = 'EIHINNASTOON'";
 			$sresult = pupe_query($query);
@@ -2419,7 +2434,7 @@
 			$query = "	SELECT selitetark
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
+						and laji = 'KKOSTOT'
 						and selite	= '$rappari'
 						and selitetark = 'EIVARASTOITAVA'";
 			$sresult = pupe_query($query);
@@ -2436,7 +2451,7 @@
 			$query = "	SELECT selitetark
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
+						and laji = 'KKOSTOT'
 						and selite	= '$rappari'
 						and selitetark = 'EHDOTETTAVAT'";
 			$sresult = pupe_query($query);
@@ -2454,7 +2469,7 @@
 			$query = "	SELECT selitetark
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
+						and laji = 'KKOSTOT'
 						and selite	= '$rappari'
 						and selitetark = 'OSTOTVARASTOITTAIN'";
 			$sresult = pupe_query($query);
@@ -2475,7 +2490,7 @@
 				$query = "	SELECT selitetark
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]'
-							and laji = 'HALYRAP'
+							and laji = 'KKOSTOT'
 							and selite	= '$rappari'
 							and selitetark = 'UUDETTUOTTEET'";
 				$sresult = pupe_query($query);
@@ -2492,7 +2507,7 @@
 				$query = "	SELECT selitetark
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]'
-							and laji = 'HALYRAP'
+							and laji = 'KKOSTOT'
 							and selite	= '$rappari'
 							and selitetark = 'VAINUUDETTUOTTEET'";
 				$sresult = pupe_query($query);
@@ -2530,7 +2545,7 @@
 				$query = "	SELECT selitetark
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]'
-							and laji = 'HALYRAP'
+							and laji = 'KKOSTOT'
 							and selite	= '$rappari'
 							and selitetark = 'VARASTO##$vrow[tunnus]'";
 				$sresult = pupe_query($query);
@@ -2564,7 +2579,7 @@
 			$query = "	SELECT distinct selite, concat('(',replace(selite, '##',') ')) nimi
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
+						and laji = 'KKOSTOT'
 						ORDER BY selite";
 			$sresult = pupe_query($query);
 
@@ -2582,19 +2597,25 @@
 			}
 			echo "</select>";
 
+			echo " <span style='float:right;'>";
+
+			$chk = ($rappari == "" and !isset($ruksaa_kaikki)) ? "checked" : "";
+
+			echo t("Ruksaa kaikki")," <input type='checkbox' name='ruksaa_kaikki' id='ruksaa_kaikki' {$chk} />";
+
+			echo "</span>";
+
 			echo "</td></tr>";
 
 			$lask = 0;
 			echo "<tr>";
-
-			echo "sarakkeita yhteensä: ".count($sarakkeet)."<br>";
 
 			foreach($sarakkeet as $key => $sarake) {
 
 				$query = "	SELECT selitetark
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]'
-							and laji	= 'HALYRAP'
+							and laji	= 'KKOSTOT'
 							and selite	= '$rappari'
 							and selitetark = '$key'";
 				$sresult = pupe_query($query);
@@ -2608,7 +2629,7 @@
 					echo "</tr><tr>";
 				}
 
-				echo "<td><input type='checkbox' name='valitut[$key]' value='$key' $sel>".ucfirst($sarake)."</td>";
+				echo "<td><input class='valitut_checkboxit' type='checkbox' name='valitut[$key]' value='$key' $sel>".ucfirst($sarake)."</td>";
 				$lask++;
 			}
 

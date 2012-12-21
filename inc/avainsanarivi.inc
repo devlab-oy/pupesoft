@@ -343,6 +343,17 @@
 		$jatko = 0;
 	}
 
+	if ($avain_sel["ALV"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {
+
+		$sel = trim($trow[$i]) != "" ? " SELECTED" : "";
+
+		$ulos  = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Tämä ei ole oletusverokanta")."</option>";
+		$ulos .= "<option value='o'{$sel}>".t("Tämä on oletusverokanta")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 	if ($avain_sel["ALVULK"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
 
 		$query = "	SELECT distinct koodi, nimi
@@ -516,7 +527,7 @@
 	if ($avain_sel['VARASTORYHMA'] == 'SELECTED' and mysql_field_name($result, $i) == "selitetark") {
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'";
+					WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'";
 		$varasto_res = mysql_query($query) or pupe_error($query);
 
 		$ulos .= "<td>";

@@ -8,15 +8,15 @@
 	if (!isset($tee)) $tee = "";
 
 	// sallitaan vain numerot 0-9
-	$tunnus = preg_replace("[^0-9]", "", $tunnus);
+	$tunnus = preg_replace("/[^0-9]/", "", $tunnus);
 
 	if ($tunnus != "" and $tee == "vaihda") {
 
-		$tila_query  = "	SELECT *
-							FROM lasku
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tila IN ('L','N','A','V','C')
-							AND tunnus = '{$tunnus}'";
+		$tila_query  = " SELECT *
+						 FROM lasku
+						 WHERE yhtio = '{$kukarow['yhtio']}'
+						 AND tila IN ('L','N','A','V','C')
+						 AND tunnus = '{$tunnus}'";
 		$tila_result = pupe_query($tila_query);
 
 		if (mysql_num_rows($tila_result) == 1) {
@@ -34,7 +34,6 @@
 			$locre = pupe_query($query);
 
 			if ($tila_row['tila'] == "C") {
-
 				if ($tila == "3") {
 					$query = "	UPDATE tilausrivi SET
 								keratty        = '',
@@ -57,10 +56,8 @@
 								AND otsikkonro 	= '{$tunnus}'";
 					$tila_result = pupe_query($query);
 				}
-
 			}
 			else {
-
 				// lähete tulostettu
 				if ($tila == "3") {
 					$query = "	UPDATE tilausrivi SET

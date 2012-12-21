@@ -24,19 +24,19 @@ if ($tee == 'PERUSTA') {
 		$paivaraha 	= (float) $hinta[$riviindex];
 		$tilino		= (int) $tilille[$riviindex];
 
-		$tuotenimitys = "Ulkomaanpäiväraha ".$annettuvuosi." ".trim(preg_replace("/[^a-z\,\.\-\(\) åäöÅÄÖ]/i", "", $maannimi[$riviindex]));
+		$tuotenimitys = "Ulkomaanpäiväraha ".$annettuvuosi." ".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "", $maannimi[$riviindex]));
 
 		if (trim($maa[$riviindex]) == '' and $erikoisehto[$riviindex] == 'K') {
-			$tuoteno = "PR-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
+			$tuoteno = "PR-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
 		}
 		elseif (trim($maa[$riviindex]) != '' and $erikoisehto[$riviindex] == '') {
 			$tuoteno = "PR-".$maa[$riviindex]."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
 		}
 		elseif (trim($maa[$riviindex]) != '' and $erikoisehto[$riviindex] == 'K') {
-			$tuoteno = "PR-".$maa[$riviindex]."-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
+			$tuoteno = "PR-".$maa[$riviindex]."-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
 		}
 		else {
-			$tuoteno = "PR-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
+			$tuoteno = "PR-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
 		}
 
 		$query  = "	INSERT INTO tuote SET
@@ -257,7 +257,7 @@ if ($tee == "synkronoi") {
 	echo t("Lisätään uudet viranomaistuotteet tietokantaan")."...<br>";
 
 	while ($rivi = fgets($file)) {
-		list($tuoteno, $nimitys, $alv, $kommentoitava, $kuvaus, $myyntihinta, $tuotetyyppi, $vienti) = explode("\t", trim($rivi));
+		list($tuoteno, $nimitys, $alv, $kommentoitava, $kuvaus, $myyntihinta, $tuotetyyppi, $vienti, $malli, $myymalahinta) = explode("\t", trim($rivi));
 
 		if (strpos($nimitys, "Ulkomaanpäiväraha") !== FALSE) {
 			$tilino = $ulkomaantilinumero;
@@ -277,6 +277,8 @@ if ($tee == "synkronoi") {
 					status			= 'A',
 					tilino 			= '$tilino',
 					vienti          = '$vienti',
+					malli      	    = '$malli',
+					myymalahinta    = '$myymalahinta',
 					yhtio			= '$kukarow[yhtio]',
 					laatija			= '$kukarow[kuka]',
 					luontiaika		= now()
@@ -290,6 +292,8 @@ if ($tee == "synkronoi") {
 					status			= 'A',
 					tilino 			= '$tilino',
 					vienti          = '$vienti',
+					malli      	    = '$malli',
+					myymalahinta    = '$myymalahinta',
 					muuttaja		= '$kukarow[kuka]',
 					muutospvm		= now()";
 		$result = mysql_query($query) or pupe_error($query);

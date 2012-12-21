@@ -588,6 +588,7 @@ if ($ytunnus != '' and $tee == "") {
 		$querykieli = "	SELECT *
 						FROM kirjoittimet
 						WHERE yhtio = '$kukarow[yhtio]'
+						AND komento != 'EDI'
 						ORDER BY kirjoitin";
 		$kires = pupe_query($querykieli);
 

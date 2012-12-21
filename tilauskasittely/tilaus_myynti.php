@@ -139,13 +139,16 @@ if ((int) $valitsetoimitus > 0) {
 	$from 			= "VALITSETOIMITUS";
 
 
-	$query = "	SELECT tila, tilaustyyppi
+	$query = "	SELECT tila, alatila, tilaustyyppi
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND tunnus = '$tilausnumero'";
 	$result = pupe_query($query);
 	$toimrow = mysql_fetch_assoc($result);
-
+	
+	$orig_tila		= $toimrow["tila"];
+	$orig_alatila	= $toimrow["alatila"];
+	
 	if ($toimrow["tila"] == "A" or (($toimrow["tila"] == "L" or $toimrow["tila"] == "N") and $toimrow["tilaustyyppi"] == "A")) {
 		$toim = (strtolower($asentaja) == 'tyomaarays_asentaja' or $toim == 'TYOMAARAYS_ASENTAJA') ? "TYOMAARAYS_ASENTAJA" : "TYOMAARAYS";
 	}

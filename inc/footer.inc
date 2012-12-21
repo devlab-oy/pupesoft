@@ -94,11 +94,11 @@
 			echo "</form>";
 		}
 
-			echo "<br><br>";
+		echo "<br><br>";
 
-			if ($kukarow["extranet"] != "") {
-				echo $yhtiorow["web_seuranta"];
-			}
+		if ($kukarow["extranet"] != "") {
+			echo $yhtiorow["web_seuranta"];
+		}
 
 		if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0) {
 

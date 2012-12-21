@@ -9,7 +9,21 @@
 //jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($kollityht > 0) {
 
-	if (($dpd_delisprint_host != "" and $dpd_delisprint_user != "" and $dpd_delisprint_pass != "" and $dpd_delisprint_path != "") or $dpd_delisprint_path != "") {
+	// Onko varastokohtainen delisprinttiserveri?
+	if (isset($varasto) and $varasto > 0) {
+		$dpd_ds_host = (isset($dpd_delisprint_host[$varasto]) and $dpd_delisprint_host[$varasto] != "") ? $dpd_delisprint_host[$varasto] : $dpd_delisprint_host;
+		$dpd_ds_user = (isset($dpd_delisprint_user[$varasto]) and $dpd_delisprint_user[$varasto] != "") ? $dpd_delisprint_user[$varasto] : $dpd_delisprint_user;
+		$dpd_ds_pass = (isset($dpd_delisprint_pass[$varasto]) and $dpd_delisprint_pass[$varasto] != "") ? $dpd_delisprint_pass[$varasto] : $dpd_delisprint_pass;
+		$dpd_ds_path = (isset($dpd_delisprint_path[$varasto]) and $dpd_delisprint_path[$varasto] != "") ? $dpd_delisprint_path[$varasto] : $dpd_delisprint_path;
+	}
+	else {
+		$dpd_ds_host = $dpd_delisprint_host;
+		$dpd_ds_user = $dpd_delisprint_user;
+		$dpd_ds_pass = $dpd_delisprint_pass;
+		$dpd_ds_path = $dpd_delisprint_path;
+	}
+
+	if (($dpd_ds_host != "" and $dpd_ds_user != "" and $dpd_ds_pass != "" and $dpd_ds_path != "") or $dpd_ds_path != "") {
 
 		if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 
@@ -22,17 +36,20 @@ if ($kollityht > 0) {
 
 			$rahtikirjanro = $logyrow["rahtikirjanro"];
 
-			$logyq = "	UPDATE rahtikirjanumero
-						SET kayttaja = '$kukarow[kuka]',
-						kaytettyaika = now()
-						WHERE yhtio = '$kukarow[yhtio]'
-						and rahtikirjanro = '$logyrow[rahtikirjanro]'";
-			$logyres = pupe_query($logyq);
+			if ($rahtikirjanro != "") {
+				$logyq = "	UPDATE rahtikirjanumero
+							SET kayttaja = '$kukarow[kuka]',
+							kaytettyaika = now()
+							WHERE yhtio = '$kukarow[yhtio]'
+							and rahtikirjanro = '$logyrow[rahtikirjanro]'";
+				$logyres = pupe_query($logyq);
+			}
 		}
-		elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
+
+		if ($rahtikirjanro == "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 			$rahtikirjanro = $lotsikot[0];
 		}
-		else {
+		elseif ($rahtikirjanro == "") {
 			$rahtikirjanro = $rivi["rahtikirjanro"];
 		}
 
@@ -49,20 +66,15 @@ if ($kollityht > 0) {
 		//	Luodaan meidän tiedostorakenne parcelOrder arrayhin ja pukataan se tonne aineistoon sitten laakista
 		$parcelOrder=array();
 		$parcelOrder["rahtikirjanro"] = $rahtikirjanro;
+		$parcelOrder["tilausnumero"] = $lotsikot[0];
 
 		/*
 			Arvotaan lähetystapa
 		*/
 
-		// onko EXPRESS10 tai 12
-		if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
-			$parcelOrder["lahetystapa"] = "NN";
-		}
-		elseif (strpos($toitarow['selite'], "E10")) {
-			$parcelOrder["lahetystapa"] = "E10";
-		}
-		elseif (strpos($toitarow['selite'], "E12")) {
-			$parcelOrder["lahetystapa"] = "E12";
+		// jos maksuehto on jv, laitetaan NP,NN,CD
+		if ($rakir_row['jv'] != "") {
+			$parcelOrder["lahetystapa"] = "NP,NN,CD";
 		}
 		else {
 			$parcelOrder["lahetystapa"] = "NP";
@@ -89,21 +101,31 @@ if ($kollityht > 0) {
 			$parcelOrder[$r] = trim(str_replace(array("\r\n", "\r", "\n"), " ", $v));
 		}
 
+		$koko_summa = 0;
+
 		//	Luotamme vahvasti siihen, että meillä on rakir_res tallella.. Täältä tulee jotain hyödyllistä kumminkin..
 		for($i=0;$i<mysql_num_fields($rakir_res);$i++) {
 
 			$r = mysql_field_name($rakir_res, $i);
 			$v = $rakir_row[$r];
 
-			//	Korvaavuksia ja näppäilyä
-			if($r=="jv" and $v != "") {
-				$parcelOrder["jv_maara"] 		= $yhteensa;
+			if ($r == "jv" and $v != "") {
+				$parcelOrder["jv_summa"] 		= $yhteensa;
 				$parcelOrder["jv_valkoodi"] 	= $yhtiorow["valkoodi"];
 				$parcelOrder["jv_pankkitili"] 	= $yhtiorow["pankkitili1"];
 				$parcelOrder["jv_viite"] 		= $viite;
 			}
 
 			$parcelOrder[$r] = $v;
+		}
+
+		if (isset($parcelOrder["jv_summa"]) and trim($parcelOrder["jv_summa"]) != "") {
+			$parcelOrder["kateinen"] = t("Käteinen");
+		}
+		else {
+			$parcelOrder["kateinen"] = "";
+			$parcelOrder["jv_summa"] = "";
+			$parcelOrder["jv_valkoodi"] = "";
 		}
 
 		//	Haetaan asiakastiedot
@@ -161,100 +183,92 @@ if ($kollityht > 0) {
 			}
 		}
 
-		$query ="	SELECT sum(kollit) kollit,
-					sum(kilot) kilot,
-					sum(kuutiot) kuutiot,
-					sum(lavametri) lavametri,
-					min(pakkauskuvaustark) pakkauskuvaustark
-					from rahtikirjat use index (otsikko_index)
-					where yhtio 		= '$kukarow[yhtio]'
-					and otsikkonro 		= '$rahtikirjanro'
-					and rahtikirjanro 	= '$rahtikirjanro'
-					and pakkaus 		= '$pakkaus[0]'";
-		//and pakkauskuvaus = '$row[selitetark]'";
-		$rakires = mysql_query($query) or pupe_error($query);
-		$rakirow = mysql_fetch_array($rakires);
-
-		for($i=0;$i<mysql_num_fields($rakires);$i++) {
-			$r = mysql_field_name($rakires, $i);
-			$v = $rakirow[$i];
-
-			//	Korvaavuksia ja näppäilyä
-			if($r == "kilot") {
-				$k = round(($rakirow[$i]/$rakirow["kollit"]), 1);
-				if($rakirow["kollit"] == 2) {
-					$v = str_replace('.', ',', $k)."/".str_replace('.', ',', $k);
-				}
-				else {
-					$v = str_replace('.', ',', $k);
-				}
-			}
-
-			$parcelOrder[$r] = $v;
-		}
-
-		//echo "<hr>data:<pre>".print_r($parcelOrder, true)."</pre>";
+		$parcelOrder["kollit"] = $kollityht;
 
 		//	Luodaan aineostoformaatti
 		if(!is_array($delisprintFileFormat)) {
-			// Lähetystapa ; Paino (kg) ; Senders Reference: ; Order #: ; Nimi ; Osoite 1 ; Maa ; Postinr. ; Kaup. ; Yhteyshenkilö ; Puh. ; Fax ; Sähköposti ;
+
+			########## Uusi muokattu formaatti ##########
+			# Reference
+			# Viite
+			# Vastaanottajan yhteyshenkilö
+			# Vastaanottajan nimi
+			# Vastaanottajan lähiosoite
+			# Vastaanottajan lähiosoite 2
+			# Vastaanottajan postinumero
+			# Vastaanottajan postitoimipaikka
+			# Vastaanottajan maa
+			# Vastaanottajan puhelinnumero
+			# Pakkausten määrä
+			# Lähetystapa
+			# Loppusumma jos jälkivaatimus, muuten ei mitään
+			# Valuutta jos jälkivaatimus, muuten ei mitään
+			# Jos maksuehto on jälkivaatimus, laitetaan t("Käteinen")
+			# Rahtikirjanro
 			$delisprintFileFormat = array(
-											"lahetystapa",
-											"kollit",
-											"kilot",
-											"rahtikirjanro",
-											"asiakkaan_tilausnumero",
-											"toim_nimi",
-											"toim_osoite",
-											"toim_maa",
-											"toim_postino",
-											"toim_postitp",
-											"yhteyshenkilo_nimi",
-											"puh",
-											"fax",
-											"email",
-											"comments",
-										);
+				"tilausnumero",
+				"viite",
+				"yhteyshenkilo_nimi",
+				"toim_nimi",
+				"toim_osoite",
+				"toim_postino",
+				"toim_postitp",
+				"toim_maa",
+				"yhteyshenkilo_puh",
+				"kollit",
+				"lahetystapa",
+				"jv_summa",
+				"jv_valkoodi",
+				"kateinen",
+				"rahtikirjanro",
+			);
 
 		}
 
-		//echo "<hr>data:<pre>".print_r($delisprintFileFormat, true)."</pre>";
-
 		unset($aineisto);
+
 		foreach($delisprintFileFormat as $p) {
-			if(isset($aineisto)) {
-				$aineisto .=";";
+			$aineisto .= $parcelOrder[$p].";";
+
+			// tehdään ylimääräinen ; koska formaatissa on lähiosoite 2 mitä ei ole pupessa
+			if ($p == "toim_osoite") {
+				$aineisto .= ";";
 			}
-			$aineisto.=$parcelOrder[$p];
 		}
 
 		// Muunnetaan merkistö Windows ANSI
 		iconv("ISO-8859-1", "Windows-1252", $aineisto);
 
-		if ($dpd_delisprint_path != '') {
-			if (substr($dpd_delisprint_path,-1) != '/') {
-				$dpd_delisprint_path .= '/';
-			}
-			$filenimi = $dpd_delisprint_path."dpdimport-".md5(uniqid(rand(),true)).".dat";
+		if (substr($dpd_ds_path,-1) != '/') {
+			$dpd_ds_path .= '/';
 		}
-		else {
+
+		// Jos siirretään FTP:llä niin $dpd_ds_path on remote pathi ja jos ei siirretä niin $dpd_ds_path on local pathi
+		if ($dpd_ds_host != "" and $dpd_ds_user != "" and $dpd_ds_pass != "" and $dpd_ds_path != "") {
+
 			$filenimi = "/tmp/dpdimport-".md5(uniqid(rand(),true)).".dat";
-		}
 
-		//kirjoitetaan faili levylle..
-		if (file_put_contents($filenimi, $aineisto) === FALSE) {
-			echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
-		}
+			if (file_put_contents($filenimi, $aineisto) === FALSE) {
+				echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
+			}
 
-		if ($dpd_delisprint_host != "" and $dpd_delisprint_user != "" and $dpd_delisprint_pass != "" and $dpd_delisprint_path != "") {
 			// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
 			// palautetaan $palautus ja $syy
-			$ftphost = $dpd_delisprint_host;
-			$ftpuser = $dpd_delisprint_user;
-			$ftppass = $dpd_delisprint_pass;
-			$ftppath = $dpd_delisprint_path;
+			$ftphost = $dpd_ds_host;
+			$ftpuser = $dpd_ds_user;
+			$ftppass = $dpd_ds_pass;
+			$ftppath = $dpd_ds_path;
 			$ftpfile = realpath($filenimi);
+
 			require ("inc/ftp-send.inc");
+		}
+		else {
+			//kirjoitetaan faili levylle..
+			$filenimi = $dpd_ds_path."dpdimport-".md5(uniqid(rand(),true)).".dat";
+
+			if (file_put_contents($filenimi, $aineisto) === FALSE) {
+				echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
+			}
 		}
 	}
 	else {

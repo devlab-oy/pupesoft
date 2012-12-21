@@ -306,12 +306,6 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
-		if ($yhtiorow['kerayserat'] == 'K' and mysql_field_name($result, $i) == "keraysvyohyke" and $tem_eisaldoa == '' and $tem_tuotetyyppi != 'A' and $tem_tuotetyyppi != 'B') {
-			if (trim($t[$i]) == '') {
-				$virhe[$i] = t("Keräyserät ovat käytössä! Keräysvyöhyke ei saa olla tyhjä");
-			}
-		}
-
 		if (mysql_field_name($result, $i) == 'status') {
 			$tem_status = $t[$i];
 		}

@@ -70,6 +70,9 @@
 
 	$forceta = FALSE;
 
+	// Napataan alkuper‰inen kukarow
+	$tiliote_kukarow = $kukarow;
+
 	// katotaan onko faili uploadattu
 	if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$userfile	= $_FILES['userfile']['name'];
@@ -97,7 +100,7 @@
 
 		$tietue = fgets($fd);
 
-		if (substr($tietue, 0, 9) == "<SOAP-ENV" or substr($tietue, 0, 5) == "<?xml") {
+		if (substr($tietue, 0, 9) == "<SOAP-ENV" or substr($tietue, 0, 5) == "<?xml" or substr($tietue, 0, 9) == "<Invoice>") {
 			// Finvoice verkkolasku
 			fclose($fd);
 
@@ -117,7 +120,7 @@
 		}
 		else {
 			// T‰m‰ oli tiliote tai viiteaineisto
-			$query= "LOCK TABLE tiliotedata WRITE, yriti READ, yhtio READ";
+			$query= "LOCK TABLE tiliotedata WRITE, yriti READ, yhtio READ, sanakirja WRITE";
 			$tiliotedataresult = pupe_query($query);
 
 			// Etsit‰‰n aineistonumero
@@ -511,6 +514,9 @@
 	}
 
 	if (!$php_cli) {
+		// Palautetaan alkuper‰inen kukarow
+		$kukarow = $tiliote_kukarow;
+
 		require("inc/footer.inc");
 	}
 

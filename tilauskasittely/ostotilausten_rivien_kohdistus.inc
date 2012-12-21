@@ -623,12 +623,13 @@ if ($tila == 'tee_siirto') {
 
 					// Siiretään rivi tälle keikalle
 					$query = "	UPDATE tilausrivi USE INDEX (uusiotunnus_index)
-								SET uusiotunnus = '$otunnus',
-								erikoisale 		= '$laskurow[erikoisale]',
-								kerattyaika 	= now(),
-								keratty 		= '$kukarow[kuka]'
+								SET uusiotunnus 		= '$otunnus',
+								erikoisale_saapuminen 	= '$laskurow[erikoisale_saapuminen]',
+								kerattyaika 			= now(),
+								keratty 				= '$kukarow[kuka]',
+								suuntalava				= 0
 								$kpl_lisa
-								WHERE yhtio = '$kukarow[yhtio]'
+								WHERE yhtio 	= '$kukarow[yhtio]'
 								and uusiotunnus = '$valittuuusiotunnus'
 								and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
 					$result = pupe_query($query);
@@ -754,7 +755,7 @@ if ($tila == 'tee_kohdistus') {
 		}
 
 		$query = "	UPDATE tilausrivi use index (PRIMARY)
-					SET uusiotunnus = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale = 0
+					SET uusiotunnus = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale_saapuminen = 0
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus in (".implode(",", $tunnukset2).")";
 		$result = pupe_query($query);
@@ -773,19 +774,19 @@ if ($tila == 'tee_kohdistus') {
 		}
 
 		$query = "	UPDATE tilausrivi
-					SET uusiotunnus = '$otunnus',
-					kerattyaika = now(),
-					keratty = '$kukarow[kuka]',
-					erikoisale = '$laskurow[erikoisale]'
+					SET uusiotunnus 		= '$otunnus',
+					kerattyaika 			= now(),
+					keratty 				= '$kukarow[kuka]',
+					erikoisale_saapuminen 	= '$laskurow[erikoisale_saapuminen]'
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus in (".implode(",", $tunnukset2).")";
 		$result = pupe_query($query);
 
 		$query = "	UPDATE tilausrivi
-					SET uusiotunnus = '$otunnus',
-					kerattyaika = now(),
-					keratty = '$kukarow[kuka]',
-					erikoisale = '$laskurow[erikoisale]'
+					SET uusiotunnus 		= '$otunnus',
+					kerattyaika 			= now(),
+					keratty 				= '$kukarow[kuka]',
+					erikoisale_saapuminen 	= '$laskurow[erikoisale_saapuminen]'
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND perheid2 in (".implode(",", $tunnukset2).")
 					AND perheid2 > 0";
@@ -835,6 +836,15 @@ if ($tila == 'tee_kohdistus') {
 		foreach ($rivi_ale3 as $tunnus => $ale) {
 			$ale  = str_replace(",",".", $ale);
 			$query  = "UPDATE tilausrivi set ale3='$ale' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and ale3<>'$ale'";
+			$result = pupe_query($query);
+		}
+	}
+
+	if (is_array($rivi_erikoisale)) {
+		// ale3
+		foreach ($rivi_erikoisale as $tunnus => $ale) {
+			$ale  = str_replace(",",".", $ale);
+			$query  = "UPDATE tilausrivi set erikoisale='$ale' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and erikoisale<>'$ale'";
 			$result = pupe_query($query);
 		}
 	}
@@ -1053,6 +1063,7 @@ if ($tila == '') {
 	}
 
 	$kennim_array[] = t('Alv');
+	$kennim_array[] = t('Tilauksen')."<br>".t('Erikoisale');
 	$kennim_array[] = t('Rivihinta');
 	$kennim_array[] = t('+Alv -Ale');
 	#$kennim_array[] = t('Extrakulu');
@@ -1199,11 +1210,11 @@ if ($tila == '') {
 				tuote.kehahin keskihinta,
 				tuotteen_toimittajat.ostohinta,
 				tuotteen_toimittajat.valuutta,
+				tilausrivi.erikoisale,
 				tilausrivi.yksikko tilyksikko,
 				if(tuotteen_toimittajat.toim_yksikko!='', tuotteen_toimittajat.toim_yksikko, tilausrivi.yksikko) toimyksikko,
 				tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.hyllyvali,
 				tuote.keraysvyohyke,
-				tilausrivi.netto as netto_x,
 				tilausrivin_lisatiedot.suoratoimitettuaika,
 				lasku.comments
 				FROM lasku
@@ -1279,13 +1290,13 @@ if ($tila == '') {
 
 	echo "<table>
 	<tr>
-		<th>".t("Saapuminen")."</th><td>$laskurow[laskunro]</td>
-		<th>".t("Laskun summa")."</th><td style='text-align:right'>$kulurow[summa] $kulurow[valkoodi]</td>
+		<th>".t("Saapuminen").":</th><td>$laskurow[laskunro]</td>
+		<th>".t("Laskun summa").":</th><td style='text-align:right'>$kulurow[summa] $kulurow[valkoodi]</td>
 		<th>".t("Perusnäkymä").":</th><td><INPUT type='radio' $chk4 name='nayta_kohdistetut' value='' onclick='submit()'></td>
 	</tr>
 	<tr>
-		<th>".t("Toimittaja")."</th><td>$laskurow[nimi]</td>
-		<th>".t("Laskun kulut")."</th><td style='text-align:right'><span id='laskun_kulut'>{$kulurow['osto_kulut']}</span> $kulurow[valkoodi]</td>
+		<th>".t("Toimittaja").":</th><td>$laskurow[nimi]</td>
+		<th>".t("Laskun kulut").":</th><td style='text-align:right'><span id='laskun_kulut'>{$kulurow['osto_kulut']}</span> $kulurow[valkoodi]</td>
 		<th>".t("Näytä kaikki kohdistetut").":</th><td><INPUT type='radio' $chk1 name='nayta_kohdistetut' value='jees' onclick='submit()'></td>
 	</tr>
 	<tr>
@@ -1308,17 +1319,17 @@ if ($tila == '') {
 	}
 
 	echo "</td>
-		<th>".t("Eturahti")."</th><td style='text-align:right'>$laskurow[rahti_etu] $kulurow[valkoodi]</td>
+		<th>".t("Eturahti").":</th><td style='text-align:right'>$laskurow[rahti_etu] $kulurow[valkoodi]</td>
 		<th>".t("Näytä vain kohdistamattomat").":</th><td><INPUT type='radio' $chk2 name='nayta_kohdistetut' value='eitod' onclick='submit()'></td>
 		</tr>
 		<tr>
-		<th>".t("Erikoisalennus")."</th><td><span id='keikan_erikoisale'>".($laskurow["erikoisale"]*1)."</span>%</td>
-		<th>".t("Kohdistettava summa")."</th><td style='text-align:right'><span id='kohdistettava_summa'>$kohdistettava_summa</span> $kulurow[valkoodi]</td>
+		<th>".t("Saapumisen erikoisale").":</th><td><span id='keikan_erikoisale'>".($laskurow["erikoisale_saapuminen"]*1)."</span>%</td>
+		<th>".t("Kohdistettava summa").":</th><td style='text-align:right'><span id='kohdistettava_summa'>$kohdistettava_summa</span> $kulurow[valkoodi]</td>
 		<th>".t("Näytä kaikki yhdellä sivulla").":</th><td><INPUT type='checkbox' $chk3 name='nayta_kaikki' value='kaikki' onclick='submit()'></td>
 		</tr>
 		<tr>";
 
-	echo "<th>",t("Näytetään rivit"),"</th>";
+	echo "<th>",t("Näytetään rivit"),":</th>";
 
 	if ($chk3 == "checked"){
 			$sivu  = 1;
@@ -1332,7 +1343,7 @@ if ($tila == '') {
 
  	echo "<td>{$alku} - {$loppu}  ",t("Sivu"),": {$sivu}</td>";
 
-	echo "<th>".t("Kohdistettu summa (riv/kpl)")."</th><td id='kohdistettu_summa_td' style='text-align:right'>$ok <span id='kohdistettu_summa'>$valittusumma</span> $kulurow[valkoodi] (<span id='kohdistettu_rivit'>$kappaleetrow[rivit]</span>/<span id='kohdistettu_kpl'>".(float) $kappaleetrow['kappaleet']."</span>)$okend</td>
+	echo "<th>".t("Kohdistettu summa (riv/kpl)").":</th><td id='kohdistettu_summa_td' style='text-align:right'>$ok <span id='kohdistettu_summa'>$valittusumma</span> $kulurow[valkoodi] (<span id='kohdistettu_rivit'>$kappaleetrow[rivit]</span>/<span id='kohdistettu_kpl'>".(float) $kappaleetrow['kappaleet']."</span>)$okend</td>
 		<th></th><td></td>
 		</tr>";
 
@@ -1340,7 +1351,7 @@ if ($tila == '') {
 
 	echo "<th></th><td></td>";
 
-	echo "<th>".t("Jäljellä")."</th><td style='text-align:right'>$ok $laskunsumma $kulurow[valkoodi]$okend</td>";
+	echo "<th>".t("Jäljellä").":</th><td style='text-align:right'>$ok $laskunsumma $kulurow[valkoodi]$okend</td>";
 
 	echo "<th></th><td></td>";
 	echo "</form>";
@@ -1485,6 +1496,9 @@ if ($tila == '') {
 		echo "</th>";
 	}
 
+	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a></th>";
+	$pointteri++;
+
 	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a><br>";
 	$pointteri++;
 	echo "$kennim_array[$pointteri]</th>";
@@ -1528,6 +1542,9 @@ if ($tila == '') {
 
 		echo "</td>";
 	}
+
+	echo "<td><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
+	$pointteri++;
 
 	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'><br>";
 	$pointteri++;
@@ -1614,16 +1631,10 @@ if ($tila == '') {
 		$onkosuoratoimitus = FALSE;
 		$onkosuoratoimitus_suoraan_asiakkaalle = FALSE;
 
-		//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
-	   	$query = "	SELECT tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen
-	   				FROM tilausrivin_lisatiedot
-	   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
-					JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-	   				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-	   				and tilausrivin_lisatiedot.tilausrivilinkki  = '$rivirow[rivitunnus]'";
-		$varastoon_result = pupe_query($query);
+		$onko_suoratoimitus_res = onko_suoratoimitus($rivirow['rivitunnus']);
 
-		if ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {
+		//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
+		if ($varastoon_row = mysql_fetch_assoc($onko_suoratoimitus_res)) {
 			$onkosuoratoimitus = TRUE;
 
 			if ($varastoon_row["suoraan_laskutukseen"] != "") {
@@ -1889,6 +1900,8 @@ if ($tila == '') {
 			}
 
 		}
+
+		echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_erikoisale[$rivirow[rivitunnus]]' value='". (float) $rivirow["erikoisale"]."' style='text-align:right'></$td>";
 
 		echo "<$td $class valign='top' align='right'>". (float) $rivirow["rivihinta"]."<br>". (float) $rivirow["alerivihinta"]."</$td>";
 		//echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_kuluhinta[$rivirow[rivitunnus]]' value='$rivirow[kuluhinta]' style='text-align:right'><br>$yhtiorow[valkoodi]</$td>";

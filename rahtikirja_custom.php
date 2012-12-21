@@ -15,6 +15,7 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 		'viitelah'     => strip_tags($_POST['viitelah']),
 		'viitevas'     => strip_tags($_POST['viitevas']),
         'rahtisopimus' => (isset($_POST['rahtisopimus'])) ? $_POST['rahtisopimus'] : '',
+		'viesti'	   => strip_tags($_POST['viesti']),
     );
 
 	$count = 0;
@@ -148,7 +149,7 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 	$osoitelappurow["osoite"] 			= $asiakasrow["osoite"];
 	$osoitelappurow["postino"] 			= $asiakasrow["postino"];
 	$osoitelappurow["postitp"] 			= $asiakasrow["postitp"];
-	$osoitelappurow["viesti"] 			= "";
+	$osoitelappurow["viesti"] 			= $asiakasrow["kuljetusohje"];
 	$osoitelappurow["liitostunnus"] 	= $asiakasrow["tunnus"];
 	$osoitelappurow["toimitustapa"] 	= $data['toimitustapa'];
 	$osoitelappurow["maksuehto"] 		= $asiakasrow["maksuehto"];
@@ -250,9 +251,6 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 		$kirrow = mysql_fetch_assoc($kirres);
 		$oslapp = $kirrow['komento'];
 
-		// Tulostetaan osoitelappu
-		if ($oslapp != "email") $oslapp .= " -#$oslappkpl ";
-
 		if ($toitarow['osoitelappu'] == 'intrade') {
 			require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 		}
@@ -299,7 +297,8 @@ if (!$asiakasid) {
 			$query = "	SELECT *
 						FROM kirjoittimet
 						WHERE yhtio = '$kukarow[yhtio]'
-						ORDER by kirjoitin";
+						AND komento != 'EDI'
+						ORDER BY kirjoitin";
 			$kirre = pupe_query($query);
 
 			echo "<br><br>".t("Uusimmat tyhjät rahtikirjat").":<br>";
@@ -367,7 +366,6 @@ if ($asiakasid) {
 	echo "<tr>
 			<td valign='top'>".t("Postitp").": </td>
 			<td><input type='text' name='tpostino' size='10' value='$asiakasrow[toim_postino]'> <input type='text' name='tpostitp' size='21' value='$asiakasrow[toim_postitp]'></td></tr>";
-
 ?>
 
 <tr><th><?php echo t('Varasto') ?></th><td><select name='varasto' onChange='document.rahtikirja.submit();'>
@@ -461,6 +459,7 @@ else {
 <?php
 	echo "<tr><th>".t('Lähettäjän viite')."</th><td><input type=hidden name='asiakas' value='$asiakasrow[ytunnus]'><input type='text' name='viitelah'></td></tr>";
 	echo "<tr><th>".t('Vastaanottajan viite')."</th><td><input type='text' name='viitevas'></td></tr>";
+	echo "<tr><th>".t('Viesti')."</th><td><input type='text' name='viesti' value='{$asiakasrow['kuljetusohje']}'></td></tr>";
     echo "<tr><th>".t('Rahtikirja')."</th><td><select name='tulostin'>";
 	echo "<option value=''>".t("Ei tulosteta")."</option>";
 
@@ -489,6 +488,7 @@ else {
     $query = "	SELECT *
 				from kirjoittimet
 				where yhtio = '$kukarow[yhtio]'
+				AND komento != 'EDI'
 				ORDER BY kirjoitin";
 	$kires = pupe_query($query);
 
@@ -578,6 +578,7 @@ function pupe_rahtikirja_insert($data) {
         'kuutiot'       	=> 0,
         'lavametri'     	=> 0,
 		'pakkauskuvaustark' => null,
+		'viesti'			=> null,
 	);
 
 	$data = array_merge($alustus, $data);
@@ -587,7 +588,7 @@ function pupe_rahtikirja_insert($data) {
 	}
 
 	$query = sprintf(
-		"INSERT INTO rahtikirjat (yhtio, merahti, rahtisopimus, pakkaus, pakkauskuvaus, toimitustapa, otsikkonro, rahtikirjanro, viitelah, viitevas, kilot, kollit, kuutiot, lavametri, pakkauskuvaustark)
+		"INSERT INTO rahtikirjat (yhtio, merahti, rahtisopimus, pakkaus, pakkauskuvaus, toimitustapa, otsikkonro, rahtikirjanro, viitelah, viitevas, kilot, kollit, kuutiot, lavametri, pakkauskuvaustark, viesti)
 		values('%s')",
 		implode("','", array_values($data))
 	);
@@ -659,10 +660,10 @@ function pupe_rahtikirja_fetch($otsikkonro) {
  *
  */
 function pupe_varasto_fetch_all() {
-	$query = sprintf("SELECT tunnus, nimitys
-				FROM varastopaikat
-				WHERE yhtio = '%s'
-				ORDER BY nimitys", mysql_real_escape_string($GLOBALS['kukarow']['yhtio']));
+	$query = sprintf("	SELECT tunnus, nimitys
+						FROM varastopaikat
+						WHERE yhtio = '%s' AND tyyppi != 'P'
+						ORDER BY tyyppi, nimitys", mysql_real_escape_string($GLOBALS['kukarow']['yhtio']));
 
 	$result = pupe_query($query);
 
@@ -731,5 +732,3 @@ function pupe_rahtisopimus($merahti, $toimitustapa, $ytunnus = null) {
 }
 
 require ("inc/footer.inc");
-
-?>

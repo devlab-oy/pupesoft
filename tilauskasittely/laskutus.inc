@@ -339,7 +339,7 @@
 		$presult = pupe_query($laskutuksen_tilausrivi_query);
 
 		// nollataan kumulatiivisia muuttujia
-		// EE keississ‰ $loppusumma-muuttujassa lasketaan veron m‰‰r‰‰ saman kaavan mukaan ku laskun tulostuksessa 
+		// EE keississ‰ $loppusumma-muuttujassa lasketaan veron m‰‰r‰‰ saman kaavan mukaan ku laskun tulostuksessa alvierittelyss‰
 		// ja sit lopuksi summataan $loppusumma+$arvosumma jotta saadaan laskun verollinen loppusumma
 		$loppusumma 			= 0;
 		$loppusumma_valuutassa 	= 0;

@@ -96,7 +96,8 @@
 	//valitaan varasto
 	$query = "	SELECT *
 				FROM varastopaikat
-				WHERE yhtio = '$kukarow[yhtio]'";
+				WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+				ORDER BY tyyppi, nimitys";
 	$vtresult = mysql_query($query) or pupe_error($query);
 
 	while ($vrow = mysql_fetch_array($vtresult)) {

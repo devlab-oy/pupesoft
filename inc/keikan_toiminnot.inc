@@ -39,10 +39,12 @@
 		// jos kysess‰ on kotimainen vaihto-omaisuuslasku, pit‰‰ lis‰t‰ tuotteen hintaan alvi
 		if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
 
+			// Lasketaan verokanta
 			if ($kulurow["arvo"] != 0) $simualv = round(100 * (($kulurow["summa"]/$kulurow["arvo"])-1),2);
 			else $simualv = 0;
 
-			if (in_array($simualv, array(8,12,17,22))) {
+			// Onko miell‰ oletuksista poikkeava alvi. Verokantoja ennen viimeisint‰ alv-muutosta.
+			if (in_array($simualv, array(23, 13, 9))) {
 				$alvti = $simualv;
 				$alvit = $simualv;
 			}
@@ -161,7 +163,12 @@
 	        }
 	    }
 
-	    $updatelisa = $otunnus == 0 ? ", suuntalava = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale=0 " : "$suuntalava_querylisa , kerattyaika = now(), keratty = '{$kukarow['kuka']}', erikoisale = '{$laskurow['erikoisale']}' ";
+		if ($otunnus == 0) {
+			$updatelisa = ", suuntalava = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale_saapuminen = 0 ";
+		}
+		else {
+			$updatelisa = "$suuntalava_querylisa , kerattyaika = now(), keratty = '{$kukarow['kuka']}', erikoisale_saapuminen = '{$laskurow['erikoisale_saapuminen']}' ";
+		}
 
 	    // Haetaan rivit ennen p‰ivityst‰
 	    $vanhathinnat = array();
@@ -177,11 +184,11 @@
 	        $vanhathinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"]);
 	    }
 
-	    // poistetaan myˆs netto = X, jos r‰pl‰t‰‰n ruksia
+		// Vied‰‰n varastoon (varastoon=1) kun r‰pl‰t‰‰n ruksia
 	    $query = "  UPDATE tilausrivi use index (yhtio_otunnus) SET
 	                uusiotunnus = '{$otunnus}',
-	                netto = ''
-	                $updatelisa
+					varastoon = 1
+	                {$updatelisa}
 	                WHERE yhtio = '{$kukarow['yhtio']}'
 	                AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
 	                AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
@@ -331,11 +338,17 @@
 		$otunnus 		= $_POST['otunnus'];
 		$monesko_kentta = $_POST['monesko_kentta'];
 
+		if ($monesko_kentta == "E") {
+			$aleupd = " erikoisale = '{$ale}' ";
+		}
+		else {
+			$aleupd = " ale{$monesko_kentta} = '{$ale}' ";
+		}
+
 		$query  = "	UPDATE tilausrivi SET
-					ale{$monesko_kentta} = '{$ale}'
+					$aleupd
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$tunnus}'
-					AND ale{$monesko_kentta} <> '{$ale}'";
+					AND tunnus = '{$tunnus}'";
 		$result = pupe_query($query);
 
 		$hinnat = laske_hinta($laskurow, $tunnus);
@@ -382,18 +395,17 @@
 
 		# Toiminta funktioitu
 		# p‰ivitet‰‰n lapset
-		$kaikki_ok = paivita_tilausrivin_kpl($tunnus, $uuden_rivin_kpl, $otunnus, true);
+		$kaikki_ok = paivita_tilausrivin_kpl($tunnus, $uuden_rivin_kpl, $otunnus, TRUE);
 
 		echo json_encode(array('paivitetaanko' => $kaikki_ok));
 
 	}
 	elseif ($_POST['ajax_toiminto'] == 'rivi_kpl_splittaus') {
-		$tunnus = $_POST['tunnus'];
-		$otunnus = $_POST['otunnus'];
+		$tunnus 		 = $_POST['tunnus'];
+		$otunnus 		 = $_POST['otunnus'];
 		$uuden_rivin_kpl = $_POST['uuden_rivin_kpl'];
 
-		$uuden_rivin_id = splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, true);
-
+		$uuden_rivin_id = splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, FALSE);
 		$hinnat = laske_hinta($laskurow, $uuden_rivin_id);
 
 		$rivi['rivihinta'] = $hinnat['rivihinta'];

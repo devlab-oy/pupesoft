@@ -758,8 +758,8 @@ if ($kasitellaan_tiedosto) {
 							$query_x = "	SELECT tunnus
 											FROM dynaaminen_puu
 											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND laji = '{$table_tarkenne}'
-											AND koodi = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
+											AND laji    = '{$table_tarkenne}'
+											AND koodi   = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
 							$koodi_tunnus_res = pupe_query($query_x);
 
 							// jos tunnusta ei löydy, ohitetaan kyseinen rivi
@@ -785,8 +785,6 @@ if ($kasitellaan_tiedosto) {
 										AND $dynaamisen_taulun_liitos = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
 							$asiakkaan_haku_res = pupe_query($query);
 
-							unset($taulunrivit[$taulu][$eriviindex]);
-
 							while ($asiakkaan_haku_row = mysql_fetch_assoc($asiakkaan_haku_res)) {
 
 								$rivi_array_x = array();
@@ -802,6 +800,8 @@ if ($kasitellaan_tiedosto) {
 								}
 
 								array_push($dynaamiset_rivit, $rivi_array_x);
+
+								unset($taulunrivit[$taulu][$eriviindex]);
 							}
 
 							$puun_alkio_index_plus++;
@@ -1177,7 +1177,10 @@ if ($kasitellaan_tiedosto) {
 							}
 						}
 
-						if ((int) $tlength[$table_mysql.".".$otsikko] > 0 and strlen($taulunrivit[$taulu][$eriviindex][$r]) > $tlength[$table_mysql.".".$otsikko] and ($table_mysql != "tuotepaikat" and $otsikko != "OLETUS" and $taulunrivit[$taulu][$eriviindex][$r] != 'XVAIHDA')) {
+						if ((int) $tlength[$table_mysql.".".$otsikko] > 0 and strlen($taulunrivit[$taulu][$eriviindex][$r]) > $tlength[$table_mysql.".".$otsikko]
+							and !($table_mysql == "tuotepaikat"  and $otsikko == "OLETUS"  and $taulunrivit[$taulu][$eriviindex][$r] == 'XVAIHDA')
+							and !($table_mysql == "asiakashinta" and $otsikko == 'ASIAKAS' and $asiakkaanvalinta == '2')) {
+
 							lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE").": $otsikko ".t("kentässä on liian pitkä tieto")."!</font> {$taulunrivit[$taulu][$eriviindex][$r]}: ".strlen($taulunrivit[$taulu][$eriviindex][$r])." > ".$tlength[$table_mysql.".".$otsikko]."!<br>");
 							$hylkaa++; // ei päivitetä tätä riviä
 						}
@@ -1573,6 +1576,9 @@ if ($kasitellaan_tiedosto) {
 							elseif ($table_mysql=='tuotepaikat' and $otsikko == 'OLETUS') {
 								//echo t("Virhe rivillä").": $rivilaskuri Oletusta ei voi muuttaa!<br>";
 							}
+							elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
+								$query .= ", $otsikko = NULL ";
+							}
 							else {
 								if ($eilisataeikamuuteta == "") {
 									$query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
@@ -1610,6 +1616,9 @@ if ($kasitellaan_tiedosto) {
 								else {
 									$query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
 								}
+							}
+							elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
+								$query .= ", $otsikko = NULL ";
 							}
 							elseif ($eilisataeikamuuteta == "") {
 								$query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
@@ -2066,10 +2075,13 @@ if (!$cli and !isset($api_kentat)) {
 		'kalenteri'                       => 'Kalenteritietoja',
 		'kuka'                            => 'Käyttäjätietoja',
 		'kustannuspaikka'                 => 'Kustannuspaikat',
+		'lahdot'            			  => 'Lähdöt',
 		'liitetiedostot'                  => 'Liitetiedostot',
 		'maksuehto'                       => 'Maksuehto',
 		'pakkaus'                         => 'Pakkaustiedot',
 		'perusalennus'                    => 'Perusalennukset',
+		'puun_alkio_asiakas'              => 'Asiakas-segmenttiliitokset',
+		'puun_alkio_tuote'                => 'Tuote-segmenttiliitokset',
 		'rahtikirjanumero'				  => 'LOGY-rahtikirjanumerot',
 		'rahtimaksut'                     => 'Rahtimaksut',
 		'rahtisopimukset'                 => 'Rahtisopimukset',
@@ -2080,9 +2092,10 @@ if (!$cli and !isset($api_kentat)) {
 		'tili'                            => 'Tilikartta',
 		'todo'                            => 'Todo-lista',
 		'toimi'                           => 'Toimittaja',
+		'toimittajaalennus'               => 'Toimittajan alennukset',
+		'toimittajahinta'                 => 'Toimittajan hinnat',
 		'toimitustapa'                    => 'Toimitustavat',
 		'toimitustavan_lahdot'            => 'Toimitustavan lähdöt',
-		'lahdot'            			  => 'Lähdöt',
 		'tullinimike'                     => 'Tullinimikeet',
 		'tuote'                           => 'Tuote',
 		'tuotepaikat'                     => 'Tuotepaikat',
@@ -2091,23 +2104,11 @@ if (!$cli and !isset($api_kentat)) {
 		'tuotteen_avainsanat'             => 'Tuotteen avainsanat',
 		'tuotteen_orginaalit'             => 'Tuotteiden originaalit',
 		'tuotteen_toimittajat'            => 'Tuotteen toimittajat',
-		'vak'                             => 'VAK-tietoja',
+		'vak'                             => 'VAK/ADR-tietoja',
+		'vak_imdg'                        => 'VAK/IMDG-tietoja',
 		'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
 		'yhteyshenkilo'                   => 'Yhteyshenkilöt',
-		'toimittajahinta'                 => 'Toimittajan hinnat',
-		'toimittajaalennus'               => 'Toimittajan alennukset',
 	);
-
-	// Lisätään dynaamiset tiedot
-	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
-	$dynaamiset_avainsanat = "";
-
-	while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
-		$taulut["puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])] = "Dynaaminen_".strtolower($dynaamiset_avainsanat_row['selite']);
-		if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
-			$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
-		}
-	}
 
 	// Yhtiökohtaisia
 	if ($kukarow['yhtio'] == 'mast') {
@@ -2160,7 +2161,7 @@ if (!$cli and !isset($api_kentat)) {
 			</tr>";
 	}
 
-	if (trim($dynaamiset_avainsanat) != '' and $table == $dynaamiset_avainsanat) {
+	if (in_array($table, array("puun_alkio_asiakas", "puun_alkio_tuote"))) {
 		echo "	<tr><th>",t("Valitse liitos"),":</th>
 					<td><select name='dynaamisen_taulun_liitos'>";
 

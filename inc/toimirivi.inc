@@ -494,6 +494,42 @@
 		$jatko = 0;
 	}
 
+// ei näytetä jos yhtiö ei suoratoimita mitään
+
+	if (mysql_field_name($result, $i) == "suoratoimitus") {
+		if ($yhtiorow["tee_osto_myyntitilaukselta"] != '') {
+
+			$sel = array_fill_keys(array('U', 'X', '-'), '');
+			$sel[$trow[$i]] = " SELECTED";
+
+			$ulos  = "<td><select name='$nimi'>";
+
+			$st_opt   = (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('X', 'Y', 'V', 'W', 'I', 'J', 'Z', 'A', 'C'))) ? '1' : '0';  // eka merkki = varastoon
+			$st_opt  .= (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'Q', 'B', 'C')))      ? '1' : '0';       // toka merkki = asiakkaalle
+
+			switch ($st_opt) {
+				case '11': // sallittu molemmille
+					$ulos .= "<option value='' >"             .t("Suoratoimitukset sallittu asiakkaalle ja varastoon")."</option>";
+					$ulos .= "<option value='U' {$sel['U']} >".t("Suoratoimitukset sallittu asiakkaalle")."</option>";
+					$ulos .= "<option value='X' {$sel['X']} >".t("Suoratoimitukset sallittu varastoon")."</option>";
+					break;
+				case '10': // sallittu vain varastoon
+					$ulos .= "<option value='' >"             .t("Suoratoimitukset sallittu varastoon")."</option>";
+					break;
+				case '01': //sallittu vain asiakkaalle
+					$ulos .= "<option value='' >"             .t("Suoratoimitukset sallittu asiakkaalle")."</option>";
+					break;
+			}
+			$ulos .= "<option value='-' {$sel['-']} >".t("Suoratoimitukset kielletty")."</option>";
+			$ulos .= "</select></td>";
+
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 0;
+		}
+	}
+
 	if (mysql_field_name($result, $i) == "edi_kuvaus") {
 
 		$path_parts = pathinfo($trow[$i]);

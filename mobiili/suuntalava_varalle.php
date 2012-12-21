@@ -29,22 +29,6 @@ if (isset($submit) and trim($submit) != '') {
 			$options = array('varmistuskoodi' => $koodi, 'reservipaikka' => 'K');
 			$kaikki_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $options);
 
-			# tarkistetaan että paikalla ei ole tuotteita
-			$query = "SELECT *
-						FROM tuotepaikat
-						WHERE yhtio		= '{$kukarow['yhtio']}'
-						AND hyllyalue	= '$hyllyalue'
-						AND hyllynro	= '$hyllynro'
-						AND hyllyvali	= '$hyllyvali'
-						AND hyllytaso	= '$hyllytaso'";
-			$result = pupe_query($query);
-			$tuotteita_tuotepaikalla = mysql_num_rows($result);
-
-			if ($tuotteita_tuotepaikalla > 0) {
-				$error['varalle'] = t("Tuotepaikalla on tuotteita!");
-				$kaikki_ok = false;
-			}
-
 			# Jos hyllypaikka ok, laitetaan koko suuntalava varastoon
 			if ($kaikki_ok) {
 

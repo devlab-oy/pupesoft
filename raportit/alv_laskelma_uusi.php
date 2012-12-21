@@ -6,9 +6,9 @@
 
 	/*
 	300 "Vero kotimaan myynnistä verokannoittain"
-	301 "23% vero"
-	302 "13% vero"
-	303 "9% vero"
+	301 "24% vero"
+	302 "14% vero"
+	303 "10% vero"
 	305 "Vero tavaraostoista muista EU maista"
 	306 "Vero palveluostoista muista EU maista"
 	307 "Kohdekuukauden vähennettävä vero"
@@ -30,8 +30,12 @@
 	if (isset($vv) and isset($kk) and $vv == '2010' and $kk < 7) {
 		$oletus_verokanta = 22;
 	}
-	else {
+	// suomen oletus ALV muuttui 1.1.2013
+	elseif (isset($vv) and $vv < '2013') {
 		$oletus_verokanta = 23;
+	}
+	else {
+		$oletus_verokanta = 24;
 	}
 
 	// Sallittu erotus on luku kuinka paljon sallitaan ALV-ilmoitus erotus poikkeavan
@@ -241,13 +245,13 @@
 
 			switch ($ryhma) {
 				case 'fi301' :
-					$tiliointilisa .= " and tiliointi.vero in (22, 23) ";
+					$tiliointilisa .= " and tiliointi.vero in (22, 23, 24) ";
 					break;
 				case 'fi302' :
-					$tiliointilisa .= " and tiliointi.vero in (12, 13) ";
+					$tiliointilisa .= " and tiliointi.vero in (12, 13, 14) ";
 					break;
 				case 'fi303' :
-					$tiliointilisa .= " and tiliointi.vero in (8, 9) ";
+					$tiliointilisa .= " and tiliointi.vero in (8, 9, 10) ";
 					break;
 			}
 
@@ -870,16 +874,19 @@
 				while ($verorow = mysql_fetch_assoc ($verores)) {
 
 					switch ($verorow['vero']) {
+						case 24 :
 						case 23 :
 						case 22 :
 							$fi301 += $verorow['veronmaara'];
 							break;
-						case 12 :
+						case 14 :
 						case 13 :
+						case 12 :
 							$fi302 += $verorow['veronmaara'];
 							break;
 						case 8 :
 						case 9 :
+						case 10 :
 							$fi303 += $verorow['veronmaara'];
 							break;
 						default:
@@ -947,10 +954,15 @@
 				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk'>302</a> ",t("12% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi302)."</td></tr>";
 				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk'>303</a> ",t("8% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi303)."</td></tr>";
 			}
-			else {
+			elseif ($oletus_verokanta == 23) {
 				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi301&vv=$vv&kk=$kk'>301</a> ",t("23% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi301)."</td></tr>";
 				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk'>302</a> ",t("13% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi302)."</td></tr>";
 				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk'>303</a> ",t("9% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi303)."</td></tr>";
+			}
+			else {
+				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi301&vv=$vv&kk=$kk'>301</a> ",t("24% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi301)."</td></tr>";
+				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk'>302</a> ",t("14% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi302)."</td></tr>";
+				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk'>303</a> ",t("10% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi303)."</td></tr>";
 			}
 
 			foreach ($fi3xx as $fikey => $fival) {

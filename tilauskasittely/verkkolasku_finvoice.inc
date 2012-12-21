@@ -582,8 +582,20 @@ if (!function_exists('finvoice_otsikko_loput')) {
 }
 
 if (!function_exists('finvoice_rivi')) {
-	function finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat) {
+	function finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi = 0) {
 		global $err_finvoice, $yhtiorow, $kukarow;
+
+		if ($laskutyyppi == 10 or $laskutyyppi == 12) {
+			$tilrow['hinta'] 				= 0;
+			$tilrow['rivihinta'] 			= 0;
+			$tilrow["rivihinta_verollinen"] = 0;
+			$vatamount 						= 0;
+			$alennukset_yhteensa 			= 0;
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				$tilrow["ale{$alepostfix}"] = 0;
+			}
+		}
 
 		if ($err_finvoice == 0) {
 			fputs($tootfinvoice, "<InvoiceRow>\r\n");
@@ -710,7 +722,7 @@ if (!function_exists('finvoice_rivi')) {
 			}
 
 			// Siivotaan myˆs lis‰kommentti
-			$lisakomm = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
+			$lisakomm = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â‹¸ ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
 
 			$RowFreeTexts = explode("|", trim(trim($lisakomm)."|".trim($tilrow["kommentti"]), "|"));
 
@@ -724,11 +736,11 @@ if (!function_exists('finvoice_rivi')) {
 
 			$alennukset_yhteensa = generoi_alekentta_php($tilrow, 'M', 'plain');
 
-			xml_add("RowDiscountPercent",                                    					pp($alennukset_yhteensa, 2),										$tootfinvoice);
-			xml_add("RowVatRatePercent",                                    					pp($tilrow['alv'], 2, 5, 2),           								$tootfinvoice);
-			xml_add("RowVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",          	pp($vatamount, $yhtiorow["hintapyoristys"], 5, 2),      			$tootfinvoice);	// veron m‰‰r‰
-			xml_add("RowVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",  	pp($tilrow['rivihinta'], $yhtiorow["hintapyoristys"], 5, 2),      	$tootfinvoice);	// veroton rivihinta
-			xml_add("RowAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",             	pp($totalvat, $yhtiorow["hintapyoristys"], 5, 2),     				$tootfinvoice);	// verollinen rivihinta
+			xml_add("RowDiscountPercent",                                    					pp($alennukset_yhteensa, 2),											$tootfinvoice);
+			xml_add("RowVatRatePercent",                                    					pp($tilrow['alv'], 2, 5, 2),           									$tootfinvoice);
+			xml_add("RowVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",          	pp($vatamount, $yhtiorow["hintapyoristys"], 5, 2),      				$tootfinvoice);	// veron m‰‰r‰
+			xml_add("RowVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",  	pp($tilrow['rivihinta'], $yhtiorow["hintapyoristys"], 5, 2),      		$tootfinvoice);	// veroton rivihinta
+			xml_add("RowAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",             	pp($tilrow["rivihinta_verollinen"], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);	// verollinen rivihinta
 			fputs($tootfinvoice, "</InvoiceRow>\r\n");
 		}
 	}

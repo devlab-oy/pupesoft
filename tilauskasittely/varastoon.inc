@@ -82,12 +82,8 @@ if ($kauttalaskutus == '') {
 
 	$varastoon_msg .= "	<th valign='top'>".t("Tuoteno")."</th>
 						<th valign='top'>".t("Määrä")." ".t("sis").".<br>".t("Määrä")." ".t("ulk").".</th>";
-
-	for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-		$varastoon_msg .= " <th valign='top'>".t("Alennus")."{$alepostfix}</th>";
-	}
-
 	$varastoon_msg .= "	<th valign='top'>".t("Ostohinta")." ".t("ulk").".<br>".t("Ostohinta")." ".t("sis").".</th>
+						<th valign='top'>".t("Alennukset")."</th>
 						<th valign='top'>".t("Osuus")."<br>".t("rahdista")."</th>
 						<th valign='top'>".t("Rahti")."</th>";
 
@@ -106,9 +102,11 @@ if ($kauttalaskutus == '') {
 	$varastoon_msg .= "</tr>";
 }
 
+$ale_query_select_lisa = generoi_alekentta_select('yhteen', 'O');
+
 if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) {
 	// virallinen laskenta, heetaan ihan kaikki rivit uudestaan (varattu=0) kaikki pitää olla viety varastoon jo ennen tätä..
-	$query = "	SELECT tilausrivi.*, tilausrivi.kpl varattu
+	$query = "	SELECT tilausrivi.*, tilausrivi.kpl varattu, {$ale_query_select_lisa} alennuksetyht
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -339,9 +337,9 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 		}
 	}
 
-	// tavallinen laskenta.. VARATTU PITÄÄ OLLA > 0 ja netto-kenttä tyhjä!
-	// jos nettokentässä on jotain niin tätä riviä ei haluttu vielä viedä varastoon
-	$query = "	SELECT tilausrivi.*
+	// tavallinen laskenta.. VARATTU PITÄÄ OLLA != 0 ja varastoon-kenttä 1!
+	// jos varastoon-kentässä on 0 niin tätä riviä ei haluttu vielä viedä varastoon
+	$query = "	SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -350,7 +348,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				and tilausrivi.varattu <> 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
-				and tilausrivi.netto = ''
+				and tilausrivi.varastoon = 1
 				$varastoon_tilausrivirajaus
 				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 }
@@ -375,7 +373,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 	}
 
 	// Näytetään ruudulla
-	$query = "	SELECT tilausrivi.*
+	$query = "	SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -405,10 +403,12 @@ if ($laskurow["vienti_kurssi"] != 1 and $kurssirow["vientikurssi"] != 0) {
 	$laskurow["vienti_kurssi"] = $kurssirow["vientikurssi"];
 }
 
-// Onko miellä oletuksesta poikkeava alvi (esim alvimuutoksen yhteydessä)
-$simualv = round(100 * (($kurssirow["summa"]/$kurssirow["arvo"])-1),2);
+// Lasketaan verokanta
+if ($kurssirow["arvo"] != 0) $simualv = round(100 * (($kurssirow["summa"]/$kurssirow["arvo"])-1),2);
+else $simualv = 0;
 
-if (in_array($simualv, array(8,12,17,22))) {
+// Onko miellä oletuksista poikkeava alvi. Verokantoja ennen viimeisintä alv-muutosta.
+if (in_array($simualv, array(23, 13, 9))) {
 	$simualv = (float) $simualv;
 }
 else {
@@ -431,14 +431,7 @@ if ((($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" a
 }
 else {
 	// muuten rahtikulut valuutassa laskettuna kuluprosentin mukaan (laskurow.rahti on kuluprosentti, laskurow.summa on kohdistettujen rivien summa)
-
-	// jos erikoislale niin otetaan sitä kanssa huomioon
-	if ($laskurow['erikoisale']<>0) {
-		$erikoisale = 1-($laskurow['erikoisale']/100);
-	}
-	else {
-		$erikoisale = 1;
-	}
+	$query_ale_lisa = generoi_alekentta('O');
 
 	if ($toiminto == "kaikkiok") {
 		$maara_peruste = "and tilausrivi.varattu = 0 and tilausrivi.kpl != 0";
@@ -448,13 +441,13 @@ else {
 	}
 
 	// lasketaan nyt varastoon vietävien rivien summa yhteensä
-	$query    = "	SELECT sum((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * $erikoisale) summa
+	$query    = "	SELECT sum((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa}) summa
 					FROM tilausrivi use index (uusiotunnus_index)
 					LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '{$laskurow["liitostunnus"]}' and tuotteen_toimittajat.yhtio = tilausrivi.yhtio and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno)
 					WHERE tilausrivi.uusiotunnus = '$otunnus'
 					and tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 					and	tilausrivi.tyyppi = 'O'
-					and tilausrivi.netto = ''
+					and tilausrivi.varastoon = 1
 					$maara_peruste";
 	$result   = pupe_query($query);
 	$hintarow = mysql_fetch_assoc($result);
@@ -1019,13 +1012,13 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	if ($toiminto == "kalkyyli" and $tee == "") {
 		$chk = "";
-		if ($tilrivirow["netto"] == '') {
+		if ($tilrivirow["varastoon"]) {
 			$chk = "CHECKED";
 		}
 
 		$varastoon_msg .= "<td align='center' valign='top'><input type='checkbox' name='varastoonko[]' value='$tilrivirow[tunnus]' $chk>";
 
-		if ($tilrivirow['netto'] == 'X') {
+		if (!$tilrivirow['varastoon']) {
 			$varastoon_msg .= "<br /><img src='../pics/lullacons/alert.png' alt='".t("Huomio")."' title='".t("HUOM: Riviä ei viedä automaattisesti varastoon.")."' />";
 		}
 
@@ -1062,7 +1055,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		}
 	}
 	else {
-		if ($tilrivirow["netto"] == '') {
+		if ($tilrivirow["varastoon"]) {
 			$varastoon_msg .= "<td align='center' valign='top'>x</td>";
 		}
 		else {
@@ -1093,13 +1086,9 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	}
 
 	$varastoon_msg .= "	<td valign='top'>$tilrivirow[tuoteno]</td>
-						<td align='right' valign='top'>$tilrivirow[varattu]<br>".sprintf('%.2f', $tilrivirow['varattu']*$tuorow['tuotekerroin'])."</td>";
-
-	for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-		$varastoon_msg .= "<td align='right' valign='top'>".$tilrivirow["ale{$alepostfix}"]."%</td>";
-	}
-
-	$varastoon_msg .= "<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta'])."<br>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta']*$tuorow['tuotekerroin'])."</td>
+						<td align='right' valign='top'>$tilrivirow[varattu]<br>".sprintf('%.2f', $tilrivirow['varattu']*$tuorow['tuotekerroin'])."</td>
+						<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta'])."<br>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta']*$tuorow['tuotekerroin'])."</td>
+						<td align='right' valign='top'>".$tilrivirow["alennuksetyht"]."%</td>
 						<td align='right' valign='top'>".sprintf('%.6f', $osuus)."</td>
 						<td align='right' valign='top'>".sprintf('%.6f', $osuus*$rahtikulut)."</td>";
 
@@ -1446,29 +1435,29 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 			 			SET suuntalavat.tila = 'P'
 						WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
 						AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
-						AND tilausrivi.netto 		= ''
+						AND tilausrivi.varastoon    = 1
 						AND tilausrivi.kpl 		   != 0
 						AND tilausrivi.tyyppi 		= 'O'
 						AND tilausrivi.suuntalava 	= '{$suuntalavan_tunnus}'";
-			$netto_suuntalava_result = pupe_query($query);
+			$varastoon_suuntalava_result = pupe_query($query);
 		}
 
 		// AINA EI SIIS OSUTA TÄHÄN, JOS JÄMÄRIVEJÄ EI OLE
 		// JOS JÄMÄRIVEJÄ (= SPLITTAANTUNEET) JÄÄ SUUNTALAVALLE
-		// JÄMÄRIVEILTÄ tyhjennetään netto-kenttä, jotta tuotteet menevät seuraavalla kerralla varastoon.
+		// JÄMÄRIVEILTÄ päivitetään varastoon-kenttä, jotta tuotteet menevät seuraavalla kerralla varastoon.
 		$query = "	UPDATE tilausrivi
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
 					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
-		 			SET tilausrivi.netto = '',
+		 			SET tilausrivi.varastoon = 1,
 					suuntalavat.tila 	 = 'S'
 					WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
 					AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
-					AND tilausrivi.netto 		= 'X'
+					AND tilausrivi.varastoon	= 0
 					AND tilausrivi.kpl 			= 0
 					AND tilausrivi.varattu 	   != 0
 					AND tilausrivi.tyyppi	 	= 'O'
 					AND tilausrivi.suuntalava 	= '{$suuntalavan_tunnus}'";
-		$netto_suuntalava_result = pupe_query($query);
+		$varastoon_suuntalava_result = pupe_query($query);
 
 		// Jos suuntalava on purettu ja rivi virty normaalisti hyllyyn niin nollataan linkki suuntalavalle
 		// jos ollaan viety koko lava purkamatta varastoon niin silloin säilytetään tilausrivin linkki suuntalavalle
@@ -1481,11 +1470,11 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 			 			SET tilausrivi.suuntalava = 0
 						WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
 						AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
-						AND tilausrivi.netto 		= ''
+						AND tilausrivi.varastoon    = 1
 						AND tilausrivi.kpl 		   != 0
 						AND tilausrivi.tyyppi 		= 'O'
 						AND tilausrivi.suuntalava 	= '{$suuntalavan_tunnus}'";
-			$netto_suuntalava_result = pupe_query($query);
+			$varastoon_suuntalava_result = pupe_query($query);
 		}
 	}
 

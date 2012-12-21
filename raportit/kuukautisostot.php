@@ -119,12 +119,6 @@
 		$sarakkeet["SARAKE9A"]	= t("vapaa saldo")."\t";
 		$sarakkeet["SARAKE9B"]	= t("myyt‰viss‰")."\t";
 
-		// $sarakkeet["SARAKE10"] 	= t("Ostoehdotus")." $ehd_kausi_o1\t";
-		// $sarakkeet["SARAKE11"] 	= t("Ostoehdotus")." $ehd_kausi_o2\t";
-		// $sarakkeet["SARAKE12"] 	= t("Ostoehdotus")." $ehd_kausi_o3\t";
-
-		// $sarakkeet["SARAKE13"] 	= t("ostettava haly")."\t";
-		// $sarakkeet["SARAKE13B"] = t("ostettava tilausmaara")."\t";
 		$sarakkeet["SARAKE14"] 	= t("osto_era")."\t";
 		$sarakkeet["SARAKE15"] 	= t("myynti_era")."\t";
 		$sarakkeet["SARAKE16"] 	= t("toimittaja")."\t";
@@ -168,9 +162,6 @@
 			$sarakkeet["SARAKE{$_x}"] = t("puutteet")." ".${"kuukausi{$i}"}."\t";
 			$_x++;
 		}
-		// $sarakkeet["SARAKE26"] = t("puutteet")." $kausi2\t";
-		// $sarakkeet["SARAKE27"] = t("puutteet")." $kausi3\t";
-		// $sarakkeet["SARAKE28"] = t("puutteet")." $kausi4\t";
 
 		//Myydyt kappaleet
 		$_x_k = $_x;
@@ -183,10 +174,6 @@
 		$sarakkeet["SARAKE{$_x}"] = t("myynti 12kk")."\t";
 		$_x++;
 
-		// $sarakkeet["SARAKE30"] = t("myynti")." $kausi2\t";
-		// $sarakkeet["SARAKE31"] = t("myynti")." $kausi3\t";
-		// $sarakkeet["SARAKE32"] = t("myynti")." $kausi4\t";
-
 		for ($i = 1; $i < 13; $i++) {
 			$sarakkeet["SARAKE{$_x}"] = t("myynti")." ".${"kuukausied{$i}"}."\t";
 			$_x++;
@@ -195,46 +182,25 @@
 		$sarakkeet["SARAKE{$_x}"] = t("myynti 24kk")."\t";
 		$_x++;
 
-		// $sarakkeet["SARAKE34"] = t("myynti")." $kausied2\t";
-		// $sarakkeet["SARAKE35"] = t("myynti")." $kausied3\t";
-		// $sarakkeet["SARAKE36"] = t("myynti")." $kausied4\t";
-
 		//Kulutetut kappaleet
 		for ($i = 1; $i < 13; $i++) {
 			$sarakkeet["SARAKE{$_x_k}K"] = t("kulutus")." ".${"kuukausi{$i}"}."\t";
 			$_x_k++;
 		}
 
-		// $sarakkeet["SARAKE30K"] = t("kulutus")." $kausi2\t";
-		// $sarakkeet["SARAKE31K"] = t("kulutus")." $kausi3\t";
-		// $sarakkeet["SARAKE32K"] = t("kulutus")." $kausi4\t";
-
-
 		for ($i = 1; $i < 13; $i++) {
 			$sarakkeet["SARAKE{$_x_k}K"] = t("kulutus")." ".${"kuukausied{$i}"}."\t";
 			$_x_k++;
 		}
 
-		// $sarakkeet["SARAKE34K"] = t("kulutus")." $kausied2\t";
-		// $sarakkeet["SARAKE35K"] = t("kulutus")." $kausied3\t";
-		// $sarakkeet["SARAKE36K"] = t("kulutus")." $kausied4\t";
-
 		for ($i = 1; $i < 13; $i++) {
 			$sarakkeet["SARAKE{$_x}"] = t("Kate")." {$yhtiorow['valkoodi']} ".${"kuukausi{$i}"}."\t";
 		}
-
-		// $sarakkeet["SARAKE38"] = t("Kate")." $yhtiorow[valkoodi] $kausi2\t";
-		// $sarakkeet["SARAKE39"] = t("Kate")." $yhtiorow[valkoodi] $kausi3\t";
-		// $sarakkeet["SARAKE40"] = t("Kate")." $yhtiorow[valkoodi] $kausi4\t";
 
 		for ($i = 1; $i < 13; $i++) {
 			$sarakkeet["SARAKE{$_x}"] = t("Kate %")." ".${"kuukausi{$i}"}."\t";
 			$_x++;
 		}
-
-		// $sarakkeet["SARAKE42"] = t("Kate %")." $kausi2\t";
-		// $sarakkeet["SARAKE43"] = t("Kate %")." $kausi3\t";
-		// $sarakkeet["SARAKE44"] = t("Kate %")." $kausi4\t";
 
 		$sarakkeet["SARAKE{$_x}"] 	= t("tuotekerroin")."\t";
 		$_x++;
@@ -249,11 +215,6 @@
 				$sarakkeet["SARAKE{$_x}"] = t("myynti asiakasosasto")." {$asiakasosasto} ".${"kuukausi{$i}"}."\t";
 
 				$_x++;
-
-				// $sarakkeet["SARAKE48"] = t("myynti asiakasosasto")." $asiakasosasto $kausi1\t";
-				// $sarakkeet["SARAKE49"] = t("myynti asiakasosasto")." $asiakasosasto $kausi2\t";
-				// $sarakkeet["SARAKE50"] = t("myynti asiakasosasto")." $asiakasosasto $kausi3\t";
-				// $sarakkeet["SARAKE51"] = t("myynti asiakasosasto")." $asiakasosasto $kausi4\t";
 			}
 		}
 
@@ -262,11 +223,6 @@
 				$sarakkeet["SARAKE{$_x}"] = t("myynti asiakas")." {$asiakasno} ".${"kuukausi{$i}"}."\t";
 
 				$_x++;
-
-				// $sarakkeet["SARAKE52"] = t("myynti asiakas")." $asiakasno $kausi1\t";
-				// $sarakkeet["SARAKE53"] = t("myynti asiakas")." $asiakasno $kausi2\t";
-				// $sarakkeet["SARAKE54"] = t("myynti asiakas")." $asiakasno $kausi3\t";
-				// $sarakkeet["SARAKE55"] = t("myynti asiakas")." $asiakasno $kausi4\t";
 			}
 		}
 
@@ -286,11 +242,6 @@
 			$sarakkeet["SARAKE{$_x}"] = t("Korvaavat Myyty")." ".${"kuukausi{$i}"}."\t";
 
 			$_x++;
-
-			// $sarakkeet["SARAKE60"] = t("Korvaavat Myyty")." $kausi1\t";
-			// $sarakkeet["SARAKE61"] = t("Korvaavat Myyty")." $kausi2\t";
-			// $sarakkeet["SARAKE62"] = t("Korvaavat Myyty")." $kausi3\t";
-			// $sarakkeet["SARAKE63"] = t("Korvaavat Myyty")." $kausi4\t";
 		}
 
 
@@ -332,8 +283,6 @@
 				$chk_array[] = "SARAKE{$xxx}";
 			}
 
-			// $chk_array = array("SARAKE56","SARAKE57","SARAKE58","SARAKE59","SARAKE60","SARAKE61","SARAKE62","SARAKE63")
-
 			foreach($valitut as $key => $value) {
 				if (in_array($key, $chk_array)) {
 					$offset = $i;
@@ -358,8 +307,6 @@
 				$paivamaarat[] = "kkl{$i}";
 				$paivamaarat[] = "vvl{$i}";
 			}
-
-			// $paivamaarat = array('ppa1','kka1','vva1','ppl1','kkl1','vvl1','ppa2','kka2','vva2','ppl2','kkl2','vvl2','ppa3','kka3','vva3','ppl3','kkl3','vvl3','ppa4','kka4','vva4','ppl4','kkl4','vvl4');
 
 			foreach($paivamaarat as $paiva) {
 				$valitut[] = "PAIVAM##".$paiva."##".${$paiva};
@@ -1210,41 +1157,6 @@
 						$excelsarake++;
 					}
 
-					// if ($valitut["SARAKE10"] != '') {
-					// 	$rivi .= "$ostettava1kk\t";
-
-					// 	$worksheet->writeNumber($excelrivi, $excelsarake, $ostettava1kk, $format_bold);
-					// 	$excelsarake++;
-					// }
-
-					// if ($valitut["SARAKE11"] != '') {
-					// 	$rivi .= "$ostettava3kk\t";
-
-					// 	$worksheet->writeNumber($excelrivi, $excelsarake, $ostettava3kk, $format_bold);
-					// 	$excelsarake++;
-					// }
-
-					// if ($valitut["SARAKE12"] != '') {
-					// 	$rivi .= "$ostettava4kk\t";
-
-					// 	$worksheet->writeNumber($excelrivi, $excelsarake, $ostettava4kk, $format_bold);
-					// 	$excelsarake++;
-					// }
-
-					// if ($valitut["SARAKE13"] != '') {
-					// 	$rivi .= "$ostettavahaly\t";
-
-					// 	$worksheet->writeNumber($excelrivi, $excelsarake, $ostettavahaly);
-					// 	$excelsarake++;
-					// }
-
-					// if ($valitut["SARAKE13B"] != '') {
-					// 	$rivi .= "$ostettavahalytilausmaara\t";
-
-					// 	$worksheet->writeNumber($excelrivi, $excelsarake, $ostettavahalytilausmaara);
-					// 	$excelsarake++;
-					// }
-
 					if ($valitut["SARAKE14"] != '') {
 						$rivi .= str_replace(".",",",$row['osto_era'])."\t";
 
@@ -1415,34 +1327,6 @@
 						}
 
 						$_x++;
-
-						// if ($valitut["SARAKE25"] != '') 	{
-						// 	$rivi .= str_replace(".",",",$puuterow['puutekpl1'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $puuterow["puutekpl1"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE26"] != '') {
-						// 	$rivi .= str_replace(".",",",$puuterow['puutekpl2'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $puuterow["puutekpl2"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE27"] != '') {
-						// 	$rivi .= str_replace(".",",",$puuterow['puutekpl3'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $puuterow["puutekpl3"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE28"] != '') {
-						// 	$rivi .= str_replace(".",",",$puuterow['puutekpl4'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $puuterow["puutekpl4"]);
-						// 	$excelsarake++;
-						// }
 					}
 
 					$_x_k = $_x;
@@ -1460,35 +1344,6 @@
 						}
 
 						$_x++;
-
-						// if ($valitut["SARAKE29"] != '') {
-						// 	$rivi .= str_replace(".",",",$laskurow['kpl1'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["kpl1"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE30"] != '') {
-						// 	$rivi .= str_replace(".",",",$laskurow['kpl2'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["kpl2"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE31"] != '') {
-						// 	$rivi .= str_replace(".",",",$laskurow['kpl3'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["kpl3"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE32"] != '') {
-						// 	$rivi .= str_replace(".",",",$laskurow['kpl4'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["kpl4"]);
-						// 	$excelsarake++;
-						// }
-
 					}
 
 					if ($valitut["SARAKE{$_x}"] != "") {
@@ -1509,34 +1364,6 @@
 						}
 
 						$_x++;
-
-						// if ($valitut["SARAKE33"] != '') {
-						// 	$rivi .= str_replace(".",",",$laskurow['EDkpl1'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["EDkpl1"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE34"] != '') {
-						// 	$rivi .= str_replace(".",",",$laskurow['EDkpl2'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["EDkpl2"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE35"] != '') {
-						// 	$rivi .= str_replace(".",",",$laskurow['EDkpl3'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["EDkpl3"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE36"] != '') {
-						// 	$rivi .= str_replace(".",",",$laskurow['EDkpl4'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["EDkpl4"]);
-						// 	$excelsarake++;
-						// }
 					}
 
 					if ($valitut["SARAKE{$_x}"] != "") {
@@ -1558,34 +1385,6 @@
 						}
 
 						$_x_k++;
-
-						// if ($valitut["SARAKE29K"] != '') {
-						// 	$rivi .= str_replace(".",",",$kulutrow['kpl1'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $kulutrow["kpl1"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE30K"] != '') {
-						// 	$rivi .= str_replace(".",",",$kulutrow['kpl2'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $kulutrow["kpl2"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE31K"] != '') {
-						// 	$rivi .= str_replace(".",",",$kulutrow['kpl3'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $kulutrow["kpl3"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE32K"] != '') {
-						// 	$rivi .= str_replace(".",",",$kulutrow['kpl4'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $kulutrow["kpl4"]);
-						// 	$excelsarake++;
-						// }
 					}
 
 					for ($i = 1; $i < 13; $i++) {
@@ -1597,27 +1396,6 @@
 						}
 
 						$_x_k++;
-
-						// if ($valitut["SARAKE34K"] != '') {
-						// 	$rivi .= str_replace(".",",",$kulutrow['EDkpl2'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $kulutrow["EDkpl2"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE35K"] != '') {
-						// 	$rivi .= str_replace(".",",",$kulutrow['EDkpl3'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $kulutrow["EDkpl3"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE36K"] != '') {
-						// 	$rivi .= str_replace(".",",",$kulutrow['EDkpl4'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $kulutrow["EDkpl4"]);
-						// 	$excelsarake++;
-						// }
 					}
 
 					for ($i = 1; $i < 13; $i++) {
@@ -1629,27 +1407,6 @@
 						}
 
 						$_x++;
-
-						// if ($valitut["SARAKE38"] != '') {
-						// 	$rivi .= str_replace(".",",",$laskurow['kate2'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["kate2"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE39"] != '') {
-						// 	$rivi .= str_replace(".",",",$laskurow['kate3'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["kate3"]);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE40"] != '') {
-						// 	$rivi .= str_replace(".",",",$laskurow['kate4'])."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow["kate4"]);
-						// 	$excelsarake++;
-						// }
 					}
 
 					for ($i = 1; $i < 13; $i++) {
@@ -1661,27 +1418,6 @@
 						}
 
 						$_x++;
-
-						// if ($valitut["SARAKE42"] != '') {
-						// 	$rivi .= str_replace(".",",",$katepros2)."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $katepros2);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE43"] != '') {
-						// 	$rivi .= str_replace(".",",",$katepros3)."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $katepros3);
-						// 	$excelsarake++;
-						// }
-
-						// if ($valitut["SARAKE44"] != '') {
-						// 	$rivi .= str_replace(".",",",$katepros4)."\t";
-
-						// 	$worksheet->writeNumber($excelrivi, $excelsarake, $katepros4);
-						// 	$excelsarake++;
-						// }
 					}
 
 					if ($valitut["SARAKE{$_x}"] != '') {
@@ -2287,20 +2023,6 @@
 			echo "<td class='back'></td>";
 			echo "<th colspan='3'>",t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)"),"</th>";
 			echo "</tr>";
-
-			// $query = "	SELECT selitetark
-			// 			FROM avainsana
-			// 			WHERE yhtio = '$kukarow[yhtio]'
-			// 			and laji	= 'HALYRAP'
-			// 			and selite	= '$rappari'
-			// 			and selitetark like 'PAIVAM##%'";
-			// $sresult = pupe_query($query);
-
-			// while($srow = mysql_fetch_assoc($sresult)) {
-			// 	list($etuliite, $nimi, $paivamaara) = explode('##',$srow["selitetark"]);
-
-			// 	${$nimi} = $paivamaara;
-			// }
 
 			for ($i = 1; $i < 13; $i++) {
 				echo "<tr>";

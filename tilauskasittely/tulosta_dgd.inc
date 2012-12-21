@@ -164,11 +164,35 @@ if (!function_exists('rivi_dgd')) {
 
 		$pdf->pages[$sivu]->setFont($norm, 8);
 
-		list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['otsikkonro'], $kieli, "DGD", "imdg");
+		list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['tunnus'], $kieli, "DGD", "imdg");
 
 		$kollimaara_yht = 0;
 
 		foreach ($vakrakirtiedot as $vakrakirrivi) {
+
+			if (($sivu == 0 and $kala < 120) or ($sivu > 0 and $kala < 30)) {
+
+				$pdf->pages[$sivu]->drawText("Continues....", mm_pt(45), mm_pt($kala), 'LATIN1');
+
+				$sivu++;
+
+				// Luodaan palautettavat
+				$return = array();
+
+				foreach ($params as $key => $null) {
+					$return[$key] = ${$key};
+				}
+
+				$params = uusi_sivu_dgd($return);
+
+				// Luodaan muuttujat
+				foreach ($params as $key => $val) {
+					${$key} = $val;
+				}
+
+				$kala = 240;
+				$pdf->pages[$sivu]->setFont($norm, 8);
+			}
 
 			list($kollimaara, $teksti, $kilot) = explode("###", $vakrakirrivi);
 

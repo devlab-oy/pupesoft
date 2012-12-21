@@ -167,7 +167,7 @@
 				if ($laskurow["varasto"] == '') {
 					$query = "	SELECT *
 								from varastopaikat
-								where yhtio = '$kukarow[yhtio]'
+								where yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 								order by alkuhyllyalue,alkuhyllynro
 								limit 1";
 				}
@@ -272,9 +272,12 @@
 
 		while ($tilrow = mysql_fetch_array($tilre)) {
 			// etsitään sopivia tilauksia
-			$query = "	SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, maksuehto.teksti maksuehto, toimitustapa, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, lasku.laatija, toimaika
+			$query = "	SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.tunnus 'tilaus',
+						concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, maksuehto.teksti maksuehto, lasku.toimitustapa,
+						date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, kuka.nimi laatija, lasku.toimaika
 						FROM lasku
 						LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)
+						LEFT JOIN kuka on (kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.laatija)
 						WHERE lasku.tunnus = '$tilrow[otunnus]'
 						and lasku.tila = 'L'
 						$haku
@@ -365,7 +368,7 @@
 			die(t("Tilausta")." $id ".t("ei voida toimittaa, koska kaikkia tilauksen tietoja ei löydy!")."!");
 		}
 
-		$row = mysql_fetch_array($result);
+		$row = mysql_fetch_assoc($result);
 
 		echo "<table>";
 		echo "<tr><th>" . t("Tilaus") ."</th><td>$row[laskutunnus]</td></tr>";
@@ -383,14 +386,20 @@
 			$hinta_riv = "tilausrivi.hinta";
 		}
 
-		$lisa = " 	round($hinta_riv / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},$yhtiorow[hintapyoristys]) rivihinta,
-					(tilausrivi.varattu+tilausrivi.kpl) kpl ";
-
-		$query = "	SELECT concat_ws(' ',hyllyalue, hyllynro, hyllytaso, hyllyvali) varastopaikka, concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno, varattu, concat_ws('@',keratty,kerattyaika) keratty, tilausrivi.tunnus, var, $lisa
-					FROM tilausrivi, tuote
-					WHERE tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and var!='J' and otunnus = '$id' and tilausrivi.yhtio='$kukarow[yhtio]'
+		$query = "	SELECT concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.hyllyvali) varastopaikka,
+					concat_ws(' ', tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno, tilausrivi.varattu,
+					concat_ws('@', tilausrivi.keratty, tilausrivi.kerattyaika) keratty, tilausrivi.tunnus,
+					tilausrivi.var,
+					if (tilausrivi.alv<500, {$hinta_riv} / if ('{$yhtiorow['alv_kasittely']}' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa} * (tilausrivi.alv/100), 0) alv,
+					{$hinta_riv} / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa} rivihinta,
+					(tilausrivi.varattu+tilausrivi.kpl) kpl
+					FROM tilausrivi
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+					WHERE tilausrivi.yhtio ='$kukarow[yhtio]'
+					and tilausrivi.var not in ('P','J')
+					and tilausrivi.tyyppi = 'L'
+					and tilausrivi.otunnus = '$id'
 					ORDER BY varastopaikka";
-
 		$result = pupe_query($query);
 		$riveja = mysql_num_rows($result);
 
@@ -402,33 +411,13 @@
 				<th>".t("Kerätty")."</th>
 				</tr>";
 
-		$rivihinta = "";
+		$summa = 0;
+		$arvo  = 0;
 
-		$query = "	SELECT laskunsummapyoristys
-					FROM asiakas
-					WHERE tunnus='$row[liitostunnus]' and yhtio='$kukarow[yhtio]'";
-		$asres = pupe_query($query);
-		$asrow = mysql_fetch_array($asres);
+		while ($rivi = mysql_fetch_assoc($result)) {
 
-		$summa = "";
-
-		while($rivi = mysql_fetch_array($result)) {
-
-			$summa = $rivi["rivihinta"];
-
-			//Käsin syötetty summa johon lasku pyöristetään
-			if (abs($row["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
-				$summa = sprintf("%.2f",$row["hinta"]);
-			}
-
-			//Jos laskun loppusumma pyöristetään lähimpään tasalukuun
-			if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
-				$summa = sprintf("%.2f",round($summa ,0));
-			}
-
-			$rivihinta += $summa;
-
-			if ($rivi['var']=='P') $rivi['varattu']=t("*puute*");
+			$summa += hintapyoristys($rivi["rivihinta"]+$rivi["alv"]);
+			$arvo  += hintapyoristys($rivi["rivihinta"]);
 
 			echo "<tr><td>$rivi[varastopaikka]</td>
 					<td>$rivi[tuoteno]</td>
@@ -437,7 +426,61 @@
 					</tr>";
 		}
 
+		// EE keississä lasketaan veron määrää saman kaavan mukaan ku laskun tulostuksessa alvierittelyssä
+		// ja sit lopuksi summataan $arvo+$alvinmaara jotta saadaan laskun verollinen loppusumma
+		if (strtoupper($yhtiorow['maa']) == 'EE') {
+
+			$alvinmaara = 0;
+
+			//Haetaan kaikki alvikannat riveiltä
+			$alvquery = "	SELECT DISTINCT alv
+							FROM tilausrivi
+							WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'
+							and tilausrivi.var not in ('P','J')
+							and tilausrivi.tyyppi 	= 'L'
+							and tilausrivi.otunnus	= '$id'
+							and tilausrivi.alv 		< 500";
+			$alvresult = pupe_query($alvquery);
+
+			while ($alvrow = mysql_fetch_assoc($alvresult)) {
+
+				$aquery = "	SELECT
+							round(sum(round({$hinta_riv} / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2) * (tilausrivi.alv / 100)),2) alvrivihinta
+							FROM tilausrivi
+							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+							WHERE tilausrivi.yhtio 	= '$kukarow[yhtio]'
+							and tilausrivi.var not in ('P','J')
+							and tilausrivi.tyyppi 	= 'L'
+							and tilausrivi.otunnus 	= '$id'
+							and tilausrivi.alv 		= '$alvrow[alv]'";
+				$aresult = pupe_query($aquery);
+				$arow = mysql_fetch_assoc($aresult);
+
+				$alvinmaara += $arow["alvrivihinta"];
+			}
+
+			$summa = $arvo+$alvinmaara;
+		}
+
 		echo "</table><br>";
+
+		// Etsitään asiakas
+		$query = "	SELECT laskunsummapyoristys
+					FROM asiakas
+					WHERE tunnus = '$row[liitostunnus]'
+					and yhtio = '$kukarow[yhtio]'";
+		$asres = pupe_query($query);
+		$asrow = mysql_fetch_assoc($asres);
+
+		//Käsin syötetty summa johon lasku pyöristetään
+		if ($row["hinta"] <> 0 and abs($row["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
+			$summa = sprintf("%.2f",$row["hinta"]);
+		}
+
+		// Jos laskun loppusumma pyöristetään lähimpään tasalukuun
+		if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
+			$summa = sprintf("%.2f", round($summa, 0));
+		}
 
 		$query = "SELECT * FROM toimitustapa WHERE yhtio='$kukarow[yhtio]' AND selite='$row[toimitustapa]'";
 		$tores = pupe_query($query);
@@ -452,6 +495,8 @@
 
 		if ($toita['nouto'] != '' and $row['kateinen'] != '' and $row["chn"] != '999' and ($row["mapvm"] == "" or $row["mapvm"] == '0000-00-00')) {
 
+			echo "<tr><th>".t("Verollinen Yhteensä")."</th><td>$summa $row[valkoodi]</td></tr>";
+
 			echo "<tr><th>".t("Valitse kassalipas")."</th><td>";
 
 			$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]'";
@@ -460,7 +505,7 @@
 			$sel = "";
 
 			echo "<input type='hidden' name='noutaja' value=''>";
-			echo "<input type='hidden' name='rivihinta' value='$rivihinta'>";
+			echo "<input type='hidden' name='rivihinta' value='$summa'>";
 			echo "<input type='hidden' name='valkoodi' value='$row[valkoodi]'>";
 			echo "<input type='hidden' name='maa' value='$row[maa]'>";
 			echo "<input type='hidden' name='vaihdakateista' value='KYLLA'>";
@@ -483,7 +528,7 @@
 
 			$query_maksuehto = "SELECT *
 								FROM maksuehto
-								WHERE yhtio='$kukarow[yhtio]'
+								WHERE yhtio = '$kukarow[yhtio]'
 								and kateinen != ''
 								and kaytossa = ''
 								and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$row[maa]%')
@@ -556,6 +601,4 @@
 		echo "<input type='submit' value='".t("Merkkaa toimitetuksi")."'></form>";
 	}
 
-	require ("../inc/footer.inc");
-
-?>
+	require ("inc/footer.inc");

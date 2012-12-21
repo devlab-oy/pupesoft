@@ -527,7 +527,7 @@
 	if ($avain_sel['VARASTORYHMA'] == 'SELECTED' and mysql_field_name($result, $i) == "selitetark") {
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'";
+					WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'";
 		$varasto_res = mysql_query($query) or pupe_error($query);
 
 		$ulos .= "<td>";

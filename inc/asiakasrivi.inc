@@ -1133,15 +1133,16 @@
 
 	if (mysql_field_name($result, $i) == "keraysvahvistus_lahetys") {
 
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array();
-		$apu = $trow[$i];
-		$sel[$apu] = "selected";
+		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('E', 'o', 'k', 'L', 'M'), '');
 
 		$ulos .= "<option value=''>".t("Käytetään yhtiön oletusta")."</option>";
-		$ulos .= "<option value='E' $sel[E]>".t("Keräysvahvistusta ei lähetetä")."</option>";
-		$ulos .= "<option value='o' $sel[o]>".t("Keräysvahvistus lähetetään asiakkaalle")."</option>";
+		$ulos .= "<option value='E'{$sel['E']}>".t("Keräysvahvistusta/sähköisetä lähetettä ei lähetetä")."</option>";
+		$ulos .= "<option value='o'{$sel['o']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
+		$ulos .= "<option value='k'{$sel['k']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='L'{$sel['L']}>".t("Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='M'{$sel['M']}>".t("Keräysvahvistus/paperinen & sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1160,4 +1161,22 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'kerayserat') {
+
+		if ($yhtiorow['kerayserat'] == 'A') {
+			$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+			$sel = trim($trow[$i]) == 'A' ? ' selected' : '';
+
+			$ulos .= "<option value = ''>".t("Keräyseriä ei käytetä")."</option>";
+			$ulos .= "<option value = 'A'{$sel}>".t("Keräyserät käytössä")."</option>";
+			$ulos .= "</select></td>";
+
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 0;
+		}
 	}

@@ -19,7 +19,7 @@
 
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 					ORDER BY tyyppi, nimitys";
 		$kires = mysql_query($query) or pupe_error($query);
 

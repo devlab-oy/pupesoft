@@ -81,7 +81,7 @@
 		return($firstpage);
 	}
 
-	function rivi ($tyyppi, $firstpage, $summa, $row) {
+	function rivi ($tyyppi, $firstpage, $row) {
 		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni,$kieli, $yhtiorow, $tito_pvm;
 
 		if ($lask == 39) {
@@ -99,17 +99,19 @@
 			$pdf->draw_text(180, $kala, tv1dateconv($row["erpcm"]), 	$firstpage, $norm);
 			$pdf->draw_text(300, $kala, $row["valkoodi"], 				$firstpage, $norm);
 
-			if ($row['valkoodi'] == $yhtiorow['valkoodi']) {
-				$oikpos = $pdf->strlen($row["laskuavoinsaldo"], $norm);
-				$pdf->draw_text(480-$oikpos, $kala, $row["laskuavoinsaldo"], $firstpage, $norm);
-				$oikpos = $pdf->strlen($row["laskusumma"], $norm);
-				$pdf->draw_text(400-$oikpos, $kala, $row["laskusumma"],		$firstpage, $norm);
+			if (strtoupper($row['valkoodi']) == strtoupper($yhtiorow['valkoodi'])) {
+				$oikpos = $pdf->strlen($row["tiliointisumma"], $norm);
+				$pdf->draw_text(400-$oikpos, $kala, $row["tiliointisumma"],		$firstpage, $norm);
+
+				$oikpos = $pdf->strlen($row["tiliointiavoinsaldo"], $norm);
+				$pdf->draw_text(480-$oikpos, $kala, $row["tiliointiavoinsaldo"], $firstpage, $norm);
 			}
 			else {
-				$oikpos = $pdf->strlen($row["laskuavoinsaldovaluutassa"], $norm);
-				$pdf->draw_text(480-$oikpos, $kala, $row["laskuavoinsaldo_valuutassa"],	$firstpage, $norm);
-				$oikpos = $pdf->strlen($row["laskusumma_valuutassa"], $norm);
-				$pdf->draw_text(400-$oikpos, $kala, $row["laskusumma_valuutassa"],		$firstpage, $norm);
+				$oikpos = $pdf->strlen($row["tiliointisumma_valuutassa"], $norm);
+				$pdf->draw_text(400-$oikpos, $kala, $row["tiliointisumma_valuutassa"],		$firstpage, $norm);
+
+				$oikpos = $pdf->strlen($row["tiliointiavoinsaldo_valuutassa"], $norm);
+				$pdf->draw_text(480-$oikpos, $kala, $row["tiliointiavoinsaldo_valuutassa"],	$firstpage, $norm);
 			}
 
 			if ($tito_pvm != date('Y-m-d')) {
@@ -245,20 +247,40 @@
 		$tito_pvm = date("Y-m-d", mktime(0, 0, 0, $kk, $pp, $vv));
 	}
 
-	$query = "	SELECT lasku.ytunnus, lasku.valkoodi, lasku.tunnus, lasku.erpcm, lasku.liitostunnus, lasku.mapvm, lasku.nimi, lasku.tapvm, lasku.laskunro,
+	$query = "	SELECT
+				lasku.ytunnus,
+				lasku.maa,
+				lasku.valkoodi,
+				lasku.tunnus,
+				lasku.erpcm,
+				lasku.liitostunnus,
+				lasku.mapvm,
+				lasku.nimi,
+				lasku.tapvm,
+				lasku.laskunro,
 				lasku.summa-lasku.saldo_maksettu laskuavoinsaldo,
 				lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa laskuavoinsaldo_valuutassa,
 				lasku.summa laskusumma,
-				lasku.summa_valuutassa laskusumma_valuutassa
+				lasku.summa_valuutassa laskusumma_valuutassa,
+				sum(tiliointi.summa) tiliointiavoinsaldo,
+				sum(tiliointi.summa_valuutassa) tiliointiavoinsaldo_valuutassa,
+				sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0))-lasku.pyoristys tiliointisumma,
+				sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
 				FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+				JOIN tiliointi use index (tositerivit_index) ON (
+					lasku.yhtio 		    = tiliointi.yhtio
+					and lasku.tunnus 	    = tiliointi.ltunnus
+					and tiliointi.tilino   in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
+					and tiliointi.korjattu  = ''
+					and tiliointi.tapvm    <= '$tito_pvm' )
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
-				and (lasku.mapvm > '$tito_pvm' or lasku.mapvm = '0000-00-00')
-				and lasku.tapvm <= '$tito_pvm'
-				and lasku.tapvm > '0000-00-00'
-				and lasku.tila = 'U'
+				and (lasku.mapvm  > '$tito_pvm' or lasku.mapvm = '0000-00-00')
+				and lasku.tapvm	  <= '$tito_pvm'
+				and lasku.tapvm	  > '0000-00-00'
+				and lasku.tila	  = 'U'
 				and lasku.alatila = 'X'
 				and lasku.liitostunnus in ($tunnukset)
-				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
+				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14
 				ORDER BY lasku.ytunnus, lasku.laskunro";
 	$result = pupe_query($query);
 	$laskutiedot = mysql_fetch_assoc($result);
@@ -281,10 +303,11 @@
 
 	$query = "	SELECT maksupvm tapvm, summa * -1 summa, valkoodi, summa*-1 laskusumma
 				FROM suoritus
-				WHERE yhtio = '$kukarow[yhtio]'
-				and kohdpvm = '0000-00-00'
-				and ltunnus > 0
-				and asiakas_tunnus in ($tunnukset)";
+				WHERE suoritus.yhtio = '$kukarow[yhtio]'
+				and (suoritus.kohdpvm = '0000-00-00' or suoritus.kohdpvm > '$tito_pvm')
+				and suoritus.ltunnus  > 0
+				and suoritus.kirjpvm <= '$tito_pvm'
+				and suoritus.asiakas_tunnus in ($tunnukset)";
 	$suoritusresult = pupe_query($query);
 
 	$firstpage = alku();
@@ -293,18 +316,18 @@
 
 	while ($row = mysql_fetch_assoc($result)) {
 
-		$firstpage = rivi(1, $firstpage, $summa, $row);
+		$firstpage = rivi(1, $firstpage, $row);
 
 		if ($row['valkoodi'] == $yhtiorow['valkoodi']) {
-			$totaali[$row['valkoodi']] += $row['laskuavoinsaldo'];
+			$totaali[$row['valkoodi']] += $row['tiliointiavoinsaldo'];
 		}
 		else {
-			$totaali[$row['valkoodi']] += $row['laskuavoinsaldo_valuutassa'];
+			$totaali[$row['valkoodi']] += $row['tiliointiavoinsaldo_valuutassa'];
 		}
 	}
 
 	while ($row = mysql_fetch_assoc($suoritusresult)) {
-		$firstpage = rivi(2, $firstpage, $summa, $row);
+		$firstpage = rivi(2, $firstpage, $row);
 		$totaali[$row['valkoodi']] += $row['summa'];
 	}
 

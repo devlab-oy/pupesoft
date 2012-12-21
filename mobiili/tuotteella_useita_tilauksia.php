@@ -36,14 +36,9 @@ $keskeneraiset_query = "SELECT kuka.kesken FROM lasku
 						and lasku.tila='K'";
 $keskeneraiset = mysql_fetch_assoc(pupe_query($keskeneraiset_query));
 
-$liitostunnus_lisa = '';
-
 # Jos kuka.kesken on saapuminen, k‰ytet‰‰n sit‰
 if ($keskeneraiset['kesken'] != 0) {
 	$saapuminen = $keskeneraiset['kesken'];
-	$query = "SELECT * FROM lasku where tunnus='{$saapuminen}'";
-	$laskurow = mysql_fetch_assoc(pupe_query($query));
-	$liitostunnus_lisa = "and lasku.liitostunnus='{$laskurow['liitostunnus']}'";
 }
 
 # Haetaan ostotilaukset
@@ -69,7 +64,6 @@ $query = "	SELECT
 				AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 			WHERE
 			$query_lisa
-			$liitostunnus_lisa
 			AND lasku.alatila = 'A'
 			AND lasku.yhtio='{$kukarow['yhtio']}'
 		";
@@ -86,29 +80,6 @@ if (isset($submit)) {
 				$errors[] = t("Valitse rivi");
 				break;
 			}
-			# Jos kuka.kesken ei ole saapuminen, tehd‰‰n uusi saapuminen haettujen ostotilausten
-			# mukaan oikealle toimittajalle
-			if ($keskeneraiset['kesken'] == 0) {
-
-				# Haetaan toimittajan tiedot
-				$toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$tilaukset['liitostunnus']}'";
-				$toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
-
-				# Kaivetaan sopivaa saapumista
-				# kyseisen laatijan saapumiset, joissa ei-siirtovalmiita suuntalavoja
-				// $saapuminen_query = "	SELECT * FROM lasku
-				// 						WHERE tila='K'
-				// 						AND liitostunnus='{$tilaukset['liitostunnus']}'
-				// 						AND laatija='{$kukarow['kuka']}'
-				// 						ORDER BY tunnus DESC
-				// 						LIMIT 1";
-
-				$saapuminen = uusi_saapuminen($toimittaja);
-
-				# Asetetaan uusi saapuminen k‰ytt‰j‰lle kesken olevaksi
-				$update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
-				$updated = pupe_query($update_kuka);
-			}
 
 			$url_array['ostotilaus'] = $ostotilaus;
 			$url_array['tilausrivi'] = $tilausrivi;
@@ -117,9 +88,6 @@ if (isset($submit)) {
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>"; exit();
 
 			break;
-		case 'cancel':
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus=$ostotilaus'>"; exit();
-		   	break;
 		default:
 			echo "Virhe";
 			break;
@@ -135,14 +103,6 @@ if ($tilausten_lukumaara == 0) {
 # Jos vain yksi osuma, menn‰‰n suoraan hyllytykseen;
 if ($tilausten_lukumaara == 1) {
 
-	if(empty($saapuminen)) {
-		# Haetaan toimittajan tiedot
-		$toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$tilaukset['liitostunnus']}'";
-		$toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
-
-		$saapuminen = uusi_saapuminen($toimittaja);
-	}
-
 	$url_array['tilausrivi'] = $tilaukset['tunnus'];
 	$url_array['ostotilaus'] = (empty($ostotilaus)) ? $tilaukset['otunnus'] : $ostotilaus;
 	$url_array['saapuminen'] = $saapuminen;
@@ -155,12 +115,14 @@ if ($tilausten_lukumaara == 1) {
 mysql_data_seek($result, 0);
 
 ### UI ###
-echo "<div class='header'><h1>",t("TUOTTEELLA USEITA TILAUKSIA"), "</h1></div>";
+echo "<div class='header'>
+	<button onclick='window.location.href=\"ostotilaus.php\"' class='button left'><img src='back2.png'></button>
+	<h1>",t("USEITA TILAUKSIA"), "</h1></div>";
 
 echo "<div class='main'>
 <form name='form1' method='post' action=''>
 <table>
-<tr><th></th>";
+<tr>";
 
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
 	echo "<th>",t("Ostotilaus"),"</th>";
@@ -177,26 +139,23 @@ echo "
 # Loopataan ostotilaukset
 while($row = mysql_fetch_assoc($result)) {
 
+	# Jos rivi on jo kohdistettu eri saapumiselle
+	if ($row['uusiotunnus'] != 0) $saapuminen = $row['uusiotunnus'];
+	$url = http_build_query(array('saapuminen' => $saapuminen, 'ostotilaus' => $row['ostotilaus'], 'tilausrivi' => $row['tunnus']));
+
 	echo "<tr>";
-	echo "<td><input class='radio' type='radio' name='tilausrivi' value='{$row['tunnus']}' /></td>";
+
 	if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
-		echo "<td>{$row['otunnus']}</td>";
+		echo "<td><a href='hyllytys.php?$url'>{$row['otunnus']}</a></td>";
 	}
 	if ($tuotenumero == '' and $viivakoodi == '' and $ostotilaus != '') {
-		echo "<td>{$row['tuoteno']}</td>";
+		echo "<td><a href='hyllytys.php?$url'>{$row['tuoteno']}</a></td>";
 	}
 	echo "
 		<td>".($row['varattu']+$row['kpl']).
 			"(".($row['varattu']+$row['kpl'])*$row['tuotekerroin'].")
 		</td>
-		<td>{$row['hylly']}</td>
-	";
-
-	$url_array['ostotilaus'] = $row['ostotilaus'];
-	$url_array['tilausrivi'] = $row['tunnus'];
-
-	echo "<input type='hidden' name='ostotilaus' value={$row['ostotilaus']}>";
-	echo "<input type='hidden' name='saapuminen' id='saapuminen' value={$saapuminen}>";
+		<td>{$row['hylly']}</td>";
 	echo "<tr>";
 }
 
@@ -204,7 +163,7 @@ echo "</table></div>";
 echo "Rivej‰: ".mysql_num_rows($result);
 
 echo "<div class='controls'>
-<button type='submit' name='submit' value='ok' onsubmit='false' onclick='return tarkista_saapuminen();'>",t("OK"),"</button>
+<button type='submit' name='submit' value='ok' onsubmit='false'>",t("OK"),"</button>
 <button class='right' name='submit' id='takaisin' value='cancel' onclick='submit();'>",t("Takaisin"),"</button>
 </form>
 </div>";
@@ -214,19 +173,3 @@ echo "<div class='error'>";
 		echo $virhe;
 	}
 echo "</div>";
-
-echo "<script type='text/javascript'>
-	function tarkista_saapuminen() {
-		var saapuminen = document.getElementById('saapuminen').value;
-		if (saapuminen == '') {
-			result = confirm('Huom, Keskener‰ist‰ saapumista ei lˆydy. Tuloutusta varten luodaan uusi saapuminen.');
-			if(result == true) {
-				return true;
-			}
-			else {
-				window.location = 'ostotilaus.php';
-				return false;
-			}
-		}
-	}
-</script>";

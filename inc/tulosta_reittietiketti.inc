@@ -105,7 +105,8 @@
 				$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 							lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
 							if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti,
-							asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
+							asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin,
+							asiakas.kuljetusohje viesti
 							FROM lasku
 							JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 							JOIN maksuehto on (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
@@ -135,6 +136,41 @@
 				$keraysera_res = pupe_query($query);
 
 				while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
+
+					$query = "	SELECT koodi
+								FROM pakkauskoodit
+								WHERE yhtio 		 = '{$kukarow['yhtio']}'
+								AND rahdinkuljettaja = '{$toitarow['rahdinkuljettaja']}'
+								AND pakkaus 		 = '{$keraysera_row['pakkaus']}'";
+					$pakkauskoodit_res = pupe_query($query);
+					$pakkauskoodit_row = mysql_fetch_assoc($pakkauskoodit_res);
+
+					$selectlisa   = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "tuote.tuoteleveys AS leveys, tuote.tuotekorkeus AS korkeus, tuote.tuotesyvyys AS syvyys" : "pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys";
+					$joinlisa 	  = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
+					$puukotuslisa = $keraysera_row['kollilaji'] != 'MUU KOLLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
+
+					$query = "	SELECT {$selectlisa},
+								ROUND(SUM(tuote.tuotemassa * kerayserat.kpl) + IFNULL(pakkaus2.oma_paino, 0), 1) tuotemassa,
+								ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
+								FROM kerayserat
+								{$joinlisa}
+								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+								LEFT JOIN pakkaus AS pakkaus2 ON (pakkaus2.yhtio = kerayserat.yhtio AND pakkaus2.tunnus = kerayserat.pakkaus)
+								WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
+								AND kerayserat.sscc 	= '{$keraysera_row['sscc']}'
+								GROUP BY 1,2,3";
+					$pakkaus_info_res = pupe_query($query);
+					$pakkaus_info_row = mysql_fetch_assoc($pakkaus_info_res);
+
+					$query = "	SELECT SUM(tuote.tuotemassa) AS paino
+								FROM kerayserat
+								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
+								WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
+								AND kerayserat.sscc 	= '{$keraysera_row['sscc']}'";
+					$paino_chk_res = pupe_query($query);
+					$paino_chk_row = mysql_fetch_assoc($paino_chk_res);
 
 					if ($unifaun_kaytossa) {
 						$row['pakkausid'] = $keraysera_row['pakkausnro'];
@@ -168,41 +204,6 @@
 						$unifaun->setKirjoitin($kirjoitin_row['unifaun_nimi']);
 
 						$unifaun->_getXML();
-
-						$query = "	SELECT koodi
-									FROM pakkauskoodit
-									WHERE yhtio 		 = '{$kukarow['yhtio']}'
-									AND rahdinkuljettaja = '{$toitarow['rahdinkuljettaja']}'
-									AND pakkaus 		 = '{$keraysera_row['pakkaus']}'";
-						$pakkauskoodit_res = pupe_query($query);
-						$pakkauskoodit_row = mysql_fetch_assoc($pakkauskoodit_res);
-
-						$selectlisa   = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "tuote.tuoteleveys AS leveys, tuote.tuotekorkeus AS korkeus, tuote.tuotesyvyys AS syvyys" : "pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys";
-						$joinlisa 	  = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
-						$puukotuslisa = $keraysera_row['kollilaji'] != 'MUU KOLLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
-
-						$query = "	SELECT {$selectlisa},
-									ROUND(SUM(tuote.tuotemassa * kerayserat.kpl) + IFNULL(pakkaus2.oma_paino, 0), 1) tuotemassa,
-									ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
-									FROM kerayserat
-									{$joinlisa}
-									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
-									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-									LEFT JOIN pakkaus AS pakkaus2 ON (pakkaus2.yhtio = kerayserat.yhtio AND pakkaus2.tunnus = kerayserat.pakkaus)
-									WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
-									AND kerayserat.sscc 	= '{$keraysera_row['sscc']}'
-									GROUP BY 1,2,3";
-						$pakkaus_info_res = pupe_query($query);
-						$pakkaus_info_row = mysql_fetch_assoc($pakkaus_info_res);
-
-						$query = "	SELECT SUM(tuote.tuotemassa) AS paino
-									FROM kerayserat
-									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
-									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
-									WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
-									AND kerayserat.sscc 	= '{$keraysera_row['sscc']}'";
-						$paino_chk_res = pupe_query($query);
-						$paino_chk_row = mysql_fetch_assoc($paino_chk_res);
 
 						$vakkoodi = array();
 
@@ -329,29 +330,36 @@
 						$unifaun->ftpSend();
 					}
 					else {
-						// HUOM: Tämä vielää off line, väärät muuttujat $params-arrayssa!!!!
-						continue;
 
-						// Tulostetaan Pupen oma kollitarra
-						$params = array(
-				 			'tilriv' => $tilriv,
-				 			'pakkaus_kirjain' => $pakkaus_kirjain,
-				 			'sscc' => $sscc,
-				 			'toimitustapa' => $laskurow['toimitustapa'],
-				 			'rivit' => $rivit,
-				 			'paino' => $paino,
-				 			'tilavuus' => $tilavuus,
-				 			'lask_nimi' => $laskurow['nimi'],
-				 			'lask_nimitark' => $laskurow['nimitark'],
-				 			'lask_osoite' => $laskurow['osoite'],
-				 			'lask_postino' => $laskurow['postino'],
-				 			'lask_postitp' => $laskurow['postitp'],
-				 			'lask_viite' => $laskurow['viesti'],
-				 			'lask_merkki' => $laskurow['sisviesti2'],
-				 			'reittietikettitulostin' => $reittietikettitulostin,
-				 		);
+						if (trim($reittietikettitulostin) != "") {
+							$query = "	SELECT komento
+										FROM kirjoittimet
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$reittietikettitulostin}'";
+							$kirjoitin_res = pupe_query($query);
+							$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 
-					 	tulosta_reittietiketti($params);
+							// Tulostetaan Pupen oma kollitarra
+							$params = array(
+					 			'tilriv' => $row['tunnus'],//tilausnumero
+					 			'pakkaus_kirjain' => excel_column_name($keraysera_row['pakkausnro']),
+					 			'sscc' => $keraysera_row['sscc'],
+					 			'toimitustapa' => $row['toimitustapa'],
+					 			'rivit' => $keraysera_row['rivimaara'],//tilausrivien määrä
+					 			'paino' => $pakkaus_info_row['tuotemassa'],
+					 			'tilavuus' => $pakkaus_info_row['kuutiot'],
+					 			'lask_nimi' => $rakir_row['toim_nimi'],
+					 			'lask_nimitark' => $rakir_row['toim_nimitark'],
+					 			'lask_osoite' => $rakir_row['toim_osoite'],
+					 			'lask_postino' => $rakir_row['toim_postino'],
+					 			'lask_postitp' => $rakir_row['toim_postitp'],
+					 			'lask_viite' => $row['viesti'],
+					 			'lask_merkki' => $row['ohjausmerkki'],
+					 			'reittietikettitulostin' => $kirjoitin_row['komento'],
+					 		);
+
+						 	tulosta_reittietiketti($params);
+						}
 					}
 				}
 			}

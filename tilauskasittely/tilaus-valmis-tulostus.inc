@@ -197,7 +197,12 @@
 		require_once ("tulosta_lahete_kerayslista.inc");
 
 		//haetaan asiakkaan tiedot
-		$query = "  SELECT luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro, kerayserat
+		$query = "  SELECT luokka,
+					puhelin,
+					if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
+					asiakasnro as asiakasnro_aito,
+					kerayserat,
+					kieli
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 		$riresult = mysql_query($query) or pupe_error($query);
@@ -282,7 +287,7 @@
 		// keräyslistan rivit
 		if (($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
 
-			if ($yhtiorow['kerayserat'] == 'K') $vhlisa = "JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)";
+			if ($yhtiorow['kerayserat'] == 'K') $vhlisa = "JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke = kerayserat.keraysvyohyke)";
 			else $vhlisa = "";
 
 			$query = "	SELECT tilausrivi.*,
@@ -290,6 +295,7 @@
 						kerayserat.kpl as tilkpl,
 						kerayserat.kpl as varattu,
 						kerayserat.tunnus as ker_tunnus,
+						kerayserat.pakkaus,
 						kerayserat.pakkausnro,
 						{$sorttauskentta}
 						FROM kerayserat
@@ -388,7 +394,7 @@
 		if ($laskurow["varasto"] == 0) {
 			$query = "	SELECT *
 						from varastopaikat
-						where yhtio='$kukarow[yhtio]'
+						where yhtio='$kukarow[yhtio]' AND tyyppi != 'P'
 						order by alkuhyllyalue,alkuhyllynro
 						limit 1";
 		}

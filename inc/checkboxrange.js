@@ -24,12 +24,21 @@
 
         selectorStr = this;
 
-        $(selectorStr).bind("click", handleClick);
+		function SortByClass(a, b){
+			var aClass = $(a).attr('class');
+			var bClass = $(b).attr('class');
+
+			return ((aClass < bClass) ? -1 : ((aClass > bClass) ? 1 : 0));
+		}
+
+		selectorStr.sort(SortByClass);
+		$(selectorStr).bind("click", handleClick);
     };
 
     function handleClick(event)
     {
         var val = this.value;
+		var nam = this.name;
         var checkStatus = this.checked;
         //get the checkbox number which the user has checked
 
@@ -38,7 +47,7 @@
             if (prevChecked != 'null') {
                 //get the current checkbox number
                 var ind = 0, found = 0, currentChecked;
-                currentChecked = getSelected(val);
+                currentChecked = getSelected(val, nam);
 
                 ind = 0;
                 if (currentChecked < prevChecked) {
@@ -48,9 +57,10 @@
                         }
                         ind++;
                     });
-                } else {
+                }
+				else {
                     $(selectorStr).each(function(i) {
-                        if (ind >= prevChecked && ind <= currentChecked) {
+						if (ind >= prevChecked && ind <= currentChecked) {
                             this.checked = checkStatus;
                         }
                         ind++;
@@ -59,19 +69,18 @@
 
                 prevChecked = currentChecked;
             }
-        } else {
-            if (checkStatus) {
-                prevChecked = getSelected(val);
-            }
+        }
+		else if (checkStatus) {
+        	prevChecked = getSelected(val, nam);
         }
     };
 
-    function getSelected(val)
+    function getSelected(val, nam)
     {
         var ind = 0, found = 0, checkedIndex;
 
         $(selectorStr).each(function(i) {
-            if (val == this.value && found != 1) {
+			if (val == this.value && nam == this.name && found != 1) {
                 checkedIndex = ind;
                 found = 1;
             }

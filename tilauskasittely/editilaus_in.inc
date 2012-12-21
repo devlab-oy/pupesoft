@@ -47,6 +47,7 @@ if (!function_exists('jt_toimita_editilaus')) {
 		$tilaus_on_jo			    	= "KYLLA";
 		$from_varastoon_inc 	    	= "editilaus_in.inc";
 		$ei_tehdastoimitus_tuotteita	= "EI";
+		$automaattinen_poiminta			= "JOO";
 
 		if ($asiakasmaa != '') {
 			$asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
@@ -462,7 +463,21 @@ while ($tietue = fgets($fd)) {
 
 		case 'OSTOTIL.OT_MAKSUEHTO' :
 		//Magento keississä maksuehdon koko nimi verkkokaupassa
-			if ($edi_tyyppi == "magento") {
+			if ($edi_tyyppi == "magento" and $tieto != '') {
+
+				if ($editilaus_maksuehto == "") {
+					$query = "	SELECT *
+								FROM maksuehto
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND teksti = '{$tieto}'";
+					$result = pupe_query($query);
+
+					if (mysql_num_rows($result) == 1) {
+						$editilaus_maksuehto_row = mysql_fetch_assoc($result);
+						$editilaus_maksuehto	 = $editilaus_maksuehto_row['tunnus'];
+					}
+				}
+
 				$editilaus_maksuteksti .= $tieto;
 			}
 			break;
@@ -717,7 +732,7 @@ while ($tietue = fgets($fd)) {
 
 		case 'OSTOTIL.OT_MAKSETTU' :
 			// jos Magenton tilaus on jo maksettu luottokortilla niin päivitetään maksuehto
-			if ($edi_tyyppi == "magento" and $tieto == 'processing') {
+			if ($edi_tyyppi == "magento" and ($tieto == 'processing' or $tieto == 'complete')) {
 				$kukarow["kassamyyja"] = "";
 				$editilaus_kassalipas = "";
 
@@ -967,6 +982,10 @@ while ($tietue = fgets($fd)) {
 					if ($editilaus_tilaustyyppi == "9") {
 						$editilaus_eilahetetta = "o";
 						$editilaus_sisainen = "o";
+					}
+					elseif ($editilaus_tilaustyyppi == 'K') {
+						$editilaus_tila 	= 'N';
+						$editilaus_alatila 	= '';
 					}
 				}
 
@@ -1570,7 +1589,7 @@ while ($tietue = fgets($fd)) {
 							$query	= "	SELECT GROUP_CONCAT(tunnus) tunnukset
 										FROM varastopaikat
 										WHERE yhtio = '$kukarow[yhtio]'
-										AND prioriteetti > 0";
+										AND prioriteetti > 0 AND tyyppi != 'P'";
 							$pres = pupe_query($query);
 							$prow = mysql_fetch_assoc($pres);
 
@@ -1700,7 +1719,7 @@ while ($tietue = fgets($fd)) {
 								tuoteno 	= '$virhetuoteno',
 								var			= 'P',
 								kpl 		= '0',
-								alv			= '23',
+								alv			= '".alv_oletus()."',
 								tilkpl 		= '$kpl',
 								otunnus 	= '$id',
 								tyyppi 		= '$editilaus_tyyppi',
@@ -1761,9 +1780,11 @@ while ($tietue = fgets($fd)) {
 					}
 				}
 
-				// Tilaus merkataan valmiiksi
-				$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
-				$result = mysql_query($query) or die($query);
+				if ($editilaus_tilaustyyppi != 'K') {
+					// Tilaus merkataan valmiiksi
+					$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
+					$result = mysql_query($query) or die($query);
+				}
 
 				// haetaan tilauksen tiedot
 				$query    = "SELECT * FROM lasku WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
@@ -1775,9 +1796,9 @@ while ($tietue = fgets($fd)) {
 				$editilaus_lasku_tunnus = $laskurow["tunnus"];
 
 				// jos terminaalitoimitus niin EI tehdä tilaus-valmista...
-				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3) {
+				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
 
-					if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
+					if (in_array($yhtiorow['jt_automatiikka'], array('Y','W','K'))) {
 						//lisätään tilaukseen ne jt-rivit jotka riittävät kaikille
 						$edi_ulos .= "\n";
 						jt_toimita_editilaus($laskurow["ytunnus"], $laskurow["liitostunnus"], $laskurow["maa"]);
@@ -1945,7 +1966,7 @@ while ($tietue = fgets($fd)) {
 
 // lähetetään meili
 if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtiorow) and $yhtiorow["edi_email"] != "") {
-	
+
 	$edi_ulos = strip_tags($edi_ulos);
 
 	$bound   = uniqid(time()."_") ;
@@ -1982,5 +2003,3 @@ else {
 	echo $edi_ulos;
 	echo "\n";
 }
-
-?>

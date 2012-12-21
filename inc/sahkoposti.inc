@@ -13,7 +13,8 @@
 	///*Kasataan käyttäjälle lähetettävä meili *///
 	//tässa on kaikki failit jotka tarvitaan
 
-	$varaposti = '';
+	$varaposti 		= '';
+	$varaposti_trig = FALSE;
 
 	if (!isset($subject) or trim($subject) == '') {
 		$subject = "$yhtiorow[nimi] - $kutsu";
@@ -24,8 +25,9 @@
 	}
 
 	if (substr($komento, 0, 12) == 'asiakasemail') {
-		$varaposti = $kukarow['eposti'];
-		$kukarow['eposti'] = substr($komento, 12);
+		$varaposti_trig 	= TRUE;
+		$varaposti 			= $kukarow['eposti'];
+		$kukarow['eposti'] 	= substr($komento, 12);
 	}
 
 	$bound = uniqid(time()."_") ;
@@ -166,7 +168,7 @@
 	unset($sisalto);
 	unset($subject);
 
-	if ($varaposti != '') {
+	if ($varaposti_trig) {
 		$kukarow['eposti'] = $varaposti;
 	}
 

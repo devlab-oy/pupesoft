@@ -1,9 +1,9 @@
 <?php
-	
+
 	echo "<font class='head'>".t("Avoimet laskut per eräpvm")."</font><hr>";
 
 	$sel1 = $sel2 = $sel3 = "";
-	
+
 	if ($aika == 'pv') {
 		$sel1 = 'SELECTED';
 	}
@@ -13,7 +13,7 @@
 	if ($aika == 'kk') {
 		$sel3 = "SELECTED";
 	}
-	
+
 	echo "<form action = 'raportit.php' method='post'>
 			<input type = 'hidden' name = 'toim' value = 'laskuerapvm'>
 			<input type = 'hidden' name = 'tee' value = '1'>
@@ -28,8 +28,8 @@
 			</tr></table></form><br>";
 
 
-	if ($aika != '') {		
-	
+	if ($aika != '') {
+
 		if ($aika == 'pv') {
 			$tapa = 'erpcm';
 		}
@@ -41,9 +41,9 @@
 		}
 		$query = "	SELECT $tapa aika, sum(summa * valuu.kurssi) summa, count(*) kpl
 					FROM lasku, valuu
-					WHERE lasku.yhtio = '$kukarow[yhtio]' 
-					and valuu.yhtio = '$kukarow[yhtio]' 
-					and lasku.valkoodi = valuu.nimi 
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and valuu.yhtio = '$kukarow[yhtio]'
+					and lasku.valkoodi = valuu.nimi
 					and lasku.tila in ('H','M','P','Q')
 					GROUP BY Aika
 					ORDER BY Aika";
@@ -51,14 +51,14 @@
 
 		echo "<table>";
 		echo "<tr><th>".t("Jakso")."</th><th>".t("Eräpvm")."</th><th>".t("Summa")."</th><th>".t("Kpl")."</th></tr>";
-	
+
 		while ($trow=mysql_fetch_array ($result)) {
 			echo "<tr>";
-		
-	
+
+
 			if ($aika == 'pv') {
 				echo "<td>".t("Päivä").": ";
-				echo "<td align='right'><a href = raportit.php?toim=laskuhaku&tee=E&pvm=$trow[aika]>".tv1dateconv($trow["aika"])."</td>";
+				echo "<td align='right'><a href = raportit.php?toim=laskuhaku&tee=E&pvm=$trow[aika]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//aika=$aika>".tv1dateconv($trow["aika"])."</td>";
 			}
 			if ($aika == 'vi') {
 				echo "<td>".t("Viikko").": ";
@@ -69,11 +69,10 @@
 				echo "<td>".substr($trow["aika"], 5, 2)." - ".substr($trow["aika"], 0, 4)."</td>";
 			}
 
-					
+
 			echo "<td style='text-align: right;'>".sprintf("%.2f", $trow["summa"])."</td>";
 			echo "<td style='text-align: right;'>$trow[kpl]</td>";
 			echo "</tr>";
 		}
 		echo "</table><br>";
 	}
-?>

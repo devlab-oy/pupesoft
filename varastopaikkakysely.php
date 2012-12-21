@@ -37,6 +37,15 @@
 	echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 	echo "<th style='vertical-align:middle;'>".t("Varastohaku")."</th>";
 	echo "<td>".livesearch_kentta("formi", "VARASTOHAKU", "varastopaikka", 300)."</td>";
+
+	# Voidaan hakea sscc-koodilla jos suuntalavat on käytössä
+	if ($yhtiorow['suuntalavat'] == 'S') {
+		echo "</tr>";
+		echo "<tr>";
+		echo "<th>".t("SSCC")."</th>";
+		echo "<td><input type='text' name='sscc' class='varastopaikka' style='width:300px'></td>";
+	}
+
 	echo "<td class='back'>";
 	echo "<input type='Submit' value='".t("Hae")."'></form></td>";
 	echo "</tr>";
@@ -99,14 +108,36 @@
 			//-->
 			</script>";
 
-		$query = "	SELECT tuotepaikat.*,tuote.nimitys
-					FROM tuotepaikat
-					JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
-					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-					AND concat(tuotepaikat.hyllyalue,'-',tuotepaikat.hyllynro,'-',tuotepaikat.hyllyvali,'-',tuotepaikat.hyllytaso) like '$varastopaikka'
-					order by tuotepaikat.tuoteno
-					$limit";
-		$result = pupe_query($query);
+		# Jos haettu sscc koodilla
+		if (!empty($sscc)) {
+			$query = "	SELECT tuotepaikat.*, suuntalavat.sscc
+						FROM tuotepaikat
+						JOIN tilausrivi on (
+						  tilausrivi.yhtio=tuotepaikat.yhtio
+						  AND tilausrivi.suuntalava > 0
+						  AND tilausrivi.tyyppi='O'
+						  AND tilausrivi.tuoteno=tuotepaikat.tuoteno
+						  AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue
+						  AND tilausrivi.hyllynro=tuotepaikat.hyllynro
+						  AND tilausrivi.hyllyvali=tuotepaikat.hyllyvali
+						  AND tilausrivi.hyllytaso=tuotepaikat.hyllytaso)
+						JOIN suuntalavat on (suuntalavat.yhtio=tilausrivi.yhtio and suuntalavat.tunnus=tilausrivi.suuntalava)
+						WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
+						AND tuotepaikat.tyyppi='S'
+						AND suuntalavat.sscc='{$sscc}'
+						GROUP BY tuotepaikat.tuoteno";
+			$result = pupe_query($query);
+		}
+		else {
+			# Haetaan tuotteet varastopaikka haulla
+			$query = "	SELECT tuotepaikat.*
+						FROM tuotepaikat
+						WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+						AND concat(tuotepaikat.hyllyalue,'-',tuotepaikat.hyllynro,'-',tuotepaikat.hyllyvali,'-',tuotepaikat.hyllytaso) = '$varastopaikka'
+						order by tuotepaikat.tuoteno
+						$limit";
+			$result = pupe_query($query);
+		}
 
 		echo "<font class='head'>".t("Varastopaikka")." $varastopaikka</font><hr>";
 
@@ -119,17 +150,26 @@
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<th>Tuoteno</th>";
-		echo "<th>Paikka</th>";
-		echo "<th>Nimitys</th>";
-		echo "<th>Saldo</th>";
-		echo "<th>Oletus</th>";
-		echo "<th>Siirrä</th>";
+		echo "<th>".t("Tuoteno")."</th>";
+		echo "<th>".t("Paikka")."</th>";
+		echo "<th>".t("Nimitys")."</th>";
+		echo "<th>".t("Saldo")."</th>";
+		echo "<th>".t("Oletus")."</th>";
+		echo "<th>".t("Suuntalava")."</th>";
+		echo "<th>".t("Siirrä")."</th>";
 		echo "</tr>";
 
 		$i=0;
 
 		while ($rivi = mysql_fetch_assoc($result)) {
+
+			# Haetaan nimitys
+			$nimitys_result = pupe_query("	SELECT nimitys
+											FROM tuote
+											WHERE yhtio='{$kukarow['yhtio']}'
+											AND tuoteno='{$rivi['tuoteno']}'");
+			$nimitys_result = mysql_fetch_assoc($nimitys_result);
+			$rivi['nimitys'] = $nimitys_result['nimitys'];
 
 			echo "<tr>";
 			echo "<td>$rivi[tuoteno]</td>";
@@ -137,6 +177,30 @@
 			echo "<td>$rivi[nimitys]</td>";
 			echo "<td>$rivi[saldo]</td>";
 			echo "<td>$rivi[oletus]</td>";
+
+			# Haetaan suuntalavan sscc, jos tuotepaikan tyyppi on 'S'
+			if ($rivi['tyyppi'] == 'S') {
+				$s_query = "SELECT group_concat(distinct(sscc)) as sscc
+							FROM tilausrivi
+							join suuntalavat on (tilausrivi.yhtio=suuntalavat.yhtio AND tilausrivi.suuntalava=suuntalavat.tunnus)
+							WHERE tilausrivi.yhtio='{$kukarow['yhtio']}'
+							AND tilausrivi.tyyppi='O'
+							AND suuntalava > 0
+							AND tuoteno='$rivi[tuoteno]'
+							AND hyllyalue='$rivi[hyllyalue]'
+							AND hyllynro='$rivi[hyllynro]'
+							AND hyllyvali='$rivi[hyllyvali]'
+							AND hyllytaso='$rivi[hyllytaso]'";
+
+				$lava_result = pupe_query($s_query);
+				$lava_result = mysql_fetch_assoc($lava_result);
+				$rivi['sscc'] = $lava_result['sscc'];
+				echo "<td>{$rivi['sscc']}</td>";
+			}
+			else {
+				echo "<td></td>";
+			}
+
 			echo "<td align='center'>";
 			if ($rivi['saldo'] != 0) {
 				echo "<input type='checkbox' name='tunnukset[$i]' value='$rivi[tunnus]'>";
@@ -151,7 +215,7 @@
 		echo "<input type='hidden' name='org_varasto' value='$org_varasto'>";
 
 		echo "<tr>";
-		echo "<th colspan='5'>".t("Ruksaa kaikki")."</th>";
+		echo "<th colspan='6'>".t("Ruksaa kaikki")."</th>";
 		echo "<td align='center'><input type='checkbox' name='tun' onclick='toggleAll(this)'></td>";
 		echo "</tr>";
 		echo "</table><br>";
@@ -180,7 +244,7 @@
 
 		foreach ($tunnukset as $key => $arvo) {
 
-			// MISTÄ varastosta viedöön
+			// Mistä varastosta viedään
 			$mista = $arvo;
 			$tuoteno = $tuotenumerot[$key];
 			$asaldo = $saldot[$key];

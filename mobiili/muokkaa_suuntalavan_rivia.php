@@ -16,6 +16,12 @@ $error = array(
 	'rivi' => ''
 );
 
+$data = array(
+	'alusta_tunnus' => $alusta_tunnus,
+	'liitostunnus' => $liitostunnus
+);
+$url = http_build_query($data);
+
 # Haetaan suuntalavan tuotteet
 $res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
 $row = mysql_fetch_assoc($res);
@@ -23,20 +29,8 @@ $row = mysql_fetch_assoc($res);
 # Jos on painettu nappia
 if (isset($submit) and trim($submit) != '') {
 
-	$data = array(
-		'alusta_tunnus' => $alusta_tunnus,
-		'liitostunnus' => $liitostunnus
-	);
-	$url = http_build_query($data);
-
-	# Takaisin nappi
-	if ($submit == 'cancel') {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
-		exit;
-	}
-
 	# Pois suuntalavalta nappi
-	elseif ($submit == 'submit') {
+	if ($submit == 'submit') {
 
 		if (!isset($maara)) {
 			$error['rivi'] = t("Syötä määrä", $browkieli).'.';
@@ -55,7 +49,7 @@ if (isset($submit) and trim($submit) != '') {
 		else {
 			# Päivitetään tilausrivin määrä ja splitataan rivi
 			$ok = paivita_tilausrivin_kpl($tilausrivi, ($row['varattu'] - $maara));
-			$uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $maara, false, true);
+			$uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $maara, TRUE, TRUE);
 
 			# Redirect alustaan vai suuntalavan_tuotteet
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
@@ -64,7 +58,9 @@ if (isset($submit) and trim($submit) != '') {
 	}
 }
 
-echo "<div class='header'><h1>",t("MUOKKAA SUUNTALAVAN RIVIÄ", $browkieli),"</h1></div>";
+echo "<div class='header'>";
+echo "<button onclick='window.location.href=\"suuntalavan_tuotteet.php?$url\"' class='button left'><img src='back2.png'></button>";
+echo "<h1>",t("MUOKKAA SUUNTALAVAN RIVIÄ", $browkieli),"</h1></div>";
 
 echo "<div class='main'>
 
@@ -95,8 +91,7 @@ echo "<div class='main'>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='submit' onclick='submit();'>",t("Pois suuntalavalta", $browkieli),"</button>
-	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+	<button name='submit' value='submit' class='button' onclick='submit();'>",t("Pois suuntalavalta", $browkieli),"</button>
 </div>";
 
 require('inc/footer.inc');

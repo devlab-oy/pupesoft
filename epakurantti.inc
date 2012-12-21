@@ -28,6 +28,7 @@
 					tuote.kustp,
 					tuote.kohde,
 					tuote.projekti,
+					tuote.myyntihinta,
 					round(if (tuote.epakurantti100pvm = '0000-00-00',
 							if (tuote.epakurantti75pvm = '0000-00-00',
 								if (tuote.epakurantti50pvm = '0000-00-00',
@@ -52,7 +53,7 @@
 			echo "<font class='error'>".t("Tuote %s ei löydy!", "", $tuoteno)."</font><br>";
 			$tee = "";
 		}
-		elseif ($tuoterow["sarjanumeroseuranta"] == 'S' or $tuoterow["sarjanumeroseuranta"] == 'U' or $tuoterow["sarjanumeroseuranta"] == 'G') {
+		elseif (in_array($tuoterow["sarjanumeroseuranta"], array('S', 'U', 'G'))) {
 
 			$sarjanumerolisa = "";
 
@@ -149,12 +150,12 @@
 		else {
 
 			$nykyinen_keskihankintahinta = $tuoterow["kehahin_nyt"];
-			$tuotteen_saldo = $tuoterow["saldo"];
-			$brutto_varastonarvo = $tuotteen_saldo * $tuoterow["kehahin"];
-			$brutto_keskihankintahinta = $tuoterow["kehahin"];
+			$tuotteen_saldo 			 = $tuoterow["saldo"];
+			$brutto_varastonarvo 		 = $tuotteen_saldo * $tuoterow["kehahin"];
+			$brutto_keskihankintahinta 	 = $tuoterow["kehahin"];
 
 			// Tehdään selkokielinen selite
-			$epakurantti_selite = "Epäkuranttimuutos: ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("päivitetään")." ";
+			$epakurantti_selite = t("Epäkuranttimuutos") . ": ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("päivitetään")." ";
 
 			// Lasketaan uusi keskihankintahinta
 			if ($tee == "paalle") {
@@ -212,7 +213,7 @@
 					WHERE yhtio = '{$kukarow["yhtio"]}'
 					and tuoteno = '{$tuoterow["tuoteno"]}'
 					and varattu > 0
-					and tyyppi = 'O'";
+					and tyyppi  = 'O'";
 		$tilre = pupe_query($query);
 		$tilro = mysql_fetch_assoc($tilre);
 
@@ -227,7 +228,7 @@
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 						AND lasku.tunnus = tilausrivi.uusiotunnus
 						AND lasku.tila = 'K'
-						AND lasku.alatila != 'X')
+						AND lasku.alatila not in ('X', 'I'))
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$tuoterow[tuoteno]'
 					and varattu = 0
@@ -241,7 +242,7 @@
 		}
 
 		if ($tuoterow["saldo"] < 0) {
-			echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotten saldo on negatiivinen!")." ".t("Ei voida vaihtaa tilaa!")."</font><br>";
+			echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotteen saldo on negatiivinen!")." ".t("Ei voida vaihtaa tilaa!")."</font><br>";
 			$tee = "";
 		}
 
@@ -279,110 +280,164 @@
 	// Päivitetään tuote
 	if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois" or $tee == "peru") {
 
-		// Tehdään lisämuuttujat, jos hypätään jonkun epäkuranttitason yli
-		$lisa75 = "";
-		$lisa50 = "";
-		$lisa25 = "";
+		$pvm25  = $tuoterow['epakurantti25pvm'];
+		$pvm50  = $tuoterow['epakurantti50pvm'];
+		$pvm75  = $tuoterow['epakurantti75pvm'];
+		$pvm100 = $tuoterow['epakurantti100pvm'];
 
-		if ($tuoterow['epakurantti75pvm'] == '0000-00-00') { // jos tuote ei ole puoliepäkurantti, päivitetään sama päivä tännekkin
-			$lisa75 = " epakurantti75pvm = now(), ";
+		$set_kehahin 	 = "";
+		$set_zenior 	 = "";
+		$zenior_jaettava = 4;
+
+		switch ($tee) {
+			case "peru" :
+				$set_kehahin = "kehahin   = '{$uusi_keskihankintahinta}',
+								muutospvm = now(),
+								muuttaja  = '{$kukarow["kuka"]}', ";
+
+			case "pois" :
+				$pvm25  = "0000-00-00";
+				$pvm50  = "0000-00-00";
+				$pvm75  = "0000-00-00";
+				$pvm100 = "0000-00-00";
+				break;
+
+			case "paalle" :
+				if ($pvm100 == "0000-00-00") {
+					$pvm100 = "now()";
+				}
+				// 100% epäkurantiksi tulevalle asetetaan 75% mukainen hinta, siksi ei jaettavaa vähennetä
+			case "75paalle" :
+				if ($pvm75 == "0000-00-00") {
+					$pvm75 = "now()";
+				}
+				$zenior_jaettava--;
+
+			case "puolipaalle" :
+				if ($pvm50 == "0000-00-00") {
+					$pvm50 = "now()";
+				}
+				$zenior_jaettava--;
+
+			case "25paalle" :
+				if ($pvm25 == "0000-00-00") {
+					$pvm25 = "now()";
+				}
+				$zenior_jaettava--;
+				$tuotteen_saldo = $tuotteen_saldo * -1;
+				break;
 		}
 
-		if ($tuoterow['epakurantti50pvm'] == '0000-00-00') { // jos tuote ei ole puoliepäkurantti, päivitetään sama päivä tännekkin
-			$lisa50 = " epakurantti50pvm = now(), ";
+		if ($yhtiorow["epakurantoinnin_myyntihintaleikkuri"] == 'Z') {
+
+			if ($tuoterow["epakurantti25pvm"] == "0000-00-00") { // oltiin nollassa, eka epäkurantoituminen
+				$zenior_jakaja = 4;
+				$on_jo_epakurantti = 0;
+			}
+			else {
+				$zenior_jakaja = 3;
+				$on_jo_epakurantti = 1;
+			}
+
+			if ($tuoterow["epakurantti50pvm"] != "0000-00-00") {
+				$zenior_jakaja = 2;
+				$on_jo_epakurantti = 1;
+			}
+
+			if ($tuoterow["epakurantti75pvm"] != "0000-00-00" or $tuoterow["epakurantti100pvm"] != "0000-00-00" ) { // jos oltiin jo 75% tai 100%:ssa, hinta on jo kohdallaan
+				$on_jo_epakurantti = 1;
+			}
+			else {
+				$set_zenior = "myyntihinta = myyntihinta * " . ($zenior_jaettava / $zenior_jakaja) . ", ";
+			}
+
+			$z_query = "SELECT laji, selitetark
+						FROM tuotteen_avainsanat
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND kieli 	= '{$yhtiorow["kieli"]}'
+						AND tuoteno = '{$tuoterow["tuoteno"]}'
+						AND laji 	= 'zeniorparts'";
+			$z_result = pupe_query($z_query);
+
+			if (mysql_num_rows($z_result) == 0) {
+				$z_row_found = 0;
+				$on_jo_epakurantti = 0;  // Tämä on epäkurantoitu ennen zeniorparts-toiminnon käyttöönottoa. Poistetaan hinnastot mutta talteen otettava tuote.myyntihinta saattaa olla käsin muutettu
+			}
+			else {
+				$z_row_found = 1;
+				$z_row = mysql_fetch_assoc($z_result);
+				$z_orig_hinta = (floatval($z_row["selitetark"]) > 0) ? floatval($z_row["selitetark"]) : $tuoterow["myyntihinta"];
+			}
+
+			if ($on_jo_epakurantti == 0) {
+				$set_zenior .= "ostoehdotus = 'E', nettohinta = 0, myymalahinta = 0, ";
+
+				$z_query = "DELETE FROM hinnasto
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tuoteno = '{$tuoterow["tuoteno"]}'";
+				$z_result = pupe_query($z_query);
+
+				$z_query = "DELETE FROM asiakashinta
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tuoteno = '{$tuoterow["tuoteno"]}'";
+				$z_result = pupe_query($z_query);
+
+				$z_query = "DELETE FROM asiakasalennus
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tuoteno = '{$tuoterow["tuoteno"]}'";
+				$z_result = pupe_query($z_query);
+
+				if ($z_row_found == 0) {
+					$z_query = "INSERT INTO tuotteen_avainsanat	SET
+								yhtio      = '{$kukarow["yhtio"]}',
+								kieli	   = '{$yhtiorow["kieli"]}',
+								tuoteno    = '{$tuoterow["tuoteno"]}',
+								laji       = 'zeniorparts',
+								selite     = 'K',
+								selitetark = '{$tuoterow["myyntihinta"]}'";
+					$z_result = pupe_query($z_query);
+				}
+			}
+			elseif (($tee == 'pois' or $tee == 'peru') and $z_row_found != 0) {
+				$set_zenior = "myyntihinta = {$z_orig_hinta}, ";
+
+				$t_query = "DELETE FROM tuotteen_avainsanat
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND kieli 	= '{$yhtiorow["kieli"]}'
+							AND laji    = 'zeniorparts'
+							AND tuoteno = '{$tuoterow["tuoteno"]}'";
+				$t_result = pupe_query($t_query);
+
+			}
 		}
 
-		if ($tuoterow['epakurantti25pvm'] == '0000-00-00') { // jos tuote ei ole puoliepäkurantti, päivitetään sama päivä tännekkin
-			$lisa25 = " epakurantti25pvm = now(), ";
-		}
+		if ($pvm25  != "now()") { $pvm25  = "'{$pvm25}'" ; }
+		if ($pvm50  != "now()") { $pvm50  = "'{$pvm50}'" ; }
+		if ($pvm75  != "now()") { $pvm75  = "'{$pvm75}'" ; }
+		if ($pvm100 != "now()") { $pvm100 = "'{$pvm100}'"; }
 
-		///* Päivitetään tuote kurantiksi *///
-		if ($tee == 'pois' or $tee == "peru") {
-			$query = "	UPDATE tuote SET
-						epakurantti25pvm = '0000-00-00',
-						epakurantti50pvm = '0000-00-00',
-						epakurantti75pvm = '0000-00-00',
-						epakurantti100pvm = '0000-00-00'
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND	tuoteno = '$tuoterow[tuoteno]'";
-			$result = pupe_query($query);
-		}
-
-		///* Päivitetään tuote täysepäkurantiksi *///
-		if ($tee == 'paalle') {
-			$query = "	UPDATE tuote set
-						$lisa75
-						$lisa50
-						$lisa25
-						epakurantti100pvm = now()
-						WHERE yhtio = '$kukarow[yhtio]'
-						and	tuoteno = '$tuoterow[tuoteno]'";
-			$result = pupe_query($query);
-		}
-
-		///* Päivitetään tuote 75epäkurantiksi *///
-		if ($tee == '75paalle') {
-			$query = "	UPDATE tuote set
-						$lisa50
-						$lisa25
-						epakurantti75pvm = now(),
-						epakurantti100pvm = ''
-						WHERE yhtio = '$kukarow[yhtio]'
-						and	tuoteno = '$tuoterow[tuoteno]'";
-			$result = pupe_query($query);
-		}
-
-		///* Päivitetään tuote puoliepäkurantiksi *///
-		if ($tee == 'puolipaalle') {
-			$query = "	UPDATE tuote set
-						$lisa25
-						epakurantti50pvm = now(),
-						epakurantti75pvm = '',
-						epakurantti100pvm = ''
-						WHERE yhtio = '$kukarow[yhtio]'
-						and	tuoteno = '$tuoterow[tuoteno]'";
-			$result = pupe_query($query);
-		}
-
-		///* Päivitetään tuote 25epäkurantiksi *///
-		if ($tee == '25paalle') {
-			$query = "	UPDATE tuote set
-						epakurantti25pvm = now(),
-						epakurantti50pvm = '',
-						epakurantti75pvm = '',
-						epakurantti100pvm = ''
-						WHERE yhtio = '$kukarow[yhtio]'
-						and	tuoteno = '$tuoterow[tuoteno]'";
-			$result = pupe_query($query);
-		}
-
-		///* Päivitetään tuotteen keskihankintahinta nykyiselle tasolle *///
-		if ($tee == 'peru') {
-			$query = "	UPDATE tuote SET
-						kehahin = '$uusi_keskihankintahinta',
-						muutospvm = now(),
-						muuttaja = '$kukarow[kuka]'
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tuoteno = '$tuoterow[tuoteno]'";
-			$result = pupe_query($query);
-		}
-
-		// jos ollaan laittamassa tuotetta epäkurantiksi niin käännetään saldon etumerkki
-		if ($tee == 'paalle' or $tee == '75paalle' or $tee == 'puolipaalle' or $tee == '25paalle') {
-			$tuotteen_saldo = $tuotteen_saldo * -1;
-		}
+		$query = "	UPDATE tuote SET
+					$set_zenior
+					$set_kehahin
+					epakurantti25pvm  =  {$pvm25},
+					epakurantti50pvm  =  {$pvm50},
+					epakurantti75pvm  =  {$pvm75},
+					epakurantti100pvm =  {$pvm100}
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND	tuoteno = '{$tuoterow["tuoteno"]}'";
+		$result = pupe_query($query);
 
 		///* Tehdään tapahtuma *///
 		$query = "	INSERT into tapahtuma set
-					yhtio   	= '$kukarow[yhtio]',
-					tuoteno 	= '$tuoterow[tuoteno]',
-					laji    	= 'Epäkurantti',
-					kpl     	= '$tuotteen_saldo',
-					hinta   	= round($keskihankintahinta_muutos, 6),
-					kplhinta	= round($keskihankintahinta_muutos, 6),
-					selite  	= '$epakurantti_selite',
-					laatija    	= '$kukarow[kuka]',
-					laadittu 	= now()";
+					yhtio    = '{$kukarow["yhtio"]}',
+					tuoteno  = '{$tuoterow["tuoteno"]}',
+					laji     = 'Epäkurantti',
+					kpl      = '$tuotteen_saldo',
+					hinta    = round($keskihankintahinta_muutos, 6),
+					kplhinta = round($keskihankintahinta_muutos, 6),
+					selite   = '$epakurantti_selite',
+					laatija  = '{$kukarow["kuka"]}',
+					laadittu = now()";
 		$result = pupe_query($query);
 
 		// otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
@@ -528,19 +583,19 @@
 
     		// Lisätään saldo uudella keharilla
 		    $query = "	INSERT into tapahtuma set
-    					yhtio   	= '$kukarow[yhtio]',
-    					tuoteno 	= '$tuoterow[tuoteno]',
-    					laji    	= 'tulo',
-    					kpl     	= {$plussa},
-    					hinta   	= {$uusi_keskihankintahinta},
-    					kplhinta	= {$uusi_keskihankintahinta},
-    					selite  	= '{$epakurantti_selite}',
-    					hyllyalue   = '{$paikatrow['hyllyalue']}',
-    					hyllynro    = '{$paikatrow['hyllynro']}',
-    					hyllyvali   = '{$paikatrow['hyllyvali']}',
-    					hyllytaso   = '{$paikatrow['hyllytaso']}',
-    					laatija    	= '$kukarow[kuka]',
-    					laadittu 	= '$luontiaika2'";
+    					yhtio     = '$kukarow[yhtio]',
+    					tuoteno   = '$tuoterow[tuoteno]',
+    					laji      = 'tulo',
+    					kpl       = {$plussa},
+    					hinta     = {$uusi_keskihankintahinta},
+    					kplhinta  = {$uusi_keskihankintahinta},
+    					selite    = '{$epakurantti_selite}',
+    					hyllyalue = '{$paikatrow['hyllyalue']}',
+    					hyllynro  = '{$paikatrow['hyllynro']}',
+    					hyllyvali = '{$paikatrow['hyllyvali']}',
+    					hyllytaso = '{$paikatrow['hyllytaso']}',
+    					laatija   = '$kukarow[kuka]',
+    					laadittu  = '$luontiaika2'";
     		$result = pupe_query($query);
 		}
 
@@ -623,8 +678,8 @@
 		}
 	}
 
-    //Tehdäänkö kirjaus kirjnapitoon?
-	if ($varaston_muutos != 0 and ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois" or $tee == "peru" or $tee == "vaihda_kehahin" or $tee == "sarjanro_paalle")) {
+    //Tehdäänkö kirjaus kirjanpitoon?
+	if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puolipaalle", "75paalle", "pois", "peru", "vaihda_kehahin", "sarjanro_paalle")))) {
 
         ///* Kirjanpito *///
 		if ($tapahtumat_samalle_tositteelle != "kylla" or $laskuid == 0) {
@@ -690,5 +745,3 @@
 					laadittu = now()";
 		$result = pupe_query($query);
 	}
-
-?>

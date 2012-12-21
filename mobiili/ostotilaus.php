@@ -11,6 +11,13 @@ elseif (@include_once("inc/parametrit.inc"));
 
 if(!isset($errors)) $errors = array();
 
+
+// Nollataan kuka.kesken
+if (isset($uusi)) {
+	$nollaus_query = "UPDATE kuka SET kesken=0 WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+	$result = pupe_query($nollaus_query);
+}
+
 # Jos haulla ei löytyny mitään, ollaan palattu tälle sivulle virheparametrilla.
 if (isset($virhe)) {
 	$errors[] = t("Ei löytynyt. Hae uudestaan.");
@@ -42,7 +49,10 @@ $ostotilaus = (!empty($ostotilaus)) ? $ostotilaus : '';
 
 ### UI ###
 echo "
-<div class='header'><h1>",t("OSTOTILAUS"),"</h1></div>";
+<div class='header'>
+	<button onclick='window.location.href=\"tulouta.php\"' class='button left'><img src='back2.png'></button>
+	<h1>",t("OSTOTILAUS"),"</h1>
+</div>";
 
 echo "<div class='main'>
 <form method='post' action=''>
@@ -57,14 +67,13 @@ echo "<div class='main'>
 	</tr>
 	<tr>
 		<th><label for='ostotilaus'>",t("Ostotilaus"),"</label></th>
-		<td><input type='text' id='ostotilaus' name='data[ostotilaus]' value='{$ostotilaus}'/><td>
+		<td><input type='text' id='ostotilaus' name='data[ostotilaus]' value=''/><td>
 	</tr>
 </table>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='ok' onclick='submit();'>",t("OK"),"</button>
-	<button class='right' name='submit' id='takaisin' value='takaisin' onclick='submit();'>",t("Takaisin"),"</button>
+	<button name='submit' value='ok' onclick='submit();' class='button'>",t("OK"),"</button>
 </form>
 </div>";
 

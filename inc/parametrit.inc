@@ -672,12 +672,9 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 				if (isset($ohjewiki_url)) {
 					$hreffi = $ohjewiki_url."/Ohjeet:".basename($phpnimi).$urltoim;
-				}
-				else {
-					$hreffi = "http://www.devlab.fi/wiki/index.php/Ohjeet:".basename($phpnimi).$urltoim;
+					echo "<div style='text-align:right; vertical-align:top;'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
 				}
 
-				echo "<div style='text-align:right; vertical-align:top;'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
 			}
 			elseif(isset($_GET["sulje"]) and $_GET["sulje"] != "") {
 				echo "<div><a href='#' onclick=\"divi=document.getElementById('$_GET[sulje]'); document.body.removeChild(divi); return false;\"><font style='color: red;'>x</font></a><br></div>";

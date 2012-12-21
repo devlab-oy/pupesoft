@@ -4,13 +4,19 @@
 
 	echo "<font class='head'>".t("Korjaa keräys").":</font><hr>";
 
+	$alatilalisa = "";
+
+	if ($yhtiorow['kerayserat'] == 'K') {
+		$alatilalisa = ",'B'";
+	}
+
 	if ($tee == 'KORJAA') {
 
 		$query = "	SELECT tunnus
 					FROM lasku
 					where yhtio = '{$kukarow['yhtio']}'
 					and tila	= 'L'
-					and alatila in ('C','A')
+					and alatila in ('C','A' $alatilalisa)
 					AND tunnus 	= '$tunnus'";
 		$tilre = pupe_query($query);
 
@@ -32,7 +38,7 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus 	= '$tunnus'
 						AND tila 	= 'L'
-						and alatila in ('C','A')";
+						and alatila in ('C','A' $alatilalisa)";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if ($yhtiorow['kerayserat'] == 'K') {
@@ -93,7 +99,7 @@
 										and tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl 23:59:59')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tila 	  = 'L'
-					AND lasku.alatila in ('C','A')
+					AND lasku.alatila in ('C','A' $alatilalisa)
 					$haku";
 		$tilre = pupe_query($query);
 

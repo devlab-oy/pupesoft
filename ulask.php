@@ -22,35 +22,22 @@ function listdir($start_dir = '.') {
 
 	if (is_dir($start_dir)) {
 
-		$fh = opendir($start_dir);
+		foreach (explode("\n", trim(`ls $start_dir | sort`)) as $file) {
 
-		while (($file = readdir($fh)) !== false) {
-			if (strcmp($file, '.') == 0 or strcmp($file, '..') == 0 or substr($file, 0, 1) == ".") {
-				continue;
-			}
 			$filepath = $start_dir . '/' . $file;
 
 			if (is_dir($filepath)) {
 				$files = array_merge($files, listdir($filepath));
 			}
 			else {
-				if(strstr($file, "skip_")) {
-					array_push($ohitetut_laskut, $filepath);
-				}
-				else {
-					array_push($files, $filepath);
-				}
+				array_push($files, $filepath);
 			}
 		}
-		closedir($fh);
-
-		# Sortataan laskut ja mergetet‰‰n skipattujen kanssa, skipatut siis viimeiseksi
-		sort($files);
-		$files = array_merge($files, $ohitetut_laskut);
 	}
 	else {
 		$files = false;
 	}
+
 	return $files;
 }
 
@@ -65,23 +52,26 @@ function hae_skannattu_lasku($kukarow, $yhtiorow, $palautus = '') {
 	// k‰yd‰‰n l‰pi ensin k‰sitelt‰v‰t kuvat
 	$files = listdir($dir);
 
+	$query = "	SELECT kesken
+				FROM kuka
+				WHERE yhtio  = '$kukarow[yhtio]'
+				AND extranet = ''";
+	$kesken_chk_res = pupe_query($query);
+
 	$i = 0;
 
 	foreach ($files as $file) {
 		$path_parts = pathinfo($file);
 
-		$query = "	SELECT kesken
-					FROM kuka
-					WHERE yhtio = '$kukarow[yhtio]'";
-		$kesken_chk_res = pupe_query($query);
+		mysql_data_seek($kesken_chk_res, 0);
 
 		while ($kesken_chk_row = mysql_fetch_assoc($kesken_chk_res)) {
 			# Jos tiedosto on k‰ytt‰j‰ll‰ kesken
-			if ($path_parts['filename'] == $kukarow['kesken']) {
+			if (is_numeric($path_parts['filename']) and $path_parts['filename'] == $kukarow['kesken']) {
 				return array('kesken' => "$path_parts[basename]");
 			}
 			# Jos tiedosto on jollain muulla k‰ytt‰j‰ll‰ kesken
-			elseif ($path_parts['filename'] == $kesken_chk_row['kesken']) continue 2;
+			elseif (is_numeric($path_parts['filename']) and $path_parts['filename'] == $kesken_chk_row['kesken']) continue 2;
 		}
 
 		if ($palautus == '') {
@@ -133,11 +123,19 @@ if ($tee == 'ohita_lasku') {
 	$ohitettava_lasku = realpath($skannatut_laskut_polku.$skannattu_lasku);
 	$path_parts = pathinfo($ohitettava_lasku);
 
-	# Nimet‰‰n ohitettu lasku "skip_" etuliitteell‰
-	if (!rename($skannatut_laskut_polku.$skannattu_lasku, $skannatut_laskut_polku."skip_".$kukarow['kesken'].".".$path_parts['extension'])) {
+	# Nimet‰‰n ohitettu lasku "ZZ" etuliitteell‰
+	if (!rename($skannatut_laskut_polku.$skannattu_lasku, $skannatut_laskut_polku."ZZ".$kukarow['kesken'].".".$path_parts['extension'])) {
 		echo "Ei pystyt‰ nime‰m‰‰n tiedostoa.<br>";
 		exit;
 	}
+
+	# Nollataan kesken ollut
+	$query = "	UPDATE kuka SET
+				kesken = 0
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND kuka = '$kukarow[kuka]'";
+	$kesken_upd_res = pupe_query($query);
+	$kukarow['kesken'] = 0;
 
 	// Haetaan seuraava lasku
 	$silent = 'ei n‰ytet‰ k‰yttˆliittym‰‰';
@@ -162,7 +160,6 @@ if ($tee == 'ohita_lasku') {
 
 		$skannattu_lasku = $kukarow['kesken'].".".$path_parts['extension'];
 	}
-
 	else {
 		$skannattu_lasku = '';
 		$iframe = '';
@@ -1154,13 +1151,13 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
 		echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus_clean])</td></tr>";
 		echo "<tr><td colspan='2'>$trow[osoite] $trow[osoitetark], $trow[maa]-$trow[postino] $trow[postitp], $trow[maa] $fakta</td></tr>";
-		
+
 		$mlaskulias = "";
-		
+
 		if ($trow["tyyppi"] == "K") {
 			$mlaskulias = "!!!KAYTTAJA!!!true";
 		}
-		
+
 		echo "<tr><td><a href='yllapito.php?toim=toimi{$mlaskulias}&tunnus=$toimittajaid&lopetus=ulask.php////tee=$tee//toimittajaid=$toimittajaid//maara=$maara//iframe=$iframe//skannattu_lasku=$skannattu_lasku//tultiin=$tultiin'>".t("Muuta toimittajan tietoja")."</a></td></tr>";
 		echo "</table>";
 		echo "</td>";
@@ -1475,21 +1472,36 @@ if ($tee == 'P' or $tee == 'E') {
 					if (!isset($osto_rahti)) $osto_rahti = '';
 
 					echo "<td>",t("Rahdit"),"</td>";
-					echo "<td><input type='text' name='osto_rahti' id='osto_rahti' tabindex='20' value='{$osto_rahti}' />";
+					echo "<td>";
+					echo "<select name='osto_rahti_alv_verollisuus'>";
+					echo "<option value=''>",t("Verollinen arvo"),"</option>";
+					echo "<option value='X'>",t("Veroton arvo"),"</option>";
+					echo "</select>&nbsp;";
+					echo "<input type='text' name='osto_rahti' id='osto_rahti' tabindex='20' value='{$osto_rahti}' />";
 					echo "&nbsp;".alv_popup('osto_rahti_alv', $osto_rahti_alv)."</td>";
 					break;
 				case '2':
 					if (!isset($osto_kulu)) $osto_kulu = '';
 
 					echo "<td>",t("Kulut"),"</td>";
-					echo "<td><input type='text' name='osto_kulu' id='osto_kulu' tabindex='21' value='{$osto_kulu}' />";
+					echo "<td>";
+					echo "<select name='osto_kulu_alv_verollisuus'>";
+					echo "<option value=''>",t("Verollinen arvo"),"</option>";
+					echo "<option value='X'>",t("Veroton arvo"),"</option>";
+					echo "</select>&nbsp;";
+					echo "<input type='text' name='osto_kulu' id='osto_kulu' tabindex='21' value='{$osto_kulu}' />";
 					echo "&nbsp;".alv_popup('osto_kulu_alv', $osto_kulu_alv)."</td>";
 					break;
 				case '3':
 					if (!isset($osto_rivi_kulu)) $osto_rivi_kulu = '';
 
 					echo "<td>",t("Rivikohtaiset kulut"),"</td>";
-					echo "<td><input type='text' name='osto_rivi_kulu' id='osto_rivi_kulu' tabindex='22' value='{$osto_rivi_kulu}' />";
+					echo "<td>";
+					echo "<select name='osto_rivi_kulu_alv_verollisuus'>";
+					echo "<option value=''>",t("Verollinen arvo"),"</option>";
+					echo "<option value='X'>",t("Veroton arvo"),"</option>";
+					echo "</select>&nbsp;";
+					echo "<input type='text' name='osto_rivi_kulu' id='osto_rivi_kulu' tabindex='22' value='{$osto_rivi_kulu}' />";
 					echo "&nbsp;".alv_popup('osto_rivi_kulu_alv', $osto_rivi_kulu_alv)."</td>";
 					break;
 			}
@@ -1931,6 +1943,18 @@ if ($tee == 'I') {
 	$osto_rahti_alv = (float) $osto_rahti_alv;
 	$osto_kulu_alv = (float) $osto_kulu_alv;
 	$osto_rivi_kulu_alv = (float) $osto_rivi_kulu_alv;
+
+	if (isset($osto_kulu_alv_verollisuus) and $osto_kulu_alv_verollisuus == 'X') {
+		$osto_kulu = $osto_kulu * (1 + ($osto_kulu_alv / 100));
+	}
+
+	if (isset($osto_rahti_alv_verollisuus) and $osto_rahti_alv_verollisuus == 'X') {
+		$osto_rahti = $osto_rahti * (1 + ($osto_rahti_alv / 100));
+	}
+
+	if (isset($osto_rivi_kulu_alv_verollisuus) and $osto_rivi_kulu_alv_verollisuus == 'X') {
+		$osto_rivi_kulu = $osto_rivi_kulu * (1 + ($osto_rivi_kulu_alv / 100));
+	}
 
 	// Kirjoitetaan lasku
 	$query = "	INSERT into lasku set
@@ -2738,5 +2762,3 @@ if (strlen($tee) == 0) {
 if (strpos($_SERVER['SCRIPT_NAME'], "ulask.php")  !== FALSE) {
 	require ("inc/footer.inc");
 }
-
-?>

@@ -119,10 +119,10 @@
 			mt_srand((float) $sec + ((float) $usec * 100000));
 
 			if ($mista == "vastaanota") {
-				$pdffilenimi = "/tmp/Vastaanotetut-".md5(uniqid(mt_rand(), true)).".pdf";
+				$pdffilenimi = "/tmp/".t("Vastaanotetut", $kieli)."-".md5(uniqid(mt_rand(), true)).".pdf";
 			}
 			else {
-				$pdffilenimi = "/tmp/Purkulista-".md5(uniqid(mt_rand(), true)).".pdf";
+				$pdffilenimi = "/tmp/".t("Purkulista", $kieli)."-".md5(uniqid(mt_rand(), true)).".pdf";
 			}
 
 			//kirjoitetaan pdf faili levylle..
@@ -135,10 +135,10 @@
 				$liite = $pdffilenimi;
 
 				if ($mista == "vastaanota") {
-					$kutsu = "Vastaanotetut";
+					$kutsu = t("Vastaanotetut", $kieli);
 				}
 				else {
-					$kutsu = "Purkulista";
+					$kutsu = t("Purkulista", $kieli);
 				}
 
 				require("../inc/sahkoposti.inc");

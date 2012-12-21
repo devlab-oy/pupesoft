@@ -22,7 +22,7 @@ $lask = 1;
 $sivu = 1;
 
 function alku ($laji = '') {
-	global $pdf, $asiakasrow, $yhtiorow, $kukarow, $asrow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $pvm, $alkuvv, $alkukk, $alkupp, $loppuvv, $loppukk, $loppupp;
+	global $pdf, $asiakasrow, $yhtiorow, $sivu, $norm, $pieni, $pvm, $alkuvv, $alkukk, $alkupp, $loppuvv, $loppukk, $loppupp;
 
 	// jos ollaan syötetty poikkeava päivä, käytetään sitä
 	if ($pvm != '') {
@@ -90,8 +90,74 @@ function alku ($laji = '') {
 	return($firstpage);
 }
 
+function rivi_kaikki($firstpage, $laji = '', $rows = array()) {
+	global $pdf, $kala, $sivu, $lask, $norm, $lask, $edosasto;
+
+	foreach ($rows as $row) {
+		if ($lask >= 34) {
+			// rivejä on tarpeeks, tehään uus headeri
+			$sivu++;
+			$kala = 575;
+			$lask = 1;
+			$firstpage = alku($laji);
+		}
+
+		if ($row["ed"] != 0) {
+			$indexi = round($row["va"]/$row["ed"],2)*100;
+		}
+		else {
+			$indexi = 0;
+		}
+
+		if ($laji == 'osasto') {
+			$asananumero = $row["osasto"];
+			$asananimitys = $row["osasto_nimitys"];
+		}
+		else {
+			$asananumero = $row["try"];
+			$asananimitys= $row["tuoteryhma_nimitys"];
+		}
+
+		if ($edosasto != $row["osasto"] and $laji == "") {
+			$edosasto = $row["osasto"];
+
+			if ($edosasto != "" and $lask > 1) {
+				$kala = $kala - 20;
+				$lask++;
+			}
+
+			$pdf->draw_text(30, $kala, "Osasto $row[osasto] - $row[osasto_nimitys]", $firstpage, $norm);
+			$kala = $kala - 20;
+			$lask++;
+		}
+
+		$pdf->draw_text(30,  $kala, $asananumero." - ".$asananimitys,	$firstpage, $norm);
+
+		$oikpos = $pdf->strlen(sprintf("%.0f", $row["kplva"]), $norm);
+		$pdf->draw_text(330-$oikpos, $kala, sprintf("%.0f", $row["kplva"]), 	$firstpage, $norm);
+
+		$oikpos = $pdf->strlen(sprintf("%.0f", $row["kpled"]), $norm);
+		$pdf->draw_text(380-$oikpos, $kala, sprintf("%.0f", $row["kpled"]), 	$firstpage, $norm);
+
+		$oikpos = $pdf->strlen(hintapyoristys($row["va"]), $norm);
+		$pdf->draw_text(460-$oikpos, $kala, hintapyoristys($row["va"]),			$firstpage, $norm);
+
+		$oikpos = $pdf->strlen(hintapyoristys($row["ed"]), $norm);
+		$pdf->draw_text(530-$oikpos, $kala, hintapyoristys($row["ed"]), 		$firstpage, $norm);
+
+		$oikpos = $pdf->strlen($indexi, $norm);
+		$pdf->draw_text(575-$oikpos, $kala, $indexi, $firstpage, $norm);
+		$kala = $kala - 15;
+
+		$lask++;
+	}
+
+	//palautetaan sivu jossa ollaan menossa, jottai funkio loppu osaa printtailla oikeilla sivulle
+	return $firstpage;
+}
+
 function rivi ($firstpage, $laji = '') {
-	global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $sumkpled, $sumkplva, $sumed, $sumva, $kukarow, $yhtiorow, $edosasto;
+	global $firstpage, $pdf, $row, $kala, $sivu, $lask, $norm, $lask, $edosasto;
 
 	if ($lask >= 34) {
 		// rivejä on tarpeeks, tehään uus headeri
@@ -159,7 +225,7 @@ function rivi ($firstpage, $laji = '') {
 }
 
 function loppu ($firstpage, $sendemail = '') {
-	global $pdf, $kala, $rectparam, $norm, $pieni, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi, $yhtiorow, $kukarow, $edasiakas, $edemail, $edasiakasno, $komento, $emailok, $asnum;
+	global $pdf, $kala, $norm, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi, $asiakas_numero;
 
 	//kirjoitetaan yhteensärivit loppuun
 	$kala -= 15;
@@ -200,76 +266,12 @@ function loppu ($firstpage, $sendemail = '') {
 	}
 
 	//keksitään uudelle failille joku varmasti uniikki nimi:
-	$pdffilenimi = "/tmp/vuosisop-".md5(uniqid(rand(),true)).".pdf";
+	$pdffilenimi = $GLOBALS['tmpdir']."Ostoseuranta_".$asiakas_numero.".pdf";
 
 	//kirjoitetaan pdf faili levylle..
 	$fh = fopen($pdffilenimi, "w");
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 	fclose($fh);
 
-	if ($asnum != '') { // ollaan valittu vain yksi asiakas, lähetetään meili ajajalle
-		$edemail = $kukarow['eposti'];
-	}
-
-	// asiakkaalla on emailosoite ja ei olla ruksattu, lähetetään sähköposti
-	if ($edemail!='' and $emailok=='') {
-		echo "Lähetetään meili asiakkaalle $edasiakasno ($edemail).. ";
-
-		$bound = uniqid(time()."_") ;
-
-		$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-		$header .= "MIME-Version: 1.0\n" ;
-		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
-
-		$content  = "--$bound\n";
-
-		$content .= "Content-Type: application/pdf; name=\"Ostoseuranta.pdf\"\n" ;
-		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: inline; filename=\"Ostoseuranta.pdf\"\n\n";
-
-		$handle  = fopen($pdffilenimi, "r");
-		$sisalto = fread($handle, filesize($pdffilenimi));
-		fclose($handle);
-
-		$content .= chunk_split(base64_encode($sisalto));
-		$content .= "\n" ;
-
-		$content .= "--$bound\n";
-
-		$boob     = mail($edemail, mb_encode_mimeheader($yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
-
-		if ($boob===FALSE) {
-			echo "Meilin lähetys epäonnistui!<br>";
-		}
-		else {
-			echo "ok.<br>";
-		}
-	}
-	// asiakkaalla on email, mutta halutaan skipata emailien lähetys...
-	elseif ($edemail!='' and $emailok!='') {
-		echo "Skipataan asiakas $edasiakasno.<br>";
-	}
-	// muissa keiseissa tulostetaan paprulle ta sähköpostiin
-	else {
-		echo "Tulostetaan asiakkaan $edasiakasno ostoseuranta.. ";
-
-		if ($komento == "email") {
-			$liite = $pdffilenimi;
-			$ctype = '';
-			$kutsu = "Ostoseuranta.pdf";
-
-			require("../inc/sahkoposti.inc");
-		}
-		else{
-			$line = exec($komento." ".$pdffilenimi);
-		}
-
-
-		echo "ok.<br>";
-	}
-
-	//poistetaan tmp file samantien kuleksimasta...
-	system("rm -f $pdffilenimi");
+	return $pdffilenimi;
 }
-
-?>

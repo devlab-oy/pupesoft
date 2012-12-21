@@ -25,6 +25,43 @@
 
 	if (!isset($nayta_pdf)) echo "<font class='head'>".t("Rahtikirjakopio")."</font><hr>";
 
+	if ($tee == 'erittelykopsu') {
+
+		$query = "	SELECT *
+					FROM lahdot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$lahto'";
+		$lahtores = pupe_query($query);
+		$lahtorow = mysql_fetch_assoc($lahtores);
+
+		$query = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$lahtorow[liitostunnus]'";
+		$toitares = pupe_query($query);
+		$toitarow = mysql_fetch_assoc($toitares);
+
+
+		$query = "	SELECT group_concat(tunnus) tilaukset
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tila = 'L'
+					AND alatila != ''
+					AND toimitustavan_lahto = '$lahtorow[tunnus]'";
+		$laskures = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($laskures);
+
+		$otunnukset = $laskurow["tilaukset"];
+
+		if ($otunnukset != "") {
+			require("tilauskasittely/rahtikirja_erittely_pdf.inc");
+
+			echo t("Rahtikirjaerittely tulostuu")."...<br><br>";
+		}
+
+		$tee = "";
+	}
+
 	if ($tee == 'tulosta' and (!isset($rtunnukset) or count($rtunnukset) == 0)) {
 		if (!isset($nayta_pdf)) echo "<font class='error'>",t("Et valinnut yht‰‰n rahtikirjaa"),"!</font><br>";
 		$tee = "";
@@ -300,7 +337,7 @@
 			<input type='text' name='vv' value='$vv' size='5'></td>
 			</tr>";
 
-			$query  = "SELECT * FROM toimitustapa WHERE nouto='' and $logistiikka_yhtiolisa order by jarjestys, selite";
+		$query  = "SELECT * FROM toimitustapa WHERE nouto='' and $logistiikka_yhtiolisa order by jarjestys, selite";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<tr><th>".t("Valitse toimitustapa").":</th>";
@@ -351,7 +388,56 @@
 
 		echo "</table><br>";
 		echo "<input type='submit' value='".t("Tulosta")."'>";
+		echo "</form><br><br><hr>";
+
+
+		echo t("Tulosta kopiot rahtikirjaerittelyst‰").":";
+		echo "<br><form action='rahtikirja-kopio.php' method='post'>";
+		echo "<input type='hidden' name='tee' value='erittelykopsu'>";
+		echo "<table>";
+
+		$query  = "	SELECT lahdot.*, toimitustapa.selite
+					FROM lahdot
+					JOIN toimitustapa ON (lahdot.yhtio=toimitustapa.yhtio and lahdot.liitostunnus=toimitustapa.tunnus and lahdot.aktiivi='S')
+					WHERE lahdot.yhtio = '$kukarow[yhtio]'
+					AND lahdot.pvm     = curdate()
+					ORDER BY lahdot.lahdon_kellonaika, toimitustapa.selite";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<tr><th>".t("Valitse l‰hto").":</th>";
+		echo "<td><select name='lahto'>";
+
+		while ($row = mysql_fetch_array($result)) {
+			if ($lahto == $row['tunnus']) $sel = " selected ";
+			else $sel = "";
+
+			echo "<option value='$row[tunnus]' $sel>$row[tunnus] $row[lahdon_kellonaika] $row[selite]</option>";
+		}
+
+		echo "</select></td></tr>";
+
+		$query = "	SELECT *
+					FROM kirjoittimet
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND komento != 'EDI'
+					ORDER BY kirjoitin";
+		$kirre = mysql_query($query) or pupe_error($query);
+
+		echo "<tr><th>".t("Tulostin"),"</th>";
+		echo "<td><select name='kirjoitin'>";
+
+		while ($kirrow = mysql_fetch_array($kirre)) {
+			if ($kirjoitin == $kirrow['komento']) $sel = " selected ";
+			else $sel = "";
+
+			echo "<option value='$kirrow[komento]' $sel>$kirrow[kirjoitin]</option>";
+		}
+
+		echo "</select></td></tr>";
+		echo "</table><br>";
+		echo "<input type='submit' value='".t("Tulosta")."'>";
 		echo "</form>";
+
 	}
 
 	require("inc/footer.inc");

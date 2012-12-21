@@ -740,10 +740,10 @@
 		$laskurow["tapvm"] = date("Y-m-d");
 		$laskurow["erpcm"] = date("Y-m-d");
 		$laskurow["kapvm"] = date("Y-m-d");
-
+		
 		$alvrow = array(
 			'rivihinta'		 => 0,
-			'alv'			 => 23,
+			'alv'			 => alv_oletus(),
 			'alvrivihinta'	 => 0
 		);
 

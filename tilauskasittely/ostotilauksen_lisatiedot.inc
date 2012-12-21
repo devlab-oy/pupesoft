@@ -12,13 +12,23 @@ if ($tee == "update") {
 	$result = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array ($result);
 
-	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
-
-	list (,,,,,,,$llrow,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
+	list (,,,,,,,,$llrow,,,,,,,) = tsekit($laskurow, 0, 0);
 
 	// Tsekki tehd‰‰n vain jos vaihto-omaisuus laskuja on liitetty keikkaan!
-	if ($llrow["volasku"] != 0 and abs($rahti_etu) > abs($llrow['vosumma_valuutassa'])) {
+	if ($llrow["volasku"] > 0 and abs($rahti_etu) > abs($llrow['vosumma_valuutassa'])) {
 		echo "<font class='message'>".t("VIRHE: Eturahti ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br><br>";
+
+		$tee = "";
+		$toiminto = "lisatiedot";
+
+		if ($nappikeikalla == 'ollaan') {
+			$nappikeikalle = 'menossa';
+			$nappikeikalla = '';
+		}
+	}
+	
+	if ((float) $erikoisale_saapuminen < 0 or (float) $erikoisale_saapuminen > 100) {
+		echo "<font class='message'>".t("VIRHE: Erikoisale pit‰‰ olla alle 100% ja yli 0%")."!</font><br><br>";
 
 		$tee = "";
 		$toiminto = "lisatiedot";
@@ -31,7 +41,7 @@ if ($tee == "update") {
 }
 
 if ($tee == "update") {
-	if ($laskurow["erikoisale"] == $erikoisale and $laskurow["rahti_etu"] == $rahti_etu and $laskurow["rahti_etu_alv"] == $rahti_etu_alv) {
+	if ($laskurow["erikoisale_saapuminen"] == $erikoisale_saapuminen and $laskurow["rahti_etu"] == $rahti_etu and $laskurow["rahti_etu_alv"] == $rahti_etu_alv) {
 		$kohdistettu = $laskurow["kohdistettu"];
 	}
 	else {
@@ -46,35 +56,36 @@ if ($tee == "update") {
 	}
 
 	// Hoidetaan pilkut pisteiksi....
-	$rahti_etu 		= str_replace ( ",", ".", $rahti_etu);
-	$rahti 			= str_replace ( ",", ".", $rahti);
-	$rahti_huolinta = str_replace ( ",", ".", $rahti_huolinta);
-	$erikoisale 	= str_replace ( ",", ".", $erikoisale);
-	$bruttopaino 	= str_replace ( ",", ".", $bruttopaino);
+	$rahti_etu 				= str_replace (",", ".", $rahti_etu);
+	$rahti 					= str_replace (",", ".", $rahti);
+	$rahti_huolinta 		= str_replace (",", ".", $rahti_huolinta);
+	$erikoisale_saapuminen 	= str_replace (",", ".", $erikoisale_saapuminen);
+	$bruttopaino 			= str_replace (",", ".", $bruttopaino);
 
 	$toimaika 		= $vv."-".$kk."-".$pp;
 	$ultilno 		= tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
 	$query = "	UPDATE lasku
-				SET maa_lahetys = '$maa_lahetys',
-				maa_maara 		= '$maa_maara',
+				SET maa_lahetys 		= '$maa_lahetys',
+				maa_maara 				= '$maa_maara',
 				kauppatapahtuman_luonne = '$ktapahtuman_luonne',
-				kuljetusmuoto 	= '$kuljetusmuoto',
-				bruttopaino 	= '$bruttopaino',
-				rahti_huolinta 	= '$rahti_huolinta',
-				rahti_etu 		= '$rahti_etu',
-				rahti_etu_alv 	= '$rahti_etu_alv',
-				rahti 			= '$rahti',
-				erikoisale 		= '$erikoisale',
-				toimaika 		= '$toimaika',
-				kohdistettu 	= '$kohdistettu',
-				comments	 	= '$kommentti',
-				ultilno 		= '$ultilno'
-				WHERE tunnus = '$otunnus' and yhtio = '$kukarow[yhtio]'";
+				kuljetusmuoto 			= '$kuljetusmuoto',
+				bruttopaino 			= '$bruttopaino',
+				rahti_huolinta 			= '$rahti_huolinta',
+				rahti_etu 				= '$rahti_etu',
+				rahti_etu_alv 			= '$rahti_etu_alv',
+				rahti 					= '$rahti',
+				erikoisale_saapuminen 	= '$erikoisale_saapuminen',
+				toimaika 				= '$toimaika',
+				kohdistettu 			= '$kohdistettu',
+				comments	 			= '$kommentti',
+				ultilno 				= '$ultilno'
+				WHERE tunnus = '$otunnus'
+				and yhtio 	 = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	$query_erikoisale = "	UPDATE tilausrivi
-							SET erikoisale = '{$erikoisale}'
+							SET erikoisale_saapuminen = '{$erikoisale_saapuminen}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND uusiotunnus = '{$otunnus}'
 							AND netto  != 'N'
@@ -92,9 +103,7 @@ if ($tee == "") {
 	$result = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array ($result);
 
-	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
-
-	list (,,,,,,,$llrow,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
+	list (,,,,,,,,$llrow,,,,,,,) = tsekit($laskurow, 0, 0);
 
 	// haetaan toimittajan tiedot
 	$query  = "SELECT * FROM toimi WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[liitostunnus]'";
@@ -102,10 +111,10 @@ if ($tee == "") {
 	$toimittaja = mysql_fetch_array($result);
 
 	// katotaan paljonko on kohdistamatta
-	$jaljella = sprintf("%.2f", $llrow["vosumma_valuutassa"] - $laskurow["summa"]);
+	$jaljella = sprintf("%.2f", $llrow["voverosumma_valuutassa"] - $laskurow["summa"]);
 
 	// kaunistellaan
-	if ($llrow["vosumma_valuutassa"] == "") $llrow["vosumma_valuutassa"] = "0.00";
+	if ($llrow["voverosumma_valuutassa"] == "") $llrow["voverosumma_valuutassa"] = "0.00";
 
 	// n‰ytet‰‰n viel‰ laskun tiedot, ettei kohdisteta p‰in berberi‰
 	echo "<br><table>";
@@ -125,7 +134,7 @@ if ($tee == "") {
 			<td>$laskurow[nimi]</td>
 			<td>$laskurow[tapvm]</td>
 			<td>$laskurow[toimitusehto]</td>
-			<td>$llrow[vosumma_valuutassa] $laskurow[valkoodi]</td>
+			<td>$llrow[voverosumma_valuutassa] $laskurow[valkoodi]</td>
 			<td>$laskurow[summa] $laskurow[valkoodi]</td>
 			<td>$jaljella $laskurow[valkoodi]</td></tr>";
 	echo "</table><br>";
@@ -288,7 +297,7 @@ if ($tee == "") {
 	echo "<tr><th valign='top'>".t("Veroton")." ".t("Eturahti").":</th><td valign='top'><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td colspan='2' valign='top' nowrap>".t("Eturahdin ALV").": ".alv_popup('rahti_etu_alv', $laskurow["rahti_etu_alv"])."</td><td class='back'> $lisatiedot </td></tr>";
 	echo "<tr><th valign='top'>".t("Arvioitu kuluprosentti").":</th><td valign='top' colspan='3'><input type='text' name='rahti' value='$laskurow[rahti]'> n.nn %</td></tr>";
 	echo "<tr><th valign='top'>".t("Kulusumma")." $yhtiorow[valkoodi]:</th><td valign='top' colspan='3'><input type='text' name='rahti_huolinta' value='$laskurow[rahti_huolinta]'> ".t("ohittaa kuluprosentin")."</td></tr>";
-	echo "<tr><th valign='top'>".t("Erikoisalennus").":</th><td valign='top' colspan='3'><input type='text' name='erikoisale' value='$laskurow[erikoisale]'></td></tr>";
+	echo "<tr><th valign='top'>".t("Erikoisalennus").":</th><td valign='top' colspan='3'><input type='text' name='erikoisale_saapuminen' value='$laskurow[erikoisale_saapuminen]'></td></tr>";
 
 	if ($laskurow["toimaika"] != '0000-00-00') {
 		$vv = substr($laskurow["toimaika"],0,4);

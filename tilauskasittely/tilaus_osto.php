@@ -49,6 +49,26 @@
 		$tee = "AKTIVOI";
 	}
 
+	// Katostaan, ett‰ tilaus on viel‰ samassa tilassa jossa se oli kun se klikattiin auku muokkaatilaus-ohjelmassa
+	if ($tee == 'AKTIVOI' and $mista == "muokkaatilaus") {
+		$query = "	SELECT tila, alatila
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus  = '$tilausnumero'
+					AND tila 	= '$orig_tila'
+					AND alatila = '$orig_alatila'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) != 1) {
+				echo "<font class='error'>".t("Tilauksen tila on vaihtunut. Ole hyv‰ avaa tilaus uudestaan").".</font><br>";
+
+				// poistetaan aktiiviset tilaukset jota t‰ll‰ k‰ytt‰j‰ll‰ oli
+				$query = "UPDATE kuka SET kesken='' WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
+				$result = pupe_query($query);
+				exit;
+		}
+	}
+
 	if ($tee == 'AKTIVOI') {
 		// katsotaan onko muilla aktiivisena
 		$query = "SELECT * from kuka where yhtio='$kukarow[yhtio]' and kesken='$tilausnumero' and kesken!=0";
@@ -66,7 +86,6 @@
 			// poistetaan aktiiviset tilaukset jota t‰ll‰ k‰ytt‰j‰ll‰ oli
 			$query = "UPDATE kuka SET kesken='' WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
 			$result = pupe_query($query);
-
 			exit;
 		}
 		else {
@@ -782,7 +801,8 @@
 			// katotaan miten halutaan sortattavan
 			$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
-			$query_ale_lisa = generoi_alekentta("O");
+			//"ei_erikoisale" koska rivill‰ ei haluta v‰hent‰‰ erikoisalea hinnasta, vaan se n‰ytet‰‰n erikseen yhteenvedossa
+			$query_ale_lisa = generoi_alekentta("O", '', 'ei_erikoisale');
 
 			$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
 
@@ -806,6 +826,7 @@
 						tuote.kehahin keskihinta,
 						tuotteen_toimittajat.ostohinta,
 						tuotteen_toimittajat.valuutta,
+						tilausrivi.erikoisale,
 						tilausrivi.ale1,
 						tilausrivi.ale2,
 						tilausrivi.ale3
@@ -847,11 +868,13 @@
 				$lask 			= mysql_num_rows($presult);
 				$tilausok 		= 0;
 				$divnolla		= 0;
+				$erikoisale_summa = 0;
 
 				while ($prow = mysql_fetch_array ($presult)) {
 					$divnolla++;
-					$yhteensa += $prow["rivihinta"];
-					$paino_yhteensa += ($prow["tilattu"]*$prow["tuotemassa"]);
+					$erikoisale_summa += (($prow['rivihinta'] * ($laskurow['erikoisale'] / 100)) * -1);
+					$yhteensa 		  += $prow["rivihinta"];
+					$paino_yhteensa   += ($prow["tilattu"]*$prow["tuotemassa"]);
 
 					$class = "";
 
@@ -1219,18 +1242,43 @@
 						<input type='hidden' name='toim_nimitykset' value = '$toim_nimitykset'>
 						<input type='hidden' name='toimittajaid' 	value = '$laskurow[liitostunnus]'>
 						<input type='hidden' name='toim' 			value = '$kopiotoim'>
-						<input type='hidden' name='nimitykset' 		value = 'JOO'>
 						<input type='hidden' name='tee' 			value = 'TULOSTA'>
 						<input type='hidden' name='lopetus' 		value = '$tilost_lopetus//from=LASKUTATILAUS'>
 						<input type='submit' value='".t("N‰yt‰")."' onClick=\"js_openFormInNewWindow('tulostaform_tosto', 'tulosta_osto'); return false;\">
 						<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tosto', 'samewindow'); return false;\">
 						</form>
+						</td>";
+
+				if ($laskurow['erikoisale'] > 0) {
+					$_colspan = $backspan1 - 1;
+					echo "<td>
+						<td class='back' colspan='$_colspan'></td>
+						<td colspan='3' class='spec'>".t('Tilauksen arvo yhteens‰')."</td>
+						<td align='right' class='spec'>".sprintf("%.2f", $yhteensa)."</td>
+						<td class='spec'>$laskurow[valkoodi]</td>
 						</td>
-						<td class='back' colspan='$backspan1'></td>
+						</tr>";
+					$_colspan = $backspan1 + 4;
+					echo "<tr>
+						<td class='back' colspan='$_colspan'></td>
+						<td colspan='3' class='spec'>".t('Erikoisalennus')." ".$laskurow['erikoisale']."%</td>
+						<td align='right' class='spec'>".sprintf("%.2f", $erikoisale_summa)."</td>
+						<td class='spec'>$laskurow[valkoodi]</td>
+						</tr>";
+					echo "<tr>
+						<td class='back' colspan='$_colspan'></td>
+						<td colspan='3' class='spec'>".t("Tilauksen arvo").":</td>
+						<td align='right' class='spec'>".sprintf("%.2f", $yhteensa + $erikoisale_summa)."</td>
+						<td class='spec'>$laskurow[valkoodi]</td>
+						</tr>";
+				}
+				else {
+					echo "<td class='back' colspan='$backspan1'></td>
 						<td colspan='3' class='spec'>".t("Tilauksen arvo").":</td>
 						<td align='right' class='spec'>".sprintf("%.2f", $yhteensa)."</td>
 						<td class='spec'>$laskurow[valkoodi]</td>
 						</tr>";
+				}
 
 				echo "	<tr>
 						<td class='back' colspan='$backspan2'></td>
@@ -1333,4 +1381,3 @@
 	}
 
 	require("../inc/footer.inc");
-?>

@@ -4,29 +4,33 @@ if (@include_once("pdflib/phppdflib.class.php"));
 else include_once("phppdflib.class.php");
 
 if ($kieli == '') {
-	$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
+	$querykiel = "	SELECT kieli
+					FROM asiakas
+					WHERE yhtio = '$kukarow[yhtio]'
+					and ytunnus = '$laskurow[ytunnus]'";
 	$kielresult = pupe_query($querykiel);
 	$kielrow = mysql_fetch_assoc($kielresult);
+
 	$kieli = strtolower($kielrow['kieli']);
 }
 
-$norm["height"] 		= 10;
-$norm["font"] 			= "Times-Roman";
+$norm["height"] 	   = 10;
+$norm["font"] 		   = "Times-Roman";
 
-$pieni["height"] 		= 8;
-$pieni["font"] 			= "Times-Roman";
+$pieni["height"] 	   = 8;
+$pieni["font"] 		   = "Times-Roman";
 
-$boldi["height"] 		= 10;
-$boldi["font"] 			= "Times-Bold";
+$boldi["height"] 	   = 10;
+$boldi["font"] 		   = "Times-Bold";
 
-$pieni_boldi["height"] 	= 8;
-$pieni_boldi["font"] 	= "Times-Bold";
+$pieni_boldi["height"] = 8;
+$pieni_boldi["font"]   = "Times-Bold";
 
-$iso["height"] 			= 14;
-$iso["font"] 			= "Helvetica-Bold";
+$iso["height"] 		   = 14;
+$iso["font"] 		   = "Helvetica-Bold";
 
-$rectparam["width"] 	= 0.3;
-$rivinkorkeus			= 15;
+$rectparam["width"]    = 0.3;
+$rivinkorkeus		   = 15;
 
 //muutamat funktiot...
 if (!function_exists('alku_lahete')) {
@@ -654,7 +658,7 @@ if (!function_exists('uusi_sivu_lahete')) {
 
 		// Luodaan muuttujat
 		extract($params);
-		
+
 		$lahetetyyppi_avainsana = t_avainsana("LAHETETYYPPI", "", " and selite='$lahetetyyppi'", "", "", "selitetark_2");
 
 		$thispage = $pdf->new_page("a4");
@@ -784,14 +788,14 @@ if (!function_exists('uusi_sivu_lahete')) {
 			// $pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 						$thispage, $pieni);
 			// $pdf->draw_text(310, 761, $asrow["asiakasnro"], 							$thispage, $norm);
 			$pdf->draw_text(430, 771, t("Päiväys", $kieli), 							$thispage, $pieni);
-			
+
 			if ($lahetetyyppi_avainsana == 1) { # Ei kellonaikaa
 				$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"], "pitka"), 	$thispage, $norm);
 			}
 			else {
 				$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"]), 	$thispage, $norm);
 			}
-			
+
 			# viivakoodi
 			$data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
 			$image = $pdf->jfif_embed($data);
@@ -1269,6 +1273,12 @@ if (!function_exists('rivi_lahete')) {
 		// Trimmataan
 		$row["kommentti"] = trim($row["kommentti"]);
 
+		// Otetaan yhteensäkommentti pois lähetteeltä (tämä tieto löytyy riviltä jos tilaus on laskutettu, mutta lähetteellä sitä ei voi näyttää)
+		$row["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+		$row["kommentti"] = preg_replace("/ ".t("yhteensä", $asrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+		$row["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+		$row["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+
 		//Kommentissa voi olla jotain sanoja jotka pitää käääntää:
 		if ($kieli != $yhtiorow["kieli"]) {
 			$row["kommentti"] = str_replace("Ennakkotilaus:", t("Ennakkotilaus", $kieli).":", $row["kommentti"]);
@@ -1703,13 +1713,13 @@ if (!function_exists('rivi_lahete')) {
 				// tulosta_lahete.inc
 				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
 					if ($yhtiorow['alv_kasittely'] == '') {
-						$return["summa"] += $row['rivihinta'];
-						$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["summa"] += ($row['hinta'] * $row['tilkpl']);
+						$return["arvo"]  += (($row['hinta'] * $row['tilkpl']) / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
 
 					}
 					else {
-						$return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
-						$return["arvo"]  += $row['rivihinta'];
+						$return["summa"] += (($row['hinta'] * $row['tilkpl']) * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["arvo"]  += ($row['hinta'] * $row['tilkpl']);
 					}
 				}
 				else {

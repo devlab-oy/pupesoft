@@ -101,7 +101,10 @@
 					}
 					elseif ($tee == 'removefromtree') {
 						$qu = "	DELETE FROM puun_alkio
-								WHERE yhtio = '{$yhtiorow["yhtio"]}' AND laji = '{$toim}' AND liitos ='{$liitos}' AND puun_tunnus = {$nodeid}";
+								WHERE yhtio = '{$yhtiorow["yhtio"]}'
+								AND laji = '{$toim}'
+								AND liitos ='{$liitos}'
+								AND puun_tunnus = {$nodeid}";
 						$re = pupe_query($qu);
 					}
 				}
@@ -125,7 +128,9 @@
 			// tuotteet
 			$qu = "	SELECT count(*) lkm
 					FROM puun_alkio
-					WHERE yhtio = '{$yhtiorow['yhtio']}' AND laji = '{$toim}' AND puun_tunnus = '{$nodeid}'";
+					WHERE yhtio = '{$yhtiorow['yhtio']}'
+					AND laji = '{$toim}'
+					AND puun_tunnus = '{$nodeid}'";
 			$re = pupe_query($qu);
 			$row = mysql_fetch_assoc($re);
 			$own_items = $row['lkm'];
@@ -134,7 +139,10 @@
 			$qu = "	SELECT count(*) lkm
 					FROM dynaaminen_puu puu
 					JOIN puun_alkio alkio ON (puu.yhtio = alkio.yhtio AND puu.tunnus = alkio.puun_tunnus)
-					WHERE puu.yhtio = '{$yhtiorow['yhtio']}' AND puu.laji = '{$toim}' AND puu.lft > {$noderow['lft']} AND puu.rgt < {$noderow['rgt']}";
+					WHERE puu.yhtio = '{$yhtiorow['yhtio']}'
+					AND puu.laji = '{$toim}'
+					AND puu.lft > {$noderow['lft']}
+					AND puu.rgt < {$noderow['rgt']}";
 			$re = pupe_query($qu);
 			$row = mysql_fetch_assoc($re);
 
@@ -167,7 +175,10 @@
 				// tarkistetaan onko jo liitetty
 				$qu = "SELECT *
 						FROM puun_alkio
-						WHERE yhtio = '{$yhtiorow["yhtio"]}' AND laji = '{$toim}' AND liitos = '{$liitos}' AND puun_tunnus = {$noderow["tunnus"]}";
+						WHERE yhtio = '{$yhtiorow["yhtio"]}'
+						AND laji = '{$toim}'
+						AND liitos = '{$liitos}'
+						AND puun_tunnus = {$noderow["tunnus"]}";
 				$re = pupe_query($qu);
 
 				if (mysql_num_rows($re) > 0) {
@@ -319,7 +330,16 @@
 		exit;
 	}
 
-	$otsikko = strtolower($toim) == "tuote" ? t("Tuotepuu") : t("Asiakaspuu");
+
+	if (strtoupper($toim) == "TUOTE") {
+		$otsikko = t("Tuotepuu");
+	}
+	elseif (strtoupper($toim) == "ASIAKAS") {
+		$otsikko = t("Asiakaspuu");
+	}
+	else {
+		$otsikko = t("Organisaatiopuu");
+	}
 
 	echo "<font class='head'>{$otsikko}</font><hr /><br />";
 
@@ -341,7 +361,9 @@
 			// haetaan valitut segmentit ja enabloidaan valintaominaisuudet yms
 			$qu = "	SELECT puun_tunnus
 					FROM puun_alkio
-					WHERE yhtio = '{$yhtiorow['yhtio']}' AND laji = '{$toim}' AND liitos = '{$liitos}'";
+					WHERE yhtio = '{$yhtiorow['yhtio']}'
+					AND laji = '{$toim}'
+					AND liitos = '{$liitos}'";
 			$re = pupe_query($qu);
 			// haetaan tiedot arrayhin myohempaa kayttoa varten
 			while($row = mysql_fetch_assoc($re)) {

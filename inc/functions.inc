@@ -14010,6 +14010,22 @@ if (!function_exists("kopioi_tilausrivi")) {
 			$insres = pupe_query($kysely);
 			$insid  = mysql_insert_id();
 
+			// tarkistetaan onko alkuper‰inen rivi asn_sanomat-taulussa
+			// jos on, lis‰t‰‰n uusi splitattu rivi kanssa sinne
+			$query = "	SELECT tunnus
+						FROM asn_sanomat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi LIKE '%{$tunnus}%'";
+			$chk_asn_res = pupe_query($query);
+
+			while ($chk_asn_row = mysql_fetch_assoc($chk_asn_res)) {
+				$query = "	UPDATE asn_sanomat SET
+							tilausrivi = CONCAT(tilausrivi, ',', '{$insid}')
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$chk_asn_row['tunnus']}'";
+				$upd_res = pupe_query($query);
+			}
+
 			// Kopioidaan tilausrivin lisatiedot
 			$query = "	SELECT *
 						FROM tilausrivin_lisatiedot
@@ -18626,7 +18642,7 @@ if (!function_exists('splittaa_tilausrivi')) {
 
 		while ($chk_asn_row = mysql_fetch_assoc($chk_asn_res)) {
 			$query = "	UPDATE asn_sanomat SET
-						tilausrivi = CONCAT(tilausrivi, ',', '{$tunnus}')
+						tilausrivi = CONCAT(tilausrivi, ',', '{$uusi_id}')
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$chk_asn_row['tunnus']}'";
 			$upd_res = pupe_query($query);

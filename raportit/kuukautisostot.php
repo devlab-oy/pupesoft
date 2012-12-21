@@ -29,7 +29,7 @@
 
 				</script>";
 
-		echo "<font class='head'>",t("Kuukautisostot"),"</font><hr>";
+		echo "<font class='head'>",t("Ostoehdotus kuukausittain"),"</font><hr>";
 
 		$org_rajaus = $abcrajaus;
 		list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);

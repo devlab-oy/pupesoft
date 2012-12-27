@@ -26,16 +26,18 @@ function listdir($start_dir = '.') {
 		return false;
 	}
 
-	$file_list = explode("\n", trim(`ls $start_dir | sort`));
+	$start_dir = rtrim($start_dir, '/');
+	$file_list = explode("\n", trim(`ls $start_dir/ | sort`));
 
 	foreach ($file_list as $file) {
 
+		if ($file == "") {
+			continue;
+		}
+
 		$filepath = $start_dir.'/'.$file;
 
-		if (is_dir($filepath)) {
-			$files = array_merge($files, listdir($filepath));
-		}
-		else {
+		if (is_file($filepath)) {
 			array_push($files, $filepath);
 		}
 	}

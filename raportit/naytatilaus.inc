@@ -477,6 +477,10 @@
 	if ($laskurow["sisviesti1"] != "") {
 		$komm .= "\n".t("Kommentti")." 3:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 90, "\n###");
 	}
+	
+	if ($laskurow["sisviesti3"] != "" and $kukarow["extranet"] == "") {
+		$komm .= "\n".t("Sisäinen viesti").":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti3']), 90, "\n###");
+	}
 
 	if ($laskurow["noutaja"] != '') {
 		$komm .= "\n".t("Noutaja").":###$laskurow[noutaja]";
@@ -599,7 +603,7 @@
 
 		$query_ale_lisa = generoi_alekentta('O');
 
-		$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
+		$ale_query_select_lisa = generoi_alekentta_select('yhteen', 'O');
 
 		// Keikat ja ostotilausket
 		$query = "	SELECT tilausrivi.otunnus tilaus,
@@ -613,7 +617,7 @@
 					round(tilausrivi.varattu*if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) tulossa_ulk,
 					tilausrivi.kpl maara,
 					concat_ws('<br>', if ('$laskurow[valkoodi]' != '$yhtiorow[valkoodi]', concat(tilausrivi.hinta, ' $laskurow[valkoodi]'), NULL), concat(round(tilausrivi.hinta*if ($laskurow[vienti_kurssi]=0, 1, $laskurow[vienti_kurssi]), '$yhtiorow[hintapyoristys]'), ' $yhtiorow[valkoodi]')) ostohinta,
-					{$ale_query_select_lisa}
+					{$ale_query_select_lisa} ale,
 					concat_ws('<br>', if ('$laskurow[valkoodi]' != '$yhtiorow[valkoodi]', concat(round((tilausrivi.varattu+tilausrivi.kpl)*tilausrivi.hinta*if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]'), ' $laskurow[valkoodi]'), NULL), concat(round((tilausrivi.varattu+tilausrivi.kpl)*tilausrivi.hinta*if ($laskurow[vienti_kurssi]=0, 1, $laskurow[vienti_kurssi])*if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]'), ' $yhtiorow[valkoodi]')) rivihinta,
 					concat(round(tilausrivi.rivihinta, '$yhtiorow[hintapyoristys]'), ' $yhtiorow[valkoodi]') Varastonarvo,
 					tilausrivi.kpl maara, tilausrivi.varattu,
@@ -661,7 +665,7 @@
 		$aputullimaara_yhteensa 		= "";
 		$rivinlisakulu_yhteensa 		= "";
 
-		while ($prow = mysql_fetch_assoc ($presult)) {
+		while ($prow = mysql_fetch_assoc($presult)) {
 
 			echo "<tr class='aktiivi'>";
 			echo "<td valign='top'>$prow[tilaus]</td>";
@@ -673,7 +677,7 @@
 			echo "<td align='right' valign='top'>".($prow["tulossa_sis"]*1)."<br>".($prow["tulossa_ulk"]*1)."</td>";
 			echo "<td align='right' valign='top'>".($prow["maara"]*1)."</td>";
 			echo "<td align='right' nowrap valign='top'>$prow[ostohinta]</td>";
-			echo "<td align='right' valign='top'>".($prow["ale1"]*1)."</td>";
+			echo "<td align='right' valign='top'>".($prow["ale"]*1)."</td>";
 			echo "<td align='right' nowrap valign='top'>$prow[rivihinta]</td>";
 			echo "<td align='right' nowrap valign='top'>$prow[Varastonarvo]</td>";
 

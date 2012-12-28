@@ -11,8 +11,10 @@
 		exit;
 	}
 
-	$logistiikka_yhtio 		= '';
-	$logistiikka_yhtiolisa 	= '';
+	if (!isset($tuvarasto)) $tuvarasto = '';
+
+	$logistiikka_yhtio = '';
+	$logistiikka_yhtiolisa = '';
 	$lasku_yhtio_originaali = $kukarow['yhtio'];
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
@@ -594,7 +596,7 @@
 		/*
 			Oletuksia
 		*/
-		if (isset($indexvas) and $indexvas == 1) {
+		if (isset($indexvas) and $indexvas == 1 and $tuvarasto == '') {
 
 			$karajaus = 1;
 
@@ -602,9 +604,14 @@
 				$karajaus = $yhtiorow["keraysaikarajaus"];
 			}
 
+			// jos käyttäjällä on oletusvarasto, valitaan se
+			if ($kukarow['oletus_varasto'] != 0) {
+				$tuvarasto = $kukarow['oletus_varasto'];
+			}
 			//	Varastorajaus jos käyttäjällä on joku varasto valittuna
-			if ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
-				$tuvarasto 	= $kukarow['varasto'];
+			elseif ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
+				// jos käyttäjällä on monta varastoa valittuna, valitaan ensimmäinen
+				$tuvarasto 	= strpos($kukarow['varasto'], ',') !== false ? array_shift(explode(",", $kukarow['varasto'])) : $kukarow['varasto'];
 			}
 			else {
 				$tuvarasto 	= "KAIKKI";

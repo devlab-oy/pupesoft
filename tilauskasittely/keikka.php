@@ -1155,7 +1155,6 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		}
 		else {
 			echo "<br><br><form method='post'>";
-			echo "<input type='hidden' name='toiminto' value='uusi'>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 			echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
 			echo "<input type='hidden' name='naytalaskelma' value='JOO'>";

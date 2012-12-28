@@ -4,9 +4,11 @@
 
 	require ("../inc/parametrit.inc");
 
+	$onko_paivitysoikeuksia_ohjelmaan = tarkista_oikeus('tilauskasittely/lahtojen_hallinta.php', '', 1);
+
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
-	if (isset($man_aloitus)) {
+	if (isset($man_aloitus) and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_child) and count($checkbox_child) > 0) {
 
@@ -30,7 +32,7 @@
 		}
 	}
 
-	if (isset($vaihda_prio)) {
+	if (isset($vaihda_prio) and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_child) and (is_array($checkbox_child) or is_string(trim($checkbox_child)))) {
 
@@ -89,7 +91,7 @@
 		}
 	}
 
-	if (isset($siirra_lahtoon)) {
+	if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_child) and (is_array($checkbox_child) or is_string(trim($checkbox_child)))) {
 
@@ -108,7 +110,7 @@
 							FROM lahdot
 							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
 							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
-							AND lahdot.tunnus = '{$valittu_lahto}'";
+							AND lahdot.tunnus  = '{$valittu_lahto}'";
 				$old_res = pupe_query($query);
 				$old_row = mysql_fetch_assoc($old_res);
 
@@ -117,15 +119,15 @@
 							FROM lahdot
 							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
 							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
-							AND lahdot.tunnus = '{$uusi_lahto}'";
+							AND lahdot.tunnus  = '{$uusi_lahto}'";
 				$new_res = pupe_query($query);
 				$new_row = mysql_fetch_assoc($new_res);
 
 				//haetaan kirjoittimen tiedot
 				$query = "	SELECT *
 							FROM kirjoittimet
-							WHERE yhtio='{$kukarow['yhtio']}'
-							AND tunnus='{$reittietikettitulostin}'";
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus  = '{$reittietikettitulostin}'";
 				$kirjoitin_res = pupe_query($query);
 				$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 
@@ -157,11 +159,11 @@
 						}
 					}
 
-					if ($tila_chk_row['tila'] == 'T' and $old_row['liitostunnus'] != $new_row['liitostunnus']) {
+					if ($old_row['liitostunnus'] != $new_row['liitostunnus']) {
 						$query = "	UPDATE rahtikirjat
 									SET toimitustapa = '{$new_row['selite']}'
-									WHERE yhtio 		= '{$kukarow['yhtio']}'
-									AND rahtikirjanro 	= '{$tilausnumero}'";
+									WHERE yhtio    = '{$kukarow['yhtio']}'
+									AND otsikkonro = '{$tilausnumero}'";
 						$upd_res = pupe_query($query);
 					}
 
@@ -475,7 +477,7 @@
 		}
 	}
 
-	if (isset($muokkaa_lahto)) {
+	if (isset($muokkaa_lahto) and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_parent) and ((is_array($checkbox_parent) and count($checkbox_parent) > 0) or is_string($checkbox_parent))) {
 
@@ -605,7 +607,7 @@
 		}
 	}
 
-	if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto > 0) {
+	if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto > 0 and $onko_paivitysoikeuksia_ohjelmaan) {
 
 		if (isset($checkbox_parent) and ((is_array($checkbox_parent) and count($checkbox_parent) > 0) or is_string($checkbox_parent))) {
 
@@ -727,6 +729,12 @@
 						if ($lahdot !== FALSE) {
 							// Otetaan eka lähtö
 							$valitu_lahto = array_shift($lahdot);
+
+							$query = "	UPDATE rahtikirjat
+										SET toimitustapa = '{$row['toimitustapa']}'
+										WHERE yhtio    = '{$kukarow['yhtio']}'
+										AND otsikkonro = '{$row['tunnus']}'";
+							$upd_res = pupe_query($query);
 
 							$query = "	UPDATE lasku
 										SET toimitustavan_lahto    = '{$valitu_lahto["tunnus"]}',
@@ -1644,6 +1652,26 @@
 						$('#napitformi').submit();
 					});
 
+					$('#muokkaa_kolleja').on('click', function() {
+
+						if ($('input[name^=\"checkbox_parent\"]:checked').length > 1) {
+							alert('",t("Voit muokata vain yhden lähdön kolleja kerrallaan"),".');
+						}
+						else if ($('input[name^=\"checkbox_parent\"]:checked').length == 0) {
+							alert('",t("Lähtö täytyy valita"),".');
+						}
+						else {
+							$('input[name^=\"checkbox_parent\"]:checked').each(function() {
+								$('#muokkaa_kolleja').after('<input type=\"hidden\" name=\"checkbox_parent[]\" value=\"'+$(this).val()+'\">');
+							});
+
+							$('#muokkaa_kolleja').after('<input type=\"hidden\" name=\"lopetus\" value=\"{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=\">');
+							$('#napitformi').attr('action', '{$palvelin2}tilauskasittely/muokkaa_kolleja.php');
+							$('#napitformi').submit();
+						}
+
+					});
+
 					$('#tulosta_rahtikirjat').on('click', function() {
 
 						var lahdot = '';
@@ -1799,14 +1827,20 @@
 		echo "<tr>";
 		echo "<td class='back'>";
 
-		if ($tee == 'lahto' and trim($tilaukset) != '') {
-			echo "<button type='button' id='man_aloitus'>",t("Man. aloitus"),"</button>&nbsp;";
-			echo "<button type='button' id='vaihda_prio'>",t("Vaihda prio"),"</button>&nbsp;";
-			echo "<button type='button' id='siirra_lahtoon'>",t("Siirrä lähtöön"),"</button>";
-		}
-		else {
-			echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa lähtö"),"</button>&nbsp;";
-			echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
+		if ($onko_paivitysoikeuksia_ohjelmaan) {
+			if ($tee == 'lahto' and trim($tilaukset) != '') {
+				echo "<button type='button' id='man_aloitus'>",t("Man. aloitus"),"</button>&nbsp;";
+				echo "<button type='button' id='vaihda_prio'>",t("Vaihda prio"),"</button>&nbsp;";
+				echo "<button type='button' id='siirra_lahtoon'>",t("Siirrä lähtöön"),"</button>";
+			}
+			else {
+				echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa lähtö"),"</button>&nbsp;";
+				echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
+
+				if (tarkista_oikeus('tilauskasittely/muokkaa_kolleja.php')) {
+					echo "<button type='button' id='muokkaa_kolleja'>",t("Muokkaa kolleja"),"</button>&nbsp;";
+				}
+			}
 		}
 
 		if ($valittu_lahto == "" and isset($tilaukset) and $tilaukset != "") {
@@ -2047,7 +2081,13 @@
 					echo "<td class='center toggleable_parent_row_stopped' id='!__{$row['lahdon_tunnus']}X__{$y}'>&nbsp;</td>";
 				}
 
-				echo "<td><input type='checkbox' class='checkall_parent' name='checkbox_parent[]' id='{$row['lahdon_tunnus']}' value='{$row['lahdon_tunnus']}'></td>";
+				echo "<td>";
+
+				if ($onko_paivitysoikeuksia_ohjelmaan) {
+					echo "<input type='checkbox' class='checkall_parent' name='checkbox_parent[]' id='{$row['lahdon_tunnus']}' value='{$row['lahdon_tunnus']}'>";
+				}
+
+				echo "</td>";
 
 				echo "<td class='toggleable center toggleable_parent_row_departure' id='{$row['lahdon_tunnus']}__{$y}'>";
 				echo "<form method='post'>";
@@ -2277,7 +2317,14 @@
 			}
 
 			echo "<tr class='header_row_{$row['lahdon_tunnus']}__{$y}' id='header_row_{$row['lahdon_tunnus']}__{$y}'>";
-			echo "<th><input type='checkbox' class='checkall_child'></th>";
+
+			echo "<th>";
+
+			if ($onko_paivitysoikeuksia_ohjelmaan) {
+				echo "<input type='checkbox' class='checkall_child'>";
+			}
+
+			echo "</th>";
 
 			echo "<th class='sort_row_by' id='row_status__{$row['lahdon_tunnus']}__{$y}'>",t("Status")," <img class='row_direction_status' />";
 			echo "<br />";
@@ -2378,7 +2425,13 @@
 
 				echo "<tr class='toggleable_row_tr' id='toggleable_row_tr_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 
-				echo "<td><input type='checkbox' class='checkbox_{$lahto_row['tilauksen_tunnus']}' name='checkbox_child[{$lahto_row['tilauksen_tunnus']}]' value='{$lahto_row['tilauksen_tunnus']}' id='checkbox_{$lahto_row['tilauksen_tunnus']}__{$x}'></td>";
+				echo "<td>";
+
+				if ($onko_paivitysoikeuksia_ohjelmaan) {
+					echo "<input type='checkbox' class='checkbox_{$lahto_row['tilauksen_tunnus']}' name='checkbox_child[{$lahto_row['tilauksen_tunnus']}]' value='{$lahto_row['tilauksen_tunnus']}' id='checkbox_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
+				}
+
+				echo "</td>";
 
 				$status = $status_text = '';
 
@@ -2470,7 +2523,7 @@
 
 				echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 
-				if (trim($lahto_row['sscc_ulkoinen']) != '') {
+				if (trim($lahto_row['sscc_ulkoinen']) != '' and trim($lahto_row['sscc_ulkoinen']) != 0) {
 					echo "<button type='button'>{$lahto_row['sscc_ulkoinen']}</button>";
 				}
 				elseif ($lahto_row['sscc'] != '') {

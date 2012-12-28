@@ -142,7 +142,7 @@ elseif (file_exists("pics/pupesoft_logo.gif")) {
 	echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.gif' border='0'>";
 }
 else {
-	echo "<a target='_top' href='/'><img src='http://api.devlab.fi/pupesoft.gif' border='0'>";
+	echo "<a target='_top' href='/'><img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif' border='0'>";
 }
 
 echo "</a></td>

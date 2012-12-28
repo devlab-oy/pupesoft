@@ -93,7 +93,7 @@ elseif (file_exists("pics/pupesoft_logo.png")) {
 	echo "<a target='_top' href='{$palvelin2}'><img src='pics/pupesoft_logo.png' border='0'>";
 }
 else {
-	echo "<a target='_top' href='{$palvelin2}'><img src='http://api.devlab.fi/pupesoft.gif' border='0'>";
+	echo "<a target='_top' href='{$palvelin2}'><img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif' border='0'>";
 }
 
 echo "</td><td><font class='head'>",t("Sis‰‰nkirjautuminen", $browkieli),"</font><br><br>";

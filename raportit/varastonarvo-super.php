@@ -762,51 +762,38 @@
 					$summaus_lisa = "";
 				}
 
-				if ($row["sarjanumeroseuranta"] == "G") {
-					# Haetaan vapaat er‰t varastosta ja lasketaan niiden saldot
-					$query	= "		SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.era_kpl
-									FROM sarjanumeroseuranta
-									JOIN varastopaikat ON (varastopaikat.yhtio = sarjanumeroseuranta.yhtio
-															and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
-															and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
-															$mistavarastosta)
-									WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-									and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
-									and sarjanumeroseuranta.ostorivitunnus>0
-									and sarjanumeroseuranta.myyntirivitunnus=0
-									$summaus_lisa
-									HAVING era_kpl > 0";
-					$vararvores = pupe_query($query);
+				$query	= "	SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.era_kpl
+							FROM sarjanumeroseuranta
+							JOIN varastopaikat ON (varastopaikat.yhtio = sarjanumeroseuranta.yhtio
+													and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
+													and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
+													$mistavarastosta)
+							JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio
+								AND tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus
+								AND tilausrivi_osto.laskutettuaika != '0000-00-00')
+							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON (tilausrivi_myynti.yhtio = sarjanumeroseuranta.yhtio
+								AND tilausrivi_myynti.tunnus = sarjanumeroseuranta.myyntirivitunnus)
+							WHERE sarjanumeroseuranta.yhtio = '{$kukarow["yhtio"]}'
+							AND sarjanumeroseuranta.tuoteno = '{$row["tuoteno"]}'
+							AND sarjanumeroseuranta.myyntirivitunnus != -1
+							$summaus_lisa
+							AND (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')";
+				$vararvores = pupe_query($query);
 
-					while ($vararvorow = mysql_fetch_assoc($vararvores)) {
-						$varaston_arvo += sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"], "", "$vv-$kk-$pp 23:59:59")*$vararvorow["era_kpl"];
-						$bruttovaraston_arvo = $varaston_arvo;
-						$kpl += $vararvorow["era_kpl"]; // saldo
-					}
-				}
-				else {
-					$query	= "	SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.era_kpl era_kpl
-								FROM sarjanumeroseuranta
-								JOIN varastopaikat ON (varastopaikat.yhtio = sarjanumeroseuranta.yhtio
-														and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
-														and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
-														$mistavarastosta)
-								LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON (tilausrivi_myynti.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus = sarjanumeroseuranta.myyntirivitunnus)
-								LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus)
-								WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-								and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
-								and sarjanumeroseuranta.myyntirivitunnus != -1
-								$summaus_lisa
-								and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
-								and tilausrivi_osto.laskutettuaika != '0000-00-00'";
-					$vararvores = pupe_query($query);
+				while ($vararvorow = mysql_fetch_assoc($vararvores)) {
 
-					while ($vararvorow = mysql_fetch_assoc($vararvores)) {
-						//	Jos meill‰ on er‰seurattu in-out arvoinen tuote, meid‰n pit‰‰
-						$varaston_arvo += sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"], "", "$vv-$kk-$pp 23:59:59");
-						$bruttovaraston_arvo = $varaston_arvo;
-						$kpl++; // saldo
+					// Jos meill‰ on er‰numeroseuranta, niin otetaan er‰n koko sarjanumeroseurannan takaa. Sarjanumeroseurannassa aina yksi.
+					if ($row["sarjanumeroseuranta"] == "G") {
+						$sarjanumeroseuranta_kpl = $vararvorow["era_kpl"];
 					}
+					else {
+						$sarjanumeroseuranta_kpl = 1;
+					}
+
+					// Jos meill‰ in-out arvoinen tuote, meid‰n pit‰‰ laskea varastonarvo ostohinnan mukaan
+					$varaston_arvo += sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"], "", "$vv-$kk-$pp 23:59:59") * $sarjanumeroseuranta_kpl;
+					$bruttovaraston_arvo = $varaston_arvo;
+					$kpl += $sarjanumeroseuranta_kpl; // saldo
 				}
 			}
 			else {

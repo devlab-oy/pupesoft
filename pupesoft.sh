@@ -26,9 +26,9 @@ REMOTELOCALDIR=""
 S3BUCKET=""
 
 # Komennot
-sh ${POLKU}pupe-backup.sh "$BACKUPDIR" "$BACKUPDB" "$BACKUPUSER" "$BACKUPPASS" "$BACKUPSAVEDAYS" "$SALAUSAVAIN" "$EXTRABACKUP" "$REMOTEHOST" "$REMOTEUSER" "$REMOTEPASS" "$REMOTEREMDIR" "$REMOTELOCALDIR" "$S3BUCKET"
-sh ${POLKU}pupe-cron.sh "$YHTIO"
-sh ${POLKU}pupe-cron-server.sh "$BACKUPSAVEDAYS"
+/bin/bash ${POLKU}pupe-backup.sh "$BACKUPDIR" "$BACKUPDB" "$BACKUPUSER" "$BACKUPPASS" "$BACKUPSAVEDAYS" "$SALAUSAVAIN" "$EXTRABACKUP" "$REMOTEHOST" "$REMOTEUSER" "$REMOTEPASS" "$REMOTEREMDIR" "$REMOTELOCALDIR" "$S3BUCKET"
+/bin/bash ${POLKU}pupe-cron.sh "$YHTIO"
+/bin/bash ${POLKU}pupe-cron-server.sh "$BACKUPSAVEDAYS"
 
 # Jos haluat seurata hitaita kyselyitä
 #SLOWLOG="/var/lib/mysql/mysqld-slow.log"

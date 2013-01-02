@@ -556,7 +556,13 @@
 			}
 
 			// P‰‰tet‰‰m maksuaineston tiedostonimi
-			$kaunisnimi = "SEPA-$kukarow[yhtio]-".$popvm_dmy.".xml";
+			if (strtoupper($yhtiorow['maa']) == 'EE') {
+				$kaunisnimi = "EESEPA-$kukarow[yhtio]-".$popvm_dmy.".xml";
+			}
+			else {
+				$kaunisnimi = "SEPA-$kukarow[yhtio]-".$popvm_dmy.".xml";
+			}
+
 			$toot = fopen($pankkitiedostot_polku.$kaunisnimi, "w+");
 
 			if (!$toot) {

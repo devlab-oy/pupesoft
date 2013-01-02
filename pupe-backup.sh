@@ -48,7 +48,52 @@ if [ -z ${BACKUPPAIVAT} ]; then
 	BACKUPPAIVAT=30
 fi
 
-FILEDATE=$(date "+%Y-%m-%d")
+function encrypt_file {
+
+	if [[ -z $1 || -z $2 ]]; then
+		echo "Funktio tarvitsee ekaksi parametriksi salausavaimen ja toiseksi parametriksi salattavan filen nimen"
+	else
+		# Otetaan parametrit muuttujiin
+		F_SALAUSAVAIN=$1
+		F_TIEDOSTO=$2
+		F_TEMP_SALAUSAVAIN="/tmp/salausavain"
+
+		# Laitetaan salausavain fileen
+		rm -f "${F_TEMP_SALAUSAVAIN}"
+		echo "${F_SALAUSAVAIN}" > "${F_TEMP_SALAUSAVAIN}"
+
+		# Salaus ei osaa ylikirjottaa output-tiedostoa, joten poistetaan se aluksi varmuuden vuoksi
+		rm -f "${F_TIEDOSTO}.nc"
+
+		# Salataan tiedosto k‰ytt‰en Rijndael-256 algoritmia
+		mcrypt -a rijndael-256 -f ${F_TEMP_SALAUSAVAIN} --quiet ${F_TIEDOSTO}
+
+		# T‰ss‰ talteen sama salaus k‰ytt‰en openssl:‰‰.
+		#openssl aes-256-cbc -in ${F_TIEDOSTO} -out ${F_TIEDOSTO}.nc -pass file:"${F_TEMP_SALAUSAVAIN}"
+
+		if [[ $? -ne 0 ]]; then
+			# Poistetaan salattu tiedosto
+			rm -f "${F_TIEDOSTO}.nc"
+
+			echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+			echo "Encrypt ${F_TIEDOSTO} FAILED!"
+		else
+			# Poistetaan salaamaton tiedosto
+			rm -f "${F_TIEDOSTO}"
+
+			# P‰ivitet‰‰n salatun tiedoston oikeudet kuntoon
+			chmod 664 "${F_TIEDOSTO}.nc"
+
+			echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+			echo ": Encrypt done."
+		fi
+
+		# Dellataan salausavain file
+		rm -f "${F_TEMP_SALAUSAVAIN}"
+	fi
+}
+
+FILEDATE=$(date "+%Y-%m-%d_%H%M%S")
 FILENAME="${DBKANTA}-backup-${FILEDATE}.bz2"
 MYSQLPOLKU=$(mysql -u ${DBKAYTTAJA} ${DBKANTA} --password=${DBSALASANA} -sN -e "show variables like 'datadir'"|cut -f 2)
 
@@ -69,19 +114,19 @@ if [ ! -d /tmp/${DBKANTA} ]; then
 fi
 
 echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-echo ": Backup ${DBKANTA}."
+echo ": Backup started."
 
 # Siirryt‰‰n temppidirriin
 cd /tmp/${DBKANTA}
 
 # Lukitaan taulut, Flushataan binlogit, Otetaan masterin positio ylˆs, Kopioidaan mysql kanta ja lopuksi vapautetaan taulut.
-mysql -u ${DBKAYTTAJA} ${DBKANTA} --password=${DBSALASANA} -e "FLUSH TABLES WITH READ LOCK; FLUSH LOGS; SHOW MASTER STATUS; system cp -R ${MYSQLPOLKU}${DBKANTA}/ /tmp/; UNLOCK TABLES;" > /tmp/${DBKANTA}/pupesoft-backup.info
+mysql -u ${DBKAYTTAJA} ${DBKANTA} --password=${DBSALASANA} -e "FLUSH TABLES WITH READ LOCK; FLUSH LOGS; SHOW MASTER STATUS; system cp -R ${MYSQLPOLKU}${DBKANTA}/ /tmp/; UNLOCK TABLES;" > /tmp/${DBKANTA}/backup-binlog.info
 
 # Jos backup onnistui!
 if [[ $? -eq 0 ]]; then
 
 	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-	echo ": Copy done."
+	echo ": Database copy done."
 
 	# Pakataan failit
 	tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *
@@ -90,34 +135,89 @@ if [[ $? -eq 0 ]]; then
 	if [[ $? -eq 0 ]]; then
 
 		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-		echo ": Bzip2 done."
+		echo ": Database bzip2 done."
 
+		# Salataan tiedosto
 		if [ ! -z "${SALAUSAVAIN}" ]; then
-
-			# Laitetaan salausavain fileen
-			echo "${SALAUSAVAIN}" > /root/salausavain
-
-			# Mcrypt ei osaa ylikirjottaa tiedostoa, joten poistetaan varmuuden vuoksi teht‰v‰ file
-			rm -f "${BACKUPDIR}/${FILENAME}.nc"
-
-			# Salataan backup k‰ytt‰en Rijndael-256 algoritmia ja poistetaan salaamaton versio jos salaus onnistuu
-			checkcrypt=`mcrypt -a rijndael-256 -f /root/salausavain --unlink --quiet ${BACKUPDIR}/${FILENAME}`
-
-			if [[ $? -ne 0 ]]; then
-				echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
-				echo
-			else
-				# P‰ivitet‰‰n oikeudet kuntoon
-				chmod 664 "${BACKUPDIR}/${FILENAME}.nc"
-				echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-				echo ": Encrypt done."
-			fi
+			encrypt_file "${SALAUSAVAIN}" "${BACKUPDIR}/${FILENAME}"
 		fi
+
+		# T‰m‰n backupin binlog-info
+		binlog_new_log=$(< /tmp/${DBKANTA}/backup-binlog.info)
+
+		# Tuorein binlog-info mik‰ meill‰ on tallella
+		tmp_filename=`ls ${BACKUPDIR}/backup-binlog* | sort -r | head -1`
+		binlog_last_log=$(< ${tmp_filename})
+
+		# Teht‰v‰n binlog backupin nimi
+		binlog_backup="${DBKANTA}-binlog-${FILEDATE}.sql.bz2"
+
+		# Regex, jolla lˆydet‰‰n filenimi ja filepositio
+		binlog_regex="(mysql-bin\.[0-9]+).([0-9]+)"
+
+		# Kaivetaan t‰m‰n backupin binlog ja logipositio info-filest‰
+		if [[ ${binlog_new_log} =~ ${binlog_regex} ]]; then
+			binlog_new_file=${BASH_REMATCH[1]}
+			binlog_new_position=${BASH_REMATCH[2]}
+		fi
+
+		# Kaivetaan edellisen backupin binlog ja logipositio info-filest‰
+		if [[ ${binlog_last_log} =~ ${binlog_regex} ]]; then
+			binlog_last_file=${BASH_REMATCH[1]}
+			binlog_last_position=${BASH_REMATCH[2]}
+		fi
+
+		# Jos lˆydettiin kaikki muuttujat
+		if [[ ! -z ${binlog_new_file} && ! -z ${binlog_new_position} && ! -z ${binlog_last_file} && ! -z ${binlog_last_position} ]]; then
+
+			# Siirryt‰‰n MySQL hakemistoon
+			cd ${MYSQLPOLKU}
+
+			# Katsotaan kaikki binlog filet edellisen ja t‰m‰n backupin v‰list‰
+			binlog_perl="print if (/^${binlog_last_file}\b/ .. /^${binlog_new_file}\b/)"
+			binlog_all=`ls mysql-bin.* | sort | perl -ne "${binlog_perl}" | perl -ne 'chomp and print "$_ "'`
+
+			# Jos lˆydettiin binlogifilet
+			if [[ ! -z ${binlog_all} ]]; then
+
+				# Tehd‰‰n binlogeista SQL-lausekkeita ja pakataan ne zippiin
+				mysqlbinlog --start-position=${binlog_last_position} --stop-position=${binlog_new_position} ${binlog_all} | pbzip2 > ${BACKUPDIR}/${binlog_backup}
+
+				# Jos pakkaus onnistui!
+				if [[ $? -eq 0 ]]; then
+					# Kopsataan t‰m‰n backupin logipositio paikalleen, ett‰ tiedet‰‰n ottaa t‰st‰ eteenp‰in seuraavalla kerralla
+					cp -f /tmp/${DBKANTA}/backup-binlog.info ${BACKUPDIR}/backup-binlog-${FILEDATE}.info
+
+					echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+					echo ": Binlog bzip2 done."
+
+					# Salataan tiedosto
+					if [ ! -z "${SALAUSAVAIN}" ]; then
+						encrypt_file "${SALAUSAVAIN}" "${BACKUPDIR}/${binlog_backup}"
+					fi
+				else
+					# Jos pakkaus ep‰onnistui! Poistetaan rikkin‰inen tiedosto.
+					rm -f ${BACKUPDIR}/${binlog_backup}
+					echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+					echo ": Binlog bzip2 FAILED!"
+				fi
+			else
+				echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+				echo ": No binlogs found!"
+			fi
+		else
+			echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+			echo ": Binlog info not found!"
+		fi
+
+		# Kopsataan t‰m‰n backupin logipositio aina backup dirikkaan samalle nimell‰. Ylemp‰n‰ kopsataan "oikea versio" p‰iv‰m‰‰r‰n kanssa.
+		# T‰m‰ siksi, ett‰ helpottaa ekalla kerralla kun backup ajetaan ja debuggia ongelmatilanteissa.
+		cp -f /tmp/${DBKANTA}/backup-binlog.info ${BACKUPDIR}/backup-binlog-0000.info
 	else
 		# Jos pakkaus ep‰onnistui! Poistetaan rikkin‰inen tiedosto.
 		rm -f ${BACKUPDIR}/${FILENAME}
 		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-		echo ": Bzip2 FAILED!"
+		echo ": Database bzip2 FAILED!"
     fi
 else
 	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
@@ -126,9 +226,6 @@ fi
 
 # Dellataan pois tempit
 rm -rf /tmp/${DBKANTA}
-
-echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-echo ": Copy config files."
 
 # Backupataan Pupeasenukseen liittyv‰t asetuskset
 PUPEPOLKU=`dirname $0|cut -d "/" -f 2-`
@@ -211,36 +308,19 @@ if [ ! -z "${BACKUPFILET}" ]; then
 	if [[ $? -ne 0 ]]; then
 		rm -f ${BACKUPDIR}/${FILENAME}
 		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-		echo ": Copy FAILED."		
+		echo ": Config files copy FAILED."
 	else
 		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-		echo ": Copy done."		
+		echo ": Config files bzip2 done."
+
+		# Salataan tiedosto
+		if [ ! -z "${SALAUSAVAIN}" ]; then
+			encrypt_file "${SALAUSAVAIN}" "${BACKUPDIR}/${FILENAME}"
+		fi
 	fi
 else
 	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-	echo ": Nothing to copy!"			
-fi
-
-if [ ! -z "${SALAUSAVAIN}" ]; then
-
-	# Mcrypt ei osaa ylikirjottaa tiedostoa, joten poistetaan varmuuden vuoksi teht‰v‰ file
-	rm -f "${BACKUPDIR}/${FILENAME}.nc"
-
-	# Salataan backup k‰ytt‰en Rijndael-256 algoritmia ja poistetaan salaamaton versio jos salaus onnistuu
-	checkcrypt=`mcrypt -a rijndael-256 -f /root/salausavain --unlink --quiet ${BACKUPDIR}/${FILENAME}`
-
-	if [[ $? -ne 0 ]]; then
-		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
-		echo
-	else
-		# P‰ivitet‰‰n oikeudet kuntoon
-		chmod 664 "${BACKUPDIR}/${FILENAME}.nc"
-		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-		echo ": Encrypt done."
-	fi
-
-	# Dellataan salausavain file
-	rm -f /root/salausavain
+	echo ": Config files not found!"
 fi
 
 #Siirret‰‰nkˆ tuorein backuppi myˆs sambaserverille jos sellainen on konffattu

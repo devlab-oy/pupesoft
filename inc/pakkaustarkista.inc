@@ -32,6 +32,12 @@
 					$t[$i] = mysql_real_escape_string($t[$i]);
 				}
 			}
+
+			if (mysql_field_name($result, $i) == 'kayttoprosentti') {
+				$t[$i] = (int) $t[$i];
+
+				if (trim($t[$i]) == 0) $virhe[$i] .= t("Käyttöprosentti pitää olla kokonaisluku ja sen pitää olla suurempi kuin nolla");
+			}
 		}
 	}
 

@@ -271,11 +271,11 @@ if (!function_exists('alku_tarjous')) {
 		}
 		else {
 			if (trim($laskurow['tilausyhteyshenkilo']) != '') {
-				$komm .= "\n".t("Tilaaja", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
+				$komm .= "\n".t("Tarjousyhteyshenkilö", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
 			}
 
 			if (trim($laskurow['asiakkaan_tilausnumero']) != '') {
-				$komm .= "\n".t("Tilauksenne", $kieli).":###".$laskurow['asiakkaan_tilausnumero'];
+				$komm .= "\n".t("Tarjouksenne", $kieli).":###".$laskurow['asiakkaan_tilausnumero'];
 			}
 
 			if (trim($laskurow['kohde']) != '') {
@@ -283,7 +283,7 @@ if (!function_exists('alku_tarjous')) {
 			}
 
 			if (trim($laskurow['viesti']) != '') {
-				$komm .= "\n".t("Tilausviite", $kieli).":###".$laskurow['viesti'];
+				$komm .= "\n".t("Tarjousviite", $kieli).":###".$laskurow['viesti'];
 			}
 
 			if (trim($laskurow['comments']) != '') {
@@ -561,11 +561,11 @@ if (!function_exists('tarjous_rivi_otsikot')) {
 			$pdf_tarjous->draw_text(25,  $kala+5, t("Tuotenimi", $kieli),		$page_tarjous, $norm);
 
 			if(trim($naytetaanko_rivihinta == 'kokonaan_ilman_hintoja')) {
-				$pdf_tarjous->draw_text(380, $kala+15, t("Tilattu", $kieli),		$page_tarjous, $norm);
+				$pdf_tarjous->draw_text(380, $kala+15, t("Määrä", $kieli),			$page_tarjous, $norm);
 				$pdf_tarjous->draw_text(450, $kala+15, t("Alennus", $kieli),		$page_tarjous, $norm);
 			}
 			else {
-				$pdf_tarjous->draw_text(330, $kala+15, t("Tilattu", $kieli),		$page_tarjous, $norm);
+				$pdf_tarjous->draw_text(330, $kala+15, t("Määrä", $kieli),			$page_tarjous, $norm);
 				$pdf_tarjous->draw_text(380, $kala+15, t("Yks.hinta", $kieli),		$page_tarjous, $norm);
 				$pdf_tarjous->draw_text(450, $kala+15, t("Alennus", $kieli),		$page_tarjous, $norm);
 			}

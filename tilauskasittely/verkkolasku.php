@@ -214,7 +214,7 @@
 		if ($tee == "LASKUTA") {
 
 			if (!function_exists("vlas_dateconv")) {
-				function vlas_dateconv ($date) {
+				function vlas_dateconv($date) {
 					//k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
 					return substr($date,0,4).substr($date,5,2).substr($date,8,2);
 				}
@@ -222,8 +222,40 @@
 
 			//tehd‰‰n viitteest‰ SPY standardia eli 20 merkki‰ etunollilla
 			if (!function_exists("spyconv")) {
-				function spyconv ($spy) {
+				function spyconv($spy) {
 					return $spy = sprintf("%020.020s",$spy);
+				}
+			}
+
+			if (!function_exists("laskunkieli")) {
+				function laskunkieli($liitostunnus, $kieli) {
+					GLOBAL $kukarow, $yhtiorow;
+
+					$asiakas_apu_query = "  SELECT *
+											FROM asiakas
+											WHERE yhtio = '$kukarow[yhtio]'
+											AND tunnus  = '$liitostunnus'";
+					$asiakas_apu_res = pupe_query($asiakas_apu_query);
+					$asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
+
+					if (strtoupper(trim($asiakas_apu_row["kieli"])) == "SE") {
+						$laskun_kieli = "SE";
+					}
+					elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "EE") {
+						$laskun_kieli = "EE";
+					}
+					elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "FI") {
+						$laskun_kieli = "FI";
+					}
+					else {
+						$laskun_kieli = trim(strtoupper($yhtiorow["kieli"]));
+					}
+
+					if ($kieli != "") {
+						$laskun_kieli = trim(strtoupper($kieli));
+					}
+
+					return $laskun_kieli;
 				}
 			}
 
@@ -872,7 +904,7 @@
 					$tunnukset .= "'$row[tunnus]',";
 				}
 
-				//vika pilkku pois
+				// vika pilkku pois
 				$tunnukset = substr($tunnukset,0,-1);
 
 				if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
@@ -905,7 +937,7 @@
 								AND lasku.yhtio = maksuehto.yhtio
 								AND lasku.maksuehto = maksuehto.tunnus
 								AND maksuehto.jv != ''
-								GROUP BY date_format(rahtikirjat.tulostettu, '%Y-%m-%d'), lasku.ytunnus, lasku.toimitustapa";
+								GROUP BY lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp";
 					$result = pupe_query($query);
 
 					$yhdista = array();
@@ -925,14 +957,14 @@
 						// lis‰t‰‰n n‰ille tilauksille jvkulut
 						$virhe = 0;
 
-						//haetaan ekan otsikon tiedot
+						//haetaan vikan otsikon tiedot
 						$query = "  SELECT lasku.*, maksuehto.jv
 									FROM lasku, maksuehto
 									WHERE lasku.yhtio = '$kukarow[yhtio]'
 									AND lasku.tunnus in ($otsikot)
 									AND lasku.yhtio = maksuehto.yhtio
 									AND lasku.maksuehto = maksuehto.tunnus
-									ORDER BY lasku.tunnus
+									ORDER BY lasku.tunnus DESC
 									LIMIT 1";
 						$otsre = pupe_query($query);
 						$laskurow = mysql_fetch_assoc($otsre);
@@ -961,10 +993,12 @@
 
 							// jos tuotenumero lˆytyy
 							if (mysql_num_rows($rhire) == 1) {
-								$trow  = mysql_fetch_assoc($rhire);
+								$trow = mysql_fetch_assoc($rhire);
+
+								$laskun_kieli = laskunkieli($laskurow['liitostunnus'], $kieli);
 
 								$hinta = $tjvrow['jvkulu']; // jv kulu
-								$nimitys = t("J‰lkivaatimuskulu", $kieli);
+								$nimitys = t("J‰lkivaatimuskulu", $laskun_kieli);
 								$kommentti = "";
 
 								list($jvhinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
@@ -990,19 +1024,20 @@
 						$tulos_ulos .= "<br>\n".t("Rahtikulut").":<br>\n<table>";
 					}
 
-					// haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per p‰iv‰ miss‰ merahti (eli kohdistettu) = K (K‰ytet‰‰n l‰hett‰j‰n rahtisopimusnumeroa)
+					// haetaan laskutettavista tilauksista per l‰htˆ, ytunnus ja toimitusosite.
+					// miss‰ merahti (eli kohdistettu) = K (K‰ytet‰‰n l‰hett‰j‰n rahtisopimusnumeroa)
 					// j‰lkivaatimukset omalle riville
 					$query   = "SELECT group_concat(distinct lasku.tunnus) tunnukset
 								FROM lasku, rahtikirjat, maksuehto
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
-								and lasku.tunnus in ($tunnukset)
-								and lasku.rahtivapaa = ''
-								and lasku.kohdistettu = 'K'
-								and lasku.yhtio = rahtikirjat.yhtio
-								and lasku.tunnus = rahtikirjat.otsikkonro
-								and lasku.yhtio = maksuehto.yhtio
-								and lasku.maksuehto = maksuehto.tunnus
-								GROUP BY date_format(rahtikirjat.tulostettu, '%Y-%m-%d'), lasku.ytunnus, lasku.toimitustapa, maksuehto.jv";
+								AND lasku.tunnus in ($tunnukset)
+								AND lasku.rahtivapaa = ''
+								AND lasku.kohdistettu = 'K'
+								AND lasku.yhtio = rahtikirjat.yhtio
+								AND lasku.tunnus = rahtikirjat.otsikkonro
+								AND lasku.yhtio = maksuehto.yhtio
+								AND lasku.maksuehto = maksuehto.tunnus
+								GROUP BY lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, maksuehto.jv";
 					$result  = pupe_query($query);
 
 					$yhdista = array();
@@ -1016,28 +1051,28 @@
 						// lis‰t‰‰n n‰ille tilauksille rahtikulut
 						$virhe = 0;
 
-						//haetaan ekan otsikon tiedot
+						//haetaan vikan otsikon tiedot
 						$query = "  SELECT lasku.*, maksuehto.jv
 									FROM lasku, maksuehto
-									WHERE lasku.yhtio='$kukarow[yhtio]'
-									and lasku.tunnus in ($otsikot)
-									and lasku.yhtio = maksuehto.yhtio
-									and lasku.maksuehto = maksuehto.tunnus
-									order by lasku.tunnus
-									limit 1";
+									WHERE lasku.yhtio = '$kukarow[yhtio]'
+									AND lasku.tunnus in ($otsikot)
+									AND lasku.yhtio = maksuehto.yhtio
+									AND lasku.maksuehto = maksuehto.tunnus
+									ORDER BY lasku.tunnus DESC
+									LIMIT 1";
 						$otsre = pupe_query($query);
 						$laskurow = mysql_fetch_assoc($otsre);
 
 						if (mysql_num_rows($otsre) != 1) $virhe++;
 
 						//summataan kaikki painot yhteen
-						$query = "SELECT sum(kilot) kilot FROM rahtikirjat WHERE yhtio='$kukarow[yhtio]' and otsikkonro in ($otsikot)";
+						$query = "SELECT sum(kilot) kilot FROM rahtikirjat WHERE yhtio='$kukarow[yhtio]' AND otsikkonro in ($otsikot)";
 						$pakre = pupe_query($query);
 						$pakka = mysql_fetch_assoc($pakre);
 						if (mysql_num_rows($pakre)!=1) $virhe++;
 
 						//haetaan v‰h‰n infoa rahtikirjoista
-						$query = "SELECT distinct date_format(tulostettu, '%d.%m.%Y') pvm, rahtikirjanro from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro in ($otsikot)";
+						$query = "SELECT DISTINCT date_format(tulostettu, '%d.%m.%Y') pvm, rahtikirjanro FROM rahtikirjat WHERE yhtio='$kukarow[yhtio]' AND otsikkonro in ($otsikot)";
 						$rahre = pupe_query($query);
 						if (mysql_num_rows($rahre)==0) $virhe++;
 
@@ -1061,10 +1096,12 @@
 
 						if ($rah_hinta > 0 and $virhe == 0 and mysql_num_rows($rhire) == 1) {
 
+							$laskun_kieli = laskunkieli($laskurow['liitostunnus'], $kieli);
+
 							$trow      = mysql_fetch_assoc($rhire);
 							$otunnus   = $laskurow['tunnus'];
 							$nimitys   = "$pvm $laskurow[toimitustapa]";
-							$kommentti = t("Rahtikirja", $kieli).": $rahtikirjanrot";
+							$kommentti = t("Rahtikirja", $laskun_kieli).": $rahtikirjanrot";
 
 							$ale_lisa_insert_query_1 = $ale_lisa_insert_query_2 = '';
 
@@ -1401,11 +1438,13 @@
 
 									if ($kv_vaktuote == "") $kv_vaktuote = $row["kv_tuotenumero"];
 
-									// haetaan otsikon tiedot
+									// haetaan vikan otsikon tiedot
 									$query = "  SELECT lasku.*
 												FROM lasku
 												WHERE lasku.yhtio = '$kukarow[yhtio]'
-												AND lasku.tunnus IN ({$row['tunnus']})";
+												AND lasku.tunnus IN ({$row['tunnus']})
+												ORDER BY lasku.tunnus DESC
+												LIMIT 1";
 									$otsre = pupe_query($query);
 									$laskurow = mysql_fetch_assoc($otsre);
 
@@ -1490,7 +1529,7 @@
 
 								$kv_komm = t("Kuljetusvakuutus muodostuu tilauksista", $kieli).": ".substr($kv_tilaukset, 0, -2);
 
-								// laskurow-valuut tosta edellisesta while loopista. Siin‰ on vikan otsikon tiedot.
+								// laskurow-valuu tosta edellisesta while loopista. Siin‰ on vikan otsikon tiedot.
 								// lis‰t‰‰n kuljetusvakuutus
 								$query = "  INSERT into tilausrivi set
 											hyllyalue       = '',
@@ -1710,12 +1749,12 @@
 								//  Jos viitenumero on v‰‰rin menn‰‰n oletuksilla!
 								if (substr($viite, 0, 2) != "RF" and tarkista_viite($viite) === FALSE) {
 									$viite = $lasno;
-									$tulos_ulos .= "<font class='message'><br>\n".t("HUOM: laskun '%s' k‰sinsyotetty viitenumero '%s' on v‰‰rin! Laskulle annettii uusi viite '%s'", $kieli, $lasno, $tarkrow["kasinsyotetty_viite"], $viite)."!</font><br>\n<br>\n";
+									$tulos_ulos .= "<font class='message'><br>\n".t("HUOM: laskun '%s' k‰sinsyotetty viitenumero '%s' on v‰‰rin! Laskulle annettii uusi viite '%s'", "", $lasno, $tarkrow["kasinsyotetty_viite"], $viite)."!</font><br>\n<br>\n";
 									require('inc/generoiviite.inc');
 								}
 								elseif (substr($viite, 0, 2) == "RF" and tarkista_rfviite($viite) === FALSE) {
 									$viite = $lasno;
-									$tulos_ulos .= "<font class='message'><br>\n".t("HUOM: laskun '%s' k‰sinsyotetty RF-viitenumero '%s' on v‰‰rin! Laskulle annettii uusi viite '%s'", $kieli, $lasno, $tarkrow["kasinsyotetty_viite"], $viite)."!</font><br>\n<br>\n";
+									$tulos_ulos .= "<font class='message'><br>\n".t("HUOM: laskun '%s' k‰sinsyotetty RF-viitenumero '%s' on v‰‰rin! Laskulle annettii uusi viite '%s'", "", $lasno, $tarkrow["kasinsyotetty_viite"], $viite)."!</font><br>\n<br>\n";
 									require('inc/generoiviite.inc');
 								}
 							}
@@ -1897,22 +1936,7 @@
 							$asiakas_apu_row = array();
 						}
 
-						if (strtoupper(trim($asiakas_apu_row["kieli"])) == "SE") {
-							$laskun_kieli = "SE";
-						}
-						elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "EE") {
-							$laskun_kieli = "EE";
-						}
-						elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "FI") {
-							$laskun_kieli = "FI";
-						}
-						else {
-							$laskun_kieli = trim(strtoupper($yhtiorow["kieli"]));
-						}
-
-						if ($kieli != "") {
-							$laskun_kieli = trim(strtoupper($kieli));
-						}
+						$laskun_kieli = laskunkieli($lasrow['liitostunnus'], $kieli);
 
 						// t‰ss‰ pohditaan laitetaanko verkkolaskuputkeen
 						if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and $lasrow["chn"] == "020")) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == ""  and $lasrow["chn"] != '666' and $lasrow["chn"] != '667' and abs($lasrow["summa"]) != 0) {

@@ -415,7 +415,8 @@
 						JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
 						WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 						and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
-						$where_yksi_suoratoimittaja";
+						$where_yksi_suoratoimittaja
+						ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)";
 			$toimpaikres  = pupe_query($query);
 
 			if (mysql_num_rows($toimpaikres) > 0) {
@@ -673,7 +674,7 @@
 				$paikatlask++;
 			}
 
-			while ($krow  = mysql_fetch_assoc($toimpaikres)) {
+			while ($krow = mysql_fetch_assoc($toimpaikres)) {
 				$sel1 = "";
 				$sel2 = "";
 
@@ -820,7 +821,8 @@
 					FROM tuotteen_toimittajat use index (yhtio_tuoteno)
 					JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
 					WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-					and tuotteen_toimittajat.tuoteno in ($perheen_tuotteet)";
+					and tuotteen_toimittajat.tuoteno in ($perheen_tuotteet)
+					ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)";
 		$toimpaikres  = pupe_query($query);
 
 		$paikat = "<option value=''>".t("Jätä jälkitoimitukseen")."</option>".$paikat;

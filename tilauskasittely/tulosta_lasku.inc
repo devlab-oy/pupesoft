@@ -1661,7 +1661,12 @@ if (!function_exists('loppu')) {
 		$y_postitp	 	= $laskurow["yhtio_postitp"];
 		$y_maa 			= $laskurow["yhtio_maa"];
 		$y_kotipaikka	= $laskurow["yhtio_kotipaikka"];
-		$y_vatnumero	= str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
+		if ($laskurow['yhtio_maa'] == 'EE') {
+			$y_vatnumero	= $yhtiorow["ytunnus"];
+		}
+		else {
+			$y_vatnumero	= str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
+		}
 		$y_iban 		= $yhtiorow['pankkiiban1'];
 		$y_swift 		= $yhtiorow['pankkiswift1'];
 
@@ -1731,8 +1736,14 @@ if (!function_exists('loppu')) {
 
 		$pdf_lasku->draw_text(404, 55 + $tileja + $barcode_korkeus, t("Y-tunnus", $kieli).": ".tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
 		$pdf_lasku->draw_text(404, 45 + $tileja + $barcode_korkeus, t("Kotipaikka", $kieli).": $y_kotipaikka",	$thispage, $pieni);
-		$pdf_lasku->draw_text(404, 35 + $tileja + $barcode_korkeus, t("Enn.per.rek", $kieli),					$thispage, $pieni);
-		$pdf_lasku->draw_text(404, 25 + $tileja + $barcode_korkeus, t("Alv.rek", $kieli),						$thispage, $pieni);
+
+		if (strtoupper($y_maa) == 'FI') {
+			$pdf_lasku->draw_text(404, 35 + $tileja + $barcode_korkeus, t("Enn.per.rek", $kieli),			$thispage, $pieni);
+			$pdf_lasku->draw_text(404, 25 + $tileja + $barcode_korkeus, t("Alv.rek", $kieli),				$thispage, $pieni);
+		}
+		else {
+			$pdf_lasku->draw_text(404, 35 + $tileja + $barcode_korkeus, t("Ovt-tunnus", $kieli).": ".$laskurow["yhtio_ovttunnus"], $thispage, $pieni);
+		}
 
 		// Viivakoodin piirtaminen
 		if ($piirra_viivakoodi) {
@@ -2417,7 +2428,7 @@ if (!function_exists("tulosta_lasku")) {
 				else {
 					$query = "	SELECT *
 								FROM varastopaikat
-								WHERE yhtio = '$kukarow[yhtio]'
+								WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 								ORDER BY alkuhyllyalue,alkuhyllynro
 								LIMIT 1";
 				}

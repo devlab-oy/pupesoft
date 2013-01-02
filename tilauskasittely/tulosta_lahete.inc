@@ -3300,7 +3300,7 @@ if (!function_exists('loppu_lahete')) {
 			}
 		}
 
-		if($yhtiorow['lasku_otsikko_allekirjoitus'] == 'X') {
+		if($yhtiorow['lomakkeiden_allekirjoitus'] == 'X') {
 			$allekirjoitus_query = "	SELECT nimi,
 										asema
 										FROM kuka

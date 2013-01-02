@@ -1435,7 +1435,7 @@ if (!function_exists('loppu_tarjous')) {
 				$pdf_tarjous->draw_text(217, $kuha-93, t("Puh", $kieli).": ". $myyrow['puhno'], $page_tarjous[$sivu], $boldi);
 				$pdf_tarjous->draw_text(404, $kuha-93, "Email: $myyrow[eposti]", $page_tarjous[$sivu], $boldi);
 
-				if($yhtiorow['lasku_otsikko_allekirjoitus'] == 'X') {
+				if($yhtiorow['lomakkeiden_allekirjoitus'] == 'X') {
 					$allekirjoitus_query = "	SELECT nimi,
 												asema
 												FROM kuka

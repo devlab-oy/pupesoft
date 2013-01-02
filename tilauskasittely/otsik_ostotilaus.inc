@@ -324,7 +324,7 @@
 				echo "<td colspan = '3'><input type='text' size='43' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'> (".t("Ostotilaus").")</td></tr>";
 			}
 
-			if($yhtiorow['lasku_otsikko_allekirjoitus'] == 'X') {
+			if($yhtiorow['lomakkeiden_allekirjoitus'] == 'X') {
 				echo "<tr>";
 				echo "<td>".t("Allekirjoittaja")."</td>";
 				echo "<td colspan = '3'><select name='allekirjoittaja'>";

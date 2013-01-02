@@ -2071,8 +2071,8 @@
 				echo "</tr>";
 			}
 
-			if($toim == "TARJOUS" or $toim == "RIVISYOTTO") {
-				if($yhtiorow['lasku_otsikko_allekirjoitus'] == 'X') {
+			if($toim == "TARJOUS" or $toim == "RIVISYOTTO" or $toim == "PIKATILAUS") {
+				if($yhtiorow['lomakkeiden_allekirjoitus'] == 'X') {
 					echo "<tr>";
 					echo "<td>".t("Allekirjoittaja")."</td>";
 					echo "<td><select name='allekirjoittaja'>";

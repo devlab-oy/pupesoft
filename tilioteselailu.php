@@ -146,27 +146,25 @@
 
 	if ($tee == 'S') {
 
-		$url = "{$palvelin2}myyntires/maksunsyotto.php?ohje=off";
-
 		echo "<script language='javascript'>
 			function vaihdacss(solut) {
 				$('td[name=td_'+solut+']').each(
 					function() {
 						if ($(this).hasClass('spec')) {
-							$(this).attr('class', '');						
+							$(this).attr('class', '');
 						}
 						else {
 							$(this).attr('class', 'spec');
 						}
 					}
 				);
-				
+
 				if ($('#kuitattu_'+solut).hasClass('spec')) {
 					$('#kuitattu_'+solut).html('<font class=\"ok\">".t("Kuitattu").": {$kukarow['nimi']} @ ".tv1dateconv(date("Y-m-d H:i:s"),"pitkä")."</font>');
 				}
 				else {
-					$('#kuitattu_'+solut).html('');	
-				}				
+					$('#kuitattu_'+solut).html('');
+				}
 			}
 
 			function lataaiframe(tunnus, url) {

@@ -19,8 +19,6 @@
 		exit;
 	}
 
-	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
-
 	if ($tee == 'T' and (int) $kuitattava_tiliotedata_tunnus > 0) {
 
 		$query = "	SELECT kuitattu
@@ -38,10 +36,10 @@
 					AND perheid = '$kuitattava_tiliotedata_tunnus'";
 		$kuitetaan_result = pupe_query($query);
 
-		error_log($query);
-
 		die("TRUE");
 	}
+
+	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
 	//Olemme tulossa takasin suorituksista
 	if ($tee == 'Z' or $tiliote == 'Z') {
@@ -148,18 +146,48 @@
 
 	if ($tee == 'S') {
 
+		$url = "{$palvelin2}myyntires/maksunsyotto.php?ohje=off";
+
 		echo "<script language='javascript'>
 			function vaihdacss(solut) {
 				$('td[name=td_'+solut+']').each(
 					function() {
 						if ($(this).hasClass('spec')) {
-							$(this).attr('class', '');
+							$(this).attr('class', '');						
 						}
 						else {
 							$(this).attr('class', 'spec');
 						}
 					}
 				);
+				
+				if ($('#kuitattu_'+solut).hasClass('spec')) {
+					$('#kuitattu_'+solut).html('<font class=\"ok\">".t("Kuitattu").": {$kukarow['nimi']} @ ".tv1dateconv(date("Y-m-d H:i:s"),"pitkä")."</font>');
+				}
+				else {
+					$('#kuitattu_'+solut).html('');	
+				}				
+			}
+
+			function lataaiframe(tunnus, url) {
+
+				var ifd = $('#ifd_'+tunnus);
+				var ifr = $('#ifr_'+tunnus);
+
+				if (ifr.length) {
+
+					if (ifr.attr('src') == url) {
+						ifd.toggle();
+					}
+					else {
+						ifd.show();
+						ifr.attr('src', url);
+					}
+				}
+				else {
+					ifd.show();
+					ifd.html(\"<div style='float:right;'><a href=\\\"javascript:document.getElementById('ifd_\"+tunnus+\"').style.display = 'none';\\\">".t("Piilota")." <img src='{$palvelin2}pics/lullacons/stop.png'></a></div><iframe id='ifr_\"+tunnus+\"' src='\"+url+\"' style='width:100%; height: 600px; border: 1px; display: block;'></iFrame>\");
+				}
 			}
 
 		</script>";

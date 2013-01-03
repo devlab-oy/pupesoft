@@ -25,11 +25,9 @@ if ($tee == 'PERUSTA') {
 		$tilino		= (int) $tilille[$riviindex];
 
 		$tuotenimitys = "Ulkomaanp‰iv‰raha ".$annettuvuosi." ".trim(preg_replace("/[^a-z\,\.\-\(\) Â‰ˆ¸≈ƒ÷]/i", "", $maannimi[$riviindex]));
+		$tuotenimitys_osa = "Ulkomaanosap‰iv‰raha ".$annettuvuosi." ".trim(preg_replace("/[^a-z\,\.\-\(\) Â‰ˆ¸≈ƒ÷]/i", "", $maannimi[$riviindex]));
 
-		if (trim($maa[$riviindex]) == '' and $erikoisehto[$riviindex] == 'K') {
-			$tuoteno = "PR-".trim(preg_replace("/[^a-z\,\.\-\(\) Â‰ˆ¸≈ƒ÷]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
-		}
-		elseif (trim($maa[$riviindex]) != '' and $erikoisehto[$riviindex] == '') {
+		if (trim($maa[$riviindex]) != '' and $erikoisehto[$riviindex] == '') {
 			$tuoteno = "PR-".$maa[$riviindex]."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
 		}
 		elseif (trim($maa[$riviindex]) != '' and $erikoisehto[$riviindex] == 'K') {
@@ -42,10 +40,12 @@ if ($tee == 'PERUSTA') {
 		$query  = "	INSERT INTO tuote SET
 					tuoteno			= '$tuoteno',
 					nimitys         = '$tuotenimitys',
+					malli			= '$tuotenimitys_osa',
 					alv             = '0',
 					kommentoitava   = '',
 					kuvaus          = '50',
 					myyntihinta     = '$paivaraha',
+					myymalahinta    = $paivaraha / 2,
 					tuotetyyppi     = 'A',
 					status			= 'A',
 					tilino 			= '$tilino',
@@ -55,10 +55,12 @@ if ($tee == 'PERUSTA') {
 					luontiaika		= now()
 					ON DUPLICATE KEY UPDATE
 					nimitys         = '$tuotenimitys',
+					malli			= '$tuotenimitys_osa',					
 					alv             = '0',
 					kommentoitava   = '',
 					kuvaus          = '50',
 					myyntihinta     = '$paivaraha',
+					myymalahinta    = $paivaraha / 2,					
 					tuotetyyppi     = 'A',
 					status			= 'A',
 					tilino 			= '$tilino',
@@ -73,11 +75,13 @@ if ($tee == 'PERUSTA') {
 }
 
 if ($tee == 'POISTA') {
+	$annettuvuosipoista = date("Y");
+	
 	$query = "	UPDATE tuote
 				SET status = 'P'
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tuotetyyppi = 'A'
-				and (tuoteno like 'PR%' OR tuoteno like 'PPR%')
+				and tuoteno like 'PR%'
 				and right(tuoteno, 2) > 0
 				and right(tuoteno, 2) < $annettuvuosipoista";
 	$result = mysql_query($query) or pupe_error($query);
@@ -92,7 +96,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
 	$ext = strtoupper($path_parts['extension']);
 
 	if ($ext != "XLS") {
-		die ("<font class='error'><br>".t("Ainoastaan .txt, .csv tai .xls tiedostot sallittuja")."!</font>");
+		die ("<font class='error'><br>".t("Ainoastaan .xls tiedostot sallittuja")."!</font>");
 	}
 
 	if ($_FILES['userfile']['size'] == 0) {
@@ -108,7 +112,6 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
 	$data->setOutputEncoding('CP1251');
 	$data->setRowColOffset(0);
 	$data->read($_FILES['userfile']['tmp_name']);
-
 
 	echo "<font class='message'>".t("Tarkastetaan l‰hetetty tiedosto")."...<br><br></font>";
 	echo "<form method='post'>";
@@ -174,7 +177,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
 
 					echo "</select></td>";
 
-					echo "<td><input type='checkbox' name='erikoisehto[$eriviindex]' value='K'> ".t("Lis‰‰ maakoodi tuotenumeroon");
+					echo "<td><input type='checkbox' name='erikoisehto[$eriviindex]' value='K'> ".t("Lis‰‰ maan nimi tuotenumeroon");
 					echo "<input type='hidden' name='maannimi[$eriviindex]' value='$eriv'></td>";
 					echo "<td>".t("Ulkomaanp‰iv‰raha")." $annettuvuosi $eriv</td>";
 				}

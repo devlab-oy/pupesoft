@@ -1771,21 +1771,6 @@ if (!function_exists('rivi_lahete')) {
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi.inc") {
 				// tulosta_lahete_viivakoodi.inc
-				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
-					if ($yhtiorow['alv_kasittely'] == '') {
-						$return["summa"] += $row['rivihinta'];
-						$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
-
-					}
-					else {
-						$return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
-						$return["arvo"]  += $row['rivihinta'];
-					}
-				}
-				else {
-					$row['rivihinta'] = 0;
-				}
-
 				$return = rivi_viivakoodi_lahete($return);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi_osh.inc") {
@@ -1809,21 +1794,6 @@ if (!function_exists('rivi_lahete')) {
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_asiakviivakoodi.inc") {
 				// tulosta_lahete_asiakviivakoodi.inc
-				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
-					if ($yhtiorow['alv_kasittely'] == '') {
-						$return["summa"] += $row['rivihinta'];
-						$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
-
-					}
-					else {
-						$return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
-						$return["arvo"]  += $row['rivihinta'];
-					}
-				}
-				else {
-					$row['rivihinta'] = 0;
-				}
-
 				$return = rivi_asiakviivakoodi_lahete($return);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi_ean13.inc") {

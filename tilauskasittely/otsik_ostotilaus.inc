@@ -326,19 +326,17 @@
 				echo "<td colspan = '3'><input type='text' size='43' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'> (".t("Ostotilaus").")</td></tr>";
 			}
 
-			if($yhtiorow['lomakkeiden_allekirjoitus'] == 'X') {
+			if ($yhtiorow['lomakkeiden_allekirjoitus'] == 'X') {
 				echo "<tr>";
 				echo "<td>".t("Allekirjoittaja")."</td>";
 				echo "<td colspan = '3'><select name='allekirjoittaja'>";
 
-				$query = "	SELECT kuka.tunnus,
-							kuka.kuka,
-							kuka.nimi,
-							kuka.asema
+				$query = "	SELECT tunnus, kuka, nimi
 							FROM kuka
-							WHERE kuka.yhtio = '$kukarow[yhtio]'
-							AND kuka.nimi != ''
-							ORDER BY kuka.nimi";
+							WHERE yhtio  = '$kukarow[yhtio]'
+							AND nimi    != ''
+							AND extranet = ''
+							ORDER BY nimi";
 				$yresult = pupe_query($query);
 
 				echo "<option value=''>".t("Valitse allekirjoittaja")."</option>";

@@ -21,20 +21,25 @@ if ($tee == 'PERUSTA') {
 
 	for ($riviindex = 0; $riviindex < count($maa); $riviindex++) {
 
-		$paivaraha 	= (float) $hinta[$riviindex];
-		$tilino		= (int) $tilille[$riviindex];
+		$paivaraha        = (float) $hinta[$riviindex];
+		$tilino           = (int) $tilille[$riviindex];
 
-		$tuotenimitys = "Ulkomaanpäiväraha ".$annettuvuosi." ".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "", $maannimi[$riviindex]));
-		$tuotenimitys_osa = "Ulkomaanosapäiväraha ".$annettuvuosi." ".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "", $maannimi[$riviindex]));
+		$maa_koodi        = trim($maa[$riviindex]);
+		$maa_nimi         = trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "", trim($maannimi[$riviindex])));
+		$vuosi            = date('y', mktime(0, 0, 0, 1, 6, $annettuvuosi));
+		$lisaa_nimi       = trim($erikoisehto[$riviindex]);
 
-		if (trim($maa[$riviindex]) != '' and $erikoisehto[$riviindex] == '') {
-			$tuoteno = "PR-".$maa[$riviindex]."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
+		$tuotenimitys     = "Ulkomaanpäiväraha $annettuvuosi $maa_nimi";
+		$tuotenimitys_osa = "Ulkomaanosapäiväraha $annettuvuosi $maa_nimi";
+
+		if ($maa_koodi != '' and $lisaa_nimi == '') {
+			$tuoteno = "PR-$maa_koodi-$vuosi";
 		}
-		elseif (trim($maa[$riviindex]) != '' and $erikoisehto[$riviindex] == 'K') {
-			$tuoteno = "PR-".$maa[$riviindex]."-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
+		elseif ($maa_koodi != '' and $lisaa_nimi == 'K') {
+			$tuoteno = "PR-$maa_koodi-$maa_nimi-$vuosi";
 		}
 		else {
-			$tuoteno = "PR-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
+			$tuoteno = "PR-$maa_nimi-$vuosi";
 		}
 
 		$query  = "	INSERT INTO tuote SET
@@ -55,12 +60,12 @@ if ($tee == 'PERUSTA') {
 					luontiaika		= now()
 					ON DUPLICATE KEY UPDATE
 					nimitys         = '$tuotenimitys',
-					malli			= '$tuotenimitys_osa',					
+					malli			= '$tuotenimitys_osa',
 					alv             = '0',
 					kommentoitava   = '',
 					kuvaus          = '50',
 					myyntihinta     = '$paivaraha',
-					myymalahinta    = $paivaraha / 2,					
+					myymalahinta    = $paivaraha / 2,
 					tuotetyyppi     = 'A',
 					status			= 'A',
 					tilino 			= '$tilino',
@@ -76,7 +81,7 @@ if ($tee == 'PERUSTA') {
 
 if ($tee == 'POISTA') {
 	$annettuvuosipoista = date("Y");
-	
+
 	$query = "	UPDATE tuote
 				SET status = 'P'
 				WHERE yhtio = '$kukarow[yhtio]'

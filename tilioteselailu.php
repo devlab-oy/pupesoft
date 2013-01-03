@@ -7,6 +7,8 @@
 
 	require "inc/parametrit.inc";
 
+	enable_ajax();
+
 	if (!isset($tee))		$tee = "";
 	if (!isset($tyyppi))	$tyyppi = "";
 	if (!isset($tiliote))	$tiliote = "";
@@ -19,15 +21,26 @@
 
 	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
-	if ($tee == 'T' and trim($kuitattava_tiliotedata_tunnus) != '') {
+	if ($tee == 'T' and (int) $kuitattava_tiliotedata_tunnus > 0) {
 
-		$kuitataan_lisa = $kuitattu == 'on' ? " kuitattu = '$kukarow[kuka]', kuitattuaika = now() " : " kuitattu = '', kuitattuaika = '0000-00-00 00:00:00' ";
+		$query = "	SELECT kuitattu
+					FROM tiliotedata
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND perheid = '$kuitattava_tiliotedata_tunnus'";
+		$kuitetaan_result = pupe_query($query);
+		$kuitetaan_row = mysql_fetch_assoc($kuitetaan_result);
+
+		$kuitataan_lisa = $kuitetaan_row['kuitattu'] == '' ? " kuitattu = '$kukarow[kuka]', kuitattuaika = now() " : " kuitattu = '', kuitattuaika = '0000-00-00 00:00:00' ";
 
 		$query = "	UPDATE tiliotedata SET
 					$kuitataan_lisa
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND perheid = '$kuitattava_tiliotedata_tunnus'";
 		$kuitetaan_result = pupe_query($query);
+
+		error_log($query);
+
+		die("TRUE");
 	}
 
 	//Olemme tulossa takasin suorituksista
@@ -134,6 +147,23 @@
 	}
 
 	if ($tee == 'S') {
+
+		echo "<script language='javascript'>
+			function vaihdacss(solut) {
+				$('td[name=td_'+solut+']').each(
+					function() {
+						if ($(this).hasClass('spec')) {
+							$(this).attr('class', '');
+						}
+						else {
+							$(this).attr('class', 'spec');
+						}
+					}
+				);
+			}
+
+		</script>";
+
 
 		if ($tyyppi == '3') {
 			$query = "	SELECT tiliotedata.*,

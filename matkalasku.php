@@ -47,7 +47,8 @@ if ($tee == "UUSI") {
 				FROM toimi
 				JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi)
 				WHERE toimi.yhtio = '$kukarow[yhtio]'
-				and toimi.nimi = '$kayttaja_tsk'";
+				and toimi.nimi = '$kayttaja_tsk'
+				and toimi.tyyppi = 'K'";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 1) {

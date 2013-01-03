@@ -5983,6 +5983,7 @@ if (!function_exists('ebid')) {
 			if ($laskurow['chn'] == '100') $out = t("Verkkolasku, tulostuspalvelu");
 			elseif ($laskurow['chn'] == '010') $out = t("Verkkolasku");
 			elseif ($laskurow['chn'] == '020') $out = t("Vienti-Verkkolasku (EU)");
+			elseif ($laskurow['chn'] == '030') $out = t("Vienti-Verkkolasku, tulostuspalvelu (EU)");
 			elseif ($laskurow['chn'] == '111') $out = t("Itella EDI: EIH-1.4 sähköinen lasku");
 			elseif ($laskurow['chn'] == '112') $out = t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin");
 			elseif ($laskurow['chn'] == '666') $out = t("Sähköposti")."-".t("lasku");

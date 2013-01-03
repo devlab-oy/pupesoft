@@ -821,8 +821,10 @@ while ($tietue = fgets($fd)) {
 
 		case 'OSTOTIL.OT_VIITTEENNE':
 			// halutaan futur-aineistosta t‰m‰ tieto sisviesti2-kentt‰‰n
-			$orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
-			$lopviesti = trim($orig_tieto);
+			if ($edi_tyyppi == "futursoft") {
+				$orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
+				$lopviesti = trim($orig_tieto);
+			}
 			break;
 
 		//Tilaus p‰‰ttyy. Aika tehd‰ se kantaan

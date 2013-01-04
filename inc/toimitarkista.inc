@@ -148,9 +148,9 @@ if(!function_exists("toimitarkista")) {
 					}
 					else {
 						$query = "	SELECT ytunnus from toimi
-									WHERE toimi.yhtio	= $hetu
-									and toimi.ytunnus 	= $tunnus";
-						if (mysql_field_name($result) == 0)	{
+									WHERE toimi.yhtio	= '$kukarow[yhtio]'
+									and toimi.ytunnus 	= $ytunnus";
+						if (mysql_field_name($result) > 0)	{
 							$virhe[$i] = t("Henkilö on jo olemassa!");
 							$errori = 1;
 						}

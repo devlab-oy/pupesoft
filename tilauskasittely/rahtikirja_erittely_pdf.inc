@@ -262,6 +262,15 @@
 	// Ei kaaduta erroriin jos jostain syystä tullaan tyhjällä
 	if ($otunnukset == "") $otunnukset = 0;
 
+	if($yhdistetaan_lahtoon != 0) {
+		if($yhdistettavan_lahdon_tilaukset != 0) {
+			$otunnukset_temppi = str_replace(' ', '', $otunnukset);
+			if($yhdistetaan_lahtoon == $otunnukset_temppi) {
+				$otunnukset .= ',' . $yhdistettavan_lahdon_tilaukset;
+			}
+		}
+	}
+
 	// Haetaan tulostetut tilaukset
 	if ($toitarow['erittely'] == 'k') {
 		$query = "	SELECT asiakkaan_tilausnumero, nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_ovttunnus, toim_postitp, tunnus, ytunnus

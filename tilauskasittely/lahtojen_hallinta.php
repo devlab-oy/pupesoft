@@ -831,6 +831,100 @@
 
 				echo "</select></td></tr>";
 
+				//tarkistetaan jos lahdon toimitustavan rahtikirjaerittely != ''
+				//tällöin näytetään liitettävien lähtöjen dropdownit
+				$lahdot_temp = implode(',', $checkbox_parent);
+				$query = "	SELECT
+							toimitustapa.erittely,
+							Group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
+							concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', Substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text
+							FROM lahdot
+							JOIN lasku
+							ON ( lasku.yhtio = lahdot.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto )
+							JOIN tilausrivi
+							ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var NOT IN ( 'P', 'J' ) )
+							JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+							AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+							AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')) )
+							JOIN toimitustapa
+							ON ( toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa )
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+							AND lahdot.tunnus IN ({$lahdot_temp})
+							AND ( ( lasku.tila = 'N' AND lasku.alatila = 'A' )
+							OR ( lasku.tila = 'L' AND lasku.alatila IN ( 'A', 'B', 'C' ) ) )
+							GROUP by lahdot.tunnus";
+				$lahdot_result = pupe_query($query);
+				$lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty = array();
+				while($lahto_row = mysql_fetch_assoc($lahdot_result)) {
+					if($lahto_row['erittely'] != '') {
+						$lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty[] = array(
+							'lahdon_tilauksien_tunnukset' => $lahto_row['tilaukset'],
+							'dropdown_text' => $lahto_row['dropdown_text'],
+						);
+					}
+				}
+
+				if(!empty($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty)) {
+					array_unshift($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty, array('lahdon_tilauksien_tunnukset' => 0 ,'dropdown_text' => 'Valitse lähtö'));
+					//tällöin voidaan näyttää mahdolliset liitettävät rahtikirjat
+					//haetaanlistaus suljetuista lähdöistä
+					$query = "	SELECT
+								lahdot.aktiivi,
+								Group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
+								concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', Substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text
+								FROM lahdot
+								JOIN lasku
+								ON ( lasku.yhtio = lahdot.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto )
+								JOIN tilausrivi
+								ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var NOT IN ( 'P', 'J' ) )
+								JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+								AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+								AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')) )
+								JOIN toimitustapa
+								ON ( toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa )
+								WHERE  lahdot.yhtio = '{$kukarow['yhtio']}'
+								AND lahdot.aktiivi = 'S'
+								AND ( ( lasku.tila = 'N' AND lasku.alatila = 'A' )
+								OR ( lasku.tila = 'L' AND lasku.alatila IN ( 'A', 'B', 'C' ) ) )
+								GROUP BY lahdot.tunnus
+								ORDER  BY
+								lahdot.pvm,
+								lahdot.lahdon_kellonaika,
+								lahdot.tunnus";
+					$suljetut_lahdot_result = pupe_query($query);
+
+					$suljetut_lahdot = array();
+					$suljetut_lahdot[] = array(
+						'dropdown_text' => t("Valitse liitettävä lähtö"),
+						'tilaukset' => 0,
+					);
+					while ($suljetut_lahdot_row = mysql_fetch_assoc($suljetut_lahdot_result)) {
+						$suljetut_lahdot[] = $suljetut_lahdot_row;
+					}
+
+					echo "<tr>";
+					echo "<th>".t("Yhdistetään lähtöön")."</th>";
+					echo "<td>";
+					echo "<select name='yhdistetaan_lahtoon'>";
+					foreach($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty as $lahto) {
+						echo "<option value='{$lahto['lahdon_tilauksien_tunnukset']}'>{$lahto['dropdown_text']}</option>";
+					}
+					echo "</select>";
+					echo "</td>";
+					echo "</tr>";
+
+					echo "<tr>";
+					echo "<th>".t("Yhdistettävä lähtö")."</th>";
+					echo "<td>";
+					echo "<select name='yhdistettavan_lahdon_tilaukset'>";
+					foreach($suljetut_lahdot as $lahto) {
+						echo "<option value='{$lahto['tilaukset']}'>{$lahto['dropdown_text']}</option>";
+					}
+					echo "</select>";
+					echo "</td>";
+					echo "</tr>";
+				}
+
 				echo "<tr><td class='back' colspan='2'>";
 				echo "<input type='submit' value='",t("Tulosta rahtikirjat"),"'>";
 				echo "</td></tr>";

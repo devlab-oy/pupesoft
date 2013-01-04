@@ -366,10 +366,10 @@ if ($tee == '') {
 	echo "</table>";
 	echo "</form><br><br>";
 
-	echo t("Poista vanhat päivärahat").":<br><br>";
+	echo t("Poista vanhat päivärahat sekä KM- alkuiset muut kulut")." (PR-*".(date("y")-1)." KM-*".(date("y")-1)."):<br><br>";
 	echo "<form method='post'>";
 	echo "<table>";
-	echo "<tr><th>".t("Poista edellisten vuosien päivärahat käytöstä")."</th>";
+	echo "<tr><th>".t("Poista edellisten vuosien päivärahat ja muut kulut käytöstä")."</th>";
 	echo "<td><input type='submit' value='".t("Poista")."'></td>";
 	echo "<input type='hidden' name='tee' value='POISTA'><input type='hidden' name='annettuvuosipoista' value='".date('y')."'><tr>";
 	echo "</table>";

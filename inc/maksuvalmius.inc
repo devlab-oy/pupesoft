@@ -207,7 +207,7 @@
 			$tapa = 'tapvm';
 		}
 		if ($aika == 'vi') {
-			$tapa = "YEARWEEK(tapvm,1)";
+			$tapa = "YEARWEEK(tapvm, 3)";
 		}
 		if ($aika == 'kk') {
 			$tapa = "left(tapvm,7)";;

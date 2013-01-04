@@ -104,7 +104,7 @@
 		$tapa = "if(lasku.tila = 'K', DATE_ADD(tilausrivi.toimaika, INTERVAL ifnull(toimi.oletus_erapvm,0) DAY), if(lasku.tila in ('H','M','P','Q','U'), if(kapvm > now(),kapvm,erpcm),olmapvm)) olmapvm";
 
 		if ($aika == 'vi') {
-			$tapa = "YEARWEEK(if(lasku.tila = 'K', DATE_ADD(tilausrivi.toimaika, INTERVAL ifnull(toimi.oletus_erapvm,0) DAY), if(lasku.tila in ('H','M','P','Q','U'), if(kapvm > now(),kapvm,erpcm),olmapvm)),1) olmapvm";
+			$tapa = "YEARWEEK(if(lasku.tila = 'K', DATE_ADD(tilausrivi.toimaika, INTERVAL ifnull(toimi.oletus_erapvm,0) DAY), if(lasku.tila in ('H','M','P','Q','U'), if(kapvm > now(),kapvm,erpcm),olmapvm)), 3) olmapvm";
 		}
 		if ($aika == 'kk') {
 			$tapa = "left(if(lasku.tila = 'K', DATE_ADD(tilausrivi.toimaika, INTERVAL ifnull(toimi.oletus_erapvm,0) DAY), if(lasku.tila in ('H','M','P','Q','U'), if(kapvm > now(),kapvm,erpcm),olmapvm)),7) olmapvm";

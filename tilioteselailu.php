@@ -167,6 +167,10 @@
 				}
 			}
 
+			function suljedivi(tunnus) {
+				$('#ifd_'+tunnus).hide();
+			}
+
 			function lataaiframe(tunnus, url) {
 
 				var ifd = $('#ifd_'+tunnus);
@@ -184,7 +188,7 @@
 				}
 				else {
 					ifd.show();
-					ifd.html(\"<div style='float:right;'><a href=\\\"javascript:document.getElementById('ifd_\"+tunnus+\"').style.display = 'none';\\\">".t("Piilota")." <img src='{$palvelin2}pics/lullacons/stop.png'></a></div><iframe id='ifr_\"+tunnus+\"' src='\"+url+\"' style='width:100%; height: 600px; border: 1px; display: block;'></iFrame>\");
+					ifd.html(\"<div style='float:right;'><a href=\\\"javascript:suljedivi('\"+tunnus+\"');\\\">".t("Piilota")." <img src='{$palvelin2}pics/lullacons/stop.png'></a></div><iframe id='ifr_\"+tunnus+\"' src='\"+url+\"' style='width:100%; height: 600px; border: 1px; display: block;'></iFrame>\");
 				}
 			}
 

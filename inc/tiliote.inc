@@ -5,15 +5,16 @@
 	if (!isset($silent))			$silent = "";
 	if (!isset($tee))				$tee = "";
 	if (!isset($tiliotejarjestys))	$tiliotejarjestys = "";
+	if (!isset($td_perheid))		$td_perheid = $tiliotedatarow['perheid'];
 
 	$tunnus = substr($tietue, 0, 3);
 
 	if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
 
-		echo "<tr class='aktiivi'><td class='$class'></td><td class='$class'></td><td class='$class'>";
+		echo "<tr class='aktiivi'><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'>";
 
 		if ($tee == 'S') {
-			echo "</td><td class='$class'>";
+			echo "</td><td name='td_{$td_perheid}' class='$class'>";
 		}
 
 		// Jossain erityistapauksissa täytyy erittely käsitellä. Niille löytyy syötetyt säännöt
@@ -350,7 +351,7 @@
 
 				if ($tiliointirow = mysql_fetch_assoc($tiliointiresult)) {
 					echo "<font class='message'>".t("Tapahtuma on käsitelty")." ".tv1dateconv($tiliotedataka)."<br>\n";
-					echo t("Alkuperäinen tiliöinti on")." <a href='{$palvelin2}muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]&lopetus=$lopetus$lopetuslisa'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>\n";
+					echo t("Alkuperäinen tiliöinti on")."</font> <a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]&ohje=off');\">$tiliointirow[tilino]/$tiliointirow[nimi]</a><br>\n";
 
 					if (($tiliointirow['korjattu'] != "0000-00-00 00:00:00") and ($tiliointirow['korjattu'] != "@0000-00-00 00:00:00")) {
 						echo "<font class='message'>".t("Tiliöinti korjattu")." $tiliointirow[korjattu]</font>";
@@ -362,7 +363,7 @@
 			}
 		}
 
-		echo "<td class='$class'></td><td class='$class'>";
+		echo "<td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'>";
 
 		//Jos tämä on selvittelyssä, niin annetaan mahdollisuus suorittaa!
 		if (isset($tiliointirow) and $kuitattu_checked == '' and ($tiliointirow['korjattu'] == "0000-00-00 00:00:00" or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00") and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili'] or $tiliointirow['tilino'] == $yritirow['oletus_selvittelytili']) and $kuittikoodi == ' ') {
@@ -377,7 +378,7 @@
 			$boob = 0;
 
 			if (mysql_num_rows($suotoiresult) > 0) {
-				echo "<font class='message'><a href='{$palvelin2}suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=".(-1*$maara)."&lopetus=$lopetus$lopetuslisa'>".t("Ostosuoritus")."</a></font><br>\n";
+				echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=".(-1*$maara)."&ohje=off');\">".t("Ostosuoritus")."</a><br>\n";
 				$boob = 1;
 			}
 
@@ -387,26 +388,27 @@
 
 			if (mysql_num_rows($suoasiresult) == 1) {
 				$suoasirow = mysql_fetch_assoc ($suoasiresult);
-				echo "<font class='message'><a href='{$palvelin2}myyntires/maksunsyotto.php?asiakasid=$suoasirow[tunnus]&ytunnus=$suoasirow[ytunnus]&summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&lopetus=$lopetus$lopetuslisa'>".t("Myyntisuoritus")." ".substr($suoasirow["nimi"], 0, 34)."</a></font><br>\n";
+				echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}myyntires/maksunsyotto.php?asiakasid=$suoasirow[tunnus]&ytunnus=$suoasirow[ytunnus]&summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&ohje=off');\">".t("Myyntisuoritus")." ".substr($suoasirow["nimi"], 0, 34)."</a><br>\n";
 				$boob = 1;
 			}
 
 			if ($boob == 0) {
-				echo "<font class='message'><a href='{$palvelin2}suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=".(-1*$maara)."&lopetus=$lopetus$lopetuslisa'>".t("Ostosuoritus")."</a></font><br>\n";
+				echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=".(-1*$maara)."&ohje=off');\">".t("Ostosuoritus")."</a></font><br>\n";
 			}
 
 			//	Annetaan Muu aina
-			echo "<font class='message'><a href='{$palvelin2}myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&maksaja_haku=$maksaa&lopetus=$lopetus$lopetuslisa'>".t("Myyntisuoritus muu")." </a></font>";
+			echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&maksaja_haku=$maksaa&ohje=off');\">".t("Myyntisuoritus muu")."</a>";
 
 		}
-		echo "</td><td class='$class'>";
+		echo "</td><td name='td_{$td_perheid}' class='$class'>";
 
 		if ($kuittikoodi == ' ') {
 			if ($eiselitetta == 1) $selite = '';
-			echo "<font class='message'><a href='{$palvelin2}tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm&lopetus=$lopetus$lopetuslisa'>".t("Tee tiliotesääntö")."</a></font>";
+			echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&tiliote=Z&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm&ohje=off');\">".t("Tee tiliotesääntö")."</a>";
 		}
 
-		echo "</td></tr>";
+		echo "</td></tr>";		
+
 		$maksu = 0; // Maksu on käsitelty
 		$maara = 0;
 		$eiselitetta = 0;
@@ -811,7 +813,10 @@
 				$tiliotedatarow["kuitattuaika"] = date("Y-m-d H:i:s");
 			}
 
-			echo "<tr><td class='back'><a name='kuitattu_$tiliotedatarow[tunnus]'></a></td></tr>";
+			echo "<tr><td colspan='7' class='back' style='padding:0; margin:0;'><div id = 'ifd_{$tiliotedatarow['tunnus']}' style='border:1px solid; display:none'></div><br></td></tr>";
+
+			$td_perheid = $tiliotedatarow['perheid'];
+
 			echo "<tr class='aktiivi'>";
 
 			$class = '';
@@ -848,39 +853,35 @@
 					}
 				}
 
-				echo "<td class='$class'>";
-				echo "<form name='kuittaus' action='{$palvelin2}tilioteselailu.php#kuitattu_$anklinkki' method='post'>";
-				echo "<input type='hidden' name='tee' value='T'>";
-				echo "<input type='hidden' name='tyyppi' value='$lopp_tyyppi'>";
-				echo "<input type='hidden' name='tilino' value='$lopp_tilino'>";
-				echo "<input type='hidden' name='pvm' value='$lopp_pvm'>";
-				echo "<input type='hidden' name='tiliotejarjestys' value='$tiliotejarjestys'>";
-				echo "<input type='checkbox' name='kuitattu'$kuitattu_checked onchange='submit();'>";
-				echo "<input type='hidden' name='kuitattava_tiliotedata_tunnus' value='$tiliotedatarow[tunnus]'>";
+				echo "<td name='td_{$td_perheid}' class='$class'>";
+				echo "<form name='kuittaus' action='javascript:sndReq(\"tiliote\", \"{$palvelin2}tilioteselailu.php?tee=T&kuitattava_tiliotedata_tunnus={$tiliotedatarow['tunnus']}\");' method='GET'>";
+				echo "<input type='checkbox' name='kuitattu' $kuitattu_checked onchange=\"vaihdacss('{$tiliotedatarow['perheid']}'); submit();\">";
 				echo "</form>";
 				echo "</td>";
 			}
 
-			echo "<td class='$class'>".substr($tietue,12,18)."</td>";
-			echo "<td class='$class'>".pankkipvm($kirjpvm)."</td>";
-			echo "<td class='$class'>$maksaa</td>";
-			echo "<td class='$class'>".(substr($tietue, 6, 6) * 1)."$kuittikoodi $omataso</td>";
-			echo "<td class='$class'>";
+			echo "<td name='td_{$td_perheid}' class='$class'>".substr($tietue,12,18)."</td>";
+			echo "<td name='td_{$td_perheid}' class='$class'>".pankkipvm($kirjpvm)."</td>";
+			echo "<td name='td_{$td_perheid}' class='$class'>$maksaa</td>";
+			echo "<td name='td_{$td_perheid}' class='$class'>".(substr($tietue, 6, 6) * 1)."$kuittikoodi $omataso</td>";
+			echo "<td name='td_{$td_perheid}' id='kuitattu_{$td_perheid}' class='$class'>";
 
 			if ($kuitattu_checked != '') {
 				echo "<font class='ok'>",t("Kuitattu"),": $tiliotedatarow[kukanimi] @ ",tv1dateconv($tiliotedatarow['kuitattuaika'], "pitkä"),"</font>";
 			}
 
 			echo "</td>";
-			echo "<td class='$class' style='text-align:right;'>$maara</td>";
+			echo "<td name='td_{$td_perheid}' class='$class' style='text-align:right;'>$maara</td>";
 			echo "</tr><tr class='aktiivi'>";
 
-			if ($tee == 'S') echo "<td class='$class'></td>";
+			if ($tee == 'S') echo "<td name='td_{$td_perheid}' class='$class'></td>";
 
-			echo "<td class='$class'>".tilinumero_print($tilino)."</td>";
-			echo "<td class='$class'>".pankkipvm($pvm)."</td>";
-			echo "<td class='$class'>$koodi $koodiselite</td>";
-			echo "<td class='$class'></td><td class='$class'></td><td class='$class'></td>";
+			echo "<td name='td_{$td_perheid}' class='$class'>".tilinumero_print($tilino)."</td>";
+			echo "<td name='td_{$td_perheid}' class='$class'>".pankkipvm($pvm)."</td>";
+			echo "<td name='td_{$td_perheid}' class='$class'>$koodi $koodiselite</td>";
+			echo "<td name='td_{$td_perheid}' class='$class'></td>
+				  <td name='td_{$td_perheid}' class='$class'></td>
+				  <td name='td_{$td_perheid}' class='$class'></td>";
 			echo "</tr>";
 			$vientiselite = "$maksaa<br>\n$koodi $koodiselite<br>\n";
 			break;
@@ -976,9 +977,9 @@
 			$tyyppi 	= substr($tietue, 6, 2);
 			$arvo 		= substr($tietue, 8, substr($tietue, 3, 3));
 
-			echo "<tr class='aktiivi'><td class='$class'></td><td class='$class'></td>";
+			echo "<tr class='aktiivi'><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'></td>";
 
-			if ($tee == 'S') echo "<td class='$class'></td>";
+			if ($tee == 'S') echo "<td name='td_{$td_perheid}' class='$class'></td>";
 
 			switch ($tyyppi) {
 
@@ -1098,7 +1099,7 @@
 					$eiselitetta = 1;
 			}
 
-			echo "<td class='$class'>$selite</td><td class='$class'></td><td class='$class'></td><td class='$class'></td></tr>";
+			echo "<td name='td_{$td_perheid}' class='$class'>$selite</td><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'></td></tr>";
 
 			$vientiselite .= $selite;
 			break;
@@ -1122,7 +1123,7 @@
 			YHTEENSÄ                                        50
 			*/
 
-			echo "<tr><td class='back'></td></tr>";
+			echo "<tr><td colspan='7' class='back' style='padding:0; margin:0;'><div id = 'ifd_{$tiliotedatarow['tunnus']}' style='border:1px solid; display:none'></div><br></td></tr>";			
 
 			echo "<tr>";
 

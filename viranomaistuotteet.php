@@ -80,15 +80,15 @@ if ($tee == 'PERUSTA') {
 }
 
 if ($tee == 'POISTA') {
-	$annettuvuosipoista = date("Y");
+	$annettuvuosipoista = date("y");
 
 	$query = "	UPDATE tuote
 				SET status = 'P'
 				WHERE yhtio = '$kukarow[yhtio]'
-				and tuotetyyppi = 'A'
-				and tuoteno like 'PR%'
-				and right(tuoteno, 2) > 0
-				and right(tuoteno, 2) < $annettuvuosipoista";
+				AND ((tuotetyyppi = 'A' and tuoteno like 'PR-%')
+					OR (tuotetyyppi = 'B' and tuoteno like 'KM-%'))
+				AND right(tuoteno, 2) > 0
+				AND right(tuoteno, 2) < $annettuvuosipoista";
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo "<br>".t("Vanhat päivärahat poistettu käytöstä")."<br><br><br>";

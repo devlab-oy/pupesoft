@@ -242,6 +242,8 @@ if ($tee == "synkronoi") {
 
 if ($tee == "synkronoi") {
 
+	echo t("Lis‰t‰‰n uudet viranomaistuotteet tietokantaan")."...<br>";
+
 	$ok = FALSE;
 
 	if ($file = fopen("http://api.devlab.fi/referenssiviranomaistuotteet.sql","r")) {
@@ -257,12 +259,8 @@ if ($tee == "synkronoi") {
 		exit;
 	}
 
-	echo "<br><br>";
-
 	// Eka rivi roskikseen
 	$rivi = fgets($file);
-
-	echo t("Lis‰t‰‰n uudet viranomaistuotteet tietokantaan")."...<br>";
 
 	while ($rivi = fgets($file)) {
 		list($tuoteno, $nimitys, $alv, $kommentoitava, $kuvaus, $myyntihinta, $tuotetyyppi, $vienti, $malli, $myymalahinta) = explode("\t", trim($rivi));
@@ -309,7 +307,45 @@ if ($tee == "synkronoi") {
 
 	fclose($file);
 
-	echo t("P‰ivitys referenssist‰ valmis")."...<br><br><br>";
+	echo t("P‰ivitet‰‰n maat tietokantaan")."...<br>";
+
+	$ok = FALSE;
+
+	if ($file = fopen("http://api.devlab.fi/referenssimaat.sql","r")) {
+		$ok = TRUE;
+	}
+	elseif ($file = fopen("http://10.0.1.2/referenssimaat.sql","r")) {
+		$ok = TRUE;
+	}
+
+	if (!$ok) {
+		echo t("Tiedoston avaus ep‰onnistui")."!";
+		require ("inc/footer.inc");
+		exit;
+	}
+
+	// Eka rivi roskikseen
+	$rivi = fgets($file);
+
+	while ($rivi = fgets($file)) {
+		list($koodi, $nimi, $eu, $ryhma_tunnus) = explode("\t", trim($rivi));
+
+		$query  = "	INSERT INTO maat SET
+					koodi			= '$koodi',
+					nimi            = '$nimi',
+					eu              = '$eu',
+					ryhma_tunnus    = '$ryhma_tunnus'
+					ON DUPLICATE KEY UPDATE
+					koodi			= '$koodi',
+					nimi            = '$nimi',
+					eu              = '$eu',
+					ryhma_tunnus    = '$ryhma_tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+	}
+
+	fclose($file);
+
+	echo t("P‰ivitys referenssist‰ valmis")."...<br>";
 	unset($tee);
 }
 

@@ -34,7 +34,7 @@
 		$query = "	DELETE
 					FROM oikeu
 					WHERE yhtio='$kukarow[yhtio]' and kuka = '$selkukarow[kuka]'";
-		if ($sovellus != '') {
+		if ($sovellus != '' and $sovellus != 'kaikki_sovellukset') {
 			$query .= " and sovellus='$sovellus'";
 		}
 		$result = mysql_query($query) or pupe_error($query);
@@ -164,12 +164,16 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 1) {
+
+		$sel = $sovellus == "kaikki_sovellukset" ? " selected" : "";
+
 		echo "	<form name='vaihdaSovellus' method='POST'>
 				<input type='hidden' name='selkuka' value='$selkukarow[tunnus]'>
 				<input type='hidden' name='toim' value='$toim'>
 				<tr><th>".t("Valitse sovellus").":</th><td>
 				<select name='sovellus' onchange='submit()'>
-				<option value=''>".t("Nayta kaikki")."</option>";
+				<option value=''>".t("Valitse")."</option>
+				<option value='kaikki_sovellukset'$sel>".t("Nayta kaikki")."</option>";
 
 		while ($orow = mysql_fetch_array($result)) {
 			$sel = '';
@@ -183,6 +187,11 @@
 	}
 	echo "</select></td><td class='back'></td></tr></table></form>";
 
+	if ($sovellus == "") {
+		require("inc/footer.inc");
+		exit;
+	}
+
 	// n‰ytet‰‰n oikeuslista
 	echo "<table>";
 
@@ -192,7 +201,7 @@
 				and yhtio = '$kukarow[yhtio]'
 				$sovellus_rajaus";
 
-	if ($sovellus != '') {
+	if ($sovellus != '' and $sovellus != 'kaikki_sovellukset') {
 		$query .= " and sovellus='$sovellus'";
 	}
 
@@ -290,10 +299,8 @@
 	echo "</table>";
 
 	if ($toim == "" or ($toim == "extranet" and $selkukarow["kuka"] != "")) {
+		echo "<br>";
 		echo "<input type='submit' value='".t("P‰ivit‰ tiedot")."'></form>";
 	}
 
 	require("inc/footer.inc");
-
-
-?>

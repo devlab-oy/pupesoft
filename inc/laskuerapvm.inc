@@ -34,7 +34,7 @@
 			$tapa = 'erpcm';
 		}
 		if ($aika == 'vi') {
-			$tapa = "YEARWEEK(erpcm)";
+			$tapa = "YEARWEEK(erpcm, 3)";
 		}
 		if ($aika == 'kk') {
 			$tapa = "LEFT(erpcm,7)";

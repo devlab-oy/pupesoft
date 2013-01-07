@@ -204,7 +204,7 @@
 						and tiliotedata.alku = '$pvm'
 						and tiliotedata.tilino = '$tilino'
 						and tiliotedata.tyyppi = '$tyyppi'
-						ORDER BY tieto";
+						ORDER BY tunnus";
 		}
 		else {
 

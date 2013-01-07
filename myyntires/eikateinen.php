@@ -44,7 +44,19 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 			'kassalipas'	 => $kassalipas
 		);
 
-		$myysaatili  = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
+		$kustp = '';
+
+		if ($toim == 'KATEINEN' and $kateinen != '') {
+			$mehtorow2 = hae_maksuehto($laskurow['maksuehto']);
+			$myysaatili = hae_kassalippaan_tiedot($laskurow['kassalipas'], $mehtorow2, $laskurow);
+			$kustp = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow, 'hae_kustp');
+
+			$_tmp  = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
+		}
+		else {
+			$myysaatili  = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
+		}
+
 		$_kassalipas = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow);
 
 		$params = array(
@@ -53,7 +65,9 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 			'myysaatili'	 => $myysaatili,
 			'tapahtumapaiva' => $tapahtumapaiva,
 			'toim'			 => $toim,
-			'_kassalipas'	 => $_kassalipas
+			'_kassalipas'	 => $_kassalipas,
+			'kateinen'		 => $kateinen,
+			'kustp'			 => $kustp
 		);
 
 		tee_kirjanpito_muutokset($params);
@@ -272,12 +286,15 @@ function tee_kirjanpito_muutokset($params) {
 		// Kopsataan alkuper‰inen ja p‰ivitet‰‰n siille uudet tiedot
 		$tilid = kopioitiliointi($vanharow['tunnus'], "");
 
+		$kustplisa = $params['kustp'] != '' ? ", kustp = '{$params['kustp']}'" : "";
+
 		$query = "	UPDATE tiliointi
 					SET tilino = '{$uusitili}',
 					summa = '{$params['laskurow']['summa']}',
 					laatija = '{$kukarow['kuka']}',
 					laadittu = now()
 					{$tapvmlisa}
+					{$kustplisa}
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and tunnus	= '{$tilid}'";
 		$result = pupe_query($query);
@@ -390,6 +407,7 @@ function hae_lasku2($laskuno, $toim) {
 					lasku.tunnus ltunnus,
 					maksuehto.tunnus,
 					maksuehto.teksti,
+					maksuehto.kateinen,
 					asiakas.ytunnus asiakas_ytunnus,
 					asiakas.nimi asiakas_nimi,
 					asiakas.nimitark asiakas_nimitark,
@@ -402,7 +420,7 @@ function hae_lasku2($laskuno, $toim) {
 					asiakas.toim_postino asiakas_toim_postino,
 					asiakas.toim_postitp asiakas_toim_postitp
 					FROM lasku
-					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus AND maksuehto.kateinen = ''
+					JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus)
 					JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND	lasku.laskunro = '{$laskuno}'
@@ -416,6 +434,7 @@ function hae_lasku2($laskuno, $toim) {
 					lasku.tunnus ltunnus,
 					maksuehto.tunnus,
 					maksuehto.teksti,
+					maksuehto.kateinen,
 					asiakas.ytunnus asiakas_ytunnus,
 					asiakas.nimi asiakas_nimi,
 					asiakas.nimitark asiakas_nimitark,
@@ -450,6 +469,7 @@ function echo_lasku_table($laskurow, $toim) {
 
 	echo "<form method='post' autocomplete='off'>";
 	echo "<input name='tunnus' type='hidden' value='$laskurow[ltunnus]'>";
+	echo "<input name='kateinen' type='hidden' value='{$laskurow['kateinen']}'>";
 
 	if (!empty($laskurow['asiakas_toim_osoite'])) {
 		$asiakas_string = "<tr><td>$laskurow[asiakas_ytunnus]<br> $laskurow[asiakas_nimi] $laskurow[asiakas_nimitark]<br> $laskurow[asiakas_osoite]<br> $laskurow[asiakas_postino] $laskurow[asiakas_postitp]</td><td>$laskurow[asiakas_ytunnus]<br> $laskurow[asiakas_toim_nimi] $laskurow[asiakas_toim_nimitark]<br> $laskurow[asiakas_toim_osoite]<br> $laskurow[asiakas_toim_postino] $laskurow[asiakas_toim_postitp]</td></tr>";
@@ -530,7 +550,7 @@ function echo_lasku_search() {
 	echo "</form>";
 }
 
-function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
+function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow, $hae_kustp = '') {
 	global $yhtiorow, $kukarow;
 
 	if ($mehtorow['kateinen'] != '') {
@@ -543,7 +563,13 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 
 		if ($mehtorow['kateinen'] == "n") {
 			if ($kateisrow["pankkikortti"] != "") {
-				$myysaatili = $kateisrow["pankkikortti"];
+
+				if ($hae_kustp != '') {
+					$myysaatili = $kateisrow['kustp'];
+				}
+				else {
+					$myysaatili = $kateisrow['pankkikortti'];
+				}
 			}
 			else {
 				$myysaatili = $yhtiorow['pankkikortti'];
@@ -552,7 +578,13 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 
 		if ($mehtorow['kateinen'] == "o") {
 			if ($kateisrow["luottokortti"] != "") {
-				$myysaatili = $kateisrow["luottokortti"];
+
+				if ($hae_kustp != '') {
+					$myysaatili = $kateisrow['kustp'];
+				}
+				else {
+					$myysaatili = $kateisrow['luottokortti'];
+				}
 			}
 			else {
 				$myysaatili = $yhtiorow['luottokortti'];
@@ -561,7 +593,13 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 
 		if($mehtorow['kateinen'] == 'p') {
 			if($kateisrow['kassa'] != '') {
-				$myysaatili = $kateisrow['kassa'];
+
+				if ($hae_kustp != '') {
+					$myysaatili = $kateisrow['kustp'];
+				}
+				else {
+					$myysaatili = $kateisrow['kassa'];
+				}
 			}
 			else {
 				$myysaatili = $yhtiorow['kassa'];
@@ -570,7 +608,13 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 
 		if ($myysaatili == "") {
 			if ($kateisrow["kassa"] != "") {
-				$myysaatili = $kateisrow["kassa"];
+
+				if ($hae_kustp != '') {
+					$myysaatili = $kateisrow['kustp'];
+				}
+				else {
+					$myysaatili = $kateisrow['kassa'];
+				}
 			}
 			else {
 				$myysaatili = $yhtiorow['kassa'];

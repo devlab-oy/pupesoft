@@ -72,6 +72,7 @@
 	if ($tee == 'paivita_kaikki_yhteen') {
 
 		$uusi_pakkaus = array();
+		$kilot = $kuutiot = $lavametrit = 0;
 
 		foreach ($uusi_pakkaus_kaikki_yhteen as $sscc => $pak) {
 
@@ -89,11 +90,26 @@
 					$uusi_pakkaus[$keraysera_row['sscc']] = "{$pak}####{$sscc}";
 				}
 
-				$uusi_pakkaus[$sscc] = $pak;
+				unset($uusi_pakkaus[$sscc]);
+
+				$uusi_pakkaus = array($sscc => $pak) + $uusi_pakkaus;
 
 				$tee = 'paivita';
 			}
 		}
+
+		$query = "	SELECT SUM(kilot) kilot,
+					SUM(kuutiot) kuutiot,
+					SUM(lavametri) lavametri
+					FROM rahtikirjat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND otsikkonro IN ({$otunnukset})";
+		$sumres = pupe_query($query);
+		$sumrow = mysql_fetch_assoc($sumres);
+
+		$kilot = $sumrow['kilot'];
+		$kuutiot = $sumrow['kuutiot'];
+		$lavametrit = $sumrow['lavametri'];
 	}
 
 	if ($tee == 'paivita') {
@@ -144,7 +160,8 @@
 				$check_res = pupe_query($query);
 
 				$rahtikirjarivit = $otunnukset = array();
-				$kilot = $kuutiot = $lavametrit = 0;
+
+				if (count($uusi_pakkaus_kaikki_yhteen) == 0) $kilot = $kuutiot = $lavametrit = 0;
 
 				while ($check_row = mysql_fetch_assoc($check_res)) {
 
@@ -159,9 +176,11 @@
 					while ($rahtikirjat_row = mysql_fetch_assoc($rahtikirjat_res)) {
 						$rahtikirjarivit[$rahtikirjat_row['otsikkonro']] = $rahtikirjat_row;
 
-						$kilot += $rahtikirjat_row['kilot'];
-						$kuutiot += $rahtikirjat_row['kuutiot'];
-						$lavametrit += $rahtikirjat_row['lavametri'];
+						if (count($uusi_pakkaus_kaikki_yhteen) == 0) {
+							$kilot += $rahtikirjat_row['kilot'];
+							$kuutiot += $rahtikirjat_row['kuutiot'];
+							$lavametrit += $rahtikirjat_row['lavametri'];
+						}
 
 						if ($toisen_sscc == "") {
 							$query = "	DELETE FROM rahtikirjat
@@ -202,6 +221,17 @@
 
 						if ($kilot == 0 and $kuutiot == 0 and $lavametrit == 0) continue;
 
+						if (count($uusi_pakkaus_kaikki_yhteen) > 0) {
+							$updlisa = "kilot = {$kilot},
+										kuutiot = {$kuutiot},
+										lavametri = {$lavametrit}";
+						}
+						else {
+							$updlisa = "kilot = kilot + {$kilot},
+										kuutiot = kuutiot + {$kuutiot},
+										lavametri = lavametri + {$lavametrit}";
+						}
+
 						// Tarkistetaan aluksi montako riviä kyseisellä rahtikirjalla on
 						// Jos rivejä on > 1, päivitetään vaan ensimmäistä löytyvää riviä
 						$query = "	SELECT tunnus
@@ -217,18 +247,14 @@
 							$row_count_chk_row = mysql_fetch_assoc($row_count_chk_res);
 
 							$query = "	UPDATE rahtikirjat SET
-										kilot = kilot + {$kilot},
-										kuutiot = kuutiot + {$kuutiot},
-										lavametri = lavametri + {$lavametrit}
+										{$updlisa}
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row_count_chk_row['tunnus']}'";
 							$updres = pupe_query($query);
 						}
 						else {
 							$query = "	UPDATE rahtikirjat SET
-										kilot = kilot + {$kilot},
-										kuutiot = kuutiot + {$kuutiot},
-										lavametri = lavametri + {$lavametrit}
+										{$updlisa}
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND otsikkonro = '{$toisen_row['otunnus']}'
 										AND pakkaus = '{$pak_row['pakkaus']}'

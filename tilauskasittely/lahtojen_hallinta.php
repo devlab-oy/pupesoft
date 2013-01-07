@@ -841,11 +841,8 @@
 							FROM lahdot
 							JOIN lasku
 							ON ( lasku.yhtio = lahdot.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto )
-							JOIN tilausrivi
-							ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var NOT IN ( 'P', 'J' ) )
-							JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-							AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-							AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')) )
+							JOIN varastopaikat
+							ON ( varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto )
 							JOIN toimitustapa
 							ON ( toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa )
 							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
@@ -875,17 +872,15 @@
 								FROM lahdot
 								JOIN lasku
 								ON ( lasku.yhtio = lahdot.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto )
-								JOIN tilausrivi
-								ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var NOT IN ( 'P', 'J' ) )
-								JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-								AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-								AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')) )
+								JOIN varastopaikat
+								ON ( varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto )
 								JOIN toimitustapa
 								ON ( toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa )
 								WHERE  lahdot.yhtio = '{$kukarow['yhtio']}'
 								AND lahdot.aktiivi = 'S'
-								AND ( ( lasku.tila = 'N' AND lasku.alatila = 'A' )
-								OR ( lasku.tila = 'L' AND lasku.alatila IN ( 'A', 'B', 'C' ) ) )
+								AND ( ( lasku.tila = 'L' AND lasku.alatila = 'D' )
+								OR  ( lasku.tila = 'L' AND lasku.alatila = 'X' ) )
+								AND lahdot.pvm > NOW() - INTERVAL 7 DAY
 								GROUP BY lahdot.tunnus
 								ORDER  BY
 								lahdot.pvm,

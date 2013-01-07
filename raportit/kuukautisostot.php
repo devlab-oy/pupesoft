@@ -195,6 +195,7 @@
 
 		for ($i = 1; $i < 13; $i++) {
 			$sarakkeet["SARAKE{$_x}"] = t("Kate")." {$yhtiorow['valkoodi']} ".${"kuukausi{$i}"}."\t";
+			$_x++;
 		}
 
 		for ($i = 1; $i < 13; $i++) {
@@ -1539,24 +1540,6 @@
 							$korvaavat_tunrot .= ",'$korvarow[tuoteno]'";
 						}
 					}
-
-					if ($valitut["SARAKE{$_x}"] != '') {
-						$query = "	SELECT count(*) kpl
-									FROM yhteensopivuus_tuote
-									JOIN yhteensopivuus_rekisteri on (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio and yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
-									WHERE yhteensopivuus_tuote.yhtio='$kukarow[yhtio]'
-									and yhteensopivuus_tuote.tuoteno in ('$row[tuoteno]' $korvaavat_tunrot)
-									 and yhteensopivuus_tuote.tyyppi='HA'";
-						$asresult = pupe_query($query);
-						$kasrow = mysql_fetch_assoc($asresult);
-
-						$rivi .= $kasrow['kpl']."\t";
-
-						$worksheet->writeNumber($excelrivi, $excelsarake, $kasrow['kpl']);
-						$excelsarake++;
-					}
-
-					$_x++;
 
 					//Liitetäänkö myös tilauttu by varasto
 					if (is_resource($osvres)) {

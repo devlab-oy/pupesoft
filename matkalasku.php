@@ -80,11 +80,35 @@ if ($tee == "UUSI") {
 				and tuote.tuoteno like 'PR%'
 				and tuote.status != 'P'
 				and tuote.tilino != ''
+				and tuote.vienti != '{$yhtiorow['maa']}'
 				LIMIT 1";
 	$result1 = pupe_query($query);
 
 	if (mysql_num_rows($result1) == 0) {
-		echo "<font class='error'>".t("VIRHE: Viranomaistuotteet puuttuu")."!</font>";
+		echo "<font class='error'>".t("VIRHE: Ulkomaanpäivärahat puuttuu")."!</font>";
+		$tee = "";
+	}
+
+	$query = "	SELECT tuote.tuoteno, tuote.nimitys, tuote.myyntihinta, tuote.malli, tuote.myymalahinta
+				FROM tuote
+				JOIN tili ON tili.yhtio = tuote.yhtio and tili.tilino = tuote.tilino
+				WHERE tuote.yhtio = '$kukarow[yhtio]'
+				and tuote.tuotetyyppi = 'A'
+				and tuote.tuoteno like 'PR%'
+				and tuote.status != 'P'
+				and tuote.tilino != ''
+				and tuote.vienti  = '{$yhtiorow['maa']}'
+				order by tuote.tunnus desc
+				LIMIT 1";
+	$result1 = pupe_query($query);
+	$vtrow = mysql_fetch_assoc($result1);
+
+	if (mysql_num_rows($result1) == 0) {
+		echo "<font class='error'>".t("VIRHE: Kotimaanpäivärahat puuttuu")."!</font>";
+		$tee = "";
+	}
+	elseif ($vtrow['nimitys'] == '' or $vtrow['myyntihinta'] == 0 or $vtrow['malli'] == '' or $vtrow['myymalahinta'] == 0) {
+		echo "<font class='error'>".t("VIRHE: Kotimaanpäivärahan tiedot puutteelliset")."!</font>";
 		$tee = "";
 	}
 }

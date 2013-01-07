@@ -349,7 +349,8 @@
 						$attribute = $node->AllowOrChargeIdentifier->attributes()->Value;
 
 						// ei oteta alennuksia huomioon Klokkerholm-keississä
-						if (strtolower($attribute) == "allow" and $laskuttajan_toimittajanumero != "123418") {
+						// eikä ZF-keississä (123007)
+						if (strtolower($attribute) == "allow" and $laskuttajan_toimittajanumero != "123418" and $laskuttajan_toimittajanumero != "123007") {
 
 							if (!isset($rtuoteno[$i]['ale1'])) {
 
@@ -547,5 +548,3 @@
 
 	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 	ini_set("display_errors", 0);
-
-?>

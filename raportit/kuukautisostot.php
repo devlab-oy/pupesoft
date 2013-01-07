@@ -195,6 +195,7 @@
 
 		for ($i = 1; $i < 13; $i++) {
 			$sarakkeet["SARAKE{$_x}"] = t("Kate")." {$yhtiorow['valkoodi']} ".${"kuukausi{$i}"}."\t";
+			$_x++;
 		}
 
 		for ($i = 1; $i < 13; $i++) {

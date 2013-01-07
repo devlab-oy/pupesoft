@@ -2122,6 +2122,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 	$hinta_array   = array();
 	$nimitys_array = array();
 	$varri_array   = array();
+	$selite_array  = array();
 	$errori 	   = "";
 
 	if ($tyyppi == "A") {
@@ -2207,7 +2208,6 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 			$puolipaivat = 0;
 			$ylitunnit 	 = 0;
 			$tunnit 	 = 0;
-			$selite 	 = "";
 			$varri		 = "1"; // Kotimaan kokop‰iv‰raha oletuksena
 
 			// Montako tuntia on oltu matkalla?
@@ -2252,8 +2252,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 					$hinta_array[1]	  = $trow['myymalahinta'];
 					$nimitys_array[1] = $trow['malli'];
 					$varri_array[1]   = "2";	 // Kotimaan osap‰iv‰raha
-
-					$selite .= "<br>$tuoteno - {$trow['malli']} $osapaivat kpl · ".(float) round($trow['myymalahinta'], 2);
+					$selite_array[1]  = "$tuoteno - {$trow['malli']} · ".(float) round($trow['myymalahinta'], 2);
 				}
 			}
 			// Ulkomaanmatkat
@@ -2293,8 +2292,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 					$hinta_array[1]	  = round($trow['myyntihinta']/2, 2);
 					$nimitys_array[1] = $trow['nimitys'] . " " .t("Puolitettu korvaus");
 					$varri_array[1]   = "6";	 // Ulkomaan puolip‰iv‰raha
-
-					$selite .= "<br>$tuoteno - {$nimitys_array[1]} $puolipaivat kpl · ".(float) $hinta_array[1];
+					$selite_array[1]  = "$tuoteno - {$nimitys_array[1]} · ".(float) $hinta_array[1];
 				}
 				elseif ($ylitunnit >= 10) {
 					/*
@@ -2318,8 +2316,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 					$hinta_array[1]	  = round($trow['myyntihinta']/2, 2);
 					$nimitys_array[1] = $trow['nimitys'] . " " .t("Puolitettu korvaus");
 					$varri_array[1]   = "6";	 // Ulkomaan puolip‰iv‰raha
-
-					$selite .= "<br>$tuoteno - {$nimitys_array[1]} $puolipaivat kpl · ".(float) $hinta_array[1];
+					$selite_array[1] = "$tuoteno - {$nimitys_array[1]} · ".(float) $hinta_array[1];
 				}
 			}
 
@@ -2334,11 +2331,11 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 				$hinta_array[0]   = $trow["myyntihinta"];
 				$nimitys_array[0] = $trow["nimitys"];
 				$varri_array[0]	  = $varri;
-
-				$selite = trim("$trow[tuoteno] - $trow[nimitys] $paivat kpl · ".(float) $trow["myyntihinta"].$selite);
+				$selite_array[0]  = trim("$trow[tuoteno] - $trow[nimitys] · ".(float) $trow["myyntihinta"]);
 			}
 
-			$selite .= "<br>Ajalla: $alkupp.$alkukk.$alkuvv klo. $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv klo. $loppuhh:$loppumm";
+			$selite_array[0] .= "<br>".t("Ajalla").": $alkupp.$alkukk.$alkuvv ".t("klo").". $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv ".t("klo").". $loppuhh:$loppumm";
+			$selite_array[1] .= "<br>".t("Ajalla").": $alkupp.$alkukk.$alkuvv ".t("klo").". $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv ".t("klo").". $loppuhh:$loppumm";
 		}
 		else {
 			$errori .= "<font class='error'>".t("VIRHE: P‰iv‰rahalle on annettava alku ja loppuaika")."</font><br>";
@@ -2368,15 +2365,15 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 		$hinta_array[0]	  = $hinta;
 		$nimitys_array[0] = $trow["nimitys"];
 		$varri_array[0]	  = 0;
-
-		$selite = "$trow[tuoteno] - $trow[nimitys] $kpl kpl · ".(float) $hinta;
+		$selite_array[0]  = "$trow[tuoteno] - $trow[nimitys] $kpl kpl · ".(float) $hinta;
 	}
 
 	//	poistetan return carriage ja newline -> <br>
 	$kommentti = str_replace("\n","<br>", str_replace("\r","", $kommentti));
 
 	if ($kommentti != "") {
-		$selite .= "<br><i>$kommentti</i>";
+		$selite_array[0] .= "<br><i>$kommentti</i>";
+		$selite_array[1] .= "<br><i>$kommentti</i>";
 	}
 
 	//	Lis‰t‰‰n annetut rivit
@@ -2581,7 +2578,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 								tapvm 		= '$laskurow[tapvm]',
 								summa 		= '$rivihinta',
 								vero 		= '$vero',
-								selite 		= '".mysql_real_escape_string($selite)."',
+								selite 		= '".mysql_real_escape_string($selite_array[$indeksi])."',
 								lukko 		= '',
 								tosite 		= '$tositenro',
 								laatija 	= '$kukarow[kuka]',
@@ -2601,7 +2598,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 									tapvm 		= '$laskurow[tapvm]',
 									summa 		= '$alv',
 									vero 		= 0,
-									selite 		= '".mysql_real_escape_string($selite)."',
+									selite 		= '".mysql_real_escape_string($selite_array[$indeksi])."',
 									lukko 		= '1',
 									laatija 	= '$kukarow[kuka]',
 									laadittu 	= now(),

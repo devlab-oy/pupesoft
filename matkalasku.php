@@ -487,7 +487,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 
 	if ($row['vienti'] == 'FI') {
 		if ($ilmaiset_lounaat >= 1) {
-			if ($row['var'] == 1) {
+			if ($row['var'] == 1 and $ilmaiset_lounaat >= 2) {
 				//kotimaan kokopäiväraha ----> kotimaan puolitettu kokopäiväraha
 				$rivihinta = $row['kpl'] * ($row['myyntihinta'] / 2);
 				$tilausrivi_uusi_hinta = ($row['myyntihinta'] / 2);
@@ -2469,8 +2469,13 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 						$ilmaiset_lounaat = tarkista_loytyyko_paivalle_matkalasku($_alkuaika, $_loppuaika, $tilausnumero);
 
 			 			if ($trow["vienti"] == 'FI') {
-			 		        if ($ilmaiset_lounaat >= 1) {
-			 		        	$var 	 = 3;
+			 		        if ($var == 1 and $ilmaiset_lounaat >= 2) {
+								$var 	 = 3;
+			 		        	$hinta 	 = $hinta / 2;
+			 		        	$nimitys = $nimitys.' '.t("Puolitettu korvaus");
+							}
+							elseif ($var == 2 and $ilmaiset_lounaat >= 1) {
+			 		        	$var 	 = 4;
 			 		        	$hinta 	 = $hinta / 2;
 			 		        	$nimitys = $nimitys.' '.t("Puolitettu korvaus");
 			 		        }

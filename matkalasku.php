@@ -2581,7 +2581,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 								tapvm 		= '$laskurow[tapvm]',
 								summa 		= '$rivihinta',
 								vero 		= '$vero',
-								selite 		= '".mysql_real_escape_string($nimitys)."',
+								selite 		= '".mysql_real_escape_string($selite)."',
 								lukko 		= '',
 								tosite 		= '$tositenro',
 								laatija 	= '$kukarow[kuka]',
@@ -2857,13 +2857,13 @@ function erittele_rivit($tilausnumero) {
 					$rivihinta = (float) $kpl * (float) $hinta;
 
 					if ($rtuoteno[$i]["laskutettuaika"] != "") {
-						$kommentti .= "Tapahtuma-aika: ".preg_replace("/([0-9]{4})([0-9]{2})([0-9]{2})/", "\$3.\$2. \$1", $rtuoteno[$i]["laskutettuaika"]);
+						$kommentti .= t("Tapahtuma-aika").": ".preg_replace("/([0-9]{4})([0-9]{2})([0-9]{2})/", "\$3.\$2. \$1", $rtuoteno[$i]["laskutettuaika"]);
 					}
 
-					$kommentti .= "<br>Tapahtuman selite: ".$rtuoteno[$i]["riviinfo"];
+					$kommentti .= "<br>".t("Tapahtuman selite").": ".$rtuoteno[$i]["riviinfo"];
 
 					if (preg_match("/([A-Z]{3})\s*([0-9\.,]*)/", $rtuoteno[$i]["riviviite"], $match)) {
-						$kommentti .= "<br>Alkupeärinen summa: $match[2] $match[1] ($hinta $yhtiorow[valkoodi])";
+						$kommentti .= "<br>".t("Alkupeärinen summa").": $match[2] $match[1] ($hinta $yhtiorow[valkoodi])";
 					}
 
 					$kommentti = preg_replace("/\.{2,}/", "", $kommentti);

@@ -847,8 +847,7 @@
 							ON ( toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa )
 							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
 							AND lahdot.tunnus IN ({$lahdot_temp})
-							AND ( ( lasku.tila = 'N' AND lasku.alatila = 'A' )
-							OR ( lasku.tila = 'L' AND lasku.alatila IN ( 'A', 'B', 'C' ) ) )
+							AND ( lasku.tila = 'L' AND lasku.alatila IN ( 'B', 'C' ) )
 							GROUP by lahdot.tunnus";
 				$lahdot_result = pupe_query($query);
 				$lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty = array();
@@ -866,25 +865,24 @@
 					//tällöin voidaan näyttää mahdolliset liitettävät rahtikirjat
 					//haetaanlistaus suljetuista lähdöistä
 					$query = "	SELECT
-								lahdot.aktiivi,
-								Group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
-								concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', Substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text
+								lahdot.tunnus,
+								group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
+								concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text
 								FROM lahdot
-								JOIN lasku
-								ON ( lasku.yhtio = lahdot.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto )
-								JOIN varastopaikat
-								ON ( varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto )
-								JOIN toimitustapa
-								ON ( toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa )
-								WHERE  lahdot.yhtio = '{$kukarow['yhtio']}'
+								JOIN lasku ON (lasku.yhtio = lahdot.yhtio
+									AND lasku.toimitustavan_lahto = lahdot.tunnus)
+								JOIN varastopaikat ON (varastopaikat.yhtio = lahdot.yhtio
+									AND varastopaikat.tunnus = lahdot.varasto)
+								JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio
+									AND toimitustapa.selite = lasku.toimitustapa)
+								WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
 								AND lahdot.aktiivi = 'S'
-								AND ( ( lasku.tila = 'L' AND lasku.alatila = 'D' )
-								OR  ( lasku.tila = 'L' AND lasku.alatila = 'X' ) )
-								AND lahdot.pvm > NOW() - INTERVAL 7 DAY
+								AND lahdot.pvm > date_sub(now(), INTERVAL 7 day)
 								GROUP BY lahdot.tunnus
-								ORDER  BY
-								lahdot.pvm,
-								lahdot.lahdon_kellonaika,
+								ORDER BY varastopaikat.nimitys,
+								toimitustapa.selite,
+								lahdot.pvm desc,
+								lahdot.lahdon_kellonaika desc,
 								lahdot.tunnus";
 					$suljetut_lahdot_result = pupe_query($query);
 
@@ -901,8 +899,22 @@
 					echo "<th>".t("Yhdistetään lähtöön")."</th>";
 					echo "<td>";
 					echo "<select name='yhdistetaan_lahtoon'>";
+					$indeksi = 1;
 					foreach($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty as $lahto) {
-						echo "<option value='{$lahto['lahdon_tilauksien_tunnukset']}'>{$lahto['dropdown_text']}</option>";
+						if(count($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty) == 2) {
+							if($indeksi == 2) {
+								$sel = "selected='SELECTED'";
+							}
+							else {
+								$sel = "";
+							}
+						}
+						else {
+							$sel = "";
+						}
+						echo "<option {$sel} value='{$lahto['lahdon_tilauksien_tunnukset']}'>{$lahto['dropdown_text']}</option>";
+
+						$indeksi++;
 					}
 					echo "</select>";
 					echo "</td>";

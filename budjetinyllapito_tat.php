@@ -421,8 +421,8 @@
 		}
 
 		// Hypätään myös myyntisarakkeiden yli
-		if ($toim == "ASIAKAS") {
-			$lukualku += 2;
+		if ($toim == "ASIAKAS" and stripos($headers[$lukualku], "Myynti")  !== FALSE) {
+			$lukualku += 3;
 		}
 
 		$insert_rivimaara = 0;

@@ -308,6 +308,90 @@
 				echo t("Lasku siirrettiin takaisin maksatukseen")."!<br><br>";
 			}
 		}
+
+		if ($tila == 'ODOTTAMAAN_SUORITUSTA') {
+
+			$query = "	SELECT GROUP_CONCAT(DISTINCT oletus_rahatili) rahatilit,
+						GROUP_CONCAT(DISTINCT oletus_selvittelytili) selvitteytilit
+						FROM yriti
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND (oletus_rahatili != '' or oletus_selvittelytili != '')";
+			$tilires = pupe_query($query);
+			$tilirow = mysql_fetch_assoc($tilires);
+
+			$tilit = array_merge(explode(",", $tilirow['rahatilit']), explode(",", $tilirow['selvitteytilit']), array($yhtiorow['selvittelytili']));
+			$tilit = array_unique($tilit);
+
+			// poistetaan tyhjät alkiot array_filterin avulla ilman callbackia
+			// If no callback is supplied, all entries of input equal to FALSE will be removed.
+			$tilit = array_filter($tilit);
+			$tilit = "'".implode("','", $tilit)."'";
+
+			// Etsitään oikea kirjaus
+			// Pitäisi aina löytyä vain yksi osuma, siksi ei ole while-looppi
+			$query = "	SELECT *
+						FROM tiliointi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND ltunnus = '{$tunnus}'
+						AND tilino IN ({$tilit})
+						AND korjattu = ''";
+			$tiliointires = pupe_query($query);
+			$tiliointirow = mysql_fetch_assoc($tiliointires);
+
+			// Etsitään vastakirjaus
+			$query = "	SELECT *
+						FROM tiliointi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tapvm = '{$tiliointirow['tapvm']}'
+						AND korjattu = ''
+						AND summa = '".abs($tiliointirow['summa'])."'";
+			$vastakirjausres = pupe_query($query);
+			$vastakirjausrow = mysql_fetch_assoc($vastakirjausres);
+
+			// Yliviivataan molemmat tiliöinnit
+			$query = "	UPDATE tiliointi SET
+						korjattu = '{$kukarow['kuka']}',
+						korjausaika = now()
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tiliointirow['tunnus']}'";
+			$updres = pupe_query($query);
+
+			$query = "	UPDATE tiliointi SET
+						korjattu = '{$kukarow['kuka']}',
+						korjausaika = now()
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$vastakirjausrow['tunnus']}'";
+			$updres = pupe_query($query);
+
+			$query = "INSERT INTO tiliointi SET ";
+
+			// Tehdään uusi kirjaus
+			for ($i = 0; $i < mysql_num_fields($tiliointires) - 1; $i++) {
+				switch (mysql_field_name($tiliointires,$i)) {
+					default:
+						$query .= mysql_field_name($tiliointires, $i)." = '".$tiliointirow[mysql_field_name($tiliointires, $i)]."',";
+				}
+			}
+
+			$query = substr($query, 0, -1);
+			$result = pupe_query($query);
+
+			$query = "	UPDATE lasku SET
+						maksaja = '',
+						maksuaika = '0000-00-00 00:00:00',
+						mapvm = '0000-00-00',
+						maksu_kurssi = 0,
+						maksu_tili = '',
+						olmapvm = '0000-00-00',
+						tila = 'Q'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tunnus}'";
+			$updres = pupe_query($query);
+
+			$tee = 'E';
+			$tila = 'X';
+
+		}
 	}
 
 	// Täällä tarkistetaan laskun uusi eräpvm
@@ -2010,6 +2094,20 @@
 					<th>".t("Palauta lasku maksatukseen")."</th>
 					<td></td>
 					<td class='back'><input type = 'submit' value = '".t("Siirrä")."'></td>
+					</tr>
+					</form>";
+		}
+
+		if ($trow['tila'] == 'Y' and $trow['mapvm'] != '0000-00-00' and $trow['mapvm'] >= $yhtiorow['tilikausi_alku'] and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
+			echo "<form method='post'>
+					<input type = 'hidden' name='tee' value='M'>
+					<input type = 'hidden' name='tila' value='ODOTTAMAAN_SUORITUSTA'>
+					<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+					<tr>
+					<th>",t("Palauta odottamaan suoritusta"),"</th>
+					<td></td>
+					<td class='back'><input type = 'submit' value = '",t("Siirrä"),"'></td>
 					</tr>
 					</form>";
 		}

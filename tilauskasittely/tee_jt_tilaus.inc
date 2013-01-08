@@ -1091,7 +1091,7 @@
 			//haetaan tilauksen kaikki jt rivit ja niiden tuotenumerot
 			$query = "	SELECT tunnus,
 						tuoteno,
-						count(*) tuote_kpl
+						sum(varattu) tuote_kpl
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND otunnus = '{$tilaus_tunnus}'

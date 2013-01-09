@@ -342,7 +342,7 @@
 				$tiliointirow = mysql_fetch_assoc($tiliointires);
 
 				// Etsit‰‰n vastakirjaus
-				$query = "	SELECT *
+				$query = "	SELECT tunnus
 							FROM tiliointi
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND ltunnus = '{$tunnus}'

@@ -24,6 +24,38 @@ $query  = "	UPDATE lasku SET vanhatunnus=tunnus $ohjausmerkkilisa
 			AND vanhatunnus=0";
 $oldtur = pupe_query($query);
 
+$ohjausmerkki_check = t_avainsana("OHJAUSMERKKI", '', "and selite = '{$laskurow['toimitustapa']}'", '', '', "selitetark");
+
+if ($ohjausmerkki_check != "") {
+
+	// Tarkistetaan löytyykö kyseinen ohjausmerkkiteksti otsikolta
+	// Ei haluta lisätä tekstiä kahteen kertaan
+	$query = "	SELECT tunnus
+				FROM lasku
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND ohjausmerkki LIKE '%{$ohjausmerkki_check}%'
+				AND tunnus = '{$laskurow['tunnus']}'";
+	$ohjausmerkki_chk_res = pupe_query($query);
+
+	if (mysql_num_rows($ohjausmerkki_chk_res) == 0) {
+
+		if ($laskurow['ohjausmerkki'] != "") {
+			$updlisa = " ohjausmerkki = CONCAT('{$ohjausmerkki_check}', ' / ', ohjausmerkki)";
+			$laskurow['ohjausmerkki'] = "{$ohjausmerkki_check} / {$laskurow['ohjausmerkki']}";
+		}
+		else {
+			$updlisa = " ohjausmerkki = '{$ohjausmerkki_check}'";
+			$laskurow['ohjausmerkki'] = $ohjausmerkki_check;
+		}
+
+		$query = "	UPDATE lasku SET
+					{$updlisa}
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$laskurow['tunnus']}'";
+		$updres = pupe_query($query);
+	}
+}
+
 // päivitetään myös muuttuja
 $laskurow["vanhatunnus"] = $laskurow["tunnus"];
 

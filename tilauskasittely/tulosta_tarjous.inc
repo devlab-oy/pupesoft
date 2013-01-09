@@ -178,7 +178,7 @@ if (!function_exists('alku_tarjous')) {
 				}
 			}
 
-			if($laskurow['toimaika'] == '0000-00-00') {
+			if ($laskurow['toimaika'] == '0000-00-00') {
 				$naytetaanko_toimitusaika = false;
 			}
 			else {
@@ -198,12 +198,12 @@ if (!function_exists('alku_tarjous')) {
 					$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
 				}
 
-				if($naytetaanko_toimitusaika == true) {
+				if ($naytetaanko_toimitusaika == true) {
 					$pdf_tarjous->draw_text(430, 782, $taika, 								$page_tarjous[$sivu], $norm);
 				}
 			}
 			else {
-				if($naytetaanko_toimitusaika == true) {
+				if ($naytetaanko_toimitusaika == true) {
 					$pdf_tarjous->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]), 	$page_tarjous[$sivu], $norm);
 				}
 			}
@@ -560,7 +560,7 @@ if (!function_exists('tarjous_rivi_otsikot')) {
 			$pdf_tarjous->draw_text(25,  $kala+15, t("Tuotenumero", $kieli),	$page_tarjous, $norm);
 			$pdf_tarjous->draw_text(25,  $kala+5, t("Tuotenimi", $kieli),		$page_tarjous, $norm);
 
-			if(trim($naytetaanko_rivihinta == 'kokonaan_ilman_hintoja')) {
+			if (trim($naytetaanko_rivihinta == 'kokonaan_ilman_hintoja')) {
 				$pdf_tarjous->draw_text(450, $kala+15, t("Määrä", $kieli),			$page_tarjous, $norm);
 			}
 			else {
@@ -677,7 +677,7 @@ if (!function_exists('rivi_tarjous')) {
 		$row["kommentti"] = trim($row["kommentti"]);
 
 		// Haetaan tuotteen myyntihinta
-		$query = "	SELECT round(if(isnull(hinnasto.hinta) OR hinnasto.hinta = '', round(tuote.myyntihinta / if('$laskurow[vienti_kurssi]' = 0, 1, '$laskurow[vienti_kurssi]'), '$yhtiorow[hintapyoristys]'), hinnasto.hinta) / (1 + (if('$yhtiorow[alv_kasittely]' = '', 0, tuote.alv) / 100)), '$yhtiorow[hintapyoristys]') myyntihinta,
+		$query = "	SELECT round(if (isnull(hinnasto.hinta) OR hinnasto.hinta = '', round(tuote.myyntihinta / if ('$laskurow[vienti_kurssi]' = 0, 1, '$laskurow[vienti_kurssi]'), '$yhtiorow[hintapyoristys]'), hinnasto.hinta) / (1 + (if ('$yhtiorow[alv_kasittely]' = '', 0, tuote.alv) / 100)), '$yhtiorow[hintapyoristys]') myyntihinta,
        				tuote.aleryhma
                     FROM tuote
                     LEFT JOIN hinnasto ON (tuote.yhtio = hinnasto.yhtio
@@ -878,7 +878,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 
 		$pdf_tarjous->draw_text(25, $kala, $row["tuoteno"], $page_tarjous[$sivu], $norm);
 
-		if($naytetaanko_rivihinta == 'kokonaan_ilman_hintoja') {
+		if ($naytetaanko_rivihinta == 'kokonaan_ilman_hintoja') {
 			$oikpos = $pdf_tarjous->strlen($row["varattu"], $norm);
 			$pdf_tarjous->draw_text(475-$oikpos, $kala, $row["varattu"], $page_tarjous[$sivu], $norm);
 		}
@@ -957,7 +957,7 @@ if (!function_exists('tarjous_rivi_custom')) {
 	function tarjous_rivi_custom($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous, $sarjanutunnus, $row, $hinnat, $asiakasrow, $verolliset_verottomat_hinnat = "", $naytetaanko_rivihinta = '', $sivu = 1) {
 		global $yhtiorow, $kukarow, $norm, $pieni, $boldi;
 
-		if($laskurow['toimaika'] == '0000-00-00') {
+		if ($laskurow['toimaika'] == '0000-00-00') {
 			$naytetaanko_toimitusaika = false;
 		}
 		else {
@@ -984,7 +984,7 @@ if (!function_exists('tarjous_rivi_custom')) {
 			$vko .= ' - '.(date("W", mktime(0, 0, 0, $kk, $pp, $vv)) + 1);
 		}
 
-		if($naytetaanko_toimitusaika == true) {
+		if ($naytetaanko_toimitusaika == true) {
 			$pdf_tarjous->draw_text(330, $kala, t("Vko", $kieli)." $vko", $page_tarjous[$sivu], $norm);
 		}
 
@@ -1201,7 +1201,7 @@ if (!function_exists('loppu_tarjous')) {
 
 			if ($yhtiorow['tarjoustyyppi'] == 1) {
 
-				if($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
+				if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
 					list($page_tarjous, $sivu, $kala) = alvierittely($pdf_tarjous, $page_tarjous, $sivu, $laskurow, $total_uudet, '', $verolliset_verottomat_hinnat, $kala);
 				}
 
@@ -1238,7 +1238,7 @@ if (!function_exists('loppu_tarjous')) {
 
 				$voimassa = tv1dateconv($tvva."-".$tkka."-".$tppa);
 
-				if($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
+				if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
 					$pdf_tarjous->draw_text(50, $kala-25, t("Toimitustapa"), $page_tarjous[$sivu], $boldi);
 					$pdf_tarjous->draw_text(200, $kala-25, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), $page_tarjous[$sivu], $norm);
 
@@ -1330,15 +1330,13 @@ if (!function_exists('loppu_tarjous')) {
 					$kuha = 168;
 				}
 
-				if ($vikanrivin_sivu != $sivu) {
-					if($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
-						$pdf_tarjous->draw_text(30,  74, t("Tarjoamme teille ylläolevan tarjouksen kohteet hintaan:", $kieli),   $page_tarjous[$vikanrivin_sivu], $boldi);
-						$oikpos = $pdf_tarjous->strlen(sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $boldi);
-						$pdf_tarjous->draw_text(380-$oikpos, 74, sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $page_tarjous[$vikanrivin_sivu], $boldi);
-					}
+				if ($vikanrivin_sivu != $sivu and $naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
+					$pdf_tarjous->draw_text(30,  74, t("Tarjoamme teille ylläolevan tarjouksen kohteet hintaan:", $kieli),   $page_tarjous[$vikanrivin_sivu], $boldi);
+					$oikpos = $pdf_tarjous->strlen(sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $boldi);
+					$pdf_tarjous->draw_text(380-$oikpos, 74, sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $page_tarjous[$vikanrivin_sivu], $boldi);
 				}
 
-				if($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
+				if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
 					$pdf_tarjous->draw_text(30,  $kuha,  t("Tarjoamme teille ylläolevan tarjouksen kohteet hintaan:", $kieli),   $page_tarjous[$sivu], $boldi);
 
 					$oikpos = $pdf_tarjous->strlen(sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $boldi);
@@ -1353,7 +1351,7 @@ if (!function_exists('loppu_tarjous')) {
 
 					$veroteksti = "";
 
-					if($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
+					if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
 						if ($laskurow["vienti"] != "") {
 							$veroteksti = ""; // Laitetaan tyhjänä
 						}
@@ -1677,7 +1675,7 @@ if (!function_exists('tulosta_tarjous')) {
 		$total_uudet  = $total;
 		$total_vanhat = $total - $total_uudet;
 
-		if($naytetaanko_rivihinta == 'kokonaan_ilman_hintoja' and $yhtiorow['tarjoustyyppi'] == 1) {
+		if ($naytetaanko_rivihinta == 'kokonaan_ilman_hintoja' and $yhtiorow['tarjoustyyppi'] == 1) {
 
 		}
 		else {

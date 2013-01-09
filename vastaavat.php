@@ -205,11 +205,11 @@ if ($tee == 'vaihtoehtoinen') {
     if ($vaihtoehtoinen == 'true' and $row['vaihtoehtoinen'] != 'K') {
 
         // Tuote voi olla useammassa ketjussa vain vaihtoehtoinen tai vastaava. Ei molempia.
-        $query = "UPDATE vastaavat SET vaihtoehtoinen='K' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuoteno}'";
+        $query = "UPDATE vastaavat SET vaihtoehtoinen='K' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$_tuoteno}'";
         $result = pupe_query($query);
     }
     else if ($vaihtoehtoinen != true and $row['vaihtoehtoinen'] == 'K') {
-        $query = "UPDATE vastaavat SET vaihtoehtoinen='' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuoteno}'";
+        $query = "UPDATE vastaavat SET vaihtoehtoinen='' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$_tuoteno}'";
         $result = pupe_query($query);
     }
 }
@@ -342,7 +342,7 @@ if ($tuoteno != '') {
                     $checked = ($tuote['vaihtoehtoinen'] == 'K') ? 'checked' : '';
                     echo "<td><form method='post'>
                         <input type='hidden' name='tunnus' value='$tuote[tunnus]'>
-                        <input type='hidden' name='tuoteno' value='$tuote[tuoteno]'>
+                        <input type='hidden' name='_tuoteno' value='$tuote[tuoteno]'>
                         <input type='hidden' name='tee' value='vaihtoehtoinen'>
                         <input type='checkbox' name='vaihtoehtoinen' value='true' onclick='submit()' $checked>
                         </form></td>";

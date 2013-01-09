@@ -835,33 +835,28 @@
 				//tällöin näytetään liitettävien lähtöjen dropdownit
 				$lahdot_temp = implode(',', $checkbox_parent);
 				$query = "	SELECT
-							toimitustapa.erittely,
+							lahdot.tunnus,
 							Group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
 							concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', Substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text
 							FROM lahdot
-							JOIN lasku
-							ON ( lasku.yhtio = lahdot.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto )
-							JOIN varastopaikat
-							ON ( varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto )
-							JOIN toimitustapa
-							ON ( toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa )
+							JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lasku.tila = 'L' AND lasku.alatila IN ( 'B', 'C' ))
+							JOIN varastopaikat ON (varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto)
+							JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
 							AND lahdot.tunnus IN ({$lahdot_temp})
-							AND ( lasku.tila = 'L' AND lasku.alatila IN ( 'B', 'C' ) )
+							AND toimitustapa.erittely != ''
 							GROUP by lahdot.tunnus";
 				$lahdot_result = pupe_query($query);
 				$lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty = array();
 				while($lahto_row = mysql_fetch_assoc($lahdot_result)) {
-					if($lahto_row['erittely'] != '') {
-						$lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty[] = array(
-							'lahdon_tilauksien_tunnukset' => $lahto_row['tilaukset'],
-							'dropdown_text' => $lahto_row['dropdown_text'],
-						);
-					}
+					$lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty[] = array(
+						'lahdon_tilauksien_tunnukset' => $lahto_row['tilaukset'],
+						'dropdown_text' => $lahto_row['dropdown_text'],
+					);
 				}
 
 				if(!empty($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty)) {
-					array_unshift($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty, array('lahdon_tilauksien_tunnukset' => 0 ,'dropdown_text' => 'Valitse lähtö'));
+					array_unshift($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty, array('lahdon_tilauksien_tunnukset' => 0 ,'dropdown_text' => t('Valitse lähtö')));
 					//tällöin voidaan näyttää mahdolliset liitettävät rahtikirjat
 					//haetaanlistaus suljetuista lähdöistä
 					$query = "	SELECT
@@ -869,12 +864,9 @@
 								group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
 								concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text
 								FROM lahdot
-								JOIN lasku ON (lasku.yhtio = lahdot.yhtio
-									AND lasku.toimitustavan_lahto = lahdot.tunnus)
-								JOIN varastopaikat ON (varastopaikat.yhtio = lahdot.yhtio
-									AND varastopaikat.tunnus = lahdot.varasto)
-								JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio
-									AND toimitustapa.selite = lasku.toimitustapa)
+								JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus)
+								JOIN varastopaikat ON (varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto)
+								JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 								WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
 								AND lahdot.aktiivi = 'S'
 								AND lahdot.pvm > date_sub(now(), INTERVAL 7 day)
@@ -900,21 +892,18 @@
 					echo "<td>";
 					echo "<select name='yhdistetaan_lahtoon'>";
 					$indeksi = 1;
+					$sel = "";
 					foreach($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty as $lahto) {
 						if(count($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty) == 2) {
+							//kun array:ssa --> valitse lähtö + 1 lähtö, esi selectoidaan se lähtö
 							if($indeksi == 2) {
 								$sel = "selected='SELECTED'";
 							}
-							else {
-								$sel = "";
-							}
-						}
-						else {
-							$sel = "";
 						}
 						echo "<option {$sel} value='{$lahto['lahdon_tilauksien_tunnukset']}'>{$lahto['dropdown_text']}</option>";
 
 						$indeksi++;
+						$sel = "";
 					}
 					echo "</select>";
 					echo "</td>";

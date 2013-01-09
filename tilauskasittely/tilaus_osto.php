@@ -610,28 +610,18 @@
 								AND tunnus = {$tilausrivin_lisatiedot_row['tilausrivitunnus']}" ;
 					$result = pupe_query($query);
 					if(mysql_num_rows($result) != 0) {
-						//p‰ivitet‰‰n myyntitilausrivi
-						//try
-						//osasto
-						//nimitys
+						//p‰ivitet‰‰n myyntitilausriville kappalem‰‰r‰t
 						$query = "	UPDATE tilausrivi
-									SET tuoteno = '{$tuoteno}',
-									tyyppi = 'L',
-									tilkpl = '{$kpl}',
-									varattu = '{$kpl}',
-									hinta = '{$hinta}',
-									alv = '{$alv}',
-									ale1 = '{$ale1}',
-									ale2 = '{$ale2}',
-									ale3 = '{$ale3}'
+									SET tilkpl = '{$kpl}',
+									varattu = '{$kpl}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'";
 						pupe_query($query);
 
-						echo "<font class='error'>".t("Myyntitilausrivi p‰ivitettiin myˆs")."</font><br/><br/>";
+						echo "<font class='error'>".t("Myyntitilausriville p‰ivitettiin m‰‰r‰t")."</font><br/><br/>";
 					}
 					else {
-						echo "<font class='error'>".t("Myyntitilausrivi on keratty, toimitettu tai laskutettu")."</font><br/><br/>";
+						echo "<font class='error'>".t("Myyntitilausrivi on keratty, toimitettu tai laskutettu, joten sit‰ ei p‰ivitetty")."</font><br/><br/>";
 					}
 				}
 				

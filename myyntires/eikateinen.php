@@ -499,9 +499,14 @@ function echo_lasku_table($laskurow, $toim) {
 		echo "<th>".t('Kassalipas')."</th>";
 		echo '<td>';
 		echo '<select name="kassalipas">';
+
 		while ($row = mysql_fetch_assoc($result)) {
-			echo '<option value="'.$row['tunnus'].'">'.t($row['nimi']).'</option>';
+
+			$sel = $laskurow['kassalipas'] == $row['tunnus'] ? " selected" : "";
+
+			echo "<option value='{$row['tunnus']}'{$sel}>".t($row['nimi'])."</option>";
 		}
+
 		echo '</select>';
 		echo '</td>';
 		echo '</tr>';

@@ -1045,8 +1045,8 @@
 					lasku.kassalipas,
 					tiliointi.ltunnus,
 					kassalipas.tunnus ktunnus,
+					(lasku.summa - lasku.pyoristys) summa,
 					SUM(tiliointi.summa) tilsumma,
-					SUM(lasku.summa - lasku.pyoristys) summa,
 					GROUP_CONCAT(IF(IFNULL(kassalipas.nimi, '') = '', 'Muut', kassalipas.nimi), lasku.nimi, lasku.ytunnus, lasku.laskunro, lasku.laskutettu, tiliointi.ltunnus) AS grouppaus
 					FROM lasku USE INDEX (yhtio_tila_mapvm)
 					JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND lasku.maksuehto = maksuehto.tunnus AND maksuehto.kateinen != '')
@@ -1057,7 +1057,7 @@
 					AND lasku.alatila	= 'X'
 					{$lisa}
 					{$kassat}
-					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
 					ORDER BY kassa, kassanimi, tyyppi, lasku.mapvm, lasku.laskunro";
 		$result = pupe_query($query);
 

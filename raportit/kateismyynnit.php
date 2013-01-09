@@ -1046,8 +1046,7 @@
 					tiliointi.ltunnus,
 					kassalipas.tunnus ktunnus,
 					(lasku.summa - lasku.pyoristys) summa,
-					SUM(tiliointi.summa) tilsumma,
-					GROUP_CONCAT(IF(IFNULL(kassalipas.nimi, '') = '', 'Muut', kassalipas.nimi), lasku.nimi, lasku.ytunnus, lasku.laskunro, lasku.laskutettu, tiliointi.ltunnus) AS grouppaus
+					SUM(tiliointi.summa) tilsumma
 					FROM lasku USE INDEX (yhtio_tila_mapvm)
 					JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND lasku.maksuehto = maksuehto.tunnus AND maksuehto.kateinen != '')
 					LEFT JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.korjattu = '' AND tiliointi.tilino IN ({$myyntisaamiset_tilit}))

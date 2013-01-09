@@ -389,7 +389,7 @@
 				}
 			}
 			else {
-				echo "<font class='error'>",t("Ei tarvittavia tilejä"),"!</font><br /><br />";
+				echo "<font class='error'>",t("Ei löytynyt tarvittavia tilejä"),"!</font><br /><br />";
 			}
 
 			$tee = 'E';

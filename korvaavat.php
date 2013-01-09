@@ -156,8 +156,7 @@
 	}
 
 	if ($tee == 'korvaa_vastaava') {
-		echo "Korvataan vastaava";
-		var_dump($_POST);
+
 		$query  = "SELECT * FROM $taulu WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 		$row    = mysql_fetch_array($result);
@@ -261,7 +260,7 @@
 							<input type='hidden' name='tunnus' value='$row[tunnus]'>
 							<input type='hidden' name='korvattava' value='$row[tuoteno]'>
 							<input type='hidden' name='korvaava' value='$paatuote[tuoteno]'>
-							<button>Korvaa</button>
+							<input type='submit' value='Korvaa' />
 							</form>
 							</td>";
 						echo "<td class='back'>Korvaa vastaava t‰m‰n ketjun p‰‰tuotteella</td>";

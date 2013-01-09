@@ -960,10 +960,11 @@
 				echo "<font class='message'>".t("Vastaavat tuotteet")."</font><hr>";
 
 				echo "<table>";
-				echo "<tr><th colspan='2'>Ketju $id</th></tr>";
+				echo "<tr><th colspan='3'>Ketju $id</th></tr>";
 				echo "<tr>";
 				echo "<th>".t("Tuotenumero")."</th>";
 				echo "<th>".t("Myytävissä")."</th>";
+				echo "<th>".t("Vaihtoehtoinen")."</th>";
 				echo "</tr>";
 
 				// Haetaan ketjun tuotteet
@@ -973,6 +974,14 @@
 					echo "<tr>";
 					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($tuote["tuoteno"])."&lopetus=$lopetus'>$tuote[tuoteno]</a></td>";
 					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
+
+					echo "<td>";
+
+					// Vaihtoehtoinen
+					if ($tuote['vaihtoehtoinen'] == 'K') {
+						echo "Kyllä";
+					}
+					echo "</td>";
 					echo "</tr>";
 				}
 				echo "</table>";
@@ -984,10 +993,11 @@
 				// Ketjujen id:t
 				foreach($vastaavat->ketjut() as $ketju) {
 					echo "<table>";
-					echo "<tr><th colspan='2'>Ketju $ketju.</th></tr>";
+					echo "<tr><th colspan='3'>Ketju $ketju.</th></tr>";
 					echo "<tr>";
 					echo "<th>".t("Tuotenumero")."</th>";
 					echo "<th>".t("Myytävissä")."</th>";
+					echo "<th>".t("Vaihtoehtoinen")."</th>";
 					echo "</tr>";
 
 					// Haetaan ketjun tuotteet ketjun id:llä
@@ -997,6 +1007,14 @@
 						echo "<tr>";
 						echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($tuote["tuoteno"])."&lopetus=$lopetus'>$tuote[tuoteno]</a></td>";
 						echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
+						echo "<td>";
+
+						// Vaihtoehtoinen
+						if ($tuote['vaihtoehtoinen'] == 'K') {
+							echo "Kyllä";
+						}
+
+						echo "</td>";
 						echo "</tr>";
 					}
 					echo "</table>";

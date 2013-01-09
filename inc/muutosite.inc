@@ -334,7 +334,8 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND ltunnus = '{$tunnus}'
 						AND tilino IN ({$tilit})
-						AND korjattu = ''";
+						AND korjattu = ''
+						AND mapvm = '{$trow['mapvm']}'";
 			$tiliointires = pupe_query($query);
 			$tiliointirow = mysql_fetch_assoc($tiliointires);
 
@@ -344,7 +345,7 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tapvm = '{$tiliointirow['tapvm']}'
 						AND korjattu = ''
-						AND summa = '".abs($tiliointirow['summa'])."'";
+						AND summa = '".($tiliointirow['summa'] * -1)."'";
 			$vastakirjausres = pupe_query($query);
 			$vastakirjausrow = mysql_fetch_assoc($vastakirjausres);
 
@@ -353,14 +354,7 @@
 						korjattu = '{$kukarow['kuka']}',
 						korjausaika = now()
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$tiliointirow['tunnus']}'";
-			$updres = pupe_query($query);
-
-			$query = "	UPDATE tiliointi SET
-						korjattu = '{$kukarow['kuka']}',
-						korjausaika = now()
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$vastakirjausrow['tunnus']}'";
+						AND tunnus IN ({$tiliointirow['tunnus']}, {$vastakirjausrow['tunnus']})";
 			$updres = pupe_query($query);
 
 			$query = "INSERT INTO tiliointi SET ";
@@ -377,12 +371,8 @@
 			$result = pupe_query($query);
 
 			$query = "	UPDATE lasku SET
-						maksaja = '',
-						maksuaika = '0000-00-00 00:00:00',
 						mapvm = '0000-00-00',
 						maksu_kurssi = 0,
-						maksu_tili = '',
-						olmapvm = '0000-00-00',
 						tila = 'Q'
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$tunnus}'";

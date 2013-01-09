@@ -337,7 +337,7 @@
 							AND ltunnus = '{$tunnus}'
 							AND tilino IN ({$tilit})
 							AND korjattu = ''
-							AND mapvm = '{$trow['mapvm']}'";
+							AND tapvm = '{$trow['mapvm']}'";
 				$tiliointires = pupe_query($query);
 				$tiliointirow = mysql_fetch_assoc($tiliointires);
 

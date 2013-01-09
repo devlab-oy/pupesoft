@@ -567,8 +567,14 @@
 
 			// Haetaan vastaavuusketjut korvaavat ketjun päätuotteella
 			require 'vastaavat.class.php';
-			$vastaavat = new Vastaavat($korvaavat->paatuote());
 
+			// Jos korvaavia tuotteita ei löydy, haetaan vastaavat myytävällä tuotteella.
+			// Muulloin etsitään vastaavat korvaavuusketjun päätuotteen mukaaan.
+			if (empty($korvaavat_tuotteet)) {
+				$vastaavat = new Vastaavat($tuoteno);
+			} else {
+				$vastaavat = new Vastaavat($korvaavat->paatuote());
+			}
 
 			// Vastaavat tuotteet array
 			$vastaavat_tuotteet = array();

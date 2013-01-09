@@ -112,7 +112,6 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "TERMINAALIALUE") 	$ulos .= "<option value='TERMINAALIALUE' $avain_sel[TERMINAALIALUE]>		".t("Varaston terminaalialue")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SSCC")			 	$ulos .= "<option value='SSCC' $avain_sel[SSCC]>							".t("SSCC-koodi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PAKKAUSKV") 		$ulos .= "<option value='PAKKAUSKV' $avain_sel[PAKKAUSKV]>					".t("Pakkaustiedon kieliversio")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "OHJAUSMERKKI") 		$ulos .= "<option value='OHJAUSMERKKI' {$avain_sel['OHJAUSMERKKI']}>		".t("Ohjausmerkki")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Työmääräysten avainsanat")."'>";
@@ -315,24 +314,6 @@
 			}
 		}
 		closedir($handle);
-
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
-	if ($avain_sel["OHJAUSMERKKI"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
-
-		$ulos  = "<td><select name='{$nimi}'>";
-
-		$query = "	SELECT selite
-					FROM toimitustapa
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					ORDER BY 1";
-		$toimitustapares = pupe_query($query);
-
-		while ($toimitustaparow = mysql_fetch_assoc($toimitustapares)) {
-			$ulos .= "<option value='{$toimitustaparow['selite']}'>{$toimitustaparow['selite']}</option>";
-		}
 
 		$ulos .= "</select></td>";
 		$jatko = 0;

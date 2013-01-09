@@ -24,28 +24,28 @@ $query  = "	UPDATE lasku SET vanhatunnus=tunnus $ohjausmerkkilisa
 			AND vanhatunnus=0";
 $oldtur = pupe_query($query);
 
-$ohjausmerkki_check = t_avainsana("OHJAUSMERKKI", '', "and selite = '{$laskurow['toimitustapa']}'", '', '', "selitetark");
+$query = "	SELECT tarkenne
+			FROM asiakkaan_avainsanat
+			WHERE yhtio = '{$kukarow['yhtio']}'
+			AND UPPER(laji) = 'OHJAUSMERKKI'
+			AND liitostunnus = '{$laskurow['liitostunnus']}'
+			AND avainsana = '{$laskurow['toimitustapa']}'";
+$ohjausmerkki_check_res = pupe_query($query);
+$ohjausmerkki_check_row = mysql_fetch_assoc($ohjausmerkki_check_res);
 
-if ($ohjausmerkki_check != "") {
+if ($ohjausmerkki_check_row['tarkenne'] != "") {
 
 	// Tarkistetaan löytyykö kyseinen ohjausmerkkiteksti otsikolta
 	// Ei haluta lisätä tekstiä kahteen kertaan
-	$query = "	SELECT tunnus
-				FROM lasku
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND ohjausmerkki LIKE '%{$ohjausmerkki_check}%'
-				AND tunnus = '{$laskurow['tunnus']}'";
-	$ohjausmerkki_chk_res = pupe_query($query);
-
-	if (mysql_num_rows($ohjausmerkki_chk_res) == 0) {
+	if (strpos($laskurow['ohjausmerkki'], $ohjausmerkki_check_row['tarkenne']) === FALSE) {
 
 		if ($laskurow['ohjausmerkki'] != "") {
-			$updlisa = " ohjausmerkki = CONCAT('{$ohjausmerkki_check}', ' / ', ohjausmerkki)";
-			$laskurow['ohjausmerkki'] = "{$ohjausmerkki_check} / {$laskurow['ohjausmerkki']}";
+			$updlisa = " ohjausmerkki = CONCAT('{$ohjausmerkki_check_row['tarkenne']}', ' / ', ohjausmerkki)";
+			$laskurow['ohjausmerkki'] = "{$ohjausmerkki_check_row['tarkenne']} / {$laskurow['ohjausmerkki']}";
 		}
 		else {
-			$updlisa = " ohjausmerkki = '{$ohjausmerkki_check}'";
-			$laskurow['ohjausmerkki'] = $ohjausmerkki_check;
+			$updlisa = " ohjausmerkki = '{$ohjausmerkki_check_row['tarkenne']}'";
+			$laskurow['ohjausmerkki'] = $ohjausmerkki_check_row['tarkenne'];
 		}
 
 		$query = "	UPDATE lasku SET

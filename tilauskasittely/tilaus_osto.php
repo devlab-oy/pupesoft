@@ -160,14 +160,18 @@
 			//Nollataan sarjanumerolinkit
 			$query    = "	SELECT tilausrivi.tunnus
 							FROM tilausrivi
-							JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+							JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.otunnus = '$kukarow[kesken]'";
 			$sres = pupe_query($query);
 
 			while($srow = mysql_fetch_array($sres)) {
-				$query = "UPDATE sarjanumeroseuranta SET ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' AND ostorivitunnus='$srow[tunnus]'";
-				$sarjares = pupe_query($query);
+				if($srow['sarjanumeroseuranta'] != '') {
+					$query = "UPDATE sarjanumeroseuranta SET ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' AND ostorivitunnus='$srow[tunnus]'";
+					$sarjares = pupe_query($query);
+				}
+
+				tarkista_myynti_osto_liitos_ja_poista($srow['tunnus']);
 			}
 
 			$query = "UPDATE lasku SET tila='D', alatila='$laskurow[tila]', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ohjelmassa tilaus_osto.php ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
@@ -175,8 +179,6 @@
 
 			$query = "UPDATE kuka SET kesken=0 WHERE session='$session'";
 			$result = pupe_query($query);
-
-			tarkista_myynti_osto_liitos_ja_poista_kaikki_myynti_rivit($kukarow['kesken']);
 
 			$tee = "";
 			$kukarow["kesken"] = 0; // Ei enää kesken

@@ -26,10 +26,10 @@ $oldtur = pupe_query($query);
 
 $query = "	SELECT tarkenne
 			FROM asiakkaan_avainsanat
-			WHERE yhtio = '{$kukarow['yhtio']}'
-			AND UPPER(laji) = 'OHJAUSMERKKI'
+			WHERE yhtio 	 = '{$kukarow['yhtio']}'
+			AND laji 		 = 'OHJAUSMERKKI'
 			AND liitostunnus = '{$laskurow['liitostunnus']}'
-			AND avainsana = '{$laskurow['toimitustapa']}'";
+			AND avainsana 	 = '{$laskurow['toimitustapa']}'";
 $ohjausmerkki_check_res = pupe_query($query);
 $ohjausmerkki_check_row = mysql_fetch_assoc($ohjausmerkki_check_res);
 
@@ -37,7 +37,7 @@ if ($ohjausmerkki_check_row['tarkenne'] != "") {
 
 	// Tarkistetaan löytyykö kyseinen ohjausmerkkiteksti otsikolta
 	// Ei haluta lisätä tekstiä kahteen kertaan
-	if (strpos($laskurow['ohjausmerkki'], $ohjausmerkki_check_row['tarkenne']) === FALSE) {
+	if (stripos($laskurow['ohjausmerkki'], $ohjausmerkki_check_row['tarkenne']) === FALSE) {
 
 		if ($laskurow['ohjausmerkki'] != "") {
 			$updlisa = " ohjausmerkki = CONCAT('{$ohjausmerkki_check_row['tarkenne']}', ' / ', ohjausmerkki)";
@@ -51,7 +51,7 @@ if ($ohjausmerkki_check_row['tarkenne'] != "") {
 		$query = "	UPDATE lasku SET
 					{$updlisa}
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$laskurow['tunnus']}'";
+					AND tunnus  = '{$laskurow['tunnus']}'";
 		$updres = pupe_query($query);
 	}
 }

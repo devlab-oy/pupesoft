@@ -325,62 +325,74 @@
 			// poistetaan tyhjät alkiot array_filterin avulla ilman callbackia
 			// If no callback is supplied, all entries of input equal to FALSE will be removed.
 			$tilit = array_filter($tilit);
-			$tilit = "'".implode("','", $tilit)."'";
 
-			// Etsitään oikea kirjaus
-			// Pitäisi aina löytyä vain yksi osuma, siksi ei ole while-looppi
-			$query = "	SELECT *
-						FROM tiliointi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND ltunnus = '{$tunnus}'
-						AND tilino IN ({$tilit})
-						AND korjattu = ''
-						AND mapvm = '{$trow['mapvm']}'";
-			$tiliointires = pupe_query($query);
-			$tiliointirow = mysql_fetch_assoc($tiliointires);
+			if (count($tilit) > 0) {
+				$tilit = "'".implode("','", $tilit)."'";
 
-			// Etsitään vastakirjaus
-			$query = "	SELECT *
-						FROM tiliointi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tapvm = '{$tiliointirow['tapvm']}'
-						AND korjattu = ''
-						AND summa = '".($tiliointirow['summa'] * -1)."'";
-			$vastakirjausres = pupe_query($query);
-			$vastakirjausrow = mysql_fetch_assoc($vastakirjausres);
+				// Etsitään oikea kirjaus
+				// Pitäisi aina löytyä vain yksi osuma, siksi ei ole while-looppi
+				$query = "	SELECT *
+							FROM tiliointi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND ltunnus = '{$tunnus}'
+							AND tilino IN ({$tilit})
+							AND korjattu = ''
+							AND mapvm = '{$trow['mapvm']}'";
+				$tiliointires = pupe_query($query);
+				$tiliointirow = mysql_fetch_assoc($tiliointires);
 
-			// Yliviivataan molemmat tiliöinnit
-			$query = "	UPDATE tiliointi SET
-						korjattu = '{$kukarow['kuka']}',
-						korjausaika = now()
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus IN ({$tiliointirow['tunnus']}, {$vastakirjausrow['tunnus']})";
-			$updres = pupe_query($query);
+				// Etsitään vastakirjaus
+				$query = "	SELECT *
+							FROM tiliointi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tapvm = '{$tiliointirow['tapvm']}'
+							AND korjattu = ''
+							AND summa = '".($tiliointirow['summa'] * -1)."'";
+				$vastakirjausres = pupe_query($query);
+				$vastakirjausrow = mysql_fetch_assoc($vastakirjausres);
 
-			$query = "INSERT INTO tiliointi SET ";
+				if (mysql_num_rows($tiliointires) == 1 and mysql_num_rows($vastakirjausres) == 1) {
+					// Yliviivataan molemmat tiliöinnit
+					$query = "	UPDATE tiliointi SET
+								korjattu = '{$kukarow['kuka']}',
+								korjausaika = now()
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus IN ({$tiliointirow['tunnus']}, {$vastakirjausrow['tunnus']})";
+					$updres = pupe_query($query);
 
-			// Tehdään uusi kirjaus
-			for ($i = 0; $i < mysql_num_fields($tiliointires) - 1; $i++) {
-				switch (mysql_field_name($tiliointires,$i)) {
-					default:
-						$query .= mysql_field_name($tiliointires, $i)." = '".$tiliointirow[mysql_field_name($tiliointires, $i)]."',";
+					$query = "INSERT INTO tiliointi SET ";
+
+					// Tehdään uusi kirjaus
+					for ($i = 0; $i < mysql_num_fields($tiliointires) - 1; $i++) {
+						switch (mysql_field_name($tiliointires,$i)) {
+							default:
+								$query .= mysql_field_name($tiliointires, $i)." = '".$tiliointirow[mysql_field_name($tiliointires, $i)]."',";
+						}
+					}
+
+					$query = substr($query, 0, -1);
+					$result = pupe_query($query);
+
+					$query = "	UPDATE lasku SET
+								mapvm = '0000-00-00',
+								maksu_kurssi = 0,
+								tila = 'Q'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$tunnus}'";
+					$updres = pupe_query($query);
+
+					echo "<font class='message'>",t("Lasku siirrettiin odottamaan suoritusta"),"!</font><br /><br />";
+				}
+				else {
+					echo "<font class='error'>",t("Ei löytynyt oikea määrä kirjauksia"),"!</font><br /><br />";
 				}
 			}
-
-			$query = substr($query, 0, -1);
-			$result = pupe_query($query);
-
-			$query = "	UPDATE lasku SET
-						mapvm = '0000-00-00',
-						maksu_kurssi = 0,
-						tila = 'Q'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$tunnus}'";
-			$updres = pupe_query($query);
+			else {
+				echo "<font class='error'>",t("Ei tarvittavia tilejä"),"!</font><br /><br />";
+			}
 
 			$tee = 'E';
 			$tila = 'X';
-
 		}
 	}
 

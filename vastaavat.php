@@ -195,7 +195,7 @@ if ($tee == 'del') {
 }
 
 if ($tee == 'vaihtoehtoinen') {
-    //haetaan poistettavan tuotteen id.. käyttäjästävällistä..
+    //haetaan tuotteen id.. käyttäjästävällistä..
     $query  = "SELECT * FROM vastaavat WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
     $result = pupe_query($query);
     $row    = mysql_fetch_array($result);
@@ -203,11 +203,13 @@ if ($tee == 'vaihtoehtoinen') {
 
     // Jos setattu vaihetoehtoiseksi?
     if ($vaihtoehtoinen == 'true' and $row['vaihtoehtoinen'] != 'K') {
-        $query = "UPDATE vastaavat SET vaihtoehtoinen='K' WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
+
+        // Tuote voi olla useammassa ketjussa vain vaihtoehtoinen tai vastaava. Ei molempia.
+        $query = "UPDATE vastaavat SET vaihtoehtoinen='K' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuoteno}'";
         $result = pupe_query($query);
     }
     else if ($vaihtoehtoinen != true and $row['vaihtoehtoinen'] == 'K') {
-        $query = "UPDATE vastaavat SET vaihtoehtoinen='' WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
+        $query = "UPDATE vastaavat SET vaihtoehtoinen='' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuoteno}'";
         $result = pupe_query($query);
     }
 }
@@ -313,6 +315,7 @@ if ($tuoteno != '') {
                     $checked = ($tuote['vaihtoehtoinen'] == 'K') ? 'checked' : '';
                     echo "<td><form method='post'>
                         <input type='hidden' name='tunnus' value='$tuote[tunnus]'>
+                        <input type='hidden' name='tuoteno' value='$tuote[tuoteno]'>
                         <input type='hidden' name='tee' value='vaihtoehtoinen'>
                         <input type='checkbox' name='vaihtoehtoinen' value='true' onclick='submit()' $checked>
                         </form></td>";

@@ -76,7 +76,7 @@ class Vastaavat {
 					JOIN tuote ON vastaavat.yhtio=tuote.yhtio AND vastaavat.tuoteno=tuote.tuoteno
 					WHERE vastaavat.yhtio='{$kukarow['yhtio']}'
 					AND id='{$id}'
-					AND vaihtoehtoinen = '{$this->tyyppi}'
+					#AND vaihtoehtoinen = '{$this->tyyppi}'
 					ORDER BY jarjestys, tuoteno";
 		$result = pupe_query($query);
 
@@ -107,12 +107,12 @@ class Vastaavat {
 		}
 
 		// Haetaan korvaavat ketju ja tuotteiden tiedot
-		$query = "SELECT 'vastaava' as tyyppi, if(jarjestys=0, 9999, jarjestys) jarjestys, tuote.*
+		$query = "SELECT 'vastaava' as tyyppi, if(jarjestys=0, 9999, jarjestys) jarjestys, vaihtoehtoinen, tuote.*
 					FROM vastaavat
 					JOIN tuote ON vastaavat.yhtio=tuote.yhtio AND vastaavat.tuoteno=tuote.tuoteno
 					WHERE vastaavat.yhtio='{$kukarow['yhtio']}'
 					AND id='{$this->id}'
-					AND vaihtoehtoinen = '{$this->tyyppi}'
+					#AND vaihtoehtoinen = '{$this->tyyppi}'
 					$conditions
 					ORDER BY jarjestys, tuoteno";
 		$result = pupe_query($query);

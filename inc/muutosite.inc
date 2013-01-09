@@ -345,6 +345,7 @@
 				$query = "	SELECT *
 							FROM tiliointi
 							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND ltunnus = '{$tunnus}'
 							AND tapvm = '{$tiliointirow['tapvm']}'
 							AND korjattu = ''
 							AND summa = '".($tiliointirow['summa'] * -1)."'";

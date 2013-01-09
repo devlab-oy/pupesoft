@@ -259,11 +259,12 @@
 		}
 	}
 
+	//rahtikirja-tulostus.php riveiltä 784 - 788 tulee välilyöntejä
+	$otunnukset = str_replace(' ', '', $otunnukset);
 	// Ei kaaduta erroriin jos jostain syystä tullaan tyhjällä
 	if ($otunnukset == "") $otunnukset = 0;
 
 	if($yhdistetaan_lahtoon != 0 and $yhdistettavan_lahdon_tilaukset != 0) {
-		$otunnukset_temppi = str_replace(' ', '', $otunnukset);
 		if($yhdistetaan_lahtoon == $otunnukset_temppi) {
 			$otunnukset .= ',' . $yhdistettavan_lahdon_tilaukset;
 		}

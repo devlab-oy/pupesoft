@@ -4039,7 +4039,7 @@ if ($tee == '') {
 
 			// jälkitoimitus muiden mukana
 			if ($jt_muidenmukana == 'KYLLA') {
-				$kerayspvm = date('Y-m-d', strtotime('now + 1 month'));
+				$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
 			}
 			elseif ($jt_muidenmukana == 'EI') {
 				$kerayspvm = $laskurow["kerayspvm"];

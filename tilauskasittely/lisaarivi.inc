@@ -2023,9 +2023,21 @@
 							$var 	= "";
 							$varattu = $kpl;
 						}
-						// Normaalisti kaikki menee puutteeksi.
+						// Normaalisti kaikki menee jälkitoimitus muiden mukana.
 						else {
-							$var 	= "P";
+							if($yhtiorow['jt_automatiikka'] != '' and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+								//kun parametrit on asennossa:
+								//jt_automatiikka != Asiakkaan JT-rivejä ei kohdisteta automaattisesti ja automaattinen_jt_toimitus == Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä keräyspäivän mukaisesti
+								//tällöin asetetaan tilausrivi oletuksena jälkitoimitus muiden mukana
+								$var = "J";
+								$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
+								$varattu 	= $kpl;
+								$jt 		= 0;
+							}
+							else {
+								//Muuten oletuksena tilausrivi on puute asennossa
+								$var 	= "P";
+							}
 						}
 						break;
 					default :

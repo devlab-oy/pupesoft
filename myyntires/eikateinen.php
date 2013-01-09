@@ -44,20 +44,16 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 			'kassalipas'	 => $kassalipas
 		);
 
-		$kustp = '';
-
 		if ($toim == 'KATEINEN' and $kateinen != '') {
-			$mehtorow2 = hae_maksuehto($laskurow['maksuehto']);
-			$myysaatili = hae_kassalippaan_tiedot($laskurow['kassalipas'], $mehtorow2, $laskurow);
-			$kustp = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow, 'hae_kustp');
-
-			$_tmp  = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
+			// Lasku oli ennestään käteinen ja nyt päivitetään sille joku toinen käteismaksuehto
+			list($myysaatili, $_tmp) = hae_kassalippaan_tiedot($laskurow['kassalipas'], hae_maksuehto($laskurow['maksuehto']), $laskurow);
+			$_tmp = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
 		}
 		else {
 			$myysaatili  = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
 		}
 
-		$_kassalipas = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow);
+		list($_kassalipas, $kustp) = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow);
 
 		$params = array(
 			'laskurow'		 => $laskurow,
@@ -550,10 +546,13 @@ function echo_lasku_search() {
 	echo "</form>";
 }
 
-function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow, $hae_kustp = '') {
+function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 	global $yhtiorow, $kukarow;
 
+	$kustp = "";
+
 	if ($mehtorow['kateinen'] != '') {
+
 		$query = "	SELECT *
 					FROM kassalipas
 					WHERE yhtio = '{$kukarow['yhtio']}'
@@ -563,13 +562,8 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow, $hae_kustp =
 
 		if ($mehtorow['kateinen'] == "n") {
 			if ($kateisrow["pankkikortti"] != "") {
-
-				if ($hae_kustp != '') {
-					$myysaatili = $kateisrow['kustp'];
-				}
-				else {
-					$myysaatili = $kateisrow['pankkikortti'];
-				}
+				$kustp 		= $kateisrow['kustp'];
+				$myysaatili = $kateisrow['pankkikortti'];
 			}
 			else {
 				$myysaatili = $yhtiorow['pankkikortti'];
@@ -578,28 +572,18 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow, $hae_kustp =
 
 		if ($mehtorow['kateinen'] == "o") {
 			if ($kateisrow["luottokortti"] != "") {
-
-				if ($hae_kustp != '') {
-					$myysaatili = $kateisrow['kustp'];
-				}
-				else {
-					$myysaatili = $kateisrow['luottokortti'];
-				}
+				$kustp 		= $kateisrow['kustp'];
+				$myysaatili = $kateisrow['luottokortti'];
 			}
 			else {
 				$myysaatili = $yhtiorow['luottokortti'];
 			}
 		}
 
-		if($mehtorow['kateinen'] == 'p') {
-			if($kateisrow['kassa'] != '') {
-
-				if ($hae_kustp != '') {
-					$myysaatili = $kateisrow['kustp'];
-				}
-				else {
-					$myysaatili = $kateisrow['kassa'];
-				}
+		if ($mehtorow['kateinen'] == 'p') {
+			if ($kateisrow['kassa'] != '') {
+				$kustp 		= $kateisrow['kustp'];
+				$myysaatili = $kateisrow['kassa'];
 			}
 			else {
 				$myysaatili = $yhtiorow['kassa'];
@@ -608,13 +592,8 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow, $hae_kustp =
 
 		if ($myysaatili == "") {
 			if ($kateisrow["kassa"] != "") {
-
-				if ($hae_kustp != '') {
-					$myysaatili = $kateisrow['kustp'];
-				}
-				else {
-					$myysaatili = $kateisrow['kassa'];
-				}
+				$kustp 		= $kateisrow['kustp'];
+				$myysaatili = $kateisrow['kassa'];
 			}
 			else {
 				$myysaatili = $yhtiorow['kassa'];
@@ -622,7 +601,7 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow, $hae_kustp =
 		}
 	}
 	else {
-		if($laskurow['kassalipas'] != '') {
+		if ($laskurow['kassalipas'] != '') {
 			//haetaan kassalippaan tilit kassalippaan takaa
 			$kassalipas_query = "	SELECT kassa,
 									pankkikortti,
@@ -634,7 +613,7 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow, $hae_kustp =
 
 			$kassalippaat = mysql_fetch_assoc($kassalipas_result);
 
-			if(!empty($kassalippaat)) {
+			if (!empty($kassalippaat)) {
 				$myysaatili = $kassalippaat;
 			}
 			else {
@@ -654,7 +633,7 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow, $hae_kustp =
 		}
 	}
 
-	return $myysaatili;
+	return array($myysaatili, $kustp);
 }
 
 function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {

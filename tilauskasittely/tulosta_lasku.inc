@@ -2460,7 +2460,7 @@ if (!function_exists("tulosta_lasku")) {
 			// otetaan t‰m‰ talteen jotta saadaan vientierittely
 			$GLOBALS['vientierittelykomento'] = $komento;
 
-			if ($komento == "email" and $kukarow["eposti"] != '') {
+			if (($komento == "email" and $kukarow["eposti"] != '') or substr($komento,0,12) == 'asiakasemail') {
 				// l‰hetet‰‰n meili
 				$komento = "";
 

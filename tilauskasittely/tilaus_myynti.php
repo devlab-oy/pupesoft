@@ -216,21 +216,23 @@ if ($tee == 'DELKESKEN') {
 
 // Katostaan, että tilaus on vielä samassa tilassa jossa se oli kun se klikattiin auku muokkaatilaus-ohjelmassa
 if ($tee == 'AKTIVOI' and $mista == "muokkaatilaus") {
-	$query = "	SELECT tila, alatila
-				FROM lasku
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND tunnus  = '$tilausnumero'
-				AND tila 	= '$orig_tila'
-				AND alatila = '$orig_alatila'";
-	$result = pupe_query($query);
+	if (isset($orig_tila) and isset($orig_alatila)) {
+		$query = "	SELECT tila, alatila
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus  = '$tilausnumero'
+					AND tila 	= '$orig_tila'
+					AND alatila = '$orig_alatila'";
+		$result = pupe_query($query);
 
-	if (mysql_num_rows($result) != 1) {
+		if (mysql_num_rows($result) != 1) {
 			echo "<font class='error'>".t("Tilauksen tila on vaihtunut. Ole hyvä avaa tilaus uudestaan").".</font><br>";
 
 			// poistetaan aktiiviset tilaukset jota tällä käyttäjällä oli
 			$query = "UPDATE kuka SET kesken='' WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
 			$result = pupe_query($query);
 			exit;
+		}
 	}
 }
 

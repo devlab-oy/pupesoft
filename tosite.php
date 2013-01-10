@@ -42,7 +42,7 @@
 	if (isset($tiliointirivit) and !is_array($tiliointirivit)) $tiliointirivit = unserialize(urldecode($tiliointirivit));
 
 	if (isset($muutparametrit)) {
-		list($tee, $kuitti, $kuva, $maara, $tpp, $tpk, $tpv, $summa, $valkoodi, $alv_tili, $nimi, $comments, $selite, $liitos, $liitostunnus, $tunnus, $tiliointirivit, $MAX_FILE_SIZE, $itili, $ikustp, $ikohde, $isumma, $ivero, $iselite, $iliitos, $ed_iliitostunnus, $ed_iliitos) = explode("#!#", $muutparametrit);
+		list($tee, $kuitti, $kuva, $maara, $tpp, $tpk, $tpv, $summa, $valkoodi, $alv_tili, $nimi, $comments, $selite, $liitos, $liitostunnus, $tunnus, $tiliointirivit, $MAX_FILE_SIZE, $itili, $ikustp, $ikohde, $isumma, $ivero, $iselite, $iliitos, $ed_iliitostunnus, $ed_iliitos, $tullaan) = explode("#!#", $muutparametrit);
 
 		$itili				= unserialize(urldecode($itili));
 		$ikustp				= unserialize(urldecode($ikustp));
@@ -85,7 +85,7 @@
 		}
 	}
 
-	$muutparametrit = $tee."#!#".$kuitti."#!#".$kuva."#!#".$maara."#!#".$tpp."#!#".$tpk."#!#".$tpv."#!#".$summa."#!#".$valkoodi."#!#".$alv_tili."#!#".$nimi."#!#".$comments."#!#".$selite."#!#".$liitos."#!#".$liitostunnus."#!#".$tunnus."#!#".urlencode(serialize($tiliointirivit))."#!#".$MAX_FILE_SIZE."#!#".urlencode(serialize($itili))."#!#".urlencode(serialize($ikustp))."#!#".urlencode(serialize($ikohde))."#!#".urlencode(serialize($isumma))."#!#".urlencode(serialize($ivero))."#!#".urlencode(serialize($iselite))."#!#".urlencode(serialize($iliitos))."#!#".urlencode(serialize($ed_iliitostunnus))."#!#".urlencode(serialize($ed_iliitos));
+	$muutparametrit = $tee."#!#".$kuitti."#!#".$kuva."#!#".$maara."#!#".$tpp."#!#".$tpk."#!#".$tpv."#!#".$summa."#!#".$valkoodi."#!#".$alv_tili."#!#".$nimi."#!#".$comments."#!#".$selite."#!#".$liitos."#!#".$liitostunnus."#!#".$tunnus."#!#".urlencode(serialize($tiliointirivit))."#!#".$MAX_FILE_SIZE."#!#".urlencode(serialize($itili))."#!#".urlencode(serialize($ikustp))."#!#".urlencode(serialize($ikohde))."#!#".urlencode(serialize($isumma))."#!#".urlencode(serialize($ivero))."#!#".urlencode(serialize($iselite))."#!#".urlencode(serialize($iliitos))."#!#".urlencode(serialize($ed_iliitostunnus))."#!#".urlencode(serialize($ed_iliitos))."#!#".$tullaan;
 
 	echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
@@ -535,57 +535,58 @@
 	// Kirjoitetaan tosite jos tiedot ok!
 	if ($tee == 'I' and isset($teetosite)) {
 
-		if (trim($nimi) != '') {
-			$qlisa = " nimi = '{$nimi}',";
-		}
+		$paivitetaanko = (isset($tunnus) and trim($tunnus) > 0) ? true : false;
 
-		$paivitetaanko = false;
+		if (isset($tiliointirivit) and is_array($tiliointirivit) and count($tiliointirivit) == 0) {
 
-		if (isset($tunnus) and trim($tunnus) > 0) {
+			if (trim($nimi) != '') {
+				$qlisa = " nimi = '{$nimi}',";
+			}
 
-			$tunnus = (int) $tunnus;
+			if (isset($tunnus) and trim($tunnus) > 0) {
 
-			$query = "	UPDATE lasku SET
-						tapvm = '{$tpv}-{$tpk}-{$tpp}',
-						{$qlisa}
-						alv_tili = '{$alv_tili}',
-						comments = '{$comments}'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$tunnus}'";
-			$result = pupe_query($query);
+				$tunnus = (int) $tunnus;
 
-			$paivitetaanko = true;
+				$query = "	UPDATE lasku SET
+							tapvm = '{$tpv}-{$tpk}-{$tpp}',
+							{$qlisa}
+							alv_tili = '{$alv_tili}',
+							comments = '{$comments}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$tunnus}'";
+				$result = pupe_query($query);
 
-			$maara = count($ed_iliitostunnus)+1;
-		}
-		else {
-			$query = "	INSERT into lasku set
-						yhtio 		= '{$kukarow['yhtio']}',
-						tapvm 		= '{$tpv}-{$tpk}-{$tpp}',
-						{$qlisa}
-						tila 		= 'X',
-						alv_tili 	= '{$alv_tili}',
-						comments	= '{$comments}',
-						laatija 	= '{$kukarow['kuka']}',
-						luontiaika 	= now()";
-			$result = pupe_query($query);
-			$tunnus = mysql_insert_id ($link);
-		}
+				$maara = count($ed_iliitostunnus)+1;
+			}
+			else {
+				$query = "	INSERT into lasku set
+							yhtio 		= '{$kukarow['yhtio']}',
+							tapvm 		= '{$tpv}-{$tpk}-{$tpp}',
+							{$qlisa}
+							tila 		= 'X',
+							alv_tili 	= '{$alv_tili}',
+							comments	= '{$comments}',
+							laatija 	= '{$kukarow['kuka']}',
+							luontiaika 	= now()";
+				$result = pupe_query($query);
+				$tunnus = mysql_insert_id ($link);
+			}
 
-		if (isset($avaavatase) and $avaavatase == 'joo') {
-			$query = "	UPDATE tilikaudet SET
-						avaava_tase = '{$tunnus}'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$tilikausi}'";
-			$avaavatase_result = pupe_query($query);
-		}
+			if (isset($avaavatase) and $avaavatase == 'joo') {
+				$query = "	UPDATE tilikaudet SET
+							avaava_tase = '{$tunnus}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$tilikausi}'";
+				$avaavatase_result = pupe_query($query);
+			}
 
-		if ($kuva) {
-			// päivitetään kuvalle vielä linkki toiseensuuntaa
-			$query = "	UPDATE liitetiedostot
-						set liitostunnus = '{$tunnus}', selite = '{$selite} {$summa}'
-						where tunnus = '{$kuva}'";
-			$result = pupe_query($query);
+			if ($kuva) {
+				// päivitetään kuvalle vielä linkki toiseensuuntaa
+				$query = "	UPDATE liitetiedostot
+							set liitostunnus = '{$tunnus}', selite = '{$selite} {$summa}'
+							where tunnus = '{$kuva}'";
+				$result = pupe_query($query);
+			}
 		}
 
 		foreach ($ed_iliitostunnus as $liit_indx => $liit) {
@@ -916,6 +917,8 @@
 			sort($tilmaarat);
 		}
 
+		$disabled = (isset($tiliointirivit) and $lopetus != "" and isset($tullaan) and $tullaan == "muutosite") ? "disabled" : "";
+
 		$sel = array();
 		$sel[$maara] = "selected";
 
@@ -923,13 +926,17 @@
 			<tr>
 			<th>".t("Tiliöintirivien määrä")."</th>
 			<td>
-			<select name='maara' onchange='submit();'>";
+			<select name='maara' onchange='submit();' {$disabled}>";
 
 		foreach ($tilmaarat as $tilmaara) {
 			echo "<option {$sel[$tilmaara]} value='{$tilmaara}'>".($tilmaara-1)."</option>";
 		}
 
-		echo "</select></td>";
+		echo "</select>";
+
+		if ($disabled != "") echo "<input type='hidden' name='maara' value='{$maara}' />";
+
+		echo "</td>";
 
 		echo "<th nowrap>".t("Valitse toimittaja")."</th>";
 		echo "<td>";
@@ -945,9 +952,17 @@
 
 		echo "<tr>\n";
 		echo "<th>".t("Tositteen päiväys")."</th>\n";
-		echo "<td><input type='text' name='tpp' maxlength='2' size='2' value='{$tpp}'>\n";
-		echo "<input type='text' name='tpk' maxlength='2' size='2' value='{$tpk}'>\n";
-		echo "<input type='text' name='tpv' maxlength='4' size='4' value='{$tpv}'> ".t("ppkkvvvv")." {$tapvmvirhe}</td>\n";
+		echo "<td><input type='text' name='tpp' maxlength='2' size='2' value='{$tpp}' {$disabled}>\n";
+		echo "<input type='text' name='tpk' maxlength='2' size='2' value='{$tpk}' {$disabled}>\n";
+		echo "<input type='text' name='tpv' maxlength='4' size='4' value='{$tpv}' {$disabled}> ".t("ppkkvvvv")." {$tapvmvirhe}";
+
+		if ($disabled != "") {
+			echo "<input type='hidden' name='tpp' value='{$tpp}' />";
+			echo "<input type='hidden' name='tpk' value='{$tpk}' />";
+			echo "<input type='hidden' name='tpv' value='{$tpv}' />";
+		}
+
+		echo "</td>\n";
 
 		echo "<th nowrap>".t("tai")." ".t("valitse asiakas")."</th>";
 		echo "<td>";
@@ -959,7 +974,7 @@
 
 		if (!isset($turvasumma_valuutassa)) $turvasumma_valuutassa = $summa;
 
-		echo "<tr><th>".t("Summa")."</th><td><input type='text' name='summa' value='{$turvasumma_valuutassa}' onchange='javascript:tositesumma();' onkeyup='javascript:tositesumma();'>\n";
+		echo "<tr><th>".t("Summa")."</th><td><input type='text' name='summa' value='{$turvasumma_valuutassa}' onchange='javascript:tositesumma();' onkeyup='javascript:tositesumma();' {$disabled}>\n";
 
 		$query = "	SELECT nimi, tunnus
 					FROM valuu
@@ -967,19 +982,30 @@
 					ORDER BY jarjestys";
 		$vresult = pupe_query($query);
 
-		echo " <select name='valkoodi'>\n";
+		echo " <select name='valkoodi' {$disabled}>\n";
 
 		while ($vrow = mysql_fetch_assoc($vresult)) {
 			$sel="";
 			if (($vrow['nimi'] == $yhtiorow["valkoodi"] and $valkoodi == "") or ($vrow["nimi"] == $valkoodi)) {
 				$sel = "selected";
 			}
+
+			if ($disabled != "" and $valkoodi == "" and $sel != "") $valkoodi = $vrow['nimi'];
+
 			echo "<option value='{$vrow['nimi']}' {$sel}>{$vrow['nimi']}</option>\n";
 		}
 
 		echo "</select>\n";
+
+		if ($disabled != "") {
+			echo "<input type='hidden' name='summa' value='{$turvasumma_valuutassa}' />";
+			echo "<input type='hidden' name='valkoodi' value='{$valkoodi}' />";
+		}
+
 		echo "</td>\n";
-		echo "<th>".t("tai")." ".t("Syötä nimi")."</th><td><input type='text' size='20' name='nimi' value='{$nimi}'></td></tr>\n";
+		echo "<th>".t("tai")." ".t("Syötä nimi")."</th><td><input type='text' size='20' name='nimi' value='{$nimi}' {$disabled}>";
+
+		echo "</td></tr>\n";
 
 
 		echo "<tr><th>".t("Tositteen kuva/liite")."</th>\n";
@@ -988,7 +1014,7 @@
 			echo "<td>".t("Kuva jo tallessa")."!<input name='kuva' type='hidden' value = '{$kuva}'></td>\n";
 		}
 		else {
-			echo "<td><input type='hidden' name='MAX_FILE_SIZE' value='8000000'><input name='userfile' type='file'></td>\n";
+			echo "<td><input type='hidden' name='MAX_FILE_SIZE' value='8000000'><input name='userfile' type='file' {$disabled}></td>\n";
 		}
 
 		echo "<th>".t("Tulosta kuitti")."</th><td>";
@@ -999,7 +1025,7 @@
 				$kuitti = 'checked';
 			}
 
-			echo "<input type='checkbox' name='kuitti' {$kuitti}>\n";
+			echo "<input type='checkbox' name='kuitti' {$kuitti} {$disabled}>\n";
 		}
 		else {
 			echo "<font class='message'>".t("Sinulla ei ole oletuskirjoitinta. Et voi tulostaa kuitteja")."!</font>\n";
@@ -1021,7 +1047,8 @@
 
 			echo "<tr>\n";
 			echo "<th>".t("Alv tili")."</th><td colspan='3'>\n";
-			echo "<select name='alv_tili'>\n";
+
+			echo "<select name='alv_tili' {$disabled}>\n";
 			echo "<option value='{$yhtiorow['alv']}'>{$yhtiorow['alv']} - {$yhtiorow['nimi']}, {$yhtiorow['kotipaikka']}, {$yhtiorow['maa']}</option>\n";
 
 			while ($vrow = mysql_fetch_assoc($alhire)) {
@@ -1043,17 +1070,17 @@
 
 		echo "<tr>\n";
 		echo "<th>".t("Tositteen kommentti")."</th>\n";
-		echo "<td colspan='3'><input type='text' name='comments' value='{$comments}' size='60'></td>\n";
+		echo "<td colspan='3'><input type='text' name='comments' value='{$comments}' size='60' {$disabled}></td>\n";
 		echo "</tr>\n";
 
 		echo "<tr>\n";
 		echo "<th>".t("Tiliöintien selitteet")."</th>\n";
-		echo "<td colspan='3'><input type='text' name='selite' value='{$selite}' maxlength='150' size='60' onchange='javascript:selitejs();' onkeyup='javascript:selitejs();'></td>\n";
+		echo "<td colspan='3'><input type='text' name='selite' value='{$selite}' maxlength='150' size='60' onchange='javascript:selitejs();' onkeyup='javascript:selitejs();' {$disabled}></td>\n";
 		echo "</tr>\n";
 
 		echo "<tr>
 				<th>".t("Lue tositteen rivit tiedostosta")."</th>
-				<td colspan='3'><input type='file' name='tositefile' onchage='submit()'></td>
+				<td colspan='3'><input type='file' name='tositefile' onchage='submit()' {$disabled}></td>
 				</tr>\n";
 
 		if ($asiakasid > 0 or $toimittajaid > 0) {
@@ -1119,7 +1146,16 @@
 						$tilinimi = $vrow['nimi'];
 					}
 				}
-				echo "<td width='200' valign='top'\">".livesearch_kentta("tosite", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT", "ivero[$i]")." {$tilinimi}</td>\n";
+				echo "<td width='200' valign='top'\">";
+
+				if ($disabled != "") {
+					echo "{$itili[$i]} <input type='hidden' name='itili[{$i}]' value='{$itili[$i]}' />";
+				}
+				else {
+					echo livesearch_kentta("tosite", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT", "ivero[$i]");
+				}
+
+				echo " {$tilinimi}</td>\n";
 			}
 			else {
 				echo "<td width='200' valign='top'>{$iulos[$i]}</td>\n";
@@ -1136,7 +1172,7 @@
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<select name = 'ikustp[{$i}]' style='width: 140px'><option value = ' '>".t("Ei kustannuspaikkaa");
+				echo "<select name = 'ikustp[{$i}]' style='width: 140px' {$disabled}><option value = ' '>".t("Ei kustannuspaikkaa");
 
 				while ($kustannuspaikkarow = mysql_fetch_assoc($result)) {
 					$valittu = "";
@@ -1146,6 +1182,8 @@
 					echo "<option value = '{$kustannuspaikkarow['tunnus']}' {$valittu}>{$kustannuspaikkarow['koodi']} {$kustannuspaikkarow['nimi']}\n";
 				}
 				echo "</select><br>\n";
+
+				if ($disabled != "") echo "<input type='hidden' name='ikustp[{$i}]' value='{$ikustp[$i]}' />";
 			}
 
 			$query = "	SELECT tunnus, nimi, koodi
@@ -1157,7 +1195,7 @@
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<select name = 'ikohde[{$i}]' style='width: 140px'><option value = ' '>".t("Ei kohdetta");
+				echo "<select name = 'ikohde[{$i}]' style='width: 140px' {$disabled}><option value = ' '>".t("Ei kohdetta");
 
 				while ($kustannuspaikkarow = mysql_fetch_assoc($result)) {
 					$valittu = "";
@@ -1167,6 +1205,8 @@
 					echo "<option value = '{$kustannuspaikkarow['tunnus']}' {$valittu}>{$kustannuspaikkarow['koodi']} {$kustannuspaikkarow['nimi']}\n";
 				}
 				echo "</select><br>\n";
+
+				if ($disabled != "") echo "<input type='hidden' name='ikohde[{$i}]' value='{$ikohde[$i]}' />";
 			}
 
 			$query = "	SELECT tunnus, nimi, koodi
@@ -1178,7 +1218,7 @@
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<select name = 'iprojekti[{$i}]' style='width: 140px'><option value = ' '>".t("Ei projektia");
+				echo "<select name = 'iprojekti[{$i}]' style='width: 140px' {$disabled}><option value = ' '>".t("Ei projektia");
 
 				while ($kustannuspaikkarow = mysql_fetch_assoc($result)) {
 					$valittu = "";
@@ -1188,13 +1228,23 @@
 					echo "<option value = '{$kustannuspaikkarow['tunnus']}' {$valittu}>{$kustannuspaikkarow['koodi']} {$kustannuspaikkarow['nimi']}\n";
 				}
 				echo "</select>\n";
+
+				if ($disabled != "") echo "<input type='hidden' name='iprojekti[{$i}]' value='{$iprojekti[$i]}' />";
 			}
 
 			echo "</td>\n";
-			echo "<td valign='top' align='right'><input type='text' size='13' style='text-align: right;' name='isumma[{$i}]' value='{$isumma_valuutassa[$i]}' onchange='javascript:tositesumma();' onkeyup='javascript:tositesumma();'> {$valkoodi}<br>&nbsp;&nbsp;{$isumma[$i]}&nbsp;&nbsp;{$valkoodi}</td>\n";
+			echo "<td valign='top' align='right'><input type='text' size='13' style='text-align: right;' name='isumma[{$i}]' value='{$isumma_valuutassa[$i]}' onchange='javascript:tositesumma();' onkeyup='javascript:tositesumma();' {$disabled}> {$valkoodi}<br>&nbsp;&nbsp;{$isumma[$i]}&nbsp;&nbsp;{$valkoodi}";
+
+			if ($disabled != "") echo "<input type='hidden' name='isumma[{$i}]' value='{$isumma_valuutassa[$i]}' />";
+
+			echo "</td>\n";
 
 			if (!isset($hardcoded_alv) or $hardcoded_alv != 1) {
-				echo "<td valign='top'>" . alv_popup('ivero['.$i.']', $ivero[$i]) . "</td>\n";
+				echo "<td valign='top'>";
+
+				if ($disabled != "") echo "{$ivero[$i]} <input type='hidden' name='ivero[{$i}]' value='{$ivero[$i]}' />";
+				else alv_popup('ivero['.$i.']', $ivero[$i]) ;
+				echo "</td>\n";
 			}
 			else {
 				echo "<td></td>\n";
@@ -1268,7 +1318,11 @@
 			// Ei rikota rivinvaihtoja
 			$iselite[$i] = str_ireplace("<br>", "(br)", $iselite[$i]);
 
-			echo "<tr><td colspan='".(5+$cspan)."' nowrap><input type='text' name='iselite[{$i}]' value='{$iselite[$i]}' maxlength='150' size='80' placeholder='".t("Selite")."'></td></tr>\n";
+			echo "<tr><td colspan='".(5+$cspan)."' nowrap><input type='text' name='iselite[{$i}]' value='{$iselite[$i]}' maxlength='150' size='80' placeholder='".t("Selite")."' {$disabled}>";
+
+			if ($disabled != "") echo "<input type='hidden' name='iselite[{$i}]' value='{$iselite[$i]}' />";
+
+			echo "</td></tr>\n";
 			echo "<tr style='height: 5px;'></tr>\n";
 		}
 

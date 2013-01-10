@@ -131,7 +131,7 @@
 					$var 				= "";
 					$varasto			= "";
 					$paikka				= "";
-
+					$varataan_saldoa	= "EI";
 
 					// $perheid_lisaarivi on perustetun rivin tunnus
 					require ("lisaarivi.inc");

@@ -520,7 +520,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 				}
 				elseif (mysql_field_name($result, $i) == "tapvm") {
 					echo "<td>".tv1dateconv($trow[$kennimi])."</td>";
-				}	
+				}
 				elseif (mysql_field_name($result, $i) == "ytunnus") {
 						echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
 					}
@@ -1350,13 +1350,17 @@ if ($tee == 'E' or $tee == 'F') {
 
 	// N‰ytet‰‰n nappi vain jos siihen on oikeus
 	if ($oikeurow['paivitys'] == 1) {
-		echo "<form method='post'>
-				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-				<input type = 'hidden' name = 'tee' value='M'>
-				<input type = 'hidden' name = 'tila' value=''>
-				<input type = 'hidden' name = 'tunnus' value='$tunnus'>
-				<input type = 'submit' value = '".t("Muuta tietoja")."'>
-				</form>";
+		echo "<form method='post'>";
+		echo "<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>";
+		echo "<input type = 'hidden' name = 'tee' value='M'>";
+		echo "<input type = 'hidden' name = 'tila' value=''>";
+		echo "<input type = 'hidden' name = 'tunnus' value='{$tunnus}'>";
+
+		if (isset($grouppaa)) echo "<input type='hidden' name='grouppaa' value='{$grouppaa}' />";
+		if (isset($viivatut_grouppaa_formi)) echo "<input type='hidden' name='viivatut_grouppaa_formi' value='{$viivatut_grouppaa_formi}' />";
+
+		echo "<input type = 'submit' value = '",t("Muuta tietoja"),"'>";
+		echo "</form>";
 	}
 
 	$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='liitetiedostot' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
@@ -1598,5 +1602,3 @@ if ($tee == "") {
 }
 
 require ("inc/footer.inc");
-
-?>

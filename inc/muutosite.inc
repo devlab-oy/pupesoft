@@ -1456,6 +1456,12 @@
 
 	if ($tila == '') {
 
+		$lisaa_grouppaus_hiddenit = "";
+
+		if (isset($grouppaa)) $lisaa_grouppaus_hiddenit .= "<input type='hidden' name='grouppaa' value='{$grouppaa}' />";
+		if (isset($viivatut_grouppaa_formi)) $lisaa_grouppaus_hiddenit .= "<input type='hidden' name='viivatut_grouppaa_formi' value='{$viivatut_grouppaa_formi}' />";
+
+
 		// katotaan onko lasku liitetty keikkaan
 		$query = "	SELECT lasku.laskunro, keikka.alatila
 					FROM lasku
@@ -1475,10 +1481,11 @@
 				$pvm = erottele($trow['tapvm']);
 
 				echo "	<form method='post'>
-						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+						<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 						<input type = 'hidden' name='tila' value='P'>
 						<input type = 'hidden' name='tee'  value='M'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t("Tapahtumapvm")."</th>
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1532,10 +1539,11 @@
 
 				if ($yhtiorow['ostolaskujen_paivays'] == "1"){
 					echo "<form method='post'>
-							<input type = 'hidden' name='lopetus' value='$lopetus'>
+							<input type = 'hidden' name='lopetus' value='{$lopetus}'>
 							<input type = 'hidden' name='tila' value='vaihda_lapvm'>
 							<input type = 'hidden' name='tee' value='M'>
-							<input type = 'hidden' name='tunnus' value='$tunnus'>";
+							{$lisaa_grouppaus_hiddenit}
+							<input type = 'hidden' name='tunnus' value='{$tunnus}'>";
 					echo "<tr><th>".t("Lapvm")."</th>";
 					echo "<td><input type = 'text' name = 'vpp' maxlength='2' size='2' value = '$lapvm[pp]'>
 						  <input type = 'text' name = 'vkk' maxlength='2' size='2' value = '$lapvm[kk]'>
@@ -1546,10 +1554,11 @@
 				}
 
 				echo "<form method='post'>
-						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+						<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 						<input type = 'hidden' name='tila' value='P'>
 						<input type = 'hidden' name='tee' value='M'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t("Tapahtumapvm")."</th>
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1568,10 +1577,11 @@
 
 					if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
 						echo "<form method='post'>
-							<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+							<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 							<input type = 'hidden' name='tila' value='Q'>
 							<input type = 'hidden' name='tee' value='M'>
-							<input type = 'hidden' name='tunnus' value='$tunnus'>
+							<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+							{$lisaa_grouppaus_hiddenit}
 							<tr>
 							<th>".t("summa")."</th>
 							<td><input type = 'text' name = 'summa' value='$trow[summa]'></td>
@@ -1586,10 +1596,11 @@
 					$pvm = erottele($trow['kapvm']);
 
 					echo "<form method='post'>
-							<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+							<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 							<input type = 'hidden' name='tila' value='C'>
 							<input type = 'hidden' name='tee' value='M'>
-							<input type = 'hidden' name='tunnus' value='$tunnus'>
+							<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+							{$lisaa_grouppaus_hiddenit}
 							<tr>
 							<th>".t("kassa-ale ja/tai kapvm")."</th>
 							<td><input type = 'text' name = 'summa' value='$trow[kasumma]'>
@@ -1606,11 +1617,12 @@
 			if (($trow['tila'] < 'N') or ($trow['tila'] == 'U' and $trow['mapvm']=='0000-00-00')) {
 				$pvm = erottele($trow['erpcm']);
 
-				echo "<form method='post'>
-						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+				echo "	<form method='post'>
+						<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 						<input type = 'hidden' name='tila' value='R'>
 						<input type = 'hidden' name='tee' value='M'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t("eräpvm")."</th>
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1623,11 +1635,12 @@
 				if (($trow['kapvm'] != '0000-00-00') and ($trow['tila'] == 'U')) {
 					$pvm = erottele($trow['kapvm']);
 
-					echo "<form method='post'>
-							<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+					echo "	<form method='post'>
+							<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 							<input type = 'hidden' name='tila' value='B'>
 							<input type = 'hidden' name='tee' value='M'>
-							<input type = 'hidden' name='tunnus' value='$tunnus'>
+							<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+							{$lisaa_grouppaus_hiddenit}
 							<tr>
 							<th>".t("kassa-alepvm")."</th>
 							<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1641,11 +1654,12 @@
 				// voidaan vaihtaa myyntilaskun mapvm jos se ei ole vielä maksettu
 				if ($trow['tila'] == 'U' and $trow['mapvm'] == '0000-00-00') {
 
-					echo "<form method='post'>
-							<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+					echo "	<form method='post'>
+							<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 							<input type = 'hidden' name='tila' value='maksuehto'>
 							<input type = 'hidden' name='tee' value='M'>
-							<input type = 'hidden' name='tunnus' value='$tunnus'>
+							<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+							{$lisaa_grouppaus_hiddenit}
 							<tr>
 							<th>".t("Vaihda maksuehto")."</th>";
 							echo "<td><select name='maksuehto'>";
@@ -1677,19 +1691,20 @@
 		if ((($trow['tila'] == 'Y') or ($trow['tila'] == 'U')) and ($trow['mapvm'] != '0000-00-00')) {
 			if ($trow['mapvm'] >= $yhtiorow['tilikausi_alku']) {
 				$pvm=erottele($trow['mapvm']);
-				echo "<form method='post'>
-					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-					<input type = 'hidden' name='tila' value='S'>
-					<input type = 'hidden' name='tee' value='M'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
-					<tr>
-					<th>".t("suorituspvm")."</th>
-					<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
-					<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
-					<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
-					<td class='back'><input type = 'submit' value = '".t("Päivitä")."'></td>
-					</tr>
-					</form>";
+				echo "	<form method='post'>
+						<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
+						<input type = 'hidden' name='tila' value='S'>
+						<input type = 'hidden' name='tee' value='M'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+						{$lisaa_grouppaus_hiddenit}
+						<tr>
+						<th>".t("suorituspvm")."</th>
+						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
+						<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
+						<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
+						<td class='back'><input type = 'submit' value = '".t("Päivitä")."'></td>
+						</tr>
+						</form>";
 			}
 		}
 
@@ -1721,11 +1736,12 @@
 			if ($trow['vienti']=='K') $vientik = 'selected';
 			if ($trow['vienti']=='L') $vientil = 'selected';
 
-			echo "<form method='post'>
-					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+			echo "	<form method='post'>
+					<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 					<input type = 'hidden' name='tila' value='W'>
 					<input type = 'hidden' name='tee' value='M'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+					{$lisaa_grouppaus_hiddenit}
 					<tr>
 					<th>".t("laskun tyyppi")."</th>";
 
@@ -1765,6 +1781,7 @@
 			echo "<input type='hidden' name='tila' value='ostolasku_kulut' />";
 			echo "<input type='hidden' name='tee' value='M' />";
 			echo "<input type='hidden' name='tunnus' value='{$tunnus}' />";
+			echo $lisaa_grouppaus_hiddenit;
 
 			for ($i = 1; $i <= $yhtiorow['ostolaskun_kulutilit']; $i++) {
 				echo "<tr>";
@@ -1819,10 +1836,12 @@
 
 		if (($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {
 			echo "<form method='post'>";
-			echo "<input type = 'hidden' name='lopetus' value='$lopetus'>";
+			echo "<input type = 'hidden' name='lopetus' value='{$lopetus}'>";
 			echo "<input type = 'hidden' name='tila' value='vaihdalaskunumero'>";
 			echo "<input type = 'hidden' name='tee' value='M'>";
-			echo "<input type = 'hidden' name='tunnus' value='$tunnus'>";
+			echo "<input type = 'hidden' name='tunnus' value='{$tunnus}'>";
+			echo $lisaa_grouppaus_hiddenit;
+
 			echo "<tr>";
 			echo "<th>".t("laskunumero")."</th>";
 			echo "<td><input type='text' name='uusi_laskunumero' value='$trow[laskunro]'></td>";
@@ -1832,11 +1851,12 @@
 		}
 
 		if (($trow['tila'] == 'M' or $trow['tila'] == 'H' or $trow['tila'] == 'Y' or $trow['tila'] == 'Q') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {
-			echo "<form method='post'>
-					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+			echo "	<form method='post'>
+					<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 					<input type = 'hidden' name='tila' value='jako'>
 					<input type = 'hidden' name='tee' value='M'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+					{$lisaa_grouppaus_hiddenit}
 					<tr>
 					<th>".t("Jaa ostolasku kahteen osaan").".<br>".t("Syötä uuden laskun summa")."</th>
 					<td><input type='text' name='syotetty_jakosumma' value=''> $trow[valkoodi]</td>
@@ -1848,10 +1868,11 @@
 		// jos meillä on suoraveloitus jolla ei ole maksutiliä (eli tiliöintejä ei ole tehty), se voidaan poistaa jos hyväksyttävänä, valmismaksatukseen tai odottaa suoritusta
 		if ($trow['suoraveloitus'] != "" and $trow["maksu_tili"] == "" and in_array($trow['tila'], array('Q','M','H'))) {
 			echo "	<form method='post'>
-					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+					<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tila' value='A'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+					{$lisaa_grouppaus_hiddenit}
 					<tr>
 					<th>".t("Poista suoraveloitus")."</th>
 					<td>Lasku siirtyy takaisin hyväksyntään</td>
@@ -1881,6 +1902,7 @@
 			echo "<input type = 'hidden' name='tunnus' value='$tunnus'>";
 			echo "<input type = 'hidden' name='tee' value='M'>";
 			echo "<input type = 'hidden' name='tila' value='KK'>";
+			echo $lisaa_grouppaus_hiddenit;
 			echo "<tr>";
 			echo "<th>".t("Alv tili")."</th>";
 			echo "<td><select name='alv_tili'>";
@@ -1901,26 +1923,28 @@
 			echo "</form>";
 		}
 
-		echo "<form method='post'>
+		echo "	<form method='post'>
 				<input type = 'hidden' name='tee' value='M'>
 				<input type = 'hidden' name='tila' value='K'>
-				<input type = 'hidden' name='lopetus' value='$lopetus'>
-				<input type = 'hidden' name='tunnus' value='$tunnus'>
+				<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+				<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+				{$lisaa_grouppaus_hiddenit}
 				<tr>
 				<th>".t("Lisää kommentti")."</th>
-				<td><input type = 'text' name = 'komm' size='40' value = '$komm'></td>
-				<td class='back'><input type = 'submit' value = '".t("Lisää")."'></td>
+				<td><input type = 'text' name = 'komm' size='40' value = '{$komm}'></td>
+				<td class='back'><input type = 'submit' value = '",t("Lisää"),"'></td>
 				</tr>
 				</form>";
 
 		if ($trow['tila'] == 'H' and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3) and $keikrow["alatila"] != "X") {
 
 			if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
-				echo "<form method='post'>
+				echo "	<form method='post'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tila' value='T'>
-						<input type = 'hidden' name='lopetus' value='$lopetus'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t("Toimittajan tilinumero (kotimainen)")."</th>
 						<td><input type = 'text' name = 'tili' size='40' value = '".tilinumero_print($trow['tilinumero'])."'></td>
@@ -1938,11 +1962,12 @@
 						</form>";
 			}
 			else {
-				echo "<form method='post'>
+				echo "	<form method='post'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tila' value='TU'>
-						<input type = 'hidden' name='lopetus' value='$lopetus'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t('Pankkihaltija')."</th>
 						<td><input type = 'text' name = 'pankki_haltija' size='40' value = '$trow[pankki_haltija]'></td>
@@ -1982,11 +2007,12 @@
 		}
 
 		if ($trow['tila'] == 'H' and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
-			echo "<form method='post'>
+			echo "	<form method='post'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tila' value='MVIESTI'>
-					<input type = 'hidden' name='lopetus' value='$lopetus'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
+					<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+					{$lisaa_grouppaus_hiddenit}
 					<tr>
 					<th>".t('laskun viesti')."</th>
 					<td><input type = 'text' name = 'viesti' size='40' value = '$trow[viesti]'></td>
@@ -2001,11 +2027,12 @@
 		}
 
 		if ($trow["tila"] == "Q" and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
-			echo "<form method='post'>
+			echo "	<form method='post'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tila' value='MAKSATUKSEEN'>
-					<input type = 'hidden' name='lopetus' value='$lopetus'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
+					<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+					{$lisaa_grouppaus_hiddenit}
 					<tr>
 					<th>".t("Palauta lasku maksatukseen")."</th>
 					<td></td>
@@ -2015,11 +2042,12 @@
 		}
 
 		if (($trow['tila'] == 'M' or $trow['tila'] == 'H') and ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) and $trow["h1time"] != '0000-00-00 00:00:00' and $keikrow["alatila"] != "X") {
-			echo "<form method='post'>
+			echo "	<form method='post'>
 					<input type = 'hidden' name='tila' value='nollaahyvak'>
 					<input type = 'hidden' name='tee' value='M'>
-					<input type = 'hidden' name='lopetus' value='$lopetus'>
-					<input type = 'hidden' name='tunnus' value='$tunnus'>
+					<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+					{$lisaa_grouppaus_hiddenit}
 					<tr>
 					<th>".t("Palauta lasku hyväksyntäkierrokselle")."</th>
 					<td></td>
@@ -2046,11 +2074,12 @@
 					$selviikorko = "SELECTED";
 				}
 
-				echo "<form method='post'>
+				echo "	<form method='post'>
 						<input type = 'hidden' name='tila' value='viikorkomuuta'>
 						<input type = 'hidden' name='tee' value='M'>
-						<input type = 'hidden' name='lopetus' value='$lopetus'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t("Viivästyskorkoprosentti")."</th>
 						<td>
@@ -2073,10 +2102,11 @@
 
 			if ($konversio_check_row["kpl"] == 0) {
 				echo "	<form method='post'>
-						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+						<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
 						<input type = 'hidden' name='tila' value='konversio_avaa'>
 						<input type = 'hidden' name='tee' value='M'>
-						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t("Muuta konversion lasku avoimeksi summalla")."</th>
 						<td><input type='text' name='syotetty_avoinsumma' value=''> $trow[valkoodi]</td>

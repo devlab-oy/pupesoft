@@ -1477,8 +1477,9 @@
 
 		if ($trow['tila'] == 'X') {
 
+			$pvm = erottele($trow['tapvm']);
+
 			if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
-				$pvm = erottele($trow['tapvm']);
 
 				echo "	<form method='post'>
 						<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
@@ -1525,6 +1526,9 @@
 					<input type = 'hidden' name='ed_iliitostunnus' value='".urlencode(serialize($ed_iliitostunnus))."' />
 					<input type = 'hidden' name='iliitos' value='".urlencode(serialize($iliitos))."' />
 					<input type = 'hidden' name='tullaan' value='muutosite' />
+					<input type = 'hidden' name='tpp' value='{$pvm['pp']}' />
+					<input type = 'hidden' name='tpk' value='{$pvm['kk']}' />
+					<input type = 'hidden' name='tpv' value='{$pvm['vv']}' />
 					<tr>
 					<th>".t("Vaihda asiakas-/toimittajaliitos")."</th>
 					<td>&nbsp;</td><td class='back'><input type = 'submit' value = '".t("Hae")."'></td>

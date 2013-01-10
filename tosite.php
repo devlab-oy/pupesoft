@@ -5,9 +5,9 @@
 	if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
 		require ("inc/tilioinnin_toiminnot.inc");
 	}
-	
+
 	enable_ajax();
-	
+
 	if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
 		exit;
@@ -1207,7 +1207,7 @@
 			if (isset($iliitos[$i]) and trim($iliitos[$i]) != '' and ((isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) != '') or (isset($ed_iliitostunnus[$i]) and trim($ed_iliitostunnus[$i]) != ''))) {
 
 				$tunnus_chk = (isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) != '') ? $iliitostunnus[$i] : $ed_iliitostunnus[$i];
-				$taulu_chk = $tunnus_chk == $ed_iliitostunnus[$i] ? $ed_iliitos[$i] : $iliitos[$i];
+				$taulu_chk = ($tunnus_chk == $ed_iliitostunnus[$i] and trim($ed_iliitos[$i]) != '') ? $ed_iliitos[$i] : $iliitos[$i];
 
 				if ($taulu_chk == "A") {
 					$taulu = "asiakas";

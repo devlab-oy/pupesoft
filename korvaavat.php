@@ -242,15 +242,26 @@
 			echo "<th>".t("J‰rjestys")."</th>";
 			echo "<td class='back'></td></tr>";
 
+			// Korvausketjussa pit‰‰ olla ensiksi j‰rjestysnumerot (ei j‰rjestys 0),
+			// ennen kuin voidaan sallia vastaavien korvaaminen vastaavat ketjussa.
+			$_query = "SELECT * FROM $taulu WHERE id = '$id' AND yhtio='{$kukarow['yhtio']}' AND jarjestys=0";
+			$_result = pupe_query($_query);
+			if (mysql_num_rows($_result) > 0) {
+				$disable_korvaa_nappi = "disabled";
+			}
+
+			// Loopataan ketjun tuotteet ja piirret‰‰n valikot
 			while ($row = mysql_fetch_array($result)) {
 				$error = "";
 				$query = "SELECT * FROM tuote WHERE tuoteno = '$row[tuoteno]' AND yhtio = '$kukarow[yhtio]'";
 				$res   = pupe_query($query);
 
+				// Tuotetta ei lˆydy
 				if (mysql_num_rows($res) == 0) {
 					$error = "<font class='error'>(".t("Tuote ei en‰‰ rekisteriss‰")."!)</font>";
 				}
 
+				// Tuote on p‰‰tuote
 				if ($row['jarjestys'] == 1) {
 					$paatuote = $row;
 				}
@@ -274,13 +285,14 @@
 					</td>
 					</form>";
 
+				// P‰‰tuotteen synkronointi vastaavat ketjuun
 				if ($taulu == 'korvaavat') {
-					# P‰‰tuotteen voi synkronoida vastaavat tauluun
+					// Tarkistetaan voidaanko p‰‰tuote synkronoida vastaava tauluun
 					$query = "SELECT * FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$row['tuoteno']}'";
 					$rresult = pupe_query($query);
 					$vastaava = mysql_num_rows($rresult);
 
-					# Tuotteella on vastaavat taulussa merkint‰ ja se ei ole jo valmiiksi p‰‰tuote
+					// Jos tuotteella on vastaavat taulussa merkint‰ ja se ei ole korvaavuusketjun p‰‰tuote
 					if ($vastaava > 0 && $row['jarjestys'] != 1) {
 						echo "<td class='back'>
 							<form action='korvaavat.php' method='post'>
@@ -288,7 +300,7 @@
 							<input type='hidden' name='tunnus' value='$row[tunnus]'>
 							<input type='hidden' name='korvattava' value='$row[tuoteno]'>
 							<input type='hidden' name='korvaava' value='$paatuote[tuoteno]'>
-							<input type='submit' value='Korvaa' />
+							<input type='submit' value='Korvaa' $disable_korvaa_nappi/>
 							</form>
 							</td>";
 						echo "<td class='back'>Korvaa vastaava t‰m‰n ketjun p‰‰tuotteella</td>";

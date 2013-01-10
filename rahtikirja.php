@@ -945,7 +945,11 @@
 						$lahetteet = array($laskurow["tunnus"]);
 					}
 
-					foreach ($lahetteet as $index => $laskutunnus) {
+					$lahetteet_tmp = $lahetteet;
+
+					if (isset($koontilahete) and count($koontilahete) > 0) $lahetteet_tmp = $koontilahete;
+
+					foreach ($lahetteet_tmp as $index => $laskutunnus) {
 
 						// Haetaan laskun kaikki tiedot uudestaan koska haluamme lähetteen per yhdistetty rahtikirja
 						$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$laskutunnus'";
@@ -962,7 +966,7 @@
 							'komento' 					=> $komento,
 							'lahetekpl'					=> $lahetekpl,
 							'kieli' 					=> $kieli,
-							'koontilahete'				=> $koontilahete,
+							'koontilahete'				=> $laskutunnus,
 							);
 
 						pupesoft_tulosta_lahete($params);

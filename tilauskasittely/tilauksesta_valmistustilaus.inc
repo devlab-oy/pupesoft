@@ -136,10 +136,13 @@
 					// $perheid_lisaarivi on perustetun rivin tunnus
 					require ("lisaarivi.inc");
 
+					// Ainoastaan asiakkaalle valmistetut j‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydess‰
+					$suoraan_laskutukseen_lisa = $yhtiorow['automaattinen_jt_toimitus_valmistus'] == 'S' ? 'o' : '';
+
 					//	P‰ivitet‰‰n tilausrivin lisatietoihin tilausrivitunnus
 					$query = "	UPDATE tilausrivin_lisatiedot SET
 									tilausrivilinkki 		= '$perheid_lisaarivi',
-									suoraan_laskutukseen	= '',
+									suoraan_laskutukseen	= '{$suoraan_laskutukseen_lisa}',
 									muutospvm				= now(),
 									muuttaja				= '$kukarow[kuka]'
 								WHERE yhtio	= '$kukarow[yhtio]' and tilausrivitunnus = '$valmlisaarivi[tunnus]'";

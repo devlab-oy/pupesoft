@@ -1824,29 +1824,31 @@
 									$query = "	SELECT lasku.*, if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) email, asiakas.keraysvahvistus_lahetys
 												FROM lasku
 												LEFT JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
-												WHERE lasku.tunnus in ({$alk_til})
-												and lasku.yhtio = '{$kukarow['yhtio']}'
-												and lasku.alatila in ('C','D')";
+												WHERE lasku.tunnus = '{$alk_til}'
+												and lasku.yhtio = '{$kukarow['yhtio']}'";
 									$alk_til_res = pupe_query($query);
-									$laskurow = mysql_fetch_assoc($alk_til_res);
 
-									$koontilahete_tilausrivit = isset($koontilahete_tilausrivit_arr[$alk_til]) ? $koontilahete_tilausrivit_arr[$alk_til] : '';
+									if (mysql_num_rows($alk_til_res) > 0) {
+										$laskurow = mysql_fetch_assoc($alk_til_res);
 
-									$params = array(
-										'laskurow'					=> $laskurow,
-										'sellahetetyyppi' 			=> $sellahetetyyppi,
-										'extranet_tilausvahvistus' 	=> "",
-										'naytetaanko_rivihinta'		=> "",
-										'tee'						=> $tee,
-										'toim'						=> $toim,
-										'komento' 					=> $komento,
-										'lahetekpl'					=> $lahetekpl,
-										'kieli' 					=> $kieli,
-										'koontilahete'				=> $koontilahete,
-										'koontilahete_tilausrivit'	=> $koontilahete_tilausrivit,
-									);
+										$koontilahete_tilausrivit = isset($koontilahete_tilausrivit_arr[$alk_til]) ? $koontilahete_tilausrivit_arr[$alk_til] : '';
 
-									pupesoft_tulosta_lahete($params);
+										$params = array(
+											'laskurow'					=> $laskurow,
+											'sellahetetyyppi' 			=> $sellahetetyyppi,
+											'extranet_tilausvahvistus' 	=> "",
+											'naytetaanko_rivihinta'		=> "",
+											'tee'						=> $tee,
+											'toim'						=> $toim,
+											'komento' 					=> $komento,
+											'lahetekpl'					=> $lahetekpl,
+											'kieli' 					=> $kieli,
+											'koontilahete'				=> $koontilahete,
+											'koontilahete_tilausrivit'	=> $koontilahete_tilausrivit,
+										);
+
+										pupesoft_tulosta_lahete($params);
+									}
 								}
 
 								if ($lahete_tulostus_paperille > 0) echo "<br>".t("Tulostettiin %s paperilähetettä", "", $lahete_tulostus_paperille).".";

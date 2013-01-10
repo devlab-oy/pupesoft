@@ -829,7 +829,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 						$suoralisa = "AND tilausrivin_lisatiedot.suoraan_laskutukseen = 'o'";
 					}
 
-					//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
+					//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän valmistusriviin
 				   	$query = "	SELECT ifnull(if((tilausrivi.perheid != 0 and tilausrivi.tunnus != tilausrivi.perheid), tilausrivi.perheid, tilausrivi.tunnus), 0) jtrivi
 				   				FROM tilausrivin_lisatiedot
 				   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)

@@ -1972,6 +1972,16 @@
 							$varattu 	= $kpl;
 							$jt 		= 0;
 						}
+
+						if(isset($jt_muidenmukana)) {
+							// jälkitoimitus muiden mukana
+							if ($jt_muidenmukana == 'KYLLA') {
+								$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
+							}
+							elseif ($jt_muidenmukana == 'EI') {
+								$kerayspvm = $laskurow["kerayspvm"];
+							}
+						}
 						break;
 					case 'P' : // Puute
 						$varattu 	= 0;
@@ -2007,6 +2017,7 @@
 							}
 
 							$var	= "J";
+							$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
 						}
 						// Terminaalitoimitukset tai ostoskorit; var tyhjää ja varattu normisti
 						elseif ($rivityyppi == 'Z' or $rivityyppi == 'B' or $rivityyppi == 'E' or $rivityyppi == 'F') {
@@ -2023,21 +2034,9 @@
 							$var 	= "";
 							$varattu = $kpl;
 						}
-						// Normaalisti kaikki menee jälkitoimitus muiden mukana.
+						// Normaalisti kaikki menee puutteeksi.
 						else {
-							if($yhtiorow['jt_automatiikka'] != '' and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
-								//kun parametrit on asennossa:
-								//jt_automatiikka != Asiakkaan JT-rivejä ei kohdisteta automaattisesti ja automaattinen_jt_toimitus == Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä keräyspäivän mukaisesti
-								//tällöin asetetaan tilausrivi oletuksena jälkitoimitus muiden mukana
-								$var = "J";
-								$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
-								$varattu 	= $kpl;
-								$jt 		= 0;
-							}
-							else {
-								//Muuten oletuksena tilausrivi on puute asennossa
-								$var 	= "P";
-							}
+							$var 	= "P";
 						}
 						break;
 					default :

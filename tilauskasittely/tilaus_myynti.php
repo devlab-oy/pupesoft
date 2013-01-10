@@ -4037,14 +4037,6 @@ if ($tee == '') {
 				$trow["alv"] = $laskurow["alv"];
 			}
 
-			// jälkitoimitus muiden mukana
-			if ($jt_muidenmukana == 'KYLLA') {
-				$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
-			}
-			elseif ($jt_muidenmukana == 'EI') {
-				$kerayspvm = $laskurow["kerayspvm"];
-			}
-
 			if ($tuoteno != '' and $kpl != 0) {
 				require ('lisaarivi.inc');
 			}

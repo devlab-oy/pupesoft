@@ -265,7 +265,7 @@
 	if ($otunnukset == "") $otunnukset = 0;
 
 	if($yhdistetaan_lahtoon != 0 and $yhdistettavan_lahdon_tilaukset != 0) {
-		if($yhdistetaan_lahtoon == $otunnukset_temppi) {
+		if($yhdistetaan_lahtoon == $otunnukset) {
 			$otunnukset .= ',' . $yhdistettavan_lahdon_tilaukset;
 		}
 	}
@@ -291,12 +291,12 @@
 					toim_postitp,
 					ytunnus,
 					liitostunnus,
-					toimitustavan_lahto,
+					max(toimitustavan_lahto),
 					group_concat(tunnus) tunnus
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus in ($otunnukset)
-					GROUP BY nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, ytunnus, liitostunnus, toimitustavan_lahto
+					GROUP BY nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, ytunnus, liitostunnus
 					ORDER BY ytunnus, liitostunnus, tunnus";
 	}
 

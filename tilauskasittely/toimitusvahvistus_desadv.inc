@@ -214,8 +214,23 @@
 
 					while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
 
+						if (isset($sscc_gs1_yritystunnus) and $sscc_gs1_yritystunnus != "") {
+							// Rakennetaan GS1 SSCC -numero
+							$sscc_sovellustunnus = "00";
+							if (!isset($sscc_gs1_laajennustunnus)) $sscc_gs1_laajennustunnus = "0";
+
+							$sscc = $sscc_sovellustunnus.$sscc_gs1_laajennustunnus.$sscc_gs1_yritystunnus.$keraysera_row['sscc'];
+
+							$sscc_tarkiste = tarkiste($sscc);
+
+							$sscc = $sscc.$sscc_tarkiste;
+						}
+						else {
+							$sscc = $keraysera_row['sscc'];
+						}
+
 						// CPS - consignment packing sequence
-						$desadv_message .= "CPS+{$keraysera_row['sscc']}++1'";
+						$desadv_message .= "CPS+{$sscc}++1'";
 						$x++;
 
 						// PAC - number and type of packages

@@ -305,6 +305,10 @@
 				$varasto = implode(",", $varasto);
 			}
 
+			if(count($kassalipas) > 0) {
+				$kassalipas = implode(",", $kassalipas);
+			}
+
 			if (is_array($keraysvyohyke) and count($keraysvyohyke) > 0) {
 				if (count($keraysvyohyke) == 1 and $keraysvyohyke == 'default') {
 					unset($keraysvyohyke);
@@ -339,6 +343,7 @@
 						oletus_varasto					= '{$oletus_varasto}',
 						oletus_pakkaamo					= '{$oletus_pakkaamo}',
 						kirjoitin 						= '{$kirjoitin}',
+						kassalipas						= '{$kassalipas}',
 						kassamyyja 						= '{$kassamyyja}',
 						dynaaminen_kassamyynti 			= '{$dynaaminen_kassamyynti}',
 						jyvitys							= '{$jyvitys}',
@@ -513,6 +518,10 @@
 				$varasto = implode(",", $varasto);
 			}
 
+			if(count($kassalipas) > 0) {
+				$kassalipas = implode(",", $kassalipas);
+			}
+
 			if (is_array($keraysvyohyke) and count($keraysvyohyke) > 0) {
 				if (count($keraysvyohyke) == 1 and $keraysvyohyke == 'default') {
 					unset($keraysvyohyke);
@@ -556,6 +565,7 @@
 						asema							= '{$asema}',
 						toimipaikka						= '{$toimipaikka}',
 						mitatoi_tilauksia				= '{$mitatoi_tilauksia}',
+						kassalipas 						= '{$kassalipas}',
 						kassamyyja 						= '{$kassamyyja}',
 						dynaaminen_kassamyynti			= '{$dynaaminen_kassamyynti}',
 						jyvitys							= '{$jyvitys}',
@@ -1012,15 +1022,33 @@
 
 					echo "</select></td></tr>";
 
+					$kassalipaslisa = $krow['toimipaikka'] != 0 ? "and (toimipaikka = 0 or toimipaikka = {$krow['toimipaikka']})" : "";
+					$query = "	SELECT *
+								FROM kassalipas
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								{$kassalipaslisa}
+								ORDER BY nimi";
+					$kassalipasres = pupe_query($query);
+					$kassalippaat = array();
+					while($kassalipas = mysql_fetch_assoc($kassalipasres)) {
+						$kassalippaat[] = $kassalipas;
+					}
+					echo "<tr>";
+					echo "<th align='left'>".t("Valitse kassalippaat, joihin käyttäjällä on oikeus")."</th>";
+					echo "<td>";
+					$kassalippaat_array = explode(",", $krow["kassalipas"]);
+					foreach($kassalippaat as $kassalipas) {
+						$sel = '';
+						if (in_array($kassalipas['tunnus'], $kassalippaat_array)) $sel = 'CHECKED';
+						echo "<input type='checkbox' name='kassalipas[]' value='{$kassalipas['tunnus']}' {$sel}> {$kassalipas['nimi']}<br/>";
+					}
+					echo "</td>";
+					echo "</tr>";
+
 					echo "<tr><th align='left'>",t("Kassamyyjä / oletuskassalipas"),":</td>";
 					echo "<td><select name='kassamyyja'><option value=''>",t("Ei oletuskassalipasta"),"</option>";
 
-					$kassalipaslisa = $krow['toimipaikka'] != 0 ? "and (toimipaikka = 0 or toimipaikka = {$krow['toimipaikka']})" : "";
-
-					$query = "SELECT * FROM kassalipas WHERE yhtio = '{$kukarow['yhtio']}' {$kassalipaslisa} ORDER BY nimi";
-					$vares = pupe_query($query);
-
-					while ($varow = mysql_fetch_array($vares)) {
+					foreach ($kassalippaat as $varow) {
 						$sel = '';
 						if ($varow['tunnus'] == $krow["kassamyyja"]) $sel = 'selected';
 						echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['nimi']}</option>";

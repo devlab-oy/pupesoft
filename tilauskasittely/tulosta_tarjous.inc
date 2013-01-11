@@ -1675,8 +1675,7 @@ if (!function_exists('tulosta_tarjous')) {
 		$total_uudet  = $total;
 		$total_vanhat = $total - $total_uudet;
 
-		if((($yhtiorow['tarjoustyyppi'] != 1) or ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja' and $yhtiorow['tarjoustyyppi'] == 1)) and ((int)$kala <= 170)) {
-			//eli käytännössä $naytetaanko_rivihinta == 'kokonaan_ilman_hintoja' and $yhtiorow['tarjoustyyppi'] == 1 on ainoa case jolloin tähän iffiin ei mennä
+		if (($yhtiorow['tarjoustyyppi'] != 1 or ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja' and $yhtiorow['tarjoustyyppi'] == 1)) and $kala <= 170) {
 			list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0, 0, 0, $verolliset_verottomat_hinnat, 0, 0, 0, $naytetaanko_rivihinta);
 
 			$sivu++;

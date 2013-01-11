@@ -10,6 +10,7 @@ class Vastaavat {
 
 	// Tuote jolla ketju on alunperin haettu
 	private $tuote;
+
 	// Tuotteen tyyppi vastaava/vaihtoehtoinen
 	private $tyyppi;
 
@@ -53,9 +54,13 @@ class Vastaavat {
 		return $this->ketjut;
 	}
 
+	function getTyyppi() {
+		return $this->tyyppi;
+	}
+
 	/** Palauttaa ketjun tuotteet ketjun id:n mukaan
 	 */
-	function find_by_ketju($id) {
+	function find_by_ketju($id, $options = array()) {
 		global $kukarow;
 
 		$tuotteet = array();
@@ -77,6 +82,7 @@ class Vastaavat {
 					WHERE vastaavat.yhtio='{$kukarow['yhtio']}'
 					AND id='{$id}'
 					#AND vaihtoehtoinen = '{$this->tyyppi}'
+					$conditions
 					ORDER BY jarjestys, tuoteno";
 		$result = pupe_query($query);
 
@@ -88,7 +94,7 @@ class Vastaavat {
 
 	}
 
-	/** Palauttaa halutun ketjun tuotteet
+	/** Palauttaa ketjun kaikki tuotteet
 	 */
 	function tuotteet($options = array()) {
 		global $kukarow;

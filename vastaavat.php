@@ -318,10 +318,11 @@ if ($tuoteno != '') {
                 echo "<br><table>";
                 echo "<tr><th colspan=3>Ketju $id</th></tr>";
                 echo "<tr>";
-                echo "<th>".t("Vastaavia tuotteita")."</td>";
+                echo "<th>".t("Vastaavia tuotteita")."</th>";
                 echo "<th>".t("Järjestys")."</th>";
                 echo "<th>".t("Vaihtoehtoinen")."</th>";
-                echo "<td class='back'></td></tr>";
+                echo "<th class='back'></th>";
+                echo "</tr>";
 
                 // Loopataan ketjun tuotteet läpi
                 foreach ($tuotteet as $tuote) {

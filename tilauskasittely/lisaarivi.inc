@@ -568,13 +568,6 @@
 			// Haetaan vastaavuusketjut korvaavat ketjun päätuotteella
 			require 'vastaavat.class.php';
 
-			// Jos korvaavia tuotteita ei löydy, haetaan vastaavat myytävällä tuotteella.
-			// Muulloin etsitään vastaavat korvaavuusketjun päätuotteen mukaaan.
-			if (empty($korvaavat_tuotteet)) {
-				$vastaavat = new Vastaavat($tuoteno);
-			} else {
-				$vastaavat = new Vastaavat($korvaavat->paatuote());
-			}
 
 			// Vastaavat tuotteet array
 			$vastaavat_tuotteet = array();
@@ -583,23 +576,43 @@
 			// Vastaavien automaattinen myynti, eli haetaanko vastaavat
 			if ($korvaavat_kiellot == "VASTAAVAT") {
 
+				// Jos tilatulla tuotteella ei korvaavia löydy, haetaan vastaavat myytävällä tuotteella.
+				// Muulloin etsitään vastaavat löydetyn korvaavuusketjun päätuotteen mukaan.
+				if (empty($korvaavat_tuotteet)) {
+					$vastaavat = new Vastaavat($tuoteno);
+				} else {
+					$vastaavat = new Vastaavat($korvaavat->paatuote());
+				}
+
 				$options = array('vastaavuusketjun_jarjestys' => $yhtiorow['vastaavuusketjun_jarjestys']);
 
-				// Useampi vastaavuusketju mergetetään yhdeksi
-				if (count($vastaavat->ketjut()) > 1) {
+				// Haetaan kaikki tuotteen vastaavuusketjut (voi löytyä useampia)
+				foreach ($vastaavat->ketjut() as $ketju) {
 
-					// Haetaan kaikki kaikki vastaavat tuotteet
-					foreach ($vastaavat->ketjut() as $ketju) {
-						$vastaavat_tuotteet = array_merge($vastaavat_tuotteet, $vastaavat->find_by_ketju($ketju));
+					// Haetaan tuotteet ketjukohtaisesti
+					$_tuotteet = $vastaavat->find_by_ketju($ketju, $options);
+
+					// Lisätään löydetyt vastaavat mahdollisten myytävien joukkoon
+					foreach ($_tuotteet as $_tuote) {
+
+						// Tarkistetaan tuote ei jo ole myytävien joukossa
+						foreach($vastaavat_tuotteet as $_ketjussa) {
+							if ($_ketjussa['tuoteno'] == $_tuote['tuoteno']) {
+								continue 2;
+							}
+						}
+
+						// Lisätään vain samaaa tyyppiä olevia tuotteita
+						if ($vastaavat->getTyyppi() == $_tuote['vaihtoehtoinen']) {
+								$vastaavat_tuotteet[] = $_tuote;
+						}
 					}
-				}
-				else {
-					$vastaavat_tuotteet = $vastaavat->tuotteet($options);
 				}
 			}
 
 			// Yhdistetään korvaavat ja vastaavat (ja vaihtoehtoiset?) ketjut
 			$tuote_ketju = array_merge($korvaavat_tuotteet, $vastaavat_tuotteet);
+
 
 			// Tuotteen korvaavat ja vastaavat ketju
 			foreach ($tuote_ketju as $krow2) {
@@ -625,7 +638,7 @@
 				$korva_ale_kaikki['erikoisale'] = $laskurow['erikoisale'];
 				$if_ale_korva_isa_chk2 *= generoi_alekentta_php($korva_ale_kaikki, 'M', 'kerto');
 
-				// Ei saa myydä korvaavia tuotteita
+				// Ei saa myydä korvaavia tuotteita eikä vastaavia
 				if ($korvaavat_kiellot == "KIELTO") {
 					if ($krmyytavissa > 0) {
 						$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])");

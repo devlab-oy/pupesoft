@@ -407,7 +407,7 @@
 			echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&tiliote=Z&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm&ohje=off');\">".t("Tee tiliotesääntö")."</a>";
 		}
 
-		echo "</td></tr>";		
+		echo "</td></tr>";
 
 		$maksu = 0; // Maksu on käsitelty
 		$maara = 0;
@@ -977,6 +977,11 @@
 			$tyyppi 	= substr($tietue, 6, 2);
 			$arvo 		= substr($tietue, 8, substr($tietue, 3, 3));
 
+			// Nordea Viro häkki
+			if ($yhtiorow['maa'] == "EE" and $koodi == '705' and $kuittikoodi != "E" and stripos($arvo, "REFERENCE PAYMENT") !== FALSE) {
+				$kuittikoodi = "E";
+			}
+			
 			echo "<tr class='aktiivi'><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'></td>";
 
 			if ($tee == 'S') echo "<td name='td_{$td_perheid}' class='$class'></td>";
@@ -1123,7 +1128,7 @@
 			YHTEENSÄ                                        50
 			*/
 
-			echo "<tr><td colspan='7' class='back' style='padding:0; margin:0;'><div id = 'ifd_{$tiliotedatarow['tunnus']}' style='border:1px solid; display:none'></div><br></td></tr>";			
+			echo "<tr><td colspan='7' class='back' style='padding:0; margin:0;'><div id = 'ifd_{$tiliotedatarow['tunnus']}' style='border:1px solid; display:none'></div><br></td></tr>";
 
 			echo "<tr>";
 

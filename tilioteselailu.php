@@ -7,8 +7,6 @@
 
 	require "inc/parametrit.inc";
 
-	enable_ajax();
-
 	if (!isset($tee))		$tee = "";
 	if (!isset($tyyppi))	$tyyppi = "";
 	if (!isset($tiliote))	$tiliote = "";
@@ -18,6 +16,8 @@
 		readfile("/tmp/".$tmpfilenimi);
 		exit;
 	}
+
+	enable_ajax();
 
 	if ($tee == 'T' and (int) $kuitattava_tiliotedata_tunnus > 0) {
 

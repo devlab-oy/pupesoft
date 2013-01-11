@@ -137,6 +137,7 @@ if ((int) $valitsetoimitus > 0) {
 	$tee 			= "AKTIVOI";
 	$tilausnumero 	= $valitsetoimitus;
 	$from 			= "VALITSETOIMITUS";
+	$mista 			= "";
 
 
 	$query = "	SELECT tila, tilaustyyppi

@@ -123,7 +123,7 @@ class Unifaun {
 
 			$ftpfile = realpath($filenimi);
 
-			require ("inc/ftp-send.inc");
+			//require ("inc/ftp-send.inc");
 		}
 	}
 

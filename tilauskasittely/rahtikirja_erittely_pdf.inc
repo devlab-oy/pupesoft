@@ -291,7 +291,7 @@
 					toim_postitp,
 					ytunnus,
 					liitostunnus,
-					max(toimitustavan_lahto),
+					max(toimitustavan_lahto) toimitustavan_lahto,
 					group_concat(tunnus) tunnus
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'

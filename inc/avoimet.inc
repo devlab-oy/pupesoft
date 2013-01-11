@@ -739,7 +739,7 @@
 				echo "<font class='message'>".t("Yrityksellä")." $yhtiorow[nimi] ".t("oli")." ".tv1dateconv($pvm)." ".t("seuraavat avoimet")." $lista:</font><br>";
 			}
 
-			pupe_DataTables(array(array($pupe_DataTables[1], 10, 11)));
+			pupe_DataTables(array(array($pupe_DataTables[1], 11, 12)));
 
 			echo "<table class='display dataTable' id='$pupe_DataTables[1]'>";
 

@@ -361,19 +361,6 @@
 								AND tunnus IN ({$tiliointirow['tunnus']}, {$vastakirjausrow['tunnus']})";
 					$updres = pupe_query($query);
 
-					$query = "INSERT INTO tiliointi SET ";
-
-					// Tehd‰‰n uusi kirjaus
-					for ($i = 0; $i < mysql_num_fields($tiliointires) - 1; $i++) {
-						switch (mysql_field_name($tiliointires,$i)) {
-							default:
-								$query .= mysql_field_name($tiliointires, $i)." = '".$tiliointirow[mysql_field_name($tiliointires, $i)]."',";
-						}
-					}
-
-					$query = substr($query, 0, -1);
-					$result = pupe_query($query);
-
 					$query = "	UPDATE lasku SET
 								mapvm = '0000-00-00',
 								maksu_kurssi = 0,

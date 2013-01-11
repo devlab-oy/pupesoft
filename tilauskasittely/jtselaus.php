@@ -1107,10 +1107,11 @@
 							}
 						}
 
-						$tunnukset = substr($tunnukset, 0, -1);
+						if (isset($tunnukset)) {
+							$tunnukset = substr($tunnukset, 0, -1);
+						}
 
-						//jos tunnukset on tyhjä, tarkoittaa se, että tuotteella saattaa olla saldoa, mutta koska sen tilauksen jt:tä ei haluta osatoimittaa, ei myöskään tätä riviä haluta toimittaa
-						if ($jtrow["ei_saldoa"] == "" and $tunnukset !== false) {
+						if ($jtrow["ei_saldoa"] == "") {
 							foreach ($varastosta as $vara) {
 
 								$jt_saldopvm = "";

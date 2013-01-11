@@ -2535,9 +2535,7 @@ if ($tee == '') {
 			<input type='hidden' name='toim' value='$toim'>
 			<input type='hidden' name='lopetus' value='$lopetus'>
 			<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
-			<input type='hidden' name='projektilla' value='$projektilla'>
-			<input type='hidden' name='orig_tila' value='$orig_tila'>
-			<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+			<input type='hidden' name='projektilla' value='$projektilla'>";
 
 	// kirjoitellaan otsikko
 	echo "<table>";

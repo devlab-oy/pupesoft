@@ -1065,9 +1065,9 @@
 						unset($perherow);
 						$perheok = 0;
 
-						if($jtrow['jtkielto'] == 'Z') {
+						if ($jtrow['jtkielto'] == 'Z') {
 							$voiko_toimittaa = hae_toimitettavat_tilausrivit($jtrow['otunnus'], $varastosta, $jtspec);
-							if($voiko_toimittaa) {
+							if ($voiko_toimittaa) {
 								$tunnukset = $jtrow['tunnus'].",";
 							}
 						}
@@ -1662,7 +1662,7 @@
 									}
 								}
 								// Ei riitä koko riville
-								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa > 0 and $perheok==0) {
+								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa > 0 and $perheok==0 and $voiko_toimittaa !== false) {
 									if ($automaaginen == '') {
 										echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:orange;'>".t("Ei riitä koko riville")."!</font><br>";
 

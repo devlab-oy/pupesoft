@@ -1065,16 +1065,14 @@
 						unset($perherow);
 						$perheok = 0;
 
+						//Käsiteltävät rivitunnukset (isä ja mahdolliset lapset)
+						$tunnukset = $jtrow["tunnus"].",";
+
 						if ($jtrow['jtkielto'] == 'Z') {
 							$voiko_toimittaa = hae_toimitettavat_tilausrivit($jtrow['otunnus'], $varastosta, $jtspec);
-							if ($voiko_toimittaa) {
-								$tunnukset = $jtrow['tunnus'].",";
-							}
 						}
 						else {
 							$voiko_toimittaa = true;
-							//Käsiteltävät rivitunnukset (isä ja mahdolliset lapset)
-							$tunnukset = $jtrow["tunnus"].",";
 						}
 
 						if (isset($lapsires) and mysql_num_rows($lapsires) > 0) {
@@ -1108,9 +1106,7 @@
 							}
 						}
 
-						if (isset($tunnukset)) {
-							$tunnukset = substr($tunnukset, 0, -1);
-						}
+						$tunnukset = substr($tunnukset, 0, -1);
 
 						if ($jtrow["ei_saldoa"] == "") {
 							foreach ($varastosta as $vara) {

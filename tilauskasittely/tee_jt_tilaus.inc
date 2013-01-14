@@ -728,7 +728,7 @@
 							}
 
 
-							if ($jt_huomioi_pvm != "") {						
+							if ($jt_huomioi_pvm != "") {
 								// Jos JT-rivit varaavat saldoa, niin tulevaisuudessa toimitettavat rivit varaavat nykyhetken saldoa vaikka "JTSPEC" tarkoittaa, että JT-rivien varauksia ei huomioida
 								$jtspec = "JTSPEC2";
 							}
@@ -1080,36 +1080,36 @@
 		}
 	}
 
-	if(!function_exists("hae_toimitettavat_tilausrivit")) {
+	if (!function_exists("hae_toimitettavat_tilausrivit")) {
 		function hae_toimitettavat_tilausrivit($tilaus_tunnus, $varastot, $jtspec) {
-			global $yhtiorow, $kukarow;
-			//Tämän funktion tarkoitus on hakea jt-käsittelyn ollessa osatoimitus kiellossa kaikki tilauksen tilausrivit ja katsoa,
-			//onko kaikilla saldoa.
-			//Jos kaikilla on saldoa, niin tällä hetkellä käsittelyssä oleva rivi voidaan toimittaa.
-			//Jos jollain ei ole saldoa, mitään tilauksen tilausriviä ei toimiteta
 
-			//haetaan tilauksen kaikki jt rivit ja niiden tuotenumerot
-			$query = "	SELECT 
-						tuoteno,
-						sum(varattu) tuote_kpl
+			global $yhtiorow, $kukarow;
+
+			// Jos tilauksen jälkitoimitusrivit ovat osatoimituskiellossa, saamme toimittaa joko tilauksen kaikki tuotteet tai ei mitään.
+			// lasku.jtkielto = 'Z' "Asiakkaan jälkitoimituksia ei osatoimiteta"
+
+			// Palautetaan true jos tilauksen kaikilla tuotteilla on saldoa
+			// Palautetaan false jos kaikilla tuotteille *EI OLE* saldoa
+
+			// Haetaan tilauksen kaikkien jt-rivien määrät (vain myynti- ja ennakkotilaus rivit)
+			$query = "	SELECT tilausrivi.tuoteno,
+						sum(tilausrivi.varattu + tilausrivi.jt) tuote_kpl
 						FROM tilausrivi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND otunnus = '{$tilaus_tunnus}'
-						AND var = 'J'
-						GROUP BY tuoteno";
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus = '{$tilaus_tunnus}'
+						AND tilausrivi.tyyppi in ('L', 'E')
+						AND tilausrivi.var = 'J'
+						AND tilausrivi.varattu + tilausrivi.jt > 0
+						GROUP BY tilausrivi.tuoteno";
 			$result = pupe_query($query);
 
-			while($tilausrivi_row = mysql_fetch_assoc($result)) {
-				//haetaan tuote kohtaisesti varasto saldo
-				//saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '');
-				//return array($saldo, $hyllyssa, $myytavissa, TRUE);
+			while ($tilausrivi_row = mysql_fetch_assoc($result)) {
+
+				// Haetaan tuotteen myytävissä määrä
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tilausrivi_row['tuoteno'], $jtspec, $varastot, $kukarow['yhtio'], '', '', '', '', '', '', '');
 
-				//special case
-				//jos samaa tuotetta on useammalla eri tilausrivillä
-				//niin katsotaan riittääkö myytavat tuotteet näille kaikille.
-				//jos ei riitä ei toimiteta mitään tai jos kaikilla tilauksen tuotteita ei pystytä toimittamaan emme toimita myöskään tätä riviä
-				if($myytavissa < $tilausrivi_row['tuote_kpl'] or $myytavissa <= 0) {
+				// Jos myytävissä on vähemmän mitä halutaan toimittaa
+				if ($myytavissa < $tilausrivi_row['tuote_kpl']) {
 					return false;
 				}
 			}

@@ -1072,6 +1072,7 @@
 							}
 						}
 						else {
+							$voiko_toimittaa = true;
 							//Käsiteltävät rivitunnukset (isä ja mahdolliset lapset)
 							$tunnukset = $jtrow["tunnus"].",";
 						}
@@ -1531,7 +1532,7 @@
 								if (!isset($kpl[$tunnukset])) $kpl[$tunnukset] = "";
 
 								// Riittää kaikille
-								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0) {
+								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0 and $voiko_toimittaa !== false) {
 
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
 									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
@@ -1606,7 +1607,7 @@
 									}
 								}
 								// Riittää tälle riville mutta ei kaikille
-								elseif (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $kokonaismyytavissa >= $jtrow["jt"] and $perheok == 0) {
+								elseif (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $kokonaismyytavissa >= $jtrow["jt"] and $perheok == 0 and $voiko_toimittaa !== false) {
 
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
 									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $automaaginen == 'tosi_automaaginen') {

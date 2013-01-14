@@ -1089,7 +1089,7 @@
 			//Jos jollain ei ole saldoa, mit‰‰n tilauksen tilausrivi‰ ei toimiteta
 
 			//haetaan tilauksen kaikki jt rivit ja niiden tuotenumerot
-			$query = "	SELECT tunnus,
+			$query = "	SELECT 
 						tuoteno,
 						sum(varattu) tuote_kpl
 						FROM tilausrivi
@@ -1108,13 +1108,8 @@
 				//special case
 				//jos samaa tuotetta on useammalla eri tilausrivill‰
 				//niin katsotaan riitt‰‰kˆ myytavat tuotteet n‰ille kaikille.
-				//jos ei riit‰ ei toimiteta mit‰‰n
-				if($myytavissa < $tilausrivi_row['tuote_kpl']) {
-					return false;
-				}
-
-				//jos kaikilla tilauksen tuotteita ei pystyt‰ toimittamaan emme toimita myˆsk‰‰n t‰t‰ rivi‰
-				if($myytavissa <= 0) {
+				//jos ei riit‰ ei toimiteta mit‰‰n tai jos kaikilla tilauksen tuotteita ei pystyt‰ toimittamaan emme toimita myˆsk‰‰n t‰t‰ rivi‰
+				if($myytavissa < $tilausrivi_row['tuote_kpl'] or $myytavissa <= 0) {
 					return false;
 				}
 			}

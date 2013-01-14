@@ -150,7 +150,7 @@ if(!function_exists("toimitarkista")) {
 						$query = "	SELECT ytunnus from toimi
 									WHERE toimi.yhtio	= '$kukarow[yhtio]'
 									and toimi.ytunnus 	= $ytunnus";
-						if (mysql_field_name($result) > 0)	{
+						if (mysql_num_rows($result) > 0)	{
 							$virhe[$i] = t("Henkilö on jo olemassa!");
 							$errori = 1;
 						}

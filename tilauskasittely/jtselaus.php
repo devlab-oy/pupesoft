@@ -1068,6 +1068,7 @@
 						//Käsiteltävät rivitunnukset (isä ja mahdolliset lapset)
 						$tunnukset = $jtrow["tunnus"].",";
 
+						// Jos meillä on lasku.jtkielto = 'Z' "Asiakkaan jälkitoimituksia ei osatoimiteta", tarkistetaanko saako rivin toimittaa. Ei tarkisteta jos ollaan väkisinhyväksymässä riviä.
 						if ($jtrow['jtkielto'] == 'Z' and $loput[$tunnukset] != 'VAKISIN') {
 							$voiko_toimittaa = hae_toimitettavat_tilausrivit($jtrow['otunnus'], $varastosta, $jtspec);
 						}

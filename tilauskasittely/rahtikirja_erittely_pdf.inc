@@ -265,7 +265,12 @@
 	if ($otunnukset == "") $otunnukset = 0;
 
 	if($yhdistetaan_lahtoon != 0 and $yhdistettavan_lahdon_tilaukset != 0) {
-		if($yhdistetaan_lahtoon == $otunnukset) {
+		$otunnukset_temp = explode(',', $otunnukset);
+		$otunnukset_temp = sort($otunnukset_temp);
+		$yhdistetaan_lahtoon_temp = explode(',', $yhdistetaan_lahtoon);
+		$yhdistetaan_lahtoon_temp = sort($yhdistetaan_lahtoon_temp);
+		//$a == $b 	Equality 	TRUE if $a and $b have the same key/value pairs.
+		if($yhdistetaan_lahtoon_temp == $otunnukset_temp) {
 			$otunnukset .= ',' . $yhdistettavan_lahdon_tilaukset;
 		}
 	}

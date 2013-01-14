@@ -21,31 +21,36 @@ if ($tee == 'PERUSTA') {
 
 	for ($riviindex = 0; $riviindex < count($maa); $riviindex++) {
 
-		$paivaraha 	= (float) $hinta[$riviindex];
-		$tilino		= (int) $tilille[$riviindex];
+		$paivaraha        = (float) $hinta[$riviindex];
+		$tilino           = (int) $tilille[$riviindex];
 
-		$tuotenimitys = "Ulkomaanpäiväraha ".$annettuvuosi." ".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "", $maannimi[$riviindex]));
+		$maa_koodi        = trim($maa[$riviindex]);
+		$maa_nimi         = trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "", trim($maannimi[$riviindex])));
+		$vuosi            = date('y', mktime(0, 0, 0, 1, 6, $annettuvuosi));
+		$lisaa_nimi       = trim($erikoisehto[$riviindex]);
 
-		if (trim($maa[$riviindex]) == '' and $erikoisehto[$riviindex] == 'K') {
-			$tuoteno = "PR-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
+		$tuotenimitys     = "Ulkomaanpäiväraha $annettuvuosi $maa_nimi";
+		$tuotenimitys_osa = "Ulkomaanosapäiväraha $annettuvuosi $maa_nimi";
+
+		if ($maa_koodi != '' and $lisaa_nimi == '') {
+			$tuoteno = "PR-$maa_koodi-$vuosi";
 		}
-		elseif (trim($maa[$riviindex]) != '' and $erikoisehto[$riviindex] == '') {
-			$tuoteno = "PR-".$maa[$riviindex]."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
-		}
-		elseif (trim($maa[$riviindex]) != '' and $erikoisehto[$riviindex] == 'K') {
-			$tuoteno = "PR-".$maa[$riviindex]."-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
+		elseif ($maa_koodi != '' and $lisaa_nimi == 'K') {
+			$tuoteno = "PR-$maa_koodi-$maa_nimi-$vuosi";
 		}
 		else {
-			$tuoteno = "PR-".trim(preg_replace("/[^a-z\,\.\-\(\) åäöüÅÄÖ]/i", "",$maannimi[$riviindex]))."-".date('y',mktime(0,0,0,1,6,$annettuvuosi));
+			$tuoteno = "PR-$maa_nimi-$vuosi";
 		}
 
 		$query  = "	INSERT INTO tuote SET
 					tuoteno			= '$tuoteno',
 					nimitys         = '$tuotenimitys',
+					malli			= '$tuotenimitys_osa',
 					alv             = '0',
 					kommentoitava   = '',
 					kuvaus          = '50',
 					myyntihinta     = '$paivaraha',
+					myymalahinta    = $paivaraha / 2,
 					tuotetyyppi     = 'A',
 					status			= 'A',
 					tilino 			= '$tilino',
@@ -55,10 +60,12 @@ if ($tee == 'PERUSTA') {
 					luontiaika		= now()
 					ON DUPLICATE KEY UPDATE
 					nimitys         = '$tuotenimitys',
+					malli			= '$tuotenimitys_osa',
 					alv             = '0',
 					kommentoitava   = '',
 					kuvaus          = '50',
 					myyntihinta     = '$paivaraha',
+					myymalahinta    = $paivaraha / 2,
 					tuotetyyppi     = 'A',
 					status			= 'A',
 					tilino 			= '$tilino',
@@ -73,13 +80,15 @@ if ($tee == 'PERUSTA') {
 }
 
 if ($tee == 'POISTA') {
+	$annettuvuosipoista = date("y");
+
 	$query = "	UPDATE tuote
 				SET status = 'P'
 				WHERE yhtio = '$kukarow[yhtio]'
-				and tuotetyyppi = 'A'
-				and (tuoteno like 'PR%' OR tuoteno like 'PPR%')
-				and right(tuoteno, 2) > 0
-				and right(tuoteno, 2) < $annettuvuosipoista";
+				AND ((tuotetyyppi = 'A' and tuoteno like 'PR-%')
+					OR (tuotetyyppi = 'B' and tuoteno like 'KM-%'))
+				AND right(tuoteno, 2) > 0
+				AND right(tuoteno, 2) < $annettuvuosipoista";
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo "<br>".t("Vanhat päivärahat poistettu käytöstä")."<br><br><br>";
@@ -92,7 +101,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
 	$ext = strtoupper($path_parts['extension']);
 
 	if ($ext != "XLS") {
-		die ("<font class='error'><br>".t("Ainoastaan .txt, .csv tai .xls tiedostot sallittuja")."!</font>");
+		die ("<font class='error'><br>".t("Ainoastaan .xls tiedostot sallittuja")."!</font>");
 	}
 
 	if ($_FILES['userfile']['size'] == 0) {
@@ -108,7 +117,6 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
 	$data->setOutputEncoding('CP1251');
 	$data->setRowColOffset(0);
 	$data->read($_FILES['userfile']['tmp_name']);
-
 
 	echo "<font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
 	echo "<form method='post'>";
@@ -174,7 +182,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
 
 					echo "</select></td>";
 
-					echo "<td><input type='checkbox' name='erikoisehto[$eriviindex]' value='K'> ".t("Lisää maakoodi tuotenumeroon");
+					echo "<td><input type='checkbox' name='erikoisehto[$eriviindex]' value='K'> ".t("Lisää maan nimi tuotenumeroon");
 					echo "<input type='hidden' name='maannimi[$eriviindex]' value='$eriv'></td>";
 					echo "<td>".t("Ulkomaanpäiväraha")." $annettuvuosi $eriv</td>";
 				}
@@ -234,6 +242,8 @@ if ($tee == "synkronoi") {
 
 if ($tee == "synkronoi") {
 
+	echo t("Lisätään uudet viranomaistuotteet tietokantaan")."...<br>";
+
 	$ok = FALSE;
 
 	if ($file = fopen("http://api.devlab.fi/referenssiviranomaistuotteet.sql","r")) {
@@ -249,15 +259,11 @@ if ($tee == "synkronoi") {
 		exit;
 	}
 
-	echo "<br><br>";
-
 	// Eka rivi roskikseen
 	$rivi = fgets($file);
 
-	echo t("Lisätään uudet viranomaistuotteet tietokantaan")."...<br>";
-
 	while ($rivi = fgets($file)) {
-		list($tuoteno, $nimitys, $alv, $kommentoitava, $kuvaus, $myyntihinta, $tuotetyyppi, $vienti) = explode("\t", trim($rivi));
+		list($tuoteno, $nimitys, $alv, $kommentoitava, $kuvaus, $myyntihinta, $tuotetyyppi, $vienti, $malli, $myymalahinta) = explode("\t", trim($rivi));
 
 		if (strpos($nimitys, "Ulkomaanpäiväraha") !== FALSE) {
 			$tilino = $ulkomaantilinumero;
@@ -277,6 +283,8 @@ if ($tee == "synkronoi") {
 					status			= 'A',
 					tilino 			= '$tilino',
 					vienti          = '$vienti',
+					malli      	    = '$malli',
+					myymalahinta    = '$myymalahinta',
 					yhtio			= '$kukarow[yhtio]',
 					laatija			= '$kukarow[kuka]',
 					luontiaika		= now()
@@ -290,6 +298,8 @@ if ($tee == "synkronoi") {
 					status			= 'A',
 					tilino 			= '$tilino',
 					vienti          = '$vienti',
+					malli      	    = '$malli',
+					myymalahinta    = '$myymalahinta',
 					muuttaja		= '$kukarow[kuka]',
 					muutospvm		= now()";
 		$result = mysql_query($query) or pupe_error($query);
@@ -297,7 +307,45 @@ if ($tee == "synkronoi") {
 
 	fclose($file);
 
-	echo t("Päivitys referenssistä valmis")."...<br><br><br>";
+	echo t("Päivitetään maat tietokantaan")."...<br>";
+
+	$ok = FALSE;
+
+	if ($file = fopen("http://api.devlab.fi/referenssimaat.sql","r")) {
+		$ok = TRUE;
+	}
+	elseif ($file = fopen("http://10.0.1.2/referenssimaat.sql","r")) {
+		$ok = TRUE;
+	}
+
+	if (!$ok) {
+		echo t("Tiedoston avaus epäonnistui")."!";
+		require ("inc/footer.inc");
+		exit;
+	}
+
+	// Eka rivi roskikseen
+	$rivi = fgets($file);
+
+	while ($rivi = fgets($file)) {
+		list($koodi, $nimi, $eu, $ryhma_tunnus) = explode("\t", trim($rivi));
+
+		$query  = "	INSERT INTO maat SET
+					koodi			= '$koodi',
+					nimi            = '$nimi',
+					eu              = '$eu',
+					ryhma_tunnus    = '$ryhma_tunnus'
+					ON DUPLICATE KEY UPDATE
+					koodi			= '$koodi',
+					nimi            = '$nimi',
+					eu              = '$eu',
+					ryhma_tunnus    = '$ryhma_tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+	}
+
+	fclose($file);
+
+	echo t("Päivitys referenssistä valmis")."...<br>";
 	unset($tee);
 }
 
@@ -318,10 +366,10 @@ if ($tee == '') {
 	echo "</table>";
 	echo "</form><br><br>";
 
-	echo t("Poista vanhat päivärahat").":<br><br>";
+	echo t("Poista vanhat päivärahat sekä KM- alkuiset muut kulut")." (PR-*".(date("y")-1)." KM-*".(date("y")-1)."):<br><br>";
 	echo "<form method='post'>";
 	echo "<table>";
-	echo "<tr><th>".t("Poista edellisten vuosien päivärahat käytöstä")."</th>";
+	echo "<tr><th>".t("Poista edellisten vuosien päivärahat ja muut kulut käytöstä")."</th>";
 	echo "<td><input type='submit' value='".t("Poista")."'></td>";
 	echo "<input type='hidden' name='tee' value='POISTA'><input type='hidden' name='annettuvuosipoista' value='".date('y')."'><tr>";
 	echo "</table>";

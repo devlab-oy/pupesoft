@@ -25,7 +25,7 @@ if ($tiliote == 'Z' and $ytunnus != '' and $asiakasid != '') {
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) != 0) {
-		echo "<br><br><font class='error'>".t("Tällainen samanlainen suoritus on jo olemassa").".</font><br><br>";
+		echo "<br><font class='error'>".t("HUOM: Samanlainen suoritus on jo olemassa")."!</font><br><br>";
 	}
 }
 
@@ -288,8 +288,7 @@ if ($tee == "SYOTTO") {
 	}
 
 	if ($tiliote == 'Z') {
-		$tee = 'Z';
-		require('tilioteselailu.php');
+		require ("inc/footer.inc");
 		exit;
 	}
 	else {
@@ -631,5 +630,3 @@ if ($tee == "" and $ytunnus == "") {
 }
 
 require ("inc/footer.inc");
-
-?>

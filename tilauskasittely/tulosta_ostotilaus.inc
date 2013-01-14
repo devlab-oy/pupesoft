@@ -438,7 +438,7 @@
 				$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
 				$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
 
-            	if ($yhtiorow['ostotilaustyyppi'] == '0' or (isset($nimitykset) and $nimitykset != "")) {
+            	if ((isset($nimitykset) and $nimitykset != "") or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A')) {
 
 	 				//Käännetään nimitys
 					$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
@@ -475,6 +475,19 @@
 
 				// Luodaan muuttujat
 				extract($params);
+
+				if($yhtiorow['lomakkeiden_allekirjoitus'] == 'X') {
+					$allekirjoitus_query = "	SELECT nimi,
+												asema
+												FROM kuka
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus = '{$laskurow['allekirjoittaja']}'";
+					$allekirjoitus_result = pupe_query($allekirjoitus_query);
+					$allekirjoitus_row = mysql_fetch_assoc($allekirjoitus_result);
+
+					$pdf->draw_text(40, 95, $allekirjoitus_row['nimi'], $thispage, $norm);
+					$pdf->draw_text(40, 85, $allekirjoitus_row['asema'], $thispage, $norm);
+				}
 
 				//Alimmat kolme laatikkoa, yhtiötietoja
 				$pdf->draw_rectangle(70, 20, 20, 580, $thispage, $rectparam);

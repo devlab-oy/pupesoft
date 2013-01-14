@@ -10,10 +10,14 @@
 	// - 25paalle
 	// - pois (kurantiksi ja keskihankintahinta nostetaan takaisin)
 	// - peru (kurantiksi ja keskihankintahinta jää alas nykyiselle tasolle)
+	// $epakurpvm - päivämäärä jolloin epäkurantoidaan
 
 	$tuoteno = isset($tuoteno) ? mysql_real_escape_string(trim($tuoteno)) : "";
 	$tee = isset($tee) ? trim($tee) : "";
 	$varaston_muutos = 0;
+
+	// Tehdään oletuksena kaikki muutokset nykyhetkeen
+	$updatepvm = "now()";
 
 	// Katsotaan löytyykö tuote
 	if ($tuoteno != "") {
@@ -275,6 +279,25 @@
 			echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote väärässä tilassa!")." ".t("Ei voida laittaa täysiepäkurantiksi!")."</font><br>";
 			$tee = "";
 		}
+
+		if (isset($epakurpvm) and $epakurpvm != "" and strtotime($yhtiorow['tilikausi_alku']) < strtotime($epakurpvm) and strtotime($yhtiorow['tilikausi_loppu']) > strtotime($epakurpvm)) {
+
+			$chkpp = substr($epakurpvm, 8, 2);
+			$chkkk = substr($epakurpvm, 5, 2);
+			$chkvv = substr($epakurpvm, 0, 4);
+
+			if (!checkdate($chkkk, $chkpp, $chkvv)) {
+				echo "<font class='error'>$tuoterow[tuoteno] ".t("VIRHE: Syötetty päivämäärä on virheellinen")."!</font><br>";
+				$tee = "";
+			}
+			else {
+				$updatepvm = "'{$epakurpvm} 23:59:59'";
+			}
+		}
+		elseif (isset($epakurpvm) and $epakurpvm != "") {
+			echo "<font class='error'>$tuoterow[tuoteno] ".t("VIRHE: Syötetty päivämäärä ei sisälly kuluvaan tilikauteen")."!</font><br>";
+			$tee = "";
+		}
 	}
 
 	// Päivitetään tuote
@@ -304,24 +327,24 @@
 
 			case "paalle" :
 				if ($pvm100 == "0000-00-00") {
-					$pvm100 = "now()";
+					$pvm100 = $updatepvm;
 				}
 				// 100% epäkurantiksi tulevalle asetetaan 75% mukainen hinta, siksi ei jaettavaa vähennetä
 			case "75paalle" :
 				if ($pvm75 == "0000-00-00") {
-					$pvm75 = "now()";
+					$pvm75 = $updatepvm;
 				}
 				$zenior_jaettava--;
 
 			case "puolipaalle" :
 				if ($pvm50 == "0000-00-00") {
-					$pvm50 = "now()";
+					$pvm50 = $updatepvm;
 				}
 				$zenior_jaettava--;
 
 			case "25paalle" :
 				if ($pvm25 == "0000-00-00") {
-					$pvm25 = "now()";
+					$pvm25 = $updatepvm;
 				}
 				$zenior_jaettava--;
 				$tuotteen_saldo = $tuotteen_saldo * -1;
@@ -411,10 +434,10 @@
 			}
 		}
 
-		if ($pvm25  != "now()") { $pvm25  = "'{$pvm25}'" ; }
-		if ($pvm50  != "now()") { $pvm50  = "'{$pvm50}'" ; }
-		if ($pvm75  != "now()") { $pvm75  = "'{$pvm75}'" ; }
-		if ($pvm100 != "now()") { $pvm100 = "'{$pvm100}'"; }
+		if ($pvm25  != $updatepvm) { $pvm25  = "'{$pvm25}'" ; }
+		if ($pvm50  != $updatepvm) { $pvm50  = "'{$pvm50}'" ; }
+		if ($pvm75  != $updatepvm) { $pvm75  = "'{$pvm75}'" ; }
+		if ($pvm100 != $updatepvm) { $pvm100 = "'{$pvm100}'"; }
 
 		$query = "	UPDATE tuote SET
 					$set_zenior
@@ -437,7 +460,7 @@
 					kplhinta = round($keskihankintahinta_muutos, 6),
 					selite   = '$epakurantti_selite',
 					laatija  = '{$kukarow["kuka"]}',
-					laadittu = now()";
+					laadittu = $updatepvm";
 		$result = pupe_query($query);
 
 		// otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
@@ -685,7 +708,7 @@
 		if ($tapahtumat_samalle_tositteelle != "kylla" or $laskuid == 0) {
 			$query = "	INSERT into lasku set
 						yhtio      = '$kukarow[yhtio]',
-						tapvm      = now(),
+						tapvm      = $updatepvm,
 						tila       = 'X',
 						alatila    = 'E',
 						viite      = '$tapahtumaid',
@@ -720,7 +743,7 @@
 					kustp    = '{$kustp_ins}',
 					kohde	 = '{$kohde_ins}',
 					projekti = '{$projekti_ins}',
-					tapvm    = now(),
+					tapvm    = $updatepvm,
 					summa    = $varaston_muutos,
 					vero     = 0,
 					lukko    = '',
@@ -736,7 +759,7 @@
 					kustp    = '{$kustp_ins}',
 					kohde	 = '{$kohde_ins}',
 					projekti = '{$projekti_ins}',
-					tapvm    = now(),
+					tapvm    = $updatepvm,
 					summa    = $varaston_muutos * -1,
 					vero     = 0,
 					lukko    = '',

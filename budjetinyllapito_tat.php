@@ -421,8 +421,8 @@
 		}
 
 		// Hypätään myös myyntisarakkeiden yli
-		if ($toim == "ASIAKAS") {
-			$lukualku += 2;
+		if ($toim == "ASIAKAS" and stripos($headers[$lukualku], "Myynti")  !== FALSE) {
+			$lukualku += 3;
 		}
 
 		$insert_rivimaara = 0;
@@ -1135,17 +1135,17 @@
 			}
 		}
 
-		if ($toim == "TUOTE" and $tuoteno == "" and $lisa_dynaaminen["tuote"] == "" and $lisa == "" and $lisa_parametri == "") {
+		if ($toim == "TUOTE" and $tuoteno == "" and $lisa_dynaaminen["tuote"] == "" and $lisa == "" and $lisa_parametri == "" and !is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 			echo "<font class='error'>".t("On valittava tuote tai tuotekategoria")."! $lisa tai $lisa_parametri</font><br>";
 			$tee = "";
 		}
 
-		if ($toim == "ASIAKAS" and $asiakasid == "" and $lisa_dynaaminen["asiakas"] == "" and $lisa == "" and $lisa_parametri == "") {
+		if ($toim == "ASIAKAS" and $asiakasid == "" and $lisa_dynaaminen["asiakas"] == "" and $lisa == "" and $lisa_parametri == "" and !is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 			echo "<font class='error'>".t("On valittava asiakas tai asiakaskategoria")."!";
 			$tee = "";
 		}
 
-		if ($toim == "TOIMITTAJA" and $toimittajaid == "") {
+		if ($toim == "TOIMITTAJA" and $toimittajaid == "" and !is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 			echo "<font class='error'>".t("On valittava toimittaja")."!</font><br>";
 			$tee = "";
 		}

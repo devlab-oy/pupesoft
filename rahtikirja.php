@@ -252,7 +252,7 @@
 		}
 	}
 
-	if ($id > 0) {
+	if ($id > 0 and $tunnukset != "") {
 		$tark = "	SELECT count(DISTINCT lasku.toimitustapa) toimitustapoja,
 					count(DISTINCT if(toimitustapa.tulostustapa = 'K' or toimitustapa.tulostustapa = 'L', 'koonti', lasku.liitostunnus)) asiakkaita,
 					count(DISTINCT if(toimitustapa.tulostustapa = 'K' or toimitustapa.tulostustapa = 'L', 'koonti', concat(lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa))) toim_osoitteita
@@ -277,7 +277,7 @@
 		}
 	}
 
-	if ($id > 0) {
+	if ($id > 0 and $tunnukset != "") {
 
 		$vakquery = "	SELECT ifnull(group_concat(DISTINCT tuote.tuoteno), '') vaktuotteet
 						FROM tilausrivi

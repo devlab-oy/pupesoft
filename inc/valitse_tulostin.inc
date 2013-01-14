@@ -73,7 +73,7 @@
 
 	if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
 
-		$chk = ((isset($nimitykset) and $nimitykset != '') or (!isset($nimitykset) and ($yhtiorow['ostotilaustyyppi'] == 0 or $yhtiorow['ostotilaustyyppi'] == 'A'))) ? 'checked' : '';
+		$chk = ((isset($nimitykset) and $nimitykset != '') or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A')) ? 'checked' : '';
 
 		echo "<tr><th>",t("Tulosta nimitykset ostotilaukselle"),"</th><td><input type='checkbox' name='nimitykset' {$chk}></td></tr>";
 
@@ -321,7 +321,7 @@
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 		echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 
-		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS') and $asrow['email'] != '') {
+		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'LASKU') and $asrow['email'] != '') {
 			echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
 		}
 

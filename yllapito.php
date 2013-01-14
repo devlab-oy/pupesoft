@@ -19,7 +19,7 @@
 		require ("inc/parametrit.inc");
 	}
 
-	if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote") {
+	if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana") {
 		enable_ajax();
 	}
 
@@ -928,7 +928,7 @@
 					$lisa .= " and {$array[$i]} = '{$haku[$i]}' ";
 				}
 			}
-			else if(trim($array[$i]) == 'ytunnus') {
+			elseif (trim($array[$i]) == 'ytunnus' and !$tarkkahaku) {
 				$lisa .= " and REPLACE({$array[$i]}, '-', '') = REPLACE('{$haku[$i]}', '-', '') ";
 			}
 			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {

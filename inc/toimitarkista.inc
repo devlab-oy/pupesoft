@@ -208,7 +208,7 @@ if(!function_exists("toimitarkista")) {
 
 					// ei löydetty itteämme
 					if ($srowapu['tunnus'] != $tunnus) {
-						$virhe[$i] = t("Samalla ytunnuksella '$tmp_ytunnus' on useita toimittajia! Lisää tarkenne ovt-tunnkseen.");
+						$virhe[$i] = t("Samalla ytunnuksella %s on useita toimittajia! Lisää tarkenne ovt-tunnkseen.", "", $tmp_ytunnus);
 					}
 				}
 			}
@@ -297,18 +297,18 @@ if(!function_exists("toimitarkista")) {
 				}
 			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "edi_kuvaus") {
 			$tmp_asn = $t[$i];
 	}
-		
+
 		if (mysql_field_name($result, $i) == "asn_sanomat") {
 			$asn_tyyppi = trim($t[$i]);
 			if ($tmp_asn == "editilaus_out_teccom.inc" and $asn_tyyppi == "") {
 				$virhe[$i] = t("Toimittajalle on laitettu TecCom-editilaus. Mitä sanomia toimittaja lähettää")." ?";
 }
 
-		}		
+		}
 	}
 }
 

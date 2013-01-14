@@ -133,6 +133,17 @@ if(!function_exists("avainsanatarkista")) {
 
 		if (mysql_field_name($result, $i) == "selitetark_2") {
 			$tem_selitetark_2 = trim($t[$i]);
+
+			if (strtoupper($tem_laji) == "INVEN_LAJI" and $tem_selitetark_2 != "") {
+
+				$query = "	SELECT tunnus
+							FROM tili
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tilino = '{$tem_selitetark_2}'";
+				$tili_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($tili_chk_res) == 0) $virhe[$i] = t("Tilinumero ei ole sallittu")."!";
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "selitetark_3") {

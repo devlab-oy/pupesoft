@@ -5983,6 +5983,7 @@ if (!function_exists('ebid')) {
 			if ($laskurow['chn'] == '100') $out = t("Verkkolasku, tulostuspalvelu");
 			elseif ($laskurow['chn'] == '010') $out = t("Verkkolasku");
 			elseif ($laskurow['chn'] == '020') $out = t("Vienti-Verkkolasku (EU)");
+			elseif ($laskurow['chn'] == '030') $out = t("Vienti-Verkkolasku, tulostuspalvelu (EU)");
 			elseif ($laskurow['chn'] == '111') $out = t("Itella EDI: EIH-1.4 sähköinen lasku");
 			elseif ($laskurow['chn'] == '112') $out = t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin");
 			elseif ($laskurow['chn'] == '666') $out = t("Sähköposti")."-".t("lasku");
@@ -6844,85 +6845,6 @@ if (!function_exists("js_open_yllapito")) {
 			}
 		</SCRIPT>
 		<?php
-	}
-}
-
-if (!function_exists("js_showhide")) {
-	// scripti balloonien tekemiseen
-	function js_showhide () {
-
-?>
-<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-
-function showhide(layer_ref, type) {
-
-
-	if (type=='byName') {
-		var e = document.getElementsByName(layer_ref);
-
-		for(i=0;i<=e.length-1;i++) {
-			if (e[i].style.display != 'none') {
-				e[i].style.display = 'none';
-			}
-			else {
-				e[i].style.display = '';
-			}
-		}
-	}
-	else {
-
-		var state = document.getElementById(layer_ref).style.display;
-		if (state != 'none') {
-			state = 'none';
-		}
-		else {
-			state = '';
-		}
-
-		if (document.all) { //IS IE 4 or 5 (or 6 beta)
-			eval( "document.all." + layer_ref + ".style.display = state");
-		}
-		if (document.layers) { //IS NETSCAPE 4 or below
-			document.layers[layer_ref].display = state;
-		}
-		if (document.getElementById &&!document.all) {
-			hza = document.getElementById(layer_ref);
-			hza.style.display = state;
-		}
-	}
-}
-
-function show(layer_ref, type) {
-
-
-	if (type=='byName') {
-		var e = document.getElementsByName(layer_ref);
-
-		for(i=0;i<=e.length-1;i++) {
-			e[i].style.display = '';
-		}
-	}
-	else {
-
-		var state = document.getElementById(layer_ref).style.display;
-		state = '';
-
-		if (document.all) { //IS IE 4 or 5 (or 6 beta)
-			eval( "document.all." + layer_ref + ".style.display = state");
-		}
-		if (document.layers) { //IS NETSCAPE 4 or below
-			document.layers[layer_ref].display = state;
-		}
-		if (document.getElementById &&!document.all) {
-			hza = document.getElementById(layer_ref);
-			hza.style.display = state;
-		}
-	}
-}
-
-</script>
-<?php
-
 	}
 }
 

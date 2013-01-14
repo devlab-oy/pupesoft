@@ -1068,7 +1068,7 @@
 						//Käsiteltävät rivitunnukset (isä ja mahdolliset lapset)
 						$tunnukset = $jtrow["tunnus"].",";
 
-						if ($jtrow['jtkielto'] == 'Z') {
+						if ($jtrow['jtkielto'] == 'Z' and $loput[$tunnukset] != 'VAKISIN') {
 							$voiko_toimittaa = hae_toimitettavat_tilausrivit($jtrow['otunnus'], $varastosta, $jtspec);
 						}
 						else {
@@ -1676,7 +1676,7 @@
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 										echo "<td valign='top' align='center' $class>&nbsp;</td>";
 
-										if ($jtrow["osatoimitus"] == "") {
+										if ($jtrow["osatoimitus"] == "" and $jtrow["jtkielto"] != "Z") {
 											echo "<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4' value='$kpl[$tunnukset]'></td>";
 											echo "<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA' $poista_check></td>";
 											echo "<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA' $jata_check></td>";

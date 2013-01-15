@@ -1354,7 +1354,7 @@
 								else {
 									$kateisottojen_summa = 0;
 									foreach($kateisotot[$edktunnus] as $kateisotto) {
-										$kateisottojen_summa += $kateisotto['summa'];
+										$kateisottojen_summa += abs($kateisotto['summa']);
 									}
 								}
 								echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' value='{$kateisottojen_summa}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
@@ -1559,7 +1559,7 @@
 				else {
 					$kateisottojen_summa = 0;
 					foreach($kateisotot[$edktunnus] as $kateisotto) {
-						$kateisottojen_summa += $kateisotto['summa'];
+						$kateisottojen_summa += abs($kateisotto['summa']);
 					}
 				}
 				echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' value='{$kateisottojen_summa}' onkeyup='update_summa(\"tasmaytysform\");'></td>";

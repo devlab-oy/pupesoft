@@ -1,8 +1,32 @@
 <?php
 
 function hinnastorivi($tuote, $laskurow) {
-    
+	global $kukarow;
+
 	$myyntihinta = tuotteen_myyntihinta($laskurow, $tuote, 1, "ei");
+
+	// Jos tuotteen status on P, hinnastoon KYLLÄ, tuote on korvaavuusketjussa ja tuotteen saldo on 0,
+	// laitetaan myyntihinta nollaksi
+	if ($tuote['status'] == 'P' and $tuote['hinnastoon'] == 'K' and $tuote['id'] != '') {
+
+		// Tarkistetaan saldo
+		$query = "SELECT sum(saldo) as saldo
+				FROM tuotepaikat
+				WHERE yhtio='{$kukarow['yhtio']}'
+				AND tuoteno='{$tuote['tuoteno']}'";
+		$result = pupe_query($query);
+
+		// jos saldo on nolla laitetaan myyntihinnaksi 0
+		$saldo = mysql_fetch_assoc($result);
+		if ($saldo['saldo'] == 0) {
+			$myyntihinta = 0;
+		}
+	}
+	// Jos tuote on poistettu ja hinnastoon on kyllä, mutta tuote ei ole korvaavuusketjussa.
+	// Ei laiteta hinnastoon.
+	else if ($tuote['status'] == 'P' and $tuote['hinnastoon'] == 'K' and $tuote['id'] == '') {
+		return;
+	}
 
     // muutetaan yksiköt ISO-standardin mukaisiksi
 	$yksikko="";
@@ -12,7 +36,7 @@ function hinnastorivi($tuote, $laskurow) {
 		$yksikko = "SET";
 	if ($tuote['yksikko']=='PAR')
 		$yksikko = "PAR";
-	
+
     // tehdään tietuetta
 	$out   = sprintf("%-1.1s",   "D"); 								// vakio, D=datarivi
 	$out  .= sprintf("%-35.25s", $tuote['tuoteno']);						// tuotenumero
@@ -42,7 +66,7 @@ function hinnastorivi($tuote, $laskurow) {
 	$out  .= sprintf("%-19.19s", "");					   				// määrän maksimi
 	$out  .= sprintf("%-11.11s", "");					   				// alennushinta
 	$out .= "\n";
-	
+
     return $out;
 }
 ?>

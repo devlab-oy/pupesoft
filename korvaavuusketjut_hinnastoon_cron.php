@@ -44,7 +44,9 @@ while ($ketju = mysql_fetch_assoc($result)) {
 	$tuotteet_query = "SELECT korvaavat.id, korvaavat.tuoteno, korvaavat.jarjestys, tuote.hinnastoon
 						FROM korvaavat
 						JOIN tuote on (tuote.yhtio=korvaavat.yhtio and tuote.tuoteno=korvaavat.tuoteno)
-						WHERE korvaavat.yhtio='{$kukarow['yhtio']}' AND id='{$ketju['id']}' ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno;";
+						WHERE korvaavat.yhtio='{$kukarow['yhtio']}'
+						AND id='{$ketju['id']}'
+						ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno;";
 	$tuotteet_result = pupe_query($tuotteet_query);
 
 	// Eka tuote on AINA ketjun päätuote

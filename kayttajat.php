@@ -1043,7 +1043,7 @@
 						echo "<input type='checkbox' name='kassalipas[]' value='{$kassalipas['tunnus']}' {$sel}> {$kassalipas['nimi']}<br/>";
 					}
 					echo "</td>";
-					echo "</tr>";
+					echo "</td><td class='back'>",t("Ilman rajausta käyttäjällä on oikeus kaikkiin kassalippaisiin"),"</td></tr>";
 
 					echo "<tr><th align='left'>",t("Kassamyyjä / oletuskassalipas"),":</td>";
 					echo "<td><select name='kassamyyja'><option value=''>",t("Ei oletuskassalipasta"),"</option>";

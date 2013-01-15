@@ -1061,6 +1061,41 @@
 					ORDER BY kassa, kassanimi, tyyppi, lasku.mapvm, lasku.laskunro";
 		$result = pupe_query($query);
 
+		if(!empty($vva) and !empty($kka) and !empty($ppa)) {
+			$tapvm_where = "	AND lasku.tapvm >= '$vva-$kka-$ppa'
+								AND lasku.tapvm <= '$vvl-$kkl-$ppl'";
+		}
+		else {
+			$tapvm_where = "AND lasku.tapvm >= '$vv-$kk-$pp'";
+		}
+
+		$kateisotot_query = "	SELECT lasku.nimi,
+								lasku.tapvm,
+								lasku.comments,
+								lasku.kassalipas,
+								tiliointi.tilino,
+								tiliointi.summa,
+								tiliointi.selite,
+								kassalipas.nimi as kassalipas_nimi,
+								kuka.nimi as kuka_nimi
+								FROM lasku
+								JOIN tiliointi
+								ON ( tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.summa < 0)
+								JOIN kassalipas
+								ON (kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = lasku.kassalipas)
+								JOIN kuka
+								ON ( kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija )
+								WHERE  lasku.yhtio = '{$kukarow['yhtio']}'
+								{$tapvm_where}
+								AND lasku.tila = 'X'
+								AND lasku.alatila = ''
+								AND lasku.tilaustyyppi = 'O'";
+		$kateisotot_result = pupe_query($kateisotot_query);
+		$kateisotot = array();
+		while($kateisotto = mysql_fetch_assoc($kateisotot_result)) {
+			$kateisotot[$kateisotto['kassalipas']][] = $kateisotto;
+		}
+
 		$i = 1;
 
 		if (mysql_num_rows($result) == 0) {
@@ -1311,7 +1346,18 @@
 										echo "9";
 									}
 								echo "' width='300px' nowrap>$edkassanimi ".t("k‰teisotto kassasta").":</td><td class='tumma' align='center'>";
-								echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' value='{$tasmaytys_array[$edktunnus]['kateisotto'.$i]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+								//jos t‰sm‰ytys t‰lle p‰iv‰lle on kertaalleen tehty, n‰ytet‰‰n kyseisess‰ formissa annetut arvot
+								//else n‰ytet‰‰n t‰lle p‰iv‰lle kassasta otetut k‰teisotot
+								if(!empty($tasmaytys_array[$edktunnus]['kateisotto'.$i])) {
+									$kateisottojen_summa = $tasmaytys_array[$edktunnus]['kateisotto'.$i];
+								}
+								else {
+									$kateisottojen_summa = 0;
+									foreach($kateisotot[$edktunnus] as $kateisotto) {
+										$kateisottojen_summa += $kateisotto['summa'];
+									}
+								}
+								echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' value='{$kateisottojen_summa}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 								if ($tilityskpl > 1) {
 									$y = $i;
 									$temp_indeksi = $i + 1;
@@ -1507,7 +1553,16 @@
 				}
 				echo "' width='300px' nowrap>$edkassanimi ".t("k‰teisotto kassasta").": </td><td class='tumma' align='center' nowrap>";
 				$temp_indeksi = 1;
-				echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' value='{$tasmaytys_array[$edktunnus]['kateisotto'.$temp_indeksi]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+				if(!empty($tasmaytys_array[$edktunnus]['kateisotto'.$i])) {
+					$kateisottojen_summa = $tasmaytys_array[$edktunnus]['kateisotto'.$i];
+				}
+				else {
+					$kateisottojen_summa = 0;
+					foreach($kateisotot[$edktunnus] as $kateisotto) {
+						$kateisottojen_summa += $kateisotto['summa'];
+					}
+				}
+				echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' value='{$kateisottojen_summa}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 				if ($tilityskpl > 1) {
 					$y = $i;
 					$temp_indeksi = $temp_indeksi + 1;
@@ -1754,6 +1809,22 @@
 				while ($row = mysql_fetch_assoc($result)) {
 
 					if ((($edkassa != $row["kassa"] and $edkassa != '') or ($kateinen != $row["tilino"] and $kateinen != ''))) {
+						$kassalippaan_kateisotot_yhteensa = 0;
+						foreach($kateisotot[$edkassa] as $kateisotto) {
+							$kassalippaan_kateisotot_yhteensa += $kateisotto['summa'];
+							echo "<tr class='aktiivi'>";
+							echo "<td>{$kateisotto['kassalipas_nimi']}</td>";
+							echo "<td>{$kateisotto['selite']} - {$kateisotto['kuka_nimi']}</td>";
+							echo "<td>-</td>";
+							echo "<td>-</td>";
+							echo "<td>".date('d.m.Y', strtotime($kateisotto['tapvm']))."</td>";
+							echo "<td>{$kateisotto['summa']}</td>";
+							echo "</tr>";
+						}
+						$kateismaksuyhteensa = $kassalippaan_kateisotot_yhteensa + $kateismaksuyhteensa;
+						$yhteensa = $kassalippaan_kateisotot_yhteensa + $yhteensa;
+						$kassayhteensa = $kassalippaan_kateisotot_yhteensa + $kassayhteensa;
+						
 						echo "</table><table width='100%'>";
 						echo "<tr><td colspan='7' class='tumma'>$edtyyppi ".t("yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
 						echo "<td align='right' class='tumma' style='width:100px'><b><div id='erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td></tr>";
@@ -1846,6 +1917,24 @@
 					$yhteensa += $row["tilsumma"];
 					$kassayhteensa += $row["tilsumma"];
 				}
+
+				$kassalippaan_kateisotot_yhteensa = 0;
+				foreach($kateisotot[$edkassa] as $kateisotto) {
+					$kassalippaan_kateisotot_yhteensa += $kateisotto['summa'];
+					echo "<tr class='aktiivi'>";
+					echo "<td>{$kateisotto['kassalipas_nimi']}</td>";
+					echo "<td>{$kateisotto['selite']} - {$kateisotto['kuka_nimi']}</td>";
+					echo "<td>-</td>";
+					echo "<td>-</td>";
+					echo "<td>".date('d.m.Y', strtotime($kateisotto['tapvm']))."</td>";
+					echo "<td>{$kateisotto['summa']}</td>";
+					echo "</tr>";
+				}
+
+				//$kassalippaan_kateisotot_yhteensa aina < 0 $kateismaksuyhteensa aina > 0
+				$kateismaksuyhteensa = $kassalippaan_kateisotot_yhteensa + $kateismaksuyhteensa;
+				$yhteensa = $kassalippaan_kateisotot_yhteensa + $yhteensa;
+				$kassayhteensa = $kassalippaan_kateisotot_yhteensa + $kassayhteensa;
 
 				if ($edkassa != '') {
 					echo "</table><table width='100%'>";

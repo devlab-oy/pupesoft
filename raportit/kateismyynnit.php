@@ -1032,30 +1032,32 @@
 
 		//Haetaan käteislaskut
 		$query = "	SELECT
-					$selecti
-					if(lasku.kassalipas = '', 'Muut', lasku.kassalipas) kassa,
-					if(ifnull(kassalipas.nimi, '') = '', 'Muut', kassalipas.nimi) kassanimi,
+					{$selecti}
+					IF(lasku.kassalipas = '', 'Muut', lasku.kassalipas) kassa,
+					IF(IFNULL(kassalipas.nimi, '') = '', 'Muut', kassalipas.nimi) kassanimi,
 					tiliointi.tilino,
-					tiliointi.summa tilsumma,
 					lasku.nimi,
 					lasku.ytunnus,
 					lasku.laskunro,
 					lasku.tunnus,
-					lasku.summa-lasku.pyoristys summa,
 					lasku.laskutettu,
 					lasku.mapvm,
 					lasku.kassalipas,
 					tiliointi.ltunnus,
-					kassalipas.tunnus ktunnus
-					FROM lasku use index (yhtio_tila_mapvm)
-					JOIN maksuehto ON (maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen != '')
-					LEFT JOIN tiliointi ON (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.korjattu = '' and tiliointi.tilino in ($myyntisaamiset_tilit))
-					LEFT JOIN kassalipas ON (kassalipas.yhtio=lasku.yhtio and kassalipas.tunnus=lasku.kassalipas)
-					WHERE lasku.yhtio	= '$kukarow[yhtio]'
-					and lasku.tila 		= 'U'
-					and lasku.alatila	= 'X'
-					$lisa
-					$kassat
+					kassalipas.tunnus ktunnus,
+					(lasku.summa - lasku.pyoristys) summa,
+					SUM(tiliointi.summa) tilsumma
+					FROM lasku USE INDEX (yhtio_tila_mapvm)
+					JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND lasku.maksuehto = maksuehto.tunnus AND maksuehto.kateinen != '')
+					LEFT JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.korjattu = '' AND tiliointi.tilino IN ({$myyntisaamiset_tilit}))
+					LEFT JOIN kassalipas ON (kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = lasku.kassalipas)
+					WHERE lasku.yhtio	= '{$kukarow['yhtio']}'
+					AND lasku.tila 		= 'U'
+					AND lasku.alatila	= 'X'
+					{$lisa}
+					{$kassat}
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14
+					HAVING tilsumma != 0
 					ORDER BY kassa, kassanimi, tyyppi, lasku.mapvm, lasku.laskunro";
 		$result = pupe_query($query);
 
@@ -2321,7 +2323,7 @@
 				}
 			}
 		}
-		
+
 		return $kassalippaat;
 	}
 

@@ -461,7 +461,7 @@
 									$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
 								}
 							}
-							elseif ($charge_description == 'freight costs' or $charge_code == 'zfwa') {
+							elseif ($charge_description == 'freight costs' or $charge_code == 'zfwa' or $charge_code == 'freightcharges') {
 
 								/*
 								 * Rahtikulu

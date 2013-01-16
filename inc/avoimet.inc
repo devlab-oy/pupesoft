@@ -317,10 +317,11 @@
 			$tiliointilisa = $kustpeet[0];
 		}
 
-		$maalisa = '';
+		$maalisa = $maalisa2 = '';
 
 		if (isset($maa) and $maa != '') {
-			$maalisa = " and lasku.maa = '$maa'";
+			$maalisa  = " and lasku.maa = '$maa'";
+			$maalisa2 = " and asiakas.maa = '$maa'";
 		}
 
 		if (substr($laji, 0, 1) == 'O') {
@@ -779,7 +780,7 @@
 			$summa = array(); // tässä kirjanpidosta osasuoritukset poistettuna
 			$summatotal = 0;  // ässä koko höskä kotivaluutassa
 
-			while ($trow = mysql_fetch_assoc ($result)) {
+			while ($trow = mysql_fetch_assoc($result)) {
 
 				if ($trow['tiliointiavoinsaldo'] != 0) {
 
@@ -889,6 +890,7 @@
 							and suoritus.kirjpvm <= '$pvm'
 							$av_lisa2
 							$valkoodi2
+							$maalisa2
 					  		ORDER BY asiakas.ytunnus";
 				$result = pupe_query($query);
 

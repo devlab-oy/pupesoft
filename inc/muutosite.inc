@@ -361,6 +361,90 @@
 								AND tunnus IN ({$tiliointirow['tunnus']}, {$vastakirjausrow['tunnus']})";
 					$updres = pupe_query($query);
 
+					// Katsotaan onko tiliöinneillä kassa-alea
+					$query = "	SELECT tunnus
+								FROM tiliointi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND ltunnus = '{$tunnus}'
+								AND tapvm = '{$tiliointirow['tapvm']}'
+								AND kustp = '{$tiliointirow['kustp']}'
+								AND kohde = '{$tiliointirow['kohde']}'
+								AND projekti = '{$tiliointirow['projekti']}'
+								AND tilino = '{$yhtiorow['kassaale']}'
+								AND valkoodi = '{$tiliointirow['valkoodi']}'
+								AND vero = '{$tiliointirow['vero']}'
+								AND korjattu = ''";
+					$kassaale_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($kassaale_chk_res) != 0) {
+
+						$kassaale_chk_row = mysql_fetch_assoc($kassaale_chk_res);
+
+						$query = "	UPDATE tiliointi SET
+									korjattu = '{$kukarow['kuka']}',
+									korjausaika = now()
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$kassaale_chk_row['tunnus']}'";
+						$updres = pupe_query($query);
+
+						if ($tiliointirow['vero'] != 0) {
+
+							// Kassa-ale alv
+							$query = "	SELECT tunnus
+										FROM tiliointi
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND ltunnus	= '{$tunnus}'
+										AND tilino = '{$yhtiorow['alv']}'
+										AND kustp = 0
+										AND kohde = 0
+										AND projekti = 0
+										AND tapvm = '{$tiliointirow['tapvm']}'
+										AND valkoodi = '{$tiliointirow['valkoodi']}'
+										AND vero = 0
+										AND aputunnus = '{$kassaale_chk_row['tunnus']}'
+										AND korjattu = ''";
+							$kassaale_alv_chk_res = pupe_query($query);
+
+							if (mysql_num_rows($kassaale_alv_chk_res) != 0) {
+
+								$kassaale_alv_chk_row = mysql_fetch_assoc($kassaale_alv_chk_res);
+
+								$query = "	UPDATE tiliointi SET
+											korjattu = '{$kukarow['kuka']}',
+											korjausaika = now()
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$kassaale_alv_chk_row['tunnus']}'";
+								$updres = pupe_query($query);
+							}
+						}
+					}
+
+					// Katsotaan onko tiliöinneillä valuuttaeroa
+					$query = "	SELECT tunnus
+								FROM tiliointi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND ltunnus = '{$tunnus}'
+								AND tapvm = '{$tiliointirow['tapvm']}'
+								AND kustp = '{$tiliointirow['kustp']}'
+								AND kohde = '{$tiliointirow['kohde']}'
+								AND projekti = '{$tiliointirow['projekti']}'
+								AND tilino = '{$yhtiorow['valuuttaero']}'
+								AND vero = 0
+								AND korjattu = ''";
+					$valuuttaero_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($valuuttaero_chk_res) != 0) {
+
+						$valuuttaero_chk_row = mysql_fetch_assoc($valuuttaero_chk_res);
+
+						$query = "	UPDATE tiliointi SET
+									korjattu = '{$kukarow['kuka']}',
+									korjausaika = now()
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$valuuttaero_chk_row['tunnus']}'";
+						$updres = pupe_query($query);
+					}
+
 					$query = "	UPDATE lasku SET
 								mapvm = '0000-00-00',
 								maksu_kurssi = 0,

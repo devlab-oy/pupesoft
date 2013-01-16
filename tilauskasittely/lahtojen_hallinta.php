@@ -831,6 +831,96 @@
 
 				echo "</select></td></tr>";
 
+				//tarkistetaan jos lahdon toimitustavan rahtikirjaerittely != ''
+				//tällöin näytetään liitettävien lähtöjen dropdownit
+				$lahdot_temp = implode(',', $checkbox_parent);
+				$query = "	SELECT
+							lahdot.tunnus,
+							Group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
+							concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', Substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text
+							FROM lahdot
+							JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lasku.tila = 'L' AND lasku.alatila IN ( 'B', 'C' ))
+							JOIN varastopaikat ON (varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto)
+							JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+							AND lahdot.tunnus IN ({$lahdot_temp})
+							AND toimitustapa.erittely != ''
+							GROUP by lahdot.tunnus";
+				$lahdot_result = pupe_query($query);
+				$lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty = array();
+				while($lahto_row = mysql_fetch_assoc($lahdot_result)) {
+					$lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty[] = array(
+						'lahdon_tilauksien_tunnukset' => $lahto_row['tilaukset'],
+						'dropdown_text' => $lahto_row['dropdown_text'],
+					);
+				}
+
+				if(!empty($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty)) {
+					array_unshift($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty, array('lahdon_tilauksien_tunnukset' => 0 ,'dropdown_text' => t('Valitse lähtö')));
+					//tällöin voidaan näyttää mahdolliset liitettävät rahtikirjat
+					//haetaanlistaus suljetuista lähdöistä
+					$query = "	SELECT
+								lahdot.tunnus,
+								group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
+								concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text
+								FROM lahdot
+								JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus)
+								JOIN varastopaikat ON (varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto)
+								JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
+								WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+								AND lahdot.aktiivi = 'S'
+								AND lahdot.pvm > date_sub(now(), INTERVAL 7 day)
+								GROUP BY lahdot.tunnus
+								ORDER BY varastopaikat.nimitys,
+								toimitustapa.selite,
+								lahdot.pvm desc,
+								lahdot.lahdon_kellonaika desc,
+								lahdot.tunnus";
+					$suljetut_lahdot_result = pupe_query($query);
+
+					$suljetut_lahdot = array();
+					$suljetut_lahdot[] = array(
+						'dropdown_text' => t("Valitse liitettävä lähtö"),
+						'tilaukset' => 0,
+					);
+					while ($suljetut_lahdot_row = mysql_fetch_assoc($suljetut_lahdot_result)) {
+						$suljetut_lahdot[] = $suljetut_lahdot_row;
+					}
+
+					echo "<tr>";
+					echo "<th>".t("Yhdistetään lähtöön")."</th>";
+					echo "<td>";
+					echo "<select name='yhdistetaan_lahtoon'>";
+					$indeksi = 1;
+					$sel = "";
+					foreach($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty as $lahto) {
+						if(count($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty) == 2) {
+							//kun array:ssa --> valitse lähtö + 1 lähtö, esi selectoidaan se lähtö
+							if($indeksi == 2) {
+								$sel = "selected='SELECTED'";
+							}
+						}
+						echo "<option {$sel} value='{$lahto['lahdon_tilauksien_tunnukset']}'>{$lahto['dropdown_text']}</option>";
+
+						$indeksi++;
+						$sel = "";
+					}
+					echo "</select>";
+					echo "</td>";
+					echo "</tr>";
+
+					echo "<tr>";
+					echo "<th>".t("Yhdistettävä lähtö")."</th>";
+					echo "<td>";
+					echo "<select name='yhdistettavan_lahdon_tilaukset'>";
+					foreach($suljetut_lahdot as $lahto) {
+						echo "<option value='{$lahto['tilaukset']}'>{$lahto['dropdown_text']}</option>";
+					}
+					echo "</select>";
+					echo "</td>";
+					echo "</tr>";
+				}
+
 				echo "<tr><td class='back' colspan='2'>";
 				echo "<input type='submit' value='",t("Tulosta rahtikirjat"),"'>";
 				echo "</td></tr>";

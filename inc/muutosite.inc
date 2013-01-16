@@ -311,156 +311,126 @@
 
 		if ($tila == 'ODOTTAMAAN_SUORITUSTA') {
 
-			$query = "	SELECT GROUP_CONCAT(DISTINCT oletus_rahatili) rahatilit,
-						GROUP_CONCAT(DISTINCT oletus_selvittelytili) selvitteytilit
-						FROM yriti
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND (oletus_rahatili != '' or oletus_selvittelytili != '')";
-			$tilires = pupe_query($query);
-			$tilirow = mysql_fetch_assoc($tilires);
-
-			$tilit = array_merge(explode(",", $tilirow['rahatilit']), explode(",", $tilirow['selvitteytilit']), array($yhtiorow['selvittelytili']));
-			$tilit = array_unique($tilit);
-
-			// poistetaan tyhjät alkiot array_filterin avulla ilman callbackia
-			// If no callback is supplied, all entries of input equal to FALSE will be removed.
-			$tilit = array_filter($tilit);
-
-			if (count($tilit) > 0) {
-				$tilit = "'".implode("','", $tilit)."'";
-
-				// Etsitään oikea kirjaus
-				// Pitäisi aina löytyä vain yksi osuma, siksi ei ole while-looppi
-				$query = "	SELECT *
-							FROM tiliointi
+			if (strtotime($trow['mapvm']) > strtotime($trow['tapvm'])) {
+				$query = "	SELECT GROUP_CONCAT(DISTINCT oletus_rahatili) rahatilit,
+							GROUP_CONCAT(DISTINCT oletus_selvittelytili) selvitteytilit
+							FROM yriti
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND ltunnus = '{$tunnus}'
-							AND tilino IN ({$tilit})
-							AND korjattu = ''
-							AND tapvm = '{$trow['mapvm']}'";
-				$tiliointires = pupe_query($query);
-				$tiliointirow = mysql_fetch_assoc($tiliointires);
+							AND (oletus_rahatili != '' or oletus_selvittelytili != '')";
+				$tilires = pupe_query($query);
+				$tilirow = mysql_fetch_assoc($tilires);
 
-				// Etsitään vastakirjaus
-				$query = "	SELECT tunnus
-							FROM tiliointi
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND ltunnus = '{$tunnus}'
-							AND tapvm = '{$tiliointirow['tapvm']}'
-							AND korjattu = ''
-							AND summa = '".($tiliointirow['summa'] * -1)."'";
-				$vastakirjausres = pupe_query($query);
-				$vastakirjausrow = mysql_fetch_assoc($vastakirjausres);
+				$tilit = array_merge(explode(",", $tilirow['rahatilit']), explode(",", $tilirow['selvitteytilit']), array($yhtiorow['selvittelytili']));
+				$tilit = array_unique($tilit);
 
-				if (mysql_num_rows($tiliointires) == 1 and mysql_num_rows($vastakirjausres) == 1) {
-					// Yliviivataan molemmat tiliöinnit
-					$query = "	UPDATE tiliointi SET
-								korjattu = '{$kukarow['kuka']}',
-								korjausaika = now()
+				// poistetaan tyhjät alkiot array_filterin avulla ilman callbackia
+				// If no callback is supplied, all entries of input equal to FALSE will be removed.
+				$tilit = array_filter($tilit);
+
+				if (count($tilit) > 0) {
+					$tilit = "'".implode("','", $tilit)."'";
+
+					// Etsitään oikea kirjaus
+					// Pitäisi aina löytyä vain yksi osuma, siksi ei ole while-looppi
+					// Rahatiliöinti
+					$query = "	SELECT *
+								FROM tiliointi
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus IN ({$tiliointirow['tunnus']}, {$vastakirjausrow['tunnus']})";
-					$updres = pupe_query($query);
+								AND ltunnus = '{$tunnus}'
+								AND tilino IN ({$tilit})
+								AND korjattu = ''
+								AND tapvm = '{$trow['mapvm']}'";
+					$tiliointires = pupe_query($query);
+					$tiliointirow = mysql_fetch_assoc($tiliointires);
 
-					// Katsotaan onko tiliöinneillä kassa-alea
+					// Etsitään Ostovelkatiliöinti
 					$query = "	SELECT tunnus
 								FROM tiliointi
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND ltunnus = '{$tunnus}'
 								AND tapvm = '{$tiliointirow['tapvm']}'
-								AND kustp = '{$tiliointirow['kustp']}'
-								AND kohde = '{$tiliointirow['kohde']}'
-								AND projekti = '{$tiliointirow['projekti']}'
-								AND tilino = '{$yhtiorow['kassaale']}'
-								AND valkoodi = '{$tiliointirow['valkoodi']}'
-								AND vero = '{$tiliointirow['vero']}'
-								AND korjattu = ''";
-					$kassaale_chk_res = pupe_query($query);
+								AND korjattu = ''
+								AND tilino IN ('{$yhtiorow['ostovelat']}', '{$yhtiorow['konserniostovelat']}')
+								AND summa = '".($tiliointirow['summa'] * -1)."'";
+					$vastakirjausres = pupe_query($query);
+					$vastakirjausrow = mysql_fetch_assoc($vastakirjausres);
 
-					if (mysql_num_rows($kassaale_chk_res) != 0) {
-
-						$kassaale_chk_row = mysql_fetch_assoc($kassaale_chk_res);
-
+					if (mysql_num_rows($tiliointires) == 1 and mysql_num_rows($vastakirjausres) == 1) {
+						// Yliviivataan molemmat tiliöinnit
 						$query = "	UPDATE tiliointi SET
 									korjattu = '{$kukarow['kuka']}',
 									korjausaika = now()
 									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$kassaale_chk_row['tunnus']}'";
+									AND tunnus IN ({$tiliointirow['tunnus']}, {$vastakirjausrow['tunnus']})";
 						$updres = pupe_query($query);
 
-						if ($tiliointirow['vero'] != 0) {
+						// Katsotaan onko tiliöinneillä kassa-alea
+						$query = "	SELECT *
+									FROM tiliointi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND ltunnus = '{$tunnus}'
+									AND tapvm = '{$trow['mapvm']}'
+									AND tilino = '{$yhtiorow['kassaale']}'
+									AND korjattu = ''";
+						$kassaale_chk_res = pupe_query($query);
 
-							// Kassa-ale alv
-							$query = "	SELECT tunnus
-										FROM tiliointi
+						if (mysql_num_rows($kassaale_chk_res) != 0) {
+
+							$kassaale_chk_row = mysql_fetch_assoc($kassaale_chk_res);
+
+							$query = "	UPDATE tiliointi SET
+										korjattu = '{$kukarow['kuka']}',
+										korjausaika = now()
 										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND ltunnus	= '{$tunnus}'
-										AND tilino = '{$yhtiorow['alv']}'
-										AND kustp = 0
-										AND kohde = 0
-										AND projekti = 0
-										AND tapvm = '{$tiliointirow['tapvm']}'
-										AND valkoodi = '{$tiliointirow['valkoodi']}'
-										AND vero = 0
-										AND aputunnus = '{$kassaale_chk_row['tunnus']}'
-										AND korjattu = ''";
-							$kassaale_alv_chk_res = pupe_query($query);
+										AND tunnus = '{$kassaale_chk_row['tunnus']}'";
+							$updres = pupe_query($query);
 
-							if (mysql_num_rows($kassaale_alv_chk_res) != 0) {
+							if ($kassaale_chk_row['vero'] != 0) {
 
-								$kassaale_alv_chk_row = mysql_fetch_assoc($kassaale_alv_chk_res);
-
+								// Kassa-ale alv
 								$query = "	UPDATE tiliointi SET
 											korjattu = '{$kukarow['kuka']}',
 											korjausaika = now()
 											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tunnus = '{$kassaale_alv_chk_row['tunnus']}'";
+											AND ltunnus	= '{$tunnus}'
+											AND aputunnus = '{$kassaale_chk_row['tunnus']}'
+											AND korjattu = ''";
 								$updres = pupe_query($query);
 							}
 						}
-					}
 
-					// Katsotaan onko tiliöinneillä valuuttaeroa
-					$query = "	SELECT tunnus
-								FROM tiliointi
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND ltunnus = '{$tunnus}'
-								AND tapvm = '{$tiliointirow['tapvm']}'
-								AND kustp = '{$tiliointirow['kustp']}'
-								AND kohde = '{$tiliointirow['kohde']}'
-								AND projekti = '{$tiliointirow['projekti']}'
-								AND tilino = '{$yhtiorow['valuuttaero']}'
-								AND vero = 0
-								AND korjattu = ''";
-					$valuuttaero_chk_res = pupe_query($query);
-
-					if (mysql_num_rows($valuuttaero_chk_res) != 0) {
-
-						$valuuttaero_chk_row = mysql_fetch_assoc($valuuttaero_chk_res);
-
+						// Ylikirjataan valuuttaero jos on valuuttaero-kirjaus
 						$query = "	UPDATE tiliointi SET
 									korjattu = '{$kukarow['kuka']}',
 									korjausaika = now()
 									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$valuuttaero_chk_row['tunnus']}'";
+									AND ltunnus = '{$tunnus}'
+									AND tapvm = '{$trow['mapvm']}'
+									AND tilino = '{$yhtiorow['valuuttaero']}'
+									AND vero = 0
+									AND korjattu = ''";
+						$valuuttaero_upd_res = pupe_query($query);
+
+						$query = "	UPDATE lasku SET
+									mapvm = '0000-00-00',
+									maksu_kurssi = 0,
+									tila = 'Q'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$tunnus}'";
 						$updres = pupe_query($query);
+
+						echo "<font class='message'>",t("Lasku siirrettiin odottamaan suoritusta"),"!</font><br /><br />";
 					}
-
-					$query = "	UPDATE lasku SET
-								mapvm = '0000-00-00',
-								maksu_kurssi = 0,
-								tila = 'Q'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$tunnus}'";
-					$updres = pupe_query($query);
-
-					echo "<font class='message'>",t("Lasku siirrettiin odottamaan suoritusta"),"!</font><br /><br />";
+					else {
+						echo "<font class='error'>",t("Ei löytynyt oikea määrä kirjauksia"),"!</font><br /><br />";
+					}
 				}
 				else {
-					echo "<font class='error'>",t("Ei löytynyt oikea määrä kirjauksia"),"!</font><br /><br />";
+					echo "<font class='error'>",t("Ei löytynyt tarvittavia tilejä"),"!</font><br /><br />";
 				}
 			}
 			else {
-				echo "<font class='error'>",t("Ei löytynyt tarvittavia tilejä"),"!</font><br /><br />";
+				echo "<font class='error'>",t("Laskun maksupäivämäärä on ennen tapahtumapäivämäärää"),"!</font><br /><br />";
 			}
 
 			$tee = 'E';

@@ -380,6 +380,13 @@
 		$jatko = 0;
 	}
 
+	if ($avain_sel['INVEN_LAJI'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
+
+		$ulos = "<td>".livesearch_kentta("mainform", "TILIHAKU", $nimi, 270, $trow[$i], "EISUBMIT")."</td>";
+
+		$jatko = 0;
+	}
+
 	if ($avain_sel["TOIMEHTO"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3") {
 
 		$sel1 = '';

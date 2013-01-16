@@ -119,7 +119,7 @@
 
 	echo "	<tr>
 			<th>".t("Mitkä laskut listataan:")."</th>
-			<td colspan = '3'><select name='laji'>
+			<td colspan = '3'><select name='laji' onchange='submit();'>
 			<option value='M'   $sel[M]>".t("myyntisaamiset")."</option>
 			<option value='MF'  $sel[MF]>".t("factoringmyyntisaamiset")."</option>
 			<option value='MK'  $sel[MK]>".t("konsernimyyntisaamiset")."</option>
@@ -136,27 +136,13 @@
 			<td colspan='3'><input type = 'text' name = 'ytunnus' value='".tarkistahetu($ytunnus)."'></td>
 			</tr>";
 
+	echo "<tr><th>".t("Rajauksia")."</th><td colspan='3'>";
 
-	$query = "	SELECT tunnus
-				FROM kustannuspaikka
-				WHERE yhtio = '$kukarow[yhtio]'
-				and tyyppi = 'K'
-				and kaytossa != 'E'
-				LIMIT 1";
-	$result = pupe_query($query);
-
-	if (mysql_num_rows($result) > 0) {
-
-		echo "<tr><th>".t("Kustannuspaikka")."</th><td colspan='3'>";
-
-		$monivalintalaatikot = array("KUSTP");
-		$noautosubmit = TRUE;
-		$piirra_otsikot = FALSE;
-
-		require ("tilauskasittely/monivalintalaatikot.inc");
-
-		echo "</td></tr>";
-	}
+	if (substr($laji,0,1) != 'O') $monivalintalaatikot = array("KUSTP", "ASIAKASOSASTO", "ASIAKASMYYJA");
+	else $monivalintalaatikot = array("KUSTP");
+	$noautosubmit = TRUE;
+	require ("tilauskasittely/monivalintalaatikot.inc");
+	echo "</td></tr>";
 
 	if ($naytetaankokommentit != "") $komsel = "CHECKED";
 	else $komsel = "";
@@ -210,7 +196,7 @@
 	echo "<option value = 'AT' $sel1>".t("Asiakas/Toimittaja")."</option>";
 	echo "</select></td></tr>";
 
-	echo "<tr><th>" . t('Maa'). " ".t("(vain myyntilaskut)").":</th><td colspan=3><select name='maa'>";
+	echo "<tr><th>".t('Maa').":</th><td colspan=3><select name='maa'>";
 
 	$query = "	SELECT distinct maa
 				FROM asiakas
@@ -218,7 +204,7 @@
 				AND maa != ''";
 	$res = pupe_query($query);
 
-	echo "<option value=''>" . t('Kaikki'). "</option>";
+	echo "<option value=''>".t('Kaikki')."</option>";
 
 	while ($rowmaa = mysql_fetch_assoc($res)) {
 		if ($maa == $rowmaa['maa']) {
@@ -233,43 +219,47 @@
 
 	echo "</td></tr>";
 
-	echo "<tr><th>".t("Maksuehto")." ".t("(vain myyntilaskut)").":</th>";
-	echo "<td colspan='3'><select name='maksuehto'>";
-	echo "<option value=''>".t("Ei valintaa")."";
+	if (substr($laji, 0, 1) != 'O') {
+		echo "<tr><th>".t("Maksuehto").":</th>";
+		echo "<td colspan='3'><select name='maksuehto'>";
+		echo "<option value=''>".t("Ei valintaa")."";
 
-	$query = "	SELECT *
-				FROM maksuehto
-				WHERE yhtio = '$kukarow[yhtio]'
-				ORDER BY jarjestys, teksti, tunnus";
-	$mresult = pupe_query($query);
+		$query = "	SELECT *
+					FROM maksuehto
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY jarjestys, teksti, tunnus";
+		$mresult = pupe_query($query);
 
-	while($row = mysql_fetch_assoc($mresult)) {
-		if ($row["tunnus"] == $maksuehto) {
-			$sel = 'selected';
+		while ($row = mysql_fetch_assoc($mresult)) {
+			if ($row["tunnus"] == $maksuehto) {
+				$sel = 'selected';
+			}
+			else {
+				$sel = "";
+			}
+
+			echo "<option value='$row[tunnus]' $sel>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
 		}
-		else {
-			$sel = "";
-		}
 
-		echo "<option value='$row[tunnus]' $sel>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
+		echo "</select></td></tr>";
+
+		echo "<tr>";
+		echo "<th>".t("Näytä laskut, joita on karhuttu ainakin")."</th>";
+		echo "<td colspan='3'>";
+		echo "<input type='text' size='5' name='karhuja' value='$karhuja'> ".t("kertaa")."";
+		echo "</td>";
+		echo "</tr>";
+
+		// luottovakuutettu
+		echo "<tr>";
+		echo "<th>".t("Näytä vain luottovakuutetut asiakkaat")."</th>";
+
+		$luottochecked = ($luottovakuutettu == "K") ? "CHECKED" : "";
+
+		echo "<td colspan='3'>";
+		echo "<input type='checkbox' name='luottovakuutettu' value='K' $luottochecked>";
+		echo "</td></tr>";
 	}
-	echo "</select></td></tr>";
-	echo "<tr>";
-	echo "<th>".t("Näytä laskut, joita on karhuttu ainakin (Vain Myyntilaskut)")."</th>";
-	echo "<td colspan='3'>";
-	echo "<input type='text' size='5' name='karhuja' value='$karhuja'> ".t("kertaa")."";
-	echo "</td>";
-	echo "</tr>";
-
-	// luottovakuutettu
-	echo "<tr>";
-	echo "<th>".t("Näytä vain luottovakuutetut asiakkaat (Vain Myyntilaskut)")."</th>";
-
-	$luottochecked = ($luottovakuutettu == "K") ? "CHECKED" : "";
-
-	echo "<td colspan='3'>";
-	echo "<input type='checkbox' name='luottovakuutettu' value='K' $luottochecked>";
-	echo "</td></tr>";
 
 	if ($excel != "") $exsel = "CHECKED";
 	else $exsel = "";
@@ -277,13 +267,13 @@
 	echo "<tr><th>".t("Tee Excel")."</th><td colspan='3'><input type='checkbox' name='excel' value = 'YES' $exsel></td></tr>";
 
 	echo "</table><br>";
-	echo "<input type = 'submit' value = '".t("Aja raportti")."'>";
+	echo "<input type = 'submit' name = 'ajaraportti' value = '".t("Aja raportti")."'>";
 	echo "</form><br><br>";
 
 	$formi = 'valinta';
 	$kentta = 'pp';
 
-	if ($tee != '') {
+	if ($tee != '' AND isset($ajaraportti)) {
 
 		switch ($laji) {
 			case 'M' :
@@ -320,7 +310,20 @@
 			$valkoodi2 = " and suoritus.valkoodi = '$savalkoodi'";
 		}
 
-		if (substr($laji,0,1) == 'O') {
+		$tiliointilisa = "";
+
+		if (isset($lisa) and strpos($lisa, "tiliointi.") !== FALSE) {
+			preg_match("/and tiliointi.kustp in \([',0-9]*?\)/", $lisa, $kustpeet);
+			$tiliointilisa = $kustpeet[0];
+		}
+
+		$maalisa = '';
+
+		if (isset($maa) and $maa != '') {
+			$maalisa = " and lasku.maa = '$maa'";
+		}
+
+		if (substr($laji, 0, 1) == 'O') {
 
 			$av_lisa = '';
 
@@ -330,13 +333,6 @@
 			}
 			else {
 				$indeksi = " use index (yhtio_tila_tapvm)";
-			}
-
-			if (isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
-				$tiliointilisa = $lisa;
-			}
-			else {
-				$tiliointilisa = '';
 			}
 
 			if ($laji == 'OOK') 	$tili = "'".$yhtiorow['ostovelat']."','".$yhtiorow['konserniostovelat']."'";
@@ -393,6 +389,7 @@
 						and lasku.tapvm <= '$pvm'
 						and lasku.tapvm > '0000-00-00'
 						and tila in ('H','Y','M','P','Q')
+						$maalisa
 						$av_lisa
 						$valkoodi1
 						$groupby
@@ -613,18 +610,6 @@
 				$av_lisa1 .= " and lasku.maksuehto = '$maksuehto' ";
 			}
 
-			$maalisa = '';
-			if (isset($maa) and $maa != '') {
-				$maalisa = " and lasku.maa = '$maa'";
-			}
-
-			if (isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
-				$tiliointilisa = $lisa;
-			}
-			else {
-				$tiliointilisa = '';
-			}
-
 			$tili = 0;
 
 			if ($laji == 'MK') 		$tili = "'$yhtiorow[konsernimyyntisaamiset]'";
@@ -713,8 +698,8 @@
 						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0))-lasku.pyoristys tiliointisumma,
 						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
 						FROM lasku $indeksi
-						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$pvm' {$tiliointilisa})
-						JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus $luottovakuutuslisa)
+						JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus {$luottovakuutuslisa})
+						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$pvm')
 						WHERE lasku.yhtio		= '$kukarow[yhtio]'
 						and (lasku.mapvm		> '$pvm' or lasku.mapvm = '0000-00-00')
 						$paivamaaralisa
@@ -722,6 +707,7 @@
 						and lasku.tapvm 		> '0000-00-00'
 						and lasku.tila			= 'U'
 						and lasku.alatila		= 'X'
+						$lisa
 						$av_lisa1
 						$valkoodi
 						$maalisa

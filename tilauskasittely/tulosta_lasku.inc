@@ -2462,7 +2462,6 @@ if (!function_exists("tulosta_lasku")) {
 
 			if (($komento == "email" and $kukarow["eposti"] != '') or substr($komento,0,12) == 'asiakasemail') {
 				// l‰hetet‰‰n meili
-				$komento = "";
 
 				$kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
 

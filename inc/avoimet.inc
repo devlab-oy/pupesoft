@@ -423,7 +423,7 @@
 					<th>".t("Eräpäivä")."</th>
 					<th>".t("Avoin saldo")."</th>
 					<th>".t("Val")."</th>
-					<th class='back'></th>
+					<th class='back' style='display:none;'></th>
 					</tr>
 					<tr>
 					<td><input type='text' class='search_field' name='search_ytunnus'></td>
@@ -437,7 +437,7 @@
 					<td><input type='text' class='search_field' name='search_erapaiva'></td>
 					<td><input type='text' class='search_field' name='search_avoinsaldo'></td>
 					<td><input type='text' class='search_field' name='search_val'></td>
-					<td class='back'></td>
+					<td class='back' style='display:none;'></td>
 				</tr>";
 
 			echo "</thead>";

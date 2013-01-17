@@ -1910,6 +1910,7 @@
 				'tee'			=> $tee,
 				'toim'			=> $toim,
 				'norm'			=> $norm,
+				'otunnukset'	=> $laskurow['tunnus'],
 				);
 
 				// Aloitellaan DGD:n teko

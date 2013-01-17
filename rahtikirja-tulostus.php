@@ -897,6 +897,7 @@
 					'tee'			=> $tee,
 					'toim'			=> $toim,
 					'norm'			=> $norm,
+					'otunnukset' 	=> $otunnukset,
 					);
 
 					// Aloitellaan lähetteen teko

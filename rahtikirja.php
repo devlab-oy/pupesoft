@@ -1086,6 +1086,8 @@
 
 				require ("tilauskasittely/tulosta_dgd.inc");
 
+				$dgd_otunnukset = (isset($dgdlle_tunnukset) and $dgdlle_tunnukset != "") ? $dgdlle_tunnukset : $laskurow['tunnus'];
+
 				$params_dgd = array(
 				'kieli'			=> 'en',
 				'laskurow'		=> $laskurow,
@@ -1096,6 +1098,7 @@
 				'tee'			=> $tee,
 				'toim'			=> $toim,
 				'norm'			=> $norm,
+				'otunnukset'	=> $dgd_otunnukset,
 				);
 
 				// Aloitellaan lähetteen teko

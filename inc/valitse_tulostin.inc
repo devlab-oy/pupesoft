@@ -322,8 +322,10 @@
 		echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 
 		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'LASKU') and $asrow['email'] != '') {
-			if ($toim == 'LASKU' and trim($asrow['lasku_email']) != '') $asrow['email'] = $asrow['lasku_email'];
 			echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
+			if ($toim == 'LASKU' and trim($asrow['lasku_email']) != '') {
+				echo "<option value='asiakasemail$asrow[lasku_email]'>".t("Asiakkaan laskutussähköpostiin").": $asrow[lasku_email]</option>";
+			}
 		}
 
 		if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and (preg_match("/(excel|wabco)/", $editoimrow['edi_kuvaus']) or ($editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != ''))) {

@@ -135,6 +135,8 @@
 			$ulos .= "</select>";
 		}
 
+		$vanha_tili = (!isset($vanha_tili) or $vanha_tili == '') ? $tili : $vanha_tili;
+
 		echo "<tr>
 				<td valign='top'>
 				<form name = 'uusi' action = '$PHP_SELF#$tunnus' method='post'>
@@ -151,10 +153,17 @@
 				<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
 				<input type='hidden' name = 'liitos' value='{$liitos}' />
 				<input type='hidden' name = 'liitostunnus' value='{$liitostunnus}' />
-				<input type='hidden' name = 'jarj' value = '$jarj'>";
+				<input type='hidden' name = 'jarj' value = '$jarj'>
+				<input type='hidden' name = 'vanha_tili' value='{$vanha_tili}' />";
 
 		if ($tiliulos == '') {
+			if ($tili == '') $vanha_tili = '';
+
 			echo livesearch_kentta("uusi", "TILIHAKU", "tili", 170, $tili, "EISUBMIT", "vero");
+
+			if ($vanha_tili != '' and $virhe != '' and $vanha_tili != $tili) {
+				echo "<br /><font class='error'>",t("Aiemmin syötetty tili")," {$vanha_tili}</font>";
+			}
 		}
 		else {
 			echo "$tiliulos";
@@ -578,5 +587,3 @@
 
 	echo "</tr>";
 	echo "</table>";
-
-?>

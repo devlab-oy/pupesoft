@@ -813,7 +813,7 @@ if (!function_exists('rivi_otsikot')) {
 }
 
 if (!function_exists('lisaa_tullinimike_ja_alkuperamaa')) {
-	function lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala) {
+	function lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala, $kieli) {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
 		$kala = $kala - 10;
@@ -828,9 +828,9 @@ if (!function_exists('lisaa_tullinimike_ja_alkuperamaa')) {
 		$alkuperamaa_res = pupe_query($query);
 		$alkuperamaa_row = mysql_fetch_assoc($alkuperamaa_res);
 
-		$tullinimike_ja_alkuperamaa_text = t("Tullinimike").": {$row["tullinimike"]}";
+		$tullinimike_ja_alkuperamaa_text = t("Tullinimike", $kieli).": {$row["tullinimike"]}";
 
-		if ($alkuperamaa_row['alkuperamaa'] != '') $tullinimike_ja_alkuperamaa_text .= " ".t("Alkuperämaa").":  {$alkuperamaa_row['alkuperamaa']}";
+		if ($alkuperamaa_row['alkuperamaa'] != '') $tullinimike_ja_alkuperamaa_text .= " ".t("Alkuperämaa", $kieli).":  {$alkuperamaa_row['alkuperamaa']}";
 
 		$pdf_lasku->draw_text(35, $kala, $tullinimike_ja_alkuperamaa_text, $thispage, $pieni);
 
@@ -997,7 +997,7 @@ if (!function_exists('rivi_original')) {
 		}
 
 		if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
-			$kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
+			$kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala, $kieli);
 		}
 
 		$kala = $kala - 15;
@@ -1127,7 +1127,7 @@ if (!function_exists('rivi_plain')) {
 		}
 
 		if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
-			$kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
+			$kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala, $kieli);
 		}
 
 		$kala = $kala - 15;
@@ -1264,7 +1264,7 @@ if (!function_exists('rivi_plain_2')) {
 		}
 
 		if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
-			$kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
+			$kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala, $kieli);
 		}
 
 		$kala = $kala - 15;
@@ -1415,7 +1415,7 @@ if (!function_exists('rivi_viro')) {
 		}
 
 		if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
-			$kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
+			$kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala, $kieli);
 		}
 
 		$kala = $kala - 15;
@@ -2266,7 +2266,7 @@ if (!function_exists("tulosta_lasku")) {
 					lasku.viesti laskuviesti,
 					lasku.asiakkaan_tilausnumero,
 					lasku.luontiaika tilauspaiva,
-					CONCAT(tuote.tullinimike1, tuote.tullinimike2) AS tullinimike,
+					CONCAT(tuote.tullinimike1, IF(tuote.tullinimike2 NOT IN ('', '00', '0'), tuote.tullinimike2, '')) AS tullinimike,
 					if (tuote.tuotetyyppi = 'K','2 Työt','1 Muut') tuotetyyppi,
 					if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
 					if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,

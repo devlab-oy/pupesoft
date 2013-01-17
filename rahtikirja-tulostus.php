@@ -195,6 +195,7 @@
 					dynaaminen_puu AS node READ,
 					dynaaminen_puu AS parent READ,
 					etaisyydet READ,
+					kerayserat READ,
 					kirjoittimet READ,
 					kuka READ,
 					lahdot READ,

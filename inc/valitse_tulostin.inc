@@ -249,7 +249,7 @@
 		$resultkieli = pupe_query($querykieli);
 		$asrow = mysql_fetch_array($resultkieli);
 
-		$querykieli = "	SELECT kieli, email
+		$querykieli = "	SELECT kieli, email, lasku_email
 						FROM $mista
 						WHERE
 						tunnus = '$asrow[liitostunnus]'
@@ -328,6 +328,9 @@
 
 		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'LASKU') and $asrow['email'] != '') {
 			echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
+			if ($toim == 'LASKU' and trim($asrow['lasku_email']) != '') {
+				echo "<option value='asiakasemail$asrow[lasku_email]'>".t("Asiakkaan laskutussähköpostiin").": $asrow[lasku_email]</option>";
+			}
 		}
 
 		if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and (preg_match("/(excel|wabco)/", $editoimrow['edi_kuvaus']) or ($editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != ''))) {

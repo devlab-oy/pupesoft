@@ -834,7 +834,7 @@ if (!function_exists('lisaa_tullinimike_ja_alkuperamaa')) {
 
 		$pdf_lasku->draw_text(35, $kala, $tullinimike_ja_alkuperamaa_text, $thispage, $pieni);
 
-		return array($thispage, $kala);
+		return $kala;
 
 	}
 }
@@ -997,7 +997,7 @@ if (!function_exists('rivi_original')) {
 		}
 
 		if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
-			list($thispage, $kala) = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
+			$kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
 		}
 
 		$kala = $kala - 15;
@@ -1127,7 +1127,7 @@ if (!function_exists('rivi_plain')) {
 		}
 
 		if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
-			list($thispage, $kala) = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
+			$kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
 		}
 
 		$kala = $kala - 15;
@@ -1264,7 +1264,7 @@ if (!function_exists('rivi_plain_2')) {
 		}
 
 		if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
-			list($thispage, $kala) = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
+			$kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
 		}
 
 		$kala = $kala - 15;
@@ -1415,7 +1415,7 @@ if (!function_exists('rivi_viro')) {
 		}
 
 		if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
-			list($thispage, $kala) = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
+			$kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
 		}
 
 		$kala = $kala - 15;

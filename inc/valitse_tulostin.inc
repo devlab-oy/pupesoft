@@ -321,7 +321,7 @@
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 		echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 
-		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS') and $asrow['email'] != '') {
+		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'LASKU') and $asrow['email'] != '') {
 			echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
 		}
 

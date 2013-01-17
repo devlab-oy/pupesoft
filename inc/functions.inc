@@ -5983,6 +5983,7 @@ if (!function_exists('ebid')) {
 			if ($laskurow['chn'] == '100') $out = t("Verkkolasku, tulostuspalvelu");
 			elseif ($laskurow['chn'] == '010') $out = t("Verkkolasku");
 			elseif ($laskurow['chn'] == '020') $out = t("Vienti-Verkkolasku (EU)");
+			elseif ($laskurow['chn'] == '030') $out = t("Vienti-Verkkolasku, tulostuspalvelu (EU)");
 			elseif ($laskurow['chn'] == '111') $out = t("Itella EDI: EIH-1.4 sähköinen lasku");
 			elseif ($laskurow['chn'] == '112') $out = t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin");
 			elseif ($laskurow['chn'] == '666') $out = t("Sähköposti")."-".t("lasku");
@@ -6844,85 +6845,6 @@ if (!function_exists("js_open_yllapito")) {
 			}
 		</SCRIPT>
 		<?php
-	}
-}
-
-if (!function_exists("js_showhide")) {
-	// scripti balloonien tekemiseen
-	function js_showhide () {
-
-?>
-<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-
-function showhide(layer_ref, type) {
-
-
-	if (type=='byName') {
-		var e = document.getElementsByName(layer_ref);
-
-		for(i=0;i<=e.length-1;i++) {
-			if (e[i].style.display != 'none') {
-				e[i].style.display = 'none';
-			}
-			else {
-				e[i].style.display = '';
-			}
-		}
-	}
-	else {
-
-		var state = document.getElementById(layer_ref).style.display;
-		if (state != 'none') {
-			state = 'none';
-		}
-		else {
-			state = '';
-		}
-
-		if (document.all) { //IS IE 4 or 5 (or 6 beta)
-			eval( "document.all." + layer_ref + ".style.display = state");
-		}
-		if (document.layers) { //IS NETSCAPE 4 or below
-			document.layers[layer_ref].display = state;
-		}
-		if (document.getElementById &&!document.all) {
-			hza = document.getElementById(layer_ref);
-			hza.style.display = state;
-		}
-	}
-}
-
-function show(layer_ref, type) {
-
-
-	if (type=='byName') {
-		var e = document.getElementsByName(layer_ref);
-
-		for(i=0;i<=e.length-1;i++) {
-			e[i].style.display = '';
-		}
-	}
-	else {
-
-		var state = document.getElementById(layer_ref).style.display;
-		state = '';
-
-		if (document.all) { //IS IE 4 or 5 (or 6 beta)
-			eval( "document.all." + layer_ref + ".style.display = state");
-		}
-		if (document.layers) { //IS NETSCAPE 4 or below
-			document.layers[layer_ref].display = state;
-		}
-		if (document.getElementById &&!document.all) {
-			hza = document.getElementById(layer_ref);
-			hza.style.display = state;
-		}
-	}
-}
-
-</script>
-<?php
-
 	}
 }
 
@@ -12098,16 +12020,16 @@ if (!function_exists("pupe_DataTables")) {
 
 								// Summataan vain ruudulla näkyvät luvut
 								for (var i=iStart; i<iEnd; i++) {
-									valuutta = aaData[aiDisplay[i]][9];
+									valuutta = aaData[aiDisplay[i]][10];
 									valuutat[valuutta] = valuutta;
 
-									if (aaData[aiDisplay[i]][7] == '') {
+									if (aaData[aiDisplay[i]][8] == '') {
 										if (typeof avoimetsuoriy[valuutta] == 'undefined') avoimetsuoriy[valuutta] = 0;
-										avoimetsuoriy[valuutta] += aaData[aiDisplay[i]][8]*1;
+										avoimetsuoriy[valuutta] += aaData[aiDisplay[i]][9]*1;
 									}
 									else {
 										if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
-										avoimety[valuutta] += aaData[aiDisplay[i]][8]*1;
+										avoimety[valuutta] += aaData[aiDisplay[i]][9]*1;
 									}
 								}
 
@@ -13063,19 +12985,39 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 		}
 
 		if ($ryhma == 'fi305' or $ryhma == 'fi306' or $ryhma == 'fi320') {
+
+			$ktrow["tilioinnit"] = "";
+
 			// Hetaan yhteisöostot/käänteisen alvin joilla on kassa-aletta
-			$query = "	SELECT
-						group_concat(DISTINCT tiliointi.tunnus) tilioinnit
+			$query = "	SELECT tiliointi.ltunnus, group_concat(tiliointi.tunnus) tilioinnit
 						FROM tiliointi
-						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
-						JOIN tiliointi tiliointi2 ON (lasku.yhtio = tiliointi2.yhtio AND lasku.tunnus = tiliointi2.ltunnus)
-						JOIN tili ON (tili.yhtio = tiliointi2.yhtio and tili.tilino = tiliointi2.tilino AND tili.alv_taso like '%$ryhma%')
-						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
 						AND tiliointi.korjattu = ''
-						AND tiliointi.tapvm >= '$alkupvm'
-						AND tiliointi.tapvm <= '$loppupvm'
-						AND tiliointi.tilino = '$yhtiorow[kassaale]'";
-			$ktres = pupe_query($query);
+						AND tiliointi.tapvm   >= '$alkupvm'
+						AND tiliointi.tapvm   <= '$loppupvm'
+						AND tiliointi.tilino   = '$yhtiorow[kassaale]'
+						GROUP BY 1";
+			$kassaaleres = pupe_query($query);
+
+			if (mysql_num_rows($kassaaleres) > 0) {
+
+				while ($kassaalerow = mysql_fetch_assoc($kassaaleres)) {
+					// Katotaan onko sillä tositteella, jolla kassaale on, myös halutun alv_taso:n kirjaus, silloin kassaale kuuluu tähän alv_taso:on
+					$query = "	SELECT lasku.tunnus
+								FROM lasku
+								JOIN tiliointi ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
+								JOIN tili ON (tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino AND tili.alv_taso like '%$ryhma%')
+								WHERE lasku.yhtio = '$kukarow[yhtio]'
+								AND lasku.tunnus  = $kassaalerow[ltunnus]";
+					$ktres2 = pupe_query($query);
+
+					if (mysql_num_rows($ktres2) > 0) {
+						$ktrow["tilioinnit"] .= "$kassaalerow[tilioinnit],";
+					}
+				}
+
+				$ktrow["tilioinnit"] = substr($ktrow["tilioinnit"], 0, -1);
+			}
 		}
 		else {
 			// Hetaan yhteisömyynti, palvelut ja tuotteet erikseen jotta osataan splitata kassa-alennus tavaramyyntiin ja palvelumyyntIin
@@ -13094,62 +13036,59 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 						AND tiliointi.korjattu = ''
 						AND tiliointi.tapvm >= '$alkupvm'
 						AND tiliointi.tapvm <= '$loppupvm'
+						AND tiliointi.tilino = '$yhtiorow[myynninkassaale]'
 						$maalisa
-						$tiliointilisa
-						AND tiliointi.tilino = '$yhtiorow[myynninkassaale]'";
+						$tiliointilisa";
 			$ktres = pupe_query($query);
-		}
-
-		if (mysql_num_rows($ktres) == 1) {
 			$ktrow = mysql_fetch_assoc($ktres);
-
-			if ($ktrow["tilioinnit"] != "" and ($ryhma == 'fi305' or $ryhma == 'fi306' or $ryhma == 'fi320' or $ktrow["yhteensa"] != 0)) {
-
-				// Palvelut ja tuotteet erikseen
-				if ($ryhma == 'fi311') {
-					$kakerroinlisa = $ktrow["tavara"]/$ktrow["yhteensa"];
-				}
-				elseif ($ryhma == 'fi312') {
-					$kakerroinlisa = $ktrow["palvelut"]/$ktrow["yhteensa"];
-				}
-				elseif ($ryhma == 'kolmikanta') {
-					$kakerroinlisa = $ktrow["kolmikanta"]/$ktrow["yhteensa"];
-				}
-
-				$selec = "	if(lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) maa,
-							if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
-							tiliointi.vero vero,
-							tiliointi.tilino tilino,
-							tili.nimi nimi,";
-				$group = "	maa, valuutta, vero, tilino, nimi";
-
-				if ($yhteenvetolilmo) {
-					$selec = "	lasku.ytunnus ytunnus,
-								if(lasku.toim_maa = '', lasku.maa, lasku.toim_maa) maa,
-								max(lasku.nimi) laskunimi, ";
-					$group = "	ytunnus, maa";
-				}
-
-				$query = "	SELECT
-							$selec
-							sum(round(tiliointi.summa * (1 + ($oletus_verokanta / 100)), 2)) $kerroin bruttosumma,
-							sum(round(tiliointi.summa * ($oletus_verokanta / 100), 2)) $kerroin verot,
-							sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + ($oletus_verokanta / 100)), 2)) $kerroin bruttosumma_valuutassa,
-							sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * ($oletus_verokanta / 100), 2)) $kerroin verot_valuutassa,
-							count(*) kpl
-							FROM tiliointi
-							JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
-							LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
-							WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-							AND tiliointi.tunnus in ($ktrow[tilioinnit])
-							GROUP BY $group
-							ORDER BY $group";
-				$ttres = pupe_query($query);
-
-				return array($kakerroinlisa, $ttres);
-			}
-			return array(NULL, NULL);
 		}
+
+		if ($ktrow["tilioinnit"] != "" and ($ryhma == 'fi305' or $ryhma == 'fi306' or $ryhma == 'fi320' or $ktrow["yhteensa"] != 0)) {
+
+			// Palvelut ja tuotteet erikseen
+			if ($ryhma == 'fi311') {
+				$kakerroinlisa = $ktrow["tavara"]/$ktrow["yhteensa"];
+			}
+			elseif ($ryhma == 'fi312') {
+				$kakerroinlisa = $ktrow["palvelut"]/$ktrow["yhteensa"];
+			}
+			elseif ($ryhma == 'kolmikanta') {
+				$kakerroinlisa = $ktrow["kolmikanta"]/$ktrow["yhteensa"];
+			}
+
+			$selec = "	if(lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) maa,
+						if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
+						tiliointi.vero vero,
+						tiliointi.tilino tilino,
+						tili.nimi nimi,";
+			$group = "	maa, valuutta, vero, tilino, nimi";
+
+			if ($yhteenvetolilmo) {
+				$selec = "	lasku.ytunnus ytunnus,
+							if(lasku.toim_maa = '', lasku.maa, lasku.toim_maa) maa,
+							max(lasku.nimi) laskunimi, ";
+				$group = "	ytunnus, maa";
+			}
+
+			$query = "	SELECT
+						$selec
+						sum(round(tiliointi.summa * (1 + ($oletus_verokanta / 100)), 2)) $kerroin bruttosumma,
+						sum(round(tiliointi.summa * ($oletus_verokanta / 100), 2)) $kerroin verot,
+						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + ($oletus_verokanta / 100)), 2)) $kerroin bruttosumma_valuutassa,
+						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * ($oletus_verokanta / 100), 2)) $kerroin verot_valuutassa,
+						count(*) kpl
+						FROM tiliointi
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
+						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						AND tiliointi.tunnus in ($ktrow[tilioinnit])
+						GROUP BY $group
+						ORDER BY $group";
+			$ttres = pupe_query($query);
+
+			return array($kakerroinlisa, $ttres);
+		}
+
 		return array(NULL, NULL);
 	}
 }

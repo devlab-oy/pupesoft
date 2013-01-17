@@ -88,7 +88,7 @@
 	if (!function_exists('rivi_erittely')) {
 		function rivi_erittely ($laskurow, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht, $vikarivi) {
 			global $yhtiorow, $kukarow, $pdf, $kieli, $rectparam, $norm, $kirj, $iso, $toitarow;
-			static $edytunnus, $kala1;
+			static $edytunnus, $kala1, $edliitostunnus;
 
 			$otsikot = FALSE;
 			$summatmenijo = FALSE;
@@ -111,7 +111,7 @@
 			}
 
 			// Asiakas vaihtuu, uudet otsikkotiedot
-			if (!$summatmenijo and $toitarow['erittely'] != 'k' and isset($edytunnus) and $edytunnus != $laskurow['ytunnus']) {
+			if (!$summatmenijo and $toitarow['erittely'] != 'k' and isset($edliitostunnus) and $edliitostunnus != $laskurow['liitostunnus']) {
 				// Piiretään sivulle summatiedot
 				list($kala, $kollityht, $kilotyht, $lavametriyht) = loppu_erittely($kala1, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht);
 				$otsikot = TRUE;
@@ -253,13 +253,22 @@
 			}
 
 			$edytunnus = $laskurow['ytunnus'];
+			$edliitostunnus = $laskurow['liitostunnus'];
 
 			return array($kala, $firstpage, $kollityht, $kilotyht, $lavametriyht);
 		}
 	}
 
+	//rahtikirja-tulostus.php riveiltä 784 - 788 tulee välilyöntejä
+	$otunnukset = str_replace(' ', '', $otunnukset);
 	// Ei kaaduta erroriin jos jostain syystä tullaan tyhjällä
 	if ($otunnukset == "") $otunnukset = 0;
+
+	if ($yhdistetaan_lahtoon != 0 and $yhdistettavan_lahdon_tilaukset != 0) {
+		if (sort(explode(',', $yhdistetaan_lahtoon)) == sort(explode(',', $otunnukset))) {
+			$otunnukset .= ',' . $yhdistettavan_lahdon_tilaukset;
+		}
+	}
 
 	// Haetaan tulostetut tilaukset
 	if ($toitarow['erittely'] == 'k') {
@@ -282,13 +291,13 @@
 					toim_postitp,
 					ytunnus,
 					liitostunnus,
-					toimitustavan_lahto,
+					max(toimitustavan_lahto) toimitustavan_lahto,
 					group_concat(tunnus) tunnus
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus in ($otunnukset)
-					GROUP BY nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, ytunnus, liitostunnus, toimitustavan_lahto
-					ORDER BY ytunnus, tunnus";
+					GROUP BY nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, ytunnus, liitostunnus
+					ORDER BY ytunnus, liitostunnus, tunnus";
 	}
 
 	$result = mysql_query($query) or pupe_error($query);

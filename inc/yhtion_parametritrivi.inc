@@ -200,7 +200,7 @@
 		$ulos .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '5'  $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
 		$ulos .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
-		$ulos .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi)")."</option>";
+		$ulos .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)")."</option>";
 		$ulos .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1");
 		#$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3");
@@ -1319,6 +1319,24 @@
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
 					<option value='' $sela>".t("Ei tulosteta allekirjoitussivua")."</option>
 					<option value='K' $selb>".t("Tulostetaan allekirjoitussivu")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
+
+	if(mysql_field_name($result, $i) == "lomakkeiden_allekirjoitus") {
+		$sela = $selb = "";
+
+		if ($trow[$i] == 'X') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value='' $sela>".t("Ei n‰ytet‰ allekirjoitusta myyntilasku, ostotilaus, l‰hete tai tarjous tulosteella")."</option>
+					<option value='X' $selb>".t("N‰ytet‰‰n allekirjoitus myyntilasku, ostotilaus, l‰hete ja tarjous tulosteella")."</option>
 				</select></td>";
 
 		$jatko = 0;

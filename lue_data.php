@@ -606,6 +606,7 @@ if ($kasitellaan_tiedosto) {
 			$hylkaa    = 0;
 			$tila      = "";
 			$tee       = "";
+			$epakurpvm = "";
 			$eilisataeikamuuteta = "";
 			$rivilaskuri++;
 
@@ -1215,44 +1216,32 @@ if ($kasitellaan_tiedosto) {
 
 						if ($table_mysql == 'tuote' and ($otsikko == 'EPAKURANTTI25PVM' or $otsikko == 'EPAKURANTTI50PVM' or $otsikko == 'EPAKURANTTI75PVM' or $otsikko == 'EPAKURANTTI100PVM')) {
 
-							// $tuoteno pit‰s olla jo aktivoitu ylh‰‰ll‰
-							if (trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI25PVM') {
-								$tee = "25paalle";
-							}
-							elseif (trim($taulunrivit[$taulu][$eriviindex][$r]) == "peru") {
-								$tee = "peru";
-							}
-							elseif ($tee == "") {
-								$tee = "pois";
-							}
-
-							if (trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI50PVM') {
-								$tee = "puolipaalle";
-							}
-							elseif (trim($taulunrivit[$taulu][$eriviindex][$r]) == "peru") {
-								$tee = "peru";
-							}
-							elseif ($tee == "") {
-								$tee = "pois";
-							}
-
-							if (trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI75PVM') {
-								$tee = "75paalle";
-							}
-							elseif (trim($taulunrivit[$taulu][$eriviindex][$r]) == "peru") {
-								$tee = "peru";
-							}
-							elseif ($tee == "") {
-								$tee = "pois";
-							}
-
 							if (trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI100PVM') {
 								$tee = "paalle";
 							}
-							elseif (trim($taulunrivit[$taulu][$eriviindex][$r]) == "peru") {
+
+							if ($tee != "paalle" and trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI75PVM') {
+								$tee = "75paalle";
+							}
+
+							if ($tee != "paalle" and $tee != "75paalle" and trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI50PVM') {
+								$tee = "puolipaalle";
+							}
+
+							if ($tee != "paalle" and $tee != "75paalle" and $tee != "puolipaalle" and trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI25PVM') {
+								$tee = "25paalle";
+							}
+
+							if (strtoupper($taulunrivit[$taulu][$eriviindex][$r]) == "PERU") {
 								$tee = "peru";
 							}
-							elseif ($tee == "") {
+
+							if ($taulunrivit[$taulu][$eriviindex][$r] == "0000-00-00" or substr(strtoupper($taulunrivit[$taulu][$eriviindex][$r]),0,4) == "POIS") {
+
+								if (substr(strtoupper($taulunrivit[$taulu][$eriviindex][$r]), 0, 4) == "POIS" and strlen($taulunrivit[$taulu][$eriviindex][$r]) == 15) {
+									$epakurpvm = substr($taulunrivit[$taulu][$eriviindex][$r], 5);
+								}
+
 								$tee = "pois";
 							}
 

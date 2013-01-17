@@ -812,9 +812,36 @@ if (!function_exists('rivi_otsikot')) {
 	}
 }
 
+if (!function_exists('lisaa_tullinimike_ja_alkuperamaa')) {
+	function lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala) {
+		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
+
+		$kala = $kala - 10;
+
+		// Haetaan tullinimike ja alkuperämaa
+		$query = "	SELECT alkuperamaa
+					FROM tuotteen_toimittajat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$row['tuoteno']}'
+					ORDER BY jarjestys ASC
+					LIMIT 1";
+		$alkuperamaa_res = pupe_query($query);
+		$alkuperamaa_row = mysql_fetch_assoc($alkuperamaa_res);
+
+		$tullinimike_ja_alkuperamaa_text = t("Tullinimike").": {$row["tullinimike"]}";
+
+		if ($alkuperamaa_row['alkuperamaa'] != '') $tullinimike_ja_alkuperamaa_text .= " ".t("Alkuperämaa").":  {$alkuperamaa_row['alkuperamaa']}";
+
+		$pdf_lasku->draw_text(35, $kala, $tullinimike_ja_alkuperamaa_text, $thispage, $pieni);
+
+		return array($thispage, $kala);
+
+	}
+}
+
 if (!function_exists('rivi_original')) {
 	function rivi_original ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
-		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
+		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso, $tullinimike_ja_alkuperamaa;
 
 		//Nimitys
 		list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 150, $pdf_lasku, $norm);
@@ -969,6 +996,10 @@ if (!function_exists('rivi_original')) {
 			$pdf_lasku->draw_text(35, $kala+$kalakorjaus, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
 		}
 
+		if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
+			list($thispage, $kala) = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
+		}
+
 		$kala = $kala - 15;
 
 		// Jos meillä on marginaalimyyntiä/käänteinen alv
@@ -993,7 +1024,7 @@ if (!function_exists('rivi_original')) {
 
 if (!function_exists('rivi_plain')) {
 	function rivi_plain ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
-		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
+		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso, $tullinimike_ja_alkuperamaa;
 
 		//Nimitys
 		list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 180, $pdf_lasku, $norm);
@@ -1095,6 +1126,10 @@ if (!function_exists('rivi_plain')) {
 			$kala += 10;
 		}
 
+		if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
+			list($thispage, $kala) = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
+		}
+
 		$kala = $kala - 15;
 
 		// Jos meillä on marginaalimyyntiä/käänteinen alv
@@ -1119,7 +1154,7 @@ if (!function_exists('rivi_plain')) {
 
 if (!function_exists('rivi_plain_2')) {
 	function rivi_plain_2 ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
-		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
+		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso, $tullinimike_ja_alkuperamaa;
 
 		//Tuoteno
 		list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 100, $pdf_lasku, $norm);
@@ -1228,6 +1263,10 @@ if (!function_exists('rivi_plain_2')) {
 			$kala += 10;
 		}
 
+		if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
+			list($thispage, $kala) = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
+		}
+
 		$kala = $kala - 15;
 
 		// Jos meillä on marginaalimyyntiä/käänteinen alv
@@ -1252,7 +1291,7 @@ if (!function_exists('rivi_plain_2')) {
 
 if (!function_exists('rivi_viro')) {
 	function rivi_viro ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
-		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
+		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso, $tullinimike_ja_alkuperamaa;
 
 		//Nimitys
 		list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 170, $pdf_lasku, $norm);
@@ -1375,6 +1414,10 @@ if (!function_exists('rivi_viro')) {
 			$pdf_lasku->draw_text(35, $kala+$kalakorjaus, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
 		}
 
+		if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
+			list($thispage, $kala) = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala);
+		}
+
 		$kala = $kala - 15;
 
 		// Jos meillä on marginaalimyyntiä/käänteinen alv
@@ -1399,7 +1442,7 @@ if (!function_exists('rivi_viro')) {
 
 if (!function_exists('rivi_perhe')) {
 	function rivi_perhe ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
-		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
+		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso, $tullinimike_ja_alkuperamaa;
 
 		$lisataa = 0;
 
@@ -2223,6 +2266,7 @@ if (!function_exists("tulosta_lasku")) {
 					lasku.viesti laskuviesti,
 					lasku.asiakkaan_tilausnumero,
 					lasku.luontiaika tilauspaiva,
+					CONCAT(tuote.tullinimike1, tuote.tullinimike2) AS tullinimike,
 					if (tuote.tuotetyyppi = 'K','2 Työt','1 Muut') tuotetyyppi,
 					if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
 					if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
@@ -2253,7 +2297,7 @@ if (!function_exists("tulosta_lasku")) {
 					and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 					and tilausrivi.varattu+tilausrivi.kpl != 0
 					$where
-					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24
 					ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$result = pupe_query($query);
 

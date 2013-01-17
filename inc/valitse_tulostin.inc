@@ -316,6 +316,11 @@
 			if (mysql_num_rows($suuntalavat_res) == 0) continue;
 		}
 
+		if ($toim == "PROFORMA") {
+			echo "<tr><th>",t("Tulosta myös tullinimike ja alkuperämaa")."</th>";
+			echo "<td><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
+		}
+
 		echo "<tr><th>".t("Valitse")." '".t("$tulostin")."' ".t("tulostuspaikka")."</th>";
 		echo "<td><select name='komento[$tulostin]'>";
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";

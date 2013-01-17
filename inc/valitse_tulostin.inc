@@ -249,7 +249,7 @@
 		$resultkieli = pupe_query($querykieli);
 		$asrow = mysql_fetch_array($resultkieli);
 
-		$querykieli = "	SELECT kieli, email
+		$querykieli = "	SELECT kieli, email, lasku_email
 						FROM $mista
 						WHERE
 						tunnus = '$asrow[liitostunnus]'
@@ -322,6 +322,7 @@
 		echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 
 		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'LASKU') and $asrow['email'] != '') {
+			if ($toim == 'LASKU' and trim($asrow['lasku_email']) != '') $asrow['email'] = $asrow['lasku_email'];
 			echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
 		}
 

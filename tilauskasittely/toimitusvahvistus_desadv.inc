@@ -194,7 +194,7 @@
 
 		if (!function_exists('desadv_row')) {
 			function desadv_row($params) {
-				global $kukarow, $yhtiorow;
+				global $kukarow, $yhtiorow, $sscc_gs1_laajennustunnus, $sscc_gs1_yritystunnus;
 
 				// Luodaan muuttujat
 				extract($params);
@@ -214,10 +214,12 @@
 
 					while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
 
-						if (isset($sscc_gs1_yritystunnus) and $sscc_gs1_yritystunnus != "") {
+						if ($sscc_gs1_yritystunnus != "") {
 							// Rakennetaan GS1 SSCC -numero
 							$sscc_sovellustunnus = "00";
-							if (!isset($sscc_gs1_laajennustunnus)) $sscc_gs1_laajennustunnus = "0";
+							if ($sscc_gs1_laajennustunnus == "") $sscc_gs1_laajennustunnus = "0";
+
+							$keraysera_row['sscc'] = str_pad($keraysera_row['sscc'], 7, 0, STR_PAD_LEFT);
 
 							$sscc = $sscc_sovellustunnus.$sscc_gs1_laajennustunnus.$sscc_gs1_yritystunnus.$keraysera_row['sscc'];
 

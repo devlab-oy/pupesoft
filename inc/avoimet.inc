@@ -764,16 +764,17 @@
 			echo "<tbody>";
 
 			if (isset($workbook)) {
-				$worksheet->write($excelrivi, 0, t("Ytunnus"), $format_bold);
-				$worksheet->write($excelrivi, 1, t("Nimi"), $format_bold);
-				$worksheet->write($excelrivi, 2, t("Maa"), $format_bold);
-				$worksheet->write($excelrivi, 3, t("Laskunro"), $format_bold);
-				$worksheet->write($excelrivi, 4, t("Pvm"), $format_bold);
-				$worksheet->write($excelrivi, 5, t("Maksupäivä"), $format_bold);
-				$worksheet->write($excelrivi, 6, t("Eräpäivä"), $format_bold);
-				$worksheet->write($excelrivi, 7, t("Laskun summa"), $format_bold);
-				$worksheet->write($excelrivi, 8, t("Avoin saldo"), $format_bold);
-				$worksheet->write($excelrivi, 9, t("Val"), $format_bold);
+				$worksheet->write($excelrivi,  0, t("Ytunnus"), $format_bold);
+				$worksheet->write($excelrivi,  1, t("Asiakasnro"), $format_bold);
+				$worksheet->write($excelrivi,  2, t("Nimi"), $format_bold);
+				$worksheet->write($excelrivi,  3, t("Maa"), $format_bold);
+				$worksheet->write($excelrivi,  4, t("Laskunro"), $format_bold);
+				$worksheet->write($excelrivi,  5, t("Pvm"), $format_bold);
+				$worksheet->write($excelrivi,  6, t("Maksupäivä"), $format_bold);
+				$worksheet->write($excelrivi,  7, t("Eräpäivä"), $format_bold);
+				$worksheet->write($excelrivi,  8, t("Laskun summa"), $format_bold);
+				$worksheet->write($excelrivi,  9, t("Avoin saldo"), $format_bold);
+				$worksheet->write($excelrivi, 10, t("Val"), $format_bold);
 				$excelrivi++;
 			}
 
@@ -836,25 +837,26 @@
 
 					if (isset($workbook)) {
 						$worksheet->writeString($excelrivi, 0, tarkistahetu($trow["ytunnus"]));
-						$worksheet->writeString($excelrivi, 1, $trow["nimi"]);
-						$worksheet->writeString($excelrivi, 2, $trow["maa"]);
-						$worksheet->write($excelrivi, 3, $trow["maksutieto"]);
-						$worksheet->write($excelrivi, 4, $trow["tapvm"]);
+						$worksheet->writeString($excelrivi, 1, $trow["asiakasnro"]);
+						$worksheet->writeString($excelrivi, 2, $trow["nimi"]);
+						$worksheet->writeString($excelrivi, 3, $trow["maa"]);
+						$worksheet->write($excelrivi, 4, $trow["maksutieto"]);
+						$worksheet->write($excelrivi, 5, $trow["tapvm"]);
 
-						if ($trow["mapvm"] != '0000-00-00') $worksheet->write($excelrivi, 5, $trow["mapvm"]);
-						else $worksheet->write($excelrivi, 5, "");
+						if ($trow["mapvm"] != '0000-00-00') $worksheet->write($excelrivi, 6, $trow["mapvm"]);
+						else $worksheet->write($excelrivi, 6, "");
 
-						$worksheet->write($excelrivi, 6, $trow["erpcm"]);
+						$worksheet->write($excelrivi, 7, $trow["erpcm"]);
 
 						if ($valuutassako == "V") {
-							$worksheet->write($excelrivi, 7, $trow["tiliointisumma_valuutassa"]);
-							$worksheet->write($excelrivi, 8, $trow["tiliointiavoinsaldo_valuutassa"]);
-							$worksheet->write($excelrivi, 9, $trow["valkoodi"]);
+							$worksheet->write($excelrivi, 8, $trow["tiliointisumma_valuutassa"]);
+							$worksheet->write($excelrivi, 9, $trow["tiliointiavoinsaldo_valuutassa"]);
+							$worksheet->write($excelrivi, 10, $trow["valkoodi"]);
 						}
 						else {
-							$worksheet->write($excelrivi, 7, $trow["tiliointisumma"]);
-							$worksheet->write($excelrivi, 8, $trow["tiliointiavoinsaldo"]);
-							$worksheet->write($excelrivi, 9, $yhtiorow["valkoodi"]);
+							$worksheet->write($excelrivi, 8, $trow["tiliointisumma"]);
+							$worksheet->write($excelrivi, 9, $trow["tiliointiavoinsaldo"]);
+							$worksheet->write($excelrivi, 10, $yhtiorow["valkoodi"]);
 						}
 
 						$excelrivi++;
@@ -870,7 +872,7 @@
 				//Listataan vielä kohdistamattomat
 				$query = "	SELECT asiakas.tunnus,
 							asiakas.ytunnus,
-							asiakas.asiakasnro,
+							if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
 							suoritus.nimi_maksaja,
 							asiakas.maa,
 							suoritus.viite,
@@ -948,22 +950,23 @@
 						if (isset($workbook)) {
 							if ($trow["tunnus"] != NULL) $worksheet->write($excelrivi, 0, tarkistahetu($trow["ytunnus"]));
 							else $worksheet->write($excelrivi, 0, "*".t("ei asiakasta")."*");
-							$worksheet->write($excelrivi, 1, $trow["nimi_maksaja"]);
-							$worksheet->write($excelrivi, 2, $trow["maa"]);
-							$worksheet->write($excelrivi, 3, $trow["viite"]);
-							$worksheet->write($excelrivi, 4, $trow["kirjpvm"]);
-							$worksheet->write($excelrivi, 5, "");
+							$worksheet->write($excelrivi, 1, $trow["asiakasnro"]);
+							$worksheet->write($excelrivi, 2, $trow["nimi_maksaja"]);
+							$worksheet->write($excelrivi, 3, $trow["maa"]);
+							$worksheet->write($excelrivi, 4, $trow["viite"]);
+							$worksheet->write($excelrivi, 5, $trow["kirjpvm"]);
 							$worksheet->write($excelrivi, 6, "");
+							$worksheet->write($excelrivi, 7, "");
 
 							if ($valuutassako == "V") {
-								$worksheet->write($excelrivi, 7, "");
-								$worksheet->write($excelrivi, 8, $trow["summa"]);
-								$worksheet->write($excelrivi, 9, $trow["valkoodi"]);
+								$worksheet->write($excelrivi, 8, "");
+								$worksheet->write($excelrivi, 9, $trow["summa"]);
+								$worksheet->write($excelrivi, 10, $trow["valkoodi"]);
 							}
 							else {
-								$worksheet->write($excelrivi, 7, "");
-								$worksheet->write($excelrivi, 8, $trow["suoritussumma"]);
-								$worksheet->write($excelrivi, 9, $yhtiorow["valkoodi"]);
+								$worksheet->write($excelrivi, 8, "");
+								$worksheet->write($excelrivi, 9, $trow["suoritussumma"]);
+								$worksheet->write($excelrivi, 10, $yhtiorow["valkoodi"]);
 							}
 
 							$excelrivi++;

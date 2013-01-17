@@ -13389,7 +13389,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 				if ($num_rows == $i_rows or (isset($edrow[$vak_kentta]) and $row[$vak_kentta] != $edrow[$vak_kentta])) {
 
-					if ($num_rows == $i_rows and $edrow == "") {
+					if ($num_rows == $i_rows and ($edrow == "" or $row[$vak_kentta] == $edrow[$vak_kentta])) {
 						$edrow = $row;
 						$edrow_ei_ollut_tyhjaa = false;
 					}

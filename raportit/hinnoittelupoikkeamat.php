@@ -253,6 +253,7 @@
 
 				$excelnimi = $worksheet->close();
 
+				echo "<br />";
 				echo "<form method='post' class='multisubmit'>";
 				echo "<table>";
 				echo "<tr><th>",t("Tallenna raportti (xlsx)"),":</th>";

@@ -5,6 +5,8 @@
 		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
+	ini_set('zlib.output_compression', 0);
+
 	require ("../inc/parametrit.inc");
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -110,22 +112,9 @@
 						ORDER BY lasku.myyja, lasku.tapvm, lasku.tunnus";
 			$laskures = pupe_query($query);
 
-			echo "<table>";
-			echo "<tr>";
-			echo "<th>",t("Myyj‰"),"</th>";
-			echo "<th>",t("Tilausnro"),"</th>";
-			echo "<th>",t("Kokonaissumma"),"</th>";
-			echo "<th>",t("Kokonaisrivim‰‰r‰"),"</th>";
-			echo "<th>",t("Asiakas"),"</th>";
-			echo "<th>",t("Sis‰inen kommentti"),"</th>";
-			echo "<th>",t("Tuoteno"),"</th>";
-			echo "<th>",t("Nimitys"),"</th>";
-			echo "<th>",t("Kpl"),"</th>";
-			echo "<th>",t("Asiakashinta"),"</th>";
-			echo "<th>",t("Muutettu hinta"),"</th>";
-			echo "<th>",t("Ero %"),"</th>";
-			echo "<th>",t("Menetys"),"</th>";
-			echo "</tr>";
+			flush();
+
+			require('inc/ProgressBar.class.php');
 
 			include('inc/pupeExcel.inc');
 
@@ -139,7 +128,14 @@
 
 			$i = 0;
 
+			$tuotteiden_alehinnat = array();
+
+			$bar = new ProgressBar();
+			$bar->initialize(mysql_num_rows($laskures));
+
 			while ($laskurow = mysql_fetch_assoc($laskures)) {
+
+				$bar->increase();
 
 				$x = 1;
 
@@ -147,33 +143,53 @@
 							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND otunnus = '{$laskurow['tunnus']}'
-							AND tyyppi = 'L'";
+							AND tyyppi = 'L'
+							AND tuoteno NOT IN (
+								'{$yhtiorow['rahti_tuotenumero']}',
+								'{$yhtiorow['jalkivaatimus_tuotenumero']}',
+								'{$yhtiorow['kasittelykulu_tuotenumero']}',
+								'{$yhtiorow['maksuehto_tuotenumero']}',
+								'{$yhtiorow['ennakkomaksu_tuotenumero']}',
+								'{$yhtiorow['alennus_tuotenumero']}',
+								'{$yhtiorow['laskutuslisa_tuotenumero']}',
+								'{$yhtiorow['kuljetusvakuutus_tuotenumero']}'
+							)";
 				$tilausrivires = pupe_query($query);
 
 				$num_rows = mysql_num_rows($tilausrivires);
 
 				while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {
 
-					$query = "	SELECT *
-								FROM tuote
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tuoteno = '{$tilausrivirow['tuoteno']}'";
-					$tres = pupe_query($query);
-					$trow = mysql_fetch_assoc($tres);
+					$alet = generoi_alekentta_php($tilausrivirow, 'M', 'kerto');
 
-					list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $tilausrivirow['kpl'], '', '', array());
+					$tilausrivirow['hinta'] = $tilausrivirow['hinta'] * $alet;
 
-					if ($lis_hinta - $tilausrivirow['hinta'] == 0) continue;
+					if (!isset($tuotteiden_alehinnat[$tilausrivirow['tuoteno']])) {
+						$query = "	SELECT *
+									FROM tuote
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tuoteno = '{$tilausrivirow['tuoteno']}'";
+						$tres = pupe_query($query);
+						$trow = mysql_fetch_assoc($tres);
+
+						list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', '', array());
+
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$lis_hinta *= (1 - $lis_ale_kaikki['ale'.$alepostfix] / 100);
+						}
+
+						$tuotteiden_alehinnat[$tilausrivirow['tuoteno']] = $lis_hinta;
+					}
+					else {
+						$lis_hinta = $tuotteiden_alehinnat[$tilausrivirow['tuoteno']];
+					}
+
+					$ero = $tilausrivirow['hinta'] - $lis_hinta;
+					$ero = hintapyoristys($ero);
+
+					if ($ero == 0) continue;
 
 					if ($x > 1) {
-						echo "<tr>";
-						echo "<td>&nbsp;</td>";
-						echo "<td>&nbsp;</td>";
-						echo "<td>&nbsp;</td>";
-						echo "<td>&nbsp;</td>";
-						echo "<td>&nbsp;</td>";
-						echo "<td>&nbsp;</td>";
-
 						$data[$i]['myyja'] = '';
 						$data[$i]['tunnus'] = '';
 						$data[$i]['num_rows'] = '';
@@ -181,15 +197,6 @@
 						$data[$i]['sisviesti3'] = '';
 					}
 					else {
-						echo "
-						<tr>
-						<td>{$laskurow['myyja']}</td>
-						<td>{$laskurow['tunnus']}</td>
-						<td>{$laskurow['summa']}</td>
-						<td>{$num_rows}</td>
-						<td>{$laskurow['nimi']}</td>
-						<td>{$laskurow['sisviesti3']}</td>";
-
 						$data[$i]['myyja'] = $laskurow['myyja'];
 						$data[$i]['tunnus'] = $laskurow['tunnus'];
 						$data[$i]['num_rows'] = $num_rows;
@@ -197,22 +204,10 @@
 						$data[$i]['sisviesti3'] = $laskurow['sisviesti3'];
 					}
 
-					$ero = $tilausrivirow['hinta'] - $lis_hinta;
 					$eropros = $tilausrivirow['hinta'] == 0 ? 100 : abs(round((($ero) / $tilausrivirow['hinta']) * 100, 2));
 
 					$lis_hinta = hintapyoristys($lis_hinta);
 					$tilausrivirow['hinta'] = hintapyoristys($tilausrivirow['hinta']);
-					$ero = hintapyoristys($ero);
-
-					echo "<td>{$tilausrivirow['tuoteno']}</td>";
-					echo "<td>{$tilausrivirow['nimitys']}</td>";
-					echo "<td>{$tilausrivirow['kpl']}</td>";
-					echo "<td>{$lis_hinta}</td>";
-					echo "<td>{$tilausrivirow['hinta']}</td>";
-					echo "<td>{$eropros}</td>";
-					echo $ero < 0 ? "<td><font class='error'>{$ero}</font></td>" : "<td><font class='ok'>{$ero}</font></td>";
-
-					echo "</tr>";
 
 					$data[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
 					$data[$i]['nimitys'] = $tilausrivirow['nimitys'];
@@ -225,31 +220,46 @@
 					$i++;
 					$x++;
 				}
-
-				echo "</tr>";
 			}
-
-			echo "</table>";
 
 			if (count($data) > 0) {
 
+				flush();
+
+				echo "<br /><br /><table><tr>";
+
 				foreach(array_keys($data[0]) AS $key) {
-					$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t($key)), $format_bold);
+					$otsikko = ucfirst(t($key));
+
+					$worksheet->writeString($excelrivi, $excelsarake, $otsikko, $format_bold);
 					$excelsarake++;
+
+					echo "<th>{$otsikko}</th>";
 				}
+
+				echo "</tr>";
 
 				$excelsarake = 0;
 				$excelrivi++;
 
 				foreach($data as $set) {
+
+					echo "<tr>";
+
 					foreach($set as $k => $v) {
 						$worksheet->write($excelrivi, $excelsarake, $v);
 						$excelsarake++;
+
+						echo "<td>{$v}</td>";
 					}
+
+					echo "</tr>";
 
 					$excelsarake = 0;
 					$excelrivi++;
 				}
+
+				echo "</table>";
 
 				$excelnimi = $worksheet->close();
 
@@ -258,7 +268,7 @@
 				echo "<table>";
 				echo "<tr><th>",t("Tallenna raportti (xlsx)"),":</th>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='Hinnoittelupoikkeamat-raportti.xlsx'>";
+				echo "<input type='hidden' name='kaunisnimi' value='",t("Hinnoittelupoikkeamat-raportti"),".xlsx'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";
 				echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr>";
 				echo "</table>";

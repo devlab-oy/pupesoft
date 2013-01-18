@@ -1776,7 +1776,7 @@
 							)
 						) {
 
-							$komento = koontilahete_check($laskurow, $komento);
+							list($komento, $koontilahete) = koontilahete_check($laskurow, $komento);
 
 							if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {
 
@@ -3086,7 +3086,8 @@
 					if ($lp_varasto == 0) {
 						$query = "	SELECT *
 									from varastopaikat
-									where yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+									where yhtio = '$kukarow[yhtio]' 
+									AND tyyppi != 'P'
 									order by alkuhyllyalue,alkuhyllynro
 									limit 1";
 					}

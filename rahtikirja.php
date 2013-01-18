@@ -933,7 +933,7 @@
 					$laskurow["email"] = $asiakas_chk_row["email"];
 					$laskurow["keraysvahvistus_lahetys"] = $asiakas_chk_row["keraysvahvistus_lahetys"];
 
-					$komento = koontilahete_check($laskurow, $komento);
+					list($komento, $koontilahete) = koontilahete_check($laskurow, $komento);
 				}
 
 				if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {

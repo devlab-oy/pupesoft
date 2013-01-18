@@ -19890,7 +19890,7 @@ if (!function_exists('koontilahete_check')) {
 			$komento[] = "asiakasemail".$laskurow['email'];
 		}
 
-		return $komento;
+		return array($komento, $koontilahete);
 	}
 }
 

@@ -604,7 +604,7 @@ if (!function_exists('rivi_lasku')) {
 		}
 
 		// Laskupohjissa 13 ja 14 ei näytetä aleja
-		if (($yhtiorow['myynnin_alekentat'] > 1 or $row['erikoisale'] > 0) and $laskutyyppi != 13 and $laskutyyppi != 14) {
+		if (($yhtiorow['myynnin_alekentat'] > 1 or $row['erikoisale'] > 0) and $laskutyyppi != 13 and $laskutyyppi != 14 and $laskutyyppi != 15 and $laskutyyppi != 16) {
 
 			$alekomm = "";
 
@@ -719,7 +719,7 @@ if (!function_exists('rivi_lasku')) {
 		if ($laskutyyppi == 1) {
 			list($thispage, $kala, $summa, $arvo) = rivi_plain($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
-		elseif ($laskutyyppi == 2 or $laskutyyppi == 12 or $laskutyyppi == 14) {
+		elseif ($laskutyyppi == 2 or $laskutyyppi == 12 or $laskutyyppi == 14 or $laskutyyppi == 15 or $laskutyyppi == 16) {
 			list($thispage, $kala, $summa, $arvo) = rivi_perhe($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
 		elseif ($laskutyyppi == 4 or $laskutyyppi == 8) {
@@ -770,6 +770,21 @@ if (!function_exists('rivi_otsikot')) {
 			//eka rivi
 			$pdf_lasku->draw_text(35,  $kala, t("Tuotenimi", $kieli),			$thispage, $pieni);
 			$pdf_lasku->draw_text(220, $kala, t("Tuotenumero", $kieli),			$thispage, $pieni);
+			$pdf_lasku->draw_text(390, $kala, t("Määrä", $kieli),				$thispage, $pieni);
+			$pdf_lasku->draw_text(440, $kala, t("A-hinta", $kieli),				$thispage, $pieni);
+			$pdf_lasku->draw_text(510, $kala, t("Veroton arvo", $kieli),		$thispage, $pieni);
+			$pdf_lasku->draw_text(550, $kala, t("Alv", $kieli)."-%",			$thispage, $pieni);
+
+			//toka rivi
+			$pdf_lasku->draw_text(35,  $kala-9, t("Tilausnumero", $kieli)."/".t("Lisätietoja", $kieli),		$thispage, $pieni);
+			$pdf_lasku->draw_text(390, $kala-9, t("Yksikkö", $kieli),			$thispage, $pieni);
+			$pdf_lasku->draw_text(440, $kala-9, t("Toimituspvm", $kieli),		$thispage, $pieni);
+		}
+		elseif ($laskutyyppi == 15 or $laskutyyppi == 16) {
+			//eka rivi
+			$pdf_lasku->draw_text(35,  $kala, t("Tuotenimi", $kieli),			$thispage, $pieni);
+			$pdf_lasku->draw_text(220, $kala, t("Tuotenumero", $kieli),			$thispage, $pieni);
+			$pdf_lasku->draw_text(390, $kala, t("SVH", $kieli),					$thispage, $pieni);
 			$pdf_lasku->draw_text(390, $kala, t("Määrä", $kieli),				$thispage, $pieni);
 			$pdf_lasku->draw_text(440, $kala, t("A-hinta", $kieli),				$thispage, $pieni);
 			$pdf_lasku->draw_text(510, $kala, t("Veroton arvo", $kieli),		$thispage, $pieni);

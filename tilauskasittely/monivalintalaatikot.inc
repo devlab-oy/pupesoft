@@ -2015,6 +2015,30 @@
 
 					echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[kustp]' size='2' value='$jarjestys[kustp]'> ".t("Kustannuspaikoittain")." <input type='checkbox' name='ruksit[kustp]' value='kustp' $ruksitchk></th></tr>";
 				}
+				else if (strpos($_SERVER['SCRIPT_NAME'], "matkalaskuraportti") !== FALSE) {
+					$ruksitchk_kustp = "";
+					$ruksitchk_toimittajalta = "";
+					$ruksitchk_tuotteilta = "";
+
+					if ($ruksit["kustp"] != "") {
+						$ruksitchk_kustp = "CHECKED";
+					}
+					if ($kenelta_kustp == "toimittajilta") {
+						$ruksitchk_toimittajalta = "CHECKED";
+					}
+					if ($kenelta_kustp == "tuotteilta") {
+						$ruksitchk_tuotteilta = "CHECKED";
+					}
+
+					echo "<tr><th>";
+					echo t("Prio").": <input type='text' name='jarjestys[kustp]' size='2' value='$jarjestys[kustp]'>";
+					echo t("Kustannuspaikoittain")." <input type='checkbox' name='ruksit[kustp]' value='kustp' $ruksitchk_kustp>";
+					echo "</th></tr>";
+					echo "<tr><th>";
+					echo t("Toimittajilta")." <input type='radio' name='kenelta_kustp' value='toimittajilta' $ruksitchk_toimittajalta> ";
+					echo t("Tuotteilta")." <input type='radio' name='kenelta_kustp' value='tuotteilta' $ruksitchk_tuotteilta> ";
+					echo "</th></tr>";
+				}
 
 				echo "</table></div>";
 			}

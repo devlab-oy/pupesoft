@@ -249,7 +249,10 @@
 		$resultkieli = pupe_query($querykieli);
 		$asrow = mysql_fetch_array($resultkieli);
 
-		$querykieli = "	SELECT kieli, email, lasku_email
+		$lasku_email = "";
+		if ($mista == 'asiakas') $lasku_email = ", lasku_email";
+
+		$querykieli = "	SELECT kieli, email $lasku_email
 						FROM $mista
 						WHERE
 						tunnus = '$asrow[liitostunnus]'

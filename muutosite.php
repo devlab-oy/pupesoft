@@ -520,7 +520,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 				}
 				elseif (mysql_field_name($result, $i) == "tapvm") {
 					echo "<td>".tv1dateconv($trow[$kennimi])."</td>";
-				}	
+				}
 				elseif (mysql_field_name($result, $i) == "ytunnus") {
 						echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
 					}
@@ -1474,14 +1474,12 @@ if ($tee == 'E' or $tee == 'F') {
 		// Laskun tilausrivit
 		echo "<br><br>";
 		require "inc/tilausrivit.inc";
-		$tee = '';
 	}
 	else {
 		// Tositteen tiliöintirivit...
 		require "inc/tiliointirivit.inc";
 
 		echo "<br><br>";
-		$tee = "";
 	}
 }
 
@@ -1598,5 +1596,3 @@ if ($tee == "") {
 }
 
 require ("inc/footer.inc");
-
-?>

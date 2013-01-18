@@ -27,7 +27,6 @@
 		$selkukarow = mysql_fetch_array($result);
 	}
 
-
 	// tehdään oikeuksien päivitys
 	if ($update == 'totta' and $selkukarow["kuka"] != "") {
 		// poistetaan ihan aluksi kaikki.. iiik.
@@ -108,13 +107,13 @@
 	echo "<font class='message'>".t("Käyttäjän")." $selkukarow[nimi] ".t("käyttöoikeudet")." ($yhtiorow[nimi])</font><hr>";
 
 	echo "<table>
-			<form method='post'>
-			<input type='hidden' name='toim' value='$toim'>
-			<input type='hidden' name='sovellus' value='$sovellus'>
-
 			<tr>
 				<th>".t("Valitse käyttäjä").":</th>
-				<td><select name='selkuka' onchange='submit()'>";
+				<td>
+				<form method='post'>
+				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='sovellus' value='$sovellus'>
+				<select name='selkuka' onchange='submit()'>";
 
 	if ($toim == "" or $selkukarow["kuka"] != "") {
 		echo "<option selected value='$selkukarow[tunnus]'>$selkukarow[nimi] ($selkukarow[kuka])</option>";
@@ -147,7 +146,7 @@
 		echo "<option value='$kurow[tunnus]'>$kurow[nimi] ($kurow[kuka])</option>";
 	}
 
-	echo "</select></td></form>";
+	echo "</select></form></td></tr>";
 
 	if ($toim == "extranet") {
 		$sovellus_rajaus = " and sovellus like 'Extranet%' ";
@@ -163,14 +162,16 @@
 				order by sovellus";
 	$result = mysql_query($query) or pupe_error($query);
 
-	if (mysql_num_rows($result) > 1) {
+	if (mysql_num_rows($result) > 0) {
 
 		$sel = $sovellus == "kaikki_sovellukset" ? " selected" : "";
 
-		echo "	<form name='vaihdaSovellus' method='POST'>
+		echo "
+				<tr><th>".t("Valitse sovellus").":</th>
+				<td>
+				<form name='vaihdaSovellus' method='POST'>
 				<input type='hidden' name='selkuka' value='$selkukarow[tunnus]'>
 				<input type='hidden' name='toim' value='$toim'>
-				<tr><th>".t("Valitse sovellus").":</th><td>
 				<select name='sovellus' onchange='submit()'>
 				<option value=''>".t("Valitse")."</option>
 				<option value='kaikki_sovellukset'$sel>".t("Nayta kaikki")."</option>";
@@ -184,8 +185,11 @@
 				echo "<option value='$orow[0]' $sel>".t("$orow[0]")."</option>";
 			}
 		}
+
+		echo "</select></td></form>";
 	}
-	echo "</select></td><td class='back'></td></tr></table></form>";
+
+	echo "<td class='back'></td></tr></table>";
 
 	if ($sovellus == "") {
 		require("inc/footer.inc");

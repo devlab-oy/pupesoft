@@ -68,7 +68,7 @@
 	}
 
 	function asiakkaanmyynti($tunnukset, $try, $osasto, $vaintamavuosi=FALSE) {
-		global $kukarow, $yhtiorow, $edellinen_vuosi_alku, $edellinen_kuukausi_loppu, $edellinen_vuosi_loppu, $myyntiennustekerroin, $myyntitavoitekerroin, $ostryntuotteet;
+		global $kukarow, $yhtiorow, $edellinen_vuosi_alku, $edellinen_kuukausi_loppu, $edellinen_vuosi_loppu, $myyntiennustekerroin, $myyntitavoitekerroin, $ostryntuotteet, $toim;
 
 		$rivilisa = "";
 
@@ -86,6 +86,13 @@
 			$alkupaiva = " and lasku.tapvm >= '{$edellinen_vuosi_alku}' ";
 		}
 
+		if ($toim == "MYYJA") {
+			$liitostunnuslisa = "and lasku.myyja in ({$tunnukset})";
+		}
+		else {
+			$liitostunnuslisa = "and lasku.liitostunnus in ({$tunnukset})";
+		}
+
 		$query = "	SELECT round(sum(if(tapvm <= '$edellinen_vuosi_loppu', tilausrivi.rivihinta, 0))) edvuodenkokonaismyynti,
 					round(sum(if(tapvm > '$edellinen_vuosi_loppu', tilausrivi.rivihinta, 0))) tanvuodenalustamyynti
 					FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
@@ -93,7 +100,7 @@
 					WHERE lasku.yhtio 	   = '$kukarow[yhtio]'
 					and lasku.tila    	   = 'U'
 					and lasku.alatila 	   = 'X'
-					and lasku.liitostunnus in ($tunnukset)
+					{$liitostunnuslisa}
 					{$alkupaiva}
 					and lasku.tapvm 	  <= '{$edellinen_kuukausi_loppu}'";
 		$result = pupe_query($query);
@@ -177,9 +184,15 @@
 			}
 		}
 
-		if ($toim == "ASIAKAS") {
+		if ($toim == "ASIAKAS" or $toim == "MYYJA") {
 			if ($naytamyyntiennuste != "") {
-				list($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste) = asiakkaanmyynti($row["asiakkaan_tunnus"], $try, $osasto);
+
+				if ($toim == "MYYJA") {
+					list($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste) = asiakkaanmyynti($row["myyjan_tunnus"], $try, $osasto);
+				}
+				else {
+					list($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste) = asiakkaanmyynti($row["asiakkaan_tunnus"], $try, $osasto);
+				}
 
 				if ($rivimaara < $maxrivimaara) {
 					echo "<td align='right'>{$edvuodenkokonaismyynti}</td>";
@@ -1464,7 +1477,7 @@
 			$excelsarake++;
 		}
 
-		if ($toim == "ASIAKAS") {
+		if ($toim == "ASIAKAS" or $toim == "MYYJA") {
 			if ($naytamyyntiennuste != "") {
 				if ($rivimaara < $maxrivimaara) {
 					echo "<th>",t("Myynti")," ",(date('Y')-1),"</th>";

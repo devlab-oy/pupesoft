@@ -1901,11 +1901,29 @@
 								}
 							}
 
-							if (isset($vertailubu) and (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or ($vertailubu == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "")) {
+							if (isset($vertailubu) and (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or ($vertailubu == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "")
+								or ($vertailubu == "mybu" and $myyjagroups > 0 and ((isset($row["asiakasmyyjä"]) and $row["asiakasmyyjä"] != "") or (isset($row["tuotemyyjä"]) and $row["tuotemyyjä"] != "") or (isset($row["myyjä"]) and $row["myyjä"] != "")))) {
 
 								if ($vertailubu == "tubu") {
 									$budj_taulu = "budjetti_tuote";
 									$bulisa = " and tuoteno	in ({$row['tuotelista']}) ";
+								}
+								elseif ($vertailubu == "mybu") {
+
+									$tunnus_lisa = "";
+
+									if (isset($row["asiakasmyyjä"]) and $row["asiakasmyyjä"] != "") {
+										$tunnus_lisa = $row["asiakasmyyjä"];
+									}
+									elseif (isset($row["tuotemyyjä"]) and $row["tuotemyyjä"] != "") {
+										$tunnus_lisa = $row["tuotemyyjä"];
+									}
+									else {
+										$tunnus_lisa = $row["myyjä"];
+									}
+
+									$budj_taulu = "budjetti_myyja";
+									$bulisa = " and myyjan_tunnus in ({$tunnus_lisa}) ";
 								}
 								else {
 									$budj_taulu = "budjetti_asiakas";
@@ -2004,85 +2022,6 @@
 									if ($tavoite_yhtl != 0) {
 										$row["tavoiteed"] = $tavoite_yhtl;
 										$row["tavoiteinded"] = round($row["myyntied"] / $tavoite_yhtl, 2);
-									}
-								}
-							}
-
-							if (isset($vertailubu) and $vertailubu == "mybu" and $myyjagroups > 0) {
-								if ($row['tuotemyyjä'] != 0 and !isset($row['asiakasmyyjä']) and !isset($row['myyjä'])) {
-									$myyja_query = "SELECT budjetti
-													FROM kuka
-													WHERE yhtio  = '{$kukarow['yhtio']}'
-													AND myyja 	 = '{$row['tuotemyyjä']}'
-													AND budjetti > 0";
-								}
-								elseif ($row['asiakasmyyjä'] != 0 and !isset($row['tuotemyyjä']) and !isset($row['myyjä'])) {
-									$myyja_query = "SELECT budjetti
-													FROM kuka
-													WHERE yhtio  = '{$kukarow['yhtio']}'
-													AND myyja 	 = '{$row['asiakasmyyjä']}'
-													AND budjetti > 0";
-								}
-								elseif ($row['myyjä'] != 0 and !isset($row['tuotemyyjä']) and !isset($row['asiakasmyyjä'])) {
-									$myyja_query = "SELECT budjetti
-													FROM kuka
-													WHERE yhtio  = '{$kukarow['yhtio']}'
-													AND tunnus   = '{$row['myyjä']}'
-													AND budjetti > 0";
-								}
-								else {
-									$myyja_query = "";
-								}
-
-								if ($myyja_query != "") {
-									$myyja_result = pupe_query($myyja_query);
-
-									if (mysql_num_rows($myyja_result) > 0) {
-
-										// Käyttäjän tavoite on per 12kk
-										$myyja_row = mysql_fetch_assoc($myyja_result);
-
-										if ($kuukausittain != "") {
-											foreach ($rows[0] as $ken_nimi => $null) {
-												if (preg_match("/^([0-9]{4,4})([0-9]{2,2})_tavoitenyt/", $ken_nimi, $pregkk)) {
-
-													if ($pregkk[1].$pregkk[2] == $alku_kausi and (int) $ppa != 1) {
-														// 12 kk myyjätavoitteet / 365 ja kerrotaan syötetyn ekan kuukauden päivillä
-														$bunyt = round($myyja_row['budjetti']/365*($alkukuun_paivat+1-$ppa));
-													}
-													elseif ($dyprow["kausi"] == $lopu_kausi and (int) $ppl != $lopukuun_paivat) {
-														// 12 kk myyjätavoitteet / 365 ja kerrotaan syötetyn vikan kuukauden päivillä
-														$bunyt = round($myyja_row['budjetti']/365*$ppl);
-													}
-													else {
-														// 12 kk myyjätavoitteet / 365 ja kerrotaan kyseisen kuukauden päivillä
-														$bunyt = round($myyja_row['budjetti']/365*date('t', mktime(0,0,0,$pregkk[2],1,$pregkk[1])));
-													}
-
-													$row[$pregkk[1].$pregkk[2]."_tavoitenyt"]	  = $bunyt;
-													$row[$pregkk[1].$pregkk[2]."_tavoiteindnyt"] = round($row[$pregkk[1].$pregkk[2]."_myynti"] / $bunyt, 2);
-
-													if ($piiloed == "") {
-														// Edellisen vuoden tavoitteina käytetään nykyistä tavoittetta
-														$edbudvv = $pregkk[1] - 1;
-
-														$row[$edbudvv.$pregkk[2]."_tavoiteed"] = $bunyt;
-														$row[$edbudvv.$pregkk[2]."_tavoiteinded"] = round($row[$edbudvv.$pregkk[2]."_myynti"] / $bunyt, 2);
-													}
-												}
-											}
-										}
-										else {
-											// 12 kk myyjätavoitteet / 365 ja kerrotaan syötetyn päivämäärävälin päivien määrällä
-											$row["tavoitenyt"] = round($myyja_row['budjetti']/365*$kausi_paivissa);
-											$row["tavoiteindnyt"] = round($row["myyntinyt"] / $row["tavoitenyt"], 2);
-
-											if ($piiloed == "") {
-												// Edellisen vuoden tavoitteina käytetään nykyistä tavoittetta
-												$row["tavoiteed"] = $row["tavoitenyt"];
-												$row["tavoiteinded"] = round($row["myyntied"] / $row["tavoitenyt"], 2);
-											}
-										}
 									}
 								}
 							}

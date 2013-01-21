@@ -95,6 +95,8 @@ else {
 	echo_matkalaskuraportti_form($request_params);
 }
 
+require ("../inc/footer.inc");
+
 function generoi_matkalaskuraportti_rivit($request_params) {
 	global $kukarow;
 
@@ -229,7 +231,7 @@ function generoi_kustannuspaikka_join($request_params) {
 function generoi_toimi_join($request_params) {
 	$toimi_join = "ON ( toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus";
 	if($request_params['kenelta_kustp'] == "toimittajilta") {
-		if(!empty($request_params['mul_kustp'])) {
+		if(!empty($request_params['mul_kustp']) and $request_params['mul_kustp'][0] != '') {
 			$toimi_join .= " AND toimi.kustannuspaikka IN (".implode(',', $request_params['mul_kustp']).")";
 		}
 	}

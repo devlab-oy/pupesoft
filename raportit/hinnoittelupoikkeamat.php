@@ -7,6 +7,9 @@
 
 	ini_set('zlib.output_compression', 0);
 
+	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	require ("../inc/parametrit.inc");
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -100,7 +103,7 @@
 			$myyjalisa = $myyja != 0 ? "AND lasku.myyja = '{$myyja}'" : "";
 
 			// Haetaan laskutetut tilaukset
-			$query = "	SELECT lasku.*, kuka.nimi AS myyja, TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) AS nimi
+			$query = "	SELECT lasku.*, IF(kuka.nimi = '', '".t("Ei myyj‰‰")."', kuka.nimi) AS myyja, TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) AS nimi
 						FROM lasku
 						LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -242,15 +245,37 @@
 				$excelsarake = 0;
 				$excelrivi++;
 
+				$user = '';
+				$total_user = 0;
+				$total = 0;
+
 				foreach($data as $set) {
 
 					echo "<tr>";
 
 					foreach($set as $k => $v) {
+
+						if ($k == 'myyja' and $user != '' and $v != '' and $user != $v) {
+							echo "<tr>";
+							echo "<th>{$user} ",t("Yhteens‰"),"</th>";
+							echo "<th colspan='11' style='text-align: right;'>{$total_user}</th>";
+							echo "</tr>";
+
+							$total_user = 0;
+
+							echo "<tr>";
+						}
+
 						$worksheet->write($excelrivi, $excelsarake, $v);
 						$excelsarake++;
 
 						echo "<td>{$v}</td>";
+
+						if ($k == 'myyja' and $v != '') $user = $v;
+						if ($k == 'ero' and $user != '') {
+							$total_user += $v;
+							$total += $v;
+						}
 					}
 
 					echo "</tr>";
@@ -258,6 +283,11 @@
 					$excelsarake = 0;
 					$excelrivi++;
 				}
+
+				echo "<tr>";
+				echo "<th>",t("Kaikki yhteens‰"),"</th>";
+				echo "<th colspan='11' style='text-align: right;'>{$total}</th>";
+				echo "</tr>";
 
 				echo "</table>";
 

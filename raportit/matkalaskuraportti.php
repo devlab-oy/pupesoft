@@ -2,8 +2,43 @@
 
 require "../inc/parametrit.inc";
 require_once '../inc/pupeExcel.inc';
+require '../inc/ProgressBar.class.php';
+
+if($tee == 'lataa_tiedosto') {
+	$filepath = "/tmp/".$tmpfilenimi;
+	if(file_exists($filepath)) {
+		readfile($filepath);
+		unlink($filepath);
+	}
+	exit;
+}
+
+?>
+<script>
+	$(document).ready(function() {
+		tuotteittain_group_by_bind();
+	});
+
+	function tuotteittain_group_by_bind() {
+		$('#tuotteittain_group').on('click', function() {
+			$('#nayta_tuotteiden_nimitykset').prop('checked', $('#tuotteittain_group').prop('checked'));
+		});
+	}
+
+	function tarkista() {
+		if($('#ppa').val() == '' || $('#kka').val() == '' || $('#vva').val() == '' || $('#ppl').val() == '' || $('#kkl').val() == '' || $('#vvl').val() == '') {
+			alert($('#paivamaara_vaarin').html());
+			return false;
+		}
+
+		return true;
+	}
+</script>
+<?php
 
 echo "<font class='head'>".t('Matkalaskuraportti')."</font><hr>";
+
+echo "<div id='paivamaara_vaarin' style='display:none;'>".t("Antamasi päivämäärä on virheellinen")."</div>";
 
 $request_params = array(
 	"ajotapa" => $ajotapa,
@@ -28,6 +63,8 @@ $request_params = array(
 	"ppl" => $ppl,
 	"kkl" => $kkl,
 	"vvl" => $vvl,
+	"tmpfilenimi" => $tmpfilenimi,
+	"kaunisnimi" => $kaunisnimi,
 	"debug" => 1,
 );
 
@@ -37,8 +74,6 @@ if($request_params['debug'] == 1) {
 	echo "</pre>";
 }
 
-echo_matkalaskuraportti_form($request_params);
-
 if($tee == 'aja_raportti') {
 	$rivit = generoi_matkalaskuraportti_rivit($request_params);
 
@@ -46,8 +81,18 @@ if($tee == 'aja_raportti') {
 	//säilytetään mahdollisuus printata myös pdf:lle tiedot
 	$request_params['tiedosto_muoto'] = "xls";
 	if($request_params['tiedosto_muoto'] == "xls") {
-		generoi_excel_tiedosto($rivit);
+		$tiedosto = generoi_excel_tiedosto($rivit, $request_params);
 	}
+
+	echo_matkalaskuraportti_form($request_params);
+	echo "<br/>";
+	echo "<font class='message'>".t("Raportti on ajettu")."</font>";
+	echo "<br/>";
+	echo "<br/>";
+	echo_tallennus_formi($tiedosto);
+}
+else {
+	echo_matkalaskuraportti_form($request_params);
 }
 
 function generoi_matkalaskuraportti_rivit($request_params) {
@@ -82,7 +127,7 @@ function generoi_matkalaskuraportti_rivit($request_params) {
 		echo "</pre>";
 	}
 
-	//$result = pupe_query($query);
+	$result = pupe_query($query);
 
 	$rivit = array();
 	while($rivi = mysql_fetch_assoc($result)) {
@@ -98,7 +143,9 @@ function generoi_where_ehdot($request_params) {
 	$where = 'WHERE ';
 
 	if(!empty($request_params['ppa']) and !empty($request_params['kka']) and !empty($request_params['vva']) and !empty($request_params['ppl']) and !empty($request_params['kkl']) and !empty($request_params['vvl'])) {
-		$where .= aika_ehto_where($request_params);
+		$where .= "lasku.yhtio = '{$kukarow['yhtio']}'
+		AND (lasku.tapvm >= '{$request_params['vva']}-{$request_params['kka']}-{$request_params['ppa']}'
+			AND lasku.tapvm < '{$request_params['vvl']}-{$request_params['kkl']}-{$request_params['ppl']}') ";
 	}
 
 	if(!empty($request_params['ajotapa'])) {
@@ -110,14 +157,6 @@ function generoi_where_ehdot($request_params) {
 	}
 
 	return $where;
-}
-
-function aika_ehto_where($request_params) {
-	global $kukarow;
-	
-	return "lasku.yhtio = '{$kukarow['yhtio']}'
-		AND (lasku.tapvm >= '{$request_params['vva']}-{$request_params['kka']}-{$request_params['ppa']}'
-			AND lasku.tapvm < '{$request_params['vvl']}-{$request_params['kkl']}-{$request_params['ppl']}') ";
 }
 
 function ajotapa_where($request_params) {
@@ -151,11 +190,13 @@ function matkalaskunro_where($request_params) {
 function generoi_tuote_join($request_params) {
 	$tuote_join = "ON ( tuote.yhtio = lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno ";
 	if(!empty($request_params['tuotetyypit'])) {
-		$tuote_join .= tuotetyypit_join($request_params);
+		$tuotetyypit = implode("','", $request_params['tuotetyypit']);
+		$tuote_join .= " AND tuote.tuotetyyppi IN ('{$tuotetyypit}')";
 	}
 
 	if(!empty($request_params['tuotteet_lista'])) {
-		$tuote_join .= tuotteet_tuoteno_join($request_params);
+		//TODO tähän pitää varmaan laittaa jotain validaatiota sun muuta???????? pilkulla eroteltunako tulee
+		$tuote_join .= " AND tuote.tuoteno IN ({$request_params['tuotteet_lista']})";
 	}
 
 	if($request_params['kenelta_kustp'] == "tuotteilta") {
@@ -166,16 +207,6 @@ function generoi_tuote_join($request_params) {
 
 	$tuote_join .= " )";
 	return $tuote_join;
-}
-
-function tuotetyypit_join($request_params) {
-	$tuotetyypit = implode("','", $request_params['tuotetyypit']);
-	return " AND tuote.tuotetyyppi IN ('{$tuotetyypit}')";
-}
-
-function tuotteet_tuoteno_join($request_params) {
-	//TODO tähän pitää varmaan laittaa jotain validaatiota sun muuta???????? pilkulla eroteltunako tulee
-	return " AND tuote.tuoteno IN ({$request_params['tuotteet_lista']})";
 }
 
 function generoi_kustannuspaikka_join($request_params) {
@@ -209,36 +240,24 @@ function generoi_toimi_join($request_params) {
 }
 
 function generoi_select($request_params) {
+	$mukaan_tulevat = jarjesta_prioriteetit($request_params);
 	$select = "";
 
-	//group: matkalaskuittain
-	if($request_params['ruksit']['matkalaskuittain'] != '') {
-		//laskunumero näytetään kun: Piilota laskunumero not checked ja groupataan laskun mukaan
-		if(!empty($request_params['laskunro'])) {
-			$select .= "lasku.laskunro, ";
-		}
-		//näytetään: kun tapahtuma päivä checked ja groupataan matkalaskuittain
-		if(!empty($request_params['tapahtumapaiva'])) {
-			$select .= "lasku.tapvm, ";
-		}
-		$select .= "lasku.summa, ";
-	}
-
-	//group: tuotteittain
-	if($request_params['ruksit']['tuotteittain'] != '') {
-		//tuotteiden nimityksen näytetään kun: nimitykset checked ja grouptaan tuotteittain
-		if(!empty($request_params['nimitykset'])) {
-			$select .= "tilausrivi.nimitys, ";
-		}
-		//matkalasku rivin muita tietoja, kuin kpl halutaan näyttää vain jos grouptaan tuotteittain
-		$select .= "tilausrivi.tuoteno, tilausrivi.keratty, tilausrivi.toimitettu, tuote.tuotetyyppi, ";
+	//generoidaan selectit annettujen grouppauksien prioriteetin mukaan, jotta kentät ovat printtaus vaiheessa oikeassa järjestyksessä.
+	foreach($mukaan_tulevat as $group => $value) {
+		$select .= select_group_byn_mukaan($request_params, $group);
 	}
 
 	//group: kaikki
 	if(empty($request_params['piilota_kappaleet'])) {
 		//jos on mikä tahansa grouppi niin tilausrivi.kpl pitää summata
-		if($request_params['ruksit']['tuotteittain'] or $request_params['ruksit']['toimittajittain'] or $request_params['ruksit']['matkalaskuittain'] or $request_params['ruksit']['tuotetyypeittain'] or $request_params['ruksit']['kustp']) {
-			$select .= "sum(tilausrivi.kpl) as kpl, sum(tilausrivi.erikoisale) as ilmaiset_lounaat, ";
+		if($request_params['ruksit']['tuotteittain']
+				or $request_params['ruksit']['toimittajittain']
+				or $request_params['ruksit']['matkalaskuittain']
+				or $request_params['ruksit']['tuotetyypeittain']
+				or $request_params['ruksit']['kustp']) {
+			//TODO kun halutaan piilottaa kappaleet niin piilotetaanko pelkästään kappaleet ja näytetään ilmaiset lounaat sun muut?
+			$select .= "sum(tilausrivi.kpl) as kpl, sum(tilausrivi.erikoisale) as ilmaiset_lounaat, sum(tilausrivi.hinta) as hinta, sum(tilausrivi.rivihinta) as rivihinta, ";
 		}
 		else {
 			$select .= "tilausrivi.kpl, tilausrivi.erikoisale as ilmaiset_lounaat, ";
@@ -254,7 +273,44 @@ function generoi_select($request_params) {
 		$select .= "";
 	}
 
-	$select .= "tilausrivi.hinta, tilausrivi.rivihinta, toimi.tunnus, toimi.nimi, lasku.tunnus";
+	$select = substr($select, 0, -2);
+
+	return $select;
+}
+
+function select_group_byn_mukaan($request_params, $group) {
+	$select = "";
+	switch($group) {
+		case 'kustp':
+			$select .= "kustannuspaikka.tunnus as kustp_tunnus, kustannuspaikka.nimi as kustp_nimi, ";
+			break;
+		case 'toimittajittain':
+			$select .= "toimi.tunnus as toimi_tunnus, toimi.nimi as toimi_nimi, ";
+			break;
+		case 'tuotteittain':
+			//tuotteiden nimityksen näytetään kun: nimitykset checked ja grouptaan tuotteittain
+			if(!empty($request_params['nimitykset'])) {
+				$select .= "tilausrivi.nimitys, ";
+			}
+			//matkalasku rivin muita tietoja, kuin kpl halutaan näyttää vain jos grouptaan tuotteittain
+			$select .= "tilausrivi.tuoteno, tilausrivi.keratty, tilausrivi.toimitettu, ";
+			break;
+		case 'tuotetyypeittain':
+			$select .= "tuote.tuotetyyppi, ";
+			break;
+		case 'matkalaskuittain':
+			$select .= "lasku.tunnus as lasku_tunnus, ";
+			//laskunumero näytetään kun: Piilota laskunumero not checked ja groupataan laskun mukaan
+			if(!empty($request_params['laskunro'])) {
+				$select .= "lasku.laskunro, ";
+			}
+			//näytetään: kun tapahtuma päivä checked ja groupataan matkalaskuittain
+			if(!empty($request_params['tapahtumapaiva'])) {
+				$select .= "lasku.tapvm, ";
+			}
+			$select .= "lasku.summa, ";
+			break;
+	}
 
 	return $select;
 }
@@ -263,27 +319,7 @@ function generoi_group_by($request_params) {
 	//selectoidaan vain valitut grouppaukset mukaan
 	$group_by = "";
 
-	$mukaan_tulevat = array();
-	foreach($request_params['ruksit'] as $index => $value) {
-		if($value != '') {
-			$mukaan_tulevat[$index] = $request_params['jarjestys'][$index];
-		}
-	}
-	//tässä meillä on mukaan tulevat grouppaukset, nyt array pitää sortata niin, että pienin prioriteetti tulee ensimmäiseksi ja tyhjät pohjalle
-	asort($mukaan_tulevat);
-	//tällä saadaan tyhjät valuet arrayn pohjalle
-	$mukaan_tulevat = array_diff($mukaan_tulevat, array('')) + array_intersect($mukaan_tulevat, array(''));
-	/*php > $arr = array(0 => '1', 1 => '3', 2 => '2', 3 => '', 4 => '', 5 => '6'); asort($arr); $re = array_diff($arr, array('')) + array_intersect($arr, array('')); echo print_r($re);
-		Array
-		(
-			[0] => 1
-			[2] => 2
-			[1] => 3
-			[5] => 6
-			[3] =>
-			[4] =>
-		)
-	 */
+	$mukaan_tulevat = jarjesta_prioriteetit($request_params);
 
 	if(!empty($mukaan_tulevat)) {
 		$group_by = "GROUP BY ";
@@ -296,7 +332,9 @@ function generoi_group_by($request_params) {
 					$group_by .= "toimi.tunnus, ";
 					break;
 				case 'tuotteittain':
-					$group_by .= "tilausrivi.tuoteno, ";
+					//tuotteittain groupattaessa pitää käyttää nimitystä, koska ilmaiset lounaat toiminnallisuutta implementoitaessa osapäiväraha otettiin pois tuoteelta ja liitettiin kokopäivärahan kanssa samaan
+					//myöskin var kentän toiminnallisuus muutettiin, minkä seurauksena emme voi groupata sen perusteella, koska se ei ole taaksepäin yhteensopiva
+					$group_by .= "tilausrivi.nimitys, ";
 					break;
 				case 'tuotetyypeittain':
 					$group_by .= "tuote.tuotetyyppi, ";
@@ -313,9 +351,40 @@ function generoi_group_by($request_params) {
 	return $group_by;
 }
 
+function jarjesta_prioriteetit($request_params) {
+	$mukaan_tulevat = array();
+	foreach ($request_params['ruksit'] as $index => $value) {
+		if ($value != '') {
+			$mukaan_tulevat[$index] = $request_params['jarjestys'][$index];
+		}
+	}
+	//tässä meillä on mukaan tulevat grouppaukset, nyt array pitää sortata niin, että pienin prioriteetti tulee ensimmäiseksi ja tyhjät pohjalle
+	asort($mukaan_tulevat);
+	//tällä saadaan tyhjät valuet arrayn pohjalle
+	$mukaan_tulevat = array_diff($mukaan_tulevat, array('')) + array_intersect($mukaan_tulevat, array(''));
+	/* php > $arr = array(0 => '1', 1 => '3', 2 => '2', 3 => '', 4 => '', 5 => '6'); asort($arr); $re = array_diff($arr, array('')) + array_intersect($arr, array('')); echo print_r($re);
+	  Array
+	  (
+	  [0] => 1
+	  [2] => 2
+	  [1] => 3
+	  [5] => 6
+	  [3] =>
+	  [4] =>
+	  )
+	 */
+
+	return $mukaan_tulevat;
+}
+
 function echo_matkalaskuraportti_form($request_params) {
 	global $kukarow;
 
+	$now = date('d-m-Y');
+	$last_month = date('d-m-Y', strtotime($now . '-1 month'));
+	$now = explode('-', $now);
+	$last_month = explode('-', $last_month);
+	
 	if ($request_params['ruksit']['tuotetyypeittain'] != '')   	$ruk_tuotetyypeittain_chk	= "CHECKED";
 	if ($request_params['ruksit']['tuotteittain'] != '')   		$ruk_tuotteittain_chk   	= "CHECKED";
 	if ($request_params['ruksit']['toimittajittain'] != '')   	$ruk_toimittajittain_chk   	= "CHECKED";
@@ -326,6 +395,15 @@ function echo_matkalaskuraportti_form($request_params) {
 	if ($request_params['laskunro'] != '')						$laskunrochk   				= "CHECKED";
 	if ($request_params['maksutieto'] != '')					$maksutietochk				= "CHECKED";
 	if ($request_params['tapahtumapaiva'] != '')				$tapahtumapaivachk			= "CHECKED";
+	
+	if($request_params['ppl'] == '')							$request_params['ppl']		= $now[0];
+	if($request_params['kkl'] == '')							$request_params['kkl']		= $now[1];
+	if($request_params['vvl'] == '')							$request_params['vvl']		= $now[2];
+
+	if($request_params['ppa'] == '')							$request_params['ppa']		= $last_month[0];
+	if($request_params['kka'] == '')							$request_params['kka']		= $last_month[1];
+	if($request_params['vva'] == '')							$request_params['vva']		= $last_month[2];
+
 	$jarjestys['kustp'] = $request_params['jarjestys']['kustp'];
 	$ruksit["kustp"] = $request_params['ruksit']['kustp'];
 	//asetetaan toimittajilta default valueksi
@@ -411,7 +489,7 @@ function echo_matkalaskuraportti_form($request_params) {
 	echo "<tr>
 			<th>".t("Listaa tuotteittain")."</th>
 			<td><input type='text' name='jarjestys[tuotteittain]' size='2' value='{$request_params['jarjestys']['tuotteittain']}'></td>
-			<td><input type='checkbox' name='ruksit[tuotteittain]' value='tuotteittain' {$ruk_tuotteittain_chk}></td>
+			<td><input id='tuotteittain_group' type='checkbox' name='ruksit[tuotteittain]' value='tuotteittain' {$ruk_tuotteittain_chk}></td>
 			<td><input type='text' name='tuotenro' value='{$request_params['tuotenro']}'></td>
 		</tr>";
 	echo "<tr>
@@ -446,8 +524,8 @@ function echo_matkalaskuraportti_form($request_params) {
 		</tr>";
 	echo "<tr>
 			<th>".t("Näytä tuotteiden nimitykset")."</th>
-			<td colspan='3'><input type='checkbox' name='nimitykset' {$nimchk}></td>
-			<td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
+			<td colspan='3'><input id='nayta_tuotteiden_nimitykset'type='checkbox' name='nimitykset' {$nimchk}></td>
+			<td class='back'>".t("(Kun listaat tuotteittain valitse tämä!)")."</td>
 		</tr>";
 	echo "<tr>
 			<th>".t("Näytä tilausrivin kommentti")."</th>
@@ -476,15 +554,15 @@ function echo_matkalaskuraportti_form($request_params) {
 	echo "<table>";
 	echo "<tr>
 			<th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
-			<td><input type='text' name='ppa' value='{$request_params['ppa']}' size='3'></td>
-			<td><input type='text' name='kka' value='{$request_params['kka']}' size='3'></td>
-			<td><input type='text' name='vva' value='{$request_params['vva']}' size='5'></td>
+			<td><input id='ppa' type='text' name='ppa' value='{$request_params['ppa']}' size='3'></td>
+			<td><input id='kka' type='text' name='kka' value='{$request_params['kka']}' size='3'></td>
+			<td><input id='vva' type='text' name='vva' value='{$request_params['vva']}' size='5'></td>
 			</tr>
 			<br/>
 			<tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
-			<td><input type='text' name='ppl' value='{$request_params['ppl']}' size='3'></td>
-			<td><input type='text' name='kkl' value='{$request_params['kkl']}' size='3'></td>
-			<td><input type='text' name='vvl' value='{$request_params['vvl']}' size='5'></td>
+			<td><input id='ppl' type='text' name='ppl' value='{$request_params['ppl']}' size='3'></td>
+			<td><input id='kkl' type='text' name='kkl' value='{$request_params['kkl']}' size='3'></td>
+			<td><input id='vvl' type='text' name='vvl' value='{$request_params['vvl']}' size='5'></td>
 		</tr>
 		<br/>";
 	echo "</table>";
@@ -493,20 +571,72 @@ function echo_matkalaskuraportti_form($request_params) {
 	echo nayta_kyselyt("myyntiseuranta");
 
 	echo "<br/>";
-	echo "<input type='submit' name='aja_raportti' value='".t("Aja raportti")."'>";
+	echo "<input type='submit' name='aja_raportti' value='".t("Aja raportti")."' onclick='return tarkista();' />";
 	echo "</form>";
 
 	echo "<br/><br/>";
 }
 
-function generoi_excel_tiedosto($rivit) {
-	$xls = new pupeExcel();
-
-	xls_headerit($xls);
+function echo_tallennus_formi($xls_filename) {
+	echo "<table>";
+	echo "<tr><th>".t("Tallenna tulos").":</th>";
+	echo "<form method='post' class='multisubmit'>";
+	echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+	echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
+	echo "<input type='hidden' name='kaunisnimi' value='".t('Matkalaskuraportti').".xlsx'>";
+	echo "<input type='hidden' name='tmpfilenimi' value='{$xls_filename}'>";
+	echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+	echo "</table><br/>";
 }
 
-function xls_headerit(pupeExcel $xls) {
+function generoi_excel_tiedosto($rivit, $request_params) {
+	$xls = new pupeExcel();
+	$rivi = 0;
+	$sarake = 0;
 
+	xls_headerit($xls, $rivit, $rivi, $sarake);
+
+	xls_rivit($xls, $rivit, $rivi, $sarake);
+
+	$xls_tiedosto = $xls->close();
+
+	return $xls_tiedosto;
+}
+
+function xls_headerit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake) {
+	foreach($rivit[0] as $header_text => $value) {
+		kirjoita_solu($xls, $header_text, $rivi, $sarake);
+	}
+	$rivi++;
+	$sarake = 0;
+}
+
+function xls_rivit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake) {
+	foreach($rivit as $matkalasku_rivi) {
+		foreach($matkalasku_rivi as $solu) {
+			kirjoita_solu($xls, $solu, $rivi, $sarake);
+		}
+		$rivi++;
+		$sarake = 0;
+	}
+}
+
+function kirjoita_solu(&$xls, $string, &$rivi, &$sarake) {
+	if(is_numeric($string)) {
+		$xls->writeNumber($rivi, $sarake, $string);
+	}
+	else if(valid_date($string) != 0 and valid_date($string) !== false) {
+		$xls->writeDate($rivi, $sarake, $string);
+	}
+	else {
+		$xls->write($rivi, $sarake, $string);
+	}
+	$sarake++;
+}
+
+function valid_date($date) {
+	//preg_match() returns 1 if the pattern matches given subject, 0 if it does not, or FALSE if an error occurred. 
+    return (preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date));
 }
 
 ?>

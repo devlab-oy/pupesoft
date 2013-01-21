@@ -8352,12 +8352,14 @@ if (!function_exists("livesearch_tuotehaku")) {
 			else {
 				$naytetaanko_poistetut = "and tuote.status != 'P'";
 			}
-			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm
+			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
+						if (tuote.tuoteno = '$haku', 1, if(left(tuote.tuoteno, length('$haku')) = '$haku', 2, if(tuote.nimitys = '$haku', 3, if(left(tuote.nimitys, length('$haku')) = '$haku', 4, 5)))) jarjestys
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						$naytetaanko_poistetut
 						$kieltolisa
-						$haku_query";
+						$haku_query
+						ORDER BY jarjestys, tuote.tuoteno";
 			$result = pupe_query($query);
 
 			$limit = 0;
@@ -8546,10 +8548,16 @@ if (!function_exists("livesearch_asiakashaku")) {
 				$haku_query .= " or asiakas.laskutus_nimi like ('%$haku%') or asiakas.laskutus_nimitark like ('%$haku%') or asiakas.laskutus_postitp like ('%$haku%')) ";
 			}
 
-			$query = "	SELECT *, if (toim_nimi != nimi and toim_nimi != '', concat(nimi, ' ', nimitark, ' / ', toim_nimi, ' ', toim_nimitark), concat(nimi, ' ', nimitark)) asiakkaan_tieto
+			$query = "	SELECT *, if (toim_nimi != nimi and toim_nimi != '', concat(nimi, ' ', nimitark, ' / ', toim_nimi, ' ', toim_nimitark), concat(nimi, ' ', nimitark)) asiakkaan_tieto,
+						if (asiakas.ytunnus = '$haku', 1, if(left(asiakas.ytunnus, length('$haku')) = '$haku', 2, 3)) jarjestys,
+						if (asiakas.asiakasnro = '$haku', 1, if(left(asiakas.asiakasnro, length('$haku')) = '$haku', 2, 3)) jarjestys2,
+						if (asiakas.nimi = '$haku', 1, if(left(asiakas.nimi, length('$haku')) = '$haku', 2, 3)) jarjestys3,
+						if (asiakas.toim_nimi = '$haku', 1, if(left(asiakas.toim_nimi, length('$haku')) = '$haku', 2, 3)) jarjestys4,
+						if (asiakas.laskutus_nimi = '$haku', 1, if(left(asiakas.laskutus_nimi, length('$haku')) = '$haku', 2, 3)) jarjestys5
 						FROM asiakas
 						WHERE asiakas.yhtio = '$kukarow[yhtio]' and asiakas.laji!='P'
-						$haku_query";
+						$haku_query
+						ORDER BY jarjestys, jarjestys2, jarjestys3, jarjestys4, jarjestys5, ytunnus, asiakkaan_tieto";
 			$result = pupe_query($query);
 
 			$limit = 0;

@@ -139,7 +139,7 @@
 				if ((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '' and $toim == "SIIRTOLISTA")) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $toim != "SIIRTOTYOMAARAYS" and $toim != "VALMISTAASIAKKAALLE" and $toim != "VALMISTAVARASTOON") {
 
 					if (!is_resource($laskusplitres)) {
-						// Jotta saadaa lasku kopsattua kivasti jos se splittaantuu
+						// Jotta saadaan lasku kopsattua kivasti jos se splittaantuu
 						$query = "	SELECT *
 									FROM lasku
 									WHERE yhtio = '$kukarow[yhtio]'

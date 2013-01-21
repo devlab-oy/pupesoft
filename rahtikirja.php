@@ -3114,6 +3114,11 @@
 
 		echo "<input name='subnappi' type='submit' value='".t("Valmis")."'>";
 
+		if ($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
+			echo "<input type='hidden' name='rakirsyotto_dgd_tulostin' value='{$rakirsyotto_dgd_tulostin}' />";
+			echo "<input type='hidden' name='dgdkpl' value='{$dgdkpl}' />";
+		}
+
 		echo "</form>";
 
 		if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php') {

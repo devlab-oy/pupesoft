@@ -13272,15 +13272,36 @@ if (!function_exists("palauta_vak_tiedot")) {
 					ORDER BY 1,2,3,4,5,6,7,8,9,10,11,12";
 		$riresult1 = pupe_query($query);
 
+		if ($otunnus{0} != "'") {
+			$otunnus = str_replace(",", "','", $otunnus);
+			$otunnus = "'{$otunnus}'";
+		}
+
+		// Tarkistetaan onko syötetty uudet pakkaustiedot
 		$query = "  SELECT distinct r1.tunnus,
 					r1.pakkaus,
 					r1.pakkauskuvaus,
 					TRIM(TRAILING '.' FROM TRIM(TRAILING '0' FROM r1.kollit)) AS kollit,
 					round(r1.kilot,1) kilot
 					FROM rahtikirjat r1
-					WHERE r1.otsikkonro in ($otunnus)
+					WHERE r1.pakkaustieto_tunnukset IN ({$otunnus})
+					AND r1.otsikkonro = 0
 					AND r1.yhtio = '$kukarow[yhtio]'";
 		$riresult2 = pupe_query($query);
+
+		// Jos uusia pakkaustietoja ei ole syötetty, katotaan normaalisti pakkaustiedot
+		if (mysql_num_rows($riresult2) == 0) {
+			$query = "  SELECT distinct r1.tunnus,
+						r1.pakkaus,
+						r1.pakkauskuvaus,
+						TRIM(TRAILING '.' FROM TRIM(TRAILING '0' FROM r1.kollit)) AS kollit,
+						round(r1.kilot,1) kilot
+						FROM rahtikirjat r1
+						WHERE r1.pakkaustieto_tunnukset = ''
+						AND r1.otsikkonro in ({$otunnus})
+						AND r1.yhtio = '{$kukarow['yhtio']}'";
+			$riresult2 = pupe_query($query);
+		}
 
 		//* Limited Quantity tiedot *//
 		//Inner packagings placed in shrink-wrapped or stretch-wrapped trays a Maximum net quantity

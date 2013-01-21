@@ -135,8 +135,8 @@
 				// Intrastat-tiedot
 				$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
-				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
-				if ((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '' and $toim == "SIIRTOLISTA")) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $toim != "SIIRTOTYOMAARAYS") {
+				//varasto vaihtuu, splitataan tilaus, paitsi jos spliauskielto on trigattu
+				if ((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '' and $toim == "SIIRTOLISTA")) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $toim != "SIIRTOTYOMAARAYS" and $toim != "VALMISTAASIAKKAALLE" and $toim != "VALMISTAVARASTOON") {
 
 					if (!is_resource($laskusplitres)) {
 						// Jotta saadaa lasku kopsattua kivasti jos se splittaantuu
@@ -175,37 +175,41 @@
 					$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 					$uusires = mysql_query($kysely) or pupe_error($kysely);
 
+					$laskurow['tunnus'] = (string) mysql_insert_id();
+					$tvs_tilausnumerot[] = $laskurow["tunnus"];
+
 					$query = "	SELECT *
 								FROM laskun_lisatiedot
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND otunnus = '$laskurow[tunnus]'";
 					$lisatiedot_result = mysql_query($query) or pupe_error($query);
-					$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
 
-					$laskurow['tunnus'] = (string) mysql_insert_id();
-					$tvs_tilausnumerot[] = $laskurow["tunnus"];
+					if (mysql_num_rows($lisatiedot_result) == 1) {
 
-					$fields = "yhtio";
-					$values = "'$kukarow[yhtio]'";
+						$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
 
-					// Ei monisteta tunnusta
-					for ($i = 1; $i < mysql_num_fields($lisatiedot_result) - 1; $i++) {
+						$fields = "yhtio";
+						$values = "'$kukarow[yhtio]'";
 
-						$fieldname = mysql_field_name($lisatiedot_result, $i);
+						// Ei monisteta tunnusta
+						for ($i = 1; $i < mysql_num_fields($lisatiedot_result) - 1; $i++) {
 
-						$fields .= ", ".$fieldname;
+							$fieldname = mysql_field_name($lisatiedot_result, $i);
 
-						switch ($fieldname) {
-							case 'otunnus':
-								$values .= ", '$laskurow[tunnus]'";
-								break;
-							default:
-								$values .= ", '".$lisatiedot_row[$fieldname]."'";
+							$fields .= ", ".$fieldname;
+
+							switch ($fieldname) {
+								case 'otunnus':
+									$values .= ", '$laskurow[tunnus]'";
+									break;
+								default:
+									$values .= ", '".$lisatiedot_row[$fieldname]."'";
+							}
 						}
-					}
 
-					$query = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
-					$lisatiedot_result = mysql_query($query) or pupe_error($query);
+						$query = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
+						$lisatiedot_result = mysql_query($query) or pupe_error($query);
+					}
 				}
 				else {
 					//päivitetään laskulle tieto mihin varastoon se kuuluu
@@ -267,11 +271,11 @@
 				}
 			}
 
-			//tyhjennetään muuttujat
-			$varasto 	= '';
-			$edvarasto 	= '';
+			// tyhjennetään muuttujat
+			$varasto   = '';
+			$edvarasto = '';
 
-			//loopataan kaikki yhdestä tilausesta syntyneet lähetteet
+			// loopataan kaikki yhdestä tilauksesta syntyneet lähetteet
 			foreach ($tvs_tilausnumerot as $tvs_tilausnumero) {
 
 				//luetaan laskun tiedot uudestaan tässä, per splitti

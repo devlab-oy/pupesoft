@@ -128,6 +128,13 @@
 			$excelsarake++;
 		}
 
+		if ($toim == "MYYJA") {
+			$worksheet->writeString($excelrivi, $excelsarake, "{$row['myyja']} {$row['nimi']}");
+			$excelsarake++;
+
+			if ($rivimaara < $maxrivimaara) echo "<tr><td>$row[myyja] $row[nimi]</td>";
+		}
+
 		if ($toim == "ASIAKAS") {
 			$worksheet->writeString($excelrivi, $excelsarake, $row['asiakasnro']);
 			$excelsarake++;
@@ -356,8 +363,14 @@
 		$budj_taulu = "budjetti_asiakas";
 		$budj_sarak = "asiakkaan_tunnus";
 	}
+	elseif ($toim == "MYYJA") {
+		echo "<font class='head'>",t("Myyjien myyntitavoitteet"),"</font><hr>";
+
+		$budj_taulu = "budjetti_myyja";
+		$budj_sarak = "myyjan_tunnus";
+	}
 	else {
-		echo "<font class='error'>Anna ohjelmalle alanimi: TUOTE, TOIMITTAJA tai ASIAKAS.</font>";
+		echo "<font class='error'>",t("Anna ohjelmalle alanimi: TUOTE, TOIMITTAJA, ASIAKAS tai MYYJA"),".</font>";
 		exit;
 	}
 
@@ -615,7 +628,7 @@
 
 					if ($solu_orig == '!' or is_numeric($solu_orig)) {
 
-						if ($toim == "ASIAKAS" and $summabudjetti == "on") {
+						if (($toim == "ASIAKAS" or $toim == "MYYJA") and $summabudjetti == "on") {
 							$liitostunnarit_array = explode(",", $liitostunnarit);
 						}
 						else {
@@ -663,7 +676,7 @@
 							if ($toim == "TOIMITTAJA") {
 								$tall_summa = $solu;
 							}
-							elseif ($toim == "ASIAKAS") {
+							elseif ($toim == "ASIAKAS" or $toim == "MYYJA") {
 								if ($budj_kohtelu == "euro") {
 									// Syötetty arvo summa kenttään
 									$tall_summa = round($solu, 2);
@@ -890,7 +903,7 @@
 				</td>";
 		echo "</tr>";
 
-		if ($toim == "TUOTE" or $toim == "ASIAKAS") {
+		if ($toim == "TUOTE" or $toim == "ASIAKAS" or $toim == "MYYJA") {
 
 			// indeksi vai euromäärä
 			echo "<tr>";
@@ -988,6 +1001,26 @@
 			echo "</tr>";
 		}
 
+		if ($toim == "MYYJA") {
+			// Tuoteosasto tai ryhmätason budjetti.
+			echo "<tr>";
+			echo "<th>",t("Anna kokonaistavoitteet valituille myyjille"),"</th>";
+
+			$scheck = ($summabudjetti != "") ? "CHECKED": "";
+			echo "<td><input type='checkbox' name='summabudjetti' {$scheck}></td>";
+			echo "</tr>";
+
+			echo "<tr><th>",t("Myyjä"),"</th><td>";
+
+			$mulselprefix = "laskumyyja";
+			$monivalintalaatikot = array('LASKUMYYJA');
+			$monivalintalaatikot_normaali = array();
+
+			require ("tilauskasittely/monivalintalaatikot.inc");
+
+			echo "</td></tr>";
+		}
+
 		if ($toim == "ASIAKAS") {
 
 			// Tuoteosasto tai ryhmätason budjetti.
@@ -1036,7 +1069,7 @@
 		echo "<td><input type='checkbox' name='onko_ilman_budjettia' $tcheck></td>";
 		echo "</tr>";
 
-		if ($toim == "ASIAKAS" or $toim == "TOIMITTAJA") {
+		if ($toim == "ASIAKAS" or $toim == "TOIMITTAJA" or $toim == "MYYJA") {
 
 			echo "<tr><th>",t("Tavoitetaso"),"</th><td>";
 
@@ -1058,11 +1091,10 @@
 			echo "<option value = 'osastoittain' $btcheck2>".t("Asiakkaan osastokohtainen tavoite")."</option>";
 			echo "</select>";
 
-
 			echo "</td></tr>";
 		}
 
-		if ($toim == "ASIAKAS") {
+		if ($toim == "ASIAKAS" or $toim == "MYYJA") {
 			// Keroin jolla interpoloidaan asiakkaan kuluvan vuoden myynnit koko vuoden myynneiksi
 			echo "<tr><th>",t("Myyntiennustekerroin, kuluva vuosi"),"</th><td>";
 			echo "<input type='text' name='myyntiennustekerroin' value='$myyntiennustekerroin' size='5'>";
@@ -1150,8 +1182,13 @@
 			$tee = "";
 		}
 
+		if ($toim == "MYYJA" and $lisa_dynaaminen["laskumyyja"] == "" and $lisa == "" and $lisa_parametri == "" and !is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+			echo "<font class='error'>".t("On valittava myyjä")."!";
+			$tee = "";
+		}
+
 		// Kokonaisbudjetti-tarkastukset
-		if (($toim == "TUOTE" or $toim == "ASIAKAS") and $summabudjetti == "on") {
+		if (($toim == "TUOTE" or $toim == "ASIAKAS" or $toim == "MYYJA") and $summabudjetti == "on") {
 			if ($budj_kohtelu == "indeksi" and $budjetointi_taso != "joka_kk_sama") {
 				echo "<font class='error'>".t("VIRHE: Kokonaistavoitteet voi syöttää indeksiluvulla vain valitsemalla jokaiselle kuukaudelle saman arvon!")."</font><br>";
 				$tee = "";
@@ -1198,6 +1235,10 @@
 		}
 		elseif ($toim == "ASIAKAS") {
 			$worksheet->write($excelrivi, $excelsarake, t("Asiakkaan tunnus"), $format_bold);
+			$excelsarake++;
+		}
+		elseif ($toim == "MYYJA") {
+			$worksheet->write($excelrivi, $excelsarake, t("Myyjän tunnus"), $format_bold);
 			$excelsarake++;
 		}
 
@@ -1314,6 +1355,18 @@
 							$lisa";
 			}
 		}
+		elseif ($toim == "MYYJA") {
+
+			$query = "	SELECT kuka.tunnus myyjan_tunnus,
+						kuka.nimi,
+						kuka.myyja
+						FROM kuka
+						WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+						AND kuka.extranet = ''
+						AND kuka.myyja > 0
+						{$lisa}";
+
+		}
 
 		$result = pupe_query($query);
 
@@ -1392,6 +1445,9 @@
 		}
 		elseif ($toim == "ASIAKAS") {
 			if ($rivimaara < $maxrivimaara) echo "<tr><th>",t("Asiakas"),"</th>";
+		}
+		elseif ($toim == "MYYJA") {
+			if ($rivimaara < $maxrivimaara) echo "<tr><th>",t("Myyjä"),"</th>";
 		}
 
 		if (isset($osastotryttain) and $osastotryttain == "tuoteryhmittain") {

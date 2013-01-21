@@ -159,7 +159,7 @@
 				}
 			}
 
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=rahtikirja-tulostus.php?tee=tulosta&tultiin=koonti_eratulostus_pakkaustiedot&toimitustapa_varasto=$toimitustapa_varasto&jv=$jv&komento=$komento&valittu_rakiroslapp_tulostin=$valittu_rakiroslapp_tulostin&pakkaustieto_rahtikirjanro=$rahtikirjanro$ltun_linkklisa'>";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=rahtikirja-tulostus.php?tee=tulosta&tultiin=koonti_eratulostus_pakkaustiedot&toimitustapa_varasto=$toimitustapa_varasto&jv=$jv&komento=$komento&rakirsyotto_dgd_tulostin={$rakirsyotto_dgd_tulostin}&dgdkpl=$dgdkpl&valittu_rakiroslapp_tulostin=$valittu_rakiroslapp_tulostin&pakkaustieto_rahtikirjanro=$rahtikirjanro$ltun_linkklisa'>";
 			exit;
 		}
 		else {

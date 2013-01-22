@@ -518,6 +518,7 @@
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and tuotetyyppi in ('','R','K','M')
 						and tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
+						AND status != 'P'
 						GROUP BY try";
 			$result = pupe_query($query);
 			$ostryntuotteet = array();
@@ -532,6 +533,7 @@
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and tuotetyyppi in ('','R','K','M')
 						and tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
+						AND status != 'P'
 						GROUP BY osasto";
 			$result = pupe_query($query);
 			$ostryntuotteet = array();

@@ -175,7 +175,7 @@
 						$tres = pupe_query($query);
 						$trow = mysql_fetch_assoc($tres);
 
-						list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', '', array());
+						list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $tilausrivirow['kpl'], '', '', array());
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$lis_hinta *= (1 - $lis_ale_kaikki['ale'.$alepostfix] / 100);

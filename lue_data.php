@@ -756,11 +756,11 @@ if ($kasitellaan_tiedosto) {
 						// jos ollaan valittu koodi puun_tunnuksen sarakkeeksi, niin haetaan dynaamisesta puusta tunnus koodilla
 						if ($dynaamisen_taulun_liitos == 'koodi') {
 
-							$query_x = "	SELECT tunnus
-											FROM dynaaminen_puu
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND laji    = '{$table_tarkenne}'
-											AND koodi   = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
+							$query_x = "SELECT tunnus
+										FROM dynaaminen_puu
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND laji    = '{$table_tarkenne}'
+										AND koodi   = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
 							$koodi_tunnus_res = pupe_query($query_x);
 
 							// jos tunnusta ei löydy, ohitetaan kyseinen rivi
@@ -786,34 +786,40 @@ if ($kasitellaan_tiedosto) {
 										AND $dynaamisen_taulun_liitos = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
 							$asiakkaan_haku_res = pupe_query($query);
 
-							while ($asiakkaan_haku_row = mysql_fetch_assoc($asiakkaan_haku_res)) {
+							if (mysql_num_rows($asiakkaan_haku_res) > 0) {
+								while ($asiakkaan_haku_row = mysql_fetch_assoc($asiakkaan_haku_res)) {
 
-								$rivi_array_x = array();
+									$rivi_array_x = array();
 
-								foreach ($taulunotsikot[$taulu] as $indexi_x => $columnin_nimi_x) {
-									switch ($columnin_nimi_x) {
-										case 'LIITOS':
-											$rivi_array_x[] = $asiakkaan_haku_row['tunnus'];
-											break;
-										default:
-											$rivi_array_x[] = $taulunrivit[$taulu][$eriviindex][$indexi_x];
+									foreach ($taulunotsikot[$taulu] as $indexi_x => $columnin_nimi_x) {
+										switch ($columnin_nimi_x) {
+											case 'LIITOS':
+												$rivi_array_x[] = $asiakkaan_haku_row['tunnus'];
+												break;
+											default:
+												$rivi_array_x[] = $taulunrivit[$taulu][$eriviindex][$indexi_x];
+										}
+									}
+
+									array_push($dynaamiset_rivit, $rivi_array_x);
+									$puun_alkio_index_plus++;
+								}
+
+								unset($taulunrivit[$taulu][$eriviindex]);
+
+								if ($rivimaara == ($eriviindex+1)) {
+									$dynaamisen_taulun_liitos = '';
+
+									foreach ($dynaamiset_rivit as $dyn_rivi) {
+										array_push($taulunrivit[$taulu], $dyn_rivi);
 									}
 								}
 
-								array_push($dynaamiset_rivit, $rivi_array_x);
-
-								unset($taulunrivit[$taulu][$eriviindex]);
+								continue 2;
 							}
-
-							$puun_alkio_index_plus++;
-
-							if ($rivimaara == ($eriviindex+1)) {
-								$dynaamisen_taulun_liitos = '';
-
-								foreach ($dynaamiset_rivit as $dyn_rivi) array_push($taulunrivit[$taulu], $dyn_rivi);
+							else {
+								$tila = 'ohita';
 							}
-
-							continue 2;
 						}
 						else {
 							$valinta .= " and liitos = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";

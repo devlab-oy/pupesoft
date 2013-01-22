@@ -152,7 +152,7 @@ function korvaa_var_paivarahan_tyypilla(&$rivi) {
 		7 => t("Ulkomaan kahteenkertaan puolitettu päiväraha"),
 	);
 
-	if(array_key_exists($var_array, $rivi['kulu_tyyppi'])) {
+	if(array_key_exists($rivi['kulu_tyyppi'], $var_array)) {
 		$rivi['kulu_tyyppi'] = $var_array[$rivi['kulu_tyyppi']];
 	}
 	else {

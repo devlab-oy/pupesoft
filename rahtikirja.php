@@ -75,7 +75,7 @@
 		$ltun_querylisa = '';
 		$ltun_linkklisa = '';
 
-		if (count($sel_ltun) > 0) {
+		if (isset($sel_ltun) and count($sel_ltun) > 0) {
 			$ltun_querylisa = " and lasku.tunnus in (".implode(",", $sel_ltun).")";
 
 			foreach ($sel_ltun as $ltun_x) {
@@ -112,6 +112,13 @@
 					$jvehto";
 		$pakkaustieto_rakir_res = pupe_query($query);
 		$pakkaustieto_rakir_row = mysql_fetch_assoc($pakkaustieto_rakir_res);
+
+		if ($ltun_linkklisa == '') {
+
+			foreach (explode(",", $pakkaustieto_rakir_row['tunnukset']) as $ltun_x) {
+				$ltun_linkklisa .= "&sel_ltun[]=$ltun_x";
+			}
+		}
 
 		$tutkimus = 0; // tänne tulee luku
 
@@ -2090,7 +2097,7 @@
 
 			$ltun_linkklisa = '';
 
-			if (count($sel_ltun) > 0) {
+			if (isset($sel_ltun) and count($sel_ltun) > 0) {
 				foreach ($sel_ltun as $ltun_x) {
 					$ltun_linkklisa .= "&sel_ltun[]=$ltun_x";
 				}

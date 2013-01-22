@@ -433,7 +433,7 @@
 		elseif ($toim == "TOIMITTAJA") {
 			$lukualku = 3;
 		}
-		elseif ($toim == "ASIAKAS") {
+		elseif ($toim == "ASIAKAS" or $toim == "MYYJA") {
 			$lukualku = 4;
 		}
 
@@ -449,7 +449,7 @@
 		}
 
 		// Hypätään myös myyntisarakkeiden yli
-		if ($toim == "ASIAKAS" and stripos($headers[$lukualku], "Myynti")  !== FALSE) {
+		if (($toim == "ASIAKAS" or $toim == "MYYJA") and stripos($headers[$lukualku], "Myynti")  !== FALSE) {
 			$lukualku += 3;
 		}
 
@@ -511,7 +511,7 @@
 	}
 
 
-	if (($tee == "TALLENNA_BUDJETTI" or $submit_button != "") and $toim == "ASIAKAS" and isset($osastotryttain) and $osastotryttain != "") {
+	if (($tee == "TALLENNA_BUDJETTI" or $submit_button != "") and ($toim == "ASIAKAS" or $toim == "MYYJA") and isset($osastotryttain) and $osastotryttain != "") {
 		if ($osastotryttain == "tuoteryhmittain") {
 			$query = "	SELECT try, group_concat(concat('\'',tuoteno,'\'')) tuotteet
 						FROM tuote

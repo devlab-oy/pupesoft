@@ -167,7 +167,9 @@
 
 					$tilausrivirow['hinta'] = $tilausrivirow['hinta'] * $alet;
 
-					if (!isset($tuotteiden_alehinnat[$laskurow['liitostunnus']][$tilausrivirow['tuoteno']])) {
+					$_chk = $laskurow['liitostunnus'].'####'.$tilausrivirow['tuoteno'].'####'.$tilausrivirow['kpl'];
+
+					if (!isset($tuotteiden_alehinnat[$_chk])) {
 						$query = "	SELECT *
 									FROM tuote
 									WHERE yhtio = '{$kukarow['yhtio']}'
@@ -181,10 +183,10 @@
 							$lis_hinta *= (1 - $lis_ale_kaikki['ale'.$alepostfix] / 100);
 						}
 
-						$tuotteiden_alehinnat[$laskurow['liitostunnus']][$tilausrivirow['tuoteno']] = $lis_hinta;
+						$tuotteiden_alehinnat[$_chk] = $lis_hinta;
 					}
 					else {
-						$lis_hinta = $tuotteiden_alehinnat[$laskurow['liitostunnus']][$tilausrivirow['tuoteno']];
+						$lis_hinta = $tuotteiden_alehinnat[$_chk];
 					}
 
 					$ero = $tilausrivirow['hinta'] - $lis_hinta;

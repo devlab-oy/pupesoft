@@ -19884,16 +19884,11 @@ if (!function_exists('triangulation')) {
 		# Katsotaan onko kyseessä kolmikantakauppa
 		$query = "	SELECT lasku.tunnus, lasku.toim_maa
 					FROM tilausrivi
-					JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-						AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-					JOIN tilausrivi as t3 ON (t3.yhtio = tilausrivi.yhtio
-						AND t3.tunnus = tilausrivin_lisatiedot.tilausrivilinkki
-						AND t3.tyyppi = 'O')
-					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-						AND lasku.tunnus = t3.otunnus
-						AND lasku.toim_maa != '{$yhtiorow['maa']}')
+					JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					JOIN tilausrivi as t3 ON (t3.yhtio = tilausrivi.yhtio AND t3.tunnus = tilausrivin_lisatiedot.tilausrivilinkki AND t3.tyyppi = 'O')
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = t3.otunnus AND lasku.toim_maa != '{$yhtiorow['maa']}')
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivi.tyyppi = 'L'
+					AND tilausrivi.tyyppi  = 'L'
 					AND tilausrivi.otunnus IN ({$tunnukset})";
 		$result = pupe_query($query);
 
@@ -19901,14 +19896,14 @@ if (!function_exists('triangulation')) {
 	}
 }
 
-if(!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
+if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 	function tarkista_myynti_osto_liitos_ja_poista($osto_rivitunnus) {
 		global $kukarow;
-		
-		$query = "	SELECT tilausrivin_lisatiedot.tilausrivitunnus
+
+		$query = "	SELECT tilausrivitunnus
 					FROM tilausrivin_lisatiedot
-					WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivin_lisatiedot.tilausrivilinkki = '{$osto_rivitunnus}'";
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivilinkki = '{$osto_rivitunnus}'";
 		$result = pupe_query($query);
 
 		if ($tilausrivin_lisatiedot_row = mysql_fetch_assoc($result)) {
@@ -19916,9 +19911,9 @@ if(!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 			$query = "	SELECT *
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'
-						AND tyyppi = 'L'
-						AND kerattyaika = '0000-00-00 00:00:00'
+						AND tunnus  = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'
+						AND tyyppi  = 'L'
+						AND kerattyaika    = '0000-00-00 00:00:00'
 						AND toimitettuaika = '0000-00-00 00:00:00'
 						AND laskutettuaika = '0000-00-00'";
 			$result = pupe_query($query);
@@ -19931,10 +19926,9 @@ if(!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 				$result = pupe_query($query);
 
 				echo "<font class='error'>".t("Rivi poistettiin myös myyntitilaukselta")."</font><br/><br/>";
-				echo "<font class='error'>".t("Rivi poistettiin ostotilaukselta")."</font><br/><br/>";
 			}
 			else {
-				echo "<font class='error'>".t("Myyntitilaus rivi on keratty, toimitettu tai laskutettu")."</font><br/><br/>";
+				echo "<font class='error'>".t("Myyntitilausrivi on kerätty, toimitettu tai laskutettu")."!</font><br/><br/>";
 			}
 		}
 	}

@@ -558,7 +558,7 @@ if (isset($nappikeikalla) and $nappikeikalla == 'ollaan' and $toiminto != 'kohdi
 
 if ($toiminto == "kohdista") {
 	if ($poista == 'Poista') {
-		// Tämä on naimisissa olevien osto ja myyntitilaus rivien saapumisten kautta poistamista varten
+		// Tämä on naimisissa olevien osto- ja myyntitilausrivien saapumisten kautta poistamista varten
 		//ostotilauksen tilausrivi on poistettu jo tässä vaiheessa, rivitunnus on tallessa formissa ja tilausrivin_lisatiedot taulusta löytyy oston ja myynnin yhdistävä linkki
 		tarkista_myynti_osto_liitos_ja_poista($rivitunnus);
 

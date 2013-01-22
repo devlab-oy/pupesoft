@@ -153,21 +153,24 @@
 		}
 
 		if ($tee == 'poista') {
-			// poistetaan tilausrivit, mutta j‰tet‰‰n PUUTE rivit analyysej‰ varten...
-			$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
+			// poistetaan tilausrivit
+			$query  = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
 			$result = pupe_query($query);
 
-			//Nollataan sarjanumerolinkit
-			$query    = "	SELECT tilausrivi.tunnus
-							FROM tilausrivi
-							JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.otunnus = '$kukarow[kesken]'";
+			// Nollataan sarjanumerolinkit
+			$query = "	SELECT tilausrivi.tunnus
+						FROM tilausrivi
+						JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and tilausrivi.otunnus = '$kukarow[kesken]'";
 			$sres = pupe_query($query);
 
-			while($srow = mysql_fetch_array($sres)) {
-				if($srow['sarjanumeroseuranta'] != '') {
-					$query = "UPDATE sarjanumeroseuranta SET ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' AND ostorivitunnus='$srow[tunnus]'";
+			while ($srow = mysql_fetch_array($sres)) {
+				if ($srow['sarjanumeroseuranta'] != '') {
+					$query = "	UPDATE sarjanumeroseuranta
+								SET ostorivitunnus = 0
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND ostorivitunnus = '$srow[tunnus]'";
 					$sarjares = pupe_query($query);
 				}
 
@@ -182,12 +185,15 @@
 
 			$tee = "";
 			$kukarow["kesken"] = 0; // Ei en‰‰ kesken
-
 		}
 
 		if ($tee == 'poista_kohdistamattomat') {
 			// poistetaan kohdistamattomat ostotilausrivit
-			$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and uusiotunnus=0";
+			$query = "	UPDATE tilausrivi
+						SET tyyppi = 'D'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND otunnus = '$kukarow[kesken]'
+						AND uusiotunnus = 0";
 			$result = pupe_query($query);
 
 			echo "<font class='message'>".t("Kohdistamattomat tilausrivit poistettu")."!<br><br></font>";
@@ -427,7 +433,7 @@
 			}
 		}
 
-		if($tee == 'POISTA_RIVI') {
+		if ($tee == 'POISTA_RIVI') {
 			tarkista_myynti_osto_liitos_ja_poista($rivitunnus);
 
 			$automatiikka = "ON";
@@ -624,7 +630,7 @@
 						echo "<font class='error'>".t("Myyntitilausrivi on keratty, toimitettu tai laskutettu, joten sit‰ ei p‰ivitetty")."</font><br/><br/>";
 					}
 				}
-				
+
 				$hinta 	= '';
 				$netto 	= '';
 				$var 	= '';

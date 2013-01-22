@@ -1305,6 +1305,9 @@
 			elseif ($toim == "ASIAKAS") {
 				$lisa = " and asiakas.tunnus in ($liitostunnukset) ";
 			}
+			elseif ($toim == "MYYJA") {
+				$lisa = " and kuka.tunnus in ({$liitostunnukset}) ";
+			}
 
 			$lisa_parametri  = "";
 			$lisa_dynaaminen = array("tuote" => "", "asiakas" => "");

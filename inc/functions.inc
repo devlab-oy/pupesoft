@@ -13297,6 +13297,13 @@ if (!function_exists("palauta_vak_tiedot")) {
 					ORDER BY 1,2,3,4,5,6,7,8,9,10,11,12";
 		$riresult1 = pupe_query($query);
 
+		$pakkaustieto_tunnukset_lisa = "";
+
+		foreach(explode(",", $otunnus) as $ot) {
+			$ot = str_replace("'", "", $ot);
+			$pakkaustieto_tunnukset_lisa .= " AND r1.pakkaustieto_tunnukset LIKE '%{$ot}%' ";
+		}
+
 		if ($otunnus{0} != "'") {
 			$otunnus = str_replace(",", "','", $otunnus);
 			$otunnus = "'{$otunnus}'";
@@ -13309,9 +13316,9 @@ if (!function_exists("palauta_vak_tiedot")) {
 					TRIM(TRAILING '.' FROM TRIM(TRAILING '0' FROM r1.kollit)) AS kollit,
 					round(r1.kilot,1) kilot
 					FROM rahtikirjat r1
-					WHERE r1.pakkaustieto_tunnukset IN ({$otunnus})
-					AND r1.otsikkonro = 0
-					AND r1.yhtio = '$kukarow[yhtio]'";
+					WHERE r1.otsikkonro = 0
+					AND r1.yhtio = '{$kukarow['yhtio']}'
+					{$pakkaustieto_tunnukset_lisa}";
 		$riresult2 = pupe_query($query);
 
 		// Jos uusia pakkaustietoja ei ole syötetty, katotaan normaalisti pakkaustiedot

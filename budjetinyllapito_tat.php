@@ -427,13 +427,13 @@
 		}
 
 		// Huomaa nämä jos muutat excel-failin sarakkeita!!!!
-		if ($toim == "TUOTE") {
+		if ($toim == "TUOTE" or $toim == "MYYJA") {
 			$lukualku = 2;
 		}
 		elseif ($toim == "TOIMITTAJA") {
 			$lukualku = 3;
 		}
-		elseif ($toim == "ASIAKAS" or $toim == "MYYJA") {
+		elseif ($toim == "ASIAKAS") {
 			$lukualku = 4;
 		}
 

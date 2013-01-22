@@ -88,16 +88,18 @@
 
 		if ($toim == "MYYJA") {
 			$liitostunnuslisa = "and lasku.myyja in ({$tunnukset})";
+			$use_index = "yhtio_tila_tapvm";
 		}
 		else {
 			$liitostunnuslisa = "and lasku.liitostunnus in ({$tunnukset})";
+			$use_index = "yhtio_tila_liitostunnus_tapvm";
 		}
 
-		$query = "	SELECT round(sum(if(tapvm <= '$edellinen_vuosi_loppu', tilausrivi.rivihinta, 0))) edvuodenkokonaismyynti,
-					round(sum(if(tapvm > '$edellinen_vuosi_loppu', tilausrivi.rivihinta, 0))) tanvuodenalustamyynti
-					FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-					JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus {$rivilisa})
-					WHERE lasku.yhtio 	   = '$kukarow[yhtio]'
+		$query = "	SELECT ROUND(SUM(IF(tapvm <= '{$edellinen_vuosi_loppu}', tilausrivi.rivihinta, 0))) edvuodenkokonaismyynti,
+					ROUND(SUM(IF(tapvm > '{$edellinen_vuosi_loppu}', tilausrivi.rivihinta, 0))) tanvuodenalustamyynti
+					FROM lasku USE INDEX ({$use_index})
+					JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus {$rivilisa})
+					WHERE lasku.yhtio 	   = '{$kukarow['yhtio']}'
 					and lasku.tila    	   = 'U'
 					and lasku.alatila 	   = 'X'
 					{$liitostunnuslisa}

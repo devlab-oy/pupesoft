@@ -475,7 +475,7 @@
 								$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);
 								$osto_rivi_kulu_alv = $laskun_alv;
 
-								if ($charge_description == 'freight costs') {
+								if ($charge_description == 'freight costs' or $charge_code == 'freightcharges') {
 									$ei_oteta_kulua_pois = true;
 								}
 							}

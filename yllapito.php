@@ -19,7 +19,7 @@
 		require ("inc/parametrit.inc");
 	}
 
-	if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote") {
+	if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana") {
 		enable_ajax();
 	}
 

@@ -249,7 +249,10 @@
 		$resultkieli = pupe_query($querykieli);
 		$asrow = mysql_fetch_array($resultkieli);
 
-		$querykieli = "	SELECT kieli, email
+		$lasku_email = "";
+		if ($mista == 'asiakas') $lasku_email = ", lasku_email";
+
+		$querykieli = "	SELECT kieli, email $lasku_email
 						FROM $mista
 						WHERE
 						tunnus = '$asrow[liitostunnus]'
@@ -316,13 +319,21 @@
 			if (mysql_num_rows($suuntalavat_res) == 0) continue;
 		}
 
+		if ($toim == "PROFORMA") {
+			echo "<tr><th>",t("Tulosta myös tullinimike ja alkuperämaa")."</th>";
+			echo "<td><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
+		}
+
 		echo "<tr><th>".t("Valitse")." '".t("$tulostin")."' ".t("tulostuspaikka")."</th>";
 		echo "<td><select name='komento[$tulostin]'>";
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 		echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 
-		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS') and $asrow['email'] != '') {
+		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'LASKU') and $asrow['email'] != '') {
 			echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
+			if ($toim == 'LASKU' and trim($asrow['lasku_email']) != '') {
+				echo "<option value='asiakasemail$asrow[lasku_email]'>".t("Asiakkaan laskutussähköpostiin").": $asrow[lasku_email]</option>";
+			}
 		}
 
 		if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and (preg_match("/(excel|wabco)/", $editoimrow['edi_kuvaus']) or ($editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != ''))) {

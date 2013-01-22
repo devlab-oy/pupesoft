@@ -123,6 +123,8 @@
 	//tuotteen varastostatus
 	if ($tee == 'VALMIS') {
 
+		$inven_laji_tilino = t_avainsana('INVEN_LAJI', '', "and selite = '{$inven_laji}'", '', '', "selitetark_2");
+
 		$virhe = 0;
 
 		// Inventoidaan EAN-koodilla
@@ -653,7 +655,7 @@
 								$laskuid = mysql_insert_id($link);
 
 								if ($yhtiorow["varastonmuutos_inventointi"] != "") {
-									$varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
+									$varastonmuutos_tili = $inven_laji_tilino != "" ? $inven_laji_tilino : $yhtiorow["varastonmuutos_inventointi"];
 								}
 								else {
 									$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
@@ -1557,5 +1559,3 @@
 	if ($mobiili != "YES") {
 		require ("inc/footer.inc");
 	}
-
-?>

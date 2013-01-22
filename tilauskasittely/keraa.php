@@ -1189,41 +1189,25 @@
 								$keraysera_update_res = pupe_query($query_upd);
 							}
 
-							// päivitetään tuoteperhen lapset kerätyiksi jos niillä on ohita_keräys täppä päällä
-							$query_chk = "	SELECT perheid, tuoteno, varattu, otunnus
-											FROM tilausrivi
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tunnus  = '{$apui}'
-											AND perheid = '{$apui}'";
-							$perheid_chk_res = pupe_query($query_chk);
-
-							if (mysql_num_rows($perheid_chk_res) > 0) {
-
-								$perheid_chk_row = mysql_fetch_assoc($perheid_chk_res);
-
-								// haetaan lapset, ei oteta isää huomioon
-								$query_lapset = "	SELECT tunnus, tuoteno, varattu
+							if (trim($maara[$apui]) != '') {
+								// haetaan lapset joilla on ohita_kerays täpätty ja tehdään poikkeama myös niille
+								$query_lapset = "	SELECT tilausrivi.tunnus, tilausrivi.varattu
 													FROM tilausrivi
-													WHERE yhtio = '{$kukarow['yhtio']}'
-													AND otunnus = '{$perheid_chk_row['otunnus']}'
-													AND perheid = '{$perheid_chk_row['perheid']}'
-													AND tunnus != '{$apui}'";
+													JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.ohita_kerays != '')
+													WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+													AND tilausrivi.otunnus = '{$tilrivirow['otunnus']}'
+													AND tilausrivi.perheid = '{$tilrivirow['perheid']}'
+													AND tilausrivi.tunnus != '{$apui}'";
 								$lapset_chk_res = pupe_query($query_lapset);
 
 								while ($lapset_chk_row = mysql_fetch_assoc($lapset_chk_res)) {
 
-									$query_ohita = "	SELECT ohita_kerays, kerroin
-														FROM tuoteperhe
-														WHERE yhtio 	= '{$kukarow['yhtio']}'
-														AND tyyppi 		= 'P'
-														AND isatuoteno 	= '{$perheid_chk_row['tuoteno']}'
-														AND tuoteno 	= '{$lapset_chk_row['tuoteno']}'";
-									$ohita_chk_res = pupe_query($query_ohita);
-									$ohita_chk_row = mysql_fetch_assoc($ohita_chk_res);
-
-									// Pitääkö lapsen kerättymäärää muuttaa? (lapsi tulee myös $kerivi[] arrayssa, joten se merkataan joka tapauksessa kerätyksi, mutta muutetaan tässä määrä jos on tarvis)
-									if ($ohita_chk_row['ohita_kerays'] != '' and round($lapset_chk_row["varattu"], 2) != round($perheid_chk_row["varattu"] * $ohita_chk_row["kerroin"], 2)) {
-										$maara[$lapset_chk_row['tunnus']] = round($perheid_chk_row["varattu"] * $ohita_chk_row["kerroin"], 2);
+									if (round($lapset_chk_row["varattu"], 2) != round($maara[$apui] * ($lapset_chk_row["varattu"]/$tilrivirow["varattu"]), 2)) {
+										$query_upd = "	UPDATE tilausrivi
+														SET varattu = round({$maara[$apui]} * ({$lapset_chk_row["varattu"]}/{$tilrivirow["varattu"]}), 2)
+														WHERE yhtio = '{$kukarow['yhtio']}'
+														AND tunnus 	= '{$lapset_chk_row['tunnus']}'";
+										$keraysera_update_res = pupe_query($query_upd);
 									}
 								}
 							}
@@ -2547,8 +2531,10 @@
 						lasku.jtkielto,
 						$select_lisa
 						$sorttauskentta,
-						if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
+						if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
+						tilausrivin_lisatiedot.ohita_kerays
 						FROM tilausrivi
+						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 						JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 						JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 						$asiakas_join_lisa
@@ -2814,14 +2800,20 @@
 							if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 								echo "<span id='maaran_paivitys_{$row['tunnus']}'></span>";
 
-								$query = "	SELECT sum(kpl) kpl
-											FROM kerayserat
-											WHERE yhtio 	= '{$kukarow['yhtio']}'
-											AND nro 		= '$id'
-											AND tilausrivi 	= '{$row['tunnus']}'
-											ORDER BY pakkausnro ASC";
-								$keraysera_res = pupe_query($query);
-								$keraysera_row = mysql_fetch_assoc($keraysera_res);
+								if ($row['ohita_kerays'] != "") {
+									// ohita_kerays tuotteet ei mee keräyseriin
+									$keraysera_row['kpl'] = $row["varattu"];
+								}
+								else {
+									$query = "	SELECT sum(kpl) kpl
+												FROM kerayserat
+												WHERE yhtio 	= '{$kukarow['yhtio']}'
+												AND nro 		= '$id'
+												AND tilausrivi 	= '{$row['tunnus']}'
+												ORDER BY pakkausnro ASC";
+									$keraysera_res = pupe_query($query);
+									$keraysera_row = mysql_fetch_assoc($keraysera_res);
+								}
 
 								// Katotaan jo tässä vaiheessa onko erässä eri määrä kuin tilausrivillä.
 								// Määrä voi olla eri, koska keräyseriin menee vain kokonaislukuja ja tilausrivillä voi olla desimaalilukuja
@@ -3107,7 +3099,8 @@
 					if ($lp_varasto == 0) {
 						$query = "	SELECT *
 									from varastopaikat
-									where yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+									where yhtio = '$kukarow[yhtio]' 
+									AND tyyppi != 'P'
 									order by alkuhyllyalue,alkuhyllynro
 									limit 1";
 					}

@@ -7,8 +7,6 @@
 
 	require "inc/parametrit.inc";
 
-	enable_ajax();
-
 	if (!isset($tee))		$tee = "";
 	if (!isset($tyyppi))	$tyyppi = "";
 	if (!isset($tiliote))	$tiliote = "";
@@ -18,6 +16,8 @@
 		readfile("/tmp/".$tmpfilenimi);
 		exit;
 	}
+
+	enable_ajax();
 
 	if ($tee == 'T' and (int) $kuitattava_tiliotedata_tunnus > 0) {
 
@@ -188,7 +188,7 @@
 				}
 				else {
 					ifd.show();
-					ifd.html(\"<div style='float:right;'><a href=\\\"javascript:suljedivi('\"+tunnus+\"');\\\">".t("Piilota")." <img src='{$palvelin2}pics/lullacons/stop.png'></a></div><iframe id='ifr_\"+tunnus+\"' src='\"+url+\"' style='width:100%; height: 600px; border: 1px; display: block;'></iFrame>\");
+					ifd.html(\"<div style='float:right;'><a href=\\\"javascript:suljedivi('\"+tunnus+\"');\\\">".t("Piilota")." <img src='{$palvelin2}pics/lullacons/stop.png'></a></div><iframe id='ifr_\"+tunnus+\"' src='\"+url+\"' style='width:100%; height: 800px; border: 1px; display: block;'></iFrame>\");
 				}
 			}
 

@@ -1098,10 +1098,20 @@
 				$btcheck2 = "SELECTED";
 			}
 
+			if ($toim == "MYYJA") {
+				$toim_selite = t("Myyjän");
+			}
+			elseif ($toim == "TOIMITTAJA") {
+				$toim_selite = t("Toimittajan");
+			}
+			else {
+				$toim_selite = t("Asiakkaan");
+			}
+
 			echo "<select name='osastotryttain' onchange='submit()';>";
-			echo "<option value = ''>".t("Asiakkaan kokonaistavoite")."</option>";
-			echo "<option value = 'tuoteryhmittain' $btcheck1>".t("Asiakkaan tuoteryhmäkohtainen tavoite")."</option>";
-			echo "<option value = 'osastoittain' $btcheck2>".t("Asiakkaan osastokohtainen tavoite")."</option>";
+			echo "<option value = ''>",t("{$toim_selite} kokonaistavoite"),"</option>";
+			echo "<option value = 'tuoteryhmittain' {$btcheck1}>",t("{$toim_selite} tuoteryhmäkohtainen tavoite"),"</option>";
+			echo "<option value = 'osastoittain' {$btcheck2}>",t("{$toim_selite} osastokohtainen tavoite"),"</option>";
 			echo "</select>";
 
 			echo "</td></tr>";

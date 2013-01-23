@@ -507,6 +507,8 @@
 			echo "<option value='asbury' {$sel_asbury}>",t("Asiakas-Tuoteryhm‰tavoitteet"),"</option>";
 			echo "<option value='tubu' 	 {$sel_tubu}>",t("Tuotetavoitteet"),"</option>";
 			echo "<option value='mybu' 	 {$sel_mybu}>",t("Myyj‰tavoitteet"),"</option>";
+			echo "<option value='mybuos' {$sel_mybuos}>",t("Myyj‰-Osastotavoitteet"),"</option>";
+			echo "<option value='mybury' {$sel_mybury}>",t("Myyj‰-Tuoteryhm‰tavoitteet"),"</option>";
 			echo "</select></td>
 			</tr>";
 
@@ -1422,16 +1424,22 @@
 					}
 				}
 
-				if ($vertailubu == "mybu") {
+				if ($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") {
 					// N‰ytet‰‰n myyj‰tavoitteet:
 
 					//siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
-					if ($tuotegroups > 0 or $turyhgroups > 0 or $tuosagroups > 0 or $laskugroups > 0 or $muutgroups > 0) {
+					if ($asiakasgroups > 0 or $tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0) {
 						echo "<font class='error'>".t("VIRHE: Muita kuin myyjiin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n myyj‰tavoitteet")."!</font><br>";
 						$tee = '';
 					}
 
-					//siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
+					// ei voi groupata muiden kuin myyjien tietojen mukaan (paitsi tuoteryhm‰n mukaan kun valitaan mybury)
+					if ($vertailubu == "mybu" and ($turyhgroups > 0 or $tuosagroups > 0)) {
+						echo "<font class='error'>".t("VIRHE: Muita kuin myyjiin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n myyj‰tavoitteet")."!</font><br>";
+						$tee = '';
+					}
+
+					// siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
 					if ($myyjagroups > 1) {
 						echo "<font class='error'>".t("VIRHE: Valitse korjeintaan yksi myyjiin liittyv‰ ryhmittely")."!</font><br>";
 						$tee = '';
@@ -1901,14 +1909,16 @@
 								}
 							}
 
-							if (isset($vertailubu) and (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or ($vertailubu == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "")
-								or ($vertailubu == "mybu" and $myyjagroups > 0 and ((isset($row["asiakasmyyj‰"]) and $row["asiakasmyyj‰"] != "") or (isset($row["tuotemyyj‰"]) and $row["tuotemyyj‰"] != "") or (isset($row["myyj‰"]) and $row["myyj‰"] != "")))) {
+							if (isset($vertailubu) and
+								(($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or
+								($vertailubu  == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "") or
+								(($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") and $myyjagroups > 0 and ((isset($row["asiakasmyyj‰"]) and $row["asiakasmyyj‰"] != "") or (isset($row["tuotemyyj‰"]) and $row["tuotemyyj‰"] != "") or (isset($row["myyj‰"]) and $row["myyj‰"] != "")))) {
 
 								if ($vertailubu == "tubu") {
 									$budj_taulu = "budjetti_tuote";
 									$bulisa = " and tuoteno	in ({$row['tuotelista']}) ";
 								}
-								elseif ($vertailubu == "mybu") {
+								elseif ($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") {
 
 									$tunnus_lisa = "";
 
@@ -1924,6 +1934,22 @@
 
 									$budj_taulu = "budjetti_myyja";
 									$bulisa = " and myyjan_tunnus in ({$tunnus_lisa}) ";
+
+									if ($vertailubu == "mybuos" and $tuosagroups > 0) {
+										$bulisa .= " and osasto = '{$row['osasto']}' ";
+									}
+									elseif ($vertailubu == "mybuos") {
+										$bulisa .= " and osasto != '' ";
+									}
+									elseif ($vertailubu == "mybury" and $turyhgroups > 0) {
+										$bulisa .= " and try = '{$row['tuoteryhm‰']}' ";
+									}
+									elseif ($vertailubu == "mybury") {
+										$bulisa .= " and try != '' ";
+									}
+									else {
+										$bulisa .= " and try = '' and osasto = '' ";
+									}
 								}
 								else {
 									$budj_taulu = "budjetti_asiakas";

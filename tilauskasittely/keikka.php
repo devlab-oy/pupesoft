@@ -1169,9 +1169,19 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 			// tehd‰‰n pop-up divi jos keikalla on kommentti...
 			if ($row["comments"] != "") {
+
+				$query = "	SELECT nimi
+							FROM kuka
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND kuka = '{$row['laatija']}'";
+				$kuka_chk_res = pupe_query($query);
+				$kuka_chk_row = mysql_fetch_assoc($kuka_chk_res);
+
 				echo "<td valign='top' class='tooltip' id='$row[laskunro]'>";
 				echo "<div id='div_$row[laskunro]' class='popup' style='width:500px;'>";
 				echo t("Saapuminen").": $row[laskunro] / $row[nimi]<br><br>";
+				echo t("Laatija"),": {$kuka_chk_row['nimi']}<br />";
+				echo t("Luontiaika"),": ",tv1dateconv($row['luontiaika'], "pitk‰"),"<br /><br />";
 				echo $row["comments"];
 				echo "</div>";
 				echo "<img src='$palvelin2/pics/lullacons/info.png'></td>";

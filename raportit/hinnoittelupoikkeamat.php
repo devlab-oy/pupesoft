@@ -103,7 +103,7 @@
 			$myyjalisa = $myyja != 0 ? "AND lasku.myyja = '{$myyja}'" : "";
 
 			// Haetaan laskutetut tilaukset
-			$query = "	SELECT lasku.*, IF(kuka.nimi = '', '".t("Ei myyjää")."', kuka.nimi) AS myyja, TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) AS nimi
+			$query = "	SELECT lasku.*, IFNULL(kuka.nimi, '".t("Ei myyjää")."') AS myyja, TRIM(CONCAT(lasku.ytunnus, ' ', lasku.nimi, ' ', lasku.nimitark)) AS nimi
 						FROM lasku
 						LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -194,20 +194,11 @@
 
 					if ($ero == 0) continue;
 
-					if ($x > 1) {
-						$data[$i]['myyja'] = '';
-						$data[$i]['tunnus'] = '';
-						$data[$i]['num_rows'] = '';
-						$data[$i]['nimi'] = '';
-						$data[$i]['sisviesti3'] = '';
-					}
-					else {
-						$data[$i]['myyja'] = $laskurow['myyja'];
-						$data[$i]['tunnus'] = $laskurow['tunnus'];
-						$data[$i]['num_rows'] = $num_rows;
-						$data[$i]['nimi'] = $laskurow['nimi'];
-						$data[$i]['sisviesti3'] = $laskurow['sisviesti3'];
-					}
+					$data[$i]['myyjä'] = $laskurow['myyja'];
+					$data[$i]['tilaus'] = $laskurow['tunnus'];
+					$data[$i]['rivejä'] = $num_rows;
+					$data[$i]['asiakas'] = $laskurow['nimi'];
+					$data[$i]['sisäinen_kommentti'] = $laskurow['sisviesti3'];
 
 					$eropros = $tilausrivirow['hinta'] == 0 ? 100 : abs(round((($ero) / $tilausrivirow['hinta']) * 100, 2));
 
@@ -217,7 +208,7 @@
 					$data[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
 					$data[$i]['nimitys'] = $tilausrivirow['nimitys'];
 					$data[$i]['kpl'] = $tilausrivirow['kpl'];
-					$data[$i]['lis_hinta'] = $lis_hinta;
+					$data[$i]['koneen_hinta'] = $lis_hinta;
 					$data[$i]['hinta'] = $tilausrivirow['hinta'];
 					$data[$i]['eropros'] = $eropros;
 					$data[$i]['ero'] = $ero;
@@ -233,14 +224,32 @@
 
 				echo "<br /><br /><table><tr>";
 
-				foreach(array_keys($data[0]) AS $key) {
-					$otsikko = ucfirst(t($key));
+				$otsikot = "";
 
+				foreach(array_keys($data[0]) AS $key) {
 					$worksheet->writeString($excelrivi, $excelsarake, $otsikko, $format_bold);
 					$excelsarake++;
 
-					echo "<th>{$otsikko}</th>";
+					switch($key) {
+						case 'eropros':
+							$otsikko = "ero %";
+							break;
+						case 'sisäinen_kommentti':
+							$otsikko = "sisäinen kommentti";
+							break;
+						case 'koneen_hinta':
+							$otsikko = "koneen hinta";
+							break;
+						default:
+							$otsikko = $key;
+					}
+
+					$otsikko = ucfirst(t($otsikko));
+
+					$otsikot .= "<th>{$otsikko}</th>";
 				}
+
+				echo $otsikot;
 
 				echo "</tr>";
 
@@ -251,17 +260,30 @@
 				$total_user = 0;
 				$total = 0;
 
+				$ed_tilaus = 0;
+				$tilaus = 0;
+				$odd = '';
+
 				foreach($data as $set) {
 
 					echo "<tr>";
 
+					if ($set['tilaus'] != $ed_tilaus and $ed_tilaus != 0) {
+						$odd = $odd == '' ? 'spec' : '';
+					}
+
+					$ed_tilaus = $set['tilaus'];
+
 					foreach($set as $k => $v) {
 
-						if ($k == 'myyja' and $user != '' and $v != '' and $user != $v) {
+						if ($k == 'myyjä' and $user != '' and $v != '' and $user != $v) {
 							echo "<tr>";
 							echo "<th>{$user} ",t("Yhteensä"),"</th>";
 							echo "<th colspan='11' style='text-align: right;'>{$total_user}</th>";
 							echo "</tr>";
+
+							echo "<tr><td class='back' colspan='12'>&nbsp;</tr>";
+							echo "<tr>{$otsikot}</tr>";
 
 							$total_user = 0;
 
@@ -271,9 +293,9 @@
 						$worksheet->write($excelrivi, $excelsarake, $v);
 						$excelsarake++;
 
-						echo "<td>{$v}</td>";
+						echo "<td class='{$odd}'>{$v}</td>";
 
-						if ($k == 'myyja' and $v != '') $user = $v;
+						if ($k == 'myyjä' and $v != '') $user = $v;
 						if ($k == 'ero' and $user != '') {
 							$total_user += $v;
 							$total += $v;
@@ -285,6 +307,11 @@
 					$excelsarake = 0;
 					$excelrivi++;
 				}
+
+				echo "<tr>";
+				echo "<th>{$user} ",t("Yhteensä"),"</th>";
+				echo "<th colspan='11' style='text-align: right;'>{$total_user}</th>";
+				echo "</tr>";
 
 				echo "<tr>";
 				echo "<th>",t("Kaikki yhteensä"),"</th>";

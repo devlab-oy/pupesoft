@@ -604,8 +604,12 @@
 				$karajaus = $yhtiorow["keraysaikarajaus"];
 			}
 
+			// jos käyttössä KAIKKILISTAT -vaihtoehto
+			if ($toim == 'KAIKKILISTAT') {
+				$tuvarasto 	= "KAIKKI";
+			}
 			// jos käyttäjällä on oletusvarasto, valitaan se
-			if ($kukarow['oletus_varasto'] != 0) {
+			elseif ($kukarow['oletus_varasto'] != 0) {
 				$tuvarasto = $kukarow['oletus_varasto'];
 			}
 			//	Varastorajaus jos käyttäjällä on joku varasto valittuna

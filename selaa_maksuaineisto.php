@@ -233,6 +233,7 @@
 					lasku.mapvm,
 					lasku.erpcm,
 					yriti.nimi maksu_tili,
+					yriti.iban yriti_iban,
 					date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy,
 					round(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) poimittusumma_eur,
 					round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) summa_eur
@@ -264,7 +265,7 @@
 			echo "<th>",t("Maksuaineisto"),"</th>";
 			echo "<td>";
 
-			if (strtoupper($yhtiorow['maa']) == 'EE') {
+			if (strtoupper($yhtiorow['maa']) == 'EE' and substr($row['yriti_iban'], 0, 2) == "EE") {
 				echo "EESEPA-$kukarow[yhtio]-".$row['popvm_dmy'].".xml";
 			}
 			else {

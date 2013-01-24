@@ -324,7 +324,7 @@
 							where yhtio = '$kukarow[yhtio]'
 							and tunnus  = '{$row['tunnus']}'
 							and vienti  = 'E'
-							and chn     = '020'
+							and chn in ('020', '030')
 							and maa_maara != ''
 							and kauppatapahtuman_luonne > 0
 							and kuljetusmuoto != ''";
@@ -931,7 +931,7 @@
 								where yhtio = '$kukarow[yhtio]'
 								and tunnus in ($otunnukset)
 								and vienti = 'E'
-								and chn = '020'
+								and chn in ('020', '030')
 								and maa_maara != ''
 								and kauppatapahtuman_luonne > 0
 								and kuljetusmuoto != ''";

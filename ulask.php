@@ -177,7 +177,7 @@ if ($tee == 'poista_lasku') {
 
 	// Sähköpostin lähetykseen parametrit
 	$parametri = array( "to" 			=> $kukarow["eposti"],
-						"cc" 			=> "",
+						"cc" 			=> $yhtiorow["talhal_email"],
 						"subject"		=> t("Poistettu lasku"),
 						"ctype"			=> "text",
 						"body"			=> t("Liitteenä Pupesoftista poistettu skannattu lasku."),

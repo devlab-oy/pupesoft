@@ -47,7 +47,8 @@ if ($tee == "UUSI") {
 				FROM toimi
 				JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi)
 				WHERE toimi.yhtio = '$kukarow[yhtio]'
-				and toimi.nimi = '$kayttaja_tsk'";
+				and toimi.nimi = '$kayttaja_tsk'
+				and toimi.tyyppi = 'K'";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 1) {
@@ -79,11 +80,35 @@ if ($tee == "UUSI") {
 				and tuote.tuoteno like 'PR%'
 				and tuote.status != 'P'
 				and tuote.tilino != ''
+				and tuote.vienti != '{$yhtiorow['maa']}'
 				LIMIT 1";
 	$result1 = pupe_query($query);
 
 	if (mysql_num_rows($result1) == 0) {
-		echo "<font class='error'>".t("VIRHE: Viranomaistuotteet puuttuu")."!</font>";
+		echo "<font class='error'>".t("VIRHE: Ulkomaanpäivärahat puuttuu")."!</font>";
+		$tee = "";
+	}
+
+	$query = "	SELECT tuote.tuoteno, tuote.nimitys, tuote.myyntihinta, tuote.malli, tuote.myymalahinta
+				FROM tuote
+				JOIN tili ON tili.yhtio = tuote.yhtio and tili.tilino = tuote.tilino
+				WHERE tuote.yhtio = '$kukarow[yhtio]'
+				and tuote.tuotetyyppi = 'A'
+				and tuote.tuoteno like 'PR%'
+				and tuote.status != 'P'
+				and tuote.tilino != ''
+				and tuote.vienti  = '{$yhtiorow['maa']}'
+				order by tuote.tunnus desc
+				LIMIT 1";
+	$result1 = pupe_query($query);
+	$vtrow = mysql_fetch_assoc($result1);
+
+	if (mysql_num_rows($result1) == 0) {
+		echo "<font class='error'>".t("VIRHE: Kotimaanpäivärahat puuttuu")."!</font>";
+		$tee = "";
+	}
+	elseif ($vtrow['nimitys'] == '' or $vtrow['myyntihinta'] == 0 or $vtrow['malli'] == '' or $vtrow['myymalahinta'] == 0) {
+		echo "<font class='error'>".t("VIRHE: Kotimaanpäivärahan tiedot puutteelliset")."!</font>";
 		$tee = "";
 	}
 }
@@ -462,7 +487,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
 
 	if ($row['vienti'] == 'FI') {
 		if ($ilmaiset_lounaat >= 1) {
-			if ($row['var'] == 1) {
+			if ($row['var'] == 1 and $ilmaiset_lounaat >= 2) {
 				//kotimaan kokopäiväraha ----> kotimaan puolitettu kokopäiväraha
 				$rivihinta = $row['kpl'] * ($row['myyntihinta'] / 2);
 				$tilausrivi_uusi_hinta = ($row['myyntihinta'] / 2);
@@ -2097,6 +2122,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 	$hinta_array   = array();
 	$nimitys_array = array();
 	$varri_array   = array();
+	$selite_array  = array();
 	$errori 	   = "";
 
 	if ($tyyppi == "A") {
@@ -2182,7 +2208,6 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 			$puolipaivat = 0;
 			$ylitunnit 	 = 0;
 			$tunnit 	 = 0;
-			$selite 	 = "";
 			$varri		 = "1"; // Kotimaan kokopäiväraha oletuksena
 
 			// Montako tuntia on oltu matkalla?
@@ -2227,8 +2252,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 					$hinta_array[1]	  = $trow['myymalahinta'];
 					$nimitys_array[1] = $trow['malli'];
 					$varri_array[1]   = "2";	 // Kotimaan osapäiväraha
-
-					$selite .= "<br>$tuoteno - {$trow['malli']} $osapaivat kpl á ".(float) round($trow['myymalahinta'], 2);
+					$selite_array[1]  = "$tuoteno - {$trow['malli']} á ".(float) round($trow['myymalahinta'], 2);
 				}
 			}
 			// Ulkomaanmatkat
@@ -2268,8 +2292,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 					$hinta_array[1]	  = round($trow['myyntihinta']/2, 2);
 					$nimitys_array[1] = $trow['nimitys'] . " " .t("Puolitettu korvaus");
 					$varri_array[1]   = "6";	 // Ulkomaan puolipäiväraha
-
-					$selite .= "<br>$tuoteno - {$nimitys_array[1]} $puolipaivat kpl á ".(float) $hinta_array[1];
+					$selite_array[1]  = "$tuoteno - {$nimitys_array[1]} á ".(float) $hinta_array[1];
 				}
 				elseif ($ylitunnit >= 10) {
 					/*
@@ -2293,8 +2316,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 					$hinta_array[1]	  = round($trow['myyntihinta']/2, 2);
 					$nimitys_array[1] = $trow['nimitys'] . " " .t("Puolitettu korvaus");
 					$varri_array[1]   = "6";	 // Ulkomaan puolipäiväraha
-
-					$selite .= "<br>$tuoteno - {$nimitys_array[1]} $puolipaivat kpl á ".(float) $hinta_array[1];
+					$selite_array[1] = "$tuoteno - {$nimitys_array[1]} á ".(float) $hinta_array[1];
 				}
 			}
 
@@ -2309,11 +2331,11 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 				$hinta_array[0]   = $trow["myyntihinta"];
 				$nimitys_array[0] = $trow["nimitys"];
 				$varri_array[0]	  = $varri;
-
-				$selite = trim("$trow[tuoteno] - $trow[nimitys] $paivat kpl á ".(float) $trow["myyntihinta"].$selite);
+				$selite_array[0]  = trim("$trow[tuoteno] - $trow[nimitys] á ".(float) $trow["myyntihinta"]);
 			}
 
-			$selite .= "<br>Ajalla: $alkupp.$alkukk.$alkuvv klo. $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv klo. $loppuhh:$loppumm";
+			$selite_array[0] .= "<br>".t("Ajalla").": $alkupp.$alkukk.$alkuvv ".t("klo").". $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv ".t("klo").". $loppuhh:$loppumm";
+			$selite_array[1] .= "<br>".t("Ajalla").": $alkupp.$alkukk.$alkuvv ".t("klo").". $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv ".t("klo").". $loppuhh:$loppumm";
 		}
 		else {
 			$errori .= "<font class='error'>".t("VIRHE: Päivärahalle on annettava alku ja loppuaika")."</font><br>";
@@ -2343,15 +2365,15 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 		$hinta_array[0]	  = $hinta;
 		$nimitys_array[0] = $trow["nimitys"];
 		$varri_array[0]	  = 0;
-
-		$selite = "$trow[tuoteno] - $trow[nimitys] $kpl kpl á ".(float) $hinta;
+		$selite_array[0]  = "$trow[tuoteno] - $trow[nimitys] $kpl kpl á ".(float) $hinta;
 	}
 
 	//	poistetan return carriage ja newline -> <br>
 	$kommentti = str_replace("\n","<br>", str_replace("\r","", $kommentti));
 
 	if ($kommentti != "") {
-		$selite .= "<br><i>$kommentti</i>";
+		$selite_array[0] .= "<br><i>$kommentti</i>";
+		$selite_array[1] .= "<br><i>$kommentti</i>";
 	}
 
 	//	Lisätään annetut rivit
@@ -2444,8 +2466,13 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 						$ilmaiset_lounaat = tarkista_loytyyko_paivalle_matkalasku($_alkuaika, $_loppuaika, $tilausnumero);
 
 			 			if ($trow["vienti"] == 'FI') {
-			 		        if ($ilmaiset_lounaat >= 1) {
-			 		        	$var 	 = 3;
+			 		        if ($var == 1 and $ilmaiset_lounaat >= 2) {
+								$var 	 = 3;
+			 		        	$hinta 	 = $hinta / 2;
+			 		        	$nimitys = $nimitys.' '.t("Puolitettu korvaus");
+							}
+							elseif ($var == 2 and $ilmaiset_lounaat >= 1) {
+			 		        	$var 	 = 4;
 			 		        	$hinta 	 = $hinta / 2;
 			 		        	$nimitys = $nimitys.' '.t("Puolitettu korvaus");
 			 		        }
@@ -2551,7 +2578,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 								tapvm 		= '$laskurow[tapvm]',
 								summa 		= '$rivihinta',
 								vero 		= '$vero',
-								selite 		= '".mysql_real_escape_string($nimitys)."',
+								selite 		= '".mysql_real_escape_string($selite_array[$indeksi])."',
 								lukko 		= '',
 								tosite 		= '$tositenro',
 								laatija 	= '$kukarow[kuka]',
@@ -2571,7 +2598,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 									tapvm 		= '$laskurow[tapvm]',
 									summa 		= '$alv',
 									vero 		= 0,
-									selite 		= '".mysql_real_escape_string($selite)."',
+									selite 		= '".mysql_real_escape_string($selite_array[$indeksi])."',
 									lukko 		= '1',
 									laatija 	= '$kukarow[kuka]',
 									laadittu 	= now(),
@@ -2827,13 +2854,13 @@ function erittele_rivit($tilausnumero) {
 					$rivihinta = (float) $kpl * (float) $hinta;
 
 					if ($rtuoteno[$i]["laskutettuaika"] != "") {
-						$kommentti .= "Tapahtuma-aika: ".preg_replace("/([0-9]{4})([0-9]{2})([0-9]{2})/", "\$3.\$2. \$1", $rtuoteno[$i]["laskutettuaika"]);
+						$kommentti .= t("Tapahtuma-aika").": ".preg_replace("/([0-9]{4})([0-9]{2})([0-9]{2})/", "\$3.\$2. \$1", $rtuoteno[$i]["laskutettuaika"]);
 					}
 
-					$kommentti .= "<br>Tapahtuman selite: ".$rtuoteno[$i]["riviinfo"];
+					$kommentti .= "<br>".t("Tapahtuman selite").": ".$rtuoteno[$i]["riviinfo"];
 
 					if (preg_match("/([A-Z]{3})\s*([0-9\.,]*)/", $rtuoteno[$i]["riviviite"], $match)) {
-						$kommentti .= "<br>Alkupeärinen summa: $match[2] $match[1] ($hinta $yhtiorow[valkoodi])";
+						$kommentti .= "<br>".t("Alkupeärinen summa").": $match[2] $match[1] ($hinta $yhtiorow[valkoodi])";
 					}
 
 					$kommentti = preg_replace("/\.{2,}/", "", $kommentti);

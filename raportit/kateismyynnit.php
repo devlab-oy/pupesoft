@@ -326,10 +326,7 @@
 
 		$tasmays_query = "	SELECT group_concat(distinct lasku.tunnus) ltunnukset
 							FROM lasku
-							JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
-							AND tiliointi.ltunnus = lasku.tunnus
-							AND tiliointi.selite LIKE '$row[nimi] %'
-							AND tiliointi.korjattu = '')
+							JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.selite LIKE '$row[nimi] %' AND tiliointi.korjattu = '')
 							WHERE lasku.yhtio 	= '$kukarow[yhtio]'
 							AND lasku.tila 		= 'X'
 							AND lasku.tapvm 	= '$vv-$kk-$pp'";
@@ -966,21 +963,21 @@
 		if ($ulko == 'ULKO') {
 			if ($koti == 'KOTI') {
 				$lisa .= ",";
-				}
+			}
 			$lisa .= "'K','E'";
 		}
 		$lisa .= ") ";
 
 		if (isset($tasmays) and $tasmays != '') {
 			//ylikirjotetaan koko lisä, koska ei saa olla muita rajauksia
-			$lisa = " and lasku.tapvm = '$vv-$kk-$pp'";
+			$lisa = " and lasku.mapvm = '$vv-$kk-$pp'";
 		}
 		else {
 			if ($vva == $vvl and $kka == $kkl and $ppa == $ppl) {
-				$lisa .= " and lasku.tapvm = '$vva-$kka-$ppa'";
+				$lisa .= " and lasku.mapvm = '$vva-$kka-$ppa' ";
 			}
 			else {
-				$lisa .= " and lasku.tapvm >= '$vva-$kka-$ppa' and lasku.tapvm <= '$vvl-$kkl-$ppl'";
+				$lisa .= " and lasku.mapvm >= '$vva-$kka-$ppa' and lasku.mapvm <= '$vvl-$kkl-$ppl' ";
 			}
 		}
 
@@ -989,7 +986,7 @@
 		if (count($kassakone) > 0) {
 			$kassat_temp = "";
 
-			foreach($kassakone as $var) {
+			foreach ($kassakone as $var) {
 				$kassat_temp .= "'".$var."',";
 			}
 
@@ -1024,42 +1021,44 @@
 		//jos monta kassalipasta niin tungetaan tämä queryyn.
 		if (count($kassakone) > 1 and isset($tasmays) and $tasmays != '') {
 			$selecti = "if(tiliointi.tilino = kassalipas.kassa OR tiliointi.tilino = '$yhtiorow[kassa]', concat(kassalipas.nimi, ' kateinen'),
-				if(tiliointi.tilino = kassalipas.pankkikortti OR tiliointi.tilino = '$yhtiorow[pankkikortti]', 'Pankkikortti',
-				if(tiliointi.tilino = kassalipas.luottokortti OR tiliointi.tilino = '$yhtiorow[luottokortti]', 'Luottokortti', 'Muut'))) tyyppi, ";
+						if(tiliointi.tilino = kassalipas.pankkikortti OR tiliointi.tilino = '$yhtiorow[pankkikortti]', 'Pankkikortti',
+						if(tiliointi.tilino = kassalipas.luottokortti OR tiliointi.tilino = '$yhtiorow[luottokortti]', 'Luottokortti', 'Muut'))) tyyppi, ";
 		}
 		else {
 			$selecti = "if(tiliointi.tilino = kassalipas.kassa OR tiliointi.tilino = '$yhtiorow[kassa]', 'Kateinen',
-				if(tiliointi.tilino = kassalipas.pankkikortti OR tiliointi.tilino = '$yhtiorow[pankkikortti]', 'Pankkikortti',
-				if(tiliointi.tilino = kassalipas.luottokortti OR tiliointi.tilino = '$yhtiorow[luottokortti]', 'Luottokortti', 'Muut'))) tyyppi, ";
+						if(tiliointi.tilino = kassalipas.pankkikortti OR tiliointi.tilino = '$yhtiorow[pankkikortti]', 'Pankkikortti',
+						if(tiliointi.tilino = kassalipas.luottokortti OR tiliointi.tilino = '$yhtiorow[luottokortti]', 'Luottokortti', 'Muut'))) tyyppi, ";
 		}
 
 		//Haetaan käteislaskut
 		$query = "	SELECT
-					$selecti
-					if(lasku.kassalipas = '', 'Muut', lasku.kassalipas) kassa,
-					if(ifnull(kassalipas.nimi, '') = '', 'Muut', kassalipas.nimi) kassanimi,
+					{$selecti}
+					IF(lasku.kassalipas = '', 'Muut', lasku.kassalipas) kassa,
+					IF(IFNULL(kassalipas.nimi, '') = '', 'Muut', kassalipas.nimi) kassanimi,
 					tiliointi.tilino,
-					tiliointi.summa tilsumma,
 					lasku.nimi,
 					lasku.ytunnus,
 					lasku.laskunro,
 					lasku.tunnus,
-					lasku.summa-lasku.pyoristys summa,
 					lasku.laskutettu,
-					lasku.tapvm,
+					lasku.mapvm,
 					lasku.kassalipas,
 					tiliointi.ltunnus,
-					kassalipas.tunnus ktunnus
-					FROM lasku use index (yhtio_tila_tapvm)
-					JOIN maksuehto ON (maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen != '')
-					LEFT JOIN tiliointi ON (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.korjattu = '' and tiliointi.tilino in ($myyntisaamiset_tilit))
-					LEFT JOIN kassalipas ON (kassalipas.yhtio=lasku.yhtio and kassalipas.tunnus=lasku.kassalipas)
-					WHERE lasku.yhtio	= '$kukarow[yhtio]'
-					and lasku.tila 		= 'U'
-					and lasku.alatila	= 'X'
-					$lisa
-					$kassat
-					ORDER BY kassa, kassanimi, tyyppi, lasku.tapvm, lasku.laskunro";
+					kassalipas.tunnus ktunnus,
+					(lasku.summa - lasku.pyoristys) summa,
+					SUM(tiliointi.summa) tilsumma
+					FROM lasku USE INDEX (yhtio_tila_mapvm)
+					JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND lasku.maksuehto = maksuehto.tunnus AND maksuehto.kateinen != '')
+					LEFT JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.korjattu = '' AND tiliointi.tilino IN ({$myyntisaamiset_tilit}))
+					LEFT JOIN kassalipas ON (kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = lasku.kassalipas)
+					WHERE lasku.yhtio	= '{$kukarow['yhtio']}'
+					AND lasku.tila 		= 'U'
+					AND lasku.alatila	= 'X'
+					{$lisa}
+					{$kassat}
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14
+					HAVING tilsumma != 0
+					ORDER BY kassa, kassanimi, tyyppi, lasku.mapvm, lasku.laskunro";
 		$result = pupe_query($query);
 
 		$i = 1;
@@ -1876,15 +1875,15 @@
 
 			if ($katsuori != '') {
 				//Haetaan kassatilille laitetut suoritukset
-				$query = "	SELECT suoritus.nimi_maksaja nimi, tiliointi.summa, lasku.tapvm
-							FROM lasku use index (yhtio_tila_tapvm)
+				$query = "	SELECT suoritus.nimi_maksaja nimi, tiliointi.summa, lasku.mapvm
+							FROM lasku use index (yhtio_tila_mapvm)
 							JOIN tiliointi use index (tositerivit_index) ON (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino='$yhtiorow[kassa]')
 							JOIN suoritus use index (tositerivit_index) ON (suoritus.yhtio=tiliointi.yhtio and suoritus.ltunnus=tiliointi.aputunnus)
 							LEFT JOIN kuka ON (lasku.laatija=kuka.kuka and lasku.yhtio=kuka.yhtio)
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.tila	= 'X'
-							and lasku.tapvm >= '$vva-$kka-$ppa'
-							and lasku.tapvm <= '$vvl-$kkl-$ppl'
+							and lasku.mapvm >= '$vva-$kka-$ppa'
+							and lasku.mapvm <= '$vvl-$kkl-$ppl'
 							ORDER BY lasku.laskunro";
 				$result = pupe_query($query);
 
@@ -2324,7 +2323,7 @@
 				}
 			}
 		}
-		
+
 		return $kassalippaat;
 	}
 

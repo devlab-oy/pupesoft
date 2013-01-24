@@ -520,7 +520,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 				}
 				elseif (mysql_field_name($result, $i) == "tapvm") {
 					echo "<td>".tv1dateconv($trow[$kennimi])."</td>";
-				}	
+				}
 				elseif (mysql_field_name($result, $i) == "ytunnus") {
 						echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
 					}
@@ -1404,7 +1404,7 @@ if ($tee == 'E' or $tee == 'F') {
 		$masrow = mysql_fetch_assoc($masres);
 
 
-		if (($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") and ($trow["vienti"] == "" or ($trow["vienti"] == "E" and $trow["chn"] == "020")) and $masrow["itsetulostus"] == "" and $trow["sisainen"] == "" and $masrow["kateinen"] == "" and $trow["chn"] != '666' and $trow["chn"] != '667' and abs($trow["summa"]) != 0) {
+		if (($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") and ($trow["vienti"] == "" or ($trow["vienti"] == "E" and ($trow["chn"] == "020" or $trow["chn"] == "030"))) and $masrow["itsetulostus"] == "" and $trow["sisainen"] == "" and $masrow["kateinen"] == "" and $trow["chn"] != '666' and $trow["chn"] != '667' and abs($trow["summa"]) != 0) {
 			echo "<form id='finvoice_$tunnus' name='finvoice_$tunnus' method='post' action='".$palvelin2."tilauskasittely/uudelleenluo_laskuaineisto.php' autocomplete='off'>
 					<input type='hidden' name='laskunumerot' value='$trow[laskunro]'>
 					<input type='hidden' name='tee' value='NAYTATILAUS'>
@@ -1474,14 +1474,12 @@ if ($tee == 'E' or $tee == 'F') {
 		// Laskun tilausrivit
 		echo "<br><br>";
 		require "inc/tilausrivit.inc";
-		$tee = '';
 	}
 	else {
 		// Tositteen tiliöintirivit...
 		require "inc/tiliointirivit.inc";
 
 		echo "<br><br>";
-		$tee = "";
 	}
 }
 
@@ -1598,5 +1596,3 @@ if ($tee == "") {
 }
 
 require ("inc/footer.inc");
-
-?>

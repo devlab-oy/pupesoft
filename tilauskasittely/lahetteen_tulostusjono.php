@@ -841,7 +841,7 @@
 					if (lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
 					varastopaikat.nimitys varastonimi,
 					varastopaikat.tunnus varastotunnus,
-					week(lasku.kerayspvm, 1) keraysviikko,
+					week(lasku.kerayspvm, 3) keraysviikko,
 					min(if (lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
 					max(if (lasku.clearing = '', 'N', if (lasku.clearing = 'JT-TILAUS', 'J', if (lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
 					$selectlisa

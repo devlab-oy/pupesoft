@@ -23,7 +23,6 @@
 		if (mysql_num_rows($tilre) > 0) {
 
 			$query = "	UPDATE tilausrivi
-						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
 						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 						SET tilausrivi.keratty = '',
 						tilausrivi.kerattyaika = ''

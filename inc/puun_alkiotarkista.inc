@@ -16,6 +16,18 @@ if(!function_exists("puun_alkiotarkista")) {
 			if ($t[$i] == '') {
 				$virhe[$i] = t("Puun tunnusta ei voi jättää tyhjäksi")."!";
 			}
+		}
+		if (mysql_field_name($result, $i) == "liitos") {
+			$query = "	SELECT tunnus
+						FROM asiakas
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji != 'P'
+						AND tunnus = '$t[$i]'";
+				$asiakkaan_haku_res = pupe_query($query);
+			
+			if (mysql_num_rows($asiakkaan_haku_res) == 0) {
+				$virhe[$i] = t("Tunnuksella ei löydy asiakasta")."!";
+			}
 		}		
 	}
 }

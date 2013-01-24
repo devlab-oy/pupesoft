@@ -17134,7 +17134,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
 		$order_sorttaus = '';
 
-		$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, email
+		$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, email, kerayserat
 								FROM asiakas
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$laskurow[liitostunnus]'";
@@ -17181,19 +17181,9 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 				$onko_kerayserat_kaytossa = true;
 			}
 
-			// jos ker‰yser‰t on A, eli asiakkaan takan pit‰‰ olla ker‰yser‰t p‰‰ll‰, tarkistetaan se ensiksi
-			if ($yhtiorow['kerayserat'] == 'A') {
-
-				$query = "	SELECT asiakas.kerayserat
-							FROM lasku
-							JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.kerayserat = 'A')
-							WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-							AND lasku.tunnus IN ({$otunnus})";
-				$chk_res = pupe_query($query);
-
-				if (mysql_num_rows($chk_res) > 0) {
-					$onko_kerayserat_kaytossa = true;
-				}
+			// jos ker‰yser‰t on A, eli asiakkaan takan pit‰‰ olla ker‰yser‰t p‰‰ll‰
+			if ($yhtiorow['kerayserat'] == 'A' and $asiakas_apu_row['kerayserat'] == 'A') {
+				$onko_kerayserat_kaytossa = true;
 			}
 
 			if ($onko_kerayserat_kaytossa === true) {

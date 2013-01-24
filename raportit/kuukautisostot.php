@@ -61,13 +61,13 @@
 			}
 
 			//Edellisen vuoden vastaavat kaudet
-			${"kkaed{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")-1));
-			${"ppaed{$i}"} = date("d", mktime(0, 0, 0, date("m")-$i+1, 1, date("Y")-1));
-			${"vvaed{$i}"} = date("Y", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")-1));
+			${"kkaed{$i}"} = date("m", mktime(0, 0, 0, ${"kka{$i}"}, date("d"), date("Y")-1));
+			${"ppaed{$i}"} = date("d", mktime(0, 0, 0, ${"kka{$i}"}, 1, date("Y")-1));
+			${"vvaed{$i}"} = date("Y", mktime(0, 0, 0, ${"kka{$i}"}, date("d"), date("Y")-1));
 
-			${"kkled{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")-1));
-			${"vvled{$i}"} = date("Y", mktime(0, 0, 0, date("m")-$i+1, 1, date("Y")-1));
-			${"ppled{$i}"} = date("d", mktime(0, 0, 0, date("m")-($i-2), 0, date("Y")));
+			${"kkled{$i}"} = date("m", mktime(0, 0, 0, ${"kkl{$i}"}, date("d"), date("Y")-1));
+			${"vvled{$i}"} = date("Y", mktime(0, 0, 0, ${"kkl{$i}"}, 1, date("Y")-1));
+			${"ppled{$i}"} = date("d", mktime(0, 0, 0, ${"kkl{$i}"}+1, 0, date("Y")-1));
 
 			//katotaan pienin alkupvm ja isoin loppupvm
 			${"apaiva{$i}"} = (int) date('Ymd',mktime(0,0,0,${"kka{$i}"},${"ppa{$i}"},${"vva{$i}"}));

@@ -25,7 +25,6 @@ $request_params = array(
 	'kateisoton_luonne' => $kateisoton_luonne,
 	'yleinen_kommentti'=>$yleinen_kommentti
 );
-echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet, $request_params);
 
 if ($tee == 'kateisotto') {
 	//tehd‰‰n k‰teisotto
@@ -43,6 +42,9 @@ if ($tee == 'kateisotto') {
 	tee_kateisotto($kassalipas, $summa, $kateisoton_luonne, $yleinen_kommentti);
 
 	echo "<font class='message'>".t("K‰teisotto tehtiin onnistuneesti")."</font>";
+}
+else {
+	echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet, $request_params);
 }
 
 function tarkista_kassalippaan_tasmaytys($kassalipas_tunnus) {

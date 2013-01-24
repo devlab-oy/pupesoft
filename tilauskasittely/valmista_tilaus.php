@@ -2,7 +2,6 @@
 
 	if (!isset($from_kaikkikorj)) {
 		require ("../inc/parametrit.inc");
-		require ("valitse_sarjanumero.inc");
 
 		if (!isset($toim)) $toim = "";
 		 if (!isset($tee)) $tee = "";
@@ -215,9 +214,102 @@
 	}
 
 	if ($tee == "TEEVALMISTUS" and $era_new_paikka != "") {
-		$paivitettiin = teeValinta("myyntirivitunnus", array("V"));
+		$paivitetty = 0;
 
-		if ($paivitettiin > 0) {
+		foreach ($era_new_paikka as $rivitunnus => $uusipaikka) {
+
+			//	Jos meill‰ on uusipaikka ja se on eri kuin vanhapaikka kohdistetaan er‰
+			if ($uusipaikka != $era_old_paikka[$rivitunnus]) {
+
+				$query = "	SELECT *
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$rivitunnus'
+							and tyyppi  = 'V'";
+				$toimres = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($toimres) > 0) {
+					$toimrow = mysql_fetch_array($toimres);
+
+					list($myy_hyllyalue, $myy_hyllynro, $myy_hyllyvali, $myy_hyllytaso, $myy_era) = explode("#!°!#", $era_new_paikka[$toimrow["tunnus"]]);
+
+					$query = "	DELETE FROM sarjanumeroseuranta
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$toimrow[tuoteno]'
+								and myyntirivitunnus = '$toimrow[tunnus]'";
+					$sarjares2 = mysql_query($query) or pupe_error($query);
+
+					if ($uusipaikka != "") {
+						if ($toimrow["varattu"] > 0) {
+							$tunken = "myyntirivitunnus";
+
+							$query = "	SELECT *
+										FROM sarjanumeroseuranta
+										WHERE yhtio		= '$kukarow[yhtio]'
+										and tuoteno		= '$toimrow[tuoteno]'
+										and hyllyalue   = '$myy_hyllyalue'
+										and hyllynro    = '$myy_hyllynro'
+										and hyllytaso   = '$myy_hyllytaso'
+										and hyllyvali   = '$myy_hyllyvali'
+										and sarjanumero = '$myy_era'
+										and myyntirivitunnus = 0
+										and ostorivitunnus > 0
+										LIMIT 1";
+							$lisa_res = mysql_query($query) or pupe_error($query);
+
+							if (mysql_num_rows($lisa_res) > 0) {
+								$lisa_row = mysql_fetch_array($lisa_res);
+								$oslisa = " ostorivitunnus ='$lisa_row[ostorivitunnus]', ";
+							}
+							else {
+								$oslisa = " ostorivitunnus ='', ";
+							}
+
+						}
+						else {
+							$tunken = "ostorivitunnus";
+							$oslisa = "";
+						}
+
+						$query = "	INSERT into sarjanumeroseuranta
+									SET yhtio 		= '$kukarow[yhtio]',
+									tuoteno			= '$toimrow[tuoteno]',
+									lisatieto 		= '$lisa_row[lisatieto]',
+									$tunken 		= '$toimrow[tunnus]',
+									$oslisa
+									kaytetty		= '$lisa_row[kaytetty]',
+									era_kpl			= '',
+									laatija			= '$kukarow[kuka]',
+									luontiaika		= now(),
+									takuu_alku 		= '$lisa_row[takuu_alku]',
+									takuu_loppu		= '$lisa_row[takuu_loppu]',
+									parasta_ennen	= '$lisa_row[parasta_ennen]',
+									hyllyalue   	= '$myy_hyllyalue',
+									hyllynro    	= '$myy_hyllynro',
+									hyllytaso   	= '$myy_hyllytaso',
+									hyllyvali   	= '$myy_hyllyvali',
+									sarjanumero 	= '$myy_era'";
+						$lisa_res = mysql_query($query) or pupe_error($query);
+
+						$query = "	UPDATE tilausrivi
+									SET hyllyalue   = '$myy_hyllyalue',
+									hyllynro    	= '$myy_hyllynro',
+									hyllytaso   	= '$myy_hyllytaso',
+									hyllyvali   	= '$myy_hyllyvali'
+									WHERE yhtio 	= '$kukarow[yhtio]'
+									and tunnus		= '$toimrow[tunnus]'";
+						$lisa_res = mysql_query($query) or pupe_error($query);
+
+						$paivitetty++;
+					}
+				}
+				else {
+					echo "Rivi‰ ei voi liitt‰‰ $query<br>";
+				}
+			}
+		}
+
+		if ($paivitetty > 0) {
 			$tee = "VALMISTA";
 		}
 	}
@@ -335,7 +427,7 @@
 				//Haetaan valmisteet
 				$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.sarjanumeroseuranta
 							FROM tilausrivi
-							JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+							JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.perheid = '$rivitunnus'
 							and tilausrivi.tyyppi in ('W','M')
@@ -370,7 +462,7 @@
 
 							$akerroin = $atil / $tilrivirow["varattu"];
 
-							//	Tarkistetaan valmisteiden sarjanumerot
+							// Tarkistetaan valmisteiden sarjanumerot
 							if ($tilrivirow["sarjanumeroseuranta"] != "") {
 								// katotaan aluks onko yht‰‰n tuotetta sarjanumeroseurannassa t‰ll‰ listalla
 								if (in_array($tilrivirow["sarjanumeroseuranta"], array("S","T","U","V"))) {

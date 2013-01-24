@@ -57,17 +57,17 @@
 			if (!isset(${"vvl{$i}"})) ${"vvl{$i}"} = date("Y", mktime(0, 0, 0, date("m")-$i+1, 1, date("Y")));
 			if (!isset(${"ppl{$i}"})) {
 				if ($i == 1) ${"ppl{$i}"} = date("d");
-				else ${"ppl{$i}"} = date("d", strtotime(date("Y")."-".(date("m")-$i+1)." last day"));
+				else ${"ppl{$i}"} = date("d", mktime(0, 0, 0, date("m")-($i-2), 0, date("Y")));
 			}
 
 			//Edellisen vuoden vastaavat kaudet
 			${"kkaed{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")-1));
-			${"ppaed{$i}"} = date("d", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
+			${"ppaed{$i}"} = date("d", mktime(0, 0, 0, date("m")-$i+1, 1, date("Y")-1));
 			${"vvaed{$i}"} = date("Y", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")-1));
 
 			${"kkled{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")-1));
 			${"vvled{$i}"} = date("Y", mktime(0, 0, 0, date("m")-$i+1, 1, date("Y")-1));
-			${"ppled{$i}"} = date("d", strtotime((date("Y")-1)."-".(date("m")-$i+1)." last day"));
+			${"ppled{$i}"} = date("d", mktime(0, 0, 0, date("m")-($i-2), 0, date("Y")));
 
 			//katotaan pienin alkupvm ja isoin loppupvm
 			${"apaiva{$i}"} = (int) date('Ymd',mktime(0,0,0,${"kka{$i}"},${"ppa{$i}"},${"vva{$i}"}));

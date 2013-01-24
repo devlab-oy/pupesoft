@@ -53,7 +53,7 @@
 
 			$nimitieto = strtoupper($nimitieto);
 
-			if (($nimitieto=="LUOTTOKUNTA-KREDITLAGET") or ($nimitieto=="LUOTTOKUNTA") or ($nimitieto=="LUOTTOKUNTA/VISA") or ($nimitieto=="LUOTTOKUNTA OY")) {
+			if (($nimitieto=="LUOTTOKUNTA-KREDITLAGET") or ($nimitieto=="LUOTTOKUNTA") or ($nimitieto=="LUOTTOKUNTA/VISA") or ($nimitieto=="LUOTTOKUNTA OY") or ($nimitieto=="NETS OY")) {
 				$query = "	SELECT tilino
 							FROM tili
 							WHERE tilino = '$tilino2' and yhtio = '$kukarow[yhtio]'";
@@ -83,7 +83,7 @@
 			}
 			else {
 				if ($tilino2 != 0) {
-					$virhe.= t("Vain maksajalle LUOTTOKUNTA-KREDITLAGET tai LUOTTOKUNTA tai LUOTTOKUNTA/VISA voi antaa palkkiotilin")."<br>";
+					$virhe.= t("Vain maksajalle LUOTTOKUNTA-KREDITLAGET tai LUOTTOKUNTA tai LUOTTOKUNTA/VISA tai NETS OY voi antaa palkkiotilin")."<br>";
 					$ok = 1;
 					$tee = '';
 				}

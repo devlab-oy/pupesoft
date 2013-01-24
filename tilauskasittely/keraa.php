@@ -1771,7 +1771,7 @@
 
 						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0)
 							or (
-								(in_array($laskurow["keraysvahvistus_lahetys"], array('k','L','M')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','L','M')) and $laskurow["keraysvahvistus_lahetys"] == ''))
+								(in_array($laskurow["keraysvahvistus_lahetys"], array('k','L','M','N','Q','P')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','L','M','N','Q','P')) and $laskurow["keraysvahvistus_lahetys"] == ''))
 								or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "")
 							)
 						) {
@@ -3099,7 +3099,7 @@
 					if ($lp_varasto == 0) {
 						$query = "	SELECT *
 									from varastopaikat
-									where yhtio = '$kukarow[yhtio]' 
+									where yhtio = '$kukarow[yhtio]'
 									AND tyyppi != 'P'
 									order by alkuhyllyalue,alkuhyllynro
 									limit 1";

@@ -1006,13 +1006,16 @@
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
 		$sel			= array();
-		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('o', 'k', 'L', 'M'), '');
+		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('o', 'k', 'L', 'M', 'N', 'Q', 'P'), '');
 
 		$ulos .= "<option value=''>".t("Ker‰ysvahvistusta/s‰hkˆist‰ l‰hetett‰ ei l‰hetet‰")."</option>";
 		$ulos .= "<option value='o'{$sel['o']}>".t("Ker‰ysvahvistus/s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
-		$ulos .= "<option value='k'{$sel['k']}>".t("Ker‰ysvahvistus/s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty")."</option>";
-		$ulos .= "<option value='L'{$sel['L']}>".t("Ker‰ysvahvistus/paperinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty")."</option>";
-		$ulos .= "<option value='M'{$sel['M']}>".t("Ker‰ysvahvistus/paperinen & s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty")."</option>";
+		$ulos .= "<option value='k'{$sel['k']}>".t("Ker‰ysvahvistus/s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus (ei JT-rivej‰) on ker‰tty")."</option>";
+		$ulos .= "<option value='L'{$sel['L']}>".t("Ker‰ysvahvistus/paperinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus (ei JT-rivej‰) on ker‰tty")."</option>";
+		$ulos .= "<option value='M'{$sel['M']}>".t("Ker‰ysvahvistus/paperinen & s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus (ei JT-rivej‰) on ker‰tty")."</option>";
+		$ulos .= "<option value='N'{$sel['N']}>".t("Ker‰ysvahvistus/s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus (myˆs JT-rivit) on ker‰tty")."</option>";
+		$ulos .= "<option value='Q'{$sel['Q']}>".t("Ker‰ysvahvistus/paperinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus (myˆs JT-rivit) on ker‰tty")."</option>";
+		$ulos .= "<option value='P'{$sel['P']}>".t("Ker‰ysvahvistus/paperinen & s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus (myˆs JT-rivit) on ker‰tty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

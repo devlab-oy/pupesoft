@@ -1143,9 +1143,9 @@
 		$ulos .= "<option value=''>".t("Käytetään yhtiön oletusta")."</option>";
 		$ulos .= "<option value='E'{$sel['E']}>".t("Keräysvahvistusta/sähköisetä lähetettä ei lähetetä")."</option>";
 		$ulos .= "<option value='o'{$sel['o']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
-		$ulos .= "<option value='k'{$sel['k']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
-		$ulos .= "<option value='L'{$sel['L']}>".t("Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
-		$ulos .= "<option value='M'{$sel['M']}>".t("Keräysvahvistus/paperinen & sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='k'{$sel['k']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (ei JT-rivejä) on kerätty")."</option>";
+		$ulos .= "<option value='L'{$sel['L']}>".t("Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus (ei JT-rivejä) on kerätty")."</option>";
+		$ulos .= "<option value='M'{$sel['M']}>".t("Keräysvahvistus/paperinen & sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (ei JT-rivejä) on kerätty")."</option>";
 		$ulos .= "<option value='N'{$sel['N']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
 		$ulos .= "<option value='Q'{$sel['Q']}>".t("Keräysvahvistus/paperinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
 		$ulos .= "<option value='P'{$sel['P']}>".t("Keräysvahvistus/paperinen & sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";

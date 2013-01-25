@@ -1779,6 +1779,12 @@
 			}
 		}
 
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'tuotteen_toimittajat') {
+			$lukitse_avaimeen = urlencode($toim_tuoteno);
+
+			echo "<iframe id='tuotteen_toimittajat_tuotenumerot_iframe' name='tuotteen_toimittajat_tuotenumerot_iframe' src='yllapito.php?toim=tuotteen_toimittajat_tuotenumerot&from=yllapito&ohje=off&haku[1]=@$liitostunnus&haku[2]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&liitostunnus=$liitostunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+		}
+
 		if ($trow["tunnus"] > 0 and $errori == "" and $from != "yllapito" and $toim == "tuote" and $laji != "V") {
 
 			$lukitse_avaimeen = urlencode($tuoteno);
@@ -1849,6 +1855,7 @@
 			$toim == "yhteyshenkilo" or
 			$toim == "autodata_tuote" or
 			$toim == "tuotteen_toimittajat" or
+			$toim == "tuotteen_toimittajat_tuotenumerot" or
 			$toim == "extranet_kayttajan_lisatiedot" or
 			$toim == "asiakkaan_avainsanat" or
 			$toim == "rahtisopimukset" or
@@ -1948,6 +1955,10 @@
 
 	if ($from == "yllapito" and $toim == "tuotteen_toimittajat") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_toimittajat_iframe' $jcsmaxheigth);</script>";
+	}
+
+	if ($from == "yllapito" and $toim == "tuotteen_toimittajat_tuotenumerot") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_toimittajat_tuotenumerot_iframe' $jcsmaxheigth);</script>";
 	}
 
 	if ($from == "yllapito" and $toim == "liitetiedostot") {

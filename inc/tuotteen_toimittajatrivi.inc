@@ -15,6 +15,10 @@
 		}
 	}
 
+	if (mysql_field_name($result, $i) == "toim_tuoteno") {
+		$toim_tuoteno = $trow[$i]; // otetaan t‰‰ talteen
+	}
+
 	if (mysql_field_name($result, $i) == "toimittaja") {
 		if(isset($alasveto[$i])) {
 			$ulos = "<td>".$alasveto[$i]."</td>";
@@ -41,6 +45,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "liitostunnus") {
+		$liitostunnus = $trow[$i];
 		$tyyppi = 4;
 	}
 

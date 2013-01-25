@@ -4,7 +4,8 @@
 	$otsikko_nappi 	= 'Kohde';
 
 	$kentat = "tunnus, nimi, (SELECT nimi from asiakas where kohde.yhtio = asiakas.yhtio AND kohde.asiakas = asiakas.tunnus) asiakas, osoite, paikkakunta";
-	$hakukentat = "tunnus, asiakas, nimi, osoite, paikkakunta";
+    $hakukentat = "tunnus, nimi, asiakas, osoite, paikkakunta";
+    
 	$jarjestys = 'asiakas, nimi';
 
 ?>

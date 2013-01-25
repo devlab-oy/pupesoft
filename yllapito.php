@@ -908,7 +908,7 @@
 				$hakuehto = " like '%{$haku[$i]}%' ";
 			}
 
-			if ($from == "" and ((($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') or ($toim == 'yhteyshenkilo' and trim($array[$i]) == 'liitostunnus'))) {
+			if ($from == "" and ((($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'kohde' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') or ($toim == 'yhteyshenkilo' and trim($array[$i]) == 'liitostunnus'))) {
 				if (!is_numeric($haku[$i])) {
 					$ashak = "	SELECT group_concat(tunnus) tunnukset
 								FROM asiakas
@@ -931,7 +931,7 @@
 			elseif (trim($array[$i]) == 'ytunnus' and !$tarkkahaku) {
 				$lisa .= " and REPLACE({$array[$i]}, '-', '') = REPLACE('{$haku[$i]}', '-', '') ";
 			}
-			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
+			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'kohde' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
 				list($a, $b) = explode("/", $haku[$i]);
 
 				if ((int) $a > 0) $a_lisa .= " asiakas = '$a' ";
@@ -970,7 +970,7 @@
 					$lisa .= " and toimittaja = '{$haku[$i]}'";
 				}
 			}
-			elseif ($from == "" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'ytunnus') {
+			elseif ($from == "" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'kohde' or $toim == 'asiakashinta') and trim($array[$i]) == 'ytunnus') {
 
 				if (!is_numeric($haku[$i])) {
 					// haetaan laskutus-asiakas
@@ -1706,6 +1706,9 @@
 
 			if (($toikrow = tarkista_oikeus("yllapito.php", "rahtisopimukset%", "", "OK")) !== FALSE) {
 				echo "<iframe id='rahtisopimukset_iframe' name='rahtisopimukset_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+			if (($toikrow = tarkista_oikeus("yllapito.php", "kohde%", "", "OK")) !== FALSE) {
+				echo "<iframe id='kohde_iframe' name='kohde_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[2]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
 

@@ -711,11 +711,13 @@
 
 					$valmkpl = str_replace(',','.',$valmkpl);
 
-					$query = "	SELECT *, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka
+					$query = "	SELECT tilausrivi.*,
+								tuote.sarjanumeroseuranta, tuote.ei_saldoa
 								FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tunnus = '$rivitunnus'
-								and tyyppi in ('W','M')";
+								JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
+								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+								and tilausrivi.tunnus  = '$rivitunnus'
+								and tilausrivi.tyyppi in ('W','M')";
 					$roxresult = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($roxresult) == 1) {
@@ -723,7 +725,6 @@
 
 						$tuoteno 		= $tilrivirow["tuoteno"];
 						$tee			= "UV";
-						$varastopaikka  = $tilrivirow["paikka"];
 
 						// Perheid sen takia, että perutaan myös useat valmisteet perutaan
 						if ($perutamakorj[$tilrivirow["perheid"]] != "") {
@@ -778,7 +779,7 @@
 					$valmkpl = str_replace(',','.',$valmkpl);
 
 					//Haetaan tilausrivi
-					$query = "	SELECT *, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka
+					$query = "	SELECT *
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$rivitunnus'
@@ -822,7 +823,6 @@
 							$akerroin 		= $atil / $tilrivirow["varattu"];
 							$tuoteno 		= $tilrivirow["tuoteno"];
 							$tee			= "UV";
-							$varastopaikka  = $tilrivirow["paikka"];
 							$jaljella_tot	= 0;
 
 							require ("valmistatuotteita.inc");

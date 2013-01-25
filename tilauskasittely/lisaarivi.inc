@@ -1973,7 +1973,7 @@
 							$jt 		= 0;
 						}
 
-						if(isset($jt_muidenmukana)) {
+						if(isset($jt_muidenmukana) or (!isset($jt_muidenmukana) and $toim == 'PIKATILAUS')) {
 							// jälkitoimitus muiden mukana
 							if ($jt_muidenmukana == 'KYLLA') {
 								$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));

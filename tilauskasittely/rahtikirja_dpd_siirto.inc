@@ -66,7 +66,20 @@ if ($kollityht > 0) {
 		//	Luodaan meidän tiedostorakenne parcelOrder arrayhin ja pukataan se tonne aineistoon sitten laakista
 		$parcelOrder=array();
 		$parcelOrder["rahtikirjanro"] = $rahtikirjanro;
-		$parcelOrder["tilausnumero"] = $lotsikot[0];
+
+		$tilausnumerot = "";
+
+		// Laitetaan max 30 merkkiä tilausnumeroita välilyönnillä eroteltuna
+		foreach($lotsikot as $tilnum) {
+			if ((strlen($tilausnumerot) + strlen($tilnum) + 1) <= 30) {
+				$tilausnumerot = "{$tilausnumerot} {$tilnum}";
+			}
+			else {
+				break;
+			}
+		}
+
+		$parcelOrder["tilausnumero"] = $tilausnumerot;
 
 		/*
 			Arvotaan lähetystapa

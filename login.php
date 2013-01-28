@@ -70,7 +70,7 @@ echo "
 	IMG				{padding:10pt;}
 	BODY			{background:#fff;}
 	FONT.info		{font-size:8pt;  font-family:Lucida,Verdana,Helvetica,Arial; color: #c0c0c0;}
-	FONT.head		{font-size:15pt; font-family:Lucida,Verdana,Helvetica,Arial; color: #666699; font-weight:bold; letter-spacing: .05em;}
+	FONT.head		{font-size:15pt; font-family:Lucida,Verdana,Helvetica,Arial; color: #666; font-weight:bold; letter-spacing: .05em;}
 	FONT.menu		{font-size:10pt; font-family:Lucida,Verdana,Helvetica,Arial; color: #666;}
 	FONT.error		{font-size:9pt;  font-family:Lucida,Verdana,Helvetica,Arial; color: #ff6666;}
 	TD				{padding:3pt;}
@@ -93,7 +93,7 @@ elseif (file_exists("pics/pupesoft_logo.png")) {
 	echo "<a target='_top' href='{$palvelin2}'><img src='pics/pupesoft_logo.png' border='0'>";
 }
 else {
-	echo "<a target='_top' href='{$palvelin2}'><img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif' border='0'>";
+	echo "<a target='_top' href='{$palvelin2}'><img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.png' border='0' style='margin-top:30px;'>";
 }
 
 echo "</td><td><font class='head'>",t("Sis‰‰nkirjautuminen", $browkieli),"</font><br><br>";

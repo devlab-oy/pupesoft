@@ -217,7 +217,7 @@ if(!function_exists("toimitarkista")) {
 
 					// ei löydetty itteämme
 					if ($srowapu['tunnus'] != $tunnus) {
-						$virhe[$i] = t("Samalla ytunnuksella %s on useita toimittajia! Lisää tarkenne ovt-tunnkseen.", "", $tmp_ytunnus);
+						$virhe[$i] = t("Samalla ytunnuksella %s on useita toimittajia! Lisää tarkenne ovt-tunnukseen.", "", $tmp_ytunnus);
 					}
 				}
 			}

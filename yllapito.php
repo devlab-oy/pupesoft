@@ -31,7 +31,8 @@
 	//Jotta m‰‰ritelty rajattu n‰kym‰ olisi myˆs k‰yttˆoikeudellisesti tiukka
 	$aputoim = $toim;
 	$toimi_array = explode('!!!', $toim);
-
+    $a_lisa = "";
+    
 	$toim = $toimi_array[0];
 	if (isset($toimi_array[1])) $alias_set = $toimi_array[1];
 	if (isset($toimi_array[2])) $rajattu_nakyma = $toimi_array[2];
@@ -937,7 +938,7 @@
 				if ((int) $a > 0) $a_lisa .= " asiakas = '$a' ";
 				else $a_lisa = "";
 
-				if ((is_numeric($b) and $b > 0) or (!is_numeric($b) and $b != "")) $b_lisa .= " ytunnus = '$b' ";
+                if ((is_numeric($b) and $b > 0) or (!is_numeric($b) and $b != "")) $b_lisa .= " ytunnus = '$b' ";
 				else $b_lisa = "";
 
 				if ($a_lisa != "" and $b_lisa != "") {
@@ -1020,7 +1021,7 @@
     	}
     }
 
-	//	S‰ilytet‰‰n ohjeen tila
+    //	S‰ilytet‰‰n ohjeen tila
 	if ($from != "") {
 		$ulisa .= "&ohje=off&from=$from&lukitse_avaimeen=".urlencode($lukitse_avaimeen)."&lukitse_laji=$lukitse_laji";
 	}
@@ -2009,6 +2010,9 @@
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('yhteensopivuus_tuote_lisatiedot_iframe' $jcsmaxheigth);</script>";
 	}
 
+    if ($from == "yllapito" and $toim == "kohde") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('kohde_iframe' $jcsmaxheigth);</script>";
+	}
 
 	elseif ($from != "yllapito") {
 		require ("inc/footer.inc");

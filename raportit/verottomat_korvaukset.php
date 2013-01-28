@@ -40,6 +40,7 @@
 		$query = "	SELECT if (kuka.nimi IS NULL, lasku.toim_ovttunnus, kuka.nimi) nimi,
 					tuote.kuvaus,
 					lasku.toim_ovttunnus,
+					lasku.ytunnus,
 					avg(tilausrivi.hinta) hinta,
 					sum(tilausrivi.kpl) kpl,
 					sum(tilausrivi.rivihinta) yhteensa
@@ -52,7 +53,7 @@
 					AND tilaustyyppi = 'M'
 					AND tapvm >= '$vv-01-01'
 					AND tapvm <= '$vv-12-31'
-					GROUP BY nimi, lasku.toim_ovttunnus, tuote.tuotetyyppi";
+					GROUP BY 1,2,3,4";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -67,9 +68,11 @@
 			echo "<th>".t("Yhteensä")."</th>";
 			echo "</tr>";
 
-			$ednimi = "";
-			$summat = array();
-			$kappaleet = array();
+			$ednimi 	= "";
+			$summat 	= array();
+			$kappaleet  = array();
+			$file 		= "";
+			$lask 		= 1;
 
 			while ($row = mysql_fetch_array($result)) {
 
@@ -123,6 +126,25 @@
 					echo "</tr>";
 				}
 
+				$file .= "000:VSPSERIE";
+				$file .= "101:0";
+				$file .= "110:P";
+				$file .= "109:$vv";
+				$file .= "102:{$yhtiorow['ytunnus']}";
+				$file .= "111:{$row['ytunnus']}";
+				$file .= "114:0";
+				$file .= "115:0";
+				$file .= "150:0";
+				$file .= "151:0";
+				$file .= "152:0";
+				$file .= "153:0";
+				$file .= "154:0";
+				$file .= "155:404";
+				$file .= "156:18584";
+				$file .= "157:0";
+				$file .= "999:$lask";
+
+				$lask++;
 				$ednimi = $row["nimi"];
 				$summat[$row["kuvaus"]] += $row["yhteensa"];
 				$kappaleet[$row["kuvaus"]] += $row["kpl"];
@@ -144,9 +166,19 @@
 			echo "</tr>";
 
 			echo "</table>";
+
+			$filenimi = "VSPSERIE-$kukarow[yhtio]-".date("dmy-His").".txt";
+			file_put_contents("dataout/".$filenimi, $file);
+
+			echo "	<form method='post' class='multisubmit'>
+						<input type='hidden' name='tee' value='lataa_tiedosto'>
+						<input type='hidden' name='lataa_tiedosto' value='1'>
+						<input type='hidden' name='kaunisnimi' value='".t("arvonlisaveroilmoitus")."-$ilmoituskausi.txt'>
+						<input type='hidden' name='filenimi' value='$filenimi'>
+						<input type='submit' name='tallenna' value='".t("Tallenna tiedosto")."'>
+					</form><br><br>";
+
 		}
 	}
 
 	require ("inc/footer.inc");
-
-?>

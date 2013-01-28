@@ -419,9 +419,6 @@
 		while ($taparow = mysql_fetch_assoc($res)) {
 
 			$uusihinta 		 = round(($uusiarvo*$kaikenkaikkiaan_arvot) / $valmkpl, 6);
-
-			echo "$uusihinta = round(($uusiarvo*$kaikenkaikkiaan_arvot) / $valmkpl, 6);<br>";
-
 			$tuoteno		 = $taparow["tuoteno"];
 			$pvm			 = $taparow["laadittu"];
 			$rivitunnus 	 = $taparow["rivitunnus"];

@@ -3,7 +3,7 @@
 
 if(!function_exists("puun_alkiotarkista")) {
 	function puun_alkiotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $alasveto;
+		global $kukarow, $yhtiorow, $alias_set, $alasveto, $table_tarkenne, $toim;
 
 
 		if (mysql_field_name($result, $i) == "laji") {
@@ -17,16 +17,18 @@ if(!function_exists("puun_alkiotarkista")) {
 				$virhe[$i] = t("Puun tunnusta ei voi jättää tyhjäksi")."!";
 			}
 		}
-		if (mysql_field_name($result, $i) == "liitos") {
-			$query = "	SELECT tunnus
-						FROM asiakas
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND laji != 'P'
-						AND tunnus = '$t[$i]'";
-				$asiakkaan_haku_res = pupe_query($query);
+		if ($table_tarkenne == 'asiakas' or $toim == 'asiakas') {
+			if (mysql_field_name($result, $i) == "liitos") {
+				$query = "	SELECT tunnus
+							FROM asiakas
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji != 'P'
+							AND tunnus = '$t[$i]'";
+						$asiakkaan_haku_res = pupe_query($query);
 			
 			if (mysql_num_rows($asiakkaan_haku_res) == 0) {
 				$virhe[$i] = t("Tunnuksella ei löydy asiakasta")."!";
+				}
 			}
 		}		
 	}

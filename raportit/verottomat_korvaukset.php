@@ -3,7 +3,17 @@
 	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 	$useslave = 1;
 
+	if (isset($_POST["tee"])) {
+		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+	}
+
 	require ("../inc/parametrit.inc");
+
+	if (isset($tee) and $tee == "lataa_tiedosto") {
+		readfile("/tmp/".$tmpfilenimi);
+		exit;
+	}
 
 	echo "<font class='head'>".t("Verottomat korvaukset")."</font><hr><br>";
 
@@ -40,7 +50,7 @@
 		$query = "	SELECT
 					toimi.tunnus,
 					toimi.ytunnus,
-					if(kuka.nimi IS NULL, concat('*POISTETTU* ', toimi.nimi), kuka.nimi) nimi,
+					if(kuka.nimi IS NULL or toimi.tyyppi = 'P', concat('*POISTETTU* ', toimi.nimi), kuka.nimi) nimi,
 					tuote.kuvaus,
 					avg(tilausrivi.hinta) hinta,
 					sum(tilausrivi.kpl) kpl,
@@ -56,7 +66,7 @@
 					AND lasku.tapvm >= '$vv-01-01'
 					AND lasku.tapvm <= '$vv-12-31'
 					GROUP BY 1,2,3,4
-					ORDER BY nimi";
+					ORDER BY nimi, kuvaus";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -74,8 +84,6 @@
 			$ednimi    = "";
 			$summat    = array();
 			$kappaleet = array();
-			$file 	   = "";
-			$lask 	   = 1;
 			$vspserie  = array();
 
 			while ($row = mysql_fetch_assoc($result)) {
@@ -102,6 +110,13 @@
 
 				if ($nimi != "") {
 					echo "<td>$nimi</td>";
+
+					$vspserie[$row["ytunnus"]]["paivarahat"] 		  = 0;
+					$vspserie[$row["ytunnus"]]["kotimaanpuolipaivat"] = 0;
+					$vspserie[$row["ytunnus"]]["kotimaanpaivat"] 	  = 0;
+					$vspserie[$row["ytunnus"]]["ulkomaanpaivat"]  	  = 0;
+					$vspserie[$row["ytunnus"]]["kilsat"] 			  = 0;
+					$vspserie[$row["ytunnus"]]["kilsat_raha"] 		  = 0;
 				}
 				else {
 					echo "<td class='back'></td>";
@@ -114,15 +129,33 @@
 				echo "</tr>";
 
 				if ($row['kuvaus'] == 50) {
-					$vspserie[$row["ytunnus"]]["paivarahat"] = $row["kpl"];
+					$vspserie[$row["ytunnus"]]["paivarahat"] = $row["yhteensa"];
+					$vspserie[$row["ytunnus"]]["kotimaanpuolipaivat"] = 0;
+					$vspserie[$row["ytunnus"]]["kotimaanpaivat"] = 0;
+					$vspserie[$row["ytunnus"]]["ulkomaanpaivat"] = 0;
 				}
 
 				if ($row['kuvaus'] == 56) {
-					$vspserie[$row["ytunnus"]]["kilsat"] = $row["yhteensa"];
+					$vspserie[$row["ytunnus"]]["kilsat"] = $row["kpl"];
+					$vspserie[$row["ytunnus"]]["kilsat_raha"] = $row["yhteensa"];
+				}
+
+				// var:t otettiin k‰yttˆˆn vasta 2013
+				if ($vv >= 2013) {
+					$varlisa = "tilausrivi.var";
+				}
+				else {
+					$varlisa = "''";
 				}
 
 				// erittely
-				$query = "	SELECT tilausrivi.tuoteno, tuote.nimitys, avg(tilausrivi.hinta) hinta, sum(tilausrivi.kpl) kpl, sum(tilausrivi.rivihinta) yhteensa
+				$query = "	SELECT tilausrivi.tuoteno,
+							tilausrivi.nimitys,
+							tuote.vienti,
+							{$varlisa} var,
+							avg(tilausrivi.hinta) hinta,
+							sum(tilausrivi.kpl) kpl,
+							sum(tilausrivi.rivihinta) yhteensa
 							FROM lasku
 							JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
 							JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A','B') and tuote.kuvaus = '$row[kuvaus]')
@@ -133,20 +166,19 @@
 							AND lasku.tapvm >= '$vv-01-01'
 							AND lasku.tapvm <= '$vv-12-31'
 							AND lasku.liitostunnus = '$row[tunnus]'
-							GROUP BY tuote.tuoteno";
+							GROUP BY 1,2,3,4
+							ORDER BY 1,2";
 				$eres = pupe_query($query);
 
 				while ($erow = mysql_fetch_assoc($eres)) {
 
-					if ($row['kuvaus'] == 56) {
-						$vspserie[$row["ytunnus"]]["kotimaanpaivat"] = 1;
-					}
-
-					if ($row['kuvaus'] == 56) {
+					if ($row['kuvaus'] == "50" and strtoupper($erow['vienti']) == "FI" and (substr($erow['tuoteno'], 0, 3) == "PPR" or $erow['var'] == "2" or $erow['var'] == "4")) {
 						$vspserie[$row["ytunnus"]]["kotimaanpuolipaivat"] = 1;
 					}
-
-					if ($row['kuvaus'] == 56) {
+					elseif ($row['kuvaus'] == "50" and strtoupper($erow['vienti']) == "FI") {
+						$vspserie[$row["ytunnus"]]["kotimaanpaivat"] = 1;
+					}
+					elseif ($row['kuvaus'] == "50") {
 						$vspserie[$row["ytunnus"]]["ulkomaanpaivat"] = 1;
 					}
 
@@ -159,7 +191,6 @@
 					echo "</tr>";
 				}
 
-				$lask++;
 				$ednimi = $row["nimi"];
 				$summat[$row["kuvaus"]] += $row["yhteensa"];
 				$kappaleet[$row["kuvaus"]] += $row["kpl"];
@@ -181,35 +212,45 @@
 
 			echo "</table>";
 
+			$file = "";
+			$lask = 1;
 
-			$file .= "000:VSPSERIE";
-			$file .= "101:0";
-			$file .= "110:P";
-			$file .= "109:$vv";
-			$file .= "102:{$yhtiorow['ytunnus']}";
-			$file .= "111:{$row['ytunnus']}";
-			$file .= "114:0";
-			$file .= "115:0";
-			$file .= "150:0";
-			$file .= "151:0";
-			$file .= "152:0";
-			$file .= "153:0";
-			$file .= "154:0";
-			$file .= "155:404";
-			$file .= "156:18584";
-			$file .= "157:0";
-			$file .= "999:$lask";
+			foreach ($vspserie as $htunnus => $matkustaja) {
 
+				$matkustaja['paivarahat']  = round($matkustaja['paivarahat']);
+				$matkustaja['kilsat']      = round($matkustaja['kilsat']);
+				$matkustaja['kilsat_raha'] = round($matkustaja['kilsat_raha']);
+
+				$file .= "000:VSPSERIE\n";
+				$file .= "101:0\n";
+				$file .= "110:P\n";
+				$file .= "109:$vv\n";
+				$file .= "102:{$yhtiorow['ytunnus']}\n";
+				$file .= "111:{$htunnus}\n";
+				$file .= "114:0\n";
+				$file .= "115:0\n";
+				$file .= "150:{$matkustaja['paivarahat']}\n";
+				$file .= "151:{$matkustaja['kotimaanpaivat']}\n";
+				$file .= "152:{$matkustaja['kotimaanpuolipaivat']}\n";
+				$file .= "153:{$matkustaja['ulkomaanpaivat']}\n";
+				$file .= "154:0\n";
+				$file .= "155:{$matkustaja['kilsat']}\n";
+				$file .= "156:{$matkustaja['kilsat_raha']}\n";
+				$file .= "157:0\n";
+				$file .= "999:$lask\n";
+
+				$lask++;
+			}
 
 			$filenimi = "VSPSERIE-$kukarow[yhtio]-".date("dmy-His").".txt";
-			file_put_contents("dataout/".$filenimi, $file);
+			file_put_contents("/tmp/".$filenimi, $file);
 
-			echo "	<form method='post' class='multisubmit'>
+			echo "<br><form method='post' class='multisubmit'>
 						<input type='hidden' name='tee' value='lataa_tiedosto'>
 						<input type='hidden' name='lataa_tiedosto' value='1'>
-						<input type='hidden' name='kaunisnimi' value='".t("arvonlisaveroilmoitus")."-$ilmoituskausi.txt'>
-						<input type='hidden' name='filenimi' value='$filenimi'>
-						<input type='submit' name='tallenna' value='".t("Tallenna tiedosto")."'>
+						<input type='hidden' name='kaunisnimi' value='".t("Verottomat_korvaukset")."-$ilmoituskausi.txt'>
+						<input type='hidden' name='tmpfilenimi' value='$filenimi'>
+						<input type='submit' name='tallenna' value='".t("Tallenna saajakohtainen erittely")."'>
 					</form><br><br>";
 
 		}

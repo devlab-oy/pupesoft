@@ -715,6 +715,37 @@
 
 			echo "</table><br>";
 
+			if (count($ttrow) > 0) {
+				echo "<font class='message'>",t("Tuotteen toimittajan vaihtoehtoiset tuotenumerot"),"</font><hr />";
+
+				echo "<table>";
+				echo "<tr>";
+				echo "<th>",t("Toimittaja"),"</th>";
+				echo "<th>",t("Tuoteno"),"</th>";
+				echo "<th>",t("Viivakoodi"),"</th>";
+				echo "</tr>";
+
+				foreach ($ttrow as $tt_rivi) {
+					$query = "	SELECT ttt.*, TRIM(CONCAT(toimi.nimi, ' ', toimi.nimitark)) AS nimi
+								FROM tuotteen_toimittajat_tuotenumerot AS ttt
+								JOIN toimi ON (toimi.yhtio = ttt.yhtio AND toimi.tunnus = ttt.liitostunnus)
+								WHERE ttt.yhtio = '{$kukarow['yhtio']}'
+								AND ttt.liitostunnus = '{$tt_rivi['liitostunnus']}'
+								AND ttt.toim_tuoteno = '{$tt_rivi['toim_tuoteno']}'";
+					$chk_res = pupe_query($query);
+
+					while ($chk_row = mysql_fetch_assoc($chk_res)) {
+						echo "<tr>";
+						echo "<td>{$chk_row['nimi']}</td>";
+						echo "<td>{$chk_row['vaihtoehtoinen_tuoteno']}</td>";
+						echo "<td>{$chk_row['viivakoodi']}</td>";
+						echo "</tr>";
+					}
+				}
+
+				echo "</table><br />";
+			}
+
 			// Onko liitetiedostoja
 			$liitteet = liite_popup("TN", $tuoterow["tunnus"]);
 

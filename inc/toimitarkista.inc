@@ -99,16 +99,6 @@ if (!function_exists("toimitarkista")) {
 				$virhe[$i] = t("Virheellinen BBAN!")." $t[$i] ".t("Tilinumerossa saa olla vain kirjaimia A-Z ja/tai numeroita 0-9");
 				$errori = 1;
 			}
-
-			// generoidaan ibanista vanhanaikainen kotimainen tilinumero
-			if (!isset($errori) and isset($tmp_tilinumeropos) and $tmp_maakoodi == strtoupper($yhtiorow['maa'])) {
-				$t[$tmp_tilinumeropos] = substr($t[$i], 4);
-				unset($virhe[$tmp_tilinumeropos]);
-			}
-			elseif (isset($tmp_tilinumeropos)) {
-				$virhe[$tmp_tilinumeropos] = t("Tieto puuttuu");
-				$errori = 1;
-			}
 		}
 
 		if (mysql_field_name($result, $i) == "swift") {

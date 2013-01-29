@@ -88,14 +88,31 @@
 	if ($tee == 'Z' and isset($tyyppi) and $tyyppi != '') {
 
 		if ($tyyppi == 'TOIMTUOTENO') {
+
 			$query = "	SELECT tuotteen_toimittajat.tuoteno
 						FROM tuotteen_toimittajat
-						JOIN tuote ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno
-						WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-						and tuotteen_toimittajat.toim_tuoteno = '$tuoteno'
-						and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+						JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+						WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+						AND tuotteen_toimittajat.toim_tuoteno = '{$tuoteno}'
+						AND (tuote.status NOT IN ('P','X') OR (SELECT SUM(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0) > 0)
 						ORDER BY tuote.tuoteno";
 			$result = pupe_query($query);
+
+			if (mysql_num_rows($result) == 0) {
+				$query = "	SELECT ttt.toim_tuoteno AS tuoteno
+							FROM tuotteen_toimittajat_tuotenumerot AS ttt
+							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.toim_tuoteno = ttt.toim_tuoteno AND tt.liitostunnus = ttt.liitostunnus)
+							JOIN tuote ON (tuote.yhtio = tt.yhtio AND tuote.tuoteno = tt.tuoteno)
+							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
+							AND ttt.vaihtoehtoinen_tuoteno = '{$tuoteno}'
+							AND ttt.vaihtoehtoinen_tuoteno != ''
+							AND (tuote.status NOT IN ('P','X') OR (SELECT SUM(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0) > 0)";
+				$chk_res = pupe_query($query);
+
+				if (mysql_num_rows($chk_res) != 0) {
+					$result = $chk_res;
+				}
+			}
 
 			if (mysql_num_rows($result) == 0) {
 				$varaosavirhe = t("VIRHE: Tiedolla ei löytynyt tuotetta")."!";

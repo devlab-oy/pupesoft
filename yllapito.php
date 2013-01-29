@@ -1647,6 +1647,10 @@
 
 		echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
 
+		if ($toim == "tuotteen_toimittajat_tuotenumerot") {
+			if (isset($liitostunnus)) echo "<input type = 'hidden' name = 'liitostunnus' value = '{$liitostunnus}'>";
+		}
+
 		if (($toim == "asiakas" or $toim == "yhtio") and $uusi != 1) {
 			echo "<br><br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille tilauksille")."'>";
 

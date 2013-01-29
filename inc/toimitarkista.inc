@@ -3,7 +3,7 @@
 if (!function_exists("toimitarkista")) {
 	function toimitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $toimtyyppi;
-		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_tilinumeropos, $tmp_nimi, $tmp_ultilno_maa, $ytunnus_ind;
+		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_nimi, $tmp_ultilno_maa, $ytunnus_ind;
 
 		if ((mysql_field_name($result, $i) == "nimi") or
 			(mysql_field_name($result, $i) == "maa") or
@@ -70,9 +70,6 @@ if (!function_exists("toimitarkista")) {
 						}
 					}
 				}
-				else {
-					$tmp_tilinumeropos = $i;
-				}
 			}
 		}
 
@@ -97,16 +94,6 @@ if (!function_exists("toimitarkista")) {
 			}
 			elseif (tarkista_bban($t[$i]) === FALSE) {
 				$virhe[$i] = t("Virheellinen BBAN!")." $t[$i] ".t("Tilinumerossa saa olla vain kirjaimia A-Z ja/tai numeroita 0-9");
-				$errori = 1;
-			}
-
-			// generoidaan ibanista vanhanaikainen kotimainen tilinumero
-			if (!isset($errori) and isset($tmp_tilinumeropos) and $tmp_maakoodi == strtoupper($yhtiorow['maa'])) {
-				$t[$tmp_tilinumeropos] = substr($t[$i], 4);
-				unset($virhe[$tmp_tilinumeropos]);
-			}
-			elseif (isset($tmp_tilinumeropos)) {
-				$virhe[$tmp_tilinumeropos] = t("Tieto puuttuu");
 				$errori = 1;
 			}
 		}

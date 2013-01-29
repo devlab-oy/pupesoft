@@ -1648,7 +1648,8 @@
 		echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
 
 		if ($toim == "tuotteen_toimittajat_tuotenumerot") {
-			if (isset($liitostunnus)) echo "<input type = 'hidden' name = 'liitostunnus' value = '{$liitostunnus}'>";
+			if (isset($liitostunnus)) echo "<input type = 'hidden' name = 'liitostunnus' value = '{$liitostunnus}' />";
+			if (isset($lukitse_avaimeen)) echo "<input type = 'hidden' name = 'toim_tuoteno' value = '{$lukitse_avaimeen}' />";
 		}
 
 		if (($toim == "asiakas" or $toim == "yhtio") and $uusi != 1) {

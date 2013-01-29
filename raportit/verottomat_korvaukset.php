@@ -50,7 +50,7 @@
 		$query = "	SELECT
 					toimi.tunnus,
 					toimi.ytunnus,
-					if(kuka.nimi IS NULL or toimi.tyyppi = 'P', concat('*POISTETTU* ', toimi.nimi), kuka.nimi) nimi,
+					if(kuka.nimi IS NULL or toimi.tyyppi = 'P', concat('~POISTETTU ', toimi.nimi), kuka.nimi) nimi,
 					tuote.kuvaus,
 					avg(tilausrivi.hinta) hinta,
 					sum(tilausrivi.kpl) kpl,

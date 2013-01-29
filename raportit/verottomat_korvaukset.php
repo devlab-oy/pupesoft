@@ -214,6 +214,7 @@
 
 			$file = "";
 			$lask = 1;
+			$ytunnus = tulosta_ytunnus($yhtiorow['ytunnus']);
 
 			foreach ($vspserie as $htunnus => $matkustaja) {
 
@@ -225,7 +226,7 @@
 				$file .= "101:0\n";
 				$file .= "110:P\n";
 				$file .= "109:$vv\n";
-				$file .= "102:{$yhtiorow['ytunnus']}\n";
+				$file .= "102:{$ytunnus}\n";
 				$file .= "111:{$htunnus}\n";
 				$file .= "114:0\n";
 				$file .= "115:0\n";
@@ -248,7 +249,7 @@
 			echo "<br><form method='post' class='multisubmit'>
 						<input type='hidden' name='tee' value='lataa_tiedosto'>
 						<input type='hidden' name='lataa_tiedosto' value='1'>
-						<input type='hidden' name='kaunisnimi' value='".t("Verottomat_korvaukset")."-$ilmoituskausi.txt'>
+						<input type='hidden' name='kaunisnimi' value='".t("Verottomat_korvaukset")."-$kukarow[yhtio]-$vv.txt'>
 						<input type='hidden' name='tmpfilenimi' value='$filenimi'>
 						<input type='submit' name='tallenna' value='".t("Tallenna saajakohtainen erittely")."'>
 					</form><br><br>";

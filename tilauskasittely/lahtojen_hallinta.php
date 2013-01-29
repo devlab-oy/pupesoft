@@ -2879,7 +2879,7 @@ function hae_yhdistettavat_tilaukset() {
 					group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
 					concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text
 					FROM lahdot
-					JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND lasku.tila != 'U' AND lasku.alatila != 'D')
+					JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND lasku.tila NOT IN('U','D') )
 					JOIN varastopaikat ON (varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto)
 					JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.tunnus IN ( ".($ajax_request == 1 ? $toimitustavan_tunnukset : implode(',', $toimitustavan_tunnukset))." ) )
 					WHERE lahdot.yhtio = '{$kukarow['yhtio']}'

@@ -8,7 +8,7 @@
 	require("inc/parametrit.inc");
 
 	if ($tee == "") {
-		echo "<font class='head'>Maksuaineistot</font><hr>";
+		echo "<font class='head'>".t("Maksuaineistot")."</font><hr>";
 
 		$query = "	SELECT lasku.tunnus
 					FROM lasku, valuu, yriti
@@ -76,7 +76,7 @@
 			echo "<font class='head'>LM03-maksuaineisto</font><hr>";
 		}
 		else {
-			echo "<font class='head'>Betalningsuppdrang via Bankgirot - Inrikesbetalningar</font><hr>";
+			echo "<font class='head'>Betalningsuppdrag via Bankgirot - Inrikesbetalningar</font><hr>";
 		}
 
 		if ($kotimaa == "FI") {
@@ -429,7 +429,7 @@
 			echo "<br><br><br><font class='head'>LUM2-maksuaineisto</font><hr>";
 		}
 		else {
-			echo "<br><br><br><font class='head'>Betalningsuppdrang via Bankgirot - Utlandsbetalningar</font><hr>";
+			echo "<br><br><br><font class='head'>Betalningsuppdrag via Bankgirot - Utlandsbetalningar</font><hr>";
 		}
 
 		$makskpl 	= 0;

@@ -929,7 +929,7 @@
 				}
 			}
 			elseif (trim($array[$i]) == 'ytunnus' and !$tarkkahaku) {
-				$lisa .= " and REPLACE({$array[$i]}, '-', '') = REPLACE('{$haku[$i]}', '-', '') ";
+				$lisa .= " and REPLACE({$array[$i]}, '-', '') like '%".str_replace('-', '', $haku[$i])."%' ";
 			}
 			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
 				list($a, $b) = explode("/", $haku[$i]);

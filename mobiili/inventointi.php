@@ -1,13 +1,16 @@
 <?php
-# Tuotepaikka ja varmistuskoodi talteen
-if ($_GET['tee'] == 'laske' and isset($_POST['tuotepaikka']) and isset($_POST['varmistuskoodi'])) {
+
+// Nollataan keksit inventoinni alkuvalikossa
+// jos $tee muuttujaa ei oo setattu getissä tai postissa
+if (!isset($_GET['tee']) AND !isset($_POST['tee'])) {
+	setcookie("_tuotepaikka", null);
+	setcookie("_varmistuskoodi", null);
+}
+// Talletetaan tuotepaikka ja varmistuskoodi keksiin, jolloin niitä ei tarvitse joka kerta syöttää.
+// Molemmat pitää olla setattu että ne talletetaan!
+elseif (!empty($_POST['tuotepaikka']) AND !empty($_POST['varmistuskoodi'])) {
 	setcookie("_tuotepaikka", $_POST['tuotepaikka']);
 	setcookie("_varmistuskoodi", $_POST['varmistuskoodi']);
-}
-# Alkuvalikossa nollataan tuotepaikka ja varmistuskoodi
-if ((!isset($_GET['tee']) and !isset($_POST['tee'])) and isset($_COOKIE['_tuotepaikka']) and isset($_COOKIE['_varmistuskoodi'])) {
-	setcookie("_tuotepaikka", "", time()-3600);
-	setcookie("_varmistuskoodi", "", time()-3600);
 }
 
 $_GET['ohje'] = 'off';
@@ -19,19 +22,21 @@ elseif (@include_once("inc/parametrit.inc"));
 
 $errors = array();
 
-# Haetaan tuotteita
+// Haetaan tuotteita tai tuotepaikkaa
 function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 	global $kukarow;
 
-	$hylly = explode('-', $tuotepaikka);
+	// Poistetaan tuotepaikasta välimerkit
+	$hylly = preg_replace("/[^a-zA-ZåäöÅÄÖ0-9]/", "", $tuotepaikka);
 
-	# Hakuehdot
+	// Hakuehdot
 	if ($viivakoodi != '')	$params[] = "tuote.eankoodi = '{$viivakoodi}'";
 	if ($tuoteno != '')		$params[] = "tuote.tuoteno = '{$tuoteno}'";
-	if ($tuotepaikka != '')	$params[] = "tuotepaikat.hyllyalue='{$hylly[0]}'
-										AND tuotepaikat.hyllynro='{$hylly[1]}'
-										AND tuotepaikat.hyllyvali='{$hylly[2]}'
-										AND tuotepaikat.hyllytaso='{$hylly[3]}'";
+	if ($tuotepaikka != '') $params[] = "concat(tuotepaikat.hyllyalue,
+										 tuotepaikat.hyllynro,
+										 tuotepaikat.hyllyvali,
+										 tuotepaikat.hyllytaso)='$hylly'";
+
 	$haku_ehto = implode($params, " AND ");
 
 	$osumat = array();
@@ -61,18 +66,25 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 	return $osumat;
 }
 
-# Tarkistetaan koodi
-function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi) {
+/** Tarkistaa varmistuskoodin syötetyn tuotepaikan ja koodin mukaan.
+ *  jos varmistuskoodia ei annettu yritetään käyttää keksissä olevaa varmistuskoodia.
+ */
+function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi = '') {
+	// Muutetaan saatuo tuotepaikka arrayksi
 	$hylly = explode('-', $tuotepaikka);
 
-	# Jos ei annettu varmistuskoodia ja keksissä on koodi, käytetään keksin koodia
+	// Jos varmistuskoodia ei saatu parametrissa, yritetään keksissä olevalla koodilla.
+	// vain jos saatu tuotepaikka on sama kuin keksissä oleva tuotepaikka.
 	if ($varmistuskoodi == '' and isset($_COOKIE['_varmistuskoodi']) and $tuotepaikka == $_COOKIE['_tuotepaikka']) {
 		$varmistuskoodi = $_COOKIE['_varmistuskoodi'];
 	}
 
+	// Jos varmistuskoodi on edelleen tyhjä niin hylätään
 	if ($varmistuskoodi == '') {
 		return false;
-	}else {
+	}
+	// Verrataan varmistuskoodia hyllypaikan varmistuskoodiin
+	else {
 		$options = array('varmistuskoodi' => $varmistuskoodi);
 		return tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $options);
 	}
@@ -80,7 +92,7 @@ function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi) {
 
 if (!isset($tee)) $tee = '';
 
-# Valikko
+// Alkuvalikko
 if ($tee == '') {
 	$title = t("Inventointi");
 	include('views/inventointi/index.php');
@@ -147,7 +159,7 @@ if ($tee == 'listat') {
 
 	if (count($listat) == 1) {
 		# Jos löytyi vain yksi lista, inventoidaan suoraan sitä
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=inventointi.php{$listat[0]['url']}'>";
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0; URL=inventointi.php{$listat[0]['url']}'>";
 	}
 	elseif (count($listat) > 1) {
 		$title = t('Useita listoja');
@@ -263,8 +275,8 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 									'reservipaikka' => $reservipaikka));
 	}
 
-	# Tarkistetaan varmistuskoodi
-	if ((isset($varmistuskoodi) or isset($_varmistuskoodi)) and tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi)) {
+	// Jos varmistuskoodi kelpaa tai on keksissä tallessa
+	if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi)) {
 		$title = t("Laske määrä");
 		include('views/inventointi/laske.php');
 

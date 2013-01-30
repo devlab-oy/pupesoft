@@ -19888,7 +19888,8 @@ if (!function_exists('koontilahete_check')) {
 			# Haetaan kaikkien tällä tilauksella olevien tilausrivien alkuperäiset tilausnumerot
 			$query = "	SELECT GROUP_CONCAT(DISTINCT tlt2.vanha_otunnus) alkuperaiset_tilaukset
 						FROM tilausrivi
-						JOIN tilausrivin_lisatiedot as tlt2 USE INDEX (tilausrivitunnus) ON (tlt2.yhtio = tilausrivi.yhtio AND tlt2.tilausrivitunnus = tilausrivi.tunnus)
+						JOIN tilausrivin_lisatiedot as tlt2 USE INDEX (tilausrivitunnus) ON (tlt2.yhtio = tilausrivi.yhtio AND tlt2.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus = '{$hakutunnus}'
 						AND tilausrivi.tyyppi = 'L'
@@ -19904,7 +19905,9 @@ if (!function_exists('koontilahete_check')) {
 					$query = "	SELECT tlt2.tunnus
 								FROM tilausrivin_lisatiedot as tlt2
 								JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi = 'L' AND tilausrivi.var != 'P' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00')
+								JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 								WHERE tlt2.yhtio = '{$kukarow['yhtio']}'
+								AND tlt2.ohita_kerays = ''
 								AND tlt2.vanha_otunnus IN ({$alk_til})";
 					$query_result = pupe_query($query);
 
@@ -19914,25 +19917,16 @@ if (!function_exists('koontilahete_check')) {
 					}
 					else {
 
-						$query = "	SELECT GROUP_CONCAT(DISTINCT tilausrivi.otunnus ORDER BY tilausrivi.otunnus) otunnukset
+						$query = "	SELECT GROUP_CONCAT(DISTINCT tilausrivi.otunnus ORDER BY tilausrivi.otunnus) otunnukset, GROUP_CONCAT(DISTINCT tilausrivi.tunnus ORDER BY tilausrivi.otunnus) tilausrivit
 									FROM tilausrivin_lisatiedot as tlt2
-									JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi = 'L' AND tilausrivi.var != 'P')
+									JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi = 'L')
 									WHERE tlt2.yhtio = '{$kukarow['yhtio']}'
 									AND tlt2.vanha_otunnus IN ({$alk_til})";
 						$query_result = pupe_query($query);
 						$otunnukset_row = mysql_fetch_assoc($query_result);
 
 						$koontilahete[$alk_til] = $otunnukset_row['otunnukset'];
-
-						$query = "	SELECT GROUP_CONCAT(DISTINCT tilausrivi.tunnus ORDER BY tilausrivi.otunnus) tilausrivit
-									FROM tilausrivin_lisatiedot as tlt2
-									JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi = 'L' AND tilausrivi.var != 'P')
-									WHERE tlt2.yhtio = '{$kukarow['yhtio']}'
-									AND tlt2.vanha_otunnus IN ({$alk_til})";
-						$query_result = pupe_query($query);
-						$tilausrivit_row = mysql_fetch_assoc($query_result);
-
-						$koontilahete_tilausrivit[$alk_til] = $tilausrivit_row['tilausrivit'];
+						$koontilahete_tilausrivit[$alk_til] = $otunnukset_row['tilausrivit'];
 					}
 				}
 			}

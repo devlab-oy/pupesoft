@@ -19920,7 +19920,9 @@ if (!function_exists('koontilahete_check')) {
 						$query = "	SELECT GROUP_CONCAT(DISTINCT tilausrivi.otunnus ORDER BY tilausrivi.otunnus) otunnukset, GROUP_CONCAT(DISTINCT tilausrivi.tunnus ORDER BY tilausrivi.otunnus) tilausrivit
 									FROM tilausrivin_lisatiedot as tlt2
 									JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi = 'L')
+									JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 									WHERE tlt2.yhtio = '{$kukarow['yhtio']}'
+									AND tlt2.ohita_kerays = ''
 									AND tlt2.vanha_otunnus IN ({$alk_til})";
 						$query_result = pupe_query($query);
 						$otunnukset_row = mysql_fetch_assoc($query_result);

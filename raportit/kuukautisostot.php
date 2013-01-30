@@ -49,11 +49,11 @@
 
 		// Tarvittavat p‰iv‰m‰‰r‰t
 		for ($i = 1; $i < 13; $i++) {
-			if (!isset(${"kka{$i}"})) ${"kka{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")));
+			if (!isset(${"kka{$i}"})) ${"kka{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, 1, date("Y")));
 			if (!isset(${"ppa{$i}"})) ${"ppa{$i}"} = date("d", mktime(0, 0, 0, date("m"), 1, date("Y")));
 			if (!isset(${"vva{$i}"})) ${"vva{$i}"} = date("Y", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")));
 
-			if (!isset(${"kkl{$i}"})) ${"kkl{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")));
+			if (!isset(${"kkl{$i}"})) ${"kkl{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, 1, date("Y")));
 			if (!isset(${"vvl{$i}"})) ${"vvl{$i}"} = date("Y", mktime(0, 0, 0, date("m")-$i+1, 1, date("Y")));
 			if (!isset(${"ppl{$i}"})) {
 				if ($i == 1) ${"ppl{$i}"} = date("d");
@@ -61,16 +61,16 @@
 			}
 
 			//Edellisen vuoden vastaavat kaudet
-			${"kkaed{$i}"} = date("m", mktime(0, 0, 0, ${"kka{$i}"}, date("d"), date("Y")-1));
-			${"ppaed{$i}"} = date("d", mktime(0, 0, 0, ${"kka{$i}"}, 1, date("Y")-1));
-			${"vvaed{$i}"} = date("Y", mktime(0, 0, 0, ${"kka{$i}"}, date("d"), date("Y")-1));
+			${"kkaed{$i}"} = date("m", mktime(0, 0, 0, ${"kka{$i}"}, date("d"), ${"vva{$i}"}-1));
+			${"ppaed{$i}"} = date("d", mktime(0, 0, 0, ${"kka{$i}"}, 1, ${"vva{$i}"}-1));
+			${"vvaed{$i}"} = date("Y", mktime(0, 0, 0, ${"kka{$i}"}, date("d"), ${"vva{$i}"}-1));
 
-			${"kkled{$i}"} = date("m", mktime(0, 0, 0, ${"kkl{$i}"}, date("d"), date("Y")-1));
-			${"vvled{$i}"} = date("Y", mktime(0, 0, 0, ${"kkl{$i}"}, 1, date("Y")-1));
-			${"ppled{$i}"} = date("d", mktime(0, 0, 0, ${"kkl{$i}"}+1, 0, date("Y")-1));
+			${"kkled{$i}"} = date("m", mktime(0, 0, 0, ${"kkl{$i}"}, date("d"), ${"vva{$i}"}-1));
+			${"vvled{$i}"} = date("Y", mktime(0, 0, 0, ${"kkl{$i}"}, 1, ${"vva{$i}"}-1));
+			${"ppled{$i}"} = date("d", mktime(0, 0, 0, ${"kkl{$i}"}+1, 0, ${"vva{$i}"}-1));
 
 			//katotaan pienin alkupvm ja isoin loppupvm
-			${"apaiva{$i}"} = (int) date('Ymd',mktime(0,0,0,${"kka{$i}"},${"ppa{$i}"},${"vva{$i}"}));
+			${"apaiva{$i}"} = (int) date('Ymd',mktime(0,0,0,${"kkaed{$i}"},${"ppaed{$i}"},${"vvaed{$i}"}));
 			${"lpaiva{$i}"} = (int) date('Ymd',mktime(0,0,0,${"kkl{$i}"},${"ppl{$i}"},${"vvl{$i}"}));
 		}
 

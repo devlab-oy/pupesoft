@@ -1125,6 +1125,54 @@
 									$kokonaismyytavissa += $myytavissa;
 								}
 							}
+							
+							//tarkistetaan, että yhtiö parametrit on (Jt_automatiikka = "kohdistetaan.." ja Automaattinen_jt_toimitus = "Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä keräyspäivän mukaisesti")
+							if(!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] = 'A') {
+								//loopata kaikki jt-rivit läpi tuotteen perusteella jat katsoa, onko joku tilannut tuotetta aikaisemmin ja vähentää saldoa jos on
+								$jt_muiden_mukana_query = "	SELECT tilausrivi.tunnus,
+															tilausrivi.tuoteno,
+															tilausrivi.nimitys,
+															tilausrivi.tilkpl,
+															tilausrivi.kerayspvm,
+															tilausrivi.jt + tilausrivi.varattu jt,
+															lasku.ytunnus,
+															lasku.nimi,
+															lasku.toim_nimi
+															FROM   tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
+															JOIN tilausrivin_lisatiedot
+															ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+															JOIN lasku USE INDEX (primary)
+															ON ( lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND ( lasku.tila != 'N' OR lasku.alatila != '' ) )
+															JOIN tuote USE INDEX (tuoteno_index)
+															ON ( tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno )
+															WHERE  tilausrivi.yhtio = '{$kukarow['yhtio']}'
+															AND tilausrivi.tyyppi IN ( 'L', 'G' )
+															AND tilausrivi.var = 'J'
+															AND tilausrivi.keratty = ''
+															AND tilausrivi.uusiotunnus = 0
+															AND tilausrivi.kpl = 0
+															and tilausrivi.jt $lisavarattu	> 0
+															AND ( ( tilausrivi.tunnus = tilausrivi.perheid AND tilausrivi.perheid2 = 0 ) OR ( tilausrivi.tunnus = tilausrivi.perheid2 ) OR ( tilausrivi.perheid = 0 AND tilausrivi.perheid2 = 0 ) )
+															AND tilausrivi.tuoteno = '{$jtrow['tuoteno']}'
+															ORDER  BY lasku.luontiaika";
+								$jt_muiden_mukana_result = pupe_query($jt_muiden_mukana_query);
+
+								while ($jt_muiden_mukana_row = mysql_fetch_assoc($jt_muiden_mukana_result)) {
+									if($jt_muiden_mukana_row['tunnus'] != $jtrow['tunnus']) {
+										//jos ennen jtrow riviä löytyy tilauksia joissa on jt rivejä nämä varaavat saldoa
+										$kokonaismyytavissa -= $jt_muiden_mukana_row['jt'];
+									}
+									else {
+										//tuli jtrow vuoro myytavissa pitää sisällään todellisen myytävissä olevan saldon. breakataan
+										//mutta jos jtrow on jt-muiden mukana niin sitä ei voida toimittaa eli $kokonaismyytavissa = 0;
+										//mutta jos ollaan tulossa esim pikatilauksesta niin myytavissa oleva saldo pitää pystyä lisäämään uudelle tilaukselle eli iffiin ei mennä
+										if($jtrow['kerayspvm'] > date('Y-m-d') and empty($tilaus_on_jo)) {
+											$kokonaismyytavissa = 0;
+										}
+										break;
+									}
+								}
+							}
 						}
 
 						// Saldoa on tai halutaan nähdä kaikki rivit

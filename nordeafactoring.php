@@ -676,7 +676,7 @@
 
 				echo "<tr><td class='back' colspan='2'></td><th>Yhteensä $vlaskukpl veloituslaskua</th><td align='right'>".sprintf('%.2f', $vlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
 				echo "<tr><td class='back' colspan='2'></td><th>Yhteensä $hlaskukpl hyvityslaskua</th><td align='right'> ".sprintf('%.2f', $hlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
-				echo "<tr><td class='back' colspan='2'></td><th>Yhteensä</th><td align='right'> ".sprintf('%.2f', ($vlaskusum+$hlaskusum)/100)."</td><td>$laskurow[valkoodi]</td></tr>";
+				echo "<tr><td class='back' colspan='2'></td><th>Yhteensä</th><td align='right'> ".sprintf('%.2f', ($vlaskusum+($hlaskusum*-1))/100)."</td><td>$laskurow[valkoodi]</td></tr>";
 
 				echo "</table>";
 				echo "<br><br>";

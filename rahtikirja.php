@@ -935,7 +935,8 @@
 				$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
 
 				// Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty
-				if ($asiakas_chk_row["keraysvahvistus_lahetys"] == 'L' or ($yhtiorow["keraysvahvistus_lahetys"] == 'L' and $asiakas_chk_row["keraysvahvistus_lahetys"] == '')) {
+				if (($asiakas_chk_row["keraysvahvistus_lahetys"] == 'L' or $asiakas_chk_row["keraysvahvistus_lahetys"] == 'Q') or
+					(($yhtiorow["keraysvahvistus_lahetys"] == 'L' or $yhtiorow["keraysvahvistus_lahetys"] == 'Q') and $asiakas_chk_row["keraysvahvistus_lahetys"] == '')) {
 
 					$laskurow["email"] = $asiakas_chk_row["email"];
 					$laskurow["keraysvahvistus_lahetys"] = $asiakas_chk_row["keraysvahvistus_lahetys"];

@@ -726,11 +726,16 @@
 				$tuotetyyppilisa = " AND tuote.tuotetyyppi = 'K' ";
 				$taso 			 = 'fi311';
 				$cleantaso 		 = 'fi312';
+				$kolmikantakauppa = "AND lasku.kolmikantakauppa = ''";
 			}
 			elseif ($taso == 'fi311') {
 				$tuotetyyppilisa = " AND tuote.tuotetyyppi != 'K' ";
 				$taso 			 = 'fi311';
 				$cleantaso 		 = 'fi311';
+				$kolmikantakauppa = "AND lasku.kolmikantakauppa = ''";
+			}
+			else {
+				$kolmikantakauppa = "";
 			}
 
 			if ($taso == 'fi313') {
@@ -774,6 +779,7 @@
 								and lasku.tapvm >= '$startmonth'
 								and lasku.tapvm <= '$endmonth'
 								and lasku.vienti = 'E'
+								{$kolmikantakauppa}
 								GROUP BY 1,2";
 				}
 				else {

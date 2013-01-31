@@ -96,6 +96,29 @@
 						echo t("Monta sopivaa s‰‰ntˆ‰, k‰ytet‰‰n oletustili‰")."!";
 					}
 				}
+				else {
+					// kokeillaan viel‰ ekalla queryll‰ mutta ilman nimitietoa!
+					$query = "	SELECT * FROM tiliotesaanto
+								WHERE yhtio = '$yritirow[yhtio]' and
+								erittely = '' and
+								pankkitili = '$pankkitilino' and
+								koodi = '$koodi' and
+								koodiselite = '$koodiselite' and
+								nimitieto = '' and
+								locate(selite, '$vientiselite') > 0";
+					$tiliotesaantoresult = mysql_query($query) or pupe_error($query);
+
+					// Jotain lˆytyy
+					if (mysql_num_rows($tiliotesaantoresult) > 0) {
+						if (mysql_num_rows($tiliotesaantoresult) == 1) {
+							$tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
+							$tiliotesaantotilino = $tiliointisaantorow['tilino'];
+						}
+						else {
+							echo t("Monta sopivaa s‰‰ntˆ‰, k‰ytet‰‰n oletustili‰")."!";
+						}
+					}
+				}
 			}
 		}
 	}

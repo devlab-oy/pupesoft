@@ -1851,47 +1851,42 @@
 			if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA") {
 
 				if ($toim == "KOONTILAHETE") {
-					list($komento, $koontilahete_arr, $koontilahete_tilausrivit_arr) = koontilahete_check($laskurow, $komento);
 
-					if ($komento != "" and count($koontilahete_arr) == 0) {
-						$koontilahete_arr[$laskurow['tunnus']] = 0;
-						$koontilahete_tilausrivit_arr = array();
+					$query = "	SELECT lasku.*, asiakas.keraysvahvistus_lahetys
+								FROM lasku
+								LEFT JOIN asiakas ON (lasku.yhtio = asiakas.yhtio AND lasku.liitostunnus = asiakas.tunnus)
+								WHERE lasku.tunnus IN ({$laskurow['tunnus']})
+								and lasku.yhtio = '{$kukarow['yhtio']}'";
+					$alk_til_res = pupe_query($query);
+					$laskurow = mysql_fetch_assoc($alk_til_res);
+
+					list($komento, $koontilahete, $koontilahete_tilausrivit) = koontilahete_check($laskurow, $komento);
+
+					if ($komento != "" and $koontilahete == 0) {
+						$koontilahete = $laskurow['tunnus'];
+						$koontilahete_tilausrivit = 0;
 					}
 				}
 				else {
-					$koontilahete_arr[$laskurow['tunnus']] = 0;
-					$koontilahete_tilausrivit_arr = array();
+					$koontilahete = $laskurow['tunnus'];
+					$koontilahete_tilausrivit = 0;
 				}
 
-				foreach ($koontilahete_arr as $alk_til => $koontilahete) {
+				$params = array(
+					'laskurow'					=> $laskurow,
+					'sellahetetyyppi' 			=> $sellahetetyyppi,
+					'extranet_tilausvahvistus' 	=> $extranet_tilausvahvistus,
+					'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
+					'tee'						=> $tee,
+					'toim'						=> $toim,
+					'komento' 					=> $komento,
+					'lahetekpl'					=> "",
+					'kieli' 					=> $kieli,
+					'koontilahete'				=> $koontilahete,
+					'koontilahete_tilausrivit'	=> $koontilahete_tilausrivit,
+				);
 
-					if ($toim == "KOONTILAHETE") {
-						$query = "	SELECT *
-									FROM lasku
-									WHERE tunnus in ({$alk_til})
-									and yhtio = '{$kukarow['yhtio']}'";
-						$alk_til_res = pupe_query($query);
-						$laskurow = mysql_fetch_assoc($alk_til_res);
-					}
-
-					$koontilahete_tilausrivit = isset($koontilahete_tilausrivit_arr[$alk_til]) ? $koontilahete_tilausrivit_arr[$alk_til] : '';
-
-					$params = array(
-						'laskurow'					=> $laskurow,
-						'sellahetetyyppi' 			=> $sellahetetyyppi,
-						'extranet_tilausvahvistus' 	=> $extranet_tilausvahvistus,
-						'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
-						'tee'						=> $tee,
-						'toim'						=> $toim,
-						'komento' 					=> $komento,
-						'lahetekpl'					=> "",
-						'kieli' 					=> $kieli,
-						'koontilahete'				=> $koontilahete,
-						'koontilahete_tilausrivit'	=> $koontilahete_tilausrivit,
-					);
-
-					pupesoft_tulosta_lahete($params);
-				}
+				pupesoft_tulosta_lahete($params);
 
 				$tee = '';
 			}

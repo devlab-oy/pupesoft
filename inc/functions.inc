@@ -17173,7 +17173,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
 			$otunnus = $koontilahete;
 
-			if ($koontilahete_tilausrivit != '') {
+			if (isset($koontilahete_tilausrivit) and $koontilahete_tilausrivit != 0) {
 				$koontilisa = "AND tilausrivi.tunnus IN ({$koontilahete_tilausrivit})";
 			}
 
@@ -19876,8 +19876,8 @@ if (!function_exists('koontilahete_check')) {
 	function koontilahete_check($laskurow, $komento) {
 		global $kukarow, $yhtiorow;
 
-		$koontilahete = array();
-		$koontilahete_tilausrivit = array();
+		$koontilahete = 0;
+		$koontilahete_tilausrivit = 0;
 
 		// onko koontivahvistus k‰ytˆss‰?
 		if (in_array($laskurow["keraysvahvistus_lahetys"], array('N','Q','P')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('N','Q','P')) and $laskurow["keraysvahvistus_lahetys"] == '')) {
@@ -19888,7 +19888,7 @@ if (!function_exists('koontilahete_check')) {
 			# Haetaan kaikkien t‰ll‰ tilauksella olevien tilausrivien alkuper‰iset tilausnumerot
 			$query = "	SELECT GROUP_CONCAT(DISTINCT tlt2.vanha_otunnus) alkuperaiset_tilaukset
 						FROM tilausrivi
-						JOIN tilausrivin_lisatiedot as tlt2 USE INDEX (tilausrivitunnus) ON (tlt2.yhtio = tilausrivi.yhtio AND tlt2.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+						JOIN tilausrivin_lisatiedot as tlt2 USE INDEX (tilausrivitunnus) ON (tlt2.yhtio = tilausrivi.yhtio AND tlt2.tilausrivitunnus = tilausrivi.tunnus AND tlt2.ohita_kerays = '')
 						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus = '{$hakutunnus}'
@@ -19900,36 +19900,33 @@ if (!function_exists('koontilahete_check')) {
 			# Lasketaan kuinka monta toimitettua tilausrivi‰ lˆytyy per alkuper‰inen tilaus
 			if ($isa_tilaus['alkuperaiset_tilaukset'] != '') {
 
-				foreach (explode(",", $isa_tilaus['alkuperaiset_tilaukset']) as $alk_til) {
+				$query = "	SELECT tlt2.tunnus
+							FROM tilausrivin_lisatiedot as tlt2
+							JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi = 'L' AND tilausrivi.var != 'P' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00')
+							JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
+							WHERE tlt2.yhtio = '{$kukarow['yhtio']}'
+							AND tlt2.ohita_kerays = ''
+							AND tlt2.vanha_otunnus IN ({$isa_tilaus['alkuperaiset_tilaukset']})";
+				$query_result = pupe_query($query);
 
-					$query = "	SELECT tlt2.tunnus
+				// Jos yksikin tilaus jossa ei ole ker‰ttyj‰ rivej‰
+				if (mysql_num_rows($query_result) > 0) {
+					$komento = "";
+				}
+				else {
+
+					$query = "	SELECT GROUP_CONCAT(DISTINCT tilausrivi.otunnus ORDER BY tilausrivi.otunnus) otunnukset, GROUP_CONCAT(DISTINCT tilausrivi.tunnus ORDER BY tilausrivi.otunnus) tilausrivit
 								FROM tilausrivin_lisatiedot as tlt2
-								JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi = 'L' AND tilausrivi.var != 'P' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00')
+								JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi = 'L')
 								JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 								WHERE tlt2.yhtio = '{$kukarow['yhtio']}'
 								AND tlt2.ohita_kerays = ''
-								AND tlt2.vanha_otunnus IN ({$alk_til})";
+								AND tlt2.vanha_otunnus IN ({$isa_tilaus['alkuperaiset_tilaukset']})";
 					$query_result = pupe_query($query);
+					$otunnukset_row = mysql_fetch_assoc($query_result);
 
-					// Jos yksikin tilaus jossa ei ole ker‰ttyj‰ rivej‰
-					if (mysql_num_rows($query_result) > 0) {
-						$komento = "";
-					}
-					else {
-
-						$query = "	SELECT GROUP_CONCAT(DISTINCT tilausrivi.otunnus ORDER BY tilausrivi.otunnus) otunnukset, GROUP_CONCAT(DISTINCT tilausrivi.tunnus ORDER BY tilausrivi.otunnus) tilausrivit
-									FROM tilausrivin_lisatiedot as tlt2
-									JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi = 'L')
-									JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
-									WHERE tlt2.yhtio = '{$kukarow['yhtio']}'
-									AND tlt2.ohita_kerays = ''
-									AND tlt2.vanha_otunnus IN ({$alk_til})";
-						$query_result = pupe_query($query);
-						$otunnukset_row = mysql_fetch_assoc($query_result);
-
-						$koontilahete[$alk_til] = $otunnukset_row['otunnukset'];
-						$koontilahete_tilausrivit[$alk_til] = $otunnukset_row['tilausrivit'];
-					}
+					$koontilahete = $otunnukset_row['otunnukset'];
+					$koontilahete_tilausrivit = $otunnukset_row['tilausrivit'];
 				}
 			}
 		}
@@ -19949,7 +19946,7 @@ if (!function_exists('koontilahete_check')) {
 
 			if (mysql_num_rows($vanhat_res) == 0) {
 				// Kaikki rivit ker‰tty! Tulostetaan koontilahete
-				$koontilahete[$hakutunnus] = $hakutunnus;
+				$koontilahete = $hakutunnus;
 
 				$query = "	SELECT GROUP_CONCAT(tilausrivi.tunnus) tilausrivit
 							FROM lasku
@@ -19961,7 +19958,7 @@ if (!function_exists('koontilahete_check')) {
 				$tilausrivit_res = pupe_query($query);
 				$tilausrivit_row = mysql_fetch_assoc($tilausrivit_res);
 
-				$koontilahete_tilausrivit[$hakutunnus] = $tilausrivit_row['tilausrivit'];
+				$koontilahete_tilausrivit = $tilausrivit_row['tilausrivit'];
 			}
 			else {
 				// T‰ll‰ asiakkaalla on koontil‰heteprosessi p‰‰ll‰, mutta kaikki rivit ei oo viel‰ ker‰tty, joten ei tulosteta mitt‰‰n
@@ -19969,7 +19966,7 @@ if (!function_exists('koontilahete_check')) {
 			}
 		}
 
-		if (count($koontilahete) > 0 and $laskurow['email'] != "" and (($laskurow['keraysvahvistus_lahetys'] != "" and $laskurow['keraysvahvistus_lahetys'] != 'L') or ($laskurow['keraysvahvistus_lahetys'] == "" and $yhtiorow["keraysvahvistus_lahetys"] != "" and $yhtiorow["keraysvahvistus_lahetys"] != 'L'))) {
+		if ($koontilahete != 0 and $laskurow['email'] != "" and (($laskurow['keraysvahvistus_lahetys'] != "" and $laskurow['keraysvahvistus_lahetys'] != 'L') or ($laskurow['keraysvahvistus_lahetys'] == "" and $yhtiorow["keraysvahvistus_lahetys"] != "" and $yhtiorow["keraysvahvistus_lahetys"] != 'L'))) {
 			// Ker‰ysvahvistus/paperinen & s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty
 			if ($laskurow['keraysvahvistus_lahetys'] == 'M' or ($yhtiorow['keraysvahvistus_lahetys'] == 'M' and $laskurow['keraysvahvistus_lahetys'] == '')) {
 				$komento = $komento != "" ? array($komento) : array();

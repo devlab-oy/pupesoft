@@ -955,7 +955,7 @@
 
 					$lahetteet_tmp = $lahetteet;
 
-					if (isset($koontilahete) and count($koontilahete) > 0) $lahetteet_tmp = $koontilahete;
+					if (isset($koontilahete) and $koontilahete != 0) $lahetteet_tmp = array($koontilahete);
 
 					foreach ($lahetteet_tmp as $index => $laskutunnus) {
 
@@ -975,7 +975,7 @@
 							'lahetekpl'					=> $lahetekpl,
 							'kieli' 					=> $kieli,
 							'koontilahete'				=> $laskutunnus,
-							);
+						);
 
 						pupesoft_tulosta_lahete($params);
 					}

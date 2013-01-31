@@ -68,7 +68,7 @@ function laheta_sahkoposti($excel_file_path) {
 	global $yhtiorow;
 
 	$email_address = "joonas@devlab.fi";
-	$subject = "Makia Webstore Sales Orders " . date('Y-m-d');
+	$subject = "{$yhtiorow['nimi']} Webstore Sales Orders " . date('Y-m-d');
 	$body = "You can find the sales orders as and excel attachment";
 	$new_file_name = "SalesOrders.xlsx";
 	$ctype = "excel";

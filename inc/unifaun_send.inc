@@ -123,7 +123,7 @@ class Unifaun {
 
 			$ftpfile = realpath($filenimi);
 
-			//require ("inc/ftp-send.inc");
+			require ("inc/ftp-send.inc");
 		}
 	}
 
@@ -750,7 +750,7 @@ class Unifaun {
 		$uni_parcel = $this->xml->shipment->addChild('container'); # Parcel information can be supplied in various ways. See p. 7.
 		$uni_parcel->addAttribute('type', "parcel");
 
-		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['maara'])); # Number of parcels
+		$uni_par_val = $uni_parcel->addChild('val', (int)utf8_encode($pakkaustiedot['maara'])); # Number of parcels
 		$uni_par_val->addAttribute('n', "copies");
 
 		#$uni_par_val = $uni_parcel->addChild('val', ""); # Parcel ID. Used only for custom parcel ID. UFPS only. Cntid is to be incremented according to number of parcels.

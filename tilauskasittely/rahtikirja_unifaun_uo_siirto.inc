@@ -52,7 +52,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 
 		$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
 
-		$postirow['shipment_unique_id'] = $shipment_idt[$indeksi];
+		$postirow['shipment_unique_id'] = $postirow['tunnus'];
 		$postirow['kuljetusohjeet'] 	= $kuljetusohjeet;
 
 		$unifaun->setYhtioRow($yhtiorow);

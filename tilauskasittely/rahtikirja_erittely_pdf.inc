@@ -259,8 +259,18 @@
 		}
 	}
 
+	//rahtikirja-tulostus.php riveiltä 784 - 788 tulee välilyöntejä
+	$otunnukset = str_replace(' ', '', $otunnukset);
 	// Ei kaaduta erroriin jos jostain syystä tullaan tyhjällä
 	if ($otunnukset == "") $otunnukset = 0;
+
+	if ($yhdistetaan_lahtoon != 0 and !empty($yhdistettavan_lahdon_tilaukset)) {
+		if (sort(explode(',', $yhdistetaan_lahtoon)) == sort(explode(',', $otunnukset))) {
+			foreach($yhdistettavan_lahdon_tilaukset as $til) {
+				$otunnukset .= ',' . $til;
+			}
+		}
+	}
 
 	// Haetaan tulostetut tilaukset
 	if ($toitarow['erittely'] == 'k') {
@@ -283,12 +293,12 @@
 					toim_postitp,
 					ytunnus,
 					liitostunnus,
-					toimitustavan_lahto,
+					max(toimitustavan_lahto) toimitustavan_lahto,
 					group_concat(tunnus) tunnus
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus in ($otunnukset)
-					GROUP BY nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, ytunnus, liitostunnus, toimitustavan_lahto
+					GROUP BY nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, ytunnus, liitostunnus
 					ORDER BY ytunnus, liitostunnus, tunnus";
 	}
 

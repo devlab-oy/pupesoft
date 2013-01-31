@@ -257,7 +257,7 @@ if ($kollityht > 0) {
 			$ftphost = $dpd_ds_host;
 			$ftpuser = $dpd_ds_user;
 			$ftppass = $dpd_ds_pass;
-			$ftppath = $dpd_ds_path;
+			$ftppath = (trim($avainrow['selitetark_3']) != '') ? $dpd_ds_path . trim($avainrow['selitetark_3']) . "/" : $dpd_ds_path;
 			$ftpfile = realpath($filenimi);
 
 			require ("inc/ftp-send.inc");

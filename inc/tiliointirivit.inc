@@ -348,7 +348,14 @@
 		echo "<td valign='top' class='$class' align='right' nowrap>$trow[summa]</td>";
 		echo "<td valign='top' class='$class' align='right'>". (float) $trow["vero"]. "</td>";
 		echo "<td align='center' valign='top' class='$class'>".tv1dateconv($trow["tapvm"])."</td>";
-		echo "<td valign='top' class='$class'>$trow[selite]";
+		echo "<td valign='top' class='$class'>";
+		
+		if (strlen($trow["selite"]) > 255) {
+			echo substr($trow["selite"], 0, 255)."...";
+		}
+		else {
+			echo "$trow[selite]";
+		}
 
 		if ($trow["summa_valuutassa"] != 0 and $trow["valkoodi"] != "" and $trow["valkoodi"] != $yhtiorow["valkoodi"]) {
 			echo " ($trow[summa_valuutassa] $trow[valkoodi])";

@@ -137,6 +137,7 @@ if ((int) $valitsetoimitus > 0) {
 	$tee 			= "AKTIVOI";
 	$tilausnumero 	= $valitsetoimitus;
 	$from 			= "VALITSETOIMITUS";
+	$mista 			= "";
 
 
 	$query = "	SELECT tila, alatila, tilaustyyppi
@@ -228,12 +229,12 @@ if ($tee == 'AKTIVOI' and $mista == "muokkaatilaus") {
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) != 1) {
-			echo "<font class='error'>".t("Tilauksen tila on vaihtunut. Ole hyvä avaa tilaus uudestaan").".</font><br>";
+		echo "<font class='error'>".t("Tilauksen tila on vaihtunut. Ole hyvä avaa tilaus uudestaan").".</font><br>";
 
-			// poistetaan aktiiviset tilaukset jota tällä käyttäjällä oli
-			$query = "UPDATE kuka SET kesken='' WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
-			$result = pupe_query($query);
-			exit;
+		// poistetaan aktiiviset tilaukset jota tällä käyttäjällä oli
+		$query = "UPDATE kuka SET kesken='' WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
+		$result = pupe_query($query);
+		exit;
 	}
 }
 
@@ -3535,7 +3536,7 @@ if ($tee == '') {
 			$omalle_tilaukselle = $tilausrivi['omalle_tilaukselle'];
 
 			// useamman valmisteen reseptit...
-			if ($tilausrivi['tyyppi'] == "W" and $tilausrivi["tunnus"] != $tilausrivi["perheid"]) {
+			if (($tilausrivi['tyyppi'] == "W" and $tilausrivi["tunnus"] != $tilausrivi["perheid"]) or ($tilausrivi['tyyppi'] == "W" and $tapa == "VAIHDA")) {
 				$perheid2 = -100;
 			}
 

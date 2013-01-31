@@ -303,6 +303,7 @@
 	}
 	elseif ($laskurow["tila"] == 'V' and $perheid2 == -100) {
 		$rivityyppi = 'W';	// Valmistustilausrivi (Valmiste)
+		$perheid2 = 0;
 	}
 	elseif ($laskurow["tila"] == 'V') {
 		$rivityyppi = 'V';	// Valmistustilausrivi
@@ -676,7 +677,7 @@
 				}
 
 				// Käydään läpi tuotepaikat
-				if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and ($paikka != "EIERAAVIELA#!¡!#EIEI")) {
+				if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and $paikka != "EIERAAVIELA#!¡!#EIEI" AND $rivityyppi != 'W' AND ($laskurow["tila"] != 'V' or $paikka != "")) {
 					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								sarjanumeroseuranta.sarjanumero era,
@@ -988,7 +989,7 @@
 				$muu_maa = array();
 
 				foreach ($zzrow as $zzrow_rivi) {
-					// jos löydetään varasto toimitusoosoitteen maasta, käytetään sitä eka
+					// jos löydetään varasto toimitusosoitteen maasta, käytetään sitä eka
 					if ($laskurow["toim_maa"] == $zzrow_rivi["varastomaa"] and $laskurow["toim_maa"] != "" and $zzrow_rivi["varastomaa"] != "") {
 						$oma_maa[] = $zzrow_rivi;
 					}
@@ -1517,7 +1518,7 @@
 
 								$result = pupe_query($query);
 								$lisatty_tun = mysql_insert_id();
-
+								
 								$trivtyrow = array("selite" => "");
 
 								@include("trivityyppivalinta.inc");

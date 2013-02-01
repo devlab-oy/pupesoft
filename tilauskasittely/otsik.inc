@@ -1770,12 +1770,14 @@
 			$laskkielto = '';
 			$jtki = "";
 			$rahtivapaa_chk = '';
+			$heti_toimitukseen = '';
 
 			if ($srow['eilahetetta'] != '') $eilah          = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
 			if ($srow['chn'] == '999')      $laskkielto     = 'CHECKED';
+			if ($srow['heti_toimitukseen'] != '') $heti_toimitukseen = 'CHECKED';
 
 			// Tarjouksia ei oletuksena osatoimiteta
 			if ($srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) $osath = 'CHECKED';
@@ -2008,6 +2010,13 @@
 			if ($yhtiorow['laskutuskielto'] != 0 and $toim != "MYYNTITILI") {
 				echo "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
 			}
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<td>".t("Heti toimitukseen")."</td>";
+			echo "<td><input type='checkbox' name='heti_toimitukseen' $heti_toimitukseen></td>";
+			echo "<td></td>";
+			echo "<td></td>";
 			echo "</tr>";
 
 			if ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") {
@@ -3125,6 +3134,7 @@
 					jakelu 								= '$jakelu',
 					jaksotettu							= '$jaksotettu',
 					jtkielto							= '$jtkielto',
+					heti_toimitukseen					= '$heti_toimitukseen',
 					kassalipas							= '$kassalipas',
 					kauppatapahtuman_luonne				= '$kauppatapahtuman_luonne',
 					kerayspvm 							= '$kervv-$kerkk-$kerpp',

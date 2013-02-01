@@ -1957,6 +1957,13 @@
 			}
 
 			if ($rivityyppi != 'O') {
+				if(!empty($laskurow['heti_toimitukseen'])) {
+					$jt_heti = 'J';
+				}
+				else {
+					$jt_heti = '';
+				}
+
 				switch ($var) {
 					case 'J' : // Jälkitoimitukseen
 					case 'R' : // Valmistetaan asiakkaalle
@@ -2349,6 +2356,7 @@
 						toimaika 		= '$toimaika',
 						kommentti 		= '$kommentti',
 						var 			= '$var',
+						jt_heti			= '$jt_heti',
 						try				= '$trow[try]',
 						osasto			= '$trow[osasto]',
 						perheid			= '$perheid',

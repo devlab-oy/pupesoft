@@ -627,7 +627,7 @@
 				while ($srow1 = mysql_fetch_assoc($sarjares1)) {
 
 					// Tsekataan onko tuotetta ikin‰ ostettu jos kehahinarvio_ennen_ensituloa-parametri on p‰‰ll‰
-					if ($yhtiorow["kehahinarvio_ennen_ensituloa"] != "" and $srow1["kehahin"] != 0 and $srow1["ei_saldoa"] == "") {
+					if ($yhtiorow["kehahinarvio_ennen_ensituloa"] = "" and $srow1["kehahin"] != 0 and $srow1["ei_saldoa"] == "") {
 
 						if ($poikkeava_pvm != "") {
 							$tapapvm = $laskvv."-".$laskkk."-".$laskpp." 23:59:59";

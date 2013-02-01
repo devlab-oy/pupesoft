@@ -163,8 +163,16 @@
 			}
 		}
 
+		if ($lasku > 0) {
+			$laskulisa 	= " and laskunro = {$lasku} AND tila = 'U' AND alatila = 'X' ";
+			$virhelaji  = "NAYTAKAIKKI";
+			$pvmlisa 	= "";
+		}
+
 		if ($virhelaji == "lahtosuljettueilaskutettu") {
-			$query = "	SELECT group_concat(lasku.tunnus) tunnukset
+			$query = "	SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.toimitustapa,
+						lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.toimitustavan_lahto, lasku.varasto,
+						lasku.kohdistettu, lasku.rahtivapaa, lasku.eilahetetta
 						FROM lasku
 						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto and lahdot.aktiivi='S')
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -172,22 +180,13 @@
 						AND lasku.alatila not in ('D','X')
 						AND lasku.luontiaika > '2012-04-01 00:00:00'";
 			$lasku_res = pupe_query($query);
-			$laskurow = mysql_fetch_assoc($lasku_res);
-
-			if ($laskurow["tunnukset"] != "") {
-				$laskulisa 	= " and tunnus in ({$laskurow['tunnukset']}) and tila in ('L','N') ";
-
-				$virhelaji  = "NAYTAKAIKKI";
-				$pvmlisa 	= "";
-				$lasku 		= "";
-			}
-			else {
-				$laskulisa 	= " and tunnus = 0 ";
-			}
+			
+			$virhelaji == "NAYTAKAIKKI"
 		}
-
-		if ($virhelaji == "lahtosuljettueikeratty") {
-			$query = "	SELECT group_concat(lasku.tunnus) tunnukset
+		elseif ($virhelaji == "lahtosuljettueikeratty") {
+			$query = "	SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.toimitustapa,
+						lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.toimitustavan_lahto, lasku.varasto,
+						lasku.kohdistettu, lasku.rahtivapaa, lasku.eilahetetta
 						FROM lasku
 						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto and lahdot.aktiivi='S')
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -195,34 +194,18 @@
 						AND lasku.alatila = 'A'
 						AND lasku.luontiaika > '2012-04-01 00:00:00'";
 			$lasku_res = pupe_query($query);
-			$laskurow = mysql_fetch_assoc($lasku_res);
-
-			if ($laskurow["tunnukset"] != "") {
-				$laskulisa 	= " and tunnus in ({$laskurow['tunnukset']}) and tila in ('L','N') ";
-
-				$virhelaji  = "NAYTAKAIKKI";
-				$pvmlisa 	= "";
-				$lasku 		= "";
-			}
-			else {
-				$laskulisa 	= " and tunnus = 0 ";
-			}
+			
+			$virhelaji == "NAYTAKAIKKI"
 		}
-
-		if ($lasku > 0) {
-			$laskulisa 	= " and laskunro = {$lasku} AND tila = 'U' AND alatila = 'X' ";
-
-			$virhelaji  = "NAYTAKAIKKI";
-			$pvmlisa 	= "";
+		else {
+			$query = "	SELECT distinct laskunro, vanhatunnus
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						{$laskulisa}
+						{$pvmlisa}
+						ORDER BY tunnus";
+			$lasku_res = pupe_query($query);
 		}
-
-		$query = "	SELECT distinct laskunro, vanhatunnus
-					FROM lasku
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					{$laskulisa}
-					{$pvmlisa}
-					ORDER BY tunnus";
-		$lasku_res = pupe_query($query);
 
 		echo "<table>";
 
@@ -235,18 +218,28 @@
 				$naytarivi = TRUE;
 			}
 
-			if ($laskurow['laskunro'] > 0) {
-				$laskulisa 	= " and laskunro = {$laskurow['laskunro']} and summa > 0 AND tila = 'L' AND alatila = 'X' ";
+			if ($virhelaji == "lahtosuljettueilaskutettu" or $virhelaji == "lahtosuljettueikeratty") {
+				$tilausrow_a = array($laskurow);
 			}
 			else {
-				$laskulisa 	= " and vanhatunnus = {$laskurow['vanhatunnus']} and tila in ('U','L','N') ";
-			}
+				if ($laskurow['laskunro'] > 0) {
+					$laskulisa 	= " and laskunro = {$laskurow['laskunro']} and summa > 0 AND tila = 'L' AND alatila = 'X' ";
+				}
+				else {
+					$laskulisa 	= " and vanhatunnus = {$laskurow['vanhatunnus']} and tila in ('U','L','N') ";
+				}
 
-			$query = "	SELECT tunnus, laskunro, nimi, toimitustapa, tila, alatila, tilaustyyppi, toimitustavan_lahto, varasto, kohdistettu, rahtivapaa, eilahetetta
-						FROM lasku
-						WHERE yhtio  = '{$kukarow['yhtio']}'
-						{$laskulisa}";
-			$tilaus_res = pupe_query($query);
+				$query = "	SELECT tunnus, laskunro, nimi, toimitustapa, tila, alatila, tilaustyyppi, toimitustavan_lahto, varasto, kohdistettu, rahtivapaa, eilahetetta
+							FROM lasku
+							WHERE yhtio  = '{$kukarow['yhtio']}'
+							{$laskulisa}";
+				$tilaus_res = pupe_query($query);
+				$tilausrow_a = array();
+
+				while ($trow = mysql_fetch_assoc($tilaus_res)) {
+					$tilausrow_a[] = $trow;
+				}
+			}
 
 			$tilaukset = "";
 
@@ -256,8 +249,8 @@
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Toimitustapa / Lähtö</th>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tila</th>";
 			$rivi .= "</tr>";
-
-			while ($tilausrow = mysql_fetch_assoc($tilaus_res)) {
+			
+			foreach ($tilausrow_a as $tilausrow) {
 
 				$tilaukset .= $tilausrow['tunnus'].",";
 

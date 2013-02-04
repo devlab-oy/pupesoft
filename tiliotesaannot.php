@@ -292,7 +292,7 @@
 					</td>
 					<td><input type='text' name='koodiselite' size='15' value = '$koodiselite'></td>
 					<td><input type='text' name='nimitieto' size='25' value = '$nimitieto'></td>
-					<td><input type='text' name='selite' size='15' value = '$selite'></td>
+					<td><input type='text' name='selite' size='50' value = '$selite'></td>
 					<td><input type='checkbox' name='erittely' $erittely></td>
 					<td><input type='text' name='tilino' size='6' value = '$tilino'></td>
 					<td>$ulos</td>

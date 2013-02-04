@@ -801,6 +801,25 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 				$jtrivit_paikat[$varastoon_row["jtrivi"]] = $tapahtumaid;
 			}
 		}
+
+		//Varastoon viennin yhteydess‰ tarkistetaan heti_toimitus myyntitilausrivit
+		$query = "	SELECT *
+					FROM lasku
+					JOIN tilausrivi
+					ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.jt_heti = 'J' AND tilausrivi.tuoteno = '{$tilrivirow['tuoteno']}' )
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					AND lasku.heti_toimitukseen = 'o'
+					ORDER BY lasku.luontiaika";
+		$jt_heti_result = pupe_query($query);
+
+		
+		$tuotetta_jaljella = $tilrivirow['varattu'];
+		while($jt_heti_row = mysql_fetch_assoc($jt_heti_result)) {
+			if($tuotetta_jaljella > 0) {
+				//jos varastoon saapunuttu tuotetta on j‰ljell‰, voidaan k‰sittelyss‰ oleva tilaus laittaa ker‰ys jonoon
+				
+			}
+		}
 	}
 
 	// n‰ytet‰‰n ruudulla

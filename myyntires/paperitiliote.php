@@ -306,7 +306,7 @@
 				WHERE suoritus.yhtio = '$kukarow[yhtio]'
 				and (suoritus.kohdpvm = '0000-00-00' or suoritus.kohdpvm > '$tito_pvm')
 				and suoritus.ltunnus  > 0
-				and suoritus.kirjpvm <= '$tito_pvm'
+				and suoritus.kirjpvm > '$tito_pvm'
 				and suoritus.asiakas_tunnus in ($tunnukset)";
 	$suoritusresult = pupe_query($query);
 

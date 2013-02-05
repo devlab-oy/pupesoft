@@ -755,7 +755,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 						$suoralisa = "AND tilausrivin_lisatiedot.suoraan_laskutukseen = 'o'";
 					}
 
-					//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
+					//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän valmistusriviin
 				   	$query = "	SELECT ifnull(if((tilausrivi.perheid != 0 and tilausrivi.tunnus != tilausrivi.perheid), tilausrivi.perheid, tilausrivi.tunnus), 0) jtrivi
 				   				FROM tilausrivin_lisatiedot
 				   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
@@ -775,7 +775,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 				$varastosta = array(kuuluukovarastoon($tilrivirow["hyllyalue"], $tilrivirow["hyllynro"]));
 
 				// Toimitetaan vain valmistettua isätuotetta, ei KAIKKIA firman jälkitoimitusrivejä
-				jt_toimita("", "", $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", "", $isatuoteno);
+				jt_toimita("", "", $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", "", $isatuoteno, '', "TULLAAN_VALMISTUKSESTA");
 
 				//	Laitetaan tavarat liikkeelle jos sallitaan!
 				if (($jtoikeudetrow["paivitys"] == 1 and ($yhtiorow["automaattinen_jt_toimitus_valmistus"] == "T" or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "S" or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "V")) or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "J") {
@@ -882,5 +882,3 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 
 	echo "<br>";
 }
-
-?>

@@ -201,9 +201,9 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);
 			$pdf->draw_rectangle(800, 420, 779, 580, $thispage, $rectparam);
 
-			if (isset($koontilahete) and $koontilahete) {
-				$pdf->draw_text(310, 792, t("Tilausnumero", $kieli),        $thispage, $pieni);
-				$pdf->draw_text(310, 782, $laskurow["vanhatunnus"],	        $thispage, $boldi);
+			if (isset($koontilahete) and $koontilahete != 0) {
+				$pdf->draw_text(310, 792, t("Tilausnumero/toimitus", $kieli),        $thispage, $pieni);
+				$pdf->draw_text(310, 782, array_shift(explode(",", $koontilahete))." / ".$laskurow["tunnus"],	        $thispage, $boldi);
 			}
 			elseif ($laskurow["tunnusnippu"] > 0) {
 				if ($tyyppi == "YLLAPITOSOPIMUS" or $laskurow["nippu"] > 0) {
@@ -639,7 +639,7 @@ if (!function_exists('alku_lahete')) {
 		// Luodaan palautettavat
 		$return = compact(array_keys($params));
 
-		if (!isset($koontilahete) or !$koontilahete) {
+		if (!isset($koontilahete) or $koontilahete == 0 or ($koontilahete != 0 and !$onko_kerayserat_kaytossa)) {
 			// Koontilähetteelle ei tässä vaiheessa oteta otsikoita
 			$return = rivi_otsikot_lahete($return);
 		}
@@ -1367,7 +1367,7 @@ if (!function_exists('rivi_lahete')) {
 		}
 
         // Koontilähetteelle mikä alkuperöinen toimitus on ollut kyseessä
-        if (isset($koontilahete) and $koontilahete) {
+        if (isset($koontilahete) and $koontilahete != 0) {
             $row["kommentti"] = t("Toimitus", $kieli).": $row[otunnus] ".$row["kommentti"];
         }
 
@@ -3958,9 +3958,9 @@ if (!function_exists('print_pdf_lahete')) {
 
 						$kutsu = t("Lähete %s", $kieli, $laskurow["tunnus"]);
 
-						if (isset($koontilahete) and $koontilahete) {
-            				$content_body .= t("Tilausnumero", $kieli).": ";
-							$content_body .= $laskurow["vanhatunnus"].".\n\n";
+						if (isset($koontilahete) and $koontilahete != 0) {
+            				$content_body .= t("Tilausnumero/toimitus", $kieli).": ";
+							$content_body .= array_shift(explode(",", $koontilahete))." / ".$laskurow["tunnus"].".\n\n";
             			}
             			elseif ($laskurow["tunnusnippu"] > 0) {
 							$content_body .= t("Tilausnumero/toimitus", $kieli).": ";

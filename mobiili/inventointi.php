@@ -30,17 +30,71 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 	$hylly = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", "", $tuotepaikka);
 
 	// Hakuehdot
-	if ($viivakoodi != '')	$params[] = "tuote.eankoodi = '{$viivakoodi}'";
-	if ($tuoteno != '')		$params[] = "tuote.tuoteno = '{$tuoteno}'";
-	if ($tuotepaikka != '') $params[] = "concat(tuotepaikat.hyllyalue,
+	if ($viivakoodi != '')	$params['viivakoodi'] = "tuote.eankoodi = '{$viivakoodi}'";
+	if ($tuoteno != '')		$params['tuoteno'] = "tuote.tuoteno = '{$tuoteno}'";
+	if ($tuotepaikka != '') $params['tuotepaikka'] = "concat(tuotepaikat.hyllyalue,
 										 tuotepaikat.hyllynro,
 										 tuotepaikat.hyllyvali,
 										 tuotepaikat.hyllytaso)='$hylly'";
 
-	$haku_ehto = implode($params, " AND ");
-
 	$osumat = array();
-	if (!empty($haku_ehto)) {
+
+	if (!empty($params)) {
+
+		// Viivakoodi case
+		if ($viivakoodi != '') {
+
+			// Tuotetaulu-loop
+			$query = "	SELECT *
+						FROM tuote
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND eankoodi = '{$viivakoodi}'";
+			$chk_res = pupe_query($query);
+
+			if (mysql_num_rows($chk_res) == 0) {
+
+				// tuotteen toimittajat loop
+				$query = "	SELECT *
+							FROM tuotteen_toimittajat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND viivakoodi = '{$viivakoodi}'";
+				$chk_res = pupe_query($query);
+
+				if (mysql_num_rows($chk_res) == 0) {
+
+					// tuotteen toimittajat tuotenumerot loop
+					$query = "	SELECT *
+								FROM tuotteen_toimittajat_tuotenumerot
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND viivakoodi = '{$viivakoodi}'";
+					$chk_res = pupe_query($query);
+
+					if (mysql_num_rows($chk_res) != 0) {
+						$chk_row = mysql_fetch_assoc($chk_res);
+					}
+				}
+				else {
+					$chk_row = mysql_fetch_assoc($chk_res);
+				}
+
+				if (mysql_num_rows($chk_res) != 0) {
+
+					$query = "	SELECT tuote.eankoodi
+								FROM tuotteen_toimittajat
+								JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+								WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+								AND tuotteen_toimittajat.liitostunnus = '{$chk_row['liitostunnus']}'
+								AND tuotteen_toimittajat.toim_tuoteno = '{$chk_row['toim_tuoteno']}'";
+					$eankoodi_chk_res = pupe_query($query);
+					$eankoodi_chk_row = mysql_fetch_assoc($eankoodi_chk_res);
+
+					$params['viivakoodi'] = "tuote.eankoodi = '{$eankoodi_chk_row['eankoodi']}'";
+				}
+			}
+		}
+
+		$haku_ehto = implode($params, " AND ");
+
 		$query = "	SELECT
 					tuote.tuoteno,
 					tuotepaikat.inventointilista,

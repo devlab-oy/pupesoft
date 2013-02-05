@@ -17181,7 +17181,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 				$onko_kerayserat_kaytossa = true;
 			}
 
-			// jos ker‰yser‰t on A, eli asiakkaan takan pit‰‰ olla ker‰yser‰t p‰‰ll‰
+			// jos ker‰yser‰t on A, eli asiakkaan takana pit‰‰ olla ker‰yser‰t p‰‰ll‰
 			if ($yhtiorow['kerayserat'] == 'A' and $asiakas_apu_row['kerayserat'] == 'A') {
 				$onko_kerayserat_kaytossa = true;
 			}

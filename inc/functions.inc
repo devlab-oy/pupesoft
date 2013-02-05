@@ -11054,7 +11054,7 @@ if (!function_exists("tarkista_iban")) {
 	function tarkista_iban($tilino) {
 		global $yhtiorow;
 
-		if ($yhtiorow["maa"] != "FI") {
+		if (strtoupper($yhtiorow["maa"]) != "FI") {
 			return $tilino;
 		}
 

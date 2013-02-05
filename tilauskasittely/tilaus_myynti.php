@@ -1386,6 +1386,23 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 			// tulostetaan l‰hetteet ja tilausvahvistukset tai sis‰inen lasku..
 			require("tilaus-valmis.inc");
+
+			if(!empty($heti_toimitukseen)) {
+				//est‰‰, ett‰ tilaus ei mene suoraan ker‰ys jonoon.
+				/**
+				$laskutyyppi = "Kokonaistoimitus";
+				$alatila = "odottaa JT tuotteita";
+				break;
+				 */
+				$tila = 'N';
+				$alatila = 'U';
+				$toimpvm = date('Y-m-d', strtotime('now + 1 month'));
+				$query = "	UPDATE lasku
+							SET tila = 'U',
+							alatila = 'N',
+							toimpva = {$toimpvm}";
+				pupe_query($query);
+			}
 		}
 	}
 
@@ -4043,12 +4060,6 @@ if ($tee == '') {
 				$kerayspvm = $laskurow["kerayspvm"];
 			}
 
-			//J‰lkitoimitus heti
-			if (!empty($laskurow['heti_toimitukseen'])) {
-//				$var = 'J';
-//				$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
-			}
-
 			if ($tuoteno != '' and $kpl != 0) {
 				require ('lisaarivi.inc');
 			}
@@ -6154,25 +6165,6 @@ if ($tee == '') {
 									<input type='hidden' name='var' 			value = 'J'>
                                     <input type='hidden' name='jt_muidenmukana' value = 'KYLLA'>
 									<input type='Submit' value='" . t("J‰lkitoim, muiden mukana") . "'>
-									</form> ";
-						}
-
-						if($row['netto'] != 'J' ) {
-							echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
-									<input type='hidden' name='toim' 			value = '$toim'>
-									<input type='hidden' name='lopetus' 		value = '$lopetus'>
-									<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
-									<input type='hidden' name='projektilla' 	value = '$projektilla'>
-									<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
-									<input type='hidden' name='mista' 			value = '$mista'>
-									<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
-									<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
-									<input type='hidden' name='menutila' 		value = '$menutila'>
-									<input type='hidden' name='tila' 			value = 'MUUTA'>
-									<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
-									<input type='hidden' name='var' 			value = 'I'>
-                                    <input type='hidden' name='jt_muidenmukana' value = 'EI'>
-									<input type='Submit' value='" . t("J‰lkitoimitus heti") . "'>
 									</form> ";
 						}
 					}

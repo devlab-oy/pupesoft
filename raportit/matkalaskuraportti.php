@@ -312,16 +312,15 @@ function generoi_toimi_join($request_params) {
 }
 
 function generoi_kuka_join($request_params) {
-	$kuka_join = "";
+	$kuka_join = "JOIN kuka ";
+	$kuka_join .= "ON ( kuka.yhtio = lasku.yhtio AND kuka.kuka = toimi.nimi ";
 	if(!empty($request_params['ruksit']['toimittajittain'])) {
-		$kuka_join = "JOIN kuka ";
-		$kuka_join .= "ON ( kuka.yhtio = lasku.yhtio AND kuka.kuka = toimi.nimi ";
 		if($request_params['toimittajanro']) {
 			$kuka_join .= "AND kuka.tunnus = '{$request_params['toimittajanro']}' ";
 		}
-
-		$kuka_join .= " )";
 	}
+
+	$kuka_join .= " )";
 
 	return $kuka_join;
 }
@@ -399,7 +398,7 @@ function select_group_byn_mukaan($request_params, $group) {
 			$select .= "lasku.summa, ";
 			break;
 		case 'tilausrivi_kommentti':
-			$select .= "tilausrivi.kommentti, ";
+			$select .= "tilausrivi.tunnus as tilausrivi_tunnus, tilausrivi.kommentti, ";
 			break;
 		default:
 			//kun ei olla groupattu mill‰‰n
@@ -418,7 +417,7 @@ function select_group_byn_mukaan($request_params, $group) {
 			if(!empty($request_params['nimitykset'])) {
 				$select .= "tilausrivi.nimitys, ";
 			}
-			$select .= "tilausrivi.var as kulu_tyyppi, tuote.tuotetyyppi, toimi.tunnus as matkustaja_tunnus, toimi.nimi as matkustaja_nimi, kustannuspaikka.tunnus as kustp_tunnus, kustannuspaikka.nimi as kustp_nimi, ";
+			$select .= "tilausrivi.var as kulu_tyyppi, tuote.tuotetyyppi, toimi.tunnus as matkustaja_tunnus, kuka.nimi as matkustaja_nimi, kustannuspaikka.tunnus as kustp_tunnus, kustannuspaikka.nimi as kustp_nimi, ";
 			break;
 	}
 
@@ -451,7 +450,7 @@ function generoi_group_by($request_params) {
 					$group_by .= "lasku.tunnus, ";
 					break;
 				case 'tilausrivi_kommentti':
-					$group_by .= "tilausrivi.kommentti, ";
+					$group_by .= "tilausrivi.tunnus, ";
 			}
 		}
 		//poistetaan viimeiset 2 merkki‰ ", " group by:n lopusta
@@ -608,7 +607,7 @@ function echo_matkalaskuraportti_form($request_params) {
 			<th>".t("Listaa toimittajittain")."</th>
 			<td><input type='text' name='jarjestys[toimittajittain]' size='2' value='{$request_params['jarjestys']['toimittajittain']}'></td>
 			<td><input type='checkbox' name='ruksit[toimittajittain]' value='toimittajittain' {$ruk_toimittajittain_chk}></td>
-			<td>".livesearch_kentta("kayttajaformi", "KAYTTAJAHAKU", "toimittajanro", 150)."</td>
+			<td>".livesearch_kentta("matkalaskuraportti", "KAYTTAJAHAKU", "toimittajanro", 150, '', 'EISUBMIT')."</td>
 		</tr>";
 	echo "<tr>
 			<th>".t("Listaa matkalaskuittain")."</th>
@@ -718,7 +717,9 @@ function generoi_excel_tiedosto($rivit, $request_params) {
 
 function xls_headerit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake) {
 	foreach($rivit[0] as $header_text => $value) {
-		kirjoita_solu($xls, $header_text, $rivi, $sarake);
+		if(!stristr($header_text, 'tunnus')) {
+			kirjoita_solu($xls, $header_text, $rivi, $sarake);
+		}
 	}
 	$rivi++;
 	$sarake = 0;
@@ -737,8 +738,10 @@ function xls_rivit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake) {
 	}
 	
 	foreach($rivit as $matkalasku_rivi) {
-		foreach($matkalasku_rivi as $solu) {
-			kirjoita_solu($xls, $solu, $rivi, $sarake);
+		foreach($matkalasku_rivi as $header => $solu) {
+			if(!stristr($header, 'tunnus')) {
+				kirjoita_solu($xls, $solu, $rivi, $sarake);
+			}
 		}
 		$rivi++;
 		$sarake = 0;

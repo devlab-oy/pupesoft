@@ -3262,3 +3262,17 @@
 		$jatko = 0;
 
 	}
+	
+	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel['Z'] = $trow[$i] == 'Z' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Matkalaskun tarkastaja ei voi muokata matkalaskua")."</option>";
+		$ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Matkalaskun tarkastaja voi muokata matkalaskua")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+
+	}

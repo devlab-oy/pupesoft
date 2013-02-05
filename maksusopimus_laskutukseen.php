@@ -270,7 +270,7 @@
 							tilausrivi.varattu,
 							tilausrivi.tilkpl,
 							{$alet}
-							if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa}, 0) summa,
+							if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1), 0) summa,
 							if (tilausrivi.alv >= 600 or tilausrivi.alv < 500, tilausrivi.alv, 0) alv
 							FROM lasku
 							JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu + tilausrivi.jt) > 0 and tilausrivi.jaksotettu = lasku.jaksotettu)

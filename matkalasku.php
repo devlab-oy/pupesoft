@@ -217,7 +217,6 @@ if ($tee != "") {
 		$tee = "";
 	}
 	else {
-
 		$query = "	SELECT lasku.*,
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
 					toimi.kustannuspaikka, toimi.kohde, toimi.projekti
@@ -237,7 +236,12 @@ if ($tee != "") {
 		else {
 			$laskurow = mysql_fetch_assoc($result);
 
-			if ($laskurow["tila"] == "H" and $laskurow["h1time"] == "0000-00-00 00:00:00" and ($laskurow["toim_ovttunnus"] == $kukarow["kuka"] or $toim == "SUPER") and strtotime($laskurow["tapvm"]) > strtotime($yhtiorow["ostoreskontrakausi_alku"]) and strtotime($laskurow["tapvm"]) < strtotime($yhtiorow["ostoreskontrakausi_loppu"])) {
+			if ($laskurow["tila"] == "H" and 
+				($laskurow["h1time"] == "0000-00-00 00:00:00" or ($laskurow['hyvak2'] == $kukarow['kuka'] and $laskurow["h2time"] == "0000-00-00 00:00:00" and $yhtiorow['matkalaskun_tarkastus'] != '')) and
+				($laskurow["toim_ovttunnus"] == $kukarow["kuka"] or $toim == "SUPER") and
+				strtotime($laskurow["tapvm"]) > strtotime($yhtiorow["ostoreskontrakausi_alku"]) and
+				strtotime($laskurow["tapvm"]) < strtotime($yhtiorow["ostoreskontrakausi_loppu"])
+			) {
 				$muokkauslukko = FALSE;
 			}
 			else {
@@ -247,7 +251,7 @@ if ($tee != "") {
 	}
 }
 
-if ($tee == "POISTA") {
+if ($tee == "POISTA" and !$muokkauslukko) {
 	$tunnus  = $tilausnumero;
 	$tee 	 = "D";
 	$kutsuja = "MATKALASKU";
@@ -266,7 +270,7 @@ if ($tee == "POISTA") {
 	$tilausnumero = 0;
 }
 
-if ($tee == "UUDELLEENKASITTELE" and $toim == "SUPER") {
+if ($tee == "UUDELLEENKASITTELE" and $toim == "SUPER" and !$muokkauslukko) {
 
 	echo "<font class='message'>".t("Poistetaan vanhat tiliöinnit ja laskut").".</font><br><br>";
 
@@ -279,7 +283,7 @@ if ($tee == "UUDELLEENKASITTELE" and $toim == "SUPER") {
 	$tee = "ERITTELE";
 }
 
-if ($tee == "ERITTELE") {
+if ($tee == "ERITTELE" and !$muokkauslukko) {
 
 	//	Onko tässä jo jotain tilausrivejä?
 	$query = "	SELECT tunnus
@@ -306,7 +310,7 @@ if ($tee == "ERITTELE") {
 	$tee = "MUOKKAA";
 }
 
-if ($tee == "TUO_KALENTERISTA") {
+if ($tee == "TUO_KALENTERISTA" and !$muokkauslukko) {
 
 	//	Onko tässä jo jotain tilausrivejä?
 	$query = "	SELECT kalenteri.*, asiakas.maa, concat_ws(' ', asiakas.nimi, asiakas.nimitark) asiakas
@@ -357,7 +361,7 @@ if ($tee == "TUO_KALENTERISTA") {
 	$tee = "MUOKKAA";
 }
 
-if ($tee == "POIMI_KALENTERISTA") {
+if ($tee == "POIMI_KALENTERISTA" and !$muokkauslukko) {
 	function erittele_rivit($tilausnumero) {
 		global $kukarow, $yhtiorow, $verkkolaskuvirheet_ok;
 
@@ -375,7 +379,7 @@ if ($tee == "POIMI_KALENTERISTA") {
 	}
 }
 
-if ($tee == "TALLENNA") {
+if ($tee == "TALLENNA" and !$muokkauslukko) {
 	if ((int) $tilausnumero == 0) {
 		echo "<font class='error'>".t("Matkalaskun numero puuttuu")."</font>";
 		$tee = "";
@@ -443,7 +447,7 @@ if ($tee == "TALLENNA") {
 	}
 }
 
-if ($tee == 'TARKISTA_ILMAISET_LOUNAAT') {
+if ($tee == 'TARKISTA_ILMAISET_LOUNAAT' and !$muokkauslukko) {
 
 	//nimitys = kokopäivärahan nimitys
 	//myyntihinta = kokopäivärahan hinta
@@ -663,7 +667,7 @@ if ($tee == "MUOKKAA") {
 		echo "<br><font class='message'>".t("Lasku on liitetty saapumiseen, alv tiliöintejä ei voi muuttaa")."! ".t("Saapuminen").": $keikrow[nimi] / $keikrow[laskunro]</font>";
 	}
 
-	if ($poistakuva > 0) {
+	if ($poistakuva > 0 and !$muokkauslukko) {
 		$query = "	DELETE FROM liitetiedostot
 					WHERE yhtio 		= '$kukarow[yhtio]'
 					and liitos			= 'lasku'
@@ -676,7 +680,7 @@ if ($tee == "MUOKKAA") {
 		}
 	}
 
-	if ($kuivat != "JOO") {
+	if ($kuivat != "JOO" and !$muokkauslukko) {
 		//rivitunnus = yhtäkuin ensimmäisen rivin tunnus sekä kaikkien haettavien perheid2. haemme ne rivit ja poistamme ne
 		if (!empty($rivitunnus)) {
 
@@ -742,7 +746,7 @@ if ($tee == "MUOKKAA") {
 	}
 
 	//	Koitetaan lisätä uusi rivi!
-	if ($tuoteno != "" and isset($lisaa) and $kuivat != "JOO") {
+	if ($tuoteno != "" and isset($lisaa) and $kuivat != "JOO" and !$muokkauslukko) {
 		if ($tyyppi == "A") {
 			$errori = lisaa_paivaraha($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm", "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm", $kommentti, $kustp, $kohde, $projekti);
 		}
@@ -990,7 +994,7 @@ if ($tee == "MUOKKAA") {
 		echo "</table><br>";
 	}
 
-	if ($tyyppi != "" and $tuoteno != "") {
+	if ($tyyppi != "" and $tuoteno != "" and !$muokkauslukko) {
 
 		$query = "	SELECT *
 					from tuote
@@ -1290,7 +1294,7 @@ if ($tee == "MUOKKAA") {
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.otunnus = '$tilausnumero'
 				and tilausrivi.tyyppi  = 'M'
-				ORDER BY tilausrivi.perheid2, tilausrivi.tunnus";
+				ORDER BY tilausrivi.perheid2 desc, tilausrivi.tunnus";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0) {
@@ -1333,7 +1337,7 @@ if ($tee == "MUOKKAA") {
 				$aikajana['ensimmainen_aika'] = tv1dateconv($row['kerattyaika'], "P");
 			}
 
-			echo_matkalasku_row($row, $kukarow, $laskurow, $yhtiorow, $tee, $lopetus, $toim, $tilausnumero, $PHP_SELF, $tapahtumia, $tilausrivien_lkm);
+			echo_matkalasku_row($row, $kukarow, $laskurow, $yhtiorow, $tee, $lopetus, $toim, $tilausnumero, $PHP_SELF, $tapahtumia, $tilausrivien_lkm, $muokkauslukko);
 
 			$summa += $row["rivihinta"];
 			$tapahtumia++;
@@ -1372,22 +1376,6 @@ if ($tee == "MUOKKAA") {
 			echo "<font class='error'>".t("Käsittelemättä")." ".number_format(($laskurow["summa"] - $rivisumma["summa"]), 2, ', ', ' ')."</font><br>";
 		}
 	}
-	else {
-		/*
-		if (mysql_num_rows($keikres) == 0) {
-			echo "	<td class='back' align='left' colspan='3'>
-						<form name='palaa' method='post'>
-						<input type = 'hidden' name='tee' value = 'TUO_KALENTERISTA'>
-						<input type='hidden' name='lopetus' value='$lopetus'>
-						<input type='hidden' name='toim' value='$toim'>
-						<input type = 'hidden' name='tilausnumero' value = '$tilausnumero'>
-						<input type='submit' value='".t("Tuo kalenterista")."'>
-						</form>
-					</td>
-					<td colspan='3' class='back' align='right'></td>";
-		}
-		*/
-	}
 
 	if ($lopetus == "") {
 		if ($laskurow["mapvm"] != "0000-00-00") {
@@ -1413,18 +1401,6 @@ if ($tee == "MUOKKAA") {
 					</form>";
 		}
 	}
-
-	/*
-	if (mysql_num_rows($keikres) == 0 and $toim == "SUPER") {
-		echo "<br><br><form method='post' autocomplete='off' onsubmit=\"return confirm('".t("Oletko varma, että haluat käsitellä kululaskun uudestaan.\\n\\nLaskun uudelleenkäsittely poistaa kaikki erittelyrivit ja tiliöinnit.\\n\\nTietoja EI VOI PALAUTTAA.")."')\">";
-		echo "<input type='hidden' name='tee' value='UUDELLEENKASITTELE'>";
-		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-		echo "<input type='hidden' name='toim' value='$toim'>";
-		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-		echo "<td class='back' colspan='4'><input type = 'submit' value='".t("Uudelleenkäsittele lasku")."'></td>";
-		echo "</form>";
-	}
-	*/
 
 	if ($id > 0) {
 		echo "<iframe src='view.php?id=$id' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
@@ -1719,7 +1695,7 @@ if ($tee == "") {
 	}
 }
 
-function echo_matkalasku_row($row, $kukarow, $laskurow, $yhtiorow, $tee, $lopetus, $toim, $tilausnumero, $PHP_SELF, $tapahtumia, $tilausrivien_lkm) {
+function echo_matkalasku_row($row, $kukarow, $laskurow, $yhtiorow, $tee, $lopetus, $toim, $tilausnumero, $PHP_SELF, $tapahtumia, $tilausrivien_lkm, $muokkauslukko) {
 	static $riviTemp = 0;
 
 	$row["nimitys"] = t_tuotteen_avainsanat($row, 'nimitys', $kukarow["kieli"]);
@@ -1746,9 +1722,9 @@ function echo_matkalasku_row($row, $kukarow, $laskurow, $yhtiorow, $tee, $lopetu
 		'projekti' => $_POST['projekti']
 	);
 
-	echo_ilmaiset_lounaat($lopetus, $toim, $tilausnumero, $row, $kustannuspaikat);
+	echo_ilmaiset_lounaat($lopetus, $toim, $tilausnumero, $row, $kustannuspaikat, $muokkauslukko);
 
-	if ($row['tunnus'] == $row['perheid2']) {
+	if ($row['tunnus'] == $row['perheid2'] and !$muokkauslukko) {
 		echo_nappulat($laskurow, $tee, $lopetus, $toim, $tilausnumero, $row['perhe'], $row['perheid2']);
 	}
 
@@ -1809,13 +1785,13 @@ function echo_td($row) {
 	echo "<td align='right'>" . tv1dateconv($row['kerattyaika']) . "</td>";
 }
 
-function echo_ilmaiset_lounaat($lopetus, $toim, $tilausnumero, $row, $kustannuspaikat) {
+function echo_ilmaiset_lounaat($lopetus, $toim, $tilausnumero, $row, $kustannuspaikat, $muokkauslukko) {
 	$selected_lounas = (int)$row['erikoisale'];
 	$ilmaiset_lounaat_kpl = array(0, 1, 2);
 
 	echo "<td>";
 
-	if ($row['tuotetyyppi'] == 'A') {
+	if ($row['tuotetyyppi'] == 'A' and !$muokkauslukko) {
 		echo "<form autocomplete='off' method='post'>
 			  	<input type='hidden' value='TARKISTA_ILMAISET_LOUNAAT' name='tee'>
 			  	<input type='hidden' value='$lopetus' name='lopetus'>
@@ -1851,6 +1827,9 @@ function echo_ilmaiset_lounaat($lopetus, $toim, $tilausnumero, $row, $kustannusp
 		}
 		echo "</select>";
 		echo "</form>";
+	}
+	elseif ($row['tuotetyyppi'] == 'A') {
+		echo $lounas;
 	}
 
 	echo "</td>";

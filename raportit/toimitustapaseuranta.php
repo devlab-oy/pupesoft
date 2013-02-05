@@ -53,7 +53,7 @@
 
 		$query = "	SELECT lasku.toimitustapa
 					{$lisa},
-					SEC_TO_TIME(AVG(TIME_TO_SEC(DATE_FORMAT(toimitettuaika,'%H:%i:%s')))) aika,
+					left(SEC_TO_TIME(AVG(TIME_TO_SEC(DATE_FORMAT(toimitettuaika,'%H:%i:%s')))),5) aika,
 					COUNT(DISTINCT lasku.tunnus) kpl,
 					SUM(tilausrivi.rivihinta) summa,
 					COUNT(DISTINCT IF(lasku.kerayslista = 0, lasku.tunnus, lasku.kerayslista)) kpl_kerayslista,
@@ -67,7 +67,7 @@
 					AND tilausrivi.toimitettuaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
 					GROUP BY 1 {$groupbylisa}
 					ORDER BY {$orderbylisa} aika, kpl desc, toimitustapa";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$otsikot =  "	<tr>
 						<th>".t("Toimitustapa")."</th>
@@ -97,32 +97,41 @@
 
 		$paivamaara = "";
 
-		$tilauksia_kaikki = 0;
-		$tilauksia = 0;
+		$tilauksia_kaikki 	  = 0;
+		$tilauksia 			  = 0;
 		$kerayslistoja_kaikki = 0;
-		$kerayslistoja = 0;
-		$tilausriveja_kaikki = 0;
-		$tilausriveja = 0;
-		$maara_kaikki = 0;
-		$maara = 0;
-		$kplperpva_kaikki = 0;
+		$kerayslistoja 		  = 0;
+		$tilausriveja_kaikki  = 0;
+		$tilausriveja 		  = 0;
+		$maara_kaikki 		  = 0;
+		$maara 				  = 0;
+		$kplperpva_kaikki 	  = 0;
+		$myynti_kaikki 		  = 0;
+		$myynti 			  = 0;
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 
 			if ($tee == 'kaikki') $row['toimitettuaika'] = "";
 
 			if ($tee == 'paivittain' and ($paivamaara == "" or $paivamaara != $row['toimitettuaika'])) {
 
 				if ($paivamaara != "") {
-					echo "<tr><th colspan='2'>&nbsp;</th><th>{$kerayslistoja}</th><th>{$tilauksia}</th><th>{$tilausriveja}</th><th>{$maara}</th><th>&nbsp;</th></tr>";
+					echo "<tr>
+							<td class='spec' colspan='2'>".t("Yhteensä").":</td>
+							<td class='spec'>{$kerayslistoja}</td>
+							<td class='spec'>{$tilauksia}</td>
+							<td class='spec'>{$tilausriveja}</td>
+							<td class='spec'>{$maara}</td>
+							<td class='spec' align='right'>{$myynti}</td></tr>";
 					echo "<tr><td class='back' colspan='7'>&nbsp;</td></tr>";
 				}
 
-				$tilauksia = 0;
+				$tilauksia 	   = 0;
 				$kerayslistoja = 0;
-				$tilausriveja = 0;
-				$maara = 0;
-
+				$tilausriveja  = 0;
+				$maara 		   = 0;
+				$myynti		   = 0;
+				
 				echo "<tr><th colspan='7'>",tv1dateconv($row['toimitettuaika']),"</th></tr>";
 				echo $otsikot;
 			}
@@ -133,12 +142,14 @@
 
 			if ($tee == 'paivittain') {
 				echo "<td>{$row['kpl_kerayslista']}</td>";
-				$kerayslistoja += $row['kpl_kerayslista'];
+				$kerayslistoja 		  += $row['kpl_kerayslista'];
 				$kerayslistoja_kaikki += $row['kpl_kerayslista'];
-				$tilausriveja += $row['tilausriveja'];
-				$tilausriveja_kaikki += $row['tilausriveja'];
-				$maara += $row['kpl_tilriv'];
-				$maara_kaikki += $row['kpl_tilriv'];
+				$tilausriveja 		  += $row['tilausriveja'];
+				$tilausriveja_kaikki  += $row['tilausriveja'];
+				$maara 				  += $row['kpl_tilriv'];				
+				$maara_kaikki 		  += $row['kpl_tilriv'];
+				$myynti 			  += $row['summa'];
+				$myynti_kaikki		  += $row['summa'];
 			}
 
 			echo "<td>$row[kpl]</td>";
@@ -153,7 +164,7 @@
 				echo "<td>{$row['kpl_tilriv']}</td>";
 			}
 
-			echo "<td>",hintapyoristys($row['summa']),"</td>";
+			echo "<td align='right'>",hintapyoristys($row['summa']),"</td>";
 			echo "</tr>";
 
 			$paivamaara = $row['toimitettuaika'];
@@ -163,13 +174,29 @@
 		}
 
 		if ($tee == 'paivittain') {
-			echo "<tr><th colspan='2'>&nbsp;</th><th>{$kerayslistoja}</th><th>{$tilauksia}</th><th>{$tilausriveja}</th><th>{$maara}</th><th>&nbsp;</th></tr>";
-
+			echo "<tr>
+					<td class='spec' colspan='2'>".t("Yhteensä").":</td>
+					<td class='spec'>{$kerayslistoja}</td>
+					<td class='spec'>{$tilauksia}</td>
+					<td class='spec'>{$tilausriveja}</td>
+					<td class='spec'>{$maara}</td>
+					<td class='spec' align='right'>{$myynti}</td></tr>";
 			echo "<tr><td class='back' colspan='7'>&nbsp;</td></tr>";
-			echo "<tr><th colspan='2'>",t("Kaikki yhteensä"),"</th><th>{$kerayslistoja_kaikki}</th><th>{$tilauksia_kaikki}</th><th>{$tilausriveja_kaikki}</th><th>{$maara_kaikki}</th><th>&nbsp;</th>";
+			
+			echo "<tr>
+					<td class='spec' colspan='2'>",t("Kaikki yhteensä"),"</td>
+					<td class='spec'>{$kerayslistoja_kaikki}</td>
+					<td class='spec'>{$tilauksia_kaikki}</td>
+					<td class='spec'>{$tilausriveja_kaikki}</td>
+					<td class='spec'>{$maara_kaikki}</td>
+					<td class='spec'>{$myynti_kaikki}</td></tr>";
 		}
 		else {
-			echo "<tr><th colspan='2'>",t("Kaikki yhteensä"),"</th><th>{$tilauksia_kaikki}</th><th>{$kplperpva_kaikki}</th><th>&nbsp;</th>";
+			echo "<tr>
+					<td class='spec' colspan='2'>",t("Kaikki yhteensä"),"</td>
+					<td class='spec'>{$tilauksia_kaikki}</td>
+					<td class='spec'>{$kplperpva_kaikki}</td>
+					<td class='spec'>{$myynti_kaikki}</td></tr>";
 		}
 
 

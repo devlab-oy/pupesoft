@@ -260,12 +260,16 @@
 			$sumrow = mysql_fetch_assoc($result);
 
 			if ($yhtiorow['ennakkolaskun_tyyppi'] == 'E') {
+
+				$alet = generoi_alekentta_select('M', 'erikseen');
+
 				$query = "	SELECT
 							tilausrivi.tuoteno,
 							tilausrivi.nimitys,
 							tilausrivi.kommentti,
 							tilausrivi.varattu,
 							tilausrivi.tilkpl,
+							{$alet}
 							if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa}, 0) summa,
 							if (tilausrivi.alv >= 600 or tilausrivi.alv < 500, tilausrivi.alv, 0) alv
 							FROM lasku
@@ -323,8 +327,18 @@
 					$varattu = $yhtiorow['ennakkolaskun_tyyppi'] == 'E' ? $row['varattu'] : 1;
 					$tilkpl = $yhtiorow['ennakkolaskun_tyyppi'] == 'E' ? $row['tilkpl'] : 1;
 
-					$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values
-							('$summa', 'N', '{$varattu}', '{$tilkpl}', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now())";
+					$ale_kentat = "";
+					$ale_arvot = "";
+
+					if ($yhtiorow['ennakkolaskun_tyyppi'] == 'E') {
+						for ($i = 1; $i <= $yhtiorow['myynnin_alekentat']; $i++) {
+							$ale_kentat .=  ",ale{$i}";
+							$ale_arvot .= ", '".$row["ale{$i}"]."'";
+						}
+					}
+
+					$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu {$ale_kentat}) values
+							('$summa', 'N', '{$varattu}', '{$tilkpl}', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now() {$ale_arvot})";
 					$addtil = pupe_query($query);
 
 					if ($debug==1) echo t("Lisättiin ennakkolaskuun rivi")." $summa $row[alv] otunnus $id<br>";

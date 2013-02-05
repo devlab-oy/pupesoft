@@ -76,13 +76,22 @@ if($request_params['debug'] == 1) {
 }
 
 if($tee == 'aja_raportti') {
+	if ($request_params['uusi_kysely'] or $request_params['aja_kysely']) {
+		aja_kysely();
+		foreach ($request_params as $index => &$value) {
+			$value = ${$index};
+		}
+	}
+	
 	$rivit = generoi_matkalaskuraportti_rivit($request_params);
 
-	//p‰‰tet‰‰n mit‰ tehd‰‰n datalle
-	//s‰ilytet‰‰n mahdollisuus printata myˆs pdf:lle tiedot
-	$request_params['tiedosto_muoto'] = "xls";
-	if($request_params['tiedosto_muoto'] == "xls") {
-		$tiedosto = generoi_excel_tiedosto($rivit, $request_params);
+	if(count($rivit) > 0) {
+		//p‰‰tet‰‰n mit‰ tehd‰‰n datalle
+		//s‰ilytet‰‰n mahdollisuus printata myˆs pdf:lle tiedot
+		$request_params['tiedosto_muoto'] = "xls";
+		if($request_params['tiedosto_muoto'] == "xls") {
+			$tiedosto = generoi_excel_tiedosto($rivit, $request_params);
+		}
 	}
 
 	echo_matkalaskuraportti_form($request_params);
@@ -91,11 +100,9 @@ if($tee == 'aja_raportti') {
 	echo "<br/>";
 	echo "<br/>";
 
-	if($request_params['uusi_kysely']) {
-		aja_kysely();
+	if(count($rivit) > 0) {
+		echo_tallennus_formi($tiedosto);
 	}
-
-	echo_tallennus_formi($tiedosto);
 }
 else {
 	echo_matkalaskuraportti_form($request_params);

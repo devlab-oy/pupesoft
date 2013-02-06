@@ -975,6 +975,7 @@
 							'lahetekpl'					=> $lahetekpl,
 							'kieli' 					=> $kieli,
 							'koontilahete'				=> $koontilahete,
+							'koontilahete_tilausrivit'	=> $koontilahete_tilausrivit,
 						);
 
 						pupesoft_tulosta_lahete($params);

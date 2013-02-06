@@ -1801,8 +1801,6 @@
 								$sellahetetyyppi = (!isset($sellahetetyyppi)) ? "" : $sellahetetyyppi;
 								$kieli = (!isset($kieli)) ? "" : $kieli;
 
-								if ($koontilahete == 0) $koontilahete = $laskurow['tunnus'];
-
 								$params = array(
 									'laskurow'					=> $laskurow,
 									'sellahetetyyppi' 			=> $sellahetetyyppi,

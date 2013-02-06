@@ -18649,7 +18649,7 @@ if (!function_exists('splittaa_tilausrivi')) {
 	function splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, $varastoon = TRUE, $pois_suuntalavalta = FALSE, $perheid = FALSE) {
 		global $kukarow, $yhtiorow;
 
-		$query = "	SELECT tilausrivi.*, GROUP_CONCAT(DISTINCT tuotteen_toimittajat.toim_tuoteno ORDER BY toim_tuoteno SEPARATOR ',') toim_tuoteno
+		$query = "	SELECT tilausrivi.*
 					FROM tilausrivi
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
 					LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)

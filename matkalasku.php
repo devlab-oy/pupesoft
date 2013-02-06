@@ -1376,7 +1376,7 @@ if ($tee == "MUOKKAA") {
 					AND otunnus = '{$tilausnumero}'
 					AND tyyppi != 'D'
 					GROUP BY perheid2
-					ORDER BY perheid2";
+					ORDER BY perheid2 desc";
 		$result2 = pupe_query($query2);
 
 		$summa 		= 0;

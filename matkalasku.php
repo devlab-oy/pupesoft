@@ -442,7 +442,7 @@ if ($tee == "TALLENNA" and !$muokkauslukko) {
 				$result = pupe_query($query);
 				$varirow = mysql_fetch_row($result);
 
-				$dir = $yhtiorow['skannatut_laskut_polku']."/Matkalaskut/$laskurow[toim_ovttunnus]";
+				$dir = $yhtiorow['skannatut_laskut_polku']."/matkalaskut/$laskurow[toim_ovttunnus]";
 
 				foreach ($skannattukuitti as $kuitti) {
 					if (filesize($dir."/".$kuitti) > $varirow[1]) {
@@ -891,7 +891,7 @@ if ($tee == "MUOKKAA") {
 					<td><input name='userfile' type='file'></td>
 					</tr>";
 
-			$dir = $yhtiorow['skannatut_laskut_polku']."/Matkalaskut/$laskurow[toim_ovttunnus]";
+			$dir = $yhtiorow['skannatut_laskut_polku']."/matkalaskut/$laskurow[toim_ovttunnus]";
 
 			if (is_dir($dir) and is_writable($dir)) {
 				// k‰yd‰‰n l‰pi ensin k‰sitelt‰v‰t kuvat

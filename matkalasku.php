@@ -236,7 +236,7 @@ if ($tee != "") {
 		else {
 			$laskurow = mysql_fetch_assoc($result);
 
-			if ($laskurow["tila"] == "H" and 
+			if ($laskurow["tila"] == "H" and
 				($laskurow["h1time"] == "0000-00-00 00:00:00" or ($laskurow['hyvak2'] == $kukarow['kuka'] and $laskurow["h2time"] == "0000-00-00 00:00:00" and $yhtiorow['matkalaskun_tarkastus'] != '')) and
 				($laskurow["toim_ovttunnus"] == $kukarow["kuka"] or $toim == "SUPER") and
 				strtotime($laskurow["tapvm"]) > strtotime($yhtiorow["ostoreskontrakausi_alku"]) and
@@ -385,6 +385,9 @@ if ($tee == "TALLENNA" and !$muokkauslukko) {
 		$tee = "";
 	}
 	else {
+
+		$errormsg = "";
+
 		//	Koitetaan tallennella kuva
 		if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 			if ($kuvaselite == "") {
@@ -423,22 +426,51 @@ if ($tee == "TALLENNA" and !$muokkauslukko) {
 						else {
 							// lisätään kuva
 							$kuva = tallenna_liite("userfile", "lasku", $tilausnumero, $kuvaselite, "", 0, 0, "");
-
-							$kuvaselite = "";
 						}
 						break;
-					}
+				}
 			}
+		}
 
-			if ($errormsg != "") {
-				echo "<font class='error'>$errormsg</font><br>";
+		if (isset($skannattukuitti) and count($skannattukuitti) > 0) {
+
+			if ($kuvaselite == "") {
+				$errormsg = t("Anna kuvalle selite");
 			}
+			else {
+				$query = "SHOW variables like 'max_allowed_packet'";
+				$result = pupe_query($query);
+				$varirow = mysql_fetch_row($result);
+
+				$dir = $yhtiorow['skannatut_laskut_polku']."/Matkalaskut/$laskurow[toim_ovttunnus]";
+
+				foreach ($skannattukuitti as $kuitti) {
+					if (filesize($dir."/".$kuitti) > $varirow[1]) {
+						$errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
+					}
+					else {
+						// lisätään kuva
+						$kuva = tallenna_liite($dir."/".$kuitti, "lasku", $tilausnumero, $kuvaselite, "", 0, 0, "");
+
+						if ((int) $kuva > 0) {
+							unlink($dir."/".$kuitti);
+						}
+					}
+				}
+			}
+		}
+
+		if ($errormsg != "") {
+			echo "<font class='error'>$errormsg</font><br>";
+		}
+		else {
+			$kuvaselite = "";
 		}
 
 		$query = "	UPDATE lasku SET
 					viite = '$viesti'
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus = '$tilausnumero'";
+					and tunnus  = '$tilausnumero'";
 		$updres = pupe_query($query);
 
 		$laskurow["viite"] = $viesti;
@@ -676,8 +708,10 @@ if ($tee == "MUOKKAA") {
 		$result = pupe_query($query);
 
 		if (mysql_affected_rows() == 0) {
-			echo "<font class='error'>".t("VIRHE: Poistettavaa liitetiedostoa ei löydy")."!</font><br>";
+			echo "<font class='error'>".t("VIRHE: Poistettavaa liitetiedostoa ei löydy")."!$query</font><br>";
 		}
+
+		$poistakuva = 0;
 	}
 
 	if ($kuivat != "JOO" and !$muokkauslukko) {
@@ -805,7 +839,7 @@ if ($tee == "MUOKKAA") {
 
 		if ($rivitunnus == "") {
 			// tässä alotellaan koko formi.. tämä pitää kirjottaa aina
-			echo "	<form name='tilaus' method='post' autocomplete='off' enctype='multipart/form-data'>
+			echo "	<form action='matkalasku.php' name='tilaus' method='post' autocomplete='off' enctype='multipart/form-data'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 					<input type='hidden' name='tee' value='TALLENNA'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
@@ -835,7 +869,7 @@ if ($tee == "MUOKKAA") {
 
 			if (mysql_num_rows($liiteres) > 0) {
 				while ($liiterow = mysql_fetch_assoc($liiteres)) {
-					echo "<a target='kuvaikkuna' href='".$palvelin2."view.php?id=$liiterow[tunnus]'>$liiterow[selite]</a>";
+					echo "<a href='#' onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600');\">$liiterow[selite]</a>";
 
 					if (!$muokkauslukko) {
 						echo "&nbsp;&nbsp;&nbsp;&nbsp;<a href='matkalasku.php?tee=$tee&tilausnumero=$tilausnumero&poistakuva=$liiterow[tunnus]'>*".t("poista")."*</a>";
@@ -855,8 +889,32 @@ if ($tee == "MUOKKAA") {
 			echo "<tr>
 					<th>".t("Valitse tiedosto")."</th>
 					<td><input name='userfile' type='file'></td>
-					</tr>
-					<th>".t("Liitteen kuvaus")."</th>
+					</tr>";
+
+			$dir = $yhtiorow['skannatut_laskut_polku']."/Matkalaskut/$laskurow[toim_ovttunnus]";
+
+			if (is_dir($dir) and is_writable($dir)) {
+				// käydään läpi ensin käsiteltävät kuvat
+				$files = listdir($dir);
+
+				if (count($files) > 0) {
+
+					echo "<tr>
+							<th>".t("Tai valitse skannattu kuitti")."</th>
+							<td>";
+
+					foreach ($files as $kuitti) {
+
+						$tiedostonimi = basename($kuitti);
+
+						echo "<input type='checkbox' name='skannattukuitti[]' value='$tiedostonimi'> <a href='#' onclick=\"window.open('$kuitti', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600');\">$tiedostonimi</a><br>";
+					}
+
+					echo "</td></tr>";
+				}
+			}
+
+			echo "<th>".t("Liitteen kuvaus")."</th>
 					<td><input type='text' size='40' name='kuvaselite' value='$kuvaselite'></td>
 					<td class='back'><input type='submit' value='".t("Tallenna liite")."'></td>
 					</tr>
@@ -952,7 +1010,7 @@ if ($tee == "MUOKKAA") {
 				}
 
 				if ($valinta != "") {
-					echo "<form method='post' autocomplete='off'>";
+					echo "<form action='matkalasku.php' method='post' autocomplete='off'>";
 					echo "<input type='hidden' name='tee' value='$tee'>";
 					echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 					echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1012,7 +1070,7 @@ if ($tee == "MUOKKAA") {
 		}
 
 		echo "<br><font class='message'>".t("Lisää")." $trow[nimitys]</font><hr>$errori";
-		echo "<form id='lisaarivi' method='post' autocomplete='off'>";
+		echo "<form action='matkalasku.php' id='lisaarivi' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='$tee'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1379,7 +1437,7 @@ if ($tee == "MUOKKAA") {
 
 	if ($lopetus == "") {
 		if ($laskurow["mapvm"] != "0000-00-00") {
-			echo "	<form name='palaa' method='post'>
+			echo "	<form action='matkalasku.php' name='palaa' method='post'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='tee' value=''>";
 
@@ -1392,7 +1450,7 @@ if ($tee == "MUOKKAA") {
 					</form>";
 		}
 		else {
-			echo "	<form name='palaa' method='post'>
+			echo "	<form action='matkalasku.php' name='palaa' method='post'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='tee' value='VALMIS'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
@@ -1411,7 +1469,7 @@ if ($tee == "") {
 
 	echo "<br><br><font class='message'>".t("Perusta uusi matkalasku")."</font><hr>";
 
-	echo "<form method='post' autocomplete='off'>";
+	echo "<form action='matkalasku.php' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='UUSI'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1425,8 +1483,8 @@ if ($tee == "") {
 		$query = "	SELECT toimi.nimi kayttaja, kuka.nimi kayttajanimi
 					FROM toimi
 		 			JOIN kuka ON kuka.yhtio=toimi.yhtio and kuka.kuka=toimi.nimi
-		 			WHERE toimi.yhtio='$kukarow[yhtio]'
-					and toimi.tyyppi='K'
+		 			WHERE toimi.yhtio = '$kukarow[yhtio]'
+					and toimi.tyyppi  = 'K'
 					ORDER BY kayttajanimi";
 		$result = pupe_query($query);
 
@@ -1458,7 +1516,7 @@ if ($tee == "") {
 
 	echo "<br><br><font class='message'>".t("Perusta uusi matkalasku ja liitä asiakas laskuun")."</font><hr>";
 
-	echo "<form method='post' autocomplete='off'>";
+	echo "<form action='matkalasku.php' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='UUSI'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1539,7 +1597,7 @@ if ($tee == "") {
 			echo "<td>$row[laskutus_nimi]</td>";
 			echo "<td>$row[viite]</td>";
 			echo "<td>$row[summa]</td>";
-			echo "<form method='post' autocomplete='off'>";
+			echo "<form action='matkalasku.php' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='MUOKKAA'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1583,14 +1641,14 @@ if ($tee == "") {
 			echo "<td>$row[laskutus_nimi]</td>";
 			echo "<td>$row[viite]</td>";
 			echo "<td>$row[summa]</td>";
-			echo "<td class='back'><form method='post' autocomplete='off'>";
+			echo "<td class='back'><form action='matkalasku.php' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='MUOKKAA'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
 			echo "<input type='Submit' value='".t("Muokkaa")."'>";
 			echo "</form></td>";
-			echo "<td class='back'><form method='post' autocomplete='off'>";
+			echo "<td class='back'><form action='matkalasku.php' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='POISTA'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1607,7 +1665,7 @@ if ($tee == "") {
 
 	if ($toim == "SUPER") {
 
-		echo "<form method='post' autocomplete='off'>";
+		echo "<form action='matkalasku.php' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value=''>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1675,7 +1733,7 @@ if ($tee == "") {
 			//tehdään selväkielinen tila/alatila
 			require ("inc/laskutyyppi.inc");
 
-			echo "<form method='post' autocomplete='off'>";
+			echo "<form action='matkalasku.php' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='MUOKKAA'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1761,18 +1819,18 @@ function echo_checks($kukarow, $yhtiorow, $row, $PHP_SELF, $tee, $lopetus, $toim
 	}
 
 	echo "<td>
-						<form action = '$PHP_SELF#ankkuri_$row[tunnus]' method='post' autocomplete='off'>
-							<input type='hidden' name='tee' value='$tee'>
-							<input type='hidden' name='lopetus' value='$lopetus'>
-							<input type='hidden' name='toim' value='$toim'>
-							<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-							<input type='hidden' name='tapa' value='MUOKKAA'>
-							<input type='hidden' name='vaihda_tyyppi' value='B'>
-							<input type='hidden' name='kulupoiminta' value='JOO'>
-							<input type='hidden' name='rivitunnus' value='$row[perhe]'>
-							$valinta
-						</form>
-					</td>";
+			<form action='matkalasku.php#ankkuri_$row[tunnus]' method='post' autocomplete='off'>
+				<input type='hidden' name='tee' value='$tee'>
+				<input type='hidden' name='lopetus' value='$lopetus'>
+				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+				<input type='hidden' name='tapa' value='MUOKKAA'>
+				<input type='hidden' name='vaihda_tyyppi' value='B'>
+				<input type='hidden' name='kulupoiminta' value='JOO'>
+				<input type='hidden' name='rivitunnus' value='$row[perhe]'>
+				$valinta
+			</form>
+		</td>";
 	$edrivi = $row["tunnus"];
 }
 
@@ -1792,7 +1850,7 @@ function echo_ilmaiset_lounaat($lopetus, $toim, $tilausnumero, $row, $kustannusp
 	echo "<td>";
 
 	if ($row['tuotetyyppi'] == 'A' and !$muokkauslukko) {
-		echo "<form autocomplete='off' method='post'>
+		echo "<form action='matkalasku.php' autocomplete='off' method='post'>
 			  	<input type='hidden' value='TARKISTA_ILMAISET_LOUNAAT' name='tee'>
 			  	<input type='hidden' value='$lopetus' name='lopetus'>
 			  	<input type='hidden' value='$toim' name='toim'>
@@ -1837,7 +1895,7 @@ function echo_ilmaiset_lounaat($lopetus, $toim, $tilausnumero, $row, $kustannusp
 
 function echo_nappulat($laskurow, $tee, $lopetus, $toim, $tilausnumero, $perhe, $perheid2) {
 	echo "<td class='back'>";
-	echo "<form method='post' autocomplete='off'>";
+	echo "<form action='matkalasku.php' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='$tee'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1851,7 +1909,7 @@ function echo_nappulat($laskurow, $tee, $lopetus, $toim, $tilausnumero, $perhe, 
 
 	if ($laskurow["tilaustyyppi"] == "M") {
 		echo "<td class='back'>";
-		echo "<form method='post' autocomplete='off'>";
+		echo "<form action='matkalasku.php' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='$tee'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
@@ -2927,6 +2985,34 @@ function erittele_rivit($tilausnumero) {
 	else {
 		return false;
 	}
+}
+
+function listdir($start_dir = '.') {
+
+	$files = array();
+	$ohitetut_laskut = array();
+
+	if (!is_dir($start_dir)) {
+		return false;
+	}
+
+	$start_dir = rtrim($start_dir, '/');
+	$file_list = explode("\n", trim(`ls $start_dir/ | sort`));
+
+	foreach ($file_list as $file) {
+
+		if ($file == "") {
+			continue;
+		}
+
+		$filepath = $start_dir.'/'.$file;
+
+		if (is_file($filepath)) {
+			array_push($files, $filepath);
+		}
+	}
+
+	return $files;
 }
 
 require ("inc/footer.inc");

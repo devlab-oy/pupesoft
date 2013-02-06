@@ -1033,7 +1033,7 @@
 						lasku2.laskunro as keikkanro,
 						tilausrivi.jaksotettu,
 						tilausrivin_lisatiedot.osto_vai_hyvitys,
-						lasku.comments,
+						lasku2.comments,
 						lasku.laatija,
 						lasku.luontiaika
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
@@ -1173,7 +1173,7 @@
 					echo "<tr>
 							<td>$jtrow[nimi]</td>";
 
-					if ($jtrow["tyyppi"] == "O" and $jtrow["laskutila"] != "K" and $jtrow["keikkanro"] > 0) {
+					if ($jtrow["tyyppi"] == "O" and $jtrow["laskutila"] != "K" and $jtrow["keikkanro"] > 0 and $jtrow['comments'] != '') {
 						echo "<td valign='top' class='tooltip' id='{$jtrow['tunnus']}{$jtrow['keikkanro']}'>";
 					}
 					else {
@@ -1182,15 +1182,7 @@
 
 					echo "<a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]&lopetus=$lopetus'>$jtrow[tunnus]</a>$keikka";
 
-					if ($jtrow["tyyppi"] == "O" and $jtrow["laskutila"] != "K" and $jtrow["keikkanro"] > 0) {
-
-						$query = "	SELECT comments
-									FROM lasku
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tila = 'K'
-									AND laskunro = '{$jtrow['keikkanro']}'";
-						$comments_chk_res = pupe_query($query);
-						$comments_chk_row = mysql_fetch_assoc($comments_chk_res);
+					if ($jtrow["tyyppi"] == "O" and $jtrow["laskutila"] != "K" and $jtrow["keikkanro"] > 0 and $jtrow['comments'] != '') {
 
 						$query = "	SELECT nimi
 									FROM kuka
@@ -1204,7 +1196,7 @@
 						echo t("Saapuminen"),": {$jtrow['keikkanro']} / {$jtrow['nimi']}<br /><br />";
 						echo t("Laatija"),": {$kuka_chk_row['nimi']}<br />";
 						echo t("Luontiaika"),": ",tv1dateconv($jtrow['luontiaika'], "pitkä"),"<br /><br />";
-						echo $comments_chk_row["comments"];
+						echo $jtrow["comments"];
 						echo "</div>";
 					}
 

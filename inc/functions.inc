@@ -18652,7 +18652,6 @@ if (!function_exists('splittaa_tilausrivi')) {
 		$query = "	SELECT tilausrivi.*
 					FROM tilausrivi
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-					LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.tunnus = '{$tunnus}'";
 		$result = pupe_query($query);

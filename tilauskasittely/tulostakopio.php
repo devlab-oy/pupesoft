@@ -1873,7 +1873,7 @@
 					}
 				}
 				else {
-					$koontilahete = $laskurow['tunnus'];
+					$koontilahete = 0;
 					$koontilahete_tilausrivit = 0;
 				}
 

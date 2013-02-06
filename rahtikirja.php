@@ -974,7 +974,7 @@
 							'komento' 					=> $komento,
 							'lahetekpl'					=> $lahetekpl,
 							'kieli' 					=> $kieli,
-							'koontilahete'				=> $laskutunnus,
+							'koontilahete'				=> $koontilahete,
 						);
 
 						pupesoft_tulosta_lahete($params);

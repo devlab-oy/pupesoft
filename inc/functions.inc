@@ -18663,6 +18663,8 @@ if (!function_exists('splittaa_tilausrivi')) {
 
 		mysql_data_seek($result, 0);
 
+		$_tmp_hinta_alkuperainen = 0;
+
 		$query = "INSERT INTO tilausrivi SET ";
 
 		for ($i = 0; $i < mysql_num_fields($result) - 1; $i++) {
@@ -18690,8 +18692,8 @@ if (!function_exists('splittaa_tilausrivi')) {
 					break;
 				case 'hinta_alkuperainen':
 					if ($rivi['hinta_alkuperainen'] != 0) {
-						$_tmp = ($rivi['hinta_alkuperainen'] / $rivi['varattu']) * $uuden_rivin_kpl;
-						$query .= " hinta_alkuperainen = {$_tmp},";
+						$_tmp_hinta_alkuperainen = ($rivi['hinta_alkuperainen'] / $rivi['varattu']) * $uuden_rivin_kpl;
+						$query .= " hinta_alkuperainen = {$_tmp_hinta_alkuperainen},";
 					}
 					else {
 						$query .= " hinta_alkuperainen = 0,";
@@ -18723,6 +18725,17 @@ if (!function_exists('splittaa_tilausrivi')) {
 		$query = substr($query, 0, -1);
 		$result = pupe_query($query);
 		$uusi_id = mysql_insert_id();
+
+		if ($_tmp_hinta_alkuperainen != 0) {
+
+			$hinta_alkuperainen = $rivi['hinta_alkuperainen'] - $_tmp_hinta_alkuperainen;
+
+			$query = "	UPDATE tilausrivi SET
+						hinta_alkuperainen = '{$hinta_alkuperainen}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$rivi['tunnus']}'";
+			$upd_res = pupe_query($query);
+		}
 
 		// tarkistetaan onko alkuperäinen rivi asn_sanomat-taulussa
 		// jos on, lisätään uusi splitattu rivi kanssa sinne

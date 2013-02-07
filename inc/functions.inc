@@ -12421,22 +12421,6 @@ if (!function_exists("pupe_DataTables")) {
 							}
 							else {
 								if (rivi_kpl_alkuperainen != kpl) {
-									$.post('{$_SERVER['SCRIPT_NAME']}',
-										{ 	keikan_otunnus: otunnus,
-											otunnus: otunnus,
-											tunnus: tun,
-											ajax_toiminto: 'rivi_kpl',
-											kpl: kpl,
-											no_head: 'yes',
-											ohje: 'off'},
-										function(return_value) {
-											var data = jQuery.parseJSON(return_value);
-
-											$('#hinnat_'+tun).html(data.rivihinta+'<br>'+data.alerivihinta);
-											$('#ulkkpl_'+tun).html(data.ulkkpl);
-											$('#alerivihintaalkuperainen_'+tun).val(data.alerivihinta);
-										}
-									);
 
 									if (kpl == 0) {
 										$('#refresh_screen_ajaxille').val('true');
@@ -12452,7 +12436,8 @@ if (!function_exists("pupe_DataTables")) {
 												ajax_toiminto: 'rivi_kpl_splittaus',
 												no_head: 'yes',
 												ohje: 'off',
-												uuden_rivin_kpl: uuden_rivin_kpl},
+												uuden_rivin_kpl: uuden_rivin_kpl,
+												vanhan_rivin_kpl: rivi_kpl_alkuperainen},
 											function(return_value) {
 
 												var data = jQuery.parseJSON(return_value);
@@ -12542,6 +12527,24 @@ if (!function_exists("pupe_DataTables")) {
 											$('#laskunsumma_jaljella').html(summa_jaljella.toFixed(2));
 										}
 									}
+
+									$.post('{$_SERVER['SCRIPT_NAME']}',
+										{ 	keikan_otunnus: otunnus,
+											otunnus: otunnus,
+											tunnus: tun,
+											ajax_toiminto: 'rivi_kpl',
+											kpl: kpl,
+											no_head: 'yes',
+											ohje: 'off'},
+										function(return_value) {
+											var data = jQuery.parseJSON(return_value);
+
+											$('#hinnat_'+tun).html(data.rivihinta+'<br>'+data.alerivihinta);
+											$('#ulkkpl_'+tun).html(data.ulkkpl);
+											$('#alerivihintaalkuperainen_'+tun).val(data.alerivihinta);
+										}
+									);
+
 								}
 							}
 						}).ajaxComplete(function(){
@@ -18646,7 +18649,7 @@ if (!function_exists('onko_suoratoimitus')) {
 }
 
 if (!function_exists('splittaa_tilausrivi')) {
-	function splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, $varastoon = TRUE, $pois_suuntalavalta = FALSE, $perheid = FALSE) {
+	function splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, $varastoon = TRUE, $pois_suuntalavalta = FALSE, $perheid = FALSE, $vanhan_rivin_kpl = '') {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT tilausrivi.*
@@ -18659,6 +18662,8 @@ if (!function_exists('splittaa_tilausrivi')) {
 		if (mysql_num_rows($result) == 0) return false;
 
 		$rivi = mysql_fetch_array($result);
+
+		$vanhan_rivin_kpl = $vanhan_rivin_kpl != '' ? $vanhan_rivin_kpl : $rivi['varattu'];
 
 		mysql_data_seek($result, 0);
 
@@ -18691,7 +18696,7 @@ if (!function_exists('splittaa_tilausrivi')) {
 					break;
 				case 'hinta_alkuperainen':
 					if ($rivi['hinta_alkuperainen'] != 0) {
-						$_tmp_hinta_alkuperainen = ($rivi['hinta_alkuperainen'] / $rivi['varattu']) * $uuden_rivin_kpl;
+						$_tmp_hinta_alkuperainen = ($rivi['hinta_alkuperainen'] / $vanhan_rivin_kpl) * $uuden_rivin_kpl;
 						$query .= " hinta_alkuperainen = {$_tmp_hinta_alkuperainen},";
 					}
 					else {

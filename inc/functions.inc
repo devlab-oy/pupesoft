@@ -6105,7 +6105,7 @@ if (!function_exists("sarjanumeron_ostohinta")) {
 				$keikkares = pupe_query($query);
 
 				while ($kulukeikkarow = mysql_fetch_assoc($keikkares)) {
-					// Haetaan kaikki keikkaan liitettyjen laskujen summa
+					// Haetaan kaikki saapumiseen liitettyjen laskujen summa
 					$query = "	SELECT sum(arvo*vienti_kurssi) kulusumma
 								FROM lasku
 								WHERE yhtio		= '$kukarow[yhtio]'
@@ -6159,7 +6159,7 @@ if (!function_exists("liitettyjen_kululaskujen_summa")) {
 		$keikkares = pupe_query($query);
 
 		while($kulukeikkarow = mysql_fetch_assoc($keikkares)) {
-			// Haetaan kaikki keikkaan liitettyjen laskujen summa
+			// Haetaan kaikki saapumiseen liitettyjen laskujen summa
 			$query = "	SELECT sum(arvo*vienti_kurssi) kulusumma
 						FROM lasku
 						WHERE yhtio		= '$kukarow[yhtio]'

@@ -72,7 +72,7 @@
 		$query  = "UNLOCK TABLE";
 		$result = pupe_query($query);
 
-		// Liitet‰‰n vastaanotettu verkkolasku uuteen keikkaan
+		// Liitet‰‰n vastaanotettu verkkolasku uuteen saapumiseen
 		// Tehd‰‰n liitosotsikko ostoreskontralaskulle
 		verkkolasku_luo_liitosotsikko($tunnus, $keikantunnus);
 
@@ -119,7 +119,7 @@
 				$rivirow = mysql_fetch_array($result);
 				$kohdistettujariveja++;
 
-				// jos rivi lˆytyi ja sit‰ ei ole kohdistettu viel‰, kohdistetaan keikkaan ja p‰ivitet‰‰n kpl
+				// jos rivi lˆytyi ja sit‰ ei ole kohdistettu viel‰, kohdistetaan saapumiseen ja p‰ivitet‰‰n kpl
 				if ($rivirow["uusiotunnus"] == 0) {
 					$query = "	UPDATE tilausrivi SET
 								uusiotunnus = '{$keikantunnus}',

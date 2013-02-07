@@ -685,7 +685,7 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT' and !$muokkauslukko) {
 
 if ($tee == "MUOKKAA") {
 
-	// Onko tosite liitetty keikkaan
+	// Onko tosite liitetty saapumiseen
 	$query = "	SELECT nimi, laskunro
 				from lasku
 				where yhtio = '$kukarow[yhtio]'

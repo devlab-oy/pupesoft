@@ -1973,12 +1973,20 @@
 							$jt 		= 0;
 						}
 
-						if(isset($jt_muidenmukana) or (!isset($jt_muidenmukana) and $toim == 'PIKATILAUS')) {
+						if(isset($jt_muidenmukana)) {
 							// j‰lkitoimitus muiden mukana
 							if ($jt_muidenmukana == 'KYLLA') {
 								$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
 							}
 							elseif ($jt_muidenmukana == 'EI') {
+								$kerayspvm = $laskurow["kerayspvm"];
+							}
+						}
+						elseif (!isset($jt_muidenmukana) and ($toim == 'PIKATILAUS' or $toim == 'RIVISYOTTO')) {
+							if($yhtiorow['puute_jt_oletus'] == 'I') {
+								$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
+							}
+							else {
 								$kerayspvm = $laskurow["kerayspvm"];
 							}
 						}
@@ -2017,7 +2025,6 @@
 							}
 
 							$var	= "J";
-							$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
 						}
 						// Terminaalitoimitukset tai ostoskorit; var tyhj‰‰ ja varattu normisti
 						elseif ($rivityyppi == 'Z' or $rivityyppi == 'B' or $rivityyppi == 'E' or $rivityyppi == 'F') {
@@ -2037,6 +2044,19 @@
 						// Normaalisti kaikki menee puutteeksi.
 						else {
 							$var 	= "P";
+						}
+						if ($yhtiorow['puute_jt_oletus'] == 'I') {
+							if ($yhtiorow["varaako_jt_saldoa"] == "") {
+								$varattu 	= 0;
+								$jt 		= $kpl;
+							}
+							else {
+								$varattu 	= $kpl;
+								$jt 		= 0;
+							}
+
+							$var	= "J";
+							$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
 						}
 						break;
 					default :

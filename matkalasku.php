@@ -714,7 +714,7 @@ if ($tee == "MUOKKAA") {
 		$poistakuva = 0;
 	}
 
-	if ($kuivat != "JOO" and !$muokkauslukko) {
+	if ($kuivat != "JOO" and !isset($lisaa) and !$muokkauslukko) {
 		//rivitunnus = yhtäkuin ensimmäisen rivin tunnus sekä kaikkien haettavien perheid2. haemme ne rivit ja poistamme ne
 		if (!empty($rivitunnus)) {
 
@@ -741,8 +741,7 @@ if ($tee == "MUOKKAA") {
 				$vero 		= $tilausrivi["tiliointialv"];
 				$hinta 		= round($tilausrivi["hinta"], 2);
 				$kommentti 	= $tilausrivi["kommentti"];
-				$rivitunnus = '';
-				$perheid2 	= '';
+				$perheid2 	= 0;
 				$kustp 		= $tilausrivi["kustp"];
 				$kohde 		= $tilausrivi["kohde"];
 				$projekti 	= $tilausrivi["projekti"];
@@ -951,13 +950,19 @@ if ($tee == "MUOKKAA") {
 
 			foreach ($a as $viranomaistyyppi) {
 
+				$tlisa = "";
+
+				if (isset($tuoteno) and $tuoteno != "") {
+					$tlisa = " or tuote.tuoteno='$tuoteno' ";
+				}
+
 				$query = "	SELECT tuote.tuoteno, tuote.nimitys, tuote.vienti,
 							if (tuote.vienti = '$yhtiorow[maa]' or tuote.nimitys like '%ateria%', 1, if (tuote.vienti != '', 2, 3)) sorttaus
 							FROM tuote
 							JOIN tili ON (tili.yhtio = tuote.yhtio and tili.tilino = tuote.tilino)
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
 							and tuote.tuotetyyppi = '$viranomaistyyppi'
-							and tuote.status != 'P'
+							and (tuote.status != 'P' $tlisa)
 							and tuote.tilino != ''
 							ORDER BY sorttaus, tuote.nimitys";
 				$tres = pupe_query($query);
@@ -1043,7 +1048,7 @@ if ($tee == "MUOKKAA") {
 
 		if (mysql_num_rows($liiteres) > 0) {
 			while ($liiterow = mysql_fetch_assoc($liiteres)) {
-				echo "<a target='kuvaikkuna' href='".$palvelin2."view.php?id=$liiterow[tunnus]'>$liiterow[selite]</a>";
+				echo "<a href='#' onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600');\">$liiterow[selite]</a>";
 				echo "<br>\n";
 			}
 		}
@@ -1056,10 +1061,9 @@ if ($tee == "MUOKKAA") {
 
 		$query = "	SELECT *
 					from tuote
-					where yhtio = '$kukarow[yhtio]'
-					and tuoteno = '$tuoteno'
-					and tuotetyyppi = '$tyyppi'
-					and status != 'P'";
+					where yhtio 	= '$kukarow[yhtio]'
+					and tuoteno 	= '$tuoteno'
+					and tuotetyyppi = '$tyyppi'";
 		$tres = pupe_query($query);
 
 		if (mysql_num_rows($tres) == 1) {
@@ -1981,12 +1985,22 @@ function poista_edelliset_matkalaskurivit($tilausnumero, $rivitunnus, $kukarow) 
 		$row['tunnukset'] = 0;
 	}
 
-	// ei poisteta tilausrivejä kokonaan, koska niistä tarvitaan erikoisale kentästä ilmaiset lounaat jos on annettu
+	// ei poisteta päiväraha tilausrivejä kokonaan, koska niistä tarvitaan erikoisale kentästä ilmaiset lounaat jos on annettu
 	$query = "	UPDATE tilausrivi
-				SET tyyppi = 'D'
-				WHERE yhtio  = '{$kukarow['yhtio']}'
-				AND otunnus  = '{$tilausnumero}'
-				AND perheid2 = '{$rivitunnus}'";
+				JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno and tuote.tuotetyyppi='A'
+				SET tilausrivi.tyyppi = 'D'
+				WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+				AND tilausrivi.otunnus  = '{$tilausnumero}'
+				AND tilausrivi.perheid2 = '{$rivitunnus}'";
+	pupe_query($query);
+
+	// kulurivit poistetaan kokonaan
+	$query = "	DELETE tilausrivi.*
+				FROM tilausrivi
+				JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno and tuote.tuotetyyppi='B'
+				WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+				AND tilausrivi.otunnus  = '{$tilausnumero}'
+				AND tilausrivi.perheid2 = '{$rivitunnus}'";
 	pupe_query($query);
 
 	// haetaan tiliöintirivien tunnukset
@@ -1997,27 +2011,25 @@ function poista_edelliset_matkalaskurivit($tilausnumero, $rivitunnus, $kukarow) 
 	$result = pupe_query($query);
 	$trow = mysql_fetch_assoc($result);
 
-	if ($trow['tiliointirivitunnukset'] == "") {
-		$trow['tiliointirivitunnukset'] = 0;
+	if ($trow['tiliointirivitunnukset'] != "") {
+		// Yliviivataan tiliöinnit
+		$query = "	UPDATE tiliointi
+					SET korjattu = '$kukarow[kuka]',
+					korjausaika  = now()
+					WHERE yhtio = '$kukarow[yhtio]'
+					and ltunnus = '$tilausnumero'
+					and tunnus in ({$trow['tiliointirivitunnukset']})";
+		$result = pupe_query($query);
+
+		// Yliviivataan ALV-tiliöinnit
+		$query = "	UPDATE tiliointi
+					SET korjattu = '$kukarow[kuka]',
+					korjausaika  = now()
+					WHERE yhtio = '$kukarow[yhtio]'
+					and ltunnus = '$tilausnumero'
+					and aputunnus in ({$trow['tiliointirivitunnukset']})";
+		$result = pupe_query($query);
 	}
-
-	// Yliviivataan tiliöinnit
-	$query = "	UPDATE tiliointi
-				SET korjattu = '$kukarow[kuka]',
-				korjausaika  = now()
-				WHERE yhtio = '$kukarow[yhtio]'
-				and ltunnus = '$tilausnumero'
-				and tunnus in ({$trow['tiliointirivitunnukset']})";
-	$result = pupe_query($query);
-
-	// Yliviivataan ALV-tiliöinnit
-	$query = "	UPDATE tiliointi
-				SET korjattu = '$kukarow[kuka]',
-				korjausaika  = now()
-				WHERE yhtio = '$kukarow[yhtio]'
-				and ltunnus = '$tilausnumero'
-				and aputunnus in ({$trow['tiliointirivitunnukset']})";
-	$result = pupe_query($query);
 
 	// Poistetaan tilausrivin lisätiedot
 	$query = "	DELETE
@@ -2141,8 +2153,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 				from tuote
 				where yhtio 	= '$kukarow[yhtio]'
 				and tuoteno 	= '$tuoteno'
-				and tuotetyyppi = '$tyyppi'
-				and status 	   != 'P'";
+				and tuotetyyppi = '$tyyppi'";
 	$tres = pupe_query($query);
 
 	if (mysql_num_rows($tres) != 1) {
@@ -2429,7 +2440,6 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						and tuote.tuotetyyppi = '$tyyppi'
 						and tuote.tuoteno = '$lisaa_tuoteno'
-						and tuote.status != 'P'
 						and tuote.tilino != ''";
 			$tres = pupe_query($query);
 
@@ -2696,7 +2706,7 @@ function korjaa_ostovelka($tilausnumero) {
 		return false;
 	}
 
-	//haetaan tiliöinti tilauskohtaisesti
+	// haetaan tiliöinti tilauskohtaisesti
 	$query = "	SELECT sum((-1*tiliointi.summa)) summa, count(*) kpl
 				FROM tiliointi
 				WHERE tiliointi.yhtio  = '$kukarow[yhtio]'

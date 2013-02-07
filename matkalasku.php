@@ -530,6 +530,13 @@ if ($tee == 'TARKISTA_ILMAISET_LOUNAAT' and !$muokkauslukko) {
 				$tilausrivi_uusi_nimitys = $row['tilausrivi_nimitys'] . ' ' . t("Puolitettu korvaus");
 				$tilausrivi_uusi_var = 3;
 			}
+			elseif ($row['var'] == 3 and $ilmaiset_lounaat < 2) {
+				//kotimaan puolitettu kokopäiväraha ----> kotimaan kokopäiväraha
+				$rivihinta = $row['kpl'] * ($row['myyntihinta']);
+				$tilausrivi_uusi_hinta = ($row['myyntihinta']);
+				$tilausrivi_uusi_nimitys = $row['nimitys'];
+				$tilausrivi_uusi_var = 1;
+			}
 			elseif ($row['var'] == 2) {
 				//kotimaan osapäiväraha ----> kotimaan puolitettu osapäiväraha
 				$rivihinta = $row['kpl'] * ($row['myymalahinta'] / 2);
@@ -1848,7 +1855,7 @@ function echo_td($row) {
 }
 
 function echo_ilmaiset_lounaat($lopetus, $toim, $tilausnumero, $row, $kustannuspaikat, $muokkauslukko) {
-	$selected_lounas = (int)$row['erikoisale'];
+	$selected_lounas = (int) $row['erikoisale'];
 	$ilmaiset_lounaat_kpl = array(0, 1, 2);
 
 	echo "<td>";
@@ -1891,7 +1898,7 @@ function echo_ilmaiset_lounaat($lopetus, $toim, $tilausnumero, $row, $kustannusp
 		echo "</form>";
 	}
 	elseif ($row['tuotetyyppi'] == 'A') {
-		echo $lounas;
+		echo $selected_lounas;
 	}
 
 	echo "</td>";

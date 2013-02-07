@@ -1999,7 +1999,7 @@
 						AND asn_sanomat.laji = 'tec'
 						AND asn_sanomat.status NOT IN ('X', 'E', 'D')
 						GROUP BY asn_sanomat.asn_numero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
-						ORDER BY toimi.nimi, toimi.ytunnus";
+						ORDER BY toimi.nimi, toimi.ytunnus, asn_sanomat.saapumispvm";
 			$result = pupe_query($query);
 
 			echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse=ostolasku&tee=' id='formi'>";

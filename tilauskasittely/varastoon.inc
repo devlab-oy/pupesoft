@@ -962,56 +962,98 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		echo "<font class='message'>".t("Vietiin tuotetta")." $tilrivirow[tuoteno] ".t("varastoon").": $tilrivirow[varattu] ".t("kappaletta").".</font><br>";
 	}
 
-	$varastoon_viedyt_tuotteet[$tilrivirow['tuoteno']] = $tilrivirow['varattu'];
+	//keeps the php notice away
+	if(!isset($varastoon_viedyt_tuotteet[$tilrivirow['tuoteno']])) {
+		$varastoon_viedyt_tuotteet[$tilrivirow['tuoteno']] = $tilrivirow['varattu'];
+	}
+	else {
+		$varastoon_viedyt_tuotteet[$tilrivirow['tuoteno']] += $tilrivirow['varattu'];
+	}
 }
 
-foreach($varastoon_viedyt_tuotteet as $tuoteno_temp => $tuote_varattu) {
-	//Varastoon viennin yhteydessä tarkistetaan heti_toimitus myyntitilausrivit
-	$query = "	SELECT lasku.tunnus,
-				tilausrivi.tilkpl,
-				tilausrivi.varattu,
-				tilausrivi.jt
-				FROM lasku
-				JOIN tilausrivi
-				ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND AND tilausrivi.tuoteno = '{$tuoteno_temp}' )
-				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-				AND lasku.tila = 'N'
-				AND lasku.alatila = 'U'
-				ORDER BY lasku.luontiaika";
-	$jt_heti_result = pupe_query($query);
+if($toiminto = "kalkyyli" and $tee = "varastoon" and $oikeasti_varastoon == 1) {
+	$lasku_tunnukset = array();
+	foreach($varastoon_viedyt_tuotteet as $tuoteno_temp => $tuotetta_viety_varastoon) {
+		//Varastoon viennin yhteydessä tarkistetaan heti_toimitus myyntitilausrivit ja asetetaan ne keräys jonoon, jos kaikki sen myyntitilauksen tilausrivit on toimitettavissa
+		$query = "	SELECT lasku.tunnus,
+					tilausrivi.tunnus as tilausrivi_tunnus,
+					tilausrivi.tuoteno,
+					tilausrivi.tilkpl,
+					tilausrivi.varattu,
+					tilausrivi.jt
+					FROM lasku
+					JOIN tilausrivi
+					ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tuoteno = '{$tuoteno_temp}' )
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					AND lasku.tila = 'N'
+					AND lasku.alatila = 'U'
+					ORDER BY lasku.luontiaika ASC";
+		$heti_toimitukseen_result = pupe_query($query);
 
-	$tuotetta_jaljella = $tuote_varattu;
-	while($jt_heti_row = mysql_fetch_assoc($jt_heti_result)) {
-		//jos tuotetta on jäljellä ja tuotetta riittää koko tilausriville ja tilauksen kaikki muut_tilausrivit voidaan myös toimittaa, niin tilaus voidaan asettaa keryäsjonoon
-		if($tuotetta_jaljella > 0 and $jt_heti_row['varattu'] <= $tuotetta_jaljella) {
-			$query = "	SELECT tunnus,
-						otunnus,
-						varattu
-						FROM tilausrivi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND otunnus = '{$jt_heti_row['tunnus']}'";
-			$kaikki_rivit_result = pupe_query($query);
-			$voi_toimittaa = true;
-			while($muut_tilausrivit = mysql_fetch_assoc($kaikki_rivit_result)) {
-				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno_temp, 'JTSPEC2', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
-
-				if($myytavissa < $muut_tilausrivit['varattu']) {
-					$voi_toimittaa = false;
-					break;
+		list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno_temp, 'JTSPEC', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
+		$tuotetta_jaljella = $saldo;
+		while($heti_toimitukseen_row = mysql_fetch_assoc($heti_toimitukseen_result)) {
+			//jos tuotetta on jäljellä ja tuotetta riittää koko tilausriville ja tilauksen kaikki muut_tilausrivit voidaan myös toimittaa, niin tilaus voidaan asettaa keryäsjonoon
+			if($tuotetta_jaljella > 0 and $heti_toimitukseen_row['tilkpl'] <= $tuotetta_jaljella) {
+				//haetaan myyntitilauksen muut tilausrivit
+				$query = "	SELECT tunnus,
+							otunnus,
+							tilkpl,
+							tuoteno
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND otunnus = '{$heti_toimitukseen_row['tunnus']}'
+							AND tunnus != '{$heti_toimitukseen_row['tilausrivi_tunnus']}'";
+				$muut_rivit_result = pupe_query($query);
+				$voi_toimittaa = true;
+				while($muut_tilausrivit = mysql_fetch_assoc($muut_rivit_result)) {
+					//haetaan muut heti_toimitukseen tilaukset ja katsotaan onko, tällä hetkellä käsittelyssä oleva tilaus toimitus kelpoinen
+					$query = "	SELECT lasku.tunnus,
+								tilausrivi.tunnus as tilausrivi_tunnus,
+								tilausrivi.tuoteno,
+								tilausrivi.tilkpl,
+								tilausrivi.varattu,
+								tilausrivi.jt
+								FROM lasku
+								JOIN tilausrivi
+								ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tuoteno = '{$muut_tilausrivit['tuoteno']}' )
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.tila = 'N'
+								AND lasku.alatila = 'U'
+								ORDER BY lasku.luontiaika ASC";
+					$muut_tilaukset_result = pupe_query($query);
+					
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($muut_tilausrivit['tuoteno'], 'JTSPEC', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
+					while($muut_tilaukset_row = mysql_fetch_assoc($muut_tilaukset_result)) {
+						if($muut_tilaukset_row['tilausrivi_tunnus'] == $muut_tilausrivit['tunnus'] and $saldo < $muut_tilausrivit['tilkpl']) {
+							$voi_toimittaa = false;
+							break;
+						}
+						$saldo -= $muut_tilaukset_row['tilkpl'];
+					}
+					if(!$voi_toimittaa) {
+						break;
+					}
+				}
+				if($voi_toimittaa) {
+					//kerätään lasku tunnukset talteen ja updateaan vasta loopin jälkeen
+					if(!in_array($heti_toimitukseen_row['tunnus'], $lasku_tunnukset)) {
+						$lasku_tunnukset[] = $heti_toimitukseen_row['tunnus'];
+					}
+					$tuotetta_jaljella -= $heti_toimitukseen_row['tilkpl'];
 				}
 			}
-			if($voi_toimittaa) {
-				$tuotetta_jaljella -= $jt_heti_row['varattu'];
-				$now = date('Y-m-d');
-				$query = "	UPDATE lasku
-							SET tila = 'N',
-							alatila = 'A',
-							toimpvm = {$now}
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$jt_heti_row['tunnus']}'";
-				pupe_query($query);
-			}
 		}
+	}
+	if(!empty($lasku_tunnukset)) {
+		$now = date('Y-m-d');
+		$query = "	UPDATE lasku
+					SET tila = 'N',
+					alatila = 'A',
+					toimaika = '{$now}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus IN(".implode(',', $lasku_tunnukset).")";
+		pupe_query($query);
 	}
 }
 

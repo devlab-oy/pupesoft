@@ -1777,7 +1777,7 @@
 			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
 			if ($srow['chn'] == '999')      $laskkielto     = 'CHECKED';
-			if ($srow['tila'] == 'N' and $srow['tila'] == 'U') $heti_toimitukseen = 'CHECKED';
+			if ($srow['heti_toimitukseen'] != '') $heti_toimitukseen = 'CHECKED';
 
 			// Tarjouksia ei oletuksena osatoimiteta
 			if ($srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) $osath = 'CHECKED';
@@ -3113,22 +3113,6 @@
 			$toimvv = '0000';
 			$toimkk = '00';
 			$toimpp = '00';
-		}
-
-		if(!empty($heti_toimitukseen)) {
-			//est‰‰, ett‰ tilaus ei mene suoraan ker‰ys jonoon.
-			/**
-			$laskutyyppi = "Kokonaistoimitus";
-			$alatila = "odottaa JT tuotteita";
-			break;
-			 */
-			$tila = 'N';
-			$alatila = 'U';
-			$toimpvm = date('Y-m-d', strtotime('now + 1 month'));
-			$toimpvm = explode('-', $toimpvm);
-			$toimvv = $toimpvm[0];
-			$toimkk = $toimpvm[1];
-			$toimpp = $toimpvm[2];
 		}
 
 		$query .= "	lasku SET

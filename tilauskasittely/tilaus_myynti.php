@@ -1387,21 +1387,31 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			// tulostetaan l‰hetteet ja tilausvahvistukset tai sis‰inen lasku..
 			require("tilaus-valmis.inc");
 
-			if(!empty($heti_toimitukseen)) {
-				//est‰‰, ett‰ tilaus ei mene suoraan ker‰ys jonoon.
-				/**
-				$laskutyyppi = "Kokonaistoimitus";
-				$alatila = "odottaa JT tuotteita";
-				break;
-				 */
-				$tila = 'N';
-				$alatila = 'U';
-				$toimpvm = date('Y-m-d', strtotime('now + 1 month'));
-				$query = "	UPDATE lasku
-							SET tila = 'U',
-							alatila = 'N',
-							toimpva = {$toimpvm}";
-				pupe_query($query);
+			if(!empty($laskurow['heti_toimitukseen'])) {
+				//estet‰‰n, ett‰ tilaus ei mene suoraan ker‰ys jonoon.
+				$query = "	SELECT *
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND otunnus = '{$laskurow['tunnus']}'";
+				$tilausrivi_result = pupe_query($query);
+				$voiko_toimittaa = true;
+				while($tilausrivi_row = mysql_fetch_assoc($tilausrivi_result)) {
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tilausrivi_row['tuoteno'], 'JTSPEC2', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
+					if($myytavissa < $tilausrivi_row['tilkpl']) {
+						$voiko_toimittaa = false;
+						break;
+					}
+				}
+				if(!$voiko_toimittaa) {
+					$toimpvm = date('Y-m-d', strtotime('now + 1 month'));
+					$query = "	UPDATE lasku
+								SET tila = 'N',
+								alatila = 'U',
+								toimaika = '{$toimpvm}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$laskurow['tunnus']}'";
+					pupe_query($query);
+				}
 			}
 		}
 	}

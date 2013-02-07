@@ -52,8 +52,8 @@
 			$tarkiste = 0;
 		}
 
-		if (substr($pankkitili, 13, 1) != $tarkiste) {
-			//echo "Tarkiste on väärin $tarkiste<br>";
+		if (substr($pankkitili, 13, 1) == '' or substr($pankkitili, 13, 1) != $tarkiste) {
+			#echo "Tarkiste on väärin $tarkiste<br>";
 			$pankkitili = "";
 		}
 	}

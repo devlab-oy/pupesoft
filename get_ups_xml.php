@@ -4,7 +4,9 @@
 	if (php_sapi_name() != 'cli') {
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
-
+	
+	date_default_timezone_set('Europe/Helsinki');
+	
 	require 'inc/connect.inc';
 	require 'inc/functions.inc';
 

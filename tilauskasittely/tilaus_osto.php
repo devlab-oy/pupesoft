@@ -609,24 +609,25 @@
 					require ('lisaarivi.inc');
 				}
 
-				//p‰ivitet‰‰n myyntitilausrivi, jos se on liitetty ostotilausriviin
-				$query = "	UPDATE tilausrivi
-							JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.tilausrivilinkki = '$rivitunnus_temp')
-							SET tilausrivi.tilkpl	= '$kpl',
-							tilausrivi.varattu 		= if(tilausrivi.varattu != 0, $kpl, 0),
-							tilausrivi.jt 			= if(tilausrivi.jt != 0, $kpl, 0),
-							tilausrivi.tyyppi = 'L'
-							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-							AND tilausrivi.kerattyaika = '0000-00-00 00:00:00'
-							AND tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
-							AND tilausrivi.laskutettuaika = '0000-00-00'";
-				$result = pupe_query($query);
+				if(!empty($rivitunnus_temp)) {
+					//p‰ivitet‰‰n myyntitilausrivi, jos se on liitetty ostotilausriviin
+					$query = "	UPDATE tilausrivi
+								JOIN tilausrivin_lisatiedot
+								ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.vanha_otunnus = tilausrivi.otunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '{$rivitunnus_temp}' )
+								SET tyyppi = 'L'
+								WHERE tilausrivi.yhtio = 'artr'
+								AND tilausrivi.tyyppi = 'D'
+								AND tilausrivi.kerattyaika = '0000-00-00 00:00:00'
+								AND tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
+								AND tilausrivi.laskutettuaika = '0000-00-00'";
+					pupe_query($query);
 
-				if(mysql_affected_rows() > 0) {
-					echo "<font class='error'>".t("Myyntitilausriville p‰ivitettiin m‰‰r‰t")."</font><br/><br/>";
-				}
-				else {
-					echo "<font class='error'>".t("Myyntitilausrivi on keratty, toimitettu tai laskutettu, joten sit‰ ei p‰ivitetty")."</font><br/><br/>";
+					if(mysql_affected_rows() > 0) {
+						echo "<font class='error'>".t("Myyntitilausriville p‰ivitettiin m‰‰r‰t")."</font><br/><br/>";
+					}
+					else {
+						echo "<font class='error'>".t("Myyntitilausrivi on keratty, toimitettu tai laskutettu, joten sit‰ ei p‰ivitetty")."</font><br/><br/>";
+					}
 				}
 
 				$hinta 	= '';

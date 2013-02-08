@@ -17167,6 +17167,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		$koontijoin 	= "";
 		$koontisort 	= "";
 		$koontilisa		= "";
+		$koontirivihinta = "";
 
 		// Koontilähetteen lisävalinnat ja -ehdot
 		if (isset($koontilahete) and $koontilahete != 0) {
@@ -17188,6 +17189,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
 			if ($onko_kerayserat_kaytossa === true) {
 				$koontiselect	= " kerayserat.sscc, kerayserat.sscc_ulkoinen, pakkaus.pakkaus, kerayserat.kpl_keratty AS varattu, 0 AS kpl, 0 as jt, kerayserat.kpl AS tilkpl,";
+				$koontirivihinta = "round(tilausrivi.hinta * (kerayserat.kpl_keratty) * {$query_ale_lisa},'{$yhtiorow['hintapyoristys']}') rivihinta,";
 				$koontijoin 	= " JOIN kerayserat ON (kerayserat.tilausrivi = tilausrivi.tunnus AND kerayserat.yhtio = tilausrivi.yhtio)
 									LEFT JOIN pakkaus ON (kerayserat.pakkaus = pakkaus.tunnus)";
 				$koontisort 	= " kerayserat.sscc_ulkoinen, ";
@@ -17198,6 +17200,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		$query = "  SELECT tilausrivi.*, {$koontiselect}
 					round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+					{$koontirivihinta}
 					$sorttauskentta,
 					if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,

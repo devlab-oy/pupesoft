@@ -17187,7 +17187,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			}
 
 			if ($onko_kerayserat_kaytossa === true) {
-				$koontiselect	= " kerayserat.sscc, kerayserat.sscc_ulkoinen, pakkaus.pakkaus,";
+				$koontiselect	= " kerayserat.sscc, kerayserat.sscc_ulkoinen, pakkaus.pakkaus, kerayserat.kpl_keratty AS varattu, 0 AS kpl, 0 as jt, kerayserat.kpl AS tilkpl,";
 				$koontijoin 	= " JOIN kerayserat ON (kerayserat.tilausrivi = tilausrivi.tunnus AND kerayserat.yhtio = tilausrivi.yhtio)
 									LEFT JOIN pakkaus ON (kerayserat.pakkaus = pakkaus.tunnus)";
 				$koontisort 	= " kerayserat.sscc_ulkoinen, ";
@@ -17195,7 +17195,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		}
 
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot
-		$query = "  SELECT $koontiselect tilausrivi.*,
+		$query = "  SELECT tilausrivi.*, {$koontiselect}
 					round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 					$sorttauskentta,
@@ -19980,7 +19980,7 @@ if (!function_exists('koontilahete_check')) {
 		// Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen
 		elseif (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "") {
 			// Jos lähetetään sähköinen keräysvahvistus, niin ei tulostetaan myös paperille, eli pushataan arrayseen
-			$komento = array();
+			$komento = $komento != "" ? array($komento) : array();
 
 			$komento[] = "asiakasemail".$laskurow['email'];
 		}

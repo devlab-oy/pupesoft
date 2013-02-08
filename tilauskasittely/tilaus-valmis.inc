@@ -4,6 +4,7 @@
 $tilaus_valmis_ulos = "";
 $ohjausmerkkilisa 	= "";
 $luottorajavirhe 	= "";
+$jtkielto 			= "";
 
 ///* Reload ja back-nappulatsekki *///
 if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {

@@ -55,20 +55,20 @@
 		if ($ryhma == '1') {
 			$taso = "ee100";
 			$eetasolisa = " or alv_taso like '%ee110%'";
-			#$tiliointilisa = " and tiliointi.vero = 20 ";
+			$tiliointilisa = " and tiliointi.vero = 20 ";
 		}
 		elseif ($ryhma == '1.1') {
 			$taso = "ee110";
-			#$tiliointilisa = " and tiliointi.vero = 20 ";
+			$tiliointilisa = " and tiliointi.vero = 20 ";
 		}
 		elseif ($ryhma == '2') {
 			$taso = "ee100";
 			$eetasolisa = " or alv_taso like '%ee110%'";
-			#$tiliointilisa = " and tiliointi.vero = 9 ";
+			$tiliointilisa = " and tiliointi.vero = 9 ";
 		}
 		elseif ($ryhma == '2.1') {
 			$taso = "ee110";
-			#$tiliointilisa = " and tiliointi.vero = 9 ";
+			$tiliointilisa = " and tiliointi.vero = 9 ";
 		}
 		elseif ($ryhma == '3') {
 			$taso = "ee300";

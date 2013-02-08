@@ -19980,7 +19980,7 @@ if (!function_exists('koontilahete_check')) {
 		// Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen
 		elseif (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "") {
 			// Jos lähetetään sähköinen keräysvahvistus, niin ei tulostetaan myös paperille, eli pushataan arrayseen
-			$komento = $komento != "" ? array($komento) : array();
+			$komento = array();
 
 			$komento[] = "asiakasemail".$laskurow['email'];
 		}

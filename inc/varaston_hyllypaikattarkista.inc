@@ -23,7 +23,8 @@
 						${'chk_'.mysql_field_name($result, $i)} = $t[$i];
 					}
 
-					if (mysql_field_name($result, $i) == "hyllytaso" and $chk_hyllyalue != '' and $chk_hyllynro != '' and $chk_hyllyvali != '' and $chk_hyllytaso != '') {
+					if (mysql_field_name($result, $i) == "hyllytaso" and $chk_hyllyalue != '' and $chk_hyllynro != '' and $chk_hyllyvali != '' and $chk_hyllytaso != ''
+						and ($chk_hyllyalue != $trow['hyllyalue'] or $chk_hyllynro != $trow['hyllynro'] or $chk_hyllyvali != $trow['hyllyvali'] or $chk_hyllytaso != $trow['hyllytaso'])) {
 
 						$query = "	SELECT tunnus
 									FROM varaston_hyllypaikat

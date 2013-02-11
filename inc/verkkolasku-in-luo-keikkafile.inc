@@ -694,7 +694,7 @@
 								}
 								break;
 							case 'hinta_alkuperainen':
-								$hinta_alkuperainenlisa = ($tilausrivirow['hinta_alkuperainen'] / ($tilausrivirow['kpl']+$tilausrivirow['varattu'])) * $kappaleerotus;
+								$hinta_alkuperainenlisa = round(($tilausrivirow['hinta_alkuperainen'] / ($tilausrivirow['kpl']+$tilausrivirow['varattu'])) * $kappaleerotus, 6);
 								$values .= ", '{$hinta_alkuperainenlisa}'";
 								break;
 							default:
@@ -710,7 +710,7 @@
 					$splitlisa2 = $tilausrivirow['kpl'] > 0 ? ", kpl = '{$rtuoteno[$i]['kpl']}'" : ", kpl = 0 ";
 					$rivihintalisa = $tilausrivirow['kpl'] > 0 ? ", rivihinta = '".(($tilausrivirow['rivihinta'] / $tilausrivirow['kpl']) * $rtuoteno[$i]['kpl'])."'" : ", rivihinta = 0";
 
-					$hinta_alkuperainenlisa = ($tilausrivirow['hinta_alkuperainen'] / ($tilausrivirow['kpl']+$tilausrivirow['varattu'])) * $rtuoteno[$i]['kpl'];
+					$hinta_alkuperainenlisa = round(($tilausrivirow['hinta_alkuperainen'] / ($tilausrivirow['kpl']+$tilausrivirow['varattu'])) * $rtuoteno[$i]['kpl'], 6);
 
 					// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 					$query = "	UPDATE tilausrivi SET
@@ -997,7 +997,7 @@
 
 							switch ($fieldname) {
 								case 'hinta_alkuperainen':
-									$hinta_alkuperainenlisa = ($tilausrivirow['hinta_alkuperainen'] / ($tilausrivirow['kpl']+$tilausrivirow['varattu'])) * $ylimaaraista;
+									$hinta_alkuperainenlisa = round(($tilausrivirow['hinta_alkuperainen'] / ($tilausrivirow['kpl']+$tilausrivirow['varattu'])) * $ylimaaraista, 6);
 									$values .= ", '{$hinta_alkuperainenlisa}'";
 									break;
 								case 'tilkpl':
@@ -1217,7 +1217,7 @@
 
 							switch ($fieldname) {
 								case 'hinta_alkuperainen':
-									$hinta_alkuperainenlisa = ($tilausrivirow['hinta_alkuperainen'] / ($tilausrivirow['kpl']+$tilausrivirow['varattu'])) * $positiivinen_arvo;
+									$hinta_alkuperainenlisa = round(($tilausrivirow['hinta_alkuperainen'] / ($tilausrivirow['kpl']+$tilausrivirow['varattu'])) * $positiivinen_arvo, 6);
 									$values .= ", '{$hinta_alkuperainenlisa}'";
 									break;
 								case 'varattu':
@@ -1272,7 +1272,7 @@
 
 						$komm_lisa = $split_row['kpl'] + $split_row['varattu'];
 
-						$hinta_alkuperainenlisa = ($tilausrivirow['hinta_alkuperainen'] / ($split_row['kpl']+$split_row['varattu'])) * $erotus;
+						$hinta_alkuperainenlisa = round(($tilausrivirow['hinta_alkuperainen'] / ($split_row['kpl']+$split_row['varattu'])) * $erotus, 6);
 
 						// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 						$query = "	UPDATE tilausrivi SET

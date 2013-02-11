@@ -18696,7 +18696,7 @@ if (!function_exists('splittaa_tilausrivi')) {
 					break;
 				case 'hinta_alkuperainen':
 					if ($rivi['hinta_alkuperainen'] != 0) {
-						$_tmp_hinta_alkuperainen = ($rivi['hinta_alkuperainen'] / $vanhan_rivin_kpl) * $uuden_rivin_kpl;
+						$_tmp_hinta_alkuperainen = round(($rivi['hinta_alkuperainen'] / $vanhan_rivin_kpl) * $uuden_rivin_kpl, 6);
 						$query .= " hinta_alkuperainen = {$_tmp_hinta_alkuperainen},";
 					}
 					else {
@@ -18732,7 +18732,7 @@ if (!function_exists('splittaa_tilausrivi')) {
 
 		if ($_tmp_hinta_alkuperainen != 0) {
 
-			$hinta_alkuperainen = $rivi['hinta_alkuperainen'] - $_tmp_hinta_alkuperainen;
+			$hinta_alkuperainen = round($rivi['hinta_alkuperainen'] - $_tmp_hinta_alkuperainen, 6);
 
 			$query = "	UPDATE tilausrivi SET
 						hinta_alkuperainen = '{$hinta_alkuperainen}'

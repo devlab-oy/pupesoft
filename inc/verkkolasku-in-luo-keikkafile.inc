@@ -2136,7 +2136,8 @@
 	}
 
 	// t‰m‰n keikan voi vied‰ saldoille ja laskuttaa
-	if ($kohdistettujariveja > 0 and ($kauttalaskutus == "kylla" or ($osrow["ebid"] == "TECCOM-INVOICE" and $virheet == 0))) {
+	// if ($kohdistettujariveja > 0 and ($kauttalaskutus == "kylla" or ($osrow["ebid"] == "TECCOM-INVOICE" and $virheet == 0))) {
+	if ($kohdistettujariveja > 0 and $kauttalaskutus == "kylla") {
 		$otunnus = $keikantunnus;
 
 		$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
@@ -2210,13 +2211,8 @@
 			$laskuvirhe .= t("Vied‰‰n varastoon").". ($laskurow[laskunro])\n";
 		}
 
-		$tullaan_automaattikohdistuksesta = $osrow['ebid'] == "TECCOM-INVOICE" ? true : false;
-
-		$toiminto = "kalkyyli";
-		$tee = "varastoon";
-
-		// vied‰‰n varastoon...
-		require ("tilauskasittely/varastoon.inc");
+		// $tullaan_automaattikohdistuksesta = $osrow['ebid'] == "TECCOM-INVOICE" ? true : false;
+		$tullaan_automaattikohdistuksesta = false;
 
 		if ($tullaan_automaattikohdistuksesta) {
 
@@ -2228,6 +2224,13 @@
 			$sum_chk_row = mysql_fetch_assoc(pupe_query($query));
 
 			if ($sum_chk_row['hinta'] - $sum_chk_row['hinta_alkuperainen'] != 0) $tullaan_automaattikohdistuksesta = false;
+		}
+		else {
+			$toiminto = "kalkyyli";
+			$tee = "varastoon";
+
+			// vied‰‰n varastoon...
+			require ("tilauskasittely/varastoon.inc");
 		}
 
 		if ($kauttalaskutus == "kylla" or $tullaan_automaattikohdistuksesta) {

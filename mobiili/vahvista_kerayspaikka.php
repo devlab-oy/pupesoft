@@ -222,6 +222,22 @@ if (isset($submit) and trim($submit) != '') {
 	}
 }
 
+
+if(isset($row['tilausrivi_tyyppi'])) {
+	if ($row['tilausrivi_tyyppi'] == '') {
+		$row['tilausrivi_tyyppi'] = 'JT';
+	}
+	elseif ($row['tilausrivi_tyyppi'] == 'o') {
+		$row['tilausrivi_tyyppi'] = 'JTS';
+	}
+	else {
+		$row['tilausrivi_tyyppi'] = '';
+	}
+}
+else {
+	$row['tilausrivi_tyyppi'] = '';
+}
+
 # Asetetaan m‰‰r‰ varattu kent‰n arvoksi jos sit‰ ei ole setattu
 $maara = (empty($maara)) ? $row['varattu'] : $maara;
 
@@ -281,7 +297,7 @@ echo "<div class='main'>
 	</tr>
 	<tr>
 		<th>",t("M‰‰r‰"),"</th>
-		<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $disabled/></td>
+		<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $disabled/> {$row['tilausrivi_tyyppi']}</td>
 		<td><span id='row_varattu' $hidden>{$row['varattu']}</span><span id='yksikko'>{$row['yksikko']}</span></td>
 	</tr>
 	<tr>

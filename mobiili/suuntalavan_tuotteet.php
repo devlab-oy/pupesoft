@@ -178,6 +178,7 @@ echo "</th>
 
 		if ($row = mysql_fetch_assoc($onko_suoratoimitus_res)) {
 			if ($row["suoraan_laskutukseen"] == "") echo "&nbsp;",t("JT");
+			else if ($row["suoraan_laskutukseen"] == "o") echo "&nbsp;",t("JTS");
 		}
 
 		echo "</td>";

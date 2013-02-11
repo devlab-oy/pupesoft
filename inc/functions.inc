@@ -18861,6 +18861,30 @@ if (!function_exists('etsi_suuntalava_sscc')) {
 	}
 }
 
+if(!function_exists('etsi_suuntalava_sscc_asn_sanomat')) {
+	function etsi_kasittelemattomat_asn_sanomat($sscc) {
+		global $kukarow;
+
+		$query = "	SELECT *
+					FROM asn_sanomat
+					WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
+					AND asn_sanomat.sscc_koodi = '{$sscc}'
+					AND asn_sanomat.status = ''
+					AND asn_sanomat.laji = 'asn'";
+		$result = pupe_query($query);
+
+		$return = array();
+		
+		if (mysql_num_rows($result) > 0) {
+			while ($row = mysql_fetch_assoc($result)) {
+				$return[] = $row;
+			}
+		}
+		
+		return $return;
+	}
+}
+
 if (!function_exists("suuntalavan_tuotteet")) {
 	function suuntalavan_tuotteet($suuntalavat, $liitostunnus, $order = "", $ascdesc = "", $tuoteno = "", $tilriv = 0, $eankoodi = "") {
 		global $kukarow;
@@ -18917,12 +18941,15 @@ if (!function_exists("suuntalavan_tuotteet")) {
 					tilausrivi.varattu + tilausrivi.kpl siskpl,
 					tuote.eankoodi,
 					IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) AS tuotekerroin,
-					CONCAT(tilausrivi.hyllyalue, ' ', tilausrivi.hyllynro, ' ', tilausrivi.hyllyvali, ' ', tilausrivi.hyllytaso) AS hyllypaikka
+					CONCAT(tilausrivi.hyllyalue, ' ', tilausrivi.hyllynro, ' ', tilausrivi.hyllyvali, ' ', tilausrivi.hyllytaso) AS hyllypaikka,
+					tilausrivin_lisatiedot.suoraan_laskutukseen as tilausrivi_tyyppi
 					FROM tilausrivi
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = tilausrivi.suuntalava $suuntalavalisa)
 					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
 					JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$liitostunnus}')
+					JOIN tilausrivin_lisatiedot
+					ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND {$uusiotunnuslisa}
 					AND tilausrivi.tyyppi = 'O'

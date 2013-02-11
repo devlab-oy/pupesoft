@@ -26,10 +26,13 @@ $query = "  SELECT
             tilausrivi.yksikko,
             tilausrivi.suuntalava,
             tilausrivi.uusiotunnus,
-            lasku.liitostunnus
+            lasku.liitostunnus,
+			tilausrivin_lisatiedot.suoraan_laskutukseen AS tilausrivi_tyyppi
             FROM lasku
             JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O'
             JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
+			JOIN tilausrivin_lisatiedot
+			ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
             WHERE tilausrivi.tunnus='{$tilausrivi}'
             AND tilausrivi.yhtio='{$kukarow['yhtio']}'
             AND lasku.tunnus='{$ostotilaus}'";
@@ -80,6 +83,21 @@ if (isset($submit)) {
 
 $suuntalava = $row['suuntalava'] ? : "Ei ole";
 
+if(isset($row['tilausrivi_tyyppi'])) {
+	if ($row['tilausrivi_tyyppi'] == '') {
+		$row['tilausrivi_tyyppi'] = 'JT';
+	}
+	elseif ($row['tilausrivi_tyyppi'] == 'o') {
+		$row['tilausrivi_tyyppi'] = 'JTS';
+	}
+	else {
+		$row['tilausrivi_tyyppi'] = '';
+	}
+}
+else {
+	$row['tilausrivi_tyyppi'] = '';
+}
+
 ######## UI ##########
 # Otsikko
 echo "<div class='header'>";
@@ -98,7 +116,7 @@ echo "<div class='main'>
     </tr>
     <tr>
         <th>",t("Hyllytetty m‰‰r‰"), "</th>
-        <td><input id='numero' class='numero' type='text' name='hyllytetty' value='{$row['siskpl']}' onchange='update_label()'></input></td>
+        <td><input id='numero' class='numero' type='text' name='hyllytetty' value='{$row['siskpl']}' onchange='update_label()'></input> {$row['tilausrivi_tyyppi']}</td>
         <td><span id='hylytetty_label'>{$row['ulkkpl']}</span></td>
     </tr>
     <tr>

@@ -12921,7 +12921,7 @@ if (!function_exists("seuraavat_lahtoajat")) {
 // K‰sitell‰‰n XML-entiteetit
 if (!function_exists("xmlentities")) {
 	function xmlentities($string) {
-   		return preg_replace("/[^\x20-\xFF]/", "", str_replace(array('&', '"', "'", '<', '>', '¥', '`'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;', '&apos;', '&apos;'), trim($string)));
+   		return preg_replace("/[^\xA\x20-\xFF]/", "", str_replace(array('&', '"', "'", '<', '>', '¥', '`'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;', '&apos;', '&apos;'), trim($string)));
 	}
 }
 

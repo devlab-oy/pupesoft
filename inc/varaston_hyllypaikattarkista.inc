@@ -23,8 +23,7 @@
 						${'chk_'.mysql_field_name($result, $i)} = $t[$i];
 					}
 
-					if (mysql_field_name($result, $i) == "hyllytaso" and $chk_hyllyalue != '' and $chk_hyllynro != '' and $chk_hyllyvali != '' and $chk_hyllytaso != ''
-						and ($chk_hyllyalue != $trow['hyllyalue'] or $chk_hyllynro != $trow['hyllynro'] or $chk_hyllyvali != $trow['hyllyvali'] or $chk_hyllytaso != $trow['hyllytaso'])) {
+					if (mysql_field_name($result, $i) == "hyllytaso" and $chk_hyllyalue != '' and $chk_hyllynro != '' and $chk_hyllyvali != '' and $chk_hyllytaso != '') {
 
 						$query = "	SELECT tunnus
 									FROM varaston_hyllypaikat
@@ -32,7 +31,8 @@
 									AND hyllyalue = '{$chk_hyllyalue}'
 									AND hyllynro = '{$chk_hyllynro}'
 									AND hyllyvali = '{$chk_hyllyvali}'
-									AND hyllytaso = '{$chk_hyllytaso}'";
+									AND hyllytaso = '{$chk_hyllytaso}'
+									and tunnus != '{$tunnus}'";
 						$chk_res = pupe_query($query);
 
 						if (mysql_num_rows($chk_res) != 0) {

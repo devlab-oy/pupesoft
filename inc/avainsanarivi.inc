@@ -567,7 +567,7 @@
 		$sel[$trow[$i]] = "SELECTED";
 
 		$query = "	SELECT tunnus,
-					concat(nimi,' - ',tilino,' - ',kustp) as dropdown_text
+					concat(nimi,' - ',tilino) as dropdown_text
 					FROM tili
 					WHERE yhtio = '{$kukarow['yhtio']}'";
 		$tilires = pupe_query($query);

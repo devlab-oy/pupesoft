@@ -13,7 +13,7 @@ require ("../inc/parametrit.inc");
 	}
 </script>
 <?php
-echo "<font class='head'>".t("K‰teisotto kassalippaasta")."</font><br/>";
+echo "<font class='head'>".t("K‰teisotto kassalippaasta")."</font><hr>";
 echo "<div id='tarvittavia_tietoja'style='display:none;'>".t("Tarvittavia tietoja puuttuu")."</div>";
 
 $kassalippaat = hae_kassalippaat();
@@ -27,21 +27,28 @@ $request_params = array(
 );
 
 if ($tee == 'kateisotto') {
-	//tehd‰‰n k‰teisotto
-	//
-	//haetaan kassalipas row
-	$kassalipas = hae_kassalipas($kassalipas_tunnus);
+	$voiko_kateisoton_tehda = tarkista_saako_laskua_muuttaa(date('Y-m-d'));
+	if($voiko_kateisoton_tehda) {
+		//tehd‰‰n k‰teisotto
+		//
+		//haetaan kassalipas row
+		$kassalipas = hae_kassalipas($kassalipas_tunnus);
 
-	//tarkistetaan, onko kassalipas jo t‰sm‰ytetty
-	$kassalippaan_tasmaytys = tarkista_kassalippaan_tasmaytys($kassalipas['tunnus']);
-	if($kassalippaan_tasmaytys['ltunnukset'] != '' and $kassalippaan_tasmaytys['selite'] != '') {
-		echo "<font class='error'>".t("T‰m‰n p‰iv‰n valittu kassalipas on jo t‰sm‰ytetty")."</font>";
-		exit;
+		//tarkistetaan, onko kassalipas jo t‰sm‰ytetty
+		$kassalippaan_tasmaytys = tarkista_kassalippaan_tasmaytys($kassalipas['tunnus']);
+		if($kassalippaan_tasmaytys['ltunnukset'] != '' and $kassalippaan_tasmaytys['selite'] != '') {
+			echo "<font class='error'>".t("T‰m‰n p‰iv‰n valittu kassalipas on jo t‰sm‰ytetty")."</font>";
+		}
+		else {
+			tee_kateisotto($kassalipas, $summa, $kateisoton_luonne, $yleinen_kommentti);
+			echo "<font class='message'>".t("K‰teisotto tehtiin onnistuneesti")."</font>";
+		}
+	}
+	else {
+		echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $yhtiorow['tilikausi_alku'], date('Y-m-d'))."!</font>";
 	}
 
-	tee_kateisotto($kassalipas, $summa, $kateisoton_luonne, $yleinen_kommentti);
-
-	echo "<font class='message'>".t("K‰teisotto tehtiin onnistuneesti")."</font>";
+	echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet);
 }
 else {
 	echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet, $request_params);
@@ -49,8 +56,6 @@ else {
 
 function tarkista_kassalippaan_tasmaytys($kassalipas_tunnus) {
 	global $kukarow;
-
-	$now = date('Y-m-d');
 
 	$query = "	SELECT group_concat(distinct lasku.tunnus) ltunnukset,
 				group_concat(distinct tiliointi.selite) selite
@@ -63,7 +68,7 @@ function tarkista_kassalippaan_tasmaytys($kassalipas_tunnus) {
 				AND tiliointi.korjattu = '')
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.tila 	  = 'X'
-				AND lasku.tapvm   = '$now'";
+				AND lasku.tapvm   = CURDATE()";
 	$result = pupe_query($query);
 
 	return mysql_fetch_assoc($result);
@@ -83,7 +88,6 @@ function tee_kateisotto($kassalipas, $summa, $kateisoton_luonne, $yleinen_kommen
 function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti) {
 	global $kukarow;
 
-	$kateis_maksuehto = hae_kateis_maksuehto();
 	//tila = X ja alatila = '' -> Muu tosite
 	//tila = X alatila = '' tilaustyyppi = O ---> T‰m‰ tarkoittaa, ett‰ K‰teisotto
 	$query = "	INSERT INTO lasku
@@ -96,9 +100,7 @@ function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti) {
 				laatija = '{$kukarow['kuka']}',
 				luontiaika = NOW(),
 				tapvm = NOW(),
-				mapvm = NOW(),
 				kassalipas = '{$kassalipas['tunnus']}',
-				maksuehto = '{$kateis_maksuehto['tunnus']}',
 				nimi = '".t("K‰teisotto kassalippaasta:")." {$kassalipas['nimi']}'";
 				
 	pupe_query($query);
@@ -129,22 +131,22 @@ function tee_tiliointi($lasku_tunnus, $kassalipas, $summa, $kateisoton_luonne) {
 				summa = {$summa},
 				summa_valuutassa = {$summa},
 				valkoodi = 'EUR',
-				selite = '".t("K‰teisotto kassalippaasta:")." {$kassalipas['nimi']}',
+				selite = '".t("K‰teisotto kassalippaasta").": {$kassalipas['nimi']}',
 				vero = 0.00";
 
 	pupe_query($query);
 }
 
-function hae_kateis_maksuehto() {
-	global $kukarow;
+function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {
+	global $kukarow, $yhtiorow;
 
-	$query = "	SELECT *
-				FROM maksuehto
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND kateinen = 'p'";
-	$result = pupe_query($query);
+	if (strtotime($yhtiorow['tilikausi_alku']) < strtotime($tapahtumapaiva) and strtotime($yhtiorow['tilikausi_loppu']) > strtotime($tapahtumapaiva)) {
+		return true;
+	}
+	else {
+		return false;
+	}
 
-	return mysql_fetch_assoc($result);
 }
 
 function hae_kassalipas($kassalipas_tunnus) {
@@ -236,7 +238,7 @@ function hae_kateisoton_luonteet() {
 	return $kateisoton_luonteet;
 }
 
-function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $request_params) {
+function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $request_params = array()) {
 	echo "<form name='kateisotto' method='POST'>";
 	echo "<input type='hidden' name='tee' value='kateisotto'/>";
 	echo "<table>";
@@ -290,4 +292,7 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $request_para
 	echo "</table>";
 	echo "</form>";
 }
+
+require("../inc/footer.inc");
+
 ?>

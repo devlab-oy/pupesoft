@@ -66,7 +66,6 @@ $request_params = array(
 	"aja_kysely" => $aja_kysely,
 	"tallenna_muutokset" => $tallenna_muutokset,
 	"poista_kysely" => $poista_kysely,
-	"tiedosto_tyyppi" => $tiedosto_tyyppi,
 	"debug" => 0,
 );
 
@@ -86,9 +85,10 @@ if($tee == 'aja_raportti') {
 	
 	$rivit = generoi_matkalaskuraportti_rivit($request_params);
 
-	if(count($rivit) > 1000 and $request_params['tiedosto_tyyppi'] == 'ruudulle') {
+	$naytetaanko_ruudulla = true;
+	if(count($rivit) > 1000) {
 		echo "<font class='message'>".t('Hakutulos oli liian suuri, ei n‰ytet‰ ruudulla')."</font>";
-		$request_params['tiedosto_tyyppi'] = 'excel';
+		$naytetaanko_ruudulla = false;
 	}
 
 	if(count($rivit) > 0) {
@@ -98,23 +98,19 @@ if($tee == 'aja_raportti') {
 			'tapvm' => t('Tapahtumap‰iv‰'),
 			'summa' => t('Summa'),
 			'nimitys' => t('Nimitys'),
-			'kulu_tyyppi' => t('Kulu tyyppi'),
-			'tuotetyyppi' => t('Tuote tyyppi'),
-			'matkustaja_nimi' => t('Matkustajan nimi'),
-			'kustp_nimi' => t('Kustannuspaikan nimi'),
+			'tuotetyyppi' => t('Tyyppi'),
+			'matkustaja_nimi' => t('Nimi'),
+			'kustp_nimi' => t('Kustannuspaikka'),
 			'tuoteno' => t('Tuotenumero'),
-			'kerattyaika' => t('Alku p‰iv‰m‰‰r‰'),
-			'toimitettuaika' => t('Loppu p‰iv‰m‰‰r‰'),
 			'kommentti' => t('Kommentti'),
-			'kpl' => t('Kpl'),
-			'ilmaiset_lounaat' => t('Ilmaiset lounaat'),
+			'kpl' => t('M‰‰r‰'),
+			'ilmaiset_lounaat' => t('Ilmaiset ateriat'),
 			'hinta' => t('Hinta'),
 		);
-		//p‰‰tet‰‰n mit‰ tehd‰‰n datalle
-		//s‰ilytet‰‰n mahdollisuus printata myˆs pdf:lle tiedot
-		if($request_params['tiedosto_tyyppi'] == "excel") {
-			$tiedosto = generoi_excel_tiedosto($rivit, $request_params, $header_values);
-		}
+		$force_to_string = array(
+			'laskunro'
+		);
+		$tiedosto = generoi_excel_tiedosto($rivit, $request_params, $header_values, $force_to_string);
 	}
 
 	echo_matkalaskuraportti_form($request_params);
@@ -123,11 +119,12 @@ if($tee == 'aja_raportti') {
 	echo "<br/>";
 	echo "<br/>";
 
-	if (count($rivit) > 0 and $request_params['tiedosto_tyyppi'] == "ruudulle") {
-		nayta_ruudulla($rivit, $request_params, $header_values);
-	}
-	else if (count($rivit) > 0 and $request_params['tiedosto_tyyppi'] == "excel") {
-		echo_tallennus_formi($tiedosto);
+	echo_tallennus_formi($tiedosto);
+
+	echo "<br/>";
+	
+	if ($naytetaanko_ruudulla) {
+		nayta_ruudulla($rivit, $request_params, $header_values, $force_to_string);
 	}
 }
 else {
@@ -182,10 +179,6 @@ function generoi_matkalaskuraportti_rivit($request_params) {
 
 	$rivit = array();
 	while($rivi = mysql_fetch_assoc($result)) {
-		if(isset($rivi['kulu_tyyppi'])) {
-			//listataan tuotteittain. p‰‰tell‰‰n var kent‰n perusteella p‰iv‰raha tyyppi
-			korvaa_var_paivarahan_tyypilla($rivi);
-		}
 		if(isset($rivi['tuotetyyppi'])) {
 			korvaa_tuotetyyppi_selitteella($rivi);
 		}
@@ -202,41 +195,6 @@ function generoi_matkalaskuraportti_rivit($request_params) {
 	echo "<br/>";
 
 	return $rivit;
-}
-
-function korvaa_var_paivarahan_tyypilla(&$rivi) {
-	$var_array = array(
-		0 => t("Kilometrikorvaus"),
-		1 => t("Kotimaan kokop‰iv‰raha"),
-		2 => t("Kotimaan osap‰iv‰raha"),
-		3 => t("Kotimaan puolitettu kokop‰iv‰raha"),
-		4 => t("Kotimaan puolitettu osap‰iv‰raha"),
-		5 => t("Ulkomaan kokop‰iv‰raha"),
-		6 => t("Ulkomaan puolitettu p‰iv‰raha"),
-		7 => t("Ulkomaan kahteenkertaan puolitettu p‰iv‰raha"),
-	);
-
-	if(array_key_exists($rivi['kulu_tyyppi'], $var_array)) {
-		$rivi['kulu_tyyppi'] = $var_array[$rivi['kulu_tyyppi']];
-	}
-	else {
-		//vanhoilla matkalaskuriveill‰ var kentt‰ on tyhj‰, selvitet‰‰n tuotenumeron perusteella tyyppi
-		if(empty($rivi['kulu_tyyppi'])) {
-			if (stristr($rivi['tuoteno'], 'PR-')) {
-				$rivi['kulu_tyyppi'] = $var_array[1];
-			}
-			else if (stristr($rivi['tuoteno'], 'PPR-')) {
-				$rivi['kulu_tyyppi'] = $var_array[5];
-			}
-			else if (stristr($rivi['tuoteno'], 'ML')) {
-				$rivi['kulu_tyyppi'] = $var_array[0];
-			}
-		}
-		else {
-			//jos var kent‰ss‰ on muu numero kuin 0-7 tai tyhj‰
-			$rivi['kulu_tyyppi'] = t("Muu tyyppi");
-		}
-	}
 }
 
 function korvaa_tuotetyyppi_selitteella(&$rivi) {
@@ -440,7 +398,7 @@ function select_group_byn_mukaan($request_params, $group) {
 				$select .= "tilausrivi.nimitys, ";
 			}
 			//matkalasku rivin muita tietoja, kuin kpl halutaan n‰ytt‰‰ vain jos grouptaan tuotteittain
-			$select .= "tilausrivi.var as kulu_tyyppi, tilausrivi.kerattyaika, tilausrivi.toimitettuaika, ";
+			$select .= "tilausrivi.var as kulu_tunnus, ";
 			break;
 		case 'tuotetyypeittain':
 			$select .= "tuote.tuotetyyppi, ";
@@ -487,7 +445,7 @@ function select_group_byn_mukaan($request_params, $group) {
 			if(!empty($request_params['nimitykset'])) {
 				$select .= "tilausrivi.nimitys, ";
 			}
-			$select .= "tilausrivi.var as kulu_tyyppi, tuote.tuotetyyppi, toimi.tunnus as matkustaja_tunnus, kuka.nimi as matkustaja_nimi, kustannuspaikka.tunnus as kustp_tunnus, kustannuspaikka.nimi as kustp_nimi, ";
+			$select .= "tilausrivi.var as kulu_tunnus, tuote.tuotetyyppi, toimi.tunnus as matkustaja_tunnus, kuka.nimi as matkustaja_nimi, kustannuspaikka.tunnus as kustp_tunnus, kustannuspaikka.nimi as kustp_nimi, ";
 			break;
 	}
 
@@ -767,19 +725,6 @@ function echo_matkalaskuraportti_form($request_params) {
 	echo nayta_kyselyt("matkalaskuraportti");
 
 	echo "<br/>";
-
-	echo "<table>";
-	echo "<tr>";
-	echo "<th>".t('Ruudulle')."</th>";
-	echo "<td><input type='radio' name='tiedosto_tyyppi' value='ruudulle' {$ruudulle}/></td>";
-	echo "</tr>";
-	echo "<tr>";
-	echo "<th>".t('Tallenna exceliin')."</th>";
-	echo "<td><input type='radio' name='tiedosto_tyyppi' value='excel' {$excel}/></td>";
-	echo "</tr>";
-	echo "</table>";
-
-	echo "<br/>";
 	echo "<input type='submit' name='aja_raportti' value='".t("Aja raportti")."' onclick='return tarkista();' />";
 	echo "</form>";
 
@@ -798,14 +743,14 @@ function echo_tallennus_formi($xls_filename) {
 	echo "</table><br/>";
 }
 
-function generoi_excel_tiedosto($rivit, $request_params, $header_values) {
+function generoi_excel_tiedosto($rivit, $request_params, $header_values, $force_to_string) {
 	$xls = new pupeExcel();
 	$rivi = 0;
 	$sarake = 0;
 
 	xls_headerit($xls, $rivit, $rivi, $sarake, $header_values);
 
-	xls_rivit($xls, $rivit, $rivi, $sarake);
+	xls_rivit($xls, $rivit, $rivi, $sarake, $force_to_string);
 
 	$xls_tiedosto = $xls->close();
 
@@ -829,7 +774,7 @@ function xls_headerit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake, $header_values
 	$sarake = 0;
 }
 
-function xls_rivit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake) {
+function xls_rivit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake, $force_to_string) {
 	echo "<br/>";
 	echo "<font class='message'>".t("Generoidaan excel-tiedosto")."</font>";
 	echo "<br/>";
@@ -844,7 +789,7 @@ function xls_rivit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake) {
 	foreach($rivit as $matkalasku_rivi) {
 		foreach($matkalasku_rivi as $header => $solu) {
 			if(!stristr($header, 'tunnus')) {
-				kirjoita_solu($xls, $solu, $rivi, $sarake);
+				kirjoita_solu($xls, $header, $solu, $rivi, $sarake, $force_to_string);
 			}
 		}
 		$rivi++;
@@ -858,11 +803,11 @@ function xls_rivit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake) {
 	echo "<br/>";
 }
 
-function kirjoita_solu(&$xls, $string, &$rivi, &$sarake) {
-	if(is_numeric($string)) {
+function kirjoita_solu(&$xls, $key, $string, &$rivi, &$sarake, $force_to_string) {
+	if(is_numeric($string) and !in_array($key, $force_to_string)) {
 		$xls->writeNumber($rivi, $sarake, $string);
 	}
-	else if(valid_date($string) != 0 and valid_date($string) !== false) {
+	else if(valid_date($string) != 0 and valid_date($string) !== false and !in_array($key, $force_to_string)) {
 		$xls->writeDate($rivi, $sarake, $string);
 	}
 	else {
@@ -881,10 +826,10 @@ function valid_date($date) {
     return (preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date));
 }
 
-function nayta_ruudulla($rivit, $request_params, $header_values) {
+function nayta_ruudulla($rivit, $request_params, $header_values, $force_to_string) {
 	echo "<table>";
 	echo_headers($rivit[0],$header_values);
-	echo_rivit($rivit);
+	echo_rivit($rivit, $force_to_string);
 	echo "</table>";
 }
 
@@ -904,12 +849,12 @@ function echo_headers($rivi, $header_values) {
 	echo "</tr>";
 }
 
-function echo_rivit($rivit) {
+function echo_rivit($rivit, $force_to_string) {
 	foreach($rivit as $rivi) {
 		echo "<tr>";
 		foreach($rivi as $header => &$solu) {
 			if(!stristr($header, 'tunnus')) {
-				if(is_numeric($solu) and floatval($solu)) {
+				if(is_numeric($solu) and floatval($solu) and !in_array($header, $force_to_string)) {
 					$solu = number_format($solu, 2);
 				}
 				echo "<td>{$solu}</td>";

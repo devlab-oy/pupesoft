@@ -628,6 +628,8 @@ if ($kasitellaan_tiedosto) {
 			$tpupque 			= '';
 			$toimi_liitostunnus = '';
 			$chtoimittaja		= '';
+			$tuoteno			= '';
+			$toim_tuoteno		= '';
 
 			if ($eiyhtiota == "" or $eiyhtiota == "EILAATIJAA") {
 				$valinta   = " yhtio = '{$kukarow['yhtio']}'";
@@ -683,6 +685,11 @@ if ($kasitellaan_tiedosto) {
 					$tuoteno = $taulunrivit[$taulu][$eriviindex][$j];
 
 					$valinta .= " and TUOTENO='$tuoteno'";
+				}
+				elseif ($taulunotsikot[$taulu][$j] == "TOIM_TUOTENO") {
+					$toim_tuoteno = $taulunrivit[$taulu][$eriviindex][$j];
+
+					$valinta .= " and TOIM_TUOTENO='{$toim_tuoteno}'";
 				}
 				elseif ($table_mysql == 'tullinimike' and strtoupper($taulunotsikot[$taulu][$j]) == "CN") {
 
@@ -1376,7 +1383,7 @@ if ($kasitellaan_tiedosto) {
 								$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 							}
 						}
-						elseif ($table_mysql == 'tuotteen_toimittajat' and $otsikko == 'LIITOSTUNNUS') {
+						elseif (($table_mysql == 'tuotteen_toimittajat' or $table_mysql == 'tuotteen_toimittajat_tuotenumerot') and $otsikko == 'LIITOSTUNNUS') {
 							$tpque = "	SELECT tunnus
 										from toimi
 										where yhtio	= '$kukarow[yhtio]'
@@ -1385,7 +1392,8 @@ if ($kasitellaan_tiedosto) {
 							$tpres = pupe_query($tpque);
 
 							if (mysql_num_rows($tpres) != 1) {
-								lue_data_echo(t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa")." '{$taulunrivit[$taulu][$eriviindex][$r]}' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>");
+								if ($table_mysql == 'tuotteen_toimittajat_tuotenumerot') lue_data_echo(t("Virhe rivillä").": {$rivilaskuri} ".t("Toimittajaa")." '{$taulunrivit[$taulu][$eriviindex][$r]}' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! ".t("TOIM_TUOTENO")." = {$toim_tuoteno}<br>");
+								else lue_data_echo(t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa")." '{$taulunrivit[$taulu][$eriviindex][$r]}' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>");
 								$hylkaa++; // ei päivitetä tätä riviä
 							}
 							else {

@@ -1939,7 +1939,7 @@
 						$laskun_kieli = laskunkieli($lasrow['liitostunnus'], $kieli);
 
 						// tässä pohditaan laitetaanko verkkolaskuputkeen
-						if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and $lasrow["chn"] == "020")) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == ""  and $lasrow["chn"] != '666' and $lasrow["chn"] != '667' and abs($lasrow["summa"]) != 0) {
+						if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and ($lasrow["chn"] == "020" or $lasrow["chn"] == "030"))) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == ""  and $lasrow["chn"] != '666' and $lasrow["chn"] != '667' and abs($lasrow["summa"]) != 0) {
 
 							// Nyt meillä on:
 							// $lasrow array on U-laskun tiedot

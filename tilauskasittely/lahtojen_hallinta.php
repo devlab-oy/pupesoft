@@ -6,6 +6,11 @@
 
 	$onko_paivitysoikeuksia_ohjelmaan = tarkista_oikeus('tilauskasittely/lahtojen_hallinta.php', '', 1);
 
+	if($hae_yhdistettavat_lahdot == 1) {
+		echo json_encode(hae_suljetut_lahdot($toimitustavan_tunnukset, 1));
+		exit;
+	}
+
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
 	if (isset($man_aloitus) and $onko_paivitysoikeuksia_ohjelmaan) {
@@ -753,7 +758,74 @@
 				}
 			}
 			else {
+				?>
+<script>
+$(document).ready(function() {
+	bind_uusi_yhdistettavat_select();
+	bind_poista_yhdistettava_lahto();
+});
+
+function bind_poista_yhdistettava_lahto() {
+	$('.poista_nappi').live('click', function(){
+		$(this).parent().remove();
+	});
+}
+
+function bind_uusi_yhdistettavat_select() {
+	$('#lisaa_yhdistettava_lahto').on('click', function() {
+		generoi_yhdistettavien_lahtojen_select();
+	});
+}
+
+function generoi_yhdistettavien_lahtojen_select() {
+	var tilaukset;
+
+	var yhdistettava_lahto_wrapper = document.createElement('div');
+	$(yhdistettava_lahto_wrapper).attr('class', 'yhdistettava_lahto_wrapper');
+
+	var select = document.createElement('select');
+	$(select).attr('name', 'yhdistettavan_lahdon_tilaukset[]');
+
+	tilaukset = hae_yhdistettavat_tilaukset();
+
+	$.each(tilaukset, function(index, value) {
+		var option = new Option(value.dropdown_text, value.tilaukset);
+
+		$(select).append(option);
+	});
+
+	$(yhdistettava_lahto_wrapper).append(select);
+
+	var poista_nappi = document.createElement('button');
+	$(poista_nappi).attr('class', 'poista_nappi').html($('#poista_nappi_value').html());
+	$(yhdistettava_lahto_wrapper).append(poista_nappi);
+	$(yhdistettava_lahto_wrapper).append(document.createElement('br'));
+
+	$('#yhdistettavan_lahdot_td').append(yhdistettava_lahto_wrapper);
+}
+
+function hae_yhdistettavat_tilaukset() {
+	var return_data;
+	$.ajax({
+		type: 'POST',
+		url: 'lahtojen_hallinta.php?hae_yhdistettavat_lahdot=1&no_head=yes',
+		dataType: 'JSON',
+		data: {
+			yhtio: $('#yhtio_tunnus').html(),
+			toimitustavan_tunnukset: $('#toimitustavan_tunnukset').html()
+		},
+		success: function(data) {
+			return_data = data;
+		},
+		async:false
+	});
+
+	return return_data;
+}
+</script>
+				<?php
 				echo "<form method='post'>";
+				echo "<div id='poista_nappi_value' style='display:none;'>".t("Poista")."</div>";
 				echo "<input type='hidden' name='tulosta_rahtikirjat' value='X' />";
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='checkbox_parent' value='",urlencode(serialize($checkbox_parent)),"' />";
@@ -831,12 +903,89 @@
 
 				echo "</select></td></tr>";
 
+				//tarkistetaan jos lahdon toimitustavan rahtikirjaerittely != ''
+				//tällöin näytetään liitettävien lähtöjen dropdownit
+				$lahdot_temp = implode(',', $checkbox_parent);
+				$query = "	SELECT
+							lahdot.tunnus,
+							Group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
+							concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', Substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text,
+							toimitustapa.tunnus as toimitustavan_tunnus
+							FROM lahdot
+							JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lasku.tila = 'L' AND lasku.alatila IN ( 'B', 'C' ))
+							JOIN varastopaikat ON (varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto)
+							JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+							AND lahdot.tunnus IN ({$lahdot_temp})
+							AND toimitustapa.erittely != ''
+							GROUP by lahdot.tunnus";
+				$lahdot_result = pupe_query($query);
+				$lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty = array();
+				$toimitustavan_tunnukset = array();
+				while($lahto_row = mysql_fetch_assoc($lahdot_result)) {
+					$lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty[] = array(
+						'lahdon_tilauksien_tunnukset' => $lahto_row['tilaukset'],
+						'dropdown_text' => $lahto_row['dropdown_text'],
+					);
+					$toimitustavan_tunnukset[] = $lahto_row['toimitustavan_tunnus'];
+				}
+
+				if(!empty($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty)) {
+					array_unshift($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty, array('lahdon_tilauksien_tunnukset' => 0 ,'dropdown_text' => t('Valitse lähtö')));
+					//tällöin voidaan näyttää mahdolliset liitettävät rahtikirjat
+					//haetaanlistaus suljetuista lähdöistä
+					$suljetut_lahdot = hae_suljetut_lahdot($toimitustavan_tunnukset, 0);
+					
+					echo "<tr>";
+					echo "<th>".t("Yhdistetään lähtöön")."</th>";
+					echo "<td>";
+					echo "<select name='yhdistetaan_lahtoon'>";
+					$indeksi = 1;
+					$sel = "";
+					foreach($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty as $lahto) {
+						if(count($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty) == 2) {
+							//kun array:ssa --> valitse lähtö + 1 lähtö, esi selectoidaan se lähtö
+							if($indeksi == 2) {
+								$sel = "selected='SELECTED'";
+							}
+						}
+						echo "<option {$sel} value='{$lahto['lahdon_tilauksien_tunnukset']}'>{$lahto['dropdown_text']}</option>";
+
+						$indeksi++;
+						$sel = "";
+					}
+					echo "</select>";
+					echo "</td>";
+					echo "</tr>";
+
+					echo "<tr>";
+					echo "<th>".t("Yhdistettävä lähtö")."</th>";
+					echo "<td id ='yhdistettavan_lahdot_td'>";
+					echo "<button id='lisaa_yhdistettava_lahto' type='button'>".t("Lisää lähtö")."</button>";
+					echo "<br/>";
+					echo "<br/>";
+					echo "<div class='yhdistettava_lahto_wrapper'>";
+					echo "<select name='yhdistettavan_lahdon_tilaukset[]'>";
+					foreach($suljetut_lahdot as $lahto) {
+						echo "<option value='{$lahto['tilaukset']}'>{$lahto['dropdown_text']}</option>";
+					}
+					echo "</select>";
+					echo "<button class='poista_nappi'>".t("Poista")."</button>";
+					echo "<br/>";
+					echo "</div>";
+					echo "</td>";
+					echo "</tr>";
+				}
+
 				echo "<tr><td class='back' colspan='2'>";
 				echo "<input type='submit' value='",t("Tulosta rahtikirjat"),"'>";
 				echo "</td></tr>";
 
 				echo "</table>";
 				echo "</form>";
+
+				echo "<div id='yhtio_tunnus' style='display:none;'>{$kukarow['yhtio']}</div>";
+				echo "<div id='toimitustavan_tunnukset' style='display:none;'>".implode(',', $toimitustavan_tunnukset)."</div>";
 
 				require ("inc/footer.inc");
 				exit;
@@ -2720,6 +2869,41 @@
 
 		echo "</table>";
 		echo "</form>";
+	}
+
+	function hae_suljetut_lahdot($toimitustavan_tunnukset, $ajax_request) {
+		global $kukarow;
+
+		$query = "	SELECT
+					lahdot.tunnus,
+					group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
+					concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text
+					FROM lahdot
+					JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND lasku.tila = 'L' )
+					JOIN varastopaikat ON (varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto)
+					JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.tunnus IN ( ".($ajax_request == 1 ? $toimitustavan_tunnukset : implode(',', $toimitustavan_tunnukset))." ) )
+					WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+					AND lahdot.aktiivi = 'S'
+					AND lahdot.pvm > date_sub(now(), INTERVAL 14 day)
+					GROUP BY lahdot.tunnus
+					ORDER BY varastopaikat.nimitys,
+					toimitustapa.selite,
+					lahdot.pvm desc,
+					lahdot.lahdon_kellonaika desc,
+					lahdot.tunnus";
+		$suljetut_lahdot_result = pupe_query($query);
+
+		$suljetut_lahdot = array();
+		$suljetut_lahdot[] = array(
+			'dropdown_text' => ($ajax_request == 1 ? utf8_encode(t("Valitse liitettävä lähtö")) : t("Valitse liitettävä lähtö")),
+			'tilaukset' => 0,
+		);
+		while ($suljetut_lahdot_row = mysql_fetch_assoc($suljetut_lahdot_result)) {
+			$suljetut_lahdot_row['dropdown_text'] = ($ajax_request == 1 ? utf8_encode($suljetut_lahdot_row['dropdown_text']) : $suljetut_lahdot_row['dropdown_text']);
+			$suljetut_lahdot[] = $suljetut_lahdot_row;
+		}
+
+		return $suljetut_lahdot;
 	}
 
 	require ("inc/footer.inc");

@@ -1,6 +1,6 @@
 <?php
 	require ("inc/parametrit.inc");
-	
+
 	echo " <!-- Enabloidaan shiftill‰ checkboxien chekkaus //-->
 			<script src='inc/checkboxrange.js'></script>
 
@@ -53,7 +53,7 @@
 					AND kuka = '$profiili'
 					AND profiili = '$profiili'";
 
-		if ($sovellus != '') {
+		if ($sovellus != '' and $sovellus != 'kaikki_sovellukset') {
 			$query .= " AND sovellus='$sovellus'";
 		}
 
@@ -227,16 +227,14 @@
 				<td><input type='text' name='uusiprofiili' size='25'></td>
 				<td class='back'><input type='submit' value='".t("Luo uusi profiili")."'></td>
 			</tr>
-			</form>
-			<form method='post'>
-			<input type='hidden' name='sovellus' value='$sovellus'>
-			<input type='hidden' name='vainval' value='$vainval'>
+		</form>
+		<form method='post'>
+		<input type='hidden' name='sovellus' value='$sovellus'>
+		<input type='hidden' name='vainval' value='$vainval'>
 
-			<tr>
-				<th>".t("Valitse Profiili").":</th>
-				<td><select name='profiili' onchange='submit()'>";
-
-
+		<tr>
+			<th>".t("Valitse Profiili").":</th>
+			<td><select name='profiili' onchange='submit()'>";
 
 	if ($uusiprofiili == "") {
 		$query = "	SELECT distinct profiili
@@ -261,7 +259,6 @@
 		echo "<input type='hidden' name='uusiprofiili' value='$uusiprofiili'>";
 	}
 
-
 	echo "</td><td class='back'><input type='submit' value='".t("Valitse profiili")."'></form></td>";
 
 	if ($profiili != '') {
@@ -270,7 +267,6 @@
 				<input type='hidden' name='profiili' value='$profiili'>
 				<td class='back'><input type='submit' value='".t("Poista t‰m‰ profiili")."'></td></form>";
 	}
-
 
 	echo "</tr></table><br><br>";
 
@@ -294,12 +290,15 @@
 
 		if (mysql_num_rows($result) > 1) {
 
+			$sel = $sovellus == "kaikki_sovellukset" ? " selected" : "";
+
 			echo "	<form name='vaihdaSovellus' method='POST'>
 					<input type='hidden' name='profiili' value='$profiili'>
 					<input type='hidden' name='uusiprofiili' value='$uusiprofiili'>
 					<tr><th>".t("Valitse sovellus").":</th><td>
 					<select name='sovellus' onchange='submit()'>
-					<option value=''>".t("Nayta kaikki")."</option>";
+					<option value=''>".t("Valitse")."</option>
+					<option value='kaikki_sovellukset'$sel>".t("Nayta kaikki")."</option>";
 
 			while ($orow = mysql_fetch_assoc($result)) {
 				$sel = '';
@@ -325,6 +324,11 @@
 
 		echo "</table></form>";
 
+		if ($sovellus == "") {
+			require("inc/footer.inc");
+			exit;
+		}
+
 		// n‰ytet‰‰n oikeuslista
 		echo "<table>";
 
@@ -335,13 +339,12 @@
 					$sovellus_rajaus
 					and yhtio = '$kukarow[yhtio]'";
 
-		if ($sovellus != '') {
+		if ($sovellus != "kaikki_sovellukset") {
 			$query .= " and sovellus = '$sovellus'";
 		}
 
 		$query .= "	ORDER BY sovellus, jarjestys, jarjestys2";
 		$result = pupe_query($query);
-
 
 		print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 			<!--
@@ -362,15 +365,13 @@
 			//-->
 			</script>";
 
-
-
 		echo "<form name='suojax' method='post'>
 				<input type='hidden' name='tee' value='PAIVITA'>
 				<input type='hidden' name='sovellus' value='$sovellus'>
 				<input type='hidden' name='profiili' value='$profiili'>";
-		
+
 		$lask = 1;
-		
+
 		while ($orow=mysql_fetch_assoc($result)) {
 
 
@@ -422,9 +423,9 @@
 
 			$vsove = $orow['sovellus'];
 			$lask++;
-		
+
 		}
-		
+
 		echo "<tr>
 				<th colspan='3'>".t("Ruksaa kaikki")."</th>
 				<td align='center'><input type='checkbox' name='val' onclick='toggleAll(this);'></td>
@@ -432,9 +433,8 @@
 				</tr>";
 		echo "</table>";
 
+		echo "<br>";
 		echo "<input type='submit' value='".t("P‰ivit‰ tiedot")."'></form>";
 	}
 
 	require("inc/footer.inc");
-
-?>

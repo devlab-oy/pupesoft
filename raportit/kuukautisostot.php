@@ -49,28 +49,28 @@
 
 		// Tarvittavat päivämäärät
 		for ($i = 1; $i < 13; $i++) {
-			if (!isset(${"kka{$i}"})) ${"kka{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")));
+			if (!isset(${"kka{$i}"})) ${"kka{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, 1, date("Y")));
 			if (!isset(${"ppa{$i}"})) ${"ppa{$i}"} = date("d", mktime(0, 0, 0, date("m"), 1, date("Y")));
 			if (!isset(${"vva{$i}"})) ${"vva{$i}"} = date("Y", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")));
 
-			if (!isset(${"kkl{$i}"})) ${"kkl{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")));
+			if (!isset(${"kkl{$i}"})) ${"kkl{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, 1, date("Y")));
 			if (!isset(${"vvl{$i}"})) ${"vvl{$i}"} = date("Y", mktime(0, 0, 0, date("m")-$i+1, 1, date("Y")));
 			if (!isset(${"ppl{$i}"})) {
 				if ($i == 1) ${"ppl{$i}"} = date("d");
-				else ${"ppl{$i}"} = date("d", strtotime(date("Y")."-".(date("m")-$i+1)." last day"));
+				else ${"ppl{$i}"} = date("d", mktime(0, 0, 0, date("m")-($i-2), 0, date("Y")));
 			}
 
 			//Edellisen vuoden vastaavat kaudet
-			${"kkaed{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")-1));
-			${"ppaed{$i}"} = date("d", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
-			${"vvaed{$i}"} = date("Y", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")-1));
+			${"kkaed{$i}"} = date("m", mktime(0, 0, 0, ${"kka{$i}"}, date("d"), ${"vva{$i}"}-1));
+			${"ppaed{$i}"} = date("d", mktime(0, 0, 0, ${"kka{$i}"}, 1, ${"vva{$i}"}-1));
+			${"vvaed{$i}"} = date("Y", mktime(0, 0, 0, ${"kka{$i}"}, date("d"), ${"vva{$i}"}-1));
 
-			${"kkled{$i}"} = date("m", mktime(0, 0, 0, date("m")-$i+1, date("d"), date("Y")-1));
-			${"vvled{$i}"} = date("Y", mktime(0, 0, 0, date("m")-$i+1, 1, date("Y")-1));
-			${"ppled{$i}"} = date("d", strtotime((date("Y")-1)."-".(date("m")-$i+1)." last day"));
+			${"kkled{$i}"} = date("m", mktime(0, 0, 0, ${"kkl{$i}"}, date("d"), ${"vva{$i}"}-1));
+			${"vvled{$i}"} = date("Y", mktime(0, 0, 0, ${"kkl{$i}"}, 1, ${"vva{$i}"}-1));
+			${"ppled{$i}"} = date("d", mktime(0, 0, 0, ${"kkl{$i}"}+1, 0, ${"vva{$i}"}-1));
 
 			//katotaan pienin alkupvm ja isoin loppupvm
-			${"apaiva{$i}"} = (int) date('Ymd',mktime(0,0,0,${"kka{$i}"},${"ppa{$i}"},${"vva{$i}"}));
+			${"apaiva{$i}"} = (int) date('Ymd',mktime(0,0,0,${"kkaed{$i}"},${"ppaed{$i}"},${"vvaed{$i}"}));
 			${"lpaiva{$i}"} = (int) date('Ymd',mktime(0,0,0,${"kkl{$i}"},${"ppl{$i}"},${"vvl{$i}"}));
 		}
 
@@ -195,6 +195,7 @@
 
 		for ($i = 1; $i < 13; $i++) {
 			$sarakkeet["SARAKE{$_x}"] = t("Kate")." {$yhtiorow['valkoodi']} ".${"kuukausi{$i}"}."\t";
+			$_x++;
 		}
 
 		for ($i = 1; $i < 13; $i++) {
@@ -1539,24 +1540,6 @@
 							$korvaavat_tunrot .= ",'$korvarow[tuoteno]'";
 						}
 					}
-
-					if ($valitut["SARAKE{$_x}"] != '') {
-						$query = "	SELECT count(*) kpl
-									FROM yhteensopivuus_tuote
-									JOIN yhteensopivuus_rekisteri on (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio and yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
-									WHERE yhteensopivuus_tuote.yhtio='$kukarow[yhtio]'
-									and yhteensopivuus_tuote.tuoteno in ('$row[tuoteno]' $korvaavat_tunrot)
-									 and yhteensopivuus_tuote.tyyppi='HA'";
-						$asresult = pupe_query($query);
-						$kasrow = mysql_fetch_assoc($asresult);
-
-						$rivi .= $kasrow['kpl']."\t";
-
-						$worksheet->writeNumber($excelrivi, $excelsarake, $kasrow['kpl']);
-						$excelsarake++;
-					}
-
-					$_x++;
 
 					//Liitetäänkö myös tilauttu by varasto
 					if (is_resource($osvres)) {

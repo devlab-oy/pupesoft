@@ -429,7 +429,7 @@ if ($toiminto == "varastopaikat") {
 	require('ostorivienvarastopaikat.inc');
 }
 
-// lis‰ill‰‰n keikkaan kululaskuja
+// lis‰ill‰‰n saapumiseen kululaskuja
 if ($toiminto == "kululaskut") {
 	$keikanalatila 	= "";
 

@@ -336,7 +336,7 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 			$browkieli = 'fi';
 		}
 
-		if ($mobile and include_once("mobiili/login.php"));
+		if (isset($mobile) and $mobile and include_once("mobiili/login.php"));
 		elseif (@include_once("login.php"));
 		elseif (@include_once("login_extranet.php"));
 
@@ -379,7 +379,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				echo "Your browser does not seem to support cookies.";
 			}
 			else {
-				$palvelin2 = $mobile ? $palvelin2.'mobiili/' : $palvelin2;
+				$palvelin2 = (isset($mobile) and $mobile) ? $palvelin2.'mobiili/' : $palvelin2;
 				echo "<script>setTimeout(\"parent.location.href='$palvelin2'\",0);</script>";
 			}
 			exit;
@@ -438,7 +438,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				echo "<table width='100%' height='70%'>";
 				echo "<tr>";
 				echo "<td style='text-align:center;font-size:9pt;font-family:Lucida,Verdana,Helvetica,Arial; color: #666;'>";
-				echo "<img src='http://api.devlab.fi/pupesoft.gif'><br><br>";
+				echo "<img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif'><br><br>";
 				echo "Käyttäjä {$kukarow["kuka"]} pyysi toimintoa $phpnimi $toim, joka on kielletty!";
 				echo "</td>";
 				echo "</tr>";
@@ -559,7 +559,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			echo "<meta http-equiv='expires' content='-1'>\n";
 			echo "<meta http-equiv='content-type' content='text/html; charset=$charset'>\n";
 			# Jos mobile on setattu, otetaan auto-zoom pois käytöstä
-			if ($mobile) {
+			if (isset($mobile) and $mobile) {
 				echo "<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>\n";
 				echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";
 			}

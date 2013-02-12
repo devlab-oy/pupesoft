@@ -115,6 +115,7 @@
 		$ulos .= "<option value='010' $sel[010]>".t("Verkkolasku")."</option>";
 		#$ulos .= "<option value='001' $sel[001]>".t("Itella Pupevoice: EDI, sähköinen lasku")."</option>";
 		$ulos .= "<option value='020' $sel[020]>".t("Vienti-Verkkolasku (EU)")."</option>";
+		$ulos .= "<option value='030' $sel[030]>".t("Vienti-Verkkolasku, tulostuspalvelu (EU)")."</option>";
 		$ulos .= "<option value='111' $sel[111]>".t("Itella EDI: EIH-1.4 sähköinen lasku")."</option>";
 		$ulos .= "<option value='112' $sel[112]>".t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin")."</option>";
 		$ulos .= "<option value='666' $sel[666]>".t("Sähköposti")."</option>";
@@ -939,7 +940,7 @@
 		$ulos .= "<option value = '2' $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '5' $sel[5]>".t("Normaali laskupohja (Ei näytetä verollista rivihintaa)")."</option>";
 		$ulos .= "<option value = '6' $sel[6]>".t("Normaali laskupohja (Ei näytetä tilausnumeroa/toimitusaikaa)")."</option>";
-		$ulos .= "<option value = '7' $sel[7]>".t("Normaali laskupohja (Näytetään tuotteen EAN koodi)")."</option>";
+		$ulos .= "<option value = '7' $sel[7]>".t("Normaali laskupohja (Näytetään tuotteen EAN koodi ja asiakaskommentti)")."</option>";
 		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1");
 		#$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3");
@@ -947,6 +948,8 @@
 		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)");
 		$ulos .= "<option value = '13' $sel[13]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja");
 		$ulos .= "<option value = '14' $sel[14]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)");
+		$ulos .= "<option value = '15' $sel[15]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja");
+		$ulos .= "<option value = '16' $sel[16]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)");
 
 		$ulos .= "</select></td>";
 
@@ -1135,7 +1138,7 @@
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('E', 'o', 'k', 'L', 'M'), '');
+		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('E', 'o', 'k', 'L', 'M', 'N', 'Q', 'P'), '');
 
 		$ulos .= "<option value=''>".t("Käytetään yhtiön oletusta")."</option>";
 		$ulos .= "<option value='E'{$sel['E']}>".t("Keräysvahvistusta/sähköisetä lähetettä ei lähetetä")."</option>";
@@ -1143,6 +1146,9 @@
 		$ulos .= "<option value='k'{$sel['k']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
 		$ulos .= "<option value='L'{$sel['L']}>".t("Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
 		$ulos .= "<option value='M'{$sel['M']}>".t("Keräysvahvistus/paperinen & sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='N'{$sel['N']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
+		$ulos .= "<option value='Q'{$sel['Q']}>".t("Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
+		$ulos .= "<option value='P'{$sel['P']}>".t("Keräysvahvistus/paperinen & sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

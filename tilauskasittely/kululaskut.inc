@@ -666,7 +666,7 @@ if ($silent == "") {
 //			$lisa .= " and lasku.ytunnus = '$laskurow[ytunnus]'";
 //		}
 
-		// katsotaan aluksi, ollaanko tähän keikkaan liitetty jo vaihto-omaisuuslasku
+		// katsotaan aluksi, ollaanko tähän saapumiseen liitetty jo vaihto-omaisuuslasku
 		$query  = "	SELECT *
 					from lasku
 					where yhtio='$kukarow[yhtio]' and tila='K' and alatila = '$keikanalatila' and vanhatunnus<>0 and laskunro='$laskurow[laskunro]' and vienti in ('C','F','I','J','K','L')";

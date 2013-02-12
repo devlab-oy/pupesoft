@@ -740,7 +740,7 @@
 		$laskurow["tapvm"] = date("Y-m-d");
 		$laskurow["erpcm"] = date("Y-m-d");
 		$laskurow["kapvm"] = date("Y-m-d");
-		
+
 		$alvrow = array(
 			'rivihinta'		 => 0,
 			'alv'			 => alv_oletus(),
@@ -801,7 +801,7 @@
 		$return_value = $client->invoice_put_finvoice($api_keys, $files_out);
 
 		if (stristr($return_value->status, 'OK')) {
-			echo "".t("Karhukirje l‰hetettiin Maventaan")."\n<br>";
+			echo t("Karhukirje l‰hetettiin Maventaan")."\n<br>";
 		}
 		else {
 			echo '<font class="error">'.t("Karhukirjeen l‰hetys maventaan ep‰onnistui")." ({$return_value->status})</font>\n<br>";
@@ -892,9 +892,10 @@
 
 		if (mysql_num_rows($kires) == 1) {
 			$kirow = mysql_fetch_assoc($kires);
-			if($kirow["komento"] == "email") {
+
+			if ($kirow["komento"] == "email") {
 				$liite = $pdffilenimi;
-				$kutsu = "Karhukirje ".$asiakastiedot["ytunnus"];
+				$kutsu = t("Maksukehotus", $kieli)." ".$asiakastiedot["ytunnus"];
 				echo t("Karhukirje l‰hetet‰‰n osoitteeseen")." $kukarow[eposti]...\n<br>";
 
 				require("inc/sahkoposti.inc");

@@ -324,7 +324,7 @@
 							where yhtio = '$kukarow[yhtio]'
 							and tunnus  = '{$row['tunnus']}'
 							and vienti  = 'E'
-							and chn     = '020'
+							and chn in ('020', '030')
 							and maa_maara != ''
 							and kauppatapahtuman_luonne > 0
 							and kuljetusmuoto != ''";
@@ -872,7 +872,7 @@
 				}
 
 				// Tulostetaan DGD
-				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE and $rakirsyotto_dgd_tulostin != "" and $dgdkomento != '' and $dgdkpl > 0) {
+				if ((strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or $tultiin == 'koonti_eratulostus_pakkaustiedot') and $rakirsyotto_dgd_tulostin != "" and $dgdkomento != '' and $dgdkpl > 0) {
 
 					$query = "	SELECT *
 								FROM lasku
@@ -897,6 +897,7 @@
 					'tee'			=> $tee,
 					'toim'			=> $toim,
 					'norm'			=> $norm,
+					'otunnukset' 	=> $otunnukset,
 					);
 
 					// Aloitellaan lähetteen teko
@@ -931,7 +932,7 @@
 								where yhtio = '$kukarow[yhtio]'
 								and tunnus in ($otunnukset)
 								and vienti = 'E'
-								and chn = '020'
+								and chn in ('020', '030')
 								and maa_maara != ''
 								and kauppatapahtuman_luonne > 0
 								and kuljetusmuoto != ''";

@@ -890,14 +890,6 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 					$kohdistettu_chk_res = pupe_query($query);
 					$kohdistettu_chk_row = mysql_fetch_assoc($kohdistettu_chk_res);
 
-					/*
-					Battle of the languages: laske tämä laskutoimitus 6059.69 - 6059.70
-					Results:
-					 - PHP:  	-0.010000000000218
-					 - Ruby: 	-0.010000000000218279
-					 - Python: 	-0.010000000000218279
-					*/
-
 					if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' and ($kohdistettu_chk_row['kohdistettu'] == 'K' or ($sum_chk_row['summa'] != $laskuja_row['vosumma'] and $erotus_chk > 0.01))) {
 						unset($row_keikat[$laskuja_row['laskunro']]);
 						continue;

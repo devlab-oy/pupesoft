@@ -31,7 +31,8 @@
 	//Jotta m‰‰ritelty rajattu n‰kym‰ olisi myˆs k‰yttˆoikeudellisesti tiukka
 	$aputoim = $toim;
 	$toimi_array = explode('!!!', $toim);
-
+    $a_lisa = "";
+    
 	$toim = $toimi_array[0];
 	if (isset($toimi_array[1])) $alias_set = $toimi_array[1];
 	if (isset($toimi_array[2])) $rajattu_nakyma = $toimi_array[2];
@@ -908,7 +909,7 @@
 				$hakuehto = " like '%{$haku[$i]}%' ";
 			}
 
-			if ($from == "" and ((($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') or ($toim == 'yhteyshenkilo' and trim($array[$i]) == 'liitostunnus'))) {
+			if ($from == "" and ((($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'kohde' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') or ($toim == 'yhteyshenkilo' and trim($array[$i]) == 'liitostunnus'))) {
 				if (!is_numeric($haku[$i])) {
 					$ashak = "	SELECT group_concat(tunnus) tunnukset
 								FROM asiakas
@@ -931,13 +932,13 @@
 			elseif (trim($array[$i]) == 'ytunnus' and !$tarkkahaku) {
 				$lisa .= " and REPLACE({$array[$i]}, '-', '') like '%".str_replace('-', '', $haku[$i])."%' ";
 			}
-			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
+			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'kohde' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
 				list($a, $b) = explode("/", $haku[$i]);
 
 				if ((int) $a > 0) $a_lisa .= " asiakas = '$a' ";
 				else $a_lisa = "";
 
-				if ((is_numeric($b) and $b > 0) or (!is_numeric($b) and $b != "")) $b_lisa .= " ytunnus = '$b' ";
+                if ((is_numeric($b) and $b > 0) or (!is_numeric($b) and $b != "")) $b_lisa .= " ytunnus = '$b' ";
 				else $b_lisa = "";
 
 				if ($a_lisa != "" and $b_lisa != "") {
@@ -970,7 +971,7 @@
 					$lisa .= " and toimittaja = '{$haku[$i]}'";
 				}
 			}
-			elseif ($from == "" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'ytunnus') {
+			elseif ($from == "" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'kohde' or $toim == 'asiakashinta') and trim($array[$i]) == 'ytunnus') {
 
 				if (!is_numeric($haku[$i])) {
 					// haetaan laskutus-asiakas
@@ -1020,7 +1021,7 @@
     	}
     }
 
-	//	S‰ilytet‰‰n ohjeen tila
+    //	S‰ilytet‰‰n ohjeen tila
 	if ($from != "") {
 		$ulisa .= "&ohje=off&from=$from&lukitse_avaimeen=".urlencode($lukitse_avaimeen)."&lukitse_laji=$lukitse_laji";
 	}
@@ -1707,6 +1708,9 @@
 			if (($toikrow = tarkista_oikeus("yllapito.php", "rahtisopimukset%", "", "OK")) !== FALSE) {
 				echo "<iframe id='rahtisopimukset_iframe' name='rahtisopimukset_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
+			if (($toikrow = tarkista_oikeus("yllapito.php", "kohde%", "", "OK")) !== FALSE) {
+				echo "<iframe id='kohde_iframe' name='kohde_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[2]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
 		}
 
 		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimi" or $toim == "asiakas")) {
@@ -1856,6 +1860,7 @@
 			$toim == "hyvityssaannot" or
 			$toim == "varaston_hyllypaikat" or
 			$toim == "tuotteen_orginaalit" or
+			$toim == "kohde" or
 			($toim == "liitetiedostot" and $poistolukko == "") or
 			($toim == "tuote" and $poistolukko == "") or
 			($toim == "toimi" and $kukarow["taso"] == "3")) {
@@ -2006,6 +2011,9 @@
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('yhteensopivuus_tuote_lisatiedot_iframe' $jcsmaxheigth);</script>";
 	}
 
+    if ($from == "yllapito" and $toim == "kohde") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('kohde_iframe' $jcsmaxheigth);</script>";
+	}
 
 	elseif ($from != "yllapito") {
 		require ("inc/footer.inc");

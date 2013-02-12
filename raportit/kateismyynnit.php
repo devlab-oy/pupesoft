@@ -1083,7 +1083,7 @@
 								AND lasku.tapvm <= '$vvl-$kkl-$ppl'";
 		}
 		else {
-			$tapvm_where = "AND lasku.tapvm >= '$vv-$kk-$pp'";
+			$tapvm_where = "AND lasku.tapvm = '$vv-$kk-$pp'";
 		}
 
 		$kateisotot = hae_kassalippaiden_kateisotot($tapvm_where);

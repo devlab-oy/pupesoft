@@ -762,6 +762,22 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		$joinlisa = "JOIN lasku AS liitetty_lasku ON (liitetty_lasku.yhtio = lasku.yhtio AND liitetty_lasku.tila = 'K' AND liitetty_lasku.laskunro = lasku.laskunro AND liitetty_lasku.vanhatunnus <> 0 AND liitetty_lasku.vienti IN ('C','F','I','J','K','L'))";
 	}
 
+	$kohdistuslisa = "";
+
+	if ($lisarajaus == 'riveja_viematta_varastoon') {
+		$tilriv_joinlisa = "AND tilausrivi.kpl >= 0 AND tilausrivi.varattu > 0";
+		$left_join = "";
+	}
+	elseif ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+		$tilriv_joinlisa = "AND tilausrivi.kpl > 0 AND tilausrivi.varattu = 0";
+		$left_join = "";
+		if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') $kohdistuslisa = " and lasku.kohdistettu = 'K'";
+	}
+	else {
+		$tilriv_joinlisa = "";
+		$left_join = "LEFT ";
+	}
+
 	// näytetään millä toimittajilla on keskeneräisiä keikkoja
 	$query = "	SELECT lasku.liitostunnus,
 				max(lasku.ytunnus)  ytunnus,
@@ -774,9 +790,11 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				group_concat(distinct lasku.laskunro SEPARATOR ', ') keikat,
 				round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta, 0)),2) varastossaarvo,
 				round(sum((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * {$query_ale_lisa}),2) kohdistettuarvo,
+				SUM(tilausrivi.kpl) var_kpl,
+				SUM(tilausrivi.varattu) var_varattu,
 				GROUP_CONCAT(DISTINCT lasku.tunnus) tilauksien_tunnukset
 				FROM lasku USE INDEX (yhtio_tila_mapvm)
-				LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
+				{$left_join}JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O' {$tilriv_joinlisa})
 				{$joinlisa}
 				{$suuntalavajoin}
 				WHERE lasku.yhtio 	  = '$kukarow[yhtio]'
@@ -785,6 +803,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				and lasku.vanhatunnus = 0
 				and lasku.mapvm 	  = '0000-00-00'
 				$laatijalisa
+				{$kohdistuslisa}
 				GROUP BY lasku.liitostunnus
 				ORDER BY lasku.nimi, lasku.nimitark, lasku.ytunnus";
 	$result = pupe_query($query);
@@ -798,38 +817,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 		while ($row = mysql_fetch_assoc($result)) {
 
-			$row_keikat = array();
-
-			if ($lisarajaus == 'riveja_viematta_varastoon' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
-
-				if ($lisarajaus == 'riveja_viematta_varastoon') {
-					$havinglisa = "HAVING kpl IS NOT NULL AND (kpl > 0 OR kpl = 0) AND varattu > 0";
-				}
-				else {
-					$havinglisa = "HAVING kpl IS NOT NULL AND kpl > 0 AND varattu = 0";
-				}
-
-				$query = "	SELECT lasku.laskunro, SUM(tilausrivi.kpl) kpl, SUM(tilausrivi.varattu) varattu
-							FROM tilausrivi
-							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.uusiotunnus)
-							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-							AND tilausrivi.uusiotunnus IN ({$row['tilauksien_tunnukset']})
-							AND tilausrivi.tyyppi = 'O'
-							GROUP BY 1
-							{$havinglisa}";
-				$tilriv_chk_res = pupe_query($query);
-
-				if (mysql_num_rows($tilriv_chk_res) == 0) continue;
-
-				while ($tilriv_chk_row = mysql_fetch_assoc($tilriv_chk_res)) {
-					$row_keikat[$tilriv_chk_row['laskunro']] = $tilriv_chk_row['laskunro'];
-				}
-
-				$row['keikat'] = implode(",", $row_keikat);
-			}
-			else {
-				$row_keikat = explode(',', $row['keikat']);
-			}
+			$row_keikat = explode(',', $row['keikat']);
 
 			$query = "	SELECT tunnus, laskunro,
 						count(*) num,
@@ -852,8 +840,6 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				'kusumma' => 0
 			);
 
-			$oliko_ok = ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') ? false : true;
-
 			if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
 				$oliko_ok = false;
 				$pitaisi_kayda_nama_tunnukset_lapi = explode(",", $row['keikat']);
@@ -867,9 +853,11 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 				if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
 
-					if (in_array($laskuja_row['laskunro'], $pitaisi_kayda_nama_tunnukset_lapi)) unset($pitaisi_kayda_nama_tunnukset_lapi[array_search($laskuja_row['laskunro'], $pitaisi_kayda_nama_tunnukset_lapi)]);
+					if (in_array($laskuja_row['laskunro'], $pitaisi_kayda_nama_tunnukset_lapi)) {
+						unset($pitaisi_kayda_nama_tunnukset_lapi[array_search($laskuja_row['laskunro'], $pitaisi_kayda_nama_tunnukset_lapi)]);
+					}
 
-					$query = "	SELECT ROUND(SUM(summa), 2) summa
+					$query = "	SELECT ROUND(summa, 2) summa
 								FROM lasku
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$laskuja_row['tunnus']}'";
@@ -878,15 +866,18 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 					$erotus_chk = abs(round($sum_chk_row['summa'] - $laskuja_row['vosumma'], 2));
 
-					$query = "	SELECT kohdistettu, tunnus
+					$query = "	SELECT lasku.kohdistettu,
+								round(sum((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * {$query_ale_lisa}),2) kohdistettuarvo
 								FROM lasku
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND laskunro = '{$laskuja_row['laskunro']}'
-								AND tunnus IN ({$row['tilauksien_tunnukset']})
-								and tila 		= 'K'
-								and alatila 	= ''
-								and vanhatunnus	= 0
-								and mapvm 		= '0000-00-00'";
+								JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O' {$tilriv_joinlisa})
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.laskunro = '{$laskuja_row['laskunro']}'
+								AND lasku.tunnus IN ({$row['tilauksien_tunnukset']})
+								and lasku.tila 		= 'K'
+								and lasku.alatila 	= ''
+								and lasku.vanhatunnus	= 0
+								and lasku.mapvm 		= '0000-00-00'
+								GROUP BY 1";
 					$kohdistettu_chk_res = pupe_query($query);
 					$kohdistettu_chk_row = mysql_fetch_assoc($kohdistettu_chk_res);
 
@@ -1060,7 +1051,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				and lasku.tila 		   = 'K'
 				and lasku.alatila 	   = ''
 				and lasku.vanhatunnus  = 0
-				#and lasku.mapvm 	   = '0000-00-00'
+				and lasku.mapvm 	   = '0000-00-00'
 				ORDER BY lasku.laskunro DESC";
 	$result = pupe_query($query);
 

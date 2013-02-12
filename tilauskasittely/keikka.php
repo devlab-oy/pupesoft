@@ -922,11 +922,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			$kaikkivarastossayhteensa += $row["varastossaarvo"];
 			$vaihtoomaisuuslaskujayhteensa += $summat_row["vosumma"];
 			$kululaskujayhteensa += $summat_row["kusumma"];
-
-			// $kaikkivarastossayhteensa 		+= $row["varastossaarvo"];
 			$kaikkiliitettyyhteensa 		+= $row["kohdistettuarvo"];
-			// $vaihtoomaisuuslaskujayhteensa  += $laskuja_row["vosumma"];
-			// $kululaskujayhteensa 			+= $laskuja_row["kusumma"];
 
 			echo "<tr class='aktiivi'>";
 			echo "<td valign='top'>$row[ytunnus]</td>";

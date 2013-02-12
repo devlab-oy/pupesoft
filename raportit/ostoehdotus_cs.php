@@ -435,6 +435,7 @@
 					tuote.yhtio in ($yhtiot)
 					$lisaa
 					and tuote.ei_saldoa = ''
+					and tuote.tuotetyyppi NOT IN ('A', 'B')
 					and tuote.ostoehdotus = ''
 					GROUP BY tuote.tuoteno
 					ORDER BY id, tuote.tuoteno, yhtio";

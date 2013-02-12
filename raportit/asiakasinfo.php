@@ -658,7 +658,7 @@ if ($asiakasid > 0) {
 			$taulu  = "";
 
 			if ($aletaulu != "" or $tee == "eposti") {
-				$tuotejoin	= " JOIN tuote ON tuote.yhtio=perusalennus.yhtio and tuote.aleryhma=perusalennus.ryhma and tuote.hinnastoon != 'E' ";
+				$tuotejoin	= " JOIN tuote ON tuote.yhtio=perusalennus.yhtio and tuote.aleryhma=perusalennus.ryhma and tuote.hinnastoon != 'E' and tuote.tuotetyyppi NOT IN ('A', 'B') ";
 				$tuotewhere = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
 				$tuotegroup = " GROUP BY tuote.try, tuote.osasto, tuote.aleryhma ";
 				$tuotecols 	= ", tuote.osasto, tuote.try";
@@ -1085,6 +1085,7 @@ if ($asiakasid > 0) {
 								WHERE tuote.yhtio = '$asiakas_yhtio'
 								and tuote.aleryhma = '$asrow[alennusryhmä]'
 								and tuote.hinnastoon != 'E'
+								AND tuote.tuotetyyppi NOT IN ('A', 'B')
 								and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 								LIMIT 1";
 					$testres = pupe_query($query);

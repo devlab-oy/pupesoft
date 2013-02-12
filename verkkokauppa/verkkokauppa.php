@@ -249,6 +249,7 @@ if (!function_exists("menu")) {
 						{$kieltolisa}
 						{$tuotemerkkilis}
 						AND tuote.status != 'P'
+						AND tuote.tuotetyyppi NOT IN ('A', 'B')
 						AND tuote.hinnastoon IN ('W', 'V')
 						ORDER BY avainsana.jarjestys, avainsana.selite+0";
 			$tryres = pupe_query($query);
@@ -264,9 +265,10 @@ if (!function_exists("menu")) {
 							WHERE yhtio 	= '{$kukarow['yhtio']}'
 							AND osasto 		= '{$osasto}'
 							AND try 		= '{$tryrow['try']}'
-							AND status 	   != 'P'
 							{$kieltolisa}
 							{$tuotemerkkilis}
+							AND status 	   != 'P'
+							AND tuotetyyppi NOT IN ('A', 'B')
 							AND hinnastoon IN ('W','V')";
 				$res = pupe_query($query);
 
@@ -341,6 +343,7 @@ if (!function_exists("menu")) {
 						{$kieltolisa}
 						{$tuotemerkkilis}
 						AND tuote.status != 'P'
+						AND tuote.tuotetyyppi NOT IN ('A', 'B')
 						AND tuote.hinnastoon IN ('W', 'V')
 						ORDER BY avainsana.jarjestys, avainsana.selite";
 			$meres = pupe_query($query);
@@ -357,8 +360,9 @@ if (!function_exists("menu")) {
 							AND osasto 		= '{$osasto}'
 							AND try 		= '{$try}'
 							AND tuotemerkki = '{$merow['tuotemerkki']}'
-							AND status 	   != 'P'
 							{$kieltolisa}
+							AND status 	   != 'P'
+							AND tuotetyyppi NOT IN ('A', 'B')
 							AND hinnastoon IN ('W', 'V')";
 				$res = pupe_query($query);
 
@@ -467,7 +471,11 @@ if (!function_exists("uutiset")) {
 						//	Haetaan tuotenumero
 						$query = "	SELECT tuoteno, nimitys
 						 			FROM tuote
-									WHERE yhtio = '$kukarow[yhtio]' and tuoteno like ('$m[1]%') and status != 'P'";
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tuoteno like ('$m[1]%')
+									AND status != 'P'
+									AND tuotetyyppi NOT IN ('A', 'B')
+									AND hinnastoon IN ('W', 'V')";
 						$tres = pupe_query($query);
 
 						//	Tämä me korvataan aina!
@@ -568,7 +576,11 @@ if ($tee == "tuotteen_lisatiedot") {
 
 	$query = "	SELECT kuvaus, lyhytkuvaus
 				FROM tuote
-				WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and hinnastoon in ('W','V') and status != 'P'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tuoteno = '$tuoteno'
+				AND status != 'P'
+				AND tuotetyyppi NOT IN ('A', 'B')
+				AND hinnastoon IN ('W', 'V')";
 	$result = pupe_query($query);
 	$row = mysql_fetch_array($result);
 
@@ -624,6 +636,7 @@ if ($tee == "tuotteen_lisatiedot") {
 				WHERE tuote.yhtio = '$kukarow[yhtio]'
 				and tuote.tuoteno = '$tuoteno'
 				and tuote.hinnastoon in ('W','V')
+				and tuote.tuotetyyppi NOT IN ('A', 'B')
 				and tuote.status != 'P'
 				ORDER BY liitetiedostot.kayttotarkoitus IN ('TK') DESC, liitetiedostot.selite";
 	$result = pupe_query($query);

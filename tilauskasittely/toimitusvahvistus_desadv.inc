@@ -324,8 +324,7 @@
 								# In line level RFF+CO the order line number has to be like we send in our orders 10, 20, 30 etc. instead of 1, 2, 3…
 								# RFF+CO: 116100531:10'
 								if ($desadv_laskurow['asiakkaan_tilausnumero'] != '') {
-									$_i = $i * 10;
-									$desadv_message .= "RFF+CO:".substr($desadv_laskurow["asiakkaan_tilausnumero"], 0, 35).":{$_i}'";
+									$desadv_message .= "RFF+CO:".substr($desadv_laskurow["asiakkaan_tilausnumero"], 0, 35).":{$tuotteet_row['tilaajanrivinro']}'";
 									$x++;
 								}
 
@@ -436,8 +435,7 @@
 							# In line level RFF+CO the order line number has to be like we send in our orders 10, 20, 30 etc. instead of 1, 2, 3…
 							# RFF+CO: 116100531:10'
 							if ($desadv_laskurow['asiakkaan_tilausnumero'] != '') {
-								$_i = $i * 10;
-								$desadv_message .= "RFF+CO:".substr($desadv_laskurow["asiakkaan_tilausnumero"], 0, 35).":{$_i}'";
+								$desadv_message .= "RFF+CO:".substr($desadv_laskurow["asiakkaan_tilausnumero"], 0, 35).":{$tuotteet_row['tilaajanrivinro']}'";
 								$x++;
 							}
 

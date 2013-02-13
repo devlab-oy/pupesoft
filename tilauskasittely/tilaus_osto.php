@@ -9,7 +9,9 @@
 
 	if (isset($_REQUEST["tee"])) {
 		if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-		if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
+		if(isset($_REQUEST["kaunisnimi"])) {
+			if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
+		}
 	}
 
 	require ("../inc/parametrit.inc");
@@ -445,7 +447,52 @@
 		}
 
 		if ($tee == 'POISTA_RIVI') {
-			tarkista_myynti_osto_liitos_ja_poista($rivitunnus);
+			//ei voida käyttää tarkista_myynti_osto_liitos_ja_poista($rivitunnus); koska se asettaa rivit ainoastaan D tilaan, tässä kohtaa haluamme oikeasti poistaa rivit
+
+			if(!empty($rivitunnus)) {
+				$query = "	SELECT tilausrivitunnus
+							FROM tilausrivin_lisatiedot
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivilinkki = '{$rivitunnus}'";
+				$result = pupe_query($query);
+
+				if ($tilausrivin_lisatiedot_row = mysql_fetch_assoc($result)) {
+					//tilaukset on naitettu. poistetaan myynti jos ei kerätty, toimitettu tai laskutettu sekä osto
+					$query = "	SELECT *
+								FROM tilausrivi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus  = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'
+								AND tyyppi  = 'L'
+								AND kerattyaika    = '0000-00-00 00:00:00'
+								AND toimitettuaika = '0000-00-00 00:00:00'
+								AND laskutettuaika = '0000-00-00'";
+					$result = pupe_query($query);
+
+					if (mysql_num_rows($result) != 0) {
+						$query = "	DELETE FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus IN ('{$tilausrivin_lisatiedot_row['tilausrivitunnus']}', '{$rivitunnus}')";
+						pupe_query($query);
+
+						$query = "	DELETE FROM tilausrivin_lisatiedot
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivilinkki = '{$rivitunnus}'";
+						pupe_query($query);
+
+						echo "<font class='error'>".t("Rivi poistettiin myös myyntitilaukselta")."</font><br/><br/>";
+					}
+					else {
+						echo "<font class='error'>".t("Myyntitilausrivi on kerätty, toimitettu tai laskutettu")."!</font><br/><br/>";
+					}
+				}
+				else {
+					//jos linkkiä ei ole poistamme vain ostotilausrivin
+					$query = "	DELETE FROM tilausrivi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus IN ('{$rivitunnus}')";
+					pupe_query($query);
+				}
+			}
 
 			$automatiikka = "ON";
 			$tee = "Y";

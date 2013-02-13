@@ -699,7 +699,7 @@ function echo_matkalaskuraportti_form($request_params) {
 	echo "<tr>
 			<th>".t("Näytä myös tapahtumapäivä")."</th>
 			<td colspan='3'><input type='checkbox' name='tapahtumapaiva' {$tapahtumapaivachk}></td>
-			<td class='back'>".t("(Toimii vain jos listaat matkalaskuittain tai jos et listaa minkään perusteella)")."</td>
+			<td class='back'>".t("(Toimii vain jos listaat matkalaskuittain, tai jos et valitse mitään listausta)")."</td>
 		</tr>";
 	echo "</table>";
 

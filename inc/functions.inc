@@ -19061,7 +19061,7 @@ if (!function_exists('splittaa_tilausrivi')) {
 }
 
 if (!function_exists('lisaa_tuotepaikka')) {
-	function lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $viesti, $oletus = '') {
+	function lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $viesti, $oletus = '', $halytysraja = 0, $tilausmaara = 0) {
 		global $kukarow;
 
 		# Isot kirjaimet
@@ -19078,6 +19078,8 @@ if (!function_exists('lisaa_tuotepaikka')) {
 					hyllyvali = '{$hyllyvali}',
 					hyllytaso = '{$hyllytaso}',
 					oletus    = '{$oletus}',
+					halytysraja = '{$halytysraja}',
+					tilausmaara = '{$tilausmaara}',
 					laatija	  = '{$kukarow['kuka']}',
 					luontiaika= now()";
 		$result = pupe_query($query);

@@ -25,9 +25,9 @@ if ($laskurow['jaksotettu'] > 0) {
 
 // p‰ivitet‰‰n vanhatunnus ja v‰h‰n muutakin laskulle
 $query  = "	UPDATE lasku SET vanhatunnus=tunnus $ohjausmerkkilisa $jtkielto
-			WHERE yhtio='$kukarow[yhtio]'
-			AND tunnus='$laskurow[tunnus]'
-			AND vanhatunnus=0";
+			WHERE yhtio     = '$kukarow[yhtio]'
+			AND tunnus      = '$laskurow[tunnus]'
+			AND vanhatunnus = 0";
 $oldtur = pupe_query($query);
 
 $query = "	SELECT tarkenne

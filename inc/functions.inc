@@ -8359,10 +8359,10 @@ if (!function_exists("livesearch_tuotehaku")) {
 						$naytetaanko_poistetut
 						$kieltolisa
 						$haku_query
-						ORDER BY jarjestys, tuote.tuoteno";
+						ORDER BY jarjestys, tuote.tuoteno
+						LIMIT 500";
 			$result = pupe_query($query);
 
-			$limit = 0;
 			if (mysql_num_rows($result) > 0) {
 
 				while ($row = mysql_fetch_assoc($result)) {
@@ -8398,14 +8398,10 @@ if (!function_exists("livesearch_tuotehaku")) {
 								style='padding:2px;'>
 								<font style='$tyyli'>$row[tuoteno]</font> &raquo; <font style='$tyyli2'>$row[nimitys]</font>
 							</div><div name='selectValues$hakuid' id='$row[tuoteno]'></div>";
-					$limit++;
 
-					if ($limit > 49) {
-						break;
-					}
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ".t("tuotetta").", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ".t("tuotetta").", ".t("näytetään")." 500 ".t("tarkinta osumaa").".</font></div>";
 			}
 			else {
 				echo "<div style='padding:2px'><font class='message'>".t("Ei tuotteita.")."</font></div>";
@@ -12921,7 +12917,7 @@ if (!function_exists("seuraavat_lahtoajat")) {
 // Käsitellään XML-entiteetit
 if (!function_exists("xmlentities")) {
 	function xmlentities($string) {
-   		return preg_replace("/[^\x20-\xFF]/", "", str_replace(array('&', '"', "'", '<', '>', '´', '`'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;', '&apos;', '&apos;'), trim($string)));
+   		return preg_replace("/[^\xA\x20-\xFF]/", "", str_replace(array('&', '"', "'", '<', '>', '´', '`'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;', '&apos;', '&apos;'), trim($string)));
 	}
 }
 

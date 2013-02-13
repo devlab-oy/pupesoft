@@ -225,6 +225,7 @@ else {
 					JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					AND tuote.ei_saldoa = ''
+					AND tuote.tuotetyyppi NOT IN ('A', 'B')
 					$epakuranttipvm
 					$tuote_epa_rajaus
 					$lisa

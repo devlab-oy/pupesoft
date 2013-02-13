@@ -373,10 +373,6 @@ function generoi_select($request_params) {
 		}
 	}
 
-	if(!empty($request_params['maksutieto'])) {
-		$select .= "concat_ws(' ', lasku.viite, lasku.viesti) as maksutieto, ";
-	}
-
 	$select = substr($select, 0, -2);
 
 	return $select;
@@ -419,6 +415,9 @@ function select_group_byn_mukaan($request_params, $group) {
 				$select .= "lasku.tapvm, ";
 			}
 			$select .= "lasku.summa, ";
+			if(!empty($request_params['maksutieto'])) {
+				$select .= "concat_ws(' ', lasku.viite, lasku.viesti) as maksutieto, ";
+			}
 			break;
 		case 'tilausrivi_kommentti':
 			$select .= "tilausrivi.tunnus as tilausrivi_tunnus, tilausrivi.kommentti, ";
@@ -440,6 +439,9 @@ function select_group_byn_mukaan($request_params, $group) {
 				$select .= "lasku.tapvm, ";
 			}
 			$select .= "lasku.summa, ";
+			if(!empty($request_params['maksutieto'])) {
+				$select .= "concat_ws(' ', lasku.viite, lasku.viesti) as maksutieto, ";
+			}
 
 			$select .= "tilausrivi.tuoteno, ";
 			if(!empty($request_params['nimitykset'])) {
@@ -689,12 +691,12 @@ function echo_matkalaskuraportti_form($request_params) {
 	echo "<tr>
 			<th>".t("Näytä myös laskunumero")."</th>
 			<td colspan='3'><input type='checkbox' name='laskunro' {$laskunrochk}></td>
-			<td class='back'>".t("(Toimii vain jos listaat matkalaskuittain)")."</td>
+			<td class='back'>".t("(Toimii vain jos listaat matkalaskuittain, tai jos et valitse mitään listausta)")."</td>
 		</tr>";
 	echo "<tr>
 			<th>".t("Näytä myös maksuetieto")."</th>
 			<td colspan='3'><input type='checkbox' name='maksutieto' {$maksutietochk}></td>
-			<td class='back'>".t("(Toimii vain jos listaat matkalaskuittain)")."</td>
+			<td class='back'>".t("(Toimii vain jos listaat matkalaskuittain, tai jos et valitse mitään listausta)")."</td>
 		</tr>";
 	echo "<tr>
 			<th>".t("Näytä myös tapahtumapäivä")."</th>

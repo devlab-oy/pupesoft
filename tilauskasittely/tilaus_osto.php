@@ -447,9 +447,8 @@
 		}
 
 		if ($tee == 'POISTA_RIVI') {
-			//ei voida k‰ytt‰‰ tarkista_myynti_osto_liitos_ja_poista($rivitunnus); koska se asettaa rivit ainoastaan D tilaan, t‰ss‰ kohtaa haluamme oikeasti poistaa rivit
 			tarkista_myynti_osto_liitos_ja_poista($rivitunnus, true);
-			
+
 			$automatiikka = "ON";
 			$tee = "Y";
 		}

@@ -19897,7 +19897,7 @@ if (!function_exists('triangulation')) {
 }
 
 if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
-	function tarkista_myynti_osto_liitos_ja_poista($osto_rivitunnus) {
+	function tarkista_myynti_osto_liitos_ja_poista($osto_rivitunnus, $poistetaanko_oikeasti) {
 		global $kukarow;
 
 		if(!empty($osto_rivitunnus)) {
@@ -19920,11 +19920,23 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 0) {
-					$query = "	UPDATE tilausrivi
-								SET tyyppi = 'D'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus IN ('{$tilausrivin_lisatiedot_row['tilausrivitunnus']}', '{$osto_rivitunnus}')";
-					$result = pupe_query($query);
+					if($poistetaanko_oikeasti) {
+						$query = "	DELETE FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus IN ('{$tilausrivin_lisatiedot_row['tilausrivitunnus']}', '{$osto_rivitunnus}')";
+						pupe_query($query);
+						$query = "	DELETE FROM tilausrivin_lisatiedot
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivilinkki = '{$osto_rivitunnus}'";
+						pupe_query($query);
+					}
+					else {
+						$query = "	UPDATE tilausrivi
+									SET tyyppi = 'D'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus IN ('{$tilausrivin_lisatiedot_row['tilausrivitunnus']}', '{$osto_rivitunnus}')";
+						$result = pupe_query($query);
+					}
 
 					echo "<font class='error'>".t("Rivi poistettiin myös myyntitilaukselta")."</font><br/><br/>";
 				}
@@ -19933,11 +19945,18 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 				}
 			}
 			else {
-				//jos linkkiä ei ole poistamme vain ostotilausrivin
-				$query = "	UPDATE tilausrivi
-							SET tyyppi = 'D'
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus IN ('{$osto_rivitunnus}')";
+				if($poistetaanko_oikeasti) {
+					$query = "	DELETE FROM tilausrivi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus IN ('{$osto_rivitunnus}')";
+				}
+				else {
+					//jos linkkiä ei ole poistamme vain ostotilausrivin
+					$query = "	UPDATE tilausrivi
+								SET tyyppi = 'D'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus IN ('{$osto_rivitunnus}')";
+				}
 				pupe_query($query);
 			}
 		}

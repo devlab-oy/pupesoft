@@ -18861,7 +18861,7 @@ if (!function_exists('etsi_suuntalava_sscc')) {
 	}
 }
 
-if(!function_exists('etsi_suuntalava_sscc_asn_sanomat')) {
+if(!function_exists('etsi_kasittelemattomat_asn_sanomat')) {
 	function etsi_kasittelemattomat_asn_sanomat($sscc) {
 		global $kukarow;
 

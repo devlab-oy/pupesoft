@@ -1043,15 +1043,44 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 	echo "</table><br />";
 
+	if ($lisarajaus == 'riveja_viematta_varastoon' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+
+		$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi = 'O')";
+
+		if ($lisarajaus == 'riveja_viematta_varastoon') {
+			$havinglisa = "HAVING kpl >= 0 AND varattu > 0";
+		}
+		else {
+			$havinglisa = "HAVING kpl > 0 AND varattu = 0";
+		}
+
+		$selectlisa = ", SUM(tilausrivi.kpl) kpl, SUM(tilausrivi.varattu) varattu";
+		$groupbylisa = "GROUP BY 1,2,3,4,5,6,7,8";
+	}
+	else {
+		$joinlisa = $havinglisa = $selectlisa = $groupbylisa = "";
+	}
+
 	// etsitään vanhoja keikkoja, vanhatunnus pitää olla tyhjää niin ei listata liitettyjä laskuja
-	$query = "	SELECT *
+	$query = "	SELECT lasku.tunnus,
+				lasku.laskunro,
+				lasku.comments,
+				lasku.nimi,
+				lasku.ytunnus,
+				lasku.luontiaika,
+				lasku.laatija,
+				lasku.rahti_etu
+				{$selectlisa}
 				FROM lasku USE INDEX (tila_index)
+				{$joinlisa}
 				where lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.liitostunnus = '$toimittajaid'
 				and lasku.tila 		   = 'K'
 				and lasku.alatila 	   = ''
 				and lasku.vanhatunnus  = 0
 				and lasku.mapvm 	   = '0000-00-00'
+				{$groupbylisa}
+				{$havinglisa}
 				ORDER BY lasku.laskunro DESC";
 	$result = pupe_query($query);
 
@@ -1112,26 +1141,6 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 							AND vienti IN ('C','F','I','J','K','L')";
 				$lasku_chk_res = pupe_query($query);
 				if (mysql_num_rows($lasku_chk_res) == 0) continue;
-			}
-
-			if ($lisarajaus == 'riveja_viematta_varastoon' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
-
-				if ($lisarajaus == 'riveja_viematta_varastoon') {
-					$havinglisa = "HAVING kpl IS NOT NULL AND (kpl > 0 OR kpl = 0) AND varattu > 0";
-				}
-				else {
-					$havinglisa = "HAVING kpl IS NOT NULL AND kpl > 0 AND varattu = 0";
-				}
-
-				$query = "	SELECT SUM(kpl) kpl, SUM(varattu) varattu
-							FROM tilausrivi
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND uusiotunnus = '{$row['tunnus']}'
-							AND tyyppi = 'O'
-							{$havinglisa}";
-				$tilriv_chk_res = pupe_query($query);
-
-				if (mysql_num_rows($tilriv_chk_res) == 0) continue;
 			}
 
 			list($kaikkivarastossayhteensa,$kaikkiliitettyyhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$liitettyarvo,$varok) = tsekit($row,$kaikkivarastossayhteensa,$kaikkiliitettyyhteensa);

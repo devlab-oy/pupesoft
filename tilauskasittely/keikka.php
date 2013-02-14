@@ -641,6 +641,8 @@ if ($ytunnus != "" or $toimittajaid != "") {
 // N‰ytet‰‰n kaikkien toimittajien keskener‰iset saapumiset
 if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
+	if (!isset($nayta_siirtovalmiit_suuntalavat)) $nayta_siirtovalmiit_suuntalavat = "";
+
 	echo "<form name='toimi' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 
@@ -709,7 +711,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		echo "</tr><tr>";
 		echo "<th>",t("N‰yt‰ vain saapumiset, joilla on siirtovalmiita suuntalavoja"),"</th>";
 
-		$chk = trim($nayta_siirtovalmiit_suuntalavat) != '' ? ' checked' : '';
+		$chk = $nayta_siirtovalmiit_suuntalavat != '' ? ' checked' : '';
 
 		echo "<td><input type='checkbox' name='nayta_siirtovalmiit_suuntalavat' {$chk} onchange='submit();'></td>";
 	}
@@ -745,8 +747,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	$kaikkiliitettyyhteensa			= 0;
 	$vaihtoomaisuuslaskujayhteensa 	= 0;
 	$kululaskujayhteensa 			= 0;
-
-	$laatijalisa = '';
+	$laatijalisa 					= '';
 
 	if (isset($keikan_laatija) and trim($keikan_laatija) != '') {
 		$laatijalisa = " and lasku.laatija = '$keikan_laatija' ";
@@ -754,7 +755,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 	$suuntalavajoin = '';
 
-	if ($yhtiorow['suuntalavat'] == 'S' and trim($nayta_siirtovalmiit_suuntalavat) != '') {
+	if ($yhtiorow['suuntalavat'] == 'S' and $nayta_siirtovalmiit_suuntalavat != '') {
 		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
 							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = lasku.tunnus) ";
 	}
@@ -836,17 +837,10 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			$laskuja_result = pupe_query($query);
 			$laskuja_row = mysql_fetch_assoc($laskuja_result);
 
-			$summat_row = array(
-				'volasku' => $laskuja_row['volasku'],
-				'kulasku' => $laskuja_row['kulasku'],
-				'vosumma' => $laskuja_row['vosumma'],
-				'kusumma' => $laskuja_row['kusumma'],
-			);
-
-			$kaikkivarastossayhteensa += $row["varastossaarvo"];
-			$vaihtoomaisuuslaskujayhteensa += $summat_row["vosumma"];
-			$kululaskujayhteensa += $summat_row["kusumma"];
+			$kaikkivarastossayhteensa 		+= $row["varastossaarvo"];
 			$kaikkiliitettyyhteensa 		+= $row["kohdistettuarvo"];
+			$vaihtoomaisuuslaskujayhteensa  += $laskuja_row["vosumma"];
+			$kululaskujayhteensa 			+= $laskuja_row["kusumma"];
 
 			echo "<tr class='aktiivi'>";
 			echo "<td valign='top'>$row[ytunnus]</td>";

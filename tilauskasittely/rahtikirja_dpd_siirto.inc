@@ -85,18 +85,6 @@ if ($kollityht > 0) {
 		$parcelOrder["tilausnumero"] = trim($tilausnumerot);
 		$parcelOrder["tilausnumero2"] = trim($tilausnumerot2);
 
-		/*
-			Arvotaan lähetystapa
-		*/
-
-		// jos maksuehto on jv, laitetaan NP,NN,CD
-		if ($rakir_row['jv'] != "") {
-			$parcelOrder["lahetystapa"] = "NP,NN,CD";
-		}
-		else {
-			$parcelOrder["lahetystapa"] = "NP";
-		}
-
 		//	Haetaan otsikkotiedot pohjalle
 		$query = "	SELECT *
 					FROM lasku
@@ -116,6 +104,50 @@ if ($kollityht > 0) {
 
 			//	Poistetaan aina kaikki turhat merkit ja välilyönnit
 			$parcelOrder[$r] = trim(str_replace(array("\r\n", "\r", "\n"), " ", $v));
+		}
+
+		//	Haetaan asiakastiedot
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+		$asres = mysql_query($query) or pupe_error($query);
+		$asrow = mysql_fetch_array($asres);
+
+		for($i=0;$i<mysql_num_fields($asres);$i++) {
+			$r = mysql_field_name($asres, $i);
+			$v = $asrow[$i];
+
+			//	Korvaavuksia ja näppäilyä
+
+			$parcelOrder["asiakas_".$r] = $v;
+		}
+
+		$query = "	SELECT *
+					FROM asiakkaan_avainsanat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND liitostunnus = '{$asrow['tunnus']}'
+					AND LOWER(laji) = 'dpd'";
+		$as_avainsana_res = pupe_query($query);
+		$as_avainsana_row = mysql_fetch_assoc($as_avainsana_res);
+
+		/*
+			Arvotaan lähetystapa
+		*/
+
+		// jos maksuehto on jv, laitetaan NP,NN,CD
+		if ($rakir_row['jv'] != "") {
+			$parcelOrder["lahetystapa"] = "NP,NN,CD";
+		}
+		else {
+			if (strtolower($toitarow['lajittelupiste']) == 'sameday') {
+				$parcelOrder["lahetystapa"] = "NP,SD";
+			}
+			elseif (strtolower($toitarow['lajittelupiste']) == 'regular' and $as_avainsana_row['avainsana'] != '') {
+				$parcelOrder["lahetystapa"] = "NP,{$as_avainsana_row['avainsana']}";
+			}
+			else {
+				$parcelOrder["lahetystapa"] = "NP";
+			}
 		}
 
 		$koko_summa = 0;
@@ -143,22 +175,6 @@ if ($kollityht > 0) {
 			$parcelOrder["kateinen"] = "";
 			$parcelOrder["jv_summa"] = "";
 			$parcelOrder["jv_valkoodi"] = "";
-		}
-
-		//	Haetaan asiakastiedot
-		$query = "	SELECT *
-					FROM asiakas
-					WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-		$asres = mysql_query($query) or pupe_error($query);
-		$asrow = mysql_fetch_array($asres);
-
-		for($i=0;$i<mysql_num_fields($asres);$i++) {
-			$r = mysql_field_name($asres, $i);
-			$v = $asrow[$i];
-
-			//	Korvaavuksia ja näppäilyä
-
-			$parcelOrder["asiakas_".$r] = $v;
 		}
 
 		/*

@@ -17,6 +17,10 @@ $useslave = 1;
 
 require ("../inc/parametrit.inc");
 
+echo "<font class='head'>".t("Raporttia huolletaan")."</font><br>";
+echo "<font class='head'>".t("Jos tarvitset tätä raporttia, ota heti yhteys Devlabin helpdeskiin")."</font><br>";
+exit;
+
 if (!function_exists("luku")) {
 	function luku($luku) {
 		$ulos = number_format($luku, 2 ,',' ,' ');

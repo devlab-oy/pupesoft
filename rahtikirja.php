@@ -2708,7 +2708,7 @@
 					echo "<input type='hidden' name='erikoispakkaus[{$i}]' value='{$keraysera_row['erikoispakkaus']}'>";
 				}
 
-				if ((strtoupper($tulostustapa) == 'E' or strtoupper($tulostustapa) == 'L') and $yhtiorow['oletus_rahtikirja_oslappkpl'] != 0) {
+				if ((strtoupper($tulostustapa) == 'E' or strtoupper($tulostustapa) == 'L') and $yhtiorow['oletus_rahtikirja_oslappkpl'] != 0 and $toitarow["rahtikirja"] != 'rahtikirja_unifaun_ps_siirto.inc' and $toitarow["rahtikirja"] != 'rahtikirja_unifaun_uo_siirto.inc') {
 					echo "<input type='text' size='4' value='{$kollit[$i]}' name='kollit[{$i}]' onKeyUp='summaa_kollit(this);'></td>";
 				}
 				else {
@@ -2814,7 +2814,7 @@
 				echo "<input type='hidden' name='erikoispakkaus[$i]' value='$row[pakkaus]'>";
 			}
 
-			if ((strtoupper($tulostustapa) == 'E' or strtoupper($tulostustapa) == 'L') and $yhtiorow['oletus_rahtikirja_oslappkpl'] != 0) {
+			if ((strtoupper($tulostustapa) == 'E' or strtoupper($tulostustapa) == 'L') and $yhtiorow['oletus_rahtikirja_oslappkpl'] != 0 and $toitarow["rahtikirja"] != 'rahtikirja_unifaun_ps_siirto.inc' and $toitarow["rahtikirja"] != 'rahtikirja_unifaun_uo_siirto.inc') {
 				echo "<input type='text' size='4' value='$kollit[$i]' name='kollit[$i]' onKeyUp='summaa_kollit(this);'></td>";
 			}
 			else {
@@ -3022,7 +3022,10 @@
 			$oslappkpl_hidden = 0;
 			$disabled = '';
 
-			if ($yhtiorow['oletus_rahtikirja_oslappkpl'] > 0 and ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A')) {
+			if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+				$oslappkpl = 0;
+			}			
+			elseif ($yhtiorow['oletus_rahtikirja_oslappkpl'] > 0 and ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A')) {
 
 				$kaikki_ok = true;
 

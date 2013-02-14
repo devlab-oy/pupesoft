@@ -297,13 +297,13 @@
 	);
 
 	// Yhtiökohtaisia
-	if ($kukarow['yhtio'] == 'mast') {
+	if (table_exists('auto_vari_tuote')) {
 		$taulut['auto_vari']              = 'Autoväri-datat';
 		$taulut['auto_vari_tuote']        = 'Autoväri-värikirja';
 		$taulut['auto_vari_korvaavat']    = 'Autoväri-korvaavat';
 	}
-
-	if ($kukarow['yhtio'] == 'artr' or $kukarow['yhtio'] == 'allr') {
+ 
+	if (table_exists('yhteensopivuus_tuote')) {
 		$taulut['autodata']                        = 'Autodatatiedot';
 		$taulut['autodata_tuote']                  = 'Autodata tuotetiedot';
 		$taulut['yhteensopivuus_auto']             = 'Yhteensopivuus automallit';

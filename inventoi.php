@@ -257,8 +257,8 @@
 								}
 							}
 
-							if (is_array($eranumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and ($onko_uusia > 0 or $hyllyssa[$i] > $erasyotetyt)) {
-								echo "<font class='error'>".t("VIRHE: Er‰numeroita ei voi lis‰t‰ kuin absoluuttisella m‰‰r‰ll‰")."! (+1)</font><br>";
+							if (is_array($eranumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and ($onko_uusia > 0 or $hyllyssa[$i] < $erasyotetyt)) {
+								echo "<font class='error'>".t("VIRHE: Er‰numeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
 								$virhe = 1;
 							}
 							elseif (substr($kpl,0,1) == '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl,1)) {

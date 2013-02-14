@@ -1851,10 +1851,30 @@
 			if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA") {
 
 				if ($toim == "KOONTILAHETE") {
-					$koontilahete = TRUE;
+
+					$query = "	SELECT lasku.*,
+								asiakas.keraysvahvistus_lahetys,
+								if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) email
+								FROM lasku
+								LEFT JOIN asiakas ON (lasku.yhtio = asiakas.yhtio AND lasku.liitostunnus = asiakas.tunnus)
+								WHERE lasku.tunnus IN ({$laskurow['tunnus']})
+								and lasku.yhtio = '{$kukarow['yhtio']}'";
+					$alk_til_res = pupe_query($query);
+					$laskurow_chk = mysql_fetch_assoc($alk_til_res);
+
+					list($komento, $koontilahete, $koontilahete_tilausrivit) = koontilahete_check($laskurow_chk, $komento);
+
+					if ($komento != "" and $koontilahete == 0) {
+						$koontilahete = $laskurow['tunnus'];
+						$koontilahete_tilausrivit = 0;
+					}
+					elseif ($komento != "" and $koontilahete != 0) {
+						$laskurow['email'] = $laskurow_chk['email'];
+					}
 				}
 				else {
-					$koontilahete = FALSE;
+					$koontilahete = 0;
+					$koontilahete_tilausrivit = 0;
 				}
 
 				$params = array(
@@ -1868,7 +1888,8 @@
 					'lahetekpl'					=> "",
 					'kieli' 					=> $kieli,
 					'koontilahete'				=> $koontilahete,
-					);
+					'koontilahete_tilausrivit'	=> $koontilahete_tilausrivit,
+				);
 
 				pupesoft_tulosta_lahete($params);
 
@@ -1889,6 +1910,7 @@
 				'tee'			=> $tee,
 				'toim'			=> $toim,
 				'norm'			=> $norm,
+				'otunnukset'	=> $laskurow['tunnus'],
 				);
 
 				// Aloitellaan DGD:n teko

@@ -94,9 +94,18 @@
 						if (strlen(trim($tilino)) > 0) {
 							echo "<font class='message'> ".t("Maksukandidaatti tilino & m‰‰r‰")."</font><br>\n";
 
+							$iban = luoiban($tilino);
+							
+							if ($iban['iban'] != "" and $iban['swift'] != "") {
+								$tilihaku = " ultilno = '{$iban['iban']}' ";
+							}
+							else {
+								$tilihaku = " tilinumero = '{$tilino}' ";
+							}
+
 							$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 										FROM lasku
-										WHERE tilinumero = '$tilino'
+										WHERE {$tilihaku}
 										and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
 										and yhtio 	= '$yritirow[yhtio]'
 										and tila 	= 'Q'
@@ -108,7 +117,7 @@
 							if (mysql_num_rows($result) == 0) {
 								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
 											FROM lasku
-											WHERE tilinumero = '$tilino'
+											WHERE {$tilihaku}
 											and ((summa = $kohdm * -1) or (abs(summa + $kohdm) < 0.01))
 											and yhtio 	= '$yritirow[yhtio]'
 											and tila 	= 'Q'

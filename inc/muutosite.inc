@@ -1584,7 +1584,7 @@
 
 	if ($tila == '') {
 
-		// katotaan onko lasku liitetty keikkaan
+		// katotaan onko lasku liitetty saapumiseen
 		$query = "	SELECT lasku.laskunro, keikka.alatila
 					FROM lasku
 					JOIN lasku keikka ON (keikka.yhtio = lasku.yhtio and keikka.laskunro = lasku.laskunro and keikka.tila = 'K' and keikka.vanhatunnus = 0)

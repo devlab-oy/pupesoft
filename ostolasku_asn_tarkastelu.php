@@ -208,7 +208,7 @@
 
 		if ($valitse != 'asn' and $tee == 'vahvistavakisinkolli') {
 
-			// Kun vahvistetaan katsotaan onko lasku liitetty jo keikkaan
+			// Kun vahvistetaan katsotaan onko lasku liitetty jo saapumiseen
 			// Jos on, niin merkataan asn_sanoma status x eikä mennä automaattikohdistukseen
 			$query = "	SELECT tunnus
 						FROM lasku

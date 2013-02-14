@@ -75,7 +75,7 @@
 		$ltun_querylisa = '';
 		$ltun_linkklisa = '';
 
-		if (count($sel_ltun) > 0) {
+		if (isset($sel_ltun) and count($sel_ltun) > 0) {
 			$ltun_querylisa = " and lasku.tunnus in (".implode(",", $sel_ltun).")";
 
 			foreach ($sel_ltun as $ltun_x) {
@@ -112,6 +112,13 @@
 					$jvehto";
 		$pakkaustieto_rakir_res = pupe_query($query);
 		$pakkaustieto_rakir_row = mysql_fetch_assoc($pakkaustieto_rakir_res);
+
+		if ($ltun_linkklisa == '') {
+
+			foreach (explode(",", $pakkaustieto_rakir_row['tunnukset']) as $ltun_x) {
+				$ltun_linkklisa .= "&sel_ltun[]=$ltun_x";
+			}
+		}
 
 		$tutkimus = 0; // tänne tulee luku
 
@@ -159,7 +166,7 @@
 				}
 			}
 
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=rahtikirja-tulostus.php?tee=tulosta&tultiin=koonti_eratulostus_pakkaustiedot&toimitustapa_varasto=$toimitustapa_varasto&jv=$jv&komento=$komento&valittu_rakiroslapp_tulostin=$valittu_rakiroslapp_tulostin&pakkaustieto_rahtikirjanro=$rahtikirjanro$ltun_linkklisa'>";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=rahtikirja-tulostus.php?tee=tulosta&tultiin=koonti_eratulostus_pakkaustiedot&toimitustapa_varasto=$toimitustapa_varasto&jv=$jv&komento=$komento&rakirsyotto_dgd_tulostin={$rakirsyotto_dgd_tulostin}&dgdkpl=$dgdkpl&valittu_rakiroslapp_tulostin=$valittu_rakiroslapp_tulostin&pakkaustieto_rahtikirjanro=$rahtikirjanro$ltun_linkklisa'>";
 			exit;
 		}
 		else {
@@ -928,12 +935,13 @@
 				$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
 
 				// Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty
-				if ($asiakas_chk_row["keraysvahvistus_lahetys"] == 'L' or ($yhtiorow["keraysvahvistus_lahetys"] == 'L' and $asiakas_chk_row["keraysvahvistus_lahetys"] == '')) {
+				if (($asiakas_chk_row["keraysvahvistus_lahetys"] == 'L' or $asiakas_chk_row["keraysvahvistus_lahetys"] == 'Q') or
+					(($yhtiorow["keraysvahvistus_lahetys"] == 'L' or $yhtiorow["keraysvahvistus_lahetys"] == 'Q') and $asiakas_chk_row["keraysvahvistus_lahetys"] == '')) {
 
 					$laskurow["email"] = $asiakas_chk_row["email"];
 					$laskurow["keraysvahvistus_lahetys"] = $asiakas_chk_row["keraysvahvistus_lahetys"];
 
-					list($komento, $koontilahete) = koontilahete_check($laskurow, $komento);
+					list($komento, $koontilahete, $koontilahete_tilausrivit) = koontilahete_check($laskurow, $komento);
 				}
 
 				if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {
@@ -945,7 +953,11 @@
 						$lahetteet = array($laskurow["tunnus"]);
 					}
 
-					foreach ($lahetteet as $index => $laskutunnus) {
+					$lahetteet_tmp = $lahetteet;
+
+					if (isset($koontilahete) and $koontilahete != 0) $lahetteet_tmp = array($koontilahete);
+
+					foreach ($lahetteet_tmp as $index => $laskutunnus) {
 
 						// Haetaan laskun kaikki tiedot uudestaan koska haluamme lähetteen per yhdistetty rahtikirja
 						$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$laskutunnus'";
@@ -961,8 +973,10 @@
 							'toim'						=> $toim,
 							'komento' 					=> $komento,
 							'lahetekpl'					=> $lahetekpl,
-							'kieli' 					=> $kieli
-							);
+							'kieli' 					=> $kieli,
+							'koontilahete'				=> $koontilahete,
+							'koontilahete_tilausrivit'	=> $koontilahete_tilausrivit,
+						);
 
 						pupesoft_tulosta_lahete($params);
 					}
@@ -1081,6 +1095,8 @@
 
 				require ("tilauskasittely/tulosta_dgd.inc");
 
+				$dgd_otunnukset = (isset($dgdlle_tunnukset) and $dgdlle_tunnukset != "") ? $dgdlle_tunnukset : $laskurow['tunnus'];
+
 				$params_dgd = array(
 				'kieli'			=> 'en',
 				'laskurow'		=> $laskurow,
@@ -1091,6 +1107,7 @@
 				'tee'			=> $tee,
 				'toim'			=> $toim,
 				'norm'			=> $norm,
+				'otunnukset'	=> $dgd_otunnukset,
 				);
 
 				// Aloitellaan lähetteen teko
@@ -2082,7 +2099,7 @@
 
 			$ltun_linkklisa = '';
 
-			if (count($sel_ltun) > 0) {
+			if (isset($sel_ltun) and count($sel_ltun) > 0) {
 				foreach ($sel_ltun as $ltun_x) {
 					$ltun_linkklisa .= "&sel_ltun[]=$ltun_x";
 				}
@@ -3105,6 +3122,11 @@
 		echo "<br><input type='hidden' name='id' value='$id'>";
 
 		echo "<input name='subnappi' type='submit' value='".t("Valmis")."'>";
+
+		if ($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
+			echo "<input type='hidden' name='rakirsyotto_dgd_tulostin' value='{$rakirsyotto_dgd_tulostin}' />";
+			echo "<input type='hidden' name='dgdkpl' value='{$dgdkpl}' />";
+		}
 
 		echo "</form>";
 

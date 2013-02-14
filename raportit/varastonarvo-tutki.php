@@ -405,7 +405,7 @@
 
 		while ($trow = mysql_fetch_assoc($result)) {
 
-			// haetaan kaikki keikkaan liitetyt vaihto-omaisuus ja rahtilaskut
+			// haetaan kaikki saapumiseen liitetyt vaihto-omaisuus ja rahtilaskut
 			$query = "	SELECT
 						sum(if(vienti in ('B','E','H'), summa, 0)) rahtilaskusumma,
 						group_concat(if(vienti in ('B','E','H'), vanhatunnus, NULL)) rahtilaskut,
@@ -441,7 +441,7 @@
 			}
 
 			// haetaan liitettyjen rahti-laskujen varastonmuutos kirjanpidosta
-			// suuntaa-antava, koska rahtilaskusta on voitu liitt‰‰ vain osa t‰h‰n keikkaan
+			// suuntaa-antava, koska rahtilaskusta on voitu liitt‰‰ vain osa t‰h‰n saapumiseen
 			if ($keekrow["rahtilaskut"] != "") {
 				$query = "	SELECT sum(summa) rahtilaskusummakokonaan
 							FROM lasku

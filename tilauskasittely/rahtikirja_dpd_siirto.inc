@@ -67,19 +67,23 @@ if ($kollityht > 0) {
 		$parcelOrder=array();
 		$parcelOrder["rahtikirjanro"] = $rahtikirjanro;
 
-		$tilausnumerot = "";
+		$tilausnumerot = $tilausnumerot2 = "";
 
 		// Laitetaan max 30 merkkiä tilausnumeroita välilyönnillä eroteltuna
 		foreach($lotsikot as $tilnum) {
 			if ((strlen($tilausnumerot) + strlen($tilnum) + 1) <= 30) {
 				$tilausnumerot = "{$tilausnumerot} {$tilnum}";
 			}
+			elseif ((strlen($tilausnumerot2) + strlen($tilnum) + 1) <= 30) {
+				$tilausnumerot2 = "{$tilausnumerot2} {$tilnum}";
+			}
 			else {
 				break;
 			}
 		}
 
-		$parcelOrder["tilausnumero"] = $tilausnumerot;
+		$parcelOrder["tilausnumero"] = trim($tilausnumerot);
+		$parcelOrder["tilausnumero2"] = trim($tilausnumerot2);
 
 		/*
 			Arvotaan lähetystapa

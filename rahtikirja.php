@@ -806,7 +806,6 @@
 						$sel_ltun = explode(",", $tunnukset);
 					}
 
-					$reittietikettitulostin = $rakirsyotto_oslapp_tulostin;
 					require ("rahtikirja-tulostus.php");
 
 				} // end if tulostetaanko heti

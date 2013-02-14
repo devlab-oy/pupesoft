@@ -94,9 +94,18 @@
 						if (strlen(trim($tilino)) > 0) {
 							echo "<font class='message'> ".t("Maksukandidaatti tilino & määrä")."</font><br>\n";
 
+							$iban = luoiban($tilino);
+							
+							if ($iban['iban'] != "" and $iban['swift'] != "") {
+								$tilihaku = " ultilno = '{$iban['iban']}' ";
+							}
+							else {
+								$tilihaku = " tilinumero = '{$tilino}' ";
+							}
+
 							$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 										FROM lasku
-										WHERE tilinumero = '$tilino'
+										WHERE {$tilihaku}
 										and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
 										and yhtio 	= '$yritirow[yhtio]'
 										and tila 	= 'Q'
@@ -108,7 +117,7 @@
 							if (mysql_num_rows($result) == 0) {
 								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
 											FROM lasku
-											WHERE tilinumero = '$tilino'
+											WHERE {$tilihaku}
 											and ((summa = $kohdm * -1) or (abs(summa + $kohdm) < 0.01))
 											and yhtio 	= '$yritirow[yhtio]'
 											and tila 	= 'Q'
@@ -407,7 +416,7 @@
 			echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&tiliote=Z&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm&ohje=off');\">".t("Tee tiliotesääntö")."</a>";
 		}
 
-		echo "</td></tr>";		
+		echo "</td><td class='back' style='width:200px;'></td></tr>";
 
 		$maksu = 0; // Maksu on käsitelty
 		$maara = 0;
@@ -654,20 +663,20 @@
 			echo "<th>".t("Tap.")."<br>\n".t("n:o")."</th>";
 			echo "<th>".t("Tiliöinti")."</th>";
 			echo "<th>".t("Määrä")."</th>";
-			echo "</tr>";
+			echo "<td class='back' style='width:200px;'></td></tr>";
 
 			echo "<tr><td></td><td></td><td></td><td></td>";
 			if ($tee == 'S') echo "<td></td>";
 			echo "<td>".t("Saldo")." ".pankkipvm(substr($tietue,65,6))."</td>";
 			echo "<td style='text-align:right;'>".sprintf("%01.2f",((substr($tietue,71,19) / 100)-$tililimiitti))."</td>";
-			echo "</tr>";
+			echo "<td class='back' style='width:200px;'></td></tr>";
 
 			if ($tililimiitti != "") {
 				echo "<tr><td></td><td></td><td></td><td></td>";
 				if ($tee == 'S') echo "<td></td>";
 				echo "<td>".t("Käyttövara")."</td>";
 				echo "<td style='text-align:right;'>".(substr($tietue,71,19) / 100)."</td>";
-				echo "</tr>";
+				echo "<td class='back' style='width:200px;'></td></tr>";
 			}
 
 			break;
@@ -813,7 +822,7 @@
 				$tiliotedatarow["kuitattuaika"] = date("Y-m-d H:i:s");
 			}
 
-			echo "<tr><td colspan='7' class='back' style='padding:0; margin:0;'><div id = 'ifd_{$tiliotedatarow['tunnus']}' style='border:1px solid; display:none'></div><br></td></tr>";
+			echo "<tr><td colspan='8' class='back' style='width:100%; padding:0; margin:0;'><div id = 'ifd_{$tiliotedatarow['tunnus']}' style='width:100%; border:1px solid; display:none'></div><br></td></tr>";
 
 			$td_perheid = $tiliotedatarow['perheid'];
 
@@ -872,7 +881,8 @@
 
 			echo "</td>";
 			echo "<td name='td_{$td_perheid}' class='$class' style='text-align:right;'>$maara</td>";
-			echo "</tr><tr class='aktiivi'>";
+			echo "<td class='back' style='width:200px;'></td></tr>";
+			echo "<tr class='aktiivi'>";
 
 			if ($tee == 'S') echo "<td name='td_{$td_perheid}' class='$class'></td>";
 
@@ -882,7 +892,7 @@
 			echo "<td name='td_{$td_perheid}' class='$class'></td>
 				  <td name='td_{$td_perheid}' class='$class'></td>
 				  <td name='td_{$td_perheid}' class='$class'></td>";
-			echo "</tr>";
+			echo "<td class='back' style='width:200px;'></td></tr>";
 			$vientiselite = "$maksaa<br>\n$koodi $koodiselite<br>\n";
 			break;
 
@@ -976,6 +986,11 @@
 			$selite 	= '';
 			$tyyppi 	= substr($tietue, 6, 2);
 			$arvo 		= substr($tietue, 8, substr($tietue, 3, 3));
+
+			// Nordea Viro häkki
+			if ($yhtiorow['maa'] == "EE" and $koodi == '705' and $kuittikoodi != "E" and stripos($arvo, "REFERENCE PAYMENT") !== FALSE) {
+				$kuittikoodi = "E";
+			}
 
 			echo "<tr class='aktiivi'><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'></td>";
 
@@ -1099,7 +1114,7 @@
 					$eiselitetta = 1;
 			}
 
-			echo "<td name='td_{$td_perheid}' class='$class'>$selite</td><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'></td></tr>";
+			echo "<td name='td_{$td_perheid}' class='$class'>$selite</td><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'></td><td class='back' style='width:200px;'></td></tr>";
 
 			$vientiselite .= $selite;
 			break;
@@ -1123,14 +1138,14 @@
 			YHTEENSÄ                                        50
 			*/
 
-			echo "<tr><td colspan='7' class='back' style='padding:0; margin:0;'><div id = 'ifd_{$tiliotedatarow['tunnus']}' style='border:1px solid; display:none'></div><br></td></tr>";			
+			echo "<tr><td colspan='8' class='back' style='width:100%; padding:0; margin:0;'><div id = 'ifd_{$tiliotedatarow['tunnus']}' style='width:100%; border:1px solid; display:none'></div><br></td></tr>";
 
 			echo "<tr>";
 
 			if ($tee == 'S') echo "<td></td>";
 
 			echo "<td></td><td></td><td></td><td></td><td>".t("Saldo")." ".pankkipvm(substr($tietue,6,6))."</td>";
-			echo "<td style='text-align:right;'>". sprintf("%01.2f",((substr($tietue,12,19) / 100)))."</td></tr>";
+			echo "<td style='text-align:right;'>". sprintf("%01.2f",((substr($tietue,12,19) / 100)))."</td><td class='back' style='width:200px;'></td></tr>";
 
 			if ($tililimiitti != "") {
 				echo "<tr>";
@@ -1138,7 +1153,7 @@
 				if ($tee == 'S') echo "<td></td>";
 
 				echo "<td></td><td></td><td></td><td></td><td>".t("Käyttövara")."</td>";
-				echo "<td style='text-align:right;'>".sprintf("%01.2f",substr($tietue,31,19) / 100)."</td></tr>";
+				echo "<td style='text-align:right;'>".sprintf("%01.2f",substr($tietue,31,19) / 100)."</td><td class='back' style='width:200px;'></td></tr>";
 			}
 
 			// Päivitetään saldo yriti-tauluun, jos sellainen löytyi
@@ -1160,7 +1175,7 @@
 				if ($tee == 'S') echo "</td><td>";
 
 				echo "<font class='message'>".t("Tilin saldo päivitettiin")."</font>";
-				echo "</td><td></td><td></td><td></td></tr>";
+				echo "</td><td></td><td></td><td></td><td class='back' style='width:200px;'></td></tr>";
 			}
 			break;
 		case 'T50':
@@ -1196,8 +1211,8 @@
 			if ($silent == "") {
 				$colspan = $tee == 'S' ? 6 : 5;
 
-				echo "<tr><th colspan='$colspan'>".t("Panot")." $jakso ".t("alusta")." ".t("kpl")." ".(substr($tietue,13,8) * 1)."</th><th style='text-align:right;'>".sprintf("%01.2f",substr($tietue,21,19) / 100)."</th></tr>";
-				echo "<tr><th colspan='$colspan'>".t("Otot")." $jakso ".t("alusta")." kpl ".(substr($tietue,40,8) * 1)."</th><th style='text-align:right;'>".sprintf("%01.2f",substr($tietue,48,19) / 100)."</th></tr>";
+				echo "<tr><th colspan='$colspan'>".t("Panot")." $jakso ".t("alusta")." ".t("kpl")." ".(substr($tietue,13,8) * 1)."</th><th style='text-align:right;'>".sprintf("%01.2f",substr($tietue,21,19) / 100)."</th><td class='back' style='width:200px;'></td></tr>";
+				echo "<tr><th colspan='$colspan'>".t("Otot")." $jakso ".t("alusta")." kpl ".(substr($tietue,40,8) * 1)."</th><th style='text-align:right;'>".sprintf("%01.2f",substr($tietue,48,19) / 100)."</th><td class='back' style='width:200px;'></td></tr>";
 			}
 			break;
 		case 'T60':
@@ -1211,37 +1226,37 @@
 
 				$colspan = $tee == 'S' ? 7 : 6;
 
-				echo "<tr><td colspan='$colspan'>".t("Koronlaskentatiedot")."</td></tr>";
-				echo "<tr><th colspan='$colspan'>".t("Korkokausi")." ".substr($tietue,11,13)."</th></tr>";
+				echo "<tr><td colspan='$colspan'>".t("Koronlaskentatiedot")."</td><td class='back' style='width:200px;'></td></tr>";
+				echo "<tr><th colspan='$colspan'>".t("Korkokausi")." ".substr($tietue,11,13)."</th><td class='back' style='width:200px;'></td></tr>";
 
 				if (substr($tietue,24,1) == '1') {
-					echo "<tr><th colspan='colspan'>".t("Talletuksen keskisaldo")." ".(substr($tietue,25,1).substr($tietue,26,18) / 100)."</th></tr>";
+					echo "<tr><th colspan='colspan'>".t("Talletuksen keskisaldo")." ".(substr($tietue,25,1).substr($tietue,26,18) / 100)."</th><td class='back' style='width:200px;'></td></tr>";
 				}
 				if (substr($tietue,44,1) == '1') {
-					echo "<tr><th colspan='$colspan'>".t("Talletuskorko")." ".(substr($tietue,45,7) / 1000)."</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Talletuskorko")." ".(substr($tietue,45,7) / 1000)."</th><td class='back' style='width:200px;'></td></tr>";
 				}
 				if (substr($tietue,52,1) == '1') {
-					echo "<tr><th colspan='$colspan'>".t("Luoton keskisaldo")." ".(substr($tietue,53,1).substr($tietue,54,18) / 100)."</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Luoton keskisaldo")." ".(substr($tietue,53,1).substr($tietue,54,18) / 100)."</th><td class='back' style='width:200px;'></td></tr>";
 				}
 				if (substr($tietue,72,1) == '1') {
-					echo "<tr><th colspan='$colspan'>".t("Luottokorko")." ".(substr($tietue,73,7) / 1000)."</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Luottokorko")." ".(substr($tietue,73,7) / 1000)."</th><td class='back' style='width:200px;'></td></tr>";
 				}
 				if (substr($tietue,80,1) == '1') {
-					echo "<tr><th colspan='$colspan'>".t("Limiitinkäyttöaste")." ".(substr($tietue,81,7) / 1000)."</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Limiitinkäyttöaste")." ".(substr($tietue,81,7) / 1000)."</th><td class='back' style='width:200px;'></td></tr>";
 				}
 				if (substr($tietue,88,1) == '1') {
-					echo "<tr><th colspan='$colspan'>".t("Pysyväsaldo")." ".(substr($tietue,89,1).substr($tietue,90,18) / 100)."</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Pysyväsaldo")." ".(substr($tietue,89,1).substr($tietue,90,18) / 100)."</th><td class='back' style='width:200px;'></td></tr>";
 				}
 				if (substr($tietue,108,1) == '1') {
-					echo "<tr><th colspan='$colspan'>".t("Talletusviitekorko")." ".substr($tietue,109,35)." ".(substr($tietue,144,7) / 1000)."</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Talletusviitekorko")." ".substr($tietue,109,35)." ".(substr($tietue,144,7) / 1000)."</th><td class='back' style='width:200px;'></td></tr>";
 				}
 				if (substr($tietue,151,1) == '1') {
-					echo "<tr><th colspan='$colspan'>".t("Luottoviitekorko")." ".substr($tietue,152,35)." ".(substr($tietue,187,7) / 1000)."</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Luottoviitekorko")." ".substr($tietue,152,35)." ".(substr($tietue,187,7) / 1000)."</th><td class='back' style='width:200px;'></td></tr>";
 				}
 			}
 			else {
 				echo "<tr><td colspan='$colspan'>";
-				echo t("Tietue T60 ei ole tunnistettu pankkiryhmälle").": ". substr($tietue,6,3)."</td></tr>";
+				echo t("Tietue T60 ei ole tunnistettu pankkiryhmälle").": ". substr($tietue,6,3)."</td><td class='back' style='width:200px;'></td></tr>";
 			}
 			break;
 		case 'T70':
@@ -1264,7 +1279,7 @@
 			*/
 
 			if ($silent == "") { // Tietue sisältää tiliotteeseen liittyviä tiedotteita
-				echo "<tr><td class='back'></td></tr>";
+				echo "<tr><td class='back'></td><td class='back' style='width:200px;'></td></tr>";
 
 				echo "<tr>";
 
@@ -1287,7 +1302,7 @@
 				$colspan = $tee == 'S' ? 7 : 6;
 
 				echo "<tr><td colspan='$colspan'>";
-				echo t("Tunnistamaton tietue").": $tunnus</td></tr>";
+				echo t("Tunnistamaton tietue").": $tunnus</td><td class='back' style='width:200px;'></td></tr>";
 			}
 	}
 ?>

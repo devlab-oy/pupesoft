@@ -200,7 +200,7 @@
 		$ulos .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '5'  $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
 		$ulos .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
-		$ulos .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi)")."</option>";
+		$ulos .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)")."</option>";
 		$ulos .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1");
 		#$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3");
@@ -209,6 +209,8 @@
 		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)");
 		$ulos .= "<option value = '13' $sel[13]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja");
 		$ulos .= "<option value = '14' $sel[14]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)");
+		$ulos .= "<option value = '15' $sel[15]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja");
+		$ulos .= "<option value = '16' $sel[16]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1004,13 +1006,16 @@
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
 		$sel			= array();
-		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('o', 'k', 'L', 'M'), '');
+		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('o', 'k', 'L', 'M', 'N', 'Q', 'P'), '');
 
 		$ulos .= "<option value=''>".t("Ker‰ysvahvistusta/s‰hkˆist‰ l‰hetett‰ ei l‰hetet‰")."</option>";
 		$ulos .= "<option value='o'{$sel['o']}>".t("Ker‰ysvahvistus/s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
 		$ulos .= "<option value='k'{$sel['k']}>".t("Ker‰ysvahvistus/s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty")."</option>";
-		$ulos .= "<option value='L'{$sel['L']}>".t("Ker‰ysvahvistus/paperinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty")."</option>";
+		$ulos .= "<option value='L'{$sel['L']}>".t("Ker‰ysvahvistus/paperinen l‰hete tulostetaan asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty")."</option>";
 		$ulos .= "<option value='M'{$sel['M']}>".t("Ker‰ysvahvistus/paperinen & s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty")."</option>";
+		$ulos .= "<option value='N'{$sel['N']}>".t("Ker‰ysvahvistus/s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus (myˆs JT-rivit) on ker‰tty")."</option>";
+		$ulos .= "<option value='Q'{$sel['Q']}>".t("Ker‰ysvahvistus/paperinen l‰hete tulostetaan asiakkaalle kun koko alkuper‰inen tilaus (myˆs JT-rivit) on ker‰tty")."</option>";
+		$ulos .= "<option value='P'{$sel['P']}>".t("Ker‰ysvahvistus/paperinen & s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus (myˆs JT-rivit) on ker‰tty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1336,7 +1341,7 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
 					<option value='' $sela>".t("Ei n‰ytet‰ allekirjoitusta myyntilasku, ostotilaus, l‰hete tai tarjous tulosteella")."</option>
-					<option value='X' $selb>".t("N‰ytet‰‰n allekirjoitus myyntilasku, ostotilaus, l‰hete ja tarjous tulosteella")."</option> 
+					<option value='X' $selb>".t("N‰ytet‰‰n allekirjoitus myyntilasku, ostotilaus, l‰hete ja tarjous tulosteella")."</option>
 				</select></td>";
 
 		$jatko = 0;
@@ -3252,6 +3257,20 @@
 
 		$ulos .= "<option value = ''>".t("Hintaa ei leikata")."</option>";
 		$ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Myyntihintaa leikataan 25% per taso")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+
+	}
+	
+	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel['Z'] = $trow[$i] == 'Z' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Matkalaskun tarkastaja ei voi muokata matkalaskua")."</option>";
+		$ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Matkalaskun tarkastaja voi muokata matkalaskua")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

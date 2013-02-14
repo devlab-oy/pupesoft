@@ -5,7 +5,7 @@ $query    = "SELECT * FROM lasku WHERE tunnus='$otunnus' AND yhtio ='$kukarow[yh
 $result   = mysql_query($query) or pupe_error($query);
 $laskurow = mysql_fetch_array($result);
 
-// yhdistetään ruksatut keikat "isäkeikkaan" $otunnus
+// yhdistetään ruksatut keikat "isäsaapumiseen" $otunnus
 if ($tee == "teeyhdistys") {
 
 	if (count($yhdistakeikka) > 0) {

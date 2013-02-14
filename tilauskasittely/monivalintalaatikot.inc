@@ -399,7 +399,12 @@
 		$laskumyyjat = substr($laskumyyjat, 0, -1);
 
 		if (trim($laskumyyjat) != '') {
-			$lisa .= " and lasku.myyja in ($laskumyyjat) ";
+			if (strpos($_SERVER['SCRIPT_NAME'], "budjetinyllapito_tat.php") !== FALSE) {
+				$lisa .= " and kuka.tunnus in ({$laskumyyjat}) ";
+			}
+			else {
+				$lisa .= " and lasku.myyja in ($laskumyyjat) ";
+			}
 		}
 	}
 

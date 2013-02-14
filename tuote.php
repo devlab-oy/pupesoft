@@ -1019,9 +1019,23 @@
 			echo "</td></tr></table><br>";
 
 			// Tilausrivit tälle tuotteelle
-			$query = "	SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
-						tilausrivi.toimaika pvm, tilausrivi.laadittu,
-						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tila laskutila, lasku.tilaustyyppi, tilausrivi.var, lasku2.laskunro as keikkanro, tilausrivi.jaksotettu, tilausrivin_lisatiedot.osto_vai_hyvitys
+			$query = "	SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi,
+						lasku.tunnus,
+						(tilausrivi.varattu+tilausrivi.jt) kpl,
+						tilausrivi.toimaika pvm,
+						tilausrivi.laadittu,
+						varastopaikat.nimitys varasto,
+						tilausrivi.tyyppi,
+						lasku.laskunro,
+						lasku.tila laskutila,
+						lasku.tilaustyyppi,
+						tilausrivi.var,
+						lasku2.laskunro as keikkanro,
+						tilausrivi.jaksotettu,
+						tilausrivin_lisatiedot.osto_vai_hyvitys,
+						lasku2.comments,
+						lasku.laatija,
+						lasku.luontiaika
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
@@ -1157,9 +1171,37 @@
 					list(, , $myyta) = saldo_myytavissa($tuoteno, "KAIKKI", '', '', '', '', '', '', '', $jtrow["pvm"]);
 
 					echo "<tr>
-							<td>$jtrow[nimi]</td>
-							<td><a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]&lopetus=$lopetus'>$jtrow[tunnus]</a>$keikka</td>
-							<td>$tyyppi</td>
+							<td>$jtrow[nimi]</td>";
+
+					if ($jtrow["tyyppi"] == "O" and $jtrow["laskutila"] != "K" and $jtrow["keikkanro"] > 0 and $jtrow['comments'] != '') {
+						echo "<td valign='top' class='tooltip' id='{$jtrow['tunnus']}{$jtrow['keikkanro']}'>";
+					}
+					else {
+						echo "<td>";
+					}
+
+					echo "<a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]&lopetus=$lopetus'>$jtrow[tunnus]</a>$keikka";
+
+					if ($jtrow["tyyppi"] == "O" and $jtrow["laskutila"] != "K" and $jtrow["keikkanro"] > 0 and $jtrow['comments'] != '') {
+
+						$query = "	SELECT nimi
+									FROM kuka
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND kuka = '{$jtrow['laatija']}'";
+						$kuka_chk_res = pupe_query($query);
+						$kuka_chk_row = mysql_fetch_assoc($kuka_chk_res);
+
+						echo "&nbsp;<img src='{$palvelin2}/pics/lullacons/info.png'>";
+						echo "<div id='div_{$jtrow['tunnus']}{$jtrow['keikkanro']}' class='popup' style='width: 500px;'>";
+						echo t("Saapuminen"),": {$jtrow['keikkanro']} / {$jtrow['nimi']}<br /><br />";
+						echo t("Laatija"),": {$kuka_chk_row['nimi']}<br />";
+						echo t("Luontiaika"),": ",tv1dateconv($jtrow['luontiaika'], "pitkä"),"<br /><br />";
+						echo $jtrow["comments"];
+						echo "</div>";
+					}
+
+					echo "</td>";
+					echo "	<td>$tyyppi</td>
 							<td>".tv1dateconv($jtrow["laadittu"])."</td>
 							<td>".tv1dateconv($jtrow["pvm"])."$vahvistettu</td>
 							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
@@ -2034,4 +2076,4 @@
 	}
 
 	require ("inc/footer.inc");
-?>
+

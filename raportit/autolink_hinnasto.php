@@ -87,9 +87,10 @@
 			$query = "	SELECT tuote.tuoteno, tuote.nimitys, tuote.myyntihinta, tuote.yksikko, tuote.aleryhma, korvaavat.id
 						FROM tuote
 						LEFT JOIN korvaavat ON (tuote.tuoteno=korvaavat.tuoteno and tuote.yhtio=korvaavat.yhtio)
-						WHERE $where tuote.yhtio='$kukarow[yhtio]' and tuote.hinnastoon!='E'
+						WHERE $where tuote.yhtio = '$kukarow[yhtio]'
+						AND tuote.hinnastoon != 'E'
+						AND tuote.tuotetyyppi NOT IN ('A', 'B')
 						ORDER BY tuote.osasto, tuote.try";
-			//echo "$query";
 			$result = mysql_query($query) or pupe_error($query);
 
 			flush();

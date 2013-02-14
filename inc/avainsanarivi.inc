@@ -159,6 +159,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA") 	$ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>		".t("Ylläpitosopimuksen rivien kentät")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LABEL") 			$ulos .= "<option value='LABEL' {$avain_sel['LABEL']}>						".t("Myyntitilauksen luokitus")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_VAKIOTE") 	$ulos .= "<option value='TARJOUS_VAKIOTE' {$avain_sel['TARJOUS_VAKIOTE']}>	".t("Tarjouksen vakioteksti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KOHDE_TYYPPI")  	$ulos .= "<option value='KOHDE_TYYPPI' {$avain_sel['KOHDE_TYYPPI']}>        ".t("Kohteen tyyppi")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -377,6 +378,13 @@
 		}
 
 		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if ($avain_sel['INVEN_LAJI'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
+
+		$ulos = "<td>".livesearch_kentta("mainform", "TILIHAKU", $nimi, 270, $trow[$i], "EISUBMIT")."</td>";
+
 		$jatko = 0;
 	}
 

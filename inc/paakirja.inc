@@ -714,7 +714,7 @@
 					}
 
 					if ($trow["alv_taso"] == "fi305" or $trow["alv_taso"] == "fi307") {
-						// Onko tosite liitetty keikkaan
+						// Onko tosite liitetty saapumiseen
 						$query = "SELECT nimi, laskunro, mapvm from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[ltunnus]'";
 						$keikres = pupe_query($query);
 

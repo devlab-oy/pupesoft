@@ -257,7 +257,7 @@ if ($kollityht > 0) {
 			$ftphost = $dpd_ds_host;
 			$ftpuser = $dpd_ds_user;
 			$ftppass = $dpd_ds_pass;
-			$ftppath = $dpd_ds_path;
+			$ftppath = (trim($toitarow['lajittelupiste']) != '') ? $dpd_ds_path . trim($toitarow['lajittelupiste']) . "/" : $dpd_ds_path;
 			$ftpfile = realpath($filenimi);
 
 			require ("inc/ftp-send.inc");

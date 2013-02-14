@@ -16,7 +16,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 
 	// Kokeillaan ensin suoraan viitteellä
 	if ($suoritus['viite'] != '') {
-		$query  = "	SELECT liitostunnus
+		$query  = "	SELECT DISTINCT liitostunnus
 					FROM lasku USE INDEX (yhtio_tila_mapvm)
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tila = 'U'

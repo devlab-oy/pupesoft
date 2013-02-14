@@ -145,7 +145,7 @@
 
 		$laskuri = 0;
 
-		// Merkitään rivit mitätöidyksi joiden otsikot on mitätöity (ei mitätöidä puuterivejä, eikä suoraan keikkaan lisättyjä ostorivejä lasku.alatila!='K')
+		// Merkitään rivit mitätöidyksi joiden otsikot on mitätöity (ei mitätöidä puuterivejä, eikä suoraan saapumiseen lisättyjä ostorivejä lasku.alatila!='K')
 		$query = "	SELECT lasku.tunnus laskutunnus
 					from lasku
 					join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'P'

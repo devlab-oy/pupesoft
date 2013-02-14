@@ -238,7 +238,7 @@
 							$erasyotetyt = 0;
 
 							foreach ($eranumero_valitut[$i] as $enro => $ekpl) {
-
+								$ekpl = str_replace(",", ".", $ekpl);
 								$erasyotetyt += $ekpl;
 								if ($ekpl != '' and ($ekpl{0} == '+' or $ekpl{0} == '-' or !is_numeric($ekpl))) {
 									echo "<font class='error'>".t("VIRHE: Erien m‰‰r‰t oltava absoluuttisia arvoja")."!</font><br>";
@@ -257,8 +257,8 @@
 								}
 							}
 
-							if (is_array($eranumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and ($onko_uusia > 0 or $hyllyssa[$i] < $erasyotetyt)) {
-								echo "<font class='error'>".t("VIRHE: Er‰numeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
+							if (is_array($eranumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and ($onko_uusia > 0 or $hyllyssa[$i] > $erasyotetyt)) {
+								echo "<font class='error'>".t("VIRHE: Er‰numeroita ei voi lis‰t‰ kuin absoluuttisella m‰‰r‰ll‰")."! (+1)</font><br>";
 								$virhe = 1;
 							}
 							elseif (substr($kpl,0,1) == '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl,1)) {
@@ -783,7 +783,7 @@
 
 									foreach ($eranumero_valitut[$i] as $enro_key => $enro_val) {
 										$sarjaquerylisa = '';
-
+										$enro_val = str_replace(",", ".", $enro_val);
 										// jos er‰ loppuu, niin poistetaan kyseinen er‰
 										if ((float) $enro_val == 0) {
 											$sarjaquerylisa = "myyntirivitunnus = '-1', siirtorivitunnus = '-1', ";

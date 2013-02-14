@@ -143,7 +143,8 @@
 		$result  = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
 
-		if ((int) $era_kpl > 0) {
+		$era_kpl = str_replace(",", ".", $era_kpl);
+		if ((float) $era_kpl > 0) {
 			$skpl = $era_kpl;
 		}
 		else {

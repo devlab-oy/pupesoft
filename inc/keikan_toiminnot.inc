@@ -404,8 +404,9 @@
 		$tunnus 		 = $_POST['tunnus'];
 		$otunnus 		 = $_POST['otunnus'];
 		$uuden_rivin_kpl = $_POST['uuden_rivin_kpl'];
+		$vanhan_rivin_kpl = $_POST['vanhan_rivin_kpl'];
 
-		$uuden_rivin_id = splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, FALSE);
+		$uuden_rivin_id = splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, FALSE, FALSE, FALSE, $vanhan_rivin_kpl);
 		$hinnat = laske_hinta($laskurow, $uuden_rivin_id);
 
 		$rivi['rivihinta'] = $hinnat['rivihinta'];

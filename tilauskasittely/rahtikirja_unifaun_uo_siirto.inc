@@ -67,10 +67,9 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 		$unifaun->_getXML();
 
 		foreach ($pakkaus as $indeksi => $pakkaus_selite) {
-			$kilot[$indeksi] = (float) $kilot[$indeksi];
 
-			$this_kilot = round($kilot[$indeksi],2);
-			$this_kuutiot = round($kuutiot[$indeksi],2);
+			$kilot[$indeksi]   = round($kilot[$indeksi]/$kollit[$indeksi], 2);
+			$kuutiot[$indeksi] = round($kuutiot[$indeksi], 2);
 
 			// Napataan pakkauksen tiedot
 			$query = "	SELECT pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys, pakkaus.pakkauskuvaus, ifnull(pakkauskoodit.koodi, pakkaus.pakkaus) koodi
@@ -84,19 +83,20 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 
 			$kollitiedot = array(
 				'maara' 		=> $kollit[$indeksi],
-				'paino' 		=> $this_kilot,
+				'paino' 		=> $kilot[$indeksi],
 				'pakkauskuvaus' => $pakkaus_row['pakkauskuvaus'],
 				'pakkauskoodi' 	=> $pakkaus_row['koodi'],
 				'leveys' 		=> $pakkaus_row['leveys'],
 				'korkeus' 		=> $pakkaus_row['korkeus'],
 				'syvyys' 		=> $pakkaus_row['syvyys'],
 				'vakkoodi' 		=> array(),
-				'kuutiot' 		=> $this_kuutiot
+				'kuutiot' 		=> $kuutiot[$indeksi]
 			);
 
 			/* VOIDAAN LÄHETTÄÄ MYÖS MONTA CONTAINER-ROWTA PER SANOMA! YKSI HEADER */
 			$unifaun->setContainerRow($kollitiedot);
 		}
+		
 		$unifaun->ftpSend();
 	}
 	else {

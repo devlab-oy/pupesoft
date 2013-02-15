@@ -1983,12 +1983,7 @@
 							}
 						}
 						elseif (!isset($jt_muidenmukana) and ($toim == 'PIKATILAUS' or $toim == 'RIVISYOTTO')) {
-							if($yhtiorow['puute_jt_oletus'] == 'I') {
-								$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
-							}
-							else {
-								$kerayspvm = $laskurow["kerayspvm"];
-							}
+							$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
 						}
 						break;
 					case 'P' : // Puute
@@ -2044,19 +2039,6 @@
 						// Normaalisti kaikki menee puutteeksi.
 						else {
 							$var 	= "P";
-						}
-						if ($yhtiorow['puute_jt_oletus'] == 'I') {
-							if ($yhtiorow["varaako_jt_saldoa"] == "") {
-								$varattu 	= 0;
-								$jt 		= $kpl;
-							}
-							else {
-								$varattu 	= $kpl;
-								$jt 		= 0;
-							}
-
-							$var	= "J";
-							$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
 						}
 						break;
 					default :

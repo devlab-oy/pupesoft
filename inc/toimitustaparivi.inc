@@ -635,6 +635,22 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "lajittelupiste") {
+
+		$ulos = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value = ''>".t("Valitse")."</option>";
+
+		$vresult = t_avainsana("TOIMTAPALP");
+
+		while ($vrow = mysql_fetch_assoc($vresult)) {
+			$sel = $trow[$i] == $vrow['selite'] ? " selected" : "";
+			$ulos .= "<option value = '{$vrow['selite']}' {$sel}>{$vrow['selitetark']}</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "kontti") {
 
 		$ulos  = "<td><select name='$nimi'>";

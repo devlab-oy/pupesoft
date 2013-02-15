@@ -616,7 +616,7 @@
 
 		if (isset($checkbox_parent) and ((is_array($checkbox_parent) and count($checkbox_parent) > 0) or is_string($checkbox_parent))) {
 
-			if (isset($jv) and (isset($laskukomento) and isset($komento) and isset($valittu_rakiroslapp_tulostin))) {
+			if (isset($jv) and (isset($rakirsyotto_laskutulostin) and isset($komento) and isset($valittu_rakiroslapp_tulostin))) {
 				$checkbox_parent = unserialize(urldecode($checkbox_parent));
 
 				$select_varasto = (int) $select_varasto;
@@ -843,35 +843,37 @@ function hae_yhdistettavat_tilaukset() {
 				echo "<td><input type='radio' name='jv' id='jv' value='vainvak'></td></tr>";
 
 				echo "<tr><th>",t("Valitse j‰lkivaatimuslaskujen tulostuspaikka"),":</th>";
-				echo "<td><select id='kirjoitin' name='laskukomento'>";
+				echo "<td><select id='kirjoitin' name='rakirsyotto_laskutulostin'>";
 				echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
-				$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
+				// Oletustulostin rahtikirjojen ja tulostukseen. K‰ytet‰‰n oletustulostimena varaston takana olevaa Rahtikirja A4 -tulostinta eli printteri6-kentt‰‰.
+				// Haetaan varaston JV-kuittitulostin printteri7:sta
+				$query = "	SELECT printteri6, printteri7
+							FROM varastopaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$select_varasto}'";
+				$default_printer_res = pupe_query($query);
+				$default_printer_row = mysql_fetch_assoc($default_printer_res);
+
+				$query = "	SELECT *
 							FROM kirjoittimet
 							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND komento != 'EDI'
 							GROUP BY komento
 							ORDER BY kirjoitin";
 				$kires = pupe_query($query);
 
 				while ($kirow = mysql_fetch_assoc($kires)) {
 
-					$sel = (isset($laskukomento) and $laskukomento == $kirow['komento']) ? " selected" : "";
-
-					echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
+					$sel = (isset($rakirsyotto_laskutulostin) and $rakirsyotto_laskutulostin == $kirow['tunnus']) ? " SELECTED" : ($kirow["tunnus"] == $default_printer_row["printteri7"]) ? " SELECTED" : "";
+					
+					echo "<option value='{$kirow['tunnus']}'{$sel}>{$kirow['kirjoitin']}</option>";
 				}
 
 				echo "</select></td></tr>";
 
 				echo "<tr><th>",t("Valitse tulostin"),":</th>";
 				echo "<td><select name='komento'>";
-
-				// Oletustulostin rahtikirjojen tulostukseen. K‰ytet‰‰n oletustulostimena varaston takana olevaa Rahtikirja A4 -tulostinta eli printteri6-kentt‰‰.
-				$query = "	SELECT printteri6
-							FROM varastopaikat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$select_varasto}'";
-				$default_printer_res = pupe_query($query);
-				$default_printer_row = mysql_fetch_assoc($default_printer_res);
 
 				if ($default_printer_row['printteri6'] != '') {
 					echo "<option value='{$default_printer_row['printteri6']}'>",t("Oletustulostin"),"</option>";

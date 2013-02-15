@@ -774,6 +774,7 @@
 							$lisaa
 							$abcwhere
 							and tuote.ei_saldoa = ''
+							and tuote.tuotetyyppi NOT IN ('A', 'B')
 							and tuote.ostoehdotus = ''
 							ORDER BY id, tuote.tuoteno";
 			}
@@ -828,6 +829,7 @@
 							$lisa
 							$lisaa
 							and tuote.ei_saldoa = ''
+							and tuote.tuotetyyppi NOT IN ('A', 'B')
 							and tuote.ostoehdotus = ''
 							$abcwhere
 							$varastot

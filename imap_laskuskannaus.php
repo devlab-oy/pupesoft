@@ -24,15 +24,15 @@
 
 		$pupe_root_polku = dirname(__FILE__);
 
-		$imaplaskut_skannauskansio 	= substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $pupe_root_polku."/".$yhtiorow['skannatut_laskut_polku'].'/' : $pupe_root_polku."/".$yhtiorow['skannatut_laskut_polku'];
-		$imaplaskut_username		= $imaplaskut_param[$yhtiorow['yhtio']]["username"];
-		$imaplaskut_password		= $imaplaskut_param[$yhtiorow['yhtio']]["password"];
-		$imaplaskut_imap_server		= $imaplaskut_param[$yhtiorow['yhtio']]["imap_server"];
-		$imaplaskut_imap_port		= $imaplaskut_param[$yhtiorow['yhtio']]["imap_port"];
-		$imaplaskut_in_box 			= $imaplaskut_param[$yhtiorow['yhtio']]["in_box"];
-		$imaplaskut_ok_box 			= $imaplaskut_param[$yhtiorow['yhtio']]["ok_box"];
-		$imaplaskut_er_box 			= $imaplaskut_param[$yhtiorow['yhtio']]["er_box"];
-		$imaplaskut_domain 			= $imaplaskut_param[$yhtiorow['yhtio']]["domain"];
+		$imaplaskut_skannauskansio = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $pupe_root_polku."/".$yhtiorow['skannatut_laskut_polku'].'/' : $pupe_root_polku."/".$yhtiorow['skannatut_laskut_polku'];
+		$imaplaskut_username	   = $imaplaskut_param[$yhtiorow['yhtio']]["username"];
+		$imaplaskut_password	   = $imaplaskut_param[$yhtiorow['yhtio']]["password"];
+		$imaplaskut_imap_server	   = $imaplaskut_param[$yhtiorow['yhtio']]["imap_server"];
+		$imaplaskut_imap_port	   = $imaplaskut_param[$yhtiorow['yhtio']]["imap_port"];
+		$imaplaskut_in_box 		   = $imaplaskut_param[$yhtiorow['yhtio']]["in_box"];
+		$imaplaskut_ok_box 		   = $imaplaskut_param[$yhtiorow['yhtio']]["ok_box"];
+		$imaplaskut_er_box 		   = $imaplaskut_param[$yhtiorow['yhtio']]["er_box"];
+		$imaplaskut_domain 		   = $imaplaskut_param[$yhtiorow['yhtio']]["domain"];
 	}
 	else {
 		echo "Voidaan ajaa vain komentoriviltä!!!\n";
@@ -561,19 +561,27 @@
 			exit;
 		}
 
-		/*
-		// listataan kaikki mailboxit ruudulle
-		$query = "LIST \"\" \"*\"";
-		$read_list = sqimap_run_command_list ($imap_stream, $query, true, $response, $message, '');
-
-	    foreach ($read_list as $r) {
-			var_dump($r);
-			echo "\n";
-		}
-		*/
-
+		// Haetaan ostoreskontran laskut
 		showMessagesForMailbox($imap_stream, $imaplaskut_in_box, $imaplaskut_ok_box, $imaplaskut_er_box, $imaplaskut_domain, $imaplaskut_skannauskansio);
- 		sqimap_logout($imap_stream);
+
+		// listataan kaikki Matkalasku-mailboxit
+		$query = "LIST \"\" \"*\"";
+		$read_list = sqimap_run_command_list($imap_stream, $query, true, $response, $message, '');
+
+	    foreach ($read_list[0] as $r) {
+			if (preg_match("/ \"([^\"]*?Matkalaskut\/[a-z]*)\"/i", $r, $matches)) {
+
+				$skannauskansio = $imaplaskut_skannauskansio."/".strtolower($matches[1])."/";
+				$in_box = $matches[1];
+				$ok_box = $matches[1]."/Ok";
+				$er_box = $matches[1]."/Error";
+
+				// Haetaan matkalaskujen kuitit
+				showMessagesForMailbox($imap_stream, $in_box, $ok_box, $er_box, $imaplaskut_domain, $skannauskansio);
+			}
+		}
+
+		sqimap_logout($imap_stream);
 	}
 	else {
 		echo date("d.m.Y @ G:i:s").": Failure: ".$errno.$errstr."\n\n";

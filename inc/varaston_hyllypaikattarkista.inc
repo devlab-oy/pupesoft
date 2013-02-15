@@ -31,7 +31,8 @@
 									AND hyllyalue = '{$chk_hyllyalue}'
 									AND hyllynro = '{$chk_hyllynro}'
 									AND hyllyvali = '{$chk_hyllyvali}'
-									AND hyllytaso = '{$chk_hyllytaso}'";
+									AND hyllytaso = '{$chk_hyllytaso}'
+									and tunnus != '{$tunnus}'";
 						$chk_res = pupe_query($query);
 
 						if (mysql_num_rows($chk_res) != 0) {

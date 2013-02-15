@@ -62,7 +62,7 @@ if (isset($submit) and trim($submit) != '') {
 	switch ($submit) {
 
 		case 'new':
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?{$url}'>";
+			echo "<META HTTP-EQUIV='Refresh' CONTENT='0; URL=uusi_kerayspaikka.php?{$url}'>";
 			exit;
 			break;
 		case 'submit':
@@ -93,21 +93,19 @@ if (isset($submit) and trim($submit) != '') {
 					$saapuminen = $row['uusiotunnus'];
 				}
 
-				# Tarkastetaan määrät, eli tarviiko tilausrivia splittailla tai kopioida
+				// Tarkastetaan syötetyt määrät, eli tarviiko tilausrivia splittailla tai kopioida
 				if ($maara < $row['varattu']) {
-					# Splitataan rivi
-					# Jos viimeinen rivi ja määrää pienennetty, pudotetaan toinen rivi pois lavalta.
-					# Koska viimeistä rivii viedessä viedään kaikkilavan rivit varastoon
-					if ($viimeinen) {
-						splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, TRUE);
-					}
-					else {
-						splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, FALSE);
-					}
 
-					# Alkuperäinen viedään varastoon, splitattu jää jäljelle
+					// Syötytty määrä on pienempi kuin tilausrivilla oleva määrä.
+					// Splitataan rivi ja siirretään ylijääneet uudellele tilausriville.
+					splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, FALSE);
+
+					// Alkuperäinen viedään varastoon, splitattu jää j‰ljelle
 					$ok = paivita_tilausrivin_kpl($tilausrivi, $maara);
 					$tilausrivit[] = $tilausrivi;
+
+					// Ei voi olla viimeinen rivi jos rivi on splitattu
+					$viimeinen = false;
 				}
 				elseif ($maara == $row['varattu']) {
 					$tilausrivit[] = $tilausrivi;
@@ -211,10 +209,10 @@ if (isset($submit) and trim($submit) != '') {
 
 				# Redirectit ostotilaukseen tai suuntalavan_tuotteet?
 				if (isset($hyllytys)) {
-					echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=ostotilaus.php?ostotilaus={$row['otunnus']}'>";
+					echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=ostotilaus.php?ostotilaus={$row['otunnus']}'>";
 				}
 				else {
-					echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavan_tuotteet.php?{$url}'>";
+					echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=suuntalavan_tuotteet.php?{$url}'>";
 				}
 			}
 			break;

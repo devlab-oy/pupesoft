@@ -147,7 +147,6 @@
 							AND laji in ('tulo', 'valmistus')
 							AND tuoteno = '$epakurantti_row[tuoteno]'
 							AND selite not like '%alkusaldo%'
-							AND selite not like 'Keskihankintahinnan muutos%'
 							ORDER BY laadittu DESC
 							LIMIT 1;";
 				$tapres = mysql_query($query) or pupe_error($query);

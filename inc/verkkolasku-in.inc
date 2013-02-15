@@ -524,7 +524,8 @@
 				$oletusprojekti 	= $trow['projekti'];
 				$selite         	= $trow['nimi'] . " " . $trow['nimitark'] . " Lasno: " . $laskun_numero;
 				$laskun_numero		= preg_replace("/[^0-9]/", "", $laskun_numero);
-				$onko_duplikaatti 	= FALSE;
+				$onko_dupli_lasku 	= FALSE;
+				$onko_dupli_asn 	= FALSE;
 
 				// Onko tämä kauttalaskutusta?
 				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
@@ -851,6 +852,7 @@
 
 					if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
 						$komm = "(verkkolas@" . date('Y-m-d') .") Mahdollisesti duplikaattilasku!<br>\n".$komm;
+						$onko_dupli_lasku = TRUE;
 					}
 
 					// katsotaan onko Teccom-lasku jo asn_sanomat-taulussa
@@ -864,7 +866,7 @@
 						$duplikaattilasku_check_res = pupe_query($query);
 
 						if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
-							$onko_duplikaatti = TRUE;
+							$onko_dupli_asn = TRUE;
 						}
 					}
 				}
@@ -1383,13 +1385,15 @@
 							}
 						}
 
-						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999 and !$onko_duplikaatti) {
+						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999 and !$onko_dupli_asn) {
 
 							if (!isset($rtuoteno[$i]['ale1'])) $rtuoteno[$i]['ale1'] = 0;
 							if (!isset($rtuoteno[$i]['ale2'])) $rtuoteno[$i]['ale2'] = 0;
 							if (!isset($rtuoteno[$i]['ale3'])) $rtuoteno[$i]['ale3'] = 0;
 							if (!isset($rtuoteno[$i]['lisakulu'])) $rtuoteno[$i]['lisakulu'] = 0;
 							if (!isset($rtuoteno[$i]['kulu'])) $rtuoteno[$i]['kulu'] = 0;
+
+							if ((float) $rtuoteno[$i]["rivihinta"] == 0) $summa_valuutassa = 0;
 
 							$asn_hinta = round($summa_valuutassa/$rtuoteno[$i]['kpl'], 2);
 
@@ -1820,7 +1824,7 @@
 												}
 											}
 
-											if ($ok == 'ok') {
+											if ($ok == 'ok' and !$onko_dupli_lasku) {
 												// Ei eroja, laitetaan lasku suoraan maksuvalmiiksi
 												$query = "	UPDATE lasku set
 															tila 		  = 'M',
@@ -1859,4 +1863,3 @@
 			}
 		}
 	}
-?>

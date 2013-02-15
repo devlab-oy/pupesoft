@@ -31,11 +31,6 @@
 						}
 					});
 
-					$('.hintapoikkeavuusbutton').click(function(){
-						$('#tee').val('hintavertailu');
-						$('#kolliformi').submit();
-					});
-
 					$('.etsibutton').click(function(){
 						var rivitunniste = $(this).attr('id');
 						$('#asn_rivi').val(rivitunniste);
@@ -123,14 +118,6 @@
 		$tee = 'nayta';
 	}
 
-	if ($tee == 'hintavertailu') {
-
-		$komento = isset($komento) ? $komento : '';
-
-		erolista($lasku, $valitse, $komento);
-
-	}
-
 	if ($tee == 'vaihdatoimittaja') {
 
 		$tila = '';
@@ -208,7 +195,7 @@
 
 		if ($valitse != 'asn' and $tee == 'vahvistavakisinkolli') {
 
-			// Kun vahvistetaan katsotaan onko lasku liitetty jo keikkaan
+			// Kun vahvistetaan katsotaan onko lasku liitetty jo saapumiseen
 			// Jos on, niin merkataan asn_sanoma status x eikä mennä automaattikohdistukseen
 			$query = "	SELECT tunnus
 						FROM lasku
@@ -1784,7 +1771,6 @@
 			$result = pupe_query($query);
 
 			$ok = $virhe = 0;
-			$hintapoikkeavuus = false;
 
 			while ($row = mysql_fetch_assoc($result)) {
 
@@ -1841,7 +1827,6 @@
 
 					if ($row['hinta'] != $hinta_chk_row['hinta']) {
 						echo "<br /><font class='error'>",t("Hintapoikkeavuus"),"</font>";
-						$hintapoikkeavuus = true;
 					}
 				}
 				else {
@@ -1854,7 +1839,10 @@
 
 				if ($row['tilausrivi'] == '' and $row['status'] != 'E') {
 					echo "<input type='button' class='etsibutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}' value='",t("Etsi"),"' />";
-					echo "<input type='button' class='erobutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}' value='",t("Erolistalle"),"' />";
+
+					if ($row['hinta'] == 0) {
+						echo "<input type='button' class='erobutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}' value='",t("Erolistalle"),"' />";
+					}
 				}
 
 				echo "</td>";
@@ -1862,10 +1850,6 @@
 			}
 
 			if ($ok and !$virhe) {
-				if ($hintapoikkeavuus) {
-					echo "<tr><th colspan='9'><input type='button' class='hintapoikkeavuusbutton' value='",t("Hintapoikkeavuus raportti"),"' /></th></tr>";
-				}
-
 				echo "<tr><th colspan='9'><input type='button' class='vahvistabutton' value='",t("Vahvista"),"' /></th></tr>";
 			}
 
@@ -2015,7 +1999,7 @@
 						AND asn_sanomat.laji = 'tec'
 						AND asn_sanomat.status NOT IN ('X', 'E', 'D')
 						GROUP BY asn_sanomat.asn_numero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
-						ORDER BY toimi.nimi, toimi.ytunnus";
+						ORDER BY toimi.nimi, toimi.ytunnus, asn_sanomat.saapumispvm";
 			$result = pupe_query($query);
 
 			echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse=ostolasku&tee=' id='formi'>";

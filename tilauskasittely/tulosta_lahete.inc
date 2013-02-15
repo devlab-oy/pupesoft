@@ -201,9 +201,9 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);
 			$pdf->draw_rectangle(800, 420, 779, 580, $thispage, $rectparam);
 
-			if (isset($koontilahete) and $koontilahete) {
-				$pdf->draw_text(310, 792, t("Tilausnumero", $kieli),        $thispage, $pieni);
-				$pdf->draw_text(310, 782, $laskurow["vanhatunnus"],	        $thispage, $boldi);
+			if (isset($koontilahete) and $koontilahete != 0) {
+				$pdf->draw_text(310, 792, t("Tilausnumero/toimitus", $kieli),        $thispage, $pieni);
+				$pdf->draw_text(310, 782, array_shift(explode(",", $koontilahete))." / ".$laskurow["tunnus"],	        $thispage, $boldi);
 			}
 			elseif ($laskurow["tunnusnippu"] > 0) {
 				if ($tyyppi == "YLLAPITOSOPIMUS" or $laskurow["nippu"] > 0) {
@@ -639,7 +639,7 @@ if (!function_exists('alku_lahete')) {
 		// Luodaan palautettavat
 		$return = compact(array_keys($params));
 
-		if (!isset($koontilahete) or !$koontilahete) {
+		if (!isset($koontilahete) or $koontilahete == 0 or ($koontilahete != 0 and !$onko_kerayserat_kaytossa)) {
 			// Koontilähetteelle ei tässä vaiheessa oteta otsikoita
 			$return = rivi_otsikot_lahete($return);
 		}
@@ -1175,8 +1175,8 @@ if (!function_exists('kollirivi_lahete')) {
 			$page[$sivu] = $thispage;
 		}
 
-		$x = $x + 22;
-		$y = $kala - 5;
+		$xkoord = $xkoord + 22;
+		$ykoord = $kala - 5;
 
 		$return = compact(array_keys($params));
 
@@ -1193,19 +1193,19 @@ if (!function_exists('kollirivi_lahete')) {
 
 		$teksti .= t("sisältäen").":";
 
-		$pdf->draw_text($x, $y, $teksti, $thispage, $font);
+		$pdf->draw_text($xkoord, $ykoord, $teksti, $thispage, $font);
 
 		$kala -= $rivinkorkeus*2;
-		$y -= $rivinkorkeus*2;
+		$ykoord -= $rivinkorkeus*2;
 
-		$pdf->draw_line($x, $kala, $thispage, $rectparam);
+		$pdf->draw_line($xkoord, $kala, $thispage, $rectparam);
 
 		// Rivin loppuviiva
 		if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_custom.inc") {
-			$x[0] = 20;
-			$x[1] = 580;
-			$y[0] = $y[1] = $return["kala"] + $return["rivinkorkeus"] - 4;
-			$pdf->draw_line($x, $y, $return["thispage"], $return["rectparam"]);
+			$xkoord[0] = 20;
+			$xkoord[1] = 580;
+			$ykoord[0] = $ykoord[1] = $return["kala"] + $return["rivinkorkeus"] - 4;
+			$pdf->draw_line($xkoord, $ykoord, $return["thispage"], $return["rectparam"]);
 		}
 
 		$return = compact(array_keys($params));
@@ -1242,10 +1242,10 @@ if (!function_exists('rivi_lahete')) {
 
 			if (isset($jtid)) $kala = $kala-10;
 
-			$x[0] = 20;
-			$x[1] = 580;
-			$y[0] = $y[1] = $kala - 4;
-			$pdf->draw_line($x, $y, $page[$sivu], $rectparam);
+			$xkoord[0] = 20;
+			$xkoord[1] = 580;
+			$ykoord[0] = $ykoord[1] = $kala - 4;
+			$pdf->draw_line($xkoord, $ykoord, $page[$sivu], $rectparam);
 
 			$pdf->draw_text(25,  $kala, "#",									$thispage, $norm);
 			$pdf->draw_text(45,  $kala, t("Jälkitoimitukseen", $kieli).":",		$thispage, $norm);
@@ -1257,10 +1257,10 @@ if (!function_exists('rivi_lahete')) {
 
 			$kala = $kala-10;
 
-			$x[0] = 20;
-			$x[1] = 580;
-			$y[0] = $y[1] = $kala - 4;
-			$pdf->draw_line($x, $y, $page[$sivu], $rectparam);
+			$xkoord[0] = 20;
+			$xkoord[1] = 580;
+			$ykoord[0] = $ykoord[1] = $kala - 4;
+			$pdf->draw_line($xkoord, $ykoord, $page[$sivu], $rectparam);
 
 			$pdf->draw_text(25,  $kala, "#",									$thispage, $norm);
 			$pdf->draw_text(45,  $kala, t("Toimituskulut", $kieli).":",		$thispage, $norm);
@@ -1367,7 +1367,7 @@ if (!function_exists('rivi_lahete')) {
 		}
 
         // Koontilähetteelle mikä alkuperöinen toimitus on ollut kyseessä
-        if (isset($koontilahete) and $koontilahete) {
+        if (isset($koontilahete) and $koontilahete != 0) {
             $row["kommentti"] = t("Toimitus", $kieli).": $row[otunnus] ".$row["kommentti"];
         }
 
@@ -1863,10 +1863,10 @@ if (!function_exists('rivi_lahete')) {
 
 		// Rivin loppuviiva
 		if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_custom.inc") {
-			$x[0] = 20;
-			$x[1] = 580;
-			$y[0] = $y[1] = $return["kala"] + $return["rivinkorkeus"] - 4;
-			$pdf->draw_line($x, $y, $return["thispage"], $return["rectparam"]);
+			$xkoord[0] = 20;
+			$xkoord[1] = 580;
+			$ykoord[0] = $ykoord[1] = $return["kala"] + $return["rivinkorkeus"] - 4;
+			$pdf->draw_line($xkoord, $ykoord, $return["thispage"], $return["rectparam"]);
 		}
 		return $return;
 	}
@@ -3548,10 +3548,10 @@ if (!function_exists('loppu_lahete')) {
 
 				$pdf->draw_text(50, $kala-240, t("Olen tutustunut", $kieli)." $yhtiorow[nimi]".t(":n yleisiin sopimusehtoihin ja hyväksyn ne sellaisenaan", $kieli).'.', $thispage, $pieni);
 
-				$x[0] = 50;
-				$x[1] = 230;
-				$y[0] = $y[1] = $kala-270;
-				$pdf->draw_line($x, $y, $thispage, $rectparam);
+				$xkoord[0] = 50;
+				$xkoord[1] = 230;
+				$ykoord[0] = $ykoord[1] = $kala-270;
+				$pdf->draw_line($xkoord, $ykoord, $thispage, $rectparam);
 
 				//etsitään myyjän nimi
 				$query  = "	SELECT nimi, kuka
@@ -3563,15 +3563,15 @@ if (!function_exists('loppu_lahete')) {
 				$pdf->draw_text(50, $kala-283, $myyrow['nimi'], $thispage, $norm);
 				$pdf->draw_text(50, $kala-303, t("Myyjän allekirjoitus", $kieli), $thispage, $boldi);
 
-				$x[0] = 330;
-				$x[1] = 510;
-				$y[0] = $y[1] = $kala-270;
-				$pdf->draw_line($x, $y, $thispage, $rectparam);
+				$xkoord[0] = 330;
+				$xkoord[1] = 510;
+				$ykoord[0] = $ykoord[1] = $kala-270;
+				$pdf->draw_line($xkoord, $ykoord, $thispage, $rectparam);
 
-				$x[0] = 330;
-				$x[1] = 510;
-				$y[0] = $y[1] = $kala-290;
-				$pdf->draw_line($x, $y, $thispage, $rectparam);
+				$xkoord[0] = 330;
+				$xkoord[1] = 510;
+				$ykoord[0] = $ykoord[1] = $kala-290;
+				$pdf->draw_line($xkoord, $ykoord, $thispage, $rectparam);
 				$pdf->draw_text(330, $kala-303, t("Ostajan allekirjoitus ja nimenselvennys", $kieli), $thispage, $boldi);
 			}
 			elseif ($tyyppi == 'TILAUSVAHVISTUS' and strpos($laskurow['tilausvahvistus'], 'A') !== FALSE) {
@@ -3958,9 +3958,9 @@ if (!function_exists('print_pdf_lahete')) {
 
 						$kutsu = t("Lähete %s", $kieli, $laskurow["tunnus"]);
 
-						if (isset($koontilahete) and $koontilahete) {
-            				$content_body .= t("Tilausnumero", $kieli).": ";
-							$content_body .= $laskurow["vanhatunnus"].".\n\n";
+						if (isset($koontilahete) and $koontilahete != 0) {
+            				$content_body .= t("Tilausnumero/toimitus", $kieli).": ";
+							$content_body .= array_shift(explode(",", $koontilahete))." / ".$laskurow["tunnus"].".\n\n";
             			}
             			elseif ($laskurow["tunnusnippu"] > 0) {
 							$content_body .= t("Tilausnumero/toimitus", $kieli).": ";

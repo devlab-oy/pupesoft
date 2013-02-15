@@ -9,7 +9,11 @@
 		$otsikko = 'Viranomaistuotteet';
 		$rajauslisa = " and tuote.tuotetyyppi IN ('A','B') ";
 	}
-	else {
+	elseif ($laji == "K") {
+		$otsikko = 'Palvelutuotteet';
+		$rajauslisa = " and tuote.tuotetyyppi = 'K' ";
+    }
+    else {
 		$otsikko = 'Tuotteet';
 		$rajauslisa = " and tuote.tuotetyyppi NOT IN ('A','B') ";
 	}

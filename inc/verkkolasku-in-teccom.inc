@@ -349,7 +349,8 @@
 						$attribute = $node->AllowOrChargeIdentifier->attributes()->Value;
 
 						// ei oteta alennuksia huomioon Klokkerholm-keississä
-						if (strtolower($attribute) == "allow" and $laskuttajan_toimittajanumero != "123418") {
+						// eikä ZF-keississä (123007)
+						if (strtolower($attribute) == "allow" and $laskuttajan_toimittajanumero != "123418" and $laskuttajan_toimittajanumero != "123007") {
 
 							if (!isset($rtuoteno[$i]['ale1'])) {
 
@@ -460,7 +461,7 @@
 									$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
 								}
 							}
-							elseif ($charge_description == 'freight costs' or $charge_code == 'zfwa') {
+							elseif ($charge_description == 'freight costs' or $charge_code == 'zfwa' or $charge_code == 'freightcharges') {
 
 								/*
 								 * Rahtikulu
@@ -474,7 +475,7 @@
 								$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);
 								$osto_rivi_kulu_alv = $laskun_alv;
 
-								if ($charge_description == 'freight costs') {
+								if ($charge_description == 'freight costs' or $charge_code == 'freightcharges') {
 									$ei_oteta_kulua_pois = true;
 								}
 							}
@@ -547,5 +548,3 @@
 
 	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 	ini_set("display_errors", 0);
-
-?>

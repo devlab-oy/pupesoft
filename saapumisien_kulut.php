@@ -137,12 +137,14 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
 					AND yhtio		 = '{$kukarow['yhtio']}'";
 		$vanhatunnus = mysql_fetch_assoc(pupe_query($query));
 
+		$vols["summa"] = 0;
 		if ($vanhatunnus['vanhatunnus'] != "") {
 			#vols, Vaihto-omaisuuslaskujen summa
-			$vols_query = "	SELECT round(sum(summa * vienti_kurssi),2) as summa
-							FROM lasku
-							WHERE tunnus IN ({$vanhatunnus['vanhatunnus']})
-							AND vienti IN ('C','F','I','J','K','L')
+			$vols_query = "	SELECT round(sum(summa),2) as summa
+							FROM tiliointi
+							WHERE ltunnus IN ({$vanhatunnus['vanhatunnus']})
+							AND korjattu = ''
+							AND tilino = '{$yhtiorow['varasto']}'
 							AND yhtio = '{$kukarow['yhtio']}'";
 			$vols = mysql_fetch_assoc(pupe_query($vols_query));
 		}

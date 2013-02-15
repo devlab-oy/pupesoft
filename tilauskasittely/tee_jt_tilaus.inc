@@ -9,7 +9,7 @@
 	// $varastosta = mist‰ varastosta myyd‰‰n
 
 	if (!function_exists("tee_jt_tilaus")) {
-		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikat = array(), $tilaus_on_jo = '', $varastosta = '', $jt_huomioi_pvm = '') {
+		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikat = array(), $tilaus_on_jo = '', $varastosta = '', $jt_huomioi_pvm = '', $mista_tullaan = '') {
 			global $yhtiorow, $kukarow, $toim, $automaattinen_poiminta;
 
 			$debug = 0;
@@ -399,6 +399,15 @@
 								$query .= $fieldname."='',";
 							}
 						}
+						elseif ($fieldname == 'sisviesti2') {
+
+							if ($mista_tullaan == "TULLAAN_VALMISTUKSESTA") {
+								$query .= $fieldname."='Tehty valmistuksen kautta',";
+							}
+							else {
+								$query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
+							}
+						}
 						// kommentti speciaalia
 						elseif ($fieldname == 'comments') {
 							if ($toim == "ENNAKKO" or $otsikkorivi['jtkielto'] == "Y") {
@@ -728,7 +737,7 @@
 							}
 
 
-							if ($jt_huomioi_pvm != "") {						
+							if ($jt_huomioi_pvm != "") {
 								// Jos JT-rivit varaavat saldoa, niin tulevaisuudessa toimitettavat rivit varaavat nykyhetken saldoa vaikka "JTSPEC" tarkoittaa, ett‰ JT-rivien varauksia ei huomioida
 								$jtspec = "JTSPEC2";
 							}

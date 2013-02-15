@@ -28,6 +28,20 @@ if ($monta == 0 and $ytunnus != '') {
 }
 
 if ($monta == 0 and $ytunnus != '') {
+	//etsit‰‰n eka koko toimittajanrolla
+	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and toimittajanro='$ytunnus' and tyyppi != 'P'";
+	$result = mysql_query($query) or pupe_error($query);
+	$monta  = mysql_num_rows($result);
+
+	if ($monta == 0) {
+		// kokeillaan toimittajanron alulla
+		$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and toimittajanro like '$ytunnus%' and tyyppi != 'P'";
+		$result = mysql_query($query) or pupe_error($query);
+		$monta  = mysql_num_rows($result);
+	}
+}
+
+if ($monta == 0 and $ytunnus != '') {
 	// kokeillaan nimen osalla
 	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and (nimi like '%$ytunnus%' or nimitark like '%$ytunnus%') and tyyppi != 'P'";
 	$result = mysql_query($query) or pupe_error($query);

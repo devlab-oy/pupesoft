@@ -188,6 +188,7 @@
 
 		$query = "	LOCK TABLES
 					asiakas READ,
+					asiakkaan_avainsanat READ,
 					avainsana as a READ,
 					avainsana as avainsana_kieli READ,
 					avainsana as b READ,
@@ -878,7 +879,7 @@
 				}
 
 				// Tulostetaan DGD
-				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE and $rakirsyotto_dgd_tulostin != "" and $dgdkomento != '' and $dgdkpl > 0) {
+				if ((strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or $tultiin == 'koonti_eratulostus_pakkaustiedot') and $rakirsyotto_dgd_tulostin != "" and $dgdkomento != '' and $dgdkpl > 0) {
 
 					$query = "	SELECT *
 								FROM lasku
@@ -903,6 +904,7 @@
 					'tee'			=> $tee,
 					'toim'			=> $toim,
 					'norm'			=> $norm,
+					'otunnukset' 	=> $otunnukset,
 					);
 
 					// Aloitellaan lähetteen teko

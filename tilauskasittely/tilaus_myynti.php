@@ -3536,7 +3536,7 @@ if ($tee == '') {
 			$omalle_tilaukselle = $tilausrivi['omalle_tilaukselle'];
 
 			// useamman valmisteen reseptit...
-			if ($tilausrivi['tyyppi'] == "W" and $tilausrivi["tunnus"] != $tilausrivi["perheid"]) {
+			if (($tilausrivi['tyyppi'] == "W" and $tilausrivi["tunnus"] != $tilausrivi["perheid"]) or ($tilausrivi['tyyppi'] == "W" and $tapa == "VAIHDA")) {
 				$perheid2 = -100;
 			}
 

@@ -868,6 +868,11 @@
 				}
 				echo "</select></td></tr>";
 			}
+			
+			if ($toim == "VIENTI") { 
+				echo "<tr><th>",t("Tulosta myös tullinimike ja alkuperämaa")."</th>"; 
+				echo "<td colspan='3'><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>"; 
+			}
 
 			echo "<tr><th>".t("Syötä poikkeava laskutuspäivämäärä (pp-kk-vvvv)").":</th>
 					<td><input type='text' name='laskpp' value='' size='3'></td>

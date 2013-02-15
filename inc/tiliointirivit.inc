@@ -2,7 +2,7 @@
 
 	// Annetaan mahdollisuus tehdä uusi tiliöinti, jos siihen on oikeus
 
-	// Onko tosite liitetty keikkaan
+	// Onko tosite liitetty saapumiseen
 	$query = "	SELECT nimi, laskunro
 				from lasku
 				where yhtio		= '$kukarow[yhtio]'
@@ -39,7 +39,7 @@
 	if (!isset($summa_valuutassa))	$summa_valuutassa = "";
 
 	// Otetaan yhtiön oletus jos ei olla submitattu....
-	if (!isset($viivatut_grouppaa_formi)) $grouppaa = $yhtiorow["tositteen_tilioinnit"];
+	if (!isset($tilirivformi))		$grouppaa = $yhtiorow["tositteen_tilioinnit"];
 
 	echo "<br><br>";
 	echo "<table>";
@@ -138,7 +138,8 @@
 		echo "<tr>
 				<td valign='top'>
 				<form name = 'uusi' action = '$PHP_SELF#$tunnus' method='post'>
-				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+				<input type='hidden' name = 'tilirivformi' value = 'submitattu'>
+				<input type='hidden' name = 'lopetus' value = '$lopetus'>
 				<input type='hidden' name = 'tee' value = 'U'>
 				<input type='hidden' name = 'tunnus' value = '$tunnus'>
 				<input type='hidden' name = 'viivatut' value = '$viivatut'>
@@ -170,7 +171,7 @@
 			<input type='hidden' name='alv_tili' value = '$alv_tili'>
 			</td>";
 
-		// jos ollaan liitetty lasku keikkaan, ei anneta laittaa veroa
+		// jos ollaan liitetty lasku saapumiseen, ei anneta laittaa veroa
 		if (mysql_num_rows($keikres) == 0) {
 			echo "<td align='right' valign='top'>".alv_popup('vero', $vero)."</td>";
 		}
@@ -349,7 +350,7 @@
 		echo "<td valign='top' class='$class' align='right'>". (float) $trow["vero"]. "</td>";
 		echo "<td align='center' valign='top' class='$class'>".tv1dateconv($trow["tapvm"])."</td>";
 		echo "<td valign='top' class='$class'>";
-		
+
 		if (strlen($trow["selite"]) > 255) {
 			echo substr($trow["selite"], 0, 255)."...";
 		}
@@ -411,11 +412,12 @@
 		    and $trow["manuaali_esto"] == '') {
 			//Eli ei näytetä muuta-nappia, jos ei oikeuksia,
 			//jos rivi on poistettu TAI se on tiliöinnin viimeinen TAI se on lukittu,
-			//jos lasku on liitetty keikkaan ja rivillä on veroa
+			//jos lasku on liitetty saapumiseen ja rivillä on veroa
 			//jos sen saa poistaa niin on hankalaa löytää heittävät tositteet...
 			//tai rivilla on manuaali_esto
 			echo "<td>
 					<form action = '$PHP_SELF#$tunnus' method='post'>
+					<input type='hidden' name = 'tilirivformi' value = 'submitattu'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type='hidden' name='tee' value = 'P'>
 					<input type='hidden' name='tunnus' value = '$tunnus'>
@@ -499,7 +501,7 @@
 	echo "<td colspan='$colspan'>";
 
 	echo "<form action = '$PHP_SELF#$tunnus' method='post'>
-			<input type='hidden' name = 'viivatut_grouppaa_formi' value = 'JOO'>
+			<input type='hidden' name = 'tilirivformi' value = 'submitattu'>
 			<input type='hidden' name = 'laji' value = '$laji'>
 			<input type='hidden' name = 'vv' value = '$vv'>
 			<input type='hidden' name = 'kk' value = '$kk'>

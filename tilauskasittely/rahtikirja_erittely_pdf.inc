@@ -264,9 +264,11 @@
 	// Ei kaaduta erroriin jos jostain syystä tullaan tyhjällä
 	if ($otunnukset == "") $otunnukset = 0;
 
-	if ($yhdistetaan_lahtoon != 0 and $yhdistettavan_lahdon_tilaukset != 0) {
+	if ($yhdistetaan_lahtoon != 0 and !empty($yhdistettavan_lahdon_tilaukset)) {
 		if (sort(explode(',', $yhdistetaan_lahtoon)) == sort(explode(',', $otunnukset))) {
-			$otunnukset .= ',' . $yhdistettavan_lahdon_tilaukset;
+			foreach($yhdistettavan_lahdon_tilaukset as $til) {
+				$otunnukset .= ',' . $til;
+			}
 		}
 	}
 

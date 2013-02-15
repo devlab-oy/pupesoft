@@ -1877,20 +1877,20 @@
 				//Haetaan kassatilille laitetut suoritukset
 				$query = "	SELECT suoritus.nimi_maksaja nimi, tiliointi.summa, lasku.mapvm
 							FROM lasku use index (yhtio_tila_mapvm)
-							JOIN tiliointi use index (tositerivit_index) ON (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino='$yhtiorow[kassa]')
+							JOIN tiliointi use index (tositerivit_index) ON (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino = '$yhtiorow[kassa]')
 							JOIN suoritus use index (tositerivit_index) ON (suoritus.yhtio=tiliointi.yhtio and suoritus.ltunnus=tiliointi.aputunnus)
 							LEFT JOIN kuka ON (lasku.laatija=kuka.kuka and lasku.yhtio=kuka.yhtio)
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.tila	= 'X'
-							and lasku.mapvm >= '$vva-$kka-$ppa'
-							and lasku.mapvm <= '$vvl-$kkl-$ppl'
+							and lasku.tapvm >= '$vva-$kka-$ppa'
+							and lasku.tapvm <= '$vvl-$kkl-$ppl'
 							ORDER BY lasku.laskunro";
 				$result = pupe_query($query);
 
 				$kassayhteensa = 0;
 
 				if (mysql_num_rows($result) > 0) {
-					echo "<br><table id='nayta$i' style='display:none'>";
+					echo "<br><table id='naytaKATSUORI' style='display:none;'>";
 					echo "<tr>
 							<th nowrap>".t("Kassa")."</th>
 							<th nowrap>".t("Asiakas")."</th>
@@ -1914,19 +1914,39 @@
 								fwrite($fh, $ots);
 								$rivit = 1;
 							}
+
 							$prn  = sprintf ('%-20.20s', 	t("Käteissuoritus"));
 							$prn .= sprintf ('%-25.25s', 	substr($row["nimi"],0,23));
 							$prn .= sprintf ('%-10.10s', 	$row["ytunnus"]);
 							$prn .= sprintf ('%-12.12s', 	$row["laskunro"]);
 							$prn .= sprintf ('%-19.19s', 	tv1dateconv($row["laskutettu"], "pitka"));
-							$prn .= str_replace(".",",",sprintf ('%-13.13s', 	$row["summa"]));
+							$prn .= str_replace(".",","		,sprintf ('%8s', $row["summa"]));
 							$prn .= "\n";
 
 							fwrite($fh, $prn);
 							$rivit++;
 						}
+
 						$yhteensa += $row["summa"];
 						$kassayhteensa += $row["summa"];
+					}
+
+
+					echo "</table><table width='100%'>";
+					echo "<tr><td colspan='6' class='tumma'>".t("Käteissuoritukset")." ".t("yhteensä").": <a href=\"javascript:toggleGroup('naytaKATSUORI')\">".t("Näytä / Piilota")."</a></th>";
+					echo "<td align='right' class='tumma' style='width:100px'><b><div id='erotusKATSUORI'>".str_replace(".",",",sprintf('%.2f',$kassayhteensa))."</div></b></td></tr>";
+
+					echo "<tr><th colspan='6'>".t("Käteissuoritukset")." ".t("yhteensä").":</th>";
+					echo "<td align='right' class='tumma'><b>".str_replace(".",",",sprintf('%.2f',$kassayhteensa))."</b></td></tr>";
+
+					if ($vaiht == 1) {
+						$prn = "\n";
+						$prn .= sprintf ("%-'.84s", t("Käteissuoritukset")." ".t("yhteensä")." ");
+						$prn .= sprintf ("%'.10s", " ".str_replace(".",",", sprintf('%.2f', $kassayhteensa)));
+						$prn .= "\n\n";
+
+						fwrite($fh, $prn);
+						$rivit++;
 					}
 				}
 			}
@@ -2020,7 +2040,9 @@
 
 				$kutsu = t("Käteismyynnit", $kieli);
 
-				$liite 				= "$filenimi.ps";
+				system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
+
+				$liite 				= "$filenimi.pdf";
 				$sahkoposti_cc 		= "";
 				$content_subject 	= "";
 				$content_body 		= "";

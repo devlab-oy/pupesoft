@@ -188,6 +188,7 @@
 
 		$query = "	LOCK TABLES
 					asiakas READ,
+					asiakkaan_avainsanat READ,
 					avainsana as a READ,
 					avainsana as avainsana_kieli READ,
 					avainsana as b READ,

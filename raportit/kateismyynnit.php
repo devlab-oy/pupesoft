@@ -742,6 +742,9 @@
 			// Ei haluta tositteeseen nollarivejä
 			if (abs(str_replace(",",".",$arvo)) > 0 and (stristr($kentta, "solu") or stristr($kentta, "erotus"))) {
 
+				// Pilkut pisteiksi
+				$arvo = (float)str_replace(",",".", $arvo);
+
 				// Jos kentän nimi on soluerotus niin se tiliöidään kassaerotustilille (eli täsmäyserot), muuten normaalisti ylempänä parsetettu tilinumero
 				if (stristr($kentta, "soluerotus")) {
 					$tilino = $kassalipasrow["kassaerotus"];
@@ -766,9 +769,6 @@
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tilino, $kustp);
 
-				// Pilkut pisteiksi
-				$arvo = str_replace(",", ".", $arvo);
-
 				// Aletaan rakentaa inserttiä
 				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',
@@ -790,6 +790,7 @@
 			// Jos kenttä on käteistilitys, niin toinen tiliöidään käteistilitys-tilille ja se summa myös miinustetaan kassasta
 			if (abs(str_replace(",",".",$arvo)) > 0 and stristr($kentta, "kateistilitys")) {
 
+				$arvo = (float)str_replace(",",".",$arvo);
 
 				if ($kassalipasrow["kateistilitys"] == "") {
 					$kassalipasrow["kateistilitys"] = $yhtiorow["kateistilitys"];
@@ -797,8 +798,6 @@
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassalipasrow["kateistilitys"], $kustp);
 
-				$arvo = str_replace(",",".",$arvo);
-				
 				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
@@ -840,14 +839,13 @@
 
 			// Jos kenttä on käteisotto, niin toinen tiliöidään käteisotto-tilille ja se summa myös miinustetaan kassasta
 			if (abs(str_replace(",",".",$arvo)) > 0 and stristr($kentta, "kateisotto")) {
+				$arvo = (float)str_replace(",",".",$arvo);
 
 				if ($kassalipasrow["kateisotto"] == "") {
 					$kassalipasrow["kateisotto"] = $yhtiorow["kassaerotus"];
 				}
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassalipasrow["kateisotto"], $kustp);
-
-				$arvo = str_replace(",",".",$arvo);
 
 				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',

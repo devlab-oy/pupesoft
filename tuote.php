@@ -1034,8 +1034,8 @@
 						tilausrivi.jaksotettu,
 						tilausrivin_lisatiedot.osto_vai_hyvitys,
 						lasku2.comments,
-						lasku.laatija,
-						lasku.luontiaika
+						lasku2.laatija,
+						lasku2.luontiaika
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus

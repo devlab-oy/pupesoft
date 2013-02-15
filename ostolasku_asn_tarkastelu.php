@@ -153,16 +153,14 @@
 			$result = pupe_query($query);
 			$row = mysql_fetch_assoc($result);
 
-			list($nro, $valitse) = explode("##", $muutparametrit);
-
 			if ($valitse == 'asn') {
-				$asn_numero = (int) $nro;
+				$asn_numerot = $muutparametrit;
 
-				$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND asn_numero = '{$asn_numero}'";
+				$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND asn_numero IN({$asn_numerot})";
 				$res = pupe_query($query);
 			}
 			else {
-				$tilausnumero = (int) $nro;
+				$tilausnumero = (int) $muutparametrit;
 
 				$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tilausnumero = '{$tilausnumero}'";
 				$res = pupe_query($query);
@@ -175,10 +173,10 @@
 		if ($tila == '') {
 
 			if ($valitse == 'asn') {
-				$action = "&muutparametrit={$asn_numero}##{$valitse}";
+				$action = "&muutparametrit={$asn_numero}&valitse={$valitse}";
 			}
 			else {
-				$action = "&muutparametrit={$tilausnumero}##{$valitse}";
+				$action = "&muutparametrit={$tilausnumero}&valitse={$valitse}";
 			}
 
 			echo "<form method='post' action='?tee={$tee}{$action}'>";
@@ -1926,6 +1924,7 @@
 			$ed_toimittaja = '';
 			$naytetaanko_toimittajabutton = true;
 
+			$asn_numerot = array();
 			while ($row = mysql_fetch_assoc($result)) {
 				$naytetaanko_toimittajabutton = true;
 
@@ -1934,10 +1933,17 @@
 					continue;
 				}
 
+				$asn_numerot[] = $row['asn_numero'];
+
 				if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
 
 					if ($naytetaanko_toimittajabutton) {
-						echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+						//asn_numerot array:ssa on tässä kohtaa yks value liikaa, joka ei kuulu tälle toimittajalle. poisettaan se arraystä
+						$seuraavaan_asn_array = array_pop($asn_numerot);
+						echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='".implode(',', $asn_numerot)."' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+
+						unset($asn_numerot);
+						$asn_numerot[] = $seuraavaan_asn_array;
 					}
 
 					echo "<tr><td colspan='8' class='back'>&nbsp;</td></tr>";
@@ -1971,7 +1977,7 @@
 			}
 
 			if (mysql_num_rows($result) > 0 and $naytetaanko_toimittajabutton) {
-				echo "<tr><th colspan='7'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+				echo "<tr><th colspan='7'><input type='button' class='toimittajabutton' id='".implode(',', $asn_numerot)."' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
 			}
 
 			echo "</table>";

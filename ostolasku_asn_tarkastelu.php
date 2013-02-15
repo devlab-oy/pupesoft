@@ -19,7 +19,7 @@
 					$('.toimittajabutton').click(function(){
 						$('#tee').val('vaihdatoimittaja');
 
-						var valitse = $(this).attr('valitse');
+						var valitse = $('form#formi').find('#valitse').val();
 
 						if (valitse == 'asn') {
 							var asn = $(this).attr('id');

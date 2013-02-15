@@ -261,7 +261,7 @@
 
 			if ($yhtiorow['ennakkolaskun_tyyppi'] == 'E') {
 
-				$alet = generoi_alekentta_select('M', 'erikseen');
+				$alet = generoi_alekentta_select('erikseen', 'M');
 
 				$query = "	SELECT
 							tilausrivi.tuoteno,

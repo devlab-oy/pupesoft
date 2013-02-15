@@ -196,14 +196,6 @@
 		echo "</select></td></tr>";
 	}
 
-	if ($toim == "TARJOUS") {
-		echo "<tr><th>",t("Näytetäänkö verolliset vai verottomat hinnat"),"</th><td><select name='verolliset_verottomat_hinnat'>";
-		echo "<option value=''>",t("Haetaan yhtiön parametreistä"),"</option>";
-		echo "<option value='verolliset'>",t("Verolliset"),"</option>";
-		echo "<option value='verottomat'>",t("Verottomat"),"</option>";
-		echo "</select></td></tr>";
-	}
-
 	if ($toim == "TILAUSVAHVISTUS") {
 		echo "<tr><th>",t("Näytetäänkö rivihinta"),"</th><td><select name='naytetaanko_rivihinta'>";
 		echo "<option value=''>",t("Näytetään rivihinta"),"</option>";
@@ -212,10 +204,21 @@
 	}
 
 	if ($toim == "TARJOUS") {
+		echo "<tr><th>",t("Näytetäänkö verolliset vai verottomat hinnat"),"</th><td><select name='verolliset_verottomat_hinnat'>";
+		echo "<option value=''>",t("Haetaan yhtiön parametreistä"),"</option>";
+		echo "<option value='verolliset'>",t("Verolliset"),"</option>";
+		echo "<option value='verottomat'>",t("Verottomat"),"</option>";
+		echo "</select></td></tr>";
+
 		echo "<tr><th>",t("Näytetäänkö rivihinta"),"</th><td><select name='naytetaanko_rivihinta'>";
 		echo "<option value=''>",t("Näytetään hinnat"),"</option>";
 		echo "<option value='ei_rivihintaa'>",t("Ei näytetä rivihintaa"),"</option>";
 		echo "<option value='kokonaan_ilman_hintoja'>",t("Kokonaan ilman hintoja"),"</option>";
+		echo "</select></td></tr>";
+
+		echo "<tr><th>",t("Näytetäänkö tuotenumerot"),"</th><td><select name='naytetaanko_tuoteno'>";
+		echo "<option value=''>",t("Kyllä"),"</option>";
+		echo "<option value='ei'>",t("Ei"),"</option>";
 		echo "</select></td></tr>";
 	}
 

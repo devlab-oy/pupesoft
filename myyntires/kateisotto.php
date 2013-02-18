@@ -9,12 +9,18 @@ require ("../inc/parametrit.inc");
 			return false;
 		}
 
+		if($('#userfile').val() != '' && $('#kuvaselite').val() == '') {
+			alert($('#kuva_selite_alert').html());
+			return false;
+		}
+
 		return true;
 	}
 </script>
 <?php
 echo "<font class='head'>".t("K‰teisotto kassalippaasta")."</font><hr>";
 echo "<div id='tarvittavia_tietoja'style='display:none;'>".t("Tarvittavia tietoja puuttuu")."</div>";
+echo "<div id='kuva_selite_alert'style='display:none;'>".t("Anna liitteelle selite")."</div>";
 
 $kassalippaat = hae_kassalippaat();
 $kateisoton_luonteeet = hae_kateisoton_luonteet();
@@ -23,25 +29,35 @@ $request_params = array(
 	'kassalipas' => $kassalipas_tunnus,
 	'summa'=> $summa,
 	'kateisoton_luonne' => $kateisoton_luonne,
-	'yleinen_kommentti'=>$yleinen_kommentti
+	'yleinen_kommentti' => $yleinen_kommentti,
+	'userfile' => $userfile,
+	'kuvaselite' => $kuvaselite
 );
 
 if ($tee == 'kateisotto') {
 	$voiko_kateisoton_tehda = tarkista_saako_laskua_muuttaa(date('Y-m-d'));
 	if($voiko_kateisoton_tehda) {
-		//tehd‰‰n k‰teisotto
-		//
-		//haetaan kassalipas row
-		$kassalipas = hae_kassalipas($kassalipas_tunnus);
 
-		//tarkistetaan, onko kassalipas jo t‰sm‰ytetty
-		$kassalippaan_tasmaytys = tarkista_kassalippaan_tasmaytys($kassalipas['tunnus']);
-		if($kassalippaan_tasmaytys['ltunnukset'] != '' and $kassalippaan_tasmaytys['selite'] != '') {
-			echo "<font class='error'>".t("T‰m‰n p‰iv‰n valittu kassalipas on jo t‰sm‰ytetty")."</font>";
-		}
-		else {
-			tee_kateisotto($kassalipas, $summa, $kateisoton_luonne, $yleinen_kommentti);
-			echo "<font class='message'>".t("K‰teisotto tehtiin onnistuneesti")."</font>";
+		$voiko_kateisoton_tehda = validoi_liitetiedosto($_FILES);
+		if($voiko_kateisoton_tehda) {
+			//tehd‰‰n k‰teisotto
+			//
+			//haetaan kassalipas row
+			$kassalipas = hae_kassalipas($kassalipas_tunnus);
+
+			//tarkistetaan, onko kassalipas jo t‰sm‰ytetty
+			$kassalippaan_tasmaytys = tarkista_kassalippaan_tasmaytys($kassalipas['tunnus']);
+			if($kassalippaan_tasmaytys['ltunnukset'] != '' and $kassalippaan_tasmaytys['selite'] != '') {
+				echo "<font class='error'>".t("T‰m‰n p‰iv‰n valittu kassalipas on jo t‰sm‰ytetty")."</font>";
+			}
+			else {
+				$lasku_tunnus = tee_kateisotto($kassalipas, $summa, $kateisoton_luonne, $yleinen_kommentti);
+				echo "<font class='message'>".t("K‰teisotto tehtiin onnistuneesti")."</font>";
+
+				if(!empty($lasku_tunnus) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+					tallenna_liite("userfile", "lasku", $lasku_tunnus, $request_params['kuvaselite'], "", 0, 0, "");
+				}
+			}
 		}
 	}
 	else {
@@ -83,6 +99,8 @@ function tee_kateisotto($kassalipas, $summa, $kateisoton_luonne, $yleinen_kommen
 	tee_tiliointi($lasku_tunnus, $kassalipas, $summa, $kateisoton_luonne);
 
 	tee_tiliointi($lasku_tunnus, $kassalipas, -1*$summa, '');
+
+	return $lasku_tunnus;
 }
 
 function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti) {
@@ -147,6 +165,46 @@ function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {
 		return false;
 	}
 
+}
+
+function validoi_liitetiedosto($_FILES) {
+	$return = true;
+	if(!empty($_FILES['userfile'])) {
+		switch ($_FILES['userfile']['error']) {
+			case 1:
+			case 2:
+				$errormsg .= t("Kuva on liian suuri, suurin sallittu koko on")." ".ini_get('post_max_size'). '<br/>';
+				$return = false;
+				break;
+			case 3:
+				$errormsg .= t("Kuvan lataus keskeytyi")."!<br/>";
+				$return = false;
+				break;
+			case 6:
+			case 7:
+			case 8:
+				$errormsg .= t("Tallennus ep‰onnistui")."!<br/>";
+				$return = false;
+				break;
+			case 0:
+				//	OK tallennetaan
+				$return = true;
+				break;
+		}
+		
+		$query = "SHOW variables like 'max_allowed_packet'";
+		$result = pupe_query($query);
+		$varirow = mysql_fetch_row($result);
+		if ($_FILES['userfile']['size'] > $varirow[1]) {
+			$errormsg .= t("Liitetiedosto on liian suuri")."! ($varirow[1]) <br/>";
+			$return = false;
+		}
+
+	}
+
+	echo "<font class='error'>". $errormsg . "</font>";
+
+	return $return;
 }
 
 function hae_kassalipas($kassalipas_tunnus) {
@@ -239,7 +297,7 @@ function hae_kateisoton_luonteet() {
 }
 
 function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $request_params = array()) {
-	echo "<form name='kateisotto' method='POST'>";
+	echo "<form name='kateisotto' method='POST' enctype='multipart/form-data'>";
 	echo "<input type='hidden' name='tee' value='kateisotto'/>";
 	echo "<table>";
 
@@ -286,10 +344,18 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $request_para
 	echo "<th>".t("Yleinen kommentti")."</th>";
 	echo "<td><input type='text' name='yleinen_kommentti' id='yleinen_kommentti' value='{$request_params['yleinen_kommentti']}'></td>";
 	echo "</tr>";
+	echo "	<tr>
+				<th>".t("Valitse tiedosto")."</th>
+				<td><input id='userfile' name='userfile' type='file'></td>
+				</tr>
+				<th>".t("Liitteen kuvaus")."</th>
+				<td><input id='kuvaselite' type='text' size='40' name='kuvaselite'></td>
+		</tr>";
+
+	echo "</table>";
 
 	echo "<td class='back'><input name='submit' type='submit' value='".t("L‰het‰")."' onClick='return tarkista();'></td>";
 
-	echo "</table>";
 	echo "</form>";
 }
 

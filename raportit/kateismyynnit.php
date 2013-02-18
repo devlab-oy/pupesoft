@@ -1300,7 +1300,7 @@
 									}
 								}
 
-								echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".sprintf('%.2f', str_replace(',', '.', $kateismaksuyhteensa))."</div></b></td>";
+								echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
 								echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu soluerotus$i' size='10' disabled></td></tr>";
 								echo "<input type='hidden' id='erotus$i' name='erotus$i' value=''>";
 								echo "<input type='hidden' id='soluerotus$i' name='soluerotus$i' value=''>";

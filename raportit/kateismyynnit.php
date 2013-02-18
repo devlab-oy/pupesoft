@@ -439,7 +439,7 @@
 					}
 
 					$prn = sprintf ('%-'.$selite_count.'.'.$selite_count.'s', $tasmaysrow["selite"]);
-					$prn .= sprintf('%13s', str_replace(',', '.', $tasmaysrow["summa"]));
+					$prn .= str_replace(".",",", sprintf('%13s', $tasmaysrow["summa"]));
 					$prn .= "\n";
 
 					fwrite($fh, $prn);
@@ -641,36 +641,38 @@
 					$comments .= "$arvo alkukassa: ";
 				}
 				else {
-					$arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
-					$comments .= "$arvo<br>";
+					$arvo = (float)sprintf('%.2f', str_replace(',', '.', $arvo));
 					$pohjakassa += $arvo;
+					$arvo = str_replace('.', ',', $arvo);
+					$comments .= "$arvo<br>";
 				}
 			}
 			else if (stristr($kentta,"yht_lopkas")) {
-				$arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
-				$comments .= "$tyyppi loppukassa: $arvo<br><br>";
+				$arvo = (float)sprintf('%.2f', str_replace(',', '.', $arvo));
 				$loppukassa_array[$kassalipasrow['tunnus']] = $arvo;
+				$arvo = str_replace('.', ',', $arvo);
+				$comments .= "$tyyppi loppukassa: $arvo<br><br>";
 			}
 
 			if (stristr($kentta, "yht_")) {
 				if ($kentta == "yht_kat") {
 					$comments_yht .= "Käteinen yhteensä: ";
-					$arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
+					$arvo = str_replace('.', ',', sprintf('%.2f', str_replace(',', '.', $arvo)));
 					$comments_yht .= "$arvo<br>";
 				}
 				else if ($kentta == "yht_katot") {
 					$comments_yht .= "Käteisotto yhteensä: ";
-					$arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
+					$arvo = str_replace('.', ',', sprintf('%.2f', str_replace(',', '.', $arvo)));
 					$comments_yht .= "$arvo<br>";
 				}
 				else if ($kentta == "yht_kattil") {
 					$comments_yht .= "Käteistilitys yhteensä: ";
-					$arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
+					$arvo = str_replace('.', ',', sprintf('%.2f', str_replace(',', '.', $arvo)));
 					$comments_yht .= "$arvo<br>";
 				}
 				else if ($kentta == "yht_kasero") {
 					$comments_yht .= "Kassaerotus yhteensä: ";
-					$arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
+					$arvo = str_replace('.', ',', sprintf('%.2f', str_replace(',', '.', $arvo)));
 					$comments_yht .= "$arvo<br>";
 				}
 			}
@@ -883,10 +885,10 @@
 			}
 		}
 
-		$pohjakassa = sprintf('%.2f', str_replace(',', '.', $pohjakassa));
+		$pohjakassa = str_replace('.', ',', $pohjakassa);
 
 		$comments_yht .= "Loppukassa yhteensä: ";
-		$loppukassa = sprintf('%.2f', str_replace(',', '.', $loppukassa));
+		$loppukassa = str_replace('.', ',', $loppukassa);
 		$comments_yht .= "$loppukassa<br>";
 
 		$kassa_json = json_encode($kassalippaat_array);
@@ -1413,7 +1415,7 @@
 						echo "<td>$row[ytunnus]</td>";
 						echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
 						echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
-						echo "<td align='right'>".sprintf('%.2f', str_replace(',', '.', $row['tilsumma']))."</td></tr>";
+						echo "<td align='right'>".str_replace(".",",",sprintf('%.2f',$row['tilsumma']))."</td></tr>";
 
 						$kateismaksu 		= $row['tyyppi'];
 						$kateismaksuekotus 	= t(str_replace("kateinen", "Käteinen", $kateismaksu));
@@ -1493,7 +1495,7 @@
 						$temp_indeksi++;
 					}
 				}
-				echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".sprintf('%.2f', str_replace(',', '.', $kateismaksuyhteensa))."</div></b></td>";
+				echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
 				echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu soluerotus$i' name='soluerotus$i' size='10' disabled></td>";
 
 				echo "</tr>";
@@ -1604,7 +1606,7 @@
 							echo "<td>$row[ytunnus]</td>";
 							echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
 							echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
-							echo "<td align='right'>".sprintf('%.2f', str_replace(',', '.', $row['tilsumma']))."</td></tr>";
+							echo "<td align='right'>".str_replace(".",",",sprintf('%.2f',$row['tilsumma']))."</td></tr>";
 
 							$kateinen    		= $row["tilino"];
 							$edkassa 	 		= $row["kassa"];
@@ -1652,7 +1654,7 @@
 						$temp_indeksi++;
 					}
 				}
-				echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".sprintf('%.2f', str_replace(',', '.', $kateismaksuyhteensa))."</div></b></td>";
+				echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
 				echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu soluerotus$i' name='soluerotus$i' size='10' disabled></td>";
 				echo "<input type='hidden' id='erotus$i' name='erotus$i' value=''>";
 				echo "<input type='hidden' id='soluerotus$i' name='soluerotus$i' value=''>";
@@ -1695,7 +1697,7 @@
 							echo "<td>$row[ytunnus]</td>";
 							echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
 							echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
-							echo "<td align='right'>".sprintf('%.2f', str_replace(',', '.', $row['tilsumma']))."</td></tr>";
+							echo "<td align='right'>".str_replace(".",",",sprintf('%.2f',$row['tilsumma']))."</td></tr>";
 
 							$kateinen    		  = $row["tilino"];
 							$edkassa 	 		  = $row["kassa"];
@@ -1744,7 +1746,7 @@
 						$temp_indeksi++;
 					}
 				}
-				echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".sprintf('%.2f', str_replace(',', '.', $kateismaksuyhteensa))."</div></b></td>";
+				echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
 				echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu soluerotus$i' name='soluerotus$i' size='10' disabled></td>";
 				echo "<input type='hidden' id='erotus$i' name='erotus$i' value=''>";
 				echo "<input type='hidden' id='soluerotus$i' name='soluerotus$i' value=''>";
@@ -1756,7 +1758,7 @@
 					if ((($edkassa != $row["kassa"] and $edkassa != '') or ($kateinen != $row["tilino"] and $kateinen != ''))) {
 						echo "</table><table width='100%'>";
 						echo "<tr><td colspan='7' class='tumma'>$edtyyppi ".t("yhteensä").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("Näytä / Piilota")."</a></td>";
-						echo "<td align='right' class='tumma' style='width:100px'><b><div id='erotus$i'>".sprintf('%.2f', str_replace(',', '.', $kateismaksuyhteensa))."</div></b></td></tr>";
+						echo "<td align='right' class='tumma' style='width:100px'><b><div id='erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td></tr>";
 						$i++;
 
 						if ($edkassa == $row["kassa"]) {
@@ -1773,7 +1775,7 @@
 						if ($vaiht == 1) {
 							$prn = "\n";
 							$prn .= sprintf ("%-'.84s", $kateismaksuekotus." ".t("yhteensä")." ");
-							$prn .= sprintf ("%'.10s", " ".sprintf('%.2f', str_replace(',', '.', $kateismaksuyhteensa)));
+							$prn .= sprintf ("%'.10s", " ".str_replace(".",",", sprintf('%.2f', $kateismaksuyhteensa)));
 							$prn .= "\n\n";
 
 							fwrite($fh, $prn);
@@ -1785,7 +1787,7 @@
 					if ($edkassa != $row["kassa"] and $edkassa != '') {
 
 						echo "<tr><th colspan='7'>$edkassanimi yhteensä: </th>";
-						echo "<td align='right' class='tumma'><b>".sprintf('%.2f', str_replace(',', '.', $kassayhteensa))."</b></td></tr>";
+						echo "<td align='right' class='tumma'><b>".str_replace(".",",",sprintf('%.2f',$kassayhteensa))."</b></td></tr>";
 						echo "<tr><td>&nbsp;</td></tr>";
 						echo "</table><table id='nayta$i' style='display:none;' width='100%'>";
 						echo "<tr>
@@ -1798,7 +1800,7 @@
 
 						if ($vaiht == 1) {
 							$prn = sprintf ("%-'.84s", $edkassanimi." ".t("yhteensä")." ");
-							$prn .= sprintf ("%'.10s", " ".sprintf('%.2f', str_replace(',', '.', $kassayhteensa)));
+							$prn .= sprintf ("%'.10s", " ".str_replace(".", ",", sprintf('%.2f', $kassayhteensa)));
 							$prn .= "\n\n\n";
 
 							fwrite($fh, $prn);
@@ -1815,7 +1817,7 @@
 					echo "<td>$row[ytunnus]</td>";
 					echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
 					echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
-					echo "<td align='right'>".sprintf('%.2f', str_replace(',', '.', $row['tilsumma']))."</td></tr>";
+					echo "<td align='right'>".str_replace(".", ",",sprintf('%.2f',$row['tilsumma']))."</td></tr>";
 
 					$kateinen    		= $row["tilino"];
 					$edkassa 	 		= $row["kassa"];
@@ -1835,7 +1837,7 @@
 						$prn .= sprintf ('%-10.10s', 	$row["ytunnus"]);
 						$prn .= sprintf ('%-12.12s', 	$row["laskunro"]);
 						$prn .= sprintf ('%-19.19s', 	tv1dateconv($row["laskutettu"], "pitka"));
-						$prn .= sprintf('%8s', str_replace(',', '.', $row["tilsumma"]));
+						$prn .= str_replace(".",","		,sprintf ('%8s', $row["tilsumma"]));
 						$prn .= "\n";
 
 						fwrite($fh, $prn);
@@ -1850,21 +1852,21 @@
 				if ($edkassa != '') {
 					echo "</table><table width='100%'>";
 					echo "<tr><td colspan='6' class='tumma'>$edtyyppi ".t("yhteensä").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("Näytä / Piilota")."</a></th>";
-					echo "<td align='right' class='tumma' style='width:100px'><b><div id='erotus$i'>".sprintf('%.2f', str_replace(',', '.', $kateismaksuyhteensa))."</div></b></td></tr>";
+					echo "<td align='right' class='tumma' style='width:100px'><b><div id='erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td></tr>";
 
 					echo "<tr><th colspan='6'>$edkassanimi yhteensä:</th>";
-					echo "<td align='right' class='tumma'><b>".sprintf('%.2f', str_replace(',', '.', $kassayhteensa))."</b></td></tr>";
+					echo "<td align='right' class='tumma'><b>".str_replace(".",",",sprintf('%.2f',$kassayhteensa))."</b></td></tr>";
 
 					if ($vaiht == 1) {
 						$prn = "\n";
 						$prn .= sprintf ("%-'.84s", $kateismaksuekotus." ".t("yhteensä")." ");
-						$prn .= sprintf ("%'.10s", " ".sprintf('%.2f', str_replace(',', '.', $kateismaksuyhteensa)));
+						$prn .= sprintf ("%'.10s", " ".str_replace(".",",", sprintf('%.2f', $kateismaksuyhteensa)));
 						$prn .= "\n\n";
 
 						fwrite($fh, $prn);
 						$rivit++;
 						$prn = sprintf ("%-'.84s", $edkassanimi." ".t("yhteensä")." ");
-						$prn .= sprintf ("%'.10s", " ".sprintf('%.2f', str_replace(',', '.', $kassayhteensa)));
+						$prn .= sprintf ("%'.10s", " ".str_replace(".",",", sprintf('%.2f', $kassayhteensa)));
 						$prn .= "\n\n";
 						fwrite($fh, $prn);
 					}
@@ -1969,7 +1971,7 @@
 
 			echo ":</font></td><td align='right'><input type='text' size='10'";
 
-			echo "id='myynti_yhteensa' value='".sprintf('%.2f',str_replace(',', '.' ,$yhteensa));
+			echo "id='myynti_yhteensa' value='".sprintf('%.2f',$yhteensa);
 
 			echo "' disabled></td></tr>";
 
@@ -2016,7 +2018,7 @@
 		if ((!isset($tasmays) or $tasmays == '') and $vaiht == 1) {
 			$prn = "\n";
 			$prn .= sprintf ("%-'.84s", t("Yhteensä")." ");
-			$prn .= sprintf ("%'.10s", " ".sprintf('%.2f', str_replace(',', '.', $yhteensa)));
+			$prn .= sprintf ("%'.10s", " ".str_replace(".",",", sprintf('%.2f', $yhteensa)));
 			$prn .= "\n";
 			fwrite($fh, $prn);
 

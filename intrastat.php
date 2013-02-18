@@ -129,6 +129,9 @@
 
 		// t‰ss‰ tulee sitten nimiketietueet unionilla
 		if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "keikka") {
+
+			$alennukset = generoi_alekentta('O', 'tilausrivi');
+
 			$query = "	(SELECT
 						tuote.tullinimike1,
 						if (lasku.maa_lahetys='', toimi.maa, lasku.maa_lahetys) maalahetys,
@@ -146,6 +149,7 @@
 						round(sum(tilausrivi.kpl * if(tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
 						round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+						round(sum(tilausrivi.kpl * tilausrivi.hinta * {$alennukset}), 0) rivihinta_laskutusarvo,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
 						group_concat(concat(tuote.tunnus,'!°!', tuote.tuoteno)) as kaikkituotteet";
@@ -211,6 +215,7 @@
 						round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
 						round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+						if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta_laskutusarvo,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
 						group_concat(concat(tuote.tunnus,'!°!', tuote.tuoteno)) as kaikkituotteet
@@ -253,6 +258,7 @@
 						round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
 						round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+						if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta_laskutusarvo,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
 						group_concat(concat(tuote.tunnus,'!°!', tuote.tuoteno)) as kaikkituotteet
@@ -538,7 +544,12 @@
 				$nim .= sprintf ('%010d', 		"");																							//2 paljouden m‰‰r‰
 			}
 
-			$nim .= sprintf ('%010d', 		$row["rivihinta"]);																					//nimikkeen laskutusarvo
+			if ($tapa == "yhdistetty" and $outputti == 'tilasto') {
+				$nim .= sprintf ('%010d', 		$row["rivihinta_laskutusarvo"]);																					//nimikkeen laskutusarvo
+			}
+			else {
+				$nim .= sprintf ('%010d', 		$row["rivihinta"]);																					//nimikkeen laskutusarvo
+			}
 			$nim .= "\r\n";
 
 			if ($outputti == "tilasto") {
@@ -568,10 +579,16 @@
 						<td>{$row["tullinimike1"]}</td>
 						<td>{$row["paino"]}</td>
 						<td>{$row["kpl"]}</td>
-						<td>{$row["su"]}</td>
-						<td>{$row["rivihinta"]}</td>
+						<td>{$row["su"]}</td>";
 
-						<td>{$row["valkoodi"]}</td>
+					if ($tapa == "yhdistetty" and $outputti == 'tilasto') {
+						$tilastoarvot .= "<td>{$row["rivihinta_laskutusarvo"]}</td>";
+					}
+					else {
+						$tilastoarvot .= "<td>{$row["rivihinta"]}</td>";
+					}
+
+					$tilastoarvot .= "<td>{$row["valkoodi"]}</td>
 						<td>{$row["rivihinta"]}</td>
 						<td>{$yhtiorow["valkoodi"]}</td>
 						<td>{$row["dm"]}</td>
@@ -631,7 +648,14 @@
 						$worksheet->write($excelrivi, 15, $row["paino"]);
 						$worksheet->write($excelrivi, 16, $row["kpl"]);
 						$worksheet->write($excelrivi, 17, $row["su"]);
-						$worksheet->write($excelrivi, 18, $row["rivihinta"]);
+
+						if ($tapa == "yhdistetty" and $outputti == 'tilasto') {
+							$worksheet->write($excelrivi, 18, $row["rivihinta_laskutusarvo"]);
+						}
+						else {
+							$worksheet->write($excelrivi, 18, $row["rivihinta"]);
+						}
+
 						$worksheet->write($excelrivi, 19, $row["valkoodi"]);
 						$worksheet->write($excelrivi, 20, $row["rivihinta"]);
 						$worksheet->write($excelrivi, 21, $yhtiorow["valkoodi"]);

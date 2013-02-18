@@ -32,7 +32,7 @@
 	$aputoim = $toim;
 	$toimi_array = explode('!!!', $toim);
     $a_lisa = "";
-    
+
 	$toim = $toimi_array[0];
 	if (isset($toimi_array[1])) $alias_set = $toimi_array[1];
 	if (isset($toimi_array[2])) $rajattu_nakyma = $toimi_array[2];
@@ -858,22 +858,25 @@
 				}
 
 				for (ele in elementit) {
+
 					newOpt = window.opener.document.createElement('option');
 					newOpt.text = \"".$otsikrow["text"]."\";
 					newOpt.value = \"".$otsikrow["value"]."\";
 
 					sel = window.opener.document.getElementById(elementit[ele]);
 
-					try {
-						sel.add(newOpt, sel.options[1]);
-					}
-					catch(ex) {
-						sel.add(newOpt, 1);
-					}
+					if (sel != null) {
+						try {
+							sel.add(newOpt, sel.options[1]);
+						}
+						catch(ex) {
+							sel.add(newOpt, 1);
+						}
 
-					if (elementit[ele] == elementti) {
-						//	Valitaan uusi arvo
-						sel.selectedIndex = 1;
+						if (elementit[ele] == elementti) {
+							//	Valitaan uusi arvo
+							sel.selectedIndex = 1;
+						}
 					}
 				}
 

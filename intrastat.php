@@ -197,7 +197,7 @@
 			$query .= "	(SELECT
 						tuote.tullinimike1,
 						if (lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if (alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
+						ifnull((SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if (alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1), '$yhtiorow[maa]') alkuperamaa,
 						if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 						lasku.kuljetusmuoto,
 						lasku.kauppatapahtuman_luonne,
@@ -239,7 +239,7 @@
 			$query .= "	(SELECT
 						tuote.tullinimike1,
 						if (lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if (alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
+						ifnull((SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if (alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1), '$yhtiorow[maa]') alkuperamaa,
 						if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 						lasku.kuljetusmuoto,
 						lasku.kauppatapahtuman_luonne,

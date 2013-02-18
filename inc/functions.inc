@@ -18944,7 +18944,7 @@ if (!function_exists("suuntalavan_tuotteet")) {
 					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
 					JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$liitostunnus}')
-					JOIN tilausrivin_lisatiedot
+					LEFT JOIN tilausrivin_lisatiedot
 					ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND {$uusiotunnuslisa}

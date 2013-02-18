@@ -456,9 +456,10 @@ if (isset($liitaasiakasnappi) and $kukarow["extranet"] == "") {
 	$tila = "vaihdaasiakas";
 }
 
-//Jos yll‰pidossa on luotu uusi asiakas
-if (isset($from) and $from == "ASIAKASYLLAPITO" and $yllapidossa == "asiakas" and $yllapidontunnus != '') {
-	$asiakasid 	= $yllapidontunnus;
+// Jos yll‰pidossa on luotu uusi asiakas
+if (isset($from) and $from == "ASIAKASYLLAPITO" and $yllapidossa == "asiakas" and $yllapidontunnus != '' and $tilausnumero == '') {
+	$tee = "OTSIK";
+	$asiakasid = $yllapidontunnus;
 }
 
 // asiakasnumero on annettu, etsit‰‰n tietokannasta...

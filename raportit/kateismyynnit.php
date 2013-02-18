@@ -883,8 +883,8 @@
 			}
 		}
 
-		$comments_yht .= "Loppukassa yhteens‰: ";
-		$comments_yht .= "$loppukassa<br>";
+		$comments_yht .= t("Loppukassa yhteens‰").": ";
+		$comments_yht .= sprintf('%.2f', $loppukassa)."<br>";
 
 		$kassa_json = json_encode($kassalippaat_array);
 		$kassa_json = $kassa_json . '##' . json_encode(array("loppukassa" => $loppukassa_array, "date" => "{$vv}-{$kk}-{$pp}"));
@@ -2264,12 +2264,12 @@
 		if (mysql_num_rows($pk_result) == 1) {
 			$pk_row = mysql_fetch_assoc($pk_result);
 			$pk_t = explode("##", $pk_row["sisviesti2"]);
-			
+
 			if (count($pk_t) > 1) {
 				//pk_t:ss‰ on nyt sek‰ loppukassa jsonina, ett‰ kaikkien kassalippaiden formin kent‰t. pit‰‰ etsi‰ loppukassa json ja asettaa se row:hun
 				foreach ($pk_t as $json_kassa_arvot) {
 					$pk = json_decode($json_kassa_arvot, true);
-					
+
 					if ($pk !== NULL) {
 						//tarkoittaa, ett‰ json_decode on onnistunut
 						if (array_key_exists('loppukassa', $pk)) {

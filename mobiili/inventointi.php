@@ -278,6 +278,15 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 	// Jos varmistuskoodi kelpaa tai on keksiss‰ tallessa
 	if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi)) {
 		$title = t("Laske m‰‰r‰");
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'INVEN_LAJI'";
+		$result = pupe_query($query);
+		$inventointi_selitteet = array();
+		while($inventointi_selite = mysql_fetch_assoc($result)) {
+			$inventointi_selitteet[] = $inventointi_selite;
+		}
 		include('views/inventointi/laske.php');
 
 	}
@@ -370,8 +379,14 @@ if ($tee == 'inventoidaan') {
 
 		# inventointi
 		$tee = 'VALMIS';
-		$inven_laji = 'Kiert‰v‰';
-		$lisaselite = 'P‰ivitt‰isinventointi k‰sip‰‰tteell‰';
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$inventointi_seliteen_tunnus}'";
+		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
+		$inven_laji = $row['selite'];
+		$lisaselite = 'K‰sip‰‰te: ' . $row['selitetark'];
 		$mobiili = 'YES';
 		require('../inventoi.php');
 

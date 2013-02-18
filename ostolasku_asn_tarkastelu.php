@@ -303,15 +303,17 @@
 
 						foreach (explode(",", $lapset['lapset']) as $lapsi_tuoteno) {
 
-							// Haetaan tämän isätuotteen lapsituotteiden tunnukset
-							$query = " 	SELECT tunnus, tuoteno
-										FROM tilausrivi
-										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-										AND tilausrivi.otunnus IN ({$tilaukset['tilaukset']})
-										AND tilausrivi.tuoteno = '{$lapsi_tuoteno}'";
-							$result = pupe_query($query);
+							if ($tilaukset['tilaukset'] != '') {
+								// Haetaan tämän isätuotteen lapsituotteiden tunnukset
+								$query = " 	SELECT tunnus, tuoteno
+											FROM tilausrivi
+											WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+											AND tilausrivi.otunnus IN ({$tilaukset['tilaukset']})
+											AND tilausrivi.tuoteno = '{$lapsi_tuoteno}'";
+								$result = pupe_query($query);
+							}
 
-							if (mysql_num_rows($result) == 0) {
+							if ($tilaukset['tilaukset'] == '' or mysql_num_rows($result) == 0) {
 
 								// otetaan ensimmäisen isätuotteen tilausrivin tiedot
 								$query = "	SELECT *

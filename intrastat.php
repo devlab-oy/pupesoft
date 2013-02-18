@@ -648,7 +648,14 @@
 						$worksheet->write($excelrivi, 15, $row["paino"]);
 						$worksheet->write($excelrivi, 16, $row["kpl"]);
 						$worksheet->write($excelrivi, 17, $row["su"]);
-						$worksheet->write($excelrivi, 18, $row["rivihinta"]);
+
+						if ($tapa == "yhdistetty" and $outputti == 'tilasto') {
+							$worksheet->write($excelrivi, 18, $row["rivihinta_laskutusarvo"]);
+						}
+						else {
+							$worksheet->write($excelrivi, 18, $row["rivihinta"]);
+						}
+
 						$worksheet->write($excelrivi, 19, $row["valkoodi"]);
 						$worksheet->write($excelrivi, 20, $row["rivihinta"]);
 						$worksheet->write($excelrivi, 21, $yhtiorow["valkoodi"]);

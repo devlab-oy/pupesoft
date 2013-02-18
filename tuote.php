@@ -99,13 +99,12 @@
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
-				$query = "	SELECT ttt.toim_tuoteno AS tuoteno
+				$query = "	SELECT tuote.tuoteno
 							FROM tuotteen_toimittajat_tuotenumerot AS ttt
 							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.toim_tuoteno = ttt.toim_tuoteno AND tt.liitostunnus = ttt.liitostunnus)
 							JOIN tuote ON (tuote.yhtio = tt.yhtio AND tuote.tuoteno = tt.tuoteno)
 							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
-							AND ttt.vaihtoehtoinen_tuoteno = '{$tuoteno}'
-							AND ttt.vaihtoehtoinen_tuoteno != ''
+							AND (ttt.vaihtoehtoinen_tuoteno = '{$tuoteno}' or ttt.viivakoodi = '{$tuoteno}')
 							AND (tuote.status NOT IN ('P','X') OR (SELECT SUM(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0) > 0)";
 				$chk_res = pupe_query($query);
 

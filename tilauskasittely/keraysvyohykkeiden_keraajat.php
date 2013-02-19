@@ -454,7 +454,7 @@
 								CONCAT(tilausrivi.hyllyalue, '-', tilausrivi.hyllynro, '-', tilausrivi.hyllyvali, '-', tilausrivi.hyllytaso) AS 'kerayspaikka',
 								tilausrivi.otunnus,
 								CONCAT(lasku.nimi, ' ', lasku.nimitark) AS 'nimi',
-								ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', kerayserat.kpl_keratty, 0)), 0) AS 'keratty',
+								ROUND(SUM(kerayserat.kpl_keratty), 0) AS 'keratty',
 								ROUND(SUM(tilausrivi.varattu), 0) AS 'tilattu'
 								FROM kerayserat
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')

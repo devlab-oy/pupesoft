@@ -142,8 +142,14 @@
 		$laskurow = mysql_fetch_array($aresult);
 
 		if ($tee == "vahvista") {
-			$query = "UPDATE tilausrivi SET  jaksotettu=1 where yhtio='$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi='O' and uusiotunnus=0";
+			$query = "	UPDATE tilausrivi
+						SET jaksotettu = 1
+						WHERE yhtio     = '$kukarow[yhtio]'
+						and otunnus     = '$kukarow[kesken]'
+						and tyyppi      = 'O'
+						and uusiotunnus = 0";
 			$result = pupe_query($query);
+
 			if (mysql_affected_rows() > 0) {
 				echo "<font class='message'>".t("Toimitus vahvistettu")."</font><br><br>";
 			}

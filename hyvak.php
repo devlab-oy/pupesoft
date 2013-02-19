@@ -286,6 +286,16 @@
 						yhtio = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
+			if ($trow['ebid'] == 'TECCOM-INVOICE') {
+
+				$query = "	DELETE FROM asn_sanomat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji = 'tec'
+							AND asn_numero = '{$trow['laskunro']}'";
+				$delres = pupe_query($query);
+
+			}
+
 			echo "<font class='error'>".sprintf(t('Poistit %s:n laskun tunnuksella %d.'), $trow['nimi'], $tunnus)."</font><br>";
 		}
 		else {

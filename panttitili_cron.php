@@ -18,12 +18,50 @@
 	$kukarow['kuka'] = 'cron';
 	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-	$query = "	SELECT asiakas, GROUP_CONCAT(tunnus) tunnukset
-				FROM panttitili
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND status = ''
-				AND myyntipvm <= DATE_SUB(now(), INTERVAL 6 MONTH)
-				GROUP BY asiakas";
+	//haetaan asiakkaat, joilla ei ole ( panttitili käytössä TAI asiakas on poistettu TAI tuote on poistettu TAI ) ja tarkistetaan onko näillä asiakkailla kuitenkin pantteja
+	//eli jos panttitili on poistettu käytöstä ja pantteja on niin kaikki avoimet pantit pitää laskuttaa
+	$query = "	SELECT Group_concat(panttitili.tunnus) tunnukset,
+				panttitili.asiakas   AS asiakas
+				FROM   asiakas
+				JOIN panttitili
+				ON ( panttitili.yhtio = asiakas.yhtio AND panttitili.asiakas = asiakas.tunnus AND panttitili.status = '' )
+				WHERE  panttitili.yhtio = '{$kukarow['yhtio']}'
+				AND asiakas.panttitili != 'K'
+				GROUP  BY asiakas.tunnus
+
+				UNION
+
+				SELECT Group_concat(panttitili.tunnus) tunnukset,
+				panttitili.asiakas   AS asiakas
+				FROM   panttitili
+				JOIN tuote
+				ON ( tuote.yhtio = panttitili.yhtio
+				AND tuote.tuoteno = panttitili.tuoteno
+				AND tuote.status = 'P' )
+				WHERE  panttitili.yhtio = '{$kukarow['yhtio']}'
+				GROUP  BY panttitili.asiakas
+
+				UNION
+
+				SELECT Group_concat(panttitili.tunnus) tunnukset,
+				panttitili.asiakas   AS asiakas
+				FROM   panttitili
+				JOIN asiakas
+				ON ( asiakas.yhtio = panttitili.yhtio
+				AND asiakas.tunnus = panttitili.asiakas
+				AND asiakas.laji = 'P' )
+				WHERE  panttitili.yhtio = '{$kukarow['yhtio']}'
+				GROUP  BY panttitili.asiakas
+
+				UNION
+
+				SELECT Group_concat(panttitili.tunnus) tunnukset,
+				panttitili.asiakas   AS asiakas
+				FROM   panttitili
+				WHERE  panttitili.yhtio = '{$kukarow['yhtio']}'
+				AND panttitili.status = ''
+				AND panttitili.myyntipvm <= Date_sub(Now(), INTERVAL 6 MONTH)
+				GROUP  BY panttitili.asiakas";
 	$panttitili_res = pupe_query($query);
 
 	while ($panttitili_row = mysql_fetch_assoc($panttitili_res)) {
@@ -77,7 +115,7 @@
 						ale1 = 100,
 						{$query_insert_lisa}
 						kate = 0,
-						kommentti = '".("Panttituotteen hyvitys palauttamattomista panteista")."',
+						kommentti = '".t("Panttituotteen hyvitys palauttamattomista panteista")."',
 						laatija = 'cron',
 						laadittu = now(),
 						keratty = 'cron',

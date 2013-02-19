@@ -1104,7 +1104,17 @@
 
 		$ulos .= "<option value = ''>".t("Ei käytössä")."</option>";
 		$ulos .= "<option value = 'K'{$sel}>".t("Käytössä")."</option>";
-		$ulos .= "</select></td>";
+		$ulos .= "</select>";
+		
+		$query = "	SELECT sum(hinta) as hinta
+					FROM panttitili
+					WHERE panttitili.yhtio = '{$kukarow['yhtio']}'
+					AND panttitili.asiakas = '{$trow['tunnus']}'";
+		$panttitili_result = pupe_query($query);
+		$panttitili_row = mysql_fetch_assoc($panttitili_result);
+
+		$ulos .= " <font class='message'>".t("Asiakkaan panttitililla yhteensä").": ".str_replace('.', ',', str_replace(',', ' ', number_format($panttitili_row['hinta'], 2)))." EUR</font>";
+		$ulos .= "</td>";
 
 		$jatko = 0;
 	}

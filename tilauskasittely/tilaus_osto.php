@@ -613,24 +613,25 @@
 
 				//rivitunnus nollataan lisaarivissa
 				$rivitunnus_temp = $rivitunnus;
+				
 				if ($kpl != "") {
 					require ('lisaarivi.inc');
 				}
 
-				if(!empty($rivitunnus_temp)) {
-					//p‰ivitet‰‰n myyntitilausrivi, jos se on liitetty ostotilausriviin
+				if (!empty($rivitunnus_temp)) {
+					// p‰ivitet‰‰n myyntitilausrivi, jos se on liitetty ostotilausriviin (nollarivej‰ ei elvytet‰...)
 					$query = "	UPDATE tilausrivi
-								JOIN tilausrivin_lisatiedot
-								ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.vanha_otunnus = tilausrivi.otunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '{$rivitunnus_temp}' )
-								SET tyyppi = 'L'
+								JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.vanha_otunnus = tilausrivi.otunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '{$rivitunnus_temp}')
+								SET tilausrivi.tyyppi = 'L'
 								WHERE tilausrivi.yhtio = 'artr'
 								AND tilausrivi.tyyppi = 'D'
-								AND tilausrivi.kerattyaika = '0000-00-00 00:00:00'
+								AND tilausrivi.varattu+tilausrivi.jt != 0
+								AND tilausrivi.kerattyaika    = '0000-00-00 00:00:00'
 								AND tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
 								AND tilausrivi.laskutettuaika = '0000-00-00'";
 					pupe_query($query);
 
-					if(mysql_affected_rows() > 0) {
+					if (mysql_affected_rows() > 0) {
 						echo "<font class='error'>".t("Myyntitilausriville p‰ivitettiin m‰‰r‰t")."</font><br/><br/>";
 					}
 					else {

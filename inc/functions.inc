@@ -19394,24 +19394,24 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				$kappalemaara = $uusikpl;
 
 				$query = "	INSERT INTO kerayserat SET
-							yhtio = '{$kukarow['yhtio']}',
-							nro = {$keraysera_nro},
-							keraysvyohyke = 0,
-							tila = '',
-							sscc = 0,
-							sscc_ulkoinen = '',
-							otunnus = '{$rivi['data']['otunnus']}',
-							tilausrivi = '{$rivi['data']['tunnus']}',
-							pakkaus = '{$valittu_pakkaus}',
-							pakkausnro = '{$rivi['data']['pakkausnro']}',
-							kpl = '{$kappalemaara}',
-							kpl_keratty = 0,
-							keratty = '',
-							kerattyaika = '0000-00-00 00:00:00',
-							laatija = '{$kukarow['kuka']}',
-							luontiaika = now(),
-							muutospvm = now(),
-							muuttaja = ''";
+							yhtio 			= '{$kukarow['yhtio']}',
+							nro 			= {$keraysera_nro},
+							keraysvyohyke 	= 0,
+							tila 			= '',
+							sscc 			= 0,
+							sscc_ulkoinen 	= '',
+							otunnus 		= '{$rivi['data']['otunnus']}',
+							tilausrivi 		= '{$rivi['data']['tunnus']}',
+							pakkaus 		= '{$valittu_pakkaus}',
+							pakkausnro 		= '{$rivi['data']['pakkausnro']}',
+							kpl 			= '{$kappalemaara}',
+							kpl_keratty 	= 0,
+							keratty 		= '',
+							kerattyaika 	= '0000-00-00 00:00:00',
+							laatija 		= '{$kukarow['kuka']}',
+							luontiaika 		= now(),
+							muutospvm 		= now(),
+							muuttaja 		= ''";
 				$keraysera_ins = pupe_query($query);
 
 			}
@@ -19426,24 +19426,24 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				$kappalemaara = $rivi['data']['upd_varattu'];
 
 				$query = "	INSERT INTO kerayserat SET
-							yhtio = '{$kukarow['yhtio']}',
-							nro = {$keraysera_nro},
-							keraysvyohyke = 0,
-							tila = '',
-							sscc = 0,
-							sscc_ulkoinen = '',
-							otunnus = '{$rivi['data']['otunnus']}',
-							tilausrivi = '{$rivi['data']['tunnus']}',
-							pakkaus = '{$valittu_pakkaus}',
-							pakkausnro = '{$rivi['data']['pakkausnro']}',
-							kpl = '{$rivi['data']['upd_varattu']}',
-							kpl_keratty = 0,
-							keratty = '',
-							kerattyaika = '0000-00-00 00:00:00',
-							laatija = '{$kukarow['kuka']}',
-							luontiaika = now(),
-							muutospvm = now(),
-							muuttaja = ''";
+							yhtio 			= '{$kukarow['yhtio']}',
+							nro 			= {$keraysera_nro},
+							keraysvyohyke 	= 0,
+							tila 			= '',
+							sscc 			= 0,
+							sscc_ulkoinen 	= '',
+							otunnus 		= '{$rivi['data']['otunnus']}',
+							tilausrivi 		= '{$rivi['data']['tunnus']}',
+							pakkaus 		= '{$valittu_pakkaus}',
+							pakkausnro 		= '{$rivi['data']['pakkausnro']}',
+							kpl 			= '{$rivi['data']['upd_varattu']}',
+							kpl_keratty 	= 0,
+							keratty 		= '',
+							kerattyaika 	= '0000-00-00 00:00:00',
+							laatija 		= '{$kukarow['kuka']}',
+							luontiaika		= now(),
+							muutospvm 		= now(),
+							muuttaja 		= ''";
 				$keraysera_ins = pupe_query($query);
 
 			}
@@ -19460,24 +19460,24 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				}
 				else {
 					$query = "	INSERT INTO kerayserat SET
-								yhtio = '{$kukarow['yhtio']}',
-								nro = {$keraysera_nro},
-								keraysvyohyke = 0,
-								tila = '',
-								sscc = 0,
-								sscc_ulkoinen = '',
-								otunnus = '{$rivi['data']['otunnus']}',
-								tilausrivi = '{$rivi['data']['tunnus']}',
-								pakkaus = '{$valittu_pakkaus}',
-								pakkausnro = '{$rivi['data']['pakkausnro']}',
-								kpl = '{$kappalemaara}',
-								kpl_keratty = 0,
-								keratty = '',
-								kerattyaika = '0000-00-00 00:00:00',
-								laatija = '{$kukarow['kuka']}',
-								luontiaika = now(),
-								muutospvm = now(),
-								muuttaja = ''";
+								yhtio 			= '{$kukarow['yhtio']}',
+								nro 			= {$keraysera_nro},
+								keraysvyohyke 	= 0,
+								tila 			= '',
+								sscc 			= 0,
+								sscc_ulkoinen 	= '',
+								otunnus 		= '{$rivi['data']['otunnus']}',
+								tilausrivi 		= '{$rivi['data']['tunnus']}',
+								pakkaus 		= '{$valittu_pakkaus}',
+								pakkausnro 		= '{$rivi['data']['pakkausnro']}',
+								kpl 			= '{$kappalemaara}',
+								kpl_keratty 	= 0,
+								keratty 		= '',
+								kerattyaika 	= '0000-00-00 00:00:00',
+								laatija 		= '{$kukarow['kuka']}',
+								luontiaika 		= now(),
+								muutospvm 		= now(),
+								muuttaja 		= ''";
 					$keraysera_ins = pupe_query($query);
 				}
 			}
@@ -19716,15 +19716,16 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 	function tarkista_myynti_osto_liitos_ja_poista($osto_rivitunnus, $poistetaanko_oikeasti) {
 		global $kukarow;
 
-		if(!empty($osto_rivitunnus)) {
-			$query = "	SELECT tilausrivitunnus
+		if (!empty($osto_rivitunnus)) {
+			$query = "	SELECT tilausrivin_lisatiedot.tilausrivitunnus
 						FROM tilausrivin_lisatiedot
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tilausrivilinkki = '{$osto_rivitunnus}'";
+						JOIN tilausrivi ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
+						WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivin_lisatiedot.tilausrivilinkki = '{$osto_rivitunnus}'";
 			$result = pupe_query($query);
 
 			if ($tilausrivin_lisatiedot_row = mysql_fetch_assoc($result)) {
-				//tilaukset on naitettu. poistetaan myynti jos ei kerätty, toimitettu tai laskutettu sekä osto
+				// tilaukset on naitettu. poistetaan myynti jos ei kerätty, toimitettu tai laskutettu sekä osto
 				$query = "	SELECT *
 							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
@@ -19736,11 +19737,12 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 0) {
-					if($poistetaanko_oikeasti) {
+					if ($poistetaanko_oikeasti) {
 						$query = "	DELETE FROM tilausrivi
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus IN ('{$tilausrivin_lisatiedot_row['tilausrivitunnus']}', '{$osto_rivitunnus}')";
 						pupe_query($query);
+
 						$query = "	DELETE FROM tilausrivin_lisatiedot
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivilinkki = '{$osto_rivitunnus}'";
@@ -19761,7 +19763,7 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 				}
 			}
 			else {
-				if($poistetaanko_oikeasti) {
+				if ($poistetaanko_oikeasti) {
 					$query = "	DELETE FROM tilausrivi
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus IN ('{$osto_rivitunnus}')";

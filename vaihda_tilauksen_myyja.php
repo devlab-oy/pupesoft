@@ -192,6 +192,7 @@
 						<input type='hidden' name='rivitunnus' 	value = '$row[rivitunnus]'>";
 
 				echo "<select name='myyja' onchange='submit();'>";
+				echo "<option value=''>".t("Valitse")."</option>";
 
 				mysql_data_seek($myyjares, 0);
 

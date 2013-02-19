@@ -307,6 +307,11 @@
 	$i = 1;
 	$max_i = mysql_num_rows($result);
 
+	$max_keratyt = 0;
+	$max_tilatut = 0;
+	$max_rivit_keratyt = 0;
+	$max_rivit_suunnittelussa = 0;
+
 	while ($row = mysql_fetch_assoc($result)) {
 		echo "<tr>";
 		echo "<th class='keraysvyohyke' id='{$i}'>{$row['ker_nimitys']}&nbsp;<img title='",t("Näytä kerääjät"),"' alt='",t("Näytä kerääjät"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></th>";
@@ -330,6 +335,11 @@
 				$chk++;
 			}
 		}
+
+		$max_keratyt += $chk;
+		$max_tilatut += $row['tilatut'];
+		$max_rivit_keratyt += $row['keratyt'];
+		$max_rivit_suunnittelussa += $row['suunnittelussa'];
 
 		echo "{$chk} / {$row['tilatut']}</td>";
 
@@ -507,6 +517,13 @@
 
 		$i++;
 	}
+
+	echo "<tr>";
+	echo "<th>",t("Yhteensä"),"</th>";
+	echo "<th>{$max_keratyt} / {$max_tilatut}</th>";
+	echo "<th>{$max_rivit_keratyt} / {$max_rivit_suunnittelussa}</th>";
+	echo "<th colspan='4'></th>";
+	echo "</tr>";
 
 	echo "</table>";
 

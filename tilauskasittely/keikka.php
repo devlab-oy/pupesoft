@@ -723,7 +723,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 		$chk = $nayta_siirtovalmiit_suuntalavat != '' ? ' checked' : '';
 
-		echo "<td><input type='checkbox' name='nayta_siirtovalmiit_suuntalavat' {$chk} onchange='submit();'></td>";
+		echo "<td><input type='checkbox' name='nayta_siirtovalmiit_suuntalavat' {$chk} /></td>";
 	}
 
 	echo "</tr>";
@@ -764,8 +764,10 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	}
 
 	$suuntalavajoin = '';
+	$left_join = "LEFT ";
 
 	if ($yhtiorow['suuntalavat'] == 'S' and $nayta_siirtovalmiit_suuntalavat != '') {
+		$left_join = "";
 		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
 							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = lasku.tunnus) ";
 	}
@@ -792,7 +794,6 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	}
 	else {
 		$tilriv_joinlisa = "";
-		$left_join = "LEFT ";
 	}
 
 	// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja

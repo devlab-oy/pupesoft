@@ -223,6 +223,7 @@ if ($kollityht > 0) {
 
 			########## Uusi muokattu formaatti ##########
 			# Reference
+			# Reference 2
 			# Viite
 			# Vastaanottajan yhteyshenkilö
 			# Vastaanottajan nimi
@@ -240,6 +241,7 @@ if ($kollityht > 0) {
 			# Rahtikirjanro
 			$delisprintFileFormat = array(
 				"tilausnumero",
+				"tilausnumero2",
 				"viite",
 				"yhteyshenkilo_nimi",
 				"toim_nimi",

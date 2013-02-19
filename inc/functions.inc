@@ -5323,6 +5323,8 @@ if (!function_exists("generoi_alekentta_select")) {
 			for ($i = 1; $i <= $maara; $i++) {
 				$return .= " {$prefix}.ale{$i},";
 			}
+
+			$return .= " {$prefix}.erikoisale,";
 		}
 		elseif ($tapa == 'yhteen') {
 			$query = '';

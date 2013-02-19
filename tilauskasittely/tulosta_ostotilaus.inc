@@ -302,17 +302,19 @@
 
 				$pdf->draw_rectangle($kala+30, 20, 70, 580, $thispage, $rectparam);
 				$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40, $thispage, $rectparam);
-				$pdf->draw_rectangle($kala+30, 40,  $kala+10, 290, $thispage, $rectparam);
-				$pdf->draw_rectangle($kala+30, 290, $kala+10, 350, $thispage, $rectparam);
-				$pdf->draw_rectangle($kala+30, 350, $kala+10, 420, $thispage, $rectparam);
+				$pdf->draw_rectangle($kala+30, 40,  $kala+10, 230, $thispage, $rectparam);
+				$pdf->draw_rectangle($kala+30, 230, $kala+10, 290, $thispage, $rectparam);
+				$pdf->draw_rectangle($kala+30, 290, $kala+10, 360, $thispage, $rectparam);
+				$pdf->draw_rectangle($kala+30, 360, $kala+10, 420, $thispage, $rectparam);
 				$pdf->draw_rectangle($kala+30, 420, $kala+10, 480, $thispage, $rectparam);
 				$pdf->draw_rectangle($kala+30, 480, $kala+10, 520, $thispage, $rectparam);
 				$pdf->draw_rectangle($kala+30, 520, $kala+10, 580, $thispage, $rectparam);
 				$pdf->draw_text(25,  $kala+15, "#", $thispage, $norm);
 				$pdf->draw_text(42,  $kala+15, t("Tuotenumero", $kieli), $thispage, $norm);
-				$pdf->draw_text(292, $kala+15, t("Toimitusaika", $kieli), $thispage, $norm);
-				$pdf->draw_text(352, $kala+15, t("Määrä", $kieli), $thispage, $norm);
-				$pdf->draw_text(422, $kala+15, t("Hinta", $kieli), $thispage, $norm);
+				$pdf->draw_text(232, $kala+15, t("Toimitusaika", $kieli), $thispage, $norm);
+				$pdf->draw_text(292, $kala+15, t("Määrä", $kieli), $thispage, $norm);
+				$pdf->draw_text(362, $kala+15, t("Hinta", $kieli), $thispage, $norm);
+				$pdf->draw_text(422, $kala+15, t("Erikoisale", $kieli), $thispage, $norm);
 				$pdf->draw_text(482, $kala+15, t("Ale", $kieli), $thispage, $norm);
 				$pdf->draw_text(522, $kala+15, t("Yhteensä", $kieli), $thispage, $norm);
 
@@ -397,12 +399,12 @@
 
 					if (strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"])) {
 						$oikpos = $pdf->strlen("(".$row["tuoteno"].")", $pieni);
-						$pdf->draw_text(290-$oikpos, $kala, "(".$row["tuoteno"].")", $thispage, $pieni);
+						$pdf->draw_text(230-$oikpos, $kala, "(".$row["tuoteno"].")", $thispage, $pieni);
 					}
 				}
 
 				if ($yhtiorow['ostotilaustyyppi'] == '0' or $yhtiorow['ostotilaustyyppi'] == 'B') {
-					$pdf->draw_text(300, $kala, tv1dateconv($row["toimaika"]), $thispage, $norm);
+					$pdf->draw_text(240, $kala, tv1dateconv($row["toimaika"]), $thispage, $norm);
 				}
 
 				//	Tarkastetaan olisiko toimittajalla yksikkö!
@@ -424,10 +426,15 @@
 				}
 
 				$oikpos = $pdf->strlen(($row["varattu"]*1)." ".$omyks, $norm);
-				$pdf->draw_text(415-$oikpos, $kala, ($row["varattu"]*1)." ".$omyks, $thispage, $norm);
+				$pdf->draw_text(355-$oikpos, $kala, ($row["varattu"]*1)." ".$omyks, $thispage, $norm);
 
 				$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
-				$pdf->draw_text(475-$oikpos, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
+				$pdf->draw_text(415-$oikpos, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
+
+				if ($row['erikoisale'] != 0) {
+					$oikpos = $pdf->strlen($row['erikoisale']."%", $norm);
+					$pdf->draw_text(470-$oikpos, $kala, $row['erikoisale']."%", $thispage, $norm);
+				}
 
 				if ($row["ale1"] != 0) {
 					$ale_prosentti = generoi_alekentta_php($row, 'O', 'plain');

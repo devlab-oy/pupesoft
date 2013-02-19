@@ -12,9 +12,16 @@
 
 					$('.poistabutton').click(function(){
 
-						if (confirm('",t("Haluatko todella poistaa tämän ASN-sanoman?"),"')) {
+						if (confirm('",t("Haluatko todella poistaa tämän sanoman?"),"')) {
 							var kollitunniste = $(this).attr('id');
-							$('#kolli').val(kollitunniste);
+
+							if ($('#valitse').val() == 'asn') {
+								$('#kolli').val(kollitunniste);
+							}
+							else {
+								$('#lasku').val(kollitunniste);
+							}
+
 							$('#tee').val('poista_sanoma');
 							$('#formi').submit();
 						}
@@ -110,13 +117,20 @@
 
 	if ($tee == 'poista_sanoma') {
 
-		if (trim($kolli) != '') {
-
+		if ($valitse == 'asn') {
 			$sanomatunniste = $kolli;
+		}
+		else {
+			$sanomatunniste = $lasku;
+		}
+
+		if (trim($sanomatunniste) != '') {
+
+			$valitse_lisa = $valitse == 'asn' ? 'asn' : 'tec';
 
 			$query = "	DELETE FROM asn_sanomat
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND laji = 'asn'
+						AND laji = '{$valitse_lisa}'
 						AND asn_numero = '{$sanomatunniste}'";
 			$res = pupe_query($query);
 
@@ -2075,7 +2089,10 @@
 				echo "<td>{$row['tilausnumero']}</td>";
 				echo "<td>".tv1dateconv($row['saapumispvm'])."</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
-				echo "<td class='back'><input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' /></td>";
+				echo "<td class='back'>";
+				echo "<input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' />&nbsp;";
+				echo "<input type='button' class='poistabutton' id='{$row['tilausnumero']}' value='",t("Poista"),"' />";
+				echo "</td>";
 				echo "</tr>";
 
 				if (($ed_toimittaja == '' or $ed_toimittaja == $row['toimittajanumero']) and $row['ok'] == $row['rivit']) {

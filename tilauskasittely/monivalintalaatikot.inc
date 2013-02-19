@@ -81,6 +81,7 @@
 	$lisa_haku_asiakasosasto = "";
 	$lisa_haku_asiakasryhma	 = "";
 	$lisa_haku_asiakaspiiri	 = "";
+	$lisa_haku_toimipaikka	 = "";
 	$lisa_haku_kustp		 = "";
 	$lisa_haku_kohde		 = "";
 	$lisa_haku_projekti		 = "";
@@ -114,6 +115,7 @@
 	if (!isset($mul_asiakasosasto)) $mul_asiakasosasto = array();
 	if (!isset($mul_asiakasryhma)) 	$mul_asiakasryhma = array();
 	if (!isset($mul_asiakaspiiri)) 	$mul_asiakaspiiri = array();
+	if (!isset($mul_toimipaikka)) 	$mul_toimipaikka = array();
 	if (!isset($mul_kustp)) 		$mul_kustp = array();
 	if (!isset($mul_kohde)) 		$mul_kohde = array();
 	if (!isset($mul_projekti)) 		$mul_projekti = array();
@@ -549,6 +551,24 @@
 				$lisa_haku_asiakaspiiri = " and asiakas.piiri in ($asiakaspiirit) ";
 				$lisa .= " and asiakas.piiri in ($asiakaspiirit) ";
 			}
+		}
+	}
+
+	if(count($mul_toimipaikka) > 0) {
+		$toimipaikat = '';
+		foreach ($mul_toimipaikka as $toimipaikkax) {
+			if (trim($toimipaikkax) != '') {
+				$toimipaikkax = trim(mysql_real_escape_string($toimipaikkax));
+				$toimipaikat .= "'$toimipaikkax',";
+				$ulisa .= "&mul_toimipaikka[]=".rawurlencode($toimipaikkax);
+			}
+		}
+
+		$toimipaikat = substr($toimipaikat, 0, -1);
+
+		if (trim($toimipaikat) != '') {
+			$lisa_haku_toimipaikka = "	and lasku.yhtio_toimipaikka in ($toimipaikat)";
+			$lisa .= " and lasku.yhtio_toimipaikka in ($toimipaikat) ";
 		}
 	}
 
@@ -1916,6 +1936,49 @@
 			}
 
 			echo "</table></div>";
+		}
+
+		if ($monivalintalaatikko == "toimipaikka") {
+			$query = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'";
+			$toimipaikka_result = pupe_query($query);
+			echo "<div style='float: left; padding-right:4px; padding-top:4px;'>";
+			echo "<table valign='top'>";
+			if ($piirra_otsikot) {
+				echo "<tr><th>",t("Toimipaikka"),"</th></tr>";
+			}
+			echo "<tr>";
+			echo "<td nowrap style='padding:0px'><select name='mul_toimipaikka[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+			echo "<option value=''>".t("Ei valintaa")."</option>";
+
+			while($toimipaikka = mysql_fetch_assoc($toimipaikka_result)) {
+				$sel = '';
+				if (count($mul_toimipaikka) > 0) {
+					if (in_array(trim($toimipaikka['tunnus']), $mul_toimipaikka)) {
+						$sel = 'SELECTED';
+					}
+				}
+
+				echo "<option value='{$toimipaikka['tunnus']}' $sel>{$toimipaikka['nimi']}" . "</option>";
+			}
+
+			echo "</tr>";
+
+			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+				$ruksitchk = "";
+
+				if ($ruksit["toimipaikka"] != "") {
+					$ruksitchk = "CHECKED";
+				}
+
+				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[toimipaikka]' size='2' value='$jarjestys[toimipaikka]'> ".t("Toimipaikoittain")." <input type='checkbox' name='ruksit[toimipaikka]' value='toimipaikka' $ruksitchk><br>";
+
+				echo "</th></tr>";
+			}
+
+			echo "</table>";
+			echo "</div>";
 		}
 
 		if ($monivalintalaatikko == "kustp") {

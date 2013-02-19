@@ -547,6 +547,16 @@ if (isset($messenger) and $messenger == 'X' and isset($message) and trim($messag
 }
 
 if ($toiminto == "kohdista") {
+	if(isset($poista) and $poista != '') {
+		// Tämä on naimisissa olevien osto- ja myyntitilausrivien saapumisten kautta poistamista varten
+		//ostotilauksen tilausrivi on poistettu jo tässä vaiheessa, rivitunnus on tallessa formissa ja tilausrivin_lisatiedot taulusta löytyy oston ja myynnin yhdistävä linkki
+		tarkista_myynti_osto_liitos_ja_poista($rivitunnus, true);
+
+		$tee = 'TI';
+		$tyhjenna = true;
+		unset($rivitunnus);
+	}
+
 	require('ostotilausten_rivien_kohdistus.inc');
 }
 

@@ -154,7 +154,7 @@
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
 						group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet";
 
-			if ($kukarow["yhtio"] != "artr") {
+			if ($kukarow["yhtio"] != "artr" AND $kukarow["yhtio"] != "mergr") {
 				$query .= "	FROM lasku use index (yhtio_tila_mapvm)
 							JOIN toimi ON (lasku.yhtio=toimi.yhtio and lasku.liitostunnus=toimi.tunnus)
 							JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi = 'O' and tilausrivi.kpl > 0)

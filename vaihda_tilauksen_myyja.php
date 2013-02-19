@@ -77,19 +77,63 @@
 			<td colspan='3'><input type='checkbox' name='riveittain' value='RIVI' $rukchk></td>";
 	echo "</tr>";
 
+	$rukchk = "";
+	if ($puuttuvat  != '') $rukchk = "CHECKED";
+
+	echo "<tr><th>".t("Näytä vain ne josta myyjä puuttuu")."</th>
+			<td colspan='3'><input type='checkbox' name='puuttuvat' value='VAIN' $rukchk></td>";
+	echo "</tr>";
+
+
+	$query = "	SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
+				FROM kuka
+				WHERE kuka.yhtio = '$kukarow[yhtio]'
+				ORDER BY kuka.nimi";
+	$myyjares = pupe_query($query);
+
+	echo "<tr><th>".t("Näytä vain myyjän tilaukset")."</th><td colspan='3'><select name='laskumyyja'>";
+	echo "<option value=''>".t("Valitse")."</option>";
+
+	while ($myyjarow = mysql_fetch_assoc($myyjares)) {
+		$sel = "";
+
+		if ($myyjarow['tunnus'] == $laskumyyja) {
+			$sel = 'selected';
+		}
+
+		echo "<option value='$myyjarow[tunnus]' $sel>$myyjarow[nimi]</option>";
+	}
+
+	echo "</select></td></tr>";
+	echo "</table><br>";
+
 	$soplisa = "";
 
 	if ($sopparit != "") {
 		$soplisa = " AND lasku.clearing != 'sopimus' ";
 	}
 
-	$rivilisa = "";
-	$rivijoin = "";
+	$rivilisa 		= "";
+	$rivijoin 		= "";
+	$puuttuvatlisa  = "";
 
 	if ($riveittain != "") {
 		$rivilisa = " tilausrivi.rivihinta, tilausrivi.kommentti rivikommetti, tilausrivi.tunnus rivitunnus, tilausrivin_lisatiedot.positio, ";
 		$rivijoin = " JOIN tilausrivi ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'L')
 					  JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus) ";
+
+		if ($puuttuvat != "") {
+			$puuttuvatlisa = " AND tilausrivin_lisatiedot.positio = '' ";
+		}
+	}
+	elseif ($puuttuvat != "") {
+		$puuttuvatlisa = " AND lasku.myyja = 0 ";
+	}
+
+	$lasmylis = "";
+
+	if ($laskumyyja != "") {
+		$lasmylis = " AND lasku.myyja = $laskumyyja ";
 	}
 
 	$query = "	SELECT
@@ -110,10 +154,10 @@
 				and lasku.tapvm  >= '$vva-$kka-$ppa'
 				and lasku.tapvm  <= '$vvl-$kkl-$ppl'
 				{$soplisa}
+				{$puuttuvatlisa}
+				{$lasmylis}
 				ORDER BY 1";
 	$result = pupe_query($query);
-
-	echo "</table><br>";
 
 	echo "<input type='submit' value='".t("Näytä tilaukset")."'>";
 	echo "</form><br><br>";

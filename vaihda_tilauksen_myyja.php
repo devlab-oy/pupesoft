@@ -45,6 +45,7 @@
 
 		require ("raportit/naytatilaus.inc");
 		echo "<hr>";
+		exit;
 	}
 
 	echo "<font class='head'>".t("Vaihda tilauksen myyjä").":</font><hr>";
@@ -86,8 +87,8 @@
 	$rivijoin = "";
 
 	if ($riveittain != "") {
-		$rivilisa = " tilausrivi.kommentti rivikommetti, tilausrivi.tunnus rivitunnus, tilausrivin_lisatiedot.positio, ";
-		$rivijoin = " JOIN tilausrivi ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L')
+		$rivilisa = " tilausrivi.rivihinta, tilausrivi.kommentti rivikommetti, tilausrivi.tunnus rivitunnus, tilausrivin_lisatiedot.positio, ";
+		$rivijoin = " JOIN tilausrivi ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'L')
 					  JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus) ";
 	}
 
@@ -145,11 +146,16 @@
 		echo "<th>".t("Summa")."</th>";
 		echo "<th>".t("Tilausviite")."</th>";
 		echo "<th>".t("Myyjä")."</th>";
+
+		if ($riveittain != "") {
+			echo "<th>".t("Rivimyyjä")."</th>";
+		}
+
 		echo "</tr>";
 		echo "</thead>";
 		echo "<tbody>";
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 
 			echo "<tr>";
 
@@ -161,7 +167,14 @@
 			echo "<td valign='top' $class>{$row['tunnus']}</td>";
 			echo "<td valign='top' $class>{$row['laskunro']}</td>";
 			echo "<td valign='top' $class>{$row['asiakas']}</td>";
-			echo "<td valign='top' align='right' $class>{$row['summa']}</td>";
+
+			if ($riveittain != "") {
+				echo "<td valign='top' align='right' $class>".sprintf('%.2f', $row['rivihinta'])."</td>";
+			}
+			else {
+				echo "<td valign='top' align='right' $class>{$row['summa']}</td>";
+			}
+
 			echo "<td valign='top' $class>{$row['tilausviite']}";
 
 			if ($riveittain != "") {
@@ -184,9 +197,9 @@
 
 			echo "</td>";
 
-			echo "<td valign='top' $class><a name='$row[tunnus]'>";
-
 			if ($riveittain != "") {
+				echo "<td valign='top' $class>$row[nimi]</td>";
+				echo "<td valign='top' $class><a name='$row[tunnus]'>";
 				echo "<form name='myyjaformi_$row[rivitunnus]' id='myyjaformi_$row[rivitunnus]' action=\"javascript:ajaxPost('myyjaformi_$row[rivitunnus]', '{$palvelin2}vaihda_tilauksen_myyja.php?', 'div_$row[rivitunnus]', '', '', '', 'post');\" method='POST'>
 						<input type='hidden' name='tee' 	value = 'PAIVITARIVIMYYJA'>
 						<input type='hidden' name='rivitunnus' 	value = '$row[rivitunnus]'>";
@@ -209,6 +222,7 @@
 				echo "</select></form><div id='div_$row[rivitunnus]'></div></td>";
 			}
 			else {
+				echo "<td valign='top' $class><a name='$row[tunnus]'>";
 				echo "<form name='myyjaformi_$row[tunnus]' id='myyjaformi_$row[tunnus]' action=\"javascript:ajaxPost('myyjaformi_$row[tunnus]', '{$palvelin2}vaihda_tilauksen_myyja.php?', 'div_$row[tunnus]', '', '', '', 'post');\" method='POST'>
 						<input type='hidden' name='tee' 	value = 'PAIVITAMYYJA'>
 						<input type='hidden' name='tunnus' 	value = '$row[tunnus]'>";
@@ -230,21 +244,7 @@
 				echo "</select></form><div id='div_$row[tunnus]'></div></td>";
 			}
 
-			echo "<td class='back' valign='top'>
-					<form method='post'>
-					<input type='hidden' name='tee' 	   value='NAYTATILAUS'>
-					<input type='hidden' name='tunnus' 	   value='$row[tunnus]'>
-					<input type='hidden' name='ppa' 	   value='$ppa'>
-					<input type='hidden' name='kka' 	   value='$kka'>
-					<input type='hidden' name='vva' 	   value='$vva'>
-					<input type='hidden' name='ppl' 	   value='$ppl'>
-					<input type='hidden' name='kkl' 	   value='$kkl'>
-					<input type='hidden' name='vvl' 	   value='$vvl'>
-					<input type='hidden' name='sopparit'   value='$sopparit'>
-					<input type='hidden' name='riveittain' value='$riveittain'>
-					<input type='submit' value='".t("Näytä tilaus")."'>
-					</form></td>";
-
+			echo "<td class='back' valign='top'><a href='' onclick=\"window.open('{$palvelin2}vaihda_tilauksen_myyja.php?tee=NAYTATILAUS&tunnus=$row[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=600'); return false;\">".t("Näytä tilaus")."</a></td>";
 			echo "</tr>";
 		}
 

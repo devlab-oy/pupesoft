@@ -23,7 +23,7 @@
 
 						if (valitse == 'asn') {
 							var asn = $(this).attr('id');
-							$('#formi').attr('action', '?valitse=asn&asn_numero='+asn+'&lopetus={$PHP_SELF}////tee=').submit();
+							$('#formi').attr('action', '?valitse=asn&asn_numerot='+asn+'&lopetus={$PHP_SELF}////tee=').submit();
 						}
 						else {
 							var tilausnumero = $(this).attr('id');
@@ -153,30 +153,41 @@
 			$result = pupe_query($query);
 			$row = mysql_fetch_assoc($result);
 
-			if ($valitse == 'asn') {
-				$asn_numerot = $muutparametrit;
+			if(!empty($row['toimittajanro'])) {
+				if ($valitse == 'asn') {
+					//riviltä 177
+					$asn_numerot = $asn_numerot;
 
-				$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND asn_numero IN({$asn_numerot})";
-				$res = pupe_query($query);
+					$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND asn_numero IN({$asn_numerot})";
+					$res = pupe_query($query);
+				}
+				else {
+					//riviltä 181
+					$tilausnumero = (int) $tilausnumero;
+
+					$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tilausnumero = '{$tilausnumero}'";
+					$res = pupe_query($query);
+				}
+
+				$tee = '';
+				$tila = 'ok';
 			}
 			else {
-				$tilausnumero = (int) $muutparametrit;
-
-				$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tilausnumero = '{$tilausnumero}'";
-				$res = pupe_query($query);
+				//toimittajalla ei ole toimittaja numeroa, sitä ei voida laittaa asn_sanomien toimittajaksi
+				echo "<font class='error'>".t("Toimittajalta puutttuu toimittaja numero").". ".t("Sitä ei voida laittaa asn_sanomien toimittajaksi")."</font>";
+				echo "<br/>";
+				$tee = 'vaihdatoimittaja';
+				$tila = '';
 			}
-
-			$tee = '';
-			$tila = 'ok';
 		}
 
 		if ($tila == '') {
 
 			if ($valitse == 'asn') {
-				$action = "&muutparametrit={$asn_numero}&valitse={$valitse}";
+				$action = "&asn_numerot={$asn_numerot}&valitse={$valitse}";
 			}
 			else {
-				$action = "&muutparametrit={$tilausnumero}&valitse={$valitse}";
+				$action = "&tilausnumero={$tilausnumero}&valitse={$valitse}";
 			}
 
 			echo "<form method='post' action='?tee={$tee}{$action}'>";

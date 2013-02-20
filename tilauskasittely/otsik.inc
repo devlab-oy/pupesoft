@@ -76,6 +76,7 @@
 					postitp				= '',
 					maa   				= '',
 					toim_ovttunnus 		= '',
+                    toim_kohde          = 0,
 					toim_nimi      		= '',
 					toim_nimitark  		= '',
 					toim_osoite    		= '',
@@ -144,6 +145,24 @@
 			$tila = 'EI_NAYTETA';
 		}
 	}
+
+    if ($tnimi == "" and isset($tkohde) and $tkohde > 0) {
+        $kohde_query = "SELECT *
+                        FROM kohde
+                        WHERE yhtio='$kukarow[yhtio]'
+                        AND tunnus = '$tkohde'
+                        LIMIT 1";
+
+        $kohde_res = pupe_query($kohde_query);
+
+		$krow = mysql_fetch_assoc($kohde_res);
+        $tnimi = $krow['nimi'];
+        $tnimitark = $krow['nimitark'];
+        $tosoite = $krow['osoite'];
+        $tpostino = $krow['postino'];
+        $tpostitp = $krow['postitp'];
+
+    }
 
 	if ($tnimi == "" and !isset($jatka) and isset($vaihdatoim_asiakas)) {
 		echo "<font class='message'>".t("Syötä hakuehto toimitusosoitteen nimi-kenttään.")."</font><br>";
@@ -673,6 +692,7 @@
 
 					if ($key == "toimpp") 			$srow["toimaika"] = $_POST["toimvv"]."-".$_POST["toimkk"]."-".$_POST["toimpp"];
 					elseif ($key == "kerpp") 		$srow["kerayspvm"] = $_POST["kervv"]."-".$_POST["kerkk"]."-".$_POST["kerpp"];
+					elseif ($key == "tkohde") 		$srow["toim_kohde"] = $val;
 					elseif ($key == "tnimi") 		$srow["toim_nimi"] = $val;
 					elseif ($key == "tnimitark") 	$srow["toim_nimitark"] = $val;
 					elseif ($key == "tosoite") 		$srow["toim_osoite"] = $val;
@@ -904,7 +924,40 @@
 			echo "<table>";
 			echo "<tr>
 					<th colspan='2' align='left' valign='top'>".t("Toimitusosoite").":</td></tr>";
-			echo "<tr>
+
+/* jos asiakkaalle ei ole tallennettu kohteita, ei piirretä kenttää */
+            $kohde_ui = "";
+            $kohde_query = "SELECT *
+                            FROM kohde
+                            WHERE yhtio='$kukarow[yhtio]'
+                            AND asiakas = '$asiakasid'";
+            $kohde_res = pupe_query($kohde_query);
+
+			while( $krow = mysql_fetch_assoc($kohde_res)) {
+                if ($krow['tunnus'] == $srow['toim_kohde']) {
+
+                    $sel = "SELECTED";
+                    $srow['toim_nimi'] = $krow['nimi'];
+                    $srow['toim_nimitark'] = $krow['nimitark'];
+                    $srow['toim_osoite'] = $krow['osoite'];
+                    $srow['toim_postino'] = $rkow['postino'];
+                    $srow['toim_postitp'] = $krow['postitp'];
+                }
+                else {
+                    $sel = "";
+                }
+                $kohde_ui .= "<option value = '{$krow['tunnus']}' $sel>{$krow["nimi"]}</option>";
+            }
+
+            if ($kohde_ui != "") {
+                echo "<tr>
+                        <td valign='top'> ".t("Kohde").": </td>
+                        <td><select name='tkohde' onChange='submit();'>
+                        <option value =''>" . t('ei kohdetta') . "</option>
+                        {$kohde_ui}
+                        </select></td></tr>";
+            }
+            echo "<tr>
 					<td valign='top'> ".t("Nimi").": </td>
 					<td><input type='text' name='tnimi' size='35' value='$srow[toim_nimi]'></td></tr>";
 			echo "<tr>
@@ -3169,6 +3222,7 @@
 					toimitustapa 						= '$toimitustapa',
 					toimvko	 							= '$toimvko',
 					toim_maa 							= '$toim_maa',
+					toim_kohde 							= '$tkohde',
 					toim_nimi 							= '$tnimi',
 					toim_nimitark 						= '$tnimitark',
 					toim_osoite 						= '$tosoite',

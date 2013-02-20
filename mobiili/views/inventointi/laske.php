@@ -42,7 +42,7 @@
 				<?php $sel = "";?>
 				<select name="inventointi_seliteen_tunnus">
 					<?php foreach($inventointi_selitteet as $inventointi_selite) {
-						if(!empty($inventointi_selite['selitetark_2'])) {
+						if(!empty($inventointi_selite['selitetark_3'])) {
 							$sel = "SELECTED";
 						}
 					?>

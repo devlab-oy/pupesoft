@@ -217,7 +217,8 @@
 				if (mysql_num_rows($liitosotsikko_chk_res) > 0) {
 
 					$query = "	UPDATE asn_sanomat SET
-								status = 'X'
+								status = 'X',
+								tilausrivi = ''
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND asn_numero = '{$lasku}'
 								AND status not in ('E', 'D')";

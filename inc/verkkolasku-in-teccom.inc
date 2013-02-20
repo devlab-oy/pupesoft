@@ -486,7 +486,8 @@
 
 									echo "rivihinta jälkeen ".$rtuoteno[$i]['rivihinta']."<br>";
 								}
-								elseif ($charge_description == 'freight costs') {
+
+								if ($charge_description == 'freight costs' or $charge_code == 'freightcharges') {
 									$ei_oteta_kulua_pois = true;
 								}
 							}

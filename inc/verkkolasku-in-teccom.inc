@@ -475,7 +475,11 @@
 								$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);
 								$osto_rivi_kulu_alv = $laskun_alv;
 
-								if ($charge_description == 'freight costs') {
+								// ZF -keississä otetaan rahti pois rivihinnasta.
+								if ($charge_code == 'freightcharges') {
+									$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node->Amount);
+								}
+								elseif ($charge_description == 'freight costs') {
 									$ei_oteta_kulua_pois = true;
 								}
 							}

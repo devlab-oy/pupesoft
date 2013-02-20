@@ -291,7 +291,7 @@
 							$charge_description = strtolower(trim($node_x->AllowOrChargeDescription));
 							$charge_code = strtolower(trim($node_x->AllowOrChargeCode));
 
-							if ($charge_code == "zcwr" or $charge_code == 'zfwa' or $charge_description == "core value") {
+							if ($charge_code == "zcwr" or $charge_code == 'zfwa' or strpos($charge_description, "core value") !== FALSE) {
 								$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node_x->Amount);
 							}
 						}

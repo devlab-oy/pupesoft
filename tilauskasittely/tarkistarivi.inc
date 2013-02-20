@@ -275,7 +275,7 @@
 		$tilausok++;
 	}
 
-	if (trim($trow["vienti"]) != '' and $row["tyyppi"] != "V" and $row["tyyppi"] != "W") {
+	if (trim($trow["vienti"]) != '' and $row["tyyppi"] != "V" and $row["tyyppi"] != "W" and $row["var2"] != "OK") {
 
 		// vientikieltokäsittely:
 		// +maa tarkoittaa että myynti on kielletty tähän maahan
@@ -288,6 +288,11 @@
 	 		$riviok++;
 	 		$tilausok++;
 			$kielletty++;
+
+			// Vientikiellossa olevan tuotteen voi hyväksyä myyntitilaukselle
+			if ($yhtiorow["vientikiellon_ohitus"] == "K" and $kukarow["extranet"] == "") {
+				$saako_hyvaksya++;
+			}
 		}
 
 		if (strpos(strtoupper($trow["vienti"]), strtoupper("-$laskurow[toim_maa]")) === FALSE and strpos($trow["vienti"], "-") !== FALSE) {
@@ -296,6 +301,11 @@
 	 		$riviok++;
 	 		$tilausok++;
 			$kielletty++;
+
+			// Vientikiellossa olevan tuotteen voi hyväksyä myyntitilaukselle
+			if ($yhtiorow["vientikiellon_ohitus"] == "K" and $kukarow["extranet"] == "") {
+				$saako_hyvaksya++;
+			}
 		}
 
 	}

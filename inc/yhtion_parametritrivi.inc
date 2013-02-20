@@ -1533,6 +1533,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "vientikiellon_ohitus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1 = ($trow[$i] == "K") ? "selected" : "";
+
+		$ulos .= "<option value='' >".t("Vientikiellossa olevaa tuotetta ei voi lisätä myyntitilaukselle")."</option>";
+		$ulos .= "<option value='K' $sel1>".t("Vientikiellossa olevan tuotteen voi hyväksyä myyntitilaukselle")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "vienti_erittelyn_tulostus") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

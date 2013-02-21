@@ -1124,7 +1124,14 @@
 					//** Asiakas_ja_tai_tuote grouppaukset start **//
 					if ($mukaan == "kustp") {
 						$group .= ",kustannuspaikka";
-						$select .= "if(tuote.kustp > 0,tuote.kustp,asiakas.kustannuspaikka) as kustannuspaikka, ";
+
+						if (!isset($kustapvalinta) or $kustapvalinta == 'tuote') {
+							$select .= "tuote.kustp as kustannuspaikka, ";
+						}
+						else {
+							$select .= "asiakas.kustannuspaikka as kustannuspaikka, ";
+						}
+
 						$order  .= "kustannuspaikka,";
 						$gluku++;
 						$muutgroups++;
@@ -1132,7 +1139,14 @@
 
 					if ($mukaan == "kohde") {
 						$group .= ",kohde";
-						$select .= "if(tuote.kohde > 0,tuote.kohde,asiakas.kohde) as kohde, ";
+
+						if (!isset($kohdevalinta) or $kohdevalinta == 'tuote') {
+							$select .= "tuote.kohde as kohde, ";
+						}
+						else {
+							$select .= "asiakas.kohde as kohde, ";
+						}
+
 						$order  .= "kohde,";
 						$gluku++;
 						$muutgroups++;
@@ -1140,7 +1154,14 @@
 
 					if ($mukaan == "projekti") {
 						$group .= ",projekti";
-						$select .= "if(tuote.projekti > 0,tuote.projekti,asiakas.projekti) as projekti, ";
+
+						if (!isset($projektivalinta) or $projektivalinta == 'tuote') {
+							$select .= "tuote.projekti as projekti, ";
+						}
+						else {
+							$select .= "asiakas.projekti as projekti, ";
+						}
+
 						$order  .= "projekti,";
 						$gluku++;
 						$muutgroups++;

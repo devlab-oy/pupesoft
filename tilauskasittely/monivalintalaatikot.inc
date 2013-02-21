@@ -101,6 +101,27 @@
 		$asiakasvalintachk  = "CHECKED";
 	}
 
+	if (!isset($kustapvalinta) or $kustapvalinta == 'tuote') {
+		$kustapvalinta_tuote  	= "CHECKED";
+	}
+	else {
+		$kustapvalinta_asiakas  = "CHECKED";
+	}
+
+	if (!isset($kohdevalinta) or $kohdevalinta == 'tuote') {
+		$kohdevalinta_tuote  	= "CHECKED";
+	}
+	else {
+		$kohdevalinta_asiakas  = "CHECKED";
+	}
+
+	if (!isset($projektivalinta) or $projektivalinta == 'tuote') {
+		$projektivalinta_tuote  	= "CHECKED";
+	}
+	else {
+		$projektivalinta_asiakas  = "CHECKED";
+	}
+
 	// Setataan muuttujat
 	if (!isset($mul_osasto)) 		$mul_osasto = array();
 	if (!isset($mul_try)) 			$mul_try = array();
@@ -591,8 +612,14 @@
 				$lisa .= " and asiakas.kustannuspaikka in ($kustpt) ";
 			}
 			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
-				$lisa_haku_kustp = " and (tuote.kustp in ($kustpt) or asiakas.kustannuspaikka in ($kustpt)) ";
-				$lisa .= " and (tuote.kustp in ($kustpt) or asiakas.kustannuspaikka in ($kustpt)) ";
+				if (isset($kustapvalinta) and $kustapvalinta == "tuote") {
+					$lisa_haku_kustp = " and tuote.kustp in ($kustpt) ";
+					$lisa .= " and tuote.kustp in ($kustpt) ";
+				}
+				else {
+					$lisa_haku_kustp = " and asiakas.kustannuspaikka in ($kustpt) ";
+					$lisa .= " and asiakas.kustannuspaikka in ($kustpt) ";
+				}
 			}
 			else {
 				$lisa_haku_kustp = " and tiliointi.kustp in ($kustpt) ";
@@ -620,8 +647,14 @@
 				$lisa .= " and asiakas.kohde in ($kohdet) ";
 			}
 			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
-				$lisa_haku_kustp = " and (tuote.kohde in ($kohdet) or asiakas.kohde in ($kohdet)) ";
-				$lisa .= " and (tuote.kohde in ($kohdet) or asiakas.kohde in ($kohdet)) ";
+				if (isset($kohdevalinta) and $kohdevalinta == "tuote") {
+					$lisa_haku_kustp = " and tuote.kohde in ($kohdet) ";
+					$lisa .= " and tuote.kohde in ($kohdet) ";
+				}
+				else {
+					$lisa_haku_kustp = " and asiakas.kohde in ($kohdet) ";
+					$lisa .= " and asiakas.kohde in ($kohdet) ";
+				}
 			}
 			else {
 				$lisa_haku_kohde = " and tiliointi.kohde in ($kohdet) ";
@@ -649,8 +682,14 @@
 				$lisa .= " and asiakas.projekti in ($projektit) ";
 			}
 			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
-				$lisa_haku_kustp = " and (tuote.projekti in ($projektit) or asiakas.projekti in ($projektit)) ";
-				$lisa .= " and (tuote.projekti in ($projektit) or asiakas.projekti in ($projektit)) ";
+				if (isset($projektivalinta) and $projektivalinta == "tuote") {
+					$lisa_haku_kustp = " and tuote.projekti in ($projektit) ";
+					$lisa .= " and tuote.projekti in ($projektit) ";
+				}
+				else {
+					$lisa_haku_kustp = " and asiakas.projekti in ($projektit) ";
+					$lisa .= " and asiakas.projekti in ($projektit) ";
+				}
 			}
 			else {
 				$lisa_haku_projekti = " and tiliointi.projekti in ($projektit) ";
@@ -1943,42 +1982,46 @@
 						FROM yhtion_toimipaikat
 						WHERE yhtio = '{$kukarow['yhtio']}'";
 			$toimipaikka_result = pupe_query($query);
-			echo "<div style='float: left; padding-right:4px; padding-top:4px;'>";
-			echo "<table valign='top'>";
-			if ($piirra_otsikot) {
-				echo "<tr><th>",t("Toimipaikka"),"</th></tr>";
-			}
-			echo "<tr>";
-			echo "<td nowrap style='padding:0px'><select name='mul_toimipaikka[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
-			echo "<option value=''>".t("Ei valintaa")."</option>";
 
-			while($toimipaikka = mysql_fetch_assoc($toimipaikka_result)) {
-				$sel = '';
-				if (count($mul_toimipaikka) > 0) {
-					if (in_array(trim($toimipaikka['tunnus']), $mul_toimipaikka)) {
-						$sel = 'SELECTED';
+			if (mysql_num_rows($toimipaikka_result) > 0) {
+
+				echo "<div style='float: left; padding-right:4px; padding-top:4px;'>";
+				echo "<table valign='top'>";
+				if ($piirra_otsikot) {
+					echo "<tr><th>",t("Toimipaikka"),"</th></tr>";
+				}
+				echo "<tr>";
+				echo "<td nowrap style='padding:0px'><select name='mul_toimipaikka[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+				echo "<option value=''>".t("Ei valintaa")."</option>";
+
+				while ($toimipaikka = mysql_fetch_assoc($toimipaikka_result)) {
+					$sel = '';
+					if (count($mul_toimipaikka) > 0) {
+						if (in_array(trim($toimipaikka['tunnus']), $mul_toimipaikka)) {
+							$sel = 'SELECTED';
+						}
 					}
+
+					echo "<option value='{$toimipaikka['tunnus']}' $sel>{$toimipaikka['nimi']}" . "</option>";
 				}
 
-				echo "<option value='{$toimipaikka['tunnus']}' $sel>{$toimipaikka['nimi']}" . "</option>";
-			}
+				echo "</tr>";
 
-			echo "</tr>";
+				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+					$ruksitchk = "";
 
-			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
-				$ruksitchk = "";
+					if ($ruksit["toimipaikka"] != "") {
+						$ruksitchk = "CHECKED";
+					}
 
-				if ($ruksit["toimipaikka"] != "") {
-					$ruksitchk = "CHECKED";
+					echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[toimipaikka]' size='2' value='$jarjestys[toimipaikka]'> ".t("Toimipaikoittain")." <input type='checkbox' name='ruksit[toimipaikka]' value='toimipaikka' $ruksitchk><br>";
+
+					echo "</th></tr>";
 				}
 
-				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[toimipaikka]' size='2' value='$jarjestys[toimipaikka]'> ".t("Toimipaikoittain")." <input type='checkbox' name='ruksit[toimipaikka]' value='toimipaikka' $ruksitchk><br>";
-
-				echo "</th></tr>";
+				echo "</table>";
+				echo "</div>";
 			}
-
-			echo "</table>";
-			echo "</div>";
 		}
 
 		if ($monivalintalaatikko == "kustp") {
@@ -2081,7 +2124,11 @@
 						$ruksitchk = "CHECKED";
 					}
 
-					echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[kustp]' size='2' value='$jarjestys[kustp]'> ".t("Kustannuspaikoittain")." <input type='checkbox' name='ruksit[kustp]' value='kustp' $ruksitchk></th></tr>";
+					echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[kustp]' size='2' value='$jarjestys[kustp]'> ".t("Kustannuspaikoittain")." <input type='checkbox' name='ruksit[kustp]' value='kustp' $ruksitchk><br>";
+
+					echo "<input type='radio' name='kustapvalinta' value='tuote' {$kustapvalinta_tuote}>",t("Tuotteilta");
+					echo "<input type='radio' name='kustapvalinta' value='asiakas' {$kustapvalinta_asiakas}>",t("Asiakkailta");
+					echo "</th></tr>";
 				}
 
 				echo "</table></div>";
@@ -2132,7 +2179,11 @@
 						$ruksitchk = "CHECKED";
 					}
 
-					echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[kohde]' size='2' value='$jarjestys[kohde]'> ".t("Kohteittain")." <input type='checkbox' name='ruksit[kohde]' value='kohde' $ruksitchk></th></tr>";
+					echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[kohde]' size='2' value='$jarjestys[kohde]'> ".t("Kohteittain")." <input type='checkbox' name='ruksit[kohde]' value='kohde' $ruksitchk><br>";
+
+					echo "<input type='radio' name='kohdevalinta' value='tuote' {$kohdevalinta_tuote}>",t("Tuotteilta");
+					echo "<input type='radio' name='kohdevalinta' value='asiakas' {$kohdevalinta_asiakas}>",t("Asiakkailta");
+					echo "</th></tr>";
 				}
 
 				echo "</table></div>";
@@ -2183,7 +2234,11 @@
 						$ruksitchk = "CHECKED";
 					}
 
-					echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[projekti]' size='2' value='$jarjestys[projekti]'> ".t("Projekteittain")." <input type='checkbox' name='ruksit[projekti]' value='projekti' $ruksitchk></th></tr>";
+					echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[projekti]' size='2' value='$jarjestys[projekti]'> ".t("Projekteittain")." <input type='checkbox' name='ruksit[projekti]' value='projekti' $ruksitchk><br>";
+
+					echo "<input type='radio' name='projektivalinta' value='tuote' {$projektivalinta_tuote}>",t("Tuotteilta");
+					echo "<input type='radio' name='projektivalinta' value='asiakas' {$projektivalinta_asiakas}>",t("Asiakkailta");
+					echo "</th></tr>";
 				}
 
 				echo "</table></div>";

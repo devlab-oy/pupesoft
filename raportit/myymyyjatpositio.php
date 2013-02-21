@@ -13,7 +13,13 @@
 	if (!isset($alkuvv))  $alkuvv  = date("Y", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
 	if (!isset($loppukk)) $loppukk = date("m", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
 	if (!isset($loppuvv)) $loppuvv = date("Y", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
-	$tee = isset($tee) ? trim($tee) : "";
+	$tee = isset($tee) ? $tee : "";
+	$toimitetut = isset($toimitetut) ? $toimitetut : "";
+
+	if ($toimitetut != "") {
+		$loppukk = date("m", mktime(0, 0, 0, date("m"), 1, date("Y")));
+		$loppuvv = date("Y", mktime(0, 0, 0, date("m"), 1, date("Y")));
+	}
 
 	if (checkdate($alkukk, 1, $alkuvv) and checkdate($loppukk, 1, $loppuvv)) {
 		// MySQL muodossa
@@ -44,6 +50,15 @@
 			</td>";
 	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
 	echo "</tr>";
+
+	$rukchk = "";
+	if ($toimitetut != '') $rukchk = "CHECKED";
+
+	echo "<tr><th>".t("Myös toimitetut tilaukset")."</th>
+			<td><input type='checkbox' name='toimitetut' value='JOO' $rukchk></td>";
+	echo "</tr>";
+
+
 	echo "</table>";
 	echo "<br>";
 
@@ -64,9 +79,29 @@
 					and lasku.tapvm >= '$pvmalku'
 					and lasku.tapvm <= '$pvmloppu'
 					GROUP BY myyja, nimi, kausi
-					HAVING summa <> 0
-					ORDER BY nimi";
-		$result = pupe_query($query);
+					HAVING summa <> 0";
+
+
+		if ($toimitetut  != '') {
+			$query2 = "	SELECT tilausrivin_lisatiedot.positio myyja,
+						ifnull(kuka.nimi, 'Ö-muu') nimi,
+						date_format(now(),'%Y/%m') kausi,
+						round(sum(tilausrivi.hinta),0) summa
+						FROM lasku
+						JOIN tilausrivi ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'L')
+						JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+						LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = tilausrivin_lisatiedot.positio)
+						WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+						and lasku.tila    = 'L'
+						and lasku.alatila = 'D'
+						GROUP BY myyja, nimi, kausi
+						HAVING summa <> 0";
+
+			$query = "($query) UNION ($query2)";
+
+		}
+
+		$result = pupe_query($query." ORDER BY myyja, nimi, kausi");
 
 		$summa = array();
 		$myyja_nimi = array();

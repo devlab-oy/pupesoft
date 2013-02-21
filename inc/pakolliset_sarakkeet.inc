@@ -45,16 +45,16 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "asiakas" :
 				$pakolliset = array("YTUNNUS");
-                
+
 				if ($yhtiorow['asiakkaan_tarkenne'] == '') {
 					$wherelliset = array("YTUNNUS", "OVTTUNNUS", "TOIM_OVTTUNNUS");
 				}
-				else {
+				elseif ($yhtiorow['asiakkaan_tarkenne'] == 'A') {
 					$wherelliset = array("YTUNNUS", "ASIAKASNRO");
 				}
-                
+
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-                
+
 				if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
 					$kielletyt[] = "LUOTTORAJA";
 				}

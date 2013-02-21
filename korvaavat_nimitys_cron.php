@@ -68,16 +68,22 @@ while($ketju = mysql_fetch_assoc($result)) {
 
 				// Muutetaan tuotteen nimitys (tuotteet joiden järjestys on 0 ja niillä on saldoa)
 				echo "Muutetaan tuotteen {$tuote['tuoteno']} nimitys 'KORVAAVA $edellinen_tuote[tuoteno]'\n";
-				$muutettu++;
 
-				// Poistetaan tuote kaikista vastaavuusketjuista
-				$poista_vastaavat_query = "DELETE FROM vastaavat
-											WHERE yhtio='{$kukarow['yhtio']}'
-											AND tuoteno='{$tuote['tuoteno']}'";
+				$uusi_nimitys = "KORVAAVA " . $edellinen_tuote['tuoteno'];
+				$muutos_query = "UPDATE tuote SET nimitys='$uusi_nimitys' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuote['tuoteno']}'";
 
-				// if (pupe_query($poista_vastaavat_query)) {
-				// 	$poistettu++;
-				// }
+				// Ajetaan päivitysquery ja poistetaan tuote vastaavuusketjuista
+				if (pupe_query($muutos_query)) {
+					$muutettu++;
+
+					$poista_vastaavat_query = "DELETE FROM vastaavat
+												WHERE yhtio='{$kukarow['yhtio']}'
+												AND tuoteno='{$tuote['tuoteno']}'";
+
+					if (pupe_query($poista_vastaavat_query)) {
+					 	$poistettu++;
+					}
+				}
 			}
 		}
 

@@ -389,8 +389,8 @@
 								$toimpp 		= $kerpp = date("j");
 								$toimkk 		= $kerkk = date("n");
 								$toimvv 		= $kervv = date("Y");
-								$comments 		= $kukarow["nimi"]." Generoi hälytysrajojen perusteella";
-								$viesti 		= $kukarow["nimi"]." Generoi hälytysrajojen perusteella";
+								$comments 		= $kukarow["nimi"]." ".t("Generoi hälytysrajojen perusteella");
+								$viesti 		= $kukarow["nimi"]." ".t("Generoi hälytysrajojen perusteella");
 								$varasto 		= $lahdevarasto;
 								$toimitustapa 	= $valittu_toimitustapa;
 								$toim			= "SIIRTOLISTA";

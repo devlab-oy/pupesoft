@@ -2058,8 +2058,8 @@
 				$kustparray[$sxrow["isa_tarkenne"]][$sxrow["tunnus"]] = $sxrow;
 			}
 
-			function lapsitasot ($isataso, $sisennys, $tunnukset) {
-				GLOBAL $kustparray, $mul_kustp;
+			function lapsitasot ($isataso, $sisennys, $tunnukset, $kustparray) {
+				GLOBAL $mul_kustp;
 
 				$sisennys++;
 
@@ -2083,7 +2083,7 @@
 
 						echo "$sxrow[koodi] $sxrow[nimi]</option>";
 
-						lapsitasot($sxrow["tunnus"], $sisennys, $tunnukset);
+						lapsitasot($sxrow["tunnus"], $sisennys, $tunnukset, $kustparray);
 
 						$tunnukset = $tunnukset_save;
 					}
@@ -2112,7 +2112,7 @@
 
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
-				lapsitasot(0, -1, "0,");
+				lapsitasot(0, -1, "0,", $kustparray);
 
 				echo "</select></td>";
 				echo "</tr>";
@@ -2128,6 +2128,30 @@
 
 					echo "<input type='radio' name='kustapvalinta' value='tuote' {$kustapvalinta_tuote}>",t("Tuotteilta");
 					echo "<input type='radio' name='kustapvalinta' value='asiakas' {$kustapvalinta_asiakas}>",t("Asiakkailta");
+					echo "</th></tr>";
+				}
+				else if (strpos($_SERVER['SCRIPT_NAME'], "matkalaskuraportti") !== FALSE) {
+					$ruksitchk_kustp = "";
+					$ruksitchk_toimittajalta = "";
+					$ruksitchk_tuotteilta = "";
+
+					if ($ruksit["kustp"] != "") {
+						$ruksitchk_kustp = "CHECKED";
+					}
+					if ($kenelta_kustp == "toimittajilta") {
+						$ruksitchk_toimittajalta = "CHECKED";
+					}
+					if ($kenelta_kustp == "tuotteilta") {
+						$ruksitchk_tuotteilta = "CHECKED";
+					}
+
+					echo "<tr><th>";
+					echo t("Prio").": <input type='text' name='jarjestys[kustp]' size='2' value='$jarjestys[kustp]'>";
+					echo t("Kustannuspaikoittain")." <input type='checkbox' name='ruksit[kustp]' value='kustp' $ruksitchk_kustp>";
+					echo "</th></tr>";
+					echo "<tr><th>";
+					echo t("Toimittajilta")." <input type='radio' name='kenelta_kustp' value='toimittajilta' $ruksitchk_toimittajalta> ";
+					echo t("Tuotteilta")." <input type='radio' name='kenelta_kustp' value='tuotteilta' $ruksitchk_tuotteilta> ";
 					echo "</th></tr>";
 				}
 

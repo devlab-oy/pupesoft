@@ -521,6 +521,7 @@
 		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = ''>".t("Asiakkaalle l‰hetet‰‰n j‰lkitoimituksia normaalisti")."</option>";
 		$ulos .= "<option value = 'Y' $jtksel[Y]>".t("Asiakkaan j‰lkitoimituksia ei yhdistet‰ JT-selauksessa")."</option>";
+		$ulos .= "<option value = 'Z' $jtksel[Z]>".t("Asiakkaan j‰lkitoimituksia ei osatoimiteta")."</option>";
 		$ulos .= "<option value = 'o' $jtksel[o]>".t("Asiakkaalle ei l‰hete‰ j‰lkitoimituksia")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;

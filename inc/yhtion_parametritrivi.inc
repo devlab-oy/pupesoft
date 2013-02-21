@@ -209,6 +209,8 @@
 		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)");
 		$ulos .= "<option value = '13' $sel[13]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja");
 		$ulos .= "<option value = '14' $sel[14]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)");
+		$ulos .= "<option value = '15' $sel[15]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja");
+		$ulos .= "<option value = '16' $sel[16]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1004,13 +1006,16 @@
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
 		$sel			= array();
-		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('o', 'k', 'L', 'M'), '');
+		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('o', 'k', 'L', 'M', 'N', 'Q', 'P'), '');
 
 		$ulos .= "<option value=''>".t("Keräysvahvistusta/sähköistä lähetettä ei lähetetä")."</option>";
 		$ulos .= "<option value='o'{$sel['o']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
 		$ulos .= "<option value='k'{$sel['k']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
-		$ulos .= "<option value='L'{$sel['L']}>".t("Keräysvahvistus/paperinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='L'{$sel['L']}>".t("Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
 		$ulos .= "<option value='M'{$sel['M']}>".t("Keräysvahvistus/paperinen & sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='N'{$sel['N']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
+		$ulos .= "<option value='Q'{$sel['Q']}>".t("Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
+		$ulos .= "<option value='P'{$sel['P']}>".t("Keräysvahvistus/paperinen & sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3252,6 +3257,20 @@
 
 		$ulos .= "<option value = ''>".t("Hintaa ei leikata")."</option>";
 		$ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Myyntihintaa leikataan 25% per taso")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+
+	}
+	
+	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel['Z'] = $trow[$i] == 'Z' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Matkalaskun tarkastaja ei voi muokata matkalaskua")."</option>";
+		$ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Matkalaskun tarkastaja voi muokata matkalaskua")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -220,6 +220,10 @@ if (!function_exists("tsekit")) {
 
 if (!isset($toiminto)) $toiminto = "";
 if (!isset($keikkarajaus)) $keikkarajaus = "";
+if (!isset($ytunnus)) $ytunnus = "";
+if (!isset($keikka)) $keikka = "";
+if (!isset($ostotil)) $ostotil = "";
+if (!isset($toimittajaid)) $toimittajaid = "";
 
 echo "<font class='head'>".t("Saapumiset")."</font><hr>";
 
@@ -419,40 +423,6 @@ if ($toiminto == "tulosta") {
 	}
 }
 
-if ($toiminto == 'erolista') {
-
-	// Haetaan itse saapuminen
-	$query    = "	SELECT *
-					FROM lasku
-					WHERE tunnus = '{$otunnus}'
-					AND yhtio = '{$kukarow['yhtio']}'";
-	$result   = pupe_query($query);
-	$laskurow = mysql_fetch_assoc($result);
-
-	// katotaan liitetyt laskut
-	$query = "	SELECT GROUP_CONCAT(DISTINCT ostores_lasku.laskunro SEPARATOR ',') volaskutunn
-				FROM lasku
-				JOIN lasku ostores_lasku on (ostores_lasku.yhtio = lasku.yhtio and ostores_lasku.tunnus = lasku.vanhatunnus)
-				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-				AND lasku.tila = 'K'
-				AND lasku.vienti IN ('C','F','I','J','K','L')
-				AND lasku.vanhatunnus <> 0
-				AND lasku.laskunro = '{$laskurow['laskunro']}'
-				HAVING volaskutunn IS NOT NULL";
-	$llres = pupe_query($query);
-	$llrow = mysql_fetch_assoc($llres);
-
-	if ($llrow['volaskutunn'] != '') {
-
-		$komento = isset($komento) ? $komento : '';
-
-		$return_bool = erolista($llrow['volaskutunn'], 'ostolasku', $komento, $otunnus);
-
-		$toiminto = $return_bool === TRUE ? "" : $toiminto;
-		$toimittajaid = $laskurow['liitostunnus'];
-	}
-}
-
 // syˆtet‰‰n keikan lis‰tietoja
 if ($toiminto == "lisatiedot") {
 	require ("ostotilauksen_lisatiedot.inc");
@@ -463,7 +433,7 @@ if ($toiminto == "varastopaikat") {
 	require('ostorivienvarastopaikat.inc');
 }
 
-// lis‰ill‰‰n keikkaan kululaskuja
+// lis‰ill‰‰n saapumiseen kululaskuja
 if ($toiminto == "kululaskut") {
 	$keikanalatila 	= "";
 
@@ -556,7 +526,37 @@ if (isset($nappikeikalla) and $nappikeikalla == 'ollaan' and $toiminto != 'kohdi
 	$toiminto = "kohdista";
 }
 
+if (isset($messenger) and $messenger == 'X' and isset($message) and trim($message) != "" and isset($vastaanottaja) and trim($vastaanottaja) != "" and isset($status) and $status == 'X') {
+
+	$message = trim($message);
+
+	$message .= " {$message_postfix}";
+
+	$query = "	INSERT INTO messenger SET
+				yhtio = '{$kukarow['yhtio']}',
+				kuka = '{$kukarow['kuka']}',
+				vastaanottaja = '{$vastaanottaja}',
+				viesti = '{$message}',
+				status = '{$status}',
+				luontiaika = now()";
+	$messenger_result = pupe_query($query);
+
+	echo "<font class='message'>",sprintf(t('Viesti l‰hetetty onnistuneesti k‰ytt‰j‰lle %s.'), $vastaanottaja)."</font><br />";
+
+	$messenger = $message = $vastaanottaja = $status = "";
+}
+
 if ($toiminto == "kohdista") {
+	if(isset($poista) and $poista != '') {
+		// T‰m‰ on naimisissa olevien osto- ja myyntitilausrivien saapumisten kautta poistamista varten
+		//ostotilauksen tilausrivi on poistettu jo t‰ss‰ vaiheessa, rivitunnus on tallessa formissa ja tilausrivin_lisatiedot taulusta lˆytyy oston ja myynnin yhdist‰v‰ linkki
+		tarkista_myynti_osto_liitos_ja_poista($rivitunnus, true);
+
+		$tee = 'TI';
+		$tyhjenna = true;
+		unset($rivitunnus);
+	}
+
 	require('ostotilausten_rivien_kohdistus.inc');
 }
 
@@ -632,11 +632,12 @@ if ($ytunnus == "" and $ostotil != "") {
 
 // jos ollaan annettu $ytunnus haetaan toimittajan tiedot arrayseen $toimittajarow
 if ($ytunnus != "" or $toimittajaid != "") {
+	$ytunnus	 = isset($ytunnus) ? $ytunnus : '';
 	$keikkamonta = 0;
 	$hakutunnus  = $ytunnus;
 	$hakuid		 = $toimittajaid;
 
-	require ("../inc/kevyt_toimittajahaku.inc");
+	require ("inc/kevyt_toimittajahaku.inc");
 
 	$keikkamonta += $monta;
 
@@ -649,6 +650,8 @@ if ($ytunnus != "" or $toimittajaid != "") {
 
 // N‰ytet‰‰n kaikkien toimittajien keskener‰iset saapumiset
 if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
+
+	if (!isset($nayta_siirtovalmiit_suuntalavat)) $nayta_siirtovalmiit_suuntalavat = "";
 
 	echo "<form name='toimi' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
@@ -718,10 +721,26 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		echo "</tr><tr>";
 		echo "<th>",t("N‰yt‰ vain saapumiset, joilla on siirtovalmiita suuntalavoja"),"</th>";
 
-		$chk = trim($nayta_siirtovalmiit_suuntalavat) != '' ? ' checked' : '';
+		$chk = $nayta_siirtovalmiit_suuntalavat != '' ? ' checked' : '';
 
 		echo "<td><input type='checkbox' name='nayta_siirtovalmiit_suuntalavat' {$chk} onchange='submit();'></td>";
 	}
+
+	echo "</tr>";
+	echo "<tr>";
+	echo "<th>",t("Lis‰rajaus"),"</th>";
+
+	if (!isset($lisarajaus)) $lisarajaus = "";
+
+	$sel = array_fill_keys(array($lisarajaus), ' selected') + array_fill_keys(array('riveja_viematta_varastoon', 'liitetty_lasku', 'liitetty_lasku_rivitok_kohdistus_eiok', 'liitetty_lasku_rivitok_kohdistus_ok'), '');
+
+	echo "<td><select name='lisarajaus' ",js_alasvetoMaxWidth('lisarajaus', 250),">";
+	echo "<option value=''>",t("N‰yt‰ kaikki"),"</option>";
+	echo "<option value='riveja_viematta_varastoon'{$sel['riveja_viematta_varastoon']}>",t("Saapumiset joissa on rivej‰ viem‰tt‰ varastoon"),"</option>";
+	echo "<option value='liitetty_lasku'{$sel['liitetty_lasku']}>",t("Saapumiset joihin on liitetty lasku"),"</option>";
+	echo "<option value='liitetty_lasku_rivitok_kohdistus_eiok'{$sel['liitetty_lasku_rivitok_kohdistus_eiok']}>",t("Saapumiset joihin on liitetty lasku ja kaikki rivit on viety varastoon ja kohdistus ei ole ok"),"</option>";
+	echo "<option value='liitetty_lasku_rivitok_kohdistus_ok'{$sel['liitetty_lasku_rivitok_kohdistus_ok']}>",t("Saapumiset joihin on liitetty lasku ja kaikki rivit on viety varastoon ja kohdistus on ok"),"</option>";
+	echo "</select></td>";
 
 	echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
 	echo "</tr>";
@@ -738,8 +757,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	$kaikkiliitettyyhteensa			= 0;
 	$vaihtoomaisuuslaskujayhteensa 	= 0;
 	$kululaskujayhteensa 			= 0;
-
-	$laatijalisa = '';
+	$laatijalisa 					= '';
 
 	if (isset($keikan_laatija) and trim($keikan_laatija) != '') {
 		$laatijalisa = " and lasku.laatija = '$keikan_laatija' ";
@@ -747,12 +765,35 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 	$suuntalavajoin = '';
 
-	if ($yhtiorow['suuntalavat'] == 'S' and trim($nayta_siirtovalmiit_suuntalavat) != '') {
+	if ($yhtiorow['suuntalavat'] == 'S' and $nayta_siirtovalmiit_suuntalavat != '') {
 		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
 							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = lasku.tunnus) ";
 	}
 
 	$query_ale_lisa = generoi_alekentta("O");
+
+	$joinlisa = "";
+
+	if ($lisarajaus == 'liitetty_lasku' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+		$joinlisa = "JOIN lasku AS liitetty_lasku ON (liitetty_lasku.yhtio = lasku.yhtio AND liitetty_lasku.tila = 'K' AND liitetty_lasku.laskunro = lasku.laskunro AND liitetty_lasku.vanhatunnus <> 0 AND liitetty_lasku.vienti IN ('C','F','I','J','K','L'))";
+	}
+
+	$kohdistuslisa = "";
+
+	if ($lisarajaus == 'riveja_viematta_varastoon') {
+		$tilriv_joinlisa = "AND tilausrivi.kpl >= 0 AND tilausrivi.varattu > 0";
+		$left_join = "";
+	}
+	elseif ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+		$tilriv_joinlisa = "AND tilausrivi.kpl > 0 AND tilausrivi.varattu = 0";
+		$left_join = "";
+		if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') $kohdistuslisa = " and lasku.kohdistettu = 'K'";
+		else $kohdistuslisa = " and lasku.kohdistettu = ''";
+	}
+	else {
+		$tilriv_joinlisa = "";
+		$left_join = "LEFT ";
+	}
 
 	// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
 	$query = "	SELECT lasku.liitostunnus,
@@ -765,16 +806,21 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				count(distinct lasku.tunnus) kpl,
 				group_concat(distinct lasku.laskunro SEPARATOR ', ') keikat,
 				round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta, 0)),2) varastossaarvo,
-				round(sum((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * {$query_ale_lisa}),2) kohdistettuarvo
+				round(sum((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * {$query_ale_lisa}),2) kohdistettuarvo,
+				SUM(tilausrivi.kpl) var_kpl,
+				SUM(tilausrivi.varattu) var_varattu,
+				GROUP_CONCAT(DISTINCT lasku.tunnus) tilauksien_tunnukset
 				FROM lasku USE INDEX (yhtio_tila_mapvm)
-				LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
-				$suuntalavajoin
+				{$left_join}JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O' {$tilriv_joinlisa})
+				{$joinlisa}
+				{$suuntalavajoin}
 				WHERE lasku.yhtio 	  = '$kukarow[yhtio]'
 				and lasku.tila 		  = 'K'
 				and lasku.alatila 	  = ''
 				and lasku.vanhatunnus = 0
 				and lasku.mapvm 	  = '0000-00-00'
 				$laatijalisa
+				{$kohdistuslisa}
 				GROUP BY lasku.liitostunnus
 				ORDER BY lasku.nimi, lasku.nimitark, lasku.ytunnus";
 	$result = pupe_query($query);
@@ -826,6 +872,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			echo "<td>$row[nimi] $row[nimitark]</td><td>$row[osoite] $row[postitp]</td><td>$row[keikat]</td><td align='right'>$row[kpl]</td><td align='right'>$row[varastossaarvo]</td>";
 			echo "<td class='back'><form method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$row[liitostunnus]'>";
+			echo "<input type='hidden' name='lisarajaus' value='{$lisarajaus}' />";
 			echo "<input type='submit' value='".t("Valitse")."'>";
 			echo "</form></td>";
 			echo "</tr>";
@@ -899,7 +946,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 	echo "<td>$toimittajarow[postino]</td>";
 	echo "<td>$toimittajarow[postitp]</td>";
 
-	echo "<td class='back' rowspan='4' style='vertical-align:bottom;'>";
+	echo "<td class='back' style='vertical-align:bottom;'>";
 	echo "<form method='post'>";
 	echo "<input type='hidden' name='toiminto' value='uusi'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
@@ -913,17 +960,71 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		echo "<tr><td colspan='5'>".wordwrap($toimittajarow["fakta"], 100, "<br>")."</td></tr>";
 	}
 
-	echo "</table><br>";
+	if (!isset($lisarajaus)) $lisarajaus = "";
+
+	$sel = array_fill_keys(array($lisarajaus), ' selected') + array_fill_keys(array('riveja_viematta_varastoon', 'liitetty_lasku', 'liitetty_lasku_rivitok_kohdistus_eiok', 'liitetty_lasku_rivitok_kohdistus_ok'), '');
+
+	echo "<tr>";
+	echo "<th>",t("Lis‰rajaus"),"</th>";
+	echo "<td colspan='4'>";
+	echo "<form method='post'>";
+	echo "<input type='hidden' name='toiminto' value=''>";
+	echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
+	echo "<select name='lisarajaus' ",js_alasvetoMaxWidth('lisarajaus', 250)," onchange='submit();'>";
+	echo "<option value=''>",t("N‰yt‰ kaikki"),"</option>";
+	echo "<option value='riveja_viematta_varastoon'{$sel['riveja_viematta_varastoon']}>",t("Saapumiset joissa on rivej‰ viem‰tt‰ varastoon"),"</option>";
+	echo "<option value='liitetty_lasku'{$sel['liitetty_lasku']}>",t("Saapumiset joihin on liitetty lasku"),"</option>";
+	echo "<option value='liitetty_lasku_rivitok_kohdistus_eiok'{$sel['liitetty_lasku_rivitok_kohdistus_eiok']}>",t("Saapumiset joihin on liitetty lasku ja kaikki rivit on viety varastoon ja kohdistus ei ole ok"),"</option>";
+	echo "<option value='liitetty_lasku_rivitok_kohdistus_ok'{$sel['liitetty_lasku_rivitok_kohdistus_ok']}>",t("Saapumiset joihin on liitetty lasku ja kaikki rivit on viety varastoon ja kohdistus on ok"),"</option>";
+	echo "</select></form></td></tr>";
+
+	echo "</table><br />";
+
+	$joinlisa = $havinglisa = $selectlisa = $groupbylisa = "";
+
+	if (in_array($lisarajaus, array('riveja_viematta_varastoon','liitetty_lasku_rivitok_kohdistus_eiok','liitetty_lasku_rivitok_kohdistus_ok','liitetty_lasku'))) {
+
+		if ($lisarajaus == 'liitetty_lasku') {
+
+			$joinlisa = "JOIN lasku AS liitetty_lasku ON (liitetty_lasku.yhtio = lasku.yhtio AND liitetty_lasku.tila = 'K' AND liitetty_lasku.laskunro = lasku.laskunro AND liitetty_lasku.vanhatunnus <> 0 AND liitetty_lasku.vienti IN ('C','F','I','J','K','L'))";
+			$groupbylisa = "GROUP BY 1,2,3,4,5,6";
+		}
+		else {
+
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi = 'O')";
+			$groupbylisa = "GROUP BY 1,2,3,4,5,6,7,8";
+			$selectlisa = ", SUM(tilausrivi.kpl) kpl, SUM(tilausrivi.varattu) varattu";
+
+			if ($lisarajaus == 'riveja_viematta_varastoon') {
+				$havinglisa = "HAVING kpl >= 0 AND varattu > 0";
+			}
+			else {
+				$havinglisa = "HAVING kpl > 0 AND varattu = 0";
+			}
+		}
+	}
 
 	// etsit‰‰n vanhoja keikkoja, vanhatunnus pit‰‰ olla tyhj‰‰ niin ei listata liitettyj‰ laskuja
-	$query = "	SELECT *
+	$query = "	SELECT lasku.tunnus,
+				lasku.laskunro,
+				lasku.comments,
+				lasku.nimi,
+				lasku.ytunnus,
+				lasku.luontiaika,
+				lasku.laatija,
+				lasku.rahti_etu,
+				lasku.kohdistettu
+				{$selectlisa}
 				FROM lasku USE INDEX (tila_index)
+				{$joinlisa}
 				where lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.liitostunnus = '$toimittajaid'
 				and lasku.tila 		   = 'K'
 				and lasku.alatila 	   = ''
 				and lasku.vanhatunnus  = 0
 				and lasku.mapvm 	   = '0000-00-00'
+				{$groupbylisa}
+				{$havinglisa}
 				ORDER BY lasku.laskunro DESC";
 	$result = pupe_query($query);
 
@@ -978,15 +1079,29 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 			$vaihtoomaisuuslaskujayhteensa += $llrow["vosumma"];
 			$kululaskujayhteensa += $llrow["kusumma"];
 
+			if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+				if ($llrow['num'] == 0 or ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' and $kohok == 1) or ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok' and $kohok == 0)) continue;
+			}
+
 			echo "<tr class='aktiivi'>";
 
 			echo "<td valign='top'>$row[laskunro]</td>";
 
 			// tehd‰‰n pop-up divi jos keikalla on kommentti...
 			if ($row["comments"] != "") {
+
+				$query = "	SELECT nimi
+							FROM kuka
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND kuka = '{$row['laatija']}'";
+				$kuka_chk_res = pupe_query($query);
+				$kuka_chk_row = mysql_fetch_assoc($kuka_chk_res);
+
 				echo "<td valign='top' class='tooltip' id='$row[laskunro]'>";
 				echo "<div id='div_$row[laskunro]' class='popup' style='width:500px;'>";
 				echo t("Saapuminen").": $row[laskunro] / $row[nimi]<br><br>";
+				echo t("Laatija"),": {$kuka_chk_row['nimi']}<br />";
+				echo t("Luontiaika"),": ",tv1dateconv($row['luontiaika'], "pitk‰"),"<br /><br />";
 				echo $row["comments"];
 				echo "</div>";
 				echo "<img src='$palvelin2/pics/lullacons/info.png'></td>";
@@ -1074,13 +1189,13 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				echo "<input type='hidden' name='tunnus' 		value='$row[tunnus]'>";
 				echo "<input type='hidden' name='laskunro' 		value='$row[laskunro]'>";
 				echo "<input type='hidden' name='indexvas' 		value='1'>";
+				echo "<input type='hidden' name='lisarajaus'	value='{$lisarajaus}' />";
 				echo "<select name='toiminto'>";
 
 				// n‰it‰ saa tehd‰ aina keikalle
 				echo "<option value='kohdista'>"         .t("Kohdista rivej‰")."</option>";
 				echo "<option value='kululaskut'>"       .t("Saapumisen laskut")."</option>";
 				echo "<option value='lisatiedot'>"       .t("Lis‰tiedot")."</option>";
-				echo "<option value='erolista'>"       	 .t("Erolista")."</option>";
 				echo "<option value='yhdista'>"          .t("Yhdist‰ saapumisia")."</option>";
 
 				// poista keikka vaan jos ei ole yht‰‰n rivi‰ kohdistettu ja ei ole yht‰‰n kululaskua liitetty
@@ -1227,12 +1342,6 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	$nappikeikka .= "<input type='hidden' name='toiminto' value='lisatiedot'>";
 	$nappikeikka .= "<input type='submit' value='".t("Lis‰tiedot")."'>";
 	$nappikeikka .= "$formloppu";
-
-	$nappikeikka .= "$formalku";
-	$nappikeikka .= "<input type='hidden' name='toiminto' value='erolista'>";
-	$nappikeikka .= "<input type='submit' value='".t("Erolista")."'>";
-	$nappikeikka .= "$formloppu";
-
 
 	// poista keikka vaan jos ei ole yht‰‰n rivi‰ kohdistettu ja ei ole yht‰‰n kululaskua liitetty
 	if ($kplyhteensa == 0 and $llrow["num"] == 0) {

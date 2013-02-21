@@ -64,7 +64,6 @@
 
 	$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 	$monivalintalaatikot_normaali = array();
-	$noautosubmit = TRUE;
 
 	require ("tilauskasittely/monivalintalaatikot.inc");
 

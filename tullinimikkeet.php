@@ -89,16 +89,16 @@ if ($tee == "muuta") {
 
 if ($tee == "synkronoi") {
 
-	$ok = FALSE;
+	$ch  = curl_init();
+	curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/referenssitullinimikkeet.sql");
+	curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+	curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+	curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt ($ch, CURLOPT_HEADER, FALSE);
+	$nimikeet = curl_exec ($ch);
+	$nimikeet = explode("\n", trim($nimikeet));
 
-	if ($file = fopen("http://api.devlab.fi/referenssitullinimikkeet.sql","r")) {
-		$ok = TRUE;
-	}
-	elseif ($file = fopen("http://10.0.1.2/referenssitullinimikkeet.sql","r")) {
-		$ok = TRUE;
-	}
-
-	if (!$ok) {
+	if (count($nimikeet) == 0) {
 		echo t("Tiedoston avaus ep‰onnistui")."!";
 		require ("inc/footer.inc");
 		exit;
@@ -167,11 +167,11 @@ if ($tee == "synkronoi") {
 	}
 
 	// Eka rivi roskikseen
-	$rivi = fgets($file);
+	unset($nimikeet[0]);
 
 	echo t("Lis‰t‰‰n uudet tullinimikkeet tietokantaan")."...<br>";
 
-	while ($rivi = fgets($file)) {
+	foreach ($nimikeet as $rivi) {
 		list($cnkey, $cn, $dashes, $dm, $su, $su_vientiilmo, $kieli) = explode("\t", trim($rivi));
 
 		$dm = preg_replace("/([^A-Z0-9ˆ‰Â≈ƒ÷ \.,\-_\:\/\!\|\?\+\(\)%#]|È)/i", "", $dm);
@@ -189,8 +189,6 @@ if ($tee == "synkronoi") {
 					luontiaika		= now()";
 		$result = mysql_query($query) or pupe_error($query);
 	}
-
-	fclose($file);
 
 	echo t("P‰ivitys valmis")."...<br><br><hr>";
 }

@@ -73,7 +73,7 @@
 				if (mysql_num_rows($result) > 0) {
 					//	Haetaan vientitieto..
 
-					//	Kululaskun voi kohdistaa useaan keikkaan
+					//	Kululaskun voi kohdistaa useaan saapumiseen
 					if (in_array($laskurow["vienti"], array("B","E","H"))) {
 						echo "<form id='liita' action='hyvak.php?keikalla=on' method='post' autocomplete='off'>";
 						echo "<input type='hidden' name='lopetus' value='$lopetus'>";
@@ -1532,7 +1532,7 @@
 						AND vanhatunnus = '$trow[tunnus]'";
 			$keikres = pupe_query($query);
 
-			//	Onko liitetty jo keikkaan
+			//	Onko liitetty jo saapumiseen
 			if (in_array($trow["vienti"], array("B", "C", "J", "E", "F", "K", "H", "I", "L"))) {
 				if (mysql_num_rows($keikres) > 0) {
 					$liitetty = "<font class='ok'>ON</font>";

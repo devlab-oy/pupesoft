@@ -49,6 +49,7 @@
 	if(!isset($ytunnus)) 	 			$ytunnus = "";
 	if(!isset($myyja))					$myyja = "";
 	if(!isset($automaattinen_poiminta))	$automaattinen_poiminta = "";
+	if (!isset($mista_tullaan))			$mista_tullaan = "";
 
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
@@ -152,7 +153,7 @@
 				}
 
 				// Toimitetaan jtrivit
-				tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, "", $tilaus_on_jo, $varastosta, $jt_huomioi_pvm);
+				tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, "", $tilaus_on_jo, $varastosta, $jt_huomioi_pvm, $mista_tullaan);
 
 				if ($kukarow['extranet'] != '' and $tee == "JT_TILAUKSELLE") {
 					unset($jarj);
@@ -1547,7 +1548,7 @@
 										$tunnusarray 		= explode(',', $tunnukset);
 
 										// Toimitetaan jtrivit
-										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm);
+										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm, $mista_tullaan);
 
 										$jt_rivilaskuri++;
 									}
@@ -1622,7 +1623,7 @@
 										$tunnusarray 		= explode(',', $tunnukset);
 
 										// Toimitetaan jtrivit
-										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm);
+										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm, $mista_tullaan);
 
 										$jt_rivilaskuri++;
 									}
@@ -2307,5 +2308,3 @@
 		elseif (@include("footer.inc"));
 		else exit;
 	}
-
-?>

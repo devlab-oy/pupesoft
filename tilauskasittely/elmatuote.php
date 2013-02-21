@@ -46,7 +46,12 @@ if ($aja=='run') {
 	if (!$handle = fopen($elma, "w")) die("Filen $elma luonti ep‰onnistui!");
 
 	// itte query
-	$query = "select * from tuote where yhtio = '$kukarow[yhtio]' and hinnastoon != 'E' and status NOT IN ('P','X')";
+	$query = "	SELECT *
+				FROM tuote
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND hinnastoon != 'E'
+				AND tuotetyyppi NOT IN ('A', 'B')
+				AND status NOT IN ('P','X')";
 	$res   = mysql_query($query) or pupe_error($query);
 
 	$echoulos .= "<font class='message'>K‰sitell‰‰n tuotteita (".mysql_num_rows($res)." kpl)...<br>";

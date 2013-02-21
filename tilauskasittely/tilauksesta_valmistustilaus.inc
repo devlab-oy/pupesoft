@@ -30,16 +30,18 @@
 						ORDER BY tilausrivi.tunnus";
 			$lsresult = mysql_query($query) or pupe_error($query);
 
+			$tehtiin_uusi_otsikko = false;
+
 			if (mysql_num_rows($lsresult) > 0) {
 				while ($valmlisaarivi = mysql_fetch_array($lsresult)) {
 
-					$viesti = trim($myytilrow["tunnusnippu"]." ".$myytilrow["toim_nimi"]." ".$valmlisaarivi["tuoteno"]);
+					$viesti = trim($myytilrow["tunnusnippu"]." ".$myytilrow["toim_nimi"]);
 
 					// Tarkistetaan onko meill‰ jo otsikko
 					$query = "	SELECT tunnus
 								from lasku
 								where yhtio 		= '$kukarow[yhtio]'
-								and liitostunnus 	= '$tiltoi[tunnus]'
+								and liitostunnus 	= '999999999'
 								and tila 			= 'V'
 								and tilaustyyppi 	= 'W'
 								and alatila 		= ''
@@ -49,7 +51,7 @@
 								and toim_postino	= '$myytilrow[toim_postino]'
 								and toim_postitp	= '$myytilrow[toim_postitp]'
 								and toim_maa		= '$myytilrow[toim_maa]'
-								and viite			= '$viesti'
+								and viesti			= '$viesti'
 								and left(luontiaika,10) = left(now(),10)
 								and laatija 		= '$kukarow[kuka]'";
 					$jtsre = mysql_query($query) or pupe_error($query);
@@ -80,6 +82,12 @@
 						$toimitustapa		= "";
 						$tilausnumero 		= 0;
 						$nokeskupdate 		= TRUE;
+						$toim_nimi			= $myytilrow['toim_nimi'];
+						$toim_nimitark		= $myytilrow['toim_nimitark'];
+						$toim_osoite		= $myytilrow['toim_osoite'];
+						$toim_postino		= $myytilrow['toim_postino'];
+						$toim_postitp		= $myytilrow['toim_postitp'];
+						$toim_maa			= $myytilrow['toim_maa'];
 
 						list($toimvv, $toimkk, $toimpp) = explode('-', $myytilrow["toimaika"]);
 						list($kervv, $kerkk, $kerpp)    = explode('-', $myytilrow["kerayspvm"]);
@@ -87,6 +95,7 @@
 						require("tilauskasittely/otsik_siirtolista.inc");
 
 						$tunnus = $id;
+						$tehtiin_uusi_otsikko = true;
 
 						$tilauksesta_valmistustilaus = "<font class='message'>".t("Perustettiin valmistus %s", $kukarow["kieli"], $tunnus)."</font><br>";
 					}
@@ -122,43 +131,50 @@
 					$var 				= "";
 					$varasto			= "";
 					$paikka				= "";
-
+					$varataan_saldoa	= "EI";
 
 					// $perheid_lisaarivi on perustetun rivin tunnus
 					require ("lisaarivi.inc");
 
+					// Ainoastaan asiakkaalle valmistetut j‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydess‰
+					$suoraan_laskutukseen_lisa = $yhtiorow['automaattinen_jt_toimitus_valmistus'] == 'S' ? 'o' : '';
+
 					//	P‰ivitet‰‰n tilausrivin lisatietoihin tilausrivitunnus
 					$query = "	UPDATE tilausrivin_lisatiedot SET
 									tilausrivilinkki 		= '$perheid_lisaarivi',
-									suoraan_laskutukseen	= '',
+									suoraan_laskutukseen	= '{$suoraan_laskutukseen_lisa}',
 									muutospvm				= now(),
 									muuttaja				= '$kukarow[kuka]'
 								WHERE yhtio	= '$kukarow[yhtio]' and tilausrivitunnus = '$valmlisaarivi[tunnus]'";
 					$updres = mysql_query($query) or pupe_error($query);
 
 					//Kopioidaan otsikon lisatiedot
-					$query = "SELECT * FROM laskun_lisatiedot WHERE otunnus='$otunnus' and yhtio ='$kukarow[yhtio]'";
-					$lisatiedotres = mysql_query($query) or pupe_error($query);
-					$lisatiedotrow = mysql_fetch_array($lisatiedotres);
+					if ($tehtiin_uusi_otsikko) {
+						$query = "SELECT * FROM laskun_lisatiedot WHERE otunnus='$otunnus' and yhtio ='$kukarow[yhtio]'";
+						$lisatiedotres = mysql_query($query) or pupe_error($query);
+						$lisatiedotrow = mysql_fetch_array($lisatiedotres);
 
-					$fields = mysql_field_name($lisatiedotres,0);
-					$values = "'".$lisatiedotrow[0]."'";
+						$fields = mysql_field_name($lisatiedotres,0);
+						$values = "'".$lisatiedotrow[0]."'";
 
-					for($i=1; $i < mysql_num_fields($lisatiedotres)-1; $i++) { // Ei monisteta tunnusta
+						for($i=1; $i < mysql_num_fields($lisatiedotres)-1; $i++) { // Ei monisteta tunnusta
 
-						$fields .= ", ".mysql_field_name($lisatiedotres,$i);
+							$fields .= ", ".mysql_field_name($lisatiedotres,$i);
 
-						switch (mysql_field_name($lisatiedotres,$i)) {
-							case 'otunnus':
-								$values .= ", '$tunnus'";
-								break;
-							default:
-								$values .= ", '".$lisatiedotrow[$i]."'";
+							switch (mysql_field_name($lisatiedotres,$i)) {
+								case 'otunnus':
+									$values .= ", '$tunnus'";
+									break;
+								default:
+									$values .= ", '".$lisatiedotrow[$i]."'";
+							}
 						}
-					}
 
-					$kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
-					$insres2 = mysql_query($kysely) or pupe_error($kysely);
+						$kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
+						$insres2 = mysql_query($kysely) or pupe_error($kysely);
+
+						$tehtiin_uusi_otsikko = false;
+					}
 
 					//	P‰ivitet‰‰n myˆs tilausriville oikeammat tiedot!
 					$query = "	SELECT *

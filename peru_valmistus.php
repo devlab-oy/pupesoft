@@ -2,7 +2,7 @@
 
 	require ("inc/parametrit.inc");
 
-	echo "<font class='head'>Peru valmistus:</font><hr>";
+	echo "<font class='head'>".t("Peru valmistus").":</font><hr>";
 
 	if ($id != 0) {
 		$query = "	SELECT *
@@ -79,7 +79,7 @@
 
 				mysql_data_seek($valm_res, 0);
 
-				//Fl‰g‰t‰‰n voidaanko is‰ poistaa
+				// Fl‰g‰t‰‰n voidaanko is‰ poistaa
 				$isa_voidaankopoistaa = "";
 				$valmkpl = 0;
 

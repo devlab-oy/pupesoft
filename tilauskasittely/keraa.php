@@ -1771,12 +1771,12 @@
 
 						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0)
 							or (
-								(in_array($laskurow["keraysvahvistus_lahetys"], array('k','L','M')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','L','M')) and $laskurow["keraysvahvistus_lahetys"] == ''))
+								(in_array($laskurow["keraysvahvistus_lahetys"], array('k','L','M','N','Q','P')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','L','M','N','Q','P')) and $laskurow["keraysvahvistus_lahetys"] == ''))
 								or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "")
 							)
 						) {
 
-							$komento = koontilahete_check($laskurow, $komento);
+							list($komento, $koontilahete, $koontilahete_tilausrivit) = koontilahete_check($laskurow, $komento);
 
 							if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {
 
@@ -1812,7 +1812,8 @@
 									'lahetekpl'					=> $lahetekpl,
 									'kieli' 					=> $kieli,
 									'koontilahete'				=> $koontilahete,
-									);
+									'koontilahete_tilausrivit'	=> $koontilahete_tilausrivit,
+								);
 
 								pupesoft_tulosta_lahete($params);
 
@@ -2014,22 +2015,13 @@
 			echo "</td>";
 			echo "<th>",t("Valitse tilaustyyppi"),":</th><td><select name='tutyyppi' onchange='submit()'>";
 
-			$sela = $selb = $selc = "";
-
-			if ($tutyyppi == "NORMAA") {
-				$sela = "SELECTED";
-			}
-			if ($tutyyppi == "ENNAKK") {
-				$selb = "SELECTED";
-			}
-			if ($tutyyppi == "JTTILA") {
-				$selc = "SELECTED";
-			}
+			$sel = array($tutyyppi => 'selected') + array('NORMAA' => '', 'ENNAKK' => '', 'JTTILA' => '', 'VALMISTUS' => '');
 
 			echo "<option value='KAIKKI'>",t("Näytä kaikki"),"</option>";
-			echo "<option value='NORMAA' {$sela}>",t("Näytä normaalitilaukset"),"</option>";
-			echo "<option value='ENNAKK' {$selb}>",t("Näytä ennakkotilaukset"),"</option>";
-			echo "<option value='JTTILA' {$selc}>",t("Näytä jt-tilaukset"),"</option>";
+			echo "<option value='NORMAA' {$sel['NORMAA']}>",t("Näytä normaalitilaukset"),"</option>";
+			echo "<option value='ENNAKK' {$sel['ENNAKK']}>",t("Näytä ennakkotilaukset"),"</option>";
+			echo "<option value='JTTILA' {$sel['JTTILA']}>",t("Näytä jt-tilaukset"),"</option>";
+			echo "<option value='VALMISTUS' {$sel['VALMISTUS']}>",t("Näytä jt-tilaukset valmistuksesta"),"</option>";
 
 			echo "</select></td></tr>";
 
@@ -2112,6 +2104,9 @@
 				}
 				elseif ($tutyyppi == "JTTILA") {
 					$haku .= " AND lasku.clearing = 'JT-TILAUS' ";
+				}
+				elseif ($tutyyppi == "VALMISTUS") {
+					$haku .= " AND lasku.sisviesti2 = 'Tehty valmistuksen kautta' ";
 				}
 			}
 
@@ -3086,7 +3081,8 @@
 					if ($lp_varasto == 0) {
 						$query = "	SELECT *
 									from varastopaikat
-									where yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+									where yhtio = '$kukarow[yhtio]'
+									AND tyyppi != 'P'
 									order by alkuhyllyalue,alkuhyllynro
 									limit 1";
 					}

@@ -7,7 +7,7 @@ function hinnastorivi($tuote, $laskurow) {
 
 	// Jos tuotteen status on P, hinnastoon KYLLÄ, tuote on korvaavuusketjussa ja tuotteen saldo on 0,
 	// laitetaan myyntihinta nollaksi
-	if ($tuote['status'] == 'P' and $tuote['hinnastoon'] == 'K' and $tuote['id'] != '') {
+	if ($tuote['status'] == 'P' and $tuote['hinnastoon'] != 'E' and $tuote['id'] != '') {
 
 		// Tarkistetaan saldo
 		$query = "SELECT sum(saldo) as saldo
@@ -24,7 +24,7 @@ function hinnastorivi($tuote, $laskurow) {
 	}
 	// Jos tuote on poistettu ja hinnastoon on kyllä, mutta tuote ei ole korvaavuusketjussa.
 	// Ei laiteta hinnastoon.
-	else if ($tuote['status'] == 'P' and $tuote['hinnastoon'] == 'K' and $tuote['id'] == '') {
+	else if ($tuote['status'] == 'P' and $tuote['hinnastoon'] != 'E' and $tuote['id'] == '') {
 		return;
 	}
 

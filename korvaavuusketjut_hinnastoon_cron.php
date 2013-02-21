@@ -68,8 +68,8 @@ while ($ketju = mysql_fetch_assoc($result)) {
 				$tuote_myytavissa = saldo_myytavissa($ketjun_tuote['tuoteno']);
 
 				// Päivitetään päätuote hinnastoon jos ketjussa on tuotteita joiden myytavissa on 0,
-				// ja hinnastoon on 'K', '', tai 'V'
-				if ($tuote_myytavissa[2] == 0 and $ketjun_tuote['hinnastoon'] == 'K' or $ketjun_tuote['hinnastoon'] == '' or $ketjun_tuote['hinnastoon'] == 'V') {
+				// ja hinnastoon KYLLÄ
+				if ($tuote_myytavissa[2] == 0 and $ketjun_tuote['hinnastoon'] != 'E') {
 					$paivitetaanko = true;
 				}
 			}
@@ -78,7 +78,7 @@ while ($ketju = mysql_fetch_assoc($result)) {
 			if ($paivitetaanko) {
 
 				// Päivitetään tuote.hinnastoon
-				$query = "UPDATE tuote SET hinnastoon='K' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$paa_tuote['tuoteno']}'";
+				$query = "UPDATE tuote SET hinnastoon='' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$paa_tuote['tuoteno']}'";
 				if ($result = pupe_query($query)) {
 					$muutettu += 1;
 				}

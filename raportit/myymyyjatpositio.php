@@ -83,10 +83,13 @@
 
 
 		if ($toimitetut  != '') {
+
+			$query_ale_lisa = generoi_alekentta('M');
+
 			$query2 = "	SELECT tilausrivin_lisatiedot.positio myyja,
 						ifnull(kuka.nimi, 'Ö-muu') nimi,
 						date_format(now(),'%Y/%m') kausi,
-						round(sum(tilausrivi.hinta),0) summa
+						round(sum(round((tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)) * tilausrivi.varattu * {$query_ale_lisa}, $yhtiorow[hintapyoristys])),0) summa
 						FROM lasku
 						JOIN tilausrivi ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'L')
 						JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)

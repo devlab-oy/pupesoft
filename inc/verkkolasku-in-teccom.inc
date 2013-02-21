@@ -291,7 +291,7 @@
 							$charge_description = strtolower(trim($node_x->AllowOrChargeDescription));
 							$charge_code = strtolower(trim($node_x->AllowOrChargeCode));
 
-							if ($charge_code == "zcwr" or $charge_code == 'zfwa' or $charge_description == "core value") {
+							if ($charge_code == "zcwr" or $charge_code == 'zfwa' or strpos($charge_description, "core value") !== FALSE) {
 								$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node_x->Amount);
 							}
 						}
@@ -413,7 +413,7 @@
 
 							if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
 								($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
-								($laskuttajan_toimittajanumero == "123084" and $charge_description == "core value")) {
+								(in_array($laskuttajan_toimittajanumero, array("123084","123007")) and strpos($charge_description, "core value") !== FALSE)) {
 
 								// Jos rivillä tulee runkoveloitus, niin pitää tehdä rungosta oma lapsirivi
 								$query = "	SELECT tuote.tuoteno, tuote.nimitys
@@ -474,6 +474,11 @@
 								$laskun_rahtikulu += (float) str_replace(",", ".", $node->Amount);
 								$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);
 								$osto_rivi_kulu_alv = $laskun_alv;
+
+								// ZF -keississä otetaan rahti pois rivihinnasta.
+								if ($charge_code == 'freightcharges') {
+									$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node->Amount);
+								}
 
 								if ($charge_description == 'freight costs' or $charge_code == 'freightcharges') {
 									$ei_oteta_kulua_pois = true;

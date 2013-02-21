@@ -1947,6 +1947,7 @@
 					<select name='jtkielto' ".js_alasvetoMaxWidth("jtkielto", 200).">
 					<option value = ''>".t("Normaali")."</option>
 					<option value = 'Y' $jtksel[Y]>".t("Jälkitoimituksia ei yhdistetä")."</option>
+					<option value = 'Z' $jtksel[Z]>".t("Ei osatoimituksia")."</option>
 					<option value = 'o' $jtksel[o]>".t("Ei jälkitoimituksia")."</option>
 					</select></td></tr>";
 

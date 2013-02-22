@@ -134,7 +134,7 @@
 						AND asn_numero = '{$sanomatunniste}'";
 			$res = pupe_query($query);
 
-			echo "<br /><font class='message'>",t("Poistettiin ASN-sanoma")," {$sanomatunniste}</font><br /><br />";
+			echo "<br /><font class='message'>",t("Poistettiin sanoma")," {$sanomatunniste}</font><br /><br />";
 		}
 
 		$tee = '';

@@ -36,6 +36,24 @@
 			<th>Tuotepaikka</th>
 			<td><?php echo $tuote['tuotepaikka'] ?></td>
 		</tr>
+		<tr>
+			<th>Inventointi selite</th>
+			<td>
+				<?php $sel = "";?>
+				<select name="inventointi_seliteen_tunnus">
+					<?php foreach($inventointi_selitteet as $inventointi_selite) {
+						if(!empty($inventointi_selite['selitetark_3'])) {
+							$sel = "SELECTED";
+						}
+					?>
+					<option value="<?php echo $inventointi_selite['tunnus'] ?>" <?php echo $sel ?>><?php echo $inventointi_selite['selite'] ?></option>
+					<?php
+						$sel = "";
+					}
+					?>
+				</select>
+			</td>
+		</tr>
 	</table>
 </div>
 <div class='controls'>

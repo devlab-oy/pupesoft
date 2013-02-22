@@ -1981,7 +1981,9 @@
 				if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
 
 					if ($naytetaanko_toimittajabutton) {
-						echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+						echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' />&nbsp;";
+						echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$ed_asn}' value='",t("Poista"),"' /></span>";
+						echo "</th></tr>";
 					}
 
 					echo "<tr><td colspan='8' class='back'>&nbsp;</td></tr>";
@@ -2005,8 +2007,7 @@
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
 
 				echo "<td class='back'>";
-				echo "<input type='button' class='kollibutton' id='{$row['paketintunniste']}##{$row['asn_numero']}##{$row['toimittajanumero']}' value='",t("Valitse"),"' />&nbsp;";
-				echo "<input type='button' class='poistabutton' id='{$row['asn_numero']}' value='",t("Poista"),"' />";
+				echo "<input type='button' class='kollibutton' id='{$row['paketintunniste']}##{$row['asn_numero']}##{$row['toimittajanumero']}' value='",t("Valitse"),"' />";
 				echo "</td>";
 
 				echo "</tr>";
@@ -2020,7 +2021,10 @@
 			}
 
 			if (mysql_num_rows($result) > 0 and $naytetaanko_toimittajabutton) {
-				echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+				echo "<tr><th colspan='8'>";
+				echo "<input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' />&nbsp;";
+				echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$ed_asn}' value='",t("Poista"),"' /></span>";
+				echo "</th></tr>";
 			}
 
 			echo "</table>";
@@ -2074,11 +2078,15 @@
 
 				if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
 
+					echo "<tr><th colspan='7'>";
+
 					if ($naytetaanko_toimittajabutton) {
-						echo "<tr><th colspan='7'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+						echo "<input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' />&nbsp;";
 					}
 
-					echo "<tr><td colspan='7' class='back'>&nbsp;</td></tr>";
+					echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$ed_tilausnumero}' value='",t("Poista"),"' /></span>";
+					echo "</th></tr>";
+					echo "<tr><td class='back' colspan='7'>&nbsp;</td></tr>";
 				}
 
 				echo "<tr>";
@@ -2090,8 +2098,7 @@
 				echo "<td>".tv1dateconv($row['saapumispvm'])."</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
 				echo "<td class='back'>";
-				echo "<input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' />&nbsp;";
-				echo "<input type='button' class='poistabutton' id='{$row['tilausnumero']}' value='",t("Poista"),"' />";
+				echo "<input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' />";
 				echo "</td>";
 				echo "</tr>";
 
@@ -2103,9 +2110,14 @@
 				$ed_tilausnumero = $row['tilausnumero'];
 			}
 
+			echo "<tr><th colspan='7'>";
+
 			if (mysql_num_rows($result) > 0 and $naytetaanko_toimittajabutton) {
-				echo "<tr><th colspan='6'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+				echo "<input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' />&nbsp;";
 			}
+
+			echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$ed_tilausnumero}' value='",t("Poista"),"' /></span>";
+			echo "</th></tr>";
 
 			echo "</table>";
 			echo "</form>";

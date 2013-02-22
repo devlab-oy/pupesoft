@@ -102,6 +102,7 @@ if ($tee == '') {
 if ($tee == 'haku') {
 
 	$title = t("Vapaa Inventointi");
+
 	# Haettu jollain
 	if (isset($viivakoodi) or isset($tuoteno) or isset($tuotepaikka)) {
 		$tuotteet = hae($viivakoodi,$tuoteno,$tuotepaikka);
@@ -119,6 +120,7 @@ if ($tee == 'haku') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=inventointi.php?{$url}'>";
 		exit();
 	}
+
 	# Löydetyt osumat
 	if (isset($tuotteet) and count($tuotteet) > 0) {
 		include('views/inventointi/hakutulokset.php');
@@ -319,7 +321,7 @@ if ($tee == 'apulaskuri') {
 	$p1 = mysql_fetch_assoc($result);
 
 	# Pakkaus2
-	$query ="SELECT
+	$query = "	SELECT
 				selite as myynti_era,
 				selitetark as yksikko
 				FROM tuotteen_avainsanat
@@ -330,7 +332,7 @@ if ($tee == 'apulaskuri') {
 	$p2 = mysql_fetch_assoc($result);
 
 	# Pakkaus3
-	$query ="SELECT
+	$query = "	SELECT
 				selite as myynti_era,
 				selitetark as yksikko
 				FROM tuotteen_avainsanat
@@ -385,9 +387,11 @@ if ($tee == 'inventoidaan') {
 					AND tunnus = '{$inventointi_seliteen_tunnus}'";
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
+
 		$inven_laji = $row['selite'];
-		$lisaselite = 'Käsipääte: ' . $row['selitetark'];
+		$lisaselite = t("Käsipääte").": " . $row['selitetark'];
 		$mobiili = 'YES';
+
 		require('../inventoi.php');
 
 		# Jos inventoidaan listalta, palataan inventoimaan listan seuraava tuote.
@@ -400,12 +404,12 @@ if ($tee == 'inventoidaan') {
 		}
 		# Palataan alkuun
 		else {
-			$paluu_url =http_build_query(array('tee' => 'haku'));
+			$paluu_url = http_build_query(array('tee' => 'haku'));
 		}
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=inventointi.php?".$paluu_url."'>";
 	}
 	else {
-		$errors[] = "Virhe inventoinnissa.";
+		$errors[] = t("Virhe inventoinnissa").".";
 	}
 	exit();
 }
@@ -420,4 +424,3 @@ if (isset($errors)) {
 }
 
 require "inc/footer.inc";
-

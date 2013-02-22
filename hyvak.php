@@ -288,9 +288,18 @@
 
 			if ($trow['ebid'] == 'TECCOM-INVOICE') {
 
+				// Haetaan toimittajanro
+				$query = "	SELECT toimittajanro
+							FROM toimi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$trow['liitostunnus']}'";
+				$toiminro_res = pupe_query($query);
+				$toiminro_row = mysql_fetch_assoc($toiminro_res);
+
 				$query = "	DELETE FROM asn_sanomat
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND laji = 'tec'
+							AND toimittajanumero = '{$toiminro_row['toimittajanro']}'
 							AND asn_numero = '{$trow['laskunro']}'";
 				$delres = pupe_query($query);
 

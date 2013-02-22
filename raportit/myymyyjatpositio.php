@@ -8,11 +8,21 @@
 
 	echo "<font class='head'>".t("Myyjien rivimyynnit").":</font><hr>";
 
+	// Otetaan kuluva tilikausi
+	$query = "	SELECT year(tilikausi_alku) y, month(tilikausi_alku) m
+				FROM tilikaudet
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tilikausi_alku < now()
+				ORDER BY tilikausi_alku DESC
+				LIMIT 1";
+	$result = pupe_query($query);
+	$tilikausi = mysql_fetch_assoc($result);
+
 	// Käyttöliittymä
-	if (!isset($alkukk))  $alkukk  = date("m", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
-	if (!isset($alkuvv))  $alkuvv  = date("Y", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
-	if (!isset($loppukk)) $loppukk = date("m", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
-	if (!isset($loppuvv)) $loppuvv = date("Y", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
+	if (!isset($alkukk))  $alkukk  = date("m", mktime(0, 0, 0, $tilikausi["m"], 1, $tilikausi["y"]));
+	if (!isset($alkuvv))  $alkuvv  = date("Y", mktime(0, 0, 0, $tilikausi["m"], 1, $tilikausi["y"]));
+	if (!isset($loppukk)) $loppukk = date("m", mktime(0, 0, 0, date("m"), 1, date("Y")));
+	if (!isset($loppuvv)) $loppuvv = date("Y", mktime(0, 0, 0, date("m"), 1, date("Y")));
 	$tee = isset($tee) ? $tee : "";
 	$toimitetut = isset($toimitetut) ? $toimitetut : "";
 

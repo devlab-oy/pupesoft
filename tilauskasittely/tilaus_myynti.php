@@ -456,9 +456,10 @@ if (isset($liitaasiakasnappi) and $kukarow["extranet"] == "") {
 	$tila = "vaihdaasiakas";
 }
 
-//Jos yll‰pidossa on luotu uusi asiakas
-if (isset($from) and $from == "ASIAKASYLLAPITO" and $yllapidossa == "asiakas" and $yllapidontunnus != '') {
-	$asiakasid 	= $yllapidontunnus;
+// Jos yll‰pidossa on luotu uusi asiakas
+if (isset($from) and $from == "ASIAKASYLLAPITO" and $yllapidossa == "asiakas" and $yllapidontunnus != '' and $tilausnumero == '') {
+	$tee = "OTSIK";
+	$asiakasid = $yllapidontunnus;
 }
 
 // asiakasnumero on annettu, etsit‰‰n tietokannasta...
@@ -1229,7 +1230,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		}
 
 		require_once ('tulosta_tarjous.inc');
-		tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli,  $tee, '', $verolliset_verottomat_hinnat, $naytetaanko_rivihinta);
+
+		tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli,  $tee, '', $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno);
 
 		$query = "UPDATE lasku SET alatila='A' where yhtio='$kukarow[yhtio]' and alatila='' and tunnus='$kukarow[kesken]'";
 		$result = pupe_query($query);
@@ -4736,8 +4738,8 @@ if ($tee == '') {
 			$headerit = "<tr>$jarjlisa<th>#</th>";
 			$sarakkeet++;
 
-			if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T") {
-				$trivityyppi_result = t_avainsana("TRIVITYYPPI");
+			if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T" or $kukarow["yhtio"] == "savt") {
+				$trivityyppi_result = t_avainsana("TRIVITYYPPI", "", "ORDER BY avainsana.selitetark");
 
 				if (mysql_num_rows($trivityyppi_result) > 0) {
 					$headerit .= "<th>".t("Tyyppi")."</th>";
@@ -5392,7 +5394,7 @@ if ($tee == '') {
 				$vanhaid 	  = $row["perheid"];
 				$trivityyulos = "";
 
-				if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T") {
+				if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T" or $kukarow["yhtio"] == "savt") {
 					if ($muokkauslukko_rivi == "" and $row["ei_nayteta"] == "") {
 						if (mysql_num_rows($trivityyppi_result) > 0) {
 							//annetaan valita tilausrivin tyyppi
@@ -5410,6 +5412,8 @@ if ($tee == '') {
 												<select name='positio' onchange='submit();' $state>";
 
 							mysql_data_seek($trivityyppi_result, 0);
+
+							$trivityyulos .= "<option value=''>".t("Valitse")."</option>";
 
 							while($trrow = mysql_fetch_assoc($trivityyppi_result)) {
 								$sel = "";
@@ -6856,7 +6860,7 @@ if ($tee == '') {
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 				}
 
-				if ($yhtiorow['kerayserat'] == 'K' and $toimitustavan_tunnus > 0 and $kukarow['extranet'] == "") {
+				if ($yhtiorow['kerayserat'] == 'K' and $toimitustavan_tunnus > 0 and $kukarow['extranet'] == "" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))) {
 
 					echo "<tr>{$jarjlisa}";
 

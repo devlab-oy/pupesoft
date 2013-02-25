@@ -102,6 +102,7 @@ if ($tee == '') {
 if ($tee == 'haku') {
 
 	$title = t("Vapaa Inventointi");
+
 	# Haettu jollain
 	if (isset($viivakoodi) or isset($tuoteno) or isset($tuotepaikka)) {
 		$tuotteet = hae($viivakoodi,$tuoteno,$tuotepaikka);
@@ -119,6 +120,7 @@ if ($tee == 'haku') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=inventointi.php?{$url}'>";
 		exit();
 	}
+
 	# Löydetyt osumat
 	if (isset($tuotteet) and count($tuotteet) > 0) {
 		include('views/inventointi/hakutulokset.php');
@@ -278,6 +280,15 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 	// Jos varmistuskoodi kelpaa tai on keksissä tallessa
 	if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi)) {
 		$title = t("Laske määrä");
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'INVEN_LAJI'";
+		$result = pupe_query($query);
+		$inventointi_selitteet = array();
+		while($inventointi_selite = mysql_fetch_assoc($result)) {
+			$inventointi_selitteet[] = $inventointi_selite;
+		}
 		include('views/inventointi/laske.php');
 
 	}
@@ -310,7 +321,7 @@ if ($tee == 'apulaskuri') {
 	$p1 = mysql_fetch_assoc($result);
 
 	# Pakkaus2
-	$query ="SELECT
+	$query = "	SELECT
 				selite as myynti_era,
 				selitetark as yksikko
 				FROM tuotteen_avainsanat
@@ -321,7 +332,7 @@ if ($tee == 'apulaskuri') {
 	$p2 = mysql_fetch_assoc($result);
 
 	# Pakkaus3
-	$query ="SELECT
+	$query = "	SELECT
 				selite as myynti_era,
 				selitetark as yksikko
 				FROM tuotteen_avainsanat
@@ -370,9 +381,17 @@ if ($tee == 'inventoidaan') {
 
 		# inventointi
 		$tee = 'VALMIS';
-		$inven_laji = 'Kiertävä';
-		$lisaselite = 'Päivittäisinventointi käsipäätteellä';
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$inventointi_seliteen_tunnus}'";
+		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
+
+		$inven_laji = $row['selite'];
+		$lisaselite = t("Käsipääte").": " . $row['selitetark'];
 		$mobiili = 'YES';
+
 		require('../inventoi.php');
 
 		# Jos inventoidaan listalta, palataan inventoimaan listan seuraava tuote.
@@ -385,12 +404,12 @@ if ($tee == 'inventoidaan') {
 		}
 		# Palataan alkuun
 		else {
-			$paluu_url =http_build_query(array('tee' => 'haku'));
+			$paluu_url = http_build_query(array('tee' => 'haku'));
 		}
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=inventointi.php?".$paluu_url."'>";
 	}
 	else {
-		$errors[] = "Virhe inventoinnissa.";
+		$errors[] = t("Virhe inventoinnissa").".";
 	}
 	exit();
 }
@@ -405,4 +424,3 @@ if (isset($errors)) {
 }
 
 require "inc/footer.inc";
-

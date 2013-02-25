@@ -852,7 +852,7 @@
 			}
 
 			if (tarkista_oikeus("yllapito.php", $ealisa, "X")) {
-				echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
+				echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO//asiakasid=$asiakasid'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
 			}
 		}
 
@@ -1947,6 +1947,7 @@
 					<select name='jtkielto' ".js_alasvetoMaxWidth("jtkielto", 200).">
 					<option value = ''>".t("Normaali")."</option>
 					<option value = 'Y' $jtksel[Y]>".t("Jälkitoimituksia ei yhdistetä")."</option>
+					<option value = 'Z' $jtksel[Z]>".t("Ei osatoimituksia")."</option>
 					<option value = 'o' $jtksel[o]>".t("Ei jälkitoimituksia")."</option>
 					</select></td></tr>";
 
@@ -2526,7 +2527,7 @@
 
 				$sela = "";
 
-				if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"]) {
+				if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"] or ($kukarow["kesken"] == 0 and $yhteysrow["oletusyhteyshenkilo"] != "")) {
 					$sela = "SELECTED";
 					$srow["tilausyhteyshenkilo"] = "";
 				}
@@ -2535,9 +2536,11 @@
 			}
 
 			echo "</select> ";
+
 			if (tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
 				echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tilaus','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]&tyhthenkilo=K');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
 			}
+
 			echo "</td>";
 			echo "<td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 

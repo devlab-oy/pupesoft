@@ -25,7 +25,7 @@
 	if (!isset($ylilimiitin)) 		$ylilimiitin = "";
 	if (!isset($sytunnus)) 			$sytunnus = "";
 	if (!isset($sanimi)) 			$sanimi = "";
-	if (!isset($grouppaus)) 		$grouppaus = "";
+	if (!isset($grouppaus)) 		$grouppaus = "asiakas";
 	if (!isset($savalkoodi)) 		$savalkoodi = "";
 	if (!isset($yli)) 				$yli = "";
 	if (!isset($valuutassako)) 		$valuutassako = "";
@@ -681,7 +681,6 @@
 							{$liitoslisa1}
 							$eta_asiakaslisa
 							LIMIT 1";
-
 				$maksuehto_chk_res = pupe_query($query);
 				$maksuehto_chk_row = mysql_fetch_assoc($maksuehto_chk_res);
 
@@ -751,12 +750,19 @@
 		}
 		elseif ($eiliittymaa == 'ON') {
 
+			$liitoslisa1 = "";
+
+			if ($yhtiorow["myyntitilaus_saatavat"] == "" and $sliitostunnus != "") {
+				$liitoslisa1 = "AND asiakas.tunnus='{$sliitostunnus}' ";
+			}
+
 			// Voi olla, että asiakkaalla on avoimia tilauksia, mutta ei avoimia laskuja, huomioidaan nämä luottorajassa
 			$query = "	SELECT ifnull(group_concat(tunnus), 0) liitostunnus
 						FROM asiakas
 						WHERE yhtio = '$saatavat_yhtio'
 						AND ytunnus = '$sytunnus'
-						AND laji != 'P'";
+						AND laji != 'P'
+						{$liitoslisa1}";
 			$result = pupe_query($query);
 			$row = mysql_fetch_assoc($result);
 

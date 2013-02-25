@@ -196,7 +196,7 @@
 
 		$tulostukseen = array();
 
-		for($las = $laskunro; $las<=$laskunroloppu; $las++) {
+		for ($las = $laskunro; $las<=$laskunroloppu; $las++) {
 			//hateaan laskun kaikki tiedot
 			$query = "  SELECT tunnus
 						FROM lasku
@@ -210,6 +210,7 @@
 				$tulostukseen[] = $laskurow["tunnus"];
 			}
 		}
+
 		$laskunro		= "";
 		$laskunroloppu	= "";
 	}
@@ -817,7 +818,16 @@
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
-		if ($laskunro > 0) {
+		
+		if (strlen($laskunro) > 0 and strpos($laskunro, ",") !== FALSE) {						
+			$where2 .= " and lasku.laskunro IN ('".str_replace(",", "','", $laskunro)."') ";
+
+			$where3 = "";
+
+			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			$use = " use index (lasno_index) ";
+		}
+		elseif ($laskunro > 0) {
 			$where2 .= " and lasku.laskunro = '$laskunro' ";
 
 			$where3 = "";
@@ -1082,7 +1092,7 @@
 								<br>";
 					}
 
-					echo "<form id='tulostakopioform_$row[tunnus]' name='tulostakopioform_$row[tunnus]' method='post' autocomplete='off'>
+					echo "<form id='tulostakopioform_$row[tunnus]' name='tulostakopioform_$row[tunnus]' action='$PHP_SELF' method='post' autocomplete='off'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='kerayseran_numero' value='$kerayseran_numero'>
 							<input type='hidden' name='kerayseran_tilaukset' value='$kerayseran_tilaukset'>
@@ -1566,7 +1576,7 @@
 
 				require_once ("tulosta_tarjous.inc");
 
-				tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat, $verolliset_verottomat_hinnat, $naytetaanko_rivihinta);
+				tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat, $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno);
 
 				$tee = '';
 			}

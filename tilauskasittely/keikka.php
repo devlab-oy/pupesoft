@@ -547,6 +547,16 @@ if (isset($messenger) and $messenger == 'X' and isset($message) and trim($messag
 }
 
 if ($toiminto == "kohdista") {
+	if(isset($poista) and $poista != '') {
+		// Tämä on naimisissa olevien osto- ja myyntitilausrivien saapumisten kautta poistamista varten
+		//ostotilauksen tilausrivi on poistettu jo tässä vaiheessa, rivitunnus on tallessa formissa ja tilausrivin_lisatiedot taulusta löytyy oston ja myynnin yhdistävä linkki
+		tarkista_myynti_osto_liitos_ja_poista($rivitunnus, true);
+
+		$tee = 'TI';
+		$tyhjenna = true;
+		unset($rivitunnus);
+	}
+
 	require('ostotilausten_rivien_kohdistus.inc');
 }
 
@@ -642,6 +652,7 @@ if ($ytunnus != "" or $toimittajaid != "") {
 if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 	if (!isset($nayta_siirtovalmiit_suuntalavat)) $nayta_siirtovalmiit_suuntalavat = "";
+	if (!isset($etsi_sscclla)) $etsi_sscclla = '';
 
 	echo "<form name='toimi' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
@@ -708,12 +719,18 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	}
 
 	if ($yhtiorow['suuntalavat'] == 'S') {
+
+		echo "</tr><tr>";
+		echo "<th>",t("Etsi SSCC-numerolla"),"</th>";
+
+		echo "<td><input type='text' name='etsi_sscclla' value='{$etsi_sscclla}' /></td>";
+
 		echo "</tr><tr>";
 		echo "<th>",t("Näytä vain saapumiset, joilla on siirtovalmiita suuntalavoja"),"</th>";
 
 		$chk = $nayta_siirtovalmiit_suuntalavat != '' ? ' checked' : '';
 
-		echo "<td><input type='checkbox' name='nayta_siirtovalmiit_suuntalavat' {$chk} onchange='submit();'></td>";
+		echo "<td><input type='checkbox' name='nayta_siirtovalmiit_suuntalavat' {$chk} /></td>";
 	}
 
 	echo "</tr>";
@@ -754,9 +771,16 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	}
 
 	$suuntalavajoin = '';
+	$left_join = "LEFT ";
 
-	if ($yhtiorow['suuntalavat'] == 'S' and $nayta_siirtovalmiit_suuntalavat != '') {
-		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
+	if ($yhtiorow['suuntalavat'] == 'S' and ($nayta_siirtovalmiit_suuntalavat != '' or $etsi_sscclla != '')) {
+		$left_join = "";
+
+		$suuntalava_lisa = $etsi_sscclla != '' ? " and suuntalavat.sscc = '{$etsi_sscclla}'" : "";
+
+		$suuntalava_tila_lisa = $nayta_siirtovalmiit_suuntalavat != '' ? " AND suuntalavat.tila = 'S'" : "";
+
+		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava {$suuntalava_tila_lisa} {$suuntalava_lisa})
 							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = lasku.tunnus) ";
 	}
 
@@ -782,7 +806,6 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	}
 	else {
 		$tilriv_joinlisa = "";
-		$left_join = "LEFT ";
 	}
 
 	// näytetään millä toimittajilla on keskeneräisiä keikkoja
@@ -863,6 +886,11 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			echo "<td class='back'><form method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$row[liitostunnus]'>";
 			echo "<input type='hidden' name='lisarajaus' value='{$lisarajaus}' />";
+
+			if ($keikkarajaus == '' and $row['keikat'] != '' and strpos($row['keikat'], ',') === FALSE) {
+				echo "<input type='hidden' name='keikkarajaus' value='{$row['keikat']}' />";
+			}
+
 			echo "<input type='submit' value='".t("Valitse")."'>";
 			echo "</form></td>";
 			echo "</tr>";

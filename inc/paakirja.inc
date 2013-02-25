@@ -30,6 +30,7 @@
 	echo "<font class='head'>".t("P‰‰- ja p‰iv‰kirja")."</font><hr>
 			<form name = 'valinta' action = 'raportit.php' method='post'>
 			<input type = 'hidden' name = 'toim' value = 'paakirja'>
+			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 			<table><tr>
 			<th>".t("Tyyppi")."</th>
 			<td colspan='3'>";
@@ -419,10 +420,14 @@
 			$lisa2 = " and tiliointi.tapvm < '$alkupvm'";
 		}
 
-		if ($tili2 == 0) $tili2 = $tili;
-
-		if (strlen(trim($tili)) > 0) {
+		if (strlen(trim($tili)) > 0 and strlen(trim($tili2)) > 0) {
 			$lisa1 .= " and tiliointi.tilino >= '$tili' and  tiliointi.tilino <= '$tili2'";
+		}
+		elseif (strlen(trim($tili)) > 0 and strpos($tili, ",") !== FALSE) {
+			$lisa1 .= " and tiliointi.tilino in ('".str_replace(",", "','", $tili)."')";
+		}
+		elseif (strlen(trim($tili)) > 0) {
+			$lisa1 .= " and tiliointi.tilino = '$tili'";
 		}
 
 		if ($kasin != '') {
@@ -490,7 +495,6 @@
 					$lisa
 					$konsernilisa
 					ORDER BY $jarj";
-
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {

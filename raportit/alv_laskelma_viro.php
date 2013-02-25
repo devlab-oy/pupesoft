@@ -116,6 +116,7 @@
 						if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
 						tilausrivi.alv vero,
 						group_concat(DISTINCT lasku.tunnus) ltunnus,
+						group_concat(DISTINCT lasku.laskunro) laskunro,
 						sum(round(rivihinta * (1 + tilausrivi.alv / 100), 2)) bruttosumma,
 						sum(round(rivihinta * (tilausrivi.alv / 100), 2)) verot,
 						sum(round(rivihinta / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + tilausrivi.alv / 100), 2)) bruttosumma_valuutassa,
@@ -144,6 +145,7 @@
 			echo "<th valign='top'>" . t("Verot") . "</th>";
 			echo "<th valign='top'>" . t("Verollinen summa valuutassa") . "</th>";
 			echo "<th valign='top'>" . t("Verot valuutassa") . "</th>";
+			echo "<th valign='top'>" . t("Laskut") . "</th>";
 			echo "</tr>";
 
 			$verosum  = 0.0;
@@ -164,7 +166,7 @@
 							<td colspan = '5' align = 'right' class='spec'>".t("Yhteensä").":</td>
 							<td align = 'right' class='spec'>".sprintf('%.2f', $kantasum)."</td>
 							<td align = 'right' class='spec'>".sprintf('%.2f', $verosum)."</td>
-							<td colspan='2' class='spec'></td>
+							<td colspan='3' class='spec'></td>
 						  </tr>";
 
 					$verosum 	= 0.0;
@@ -188,20 +190,21 @@
 				echo "<td valign='top'>$trow[maa]</td>";
 				echo "<td valign='top'>$trow[valuutta]</td>";
 				echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-				echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
+				echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
 				echo "<td valign='top'>$trow[nimi]</td>";
 				echo "<td valign='top' align='right' nowrap>$trow[bruttosumma]</td>";
 				echo "<td valign='top' align='right' nowrap>$trow[verot]</td>";
 
 				if (strtoupper($trow["maa"]) != strtoupper($yhtiorow["maa"])) {
 					echo "<td valign='top' align='right' nowrap>$trow[bruttosumma_valuutassa]</td>";
-					echo "<td valign='top' align='right' nowrap>$trow[verot_valuutassa]</td>";
+					echo "<td valign='top' align='right' nowrap></td>";
 				}
 				else {
 					echo "<td valign='top' align='right'></td>";
 					echo "<td valign='top' align='right'></td>";
 				}
-
+				echo "<td><a href = '".$palvelin2."tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$trow[laskunro]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>".t("Näytä laskut")."</a></td>";
+				
 				echo "</tr>";
 
 				$verosum  += $trow['verot'];
@@ -239,7 +242,7 @@
 					echo "<td valign='top'>$trow[maa]</td>";
 					echo "<td valign='top'>$trow[valuutta]</td>";
 					echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-					echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
+					echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
 					echo "<td valign='top'>$trow[nimi]</td>";
 					echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['bruttosumma']),"</td>";
 					echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot']),"</td>";
@@ -265,12 +268,12 @@
 			echo "<tr><td colspan='5' align='right' class='spec'>".t("Yhteensä").":</td>
 					<td align = 'right' class='spec'>".sprintf('%.2f', $kantasum)."</td>
 					<td align = 'right' class='spec'>".sprintf('%.2f', $verosum)."</td>
-					<td colspan='2' class='spec'></td></tr>";
+					<td colspan='3' class='spec'></td></tr>";
 
 			echo "<tr><td colspan='5' align='right' class='spec'>".t("Verokannat yhteensä").":</td>
 					<td align = 'right' class='spec'>".sprintf('%.2f', $kantatot)."</td>
 					<td align = 'right' class='spec'>".sprintf('%.2f', $verotot)."</td>
-					<td colspan='2' class='spec'></td></tr>";
+					<td colspan='3' class='spec'></td></tr>";
 			echo "</table><br/>";
 
 		}

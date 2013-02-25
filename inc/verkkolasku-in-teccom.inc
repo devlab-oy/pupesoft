@@ -49,7 +49,7 @@
 	if (strtoupper($laskuttajan_toimittajanumero) == "ELRING") {
 		$laskuttajan_toimittajanumero = "123312";
 	}
-	elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH") {
+	elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH" OR strtoupper($laskuttajan_toimittajanumero) == "AA_FI") {
 		$laskuttajan_toimittajanumero = "123067";
 
 		// Tarkistusnumero

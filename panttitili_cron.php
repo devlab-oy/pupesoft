@@ -18,14 +18,14 @@
 	$kukarow['kuka'] = 'cron';
 	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-	//haetaan asiakkaat, joilla ei ole ( panttitili käytössä TAI asiakas on poistettu TAI tuote on poistettu TAI ) ja tarkistetaan onko näillä asiakkailla kuitenkin pantteja
+	//haetaan asiakkaat, joilla ei ole ( panttitili käytössä TAI asiakas on poistettu TAI tuote on poistettu TAI panttitili riviä ei ole käsitelty) ja tarkistetaan onko näillä asiakkailla kuitenkin pantteja
 	//eli jos panttitili on poistettu käytöstä ja pantteja on niin kaikki avoimet pantit pitää laskuttaa
 	$query = "	SELECT Group_concat(panttitili.tunnus) tunnukset,
 				panttitili.asiakas   AS asiakas
 				FROM   asiakas
 				JOIN panttitili
-				ON ( panttitili.yhtio = asiakas.yhtio AND panttitili.asiakas = asiakas.tunnus AND panttitili.status = '' )
-				WHERE  panttitili.yhtio = '{$kukarow['yhtio']}'
+				ON ( panttitili.yhtio = asiakas.yhtio AND panttitili.asiakas = asiakas.tunnus AND panttitili.status = '' AND panttitili.myyntipvm <= Date_sub(Now(), INTERVAL 6 MONTH) )
+				WHERE  asiakas.yhtio = '{$kukarow['yhtio']}'
 				AND asiakas.panttitili != 'K'
 				GROUP  BY asiakas.tunnus
 
@@ -39,6 +39,7 @@
 				AND tuote.tuoteno = panttitili.tuoteno
 				AND tuote.status = 'P' )
 				WHERE  panttitili.yhtio = '{$kukarow['yhtio']}'
+				AND panttitili.myyntipvm <= Date_sub(Now(), INTERVAL 6 MONTH)
 				GROUP  BY panttitili.asiakas
 
 				UNION
@@ -51,17 +52,19 @@
 				AND asiakas.tunnus = panttitili.asiakas
 				AND asiakas.laji = 'P' )
 				WHERE  panttitili.yhtio = '{$kukarow['yhtio']}'
+				AND panttitili.myyntipvm <= Date_sub(Now(), INTERVAL 6 MONTH)
 				GROUP  BY panttitili.asiakas
 
 				UNION
 
 				SELECT Group_concat(panttitili.tunnus) tunnukset,
 				panttitili.asiakas   AS asiakas
-				FROM   panttitili
-				WHERE  panttitili.yhtio = '{$kukarow['yhtio']}'
-				AND panttitili.status = ''
-				AND panttitili.myyntipvm <= Date_sub(Now(), INTERVAL 6 MONTH)
-				GROUP  BY panttitili.asiakas";
+				FROM   asiakas
+				JOIN panttitili
+				ON ( panttitili.yhtio = asiakas.yhtio AND panttitili.asiakas = asiakas.tunnus AND panttitili.status = '' AND panttitili.myyntipvm <= Date_sub(Now(), INTERVAL 6 MONTH) )
+				WHERE  asiakas.yhtio = '{$kukarow['yhtio']}'
+				AND asiakas.panttitili = 'K'
+				GROUP  BY asiakas.tunnus";
 	$panttitili_res = pupe_query($query);
 
 	while ($panttitili_row = mysql_fetch_assoc($panttitili_res)) {

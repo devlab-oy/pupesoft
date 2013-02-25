@@ -1106,14 +1106,17 @@
 		$ulos .= "<option value = 'K'{$sel}>".t("Käytössä")."</option>";
 		$ulos .= "</select>";
 		
-		$query = "	SELECT sum(hinta) as hinta
+		$query = "	SELECT *
 					FROM panttitili
 					WHERE panttitili.yhtio = '{$kukarow['yhtio']}'
 					AND panttitili.asiakas = '{$trow['tunnus']}'";
 		$panttitili_result = pupe_query($query);
-		$panttitili_row = mysql_fetch_assoc($panttitili_result);
+		$koko_hinta = 0;
+		while($panttitili_row = mysql_fetch_assoc($panttitili_result)) {
+			$koko_hinta += laske_rivihinta($row);
+		}
 
-		$ulos .= " <font class='message'>".t("Asiakkaan panttitililla yhteensä").": ".str_replace('.', ',', str_replace(',', ' ', number_format($panttitili_row['hinta'], 2)))." EUR</font>";
+		$ulos .= " <font class='message'>".t("Asiakkaan panttitililla yhteensä").": ".str_replace('.', ',', str_replace(',', ' ', number_format($koko_hinta, 2)))." EUR</font>";
 		$ulos .= "</td>";
 
 		$jatko = 0;

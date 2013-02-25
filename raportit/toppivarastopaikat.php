@@ -8,9 +8,10 @@ ob_implicit_flush(1);
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 require '../inc/pupeExcel.inc';
 require '../inc/ProgressBar.class.php';
+require '../inc/functions.inc';
 
 ini_set("memory_limit", "2G");
 
@@ -491,80 +492,7 @@ function echo_tallennus_formi($xls_filename) {
 	echo "<br/>";
 }
 
-function generoi_excel_tiedosto(&$rivit, $header_values, $force_to_string) {
-	$xls = new pupeExcel();
-	$rivi = 0;
-	$sarake = 0;
-
-	xls_headerit($xls, $rivit, $rivi, $sarake, $header_values);
-
-	xls_rivit($xls, $rivit, $rivi, $sarake, $force_to_string);
-
-	$xls_tiedosto = $xls->close();
-
-	return $xls_tiedosto;
-}
-
-function xls_headerit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake, $header_values) {
-	$style = array("bold" => TRUE);
-	foreach ($rivit[0] as $header_text => $value) {
-		if (!stristr($header_text, 'tunnus')) {
-			if (array_key_exists($header_text, $header_values)) {
-				kirjoita_header_solu($xls, $header_values[$header_text], $rivi, $sarake, $style);
-			}
-			else {
-				//fail safe
-				kirjoita_header_solu($xls, $header_text, $rivi, $sarake, $style);
-			}
-		}
-	}
-	$rivi++;
-	$sarake = 0;
-}
-
-function xls_rivit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake, $force_to_string) {
-	$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
-	$xls_progress_bar->initialize(count($rivit));
-	
-	foreach ($rivit as $rivi) {
-		foreach ($rivi as $header => $solu) {
-			if (!stristr($header, 'tunnus')) {
-				kirjoita_solu($xls, $header, $solu, $rivi, $sarake, $force_to_string);
-			}
-		}
-		$rivi++;
-		$sarake = 0;
-
-		$xls_progress_bar->increase();
-	}
-
-	echo "<br/>";
-}
-
-function kirjoita_solu(&$xls, $key, $string, &$rivi, &$sarake, $force_to_string) {
-	if (is_numeric($string) and !in_array($key, $force_to_string)) {
-		$xls->writeNumber($rivi, $sarake, $string);
-	}
-	else if (valid_date($string) != 0 and valid_date($string) !== false and !in_array($key, $force_to_string)) {
-		$xls->writeDate($rivi, $sarake, $string);
-	}
-	else {
-		$xls->write($rivi, $sarake, $string);
-	}
-	$sarake++;
-}
-
-function kirjoita_header_solu(&$xls, $string, &$rivi, &$sarake, $style = array()) {
-	$xls->write($rivi, $sarake, $string, $style);
-	$sarake++;
-}
-
-function valid_date($date) {
-	//preg_match() returns 1 if the pattern matches given subject, 0 if it does not, or FALSE if an error occurred.
-	return (preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date));
-}
-
-function nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl) {
+function nayta_ruudulla(&$rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl) {
 	echo "<table><tr>
 	<th>".t("Valittu kausi")."</th>
 	<td>{$ppa}</td>
@@ -575,42 +503,8 @@ function nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $v
 	<td>{$kkl}</td>
 	<td>{$vvl}</td>
 	</tr></table><br>";
-		
-	echo "<table>";
-	echo_headers($rivit[0], $header_values);
-	echo_rivit($rivit, $force_to_string);
-	echo "</table>";
-}
 
-function echo_headers($rivi, $header_values) {
-	echo "<tr>";
-	foreach ($rivi as $header_text => $value) {
-		if (!stristr($header_text, 'tunnus')) {
-			if (array_key_exists($header_text, $header_values)) {
-				echo "<th>{$header_values[$header_text]}</th>";
-			}
-			else {
-				//fail safe
-				echo "<th>{$header_text}</th>";
-			}
-		}
-	}
-	echo "</tr>";
-}
-
-function echo_rivit($rivit, $force_to_string) {
-	foreach ($rivit as $rivi) {
-		echo "<tr>";
-		foreach ($rivi as $header => &$solu) {
-			if (!stristr($header, 'tunnus')) {
-				if (is_numeric($solu) and floatval($solu) and !in_array($header, $force_to_string)) {
-					$solu = number_format($solu, 2);
-				}
-				echo "<td>{$solu}</td>";
-			}
-		}
-		echo "</tr>";
-	}
+	echo_rows_in_table($rivit, $header_values, $force_to_string);
 }
 
 require ("../inc/footer.inc");

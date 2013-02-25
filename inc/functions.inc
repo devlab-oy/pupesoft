@@ -19780,3 +19780,151 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 		}
 	}
 }
+
+/**
+ * HOW TO:
+ * $rivit :
+ * $rivit = array();
+ * while($rivi = mysql_fetch_assoc($result)) {
+ *			$rivit[] = $rivi;
+ * }
+ *
+ * $header_values: query column names as array keys
+ * $header_values = array(
+		'tuoteno' => t('Tuoteno'),
+		'nimitys' => t('Tuotteen nimi'),
+		'varaston_nimitys' => t('Varasto'),
+	);
+ * 
+ * $force_to_string: query column names that DO NOT need to be printed on excel as array values
+	$force_to_string = array(
+		'tuoteno'
+	);
+ */
+if (!function_exists('generoi_excel_tiedosto')) {
+	function generoi_excel_tiedosto(&$rivit, $header_values, $force_to_string) {
+		$xls = new pupeExcel();
+		$rivi_numero = 0;
+		$sarake_numero = 0;
+
+		_xls_headerit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values);
+
+		_xls_rivit($xls, $rivit, $rivi_numero, $sarake_numero, $force_to_string);
+
+		$xls_tiedosto = $xls->close();
+
+		return $xls_tiedosto;
+	}
+}
+
+if (!function_exists('_xls_headerit')) {
+	function _xls_headerit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values) {
+		$style = array("bold" => TRUE);
+		foreach ($rivit[0] as $header_text => $value) {
+			if (!stristr($header_text, 'tunnus')) {
+				if (array_key_exists($header_text, $header_values)) {
+					_kirjoita_header_solu($xls, $header_values[$header_text], $rivi_numero, $sarake_numero, $style);
+				}
+				else {
+					//fail safe
+					_kirjoita_header_solu($xls, $header_text, $rivi_numero, $sarake_numero, $style);
+				}
+			}
+		}
+		$rivi_numero++;
+		$sarake_numero = 0;
+	}
+}
+
+if (!function_exists('_xls_rivit')) {
+	function _xls_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $force_to_string) {
+		$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
+		$xls_progress_bar->initialize(count($rivit));
+
+		foreach ($rivit as $rivi) {
+			foreach ($rivi as $header => $solu) {
+				if (!stristr($header, 'tunnus')) {
+					_kirjoita_solu($xls, $header, $solu, $rivi_numero, $sarake_numero, $force_to_string);
+				}
+			}
+			$rivi_numero++;
+			$sarake_numero = 0;
+
+			$xls_progress_bar->increase();
+		}
+
+		echo "<br/>";
+	}
+}
+
+if (!function_exists('_kirjoita_solu')) {
+	function _kirjoita_solu(&$xls, $key, $string, &$rivi, &$sarake, $force_to_string) {
+		if (is_numeric($string) and !in_array($key, $force_to_string)) {
+			$xls->writeNumber($rivi, $sarake, $string);
+		}
+		else if (valid_date($string) != 0 and valid_date($string) !== false and !in_array($key, $force_to_string)) {
+			$xls->writeDate($rivi, $sarake, $string);
+		}
+		else {
+			$xls->write($rivi, $sarake, $string);
+		}
+		$sarake++;
+	}
+}
+
+if (!function_exists('_kirjoita_header_solu')) {
+	function _kirjoita_header_solu(&$xls, $string, &$rivi, &$sarake, $style = array()) {
+		$xls->write($rivi, $sarake, $string, $style);
+		$sarake++;
+	}
+}
+
+if (!function_exists('valid_date')) {
+	function valid_date($date) {
+		//preg_match() returns 1 if the pattern matches given subject, 0 if it does not, or FALSE if an error occurred.
+		return (preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date));
+	}
+}
+if(!function_exists('echo_rows_in_table')) {
+	function echo_rows_in_table(&$rivit, $header_values, $force_to_string) {
+		echo "<table>";
+		_echo_table_headers($rivit[0], $header_values);
+		_echo_table_rows($rivit, $force_to_string);
+		echo "</table>";
+	}
+}
+
+if(!function_exists('_echo_table_headers')) {
+	function _echo_table_headers($rivi, $header_values) {
+		echo "<tr>";
+		foreach ($rivi as $header_text => $value) {
+			if (!stristr($header_text, 'tunnus')) {
+				if (array_key_exists($header_text, $header_values)) {
+					echo "<th>{$header_values[$header_text]}</th>";
+				}
+				else {
+					//fail safe
+					echo "<th>{$header_text}</th>";
+				}
+			}
+		}
+		echo "</tr>";
+	}
+}
+
+if(!function_exists('_echo_table_rows')) {
+	function _echo_table_rows(&$rivit, $force_to_string) {
+		foreach ($rivit as $rivi) {
+			echo "<tr>";
+			foreach ($rivi as $header => &$solu) {
+				if (!stristr($header, 'tunnus')) {
+					if (is_numeric($solu) and floatval($solu) and !in_array($header, $force_to_string)) {
+						$solu = number_format($solu, 2);
+					}
+					echo "<td>{$solu}</td>";
+				}
+			}
+			echo "</tr>";
+		}
+	}
+}

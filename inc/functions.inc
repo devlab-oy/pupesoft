@@ -19885,6 +19885,27 @@ if (!function_exists('valid_date')) {
 		return (preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date));
 	}
 }
+
+/**
+ * HOW TO:
+ * $rivit :
+ * $rivit = array();
+ * while($rivi = mysql_fetch_assoc($result)) {
+ *			$rivit[] = $rivi;
+ * }
+ *
+ * $header_values: query column names as array keys
+ * $header_values = array(
+		'tuoteno' => t('Tuoteno'),
+		'nimitys' => t('Tuotteen nimi'),
+		'varaston_nimitys' => t('Varasto'),
+	);
+ *
+ * $force_to_string: query column names that DO NOT need to be printed on excel as array values
+	$force_to_string = array(
+		'tuoteno'
+	);
+ */
 if(!function_exists('echo_rows_in_table')) {
 	function echo_rows_in_table(&$rivit, $header_values, $force_to_string) {
 		echo "<table>";

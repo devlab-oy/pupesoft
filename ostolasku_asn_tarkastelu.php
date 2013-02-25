@@ -200,7 +200,7 @@
 					//n. rivi 187 "&asn_numerot={$asn_numerot}&valitse={$valitse}";
 					$asn_numerot = $asn_numerot;
 
-					$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND asn_numero IN({$asn_numerot})";
+					$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND asn_numero IN ({$asn_numerot})";
 					$res = pupe_query($query);
 				}
 				else {
@@ -1992,8 +1992,8 @@
 			$ed_asn = '';
 			$ed_toimittaja = '';
 			$naytetaanko_toimittajabutton = true;
-
 			$asn_numerot = array();
+
 			while ($row = mysql_fetch_assoc($result)) {
 				$naytetaanko_toimittajabutton = true;
 
@@ -2002,20 +2002,24 @@
 					continue;
 				}
 
-				$asn_numerot[] = $row['asn_numero'];
+				$asn_numerot[$row['asn_numero']] = $row['asn_numero'];
 
 				if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
 
 					if ($naytetaanko_toimittajabutton) {
 						//asn_numerot array:ssa on tässä kohtaa yks value liikaa, joka ei kuulu tälle toimittajalle. poisettaan se arraystä
 						$seuraavaan_asn_array = array_pop($asn_numerot);
-						echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='".implode(',', $asn_numerot)."' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
 
-						unset($asn_numerot);
-						$asn_numerot[] = $seuraavaan_asn_array;
+						echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='".implode(',', $asn_numerot)."' value='",t("Vaihda toimittajaa"),"' />";
 
-						#SAMI:
-						#echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$ed_asn}' value='",t("Poista"),"' /></span>";
+						foreach ($asn_numerot as $pasn) {
+							echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$pasn}' value='",t("Poista sanoma"),": $pasn' /></span> ";
+						}
+
+						echo "</th></tr>";
+
+						$asn_numerot = array();
+						$asn_numerot[$seuraavaan_asn_array] = $seuraavaan_asn_array;
 					}
 
 					echo "<tr><td colspan='8' class='back'>&nbsp;</td></tr>";
@@ -2053,10 +2057,13 @@
 			}
 
 			if (mysql_num_rows($result) > 0 and $naytetaanko_toimittajabutton) {
-				echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='".implode(',', $asn_numerot)."' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
-				
-				#SAMI:
-				#echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$ed_asn}' value='",t("Poista"),"' /></span>";
+				echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='".implode(',', $asn_numerot)."' value='",t("Vaihda toimittajaa"),"' />";
+
+				foreach ($asn_numerot as $pasn) {
+					echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$pasn}' value='",t("Poista sanoma"),": $pasn' /></span> ";
+				}
+
+				echo "</th></tr>";
 			}
 
 			echo "</table>";

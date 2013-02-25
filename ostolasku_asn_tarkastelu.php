@@ -10,6 +10,23 @@
 						$('#formi').submit();
 					});
 
+					$('.poistabutton').click(function(){
+
+						if (confirm('",t("Haluatko todella poistaa tämän sanoman?"),"')) {
+							var kollitunniste = $(this).attr('id');
+
+							if ($('#valitse').val() == 'asn') {
+								$('#kolli').val(kollitunniste);
+							}
+							else {
+								$('#lasku').val(kollitunniste);
+							}
+
+							$('#tee').val('poista_sanoma');
+							$('#formi').submit();
+						}
+					});
+
 					$('.ostolaskubutton').click(function(){
 						var lasku = $(this).attr('id');
 						$('#lasku').val(lasku);
@@ -97,6 +114,31 @@
 	if (!isset($valitse)) $valitse = '';
 	if (!isset($asn_rivi)) $asn_rivi = '';
 	if (isset($muut_siirrettavat) and trim($muut_siirrettavat) != "") list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl, $valitse) = explode("!¡!", $muut_siirrettavat);
+
+	if ($tee == 'poista_sanoma') {
+
+		if ($valitse == 'asn') {
+			$sanomatunniste = $kolli;
+		}
+		else {
+			$sanomatunniste = $lasku;
+		}
+
+		if (trim($sanomatunniste) != '') {
+
+			$valitse_lisa = $valitse == 'asn' ? 'asn' : 'tec';
+
+			$query = "	DELETE FROM asn_sanomat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji = '{$valitse_lisa}'
+						AND asn_numero = '{$sanomatunniste}'";
+			$res = pupe_query($query);
+
+			echo "<br /><font class='message'>",t("Poistettiin sanoma")," {$sanomatunniste}</font><br /><br />";
+		}
+
+		$tee = '';
+	}
 
 	if ($tee == 'erolistalle') {
 
@@ -1952,7 +1994,9 @@
 				if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
 
 					if ($naytetaanko_toimittajabutton) {
-						echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+						echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' />&nbsp;";
+						echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$ed_asn}' value='",t("Poista"),"' /></span>";
+						echo "</th></tr>";
 					}
 
 					echo "<tr><td colspan='8' class='back'>&nbsp;</td></tr>";
@@ -1974,7 +2018,11 @@
 				echo "<td>{$row['paketintunniste']}</td>";
 				echo "<td>".tv1dateconv($row['saapumispvm'])."</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
-				echo "<td class='back'><input type='button' class='kollibutton' id='{$row['paketintunniste']}##{$row['asn_numero']}##{$row['toimittajanumero']}' value='",t("Valitse"),"' /></td>";
+
+				echo "<td class='back'>";
+				echo "<input type='button' class='kollibutton' id='{$row['paketintunniste']}##{$row['asn_numero']}##{$row['toimittajanumero']}' value='",t("Valitse"),"' />";
+				echo "</td>";
+
 				echo "</tr>";
 
 				if (($ed_toimittaja == '' or $ed_toimittaja == $row['toimittajanumero']) and $row['ok'] == $row['rivit']) {
@@ -1986,7 +2034,10 @@
 			}
 
 			if (mysql_num_rows($result) > 0 and $naytetaanko_toimittajabutton) {
-				echo "<tr><th colspan='7'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+				echo "<tr><th colspan='8'>";
+				echo "<input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' />&nbsp;";
+				echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$ed_asn}' value='",t("Poista"),"' /></span>";
+				echo "</th></tr>";
 			}
 
 			echo "</table>";
@@ -2040,11 +2091,15 @@
 
 				if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
 
+					echo "<tr><th colspan='7'>";
+
 					if ($naytetaanko_toimittajabutton) {
-						echo "<tr><th colspan='7'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+						echo "<input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' />&nbsp;";
 					}
 
-					echo "<tr><td colspan='7' class='back'>&nbsp;</td></tr>";
+					echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$ed_tilausnumero}' value='",t("Poista"),"' /></span>";
+					echo "</th></tr>";
+					echo "<tr><td class='back' colspan='7'>&nbsp;</td></tr>";
 				}
 
 				echo "<tr>";
@@ -2055,7 +2110,9 @@
 				echo "<td>{$row['tilausnumero']}</td>";
 				echo "<td>".tv1dateconv($row['saapumispvm'])."</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
-				echo "<td class='back'><input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' /></td>";
+				echo "<td class='back'>";
+				echo "<input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' />";
+				echo "</td>";
 				echo "</tr>";
 
 				if (($ed_toimittaja == '' or $ed_toimittaja == $row['toimittajanumero']) and $row['ok'] == $row['rivit']) {
@@ -2066,9 +2123,14 @@
 				$ed_tilausnumero = $row['tilausnumero'];
 			}
 
+			echo "<tr><th colspan='7'>";
+
 			if (mysql_num_rows($result) > 0 and $naytetaanko_toimittajabutton) {
-				echo "<tr><th colspan='6'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+				echo "<input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' />&nbsp;";
 			}
+
+			echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$ed_tilausnumero}' value='",t("Poista"),"' /></span>";
+			echo "</th></tr>";
 
 			echo "</table>";
 			echo "</form>";

@@ -155,14 +155,14 @@
 
 			if(!empty($row['toimittajanro'])) {
 				if ($valitse == 'asn') {
-					//riviltä 177
+					//n. rivi 187 "&asn_numerot={$asn_numerot}&valitse={$valitse}";
 					$asn_numerot = $asn_numerot;
 
 					$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND asn_numero IN({$asn_numerot})";
 					$res = pupe_query($query);
 				}
 				else {
-					//riviltä 181
+					//n. rivi 190 "&tilausnumero={$tilausnumero}&valitse={$valitse}";
 					$tilausnumero = (int) $tilausnumero;
 
 					$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tilausnumero = '{$tilausnumero}'";

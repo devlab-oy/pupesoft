@@ -12,6 +12,8 @@ require('../inc/parametrit.inc');
 require '../inc/pupeExcel.inc';
 require '../inc/ProgressBar.class.php';
 
+ini_set("memory_limit", "2G");
+
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
 	if (file_exists($filepath)) {
@@ -524,8 +526,8 @@ function xls_rivit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake, $force_to_string)
 	$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
 	$xls_progress_bar->initialize(count($rivit));
 	
-	foreach ($rivit as $matkalasku_rivi) {
-		foreach ($matkalasku_rivi as $header => $solu) {
+	foreach ($rivit as $rivi) {
+		foreach ($rivi as $header => $solu) {
 			if (!stristr($header, 'tunnus')) {
 				kirjoita_solu($xls, $header, $solu, $rivi, $sarake, $force_to_string);
 			}

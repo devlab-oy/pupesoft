@@ -1,10 +1,25 @@
 <?php
 
+// Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
+ini_set('zlib.output_compression', 0);
+ini_set('implicit_flush', 1);
+ob_implicit_flush(1);
+
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
 require '../inc/pupeExcel.inc';
+require '../inc/ProgressBar.class.php';
+
+if ($tee == 'lataa_tiedosto') {
+	$filepath = "/tmp/".$tmpfilenimi;
+	if (file_exists($filepath)) {
+		readfile($filepath);
+		unlink($filepath);
+	}
+	exit;
+}
 
 // ehdotetaan 7 päivää taaksepäin
 if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
@@ -152,6 +167,13 @@ if ($tee != '') {
 		'kpl_6' => t('Keräystä tästä päivästä 6kk'),
 		'kpl_12' => t('Keräystä tästä päivästä 12kk'),
 		'poistettu' => t('Poistettu varastopaikka'),
+		'tuotekorkeus' => t('Tuotteen korkeus'),
+		'tuoteleveys' => t('Tuotteen leveys'),
+		'tuotesyvyys' => t('Tuotteen syvyys'),
+		'tuotemassa' => t('Tuotteen massa'),
+		'status' => t('Status'),
+		'luontiaika' => t('Tuotteen Luontiaika'),
+		'ostoehdotus' => t('Ostoehdotus'),
 	);
 	$force_to_string = array(
 		'tuoteno'
@@ -162,20 +184,18 @@ if ($tee != '') {
 		if(count($rivit) > 0) {
 			$xls_filename = generoi_excel_tiedosto($rivit, $header_values, $force_to_string);
 			echo_tallennus_formi($xls_filename);
+
+			nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl);
 		}
-		nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl);
-		
-		//$saldolliset = echo_rivit("PAIKKA", $result, $ppa, $kka, $vva, $ppl, $kkl, $vvl);
 	}
 	else {
 		list($rivit, $saldolliset) = hae_rivit("TUOTE", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $kaikki_lisa_kentat);
 		if(count($rivit) > 0) {
 			$xls_filename = generoi_excel_tiedosto($rivit, $header_values, $force_to_string);
 			echo_tallennus_formi($xls_filename);
-		}
-		nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl);
 
-		//$saldolliset = echo_rivit("TUOTE", $result, $ppa, $kka, $vva, $ppl, $kkl, $vvl);
+			nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl);
+		}
 	}
 
 	echo_tulosta_inventointilista($saldolliset);
@@ -226,6 +246,12 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 	}
 
 	if ($tyyppi == "TUOTE") {
+		$vresult = t_avainsana("S");
+		$tuote_statukset = array();
+		while($status = mysql_fetch_assoc($vresult)) {
+			$tuote_statukset[$status['selite']] = $status['selitetark'];
+		}
+
 		if(!empty($lisa_kentat)) {
 			$tuote_select = "";
 			foreach($lisa_kentat as $lisa_kentta) {
@@ -234,8 +260,16 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 				}
 			}
 		}
-		
-		$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
+		$tuotepaikat_select = "tuotepaikat.saldo, tuotepaikat.tunnus paikkatun, ";
+		$group = "GROUP BY tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso, tapahtuma.tuoteno";
+	}
+	else {
+		$tuote_select = "";
+		$tuotepaikat_select = "";
+		$group = "GROUP BY tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso";
+	}
+
+	$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
 					keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,
 					CONCAT_WS(' ', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) as hylly,
 					sum(if(tapahtuma.laadittu >= '$vva-$kka-$ppa' AND tapahtuma.laadittu <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
@@ -244,10 +278,9 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 6 month), tapahtuma.kpl * -1, 0)) tuo_kpl_6,
 					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month), 1, 0)) kpl_12,
 					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month), tapahtuma.kpl * -1, 0)) tuo_kpl_12,
-					sum(if(tuotepaikat.tunnus IS NULL , 1, 0)) poistettu,
 					{$tuote_select}
-					tuotepaikat.saldo,
-					tuotepaikat.tunnus paikkatun
+					{$tuotepaikat_select}
+					sum(if(tuotepaikat.tunnus IS NULL , 1, 0)) poistettu
 					FROM tapahtuma
 					JOIN tuote ON ( tapahtuma.yhtio = tuote.yhtio AND tapahtuma.tuoteno = tuote.tuoteno )
 					LEFT JOIN tuotepaikat
@@ -274,53 +307,13 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 					AND tapahtuma.laji = 'laskutus'
 					{$tuotepaikka_where}
 					{$_date}
-					GROUP BY tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso, tapahtuma.tuoteno
-					ORDER BY kpl_valittu_aika DESC
-					LIMIT 10";
-	}
-	else {
-
-		$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
-					keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,
-					CONCAT_WS(' ', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) as hylly,
-					sum(if(tapahtuma.laadittu >= '$vva-$kka-$ppa' AND tapahtuma.laadittu <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
-					sum(if(tapahtuma.laadittu >= '$vva-$kka-$ppa' AND tapahtuma.laadittu <= '$vvl-$kkl-$ppl', tapahtuma.kpl * -1, 0)) tuokpl_valittu_aika,
-					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 6 month), 1, 0)) kpl_6,
-					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 6 month), tapahtuma.kpl * -1, 0)) tuo_kpl_6,
-					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month), 1, 0)) kpl_12,
-					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month), tapahtuma.kpl * -1, 0)) tuo_kpl_12,
-					sum(if(tuotepaikat.tunnus IS NULL , 1, 0)) poistettu,
-					tuotepaikat.tunnus paikkatun
-					FROM tapahtuma
-					LEFT JOIN tuotepaikat
-					ON ( tapahtuma.yhtio = tuotepaikat.yhtio
-						AND tapahtuma.hyllyalue = tuotepaikat.hyllyalue
-						AND tapahtuma.hyllynro = tuotepaikat.hyllynro
-						AND tapahtuma.hyllyvali = tuotepaikat.hyllyvali
-						AND tapahtuma.hyllytaso = tuotepaikat.hyllytaso
-						AND tapahtuma.tuoteno = tuotepaikat.tuoteno
-					)
-					JOIN varastopaikat
-					ON (
-						varastopaikat.yhtio = tapahtuma.yhtio
-						AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-						AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-						$varasto_join
-					)
-					JOIN keraysvyohyke
-					ON (
-						keraysvyohyke.yhtio = varastopaikat.yhtio
-						AND keraysvyohyke.varasto = varastopaikat.tunnus
-						{$keraysvyohyke_join}
-					)
-					WHERE  tapahtuma.yhtio = '{$kukarow['yhtio']}'
-				   	AND tapahtuma.laji = 'laskutus'
-					{$tuotepaikka_where}
-				   	{$_date}
-					GROUP BY tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso
+					{$group}
 					ORDER BY kpl_valittu_aika DESC";
-	}
 
+//	echo "<pre>";
+//	echo $query;
+//	echo "</pre>";
+					
 	$result = mysql_query($query) or pupe_error($query);
 
 	//päiviä aikajaksossa
@@ -331,17 +324,12 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 
 	$poistettu = t('Poistettu');
 
-	if($tyyppi == 'TUOTE')  {
-		$vresult = t_avainsana("S");
-		$tuote_statukset = array();
-		while($status = mysql_fetch_assoc($vresult)) {
-			$tuote_statukset[$status['selite']] = $status['selitetark'];
-		}
-	}
-
 	$rows = array();
 	$saldolliset = array();
+	$progress_bar = new ProgressBar(t("Haetaan tiedot"));
+	$progress_bar->initialize(mysql_num_rows($result));
 	while($row = mysql_fetch_assoc($result)) {
+		$progress_bar->increase();
 		if($tyyppi == 'TUOTE') {
 			$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys');
 			if(isset($row['status']) and array_key_exists($row['status'], $tuote_statukset)) {
@@ -374,6 +362,8 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 
 		$rows[] = $row;
 	}
+
+	echo "<br/>";
 
 	return array($rows, $saldolliset);
 }
@@ -484,18 +474,22 @@ function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $a
 }
 
 function echo_tallennus_formi($xls_filename) {
-	echo "<table>";
-	echo "<tr><th>".t("Tallenna excel aineisto").":</th>";
 	echo "<form method='post' class='multisubmit'>";
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>".t("Tallenna excel aineisto").":</th>";
 	echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 	echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
 	echo "<input type='hidden' name='kaunisnimi' value='".t('Keraysseuranta').".xlsx'>";
 	echo "<input type='hidden' name='tmpfilenimi' value='{$xls_filename}'>";
-	echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-	echo "</table><br/>";
+	echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td>";
+	echo "</tr>";
+	echo "</table>";
+	echo "</form>";
+	echo "<br/>";
 }
 
-function generoi_excel_tiedosto($rivit, $header_values, $force_to_string) {
+function generoi_excel_tiedosto(&$rivit, $header_values, $force_to_string) {
 	$xls = new pupeExcel();
 	$rivi = 0;
 	$sarake = 0;
@@ -527,6 +521,9 @@ function xls_headerit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake, $header_values
 }
 
 function xls_rivit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake, $force_to_string) {
+	$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
+	$xls_progress_bar->initialize(count($rivit));
+	
 	foreach ($rivit as $matkalasku_rivi) {
 		foreach ($matkalasku_rivi as $header => $solu) {
 			if (!stristr($header, 'tunnus')) {
@@ -535,6 +532,8 @@ function xls_rivit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake, $force_to_string)
 		}
 		$rivi++;
 		$sarake = 0;
+
+		$xls_progress_bar->increase();
 	}
 
 	echo "<br/>";

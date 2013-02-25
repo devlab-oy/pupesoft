@@ -569,6 +569,19 @@
 
 					if ($virheet == 0) {
 
+						if (isset($keikantunnus) and $keikantunnus != '' and $keikantunnus != 0) {
+
+							// Haetaan saapumisen numero
+							$query = "	SELECT laskunro
+										FROM lasku
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$keikantunnus}'";
+							$saapumisen_nro_chk_res = pupe_query($query);
+							$saapumisen_nro_chk_row = mysql_fetch_assoc($saapumisen_nro_chk_res);
+
+							echo "<br /><font class='message'>",t("Lasku liitettiin saapumiseen")," {$saapumisen_nro_chk_row['laskunro']}</font><br /><br />";
+						}
+
 						$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND status not in ('E','D') {$wherelisa}";
 						$kollires = pupe_query($query);
 

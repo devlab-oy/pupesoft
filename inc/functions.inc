@@ -19901,7 +19901,7 @@ if (!function_exists('valid_date')) {
 		'varaston_nimitys' => t('Varasto'),
 	);
  *
- * $force_to_string: query column names that DO NOT need to be printed on excel as array values
+ * $force_to_string: query column names that DO NOT need to be printed on html dom as array values
 	$force_to_string = array(
 		'tuoteno'
 	);

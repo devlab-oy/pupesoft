@@ -101,7 +101,7 @@ if ($monta > 1 and $monta <= $limit) {
 
 			echo "<td class='back'>";
 			if(stristr($PHP_SELF, 'ostolasku_asn_tarkastelu')) {
-				if($valitse = 'asn') {
+				if($valitse == 'asn') {
 					$action = "&asn_numerot={$asn_numerot}&valitse={$valitse}";
 				}
 				else {

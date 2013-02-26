@@ -1975,8 +1975,9 @@
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
 
-		$ulos .= "<option value = '' $sel>".t("Ovttunnus")."</option>";
+		$ulos .= "<option value = '' $sel>".t("Ovttunnus ja Toimitusosoitteen Ovttunnus")."</option>";
 		$ulos .= "<option value = 'A' $sel[A]>".t("Asiakasnro")."</option>";
+		$ulos .= "<option value = 'B' $sel[B]>".t("Ytunnus")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

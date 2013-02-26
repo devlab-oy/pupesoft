@@ -262,7 +262,7 @@
 					if (strtoupper($tavarantoimittajanumero) == "ELRING") {
 						$tavarantoimittajanumero = "123312";
 					}
-					elseif (strtoupper($tavarantoimittajanumero) == "BOSCH") {
+					elseif (strtoupper($tavarantoimittajanumero) == "BOSCH" OR strtoupper($tavarantoimittajanumero) == "AA_FI") {
 						$tavarantoimittajanumero = "123067";
 					}
 					elseif (strtoupper($tavarantoimittajanumero) == "NISSENS") {

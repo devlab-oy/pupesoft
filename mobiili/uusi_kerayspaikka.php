@@ -76,7 +76,7 @@ if (isset($submit) and trim($submit) != '') {
 				# Jos syˆtetty‰ paikkaa ei ole t‰m‰n tuotteen, lis‰t‰‰n uusi tuotepaikka
 				if (mysql_num_rows($oma_paikka) == 0) {
 					#lisaa_tuotepaikka($row['tuoteno'], $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], 'Saapumisessa', $oletus);
-					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, 'Saapumisessa', $oletus);
+					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, 'Saapumisessa', $oletus, $halytysraja, $tilausmaara);
 				}
 
 				# P‰ivitet‰‰n oletuspaikat jos tehd‰‰n t‰st‰ oletuspaikka
@@ -156,6 +156,14 @@ echo "<div class='main'>
 		<tr>
 			<th>",t("Taso"),"</td>
 			<td><input type='text' name='hyllytaso' value='' /></th>
+		</tr>
+		<tr>
+			<th>",t("H‰lytysraja"),"</td>
+			<td><input type='text' name='halytysraja' value='' /></th>
+		</tr>
+		<tr>
+			<th>",t("Tilausm‰‰r‰"),"</td>
+			<td><input type='text' name='tilausmaara' value='' /></th>
 		</tr>
 		<tr>
 			<td colspan='2'>",t("Tee t‰st‰ oletuspaikka")," <input type='checkbox' name='oletuspaikka' $oletuspaikka_chk /></td>

@@ -241,7 +241,11 @@ if ($tee == 'AKTIVOI' and $mista == "muokkaatilaus") {
 // aktivoidaan saatu id
 if ($tee == 'AKTIVOI') {
 	// katsotaan onko muilla aktiivisena
-	$query = "SELECT * from kuka where yhtio='$kukarow[yhtio]' and kesken='$tilausnumero' and kesken!=0";
+	$query = "	SELECT *
+				FROM kuka
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND kesken  = '$tilausnumero'
+				AND kesken != 0";
 	$result = pupe_query($query);
 
 	unset($row);
@@ -1912,9 +1916,9 @@ if ($tee == '') {
 
 		if ((int) $myyjanro > 0) {
 			$apuqu = "	SELECT *
-						from kuka use index (yhtio_myyja)
-						where yhtio = '$kukarow[yhtio]'
-						and myyja = '$myyjanro'
+						FROM kuka use index (yhtio_myyja)
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND myyja = '$myyjanro'
 						AND myyja > 0";
 			$meapu = pupe_query($apuqu);
 
@@ -2887,7 +2891,9 @@ if ($tee == '') {
 
 			$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
-						WHERE kuka.yhtio = '$kukarow[yhtio]' and (kuka.extranet = '' or kuka.tunnus='$laskurow[myyja]')
+						JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND (kuka.extranet = '' or kuka.tunnus='$laskurow[myyja]')
 						ORDER BY kuka.nimi";
 			$yresult = pupe_query($query);
 
@@ -4749,8 +4755,8 @@ if ($tee == '') {
 			$headerit = "<tr>$jarjlisa<th>#</th>";
 			$sarakkeet++;
 
-			if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T") {
-				$trivityyppi_result = t_avainsana("TRIVITYYPPI");
+			if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T" or $kukarow["yhtio"] == "savt") {
+				$trivityyppi_result = t_avainsana("TRIVITYYPPI", "", "ORDER BY avainsana.selitetark");
 
 				if (mysql_num_rows($trivityyppi_result) > 0) {
 					$headerit .= "<th>".t("Tyyppi")."</th>";
@@ -5405,7 +5411,7 @@ if ($tee == '') {
 				$vanhaid 	  = $row["perheid"];
 				$trivityyulos = "";
 
-				if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T") {
+				if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T" or $kukarow["yhtio"] == "savt") {
 					if ($muokkauslukko_rivi == "" and $row["ei_nayteta"] == "") {
 						if (mysql_num_rows($trivityyppi_result) > 0) {
 							//annetaan valita tilausrivin tyyppi
@@ -5423,6 +5429,8 @@ if ($tee == '') {
 												<select name='positio' onchange='submit();' $state>";
 
 							mysql_data_seek($trivityyppi_result, 0);
+
+							$trivityyulos .= "<option value=''>".t("Valitse")."</option>";
 
 							while($trrow = mysql_fetch_assoc($trivityyppi_result)) {
 								$sel = "";
@@ -6869,7 +6877,7 @@ if ($tee == '') {
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 				}
 
-				if ($yhtiorow['kerayserat'] == 'K' and $toimitustavan_tunnus > 0 and $kukarow['extranet'] == "") {
+				if ($yhtiorow['kerayserat'] == 'K' and $toimitustavan_tunnus > 0 and $kukarow['extranet'] == "" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))) {
 
 					echo "<tr>{$jarjlisa}";
 

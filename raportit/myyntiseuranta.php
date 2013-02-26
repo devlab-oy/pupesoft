@@ -15,7 +15,7 @@
 
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+		if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
@@ -181,7 +181,7 @@
 			}
 
 			$noautosubmit = TRUE;
-			$monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "<br>DYNAAMINEN_ASIAKAS", "<br>OSASTO", "TRY", "TUOTEMERKKI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE", "<br>LASKUMYYJA", "TUOTEMYYJA", "ASIAKASMYYJA", "TUOTEOSTAJA", "<br>KUSTP", "KOHDE", "PROJEKTI");
+			$monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "<br>DYNAAMINEN_ASIAKAS", "<br>OSASTO", "TRY", "TUOTEMERKKI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE", "<br>LASKUMYYJA", "TUOTEMYYJA", "ASIAKASMYYJA", "TUOTEOSTAJA", "<br>TOIMIPAIKKA","KUSTP", "KOHDE", "PROJEKTI");
 			$monivalintalaatikot_normaali = array();
 
 			require ("tilauskasittely/monivalintalaatikot.inc");
@@ -1114,10 +1114,24 @@
 					}
 					//** Laskugrouppaukset loppu **//
 
+					if ($mukaan == "toimipaikka") {
+						$group .= ",lasku.yhtio_toimipaikka";
+						$select .= "lasku.yhtio_toimipaikka, ";
+						$order  .= "lasku.yhtio_toimipaikka,";
+						$gluku++;
+						$muutgroups++;
+					}
 					//** Asiakas_ja_tai_tuote grouppaukset start **//
 					if ($mukaan == "kustp") {
 						$group .= ",kustannuspaikka";
-						$select .= "if(tuote.kustp > 0,tuote.kustp,asiakas.kustannuspaikka) as kustannuspaikka, ";
+
+						if (!isset($kustapvalinta) or $kustapvalinta == 'tuote') {
+							$select .= "tuote.kustp as kustannuspaikka, ";
+						}
+						else {
+							$select .= "asiakas.kustannuspaikka as kustannuspaikka, ";
+						}
+
 						$order  .= "kustannuspaikka,";
 						$gluku++;
 						$muutgroups++;
@@ -1125,7 +1139,14 @@
 
 					if ($mukaan == "kohde") {
 						$group .= ",kohde";
-						$select .= "if(tuote.kohde > 0,tuote.kohde,asiakas.kohde) as kohde, ";
+
+						if (!isset($kohdevalinta) or $kohdevalinta == 'tuote') {
+							$select .= "tuote.kohde as kohde, ";
+						}
+						else {
+							$select .= "asiakas.kohde as kohde, ";
+						}
+
 						$order  .= "kohde,";
 						$gluku++;
 						$muutgroups++;
@@ -1133,7 +1154,14 @@
 
 					if ($mukaan == "projekti") {
 						$group .= ",projekti";
-						$select .= "if(tuote.projekti > 0,tuote.projekti,asiakas.projekti) as projekti, ";
+
+						if (!isset($projektivalinta) or $projektivalinta == 'tuote') {
+							$select .= "tuote.projekti as projekti, ";
+						}
+						else {
+							$select .= "asiakas.projekti as projekti, ";
+						}
+
 						$order  .= "projekti,";
 						$gluku++;
 						$muutgroups++;
@@ -2435,6 +2463,19 @@
 										}
 										else {
 											$row[$ken_nimi] = 0;
+										}
+									}
+
+									if ($ken_nimi == "yhtio_toimipaikka") {
+										$query = "	SELECT nimi
+													FROM yhtion_toimipaikat
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND tunnus = '{$row[$ken_nimi]}'";
+										$toimipaikka_result = pupe_query($query);
+
+										if (mysql_num_rows($toimipaikka_result) == 1) {
+											$toimipaikka_row = mysql_fetch_assoc($toimipaikka_result);
+											$row[$ken_nimi] = $toimipaikka_row['nimi'];
 										}
 									}
 

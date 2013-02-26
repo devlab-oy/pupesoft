@@ -19,7 +19,7 @@
 	if (!isset($aikamaare)) $aikamaare = 10;
 	if (!isset($laskutusajo_tuotteet)) $laskutusajo_tuotteet = '';
 	if (!isset($nayta_viennit)) $nayta_viennit = '';
-	if (!isset($tilaustyyppi)) $tilaustyyppi = "";
+	if (!isset($tilaustyyppi)) $tilaustyyppi = array();
 	if (!isset($toimittumassa)) $toimittumassa = "";
 
 	echo "	<script type='text/javascript' language='JavaScript'>

@@ -224,10 +224,7 @@ if (isset($submit) and trim($submit) != '') {
 
 
 if(isset($row['tilausrivi_tyyppi'])) {
-	if ($row['tilausrivi_tyyppi'] == '') {
-		$row['tilausrivi_tyyppi'] = 'JT';
-	}
-	elseif ($row['tilausrivi_tyyppi'] == 'o') {
+	if ($row['tilausrivi_tyyppi'] == 'o') {
 		$row['tilausrivi_tyyppi'] = 'JTS';
 	}
 	else {

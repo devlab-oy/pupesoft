@@ -31,7 +31,7 @@ $query = "  SELECT
             FROM lasku
             JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O'
             JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
-			JOIN tilausrivin_lisatiedot
+			LEFT JOIN tilausrivin_lisatiedot
 			ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
             WHERE tilausrivi.tunnus='{$tilausrivi}'
             AND tilausrivi.yhtio='{$kukarow['yhtio']}'
@@ -84,10 +84,7 @@ if (isset($submit)) {
 $suuntalava = $row['suuntalava'] ? : "Ei ole";
 
 if(isset($row['tilausrivi_tyyppi'])) {
-	if ($row['tilausrivi_tyyppi'] == '') {
-		$row['tilausrivi_tyyppi'] = 'JT';
-	}
-	elseif ($row['tilausrivi_tyyppi'] == 'o') {
+	if ($row['tilausrivi_tyyppi'] == 'o') {
 		$row['tilausrivi_tyyppi'] = 'JTS';
 	}
 	else {

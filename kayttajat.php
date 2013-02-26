@@ -471,7 +471,10 @@
 	}
 
 	// Muutetaanko jonkun muun oikeuksia??
-	if (strtoupper($toim) == 'EXTRANET') {
+	if ($selkuka == "UUSI" or $selkuka == "KOPSAAUUSI") {
+		$query = "SELECT * FROM kuka WHERE tunnus = -1";
+	}
+	elseif (strtoupper($toim) == 'EXTRANET') {
 		$query = "SELECT * FROM kuka WHERE tunnus = '{$selkuka}' and extranet != ''";
 	}
 	else {
@@ -479,13 +482,7 @@
 	}
 
 	$result = pupe_query($query);
-
-	if (mysql_num_rows($result) == 0) {
-		$tee = "";
-	}
-	else {
-		$selkukarow = mysql_fetch_array($result);
-	}
+	$selkukarow = mysql_fetch_array($result);
 
 	//muutetaan kayttajan tietoja tai syotetaan uuden kayttajan tiedot
 	if ($tee == 'MUUTA') {

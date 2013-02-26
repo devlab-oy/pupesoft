@@ -65,7 +65,6 @@
 	echo "<td><input type='text' name='ppa' value='{$ppa}' size='3'></td>";
 	echo "<td><input type='text' name='kka' value='{$kka}' size='3'></td>";
 	echo "<td><input type='text' name='vva' value='{$vva}' size='5'></td>";
-	echo "<td class='back'><-- ",t("Jos valitset *Päivittäin tai Kuukausittain*, niin ajetaan tämän vuoden tiedot"),"</td>";
 	echo "</tr>";
 
 	echo "<tr>";
@@ -269,16 +268,9 @@
 
 		if (($tapa == 'kerpvm') or ($tapa == 'kerkk')) {
 
-			if (!isset($vva)) {
-				$vvaa = date("Y");
-			}
-			else {
-				$vvaa = $vva;
-			}
-
 			$grp = $tapa == 'kerkk' ? 'left(kerattyaika, 7)' : 'pvm';
 
-			$query = "	SELECT DATE_FORMAT(LEFT(tilausrivi.kerattyaika,10), '%j') pvm,
+			$query = "	SELECT LEFT(tilausrivi.kerattyaika,10) pvm,
 						LEFT(tilausrivi.kerattyaika,10) kerattyaika,
 						SUM(IF(tilausrivi.var  = 'P', 1, 0)) puutteet,
 						SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi='L', 1, 0)) kappaleet,
@@ -290,8 +282,8 @@
 		                CONCAT(RPAD(UPPER(alkuhyllyalue),  5, '0'),LPAD(UPPER(alkuhyllynro),  5, '0')) <= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')) AND
 		                CONCAT(RPAD(UPPER(loppuhyllyalue), 5, '0'),LPAD(UPPER(loppuhyllynro), 5, '0')) >= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')))
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-						AND tilausrivi.kerattyaika >= '{$vvaa}-01-01 00:00:00'
-						AND tilausrivi.kerattyaika <= '{$vvaa}-12-31 23:59:59'
+						AND tilausrivi.kerattyaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+						AND tilausrivi.kerattyaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
 						AND tilausrivi.var IN ('','H','P')
 						AND tilausrivi.tyyppi IN ('L','G')
 						{$lisa}
@@ -333,16 +325,10 @@
 				}
 			}
 			else {
-				$puutteet = $kerattyaik = $kappalee = $siirrot = $yht = array();
 
 				while ($ressu = mysql_fetch_assoc($result)) {
 
-					$apu = (int) $ressu['pvm'];
-					$puutteet[$apu]	= $ressu['puutteet'];
-					$kerattyaika[$apu] = $ressu['kerattyaika'];
-					$kappaleet[$apu] = $ressu['kappaleet'];
-					$siirrot[$apu] = $ressu['siirrot'];
-					$yht[$apu] = $ressu['yht'];
+					// $kerattyaika[$apu] = $ressu['kerattyaika'];
 
 					// yhteensä
 					$psummayht	+= $ressu["puutteet"];
@@ -350,24 +336,14 @@
 					$ssummayht	+= $ressu["siirrot"];
 					$summayht	+= $ressu["yht"];
 
-				}
-
-				for ($i=1; $i<367; $i++) {
-
 					echo "<tr>";
-
-					if (strlen($kerattyaika[$i]) == 0) {
-						echo "<td>$i</td>";
-					}
-					else {
-						echo "<td>".tv1dateconv($kerattyaika[$i],"P")."</td>";
-					}
-
-					echo "<td align='right'>$puutteet[$i]</td>";
-					echo "<td align='right'>$siirrot[$i]</td>";
-					echo "<td align='right'>$kappaleet[$i]</td>";
-					echo "<td align='right'>$yht[$i]</td>";
+					echo "<td>",tv1dateconv($ressu['pvm'],"P"),"</td>";
+					echo "<td align='right'>{$ressu['puutteet']}</td>";
+					echo "<td align='right'>{$ressu['siirrot']}</td>";
+					echo "<td align='right'>{$ressu['kappaleet']}</td>";
+					echo "<td align='right'>{$ressu['yht']}</td>";
 					echo "</tr>";
+
 				}
 			}
 

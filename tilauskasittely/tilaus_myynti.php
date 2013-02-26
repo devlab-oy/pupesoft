@@ -241,7 +241,11 @@ if ($tee == 'AKTIVOI' and $mista == "muokkaatilaus") {
 // aktivoidaan saatu id
 if ($tee == 'AKTIVOI') {
 	// katsotaan onko muilla aktiivisena
-	$query = "SELECT * from kuka where yhtio='$kukarow[yhtio]' and kesken='$tilausnumero' and kesken!=0";
+	$query = "	SELECT *
+				FROM kuka
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND kesken  = '$tilausnumero'
+				AND kesken != 0";
 	$result = pupe_query($query);
 
 	unset($row);
@@ -1901,9 +1905,9 @@ if ($tee == '') {
 
 		if ((int) $myyjanro > 0) {
 			$apuqu = "	SELECT *
-						from kuka use index (yhtio_myyja)
-						where yhtio = '$kukarow[yhtio]'
-						and myyja = '$myyjanro'
+						FROM kuka use index (yhtio_myyja)
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND myyja = '$myyjanro'
 						AND myyja > 0";
 			$meapu = pupe_query($apuqu);
 
@@ -2876,7 +2880,9 @@ if ($tee == '') {
 
 			$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
-						WHERE kuka.yhtio = '$kukarow[yhtio]' and (kuka.extranet = '' or kuka.tunnus='$laskurow[myyja]')
+						JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND (kuka.extranet = '' or kuka.tunnus='$laskurow[myyja]')
 						ORDER BY kuka.nimi";
 			$yresult = pupe_query($query);
 

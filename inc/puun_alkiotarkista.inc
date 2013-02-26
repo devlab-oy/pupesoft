@@ -24,7 +24,7 @@ if (!function_exists("puun_alkiotarkista")) {
 			}
 		}
 
-		if ((strtoupper($tem_laji) == 'ASIAKAS' or strtoupper($table_tarkenne) == 'ASIAKAS') and mysql_field_name($result, $i) == "tunnus") {
+		if ((!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA") and (strtoupper($tem_laji) == 'ASIAKAS' or strtoupper($table_tarkenne) == 'ASIAKAS') and mysql_field_name($result, $i) == "tunnus") {
 			$query = "	SELECT tunnus
 						FROM asiakas
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -37,7 +37,7 @@ if (!function_exists("puun_alkiotarkista")) {
 			}
 		}
 
-		if ((strtoupper($tem_laji) == 'TUOTE' or strtoupper($table_tarkenne) == 'TUOTE') and mysql_field_name($result, $i) == "tunnus") {
+		if ((!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA") and (strtoupper($tem_laji) == 'TUOTE' or strtoupper($table_tarkenne) == 'TUOTE') and mysql_field_name($result, $i) == "tunnus") {
 			$query = "	SELECT tunnus
 						FROM tuote
 						WHERE yhtio = '{$kukarow['yhtio']}'

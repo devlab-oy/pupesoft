@@ -114,6 +114,7 @@
 			echo "<tr>";
 			echo "<th>",t("Nimi"),"</th>";
 			echo "<th>",t("Saapuminen"),"</th>";
+			echo "<th>",t("Toimittaja"),"</th>";
 			echo "<th>",t("Yksiköt"),"</th>";
 			echo "<th>",t("Rivit"),"</th>";
 			echo "<th nowrap>",t("Viety varastoon"),"</th>";
@@ -131,18 +132,18 @@
 				if ($edkeraaja != $row["kuka"] and $lask > 0 and $ysumma != 0) {
 
 					echo "<tr>";
-					echo "<th colspan='2'>",t("Yhteensä"),":</th>";
+					echo "<th colspan='3'>",t("Yhteensä"),":</th>";
 					echo "<th style='text-align:right'>{$ysumma}</th>";
 					echo "<th style='text-align:right'>{$rsumma}</th>";
 					echo "<th></th>";
 					echo "</tr>";
 
-					echo "<tr><td class='back'><br></td></tr></table>";
+					echo "<tr><td class='back'><br></td></tr>";
 
-					echo "<table>";
 					echo "<tr>";
 					echo "<th>",t("Nimi"),"</th>";
 					echo "<th>",t("Saapuminen"),"</th>";
+					echo "<th>",t("Toimittaja"),"</th>";
 					echo "<th>",t("Yksiköt"),"</th>";
 					echo "<th>",t("Rivit"),"</th>";
 					echo "<th nowrap>",t("Viety varastoon"),"</th>";
@@ -152,7 +153,7 @@
 					$rsumma	= 0;
 				}
 
-				$query = "	SELECT laskunro
+				$query = "	SELECT laskunro, TRIM(CONCAT(nimi, ' ', nimitark)) nimi
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$row['keikka']}'";
@@ -162,6 +163,7 @@
 				echo "<tr class='aktiivi'>";
 				echo "<td>{$row['kuka']}</td>";
 				echo "<td>{$laskunro_row['laskunro']}</td>";
+				echo "<td>{$laskunro_row['nimi']}</td>";
 				echo "<td align='right'>{$row['yksikot']}</td>";
 				echo "<td align='right'>{$row['rivit']}</td>";
 				echo "<td align='right'>",tv1dateconv($row["laadittu"]),"</td>";
@@ -180,7 +182,7 @@
 
 			if ($ysumma > 0) {
 				echo "<tr>";
-				echo "<th colspan='2'>",t("Yhteensä"),":</th>";
+				echo "<th colspan='3'>",t("Yhteensä"),":</th>";
 				echo "<th style='text-align:right'>{$ysumma}</th>";
 				echo "<th style='text-align:right'>{$rsumma}</th>";
 				echo "<th></th>";
@@ -193,13 +195,14 @@
 			echo "</tr>";
 
 			echo "<tr>";
-			echo "<th colspan='2'>",t("Kaikki yhteensä"),":</th>";
+			echo "<th colspan='3'>",t("Kaikki yhteensä"),":</th>";
 			echo "<th style='text-align:right'>{$ysummayht}</th>";
 			echo "<th style='text-align:right'>{$rsummayht}</th>";
 			echo "<th></th>";
 			echo "</tr>";
 
 			echo "</table>";
+
 		}
 		else {
 

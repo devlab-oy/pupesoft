@@ -132,6 +132,7 @@
 						AND tilausrivi.kerattyaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
 						AND tilausrivi.var IN ('','H','P')
 						AND tilausrivi.tyyppi IN ('L','G')
+						AND tilausrivi.keratty != ''
 						{$lisa}
 						GROUP BY tilausrivi.keratty, tilausrivi.otunnus
 						ORDER BY tilausrivi.keratty, tilausrivi.kerattyaika";
@@ -159,6 +160,14 @@
 			$ksummayht	= 0;
 			$ssummayht	= 0;
 			$summayht	= 0;
+			$psumma	= 0;
+			$ksumma	= 0;
+			$ssumma	= 0;
+			$summa	= 0;
+			$kapsu	= 0;
+			$kilsu	= 0;
+			$kapsuyht = 0;
+			$kilsuyht = 0;
 
 			while ($row = mysql_fetch_assoc($result)) {
 
@@ -361,16 +370,16 @@
 					echo "</tr>";
 				}
 			}
-		}
 
-		echo "<tr>";
-		echo "<th>",t("Yhteensä"),"</th>";
-		echo "<td class='tumma' align='right'>{$psummayht}</td>";
-		echo "<td class='tumma' align='right'>{$ssummayht}</td>";
-		echo "<td class='tumma' align='right'>{$ksummayht}</td>";
-		echo "<td class='tumma' align='right'>{$summayht}</td>";
-		echo "</tr>";
-		echo "</table><br>";
+			echo "<tr>";
+			echo "<th>",t("Yhteensä"),"</th>";
+			echo "<td class='tumma' align='right'>{$psummayht}</td>";
+			echo "<td class='tumma' align='right'>{$ssummayht}</td>";
+			echo "<td class='tumma' align='right'>{$ksummayht}</td>";
+			echo "<td class='tumma' align='right'>{$summayht}</td>";
+			echo "</tr>";
+			echo "</table><br>";
+		}
 	}
 
 	require ("inc/footer.inc");

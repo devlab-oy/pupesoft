@@ -4,8 +4,6 @@ require "../inc/parametrit.inc";
 require "../inc/pupeExcel.inc";
 require "../inc/functions.inc";
 
-echo "<font class='head'>".t('Myyntitilaus generaattori')."</font><hr>";
-
 $myyntitilaukset = hae_tamanpaivan_webstore_myyntitilaukset();
 
 if(!empty($myyntitilaukset)) {
@@ -14,9 +12,11 @@ if(!empty($myyntitilaukset)) {
 	$excel_file_path = "/tmp/".$excel_file_path;
 
 	laheta_sahkoposti($excel_file_path);
+    
+    merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset);
 }
 else {
-	echo "<font class='message'>".t("Myyntitilauksien ei löytynyt tälle päivälle")."</font>";
+	echo t("Myyntitilauksia ei löytynyt tälle päivälle");
 }
 
 function hae_tamanpaivan_webstore_myyntitilaukset() {
@@ -24,10 +24,7 @@ function hae_tamanpaivan_webstore_myyntitilaukset() {
 	
 	$now = date('Y-m-d') . ' 00:00:00';
 
-	//for debug
-	$now = date('Y-m-d', strtotime($now .' -1 day')) . ' 00:00:00';
-
-	$query .= "	SELECT lasku.tunnus as 'Sales order number Makia',
+	$query .= "	SELECT lasku.tunnus as 'Sales order numbers',
 				lasku.asiakkaan_tilausnumero as 'Customer Order reference',
 				lasku.toimaika as 'Requested Ship Date',
 				substring(toimitusehto, 1, 3) as 'Incoterms',
@@ -53,7 +50,8 @@ function hae_tamanpaivan_webstore_myyntitilaukset() {
 				JOIN asiakas
 				ON ( asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus AND asiakas.ytunnus = 'WEBSTORE' )
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-				AND lasku.luontiaika > '{$now}'";
+				AND lasku.luontiaika > '{$now}'
+                AND noutaja != 'X'";
 	$result = pupe_query($query);
 
 	$myyntilaskut = array();
@@ -92,56 +90,18 @@ function laheta_sahkoposti($excel_file_path) {
 	pupesoft_sahkoposti($params);
 }
 
-function generoi_excel_tiedosto($rivit) {
-	$xls = new pupeExcel();
-	$rivi = 0;
-	$sarake = 0;
+function merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset) {
+    global $kukarow;
+    $myyntitilaus_tunnukset = '';
+    foreach ($myyntitilaukset as $myyntitilaus) {
+        $myyntitilaus_tunnukset .= $myyntitilaus['Sales order number Makia'] . ',';
+    }
+    $myyntitilaus_tunnukset = substr($myyntitilaus_tunnukset, 0, -1);
 
-	xls_headerit($xls, $rivit, $rivi, $sarake);
-
-	xls_rivit($xls, $rivit, $rivi, $sarake);
-
-	$xls_tiedosto = $xls->close();
-
-	return $xls_tiedosto;
+    $query = "  UPDATE lasku
+                SET noutaja = 'X'
+                WHERE yhtio = '{$kukarow}'
+                AND tunnus IN ({$myyntitilaus_tunnukset})";
+    pupe_query($query);
 }
-
-function xls_headerit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake) {
-	foreach ($rivit[0] as $header_text => $value) {
-		kirjoita_solu($xls, $header_text, $rivi, $sarake);
-	}
-	$rivi++;
-	$sarake = 0;
-}
-
-function xls_rivit(pupeExcel &$xls, &$rivit, &$rivi, &$sarake) {
-	foreach ($rivit as $matkalasku_rivi) {
-		foreach ($matkalasku_rivi as $solu) {
-			kirjoita_solu($xls, $solu, $rivi, $sarake);
-		}
-		$rivi++;
-		$sarake = 0;
-	}
-}
-
-function kirjoita_solu(&$xls, $string, &$rivi, &$sarake) {
-	//substr($string, 0, 1) != '0' on postinumeroita varten --> postinumerot kirjotetaan stringinä, että leading nollat tulee oikein
-	if (is_numeric($string) and substr($string, 0, 1) != '0') {
-		$xls->writeNumber($rivi, $sarake, $string);
-	}
-	else if (valid_date($string) != 0 and valid_date($string) !== false) {
-		$xls->writeDate($rivi, $sarake, $string);
-	}
-	else {
-		$xls->write($rivi, $sarake, $string);
-	}
-	$sarake++;
-}
-
-function valid_date($date) {
-	//date pitää olla muodossa Y-m-d. lopussa saa olla myös kellonaika
-	//preg_match() returns 1 if the pattern matches given subject, 0 if it does not, or FALSE if an error occurred.
-	return (preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date));
-}
-
 ?>

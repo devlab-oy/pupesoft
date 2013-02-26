@@ -502,7 +502,7 @@
 				$query = "	UPDATE lasku SET
 							alatila = 'C',
 							lahetepvm = now(),
-							hyvak3 = {$kukarow['kuka']},
+							hyvak3 = '{$kukarow['kuka']}',
 							h3time = NOW(),
 							kerayslista = '$kerayslistatunnus'
 							$ei_pakkaamoa_lisaviesti
@@ -514,7 +514,7 @@
 				$query = "	UPDATE lasku SET
 							tila = 'L',
 							lahetepvm = now(),
-							hyvak3 = {$kukarow['kuka']},
+							hyvak3 = '{$kukarow['kuka']}',
 							h3time = NOW(),
 							kerayslista = '$kerayslistatunnus'
 							$ei_pakkaamoa_lisaviesti

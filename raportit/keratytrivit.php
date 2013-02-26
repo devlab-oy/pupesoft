@@ -5,7 +5,89 @@
 
 	require('../inc/parametrit.inc');
 
-	echo "<font class='head'>".t("Kerätyt rivit").":</font><hr>";
+	echo "<font class='head'>",t("Kerätyt rivit"),"</font><hr>";
+
+	if (!isset($tee)) $tee = '';
+
+	if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+
+	if (!isset($kkl)) $kkl = date("m");
+	if (!isset($vvl)) $vvl = date("Y");
+	if (!isset($ppl)) $ppl = date("d");
+
+	if (!isset($tapa)) $tapa = "";
+	if (!isset($eipoistettuja)) $eipoistettuja = "";
+	if (!isset($varastot)) $varastot = array();
+
+	//Käyttöliittymä
+	echo "<form method='post'>";
+	echo "<table>";
+
+	echo "<input type='hidden' name='tee' value='kaikki'>";
+
+	$sel = array($tapa => " selected") + array("keraaja" => "", "kerpvm" => "", "kerkk" => "");
+
+	echo "<tr>";
+	echo "<th>",t("Valitse tapa"),"</th>";
+	echo "<td colspan='3'>";
+	echo "<select name='tapa'>";
+	echo "<option value='keraaja'{$sel['keraaja']}>",t("Kerääjittäin"),"</option>";
+	echo "<option value='kerpvm'{$sel['kerpvm']}>",t("Päivittäin"),"</option>";
+	echo "<option value='kerkk'{$sel['kerkk']}>",t("Kuukausittain"),"</option>";
+	echo "</select>";
+	echo "</td>";
+	echo "</tr>";
+
+	$query  = "	SELECT tunnus, nimitys
+				FROM varastopaikat
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tyyppi != 'P'
+				ORDER BY tyyppi, nimitys";
+	$vares = pupe_query($query);
+
+	echo "<tr>";
+	echo "<th valign=top>",t('Varastot'),"<br /><br /><span style='font-size: 0.8em;'>",t('Saat kaikki varastot jos et valitse yhtään'),"</span></th>";
+	echo "<td colspan='3'>";
+
+    while ($varow = mysql_fetch_assoc($vares)) {
+		$sel = in_array($varow['tunnus'], $varastot) ? 'checked' : '';
+
+		echo "<input type='checkbox' name='varastot[]' value='{$varow['tunnus']}' {$sel}/>{$varow['nimitys']}<br />\n";
+	}
+
+	echo "</td></tr>";
+
+
+	echo "<tr>";
+	echo "<th>",t("Syötä päivämäärä (pp-kk-vvvv)"),"</th>";
+	echo "<td><input type='text' name='ppa' value='{$ppa}' size='3'></td>";
+	echo "<td><input type='text' name='kka' value='{$kka}' size='3'></td>";
+	echo "<td><input type='text' name='vva' value='{$vva}' size='5'></td>";
+	echo "<td class='back'><-- ",t("Jos valitset *Päivittäin tai Kuukausittain*, niin ajetaan tämän vuoden tiedot"),"</td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>",t("Syötä loppupäivämäärä (pp-kk-vvvv)"),"</th>";
+	echo "<td><input type='text' name='ppl' value='{$ppl}' size='3'></td>";
+	echo "<td><input type='text' name='kkl' value='{$kkl}' size='3'></td>";
+	echo "<td><input type='text' name='vvl' value='{$vvl}' size='5'></td>";
+	echo "</tr>";
+
+	$chk = $eipoistettuja != '' ? " checked" : "";
+
+	echo "<tr>";
+	echo "<th>",t("Älä näytä poistettujen käyttäjien rivejä"),"</th>";
+	echo "<td colspan='3'><input type='checkbox' name='eipoistettuja'{$chk}></td>";
+	echo "</tr>";
+
+	echo "<tr><td colspan='4' class='back'></td></tr>";
+	echo "<tr><td colspan='4' class='back'><input type='submit' value='",t("Aja raportti"),"'></td></tr>";
+	echo "</table>";
+	echo "</form>";
+
+	echo "<br /><br />";
 
 	if ($tee != '') {
 
@@ -31,44 +113,45 @@
 						lasku.lahetepvm,
 						kuka.nimi,
 						kuka.keraajanro,
-						sec_to_time(unix_timestamp(kerattyaika)-unix_timestamp(lahetepvm)) aika,
-						sum(if(tilausrivi.var  = 'P', 1, 0)) puutteet,
-						sum(if(tilausrivi.var != 'P' and tilausrivi.tyyppi='L', 1, 0)) kappaleet,
-						sum(if(tilausrivi.var != 'P' and tilausrivi.tyyppi='G', 1, 0)) siirrot,
-						round(sum(if(tilausrivi.var != 'P', tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl, 0)), 2) kerkappaleet,
-						round(sum(if(tilausrivi.var != 'P', (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl)*tuote.tuotemassa, 0)), 2) kerkilot,
-						count(*) yht
+						SEC_TO_TIME(UNIX_TIMESTAMP(kerattyaika) - UNIX_TIMESTAMP(lahetepvm)) aika,
+						SUM(IF(tilausrivi.var  = 'P', 1, 0)) puutteet,
+						SUM(IF(tilausrivi.var != 'P' AND tilausrivi.tyyppi = 'L', 1, 0)) kappaleet,
+						SUM(IF(tilausrivi.var != 'P' AND tilausrivi.tyyppi = 'G', 1, 0)) siirrot,
+						ROUND(SUM(IF(tilausrivi.var != 'P', tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl, 0)), 2) kerkappaleet,
+						ROUND(SUM(IF(tilausrivi.var != 'P', (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) * tuote.tuotemassa, 0)), 2) kerkilot,
+						COUNT(*) yht
 						FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
-						JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-						$lefti JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio and kuka.kuka = tilausrivi.keratty)
-						LEFT JOIN varastopaikat ON (varastopaikat.yhtio=tilausrivi.yhtio and
-		                concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')) and
-		                concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.kerattyaika >= '$vva-$kka-$ppa 00:00:00'
-						and tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl 23:59:59'
-						and tilausrivi.var in ('','H','P')
-						and tilausrivi.tyyppi in ('L','G')
-						$lisa
+						JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+						{$lefti} JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio AND kuka.kuka = tilausrivi.keratty)
+						LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio AND
+		                CONCAT(RPAD(UPPER(alkuhyllyalue),  5, '0'),LPAD(UPPER(alkuhyllynro),  5, '0')) <= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')) AND
+		                CONCAT(RPAD(UPPER(loppuhyllyalue), 5, '0'),LPAD(UPPER(loppuhyllynro), 5, '0')) >= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')))
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.kerattyaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+						AND tilausrivi.kerattyaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+						AND tilausrivi.var IN ('','H','P')
+						AND tilausrivi.tyyppi IN ('L','G')
+						{$lisa}
 						GROUP BY tilausrivi.keratty, tilausrivi.otunnus
 						ORDER BY tilausrivi.keratty, tilausrivi.kerattyaika";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
-			echo "	<table><tr>
-					<th nowrap>".t("Nimi")."</th>
-					<th nowrap>".t("Kerääjänro")."</th>
-					<th nowrap>".t("Tilaus")."</th>
-					<th nowrap>".t("Lähete tulostettu")."</th>
-					<th nowrap>".t("Tilaus kerätty")."</th>
-					<th nowrap>".t("Käytetty aika")."</th>
-					<th norwap>".t("Puuterivit")."</th>
-					<th norwap>".t("Siirrot")."</th>
-					<th nowrap>".t("Kerätyt")."</th>
-					<th nowrap>".t("Yhteensä")."</th>
-					<th nowrap>".t("Kappaleet")."<br>".t("Yhteensä")."</th>
-					<th nowrap>".t("Kilot")."<br>".t("Yhteensä")."</th>
-					</tr>";
+			echo "<table>";
+			echo "<tr>";
+			echo "<th nowrap>",t("Nimi"),"</th>";
+			echo "<th nowrap>",t("Kerääjänro"),"</th>";
+			echo "<th nowrap>",t("Tilaus"),"</th>";
+			echo "<th nowrap>",t("Lähete tulostettu"),"</th>";
+			echo "<th nowrap>",t("Tilaus kerätty"),"</th>";
+			echo "<th nowrap>",t("Käytetty aika"),"</th>";
+			echo "<th norwap>",t("Puuterivit"),"</th>";
+			echo "<th norwap>",t("Siirrot"),"</th>";
+			echo "<th nowrap>",t("Kerätyt"),"</th>";
+			echo "<th nowrap>",t("Yhteensä"),"</th>";
+			echo "<th nowrap>",t("Kappaleet"),"<br />",t("Yhteensä"),"</th>";
+			echo "<th nowrap>",t("Kilot"),"<br />",t("Yhteensä"),"</th>";
+			echo "</tr>";
 
 			$lask		= 0;
 			$edkeraaja	= 'EKADUUD';
@@ -77,34 +160,34 @@
 			$ssummayht	= 0;
 			$summayht	= 0;
 
-			while ($row = mysql_fetch_array($result)) {
+			while ($row = mysql_fetch_assoc($result)) {
 
 				if ($edkeraaja != $row["keratty"] and $summa > 0 and $edkeraaja != "EKADUUD") {
-					echo "<tr>
-							<th colspan='6'>".t("Yhteensä").":</th>
-							<td class='tumma' align='right'>$psumma</td>
-							<td class='tumma' align='right'>$ssumma</td>
-							<td class='tumma' align='right'>$ksumma</td>
-							<td class='tumma' align='right'>$summa</td>
-							<td class='tumma' align='right'>$kapsu</td>
-							<td class='tumma' align='right'>$kilsu</td>
-							</tr>";
-					echo "<tr><td class='back'><br></td></tr>";
+					echo "<tr>";
+					echo "<th colspan='6'>",t("Yhteensä"),":</th>";
+					echo "<td class='tumma' align='right'>{$psumma}</td>";
+					echo "<td class='tumma' align='right'>{$ssumma}</td>";
+					echo "<td class='tumma' align='right'>{$ksumma}</td>";
+					echo "<td class='tumma' align='right'>{$summa}</td>";
+					echo "<td class='tumma' align='right'>{$kapsu}</td>";
+					echo "<td class='tumma' align='right'>{$kilsu}</td>";
+					echo "</tr>";
+					echo "<tr><td class='back'><br /></td></tr>";
 
-					echo "	<tr>
-							<th nowrap>".t("Nimi")."</th>
-							<th nowrap>".t("Kerääjänro")."</th>
-							<th nowrap>".t("Tilaus")."</th>
-							<th nowrap>".t("Lähete tulostettu")."</th>
-							<th nowrap>".t("Tilaus kerätty")."</th>
-							<th nowrap>".t("Käytetty aika")."</th>
-							<th norwap>".t("Puuterivit")."</th>
-							<th norwap>".t("Siirrot")."</th>
-							<th nowrap>".t("Kerätyt")."</th>
-							<th nowrap>".t("Yhteensä")."</th>
-							<th nowrap>".t("Yhteensä")."<br>".t("kappaleet")."</th>
-							<th nowrap>".t("Yhteensä")."<br>".t("kilot")."</th>
-							</tr>";
+					echo "<tr>";
+					echo "<th nowrap>",t("Nimi"),"</th>";
+					echo "<th nowrap>",t("Kerääjänro"),"</th>";
+					echo "<th nowrap>",t("Tilaus"),"</th>";
+					echo "<th nowrap>",t("Lähete tulostettu"),"</th>";
+					echo "<th nowrap>",t("Tilaus kerätty"),"</th>";
+					echo "<th nowrap>",t("Käytetty aika"),"</th>";
+					echo "<th norwap>",t("Puuterivit"),"</th>";
+					echo "<th norwap>",t("Siirrot"),"</th>";
+					echo "<th nowrap>",t("Kerätyt"),"</th>";
+					echo "<th nowrap>",t("Yhteensä"),"</th>";
+					echo "<th nowrap>",t("Yhteensä"),"<br />",t("kappaleet"),"</th>";
+					echo "<th nowrap>",t("Yhteensä"),"<br />",t("kilot"),"</th>";
+					echo "</tr>";
 
 					$psumma	= 0;
 					$ksumma	= 0;
@@ -114,20 +197,20 @@
 					$kilsu	= 0;
 				}
 
-				echo "<tr>
-						<td>$row[nimi] ($row[keratty])</td>
-						<td>$row[keraajanro]</td>
-						<td>$row[otunnus]</td>
-						<td>".tv1dateconv($row["lahetepvm"],"P")."</td>
-						<td>".tv1dateconv($row["kerattyaika"],"P")."</td>
-						<td>$row[aika]</td>
-						<td align='right'>$row[puutteet]</td>
-						<td align='right'>$row[siirrot]</td>
-						<td align='right'>$row[kappaleet]</td>
-						<td align='right'>$row[yht]</td>
-						<td align='right'>$row[kerkappaleet]</td>
-						<td align='right'>$row[kerkilot]</td>
-					</tr>";
+				echo "<tr>";
+				echo "<td>{$row['nimi']} ({$row['keratty']})</td>";
+				echo "<td>{$row['keraajanro']}</td>";
+				echo "<td>{$row['otunnus']}</td>";
+				echo "<td>",tv1dateconv($row["lahetepvm"], "P"),"</td>";
+				echo "<td>",tv1dateconv($row["kerattyaika"], "P"),"</td>";
+				echo "<td>{$row['aika']}</td>";
+				echo "<td align='right'>{$row['puutteet']}</td>";
+				echo "<td align='right'>{$row['siirrot']}</td>";
+				echo "<td align='right'>{$row['kappaleet']}</td>";
+				echo "<td align='right'>{$row['yht']}</td>";
+				echo "<td align='right'>{$row['kerkappaleet']}</td>";
+				echo "<td align='right'>{$row['kerkilot']}</td>";
+				echo "</tr>";
 
 				$psumma	+= $row["puutteet"];
 				$ksumma	+= $row["kappaleet"];
@@ -149,30 +232,30 @@
 			}
 
 			if ($summa > 0) {
-				echo "<tr>
-						<th colspan='6'>".t("Yhteensä").":</th>
-						<td class='tumma' align='right'>$psumma</td>
-						<td class='tumma' align='right'>$ssumma</td>
-						<td class='tumma' align='right'>$ksumma</td>
-						<td class='tumma' align='right'>$summa</td>
-						<td class='tumma' align='right'>$kapsu</td>
-						<td class='tumma' align='right'>$kilsu</td>
-					</tr>";
-				echo "<tr><td class='back'><br></td></tr>";
+				echo "<tr>";
+				echo "<th colspan='6'>",t("Yhteensä"),":</th>";
+				echo "<td class='tumma' align='right'>{$psumma}</td>";
+				echo "<td class='tumma' align='right'>{$ssumma}</td>";
+				echo "<td class='tumma' align='right'>{$ksumma}</td>";
+				echo "<td class='tumma' align='right'>{$summa}</td>";
+				echo "<td class='tumma' align='right'>{$kapsu}</td>";
+				echo "<td class='tumma' align='right'>{$kilsu}</td>";
+				echo "</tr>";
+				echo "<tr><td class='back'><br /></td></tr>";
 			}
 
 			// Kaikki yhteensä
-			echo "<tr>
-					<th colspan='6'>".t("Kaikki yhteensä").":</th>
-					<td class='tumma' align='right'>$psummayht</td>
-					<td class='tumma' align='right'>$ssummayht</td>
-					<td class='tumma' align='right'>$ksummayht</td>
-					<td class='tumma' align='right'>$summayht</td>
-					<td class='tumma' align='right'>$kapsuyht</td>
-					<td class='tumma' align='right'>$kilsuyht</td>
-					</tr>";
+			echo "<tr>";
+			echo "<th colspan='6'>",t("Kaikki yhteensä"),":</th>";
+			echo "<td class='tumma' align='right'>{$psummayht}</td>";
+			echo "<td class='tumma' align='right'>{$ssummayht}</td>";
+			echo "<td class='tumma' align='right'>{$ksummayht}</td>";
+			echo "<td class='tumma' align='right'>{$summayht}</td>";
+			echo "<td class='tumma' align='right'>{$kapsuyht}</td>";
+			echo "<td class='tumma' align='right'>{$kilsuyht}</td>";
+			echo "</tr>";
 
-			echo "</table><br>";
+			echo "</table><br />";
 		}
 
 		if (($tapa == 'kerpvm') or ($tapa == 'kerkk')) {
@@ -184,39 +267,38 @@
 				$vvaa = $vva;
 			}
 
-			$grp = 'pvm';
-                        if ($tapa == 'kerkk') $grp = 'left(kerattyaika, 7)';
+			$grp = $tapa == 'kerkk' ? 'left(kerattyaika, 7)' : 'pvm';
 
-			$query = "	SELECT date_format(left(tilausrivi.kerattyaika,10), '%j') pvm,
-						left(tilausrivi.kerattyaika,10) kerattyaika,
-						sum(if(tilausrivi.var  = 'P', 1, 0)) puutteet,
-						sum(if(tilausrivi.var != 'P' and tilausrivi.tyyppi='L', 1, 0)) kappaleet,
-						sum(if(tilausrivi.var != 'P' and tilausrivi.tyyppi='G', 1, 0)) siirrot,
-						count(*) yht
+			$query = "	SELECT DATE_FORMAT(LEFT(tilausrivi.kerattyaika,10), '%j') pvm,
+						LEFT(tilausrivi.kerattyaika,10) kerattyaika,
+						SUM(IF(tilausrivi.var  = 'P', 1, 0)) puutteet,
+						SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi='L', 1, 0)) kappaleet,
+						SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi='G', 1, 0)) siirrot,
+						COUNT(*) yht
 						FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
-						$lefti JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio and kuka.kuka = tilausrivi.keratty)
-						LEFT JOIN varastopaikat ON (varastopaikat.yhtio=tilausrivi.yhtio and
-		                concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')) and
-		                concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.kerattyaika >= '$vvaa-01-01 00:00:00'
-						and tilausrivi.kerattyaika <= '$vvaa-12-31 23:59:59'
-						and tilausrivi.var in ('','H','P')
-						and tilausrivi.tyyppi in ('L','G')
-						$lisa
-						GROUP BY $grp
+						{$lefti} JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio AND kuka.kuka = tilausrivi.keratty)
+						LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio AND
+		                CONCAT(RPAD(UPPER(alkuhyllyalue),  5, '0'),LPAD(UPPER(alkuhyllynro),  5, '0')) <= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')) AND
+		                CONCAT(RPAD(UPPER(loppuhyllyalue), 5, '0'),LPAD(UPPER(loppuhyllynro), 5, '0')) >= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')))
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.kerattyaika >= '{$vvaa}-01-01 00:00:00'
+						AND tilausrivi.kerattyaika <= '{$vvaa}-12-31 23:59:59'
+						AND tilausrivi.var IN ('','H','P')
+						AND tilausrivi.tyyppi IN ('L','G')
+						{$lisa}
+						GROUP BY {$grp}
 						ORDER BY 1";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			echo "<table>";
 
-			echo "<tr>
-					<th>".t("Pvm")."</th>
-					<th>".t("Puutteet")."</th>
-					<th>".t("Siirrot")."</th>
-					<th>".t("Kerätyt")."</th>
-					<th>".t("Yhteensä")."</th>
-				</tr>";
+			echo "<tr>";
+			echo "<th>",t("Pvm"),"</th>";
+			echo "<th>",t("Puutteet"),"</th>";
+			echo "<th>",t("Siirrot"),"</th>";
+			echo "<th>",t("Kerätyt"),"</th>";
+			echo "<th>",t("Yhteensä"),"</th>";
+			echo "</tr>";
 
 			$psummayht	= 0;
 			$ksummayht	= 0;
@@ -224,14 +306,16 @@
 			$summayht	= 0;
 
 			if ($tapa == 'kerkk') {
-				while ($ressu = mysql_fetch_array($result)) {
+
+				while ($ressu = mysql_fetch_assoc($result)) {
 					echo "<tr>";
-					echo "<td align='right'>".substr($ressu[kerattyaika],0,7)."</td>";
-					echo "<td align='right'>$ressu[puutteet]</td>";
-					echo "<td align='right'>$ressu[siirrot]</td>";
-					echo "<td align='right'>$ressu[kappaleet]</td>";
-					echo "<td align='right'>$ressu[yht]</td>";
+					echo "<td align='right'>",substr($ressu['kerattyaika'], 0, 7),"</td>";
+					echo "<td align='right'>{$ressu['puutteet']}</td>";
+					echo "<td align='right'>{$ressu['siirrot']}</td>";
+					echo "<td align='right'>{$ressu['kappaleet']}</td>";
+					echo "<td align='right'>{$ressu['yht']}</td>";
 					echo "</tr>";
+
 					// yhteensä
 					$psummayht	+= $ressu["puutteet"];
 					$ksummayht	+= $ressu["kappaleet"];
@@ -240,20 +324,16 @@
 				}
 			}
 			else {
-				$puutteet	= array();
-				$kerattyaik= array();
-				$kappalee	= array();
-				$siirrot	= array();
-				$yht	= array();
+				$puutteet = $kerattyaik = $kappalee = $siirrot = $yht = array();
 
-				while ($ressu = mysql_fetch_array($result)) {
+				while ($ressu = mysql_fetch_assoc($result)) {
 
-					$apu		= (int) $ressu['pvm'];
+					$apu = (int) $ressu['pvm'];
 					$puutteet[$apu]	= $ressu['puutteet'];
-					$kerattyaika[$apu]	= $ressu['kerattyaika'];
-					$kappaleet[$apu]	= $ressu['kappaleet'];
-					$siirrot[$apu]	= $ressu['siirrot'];
-					$yht[$apu]		= $ressu['yht'];
+					$kerattyaika[$apu] = $ressu['kerattyaika'];
+					$kappaleet[$apu] = $ressu['kappaleet'];
+					$siirrot[$apu] = $ressu['siirrot'];
+					$yht[$apu] = $ressu['yht'];
 
 					// yhteensä
 					$psummayht	+= $ressu["puutteet"];
@@ -279,95 +359,18 @@
 					echo "<td align='right'>$kappaleet[$i]</td>";
 					echo "<td align='right'>$yht[$i]</td>";
 					echo "</tr>";
-
 				}
 			}
 		}
+
 		echo "<tr>";
-		echo "<th>".t("Yhteensä")."</th>";
-		echo "<td class='tumma' align='right'>$psummayht</td>";
-		echo "<td class='tumma' align='right'>$ssummayht</td>";
-		echo "<td class='tumma' align='right'>$ksummayht</td>";
-		echo "<td class='tumma' align='right'>$summayht</td>";
+		echo "<th>",t("Yhteensä"),"</th>";
+		echo "<td class='tumma' align='right'>{$psummayht}</td>";
+		echo "<td class='tumma' align='right'>{$ssummayht}</td>";
+		echo "<td class='tumma' align='right'>{$ksummayht}</td>";
+		echo "<td class='tumma' align='right'>{$summayht}</td>";
 		echo "</tr>";
 		echo "</table><br>";
 	}
 
-	//Käyttöliittymä
-	echo "<form method='post'>";
-	echo "<table>";
-
-	if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-	if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-	if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-
-	if (!isset($kkl)) $kkl = date("m");
-	if (!isset($vvl)) $vvl = date("Y");
-	if (!isset($ppl)) $ppl = date("d");
-
-	echo "<input type='hidden' name='tee' value='kaikki'>";
-
-	echo "<tr>
-			<th>".t("Valitse tapa")."</th>
-			<td colspan='3'>
-				<select name='tapa'>
-					<option value='keraaja'>".t("Kerääjittäin")."</option>
-					<option value='kerpvm'>".t("Päivittäin")."</option>
-					<option value='kerkk'>".t("Kuukausittain")."</option>
-				</select>
-			</td>
-		</tr>";
-
-
-	$query  = "	SELECT tunnus, nimitys
-				FROM varastopaikat
-				WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
-				ORDER BY tyyppi, nimitys";
-	$vares = mysql_query($query) or pupe_error($query);
-
-	echo "<tr><th valign=top>" . t('Varastot') . "<br /><br /><span style='font-size: 0.8em;'>"
-		. t('Saat kaikki varastot jos et valitse yhtään')
-		. "</span></th>
-	    <td colspan='3'>";
-
-	$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
-
-    while ($varow = mysql_fetch_array($vares)) {
-		$sel = '';
-		if (in_array($varow['tunnus'], $varastot)) {
-			$sel = 'checked';
-		}
-
-		echo "<input type='checkbox' name='varastot[]' value='{$varow['tunnus']}' $sel/>{$varow['nimitys']}<br />\n";
-	}
-
-	echo "</td></tr>";
-
-
-	echo "<tr>
-			<th>".t("Syötä päivämäärä (pp-kk-vvvv)")."</th>
-			<td><input type='text' name='ppa' value='$ppa' size='3'></td>
-			<td><input type='text' name='kka' value='$kka' size='3'></td>
-			<td><input type='text' name='vva' value='$vva' size='5'></td><td class='back'><-- ".t("Jos valitset *Päivittäin tai Kuukausittain*, niin ajetaan tämän vuoden tiedot")."</td>
-		</tr>
-		<tr>
-			<th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
-			<td><input type='text' name='ppl' value='$ppl' size='3'></td>
-			<td><input type='text' name='kkl' value='$kkl' size='3'></td>
-			<td><input type='text' name='vvl' value='$vvl' size='5'></td>
-		</tr>";
-
-	echo "<tr>
-			<th>".t("Älä näytä poistettujen käyttäjien rivejä")."</th>
-			<td colspan='3'><input type='checkbox' name='eipoistettuja'></td>
-		</tr>";
-
-	echo "</table>";
-
-	echo "<br>";
-	echo "<input type='submit' value='".t("Aja raportti")."'>";
-	echo "</form>";
-
-	require ("../inc/footer.inc");
-
-?>
+	require ("inc/footer.inc");

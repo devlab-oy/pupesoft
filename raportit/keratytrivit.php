@@ -20,6 +20,7 @@
 	if (!isset($tapa)) $tapa = "";
 	if (!isset($eipoistettuja)) $eipoistettuja = "";
 	if (!isset($varastot)) $varastot = array();
+	if (!isset($keraysvyohykkeet)) $keraysvyohykkeet = array();
 
 	//Käyttöliittymä
 	echo "<form method='post'>";
@@ -39,6 +40,24 @@
 	echo "</select>";
 	echo "</td>";
 	echo "</tr>";
+
+	$query  = "	SELECT tunnus, nimitys
+				FROM keraysvyohyke
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				ORDER BY nimitys";
+	$vares = pupe_query($query);
+
+	echo "<tr>";
+	echo "<th valign=top>",t('Keräysvyöhykkeet'),"<br /><br /><span style='font-size: 0.8em;'>",t('Saat kaikki keräysvyöhykkeet jos et valitse yhtään'),"</span></th>";
+	echo "<td colspan='3'>";
+
+    while ($varow = mysql_fetch_assoc($vares)) {
+		$sel = in_array($varow['tunnus'], $keraysvyohykkeet) ? 'checked' : '';
+
+		echo "<input type='checkbox' name='keraysvyohykkeet[]' value='{$varow['tunnus']}' {$sel}/>{$varow['nimitys']}<br />\n";
+	}
+
+	echo "</td></tr>";
 
 	$query  = "	SELECT tunnus, nimitys
 				FROM varastopaikat
@@ -97,12 +116,17 @@
 			$lefti = "LEFT";
 		}
 
+		$lisa = "";
+
 		if (count($varastot) > 0) {
 			$lisa = " and varastopaikat.tunnus IN (".implode(', ', $varastot).")";
         }
-		else {
-			$lisa = "";
-		}
+
+        $keraysvyohykejoin = "";
+
+        if (count($keraysvyohykkeet) > 0) {
+        	$keraysvyohykejoin = "	JOIN varaston_hyllypaikat AS vh1 ON (vh1.yhtio = tilausrivi.yhtio AND vh1.hyllyalue = tilausrivi.hyllyalue AND vh1.hyllynro = tilausrivi.hyllynro AND vh1.hyllyvali = tilausrivi.hyllyvali AND vh1.hyllytaso = tilausrivi.hyllytaso AND vh1.keraysvyohyke IN (".implode(",", $keraysvyohykkeet)."))";
+        }
 
 		if ($tapa == 'keraaja') {
 
@@ -123,6 +147,7 @@
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
 						JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.eilahetetta = '' AND lasku.sisainen = '')
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
+						{$keraysvyohykejoin}
 						{$lefti} JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio AND kuka.kuka = tilausrivi.keratty)
 						LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio AND
 		                CONCAT(RPAD(UPPER(alkuhyllyalue),  5, '0'),LPAD(UPPER(alkuhyllynro),  5, '0')) <= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')) AND
@@ -134,7 +159,7 @@
 						AND tilausrivi.tyyppi IN ('L','G')
 						AND tilausrivi.keratty != ''
 						{$lisa}
-						GROUP BY tilausrivi.keratty, tilausrivi.otunnus
+						GROUP BY 1,2,3,4,5,6,7
 						ORDER BY tilausrivi.keratty, tilausrivi.kerattyaika";
 			$result = pupe_query($query);
 
@@ -206,6 +231,8 @@
 					$kilsu	= 0;
 				}
 
+				$row['kerkilot'] = abs($row['kerkilot']);
+
 				echo "<tr>";
 				echo "<td>{$row['nimi']} ({$row['keratty']})</td>";
 				echo "<td>{$row['keraajanro']}</td>";
@@ -220,6 +247,8 @@
 				echo "<td align='right'>{$row['kerkappaleet']}</td>";
 				echo "<td align='right'>{$row['kerkilot']}</td>";
 				echo "</tr>";
+
+				$row['kerkappaleet'] = abs($row['kerkappaleet']);
 
 				$psumma	+= $row["puutteet"];
 				$ksumma	+= $row["kappaleet"];
@@ -271,10 +300,17 @@
 
 			$grp = $tapa == 'kerkk' ? 'left(kerattyaika, 7)' : 'pvm';
 
-			$query = "	SELECT LEFT(tilausrivi.kerattyaika,10) pvm,
-						LEFT(tilausrivi.kerattyaika,10) kerattyaika,
+			if ($tapa == 'kerkk') {
+				$selecti = "LEFT(tilausrivi.kerattyaika,7) pvm,";
+			}
+			else {
+				$selecti = "LEFT(tilausrivi.kerattyaika,10) pvm,";
+			}
+
+			$query = "	SELECT {$selecti}
 						SUM(IF(tilausrivi.var  = 'P', 1, 0)) puutteet,
-						SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi='L', 1, 0)) kappaleet,
+						SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) > 0, 1, 0)) kappaleet,
+						SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) < 0, 1, 0)) kappaleet_palautus,
 						SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi='G', 1, 0)) siirrot,
 						COUNT(*) yht
 						FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
@@ -290,7 +326,7 @@
 						AND tilausrivi.var IN ('','H','P')
 						AND tilausrivi.tyyppi IN ('L','G')
 						{$lisa}
-						GROUP BY {$grp}
+						GROUP BY 1
 						ORDER BY 1";
 			$result = pupe_query($query);
 
@@ -301,11 +337,13 @@
 			echo "<th>",t("Puutteet"),"</th>";
 			echo "<th>",t("Siirrot"),"</th>";
 			echo "<th>",t("Kerätyt"),"</th>";
+			echo "<th>",t("Palautukset"),"</th>";
 			echo "<th>",t("Yhteensä"),"</th>";
 			echo "</tr>";
 
 			$psummayht	= 0;
 			$ksummayht	= 0;
+			$palsummayht = 0;
 			$ssummayht	= 0;
 			$summayht	= 0;
 
@@ -313,15 +351,17 @@
 
 				while ($ressu = mysql_fetch_assoc($result)) {
 					echo "<tr>";
-					echo "<td align='right'>",substr($ressu['kerattyaika'], 0, 7),"</td>";
+					echo "<td align='right'>{$ressu['pvm']}</td>";
 					echo "<td align='right'>{$ressu['puutteet']}</td>";
 					echo "<td align='right'>{$ressu['siirrot']}</td>";
 					echo "<td align='right'>{$ressu['kappaleet']}</td>";
+					echo "<td align='right'>{$ressu['kappaleet_palautus']}</td>";
 					echo "<td align='right'>{$ressu['yht']}</td>";
 					echo "</tr>";
 
 					// yhteensä
 					$psummayht	+= $ressu["puutteet"];
+					$palsummayht += abs($ressu["kappaleet_palautus"]);
 					$ksummayht	+= $ressu["kappaleet"];
 					$ssummayht	+= $ressu["siirrot"];
 					$summayht	+= $ressu["yht"];
@@ -335,6 +375,7 @@
 
 					// yhteensä
 					$psummayht	+= $ressu["puutteet"];
+					$palsummayht += abs($ressu["kappaleet_palautus"]);
 					$ksummayht	+= $ressu["kappaleet"];
 					$ssummayht	+= $ressu["siirrot"];
 					$summayht	+= $ressu["yht"];
@@ -344,6 +385,7 @@
 					echo "<td align='right'>{$ressu['puutteet']}</td>";
 					echo "<td align='right'>{$ressu['siirrot']}</td>";
 					echo "<td align='right'>{$ressu['kappaleet']}</td>";
+					echo "<td align='right'>{$ressu['kappaleet_palautus']}</td>";
 					echo "<td align='right'>{$ressu['yht']}</td>";
 					echo "</tr>";
 
@@ -355,6 +397,7 @@
 			echo "<td class='tumma' align='right'>{$psummayht}</td>";
 			echo "<td class='tumma' align='right'>{$ssummayht}</td>";
 			echo "<td class='tumma' align='right'>{$ksummayht}</td>";
+			echo "<td class='tumma' align='right'>{$palsummayht}</td>";
 			echo "<td class='tumma' align='right'>{$summayht}</td>";
 			echo "</tr>";
 			echo "</table><br>";

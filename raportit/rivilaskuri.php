@@ -220,7 +220,7 @@
 					COUNT(*) yhteensa_riveja,
 					ROUND(SUM(kpl + varattu + jt)) yhteensa_nimikkeita,
 					{$vientilisa}
-					SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO') 1, 0)) sahkoisia_riveja,
+					SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), 1, 0)) sahkoisia_riveja,
 					ROUND(SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), kpl + varattu + jt, 0))) sahkoisia_nimikkeita,
 					GROUP_CONCAT(lasku.tunnus) tunnukset
 					FROM tilausrivi USE INDEX ({$ajoindex})
@@ -291,8 +291,8 @@
 						COUNT(*) yhteensa_riveja,
 						ROUND(SUM(kpl + varattu + jt)) yhteensa_nimikkeita,
 						{$vientilisa}
-						SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO') 1, 0)) sahkoisia_riveja,
-						ROUND(SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), kpl + varattu + jt, 0))) sahkoisia_nimikkeita,
+						SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), 1, 0)) sahkoisia_riveja,
+						ROUND(SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), kpl + varattu + jt, 0))) sahkoisia_nimikkeita
 						FROM tilausrivi USE INDEX ({$ajoindex})
 						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'L' AND lasku.tunnus IN ({$row['tunnukset']}) {$tilaustyyppilisa})
 						JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
@@ -343,8 +343,8 @@
 					count(*) yhteensa_riveja,
 					round(sum(kpl + varattu + jt)) yhteensa_nimikkeita,
 					{$vientilisa}
-					SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO') 1, 0)) sahkoisia_riveja,
-					ROUND(SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), kpl + varattu + jt, 0))) sahkoisia_nimikkeita,
+					SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), 1, 0)) sahkoisia_riveja,
+					ROUND(SUM(IF(lasku.ohjelma_moduli IN ('EDIFACT911', 'FUTURSOFT', 'MAGENTO'), kpl + varattu + jt, 0))) sahkoisia_nimikkeita
 					FROM tilausrivi USE INDEX ($ajoindex)
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'L' {$tilaustyyppilisa})
 					{$lahdotlisa}

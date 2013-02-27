@@ -101,20 +101,17 @@
 		echo "</tr>";
 	}
 
-	$sel = array_fill_keys($tilaustyyppi, " checked") + array('N' => '', 'E' => '', 'T' => '', '2' => '', '7' => '', 'S' => '', '8' => '', 'A' => '');
+	$sel = array_fill_keys($tilaustyyppi, " checked") + array('N' => '', '2' => '', '7' => '', 'S' => '', '8' => '');
 
 	echo "<tr>";
 	echo "<th>",t("Tilaustyyppi"),"</th>";
 	echo "<td colspan='3'>";
 	echo "<input type='hidden' name='tilaustyyppi[]' value='default' />";
 	echo "<input type='checkbox' name='tilaustyyppi[]' value='N' {$sel['N']}>",t("Normaalitilaus"),"<br />";
-	echo "<input type='checkbox' name='tilaustyyppi[]' value='E' {$sel['E']}>",t("Ennakkotilaus"),"<br />";
-	echo "<input type='checkbox' name='tilaustyyppi[]' value='T' {$sel['T']}>",t("Tarjoustilaus"),"<br />";
 	echo "<input type='checkbox' name='tilaustyyppi[]' value='2' {$sel[2]}>",t("Varastotäydennys"),"<br />";
 	echo "<input type='checkbox' name='tilaustyyppi[]' value='7' {$sel[7]}>",t("Tehdastilaus"),"<br />";
 	echo "<input type='checkbox' name='tilaustyyppi[]' value='S' {$sel['S']}>",t("Sarjatilaus"),"<br />";
 	echo "<input type='checkbox' name='tilaustyyppi[]' value='8' {$sel[8]}>",t("Muiden mukana"),"<br />";
-	echo "<input type='checkbox' name='tilaustyyppi[]' value='A' {$sel['A']}>",t("Työmääräys"),"<br />";
 	echo "</td>";
 	echo "</tr>";
 

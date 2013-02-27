@@ -57,7 +57,7 @@
 	$sel = array($aikamaare => ' selected') + array(10 => '', 30 => '', 60 => '');
 
 	echo "<tr>";
-	echo "<th>",t("Aikam‰‰re"),"</th>";
+	echo "<th>",t("N‰yt‰ raportin tulos per"),"</th>";
 	echo "<td colspan='3'><select name='aikamaare'>";
 	echo "<option value='10'{$sel[10]}>",t("10 minuuttia"),"</option>";
 	echo "<option value='30'{$sel[30]}>",t("30 minuuttia"),"</option>";
@@ -68,7 +68,7 @@
 	$sel = $laskutusajo_tuotteet != '' ? " selected" : "";
 
 	echo "<tr>";
-	echo "<th>",t("N‰yt‰ laskutusajo-tuotteet"),"</th>";
+	echo "<th>",t("Pupesoftin automaattisesti lis‰‰m‰t tuotteet"),",<br>",t("kuten esimerkiksi rahtituotenumero ja kuljetusvakuutus"),"</th>";
 	echo "<td colspan='3'><select name='laskutusajo_tuotteet'>";
 	echo "<option value=''>",t("N‰yt‰"),"</option>";
 	echo "<option value='ei'{$sel}>",t("Ei n‰ytet‰"),"</option>";
@@ -96,7 +96,7 @@
 		$sel = $toimittumassa != '' ? " checked" : "";
 
 		echo "<tr>";
-		echo "<th>",t("Toimittumassa"),"</th>";
+		echo "<th>",t("Huomioidaan vain niiden tilauksien rivit") ,"<br>",t("jotka on annetun p‰iv‰m‰‰r‰v‰lin l‰hdˆiss‰"),"</th>";
 		echo "<td colspan='3'><input type='checkbox' name='toimittumassa' {$sel} /></td>";
 		echo "</tr>";
 	}

@@ -233,7 +233,7 @@
 			echo "<table>";
 
 			echo "<tr>";
-			echo "<th>",t("Pvm"),"</th>";
+			echo "<th colspan='2'>",t("Pvm"),"</th>";
 			echo "<th>",t("Kappaleet"),"</th>";
 			echo "<th>",t("Rivit"),"</th>";
 			echo "<th></th>";
@@ -243,14 +243,14 @@
 
 				if ($tapa == 'pp') {
 					echo "<tr class='kayttajat' id='{$ressu['pvm']}'>";
-					echo "<td>",tv1dateconv($ressu['pvm']),"</td>";
+					echo "<td colspan='2'>",tv1dateconv($ressu['pvm']),"</td>";
 
 					$wherelisa = "	AND tapahtuma.laadittu >= '{$ressu['pvm']} 00:00:00'
 									AND tapahtuma.laadittu <= '{$ressu['pvm']} 23:59:59'";
 				}
 				elseif ($tapa == 'vk') {
 					echo "<tr class='kayttajat' id='{$ressu['pvm']}'>";
-					echo "<td>",t("Viikko")," {$ressu['pvm']}</td>";
+					echo "<td colspan='2'>",t("Viikko")," {$ressu['pvm']}</td>";
 
 					$wherelisa = "	AND WEEK(tapahtuma.laadittu) = '{$ressu['pvm']}'
 									AND tapahtuma.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
@@ -261,7 +261,7 @@
 					list($ressu['pvm'], $vuosi) = explode("#", $ressu['pvm']);
 
 					echo "<tr class='kayttajat' id='{$ressu['pvm']}'>";
-					echo "<td>",$MONTH_ARRAY[$ressu['pvm']]," {$vuosi}</td>";
+					echo "<td colspan='2'>",$MONTH_ARRAY[$ressu['pvm']]," {$vuosi}</td>";
 
 					$wherelisa = "	AND MONTH(tapahtuma.laadittu) = '{$ressu['pvm']}'
 									AND tapahtuma.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
@@ -289,7 +289,7 @@
 				$kayttajittain_result = pupe_query($query);
 
 				echo "<tr class='{$ressu['pvm']}' style='display:none;'>";
-				echo "<th>",t("Nimi"),"</th>";
+				echo "<th colspan='2'>",t("Nimi"),"</th>";
 				echo "<th>",t("Yksiköt"),"</th>";
 				echo "<th>",t("Rivit"),"</th>";
 				echo "<th></th>";
@@ -298,7 +298,7 @@
 				while ($kayttajittain_row = mysql_fetch_assoc($kayttajittain_result)) {
 
 					echo "<tr class='spec useri {$ressu['pvm']}' id='{$ressu['pvm']}{$kayttajittain_row['kuka_tunnus']}' style='display:none;'>";
-					echo "<td>{$kayttajittain_row['kuka']}</td>";
+					echo "<td colspan='2'>{$kayttajittain_row['kuka']}</td>";
 					echo "<td align='right'>{$kayttajittain_row['yksikot']}</td>";
 					echo "<td align='right'>{$kayttajittain_row['rivit']}</td>";
 					echo "<td><img title='",t("Käyttäjä"),"' alt='",t("Käyttäjä"),"' src='{$palvelin2}pics/lullacons/go-down.png' /></td>";
@@ -321,6 +321,7 @@
 					$kayttaja_result = pupe_query($query);
 
 					echo "<tr class='lapsi {$ressu['pvm']}{$kayttajittain_row['kuka_tunnus']}' style='display:none;'>";
+					echo "<th>",t("Toimittaja"),"</th>";
 					echo "<th>",t("Saapuminen"),"</th>";
 					echo "<th>",t("Yksiköt"),"</th>";
 					echo "<th>",t("Rivit"),"</th>";
@@ -329,7 +330,7 @@
 
 					while ($kayttaja_row = mysql_fetch_assoc($kayttaja_result)) {
 
-						$query = "	SELECT laskunro
+						$query = "	SELECT laskunro, TRIM(CONCAT(nimi, ' ', nimitark)) nimi
 									FROM lasku
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$kayttaja_row['keikka']}'";
@@ -337,6 +338,7 @@
 						$laskunro_row = mysql_fetch_assoc($laskunro_res);
 
 						echo "<tr class='tumma lapsi {$ressu['pvm']}{$kayttajittain_row['kuka_tunnus']}' style='display:none;'>";
+						echo "<td>{$laskunro_row['nimi']}</td>";
 						echo "<td>{$laskunro_row['laskunro']}</td>";
 						echo "<td align='right'>{$kayttaja_row['yksikot']}</td>";
 						echo "<td align='right'>{$kayttaja_row['rivit']}</td>";

@@ -353,6 +353,12 @@
 			echo "<th>",t("Kerätyt"),"</th>";
 			echo "<th>",t("Palautukset"),"</th>";
 			echo "<th>",t("Yhteensä"),"</th>";
+			echo "<th>",t("Ed. vuoden Pvm"),"</th>";
+			echo "<th>",t("Ed. vuoden Puutteet"),"</th>";
+			echo "<th>",t("Ed. vuoden Siirrot"),"</th>";
+			echo "<th>",t("Ed. vuoden Kerätyt"),"</th>";
+			echo "<th>",t("Ed. vuoden Palautukset"),"</th>";
+			echo "<th>",t("Ed. vuosi Yhteensä"),"</th>";
 			echo "</tr>";
 
 			$psummayht	= 0;
@@ -360,6 +366,13 @@
 			$palsummayht = 0;
 			$ssummayht	= 0;
 			$summayht	= 0;
+
+			$ed_psummayht	= 0;
+			$ed_ksummayht	= 0;
+			$ed_palsummayht = 0;
+			$ed_ssummayht	= 0;
+			$ed_summayht	= 0;
+
 
 			if ($tapa == 'kerkk') {
 

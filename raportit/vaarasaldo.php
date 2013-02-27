@@ -93,17 +93,16 @@
 	//Käyttöliittymä
 	echo "<br>";
 	echo "<table><form method='post'>";
-
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 
 	echo "<tr>";
 	echo "<th>",t("Näytä"),"</th>";
 	echo "<td><select name='nayta'>";
-	echo "<option value=''>",t("Kaikki"),"</option>";
+	echo "<option value=''>",t("Kaikki poikkeamat"),"</option>";
 
 	$sel = $nayta == 'ei_ylijaamia' ? ' selected' : '';
 
-	echo "<option value='ei_ylijaamia'{$sel}>",t("Ei ylijäämiä"),"</option>";
+	echo "<option value='ei_ylijaamia'{$sel}>",t("Kaikki paitsi rivit jossa kerääjä on kerännyt tilattua enemmän"),"</option>";
 	echo "</select></td>";
 	echo "</tr>";
 
@@ -129,4 +128,3 @@
 	echo "<td class='back'><input type='submit' value='",t("Aja raportti"),"'></td></tr></table>";
 
 	require ("inc/footer.inc");
-?>

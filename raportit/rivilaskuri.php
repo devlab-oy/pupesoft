@@ -170,15 +170,28 @@
 		}
 
 		if ($laskutusajo_tuotteet != '') {
-			$ei_laskutusajo_tuotteita = "AND tilausrivi.tuoteno NOT IN (
-											'{$yhtiorow['rahti_tuotenumero']}',
+
+			$query = "	SELECT GROUP_CONCAT(DISTINCT kuljetusvakuutus_tuotenumero SEPARATOR '\',\'') kuljetusvakuutus_tuotenumerot
+						FROM toimitustapa
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND kuljetusvakuutus_tuotenumero != ''";
+			$toimitustapa_res = pupe_query($query);
+			$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
+
+			$ei_laskutusajo_tuotteita = "AND tilausrivi.tuoteno NOT IN (";
+
+			$ei_laskutusajo_tuotteita .= "	'{$yhtiorow['rahti_tuotenumero']}',
 											'{$yhtiorow['jalkivaatimus_tuotenumero']}',
 											'{$yhtiorow['kasittelykulu_tuotenumero']}',
 											'{$yhtiorow['maksuehto_tuotenumero']}',
 											'{$yhtiorow['ennakkomaksu_tuotenumero']}',
 											'{$yhtiorow['alennus_tuotenumero']}',
 											'{$yhtiorow['laskutuslisa_tuotenumero']}',
-											'{$yhtiorow['kuljetusvakuutus_tuotenumero']}')";
+											'{$yhtiorow['kuljetusvakuutus_tuotenumero']}'";
+
+			if ($toimitustapa_row['kuljetusvakuutus_tuotenumerot'] != '') $ei_laskutusajo_tuotteita .= ",'{$toimitustapa_row['kuljetusvakuutus_tuotenumerot']}'";
+
+			$ei_laskutusajo_tuotteita .= ")";
 		}
 		else {
 			$ei_laskutusajo_tuotteita = "";

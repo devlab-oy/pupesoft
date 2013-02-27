@@ -384,106 +384,42 @@
 			$ed_summayht	= 0;
 
 
-			if ($tapa == 'kerkk') {
+			while ($ressu = mysql_fetch_assoc($result)) {
 
-				while ($ressu = mysql_fetch_assoc($result)) {
-
-					// lasketaan ensiksi kuukauden viimeinen p‰iv‰
+				// lasketaan ensiksi kuukauden viimeinen p‰iv‰
+				if ($tapa == 'kerkk') {
 					list($vuosi, $kk_x) = explode("-", $ressu['pvm']);
+					$pp_x = $ppa;
+					$pp_y = $ppl;
+				}
+				else {
+					list($vuosi, $kk_x, $pp_x) = explode("-", $ressu['pvm']);
+					$pp_y = $pp_x;
+				}
 
-					$kk = $kk_x{0} == 0 ? $kk_x{1} : $kk_x;
+				$kk = $kk_x{0} == 0 ? $kk_x{1} : $kk_x;
 
-					echo "<tr class='kayttajittain' id='",str_replace("-", "", $ressu['pvm']),"'>";
+				echo "<tr class='kayttajittain' id='",str_replace("-", "", $ressu['pvm']),"'>";
+
+				if ($tapa == 'kerpvm') {
+					echo "<td>",tv1dateconv($ressu['pvm'], "P"),"</td>";
+				}
+				else {
 					echo "<td>",$MONTH_ARRAY[$kk]," {$vuosi}</td>";
-					echo "<td align='right'>{$ressu['puutteet']}</td>";
-					echo "<td align='right'>{$ressu['siirrot']}</td>";
-					echo "<td align='right'>{$ressu['kappaleet']}</td>";
-					echo "<td align='right'>{$ressu['kappaleet_palautus']}</td>";
-					echo "<td align='right'>{$ressu['yht']}</td>";
+				}
 
-					if ($edellinen_vuosi) {
+				echo "<td align='right'>{$ressu['puutteet']}</td>";
+				echo "<td align='right'>{$ressu['siirrot']}</td>";
+				echo "<td align='right'>{$ressu['kappaleet']}</td>";
+				echo "<td align='right'>{$ressu['kappaleet_palautus']}</td>";
+				echo "<td align='right'>{$ressu['yht']}</td>";
 
-						$ed_vuosi_a = $vuosi - 1;
-						$ed_vuosi_l = $vuosi - 1;
+				if ($edellinen_vuosi) {
 
-						$query = "	SELECT {$selecti}
-									SUM(IF(tilausrivi.var  = 'P', 1, 0)) puutteet,
-									SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) > 0, 1, 0)) kappaleet,
-									SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) < 0, 1, 0)) kappaleet_palautus,
-									SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi='G', 1, 0)) siirrot,
-									COUNT(*) yht
-									FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
-									JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
-									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
-									{$lefti} JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio AND kuka.kuka = tilausrivi.keratty)
-									JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio AND
-					                CONCAT(RPAD(UPPER(alkuhyllyalue),  5, '0'),LPAD(UPPER(alkuhyllynro),  5, '0')) <= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')) AND
-					                CONCAT(RPAD(UPPER(loppuhyllyalue), 5, '0'),LPAD(UPPER(loppuhyllynro), 5, '0')) >= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')))
-									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-									AND tilausrivi.kerattyaika >= '{$ed_vuosi_a}-{$kk_x}-{$ppa} 00:00:00'
-									AND tilausrivi.kerattyaika <= '{$ed_vuosi_l}-{$kk_x}-{$ppl} 23:59:59'
-									AND tilausrivi.var IN ('','H','P')
-									AND tilausrivi.tyyppi IN ('L','G')
-									{$lisa}
-									GROUP BY 1
-									ORDER BY 1";
-						$result_ed = pupe_query($query);
-						$ressu_ed = mysql_fetch_assoc($result_ed);
+					$ed_vuosi_a = $vuosi - 1;
+					$ed_vuosi_l = $vuosi - 1;
 
-						echo "<td>",$MONTH_ARRAY[$kk]," {$ed_vuosi_a}</td>";
-						echo "<td align='right'>{$ressu_ed['puutteet']}</td>";
-						echo "<td align='right'>{$ressu_ed['siirrot']}</td>";
-						echo "<td align='right'>{$ressu_ed['kappaleet']}</td>";
-						echo "<td align='right'>{$ressu_ed['kappaleet_palautus']}</td>";
-						echo "<td align='right'>{$ressu_ed['yht']}</td>";
-
-						// yhteens‰
-						$ed_psummayht	+= $ressu_ed["puutteet"];
-						$ed_palsummayht += abs($ressu_ed["kappaleet_palautus"]);
-						$ed_ksummayht	+= $ressu_ed["kappaleet"];
-						$ed_ssummayht	+= $ressu_ed["siirrot"];
-						$ed_summayht	+= $ressu_ed["yht"];
-					}
-
-					echo "</tr>";
-
-					$psummayht	+= $ressu["puutteet"];
-					$palsummayht += abs($ressu["kappaleet_palautus"]);
-					$ksummayht	+= $ressu["kappaleet"];
-					$ssummayht	+= $ressu["siirrot"];
-					$summayht	+= $ressu["yht"];
-
-					echo "<tr class='",str_replace("-", "", $ressu['pvm']),"' style='display:none;'>";
-					echo "<th>",t("Ker‰‰j‰"),"</th>";
-					echo "<th>",t("Puutteet"),"</th>";
-					echo "<th>",t("Siirrot"),"</th>";
-					echo "<th>",t("Ker‰tyt"),"</th>";
-					echo "<th>",t("Palautukset"),"</th>";
-					echo "<th>",t("Yhteens‰"),"</th>";
-
-					if ($edellinen_vuosi) {
-						echo "<th>",t("Ker‰‰j‰"),"</th>";
-						echo "<th>",t("Puutteet"),"</th>";
-						echo "<th>",t("Siirrot"),"</th>";
-						echo "<th>",t("Ker‰tyt"),"</th>";
-						echo "<th>",t("Palautukset"),"</th>";
-						echo "<th>",t("Yhteens‰"),"</th>";
-					}
-
-					echo "</tr>";
-
-					$kk++;
-
-					if ($kk == 13) {
-						$vuosi++;
-						$kk = 1;
-					}
-
-					$pp = date("d", mktime(0,0,0,$kk, 0, $vuosi));
-
-					list($vuosi, $kk) = explode("-", $ressu['pvm']);
-
-					$query = "	SELECT tilausrivi.keratty, kuka.nimi,
+					$query = "	SELECT {$selecti}
 								SUM(IF(tilausrivi.var  = 'P', 1, 0)) puutteet,
 								SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) > 0, 1, 0)) kappaleet,
 								SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) < 0, 1, 0)) kappaleet_palautus,
@@ -497,142 +433,164 @@
 				                CONCAT(RPAD(UPPER(alkuhyllyalue),  5, '0'),LPAD(UPPER(alkuhyllynro),  5, '0')) <= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')) AND
 				                CONCAT(RPAD(UPPER(loppuhyllyalue), 5, '0'),LPAD(UPPER(loppuhyllynro), 5, '0')) >= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')))
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.kerattyaika >= '{$vuosi}-{$kk}-01 00:00:00'
-								AND tilausrivi.kerattyaika <= '{$vuosi}-{$kk}-{$pp} 23:59:59'
+								AND tilausrivi.kerattyaika >= '{$ed_vuosi_a}-{$kk_x}-{$pp_x} 00:00:00'
+								AND tilausrivi.kerattyaika <= '{$ed_vuosi_l}-{$kk_x}-{$pp_y} 23:59:59'
 								AND tilausrivi.var IN ('','H','P')
 								AND tilausrivi.tyyppi IN ('L','G')
 								{$lisa}
-								GROUP BY 1,2
+								GROUP BY 1
 								ORDER BY 1";
-					$keraajittain_result = pupe_query($query);
+					$result_ed = pupe_query($query);
+					$ressu_ed = mysql_fetch_assoc($result_ed);
 
-					while ($keraajittain_row = mysql_fetch_assoc($keraajittain_result)) {
-
-						echo "<tr class='spec aktiivi ",str_replace("-", "", $ressu['pvm']),"' style='display:none;'>";
-						echo "<td>{$keraajittain_row['nimi']} ({$keraajittain_row['keratty']})</td>";
-						echo "<td align='right'>{$keraajittain_row['puutteet']}</td>";
-						echo "<td align='right'>{$keraajittain_row['siirrot']}</td>";
-						echo "<td align='right'>{$keraajittain_row['kappaleet']}</td>";
-						echo "<td align='right'>{$keraajittain_row['kappaleet_palautus']}</td>";
-						echo "<td align='right'>{$keraajittain_row['yht']}</td>";
-
-						if ($edellinen_vuosi) {
-
-							$ed_vuosi = $vuosi - 1;
-
-							$query = "	SELECT tilausrivi.keratty, kuka.nimi,
-										SUM(IF(tilausrivi.var  = 'P', 1, 0)) puutteet,
-										SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) > 0, 1, 0)) kappaleet,
-										SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) < 0, 1, 0)) kappaleet_palautus,
-										SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi='G', 1, 0)) siirrot,
-										COUNT(*) yht
-										FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
-										JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
-										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
-										JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio AND kuka.kuka = tilausrivi.keratty)
-										JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio AND
-						                CONCAT(RPAD(UPPER(alkuhyllyalue),  5, '0'),LPAD(UPPER(alkuhyllynro),  5, '0')) <= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')) AND
-						                CONCAT(RPAD(UPPER(loppuhyllyalue), 5, '0'),LPAD(UPPER(loppuhyllynro), 5, '0')) >= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')))
-										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-										AND tilausrivi.kerattyaika >= '{$ed_vuosi}-{$kk}-01 00:00:00'
-										AND tilausrivi.kerattyaika <= '{$ed_vuosi}-{$kk}-{$pp} 23:59:59'
-										AND tilausrivi.keratty = '{$keraajittain_row['keratty']}'
-										AND tilausrivi.var IN ('','H','P')
-										AND tilausrivi.tyyppi IN ('L','G')
-										{$lisa}
-										GROUP BY 1,2
-										ORDER BY 1";
-							$ed_keraajittain_result = pupe_query($query);
-
-							$ed_keraajittain_row = mysql_fetch_assoc($ed_keraajittain_result);
-
-							if ($ed_keraajittain_row['keratty'] != '') {
-								echo "<td>{$ed_keraajittain_row['nimi']} ({$ed_keraajittain_row['keratty']})</td>";
-								echo "<td align='right'>{$ed_keraajittain_row['puutteet']}</td>";
-								echo "<td align='right'>{$ed_keraajittain_row['siirrot']}</td>";
-								echo "<td align='right'>{$ed_keraajittain_row['kappaleet']}</td>";
-								echo "<td align='right'>{$ed_keraajittain_row['kappaleet_palautus']}</td>";
-								echo "<td align='right'>{$ed_keraajittain_row['yht']}</td>";
-							}
-							else {
-								echo "<td></td>";
-								echo "<td align='right'></td>";
-								echo "<td align='right'></td>";
-								echo "<td align='right'></td>";
-								echo "<td align='right'></td>";
-								echo "<td align='right'></td>";
-							}
-						}
-
-						echo "</tr>";
+					if ($tapa == 'kerkk') {
+						echo "<td>",$MONTH_ARRAY[$kk]," {$ed_vuosi_a}</td>";
 					}
-				}
-			}
-			else {
+					else {
+						echo "<td>",tv1dateconv("{$ed_vuosi_a}-{$kk_x}-{$pp_x}", "P"),"</td>";
+					}
 
-				while ($ressu = mysql_fetch_assoc($result)) {
-
-					// $kerattyaika[$apu] = $ressu['kerattyaika'];
+					echo "<td align='right'>{$ressu_ed['puutteet']}</td>";
+					echo "<td align='right'>{$ressu_ed['siirrot']}</td>";
+					echo "<td align='right'>{$ressu_ed['kappaleet']}</td>";
+					echo "<td align='right'>{$ressu_ed['kappaleet_palautus']}</td>";
+					echo "<td align='right'>{$ressu_ed['yht']}</td>";
 
 					// yhteens‰
-					$psummayht	+= $ressu["puutteet"];
-					$palsummayht += abs($ressu["kappaleet_palautus"]);
-					$ksummayht	+= $ressu["kappaleet"];
-					$ssummayht	+= $ressu["siirrot"];
-					$summayht	+= $ressu["yht"];
+					$ed_psummayht	+= $ressu_ed["puutteet"];
+					$ed_palsummayht += abs($ressu_ed["kappaleet_palautus"]);
+					$ed_ksummayht	+= $ressu_ed["kappaleet"];
+					$ed_ssummayht	+= $ressu_ed["siirrot"];
+					$ed_summayht	+= $ressu_ed["yht"];
+				}
 
-					echo "<tr class='kayttajittain' id='",str_replace(".", "", $ressu['pvm']),"'>";
-					echo "<td>",tv1dateconv($ressu['pvm'],"P")," <img title='",t("K‰ytt‰jitt‰in"),"' alt='",t("K‰ytt‰jitt‰in"),"' src='{$palvelin2}pics/lullacons/go-down.png' /></td>";
-					echo "<td align='right'>{$ressu['puutteet']}</td>";
-					echo "<td align='right'>{$ressu['siirrot']}</td>";
-					echo "<td align='right'>{$ressu['kappaleet']}</td>";
-					echo "<td align='right'>{$ressu['kappaleet_palautus']}</td>";
-					echo "<td align='right'>{$ressu['yht']}</td>";
-					echo "</tr>";
+				echo "</tr>";
 
-					echo "<tr class='",str_replace(".", "", $ressu['pvm']),"' style='display:none;'>";
+				$psummayht	+= $ressu["puutteet"];
+				$palsummayht += abs($ressu["kappaleet_palautus"]);
+				$ksummayht	+= $ressu["kappaleet"];
+				$ssummayht	+= $ressu["siirrot"];
+				$summayht	+= $ressu["yht"];
+
+				echo "<tr class='",str_replace("-", "", $ressu['pvm']),"' style='display:none;'>";
+				echo "<th>",t("Ker‰‰j‰"),"</th>";
+				echo "<th>",t("Puutteet"),"</th>";
+				echo "<th>",t("Siirrot"),"</th>";
+				echo "<th>",t("Ker‰tyt"),"</th>";
+				echo "<th>",t("Palautukset"),"</th>";
+				echo "<th>",t("Yhteens‰"),"</th>";
+
+				if ($edellinen_vuosi) {
 					echo "<th>",t("Ker‰‰j‰"),"</th>";
 					echo "<th>",t("Puutteet"),"</th>";
 					echo "<th>",t("Siirrot"),"</th>";
 					echo "<th>",t("Ker‰tyt"),"</th>";
 					echo "<th>",t("Palautukset"),"</th>";
 					echo "<th>",t("Yhteens‰"),"</th>";
-					echo "</tr>";
+				}
 
-					$query = "	SELECT tilausrivi.keratty, kuka.nimi,
-								SUM(IF(tilausrivi.var  = 'P', 1, 0)) puutteet,
-								SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) > 0, 1, 0)) kappaleet,
-								SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) < 0, 1, 0)) kappaleet_palautus,
-								SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi='G', 1, 0)) siirrot,
-								COUNT(*) yht
-								FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
-								JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
-								{$lefti} JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio AND kuka.kuka = tilausrivi.keratty)
-								LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio AND
-				                CONCAT(RPAD(UPPER(alkuhyllyalue),  5, '0'),LPAD(UPPER(alkuhyllynro),  5, '0')) <= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')) AND
-				                CONCAT(RPAD(UPPER(loppuhyllyalue), 5, '0'),LPAD(UPPER(loppuhyllynro), 5, '0')) >= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')))
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.kerattyaika >= '{$ressu['pvm']} 00:00:00'
-								AND tilausrivi.kerattyaika <= '{$ressu['pvm']} 23:59:59'
-								AND tilausrivi.var IN ('','H','P')
-								AND tilausrivi.tyyppi IN ('L','G')
-								{$lisa}
-								GROUP BY 1
-								ORDER BY 1";
-					$keraajittain_result = pupe_query($query);
+				echo "</tr>";
 
-					while ($keraajittain_row = mysql_fetch_assoc($keraajittain_result)) {
+				$kk++;
 
-						echo "<tr class='spec aktiivi ",str_replace(".", "", $ressu['pvm']),"' style='display:none;'>";
-						echo "<td>{$keraajittain_row['nimi']} ({$keraajittain_row['keratty']})</td>";
-						echo "<td align='right'>{$keraajittain_row['puutteet']}</td>";
-						echo "<td align='right'>{$keraajittain_row['siirrot']}</td>";
-						echo "<td align='right'>{$keraajittain_row['kappaleet']}</td>";
-						echo "<td align='right'>{$keraajittain_row['kappaleet_palautus']}</td>";
-						echo "<td align='right'>{$keraajittain_row['yht']}</td>";
-						echo "</tr>";
+				if ($kk == 13) {
+					$vuosi++;
+					$kk = 1;
+				}
+
+				$pp = date("d", mktime(0,0,0,$kk, 0, $vuosi));
+
+				if ($tapa == 'kerpvm') {
+					list($vuosi, $kk, $pp) = explode("-", $ressu['pvm']);
+					$pp_x = $pp;
+				}
+				else {
+					list($vuosi, $kk) = explode("-", $ressu['pvm']);
+					$pp_x = "01";
+				}
+
+				$query = "	SELECT tilausrivi.keratty, kuka.nimi,
+							SUM(IF(tilausrivi.var  = 'P', 1, 0)) puutteet,
+							SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) > 0, 1, 0)) kappaleet,
+							SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) < 0, 1, 0)) kappaleet_palautus,
+							SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi='G', 1, 0)) siirrot,
+							COUNT(*) yht
+							FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
+							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
+							{$lefti} JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio AND kuka.kuka = tilausrivi.keratty)
+							JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio AND
+			                CONCAT(RPAD(UPPER(alkuhyllyalue),  5, '0'),LPAD(UPPER(alkuhyllynro),  5, '0')) <= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')) AND
+			                CONCAT(RPAD(UPPER(loppuhyllyalue), 5, '0'),LPAD(UPPER(loppuhyllynro), 5, '0')) >= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')))
+							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivi.kerattyaika >= '{$vuosi}-{$kk}-{$pp_x} 00:00:00'
+							AND tilausrivi.kerattyaika <= '{$vuosi}-{$kk}-{$pp} 23:59:59'
+							AND tilausrivi.var IN ('','H','P')
+							AND tilausrivi.tyyppi IN ('L','G')
+							{$lisa}
+							GROUP BY 1,2
+							ORDER BY 1";
+				$keraajittain_result = pupe_query($query);
+
+				while ($keraajittain_row = mysql_fetch_assoc($keraajittain_result)) {
+
+					echo "<tr class='spec aktiivi ",str_replace("-", "", $ressu['pvm']),"' style='display:none;'>";
+					echo "<td>{$keraajittain_row['nimi']} ({$keraajittain_row['keratty']})</td>";
+					echo "<td align='right'>{$keraajittain_row['puutteet']}</td>";
+					echo "<td align='right'>{$keraajittain_row['siirrot']}</td>";
+					echo "<td align='right'>{$keraajittain_row['kappaleet']}</td>";
+					echo "<td align='right'>{$keraajittain_row['kappaleet_palautus']}</td>";
+					echo "<td align='right'>{$keraajittain_row['yht']}</td>";
+
+					if ($edellinen_vuosi) {
+
+						$ed_vuosi = $vuosi - 1;
+
+						$query = "	SELECT tilausrivi.keratty, kuka.nimi,
+									SUM(IF(tilausrivi.var  = 'P', 1, 0)) puutteet,
+									SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) > 0, 1, 0)) kappaleet,
+									SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) < 0, 1, 0)) kappaleet_palautus,
+									SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi='G', 1, 0)) siirrot,
+									COUNT(*) yht
+									FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
+									JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
+									JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio AND kuka.kuka = tilausrivi.keratty)
+									JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio AND
+					                CONCAT(RPAD(UPPER(alkuhyllyalue),  5, '0'),LPAD(UPPER(alkuhyllynro),  5, '0')) <= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')) AND
+					                CONCAT(RPAD(UPPER(loppuhyllyalue), 5, '0'),LPAD(UPPER(loppuhyllynro), 5, '0')) >= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')))
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivi.kerattyaika >= '{$ed_vuosi}-{$kk}-{$pp_x} 00:00:00'
+									AND tilausrivi.kerattyaika <= '{$ed_vuosi}-{$kk}-{$pp} 23:59:59'
+									AND tilausrivi.keratty = '{$keraajittain_row['keratty']}'
+									AND tilausrivi.var IN ('','H','P')
+									AND tilausrivi.tyyppi IN ('L','G')
+									{$lisa}
+									GROUP BY 1,2
+									ORDER BY 1";
+						$ed_keraajittain_result = pupe_query($query);
+
+						$ed_keraajittain_row = mysql_fetch_assoc($ed_keraajittain_result);
+
+						if ($ed_keraajittain_row['keratty'] != '') {
+							echo "<td>{$ed_keraajittain_row['nimi']} ({$ed_keraajittain_row['keratty']})</td>";
+							echo "<td align='right'>{$ed_keraajittain_row['puutteet']}</td>";
+							echo "<td align='right'>{$ed_keraajittain_row['siirrot']}</td>";
+							echo "<td align='right'>{$ed_keraajittain_row['kappaleet']}</td>";
+							echo "<td align='right'>{$ed_keraajittain_row['kappaleet_palautus']}</td>";
+							echo "<td align='right'>{$ed_keraajittain_row['yht']}</td>";
+						}
+						else {
+							echo "<td></td>";
+							echo "<td align='right'></td>";
+							echo "<td align='right'></td>";
+							echo "<td align='right'></td>";
+							echo "<td align='right'></td>";
+							echo "<td align='right'></td>";
+						}
 					}
+
+					echo "</tr>";
 				}
 			}
 

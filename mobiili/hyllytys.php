@@ -27,7 +27,7 @@ $query = "  SELECT
             tilausrivi.suuntalava,
             tilausrivi.uusiotunnus,
             lasku.liitostunnus,
-			tilausrivin_lisatiedot.suoraan_laskutukseen AS tilausrivi_tyyppi
+			IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') as tilausrivi_tyyppi
             FROM lasku
             JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O'
             JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
@@ -83,16 +83,13 @@ if (isset($submit)) {
 
 $suuntalava = $row['suuntalava'] ? : "Ei ole";
 
-if(isset($row['tilausrivi_tyyppi'])) {
-	if ($row['tilausrivi_tyyppi'] == 'o') {
-		$row['tilausrivi_tyyppi'] = 'JTS';
-	}
-	else {
-		$row['tilausrivi_tyyppi'] = '';
-	}
+if ($row['tilausrivi_tyyppi'] == 'o') {
+    //suoratoimitus asiakkaalle
+    $row['tilausrivi_tyyppi'] = 'JTS';
 }
-else {
-	$row['tilausrivi_tyyppi'] = '';
+elseif($row['tilausrivi_tyyppi'] == '') {
+    //linkitetty osto / myyntitilaus varastoon
+    $row['tilausrivi_tyyppi'] = 'JTV';
 }
 
 ######## UI ##########

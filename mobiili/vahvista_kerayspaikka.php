@@ -223,16 +223,13 @@ if (isset($submit) and trim($submit) != '') {
 }
 
 
-if(isset($row['tilausrivi_tyyppi'])) {
-	if ($row['tilausrivi_tyyppi'] == 'o') {
-		$row['tilausrivi_tyyppi'] = 'JTS';
-	}
-	else {
-		$row['tilausrivi_tyyppi'] = '';
-	}
+if ($row['tilausrivi_tyyppi'] == 'o') {
+    //suoratoimitus asiakkaalle
+    $row['tilausrivi_tyyppi'] = 'JTS';
 }
-else {
-	$row['tilausrivi_tyyppi'] = '';
+elseif($row['tilausrivi_tyyppi'] == '') {
+    //linkitetty osto / myyntitilaus varastoon
+    $row['tilausrivi_tyyppi'] = '';
 }
 
 # Asetetaan m‰‰r‰ varattu kent‰n arvoksi jos sit‰ ei ole setattu

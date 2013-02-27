@@ -2132,7 +2132,9 @@
 							GROUP_CONCAT(DISTINCT lasku.prioriteettinro ORDER BY lasku.prioriteettinro SEPARATOR ', ') AS prioriteetti,
 							GROUP_CONCAT(DISTINCT concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark, CONCAT(\"(\", lasku.ytunnus, \")\")) SEPARATOR '<br />') AS 'asiakas',
 							GROUP_CONCAT(DISTINCT lasku.tunnus ORDER BY lasku.tunnus SEPARATOR ', ') AS 'tunnus',
-							COUNT(DISTINCT tilausrivi.tunnus) AS 'riveja'
+							COUNT(DISTINCT tilausrivi.tunnus) AS 'riveja',
+							kuka.nimi as keraaja_nimi,
+							kuka.keraajanro as keraaja_nro
 							FROM lasku USE INDEX (tila_index)
 							JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (
 								tilausrivi.yhtio = lasku.yhtio AND
@@ -2144,6 +2146,7 @@
 								((tilausrivi.laskutettu = '' AND tilausrivi.laskutettuaika 	= '0000-00-00') OR lasku.mapvm != '0000-00-00'))
 							JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus AND kerayserat.tila = 'K' {$kerayserahaku})
 							JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+							LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.hyvak3)
 							WHERE lasku.{$logistiikka_yhtiolisa}
 							AND lasku.tila = 'L'
 							AND lasku.alatila = 'A'
@@ -2233,6 +2236,12 @@
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='kerayspvm'; document.forms['find'].submit();\">",t("Ker‰ysaika"),"</a><br>
 						<a href='#' onclick=\"getElementById('jarj').value='toimaika'; document.forms['find'].submit();\">",t("Toimitusaika"),"</a></th>";
 
+				echo "	<th valign='top'>
+							<a href='#' onclick=\"getElementById('jarj').value='keraaja_nimi'; document.forms['find'].submit();\">",t("Ker‰‰j‰n nimi"),"</a>
+							<br/>
+							<a href='#' onclick=\"getElementById('jarj').value='keraaja_nro'; document.forms['find'].submit();\">",t("Ker‰‰j‰n numero"),"</a>
+						</th>";
+
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">",t("Toimitustapa"),"</a></th>";
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">",t("Riv"),"</a></th>";
 				echo "<th valign='top'>",t("Ker‰‰"),"</th>";
@@ -2298,6 +2307,7 @@
 						echo "<td valign='top' nowrap align='right'>",tv1dateconv($row["kerayspvm"], "", "LYHYT"),"<br />",tv1dateconv($row["toimaika"], "", "LYHYT"),"</td>";
 					}
 
+					echo "<td valign='top'>{$row['keraaja_nimi']}<br/>{$row['keraaja_nro']}</td>";
 					echo "<td valign='top'>{$row['toimitustapa']}</td>";
 					echo "<td valign='top'>{$row['riveja']}</td>";
 

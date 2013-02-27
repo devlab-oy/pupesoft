@@ -6,10 +6,21 @@
 
 	$onko_paivitysoikeuksia_ohjelmaan = tarkista_oikeus('tilauskasittely/lahtojen_hallinta.php', '', 1);
 
-	if($hae_yhdistettavat_lahdot == 1) {
-		echo json_encode(hae_suljetut_lahdot($toimitustavan_tunnukset, 1));
-		exit;
+	if($ajax_request == 1) {
+		if($hae_yhdistettavat_lahdot == 1) {
+			echo json_encode(hae_suljetut_lahdot($toimitustavan_tunnukset, 1));
+			exit;
+		}
+		if($tarkista_lahdot == 1) {
+			$return_array = array(
+				'keraamatta' => lahdot_joissa_tilauksia_keraamatta($lahdot),
+				'aikaa_jaljella' => lahdot_joissa_tilausaikaa_jaljella($lahdot),
+			);
+			echo json_encode($return_array);
+			exit;
+		}
 	}
+	
 
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
@@ -808,7 +819,7 @@ function hae_yhdistettavat_tilaukset() {
 	var return_data;
 	$.ajax({
 		type: 'POST',
-		url: 'lahtojen_hallinta.php?hae_yhdistettavat_lahdot=1&no_head=yes',
+		url: 'lahtojen_hallinta.php?ajax_request=1&hae_yhdistettavat_lahdot=1&no_head=yes',
 		dataType: 'JSON',
 		data: {
 			yhtio: $('#yhtio_tunnus').html(),
@@ -1838,12 +1849,42 @@ function hae_yhdistettavat_tilaukset() {
 							}
 						});
 
+						var tarkista_lahdot;
+						$.ajax({
+							type: 'POST',
+							url: 'lahtojen_hallinta.php?ajax_request=1&tarkista_lahdot=1&no_head=yes',
+							dataType: 'JSON',
+							async: false,
+							data: {
+								lahdot: lahdot.substring(0, lahdot.length - 2)
+							}
+						}).done(function(data){
+							tarkista_lahdot = data;
+						});
+
 						$(this).after('<input type=\"hidden\" name=\"tulosta_rahtikirjat\" value=\"X\">');
 
-						if (lahdotcount > 1) lahdot = '".t("Oletko varma, että haluat tulostaa rahtikirjat ja sulkea lähdöt")."'+': '+lahdot.substring(0, lahdot.length - 2);
-						else lahdot = '".t("Oletko varma, että haluat tulostaa rahtikirjat ja sulkea lähdön")."'+': '+lahdot.substring(0, lahdot.length - 2);
+						if(!$.isEmptyObject(tarkista_lahdot['keraamatta']) || !$.isEmptyObject(tarkista_lahdot['aikaa_jaljella']) ) {
+							var error_message = '';
+							if(tarkista_lahdot['keraamatta'].length > 0) {
+								error_message += '".t("Lähdöillä tilauksia keräämättä").":' + '\\n';
+								$.each(tarkista_lahdot['keraamatta'], function(index,value){
+									error_message += value['lahdon_tunnus'] + ', ' + value['keraamatta'] + ' ".t("kappaletta")."\\n';
+								});
+							}
+							if (tarkista_lahdot['aikaa_jaljella'].length > 0) {
+							error_message += '\\n".t("Lähdöillä tilausaikaa jäljellä").":';
+								$.each(tarkista_lahdot['aikaa_jaljella'], function(index,value){
+									error_message += value['tunnus'] + ', ';
+								});
+							}
+							error_message += '\\n".t("Haluatko sulkea lähdöt")."';
 
-						if (confirm(lahdot)) $('#napitformi').submit();
+							if (confirm(error_message)) $('#napitformi').submit();
+						}
+						else {
+							$('#napitformi').submit();
+						}
 					});
 
 					$('#vaihda_prio').on('click', function() {
@@ -2906,6 +2947,47 @@ function hae_yhdistettavat_tilaukset() {
 		}
 
 		return $suljetut_lahdot;
+	}
+
+	function lahdot_joissa_tilauksia_keraamatta($lahdot) {
+		global $kukarow;
+
+		$query = "	SELECT lahdot.tunnus AS lahdon_tunnus,
+					count(*) AS keraamatta
+					FROM   lahdot
+					JOIN lasku
+					ON ( lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND lasku.tila = 'L' )
+					JOIN tilausrivi ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' )
+					WHERE  lahdot.yhtio = '{$kukarow['yhtio']}'
+					AND lahdot.tunnus IN ({$lahdot})
+					GROUP BY lahdot.tunnus";
+		$result = pupe_query($query);
+
+		$lahdot = array();
+		while($lahto = mysql_fetch_assoc($result)) {
+			$lahdot[] = $lahto;
+		}
+
+		return $lahdot;
+	}
+
+	function lahdot_joissa_tilausaikaa_jaljella($lahdot) {
+		global $kukarow;
+
+		$query = "	SELECT lahdot.tunnus
+					FROM lahdot
+					WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+					AND lahdot.tunnus IN ({$lahdot})
+					AND lahdot.pvm >= CURDATE()
+					AND lahdot.viimeinen_tilausaika >= NOW()";
+		$result = pupe_query($query);
+		
+		$lahdot = array();
+		while($lahto = mysql_fetch_assoc($result)) {
+			$lahdot[] = $lahto;
+		}
+
+		return $lahdot;
 	}
 
 	require ("inc/footer.inc");

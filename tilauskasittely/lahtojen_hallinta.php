@@ -20,7 +20,7 @@
 			exit;
 		}
 	}
-	
+
 
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
@@ -877,7 +877,7 @@ function hae_yhdistettavat_tilaukset() {
 				while ($kirow = mysql_fetch_assoc($kires)) {
 
 					$sel = (isset($rakirsyotto_laskutulostin) and $rakirsyotto_laskutulostin == $kirow['tunnus']) ? " SELECTED" : ($kirow["tunnus"] == $default_printer_row["printteri7"]) ? " SELECTED" : "";
-					
+
 					echo "<option value='{$kirow['tunnus']}'{$sel}>{$kirow['kirjoitin']}</option>";
 				}
 
@@ -948,7 +948,7 @@ function hae_yhdistettavat_tilaukset() {
 					//tällöin voidaan näyttää mahdolliset liitettävät rahtikirjat
 					//haetaanlistaus suljetuista lähdöistä
 					$suljetut_lahdot = hae_suljetut_lahdot($toimitustavan_tunnukset, 0);
-					
+
 					echo "<tr>";
 					echo "<th>".t("Yhdistetään lähtöön")."</th>";
 					echo "<td>";
@@ -2952,18 +2952,22 @@ function hae_yhdistettavat_tilaukset() {
 	function lahdot_joissa_tilauksia_keraamatta($lahdot) {
 		global $kukarow;
 
-		$query = "	SELECT lahdot.tunnus AS lahdon_tunnus,
-					count(*) AS keraamatta
-					FROM   lahdot
-					JOIN lasku
-					ON ( lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND lasku.tila = 'L' )
-					JOIN tilausrivi ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' )
-					WHERE  lahdot.yhtio = '{$kukarow['yhtio']}'
-					AND lahdot.tunnus IN ({$lahdot})
-					GROUP BY lahdot.tunnus";
+		$query = "  SELECT lahdot.tunnus AS lahdon_tunnus,
+                            count(*) AS keraamatta
+                            FROM lahdot
+                            JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND (lasku.tila = 'L' OR (lasku.tila = 'N' AND lasku.alatila = 'A')))
+                            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND tilausrivi.var NOT IN ('P','J'))
+                            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '' )
+                            JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+                            WHERE  lahdot.yhtio = '{$kukarow['yhtio']}'
+                            AND lahdot.tunnus IN ({$lahdot})
+                            GROUP BY lahdot.tunnus";
 		$result = pupe_query($query);
 
+		error_log($query);
+
 		$lahdot = array();
+
 		while($lahto = mysql_fetch_assoc($result)) {
 			$lahdot[] = $lahto;
 		}
@@ -2981,7 +2985,7 @@ function hae_yhdistettavat_tilaukset() {
 					AND lahdot.pvm >= CURDATE()
 					AND lahdot.viimeinen_tilausaika >= NOW()";
 		$result = pupe_query($query);
-		
+
 		$lahdot = array();
 		while($lahto = mysql_fetch_assoc($result)) {
 			$lahdot[] = $lahto;

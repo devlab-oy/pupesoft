@@ -57,7 +57,7 @@
 	$sel = array($aikamaare => ' selected') + array(10 => '', 30 => '', 60 => '');
 
 	echo "<tr>";
-	echo "<th>",t("Näytä raportin tulos per"),"</th>";
+	echo "<th>",t("Summaustaso"),"</th>";
 	echo "<td colspan='3'><select name='aikamaare'>";
 	echo "<option value='10'{$sel[10]}>",t("10 minuuttia"),"</option>";
 	echo "<option value='30'{$sel[30]}>",t("30 minuuttia"),"</option>";

@@ -19907,10 +19907,10 @@ if (!function_exists('valid_date')) {
 	);
  */
 if(!function_exists('echo_rows_in_table')) {
-	function echo_rows_in_table(&$rivit, $header_values, $force_to_string) {
+	function echo_rows_in_table(&$rivit, $header_values = array(), $force_to_string = array(), $callback = '') {
 		echo "<table>";
 		_echo_table_headers($rivit[0], $header_values);
-		_echo_table_rows($rivit, $force_to_string);
+		_echo_table_rows($rivit, $force_to_string, $callback);
 		echo "</table>";
 	}
 }
@@ -19934,18 +19934,36 @@ if(!function_exists('_echo_table_headers')) {
 }
 
 if(!function_exists('_echo_table_rows')) {
-	function _echo_table_rows(&$rivit, $force_to_string) {
+	function _echo_table_rows(&$rivit, $force_to_string = array(), $callback = '') {
 		foreach ($rivit as $rivi) {
 			echo "<tr>";
 			foreach ($rivi as $header => &$solu) {
-				if (!stristr($header, 'tunnus')) {
-					if (is_numeric($solu) and floatval($solu) and !in_array($header, $force_to_string)) {
-						$solu = number_format($solu, 2);
-					}
-					echo "<td>{$solu}</td>";
-				}
+                if($callback == '') {
+                    _echo_table_row_td($header, $solu, $force_to_string);
+                }
+                else {
+                    //callback k‰ytet‰‰n jos halutaan defaultista poikkeava taulukko.
+                    if(function_exists($callback)) {
+                        $callback($header, $solu, $force_to_string);
+                    }
+                    else {
+                        //k‰ytet‰‰n defaulttia
+                        _echo_table_row_td($header, $solu, $force_to_string);
+                    }
+                }
 			}
 			echo "</tr>";
 		}
 	}
+}
+
+if(!function_exists('_echo_table_row_td')) {
+    function _echo_table_row_td($header, $solu, $force_to_string) {
+        if (!stristr($header, 'tunnus')) {
+            if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
+                $solu = number_format($solu, 2);
+            }
+            echo "<td>{$solu}</td>";
+        }
+    }
 }

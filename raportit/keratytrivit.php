@@ -19,6 +19,8 @@
 
 	echo "<font class='head'>",t("Kerätyt rivit"),"</font><hr>";
 
+	if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+
 	if (!isset($tee)) $tee = '';
 
 	if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
@@ -363,8 +365,13 @@
 
 				while ($ressu = mysql_fetch_assoc($result)) {
 
+					// lasketaan ensiksi kuukauden viimeinen päivä
+					list($vuosi, $kk) = explode("-", $ressu['pvm']);
+
+					$kk = $kk{0} == 0 ? $kk{1} : $kk;
+
 					echo "<tr class='kayttajittain' id='",str_replace("-", "", $ressu['pvm']),"'>";
-					echo "<td align='right'>{$ressu['pvm']}</td>";
+					echo "<td>",$MONTH_ARRAY[$kk]," {$vuosi}</td>";
 					echo "<td align='right'>{$ressu['puutteet']}</td>";
 					echo "<td align='right'>{$ressu['siirrot']}</td>";
 					echo "<td align='right'>{$ressu['kappaleet']}</td>";
@@ -387,9 +394,6 @@
 					echo "<th>",t("Palautukset"),"</th>";
 					echo "<th>",t("Yhteensä"),"</th>";
 					echo "</tr>";
-
-					// lasketaan ensiksi kuukauden viimeinen päivä
-					list($vuosi, $kk) = explode("-", $ressu['pvm']);
 
 					$kk++;
 

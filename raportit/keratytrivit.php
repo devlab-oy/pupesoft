@@ -395,7 +395,7 @@
 				}
 				else {
 					list($vuosi, $kk_x, $pp_x) = explode("-", $ressu['pvm']);
-					$pp_y = $pp_x;
+					$pp_y = $ppl;
 				}
 
 				$kk = $kk_x{0} == 0 ? $kk_x{1} : $kk_x;
@@ -493,22 +493,34 @@
 
 				echo "</tr>";
 
-				$kk++;
-
-				if ($kk == 13) {
-					$vuosi++;
-					$kk = 1;
-				}
-
-				$pp = date("d", mktime(0,0,0,$kk, 0, $vuosi));
-
 				if ($tapa == 'kerpvm') {
 					list($vuosi, $kk, $pp) = explode("-", $ressu['pvm']);
 					$pp_x = $pp;
+
+					$kk_x = $kk_y = $kk;
 				}
 				else {
 					list($vuosi, $kk) = explode("-", $ressu['pvm']);
-					$pp_x = "01";
+					$pp_x = $ppa;
+					$pp = $ppl;
+
+					$kk_x = $kk_y = $kk;
+
+					if ($kka != $kkl and $kk != $kkl) {
+						$kk++;
+
+						if ($kk == 13) {
+							$vuosi_x = $vuosi + 1;
+							$kk = 1;
+						}
+
+						$pp = date("d", mktime(0,0,0,$kk, 0, $vuosi_x));
+
+						if ($kk_x != $kka and $kk_x != $kkl) $pp_x = "01";
+					}
+					elseif ($kka != $kkl and $kk == $kkl) {
+						$pp_x = "01";
+					}
 				}
 
 				$query = "	SELECT tilausrivi.keratty, kuka.nimi,
@@ -526,8 +538,8 @@
 			                CONCAT(RPAD(UPPER(alkuhyllyalue),  5, '0'),LPAD(UPPER(alkuhyllynro),  5, '0')) <= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')) AND
 			                CONCAT(RPAD(UPPER(loppuhyllyalue), 5, '0'),LPAD(UPPER(loppuhyllynro), 5, '0')) >= CONCAT(RPAD(UPPER(tilausrivi.hyllyalue), 5, '0'),LPAD(UPPER(tilausrivi.hyllynro), 5, '0')))
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-							AND tilausrivi.kerattyaika >= '{$vuosi}-{$kk}-{$pp_x} 00:00:00'
-							AND tilausrivi.kerattyaika <= '{$vuosi}-{$kk}-{$pp} 23:59:59'
+							AND tilausrivi.kerattyaika >= '{$vuosi}-{$kk_x}-{$pp_x} 00:00:00'
+							AND tilausrivi.kerattyaika <= '{$vuosi}-{$kk_y}-{$pp} 23:59:59'
 							AND tilausrivi.var IN ('','H','P')
 							AND tilausrivi.tyyppi IN ('L','G')
 							{$lisa}

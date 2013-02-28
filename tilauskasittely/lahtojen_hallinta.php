@@ -1867,7 +1867,7 @@ function hae_yhdistettavat_tilaukset() {
 						if(!$.isEmptyObject(tarkista_lahdot['keraamatta']) || !$.isEmptyObject(tarkista_lahdot['aikaa_jaljella']) ) {
 							var error_message = '';
 							if(tarkista_lahdot['keraamatta'].length > 0) {
-								error_message += '".t("Lähdöillä tilauksia keräämättä").":' + '\\n';
+								error_message += '".t("Lähdöillä rivejä keräämättä").":' + '\\n';
 								$.each(tarkista_lahdot['keraamatta'], function(index,value){
 									error_message += value['lahdon_tunnus'] + ', ' + value['keraamatta'] + ' ".t("kappaletta")."\\n';
 								});

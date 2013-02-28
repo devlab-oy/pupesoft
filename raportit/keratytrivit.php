@@ -63,17 +63,19 @@
 				ORDER BY nimitys";
 	$vares = pupe_query($query);
 
-	echo "<tr>";
-	echo "<th valign=top>",t('Keräysvyöhykkeet'),"<br /><br /><span style='font-size: 0.8em;'>",t('Saat kaikki keräysvyöhykkeet jos et valitse yhtään'),"</span></th>";
-	echo "<td colspan='3'>";
+	if (mysql_num_rows($vares) > 0) {
+		echo "<tr>";
+		echo "<th valign=top>",t('Keräysvyöhykkeet'),"<br /><br /><span style='font-size: 0.8em;'>",t('Saat kaikki keräysvyöhykkeet jos et valitse yhtään'),"</span></th>";
+		echo "<td colspan='3'>";
 
-    while ($varow = mysql_fetch_assoc($vares)) {
-		$sel = in_array($varow['tunnus'], $keraysvyohykkeet) ? 'checked' : '';
+	    while ($varow = mysql_fetch_assoc($vares)) {
+			$sel = in_array($varow['tunnus'], $keraysvyohykkeet) ? 'checked' : '';
 
-		echo "<input type='checkbox' name='keraysvyohykkeet[]' value='{$varow['tunnus']}' {$sel}/>{$varow['nimitys']}<br />\n";
+			echo "<input type='checkbox' name='keraysvyohykkeet[]' value='{$varow['tunnus']}' {$sel}/>{$varow['nimitys']}<br />\n";
+		}
+
+		echo "</td></tr>";
 	}
-
-	echo "</td></tr>";
 
 	$query  = "	SELECT tunnus, nimitys
 				FROM varastopaikat

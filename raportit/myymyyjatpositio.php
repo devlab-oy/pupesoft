@@ -121,7 +121,7 @@
 
 		while ($row = mysql_fetch_array($result)) {
 			$myyja_nimi[$row["myyja"]] = $row["nimi"];
-			$summa[$row["myyja"]][$row["kausi"]] = $row["summa"];
+			$summa[$row["myyja"]][$row["kausi"]] += $row["summa"];
 		}
 
 		$sarakkeet	= 0;

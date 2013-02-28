@@ -339,6 +339,48 @@ if ($kasitellaan_tiedosto) {
 		}
 	}
 
+	if (in_array("tuotteen_toimittajat_tuotenumerot", $taulut)) {
+
+		$chk_toim_tuoteno = $chk_ytunnus = "x";
+
+		foreach ($taulunotsikot["tuotteen_toimittajat_tuotenumerot"] as $key => $column) {
+
+			if ($column == "TOIM_TUOTENO") $chk_toim_tuoteno = $key;
+			if ($column == "YTUNNUS") $chk_ytunnus = $key;
+		}
+
+		if (is_int($chk_toim_tuoteno) and is_int($chk_ytunnus)) {
+
+			// Vaihdetaan otsikko
+			$taulunotsikot["tuotteen_toimittajat_tuotenumerot"][$chk_ytunnus] = "TOIM_TUOTENO_TUNNUS";
+			unset($taulunotsikot["tuotteen_toimittajat_tuotenumerot"][$chk_toim_tuoteno]);
+
+			// Muutetaan arvot
+			foreach ($taulunrivit["tuotteen_toimittajat_tuotenumerot"] as $ind => $rivit) {
+				$chk_ytunnus_val = $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_ytunnus];
+				$chk_toim_tuoteno_val = $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_toim_tuoteno];
+
+				$query = "	SELECT tt.tunnus
+							FROM tuotteen_toimittajat AS tt
+							JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.ytunnus = '{$chk_ytunnus_val}')
+							WHERE tt.yhtio = '{$kukarow['yhtio']}'
+							AND tt.toim_tuoteno = '{$chk_toim_tuoteno_val}'";
+				$chk_tunnus_res = pupe_query($query);
+
+				if (mysql_num_rows($chk_tunnus_res) == 1) {
+					$chk_tunnus_row = mysql_fetch_assoc($chk_tunnus_res);
+
+					$taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_ytunnus] = $chk_tunnus_row['tunnus'];
+				}
+				else {
+					$taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_ytunnus] = "";
+				}
+
+				unset($taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_toim_tuoteno]);
+			}
+		}
+	}
+
 	// Korjataan spessujoini yhteensopivuus_tuote_lisatiedot/yhteensopivuus_tuote
 	if (in_array("yhteensopivuus_tuote", $taulut) and in_array("yhteensopivuus_tuote_lisatiedot", $taulut)) {
 

@@ -6,7 +6,7 @@
 
 			static $chk_tuoteno, $chk_viivakoodi;
 
-			if (mysql_field_name($result, $i) == "toim_tuoteno") {
+			if (mysql_field_name($result, $i) == "tuoteno") {
 				$chk_tuoteno = $t[$i];
 			}
 
@@ -17,7 +17,7 @@
 				$query = "	SELECT *
 							FROM tuotteen_toimittajat_tuotenumerot
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND toim_tuoteno = '{$toim_tuoteno}'
+							AND tuoteno = '{$toim_tuoteno}'
 							AND viivakoodi = '{$chk_viivakoodi}'";
 				$chk_res = pupe_query($query);
 

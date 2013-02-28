@@ -630,7 +630,6 @@ if ($tee == "") {
 																		AND tuotepaikat.hyllytaso = varaston_hyllypaikat.hyllytaso
 																		AND tuotepaikat.oletus = '')
 													WHERE varaston_hyllypaikat.yhtio = '{$kukarow['yhtio']}'
-													AND varaston_hyllypaikat.varasto = '{$hyllypaikat_varasto}'
 													AND varaston_hyllypaikat.korkeus >= '{$hyllypaikat_row['korkeus']}'
 													AND varaston_hyllypaikat.leveys >= '{$hyllypaikat_row['leveys']}'
 													AND varaston_hyllypaikat.syvyys >= '{$hyllypaikat_row['syvyys']}'

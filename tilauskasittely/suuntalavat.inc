@@ -517,7 +517,6 @@
 											AND tuotepaikat.hyllytaso = varaston_hyllypaikat.hyllytaso
 											AND tuotepaikat.oletus = '')
 						WHERE varaston_hyllypaikat.yhtio = '{$kukarow['yhtio']}'
-						AND varaston_hyllypaikat.varasto = '{$pakkaus_row['varasto']}'
 						AND varaston_hyllypaikat.korkeus >= '{$pakkaus_row['korkeus']}'
 						AND varaston_hyllypaikat.leveys >= '{$pakkaus_row['leveys']}'
 						AND varaston_hyllypaikat.syvyys >= '{$pakkaus_row['syvyys']}'

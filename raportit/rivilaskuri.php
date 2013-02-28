@@ -101,7 +101,7 @@
 		echo "</tr>";
 	}
 
-	$sel = array_fill_keys($tilaustyyppi, " checked") + array('N' => '', '2' => '', '7' => '', 'S' => '', '8' => '');
+	$sel = array_fill_keys($tilaustyyppi, " checked") + array('N' => '', '2' => '', '7' => '', 'S' => '', '8' => '', 'R' => '');
 
 	echo "<tr>";
 	echo "<th>",t("Tilaustyyppi"),"</th>";
@@ -112,6 +112,7 @@
 	echo "<input type='checkbox' name='tilaustyyppi[]' value='7' {$sel[7]}>",t("Tehdastilaus"),"<br />";
 	echo "<input type='checkbox' name='tilaustyyppi[]' value='S' {$sel['S']}>",t("Sarjatilaus"),"<br />";
 	echo "<input type='checkbox' name='tilaustyyppi[]' value='8' {$sel[8]}>",t("Muiden mukana"),"<br />";
+	echo "<input type='checkbox' name='tilaustyyppi[]' value='R' {$sel['R']}>",t("Reklamaatio"),"<br />";
 	echo "</td>";
 	echo "</tr>";
 
@@ -213,6 +214,9 @@
 
 		if (count($tilaustyyppi) > 1) {
 			unset($tilaustyyppi[0]);
+
+			if (in_array('N', $tilaustyyppi)) $tilaustyyppi[] = '';
+
 			$tilaustyyppilisa = " AND lasku.tilaustyyppi IN ('".implode("','", $tilaustyyppi)."')";
 		}
 

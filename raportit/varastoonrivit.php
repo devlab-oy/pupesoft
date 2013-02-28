@@ -19,6 +19,8 @@
 	if (!isset($tee)) $tee = "";
 	if (!isset($tapa)) $tapa = '';
 
+	if (!isset($keraajanro_pakollinen)) $keraajanro_pakollinen = "";
+
 	if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 
 	echo "	<script type='text/javascript'>
@@ -56,6 +58,13 @@
 	echo "</select></td>";
 	echo "</tr>";
 
+	$chk = $keraajanro_pakollinen != '' ? "checked" : "";
+
+	echo "<tr>";
+	echo "<th>",t("Kerääjänumero pakollinen"),"</th>";
+	echo "<td colspan='3'><input type='checkbox' name='keraajanro_pakollinen' {$chk} /></td>";
+	echo "</tr>";
+
 	echo "<tr>";
 	echo "<th>",t("Syötä päivämäärä (pp-kk-vvvv)"),"</th>";
 	echo "<td><input type='text' name='ppa' value='{$ppa}' size='3'></td>";
@@ -91,11 +100,17 @@
 
 	if ($tee != '') {
 
+		$keraajanrolisa = $keraajanro_pakollinen != '' ? "HAVING (kuka.keraajanro IS NOT NULL and kuka.keraajanro != 0)" : "";
+		$keraajanrolisaselect = $keraajanro_pakollinen != '' ? "kuka.keraajanro," : "";
+
 		if ($tapa == 'vieja') {
+
+			$groupby = $keraajanro_pakollinen != '' ? "GROUP BY 1,2,3,4" : "GROUP BY 1,2,3";
 
 			$query = "	SELECT IF(kuka.nimi IS NULL,tapahtuma.laatija, kuka.nimi) kuka,
 						tilausrivi.uusiotunnus keikka,
 						LEFT(tapahtuma.laadittu,10) laadittu,
+						{$keraajanrolisaselect}
 						SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
 						COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
 						FROM tapahtuma
@@ -106,7 +121,8 @@
 						AND tapahtuma.laji = 'tulo'
 						AND tapahtuma.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
 						AND tapahtuma.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-						GROUP BY 1,2,3
+						{$groupby}
+						{$keraajanrolisa}
 						ORDER BY kuka.nimi, LEFT(tapahtuma.laadittu,10)";
 			$result = pupe_query($query);
 
@@ -239,6 +255,8 @@
 			echo "<th></th>";
 			echo "</tr>";
 
+			$groupby = $keraajanro_pakollinen != '' ? "GROUP BY 1,2,3" : "GROUP BY 1,2";
+
 			while ($ressu = mysql_fetch_assoc($result)) {
 
 				if ($tapa == 'pp') {
@@ -273,8 +291,11 @@
 				echo "<td><img title='",t("Käyttäjittäin"),"' alt='",t("Käyttäjittäin"),"' src='{$palvelin2}pics/lullacons/go-down.png' /></td>";
 				echo "</tr>";
 
+
+
 				$query = "	SELECT IF(kuka.nimi IS NULL,tapahtuma.laatija, kuka.nimi) kuka,
 							IF(kuka.kuka IS NULL,tapahtuma.laatija, kuka.kuka) kuka_tunnus,
+							{$keraajanrolisaselect}
 							SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
 							COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
 							FROM tapahtuma
@@ -284,7 +305,8 @@
 							WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 							AND tapahtuma.laji = 'tulo'
 							{$wherelisa}
-							GROUP BY 1,2
+							{$groupby}
+							{$keraajanrolisa}
 							ORDER BY kuka.nimi, LEFT(tapahtuma.laadittu,10)";
 				$kayttajittain_result = pupe_query($query);
 
@@ -306,6 +328,7 @@
 
 					$query = "	SELECT tilausrivi.uusiotunnus keikka,
 								LEFT(tapahtuma.laadittu,10) laadittu,
+								{$keraajanrolisaselect}
 								SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
 								COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
 								FROM tapahtuma
@@ -316,7 +339,8 @@
 								AND tapahtuma.laji = 'tulo'
 								{$wherelisa}
 								AND tapahtuma.laatija = '{$kayttajittain_row['kuka_tunnus']}'
-								GROUP BY 1,2
+								{$groupby}
+								{$keraajanrolisa}
 								ORDER BY kuka.nimi, LEFT(tapahtuma.laadittu,10)";
 					$kayttaja_result = pupe_query($query);
 

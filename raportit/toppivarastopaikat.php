@@ -310,7 +310,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
                                             AND vh.hyllyvali = tilausrivi.hyllyvali
                                             AND vh.keraysvyohyke IN (".implode(",", $keraysvyohykkeet).")
                                         )";
-        $keraysvyohyke_join = "    LEFT JOIN keraysvyohyke
+        $keraysvyohyke_join = "    JOIN keraysvyohyke
                                     ON (
                                         keraysvyohyke.yhtio = vh.yhtio
                                         AND keraysvyohyke.tunnus = vh.keraysvyohyke

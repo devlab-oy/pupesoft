@@ -1,15 +1,29 @@
 <?php
 
 // Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
-//ini_set('zlib.output_compression', 0);
-//ini_set('implicit_flush', 1);
-//ob_implicit_flush(1);
+ini_set('zlib.output_compression', 0);
+ini_set('implicit_flush', 1);
+ob_implicit_flush(1);
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 $usemastertoo = 1;
 
 require '../inc/parametrit.inc';
+
+//tiedoston lataus pitää olla ennen functions.inciä koska muuten menee headerit solmuun
+if ($tee == 'lataa_tiedosto') {
+	$filepath = "/tmp/".$tmpfilenimi;
+	if (file_exists($filepath)) {
+		readfile($filepath);
+		unlink($filepath);
+	}
+    else {
+        echo "<font class='error'>".t("Tiedostoa ei ole olemassa")."</font>";
+    }
+	exit;
+}
+
 require '../inc/pupeExcel.inc';
 require '../inc/ProgressBar.class.php';
 require '../inc/functions.inc';
@@ -36,20 +50,8 @@ ini_set("memory_limit", "2G");
         return saako_submit;
     }
 </script>
+
 <?php
-
-if ($tee == 'lataa_tiedosto') {
-	$filepath = "/tmp/".$tmpfilenimi;
-	if (file_exists($filepath)) {
-		readfile($filepath);
-		unlink($filepath);
-	}
-    else {
-        echo "<font class='error'>".t("Tiedostoa ei ole olemassa")."</font>";
-    }
-	exit;
-}
-
 // ehdotetaan 7 päivää taaksepäin
 if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
 if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
@@ -154,23 +156,25 @@ while ($varasto = mysql_fetch_assoc($result)) {
 	);
 }
 
-$query = "	SELECT tunnus, nimitys
-			FROM keraysvyohyke
-			WHERE yhtio = '{$kukarow['yhtio']}'
-			AND nimitys != ''";
-$result = pupe_query($query);
-$kaikki_keraysvyohykkeet = array();
-while ($keraysvyohyke = mysql_fetch_assoc($result)) {
-	if (isset($keraysvyohykkeet) and in_array($keraysvyohyke['tunnus'], $keraysvyohykkeet)) {
-		$checked = "checked = 'checked'";
-	}
-	else {
-		$checked = "";
-	}
-	$kaikki_keraysvyohykkeet[$keraysvyohyke['tunnus']] = array(
-		'nimitys' => $keraysvyohyke['nimitys'],
-		'checked' => $checked,
-	);
+if(!empty($yhtiorow['kerayserat'])) {
+    $query = "	SELECT tunnus, nimitys
+                FROM keraysvyohyke
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND nimitys != ''";
+    $result = pupe_query($query);
+    $kaikki_keraysvyohykkeet = array();
+    while ($keraysvyohyke = mysql_fetch_assoc($result)) {
+        if (isset($keraysvyohykkeet) and in_array($keraysvyohyke['tunnus'], $keraysvyohykkeet)) {
+            $checked = "checked = 'checked'";
+        }
+        else {
+            $checked = "";
+        }
+        $kaikki_keraysvyohykkeet[$keraysvyohyke['tunnus']] = array(
+            'nimitys' => $keraysvyohyke['nimitys'],
+            'checked' => $checked,
+        );
+    }
 }
 
 if ($tee != '') {
@@ -285,8 +289,15 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 	}
 
 	$keraysvyohyke_join = "";
+    $keraysvyohyke_select = "";
 	if (!empty($keraysvyohykkeet)) {
-		$keraysvyohyke_join = " AND keraysvyohyke.tunnus IN (".implode(",", $keraysvyohykkeet).") ";
+        $keraysvyohyke_select = "keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,";
+        $keraysvyohyke_join = " LEFT JOIN keraysvyohyke
+                                ON (
+                                    keraysvyohyke.yhtio = varastopaikat.yhtio
+                                    AND keraysvyohyke.varasto = varastopaikat.tunnus
+                                    AND keraysvyohyke.tunnus IN (".implode(",", $keraysvyohykkeet).") 
+                                )";
 	}
 
 	if ($tyyppi == "TUOTE") {
@@ -314,7 +325,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 	}
 
 	$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
-				keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,
+				{$keraysvyohyke_select}
 				CONCAT_WS(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as hylly,
 				sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
 				sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl * -1, 0)) tuokpl_valittu_aika,
@@ -342,12 +353,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 					AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
 					{$varasto_join}
 				)
-				LEFT JOIN keraysvyohyke
-				ON (
-					keraysvyohyke.yhtio = varastopaikat.yhtio
-					AND keraysvyohyke.varasto = varastopaikat.tunnus
-					{$keraysvyohyke_join}
-				)
+				{$keraysvyohyke_join}
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				AND tilausrivi.tyyppi = 'L'
 				{$tuotepaikka_where}
@@ -429,6 +435,7 @@ function echo_tulosta_inventointilista($saldolliset) {
 }
 
 function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso, $toppi, $summaa_varastopaikalle, $varastot, $keraysvyohykkeet, $lisa_kentat) {
+    global $yhtiorow;
 	//Käyttöliittymä
 	echo "<br>";
 	echo "<form method='POST'>";
@@ -484,12 +491,13 @@ function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $a
 	echo "</td>";
 	echo "</tr>";
 
-	echo "<tr>";
-	echo "<th>";
-
-    if (!empty($keraysvyohykkeet)) {
+    if (!empty($yhtiorow['kerayserat']) and !empty($keraysvyohykkeet)) {
+        echo "<tr>";
+        
+        echo "<th>";
         echo t("Keräysvyöhykkeet");
         echo "</th>";
+        
         echo "<td>";
         foreach ($keraysvyohykkeet as $keraysvyohykkeet_index => $keraysvyohykkeet) {
             echo "<input class='keraysvyohykkeet' type='checkbox' name='keraysvyohykkeet[]' value='{$keraysvyohykkeet_index}' {$keraysvyohykkeet['checked']} />";
@@ -497,6 +505,7 @@ function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $a
             echo "<br/>";
         }
         echo "</td>";
+        
         echo "</tr>";
     }
 
@@ -568,5 +577,3 @@ function right_aling_numbers($header, $solu, $force_to_string) {
 }
 
 require ("inc/footer.inc");
-
-?>

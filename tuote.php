@@ -104,7 +104,7 @@
 							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
 							JOIN tuote ON (tuote.yhtio = tt.yhtio AND tuote.tuoteno = tt.tuoteno)
 							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
-							AND (ttt.toim_tuoteno = '{$tuoteno}' or ttt.viivakoodi = '{$tuoteno}')
+							AND (ttt.tuoteno = '{$tuoteno}' or ttt.viivakoodi = '{$tuoteno}')
 							AND (tuote.status NOT IN ('P','X') OR (SELECT SUM(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0) > 0)";
 				$chk_res = pupe_query($query);
 
@@ -752,7 +752,7 @@
 					while ($chk_row = mysql_fetch_assoc($chk_res)) {
 						echo "<tr>";
 						echo "<td>{$chk_row['nimi']}</td>";
-						echo "<td>{$chk_row['toim_tuoteno']}</td>";
+						echo "<td>{$chk_row['tuoteno']}</td>";
 						echo "<td>{$chk_row['viivakoodi']}</td>";
 						echo "</tr>";
 					}

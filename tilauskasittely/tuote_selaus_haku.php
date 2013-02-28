@@ -490,7 +490,7 @@
 		$query = "	SELECT GROUP_CONCAT(DISTINCT toim_tuoteno_tunnus SEPARATOR ',') toim_tuoteno_tunnukset
 					FROM tuotteen_toimittajat_tuotenumerot
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND toim_tuoteno = '{$toim_tuoteno}'";
+					AND tuoteno = '{$toim_tuoteno}'";
 		$vaih_tuoteno_res = pupe_query($query);
 		$vaih_tuoteno_row = mysql_fetch_assoc($vaih_tuoteno_res);
 

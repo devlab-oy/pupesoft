@@ -111,9 +111,9 @@ echo "<div id='kuva_selite_alert'style='display:none;'>".t("Anna liitteelle seli
 $kassalippaat = hae_kassalippaat();
 $kateisoton_luonteeet = hae_kateisoton_luonteet();
 $alvit = array(
-    0 => t("Valitse alvtaso"),
-    9 => t("Alvtaso") . ': 9',
-    23 => t("Alvtaso") . ': 23',
+    0 => t("Alvtaso") . ': 0',
+    10 => t("Alvtaso") . ': 10',
+    14 => t("Alvtaso") . ': 14',
     24 => t("Alvtaso") . ': 24',
 );
 
@@ -198,13 +198,13 @@ function tee_kateisotto($kassalipas, $request_params) {
             $alv_maara = $kateisotto_rivi['summa'] - $alviton_summa;
             
             //tehdään summalle tiliöinti
-            tee_tiliointi($lasku_tunnus, $kassalipas, $kateisotto_rivi['summa'], '');
+            tee_tiliointi($lasku_tunnus, $kassalipas, -1*$kateisotto_rivi['summa'], '');
             
             //tehdään alvittoman summan tiliöinti
-            tee_tiliointi($lasku_tunnus, $kassalipas, -1*$alviton_summa, $kateisotto_rivi['kateisoton_luonne']);
+            tee_tiliointi($lasku_tunnus, $kassalipas, $alviton_summa, $kateisotto_rivi['kateisoton_luonne']);
             
             //tehdään alv tiliöinti
-            tee_tiliointi($lasku_tunnus, $kassalipas, -1*$alv_maara, '', $kateisotto_rivi['alv']);
+            tee_tiliointi($lasku_tunnus, $kassalipas, $alv_maara, '', $kateisotto_rivi['alv']);
         }
         else {
             tee_tiliointi($lasku_tunnus, $kassalipas, $kateisotto_rivi['summa'], $kateisotto_rivi['kateisoton_luonne']);

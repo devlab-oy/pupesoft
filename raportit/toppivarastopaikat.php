@@ -1,9 +1,9 @@
 <?php
 
 // Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
-ini_set('zlib.output_compression', 0);
-ini_set('implicit_flush', 1);
-ob_implicit_flush(1);
+//ini_set('zlib.output_compression', 0);
+//ini_set('implicit_flush', 1);
+//ob_implicit_flush(1);
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
@@ -36,7 +36,6 @@ ini_set("memory_limit", "2G");
         return saako_submit;
     }
 </script>
-
 <?php
 
 if ($tee == 'lataa_tiedosto') {
@@ -45,6 +44,9 @@ if ($tee == 'lataa_tiedosto') {
 		readfile($filepath);
 		unlink($filepath);
 	}
+    else {
+        echo "<font class='error'>".t("Tiedostoa ei ole olemassa")."</font>";
+    }
 	exit;
 }
 
@@ -566,3 +568,5 @@ function right_aling_numbers($header, $solu, $force_to_string) {
 }
 
 require ("inc/footer.inc");
+
+?>

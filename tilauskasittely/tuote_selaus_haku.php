@@ -487,14 +487,14 @@
 		$toim_tuoteno = mysql_real_escape_string(trim($toim_tuoteno));
 
 		// Katsotaan löytyykö tuotenumero toimittajan vaihtoehtoisista tuotenumeroista
-		$query = "	SELECT GROUP_CONCAT(DISTINCT toim_tuoteno SEPARATOR ',') vaihtoehtoinen_tuoteno
+		$query = "	SELECT GROUP_CONCAT(DISTINCT toim_tuoteno_tunnus SEPARATOR ',') toim_tuoteno_tunnukset
 					FROM tuotteen_toimittajat_tuotenumerot
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND vaihtoehtoinen_tuoteno = '{$toim_tuoteno}'";
+					AND toim_tuoteno = '{$toim_tuoteno}'";
 		$vaih_tuoteno_res = pupe_query($query);
 		$vaih_tuoteno_row = mysql_fetch_assoc($vaih_tuoteno_res);
 
-		$vaihtoehtoinen_tuoteno_lisa = $vaih_tuoteno_row['vaihtoehtoinen_tuoteno'] != '' ? " OR toim_tuoteno IN ('{$vaih_tuoteno_row['vaihtoehtoinen_tuoteno']}')" : "";
+		$vaihtoehtoinen_tuoteno_lisa = $vaih_tuoteno_row['toim_tuoteno_tunnukset'] != '' ? " OR tunnus IN ('{$vaih_tuoteno_row['toim_tuoteno_tunnukset']}')" : "";
 
 		//Otetaan konserniyhtiöt hanskaan
 		$query	= "	SELECT DISTINCT tuoteno

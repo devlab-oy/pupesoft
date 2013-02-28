@@ -101,10 +101,10 @@
 			if (mysql_num_rows($result) == 0) {
 				$query = "	SELECT tuote.tuoteno
 							FROM tuotteen_toimittajat_tuotenumerot AS ttt
-							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.toim_tuoteno = ttt.toim_tuoteno AND tt.liitostunnus = ttt.liitostunnus)
+							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
 							JOIN tuote ON (tuote.yhtio = tt.yhtio AND tuote.tuoteno = tt.tuoteno)
 							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
-							AND (ttt.vaihtoehtoinen_tuoteno = '{$tuoteno}' or ttt.viivakoodi = '{$tuoteno}')
+							AND (ttt.toim_tuoteno = '{$tuoteno}' or ttt.viivakoodi = '{$tuoteno}')
 							AND (tuote.status NOT IN ('P','X') OR (SELECT SUM(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0) > 0)";
 				$chk_res = pupe_query($query);
 
@@ -744,16 +744,15 @@
 				foreach ($ttrow as $tt_rivi) {
 					$query = "	SELECT ttt.*, TRIM(CONCAT(toimi.nimi, ' ', toimi.nimitark)) AS nimi
 								FROM tuotteen_toimittajat_tuotenumerot AS ttt
-								JOIN toimi ON (toimi.yhtio = ttt.yhtio AND toimi.tunnus = ttt.liitostunnus)
-								WHERE ttt.yhtio = '{$kukarow['yhtio']}'
-								AND ttt.liitostunnus = '{$tt_rivi['liitostunnus']}'
-								AND ttt.toim_tuoteno = '{$tt_rivi['toim_tuoteno']}'";
+								JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus AND tt.toim_tuoteno = '{$tt_rivi['toim_tuoteno']}')
+								JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
+								WHERE ttt.yhtio = '{$kukarow['yhtio']}'";
 					$chk_res = pupe_query($query);
 
 					while ($chk_row = mysql_fetch_assoc($chk_res)) {
 						echo "<tr>";
 						echo "<td>{$chk_row['nimi']}</td>";
-						echo "<td>{$chk_row['vaihtoehtoinen_tuoteno']}</td>";
+						echo "<td>{$chk_row['toim_tuoteno']}</td>";
 						echo "<td>{$chk_row['viivakoodi']}</td>";
 						echo "</tr>";
 					}

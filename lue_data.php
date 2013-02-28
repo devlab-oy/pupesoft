@@ -1186,7 +1186,7 @@ if ($kasitellaan_tiedosto) {
 
 						if ((int) $tlength[$table_mysql.".".$otsikko] > 0 and strlen($taulunrivit[$taulu][$eriviindex][$r]) > $tlength[$table_mysql.".".$otsikko]
 							and !($table_mysql == "tuotepaikat"  and $otsikko == "OLETUS"  and $taulunrivit[$taulu][$eriviindex][$r] == 'XVAIHDA')
-							and !($table_mysql == "asiakashinta" and $otsikko == 'ASIAKAS' and $asiakkaanvalinta == '2')) {
+							and !($table_mysql == "asiakashinta" and $otsikko == 'ASIAKAS' and $asiakkaanvalinta > 1)) {
 
 							lue_data_echo(t("Virhe rivill‰").": $rivilaskuri <font class='error'>".t("VIRHE").": $otsikko ".t("kent‰ss‰ on liian pitk‰ tieto")."!</font> {$taulunrivit[$taulu][$eriviindex][$r]}: ".strlen($taulunrivit[$taulu][$eriviindex][$r])." > ".$tlength[$table_mysql.".".$otsikko]."!<br>");
 							$hylkaa++; // ei p‰ivitet‰ t‰t‰ rivi‰
@@ -1403,21 +1403,41 @@ if ($kasitellaan_tiedosto) {
 								$chryhma = $taulunrivit[$taulu][$eriviindex][$r];
 							}
 
-							// Asiakas sarakkaassa on tunnus
-							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == '1' and $taulunrivit[$taulu][$eriviindex][$r] != "") {
+							// Asiakas sarakkeessa on tunnus
+							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == 1 and $taulunrivit[$taulu][$eriviindex][$r] != "") {
 								$chasiakas = $taulunrivit[$taulu][$eriviindex][$r];
 							}
-
-							// Asiakas sarakkaassa on toim_ovttunnus (ytunnus pit‰‰ olla setattu) (t‰m‰ on oletus er‰ajossa)
-							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta != '1' and $taulunrivit[$taulu][$eriviindex][$r] != "") {
+							// Asiakas sarakkeessa on toim_ovttunnus (ytunnus pit‰‰ olla setattu) (t‰m‰ on oletus er‰ajossa)
+							elseif ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == 2 and $taulunrivit[$taulu][$eriviindex][$r] != "") {
 								$etsitunnus = " SELECT tunnus
-												FROM asiakas
-												USE INDEX (toim_ovttunnus_index)
+												FROM asiakas USE INDEX (toim_ovttunnus_index)
 												WHERE yhtio = '$kukarow[yhtio]'
 												AND toim_ovttunnus = '{$taulunrivit[$taulu][$eriviindex][$r]}'
 												AND toim_ovttunnus != ''
 												AND ytunnus != ''
 												AND ytunnus = '".$taulunrivit[$taulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$taulu])]."'";
+								$etsiresult = pupe_query($etsitunnus);
+
+								if (mysql_num_rows($etsiresult) == 1) {
+									$etsirow = mysql_fetch_assoc($etsiresult);
+
+									// Vaihdetaan asiakas sarakkeeseen tunnus sek‰ ytunnus tulee nollata (koska ei saa olla molempia)
+									$chasiakas = $etsirow['tunnus'];
+									$chytunnus = "";
+									$taulunrivit[$taulu][$eriviindex][$r] = $etsirow['tunnus'];
+									$taulunrivit[$taulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$taulu])] = "";
+								}
+								else {
+									$chasiakas = -1;
+								}
+							}
+							// Asiakas sarakkeessa on asiakasnumero
+							elseif ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == 3 and $taulunrivit[$taulu][$eriviindex][$r] != "") {
+								$etsitunnus = " SELECT tunnus
+												FROM asiakas USE INDEX (asno_index)
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND asiakasnro = '{$taulunrivit[$taulu][$eriviindex][$r]}'
+												AND asiakasnro != ''";
 								$etsiresult = pupe_query($etsitunnus);
 
 								if (mysql_num_rows($etsiresult) == 1) {
@@ -2185,6 +2205,7 @@ if (!$cli and !isset($api_kentat)) {
 					<td><select name='asiakkaanvalinta'>
 					<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
 					<option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
+					<option value='3'>".t("Asiakas-sarakkeessa asiakkaan asiakasnumero")."</option>
 					</select></td>
 			</tr>";
 	}

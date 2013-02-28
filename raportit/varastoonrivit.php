@@ -96,11 +96,11 @@
 			$query = "	SELECT IF(kuka.nimi IS NULL,tapahtuma.laatija, kuka.nimi) kuka,
 						tilausrivi.uusiotunnus keikka,
 						LEFT(tapahtuma.laadittu,10) laadittu,
-						SUM(tapahtuma.kpl) yksikot,
-						COUNT(tapahtuma.tunnus) rivit
+						SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
+						COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
 						FROM tapahtuma
 						JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
-						JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.suoraan_laskutukseen = '' AND tl.ohita_kerays = '')
+						LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
 						LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
 						WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 						AND tapahtuma.laji = 'tulo'
@@ -217,14 +217,14 @@
 			}
 
 			$query = "	SELECT {$select}
-						SUM(tapahtuma.kpl) yksikot,
-						COUNT(tapahtuma.tunnus) rivit
+						SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
+						COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
 						FROM tapahtuma
 						JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
-						JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.suoraan_laskutukseen = '' AND tl.ohita_kerays = '')
+						LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
 						WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 						AND tapahtuma.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-						AND tapahtuma.laadittu <= '{$vvl}-{$kkl}-{$ppl} 00:00:00'
+						AND tapahtuma.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
 						AND tapahtuma.laji = 'tulo'
 						GROUP BY 1
 						ORDER BY 1";
@@ -254,7 +254,7 @@
 
 					$wherelisa = "	AND WEEK(tapahtuma.laadittu) = '{$ressu['pvm']}'
 									AND tapahtuma.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-									AND tapahtuma.laadittu <= '{$vvl}-{$kkl}-{$ppl} 00:00:00'";
+									AND tapahtuma.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'";
 				}
 				else {
 
@@ -265,7 +265,7 @@
 
 					$wherelisa = "	AND MONTH(tapahtuma.laadittu) = '{$ressu['pvm']}'
 									AND tapahtuma.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-									AND tapahtuma.laadittu <= '{$vvl}-{$kkl}-{$ppl} 00:00:00'";
+									AND tapahtuma.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'";
 				}
 
 				echo "<td align='right'>{$ressu['yksikot']}</td>";
@@ -275,11 +275,11 @@
 
 				$query = "	SELECT IF(kuka.nimi IS NULL,tapahtuma.laatija, kuka.nimi) kuka,
 							IF(kuka.kuka IS NULL,tapahtuma.laatija, kuka.kuka) kuka_tunnus,
-							SUM(tapahtuma.kpl) yksikot,
-							COUNT(tapahtuma.tunnus) rivit
+							SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
+							COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
 							FROM tapahtuma
 							JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
-							JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.suoraan_laskutukseen = '' AND tl.ohita_kerays = '')
+							LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
 							LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
 							WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 							AND tapahtuma.laji = 'tulo'
@@ -306,11 +306,11 @@
 
 					$query = "	SELECT tilausrivi.uusiotunnus keikka,
 								LEFT(tapahtuma.laadittu,10) laadittu,
-								SUM(tapahtuma.kpl) yksikot,
-								COUNT(tapahtuma.tunnus) rivit
+								SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
+								COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
 								FROM tapahtuma
 								JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
-								JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.suoraan_laskutukseen = '' AND tl.ohita_kerays = '')
+								LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
 								LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
 								WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 								AND tapahtuma.laji = 'tulo'

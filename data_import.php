@@ -374,8 +374,9 @@
 		</tr>";
 		echo "<tr><th>".t("Asiakkaan valinta").":</th>
 				<td><select name='asiakkaanvalinta'>
-				<option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
-				<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
+					<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
+					<option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
+					<option value='3'>".t("Asiakas-sarakkeessa asiakkaan asiakasnumero")."</option>
 				</select></td>
 		</tr>";
 	}

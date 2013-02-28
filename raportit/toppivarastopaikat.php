@@ -233,6 +233,9 @@ if ($tee != '') {
 
 			nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl, 'right_aling_numbers');
 		}
+        else {
+            echo "<font class='error'>".t("Yhtään keräystä ei löytynyt")."</font>";
+        }
 	}
 	else {
 		list($rivit, $saldolliset) = hae_rivit("TUOTE", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $kaikki_lisa_kentat);
@@ -242,9 +245,14 @@ if ($tee != '') {
 
 			nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl, 'right_aling_numbers');
 		}
+        else {
+            echo "<font class='error'>".t("Yhtään keräystä ei löytynyt")."</font>";
+        }
 	}
 
-	echo_tulosta_inventointilista($saldolliset);
+    if(count($saldolliset) > 0) {
+        echo_tulosta_inventointilista($saldolliset);
+    }
 }
 
 echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso, $toppi, $summaa_varastopaikalle, $kaikki_varastot, $kaikki_keraysvyohykkeet, $kaikki_lisa_kentat);
@@ -288,16 +296,25 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 		$varasto_join = " AND varastopaikat.tunnus IN (".implode(",", $varastot).") ";
 	}
 
-	$keraysvyohyke_join = "";
     $keraysvyohyke_select = "";
+    $keraysvyohyke_join = "";
+    $varaston_hyllypaikat_join = "";
 	if (!empty($keraysvyohykkeet)) {
         $keraysvyohyke_select = "keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,";
-        $keraysvyohyke_join = " LEFT JOIN keraysvyohyke
-                                ON (
-                                    keraysvyohyke.yhtio = varastopaikat.yhtio
-                                    AND keraysvyohyke.varasto = varastopaikat.tunnus
-                                    AND keraysvyohyke.tunnus IN (".implode(",", $keraysvyohykkeet).") 
-                                )";
+        $varaston_hyllypaikat_join = "  LEFT JOIN varaston_hyllypaikat AS vh
+                                        ON (
+                                            vh.yhtio = tilausrivi.yhtio
+                                            AND vh.hyllyalue = tilausrivi.hyllyalue
+                                            AND vh.hyllynro = tilausrivi.hyllynro
+                                            AND vh.hyllytaso = tilausrivi.hyllytaso
+                                            AND vh.hyllyvali = tilausrivi.hyllyvali
+                                            AND vh.keraysvyohyke IN (".implode(",", $keraysvyohykkeet).")
+                                        )";
+        $keraysvyohyke_join = "    LEFT JOIN keraysvyohyke
+                                    ON (
+                                        keraysvyohyke.yhtio = vh.yhtio
+                                        AND keraysvyohyke.tunnus = vh.keraysvyohyke
+                                    )";
 	}
 
 	if ($tyyppi == "TUOTE") {
@@ -353,6 +370,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 					AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
 					{$varasto_join}
 				)
+                {$varaston_hyllypaikat_join}
 				{$keraysvyohyke_join}
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				AND tilausrivi.tyyppi = 'L'
@@ -373,14 +391,20 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 
 	$rows = array();
 	$saldolliset = array();
-	$progress_bar = new ProgressBar(t("Haetaan tiedot"));
-	$progress_bar->initialize(mysql_num_rows($result));
+    if(mysql_num_rows($result) > 0) {
+        $progress_bar = new ProgressBar(t("Haetaan tiedot"));
+        $progress_bar->initialize(mysql_num_rows($result));
+    }
 
 	while ($row = mysql_fetch_assoc($result)) {
-		$progress_bar->increase();
+        if(isset($progress_bar)) {
+            $progress_bar->increase();
+        }
 
 		if ($tyyppi == 'TUOTE') {
-			$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys');
+            if(!empty($lisa_kentat['nimitys']['checked'])) {
+                $row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys');
+            }
 			if (isset($row['status']) and array_key_exists($row['status'], $tuote_statukset)) {
 				$row['status'] = $tuote_statukset[$row['status']];
 			}
@@ -562,7 +586,7 @@ function nayta_ruudulla(&$rivit, $header_values, $force_to_string, $ppa, $kka, $
 //callback function table td:lle
 function right_aling_numbers($header, $solu, $force_to_string) {
     if (!stristr($header, 'tunnus')) {
-        if (is_numeric($solu)) {
+        if (is_numeric($solu) and !in_array($header, $force_to_string)) {
             $align = "align='right'";
         }
         else {

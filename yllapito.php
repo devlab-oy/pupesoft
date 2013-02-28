@@ -1103,7 +1103,7 @@
 
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
-			if (isset($liitostunnus)) echo "&liitostunnus=$liitostunnus";
+			if (isset($liitostunnus)) echo "&liitostunnus={$liitostunnus}";
 			echo "' method = 'post'>
 					<input type = 'hidden' name = 'uusi' value = '1'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
@@ -1648,8 +1648,7 @@
 		echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
 
 		if ($toim == "tuotteen_toimittajat_tuotenumerot") {
-			if (isset($liitostunnus)) echo "<input type = 'hidden' name = 'liitostunnus' value = '{$liitostunnus}' />";
-			if (isset($lukitse_avaimeen)) echo "<input type = 'hidden' name = 'toim_tuoteno' value = '{$lukitse_avaimeen}' />";
+			if (isset($lukitse_avaimeen)) echo "<input type = 'hidden' name = 'toim_tuoteno_tunnus' value = '{$lukitse_avaimeen}' />";
 		}
 
 		if (($toim == "asiakas" or $toim == "yhtio") and $uusi != 1) {
@@ -1786,9 +1785,9 @@
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'tuotteen_toimittajat') {
 			if (($toikrow = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat_tuotenumerot%", "", "OK")) !== FALSE) {
-				$lukitse_avaimeen = urlencode($toim_tuoteno);
+				$lukitse_avaimeen = urlencode($toim_tuoteno_tunnus);
 
-				echo "<iframe id='tuotteen_toimittajat_tuotenumerot_iframe' name='tuotteen_toimittajat_tuotenumerot_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@$liitostunnus&haku[2]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&liitostunnus=$liitostunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "<iframe id='tuotteen_toimittajat_tuotenumerot_iframe' name='tuotteen_toimittajat_tuotenumerot_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
 
@@ -1915,7 +1914,7 @@
 	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit"  and $uusilukko == "" and $from == "") {
 		echo "<br>
 				<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
-				if (isset($liitostunnus)) echo "&liitostunnus=$liitostunnus";
+				if (isset($liitostunnus)) echo "&liitostunnus={$liitostunnus}";
 				echo "' method = 'post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
 				<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>

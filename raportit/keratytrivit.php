@@ -160,7 +160,7 @@
 						kuka.keraajanro,
 						SEC_TO_TIME(UNIX_TIMESTAMP(kerattyaika) - UNIX_TIMESTAMP(lahetepvm)) aika,
 						SUM(IF(tilausrivi.var  = 'P', 1, 0)) puutteet,
-						SUM(IF(tilausrivi.var != 'P' AND tilausrivi.tyyppi = 'L', 1, 0)) kappaleet,
+						SUM(IF(tilausrivi.var != 'P' AND tilausrivi.tyyppi in ('L','V'), 1, 0)) kappaleet,
 						SUM(IF(tilausrivi.var != 'P' AND tilausrivi.tyyppi = 'G', 1, 0)) siirrot,
 						ROUND(SUM(IF(tilausrivi.var != 'P', tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl, 0)), 2) kerkappaleet,
 						ROUND(SUM(IF(tilausrivi.var != 'P', (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) * tuote.tuotemassa, 0)), 2) kerkilot,
@@ -178,7 +178,7 @@
 						AND tilausrivi.kerattyaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
 						AND tilausrivi.kerattyaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
 						AND tilausrivi.var IN ('','H','P')
-						AND tilausrivi.tyyppi IN ('L','G')
+						AND tilausrivi.tyyppi IN ('L','G','V')
 						AND tilausrivi.keratty != ''
 						{$lisa}
 						GROUP BY 1,2,3,4,5,6,7
@@ -345,9 +345,9 @@
 				$query = "	SELECT {$selecti}
 							CONCAT(kuka.nimi, ' (', tilausrivi.keratty, ')') keratty,
 							SUM(IF(tilausrivi.var  = 'P', 1, 0)) puutteet,
-							SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) > 0, 1, 0)) kappaleet,
-							SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'L' and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) < 0, 1, 0)) kappaleet_palautus,
-							SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi='G', 1, 0)) siirrot,
+							SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi in ('L','V') and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) > 0, 1, 0)) kappaleet,
+							SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi in ('L','V') and (tilausrivi.jt + tilausrivi.varattu + tilausrivi.kpl) < 0, 1, 0)) kappaleet_palautus,
+							SUM(IF(tilausrivi.var != 'P' and tilausrivi.tyyppi = 'G', 1, 0)) siirrot,
 							COUNT(*) yht
 							FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.eilahetetta = '' AND lasku.sisainen = '')
@@ -362,7 +362,7 @@
 							AND tilausrivi.kerattyaika >= '{$vva_x}-{$kka}-{$ppa} 00:00:00'
 							AND tilausrivi.kerattyaika <= '{$vvl_x}-{$kkl}-{$ppl} 23:59:59'
 							AND tilausrivi.var IN ('','H','P')
-							AND tilausrivi.tyyppi IN ('L','G')
+							AND tilausrivi.tyyppi IN ('L','G','V')
 							{$lisa}
 							GROUP BY 1,2
 							ORDER BY 1";

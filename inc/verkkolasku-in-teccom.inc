@@ -49,7 +49,7 @@
 	if (strtoupper($laskuttajan_toimittajanumero) == "ELRING") {
 		$laskuttajan_toimittajanumero = "123312";
 	}
-	elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH") {
+	elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH" OR strtoupper($laskuttajan_toimittajanumero) == "AA_FI") {
 		$laskuttajan_toimittajanumero = "123067";
 
 		// Tarkistusnumero
@@ -68,6 +68,9 @@
 	}
 	elseif ($laskuttajan_toimittajanumero == "112") {
 		$laskuttajan_toimittajanumero = "123442";
+	}
+	elseif ($laskuttajan_toimittajanumero == "123035") {
+		$laskuttajan_toimittajanumero = "123036";
 	}
 
 	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount)  and $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount != 0) {
@@ -291,7 +294,7 @@
 							$charge_description = strtolower(trim($node_x->AllowOrChargeDescription));
 							$charge_code = strtolower(trim($node_x->AllowOrChargeCode));
 
-							if ($charge_code == "zcwr" or $charge_code == 'zfwa' or $charge_description == "core value") {
+							if ($charge_code == "zcwr" or $charge_code == 'zfwa' or strpos($charge_description, "core value") !== FALSE) {
 								$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node_x->Amount);
 							}
 						}
@@ -349,7 +352,8 @@
 						$attribute = $node->AllowOrChargeIdentifier->attributes()->Value;
 
 						// ei oteta alennuksia huomioon Klokkerholm-keississä
-						if (strtolower($attribute) == "allow" and $laskuttajan_toimittajanumero != "123418") {
+						// eikä ZF-keississä (123007)
+						if (strtolower($attribute) == "allow" and $laskuttajan_toimittajanumero != "123418" and $laskuttajan_toimittajanumero != "123007") {
 
 							if (!isset($rtuoteno[$i]['ale1'])) {
 
@@ -412,7 +416,7 @@
 
 							if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
 								($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
-								($laskuttajan_toimittajanumero == "123084" and $charge_description == "core value")) {
+								(in_array($laskuttajan_toimittajanumero, array("123084","123007")) and strpos($charge_description, "core value") !== FALSE)) {
 
 								// Jos rivillä tulee runkoveloitus, niin pitää tehdä rungosta oma lapsirivi
 								$query = "	SELECT tuote.tuoteno, tuote.nimitys
@@ -460,7 +464,7 @@
 									$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
 								}
 							}
-							elseif ($charge_description == 'freight costs' or $charge_code == 'zfwa') {
+							elseif ($charge_description == 'freight costs' or $charge_code == 'zfwa' or $charge_code == 'freightcharges') {
 
 								/*
 								 * Rahtikulu
@@ -474,7 +478,12 @@
 								$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);
 								$osto_rivi_kulu_alv = $laskun_alv;
 
-								if ($charge_description == 'freight costs') {
+								// ZF -keississä otetaan rahti pois rivihinnasta.
+								if ($charge_code == 'freightcharges') {
+									$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node->Amount);
+								}
+
+								if ($charge_description == 'freight costs' or $charge_code == 'freightcharges') {
 									$ei_oteta_kulua_pois = true;
 								}
 							}
@@ -547,5 +556,3 @@
 
 	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 	ini_set("display_errors", 0);
-
-?>

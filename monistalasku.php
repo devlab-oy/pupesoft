@@ -291,10 +291,13 @@ if ($tee == "ETSILASKU") {
 				<td><input type='text' name='vvl' value='{$vvl}' size='5'></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr></form></table><br>";
 	}
-
+	
+	$limit = "LIMIT 100";
+	
 	if ($tunnukset != '') {
 		$where 	= " tila = 'U' and lasku.tunnus in ({$tunnukset}) ";
 		$use 	= " ";
+		$limit = "";
 	}
 	elseif ($laskunro > 0) {
 		$where 	= " tila = 'U' and laskunro = '{$laskunro}' ";
@@ -391,7 +394,7 @@ if ($tee == "ETSILASKU") {
 				WHERE {$where}
 				AND yhtio in ('".implode("','", $yhtiot)."')
 				ORDER BY tapvm, lasku.tunnus DESC
-				LIMIT 100";
+				$limit";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0) {

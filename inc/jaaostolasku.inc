@@ -73,7 +73,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 					AND kohdistettu = 'X'";
 		$check_res = pupe_query($query);
 
-		// katsotaan onko alkuper‰inen lasku liitetty kokonaan keikkaan, jos on voidaan liitt‰‰ molemmat laskut uudestaan
+		// katsotaan onko alkuper‰inen lasku liitetty kokonaan saapumiseen, jos on voidaan liitt‰‰ molemmat laskut uudestaan
 		if ($jaettavalaskurow['summa'] == $keikkarow['summa']) {
 			$keikat[] = $keikkarow['laskunro'];
 

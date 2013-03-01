@@ -476,11 +476,14 @@
 	}
 
 	// Muutetaanko jonkun muun oikeuksia??
-	if (isset($selkuka) and $selkuka != '') {
-		$query = "SELECT * FROM kuka WHERE tunnus = '{$selkuka}'";
+	if ($selkuka == "UUSI" or $selkuka == "KOPSAAUUSI") {
+		$query = "SELECT * FROM kuka WHERE tunnus = -1";
+	}
+	elseif (strtoupper($toim) == 'EXTRANET') {
+		$query = "SELECT * FROM kuka WHERE tunnus = '{$selkuka}' and extranet != ''";
 	}
 	else {
-		$query = "SELECT * FROM kuka WHERE tunnus = '{$kukarow['tunnus']}'";
+		$query = "SELECT * FROM kuka WHERE tunnus = '{$selkuka}' and extranet = ''";
 	}
 
 	$result = pupe_query($query);

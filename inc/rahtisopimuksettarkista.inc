@@ -3,7 +3,7 @@
 if(!function_exists("rahtisopimuksettarkista")) {
 	function rahtisopimuksettarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto;
-		
+
 		static $chytunnus;
 		if (mysql_field_name($result, $i) == "rahtisopimus") {
 			if (trim($t[$i]) == '') {
@@ -25,7 +25,7 @@ if(!function_exists("rahtisopimuksettarkista")) {
 
 					$ytunnus 		= $chytunnus;
 					$kutsuja 		= "yllapito.php";
-					$ulos 			= "";				
+					$ulos 			= "";
 					require("asiakashaku.inc");
 
 					if ($ulos != "" and $ytunnus == "") {
@@ -35,14 +35,14 @@ if(!function_exists("rahtisopimuksettarkista")) {
 					elseif ($ytunnus != "") {
 						$t[$i]  = $ytunnus;
 						$virhe[$i] = t("Asiakas löytyi!");
-					}	
+					}
 					else {
-						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");	
-					}	
+						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
+					}
 				}
-			}	
+			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "asiakas") {
 			$chastunn = $t[$i];
 
@@ -51,30 +51,30 @@ if(!function_exists("rahtisopimuksettarkista")) {
 							FROM asiakas
 							WHERE yhtio='$kukarow[yhtio]' and tunnus='$chastunn'";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				if (mysql_num_rows($result) != 1) {
-				
+
 					$ytunnus 		= $chastunn;
 					$kutsuja 		= "yllapito.php";
-					$ulos2 			= "";				
+					$ulos2 			= "";
 					require("asiakashaku.inc");
 
 					if ($ulos != "" and $ytunnus == "") {
 						$alasveto[$i] = "<select name='t[$i]'>".$ulos2."</select>";
 						$virhe[$i]    = t("Valitse asiakas!");
 					}
-					elseif ($ytunnus != "") {
+					elseif ($ytunnus != "" and $asiakasid > 0) {
 						$t[$i]  = $asiakasid;
 						$virhe[$i] = t("Asiakas löytyi!");
-					}	
+					}
 					else {
-						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");	
+						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
 					}
 				}
-			}	
+			}
 		}
 	}
 }
 
-	
+
 ?>

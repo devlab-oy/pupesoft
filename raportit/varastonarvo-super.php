@@ -568,7 +568,6 @@
 					$where_lisa)
 					ORDER BY $order_lisa";
 		$result = pupe_query($query);
-
 		$elements = mysql_num_rows($result);
 
 		if (!$php_cli) {
@@ -861,6 +860,9 @@
 			 			WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 			 			and tapahtuma.tuoteno = '{$row['tuoteno']}'
 			 			and tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
+						and tapahtuma.hyllyalue != ''
+						and tapahtuma.hyllynro != ''
+						and tapahtuma.laji != 'Ep‰kurantti'
 						$summaus_lisa
 						GROUP BY tapahtuma.laadittu
 						ORDER BY tapahtuma.laadittu DESC, tapahtuma.tunnus desc";
@@ -924,7 +926,7 @@
 					$muutoskpl -= $muutosrow["muutoskpl"];
 
 					// arvo historiassa: lasketaan nykyinen arvo - muutosarvo
-					$muutoshinta -= $muutosrow["muutoshinta"];
+					$muutoshinta  -= $muutosrow["muutoshinta"];
 					$bmuutoshinta -= $muutosrow["bmuutoshinta"];
 
 					$edlaadittu = $muutosrow['laadittu'];
@@ -1020,7 +1022,6 @@
 				// summataan varastonarvoa
 				$varvo   += $muutoshinta;
 				$bvarvo  += $bmuutoshinta;
-				$kehalisa = "";
 
 				if ($variaatiosummaus != "") {
 					$kehasilloin = $row["kehahin_nyt"];		// nykyinen kehahin
@@ -1029,65 +1030,18 @@
 					// sarjanumerollisilla tuotteilla ei ole keskihankintahintaa
 					if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
 						if ($kpl == 0) {
-							$kehasilloin = 0;
+							$kehasilloin  = 0;
 							$bkehasilloin = 0;
-							$kehalisa = "~";
 						}
 						else {
-							$kehasilloin = round($varaston_arvo / $kpl, 6); // lasketaan "kehahin"
+							$kehasilloin  = round($varaston_arvo / $kpl, 6); // lasketaan "kehahin"
 							$bkehasilloin = $kehasilloin;
-							$kehalisa = "~";
 						}
 					}
 					else {
-						// yritet‰‰n kaivaa listaan viel‰ sen hetkinen kehahin jos se halutaan kerran n‰hd‰
-						$kehasilloin = $row["kehahin_nyt"];		// nykyinen kehahin
-						$bkehasilloin = $row["kehahin"];		// brutto kehahin
-
-						// ei suotta haeskella keharia jos ajetaan t‰lle p‰iv‰lle
-						if (date("Y-m-d") != "$vv-$kk-$pp") {
-							// katotaan mik‰ oli tuotteen viimeisin hinta annettuna p‰iv‰n‰ tai sitten sit‰ ennen
-							$query = "	SELECT hinta
-										FROM tapahtuma use index (yhtio_tuote_laadittu)
-										WHERE yhtio = '$kukarow[yhtio]'
-										and tuoteno = '{$row['tuoteno']}'
-										and laadittu <= '$vv-$kk-$pp 23:59:59'
-										and laji NOT IN ('poistettupaikka','uusipaikka')
-										ORDER BY laadittu desc, tunnus desc
-										LIMIT 1";
-							$ares = pupe_query($query);
-
-							if (mysql_num_rows($ares) == 1) {
-								// lˆydettiin keskihankintahinta tapahtumista k‰ytet‰‰n
-								$arow = mysql_fetch_assoc($ares);
-								$kehasilloin  = $arow["hinta"];
-								$bkehasilloin = $arow["hinta"];
-								$kehalisa = "";
-							}
-							else {
-								// ei lˆydetty alasp‰in, kokeillaan kattoo l‰hin hinta ylˆsp‰in
-								$query = "	SELECT hinta
-											FROM tapahtuma use index (yhtio_tuote_laadittu)
-											WHERE yhtio = '$kukarow[yhtio]'
-											and tuoteno = '{$row['tuoteno']}'
-											and laadittu > '$vv-$kk-$pp 23:59:59'
-											and laji NOT IN ('poistettupaikka','uusipaikka')
-											ORDER BY laadittu, tunnus
-											LIMIT 1";
-								$ares = pupe_query($query);
-
-								if (mysql_num_rows($ares) == 1) {
-									// lˆydettiin keskihankintahinta tapahtumista k‰ytet‰‰n
-									$arow = mysql_fetch_assoc($ares);
-									$kehasilloin  = $arow["hinta"];
-									$bkehasilloin = $arow["hinta"];
-									$kehalisa = "";
-								}
-								else {
-									$kehalisa = "~";
-								}
-							}
-						}
+						// arvioidaan sen hetkinen kehahin jos se halutaan kerran n‰hd‰
+						$kehasilloin  = round($muutoshinta / $muutoskpl, 6);
+						$bkehasilloin = round($bmuutoshinta / $muutoskpl, 6);
 					}
 
 					// jos summaustaso on per paikka, otetaan myynti ja kulutus vain silt‰ paikalta
@@ -1246,8 +1200,6 @@
 
 					$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row["vihapvm"]));
 					$excelsarake++;
-
-					$worksheet->writeString($excelrivi, $excelsarake, $kehalisa);
 				}
 
 				$excelrivi++;

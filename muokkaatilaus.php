@@ -1205,14 +1205,10 @@
 		}
 		elseif ($toim == 'OSTO') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext,
-							(SELECT count(*)
-							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)
-							WHERE aputilausrivi.yhtio = lasku.yhtio
-							AND aputilausrivi.otunnus = lasku.tunnus
-							AND aputilausrivi.uusiotunnus > 0
-							AND aputilausrivi.kpl <> 0
-							AND aputilausrivi.tyyppi = 'O') varastokpl
+						sum(if(tilausrivi.kpl is not null and tilausrivi.kpl != 0, 1, 0)) varastokpl,
+						sum(if(tilausrivi.jaksotettu is not null and tilausrivi.jaksotettu != 0, 1, 0)) vahvistettukpl
 						FROM lasku use index (tila_index)
+						LEFT JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi = 'O'
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
@@ -1220,20 +1216,17 @@
 						and lasku.alatila		= ''
 						and lasku.tilaustyyppi != 'O'
 						$haku
+						GROUP BY 1,2,3,4,5,6,7,8
 						ORDER by kuka_ext, lasku.luontiaika desc
 						$rajaus";
-			$miinus = 5;
+			$miinus = 6;
 		}
 		elseif ($toim == 'OSTOSUPER') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext,
-							(SELECT count(*)
-							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)
-							WHERE aputilausrivi.yhtio = lasku.yhtio
-							AND aputilausrivi.otunnus = lasku.tunnus
-							AND aputilausrivi.uusiotunnus > 0
-							AND aputilausrivi.kpl <> 0
-							AND aputilausrivi.tyyppi = 'O') varastokpl
+						sum(if(tilausrivi.kpl is not null and tilausrivi.kpl != 0, 1, 0)) varastokpl,
+						sum(if(tilausrivi.jaksotettu is not null and tilausrivi.jaksotettu != 0, 1, 0)) vahvistettukpl
 						FROM lasku use index (tila_index)
+						LEFT JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi = 'O'
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
@@ -1241,19 +1234,13 @@
 						and lasku.alatila in ('A','')
 						and lasku.tilaustyyppi != 'O'
 						$haku
+						GROUP BY 1,2,3,4,5,6,7,8
 						ORDER by kuka_ext, lasku.luontiaika desc
 						$rajaus";
-			$miinus = 5;
+			$miinus = 6;
 		}
 		elseif ($toim == 'HAAMU') {
-			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
-							(SELECT count(*)
-							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)
-							WHERE aputilausrivi.yhtio = lasku.yhtio
-							AND aputilausrivi.otunnus = lasku.tunnus
-							AND aputilausrivi.uusiotunnus > 0
-							AND aputilausrivi.kpl <> 0
-							AND aputilausrivi.tyyppi = 'O') varastokpl
+			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
@@ -1848,11 +1835,14 @@
 							$alatila = "Toimitettu asiakkaalle";
 						}
 
+						$varastotila = "";
+
 						if (isset($row["varastokpl"]) and $row["varastokpl"] > 0) {
-							$varastotila = "<font class='info'><br>".t("Viety osittain varastoon")."</font>";
+							$varastotila .= "<font class='info'><br>".t("Viety osittain varastoon")."</font>";
 						}
-						else {
-							$varastotila = "";
+
+						if (isset($row["vahvistettukpl"]) and $row["vahvistettukpl"] > 0) {
+							$varastotila .= "<font class='info'><br>".t("Toimitusajat vahvistettu")."</font>";
 						}
 
 						echo "<td class='$class' valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila</td>";

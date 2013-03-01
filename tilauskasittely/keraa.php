@@ -1771,12 +1771,12 @@
 
 						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0)
 							or (
-								(in_array($laskurow["keraysvahvistus_lahetys"], array('k','L','M')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','L','M')) and $laskurow["keraysvahvistus_lahetys"] == ''))
+								(in_array($laskurow["keraysvahvistus_lahetys"], array('k','L','M','N','Q','P')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','L','M','N','Q','P')) and $laskurow["keraysvahvistus_lahetys"] == ''))
 								or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "")
 							)
 						) {
 
-							$komento = koontilahete_check($laskurow, $komento);
+							list($komento, $koontilahete, $koontilahete_tilausrivit) = koontilahete_check($laskurow, $komento);
 
 							if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {
 
@@ -1812,7 +1812,8 @@
 									'lahetekpl'					=> $lahetekpl,
 									'kieli' 					=> $kieli,
 									'koontilahete'				=> $koontilahete,
-									);
+									'koontilahete_tilausrivit'	=> $koontilahete_tilausrivit,
+								);
 
 								pupesoft_tulosta_lahete($params);
 
@@ -2014,22 +2015,13 @@
 			echo "</td>";
 			echo "<th>",t("Valitse tilaustyyppi"),":</th><td><select name='tutyyppi' onchange='submit()'>";
 
-			$sela = $selb = $selc = "";
-
-			if ($tutyyppi == "NORMAA") {
-				$sela = "SELECTED";
-			}
-			if ($tutyyppi == "ENNAKK") {
-				$selb = "SELECTED";
-			}
-			if ($tutyyppi == "JTTILA") {
-				$selc = "SELECTED";
-			}
+			$sel = array($tutyyppi => 'selected') + array('NORMAA' => '', 'ENNAKK' => '', 'JTTILA' => '', 'VALMISTUS' => '');
 
 			echo "<option value='KAIKKI'>",t("N‰yt‰ kaikki"),"</option>";
-			echo "<option value='NORMAA' {$sela}>",t("N‰yt‰ normaalitilaukset"),"</option>";
-			echo "<option value='ENNAKK' {$selb}>",t("N‰yt‰ ennakkotilaukset"),"</option>";
-			echo "<option value='JTTILA' {$selc}>",t("N‰yt‰ jt-tilaukset"),"</option>";
+			echo "<option value='NORMAA' {$sel['NORMAA']}>",t("N‰yt‰ normaalitilaukset"),"</option>";
+			echo "<option value='ENNAKK' {$sel['ENNAKK']}>",t("N‰yt‰ ennakkotilaukset"),"</option>";
+			echo "<option value='JTTILA' {$sel['JTTILA']}>",t("N‰yt‰ jt-tilaukset"),"</option>";
+			echo "<option value='VALMISTUS' {$sel['VALMISTUS']}>",t("N‰yt‰ jt-tilaukset valmistuksesta"),"</option>";
 
 			echo "</select></td></tr>";
 
@@ -2113,6 +2105,9 @@
 				elseif ($tutyyppi == "JTTILA") {
 					$haku .= " AND lasku.clearing = 'JT-TILAUS' ";
 				}
+				elseif ($tutyyppi == "VALMISTUS") {
+					$haku .= " AND lasku.sisviesti2 = 'Tehty valmistuksen kautta' ";
+				}
 			}
 
 			if ($jarj != "") {
@@ -2137,7 +2132,9 @@
 							GROUP_CONCAT(DISTINCT lasku.prioriteettinro ORDER BY lasku.prioriteettinro SEPARATOR ', ') AS prioriteetti,
 							GROUP_CONCAT(DISTINCT concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark, CONCAT(\"(\", lasku.ytunnus, \")\")) SEPARATOR '<br />') AS 'asiakas',
 							GROUP_CONCAT(DISTINCT lasku.tunnus ORDER BY lasku.tunnus SEPARATOR ', ') AS 'tunnus',
-							COUNT(DISTINCT tilausrivi.tunnus) AS 'riveja'
+							COUNT(DISTINCT tilausrivi.tunnus) AS 'riveja',
+							kuka.nimi as keraaja_nimi,
+							kuka.keraajanro as keraaja_nro
 							FROM lasku USE INDEX (tila_index)
 							JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (
 								tilausrivi.yhtio = lasku.yhtio AND
@@ -2149,6 +2146,7 @@
 								((tilausrivi.laskutettu = '' AND tilausrivi.laskutettuaika 	= '0000-00-00') OR lasku.mapvm != '0000-00-00'))
 							JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus AND kerayserat.tila = 'K' {$kerayserahaku})
 							JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+							LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.hyvak3)
 							WHERE lasku.{$logistiikka_yhtiolisa}
 							AND lasku.tila = 'L'
 							AND lasku.alatila = 'A'
@@ -2238,6 +2236,12 @@
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='kerayspvm'; document.forms['find'].submit();\">",t("Ker‰ysaika"),"</a><br>
 						<a href='#' onclick=\"getElementById('jarj').value='toimaika'; document.forms['find'].submit();\">",t("Toimitusaika"),"</a></th>";
 
+				echo "	<th valign='top'>
+							<a href='#' onclick=\"getElementById('jarj').value='keraaja_nimi'; document.forms['find'].submit();\">",t("Ker‰‰j‰n nimi"),"</a>
+							<br/>
+							<a href='#' onclick=\"getElementById('jarj').value='keraaja_nro'; document.forms['find'].submit();\">",t("Ker‰‰j‰n numero"),"</a>
+						</th>";
+
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">",t("Toimitustapa"),"</a></th>";
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">",t("Riv"),"</a></th>";
 				echo "<th valign='top'>",t("Ker‰‰"),"</th>";
@@ -2303,6 +2307,7 @@
 						echo "<td valign='top' nowrap align='right'>",tv1dateconv($row["kerayspvm"], "", "LYHYT"),"<br />",tv1dateconv($row["toimaika"], "", "LYHYT"),"</td>";
 					}
 
+					echo "<td valign='top'>{$row['keraaja_nimi']}<br/>{$row['keraaja_nro']}</td>";
 					echo "<td valign='top'>{$row['toimitustapa']}</td>";
 					echo "<td valign='top'>{$row['riveja']}</td>";
 
@@ -3086,7 +3091,8 @@
 					if ($lp_varasto == 0) {
 						$query = "	SELECT *
 									from varastopaikat
-									where yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+									where yhtio = '$kukarow[yhtio]'
+									AND tyyppi != 'P'
 									order by alkuhyllyalue,alkuhyllynro
 									limit 1";
 					}

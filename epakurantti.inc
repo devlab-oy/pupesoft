@@ -226,7 +226,7 @@
 			$tee = "";
 		}
 
-		// katotaan onko liitetty keikkaan jonka virallista varastonarvoa ei ole laskettu
+		// katotaan onko liitetty saapumiseen jonka virallista varastonarvoa ei ole laskettu
 		$query = "	SELECT laskunro
 					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio

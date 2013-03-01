@@ -18408,6 +18408,377 @@ if (!function_exists("pupesoft_sahkoposti")) {
 			$header .= "Cc: $email_cc\n";
 		}
 
+<<<<<<< HEAD
+=======
+		// $kala = 815;
+		$kala = 570;
+
+		$pdf->draw_text(410, $kala, t("Erolista", $kieli), $thispage, $iso);
+
+		$lasku = str_replace(",", ", ", $lasku);
+
+		$lajilisa = $valitse == 'asn' ? 'asn' : 'tec';
+
+		$rivihintalisa = $valitse != 'asn' ? ", round(kappalemaara * hinta * (1 - lasku_ale1 / 100) * (1 - lasku_ale2 / 100) * (1 - lasku_ale3 / 100),'{$yhtiorow['hintapyoristys']}') rivihinta" : "";
+
+		$query = "	SELECT *
+					{$rivihintalisa}
+					FROM asn_sanomat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND asn_numero IN ({$lasku})
+					AND laji = '{$lajilisa}'
+					AND tilausrivi != ''
+					ORDER BY asn_numero";
+		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
+
+		if ($valitse != 'asn' and $row['tilausrivi'] == '') {
+			echo "<font class='error'>",t("Ei laskua"),"</font><br />";
+			return false;
+		}
+
+		$query = "	SELECT nimi, nimitark, oletus_kulupros
+					FROM toimi
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND toimittajanro = '{$row['toimittajanumero']}'";
+		$toimires = pupe_query($query);
+		$toimirow = mysql_fetch_assoc($toimires);
+
+		$toimittajan_nimi = trim($toimirow['nimi'].' '.$toimirow['nimitark']);
+
+		$kala -= 40;
+
+		$pdf->draw_text(50, $kala, t("Toimittaja", $kieli).": {$toimirow['nimi']} {$toimirow['nimitark']}", $thispage, $boldi);
+
+		$kala -= $rivinkorkeus;
+
+		$kumpi = $valitse == 'asn' ? 'ASN' : "Lasku ";
+
+		$pdf->draw_text(50, $kala, t($kumpi, $kieli).": {$lasku}", $thispage, $boldi);
+
+		if ($otunnus != '') {
+			$otunnus = (int) $otunnus;
+
+			$query = "	SELECT laskunro
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tila = 'K'
+						AND tunnus = '{$otunnus}'";
+			$laskunro_res = pupe_query($query);
+			$laskunro_row = mysql_fetch_assoc($laskunro_res);
+
+			$kala -= $rivinkorkeus;
+
+			$pdf->draw_text(50, $kala, t("Saapuminen", $kieli).": {$laskunro_row['laskunro']}", $thispage, $boldi);
+		}
+
+		mysql_data_seek($result, 0);
+
+		$kala -= ($rivinkorkeus * 2);
+
+		if ($valitse == 'asn') {
+			$pdf->draw_rectangle($kala + 10, 40, $kala - $rivinkorkeus - 7, 300, $thispage, $rectparam);
+		}
+		else {
+			$pdf->draw_rectangle($kala + 10, 40, $kala - $rivinkorkeus - 7, 802, $thispage, $rectparam);
+		}
+
+		$pdf->draw_text(50, $kala, t("Tuoteno", $kieli), $thispage, $boldi);
+		$pdf->draw_text(50, $kala - $rivinkorkeus, t("Nimitys", $kieli), $thispage, $boldi);
+
+		$pdf->draw_text(220, $kala, t($kumpi." kpl", $kieli), $thispage, $boldi);
+		$pdf->draw_text(220, $kala - $rivinkorkeus, t("Til Kpl", $kieli), $thispage, $boldi);
+		$pdf->draw_text(290, $kala, t("Kplero", $kieli), $thispage, $boldi);
+
+		if ($valitse != 'asn') {
+			$pdf->draw_text(360, $kala, t("L.Hinta", $kieli), $thispage, $boldi);
+			$pdf->draw_text(360, $kala - $rivinkorkeus, t("T.Hinta", $kieli), $thispage, $boldi);
+
+			$pdf->draw_text(430, $kala, t("Hintaero", $kieli), $thispage, $boldi);
+
+			$pdf->draw_text(500, $kala, t("L.Riv.Hin", $kieli), $thispage, $boldi);
+			$pdf->draw_text(500, $kala - $rivinkorkeus, t("T.Riv.Hin", $kieli), $thispage, $boldi);
+
+			$pdf->draw_text(570, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
+
+			$pdf->draw_text(640, $kala, t("L.Ale1", $kieli), $thispage, $boldi);
+			$pdf->draw_text(640, $kala - $rivinkorkeus, t("T.Ale1", $kieli), $thispage, $boldi);
+
+			$pdf->draw_text(690, $kala, t("L.Ale2", $kieli), $thispage, $boldi);
+			$pdf->draw_text(690, $kala - $rivinkorkeus, t("T.Ale2", $kieli), $thispage, $boldi);
+
+			$pdf->draw_text(740, $kala, t("L.Ale3", $kieli), $thispage, $boldi);
+			$pdf->draw_text(740, $kala - $rivinkorkeus, t("T.Ale3", $kieli), $thispage, $boldi);
+		}
+
+		$kala -= 35;
+
+		while ($row = mysql_fetch_assoc($result)) {
+
+			if ($kala <= 150) {
+				$thispage = $pdf->new_page("842x595");
+
+				// $kala = 815;
+				$kala = 570;
+
+				$pdf->draw_text(410, $kala, t("Erolista", $kieli), $thispage, $iso);
+
+				$kala -= 40;
+
+				$pdf->draw_text(50, $kala, t("Toimittaja", $kieli).": {$toimirow['nimi']} {$toimirow['nimitark']}", $thispage, $boldi);
+
+				$kala -= $rivinkorkeus;
+
+				$pdf->draw_text(50, $kala, t("Laskut", $kieli).": {$lasku}", $thispage, $boldi);
+
+				$kala -= ($rivinkorkeus * 2);
+
+				if ($valitse == 'asn') {
+					$pdf->draw_rectangle($kala + 10, 40, $kala - $rivinkorkeus - 7, 300, $thispage, $rectparam);
+				}
+				else {
+					$pdf->draw_rectangle($kala + 10, 40, $kala - $rivinkorkeus - 7, 802, $thispage, $rectparam);
+				}
+
+				$pdf->draw_text(50, $kala, t("Tuoteno", $kieli), $thispage, $boldi);
+				$pdf->draw_text(50, $kala - $rivinkorkeus, t("Nimitys", $kieli), $thispage, $boldi);
+
+				$pdf->draw_text(220, $kala, t($kumpi." kpl", $kieli), $thispage, $boldi);
+				$pdf->draw_text(220, $kala - $rivinkorkeus, t("Til Kpl", $kieli), $thispage, $boldi);
+				$pdf->draw_text(290, $kala, t("Kplero", $kieli), $thispage, $boldi);
+
+				if ($valitse != 'asn') {
+					$pdf->draw_text(360, $kala, t("L.Hinta", $kieli), $thispage, $boldi);
+					$pdf->draw_text(360, $kala - $rivinkorkeus, t("T.Hinta", $kieli), $thispage, $boldi);
+
+					$pdf->draw_text(430, $kala, t("Hintaero", $kieli), $thispage, $boldi);
+
+					$pdf->draw_text(500, $kala, t("L.Riv.Hin", $kieli), $thispage, $boldi);
+					$pdf->draw_text(500, $kala - $rivinkorkeus, t("T.Riv.Hin", $kieli), $thispage, $boldi);
+
+					$pdf->draw_text(570, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
+
+					$pdf->draw_text(640, $kala, t("L.Ale1", $kieli), $thispage, $boldi);
+					$pdf->draw_text(640, $kala - $rivinkorkeus, t("T.Ale1", $kieli), $thispage, $boldi);
+
+					$pdf->draw_text(690, $kala, t("L.Ale2", $kieli), $thispage, $boldi);
+					$pdf->draw_text(690, $kala - $rivinkorkeus, t("T.Ale2", $kieli), $thispage, $boldi);
+
+					$pdf->draw_text(740, $kala, t("L.Ale3", $kieli), $thispage, $boldi);
+					$pdf->draw_text(740, $kala - $rivinkorkeus, t("T.Ale3", $kieli), $thispage, $boldi);
+				}
+
+				$kala -= 35;
+			}
+
+			$query = "	SELECT tuoteno,
+						nimitys,
+						ale1,
+						ale2,
+						ale3,
+						hinta,
+						varattu + kpl AS kpl,
+						laatija
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus IN ({$row['tilausrivi']})
+						#GROUP BY 1,2,3,4,5";
+			$rivires = pupe_query($query);
+
+			$kala_orig = $kala;
+
+			$nimi_kerran = false;
+
+			$kplero = $row['kappalemaara'];
+
+			while ($rivirow = mysql_fetch_assoc($rivires)) {
+
+				$rivirow['rivihinta'] = $row['keikkarivinhinta'] * $rivirow['kpl'] * ((100 - $rivirow['ale1']) / 100) * ((100 - $rivirow['ale2']) / 100) * ((100 - $rivirow['ale3']) / 100);
+
+				$hintaero = round($row['hinta'] - $rivirow['hinta'], 2);
+				$rivihintaero = round($row['rivihinta'] - $rivirow['rivihinta'], 2);
+				$kplero = round($kplero - $rivirow['kpl'], 0);
+
+				if ($hintaero == 0 and $rivihintaero == 0) continue;
+
+				if (!$nimi_kerran) {
+					$pdf->draw_text(50, $kala, $rivirow['tuoteno'], $thispage, $norm);
+				}
+
+				// jos verkkolasku-in-luo-keikkafile.inc tai asn_kohdistus.inc on joutunut tekemään ylimääräisiä rivejä, on laatijana 'extraa'. Näytetään tässä tämmöset rivit käyttäjälle.
+				$extraa = "";
+				if ($rivirow['laatija'] == 'extraa') $extraa = " enemmän kuin tilattu!";
+
+				if ($rivirow['ale1'] == 0) $rivirow['ale1'] = "";
+				if ($rivirow['ale2'] == 0) $rivirow['ale2'] = "";
+				if ($rivirow['ale3'] == 0) $rivirow['ale3'] = "";
+				if ($row['ale1'] == 0) $row['ale1'] = "";
+				if ($row['ale2'] == 0) $row['ale2'] = "";
+				if ($row['ale3'] == 0) $row['ale3'] = "";
+
+				// $pdf->draw_text(150, $kala, $rivirow['kpl'], $thispage, $norm);
+				$pdf->draw_text(220, $kala - $rivinkorkeus, $rivirow['kpl'] . $extraa, $thispage, $norm);
+
+				if ($valitse != 'asn') {
+					$pdf->draw_text(360, $kala - $rivinkorkeus, round($rivirow['hinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
+
+					$pdf->draw_text(430, $kala - $rivinkorkeus, $hintaero, $thispage, $norm);
+					$pdf->draw_text(500, $kala - $rivinkorkeus, round($rivirow['rivihinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
+					$pdf->draw_text(570, $kala - $rivinkorkeus, $rivihintaero, $thispage, $norm);
+
+					$pdf->draw_text(640, $kala - $rivinkorkeus, $rivirow['ale1'], $thispage, $norm);
+
+					$pdf->draw_text(690, $kala - $rivinkorkeus, $rivirow['ale2'], $thispage, $norm);
+
+					$pdf->draw_text(740, $kala - $rivinkorkeus, $rivirow['ale3'], $thispage, $norm);
+				}
+
+				if (!$nimi_kerran) {
+					$pdf->draw_text(50, $kala - $rivinkorkeus, $rivirow['nimitys'], $thispage, $norm);
+					$nimi_kerran = true;
+				}
+
+				$kala -= $rivinkorkeus;
+
+				// $kala -= ($rivinkorkeus + 5);
+			}
+
+			if ($kala_orig != $kala) {
+
+				$kala_tmp = $kala;
+				$kala = $kala_orig;
+
+				$pdf->draw_text(220, $kala, $row['kappalemaara'], $thispage, $norm);
+
+				if ($valitse != 'asn') {
+					$pdf->draw_text(290, $kala, $kplero, $thispage, $norm);
+					$pdf->draw_text(360, $kala, round($row['hinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
+					$pdf->draw_text(500, $kala, round($row['rivihinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
+					$pdf->draw_text(640, $kala, $row['ale1'], $thispage, $norm);
+					$pdf->draw_text(690, $kala, $row['ale2'], $thispage, $norm);
+					$pdf->draw_text(740, $kala, $row['ale3'], $thispage, $norm);
+				}
+
+				if ($valitse == 'asn') {
+					$pdf->draw_rectangle($kala - 7, 40, $kala - 7, 300, $thispage, $rectparam);
+				}
+				else {
+					$pdf->draw_rectangle($kala_tmp - 5, 40, $kala_tmp - 5, 802, $thispage, $rectparam);
+				}
+
+				$kala = $kala_tmp;
+				$kala -= $rivinkorkeus;
+			}
+		}
+
+		//keksitään uudelle failille joku varmasti uniikki nimi:
+		list($usec, $sec) = explode(' ', microtime());
+		mt_srand((float) $sec + ((float) $usec * 100000));
+		$pdffilenimi = "/tmp/".t("Erolista")."-".md5(uniqid(mt_rand(), true)).".pdf";
+
+		//kirjoitetaan pdf faili levylle..
+		$fh = fopen($pdffilenimi, "w");
+		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
+		fclose($fh);
+
+		if (!is_array($komento)) {
+			$komentoulos = array($komento);
+		}
+		else {
+			$komentoulos = $komento;
+		}
+
+		foreach ($komentoulos as $komento) {
+
+			// itse print komento...
+			if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
+				$liite = $pdffilenimi;
+				$content_body = "";
+
+				echo t("Erolista-raportti tulostuu"),"...<br /><br />";
+
+				$kutsu = t("Erolista-raportti", $kieli).' '.$toimittajan_nimi;
+
+				if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+					$kutsu .= " ".t("Erolista-raportti", $kieli).' '.$toimittajan_nimi;
+				}
+
+				include("inc/sahkoposti.inc");
+			}
+			elseif ($komento != '' and $komento != 'edi') {
+				echo t("Erolista-raportti tulostuu"),"...<br /><br />";
+				$line = exec("{$komento} {$pdffilenimi}", $output, $returnvalue);
+			}
+		}
+
+		// poistetaan tmp file samantien kuleksimasta...
+		system("rm -f {$pdffilenimi}");
+
+		return true;
+	}
+}
+
+if (!function_exists("pupesoft_sahkoposti")) {
+
+	function pupesoft_sahkoposti($parametrit) {
+
+		/* Tällä funktiolla lähetetään sähköposti, johon voidaan liittää yksi tai useampi liitetiedosto.
+
+		Parametrinä seuraavanlainen array:
+
+		$parametri = array( "to" 		=> "devlab@devlab.fi",
+							"cc" 		=> "",
+							"subject"	=> "Mail from Pupesoft!",
+							"ctype"		=> "html",
+							"body"		=> "<h1>Hello from Pupesoft!</h1>",
+							"yhtio" => "Testi yhtio",
+							"postittaja_email" => "minun@email.com"
+
+							"attachements" => array(0 	=> array(
+														"filename"		=> "/foo/baz/file1.txt",
+														"newfilename"	=> "report.txt",
+														"ctype"			=> "text"),
+
+													1 	=> array(
+														"filename"		=> "/bar/foo/file2",
+														"newfilename"	=> "pretty_report.xls",
+														"ctype"			=> "excel"),
+							)
+		);
+
+		*/
+
+		global $yhtiorow, $kukarow;
+
+		if (php_sapi_name() == 'cli') {
+			$yhtiorow['nimi'] = $parametrit['yhtio'];
+			$yhtiorow['postittaja_email'] = $parametrit['postittaja_email'];
+		}
+
+		// Tarvitaan seuraavat parametrit
+		$email_to		= isset($parametrit["to"]) ? $parametrit["to"] : "";
+		$email_cc		= isset($parametrit["cc"]) ? $parametrit["cc"] : "";
+		$email_subject	= isset($parametrit["subject"]) ? $parametrit["subject"] : "";
+		$email_ctype 	= isset($parametrit["ctype"]) ? strtoupper($parametrit["ctype"]) : "";
+		$email_body 	= isset($parametrit["body"]) ? $parametrit["body"] : "";
+
+		// Liitetiedostoja tulee parametreissä arrayna
+		$liitteet		= (isset($parametrit["attachements"]) and is_array($parametrit["attachements"])) ? $parametrit["attachements"] : "";
+
+		// Kaikki pitää tulla kunnossa (paitsi body ja cc)
+		if ($email_to == "" or $email_subject == "" or $email_ctype == "" or $liitteet == "") {
+			return false;
+		}
+
+		$content = "";
+		$bound = uniqid(time()."_") ;
+		$header = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <{$yhtiorow["postittaja_email"]}>\n";
+
+		if ($email_cc != "") {
+			$header .= "Cc: $email_cc\n";
+		}
+
+>>>>>>> KeraÌˆysaineiston generointi.
 		$header .= "MIME-Version: 1.0\n" ;
 		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -20481,6 +20852,7 @@ if (!function_exists('_echo_ordered_table_rows')) {
 	}
 }
 
+<<<<<<< HEAD
 // Sorttaa kaksiulotteisen arrayn annetun keyn perusteella
 //esim
 /**
@@ -20508,6 +20880,34 @@ if(!function_exists('_two_dimensional_array_sort_by_key')) {
 
 		$array = $_return_array;
 	}
+=======
+if (!function_exists('_xls_rivit')) {
+    function _xls_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $force_to_string) {
+		if(php_sapi_name() != 'cli') {
+			require_once 'ProgressBar.class.php';
+			$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
+			$xls_progress_bar->initialize(count($rivit));
+		}
+
+        foreach ($rivit as $rivi) {
+            foreach ($rivi as $header => $solu) {
+                if (!stristr($header, 'tunnus')) {
+                    _kirjoita_solu($xls, $header, $solu, $rivi_numero, $sarake_numero, $force_to_string);
+                }
+            }
+            $rivi_numero++;
+            $sarake_numero = 0;
+
+			if(isset($xls_progress_bar)) {
+				$xls_progress_bar->increase();
+			}
+        }
+
+		if(php_sapi_name() != 'cli') {
+			echo "<br/>";
+		}
+    }
+>>>>>>> KeraÌˆysaineiston generointi.
 }
 
 if (!function_exists('hae_maa')) {

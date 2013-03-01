@@ -1,33 +1,81 @@
 <?php
+/*
+ * HOW TO CLI:
+ * php myyntitilauksien_generointi.php yhtio to@example.com from@example.com
+ */
 
-require "../inc/parametrit.inc";
-require "../inc/pupeExcel.inc";
 require "../inc/functions.inc";
+require "../inc/pupeExcel.inc";
 
-$myyntitilaukset = hae_tamanpaivan_webstore_myyntitilaukset();
+if (php_sapi_name() == 'cli') {
+	require "../inc/connect.inc";
+	$php_cli = true;
+	$yhtio = $argv[1];
+	$email = $argv[2];
+	$from = $argv[3];
+	$pupe_root_polku = dirname(dirname(__FILE__));
 
-if(!empty($myyntitilaukset)) {
-	$excel_file_path = generoi_excel_tiedosto($myyntitilaukset);
-
-	$excel_file_path = "/tmp/".$excel_file_path;
-
-	laheta_sahkoposti($excel_file_path);
-    
-    merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset);
+	//yhtiötä tai sähköpostia ei ole annettu
+	if(empty($yhtio) and empty($email)) {
+		$php_cli = false;
+	}
 }
 else {
-	echo t("Myyntitilauksia ei löytynyt tälle päivälle");
+	require "../inc/parametrit.inc";
+
+	echo "<font class='head'>".t('Keräysaineiston generointi')."</font><hr>";
+	
+	$php_cli = false;
+	$yhtio = '';
+	$email = '';
 }
 
-function hae_tamanpaivan_webstore_myyntitilaukset() {
+if($tee == 'hae_keraysaineisto' or $php_cli == true) {
+	$myyntitilaukset = hae_tamanpaivan_webstore_myyntitilaukset($yhtio);
+	if(!empty($myyntitilaukset)) {
+		$excel_file_path = generoi_excel_tiedosto($myyntitilaukset);
+
+		$excel_file_path = "/tmp/".$excel_file_path;
+
+		//jos ei ajeta cronista
+		if($tee == 'hae_keraysaineisto') {
+			$email = $vastaanottava_email;
+		}
+
+		$email_ok = laheta_sahkoposti($excel_file_path, $email, $yhtio, $from);
+
+		if($email_ok) {
+			merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset, $yhtio);
+			echo "<font class='message'>".t("Sähköposti lähetetty onnistuneesti")."</font>";
+		}
+	}
+	else {
+		echo t("Myyntitilauksia ei löytynyt tälle päivälle");
+	}
+}
+else {
+	echo_kayttoliittyma();
+}
+
+
+function hae_tamanpaivan_webstore_myyntitilaukset($yhtio = '') {
 	global $kukarow;
+
+	//jos ajetaan cronista
+	if(!empty($yhtio)) {
+		$kukarow['yhtio'] = $yhtio;
+	}
 	
 	$now = date('Y-m-d') . ' 00:00:00';
+
+	//for debug
+	$now = date('Y-m-d', strtotime($now .' -1 day')) . ' 00:00:00';
+
 
 	$query .= "	SELECT lasku.tunnus as 'Sales order numbers',
 				lasku.asiakkaan_tilausnumero as 'Customer Order reference',
 				lasku.toimaika as 'Requested Ship Date',
-				substring(toimitusehto, 1, 3) as 'Incoterms',
+				substring(lasku.toimitusehto, 1, 3) as 'Incoterms',
 				'' as 'Sold To Customer Code',
 				lasku.nimi as 'Ship To Customer Name',
 				lasku.nimi as 'Ship to Customer Contact Information',
@@ -62,10 +110,13 @@ function hae_tamanpaivan_webstore_myyntitilaukset() {
 	return $myyntilaskut;
 }
 
-function laheta_sahkoposti($excel_file_path) {
+function laheta_sahkoposti($excel_file_path, $email_address, $yhtio = '', $postittaja = '') {
 	global $yhtiorow;
 
-	$email_address = "joonas@devlab.fi";
+	if($yhtio != '') {
+		$yhtiorow['nimi'] = $yhtio;
+	}
+
 	$subject = "{$yhtiorow['nimi']} Webstore Sales Orders " . date('Y-m-d');
 	$body = "You can find the sales orders as and excel attachment";
 	$new_file_name = "SalesOrders.xlsx";
@@ -79,6 +130,11 @@ function laheta_sahkoposti($excel_file_path) {
 		"attachements"	 => array()
 	);
 
+	if(php_sapi_name() == 'cli') {
+		$params['yhtio'] = $yhtio;
+		$params['postittaja_email'] = $postittaja;
+	}
+
 	$liitetiedosto = array(
 		'filename'		 => $excel_file_path,
 		'newfilename'	 => $new_file_name,
@@ -87,21 +143,44 @@ function laheta_sahkoposti($excel_file_path) {
 
 	$params['attachements'][] = $liitetiedosto;
 
-	pupesoft_sahkoposti($params);
+	$email_ok = pupesoft_sahkoposti($params);
+
+	return $email_ok;
 }
 
-function merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset) {
+function merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset, $yhtio = '') {
     global $kukarow;
+
+	if($yhtio != '') {
+		$yhtiorow['yhtio'] = $yhtio;
+	}
+
     $myyntitilaus_tunnukset = '';
     foreach ($myyntitilaukset as $myyntitilaus) {
-        $myyntitilaus_tunnukset .= $myyntitilaus['Sales order number Makia'] . ',';
+        $myyntitilaus_tunnukset .= $myyntitilaus['Sales order numbers'] . ',';
     }
     $myyntitilaus_tunnukset = substr($myyntitilaus_tunnukset, 0, -1);
 
     $query = "  UPDATE lasku
                 SET noutaja = 'X'
-                WHERE yhtio = '{$kukarow}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus IN ({$myyntitilaus_tunnukset})";
     pupe_query($query);
 }
+
+function echo_kayttoliittyma() {
+	echo "<form method='POST' action=''>";
+	echo "<table>";
+	echo "<th>".t("Vastaanottava sähköposti")."</th>";
+	echo "<td>";
+	echo "<input type='hidden' name='tee' value='hae_keraysaineisto' />";
+	echo "<input type='text' name='vastaanottava_email' />";
+	echo "</td>";
+	echo "</table>";
+	echo "<br/>";
+	echo "<input type='submit' value='".t("Lähetä")."'/>";
+	echo "</form>";
+}
+
+require '../inc/footer.inc';
 ?>

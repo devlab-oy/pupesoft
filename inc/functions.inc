@@ -5295,6 +5295,10 @@ if (!function_exists("generoi_alekentta_php")) {
 	}
 }
 
+/*
+ * sis‰llytt‰‰ kaikki ale ja alv sanan sis‰lt‰m‰t keyt alennuksen laskentaan
+ * palauttaa rivin todellisen rivihinnan
+ */
 if(!function_exists('laske_rivihinta')) {
 	function laske_rivihinta($row) {
 		$ale = 1;

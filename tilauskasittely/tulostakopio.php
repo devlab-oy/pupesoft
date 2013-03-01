@@ -602,6 +602,10 @@
 			//myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
 			$where1 .= " lasku.tila = 'U' ";
 
+			if ($toim == "VIENTILASKU") {
+				$where1 .= " and lasku.vienti != '' ";
+			}
+
 			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
 			}
@@ -821,8 +825,8 @@
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
-		
-		if (strlen($laskunro) > 0 and strpos($laskunro, ",") !== FALSE) {						
+
+		if (strlen($laskunro) > 0 and strpos($laskunro, ",") !== FALSE) {
 			$where2 .= " and lasku.laskunro IN ('".str_replace(",", "','", $laskunro)."') ";
 
 			$where3 = "";

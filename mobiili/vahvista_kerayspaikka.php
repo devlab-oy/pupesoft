@@ -29,7 +29,7 @@ if (!empty($alusta_tunnus)) {
 	$row = mysql_fetch_assoc($res);
 }
 
-# Jos suuntalavan_tuotteet() ei löytänyt mitään
+# Jos suuntalavan_tuotteet() ei löytynyt mitään
 if(!isset($row)) {
 	$query = "	SELECT
 				tilausrivi.*,
@@ -96,11 +96,11 @@ if (isset($submit) and trim($submit) != '') {
 				// Tarkastetaan syötetyt määrät, eli tarviiko tilausrivia splittailla tai kopioida
 				if ($maara < $row['varattu']) {
 
-					// Syötytty määrä on pienempi kuin tilausrivilla oleva määrä.
+					// Syötetty määrä on pienempi kuin tilausrivilla oleva määrä.
 					// Splitataan rivi ja siirretään ylijääneet uudellele tilausriville.
 					splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, FALSE);
 
-					// Alkuperäinen viedään varastoon, splitattu jää j‰ljelle
+					// Alkuperäinen viedään varastoon, splitattu jää jâljelle
 					$ok = paivita_tilausrivin_kpl($tilausrivi, $maara);
 					$tilausrivit[] = $tilausrivi;
 
@@ -229,7 +229,7 @@ if ($row['tilausrivi_tyyppi'] == 'o') {
 }
 elseif($row['tilausrivi_tyyppi'] == '') {
     //linkitetty osto / myyntitilaus varastoon
-    $row['tilausrivi_tyyppi'] = '';
+    $row['tilausrivi_tyyppi'] = 'JT';
 }
 
 # Asetetaan määrä varattu kentän arvoksi jos sitä ei ole setattu

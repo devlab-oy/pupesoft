@@ -89,7 +89,7 @@ if ($row['tilausrivi_tyyppi'] == 'o') {
 }
 elseif($row['tilausrivi_tyyppi'] == '') {
     //linkitetty osto / myyntitilaus varastoon
-    $row['tilausrivi_tyyppi'] = 'JTV';
+    $row['tilausrivi_tyyppi'] = 'JT';
 }
 
 ######## UI ##########

@@ -69,6 +69,9 @@
 	elseif ($laskuttajan_toimittajanumero == "112") {
 		$laskuttajan_toimittajanumero = "123442";
 	}
+	elseif ($laskuttajan_toimittajanumero == "123035") {
+		$laskuttajan_toimittajanumero = "123036";
+	}
 
 	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount)  and $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount != 0) {
 		$laskun_summa_eur = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount);

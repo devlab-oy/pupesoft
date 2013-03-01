@@ -10,28 +10,30 @@ if($ajax_request == 1 and $kateisoton_luonne == 1) {
     exit;
 }
 if($ajax_request == 1 and $alv == 1) {
-    $alvit = array(
-        0 => t("Valitse alvtaso"),
-        9 => t("Alvtaso") . ': 9',
-        23 => t("Alvtaso") . ': 23',
-        24 => t("Alvtaso") . ': 24',
-    );
-    echo json_encode($alvit,false);
+    echo json_encode(hae_kaikki_alvit(),false);
     exit;
 }
 ?>
 <script language='javascript' type='text/javascript'>
     
     $(document).ready(function(){
-        bind_uusi_tyyppi();
+        bind_uusi_rivi();
+		bind_poista_rivi();
     });
     
-    function bind_uusi_tyyppi() {
+    function bind_uusi_rivi() {
         $('#uusi_tyyppi').click(function(event){
             event.preventDefault();
             lisaa_uusi_tyyppi_rivi();
         });
     }
+
+	function bind_poista_rivi() {
+		$('.poista_rivi').live('click',function(event){
+            event.preventDefault();
+            $(this).parent().parent().remove();
+        });
+	}
     
     function lisaa_uusi_tyyppi_rivi() {
         var kateisotto_rivi = $('#kateisotto_rivi_template').clone();
@@ -45,7 +47,8 @@ if($ajax_request == 1 and $alv == 1) {
         
         populoi_kateis_oton_luonteet($(kateisotto_rivi).find('select.kateisoton_luonne'));
         populoi_alvit($(kateisotto_rivi).find('select.alv'));
-        
+
+		$(kateisotto_rivi).attr('id', '');
         $(kateisotto_rivi).css('display','');
         
         $('#kommentti_tr').before(kateisotto_rivi);
@@ -82,25 +85,39 @@ if($ajax_request == 1 and $alv == 1) {
             async:true
         }).done(function(data) {
             $.each(data, function(index, value){
-                console.log(value);
-                var option = new Option(value, index);
+                var option = new Option(value['selite'], value['selite']);
                 $(alv_select).append(option);
             });
         });
     }
     
 	function tarkista() {
-		if($('#kassalipas').val() == '' || $('#summa').val() == '' || $('#kateisoton_luonne').val() == '') {
-			alert($('#tarvittavia_tietoja').html());
-			return false;
+		var ok = true;
+		if($('.kassalipas').val() == '') {
+			ok = false;
 		}
+
+		$.each($('#kateisotto_table .summa'), function(index,value) {
+			if($(value).val() == '') {
+				ok = false;
+			}
+		});
+
+		$.each($('#kateisotto_table .kateisoton_luonne'), function(index,value) {
+			if($(value).val() == '') {
+				ok = false;
+			}
+		});
 
 		if($('#userfile').val() != '' && $('#kuvaselite').val() == '') {
 			alert($('#kuva_selite_alert').html());
-			return false;
+			ok = false;
 		}
 
-		return true;
+		if(!ok) {
+			alert($('#tarvittavia_tietoja').html());
+		}
+		return ok;
 	}
 </script>
 <?php
@@ -110,12 +127,7 @@ echo "<div id='kuva_selite_alert'style='display:none;'>".t("Anna liitteelle seli
 
 $kassalippaat = hae_kassalippaat();
 $kateisoton_luonteeet = hae_kateisoton_luonteet();
-$alvit = array(
-    0 => t("Alvtaso") . ': 0',
-    10 => t("Alvtaso") . ': 10',
-    14 => t("Alvtaso") . ': 14',
-    24 => t("Alvtaso") . ': 24',
-);
+$alvit = hae_kaikki_alvit();
 
 $request_params = array(
 	'kassalipas' => $kassalipas_tunnus,
@@ -459,7 +471,7 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
     echo "</th>";
     echo "<td>";
     echo "<input type='hidden' class='child_index' value='0' />";
-    echo "<button class='poista_rivi'>".t("Poista rivi")."</button>";
+    echo "<button class='poista_rivi' onclick='bind_poista_rivi();'>".t("Poista rivi")."</button>";
     echo "<br/>";
     
     echo t("Summa") . ':';
@@ -485,8 +497,8 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
     echo t("Alv");
     echo "<br/>";
     echo "<select name='kateisotto_rivi[0][alv]' class='alv'>";
-    foreach($alvit as $alv_index => $alv_value) {
-        echo "<option value='{$alv_index}'>{$alv_value}</option>";
+    foreach($alvit as $alv) {
+        echo "<option value='{$alv['selite']}'>{$alv['selite']}</option>";
     }
     echo "</select>";
     
@@ -516,7 +528,7 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
                 <th>'.t("K‰teisotto rivi").'</th>
                 <td>
                     <input type="hidden" value="" class="child_index">
-                    <button class="poista_rivi">'.t("Poista rivi").'</button>
+                    <button class="poista_rivi" onclick="bind_poista_rivi();">'.t("Poista rivi").'</button>
                     <br/>
                     '.t("Summa").':
                     <br>
@@ -525,7 +537,7 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
                     '.t("Mihin tarkoitukseen k‰teisotto tehd‰‰n").':
                     <br>
                     <select class="kateisoton_luonne" name="">
-                    <option>'.t("Valitse tarkoitus").'</option>
+                    <option value="">'.t("Valitse tarkoitus").'</option>
                     </select>
                     <br><br>
                     '.t("Alv").':

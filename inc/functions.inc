@@ -10507,6 +10507,26 @@ if (!function_exists("alv_popup_oletus")) {
 	}
 }
 
+if (!function_exists("hae_kaikki_alvit")) {
+	function hae_kaikki_alvit() {
+		global $kukarow;
+
+		$query = "	SELECT selite,
+					selitetark,
+					selitetark_2
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv'";
+		$vresult = pupe_query($query);
+
+		$alvit = array();
+		while($alv = mysql_fetch_assoc($vresult)) {
+			$alvit[] = $alv;
+		}
+
+		return $alvit;
+	}
+}
+
 if (!function_exists("alv_oletus")) {
 	function alv_oletus($tili = '') {
 		global $kukarow;

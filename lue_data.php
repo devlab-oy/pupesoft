@@ -26,8 +26,7 @@ if (php_sapi_name() == 'cli') {
 	require ("{$pupe_root_polku}/inc/functions.inc");
 
 	$cli = true;
-
-	ini_set("include_path", ".".PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
 
 	if (trim($argv[1]) != '') {
 		$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
@@ -39,6 +38,21 @@ if (php_sapi_name() == 'cli') {
 
 	if (trim($argv[2]) != '') {
 		$table = trim($argv[2]);
+
+		// T‰‰lt‰ voi tulla ties mit‰ lis‰parameja
+		if (strpos($table, ".") !== FALSE) {
+			$paramit = explode("..", $table);
+
+			// Eka veks, ku siin‰ on taulun nimi eik‰ parami
+			array_shift($paramit);
+
+			foreach ($paramit as $parami) {
+				list($muuttuja, $arvo) = explode(".", $parami);
+
+				// Jotain pient‰ tietoturvaa kuitenki...
+				${$muuttuja} = preg_replace("/[^a-z_0-9]/i", "", $arvo);
+			}
+		}
 	}
 	else {
 		die ("Et antanut taulun nime‰.\n");

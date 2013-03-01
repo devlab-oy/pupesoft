@@ -20,7 +20,7 @@
 
 	//haetaan asiakkaat, joilla ( ei ole panttitili käytössä TAI asiakas on poistettu TAI tuote on poistettu TAI panttitili riviä ei ole käsitelty) ja tarkistetaan onko näillä asiakkailla kuitenkin pantteja
 	//eli jos panttitili on poistettu käytöstä ja pantteja on niin kaikki avoimet pantit pitää laskuttaa
-	//ajetaan queryt arraysta, jotta edellisten queryjen resultit eivät pääse vaikuttamaan seuraaviin.
+	//ajetaan arraystä jotta resultteihin ei pääse tulemaan tuplia
 	$queryt = array(
 		"/*Asiakkaalla on panttitili käytössä, mutta sitä ei ole käsitelty ja pantin myyntipvm on 6kk sitten tai aikaisemmin*/
 		SELECT Group_concat(panttitili.tunnus) tunnukset,

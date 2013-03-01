@@ -114,6 +114,9 @@
 	if ($toim == "LASKU") {
 		$fuse = t("Lasku");
 	}
+	if ($toim == "VIENTILASKU") {
+		$fuse = t("Vientilasku");
+	}
 	if ($toim == "TUOTETARRA") {
 		$fuse = t("Tuotetarra");
 	}
@@ -217,7 +220,7 @@
 
 	// Extranettaajat voivat ottaa kopioita omista laskuistaan ja lähetteistään
 	if ($kukarow["extranet"] != "") {
-		if ($kukarow["oletus_asiakas"] > 0 and ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "LASKU" or $toim == "TILAUSVAHVISTUS")) {
+		if ($kukarow["oletus_asiakas"] > 0 and ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "LASKU" or $toim == "VIENTILASKU" or $toim == "TILAUSVAHVISTUS")) {
 			$query  = "	SELECT *
 						FROM asiakas
 						WHERE yhtio	= '$kukarow[yhtio]'
@@ -595,9 +598,13 @@
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
-		if ($toim == "LASKU") {
+		if ($toim == "LASKU" or $toim == "VIENTILASKU") {
 			//myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
 			$where1 .= " lasku.tila = 'U' ";
+
+			if ($toim == "VIENTILASKU") {
+				$where1 .= " and lasku.vienti != '' ";
+			}
 
 			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
@@ -818,8 +825,8 @@
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
-		
-		if (strlen($laskunro) > 0 and strpos($laskunro, ",") !== FALSE) {						
+
+		if (strlen($laskunro) > 0 and strpos($laskunro, ",") !== FALSE) {
 			$where2 .= " and lasku.laskunro IN ('".str_replace(",", "','", $laskunro)."') ";
 
 			$where3 = "";
@@ -1021,7 +1028,7 @@
 				echo "<$ero valign='top'>$row[laatija]</$ero>";
 
 				if ($kukarow['hinnat'] == 0) {
-					if ($toim != "LASKU" and $row["summa"] == 0) {
+					if ($toim != "LASKU" and $toim != "VIENTILASKU" and $row["summa"] == 0) {
 
 						if ($toim == "OSTO") {
 							$kerroinlisa1 = " * if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) ";
@@ -1174,7 +1181,7 @@
 				$komento["Tariffilista"] .= " -# $kappaleet ";
 			}
 		}
-		elseif ($toim == "LASKU") {
+		elseif ($toim == "LASKU" or $toim == "VIENTILASKU") {
 			$tulostimet[0] = 'Lasku';
 			if ($kappaleet > 0 and $komento["Lasku"] != 'email') {
 				$komento["Lasku"] .= " -# $kappaleet ";
@@ -1535,7 +1542,7 @@
 				$tee = '';
 			}
 
-			if ($toim == "LASKU" or $toim == 'PROFORMA') {
+			if ($toim == "LASKU" or $toim == 'PROFORMA' or $toim == "VIENTILASKU") {
 
 				if (@include_once("tilauskasittely/tulosta_lasku.inc"));
 				elseif (@include_once("tulosta_lasku.inc"));

@@ -329,6 +329,9 @@ if(!function_exists("asiakastarkista")) {
 				$virhe[$i] = t("Pakollinen kenttä kun laskutus nimi on annettu")."!";
 				$virhe[$laskutus_talteen_i] = t("Pakollisia: laskutusosoite, laskutus postinumero, laskutus postitoimipaikka")."!";
 			}
+
+			$laskutus_talteen = "";
+			$laskutus_talteen_i = "";
 		}
 	}
 }

@@ -275,7 +275,7 @@
 		$tilausok++;
 	}
 
-	if (trim($trow["vienti"]) != '' and $row["tyyppi"] != "V" and $row["tyyppi"] != "W" and $row["var2"] != "OK") {
+	if (trim($trow["vienti"]) != '' and $row["tyyppi"] != "V" and $row["tyyppi"] != "W" and ($row["var2"] != "OK" or $yhtiorow["vientikiellon_ohitus"] != "K")) {
 
 		// vientikieltokäsittely:
 		// +maa tarkoittaa että myynti on kielletty tähän maahan
@@ -307,7 +307,6 @@
 				$saako_hyvaksya++;
 			}
 		}
-
 	}
 
 	if ($row["var"] == 'S') {

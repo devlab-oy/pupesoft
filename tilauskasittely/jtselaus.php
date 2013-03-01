@@ -1420,7 +1420,7 @@
 
 									if ($ylivito > 0) {
 										echo "<br/>";
-										echo "<font class='message'>".t("Yli 15 pv sitten er‰‰ntyneit‰ laskuja")."</font>";
+										echo "<font class='message'>".t("Yli %s pv sitten er‰‰ntyneit‰ laskuja", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."</font>";
 									}
 
 									if ($trattavirhe != '') {

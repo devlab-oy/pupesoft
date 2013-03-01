@@ -3144,6 +3144,25 @@
 		$jatko = 0;
 	}
 
+    if (mysql_field_name($result, $i) == 'erapaivan_ylityksen_toimenpide') {
+        if ($yhtiorow["erapaivan_ylityksen_raja"] > 0) {
+            $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+            $sel = array_fill_keys(array('K', 'E'), '');
+            $sel[$trow[$i]] = " SELECTED";
+
+            $ulos .= "<option value = ''>".t("Myynti‰ ei estet‰, vaikka er‰p‰iv‰ olisi liikaa ylitetty")."</option>";
+            $ulos .= "<option value = 'K' {$sel["K"]}>".t("Kaikki myynti estet‰‰n, jos er‰p‰iv‰ on liikaa ylitetty")."</option>";
+            $ulos .= "<option value = 'E' {$sel["E"]}>".t("Muu kuin myyjien tekem‰ myynti estet‰‰n, jos er‰p‰iv‰ on liikaa ylitetty")."</option>";
+            $ulos .= "</select></td>";
+
+            $jatko = 0;
+        }
+        else {
+            $tyyppi = 0;
+        }
+	}
+
 	if (mysql_field_name($result, $i) == 'naytayhteensamaarat') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3263,7 +3282,7 @@
 		$jatko = 0;
 
 	}
-	
+
 	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

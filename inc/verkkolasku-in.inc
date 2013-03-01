@@ -437,7 +437,21 @@
 					$trow = mysql_fetch_assoc($result);
 				}
 			}
+			
+			if (!isset($trow) and $laskuttajan_toimittajanumero != "") {
+				// 9 etsit‰‰n toimittaja teccomi-specific
+				$query = "	SELECT *
+							FROM toimi
+							WHERE yhtio = '$yhtio'
+							and toimittajanro = '$laskuttajan_toimittajanumero'
+							and tyyppi != 'P'";
+				$result = pupe_query($query);
 
+				if (mysql_num_rows($result) == 1) {
+					$trow = mysql_fetch_assoc($result);
+				}
+			}
+			
 			if (!isset($trow) and $laskuttajan_nimi != "") {
 				// 7 etsit‰‰n toimittaja nimell‰
 				$query = "	SELECT *
@@ -463,20 +477,6 @@
 							WHERE yhtio = '$yhtio'
 							and ultilno = '$laskuttajan_nimi'
 							and ultilno not in ('','0')
-							and tyyppi != 'P'";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$trow = mysql_fetch_assoc($result);
-				}
-			}
-
-			if (!isset($trow) and $laskuttajan_toimittajanumero != "") {
-				// 9 etsit‰‰n toimittaja teccomi-specific
-				$query = "	SELECT *
-							FROM toimi
-							WHERE yhtio = '$yhtio'
-							and toimittajanro = '$laskuttajan_toimittajanumero'
 							and tyyppi != 'P'";
 				$result = pupe_query($query);
 

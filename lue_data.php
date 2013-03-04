@@ -1234,7 +1234,7 @@ if ($kasitellaan_tiedosto) {
 							}
 						}
 
-						if ($table_mysql == 'tuote' and ($otsikko == 'EPAKURANTTI25PVM' or $otsikko == 'EPAKURANTTI50PVM' or $otsikko == 'EPAKURANTTI75PVM' or $otsikko == 'EPAKURANTTI100PVM')) {
+						if ($table_mysql == 'tuote' and ($otsikko == 'EPAKURANTTI25PVM' or $otsikko == 'EPAKURANTTI50PVM' or $otsikko == 'EPAKURANTTI75PVM' or $otsikko == 'EPAKURANTTI100PVM') and $taulunrivit[$taulu][$eriviindex][$r] != "") {
 
 							if (trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI100PVM') {
 								$tee = "paalle";
@@ -1608,10 +1608,8 @@ if ($kasitellaan_tiedosto) {
 							elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
 								$query .= ", $otsikko = NULL ";
 							}
-							else {
-								if ($eilisataeikamuuteta == "") {
-									$query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
-								}
+							elseif ($eilisataeikamuuteta == "") {
+								$query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
 					  		}
 						}
 

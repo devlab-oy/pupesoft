@@ -1037,7 +1037,7 @@
 						$kassalippaat[] = $kassalipas;
 					}
 					echo "<tr>";
-					echo "<th align='left'>".t("Valitse kassalippaat, joihin käyttäjällä on oikeus")."</th>";
+					echo "<th align='left'>".t("Valitse kassalippaat, joihin käyttäjällä on otto oikeus")."</th>";
 					echo "<td>";
 					$kassalippaat_array = explode(",", $krow["kassalipas"]);
 					foreach($kassalippaat as $kassalipas) {

@@ -2538,7 +2538,7 @@
 								kuka.nimi as kuka_nimi
 								FROM lasku
 								JOIN tiliointi
-								ON ( tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.summa < 0)
+								ON ( tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.summa < 0 AND tiliointi.korjattu = '')
 								JOIN kassalipas
 								ON (kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = lasku.kassalipas)
 								JOIN kuka

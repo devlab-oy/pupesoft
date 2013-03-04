@@ -243,7 +243,7 @@ function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti) {
 				luontiaika = NOW(),
 				tapvm = NOW(),
 				kassalipas = '{$kassalipas['tunnus']}',
-				nimi = '".t("Käteisotto kassalippaasta:")." {$kassalipas['nimi']}'";
+				nimi = '".t("Käteisotto kassalippaasta").": {$kassalipas['nimi']}'";
 				
 	pupe_query($query);
 
@@ -286,7 +286,7 @@ function tee_tiliointi($lasku_tunnus, $kassalipas, $summa, $kateisoton_luonne, $
                 tapvm = NOW(),
                 summa = {$summa},
                 summa_valuutassa = {$summa},
-                valkoodi = 'EUR',
+                valkoodi = '{$yhtiorow['valkoodi']}',
                 selite = '{$selite}',
                 vero = {$vero}";
 

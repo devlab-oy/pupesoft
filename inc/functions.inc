@@ -5295,23 +5295,6 @@ if (!function_exists("generoi_alekentta_php")) {
 	}
 }
 
-/*
- * sisällyttää kaikki ale ja alv sanan sisältämät keyt alennuksen laskentaan
- * palauttaa rivin todellisen rivihinnan
- */
-if(!function_exists('laske_rivihinta')) {
-	function laske_rivihinta($row) {
-		$ale = 1;
-		foreach($row as $index => $value) {
-			if(stristr($index, 'ale') or stristr($index, 'alv')) {
-				$ale *= (1 - $value / 100);
-			}
-		}
-
-		return $ale * $row['hinta'] * $row['kpl'];
-	}
-}
-
 if (!function_exists("generoi_alekentta_select")) {
 	function generoi_alekentta_select($tapa, $tyyppi) {
 		global $yhtiorow;
@@ -5397,7 +5380,12 @@ if (!function_exists("generoi_alekentta")) {
 			}
 		}
 
-		$return = "if ({$prefix}.netto='N', 1, {$ale})";
+		if($prefix != 'panttitili') {
+			$return = "if ({$prefix}.netto='N', 1, {$ale})";
+		}
+		else {
+			$return = $ale;
+		}
 
 		return $return;
 	}

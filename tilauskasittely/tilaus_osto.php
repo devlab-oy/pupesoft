@@ -210,7 +210,8 @@
 			$query = "	SELECT tilausrivi.tunnus
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND otunnus = '{$kukarow['kesken']}'";
+						AND otunnus = '{$kukarow['kesken']}'
+						AND uusiotunnus = 0";
 			$result = pupe_query($query);
 
 			while($ostotilausrivi = mysql_fetch_assoc($result)) {

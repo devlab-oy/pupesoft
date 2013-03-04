@@ -9,9 +9,17 @@ ob_implicit_flush(1);
 $useslave = 1;
 $usemastertoo = 1;
 
-require '../inc/parametrit.inc';
+if (isset($_POST["tee"])) {
+	if ($_POST["tee"] == 'lataa_tiedosto') {
+		$lataa_tiedosto = 1;
+	}
+	if ($_POST["kaunisnimi"] != '') {
+		$_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+	}
+}
 
-//tiedoston lataus pit‰‰ olla ennen functions.inci‰ koska muuten menee headerit solmuun
+require "../inc/parametrit.inc";
+
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
 	if (file_exists($filepath)) {
@@ -42,7 +50,7 @@ ini_set("memory_limit", "2G");
         var lhylly_not_empty_values = all_values.filter(function(v){return v!==''});
 
         //jos ei olla rajattu ahylly, lhylly tai varastolla
-        if ((ahylly_not_empty_values.length === 0 && ahylly_not_empty_values.length === 0 ) && $('.varastot:checked').length === 0) {
+        if ((ahylly_not_empty_values.length === 0 && lhylly_not_empty_values.length === 0 ) && $('.varastot:checked').length === 0) {
             alert($('#valitse_varasto').html());
             saako_submit = false;
         }

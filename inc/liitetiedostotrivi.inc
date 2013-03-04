@@ -105,7 +105,7 @@
 				}
 			}
 			else {
-				$ulos .= "<option value= ''>".t("Yleinen")."</option>";
+				$ulos .= "<option value='MU'>".t("Yleinen")."</option>";
 			}
 
 			// Jos LITETY-avainsanaa ei ollut mutta kannassa on kuitenkin jokin tieto jo niin pidetään se selectöitynä

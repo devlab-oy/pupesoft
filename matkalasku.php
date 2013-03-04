@@ -143,7 +143,7 @@ if ($tee == "UUSI") {
 			// Perustetaan lasku
 			$query = "	INSERT into lasku set
 						yhtio 			= '$kukarow[yhtio]',
-						valkoodi 		= 'EUR',
+						valkoodi 		= '{$yhtiorow['valkoodi']}',
 						hyvak1 			= '$trow[kuka]',
 						hyvaksyja_nyt 	= '$trow[kuka]',
 						hyvak2 			= '$trow[oletus_hyvak2]',

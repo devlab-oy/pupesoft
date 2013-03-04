@@ -93,7 +93,7 @@ if ($ajax_request == 1 and $alv == 1) {
 
 	function tarkista() {
 		var ok = true;
-		if ($('.kassalipas').val() == '') {
+		if ($('#kassalipas').val() == '') {
 			ok = false;
 		}
 
@@ -167,7 +167,7 @@ if ($tee == 'kateisotto') {
 		echo "<font class='error'>".t("VIRHE: Tilikausi on päättynyt %s. Et voi merkitä laskua maksetuksi päivälle %s", "", $yhtiorow['tilikausi_alku'], date('Y-m-d'))."!</font>";
 	}
 
-	echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet);
+	echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet, $alvit);
 }
 else {
 	echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet, $alvit, $request_params);
@@ -201,7 +201,7 @@ function tee_kateisotto($kassalipas, $request_params) {
         $summa += $kateisotto_rivi['summa'];
     }
 
-	$lasku_tunnus = tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti);
+	$lasku_tunnus = tee_laskuotsikko($kassalipas, $summa, $request_params['yleinen_kommentti']);
 
     foreach($request_params['kateisotto_rivi'] as $kateisotto_rivi) {
         if ($kateisotto_rivi['alv'] > 0) {
@@ -209,18 +209,42 @@ function tee_kateisotto($kassalipas, $request_params) {
             $alviton_summa = $kateisotto_rivi['summa'] / (1 + ($kateisotto_rivi['alv'] / 100));
             $alv_maara = $kateisotto_rivi['summa'] - $alviton_summa;
 
-            //tehdään summalle tiliöinti
-            tee_tiliointi($lasku_tunnus, $kassalipas, -1*$kateisotto_rivi['summa'], '');
+			$params = array(
+				'lasku_tunnus' => $lasku_tunnus,
+				'kassalipas' => $kassalipas,
+				'kateisoton_luonne' => $kateisotto_rivi['kateisoton_luonne'],
+				'alv' => $kateisotto_rivi['alv'],
+				'summa' => -1*$kateisotto_rivi['summa'],
+			);
 
-            //tehdään alvittoman summan tiliöinti
-            tee_tiliointi($lasku_tunnus, $kassalipas, $alviton_summa, $kateisotto_rivi['kateisoton_luonne']);
+			//tehdään käteisotto tiliöinti
+            tee_tiliointi($params);
+
+            //tehdään alvittoman summan tiliöinti eli kulutiliöinti
+			$params['summa'] = $alviton_summa;
+            $kulu_tiliointi_tunnus = tee_tiliointi($params, true);
 
             //tehdään alv tiliöinti
-            tee_tiliointi($lasku_tunnus, $kassalipas, $alv_maara, '', $kateisotto_rivi['alv']);
+			$params['summa'] = $alv_maara;
+			$params['kulu_tiliointi_tunnus'] = $kulu_tiliointi_tunnus;
+            tee_tiliointi($params, false, true);
         }
         else {
-            tee_tiliointi($lasku_tunnus, $kassalipas, $kateisotto_rivi['summa'], $kateisotto_rivi['kateisoton_luonne']);
-            tee_tiliointi($lasku_tunnus, $kassalipas, -1*$kateisotto_rivi['summa'], '');
+			$params = array(
+				'lasku_tunnus' => $lasku_tunnus,
+				'kassalipas' => $kassalipas,
+				'kateisoton_luonne' => $kateisotto_rivi['kateisoton_luonne'],
+				'summa' => $kateisotto_rivi['summa'],
+				'alv' => 0,
+			);
+
+			//tehdään kulutiliöinti
+			tee_tiliointi($params, true);
+
+			//tehdään käteisottotiliöinti
+			$params['summa'] = -1*$kateisotto_rivi['summa'];
+			$params['alv'] = 0;
+			tee_tiliointi($params);
         }
     }
 
@@ -250,51 +274,52 @@ function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti) {
 	return mysql_insert_id();
 }
 
-function tee_tiliointi($lasku_tunnus, $kassalipas, $summa, $kateisoton_luonne, $alv = 0) {
+function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false) {
 	global $kukarow, $yhtiorow;
 
-    if (empty($alv)) {
-        if ($kateisoton_luonne != '') {
-            $kateisoton_luonne_row = hae_kateisoton_luonne($kateisoton_luonne);
-            $kateisoton_luonne_row['kustp'] = $kassalipas['kustp'];
-            $selite = t("Käteisotto kassalippaasta").": " . $kassalipas['nimi'];
-            $vero = 0;
-        }
-        else {
-            //tämä on myyntisaamisia varten
-            $kateisoton_luonne_row['tilino'] = $kassalipas['kassa'];
-            $kateisoton_luonne_row['kustp'] = $kassalipas['kustp'];
-            $selite = t("Käteisotto kassalippaasta").": " . $kassalipas['nimi'];
-            $vero = 0;
-        }
-    }
-    else {
-        $kateisoton_luonne_row['tilino'] = $yhtiorow['alv'];
+	if($kulu_tiliointi) {
+		$kateisoton_luonne_row = hae_kateisoton_luonne($params['kateisoton_luonne']);
+		$kateisoton_luonne_row['kustp'] = $params['kassalipas']['kustp'];
+		$selite = t("Käteisotto kassalippaasta").": " . $params['kassalipas']['nimi'];
+		$vero = $params['alv'];
+		$kulu_tiliointi_linkki = "";
+	}
+	else if ($alv_tiliointi) {
+		$kateisoton_luonne_row['tilino'] = $yhtiorow['alv'];
         $kateisoton_luonne_row['kustp'] = 0;
-        $selite = t("Käteisotton vero kassalippaasta").": " . $kassalipas['nimi'];
-        $vero = $alv;
-    }
-
-
-    $query = "	INSERT INTO tiliointi
+        $selite = t("Käteisotton vero kassalippaasta").": " . $params['kassalipas']['nimi'];
+        $vero = 0;
+		$kulu_tiliointi_linkki = "aputunnus = {$params['kulu_tiliointi_tunnus']},";
+	}
+	else {
+		$kateisoton_luonne_row['tilino'] = $params['kassalipas']['kassa'];
+		$kateisoton_luonne_row['kustp'] = $params['kassalipas']['kustp'];
+		$selite = t("Käteisotto kassalippaasta").": " . $params['kassalipas']['nimi'];
+		$vero = 0;
+		$kulu_tiliointi_linkki = "";
+	}
+	$query = "	INSERT INTO tiliointi
                 SET yhtio = '{$kukarow['yhtio']}',
                 laatija = '{$kukarow['kuka']}',
                 laadittu = NOW(),
-                ltunnus = '{$lasku_tunnus}',
+                ltunnus = '{$params['lasku_tunnus']}',
                 tilino = '{$kateisoton_luonne_row['tilino']}',
                 kustp = '{$kateisoton_luonne_row['kustp']}',
                 tapvm = NOW(),
-                summa = {$summa},
-                summa_valuutassa = {$summa},
+                summa = {$params['summa']},
+                summa_valuutassa = {$params['summa']},
                 valkoodi = '{$yhtiorow['valkoodi']}',
                 selite = '{$selite}',
+				{$kulu_tiliointi_linkki}
                 vero = {$vero}";
 
     pupe_query($query);
+
+	return mysql_insert_id();
 }
 
 function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {
-	global $kukarow, $yhtiorow;
+	global $yhtiorow;
 
 	if (strtotime($yhtiorow['tilikausi_alku']) < strtotime($tapahtumapaiva) and strtotime($yhtiorow['tilikausi_loppu']) > strtotime($tapahtumapaiva)) {
 		return true;

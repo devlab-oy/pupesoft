@@ -1973,17 +1973,13 @@
 							$jt 		= 0;
 						}
 
-						if(isset($jt_muidenmukana)) {
-							// j‰lkitoimitus muiden mukana
-							if ($jt_muidenmukana == 'KYLLA') {
-								$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
-							}
-							elseif ($jt_muidenmukana == 'EI') {
-								$kerayspvm = $laskurow["kerayspvm"];
-							}
-						}
-						elseif (!isset($jt_muidenmukana) and ($toim == 'PIKATILAUS' or $toim == 'RIVISYOTTO')) {
+						// Ollaan painettu JT-muiden mukana nappia, tai meill‰ on parametrit siten, ett‰ se halutaan defaulttina p‰‰lle
+						// (Jt_automatiikka = "kohdistetaan.." ja Automaattinen_jt_toimitus = "J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰ ker‰ysp‰iv‰n mukaisesti")
+						if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
 							$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
+						}
+						else {
+							$kerayspvm = $laskurow["kerayspvm"];
 						}
 						break;
 					case 'P' : // Puute

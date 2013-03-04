@@ -32,9 +32,8 @@ if ($tee == 'lataa_tiedosto') {
 	exit;
 }
 
-require '../inc/pupeExcel.inc';
-require '../inc/ProgressBar.class.php';
-require '../inc/functions.inc';
+require ('inc/pupeExcel.inc');
+require ('inc/ProgressBar.class.php');
 
 ini_set("memory_limit", "2G");
 
@@ -164,14 +163,15 @@ while ($varasto = mysql_fetch_assoc($result)) {
 	);
 }
 
-if(!empty($yhtiorow['kerayserat'])) {
+if (!empty($yhtiorow['kerayserat'])) {
     $query = "	SELECT tunnus, nimitys
                 FROM keraysvyohyke
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND nimitys != ''";
     $result = pupe_query($query);
     $kaikki_keraysvyohykkeet = array();
-    while ($keraysvyohyke = mysql_fetch_assoc($result)) {
+
+	while ($keraysvyohyke = mysql_fetch_assoc($result)) {
         if (isset($keraysvyohykkeet) and in_array($keraysvyohyke['tunnus'], $keraysvyohykkeet)) {
             $checked = "checked = 'checked'";
         }
@@ -258,7 +258,7 @@ if ($tee != '') {
         }
 	}
 
-    if(count($saldolliset) > 0) {
+    if (count($saldolliset) > 0) {
         echo_tulosta_inventointilista($saldolliset);
     }
 }
@@ -307,6 +307,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
     $keraysvyohyke_select = "";
     $keraysvyohyke_join = "";
     $varaston_hyllypaikat_join = "";
+
 	if (!empty($keraysvyohykkeet)) {
         $keraysvyohyke_select = "keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,";
         $varaston_hyllypaikat_join = "  LEFT JOIN varaston_hyllypaikat AS vh
@@ -328,6 +329,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 	if ($tyyppi == "TUOTE") {
 		$vresult = t_avainsana("S");
 		$tuote_statukset = array();
+
 		while ($status = mysql_fetch_assoc($vresult)) {
 			$tuote_statukset[$status['selite']] = $status['selitetark'];
 		}
@@ -340,6 +342,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 				}
 			}
 		}
+
 		$tuotepaikat_select = "tuotepaikat.saldo, tuotepaikat.tunnus paikkatun, ";
 		$group = "GROUP BY tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno";
 	}
@@ -352,15 +355,15 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 	$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
 				{$keraysvyohyke_select}
 				CONCAT_WS(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as hylly,
-				sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
-				sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl * -1, 0)) tuokpl_valittu_aika,
-				sum(if(tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 6 month), 1, 0)) kpl_6,
-				sum(if(tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 6 month), tilausrivi.kpl * -1, 0)) tuo_kpl_6,
-				sum(if(tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 12 month), 1, 0)) kpl_12,
-				sum(if(tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 12 month), tilausrivi.kpl * -1, 0)) tuo_kpl_12,
+				sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
+				sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl * -1, 0)) tuokpl_valittu_aika,
+				sum(if (tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 6 month), 1, 0)) kpl_6,
+				sum(if (tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 6 month), tilausrivi.kpl * -1, 0)) tuo_kpl_6,
+				sum(if (tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 12 month), 1, 0)) kpl_12,
+				sum(if (tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 12 month), tilausrivi.kpl * -1, 0)) tuo_kpl_12,
 				{$tuote_select}
 				{$tuotepaikat_select}
-				sum(if(tuotepaikat.tunnus IS NULL , 1, 0)) poistettu
+				sum(if (tuotepaikat.tunnus IS NULL , 1, 0)) poistettu
 				FROM tilausrivi
 				JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 				LEFT JOIN tuotepaikat
@@ -399,18 +402,18 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 
 	$rows = array();
 	$saldolliset = array();
-    if(mysql_num_rows($result) > 0) {
+    if (mysql_num_rows($result) > 0) {
         $progress_bar = new ProgressBar(t("Haetaan tiedot"));
         $progress_bar->initialize(mysql_num_rows($result));
     }
 
 	while ($row = mysql_fetch_assoc($result)) {
-        if(isset($progress_bar)) {
+        if (isset($progress_bar)) {
             $progress_bar->increase();
         }
 
 		if ($tyyppi == 'TUOTE') {
-            if(!empty($lisa_kentat['nimitys']['checked'])) {
+            if (!empty($lisa_kentat['nimitys']['checked'])) {
                 $row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys');
             }
 			if (isset($row['status']) and array_key_exists($row['status'], $tuote_statukset)) {
@@ -493,27 +496,27 @@ function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $a
 			<input type='text' name='kkl' value='$kkl' size='3' />
 			<input type='text' name='vvl' value='$vvl' size='5' /></td>";
 
-	echo "<tr><th>".t("Anna alkuvarastopaikka:")."</th>
+	echo "<tr><th>".t("Anna alkuvarastopaikka").":</th>
 			<td><input class='ahylly' type='text' size='6' name='ahyllyalue' value='$ahyllyalue' />
 			<input class='ahylly' type='text' size='6' name='ahyllynro' value='$ahyllynro' />
 			<input class='ahylly' type='text' size='6' name='ahyllyvali' value='$ahyllyvali' />
 			<input class='ahylly' type='text' size='6' name='ahyllytaso' value='$ahyllytaso' />
 			</td></tr>";
 
-	echo "<tr><th>".t("ja loppuvarastopaikka:")."</th>
+	echo "<tr><th>".t("ja loppuvarastopaikka").":</th>
 			<td><input class='lhylly' type='text' size='6' name='lhyllyalue' value='$lhyllyalue' />
 			<input class='lhylly' type='text' size='6' name='lhyllynro' value='$lhyllynro' />
 			<input class='lhylly' type='text' size='6' name='lhyllyvali' value='$lhyllyvali' />
 			<input class='lhylly' type='text' size='6' name='lhyllytaso' value='$lhyllytaso' />
 			</td></tr>";
 
-	echo "<tr><th>".t("Listaa vain näin monta kerätyintä tuotetta:")."</th>
+	echo "<tr><th>".t("Listaa vain näin monta kerätyintä tuotetta").":</th>
 			<td><input type='text' size='6' name='toppi' value='$toppi' /></td>";
 
 	echo "<tr>";
 	echo "<th>";
 	echo t("Varastot");
-	echo "</th>";
+	echo ":</th>";
 	echo "<td>";
 	foreach ($varastot as $varasto_index => $varasto) {
 		echo "<input class='varastot' type='checkbox' name='varastot[]' value='{$varasto_index}' {$varasto['checked']} />";
@@ -525,11 +528,11 @@ function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $a
 
     if (!empty($yhtiorow['kerayserat']) and !empty($keraysvyohykkeet)) {
         echo "<tr>";
-        
+
         echo "<th>";
         echo t("Keräysvyöhykkeet");
-        echo "</th>";
-        
+        echo ":</th>";
+
         echo "<td>";
         foreach ($keraysvyohykkeet as $keraysvyohykkeet_index => $keraysvyohykkeet) {
             echo "<input class='keraysvyohykkeet' type='checkbox' name='keraysvyohykkeet[]' value='{$keraysvyohykkeet_index}' {$keraysvyohykkeet['checked']} />";
@@ -537,14 +540,14 @@ function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $a
             echo "<br/>";
         }
         echo "</td>";
-        
+
         echo "</tr>";
     }
 
 	echo "<tr>";
 	echo "<th>";
 	echo t("Lisäkentät");
-	echo "</th>";
+	echo ":</th>";
 	echo "<td>";
 	foreach ($lisa_kentat as $lisa_kentat_index => $lisa_kentat) {
 		echo "<input class='keraysvyohykkeet' type='checkbox' name='lisa_kentat[]' value='{$lisa_kentat_index}' {$lisa_kentat['checked']} />";

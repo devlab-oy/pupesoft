@@ -356,11 +356,11 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 				{$keraysvyohyke_select}
 				CONCAT_WS(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as hylly,
 				sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
-				sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl * -1, 0)) tuokpl_valittu_aika,
+				sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl, 0)) tuokpl_valittu_aika,
 				sum(if (tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 6 month), 1, 0)) kpl_6,
-				sum(if (tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 6 month), tilausrivi.kpl * -1, 0)) tuo_kpl_6,
+				sum(if (tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 6 month), tilausrivi.kpl, 0)) tuo_kpl_6,
 				sum(if (tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 12 month), 1, 0)) kpl_12,
-				sum(if (tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 12 month), tilausrivi.kpl * -1, 0)) tuo_kpl_12,
+				sum(if (tilausrivi.laskutettuaika >= Date_sub(Now(), INTERVAL 12 month), tilausrivi.kpl, 0)) tuo_kpl_12,
 				{$tuote_select}
 				{$tuotepaikat_select}
 				sum(if (tuotepaikat.tunnus IS NULL , 1, 0)) poistettu
@@ -604,7 +604,7 @@ function right_aling_numbers($header, $solu, $force_to_string) {
             $align = "";
         }
         if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
-            $solu = number_format($solu, 2);
+            $solu = number_format($solu, 0);
         }
 
         echo "<td $align>{$solu}</td>";

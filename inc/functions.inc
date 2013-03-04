@@ -5382,7 +5382,12 @@ if (!function_exists("generoi_alekentta")) {
 			}
 		}
 
-		$return = "if ({$prefix}.netto='N', 1, {$ale})";
+		if($prefix != 'panttitili') {
+			$return = "if ({$prefix}.netto='N', 1, {$ale})";
+		}
+		else {
+			$return = $ale;
+		}
 
 		return $return;
 	}

@@ -23,7 +23,7 @@ find ${POLKU}/dataout -type f -mtime +${BACKUPSAVEDAYS} -not -path '*/.gitignore
 
 # Siivotaan datain dirikasta vanhat failit pois
 touch ${POLKU}/datain
-find ${POLKU}/datain -type f -mtime +${BACKUPSAVEDAYS} -not -path '*/Finvoice*' -not -path '*/*.xsd' -delete
+find ${POLKU}/datain -type f -mtime +${BACKUPSAVEDAYS} -not -path '*/Finvoice*' -not -path '*/*.xsd' -not -path '*/*.xsl' -delete
 
 # Jos Nagios on käytössä, niin tsekataan apachen fatalit errorit
 if [ -f "/home/nagios/nagios-pupesoft.sh" ]; then

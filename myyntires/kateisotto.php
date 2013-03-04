@@ -2,25 +2,25 @@
 
 require ("../inc/parametrit.inc");
 
-if($ajax_request == 1 and $kateisoton_luonne == 1) {
+if ($ajax_request == 1 and $kateisoton_luonne == 1) {
     $luonteet = hae_kateisoton_luonteet();
     array_walk_recursive($luonteet, 'array_utf8_encode');
-    
+
     echo json_encode($luonteet,false);
     exit;
 }
-if($ajax_request == 1 and $alv == 1) {
+if ($ajax_request == 1 and $alv == 1) {
     echo json_encode(hae_kaikki_alvit(),false);
     exit;
 }
 ?>
 <script language='javascript' type='text/javascript'>
-    
+
     $(document).ready(function(){
         bind_uusi_rivi();
 		bind_poista_rivi();
     });
-    
+
     function bind_uusi_rivi() {
         $('#uusi_tyyppi').click(function(event){
             event.preventDefault();
@@ -34,34 +34,34 @@ if($ajax_request == 1 and $alv == 1) {
             $(this).parent().parent().remove();
         });
 	}
-    
+
     function lisaa_uusi_tyyppi_rivi() {
         var kateisotto_rivi = $('#kateisotto_rivi_template').clone();
         var current_child_index = hae_taman_hetkinen_child_index();
         current_child_index += 1;
-        
+
         $(kateisotto_rivi).find('input.child_index').val(current_child_index);
         $(kateisotto_rivi).find('input.summa').attr('name', 'kateisotto_rivi['+current_child_index+'][summa]');
         $(kateisotto_rivi).find('select.kateisoton_luonne').attr('name', 'kateisotto_rivi['+current_child_index+'][kateisoton_luonne]');
         $(kateisotto_rivi).find('select.alv').attr('name', 'kateisotto_rivi['+current_child_index+'][alv]');
-        
+
         populoi_kateis_oton_luonteet($(kateisotto_rivi).find('select.kateisoton_luonne'));
         populoi_alvit($(kateisotto_rivi).find('select.alv'));
 
 		$(kateisotto_rivi).attr('id', '');
         $(kateisotto_rivi).css('display','');
-        
+
         $('#kommentti_tr').before(kateisotto_rivi);
     }
-    
+
     function hae_taman_hetkinen_child_index() {
         var values = $('input.child_index').map(function(){
             return isNaN(this.value) ? [] : +this.value;
         }).get();
-        
+
         return Math.max.apply(null, values);
     }
-    
+
     function populoi_kateis_oton_luonteet(kateisoton_luonne_select) {
         $.ajax({
             type: 'POST',
@@ -76,7 +76,7 @@ if($ajax_request == 1 and $alv == 1) {
             });
         });
     }
-    
+
     function populoi_alvit(alv_select) {
         $.ajax({
             type: 'POST',
@@ -90,31 +90,31 @@ if($ajax_request == 1 and $alv == 1) {
             });
         });
     }
-    
+
 	function tarkista() {
 		var ok = true;
-		if($('.kassalipas').val() == '') {
+		if ($('.kassalipas').val() == '') {
 			ok = false;
 		}
 
 		$.each($('#kateisotto_table .summa'), function(index,value) {
-			if($(value).val() == '') {
+			if ($(value).val() == '') {
 				ok = false;
 			}
 		});
 
 		$.each($('#kateisotto_table .kateisoton_luonne'), function(index,value) {
-			if($(value).val() == '') {
+			if ($(value).val() == '') {
 				ok = false;
 			}
 		});
 
-		if($('#userfile').val() != '' && $('#kuvaselite').val() == '') {
+		if ($('#userfile').val() != '' && $('#kuvaselite').val() == '') {
 			alert($('#kuva_selite_alert').html());
 			ok = false;
 		}
 
-		if(!ok) {
+		if (!ok) {
 			alert($('#tarvittavia_tietoja').html());
 		}
 		return ok;
@@ -139,10 +139,10 @@ $request_params = array(
 
 if ($tee == 'kateisotto') {
 	$voiko_kateisoton_tehda = tarkista_saako_laskua_muuttaa(date('Y-m-d'));
-	if($voiko_kateisoton_tehda) {
+	if ($voiko_kateisoton_tehda) {
 
 		$voiko_kateisoton_tehda = validoi_liitetiedosto($_FILES);
-		if($voiko_kateisoton_tehda) {
+		if ($voiko_kateisoton_tehda) {
 			//tehdään käteisotto
 			//
 			//haetaan kassalipas row
@@ -150,14 +150,14 @@ if ($tee == 'kateisotto') {
 
 			//tarkistetaan, onko kassalipas jo täsmäytetty
 			$kassalippaan_tasmaytys = tarkista_kassalippaan_tasmaytys($kassalipas['tunnus']);
-			if($kassalippaan_tasmaytys['ltunnukset'] != '' and $kassalippaan_tasmaytys['selite'] != '') {
+			if ($kassalippaan_tasmaytys['ltunnukset'] != '' and $kassalippaan_tasmaytys['selite'] != '') {
 				echo "<font class='error'>".t("Tämän päivän valittu kassalipas on jo täsmäytetty")."</font>";
 			}
 			else {
 				$lasku_tunnus = tee_kateisotto($kassalipas, $request_params);
 				echo "<font class='message'>".t("Käteisotto tehtiin onnistuneesti")."</font>";
 
-				if(!empty($lasku_tunnus) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+				if (!empty($lasku_tunnus) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 					tallenna_liite("userfile", "lasku", $lasku_tunnus, $request_params['kuvaselite'], "", 0, 0, "");
 				}
 			}
@@ -195,26 +195,26 @@ function tarkista_kassalippaan_tasmaytys($kassalipas_tunnus) {
 
 function tee_kateisotto($kassalipas, $request_params) {
 	global $kukarow, $yhtiorow;
-	
+
     $summa = 0;
     foreach($request_params['kateisotto_rivi'] as $kateisotto_rivi) {
         $summa += $kateisotto_rivi['summa'];
     }
-    
+
 	$lasku_tunnus = tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti);
-    
+
     foreach($request_params['kateisotto_rivi'] as $kateisotto_rivi) {
-        if($kateisotto_rivi['alv'] > 0) {
+        if ($kateisotto_rivi['alv'] > 0) {
             //jos käteisotto rivin alv on muuta kuin nolla niin pitää laskea tiliöinnin alvittomat hinnat tehdä myös alv tiliöinti
             $alviton_summa = $kateisotto_rivi['summa'] / (1 + ($kateisotto_rivi['alv'] / 100));
             $alv_maara = $kateisotto_rivi['summa'] - $alviton_summa;
-            
+
             //tehdään summalle tiliöinti
             tee_tiliointi($lasku_tunnus, $kassalipas, -1*$kateisotto_rivi['summa'], '');
-            
+
             //tehdään alvittoman summan tiliöinti
             tee_tiliointi($lasku_tunnus, $kassalipas, $alviton_summa, $kateisotto_rivi['kateisoton_luonne']);
-            
+
             //tehdään alv tiliöinti
             tee_tiliointi($lasku_tunnus, $kassalipas, $alv_maara, '', $kateisotto_rivi['alv']);
         }
@@ -244,7 +244,7 @@ function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti) {
 				tapvm = NOW(),
 				kassalipas = '{$kassalipas['tunnus']}',
 				nimi = '".t("Käteisotto kassalippaasta").": {$kassalipas['nimi']}'";
-				
+
 	pupe_query($query);
 
 	return mysql_insert_id();
@@ -253,8 +253,8 @@ function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti) {
 function tee_tiliointi($lasku_tunnus, $kassalipas, $summa, $kateisoton_luonne, $alv = 0) {
 	global $kukarow, $yhtiorow;
 
-    if(empty($alv)) {
-        if($kateisoton_luonne != '') {
+    if (empty($alv)) {
+        if ($kateisoton_luonne != '') {
             $kateisoton_luonne_row = hae_kateisoton_luonne($kateisoton_luonne);
             $kateisoton_luonne_row['kustp'] = $kassalipas['kustp'];
             $selite = t("Käteisotto kassalippaasta").": " . $kassalipas['nimi'];
@@ -274,8 +274,8 @@ function tee_tiliointi($lasku_tunnus, $kassalipas, $summa, $kateisoton_luonne, $
         $selite = t("Käteisotton vero kassalippaasta").": " . $kassalipas['nimi'];
         $vero = $alv;
     }
-    
-            
+
+
     $query = "	INSERT INTO tiliointi
                 SET yhtio = '{$kukarow['yhtio']}',
                 laatija = '{$kukarow['kuka']}',
@@ -307,7 +307,7 @@ function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {
 
 function validoi_liitetiedosto($_FILES) {
 	$return = true;
-	if(!empty($_FILES['userfile'])) {
+	if (!empty($_FILES['userfile'])) {
 		switch ($_FILES['userfile']['error']) {
 			case 1:
 			case 2:
@@ -329,7 +329,7 @@ function validoi_liitetiedosto($_FILES) {
 				$return = true;
 				break;
 		}
-		
+
 		$query = "SHOW variables like 'max_allowed_packet'";
 		$result = pupe_query($query);
 		$varirow = mysql_fetch_row($result);
@@ -357,13 +357,13 @@ function hae_kassalipas($kassalipas_tunnus) {
 	//tarkistetaan, että kassalippaan takaa löytyy tilinumerot, jos ei löydy niin laitetaan yhtiorown takaa defut
 	$kassalipas = mysql_fetch_assoc($result);
 
-	if($kassalipas['kassa'] == '') {
+	if ($kassalipas['kassa'] == '') {
 		$kassalipas['kassa'] = $yhtiorow['kassa'];
 	}
-	if($kassalipas['pankkikortti'] == '') {
+	if ($kassalipas['pankkikortti'] == '') {
 		$kassalipas['pankkikortti'] = $yhtiorow['pankkikortti'];
 	}
-	if($kassalipas['luottokortti'] == '') {
+	if ($kassalipas['luottokortti'] == '') {
 		$kassalipas['luottokortti'] = $yhtiorow['luottokortti'];
 	}
 
@@ -375,21 +375,21 @@ function hae_kassalipas($kassalipas_tunnus) {
 function hae_kassalippaat() {
 	global $kukarow;
 
-	if ($kukarow['kassalipas'] != '') {
-		$sallitut_kassalipppaat = "AND tunnus IN ({$kukarow['kassalipas']})";
+	if ($kukarow['kassalipas_otto'] != '') {
+		$sallitut_kassalipppaat = "AND tunnus IN ({$kukarow['kassalipas_otto']})";
 	}
-	
+
 	$query = "	SELECT *
 				FROM kassalipas
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				{$sallitut_kassalipppaat}";
 	$result = pupe_query($query);
-	
+
 	$kassalippaat = array();
-	while($kassalipas = mysql_fetch_assoc($result)) {
+	while ($kassalipas = mysql_fetch_assoc($result)) {
 		$kassalippaat[] = $kassalipas;
 	}
-	
+
 	return $kassalippaat;
 }
 
@@ -427,7 +427,7 @@ function hae_kateisoton_luonteet() {
 	$result = pupe_query($query);
 
 	$kateisoton_luonteet = array();
-	while($kateisoton_luonne = mysql_fetch_assoc($result)) {
+	while ($kateisoton_luonne = mysql_fetch_assoc($result)) {
 		$kateisoton_luonteet[] = $kateisoton_luonne;
 	}
 
@@ -446,7 +446,7 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
 	echo "<option value=''>".t("Valitse kassalipas")."</option>";
 	$sel = "";
 	foreach ($kassalippaat as $kassalipas) {
-		if($kassalipas['tunnus'] == $request_params['kassalipas']) {
+		if ($kassalipas['tunnus'] == $request_params['kassalipas']) {
 			$sel = "SELECTED";
 		}
 		echo "<option value='{$kassalipas['tunnus']}' $sel>{$kassalipas['nimi']}</option>";
@@ -455,7 +455,7 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
 	echo "</select>";
 	echo "</td>";
 	echo "</tr>";
-    
+
     echo "<tr>";
     echo "<th>";
     echo t("Lisää uusi rivi");
@@ -464,7 +464,7 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
     echo "<button id='uusi_tyyppi'>".t("Uusi käteisotto rivi")."</button>";
     echo "</td>";
     echo "</tr>";
-    
+
     echo "<tr>";
     echo "<th>";
     echo t("Käteisotto rivi");
@@ -473,19 +473,19 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
     echo "<input type='hidden' class='child_index' value='0' />";
     echo "<button class='poista_rivi' onclick='bind_poista_rivi();'>".t("Poista rivi")."</button>";
     echo "<br/>";
-    
+
     echo t("Summa") . ':';
     echo "<br/>";
     echo "<input type='text' name='kateisotto_rivi[0][summa]' class='summa' value='{$request_params['summa']}'>";
     echo "<br/>";
-    
+
     echo t("Mihin tarkoitukseen käteisotto tehdään");
     echo "<br/>";
     echo "<select name='kateisotto_rivi[0][kateisoton_luonne]' class='kateisoton_luonne'>";
 	echo "<option value=''>".t("Valitse tarkoitus")."</option>";
 	$sel = "";
 	foreach ($kateisoton_luonteet as $luonne) {
-		if($luonne['tunnus'] == $request_params['kateisoton_luonne']) {
+		if ($luonne['tunnus'] == $request_params['kateisoton_luonne']) {
 			$sel = "SELECTED";
 		}
 		echo "<option value='{$luonne['tunnus']}' $sel>{$luonne['selitetark']} - {$luonne['tilino']}</option>";
@@ -493,7 +493,7 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
 	}
 	echo "</select>";
     echo "<br/>";
-    
+
     echo t("Alv");
     echo "<br/>";
     echo "<select name='kateisotto_rivi[0][alv]' class='alv'>";
@@ -501,7 +501,7 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
         echo "<option value='{$alv['selite']}'>{$alv['selite']}</option>";
     }
     echo "</select>";
-    
+
     echo "</td>";
     echo "</tr>";
 
@@ -522,7 +522,7 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
 	echo "<td class='back'><input name='submit' type='submit' value='".t("Lähetä")."' onClick='return tarkista();'></td>";
 
 	echo "</form>";
-    
+
     echo "<table>";
     echo '  <tr id="kateisotto_rivi_template" style="display:none;">
                 <th>'.t("Käteisotto rivi").'</th>

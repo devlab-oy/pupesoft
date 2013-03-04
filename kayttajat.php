@@ -305,8 +305,8 @@
 				$varasto = implode(",", $varasto);
 			}
 
-			if(count($kassalipas) > 0) {
-				$kassalipas = implode(",", $kassalipas);
+			if (count($kassalipas_otto) > 0) {
+				$kassalipas_otto = implode(",", $kassalipas_otto);
 			}
 
 			if (is_array($keraysvyohyke) and count($keraysvyohyke) > 0) {
@@ -343,7 +343,7 @@
 						oletus_varasto					= '{$oletus_varasto}',
 						oletus_pakkaamo					= '{$oletus_pakkaamo}',
 						kirjoitin 						= '{$kirjoitin}',
-						kassalipas						= '{$kassalipas}',
+						kassalipas_otto					= '{$kassalipas_otto}',
 						kassamyyja 						= '{$kassamyyja}',
 						dynaaminen_kassamyynti 			= '{$dynaaminen_kassamyynti}',
 						jyvitys							= '{$jyvitys}',
@@ -521,8 +521,8 @@
 				$varasto = implode(",", $varasto);
 			}
 
-			if(count($kassalipas) > 0) {
-				$kassalipas = implode(",", $kassalipas);
+			if (count($kassalipas_otto) > 0) {
+				$kassalipas_otto = implode(",", $kassalipas_otto);
 			}
 
 			if (is_array($keraysvyohyke) and count($keraysvyohyke) > 0) {
@@ -568,7 +568,7 @@
 						asema							= '{$asema}',
 						toimipaikka						= '{$toimipaikka}',
 						mitatoi_tilauksia				= '{$mitatoi_tilauksia}',
-						kassalipas 						= '{$kassalipas}',
+						kassalipas_otto					= '{$kassalipas_otto}',
 						kassamyyja 						= '{$kassamyyja}',
 						dynaaminen_kassamyynti			= '{$dynaaminen_kassamyynti}',
 						jyvitys							= '{$jyvitys}',
@@ -1039,11 +1039,11 @@
 					echo "<tr>";
 					echo "<th align='left'>".t("Valitse kassalippaat, joihin käyttäjällä on otto oikeus")."</th>";
 					echo "<td>";
-					$kassalippaat_array = explode(",", $krow["kassalipas"]);
+					$kassalippaat_array = explode(",", $krow["kassalipas_otto"]);
 					foreach($kassalippaat as $kassalipas) {
 						$sel = '';
 						if (in_array($kassalipas['tunnus'], $kassalippaat_array)) $sel = 'CHECKED';
-						echo "<input type='checkbox' name='kassalipas[]' value='{$kassalipas['tunnus']}' {$sel}> {$kassalipas['nimi']}<br/>";
+						echo "<input type='checkbox' name='kassalipas_otto[]' value='{$kassalipas['tunnus']}' {$sel}> {$kassalipas['nimi']}<br/>";
 					}
 					echo "</td>";
 					echo "</td><td class='back'>",t("Ilman rajausta käyttäjällä on oikeus kaikkiin kassalippaisiin"),"</td></tr>";
@@ -1326,7 +1326,7 @@
 					echo "</select></td></tr>";
 
 					//	Jos vain valitut henkilöt saa jyvitellä hintoja näytetään tämän valinta
-					if($yhtiorow["salli_jyvitys_myynnissa"] == "V") {
+					if ($yhtiorow["salli_jyvitys_myynnissa"] == "V") {
 
 						if ($krow['jyvitys'] == "") {
 							$sel1 = "SELECTED";
@@ -1417,7 +1417,7 @@
 					while ($prow = mysql_fetch_array($pres)) {
 
 						$chk = "";
-						if(in_array($prow["selite"], $piirit)) {
+						if (in_array($prow["selite"], $piirit)) {
 							$chk = "CHECKED";
 						}
 
@@ -1511,7 +1511,7 @@
 		if ($toim == "extranet") $extrsel = "X";
 		else $extrsel = "";
 
-		$query = "	SELECT kuka.nimi, kuka.kuka, kuka.tunnus, if(count(oikeu.tunnus) > 0, 0, 1) aktiivinen
+		$query = "	SELECT kuka.nimi, kuka.kuka, kuka.tunnus, if (count(oikeu.tunnus) > 0, 0, 1) aktiivinen
 					FROM kuka
 					LEFT JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 					WHERE kuka.yhtio = '{$kukarow['yhtio']}'

@@ -458,7 +458,7 @@ while ($tietue = fgets($fd)) {
 
 		case 'ORFFCR_NU'  :
 		//Kommentteja
-			$edi_kommentti .= $tieto . ' ';
+			$merkkitieto = $tieto;
 			break;
 
 		case 'OSTOTIL.OT_MAKSUEHTO' :
@@ -1138,6 +1138,7 @@ while ($tietue = fgets($fd)) {
 							sisainen							= '$editilaus_sisainen',
 							sisviesti1         					= '$arow[sisviesti1]',
 							sisviesti2         					= '$lopviesti',
+							sisviesti3							= '{$merkkitieto}',
 							splittauskielto						= '$splittauskielto',
 							tila 			   					= '$editilaus_tila',
 							tilaustyyppi						= '$tilaustyyppilisa',

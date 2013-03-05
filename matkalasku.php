@@ -875,10 +875,10 @@ if ($tee == "MUOKKAA") {
 
 			if (mysql_num_rows($liiteres) > 0) {
 				while ($liiterow = mysql_fetch_assoc($liiteres)) {
-					echo "<a href='' onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$liiterow[selite]</a>";
+					echo "<button onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$liiterow[selite]</button>";
 
 					if (!$muokkauslukko) {
-						echo "&nbsp;&nbsp;&nbsp;&nbsp;<a href='matkalasku.php?tee=$tee&tilausnumero=$tilausnumero&poistakuva=$liiterow[tunnus]'>*".t("poista")."*</a>";
+						echo "&nbsp;&nbsp;&nbsp;&nbsp;<a href='matkalasku.php?toim=$toim&tee=$tee&tilausnumero=$tilausnumero&poistakuva=$liiterow[tunnus]'>*".t("poista")."*</a>";
 					}
 
 					echo "<br>\n";
@@ -910,10 +910,9 @@ if ($tee == "MUOKKAA") {
 							<td>";
 
 					foreach ($files as $kuitti) {
-
 						$tiedostonimi = basename($kuitti);
 
-						echo "<input type='checkbox' name='skannattukuitti[]' value='$tiedostonimi'> <a href='' onclick=\"window.open('$kuitti', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$tiedostonimi</a><br>";
+						echo "<input type='checkbox' name='skannattukuitti[]' value='$tiedostonimi'> <button onclick=\"window.open('$kuitti', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$tiedostonimi</button><br>";
 					}
 
 					echo "</td></tr>";
@@ -1055,7 +1054,7 @@ if ($tee == "MUOKKAA") {
 
 		if (mysql_num_rows($liiteres) > 0) {
 			while ($liiterow = mysql_fetch_assoc($liiteres)) {
-				echo "<a href='' onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$liiterow[selite]</a>";
+				echo "<button onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$liiterow[selite]</button>";
 				echo "<br>\n";
 			}
 		}

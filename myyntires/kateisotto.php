@@ -283,6 +283,7 @@ function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false)
 		$selite = t("Käteisotto kassalippaasta").": " . $params['kassalipas']['nimi'];
 		$vero = $params['alv'];
 		$kulu_tiliointi_linkki = "";
+		$lukko = "lukko = '',";
 	}
 	else if ($alv_tiliointi) {
 		$kateisoton_luonne_row['tilino'] = $yhtiorow['alv'];
@@ -290,6 +291,7 @@ function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false)
         $selite = t("Käteisotton vero kassalippaasta").": " . $params['kassalipas']['nimi'];
         $vero = 0;
 		$kulu_tiliointi_linkki = "aputunnus = {$params['kulu_tiliointi_tunnus']},";
+		$lukko = "lukko = '1',";
 	}
 	else {
 		$kateisoton_luonne_row['tilino'] = $params['kassalipas']['kassa'];
@@ -297,6 +299,7 @@ function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false)
 		$selite = t("Käteisotto kassalippaasta").": " . $params['kassalipas']['nimi'];
 		$vero = 0;
 		$kulu_tiliointi_linkki = "";
+		$lukko = "lukko = '1',";
 	}
 	$query = "	INSERT INTO tiliointi
                 SET yhtio = '{$kukarow['yhtio']}',
@@ -311,6 +314,7 @@ function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false)
                 valkoodi = '{$yhtiorow['valkoodi']}',
                 selite = '{$selite}',
 				{$kulu_tiliointi_linkki}
+				{$lukko}
                 vero = {$vero}";
 
     pupe_query($query);

@@ -662,10 +662,11 @@
 				if (isset($lahete_tulostus_paperille) and $lahete_tulostus_paperille > 0) $print_array[] = "{$lahete_tulostus_paperille} lähetettä";
 				if (isset($lahete_tulostus_paperille_vak) and $lahete_tulostus_paperille_vak > 0) $print_array[] = "{$lahete_tulostus_paperille_vak} vak/adr {$dokumenttiteksti}";
 
-				$response = "0,".implode(" ja ", $print_array)." tulostuu kirjoittimelta{$laheteprintterinimi}\r\n\r\n";
-
 				if (count($print_array) == 0) {
 					$response = "0,Lähetteitä ei tulosteta\r\n\r\n";
+				}
+				else {
+					$response = "0,".implode(" ja ", $print_array)." tulostuu kirjoittimelta{$laheteprintterinimi}\r\n\r\n";
 				}
 			}
 		}

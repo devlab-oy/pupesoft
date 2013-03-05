@@ -426,27 +426,27 @@
 					and o2.tunnus is null";
 		$result = mysql_query($query) or pupe_error($query);
 
-		/*
+
 		// Merkataan myyntitilit valmiiksi, jos niillä ei ole yhtään käsittelemättömiä rivejä
-		$query = "	SELECT lasku.tunnus, sum(tilausrivi.kpl) kpl
+		$query = "	SELECT lasku.tunnus,
+					sum(if(tilausrivi.var not in ('A','B') or tilausrivi.toimitettuaika='0000-00-00 00:00:00', 1, 0)) ei_valmis
 					FROM lasku
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
-						AND tilausrivi.otunnus = lasku.tunnus
-						AND tilausrivi.tyyppi != 'D')
-					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-					AND lasku.tila = 'G'
-					AND lasku.tilaustyyppi = 'M'
-					AND lasku.alatila != 'X'
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila = 'G'
+					and lasku.tilaustyyppi = 'M'
+					and lasku.alatila = 'V'
 					GROUP BY lasku.tunnus
-					HAVING kpl = 0";
+					HAVING ei_valmis = 0";
 		$result = pupe_query($query);
 
 		$myyntitili = 0;
+
 		while ($laskurow = mysql_fetch_assoc($result)) {
 			$query = "	UPDATE lasku
 						SET alatila = 'X'
 						WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-						AND lasku.tunnus = '{$laskurow["tunnus"]}'";
+						AND lasku.tunnus  = '{$laskurow["tunnus"]}'";
 			$update_result = pupe_query($query);
 			$myyntitili++;
 		}
@@ -454,7 +454,6 @@
 		if ($myyntitili > 0) {
 			$iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $myyntitili myyntitiliä valmiiksi.\n";
 		}
-		*/
 
 		// Poistetaan kaikki myyntitili-varastopaikat, jos niiden saldo on nolla
 		$query = "	SELECT tunnus, tuoteno
@@ -466,6 +465,7 @@
 		$iltatuotepaikatresult = pupe_query($query);
 
 		$myyntitili = 0;
+
 		while ($iltatuotepaikatrow = mysql_fetch_assoc($iltatuotepaikatresult)) {
 			$tee = "MUUTA";
 			$tuoteno = $iltatuotepaikatrow["tuoteno"];
@@ -495,7 +495,7 @@
 				mail($yhtiorow["admin_email"], mb_encode_mimeheader("Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'", "ISO-8859-1", "Q"), $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
 			}
 		}
-		
+
 		# Poistetaan tuotepaikat joiden saldo on 0 ja ne on määritelty reservipaikoiksi (ei kuitenkaan oletuspaikkaa)
 		if ($yhtiorow['kerayserat'] == 'K') {
 			$query = "	SELECT tuotepaikat.*

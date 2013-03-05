@@ -13,7 +13,7 @@ if (isset($_POST["tee"])) {
 	if ($_POST["tee"] == 'lataa_tiedosto') {
 		$lataa_tiedosto = 1;
 	}
-	if ($_POST["kaunisnimi"] != '') {
+	if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
 		$_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 	}
 }
@@ -271,7 +271,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 		'E' => ("Ei ehdoteta ostoehdotusohjelmissa tilattavaksi"),
 	);
 
-	if (strtotime("$vva-$kka-$ppa") >= strtotime('now - 12 months')) {
+	if (strtotime("$vva-$kka-$ppa") < strtotime('now - 12 months')) {
 		$_date = "AND tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
 				  AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'";
 	}
@@ -428,7 +428,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 			}
 		}
 
-		$row['kpl_kerays'] = number_format($row["kpl_valittu_aika"] > 0 ? round($row["tuokpl_valittu_aika"] / $row["kpl_valittu_aika"]) : "", 0);
+		$row['kpl_kerays'] = number_format($row["kpl_valittu_aika"] > 0 ? round($row["tuokpl_valittu_aika"] / $row["kpl_valittu_aika"]) : 0, 0);
 		$row['kpl_valittu_aika_pvm'] = number_format($row["kpl_valittu_aika"] / $pva, 0);
 
 		if ($row['poistettu'] != 0) {
@@ -490,7 +490,7 @@ function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $a
 	echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
 			<td><input type='text' name='ppa' value='$ppa' size='3'>
 			<input type='text' name='kka' value='$kka' size='3' />
-			<input type='text' name='vva' value='$vva' size='5' /> ".t("Alkupäivämäärä voi olla korkeintaan 12kk päässä nykyhetkestä")."</td>
+			<input type='text' name='vva' value='$vva' size='5' /></td>
 			</tr><tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
 			<td><input type='text' name='ppl' value='$ppl' size='3' />
 			<input type='text' name='kkl' value='$kkl' size='3' />

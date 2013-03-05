@@ -209,25 +209,82 @@ if ($tee != '') {
 	}
 
 	$header_values = array(
-		'tuoteno' => t('Tuoteno'),
-		'nimitys' => t('Tuotteen nimi'),
-		'varaston_nimitys' => t('Varasto'),
-		'keraysvyohykkeen_nimitys' => t('Keräysvyöhyke'),
-		'hylly' => t('Varastopaikka'),
-		'saldo' => t('Saldo'),
-		'kpl_valittu_aika' => t('Keräystä'),
-		'kpl_valittu_aika_pvm' => t('Keräystä/Päivä'),
-		'kpl_kerays' => t('Kpl/Keräys'),
-		'kpl_6' => t('Keräystä tästä päivästä 6kk'),
-		'kpl_12' => t('Keräystä tästä päivästä 12kk'),
-		'poistettu' => t('Poistettu varastopaikka'),
-		'tuotekorkeus' => t('Tuotteen korkeus'),
-		'tuoteleveys' => t('Tuotteen leveys'),
-		'tuotesyvyys' => t('Tuotteen syvyys'),
-		'tuotemassa' => t('Tuotteen massa'),
-		'status' => t('Status'),
-		'luontiaika' => t('Tuotteen Luontiaika'),
-		'ostoehdotus' => t('Ostoehdotus'),
+		'tuoteno' => array(
+			'header' => t('Tuoteno'),
+			'order' => 0
+		),
+		'nimitys' => array(
+			'header' => t('Tuotteen nimi'),
+			'order' => 1
+		),
+		'varaston_nimitys' => array(
+			'header' => t('Varasto'),
+			'order' => 2
+		),
+		'keraysvyohykkeen_nimitys' => array(
+			'header' => t('Keräysvyöhyke'),
+			'order' => 3
+		),
+		'hylly' => array(
+			'header' => t('Varastopaikka'),
+			'order' => 4
+		),
+		'saldo' => array(
+			'header' => t('Saldo'),
+			'order' => 5
+		),
+		'kpl_valittu_aika' => array(
+			'header' => t('Keräystä'),
+			'order' => 6
+		),
+		'kpl_valittu_aika_pvm' => array(
+			'header' => t('Keräystä/Päivä'),
+			'order' => 7
+		),
+		'kpl_kerays' => array(
+			'header' => t('Kpl/Keräys'),
+			'order' => 8
+		),
+		'kpl_6' => array(
+			'header' => t('Keräystä tästä päivästä 6kk'),
+			'order' => 9
+		),
+		'kpl_12' => array(
+			'header' => t('Keräystä tästä päivästä 12kk'),
+			'order' => 10
+		),
+		'poistettu' => array(
+			'header' => t('Poistettu varastopaikka'),
+			'order' => 11
+		),
+		'tuotekorkeus' => array(
+			'header' => t('Tuotteen korkeus'),
+			'order' => 12
+		),
+		'tuoteleveys' => array(
+			'header' => t('Tuotteen leveys'),
+			'order' => 13
+		),
+		'tuotesyvyys' => array(
+			'header' => t('Tuotteen syvyys'),
+			'order' => 14
+		),
+		'tuotemassa' => array(
+			'header' => t('Tuotteen massa'),
+			'order' => 15
+		),
+		'status' => array(
+			'header' => t('Status'),
+			'order' => 16
+		),
+		'luontiaika' => array(
+			'header' => t('Tuotteen Luontiaika'),
+			'order' => 17
+		),
+		'ostoehdotus' => array(
+			'header' => t('Ostoehdotus'),
+			'order' => 18
+		),
 	);
 	$force_to_string = array(
 		'tuoteno'
@@ -266,6 +323,8 @@ if ($tee != '') {
 echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso, $toppi, $summaa_varastopaikalle, $kaikki_varastot, $kaikki_keraysvyohykkeet, $kaikki_lisa_kentat);
 
 function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $lisa_kentat) {
+	global $yhtiorow;
+
 	$ostoehdotukset = array(
 		'' => t("Ehdotetaan ostoehdotusohjelmissa tilattavaksi"),
 		'E' => ("Ei ehdoteta ostoehdotusohjelmissa tilattavaksi"),
@@ -308,22 +367,24 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
     $keraysvyohyke_join = "";
     $varaston_hyllypaikat_join = "";
 
-	if (!empty($keraysvyohykkeet)) {
-        $keraysvyohyke_select = "keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,";
-        $varaston_hyllypaikat_join = "  LEFT JOIN varaston_hyllypaikat AS vh
-                                        ON (
-                                            vh.yhtio = tilausrivi.yhtio
-                                            AND vh.hyllyalue = tilausrivi.hyllyalue
-                                            AND vh.hyllynro = tilausrivi.hyllynro
-                                            AND vh.hyllytaso = tilausrivi.hyllytaso
-                                            AND vh.hyllyvali = tilausrivi.hyllyvali
-                                            AND vh.keraysvyohyke IN (".implode(",", $keraysvyohykkeet).")
-                                        )";
-        $keraysvyohyke_join = "    JOIN keraysvyohyke
-                                    ON (
-                                        keraysvyohyke.yhtio = vh.yhtio
-                                        AND keraysvyohyke.tunnus = vh.keraysvyohyke
-                                    )";
+	if (!empty($yhtiorow['kerayserat'])) {
+		$keraysvyohyke_select = "keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,";
+		$keraysvyohyke_join = "    JOIN keraysvyohyke
+											ON (
+												keraysvyohyke.yhtio = vh.yhtio
+												AND keraysvyohyke.tunnus = vh.keraysvyohyke
+											)";
+		$varaston_hyllypaikat_join = "  LEFT JOIN varaston_hyllypaikat AS vh
+												ON (
+													vh.yhtio = tilausrivi.yhtio
+													AND vh.hyllyalue = tilausrivi.hyllyalue
+													AND vh.hyllynro = tilausrivi.hyllynro
+													AND vh.hyllytaso = tilausrivi.hyllytaso
+													AND vh.hyllyvali = tilausrivi.hyllyvali";
+			if (!empty($keraysvyohykkeet)) {
+				$varaston_hyllypaikat_join .= "  AND vh.keraysvyohyke IN (".implode(",", $keraysvyohykkeet).")";
+			}
+			$varaston_hyllypaikat_join .= ")";
 	}
 
 	if ($tyyppi == "TUOTE") {

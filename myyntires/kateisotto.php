@@ -155,7 +155,7 @@ if ($tee == 'kateisotto') {
 			}
 			else {
 				$lasku_tunnus = tee_kateisotto($kassalipas, $request_params);
-				echo "<font class='message'>".t("Käteisotto tehtiin onnistuneesti")."</font>";
+				echo "<br><font class='message'>".t("Käteisotto tehtiin onnistuneesti")."!</font><br><br>";
 
 				if (!empty($lasku_tunnus) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 					tallenna_liite("userfile", "lasku", $lasku_tunnus, $request_params['kuvaselite'], "", 0, 0, "");

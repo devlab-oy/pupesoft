@@ -23,7 +23,7 @@ if(!function_exists("tasotarkista")) {
 			}
 			elseif ((strtoupper($tyyppitalteen) == 'B') and !is_numeric($t[$i])) {
 				$virhe[$i] = t("Tulosseuranta taso tulee olla numero!");
-			}			
+			}
 			else {
 				$query = "	SELECT tunnus
 							FROM taso
@@ -41,6 +41,24 @@ if(!function_exists("tasotarkista")) {
 
 		if (mysql_field_name($result, $i) == "nimi" and trim($t[$i]) == '') {
 			$virhe[$i] = t("Syötä nimitys!");
+		}
+
+		if (mysql_field_name($result, $i) == "summattava_taso" and trim($t[$i]) != '') {
+			$t[$i] = trim($t[$i]);
+
+			foreach (explode(",", $t[$i]) as $sumtas) {
+				$query = "	SELECT tunnus
+							FROM taso
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND taso = BINARY '$sumtas'
+							AND tyyppi = '$tyyppitalteen'
+							AND tunnus != '$tunnus'";
+				$sresult = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($sresult) == 0) {
+					$virhe[$i] = t("Summattavaa tasoa %s ei ole perustettu!", "", $sumtas);
+				}
+			}
 		}
 	}
 }

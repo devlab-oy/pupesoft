@@ -291,7 +291,7 @@ function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false)
         $selite = t("Käteisotton vero kassalippaasta").": " . $params['kassalipas']['nimi'];
         $vero = 0;
 		$kulu_tiliointi_linkki = "aputunnus = {$params['kulu_tiliointi_tunnus']},";
-		$lukko = "lukko = '1',";
+		$lukko = "lukko = '',";
 	}
 	else {
 		$kateisoton_luonne_row['tilino'] = $params['kassalipas']['kassa'];

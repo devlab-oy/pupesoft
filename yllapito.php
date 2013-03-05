@@ -1099,7 +1099,7 @@
 		}
 
 		// Ei näytetä seuraavia avainsanoja avainsana-ylläpitolistauksessa
-		$avainsana_query_lisa = $toim == "avainsana" ? " AND laji NOT IN ('MYSQLALIAS', 'HALYRAP', 'SQLDBQUERY') " : "";
+		$avainsana_query_lisa = $toim == "avainsana" ? " AND laji NOT IN ('MYSQLALIAS', 'HALYRAP', 'SQLDBQUERY', 'KKOSTOT') " : "";
 
 		$query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa";
         $query .= "$ryhma ORDER BY $jarjestys $limiitti";

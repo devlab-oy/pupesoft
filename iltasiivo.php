@@ -429,7 +429,7 @@
 
 		// Merkataan myyntitilit valmiiksi, jos niillä ei ole yhtään käsittelemättömiä rivejä
 		$query = "	SELECT lasku.tunnus,
-					sum(if(tilausrivi.var not in ('A','B') or tilausrivi.toimitettuaika='0000-00-00 00:00:00', 1, 0)) ei_valmis
+					sum(if(tilausrivi.kpl != 0, 1, 0)) ei_valmis
 					FROM lasku
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]'

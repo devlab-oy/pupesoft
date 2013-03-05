@@ -211,7 +211,7 @@
 					$data[$i]['koneen_hinta'] = $lis_hinta;
 					$data[$i]['hinta'] = $tilausrivirow['hinta'];
 					$data[$i]['eropros'] = $eropros;
-					$data[$i]['ero'] = $ero;
+					$data[$i]['ero'] = $ero * $tilausrivirow['kpl'];
 
 					$i++;
 					$x++;

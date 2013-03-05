@@ -127,6 +127,7 @@ $verkkokauppavarasto_li	= "";
 $editilaus_loppuhinta	= "";
 $kieltolisa				= "";
 $OT_ASIAKASNRO			= "";
+$merkkitieto			= "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
 $tuoteerror      	= 1; // oletetaan aina ettei  tuotetta löydy

@@ -244,7 +244,7 @@
 		$resyh   = pupe_query($query);
 
 		if (mysql_num_rows($resyh) > 0) {
-			$monta = mysql_fetch_array($resyh);
+			$monta = mysql_fetch_assoc($resyh);
 			echo "<font class='error'>",t("K‰ytt‰j‰")," {$monta['kuka']} ({$monta['nimi']}) ",t("on jo yrityksess‰")," {$yhtio}.</font><br>";
 			$jatka = 1; // ei perusteta
 		}
@@ -252,7 +252,7 @@
 		$salasana = "";
 
 		if (mysql_num_rows($reskuka) > 0 and $jatka != 1 and $kopsaakuka == "JOO") {
-			$monta = mysql_fetch_array($reskuka);
+			$monta = mysql_fetch_assoc($reskuka);
 
 			$firname 						= $monta['nimi'];
 			$ktunnus 						= $monta['kuka'];
@@ -408,7 +408,7 @@
 								AND profiili = '{$prof}'";
 					$pres = pupe_query($query);
 
-					while ($trow = mysql_fetch_array($pres)) {
+					while ($trow = mysql_fetch_assoc($pres)) {
 						//joudumme tarkistamaan ettei t‰t‰ oikeutta ole jo t‰ll‰ k‰ytt‰j‰ll‰.
 						//voi olla esim jos se on lukittuna annettu
 						$query = "	SELECT yhtio, paivitys
@@ -419,7 +419,7 @@
 									and nimi		= '{$trow['nimi']}'
 									and alanimi 	= '{$trow['alanimi']}'";
 						$tarkesult = pupe_query($query);
-						$tarkesultrow = mysql_fetch_array($tarkesult);
+						$tarkesultrow = mysql_fetch_assoc($tarkesult);
 
 						if (mysql_num_rows($tarkesult) == 0) {
 							$query = "	INSERT into oikeu SET
@@ -476,18 +476,21 @@
 	}
 
 	// Muutetaanko jonkun muun oikeuksia??
-	if ($selkuka == "UUSI" or $selkuka == "KOPSAAUUSI") {
+	if (isset($selkuka) and ($selkuka == "UUSI" or $selkuka == "KOPSAAUUSI")) {
 		$query = "SELECT * FROM kuka WHERE tunnus = -1";
 	}
-	elseif (strtoupper($toim) == 'EXTRANET') {
+	elseif (strtoupper($toim) == 'EXTRANET' and isset($selkuka)) {
 		$query = "SELECT * FROM kuka WHERE tunnus = '{$selkuka}' and extranet != ''";
 	}
-	else {
+	elseif (isset($selkuka)) {
 		$query = "SELECT * FROM kuka WHERE tunnus = '{$selkuka}' and extranet = ''";
+	}
+	else {
+		$query = "SELECT * FROM kuka WHERE session = '{$session}'";
 	}
 
 	$result = pupe_query($query);
-	$selkukarow = mysql_fetch_array($result);
+	$selkukarow = mysql_fetch_assoc($result);
 
 	//muutetaan kayttajan tietoja tai syotetaan uuden kayttajan tiedot
 	if ($tee == 'MUUTA') {
@@ -593,7 +596,7 @@
 						FROM kuka
 						WHERE tunnus = '{$selkuka}'";
 			$result = pupe_query($query);
-			$selkukarow = mysql_fetch_array($result);
+			$selkukarow = mysql_fetch_assoc($result);
 
 			//p‰ivitet‰‰n oikeudet jos profiileja on olemassa
 			$profiilit = explode(',', trim($profile));
@@ -617,7 +620,7 @@
 								AND profiili = '{$prof}'";
 					$pres = pupe_query($query);
 
-					while ($trow = mysql_fetch_array($pres)) {
+					while ($trow = mysql_fetch_assoc($pres)) {
 						//joudumme tarkistamaan ettei t‰t‰ oikeutta ole jo t‰ll‰ k‰ytt‰j‰ll‰.
 						//voi olla esim jos se on lukittuna annettu
 						$query = "	SELECT yhtio, paivitys
@@ -628,7 +631,7 @@
 									AND nimi		= '{$trow['nimi']}'
 									AND alanimi 	= '{$trow['alanimi']}'";
 						$tarkesult = pupe_query($query);
-						$tarkesultrow = mysql_fetch_array($tarkesult);
+						$tarkesultrow = mysql_fetch_assoc($tarkesult);
 
 						if (mysql_num_rows($tarkesult) == 0) {
 							$query = "	INSERT into oikeu SET
@@ -678,7 +681,7 @@
 				}
 
 				$result = pupe_query($query);
-				$krow = mysql_fetch_array ($result);
+				$krow = mysql_fetch_assoc ($result);
 
 				if (mysql_num_rows($result) != 1) {
 					echo t("VIRHE: Hakkerointia!");
@@ -724,7 +727,7 @@
 				$query  = "show columns from sanakirja";
 				$fields =  mysql_query($query);
 
-				while ($apurow = mysql_fetch_array($fields)) {
+				while ($apurow = mysql_fetch_row($fields)) {
 					if (strlen($apurow[0]) == 2) {
 						$sel = "";
 						if ($krow["kieli"] == $apurow[0] or ($krow["kieli"] == "" and $apurow[0] == $yhtiorow["kieli"])) {
@@ -733,7 +736,7 @@
 						if ($apurow[0] != "tunnus") {
 							$query = "SELECT distinct nimi from maat where koodi = '{$apurow[0]}'";
 							$maare = pupe_query($query);
-							$maaro = mysql_fetch_array($maare);
+							$maaro = mysql_fetch_assoc($maare);
 							$maa   = strtolower($maaro["nimi"]);
 							if ($maa=="") $maa = $apurow[0];
 							echo "<option value='{$apurow[0]}' {$sel}>",t($maa),"</option>";
@@ -940,7 +943,7 @@
 
 					$vares = t_avainsana("HENKILO_OSASTO");
 
-					while ($varow = mysql_fetch_array($vares)) {
+					while ($varow = mysql_fetch_assoc($vares)) {
 						$sel = '';
 						if ($varow['selite'] == $krow["osasto"]) $sel = 'selected';
 						echo "<option value='{$varow['selite']}' {$sel}>{$varow['selitetark']}</option>";
@@ -960,7 +963,7 @@
 
 				echo "<select name='oletus_varasto'>";
 				echo "<option value='0'>",t("Oletusvarasto"),"</option>";
-				while ($varow = mysql_fetch_array($vares)) {
+				while ($varow = mysql_fetch_assoc($vares)) {
 					$sel = '';
 					if ($varow['tunnus'] == $krow['oletus_varasto']) {
 						$sel = 'selected';
@@ -980,7 +983,7 @@
 
 				$varastot_array = explode(",", $krow["varasto"]);
 
-				while ($varow = mysql_fetch_array($vares)) {
+				while ($varow = mysql_fetch_assoc($vares)) {
 					$sel = $eri = '';
 					if (in_array($varow['tunnus'], $varastot_array)) $sel = 'CHECKED';
 					if ($varow["tyyppi"] == "E") $eri = "(E)";
@@ -996,7 +999,7 @@
 					$query  = "SELECT DISTINCT nimi FROM pakkaamo WHERE yhtio = '{$kukarow['yhtio']}'";
 					$pakkaamores = pupe_query($query);
 
-					while ($pakkaamorow = mysql_fetch_array($pakkaamores)) {
+					while ($pakkaamorow = mysql_fetch_assoc($pakkaamores)) {
 						$sel = '';
 						if ($pakkaamorow['nimi'] == $krow["oletus_pakkaamo"]) $sel = 'selected';
 						echo "<option value='{$pakkaamorow['nimi']}' {$sel}>{$pakkaamorow['nimi']}</option>";
@@ -1017,7 +1020,7 @@
 								ORDER BY kirjoitin";
 					$vares = pupe_query($query);
 
-					while ($varow = mysql_fetch_array($vares)) {
+					while ($varow = mysql_fetch_assoc($vares)) {
 						$sel = '';
 						if ($varow['tunnus'] == $krow["kirjoitin"]) $sel = 'selected';
 						echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['kirjoitin']}</option>";
@@ -1118,7 +1121,7 @@
 						$vares = pupe_query($query);
 
 						if (mysql_num_rows($vares) == 1) {
-							$varow = mysql_fetch_array($vares);
+							$varow = mysql_fetch_assoc($vares);
 
 							echo "<td>{$varow['ytunnus']} {$varow['nimi']} {$varow['nimitark']}<br>{$varow['toim_ovttunnus']} {$varow['toim_nimi']} {$varow['toim_nimitark']} {$varow['toim_postitp']}
 									<input type='hidden' name='oletus_asiakas' value='{$krow['oletus_asiakas']}'></td>";
@@ -1149,7 +1152,7 @@
 							$vares = pupe_query($query);
 
 							if (mysql_num_rows($vares) == 1) {
-								$varow = mysql_fetch_array($vares);
+								$varow = mysql_fetch_assoc($vares);
 
 								echo "<td>{$varow['ytunnus']} {$varow['nimi']} {$varow['nimitark']}<br>{$varow['toim_ovttunnus']} {$varow['toim_nimi']} {$varow['toim_nimitark']} {$varow['toim_postitp']}
 										<input type='hidden' name='oletus_asiakastiedot' value='{$krow['oletus_asiakastiedot']}'></td>";
@@ -1234,7 +1237,7 @@
 								ORDER BY sovellus, nimitys";
 					$vares = pupe_query($query);
 
-					while ($varow = mysql_fetch_array($vares)) {
+					while ($varow = mysql_fetch_assoc($vares)) {
 						$sel = '';
 						if ($varow['nimi'] == $krow["oletus_ohjelma"]) $sel = 'selected';
 
@@ -1303,7 +1306,7 @@
 
 					$vares = t_avainsana("KUKAASEMA");
 
-					while ($varow = mysql_fetch_array($vares)) {
+					while ($varow = mysql_fetch_assoc($vares)) {
 						$sel = '';
 						if ($varow['selite'] == $krow["asema"]) $sel = 'selected';
 						echo "<option value='{$varow['selite']}' {$sel}>{$varow['selitetark']}</option>";
@@ -1317,7 +1320,7 @@
 					$query = "SELECT * FROM yhtion_toimipaikat WHERE yhtio = '{$kukarow['yhtio']}' AND vat_numero = '' ORDER BY nimi";
 					$vares = pupe_query($query);
 
-					while ($varow = mysql_fetch_array($vares)) {
+					while ($varow = mysql_fetch_assoc($vares)) {
 						$sel = '';
 						if ($varow['tunnus'] == $krow["toimipaikka"]) $sel = 'selected';
 						echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['ovtlisa']} {$varow['nimi']}</option>";
@@ -1389,7 +1392,7 @@
 
 				echo "<tr><th valign='top'>",t("Profiilit"),":</th><td>";
 
-				while ($prow = mysql_fetch_array($pres)) {
+				while ($prow = mysql_fetch_assoc($pres)) {
 
 					$chk = "";
 
@@ -1414,7 +1417,7 @@
 
 					$pres = t_avainsana("PIIRI");
 
-					while ($prow = mysql_fetch_array($pres)) {
+					while ($prow = mysql_fetch_assoc($pres)) {
 
 						$chk = "";
 						if (in_array($prow["selite"], $piirit)) {

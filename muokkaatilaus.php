@@ -815,26 +815,15 @@
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila = 'V'
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.kpl != 0)
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila = 'G'
+						and lasku.tilaustyyppi = 'M'
+						and lasku.alatila = 'V'
 						$haku
 						GROUP BY lasku.tunnus
 						order by lasku.luontiaika desc
 						$rajaus";
-
-			 // haetaan tilausten arvo
-			if ($kukarow['hinnat'] == 0) {
-				$sumquery = "	SELECT
-				 				round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
-				 				round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa,
-				 				count(distinct lasku.tunnus) kpl
-				 				FROM lasku use index (tila_index)
-				 				JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-				 				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila = 'V'";
-				 $sumresult = pupe_query($sumquery);
-				 $sumrow = mysql_fetch_assoc($sumresult);
-			}
-
 			$miinus = 4;
 		}
 		elseif ($toim == "JTTOIMITA") {

@@ -1105,7 +1105,20 @@
 
 		$ulos .= "<option value = ''>".t("Ei käytössä")."</option>";
 		$ulos .= "<option value = 'K'{$sel}>".t("Käytössä")."</option>";
-		$ulos .= "</select></td>";
+		$ulos .= "</select>";
+
+		$query_ale_lisa = generoi_alekentta('M', 'panttitili');
+
+		$query = "	SELECT
+					round(sum(hinta * kpl * {$query_ale_lisa}), 2) as rivihinta
+					FROM panttitili
+					WHERE panttitili.yhtio = '{$kukarow['yhtio']}'
+					AND panttitili.asiakas = '{$trow['tunnus']}'
+					AND panttitili.status  = ''";
+		$panttitili_result = pupe_query($query);
+		$panttitili_row = mysql_fetch_assoc($panttitili_result);
+		$ulos .= " <font class='message'>".t("Asiakkaan panttitilillä yhteensä").": ".str_replace('.', ',', str_replace(',', ' ', $panttitili_row['rivihinta']))." EUR</font>";
+		$ulos .= "</td>";
 
 		$jatko = 0;
 	}

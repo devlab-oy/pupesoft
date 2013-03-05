@@ -67,26 +67,6 @@ if(!function_exists("tuotetarkista")) {
 			$tem_tuoteno = $t[$i];
 		}
 
-		if (mysql_field_name($result, $i) == "panttitili" and trim($t[$i]) == '') {
-
-			if (trim($t[$i]) != trim($trow[$i])) {
-				$query = "	SELECT *
-							FROM panttitili
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND asiakas != ''
-							AND status = ''
-							AND kaytettypvm = '0000-00-00'
-							AND kaytettytilausnro = 0
-							AND tuoteno = '{$tem_tuoteno}'";
-				$chk_res = pupe_query($query);
-
-				if (mysql_num_rows($chk_res) > 0) {
-					$virhe[$i] = t("Asiakkaalla panttitilill‰ aktiivisia tuotteita, panttitili‰ ei voi kytke‰ pois p‰‰lt‰").".";
-					$errori = 1;
-				}
-			}
-		}
-
 		if ((mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i) == "kohde" or mysql_field_name($result, $i) == "kustp") and (int) trim($t[$i]) != 0) {
 
 			if (mysql_field_name($result, $i) == "projekti") $kptyyppi = "P";

@@ -5382,7 +5382,12 @@ if (!function_exists("generoi_alekentta")) {
 			}
 		}
 
-		$return = "if ({$prefix}.netto='N', 1, {$ale})";
+		if($prefix != 'panttitili') {
+			$return = "if ({$prefix}.netto='N', 1, {$ale})";
+		}
+		else {
+			$return = $ale;
+		}
 
 		return $return;
 	}
@@ -7841,7 +7846,7 @@ if (!function_exists('tallenna_liite')) {
 		}
 
 		$data 		= mysql_real_escape_string(file_get_contents($file["tmp_name"]));
-		$filename	= mysql_real_escape_string($file["name"]);
+		$filename   = preg_replace("/[^A-Z0-9\._\-%]/i", "", $file["name"]);
 		$filetype	= mysql_real_escape_string($file["type"]);
 		$filesize	= mysql_real_escape_string($file["size"]);
 		$selite		= mysql_real_escape_string($selite);
@@ -7912,7 +7917,7 @@ if (!function_exists('tallenna_liite')) {
 						image_height	= '$image_height',
 						image_bits		= '$image_bits',
 						image_channels	= '$image_channels',
-						kayttotarkoitus	= '$teetyyppi',
+						kayttotarkoitus	= '$kayttotarkoitus',
 						jarjestys		= '$jarjestys',
 						laatija			= '$kukarow[kuka]',
 						luontiaika		= now()

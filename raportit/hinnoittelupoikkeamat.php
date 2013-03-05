@@ -192,7 +192,7 @@
 					$ero = $tilausrivirow['hinta'] - $lis_hinta;
 					$ero = hintapyoristys($ero);
 
-					if ($ero == 0) continue;
+					if ($ero >= 0) continue;
 
 					$data[$i]['myyjä'] = $laskurow['myyja'];
 					$data[$i]['tilaus'] = $laskurow['tunnus'];

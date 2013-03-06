@@ -79,6 +79,7 @@ if (!isset($lhyllynro))  $lhyllynro  = "";
 if (!isset($lhyllyvali)) $lhyllyvali = "";
 if (!isset($lhyllytaso)) $lhyllytaso = "";
 if (!isset($summaa_varastopaikalle)) $summaa_varastopaikalle = "";
+if (!isset($tee_excel)) $tee_excel = "";
 
 echo "<div id='valitse_varasto' style='display:none;'>".t("Valitse varasto tai rajaa varastopaikalla")."</div>";
 
@@ -292,26 +293,34 @@ if ($tee != '') {
 
 	if (!empty($summaa_varastopaikalle)) {
 		list($rivit, $saldolliset) = hae_rivit("PAIKKA", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $kaikki_lisa_kentat);
-		if (count($rivit) > 0) {
-			$xls_filename = generoi_excel_tiedosto($rivit, $header_values, $force_to_string);
-			echo_tallennus_formi($xls_filename);
 
-			nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl, 'right_aling_numbers');
+		if (count($rivit) > 0) {
+
+			if (!empty($tee_excel)) {
+				$xls_filename = generoi_excel_tiedosto($rivit, $header_values, $force_to_string);
+				echo_tallennus_formi($xls_filename);
+			}
+
+			nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl, 'right_align_numbers');
 		}
         else {
-            echo "<font class='error'>".t("Yhtään keräystä ei löytynyt")."</font>";
+            echo "<br><font class='error'>".t("Yhtään keräystä ei löytynyt")."</font><br><br>";
         }
 	}
 	else {
 		list($rivit, $saldolliset) = hae_rivit("TUOTE", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $kaikki_lisa_kentat);
-		if (count($rivit) > 0) {
-			$xls_filename = generoi_excel_tiedosto($rivit, $header_values, $force_to_string);
-			echo_tallennus_formi($xls_filename);
 
-			nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl, 'right_aling_numbers');
+		if (count($rivit) > 0) {
+
+			if (!empty($tee_excel)) {
+				$xls_filename = generoi_excel_tiedosto($rivit, $header_values, $force_to_string);
+				echo_tallennus_formi($xls_filename);
+			}
+
+			nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl, 'right_align_numbers');
 		}
         else {
-            echo "<font class='error'>".t("Yhtään keräystä ei löytynyt")."</font>";
+            echo "<br><font class='error'>".t("Yhtään keräystä ei löytynyt")."</font><br><br>";
         }
 	}
 
@@ -320,7 +329,7 @@ if ($tee != '') {
     }
 }
 
-echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso, $toppi, $summaa_varastopaikalle, $kaikki_varastot, $kaikki_keraysvyohykkeet, $kaikki_lisa_kentat);
+echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso, $toppi, $summaa_varastopaikalle, $tee_excel, $kaikki_varastot, $kaikki_keraysvyohykkeet, $kaikki_lisa_kentat);
 
 function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $lisa_kentat) {
 	global $yhtiorow;
@@ -358,9 +367,10 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 					concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'),5, '0'))";
 	}
 
-	$varasto_join = "";
+	$varasto_lisa = "";
+
 	if (!empty($varastot)) {
-		$varasto_join = " AND varastopaikat.tunnus IN (".implode(",", $varastot).") ";
+		$varasto_lisa = " AND varastopaikat.tunnus IN (".implode(",", $varastot).") ";
 	}
 
     $keraysvyohyke_select = "";
@@ -369,22 +379,19 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 
 	if (!empty($yhtiorow['kerayserat'])) {
 		$keraysvyohyke_select = "keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,";
-		$keraysvyohyke_join = "    JOIN keraysvyohyke
-											ON (
-												keraysvyohyke.yhtio = vh.yhtio
-												AND keraysvyohyke.tunnus = vh.keraysvyohyke
-											)";
-		$varaston_hyllypaikat_join = "  LEFT JOIN varaston_hyllypaikat AS vh
-												ON (
-													vh.yhtio = tilausrivi.yhtio
-													AND vh.hyllyalue = tilausrivi.hyllyalue
-													AND vh.hyllynro = tilausrivi.hyllynro
-													AND vh.hyllytaso = tilausrivi.hyllytaso
-													AND vh.hyllyvali = tilausrivi.hyllyvali";
-			if (!empty($keraysvyohykkeet)) {
-				$varaston_hyllypaikat_join .= "  AND vh.keraysvyohyke IN (".implode(",", $keraysvyohykkeet).")";
-			}
-			$varaston_hyllypaikat_join .= ")";
+		$keraysvyohyke_join = " JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)";
+		$varaston_hyllypaikat_join = " JOIN varaston_hyllypaikat AS vh
+										ON (
+											vh.yhtio = tilausrivi.yhtio
+											AND vh.hyllyalue = tilausrivi.hyllyalue
+											AND vh.hyllynro = tilausrivi.hyllynro
+											AND vh.hyllytaso = tilausrivi.hyllytaso
+											AND vh.hyllyvali = tilausrivi.hyllyvali";
+		if (!empty($keraysvyohykkeet)) {
+			$varaston_hyllypaikat_join .= "  AND vh.keraysvyohyke IN (".implode(",", $keraysvyohykkeet).")";
+		}
+
+		$varaston_hyllypaikat_join .= ")";
 	}
 
 	if ($tyyppi == "TUOTE") {
@@ -440,13 +447,13 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 					varastopaikat.yhtio = tilausrivi.yhtio
 					AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
 					AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-					{$varasto_join}
 				)
                 {$varaston_hyllypaikat_join}
 				{$keraysvyohyke_join}
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				AND tilausrivi.tyyppi = 'L'
 				{$tuotepaikka_where}
+				{$varasto_lisa}
 				{$_date}
 				{$group}
 				ORDER BY kpl_valittu_aika DESC";
@@ -514,7 +521,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 }
 
 function echo_tulosta_inventointilista($saldolliset) {
-	echo "<form method='POST' action='../inventointi_listat.php'>";
+	echo "<br><br><form method='POST' action='../inventointi_listat.php'>";
 	echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
 	$saldot = "";
@@ -530,8 +537,9 @@ function echo_tulosta_inventointilista($saldolliset) {
 	echo "<input type='submit' value='".t("Tulosta inventointilista")."'></form><br><br>";
 }
 
-function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso, $toppi, $summaa_varastopaikalle, $varastot, $keraysvyohykkeet, $lisa_kentat) {
+function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso, $toppi, $summaa_varastopaikalle, $tee_excel, $varastot, $keraysvyohykkeet, $lisa_kentat) {
     global $yhtiorow;
+
 	//Käyttöliittymä
 	echo "<br>";
 	echo "<form method='POST'>";
@@ -618,6 +626,16 @@ function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $a
 	echo "</td>";
 	echo "</tr>";
 
+	if (!empty($tee_excel)) {
+		$checked = 'checked = "checked"';
+	}
+	else {
+		$checked = '';
+	}
+
+	echo "<tr><th>".t('Tee Excel')."</th>
+			<td><input type='checkbox' name='tee_excel' $checked /></td></tr>";
+
 	echo "</table>";
 	echo '<br/>';
 	echo "<input type='submit' value='".t("Aja raportti")."' onclick='return tarkista();'/>";
@@ -656,7 +674,7 @@ function nayta_ruudulla(&$rivit, $header_values, $force_to_string, $ppa, $kka, $
 }
 
 //callback function table td:lle
-function right_aling_numbers($header, $solu, $force_to_string) {
+function right_align_numbers($header, $solu, $force_to_string) {
     if (!stristr($header, 'tunnus')) {
         if (is_numeric($solu) and !in_array($header, $force_to_string)) {
             $align = "align='right'";

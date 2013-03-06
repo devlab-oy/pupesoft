@@ -1964,6 +1964,7 @@ while ($tietue = fgets($fd)) {
 			$editilaus_loppuhinta	= "";
 			$kieltolisa				= "";
 			$OT_ASIAKASNRO			= "";
+			$merkkitieto = "";
 			break;
 	}
 }

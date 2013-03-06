@@ -215,75 +215,75 @@ if ($tee != '') {
 		),
 		'nimitys' => array(
 			'header' => t('Tuotteen nimi'),
-			'order' => 1
+			'order' => 10
 		),
 		'varaston_nimitys' => array(
 			'header' => t('Varasto'),
-			'order' => 2
+			'order' => 20
 		),
 		'keraysvyohykkeen_nimitys' => array(
 			'header' => t('Keräysvyöhyke'),
-			'order' => 3
+			'order' => 30
 		),
 		'hylly' => array(
 			'header' => t('Varastopaikka'),
-			'order' => 4
+			'order' => 40
 		),
 		'saldo' => array(
 			'header' => t('Saldo'),
-			'order' => 5
+			'order' => 50
 		),
 		'kpl_valittu_aika' => array(
 			'header' => t('Keräystä'),
-			'order' => 6
+			'order' => 60
 		),
 		'kpl_valittu_aika_pvm' => array(
 			'header' => t('Keräystä/Päivä'),
-			'order' => 7
+			'order' => 70
 		),
 		'kpl_kerays' => array(
 			'header' => t('Kpl/Keräys'),
-			'order' => 8
+			'order' => 80
 		),
 		'kpl_6' => array(
 			'header' => t('Keräystä tästä päivästä 6kk'),
-			'order' => 9
+			'order' => 90
 		),
 		'kpl_12' => array(
 			'header' => t('Keräystä tästä päivästä 12kk'),
-			'order' => 10
+			'order' => 100
 		),
 		'poistettu' => array(
 			'header' => t('Poistettu varastopaikka'),
-			'order' => 11
+			'order' => 110
 		),
 		'tuotekorkeus' => array(
 			'header' => t('Tuotteen korkeus'),
-			'order' => 12
+			'order' => 11
 		),
 		'tuoteleveys' => array(
 			'header' => t('Tuotteen leveys'),
-			'order' => 13
+			'order' => 12
 		),
 		'tuotesyvyys' => array(
 			'header' => t('Tuotteen syvyys'),
-			'order' => 14
+			'order' => 13
 		),
 		'tuotemassa' => array(
 			'header' => t('Tuotteen massa'),
-			'order' => 15
+			'order' => 14
 		),
 		'status' => array(
 			'header' => t('Status'),
-			'order' => 16
+			'order' => 15
 		),
 		'luontiaika' => array(
 			'header' => t('Tuotteen Luontiaika'),
-			'order' => 17
+			'order' => 16
 		),
 		'ostoehdotus' => array(
 			'header' => t('Ostoehdotus'),
-			'order' => 18
+			'order' => 17
 		),
 	);
 	$force_to_string = array(

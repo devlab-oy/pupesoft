@@ -1385,7 +1385,7 @@
 							}
 						}
 
-						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999 and !$onko_dupli_asn) {
+						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999 and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
 
 							if (!isset($rtuoteno[$i]['ale1'])) $rtuoteno[$i]['ale1'] = 0;
 							if (!isset($rtuoteno[$i]['ale2'])) $rtuoteno[$i]['ale2'] = 0;
@@ -1515,7 +1515,7 @@
 					}
 
 					// jos kyseessä on tavaraa
-					if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I' or $trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L') {
+					if ((!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I' or $trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L')) {
 						/**
 						 * Jos Unikkoinvoice, muutetaan oletus_vienti
 						 * C => A

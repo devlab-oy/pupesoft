@@ -116,6 +116,14 @@
 		$laskun_tilausviite = implode(",",$rivi);
 	}
 
+	$onko_hyvityslasku_kerroin = 1;
+
+	// Boschin hyvityslasku -keissi
+	if ($laskuttajan_toimittajanumero == "123067" and isset($xml->InvoiceHeader->FreeText) and isset($xml->InvoiceHeader->FreeText->attributes()->Caption) and $xml->InvoiceHeader->FreeText->attributes()->Caption == 'C') {
+		$onko_hyvityslasku_kerroin = -1;
+		$laskun_summa_eur *= $onko_hyvityslasku_kerroin;
+	}
+
 	$laskun_asiakkaan_tilausnumero 	= "";
 	$kauttalaskutus 				= "";
 	$laskun_toimitunnus				= 0;
@@ -462,6 +470,11 @@
 									$rtuoteno[$x]['status']				= '';
 									$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
 									$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
+
+									if ($onko_hyvityslasku_kerroin != 1) {
+										$rtuoteno[$x]['rivihinta'] *= $onko_hyvityslasku_kerroin;
+										$rtuoteno[$x]['hinta'] *= $onko_hyvityslasku_kerroin;
+									}
 								}
 							}
 							elseif ($charge_description == 'freight costs' or $charge_code == 'zfwa' or $charge_code == 'freightcharges') {
@@ -516,6 +529,11 @@
 				$ealvi[$i] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["alv"] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
+
+				if ($onko_hyvityslasku_kerroin != 1) {
+					$rtuoteno[$i]['rivihinta'] *= $onko_hyvityslasku_kerroin;
+					$rtuoteno[$i]['hinta'] *= $onko_hyvityslasku_kerroin;
+				}
 			}
 			else {
 				//	Poistetaan tämä tietue
@@ -532,10 +550,12 @@
 		}
 
 		if ($laskun_alv != 0) {
-			$osto_kulu = round($osto_kulu * (1 + ($laskun_alv / 100)),2);
-			$osto_rahti = round($osto_rahti * (1 + ($laskun_alv / 100)),2);
-			$osto_rivi_kulu = round($osto_rivi_kulu * (1 + ($laskun_alv / 100)),2);
+			$osto_kulu = round($osto_kulu * (1 + ($laskun_alv / 100)) * $onko_hyvityslasku_kerroin, 2);
+			$osto_rahti = round($osto_rahti * (1 + ($laskun_alv / 100)) * $onko_hyvityslasku_kerroin, 2);
+			$osto_rivi_kulu = round($osto_rivi_kulu * (1 + ($laskun_alv / 100)) * $onko_hyvityslasku_kerroin, 2);
 		}
+
+		if ($laskun_rahtikulu != 0 and $onko_hyvityslasku_kerroin != 1) $laskun_rahtikulu *= $onko_hyvityslasku_kerroin;
 
 		// lasketaan mätsäävätkö rivihinnat ja laskunloppusumma, jos ei niin lisätään se kuluihin.
 		// $chk_sum = 0;

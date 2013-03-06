@@ -3857,23 +3857,37 @@ if (!function_exists('kuittaus_lahete')) {
 	function kuittaus_lahete($params) {
 		global $kukarow, $yhtiorow;
 
-		$params["sivu"]++;
-		$params["ei_otsikoita"] = "EI";
+		if($yhtiorow['lahete_nouto_allekirjoitus'] == 'K') {
+			$params["sivu"]++;
+			$params["ei_otsikoita"] = "EI";
 
-		$params = alku_lahete($params);
+			$params = alku_lahete($params);
 
-		// Luodaan muuttujat
-		extract($params);
+			// Luodaan muuttujat
+			extract($params);
 
-		$page[$sivu] = $thispage;
+			$page[$sivu] = $thispage;
 
-		$pdf->draw_text(50, 400, t("Allekirjoitus", $kieli).": _______________________________", 	$thispage, $norm);
-		$pdf->draw_text(300, 400, t("Nimenselvennys", $kieli).": _______________________________", 	$thispage, $norm);
+			$pdf->draw_text(50, 400, t("Allekirjoitus", $kieli).": _______________________________", 	$thispage, $norm);
+			$pdf->draw_text(300, 400, t("Nimenselvennys", $kieli).": _______________________________", 	$thispage, $norm);
 
-		// Luodaan palautettavat
-		$return = compact(array_keys($params));
+			// Luodaan palautettavat
+			$return = compact(array_keys($params));
 
-		return $return;
+			return $return;
+		}
+		else {
+			// Luodaan muuttujat
+			extract($params);
+
+			$pdf->draw_text(50, 90, t("Allekirjoitus", $kieli).": _______________________________", 	$thispage, $norm);
+			$pdf->draw_text(300, 90, t("Nimenselvennys", $kieli).": _______________________________", 	$thispage, $norm);
+
+			// Luodaan palautettavat
+			$return = compact(array_keys($params));
+
+			return $return;
+		}
 	}
 }
 

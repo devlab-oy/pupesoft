@@ -1317,13 +1317,17 @@
 		if ($trow[$i] == 'K') {
 			$selb = "selected";
 		}
+		else if ($trow[$i] == 'A') {
+			$selc = "selected";
+		}
 		else {
 			$sela = "selected";
 		}
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
 					<option value='' $sela>".t("Ei tulosteta allekirjoitussivua")."</option>
-					<option value='K' $selb>".t("Tulostetaan allekirjoitussivu")."</option>
+					<option value='A' $selc>".t("Tulostetaan allekirjoitus samalle sivulle")."</option>
+					<option value='K' $selb>".t("Tulostetaan erillinen allekirjoitussivu")."</option>
 				</select></td>";
 
 		$jatko = 0;

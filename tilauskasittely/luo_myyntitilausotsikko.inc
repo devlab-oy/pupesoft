@@ -115,7 +115,9 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			if ($kukarow["extranet"] != '') {
 				$query  = "	SELECT distinct selite
 							FROM avainsana
-							WHERE yhtio='$kukarow[yhtio]' and laji = 'asiakasluokka' and selite != ''
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji    = 'asiakasluokka'
+							and selite != ''
 							ORDER BY 1
 							LIMIT 1";
 				$prioresult = pupe_query($query);
@@ -184,7 +186,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$yhteysquery = "SELECT nimi
 							FROM yhteyshenkilo
 							where yhtio = '$kukarow[yhtio]'
-							and liitostunnus = '$srow[liitostunnus]'
+							and liitostunnus = '$asiakasrow[tunnus]'
 							and tyyppi = 'A'
 							and tilausyhteyshenkilo != ''
 							and oletusyhteyshenkilo != ''

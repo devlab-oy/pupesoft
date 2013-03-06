@@ -1087,7 +1087,6 @@ while ($tietue = fgets($fd)) {
 					}
 				}
 
-
 				// Onko asiakkaalla oletusyhteyshenkilö?
 				$yhteysquery = "SELECT nimi
 								FROM yhteyshenkilo

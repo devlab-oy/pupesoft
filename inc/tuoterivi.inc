@@ -78,7 +78,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "tuotetyyppi") {
- 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('A', 'B', 'R', 'K', 'M', 'N'), '');
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('A', 'B', 'R', 'K', 'M'), '');
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
@@ -91,11 +91,21 @@
 			$ulos .= "<option value='R' $sel[R]>".t("Raaka-aine")."</option>";
 			$ulos .= "<option value='K' $sel[K]>".t("Palvelu")."</option>";
 			$ulos .= "<option value='M' $sel[M]>".t("Muu/Informatiivinen")."</option>";
-			$ulos .= "<option value='N' $sel[N]>".t("Normaali / Kulutuote (ei näytetä myynninseurannassa)")."</option>";
 		}
 		$ulos .= "</select></td>";
 
 		$jatko=0;
+	}
+
+	if (mysql_field_name($result, $i) == "myynninseuranta") {
+		$sel = $trow[$i] == "E" ? " selected" : "";
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value = ''>".t("Tuote otetaan huomioon myynninseurannassa")."</option>";
+		$ulos .= "<option value = 'E'{$sel}>".t("Tuotetta ei oteta huomioon myynninseurannassa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "kehahin" or

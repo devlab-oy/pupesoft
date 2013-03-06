@@ -118,6 +118,7 @@
 	// Boschin hyvityslasku -keissi
 	if ($laskuttajan_toimittajanumero == "123067" and isset($xml->InvoiceHeader->FreeText) and isset($xml->InvoiceHeader->FreeText->attributes()->Caption) and $xml->InvoiceHeader->FreeText->attributes()->Caption == 'C') {
 		$onko_hyvityslasku_kerroin = -1;
+		$laskun_summa_eur *= $onko_hyvityslasku_kerroin;
 	}
 
 	$laskun_asiakkaan_tilausnumero 	= "";

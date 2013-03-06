@@ -128,6 +128,7 @@ $verkkokauppavarasto_li	= "";
 $editilaus_loppuhinta	= "";
 $kieltolisa				= "";
 $OT_ASIAKASNRO			= "";
+$merkkitieto			= "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
 $tuoteerror      	= 1; // oletetaan aina ettei  tuotetta löydy
@@ -459,7 +460,7 @@ while ($tietue = fgets($fd)) {
 
 		case 'ORFFCR_NU'  :
 		//Kommentteja
-			$edi_kommentti .= $tieto . ' ';
+			$merkkitieto = $tieto;
 			break;
 
 		case 'OSTOTIL.OT_MAKSUEHTO' :
@@ -1155,6 +1156,7 @@ while ($tietue = fgets($fd)) {
 							sisainen							= '$editilaus_sisainen',
 							sisviesti1         					= '$arow[sisviesti1]',
 							sisviesti2         					= '$lopviesti',
+							sisviesti3							= '{$merkkitieto}',
 							splittauskielto						= '$splittauskielto',
 							tila 			   					= '$editilaus_tila',
 							tilaustyyppi						= '$tilaustyyppilisa',
@@ -1980,6 +1982,7 @@ while ($tietue = fgets($fd)) {
 			$editilaus_loppuhinta	= "";
 			$kieltolisa				= "";
 			$OT_ASIAKASNRO			= "";
+			$merkkitieto = "";
 			break;
 	}
 }

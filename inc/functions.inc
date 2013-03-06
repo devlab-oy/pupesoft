@@ -19903,7 +19903,7 @@ if (!function_exists('_xls_jarjestetty_rivit')) {
 
 		foreach ($rivit as $rivi) {
 			foreach($header_values as $column_name => $value) {
-				if (!stristr($column_name, 'tunnus')) {
+				if (!stristr($column_name, 'tunnus') and isset($rivi[$column_name])) {
 					_kirjoita_solu($xls, $column_name, $rivi[$column_name], $rivi_numero, $sarake_numero, $force_to_string);
 				}
 			}
@@ -20098,7 +20098,16 @@ if (!function_exists('_echo_ordered_table_rows')) {
 	}
 }
 
-// Sorttaa yksiulotteisen arrayn annetun keyn perusteella
+// Sorttaa kaksiulotteisen arrayn annetun keyn perusteella
+//esim
+/**
+ * $header_values = array(
+		'tuoteno' => array(
+			'header' => t('Tuoteno'),
+			'order' => 0
+		),
+ * );
+ */
 if(!function_exists('_two_dimensional_array_sort_by_key')) {
 	function _two_dimensional_array_sort_by_key(&$array, $key) {
 		$_sorter = array();
@@ -20118,6 +20127,17 @@ if(!function_exists('_two_dimensional_array_sort_by_key')) {
 	}
 }
 
+//etsii halutun array keyn arraysta ja palauttaa kyseisen keyn parentit arrayssa jos key löytyy
+//esim voit etsiä funktiolla order ja funktio palauttaa kaikki ensimmäisen tason (tuoteno) arrayt jos order löytyy
+/**
+ * $header_values = array(
+		'tuoteno' => array(
+			'header' => t('Tuoteno'),
+			'order' => 0
+		),
+ * );
+ *
+ */
 if (!function_exists('search_array_key_recursive')) {
 	function search_array_key_recursive($array, $key) {
 		$results = array();

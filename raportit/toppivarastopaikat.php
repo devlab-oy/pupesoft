@@ -119,12 +119,12 @@ $kaikki_lisa_kentat = array(
 	6 => array(
 		'kolumni' => 'tuote.tuoteno',
         'header' => t('Tuotenumero'),
-		'checked' => '',
+		'checked' => ($tee == '' ? "checked='checked'" : ''),
 	),
 	7 => array(
 		'kolumni' => 'tuote.nimitys',
         'header' => t('Nimitys'),
-		'checked' => '',
+		'checked' => ($tee == '' ? "checked='checked'" : ''),
 	),
 	8 => array(
 		'kolumni' => 'tuote.ostoehdotus',
@@ -134,7 +134,7 @@ $kaikki_lisa_kentat = array(
 );
 //for looppi vain sen takia, että saadaan synkattua formista valitut kentät, mahdollisien kenttien kanssa
 foreach ($kaikki_lisa_kentat as $kentat_index => &$kentat_value) {
-	if (isset($lisa_kentat) and in_array($kentat_index, $lisa_kentat)) {
+	if ((isset($lisa_kentat) and in_array($kentat_index, $lisa_kentat)) or (!empty($kentat_value['checked']))) {
 		$kentat_value['checked'] = "checked='checked'";
 	}
 	else {

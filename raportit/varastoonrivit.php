@@ -232,12 +232,16 @@
 				$select = "LEFT(tapahtuma.laadittu, 10) pvm,";
 			}
 
+			$lefti = $keraajanro_pakollinen == "" ? "LEFT" : "";
+			$keraajanro_joinlisa = $keraajanro_pakollinen != "" ? "AND kuka.keraajanro != 0" : "";
+
 			$query = "	SELECT {$select}
 						SUM(IF(tl.tunnus IS NOT NULL, 0, tapahtuma.kpl)) yksikot,
 						COUNT(IF(tl.tunnus IS NOT NULL, NULL, tapahtuma.tunnus)) rivit
 						FROM tapahtuma
 						JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
 						LEFT JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND (tl.suoraan_laskutukseen != '' OR tl.ohita_kerays != ''))
+						{$lefti} JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija {$keraajanro_joinlisa})
 						WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 						AND tapahtuma.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
 						AND tapahtuma.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'

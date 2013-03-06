@@ -66,7 +66,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				$kolm_postitp 	= $asiakasrow["kolm_postitp"];
 			}
 
-			$maksuehto 		= $asiakasrow["maksuehto"];
+			$maksuehto = $asiakasrow["maksuehto"];
 
 			if ($myyjanro != "") {
 				$apuqu = "	SELECT *
@@ -179,6 +179,21 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				elseif ($toimehto_row["selitetark_3"] == "VASTAANOTTAJAN_SOPIMUS") {
 					$maksaja = "";
 				}
+			}
+
+			$yhteysquery = "SELECT nimi
+							FROM yhteyshenkilo
+							where yhtio = '$kukarow[yhtio]'
+							and liitostunnus = '$srow[liitostunnus]'
+							and tyyppi = 'A'
+							and tilausyhteyshenkilo != ''
+							and oletusyhteyshenkilo != ''
+							ORDER BY nimi
+							LIMIT 1";
+			$yhteysresult = pupe_query($yhteysquery);
+
+			if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
+				$tilausyhteyshenkilo = $yhteysrow['nimi'];
 			}
 		}
 		else {

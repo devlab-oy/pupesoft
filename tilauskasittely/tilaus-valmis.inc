@@ -79,7 +79,7 @@ if ($luottoraja_chk or $erapaiva_chk) {
 	$eiliittymaa 	 = "ON";
 	$luottorajavirhe = "";
 	$jvvirhe 		 = "";
-	$ylivito 		 = "";
+	$ylivito 		 = 0;
 	$trattavirhe 	 = "";
 	$laji 			 = "MA";
 	$grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
@@ -96,7 +96,7 @@ if ($luottoraja_chk or $erapaiva_chk) {
 	ob_end_clean();
 
     if ($luottoraja_chk == 0) { $luottorajavirhe = ""; }
-    if ($erapaiva_chk   == 0) { $ylivito         = ""; }
+    if ($erapaiva_chk   == 0) { $ylivito         = 0; }
 }
 
 // otetaan maksuehto t‰ss‰ heti alussa selville.. k‰teinen ja itsetulostus muuttaa asioita
@@ -128,7 +128,7 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
 	// Laitetaan lopetus tyhj‰ksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
 	$lopetus = "";
 }
-elseif ($luottorajavirhe != '' or $ylivito != "") {
+elseif ($luottorajavirhe != '' or $ylivito > 0) {
 	if ($kutsuja == "EDITILAUS" or $kukarow["extranet"] != "") {
 		$alatila = "F";
 	}
@@ -148,7 +148,7 @@ elseif ($luottorajavirhe != '' or $ylivito != "") {
         $errortext = t("Asiakkaan luottoraja on ylitetty") . ". ";
     }
 
-    if ($ylivito != "") {
+    if ($ylivito > 0) {
         $errortext .= t("Asiakkaalla on yli %s pv sitten er‰‰ntyneit‰ laskuja", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja']) . ". ";
     }
 

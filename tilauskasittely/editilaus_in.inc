@@ -110,6 +110,7 @@ $loppostino           	= "";
 $loposoite            	= "";
 $ltoim_maa				= "";
 $yhteyshenkilon_puhelin = "";
+$tilausyhteyshenkilo	= "";
 $lopviesti            	= "";
 $ketjutus             	= "";
 $editilaus_maksuehto	= "";
@@ -1086,6 +1087,23 @@ while ($tietue = fgets($fd)) {
 					}
 				}
 
+
+				// Onko asiakkaalla oletusyhteyshenkilö?
+				$yhteysquery = "SELECT nimi
+								FROM yhteyshenkilo
+								where yhtio = '$kukarow[yhtio]'
+								and liitostunnus = '$arow[tunnus]'
+								and tyyppi = 'A'
+								and tilausyhteyshenkilo != ''
+								and oletusyhteyshenkilo != ''
+								ORDER BY nimi
+								LIMIT 1";
+				$yhteysresult = pupe_query($yhteysquery);
+
+				if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
+					$tilausyhteyshenkilo = $yhteysrow['nimi'];
+				}
+
 				// Lisätään otsikko
 				$query = "	INSERT into lasku SET
 							aktiivinen_kuljetus					= '$suunnistus',
@@ -1142,7 +1160,7 @@ while ($tietue = fgets($fd)) {
 							tila 			   					= '$editilaus_tila',
 							tilaustyyppi						= '$tilaustyyppilisa',
 							tilausvahvistus    					= '$vastaustapa',
-							tilausyhteyshenkilo					= '',
+							tilausyhteyshenkilo					= '$tilausyhteyshenkilo',
 							toimaika 		   					= '$toimpvm',
 							toimitusehto 	   					= '$arow[toimitusehto]',
 							toimitustapa 	   					= '$editilaus_toimitustapa',
@@ -1945,6 +1963,7 @@ while ($tietue = fgets($fd)) {
 			$loposoite            	= "";
 			$ltoim_maa				= "";
 			$yhteyshenkilon_puhelin = "";
+			$tilausyhteyshenkilo	= "";
 			$lopviesti            	= "";
 			$ketjutus             	= "";
 			$editilaus_maksuehto	= "";

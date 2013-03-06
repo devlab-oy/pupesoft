@@ -17,8 +17,9 @@
 				$query = "	SELECT *
 							FROM tuotteen_toimittajat_tuotenumerot
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tuoteno = '{$toim_tuoteno}'
-							AND viivakoodi = '{$chk_viivakoodi}'";
+							AND tuoteno = '{$chk_tuoteno}'
+							AND viivakoodi = '{$chk_viivakoodi}'
+							AND tunnus != '{$tunnus}'";
 				$chk_res = pupe_query($query);
 
 				if (mysql_num_rows($chk_res) != 0) {

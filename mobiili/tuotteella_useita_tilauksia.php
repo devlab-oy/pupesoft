@@ -40,10 +40,11 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 			if (mysql_num_rows($chk_res) == 0) {
 
 				// tuotteen toimittajat tuotenumerot loop
-				$query = "	SELECT *
-							FROM tuotteen_toimittajat_tuotenumerot
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND viivakoodi = '{$viivakoodi}'";
+				$query = "	SELECT tt.*
+							FROM tuotteen_toimittajat_tuotenumerot AS ttt
+							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
+							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
+							AND ttt.viivakoodi = '{$viivakoodi}'";
 				$chk_res = pupe_query($query);
 
 				if (mysql_num_rows($chk_res) != 0) {

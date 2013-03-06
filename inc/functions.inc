@@ -19836,3 +19836,378 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 		}
 	}
 }
+
+/**
+ * HOW TO:
+ * $rivit :
+ * $rivit = array();
+ * while($rivi = mysql_fetch_assoc($result)) {
+ *			$rivit[] = $rivi;
+ * }
+ *
+ * OPTION 1:
+ * $header_values: query column names as array keys
+ * $header_values = array(
+		'tuoteno' => t('Tuoteno'),
+		'nimitys' => t('Tuotteen nimi'),
+		'varaston_nimitys' => t('Varasto'),
+	);
+ *
+ * OPTION 2:
+ * $header_values containing column names as array keys and header text and order as value
+ * 	$header_values = array(
+		'tuoteno' => array(
+			'header' => t('Tuoteno'),
+			'order' => 0
+		),
+		'nimitys' => array(
+			'header' => t('Tuotteen nimi'),
+			'order' => 1
+		),
+ *	);
+ * 
+ * $force_to_string: query column names that DO NOT need to be printed on excel as array values
+	$force_to_string = array(
+		'tuoteno'
+	);
+ */
+if (!function_exists('generoi_excel_tiedosto')) {
+	function generoi_excel_tiedosto(&$rivit, $header_values, $force_to_string) {
+		$xls = new pupeExcel();
+		$rivi_numero = 0;
+		$sarake_numero = 0;
+		
+		$_temp = search_array_key_recursive($header_values, 'order');
+		if(!empty($_temp)) {
+			_two_dimensional_array_sort_by_key($header_values, 'order');
+
+			_xls_jarjestetty_headerit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values);
+			_xls_jarjestetty_rivit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values, $force_to_string);
+		}
+		else {
+			_xls_headerit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values);
+			_xls_rivit($xls, $rivit, $rivi_numero, $sarake_numero, $force_to_string);
+		}
+
+		$xls_tiedosto = $xls->close();
+
+		return $xls_tiedosto;
+	}
+}
+
+if (!function_exists('_xls_headerit')) {
+	function _xls_headerit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values) {
+		$style = array("bold" => TRUE);
+		foreach ($rivit[0] as $header_text => $value) {
+			if (!stristr($header_text, 'tunnus')) {
+				if (array_key_exists($header_text, $header_values)) {
+					_kirjoita_header_solu($xls, $header_values[$header_text], $rivi_numero, $sarake_numero, $style);
+				}
+				else {
+					//fail safe
+					_kirjoita_header_solu($xls, $header_text, $rivi_numero, $sarake_numero, $style);
+				}
+			}
+		}
+		$rivi_numero++;
+		$sarake_numero = 0;
+	}
+}
+
+if(!function_exists('_xls_jarjestetty_headerit')) {
+	function _xls_jarjestetty_headerit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values) {
+		$style = array("bold" => TRUE);
+		foreach($header_values as $column_name => $value) {
+			if (!stristr($column_name, 'tunnus') and array_key_exists($column_name, $rivit[0])) {
+				_kirjoita_header_solu($xls, $value['header'], $rivi_numero, $sarake_numero, $style);
+			}
+		}
+		
+		$rivi_numero++;
+		$sarake_numero = 0;
+	}
+}
+
+if (!function_exists('_xls_rivit')) {
+	function _xls_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $force_to_string = array()) {
+		$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
+		$xls_progress_bar->initialize(count($rivit));
+
+		foreach ($rivit as $rivi) {
+			foreach ($rivi as $header => $solu) {
+				if (!stristr($header, 'tunnus')) {
+					_kirjoita_solu($xls, $header, $solu, $rivi_numero, $sarake_numero, $force_to_string);
+				}
+			}
+			$rivi_numero++;
+			$sarake_numero = 0;
+
+			$xls_progress_bar->increase();
+		}
+
+		echo "<br/>";
+	}
+}
+
+if (!function_exists('_xls_jarjestetty_rivit')) {
+	function _xls_jarjestetty_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values, $force_to_string = array()) {
+		if (php_sapi_name() != 'cli') {
+			require_once 'ProgressBar.class.php';
+			$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
+			$xls_progress_bar->initialize(count($rivit));
+		}
+
+		foreach ($rivit as $rivi) {
+			foreach($header_values as $column_name => $value) {
+				if (!stristr($column_name, 'tunnus') and isset($rivi[$column_name])) {
+					_kirjoita_solu($xls, $column_name, $rivi[$column_name], $rivi_numero, $sarake_numero, $force_to_string);
+				}
+			}
+			$rivi_numero++;
+			$sarake_numero = 0;
+
+			if (isset($xls_progress_bar)) {
+				$xls_progress_bar->increase();
+			}
+		}
+
+		if (php_sapi_name() != 'cli') {
+			echo "<br/>";
+		}
+	}
+}
+
+if (!function_exists('_kirjoita_solu')) {
+	function _kirjoita_solu(&$xls, $key, $string, &$rivi, &$sarake, $force_to_string) {
+		if (is_numeric($string) and !in_array($key, $force_to_string)) {
+			$xls->writeNumber($rivi, $sarake, $string);
+		}
+		else if (valid_date($string) != 0 and valid_date($string) !== false and !in_array($key, $force_to_string)) {
+			$xls->writeDate($rivi, $sarake, $string);
+		}
+		else {
+			$xls->write($rivi, $sarake, $string);
+		}
+		$sarake++;
+	}
+}
+
+if (!function_exists('_kirjoita_header_solu')) {
+	function _kirjoita_header_solu(&$xls, $string, &$rivi, &$sarake, $style = array()) {
+		$xls->write($rivi, $sarake, $string, $style);
+		$sarake++;
+	}
+}
+
+if (!function_exists('valid_date')) {
+	function valid_date($date) {
+		//preg_match() returns 1 if the pattern matches given subject, 0 if it does not, or FALSE if an error occurred.
+		return (preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date));
+	}
+}
+
+/**
+ * WARNING:
+ * array key "order" on varattujen key:ten listalle. ƒLƒ KƒYTƒ SITƒ.
+ * 
+ * HOW TO:
+ * $rivit :
+ * $rivit = array();
+ * while($rivi = mysql_fetch_assoc($result)) {
+ *			$rivit[] = $rivi;
+ * }
+ *
+ * OPTION 1:
+ * $header_values: query column names as array keys
+ * $header_values = array(
+		'tuoteno' => t('Tuoteno'),
+		'nimitys' => t('Tuotteen nimi'),
+		'varaston_nimitys' => t('Varasto'),
+	);
+ *
+ * OPTION 2:
+ * $header_values containing column names as array keys and header text and order as value
+ * 	$header_values = array(
+		'tuoteno' => array(
+			'header' => t('Tuoteno'),
+			'order' => 0
+		),
+		'nimitys' => array(
+			'header' => t('Tuotteen nimi'),
+			'order' => 1
+		),
+ *	);
+ * 
+ * $force_to_string: query column names that DO NOT need to be printed on html dom as array values
+	$force_to_string = array(
+		'tuoteno'
+	);
+ */
+if(!function_exists('echo_rows_in_table')) {
+	function echo_rows_in_table(&$rivit, $header_values = array(), $force_to_string = array(), $callback = '') {
+		echo "<table>";
+		$_temp = search_array_key_recursive($header_values, 'order');
+		if(!empty($_temp)) {
+			_two_dimensional_array_sort_by_key($header_values, 'order');
+			
+			_echo_ordered_table_headers($rivit[0], $header_values);
+			_echo_ordered_table_rows($rivit, $header_values, $force_to_string, $callback);
+		}
+		else {
+			_echo_table_headers($rivit[0], $header_values);
+			_echo_table_rows($rivit, $force_to_string, $callback);
+		}
+		echo "</table>";
+	}
+}
+
+if(!function_exists('_echo_table_headers')) {
+	function _echo_table_headers($rivi, $header_values) {
+		echo "<tr>";
+		foreach ($rivi as $header_text => $value) {
+			if (!stristr($header_text, 'tunnus')) {
+				if (array_key_exists($header_text, $header_values)) {
+					echo "<th>{$header_values[$header_text]}</th>";
+				}
+				else {
+					//fail safe
+					echo "<th>{$header_text}</th>";
+				}
+			}
+		}
+		echo "</tr>";
+	}
+}
+
+if (!function_exists('_echo_ordered_table_headers')) {
+	function _echo_ordered_table_headers($rivi, $header_values) {
+		echo "<tr>";
+		foreach($header_values as $column_name => $value) {
+			if (!stristr($column_name, 'tunnus')) {
+				if(array_key_exists($column_name, $rivi)) {
+					echo "<th>{$value['header']}</th>";
+				}
+			}
+		}
+		echo "</tr>";
+	}
+}
+
+if(!function_exists('_echo_table_rows')) {
+	function _echo_table_rows(&$rivit, $force_to_string = array(), $callback = '') {
+		foreach ($rivit as $rivi) {
+			echo "<tr>";
+			foreach ($rivi as $header => &$solu) {
+                if($callback == '') {
+                    _echo_table_row_td($header, $solu, $force_to_string);
+                }
+                else {
+                    //callback k‰ytet‰‰n jos halutaan defaultista poikkeava taulukko.
+                    if(function_exists($callback)) {
+                        $callback($header, $solu, $force_to_string);
+                    }
+                    else {
+                        //k‰ytet‰‰n defaulttia
+                        _echo_table_row_td($header, $solu, $force_to_string);
+                    }
+                }
+			}
+			echo "</tr>";
+		}
+	}
+}
+
+if(!function_exists('_echo_table_row_td')) {
+    function _echo_table_row_td($header, $solu, $force_to_string) {
+        if (!stristr($header, 'tunnus')) {
+            if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
+                $solu = number_format($solu, 2);
+            }
+            echo "<td>{$solu}</td>";
+        }
+    }
+}
+
+if (!function_exists('_echo_ordered_table_rows')) {
+	function _echo_ordered_table_rows(&$rivit, $header_values, $force_to_string = array(), $callback = '') {
+		foreach ($rivit as $rivi) {
+			echo "<tr>";
+			foreach ($header_values as $column_name => $value) {
+				if (array_key_exists($column_name, $rivi)) {
+					if ($callback == '') {
+						_echo_table_row_td($column_name, $rivi[$column_name], $force_to_string);
+					}
+					else {
+						//callback k‰ytet‰‰n jos halutaan defaultista poikkeava taulukko.
+						if (function_exists($callback)) {
+							$callback($column_name, $rivi[$column_name], $force_to_string);
+						}
+						else {
+							//k‰ytet‰‰n defaulttia
+							_echo_table_row_td($column_name, $rivi[$column_name], $force_to_string);
+						}
+					}
+				}
+			}
+			echo "</tr>";
+		}
+	}
+}
+
+// Sorttaa kaksiulotteisen arrayn annetun keyn perusteella
+//esim
+/**
+ * $header_values = array(
+		'tuoteno' => array(
+			'header' => t('Tuoteno'),
+			'order' => 0
+		),
+ * );
+ */
+if(!function_exists('_two_dimensional_array_sort_by_key')) {
+	function _two_dimensional_array_sort_by_key(&$array, $key) {
+		$_sorter = array();
+		$_return_array = array();
+
+		foreach ($array as $i => $value) {
+			$_sorter[$i] = $value[$key];
+		}
+
+		asort($_sorter);
+		
+		foreach ($_sorter as $i => $value) {
+			$_return_array[$i] = $array[$i];
+		}
+		
+		$array = $_return_array;
+	}
+}
+
+//etsii halutun array keyn arraysta ja palauttaa kyseisen keyn parentit arrayssa jos key lˆytyy
+//esim voit etsi‰ funktiolla order ja funktio palauttaa kaikki ensimm‰isen tason (tuoteno) arrayt jos order lˆytyy
+/**
+ * $header_values = array(
+		'tuoteno' => array(
+			'header' => t('Tuoteno'),
+			'order' => 0
+		),
+ * );
+ *
+ */
+if (!function_exists('search_array_key_recursive')) {
+	function search_array_key_recursive($array, $key) {
+		$results = array();
+
+		if (is_array($array)) {
+			if (isset($array[$key])) {
+				$results[] = $array;
+			}
+
+			foreach ($array as $subarray) {
+				$results = array_merge($results, search_array_key_recursive($subarray, $key));
+			}
+		}
+
+		return $results;
+	}
+}

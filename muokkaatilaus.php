@@ -1359,6 +1359,7 @@
 						HAVING extra = '' or extra is null
 						order by lasku.luontiaika desc
 						$rajaus";
+
 			// haetaan tilausten arvo
 			if ($kukarow['hinnat'] == 0) {
 				$sumquery = "	SELECT
@@ -2023,7 +2024,7 @@
 
 					if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "ENNAKKO" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
 						echo "<input type='submit' name='$aputoim2' value='$lisa2' $button_disabled>";
-						
+
 					}
 
 					echo "<input type='submit' name='$aputoim1' value='$lisa1' $button_disabled>";

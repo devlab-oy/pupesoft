@@ -1741,9 +1741,9 @@
 							$kirrow  = mysql_fetch_assoc($kirres);
 							$vakadr_komento = $kirrow['komento'];
 
-							tulosta_vakadr_erittely($laskurow["tunnus"], $vakadr_komento, $tee);
+							$onko_vak = tulosta_vakadr_erittely($laskurow["tunnus"], $vakadr_komento, $tee);
 
-							if ($vakadr_komento != 'email') $lahete_tulostus_paperille_vak++;
+							if ($vakadr_komento != 'email' and $onko_vak) $lahete_tulostus_paperille_vak++;
 						}
 
 						if ($valittu_tulostin != "") {

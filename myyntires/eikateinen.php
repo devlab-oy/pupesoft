@@ -648,7 +648,7 @@ function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {
 		return false;
 	}
 	else {
-		return $tilikausi_alku;
+		return $yhtiorow['tilikausi_alku'];
 	}
 
 }

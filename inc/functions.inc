@@ -18005,12 +18005,12 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 
 		if ($yhtiorow["kerayserat"] == "") {
 			echo t("Keräyserät pitää olla käytössä, ei tulosteta VAK-erittelyä");
-			return;
+			return FALSE;
 		}
 
 		if ($yhtiorow["vak_erittely"] != "K") {
 			echo t("Vak-erittely pitää olla käytössä, ei tulosteta VAK-erittelyä");
-			return;
+			return FALSE;
 		}
 
 		$query = "	SELECT *
@@ -18021,7 +18021,7 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 
 		if (mysql_num_rows($result) == 0) {
 			echo t("Laskua ei löydy");
-			return;
+			return FALSE;
 		}
 
 		$laskurow = mysql_fetch_assoc($result);
@@ -18130,6 +18130,11 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 
 			// Tulostetaan PDF
 			print_pdf_vakadr($params_vak);
+
+			return TRUE;
+		}
+		else {
+			return FALSE;
 		}
 	}
 }
@@ -18543,13 +18548,13 @@ if(!function_exists('etsi_kasittelemattomat_asn_sanomat')) {
 		$result = pupe_query($query);
 
 		$return = array();
-		
+
 		if (mysql_num_rows($result) > 0) {
 			while ($row = mysql_fetch_assoc($result)) {
 				$return[] = $row;
 			}
 		}
-		
+
 		return $return;
 	}
 }

@@ -60,7 +60,7 @@
 
 				$trow[$i] = $autom_tuoteno_row['seuraava_tuoteno'];
 
-				if (mysql_num_rows($autom_tuoteno_res) == 0 and $autom_wherelisa != "") $trow[$i] = "{$kaatokoodi_tuotteen_tuotenumeron_alku}1";
+				if ($autom_tuoteno_row['seuraava_tuoteno'] == '' and $autom_wherelisa != "") $trow[$i] = "{$kaatokoodi_tuotteen_tuotenumeron_alku}1";
 			}
 
 			$ulos = "<td><input type = 'hidden' name = 'uusi' value = '$uusi'><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";

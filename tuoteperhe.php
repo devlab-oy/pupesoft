@@ -680,7 +680,7 @@
 					echo "<th>".t("Samankaltaisuudet")."</th><th>".t("Nimitys")."</th><th>".t("Kerroin")."</th><td class='back'></td></tr>";
 				}
 				else {
-					echo "<th>".t("Raaka-aineet")."</th><th>".t("Nimitys")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>".t("Pituus kerroin")."</th><td class='back'></td></tr>";
+					echo "<th>".t("Raaka-aineet")."</th><th>".t("Nimitys")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Yksikko")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>".t("Pituus kerroin")."</th><td class='back'></td></tr>";
 				}
 
 				$query = "	SELECT *
@@ -730,7 +730,7 @@
 					}
 					else echo "<td></td><td></td>";
 
-					if ($toim == "PERHE") {
+					if ($toim == "PERHE" or $toim == "RESEPTI") {
 						echo "<td></td>";
 					}
 
@@ -780,7 +780,10 @@
 							echo"<td align='right'>$prow[hintakerroin]</td><td align='right'>$prow[alekerroin]</td>";
 							#echo "<td align='right'>$prow[rivikommentti]</td>";
 						}
-
+						
+						if ($toim == "RESEPTI") {
+							echo "<td align='left'>$tuoterow[yksikko]</td>";
+					    }
 						if ($toim != "VSUUNNITTELU") {
 							echo "<td align='right'>$tuoterow[kehahin]</td><td align='right'>".round($lapsiyht, 6)."</td>";
 						}
@@ -871,7 +874,7 @@
 							else {
 								$sel1 = "SELECTED";
 							}
-
+						
 							echo "<td>
 										<select name='kpl2' style='width: 150px;'>
 											<option value='' $sel1>".t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)")."</option>
@@ -893,6 +896,9 @@
 					}
 					if ($toim == "PERHE") {
 						echo "<td class='back' colspan='2'></td>";
+					}
+					if ($toim == "RESEPTI") {
+						echo "<td class='back' colspan='1'></td>";
 					}
 
 					echo "<th align='right'>".t("Yhteens‰").":</th>

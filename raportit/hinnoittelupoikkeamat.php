@@ -147,6 +147,7 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND otunnus = '{$laskurow['tunnus']}'
 							AND tyyppi = 'L'
+							AND kpl+varattu > 0
 							AND tuoteno NOT IN (
 								'{$yhtiorow['rahti_tuotenumero']}',
 								'{$yhtiorow['jalkivaatimus_tuotenumero']}',

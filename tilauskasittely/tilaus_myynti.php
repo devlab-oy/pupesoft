@@ -1393,22 +1393,25 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			// tulostetaan l‰hetteet ja tilausvahvistukset tai sis‰inen lasku..
 			require("tilaus-valmis.inc");
 
-			if(!empty($laskurow['heti_toimitukseen'])) {
-				//estet‰‰n, ett‰ tilaus ei mene suoraan ker‰ys jonoon.
+			if (!empty($laskurow['heti_toimitukseen'])) {
+				// estet‰‰n, ett‰ tilaus ei mene suoraan ker‰ysjonoon.
 				$query = "	SELECT *
 							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND otunnus = '{$laskurow['tunnus']}'";
 				$tilausrivi_result = pupe_query($query);
 				$voiko_toimittaa = true;
-				while($tilausrivi_row = mysql_fetch_assoc($tilausrivi_result)) {
+
+				while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_result)) {
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tilausrivi_row['tuoteno'], 'JTSPEC2', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
-					if($myytavissa < $tilausrivi_row['tilkpl']) {
+
+					if ($myytavissa < $tilausrivi_row['tilkpl']) {
 						$voiko_toimittaa = false;
 						break;
 					}
 				}
-				if(!$voiko_toimittaa) {
+
+				if (!$voiko_toimittaa) {
 					$toimpvm = date('Y-m-d', strtotime('now + 1 month'));
 					$query = "	UPDATE lasku
 								SET tila = 'N',

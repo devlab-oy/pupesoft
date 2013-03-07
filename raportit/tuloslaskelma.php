@@ -669,7 +669,18 @@
 
 			if ($vertailued != "") {
 				$totalalku  = ($plvv-1)."-".$plvk."-".$plvp;
-				$totalloppued = ($alvv-1)."-".$alvk."-".$alvp;
+
+				if ((int) $alvk == 2 and (int) $alvp == 29 and date("t", mktime(0, 0, 0, $alvk, 1, $alvv)) == 29) {
+					// onko tämä vuosi karkausvuosi?
+					$totalloppued = ($alvv-1)."-".$alvk."-28";
+				}
+				elseif ((int) $alvk == 2 and (int) $alvp == 28 and date("t", mktime(0, 0, 0, $alvk, 1, ($alvv-1))) == 29) {
+					// oliko edellinen vuosi karkausvuosi?
+					$totalloppued = ($alvv-1)."-".$alvk."-29";
+				}
+				else {
+					$totalloppued = ($alvv-1)."-".$alvk."-".$alvp;
+				}
 			}
 			else {
 				$totalalku = $plvv."-".$plvk."-".$plvp;
@@ -702,7 +713,20 @@
 					if ($i == $startmonth) $alku_ed = ($plvv-1)."-".$plvk."-".$plvp;
 					else $alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)-1));
 
-					if ($i == $endmonth) $loppu_ed = ($alvv-1)."-".$alvk."-".$alvp;
+					if ($i == $endmonth) {
+
+						if ((int) $alvk == 2 and (int) $alvp == 29 and date("t", mktime(0, 0, 0, $alvk, 1, $alvv)) == 29) {
+							// onko tämä vuosi karkausvuosi?
+							$loppu_ed = ($alvv-1)."-".$alvk."-28";
+						}
+						elseif ((int) $alvk == 2 and (int) $alvp == 28 and date("t", mktime(0, 0, 0, $alvk, 1, ($alvv-1))) == 29) {
+							// oliko edellinen vuosi karkausvuosi?
+							$loppu_ed = ($alvv-1)."-".$alvk."-29";
+						}
+						else {
+							$loppu_ed = ($alvv-1)."-".$alvk."-".$alvp;
+						}
+					}
 					else $loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2)+1, 0, substr($i,0,4)-1));
 
 					$headed   = date("Y/m",   mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)-1));

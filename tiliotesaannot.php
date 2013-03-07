@@ -53,7 +53,7 @@
 
 			$nimitieto = strtoupper($nimitieto);
 
-			if (($nimitieto=="LUOTTOKUNTA-KREDITLAGET") or ($nimitieto=="LUOTTOKUNTA") or ($nimitieto=="LUOTTOKUNTA/VISA") or ($nimitieto=="LUOTTOKUNTA OY")) {
+			if (($nimitieto=="LUOTTOKUNTA-KREDITLAGET") or ($nimitieto=="LUOTTOKUNTA") or ($nimitieto=="LUOTTOKUNTA/VISA") or ($nimitieto=="LUOTTOKUNTA OY") or ($nimitieto=="NETS OY")) {
 				$query = "	SELECT tilino
 							FROM tili
 							WHERE tilino = '$tilino2' and yhtio = '$kukarow[yhtio]'";
@@ -83,7 +83,7 @@
 			}
 			else {
 				if ($tilino2 != 0) {
-					$virhe.= t("Vain maksajalle LUOTTOKUNTA-KREDITLAGET tai LUOTTOKUNTA tai LUOTTOKUNTA/VISA voi antaa palkkiotilin")."<br>";
+					$virhe.= t("Vain maksajalle LUOTTOKUNTA-KREDITLAGET tai LUOTTOKUNTA tai LUOTTOKUNTA/VISA tai NETS OY voi antaa palkkiotilin")."<br>";
 					$ok = 1;
 					$tee = '';
 				}
@@ -292,7 +292,7 @@
 					</td>
 					<td><input type='text' name='koodiselite' size='15' value = '$koodiselite'></td>
 					<td><input type='text' name='nimitieto' size='25' value = '$nimitieto'></td>
-					<td><input type='text' name='selite' size='15' value = '$selite'></td>
+					<td><input type='text' name='selite' size='50' value = '$selite'></td>
 					<td><input type='checkbox' name='erittely' $erittely></td>
 					<td><input type='text' name='tilino' size='6' value = '$tilino'></td>
 					<td>$ulos</td>

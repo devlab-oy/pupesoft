@@ -47,6 +47,8 @@
 
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 
+	date_default_timezone_set('Europe/Helsinki');
+
 	$pupe_root_polku = dirname(__FILE__);
 	chdir($pupe_root_polku);
 
@@ -103,6 +105,10 @@
 
 	// Erotellaan sanoman sisältö arrayseen
 	$sisalto = explode(",", str_replace("'", "", $sisalto));
+
+	$responseaika_alku = date("Y-m-d H:i:s");
+	$responseaika_alku_sek = time();
+
 	$response = "";
 
 	require('inc/connect.inc');
@@ -855,12 +861,20 @@
 	$fleur = ob_get_contents();
 	$fleur = ($fleur != "") ? $fleur."\n" : "";
 
+	$responseaika_loppu     = date("Y-m-d H:i:s");
+	$responseaika_loppu_sek = time();
+	$responseaika_sek_error = "";
+
+	if ($responseaika_loppu_sek-$responseaika_alku_sek >= 20) {
+		$responseaika_sek_error = "-----------------TIMEOUT:".sprintf("%011d", $responseaika_loppu_sek-$responseaika_alku_sek)."-----------------\n";
+	}
+
 	// Onko nagios monitor asennettu?
 	if (file_exists("/home/optiscan/optiscan.log")) {
 		// Noticet veks lokista
-		$fleur = preg_replace("/Notice:.*\n(\n)?/", "", $fleur);
+		$fleur = str_replace("<br>", "\n", preg_replace("/Notice:.*\n(\n)?/", "", $fleur));
 
-		file_put_contents("/home/optiscan/optiscan.log", "------------------------START------------------------\n$kukarow[kuka]: {$lines[0]}\npupe: ".trim($response)."\n$fleur------------------------STOP-------------------------\n\n", FILE_APPEND);
+		file_put_contents("/home/optiscan/optiscan.log", "------------------------START------------------------\n-----------------$responseaika_alku-----------------\n$kukarow[kuka]: {$lines[0]}\npupe: ".trim($response)."\n$fleur-----------------$responseaika_loppu-----------------\n$responseaika_sek_error------------------------STOP-------------------------\n\n", FILE_APPEND);
 	}
 
 	ob_end_clean();

@@ -649,13 +649,11 @@
 							<td colspan='2'><select name='kuka'>
 							<option value='$kukarow[kuka]'>".t("Itse")."</option>";
 
-					$query = "	SELECT distinct kuka.tunnus, kuka.nimi, kuka.kuka
-								FROM kuka, oikeu
-								WHERE kuka.yhtio	= '$kukarow[yhtio]'
-								and oikeu.yhtio		= kuka.yhtio
-								and oikeu.kuka		= kuka.kuka
-								and oikeu.nimi		= 'crm/kalenteri.php'
-								and kuka.kuka 		<> '$kukarow[kuka]'
+					$query = "	SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
+								FROM kuka
+								JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
+								WHERE kuka.yhtio = '$kukarow[yhtio]'
+								and kuka.kuka != '$kukarow[kuka]'
 								ORDER BY kuka.nimi";
 					$result = pupe_query($query);
 
@@ -708,13 +706,11 @@
 							<th>".t("Leadia valvoo").":</th>
 							<td colspan='2'><select name='myyntipaallikko'>";
 
-					$query = "	SELECT distinct kuka.tunnus, kuka.nimi, kuka.kuka
-								FROM kuka, oikeu
-								WHERE kuka.yhtio	= '$kukarow[yhtio]'
-								and oikeu.yhtio		= kuka.yhtio
-								and oikeu.kuka		= kuka.kuka
-								and oikeu.nimi		= 'crm/kalenteri.php'
-								and kuka.asema   like '%MP%'
+					$query = "	SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
+								FROM kuka
+								JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
+								WHERE kuka.yhtio = '$kukarow[yhtio]'
+								and kuka.asema like '%MP%'
 								ORDER BY kuka.nimi";
 					$result = pupe_query($query);
 
@@ -736,13 +732,11 @@
 							<td colspan='2'><select name='kuka'>
 							<option value='$kukarow[kuka]'>$kukarow[nimi]</option>";
 
-					$query = "	SELECT distinct kuka.tunnus, kuka.nimi, kuka.kuka
-								FROM kuka, oikeu
-								WHERE kuka.yhtio	= '$kukarow[yhtio]'
-								and oikeu.yhtio		= kuka.yhtio
-								and oikeu.kuka		= kuka.kuka
-								and oikeu.nimi		= 'crm/kalenteri.php'
-								and kuka.kuka 		<> '$kukarow[kuka]'
+					$query = "	SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
+								FROM kuka
+								JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
+								WHERE kuka.yhtio = '$kukarow[yhtio]'
+								and kuka.kuka != '$kukarow[kuka]'
 								ORDER BY kuka.nimi";
 					$result = pupe_query($query);
 
@@ -898,16 +892,26 @@
 						echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
 						echo "<select name='email' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
 
-						$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
+						$query = "	SELECT distinct yhtio
+									FROM yhtio
+									WHERE (konserni = '$yhtiorow[konserni]' and konserni != '')
+									OR (yhtio = '$yhtiorow[yhtio]')";
 						$result = pupe_query($query);
 						$konsernit = "";
 
 						while ($row = mysql_fetch_array($result)) {
 							$konsernit .= " '".$row["yhtio"]."' ,";
 						}
-						$lisa2 = " yhtio in (".substr($konsernit, 0, -1).") ";
 
-						$query  = "SELECT distinct kuka, nimi, eposti FROM kuka WHERE $lisa2 and extranet='' and eposti != '' ORDER BY nimi";
+						$lisa2 = " kuka.yhtio in (".substr($konsernit, 0, -1).") ";
+
+						$query  = "	SELECT DISTINCT kuka.kuka, kuka.nimi, kuka.eposti
+									FROM kuka
+									JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka)
+									WHERE $lisa2
+									and kuka.extranet = ''
+									and kuka.eposti != ''
+									ORDER BY kuka.nimi";
 						$vares = pupe_query($query);
 
 						while ($varow = mysql_fetch_array($vares)) {

@@ -7,7 +7,7 @@
 	$pankki = substr($pankkitili,0,1);
 
 	// poistetaan väliviiva
-	$pankkitili = str_replace("-", "", $pankkitili);
+	$pankkitili = preg_replace("/[^0-9]/", "", $pankkitili);
 
 	// Sisäisen pankin tilejä ei tsekata
 	if ($pankki == 9) {
@@ -52,8 +52,8 @@
 			$tarkiste = 0;
 		}
 
-		if (substr($pankkitili, 13, 1) != $tarkiste) {
-			//echo "Tarkiste on väärin $tarkiste<br>";
+		if (substr($pankkitili, 13, 1) == '' or substr($pankkitili, 13, 1) != $tarkiste) {
+			#echo "Tarkiste on väärin $tarkiste<br>";
 			$pankkitili = "";
 		}
 	}

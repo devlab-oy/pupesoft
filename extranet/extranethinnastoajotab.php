@@ -10,7 +10,8 @@
 	//Haetaan asiakkaan tunnuksella
 	$query  = "	SELECT *
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+				WHERE yhtio = '$kukarow[yhtio]' 
+				and tunnus  = '$kukarow[oletus_asiakas]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 1) {
@@ -43,14 +44,18 @@
 		}
 
 		$rivi = '';
-		$query = "	select a.tuoteno, a.nimitys, a.lyhytkuvaus, a.tuotemerkki, a.myyntihinta hinta_veroll, a.alv,
+		
+		$query = "	SELECT a.tuoteno, a.nimitys, a.lyhytkuvaus, a.tuotemerkki, a.myyntihinta hinta_veroll, a.alv,
 					if(b.alennus is null,'0,00', alennus) 'alepros', a.aleryhma
-					from tuote a
-					join asiakas c on a.yhtio = c.yhtio and c.ytunnus = '$ytunnus'
-					left join asiakasalennus b on a.yhtio = b.yhtio and a.aleryhma = b.ryhma and b.ytunnus = c.ytunnus
-					where a.yhtio = '$kukarow[yhtio]' and a.status in ('','a') and hinnastoon != 'E'
+					FROM tuote a
+					JOIN asiakas c on a.yhtio = c.yhtio and c.ytunnus = '$ytunnus'
+					LEFT JOIN asiakasalennus b on a.yhtio = b.yhtio and a.aleryhma = b.ryhma and b.ytunnus = c.ytunnus
+					WHERE a.yhtio = '$kukarow[yhtio]' 
+					and a.status in ('','a') 
+					and a.hinnastoon != 'E'
+					and a.tuotetyyppi NOT IN ('A', 'B')
 					$lisa
-					order by 1";
+					ORDER BY 1";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {

@@ -196,14 +196,6 @@
 		echo "</select></td></tr>";
 	}
 
-	if ($toim == "TARJOUS") {
-		echo "<tr><th>",t("Näytetäänkö verolliset vai verottomat hinnat"),"</th><td><select name='verolliset_verottomat_hinnat'>";
-		echo "<option value=''>",t("Haetaan yhtiön parametreistä"),"</option>";
-		echo "<option value='verolliset'>",t("Verolliset"),"</option>";
-		echo "<option value='verottomat'>",t("Verottomat"),"</option>";
-		echo "</select></td></tr>";
-	}
-
 	if ($toim == "TILAUSVAHVISTUS") {
 		echo "<tr><th>",t("Näytetäänkö rivihinta"),"</th><td><select name='naytetaanko_rivihinta'>";
 		echo "<option value=''>",t("Näytetään rivihinta"),"</option>";
@@ -212,10 +204,21 @@
 	}
 
 	if ($toim == "TARJOUS") {
+		echo "<tr><th>",t("Näytetäänkö verolliset vai verottomat hinnat"),"</th><td><select name='verolliset_verottomat_hinnat'>";
+		echo "<option value=''>",t("Haetaan yhtiön parametreistä"),"</option>";
+		echo "<option value='verolliset'>",t("Verolliset"),"</option>";
+		echo "<option value='verottomat'>",t("Verottomat"),"</option>";
+		echo "</select></td></tr>";
+
 		echo "<tr><th>",t("Näytetäänkö rivihinta"),"</th><td><select name='naytetaanko_rivihinta'>";
 		echo "<option value=''>",t("Näytetään hinnat"),"</option>";
 		echo "<option value='ei_rivihintaa'>",t("Ei näytetä rivihintaa"),"</option>";
 		echo "<option value='kokonaan_ilman_hintoja'>",t("Kokonaan ilman hintoja"),"</option>";
+		echo "</select></td></tr>";
+
+		echo "<tr><th>",t("Näytetäänkö tuotenumerot"),"</th><td><select name='naytetaanko_tuoteno'>";
+		echo "<option value=''>",t("Kyllä"),"</option>";
+		echo "<option value='ei'>",t("Ei"),"</option>";
 		echo "</select></td></tr>";
 	}
 
@@ -319,7 +322,7 @@
 			if (mysql_num_rows($suuntalavat_res) == 0) continue;
 		}
 
-		if ($toim == "PROFORMA") {
+		if ($toim == "PROFORMA" or $toim == "VIENTILASKU") {
 			echo "<tr><th>",t("Tulosta myös tullinimike ja alkuperämaa")."</th>";
 			echo "<td><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
 		}
@@ -329,7 +332,7 @@
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 		echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 
-		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'LASKU') and $asrow['email'] != '') {
+		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'TILAUSVAHVISTUS' or $toim == 'LASKU') and $asrow['email'] != '') {
 			echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
 			if ($toim == 'LASKU' and trim($asrow['lasku_email']) != '') {
 				echo "<option value='asiakasemail$asrow[lasku_email]'>".t("Asiakkaan laskutussähköpostiin").": $asrow[lasku_email]</option>";

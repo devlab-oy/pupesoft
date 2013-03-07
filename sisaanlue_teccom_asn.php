@@ -34,7 +34,7 @@
 	// setataan käytetyt muuttujat:
 	$asn_numero					= "";
 	$kukarow["kuka"] 			= "crond";
-	$poikkeukset 				= array("123001", "123067", "123310", "123312", "123342", "123108", "123035", "123049", "123317","123441","123080","123007","123453");
+	$poikkeukset 				= array("123001", "123067", "123310", "123312", "123342", "123108", "123036", "123049", "123317","123441","123080","123007","123453");
 	$tavarantoimittajanumero 	= "";
 	$tiedosto_sisalto			= "";
 	$toimituspvm				= "";
@@ -262,7 +262,7 @@
 					if (strtoupper($tavarantoimittajanumero) == "ELRING") {
 						$tavarantoimittajanumero = "123312";
 					}
-					elseif (strtoupper($tavarantoimittajanumero) == "BOSCH") {
+					elseif (strtoupper($tavarantoimittajanumero) == "BOSCH" OR strtoupper($tavarantoimittajanumero) == "AA_FI") {
 						$tavarantoimittajanumero = "123067";
 					}
 					elseif (strtoupper($tavarantoimittajanumero) == "NISSENS") {
@@ -273,6 +273,9 @@
 					}
 					elseif (strtoupper($tavarantoimittajanumero) == "LES-7") {
 						$tavarantoimittajanumero = "123080";
+					}	
+					elseif (strtoupper($tavarantoimittajanumero) == "123035") {
+							$tavarantoimittajanumero = "123036";
 					}				
 
 					$asn_numero  = (string) $xml->DesAdvHeader->DesAdvId;

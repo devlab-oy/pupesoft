@@ -17,6 +17,36 @@ if (isset($uusi)) {
 	$nollaus_query = "UPDATE kuka SET kesken=0 WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
 	$result = pupe_query($nollaus_query);
 }
+else {
+	$query = "	SELECT kesken
+				FROM kuka
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND kuka='{$kukarow['kuka']}'";
+	$result = pupe_query($query);
+	$kesken_row = mysql_fetch_assoc($result);
+
+	//jos käyttäjällä ei ole mitään tilausta kesken, haetaan käyttäjän viimeisimmäksi luotu saapumisotsikko ja jatketaan sitä
+	if ($kesken_row['kesken'] == 0) {
+		//haetaan uusin saapumisen tunnus ja setataan se kesken kolumniin
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laatija = '{$kukarow['kuka']}'
+					AND tila = 'K'
+					AND alatila NOT IN ('X', 'I')
+					ORDER BY luontiaika DESC
+					LIMIT 1";
+		$result = pupe_query($query);
+
+		$saapuminen_row = mysql_fetch_assoc($result);
+
+		$kesken_query = "	UPDATE kuka
+							SET kesken = '{$saapuminen_row['tunnus']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND kuka = '{$kukarow['kuka']}'";
+		pupe_query($kesken_query);
+	}
+}
 
 # Jos haulla ei löytyny mitään, ollaan palattu tälle sivulle virheparametrilla.
 if (isset($virhe)) {

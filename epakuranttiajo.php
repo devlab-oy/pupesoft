@@ -55,6 +55,9 @@
 
 	if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "EPAKURANTOI"))) {
 
+		// Viimeisimmästä tulosta ja laskutuksesta näin monta päivää HOUM: tän voi laittaa myös salasanat.php:seen.
+		if (!isset($epakurtasot_array)) $epakurtasot_array = array("100%" => 913, "75%" => 820, "50%" => 730, "25%" => 547);
+
 		// Tehdään kaikki tapahtumat samalle tositteelle!
 		$tapahtumat_samalle_tositteelle = "kylla";
 		$laskuid = 0;
@@ -193,8 +196,8 @@
 				$tee 		= "";
 				$mikataso 	= 0;
 
-				// jos yli 30 kuukautta --> 100% epäkurantiksi
-				if ($tulo > 913 and $lasku > 913 and $epakurantti_row["epakurantti100pvm"] == "0000-00-00") {
+				// viimeisin tulo yli $epakurtasot_array["100%"] päivää sitten --> 100% epäkurantiksi
+				if (isset($epakurtasot_array["100%"]) and $epakurtasot_array["100%"] > 0 and $tulo > $epakurtasot_array["100%"] and $lasku > $epakurtasot_array["100%"] and $epakurantti_row["epakurantti100pvm"] == "0000-00-00") {
 
 					if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
 						$tee = "paalle";
@@ -203,8 +206,18 @@
 
 					$mikataso = 100;
 				}
-				// jos yli 24 kuukautta --> 50% epäkurantiksi
-				elseif ($tulo > 730 and $lasku > 730 and $epakurantti_row["epakurantti50pvm"] == "0000-00-00") {
+				// viimeisin tulo yli $epakurtasot_array["75%"] päivää sitten --> 75% epäkurantiksi
+				elseif (isset($epakurtasot_array["75%"]) and $epakurtasot_array["75%"] > 0 and $tulo > $epakurtasot_array["75%"] and $lasku > $epakurtasot_array["75%"] and $epakurantti_row["epakurantti75pvm"] == "0000-00-00") {
+
+					if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
+						$tee = "75paalle";
+						require ("epakurantti.inc");
+					}
+
+					$mikataso = 75;
+				}
+				// viimeisin tulo yli $epakurtasot_array["50%"] päivää sitten --> 50% epäkurantiksi
+				elseif (isset($epakurtasot_array["50%"]) and $epakurtasot_array["50%"] > 0 and $tulo > $epakurtasot_array["50%"] and $lasku > $epakurtasot_array["50%"] and $epakurantti_row["epakurantti50pvm"] == "0000-00-00") {
 
 					if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
 						$tee = "puolipaalle";
@@ -213,8 +226,8 @@
 
 					$mikataso = 50;
 				}
-				// jos yli 18 kuukautta --> 25% epäkurantiksi
-				elseif ($tulo > 547 and $lasku > 547 and $epakurantti_row["epakurantti25pvm"] == "0000-00-00") {
+				// viimeisin tulo yli $epakurtasot_array["25%"] päivää sitten --> 25% epäkurantiksi
+				elseif (isset($epakurtasot_array["25%"]) and $epakurtasot_array["25%"] > 0 and $tulo > $epakurtasot_array["25%"] and $lasku > $epakurtasot_array["25%"] and $epakurantti_row["epakurantti25pvm"] == "0000-00-00") {
 
 					if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
 						$tee = "25paalle";
@@ -254,17 +267,20 @@
 					}
 
 					if ($mikataso == 100) {
-						if (!$php_cli) echo "<td>".t("Yli 30kk sitten")."</td>";
-						$worksheet->writeString($excelrivi, $excelsarake++, t("Yli 30kk sitten"));
+						$ekk = round($epakurtasot_array["100%"] / (365/12), 1);
+					}
+					elseif ($mikataso == 75) {
+						$ekk = round($epakurtasot_array["75%"] / (365/12), 1);
 					}
 					elseif ($mikataso == 50) {
-						if (!$php_cli) echo "<td>".t("Yli 24kk sitten")."</td>";
-						$worksheet->writeString($excelrivi, $excelsarake++, t("Yli 24kk sitten"));
+						$ekk = round($epakurtasot_array["50%"] / (365/12), 1);
 					}
 					elseif ($mikataso == 25) {
-						if (!$php_cli) echo "<td>".t("Yli 18kk sitten")."</td>";
-						$worksheet->writeString($excelrivi, $excelsarake++, t("Yli 18kk sitten"));
+						$ekk = round($epakurtasot_array["25%"] / (365/12), 1);
 					}
+
+					if (!$php_cli) echo "<td>".t("Yli %s kk sitten", "", $ekk)."</td>";
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Yli %s kk sitten", "", $ekk));
 
 					if (!$php_cli) echo "<td align='right'>{$mikataso}%</td>";
 					$worksheet->writeString($excelrivi, $excelsarake++, $mikataso."%");
@@ -282,6 +298,9 @@
 
 					if ($mikataso == 100) {
 						$vararvo_sit = 0;
+					}
+					elseif ($mikataso == 75) {
+						$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.25*$epakurantti_row['saldo'], 2);
 					}
 					elseif ($mikataso == 50) {
 						$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.5*$epakurantti_row['saldo'], 2);

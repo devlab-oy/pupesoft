@@ -157,6 +157,77 @@
 			closedir($handle);
 		}
 
+		// MAVENTA
+		$kansio = "{$pupe_root_polku}/dataout/maventa_error/";
+
+		if ($handle = opendir($kansio)) {
+			while (($lasku = readdir($handle)) !== FALSE) {
+				if (preg_match("/laskutus\-(.*?)\-2[0-9]{7,7}\-([0-9]*?)\-serialized.txt/", $lasku, $matsit)) {
+
+					$kukarow['yhtio'] = $matsit[1];
+					$kukarow['kuka']  = 'cron';
+					$kukarow['kieli'] = 'fi';
+
+					$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+
+					// T‰ytet‰‰n api_keys, n‰ill‰ kirjaudutaan Maventaan
+					$api_keys = array();
+					$api_keys["user_api_key"] 	= $yhtiorow['maventa_api_avain'];
+					$api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
+
+					// Vaihtoehtoinen company_uuid
+					if ($yhtiorow['maventa_yrityksen_uuid'] != "") {
+						$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
+					}
+
+					try {
+						// Testaus
+						#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+
+						// Tuotanto
+						$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+
+						// Haetaan tarvittavat tiedot filest‰
+						$files_out = unserialize(file_get_contents($kansio.$lasku));
+
+						$status = maventa_invoice_put_file($client, $api_keys, $matsit[2], "", $kukarow['kieli'], $files_out);
+
+						// Siirret‰‰n dataout kansioon jos kaikki meni ok
+						rename($kansio.$lasku, "{$pupe_root_polku}/dataout/$lasku");
+
+						echo  "Maventa-lasku $matsit[2]: $status<br>\n";
+					}
+					catch (Exception $exVirhe) {
+						echo "VIRHE: Yhteys Maventaan ep‰onnistui: ".$exVirhe->getMessage()."\n";
+					}
+				}
+			}
+
+			closedir($handle);
+		}
+
+		// APIX
+		$kansio = "{$pupe_root_polku}/dataout/apix_error/";
+
+		if ($handle = opendir($kansio)) {
+			while (($lasku = readdir($handle)) !== FALSE) {
+				if (preg_match("/Apix_(.*?)_invoices_/", $lasku, $matsit)) {
+
+					$kukarow['yhtio'] = $matsit[1];
+					$kukarow['kuka']  = 'cron';
+					$kukarow['kieli'] = 'fi';
+
+					$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+
+					$status = apix_invoice_put_file("", $kukarow['kieli'], $lasku);
+
+					echo "APIX-l‰hetys $status<br>\n";
+				}
+			}
+
+			closedir($handle);
+		}
+
 		unlink("/tmp/##verkkolasku-resend.lock");
 	}
 

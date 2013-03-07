@@ -164,7 +164,7 @@ if (!function_exists('rivi_dgd')) {
 
 		$pdf->pages[$sivu]->setFont($norm, 8);
 
-		list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['tunnus'], $kieli, "DGD", "imdg");
+		list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($otunnukset, $kieli, "DGD", "imdg");
 
 		$kollimaara_yht = 0;
 

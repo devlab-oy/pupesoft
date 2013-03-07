@@ -180,7 +180,7 @@
 
 
 		//Luodaan er‰tietue
-		if($toim == "OKO") {
+		if ($toim == "OKO") {
 			$ulos  = sprintf ('%-4.4s', "LA01");									//sovellustunnus
 		}
 		elseif ($toim == "SAMPO") {
@@ -308,8 +308,12 @@
 			$vlaskusum = 0;
 			$hlaskukpl = 0;
 			$hlaskusum = 0;
-
 			$laskuvirh = 0;
+
+			echo "<table>";
+			echo "<tr><th>P‰iv‰m‰‰r‰:</th><td>".date("d.m.Y")."</td>";
+			echo "<tr><th>Sopimusnumero:</th><td>{$frow["sopimusnumero"]}</td>";
+			echo "<tr><th>Siirtoluettelon numero:</th><td>$factoringsiirtonumero</td></tr></table><br>";
 
 			echo "<table>";
 			echo "<tr><th>Tyyppi</th><th>Laskunumero</th><th>Nimi</th><th>Summa</th><th>Valuutta</th></tr>";
@@ -672,6 +676,7 @@
 
 				echo "<tr><td class='back' colspan='2'></td><th>Yhteens‰ $vlaskukpl veloituslaskua</th><td align='right'>".sprintf('%.2f', $vlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
 				echo "<tr><td class='back' colspan='2'></td><th>Yhteens‰ $hlaskukpl hyvityslaskua</th><td align='right'> ".sprintf('%.2f', $hlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
+				echo "<tr><td class='back' colspan='2'></td><th>Yhteens‰</th><td align='right'> ".sprintf('%.2f', ($vlaskusum+($hlaskusum*-1))/100)."</td><td>$laskurow[valkoodi]</td></tr>";
 
 				echo "</table>";
 				echo "<br><br>";
@@ -702,4 +707,3 @@
 	if ($tee != "lataa_tiedosto") {
 		require ("inc/footer.inc");
 	}
-?>

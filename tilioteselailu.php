@@ -7,8 +7,6 @@
 
 	require "inc/parametrit.inc";
 
-	enable_ajax();
-
 	if (!isset($tee))		$tee = "";
 	if (!isset($tyyppi))	$tyyppi = "";
 	if (!isset($tiliote))	$tiliote = "";
@@ -18,6 +16,8 @@
 		readfile("/tmp/".$tmpfilenimi);
 		exit;
 	}
+
+	enable_ajax();
 
 	if ($tee == 'T' and (int) $kuitattava_tiliotedata_tunnus > 0) {
 
@@ -71,9 +71,9 @@
 			$query = "	SELECT *
 						FROM tiliotedata use index (yhtio_tilino_alku)
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND alku > '$pvm'
-						AND tilino = '$tilino'
-						AND tyyppi = '1'
+						AND alku    > '$pvm'
+						AND tilino  = '$tilino'
+						AND tyyppi  = '1'
 						ORDER BY tunnus
 						LIMIT 1";
 			$tyyppi = 1;
@@ -83,9 +83,9 @@
 			$query = "	SELECT *
 						FROM tiliotedata use index (yhtio_tilino_alku)
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND alku < '$pvm'
-						AND tilino = '$tilino'
-						AND tyyppi = '1'
+						AND alku    < '$pvm'
+						AND tilino  = '$tilino'
+						AND tyyppi  = '1'
 						ORDER BY tunnus desc
 						LIMIT 1";
 			$tyyppi = 1;
@@ -95,9 +95,9 @@
 			$query = "	SELECT *
 						FROM tiliotedata use index (yhtio_tilino_alku)
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND alku > '$pvm'
-						AND tilino = '$tilino'
-						AND tyyppi = '3'
+						AND alku    > '$pvm'
+						AND tilino  = '$tilino'
+						AND tyyppi  = '3'
 						ORDER BY tunnus
 						LIMIT 1";
 			$tyyppi = 3;
@@ -107,9 +107,9 @@
 			$query = "	SELECT *
 						FROM tiliotedata use index (yhtio_tilino_alku)
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND alku < '$pvm'
-						AND tilino = '$tilino'
-						AND tyyppi = '3'
+						AND alku    < '$pvm'
+						AND tilino  = '$tilino'
+						AND tyyppi  = '3'
 						ORDER BY tunnus desc
 						LIMIT 1";
 			$tyyppi = 3;
@@ -188,7 +188,7 @@
 				}
 				else {
 					ifd.show();
-					ifd.html(\"<div style='float:right;'><a href=\\\"javascript:suljedivi('\"+tunnus+\"');\\\">".t("Piilota")." <img src='{$palvelin2}pics/lullacons/stop.png'></a></div><iframe id='ifr_\"+tunnus+\"' src='\"+url+\"' style='width:100%; height: 600px; border: 1px; display: block;'></iFrame>\");
+					ifd.html(\"<div style='float:right;'><a href=\\\"javascript:suljedivi('\"+tunnus+\"');\\\">".t("Piilota")." <img src='{$palvelin2}pics/lullacons/stop.png'></a></div><iframe id='ifr_\"+tunnus+\"' src='\"+url+\"' style='width:100%; height: 800px; border: 1px; display: block;'></iFrame>\");
 				}
 			}
 
@@ -201,9 +201,9 @@
 						FROM tiliotedata
 						LEFT JOIN kuka ON (kuka.yhtio = tiliotedata.yhtio AND kuka.kuka = tiliotedata.kuitattu)
 						WHERE tiliotedata.yhtio = '{$kukarow['yhtio']}'
-						and tiliotedata.alku = '$pvm'
-						and tiliotedata.tilino = '$tilino'
-						and tiliotedata.tyyppi = '$tyyppi'
+						and tiliotedata.alku    = '$pvm'
+						and tiliotedata.tilino  = '$tilino'
+						and tiliotedata.tyyppi  = '$tyyppi'
 						ORDER BY tunnus";
 		}
 		else {
@@ -220,9 +220,9 @@
 						FROM tiliotedata
 						LEFT JOIN kuka ON (kuka.yhtio = tiliotedata.yhtio AND kuka.kuka = tiliotedata.kuitattu)
 						WHERE tiliotedata.yhtio = '{$kukarow['yhtio']}'
-						and tiliotedata.alku = '$pvm'
-						and tiliotedata.tilino = '$tilino'
-						and tiliotedata.tyyppi = '$tyyppi'
+						and tiliotedata.alku    = '$pvm'
+						and tiliotedata.tilino  = '$tilino'
+						and tiliotedata.tyyppi  = '$tyyppi'
 						ORDER BY $tjarjlista perheid, tunnus";
 		}
 		$tiliotedataresult = pupe_query($query);
@@ -321,7 +321,7 @@
 
 		echo "</select></td></tr>
 				<tr>
-				<th>Laji</th>
+				<th>".t("Laji")."</th>
 				<td><select name='tyyppi'>
 					<option value=''>".t("Näytä kaikki")."
 					<option value='1' $chk[1]>".t("Tiliote")."
@@ -337,8 +337,8 @@
 		$query = "	SELECT alku, loppu, concat_ws(' ', yriti.nimi, yriti.tilino) tili, if(tyyppi='1', 'tiliote', if(tyyppi='2','lmp','viitesiirrot')) laji, tyyppi, yriti.tilino
 					FROM tiliotedata
 					JOIN yriti ON (yriti.yhtio = tiliotedata.yhtio and yriti.tilino = tiliotedata.tilino)
-	                WHERE tiliotedata.yhtio = '$kukarow[yhtio]' and
-					tiliotedata.alku >= '$vv-$kk-$pp'
+	                WHERE tiliotedata.yhtio = '$kukarow[yhtio]'
+					and tiliotedata.alku   >= '$vv-$kk-$pp'
 					$querylisa
 					GROUP BY alku, tili, laji
 					ORDER BY alku DESC, tiliotedata.tilino, laji";

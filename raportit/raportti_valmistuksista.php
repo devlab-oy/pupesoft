@@ -125,6 +125,7 @@
 					{$lisa_parametri}
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.status != 'P'
+					AND tuote.tuotetyyppi not in ('A', 'B')
 					{$lisa}
 					GROUP BY 1,2,3,4,5,6,7,8
 					HAVING valmistettu != 0 OR valmistetaan != 0)
@@ -151,6 +152,7 @@
 					{$lisa_parametri}
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.status != 'P'
+					AND tuote.tuotetyyppi not in ('A', 'B')
 					{$lisa}
 					GROUP BY 1,2,3,4,5,6,7,8
 					HAVING valmistettu != 0 OR valmistetaan != 0)

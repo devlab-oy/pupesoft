@@ -225,6 +225,7 @@ else {
 					JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					AND tuote.ei_saldoa = ''
+					AND tuote.tuotetyyppi NOT IN ('A', 'B')
 					$epakuranttipvm
 					$tuote_epa_rajaus
 					$lisa
@@ -358,6 +359,7 @@ else {
 						FROM tapahtuma
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tuoteno = '$row[tuoteno]'
+						AND selite not like '%alkusaldo%'
 						AND laji in ('tulo', 'valmistus')";
 			$tapres = mysql_query($query) or pupe_error($query);
 			$taprow = mysql_fetch_assoc($tapres);

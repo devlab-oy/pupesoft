@@ -1452,12 +1452,14 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	}
 	echo "</select></td>";
 	echo "<td>";
+
 	if ($kukarow["taso"] == 3) {
 		echo "<input type='checkbox' name='vaihdasuorituksentiliointitunnuksia'>";
 	}
 	else {
 		echo "<input type='hidden' name='vaihdasuorituksentiliointitunnuksia' value=''>";
 	}
+
 	echo "</td>";
 	echo "</form>\n\n";
 
@@ -1562,7 +1564,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	echo "<form action='manuaalinen_suoritusten_kohdistus.php?tila=tee_kohdistus' method = 'post' onSubmit='return validate(this)' class='multisubmit'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
-	$laskucount=0;
+	$laskucount = 0;
 
 	if ($asiakas_nimi != '') echo "<input type='hidden' name='asiakas_nimi' value='$asiakas_nimi'>";
 
@@ -1604,7 +1606,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 			echo "<td align='right'></td>";
 		}
 
-		echo "<td><a href='../muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus'>$maksurow[laskunro]</a></td>";
+		echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/{$palvelin2}myyntires/manuaalinen_suoritusten_kohdistus.php////tunnus=$tunnus//tila=$tila//asiakas_tunnus=$asiakas_tunnus//asiakas_nimi=$asiakas_nimi//suoritus_tunnus=$suoritus_tunnus//vastatili=$vastatili'>$maksurow[laskunro]</a></td>";
 		echo "<td>".tv1dateconv($maksurow["erpcm"])."</td>";
 		echo "<td>".tv1dateconv($maksurow["kapvm"])."</td>";
 		echo "<td>$maksurow[viite]</td>";

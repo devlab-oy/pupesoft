@@ -59,7 +59,7 @@ if (isset($isizelogo) and is_array($isizelogo)) {
 	$yhtio_nimi = "";
 }
 else {
-	$logo = "{$pupesoft_scheme}api.devlab.fi/devlab.png";
+	$logo = "{$pupesoft_scheme}api.devlab.fi/pupesoft.png";
 	$koko = "width='150'";
 	$yhtio_nimi = "<font class='info'>$yhtiorow[nimi]</font><br>";
 }

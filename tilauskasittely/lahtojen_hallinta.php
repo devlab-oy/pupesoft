@@ -2963,9 +2963,7 @@ function hae_yhdistettavat_tilaukset() {
                             AND lahdot.tunnus IN ({$lahdot})
                             GROUP BY lahdot.tunnus";
 		$result = pupe_query($query);
-
-		error_log($query);
-
+		
 		$lahdot = array();
 
 		while($lahto = mysql_fetch_assoc($result)) {

@@ -838,6 +838,13 @@
 
 			echo "</select></td></tr>";
 
+			if(isset($srow['ryhma'])) {
+				echo "<tr>";
+				echo "<td valign='top'>".t("Asiakasryhmä")."</td>";
+				echo "<td>{$srow['ryhma']}</td>";
+				echo "</tr>";
+			}
+
 			$query  = "	SELECT laji
 						FROM asiakas
 						WHERE yhtio='$kukarow[yhtio]' and tunnus='$srow[liitostunnus]'";

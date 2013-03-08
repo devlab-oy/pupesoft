@@ -181,7 +181,7 @@
 			$generoitumuuttuja .= " and lasku.nimi like '%$sanimi%' ";
 		}
 
-		if ($sytunnus != '') {
+		if ($sytunnus != '' and $grouppaus == "ytunnus") {
 
 			// KAUTTALASKUTUSKIKKARE
 			if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $kukarow['yhtio'] == $GLOBALS['koti_yhtio'] and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
@@ -220,6 +220,9 @@
 
 			$generoitumuuttuja .= " and lasku.liitostunnus in ($row[tunnukset]) ";
 		}
+        if ($generoitumuuttuja == "") {
+            $generoitumuuttuja = " AND lasku.liitostunnus = $sliitostunnus ";
+        }
 
 		if ($yli != 0) {
 			$having = " HAVING avoimia >= '$yli' ";
@@ -311,6 +314,7 @@
 					GROUP BY {$grouppauslisa}
 					{$having}
 					ORDER BY 1,2,3";
+
 		$result = pupe_query($query);
 
 		$saatavat_yhteensa 			= array();

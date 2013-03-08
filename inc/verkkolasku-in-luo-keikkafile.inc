@@ -562,6 +562,56 @@
 		}
 	}
 
+	if (!function_exists('kopioi_tapahtuma')) {
+		function kopioi_tapahtuma($_arr, $kappaleerotus, $kpl) {
+			global $kukarow;
+
+			foreach ($_arr as $_ktunnus => $_vid) {
+				$query = "	SELECT *
+							FROM tapahtuma
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji = 'tulo'
+							AND rivitunnus = '{$_ktunnus}'";
+				$tapahtuma_res = pupe_query($query);
+				$tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
+
+				// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
+				$fields = "yhtio";
+				$values = "'{$kukarow['yhtio']}'";
+
+				// Ei monisteta tunnusta
+				for ($ii = 1; $ii < mysql_num_fields($tapahtuma_res) - 1; $ii++) {
+
+					$fieldname = mysql_field_name($tapahtuma_res,$ii);
+
+					$fields .= ", ".$fieldname;
+
+					switch ($fieldname) {
+						case 'rivitunnus':
+							$values .= ", '{$_vid}'";
+							break;
+						case 'kpl':
+							$values .= ", '{$kappaleerotus}'";
+							break;
+						default:
+							$values .= ", '".$tapahtuma_row[$fieldname]."'";
+					}
+				}
+
+				$kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
+				$uusires = pupe_query($kysely);
+				$tapahtuma_id = mysql_insert_id();
+
+				$query = "	UPDATE tapahtuma
+							SET kpl = '{$kpl}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji = 'tulo'
+							AND rivitunnus = '{$_ktunnus}'";
+				$upd_res = pupe_query($query);
+			}
+		}
+	}
+
 	// Tarvitaan $tunnus jossa on ostoreskontralaskun tunnus
 	// Tarvitaan $trow jossa on toimittajan tiedot
 	// Tarvitaan $rtuoteno jossa on array kaikista ostoreskontralaskun tuotteista
@@ -972,49 +1022,7 @@
 
 								if ($myynti_tilausrivi_id_lapsi != 0) $_arr[$myynti_rivi_row['tunnus']] = $myynti_tilausrivi_id_lapsi;
 
-								foreach ($_arr as $_ktunnus => $_vid) {
-									$query = "	SELECT *
-												FROM tapahtuma
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND laji = 'tulo'
-												AND rivitunnus = '{$_ktunnus}'";
-									$tapahtuma_res = pupe_query($query);
-									$tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
-
-									// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
-									$fields = "yhtio";
-									$values = "'{$kukarow['yhtio']}'";
-
-									// Ei monisteta tunnusta
-									for ($ii = 1; $ii < mysql_num_fields($tapahtuma_res) - 1; $ii++) {
-
-										$fieldname = mysql_field_name($tapahtuma_res,$ii);
-
-										$fields .= ", ".$fieldname;
-
-										switch ($fieldname) {
-											case 'rivitunnus':
-												$values .= ", '{$_vid}'";
-												break;
-											case 'kpl':
-												$values .= ", '{$kappaleerotus}'";
-												break;
-											default:
-												$values .= ", '".$tapahtuma_row[$fieldname]."'";
-										}
-									}
-
-									$kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
-									$uusires = pupe_query($kysely);
-									$tapahtuma_id = mysql_insert_id();
-
-									$query = "	UPDATE tapahtuma
-												SET kpl = '{$rtuoteno[$i]['kpl']}'
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND laji = 'tulo'
-												AND rivitunnus = '{$_ktunnus}'";
-									$upd_res = pupe_query($query);
-								}
+								kopioi_tapahtuma($_arr, $kappaleerotus, $rtuoteno[$i]['kpl']);
 							}
 						}
 					}
@@ -1059,50 +1067,7 @@
 							$myynti_rivi_row_isa['tunnus'] => $myynti_tilausrivi_id_isa
 						);
 
-						foreach ($_arr as $_ktunnus => $_vid) {
-
-							$query = "	SELECT *
-										FROM tapahtuma
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND laji = 'tulo'
-										AND rivitunnus = '{$_ktunnus}'";
-							$tapahtuma_res = pupe_query($query);
-							$tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
-
-							// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
-							$fields = "yhtio";
-							$values = "'{$kukarow['yhtio']}'";
-
-							// Ei monisteta tunnusta
-							for ($ii = 1; $ii < mysql_num_fields($tapahtuma_res) - 1; $ii++) {
-
-								$fieldname = mysql_field_name($tapahtuma_res,$ii);
-
-								$fields .= ", ".$fieldname;
-
-								switch ($fieldname) {
-									case 'rivitunnus':
-										$values .= ", '{$_vid}'";
-										break;
-									case 'kpl':
-										$values .= ", '{$kappaleerotus}'";
-										break;
-									default:
-										$values .= ", '".$tapahtuma_row[$fieldname]."'";
-								}
-							}
-
-							$kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
-							$uusires = pupe_query($kysely);
-							$tapahtuma_id = mysql_insert_id();
-
-							$query = "	UPDATE tapahtuma
-										SET kpl = '{$rtuoteno[$i]['kpl']}'
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND laji = 'tulo'
-										AND rivitunnus = '{$_ktunnus}'";
-							$upd_res = pupe_query($query);
-						}
+						kopioi_tapahtuma($_arr, $kappaleerotus, $rtuoteno[$i]['kpl']);
 					}
 				}
 				else {
@@ -1521,49 +1486,7 @@
 
 									if ($myynti_tilausrivi_id_lapsi != 0) $_arr[$myynti_rivi_row['tunnus']] = $myynti_tilausrivi_id_lapsi;
 
-									foreach ($_arr as $_ktunnus => $_vid) {
-										$query = "	SELECT *
-													FROM tapahtuma
-													WHERE yhtio = '{$kukarow['yhtio']}'
-													AND laji = 'tulo'
-													AND rivitunnus = '{$_ktunnus}'";
-										$tapahtuma_res = pupe_query($query);
-										$tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
-
-										// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
-										$fields = "yhtio";
-										$values = "'{$kukarow['yhtio']}'";
-
-										// Ei monisteta tunnusta
-										for ($ii = 1; $ii < mysql_num_fields($tapahtuma_res) - 1; $ii++) {
-
-											$fieldname = mysql_field_name($tapahtuma_res,$ii);
-
-											$fields .= ", ".$fieldname;
-
-											switch ($fieldname) {
-												case 'rivitunnus':
-													$values .= ", '{$_vid}'";
-													break;
-												case 'kpl':
-													$values .= ", '{$positiivinen_arvo}'";
-													break;
-												default:
-													$values .= ", '".$tapahtuma_row[$fieldname]."'";
-											}
-										}
-
-										$kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
-										$uusires = pupe_query($kysely);
-										$tapahtuma_id = mysql_insert_id();
-
-										$query = "	UPDATE tapahtuma
-													SET kpl = '{$erotus}'
-													WHERE yhtio = '{$kukarow['yhtio']}'
-													AND laji = 'tulo'
-													AND rivitunnus = '{$_ktunnus}'";
-										$upd_res = pupe_query($query);
-									}
+									kopioi_tapahtuma($_arr, $positiivinen_arvo, $erotus);
 								}
 							}
 						}
@@ -1610,49 +1533,7 @@
 								$myynti_rivi_row_isa['tunnus'] => $myynti_tilausrivi_id_isa
 							);
 
-							foreach ($_arr as $_ktunnus => $_vid) {
-								$query = "	SELECT *
-											FROM tapahtuma
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND laji = 'tulo'
-											AND rivitunnus = '{$_ktunnus}'";
-								$tapahtuma_res = pupe_query($query);
-								$tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
-
-								// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
-								$fields = "yhtio";
-								$values = "'{$kukarow['yhtio']}'";
-
-								// Ei monisteta tunnusta
-								for ($ii = 1; $ii < mysql_num_fields($tapahtuma_res) - 1; $ii++) {
-
-									$fieldname = mysql_field_name($tapahtuma_res,$ii);
-
-									$fields .= ", ".$fieldname;
-
-									switch ($fieldname) {
-										case 'rivitunnus':
-											$values .= ", '{$_vid}'";
-											break;
-										case 'kpl':
-											$values .= ", '{$positiivinen_arvo}'";
-											break;
-										default:
-											$values .= ", '".$tapahtuma_row[$fieldname]."'";
-									}
-								}
-
-								$kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
-								$uusires = pupe_query($kysely);
-								$tapahtuma_id = mysql_insert_id();
-
-								$query = "	UPDATE tapahtuma
-											SET kpl = '{$erotus}'
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND laji = 'tulo'
-											AND rivitunnus = '{$_ktunnus}'";
-								$upd_res = pupe_query($query);
-							}
+							kopioi_tapahtuma($_arr, $positiivinen_arvo, $erotus);
 						}
 					}
 

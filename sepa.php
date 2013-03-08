@@ -544,9 +544,10 @@
 
 		if (mysql_num_rows($result) > 0) {
 
+			$popvm_row = mysql_fetch_assoc($result);
+
 			// uniikkia tunnusta varten popvm: aineistokopiolle alkuper‰inen ja uudelle aineistolle se joka kirjoitetaan kantaan
 			if ($tee == "KIRJOITAKOPIO") {
-				$popvm_row = mysql_fetch_assoc($result);
 				$popvm_nyt = $popvm_row["popvm"];
 				$popvm_dmy = $popvm_row["popvm_dmy"];
 			}
@@ -556,7 +557,13 @@
 			}
 
 			// P‰‰tet‰‰m maksuaineston tiedostonimi
-			$kaunisnimi = "SEPA-$kukarow[yhtio]-".$popvm_dmy.".xml";
+			if (strtoupper($yhtiorow['maa']) == 'EE' and substr($popvm_row['yriti_iban'], 0, 2) == "EE") {
+				$kaunisnimi = "EESEPA-$kukarow[yhtio]-".$popvm_dmy.".xml";
+			}
+			else {
+				$kaunisnimi = "SEPA-$kukarow[yhtio]-".$popvm_dmy.".xml";
+			}
+
 			$toot = fopen($pankkitiedostot_polku.$kaunisnimi, "w+");
 
 			if (!$toot) {

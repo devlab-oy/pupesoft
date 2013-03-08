@@ -38,7 +38,14 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
-			$error['alusta'] = "<font class='error'>".t("Alustaa ei ole olemassa.")."</font>";
+			$return2 = etsi_kasittelemattomat_asn_sanomat(trim($alusta));
+
+			if(!empty($return2)) {
+				$error['alusta'] = "<font class='error'>".t("Alustaa ei voida vielä ottaa käsittelyyn (käsittelemätön ASN-sanoma). Hae uudestaan.").".</font>";
+			}
+			else {
+				$error['alusta'] = "<font class='error'>".t("Alustaa ei ole olemassa.")."</font>";
+			}
 		}
 		else {
 			$return = etsi_suuntalava_sscc(trim($alusta));

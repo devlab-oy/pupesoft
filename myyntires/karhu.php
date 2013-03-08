@@ -585,7 +585,8 @@ if ($tee == "") {
 				and nimi    != ''
 				and puhno   != ''
 				and eposti  != ''
-				and extranet = ''";
+				and extranet = ''
+				order by nimi";
 	$meapu = pupe_query($apuqu);
 
 	echo "<tr><th>".t("Yhteyshenkilö").":</th>";

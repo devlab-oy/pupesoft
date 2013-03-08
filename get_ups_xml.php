@@ -5,6 +5,8 @@
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
 
+	date_default_timezone_set('Europe/Helsinki');
+
 	require 'inc/connect.inc';
 	require 'inc/functions.inc';
 
@@ -67,22 +69,25 @@
 					$fileget = ftp_get($conn_id, '/tmp/ups_temp_file.xml', $file, FTP_BINARY);
 
 					if ($fileget) {
-						$xml = simplexml_load_file('/tmp/ups_temp_file.xml');
+			   			$xml = simplexml_load_file('/tmp/ups_temp_file.xml');
 					}
 
 					if ($xml) {
 						foreach ($xml->children() as $children) {
 
-							$reference_number = '';
+							$reference_number 	 = '';
 							$ups_tracking_number = '';
-							$xml_yhtio = '';
+							$xml_yhtio 			 = '';
 
 							foreach ($children as $child) {
+
 								if ($child->getName() == 'ShipmentInformation') {
 									$reference_number = $child->Reference1;
 								}
 								elseif ($child->getName() == 'ProcessMessage') {
-									$ups_tracking_number = $child->ShipmentRates->PackageRates->PackageRate->TrackingNumber;
+									foreach ($child->TrackingNumbers->children() as $ups_tracking_num) {
+										$ups_tracking_number .= " UPS:$ups_tracking_num";
+									}
 								}
 								elseif ($child->getName() == 'ShipFrom') {
 									$xml_yhtio = $child->CustomerID;
@@ -99,7 +104,7 @@
 									$row = mysql_fetch_assoc($result);
 
 									$query = "	UPDATE rahtikirjat SET
-												rahtikirjanro = concat(rahtikirjanro, ' ', 'UPS:$ups_tracking_number')
+												rahtikirjanro = concat(rahtikirjanro, '$ups_tracking_number')
 												WHERE yhtio = '$row[yhtio]'
 												AND otsikkonro = $reference_number";
 									$result = mysql_query($query) or die("Ei voitu paivittaa $reference_number $ups_tracking_number\n".mysql_error()."\n\n");
@@ -111,6 +116,7 @@
 								}
 							}
 						}
+
 						ftp_delete($conn_id, $file);
 						$ups_dellattuja++;
 					}

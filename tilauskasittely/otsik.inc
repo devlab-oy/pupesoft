@@ -852,7 +852,7 @@
 			}
 
 			if (tarkista_oikeus("yllapito.php", $ealisa, "X")) {
-				echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
+				echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO//asiakasid=$asiakasid'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
 			}
 		}
 
@@ -1503,13 +1503,16 @@
 			echo "<td>".t("Myyjä")."</td>";
 			echo "<td><select name='myyja'>";
 
-			$query = "	SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
+			$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja
 						FROM kuka
-						WHERE kuka.yhtio = '$kukarow[yhtio]' and (kuka.extranet = '' or kuka.tunnus='$srow[myyja]')
+						JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND (kuka.extranet = '' or kuka.tunnus='$srow[myyja]')
 						ORDER BY kuka.nimi";
 			$yresult = pupe_query($query);
 
-			while($row = mysql_fetch_assoc($yresult)) {
+			while ($row = mysql_fetch_assoc($yresult)) {
+
 				$sel = "";
 				if ($srow['myyja'] == '' or $srow['myyja'] == 0) {
 					if ($row['nimi'] == $kukarow['nimi']) {
@@ -1559,11 +1562,13 @@
 
 				echo "<option value=''>".t("Ei projektipäällikköä")."</option>";
 
-				$query = "	SELECT tunnus, kuka, nimi, myyja, asema
+				$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 							FROM kuka
-							WHERE yhtio = '$kukarow[yhtio]'
-							and asema	= 'PP'
-							ORDER BY nimi";
+							JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+							WHERE kuka.yhtio  = '$kukarow[yhtio]'
+							AND kuka.extranet = ''
+							AND kuka.asema	  = 'PP'
+							ORDER BY kuka.nimi";
 				$yresult = pupe_query($query);
 
 				while($row = mysql_fetch_assoc($yresult)) {
@@ -1947,6 +1952,7 @@
 					<select name='jtkielto' ".js_alasvetoMaxWidth("jtkielto", 200).">
 					<option value = ''>".t("Normaali")."</option>
 					<option value = 'Y' $jtksel[Y]>".t("Jälkitoimituksia ei yhdistetä")."</option>
+					<option value = 'Z' $jtksel[Z]>".t("Ei osatoimituksia")."</option>
 					<option value = 'o' $jtksel[o]>".t("Ei jälkitoimituksia")."</option>
 					</select></td></tr>";
 
@@ -2071,6 +2077,32 @@
 
 			if ($toim == "TARJOUS" or $yhtiorow["splittauskielto"] == "E") {
 				echo "</tr>";
+			}
+
+			if ($yhtiorow['lomakkeiden_allekirjoitus'] == 'X' and ($toim == "TARJOUS" or $toim == "RIVISYOTTO" or $toim == "PIKATILAUS")) {
+				echo "<tr>";
+				echo "<td>".t("Allekirjoittaja")."</td>";
+				echo "<td><select name='allekirjoittaja'>";
+
+				$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi
+							FROM kuka
+							JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+							WHERE kuka.yhtio  = '$kukarow[yhtio]'
+							AND kuka.nimi    != ''
+							AND kuka.extranet = ''
+							ORDER BY kuka.nimi";
+				$yresult = pupe_query($query);
+
+				echo "<option value=''>".t("Valitse allekirjoittaja")."</option>";
+
+				while ($row = mysql_fetch_assoc($yresult)) {
+					$sel = "";
+					if ($row['tunnus'] == $srow['allekirjoittaja']) {
+						$sel = 'selected';
+					}
+					echo "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
+				}
+				echo "</select></td></tr>";
 			}
 
 			if (($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and ((trim($kantaasiakastunnus) != '' and trim($kantaasiakastunnus) != '0') or (trim($srow['kantaasiakastunnus']) != '' and trim($srow['kantaasiakastunnus']) != '0'))) {
@@ -2223,10 +2255,12 @@
 					}
 					elseif ($kentta == "suorittaja") {
 
-						$query = "	SELECT if (avainsana.selitetark is null,'b','a') sort, kuka.kuka, kuka.nimi
+						$query = "	SELECT DISTINCT if (avainsana.selitetark is null,'b','a') sort, kuka.kuka, kuka.nimi
 									FROM kuka
-									LEFT JOIN avainsana ON avainsana.yhtio=kuka.yhtio and avainsana.laji='TYOM_TYOLINJA' and avainsana.selitetark=kuka.kuka
-									WHERE kuka.yhtio = '$kukarow[yhtio]' and kuka.extranet=''
+									JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+									LEFT JOIN avainsana ON (avainsana.yhtio=kuka.yhtio and avainsana.laji='TYOM_TYOLINJA' and avainsana.selitetark=kuka.kuka)
+									WHERE kuka.yhtio  = '$kukarow[yhtio]'
+									and kuka.extranet = ''
 									ORDER BY sort, kuka.nimi";
 						$yresult = pupe_query($query);
 
@@ -2501,7 +2535,7 @@
 
 				$sela = "";
 
-				if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"]) {
+				if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"] or ($kukarow["kesken"] == 0 and $yhteysrow["oletusyhteyshenkilo"] != "")) {
 					$sela = "SELECTED";
 					$srow["tilausyhteyshenkilo"] = "";
 				}
@@ -2510,9 +2544,11 @@
 			}
 
 			echo "</select> ";
+
 			if (tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
 				echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tilaus','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]&tyhthenkilo=K');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
 			}
+
 			echo "</td>";
 			echo "<td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 
@@ -3117,6 +3153,7 @@
 					maksuehto 							= '$maksuehto',
 					maksuteksti 						= '$maksuteksti',
 					myyja 								= '$myyja',
+					allekirjoittaja						= '$allekirjoittaja',
 					nimi 								= '$nimi',
 					nimitark 							= '$nimitark',
 					ohjausmerkki						= '$ohjausmerkki',

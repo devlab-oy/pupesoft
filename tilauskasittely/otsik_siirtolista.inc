@@ -421,12 +421,12 @@
 		$vtresult = mysql_query($aquery) or pupe_error($aquery);
 		$vtrow = mysql_fetch_array($vtresult);
 
-		if ($toim_nimi == '') {
-			$toim_nimi = $vtrow['nimi'];
+		if ($toim_nimitark == '' and $toim_nimi == '') {
+			$toim_nimitark = $vtrow['nimitark'];
 		}
 
-		if ($toim_nimitark == '') {
-			$toim_nimitark = $vtrow['nimitark'];
+		if ($toim_nimi == '') {
+			$toim_nimi = $vtrow['nimi'];
 		}
 
 		if ($toim_osoite == '') {
@@ -481,12 +481,12 @@
 					toimitustapa		= '$toimitustapa'";
 
 		if ($toim == "VALMISTAVARASTOON") {
-			$query .= ",tilaustyyppi = 'W', tila='V', ytunnus='$vtrow[nimitys]', liitostunnus='9999999999'";
+			$query .= ",tilaustyyppi = 'W', tila='V', ytunnus='$vtrow[nimitys]', liitostunnus='999999999'";
 
 			$tee = "";
 		}
 		elseif ($toim == "SIIRTOLISTA") {
-			$query .= ",tilaustyyppi = 'G', tila='G', ytunnus='SIIRTO', liitostunnus='9999999999'";
+			$query .= ",tilaustyyppi = 'G', tila='G', ytunnus='SIIRTO', liitostunnus='999999999'";
 
 			// Siirtolistat aina lähettäjän rahtisopparilla
 			$query .= ",kohdistettu = 'K'";
@@ -498,7 +498,7 @@
 			$tee = "";
 		}
 		elseif ($toim == "SIIRTOTYOMAARAYS") {
-			$query .= ",tilaustyyppi = 'S', tila='S', ytunnus='SISAINEN', liitostunnus='9999999999'";
+			$query .= ",tilaustyyppi = 'S', tila='S', ytunnus='SISAINEN', liitostunnus='999999999'";
 
 			$tee = "";
 		}

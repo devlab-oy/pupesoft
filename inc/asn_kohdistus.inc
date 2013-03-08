@@ -1028,7 +1028,7 @@
 				echo "VIRHE: Toimittajanumero: {$edellinen_toimittaja} ei löydy jarjestelmasta!\n";
 			}
 			else {
-				// Jos kaikki paketin rivit olivat kunnossa, tehdään suuntalava ja linkataan ostotilausrivi keikkaan sekä suuntalavaan
+				// Jos kaikki paketin rivit olivat kunnossa, tehdään suuntalava ja linkataan ostotilausrivi saapumiseen sekä suuntalavaan
 				$toimittajarow = mysql_fetch_array($checkres);
 
 				// Tehdään keikka, jos sitä ei vielä ole. ASN-numero löytyy comments kentästä.

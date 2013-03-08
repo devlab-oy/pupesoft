@@ -33,6 +33,7 @@
 			if ($row["selite"] == $trow[$i]) {
 				$sel = 'selected';
 				$asavainsanatyyppi = $row["selitetark_2"];
+				$asavainsanalaji = $row['selite'];
 			}
 
 			$ulos .= "<option value='$row[selite]' $sel>$row[selitetark]</option>";
@@ -46,6 +47,26 @@
 
 		if (stripos($asavainsanatyyppi, "DATE") !== FALSE) {
 			$tyyppi = 1.5;
+		}
+		elseif (stripos($asavainsanalaji, "OHJAUSMERKKI") !== FALSE) {
+
+			$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+			$query = "	SELECT selite
+						FROM toimitustapa
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						ORDER BY 1";
+			$toimitustapares = pupe_query($query);
+
+			while ($toimitustaparow = mysql_fetch_assoc($toimitustapares)) {
+
+				$sel = $trow[$i] == $toimitustaparow['selite'] ? " selected" : "";
+
+				$ulos .= "<option value='{$toimitustaparow['selite']}'{$sel}>{$toimitustaparow['selite']}</option>";
+			}
+
+			$ulos .= "</select></td>";
+			$jatko = 0;
 		}
 		elseif (stripos($asavainsanatyyppi, "TOIMITUSTAPA") !== FALSE) {
 			$query = "	SELECT *
@@ -125,5 +146,3 @@
 
 		$jatko = 0;
 	}
-
-?>

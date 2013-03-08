@@ -26,8 +26,7 @@ if (php_sapi_name() == 'cli') {
 	require ("{$pupe_root_polku}/inc/functions.inc");
 
 	$cli = true;
-
-	ini_set("include_path", ".".PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
 
 	if (trim($argv[1]) != '') {
 		$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
@@ -39,6 +38,21 @@ if (php_sapi_name() == 'cli') {
 
 	if (trim($argv[2]) != '') {
 		$table = trim($argv[2]);
+
+		// T‰‰lt‰ voi tulla ties mit‰ lis‰parameja
+		if (strpos($table, ".") !== FALSE) {
+			$paramit = explode("..", $table);
+
+			// Eka veks, ku siin‰ on taulun nimi eik‰ parami
+			array_shift($paramit);
+
+			foreach ($paramit as $parami) {
+				list($muuttuja, $arvo) = explode(".", $parami);
+
+				// Jotain pient‰ tietoturvaa kuitenki...
+				${$muuttuja} = preg_replace("/[^a-z_0-9]/i", "", $arvo);
+			}
+		}
 	}
 	else {
 		die ("Et antanut taulun nime‰.\n");
@@ -606,6 +620,7 @@ if ($kasitellaan_tiedosto) {
 			$hylkaa    = 0;
 			$tila      = "";
 			$tee       = "";
+			$epakurpvm = "";
 			$eilisataeikamuuteta = "";
 			$rivilaskuri++;
 
@@ -755,11 +770,11 @@ if ($kasitellaan_tiedosto) {
 						// jos ollaan valittu koodi puun_tunnuksen sarakkeeksi, niin haetaan dynaamisesta puusta tunnus koodilla
 						if ($dynaamisen_taulun_liitos == 'koodi') {
 
-							$query_x = "	SELECT tunnus
-											FROM dynaaminen_puu
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND laji    = '{$table_tarkenne}'
-											AND koodi   = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
+							$query_x = "SELECT tunnus
+										FROM dynaaminen_puu
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND laji    = '{$table_tarkenne}'
+										AND koodi   = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
 							$koodi_tunnus_res = pupe_query($query_x);
 
 							// jos tunnusta ei lˆydy, ohitetaan kyseinen rivi
@@ -785,34 +800,40 @@ if ($kasitellaan_tiedosto) {
 										AND $dynaamisen_taulun_liitos = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
 							$asiakkaan_haku_res = pupe_query($query);
 
-							while ($asiakkaan_haku_row = mysql_fetch_assoc($asiakkaan_haku_res)) {
+							if (mysql_num_rows($asiakkaan_haku_res) > 0) {
+								while ($asiakkaan_haku_row = mysql_fetch_assoc($asiakkaan_haku_res)) {
 
-								$rivi_array_x = array();
+									$rivi_array_x = array();
 
-								foreach ($taulunotsikot[$taulu] as $indexi_x => $columnin_nimi_x) {
-									switch ($columnin_nimi_x) {
-										case 'LIITOS':
-											$rivi_array_x[] = $asiakkaan_haku_row['tunnus'];
-											break;
-										default:
-											$rivi_array_x[] = $taulunrivit[$taulu][$eriviindex][$indexi_x];
+									foreach ($taulunotsikot[$taulu] as $indexi_x => $columnin_nimi_x) {
+										switch ($columnin_nimi_x) {
+											case 'LIITOS':
+												$rivi_array_x[] = $asiakkaan_haku_row['tunnus'];
+												break;
+											default:
+												$rivi_array_x[] = $taulunrivit[$taulu][$eriviindex][$indexi_x];
+										}
+									}
+
+									array_push($dynaamiset_rivit, $rivi_array_x);
+									$puun_alkio_index_plus++;
+								}
+
+								unset($taulunrivit[$taulu][$eriviindex]);
+
+								if ($rivimaara == ($eriviindex+1)) {
+									$dynaamisen_taulun_liitos = '';
+
+									foreach ($dynaamiset_rivit as $dyn_rivi) {
+										array_push($taulunrivit[$taulu], $dyn_rivi);
 									}
 								}
 
-								array_push($dynaamiset_rivit, $rivi_array_x);
-
-								unset($taulunrivit[$taulu][$eriviindex]);
+								continue 2;
 							}
-
-							$puun_alkio_index_plus++;
-
-							if ($rivimaara == ($eriviindex+1)) {
-								$dynaamisen_taulun_liitos = '';
-
-								foreach ($dynaamiset_rivit as $dyn_rivi) array_push($taulunrivit[$taulu], $dyn_rivi);
+							else {
+								$tila = 'ohita';
 							}
-
-							continue 2;
 						}
 						else {
 							$valinta .= " and liitos = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
@@ -1179,7 +1200,7 @@ if ($kasitellaan_tiedosto) {
 
 						if ((int) $tlength[$table_mysql.".".$otsikko] > 0 and strlen($taulunrivit[$taulu][$eriviindex][$r]) > $tlength[$table_mysql.".".$otsikko]
 							and !($table_mysql == "tuotepaikat"  and $otsikko == "OLETUS"  and $taulunrivit[$taulu][$eriviindex][$r] == 'XVAIHDA')
-							and !($table_mysql == "asiakashinta" and $otsikko == 'ASIAKAS' and $asiakkaanvalinta == '2')) {
+							and !($table_mysql == "asiakashinta" and $otsikko == 'ASIAKAS' and $asiakkaanvalinta > 1)) {
 
 							lue_data_echo(t("Virhe rivill‰").": $rivilaskuri <font class='error'>".t("VIRHE").": $otsikko ".t("kent‰ss‰ on liian pitk‰ tieto")."!</font> {$taulunrivit[$taulu][$eriviindex][$r]}: ".strlen($taulunrivit[$taulu][$eriviindex][$r])." > ".$tlength[$table_mysql.".".$otsikko]."!<br>");
 							$hylkaa++; // ei p‰ivitet‰ t‰t‰ rivi‰
@@ -1213,46 +1234,34 @@ if ($kasitellaan_tiedosto) {
 							}
 						}
 
-						if ($table_mysql == 'tuote' and ($otsikko == 'EPAKURANTTI25PVM' or $otsikko == 'EPAKURANTTI50PVM' or $otsikko == 'EPAKURANTTI75PVM' or $otsikko == 'EPAKURANTTI100PVM')) {
-
-							// $tuoteno pit‰s olla jo aktivoitu ylh‰‰ll‰
-							if (trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI25PVM') {
-								$tee = "25paalle";
-							}
-							elseif (trim($taulunrivit[$taulu][$eriviindex][$r]) == "peru") {
-								$tee = "peru";
-							}
-							elseif ($tee == "") {
-								$tee = "pois";
-							}
-
-							if (trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI50PVM') {
-								$tee = "puolipaalle";
-							}
-							elseif (trim($taulunrivit[$taulu][$eriviindex][$r]) == "peru") {
-								$tee = "peru";
-							}
-							elseif ($tee == "") {
-								$tee = "pois";
-							}
-
-							if (trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI75PVM') {
-								$tee = "75paalle";
-							}
-							elseif (trim($taulunrivit[$taulu][$eriviindex][$r]) == "peru") {
-								$tee = "peru";
-							}
-							elseif ($tee == "") {
-								$tee = "pois";
-							}
+						if ($table_mysql == 'tuote' and ($otsikko == 'EPAKURANTTI25PVM' or $otsikko == 'EPAKURANTTI50PVM' or $otsikko == 'EPAKURANTTI75PVM' or $otsikko == 'EPAKURANTTI100PVM') and $taulunrivit[$taulu][$eriviindex][$r] != "") {
 
 							if (trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI100PVM') {
 								$tee = "paalle";
 							}
-							elseif (trim($taulunrivit[$taulu][$eriviindex][$r]) == "peru") {
+
+							if ($tee != "paalle" and trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI75PVM') {
+								$tee = "75paalle";
+							}
+
+							if ($tee != "paalle" and $tee != "75paalle" and trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI50PVM') {
+								$tee = "puolipaalle";
+							}
+
+							if ($tee != "paalle" and $tee != "75paalle" and $tee != "puolipaalle" and trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI25PVM') {
+								$tee = "25paalle";
+							}
+
+							if (strtoupper($taulunrivit[$taulu][$eriviindex][$r]) == "PERU") {
 								$tee = "peru";
 							}
-							elseif ($tee == "") {
+
+							if ($taulunrivit[$taulu][$eriviindex][$r] == "0000-00-00" or substr(strtoupper($taulunrivit[$taulu][$eriviindex][$r]),0,4) == "POIS") {
+
+								if (substr(strtoupper($taulunrivit[$taulu][$eriviindex][$r]), 0, 4) == "POIS" and strlen($taulunrivit[$taulu][$eriviindex][$r]) == 15) {
+									$epakurpvm = substr($taulunrivit[$taulu][$eriviindex][$r], 5);
+								}
+
 								$tee = "pois";
 							}
 
@@ -1408,21 +1417,41 @@ if ($kasitellaan_tiedosto) {
 								$chryhma = $taulunrivit[$taulu][$eriviindex][$r];
 							}
 
-							// Asiakas sarakkaassa on tunnus
-							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == '1' and $taulunrivit[$taulu][$eriviindex][$r] != "") {
+							// Asiakas sarakkeessa on tunnus
+							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == 1 and $taulunrivit[$taulu][$eriviindex][$r] != "") {
 								$chasiakas = $taulunrivit[$taulu][$eriviindex][$r];
 							}
-
-							// Asiakas sarakkaassa on toim_ovttunnus (ytunnus pit‰‰ olla setattu) (t‰m‰ on oletus er‰ajossa)
-							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta != '1' and $taulunrivit[$taulu][$eriviindex][$r] != "") {
+							// Asiakas sarakkeessa on toim_ovttunnus (ytunnus pit‰‰ olla setattu) (t‰m‰ on oletus er‰ajossa)
+							elseif ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == 2 and $taulunrivit[$taulu][$eriviindex][$r] != "") {
 								$etsitunnus = " SELECT tunnus
-												FROM asiakas
-												USE INDEX (toim_ovttunnus_index)
+												FROM asiakas USE INDEX (toim_ovttunnus_index)
 												WHERE yhtio = '$kukarow[yhtio]'
 												AND toim_ovttunnus = '{$taulunrivit[$taulu][$eriviindex][$r]}'
 												AND toim_ovttunnus != ''
 												AND ytunnus != ''
 												AND ytunnus = '".$taulunrivit[$taulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$taulu])]."'";
+								$etsiresult = pupe_query($etsitunnus);
+
+								if (mysql_num_rows($etsiresult) == 1) {
+									$etsirow = mysql_fetch_assoc($etsiresult);
+
+									// Vaihdetaan asiakas sarakkeeseen tunnus sek‰ ytunnus tulee nollata (koska ei saa olla molempia)
+									$chasiakas = $etsirow['tunnus'];
+									$chytunnus = "";
+									$taulunrivit[$taulu][$eriviindex][$r] = $etsirow['tunnus'];
+									$taulunrivit[$taulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$taulu])] = "";
+								}
+								else {
+									$chasiakas = -1;
+								}
+							}
+							// Asiakas sarakkeessa on asiakasnumero
+							elseif ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == 3 and $taulunrivit[$taulu][$eriviindex][$r] != "") {
+								$etsitunnus = " SELECT tunnus
+												FROM asiakas USE INDEX (asno_index)
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND asiakasnro = '{$taulunrivit[$taulu][$eriviindex][$r]}'
+												AND asiakasnro != ''";
 								$etsiresult = pupe_query($etsitunnus);
 
 								if (mysql_num_rows($etsiresult) == 1) {
@@ -1579,10 +1608,8 @@ if ($kasitellaan_tiedosto) {
 							elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
 								$query .= ", $otsikko = NULL ";
 							}
-							else {
-								if ($eilisataeikamuuteta == "") {
-									$query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
-								}
+							elseif ($eilisataeikamuuteta == "") {
+								$query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
 					  		}
 						}
 
@@ -2111,13 +2138,13 @@ if (!$cli and !isset($api_kentat)) {
 	);
 
 	// Yhtiˆkohtaisia
-	if ($kukarow['yhtio'] == 'mast') {
+	if (table_exists('auto_vari_tuote')) {
 		$taulut['auto_vari']              = 'Autov‰ri-datat';
 		$taulut['auto_vari_tuote']        = 'Autov‰ri-v‰rikirja';
 		$taulut['auto_vari_korvaavat']    = 'Autov‰ri-korvaavat';
 	}
 
-	if ($kukarow['yhtio'] == 'artr' or $kukarow['yhtio'] == 'allr') {
+	if (table_exists('yhteensopivuus_tuote')) {
 		$taulut['autodata']                        = 'Autodatatiedot';
 		$taulut['autodata_tuote']                  = 'Autodata tuotetiedot';
 		$taulut['yhteensopivuus_auto']             = 'Yhteensopivuus automallit';
@@ -2190,6 +2217,7 @@ if (!$cli and !isset($api_kentat)) {
 					<td><select name='asiakkaanvalinta'>
 					<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
 					<option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
+					<option value='3'>".t("Asiakas-sarakkeessa asiakkaan asiakasnumero")."</option>
 					</select></td>
 			</tr>";
 	}

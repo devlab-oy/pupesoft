@@ -40,15 +40,33 @@
 	echo "<font class='head'>".t("Datan sis‰‰nluku")." ".t("er‰ajo")."</font><hr>";
 
 	// Muuttujat
-	$tee = isset($tee) ? trim($tee) : "";
-	$table = isset($table) ? trim($table) : "";
-	$laheta = isset($laheta) ? trim($laheta) : "";
+	$tee       = isset($tee) ? trim($tee) : "";
+	$table     = isset($table) ? trim($table) : "";
+	$laheta    = isset($laheta) ? trim($laheta) : "";
+	$tablelisa = "";
 
 	// K‰sitell‰‰n file
 	if ($tee == "file" and $laheta != "") {
 
 		$kasitellaan_tiedosto = TRUE;
 		$kasitellaan_tiedosto_tyyppi = "";
+
+		if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri"))) {
+			$tablelisa .= "..ytunnustarkkuus.$ytunnustarkkuus";
+		}
+
+		if (in_array($table, array("puun_alkio_asiakas", "puun_alkio_tuote"))) {
+			$tablelisa .= "..dynaamisen_taulun_liitos.$dynaamisen_taulun_liitos";
+		}
+
+		if (in_array($table, array("asiakasalennus", "asiakashinta"))) {
+			$tablelisa .= "..segmenttivalinta.$segmenttivalinta";
+			$tablelisa .= "..asiakkaanvalinta.$asiakkaanvalinta";
+		}
+
+		if ($table == "extranet_kayttajan_lisatiedot") {
+			$tablelisa .= "..liitostunnusvalinta.$liitostunnusvalinta";
+		}
 
 		if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
@@ -83,7 +101,7 @@
 				$kasitellaan_tiedosto = FALSE;
 			}
 
-			if (preg_match('/[^A-Za-z0-9. -\_]/', $alkuperainen_filenimi)) {
+			if (preg_match('/[^A-Za-z0-9\. \-\_]/', $alkuperainen_filenimi)) {
 				echo "<font class='error'>".t("Tiedostonimess‰ kiellettyj‰ merkkej‰").". ".t("Sallitut merkit").": A-Z 0-9</font><br>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
@@ -131,7 +149,7 @@
 			}
 
 			// Generoidaan uusi k‰ytt‰j‰kohtainen filenimi datain -hakemistoon. Konversion j‰lkeen filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.DATAIMPORT
-			$kasiteltava_filenimi = "lue-data#".$kukarow["kuka"]."#".$kukarow["yhtio"]."#".$table."#".md5(uniqid(microtime(), TRUE) . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT'])."#".$alkuperainen_filenimi;
+			$kasiteltava_filenimi = "lue-data#".$kukarow["kuka"]."#".$kukarow["yhtio"]."#".$table.$tablelisa."#".md5(uniqid(microtime(), TRUE) . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT'])."#".$alkuperainen_filenimi;
 			$kasiteltava_filepath = $pupe_root_polku."/datain/";
 			$kasiteltava_kokonimi = $kasiteltava_filepath.$kasiteltava_filenimi;
 
@@ -297,13 +315,13 @@
 	);
 
 	// Yhtiˆkohtaisia
-	if ($kukarow['yhtio'] == 'mast') {
+	if (table_exists('auto_vari_tuote')) {
 		$taulut['auto_vari']              = 'Autov‰ri-datat';
 		$taulut['auto_vari_tuote']        = 'Autov‰ri-v‰rikirja';
 		$taulut['auto_vari_korvaavat']    = 'Autov‰ri-korvaavat';
 	}
 
-	if ($kukarow['yhtio'] == 'artr' or $kukarow['yhtio'] == 'allr') {
+	if (table_exists('yhteensopivuus_tuote')) {
 		$taulut['autodata']                        = 'Autodatatiedot';
 		$taulut['autodata_tuote']                  = 'Autodata tuotetiedot';
 		$taulut['yhteensopivuus_auto']             = 'Yhteensopivuus automallit';
@@ -374,8 +392,9 @@
 		</tr>";
 		echo "<tr><th>".t("Asiakkaan valinta").":</th>
 				<td><select name='asiakkaanvalinta'>
-				<option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
-				<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
+					<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
+					<option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
+					<option value='3'>".t("Asiakas-sarakkeessa asiakkaan asiakasnumero")."</option>
 				</select></td>
 		</tr>";
 	}
@@ -418,12 +437,21 @@
 					$filen_tiedot = explode("#", $file);
 					$kuka = $filen_tiedot[1];
 					$taulu = $filen_tiedot[3];
+					
+					// T‰‰lt‰ voi tulla ties mit‰ lis‰parameja, unohdetaan ne t‰ss‰
+					if (strpos($taulu, ".") !== FALSE) {
+						$cleantaulu = substr($taulu, 0, strpos($taulu, "."));
+					}
+					else {
+						$cleantaulu = $taulu;
+					}
+					
 					$orig_file = $filen_tiedot[5];
 
 					$kasitelty[$kasitelty_i]["filename"] = $file;
 					$kasitelty[$kasitelty_i]["errfilename"] = substr($file,0,-3)."ERR";
 					$kasitelty[$kasitelty_i]["orig_file"] = $orig_file;
-					$kasitelty[$kasitelty_i]["taulu"] = $taulut[$taulu];
+					$kasitelty[$kasitelty_i]["taulu"] = $taulut[$cleantaulu];
 					$kasitelty[$kasitelty_i]["aika"] = date("d.m.Y H:i:s", filemtime($pupe_root_polku."/datain/".$file));
 					$kasitelty[$kasitelty_i]["lognimi"] = "$kuka-$taulu-".date("Ymd-His", filemtime($pupe_root_polku."/datain/".$file)).".txt";
 					$kasitelty[$kasitelty_i]["errnimi"] = "$kuka-$taulu-".date("Ymd-His", filemtime($pupe_root_polku."/datain/".$file)).".xls";

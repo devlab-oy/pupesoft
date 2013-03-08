@@ -9,7 +9,7 @@
 	// $varastosta = mist‰ varastosta myyd‰‰n
 
 	if (!function_exists("tee_jt_tilaus")) {
-		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikat = array(), $tilaus_on_jo = '', $varastosta = '', $jt_huomioi_pvm = '') {
+		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikat = array(), $tilaus_on_jo = '', $varastosta = '', $jt_huomioi_pvm = '', $mista_tullaan = '') {
 			global $yhtiorow, $kukarow, $toim, $automaattinen_poiminta;
 
 			$debug = 0;
@@ -399,6 +399,15 @@
 								$query .= $fieldname."='',";
 							}
 						}
+						elseif ($fieldname == 'sisviesti2') {
+
+							if ($mista_tullaan == "TULLAAN_VALMISTUKSESTA") {
+								$query .= $fieldname."='Tehty valmistuksen kautta',";
+							}
+							else {
+								$query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
+							}
+						}
 						// kommentti speciaalia
 						elseif ($fieldname == 'comments') {
 							if ($toim == "ENNAKKO" or $otsikkorivi['jtkielto'] == "Y") {
@@ -728,7 +737,7 @@
 							}
 
 
-							if ($jt_huomioi_pvm != "") {						
+							if ($jt_huomioi_pvm != "") {
 								// Jos JT-rivit varaavat saldoa, niin tulevaisuudessa toimitettavat rivit varaavat nykyhetken saldoa vaikka "JTSPEC" tarkoittaa, ett‰ JT-rivien varauksia ei huomioida
 								$jtspec = "JTSPEC2";
 							}
@@ -1077,5 +1086,43 @@
 					}
 				}
 			}
+		}
+	}
+
+	if (!function_exists("hae_toimitettavat_tilausrivit")) {
+		function hae_toimitettavat_tilausrivit($tilaus_tunnus, $varastot, $jtspec) {
+
+			global $yhtiorow, $kukarow;
+
+			// Jos tilauksen j‰lkitoimitusrivit ovat osatoimituskiellossa, saamme toimittaa joko tilauksen kaikki tuotteet tai ei mit‰‰n.
+			// lasku.jtkielto = 'Z' "Asiakkaan j‰lkitoimituksia ei osatoimiteta"
+
+			// Palautetaan true jos tilauksen kaikilla tuotteilla on saldoa
+			// Palautetaan false jos kaikilla tuotteille *EI OLE* saldoa
+
+			// Haetaan tilauksen kaikkien jt-rivien m‰‰r‰t (vain myynti- ja ennakkotilaus rivit)
+			$query = "	SELECT tilausrivi.tuoteno,
+						sum(tilausrivi.varattu + tilausrivi.jt) tuote_kpl
+						FROM tilausrivi
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus = '{$tilaus_tunnus}'
+						AND tilausrivi.tyyppi in ('L', 'E')
+						AND tilausrivi.var = 'J'
+						AND tilausrivi.varattu + tilausrivi.jt > 0
+						GROUP BY tilausrivi.tuoteno";
+			$result = pupe_query($query);
+
+			while ($tilausrivi_row = mysql_fetch_assoc($result)) {
+
+				// Haetaan tuotteen myyt‰viss‰ m‰‰r‰
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tilausrivi_row['tuoteno'], $jtspec, $varastot, $kukarow['yhtio'], '', '', '', '', '', '', '');
+
+				// Jos myyt‰viss‰ on v‰hemm‰n mit‰ halutaan toimittaa
+				if ($myytavissa < $tilausrivi_row['tuote_kpl']) {
+					return false;
+				}
+			}
+
+			return true;
 		}
 	}

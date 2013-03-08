@@ -66,19 +66,24 @@ if ($kollityht > 0) {
 		//	Luodaan meidän tiedostorakenne parcelOrder arrayhin ja pukataan se tonne aineistoon sitten laakista
 		$parcelOrder=array();
 		$parcelOrder["rahtikirjanro"] = $rahtikirjanro;
-		$parcelOrder["tilausnumero"] = $lotsikot[0];
 
-		/*
-			Arvotaan lähetystapa
-		*/
+		$tilausnumerot = $tilausnumerot2 = "";
 
-		// jos maksuehto on jv, laitetaan NP,NN,CD
-		if ($rakir_row['jv'] != "") {
-			$parcelOrder["lahetystapa"] = "NP,NN,CD";
+		// Laitetaan max 30 merkkiä tilausnumeroita välilyönnillä eroteltuna
+		foreach($lotsikot as $tilnum) {
+			if ((strlen($tilausnumerot) + strlen($tilnum) + 1) <= 30) {
+				$tilausnumerot = "{$tilausnumerot} {$tilnum}";
+			}
+			elseif ((strlen($tilausnumerot2) + strlen($tilnum) + 1) <= 30) {
+				$tilausnumerot2 = "{$tilausnumerot2} {$tilnum}";
+			}
+			else {
+				break;
+			}
 		}
-		else {
-			$parcelOrder["lahetystapa"] = "NP";
-		}
+
+		$parcelOrder["tilausnumero"] = trim($tilausnumerot);
+		$parcelOrder["tilausnumero2"] = trim($tilausnumerot2);
 
 		//	Haetaan otsikkotiedot pohjalle
 		$query = "	SELECT *
@@ -99,6 +104,51 @@ if ($kollityht > 0) {
 
 			//	Poistetaan aina kaikki turhat merkit ja välilyönnit
 			$parcelOrder[$r] = trim(str_replace(array("\r\n", "\r", "\n"), " ", $v));
+		}
+
+		//	Haetaan asiakastiedot
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+		$asres = mysql_query($query) or pupe_error($query);
+		$asrow = mysql_fetch_array($asres);
+
+		for($i=0;$i<mysql_num_fields($asres);$i++) {
+			$r = mysql_field_name($asres, $i);
+			$v = $asrow[$i];
+
+			//	Korvaavuksia ja näppäilyä
+
+			$parcelOrder["asiakas_".$r] = $v;
+		}
+
+		$query = "	SELECT *
+					FROM asiakkaan_avainsanat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND liitostunnus = '{$asrow['tunnus']}'
+					AND LOWER(laji) = 'dpd'";
+		$as_avainsana_res = pupe_query($query);
+		$as_avainsana_row = mysql_fetch_assoc($as_avainsana_res);
+
+		/*
+			Arvotaan lähetystapa
+		*/
+
+		// jos maksuehto on jv, laitetaan NP,NN,CD
+		if ($rakir_row['jv'] != "") {
+			$parcelOrder["lahetystapa"] = "NP,NN,CD";
+		}
+		else {
+			if (strtolower($toitarow['lajittelupiste']) == 'sameday') {
+				//$parcelOrder["lahetystapa"] = "NP,SD"; Toistaiseksi tuo SD pois DPD:n pyynnöstä "sameday" tapauksessa.
+				$parcelOrder["lahetystapa"] = "NP";
+			}
+			elseif (strtolower($toitarow['lajittelupiste']) == 'regular' and $as_avainsana_row['avainsana'] != '') {
+				$parcelOrder["lahetystapa"] = "NP,{$as_avainsana_row['avainsana']}";
+			}
+			else {
+				$parcelOrder["lahetystapa"] = "NP";
+			}
 		}
 
 		$koko_summa = 0;
@@ -126,22 +176,6 @@ if ($kollityht > 0) {
 			$parcelOrder["kateinen"] = "";
 			$parcelOrder["jv_summa"] = "";
 			$parcelOrder["jv_valkoodi"] = "";
-		}
-
-		//	Haetaan asiakastiedot
-		$query = "	SELECT *
-					FROM asiakas
-					WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-		$asres = mysql_query($query) or pupe_error($query);
-		$asrow = mysql_fetch_array($asres);
-
-		for($i=0;$i<mysql_num_fields($asres);$i++) {
-			$r = mysql_field_name($asres, $i);
-			$v = $asrow[$i];
-
-			//	Korvaavuksia ja näppäilyä
-
-			$parcelOrder["asiakas_".$r] = $v;
 		}
 
 		/*
@@ -190,6 +224,7 @@ if ($kollityht > 0) {
 
 			########## Uusi muokattu formaatti ##########
 			# Reference
+			# Reference 2
 			# Viite
 			# Vastaanottajan yhteyshenkilö
 			# Vastaanottajan nimi
@@ -207,6 +242,7 @@ if ($kollityht > 0) {
 			# Rahtikirjanro
 			$delisprintFileFormat = array(
 				"tilausnumero",
+				"tilausnumero2",
 				"viite",
 				"yhteyshenkilo_nimi",
 				"toim_nimi",
@@ -257,7 +293,7 @@ if ($kollityht > 0) {
 			$ftphost = $dpd_ds_host;
 			$ftpuser = $dpd_ds_user;
 			$ftppass = $dpd_ds_pass;
-			$ftppath = $dpd_ds_path;
+			$ftppath = (trim($toitarow['lajittelupiste']) != '') ? $dpd_ds_path . trim($toitarow['lajittelupiste']) . "/" : $dpd_ds_path;
 			$ftpfile = realpath($filenimi);
 
 			require ("inc/ftp-send.inc");

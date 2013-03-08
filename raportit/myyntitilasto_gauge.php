@@ -315,7 +315,7 @@
 		$vvl = (int) $vvl;
 
 		if ($naytetaan_tulos == 'weekly') {
-			$pvmlisa = "WEEK(SUBSTRING(tilausrivi.laadittu, 1, 10), 7)";
+			$pvmlisa = "WEEK(SUBSTRING(tilausrivi.laadittu, 1, 10), 3)";
 		}
 		elseif ($naytetaan_tulos == 'monthly') {
 			$pvmlisa = "MONTH(SUBSTRING(tilausrivi.laadittu, 1, 10))";
@@ -425,7 +425,7 @@
 		}
 
 		if ($naytetaan_tulos == 'weekly') {
-			$pvmlisa = "WEEK(SUBSTRING(tilausrivi.laskutettuaika, 1, 10), 7)";
+			$pvmlisa = "WEEK(SUBSTRING(tilausrivi.laskutettuaika, 1, 10), 3)";
 		}
 		elseif ($naytetaan_tulos == 'monthly') {
 			$pvmlisa = "MONTH(SUBSTRING(tilausrivi.laskutettuaika, 1, 10))";

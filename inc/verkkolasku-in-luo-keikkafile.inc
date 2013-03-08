@@ -1516,7 +1516,7 @@
 									{$splitlisa}
 									{$splitlisa2}
 									{$rivihintalisa}
-									kommentti = concat(kommentti,' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}'),
+									kommentti = concat(ifnull(kommentti, ''),' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}'),
 									hinta_alkuperainen = '{$hinta_alkuperainenlisa}'
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '{$split_row['tunnus']}'";

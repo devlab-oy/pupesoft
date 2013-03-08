@@ -47,7 +47,7 @@
 
 				$autom_wherelisa = "";
 
-				if (isset($kaatokoodi_tuotteen_tuotenumeron_alku) and trim($kaatokoodi_tuotteen_tuotenumeron_alku) != '') {
+				if (isset($kaatokoodi_tuotteen_tuotenumeron_alku) and trim($kaatokoodi_tuotteen_tuotenumeron_alku) != '' and isset($tee_myos_tuotteen_toimittaja_liitos)) {
 					$autom_wherelisa = "AND tuoteno LIKE '{$kaatokoodi_tuotteen_tuotenumeron_alku}%'";
 				}
 

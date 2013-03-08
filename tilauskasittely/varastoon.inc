@@ -974,105 +974,15 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		echo "<font class='message'>".t("Vietiin tuotetta")." $tilrivirow[tuoteno] ".t("varastoon").": $tilrivirow[varattu] ".t("kappaletta").".</font><br>";
 	}
 
-	//keeps the php notice away
-	if(!isset($varastoon_viedyt_tuotteet[$tilrivirow['tuoteno']])) {
-		$varastoon_viedyt_tuotteet[$tilrivirow['tuoteno']] = $tilrivirow['varattu'];
-	}
-	else {
-		$varastoon_viedyt_tuotteet[$tilrivirow['tuoteno']] += $tilrivirow['varattu'];
-	}
+	$varastoon_viedyt_tuotteet[] = $tilrivirow['tuoteno'];
 }
 
 if ($toiminto == "kalkyyli" and $tee == "varastoon" and $oikeasti_varastoon == 1) {
 
-	$lasku_tunnukset = array();
-
-	foreach ($varastoon_viedyt_tuotteet as $tuoteno_temp => $tuotetta_viety_varastoon) {
-
-		// Varastoon viennin yhteydessä tarkistetaan heti_toimitus myyntitilausrivit ja asetetaan ne keräys jonoon, jos kaikki sen myyntitilauksen tilausrivit on toimitettavissa
-		$query = "	SELECT lasku.tunnus,
-					tilausrivi.tunnus as tilausrivi_tunnus,
-					tilausrivi.tuoteno,
-					tilausrivi.tilkpl,
-					tilausrivi.varattu,
-					tilausrivi.jt
-					FROM lasku
-					JOIN tilausrivi
-					ON (tilausrivi.yhtio = lasku.yhtio
-						AND tilausrivi.otunnus = lasku.tunnus
-						AND tilausrivi.tuoteno = '{$tuoteno_temp}')
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-					AND lasku.tila = 'N'
-					AND lasku.alatila = 'U'
-					ORDER BY lasku.luontiaika ASC";
-		$heti_toimitukseen_result = pupe_query($query);
-
-		list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno_temp, 'JTSPEC', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
-		$tuotetta_jaljella = $saldo;
-
-		while ($heti_toimitukseen_row = mysql_fetch_assoc($heti_toimitukseen_result)) {
-
-			// jos tuotetta on jäljellä ja tuotetta riittää koko tilausriville ja tilauksen kaikki muut_tilausrivit voidaan myös toimittaa, niin tilaus voidaan asettaa keryäsjonoon
-			if ($tuotetta_jaljella > 0 and $heti_toimitukseen_row['tilkpl'] <= $tuotetta_jaljella) {
-
-				// haetaan myyntitilauksen muut tilausrivit
-				$query = "	SELECT tunnus,
-							otunnus,
-							tilkpl,
-							tuoteno
-							FROM tilausrivi
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND otunnus = '{$heti_toimitukseen_row['tunnus']}'
-							AND tunnus != '{$heti_toimitukseen_row['tilausrivi_tunnus']}'";
-				$muut_rivit_result = pupe_query($query);
-				$voi_toimittaa = true;
-
-				while ($muut_tilausrivit = mysql_fetch_assoc($muut_rivit_result)) {
-					// haetaan muut heti_toimitukseen tilaukset ja katsotaan onko, tällä hetkellä käsittelyssä oleva tilaus toimitus kelpoinen
-					$query = "	SELECT lasku.tunnus,
-								tilausrivi.tunnus as tilausrivi_tunnus,
-								tilausrivi.tuoteno,
-								tilausrivi.tilkpl,
-								tilausrivi.varattu,
-								tilausrivi.jt
-								FROM lasku
-								JOIN tilausrivi
-								ON (tilausrivi.yhtio = lasku.yhtio
-									AND tilausrivi.otunnus = lasku.tunnus
-									AND tilausrivi.tuoteno = '{$muut_tilausrivit['tuoteno']}')
-								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND lasku.tila = 'N'
-								AND lasku.alatila = 'U'
-								ORDER BY lasku.luontiaika ASC";
-					$muut_tilaukset_result = pupe_query($query);
-
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($muut_tilausrivit['tuoteno'], 'JTSPEC', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
-
-					while ($muut_tilaukset_row = mysql_fetch_assoc($muut_tilaukset_result)) {
-						if ($muut_tilaukset_row['tilausrivi_tunnus'] == $muut_tilausrivit['tunnus'] and $saldo < $muut_tilausrivit['tilkpl']) {
-							$voi_toimittaa = false;
-							break;
-						}
-						$saldo -= $muut_tilaukset_row['tilkpl'];
-					}
-
-					if (!$voi_toimittaa) {
-						break;
-					}
-				}
-
-				if ($voi_toimittaa) {
-					// kerätään lasku tunnukset talteen ja updateaan vasta loopin jälkeen
-					if (!in_array($heti_toimitukseen_row['tunnus'], $lasku_tunnukset)) {
-						$lasku_tunnukset[] = $heti_toimitukseen_row['tunnus'];
-					}
-					$tuotetta_jaljella -= $heti_toimitukseen_row['tilkpl'];
-				}
-			}
-		}
-	}
+	$lasku_tunnukset = heti_toimitus_voiko_toimittaa($varastoon_viedyt_tuotteet);
 
 	if (!empty($lasku_tunnukset)) {
+
 		$now = date('Y-m-d');
 		$query = "	UPDATE lasku
 					SET tila = 'N',
@@ -1466,5 +1376,118 @@ if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tull
 	echo "<input type='hidden' name='ytunnus' value=''>";
 	echo "<input type='submit' value='".t("Takaisin toimittajan valintaan")."'>";
 	echo "</form>";
+}
+
+function heti_toimitus_voiko_toimittaa($tuotteet) {
+	global $kukarow, $yhtiorow;
+
+	$lasku_tunnukset = array();
+
+	//haetaan kaikkien varastoonvietyjen tuotenumeroiden perusteella heti_toimitukseen rivit
+	$heti_toimitukseen_rows = hae_kaikki_heti_toimitukseen_tilausrivit($tuotteet);
+
+	$tuotetta_jaljella = array();
+	foreach ($heti_toimitukseen_rows as $heti_toimitukseen_row) {
+
+		list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($heti_toimitukseen_row['tuoteno'], 'JTSPEC', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
+		if (!isset($tuotetta_jaljella[$heti_toimitukseen_row['tuoteno']])) {
+			$tuotetta_jaljella[$heti_toimitukseen_row['tuoteno']] = $saldo;
+		}
+
+		// jos tuotetta on jäljellä ja tuotetta riittää koko tilausriville ja tilauksen kaikki muut_tilausrivit voidaan myös toimittaa, niin tilaus voidaan asettaa keryäsjonoon
+		if ($tuotetta_jaljella[$heti_toimitukseen_row['tuoteno']] > 0 and $heti_toimitukseen_row['kpl'] <= $tuotetta_jaljella[$heti_toimitukseen_row['tuoteno']]) {
+
+			//haetaan tällähetkellä käsittelyssä olevan tilausrivin muut tilausrivit
+			$muut_tilausrivit = hae_tilauksen_kaikki_muut_tilausrivit($heti_toimitukseen_row);
+			$voi_toimittaa = true;
+
+			foreach ($muut_tilausrivit as $muu_tilausrivi) {
+
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($muu_tilausrivi['tuoteno'], 'JTSPEC', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
+
+				//käydään heti_toimitukseen tilausrivit uudelleen läpi samasta arraystä
+				foreach ($heti_toimitukseen_rows as $muut_heti_toimitukseen_tilaukset_row) {
+
+					if ($muut_heti_toimitukseen_tilaukset_row['tuoteno'] == $muu_tilausrivi['tuoteno']) {
+
+						if ($muut_heti_toimitukseen_tilaukset_row['tilausrivi_tunnus'] == $muu_tilausrivi['tunnus'] and $saldo < $muu_tilausrivi['kpl']) {
+							$voi_toimittaa = false;
+							break;
+						}
+
+						$saldo -= $muut_heti_toimitukseen_tilaukset_row['kpl'];
+					}
+				}
+
+				if (!$voi_toimittaa) {
+					break;
+				}
+			}
+
+			if ($voi_toimittaa) {
+
+				// kerätään lasku tunnukset talteen ja updateaan vasta loopin jälkeen
+				if (!in_array($heti_toimitukseen_row['lasku_tunnus'], $lasku_tunnukset)) {
+
+					$lasku_tunnukset[] = $heti_toimitukseen_row['lasku_tunnus'];
+				}
+				$tuotetta_jaljella[$heti_toimitukseen_row['tuoteno']] -= $heti_toimitukseen_row['kpl'];
+			}
+		}
+	}
+
+	return $lasku_tunnukset;
+}
+
+function hae_kaikki_heti_toimitukseen_tilausrivit($tuotteet) {
+	global $kukarow, $yhtiorow;
+
+	// Varastoon viennin yhteydessä tarkistetaan heti_toimitus myyntitilausrivit ja asetetaan ne keräys jonoon, jos kaikki sen myyntitilauksen tilausrivit on toimitettavissa
+	$query = "	SELECT lasku.tunnus as lasku_tunnus,
+				tilausrivi.tunnus as tilausrivi_tunnus,
+				tilausrivi.tuoteno,
+				tilausrivi.varattu + tilausrivi.jt as kpl
+				FROM lasku
+				JOIN tilausrivi
+				ON (tilausrivi.yhtio = lasku.yhtio
+					AND tilausrivi.otunnus = lasku.tunnus
+					AND tilausrivi.tuoteno IN('".implode("','", $tuotteet)."')
+					AND tilausrivi.tyyppi = 'L')
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND lasku.tila = 'N'
+				AND lasku.alatila = 'U'
+				ORDER BY lasku.luontiaika ASC";
+	$heti_toimitukseen_result = pupe_query($query);
+
+	$heti_toimitukseen_rows = array();
+	while ($heti_toimitukseen_row = mysql_fetch_assoc($heti_toimitukseen_result)) {
+		$heti_toimitukseen_rows[] = $heti_toimitukseen_row;
+	}
+
+	return $heti_toimitukseen_rows;
+}
+
+function hae_tilauksen_kaikki_muut_tilausrivit($heti_toimitukseen_row) {
+	global $kukarow, $yhtiorow;
+
+	// haetaan myyntitilauksen muut tilausrivit
+	$query = "	SELECT tunnus,
+				otunnus,
+				varattu + jt as kpl,
+				tuoteno
+				FROM tilausrivi
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus = '{$heti_toimitukseen_row['lasku_tunnus']}'
+				AND tunnus != '{$heti_toimitukseen_row['tilausrivi_tunnus']}'
+				AND tyyppi = 'L'";
+	$muut_rivit_result = pupe_query($query);
+
+	$muut_tilausrivit = array();
+
+	while ($muu_tilausrivi = mysql_fetch_assoc($muut_rivit_result)) {
+		$muut_tilausrivit[] = $muu_tilausrivi;
+	}
+
+	return $muut_tilausrivit;
 }
 

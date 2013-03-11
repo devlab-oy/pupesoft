@@ -2019,7 +2019,7 @@
 			echo "</tr>";
 
 			echo "<tr>";
-			echo "<td>".t("Heti toimitukseen")."</td>";
+			echo "<td>".t("Ei osatoimitusta. Koko tilaus toimitetaan heti kun kaikkia tuotteita saatavilla")."</td>";
 			echo "<td><input type='checkbox' name='heti_toimitukseen' $heti_toimitukseen></td>";
 			echo "<td></td>";
 			echo "<td></td>";

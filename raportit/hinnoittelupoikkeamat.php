@@ -294,7 +294,9 @@
 						$worksheet->write($excelrivi, $excelsarake, $v);
 						$excelsarake++;
 
-						echo "<td class='{$odd}'>{$v}</td>";
+						$stylelisa = $excelsarake > 7 ? " style='text-align: right;' " : "";
+
+						echo "<td class='{$odd}' {$stylelisa}>{$v}</td>";
 
 						if ($k == 'myyjä' and $v != '') $user = $v;
 						if ($k == 'ero' and $user != '') {

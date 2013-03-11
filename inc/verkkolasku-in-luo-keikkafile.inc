@@ -1490,119 +1490,10 @@
 			$query  = "UNLOCK TABLE";
 			$result = pupe_query($query);
 
-			$laskun_kulut = array(
-				'osto_kulu' => $osrow['osto_kulu'],
-				'osto_kulu_alv' => $osrow['osto_kulu_alv'],
-				'osto_rahti' => $osrow['osto_rahti'],
-				'osto_rahti_alv' => $osrow['osto_rahti_alv'],
-				'osto_rivi_kulu' => $osrow['osto_rivi_kulu'],
-				'osto_rivi_kulu_alv' => $osrow['osto_rivi_kulu_alv']
-			);
+			$_uusiotunnus = $keikan_tunnus;
 
-			verkkolasku_luo_liitosotsikko($tunnus, $keikan_tunnus, $laskun_kulut);
+			$loop_array = array($ostoilla);
 
-			// lis‰t‰‰n tuotteet keikalle ja kohdistetaan
-			foreach ($ostoilla as $pointteri) {
-
-				$query = "	SELECT *
-							FROM tilausrivi
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$pointteri['tunnus']}'";
-				$hinta_chk_res = pupe_query($query);
-				$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
-
-				$update_asn = "	UPDATE asn_sanomat SET
-								#tilausrivi = '{$pointteri['tunnus']}',
-								keikkarivinhinta = '{$hinta_chk_row['hinta']}',
-								ale1 = '{$hinta_chk_row['ale1']}',
-								ale2 = '{$hinta_chk_row['ale2']}',
-								ale3 = '{$hinta_chk_row['ale3']}',
-								status = 'X',
-								tuoteno = '{$hinta_chk_row['tuoteno']}'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$pointteri['insert_id']}'
-								AND laji = '{$lajilisa}'";
-				pupe_query($update_asn);
-
-				if ($hinta_chk_row['perheid'] != 0) {
-
-					$lapsen_lisakululisa = "";
-
-					if (isset($pointteri["lisakulu"]) and trim($pointteri["lisakulu"]) != 0) {
-						$lapsen_lisakululisa = " hinta = {$pointteri['lisakulu']} / {$pointteri['kpl']}, ";
-					}
-
-					$update = "	UPDATE tilausrivi SET
-								{$lapsen_lisakululisa}
-								ale1 = 0,
-								ale2 = 0,
-								ale3 = 0,
-								netto = '',
-								uusiotunnus = '{$keikan_tunnus}'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND otunnus = '{$hinta_chk_row['otunnus']}'
-								AND perheid = '{$hinta_chk_row['perheid']}'
-								AND tunnus != '{$hinta_chk_row['perheid']}'";
-					pupe_query($update);
-				}
-
-				if ($hinta_chk_row['hinta_alkuperainen'] == 0) {
-					$query  = "	SELECT tuote.*,
-								if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv) alv,
-								if(tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) tuotekerroin
-								from tuote
-								LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$osrow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
-								where tuote.yhtio	= '$kukarow[yhtio]'
-								and tuote.tuoteno	= '$hinta_chk_row[tuoteno]'";
-					$tuores = pupe_query($query);
-					$tuorow = mysql_fetch_assoc($tuores);
-
-					$ale_lisa_apu_kala = generoi_alekentta_php($hinta_chk_row, 'O', 'kerto');
-
-					$ohinta = round($hinta_chk_row['hinta']*$ale_lisa_apu_kala*$tuorow['tuotekerroin']*$osrow['vienti_kurssi']*$hinta_chk_row['varattu'], 6); // tuotteen rivihinta OLETUSVALUUTASSA
-
-					$query  = "	UPDATE tilausrivi SET
-								hinta_alkuperainen = '{$ohinta}'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$hinta_chk_row['tunnus']}'";
-					$resultxxx = pupe_query($query);
-				}
-
-				$ale1lisa = (isset($pointteri['ale1']) and trim($pointteri['ale1']) != "" and trim($pointteri['ale1']) != 0) ? " ale1 = '{$pointteri['ale1']}', " : " ale1 = 0, ";
-				$ale2lisa = (isset($pointteri['ale2']) and trim($pointteri['ale2']) != "" and trim($pointteri['ale2']) != 0) ? " ale2 = '{$pointteri['ale2']}', " : " ale2 = 0, ";
-				$ale3lisa = (isset($pointteri['ale3']) and trim($pointteri['ale3']) != "" and trim($pointteri['ale3']) != 0) ? " ale3 = '{$pointteri['ale3']}', " : " ale3 = 0, ";
-
-				$update = "	UPDATE tilausrivi SET
-							hinta = '{$pointteri['hinta']}',
-							netto = '',
-							{$ale1lisa}
-							{$ale2lisa}
-							{$ale3lisa}
-							uusiotunnus = '{$keikan_tunnus}'
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$pointteri['tunnus']}'";
-				#echo "<pre>",str_replace("\t", "", $update),"</pre>";
-				pupe_query($update);
-
-				$update = "	UPDATE asn_sanomat SET
-							toim_tuoteno = '{$pointteri['tuoteno']}'
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$pointteri['insert_id']}'";
-				#echo "<pre>$query</pre>";
-				pupe_query($update);
-			}
-
-			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keikan_tunnus}'";
-			$laskures = pupe_query($query);
-			$laskurow = mysql_fetch_assoc($laskures);
-
-			$tee_kululaskut = "liita";
- 			$silent = "SILENT";
- 			$keikanalatila = "";
- 			$laskutunnus = $tunnus;
- 			$otunnus = $keikantunnus = $keikan_tunnus;
-
-			require("tilauskasittely/kululaskut.inc");
 		}
 		elseif (count($keikoilla) > 0 and $virheet == 0) {
 
@@ -1702,6 +1593,17 @@
 
 			reset($keikoilla);
 
+			$_uusiotunnus = $keikoilla[0]['uusiotunnus'];
+
+			$loop_array = array($keikoilla, $ostoilla);
+		}
+		else {
+			$virheet++;
+			echo "Laskulla oli virheit‰, emme tehneet mit‰‰n.\n";
+		}
+
+		if ($virheet == 0) {
+
 			$laskun_kulut = array(
 				'osto_kulu' => $osrow['osto_kulu'],
 				'osto_kulu_alv' => $osrow['osto_kulu_alv'],
@@ -1711,13 +1613,9 @@
 				'osto_rivi_kulu_alv' => $osrow['osto_rivi_kulu_alv']
 			);
 
-			$_uusiotunnus = $keikoilla[0]['uusiotunnus'];
-
 			// jos tullaan t‰h‰n kohtaan niin kappalem‰‰r‰t t‰sm‰‰. On jo tarkistettu rivill‰ 166
 			// muutetaan hinta ja rivi on ok.
-			verkkolasku_luo_liitosotsikko($tunnus, $keikoilla[0]['uusiotunnus'], $laskun_kulut);
-
-			$loop_array = array($keikoilla, $ostoilla);
+			verkkolasku_luo_liitosotsikko($tunnus, $_uusiotunnus, $laskun_kulut);
 
 			foreach ($loop_array as $_arr) {
 
@@ -1875,13 +1773,9 @@
  			$silent = "SILENT";
  			$keikanalatila = "";
  			$laskutunnus = $tunnus;
- 			$otunnus = $keikantunnus =  $keikoilla[0]['uusiotunnus'];
+ 			$otunnus = $keikantunnus =  $_uusiotunnus;
 
 			require("tilauskasittely/kululaskut.inc");
-		}
-		else {
-			$virheet++;
-			echo "Laskulla oli virheit‰, emme tehneet mit‰‰n.\n";
 		}
 	}
 

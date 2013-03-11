@@ -43,11 +43,11 @@
 		else {
 
 			// Jos automaattinen tuotenumeron ehdotus on p‰‰ll‰...
-			if ($trow[$i] == '' and $yhtiorow['seuraava_tuotenumero'] != '') {
+			if ($trow[$i] == '' and $yhtiorow['seuraava_tuotenumero'] != '' and isset($tee_myos_tuotteen_toimittaja_liitos)) {
 
 				$autom_wherelisa = "";
 
-				if (isset($kaatokoodi_tuotteen_tuotenumeron_alku) and trim($kaatokoodi_tuotteen_tuotenumeron_alku) != '' and isset($tee_myos_tuotteen_toimittaja_liitos)) {
+				if (isset($kaatokoodi_tuotteen_tuotenumeron_alku) and trim($kaatokoodi_tuotteen_tuotenumeron_alku) != '') {
 					$autom_wherelisa = "AND tuoteno LIKE '{$kaatokoodi_tuotteen_tuotenumeron_alku}%'";
 				}
 

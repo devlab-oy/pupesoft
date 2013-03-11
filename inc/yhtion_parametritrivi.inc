@@ -1008,7 +1008,7 @@
 		$sel			= array();
 		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('o', 'k', 'L', 'M', 'N', 'Q', 'P'), '');
 
-		$ulos .= "<option value='E'{$sel['E']}>".t("Keräysvahvistusta/sähköistä lähetettä ei lähetetä")."</option>";
+		$ulos .= "<option value=''>".t("Keräysvahvistusta/sähköistä lähetettä ei lähetetä")."</option>";
 		$ulos .= "<option value='o'{$sel['o']}>".t("Keräysvahvistus/sähköinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
 		$ulos .= "<option value='k'{$sel['k']}>".t("Keräysvahvistus/sähköinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty. Paperista lähetettä ei tulosteta. ")."</option>";
 		$ulos .= "<option value='L'{$sel['L']}>".t("Keräysvahvistusta/sähköistä lähetettä ei lähetetä. Paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";

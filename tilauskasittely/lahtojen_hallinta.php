@@ -6,6 +6,22 @@
 
 	$onko_paivitysoikeuksia_ohjelmaan = tarkista_oikeus('tilauskasittely/lahtojen_hallinta.php', '', 1);
 
+	if($ajax_request == 1) {
+		if($hae_yhdistettavat_lahdot == 1) {
+			echo json_encode(hae_suljetut_lahdot($toimitustavan_tunnukset, 1));
+			exit;
+		}
+		if($tarkista_lahdot == 1) {
+			$return_array = array(
+				'keraamatta' => lahdot_joissa_tilauksia_keraamatta($lahdot),
+				'aikaa_jaljella' => lahdot_joissa_tilausaikaa_jaljella($lahdot),
+			);
+			echo json_encode($return_array);
+			exit;
+		}
+	}
+
+
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
 	if (isset($man_aloitus) and $onko_paivitysoikeuksia_ohjelmaan) {
@@ -611,7 +627,7 @@
 
 		if (isset($checkbox_parent) and ((is_array($checkbox_parent) and count($checkbox_parent) > 0) or is_string($checkbox_parent))) {
 
-			if (isset($jv) and (isset($laskukomento) and isset($komento) and isset($valittu_rakiroslapp_tulostin))) {
+			if (isset($jv) and (isset($rakirsyotto_laskutulostin) and isset($komento) and isset($valittu_rakiroslapp_tulostin))) {
 				$checkbox_parent = unserialize(urldecode($checkbox_parent));
 
 				$select_varasto = (int) $select_varasto;
@@ -753,7 +769,74 @@
 				}
 			}
 			else {
+				?>
+<script>
+$(document).ready(function() {
+	bind_uusi_yhdistettavat_select();
+	bind_poista_yhdistettava_lahto();
+});
+
+function bind_poista_yhdistettava_lahto() {
+	$('.poista_nappi').live('click', function(){
+		$(this).parent().remove();
+	});
+}
+
+function bind_uusi_yhdistettavat_select() {
+	$('#lisaa_yhdistettava_lahto').on('click', function() {
+		generoi_yhdistettavien_lahtojen_select();
+	});
+}
+
+function generoi_yhdistettavien_lahtojen_select() {
+	var tilaukset;
+
+	var yhdistettava_lahto_wrapper = document.createElement('div');
+	$(yhdistettava_lahto_wrapper).attr('class', 'yhdistettava_lahto_wrapper');
+
+	var select = document.createElement('select');
+	$(select).attr('name', 'yhdistettavan_lahdon_tilaukset[]');
+
+	tilaukset = hae_yhdistettavat_tilaukset();
+
+	$.each(tilaukset, function(index, value) {
+		var option = new Option(value.dropdown_text, value.tilaukset);
+
+		$(select).append(option);
+	});
+
+	$(yhdistettava_lahto_wrapper).append(select);
+
+	var poista_nappi = document.createElement('button');
+	$(poista_nappi).attr('class', 'poista_nappi').html($('#poista_nappi_value').html());
+	$(yhdistettava_lahto_wrapper).append(poista_nappi);
+	$(yhdistettava_lahto_wrapper).append(document.createElement('br'));
+
+	$('#yhdistettavan_lahdot_td').append(yhdistettava_lahto_wrapper);
+}
+
+function hae_yhdistettavat_tilaukset() {
+	var return_data;
+	$.ajax({
+		type: 'POST',
+		url: 'lahtojen_hallinta.php?ajax_request=1&hae_yhdistettavat_lahdot=1&no_head=yes',
+		dataType: 'JSON',
+		data: {
+			yhtio: $('#yhtio_tunnus').html(),
+			toimitustavan_tunnukset: $('#toimitustavan_tunnukset').html()
+		},
+		success: function(data) {
+			return_data = data;
+		},
+		async:false
+	});
+
+	return return_data;
+}
+</script>
+				<?php
 				echo "<form method='post'>";
+				echo "<div id='poista_nappi_value' style='display:none;'>".t("Poista")."</div>";
 				echo "<input type='hidden' name='tulosta_rahtikirjat' value='X' />";
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='checkbox_parent' value='",urlencode(serialize($checkbox_parent)),"' />";
@@ -771,35 +854,37 @@
 				echo "<td><input type='radio' name='jv' id='jv' value='vainvak'></td></tr>";
 
 				echo "<tr><th>",t("Valitse jälkivaatimuslaskujen tulostuspaikka"),":</th>";
-				echo "<td><select id='kirjoitin' name='laskukomento'>";
+				echo "<td><select id='kirjoitin' name='rakirsyotto_laskutulostin'>";
 				echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
-				$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
+				// Oletustulostin rahtikirjojen ja tulostukseen. Käytetään oletustulostimena varaston takana olevaa Rahtikirja A4 -tulostinta eli printteri6-kenttää.
+				// Haetaan varaston JV-kuittitulostin printteri7:sta
+				$query = "	SELECT printteri6, printteri7
+							FROM varastopaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$select_varasto}'";
+				$default_printer_res = pupe_query($query);
+				$default_printer_row = mysql_fetch_assoc($default_printer_res);
+
+				$query = "	SELECT *
 							FROM kirjoittimet
 							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND komento != 'EDI'
 							GROUP BY komento
 							ORDER BY kirjoitin";
 				$kires = pupe_query($query);
 
 				while ($kirow = mysql_fetch_assoc($kires)) {
 
-					$sel = (isset($laskukomento) and $laskukomento == $kirow['komento']) ? " selected" : "";
+					$sel = (isset($rakirsyotto_laskutulostin) and $rakirsyotto_laskutulostin == $kirow['tunnus']) ? " SELECTED" : ($kirow["tunnus"] == $default_printer_row["printteri7"]) ? " SELECTED" : "";
 
-					echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
+					echo "<option value='{$kirow['tunnus']}'{$sel}>{$kirow['kirjoitin']}</option>";
 				}
 
 				echo "</select></td></tr>";
 
 				echo "<tr><th>",t("Valitse tulostin"),":</th>";
 				echo "<td><select name='komento'>";
-
-				// Oletustulostin rahtikirjojen tulostukseen. Käytetään oletustulostimena varaston takana olevaa Rahtikirja A4 -tulostinta eli printteri6-kenttää.
-				$query = "	SELECT printteri6
-							FROM varastopaikat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$select_varasto}'";
-				$default_printer_res = pupe_query($query);
-				$default_printer_row = mysql_fetch_assoc($default_printer_res);
 
 				if ($default_printer_row['printteri6'] != '') {
 					echo "<option value='{$default_printer_row['printteri6']}'>",t("Oletustulostin"),"</option>";
@@ -831,12 +916,89 @@
 
 				echo "</select></td></tr>";
 
+				//tarkistetaan jos lahdon toimitustavan rahtikirjaerittely != ''
+				//tällöin näytetään liitettävien lähtöjen dropdownit
+				$lahdot_temp = implode(',', $checkbox_parent);
+				$query = "	SELECT
+							lahdot.tunnus,
+							Group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
+							concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', Substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text,
+							toimitustapa.tunnus as toimitustavan_tunnus
+							FROM lahdot
+							JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lasku.tila = 'L' AND lasku.alatila IN ( 'B', 'C' ))
+							JOIN varastopaikat ON (varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto)
+							JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+							AND lahdot.tunnus IN ({$lahdot_temp})
+							AND toimitustapa.erittely != ''
+							GROUP by lahdot.tunnus";
+				$lahdot_result = pupe_query($query);
+				$lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty = array();
+				$toimitustavan_tunnukset = array();
+				while($lahto_row = mysql_fetch_assoc($lahdot_result)) {
+					$lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty[] = array(
+						'lahdon_tilauksien_tunnukset' => $lahto_row['tilaukset'],
+						'dropdown_text' => $lahto_row['dropdown_text'],
+					);
+					$toimitustavan_tunnukset[] = $lahto_row['toimitustavan_tunnus'];
+				}
+
+				if(!empty($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty)) {
+					array_unshift($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty, array('lahdon_tilauksien_tunnukset' => 0 ,'dropdown_text' => t('Valitse lähtö')));
+					//tällöin voidaan näyttää mahdolliset liitettävät rahtikirjat
+					//haetaanlistaus suljetuista lähdöistä
+					$suljetut_lahdot = hae_suljetut_lahdot($toimitustavan_tunnukset, 0);
+
+					echo "<tr>";
+					echo "<th>".t("Yhdistetään lähtöön")."</th>";
+					echo "<td>";
+					echo "<select name='yhdistetaan_lahtoon'>";
+					$indeksi = 1;
+					$sel = "";
+					foreach($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty as $lahto) {
+						if(count($lahdot_joissa_tilauksien_toimitustapa_rahtikirja_eritelty) == 2) {
+							//kun array:ssa --> valitse lähtö + 1 lähtö, esi selectoidaan se lähtö
+							if($indeksi == 2) {
+								$sel = "selected='SELECTED'";
+							}
+						}
+						echo "<option {$sel} value='{$lahto['lahdon_tilauksien_tunnukset']}'>{$lahto['dropdown_text']}</option>";
+
+						$indeksi++;
+						$sel = "";
+					}
+					echo "</select>";
+					echo "</td>";
+					echo "</tr>";
+
+					echo "<tr>";
+					echo "<th>".t("Yhdistettävä lähtö")."</th>";
+					echo "<td id ='yhdistettavan_lahdot_td'>";
+					echo "<button id='lisaa_yhdistettava_lahto' type='button'>".t("Lisää lähtö")."</button>";
+					echo "<br/>";
+					echo "<br/>";
+					echo "<div class='yhdistettava_lahto_wrapper'>";
+					echo "<select name='yhdistettavan_lahdon_tilaukset[]'>";
+					foreach($suljetut_lahdot as $lahto) {
+						echo "<option value='{$lahto['tilaukset']}'>{$lahto['dropdown_text']}</option>";
+					}
+					echo "</select>";
+					echo "<button class='poista_nappi'>".t("Poista")."</button>";
+					echo "<br/>";
+					echo "</div>";
+					echo "</td>";
+					echo "</tr>";
+				}
+
 				echo "<tr><td class='back' colspan='2'>";
 				echo "<input type='submit' value='",t("Tulosta rahtikirjat"),"'>";
 				echo "</td></tr>";
 
 				echo "</table>";
 				echo "</form>";
+
+				echo "<div id='yhtio_tunnus' style='display:none;'>{$kukarow['yhtio']}</div>";
+				echo "<div id='toimitustavan_tunnukset' style='display:none;'>".implode(',', $toimitustavan_tunnukset)."</div>";
 
 				require ("inc/footer.inc");
 				exit;
@@ -1687,12 +1849,42 @@
 							}
 						});
 
+						var tarkista_lahdot;
+						$.ajax({
+							type: 'POST',
+							url: 'lahtojen_hallinta.php?ajax_request=1&tarkista_lahdot=1&no_head=yes',
+							dataType: 'JSON',
+							async: false,
+							data: {
+								lahdot: lahdot.substring(0, lahdot.length - 2)
+							}
+						}).done(function(data){
+							tarkista_lahdot = data;
+						});
+
 						$(this).after('<input type=\"hidden\" name=\"tulosta_rahtikirjat\" value=\"X\">');
 
-						if (lahdotcount > 1) lahdot = '".t("Oletko varma, että haluat tulostaa rahtikirjat ja sulkea lähdöt")."'+': '+lahdot.substring(0, lahdot.length - 2);
-						else lahdot = '".t("Oletko varma, että haluat tulostaa rahtikirjat ja sulkea lähdön")."'+': '+lahdot.substring(0, lahdot.length - 2);
+						if(!$.isEmptyObject(tarkista_lahdot['keraamatta']) || !$.isEmptyObject(tarkista_lahdot['aikaa_jaljella']) ) {
+							var error_message = '';
+							if(tarkista_lahdot['keraamatta'].length > 0) {
+								error_message += '".t("Lähdöillä rivejä keräämättä").":' + '\\n';
+								$.each(tarkista_lahdot['keraamatta'], function(index,value){
+									error_message += value['lahdon_tunnus'] + ', ' + value['keraamatta'] + ' ".t("kappaletta")."\\n';
+								});
+							}
+							if (tarkista_lahdot['aikaa_jaljella'].length > 0) {
+							error_message += '\\n".t("Lähdöillä tilausaikaa jäljellä").":';
+								$.each(tarkista_lahdot['aikaa_jaljella'], function(index,value){
+									error_message += value['tunnus'] + ', ';
+								});
+							}
+							error_message += '\\n".t("Haluatko sulkea lähdöt")."';
 
-						if (confirm(lahdot)) $('#napitformi').submit();
+							if (confirm(error_message)) $('#napitformi').submit();
+						}
+						else {
+							$('#napitformi').submit();
+						}
 					});
 
 					$('#vaihda_prio').on('click', function() {
@@ -2720,6 +2912,86 @@
 
 		echo "</table>";
 		echo "</form>";
+	}
+
+	function hae_suljetut_lahdot($toimitustavan_tunnukset, $ajax_request) {
+		global $kukarow;
+
+		$query = "	SELECT
+					lahdot.tunnus,
+					group_concat(DISTINCT lasku.tunnus) AS 'tilaukset',
+					concat(varastopaikat.nimitys, ' - ', toimitustapa.selite, ' - ', lahdot.pvm, ' - ', substring(lahdot.lahdon_kellonaika, 1, 5)) AS dropdown_text
+					FROM lahdot
+					JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND lasku.tila = 'L' )
+					JOIN varastopaikat ON (varastopaikat.yhtio = lahdot.yhtio AND varastopaikat.tunnus = lahdot.varasto)
+					JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.tunnus IN ( ".($ajax_request == 1 ? $toimitustavan_tunnukset : implode(',', $toimitustavan_tunnukset))." ) )
+					WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+					AND lahdot.aktiivi = 'S'
+					AND lahdot.pvm > date_sub(now(), INTERVAL 14 day)
+					GROUP BY lahdot.tunnus
+					ORDER BY varastopaikat.nimitys,
+					toimitustapa.selite,
+					lahdot.pvm desc,
+					lahdot.lahdon_kellonaika desc,
+					lahdot.tunnus";
+		$suljetut_lahdot_result = pupe_query($query);
+
+		$suljetut_lahdot = array();
+		$suljetut_lahdot[] = array(
+			'dropdown_text' => ($ajax_request == 1 ? utf8_encode(t("Valitse liitettävä lähtö")) : t("Valitse liitettävä lähtö")),
+			'tilaukset' => 0,
+		);
+		while ($suljetut_lahdot_row = mysql_fetch_assoc($suljetut_lahdot_result)) {
+			$suljetut_lahdot_row['dropdown_text'] = ($ajax_request == 1 ? utf8_encode($suljetut_lahdot_row['dropdown_text']) : $suljetut_lahdot_row['dropdown_text']);
+			$suljetut_lahdot[] = $suljetut_lahdot_row;
+		}
+
+		return $suljetut_lahdot;
+	}
+
+	function lahdot_joissa_tilauksia_keraamatta($lahdot) {
+		global $kukarow;
+
+		$query = "  SELECT lahdot.tunnus AS lahdon_tunnus,
+                            count(*) AS keraamatta
+                            FROM lahdot
+                            JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND (lasku.tila = 'L' OR (lasku.tila = 'N' AND lasku.alatila = 'A')))
+                            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND tilausrivi.var NOT IN ('P','J'))
+                            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '' )
+                            JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+                            WHERE  lahdot.yhtio = '{$kukarow['yhtio']}'
+                            AND lahdot.tunnus IN ({$lahdot})
+                            GROUP BY lahdot.tunnus";
+		$result = pupe_query($query);
+
+		error_log($query);
+
+		$lahdot = array();
+
+		while($lahto = mysql_fetch_assoc($result)) {
+			$lahdot[] = $lahto;
+		}
+
+		return $lahdot;
+	}
+
+	function lahdot_joissa_tilausaikaa_jaljella($lahdot) {
+		global $kukarow;
+
+		$query = "	SELECT lahdot.tunnus
+					FROM lahdot
+					WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+					AND lahdot.tunnus IN ({$lahdot})
+					AND lahdot.pvm >= CURDATE()
+					AND lahdot.viimeinen_tilausaika >= NOW()";
+		$result = pupe_query($query);
+
+		$lahdot = array();
+		while($lahto = mysql_fetch_assoc($result)) {
+			$lahdot[] = $lahto;
+		}
+
+		return $lahdot;
 	}
 
 	require ("inc/footer.inc");

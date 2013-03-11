@@ -1939,7 +1939,7 @@
 						$laskun_kieli = laskunkieli($lasrow['liitostunnus'], $kieli);
 
 						// tässä pohditaan laitetaanko verkkolaskuputkeen
-						if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and $lasrow["chn"] == "020")) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == ""  and $lasrow["chn"] != '666' and $lasrow["chn"] != '667' and abs($lasrow["summa"]) != 0) {
+						if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and ($lasrow["chn"] == "020" or $lasrow["chn"] == "030"))) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == ""  and $lasrow["chn"] != '666' and $lasrow["chn"] != '667' and abs($lasrow["summa"]) != 0) {
 
 							// Nyt meillä on:
 							// $lasrow array on U-laskun tiedot
@@ -2647,11 +2647,17 @@
 						$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
 					}
 
-					// Testaus
-					#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+					try {
+						// Testaus
+						#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
 
-					// Tuotanto
-					$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+						// Tuotanto
+						$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+					}
+					catch (Exception $exVirhe) {
+						$client = FALSE;
+						$tulos_ulos .= "VIRHE: Yhteys Maventaan epäonnistui: ".$exVirhe->getMessage()."\n";
+					}
 
 					// Splitataan file ja lähetetään YKSI lasku kerrallaan
 					$maventa_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents($nimifinvoice));

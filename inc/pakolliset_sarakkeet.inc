@@ -44,20 +44,13 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "asiakas" :
-				//	T‰m‰ est‰‰ syncronoinnin muilla kuin suomalaisilla toimittajilla..
-				if (strtoupper($yhtiorow['maa']) == 'FI') {
+				$pakolliset = array("YTUNNUS");
 
-					$pakolliset = array("YTUNNUS");
-
-					if ($yhtiorow['asiakkaan_tarkenne'] == '') {
-						$wherelliset = array("YTUNNUS", "OVTTUNNUS", "TOIM_OVTTUNNUS");
-					}
-					else {
-						$wherelliset = array("YTUNNUS", "ASIAKASNRO");
-					}
+				if ($yhtiorow['asiakkaan_tarkenne'] == '') {
+					$wherelliset = array("YTUNNUS", "OVTTUNNUS", "TOIM_OVTTUNNUS");
 				}
-				else {
-					$pakolliset = array("YTUNNUS");
+				elseif ($yhtiorow['asiakkaan_tarkenne'] == 'A') {
+					$wherelliset = array("YTUNNUS", "ASIAKASNRO");
 				}
 
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");

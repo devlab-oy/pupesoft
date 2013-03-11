@@ -255,6 +255,11 @@
 				if (trim($laskurow['viesti']) != '') {
 					$komm .= "\n".t("Tilausviite", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['viesti']), 90, "\n###");
 				}
+
+				if ($laskurow['erikoisale'] != 0) {
+					$komm .= "\n".t("Tuotteet sisältävät erikoisalennuksen %d", $kieli, $laskurow['erikoisale'])."%";
+				}
+
 				if (trim($laskurow['sisviesti1']) != '') {
 					$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 90, "\n###");
 				}
@@ -475,6 +480,19 @@
 
 				// Luodaan muuttujat
 				extract($params);
+
+				if($yhtiorow['lomakkeiden_allekirjoitus'] == 'X') {
+					$allekirjoitus_query = "	SELECT nimi,
+												asema
+												FROM kuka
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus = '{$laskurow['allekirjoittaja']}'";
+					$allekirjoitus_result = pupe_query($allekirjoitus_query);
+					$allekirjoitus_row = mysql_fetch_assoc($allekirjoitus_result);
+
+					$pdf->draw_text(40, 95, $allekirjoitus_row['nimi'], $thispage, $norm);
+					$pdf->draw_text(40, 85, $allekirjoitus_row['asema'], $thispage, $norm);
+				}
 
 				//Alimmat kolme laatikkoa, yhtiötietoja
 				$pdf->draw_rectangle(70, 20, 20, 580, $thispage, $rectparam);

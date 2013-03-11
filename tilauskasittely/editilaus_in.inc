@@ -110,6 +110,7 @@ $loppostino           	= "";
 $loposoite            	= "";
 $ltoim_maa				= "";
 $yhteyshenkilon_puhelin = "";
+$tilausyhteyshenkilo	= "";
 $lopviesti            	= "";
 $ketjutus             	= "";
 $editilaus_maksuehto	= "";
@@ -127,6 +128,7 @@ $verkkokauppavarasto_li	= "";
 $editilaus_loppuhinta	= "";
 $kieltolisa				= "";
 $OT_ASIAKASNRO			= "";
+$merkkitieto			= "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
 $tuoteerror      	= 1; // oletetaan aina ettei  tuotetta löydy
@@ -458,7 +460,7 @@ while ($tietue = fgets($fd)) {
 
 		case 'ORFFCR_NU'  :
 		//Kommentteja
-			$edi_kommentti .= $tieto . ' ';
+			$merkkitieto = $tieto;
 			break;
 
 		case 'OSTOTIL.OT_MAKSUEHTO' :
@@ -821,8 +823,10 @@ while ($tietue = fgets($fd)) {
 
 		case 'OSTOTIL.OT_VIITTEENNE':
 			// halutaan futur-aineistosta tämä tieto sisviesti2-kenttään
-			$orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
-			$lopviesti = trim($orig_tieto);
+			if ($edi_tyyppi == "futursoft") {
+				$orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
+				$lopviesti = trim($orig_tieto);
+			}
 			break;
 
 		//Tilaus päättyy. Aika tehdä se kantaan
@@ -1084,6 +1088,22 @@ while ($tietue = fgets($fd)) {
 					}
 				}
 
+				// Onko asiakkaalla oletusyhteyshenkilö?
+				$yhteysquery = "SELECT nimi
+								FROM yhteyshenkilo
+								where yhtio = '$kukarow[yhtio]'
+								and liitostunnus = '$arow[tunnus]'
+								and tyyppi = 'A'
+								and tilausyhteyshenkilo != ''
+								and oletusyhteyshenkilo != ''
+								ORDER BY nimi
+								LIMIT 1";
+				$yhteysresult = pupe_query($yhteysquery);
+
+				if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
+					$tilausyhteyshenkilo = $yhteysrow['nimi'];
+				}
+
 				// Lisätään otsikko
 				$query = "	INSERT into lasku SET
 							aktiivinen_kuljetus					= '$suunnistus',
@@ -1136,11 +1156,12 @@ while ($tietue = fgets($fd)) {
 							sisainen							= '$editilaus_sisainen',
 							sisviesti1         					= '$arow[sisviesti1]',
 							sisviesti2         					= '$lopviesti',
+							sisviesti3							= '{$merkkitieto}',
 							splittauskielto						= '$splittauskielto',
 							tila 			   					= '$editilaus_tila',
 							tilaustyyppi						= '$tilaustyyppilisa',
 							tilausvahvistus    					= '$vastaustapa',
-							tilausyhteyshenkilo					= '',
+							tilausyhteyshenkilo					= '$tilausyhteyshenkilo',
 							toimaika 		   					= '$toimpvm',
 							toimitusehto 	   					= '$arow[toimitusehto]',
 							toimitustapa 	   					= '$editilaus_toimitustapa',
@@ -1943,6 +1964,7 @@ while ($tietue = fgets($fd)) {
 			$loposoite            	= "";
 			$ltoim_maa				= "";
 			$yhteyshenkilon_puhelin = "";
+			$tilausyhteyshenkilo	= "";
 			$lopviesti            	= "";
 			$ketjutus             	= "";
 			$editilaus_maksuehto	= "";
@@ -1960,6 +1982,7 @@ while ($tietue = fgets($fd)) {
 			$editilaus_loppuhinta	= "";
 			$kieltolisa				= "";
 			$OT_ASIAKASNRO			= "";
+			$merkkitieto = "";
 			break;
 	}
 }

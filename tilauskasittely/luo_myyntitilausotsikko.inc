@@ -66,7 +66,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				$kolm_postitp 	= $asiakasrow["kolm_postitp"];
 			}
 
-			$maksuehto 		= $asiakasrow["maksuehto"];
+			$maksuehto = $asiakasrow["maksuehto"];
 
 			if ($myyjanro != "") {
 				$apuqu = "	SELECT *
@@ -115,7 +115,9 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			if ($kukarow["extranet"] != '') {
 				$query  = "	SELECT distinct selite
 							FROM avainsana
-							WHERE yhtio='$kukarow[yhtio]' and laji = 'asiakasluokka' and selite != ''
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji    = 'asiakasluokka'
+							and selite != ''
 							ORDER BY 1
 							LIMIT 1";
 				$prioresult = pupe_query($query);
@@ -179,6 +181,21 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				elseif ($toimehto_row["selitetark_3"] == "VASTAANOTTAJAN_SOPIMUS") {
 					$maksaja = "";
 				}
+			}
+
+			$yhteysquery = "SELECT nimi
+							FROM yhteyshenkilo
+							where yhtio = '$kukarow[yhtio]'
+							and liitostunnus = '$asiakasrow[tunnus]'
+							and tyyppi = 'A'
+							and tilausyhteyshenkilo != ''
+							and oletusyhteyshenkilo != ''
+							ORDER BY nimi
+							LIMIT 1";
+			$yhteysresult = pupe_query($yhteysquery);
+
+			if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
+				$tilausyhteyshenkilo = $yhteysrow['nimi'];
 			}
 		}
 		else {

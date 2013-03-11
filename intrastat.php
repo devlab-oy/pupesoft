@@ -149,7 +149,7 @@
 						round(sum(tilausrivi.kpl * if(tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
 						round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
-						round(sum(tilausrivi.kpl * tilausrivi.hinta * {$alennukset}), 0) rivihinta_laskutusarvo,
+						if (round(sum(tilausrivi.rivihinta / (1 + (lasku.rahti / 100))),0) > 0.50, round(sum(tilausrivi.rivihinta / (1 + (lasku.rahti / 100))),0), 1) rivihinta_laskutusarvo,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
 						group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet";

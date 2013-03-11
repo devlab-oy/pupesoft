@@ -3282,8 +3282,8 @@
 
 		$sel = $trow[$i] == 'K' ? 'selected' : '';
 
-		$ulos .= "<option value = ''>".t("Ei ehdoteta seuraavaa vapaata tuotenumeroa automaattisesti tuotetta perustettaessa")."</option>";
-		$ulos .= "<option value = 'K' {$sel}>".t("Ehdotetaan seuraava vapaa tuotenumero automaattisesti tuotetta perustettaessa")."</option>";
+		$ulos .= "<option value = ''>".t("Ei ehdoteta seuraavaa vapaata tuotenumeroa automaattisesti tuotetta ostotilauksella perustettaessa")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Ehdotetaan seuraava vapaa tuotenumero automaattisesti tuotetta ostotilauksella perustettaessa")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

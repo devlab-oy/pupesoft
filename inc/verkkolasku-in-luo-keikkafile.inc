@@ -685,6 +685,18 @@
 				$upres = pupe_query($query);
 			}
 
+			// jos rivi on jo viety varastoon ja yll‰ splitattiin se rivi, korjataan tapahtumat
+			if ($row['kpl'] > 0) {
+
+				$_arr = array(
+					$row['tunnus'] => $tilausrivi_id,
+				);
+
+				if ($myynti_tilausrivi_id_isa != 0) $_arr[$myynti_rivi_row_isa['tunnus']] = $myynti_tilausrivi_id_isa;
+
+				kopioi_tapahtuma($_arr, $kappaleerotus, $datan_kpl);
+			}
+
 			// katsotaan onko tuoteperheen is‰tuote
 			if ($row['perheid'] == $row['tunnus']) {
 
@@ -1067,17 +1079,6 @@
 					$foo = pupe_query($update_asn);
 
 					list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilausrivirow['tunnus'], $tilausrivirow, $rtuoteno[$i]);
-
-					// jos rivi on jo viety varastoon ja yll‰ splitattiin se rivi, korjataan tapahtumat
-					if ($tilausrivirow['kpl'] > 0) {
-
-						$_arr = array(
-							$tilausrivirow['tunnus'] => $tilausrivi_id,
-							$myynti_rivi_row_isa['tunnus'] => $myynti_tilausrivi_id_isa
-						);
-
-						kopioi_tapahtuma($_arr, $kappaleerotus, $rtuoteno[$i]['kpl']);
-					}
 				}
 				else {
 					// tuli enemm‰n kuin tilattu
@@ -1362,17 +1363,6 @@
 						$upd_res = pupe_query($updatequery);
 
 						echo "P‰ivitet‰‰n ja kohdistetaan asn_sanomat-taulun rivi.<br><pre>",str_replace("\t", "", $query),"</pre><br><br>";
-
-						// jos rivi on jo viety varastoon ja yll‰ splitattiin se rivi, korjataan tapahtumat
-						if ($split_row['kpl'] > 0) {
-
-							$_arr = array(
-								$split_row['tunnus'] => $tilausrivi_id,
-								$myynti_rivi_row_isa['tunnus'] => $myynti_tilausrivi_id_isa
-							);
-
-							kopioi_tapahtuma($_arr, $positiivinen_arvo, $erotus);
-						}
 					}
 
 					foreach($lisa_array as $tilriv) {

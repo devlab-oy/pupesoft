@@ -68,11 +68,11 @@ else {
         $toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$saapumisen_toimittaja['liitostunnus']}'";
         $toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
         $saapuminen = uusi_saapuminen($toimittaja);
-
-        // P‰ivitet‰‰n kuka.kesken
-        $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
-        $updated = pupe_query($update_kuka);
     }
+
+    // P‰ivitet‰‰n kuka.kesken
+    $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+    $updated = pupe_query($update_kuka);
 }
 
 # Kontrolleri

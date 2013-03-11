@@ -1718,6 +1718,7 @@
 
 					$tilausnumeroita_backup 	= $tilausnumeroita;
 					$lahete_tulostus_paperille 	= 0;
+					$lahete_tulostus_paperille_vak = 0;
 					$lahete_tulostus_emailiin 	= 0;
 					$laheteprintterinimi 		= "";
 					$onko_nouto 				= "";
@@ -1740,7 +1741,9 @@
 							$kirrow  = mysql_fetch_assoc($kirres);
 							$vakadr_komento = $kirrow['komento'];
 
-							tulosta_vakadr_erittely($laskurow["tunnus"], $vakadr_komento, $tee);
+							$onko_vak = tulosta_vakadr_erittely($laskurow["tunnus"], $vakadr_komento, $tee);
+
+							if ($vakadr_komento != 'email' and $onko_vak) $lahete_tulostus_paperille_vak++;
 						}
 
 						if ($valittu_tulostin != "") {

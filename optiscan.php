@@ -654,18 +654,19 @@
 
 				require('tilauskasittely/keraa.php');
 
-				if (isset($lahete_tulostus_paperille) and $lahete_tulostus_paperille > 0) {
-					if (isset($laheteprintterinimi) and $laheteprintterinimi != "") {
-						$laheteprintterinimi = preg_replace("/[^a-zA-ZåäöÅÄÖ0-9]/", " ", $laheteprintterinimi);
+				$laheteprintterinimi = (isset($laheteprintterinimi) and $laheteprintterinimi != "") ? " ".preg_replace("/[^a-zA-ZåäöÅÄÖ0-9]/", " ", $laheteprintterinimi) : "";
+				$dokumenttiteksti = (isset($lahete_tulostus_paperille_vak) and $lahete_tulostus_paperille_vak > 1) ? "dokumenttia" : "dokumentti";
 
-						$response = "0,{$lahete_tulostus_paperille} lähetettä tulostuu kirjoittimelta {$laheteprintterinimi}\r\n\r\n";
-					}
-					else {
-						$response = "0,{$lahete_tulostus_paperille} lähetettä tulostuu kirjoittimelta\r\n\r\n";
-					}
+				$print_array = array();
+
+				if (isset($lahete_tulostus_paperille) and $lahete_tulostus_paperille > 0) $print_array[] = "{$lahete_tulostus_paperille} lähetettä";
+				if (isset($lahete_tulostus_paperille_vak) and $lahete_tulostus_paperille_vak > 0) $print_array[] = "{$lahete_tulostus_paperille_vak} vak/adr {$dokumenttiteksti}";
+
+				if (count($print_array) == 0) {
+					$response = "0,Lähetteitä ei tulosteta\r\n\r\n";
 				}
 				else {
-					$response = "0,Lähetteitä ei tulosteta\r\n\r\n";
+					$response = "0,".implode(" ja ", $print_array)." tulostuu kirjoittimelta{$laheteprintterinimi}\r\n\r\n";
 				}
 			}
 		}

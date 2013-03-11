@@ -1305,34 +1305,13 @@
 						$extraa = mysql_insert_id();
 						$lisa_array[]			= $extraa;
 
-						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
-						$siistitty 				= implode(",", $lisa_array);
-
-						// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
-						$updatequery = "UPDATE asn_sanomat SET
-										tilausrivi = '{$siistitty}',
-										tuoteno = '{$tilausrivirow['tuoteno']}'
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
-						echo "<pre>$updatequery</pre>";
-						$upd_res = pupe_query($updatequery);
+						$upd_tuoteno = $tilausrivirow['tuoteno'];
 					}
 					elseif ($ylimaaraista == 0) {
 
-						// Jos menee tasan tilatut ja tulleet.
-						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
-						$siistitty 				= implode(",", $lisa_array);
+						$upd_tuoteno = $tilausrivirow['tuoteno'];
 
 						echo "Ylim‰‰r‰ist‰ = 0<br><br>";
-
-						// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
-						$updatequery = "UPDATE asn_sanomat SET
-										tilausrivi = '{$siistitty}',
-										tuoteno = '{$tilausrivirow['tuoteno']}'
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
-						echo "<pre>",str_replace("\t", "", $updatequery),"</pre>";
-						$upd_res = pupe_query($updatequery);
 					}
 					elseif ($ylimaaraista < 0) {
 
@@ -1351,19 +1330,22 @@
 
 						paivita_ja_splittaa($split_row, $erotus, $positiivinen_arvo);
 
-						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
-						$siistitty 				= implode(",", $lisa_array);
-
-						// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
-						$updatequery = "UPDATE asn_sanomat SET
-										tilausrivi = '{$siistitty}',
-										tuoteno = '{$split_row['tuoteno']}'
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
-						$upd_res = pupe_query($updatequery);
+						$upd_tuoteno = $split_row['tuoteno'];
 
 						echo "P‰ivitet‰‰n ja kohdistetaan asn_sanomat-taulun rivi.<br><pre>",str_replace("\t", "", $query),"</pre><br><br>";
 					}
+
+					$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
+					$siistitty 				= implode(",", $lisa_array);
+
+					// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
+					$updatequery = "UPDATE asn_sanomat SET
+									tilausrivi = '{$siistitty}',
+									tuoteno = '{$upd_tuoteno}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
+					echo "<pre>$updatequery</pre>";
+					$upd_res = pupe_query($updatequery);
 
 					foreach($lisa_array as $tilriv) {
 

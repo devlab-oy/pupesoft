@@ -780,7 +780,7 @@
 							echo"<td align='right'>$prow[hintakerroin]</td><td align='right'>$prow[alekerroin]</td>";
 							#echo "<td align='right'>$prow[rivikommentti]</td>";
 						}
-						
+
 						if ($toim == "RESEPTI") {
 							echo "<td align='left'>$tuoterow[yksikko]</td>";
 					    }
@@ -850,6 +850,10 @@
 							echo "	<td><input type='text' name='kerroin' size='10' value='$zrow[kerroin]'></td>";
 						}
 
+						if ($toim == "RESEPTI") {
+							echo "<td></td>";
+						}
+
 						if ($toim == "PERHE") {
 							echo "	<td><input type='text' name='hintakerroin' size='10' value='$zrow[hintakerroin]'></td>
 									<td><input type='text' name='alekerroin' size='10' value='$zrow[alekerroin]'></td>";
@@ -865,7 +869,7 @@
 							echo "<td><input type='checkbox' name='ohita_kerays'{$chk_ohita_kerays}></td>";
 						}
 
-						if($toim == "RESEPTI") {
+						if ($toim == "RESEPTI") {
 							$sel1=$sel2="";
 
 							if ($prow["omasivu"] != "") {
@@ -874,7 +878,7 @@
 							else {
 								$sel1 = "SELECTED";
 							}
-						
+
 							echo "<td>
 										<select name='kpl2' style='width: 150px;'>
 											<option value='' $sel1>".t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)")."</option>

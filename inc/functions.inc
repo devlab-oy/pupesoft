@@ -19200,8 +19200,62 @@ if (!function_exists('paivita_oletuspaikka')) {
 						ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";
 			$upresult = mysql_query($query) or pupe_error($query);
 		}
-		##
+
 		return 1;
+	}
+}
+
+if (!function_exists('hyllyalue')) {
+	function hyllyalue($hyllyalue_key, $hyllyalue_value, $esitysmuoto = '') {
+		global $kukarow, $yhtiorow;
+
+		/*
+		Funktioon liittyvä javascripti löytyy parametrit.inc riviltä 617
+		*/
+
+		if ($esitysmuoto == 'riisuttu') {
+			return $yhtiorow['varastontunniste'] != "" ? substr("{$hyllyalue_value}", $yhtiorow['varastontunniste']) : $hyllyalue_value;
+		}
+		else {
+
+			$input_html = $varastolisa = "";
+
+			if ($yhtiorow['varastontunniste'] != "") {
+				$input_html .= "<select class='select_varastontunniste' id='{$hyllyalue_key}_select_varastontunniste' name='select_varastontunniste'>";
+
+				$query = "	SELECT tunnus, nimitys, alkuhyllyalue
+							FROM varastopaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							ORDER BY alkuhyllyalue";
+				$varastores = pupe_query($query);
+
+				while ($varastorow = mysql_fetch_assoc($varastores)) {
+
+					$val = substr($varastorow['alkuhyllyalue'], 0, $yhtiorow['varastontunniste']);
+
+					$sel = "";
+
+					if ((trim($hyllyalue_value) != "" and substr($hyllyalue_value, 0, $yhtiorow['varastontunniste']) == $varastorow['alkuhyllyalue']) or (trim($hyllyalue_value) == '' and $kukarow['oletus_varasto'] == $varastorow['tunnus'])) {
+						$varastolisa = $val;
+						$sel = " selected";
+					}
+
+					$input_html .= "<option value='{$val}'{$sel}>{$varastorow['nimitys']} ({$val}) $sel</option>";
+				}
+
+				$input_html .= "</select>&nbsp;";
+			}
+
+			$maxlength = $yhtiorow['varastontunniste'] != "" ? (5 - $yhtiorow['varastontunniste']) : 5;
+			$size = $maxlength + 1;
+
+			$hyllyalue_value = substr("{$hyllyalue_value}", $yhtiorow['varastontunniste']);
+
+			$input_html .= "	<input type='text' class='hyllyalue' id='{$hyllyalue_key}' size='{$size}' maxlength='{$maxlength}' value = '{$hyllyalue_value}' />
+								<input type='hidden' id='{$hyllyalue_key}_hidden' name='{$hyllyalue_key}' value='{$varastolisa}{$hyllyalue_value}' />";
+
+			return $input_html;
+		}
 	}
 }
 

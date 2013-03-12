@@ -5,6 +5,18 @@ echo_myyntiseuranta_table();
 function echo_myyntiseuranta_table() {
 	global $kukarow, $yhtiorow;
 
+	// Hot-temp-fix. N‰ytet‰‰n taulukko vaan admin profiilin heeboille
+	$query = "	SELECT tunnus 
+				FROM kuka 
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND kuka = '{$kukarow['kuka']}'
+				AND profiilit like '%admin%'";
+	$check_res = pupe_query($query);
+
+	if (mysql_num_rows($check_res) == 0) {
+		return;
+	}
+
 	$nykyinen_kvartaali = paata_kvartaali();
 	$nykyinen_kuukausi = paata_kuukausi();
 

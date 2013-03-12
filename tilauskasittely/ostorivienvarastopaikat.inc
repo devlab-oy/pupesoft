@@ -61,7 +61,6 @@ if ($tee == "valmis") {
 					$t2[$tilausrivirow["tunnus"]] = $faijanmesta[$tilausrivirow["perheid2"]]["t2"];
 					$t3[$tilausrivirow["tunnus"]] = $faijanmesta[$tilausrivirow["perheid2"]]["t3"];
 					$t4[$tilausrivirow["tunnus"]] = $faijanmesta[$tilausrivirow["perheid2"]]["t4"];
-
 				}
 				elseif (($rivivarasto[$tunnus] != 'x') and ($rivivarasto[$tunnus] != '')) {  //Varastopaikka vaihdettiin pop-upista, siellä on paikan tunnus
 
@@ -143,6 +142,7 @@ if ($tee == "valmis") {
 					//echo "VALIKKOON: $tilausrivirow[tuoteno] $query<br><br>";
 				}
 				else {
+
 					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
 								from tuotepaikat
 								WHERE yhtio		= '$kukarow[yhtio]'
@@ -173,6 +173,7 @@ if ($tee == "valmis") {
 					}
 
 					if ($t1[$tilausrivirow["tunnus"]] != '' and $t2[$tilausrivirow["tunnus"]] != '' and $t3[$tilausrivirow["tunnus"]] != '' and $t4[$tilausrivirow["tunnus"]] != '') {
+
 						//dubbelchekataan, ettei nyt varmasti mene duplikaattina mitään paikkaa
 						$query = "	SELECT tuoteno
 									FROM tuotepaikat
@@ -188,6 +189,7 @@ if ($tee == "valmis") {
 						if (mysql_num_rows($checkres) == 0) {
 							$virheita = 0;
 							if (kuuluukovarastoon($t1[$tilausrivirow["tunnus"]],$t2[$tilausrivirow["tunnus"]],'') != 0) {
+
 								$query = "	insert into tuotepaikat (hyllyalue,hyllynro,hyllyvali,hyllytaso,oletus,saldo,saldoaika,tuoteno,yhtio,laatija,luontiaika)
 											values ('".$t1[$tilausrivirow["tunnus"]]."','".$t2[$tilausrivirow["tunnus"]]."','".$t3[$tilausrivirow["tunnus"]]."','".$t4[$tilausrivirow["tunnus"]]."','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
 								$insre = mysql_query($query) or pupe_error($query);
@@ -240,6 +242,7 @@ if ($tee == "valmis") {
 
 				//	Jos meillä on isätuotenumero niin laitetaan tuotepaikka talteen!!
 				if(!isset($faijanmesta[$tilausrivirow["perheid2"]]) and $tilausrivirow["perheid2"] == $tilausrivirow["tunnus"]) {
+
 					$faijanmesta[$tilausrivirow["perheid2"]]["t1"] = $paikkarow["hyllyalue"];
 					$faijanmesta[$tilausrivirow["perheid2"]]["t2"] = $paikkarow["hyllynro"];
 					$faijanmesta[$tilausrivirow["perheid2"]]["t3"] = $paikkarow["hyllyvali"];
@@ -627,7 +630,6 @@ if ($tee == "") {
 																		AND tuotepaikat.hyllytaso = varaston_hyllypaikat.hyllytaso
 																		AND tuotepaikat.oletus = '')
 													WHERE varaston_hyllypaikat.yhtio = '{$kukarow['yhtio']}'
-													AND varaston_hyllypaikat.varasto = '{$hyllypaikat_varasto}'
 													AND varaston_hyllypaikat.korkeus >= '{$hyllypaikat_row['korkeus']}'
 													AND varaston_hyllypaikat.leveys >= '{$hyllypaikat_row['leveys']}'
 													AND varaston_hyllypaikat.syvyys >= '{$hyllypaikat_row['syvyys']}'
@@ -693,7 +695,7 @@ if ($tee == "") {
 				$rivlla4 = $rivirow["r4"];
 			}
 
-			echo "<td><input type='text' name='t1[$rivirow[tunnus]]' value='$rivlla1' maxlength='5' size='5'></td>";
+			echo "<td>",hyllyalue("t1[{$rivirow['tunnus']}]", $rivlla1),"</td>";
 			echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$rivlla2' maxlength='5' size='5'></td>";
 			echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$rivlla3' maxlength='5' size='5'></td>";
 			echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$rivlla4' maxlength='5' size='5'></td>";
@@ -707,10 +709,11 @@ if ($tee == "") {
 		echo "</tr><tr>";
 		echo "<td colspan='3' class='back'></td>";
 		echo "<td colspan='2' align='right' class='back'>".t("Täytä kaikki kentät").":</td>";
-		echo "<td><input type='text' name='t1_kaikki' onKeyUp='WriteText(\"t1\");' value='' maxlength='5' size='5'></td>";
+		echo "<td align='right'><input type='text' name='t1_kaikki' onKeyUp='WriteText(\"t1\");' value='' maxlength='5' size='5'></td>";
 		echo "<td><input type='text' name='t2_kaikki' onKeyUp='WriteText(\"t2\");' value='' maxlength='5' size='5'></td>";
 		echo "<td><input type='text' name='t3_kaikki' onKeyUp='WriteText(\"t3\");' value='' maxlength='5' size='5'></td>";
 		echo "<td><input type='text' name='t4_kaikki' onKeyUp='WriteText(\"t4\");' value='' maxlength='5' size='5'></td>";
+
 		echo "</tr>";
 		echo "</table>";
 
@@ -739,5 +742,3 @@ if ($tee == "") {
 		echo "</form>";
 	}
 }
-
-?>

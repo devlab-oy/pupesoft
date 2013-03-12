@@ -65,7 +65,7 @@ else {
     if ($saapumisen_toimittaja['liitostunnus'] != $row['liitostunnus']) {
 
         // Haetaan toimittajan tiedot uudestaan ja tehd‰‰n uudelle toimittajalle saapuminen
-        $toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$saapumisen_toimittaja['liitostunnus']}'";
+        $toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
         $toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
         $saapuminen = uusi_saapuminen($toimittaja);
     }

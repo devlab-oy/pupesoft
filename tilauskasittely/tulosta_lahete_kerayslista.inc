@@ -4,25 +4,25 @@ require_once("pdflib/phppdflib.class.php");
 
 $norm["height"] 	    = 10;
 $norm["font"] 		    = "Times-Roman";
-                        
+
 $pieni["height"] 	    = 8;
 $pieni["font"] 		    = "Times-Roman";
-                        
+
 $boldi["height"] 	    = 10;
 $boldi["font"] 		    = "Times-Bold";
-                        
+
 $pieni_boldi["height"]  = 8;
 $pieni_boldi["font"]    = "Times-Bold";
-                        
+
 $keraaja_font["height"] = 12;
 $keraaja_font["font"]   = "Helvetica";
-                        
+
 $iso["height"] 		    = 14;
 $iso["font"] 		    = "Helvetica-Bold";
-                        
+
 $iso_boldi["height"]    = 24;
 $iso_boldi["font"] 	    = "Helvetica-Bold";
-                        
+
 $rectparam["width"]     = 0.3;
 $rivinkorkeus		    = 17;
 
@@ -758,12 +758,7 @@ if (!function_exists('rivi_kerayslista')) {
 				or ($row["var"] == "P" and ($yhtiorow["puute_jt_kerataanko"] == "P" or $yhtiorow["puute_jt_kerataanko"] == "Q"))
 				or ($row["var"] == "J" and ($yhtiorow["puute_jt_kerataanko"] == "J" or $yhtiorow["puute_jt_kerataanko"] == "Q"))) {
 
-				if ($yhtiorow['varastontunniste'] != "") {
-					$varastopaikka = substr("{$row["hyllyalue"]}", $yhtiorow['varastontunniste']) . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
-				}
-				else {
-					$varastopaikka = $row["hyllyalue"] . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
-				}
+				$varastopaikka = hyllyalue('hyllyalue', $row['hyllyalue'], 'teksti') . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
 
 				$row["perhe_kommentti1"] = "";
 				$row["perhe_kommentti2"] = "";
@@ -1123,7 +1118,7 @@ if (!function_exists('rivi_kerayslista')) {
 
 					$row['kommentti'] .= "\n".t("Myyjä", $kieli).": {$myyrow['nimi']}";
 				}
-				
+
 				// Otetaan yhteensäkommentti pois keröyslistalta (tämä tieto löytyy riviltä jos tilaus on laskutettu, mutta lähetteellä sitä ei voi näyttää)
 				$row["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
 				$row["kommentti"] = preg_replace("/ ".t("yhteensä", $asrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);

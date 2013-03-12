@@ -82,7 +82,7 @@
 
 	echo "<table>";
 	echo "<tr><th>".t("Alkuosoite")."</th></tr><tr>";
-	echo "<td>",tee_hyllyalue_input("ahyllyalue", $ahyllyalue);
+	echo "<td>",hyllyalue("ahyllyalue", $ahyllyalue);
 	echo "-";
 	echo "<input type='text' name='ahyllynro' size='5' maxlength='5' value='$ahyllynro'>";
 	echo "-";
@@ -91,7 +91,7 @@
 	echo "<input type='text' name='ahyllytaso' size='5' maxlength='5' value='$ahyllytaso'></td></tr>";
 
 	echo "<tr><th>".t("Loppuosoite")."</th></tr><tr>";
-	echo "<td>",tee_hyllyalue_input("lhyllyalue", $lhyllyalue);
+	echo "<td>",hyllyalue("lhyllyalue", $lhyllyalue);
 	echo "-";
 	echo "<input type='text' name='lhyllynro' size='5' maxlength='5' value='$lhyllynro'>";
 	echo "-";
@@ -146,7 +146,7 @@
 	echo "<input type='hidden' name='tee' value='Z'>";
 	echo "<input type='hidden' name='lisa' value='yks'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
-	echo "<td>",tee_hyllyalue_input("yhyllyalue", $yhyllyalue);
+	echo "<td>",hyllyalue("yhyllyalue", $yhyllyalue);
 	echo "-";
 	echo "<input type='text' name='yhyllynro' size='5' maxlength='5' value='$yhyllynro'>";
 	echo "-";

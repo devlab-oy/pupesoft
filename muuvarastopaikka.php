@@ -1208,7 +1208,7 @@
 				<input type='hidden' name='tuoteno' value='$tuoteno'>
 				<tr><th>".t("Lis‰‰ uusi varastopaikka")."</th></tr>
 				<tr><td>
-				".t("Alue")." ",tee_hyllyalue_input('ahyllyalue', $ahyllyalue),"
+				".t("Alue")." ",hyllyalue('ahyllyalue', $ahyllyalue),"
 				".t("Nro")."  <input type = 'text' name = 'ahyllynro'  size = '5' maxlength='5' value = '$ahyllynro'>
 				".t("V‰li")." <input type = 'text' name = 'ahyllyvali' size = '5' maxlength='5' value = '$ahyllyvali'>
 				".t("Taso")." <input type = 'text' name = 'ahyllytaso' size = '5' maxlength='5' value = '$ahyllytaso'>";

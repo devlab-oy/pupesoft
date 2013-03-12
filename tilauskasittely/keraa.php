@@ -2769,7 +2769,7 @@
 							}
 
 							echo "</select><br />";
-							echo tee_hyllyalue_input("rekla_hyllyalue[{$row['tunnus']}]", $rekla_hyllyalue[$row["tunnus"]]),"
+							echo hyllyalue("rekla_hyllyalue[{$row['tunnus']}]", $rekla_hyllyalue[$row["tunnus"]]),"
 	                              <input type='text' size='5' name='rekla_hyllynro[$row[tunnus]]'  value = '{$rekla_hyllynro[$row["tunnus"]]}'>
 	                              <input type='text' size='5' name='rekla_hyllyvali[$row[tunnus]]' value = '{$rekla_hyllyvali[$row["tunnus"]]}'>
 	                              <input type='text' size='5' name='rekla_hyllytaso[$row[tunnus]]' value = '{$rekla_hyllytaso[$row["tunnus"]]}'>";

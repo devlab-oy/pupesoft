@@ -12,7 +12,7 @@
 	if (mysql_field_name($result, $i) == "hyllyalue") {
 		$ulos = "<td>";
 
-		$ulos .= tee_hyllyalue_input($nimi, $trow[$i]);
+		$ulos .= hyllyalue($nimi, $trow[$i]);
 
 		$ulos .= "</td>";
 		$jatko = 0;

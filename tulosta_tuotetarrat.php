@@ -283,7 +283,7 @@
 		echo "<table>";
 		echo "<tr><th colspan='2'><center>".t("Tulostetaan tuotetarrat hyllyjen väliltä")."</center></th><tr>";
 		echo "<tr><th>".t("Alkuosoite")."</th>";
-		echo "<td>",tee_hyllyalue_input("ahyllyalue", $ahyllyalue);
+		echo "<td>",hyllyalue("ahyllyalue", $ahyllyalue);
 		echo "-";
 		echo "<input type='text' name='ahyllynro' size='5' maxlength='5' value='$ahyllynro'>";
 		echo "-";
@@ -292,7 +292,7 @@
 		echo "<input type='text' name='ahyllytaso' size='5' maxlength='5' value='$ahyllytaso'></td></tr>";
 
 		echo "<tr><th>".t("Loppuosoite")."</th>";
-		echo "<td>",tee_hyllyalue_input("lhyllyalue", $lhyllyalue);
+		echo "<td>",hyllyalue("lhyllyalue", $lhyllyalue);
 		echo "-";
 		echo "<input type='text' name='lhyllynro' size='5' maxlength='5' value='$lhyllynro'>";
 		echo "-";

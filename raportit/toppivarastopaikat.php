@@ -566,14 +566,14 @@ function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $a
 			<input type='text' name='vvl' value='$vvl' size='5' /></td>";
 
 	echo "<tr><th>".t("Anna alkuvarastopaikka").":</th>
-			<td>",tee_hyllyalue_input("ahyllyalue", $ahyllyalue),"
+			<td>",hyllyalue("ahyllyalue", $ahyllyalue),"
 			<input class='ahylly' type='text' size='6' name='ahyllynro' value='$ahyllynro' />
 			<input class='ahylly' type='text' size='6' name='ahyllyvali' value='$ahyllyvali' />
 			<input class='ahylly' type='text' size='6' name='ahyllytaso' value='$ahyllytaso' />
 			</td></tr>";
 
 	echo "<tr><th>".t("ja loppuvarastopaikka").":</th>
-			<td>",tee_hyllyalue_input("lhyllyalue", $lhyllyalue),"
+			<td>",hyllyalue("lhyllyalue", $lhyllyalue),"
 			<input class='lhylly' type='text' size='6' name='lhyllynro' value='$lhyllynro' />
 			<input class='lhylly' type='text' size='6' name='lhyllyvali' value='$lhyllyvali' />
 			<input class='lhylly' type='text' size='6' name='lhyllytaso' value='$lhyllytaso' />

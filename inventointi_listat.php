@@ -32,14 +32,14 @@
 	echo "<tr><td class='back'>",t("ja/tai"),"...</td></tr>";
 
 	echo "<tr><th>".t("Anna alkuvarastopaikka:")."</th>";
-	echo "<td>",tee_hyllyalue_input("ahyllyalue", '');
+	echo "<td>",hyllyalue("ahyllyalue", '');
 	echo "	<input type='text' size='6' maxlength='5' name='ahyllynro'>
 			<input type='text' size='6' maxlength='5' name='ahyllyvali'>
 				<input type='text' size='6' maxlength='5' name='ahyllytaso'>";
 	echo "</td></tr>";
 
 	echo "<tr><th>".t("ja loppuvarastopaikka:")."</th>";
-	echo "<td>",tee_hyllyalue_input("lhyllyalue", '');
+	echo "<td>",hyllyalue("lhyllyalue", '');
 	echo "	<input type='text' size='6' maxlength='5' name='lhyllynro'>
 			<input type='text' size='6' maxlength='5' name='lhyllyvali'>
 			<input type='text' size='6' maxlength='5' name='lhyllytaso'>";

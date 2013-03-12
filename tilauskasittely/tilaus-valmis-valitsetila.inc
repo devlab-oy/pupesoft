@@ -100,6 +100,25 @@
 		}
 	}
 
+	if ($laskurow['osatoimitus'] == 'e') {
+		// estet‰‰n, ett‰ tilaus ei mene suoraan ker‰ysjonoon.
+		$query = "	SELECT *
+					FROM tilausrivi
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND otunnus = '{$laskurow['tunnus']}'";
+		$tilausrivi_result = pupe_query($query);
+		$voiko_toimittaa = true;
+
+		while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_result)) {
+			list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tilausrivi_row['tuoteno'], 'JTSPEC2', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
+
+			if ($myytavissa < $tilausrivi_row['tilkpl']) {
+				$voiko_toimittaa = false;
+				break;
+			}
+		}
+	}
+
 	/*
 	echo "puute_jt_kerataanko: $yhtiorow[puute_jt_kerataanko]<br>";
 	echo "kerataanko_jos_vain_puute_jt: $yhtiorow[kerataanko_jos_vain_puute_jt]<br>";
@@ -133,7 +152,18 @@
 		$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s mit‰tˆitiin koska tilauksella ei ollut yht‰‰n ker‰tt‰v‰‰/laskutettavaa rivi‰."), $laskurow["tunnus"])."</font><br><br>\n";
 		$toimitusvahvitus_laheta = TRUE;
 	}
-	elseif ($rivirow["jteet"] > 0 and $laskurow["osatoimitus"] != '') {
+	elseif (!$voiko_toimittaa) {
+		$query = "	UPDATE lasku
+					SET tila = 'N',
+					alatila  = 'U',
+					toimaika = DATE_ADD(current_date, INTERVAL 1 MONTH)
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus  = '{$laskurow['tunnus']}'";
+		pupe_query($query);
+
+		$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli JT-rivej‰ joille ei riitt‰nyt saldoa ja osatoimitusta ei tehd‰, eli se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
+	}
+	elseif ($rivirow["jteet"] > 0 and $laskurow["osatoimitus"] == 'o') {
 		// Jos tilauksella oli yksikin jt-rivi ja osatoimitus on kielletty
 		$query  = "	UPDATE lasku
 					SET tila='N', alatila='U'
@@ -142,6 +172,16 @@
 		$result = pupe_query($query);
 
 		$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli JT-rivej‰ ja osatoimitusta ei tehd‰, eli se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
+	}
+	elseif ($rivirow["jteet"] > 0 and $laskurow["osatoimitus"] == 'e') {
+		// Jos tilauksella oli yksikin jt-rivi ja osatoimitus on kielletty
+		$query  = "	UPDATE lasku
+					SET tila='N', alatila='A'
+					where tunnus='$laskurow[tunnus]'
+					and yhtio='$kukarow[yhtio]'";
+		$result = pupe_query($query);
+
+		$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s laitettiin tulostusjonoon."), $laskurow["tunnus"])."</font><br><br>\n";
 	}
 	elseif ($kerattavia == 0) {
 		// Tilauskella on pelk‰st‰‰n puuterivej‰ joita ei ker‰t‰

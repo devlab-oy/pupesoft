@@ -975,6 +975,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	}
 
 	$varastoon_viedyt_tuotteet[] = $tilrivirow['tuoteno'];
+
+	echo "<br/>";
 }
 
 if ($toiminto == "kalkyyli" and $tee == "varastoon" and $oikeasti_varastoon == 1) {
@@ -982,14 +984,9 @@ if ($toiminto == "kalkyyli" and $tee == "varastoon" and $oikeasti_varastoon == 1
 	$lasku_tunnukset = heti_toimitus_voiko_toimittaa($varastoon_viedyt_tuotteet);
 
 	if (!empty($lasku_tunnukset)) {
-
-		$query = "	UPDATE lasku
-					SET tila = 'N',
-					alatila  = 'A',
-					toimaika = current_date
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus IN (".implode(',', $lasku_tunnukset).")";
-		pupe_query($query);
+		foreach($lasku_tunnukset as $tunnus_temp) {
+			aseta_tilaus_valmiiksi($tunnus_temp);
+		}
 	}
 }
 
@@ -1491,3 +1488,18 @@ function hae_tilauksen_kaikki_muut_tilausrivit($heti_toimitukseen_row) {
 	return $muut_tilausrivit;
 }
 
+function aseta_tilaus_valmiiksi($tunnus) {
+	global $kukarow, $yhtiorow;
+	
+	$query = "	SELECT *
+				FROM lasku
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$tunnus}'";
+	$laskures = pupe_query($query);
+	$laskurow = mysql_fetch_assoc($laskures);
+
+	//asetetaan kesken muuttuja, koska tilaus-valmis.inc vaatii sitä
+	$kukarow['kesken'] = $tunnus;
+
+	require('tilaus-valmis.inc');
+}

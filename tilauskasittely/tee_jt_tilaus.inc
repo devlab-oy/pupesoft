@@ -102,7 +102,7 @@
 					$lisatiedot_result = pupe_query($query);
 					$lisatiedot_row = mysql_fetch_assoc($lisatiedot_result);
 				}
-				elseif ($isarivirow["osatoimitus"] != "") {
+				elseif ($isarivirow["osatoimitus"] == "o") {
 					$query = "	SELECT *
 								FROM lasku
 								WHERE yhtio	= '$kukarow[yhtio]'

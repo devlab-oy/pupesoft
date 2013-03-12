@@ -281,35 +281,6 @@ else {
 		$laskurow['kassalipas'] = $kertakassa;
 	}
 
-	if ($laskurow['osatoimitus'] == 'e') {
-		// estet‰‰n, ett‰ tilaus ei mene suoraan ker‰ysjonoon.
-		$query = "	SELECT *
-					FROM tilausrivi
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND otunnus = '{$laskurow['tunnus']}'";
-		$tilausrivi_result = pupe_query($query);
-		$voiko_toimittaa = true;
-
-		while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_result)) {
-			list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tilausrivi_row['tuoteno'], 'JTSPEC2', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
-
-			if ($myytavissa < $tilausrivi_row['tilkpl']) {
-				$voiko_toimittaa = false;
-				break;
-			}
-		}
-
-		if (!$voiko_toimittaa) {
-			$query = "	UPDATE lasku
-						SET tila = 'N',
-						alatila  = 'U',
-						toimaika = DATE_ADD(current_date, INTERVAL 1 MONTH)
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus  = '{$laskurow['tunnus']}'";
-			pupe_query($query);
-		}
-	}
-
 	// Aktivoituiko "Odottaa jt-rivej‰" tilaus?
 	if (($laskurow["tila"] == 'N' or $laskurow["tila"] == 'G') and ($laskurow["alatila"] == 'T' or $laskurow["alatila"] == 'U')) {
 		// Onko jotain tulostettavaa?

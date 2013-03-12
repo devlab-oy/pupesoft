@@ -2705,6 +2705,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "varastontunniste") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array(1,2,3), '');
+
+		$ulos .= "<option value = ''>".t("Varaston tunnisteet ei ole k‰ytˆss‰")."</option>";
+		$ulos .= "<option value = '1'{$sel[1]}>".t("Varaston tunnisteena k‰ytet‰‰n hyllyalueen ensimm‰ist‰ merkki‰")."</option>";
+		$ulos .= "<option value = '2'{$sel[2]}>".t("Varaston tunnisteena k‰ytet‰‰n hyllyalueen 2 ensimm‰ist‰ merkki‰")."</option>";
+		$ulos .= "<option value = '3'{$sel[3]}>".t("Varaston tunnisteena k‰ytet‰‰n hyllyalueen 3 ensimm‰ist‰ merkki‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "suuntalavat") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

@@ -281,7 +281,7 @@
 				$pakkauskirjain = strtoupper(chr((64+$rivi_row['pakkausnro'])));
 				$tuotteen_nimitys = str_replace(array("'", ","), "", $rivi_row['nimitys']);
 
-				$hyllypaikka = $rivi_row['hyllyalue'];
+				$hyllypaikka = hyllyalue('', $rivi_row["hyllyalue"], 'riisuttu');
 				$hyllypaikka = trim($rivi_row['hyllynro'])  != '' ? $hyllypaikka." ".$rivi_row['hyllynro']  : $hyllypaikka;
 				$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka." ".$rivi_row['hyllyvali'] : $hyllypaikka;
 				$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka." ".$rivi_row['hyllytaso'] : $hyllypaikka;

@@ -1118,11 +1118,21 @@
 
 								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
 
-								if ($saldolaskenta == "hyllysaldo") {
-									$kokonaismyytavissa += $hyllyssa;
+								if(!empty($onko_suoratoimi)) {
+									if ($saldolaskenta == "hyllysaldo") {
+										$kokonaismyytavissa += $hyllyssa;
+									}
+									else {
+										$kokonaismyytavissa += $saldo;
+									}
 								}
 								else {
-									$kokonaismyytavissa += $myytavissa;
+									if ($saldolaskenta == "hyllysaldo") {
+										$kokonaismyytavissa += $hyllyssa;
+									}
+									else {
+										$kokonaismyytavissa += $myytavissa;
+									}
 								}
 							}
 						}
@@ -1542,8 +1552,13 @@
 											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen").". (".t("Tuotetta riitti kaikille JT-riveille").")</font><br>";
 										}
 
-										// Pomitaan tämä rivi/perhe
-										$loput[$tunnukset] 	= "KAIKKI";
+										if(!empty($onko_suoratoimi)) {
+											$loput[$tunnukset] 	= "VAKISIN";
+										}
+										else {
+											$loput[$tunnukset] 	= "KAIKKI";
+										}
+										
 										$kpl[$tunnukset] 	= 0;
 										$tunnusarray 		= explode(',', $tunnukset);
 

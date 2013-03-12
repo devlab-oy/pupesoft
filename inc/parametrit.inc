@@ -639,6 +639,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 						var varastontunniste = $('#'+hyllyalue+'_select_varastontunniste > option:selected').val();
 
+						if (varastontunniste == undefined) varastontunniste = '';
+
 						$('#'+hyllyalue+'_hidden').val(varastontunniste+hyllyalue_val);
 					};
 

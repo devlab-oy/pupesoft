@@ -298,7 +298,7 @@ else {
 			<br>";
 
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data'> <table>";
-			echo "<tr><td>".t("Valitse varasto:")."</td>
+			echo "<tr><th>".t("Valitse varasto:")."</th>
 				<td><select name='tuvarasto'>";
 
 	$query = "	SELECT tunnus, nimitys

@@ -983,13 +983,12 @@ if ($toiminto == "kalkyyli" and $tee == "varastoon" and $oikeasti_varastoon == 1
 
 	if (!empty($lasku_tunnukset)) {
 
-		$now = date('Y-m-d');
 		$query = "	UPDATE lasku
 					SET tila = 'N',
-					alatila = 'A',
-					toimaika = '{$now}'
+					alatila  = 'A',
+					toimaika = current_date
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus IN(".implode(',', $lasku_tunnukset).")";
+					AND tunnus IN (".implode(',', $lasku_tunnukset).")";
 		pupe_query($query);
 	}
 }
@@ -1387,6 +1386,7 @@ function heti_toimitus_voiko_toimittaa($tuotteet) {
 	$heti_toimitukseen_rows = hae_kaikki_heti_toimitukseen_tilausrivit($tuotteet);
 
 	$tuotetta_jaljella = array();
+
 	foreach ($heti_toimitukseen_rows as $heti_toimitukseen_row) {
 
 		list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($heti_toimitukseen_row['tuoteno'], 'JTSPEC', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');

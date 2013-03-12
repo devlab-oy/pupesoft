@@ -19289,10 +19289,8 @@ if (!function_exists('hyllyalue')) {
 		Funktioon liittyvä javascripti löytyy parametrit.inc riviltä 617
 		*/
 
-		if ($esitysmuoto == 'teksti') {
-
+		if ($esitysmuoto == 'riisuttu') {
 			return $yhtiorow['varastontunniste'] != "" ? substr("{$hyllyalue_value}", $yhtiorow['varastontunniste']) : $hyllyalue_value;
-
 		}
 		else {
 

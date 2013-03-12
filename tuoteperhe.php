@@ -680,7 +680,7 @@
 					echo "<th>".t("Samankaltaisuudet")."</th><th>".t("Nimitys")."</th><th>".t("Kerroin")."</th><td class='back'></td></tr>";
 				}
 				else {
-					echo "<th>".t("Raaka-aineet")."</th><th>".t("Nimitys")."</th><th>".t("Määräkerroin")."</th><th>".t("Yksikko")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>".t("Pituus kerroin")."</th><td class='back'></td></tr>";
+					echo "<th>".t("Raaka-aineet")."</th><th>".t("Nimitys")."</th><th>".t("Määräkerroin")."</th><th>".t("Yksikkö")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>".t("Pituus kerroin")."</th><td class='back'></td></tr>";
 				}
 
 				$query = "	SELECT *

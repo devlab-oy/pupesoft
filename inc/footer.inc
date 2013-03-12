@@ -106,11 +106,15 @@
 
 			$loppumem = memory_get_usage();
 			echo "php: ".sprintf("%.04f", $aika)." sec, ".round((($loppumem - $alkumem) / 1024 / 1024), 2)." mb<br>";
-			echo "sql: ".sprintf("%.04f", array_sum($aika_debug_array))." sec, ".sprintf("%.04f", array_sum($aika_debug_array) / count($aika_debug_array))." sec/query (".count($aika_debug_array)." queries)<br>";
+			if (!empty($aika_debug_array)) {
+				echo "sql: ".sprintf("%.04f", array_sum($aika_debug_array))." sec, ".sprintf("%.04f", array_sum($aika_debug_array) / count($aika_debug_array))." sec/query (".count($aika_debug_array)." queries)<br>";
+			}
 			echo "<hr>";
 
-			// Sortataan kestojärjestykseen
-			array_multisort($aika_debug_array, SORT_DESC, $quer_debug_array);
+			if (!empty($aika_debug_array)) {
+				// Sortataan kestojärjestykseen
+				array_multisort($aika_debug_array, SORT_DESC, $quer_debug_array);
+			}
 
 			for ($i=0; $i<count($aika_debug_array); $i++) {
 				if ($aika_debug_array[$i] > $GLOBALS["pupe_query_debug"]) {

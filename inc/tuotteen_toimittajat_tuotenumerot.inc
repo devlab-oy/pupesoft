@@ -1,7 +1,7 @@
 <?php
 
-	$otsikko = t('Tuotteen toimittajan vaihtoehtoiset tuotenumerot');
-	$otsikko_nappi	= t("vaihtoehtoinen tuotenumero");
+	$otsikko = t('Toimittajan vaihtoehtoiset tuotekoodit');
+	$otsikko_nappi	= t("vaihtoehtoinen tuotekoodi");
 
 	if ($from == "") {
 		$kentat = "tunnus, toim_tuoteno_tunnus, tuoteno, viivakoodi";

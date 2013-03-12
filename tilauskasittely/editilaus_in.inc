@@ -1088,7 +1088,7 @@ while ($tietue = fgets($fd)) {
 					}
 				}
 
-				if ($asiakasrow["myynti_kommentti1"] != "") {
+				if ($arow["myynti_kommentti1"] != "") {
 					$edi_kommentti .= $arow["myynti_kommentti1"]." \n";
 				}
 

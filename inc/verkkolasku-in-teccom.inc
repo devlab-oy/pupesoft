@@ -49,7 +49,7 @@
 	if (strtoupper($laskuttajan_toimittajanumero) == "ELRING") {
 		$laskuttajan_toimittajanumero = "123312";
 	}
-	elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH") {
+	elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH" OR strtoupper($laskuttajan_toimittajanumero) == "AA_FI") {
 		$laskuttajan_toimittajanumero = "123067";
 
 		// Tarkistusnumero
@@ -68,6 +68,9 @@
 	}
 	elseif ($laskuttajan_toimittajanumero == "112") {
 		$laskuttajan_toimittajanumero = "123442";
+	}
+	elseif ($laskuttajan_toimittajanumero == "123035") {
+		$laskuttajan_toimittajanumero = "123036";
 	}
 
 	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount)  and $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount != 0) {
@@ -111,6 +114,14 @@
 		$rivi = array_unique($rivi); // otetaan uniikit
 		$rivi = array_values($rivi); // poistetaan turhat välit
 		$laskun_tilausviite = implode(",",$rivi);
+	}
+
+	$onko_hyvityslasku_kerroin = 1;
+
+	// Boschin hyvityslasku -keissi
+	if ($laskuttajan_toimittajanumero == "123067" and isset($xml->InvoiceHeader->FreeText) and isset($xml->InvoiceHeader->FreeText->attributes()->Caption) and $xml->InvoiceHeader->FreeText->attributes()->Caption == 'C') {
+		$onko_hyvityslasku_kerroin = -1;
+		$laskun_summa_eur *= $onko_hyvityslasku_kerroin;
 	}
 
 	$laskun_asiakkaan_tilausnumero 	= "";
@@ -291,7 +302,7 @@
 							$charge_description = strtolower(trim($node_x->AllowOrChargeDescription));
 							$charge_code = strtolower(trim($node_x->AllowOrChargeCode));
 
-							if ($charge_code == "zcwr" or $charge_code == 'zfwa' or $charge_description == "core value") {
+							if ($charge_code == "zcwr" or $charge_code == 'zfwa' or strpos($charge_description, "core value") !== FALSE) {
 								$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node_x->Amount);
 							}
 						}
@@ -413,7 +424,7 @@
 
 							if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
 								($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
-								($laskuttajan_toimittajanumero == "123084" and $charge_description == "core value")) {
+								(in_array($laskuttajan_toimittajanumero, array("123084","123007")) and strpos($charge_description, "core value") !== FALSE)) {
 
 								// Jos rivillä tulee runkoveloitus, niin pitää tehdä rungosta oma lapsirivi
 								$query = "	SELECT tuote.tuoteno, tuote.nimitys
@@ -459,6 +470,11 @@
 									$rtuoteno[$x]['status']				= '';
 									$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
 									$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
+
+									if ($onko_hyvityslasku_kerroin != 1) {
+										$rtuoteno[$x]['rivihinta'] *= $onko_hyvityslasku_kerroin;
+										$rtuoteno[$x]['hinta'] *= $onko_hyvityslasku_kerroin;
+									}
 								}
 							}
 							elseif ($charge_description == 'freight costs' or $charge_code == 'zfwa' or $charge_code == 'freightcharges') {
@@ -474,6 +490,11 @@
 								$laskun_rahtikulu += (float) str_replace(",", ".", $node->Amount);
 								$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);
 								$osto_rivi_kulu_alv = $laskun_alv;
+
+								// ZF -keississä otetaan rahti pois rivihinnasta.
+								if ($charge_code == 'freightcharges') {
+									$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node->Amount);
+								}
 
 								if ($charge_description == 'freight costs' or $charge_code == 'freightcharges') {
 									$ei_oteta_kulua_pois = true;
@@ -508,6 +529,11 @@
 				$ealvi[$i] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["alv"] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
+
+				if ($onko_hyvityslasku_kerroin != 1) {
+					$rtuoteno[$i]['rivihinta'] *= $onko_hyvityslasku_kerroin;
+					$rtuoteno[$i]['hinta'] *= $onko_hyvityslasku_kerroin;
+				}
 			}
 			else {
 				//	Poistetaan tämä tietue
@@ -524,10 +550,12 @@
 		}
 
 		if ($laskun_alv != 0) {
-			$osto_kulu = round($osto_kulu * (1 + ($laskun_alv / 100)),2);
-			$osto_rahti = round($osto_rahti * (1 + ($laskun_alv / 100)),2);
-			$osto_rivi_kulu = round($osto_rivi_kulu * (1 + ($laskun_alv / 100)),2);
+			$osto_kulu = round($osto_kulu * (1 + ($laskun_alv / 100)) * $onko_hyvityslasku_kerroin, 2);
+			$osto_rahti = round($osto_rahti * (1 + ($laskun_alv / 100)) * $onko_hyvityslasku_kerroin, 2);
+			$osto_rivi_kulu = round($osto_rivi_kulu * (1 + ($laskun_alv / 100)) * $onko_hyvityslasku_kerroin, 2);
 		}
+
+		if ($laskun_rahtikulu != 0 and $onko_hyvityslasku_kerroin != 1) $laskun_rahtikulu *= $onko_hyvityslasku_kerroin;
 
 		// lasketaan mätsäävätkö rivihinnat ja laskunloppusumma, jos ei niin lisätään se kuluihin.
 		// $chk_sum = 0;

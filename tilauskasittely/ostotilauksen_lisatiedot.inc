@@ -14,7 +14,7 @@ if ($tee == "update") {
 
 	list (,,,,,,,,$llrow,,,,,,,) = tsekit($laskurow, 0, 0);
 
-	// Tsekki tehdään vain jos vaihto-omaisuus laskuja on liitetty keikkaan!
+	// Tsekki tehdään vain jos vaihto-omaisuus laskuja on liitetty saapumiseen!
 	if ($llrow["volasku"] > 0 and abs($rahti_etu) > abs($llrow['vosumma_valuutassa'])) {
 		echo "<font class='message'>".t("VIRHE: Eturahti ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br><br>";
 

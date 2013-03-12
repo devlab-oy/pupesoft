@@ -233,7 +233,7 @@
 								WHERE tilino = '$tilino'
 								and alku 	 = '$alkupvm'
 								and loppu 	 = '$loppupvm'
-								and tyyppi 	 = $xtyyppi";
+								and tyyppi 	 = '$xtyyppi'";
 					$tiliotedatares = pupe_query($query);
 
 					if (mysql_num_rows($tiliotedatares) > 0) {
@@ -248,7 +248,7 @@
 										WHERE tilino = '$tilino'
 										and alku 	 = '$alkupvm'
 										and loppu 	 = '$loppupvm'
-										and tyyppi 	 = $xtyyppi";
+										and tyyppi 	 = '$xtyyppi'";
 							$tiliotedatares = pupe_query($query);
 							$tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
 
@@ -326,7 +326,7 @@
 									FROM tiliotedata
 									WHERE yhtio	= '$yritirow[yhtio]'
 									and tilino 	= '$tilino'
-									and tyyppi 	= $xtyyppi
+									and tyyppi 	= '$xtyyppi'
 									and tieto	= '$tietue'
 									and substring(tieto, 13, 18) = '$arkistotunnari'";
 						$vchkres = pupe_query($query);
@@ -380,7 +380,7 @@
 									FROM tiliotedata
 									WHERE yhtio	= '$yritirow[yhtio]'
 									and tilino 	= '$tilino'
-									and tyyppi 	= $xtyyppi
+									and tyyppi 	= '$xtyyppi'
 									and tieto	= '$tietue'
 									and substring(tieto, 28, 16) = '$arkistotunnari'";
 						$vchkres = pupe_query($query);

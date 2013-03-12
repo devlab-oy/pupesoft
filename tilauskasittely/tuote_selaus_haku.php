@@ -922,6 +922,7 @@
 					FROM tuote use index (tuoteno, nimitys)
 					$lisa_parametri
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
+					and tuote.tuotetyyppi NOT IN ('A', 'B')
 					$kieltolisa
 					$lisa
 					$extra_poislisa

@@ -1006,13 +1006,16 @@
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
 		$sel			= array();
-		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('o', 'k', 'L', 'M'), '');
+		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('o', 'k', 'L', 'M', 'N', 'Q', 'P'), '');
 
 		$ulos .= "<option value=''>".t("Keräysvahvistusta/sähköistä lähetettä ei lähetetä")."</option>";
-		$ulos .= "<option value='o'{$sel['o']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
-		$ulos .= "<option value='k'{$sel['k']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
-		$ulos .= "<option value='L'{$sel['L']}>".t("Keräysvahvistus/paperinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
-		$ulos .= "<option value='M'{$sel['M']}>".t("Keräysvahvistus/paperinen & sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='o'{$sel['o']}>".t("Keräysvahvistus/sähköinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
+		$ulos .= "<option value='k'{$sel['k']}>".t("Keräysvahvistus/sähköinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty. Paperista lähetettä ei tulosteta. ")."</option>";
+		$ulos .= "<option value='L'{$sel['L']}>".t("Keräysvahvistusta/sähköistä lähetettä ei lähetetä. Paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='M'{$sel['M']}>".t("Keräysvahvistus/sähköinen ja paperinen lähete lähetetään/tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='N'{$sel['N']}>".t("Keräysvahvistus/sähköinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty. Paperista lähetettä ei tulosteta.")."</option>";
+		$ulos .= "<option value='Q'{$sel['Q']}>".t("Keräysvahvistusta/sähköistä lähetettä ei lähetetä. Paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
+		$ulos .= "<option value='P'{$sel['P']}>".t("Keräysvahvistus/sähköinen ja paperinen lähete lähetetään/tulostetaan asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1530,6 +1533,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "vientikiellon_ohitus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1 = ($trow[$i] == "K") ? "selected" : "";
+
+		$ulos .= "<option value='' >".t("Vientikiellossa olevaa tuotetta ei voi lisätä myyntitilaukselle")."</option>";
+		$ulos .= "<option value='K' $sel1>".t("Vientikiellossa olevan tuotteen voi hyväksyä myyntitilaukselle")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "vienti_erittelyn_tulostus") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -1972,8 +1988,9 @@
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
 
-		$ulos .= "<option value = '' $sel>".t("Ovttunnus")."</option>";
+		$ulos .= "<option value = '' $sel>".t("Ovttunnus ja Toimitusosoitteen Ovttunnus")."</option>";
 		$ulos .= "<option value = 'A' $sel[A]>".t("Asiakasnro")."</option>";
+		$ulos .= "<option value = 'B' $sel[B]>".t("Ytunnus")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3254,6 +3271,20 @@
 
 		$ulos .= "<option value = ''>".t("Hintaa ei leikata")."</option>";
 		$ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Myyntihintaa leikataan 25% per taso")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+
+	}
+	
+	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel['Z'] = $trow[$i] == 'Z' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Matkalaskun tarkastaja ei voi muokata matkalaskua")."</option>";
+		$ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Matkalaskun tarkastaja voi muokata matkalaskua")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

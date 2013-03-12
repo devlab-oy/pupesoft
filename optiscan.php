@@ -47,6 +47,8 @@
 
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 
+	date_default_timezone_set('Europe/Helsinki');
+
 	$pupe_root_polku = dirname(__FILE__);
 	chdir($pupe_root_polku);
 
@@ -103,6 +105,10 @@
 
 	// Erotellaan sanoman sisältö arrayseen
 	$sisalto = explode(",", str_replace("'", "", $sisalto));
+
+	$responseaika_alku = date("Y-m-d H:i:s");
+	$responseaika_alku_sek = time();
+
 	$response = "";
 
 	require('inc/connect.inc');
@@ -648,18 +654,19 @@
 
 				require('tilauskasittely/keraa.php');
 
-				if (isset($lahete_tulostus_paperille) and $lahete_tulostus_paperille > 0) {
-					if (isset($laheteprintterinimi) and $laheteprintterinimi != "") {
-						$laheteprintterinimi = preg_replace("/[^a-zA-ZåäöÅÄÖ0-9]/", " ", $laheteprintterinimi);
+				$laheteprintterinimi = (isset($laheteprintterinimi) and $laheteprintterinimi != "") ? " ".preg_replace("/[^a-zA-ZåäöÅÄÖ0-9]/", " ", $laheteprintterinimi) : "";
+				$dokumenttiteksti = (isset($lahete_tulostus_paperille_vak) and $lahete_tulostus_paperille_vak > 1) ? "dokumenttia" : "dokumentti";
 
-						$response = "0,{$lahete_tulostus_paperille} lähetettä tulostuu kirjoittimelta {$laheteprintterinimi}\r\n\r\n";
-					}
-					else {
-						$response = "0,{$lahete_tulostus_paperille} lähetettä tulostuu kirjoittimelta\r\n\r\n";
-					}
+				$print_array = array();
+
+				if (isset($lahete_tulostus_paperille) and $lahete_tulostus_paperille > 0) $print_array[] = "{$lahete_tulostus_paperille} lähetettä";
+				if (isset($lahete_tulostus_paperille_vak) and $lahete_tulostus_paperille_vak > 0) $print_array[] = "{$lahete_tulostus_paperille_vak} vak/adr {$dokumenttiteksti}";
+
+				if (count($print_array) == 0) {
+					$response = "0,Lähetteitä ei tulosteta\r\n\r\n";
 				}
 				else {
-					$response = "0,Lähetteitä ei tulosteta\r\n\r\n";
+					$response = "0,".implode(" ja ", $print_array)." tulostuu kirjoittimelta{$laheteprintterinimi}\r\n\r\n";
 				}
 			}
 		}
@@ -855,12 +862,20 @@
 	$fleur = ob_get_contents();
 	$fleur = ($fleur != "") ? $fleur."\n" : "";
 
+	$responseaika_loppu     = date("Y-m-d H:i:s");
+	$responseaika_loppu_sek = time();
+	$responseaika_sek_error = "";
+
+	if ($responseaika_loppu_sek-$responseaika_alku_sek >= 20) {
+		$responseaika_sek_error = "-----------------TIMEOUT:".sprintf("%011d", $responseaika_loppu_sek-$responseaika_alku_sek)."-----------------\n";
+	}
+
 	// Onko nagios monitor asennettu?
 	if (file_exists("/home/optiscan/optiscan.log")) {
 		// Noticet veks lokista
-		$fleur = preg_replace("/Notice:.*\n(\n)?/", "", $fleur);
+		$fleur = str_replace("<br>", "\n", preg_replace("/Notice:.*\n(\n)?/", "", $fleur));
 
-		file_put_contents("/home/optiscan/optiscan.log", "------------------------START------------------------\n$kukarow[kuka]: {$lines[0]}\npupe: ".trim($response)."\n$fleur------------------------STOP-------------------------\n\n", FILE_APPEND);
+		file_put_contents("/home/optiscan/optiscan.log", "------------------------START------------------------\n-----------------$responseaika_alku-----------------\n$kukarow[kuka]: {$lines[0]}\npupe: ".trim($response)."\n$fleur-----------------$responseaika_loppu-----------------\n$responseaika_sek_error------------------------STOP-------------------------\n\n", FILE_APPEND);
 	}
 
 	ob_end_clean();

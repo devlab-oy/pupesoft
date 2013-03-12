@@ -255,6 +255,11 @@
 				if (trim($laskurow['viesti']) != '') {
 					$komm .= "\n".t("Tilausviite", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['viesti']), 90, "\n###");
 				}
+
+				if ($laskurow['erikoisale'] != 0) {
+					$komm .= "\n".t("Tuotteet sisältävät erikoisalennuksen %d", $kieli, $laskurow['erikoisale'])."%";
+				}
+
 				if (trim($laskurow['sisviesti1']) != '') {
 					$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 90, "\n###");
 				}

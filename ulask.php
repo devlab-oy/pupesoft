@@ -251,7 +251,7 @@ if ($tee == 'VIIVA') {
 			$erp 	= substr($nimi,52,2);
 		}
 
-		//Toistaiseksi osataan vaan tarkistaa suomalaisten pankkitilien oikeellisuutta
+		// Toistaiseksi osataan vaan tarkistaa suomalaisten pankkitilien oikeellisuutta
 		if (strtoupper($yhtiorow['maa']) == 'FI') {
 			if ($versio == '2'){
 				$pankkitili = $tilino;
@@ -353,7 +353,9 @@ if ($tee == 'I') {
 	}
 
 	if (isset($toitilinumero)) {
-		$query = "SELECT * FROM toimi WHERE tunnus = '$toimittajaid'";
+		$query = "	SELECT *
+					FROM toimi
+					WHERE tunnus = '$toimittajaid'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -366,25 +368,46 @@ if ($tee == 'I') {
 		// Ei näytetä henkilötunnusta
 		$trow["ytunnus_clean"] = tarkistahetu($trow["ytunnus"]);
 
-		if (isset($toitilinumero) and (strtoupper($trow['maa'])) == 'FI') {
+		// Vaaditaan isot kirjaimet
+		$toitilinumero = trim(strtoupper($toitilinumero));
+		$toiswift = trim(strtoupper($toiswift));
+
+		if ($trow['ultilno_maa'] != "") $ibanmaa = $trow['ultilno_maa'];
+		else $ibanmaa = $trow['maa'];
+
+		// Kotimainen tilinumero
+		if (isset($toitilinumero) and strtoupper($trow['maa']) == 'FI') {
 			$pankkitili = $toitilinumero;
+
 			require("inc/pankkitilinoikeellisuus.php");
-			$tilino = $pankkitili; //Jos tämä ei siis onnistu puuttuu tilinumero ja se huomataan myöhemmin
-			if ($tilino == '') unset($toitilinumero); //Ei päivitetä
+
+			if ($pankkitili != '') {
+				$iban = luoiban($pankkitili);
+
+				$trow['tilinumero'] = $pankkitili;
+				$trow['ultilno']    = $iban['iban'];
+				$trow['swift']      = $iban['swift'];
+
+				$query = "UPDATE toimi set tilinumero='{$trow['tilinumero']}', ultilno='{$trow['ultilno']}', swift='{$trow['swift']}' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
+				$result = pupe_query($query);
+			}
 		}
 
-		if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
-			$query = "UPDATE toimi set tilinumero='$toitilinumero' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
+		// Jos SEPA-maa, tarkistetaan IBAN
+		if (isset($toitilinumero) and tarkista_sepa($ibanmaa) and tarkista_iban($toitilinumero) == $toitilinumero and $toiswift != '') {
+			$trow['ultilno'] = $toitilinumero;
+			$trow['swift']	 = $toiswift;
+
+			$query = "UPDATE toimi set ultilno='{$trow['ultilno']}', swift='{$trow['swift']}' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
 			$result = pupe_query($query);
-		}
-		else {
-			// trimmataan varmuudeksi swift ja ultilno
-			$toitilinumero = trim($toitilinumero);
-			$toiswift = trim($toiswift);
 
-			$query = "UPDATE toimi set ultilno='$toitilinumero', swift='$toiswift' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
-			$trow['ultilno']=$toitilinumero;
-			$trow['swift']=$toiswift;
+		}
+		// Jos ei SEPA-maa, niin BBAN-tsekki
+		elseif (isset($toitilinumero) and !tarkista_sepa($ibanmaa) and tarkista_bban($toitilinumero) === FALSE and $toiswift != '') {
+			$trow['ultilno'] = $toitilinumero;
+			$trow['swift']	 = $toiswift;
+
+			$query = "UPDATE toimi set ultilno='{$trow['ultilno']}', swift='{$trow['swift']}' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
 			$result = pupe_query($query);
 		}
 	}
@@ -741,61 +764,46 @@ if ($tee == 'I') {
 		$tee = 'E';
 	}
 
-	// Kotimainen toimittaja
-	if (strtoupper($trow['maa']) == "FI" or $tyyppi == strtoupper($yhtiorow['maa'])) {
+	$pankkitiliok = FALSE;
 
-		// Onko IBAN syötetty
-		if (strlen($trow['tilinumero']) < 6 and strlen($trow['ultilno']) > 6) {
-			$trow['tilinumero'] = substr($trow['ultilno'], 4);
-		}
+	if ($trow['ultilno_maa'] != "") $ibanmaa = $trow['ultilno_maa'];
+	else $ibanmaa = $trow['maa'];
 
-		if ((int) trim($trow['tilinumero']) != 0) {
-			$pankkitili = $trow['tilinumero'];
+	// Kotimainen tilinumero
+	if (strtoupper($ibanmaa) == "FI") {
+		$pankkitili = $trow['tilinumero'];
 
-			require 'inc/pankkitilinoikeellisuus.php';
+		require 'inc/pankkitilinoikeellisuus.php';
 
-			if ($pankkitili == '') {
-				$errormsg .= "<font class='error'>".t("Pankkitili %s on virheellinen", "", $trow['tilinumero'])."</font><br>";
-				$tee = 'E';
-			}
-			else {
-				$vastaus = luoiban($pankkitili);
+		if ($pankkitili != '') {
+			$iban = luoiban($pankkitili);
 
-				$trow['tilinumero'] = $pankkitili;
-				$trow['ultilno'] = $vastaus['iban'];
-				$trow['swift'] = $vastaus['swift'];
-			}
-		}
-		else {
-			$errormsg .= "<font class='error'>".t("Pankkitili puuttuu tai liian lyhyt")."</font><br>";
-			$tee = 'E';
-		}
-	}
-	else {
-		// Ulkomainen toimittaja
-		if (strlen($trow['ultilno']) == 0) {
-			$errormsg .= "<font class='error'>".t("Ulkomainenpankkitili puuttuu")."</font><br>";
-			$tee = 'E';
-		}
-		else {
-			// Vaaditaan isot kirjaimet
-			$trow['ultilno'] = strtoupper($trow['ultilno']);
-
-			if ($trow['ultilno_maa'] != "") $ibanmaa = $trow['ultilno_maa'];
-			else $ibanmaa = $trow['maa'];
-
-			// Jos SEPA-maa, tarkistetaan IBAN
-			if (tarkista_sepa($ibanmaa) and tarkista_iban($trow['ultilno']) != $trow['ultilno']) {
-				$errormsg .= "<font class='error'>".t("Virheellinen IBAN!")."</font><br>";
-				$tee = 'E';
-			}
-			elseif (tarkista_bban($trow['ultilno']) === FALSE) {
-				$errormsg .= "<font class='error'>".t("Virheellinen BBAN!")." $t[$i] ".t("Tilinumerossa saa olla vain kirjaimia A-Z ja/tai numeroita 0-9")."</font><br>";
-				$tee = 'E';
-			}
+			$trow['tilinumero'] = $pankkitili;
+			$trow['ultilno']    = $iban['iban'];
+			$trow['swift']      = $iban['swift'];
+			$pankkitiliok 		= TRUE;
 		}
 	}
 
+	// IBAN / BBAN
+	if ($trow['ultilno'] != "") {
+		// Vaaditaan isot kirjaimet
+		$trow['ultilno'] = strtoupper($trow['ultilno']);
+		$trow['swift']   = strtoupper($trow['swift']);
+
+		// Jos SEPA-maa, tarkistetaan IBAN
+		if (tarkista_sepa($ibanmaa) and tarkista_iban($trow['ultilno']) == $trow['ultilno']) {
+			$pankkitiliok = TRUE;
+		}
+		elseif (!tarkista_sepa($ibanmaa) and tarkista_bban($trow['ultilno']) !== FALSE) {
+			$pankkitiliok = TRUE;
+		}
+	}
+
+	if (!$pankkitiliok) {
+		$errormsg .= "<font class='error'>".t("Pankkitili puuttuu tai on virheellinen")."!</font><br>";
+		$tee = 'E';
+	}
 }
 
 if ($tee == 'Y') {
@@ -1157,7 +1165,7 @@ if ($tee == 'P' or $tee == 'E') {
 			if ($trow['pankki4']!='') $pankki .= "<br>$trow[pankki4]";
 
 			if ($trow['ultilno'] == '') { //Toimittajan tilinumero puuttuu. Annetaan sen syöttö
-				echo "<tr><td>".t("Tilinumero")."</td><td><input type='text' name='toitilinumero' size=10 value='$toitilinumero'></td></tr>";
+				echo "<tr><td>".t("Tilinumero")."</td><td><input type='text' name='toitilinumero' size=20 value='$toitilinumero'></td></tr>";
 				echo "<tr><td>".t("BIC")."</td><td><input type='text' name='toiswift' size=10 value='$toiswift'></td></tr>";
 			}
 			else {
@@ -1167,13 +1175,14 @@ if ($tee == 'P' or $tee == 'E') {
 			}
 		}
 		else {
-			if ($trow['tilinumero'] == '') { //Toimittajan tilinumero puuttuu. Annetaan sen syöttö
-				echo "<tr><td>".t("Tilinumero")."</td><td><input type='text' name='toitilinumero' size=10 value='$toitilinumero'></td></tr>";
+			if ($trow['tilinumero'] == '' and $trow['ultilno'] == '') { //Toimittajan tilinumero puuttuu. Annetaan sen syöttö
+				echo "<tr><td>".t("Tilinumero")."</td><td><input type='text' name='toitilinumero' size=20 value='$toitilinumero'></td></tr>";
+				echo "<tr><td>".t("BIC")."</td><td><input type='text' name='toiswift' size=10 value='$toiswift'></td></tr>";
 			}
 			else {
-				echo "<tr><td>".t("Tilinumero")."</td><td>$trow[tilinumero]</td></tr>";
-				echo "<tr><td>".t("IBAN")."</td><td>$trow[ultilno]</td></tr>";
-				echo "<tr><td>".t("BIC")."</td><td>$trow[swift]</td></tr>";
+			   echo "<tr><td>".t("Tilinumero")."</td><td>$trow[tilinumero]</td></tr>";
+			   echo "<tr><td>".t("IBAN")."</td><td>$trow[ultilno]</td></tr>";
+			   echo "<tr><td>".t("BIC")."</td><td>$trow[swift]</td></tr>";
 			}
 		}
 		echo "</table>";
@@ -1263,13 +1272,13 @@ if ($tee == 'P' or $tee == 'E') {
 				<tr><th>".t("ytunnus")."</th>	<td><input type='text' name='trow[ytunnus]'    maxlength='8'  size=10 value='$trow[ytunnus]'></td></tr>
 				<tr><th>".t("nimi")."</th>		<td><input type='text' name='trow[nimi]'       maxlength='45' size=45 value='$trow[nimi]'></td></tr>
 				<tr><th>".t("nimitark")."</th>	<td><input type='text' name='trow[nimitark]'   maxlength='45' size=45 value='$trow[nimitark]'></td></tr>
-				<tr><th>".t("osoite")."</th>		<td><input type='text' name='trow[osoite]'     maxlength='45' size=45 value='$trow[osoite]'></td></tr>
-				<tr><th>".t("osoitetark")."</th>	<td><input type='text' name='trow[osoitetark]' maxlength='45' size=45 value='$trow[osoitetark]'></td></tr>
+				<tr><th>".t("osoite")."</th>	<td><input type='text' name='trow[osoite]'     maxlength='45' size=45 value='$trow[osoite]'></td></tr>
+				<tr><th>".t("osoitetark")."</th><td><input type='text' name='trow[osoitetark]' maxlength='45' size=45 value='$trow[osoitetark]'></td></tr>
 				<tr><th>".t("postino")."</th>	<td><input type='text' name='trow[postino]'    maxlength='5'  size=10 value='$trow[postino]'></td></tr>
 				<tr><th>".t("postitp")."</th>	<td><input type='text' name='trow[postitp]'    maxlength='45' size=45 value='$trow[postitp]'></td></tr>
-				<tr><th>".t("Tilinumero")."</th>	<td><input type='text' name='trow[tilinumero]' maxlength='45' size=45 value='$trow[tilinumero]'></td></tr>
-				<tr><th>".t("IBAN")."</th>		<td><input type='text' name='trow[ultilno]'  maxlength='35' size=45 value='$trow[ultilno]'></td></tr>
-				<tr><th>".t("SWIFT")."</th>		<td><input type='text' name='trow[swift]'    maxlength='11' size=45 value='$trow[swift]'></td></tr>
+				<tr><th>".t("Tilinumero")."</th><td><input type='text' name='trow[tilinumero]' maxlength='45' size=45 value='$trow[tilinumero]'></td></tr>
+				<tr><th>".t("IBAN")."</th>		<td><input type='text' name='trow[ultilno]'    maxlength='35' size=45 value='$trow[ultilno]'></td></tr>
+				<tr><th>".t("SWIFT")."</th>		<td><input type='text' name='trow[swift]'      maxlength='11' size=45 value='$trow[swift]'></td></tr>
 				</table>";
 		}
 

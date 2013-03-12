@@ -482,7 +482,7 @@
 									}
 								}
 							}
-							elseif ($charge_description == 'freight costs' or $charge_code == 'zfwa' or $charge_code == 'freightcharges') {
+							elseif ($charge_description == 'freight costs' or $charge_description == 'freight charges' or $charge_code == 'zfwa' or $charge_code == 'freightcharges') {
 
 								/*
 								 * Rahtikulu
@@ -501,7 +501,7 @@
 									$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node->Amount);
 								}
 
-								if ($charge_description == 'freight costs' or $charge_code == 'freightcharges') {
+								if ($charge_description == 'freight costs' or $charge_description == 'freight charges' or $charge_code == 'freightcharges') {
 									$ei_oteta_kulua_pois = true;
 								}
 							}

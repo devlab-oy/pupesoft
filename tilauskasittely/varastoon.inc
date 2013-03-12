@@ -193,8 +193,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 
 $presult = pupe_query($query);
 
-// jos meill‰ on valuuttakeikka, lasketaan keskikurssi kaikille vaihto-omaisuuslaskuille
-$query  = "	SELECT sum(summa) summa, sum(arvo) arvo, ifnull(round(sum(summa * vienti_kurssi) / sum(summa), 6), 0) vientikurssi
+// jos meill‰ on valuuttakeikka, lasketaan keskikurssi kaikille vaihto-omaisuuslaskuille ja otetaan valuutta mukaan
+$query  = "	SELECT max(valkoodi) valkoodi, sum(summa) summa, sum(arvo) arvo, ifnull(round(sum(summa * vienti_kurssi) / sum(summa), 6), 0) vientikurssi
 			FROM lasku
 			WHERE yhtio = '$kukarow[yhtio]'
 			and tila = 'K'
@@ -208,6 +208,7 @@ $kurssirow = mysql_fetch_assoc($result);
 if ($laskurow["vienti_kurssi"] != 1 and $kurssirow["vientikurssi"] != 0) {
 	$laskurow["vienti_kurssi"] = $kurssirow["vientikurssi"];
 }
+$laskurow["valkoodi"] = $kurssirow["valkoodi"];
 
 // Lasketaan verokanta
 if ($kurssirow["arvo"] != 0) $simualv = round(100 * (($kurssirow["summa"]/$kurssirow["arvo"])-1),2);
@@ -988,11 +989,13 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 	// laitetaan kohdistettu X kun lasku on viety varastoon...
 	// laitetaan MAPVM kentt‰‰n t‰m‰ p‰iv‰ niin tiedet‰‰n koska viety varastoon
 	// MAPVM p‰vittyy jos keikka loppulasketaan uudestaan ja se nolllataan jos/kun keikka avataan (avaa_keikka.php)
+	// P‰ivitet‰‰n samalla saapumisotsikolle vaihto-omaisuuslaskun valuutta kuntoon
 	$query = "	UPDATE lasku set
 				kohdistettu = 'X',
 				alatila = 'X',
 				mapvm = now(),
 				vienti_kurssi = '$laskurow[vienti_kurssi]',
+				valkoodi = '$laskurow[valkoodi]',
 				maksu_kurssi = '$laskurow[maksu_kurssi]'
 				WHERE tunnus = '$laskurow[tunnus]'
 				and yhtio = '$kukarow[yhtio]'";

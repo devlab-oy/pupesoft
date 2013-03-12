@@ -434,12 +434,9 @@
 
 							echo "<tr class='kayttajittain' id='",str_replace("-", "", $pvm),"'>";
 
-							if ($tapa == 'kerpvm') {
-								echo "<td>",tv1dateconv($pvm, "P"),"</td>";
-							}
-							else {
-								echo "<td>$pvm</td>";
-							}
+							echo "<td>";
+							echo $tapa == 'kerpvm' ? tv1dateconv($pvm, "P") : $pvm;
+							echo " <img src='{$palvelin2}pics/lullacons/go-down.png' /></td>";
 
 							foreach ($_arr as $title => $value) {
 								echo "<td align='right'>{$value}</td>";

@@ -1718,6 +1718,7 @@
 
 					$tilausnumeroita_backup 	= $tilausnumeroita;
 					$lahete_tulostus_paperille 	= 0;
+					$lahete_tulostus_paperille_vak = 0;
 					$lahete_tulostus_emailiin 	= 0;
 					$laheteprintterinimi 		= "";
 					$onko_nouto 				= "";
@@ -1740,7 +1741,9 @@
 							$kirrow  = mysql_fetch_assoc($kirres);
 							$vakadr_komento = $kirrow['komento'];
 
-							tulosta_vakadr_erittely($laskurow["tunnus"], $vakadr_komento, $tee);
+							$onko_vak = tulosta_vakadr_erittely($laskurow["tunnus"], $vakadr_komento, $tee);
+
+							if ($vakadr_komento != 'email' and $onko_vak) $lahete_tulostus_paperille_vak++;
 						}
 
 						if ($valittu_tulostin != "") {
@@ -2236,11 +2239,13 @@
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='kerayspvm'; document.forms['find'].submit();\">",t("Ker‰ysaika"),"</a><br>
 						<a href='#' onclick=\"getElementById('jarj').value='toimaika'; document.forms['find'].submit();\">",t("Toimitusaika"),"</a></th>";
 
-				echo "	<th valign='top'>
-							<a href='#' onclick=\"getElementById('jarj').value='keraaja_nimi'; document.forms['find'].submit();\">",t("Ker‰‰j‰n nimi"),"</a>
-							<br/>
-							<a href='#' onclick=\"getElementById('jarj').value='keraaja_nro'; document.forms['find'].submit();\">",t("Ker‰‰j‰n numero"),"</a>
-						</th>";
+				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+					echo "	<th valign='top'>
+								<a href='#' onclick=\"getElementById('jarj').value='keraaja_nimi'; document.forms['find'].submit();\">",t("Ker‰‰j‰n nimi"),"</a>
+								<br/>
+								<a href='#' onclick=\"getElementById('jarj').value='keraaja_nro'; document.forms['find'].submit();\">",t("Ker‰‰j‰n numero"),"</a>
+							</th>";
+				}
 
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">",t("Toimitustapa"),"</a></th>";
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">",t("Riv"),"</a></th>";
@@ -2307,7 +2312,10 @@
 						echo "<td valign='top' nowrap align='right'>",tv1dateconv($row["kerayspvm"], "", "LYHYT"),"<br />",tv1dateconv($row["toimaika"], "", "LYHYT"),"</td>";
 					}
 
-					echo "<td valign='top'>{$row['keraaja_nimi']}<br/>{$row['keraaja_nro']}</td>";
+					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+						echo "<td valign='top'>{$row['keraaja_nimi']}<br/>{$row['keraaja_nro']}</td>";
+					}
+
 					echo "<td valign='top'>{$row['toimitustapa']}</td>";
 					echo "<td valign='top'>{$row['riveja']}</td>";
 
@@ -2766,7 +2774,7 @@
 							}
 
 							echo "</select><br />";
-							echo "<input type='text' size='5' name='rekla_hyllyalue[$row[tunnus]]' value = '{$rekla_hyllyalue[$row["tunnus"]]}'>
+							echo hyllyalue("rekla_hyllyalue[{$row['tunnus']}]", $rekla_hyllyalue[$row["tunnus"]]),"
 	                              <input type='text' size='5' name='rekla_hyllynro[$row[tunnus]]'  value = '{$rekla_hyllynro[$row["tunnus"]]}'>
 	                              <input type='text' size='5' name='rekla_hyllyvali[$row[tunnus]]' value = '{$rekla_hyllyvali[$row["tunnus"]]}'>
 	                              <input type='text' size='5' name='rekla_hyllytaso[$row[tunnus]]' value = '{$rekla_hyllytaso[$row["tunnus"]]}'>";

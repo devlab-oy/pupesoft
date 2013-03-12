@@ -412,7 +412,7 @@ while ($tietue = fgets($fd)) {
 
 		case 'OFTXGENTX' :
 		//Kommentti
-			$edi_kommentti .= $tieto . ' ';
+			$edi_kommentti .= $tieto." \n";
 			break;
 
 		case 'ODTM2__DT' :
@@ -455,7 +455,7 @@ while ($tietue = fgets($fd)) {
 
 		case 'ORFFCT_NU'  :
 		//Kommentteja
-			$edi_kommentti .= $tieto . ' ';
+			$edi_kommentti .= $tieto." \n";
 			break;
 
 		case 'ORFFCR_NU'  :
@@ -965,7 +965,7 @@ while ($tietue = fgets($fd)) {
 						$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
 					}
 					else {
-						$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa ";
+						$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa \n";
 						$editilaus_toimitustapa = '';
 					}
 				}
@@ -1087,6 +1087,12 @@ while ($tietue = fgets($fd)) {
 						$tilaustyyppilisa = 2;
 					}
 				}
+
+				if ($asiakasrow["myynti_kommentti1"] != "") {
+					$edi_kommentti .= $arow["myynti_kommentti1"]." \n";
+				}
+
+				$edi_kommentti = trim($edi_kommentti);
 
 				// Onko asiakkaalla oletusyhteyshenkilö?
 				$yhteysquery = "SELECT nimi

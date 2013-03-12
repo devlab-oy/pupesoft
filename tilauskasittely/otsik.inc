@@ -1786,17 +1786,17 @@
 
 			// Tarjouksia ei oletuksena osatoimiteta
 			if ($srow['osatoimitus'] == 'o' or ((in_array($toim, array("TARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) {
-				$osath = 'selected="SELECTED"';
+				$osath  = 'selected="SELECTED"';
 				$osath1 = '';
 				$osath2 = '';
 			}
 			elseif($srow['osatoimitus'] == 'e') {
-				$osath = '';
+				$osath  = '';
 				$osath1 = '';
 				$osath2 = 'selected="SELECTED"';
 			}
 			else {
-				$osath = '';
+				$osath  = '';
 				$osath1 = 'selected="SELECTED"';
 				$osath2 = '';
 			}
@@ -1938,7 +1938,7 @@
 			if ($toim != "MYYNTITILI") {
 				echo "<td>".t("Osatoimitus").":</td>";
 				echo "<td>";
-				echo "<select name='osatoimitus'>";
+				echo "<select name='osatoimitus' ".js_alasvetoMaxWidth("jtkielto", 200).">";
 				echo "<option value='' $osath1>".t("Voidaan osatoimittaa")."</option>";
 				echo "<option value='o' $osath>".t("Ei osatoimiteta")."</option>";
 				echo "<option value='e' $osath2>".t("Ei osatoimiteta").'. '.t("Tilaus toimitetaan automaattisesti kun kaikkia tuotteita on varastossa")."</option>";

@@ -88,14 +88,30 @@
 	if ($tee == 'Z' and isset($tyyppi) and $tyyppi != '') {
 
 		if ($tyyppi == 'TOIMTUOTENO') {
+
 			$query = "	SELECT tuotteen_toimittajat.tuoteno
 						FROM tuotteen_toimittajat
-						JOIN tuote ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno
-						WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-						and tuotteen_toimittajat.toim_tuoteno = '$tuoteno'
-						and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+						JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+						WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+						AND tuotteen_toimittajat.toim_tuoteno = '{$tuoteno}'
+						AND (tuote.status NOT IN ('P','X') OR (SELECT SUM(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0) > 0)
 						ORDER BY tuote.tuoteno";
 			$result = pupe_query($query);
+
+			if (mysql_num_rows($result) == 0) {
+				$query = "	SELECT tuote.tuoteno
+							FROM tuotteen_toimittajat_tuotenumerot AS ttt
+							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
+							JOIN tuote ON (tuote.yhtio = tt.yhtio AND tuote.tuoteno = tt.tuoteno)
+							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
+							AND (ttt.tuoteno = '{$tuoteno}' or ttt.viivakoodi = '{$tuoteno}')
+							AND (tuote.status NOT IN ('P','X') OR (SELECT SUM(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0) > 0)";
+				$chk_res = pupe_query($query);
+
+				if (mysql_num_rows($chk_res) != 0) {
+					$result = $chk_res;
+				}
+			}
 
 			if (mysql_num_rows($result) == 0) {
 				$varaosavirhe = t("VIRHE: Tiedolla ei löytynyt tuotetta")."!";
@@ -714,6 +730,36 @@
 			echo "</tr>";
 
 			echo "</table><br>";
+
+			if (count($ttrow) > 0) {
+				echo "<font class='message'>",t("Tuotteen toimittajan vaihtoehtoiset tuotenumerot"),"</font><hr />";
+
+				echo "<table>";
+				echo "<tr>";
+				echo "<th>",t("Toimittaja"),"</th>";
+				echo "<th>",t("Tuoteno"),"</th>";
+				echo "<th>",t("Viivakoodi"),"</th>";
+				echo "</tr>";
+
+				foreach ($ttrow as $tt_rivi) {
+					$query = "	SELECT ttt.*, TRIM(CONCAT(toimi.nimi, ' ', toimi.nimitark)) AS nimi
+								FROM tuotteen_toimittajat_tuotenumerot AS ttt
+								JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus AND tt.toim_tuoteno = '{$tt_rivi['toim_tuoteno']}')
+								JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
+								WHERE ttt.yhtio = '{$kukarow['yhtio']}'";
+					$chk_res = pupe_query($query);
+
+					while ($chk_row = mysql_fetch_assoc($chk_res)) {
+						echo "<tr>";
+						echo "<td>{$chk_row['nimi']}</td>";
+						echo "<td>{$chk_row['tuoteno']}</td>";
+						echo "<td>{$chk_row['viivakoodi']}</td>";
+						echo "</tr>";
+					}
+				}
+
+				echo "</table><br />";
+			}
 
 			// Onko liitetiedostoja
 			$liitteet = liite_popup("TN", $tuoterow["tunnus"]);

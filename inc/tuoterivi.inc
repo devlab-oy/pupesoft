@@ -48,12 +48,13 @@
 				$autom_wherelisa = "";
 
 				if (isset($kaatokoodi_tuotteen_tuotenumeron_alku) and trim($kaatokoodi_tuotteen_tuotenumeron_alku) != '') {
-					$autom_wherelisa = "AND tuoteno LIKE '{$kaatokoodi_tuotteen_tuotenumeron_alku}%'";
+					$autom_wherelisa = "AND tuote.tuoteno LIKE '{$kaatokoodi_tuotteen_tuotenumeron_alku}%'";
 				}
 
-				$query = "	SELECT MAX(CAST(tuoteno AS unsigned)) + 1 AS seuraava_tuoteno
+				$query = "	SELECT MAX(CAST(tuote.tuoteno AS unsigned)) + 1 AS seuraava_tuoteno
 							FROM tuote
-							WHERE yhtio = '{$kukarow['yhtio']}'
+							WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+							AND tuote.tuoteno REGEXP '[^0-9]' = 0
 							{$autom_wherelisa}";
 				$autom_tuoteno_res = pupe_query($query);
 				$autom_tuoteno_row = mysql_fetch_assoc($autom_tuoteno_res);

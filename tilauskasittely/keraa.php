@@ -2239,11 +2239,13 @@
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='kerayspvm'; document.forms['find'].submit();\">",t("Ker‰ysaika"),"</a><br>
 						<a href='#' onclick=\"getElementById('jarj').value='toimaika'; document.forms['find'].submit();\">",t("Toimitusaika"),"</a></th>";
 
-				echo "	<th valign='top'>
-							<a href='#' onclick=\"getElementById('jarj').value='keraaja_nimi'; document.forms['find'].submit();\">",t("Ker‰‰j‰n nimi"),"</a>
-							<br/>
-							<a href='#' onclick=\"getElementById('jarj').value='keraaja_nro'; document.forms['find'].submit();\">",t("Ker‰‰j‰n numero"),"</a>
-						</th>";
+				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+					echo "	<th valign='top'>
+								<a href='#' onclick=\"getElementById('jarj').value='keraaja_nimi'; document.forms['find'].submit();\">",t("Ker‰‰j‰n nimi"),"</a>
+								<br/>
+								<a href='#' onclick=\"getElementById('jarj').value='keraaja_nro'; document.forms['find'].submit();\">",t("Ker‰‰j‰n numero"),"</a>
+							</th>";
+				}
 
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">",t("Toimitustapa"),"</a></th>";
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">",t("Riv"),"</a></th>";
@@ -2310,7 +2312,10 @@
 						echo "<td valign='top' nowrap align='right'>",tv1dateconv($row["kerayspvm"], "", "LYHYT"),"<br />",tv1dateconv($row["toimaika"], "", "LYHYT"),"</td>";
 					}
 
-					echo "<td valign='top'>{$row['keraaja_nimi']}<br/>{$row['keraaja_nro']}</td>";
+					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+						echo "<td valign='top'>{$row['keraaja_nimi']}<br/>{$row['keraaja_nro']}</td>";
+					}
+
 					echo "<td valign='top'>{$row['toimitustapa']}</td>";
 					echo "<td valign='top'>{$row['riveja']}</td>";
 

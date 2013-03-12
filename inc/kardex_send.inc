@@ -60,9 +60,7 @@
 
 			$kardex_row['kpl'] = str_replace(".", ",", $kardex_row['kpl']);
 
-			$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr("{$tilriv_tiedot_row["hyllyalue"]}", $yhtiorow['varastontunniste']) : $tilriv_tiedot_row["hyllyalue"];
-
-			$hyllypaikka = "{$hyllyalue_value}-{$tilriv_tiedot_row['hyllypaikka']}";
+			$hyllypaikka = hyllyalue('', $tilriv_tiedot_row["hyllyalue"], 'riisuttu')."-{$tilriv_tiedot_row['hyllypaikka']}";
 
 			$sisalto .= "4;{$kardex_sscc_sisalto};{$tilriv_tiedot_row['tuoteno']};{$tilriv_tiedot_row['nimitys']};-{$kardex_row['kpl']};{$hyllypaikka};{$kardex_row['tunnus']}\r\n";
 		}

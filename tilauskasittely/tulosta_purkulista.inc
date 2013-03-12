@@ -357,7 +357,7 @@
 			// RIVI 1
 			$out .= sprintf('%-46.46s',	$row["tuoteno"]." ".$row["nimitys"]);
 			$out .= sprintf('%1s',		' ');
-			$out .= sprintf('%-23.23s',	hyllyalue('hyllyalue', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
+			$out .= sprintf('%-23.23s',	hyllyalue('', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
 			$out .= sprintf('%13.13s',	$varattu); // tilattu
 			$out .= sprintf('%16s',		' ');
 			$out .= sprintf('%-15.15s',	$row["tuoteno"]);
@@ -365,7 +365,7 @@
 
 			// RIVI 2
 			$out .= sprintf('%-99s',	$row["toim_tuoteno"]);
-			$out .= sprintf('%-15.15s',	hyllyalue('hyllyalue', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
+			$out .= sprintf('%-15.15s',	hyllyalue('', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
 			$out .= chr(10).chr(10).chr(13);
 		}
 
@@ -525,7 +525,7 @@
 
 			if ($mista == "vastaanota") {
 
-				$pdf->draw_text(315, $kala, hyllyalue('hyllyalue', $row['trhyllyalue'], 'riisuttu')." ".$row["trhyllynro"]." ".$row["trhyllyvali"]." ".$row["trhyllytaso"],		$firstpage, $p);
+				$pdf->draw_text(315, $kala, hyllyalue('', $row['trhyllyalue'], 'riisuttu')." ".$row["trhyllynro"]." ".$row["trhyllyvali"]." ".$row["trhyllytaso"],		$firstpage, $p);
 
 				if ($vainlistaus != '') {
 
@@ -587,17 +587,17 @@
 
 					$hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
 
-					$pdf->draw_text(475, $kala, hyllyalue('hyllyalue', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
+					$pdf->draw_text(475, $kala, hyllyalue('', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
 				}
 
 			}
 			else {
 
 				if ($yhtiorow['suuntalavat'] == 'S') {
-					$pdf->draw_text(440, $kala, hyllyalue('hyllyalue', $olesaldorow['hyllyalue'], 'riisuttu')." ".$olesaldorow["hyllynro"]." ".$olesaldorow["hyllyvali"]." ".$olesaldorow["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
+					$pdf->draw_text(440, $kala, hyllyalue('', $olesaldorow['hyllyalue'], 'riisuttu')." ".$olesaldorow["hyllynro"]." ".$olesaldorow["hyllyvali"]." ".$olesaldorow["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
 				}
 				else {
-					$pdf->draw_text(440, $kala, hyllyalue('hyllyalue', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
+					$pdf->draw_text(440, $kala, hyllyalue('', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
 				}
 			}
 

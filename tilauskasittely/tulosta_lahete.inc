@@ -3857,7 +3857,17 @@ if (!function_exists('kuittaus_lahete')) {
 	function kuittaus_lahete($params) {
 		global $kukarow, $yhtiorow;
 
-		if($yhtiorow['lahete_nouto_allekirjoitus'] == 'K') {
+		//katotaan onko laskutus nouto
+		$query = "  SELECT toimitustapa.nouto, maksuehto.kateinen
+					FROM lasku
+					JOIN toimitustapa ON lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite
+					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '{$params['laskurow']['tunnus']}'
+					and toimitustapa.nouto != '' and maksuehto.kateinen = ''";
+		$kures = pupe_query($query);
+
+		//toimitustapa on nouto ja lahete_allekirjoitus Tulostetaan erillinen allekirjoitussivu vain kun toimitustapa on nouto
+		if(mysql_num_rows($kures) > 0 and $yhtiorow['lahete_allekirjoitus'] == 'K') {
 			$params["sivu"]++;
 			$params["ei_otsikoita"] = "EI";
 
@@ -3876,7 +3886,8 @@ if (!function_exists('kuittaus_lahete')) {
 
 			return $return;
 		}
-		else {
+		//toimitustapa on nouto ja lahete_allekirjoitus Tulostetaan allekirjoitus samalle sivulle vain kun toimitustapa on nouto
+		elseif (mysql_num_rows($kures) > 0 and $yhtiorow['lahete_allekirjoitus'] == 'A') {
 			// Luodaan muuttujat
 			extract($params);
 
@@ -3887,6 +3898,42 @@ if (!function_exists('kuittaus_lahete')) {
 			$return = compact(array_keys($params));
 
 			return $return;
+		}
+		//toimitustavalla ei väliä lahete_allekirjoitus Tulostetaan erillinen allekirjoitussivu kaikilla toimitustavoilla
+		elseif($yhtiorow['lahete_allekirjoitus'] == 'E') {
+			$params["sivu"]++;
+			$params["ei_otsikoita"] = "EI";
+
+			$params = alku_lahete($params);
+
+			// Luodaan muuttujat
+			extract($params);
+
+			$page[$sivu] = $thispage;
+
+			$pdf->draw_text(50, 400, t("Allekirjoitus", $kieli).": _______________________________", 	$thispage, $norm);
+			$pdf->draw_text(300, 400, t("Nimenselvennys", $kieli).": _______________________________", 	$thispage, $norm);
+
+			// Luodaan palautettavat
+			$return = compact(array_keys($params));
+
+			return $return;
+		}
+		//toimitustavalla ei väliä lahete_allekirjoitus Tulostetaan allekirjoitussivu samalle sivulle kaikilla toimitustavoilla
+		elseif($yhtiorow['lahete_allekirjoitus'] == 'S')  {
+			// Luodaan muuttujat
+			extract($params);
+
+			$pdf->draw_text(50, 90, t("Allekirjoitus", $kieli).": _______________________________", 	$thispage, $norm);
+			$pdf->draw_text(300, 90, t("Nimenselvennys", $kieli).": _______________________________", 	$thispage, $norm);
+
+			// Luodaan palautettavat
+			$return = compact(array_keys($params));
+
+			return $return;
+		}
+		else {
+			return $params;
 		}
 	}
 }

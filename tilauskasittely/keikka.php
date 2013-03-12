@@ -749,6 +749,8 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			'liitetty_lasku_rivitok_kohdistus_eiok' => '',
 			'liitetty_lasku_rivitok_kohdistus_ok' => '',
 		);
+
+		$lisarajaus = 'riveja_viematta_varastoon';
 	}
 
 	echo "<td><select name='lisarajaus' ",js_alasvetoMaxWidth('lisarajaus', 250),">";

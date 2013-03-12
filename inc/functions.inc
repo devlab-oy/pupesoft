@@ -17395,16 +17395,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		$params_lahete["tots"] = 1;
 		$params_lahete = loppu_lahete($params_lahete);
 
-		//katotaan onko laskutus nouto
-		$query = "  SELECT toimitustapa.nouto, maksuehto.kateinen
-					FROM lasku
-					JOIN toimitustapa ON lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite
-					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$laskurow[tunnus]'
-					and toimitustapa.nouto != '' and maksuehto.kateinen = ''";
-		$kures = pupe_query($query);
-
-		if (mysql_num_rows($kures) > 0 and $yhtiorow["lahete_nouto_allekirjoitus"] != "") {
+		if($yhtiorow["lahete_allekirjoitus"] != "") {
 			$params_lahete = kuittaus_lahete($params_lahete);
 		}
 

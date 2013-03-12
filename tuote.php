@@ -732,14 +732,8 @@
 			echo "</table><br>";
 
 			if (count($ttrow) > 0) {
-				echo "<font class='message'>",t("Tuotteen toimittajan vaihtoehtoiset tuotenumerot"),"</font><hr />";
 
-				echo "<table>";
-				echo "<tr>";
-				echo "<th>",t("Toimittaja"),"</th>";
-				echo "<th>",t("Tuoteno"),"</th>";
-				echo "<th>",t("Viivakoodi"),"</th>";
-				echo "</tr>";
+				$otsikot = FALSE;
 
 				foreach ($ttrow as $tt_rivi) {
 					$query = "	SELECT ttt.*, TRIM(CONCAT(toimi.nimi, ' ', toimi.nimitark)) AS nimi
@@ -748,6 +742,18 @@
 								JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
 								WHERE ttt.yhtio = '{$kukarow['yhtio']}'";
 					$chk_res = pupe_query($query);
+
+					if (mysql_num_rows($chk_res) > 0 and !$otsikot) {
+						echo "<font class='message'>",t("Tuotteen toimittajan vaihtoehtoiset tuotenumerot"),"</font><hr />";
+						echo "<table>";
+						echo "<tr>";
+						echo "<th>",t("Toimittaja"),"</th>";
+						echo "<th>",t("Tuoteno"),"</th>";
+						echo "<th>",t("Viivakoodi"),"</th>";
+						echo "</tr>";
+
+						$otsikot = TRUE;
+					}
 
 					while ($chk_row = mysql_fetch_assoc($chk_res)) {
 						echo "<tr>";
@@ -758,7 +764,7 @@
 					}
 				}
 
-				echo "</table><br />";
+				if ($otsikot) echo "</table><br />";
 			}
 
 			// Onko liitetiedostoja

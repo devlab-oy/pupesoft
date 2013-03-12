@@ -9,24 +9,12 @@
 		$tyyppi = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "varasto") {
-		$ulos = "<td><select name='{$nimi}'>";
+	if (mysql_field_name($result, $i) == "hyllyalue") {
+		$ulos = "<td>";
 
-		$query = "	SELECT *
-					FROM varastopaikat
-					WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
-					ORDER BY tyyppi, nimitys";
-		$varasto_res = mysql_query($query) or pupe_error($query);
+		$ulos .= hyllyalue($nimi, $trow[$i]);
 
-		while ($varasto_row = mysql_fetch_assoc($varasto_res)) {
-
-			$sel = $varasto_row['tunnus'] == $trow[$i] ? ' selected' : '';
-
-			$ulos .= "<option value='{$varasto_row['tunnus']}'{$sel}>{$varasto_row['nimitys']}</option>";
-		}
-
-		$ulos .= "</select></td>";
-
+		$ulos .= "</td>";
 		$jatko = 0;
 	}
 

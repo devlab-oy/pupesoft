@@ -217,6 +217,11 @@
 					$pdf->draw_text(62, $kala2, $tilausnumero, $firstpage, $kirj);
 					$kala2 -= 10;
 				}
+
+				// Lisäkommentti jälkivaatimuksesta seuraavalle riville
+				if ($laskurow['jv'] != '') {
+					$pdf->draw_text(62, $kala2-10, t("Jälkivaatimus"), $firstpage, $kirj);
+				}
 			}
 
 			// summataan kaikki painot yhteen
@@ -294,10 +299,12 @@
 					ytunnus,
 					liitostunnus,
 					max(toimitustavan_lahto) toimitustavan_lahto,
-					group_concat(tunnus) tunnus
+					group_concat(lasku.tunnus) tunnus,
+					max(maksuehto.jv) jv
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND tunnus in ($otunnukset)
+					LEFT JOIN maksuehto on (lasku.yhtio=maksuehto.yhtio AND lasku.maksuehto=maksuehto.tunnus)
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND lasku.tunnus in ($otunnukset)
 					GROUP BY nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, ytunnus, liitostunnus
 					ORDER BY ytunnus, liitostunnus, tunnus";
 	}

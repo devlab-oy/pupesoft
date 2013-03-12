@@ -1772,20 +1772,34 @@
 			$eiket = '';
 			$sisah = '';
 			$osath = '';
+			$osath1 = '';
+			$osath2 = '';
 			$laskkielto = '';
 			$jtki = "";
 			$rahtivapaa_chk = '';
-			$heti_toimitukseen = '';
 
 			if ($srow['eilahetetta'] != '') $eilah          = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
 			if ($srow['chn'] == '999')      $laskkielto     = 'CHECKED';
-			if ($srow['heti_toimitukseen'] != '') $heti_toimitukseen = 'CHECKED';
 
 			// Tarjouksia ei oletuksena osatoimiteta
-			if ($srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) $osath = 'CHECKED';
+			if ($srow['osatoimitus'] == 'o' or ((in_array($toim, array("TARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) {
+				$osath = 'selected="SELECTED"';
+				$osath1 = '';
+				$osath2 = '';
+			}
+			elseif($srow['osatoimitus'] == 'e') {
+				$osath = '';
+				$osath1 = '';
+				$osath2 = 'selected="SELECTED"';
+			}
+			else {
+				$osath = '';
+				$osath1 = 'selected="SELECTED"';
+				$osath2 = '';
+			}
 
 			// Pit‰‰ olla myyntitilaus ja k‰ytt‰j‰ll‰ oikeus laskuttaa tilaus
 			if (($toim == "PIKATILAUS" or $toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim =="REKLAMAATIO") and (tarkista_oikeus("valitse_laskutettavat_tilaukset.php") or
@@ -1922,7 +1936,14 @@
 			}
 
 			if ($toim != "MYYNTITILI") {
-				echo "<td>".t("Tilausta ei osatoimiteta").":</td><td><input type='checkbox' name='osatoimitus' $osath></td>";
+				echo "<td>".t("Osatoimitus").":</td>";
+				echo "<td>";
+				echo "<select name='osatoimitus'>";
+				echo "<option value='' $osath1>".t("Voidaan osatoimittaa")."</option>";
+				echo "<option value='o' $osath>".t("Ei osatoimiteta")."</option>";
+				echo "<option value='e' $osath2>".t("Ei osatoimiteta").'. '.t("Tilaus toimitetaan automaattisesti kun kaikkia tuotteita on varastossa")."</option>";
+				echo "</select>";
+				echo "</td>";
 			}
 			else {
 				echo "<td></td><td></td>";
@@ -2016,13 +2037,6 @@
 			if ($yhtiorow['laskutuskielto'] != 0 and $toim != "MYYNTITILI") {
 				echo "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
 			}
-			echo "</tr>";
-
-			echo "<tr>";
-			echo "<td>".t("Ei osatoimitusta. Koko tilaus toimitetaan heti kun kaikkia tuotteita saatavilla")."</td>";
-			echo "<td><input type='checkbox' name='heti_toimitukseen' $heti_toimitukseen></td>";
-			echo "<td></td>";
-			echo "<td></td>";
 			echo "</tr>";
 
 			if ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") {
@@ -3145,7 +3159,6 @@
 					jakelu 								= '$jakelu',
 					jaksotettu							= '$jaksotettu',
 					jtkielto							= '$jtkielto',
-					heti_toimitukseen					= '$heti_toimitukseen',
 					kassalipas							= '$kassalipas',
 					kauppatapahtuman_luonne				= '$kauppatapahtuman_luonne',
 					kerayspvm 							= '$kervv-$kerkk-$kerpp',

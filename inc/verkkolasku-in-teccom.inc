@@ -497,11 +497,13 @@
 								$osto_rivi_kulu_alv = $laskun_alv;
 
 								// ZF -keississä otetaan rahti pois rivihinnasta.
-								if ($charge_code == 'freightcharges') {
+								// Bosch -keississä ($charge_description == 'freight charges') otetaan myös rahti pois rivihinnasta
+								if ($charge_code == 'freightcharges' or $charge_description == 'freight charges') {
 									$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node->Amount);
 								}
 
-								if ($charge_description == 'freight costs' or $charge_description == 'freight charges' or $charge_code == 'freightcharges') {
+								// Bosch -keissit
+								if ($charge_description == 'freight costs' or $charge_code == 'freightcharges' or $charge_description == 'freight charges') {
 									$ei_oteta_kulua_pois = true;
 								}
 							}

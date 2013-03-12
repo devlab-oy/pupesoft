@@ -300,13 +300,12 @@ else {
 		}
 
 		if (!$voiko_toimittaa) {
-			$toimpvm = date('Y-m-d', strtotime('now + 1 month'));
 			$query = "	UPDATE lasku
 						SET tila = 'N',
-						alatila = 'U',
-						toimaika = '{$toimpvm}'
+						alatila  = 'U',
+						toimaika = DATE_ADD(current_date, INTERVAL 1 MONTH)
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$laskurow['tunnus']}'";
+						AND tunnus  = '{$laskurow['tunnus']}'";
 			pupe_query($query);
 		}
 	}
@@ -328,6 +327,7 @@ else {
 			//Muutetaan tulostettavaksi
 			$query = "UPDATE lasku SET alatila = '' where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
 			$result = pupe_query($query);
+			
 			$laskurow["alatila"] = "";
 		}
 	}

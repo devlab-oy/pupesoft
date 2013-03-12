@@ -1632,8 +1632,13 @@
 											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen").". (".t("Tuotetta ei riittänyt kaikille JT-riveille").")</font><br>";
 										}
 
-										// Pomitaan tämä rivi/perhe
-										$loput[$tunnukset] 	= "KAIKKI";
+										if(!empty($onko_suoratoimi)) {
+											$loput[$tunnukset] 	= "VAKISIN";
+										}
+										else {
+											$loput[$tunnukset] 	= "KAIKKI";
+										}
+										
 										$kpl[$tunnukset] 	= 0;
 										$tunnusarray 		= explode(',', $tunnukset);
 

@@ -220,7 +220,8 @@
 
 				// Lisäkommentti jälkivaatimuksesta seuraavalle riville
 				if ($laskurow['jv'] != '') {
-					$pdf->draw_text(62, $kala2-10, t("Jälkivaatimus"), $firstpage, $kirj);
+					$pdf->draw_text(62, $kala2, t("Jälkivaatimus"), $firstpage, $kirj);
+					$kala2 -= 10;
 				}
 			}
 

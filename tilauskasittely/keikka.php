@@ -441,7 +441,7 @@ if ($toiminto == "kululaskut") {
 }
 
 if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' and trim($suuntalavan_tunnus) != '' and trim($koko_suuntalava) == 'X') {
-	if ((isset($suuntalavan_hyllyalue) and trim($suuntalavan_hyllyalue) == '') or (isset($suuntalavan_hyllypaikka) and trim($suuntalavan_hyllypaikka) == '')) {
+	if ((isset($suuntalavanhyllyalue) and trim($suuntalavanhyllyalue) == '') or (isset($suuntalavan_hyllypaikka) and trim($suuntalavan_hyllypaikka) == '')) {
 		echo "<font class='error'>",t("Hyllyalue oli tyhjä"),"!</font><br />";
 		$toiminto = 'suuntalavat';
 		$tee = 'vie_koko_suuntalava';
@@ -450,17 +450,17 @@ if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' a
 		$vietiinko_koko_suuntalava = '';
 
 		if (trim($suuntalavan_hyllypaikka) != '') {
-			list($suuntalavan_hyllyalue, $suuntalavan_hyllynro, $suuntalavan_hyllyvali, $suuntalavan_hyllytaso) = explode("#", $suuntalavan_hyllypaikka);
+			list($suuntalavanhyllyalue, $suuntalavan_hyllynro, $suuntalavan_hyllyvali, $suuntalavan_hyllytaso) = explode("#", $suuntalavan_hyllypaikka);
 		}
 
-		$suuntalavan_hyllyalue = mysql_real_escape_string($suuntalavan_hyllyalue);
+		$suuntalavanhyllyalue = mysql_real_escape_string($suuntalavanhyllyalue);
 		$suuntalavan_hyllynro  = mysql_real_escape_string($suuntalavan_hyllynro);
 		$suuntalavan_hyllyvali = mysql_real_escape_string($suuntalavan_hyllyvali);
 		$suuntalavan_hyllytaso = mysql_real_escape_string($suuntalavan_hyllytaso);
 
 		# Koko suuntalava voidaan viedä vain reservipaikalle, jossa ei ole tuotteita.
 		$options = array('reservipaikka' => 'K');
-		$hyllypaikka_ok = tarkista_varaston_hyllypaikka($suuntalavan_hyllyalue, $suuntalavan_hyllynro, $suuntalavan_hyllyvali, $suuntalavan_hyllytaso, $options);
+		$hyllypaikka_ok = tarkista_varaston_hyllypaikka($suuntalavanhyllyalue, $suuntalavan_hyllynro, $suuntalavan_hyllyvali, $suuntalavan_hyllytaso, $options);
 
 		# Hyllypaikkaa ei löydy tai se ei ole reservipaikka
 		if (!$hyllypaikka_ok) {
@@ -473,13 +473,13 @@ if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' a
 		else {
 			# OK, päivitetään tilausrivien hyllypaikat
 			$paivitetyt_rivit = paivita_hyllypaikat($suuntalavan_tunnus,
-													$suuntalavan_hyllyalue,
+													$suuntalavanhyllyalue,
 													$suuntalavan_hyllynro,
 													$suuntalavan_hyllyvali,
 													$suuntalavan_hyllytaso);
 
 			if ($paivitetyt_rivit > 0) {
-				echo "<br />",t("Päivitettiin suuntalavan tuotteet paikalle")," {$suuntalavan_hyllyalue} {$suuntalavan_hyllynro} {$suuntalavan_hyllyvali} {$suuntalavan_hyllytaso}<br />";
+				echo "<br />",t("Päivitettiin suuntalavan tuotteet paikalle")," {$suuntalavanhyllyalue} {$suuntalavan_hyllynro} {$suuntalavan_hyllyvali} {$suuntalavan_hyllytaso}<br />";
 				$vietiinko_koko_suuntalava = 'joo';
 			}
 		}

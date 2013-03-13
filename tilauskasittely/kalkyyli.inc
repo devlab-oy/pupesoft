@@ -96,7 +96,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 				echo "<input type='hidden' name='suuntalavan_hyllypaikka' value='{$suuntalavan_hyllypaikka}' />";
 			}
 			else {
-				echo "<input type='hidden' name='suuntalavan_hyllyalue' value='{$suuntalavan_hyllyalue}' />";
+				echo "<input type='hidden' name='suuntalavanhyllyalue' value='{$suuntalavanhyllyalue}' />";
 				echo "<input type='hidden' name='suuntalavan_hyllynro' value='{$suuntalavan_hyllynro}' />";
 				echo "<input type='hidden' name='suuntalavan_hyllyvali' value='{$suuntalavan_hyllyvali}' />";
 				echo "<input type='hidden' name='suuntalavan_hyllytaso' value='{$suuntalavan_hyllytaso}' />";
@@ -144,7 +144,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 				echo "<input type='hidden' name='suuntalavan_hyllypaikka' value='{$suuntalavan_hyllypaikka}' />";
 			}
 			else {
-				echo "<input type='hidden' name='suuntalavan_hyllyalue' value='{$suuntalavan_hyllyalue}' />";
+				echo "<input type='hidden' name='suuntalavanhyllyalue' value='{$suuntalavanhyllyalue}' />";
 				echo "<input type='hidden' name='suuntalavan_hyllynro' value='{$suuntalavan_hyllynro}' />";
 				echo "<input type='hidden' name='suuntalavan_hyllyvali' value='{$suuntalavan_hyllyvali}' />";
 				echo "<input type='hidden' name='suuntalavan_hyllytaso' value='{$suuntalavan_hyllytaso}' />";

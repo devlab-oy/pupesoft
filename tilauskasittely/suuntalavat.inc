@@ -571,7 +571,7 @@
 
 		echo "<table><tr>";
 		echo "<th>",t("Syötä suuntalavalle hyllypaikka"),"</th>";
-		echo "<td>",hyllyalue("suuntalavan_hyllyalue", '')," <input type='text' name='suuntalavan_hyllynro' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavan_hyllyvali' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavan_hyllytaso' size='6' maxlength='5' value='' /></td>";
+		echo "<td>",hyllyalue("suuntalavanhyllyalue", '')," <input type='text' name='suuntalavan_hyllynro' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavan_hyllyvali' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavan_hyllytaso' size='6' maxlength='5' value='' /></td>";
 		echo "</tr></table>";
 
 		echo "<input type='submit' value='",t("Vie koko suuntalava varastoon"),"' />";

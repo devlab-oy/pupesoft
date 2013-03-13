@@ -145,7 +145,7 @@
 
 		$laskuri = 0;
 
-		// Merkit‰‰n rivit mit‰tˆidyksi joiden otsikot on mit‰tˆity (ei mit‰tˆid‰ puuterivej‰, eik‰ suoraan keikkaan lis‰ttyj‰ ostorivej‰ lasku.alatila!='K')
+		// Merkit‰‰n rivit mit‰tˆidyksi joiden otsikot on mit‰tˆity (ei mit‰tˆid‰ puuterivej‰, eik‰ suoraan saapumiseen lis‰ttyj‰ ostorivej‰ lasku.alatila!='K')
 		$query = "	SELECT lasku.tunnus laskutunnus
 					from lasku
 					join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'P'
@@ -426,27 +426,27 @@
 					and o2.tunnus is null";
 		$result = mysql_query($query) or pupe_error($query);
 
-		/*
+
 		// Merkataan myyntitilit valmiiksi, jos niill‰ ei ole yht‰‰n k‰sittelem‰ttˆmi‰ rivej‰
-		$query = "	SELECT lasku.tunnus, sum(tilausrivi.kpl) kpl
+		$query = "	SELECT lasku.tunnus,
+					sum(if(tilausrivi.kpl != 0, 1, 0)) ei_valmis
 					FROM lasku
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
-						AND tilausrivi.otunnus = lasku.tunnus
-						AND tilausrivi.tyyppi != 'D')
-					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-					AND lasku.tila = 'G'
-					AND lasku.tilaustyyppi = 'M'
-					AND lasku.alatila != 'X'
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila = 'G'
+					and lasku.tilaustyyppi = 'M'
+					and lasku.alatila = 'V'
 					GROUP BY lasku.tunnus
-					HAVING kpl = 0";
+					HAVING ei_valmis = 0";
 		$result = pupe_query($query);
 
 		$myyntitili = 0;
+
 		while ($laskurow = mysql_fetch_assoc($result)) {
 			$query = "	UPDATE lasku
 						SET alatila = 'X'
 						WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-						AND lasku.tunnus = '{$laskurow["tunnus"]}'";
+						AND lasku.tunnus  = '{$laskurow["tunnus"]}'";
 			$update_result = pupe_query($query);
 			$myyntitili++;
 		}
@@ -454,7 +454,6 @@
 		if ($myyntitili > 0) {
 			$iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $myyntitili myyntitili‰ valmiiksi.\n";
 		}
-		*/
 
 		// Poistetaan kaikki myyntitili-varastopaikat, jos niiden saldo on nolla
 		$query = "	SELECT tunnus, tuoteno
@@ -466,6 +465,7 @@
 		$iltatuotepaikatresult = pupe_query($query);
 
 		$myyntitili = 0;
+
 		while ($iltatuotepaikatrow = mysql_fetch_assoc($iltatuotepaikatresult)) {
 			$tee = "MUUTA";
 			$tuoteno = $iltatuotepaikatrow["tuoteno"];
@@ -496,40 +496,43 @@
 			}
 		}
 
-		# Poistetaan tyhj‰t tuotepaikat joiden saldo on 0 ja tyyppi on 'S'
-		$query = "SELECT *
-					FROM tuotepaikat
-					WHERE yhtio='{$kukarow['yhtio']}'
-					AND saldo=0
-					AND tyyppi='S'
-					AND inventointilista_aika='0000-00-00 00:00:00'";
-		$tuotepaikat = pupe_query($query);
+		# Poistetaan tuotepaikat joiden saldo on 0 ja ne on m‰‰ritelty reservipaikoiksi (ei kuitenkaan oletuspaikkaa)
+		if ($yhtiorow['kerayserat'] == 'K') {
+			$query = "	SELECT tuotepaikat.*
+						FROM tuotepaikat
+						JOIN varaston_hyllypaikat ON (varaston_hyllypaikat.yhtio = tuotepaikat.yhtio AND varaston_hyllypaikat.hyllyalue = tuotepaikat.hyllyalue AND varaston_hyllypaikat.hyllynro = tuotepaikat.hyllynro AND varaston_hyllypaikat.hyllyvali = tuotepaikat.hyllyvali AND varaston_hyllypaikat.hyllytaso = tuotepaikat.hyllytaso AND varaston_hyllypaikat.reservipaikka = 'K')
+						WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
+						AND tuotepaikat.saldo=0
+						AND tuotepaikat.oletus = ''
+						AND tuotepaikat.inventointilista_aika='0000-00-00 00:00:00'";
+			$tuotepaikat = pupe_query($query);
 
-		# Poistetaan lˆydetyt rivit ja tehd‰‰n tapahtuma
-		while($tuotepaikkarow = mysql_fetch_assoc($tuotepaikat)) {
-			# Poistetaan paikka
-			$query = "DELETE FROM tuotepaikat
-						WHERE yhtio='{$kukarow['yhtio']}'
-						AND tunnus='{$tuotepaikkarow['tunnus']}'
-						AND saldo=0";
-			$tuotepaikat_siivo_result = pupe_query($query);
+			# Poistetaan lˆydetyt rivit ja tehd‰‰n tapahtuma
+			while($tuotepaikkarow = mysql_fetch_assoc($tuotepaikat)) {
+				# Poistetaan paikka
+				$query = "	DELETE FROM tuotepaikat
+							WHERE yhtio='{$kukarow['yhtio']}'
+							AND tunnus='{$tuotepaikkarow['tunnus']}'
+							AND saldo=0";
+				$tuotepaikat_siivo_result = pupe_query($query);
 
-			# Tehd‰‰n tapahtuma
-			$query = "INSERT INTO tapahtuma SET
-						yhtio 		= '$kukarow[yhtio]',
-						tuoteno 	= '$tuotepaikkarow[tuoteno]',
-						kpl			= '0',
-						kplhinta	= '0',
-						hinta		= '0',
-						hyllyalue	= '$tuotepaikkarow[hyllyalue]',
-						hyllynro	= '$tuotepaikkarow[hyllynro]',
-						hyllyvali	= '$tuotepaikkarow[hyllyvali]',
-						hyllytaso	= '$tuotepaikkarow[hyllytaso]',
-						laji		= 'poistettupaikka',
-						selite		= '".t("Poistettiin tuotepaikka")." $tuotepaikkarow[hyllyalue] $tuotepaikkarow[hyllynro] $tuotepaikkarow[hyllyvali] $tuotepaikkarow[hyllytaso]',
-						laatija		= '$kukarow[kuka]',
-						laadittu	= now()";
-			$tapahtuma_result = pupe_query($query);
+				# Tehd‰‰n tapahtuma
+				$query = "	INSERT INTO tapahtuma SET
+							yhtio 		= '$kukarow[yhtio]',
+							tuoteno 	= '$tuotepaikkarow[tuoteno]',
+							kpl			= '0',
+							kplhinta	= '0',
+							hinta		= '0',
+							hyllyalue	= '$tuotepaikkarow[hyllyalue]',
+							hyllynro	= '$tuotepaikkarow[hyllynro]',
+							hyllyvali	= '$tuotepaikkarow[hyllyvali]',
+							hyllytaso	= '$tuotepaikkarow[hyllytaso]',
+							laji		= 'poistettupaikka',
+							selite		= '".t("Poistettiin tuotepaikka")." $tuotepaikkarow[hyllyalue] $tuotepaikkarow[hyllynro] $tuotepaikkarow[hyllyvali] $tuotepaikkarow[hyllytaso]',
+							laatija		= '$kukarow[kuka]',
+							laadittu	= now()";
+				$tapahtuma_result = pupe_query($query);
+			}
 		}
 	}
 

@@ -126,6 +126,35 @@ if (!function_exists("kopioi_tilaus")) {
 			$kysely = "INSERT into tilausrivi ($rfields) VALUES ($rvalues)";
 			$insres = pupe_query($kysely);
 			$insid  = mysql_insert_id();
+
+			// Kopioidaan tilausrivin lisatiedot
+			$query = "	SELECT *
+						FROM tilausrivin_lisatiedot
+						WHERE tilausrivitunnus = '$rivirow[tunnus]' and yhtio = '$kukarow[yhtio]'";
+			$monistares2 = pupe_query($query);
+
+			if (mysql_num_rows($monistares2) > 0) {
+				$monistarow2 = mysql_fetch_array($monistares2);
+
+				$kysely = "	INSERT INTO tilausrivin_lisatiedot SET ";
+
+				for($i=0; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
+					switch (mysql_field_name($monistares2,$i)) {
+
+						case 'tilausrivitunnus':
+							$kysely .= mysql_field_name($monistares2, $i)."='$insid',";
+						case 'tiliointirivitunnus':
+						case 'tilausrivilinkki':
+							$kysely .= "";
+							break;
+						default:
+							$kysely .= mysql_field_name($monistares2, $i)."='".$monistarow2[$i]."',";
+					}
+				}
+
+				$kysely  = substr($kysely, 0, -1);
+				pupe_query($kysely);
+			}
 		}
 
 		//Korjataan perheid:t uusilla riveillä

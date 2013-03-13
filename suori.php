@@ -514,7 +514,7 @@
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0)
-				 echo "<font class='message'>".t("Summalla ei löytynyt laskua")." $tiliotesumma</font><br>";
+				 echo "<font class='error'><br>".t("HUOM: Summalla ei löytynyt laskua")." $tiliotesumma!</font><br><br>";
 			else
 				$summahakuok=1;
 		}

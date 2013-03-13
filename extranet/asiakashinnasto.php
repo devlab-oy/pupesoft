@@ -140,7 +140,8 @@
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						and tuote.status NOT IN ('P','X')
-						and hinnastoon != 'E'
+						and tuote.tuotetyyppi NOT IN ('A', 'B')
+						and tuote.hinnastoon != 'E'
 						$kieltolisa
 						$lisa
 						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";

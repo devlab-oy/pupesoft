@@ -14,9 +14,62 @@ if(!isset($errors)) $errors = array();
 # Joku parametri tarvii olla setattu.
 if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 
-	if ($viivakoodi != '') 	$params[] = "tuote.eankoodi = '{$viivakoodi}'";
-	if ($tuotenumero != '') $params[] = "tilausrivi.tuoteno = '{$tuotenumero}'";
-	if ($ostotilaus != '') 	$params[] = "tilausrivi.otunnus = '{$ostotilaus}'";
+	if ($viivakoodi != '') 	$params['viivakoodi'] = "tuote.eankoodi = '{$viivakoodi}'";
+	if ($tuotenumero != '') $params['tuoteno'] = "tilausrivi.tuoteno = '{$tuotenumero}'";
+	if ($ostotilaus != '') 	$params['otunnus'] = "tilausrivi.otunnus = '{$ostotilaus}'";
+
+	// Viivakoodi case
+	if ($viivakoodi != '') {
+
+		// Tuotetaulu-loop
+		$query = "	SELECT *
+					FROM tuote
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND eankoodi = '{$viivakoodi}'";
+		$chk_res = pupe_query($query);
+
+		if (mysql_num_rows($chk_res) == 0) {
+
+			// tuotteen toimittajat loop
+			$query = "	SELECT *
+						FROM tuotteen_toimittajat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND viivakoodi = '{$viivakoodi}'";
+			$chk_res = pupe_query($query);
+
+			if (mysql_num_rows($chk_res) == 0) {
+
+				// tuotteen toimittajat tuotenumerot loop
+				$query = "	SELECT tt.*
+							FROM tuotteen_toimittajat_tuotenumerot AS ttt
+							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
+							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
+							AND ttt.viivakoodi = '{$viivakoodi}'";
+				$chk_res = pupe_query($query);
+
+				if (mysql_num_rows($chk_res) != 0) {
+					$chk_row = mysql_fetch_assoc($chk_res);
+				}
+			}
+			else {
+				$chk_row = mysql_fetch_assoc($chk_res);
+			}
+
+			if (mysql_num_rows($chk_res) != 0) {
+
+				$query = "	SELECT tuote.eankoodi
+							FROM tuotteen_toimittajat
+							JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+							WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+							AND tuotteen_toimittajat.liitostunnus = '{$chk_row['liitostunnus']}'
+							AND tuotteen_toimittajat.toim_tuoteno = '{$chk_row['toim_tuoteno']}'";
+				$eankoodi_chk_res = pupe_query($query);
+				$eankoodi_chk_row = mysql_fetch_assoc($eankoodi_chk_res);
+
+				$params['viivakoodi'] = "tuote.eankoodi = '{$eankoodi_chk_row['eankoodi']}'";
+			}
+		}
+	}
 
 	$query_lisa = implode($params, " AND ");
 

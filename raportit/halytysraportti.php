@@ -651,6 +651,7 @@
 							WHERE tuote.$yhtiot
 							$lisaa
 							and tuote.ei_saldoa = ''
+							and tuote.tuotetyyppi NOT IN ('A', 'B')
 							ORDER BY id, tuote.tuoteno";
 			}
 			//Ajetaan raportti tuotteittain, varastopaikoittain
@@ -701,6 +702,7 @@
 							WHERE tuote.$yhtiot
 							$lisaa
 							and tuote.ei_saldoa = ''
+							and tuote.tuotetyyppi NOT IN ('A', 'B')
 							$varastot
 							order by id, tuote.tuoteno, varastopaikka";
 			}

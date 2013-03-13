@@ -100,10 +100,7 @@
 			$perhearray = array();
 			$tuoteno 	= strtoupper($tuoteno);
 
-			if (in_array($tuoteno, $isat_array)) {
-				//echo "FUULI! TEET IKUISEN LUUPIN!!!!!!!!<br>";
-			}
-			else {
+			if (!in_array($tuoteno, $isat_array)) {
 				$isat_array[] = $tuoteno;
 
 				// Haetaan tuoteperheen lapset ja lisätään ne $isa_array arrayseen
@@ -120,12 +117,12 @@
 				while ($perherow = mysql_fetch_assoc($perheresult)) {
 					$perherow["tuoteno"] = strtoupper($perherow["tuoteno"]);
 
-					$kaikki_array[]		= $perherow["tuoteno"]; // lisätään tuoteno arrayseen
-					$kerroin_array[]	= $tuoteno."#!¡!#".$perherow["kerroin"];
+					$kaikki_array[]		  = $perherow["tuoteno"]; // lisätään tuoteno arrayseen
+					$kerroin_array[]	  = $tuoteno."#!¡!#".$perherow["kerroin"];
 					$ohita_kerays_array[] = $perherow['ohita_kerays'];
 
 					$mikaisa = $perherow["tuoteno"];
-					$tmp_kaikki_array = $kaikki_array;
+					$tmp_kaikki_array  = $kaikki_array;
 					$tmp_kerroin_array = $kerroin_array;
 
 					krsort($tmp_kaikki_array);
@@ -306,6 +303,7 @@
 	}
 	elseif ($laskurow["tila"] == 'V' and $perheid2 == -100) {
 		$rivityyppi = 'W';	// Valmistustilausrivi (Valmiste)
+		$perheid2 = 0;
 	}
 	elseif ($laskurow["tila"] == 'V') {
 		$rivityyppi = 'V';	// Valmistustilausrivi
@@ -326,7 +324,7 @@
 		$rivityyppi = 'L'; // Myyntitilausrivi
 	}
 
-	if ($kpl > 0 and (($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') or $trow['minimi_era'] > 0) and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'EXTRANET' or ($kutsuja == "EDITILAUS" and $edi_tyyppi != "magento"))) {
+	if ($kpl > 0 and (($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') or $trow['minimi_era'] > 0) and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'ENNAKKO' or $toim == 'EXTRANET' or ($kutsuja == "EDITILAUS" and $edi_tyyppi != "magento"))) {
 		$org_kpl = $kpl;
 
 		if ($kpl < $trow['minimi_era']) {
@@ -679,7 +677,7 @@
 				}
 
 				// Käydään läpi tuotepaikat
-				if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and ($paikka != "EIERAAVIELA#!¡!#EIEI")) {
+				if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and $paikka != "EIERAAVIELA#!¡!#EIEI" AND $rivityyppi != 'W' AND ($laskurow["tila"] != 'V' or $paikka != "")) {
 					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								sarjanumeroseuranta.sarjanumero era,
@@ -991,7 +989,7 @@
 				$muu_maa = array();
 
 				foreach ($zzrow as $zzrow_rivi) {
-					// jos löydetään varasto toimitusoosoitteen maasta, käytetään sitä eka
+					// jos löydetään varasto toimitusosoitteen maasta, käytetään sitä eka
 					if ($laskurow["toim_maa"] == $zzrow_rivi["varastomaa"] and $laskurow["toim_maa"] != "" and $zzrow_rivi["varastomaa"] != "") {
 						$oma_maa[] = $zzrow_rivi;
 					}
@@ -1250,11 +1248,11 @@
 
 						if (count($tuoteperhe) > 0) {
 
-							$riikoko 		= 1;
-							$isat_array 	= array();
-							$kaikki_array 	= array($tuoteno);
-							$kerroin_array 	= array($tuoteno."#!¡!#1");
-							$perhearray 	= array();
+							$riikoko 			= 1;
+							$isat_array 		= array();
+							$kaikki_array 		= array($tuoteno);
+							$kerroin_array 		= array($tuoteno."#!¡!#1");
+							$perhearray 		= array();
 							$ohita_kerays_array = array();
 
 							for ($isa = 0; $isa < $riikoko; $isa++) {
@@ -1557,11 +1555,11 @@
 									$query = "	UPDATE tilausrivin_lisatiedot
 												SET
 												positio = if (positio = '', '$trivtyrow[selite]', positio),
-												toimittajan_tunnus	= '$toimittajan_tunnus',
-												muutospvm			= now(),
-												muuttaja			= '$kukarow[kuka]',
-												erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]',
-												ohita_kerays = '{$myy_ohita_kerays[$indeksi]}'
+												toimittajan_tunnus		= '$toimittajan_tunnus',
+												muutospvm				= now(),
+												muuttaja				= '$kukarow[kuka]',
+												erikoistoimitus_myynti	= '$myy_erikoistoimitus[$indeksi]',
+												ohita_kerays 			= '{$myy_ohita_kerays[$indeksi]}'
 												{$tlisatied_lisa}
 												{$tlisatied_lisa2}
 												WHERE yhtio			 = '$kukarow[yhtio]'
@@ -1774,6 +1772,7 @@
 		$puu_hintake	= array();
 		$puu_alekerr	= array();
 		$puu_ein 		= array();
+		$puu_ohiker		= array();
 		$puu_var		= array();
 
 		if ($rivityyppi == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
@@ -1799,6 +1798,7 @@
 			$puu_hintake[]	= "X";
 			$puu_alekerr[]	= "X";
 			$puu_ein[]		= "";
+			$puu_ohiker[]	= "";
 			$puu_var[]		= $var;
 
 			if (substr($var,0,8) == "LOJ#!¡!#" and substr($var, 8) - $toimittamatta > 0) {
@@ -1807,6 +1807,7 @@
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
 				$puu_ein[]		= "";
+				$puu_ohiker[]	= "";
 				$puu_var[]		= "";
 			}
 			elseif (substr($lop,0,8) == "LOP#!¡!#" and substr($lop, 8) - $toimittamatta > 0) {
@@ -1815,6 +1816,7 @@
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
 				$puu_ein[]		= "";
+				$puu_ohiker[]	= "";
 				$puu_var[]		= "P";
 			}
 		}
@@ -1826,16 +1828,17 @@
 			$puu_hintake[]	= "X";
 			$puu_alekerr[]	= "X";
 			$puu_ein[]		= "";
+			$puu_ohiker[]	= "";
 			$puu_var[]		= $var;
 		}
 
 		if ($rivityyppi != 'O' and $perheid == 0 and $perhekielto == "") {
 
-			$riikoko 		= 1;
-			$isat_array 	= array();
-			$kaikki_array 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote) : array($alkupera_trow["tuoteno"]);
-			$kerroin_array 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote."#!¡!#1") : array($alkupera_trow["tuoteno"]."#!¡!#1");
-			$perhearray 	= array();
+			$riikoko 			= 1;
+			$isat_array 		= array();
+			$kaikki_array 		= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote) : array($alkupera_trow["tuoteno"]);
+			$kerroin_array 		= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote."#!¡!#1") : array($alkupera_trow["tuoteno"]."#!¡!#1");
+			$perhearray 		= array();
 			$ohita_kerays_array = array();
 
 			for ($isa=0; $isa < $riikoko; $isa++) {
@@ -1859,6 +1862,7 @@
 				$puu_hintake[]	= $perherow["hintakerroin"];
 				$puu_alekerr[]	= $perherow["alekerroin"];
 				$puu_ein[] 		= $perherow["ei_nayteta"];
+				$puu_ohiker[] 	= $perherow["ohita_kerays"];
 				$puu_var[]		= $var;
 			}
 		}
@@ -2425,7 +2429,9 @@
 							positio = if (positio = '', '$trivtyrow[selite]', positio),
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							muutospvm			= now(),
-							muuttaja			= '$kukarow[kuka]'
+							muuttaja			= '$kukarow[kuka]',
+							ei_nayteta			= '{$puu_ein[$i]}',
+							ohita_kerays 		= '{$puu_ohiker[$i]}'
 							{$tlisatied_lisa}
 							{$tlisatied_lisa2}
 							WHERE yhtio			 = '$kukarow[yhtio]'
@@ -2446,7 +2452,8 @@
 							tilausrivitunnus	= '$lisatty_tun',
 							jarjestys			= '$jarjestys',
 							vanha_otunnus		= '$kukarow[kesken]',
-							ei_nayteta			= '$puu_ein[$i]',
+							ei_nayteta			= '{$puu_ein[$i]}',
+							ohita_kerays 		= '{$puu_ohiker[$i]}',
 							luontiaika			= now(),
 							laatija 			= '$kukarow[kuka]'
 							{$tlisatied_lisa}

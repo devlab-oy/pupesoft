@@ -1284,7 +1284,7 @@
 					<th valign='top'>".t("Ebid")."</th>
 					<th valign='top'>".t("Maksatus")."</th>
 					<th valign='top'>".t("Lisätieto")."</th>
-					<th class='back'></th>
+					<th style='display:none;'></th>
 					</tr>
 					<tr>
 					<td><input type='text' class='search_field' name='search_nimi'></td>

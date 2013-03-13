@@ -412,6 +412,7 @@
 			if ($ekarow["chn"] == '100') $toimitusselite = t("Verkkolasku, tulostuspalvelu");
 			if ($ekarow["chn"] == '010') $toimitusselite = t("Verkkolasku");
 			if ($ekarow["chn"] == '020') $toimitusselite = t("Vienti-Verkkolasku (EU)");
+			if ($ekarow["chn"] == '030') $toimitusselite = t("Vienti-Verkkolasku, tulostuspalvelu (EU)");
 			if ($ekarow["chn"] == '111') $toimitusselite = t("Itella EDI: EIH-1.4 sähköinen lasku");
 			if ($ekarow['chn'] == '112') $toimitusselite = t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin");
 			if ($ekarow["chn"] == '666') $toimitusselite = t("Sähköposti");
@@ -867,6 +868,11 @@
 				}
 				echo "</select></td></tr>";
 			}
+			
+			if ($toim == "VIENTI") { 
+				echo "<tr><th>",t("Tulosta myös tullinimike ja alkuperämaa")."</th>"; 
+				echo "<td colspan='3'><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>"; 
+			}
 
 			echo "<tr><th>".t("Syötä poikkeava laskutuspäivämäärä (pp-kk-vvvv)").":</th>
 					<td><input type='text' name='laskpp' value='' size='3'></td>
@@ -1102,7 +1108,8 @@
 				$toimitusselite = "";
 				if ($tilrow["chn"] == '100') $toimitusselite = t("Verkkolasku, tulostuspalvelu");
 				if ($tilrow["chn"] == '010') $toimitusselite = t("Verkkolasku");
-				if ($tilrow["chn"] == '020') $toimitusselite = t("Itella Pupevoice: Vienti-Verkkolasku");
+				if ($tilrow["chn"] == '020') $toimitusselite = t("Vienti-Verkkolasku (EU)");
+				if ($tilrow["chn"] == '030') $toimitusselite = t("Vienti-Verkkolasku, tulostuspalvelu (EU)");
 				if ($tilrow["chn"] == '111') $toimitusselite = t("Itella EDI: EIH-1.4 sähköinen lasku");
 				if ($tilrow["chn"] == '112') $toimitusselite = t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin");
 				if ($tilrow["chn"] == '666') $toimitusselite = t("Sähköposti");

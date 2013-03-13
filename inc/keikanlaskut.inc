@@ -90,13 +90,13 @@
 
 	echo "<br><font class='head'>".t("Laskut joita ei ole liitetty saapumisiin")."</font><hr>";
 
-	$query = "	SELECT lasku.ytunnus, 
-				lasku.nimi, 
-				lasku.summa, 
-				lasku.valkoodi, 
+	$query = "	SELECT lasku.ytunnus,
+				lasku.nimi,
+				lasku.summa,
+				lasku.valkoodi,
 				lasku.tapvm,
-				lasku.vienti, 
-				liitos.tunnus, 
+				lasku.vienti,
+				liitos.tunnus,
 				lasku.tunnus latunnus,
 				lasku.alv,
 				if (lasku.vienti in ('B','E','H'), 2, 1) sorttaus,
@@ -141,11 +141,11 @@
 		$yhteesa_ve = 0;
 		$yhteesa_eive = 0;
 		$edellinen = 0;
-		
+
 		$vaihto_arvo_yhteensa = 0;
 		$rahti_arvo_yhteensa  = 0;
 		$vaihto_sum_yhteensa  = 0;
-		$rahti_sum_yhteensa   = 0;		
+		$rahti_sum_yhteensa   = 0;
 
 		while ($trow = mysql_fetch_array($result)) {
 
@@ -220,7 +220,7 @@
 			}
 
 			echo "</tr>";
-			
+
 			if ($trow["sorttaus"] == 1) {
 				$vaihto_sum_yhteensa += $trow["summaeur"];
 				$vaihto_arvo_yhteensa += $trow["arvo"];
@@ -234,7 +234,7 @@
 			$yhteesa_ve += $trow["summaeur"];
 			$yhteesa_eive += $trow["arvo"];
 		}
-		
+
 		echo "<tr>";
 		echo "<th colspan='3'>".t("Vaihto-omaisuuslaskuja yhteens‰")."</th>";
 		echo "<th style='text-align: right;'>".round($vaihto_sum_yhteensa,2)." $yhtiorow[valkoodi]</th>";
@@ -242,7 +242,7 @@
 		echo "<th style='text-align: right;'>".round($vaihto_arvo_yhteensa,2)." $yhtiorow[valkoodi]</th>";
 		echo "<th colspan='3'></th>";
 		echo "</tr>";
-		
+
 		echo "<tr>";
 		echo "<th colspan='3'>".t("Rahti/huolintalaskuja yhteens‰")."</th>";
 		echo "<th style='text-align: right;'>".round($rahti_sum_yhteensa,2)." $yhtiorow[valkoodi]</th>";
@@ -250,8 +250,8 @@
 		echo "<th style='text-align: right;'>".round($rahti_arvo_yhteensa,2)." $yhtiorow[valkoodi]</th>";
 		echo "<th colspan='3'></th>";
 		echo "</tr>";
-		
-		
+
+
 		echo "<tr>";
 		echo "<th colspan='3'>".t("Yhteens‰")."</th>";
 		echo "<th style='text-align: right;'>".round($yhteesa_ve,2)." $yhtiorow[valkoodi]</th>";
@@ -353,21 +353,20 @@
 
 	$query = "	SELECT tiliointi.*, tili.nimi tilinimi, kustannuspaikka1.nimi kustpnimi, kustannuspaikka2.nimi kohdenimi, kustannuspaikka3.nimi projektinimi
 				FROM lasku
-				JOIN tiliointi on (	tiliointi.yhtio = lasku.yhtio and
-									tiliointi.ltunnus = lasku.tunnus and
-									tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]') and
-									tiliointi.korjattu = '' and
-									tiliointi.selite not like ('Inventointi%') and
-									tiliointi.selite not like ('%ep‰kuranttimuutos') and
-									tiliointi.selite not like ('%ep‰kurantttimuutos'))
+				JOIN tiliointi ON (	tiliointi.yhtio = lasku.yhtio
+									and tiliointi.ltunnus = lasku.tunnus
+									and tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+									and tiliointi.korjattu = ''
+									and tiliointi.selite not like ('Inventointi%')
+									and tiliointi.selite not like ('Ep‰kuranttimuutos%'))
 				LEFT JOIN tili ON (tili.yhtio = lasku.yhtio and tili.tilino = tiliointi.tilino)
 				LEFT JOIN kustannuspaikka AS kustannuspaikka1 ON (kustannuspaikka1.yhtio = lasku.yhtio and kustannuspaikka1.tunnus = tiliointi.kustp)
 				LEFT JOIN kustannuspaikka AS kustannuspaikka2 ON (kustannuspaikka2.yhtio = lasku.yhtio and kustannuspaikka2.tunnus = tiliointi.kohde)
 				LEFT JOIN kustannuspaikka AS kustannuspaikka3 ON (kustannuspaikka3.yhtio = lasku.yhtio and kustannuspaikka3.tunnus = tiliointi.projekti)
-				WHERE lasku.yhtio = '$kukarow[yhtio]' and
-				lasku.tila = 'X' and
-				lasku.tapvm >= '$avv-$akk-$app' and
-				lasku.tapvm <= '$lvv-$lkk-$lpp'
+				WHERE lasku.yhtio = '$kukarow[yhtio]'
+				AND lasku.tila = 'X'
+				AND lasku.tapvm >= '$avv-$akk-$app'
+				AND lasku.tapvm <= '$lvv-$lkk-$lpp'
 				ORDER BY tiliointi.tapvm, tiliointi.summa";
 	$result = pupe_query($query);
 
@@ -561,21 +560,29 @@
 
 	echo "<font class='head'>".t("Laskut joiden varastokirjaukset eiv‰t t‰sm‰‰")."</font><hr>";
 
-	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*lasku.vienti_kurssi 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus,
-					(SELECT sum(summa)
-						FROM tiliointi AS tiliointi1
-						WHERE tiliointi1.yhtio = lasku.yhtio and tiliointi1.ltunnus = lasku.tunnus and tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]') and tiliointi1.korjattu = ''
-					) summa1,
-					(SELECT sum(summa)
-						FROM tiliointi AS tiliointi2
-						WHERE tiliointi2.yhtio = lasku.yhtio and tiliointi2.ltunnus = lasku.tunnus and tiliointi2.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and tiliointi2.korjattu = ''
-					) summa2
+	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*lasku.vienti_kurssi 'summaeur',
+				lasku.tapvm, lasku.vienti, lasku.tunnus latunnus,
+				lasku.osto_rahti/(1+lasku.osto_rahti_alv/100) osto_rahti,
+				lasku.osto_kulu/(1+lasku.osto_kulu_alv/100) osto_kulu,
+				lasku.osto_rivi_kulu/(1+lasku.osto_rivi_kulu_alv/100) osto_rivi_kulu,
+				(SELECT sum(summa)
+					FROM tiliointi AS tiliointi1
+					WHERE tiliointi1.yhtio = lasku.yhtio and tiliointi1.ltunnus = lasku.tunnus and tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]') and tiliointi1.korjattu = ''
+				) summa1,
+				(SELECT sum(summa)
+					FROM tiliointi AS tiliointi2
+					WHERE tiliointi2.yhtio = lasku.yhtio and tiliointi2.ltunnus = lasku.tunnus and tiliointi2.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and tiliointi2.korjattu = ''
+				) summa2,
+				(SELECT sum(summa)
+					FROM tiliointi AS tiliointi2
+					WHERE tiliointi2.yhtio = lasku.yhtio and tiliointi2.ltunnus = lasku.tunnus and tiliointi2.tilino in ('$yhtiorow[alv]') and tiliointi2.korjattu = ''
+				) summa3
 				FROM lasku
-				WHERE lasku.yhtio = '$kukarow[yhtio]' and
-				lasku.tila in ('H','Y','M','P','Q') and
-				lasku.tapvm >= '$avv-$akk-$app' and
-				lasku.tapvm <= '$lvv-$lkk-$lpp'
-				HAVING abs(abs(summa1) - abs(summa2)) > 0.01
+				WHERE lasku.yhtio = '$kukarow[yhtio]'
+				and lasku.tila in ('H','Y','M','P','Q')
+				and lasku.tapvm >= '$avv-$akk-$app'
+				and lasku.tapvm <= '$lvv-$lkk-$lpp'
+				HAVING abs(summa1 + summa2) > 0.01 or abs(summaeur-summa3-osto_rahti-osto_kulu-osto_rivi_kulu+summa1) > 0.01 or abs(summaeur-summa3-osto_rahti-osto_kulu-osto_rivi_kulu-summa2) > 0.01
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 	$result = pupe_query($query);
 
@@ -590,6 +597,9 @@
 		echo "<th>".t("Nimi")."</th>";
 		echo "<th>".t("Summa valuutassa")."</th>";
 		echo "<th>".t("Summa")."</th>";
+		echo "<th>".t("Arvo")."</th>";
+		echo "<th>".t("Varastonmuutos")."</th>";
+		echo "<th>".t("Varasto")."</th>";
 		echo "<th>".t("Ero")."</th>";
 		echo "<th>".t("Tapvm")."</th>";
 		echo "<th>".t("Tyyppi")."</th>";
@@ -617,17 +627,20 @@
 			echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
 			echo "<td>$trow[nimi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
-			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
-			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", (abs($trow["summa1"]) - abs($trow["summa2"])))." $yhtiorow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])."</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"]-$trow["summa3"]-$trow["osto_rahti"]-$trow["osto_kulu"]-$trow["osto_rivi_kulu"])."</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa1"]*-1)."</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa2"])."</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", ($trow["summaeur"]-$trow["summa3"]-$trow["osto_rahti"]-$trow["osto_kulu"]-$trow["osto_rivi_kulu"]+$trow["summa1"]))." $yhtiorow[valkoodi]</td>";
 			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
 			echo "<td>$vienti</td>";
 			echo "</tr>";
 
-			$yhteesa += (abs($trow["summa1"]) - abs($trow["summa2"]));
+			$yhteesa += ($trow["summaeur"]-$trow["summa3"]-$trow["osto_rahti"]-$trow["osto_kulu"]-$trow["osto_rivi_kulu"]+$trow["summa1"]);
 		}
 
 		echo "<tr>";
-		echo "<th colspan='4'>".t("Yhteens‰")."</th>";
+		echo "<th colspan='7'>".t("Yhteens‰")."</th>";
 		echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
 		echo "<th colspan='2'></th>";
 		echo "</tr>";

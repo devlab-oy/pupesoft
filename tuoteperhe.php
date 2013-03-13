@@ -680,7 +680,7 @@
 					echo "<th>".t("Samankaltaisuudet")."</th><th>".t("Nimitys")."</th><th>".t("Kerroin")."</th><td class='back'></td></tr>";
 				}
 				else {
-					echo "<th>".t("Raaka-aineet")."</th><th>".t("Nimitys")."</th><th>".t("Määräkerroin")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>".t("Pituus kerroin")."</th><td class='back'></td></tr>";
+					echo "<th>".t("Raaka-aineet")."</th><th>".t("Nimitys")."</th><th>".t("Määräkerroin")."</th><th>".t("Yksikkö")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>".t("Pituus kerroin")."</th><td class='back'></td></tr>";
 				}
 
 				$query = "	SELECT *
@@ -730,7 +730,7 @@
 					}
 					else echo "<td></td><td></td>";
 
-					if ($toim == "PERHE") {
+					if ($toim == "PERHE" or $toim == "RESEPTI") {
 						echo "<td></td>";
 					}
 
@@ -781,6 +781,9 @@
 							#echo "<td align='right'>$prow[rivikommentti]</td>";
 						}
 
+						if ($toim == "RESEPTI") {
+							echo "<td align='left'>$tuoterow[yksikko]</td>";
+					    }
 						if ($toim != "VSUUNNITTELU") {
 							echo "<td align='right'>$tuoterow[kehahin]</td><td align='right'>".round($lapsiyht, 6)."</td>";
 						}
@@ -847,6 +850,10 @@
 							echo "	<td><input type='text' name='kerroin' size='10' value='$zrow[kerroin]'></td>";
 						}
 
+						if ($toim == "RESEPTI") {
+							echo "<td></td>";
+						}
+
 						if ($toim == "PERHE") {
 							echo "	<td><input type='text' name='hintakerroin' size='10' value='$zrow[hintakerroin]'></td>
 									<td><input type='text' name='alekerroin' size='10' value='$zrow[alekerroin]'></td>";
@@ -862,7 +869,7 @@
 							echo "<td><input type='checkbox' name='ohita_kerays'{$chk_ohita_kerays}></td>";
 						}
 
-						if($toim == "RESEPTI") {
+						if ($toim == "RESEPTI") {
 							$sel1=$sel2="";
 
 							if ($prow["omasivu"] != "") {
@@ -893,6 +900,9 @@
 					}
 					if ($toim == "PERHE") {
 						echo "<td class='back' colspan='2'></td>";
+					}
+					if ($toim == "RESEPTI") {
+						echo "<td class='back' colspan='1'></td>";
 					}
 
 					echo "<th align='right'>".t("Yhteensä").":</th>

@@ -110,7 +110,9 @@ if ($tee == "aja") {
 		$query = "	SELECT liitetiedostot.*
 					FROM liitetiedostot
 					JOIN tuote ON tuote.yhtio = liitetiedostot.yhtio and tuote.hinnastoon = 'W' and tuote.tunnus = liitetiedostot.liitostunnus
-					WHERE liitetiedostot.yhtio = '$kyhtio' and liitetiedostot.liitos = 'tuote' and liitetiedostot.kayttotarkoitus in ('TK','MU')
+					WHERE liitetiedostot.yhtio = '$kyhtio'
+					and liitetiedostot.liitos = 'tuote'
+					and liitetiedostot.kayttotarkoitus in ('TK','MU')
 					ORDER BY liitetiedostot.kayttotarkoitus ASC";
 		$result = pupe_query($query);
 

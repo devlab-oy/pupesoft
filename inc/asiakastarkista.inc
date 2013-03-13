@@ -63,7 +63,17 @@ if(!function_exists("asiakastarkista")) {
 				$virhe[$i] = t("Y-tunnus puuttuu")."!";
 				$errori = 1;
 			}
+		}
 
+		if (mysql_field_name($result, $i) == "ytunnus" and $yhtiorow['asiakkaan_tarkenne'] == 'B') {
+
+			$query   = "SELECT tunnus from asiakas where yhtio = '$kukarow[yhtio]' and ytunnus='$ytunnus' and tunnus != '$tunnus'";
+			$sresult = pupe_query($query);
+
+			if (mysql_num_rows($sresult) > 0) {
+				$virhe[$i] = t("Samalla tiedoilla on useita asiakkaita!");
+				$errori = 1;
+			}
 		}
 
 		if ((mysql_field_name($result, $i) == "osasto" or mysql_field_name($result, $i) == "ryhma" or mysql_field_name($result, $i) == "piiri") and trim($t[$i]) != '') {
@@ -124,7 +134,7 @@ if(!function_exists("asiakastarkista")) {
 				}
 			}
 
-			if ($yhtiorow['asiakkaan_tarkenne'] != '') {
+			if ($yhtiorow['asiakkaan_tarkenne'] == 'A') {
 
 				if ($asiakasnro_select != '') {
 					$asiakas_numero = $asiakasnro_select;
@@ -133,7 +143,7 @@ if(!function_exists("asiakastarkista")) {
 					$asiakas_numero = $t[$i];
 				}
 
-				$query   = "select tunnus from asiakas where yhtio = '$kukarow[yhtio]' and ytunnus='$ytunnus' and asiakasnro='$asiakas_numero' and tunnus != '$tunnus'";
+				$query   = "SELECT tunnus from asiakas where yhtio = '$kukarow[yhtio]' and ytunnus='$ytunnus' and asiakasnro='$asiakas_numero' and tunnus != '$tunnus'";
 				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) > 0) {
@@ -148,7 +158,6 @@ if(!function_exists("asiakastarkista")) {
 					}
 				}
 			}
-
 		}
 
 		if (mysql_field_name($result, $i) == "ovttunnus") {
@@ -157,7 +166,7 @@ if(!function_exists("asiakastarkista")) {
 
 		if (mysql_field_name($result, $i) == "toim_ovttunnus" and $yhtiorow['asiakkaan_tarkenne'] == '') {
 
-			$query   = "select tunnus from asiakas where yhtio = '$kukarow[yhtio]' and ytunnus='$ytunnus' and ovttunnus='$ovttunnus' and toim_ovttunnus='$t[$i]' and tunnus != '$tunnus'";
+			$query   = "SELECT tunnus from asiakas where yhtio = '$kukarow[yhtio]' and ytunnus='$ytunnus' and ovttunnus='$ovttunnus' and toim_ovttunnus='$t[$i]' and tunnus != '$tunnus'";
 			$sresult = pupe_query($query);
 
 			if (mysql_num_rows($sresult) > 0) {
@@ -212,7 +221,7 @@ if(!function_exists("asiakastarkista")) {
 				}
 
 				// jos ollaan valittu jotain muuta kuin PAPERI tai EMAIL niin verkkotunnus pit‰‰ syˆtt‰‰!
-				if (trim($t[$i]) != '999' and trim($t[$i]) != '112' and trim($t[$i]) != '666' and trim($t[$i]) != '667' and trim($t[$i]) != '100' and $apuverkkotunnus == "") {
+				if (trim($t[$i]) != '999' and trim($t[$i]) != '112' and trim($t[$i]) != '666' and trim($t[$i]) != '667' and trim($t[$i]) != '100' and trim($t[$i]) != '030' and $apuverkkotunnus == "") {
 					// Pit‰‰ aina setata myˆs "t‰m‰n" kent‰n virhe, muuten luedata ei toimi
 					$virhe[$i] = $virhe[$apuverkkotunnusi] = t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhj‰! Laskutus ei onnistu")."!";
 					$errori = 1;
@@ -261,26 +270,6 @@ if(!function_exists("asiakastarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "panttitili" and trim($t[$i]) == '') {
-
-			if (trim($t[$i]) != trim($trow[$i])) {
-				$query = "	SELECT *
-							FROM panttitili
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND asiakas = '{$tunnus}'
-							AND status = ''
-							AND kaytettypvm = '0000-00-00'
-							AND kaytettytilausnro = 0
-							AND tuoteno != ''";
-				$chk_res = pupe_query($query);
-
-				if (mysql_num_rows($chk_res) > 0) {
-					$virhe[$i] = t("Asiakkaalla panttitilill‰ aktiivisia tuotteita, panttitili‰ ei voi kytke‰ pois p‰‰lt‰").".";
-					$errori = 1;
-				}
-			}
-		}
-
 		if (mysql_field_name($result, $i) == "toim_maa") {
 			$apu_toim_maa = $t[$i];
 		}
@@ -320,6 +309,9 @@ if(!function_exists("asiakastarkista")) {
 				$virhe[$i] = t("Pakollinen kentt‰ kun laskutus nimi on annettu")."!";
 				$virhe[$laskutus_talteen_i] = t("Pakollisia: laskutusosoite, laskutus postinumero, laskutus postitoimipaikka")."!";
 			}
+
+			$laskutus_talteen = "";
+			$laskutus_talteen_i = "";
 		}
 	}
 }

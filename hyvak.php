@@ -73,7 +73,7 @@
 				if (mysql_num_rows($result) > 0) {
 					//	Haetaan vientitieto..
 
-					//	Kululaskun voi kohdistaa useaan keikkaan
+					//	Kululaskun voi kohdistaa useaan saapumiseen
 					if (in_array($laskurow["vienti"], array("B","E","H"))) {
 						echo "<form id='liita' action='hyvak.php?keikalla=on' method='post' autocomplete='off'>";
 						echo "<input type='hidden' name='lopetus' value='$lopetus'>";
@@ -285,6 +285,25 @@
 						WHERE tunnus = '$tunnus' and
 						yhtio = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
+
+			if ($trow['ebid'] == 'TECCOM-INVOICE') {
+
+				// Haetaan toimittajanro
+				$query = "	SELECT toimittajanro
+							FROM toimi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$trow['liitostunnus']}'";
+				$toiminro_res = pupe_query($query);
+				$toiminro_row = mysql_fetch_assoc($toiminro_res);
+
+				$query = "	DELETE FROM asn_sanomat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji = 'tec'
+							AND toimittajanumero = '{$toiminro_row['toimittajanro']}'
+							AND asn_numero = '{$trow['laskunro']}'";
+				$delres = pupe_query($query);
+
+			}
 
 			echo "<font class='error'>".sprintf(t('Poistit %s:n laskun tunnuksella %d.'), $trow['nimi'], $tunnus)."</font><br>";
 		}
@@ -1532,7 +1551,7 @@
 						AND vanhatunnus = '$trow[tunnus]'";
 			$keikres = pupe_query($query);
 
-			//	Onko liitetty jo keikkaan
+			//	Onko liitetty jo saapumiseen
 			if (in_array($trow["vienti"], array("B", "C", "J", "E", "F", "K", "H", "I", "L"))) {
 				if (mysql_num_rows($keikres) > 0) {
 					$liitetty = "<font class='ok'>ON</font>";

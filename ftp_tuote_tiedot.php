@@ -237,7 +237,8 @@ if ($tee == "aja") {
 					join avainsana as avosasto on tuote.yhtio = avosasto.yhtio and tuote.osasto = avosasto.selite and avosasto.laji = 'OSASTO' and avosasto.nakyvyys != 'E' and avosasto.kieli = 'fi'
 					WHERE tuote.yhtio = '$kyhtio'
 					AND tuote.hinnastoon = 'W'
-					AND tuote.status NOT IN('P','X')
+					AND tuote.status NOT IN ('P','X')
+					AND tuote.tuotetyyppi NOT IN ('A', 'B')
 					GROUP BY tuote.tuoteno, tuote.try, tuote.osasto, tuote.nimitys, substring(ta_nimitys_se.selite,1,1024), substring(tuote.kuvaus,1,1024), substring(ta_kuvaus_se.selite,1,1024),
 					substring(ta_nimitys_en.selite,1,1024), substring(ta_kuvaus_en.selite,1,1024), substring(ta_nimitys_ru.selite,1,1024), substring(ta_kuvaus_ru.selite,1,1024),
 					substring(ta_nimitys_ee.selite,1,1024), substring(ta_kuvaus_ee.selite,1,1024), substring(ta_nimitys_de.selite,1,1024), substring(ta_kuvaus_de.selite,1,1024)

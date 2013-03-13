@@ -233,6 +233,7 @@
 					lasku.mapvm,
 					lasku.erpcm,
 					yriti.nimi maksu_tili,
+					yriti.iban yriti_iban,
 					date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy,
 					round(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) poimittusumma_eur,
 					round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) summa_eur
@@ -262,7 +263,16 @@
 			echo "</tr>";
 			echo "<tr class='aktiivi'>";
 			echo "<th>",t("Maksuaineisto"),"</th>";
-			echo "<td>SEPA-$kukarow[yhtio]-".$row['popvm_dmy'].".xml</td>";
+			echo "<td>";
+
+			if (strtoupper($yhtiorow['maa']) == 'EE' and substr($row['yriti_iban'], 0, 2) == "EE") {
+				echo "EESEPA-$kukarow[yhtio]-".$row['popvm_dmy'].".xml";
+			}
+			else {
+				echo "SEPA-$kukarow[yhtio]-".$row['popvm_dmy'].".xml";
+			}
+
+			echo "</td>";
 			echo "</tr>";
 			echo "</table>";
 			echo "<br />";
@@ -294,7 +304,7 @@
 			else {
 				$toslink = FALSE;
 			}
-			
+
 			$poimitut_laskut = array();
 
 			while ($row = mysql_fetch_assoc($result)) {
@@ -319,7 +329,7 @@
 				echo "</tr>";
 
 				$laskuja++;
-				
+
 				$poimitut_laskut[] = $row['tunnus'];
 				$poimittu_summa += $row['poimittusumma_eur'];
 				$summa += $row['summa_eur'];
@@ -333,8 +343,8 @@
 			echo "</tr>";
 
 			echo "</table>";
-			
-			if (tarkista_oikeus("sepa.php")) {		
+
+			if (tarkista_oikeus("sepa.php")) {
 				echo "<br><br><form name = 'valinta' method='post' action = 'sepa.php'>";
 				echo "<input type = 'hidden' name = 'tee' value = 'KIRJOITAKOPIO'>";
 				echo "<input type = 'hidden' name = 'poimitut_laskut' value = '".implode(",", $poimitut_laskut)."'>";

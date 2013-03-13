@@ -156,6 +156,7 @@ if (isset($submitnappi)) {
 				$kl_lisa
 				and ((tuote.vienti = '' or tuote.vienti like '%-$laskurowfake[maa]%' or tuote.vienti like '%+%')
 				and tuote.vienti not like '%+$laskurowfake[maa]%')
+				and tuote.tuotetyyppi NOT IN ('A', 'B')
 				and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 				ORDER BY tuote.osasto+0, tuote.try+0";
 	$result = pupe_query($query);

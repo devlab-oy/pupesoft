@@ -794,7 +794,7 @@
 		$ulos .= "<option value='K' $sel[K]>".t("J‰lkitoimitusrivit kohdistetaan automaattisesti valmistuksen yhteydess‰")."</option>";
 		$ulos .= "<option value='T' $sel[T]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydess‰, jos k‰ytt‰j‰ll‰ on p‰ivitysoikeus JT-selaukseen")."</option>";
 		$ulos .= "<option value='J' $sel[J]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydess‰")."</option>";
-		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan asiakkaalle valmistetut j‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydess‰")."</option>";
+		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan asiakkaalle valmistetut j‰lkitoimitusrivit kohdistetaan ja siirret‰‰n tulostusjonoon automaattisesti valmistuksen yhteydess‰")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Asiakkaalle sek‰ myyntitilaukselta varastoon valmistetut j‰lkitoimitusrivit kohdistetaan asiakkaalle ja toimitetaan automaattisesti valmistuksen yhteydess‰")."</option>";
 		$ulos .= "</select></td>";
 
@@ -3291,7 +3291,7 @@
 		$jatko = 0;
 
 	}
-	
+
 	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

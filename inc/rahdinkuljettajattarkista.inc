@@ -15,5 +15,14 @@
 			if (mysql_field_name($result, $i) == "neutraali") {
 				$t[$i] = trim($t[$i]) == '' ? "" : $t[$i];
 			}
+
+			if (mysql_field_name($result, $i) == 'minimi_dimensio') {
+				if(is_numeric($t[$i])) {
+					$t[$i] = str_replace(',', '.', $t[$i]);
+				}
+				else {
+					$virhe[$i] = t("Tietue pit‰‰ olla numero");
+				}
+			}
 		}
 	}

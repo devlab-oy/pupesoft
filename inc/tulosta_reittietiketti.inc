@@ -191,18 +191,18 @@
 						}
 
 						//TODO hae rahdinkuljettajat joiden minimi dimensio on 0.25
-//						$query = "	SELECT koodi
-//									FROM rahdinkuljettajat
-//									WHERE yhtio = '{$kukarow['yhtio']}'
-//									AND ...";
-//						$rahdinkuljettajat_result = pupe_query($query);
-//						$rahdinkuljettajat_rivit = array();
-//
-//						while ($rahdinkuljettaja_rivi = mysql_fetch_assoc($rahdinkuljettajat_result)) {
-//							$rahdinkuljettajat_rivit[] = $rahdinkuljettaja_rivi;
-//						}
-//
-//						$unifaun->setRahdinKuljettaja025Rows($rahdinkuljettajat_rivit);
+						$query = "	SELECT koodi
+									FROM rahdinkuljettajat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND minimi_dimensio = 0.25";
+						$rahdinkuljettajat_result = pupe_query($query);
+						$rahdinkuljettajat_rivit = array();
+
+						while ($rahdinkuljettaja_rivi = mysql_fetch_assoc($rahdinkuljettajat_result)) {
+							$rahdinkuljettajat_rivit[] = $rahdinkuljettaja_rivi;
+						}
+
+						$unifaun->setRahdinKuljettaja025Rows($rahdinkuljettajat_rivit);
 						$unifaun->setYhtioRow($yhtiorow);
 						$unifaun->setKukaRow($kukarow);
 						$unifaun->setPostiRow($row);

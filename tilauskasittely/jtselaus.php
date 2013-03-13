@@ -1118,21 +1118,11 @@
 
 								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
 
-								if($automaaginen == 'suoratoimitukset') {
-									if ($saldolaskenta == "hyllysaldo") {
-										$kokonaismyytavissa += $hyllyssa;
-									}
-									else {
-										$kokonaismyytavissa += $saldo;
-									}
+								if ($saldolaskenta == "hyllysaldo") {
+									$kokonaismyytavissa += $hyllyssa;
 								}
 								else {
-									if ($saldolaskenta == "hyllysaldo") {
-										$kokonaismyytavissa += $hyllyssa;
-									}
-									else {
-										$kokonaismyytavissa += $myytavissa;
-									}
+									$kokonaismyytavissa += $myytavissa;
 								}
 							}
 						}
@@ -1540,10 +1530,10 @@
 								if (!isset($kpl[$tunnukset])) $kpl[$tunnukset] = "";
 
 								// Riittää kaikille
-								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0 and $voiko_toimittaa !== false) {
+								if ((($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0 and $voiko_toimittaa !== false) or $automaaginen == 'vakisin') {
 
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
-									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen' or $automaaginen == 'suoratoimitukset')) {
+									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen' or $automaaginen == 'vakisin')) {
 
 										if ($from_varastoon_inc == "editilaus_in.inc") {
 											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
@@ -1552,7 +1542,7 @@
 											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen").". (".t("Tuotetta riitti kaikille JT-riveille").")</font><br>";
 										}
 
-										if($automaaginen == 'suoratoimitukset') {
+										if($automaaginen == 'vakisin') {
 											$loput[$tunnukset] 	= "VAKISIN";
 										}
 										else {
@@ -1623,7 +1613,7 @@
 								elseif (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $kokonaismyytavissa >= $jtrow["jt"] and $perheok == 0 and $voiko_toimittaa !== false) {
 
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
-									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and ($automaaginen == 'tosi_automaaginen' or $automaaginen == 'suoratoimitukset')) {
+									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $automaaginen == 'tosi_automaaginen') {
 
 										if ($from_varastoon_inc == "editilaus_in.inc") {
 											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
@@ -1632,12 +1622,7 @@
 											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen").". (".t("Tuotetta ei riittänyt kaikille JT-riveille").")</font><br>";
 										}
 
-										if($automaaginen == 'suoratoimitukset') {
-											$loput[$tunnukset] 	= "VAKISIN";
-										}
-										else {
-											$loput[$tunnukset] 	= "KAIKKI";
-										}
+										$loput[$tunnukset] 	= "KAIKKI";
 										
 										$kpl[$tunnukset] 	= 0;
 										$tunnusarray 		= explode(',', $tunnukset);

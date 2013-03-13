@@ -139,7 +139,6 @@ if ((int) $valitsetoimitus > 0) {
 	$from 			= "VALITSETOIMITUS";
 	$mista 			= "";
 
-
 	$query = "	SELECT tila, alatila, tilaustyyppi
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
@@ -1724,10 +1723,6 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 	}
 	$result = pupe_query($query);
 	$laskurow = mysql_fetch_assoc($result);
-
-	if ($toim == "ENNAKKO") {
-		$toim = "RIVISYOTTO";
-	}
 
 	$kaytiin_otsikolla = "NOJOO!";
 }

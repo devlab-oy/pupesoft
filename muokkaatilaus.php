@@ -418,7 +418,7 @@
 			if ($toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET" and $toim != "VALMISTUSMYYNTI" and $toim != "VALMISTUSMYYNTISUPER") {
 				if (isset($eresult) and  mysql_num_rows($eresult) > 0) {
 					// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-					if ($toim == "" or $toim == "SUPER" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN") {
+					if ($toim == "" or $toim == "SUPER" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN") {
 						$aputoim1 = "RIVISYOTTO";
 						$aputoim2 = "PIKATILAUS";
 
@@ -448,6 +448,13 @@
 					}
 					elseif ($toim == "TARJOUSSUPER") {
 						$aputoim1 = "TARJOUS";
+						$lisa1 = t("Muokkaa");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					elseif ($toim == "ENNAKKO") {
+						$aputoim1 = "ENNAKKO";
 						$lisa1 = t("Muokkaa");
 
 						$aputoim2 = "";
@@ -1889,7 +1896,7 @@
 					$excelrivi++;
 
 					// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-					if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "ENNAKKO" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO"or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
+					if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO"or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
 						$aputoim1 = "RIVISYOTTO";
 						$aputoim2 = "PIKATILAUS";
 
@@ -1926,6 +1933,13 @@
 					}
 					elseif ($whiletoim == "TARJOUSSUPER") {
 						$aputoim1 = "TARJOUS";
+						$lisa1 = t("Muokkaa");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					elseif ($whiletoim == "ENNAKKO") {
+						$aputoim1 = "ENNAKKO";
 						$lisa1 = t("Muokkaa");
 
 						$aputoim2 = "";
@@ -2022,7 +2036,7 @@
 						echo "	<input type='hidden' name='mista' value='vastaanota'>";
 					}
 
-					if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "ENNAKKO" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
+					if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
 						echo "<input type='submit' name='$aputoim2' value='$lisa2' $button_disabled>";
 
 					}

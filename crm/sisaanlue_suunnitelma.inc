@@ -185,7 +185,7 @@ if ($tee == "FILE") {
 
 							$query = "	UPDATE kalenteri
 										SET
-										tyyppi 		= 'memo',
+										tyyppi 		= 'memo'
 										WHERE yhtio = '$yhtio'
 										and tunnus 	= '$prow[tunnus]'";
 							$result = pupe_query($query);

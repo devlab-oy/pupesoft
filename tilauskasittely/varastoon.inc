@@ -1331,7 +1331,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 		}
 
 		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A','S','V')) and count($jtrivit) > 0) {
-			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", '', '', $jt_huomioi_pvm);
+			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "suoratoimitukset", "JATKA", '', '', $jt_huomioi_pvm);
 		}
 
 		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A'))) {

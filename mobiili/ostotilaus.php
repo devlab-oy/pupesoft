@@ -20,10 +20,9 @@ if (isset($uusi)) {
 else {
 	$query = "	SELECT kesken
 				FROM kuka
-				JOIN lasku ON (kuka.yhtio=lasku.yhtio AND kuka.kesken=lasku.tunnus)
-				WHERE kuka='{$kukarow['kuka']}'
-				AND kuka.yhtio = '{$kukarow['yhtio']}'
-				AND lasku.tila='K'";
+				JOIN lasku ON (kuka.yhtio=lasku.yhtio AND kuka.kesken=lasku.tunnus AND lasku.tila='K' AND lasku.alatila NOT IN ('X','I'))
+				WHERE kuka.kuka = '{$kukarow['kuka']}'
+				AND kuka.yhtio  = '{$kukarow['yhtio']}'";
 	$result = pupe_query($query);
 	$kesken_row = mysql_fetch_assoc($result);
 
@@ -36,17 +35,16 @@ else {
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laatija = '{$kukarow['kuka']}'
 					AND tila = 'K'
-					AND alatila NOT IN ('X', 'I')
+					AND alatila NOT IN ('X','I')
 					ORDER BY luontiaika DESC
 					LIMIT 1";
 		$result = pupe_query($query);
-
 		$saapuminen_row = mysql_fetch_assoc($result);
 
 		$kesken_query = "	UPDATE kuka
 							SET kesken = '{$saapuminen_row['tunnus']}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND kuka = '{$kukarow['kuka']}'";
+							AND kuka    = '{$kukarow['kuka']}'";
 		pupe_query($kesken_query);
 	}
 }

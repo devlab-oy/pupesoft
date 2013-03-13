@@ -624,7 +624,7 @@
 					$query = "	UPDATE tilausrivi
 								JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.vanha_otunnus = tilausrivi.otunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '{$rivitunnus_temp}')
 								SET tilausrivi.tyyppi = 'L'
-								WHERE tilausrivi.yhtio = 'artr'
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tyyppi = 'D'
 								AND tilausrivi.varattu+tilausrivi.jt != 0
 								AND tilausrivi.kerattyaika    = '0000-00-00 00:00:00'

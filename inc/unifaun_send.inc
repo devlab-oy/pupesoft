@@ -21,6 +21,9 @@ class Unifaun {
 	private $xml;
 	private $kirjoitin;
 
+	//rahdinkuljettajat, joilla pakkauksen minimi on 0,25 x 0,25 x 0,25
+	private $rahdinkuljettajat_025;
+
 	public function __construct($hostname, $username, $password, $ftppath, $ftpport, $ftpfail, $ftpsucc) {
 		$this->hostname = $hostname;
 		$this->username = $username;
@@ -94,6 +97,10 @@ class Unifaun {
 		}
 
 		$this->setAsiakasRow();
+	}
+
+	public function setRahdinKuljettaja025Rows(array $rahdinkuljettajat_025 = array()) {
+		$this->rahdinkuljettajat_025 = $rahdinkuljettajat_025;
 	}
 
 	public function setKirjoitin($kirjoitin) {
@@ -781,8 +788,15 @@ class Unifaun {
 		#$uni_par_val = $uni_parcel->addChild('val', ""); # Loadmeter. Can only be specified for entire shipment.
 		#$uni_par_val->addAttribute('n', "area");
 
-		$pakkaustiedot['syvyys'] = $pakkaustiedot['syvyys'] < 0.25 ? 0.25 : $pakkaustiedot['syvyys'];
-		$pakkaustiedot['leveys'] = $pakkaustiedot['leveys'] < 0.25 ? 0.25 : $pakkaustiedot['leveys'];
+		if(in_array($this->toitarow['rahdinkuljettaja'], $this->rahdinkuljettajat_025)) {
+			$minimi_dimensio = 0.25;
+		}
+		else {
+			$minimi_dimensio = 0.01;
+		}
+
+		$pakkaustiedot['syvyys'] = $pakkaustiedot['syvyys'] < $minimi_dimensio ? $minimi_dimensio : $pakkaustiedot['syvyys'];
+		$pakkaustiedot['leveys'] = $pakkaustiedot['leveys'] < $minimi_dimensio ? $minimi_dimensio : $pakkaustiedot['leveys'];
 
 		/*
 		Otamme pakkauksen kaksi mittaa (pohjan mitat) syvyys ja leveys, korkeuden laskemme tilavuudesta jakamalla tilavuuden pohjan alalla.
@@ -793,10 +807,10 @@ class Unifaun {
 		if ($pakkaustiedot['kuutiot'] > 0) {
 			$pakkaustiedot['korkeus'] = $pakkaustiedot['kuutiot'] / ($pakkaustiedot['syvyys'] * $pakkaustiedot['leveys']);
 
-			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < 0.25 ? 0.25 : round($pakkaustiedot['korkeus'], 2);
+			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < $minimi_dimensio ? $minimi_dimensio : round($pakkaustiedot['korkeus'], 2);
 		}
 		else {
-			$pakkaustiedot['korkeus'] = 0.25;
+			$pakkaustiedot['korkeus'] = $minimi_dimensio;
 		}
 
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['syvyys'])); # Length

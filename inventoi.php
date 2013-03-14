@@ -1,7 +1,8 @@
 <?php
+
 	if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
-			require ("inc/parametrit.inc");
-		}
+		require ("inc/parametrit.inc");
+	}
 
 	if (!isset($fileesta))			$fileesta = "";
 	if (!isset($filusta))			$filusta = "";
@@ -211,7 +212,7 @@
 					}
 
 					//Sarjanumerot
-					if (in_array($tuote_row["sarjanumeroseuranta"], array("S","U")) and is_array($sarjanumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and (int) $kpl!=count($sarjanumero_kaikki[$i]) and ($onko_uusia > 0 or $hyllyssa[$i] < $kpl)) {
+					if (in_array($tuote_row["sarjanumeroseuranta"], array("S","U")) and is_array($sarjanumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and (int) $kpl != count($sarjanumero_kaikki[$i]) and ($onko_uusia > 0 or $hyllyssa[$i] < $kpl)) {
 						echo "<font class='error'>".t("VIRHE: Sarjanumeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
 						$virhe = 1;
 					}
@@ -238,9 +239,7 @@
 							$erasyotetyt = 0;
 
 							foreach ($eranumero_valitut[$i] as $enro => $ekpl) {
-								$ekpl = (float) str_replace(",", ".", $ekpl);
-
-								$erasyotetyt += $ekpl;
+								$ekpl = str_replace(",", ".", $ekpl);
 
 								if ($ekpl != '' and ($ekpl{0} == '+' or $ekpl{0} == '-' or !is_numeric($ekpl))) {
 									echo "<font class='error'>".t("VIRHE: Erien m‰‰r‰t oltava absoluuttisia arvoja")."!</font><br>";
@@ -248,11 +247,13 @@
 									break;
 								}
 
-								if (($kpl{0} == '+' or $kpl{0} == '-') and (int) $ekpl == 0 and $ekpl != '' and $onko_uusia == 0) {
+								if (($kpl{0} == '+' or $kpl{0} == '-') and (float) $ekpl == 0 and $ekpl != '' and $onko_uusia == 0) {
 									echo "<font class='error'>".t("VIRHE: Et voi nollata er‰‰, jos olet syˆtt‰nyt relatiivisen m‰‰r‰n")."!</font><br>";
 									$virhe = 1;
 									break;
 								}
+
+								$erasyotetyt += (float) $ekpl;
 
 								if ($eranumero_uudet[$i][$enro] == '0000-00-00') {
 									$onko_uusia++;
@@ -1262,12 +1263,14 @@
 
 				if ($tuoterow["hyllyalue"] == "!!M") {
 					$asiakkaan_tunnus = (int) $tuoterow["hyllynro"].$tuoterow["hyllyvali"].$tuoterow["hyllytaso"];
+
 					$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
 								FROM asiakas
 								WHERE yhtio = '{$kukarow["yhtio"]}'
 								AND tunnus = '$asiakkaan_tunnus'";
 					$asiakasresult = pupe_query($query);
 					$asiakasrow = mysql_fetch_assoc($asiakasresult);
+
 					echo t("Myyntitili"), " ", $asiakasrow["asiakkaan_nimi"];
 				}
 				else {

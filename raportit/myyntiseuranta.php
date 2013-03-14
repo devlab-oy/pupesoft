@@ -458,12 +458,12 @@
 				<tr>
 				<th>",t("Näytä kaikki asiakkaat"),"</th>
 				<td colspan='3'><input type='checkbox' name='naytakaikkiasiakkaat' {$naytakaikkiasiakkaatchk}></td>
-				<td class='back'></td>
+				<td class='back'>",t("(Näyttää myös asiakkaat joita ei huomioida myynninseurannassa)"),"</td>
 				</tr>
 				<tr>
 				<th>",t("Näytä kaikki tuotteet"),"</th>
 				<td colspan='3'><input type='checkbox' name='naytakaikkituotteet' {$naytakaikkituotteetchk}></td>
-				<td class='back'></td>
+				<td class='back'>",t("(Näyttää tuotteet joita ei huomioida myynninseurannassa)"),"</td>
 				</tr>
 				<th>",t("Näytä laskutuspäivä"),"</th>
 				<td colspan='3'><input type='checkbox' name='laskutuspaiva' {$laskutuspaivachk}></td>
@@ -1498,22 +1498,16 @@
 					}
 				}
 
-				if ($naytakaikkituotteet != "") {
-					$lisa .= " and tuote.myynninseuranta IN ('', 'E') ";
-				}
-				else {
+				if ($naytakaikkituotteet == "") {
 					$lisa .= " and tuote.myynninseuranta = '' ";
 				}
 
-				if ($naytakaikkiasiakkaat != "") {
-					$asiakaslisa = " and asiakas.myynninseuranta IN ('', 'E') ";
-				}
-				else {
+				if ($naytakaikkiasiakkaat == "") {
 					$asiakaslisa = " and asiakas.myynninseuranta = '' ";
 				}
 
 				if ($naytaennakko == "") {
-					$lisa .= " and tilausrivi.tuoteno !='{$yhtiorow['ennakkomaksu_tuotenumero']}'";
+					$lisa .= " and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}' ";
 				}
 
 				if ($tee == 'go') {

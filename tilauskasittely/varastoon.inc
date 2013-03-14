@@ -1163,14 +1163,14 @@ if ($tee == "") {
 
 	if ($yhtiorow['suuntalavat'] == 'S' and $tee == '' and trim($suuntalavan_tunnus) != '' and trim($koko_suuntalava) == 'X') {
 
-		if (trim($suuntalavan_hyllypaikka) != '') {
-			echo "<input type='hidden' name='suuntalavan_hyllypaikka' value='{$suuntalavan_hyllypaikka}' />";
+		if (trim($suuntalavanhyllypaikka) != '') {
+			echo "<input type='hidden' name='suuntalavanhyllypaikka' value='{$suuntalavanhyllypaikka}' />";
 		}
 		else {
-			echo "<input type='hidden' name='suuntalavan_hyllyalue' value='{$suuntalavan_hyllyalue}' />";
-			echo "<input type='hidden' name='suuntalavan_hyllynro'  value='{$suuntalavan_hyllynro}' />";
-			echo "<input type='hidden' name='suuntalavan_hyllyvali' value='{$suuntalavan_hyllyvali}' />";
-			echo "<input type='hidden' name='suuntalavan_hyllytaso' value='{$suuntalavan_hyllytaso}' />";
+			echo "<input type='hidden' name='suuntalavanhyllyalue' value='{$suuntalavanhyllyalue}' />";
+			echo "<input type='hidden' name='suuntalavanhyllynro'  value='{$suuntalavanhyllynro}' />";
+			echo "<input type='hidden' name='suuntalavanhyllyvali' value='{$suuntalavanhyllyvali}' />";
+			echo "<input type='hidden' name='suuntalavanhyllytaso' value='{$suuntalavanhyllytaso}' />";
 		}
 		echo "<input type='hidden' name='koko_suuntalava' value='X' />";
 		echo "<input type='hidden' name='vietiinko_koko_suuntalava' value='{$vietiinko_koko_suuntalava}' />";
@@ -1331,7 +1331,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 		}
 
 		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A','S','V')) and count($jtrivit) > 0) {
-			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", '', '', $jt_huomioi_pvm);
+			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "vakisin", "JATKA", '', '', $jt_huomioi_pvm);
 		}
 
 		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A'))) {

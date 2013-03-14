@@ -636,7 +636,18 @@
 						echo "<font class='error'>".t("Myyntitilausriville päivitettiin määrät")."</font><br/><br/>";
 					}
 					else {
-						echo "<font class='error'>".t("Myyntitilausrivi on keratty, toimitettu tai laskutettu, joten sitä ei päivitetty")."</font><br/><br/>";
+						$query = "	SELECT tilausrivin_lisatiedot.tilausrivitunnus
+									FROM tilausrivin_lisatiedot
+									JOIN tilausrivi ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
+									WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivin_lisatiedot.tilausrivilinkki = '{$rivitunnus_temp}'";
+						$result = pupe_query($query);
+
+						$tilausrivin_lisatiedot_row = mysql_fetch_assoc($result);
+						//jos tilausrivin lisatiedot rivi löytyy kyseessä on naitettu myynti-osto tilaus
+						if(!empty($tilausrivin_lisatiedot_row)) {
+							echo "<font class='error'>".t("Myyntitilausrivi on kerätty, toimitettu tai laskutettu, joten sitä ei päivitetty")."</font><br/><br/>";
+						}
 					}
 				}
 

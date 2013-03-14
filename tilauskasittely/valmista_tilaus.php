@@ -1400,7 +1400,7 @@
 			}
 
 			if ($toim != 'KORJAA' and $toim != 'TUTKAA') {
-				echo "<tr><td colspan='8'>",t("Valmista syötetyt kappaleet"),":</td><td><input type='submit' name='osavalmistus' id='osavalmistus' value='".t("Valmista")."'><input type='hidden' name='tulin' value='{$tulin}' /></td>$osavalmistus_force</tr>";
+				echo "<tr><td colspan='8'>",t("Valmista syötetyt kappaleet"),":</td><td><input type='submit' name='osavalmistus' id='osavalmistus' value='".t("Valmista")."'></td>$osavalmistus_force</tr>";
 				echo "<tr><td colspan='4'>",t("Valmista prosentti koko tilauksesta"),":</td><td colspan='4' align='right'><input type='text' name='kokopros' size='5'> % </td><td><input type='submit' name='osavalmistus' id='osavalmistus' value='".t("Valmista")."'></td>$osavalmistuspros_force</tr>";
 				echo "<tr><td colspan='8'>",t("Siirrä valitut valmisteet uudelle tilaukselle"),":</td><td><input type='submit' name='osatoimitus' id='osatoimitus' value='".t("Osatoimita")."'></td>$osatoimitus_force</tr>";
 				echo "<tr><td colspan='8'>",t("Valmista koko tilaus"),":</td><td><input type='submit' name='kokovalmistus' id='kokovalmistus' value='".t("Valmista")."'></td>$kokovalmistus_force";

@@ -181,7 +181,7 @@
 			$generoitumuuttuja .= " and lasku.nimi like '%$sanimi%' ";
 		}
 
-		if ($sytunnus != '' and $grouppaus == "ytunnus") {
+		if ($sytunnus != '') {
 
 			// KAUTTALASKUTUSKIKKARE
 			if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $kukarow['yhtio'] == $GLOBALS['koti_yhtio'] and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
@@ -220,7 +220,7 @@
 
 			$generoitumuuttuja .= " and lasku.liitostunnus in ($row[tunnukset]) ";
 		}
-        if ($generoitumuuttuja == "") {
+        if ($generoitumuuttuja == "" and !empty($sliitostunnus)) {
             $generoitumuuttuja = " AND lasku.liitostunnus = $sliitostunnus ";
         }
 

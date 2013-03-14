@@ -937,14 +937,14 @@
 			}
 
 			//	Voidaan hypätä suoraan muokkaamaan tilausta
-			if ($toim == "" and isset($tulin) and $tulin == "VALINNASTA" and strpos($row["Tilaus"], ",") === FALSE and $row["Tilaustyyppi"] == "W") {
-
+			if ($toim == "" and strpos($row["Tilaus"], ",") === FALSE and $row["Tilaustyyppi"] == "W") {
 				echo "	<tr>
 							<td class='back' colspan='2'>
 							<form method='post' action='tilaus_myynti.php'>
 							<input type='hidden' name='toim' value='VALMISTAVARASTOON'>
 							<input type='hidden' name='tee' value='AKTIVOI'>
 							<input type='hidden' name='tilausnumero' value='$row[Tilaus]'>
+							<input type='hidden' name='lopetus' value='$PHP_SELF////tee=VALMISTA//tulin=VALINNASTA//valmistettavat=$valmistettavat'>
 							<input type='submit' value='".t("Muokkaa tilausta")."'>
 							</form>
 							</td>

@@ -117,10 +117,10 @@ if(!function_exists("pankkitiedot")) {
 				$pankki["pankkilaitos"] 	= "Ålandsbanken";
 				$pankki["swift"]			= "AABAFI22";
 				break;
-			case (7) : //Itella Pankki
+			case (7) : //Citibank
 				$pankki["rahalaitos"]		= '  ';
-				$pankki["pankkilaitos"] 	= "Itella Pankki";
-				$pankki["swift"]			= "ITELFIHH";
+				$pankki["pankkilaitos"] 	= "Citibank";
+				$pankki["swift"]			= "CITIFIHX";
 				break;
 			case (8) : //Sampo Pankki
 				$pankki["rahalaitos"]		= '8 ';

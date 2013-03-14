@@ -73,12 +73,12 @@ if(!function_exists("pankkitiedot")) {
 						break;
 					case (6) : //Tapiola Pankki
 						$pankki["rahalaitos"]		= '  ';
-						$pankki["pankkilaitos"] 	= "Tapiolapankki";
+						$pankki["pankkilaitos"] 	= "Tapiola Pankki";
 						$pankki["swift"]			= "TAPIFI22";
 						break;
-					case (7) : //DnB NOR Bank ASA
+					case (7) : //DNB Bank ASA
 						$pankki["rahalaitos"]		= '  ';
-						$pankki["pankkilaitos"] 	= "DnB NOR Bank ASA";
+						$pankki["pankkilaitos"] 	= "DNB Bank ASA";
 						$pankki["swift"]			= "DNBAFIHX";
 						break;
 					case (8) : //Swedbank
@@ -91,18 +91,18 @@ if(!function_exists("pankkitiedot")) {
 						$pankki["pankkilaitos"] 	= "S-Pankki";
 						$pankki["swift"]			= "SBANFIHH";
 						break;
-					}
+				}
 				break;
-			case (4) : //Nooa , säästöpankit (Sp) ja paikallisosuuspankit (Pop) sekä Aktia
+			case (4) : //Aktia Pankki, Säästöpankit (Sp) ja Paikallisosuuspankit (POP)
 				$pankki["rahalaitos"]		= '4 ';
-				$pankki["pankkilaitos"] 	= "Nooa";
+				$pankki["pankkilaitos"] 	= "Aktia, Säästöpankit ja Paikallisosuuspankit";
 				$pankki["tiedostonimilum2"]	= "XXXXLUM2.DAT";
 				$pankki["ytunnus"]			= sprintf("%010.10s",$yhtiorow["ytunnus"])." ";
 				$pankki["swift"]			= "HELSFIHH";
 				break;
 			case (5) : //osuuspankit (Op), OKO ja Okopankki
 				$pankki["rahalaitos"]		= '5 ';
-				$pankki["pankkilaitos"] 	= "Osuuspankki";
+				$pankki["pankkilaitos"] 	= "Pohjola Pankki";
 				$pankki["ytunnus"]			= $ytunnus_valiviivalla;
 				$pankki["lum_eumaksu"] 		= "B";
 				$pankki["lum_et_5kentta"]	= sprintf ('%05s', $asiakastunnus);
@@ -117,14 +117,30 @@ if(!function_exists("pankkitiedot")) {
 				$pankki["pankkilaitos"] 	= "Ålandsbanken";
 				$pankki["swift"]			= "AABAFI22";
 				break;
-			case (7) : //Citibank
-				$pankki["rahalaitos"]		= '  ';
-				$pankki["pankkilaitos"] 	= "Citibank";
-				$pankki["swift"]			= "CITIFIHX";
+			case (7) :
+				$tmp_tilino = substr($tilino, 0, 3);
+
+				switch ($tmp_tilino) {
+					case (711) : //Calyon Pankki
+						$pankki["rahalaitos"]		= '  ';
+						$pankki["pankkilaitos"] 	= "Calyon";
+						$pankki["swift"]			= "BSUIFIHH";
+						break;
+					case (715) : //Itella Pankki
+						$pankki["rahalaitos"]		= '  ';
+						$pankki["pankkilaitos"] 	= "Itella Pankki";
+						$pankki["swift"]			= "ITELFIHH";
+						break;
+					case (713) : //Citibank
+						$pankki["rahalaitos"]		= '  ';
+						$pankki["pankkilaitos"] 	= "Citibank";
+						$pankki["swift"]			= "CITIFIHX";
+						break;
+				}
 				break;
 			case (8) : //Sampo Pankki
 				$pankki["rahalaitos"]		= '8 ';
-				$pankki["pankkilaitos"] 	= "Sampo";
+				$pankki["pankkilaitos"] 	= "Sampo Pankki";
 				$pankki["tiedostonimi"] 	= "LEOL2L.DAT";
 				$pankki["tiedostonimilum2"]	= "LEUM2L.DAT";
 				$pankki["swift"]			= "DABAFIHH";

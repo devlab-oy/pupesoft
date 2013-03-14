@@ -1482,6 +1482,11 @@
 
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
 
+			// Intrastat_kurssi kenttä näytetään vain jos yrityksen maa on EE
+			if ($yhtiorow['maa'] != 'EE' and mysql_field_name($result, $i) == 'intrastat_kurssi') {
+				continue;
+			}
+
 			$nimi = "t[$i]";
 
 			if (isset($t[$i])) {

@@ -644,7 +644,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 						$('#'+hyllyalue+'_hidden').val(varastontunniste+hyllyalue_val);
 					};
 
-					$('input.hyllyalue').on('keyup', hyllyalue_function);
+					$('input.hyllyalue').on('keyup change blur', hyllyalue_function);
 					$('select.select_varastontunniste').on('change', hyllyalue_function);
 
 				});</script>";

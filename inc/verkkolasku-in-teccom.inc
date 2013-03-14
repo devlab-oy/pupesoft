@@ -1,5 +1,8 @@
 <?php
 
+	// Bosch Teccom -case
+	$xml = isset($xml->ArchivedDocument->Invoice) ? $xml->ArchivedDocument->Invoice : $xml;
+
 	$laskuformaatti 		= "TECCOM-INVOICE";
 
 	// parseroidaan xml
@@ -422,7 +425,8 @@
 							 * core value = GKN
 							 */
 
-							if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
+							if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx core value") or
+								($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
 								($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
 								(in_array($laskuttajan_toimittajanumero, array("123084","123007")) and strpos($charge_description, "core value") !== FALSE)) {
 
@@ -464,6 +468,8 @@
 									else {
 										$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $node->Amount);
 										$rtuoteno[$x]['hinta']				= $rtuoteno[$x]['rivihinta'] / $rtuoteno[$x]['kpl'];
+
+										if ($laskuttajan_toimittajanumero == "123067") $rtuoteno[$i]['rivihinta'] -= $rtuoteno[$x]['rivihinta'];
 									}
 
 									$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
@@ -478,7 +484,7 @@
 									}
 								}
 							}
-							elseif ($charge_description == 'freight costs' or $charge_code == 'zfwa' or $charge_code == 'freightcharges') {
+							elseif ($charge_description == 'freight costs' or $charge_description == 'freight charges' or $charge_code == 'zfwa' or $charge_code == 'freightcharges') {
 
 								/*
 								 * Rahtikulu
@@ -493,11 +499,13 @@
 								$osto_rivi_kulu_alv = $laskun_alv;
 
 								// ZF -keississä otetaan rahti pois rivihinnasta.
-								if ($charge_code == 'freightcharges') {
+								// Bosch -keississä ($charge_description == 'freight charges') otetaan myös rahti pois rivihinnasta
+								if ($charge_code == 'freightcharges' or $charge_description == 'freight charges') {
 									$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node->Amount);
 								}
 
-								if ($charge_description == 'freight costs' or $charge_code == 'freightcharges') {
+								// Bosch -keissit
+								if ($charge_description == 'freight costs' or $charge_code == 'freightcharges' or $charge_description == 'freight charges') {
 									$ei_oteta_kulua_pois = true;
 								}
 							}

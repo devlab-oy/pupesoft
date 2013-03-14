@@ -19287,6 +19287,7 @@ if (!function_exists('hyllyalue')) {
 
 		/*
 		Funktioon liittyvä javascripti löytyy parametrit.inc riviltä 617
+		Funktion $hyllyalue_key ei saa sisältää "_"-merkkiä
 		*/
 
 		if ($esitysmuoto == 'riisuttu') {

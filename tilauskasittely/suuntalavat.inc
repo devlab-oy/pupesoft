@@ -535,7 +535,7 @@
 				echo "<font class='ok'>",t("Suuntalava mahtuu hyllypaikalle"),"</font>&nbsp;&nbsp;";
 
 				echo "<form method='post'>";
-				echo "<select name='suuntalavan_hyllypaikka'>";
+				echo "<select name='suuntalavanhyllypaikka'>";
 
 				while ($loput_row = mysql_fetch_assoc($loput_res)) {
 					echo "<option value='{$loput_row['hyllyalue']}#{$loput_row['hyllynro']}#{$loput_row['hyllyvali']}#{$loput_row['hyllytaso']}'>{$loput_row['hyllyalue']} {$loput_row['hyllynro']} {$loput_row['hyllyvali']} {$loput_row['hyllytaso']}</option>";
@@ -571,7 +571,7 @@
 
 		echo "<table><tr>";
 		echo "<th>",t("Syötä suuntalavalle hyllypaikka"),"</th>";
-		echo "<td>",hyllyalue("suuntalavanhyllyalue", '')," <input type='text' name='suuntalavan_hyllynro' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavan_hyllyvali' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavan_hyllytaso' size='6' maxlength='5' value='' /></td>";
+		echo "<td>",hyllyalue("suuntalavanhyllyalue", '')," <input type='text' name='suuntalavanhyllynro' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavanhyllyvali' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavanhyllytaso' size='6' maxlength='5' value='' /></td>";
 		echo "</tr></table>";
 
 		echo "<input type='submit' value='",t("Vie koko suuntalava varastoon"),"' />";

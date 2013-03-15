@@ -155,7 +155,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
 			$verkkolasku_lah_talteen = trim($t[$i]);
 			$verkkolasku_lah_talteen_i = $i;
 		}
-		
+
         if (mysql_field_name($result, $i) == "erapaivan_ylityksen_raja") {
             $t[$i] = (int) trim($t[$i]);
 			if ($t[$i] < 1) {
@@ -164,5 +164,3 @@ if(!function_exists("yhtion_parametrittarkista")) {
         }
 	}
 }
-
-?>

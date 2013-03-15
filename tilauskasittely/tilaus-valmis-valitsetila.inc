@@ -7,6 +7,7 @@
 	$kerattavia 	= 0;
 	$ei_kerattavia 	= 0;
 	$tilaus_valmis_message = "";
+	$voiko_toimittaa = true;
 
 	// Pamautetaan toimitusvahvistus asiakkaalle jos menn‰‰n haaraan jossa ei toimiteta mit‰‰n
 	$toimitusvahvitus_laheta = FALSE;
@@ -107,12 +108,11 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND otunnus = '{$laskurow['tunnus']}'";
 		$tilausrivi_result = pupe_query($query);
-		$voiko_toimittaa = true;
-
+	
 		while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_result)) {
 			list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tilausrivi_row['tuoteno'], 'JTSPEC2', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
 
-			if ($myytavissa < $tilausrivi_row['tilkpl']) {
+			if ($myytavissa < $tilausrivi_row['varattu']) {
 				$voiko_toimittaa = false;
 				break;
 			}

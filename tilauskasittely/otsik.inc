@@ -1938,7 +1938,7 @@
 			if ($toim != "MYYNTITILI") {
 				echo "<td>".t("Osatoimitus").":</td>";
 				echo "<td>";
-				echo "<select name='osatoimitus' ".js_alasvetoMaxWidth("jtkielto", 200).">";
+				echo "<select name='osatoimitus' id='osatoimitus' ".js_alasvetoMaxWidth("osatoimitus", 200).">";
 				echo "<option value='' $osath1>".t("Voidaan osatoimittaa")."</option>";
 				echo "<option value='o' $osath>".t("Ei osatoimiteta")."</option>";
 				echo "<option value='e' $osath2>".t("Ei osatoimiteta").'. '.t("Tilaus toimitetaan automaattisesti kun kaikkia tuotteita on varastossa")."</option>";
@@ -1948,6 +1948,7 @@
 			else {
 				echo "<td></td><td></td>";
 			}
+
 			echo "</tr>";
 			echo "<tr><td>".t("Asiakkaan piiri").":</td><td>";
 

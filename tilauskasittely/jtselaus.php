@@ -174,7 +174,6 @@
 						AND tila = 'N'";
 		}
 		else {
-
 			// "Osatoimitus kielletty"-tilauksella, mutta nyt kaikki JT-rivit on poimittu, joten laitetaan tilaus eteenpäin
 			$query = "	SELECT lasku.tunnus tilaus,
 						count(tilausrivi.tunnus) tot_riveja,

@@ -104,13 +104,13 @@ echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"alusta.php\"' class='button left'><img src='back2.png'></button>";
 echo "<h1>",t("SUUNTALAVAN TUOTTEET"),"</h1></div>";
 
-echo "<form name='viivakoodiformi' method='post' action=''>
+echo "<form name='viivakoodiformi' method='post' action='' id='viivakoodiformi'>
 	<table class='search'>
 		<tr>
 			<th>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
 			</th>
 			<td>
-				<button name='submit' value='viivakoodi' class='button' onclick='submit();'>",t("Etsi"),"</button>
+				<button name='submit' id='valitse_nappi' value='viivakoodi' class='button' onclick='submit();'>",t("Etsi"),"</button>
 			</td>
 		</tr>
 	</table>
@@ -222,9 +222,18 @@ echo "
 </table>
 </div>";
 
-# Autofocus opera mobileen
+// Autofocus opera mobileen
 echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
 echo "<script type='text/javascript'>
+
+	$(document).ready(function() {
+		$('#viivakoodi').on('keyup', function() {
+			// Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
+			if ($('#viivakoodi').val().length > 8) {
+				document.getElementById('valitse_nappi').click();
+			}
+		});
+	});
 
 	function doFocus() {
 	        var focusElementId = 'viivakoodi'

@@ -217,6 +217,12 @@
 					$pdf->draw_text(62, $kala2, $tilausnumero, $firstpage, $kirj);
 					$kala2 -= 10;
 				}
+
+				// Lisäkommentti jälkivaatimuksesta seuraavalle riville
+				if ($laskurow['jv'] != '') {
+					$pdf->draw_text(62, $kala2, t("Jälkivaatimus"), $firstpage, $kirj);
+					$kala2 -= 10;
+				}
 			}
 
 			// summataan kaikki painot yhteen
@@ -281,25 +287,28 @@
 					ORDER BY ytunnus, tunnus";
 	}
 	else {
-		$query = "	SELECT nimi,
-					nimitark,
-					osoite,
-					postino,
-					postitp,
-					toim_nimi,
-					toim_nimitark,
-					toim_osoite,
-					toim_postino,
-					toim_postitp,
-					ytunnus,
-					liitostunnus,
-					max(toimitustavan_lahto) toimitustavan_lahto,
-					group_concat(tunnus) tunnus
+		$query = "	SELECT
+					lasku.nimi,
+					lasku.nimitark,
+					lasku.osoite,
+					lasku.postino,
+					lasku.postitp,
+					lasku.toim_nimi,
+					lasku.toim_nimitark,
+					lasku.toim_osoite,
+					lasku.toim_postino,
+					lasku.toim_postitp,
+					lasku.ytunnus,
+					lasku.liitostunnus,
+					max(lasku.toimitustavan_lahto) toimitustavan_lahto,
+					group_concat(lasku.tunnus) tunnus,
+					max(maksuehto.jv) jv
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND tunnus in ($otunnukset)
-					GROUP BY nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, ytunnus, liitostunnus
-					ORDER BY ytunnus, liitostunnus, tunnus";
+					LEFT JOIN maksuehto on (lasku.yhtio=maksuehto.yhtio AND lasku.maksuehto=maksuehto.tunnus)
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND lasku.tunnus in ($otunnukset)
+					GROUP BY lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.ytunnus, lasku.liitostunnus
+					ORDER BY lasku.ytunnus, lasku.liitostunnus, lasku.tunnus";
 	}
 
 	$result = mysql_query($query) or pupe_error($query);

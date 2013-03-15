@@ -20309,3 +20309,84 @@ if (!function_exists('search_array_key_recursive')) {
 		return $results;
 	}
 }
+
+/**
+ * HOW TO:
+ * $holidays = array(
+ * 		"2008-12-25",
+ * 		"2008-12-26",
+ * 		"2009-01-01"
+ * );
+ *
+ * $tyopaivien_lukumaara = hae_tyopaivien_lukumaara('2012-01-01', '2012-01-31', $holidays);
+ *
+ */
+//The function returns the no. of business days between two dates and it skips the holidays
+if (!function_exists('hae_tyopaivien_lukumaara')) {
+
+	function hae_tyopaivien_lukumaara($alku_aika, $loppu_aika, $lomat = array()) {
+		if (!empty($alku_aika) and !empty($loppu_aika)) {
+			// do strtotime calculations just once
+			$loppu_aika = strtotime($loppu_aika);
+			$alku_aika = strtotime($alku_aika);
+
+
+			//The total number of days between the two dates. We compute the no. of seconds and divide it to 60*60*24
+			//We add one to inlude both dates in the interval.
+			$paivat = ($loppu_aika - $alku_aika) / 86400 + 1;
+
+			$taysien_viikkojen_lkm = floor($paivat / 7);
+			$jaljella_olevien_paivien_lkm = fmod($paivat, 7);
+
+			//It will return 1 if it's Monday,.. ,7 for Sunday
+			$viikon_ensimmainen_paiva = date("N", $alku_aika);
+			$viikon_viimeinen_paiva = date("N", $loppu_aika);
+
+			//---->The two can be equal in leap years when february has 29 days, the equal sign is added here
+			//In the first case the whole interval is within a week, in the second case the interval falls in two weeks.
+			if ($viikon_ensimmainen_paiva <= $viikon_viimeinen_paiva) {
+				if ($viikon_ensimmainen_paiva <= 6 && 6 <= $viikon_viimeinen_paiva)
+					$jaljella_olevien_paivien_lkm--;
+				if ($viikon_ensimmainen_paiva <= 7 && 7 <= $viikon_viimeinen_paiva)
+					$jaljella_olevien_paivien_lkm--;
+			}
+			else {
+				// (edit by Tokes to fix an edge case where the start day was a Sunday
+				// and the end day was NOT a Saturday)
+				// the day of the week for start is later than the day of the week for end
+				if ($viikon_ensimmainen_paiva == 7) {
+					// if the start date is a Sunday, then we definitely subtract 1 day
+					$jaljella_olevien_paivien_lkm--;
+
+					if ($viikon_viimeinen_paiva == 6) {
+						// if the end date is a Saturday, then we subtract another day
+						$jaljella_olevien_paivien_lkm--;
+					}
+				}
+				else {
+					// the start date was a Saturday (or earlier), and the end date was (Mon..Fri)
+					// so we skip an entire weekend and subtract 2 days
+					$jaljella_olevien_paivien_lkm -= 2;
+				}
+			}
+
+			//The no. of business days is: (number of weeks between the two dates) * (5 working days) + the remainder
+//---->february in none leap years gave a remainder of 0 but still calculated weekends between first and last day, this is one way to fix it
+			$tyo_paivat = $taysien_viikkojen_lkm * 5;
+			if ($jaljella_olevien_paivien_lkm > 0) {
+				$tyo_paivat += $jaljella_olevien_paivien_lkm;
+			}
+
+			//We subtract the holidays
+			foreach ($lomat as $holiday) {
+				$time_stamp = strtotime($holiday);
+				//If the holiday doesn't fall in weekend
+				if ($alku_aika <= $time_stamp && $time_stamp <= $loppu_aika && date("N", $time_stamp) != 6 && date("N", $time_stamp) != 7)
+					$tyo_paivat--;
+			}
+		}
+		return $tyo_paivat;
+	}
+
+}
+

@@ -181,7 +181,10 @@
 			$generoitumuuttuja .= " and lasku.nimi like '%$sanimi%' ";
 		}
 
-		if ($sytunnus != '') {
+		if (!empty($sliitostunnus)) {
+         	$generoitumuuttuja = " AND lasku.liitostunnus = $sliitostunnus ";
+        }
+		elseif (!empty($sytunnus)) {
 
 			// KAUTTALASKUTUSKIKKARE
 			if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $kukarow['yhtio'] == $GLOBALS['koti_yhtio'] and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
@@ -220,9 +223,6 @@
 
 			$generoitumuuttuja .= " and lasku.liitostunnus in ($row[tunnukset]) ";
 		}
-        if ($generoitumuuttuja == "" and !empty($sliitostunnus)) {
-            $generoitumuuttuja = " AND lasku.liitostunnus = $sliitostunnus ";
-        }
 
 		if ($yli != 0) {
 			$having = " HAVING avoimia >= '$yli' ";

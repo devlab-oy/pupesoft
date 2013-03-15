@@ -71,6 +71,7 @@ $tilausvalmis_asiakas_row = mysql_fetch_assoc($tilausvalmis_asiakas_res);
 // samma på erapaivan_ylityksen_raja
 $luottoraja_chk = (($yhtiorow["luottorajan_ylitys"] == "K"             or ($yhtiorow["luottorajan_ylitys"] == "E"             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) ? 1 : 0;
 $erapaiva_chk   =  ($yhtiorow["erapaivan_ylityksen_toimenpide"] == "K" or ($yhtiorow["erapaivan_ylityksen_toimenpide"] == "E" and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) ? 1 : 0;
+
 if ($luottoraja_chk or $erapaiva_chk) {
 
 	// Parametrejä saatanat.php:lle

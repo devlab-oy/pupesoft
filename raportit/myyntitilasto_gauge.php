@@ -190,7 +190,7 @@
 				round(sum(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)))), 0) AS 'tilatut_kate',
 				sum(if(tilausrivi.toimitettu!='', 1, 0)) AS 'toimitetut_rivit'
 				FROM tilausrivi
-				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotetyyppi != 'N')
+				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '')
 				JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
 				JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -330,7 +330,7 @@
 					kustannuspaikka.nimi AS kustannuspaikka,
 					tuote.osasto, tuote.try
 					FROM tilausrivi
-					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotetyyppi != 'N')
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '')
 					JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
 					JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
 					LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tilausrivi.yhtio AND kustannuspaikka.tunnus = asiakas.kustannuspaikka)
@@ -440,7 +440,7 @@
 					kustannuspaikka.nimi AS kustannuspaikka,
 					tuote.osasto, tuote.try
 					FROM tilausrivi
-					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotetyyppi != 'N')
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '')
 					JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
 					JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
 					LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tilausrivi.yhtio AND kustannuspaikka.tunnus = asiakas.kustannuspaikka)

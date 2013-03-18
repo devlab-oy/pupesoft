@@ -156,7 +156,7 @@ if(!function_exists("tuotetarkista")) {
 			if (isset($t[$i])) {
 				// Tyyppiä ei saa vaihtaa, jos tuotteella on yksikin tapahtuma
 				if (trim(strtoupper($trow["tuotetyyppi"])) != trim(strtoupper($t[$i]))) {
-					if (trim(strtoupper($trow["tuotetyyppi"])) == "" or trim(strtoupper($trow["tuotetyyppi"])) == "N") {
+					if (trim(strtoupper($trow["tuotetyyppi"])) == "") {
 						if ($poistolukko != "" and ($t[$i] == 'R' or $t[$i] == 'K' or $t[$i] == 'M')) {
 							$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
 						}
@@ -463,5 +463,3 @@ if(!function_exists("tuotetarkista")) {
 		}
 	}
 }
-
-?>

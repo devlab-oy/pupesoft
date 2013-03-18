@@ -13,6 +13,9 @@
 						$('.'+$(this).attr('id')).toggle();
 
 						if ($(this).hasClass('nayta_keraaja') || $(this).hasClass('nayta_keraajittain')) {
+
+							$(this).toggleClass('tumma');
+
 							if ($('.'+$(this).attr('id')).is(':visible')) {
 								$('#arrowi_'+$(this).attr('id')).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-down.png');
 							}

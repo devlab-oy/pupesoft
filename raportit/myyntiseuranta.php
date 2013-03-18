@@ -2252,7 +2252,8 @@
 									// jos kyseessa on tuote
 									if ($ken_nimi == "tuoteno") {
 										$koskematon_tuoteno = $row["tuoteno"];
-										$row[$ken_nimi] = "<a href='../tuote.php?tee=Z&tuoteno=".urlencode($row[$ken_nimi])."'>{$row[$ken_nimi]}</a>";
+
+										$row[$ken_nimi] = "<a href='#' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row[$ken_nimi])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$row[$ken_nimi]}</a>";
 									}
 
 									if ($ken_nimi == "laskutuspvm") {

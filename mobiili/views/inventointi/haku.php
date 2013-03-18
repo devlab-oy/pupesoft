@@ -17,7 +17,7 @@
 			</tr>
 			<tr>
 				<th>Tuotepaikka</th>
-				<td><input type='text' name='tuotepaikka'></td>
+				<td><input type='text' name='tuotepaikka' id='tuotepaikka'></td>
 			</tr>
 		</table>
 </div>
@@ -30,10 +30,22 @@
 <script type='text/javascript'>
 
 	$(document).ready(function() {
+
+		// Tuotteen viivakoodi autosubmit
 		$('#viivakoodi').on('keyup', function() {
 			// Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
 			if ($('#viivakoodi').val().length > 8) {
 				$('#haku_formi').submit();
+			}
+		});
+
+		// Tuotepaikka autosubmit
+		$('#tuotepaikka').on('keyup', function() {
+			// Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
+			if ($('#tuotepaikka').val().length > 4) {
+				setTimeout(function() {
+					$('#haku_formi').submit();
+				}, 1000);
 			}
 		});
 	});

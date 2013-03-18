@@ -724,22 +724,24 @@
 		$ulos .= "<option value='K'{$sel}>".t("Käytössä")."</option>";
 		$ulos .= "</select>";
 
-		$query_ale_lisa = generoi_alekentta('M', 'panttitili');
+		if (trim($trow[$i]) == 'K') {
+			$query_ale_lisa = generoi_alekentta('M', 'panttitili');
 
-		$query = "	SELECT
-					round(sum(hinta*kpl* {$query_ale_lisa}), 2) as rivihinta
-					FROM panttitili
-					WHERE panttitili.yhtio = '{$kukarow['yhtio']}'
-					AND panttitili.tuoteno = '{$trow['tuoteno']}'
-					AND panttitili.status  = ''";
-		$panttitili_result = pupe_query($query);
-		$panttitili_row = mysql_fetch_assoc($panttitili_result);
+			$query = "	SELECT
+						round(sum(hinta*kpl* {$query_ale_lisa}), 2) as rivihinta
+						FROM panttitili
+						WHERE panttitili.yhtio = '{$kukarow['yhtio']}'
+						AND panttitili.tuoteno = '{$trow['tuoteno']}'
+						AND panttitili.status  = ''";
+			$panttitili_result = pupe_query($query);
+			$panttitili_row = mysql_fetch_assoc($panttitili_result);
 
-		$ulos .= " <font class='message'>".t("Tuotetta panttitileillä yhteensä").": ".str_replace('.', ',', str_replace(',', ' ', $panttitili_row['rivihinta']))." EUR</font>";
+			$ulos .= " <font class='message'>".t("Tuotetta panttitileillä yhteensä").": {$panttitili_row['rivihinta']} {$yhtiorow['valkoodi']}</font>";
+		}
+
 		$ulos .= "</td>";
 
 		$jatko = 0;
-
 	}
 
 	if (mysql_field_name($result, $i) == "meria_saastuttava") {
@@ -751,7 +753,6 @@
 		$ulos .= "<option value='K'{$sel}>".t("Kyllä")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
-
 	}
 
 	if (mysql_field_name($result, $i) == "ostoehdotus") {

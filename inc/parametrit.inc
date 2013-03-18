@@ -615,6 +615,38 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 							return false;
 						}
 					});
+
+					var hyllyalue_function = function() {
+
+						var hyllyalue, hyllyalue_val;
+
+						if ($(this).is(':text')) {
+							hyllyalue_tmp = $(this).attr('id');
+							hyllyalue_tmp = hyllyalue_tmp.replace(/(\[|\])/g,\"\\\\$1\");
+
+							hyllyalue = hyllyalue_tmp.split(\"_\", 1);
+
+							hyllyalue_val = $(this).val();
+						}
+						else {
+							hyllyalue_tmp = $(this).attr('id');
+							hyllyalue_tmp = hyllyalue_tmp.replace(/(\[|\])/g,\"\\\\$1\");
+
+							hyllyalue = hyllyalue_tmp.split(\"_\", 1);
+
+							hyllyalue_val = $('#'+hyllyalue).val();
+						}
+
+						var varastontunniste = $('#'+hyllyalue+'_select_varastontunniste > option:selected').val();
+
+						if (varastontunniste == undefined) varastontunniste = '';
+
+						$('#'+hyllyalue+'_hidden').val(varastontunniste+hyllyalue_val);
+					};
+
+					$('input.hyllyalue').on('keyup change blur', hyllyalue_function);
+					$('select.select_varastontunniste').on('change', hyllyalue_function);
+
 				});</script>";
 
 			echo "<title>\n$yhtiorow[nimi]</title>\n";

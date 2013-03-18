@@ -971,7 +971,11 @@
 			elseif (trim($array[$i]) == 'ytunnus' and !$tarkkahaku) {
 				$lisa .= " and REPLACE({$array[$i]}, '-', '') like '%".str_replace('-', '', $haku[$i])."%' ";
 			}
+			elseif ($from == "yllapito" and $toim == "tuotteen_toimittajat_tuotenumerot" and trim($array[$i]) == "tuoteno") {
+				$lisa .= " and toim_tuoteno_tunnus {$hakuehto} ";
+			}
 			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'kohde' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
+
 				list($a, $b) = explode("/", $haku[$i]);
 
 				if ((int) $a > 0) $a_lisa .= " asiakas = '$a' ";
@@ -1135,7 +1139,7 @@
 		}
 
 		// Ei n‰ytet‰ seuraavia avainsanoja avainsana-yll‰pitolistauksessa
-		$avainsana_query_lisa = $toim == "avainsana" ? " AND laji NOT IN ('MYSQLALIAS', 'HALYRAP', 'SQLDBQUERY') " : "";
+		$avainsana_query_lisa = $toim == "avainsana" ? " AND laji NOT IN ('MYSQLALIAS', 'HALYRAP', 'SQLDBQUERY', 'KKOSTOT') " : "";
 
 		$query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa";
         $query .= "$ryhma ORDER BY $jarjestys $limiitti";
@@ -1143,7 +1147,7 @@
 
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
-			if (isset($liitostunnus)) echo "&liitostunnus=$liitostunnus";
+			if (isset($liitostunnus)) echo "&liitostunnus={$liitostunnus}";
 			echo "' method = 'post'>
 					<input type = 'hidden' name = 'uusi' value = '1'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
@@ -1396,6 +1400,16 @@
 								}
 							}
 						}
+						elseif (mysql_field_name($result, $i) == 'toim_tuoteno_tunnus') {
+							$query = "	SELECT tt.toim_tuoteno
+										FROM tuotteen_toimittajat AS tt
+										WHERE tt.yhtio = '{$kukarow['yhtio']}'
+										AND tt.tunnus = '{$trow[$i]}'";
+							$toim_tuoteno_chk_res = pupe_query($query);
+							$toim_tuoteno_chk_row = mysql_fetch_assoc($toim_tuoteno_chk_res);
+
+							echo $toim_tuoteno_chk_row['toim_tuoteno'];
+						}
 						else {
 							echo $trow[1];
 						}
@@ -1505,6 +1519,11 @@
 		echo "<table>";
 
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
+
+			// Intrastat_kurssi kentt‰ n‰ytet‰‰n vain jos yrityksen maa on EE
+			if ($yhtiorow['maa'] != 'EE' and mysql_field_name($result, $i) == 'intrastat_kurssi') {
+				continue;
+			}
 
 			$nimi = "t[$i]";
 
@@ -1829,7 +1848,7 @@
 			$lukitse_avaimeen = urlencode($tuoteno);
 
 			if (($toikrow = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat%", "", "OK")) !== FALSE) {
-				echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame><br />";
 			}
 
 			if (($toikrow = tarkista_oikeus("yllapito.php", "toimittajaalennus%", "", "OK")) !== FALSE) {
@@ -1859,7 +1878,6 @@
 		}
 
 		echo "</td></tr>";
-		echo "</table>";
 
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
 		if ($toim == "auto_vari" or
@@ -1894,6 +1912,7 @@
 			$toim == "yhteyshenkilo" or
 			$toim == "autodata_tuote" or
 			$toim == "tuotteen_toimittajat" or
+			$toim == "tuotteen_toimittajat_tuotenumerot" or
 			$toim == "extranet_kayttajan_lisatiedot" or
 			$toim == "asiakkaan_avainsanat" or
 			$toim == "rahtisopimukset" or
@@ -1926,7 +1945,8 @@
 
 					if (!isset($seuraavatunnus)) $seuraavatunnus = 0;
 
-					echo "<br><br>
+					echo "<tr><td class='back'>";
+					echo "<br />
 						<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()' enctype='multipart/form-data'>
 						<input type = 'hidden' name = 'toim' value = '$aputoim'>
 						<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
@@ -1940,14 +1960,28 @@
 						<input type='hidden' name='seuraavatunnus' value = '$seuraavatunnus'>
 						<input type = 'submit' value = '".t("Poista $otsikko_nappi")."'>
 						</form>";
+					echo "</td></tr>";
 				}
 			}
 		}
+
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'tuotteen_toimittajat') {
+			if (($toikrow = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat_tuotenumerot%", "", "OK")) !== FALSE) {
+				$lukitse_avaimeen = urlencode($toim_tuoteno_tunnus);
+
+				echo "<tr><td class='back'></td></tr>";
+				echo "<tr><td class='back'>";
+				echo "<iframe id='tuotteen_toimittajat_tuotenumerot_iframe' name='tuotteen_toimittajat_tuotenumerot_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$lukitse_avaimeen}&lukitse_avaimeen={$lukitse_avaimeen}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "</td></tr>";
+			}
+		}
+
+		echo "</table>";
 	}
 	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit"  and $uusilukko == "" and $from == "") {
 		echo "<br>
 				<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
-				if (isset($liitostunnus)) echo "&liitostunnus=$liitostunnus";
+				if (isset($liitostunnus)) echo "&liitostunnus={$liitostunnus}";
 				echo "' method = 'post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
 				<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
@@ -1994,6 +2028,10 @@
 
 	if ($from == "yllapito" and $toim == "tuotteen_toimittajat") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_toimittajat_iframe' $jcsmaxheigth);</script>";
+	}
+
+	if ($from == "yllapito" and $toim == "tuotteen_toimittajat_tuotenumerot") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_toimittajat_tuotenumerot_iframe' $jcsmaxheigth);</script>";
 	}
 
 	if ($from == "yllapito" and $toim == "liitetiedostot") {

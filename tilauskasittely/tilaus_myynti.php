@@ -139,7 +139,6 @@ if ((int) $valitsetoimitus > 0) {
 	$from 			= "VALITSETOIMITUS";
 	$mista 			= "";
 
-
 	$query = "	SELECT tila, alatila, tilaustyyppi
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
@@ -1725,10 +1724,6 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 	$result = pupe_query($query);
 	$laskurow = mysql_fetch_assoc($result);
 
-	if ($toim == "ENNAKKO") {
-		$toim = "RIVISYOTTO";
-	}
-
 	$kaytiin_otsikolla = "NOJOO!";
 }
 
@@ -3150,7 +3145,7 @@ if ($tee == '') {
 		$eiliittymaa 	 = "ON";
 		$luottorajavirhe = "";
 		$jvvirhe 		 = "";
-		$ylivito 		 = "";
+		$ylivito 		 = 0;
 		$trattavirhe 	 = "";
 		$laji 			 = "MA";
 		$grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
@@ -3178,7 +3173,7 @@ if ($tee == '') {
 
 		if ($ylivito > 0) {
 			echo "<br/>";
-			echo "<font class='error'>".t("HUOM: Asiakkaalla on yli 15 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."!</font>";
+			echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!</font>";
 			echo "<br/>";
 		}
 

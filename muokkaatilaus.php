@@ -264,9 +264,23 @@
 		elseif ($toim == "HYPER") {
 			$otsikko = t("tilauksia");
 		}
+		elseif ($toim == 'TOSI_KESKEN') {
+			$otsikko = t("keskener‰isi‰ myyntitilauksia");
+		}
 		else {
 			$otsikko = t("myyntitilausta");
 			$toim = "";
+		}
+
+		//onko pikatilaus ja rivisyˆtt‰ napit disabloitu
+		$button_disabled = "";
+
+		if (($row["tila"] == "L" or $row["tila"] == "N") and isset($row["mapvm"]) and $row["mapvm"] != '0000-00-00' and $row["mapvm"] != '') {
+			$button_disabled = "disabled";
+		}
+
+		if(empty($oikeurow['paivitys'])) {
+			$button_disabled = "disabled";
 		}
 
 		if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $kukarow["kesken"] != 0 and $tilausnumero != "") {
@@ -404,7 +418,7 @@
 			if ($toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET" and $toim != "VALMISTUSMYYNTI" and $toim != "VALMISTUSMYYNTISUPER") {
 				if (isset($eresult) and  mysql_num_rows($eresult) > 0) {
 					// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-					if ($toim == "" or $toim == "SUPER" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN") {
+					if ($toim == "" or $toim == "SUPER" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN") {
 						$aputoim1 = "RIVISYOTTO";
 						$aputoim2 = "PIKATILAUS";
 
@@ -434,6 +448,13 @@
 					}
 					elseif ($toim == "TARJOUSSUPER") {
 						$aputoim1 = "TARJOUS";
+						$lisa1 = t("Muokkaa");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					elseif ($toim == "ENNAKKO") {
+						$aputoim1 = "ENNAKKO";
 						$lisa1 = t("Muokkaa");
 
 						$aputoim2 = "";
@@ -495,11 +516,11 @@
 
 					echo "</select></td>";
 
-					if ($toim == "" or $toim == "SUPER" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN") {
-						echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
+					if ($toim == "" or $toim == "SUPER" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN") {
+						echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2' $button_disabled></td>";
 					}
 
-					echo "<td class='back'><input type='submit' name='$aputoim1' value='$lisa1'></td>";
+					echo "<td class='back'><input type='submit' name='$aputoim1' value='$lisa1' $button_disabled></td>";
 					echo "</tr></table></form>";
 				}
 				else {
@@ -815,26 +836,15 @@
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila = 'V'
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.kpl != 0)
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila = 'G'
+						and lasku.tilaustyyppi = 'M'
+						and lasku.alatila = 'V'
 						$haku
 						GROUP BY lasku.tunnus
 						order by lasku.luontiaika desc
 						$rajaus";
-
-			 // haetaan tilausten arvo
-			if ($kukarow['hinnat'] == 0) {
-				$sumquery = "	SELECT
-				 				round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
-				 				round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa,
-				 				count(distinct lasku.tunnus) kpl
-				 				FROM lasku use index (tila_index)
-				 				JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-				 				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila = 'V'";
-				 $sumresult = pupe_query($sumquery);
-				 $sumrow = mysql_fetch_assoc($sumresult);
-			}
-
 			$miinus = 4;
 		}
 		elseif ($toim == "JTTOIMITA") {
@@ -1336,6 +1346,36 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'N' and lasku.alatila in ('A','','T','U')";
+				$sumresult = pupe_query($sumquery);
+				$sumrow = mysql_fetch_assoc($sumresult);
+			}
+
+			$miinus = 7;
+		}
+		else if ($toim == 'TOSI_KESKEN') {
+			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,
+						if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
+						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka1.extranet extra, lasku.mapvm, lasku.tilaustyyppi, lasku.label
+						FROM lasku use index (tila_index)
+						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
+						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila = 'N'
+						and lasku.alatila = ''
+						$haku
+						HAVING extra = '' or extra is null
+						order by lasku.luontiaika desc
+						$rajaus";
+
+			// haetaan tilausten arvo
+			if ($kukarow['hinnat'] == 0) {
+				$sumquery = "	SELECT
+								round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
+								round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa,
+								count(distinct lasku.tunnus) kpl
+								FROM lasku use index (tila_index)
+								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
+								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'N' and lasku.alatila = ''";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -1856,7 +1896,7 @@
 					$excelrivi++;
 
 					// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-					if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "ENNAKKO" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO"or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
+					if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO"or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
 						$aputoim1 = "RIVISYOTTO";
 						$aputoim2 = "PIKATILAUS";
 
@@ -1893,6 +1933,13 @@
 					}
 					elseif ($whiletoim == "TARJOUSSUPER") {
 						$aputoim1 = "TARJOUS";
+						$lisa1 = t("Muokkaa");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					elseif ($whiletoim == "ENNAKKO") {
+						$aputoim1 = "ENNAKKO";
 						$lisa1 = t("Muokkaa");
 
 						$aputoim2 = "";
@@ -1956,12 +2003,6 @@
 						$pitaako_varmistaa = t("Siirtolista on jo tulostettu! Oletko varma, ett‰ haluat viel‰ muokata siirtolistaa?");
 					}
 
-					$button_disabled = "";
-
-					if (($row["tila"] == "L" or $row["tila"] == "N") and isset($row["mapvm"]) and $row["mapvm"] != '0000-00-00' and $row["mapvm"] != '') {
-						$button_disabled = "disabled";
-					}
-
 					// tehd‰‰n alertti jos sellanen ollaan m‰‰ritelty
 					$javalisa = "";
 
@@ -1995,8 +2036,9 @@
 						echo "	<input type='hidden' name='mista' value='vastaanota'>";
 					}
 
-					if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "ENNAKKO" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
+					if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
 						echo "<input type='submit' name='$aputoim2' value='$lisa2' $button_disabled>";
+
 					}
 
 					echo "<input type='submit' name='$aputoim1' value='$lisa1' $button_disabled>";

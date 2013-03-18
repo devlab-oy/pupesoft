@@ -119,7 +119,7 @@ if ($tee == '') {
 			$eiliittymaa 	 = "ON";
 			$luottorajavirhe = "";
 			$jvvirhe 		 = "";
-			$ylivito 		 = "";
+			$ylivito 		 = 0;
 			$trattavirhe 	 = "";
 			$laji 			 = "MA";
 			$grouppaus       = "";

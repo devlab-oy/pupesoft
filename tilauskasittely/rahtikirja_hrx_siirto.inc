@@ -125,7 +125,7 @@ if ($kollityht > 0) {
 			$hrx_path .= '/';
 		}
 
-		$filenimi = $hrx_path."hrx-import-".md5(uniqid(rand(),true)).".dat";
+		$filenimi = "/tmp/hrx-import-".md5(uniqid(rand(),true)).".dat";
 
 		//kirjoitetaan faili levylle..
 		if (file_put_contents($filenimi, $sanoma) === FALSE) {

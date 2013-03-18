@@ -148,9 +148,6 @@ else {
 
 echo "<table style='padding:0; margin:0; width:135px;'>";
 
-//N‰ytet‰‰n aina exit-nappi
-echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='logout.php' target='main'>".t("Exit")."</a></td></tr>";
-
 // Mit‰ k‰ytt‰j‰ saa tehd‰?
 // Valitaan ensin vain yl‰taso jarjestys2='0'
 
@@ -256,7 +253,9 @@ while ($orow = mysql_fetch_array($result)) {
 
 }
 
+//N‰ytet‰‰n aina exit-nappi
+echo "<tr><td class='back' style='padding:0px; margin:0px;'><br></td></tr>";
+echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='logout.php' target='main'>".t("Kirjaudu ulos")."</a></td></tr>";
+
 echo "</table>";
 echo "</body></html>";
-
-?>

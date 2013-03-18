@@ -328,16 +328,20 @@ if ($tee == "synkronoi") {
 	$rivi = fgets($file);
 
 	while ($rivi = fgets($file)) {
-		list($koodi, $nimi, $eu, $ryhma_tunnus) = explode("\t", trim($rivi));
+		list($koodi, $nimi, $eu, $ryhma_tunnus, $iso3, $iso_name) = explode("\t", trim($rivi));
 
 		$query  = "	INSERT INTO maat SET
 					koodi			= '$koodi',
+					iso3			= '$iso3',
 					nimi            = '$nimi',
+					name			= '$iso_name',
 					eu              = '$eu',
 					ryhma_tunnus    = '$ryhma_tunnus'
 					ON DUPLICATE KEY UPDATE
 					koodi			= '$koodi',
+					iso3			= '$iso3',
 					nimi            = '$nimi',
+					name			= '$iso_name',
 					eu              = '$eu',
 					ryhma_tunnus    = '$ryhma_tunnus'";
 		$result = mysql_query($query) or pupe_error($query);

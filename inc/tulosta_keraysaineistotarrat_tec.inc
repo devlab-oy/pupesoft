@@ -17,6 +17,7 @@ elseif ($tee == 'vanhat' and count($vanhatunnukset) > 0) {
 $query = "	SELECT ytunnus, asiakkaan_tilausnumero tiltunnus, tilkpl, sisviesti2 astunnus,
 			DATE_FORMAT(laadittu, '%d-%m-%y') laadittu, tuote.eankoodi eankoodi, kommentti tuoteno,
 			aktiivinen_kuljetus suunnistus, lasku.tunnus xtunnus,
+			lasku.sisviesti3 as merkkitieto,
 			concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 			FROM lasku
 			JOIN tilausrivi on lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (tilausrivi.tunnus = tilausrivi.perheid or tilausrivi.perheid = 0) and tilausrivi.tyyppi = 'Z'
@@ -36,7 +37,7 @@ if (mysql_num_rows($tarrares) > 0) {
 		$tilkpl			= $tarrarow['tilkpl'];
 		$laadittu		= $tarrarow['laadittu'];
 		$eankoodi		= $tarrarow['eankoodi'];
-		$suunnistus		= $tarrarow['suunnistus'];
+		$suunnistus		= $tarrarow['suunnistus'] . ' ' . $tarrarow['merkkitieto'];
 		$xtunnus		= $tarrarow['xtunnus'];
 
 		list($tuoteno,$nimitys) = explode("#",$tarrarow['tuoteno']);

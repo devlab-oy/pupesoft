@@ -4,10 +4,11 @@
 	# 3 -> viitesiirto
 	# 5 -> suoraveloitus
 	# 9 -> summatietue
+    # S -> Danske Bank factoring VIPN -rivi
 
 	$type=substr($tietue,0,1);
 
-	if ($type == 0 and substr($tietue, 0,3) != "\$\$E" and substr($tietue, 0,3) != "EOF") {
+	if ($type == '0' and substr($tietue, 0,3) != "\$\$E" and substr($tietue, 0,3) != "EOF") {
 
 		$pvm = substr($tietue, 1, 6);
 		$vv = substr($pvm,0,2)+2000;
@@ -18,8 +19,8 @@
 
 		echo "<table>";
 		echo "<tr><td class='back'><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XXS&lopetus=$lopetus$vii_lopetus'>&laquo; ".t("Edellinen")."</td><td class='back'><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XS&lopetus=$lopetus$vii_lopetus'>".t("Seuraava")." &raquo;</a></td></tr>";
-		echo "<tr><th>".t("Aineston luontipv")."</th><td>".pankkipvm(substr($tietue,1,6))."</td></tr>";
-		echo "<tr><th>".t("Aineston luontiaika")."</th><td>".substr($tietue,7,4)."</td></tr>";
+		echo "<tr><th>".t("Aineiston luontipv")."</th><td>".pankkipvm(substr($tietue,1,6))."</td></tr>";
+		echo "<tr><th>".t("Aineiston luontiaika")."</th><td>".substr($tietue,7,4)."</td></tr>";
 		echo "<tr><th>".t("Rahalaitostunnus")."</th><td>".substr($tietue,11,2)."</td></tr>";
 		echo "<tr><th>".t("Aineisto käsitelty")."</th><td>".tv1dateconv($tiliotedatarow["kasitelty"])."</td></tr>";
 
@@ -36,13 +37,19 @@
 		echo "<th>".t("Viite")."</th>";
 		echo "<th>".t("Tila")."</th></tr>";
 	}
-	elseif ($type == 3) {
+	elseif ($type == '3' or $type == 'S') {
 
 		$viiteaineisto_summa = sprintf('%01.2f', substr($tietue, 77, 10) / 100);
 		$viiteaineisto_viite = ltrim(substr($tietue, 43, 20), "0");
+        if ($type == 'S') {
+            $viiteaineisto_tilino = $tiliotedatarow['tilino'];
+        }
+        else {
+            $viiteaineisto_tilino = substr($tietue,1,14);
+        }
 
 		echo "<tr class='aktiivi'><td>".substr($tietue,27,16)."</td>";
-		echo "<td>".tilinumero_print(substr($tietue,1,14))."</td>";
+		echo "<td>".tilinumero_print($viiteaineisto_tilino)."</td>";
 		echo "<td>".pankkipvm(substr($tietue,15,6))."</td>";
 		echo "<td>".pankkipvm(substr($tietue,21,6))."</td>";
 		echo "<td>".substr($tietue,63,12)."</td>";
@@ -72,10 +79,11 @@
 					echo "<font class='error'>".t("Kohdistamatta asiakkaaseen")."</font>";
 				}
 			}
-			echo "</td></tr>";
 		}
+     	echo "</td></tr>";
+
 	}
-	elseif ($type == 9) {
+	elseif ($type == '9') {
 		echo "</table><br><table>";
 		echo "<tr>
 				<td class='back'></td>
@@ -91,4 +99,4 @@
 	elseif(substr($tietue, 0,3) != "\$\$E" and substr($tietue, 0,3) != "EOF") {
 		echo "<td>".t("Tuntematon tietuetunnus")." $type</td>";
 	}
-?>
+

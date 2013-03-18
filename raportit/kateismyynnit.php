@@ -56,6 +56,7 @@
 					var loppukas = 0;
 					var yht_alku = 0;
 					var yht_kat = 0;
+					var yht_katot_ohjelm = 0;
 					var yht_katot = 0;
 					var yht_kattil = 0;
 					var yht_kasero = 0;
@@ -118,6 +119,15 @@
 						else if (obj.elements[i].value != '' && obj.elements[i].id == 'kaikkiyhteensa') {
 							temp_value = Number(obj.elements[i].value.replace(\",\",\".\"));
 							obj.elements[i].value = temp_value.toFixed(2);
+						}
+						else if (obj.elements[i].value != '' && obj.elements[i].id.substring(0,10) == ('kateisotot')) {
+							summa -= Number(obj.elements[i].value.replace(\",\",\".\"));
+							yht_katot_ohjelm += Number(obj.elements[i].value.replace(\",\",\".\"));
+
+							loppukas -= Number(obj.elements[i].value.replace(\",\",\".\"));
+							if (document.getElementById('kassalippaan_loppukassa'+pointer)) {
+								document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
+							}
 						}
 						else if (obj.elements[i].value != '' && obj.elements[i].id.substring(0,10) == ('kateisotto')) {
 							summa -= Number(obj.elements[i].value.replace(\",\",\".\"));
@@ -246,7 +256,8 @@
 						document.getElementById('kaikkiyhteensa').value = temp.toFixed(2);
 						document.getElementById('yht_alkukassa').value = yht_alku.toFixed(2);
 						document.getElementById('yht_kateinen').value = yht_kat.toFixed(2);
-						document.getElementById('yht_kateisotto').value = yht_katot.toFixed(2);
+						var yht_katot_sum = yht_katot + yht_katot_ohjelm;
+						document.getElementById('yht_kateisotto').value = yht_katot_sum.toFixed(2);
 						document.getElementById('yht_kateistilitys').value = yht_kattil.toFixed(2);
 						document.getElementById('yht_kassaerotus').value = yht_kasero.toFixed(2);
 						document.getElementById('yht_loppukassa').value = yht_loppu.toFixed(2);
@@ -255,6 +266,7 @@
 
 						document.getElementById('yht_alkukas').value = yht_alku.toFixed(2);
 						document.getElementById('yht_kat').value = yht_kat.toFixed(2);
+						document.getElementById('yht_katot_ohjelm').value = yht_katot_ohjelm.toFixed(2);
 						document.getElementById('yht_katot').value = yht_katot.toFixed(2);
 						document.getElementById('yht_kattil').value = yht_kattil.toFixed(2);
 						document.getElementById('yht_kasero').value = yht_kasero.toFixed(2);
@@ -658,6 +670,11 @@
 					$arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
 					$comments_yht .= "$arvo<br>";
 				}
+				else if ($kentta == "yht_katot_ohjelm") {
+					$comments_yht .= "K‰teisotto-ohjelmasta yhteens‰: ";
+					$arvo = str_replace(".",",",sprintf('%.2f',$arvo));
+					$comments_yht .= "$arvo<br>";
+				}
 				else if ($kentta == "yht_katot") {
 					$comments_yht .= "K‰teisotto yhteens‰: ";
 					$arvo = sprintf('%.2f', str_replace(',', '.', $arvo));
@@ -1058,6 +1075,16 @@
 					ORDER BY kassa, kassanimi, tyyppi, lasku.mapvm, lasku.laskunro";
 		$result = pupe_query($query);
 
+		if(!empty($vva) and !empty($kka) and !empty($ppa)) {
+			$tapvm_where = "	AND lasku.tapvm >= '$vva-$kka-$ppa'
+								AND lasku.tapvm <= '$vvl-$kkl-$ppl'";
+		}
+		else {
+			$tapvm_where = "AND lasku.tapvm = '$vv-$kk-$pp'";
+		}
+
+		$kateisotot = hae_kassalippaiden_kateisotot($tapvm_where);
+
 		$i = 1;
 
 		if (mysql_num_rows($result) == 0) {
@@ -1300,6 +1327,56 @@
 								echo "<input type='hidden' id='erotus$i' name='erotus$i' value=''>";
 								echo "<input type='hidden' id='soluerotus$i' name='soluerotus$i' value=''>";
 
+								if(!empty($kateisotot)) {
+									echo "<tr>";
+									echo "<td>";
+									echo "<table id='nayta_otot$i' style='display:none;' width='100%'>";
+									echo "<tr>
+											<th>".t("Kassa")."</th>
+											<th>".t("Ottaja")."</th>
+											<th>".t("Pvm")."</th>
+											<th>$yhtiorow[valkoodi]</th></tr>";
+									foreach ($kateisotot as $kassalipas_tunnus_temp => $kateisotot_kassalipas) {
+										if ($edktunnus == $kassalipas_tunnus_temp) {
+											foreach ($kateisotot_kassalipas as $kateisotto) {
+												echo "<tr class='aktiivi'>";
+												echo "<td>$kateisotto[kassalipas_nimi]</td>";
+												echo "<td>".substr($kateisotto[kuka_nimi],0,23)."</td>";
+												echo "<td>".tv1dateconv($kateisotto[tapvm], "pitka")."</td>";
+												echo "<td align='right'>".str_replace(".",",",sprintf('%.2f',$kateisotto[summa]))."</td></tr>";
+											}
+										}
+									}
+									echo "</table>";
+									echo "</td>";
+									echo "</tr>";
+								}
+								echo "<tr>";
+								echo "<td class='tumma' colspan='";
+								if ($tilityskpl > 1) {
+									echo $tilityskpl+6;
+								}
+								else {
+									echo "9";
+								}
+								echo "' width='300px' nowrap>$edkassanimi ".t("k‰teisotto-ohjelmasta otetut k‰teisotot yhteens‰").": <br/><a href=\"javascript:toggleGroup('nayta_otot$i')\">".t("N‰yt‰ / Piilota")."</a></td><td class='tumma' align='center' nowrap>";
+								if(!empty($kateisotot)) {
+									$kateisottojen_summa = 0;
+									foreach($kateisotot[$edktunnus] as $kateisotto) {
+										$kateisottojen_summa += abs($kateisotto['summa']);
+									}
+								}
+								echo "<input type='text' name='kateisotot_ohjelmasta$i' id='kateisotot_ohjelmasta$i' size='10' autocomplete='off' value='{$kateisottojen_summa}' disabled='disabled'/></td>";
+								if ($tilityskpl > 1) {
+									$y = $i;
+									for ($yy = 1; $yy < $tilityskpl; $yy++) {
+										$y .= $i;
+										echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td>";
+									}
+								}
+								echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td>";
+								echo "</tr>";
+
 								echo "<tr><td class='tumma' colspan='";
 									if ($tilityskpl > 1) {
 										echo $tilityskpl+6;
@@ -1308,6 +1385,7 @@
 										echo "9";
 									}
 								echo "' width='300px' nowrap>$edkassanimi ".t("k‰teisotto kassasta").":</td><td class='tumma' align='center'>";
+								//jos t‰sm‰ytys t‰lle p‰iv‰lle on kertaalleen tehty, n‰ytet‰‰n kyseisess‰ formissa annetut arvot
 								echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' value='{$tasmaytys_array[$edktunnus]['kateisotto'.$i]}' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 								if ($tilityskpl > 1) {
 									$y = $i;
@@ -1493,6 +1571,57 @@
 				echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".sprintf('%.2f',$kateismaksuyhteensa)."</div></b></td>";
 				echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu soluerotus$i' name='soluerotus$i' size='10' disabled></td>";
 
+				echo "</tr>";
+
+				if(!empty($kateisotot)) {
+					echo "<tr>";
+					echo "<td>";
+					echo "<table id='nayta_otot$i' style='display:none;' width='100%'>";
+					echo "<tr>
+							<th>".t("Kassa")."</th>
+							<th>".t("Ottaja")."</th>
+							<th>".t("Pvm")."</th>
+							<th>$yhtiorow[valkoodi]</th></tr>";
+					foreach ($kateisotot as $kassalipas_tunnus_temp => $kateisotot_kassalipas) {
+						if ($edktunnus == $kassalipas_tunnus_temp) {
+							foreach ($kateisotot_kassalipas as $kateisotto) {
+								echo "<tr class='aktiivi'>";
+								echo "<td>$kateisotto[kassalipas_nimi]</td>";
+								echo "<td>".substr($kateisotto[kuka_nimi],0,23)."</td>";
+								echo "<td>".tv1dateconv($kateisotto[tapvm], "pitka")."</td>";
+								echo "<td align='right'>".str_replace(".",",",sprintf('%.2f',$kateisotto[summa]))."</td></tr>";
+							}
+						}
+					}
+					echo "</table>";
+					echo "</td>";
+					echo "</tr>";
+				}
+
+				echo "<tr>";
+				echo "<td class='tumma' colspan='";
+				if ($tilityskpl > 1) {
+					echo $tilityskpl+6;
+				}
+				else {
+					echo "9";
+				}
+				echo "' width='300px' nowrap>$edkassanimi ".t("k‰teisotto-ohjelmasta otetut k‰teisotot yhteens‰").": <br/><a href=\"javascript:toggleGroup('nayta_otot$i')\">".t("N‰yt‰ / Piilota")."</a></td><td class='tumma' align='center' nowrap>";
+				if(!empty($kateisotot)) {
+					$kateisottojen_summa = 0;
+					foreach($kateisotot[$edktunnus] as $kateisotto) {
+						$kateisottojen_summa += abs($kateisotto['summa']);
+					}
+				}
+				echo "<input type='text' name='kateisotot_ohjelmasta$i' id='kateisotot_ohjelmasta$i' size='10' autocomplete='off' value='{$kateisottojen_summa}' disabled='disabled'/></td>";
+				if ($tilityskpl > 1) {
+					$y = $i;
+					for ($yy = 1; $yy < $tilityskpl; $yy++) {
+						$y .= $i;
+						echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td>";
+					}
+				}
+				echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td>";
 				echo "</tr>";
 
 				echo "<tr><td class='tumma' colspan='";
@@ -1751,6 +1880,22 @@
 				while ($row = mysql_fetch_assoc($result)) {
 
 					if ((($edkassa != $row["kassa"] and $edkassa != '') or ($kateinen != $row["tilino"] and $kateinen != ''))) {
+						$kassalippaan_kateisotot_yhteensa = 0;
+						foreach($kateisotot[$edkassa] as $kateisotto) {
+							$kassalippaan_kateisotot_yhteensa += $kateisotto['summa'];
+							echo "<tr class='aktiivi'>";
+							echo "<td>{$kateisotto['kassalipas_nimi']}</td>";
+							echo "<td>{$kateisotto['selite']} - {$kateisotto['kuka_nimi']}</td>";
+							echo "<td>-</td>";
+							echo "<td>-</td>";
+							echo "<td>".date('d.m.Y', strtotime($kateisotto['tapvm']))."</td>";
+							echo "<td>{$kateisotto['summa']}</td>";
+							echo "</tr>";
+						}
+						$kateismaksuyhteensa = $kassalippaan_kateisotot_yhteensa + $kateismaksuyhteensa;
+						$yhteensa = $kassalippaan_kateisotot_yhteensa + $yhteensa;
+						$kassayhteensa = $kassalippaan_kateisotot_yhteensa + $kassayhteensa;
+						
 						echo "</table><table width='100%'>";
 						echo "<tr><td colspan='7' class='tumma'>$edtyyppi ".t("yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
 						echo "<td align='right' class='tumma' style='width:100px'><b><div id='erotus$i'>".sprintf('%.2f',$kateismaksuyhteensa)."</div></b></td></tr>";
@@ -1843,6 +1988,24 @@
 					$yhteensa += $row["tilsumma"];
 					$kassayhteensa += $row["tilsumma"];
 				}
+
+				$kassalippaan_kateisotot_yhteensa = 0;
+				foreach($kateisotot[$edkassa] as $kateisotto) {
+					$kassalippaan_kateisotot_yhteensa += $kateisotto['summa'];
+					echo "<tr class='aktiivi'>";
+					echo "<td>{$kateisotto['kassalipas_nimi']}</td>";
+					echo "<td>{$kateisotto['selite']} - {$kateisotto['kuka_nimi']}</td>";
+					echo "<td>-</td>";
+					echo "<td>-</td>";
+					echo "<td>".date('d.m.Y', strtotime($kateisotto['tapvm']))."</td>";
+					echo "<td>{$kateisotto['summa']}</td>";
+					echo "</tr>";
+				}
+
+				//$kassalippaan_kateisotot_yhteensa aina < 0 $kateismaksuyhteensa aina > 0
+				$kateismaksuyhteensa = $kassalippaan_kateisotot_yhteensa + $kateismaksuyhteensa;
+				$yhteensa = $kassalippaan_kateisotot_yhteensa + $yhteensa;
+				$kassayhteensa = $kassalippaan_kateisotot_yhteensa + $kassayhteensa;
 
 				if ($edkassa != '') {
 					echo "</table><table width='100%'>";
@@ -1995,6 +2158,7 @@
 				echo "<input type='hidden' name='loppukassa2' id='loppukassa2' value=''>";
 				echo "<input type='hidden' name='yht_alkukas' id='yht_alkukas' value=''>";
 				echo "<input type='hidden' name='yht_kat' id='yht_kat' value=''>";
+				echo "<input type='hidden' name='yht_katot_ohjelm' id='yht_katot_ohjelm' value=''>";
 				echo "<input type='hidden' name='yht_katot' id='yht_katot' value=''>";
 				echo "<input type='hidden' name='yht_kattil' id='yht_kattil' value=''>";
 				echo "<input type='hidden' name='yht_kasero' id='yht_kasero' value=''>";
@@ -2358,6 +2522,39 @@
 		$result = pupe_query($query);
 
 		return mysql_fetch_assoc($result);
+	}
+
+	function hae_kassalippaiden_kateisotot($tapvm_where) {
+		global $kukarow;
+		
+		$kateisotot_query = "	SELECT lasku.nimi,
+								lasku.tapvm,
+								lasku.comments,
+								lasku.kassalipas,
+								tiliointi.tilino,
+								tiliointi.summa,
+								tiliointi.selite,
+								kassalipas.nimi as kassalipas_nimi,
+								kuka.nimi as kuka_nimi
+								FROM lasku
+								JOIN tiliointi
+								ON ( tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.summa < 0 AND tiliointi.korjattu = '')
+								JOIN kassalipas
+								ON (kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = lasku.kassalipas)
+								JOIN kuka
+								ON ( kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija )
+								WHERE  lasku.yhtio = '{$kukarow['yhtio']}'
+								{$tapvm_where}
+								AND lasku.tila = 'X'
+								AND lasku.alatila = ''
+								AND lasku.tilaustyyppi = 'O'";
+		$kateisotot_result = pupe_query($kateisotot_query);
+		$kateisotot = array();
+		while($kateisotto = mysql_fetch_assoc($kateisotot_result)) {
+			$kateisotot[$kateisotto['kassalipas']][] = $kateisotto;
+		}
+
+		return $kateisotot;
 	}
 
 require ("inc/footer.inc");

@@ -43,12 +43,34 @@ if (!$row) {
     exit("Virhe, rivi‰ ei lˆydy");
 }
 
-# Tehd‰‰n tarvittaessa uusi saapuminen
-if (empty($saapuminen)) {
-    $toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
-    $toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
-    $saapuminen = uusi_saapuminen($toimittaja);
+// Haetaan toimittajan tiedot
+$toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
+$toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
 
+// Jos saapumista ei ole setattu, tehd‰‰n uusi saapuminen haetulle toimittajalle
+if (empty($saapuminen)) {
+    $saapuminen = uusi_saapuminen($toimittaja);
+    $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+    $updated = pupe_query($update_kuka);
+}
+// Jos saapuminen on niin tarkistetaan ett‰ se on samalle toimittajalle
+else {
+    // Haetaan saapumisen toimittaja tunnus
+    $saapuminen_query = "SELECT liitostunnus
+                        FROM lasku
+                        WHERE tunnus='{$saapuminen}'";
+    $saapumisen_toimittaja = mysql_fetch_assoc(pupe_query($saapuminen_query));
+
+    // jos toimittaja ei ole sama kuin tilausrivin niin tehd‰‰n uusi saapuminen
+    if ($saapumisen_toimittaja['liitostunnus'] != $row['liitostunnus']) {
+
+        // Haetaan toimittajan tiedot uudestaan ja tehd‰‰n uudelle toimittajalle saapuminen
+        $toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
+        $toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
+        $saapuminen = uusi_saapuminen($toimittaja);
+    }
+
+    // P‰ivitet‰‰n kuka.kesken
     $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
     $updated = pupe_query($update_kuka);
 }

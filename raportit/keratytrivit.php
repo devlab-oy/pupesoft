@@ -192,7 +192,7 @@
 						AND tilausrivi.keratty != ''
 						{$lisa}
 						GROUP BY 1,2,3,4,5,6,7
-						ORDER BY tilausrivi.keratty, tilausrivi.kerattyaika";
+						ORDER BY kuka.nimi, tilausrivi.keratty, tilausrivi.kerattyaika";
 			$result = pupe_query($query);
 
 			$data = array(

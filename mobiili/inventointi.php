@@ -35,7 +35,7 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 	if ($tuotepaikka != '') $params['tuotepaikka'] = "concat(tuotepaikat.hyllyalue,
 										 tuotepaikat.hyllynro,
 										 tuotepaikat.hyllyvali,
-										 tuotepaikat.hyllytaso)='$hylly'";
+										 tuotepaikat.hyllytaso) LIKE '$hylly%'";
 
 	$osumat = array();
 
@@ -159,8 +159,13 @@ if ($tee == 'haku') {
 
 	# Haettu jollain
 	if (isset($viivakoodi) or isset($tuoteno) or isset($tuotepaikka)) {
-		$tuotteet = hae($viivakoodi,$tuoteno,$tuotepaikka);
-		if(count($tuotteet) == 0) $errors[] = "Ei löytynyt";
+		if (!empty($tuotepaikka) and strlen($tuotepaikka) < 2) {
+			$errors[] = t("Tuotepaikka haun on oltava vähintään 2 merkkiä");
+		}
+		else {
+			$tuotteet = hae($viivakoodi,$tuoteno,$tuotepaikka);
+			if(count($tuotteet) == 0) $errors[] = "Ei löytynyt";
+		}
 	}
 
 	$haku_tuotepaikalla = ($viivakoodi=='' and $tuoteno=='' and $tuotepaikka != '') ? 'true' : '';

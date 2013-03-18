@@ -337,7 +337,7 @@
 
 				foreach ($data['keraaja'][$_arr_key] as $aika => $arr) {
 
-					echo "<tr class='{$id} spec' style='display: none;'>";
+					echo "<tr class='{$id} spec aktiivi' style='display: none;'>";
 
 					foreach ($arr as $val) {
 						echo "<td>{$val}</td>";

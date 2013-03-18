@@ -54,8 +54,8 @@ if (isset($submit) and trim($submit) != '') {
 				list($alku, $loppu) = explode(' ', $tuotepaikka);
 
 				// M‰ts‰t‰‰n numerot ja kirjaimet erilleen
-				preg_match_all('/([0-9]+)|([a-z]+)/', $alku, $alku);
-				preg_match_all('/([0-9]+)|([a-z]+)/', $loppu, $loppu);
+				preg_match_all('/([0-9]+)|([a-z]+)/i', $alku, $alku);
+				preg_match_all('/([0-9]+)|([a-z]+)/i', $loppu, $loppu);
 
 				// Hyllyn tiedot oikeisiin muuttujiin
 				$hyllyalue = $alku[0][0];
@@ -90,7 +90,7 @@ if (isset($submit) and trim($submit) != '') {
 
 			// Tarkistetaan ett‰ tuotepaikka on olemassa
 			if (count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
-				$errors[] = t("Varaston tuotepaikkaa ei ole perustettu").'.';
+				$errors[] = t("Varaston tuotepaikkaa ($hyllyalue-$hyllynro-$hyllyvali-$hyllytaso) ei ole perustettu").'.';
 			}
 
 			if (count($errors) == 0) {

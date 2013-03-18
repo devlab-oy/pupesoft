@@ -11,23 +11,21 @@
 	# otetaan tietokanta connect
 	require ($pupesoft_polku."/inc/connect.inc");
 
-	if (!isset($verkkolaskut_in) or $verkkolaskut_in == "" or !is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) {
-		// VIRHE: verkkolaskut_in-kansio ei ole määritelty!
-		// Ei echota mitään, niin tän voi laittaa aina croniin
-		exit;
-	}
+	// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ssä
+	$verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut/"        : $verkkolaskut_in;
+	$verkkolaskut_ok     = empty($verkkolaskut_ok)     ? "/home/verkkolaskut/ok/"     : $verkkolaskut_ok;
+	$verkkolaskut_orig   = empty($verkkolaskut_orig)   ? "/home/verkkolaskut/orig/"   : $verkkolaskut_orig;
+	$verkkolaskut_error  = empty($verkkolaskut_error)  ? "/home/verkkolaskut/error/"  : $verkkolaskut_error;
+	$verkkolaskut_reject = empty($verkkolaskut_reject) ? "/home/verkkolaskut/reject/" : $verkkolaskut_reject;
 
-	$aikaikkuna = 5;
+	// VIRHE: verkkolasku-kansiot on väärin määritelty!
+	if (!is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) exit;
+	if (!is_dir($verkkolaskut_ok) or !is_writable($verkkolaskut_ok)) exit;
+	if (!is_dir($verkkolaskut_orig) or !is_writable($verkkolaskut_orig)) exit;
+	if (!is_dir($verkkolaskut_error) or !is_writable($verkkolaskut_error)) exit;
+	if (!is_dir($verkkolaskut_reject) or !is_writable($verkkolaskut_reject)) exit;
 
-	if (isset($argv[1]) and $argv[1] != "") {
-		$aikaikkuna = (int) $argv[1];
-	}
-
-	# Testaus
-	#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
-
-	# Tuotanto
-	$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+	$aikaikkuna = empty($argv[1]) ? 5 : (int) $argv[1];
 
 	# Haetaan api_keyt yhtion_parametrit taulusta
 	# Kaikki yritykset joilla on api_avain ja ohjelmisto_api_avain kenttää täytettynä. Yrityksen_uuid on vaihtoehtoinen kenttä.
@@ -40,6 +38,12 @@
 	$maventa_result = mysql_query($sql_query) or die("Error in query: ".$sql_query);
 
 	while ($maventa_keys = mysql_fetch_assoc($maventa_result)) {
+
+		# Testaus
+		#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+
+		# Tuotanto
+		$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
 		# Kun ajetaan ekan kerran niin ajetaan ilman akaleimaa, niin saadaan kaikki "unseen"-laskut.
 		if ($maventa_keys["maventa_aikaleima"] == "0000-00-00 00:00:00") {

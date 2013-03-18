@@ -11,11 +11,19 @@
 	// otetaan tietokanta connect
 	require ($pupesoft_polku."/inc/connect.inc");
 
-	if (!isset($verkkolaskut_in) or $verkkolaskut_in == "" or !is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) {
-		// VIRHE: verkkolaskut_in-kansio ei ole määritelty!
-		// Ei echota mitään, niin tän voi laittaa aina croniin
-		exit;
-	}
+	// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ssä
+	$verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut/"        : $verkkolaskut_in;
+	$verkkolaskut_ok     = empty($verkkolaskut_ok)     ? "/home/verkkolaskut/ok/"     : $verkkolaskut_ok;
+	$verkkolaskut_orig   = empty($verkkolaskut_orig)   ? "/home/verkkolaskut/orig/"   : $verkkolaskut_orig;
+	$verkkolaskut_error  = empty($verkkolaskut_error)  ? "/home/verkkolaskut/error/"  : $verkkolaskut_error;
+	$verkkolaskut_reject = empty($verkkolaskut_reject) ? "/home/verkkolaskut/reject/" : $verkkolaskut_reject;
+
+	// VIRHE: verkkolasku-kansiot on väärin määritelty!
+	if (!is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) exit;
+	if (!is_dir($verkkolaskut_ok) or !is_writable($verkkolaskut_ok)) exit;
+	if (!is_dir($verkkolaskut_orig) or !is_writable($verkkolaskut_orig)) exit;
+	if (!is_dir($verkkolaskut_error) or !is_writable($verkkolaskut_error)) exit;
+	if (!is_dir($verkkolaskut_reject) or !is_writable($verkkolaskut_reject)) exit;
 
 	function apix_receive ($apix_keys) {
 
@@ -102,4 +110,3 @@
 			}
 		}
 	}
-

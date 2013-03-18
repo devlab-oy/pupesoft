@@ -34,19 +34,19 @@
 
 			require ("inc/connect.inc"); // otetaan tietokantayhteys
 
-			// määritellään polut
-			if (!isset($verkkolaskut_in)) {
-				$verkkolaskut_in = "/home/verkkolaskut";
-			}
-			if (!isset($verkkolaskut_ok)){
-				$verkkolaskut_ok = "/home/verkkolaskut/ok";
-			}
-			if (!isset($verkkolaskut_orig)) {
-				$verkkolaskut_orig = "/home/verkkolaskut/orig";
-			}
-			if (!isset($verkkolaskut_error)) {
-				$verkkolaskut_error = "/home/verkkolaskut/error";
-			}
+			// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ssä
+			$verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut/"        : $verkkolaskut_in;
+			$verkkolaskut_ok     = empty($verkkolaskut_ok)     ? "/home/verkkolaskut/ok/"     : $verkkolaskut_ok;
+			$verkkolaskut_orig   = empty($verkkolaskut_orig)   ? "/home/verkkolaskut/orig/"   : $verkkolaskut_orig;
+			$verkkolaskut_error  = empty($verkkolaskut_error)  ? "/home/verkkolaskut/error/"  : $verkkolaskut_error;
+			$verkkolaskut_reject = empty($verkkolaskut_reject) ? "/home/verkkolaskut/reject/" : $verkkolaskut_reject;
+
+			// VIRHE: verkkolasku-kansiot on väärin määritelty!
+			if (!is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) exit;
+			if (!is_dir($verkkolaskut_ok) or !is_writable($verkkolaskut_ok)) exit;
+			if (!is_dir($verkkolaskut_orig) or !is_writable($verkkolaskut_orig)) exit;
+			if (!is_dir($verkkolaskut_error) or !is_writable($verkkolaskut_error)) exit;
+			if (!is_dir($verkkolaskut_reject) or !is_writable($verkkolaskut_reject)) exit;
 
 			$laskut     = $verkkolaskut_in;
 			$oklaskut   = $verkkolaskut_ok;
@@ -144,5 +144,3 @@
 		# siivotaan yli 90 päivää vanhat aineistot
 		system("find $verkkolaskut_in -type f -mtime +90 -delete");
 	}
-
-?>

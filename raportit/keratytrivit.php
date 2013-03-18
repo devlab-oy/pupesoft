@@ -264,7 +264,7 @@
 
 				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['keraajanro'] = $row['keraajanro'];
 				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['otunnus'] = $row['otunnus'];
-				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['lahetepvm'] = tv1dateconv($row['lahetepvm']);
+				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['lahetepvm'] = tv1dateconv($row['lahetepvm'], "P");
 				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['kerattyaika'] = tv1dateconv($row['kerattyaika'], "P");
 				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['aika'] = $row['aika'];
 				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['puutteet'] += $row['puutteet'];

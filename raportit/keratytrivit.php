@@ -285,7 +285,7 @@
 
 			echo "<tr class='nayta_keraajittain' id='keraajittain'>";
 
-			echo "<td colspan='5'><img id='arrowi_keraajittain' style='float:right;' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' /></td>";
+			echo "<td colspan='5'><img id='arrowi_keraajittain' style='float:left;' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' /></td>";
 
 			foreach ($data['summaus']['yhteensa'] as $_arr_key => $_arr_values) {
 				echo "<td>{$_arr_values}</td>";
@@ -313,7 +313,7 @@
 
 				$nimi = $nimet[$_arr_key] != "" ? "{$nimet[$_arr_key]} ($_arr_key)" : $_arr_key;
 
-				echo "<td colspan='5'>{$nimi}&nbsp;&nbsp;<img id='arrowi_{$id}' style='float:right;' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' /></td>";
+				echo "<td colspan='5'><img id='arrowi_{$id}' style='float:left;' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;&nbsp;{$nimi}</td>";
 
 				foreach($_arr_values as $_val) {
 					echo "<td>{$_val}</td>";

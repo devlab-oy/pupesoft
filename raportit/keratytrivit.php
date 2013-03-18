@@ -20,6 +20,12 @@
 								$('#arrowi_'+$(this).attr('id')).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-down.png');
 							}
 							else {
+
+								if ($(this).hasClass('nayta_keraajittain')) {
+									$('.child').hide().removeClass('tumma');
+									$('img[id^=\"arrowi_\"]').attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-right.png');
+								}
+
 								$('#arrowi_'+$(this).attr('id')).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-right.png');
 							}
 						}
@@ -298,7 +304,7 @@
 
 			unset($data['summaus']['yhteensa']);
 
-			echo "<tr class='keraajittain' style='display: none;'>";
+			echo "<tr class='keraajittain child' style='display: none;'>";
 			echo "<th nowrap colspan='5'>",t("Ker‰‰j‰"),"</th>";
 			echo "<th norwap>",t("Puuterivit"),"</th>";
 			echo "<th norwap>",t("Siirrot"),"</th>";
@@ -312,7 +318,7 @@
 
 				$id = str_replace(array(".", " ", ":"), "", $_arr_key);
 
-				echo "<tr class='keraajittain nayta_keraaja' id='{$id}' style='display: none;'>";
+				echo "<tr class='keraajittain nayta_keraaja child' id='{$id}' style='display: none;'>";
 
 				$nimi = $nimet[$_arr_key] != "" ? "{$nimet[$_arr_key]} ($_arr_key)" : $_arr_key;
 
@@ -324,7 +330,7 @@
 
 				echo "</tr>";
 
-				echo "<tr class='{$id}' style='display: none;'>";
+				echo "<tr class='{$id} child' style='display: none;'>";
 				echo "<th nowrap>",t("Ker‰‰j‰nro"),"</th>";
 				echo "<th nowrap>",t("Tilaus"),"</th>";
 				echo "<th nowrap>",t("L‰hete tulostettu"),"</th>";
@@ -340,7 +346,7 @@
 
 				foreach ($data['keraaja'][$_arr_key] as $aika => $arr) {
 
-					echo "<tr class='{$id} spec aktiivi' style='display: none;'>";
+					echo "<tr class='{$id} spec aktiivi child' style='display: none;'>";
 
 					foreach ($arr as $val) {
 						echo "<td>{$val}</td>";

@@ -43,7 +43,7 @@
 		else {
 
 			// Jos automaattinen tuotenumeron ehdotus on p‰‰ll‰...
-			if ($trow[$i] == '' and $yhtiorow['seuraava_tuotenumero'] != '' and isset($tee_myos_tuotteen_toimittaja_liitos)) {
+			if ($trow[$i] == '' and ($yhtiorow['seuraava_tuotenumero'] == 'K' or ($yhtiorow['seuraava_tuotenumero'] != '' and isset($tee_myos_tuotteen_toimittaja_liitos)))) {
 
 				$autom_wherelisa = "";
 

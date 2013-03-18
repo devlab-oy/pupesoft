@@ -3291,7 +3291,6 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
-
 	}
 
 	if (mysql_field_name($result, $i) == 'epakurantoinnin_myyntihintaleikkuri') {
@@ -3305,7 +3304,6 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
-
 	}
 
 	if (mysql_field_name($result, $i) == 'seuraava_tuotenumero') {
@@ -3313,12 +3311,12 @@
 
 		$sel = $trow[$i] == 'K' ? 'selected' : '';
 
-		$ulos .= "<option value = ''>".t("Ei ehdoteta seuraavaa vapaata tuotenumeroa automaattisesti tuotetta ostotilauksella perustettaessa")."</option>";
-		$ulos .= "<option value = 'K' {$sel}>".t("Ehdotetaan seuraava vapaa tuotenumero automaattisesti tuotetta ostotilauksella perustettaessa")."</option>";
+		$ulos .= "<option value = ''>".t("Ei ehdoteta seuraavaa vapaata tuotenumeroa tuotetta perustettaessa")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa")."</option>";
+		$ulos .= "<option value = 'O' {$sel}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa (vain ostotilauksella)")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
-
 	}
 
 	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
@@ -3332,5 +3330,4 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
-
 	}

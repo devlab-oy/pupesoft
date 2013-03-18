@@ -6,16 +6,19 @@
 
 	$onko_paivitysoikeuksia_ohjelmaan = tarkista_oikeus('tilauskasittely/lahtojen_hallinta.php', '', 1);
 
-	if($ajax_request == 1) {
-		if($hae_yhdistettavat_lahdot == 1) {
+	if ($ajax_request == 1) {
+
+		if ($hae_yhdistettavat_lahdot == 1) {
 			echo json_encode(hae_suljetut_lahdot($toimitustavan_tunnukset, 1));
 			exit;
 		}
-		if($tarkista_lahdot == 1) {
+
+		if ($tarkista_lahdot == 1) {
 			$return_array = array(
 				'keraamatta' => lahdot_joissa_tilauksia_keraamatta($lahdot),
 				'aikaa_jaljella' => lahdot_joissa_tilausaikaa_jaljella($lahdot),
 			);
+
 			echo json_encode($return_array);
 			exit;
 		}
@@ -2952,47 +2955,51 @@ function hae_yhdistettavat_tilaukset() {
 	function lahdot_joissa_tilauksia_keraamatta($lahdot) {
 		global $kukarow;
 
-		$lahdot = array();
+		$keraamatta = array();
 
 		if ($lahdot != "") {
 
 			$query = "  SELECT lahdot.tunnus AS lahdon_tunnus,
-	                            count(*) AS keraamatta
-	                            FROM lahdot
-	                            JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND (lasku.tila = 'L' OR (lasku.tila = 'N' AND lasku.alatila = 'A')))
-	                            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND tilausrivi.var NOT IN ('P','J'))
-	                            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '' )
-	                            JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
-	                            WHERE  lahdot.yhtio = '{$kukarow['yhtio']}'
-	                            AND lahdot.tunnus IN ({$lahdot})
-	                            GROUP BY lahdot.tunnus";
+                        count(*) AS keraamatta
+                        FROM lahdot
+                        JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND (lasku.tila = 'L' OR (lasku.tila = 'N' AND lasku.alatila = 'A')))
+                        JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND tilausrivi.var NOT IN ('P','J'))
+                        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '' )
+                        JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+                        WHERE  lahdot.yhtio = '{$kukarow['yhtio']}'
+                        AND lahdot.tunnus IN ({$lahdot})
+                        GROUP BY lahdot.tunnus";
 			$result = pupe_query($query);
 
-			while($lahto = mysql_fetch_assoc($result)) {
-				$lahdot[] = $lahto;
+			while ($lahto = mysql_fetch_assoc($result)) {
+				$keraamatta[] = $lahto;
 			}
 		}
 
-		return $lahdot;
+		return $keraamatta;
 	}
 
 	function lahdot_joissa_tilausaikaa_jaljella($lahdot) {
 		global $kukarow;
 
-		$query = "	SELECT lahdot.tunnus
-					FROM lahdot
-					WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
-					AND lahdot.tunnus IN ({$lahdot})
-					AND lahdot.pvm >= CURDATE()
-					AND lahdot.viimeinen_tilausaika >= NOW()";
-		$result = pupe_query($query);
+		$aikaa_jaljella = array();
 
-		$lahdot = array();
-		while($lahto = mysql_fetch_assoc($result)) {
-			$lahdot[] = $lahto;
+		if ($lahdot != "") {
+
+			$query = "	SELECT lahdot.tunnus
+						FROM lahdot
+						WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+						AND lahdot.tunnus IN ({$lahdot})
+						AND lahdot.pvm >= CURDATE()
+						AND lahdot.viimeinen_tilausaika >= NOW()";
+			$result = pupe_query($query);
+
+			while ($lahto = mysql_fetch_assoc($result)) {
+				$aikaa_jaljella[] = $lahto;
+			}
 		}
 
-		return $lahdot;
+		return $aikaa_jaljella;
 	}
 
 	require ("inc/footer.inc");

@@ -41,6 +41,29 @@
 			}
 		}
 		else {
+
+			// Jos automaattinen tuotenumeron ehdotus on p‰‰ll‰...
+			if ($trow[$i] == '' and ($yhtiorow['seuraava_tuotenumero'] == 'K' or ($yhtiorow['seuraava_tuotenumero'] == 'O' and isset($tee_myos_tuotteen_toimittaja_liitos)))) {
+
+				$autom_wherelisa = "";
+
+				if (isset($kaatokoodi_tuotteen_tuotenumeron_alku) and trim($kaatokoodi_tuotteen_tuotenumeron_alku) != '') {
+					$autom_wherelisa = "AND tuote.tuoteno LIKE '{$kaatokoodi_tuotteen_tuotenumeron_alku}%'";
+				}
+
+				$query = "	SELECT MAX(CAST(tuote.tuoteno AS unsigned)) + 1 AS seuraava_tuoteno
+							FROM tuote
+							WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+							AND tuote.tuoteno REGEXP '[^0-9]' = 0
+							{$autom_wherelisa}";
+				$autom_tuoteno_res = pupe_query($query);
+				$autom_tuoteno_row = mysql_fetch_assoc($autom_tuoteno_res);
+
+				$trow[$i] = $autom_tuoteno_row['seuraava_tuoteno'];
+
+				if ($autom_tuoteno_row['seuraava_tuoteno'] == '' and $autom_wherelisa != "") $trow[$i] = "{$kaatokoodi_tuotteen_tuotenumeron_alku}1";
+			}
+
 			$ulos = "<td><input type = 'hidden' name = 'uusi' value = '$uusi'><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
 			$jatko=0;
 

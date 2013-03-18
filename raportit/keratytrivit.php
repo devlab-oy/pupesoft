@@ -12,7 +12,7 @@
 					$('.kayttajittain, .nayta_keraajittain, .nayta_keraaja').on('click', function() {
 						$('.'+$(this).attr('id')).toggle();
 
-						if ($(this).hasClass('nayta_keraaja')) {
+						if ($(this).hasClass('nayta_keraaja') || $(this).hasClass('nayta_keraajittain')) {
 							if ($('.'+$(this).attr('id')).is(':visible')) {
 								$('#arrowi_'+$(this).attr('id')).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-down.png');
 							}
@@ -281,7 +281,7 @@
 
 			echo "<tr class='nayta_keraajittain' id='keraajittain'>";
 
-			echo "<td colspan='5'></td>";
+			echo "<td colspan='5'><img id='arrowi_keraajittain' style='float:right;' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' /></td>";
 
 			foreach ($data['summaus']['yhteensa'] as $_arr_key => $_arr_values) {
 				echo "<td>{$_arr_values}</td>";
@@ -305,11 +305,11 @@
 
 				$id = str_replace(array(".", " ", ":"), "", $_arr_key);
 
-				echo "<tr class='keraajittain nayta_keraaja' id='keraaja{$id}' style='display: none;'>";
+				echo "<tr class='keraajittain nayta_keraaja' id='{$id}' style='display: none;'>";
 
 				$nimi = $nimet[$_arr_key] != "" ? "{$nimet[$_arr_key]} ($_arr_key)" : $_arr_key;
 
-				echo "<td colspan='5'>{$nimi}&nbsp;&nbsp;<img id='arrowi_keraaja{$id}' style='float:right;' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' /></td>";
+				echo "<td colspan='5'>{$nimi}&nbsp;&nbsp;<img id='arrowi_{$id}' style='float:right;' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' /></td>";
 
 				foreach($_arr_values as $_val) {
 					echo "<td>{$_val}</td>";
@@ -333,7 +333,7 @@
 
 				foreach ($data['keraaja'][$_arr_key] as $aika => $arr) {
 
-					echo "<tr class='keraaja{$id} spec' style='display: none;'>";
+					echo "<tr class='{$id} spec' style='display: none;'>";
 
 					foreach ($arr as $val) {
 						echo "<td>{$val}</td>";

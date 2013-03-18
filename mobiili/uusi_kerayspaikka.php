@@ -68,14 +68,23 @@ if (isset($submit) and trim($submit) != '') {
 					$errors[] = t("Tuotepaikan haussa virhe, yritä syöttää tuotepaikka käsin") . " ($tuotepaikka)";
 				}
 			}
-			// Tuotepaikka syötetty manuaalisesti (C-21-04-5)
-			elseif (strstr($tuotepaikka, '-')) {
-				// Parsitaan tuotepaikka omiin muuttujiin
-				list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode('-', $tuotepaikka);
+			// Tuotepaikka syötetty manuaalisesti (C-21-04-5) tai (C 21 04 5)
+			elseif (strstr($tuotepaikka, '-') or strstr($tuotepaikka, ' ')) {
+				// Parsitaan tuotepaikka omiin muuttujiin (erotelto välilyönnillä)
+				if (preg_match('/\w+\s\w+\s\w+\s\w+/i', $tuotepaikka)) {
+					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode(' ', $tuotepaikka);
+				}
+				// (erotelto väliviivalla)
+				elseif (preg_match('/\w+-\w+-\w+-\w+/i', $tuotepaikka)) {
+					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode('-', $tuotepaikka);
+				}
 
 				// Ei saa olla tyhjiä kenttiä
 				if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
 					$errors[] = t("Virheellinen tuotepaikka") . ". ($hyllyalue-$hyllynro-$hyllyvali-$hyllytaso)";
+				}
+				else {
+					$errors[] = t("Tuntematon virhe uusi_kerayspaikka.php");
 				}
 			}
 			else {

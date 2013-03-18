@@ -128,8 +128,7 @@ function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi = '') {
 	$hylly = explode('-', $tuotepaikka);
 
 	// Jos varmistuskoodia ei saatu parametrissa, yritet‰‰n keksiss‰ olevalla koodilla.
-	// vain jos saatu tuotepaikka on sama kuin keksiss‰ oleva tuotepaikka.
-	if ($varmistuskoodi == '' and isset($_COOKIE['_varmistuskoodi']) and $tuotepaikka == $_COOKIE['_tuotepaikka']) {
+	if ($varmistuskoodi == '' and isset($_COOKIE['_varmistuskoodi'])) {
 		$varmistuskoodi = $_COOKIE['_varmistuskoodi'];
 	}
 

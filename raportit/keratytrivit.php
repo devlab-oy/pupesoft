@@ -268,6 +268,10 @@
 				$nimet[$row['keratty']] = $row['nimi'];
 			}
 
+			echo "<img src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' /> <font class='info'>= ",t("Voit avata alatasoja nuolella varustetuista riveistä"),"</font>";
+
+			echo "<br /><br />";
+
 			echo "<table>";
 			echo "<tr>";
 			echo "<th colspan='5'></th>";

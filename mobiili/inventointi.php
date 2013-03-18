@@ -168,7 +168,7 @@ if ($tee == 'haku') {
 		}
 	}
 
-	$haku_tuotepaikalla = ($viivakoodi=='' and $tuoteno=='' and $tuotepaikka != '') ? 'true' : '';
+	$haku_tuotepaikalla = ($viivakoodi=='' and $tuoteno=='' and $tuotepaikka != '') ? $tuotepaikka : '';
 
 	# Vain yksi osuma
 	if (isset($tuotteet) and count($tuotteet) == 1) {
@@ -458,8 +458,8 @@ if ($tee == 'inventoidaan') {
 			$paluu_url = http_build_query(array('tee' => 'laske', 'lista' => $lista, 'reservipaikka' => $reservipaikka));
 		}
 		# Jos inventoitu tuotepaikalla, palataan takaisin hakuun kyseisellä tuotepaikalla
-		elseif($tuotepaikalla=='true') {
-			$paluu_url = http_build_query(array('tee' => 'haku', 'viivakoodi' => '', 'tuoteno' => '', 'tuotepaikka' => $tuotepaikka));
+		elseif(!empty($tuotepaikalla)) {
+			$paluu_url = http_build_query(array('tee' => 'haku', 'viivakoodi' => '', 'tuoteno' => '', 'tuotepaikka' => $tuotepaikalla));
 		}
 		# Palataan alkuun
 		else {

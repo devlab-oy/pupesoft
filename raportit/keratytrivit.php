@@ -321,7 +321,7 @@
 
 				echo "</tr>";
 
-				echo "<tr class='keraaja{$id}' style='display: none;'>";
+				echo "<tr class='{$id}' style='display: none;'>";
 				echo "<th nowrap>",t("Ker‰‰j‰nro"),"</th>";
 				echo "<th nowrap>",t("Tilaus"),"</th>";
 				echo "<th nowrap>",t("L‰hete tulostettu"),"</th>";

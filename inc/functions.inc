@@ -20390,3 +20390,39 @@ if (!function_exists('hae_tyopaivien_lukumaara')) {
 
 }
 
+//etsii halutun array keyn arraysta jonka arvo täsmää valuen kanssa ja palauttaa kyseisen keyn parentit arrayssa
+//esim voit etsiä funktiolla order ja funktio palauttaa kaikki ensimmäisen tason (tuoteno) arrayt jos order löytyy
+/**
+ * $tilikaudet = array(
+		0 => array(
+			'tunnus' => 94,
+			'nimi' => 'Eka'
+		),
+*		1 => array(
+			'tunnus' => 95,
+			'nimi' => 'Toka'
+		),
+ * );
+ *
+ * $halutut_tilikaudet = search_array_key_for_value_recursive($tilikaudet, 'tunnus', 94);
+ *
+ * @TODO: Tän vois mergettää search_array_key_recursive funktion kanssa ja refaktoroida koodin.
+ *
+ */
+if (!function_exists('search_array_key_for_value_recursive')) {
+	function search_array_key_for_value_recursive($array, $key, $value) {
+		$results = array();
+
+		if (is_array($array)) {
+			if (isset($array[$key]) and $array[$key] == $value) {
+				$results[] = $array;
+			}
+
+			foreach ($array as $subarray) {
+				$results = array_merge($results, search_array_key_for_value_recursive($subarray, $key, $value));
+			}
+		}
+
+		return $results;
+	}
+}

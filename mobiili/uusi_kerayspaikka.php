@@ -81,10 +81,7 @@ if (isset($submit) and trim($submit) != '') {
 
 				// Ei saa olla tyhjiä kenttiä
 				if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
-					$errors[] = t("Virheellinen tuotepaikka") . ". ($hyllyalue-$hyllynro-$hyllyvali-$hyllytaso)";
-				}
-				else {
-					$errors[] = t("Tuntematon virhe uusi_kerayspaikka.php");
+					$errors[] = t("Virheellinen tuotepaikka") . ". ($tuotepaikka)";
 				}
 			}
 			else {

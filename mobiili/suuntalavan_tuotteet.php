@@ -137,7 +137,6 @@ echo "<div class='main'>
 	<table>
 
 <tr>
-<th>&nbsp;</th>
 <th nowrap>
 <a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuote"),"</a>&nbsp;";
 
@@ -168,8 +167,7 @@ echo "</th>
 
 	foreach ($tuotteet as $tuote) {
 		echo "<tr id='{$tuote['tilriv_tunnus']}'>";
-		echo "<td><input class='radio' type='radio' name='tilausrivi' value='{$tuote['tilriv_tunnus']}'{$chk} /></td>";
-		echo "<td nowrap>{$tuote['tuoteno']}</td>";
+		echo "<td nowrap><a href='vahvista_kerayspaikka.php?suuntalavan_tuotteet&tilausrivi={$tuote['tilriv_tunnus']}&alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}'>{$tuote['tuoteno']}</a></td>";
 		echo "<td nowrap>{$tuote['maara']}";
 
 		if ($tuote['tuotekerroin'] != 1) echo "&nbsp;(",$tuote['maara'] * $tuote['tuotekerroin'],")";

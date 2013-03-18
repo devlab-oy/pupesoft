@@ -808,6 +808,7 @@
 				$gluku  			= 0;
 				$varasto_join 		= "";
 				$kantaasiakas_join 	= "";
+				$maksuehto_join 	= "";
 
 				// n‰it‰ k‰ytet‰‰n queryss‰
 				$sel_osasto = "";
@@ -1216,14 +1217,16 @@
 
 					//**  Maksuehtogrouppaukset start **//
 					if ($mukaan == "maksuehdoittain") {
-						$group  .= ",lasku.maksuteksti";
-						$select .= "lasku.maksuteksti maksuehto, ";
-						$order  .= "lasku.maksuteksti,";
+						$group  .= ",maksuehto.teksti";
+						$select .= "maksuehto.teksti maksuehto, ";
+						$order  .= "maksuehto.teksti,";
 						$gluku++;
 
 						if ($rajaus[$i] != "") {
-							$lisa .= " and lasku.maksuteksti='{$rajaus[$i]}' ";
+							$lisa .= " and maksuehto.teksti='{$rajaus[$i]}' ";
 						}
+
+						$maksuehto_join = "JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)\n";
 					}
 					//**  Maksuehtogrouppaukset loppu **//
 
@@ -1791,6 +1794,7 @@
 								{$lisatiedot_join}
 								{$varasto_join}
 								{$kantaasiakas_join}
+								{$maksuehto_join}
 								{$lisa_parametri}
 								WHERE lasku.yhtio in ({$yhtio})
 								and lasku.tila in ({$tila})";

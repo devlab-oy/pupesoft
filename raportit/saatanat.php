@@ -36,7 +36,7 @@
 	if (!isset($luottolisa)) 		$luottolisa = "";
 	if (!isset($sliitostunnus)) 	$sliitostunnus = "";
 
-    $pvmraja = $yhtiorow['erapaivan_ylityksen_raja'] ? : 15;
+    $pvmraja = $yhtiorow['erapaivan_ylityksen_raja'] >= 1 ? $yhtiorow['erapaivan_ylityksen_raja'] : 15;
 
 	if ($eiliittymaa != 'ON') {
 

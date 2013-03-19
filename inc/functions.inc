@@ -19968,9 +19968,15 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 	$force_to_string = array(
 		'tuoteno'
 	);
+ *
+ * $sulje_pois: ÄLÄ tulosta näitä kolumneja
+ * $sulje_pois = array(
+ *		'tuoteno',
+ *		'nimitys',
+ * );
  */
 if (!function_exists('generoi_excel_tiedosto')) {
-	function generoi_excel_tiedosto(&$rivit, $header_values, $force_to_string = array()) {
+	function generoi_excel_tiedosto(&$rivit, $header_values, $force_to_string = array(), $sulje_pois = array()) {
 		require_once('pupeExcel.inc');
 		require_once('ProgressBar.class.php');
 		$xls = new pupeExcel();
@@ -19981,12 +19987,12 @@ if (!function_exists('generoi_excel_tiedosto')) {
 		if(!empty($_temp)) {
 			_two_dimensional_array_sort_by_key($header_values, 'order');
 
-			_xls_jarjestetty_headerit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values);
-			_xls_jarjestetty_rivit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values, $force_to_string);
+			_xls_jarjestetty_headerit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values, $sulje_pois);
+			_xls_jarjestetty_rivit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values, $force_to_string, $sulje_pois);
 		}
 		else {
-			_xls_headerit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values);
-			_xls_rivit($xls, $rivit, $rivi_numero, $sarake_numero, $force_to_string);
+			_xls_headerit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values, $sulje_pois);
+			_xls_rivit($xls, $rivit, $rivi_numero, $sarake_numero, $force_to_string, $sulje_pois);
 		}
 
 		$xls_tiedosto = $xls->close();
@@ -19996,16 +20002,16 @@ if (!function_exists('generoi_excel_tiedosto')) {
 }
 
 if (!function_exists('_xls_headerit')) {
-	function _xls_headerit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values) {
+	function _xls_headerit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values, $sulje_pois) {
 		$style = array("bold" => TRUE);
-		foreach ($rivit[0] as $header_text => $value) {
-			if (!stristr($header_text, 'tunnus')) {
-				if (array_key_exists($header_text, $header_values)) {
-					_kirjoita_header_solu($xls, $header_values[$header_text], $rivi_numero, $sarake_numero, $style);
+		foreach ($rivit[0] as $column_name => $value) {
+			if (!stristr($column_name, 'tunnus') and !in_array($column_name, $sulje_pois)) {
+				if (array_key_exists($column_name, $header_values)) {
+					_kirjoita_header_solu($xls, $header_values[$column_name], $rivi_numero, $sarake_numero, $style);
 				}
 				else {
 					//fail safe
-					_kirjoita_header_solu($xls, $header_text, $rivi_numero, $sarake_numero, $style);
+					_kirjoita_header_solu($xls, $column_name, $rivi_numero, $sarake_numero, $style);
 				}
 			}
 		}
@@ -20015,10 +20021,10 @@ if (!function_exists('_xls_headerit')) {
 }
 
 if(!function_exists('_xls_jarjestetty_headerit')) {
-	function _xls_jarjestetty_headerit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values) {
+	function _xls_jarjestetty_headerit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values, $sulje_pois) {
 		$style = array("bold" => TRUE);
 		foreach($header_values as $column_name => $value) {
-			if (!stristr($column_name, 'tunnus') and array_key_exists($column_name, $rivit[0])) {
+			if (!stristr($column_name, 'tunnus') and array_key_exists($column_name, $rivit[0]) and !in_array($column_name, $sulje_pois)) {
 				_kirjoita_header_solu($xls, $value['header'], $rivi_numero, $sarake_numero, $style);
 			}
 		}
@@ -20029,14 +20035,14 @@ if(!function_exists('_xls_jarjestetty_headerit')) {
 }
 
 if (!function_exists('_xls_rivit')) {
-	function _xls_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $force_to_string = array()) {
+	function _xls_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $force_to_string, $sulje_pois) {
 		$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
 		$xls_progress_bar->initialize(count($rivit));
 
 		foreach ($rivit as $rivi) {
-			foreach ($rivi as $header => $solu) {
-				if (!stristr($header, 'tunnus')) {
-					_kirjoita_solu($xls, $header, $solu, $rivi_numero, $sarake_numero, $force_to_string);
+			foreach ($rivi as $column_name => $solu) {
+				if (!stristr($column_name, 'tunnus') and !in_array($column_name, $sulje_pois)) {
+					_kirjoita_solu($xls, $column_name, $solu, $rivi_numero, $sarake_numero, $force_to_string);
 				}
 			}
 			$rivi_numero++;
@@ -20050,7 +20056,7 @@ if (!function_exists('_xls_rivit')) {
 }
 
 if (!function_exists('_xls_jarjestetty_rivit')) {
-	function _xls_jarjestetty_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values, $force_to_string = array()) {
+	function _xls_jarjestetty_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values, $force_to_string, $sulje_pois) {
 		if (php_sapi_name() != 'cli') {
 			require_once 'ProgressBar.class.php';
 			$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
@@ -20059,7 +20065,7 @@ if (!function_exists('_xls_jarjestetty_rivit')) {
 
 		foreach ($rivit as $rivi) {
 			foreach($header_values as $column_name => $value) {
-				if (!stristr($column_name, 'tunnus') and isset($rivi[$column_name])) {
+				if (!stristr($column_name, 'tunnus') and isset($rivi[$column_name]) and !in_array($column_name, $sulje_pois)) {
 					_kirjoita_solu($xls, $column_name, $rivi[$column_name], $rivi_numero, $sarake_numero, $force_to_string);
 				}
 			}

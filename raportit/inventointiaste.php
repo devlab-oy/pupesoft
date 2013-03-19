@@ -51,15 +51,23 @@ gauge();
 		clear: both;
 	}
 
+	.kuukausittain_img {
+		float: right;
+	}
+
 	.inventointilajeittain_tr {
 		display: none;
 	}
 	.inventointilajeittain_tr_not_hidden {
-
+		background: none repeat scroll 0 0 #DADDDE;
 	}
 
 	.inventointilajit_wrapper {
 		display: none;
+	}
+
+	.inventointilajeittain_img {
+		float: right;
 	}
 
 	.tapahtumat_table {
@@ -74,6 +82,7 @@ gauge();
 	}
 
 	.tapahtumat_wrapper_not_hidden {
+		background: none repeat scroll 0 0 #DADDDE;
 	}
 
 	#footer {
@@ -107,11 +116,13 @@ gauge();
 				$(children).addClass('inventointilajeittain_tr');
 				$(children).removeClass('inventointilajeittain_tr_not_hidden');
 				$(this).removeClass('not_hidden');
+				$(this).find('.kuukausittain_img').attr('src', $('#down_arrow').val());
 			}
 			else {
 				$(children).removeClass('inventointilajeittain_tr');
 				$(children).addClass('inventointilajeittain_tr_not_hidden');
 				$(this).addClass('not_hidden');
+				$(this).find('.kuukausittain_img').attr('src', $('#right_arrow').val());
 			}
 		});
 	}
@@ -125,6 +136,7 @@ gauge();
 				$(children).find('.tapahtumat_table').addClass('tapahtumat_table');
 				$(children).find('.tapahtumat_table').removeClass('tapahtumat_table_not_hidden');
 				$(this).removeClass('not_hidden');
+				$(this).find('.inventointilajeittain_img').attr('src', $('#down_arrow').val());
 			}
 			else {
 				$(children).removeClass('tapahtumat_wrapper');
@@ -132,6 +144,7 @@ gauge();
 				$(children).find('.tapahtumat_table').removeClass('tapahtumat_table');
 				$(children).find('.tapahtumat_table').addClass('tapahtumat_table_not_hidden');
 				$(this).addClass('not_hidden');
+				$(this).find('.inventointilajeittain_img').attr('src', $('#right_arrow').val());
 			}
 		});
 	}
@@ -263,13 +276,21 @@ if ($request['tee'] == 'aja_raportti') {
 	$rivit = hae_inventoinnit($request);
 	if ($request['tallenna_exceliin']) {
 		$header_values = array(
-			'laadittu_pvm'				 => array(
-				'header' => t('Aika'),
+			'vuosi'						 => array(
+				'header' => t('Vuosi'),
 				'order'	 => 1
 			),
-			'laadittu'					 => array(
-				'header' => t('Inventointiaika'),
-				'order'	 => 90
+			'kuukausi'					 => array(
+				'header' => t('Kuukausi'),
+				'order'	 => 2
+			),
+			'paiva'						 => array(
+				'header' => t('Päivä'),
+				'order'	 => 3
+			),
+			'kellon_aika'				 => array(
+				'header' => t('Kellon aika'),
+				'order'	 => 4
 			),
 			'inventointi_poikkeama_eur'	 => array(
 				'header' => t('Inventointipoikkeama').' '.$yhtiorow['valkoodi'],
@@ -311,8 +332,12 @@ if ($request['tee'] == 'aja_raportti') {
 		$force_to_string = array(
 			'tuoteno'
 		);
+		$sulje_pois = array(
+			'laadittu_pvm',
+			'laadittu',
+		);
 
-		$excel_filepath = generoi_excel_tiedosto($rivit, $header_values, $force_to_string);
+		$excel_filepath = generoi_excel_tiedosto($rivit, $header_values, $force_to_string, $sulje_pois);
 	}
 	$rivit = kasittele_rivit($rivit);
 
@@ -330,10 +355,14 @@ require ("../inc/footer.inc");
 echo "</div>";
 
 function init(&$request) {
+	global $palvelin2;
+
 	echo "<input type='hidden' id='valitse_varasto_error_message' value='".t("Valitse varasto")."' />";
 	echo "<input type='hidden' id='valitse_aika_error_message' value='".t("Syötä validi aika")."' />";
 	echo "<input type='hidden' id='12kk_gauge_message' value='".t("Juokseva 12kk")."' />";
 	echo "<input type='hidden' id='tilikausi_gauge_message' value='".t("Kuluva tilikausi")."' />";
+	echo "<input type='hidden' id='down_arrow' value='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
+	echo "<input type='hidden' id='right_arrow' value='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />";
 
 	echo "<div id='chart_div'></div>";
 	echo "<br/>";
@@ -444,11 +473,15 @@ function echo_raportin_tulokset($rivit) {
 }
 
 function echo_table_first_layer($rivi_index, $rivi) {
+	global $palvelin2;
+	
 	echo "<tr class='kuukausittain_tr aktiivi'>";
 
 	echo "<td>";
 	echo "<input type='hidden' class='kuukausittain_key' value='{$rivi_index}'/>";
 	echo $rivi_index;
+	echo "&nbsp";
+	echo "<img class='kuukausittain_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
 	echo "</td>";
 
 	echo "<td></td>";
@@ -471,6 +504,8 @@ function echo_table_first_layer($rivi_index, $rivi) {
 }
 
 function echo_table_second_layer($rivi, $rivi_index) {
+	global $palvelin2;
+	
 	foreach ($rivi['inventointilajit'] as $inventointilaji) {
 		echo "<tr class='inventointilajeittain_tr aktiivi {$rivi_index}'>";
 
@@ -478,6 +513,8 @@ function echo_table_second_layer($rivi, $rivi_index) {
 		echo "<td>";
 		//$inventointilaji pitää sisällään ainoastaan tietyn inventointilajin inventointeja, tällöin voimme printata lajin nimityksen ensimmäisestä alkiosta
 		echo $inventointilaji['tapahtumat'][0]['inventointilaji'];
+		echo "&nbsp";
+		echo "<img class='inventointilajeittain_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
 		echo "</td>";
 
 		echo "<td>";
@@ -520,7 +557,7 @@ function echo_table_third_layer($inventointilaji) {
 	echo "</tr>";
 
 	foreach ($inventointilaji['tapahtumat'] as $tapahtuma) {
-		echo "<tr>";
+		echo "<tr class='tapahtuma_tr'>";
 		echo "<td>{$tapahtuma['tuoteno']}</td>";
 		echo "<td>{$tapahtuma['tuote_nimitys']}</td>";
 		echo "<td>{$tapahtuma['hyllypaikka']}</td>";
@@ -720,15 +757,18 @@ function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {
 		$request['alku_aika'] = date('Y-m-d', strtotime('now - 12 month'));
 		$request['loppu_aika'] = date('Y-m-d');
 		$tapahtuma_where = "";
+		$group = "GROUP BY hyllypaikka";
 	}
 	elseif ($aikavali_tyyppi == 'tilikausi') {
 		$request['alku_aika'] = $request['tamanhetkinen_tilikausi']['tilikausi_alku'];
 		$request['loppu_aika'] = $request['tamanhetkinen_tilikausi']['tilikausi_loppu'];
 		$tapahtuma_where = "";
+		$group = "GROUP BY hyllypaikka";
 	}
 	else {
 		parsi_paivat($request);
 		$tapahtuma_where = "AND tapahtuma.kpl != 0";
+		$group = "";
 	}
 
 	if (!empty($request['valitut_inventointilajit'])) {
@@ -743,6 +783,10 @@ function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {
 
 	$query = "	SELECT DATE(tapahtuma.laadittu) laadittu_pvm,
 				tapahtuma.laadittu,
+				YEAR(tapahtuma.laadittu) as vuosi,
+				MONTH(tapahtuma.laadittu) as kuukausi,
+				DAY(tapahtuma.laadittu) as paiva,
+				TIME(tapahtuma.laadittu) as kellon_aika,
 				( tapahtuma.kpl * tapahtuma.hinta ) AS inventointi_poikkeama_eur,
 				tapahtuma.selite,
 				substring( tapahtuma.selite, ( length(tapahtuma.selite)-locate( '>rb<',reverse(tapahtuma.selite)) ) +2 ) AS inventointilaji,
@@ -750,8 +794,8 @@ function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {
 				tuote.nimitys AS tuote_nimitys,
 				tapahtuma.kpl,
 				Concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllytaso, tapahtuma.hyllyvali) AS hyllypaikka,
-				tapahtuma.laatija,
-				ifnull(keraysvyohyke.nimitys, 'Poistettu') AS keraysvyohyke_nimitys
+				IFNULL(kuka.nimi, '".t("Poistettu käyttäjä")."') as laatija,
+				IFNULL(keraysvyohyke.nimitys, '".t("Poistettu")."') AS keraysvyohyke_nimitys
 				FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
 				JOIN tuote
 				ON ( tuote.yhtio = tapahtuma.yhtio
@@ -763,6 +807,9 @@ function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {
 				  AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
 				  AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
 				  AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
+				LEFT JOIN kuka
+				ON ( kuka.yhtio = tapahtuma.yhtio
+					AND kuka.kuka = tapahtuma.laatija )
 				LEFT JOIN varaston_hyllypaikat AS vh
 				ON ( vh.yhtio = tapahtuma.yhtio
 					AND vh.hyllyalue = tapahtuma.hyllyalue
@@ -775,7 +822,8 @@ function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {
 				WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 				  AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
 				  AND tapahtuma.laji = 'Inventointi'
-				  {$tapahtuma_where}";
+				{$tapahtuma_where}
+				{$group}";
 	$result = pupe_query($query);
 
 	$rivit = array();
@@ -850,8 +898,9 @@ function hae_tilikaudet($request = array()) {
 			$tilikausi['selected'] = 'selected';
 		}
 		else {
-			//jos requestista ei tule valittua tilikautta, esivalitaan tämän hetkinen tilikausi
-			if ($tilikausi['tilikausi_alku'] <= date('Y-m-d') and $tilikausi['tilikausi_loppu'] > date('Y-m-d')) {
+			//jos requestista ei tule valittua tilikautta, esivalitaan tämän hetkinen tilikausi, mutta jos requestissa tulee ppa, kka, vva, ppl, kkl tai vvl tarkoittaa tämä, että kyseessä ei ole ensimmäinen sivu lataus, jolloin tilikautta ei kuulu esivalita
+			//huom! js estää epävalidin ajan syöttämisen, tällöin riittää, että tarkastamme vva:n
+			if ($tilikausi['tilikausi_alku'] <= date('Y-m-d') and $tilikausi['tilikausi_loppu'] > date('Y-m-d') and empty($request['vva'])) {
 				$tilikausi['selected'] = 'selected';
 			}
 			else {

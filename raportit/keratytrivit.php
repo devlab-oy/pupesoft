@@ -292,9 +292,9 @@
 			echo "<th nowrap>",t("Kilot"),"<br />",t("Yhteens‰"),"</th>";
 			echo "</tr>";
 
-			echo "<tr class='nayta_keraajittain' id='keraajittain'>";
+			echo "<tr class='nayta_keraajittain tumma' id='keraajittain'>";
 
-			echo "<td colspan='5'><img id='arrowi_keraajittain' style='float:left;' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' /></td>";
+			echo "<td colspan='5'><img id='arrowi_keraajittain' style='float:left;' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' /> ".t("Yhteens‰")."</td>";
 
 			foreach ($data['summaus']['yhteensa'] as $_arr_key => $_arr_values) {
 				echo "<td>{$_arr_values}</td>";
@@ -304,7 +304,7 @@
 
 			unset($data['summaus']['yhteensa']);
 
-			echo "<tr class='keraajittain child' style='display: none;'>";
+			echo "<tr class='keraajittain child' style=''>";
 			echo "<th nowrap colspan='5'>",t("Ker‰‰j‰"),"</th>";
 			echo "<th norwap>",t("Puuterivit"),"</th>";
 			echo "<th norwap>",t("Siirrot"),"</th>";
@@ -318,14 +318,15 @@
 
 				$id = str_replace(array(".", " ", ":"), "", $_arr_key);
 
-				echo "<tr class='keraajittain nayta_keraaja child' id='{$id}' style='display: none;'>";
+				echo "<tr class='keraajittain nayta_keraaja child' id='{$id}' style=''>";
 
 				$nimi = $nimet[$_arr_key] != "" ? "{$nimet[$_arr_key]} ($_arr_key)" : $_arr_key;
 
 				echo "<td colspan='5'><img id='arrowi_{$id}' style='float:left;' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;&nbsp;{$nimi}</td>";
 
-				foreach($_arr_values as $_val) {
-					echo "<td>{$_val}</td>";
+				foreach($_arr_values as $_key => $_val) {
+					if ($_key == "yhteensa_kilot") echo "<td align='right'>{$_val}</td>";
+					else echo "<td>{$_val}</td>";					
 				}
 
 				echo "</tr>";
@@ -348,8 +349,9 @@
 
 					echo "<tr class='{$id} spec aktiivi child' style='display: none;'>";
 
-					foreach ($arr as $val) {
-						echo "<td>{$val}</td>";
+					foreach($arr as $_key => $_val) {
+						if ($_key == "yhteensa_kilot") echo "<td align='right'>{$_val}</td>";
+						else echo "<td>{$_val}</td>";					
 					}
 
 					echo "</tr>";

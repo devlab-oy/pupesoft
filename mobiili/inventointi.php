@@ -123,12 +123,19 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 /** Tarkistaa varmistuskoodin syˆtetyn tuotepaikan ja koodin mukaan.
  *  jos varmistuskoodia ei annettu yritet‰‰n k‰ytt‰‰ keksiss‰ olevaa varmistuskoodia.
  */
-function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi = '') {
+function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi = '', $haettu_tuotepaikalla = '') {
 	// Muutetaan saatuo tuotepaikka arrayksi
 	$hylly = explode('-', $tuotepaikka);
 
+	// Jos haettu vajaalla tuotepaikalla, eli hyllyalue-hyllynro, niin tarkistetaan ett‰ jos
+	// keksiss‰ oleva tuotepaikka t‰sm‰‰ kyseist‰ aluetta. Jos t‰sm‰‰ niin varmistuskoodi tarkistetaan suoraan.
+	$tuotealue = false;
+	if (stripos(str_replace('-', '', $_COOKIE['_tuotepaikka']), $haettu_tuotepaikalla) === 0) {
+		$tuotealue = true;
+	}
+
 	// Jos varmistuskoodia ei saatu parametrissa, yritet‰‰n keksiss‰ olevalla koodilla.
-	if ($varmistuskoodi == '' and isset($_COOKIE['_varmistuskoodi'])) {
+	if ($varmistuskoodi == '' and isset($_COOKIE['_varmistuskoodi']) and ($tuotepaikka == $_COOKIE['_tuotepaikka'] or $tuotealue == true)) {
 		$varmistuskoodi = $_COOKIE['_varmistuskoodi'];
 	}
 
@@ -336,7 +343,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 	}
 
 	// Jos varmistuskoodi kelpaa tai on keksiss‰ tallessa
-	if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi)) {
+	if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi, $tuotepaikalla)) {
 		$title = t("Laske m‰‰r‰");
 		$query = "	SELECT *
 					FROM avainsana

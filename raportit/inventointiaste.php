@@ -29,8 +29,11 @@ gauge();
 		clear: both;
 	}
 
-	.inventointilajeittain_table {
+	.inventointilajeittain_tr {
 		display: none;
+	}
+	.inventointilajeittain_tr_not_hidden {
+		
 	}
 
 	.inventointilajit_wrapper {
@@ -41,8 +44,14 @@ gauge();
 		display: none;
 	}
 
+	.tapahtumat_table_not_hidden {
+	}
+
 	.tapahtumat_wrapper {
 		display: none;
+	}
+
+	.tapahtumat_wrapper_not_hidden {
 	}
 
 	#footer {
@@ -68,15 +77,16 @@ gauge();
 
 	function bind_kuukausittain_tr() {
 		$('.kuukausittain_tr').click(function() {
-			var children = $(this).next().find('.inventointilajeittain_table');
+			var kuukausittain_key = $(this).find('.kuukausittain_key').val();
+			var children = $(this).parent().find('.' + kuukausittain_key);
 			if ($(this).hasClass('not_hidden')) {
-				$(children).parent().parent().css('display', 'none');
-				$(children).css('display', 'none');
+				$(children).addClass('inventointilajeittain_tr');
+				$(children).removeClass('inventointilajeittain_tr_not_hidden');
 				$(this).removeClass('not_hidden');
 			}
 			else {
-				$(children).parent().parent().css('display', 'block');
-				$(children).css('display', 'block');
+				$(children).removeClass('inventointilajeittain_tr');
+				$(children).addClass('inventointilajeittain_tr_not_hidden');
 				$(this).addClass('not_hidden');
 			}
 		});
@@ -84,15 +94,19 @@ gauge();
 
 	function bind_inventointilajeittain_tr() {
 		$('.inventointilajeittain_tr').click(function() {
-			var children = $(this).next().find('.tapahtumat_table');
+			var children = $(this).next();
 			if ($(this).hasClass('not_hidden')) {
-				$(children).parent().parent().css('display', 'none');
-				$(children).css('display', 'none');
+				$(children).addClass('tapahtumat_wrapper');
+				$(children).removeClass('tapahtumat_wrapper_not_hidden');
+				$(children).find('.tapahtumat_table').addClass('tapahtumat_table');
+				$(children).find('.tapahtumat_table').removeClass('tapahtumat_table_not_hidden');
 				$(this).removeClass('not_hidden');
 			}
 			else {
-				$(children).parent().parent().css('display', 'block');
-				$(children).css('display', 'block');
+				$(children).removeClass('tapahtumat_wrapper');
+				$(children).addClass('tapahtumat_wrapper_not_hidden');
+				$(children).find('.tapahtumat_table').removeClass('tapahtumat_table');
+				$(children).find('.tapahtumat_table').addClass('tapahtumat_table_not_hidden');
 				$(this).addClass('not_hidden');
 			}
 		});
@@ -178,11 +192,9 @@ gauge();
 			}
 		});
 
-		if ($('#valittu_tilikausi').val() === '') {
-			if (alku_aika_not_empty_values.length !== 3 && loppu_aika_not_empty_values.length !== 3) {
-				ok = false;
-				alert($('#valitse_aika_error_message').val());
-			}
+		if ($('#valittu_tilikausi').val() === '' || (alku_aika_not_empty_values.length !== 3 && loppu_aika_not_empty_values.length !== 3)) {
+			ok = false;
+			alert($('#valitse_aika_error_message').val());
 		}
 
 		return ok;
@@ -208,19 +220,21 @@ $request = array(
 echo "<div id='wrapper'>";
 init($request);
 
-if ($request['tee'] == 'aja_raportti') {
-	$rivit = hae_inventoinnit($request);
-	$rivit = kasittele_rivit($rivit);
-
-	echo_raportin_tulokset($rivit);
-}
-
 echo "<div id='table_div'>";
 
 echo_arvot($request);
 echo_kayttoliittyma($request);
 
 echo "</div>";
+echo "<br/>";
+echo "<br/>";
+
+if ($request['tee'] == 'aja_raportti') {
+	$rivit = hae_inventoinnit($request);
+	$rivit = kasittele_rivit($rivit);
+
+	echo_raportin_tulokset($rivit);
+}
 
 echo "</div>";
 
@@ -293,7 +307,7 @@ function echo_arvot(&$request) {
 		}
 	}
 	if (empty($tyopaivien_lukumaara)) {
-		//fail safe
+		//fail safe, jos kannasta ei jostain syystä löydy tilikautta tälle ajanhetkelle
 		$tyopaivien_lukumaara = hae_tyopaivien_lukumaara(date('Y-m-d'), date('Y-12-31'));
 	}
 
@@ -336,70 +350,61 @@ function echo_table_first_layer($rivi_index, $rivi) {
 	echo "<tr class='kuukausittain_tr aktiivi'>";
 
 	echo "<td>";
+	echo "<input type='hidden' class='kuukausittain_key' value='{$rivi_index}'/>";
 	echo $rivi_index;
 	echo "</td>";
 
+	echo "<td></td>";
+
 	echo "<td>";
-	echo (isset($rivi['kuukausittain_luvut']['pos']) ? $rivi['kuukausittain_luvut']['pos'] : 0);
+	echo (isset($rivi['kuukausittain_luvut']['pos']) ? round($rivi['kuukausittain_luvut']['pos'], 2) : 0);
 	echo "</td>";
 
 	echo "<td>";
-	echo (isset($rivi['kuukausittain_luvut']['neg']) ? $rivi['kuukausittain_luvut']['neg'] : 0);
+	echo (isset($rivi['kuukausittain_luvut']['neg']) ? round($rivi['kuukausittain_luvut']['neg'], 2) : 0);
 	echo "</td>";
 
 	echo "<td>";
-	echo (isset($rivi['kuukausittain_luvut']['ero']) ? $rivi['kuukausittain_luvut']['ero'] : 0);
+	echo (isset($rivi['kuukausittain_luvut']['ero']) ? round($rivi['kuukausittain_luvut']['ero'], 2) : 0);
 	echo "</td>";
 
 	echo "</tr>";
 
-	echo "<tr class='inventointilajit_wrapper'>";
-	echo "<td>";
-	echo_table_second_layer($rivi);
-	echo "</td>";
-	echo "</tr>";
+	echo_table_second_layer($rivi, $rivi_index);
 }
 
-function echo_table_second_layer($rivi) {
-	echo "<table class='inventointilajeittain_table'>";
+function echo_table_second_layer($rivi, $rivi_index) {
+	foreach ($rivi['inventointilajit'] as $inventointilaji) {
+		echo "<tr class='inventointilajeittain_tr aktiivi {$rivi_index}'>";
 
-	echo "<tr>";
-	echo "<th>".t("Inventointilaji")."</th>";
-	echo "<th>".t("Inventoitu positiivista")."</th>";
-	echo "<th>".t("Inventoitu negatiivista")."</th>";
-	echo "<th>".t("Inventointi erotus")."</th>";
-	echo "</tr>";
-
-	foreach ($rivi['inventointilajit'] as $inventointilaji_index => $inventointilaji) {
-		echo "<tr class='inventointilajeittain_tr aktiivi'>";
-
+		echo "<td></td>";
 		echo "<td>";
 		//$inventointilaji pitää sisällään ainoastaan tietyn inventointilajin inventointeja, tällöin voimme printata lajin nimityksen ensimmäisestä alkiosta
 		echo $inventointilaji['tapahtumat'][0]['inventointilaji'];
 		echo "</td>";
 
 		echo "<td>";
-		echo (isset($inventointilaji['inventointilajeittain_luvut']['pos']) ? $inventointilaji['inventointilajeittain_luvut']['pos'] : 0);
+		echo (isset($inventointilaji['inventointilajeittain_luvut']['pos']) ? round($inventointilaji['inventointilajeittain_luvut']['pos'], 2) : 0);
 		echo "</td>";
 
 		echo "<td>";
-		echo (isset($inventointilaji['inventointilajeittain_luvut']['neg']) ? $inventointilaji['inventointilajeittain_luvut']['neg'] : 0);
+		echo (isset($inventointilaji['inventointilajeittain_luvut']['neg']) ? round($inventointilaji['inventointilajeittain_luvut']['neg'], 2) : 0);
 		echo "</td>";
 
 		echo "<td>";
-		echo (isset($inventointilaji['inventointilajeittain_luvut']['ero']) ? $inventointilaji['inventointilajeittain_luvut']['ero'] : 0);
+		echo (isset($inventointilaji['inventointilajeittain_luvut']['ero']) ? round($inventointilaji['inventointilajeittain_luvut']['ero'], 2) : 0);
 		echo "</td>";
 
 		echo "</tr>";
 
 		echo "<tr class='tapahtumat_wrapper'>";
-		echo "<td>";
+		echo "<td></td>";
+		echo "<td></td>";
+		echo "<td colspan='3'>";
 		echo_table_third_layer($inventointilaji);
 		echo "</td>";
 		echo "</tr>";
 	}
-
-	echo "</table>";
 }
 
 function echo_table_third_layer($inventointilaji) {

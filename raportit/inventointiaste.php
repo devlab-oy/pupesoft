@@ -3,7 +3,29 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
+if (isset($_POST["tee"])) {
+	if ($_POST["tee"] == 'lataa_tiedosto') {
+		$lataa_tiedosto = 1;
+	}
+	if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
+		$_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+	}
+}
+
 require ("../inc/parametrit.inc");
+
+if ($tee == 'lataa_tiedosto') {
+	$filepath = "/tmp/".$tmpfilenimi;
+	if (file_exists($filepath)) {
+		readfile($filepath);
+		unlink($filepath);
+	}
+	else {
+		echo "<font class='error'>".t("Tiedostoa ei ole olemassa")."</font>";
+	}
+	exit;
+}
+
 require ("../inc/functions.inc");
 
 echo "<font class='head'>".t("Inventointiaste")."</font><hr>";
@@ -33,7 +55,7 @@ gauge();
 		display: none;
 	}
 	.inventointilajeittain_tr_not_hidden {
-		
+
 	}
 
 	.inventointilajit_wrapper {
@@ -70,6 +92,8 @@ gauge();
 		for (var gauge_type in gauge_types) {
 			gauges[gauge_types[gauge_type]] = init_and_draw_gauge(gauge_types[gauge_type]);
 		}
+
+		append_gauge_headers();
 
 		bind_kuukausittain_tr();
 		bind_inventointilajeittain_tr();
@@ -160,6 +184,11 @@ gauge();
 		return gauge;
 	}
 
+	function append_gauge_headers() {
+		$('#prosentti12kk').prepend('<div align="center"><font class="message">' + $('#12kk_gauge_message').val() + '</font></div>');
+		$('#prosenttitilikausi').prepend('<div align="center"><font class="message">' + $('#tilikausi_gauge_message').val() + '</font></div>');
+	}
+
 	function tarkista() {
 		var ok = true;
 
@@ -192,7 +221,7 @@ gauge();
 			}
 		});
 
-		if ($('#valittu_tilikausi').val() === '' || (alku_aika_not_empty_values.length !== 3 && loppu_aika_not_empty_values.length !== 3)) {
+		if ($('#valittu_tilikausi').val() === '' && (alku_aika_not_empty_values.length !== 3 && loppu_aika_not_empty_values.length !== 3)) {
 			ok = false;
 			alert($('#valitse_aika_error_message').val());
 		}
@@ -206,6 +235,7 @@ gauge();
 
 $request = array(
 	'tee'						 => $tee,
+	'tallenna_exceliin'			 => $tallenna_exceliin,
 	'ppa'						 => $ppa,
 	'kka'						 => $kka,
 	'vva'						 => $vva,
@@ -231,7 +261,64 @@ echo "<br/>";
 
 if ($request['tee'] == 'aja_raportti') {
 	$rivit = hae_inventoinnit($request);
+	if ($request['tallenna_exceliin']) {
+		$header_values = array(
+			'laadittu_pvm'				 => array(
+				'header' => t('Aika'),
+				'order'	 => 1
+			),
+			'laadittu'					 => array(
+				'header' => t('Inventointiaika'),
+				'order'	 => 90
+			),
+			'inventointi_poikkeama_eur'	 => array(
+				'header' => t('Inventointipoikkeama').' '.$yhtiorow['valkoodi'],
+				'order'	 => 60
+			),
+			'selite'					 => array(
+				'header' => t('Selite'),
+				'order'	 => 80
+			),
+			'inventointilaji'			 => array(
+				'header' => t('Inventointilaji'),
+				'order'	 => 70
+			),
+			'tuoteno'					 => array(
+				'header' => t('Tuoteno'),
+				'order'	 => 10
+			),
+			'tuote_nimitys'				 => array(
+				'header' => t('Tuotteen nimitys'),
+				'order'	 => 20
+			),
+			'kpl'						 => array(
+				'header' => t('Inventointi määrä'),
+				'order'	 => 50
+			),
+			'hyllypaikka'				 => array(
+				'header' => t('Hyllypaikka'),
+				'order'	 => 30
+			),
+			'laatija'					 => array(
+				'header' => t('Inventoija'),
+				'order'	 => 89
+			),
+			'keraysvyohyke_nimitys'		 => array(
+				'header' => t('Keräysvyohykkeen nimitys'),
+				'order'	 => 40
+			),
+		);
+		$force_to_string = array(
+			'tuoteno'
+		);
+
+		$excel_filepath = generoi_excel_tiedosto($rivit, $header_values, $force_to_string);
+	}
 	$rivit = kasittele_rivit($rivit);
+
+	if (!empty($excel_filepath)) {
+		echo_tallennus_formi($excel_filepath);
+	}
 
 	echo_raportin_tulokset($rivit);
 }
@@ -245,6 +332,8 @@ echo "</div>";
 function init(&$request) {
 	echo "<input type='hidden' id='valitse_varasto_error_message' value='".t("Valitse varasto")."' />";
 	echo "<input type='hidden' id='valitse_aika_error_message' value='".t("Syötä validi aika")."' />";
+	echo "<input type='hidden' id='12kk_gauge_message' value='".t("Juokseva 12kk")."' />";
+	echo "<input type='hidden' id='tilikausi_gauge_message' value='".t("Kuluva tilikausi")."' />";
 
 	echo "<div id='chart_div'></div>";
 	echo "<br/>";
@@ -264,6 +353,23 @@ function init(&$request) {
 	}
 	else {
 		$request['tilikaudet'] = array('tunnus'	 => '', 'tilikausi'	 => t("Valitse tilikausi tai syötä päivämäärä rajat"));
+	}
+
+	foreach ($request['tilikaudet'] as $tilikausi) {
+		if ($tilikausi['tilikausi_alku'] <= date('Y-m-d') and $tilikausi['tilikausi_loppu'] > date('Y-m-d')) {
+			$request['tamanhetkinen_tilikausi'] = array(
+				'tilikausi_alku'	 => $tilikausi['tilikausi_alku'],
+				'tilikausi_loppu'	 => $tilikausi['tilikausi_loppu'],
+			);
+			break;
+		}
+	}
+	if (empty($request['tamanhetkinen_tilikausi'])) {
+		//fail safe, jos tilikautta ei ole asetettu kantaan
+		$request['tamanhetkinen_tilikausi'] = array(
+			'tilikausi_alku'	 => date('Y-01-01'),
+			'tilikausi_loppu'	 => date('Y-12-31'),
+		);
 	}
 
 	$request['varastot'] = hae_varastot($request);
@@ -291,27 +397,18 @@ function init(&$request) {
 
 function echo_arvot(&$request) {
 
-	$inventointien_lukumaara_12kk = hae_inventointien_lukumaara($request, '12kk');
-	$inventointien_lukumaara_tilikausi = hae_inventointien_lukumaara($request, 'tilikausi');
+	$inventointien_lukumaara_12kk = count(hae_inventoinnit($request, '12kk'));
+	$inventointien_lukumaara_tilikausi = count(hae_inventoinnit($request, 'tilikausi'));
 	$varaston_hyllypaikkojen_lukumaara = hae_varaston_hyllypaikkojen_lukumaara($request);
 
-	echo "<input type='hidden' id='inventointien_lukumaara_12kk' value='{$inventointien_lukumaara_12kk['inventointien_lukumaara']}' />";
-	echo "<input type='hidden' id='inventointien_lukumaara_tilikausi' value='{$inventointien_lukumaara_tilikausi['inventointien_lukumaara']}' />";
+	echo "<input type='hidden' id='inventointien_lukumaara_12kk' value='{$inventointien_lukumaara_12kk}' />";
+	echo "<input type='hidden' id='inventointien_lukumaara_tilikausi' value='{$inventointien_lukumaara_tilikausi}' />";
 	echo "<input type='hidden' id='varaston_hyllypaikkojen_lukumaara' value='{$varaston_hyllypaikkojen_lukumaara['varaston_hyllypaikkojen_lukumaara']}' />";
 
 	//haetaan tämän tilikauden jäljellä olevien työpäivien lukumäärä
-	foreach ($request['tilikaudet'] as $tilikausi) {
-		if ($tilikausi['tilikausi_alku'] <= date('Y-m-d') and $tilikausi['tilikausi_loppu'] > date('Y-m-d')) {
-			$tyopaivien_lukumaara = hae_tyopaivien_lukumaara($tilikausi['tilikausi_alku'], $tilikausi['tilikausi_loppu']);
-			break;
-		}
-	}
-	if (empty($tyopaivien_lukumaara)) {
-		//fail safe, jos kannasta ei jostain syystä löydy tilikautta tälle ajanhetkelle
-		$tyopaivien_lukumaara = hae_tyopaivien_lukumaara(date('Y-m-d'), date('Y-12-31'));
-	}
+	$tyopaivien_lukumaara = hae_tyopaivien_lukumaara($request['tamanhetkinen_tilikausi']['tilikausi_alku'], $request['tamanhetkinen_tilikausi']['tilikausi_loppu']);
 
-	$inventointeja_per_paiva = ($varaston_hyllypaikkojen_lukumaara['varaston_hyllypaikkojen_lukumaara'] - $inventointien_lukumaara_tilikausi['inventointien_lukumaara']) / $tyopaivien_lukumaara;
+	$inventointeja_per_paiva = ($varaston_hyllypaikkojen_lukumaara['varaston_hyllypaikkojen_lukumaara'] - $inventointien_lukumaara_tilikausi) / $tyopaivien_lukumaara;
 
 	echo "<table>";
 	echo "<tr>";
@@ -448,6 +545,10 @@ function echo_kayttoliittyma($request) {
 	echo "<table>";
 
 	echo "<tr>";
+	echo "<th>".t("Tallenna exceliin")."</th>";
+	echo "<td><input type='checkbox' name='tallenna_exceliin' ".(!empty($request['tallenna_exceliin']) ? 'checked="checked"' : '')."/></td>";
+	echo "</tr>";
+	echo "<tr>";
 	echo "<th>", t("Syötä alkupäivämäärä"), " (", t("pp-kk-vvvv"), ")</th>";
 	echo "<td><input type='text' name='ppa' id='ppa' class='alku_aika' value='{$request['ppa']}' size='3'>";
 	echo "<input type='text' name='kka' id='kka' class='alku_aika' value='{$request['kka']}' size='3'>";
@@ -513,80 +614,6 @@ function echo_kayttoliittyma($request) {
 	echo "</form>";
 }
 
-function hae_inventoinnit(&$request) {
-	global $kukarow;
-
-	parsi_paivat($request);
-
-	$query = "	SELECT DATE(tapahtuma.laadittu) laadittu_pvm,
-				tapahtuma.laadittu,
-				( tapahtuma.kpl * tapahtuma.hinta ) AS inventointi_poikkeama_eur,
-				tapahtuma.selite,
-				substring( tapahtuma.selite, ( length(tapahtuma.selite)-locate( '>rb<',reverse(tapahtuma.selite)) ) +2 ) as inventointilaji,
-				tapahtuma.tuoteno,
-				tuote.nimitys AS tuote_nimitys,
-				tapahtuma.kpl,
-				Concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllytaso, tapahtuma.hyllyvali) AS hyllypaikka,
-				tapahtuma.laatija,
-				keraysvyohyke.nimitys AS keraysvyohyke_nimitys
-				FROM   tuotepaikat
-				JOIN tuote
-				ON ( tuote.yhtio = tuotepaikat.yhtio
-					AND tuote.tuoteno = tuotepaikat.tuoteno
-					AND tuote.ei_saldoa = ''
-					AND tuote.status = 'A' )
-				JOIN tapahtuma
-				ON ( tapahtuma.yhtio = tuotepaikat.yhtio
-					AND tapahtuma.tuoteno = tuotepaikat.tuoteno
-					AND tapahtuma.hyllyalue = tuotepaikat.hyllyalue
-					AND tapahtuma.hyllynro = tuotepaikat.hyllynro
-					AND tapahtuma.hyllyvali = tuotepaikat.hyllyvali
-					AND tapahtuma.hyllytaso = tuotepaikat.hyllytaso
-					AND tapahtuma.laadittu BETWEEN '{$request['raportti_alku_aika']}' AND '{$request['raportti_loppu_aika']}'
-					AND tapahtuma.laji = 'Inventointi'
-					{$request['inventointilaji_rajaus']}
-					AND tapahtuma.kpl != 0 )
-				JOIN varaston_hyllypaikat AS vh
-				ON ( vh.yhtio = tapahtuma.yhtio
-					AND vh.hyllyalue = tapahtuma.hyllyalue
-					AND vh.hyllynro = tapahtuma.hyllynro
-					AND vh.hyllytaso = tapahtuma.hyllytaso
-					AND vh.hyllyvali = tapahtuma.hyllyvali )
-				JOIN keraysvyohyke
-				ON ( keraysvyohyke.yhtio = vh.yhtio
-					AND keraysvyohyke.tunnus = vh.keraysvyohyke )
-				JOIN varastopaikat
-				ON ( varastopaikat.yhtio = tuotepaikat.yhtio
-					AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-					AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-					AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
-				WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-				ORDER BY laadittu_pvm ASC";
-	$result = pupe_query($query);
-
-	$rivit = array();
-	while ($rivi = mysql_fetch_assoc($result)) {
-		$rivit[] = $rivi;
-	}
-
-	return $rivit;
-}
-
-function parsi_paivat(&$request) {
-
-	if (!empty($request['valittu_tilikausi'])) {
-		$tilikausi_temp = search_array_key_for_value_recursive($request['tilikaudet'], 'tunnus', $request['valittu_tilikausi']);
-		//funktion on tarkoitus palauttaa ainoastaan yksi tilikausi, siksi voimme viitata indeksillä
-		$request['raportti_alku_aika'] = $tilikausi_temp[0]['tilikausi_alku'];
-		$request['raportti_loppu_aika'] = $tilikausi_temp[0]['tilikausi_loppu'];
-	}
-	else {
-		//TODO onko formista tulevilla alku loppu ajoilla jotain maksimi arvoja? esim saa hakea inventointeja korkeintaan vuoden päähän tjsp
-		$request['raportti_alku_aika'] = $request['vva'].'-'.$request['kka'].'-'.$request['ppa'];
-		$request['raportti_loppu_aika'] = $request['vvl'].'-'.$request['kkl'].'-'.$request['ppl'];
-	}
-}
-
 function kasittele_rivit($rivit) {
 
 	$rivit_temp = array();
@@ -600,6 +627,11 @@ function kasittele_rivit($rivit) {
 		}
 		$aika = date('Y-m', strtotime($rivi['laadittu_pvm']));
 
+		$eilinen = date('Y-m-d', strtotime('now - 1 day'));
+		if (date('Y-m-d', strtotime($rivi['laadittu'])) == $eilinen) {
+			$aika = $eilinen;
+		}
+
 		//kerätään kuukausittain luvut suoraan kuukauden alle
 		keraa_kuukausittain_luvut($rivi, $rivit_temp, $inventointilaji, $aika);
 
@@ -608,6 +640,8 @@ function kasittele_rivit($rivit) {
 
 		$rivit_temp[$aika]['inventointilajit'][$inventointilaji]['tapahtumat'][] = $rivi;
 	}
+
+	krsort($rivit_temp);
 
 	return $rivit_temp;
 }
@@ -664,20 +698,37 @@ function keraa_inventointilajeittain_luvut(&$rivi, &$rivit_temp, $inventointilaj
 	}
 }
 
-function hae_inventointien_lukumaara(&$request, $aikavali_tyyppi = '') {
+function parsi_paivat(&$request) {
+
+	if (!empty($request['valittu_tilikausi'])) {
+		$tilikausi_temp = search_array_key_for_value_recursive($request['tilikaudet'], 'tunnus', $request['valittu_tilikausi']);
+		//funktion on tarkoitus palauttaa ainoastaan yksi tilikausi, siksi voimme viitata indeksillä
+		$request['alku_aika'] = $tilikausi_temp[0]['tilikausi_alku'];
+		$request['loppu_aika'] = $tilikausi_temp[0]['tilikausi_loppu'];
+	}
+	else {
+		//TODO onko formista tulevilla alku loppu ajoilla jotain maksimi arvoja? esim saa hakea inventointeja korkeintaan vuoden päähän tjsp
+		$request['alku_aika'] = $request['vva'].'-'.$request['kka'].'-'.$request['ppa'];
+		$request['loppu_aika'] = $request['vvl'].'-'.$request['kkl'].'-'.$request['ppl'];
+	}
+}
+
+function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {
 	global $kukarow;
 
 	if ($aikavali_tyyppi == '12kk') {
 		$request['alku_aika'] = date('Y-m-d', strtotime('now - 12 month'));
 		$request['loppu_aika'] = date('Y-m-d');
+		$tapahtuma_where = "";
 	}
 	elseif ($aikavali_tyyppi == 'tilikausi') {
-		$request['alku_aika'] = date('Y-01-01');
-		$request['loppu_aika'] = date('Y-12-31');
+		$request['alku_aika'] = $request['tamanhetkinen_tilikausi']['tilikausi_alku'];
+		$request['loppu_aika'] = $request['tamanhetkinen_tilikausi']['tilikausi_loppu'];
+		$tapahtuma_where = "";
 	}
 	else {
-		$request['alku_aika'] = $request['alku_aika'];
-		$request['loppu_aika'] = $request['loppu_aika'];
+		parsi_paivat($request);
+		$tapahtuma_where = "AND tapahtuma.kpl != 0";
 	}
 
 	if (!empty($request['valitut_inventointilajit'])) {
@@ -685,39 +736,54 @@ function hae_inventointien_lukumaara(&$request, $aikavali_tyyppi = '') {
 		foreach ($request['valitut_inventointilajit'] as $inventointilaji) {
 			$inventointilaji_rajaus .= " tapahtuma.selite LIKE '%$inventointilaji' OR";
 		}
+		//viimenen "OR " pois
 		$inventointilaji_rajaus = substr($inventointilaji_rajaus, 0, -3);
 		$inventointilaji_rajaus .= " )";
-
-		//laitetaan inventoinitilaji_rajaus requestiin talteen myöhempää käyttö varten
-		$request['inventointilaji_rajaus'] = $inventointilaji_rajaus;
 	}
 
-	$query = "	SELECT count(*) as inventointien_lukumaara
-				FROM tuotepaikat
+	$query = "	SELECT DATE(tapahtuma.laadittu) laadittu_pvm,
+				tapahtuma.laadittu,
+				( tapahtuma.kpl * tapahtuma.hinta ) AS inventointi_poikkeama_eur,
+				tapahtuma.selite,
+				substring( tapahtuma.selite, ( length(tapahtuma.selite)-locate( '>rb<',reverse(tapahtuma.selite)) ) +2 ) AS inventointilaji,
+				tapahtuma.tuoteno,
+				tuote.nimitys AS tuote_nimitys,
+				tapahtuma.kpl,
+				Concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllytaso, tapahtuma.hyllyvali) AS hyllypaikka,
+				tapahtuma.laatija,
+				ifnull(keraysvyohyke.nimitys, 'Poistettu') AS keraysvyohyke_nimitys
+				FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
 				JOIN tuote
-				ON ( tuote.yhtio = tuotepaikat.yhtio
-					AND tuote.tuoteno = tuotepaikat.tuoteno
-					AND tuote.ei_saldoa = ''
-					AND tuote.status = 'A' )
-				JOIN tapahtuma
-				ON ( tapahtuma.yhtio = tuotepaikat.yhtio
-					AND tapahtuma.tuoteno = tuotepaikat.tuoteno
-					AND tapahtuma.hyllyalue = tuotepaikat.hyllyalue
-					AND tapahtuma.hyllynro = tuotepaikat.hyllynro
-					AND tapahtuma.hyllyvali = tuotepaikat.hyllyvali
-					AND tapahtuma.hyllytaso = tuotepaikat.hyllytaso
-					AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
-					AND tapahtuma.laji = 'Inventointi'
-					{$inventointilaji_rajaus} )
+				ON ( tuote.yhtio = tapahtuma.yhtio
+				  AND tuote.tuoteno = tapahtuma.tuoteno
+				  AND tuote.ei_saldoa = ''
+				  AND tuote.status = 'A' )
 				JOIN varastopaikat
-				ON ( varastopaikat.yhtio = tuotepaikat.yhtio
-					AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-					AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-					AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
-				WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'";
+				ON ( varastopaikat.yhtio = tapahtuma.yhtio
+				  AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
+				  AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
+				  AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
+				LEFT JOIN varaston_hyllypaikat AS vh
+				ON ( vh.yhtio = tapahtuma.yhtio
+					AND vh.hyllyalue = tapahtuma.hyllyalue
+					AND vh.hyllynro = tapahtuma.hyllynro
+					AND vh.hyllytaso = tapahtuma.hyllytaso
+					AND vh.hyllyvali = tapahtuma.hyllyvali )
+				LEFT JOIN keraysvyohyke
+				ON ( keraysvyohyke.yhtio = vh.yhtio
+					AND keraysvyohyke.tunnus = vh.keraysvyohyke )
+				WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
+				  AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
+				  AND tapahtuma.laji = 'Inventointi'
+				  {$tapahtuma_where}";
 	$result = pupe_query($query);
 
-	return mysql_fetch_assoc($result);
+	$rivit = array();
+	while ($rivi = mysql_fetch_assoc($result)) {
+		$rivit[] = $rivi;
+	}
+
+	return $rivit;
 }
 
 function hae_varaston_hyllypaikkojen_lukumaara($request) {
@@ -875,4 +941,20 @@ function hae_inventointilajit($request = array()) {
 	}
 
 	return $inventointilajit;
+}
+
+function echo_tallennus_formi($xls_filename) {
+	echo "<form method='post' class='multisubmit'>";
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>".t("Tallenna excel aineisto").":</th>";
+	echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+	echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
+	echo "<input type='hidden' name='kaunisnimi' value='".t('Inventoinnit').".xlsx'>";
+	echo "<input type='hidden' name='tmpfilenimi' value='{$xls_filename}'>";
+	echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td>";
+	echo "</tr>";
+	echo "</table>";
+	echo "</form>";
+	echo "<br/>";
 }

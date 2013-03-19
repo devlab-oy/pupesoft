@@ -19970,7 +19970,9 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 	);
  */
 if (!function_exists('generoi_excel_tiedosto')) {
-	function generoi_excel_tiedosto(&$rivit, $header_values, $force_to_string) {
+	function generoi_excel_tiedosto(&$rivit, $header_values, $force_to_string = array()) {
+		require_once('pupeExcel.inc');
+		require_once('ProgressBar.class.php');
 		$xls = new pupeExcel();
 		$rivi_numero = 0;
 		$sarake_numero = 0;
@@ -20371,7 +20373,7 @@ if (!function_exists('hae_tyopaivien_lukumaara')) {
 			}
 
 			//The no. of business days is: (number of weeks between the two dates) * (5 working days) + the remainder
-//---->february in none leap years gave a remainder of 0 but still calculated weekends between first and last day, this is one way to fix it
+			//---->february in none leap years gave a remainder of 0 but still calculated weekends between first and last day, this is one way to fix it
 			$tyo_paivat = $taysien_viikkojen_lkm * 5;
 			if ($jaljella_olevien_paivien_lkm > 0) {
 				$tyo_paivat += $jaljella_olevien_paivien_lkm;

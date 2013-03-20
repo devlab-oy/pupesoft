@@ -1960,6 +1960,11 @@
 			if ($rivityyppi != 'O') {
 				switch ($var) {
 					case 'J' : // J‰lkitoimitukseen
+						// Ollaan painettu JT-muiden mukana nappia, tai meill‰ on parametrit siten, ett‰ se halutaan defaulttina p‰‰lle
+						// (Jt_automatiikka = "kohdistetaan.." ja Automaattinen_jt_toimitus = "J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰ ker‰ysp‰iv‰n mukaisesti")
+						if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
+							$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
+						}
 					case 'R' : // Valmistetaan asiakkaalle
 					case 'U' : // Tilataan toimittajalta asiakkaalle
 					case 'T' : // Tilataan toimittajalta
@@ -1971,15 +1976,6 @@
 						else {
 							$varattu 	= $kpl;
 							$jt 		= 0;
-						}
-
-						// Ollaan painettu JT-muiden mukana nappia, tai meill‰ on parametrit siten, ett‰ se halutaan defaulttina p‰‰lle
-						// (Jt_automatiikka = "kohdistetaan.." ja Automaattinen_jt_toimitus = "J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰ ker‰ysp‰iv‰n mukaisesti")
-						if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
-							$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
-						}
-						else {
-							$kerayspvm = $laskurow["kerayspvm"];
 						}
 						break;
 					case 'P' : // Puute

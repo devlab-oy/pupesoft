@@ -552,8 +552,8 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 					$subq = "	SELECT sum(substring(tieto, 78, 10)/100) aineistosumma
 								FROM tiliotedata
 								WHERE yhtio = '$kukarow[yhtio]'
-								and tyyppi = 3
-								and tilino = '$trow[tilino]'
+								and tyyppi  = '3'
+								and tilino  = '$trow[tilino]'
 								and substr(tieto, 16, 6) = '$orgpvm_pankki'
 								and left(tieto, 1) = '3'";
 					$subr = pupe_query($subq);

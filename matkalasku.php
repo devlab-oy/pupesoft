@@ -143,7 +143,7 @@ if ($tee == "UUSI") {
 			// Perustetaan lasku
 			$query = "	INSERT into lasku set
 						yhtio 			= '$kukarow[yhtio]',
-						valkoodi 		= 'EUR',
+						valkoodi 		= '{$yhtiorow['valkoodi']}',
 						hyvak1 			= '$trow[kuka]',
 						hyvaksyja_nyt 	= '$trow[kuka]',
 						hyvak2 			= '$trow[oletus_hyvak2]',
@@ -875,10 +875,10 @@ if ($tee == "MUOKKAA") {
 
 			if (mysql_num_rows($liiteres) > 0) {
 				while ($liiterow = mysql_fetch_assoc($liiteres)) {
-					echo "<a href='#' onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600');\">$liiterow[selite]</a>";
+					echo "<button onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$liiterow[selite]</button>";
 
 					if (!$muokkauslukko) {
-						echo "&nbsp;&nbsp;&nbsp;&nbsp;<a href='matkalasku.php?tee=$tee&tilausnumero=$tilausnumero&poistakuva=$liiterow[tunnus]'>*".t("poista")."*</a>";
+						echo "&nbsp;&nbsp;&nbsp;&nbsp;<a href='matkalasku.php?toim=$toim&tee=$tee&tilausnumero=$tilausnumero&poistakuva=$liiterow[tunnus]'>*".t("poista")."*</a>";
 					}
 
 					echo "<br>\n";
@@ -910,10 +910,9 @@ if ($tee == "MUOKKAA") {
 							<td>";
 
 					foreach ($files as $kuitti) {
-
 						$tiedostonimi = basename($kuitti);
 
-						echo "<input type='checkbox' name='skannattukuitti[]' value='$tiedostonimi'> <a href='#' onclick=\"window.open('$kuitti', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600');\">$tiedostonimi</a><br>";
+						echo "<input type='checkbox' name='skannattukuitti[]' value='$tiedostonimi'> <button onclick=\"window.open('$kuitti', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$tiedostonimi</button><br>";
 					}
 
 					echo "</td></tr>";
@@ -1055,7 +1054,7 @@ if ($tee == "MUOKKAA") {
 
 		if (mysql_num_rows($liiteres) > 0) {
 			while ($liiterow = mysql_fetch_assoc($liiteres)) {
-				echo "<a href='#' onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600');\">$liiterow[selite]</a>";
+				echo "<button onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$liiterow[selite]</button>";
 				echo "<br>\n";
 			}
 		}
@@ -2128,16 +2127,23 @@ function tarkista_loytyyko_paivalle_matkalasku($alkuaika, $loppuaika, $tilausnum
 	$result = pupe_query($query);
 
 	if ($tilausrivi_row = mysql_fetch_assoc($result)) {
-
-		$query = "	DELETE FROM tilausrivi
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus  = '{$tilausrivi_row['tunnus']}'";
-		$result = pupe_query($query);
+		dellaa_mitatoity_rivi($tilausnumero, $tilausrivi_row['tunnus']);
 
 		return $tilausrivi_row['erikoisale'];
 	}
 
 	return 0;
+}
+
+function dellaa_mitatoity_rivi($tilausnumero, $rivitunnus) {
+	global $kukarow;
+
+	$query = "	DELETE FROM tilausrivi
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus = '$tilausnumero'
+				AND tyyppi  = 'D'
+				AND tunnus  = '$rivitunnus'";
+	pupe_query($query);
 }
 
 function lisaa_paivaraha($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, $kommentti, $kustp, $kohde, $projekti) {
@@ -2541,6 +2547,8 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 					}
 
 					$rivihinta = round($ins_kpl*$hinta, 2);
+
+					if ((int) $rivitunnus > 0) dellaa_mitatoity_rivi($tilausnumero, $rivitunnus);
 
 					$query = "	INSERT into tilausrivi set
 								hyllyalue   	= '0',

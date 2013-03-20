@@ -25,7 +25,7 @@
 	if (!isset($ylilimiitin)) 		$ylilimiitin = "";
 	if (!isset($sytunnus)) 			$sytunnus = "";
 	if (!isset($sanimi)) 			$sanimi = "";
-	if (!isset($grouppaus)) 		$grouppaus = "";
+	if (!isset($grouppaus)) 		$grouppaus = "asiakas";
 	if (!isset($savalkoodi)) 		$savalkoodi = "";
 	if (!isset($yli)) 				$yli = "";
 	if (!isset($valuutassako)) 		$valuutassako = "";
@@ -35,6 +35,8 @@
 	if (!isset($pupe_DataTables)) 	$pupe_DataTables = "";
 	if (!isset($luottolisa)) 		$luottolisa = "";
 	if (!isset($sliitostunnus)) 	$sliitostunnus = "";
+
+    $pvmraja = $yhtiorow['erapaivan_ylityksen_raja'] >= 1 ? $yhtiorow['erapaivan_ylityksen_raja'] : 15;
 
 	if ($eiliittymaa != 'ON') {
 
@@ -179,7 +181,10 @@
 			$generoitumuuttuja .= " and lasku.nimi like '%$sanimi%' ";
 		}
 
-		if ($sytunnus != '') {
+		if (!empty($sliitostunnus)) {
+         	$generoitumuuttuja = " AND lasku.liitostunnus = $sliitostunnus ";
+        }
+		elseif (!empty($sytunnus)) {
 
 			// KAUTTALASKUTUSKIKKARE
 			if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $kukarow['yhtio'] == $GLOBALS['koti_yhtio'] and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
@@ -269,7 +274,7 @@
 
 		if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
 			$summalisa  = " round(sum(tiliointi.summa_valuutassa),2) avoimia,\n";
-			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > 15, tiliointi.summa_valuutassa, 0)) 'ylivito',\n";
+			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > {$pvmraja}, tiliointi.summa_valuutassa, 0)) 'ylivito',\n";
 			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) <= $saatavat_array[0], tiliointi.summa_valuutassa, 0)) 'alle_$saatavat_array[0]',\n";
 
 			for ($sa = 1; $sa < count($saatavat_array); $sa++) {
@@ -280,7 +285,7 @@
 		}
 		else {
 			$summalisa  = " round(sum(tiliointi.summa),2) avoimia,\n";
-			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > 15, tiliointi.summa, 0)) 'ylivito',\n";
+			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > {$pvmraja}, tiliointi.summa, 0)) 'ylivito',\n";
 			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) <= $saatavat_array[0], tiliointi.summa, 0)) 'alle_$saatavat_array[0]',\n";
 
 			for ($sa = 1; $sa < count($saatavat_array); $sa++) {
@@ -309,6 +314,7 @@
 					GROUP BY {$grouppauslisa}
 					{$having}
 					ORDER BY 1,2,3";
+
 		$result = pupe_query($query);
 
 		$saatavat_yhteensa 			= array();
@@ -681,7 +687,6 @@
 							{$liitoslisa1}
 							$eta_asiakaslisa
 							LIMIT 1";
-
 				$maksuehto_chk_res = pupe_query($query);
 				$maksuehto_chk_row = mysql_fetch_assoc($maksuehto_chk_res);
 
@@ -727,7 +732,7 @@
 
 				if ($ylivito > 0 and $eiliittymaa != 'ON') {
 					echo "<br/>";
-					echo "<font class='error'>".t("HUOM! Asiakkaalla on yli 15 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."</font>";
+					echo "<font class='error'>".t("HUOM! Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $pvmraja)."</font>";
 					echo "<br/>";
 				}
 			}
@@ -751,12 +756,19 @@
 		}
 		elseif ($eiliittymaa == 'ON') {
 
+			$liitoslisa1 = "";
+
+			if ($yhtiorow["myyntitilaus_saatavat"] == "" and $sliitostunnus != "") {
+				$liitoslisa1 = "AND asiakas.tunnus='{$sliitostunnus}' ";
+			}
+
 			// Voi olla, ett‰ asiakkaalla on avoimia tilauksia, mutta ei avoimia laskuja, huomioidaan n‰m‰ luottorajassa
 			$query = "	SELECT ifnull(group_concat(tunnus), 0) liitostunnus
 						FROM asiakas
 						WHERE yhtio = '$saatavat_yhtio'
 						AND ytunnus = '$sytunnus'
-						AND laji != 'P'";
+						AND laji != 'P'
+						{$liitoslisa1}";
 			$result = pupe_query($query);
 			$row = mysql_fetch_assoc($result);
 

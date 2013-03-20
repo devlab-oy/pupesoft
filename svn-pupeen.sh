@@ -10,6 +10,11 @@ echo "Haetaan tietokantamuutokset.."
 
 pupedir=`dirname $0`
 
+# Katsotaan, onko parami syötetty
+if [ ! -z $1 ]; then
+	JATKETAAN=$1
+fi
+
 # Tutkitaan tietokantarakenne...
 dumppi=`php ${pupedir}/dumppaa_mysqlkuvaus.php komentorivilta`
 
@@ -27,8 +32,12 @@ else
 		fi
 	done < "/tmp/_mysqlkuvaus.tmp"
 
-	echo -n "Tehdaanko tietokantamuutokset (k/e)? "
-	read jatketaanko
+	if [[ ! -z "${JATKETAAN}" && "${JATKETAAN}" = "auto" ]]; then
+		jatketaanko="k"
+	else
+		echo -n "Tehdaanko tietokantamuutokset (k/e)? "
+		read jatketaanko
+	fi
 
 	if [ "$jatketaanko" = "k" ]; then
 		while read line
@@ -49,8 +58,12 @@ else
 	rm -f /tmp/_mysqlkuvays.tmp
 fi
 
-echo -n "Paivitetaanko Pupesoft (k/e)? "
-read jatketaanko
+if [[ ! -z "${JATKETAAN}" && "${JATKETAAN}" = "auto" ]]; then
+	jatketaanko="k"
+else
+	echo -n "Paivitetaanko Pupesoft (k/e)? "
+	read jatketaanko
+fi
 
 if [ "$jatketaanko" = "k" ]; then
 	cd $pupedir

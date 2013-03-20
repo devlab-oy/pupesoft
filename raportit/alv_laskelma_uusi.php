@@ -164,6 +164,7 @@
 		$_309lisa	 	 = '';
 		$vainveroton 	 = '';
 		$tuotetyyppilisa = '';
+		$kolmilkantakauppa = '';
 
 		if ($ryhma == 'fi307') {
 			// Kohdekuukauden vähennettävä vero
@@ -202,6 +203,7 @@
 			// Tavaran/Palveluiden myynti muihin EU-maihin
 			$taso = 'fi311';
 			$kerroin = ' * -1 ';
+			$kolmikantakauppa = "AND lasku.kolmikantakauppa = ''";
 		}
 		elseif ($ryhma == 'fi313') {
 			// Tavaraostot muista EU-maista
@@ -276,7 +278,7 @@
 						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) $kerroin verot_valuutassa,
 						count(*) kpl
 						FROM tiliointi
-						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus {$kolmikantakauppa})
 						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						AND tiliointi.korjattu = ''
@@ -541,6 +543,7 @@
 							and lasku.tapvm >= '$alkupvm'
 							and lasku.tapvm <= '$loppupvm'
 							and lasku.vienti = 'E'
+							and lasku.kolmikantakauppa = ''
 							GROUP BY 1, 2, 3
 							ORDER BY maa, valuutta, vero";
 				$result = pupe_query($query);
@@ -726,11 +729,16 @@
 				$tuotetyyppilisa = " AND tuote.tuotetyyppi = 'K' ";
 				$taso 			 = 'fi311';
 				$cleantaso 		 = 'fi312';
+				$kolmikantakauppa = "AND lasku.kolmikantakauppa = ''";
 			}
 			elseif ($taso == 'fi311') {
 				$tuotetyyppilisa = " AND tuote.tuotetyyppi != 'K' ";
 				$taso 			 = 'fi311';
 				$cleantaso 		 = 'fi311';
+				$kolmikantakauppa = "AND lasku.kolmikantakauppa = ''";
+			}
+			else {
+				$kolmikantakauppa = "";
 			}
 
 			if ($taso == 'fi313') {
@@ -774,6 +782,7 @@
 								and lasku.tapvm >= '$startmonth'
 								and lasku.tapvm <= '$endmonth'
 								and lasku.vienti = 'E'
+								{$kolmikantakauppa}
 								GROUP BY 1,2";
 				}
 				else {

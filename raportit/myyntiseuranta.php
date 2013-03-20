@@ -15,7 +15,7 @@
 
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+		if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
@@ -181,7 +181,7 @@
 			}
 
 			$noautosubmit = TRUE;
-			$monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "<br>DYNAAMINEN_ASIAKAS", "<br>OSASTO", "TRY", "TUOTEMERKKI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE", "<br>LASKUMYYJA", "TUOTEMYYJA", "ASIAKASMYYJA", "TUOTEOSTAJA", "<br>KUSTP", "KOHDE", "PROJEKTI");
+			$monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "<br>DYNAAMINEN_ASIAKAS", "<br>OSASTO", "TRY", "TUOTEMERKKI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE", "<br>LASKUMYYJA", "TUOTEMYYJA", "ASIAKASMYYJA", "TUOTEOSTAJA", "<br>TOIMIPAIKKA","KUSTP", "KOHDE", "PROJEKTI");
 			$monivalintalaatikot_normaali = array();
 
 			require ("tilauskasittely/monivalintalaatikot.inc");
@@ -252,13 +252,15 @@
 			if ($piilotanollarivit != '')	$einollachk 			= "CHECKED";
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
 			if ($vertailubu != '')			${"sel_".$vertailubu}	= "SELECTED";
-			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
+			if ($naytakaikkiasiakkaat != '') $naytakaikkiasiakkaatchk = "CHECKED";
+			if ($naytakaikkituotteet != '') $naytakaikkituotteetchk	= "CHECKED";
 			if ($laskutuspaiva != '')		$laskutuspaivachk		= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
 			if ($liitetiedostot != '')		$liitetiedostotchk		= "CHECKED";
 			if ($ytun_laajattied != '')		$ytun_laajattiedchk		= "CHECKED";
+			if ($naytatoimtuoteno != '')	$naytatoimtuotenochk 	= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -449,9 +451,19 @@
 				<td class='back'></td>
 				</tr>
 				<tr>
-				<th>",t("Näytä kaikki tuotetyypit"),"</th>
-				<td colspan='3'><input type='checkbox' name='naytakaikkityypit' {$naytakaikkityypitchk}></td>
+				<th>",t("Näytä myös toimittajan tuoteno"),"</th>
+				<td colspan='3'><input type='checkbox' name='naytatoimtuoteno' {$naytatoimtuotenochk}></td>
 				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>",t("Näytä kaikki asiakkaat"),"</th>
+				<td colspan='3'><input type='checkbox' name='naytakaikkiasiakkaat' {$naytakaikkiasiakkaatchk}></td>
+				<td class='back'>",t("(Näyttää myös asiakkaat joita ei huomioida myynninseurannassa)"),"</td>
+				</tr>
+				<tr>
+				<th>",t("Näytä kaikki tuotteet"),"</th>
+				<td colspan='3'><input type='checkbox' name='naytakaikkituotteet' {$naytakaikkituotteetchk}></td>
+				<td class='back'>",t("(Näyttää tuotteet joita ei huomioida myynninseurannassa)"),"</td>
 				</tr>
 				<th>",t("Näytä laskutuspäivä"),"</th>
 				<td colspan='3'><input type='checkbox' name='laskutuspaiva' {$laskutuspaivachk}></td>
@@ -796,6 +808,7 @@
 				$gluku  			= 0;
 				$varasto_join 		= "";
 				$kantaasiakas_join 	= "";
+				$maksuehto_join 	= "";
 
 				// näitä käytetään queryssä
 				$sel_osasto = "";
@@ -1114,10 +1127,24 @@
 					}
 					//** Laskugrouppaukset loppu **//
 
+					if ($mukaan == "toimipaikka") {
+						$group .= ",lasku.yhtio_toimipaikka";
+						$select .= "lasku.yhtio_toimipaikka, ";
+						$order  .= "lasku.yhtio_toimipaikka,";
+						$gluku++;
+						$muutgroups++;
+					}
 					//** Asiakas_ja_tai_tuote grouppaukset start **//
 					if ($mukaan == "kustp") {
 						$group .= ",kustannuspaikka";
-						$select .= "if(tuote.kustp > 0,tuote.kustp,asiakas.kustannuspaikka) as kustannuspaikka, ";
+
+						if (!isset($kustapvalinta) or $kustapvalinta == 'tuote') {
+							$select .= "tuote.kustp as kustannuspaikka, ";
+						}
+						else {
+							$select .= "asiakas.kustannuspaikka as kustannuspaikka, ";
+						}
+
 						$order  .= "kustannuspaikka,";
 						$gluku++;
 						$muutgroups++;
@@ -1125,7 +1152,14 @@
 
 					if ($mukaan == "kohde") {
 						$group .= ",kohde";
-						$select .= "if(tuote.kohde > 0,tuote.kohde,asiakas.kohde) as kohde, ";
+
+						if (!isset($kohdevalinta) or $kohdevalinta == 'tuote') {
+							$select .= "tuote.kohde as kohde, ";
+						}
+						else {
+							$select .= "asiakas.kohde as kohde, ";
+						}
+
 						$order  .= "kohde,";
 						$gluku++;
 						$muutgroups++;
@@ -1133,7 +1167,14 @@
 
 					if ($mukaan == "projekti") {
 						$group .= ",projekti";
-						$select .= "if(tuote.projekti > 0,tuote.projekti,asiakas.projekti) as projekti, ";
+
+						if (!isset($projektivalinta) or $projektivalinta == 'tuote') {
+							$select .= "tuote.projekti as projekti, ";
+						}
+						else {
+							$select .= "asiakas.projekti as projekti, ";
+						}
+
 						$order  .= "projekti,";
 						$gluku++;
 						$muutgroups++;
@@ -1176,14 +1217,16 @@
 
 					//**  Maksuehtogrouppaukset start **//
 					if ($mukaan == "maksuehdoittain") {
-						$group  .= ",lasku.maksuteksti";
-						$select .= "lasku.maksuteksti maksuehto, ";
-						$order  .= "lasku.maksuteksti,";
+						$group  .= ",maksuehto.teksti";
+						$select .= "maksuehto.teksti maksuehto, ";
+						$order  .= "maksuehto.teksti,";
 						$gluku++;
 
 						if ($rajaus[$i] != "") {
-							$lisa .= " and lasku.maksuteksti='{$rajaus[$i]}' ";
+							$lisa .= " and maksuehto.teksti='{$rajaus[$i]}' ";
 						}
+
+						$maksuehto_join = "JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)\n";
 					}
 					//**  Maksuehtogrouppaukset loppu **//
 
@@ -1229,6 +1272,18 @@
 					$select .= "lasku.mapvm maksupvm, ";
 					$gluku++;
 					$muutgroups++;
+				}
+
+				if ($naytatoimtuoteno != "") {
+					$group .= ",toim_tuoteno";
+					$select .= "(SELECT tuotteen_toimittajat.toim_tuoteno
+								FROM tuotteen_toimittajat use index (yhtio_tuoteno)
+								WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio
+								AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+								ORDER BY IF(jarjestys = 0, 999, jarjestys)
+								LIMIT 1) toim_tuoteno, ";
+					$order  .= "toim_tuoteno,";
+					$gluku++;
 				}
 
 				// Näytetään sarjanumerot
@@ -1446,15 +1501,16 @@
 					}
 				}
 
-				if ($naytakaikkityypit != "") {
-					$lisa .= " and tuote.tuotetyyppi in ('','R','K','M','N') ";
+				if ($naytakaikkituotteet == "") {
+					$lisa .= " and tuote.myynninseuranta = '' ";
 				}
-				else {
-					$lisa .= " and tuote.tuotetyyppi in ('','R','K','M') ";
+
+				if ($naytakaikkiasiakkaat == "") {
+					$asiakaslisa = " and asiakas.myynninseuranta = '' ";
 				}
 
 				if ($naytaennakko == "") {
-					$lisa .= " and tilausrivi.tuoteno !='{$yhtiorow['ennakkomaksu_tuotenumero']}'";
+					$lisa .= " and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}' ";
 				}
 
 				if ($tee == 'go') {
@@ -1733,11 +1789,12 @@
 								JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
 								JOIN tilausrivi use index ({$index}) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$ouusio}=lasku.tunnus and tilausrivi.tyyppi={$tyyppi})
 								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno)
-								JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
+								JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus {$asiakaslisa})
 								LEFT JOIN toimitustapa ON (lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite)
 								{$lisatiedot_join}
 								{$varasto_join}
 								{$kantaasiakas_join}
+								{$maksuehto_join}
 								{$lisa_parametri}
 								WHERE lasku.yhtio in ({$yhtio})
 								and lasku.tila in ({$tila})";
@@ -2199,7 +2256,8 @@
 									// jos kyseessa on tuote
 									if ($ken_nimi == "tuoteno") {
 										$koskematon_tuoteno = $row["tuoteno"];
-										$row[$ken_nimi] = "<a href='../tuote.php?tee=Z&tuoteno=".urlencode($row[$ken_nimi])."'>{$row[$ken_nimi]}</a>";
+
+										$row[$ken_nimi] = "<a href='#' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row[$ken_nimi])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$row[$ken_nimi]}</a>";
 									}
 
 									if ($ken_nimi == "laskutuspvm") {
@@ -2435,6 +2493,19 @@
 										}
 										else {
 											$row[$ken_nimi] = 0;
+										}
+									}
+
+									if ($ken_nimi == "yhtio_toimipaikka") {
+										$query = "	SELECT nimi
+													FROM yhtion_toimipaikat
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND tunnus = '{$row[$ken_nimi]}'";
+										$toimipaikka_result = pupe_query($query);
+
+										if (mysql_num_rows($toimipaikka_result) == 1) {
+											$toimipaikka_row = mysql_fetch_assoc($toimipaikka_result);
+											$row[$ken_nimi] = $toimipaikka_row['nimi'];
 										}
 									}
 

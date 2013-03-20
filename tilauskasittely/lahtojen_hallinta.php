@@ -6,10 +6,24 @@
 
 	$onko_paivitysoikeuksia_ohjelmaan = tarkista_oikeus('tilauskasittely/lahtojen_hallinta.php', '', 1);
 
-	if($hae_yhdistettavat_lahdot == 1) {
-		echo json_encode(hae_suljetut_lahdot($toimitustavan_tunnukset, 1));
-		exit;
+	if ($ajax_request == 1) {
+
+		if ($hae_yhdistettavat_lahdot == 1) {
+			echo json_encode(hae_suljetut_lahdot($toimitustavan_tunnukset, 1));
+			exit;
+		}
+
+		if ($tarkista_lahdot == 1) {
+			$return_array = array(
+				'keraamatta' => lahdot_joissa_tilauksia_keraamatta($lahdot),
+				'aikaa_jaljella' => lahdot_joissa_tilausaikaa_jaljella($lahdot),
+			);
+
+			echo json_encode($return_array);
+			exit;
+		}
 	}
+
 
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
@@ -616,7 +630,7 @@
 
 		if (isset($checkbox_parent) and ((is_array($checkbox_parent) and count($checkbox_parent) > 0) or is_string($checkbox_parent))) {
 
-			if (isset($jv) and (isset($laskukomento) and isset($komento) and isset($valittu_rakiroslapp_tulostin))) {
+			if (isset($jv) and (isset($rakirsyotto_laskutulostin) and isset($komento) and isset($valittu_rakiroslapp_tulostin))) {
 				$checkbox_parent = unserialize(urldecode($checkbox_parent));
 
 				$select_varasto = (int) $select_varasto;
@@ -808,7 +822,7 @@ function hae_yhdistettavat_tilaukset() {
 	var return_data;
 	$.ajax({
 		type: 'POST',
-		url: 'lahtojen_hallinta.php?hae_yhdistettavat_lahdot=1&no_head=yes',
+		url: 'lahtojen_hallinta.php?ajax_request=1&hae_yhdistettavat_lahdot=1&no_head=yes',
 		dataType: 'JSON',
 		data: {
 			yhtio: $('#yhtio_tunnus').html(),
@@ -843,35 +857,37 @@ function hae_yhdistettavat_tilaukset() {
 				echo "<td><input type='radio' name='jv' id='jv' value='vainvak'></td></tr>";
 
 				echo "<tr><th>",t("Valitse jälkivaatimuslaskujen tulostuspaikka"),":</th>";
-				echo "<td><select id='kirjoitin' name='laskukomento'>";
+				echo "<td><select id='kirjoitin' name='rakirsyotto_laskutulostin'>";
 				echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
-				$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
+				// Oletustulostin rahtikirjojen ja tulostukseen. Käytetään oletustulostimena varaston takana olevaa Rahtikirja A4 -tulostinta eli printteri6-kenttää.
+				// Haetaan varaston JV-kuittitulostin printteri7:sta
+				$query = "	SELECT printteri6, printteri7
+							FROM varastopaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$select_varasto}'";
+				$default_printer_res = pupe_query($query);
+				$default_printer_row = mysql_fetch_assoc($default_printer_res);
+
+				$query = "	SELECT *
 							FROM kirjoittimet
 							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND komento != 'EDI'
 							GROUP BY komento
 							ORDER BY kirjoitin";
 				$kires = pupe_query($query);
 
 				while ($kirow = mysql_fetch_assoc($kires)) {
 
-					$sel = (isset($laskukomento) and $laskukomento == $kirow['komento']) ? " selected" : "";
+					$sel = (isset($rakirsyotto_laskutulostin) and $rakirsyotto_laskutulostin == $kirow['tunnus']) ? " SELECTED" : ($kirow["tunnus"] == $default_printer_row["printteri7"]) ? " SELECTED" : "";
 
-					echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
+					echo "<option value='{$kirow['tunnus']}'{$sel}>{$kirow['kirjoitin']}</option>";
 				}
 
 				echo "</select></td></tr>";
 
 				echo "<tr><th>",t("Valitse tulostin"),":</th>";
 				echo "<td><select name='komento'>";
-
-				// Oletustulostin rahtikirjojen tulostukseen. Käytetään oletustulostimena varaston takana olevaa Rahtikirja A4 -tulostinta eli printteri6-kenttää.
-				$query = "	SELECT printteri6
-							FROM varastopaikat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$select_varasto}'";
-				$default_printer_res = pupe_query($query);
-				$default_printer_row = mysql_fetch_assoc($default_printer_res);
 
 				if ($default_printer_row['printteri6'] != '') {
 					echo "<option value='{$default_printer_row['printteri6']}'>",t("Oletustulostin"),"</option>";
@@ -935,7 +951,7 @@ function hae_yhdistettavat_tilaukset() {
 					//tällöin voidaan näyttää mahdolliset liitettävät rahtikirjat
 					//haetaanlistaus suljetuista lähdöistä
 					$suljetut_lahdot = hae_suljetut_lahdot($toimitustavan_tunnukset, 0);
-					
+
 					echo "<tr>";
 					echo "<th>".t("Yhdistetään lähtöön")."</th>";
 					echo "<td>";
@@ -1836,12 +1852,42 @@ function hae_yhdistettavat_tilaukset() {
 							}
 						});
 
+						var tarkista_lahdot;
+						$.ajax({
+							type: 'POST',
+							url: 'lahtojen_hallinta.php?ajax_request=1&tarkista_lahdot=1&no_head=yes',
+							dataType: 'JSON',
+							async: false,
+							data: {
+								lahdot: lahdot.substring(0, lahdot.length - 2)
+							}
+						}).done(function(data){
+							tarkista_lahdot = data;
+						});
+
 						$(this).after('<input type=\"hidden\" name=\"tulosta_rahtikirjat\" value=\"X\">');
 
-						if (lahdotcount > 1) lahdot = '".t("Oletko varma, että haluat tulostaa rahtikirjat ja sulkea lähdöt")."'+': '+lahdot.substring(0, lahdot.length - 2);
-						else lahdot = '".t("Oletko varma, että haluat tulostaa rahtikirjat ja sulkea lähdön")."'+': '+lahdot.substring(0, lahdot.length - 2);
+						if(!$.isEmptyObject(tarkista_lahdot['keraamatta']) || !$.isEmptyObject(tarkista_lahdot['aikaa_jaljella']) ) {
+							var error_message = '';
+							if(tarkista_lahdot['keraamatta'].length > 0) {
+								error_message += '".t("Lähdöillä rivejä keräämättä").":' + '\\n';
+								$.each(tarkista_lahdot['keraamatta'], function(index,value){
+									error_message += value['lahdon_tunnus'] + ', ' + value['keraamatta'] + ' ".t("kappaletta")."\\n';
+								});
+							}
+							if (tarkista_lahdot['aikaa_jaljella'].length > 0) {
+							error_message += '\\n".t("Lähdöillä tilausaikaa jäljellä").":';
+								$.each(tarkista_lahdot['aikaa_jaljella'], function(index,value){
+									error_message += value['tunnus'] + ', ';
+								});
+							}
+							error_message += '\\n".t("Haluatko sulkea lähdöt")."';
 
-						if (confirm(lahdot)) $('#napitformi').submit();
+							if (confirm(error_message)) $('#napitformi').submit();
+						}
+						else {
+							$('#napitformi').submit();
+						}
 					});
 
 					$('#vaihda_prio').on('click', function() {
@@ -2904,6 +2950,56 @@ function hae_yhdistettavat_tilaukset() {
 		}
 
 		return $suljetut_lahdot;
+	}
+
+	function lahdot_joissa_tilauksia_keraamatta($lahdot) {
+		global $kukarow;
+
+		$keraamatta = array();
+
+		if ($lahdot != "") {
+
+			$query = "  SELECT lahdot.tunnus AS lahdon_tunnus,
+                        count(*) AS keraamatta
+                        FROM lahdot
+                        JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND (lasku.tila = 'L' OR (lasku.tila = 'N' AND lasku.alatila = 'A')))
+                        JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND tilausrivi.var NOT IN ('P','J'))
+                        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '' )
+                        JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+                        WHERE  lahdot.yhtio = '{$kukarow['yhtio']}'
+                        AND lahdot.tunnus IN ({$lahdot})
+                        GROUP BY lahdot.tunnus";
+			$result = pupe_query($query);
+
+			while ($lahto = mysql_fetch_assoc($result)) {
+				$keraamatta[] = $lahto;
+			}
+		}
+
+		return $keraamatta;
+	}
+
+	function lahdot_joissa_tilausaikaa_jaljella($lahdot) {
+		global $kukarow;
+
+		$aikaa_jaljella = array();
+
+		if ($lahdot != "") {
+
+			$query = "	SELECT lahdot.tunnus
+						FROM lahdot
+						WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+						AND lahdot.tunnus IN ({$lahdot})
+						AND lahdot.pvm >= CURDATE()
+						AND lahdot.viimeinen_tilausaika >= NOW()";
+			$result = pupe_query($query);
+
+			while ($lahto = mysql_fetch_assoc($result)) {
+				$aikaa_jaljella[] = $lahto;
+			}
+		}
+
+		return $aikaa_jaljella;
 	}
 
 	require ("inc/footer.inc");

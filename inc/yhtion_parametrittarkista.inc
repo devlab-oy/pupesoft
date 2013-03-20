@@ -156,7 +156,11 @@ if(!function_exists("yhtion_parametrittarkista")) {
 			$verkkolasku_lah_talteen_i = $i;
 		}
 
+        if (mysql_field_name($result, $i) == "erapaivan_ylityksen_raja") {
+            $t[$i] = (int) trim($t[$i]);
+			if ($t[$i] < 1) {
+				$virhe[$i] = t("Arvon oltava kokonaisluku ja vähintään 1") . "!";
+			}
+        }
 	}
 }
-
-?>

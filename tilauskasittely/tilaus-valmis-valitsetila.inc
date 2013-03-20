@@ -102,19 +102,36 @@
 	}
 
 	if ($laskurow['osatoimitus'] == 'e' and $laskurow['tila'] == 'N') {
-		// estet‰‰n, ett‰ tilaus ei mene suoraan ker‰ysjonoon.
-		$query = "	SELECT *
+		$query = "	SELECT tunnus,
+					tuoteno,
+					(varattu + jt) as kpl
 					FROM tilausrivi
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND otunnus = '{$laskurow['tunnus']}'";
 		$tilausrivi_result = pupe_query($query);
-	
 		while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_result)) {
-			list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tilausrivi_row['tuoteno'], 'JTSPEC2', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
-
-			if ($myytavissa < $tilausrivi_row['varattu']) {
-				$voiko_toimittaa = false;
-				break;
+			//haetaan kaikki tilausrivit t‰ll‰ tuotenumerolla, joita ei ole viel‰ ker‰tty tai toimitettu ja katsotaan riitt‰‰kˆ t‰ll‰ hetkell‰ k‰sittelyss‰ olevalle riville saldoa.
+			$query = "	SELECT tunnus,
+						tuoteno,
+						tilkpl,
+						(varattu + jt) as kpl
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '{$tilausrivi_row['tuoteno']}'
+						AND tyyppi = 'L'
+						AND kerattyaika = '0000-00-00 00:00:00'
+						AND toimitettuaika = '0000-00-00 00:00:00'
+						ORDER BY laadittu ASC";
+			$tuotteet_result = pupe_query($query);
+			$tuote_varattu = 0;
+			list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tilausrivi_row['tuoteno'], 'JTSPEC', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
+			while ($tuote = mysql_fetch_assoc($tuotteet_result)) {
+				if ($tilausrivi_row['tunnus'] == $tuote['tunnus'] and ($saldo - $tuote_varattu) < $tilausrivi_row['kpl']) {
+					//kun tilaus listalta tulee k‰sittelyss‰ oleva tilausrivi tarkastetaan saldo. jos saldo ei riit‰ koko tilausta ei voida toimittaa.
+					$voiko_toimittaa = false;
+					break;
+				}
+				$tuote_varattu += $tuote['tilkpl'];
 			}
 		}
 	}

@@ -3040,7 +3040,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == 'esivalinta_varasto') {
+	if (mysql_field_name($result, $i) == 'oletusvarasto_tilaukselle') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
 		$sel = $trow[$i] == 'O' ? ' selected' : '';

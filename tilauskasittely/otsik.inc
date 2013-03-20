@@ -1754,7 +1754,7 @@
 
 					$sel = '';
 
-					if($yhtiorow['esivalinta_varasto'] == 'O') {
+					if ($yhtiorow['oletusvarasto_tilaukselle'] == 'O') {
 						//jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletus varasto
 						if ($varow['tunnus'] == $srow["varasto"] or ($varow['tunnus'] == $kukarow['oletus_varasto'] and $srow['varasto'] == '')) {
 							$sel = 'selected';

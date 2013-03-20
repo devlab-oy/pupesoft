@@ -353,6 +353,48 @@ if ($kasitellaan_tiedosto) {
 		}
 	}
 
+	if (in_array("tuotteen_toimittajat_tuotenumerot", $taulut)) {
+
+		$chk_toim_tuoteno = $chk_ytunnus = "x";
+
+		foreach ($taulunotsikot["tuotteen_toimittajat_tuotenumerot"] as $key => $column) {
+
+			if ($column == "TOIM_TUOTENO") $chk_toim_tuoteno = $key;
+			if ($column == "YTUNNUS") $chk_ytunnus = $key;
+		}
+
+		if (is_int($chk_toim_tuoteno) and is_int($chk_ytunnus)) {
+
+			// Vaihdetaan otsikko
+			$taulunotsikot["tuotteen_toimittajat_tuotenumerot"][$chk_ytunnus] = "TOIM_TUOTENO_TUNNUS";
+			unset($taulunotsikot["tuotteen_toimittajat_tuotenumerot"][$chk_toim_tuoteno]);
+
+			// Muutetaan arvot
+			foreach ($taulunrivit["tuotteen_toimittajat_tuotenumerot"] as $ind => $rivit) {
+				$chk_ytunnus_val = $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_ytunnus];
+				$chk_toim_tuoteno_val = $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_toim_tuoteno];
+
+				$query = "	SELECT tt.tunnus
+							FROM tuotteen_toimittajat AS tt
+							JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.ytunnus = '{$chk_ytunnus_val}')
+							WHERE tt.yhtio = '{$kukarow['yhtio']}'
+							AND tt.toim_tuoteno = '{$chk_toim_tuoteno_val}'";
+				$chk_tunnus_res = pupe_query($query);
+
+				if (mysql_num_rows($chk_tunnus_res) == 1) {
+					$chk_tunnus_row = mysql_fetch_assoc($chk_tunnus_res);
+
+					$taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_ytunnus] = $chk_tunnus_row['tunnus'];
+				}
+				else {
+					$taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_ytunnus] = "";
+				}
+
+				unset($taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_toim_tuoteno]);
+			}
+		}
+	}
+
 	// Korjataan spessujoini yhteensopivuus_tuote_lisatiedot/yhteensopivuus_tuote
 	if (in_array("yhteensopivuus_tuote", $taulut) and in_array("yhteensopivuus_tuote_lisatiedot", $taulut)) {
 
@@ -642,6 +684,8 @@ if ($kasitellaan_tiedosto) {
 			$tpupque 			= '';
 			$toimi_liitostunnus = '';
 			$chtoimittaja		= '';
+			$tuoteno			= '';
+			$toim_tuoteno		= '';
 
 			if ($eiyhtiota == "" or $eiyhtiota == "EILAATIJAA") {
 				$valinta   = " yhtio = '{$kukarow['yhtio']}'";
@@ -697,6 +741,11 @@ if ($kasitellaan_tiedosto) {
 					$tuoteno = $taulunrivit[$taulu][$eriviindex][$j];
 
 					$valinta .= " and TUOTENO='$tuoteno'";
+				}
+				elseif ($taulunotsikot[$taulu][$j] == "TOIM_TUOTENO") {
+					$toim_tuoteno = $taulunrivit[$taulu][$eriviindex][$j];
+
+					$valinta .= " and TOIM_TUOTENO='{$toim_tuoteno}'";
 				}
 				elseif ($table_mysql == 'tullinimike' and strtoupper($taulunotsikot[$taulu][$j]) == "CN") {
 
@@ -1390,7 +1439,7 @@ if ($kasitellaan_tiedosto) {
 								$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 							}
 						}
-						elseif ($table_mysql == 'tuotteen_toimittajat' and $otsikko == 'LIITOSTUNNUS') {
+						elseif (($table_mysql == 'tuotteen_toimittajat' or $table_mysql == 'tuotteen_toimittajat_tuotenumerot') and $otsikko == 'LIITOSTUNNUS') {
 							$tpque = "	SELECT tunnus
 										from toimi
 										where yhtio	= '$kukarow[yhtio]'
@@ -1399,7 +1448,8 @@ if ($kasitellaan_tiedosto) {
 							$tpres = pupe_query($tpque);
 
 							if (mysql_num_rows($tpres) != 1) {
-								lue_data_echo(t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa")." '{$taulunrivit[$taulu][$eriviindex][$r]}' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>");
+								if ($table_mysql == 'tuotteen_toimittajat_tuotenumerot') lue_data_echo(t("Virhe rivillä").": {$rivilaskuri} ".t("Toimittajaa")." '{$taulunrivit[$taulu][$eriviindex][$r]}' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! ".t("TOIM_TUOTENO")." = {$toim_tuoteno}<br>");
+								else lue_data_echo(t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa")." '{$taulunrivit[$taulu][$eriviindex][$r]}' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>");
 								$hylkaa++; // ei päivitetä tätä riviä
 							}
 							else {
@@ -2131,6 +2181,7 @@ if (!$cli and !isset($api_kentat)) {
 		'tuotteen_avainsanat'             => 'Tuotteen avainsanat',
 		'tuotteen_orginaalit'             => 'Tuotteiden originaalit',
 		'tuotteen_toimittajat'            => 'Tuotteen toimittajat',
+		'tuotteen_toimittajat_tuotenumerot' => 'Tuotteen toimittajan vaihtoehtoiset tuotenumerot',
 		'vak'                             => 'VAK/ADR-tietoja',
 		'vak_imdg'                        => 'VAK/IMDG-tietoja',
 		'varaston_hyllypaikat'            => 'Varaston hyllypaikat',

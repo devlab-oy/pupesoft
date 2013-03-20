@@ -10,8 +10,6 @@
 	require 'inc/connect.inc';
 	require 'inc/functions.inc';
 
-	echo date("d.m.Y @ G:i:s").": UPS-rahtikirjojen paivitys\n";
-
 	foreach ($ups_path as $ups_key => $ups_val) {
 
 		$ups_host_temp = $ups_host[$ups_key];
@@ -130,7 +128,3 @@
 			}
 		}
 	}
-
-	echo date("d.m.Y @ G:i:s").": UPS-rahtikirjojen paivitys. Done!\n\n";
-
-?>

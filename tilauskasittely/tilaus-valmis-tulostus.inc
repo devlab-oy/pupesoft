@@ -4,13 +4,13 @@
 
 	// katotaan ihan aluksi, että meillä on edellytykset tulostukselle...
 	$query  = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]'";
-	$prires = mysql_query($query) or pupe_error($query);
+	$prires = pupe_query($query);
 
 	if (mysql_num_rows($prires) != 0) {
 		$prirow = mysql_fetch_array($prires);
 
 		$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri1]'";
-		$kirres = mysql_query($query) or pupe_error($query);
+		$kirres = pupe_query($query);
 
 		if (mysql_num_rows($kirres)==0)
 			die ("<font class='error'>VIRHE: Varaston $prirow[nimitys] tulostinta ei löydy. Lähetteitä ei voida tulostaa...</font>");
@@ -107,7 +107,7 @@
 						varaston_hyllypaikat AS vh2 READ";
 		}
 
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 	}
 
 	if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
@@ -122,7 +122,7 @@
 					WHERE tunnus in ($tilausnumeroita)
 					and yhtio	= '$kukarow[yhtio]'";
 	}
-	$chk_result = mysql_query($queryc) or pupe_error($queryc);
+	$chk_result = pupe_query($queryc);
 	$chk_row = mysql_fetch_array($chk_result);
 
 	// Katsotaan, että tämä keräyslista ei ole jo tulostettu
@@ -205,7 +205,7 @@
 					kieli
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
-		$riresult = mysql_query($query) or pupe_error($query);
+		$riresult = pupe_query($query);
 		$asrow = mysql_fetch_array($riresult);
 
 		if ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A')) {
@@ -257,7 +257,7 @@
 							FROM keraysvyohyke
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$keraysvyohyke}'";
-				$ker_res = mysql_query($query) or pupe_error($query);
+				$ker_res = pupe_query($query);
 				$ker_row = mysql_fetch_assoc($ker_res);
 
 				if ($ker_row['keraysjarjestys'] == 'P') {
@@ -323,7 +323,7 @@
 						$where_lisa
 						ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		}
-		$riresult = mysql_query($query) or pupe_error($query);
+		$riresult = pupe_query($query);
 
 		//generoidaan rivinumerot
 		$rivinumerot = array();
@@ -394,17 +394,18 @@
 		if ($laskurow["varasto"] == 0) {
 			$query = "	SELECT *
 						from varastopaikat
-						where yhtio='$kukarow[yhtio]' AND tyyppi != 'P'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tyyppi != 'P'
 						order by alkuhyllyalue,alkuhyllynro
 						limit 1";
 		}
 		else {
 			$query = "	SELECT *
 						from varastopaikat
-						where yhtio='$kukarow[yhtio]'
-						and tunnus='$laskurow[varasto]'";
+						where yhtio = '$kukarow[yhtio]'
+						and tunnus  = '$laskurow[varasto]'";
 		}
-		$prires = mysql_query($query) or pupe_error($query);
+		$prires = pupe_query($query);
 
 		if (mysql_num_rows($prires) > 0) {
 			$prirow = mysql_fetch_array($prires);
@@ -421,7 +422,7 @@
 				$apuprintteri = $kirjoitin;
 			}
 
-			//käsinvalittu printteri
+			// käsinvalittu printteri
 			if (isset($valittu_tulostin) and $valittu_tulostin != '') {
 				$apuprintteri = $valittu_tulostin;
 			}
@@ -431,7 +432,7 @@
 						FROM kirjoittimet
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus  = '$apuprintteri'";
-			$kirres = mysql_query($query) or pupe_error($query);
+			$kirres = pupe_query($query);
 			$kirrow = mysql_fetch_assoc($kirres);
 
 			$komento = $kirrow['komento'];
@@ -483,7 +484,7 @@
 		// jos meillä oli lähetteen tulostusongelmia
 		if ($virheellinen != 'X') {
 
-			//jos tilauksia on useita niin laitetaan niille yhteinen kerayslista-tunnus
+			// jos tilauksia on useita niin laitetaan niille yhteinen kerayslista-tunnus
 			if ($laskuja > 1) {
 				$tunnukset = explode(',', $tilausnumeroita);
 				$kerayslistatunnus = trim($tunnukset[0]);
@@ -498,7 +499,7 @@
 				$ei_pakkaamoa_lisaviesti = ", sisviesti2 = concat(sisviesti2, ' $kukarow[kuka] ".t("halusi tilauksen pakkaamolokeroihin")." ".tv1dateconv(date("Y-m-d H:i:s"))."')";
 			}
 
-			if ($toim =='VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+			if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
 				$query = "	UPDATE lasku SET
 							alatila = 'C',
 							lahetepvm = now(),
@@ -507,7 +508,8 @@
 							kerayslista = '$kerayslistatunnus'
 							$ei_pakkaamoa_lisaviesti
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tila = 'C' and alatila = 'B'
+							and tila = 'C'
+							and alatila = 'B'
 							and tunnus in ($tilausnumeroita)";
 			}
 			else {
@@ -520,8 +522,8 @@
 							$ei_pakkaamoa_lisaviesti
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus in ($tilausnumeroita)";
-				}
-			$result = mysql_query($query) or pupe_error($query);
+			}
+			$result = pupe_query($query);
 		}
 	}
 	else {

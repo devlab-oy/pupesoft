@@ -9,8 +9,27 @@
 
 				$(function() {
 
-					$('.kayttajittain').on('click', function() {
+					$('.kayttajittain, .nayta_keraajittain, .nayta_keraaja').on('click', function() {
 						$('.'+$(this).attr('id')).toggle();
+
+						if ($(this).hasClass('nayta_keraaja') || $(this).hasClass('nayta_keraajittain')) {
+
+							$(this).toggleClass('tumma');
+
+							if ($('.'+$(this).attr('id')).is(':visible')) {
+								$('#arrowi_'+$(this).attr('id')).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-down.png');
+							}
+							else {
+
+								if ($(this).hasClass('nayta_keraajittain')) {
+									$('.child').hide().removeClass('tumma');
+									$('img[id^=\"arrowi_\"]').attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-right.png');
+								}
+
+								$('#arrowi_'+$(this).attr('id')).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-right.png');
+							}
+						}
+
 					});
 
 				});
@@ -182,17 +201,89 @@
 						AND tilausrivi.keratty != ''
 						{$lisa}
 						GROUP BY 1,2,3,4,5,6,7
-						ORDER BY tilausrivi.keratty, tilausrivi.kerattyaika";
+						ORDER BY kuka.nimi, tilausrivi.keratty, tilausrivi.kerattyaika";
 			$result = pupe_query($query);
+
+			$data = array(
+				'keraaja' => array(),
+				'summaus' => array(
+					'yhteensa' => array(
+						'puutteet' => 0,
+						'siirrot' => 0,
+						'keratyt' => 0,
+						'yhteensa' => 0,
+						'yhteensa_kpl' => 0,
+						'yhteensa_kilot' => 0
+					),
+				),
+			);
+
+			$nimet = array();
+
+			while ($row = mysql_fetch_assoc($result)) {
+				$data['summaus']['yhteensa']['puutteet'] += $row['puutteet'];
+				$data['summaus']['yhteensa']['siirrot'] += $row['siirrot'];
+				$data['summaus']['yhteensa']['keratyt'] += $row['kappaleet'];
+				$data['summaus']['yhteensa']['yhteensa'] += $row['yht'];
+				$data['summaus']['yhteensa']['yhteensa_kpl'] += $row['kerkappaleet'];
+				$data['summaus']['yhteensa']['yhteensa_kilot'] += $row['kerkilot'];
+
+				if (!isset($data['summaus'][$row['keratty']])) {
+					$data['summaus'][$row['keratty']] = array(
+						'puutteet' => 0,
+						'siirrot' => 0,
+						'keratyt' => 0,
+						'yhteensa' => 0,
+						'yhteensa_kpl' => 0,
+						'yhteensa_kilot' => 0
+					);
+				}
+
+				$data['summaus'][$row['keratty']]['puutteet'] += $row['puutteet'];
+				$data['summaus'][$row['keratty']]['siirrot'] += $row['siirrot'];
+				$data['summaus'][$row['keratty']]['keratyt'] += $row['kappaleet'];
+				$data['summaus'][$row['keratty']]['yhteensa'] += $row['yht'];
+				$data['summaus'][$row['keratty']]['yhteensa_kpl'] += $row['kerkappaleet'];
+				$data['summaus'][$row['keratty']]['yhteensa_kilot'] += $row['kerkilot'];
+
+				if (!isset($data['keraaja'][$row['keratty']][$row['kerattyaika']])) {
+					$data['keraaja'][$row['keratty']][$row['kerattyaika']] = array(
+						'keraajanro' => '',
+						'otunnus' => '',
+						'lahetepvm' => '',
+						'kerattyaika' => '',
+						'aika' => '',
+						'puutteet' => 0,
+						'siirrot' => 0,
+						'keratyt' => 0,
+						'yhteensa' => 0,
+						'yhteensa_kpl' => 0,
+						'yhteensa_kilot' => 0
+					);
+				}
+
+				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['keraajanro'] = $row['keraajanro'];
+				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['otunnus'] = $row['otunnus'];
+				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['lahetepvm'] = tv1dateconv($row['lahetepvm'], "P");
+				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['kerattyaika'] = tv1dateconv($row['kerattyaika'], "P");
+				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['aika'] = $row['aika'];
+				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['puutteet'] += $row['puutteet'];
+				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['siirrot'] += $row['siirrot'];
+				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['keratyt'] += $row['kappaleet'];
+				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['yhteensa'] += $row['yht'];
+				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['yhteensa_kpl'] += $row['kerkappaleet'];
+				$data['keraaja'][$row['keratty']][$row['kerattyaika']]['yhteensa_kilot'] += $row['kerkilot'];
+
+				$nimet[$row['keratty']] = $row['nimi'];
+			}
+
+			echo "<img src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' /> <font class='info'>= ",t("Voit avata alatasoja nuolella varustetuista riveist‰"),"</font>";
+
+			echo "<br /><br />";
 
 			echo "<table>";
 			echo "<tr>";
-			echo "<th nowrap>",t("Nimi"),"</th>";
-			echo "<th nowrap>",t("Ker‰‰j‰nro"),"</th>";
-			echo "<th nowrap>",t("Tilaus"),"</th>";
-			echo "<th nowrap>",t("L‰hete tulostettu"),"</th>";
-			echo "<th nowrap>",t("Tilaus ker‰tty"),"</th>";
-			echo "<th nowrap>",t("K‰ytetty aika"),"</th>";
+			echo "<th colspan='5'></th>";
 			echo "<th norwap>",t("Puuterivit"),"</th>";
 			echo "<th norwap>",t("Siirrot"),"</th>";
 			echo "<th nowrap>",t("Ker‰tyt"),"</th>";
@@ -201,121 +292,73 @@
 			echo "<th nowrap>",t("Kilot"),"<br />",t("Yhteens‰"),"</th>";
 			echo "</tr>";
 
-			$lask		= 0;
-			$edkeraaja	= 'EKADUUD';
-			$psummayht	= 0;
-			$ksummayht	= 0;
-			$ssummayht	= 0;
-			$summayht	= 0;
-			$psumma	= 0;
-			$ksumma	= 0;
-			$ssumma	= 0;
-			$summa	= 0;
-			$kapsu	= 0;
-			$kilsu	= 0;
-			$kapsuyht = 0;
-			$kilsuyht = 0;
+			echo "<tr class='nayta_keraajittain tumma' id='keraajittain'>";
 
-			while ($row = mysql_fetch_assoc($result)) {
+			echo "<td colspan='5'><img id='arrowi_keraajittain' style='float:left;' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' /> ".t("Yhteens‰")."</td>";
 
-				if ($edkeraaja != $row["keratty"] and $summa > 0 and $edkeraaja != "EKADUUD") {
-					echo "<tr>";
-					echo "<th colspan='6'>",t("Yhteens‰"),":</th>";
-					echo "<td class='tumma' align='right'>{$psumma}</td>";
-					echo "<td class='tumma' align='right'>{$ssumma}</td>";
-					echo "<td class='tumma' align='right'>{$ksumma}</td>";
-					echo "<td class='tumma' align='right'>{$summa}</td>";
-					echo "<td class='tumma' align='right'>{$kapsu}</td>";
-					echo "<td class='tumma' align='right'>{$kilsu}</td>";
-					echo "</tr>";
-					echo "<tr><td class='back'><br /></td></tr>";
-
-					echo "<tr>";
-					echo "<th nowrap>",t("Nimi"),"</th>";
-					echo "<th nowrap>",t("Ker‰‰j‰nro"),"</th>";
-					echo "<th nowrap>",t("Tilaus"),"</th>";
-					echo "<th nowrap>",t("L‰hete tulostettu"),"</th>";
-					echo "<th nowrap>",t("Tilaus ker‰tty"),"</th>";
-					echo "<th nowrap>",t("K‰ytetty aika"),"</th>";
-					echo "<th norwap>",t("Puuterivit"),"</th>";
-					echo "<th norwap>",t("Siirrot"),"</th>";
-					echo "<th nowrap>",t("Ker‰tyt"),"</th>";
-					echo "<th nowrap>",t("Yhteens‰"),"</th>";
-					echo "<th nowrap>",t("Yhteens‰"),"<br />",t("kappaleet"),"</th>";
-					echo "<th nowrap>",t("Yhteens‰"),"<br />",t("kilot"),"</th>";
-					echo "</tr>";
-
-					$psumma	= 0;
-					$ksumma	= 0;
-					$ssumma	= 0;
-					$summa	= 0;
-					$kapsu	= 0;
-					$kilsu	= 0;
-				}
-
-				$row['kerkilot'] = abs($row['kerkilot']);
-
-				echo "<tr>";
-				echo "<td>{$row['nimi']} ({$row['keratty']})</td>";
-				echo "<td>{$row['keraajanro']}</td>";
-				echo "<td>{$row['otunnus']}</td>";
-				echo "<td>",tv1dateconv($row["lahetepvm"], "P"),"</td>";
-				echo "<td>",tv1dateconv($row["kerattyaika"], "P"),"</td>";
-				echo "<td>{$row['aika']}</td>";
-				echo "<td align='right'>{$row['puutteet']}</td>";
-				echo "<td align='right'>{$row['siirrot']}</td>";
-				echo "<td align='right'>{$row['kappaleet']}</td>";
-				echo "<td align='right'>{$row['yht']}</td>";
-				echo "<td align='right'>{$row['kerkappaleet']}</td>";
-				echo "<td align='right'>{$row['kerkilot']}</td>";
-				echo "</tr>";
-
-				$row['kerkappaleet'] = abs($row['kerkappaleet']);
-
-				$psumma	+= $row["puutteet"];
-				$ksumma	+= $row["kappaleet"];
-				$ssumma	+= $row["siirrot"];
-				$summa	+= $row["yht"];
-				$kapsu	+= $row["kerkappaleet"];
-				$kilsu	+= $row["kerkilot"];
-
-				// yhteens‰
-				$psummayht	+= $row["puutteet"];
-				$ksummayht	+= $row["kappaleet"];
-				$ssummayht	+= $row["siirrot"];
-				$summayht	+= $row["yht"];
-				$kapsuyht	+= $row["kerkappaleet"];
-				$kilsuyht	+= $row["kerkilot"];
-
-				$lask++;
-				$edkeraaja = $row["keratty"];
+			foreach ($data['summaus']['yhteensa'] as $_arr_key => $_arr_values) {
+				echo "<td>{$_arr_values}</td>";
 			}
 
-			if ($summa > 0) {
-				echo "<tr>";
-				echo "<th colspan='6'>",t("Yhteens‰"),":</th>";
-				echo "<td class='tumma' align='right'>{$psumma}</td>";
-				echo "<td class='tumma' align='right'>{$ssumma}</td>";
-				echo "<td class='tumma' align='right'>{$ksumma}</td>";
-				echo "<td class='tumma' align='right'>{$summa}</td>";
-				echo "<td class='tumma' align='right'>{$kapsu}</td>";
-				echo "<td class='tumma' align='right'>{$kilsu}</td>";
-				echo "</tr>";
-				echo "<tr><td class='back'><br /></td></tr>";
-			}
-
-			// Kaikki yhteens‰
-			echo "<tr>";
-			echo "<th colspan='6'>",t("Kaikki yhteens‰"),":</th>";
-			echo "<td class='tumma' align='right'>{$psummayht}</td>";
-			echo "<td class='tumma' align='right'>{$ssummayht}</td>";
-			echo "<td class='tumma' align='right'>{$ksummayht}</td>";
-			echo "<td class='tumma' align='right'>{$summayht}</td>";
-			echo "<td class='tumma' align='right'>{$kapsuyht}</td>";
-			echo "<td class='tumma' align='right'>{$kilsuyht}</td>";
 			echo "</tr>";
 
-			echo "</table><br />";
+			unset($data['summaus']['yhteensa']);
+
+			echo "<tr class='keraajittain child' style=''>";
+			echo "<th nowrap colspan='5'>",t("Ker‰‰j‰"),"</th>";
+			echo "<th norwap>",t("Puuterivit"),"</th>";
+			echo "<th norwap>",t("Siirrot"),"</th>";
+			echo "<th nowrap>",t("Ker‰tyt"),"</th>";
+			echo "<th nowrap>",t("Yhteens‰"),"</th>";
+			echo "<th nowrap>",t("Kappaleet"),"<br />",t("Yhteens‰"),"</th>";
+			echo "<th nowrap>",t("Kilot"),"<br />",t("Yhteens‰"),"</th>";
+			echo "</tr>";
+
+			foreach ($data['summaus'] as $_arr_key => $_arr_values) {
+
+				$id = str_replace(array(".", " ", ":"), "", $_arr_key);
+
+				echo "<tr class='keraajittain nayta_keraaja child' id='{$id}' style=''>";
+
+				$nimi = $nimet[$_arr_key] != "" ? "{$nimet[$_arr_key]} ($_arr_key)" : $_arr_key;
+
+				echo "<td colspan='5'><img id='arrowi_{$id}' style='float:left;' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;&nbsp;{$nimi}</td>";
+
+				foreach($_arr_values as $_key => $_val) {
+					if ($_key == "yhteensa_kilot") echo "<td align='right'>{$_val}</td>";
+					else echo "<td>{$_val}</td>";					
+				}
+
+				echo "</tr>";
+
+				echo "<tr class='{$id} child' style='display: none;'>";
+				echo "<th nowrap>",t("Ker‰‰j‰nro"),"</th>";
+				echo "<th nowrap>",t("Tilaus"),"</th>";
+				echo "<th nowrap>",t("L‰hete tulostettu"),"</th>";
+				echo "<th nowrap>",t("Tilaus ker‰tty"),"</th>";
+				echo "<th nowrap>",t("K‰ytetty aika"),"</th>";
+				echo "<th norwap>",t("Puuterivit"),"</th>";
+				echo "<th norwap>",t("Siirrot"),"</th>";
+				echo "<th nowrap>",t("Ker‰tyt"),"</th>";
+				echo "<th nowrap>",t("Yhteens‰"),"</th>";
+				echo "<th nowrap>",t("Kappaleet"),"<br />",t("Yhteens‰"),"</th>";
+				echo "<th nowrap>",t("Kilot"),"<br />",t("Yhteens‰"),"</th>";
+				echo "</tr>";
+
+				foreach ($data['keraaja'][$_arr_key] as $aika => $arr) {
+
+					echo "<tr class='{$id} spec aktiivi child' style='display: none;'>";
+
+					foreach($arr as $_key => $_val) {
+						if ($_key == "yhteensa_kilot") echo "<td align='right'>{$_val}</td>";
+						else echo "<td>{$_val}</td>";					
+					}
+
+					echo "</tr>";
+				}
+			}
+
+			echo "</table>";
 		}
 
 		if (($tapa == 'kerpvm') or ($tapa == 'kerkk')) {

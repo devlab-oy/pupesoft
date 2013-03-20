@@ -440,7 +440,8 @@
 							}
 						}
 						elseif ($fieldname == 'eilahetetta') {
-							$query .= "eilahetetta='".$isarivirow["suoraan_laskutukseen"]."',";
+							if ($mista_tullaan == "TULLAAN_VALMISTUKSESTA") $query .= "eilahetetta='',";
+							else $query .= "eilahetetta='".$isarivirow["suoraan_laskutukseen"]."',";
 						}
 						elseif ($fieldname == 'kohdistettu') {
 							// riipastaan tarkoituksella tyhjää, hoidetaan homma 'rahtivapaa' haarassa
@@ -895,7 +896,7 @@
 									}
 
 									// jos alkuperäinen rivi oli suoratoimitettu asiakkaalle, merkataan rivit kerätyksi ja toimitetuksi
-									if ($isarivirow["suoraan_laskutukseen"] != "") {
+									if ($isarivirow["suoraan_laskutukseen"] != "" and $mista_tullaan != "TULLAAN_VALMISTUKSESTA") {
 
 										//Tutkitaan löytyykö ostorivi ja sen toimitettuaika
 									   	$query = "	SELECT tilausrivin_lisatiedot.suoratoimitettuaika

@@ -224,6 +224,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$joinattavat = array("TUOTENO" => "tuote");
 				$saakopoistaa = TRUE;
 				break;
+			case "tuotteen_toimittajat_tuotenumerot" :
+				$pakolliset  = array("TOIM_TUOTENO_TUNNUS");
+				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$wherelliset = array("TUOTENO", "VIIVAKOODI");
+				$saakopoistaa = TRUE;
+				break;
 			case "kuka" :
 				$pakolliset = array("KUKA");
 				$kielletyt  = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");

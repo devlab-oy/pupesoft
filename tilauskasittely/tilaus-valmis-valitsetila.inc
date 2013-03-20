@@ -1,5 +1,7 @@
 <?php
 
+	require_once ('../inc/functions.inc');
+	
 	// Tarvitsemme
 	// $laskurow jossa on laskun tiedot
 	// $kutsuja jossa on skripti josta kutsutaan
@@ -102,37 +104,21 @@
 	}
 
 	if ($laskurow['osatoimitus'] == 'e' and $laskurow['tila'] == 'N') {
-		$query = "	SELECT tunnus,
-					tuoteno,
-					(varattu + jt) as kpl
+
+		$query = "	SELECT tuoteno
 					FROM tilausrivi
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND otunnus = '{$laskurow['tunnus']}'";
 		$tilausrivi_result = pupe_query($query);
-		while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_result)) {
-			//haetaan kaikki tilausrivit tällä tuotenumerolla, joita ei ole vielä kerätty tai toimitettu ja katsotaan riittääkö tällä hetkellä käsittelyssä olevalle riville saldoa.
-			$query = "	SELECT tunnus,
-						tuoteno,
-						tilkpl,
-						(varattu + jt) as kpl
-						FROM tilausrivi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tuoteno = '{$tilausrivi_row['tuoteno']}'
-						AND tyyppi = 'L'
-						AND kerattyaika = '0000-00-00 00:00:00'
-						AND toimitettuaika = '0000-00-00 00:00:00'
-						ORDER BY laadittu ASC";
-			$tuotteet_result = pupe_query($query);
-			$tuote_varattu = 0;
-			list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tilausrivi_row['tuoteno'], 'JTSPEC', 0, $kukarow['yhtio'], '', '', '', '', '', '', '');
-			while ($tuote = mysql_fetch_assoc($tuotteet_result)) {
-				if ($tilausrivi_row['tunnus'] == $tuote['tunnus'] and ($saldo - $tuote_varattu) < $tilausrivi_row['kpl']) {
-					//kun tilaus listalta tulee käsittelyssä oleva tilausrivi tarkastetaan saldo. jos saldo ei riitä koko tilausta ei voida toimittaa.
-					$voiko_toimittaa = false;
-					break;
-				}
-				$tuote_varattu += $tuote['tilkpl'];
-			}
+		$tuotteet = array();
+		while($tilausrivi_row = mysql_fetch_assoc($tilausrivi_result)) {
+			$tuotteet[] = $tilausrivi_row;
+		}
+		
+		$lasku_tunnukset = heti_toimitus_voiko_toimittaa($tuotteet);
+
+		if(empty($lasku_tunnukset)) {
+			$voiko_toimittaa = false;
 		}
 	}
 

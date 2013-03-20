@@ -2548,7 +2548,7 @@ if ($tee == '') {
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] > 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
-		$query = "	SELECT fakta, luokka, asiakasnro, osasto, laji
+		$query = "	SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$laskurow[liitostunnus]'";
@@ -2589,6 +2589,7 @@ if ($tee == '') {
 				if ($faktarow["asiakasnro"] != "") {
 					echo " / $faktarow[asiakasnro]";
 				}
+				echo " / {$faktarow['ryhma']}";
 			}
 
 			echo "</td>";
@@ -4421,7 +4422,7 @@ if ($tee == '') {
 							echo "<tr>";
 							echo "<td>{$tapahtuma_chk_row['laatija']}</td>";
 							echo "<td>",tv1dateconv($tapahtuma_chk_row['laadittu']),"</td>";
-							echo "<td align='right'>".($tapahtuma_chk_row['kpl'] * -1)."</td>";
+							echo "<td align='right'>".($tapahtuma_chk_row['kpl'] * -1)." {$tapahtuma_chk_row['yksikko']}</td>";
 
 							if ($oikeus_chk) {
 
@@ -5792,8 +5793,8 @@ if ($tee == '') {
 							echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle</td>";
 						}
 					}
-					elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
-						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle".strtolower($row["yksikko"])."</td>";
+					elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE" or $toim == "RIVISYOTTO") {
+						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle ".strtolower($row["yksikko"])."</td>";
 					}
 					else {
 						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle</td>";

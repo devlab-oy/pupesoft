@@ -739,7 +739,19 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 	if (!isset($lisarajaus)) $lisarajaus = "";
 
-	$sel = array_fill_keys(array($lisarajaus), ' selected') + array_fill_keys(array('riveja_viematta_varastoon', 'liitetty_lasku', 'liitetty_lasku_rivitok_kohdistus_eiok', 'liitetty_lasku_rivitok_kohdistus_ok'), '');
+	if($toim != 'AVOIMET') {
+		$sel = array_fill_keys(array($lisarajaus), ' selected') + array_fill_keys(array('riveja_viematta_varastoon', 'liitetty_lasku', 'liitetty_lasku_rivitok_kohdistus_eiok', 'liitetty_lasku_rivitok_kohdistus_ok'), '');
+	}
+	else {
+		$sel = array(
+			'riveja_viematta_varastoon' => 'selected',
+			'liitetty_lasku' => '',
+			'liitetty_lasku_rivitok_kohdistus_eiok' => '',
+			'liitetty_lasku_rivitok_kohdistus_ok' => '',
+		);
+
+		$lisarajaus = 'riveja_viematta_varastoon';
+	}
 
 	echo "<td><select name='lisarajaus' ",js_alasvetoMaxWidth('lisarajaus', 250),">";
 	echo "<option value=''>",t("Näytä kaikki"),"</option>";

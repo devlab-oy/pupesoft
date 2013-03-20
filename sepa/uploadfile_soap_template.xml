@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<soapenv:Envelope xmlns:sign="http://danskebank.dk/AGENA/SEPA/SigningService" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:cor="http://bxd.fi/CorporateFileService" xmlns:mod="http://model.bxd.fi" xmlns:dpstate="http://danskebank.dk/AGENA/SEPA/dpstate">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<cor:uploadFilein>
+			<mod:RequestHeader>
+				<mod:SenderId>_CUSTOMERID_</mod:SenderId>
+				<mod:RequestId>_REQUESTID_</mod:RequestId>
+				<mod:Timestamp>_TIMESTAMP_</mod:Timestamp>
+				<mod:Language>EN</mod:Language>
+				<mod:UserAgent>Pupesoft 1.0</mod:UserAgent>
+				<mod:ReceiverId>DABAFIHH</mod:ReceiverId>
+			</mod:RequestHeader>
+			<mod:ApplicationRequest>_CONTENT_</mod:ApplicationRequest>
+		</cor:uploadFilein>
+	</soapenv:Body>
+</soapenv:Envelope>

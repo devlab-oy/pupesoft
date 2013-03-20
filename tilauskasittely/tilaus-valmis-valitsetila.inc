@@ -101,7 +101,7 @@
 		}
 	}
 
-	if ($laskurow['osatoimitus'] == 'e') {
+	if ($laskurow['osatoimitus'] == 'e' and $laskurow['tila'] == 'N') {
 		// estet‰‰n, ett‰ tilaus ei mene suoraan ker‰ysjonoon.
 		$query = "	SELECT *
 					FROM tilausrivi

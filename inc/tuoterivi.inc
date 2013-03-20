@@ -41,6 +41,29 @@
 			}
 		}
 		else {
+
+			// Jos automaattinen tuotenumeron ehdotus on päällä...
+			if ($trow[$i] == '' and ($yhtiorow['seuraava_tuotenumero'] == 'K' or ($yhtiorow['seuraava_tuotenumero'] == 'O' and isset($tee_myos_tuotteen_toimittaja_liitos)))) {
+
+				$autom_wherelisa = "";
+
+				if (isset($kaatokoodi_tuotteen_tuotenumeron_alku) and trim($kaatokoodi_tuotteen_tuotenumeron_alku) != '') {
+					$autom_wherelisa = "AND tuote.tuoteno LIKE '{$kaatokoodi_tuotteen_tuotenumeron_alku}%'";
+				}
+
+				$query = "	SELECT MAX(CAST(tuote.tuoteno AS unsigned)) + 1 AS seuraava_tuoteno
+							FROM tuote
+							WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+							AND tuote.tuoteno REGEXP '[^0-9]' = 0
+							{$autom_wherelisa}";
+				$autom_tuoteno_res = pupe_query($query);
+				$autom_tuoteno_row = mysql_fetch_assoc($autom_tuoteno_res);
+
+				$trow[$i] = $autom_tuoteno_row['seuraava_tuoteno'];
+
+				if ($autom_tuoteno_row['seuraava_tuoteno'] == '' and $autom_wherelisa != "") $trow[$i] = "{$kaatokoodi_tuotteen_tuotenumeron_alku}1";
+			}
+
 			$ulos = "<td><input type = 'hidden' name = 'uusi' value = '$uusi'><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
 			$jatko=0;
 
@@ -78,7 +101,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "tuotetyyppi") {
- 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('A', 'B', 'R', 'K', 'M', 'N'), '');
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('A', 'B', 'R', 'K', 'M'), '');
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
@@ -91,11 +114,21 @@
 			$ulos .= "<option value='R' $sel[R]>".t("Raaka-aine")."</option>";
 			$ulos .= "<option value='K' $sel[K]>".t("Palvelu")."</option>";
 			$ulos .= "<option value='M' $sel[M]>".t("Muu/Informatiivinen")."</option>";
-			$ulos .= "<option value='N' $sel[N]>".t("Normaali / Kulutuote (ei näytetä myynninseurannassa)")."</option>";
 		}
 		$ulos .= "</select></td>";
 
 		$jatko=0;
+	}
+
+	if (mysql_field_name($result, $i) == "myynninseuranta") {
+		$sel = $trow[$i] == "E" ? " selected" : "";
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value = ''>".t("Tuote otetaan huomioon myynninseurannassa")."</option>";
+		$ulos .= "<option value = 'E'{$sel}>".t("Tuotetta ei oteta huomioon myynninseurannassa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "kehahin" or
@@ -701,22 +734,24 @@
 		$ulos .= "<option value='K'{$sel}>".t("Käytössä")."</option>";
 		$ulos .= "</select>";
 
-		$query_ale_lisa = generoi_alekentta('M', 'panttitili');
+		if (trim($trow[$i]) == 'K') {
+			$query_ale_lisa = generoi_alekentta('M', 'panttitili');
 
-		$query = "	SELECT
-					round(sum(hinta*kpl* {$query_ale_lisa}), 2) as rivihinta
-					FROM panttitili
-					WHERE panttitili.yhtio = '{$kukarow['yhtio']}'
-					AND panttitili.tuoteno = '{$trow['tuoteno']}'
-					AND panttitili.status  = ''";
-		$panttitili_result = pupe_query($query);
-		$panttitili_row = mysql_fetch_assoc($panttitili_result);
+			$query = "	SELECT
+						round(sum(hinta*kpl* {$query_ale_lisa}), 2) as rivihinta
+						FROM panttitili
+						WHERE panttitili.yhtio = '{$kukarow['yhtio']}'
+						AND panttitili.tuoteno = '{$trow['tuoteno']}'
+						AND panttitili.status  = ''";
+			$panttitili_result = pupe_query($query);
+			$panttitili_row = mysql_fetch_assoc($panttitili_result);
 
-		$ulos .= " <font class='message'>".t("Tuotetta panttitileillä yhteensä").": ".str_replace('.', ',', str_replace(',', ' ', $panttitili_row['rivihinta']))." EUR</font>";
+			$ulos .= " <font class='message'>".t("Tuotetta panttitileillä yhteensä").": {$panttitili_row['rivihinta']} {$yhtiorow['valkoodi']}</font>";
+		}
+
 		$ulos .= "</td>";
 
 		$jatko = 0;
-
 	}
 
 	if (mysql_field_name($result, $i) == "meria_saastuttava") {
@@ -728,7 +763,6 @@
 		$ulos .= "<option value='K'{$sel}>".t("Kyllä")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
-
 	}
 
 	if (mysql_field_name($result, $i) == "ostoehdotus") {

@@ -35,7 +35,7 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 	if ($tuotepaikka != '') $params['tuotepaikka'] = "concat(tuotepaikat.hyllyalue,
 										 tuotepaikat.hyllynro,
 										 tuotepaikat.hyllyvali,
-										 tuotepaikat.hyllytaso)='$hylly'";
+										 tuotepaikat.hyllytaso) LIKE '$hylly%'";
 
 	$osumat = array();
 
@@ -123,13 +123,19 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 /** Tarkistaa varmistuskoodin syˆtetyn tuotepaikan ja koodin mukaan.
  *  jos varmistuskoodia ei annettu yritet‰‰n k‰ytt‰‰ keksiss‰ olevaa varmistuskoodia.
  */
-function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi = '') {
+function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi = '', $haettu_tuotepaikalla = '') {
 	// Muutetaan saatuo tuotepaikka arrayksi
 	$hylly = explode('-', $tuotepaikka);
 
+	// Jos haettu vajaalla tuotepaikalla, eli hyllyalue-hyllynro, niin tarkistetaan ett‰ jos
+	// keksiss‰ oleva tuotepaikka t‰sm‰‰ kyseist‰ aluetta. Jos t‰sm‰‰ niin varmistuskoodi tarkistetaan suoraan.
+	$tuotealue = false;
+	if (stripos(str_replace('-', '', $_COOKIE['_tuotepaikka']), $haettu_tuotepaikalla) === 0) {
+		$tuotealue = true;
+	}
+
 	// Jos varmistuskoodia ei saatu parametrissa, yritet‰‰n keksiss‰ olevalla koodilla.
-	// vain jos saatu tuotepaikka on sama kuin keksiss‰ oleva tuotepaikka.
-	if ($varmistuskoodi == '' and isset($_COOKIE['_varmistuskoodi']) and $tuotepaikka == $_COOKIE['_tuotepaikka']) {
+	if ($varmistuskoodi == '' and isset($_COOKIE['_varmistuskoodi']) and ($tuotepaikka == $_COOKIE['_tuotepaikka'] or $tuotealue == true)) {
 		$varmistuskoodi = $_COOKIE['_varmistuskoodi'];
 	}
 
@@ -159,11 +165,16 @@ if ($tee == 'haku') {
 
 	# Haettu jollain
 	if (isset($viivakoodi) or isset($tuoteno) or isset($tuotepaikka)) {
-		$tuotteet = hae($viivakoodi,$tuoteno,$tuotepaikka);
-		if(count($tuotteet) == 0) $errors[] = "Ei lˆytynyt";
+		if (!empty($tuotepaikka) and strlen($tuotepaikka) < 2) {
+			$errors[] = t("Tuotepaikka haun on oltava v‰hint‰‰n 2 merkki‰");
+		}
+		else {
+			$tuotteet = hae($viivakoodi,$tuoteno,$tuotepaikka);
+			if(count($tuotteet) == 0) $errors[] = "Ei lˆytynyt";
+		}
 	}
 
-	$haku_tuotepaikalla = ($viivakoodi=='' and $tuoteno=='' and $tuotepaikka != '') ? 'true' : '';
+	$haku_tuotepaikalla = ($viivakoodi=='' and $tuoteno=='' and $tuotepaikka != '') ? $tuotepaikka : '';
 
 	# Vain yksi osuma
 	if (isset($tuotteet) and count($tuotteet) == 1) {
@@ -332,7 +343,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 	}
 
 	// Jos varmistuskoodi kelpaa tai on keksiss‰ tallessa
-	if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi)) {
+	if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi, $tuotepaikalla)) {
 		$title = t("Laske m‰‰r‰");
 		$query = "	SELECT *
 					FROM avainsana
@@ -453,8 +464,8 @@ if ($tee == 'inventoidaan') {
 			$paluu_url = http_build_query(array('tee' => 'laske', 'lista' => $lista, 'reservipaikka' => $reservipaikka));
 		}
 		# Jos inventoitu tuotepaikalla, palataan takaisin hakuun kyseisell‰ tuotepaikalla
-		elseif($tuotepaikalla=='true') {
-			$paluu_url = http_build_query(array('tee' => 'haku', 'viivakoodi' => '', 'tuoteno' => '', 'tuotepaikka' => $tuotepaikka));
+		elseif(!empty($tuotepaikalla)) {
+			$paluu_url = http_build_query(array('tee' => 'haku', 'viivakoodi' => '', 'tuoteno' => '', 'tuotepaikka' => $tuotepaikalla));
 		}
 		# Palataan alkuun
 		else {

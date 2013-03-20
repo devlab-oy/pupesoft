@@ -2577,7 +2577,6 @@ if ($tee == '') {
 			if ($faktarow["asiakasnro"] != "") {
 				echo " / ".t("Asiakasnro");
 			}
-			echo " / " . t("Asiakasryhmä");
 
 			echo ":</th><td>";
 

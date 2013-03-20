@@ -466,6 +466,50 @@ if (!function_exists('rivi_valm')) {
 			$pdf->draw_line($x, $y, $thispage, $rectparam);
 		}
 
+		//Haetan sarjanumeron tiedot
+		if ($row["sarjanumeroseuranta"] != "") {
+
+			if ($row["tyyppi"] == "V") {
+				$tunken = "myyntirivitunnus";
+			}
+			else {
+				$tunken = "ostorivitunnus";
+			}
+
+			$query = "	SELECT DISTINCT sarjanumero, parasta_ennen
+						FROM sarjanumeroseuranta
+						WHERE yhtio 	 = '$kukarow[yhtio]'
+						and tuoteno 	 = '$row[tuoteno]'
+						and $tunken 	 = '$row[tunnus]'
+						and sarjanumero != ''
+						ORDER BY sarjanumero";
+			$sarjares = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($sarjares) > 0) {
+				if ($row["kommentti"] != '') {
+					$row["kommentti"] .= "\n";
+				}
+
+				if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") {
+					$row["kommentti"] .= t("E:nro", $kieli).": ";
+				}
+				else {
+					$row["kommentti"] .= t("S:nro", $kieli).": ";
+				}
+
+				while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+					if ($row["sarjanumeroseuranta"] == "F") {
+						$row["kommentti"] .= $sarjarow["sarjanumero"]." ".t("Parasta ennen", $kieli).": ".tv1dateconv($sarjarow["parasta_ennen"]).", ";
+					}
+					else {
+						$row["kommentti"] .= $sarjarow["sarjanumero"].", ";
+					}
+				}
+
+				$row["kommentti"] = substr($row["kommentti"], 0, -2);
+			}
+		}
+
 		// Mahtuuko rivi tälle sivulle
 		$kala_nyt = $kala;
 
@@ -546,11 +590,11 @@ if (!function_exists('rivi_valmistus')) {
 
 			$komm = t("Kommentti", $kieli).":\n".$row["kommentti"];
 
-			foreach(explode("\n", wordwrap(trim($komm), 90, "\n")) as $kommentti) {
+			foreach (explode("\n", wordwrap(trim($komm), 90, "\n")) as $kommentti) {
 				$kala = $kala - $rivinkorkeus;
 				$lask_valm++;
 
-				$pdf->draw_text(125,  $kala, $kommentti,	$thispage, $p);
+				$pdf->draw_text(125, $kala, $kommentti, $thispage, $p);
 			}
 		}
 

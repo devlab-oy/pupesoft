@@ -1389,7 +1389,7 @@
 										$eiliittymaa 	 = "ON";
 										$luottorajavirhe = "";
 										$jvvirhe 		 = "";
-										$ylivito 		 = "";
+										$ylivito 		 = 0;
 										$trattavirhe 	 = "";
 										$laji 			 = "MA";
 										$grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
@@ -1420,7 +1420,7 @@
 
 									if ($ylivito > 0) {
 										echo "<br/>";
-										echo "<font class='message'>".t("Yli 15 pv sitten er‰‰ntyneit‰ laskuja")."</font>";
+										echo "<font class='message'>".t("Yli %s pv sitten er‰‰ntyneit‰ laskuja", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."</font>";
 									}
 
 									if ($trattavirhe != '') {
@@ -1530,10 +1530,10 @@
 								if (!isset($kpl[$tunnukset])) $kpl[$tunnukset] = "";
 
 								// Riitt‰‰ kaikille
-								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0 and $voiko_toimittaa !== false) {
+								if ((($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0 and $voiko_toimittaa !== false) or $automaaginen == 'vakisin') {
 
 									// Jos haluttiin toimittaa t‰m‰ rivi automaagisesti
-									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
+									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen' or $automaaginen == 'vakisin')) {
 
 										if ($from_varastoon_inc == "editilaus_in.inc") {
 											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lis‰ttiin tilaukseen")."!";
@@ -1542,8 +1542,13 @@
 											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lis‰ttiin tilaukseen").". (".t("Tuotetta riitti kaikille JT-riveille").")</font><br>";
 										}
 
-										// Pomitaan t‰m‰ rivi/perhe
-										$loput[$tunnukset] 	= "KAIKKI";
+										if($automaaginen == 'vakisin') {
+											$loput[$tunnukset] 	= "VAKISIN";
+										}
+										else {
+											$loput[$tunnukset] 	= "KAIKKI";
+										}
+										
 										$kpl[$tunnukset] 	= 0;
 										$tunnusarray 		= explode(',', $tunnukset);
 
@@ -1617,8 +1622,8 @@
 											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lis‰ttiin tilaukseen").". (".t("Tuotetta ei riitt‰nyt kaikille JT-riveille").")</font><br>";
 										}
 
-										// Pomitaan t‰m‰ rivi/perhe
 										$loput[$tunnukset] 	= "KAIKKI";
+										
 										$kpl[$tunnukset] 	= 0;
 										$tunnusarray 		= explode(',', $tunnukset);
 

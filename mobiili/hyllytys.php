@@ -26,10 +26,13 @@ $query = "  SELECT
             tilausrivi.yksikko,
             tilausrivi.suuntalava,
             tilausrivi.uusiotunnus,
-            lasku.liitostunnus
+            lasku.liitostunnus,
+			IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') as tilausrivi_tyyppi
             FROM lasku
             JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O'
             JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
+			LEFT JOIN tilausrivin_lisatiedot
+			ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
             WHERE tilausrivi.tunnus='{$tilausrivi}'
             AND tilausrivi.yhtio='{$kukarow['yhtio']}'
             AND lasku.tunnus='{$ostotilaus}'";
@@ -40,12 +43,34 @@ if (!$row) {
     exit("Virhe, rivi‰ ei lˆydy");
 }
 
-# Tehd‰‰n tarvittaessa uusi saapuminen
-if (empty($saapuminen)) {
-    $toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
-    $toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
-    $saapuminen = uusi_saapuminen($toimittaja);
+// Haetaan toimittajan tiedot
+$toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
+$toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
 
+// Jos saapumista ei ole setattu, tehd‰‰n uusi saapuminen haetulle toimittajalle
+if (empty($saapuminen)) {
+    $saapuminen = uusi_saapuminen($toimittaja);
+    $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+    $updated = pupe_query($update_kuka);
+}
+// Jos saapuminen on niin tarkistetaan ett‰ se on samalle toimittajalle
+else {
+    // Haetaan saapumisen toimittaja tunnus
+    $saapuminen_query = "SELECT liitostunnus
+                        FROM lasku
+                        WHERE tunnus='{$saapuminen}'";
+    $saapumisen_toimittaja = mysql_fetch_assoc(pupe_query($saapuminen_query));
+
+    // jos toimittaja ei ole sama kuin tilausrivin niin tehd‰‰n uusi saapuminen
+    if ($saapumisen_toimittaja['liitostunnus'] != $row['liitostunnus']) {
+
+        // Haetaan toimittajan tiedot uudestaan ja tehd‰‰n uudelle toimittajalle saapuminen
+        $toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
+        $toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
+        $saapuminen = uusi_saapuminen($toimittaja);
+    }
+
+    // P‰ivitet‰‰n kuka.kesken
     $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
     $updated = pupe_query($update_kuka);
 }
@@ -80,6 +105,15 @@ if (isset($submit)) {
 
 $suuntalava = $row['suuntalava'] ? : "Ei ole";
 
+if ($row['tilausrivi_tyyppi'] == 'o') {
+    //suoratoimitus asiakkaalle
+    $row['tilausrivi_tyyppi'] = 'JTS';
+}
+elseif($row['tilausrivi_tyyppi'] == '') {
+    //linkitetty osto / myyntitilaus varastoon
+    $row['tilausrivi_tyyppi'] = 'JT';
+}
+
 ######## UI ##########
 # Otsikko
 echo "<div class='header'>";
@@ -98,7 +132,7 @@ echo "<div class='main'>
     </tr>
     <tr>
         <th>",t("Hyllytetty m‰‰r‰"), "</th>
-        <td><input id='numero' class='numero' type='text' name='hyllytetty' value='{$row['siskpl']}' onchange='update_label()'></input></td>
+        <td><input id='numero' class='numero' type='text' name='hyllytetty' value='{$row['siskpl']}' onchange='update_label()'></input> {$row['tilausrivi_tyyppi']}</td>
         <td><span id='hylytetty_label'>{$row['ulkkpl']}</span></td>
     </tr>
     <tr>

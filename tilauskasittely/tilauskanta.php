@@ -52,7 +52,7 @@
 
 		$query = "	(select lasku.toimaika as 'Toimitusaika',
 					concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
-					lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi
+					lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti
 					from lasku use index (tila_index)
 					$tuotelisa
 					where lasku.yhtio = '$kukarow[yhtio]'
@@ -63,7 +63,7 @@
 
 					(select lasku.toimaika as 'Toimitusaika',
 					concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
-					lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi
+					lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti
 					from lasku use index (yhtio_tila_tapvm)
 					$tuotelisa
 					where lasku.yhtio = '$kukarow[yhtio]'
@@ -75,7 +75,7 @@
 
 					(select lasku.toimaika as 'Toimitusaika',
 					concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
-					lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi
+					lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti
 					from lasku use index (yhtio_tila_tapvm)
 					$tuotelisa
 					where lasku.yhtio = '$kukarow[yhtio]'
@@ -87,7 +87,7 @@
 
 					(select lasku.toimaika as 'Toimitusaika',
 					concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
-					lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi
+					lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti
 					from lasku use index (tila_index)
 					$tuotelisa
 					where lasku.yhtio = '$kukarow[yhtio]'
@@ -113,6 +113,7 @@
 		$kojarj = $vanhaojarj;
 
 		echo "<th align='left'><a href = '$PHP_SELF?tee=$tee&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuotealku=$tuotealku&tuoteloppu=$tuoteloppu&osasto=$osasto&try=$try&kojarj=4,5'>".t("Tyyppi")."</a></th>";
+		echo "<th align='left'>".t("Viesti")."</th>";
 		echo "<th align='left'>".t("Summa")."</th>";
 		echo "</tr>";
 
@@ -158,6 +159,8 @@
 
 			echo "<$ero valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")."</$ero>";
 
+			echo "<$ero valign='top'>{$prow['viesti']}</$ero>";
+
 			if ($prow["tilaustyyppi"] != "W") {
 
 				$query_ale_lisa = generoi_alekentta('M');
@@ -187,8 +190,8 @@
 
 		}
 
-		echo "<tr><td class='back' colspan='3'><th>".t("Veroton").":</th><th>".sprintf('%.2f', $arvot)."</th></tr>";
-		echo "<tr><td class='back' colspan='3'><th>".t("Verollinen").":</th><th>".sprintf('%.2f', $summat)."</th></tr>";
+		echo "<tr><td class='back' colspan='5'><th>".t("Veroton").":</th><th>".sprintf('%.2f', $arvot)."</th></tr>";
+		echo "<tr><td class='back' colspan='5'><th>".t("Verollinen").":</th><th>".sprintf('%.2f', $summat)."</th></tr>";
 
 		echo "</table><br><br><br><br>";
 	}

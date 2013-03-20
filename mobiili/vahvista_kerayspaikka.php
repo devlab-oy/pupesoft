@@ -29,7 +29,7 @@ if (!empty($alusta_tunnus)) {
 	$row = mysql_fetch_assoc($res);
 }
 
-# Jos suuntalavan_tuotteet() ei löytänyt mitään
+# Jos suuntalavan_tuotteet() ei löytynyt mitään
 if(!isset($row)) {
 	$query = "	SELECT
 				tilausrivi.*,
@@ -96,11 +96,11 @@ if (isset($submit) and trim($submit) != '') {
 				// Tarkastetaan syötetyt määrät, eli tarviiko tilausrivia splittailla tai kopioida
 				if ($maara < $row['varattu']) {
 
-					// Syötytty määrä on pienempi kuin tilausrivilla oleva määrä.
+					// Syötetty määrä on pienempi kuin tilausrivilla oleva määrä.
 					// Splitataan rivi ja siirretään ylijääneet uudellele tilausriville.
 					splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, FALSE);
 
-					// Alkuperäinen viedään varastoon, splitattu jää j‰ljelle
+					// Alkuperäinen viedään varastoon, splitattu jää jâljelle
 					$ok = paivita_tilausrivin_kpl($tilausrivi, $maara);
 					$tilausrivit[] = $tilausrivi;
 
@@ -222,6 +222,16 @@ if (isset($submit) and trim($submit) != '') {
 	}
 }
 
+
+if ($row['tilausrivi_tyyppi'] == 'o') {
+    //suoratoimitus asiakkaalle
+    $row['tilausrivi_tyyppi'] = 'JTS';
+}
+elseif($row['tilausrivi_tyyppi'] == '') {
+    //linkitetty osto / myyntitilaus varastoon
+    $row['tilausrivi_tyyppi'] = 'JT';
+}
+
 # Asetetaan määrä varattu kentän arvoksi jos sitä ei ole setattu
 $maara = (empty($maara)) ? $row['varattu'] : $maara;
 
@@ -281,7 +291,7 @@ echo "<div class='main'>
 	</tr>
 	<tr>
 		<th>",t("Määrä"),"</th>
-		<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $disabled/></td>
+		<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $disabled/> {$row['tilausrivi_tyyppi']}</td>
 		<td><span id='row_varattu' $hidden>{$row['varattu']}</span><span id='yksikko'>{$row['yksikko']}</span></td>
 	</tr>
 	<tr>

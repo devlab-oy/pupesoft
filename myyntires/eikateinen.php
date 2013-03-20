@@ -421,7 +421,8 @@ function hae_lasku2($laskuno, $toim) {
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND	lasku.laskunro = '{$laskuno}'
 					AND lasku.tila = 'U'
-					AND lasku.alatila = 'X'";
+					AND lasku.alatila = 'X'
+					AND lasku.saldo_maksettu = 0";
 	}
 	else {
 		$query = "	SELECT lasku.ytunnus,
@@ -448,13 +449,14 @@ function hae_lasku2($laskuno, $toim) {
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.laskunro = '{$laskuno}'
 					AND lasku.tila = 'U'
-					AND lasku.alatila = 'X'";
+					AND lasku.alatila = 'X'
+					AND lasku.saldo_maksettu = 0";
 	}
 
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
-		echo "<font class='error'>".t("Laskunumerolla")." '$laskuno' ".t("ei löydy käteislaskua")."!</font><br><br>";
+		echo "<font class='error'>".t("Laskunumerolla")." '$laskuno' ".t("ei löydy sopivaa laskua")."!</font><br><br>";
 	}
 
 	return mysql_fetch_assoc($result);
@@ -648,7 +650,7 @@ function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {
 		return false;
 	}
 	else {
-		return $tilikausi_alku;
+		return $yhtiorow['tilikausi_alku'];
 	}
 
 }

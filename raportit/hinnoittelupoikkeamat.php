@@ -147,6 +147,7 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND otunnus = '{$laskurow['tunnus']}'
 							AND tyyppi = 'L'
+							AND kpl+varattu > 0
 							AND tuoteno NOT IN (
 								'{$yhtiorow['rahti_tuotenumero']}',
 								'{$yhtiorow['jalkivaatimus_tuotenumero']}',
@@ -192,7 +193,7 @@
 					$ero = $tilausrivirow['hinta'] - $lis_hinta;
 					$ero = hintapyoristys($ero);
 
-					if ($ero == 0) continue;
+					if ($ero >= 0) continue;
 
 					$data[$i]['myyjä'] = $laskurow['myyja'];
 					$data[$i]['tilaus'] = $laskurow['tunnus'];
@@ -211,7 +212,7 @@
 					$data[$i]['koneen_hinta'] = $lis_hinta;
 					$data[$i]['hinta'] = $tilausrivirow['hinta'];
 					$data[$i]['eropros'] = $eropros;
-					$data[$i]['ero'] = $ero;
+					$data[$i]['ero'] = $ero * $tilausrivirow['kpl'];
 
 					$i++;
 					$x++;
@@ -293,7 +294,9 @@
 						$worksheet->write($excelrivi, $excelsarake, $v);
 						$excelsarake++;
 
-						echo "<td class='{$odd}'>{$v}</td>";
+						$stylelisa = $excelsarake > 7 ? " style='text-align: right;' " : "";
+
+						echo "<td class='{$odd}' {$stylelisa}>{$v}</td>";
 
 						if ($k == 'myyjä' and $v != '') $user = $v;
 						if ($k == 'ero' and $user != '') {

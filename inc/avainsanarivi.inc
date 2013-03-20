@@ -160,6 +160,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA") 	$ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>		".t("Ylläpitosopimuksen rivien kentät")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LABEL") 			$ulos .= "<option value='LABEL' {$avain_sel['LABEL']}>						".t("Myyntitilauksen luokitus")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_VAKIOTE") 	$ulos .= "<option value='TARJOUS_VAKIOTE' {$avain_sel['TARJOUS_VAKIOTE']}>	".t("Tarjouksen vakioteksti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KATEISOTTO")		$ulos .= "<option value='KATEISOTTO' {$avain_sel['KATEISOTTO']}>			".t("Käteisoton luonne")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KOHDE_TYYPPI")  	$ulos .= "<option value='KOHDE_TYYPPI' {$avain_sel['KOHDE_TYYPPI']}>        ".t("Kohteen tyyppi")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
@@ -568,4 +569,32 @@
 		if ($trow[$i] == "" and $ajarjestys != "") {
 			$trow[$i] = $ajarjestys;
 		}
+	}
+
+	if ($avain_sel['KATEISOTTO'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$query = "	SELECT tunnus,
+					concat(tilino,' - ',nimi) as dropdown_text
+					FROM tili
+					WHERE yhtio = '{$kukarow['yhtio']}'";
+		$tilires = pupe_query($query);
+		$tilit = array();
+		while($tili = mysql_fetch_assoc($tilires)) {
+			$tilit[] = $tili;
+		}
+
+		$ulos = "<td><select name = '$nimi'>";
+		$ulos .= "<option value = '' >".t("Valitse tili")."</option>";
+		foreach($tilit as $tili) {
+			$sel="";
+			if ($trow[$i] == $tili['tunnus']) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '{$tili['tunnus']}' $sel>".t($tili['dropdown_text'])."</option>";
+		}
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
 	}

@@ -794,7 +794,7 @@
 		$ulos .= "<option value='K' $sel[K]>".t("Jälkitoimitusrivit kohdistetaan automaattisesti valmistuksen yhteydessä")."</option>";
 		$ulos .= "<option value='T' $sel[T]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä, jos käyttäjällä on päivitysoikeus JT-selaukseen")."</option>";
 		$ulos .= "<option value='J' $sel[J]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä")."</option>";
-		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan asiakkaalle valmistetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä")."</option>";
+		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan asiakkaalle valmistetut jälkitoimitusrivit kohdistetaan ja siirretään tulostusjonoon automaattisesti valmistuksen yhteydessä")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Asiakkaalle sekä myyntitilaukselta varastoon valmistetut jälkitoimitusrivit kohdistetaan asiakkaalle ja toimitetaan automaattisesti valmistuksen yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
@@ -1009,13 +1009,13 @@
 		$sel = array_fill_keys(array($trow[$i]), ' selected') + array_fill_keys(array('o', 'k', 'L', 'M', 'N', 'Q', 'P'), '');
 
 		$ulos .= "<option value=''>".t("Keräysvahvistusta/sähköistä lähetettä ei lähetetä")."</option>";
-		$ulos .= "<option value='o'{$sel['o']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
-		$ulos .= "<option value='k'{$sel['k']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
-		$ulos .= "<option value='L'{$sel['L']}>".t("Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
-		$ulos .= "<option value='M'{$sel['M']}>".t("Keräysvahvistus/paperinen & sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
-		$ulos .= "<option value='N'{$sel['N']}>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
-		$ulos .= "<option value='Q'{$sel['Q']}>".t("Keräysvahvistus/paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
-		$ulos .= "<option value='P'{$sel['P']}>".t("Keräysvahvistus/paperinen & sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
+		$ulos .= "<option value='o'{$sel['o']}>".t("Keräysvahvistus/sähköinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
+		$ulos .= "<option value='k'{$sel['k']}>".t("Keräysvahvistus/sähköinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty. Paperista lähetettä ei tulosteta. ")."</option>";
+		$ulos .= "<option value='L'{$sel['L']}>".t("Keräysvahvistusta/sähköistä lähetettä ei lähetetä. Paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='M'{$sel['M']}>".t("Keräysvahvistus/sähköinen ja paperinen lähete lähetetään/tulostetaan asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
+		$ulos .= "<option value='N'{$sel['N']}>".t("Keräysvahvistus/sähköinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty. Paperista lähetettä ei tulosteta.")."</option>";
+		$ulos .= "<option value='Q'{$sel['Q']}>".t("Keräysvahvistusta/sähköistä lähetettä ei lähetetä. Paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
+		$ulos .= "<option value='P'{$sel['P']}>".t("Keräysvahvistus/sähköinen ja paperinen lähete lähetetään/tulostetaan asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1528,6 +1528,19 @@
 
 		$ulos .= "<option value='3' $sel1>".t("Rahtikirjasta tulostetaan 3 kopiota.")."</option>";
 		$ulos .= "<option value='4' $sel2>".t("Rahtikirjasta tulostetaan 4 kopiota.")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "vientikiellon_ohitus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1 = ($trow[$i] == "K") ? "selected" : "";
+
+		$ulos .= "<option value='' >".t("Vientikiellossa olevaa tuotetta ei voi lisätä myyntitilaukselle")."</option>";
+		$ulos .= "<option value='K' $sel1>".t("Vientikiellossa olevan tuotteen voi hyväksyä myyntitilaukselle")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2692,6 +2705,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "varastontunniste") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array(1,2,3), '');
+
+		$ulos .= "<option value = ''>".t("Varaston tunnisteet ei ole käytössä")."</option>";
+		$ulos .= "<option value = '1'{$sel[1]}>".t("Varaston tunnisteena käytetään hyllyalueen ensimmäistä merkkiä")."</option>";
+		$ulos .= "<option value = '2'{$sel[2]}>".t("Varaston tunnisteena käytetään hyllyalueen 2 ensimmäistä merkkiä")."</option>";
+		$ulos .= "<option value = '3'{$sel[3]}>".t("Varaston tunnisteena käytetään hyllyalueen 3 ensimmäistä merkkiä")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "suuntalavat") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3144,6 +3172,22 @@
 		$jatko = 0;
 	}
 
+    if (mysql_field_name($result, $i) == 'erapaivan_ylityksen_toimenpide') {
+
+        $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+        $sel = array_fill_keys(array('K', 'E'), '');
+        $sel[$trow[$i]] = " SELECTED";
+
+        $ulos .= "<option value = ''>".t("Myyntiä ei estetä, vaikka eräpäivä olisi liikaa ylitetty")."</option>";
+        $ulos .= "<option value = 'K' {$sel["K"]}>".t("Kaikki myynti estetään, jos eräpäivä on liikaa ylitetty")."</option>";
+        $ulos .= "<option value = 'E' {$sel["E"]}>".t("Muu kuin myyjien tekemä myynti estetään, jos eräpäivä on liikaa ylitetty")."</option>";
+        $ulos .= "</select></td>";
+
+        $jatko = 0;
+
+	}
+
 	if (mysql_field_name($result, $i) == 'naytayhteensamaarat') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3247,7 +3291,6 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
-
 	}
 
 	if (mysql_field_name($result, $i) == 'epakurantoinnin_myyntihintaleikkuri') {
@@ -3261,9 +3304,21 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
-
 	}
-	
+
+	if (mysql_field_name($result, $i) == 'seuraava_tuotenumero') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Ei ehdoteta seuraavaa vapaata tuotenumeroa tuotetta perustettaessa")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa")."</option>";
+		$ulos .= "<option value = 'O' {$sel}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa (vain ostotilauksella)")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3275,5 +3330,4 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
-
 	}

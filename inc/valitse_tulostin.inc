@@ -322,7 +322,7 @@
 			if (mysql_num_rows($suuntalavat_res) == 0) continue;
 		}
 
-		if ($toim == "PROFORMA") {
+		if ($toim == "PROFORMA" or $toim == "VIENTILASKU") {
 			echo "<tr><th>",t("Tulosta myös tullinimike ja alkuperämaa")."</th>";
 			echo "<td><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
 		}

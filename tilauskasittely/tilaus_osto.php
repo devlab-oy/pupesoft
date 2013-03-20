@@ -210,7 +210,8 @@
 			$query = "	SELECT tilausrivi.tunnus
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND otunnus = '{$kukarow['kesken']}'";
+						AND otunnus = '{$kukarow['kesken']}'
+						AND uusiotunnus = 0";
 			$result = pupe_query($query);
 
 			while($ostotilausrivi = mysql_fetch_assoc($result)) {
@@ -613,7 +614,7 @@
 
 				//rivitunnus nollataan lisaarivissa
 				$rivitunnus_temp = $rivitunnus;
-				
+
 				if ($kpl != "") {
 					require ('lisaarivi.inc');
 				}
@@ -754,10 +755,7 @@
 					</form>
 					</td>";
 
-			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='liitetiedostot' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
-			$res = pupe_query($queryoik);
-
-			if (mysql_num_rows($res) > 0) {
+			if (tarkista_oikeus('yllapito.php', 'liitetiedostot')) {
 
 				if ($laskurow["tunnusnippu"] > 0) {
 					$id = $laskurow["tunnusnippu"];
@@ -768,13 +766,26 @@
 
 				echo "<td class='back'>
 						<form method='POST' action='{$palvelin2}yllapito.php?toim=liitetiedostot&from=tilausmyynti&ohje=off&haku[7]=@lasku&haku[8]=@$id&lukitse_avaimeen=$id&lukitse_laji=lasku'>
-						<input type='hidden' name='lopetus' value='$tilost_lopetus//from=LASKUTATILAUS'>
-						<input type='hidden' name='toim_kutsu' value='$toim'>
-						<input type='submit' value='" . t('Tilauksen liitetiedostot')."'>
+						<input type='hidden' name='lopetus' value='{$tilost_lopetus}//from=LASKUTATILAUS'>
+						<input type='hidden' name='toim_kutsu' value='{$toim}'>
+						<input type='submit' value='",t('Tilauksen liitetiedostot'),"'>
 						</form>
 						</td>";
 			}
 
+			if (tarkista_oikeus('yllapito.php', 'tuote')) {
+
+				echo "<td class='back'>";
+				echo "<form method='POST' action='{$palvelin2}yllapito.php?toim=tuote&from=tilausmyynti&ohje=off&uusi=1'>
+						<input type='hidden' name='lopetus' value='{$tilost_lopetus}//from=LASKUTATILAUS'>
+						<input type='hidden' name='toim_kutsu' value='{$toim}'>
+						<input type='hidden' name='liitostunnus' value='{$laskurow['liitostunnus']}' />
+						<input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='JOO' />
+						<input type='submit' value='",t('Uusi tuote'),"'>
+						</form>";
+				echo "</td>";
+
+			}
 
 			echo "</tr>";
 			echo "</table><br>";

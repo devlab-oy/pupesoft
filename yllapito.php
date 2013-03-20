@@ -337,7 +337,11 @@
 
 		// Luodaan tietue
 		if ($errori == "") {
-			if ($tunnus == "") {
+
+			$onko_tama_insert = $tunnus == "" ? true : false;
+
+			if ($onko_tama_insert) {
+
 				// Taulun ensimmäinen kenttä on aina yhtiö
 				$query = "INSERT into $toim SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
@@ -408,8 +412,40 @@
 
 			$result = pupe_query($query);
 
-			if ($tunnus == '') {
+			if ($onko_tama_insert) {
 				$tunnus = mysql_insert_id();
+			}
+
+			if ($onko_tama_insert and $tunnus > 0 and isset($tee_myos_tuotteen_toimittaja_liitos) and isset($liitostunnus) and $toim == "tuote") {
+
+				$query = "	SELECT *
+							FROM tuote
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$tunnus}'";
+				$tuote_chk_res = pupe_query($query);
+
+				$query = "	SELECT *
+							FROM toimi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$liitostunnus}'";
+				$toimi_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($tuote_chk_res) == 1 and mysql_num_rows($toimi_chk_res) == 1) {
+					$tuote_chk_row = mysql_fetch_assoc($tuote_chk_res);
+					$toimi_chk_row = mysql_fetch_assoc($toimi_chk_res);
+
+					$query = "	INSERT INTO tuotteen_toimittajat SET
+								yhtio = '{$kukarow['yhtio']}',
+								tuoteno = '{$tuote_chk_row['tuoteno']}',
+								liitostunnus = '{$liitostunnus}',
+								toimittaja = '{$toimi_chk_row['toimittajanro']}',
+								alkuperamaa = '{$toimi_chk_row['maa']}',
+								laatija = '{$kukarow['kuka']}',
+								luontiaika = now(),
+								muutospvm = now(),
+								muuttaja = '{$kukarow['kuka']}'";
+					$tuotteen_toimittaja_insertti = pupe_query($query);
+				}
 			}
 
 			if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "asiakas") {
@@ -1459,6 +1495,8 @@
 		}
 
 		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa$ankkuri' name='mainform' id='mainform' method = 'post' autocomplete='off' $javalisasubmit enctype='multipart/form-data'>";
+		if (isset($liitostunnus)) echo "<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />";
+		if (isset($tee_myos_tuotteen_toimittaja_liitos)) echo "<input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='{$tee_myos_tuotteen_toimittaja_liitos}' />";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>";
 		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";

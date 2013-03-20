@@ -80,12 +80,20 @@
 
 		if (substr($laji,0,1) == 'M') {
 			include "asiakashaku.inc";
-			if ($asiakasid == '') $tee = '';
+			if ($asiakasid == '') {
+				$tee = '';
+				echo "<br>";
+			}
+			else $ajaraportti = 'JOO';
 		}
 
 		if (substr($laji,0,1) == 'O') {
 			include "kevyt_toimittajahaku.inc";
-			if ($toimittajaid == '') $tee = '';
+			if ($toimittajaid == '') {
+				$tee = '';
+				echo "<br>";
+			}
+			else $ajaraportti = 'JOO';
 		}
 	}
 
@@ -133,7 +141,20 @@
 
 	echo "	<tr>
 			<th>".t("Vain toimittaja/asiakas").":</th>
-			<td colspan='3'><input type = 'text' name = 'ytunnus' value='".tarkistahetu($ytunnus)."'></td>
+			<td colspan='3'><input type = 'text' name = 'ytunnus' value='".tarkistahetu($ytunnus)."'>";
+
+	if ($asiakasid > 0) {
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND tunnus = '$asiakasid'";
+		$result = pupe_query($query);
+		$asiakasrow = mysql_fetch_assoc($result);
+
+		echo "$asiakasrow[nimi] $asiakasrow[nimitark] $asiakasrow[toim_nimi] $asiakasrow[toim_nimitark]";
+	}
+
+	echo "</td>
 			</tr>";
 
 	echo "<tr><th>".t("Rajauksia")."</th><td colspan='3'>";

@@ -30,17 +30,71 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 	$hylly = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", "", $tuotepaikka);
 
 	// Hakuehdot
-	if ($viivakoodi != '')	$params[] = "tuote.eankoodi = '{$viivakoodi}'";
-	if ($tuoteno != '')		$params[] = "tuote.tuoteno = '{$tuoteno}'";
-	if ($tuotepaikka != '') $params[] = "concat(tuotepaikat.hyllyalue,
+	if ($viivakoodi != '')	$params['viivakoodi'] = "tuote.eankoodi = '{$viivakoodi}'";
+	if ($tuoteno != '')		$params['tuoteno'] = "tuote.tuoteno = '{$tuoteno}'";
+	if ($tuotepaikka != '') $params['tuotepaikka'] = "concat(tuotepaikat.hyllyalue,
 										 tuotepaikat.hyllynro,
 										 tuotepaikat.hyllyvali,
-										 tuotepaikat.hyllytaso)='$hylly'";
-
-	$haku_ehto = implode($params, " AND ");
+										 tuotepaikat.hyllytaso) LIKE '$hylly%'";
 
 	$osumat = array();
-	if (!empty($haku_ehto)) {
+
+	if (!empty($params)) {
+
+		// Viivakoodi case
+		if ($viivakoodi != '') {
+
+			// Tuotetaulu-loop
+			$query = "	SELECT *
+						FROM tuote
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND eankoodi = '{$viivakoodi}'";
+			$chk_res = pupe_query($query);
+
+			if (mysql_num_rows($chk_res) == 0) {
+
+				// tuotteen toimittajat loop
+				$query = "	SELECT *
+							FROM tuotteen_toimittajat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND viivakoodi = '{$viivakoodi}'";
+				$chk_res = pupe_query($query);
+
+				if (mysql_num_rows($chk_res) == 0) {
+
+					// tuotteen toimittajat tuotenumerot loop
+					$query = "	SELECT *
+								FROM tuotteen_toimittajat_tuotenumerot
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND viivakoodi = '{$viivakoodi}'";
+					$chk_res = pupe_query($query);
+
+					if (mysql_num_rows($chk_res) != 0) {
+						$chk_row = mysql_fetch_assoc($chk_res);
+					}
+				}
+				else {
+					$chk_row = mysql_fetch_assoc($chk_res);
+				}
+
+				if (mysql_num_rows($chk_res) != 0) {
+
+					$query = "	SELECT tuote.eankoodi
+								FROM tuotteen_toimittajat
+								JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+								WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+								AND tuotteen_toimittajat.liitostunnus = '{$chk_row['liitostunnus']}'
+								AND tuotteen_toimittajat.toim_tuoteno = '{$chk_row['toim_tuoteno']}'";
+					$eankoodi_chk_res = pupe_query($query);
+					$eankoodi_chk_row = mysql_fetch_assoc($eankoodi_chk_res);
+
+					$params['viivakoodi'] = "tuote.eankoodi = '{$eankoodi_chk_row['eankoodi']}'";
+				}
+			}
+		}
+
+		$haku_ehto = implode($params, " AND ");
+
 		$query = "	SELECT
 					tuote.tuoteno,
 					tuotepaikat.inventointilista,
@@ -69,13 +123,19 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 /** Tarkistaa varmistuskoodin syˆtetyn tuotepaikan ja koodin mukaan.
  *  jos varmistuskoodia ei annettu yritet‰‰n k‰ytt‰‰ keksiss‰ olevaa varmistuskoodia.
  */
-function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi = '') {
+function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi = '', $haettu_tuotepaikalla = '') {
 	// Muutetaan saatuo tuotepaikka arrayksi
 	$hylly = explode('-', $tuotepaikka);
 
+	// Jos haettu vajaalla tuotepaikalla, eli hyllyalue-hyllynro, niin tarkistetaan ett‰ jos
+	// keksiss‰ oleva tuotepaikka t‰sm‰‰ kyseist‰ aluetta. Jos t‰sm‰‰ niin varmistuskoodi tarkistetaan suoraan.
+	$tuotealue = false;
+	if (stripos(str_replace('-', '', $_COOKIE['_tuotepaikka']), $haettu_tuotepaikalla) === 0) {
+		$tuotealue = true;
+	}
+
 	// Jos varmistuskoodia ei saatu parametrissa, yritet‰‰n keksiss‰ olevalla koodilla.
-	// vain jos saatu tuotepaikka on sama kuin keksiss‰ oleva tuotepaikka.
-	if ($varmistuskoodi == '' and isset($_COOKIE['_varmistuskoodi']) and $tuotepaikka == $_COOKIE['_tuotepaikka']) {
+	if ($varmistuskoodi == '' and isset($_COOKIE['_varmistuskoodi']) and ($tuotepaikka == $_COOKIE['_tuotepaikka'] or $tuotealue == true)) {
 		$varmistuskoodi = $_COOKIE['_varmistuskoodi'];
 	}
 
@@ -102,13 +162,19 @@ if ($tee == '') {
 if ($tee == 'haku') {
 
 	$title = t("Vapaa Inventointi");
+
 	# Haettu jollain
 	if (isset($viivakoodi) or isset($tuoteno) or isset($tuotepaikka)) {
-		$tuotteet = hae($viivakoodi,$tuoteno,$tuotepaikka);
-		if(count($tuotteet) == 0) $errors[] = "Ei lˆytynyt";
+		if (!empty($tuotepaikka) and strlen($tuotepaikka) < 2) {
+			$errors[] = t("Tuotepaikka haun on oltava v‰hint‰‰n 2 merkki‰");
+		}
+		else {
+			$tuotteet = hae($viivakoodi,$tuoteno,$tuotepaikka);
+			if(count($tuotteet) == 0) $errors[] = "Ei lˆytynyt";
+		}
 	}
 
-	$haku_tuotepaikalla = ($viivakoodi=='' and $tuoteno=='' and $tuotepaikka != '') ? 'true' : '';
+	$haku_tuotepaikalla = ($viivakoodi=='' and $tuoteno=='' and $tuotepaikka != '') ? $tuotepaikka : '';
 
 	# Vain yksi osuma
 	if (isset($tuotteet) and count($tuotteet) == 1) {
@@ -119,6 +185,7 @@ if ($tee == 'haku') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=inventointi.php?{$url}'>";
 		exit();
 	}
+
 	# Lˆydetyt osumat
 	if (isset($tuotteet) and count($tuotteet) > 0) {
 		include('views/inventointi/hakutulokset.php');
@@ -276,8 +343,17 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 	}
 
 	// Jos varmistuskoodi kelpaa tai on keksiss‰ tallessa
-	if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi)) {
+	if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi, $tuotepaikalla)) {
 		$title = t("Laske m‰‰r‰");
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'INVEN_LAJI'";
+		$result = pupe_query($query);
+		$inventointi_selitteet = array();
+		while($inventointi_selite = mysql_fetch_assoc($result)) {
+			$inventointi_selitteet[] = $inventointi_selite;
+		}
 		include('views/inventointi/laske.php');
 
 	}
@@ -310,7 +386,7 @@ if ($tee == 'apulaskuri') {
 	$p1 = mysql_fetch_assoc($result);
 
 	# Pakkaus2
-	$query ="SELECT
+	$query = "	SELECT
 				selite as myynti_era,
 				selitetark as yksikko
 				FROM tuotteen_avainsanat
@@ -321,7 +397,7 @@ if ($tee == 'apulaskuri') {
 	$p2 = mysql_fetch_assoc($result);
 
 	# Pakkaus3
-	$query ="SELECT
+	$query = "	SELECT
 				selite as myynti_era,
 				selitetark as yksikko
 				FROM tuotteen_avainsanat
@@ -370,9 +446,17 @@ if ($tee == 'inventoidaan') {
 
 		# inventointi
 		$tee = 'VALMIS';
-		$inven_laji = 'Kiert‰v‰';
-		$lisaselite = 'P‰ivitt‰isinventointi k‰sip‰‰tteell‰';
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$inventointi_seliteen_tunnus}'";
+		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
+
+		$inven_laji = $row['selite'];
+		$lisaselite = t("K‰sip‰‰te").": " . $row['selitetark'];
 		$mobiili = 'YES';
+
 		require('../inventoi.php');
 
 		# Jos inventoidaan listalta, palataan inventoimaan listan seuraava tuote.
@@ -380,17 +464,17 @@ if ($tee == 'inventoidaan') {
 			$paluu_url = http_build_query(array('tee' => 'laske', 'lista' => $lista, 'reservipaikka' => $reservipaikka));
 		}
 		# Jos inventoitu tuotepaikalla, palataan takaisin hakuun kyseisell‰ tuotepaikalla
-		elseif($tuotepaikalla=='true') {
-			$paluu_url = http_build_query(array('tee' => 'haku', 'viivakoodi' => '', 'tuoteno' => '', 'tuotepaikka' => $tuotepaikka));
+		elseif(!empty($tuotepaikalla)) {
+			$paluu_url = http_build_query(array('tee' => 'haku', 'viivakoodi' => '', 'tuoteno' => '', 'tuotepaikka' => $tuotepaikalla));
 		}
 		# Palataan alkuun
 		else {
-			$paluu_url =http_build_query(array('tee' => 'haku'));
+			$paluu_url = http_build_query(array('tee' => 'haku'));
 		}
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=inventointi.php?".$paluu_url."'>";
 	}
 	else {
-		$errors[] = "Virhe inventoinnissa.";
+		$errors[] = t("Virhe inventoinnissa").".";
 	}
 	exit();
 }
@@ -405,4 +489,3 @@ if (isset($errors)) {
 }
 
 require "inc/footer.inc";
-

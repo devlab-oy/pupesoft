@@ -106,7 +106,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and laji != 'R'
 						and laji != 'P'
-						and MATCH (nimi) AGAINST ('$unimi')";
+						and MATCH (nimi) AGAINST ('\"$unimi\"' IN BOOLEAN MODE)";
 			$asres = pupe_query($query);
 
 			if (mysql_num_rows($asres) == 1) {
@@ -121,7 +121,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
 						and laji != 'R'
-						and MATCH (nimi) AGAINST ('$unimi')";
+						and MATCH (nimi) AGAINST ('\"$unimi\"' IN BOOLEAN MODE)";
 			$asres = pupe_query($query);
 
 			if (mysql_num_rows($asres) == 1) {

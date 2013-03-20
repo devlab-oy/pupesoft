@@ -4,7 +4,7 @@ require ("../inc/parametrit.inc");
 
 echo "<font class='head'>".t("Kohdista viitesuoritus korkoihin")."</font><hr>";
 
-print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 	<!--
 
 	function toggleAll(toggleBox) {
@@ -48,12 +48,14 @@ if (isset($tapa) and $tapa == 'paalle') {
 		// tutkaillaan suoritusta
 		$query = "	SELECT suoritus.*
 					FROM suoritus
-					JOIN yriti ON and suoritus.yhtio=yriti.yhtio and suoritus.tilino=yriti.tilino and yriti.factoring != ''
+					JOIN yriti ON (suoritus.yhtio = yriti.yhtio
+						AND suoritus.tilino = yriti.tilino
+						AND yriti.factoring != '')
 					WHERE suoritus.yhtio = '$kukarow[yhtio]'
 					AND suoritus.kohdpvm = '0000-00-00'
-					and suoritus.ltunnus > 0
+					AND suoritus.ltunnus > 0
 					AND suoritus.summa  != 0
-					AND suoritus.viite like '$viite%'";
+					AND suoritus.viite LIKE '$viite%'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -65,16 +67,29 @@ if (isset($tapa) and $tapa == 'paalle') {
 			echo "<form method='post' autocomplete='off'>";
 			echo "<input name='tilino' type='hidden' value='$tilino'>";
 			echo "<input name='tapa'   type='hidden' value='$tapa'>";
-			echo "<table>
-				<tr><th>".t("Viite")."</th><th>".t("Asiakas")."</th><th>".t("Summa")."</th><th>".t("Valitse")."</th></tr>";
 
-			while ($suoritusrow=mysql_fetch_assoc($result)) {
-				echo "<tr><td>$suoritusrow[viite]</td><td>$suoritusrow[nimi_maksaja]</td><td>$suoritusrow[summa]</td><td><input name='valitut[]' type='checkbox' value='$suoritusrow[tunnus]' CHECKED></td></tr>";
+			echo "<table>";
+			echo "<tr>";
+			echo "<th>".t("Viite")."</th>";
+			echo "<th>".t("Asiakas")."</th>";
+			echo "<th>".t("Summa")."</th>";
+			echo "<th>".t("Valitse")."</th>";
+			echo "</tr>";
+
+			while ($suoritusrow = mysql_fetch_assoc($result)) {
+				echo "<tr>";
+				echo "<td>{$suoritusrow["viite"]}</td>";
+				echo "<td>{$suoritusrow["nimi_maksaja"]}</td>";
+				echo "<td>{$suoritusrow["summa"]}</td>";
+				echo "<td><input name='valitut[]' type='checkbox' value='{$suoritusrow["tunnus"]}' CHECKED></td>";
+				echo "</tr>";
 			}
 
 			echo "</table><br>";
+
 			echo "<input type='checkbox' name='val' onclick='toggleAll(this);' CHECKED> Ruksaa kaikki<br><br>";
-			echo "<input type='submit' value='".t("Kohdista")."'></form>";
+			echo "<input type='submit' value='".t("Kohdista")."'>";
+			echo "</form>";
 		}
 
 	}
@@ -109,9 +124,10 @@ if (isset($tapa) and $tapa == 'paalle') {
 				}
 
 				// tehd‰‰n kirjanpitomuutokset
-				$query = "	UPDATE tiliointi
-							set tilino = '$tilino', selite = '".t("Kohdistettiin korkoihin")."'
-							where yhtio = '$kukarow[yhtio]'
+				$query = "	UPDATE tiliointi SET
+							tilino = '$tilino',
+							selite = '".t("Kohdistettiin korkoihin")."'
+							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus  = '$suoritusrow[ltunnus]'";
 				$result = pupe_query($query);
 
@@ -150,13 +166,24 @@ if (isset($tapa) and $tapa == 'pois') {
 			echo "<form method='post' autocomplete='off'>";
 			echo "<input name='tilino' type='hidden' value='$yhtiorow[factoringsaamiset]'>";
 			echo "<input name='tapa'   type='hidden' value='$tapa'>";
-			echo "<table>
-				<tr><th>".t("Viite")."</th><th>".t("Asiakas")."</th><th>".t("Summa")."</th><th>".t("Valitse")."</th></tr>";
+			echo "<table>";
+			echo "<tr>";
+			echo "<th>".t("Viite")."</th>";
+			echo "<th>".t("Asiakas")."</th>";
+			echo "<th>".t("Summa")."</th>";
+			echo "<th>".t("Valitse")."</th>";
+			echo "</tr>";
 
 			while ($suoritusrow = mysql_fetch_assoc($result)) {
-				echo "<tr><td>$suoritusrow[viite]</td><td>$suoritusrow[nimi_maksaja]</td><td>$suoritusrow[summa]</td><td><input name='valitut[]' type='checkbox' value='$suoritusrow[tunnus]' CHECKED></td></tr>";
+				echo "<tr>";
+				echo "<td>{$suoritusrow["viite"]}</td>";
+				echo "<td>{$suoritusrow["nimi_maksaja"]}</td>";
+				echo "<td>{$suoritusrow["summa"]}</td>";
+				echo "<td><input name='valitut[]' type='checkbox' value='{$suoritusrow["tunnus"]}' CHECKED></td>";
+				echo "</tr>";
 			}
-			echo "</table><br><input type='submit' value='".t("Peru korkoviennit")."'></form>";
+			echo "</table><br><input type='submit' value='".t("Peru korkoviennit")."'>";
+			echo "</form>";
 		}
 	}
 
@@ -276,6 +303,4 @@ else {
 $formi = "eikat";
 $kentta = "viite";
 
-require ("../inc/footer.inc");
-
-?>
+require ("inc/footer.inc");

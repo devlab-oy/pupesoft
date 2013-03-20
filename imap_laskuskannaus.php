@@ -522,8 +522,6 @@
 		}
 	}
 
-	echo date("d.m.Y @ G:i:s").": Ostolaskujen sisäänluku.\n";
-
 	if (!extension_loaded('openssl')) {
 		echo date("d.m.Y @ G:i:s").": SSL ei käytössä!\n";
 		exit;
@@ -534,8 +532,6 @@
 	if ($imap_stream) {
 
 		$server_info = fgets ($imap_stream, 1024);
-
-		echo date("d.m.Y @ G:i:s").": Stream ok: $server_info\n";
 
 		// Original IMAP login code
         $query = 'LOGIN';
@@ -586,6 +582,3 @@
 	else {
 		echo date("d.m.Y @ G:i:s").": Failure: ".$errno.$errstr."\n\n";
 	}
-
-	echo date("d.m.Y @ G:i:s").": Ostolaskujen sisäänluku. Done!\n\n";
-?>

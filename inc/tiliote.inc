@@ -95,7 +95,7 @@
 							echo "<font class='message'> ".t("Maksukandidaatti tilino & m‰‰r‰")."</font><br>\n";
 
 							$iban = luoiban($tilino);
-							
+
 							if ($iban['iban'] != "" and $iban['swift'] != "") {
 								$tilihaku = " ultilno = '{$iban['iban']}' ";
 							}
@@ -312,13 +312,14 @@
 						// Luultavimmin LMP-ainesisto
 						$query = "	SELECT *
 									FROM tiliotedata
-									WHERE alku = '".(substr($pvm,0,2)+2000)."-".substr($pvm,2,2)."-".substr($pvm,4,2)."'
-									and tilino = '$tiliotedatarow[tilino]'
-									and tyyppi = '2'
+									WHERE yhtio = '$tiliotedatarow[yhtio]'
+									and alku    = '".(substr($pvm,0,2)+2000)."-".substr($pvm,2,2)."-".substr($pvm,4,2)."'
+									and tilino  = '$tiliotedatarow[tilino]'
+									and tyyppi  = '2'
 									ORDER BY alku, tunnus";
 						$tiliointiresult = pupe_query($query);
 
-						if ($tiliointirow = mysql_fetch_assoc ($tiliointiresult)) {
+						if ($tiliointirow = mysql_fetch_assoc($tiliointiresult)) {
 							echo "<a href='{$palvelin2}tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=2&tilino=$tiliotedatarow[tilino]&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus$lopetuslisa'>".t("Avaa LMP-erittely")."</a><br>\n";
 
 							$erilinkkiekotus = TRUE;
@@ -328,13 +329,14 @@
 					if (!$erilinkkiekotus) {
 						$query = "	SELECT *
 									FROM tiliotedata
-									WHERE alku = '".(substr($pvm,0,2)+2000)."-".substr($pvm,2,2)."-".substr($pvm,4,2)."'
-									and tilino = '$tiliotedatarow[tilino]'
-									and tyyppi = '3'
+									WHERE yhtio = '$tiliotedatarow[yhtio]'
+									and alku    = '".(substr($pvm,0,2)+2000)."-".substr($pvm,2,2)."-".substr($pvm,4,2)."'
+									and tilino  = '$tiliotedatarow[tilino]'
+									and tyyppi  = '3'
 									ORDER BY alku, tunnus";
 						$tiliointiresult = pupe_query($query);
 
-						if ($tiliointirow = mysql_fetch_assoc ($tiliointiresult)) {
+						if ($tiliointirow = mysql_fetch_assoc($tiliointiresult)) {
 							echo "<a href='{$palvelin2}tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus$lopetuslisa'>".t("Avaa viiteaineisto")."</a><br>\n";
 
 							$erilinkkiekotus = TRUE;

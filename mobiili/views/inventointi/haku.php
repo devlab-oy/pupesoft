@@ -4,7 +4,7 @@
 </div>
 
 <div class='main'>
-	<form action='inventointi.php' method='get'>
+	<form action='inventointi.php' method='get' id='haku_formi'>
 		<input type='hidden' name='tee' value='haku'>
 		<table>
 			<tr>
@@ -17,7 +17,7 @@
 			</tr>
 			<tr>
 				<th>Tuotepaikka</th>
-				<td><input type='text' name='tuotepaikka'></td>
+				<td><input type='text' name='tuotepaikka' id='tuotepaikka'></td>
 			</tr>
 		</table>
 </div>
@@ -28,6 +28,28 @@
 
 <input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>
 <script type='text/javascript'>
+
+	$(document).ready(function() {
+
+		// Tuotteen viivakoodi autosubmit
+		$('#viivakoodi').on('keyup', function() {
+			// Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
+			if ($('#viivakoodi').val().length > 8) {
+				$('#haku_formi').submit();
+			}
+		});
+
+		// Tuotepaikka autosubmit
+		$('#tuotepaikka').on('keyup', function() {
+			// Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
+			if ($('#tuotepaikka').val().length > 4) {
+				setTimeout(function() {
+					$('#haku_formi').submit();
+				}, 1000);
+			}
+		});
+	});
+
 	function doFocus() {
 		document.getElementById('viivakoodi').focus();
 	}

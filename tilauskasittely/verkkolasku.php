@@ -2647,11 +2647,17 @@
 						$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
 					}
 
-					// Testaus
-					#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+					try {
+						// Testaus
+						#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
 
-					// Tuotanto
-					$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+						// Tuotanto
+						$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+					}
+					catch (Exception $exVirhe) {
+						$client = FALSE;
+						$tulos_ulos .= "VIRHE: Yhteys Maventaan epäonnistui: ".$exVirhe->getMessage()."\n";
+					}
 
 					// Splitataan file ja lähetetään YKSI lasku kerrallaan
 					$maventa_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents($nimifinvoice));

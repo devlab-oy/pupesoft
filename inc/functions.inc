@@ -19247,7 +19247,8 @@ if (!function_exists('paivita_oletuspaikka')) {
 		$query = "	UPDATE tuotepaikat
 					SET oletus 	= 'X',
 					muuttaja	= '$kukarow[kuka]',
-					muutospvm	= now()
+					muutospvm	= now(),
+					poistettava = ''
 					WHERE yhtio 	= '$kukarow[yhtio]'
 					and tuoteno 	= '$tuoteno'
 					and hyllyalue	= '$hylly[hyllyalue]'
@@ -19270,7 +19271,8 @@ if (!function_exists('paivita_oletuspaikka')) {
 			$query = "	UPDATE tuotepaikat
 						SET oletus 	= 'X',
 						muuttaja	= '$kukarow[kuka]',
-						muutospvm	= now()
+						muutospvm	= now(),
+						poistettava = ''
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoteno'
 						ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";

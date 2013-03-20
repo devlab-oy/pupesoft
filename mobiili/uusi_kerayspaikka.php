@@ -131,7 +131,6 @@ if (isset($submit) and trim($submit) != '') {
 				// P‰ivitet‰‰n oletuspaikat jos tehd‰‰n t‰st‰ oletuspaikka
 				if ($oletus == 'X') {
 					// Asetetaan oletuspaikka uusiksi
-
 					$paivitetty_paikka = paivita_oletuspaikka($row['tuoteno'], $hylly);
 
 					// Siirret‰‰n saldot jos on siirrett‰v‰‰
@@ -139,11 +138,13 @@ if (isset($submit) and trim($submit) != '') {
 
 						// Siirret‰‰n saldot vanhasta oletuspaikasta uuteen oletuspaikkaan
 						// Poistetaan VANHALTA tuotepaikalta siirrett‰v‰ m‰‰r‰
+						// Saldojen siirroissa vanha tuotepaikka merkataan aina poistettavaksi
 						$query = "UPDATE tuotepaikat SET
 									saldo         = saldo - {$saldo['myytavissa']},
 									saldoaika     = now(),
 									muuttaja      = '{$kukarow['kuka']}',
-									muutospvm     = now()
+									muutospvm     = now(),
+									poistettava   = 'D'
 									WHERE tuoteno = '{$row['tuoteno']}'
 									AND yhtio     = '{$kukarow['yhtio']}'
 									AND hyllyalue = '{$row['hyllyalue']}'
@@ -158,7 +159,8 @@ if (isset($submit) and trim($submit) != '') {
 									saldo         = saldo + {$saldo['myytavissa']},
 									saldoaika     = now(),
 									muuttaja      = '{$kukarow['kuka']}',
-									muutospvm     = now()
+									muutospvm     = now(),
+									poistettava   = ''
 									WHERE tuoteno = '{$row['tuoteno']}'
 									AND yhtio     = '{$kukarow['yhtio']}'
 									AND hyllyalue = '{$hyllyalue}'

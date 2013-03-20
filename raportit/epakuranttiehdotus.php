@@ -359,6 +359,7 @@ else {
 						FROM tapahtuma
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tuoteno = '$row[tuoteno]'
+						AND selite not like '%alkusaldo%'
 						AND laji in ('tulo', 'valmistus')";
 			$tapres = mysql_query($query) or pupe_error($query);
 			$taprow = mysql_fetch_assoc($tapres);

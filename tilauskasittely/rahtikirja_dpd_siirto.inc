@@ -140,7 +140,8 @@ if ($kollityht > 0) {
 		}
 		else {
 			if (strtolower($toitarow['lajittelupiste']) == 'sameday') {
-				$parcelOrder["lahetystapa"] = "NP,SD";
+				//$parcelOrder["lahetystapa"] = "NP,SD"; Toistaiseksi tuo SD pois DPD:n pyynnöstä "sameday" tapauksessa.
+				$parcelOrder["lahetystapa"] = "NP";
 			}
 			elseif (strtolower($toitarow['lajittelupiste']) == 'regular' and $as_avainsana_row['avainsana'] != '') {
 				$parcelOrder["lahetystapa"] = "NP,{$as_avainsana_row['avainsana']}";
@@ -223,6 +224,7 @@ if ($kollityht > 0) {
 
 			########## Uusi muokattu formaatti ##########
 			# Reference
+			# Reference 2
 			# Viite
 			# Vastaanottajan yhteyshenkilö
 			# Vastaanottajan nimi
@@ -240,6 +242,7 @@ if ($kollityht > 0) {
 			# Rahtikirjanro
 			$delisprintFileFormat = array(
 				"tilausnumero",
+				"tilausnumero2",
 				"viite",
 				"yhteyshenkilo_nimi",
 				"toim_nimi",

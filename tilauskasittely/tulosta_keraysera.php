@@ -543,6 +543,14 @@
 						$lukotetaan 		  = FALSE;
 
 						require("tilauskasittely/tilaus-valmis-tulostus.inc");
+
+						// Jos tulostus feilasi, niin dellataan keräyserä
+						if ($virheellinen == "X" and $kerayseran_numero > 0) {
+							$query = "	DELETE FROM kerayserat
+										WHERE yhtio	= '{$kukarow['yhtio']}'
+										AND nro		= '{$kerayseran_numero}' ";
+							pupe_query($query);
+						}
 					}
 				}
 				else {

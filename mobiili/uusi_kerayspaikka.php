@@ -41,6 +41,10 @@ else {
 	$row = mysql_fetch_assoc(pupe_query($query));
 }
 
+// Tarkistetaan tuotteen saldo
+list($saldo['saldo'], $saldo['hyllyssa'], $saldo['myytavissa']) = saldo_myytavissa($row['tuoteno'], '', '', '0', $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso']);
+$saldo['myytavissa'] = ($saldo['myytavissa'] > 0) ? $saldo['myytavissa'] : 0;
+
 if (isset($submit) and trim($submit) != '') {
 
 	switch ($submit) {
@@ -94,24 +98,9 @@ if (isset($submit) and trim($submit) != '') {
 			}
 
 			if (count($errors) == 0) {
-
 				// Oletuspaikka checkboxi
 				if ($oletuspaikka == 'on') {
 					$oletus = 'X';
-
-					// Siirretään saldot
-					if ($siirra_saldot == 'on') {
-						// Siirretään saldot vanhasta oletuspaikasta uuteen oletuspaikkaan
-						// Poistetaan vanhalta tuotepaikalta siirrettävä määrä
-						// update tuotepaikat set saldo = saldo - "saldo_myytavissa"
-						// Lisätään uuteen tuotepaikkaan siirrettävä määrä
-						// update tuotepaikat set saldo = saldo + "saldo_myytavissa"
-
-						// Tapahtumat
-						// insert into tapahtumat "vähennettiin"
-						// insert into tapahtumat "lisättiin"
-
-					}
 				}
 				else {
 					$oletus = '';
@@ -124,31 +113,144 @@ if (isset($submit) and trim($submit) != '') {
 						"hyllytaso" => $hyllytaso
 					);
 
-				# Tarkistetaan onko syötetty hyllypaikka jo tälle tuotteelle
+				// Tarkistetaan onko syötetty hyllypaikka jo tälle tuotteelle
 				$tuotteen_oma_hyllypaikka = "	SELECT * FROM tuotepaikat
-												WHERE tuoteno='$row[tuoteno]'
-												AND hyllyalue='$hyllyalue'
-												AND hyllynro='$hyllynro'
-												AND hyllyvali='$hyllyvali'
-												AND hyllytaso='$hyllytaso'";
+												WHERE tuoteno ='$row[tuoteno]'
+												AND hyllyalue ='$hyllyalue'
+												AND hyllynro  ='$hyllynro'
+												AND hyllyvali ='$hyllyvali'
+												AND hyllytaso ='$hyllytaso'";
 				$oma_paikka = mysql_query($tuotteen_oma_hyllypaikka);
 
-				# Jos syötettyä paikkaa ei ole tämän tuotteen, lisätään uusi tuotepaikka
+				// Jos syötettyä paikkaa ei ole tämän tuotteen, lisätään uusi tuotepaikka
 				if (mysql_num_rows($oma_paikka) == 0) {
 					#lisaa_tuotepaikka($row['tuoteno'], $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], 'Saapumisessa', $oletus);
 					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, 'Saapumisessa', $oletus, $halytysraja, $tilausmaara);
 				}
 
-				# Päivitetään oletuspaikat jos tehdään tästä oletuspaikka
-				if($oletus != '') {
-					# Asetetaan oletuspaikka uusiksi
+				// Päivitetään oletuspaikat jos tehdään tästä oletuspaikka
+				if ($oletus == 'X') {
+					// Asetetaan oletuspaikka uusiksi
+
 					$paivitetty_paikka = paivita_oletuspaikka($row['tuoteno'], $hylly);
+
+					// Siirretään saldot jos on siirrettävää
+					if ($siirra_saldot == 'on' and $saldo['myytavissa'] > 0) {
+
+						// Siirretään saldot vanhasta oletuspaikasta uuteen oletuspaikkaan
+						// Poistetaan VANHALTA tuotepaikalta siirrettävä määrä
+						$query = "UPDATE tuotepaikat SET
+									saldo         = saldo - {$saldo['myytavissa']},
+									saldoaika     = now(),
+									muuttaja      = '{$kukarow['kuka']}',
+									muutospvm     = now()
+									WHERE tuoteno = '{$row['tuoteno']}'
+									AND yhtio     = '{$kukarow['yhtio']}'
+									AND hyllyalue = '{$row['hyllyalue']}'
+									AND hyllynro  = '{$row['hyllynro']}'
+									AND hyllyvali = '{$row['hyllyvali']}'
+									AND hyllytaso = '{$row['hyllytaso']}'";
+
+						$result = pupe_query($query);
+
+						// Lisätään UUTEEN tuotepaikkaan siirrettävä määrä
+						$query = "UPDATE tuotepaikat SET
+									saldo         = saldo + {$saldo['myytavissa']},
+									saldoaika     = now(),
+									muuttaja      = '{$kukarow['kuka']}',
+									muutospvm     = now()
+									WHERE tuoteno = '{$row['tuoteno']}'
+									AND yhtio     = '{$kukarow['yhtio']}'
+									AND hyllyalue = '{$hyllyalue}'
+									AND hyllynro  = '{$hyllynro}'
+									AND hyllyvali = '{$hyllyvali}'
+									AND hyllytaso = '{$hyllytaso}'";
+
+						$result = pupe_query($query);
+
+						$mista = "{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}";
+						$minne = "$hyllyalue $hyllynro $hyllyvali $hyllytaso";
+
+						###
+						$kehahin_query = "	SELECT tuote.sarjanumeroseuranta,
+											round(if (tuote.epakurantti100pvm = '0000-00-00',
+													if (tuote.epakurantti75pvm = '0000-00-00',
+														if (tuote.epakurantti50pvm = '0000-00-00',
+															if (tuote.epakurantti25pvm = '0000-00-00',
+																tuote.kehahin,
+															tuote.kehahin * 0.75),
+														tuote.kehahin * 0.5),
+													tuote.kehahin * 0.25),
+												0),
+											6) kehahin
+											FROM tuote
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											and tuoteno = '{$row['tuoteno']}'";
+						$kehahin_result = mysql_query($kehahin_query) or pupe_error($kehahin_query);
+						$kehahin_row = mysql_fetch_array($kehahin_result);
+						$keskihankintahinta = $kehahin_row['kehahin'];
+						###
+
+						// Tapahtumat
+						// insert into tapahtumat "vähennettiin"
+						$tapahtuma_query = "INSERT INTO tapahtuma SET
+											yhtio 		= '{$kukarow['yhtio']}',
+											tuoteno 	= '{$row['tuoteno']}',
+											kpl 		= {$saldo['myytavissa']} * -1,
+											hinta 		= '$keskihankintahinta',
+											laji 		= 'siirto',
+											hyllyalue	= '{$row['hyllyalue']}',
+											hyllynro 	= '{$row['hyllynro']}',
+											hyllyvali	= '{$row['hyllyvali']}',
+											hyllytaso	= '{$row['hyllytaso']}',
+											rivitunnus	= '0',
+											selite 		= '".t("Paikasta")." $mista ".t("vähennettiin")." {$saldo['myytavissa']}',
+											laatija 	= '$kukarow[kuka]',
+											laadittu 	= now()";
+
+						$result = pupe_query($tapahtuma_query);
+
+						// insert into tapahtumat "lisättiin"
+						$tapahtuma_query = "INSERT INTO tapahtuma SET
+											yhtio 		= '{$kukarow['yhtio']}',
+											tuoteno 	= '{$row['tuoteno']}',
+											kpl 		= {$saldo['myytavissa']},
+											hinta 		= '$keskihankintahinta',
+											laji 		= 'siirto',
+											hyllyalue	= '$hyllyalue',
+											hyllynro 	= '$hyllynro',
+											hyllyvali	= '$hyllyvali',
+											hyllytaso	= '$hyllytaso',
+											rivitunnus	= '0',
+											selite 		= '".t("Paikalle")." $minne ".t("lisättiin")." {$saldo['myytavissa']}',
+											laatija 	= '$kukarow[kuka]',
+											laadittu 	= now()";
+
+						$result = pupe_query($tapahtuma_query);
+
+						// Päivitetään vanhan tuotepaikan avoimet tulouttamattomat ostot uudelle paikalle
+						$ostot_query = "UPDATE tilausrivi SET
+										hyllyalue     = '$hyllyalue',
+										hyllynro      = '$hyllynro',
+										hyllyvali     = '$hyllyvali',
+										hyllytaso     = '$hyllytaso'
+										WHERE yhtio   = '{$kukarow['yhtio']}'
+										AND tyyppi    = 'O'
+										AND varattu   > 0
+										AND tuoteno   = '{$row['tuoteno']}'
+										AND hyllyalue = '{$row['hyllyalue']}'
+										AND hyllynro  = '{$row['hyllynro']}'
+										AND hyllyvali = '{$row['hyllyvali']}'
+										AND hyllytaso = '{$row['hyllytaso']}'";
+
+						$result = pupe_query($ostot_query);
+					}
 				}
 
-				# Asetetaan tuotepaikka tilausriville
-				paivita_tilausrivin_hylly($tilausrivi, $hylly);
+				// Asetetaan tuotepaikka tilausriville
+				$affected_rows = paivita_tilausrivin_hylly($tilausrivi, $hylly);
 
-				# Palataan edelliselle sivulle
+				// Palataan edelliselle sivulle
 				if(isset($hyllytys)) {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?{$url}'>"; exit();
 				} else {
@@ -169,17 +271,21 @@ if ($row_suoratoimitus = mysql_fetch_assoc($onko_suoratoimitus_res)) {
 	if ($row_suoratoimitus["suoraan_laskutukseen"] == "") $oletuspaikka_chk = '';
 }
 
+if ($siirra_saldot == 'on') {
+	$siirra_saldot_chk = "checked";
+}
+
 $paluu_url = "vahvista_kerayspaikka.php?{$url}";
 if (isset($hyllytys)) {
 	$paluu_url = "hyllytys.php?{$url}";
 }
 
-####
+// View
 echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"$paluu_url\"' class='button left'><img src='back2.png'></button>";
 echo "<h1>",t("UUSI KERÄYSPAIKKA"),"</h1></div>";
 
-# Virheet
+// Virheet
 if (isset($errors)) {
 	echo "<span class='error'>";
 	foreach($errors as $virhe) {
@@ -187,12 +293,6 @@ if (isset($errors)) {
 	}
 	echo "</span>";
 }
-
-list($saldo['saldo'], $saldo['hyllyssa'], $saldo['myytavissa']) = saldo_myytavissa($row['tuoteno'], '', '', '0', $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso']);
-
-echo "<pre>";
-var_dump($saldo);
-echo "</pre>";
 
 echo "<div class='main'>
 <form name='uusipaikkaformi' method='post' action=''>
@@ -225,9 +325,8 @@ echo "<div class='main'>
 			<td colspan='2'>",t("Tee tästä oletuspaikka")," <input type='checkbox' id='oletuspaikka' name='oletuspaikka' $oletuspaikka_chk /></td>
 		</tr>
 		<tr>
-			<td colspan='2'>",t("Siirrä saldot")," <input type='checkbox' id='siirra_saldot' name='siirra_saldot' /></td>
+			<td colspan='2'>",t("Siirrä saldo")," ({$saldo['myytavissa']}) <input type='checkbox' id='siirra_saldot' name='siirra_saldot' $siirra_saldot_chk/> </td>
 		</tr>
-		<tr><td>Myytavissa " . $saldo['myytavissa'] . " kpl</td></tr>
 	</table>
 
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />

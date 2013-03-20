@@ -1,7 +1,8 @@
 <?php
+
 	if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
-			require ("inc/parametrit.inc");
-		}
+		require ("inc/parametrit.inc");
+	}
 
 	if (!isset($fileesta))			$fileesta = "";
 	if (!isset($filusta))			$filusta = "";
@@ -123,6 +124,8 @@
 	//tuotteen varastostatus
 	if ($tee == 'VALMIS') {
 
+		$inven_laji_tilino = t_avainsana('INVEN_LAJI', '', "and selite = '{$inven_laji}'", '', '', "selitetark_2");
+
 		$virhe = 0;
 
 		// Inventoidaan EAN-koodilla
@@ -209,7 +212,7 @@
 					}
 
 					//Sarjanumerot
-					if (in_array($tuote_row["sarjanumeroseuranta"], array("S","U")) and is_array($sarjanumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and (int) $kpl!=count($sarjanumero_kaikki[$i]) and ($onko_uusia > 0 or $hyllyssa[$i] < $kpl)) {
+					if (in_array($tuote_row["sarjanumeroseuranta"], array("S","U")) and is_array($sarjanumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and (int) $kpl != count($sarjanumero_kaikki[$i]) and ($onko_uusia > 0 or $hyllyssa[$i] < $kpl)) {
 						echo "<font class='error'>".t("VIRHE: Sarjanumeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
 						$virhe = 1;
 					}
@@ -236,26 +239,28 @@
 							$erasyotetyt = 0;
 
 							foreach ($eranumero_valitut[$i] as $enro => $ekpl) {
+								$ekpl = str_replace(",", ".", $ekpl);
 
-								$erasyotetyt += $ekpl;
 								if ($ekpl != '' and ($ekpl{0} == '+' or $ekpl{0} == '-' or !is_numeric($ekpl))) {
 									echo "<font class='error'>".t("VIRHE: Erien m‰‰r‰t oltava absoluuttisia arvoja")."!</font><br>";
 									$virhe = 1;
 									break;
 								}
 
-								if (($kpl{0} == '+' or $kpl{0} == '-') and (int) $ekpl == 0 and $ekpl != '' and $onko_uusia == 0) {
+								if (($kpl{0} == '+' or $kpl{0} == '-') and (float) $ekpl == 0 and $ekpl != '' and $onko_uusia == 0) {
 									echo "<font class='error'>".t("VIRHE: Et voi nollata er‰‰, jos olet syˆtt‰nyt relatiivisen m‰‰r‰n")."!</font><br>";
 									$virhe = 1;
 									break;
 								}
+
+								$erasyotetyt += (float) $ekpl;
 
 								if ($eranumero_uudet[$i][$enro] == '0000-00-00') {
 									$onko_uusia++;
 								}
 							}
 
-							if (is_array($eranumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and ($onko_uusia > 0 or $hyllyssa[$i] < $erasyotetyt)) {
+							if (is_array($eranumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and $onko_uusia > 0) {
 								echo "<font class='error'>".t("VIRHE: Er‰numeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
 								$virhe = 1;
 							}
@@ -357,7 +362,7 @@
 							$saldomuutos = 0;
 							$kerattymuut = 0;
 
-							if ($row["sarjanumeroseuranta"] == "" and $row["inventointilista_aika"] != "0000-00-00 00:00:00") {
+							if ($row["sarjanumeroseuranta"] == "" and $row["inventointilista_aika"] != "0000-00-00 00:00:00" and $mobiili != "YES") {
 								//katotaan paljonko saldot on muuttunut listan ajoajankohdasta
 								$query = "	SELECT sum(tapahtuma.kpl) muutos
 											FROM tapahtuma
@@ -481,6 +486,8 @@
 										}
 
 										foreach ($eranumero_valitut[$i] as $enro_tun => $enro_arvo) {
+											$enro_arvo = (float) str_replace(",", ".", $enro_arvo);
+
 											$varvo_jalke += (sarjanumeron_ostohinta("tunnus", $enro_tun) * $enro_arvo);
 										}
 									}
@@ -501,6 +508,8 @@
 								elseif ((float) $skp != 0) {
 									if ($row["sarjanumeroseuranta"] == "G") {
 										foreach ($eranumero_valitut[$i] as $enro_tun => $enro_arvo) {
+											$enro_arvo = (float) str_replace(",", ".", $enro_arvo);
+
 											// katsotaan varastonarvo vain, jos ollaan lis‰‰m‰ss‰ tai kyseess‰ on vanha tuote
 											if ($eranumero_uudet[$i][$enro_tun] != '0000-00-00' or $skp > 0) {
 												$varvo_muuto += (sarjanumeron_ostohinta("tunnus", $enro_tun) * $enro_arvo);
@@ -559,6 +568,8 @@
 								}
 								elseif ($row['sarjanumeroseuranta'] == 'E' or $row['sarjanumeroseuranta'] == 'F') {
 									foreach ($eranumero_valitut[$i] as $enro_tun => $enro_arvo) {
+										$enro_arvo = (float) str_replace(",", ".", $enro_arvo);
+
 										if ($eranumero_uudet[$i][$enro_tun] == '0000-00-00' and $skp < 0) {
 											// ollaan poistamatta uutta er‰numeroa, kplm‰‰r‰ nollataan joten ei tapahtu varastonmuutosta!!
 											$erotus = 0;
@@ -653,7 +664,7 @@
 								$laskuid = mysql_insert_id($link);
 
 								if ($yhtiorow["varastonmuutos_inventointi"] != "") {
-									$varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
+									$varastonmuutos_tili = $inven_laji_tilino != "" ? $inven_laji_tilino : $yhtiorow["varastonmuutos_inventointi"];
 								}
 								else {
 									$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
@@ -780,6 +791,8 @@
 								if ((float) $skp == 0) {
 
 									foreach ($eranumero_valitut[$i] as $enro_key => $enro_val) {
+										$enro_val = (float) str_replace(",", ".", $enro_val);
+
 										$sarjaquerylisa = '';
 
 										// jos er‰ loppuu, niin poistetaan kyseinen er‰
@@ -801,6 +814,7 @@
 
 									// Ollaan syˆtetty relatiivinen m‰‰r‰
 									foreach ($eranumero_valitut[$i] as $enro_key => $enro_val) {
+										$enro_val = (float) str_replace(",", ".", $enro_val);
 
 										if ((float) $enro_val > 0) {
 
@@ -1249,12 +1263,14 @@
 
 				if ($tuoterow["hyllyalue"] == "!!M") {
 					$asiakkaan_tunnus = (int) $tuoterow["hyllynro"].$tuoterow["hyllyvali"].$tuoterow["hyllytaso"];
+
 					$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
 								FROM asiakas
 								WHERE yhtio = '{$kukarow["yhtio"]}'
 								AND tunnus = '$asiakkaan_tunnus'";
 					$asiakasresult = pupe_query($query);
 					$asiakasrow = mysql_fetch_assoc($asiakasresult);
+
 					echo t("Myyntitili"), " ", $asiakasrow["asiakkaan_nimi"];
 				}
 				else {
@@ -1557,5 +1573,3 @@
 	if ($mobiili != "YES") {
 		require ("inc/footer.inc");
 	}
-
-?>

@@ -486,11 +486,21 @@
 	if (trim($toim_tuoteno) != '') {
 		$toim_tuoteno = mysql_real_escape_string(trim($toim_tuoteno));
 
+		// Katsotaan löytyykö tuotenumero toimittajan vaihtoehtoisista tuotenumeroista
+		$query = "	SELECT GROUP_CONCAT(DISTINCT toim_tuoteno_tunnus SEPARATOR ',') toim_tuoteno_tunnukset
+					FROM tuotteen_toimittajat_tuotenumerot
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$toim_tuoteno}'";
+		$vaih_tuoteno_res = pupe_query($query);
+		$vaih_tuoteno_row = mysql_fetch_assoc($vaih_tuoteno_res);
+
+		$vaihtoehtoinen_tuoteno_lisa = $vaih_tuoteno_row['toim_tuoteno_tunnukset'] != '' ? " OR tunnus IN ('{$vaih_tuoteno_row['toim_tuoteno_tunnukset']}')" : "";
+
 		//Otetaan konserniyhtiöt hanskaan
-		$query	= "	SELECT distinct tuoteno
+		$query	= "	SELECT DISTINCT tuoteno
 					FROM tuotteen_toimittajat
-					WHERE yhtio = '$kukarow[yhtio]'
-					and toim_tuoteno like '%".$toim_tuoteno."%'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND (toim_tuoteno LIKE '%{$toim_tuoteno}%' $vaihtoehtoinen_tuoteno_lisa)
 					LIMIT 500";
 		$pres = pupe_query($query);
 
@@ -912,6 +922,7 @@
 					FROM tuote use index (tuoteno, nimitys)
 					$lisa_parametri
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
+					and tuote.tuotetyyppi NOT IN ('A', 'B')
 					$kieltolisa
 					$lisa
 					$extra_poislisa
@@ -2180,4 +2191,3 @@
 		elseif (@include("footer.inc"));
 		else exit;
 	}
-?>

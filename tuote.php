@@ -88,14 +88,30 @@
 	if ($tee == 'Z' and isset($tyyppi) and $tyyppi != '') {
 
 		if ($tyyppi == 'TOIMTUOTENO') {
+
 			$query = "	SELECT tuotteen_toimittajat.tuoteno
 						FROM tuotteen_toimittajat
-						JOIN tuote ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno
-						WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-						and tuotteen_toimittajat.toim_tuoteno = '$tuoteno'
-						and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+						JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+						WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+						AND tuotteen_toimittajat.toim_tuoteno = '{$tuoteno}'
+						AND (tuote.status NOT IN ('P','X') OR (SELECT SUM(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0) > 0)
 						ORDER BY tuote.tuoteno";
 			$result = pupe_query($query);
+
+			if (mysql_num_rows($result) == 0) {
+				$query = "	SELECT tuote.tuoteno
+							FROM tuotteen_toimittajat_tuotenumerot AS ttt
+							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
+							JOIN tuote ON (tuote.yhtio = tt.yhtio AND tuote.tuoteno = tt.tuoteno)
+							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
+							AND (ttt.tuoteno = '{$tuoteno}' or ttt.viivakoodi = '{$tuoteno}')
+							AND (tuote.status NOT IN ('P','X') OR (SELECT SUM(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0) > 0)";
+				$chk_res = pupe_query($query);
+
+				if (mysql_num_rows($chk_res) != 0) {
+					$result = $chk_res;
+				}
+			}
 
 			if (mysql_num_rows($result) == 0) {
 				$varaosavirhe = t("VIRHE: Tiedolla ei löytynyt tuotetta")."!";
@@ -715,6 +731,42 @@
 
 			echo "</table><br>";
 
+			if (count($ttrow) > 0) {
+
+				$otsikot = FALSE;
+
+				foreach ($ttrow as $tt_rivi) {
+					$query = "	SELECT ttt.*, TRIM(CONCAT(toimi.nimi, ' ', toimi.nimitark)) AS nimi
+								FROM tuotteen_toimittajat_tuotenumerot AS ttt
+								JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus AND tt.toim_tuoteno = '{$tt_rivi['toim_tuoteno']}')
+								JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
+								WHERE ttt.yhtio = '{$kukarow['yhtio']}'";
+					$chk_res = pupe_query($query);
+
+					if (mysql_num_rows($chk_res) > 0 and !$otsikot) {
+						echo "<font class='message'>",t("Tuotteen toimittajan vaihtoehtoiset tuotenumerot"),"</font><hr />";
+						echo "<table>";
+						echo "<tr>";
+						echo "<th>",t("Toimittaja"),"</th>";
+						echo "<th>",t("Tuoteno"),"</th>";
+						echo "<th>",t("Viivakoodi"),"</th>";
+						echo "</tr>";
+
+						$otsikot = TRUE;
+					}
+
+					while ($chk_row = mysql_fetch_assoc($chk_res)) {
+						echo "<tr>";
+						echo "<td>{$chk_row['nimi']}</td>";
+						echo "<td>{$chk_row['tuoteno']}</td>";
+						echo "<td>{$chk_row['viivakoodi']}</td>";
+						echo "</tr>";
+					}
+				}
+
+				if ($otsikot) echo "</table><br />";
+			}
+
 			// Onko liitetiedostoja
 			$liitteet = liite_popup("TN", $tuoterow["tunnus"]);
 
@@ -1050,9 +1102,23 @@
 			echo "</td></tr></table><br>";
 
 			// Tilausrivit tälle tuotteelle
-			$query = "	SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
-						tilausrivi.toimaika pvm, tilausrivi.laadittu,
-						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tila laskutila, lasku.tilaustyyppi, tilausrivi.var, lasku2.laskunro as keikkanro, tilausrivi.jaksotettu, tilausrivin_lisatiedot.osto_vai_hyvitys
+			$query = "	SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi,
+						lasku.tunnus,
+						(tilausrivi.varattu+tilausrivi.jt) kpl,
+						tilausrivi.toimaika pvm,
+						tilausrivi.laadittu,
+						varastopaikat.nimitys varasto,
+						tilausrivi.tyyppi,
+						lasku.laskunro,
+						lasku.tila laskutila,
+						lasku.tilaustyyppi,
+						tilausrivi.var,
+						lasku2.laskunro as keikkanro,
+						tilausrivi.jaksotettu,
+						tilausrivin_lisatiedot.osto_vai_hyvitys,
+						lasku2.comments,
+						lasku2.laatija,
+						lasku2.luontiaika
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
@@ -1188,9 +1254,37 @@
 					list(, , $myyta) = saldo_myytavissa($tuoteno, "KAIKKI", '', '', '', '', '', '', '', $jtrow["pvm"]);
 
 					echo "<tr>
-							<td>$jtrow[nimi]</td>
-							<td><a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]&lopetus=$lopetus'>$jtrow[tunnus]</a>$keikka</td>
-							<td>$tyyppi</td>
+							<td>$jtrow[nimi]</td>";
+
+					if ($jtrow["tyyppi"] == "O" and $jtrow["laskutila"] != "K" and $jtrow["keikkanro"] > 0 and $jtrow['comments'] != '') {
+						echo "<td valign='top' class='tooltip' id='{$jtrow['tunnus']}{$jtrow['keikkanro']}'>";
+					}
+					else {
+						echo "<td>";
+					}
+
+					echo "<a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]&lopetus=$lopetus'>$jtrow[tunnus]</a>$keikka";
+
+					if ($jtrow["tyyppi"] == "O" and $jtrow["laskutila"] != "K" and $jtrow["keikkanro"] > 0 and $jtrow['comments'] != '') {
+
+						$query = "	SELECT nimi
+									FROM kuka
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND kuka = '{$jtrow['laatija']}'";
+						$kuka_chk_res = pupe_query($query);
+						$kuka_chk_row = mysql_fetch_assoc($kuka_chk_res);
+
+						echo "&nbsp;<img src='{$palvelin2}/pics/lullacons/info.png'>";
+						echo "<div id='div_{$jtrow['tunnus']}{$jtrow['keikkanro']}' class='popup' style='width: 500px;'>";
+						echo t("Saapuminen"),": {$jtrow['keikkanro']} / {$jtrow['nimi']}<br /><br />";
+						echo t("Laatija"),": {$kuka_chk_row['nimi']}<br />";
+						echo t("Luontiaika"),": ",tv1dateconv($jtrow['luontiaika'], "pitkä"),"<br /><br />";
+						echo $jtrow["comments"];
+						echo "</div>";
+					}
+
+					echo "</td>";
+					echo "	<td>$tyyppi</td>
 							<td>".tv1dateconv($jtrow["laadittu"])."</td>
 							<td>".tv1dateconv($jtrow["pvm"])."$vahvistettu</td>
 							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
@@ -2065,4 +2159,4 @@
 	}
 
 	require ("inc/footer.inc");
-?>
+

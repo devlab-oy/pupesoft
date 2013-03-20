@@ -13,8 +13,10 @@
 
 	if (!isset($tuvarasto)) $tuvarasto = '';
 
-	$logistiikka_yhtio = '';
-	$logistiikka_yhtiolisa = '';
+	if (!isset($tutyyppi)) $tutyyppi = '';
+
+	$logistiikka_yhtio 		= '';
+	$logistiikka_yhtiolisa 	= '';
 	$lasku_yhtio_originaali = $kukarow['yhtio'];
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
@@ -662,6 +664,9 @@
 			elseif ($tutyyppi == "JTTILA") {
 				$haku .= " and lasku.clearing='JT-TILAUS' ";
 			}
+			elseif ($tutyyppi == "VALMISTUS") {
+				$haku .= " and lasku.sisviesti2='Tehty valmistuksen kautta' ";
+			}
 		}
 
 		if (!is_numeric($etsi) and $etsi != '') {
@@ -736,29 +741,33 @@
 
 		echo "<th>".t("Valitse tilaustyyppi:")."</th><td><select name='tutyyppi' onchange='submit()'>";
 
-		$query = "	SELECT clearing, count(*) kpl
+		$query = "	SELECT IF(sisviesti2 = 'Tehty valmistuksen kautta' and clearing = 'JT-TILAUS', 'VALMISTUS', clearing) AS clearing, count(*) kpl
 					FROM lasku
-					WHERE $logistiikka_yhtiolisa
-					and ((tila = '$tila' and alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi
+					WHERE {$logistiikka_yhtiolisa}
+					and ((tila = '{$tila}' and alatila = '{$lalatila}') {$tila_lalatila_lisa}) {$tilaustyyppi}
 					GROUP BY clearing
 					ORDER by clearing";
+		$result = pupe_query($query);
 
-		$result = mysql_query($query) or pupe_error($query);
-		$sel=array();
-		$sel[$tutyyppi]="selected";
+		echo "<option value='KAIKKI'>",t("Näytä kaikki"),"</option>";
 
-		echo "<option value='KAIKKI' $seltuty[KAIKKI]>".t("Näytä kaikki")."</option>";
+		if (mysql_num_rows($result) > 0) {
 
-		if (mysql_num_rows($result)>0) {
-			while ($row = mysql_fetch_array($result)) {
+			$sel = array_fill_keys(array($tutyyppi), 'selected') + array('NORMAA' => '', 'ENNAKK' => '', 'JTTILA' => '', 'VALMISTUS' => '');
+
+			while ($row = mysql_fetch_assoc($result)) {
+
 				if ($row["clearing"] == "") {
-					echo "<option value='NORMAA' $sel[NORMAA]>".t("Näytä normaalitilaukset")." ($row[kpl])</option>";
+					echo "<option value='NORMAA' {$sel['NORMAA']}>",t("Näytä normaalitilaukset")," ({$row['kpl']})</option>";
 				}
  				elseif ($row["clearing"] == "ENNAKKOTILAUS") {
-					echo "<option value='ENNAKK' $sel[ENNAKK]>".t("Näytä ennakkotilaukset")." ($row[kpl])</option>";
+					echo "<option value='ENNAKK' {$sel['ENNAKK']}>",t("Näytä ennakkotilaukset")," ({$row['kpl']})</option>";
 				}
  				elseif ($row["clearing"] == "JT-TILAUS") {
-					echo "<option value='JTTILA' $sel[JTTILA]>".t("Näytä jt-tilaukset")." ($row[kpl])</option>";
+					echo "<option value='JTTILA' {$sel['JTTILA']}>",t("Näytä jt-tilaukset")," ({$row['kpl']})</option>";
+				}
+				elseif ($row['clearing'] == 'VALMISTUS') {
+					echo "<option value='VALMISTUS' {$sel['VALMISTUS']}>",t("Näytä jt-tilaukset valmistuksesta")," ({$row['kpl']})</option>";
 				}
 			}
 		}
@@ -841,7 +850,7 @@
 					if (lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
 					varastopaikat.nimitys varastonimi,
 					varastopaikat.tunnus varastotunnus,
-					week(lasku.kerayspvm, 1) keraysviikko,
+					week(lasku.kerayspvm, 3) keraysviikko,
 					min(if (lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
 					max(if (lasku.clearing = '', 'N', if (lasku.clearing = 'JT-TILAUS', 'J', if (lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
 					$selectlisa

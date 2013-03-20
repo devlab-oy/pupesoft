@@ -148,11 +148,10 @@ if (isset($submitnappi)) {
 		$kl_lisa = " and tuote.hinnastoon != 'E' ";
 	}
 
-
 	// Poistettuja ei lisätä hinnastoon
 	$poistetut = "'P',";
 
-	// Futurhinnastoon lisätään jatkossa myös ne tuotteet joiden status = P ja tuote.hinnastoon = “KYLLÄ”
+	// Futurhinnastoon lisätään jatkossa myös ne tuotteet joiden status = P ja tuote.hinnastoon = KYLLÄ
 	// ja kyseinen tuote löytyy korvaavuusketjusta.
 	if ($_POST["hinnasto"] == 'futur') {
 		$poistetut = '';
@@ -166,14 +165,8 @@ if (isset($submitnappi)) {
 				$kl_lisa
 				and ((tuote.vienti = '' or tuote.vienti like '%-$laskurowfake[maa]%' or tuote.vienti like '%+%')
 				and tuote.vienti not like '%+$laskurowfake[maa]%')
-				and (tuote.status not in ($poistetut 'X')
-				or (
-					SELECT sum(saldo)
-					FROM tuotepaikat
-					WHERE tuotepaikat.yhtio=tuote.yhtio
-					and tuotepaikat.tuoteno=tuote.tuoteno
-					and tuotepaikat.saldo > 0) > 0
-					)
+				and tuote.tuotetyyppi NOT IN ('A', 'B')
+				and (tuote.status not in ($poistetut'X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 				ORDER BY tuote.osasto+0, tuote.try+0";
 	$result = pupe_query($query);
 

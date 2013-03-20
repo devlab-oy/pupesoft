@@ -168,8 +168,23 @@
 						//Luetaan tilinumero seuraavalta riviltä ja siirretään pointteri takaisin nykypaikkaan
 						$pointterin_paikka = ftell($fd);
 						$tilino 	= fgets($fd);
-						$tilino 	= substr($tilino,1,14);
+                        $onko_vipn  = (substr($tilino,0,1) == 'S') ? 1 : 0;    # tunnistetaan Danske Bankin VIPN-factoringaineisto, koska tiedostossa ei tule tilinumeroa
+                        $tilino 	= substr($tilino,1,14);
 						fseek($fd, $pointterin_paikka);
+
+                        if ($onko_vipn) {
+                            $query = " SELECT tilino
+                                       FROM yriti
+                                       WHERE bic       =  'DABAFIHH'
+                                       AND   factoring != ''
+                                       LIMIT 1;";
+                            $f_result = pupe_query($query);
+
+                            if (mysql_num_rows($f_result) === 1) {
+                                $f_row = mysql_fetch_assoc($f_result);
+                                $tilino = $f_row['tilino'];
+                            } # jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
+                        }
 					}
 
 					$query = "	SELECT *
@@ -233,7 +248,7 @@
 								WHERE tilino = '$tilino'
 								and alku 	 = '$alkupvm'
 								and loppu 	 = '$loppupvm'
-								and tyyppi 	 = $xtyyppi";
+								and tyyppi 	 = '$xtyyppi'";
 					$tiliotedatares = pupe_query($query);
 
 					if (mysql_num_rows($tiliotedatares) > 0) {
@@ -248,7 +263,7 @@
 										WHERE tilino = '$tilino'
 										and alku 	 = '$alkupvm'
 										and loppu 	 = '$loppupvm'
-										and tyyppi 	 = $xtyyppi";
+										and tyyppi 	 = '$xtyyppi'";
 							$tiliotedatares = pupe_query($query);
 							$tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
 
@@ -326,7 +341,7 @@
 									FROM tiliotedata
 									WHERE yhtio	= '$yritirow[yhtio]'
 									and tilino 	= '$tilino'
-									and tyyppi 	= $xtyyppi
+									and tyyppi 	= '$xtyyppi'
 									and tieto	= '$tietue'
 									and substring(tieto, 13, 18) = '$arkistotunnari'";
 						$vchkres = pupe_query($query);
@@ -360,7 +375,7 @@
 				}
 
 				// Tsekataan, ettei mene duplikaattiviitesuortiuksia ja tsekataan ettei kirjata suljetuille kausille
-				if ($xtyyppi == 3 and substr($tietue, 0, 1) == "3") {
+				if ($xtyyppi == 3 and (substr($tietue, 0, 1) == "3" or substr($tietue, 0, 1) == "S" )) {
 
 					// VVKKPP
 					$tsekpvm = (int) "20".substr($tietue, 15, 6);
@@ -380,7 +395,7 @@
 									FROM tiliotedata
 									WHERE yhtio	= '$yritirow[yhtio]'
 									and tilino 	= '$tilino'
-									and tyyppi 	= $xtyyppi
+									and tyyppi 	= '$xtyyppi'
 									and tieto	= '$tietue'
 									and substring(tieto, 28, 16) = '$arkistotunnari'";
 						$vchkres = pupe_query($query);

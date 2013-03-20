@@ -566,6 +566,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 				tuote.yhtio in ($yhtiot)
 				$lisaa
 				and tuote.ei_saldoa = ''
+				and tuote.tuotetyyppi NOT IN ('A', 'B')
 				and tuote.ostoehdotus = ''
 				GROUP BY tuote.tuoteno
 				ORDER BY id, tuote.tuoteno, yhtio";
@@ -778,7 +779,8 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
 	$query = "	SELECT distinct tuotemerkki
 				FROM tuote
-				WHERE yhtio in ($yhtiot) and tuotemerkki != ''
+				WHERE yhtio in ($yhtiot)
+				and tuotemerkki != ''
 				ORDER BY tuotemerkki";
 	$sresult = pupe_query($query);
 

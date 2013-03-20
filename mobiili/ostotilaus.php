@@ -11,11 +11,42 @@ elseif (@include_once("inc/parametrit.inc"));
 
 if(!isset($errors)) $errors = array();
 
-
-// Nollataan kuka.kesken
+// Jos uusi parametri on setattu nollataan kuka.kesken
 if (isset($uusi)) {
 	$nollaus_query = "UPDATE kuka SET kesken=0 WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
 	$result = pupe_query($nollaus_query);
+}
+// Katsotaan onko käyttäjälle keskeneräistä saapumista
+else {
+	$query = "	SELECT kesken
+				FROM kuka
+				JOIN lasku ON (kuka.yhtio=lasku.yhtio AND kuka.kesken=lasku.tunnus AND lasku.tila='K' AND lasku.alatila NOT IN ('X','I'))
+				WHERE kuka.kuka = '{$kukarow['kuka']}'
+				AND kuka.yhtio  = '{$kukarow['yhtio']}'";
+	$result = pupe_query($query);
+	$kesken_row = mysql_fetch_assoc($result);
+
+	// Jos käyttäjällä ei ole keskeneräistä saapumista, haetaan käyttäjän viimeisimmäksi luotu saapumisotsikko ja jatketaan sitä
+	if ($kesken_row['kesken'] == 0) {
+
+		// Haetaan käyttäjän uusin saapumisen tunnus ja setataan se kesken kolumniin
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laatija = '{$kukarow['kuka']}'
+					AND tila = 'K'
+					AND alatila NOT IN ('X','I')
+					ORDER BY luontiaika DESC
+					LIMIT 1";
+		$result = pupe_query($query);
+		$saapuminen_row = mysql_fetch_assoc($result);
+
+		$kesken_query = "	UPDATE kuka
+							SET kesken = '{$saapuminen_row['tunnus']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND kuka    = '{$kukarow['kuka']}'";
+		pupe_query($kesken_query);
+	}
 }
 
 # Jos haulla ei löytyny mitään, ollaan palattu tälle sivulle virheparametrilla.
@@ -73,7 +104,7 @@ echo "<div class='main'>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='ok' onclick='submit();' class='button'>",t("OK"),"</button>
+	<button name='submit' id='haku_nappi' value='ok' onclick='submit();' class='button'>",t("OK"),"</button>
 </form>
 </div>";
 
@@ -85,6 +116,15 @@ echo "</div>";
 
 echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
 echo "<script type='text/javascript'>
+
+	$(document).ready(function() {
+		$('#viivakoodi').on('keyup', function() {
+			// Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
+			if ($('#viivakoodi').val().length > 8) {
+				document.getElementById('haku_nappi').click();
+			}
+		});
+	});
 
 	function doFocus() {
 	        var focusElementId = 'viivakoodi';

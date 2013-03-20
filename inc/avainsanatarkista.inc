@@ -44,10 +44,9 @@ if(!function_exists("avainsanatarkista")) {
 					$virhe[$i] = t("Selitteen ensimm‰inen kirjain pit‰‰ olla #");
 				}
 				elseif (strlen($tem_selite) != 4 and strlen($tem_selite) != 7) {
-					$virhe[$i] = t("Selite t‰ytyy olla 4 tai 7 merkki‰ pitk‰").' '.strlen($tem_selite);
+					$virhe[$i] = t("Selite t‰ytyy olla 4 tai 7 merkki‰ pitk‰");
 				}
 			}
-
 
 			if (strtoupper($tem_laji) == "ALVULK") {
 				//	ALV pit‰‰ olla pisteell‰, ei pilkulla
@@ -133,6 +132,17 @@ if(!function_exists("avainsanatarkista")) {
 
 		if (mysql_field_name($result, $i) == "selitetark_2") {
 			$tem_selitetark_2 = trim($t[$i]);
+
+			if (strtoupper($tem_laji) == "INVEN_LAJI" and $tem_selitetark_2 != "") {
+
+				$query = "	SELECT tunnus
+							FROM tili
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tilino = '{$tem_selitetark_2}'";
+				$tili_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($tili_chk_res) == 0) $virhe[$i] = t("Tilinumero ei ole sallittu")."!";
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "selitetark_3") {

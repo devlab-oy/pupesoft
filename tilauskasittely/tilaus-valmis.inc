@@ -24,6 +24,38 @@ $query  = "	UPDATE lasku SET vanhatunnus=tunnus $ohjausmerkkilisa
 			AND vanhatunnus=0";
 $oldtur = pupe_query($query);
 
+$query = "	SELECT tarkenne
+			FROM asiakkaan_avainsanat
+			WHERE yhtio 	 = '{$kukarow['yhtio']}'
+			AND laji 		 = 'OHJAUSMERKKI'
+			AND liitostunnus = '{$laskurow['liitostunnus']}'
+			AND avainsana 	 = '{$laskurow['toimitustapa']}'";
+$ohjausmerkki_check_res = pupe_query($query);
+$ohjausmerkki_check_row = mysql_fetch_assoc($ohjausmerkki_check_res);
+
+if ($ohjausmerkki_check_row['tarkenne'] != "") {
+
+	// Tarkistetaan lˆytyykˆ kyseinen ohjausmerkkiteksti otsikolta
+	// Ei haluta lis‰t‰ teksti‰ kahteen kertaan
+	if (stripos($laskurow['ohjausmerkki'], $ohjausmerkki_check_row['tarkenne']) === FALSE) {
+
+		if ($laskurow['ohjausmerkki'] != "") {
+			$updlisa = " ohjausmerkki = CONCAT('{$ohjausmerkki_check_row['tarkenne']}', ' / ', ohjausmerkki)";
+			$laskurow['ohjausmerkki'] = "{$ohjausmerkki_check_row['tarkenne']} / {$laskurow['ohjausmerkki']}";
+		}
+		else {
+			$updlisa = " ohjausmerkki = '{$ohjausmerkki_check_row['tarkenne']}'";
+			$laskurow['ohjausmerkki'] = $ohjausmerkki_check_row['tarkenne'];
+		}
+
+		$query = "	UPDATE lasku SET
+					{$updlisa}
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus  = '{$laskurow['tunnus']}'";
+		$updres = pupe_query($query);
+	}
+}
+
 // p‰ivitet‰‰n myˆs muuttuja
 $laskurow["vanhatunnus"] = $laskurow["tunnus"];
 
@@ -36,7 +68,11 @@ $tilausvalmis_asiakas_res = pupe_query($query);
 $tilausvalmis_asiakas_row = mysql_fetch_assoc($tilausvalmis_asiakas_res);
 
 // Myynti estete‰‰n jos luottoraja on ylitetty (K - kaikki estet‰‰n, E -  kaikki muu ku myyjien tekem‰ estet‰‰n)
-if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] == "E" and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) {
+// samma pÂ erapaivan_ylityksen_raja
+$luottoraja_chk = (($yhtiorow["luottorajan_ylitys"] == "K"             or ($yhtiorow["luottorajan_ylitys"] == "E"             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) ? 1 : 0;
+$erapaiva_chk   =  ($yhtiorow["erapaivan_ylityksen_toimenpide"] == "K" or ($yhtiorow["erapaivan_ylityksen_toimenpide"] == "E" and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) ? 1 : 0;
+
+if ($luottoraja_chk or $erapaiva_chk) {
 
 	// Parametrej‰ saatanat.php:lle
 	$sytunnus 	 	 = $laskurow['ytunnus'];
@@ -44,7 +80,7 @@ if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] 
 	$eiliittymaa 	 = "ON";
 	$luottorajavirhe = "";
 	$jvvirhe 		 = "";
-	$ylivito 		 = "";
+	$ylivito 		 = 0;
 	$trattavirhe 	 = "";
 	$laji 			 = "MA";
 	$grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
@@ -59,6 +95,9 @@ if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] 
 	}
 
 	ob_end_clean();
+
+    if ($luottoraja_chk == 0) { $luottorajavirhe = ""; }
+    if ($erapaiva_chk   == 0) { $ylivito         = 0; }
 }
 
 // otetaan maksuehto t‰ss‰ heti alussa selville.. k‰teinen ja itsetulostus muuttaa asioita
@@ -90,7 +129,7 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
 	// Laitetaan lopetus tyhj‰ksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
 	$lopetus = "";
 }
-elseif ($luottorajavirhe != '') {
+elseif ($luottorajavirhe != '' or $ylivito > 0) {
 	if ($kutsuja == "EDITILAUS" or $kukarow["extranet"] != "") {
 		$alatila = "F";
 	}
@@ -104,7 +143,17 @@ elseif ($luottorajavirhe != '') {
 				AND tunnus = '$laskurow[tunnus]'";
 	$myyntikielto_res = pupe_query($query);
 
-	echo "<font class='error'>",t("Asiakkaan luottoraja on ylitetty"),". ",t("Tilausta ei merkit‰ valmiiksi"),".</font><br/><br/>";
+    $errortext = "";
+
+    if ($luottorajavirhe != "") {
+        $errortext = t("Asiakkaan luottoraja on ylitetty") . ". ";
+    }
+
+    if ($ylivito > 0) {
+        $errortext .= t("Asiakkaalla on yli %s pv sitten er‰‰ntyneit‰ laskuja", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja']) . ". ";
+    }
+
+	echo "<font class='error'>" . $errortext . t("Tilausta ei merkit‰ valmiiksi"),".</font><br/><br/>";
 
 	// Laitetaan lopetus tyhj‰ksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
 	$lopetus = "";

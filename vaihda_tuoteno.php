@@ -170,6 +170,11 @@ if ($error == 0 and $tee == "file") {
 				$tulos[] = $tables[0]."##".$fields[0];
 			}
 		}
+		// puun_alkioissa on liitos-kentässä tuotenumeroita, huomioidaan nekin
+		if ($tables[0] == 'puun_alkio') {
+			$locktables[$tables[0]] = $tables[0];
+			$tulos[] = $tables[0]."##liitos";
+		}
 	}
 
 	foreach ($locktables as $ltable) {
@@ -417,6 +422,17 @@ if ($error == 0 and $tee == "file") {
 											yhtio = '$kukarow[yhtio]'
 											and kieli in ($kielet)
 											and $sarake	= '$vantuoteno'";
+								$result2 = pupe_query($query);
+							}
+							elseif ($taulu == 'puun_alkio') {
+								$query = "	UPDATE $taulu
+											SET
+											$sarake	= '$uustuoteno'
+											WHERE
+											yhtio = '$kukarow[yhtio]'
+											and kieli in ($kielet)
+											and $sarake	= '$vantuoteno'
+											and laji = 'tuote'";
 								$result2 = pupe_query($query);
 							}
 							else {

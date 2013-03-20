@@ -33,7 +33,7 @@
 			}
 			break;
 		case "K":
-			$laskutyyppi = "Saapuva ostotilaus";
+			$laskutyyppi = "Saapuminen";
 			switch($alatila) {
 				case "X":
 					$alatila = "Valmis";
@@ -265,13 +265,13 @@
 			}
 			break;
 		case "O":
-			$laskutyyppi = "Varaston ostotilaus";
+			$laskutyyppi = "Ostotilaus";
 			switch($alatila) {
 				case "":
 					$alatila = "kesken";
 					break;
 				case "A":
-					$alatila = "Tilaus lähetetty/tulostettu";
+					$alatila = "lähetetty/tulostettu";
 					break;
 				case "B":
 					$alatila = "";
@@ -312,7 +312,7 @@
 					$alatila = "Sisäinen työmääräys";
 					break;
 				case "O":
-					$alatila = "Varaston ostotilaus";
+					$alatila = "Ostotilaus";
 					break;
 				case "Z":
 					$alatila = "Terminaalitoimitus";

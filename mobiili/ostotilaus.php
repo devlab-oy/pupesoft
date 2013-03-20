@@ -104,7 +104,7 @@ echo "<div class='main'>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='ok' onclick='submit();' class='button'>",t("OK"),"</button>
+	<button name='submit' id='haku_nappi' value='ok' onclick='submit();' class='button'>",t("OK"),"</button>
 </form>
 </div>";
 
@@ -116,6 +116,15 @@ echo "</div>";
 
 echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
 echo "<script type='text/javascript'>
+
+	$(document).ready(function() {
+		$('#viivakoodi').on('keyup', function() {
+			// Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
+			if ($('#viivakoodi').val().length > 8) {
+				document.getElementById('haku_nappi').click();
+			}
+		});
+	});
 
 	function doFocus() {
 	        var focusElementId = 'viivakoodi';

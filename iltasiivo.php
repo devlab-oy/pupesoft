@@ -536,6 +536,52 @@
 		}
 	}
 
+	/**
+	 * Poistetaan poistettavaksi merkatut tuotepaikat joilla ei ole saldoa
+	 * tuotepaikat.poistettava = 'D' ja tuotepaikat.saldo=0
+	 * Ei poisteta oletuspaikkaa
+	 */
+	$query = "SELECT *
+				FROM tuotepaikat
+				WHERE yhtio     = '{$kukarow['yhtio']}'
+				AND poistettava = 'D'
+				AND saldo       = 0
+				AND oletus 		= ''";
+	$poistettavat_tuotepaikat = pupe_query($query);
+	$poistettu = 0;
+
+	// Loopataan poistettavat tuotepaikat läpi
+	while ($tuotepaikka = mysql_fetch_assoc($poistettavat_tuotepaikat)) {
+
+		// Poistetaan tuotepaikka
+		$query = "DELETE FROM tuotepaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND poistettava = 'D'
+					AND saldo   = 0
+					AND tunnus  = {$tuotepaikka['tunnus']}";
+		$poistettu_result = pupe_query($query);
+		$poistettu++;
+
+		// Luodaan tapahtuma
+		$tapahtuma_query = "INSERT INTO tapahtuma SET
+							yhtio 		= '$kukarow[yhtio]',
+							tuoteno 	= '$tuotepaikka[tuoteno]',
+							kpl			= '0',
+							kplhinta	= '0',
+							hinta		= '0',
+							hyllyalue	= '$tuotepaikka[hyllyalue]',
+							hyllynro	= '$tuotepaikka[hyllynro]',
+							hyllyvali	= '$tuotepaikka[hyllyvali]',
+							hyllytaso	= '$tuotepaikka[hyllytaso]',
+							laji		= 'poistettupaikka',
+							selite		= '".t("Poistettiin tuotepaikka")." $tuotepaikka[hyllyalue] $tuotepaikka[hyllynro] $tuotepaikka[hyllyvali] $tuotepaikka[hyllytaso]',
+							laatija		= '$kukarow[kuka]',
+							laadittu	= now()";
+		$tapahtuma_result = pupe_query($tapahtuma_query);
+	}
+
+	echo date("d.m.Y @ G:i:s").": Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.\n";
+
 	if (!$php_cli) {
 		echo "</pre>";
 		require('inc/footer.inc');

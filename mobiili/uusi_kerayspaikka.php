@@ -21,15 +21,15 @@ $data = array(
 );
 $url = http_build_query($data);
 
-# Virheet
+// Virheet
 $errors = array();
 
-# Suuntalavan kanssa
+// Suuntalavan kanssa
 if (!empty($alusta_tunnus)) {
 	$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
 	$row = mysql_fetch_assoc($res);
 }
-# Ilman suuntalavaa
+// Ilman suuntalavaa
 else {
 	$query = "	SELECT
 				tilausrivi.*,
@@ -94,7 +94,28 @@ if (isset($submit) and trim($submit) != '') {
 			}
 
 			if (count($errors) == 0) {
-				$oletus = $oletuspaikka != '' ? 'X' : '';
+
+				// Oletuspaikka checkboxi
+				if ($oletuspaikka == 'on') {
+					$oletus = 'X';
+
+					// Siirret‰‰n saldot
+					if ($siirra_saldot == 'on') {
+						// Siirret‰‰n saldot vanhasta oletuspaikasta uuteen oletuspaikkaan
+						// Poistetaan vanhalta tuotepaikalta siirrett‰v‰ m‰‰r‰
+						// update tuotepaikat set saldo = saldo - "saldo_myytavissa"
+						// Lis‰t‰‰n uuteen tuotepaikkaan siirrett‰v‰ m‰‰r‰
+						// update tuotepaikat set saldo = saldo + "saldo_myytavissa"
+
+						// Tapahtumat
+						// insert into tapahtumat "v‰hennettiin"
+						// insert into tapahtumat "lis‰ttiin"
+
+					}
+				}
+				else {
+					$oletus = '';
+				}
 
 				$hylly = array(
 						"hyllyalue" => $hyllyalue,
@@ -166,6 +187,13 @@ if (isset($errors)) {
 	}
 	echo "</span>";
 }
+
+list($saldo['saldo'], $saldo['hyllyssa'], $saldo['myytavissa']) = saldo_myytavissa($row['tuoteno'], '', '', '0', $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso']);
+
+echo "<pre>";
+var_dump($saldo);
+echo "</pre>";
+
 echo "<div class='main'>
 <form name='uusipaikkaformi' method='post' action=''>
 	<table>
@@ -194,8 +222,12 @@ echo "<div class='main'>
 			<td><input type='text' name='tilausmaara' value='' /></th>
 		</tr>
 		<tr>
-			<td colspan='2'>",t("Tee t‰st‰ oletuspaikka")," <input type='checkbox' name='oletuspaikka' $oletuspaikka_chk /></td>
+			<td colspan='2'>",t("Tee t‰st‰ oletuspaikka")," <input type='checkbox' id='oletuspaikka' name='oletuspaikka' $oletuspaikka_chk /></td>
 		</tr>
+		<tr>
+			<td colspan='2'>",t("Siirr‰ saldot")," <input type='checkbox' id='siirra_saldot' name='siirra_saldot' /></td>
+		</tr>
+		<tr><td>Myytavissa " . $saldo['myytavissa'] . " kpl</td></tr>
 	</table>
 
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
@@ -207,5 +239,25 @@ echo "<div class='controls'>
 	<button name='submit' class='button' value='submit' onclick='submit();'>",t("Perusta"),"</button>
 	</form>
 </div>";
+
+echo "
+<script type='text/javascript'>
+
+$(document).ready(function() {
+	$('#oletuspaikka').on('change', function() {
+		if ($('#oletuspaikka').is(':checked')) {
+			// enabloidaan siirra saldot checkbox
+			$('#siirra_saldot').removeAttr('disabled');
+		}
+		else {
+			// Tyhjennet‰‰n ja disabloidaan siirra saldot checkbox
+			$('#siirra_saldot').attr('disabled', 'disabled');
+			$('#siirra_saldot').removeAttr('checked');
+		}
+	});
+});
+
+</script>";
+
 
 require('inc/footer.inc');

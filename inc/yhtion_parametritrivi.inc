@@ -1310,12 +1310,21 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "lahete_nouto_allekirjoitus") {
+	if (mysql_field_name($result, $i) == "lahete_allekirjoitus") {
 
-		$sela = $selb = "";
+		$sela = $selb = $selc = $seld = $sele = "";
 
 		if ($trow[$i] == 'K') {
 			$selb = "selected";
+		}
+		elseif ($trow[$i] == 'A') {
+			$selc = "selected";
+		}
+		elseif($trow[$i] == 'E') {
+			$seld = "selected";
+		}
+		elseif($trow[$i] == 'S') {
+			$sele = "selected";
 		}
 		else {
 			$sela = "selected";
@@ -1323,7 +1332,10 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
 					<option value='' $sela>".t("Ei tulosteta allekirjoitussivua")."</option>
-					<option value='K' $selb>".t("Tulostetaan allekirjoitussivu")."</option>
+					<option value='A' $selc>".t("Tulostetaan allekirjoitus samalle sivulle vain kun toimitustapa on nouto")."</option>
+					<option value='K' $selb>".t("Tulostetaan erillinen allekirjoitussivu vain kun toimitustapa on nouto")."</option>
+					<option value='E' $seld>".t("Tulostetaan erillinen allekirjoitussivu kaikilla toimitustavoilla")."</option>
+					<option value='S' $sele>".t("Tulostetaan allekirjoitussivu samalle sivulle kaikilla toimitustavoilla")."</option>
 				</select></td>";
 
 		$jatko = 0;
@@ -3027,6 +3039,19 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == 'oletusvarasto_tilaukselle') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'O' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Ei esivalita myyntitilaukselle käyttäjän oletusvarastoa")."</option>";
+		$ulos .= "<option value = 'O' {$sel}>".t("Esivalitaan myyntitilaukselle käyttäjän oletusvarasto")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'siirtolistatyyppi') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

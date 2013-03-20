@@ -135,7 +135,13 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$varasto = 0;
 
 			if (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
+				// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan $kukarow['varasto']
 				$varasto = $kukarow['varasto'];
+			}
+			// valitaan käyttäjän oletus varasto
+			elseif ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int) $kukarow["oletus_varasto"] > 0) {
+				// jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletus varasto
+				$varasto = $kukarow['oletus_varasto'];
 			}
 
 			if ($yhtiorow["splittauskielto"] != '') {
@@ -212,7 +218,13 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$varasto = 0;
 
 			if (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
+				// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan $kukarow['varasto']
 				$varasto = $kukarow['varasto'];
+			}
+			// valitaan käyttäjän oletus varasto
+			elseif ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int) $kukarow["oletus_varasto"] > 0) {
+				// jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletus varasto
+				$varasto = $kukarow['oletus_varasto'];
 			}
 		}
 

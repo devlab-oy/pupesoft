@@ -97,7 +97,20 @@ if (isset($submit) and trim($submit) != '') {
 				$errors[] = t("Varaston tuotepaikkaa ($hyllyalue-$hyllynro-$hyllyvali-$hyllytaso) ei ole perustettu").'.';
 			}
 
+			// Ei sarjanumerollisia tuotteita
+			$query = "SELECT sarjanumeroseuranta
+						FROM tuote
+						WHERE yhtio='{$kukarow['yhtio']}'
+						AND tuoteno='{$row['tuoteno']}'";
+			$result = pupe_query($query);
+			$tuote = mysql_fetch_assoc($result);
+
+			if ($tuote['sarjanumeroseuranta'] != '' and $siirra_saldot == 'on') {
+				$errors[] = t("Saldojen siirto ei tue sarjanumerollisia tuotteita");
+			}
+
 			if (count($errors) == 0) {
+
 				// Oletuspaikka checkboxi
 				if ($oletuspaikka == 'on') {
 					$oletus = 'X';
@@ -116,6 +129,7 @@ if (isset($submit) and trim($submit) != '') {
 				// Tarkistetaan onko syötetty hyllypaikka jo tälle tuotteelle
 				$tuotteen_oma_hyllypaikka = "	SELECT * FROM tuotepaikat
 												WHERE tuoteno ='$row[tuoteno]'
+												AND yhtio     ='{$kukarow['yhtio']}'
 												AND hyllyalue ='$hyllyalue'
 												AND hyllynro  ='$hyllynro'
 												AND hyllyvali ='$hyllyvali'
@@ -124,8 +138,19 @@ if (isset($submit) and trim($submit) != '') {
 
 				// Jos syötettyä paikkaa ei ole tämän tuotteen, lisätään uusi tuotepaikka
 				if (mysql_num_rows($oma_paikka) == 0) {
-					#lisaa_tuotepaikka($row['tuoteno'], $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], 'Saapumisessa', $oletus);
 					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, 'Saapumisessa', $oletus, $halytysraja, $tilausmaara);
+				}
+				else {
+					// Nollataan poistettava kenttä varmuuden vuoksi
+					$query = "UPDATE tuotepaikat SET
+								poistettava 	= ''
+								WHERE tuoteno 	= '{$row['tuoteno']}'
+								AND yhtio     	= '{$kukarow['yhtio']}'
+								AND hyllyalue 	= '$hyllyalue'
+								AND hyllynro  	= '$hyllynro'
+								AND hyllyvali 	= '$hyllyvali'
+								AND hyllytaso 	= '$hyllytaso'";
+					pupe_query($query);
 				}
 
 				// Päivitetään oletuspaikat jos tehdään tästä oletuspaikka
@@ -134,7 +159,7 @@ if (isset($submit) and trim($submit) != '') {
 					$paivitetty_paikka = paivita_oletuspaikka($row['tuoteno'], $hylly);
 
 					// Siirretään saldot jos on siirrettävää
-					if ($siirra_saldot == 'on' and $saldo['myytavissa'] > 0) {
+					if ($siirra_saldot == 'on' and $saldo['myytavissa'] > 0 and $tuote['sarjanumeroseuranta'] == '') {
 
 						// Siirretään saldot vanhasta oletuspaikasta uuteen oletuspaikkaan
 						// Poistetaan VANHALTA tuotepaikalta siirrettävä määrä

@@ -5807,11 +5807,11 @@ if ($tee == '') {
 							echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle</td>";
 						}
 					}
-					elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
+					elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE" or $toim == "RIVISYOTTO") {
 						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle ".strtolower($row["yksikko"])."</td>";
 					}
 					else {
-						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle ".strtolower($row["yksikko"])."</td>";
+						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle</td>";
 					}
 				}
 

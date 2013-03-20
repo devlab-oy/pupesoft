@@ -1754,9 +1754,18 @@
 
 					$sel = '';
 
-					// Jos kukarow varasto on vain YKSI varasto ja oletus varasto ei valittu, niin silloin valitaan $kukarow['varasto']
-					//jos $kukarow['oletus_varasto'] valittu valitaan se
-					if ($varow['tunnus'] == $srow["varasto"] or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_varasto'] = '') or ($varow['tunnus'] == $kukarow['oletus_varasto'] and $srow['varasto'] == '')) $sel = 'selected';
+					if($yhtiorow['esivalinta_varasto'] == 'O') {
+						//jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletus varasto
+						if ($varow['tunnus'] == $srow["varasto"] or ($varow['tunnus'] == $kukarow['oletus_varasto'] and $srow['varasto'] == '')) {
+							$sel = 'selected';
+						}
+					}
+					else {
+						// Jos kukarow varasto on vain YKSI varasto ja oletus varasto ei valittu, niin silloin valitaan $kukarow['varasto']
+						if ($varow['tunnus'] == $srow["varasto"] or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '')) {
+							$sel = 'selected';
+						}
+					}
 
 					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 				}

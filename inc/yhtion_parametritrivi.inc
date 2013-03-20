@@ -3024,6 +3024,19 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == 'esivalinta_varasto') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'O' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Ei esivalita myyntitilaukselle käyttäjän oletusvarastoa")."</option>";
+		$ulos .= "<option value = 'O' {$sel}>".t("Esivalitaan myyntitilaukselle käyttäjän oletusvarasto")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'siirtolistatyyppi') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

@@ -270,26 +270,6 @@ if(!function_exists("asiakastarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "panttitili" and trim($t[$i]) == '') {
-
-			if (trim($t[$i]) != trim($trow[$i])) {
-				$query = "	SELECT *
-							FROM panttitili
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND asiakas = '{$tunnus}'
-							AND status = ''
-							AND kaytettypvm = '0000-00-00'
-							AND kaytettytilausnro = 0
-							AND tuoteno != ''";
-				$chk_res = pupe_query($query);
-
-				if (mysql_num_rows($chk_res) > 0) {
-					$virhe[$i] = t("Asiakkaalla panttitilill‰ aktiivisia tuotteita, panttitili‰ ei voi kytke‰ pois p‰‰lt‰").".";
-					$errori = 1;
-				}
-			}
-		}
-
 		if (mysql_field_name($result, $i) == "toim_maa") {
 			$apu_toim_maa = $t[$i];
 		}
@@ -329,6 +309,9 @@ if(!function_exists("asiakastarkista")) {
 				$virhe[$i] = t("Pakollinen kentt‰ kun laskutus nimi on annettu")."!";
 				$virhe[$laskutus_talteen_i] = t("Pakollisia: laskutusosoite, laskutus postinumero, laskutus postitoimipaikka")."!";
 			}
+
+			$laskutus_talteen = "";
+			$laskutus_talteen_i = "";
 		}
 	}
 }

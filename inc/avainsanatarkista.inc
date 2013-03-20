@@ -44,10 +44,9 @@ if(!function_exists("avainsanatarkista")) {
 					$virhe[$i] = t("Selitteen ensimm‰inen kirjain pit‰‰ olla #");
 				}
 				elseif (strlen($tem_selite) != 4 and strlen($tem_selite) != 7) {
-					$virhe[$i] = t("Selite t‰ytyy olla 4 tai 7 merkki‰ pitk‰").' '.strlen($tem_selite);
+					$virhe[$i] = t("Selite t‰ytyy olla 4 tai 7 merkki‰ pitk‰");
 				}
 			}
-
 
 			if (strtoupper($tem_laji) == "ALVULK") {
 				//	ALV pit‰‰ olla pisteell‰, ei pilkulla

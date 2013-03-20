@@ -69,7 +69,8 @@ if(!function_exists("liitetiedostottarkista")) {
 					$kayttotarkoitus_lisa = " and kayttotarkoitus = 'MU' ";
 				}
 
-				$file_name = mysql_real_escape_string($_FILES['liite_data']['name']);
+				// sallitut merkit listattu, kaikki muut poistetaan filenamesta...
+				$file_name = preg_replace("/[^A-Z0-9\._\-%]/i", "", $_FILES['liite_data']['name']);
 
 				//ehkä kieli whereen
 				$query = "  SELECT filename, kayttotarkoitus

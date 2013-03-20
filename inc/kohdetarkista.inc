@@ -10,7 +10,7 @@
                 // Ei tsekata turhaan kun rivi dellataan luedatasta
                 if ($chastunn != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 
-                    unset($result);
+                    unset($chasresult);
 
                     if (is_numeric($chastunn) and $chastunn > 0) {
                         $query	= "	SELECT *
@@ -18,10 +18,10 @@
                                     WHERE yhtio = '$kukarow[yhtio]'
                                     and laji != 'P'
                                     and tunnus = '$chastunn'";
-                        $result = mysql_query($query) or pupe_error($query);
+                        $chasresult = mysql_query($query) or pupe_error($query);
                     }
 
-                    if (!isset($result) or (isset($result) and mysql_num_rows($result) != 1)) {
+                    if (!isset($chasresult) or (isset($chasresult) and mysql_num_rows($chasresult) != 1)) {
 
                         $ytunnus 		= $chastunn;
                         $kutsuja 		= "yllapito.php";
@@ -43,6 +43,7 @@
                         }
                     }
                 }
+
                 if (!isset($virhe[$i]) and $chastunn == '') {
                     $virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
                 }

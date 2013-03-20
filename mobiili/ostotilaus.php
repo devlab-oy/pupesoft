@@ -11,39 +11,40 @@ elseif (@include_once("inc/parametrit.inc"));
 
 if(!isset($errors)) $errors = array();
 
-
-// Nollataan kuka.kesken
+// Jos uusi parametri on setattu nollataan kuka.kesken
 if (isset($uusi)) {
 	$nollaus_query = "UPDATE kuka SET kesken=0 WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
 	$result = pupe_query($nollaus_query);
 }
+// Katsotaan onko k‰ytt‰j‰lle keskener‰ist‰ saapumista
 else {
 	$query = "	SELECT kesken
 				FROM kuka
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND kuka='{$kukarow['kuka']}'";
+				JOIN lasku ON (kuka.yhtio=lasku.yhtio AND kuka.kesken=lasku.tunnus AND lasku.tila='K' AND lasku.alatila NOT IN ('X','I'))
+				WHERE kuka.kuka = '{$kukarow['kuka']}'
+				AND kuka.yhtio  = '{$kukarow['yhtio']}'";
 	$result = pupe_query($query);
 	$kesken_row = mysql_fetch_assoc($result);
 
-	//jos k‰ytt‰j‰ll‰ ei ole mit‰‰n tilausta kesken, haetaan k‰ytt‰j‰n viimeisimm‰ksi luotu saapumisotsikko ja jatketaan sit‰
+	// Jos k‰ytt‰j‰ll‰ ei ole keskener‰ist‰ saapumista, haetaan k‰ytt‰j‰n viimeisimm‰ksi luotu saapumisotsikko ja jatketaan sit‰
 	if ($kesken_row['kesken'] == 0) {
-		//haetaan uusin saapumisen tunnus ja setataan se kesken kolumniin
+
+		// Haetaan k‰ytt‰j‰n uusin saapumisen tunnus ja setataan se kesken kolumniin
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laatija = '{$kukarow['kuka']}'
 					AND tila = 'K'
-					AND alatila NOT IN ('X', 'I')
+					AND alatila NOT IN ('X','I')
 					ORDER BY luontiaika DESC
 					LIMIT 1";
 		$result = pupe_query($query);
-
 		$saapuminen_row = mysql_fetch_assoc($result);
 
 		$kesken_query = "	UPDATE kuka
 							SET kesken = '{$saapuminen_row['tunnus']}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND kuka = '{$kukarow['kuka']}'";
+							AND kuka    = '{$kukarow['kuka']}'";
 		pupe_query($kesken_query);
 	}
 }
@@ -103,7 +104,7 @@ echo "<div class='main'>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='ok' onclick='submit();' class='button'>",t("OK"),"</button>
+	<button name='submit' id='haku_nappi' value='ok' onclick='submit();' class='button'>",t("OK"),"</button>
 </form>
 </div>";
 
@@ -115,6 +116,15 @@ echo "</div>";
 
 echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
 echo "<script type='text/javascript'>
+
+	$(document).ready(function() {
+		$('#viivakoodi').on('keyup', function() {
+			// Autosubmit vain jos on syˆtetty tarpeeksi pitk‰ viivakoodi
+			if ($('#viivakoodi').val().length > 8) {
+				document.getElementById('haku_nappi').click();
+			}
+		});
+	});
 
 	function doFocus() {
 	        var focusElementId = 'viivakoodi';

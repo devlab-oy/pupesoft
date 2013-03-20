@@ -1802,10 +1802,10 @@
 
 			echo "<tr>";
 
-			$query = "	SELECT distinct myyja, nimi
+			$query = "	SELECT DISTINCT myyja, nimi
 						FROM kuka
-						WHERE yhtio='$kukarow[yhtio]'
-						AND myyja>0
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND myyja > 0
 						ORDER BY myyja";
 			$sresult = pupe_query($query);
 

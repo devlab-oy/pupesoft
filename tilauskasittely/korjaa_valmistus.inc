@@ -204,7 +204,7 @@
 					 			FROM sarjanumeroseuranta
 								WHERE yhtio 		 = '$kukarow[yhtio]'
 								and tuoteno			 = '$raakaainerow[tuoteno]'
-								and myyntirivitunnus = '$raakaainerow[tunnus]
+								and myyntirivitunnus = '$raakaainerow[tunnus]'
 								LIMIT 1";
 					$result = pupe_query($query);
 

@@ -1,6 +1,6 @@
 <?php
 
-	// Ohjelma vatii muuttujan $otunnus joka viittaa keikkaan johon rivit on kohdistettu.
+	// Ohjelma vatii muuttujan $otunnus joka viittaa saapumiseen johon rivit on kohdistettu.
 	// sekä $laskurow arrayn jossa on keikka jossa tunnus on $otunnus
 	require_once('pdflib/phppdflib.class.php');
 

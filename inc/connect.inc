@@ -30,7 +30,7 @@ if ($useslave > 0) {
 
 // Käytetään slave kantaa
 if ($useslave > 0) {
-	if ($usemastertoo > 0) {
+	if (isset($usemastertoo) and $usemastertoo > 0) {
 		// Tässä tapauksessa käytetään MYÖS master-kantaa
 		$masterlink = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
 		mysql_select_db($dbkanta, $masterlink) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");

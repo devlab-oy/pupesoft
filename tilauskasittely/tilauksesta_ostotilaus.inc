@@ -269,7 +269,7 @@
 									'tuoteno' 	=> $tilrivirow['tuoteno']
 								);
 
-								list($hinta,$netto,$ale,) = alehinta_osto($jtsro, $tuote_row, $tilrivirow['kpl']);
+								list($hinta,$netto,$ale,) = alehinta_osto($jtsro, $tuote_row, $tilrivirow['kpl'], '', '', '');
 								// lis‰t‰‰n ostotilausrivi
 								$query = "	INSERT into tilausrivi set
 											hyllyalue 		= '$jtstu[hyllyalue]',

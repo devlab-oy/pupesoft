@@ -36,7 +36,7 @@ if(!function_exists("asiakashintatarkista")) {
 			// Ei tsekata turhaan kun rivi dellataan luedatasta
 			if ($chastunn != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 
-				unset($result);
+				unset($chasresult);
 
 				if (is_numeric($chastunn) and $chastunn > 0) {
 					$query	= "	SELECT *
@@ -44,10 +44,10 @@ if(!function_exists("asiakashintatarkista")) {
 								WHERE yhtio = '$kukarow[yhtio]'
 								and laji != 'P'
 								and tunnus = '$chastunn'";
-					$result = mysql_query($query) or pupe_error($query);
+					$chasresult = mysql_query($query) or pupe_error($query);
 				}
 
-				if (!isset($result) or (isset($result) and mysql_num_rows($result) != 1)) {
+				if (!isset($chasresult) or (isset($chasresult) and mysql_num_rows($chasresult) != 1)) {
 
 					$ytunnus 		= $chastunn;
 					$kutsuja 		= "yllapito.php";
@@ -61,7 +61,7 @@ if(!function_exists("asiakashintatarkista")) {
 						$alasveto[$i] = "<select name='t[$i]'><option value=''>".t("Valitse asiakas")."</option>".$ulos2."</select>";
 						$virhe[$i]    = t("Valitse asiakas!");
 					}
-					elseif ($ytunnus != "") {
+					elseif ($ytunnus != "" and $asiakasid > 0) {
 						$t[$i]  = $asiakasid;
 						if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") === FALSE) $virhe[$i] = t("Asiakas löytyi!");
 					}

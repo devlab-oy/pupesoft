@@ -41,6 +41,9 @@
 	}
 
 	if (mysql_field_name($result, $i) == "liitostunnus") {
+		$toim_tuoteno_tunnus = $tunnus; // otetaan t‰‰ talteen
+
+		$liitostunnus = $trow[$i];
 		$tyyppi = 4;
 	}
 

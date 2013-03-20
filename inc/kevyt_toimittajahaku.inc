@@ -28,6 +28,20 @@ if ($monta == 0 and $ytunnus != '') {
 }
 
 if ($monta == 0 and $ytunnus != '') {
+	//etsitään eka koko toimittajanrolla
+	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and toimittajanro='$ytunnus' and tyyppi != 'P'";
+	$result = mysql_query($query) or pupe_error($query);
+	$monta  = mysql_num_rows($result);
+
+	if ($monta == 0) {
+		// kokeillaan toimittajanron alulla
+		$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and toimittajanro like '$ytunnus%' and tyyppi != 'P'";
+		$result = mysql_query($query) or pupe_error($query);
+		$monta  = mysql_num_rows($result);
+	}
+}
+
+if ($monta == 0 and $ytunnus != '') {
 	// kokeillaan nimen osalla
 	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and (nimi like '%$ytunnus%' or nimitark like '%$ytunnus%') and tyyppi != 'P'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -86,7 +100,18 @@ if ($monta > 1 and $monta <= $limit) {
 			}
 
 			echo "<td class='back'>";
-			echo "<form id='toimittaja_$toimittaja[tunnus]' name='toimittaja_$toimittaja[tunnus]' action=\"$PHP_SELF\" method='post'>";
+			if(stristr($PHP_SELF, 'ostolasku_asn_tarkastelu')) {
+				if($valitse == 'asn') {
+					$action = "&asn_numerot={$asn_numerot}&valitse={$valitse}";
+				}
+				else {
+					$action = "&tilausnumero={$tilausnumero}&valitse={$valitse}";
+				}
+				echo "<form id='toimittaja_$toimittaja[tunnus]' name='toimittaja_$toimittaja[tunnus]' action=\"?tee=vaihdatoimittaja{$action}\" method='post'>";
+			}
+			else {
+				echo "<form id='toimittaja_$toimittaja[tunnus]' name='toimittaja_$toimittaja[tunnus]' action=\"$PHP_SELF\" method='post'>";
+			}
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittaja[tunnus]'>";
 			echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";

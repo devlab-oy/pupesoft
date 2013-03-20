@@ -336,7 +336,7 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 			$browkieli = 'fi';
 		}
 
-		if ($mobile and include_once("mobiili/login.php"));
+		if (isset($mobile) and $mobile and include_once("mobiili/login.php"));
 		elseif (@include_once("login.php"));
 		elseif (@include_once("login_extranet.php"));
 
@@ -379,7 +379,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				echo "Your browser does not seem to support cookies.";
 			}
 			else {
-				$palvelin2 = $mobile ? $palvelin2.'mobiili/' : $palvelin2;
+				$palvelin2 = (isset($mobile) and $mobile) ? $palvelin2.'mobiili/' : $palvelin2;
 				echo "<script>setTimeout(\"parent.location.href='$palvelin2'\",0);</script>";
 			}
 			exit;
@@ -438,7 +438,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				echo "<table width='100%' height='70%'>";
 				echo "<tr>";
 				echo "<td style='text-align:center;font-size:9pt;font-family:Lucida,Verdana,Helvetica,Arial; color: #666;'>";
-				echo "<img src='http://api.devlab.fi/pupesoft.gif'><br><br>";
+				echo "<img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif'><br><br>";
 				echo "Käyttäjä {$kukarow["kuka"]} pyysi toimintoa $phpnimi $toim, joka on kielletty!";
 				echo "</td>";
 				echo "</tr>";
@@ -559,7 +559,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			echo "<meta http-equiv='expires' content='-1'>\n";
 			echo "<meta http-equiv='content-type' content='text/html; charset=$charset'>\n";
 			# Jos mobile on setattu, otetaan auto-zoom pois käytöstä
-			if ($mobile) {
+			if (isset($mobile) and $mobile) {
 				echo "<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>\n";
 				echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";
 			}
@@ -615,6 +615,38 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 							return false;
 						}
 					});
+
+					var hyllyalue_function = function() {
+
+						var hyllyalue, hyllyalue_val;
+
+						if ($(this).is(':text')) {
+							hyllyalue_tmp = $(this).attr('id');
+							hyllyalue_tmp = hyllyalue_tmp.replace(/(\[|\])/g,\"\\\\$1\");
+
+							hyllyalue = hyllyalue_tmp.split(\"_\", 1);
+
+							hyllyalue_val = $(this).val();
+						}
+						else {
+							hyllyalue_tmp = $(this).attr('id');
+							hyllyalue_tmp = hyllyalue_tmp.replace(/(\[|\])/g,\"\\\\$1\");
+
+							hyllyalue = hyllyalue_tmp.split(\"_\", 1);
+
+							hyllyalue_val = $('#'+hyllyalue).val();
+						}
+
+						var varastontunniste = $('#'+hyllyalue+'_select_varastontunniste > option:selected').val();
+
+						if (varastontunniste == undefined) varastontunniste = '';
+
+						$('#'+hyllyalue+'_hidden').val(varastontunniste+hyllyalue_val);
+					};
+
+					$('input.hyllyalue').on('keyup change blur', hyllyalue_function);
+					$('select.select_varastontunniste').on('change', hyllyalue_function);
+
 				});</script>";
 
 			echo "<title>\n$yhtiorow[nimi]</title>\n";
@@ -677,7 +709,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			$message_query = "	SELECT messenger.tunnus, left(messenger.viesti, 25) kooste, messenger.viesti, kuka.nimi, messenger.luontiaika
 								FROM messenger USE INDEX (yhtio_vastaanottaja_status)
 								JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = messenger.yhtio AND kuka.kuka = messenger.kuka)
-								WHERE messenger.yhtio in ($konserni_yhtiot) AND messenger.vastaanottaja = '$kukarow[kuka]' AND extranet='' AND messenger.status = 'X'";
+								WHERE messenger.yhtio in ($konserni_yhtiot)
+								AND messenger.vastaanottaja = '$kukarow[kuka]'
+								AND kuka.extranet = ''
+								AND messenger.status = 'X'";
 			if ($message_result = mysql_query($message_query)) {
 				if (mysql_num_rows($message_result) > 0) {
 
@@ -685,11 +720,14 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 					while ($message_row = mysql_fetch_assoc($message_result)) {
 						echo "<div id='$message_row[tunnus]'>";
-						echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'>";
-						echo "<font class='info'> $message_row[nimi] @ ".tv1dateconv($message_row['luontiaika'],'yes').": ";
-						echo "<b>$message_row[viesti]</b></font><br>";
+						echo t("Viesti käyttäjältä").": ";
+						echo "$message_row[nimi] @ ".tv1dateconv($message_row['luontiaika'],'yes').": ";
+						echo "$message_row[viesti] ";
+						echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'><br>";
 						echo "</div>";
 					}
+
+					echo "<br>";
 				}
 			}
 		}

@@ -1,10 +1,9 @@
 <?php
 
-if(!function_exists("toimitarkista")) {
+if (!function_exists("toimitarkista")) {
 	function toimitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $toimtyyppi;
-
-		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_tilinumeropos, $tmp_nimi, $tmp_ultilno_maa;
+		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_nimi, $tmp_ultilno_maa, $ytunnus_ind;
 
 		if ((mysql_field_name($result, $i) == "nimi") or
 			(mysql_field_name($result, $i) == "maa") or
@@ -71,9 +70,6 @@ if(!function_exists("toimitarkista")) {
 						}
 					}
 				}
-				else {
-					$tmp_tilinumeropos = $i;
-				}
 			}
 		}
 
@@ -100,16 +96,6 @@ if(!function_exists("toimitarkista")) {
 				$virhe[$i] = t("Virheellinen BBAN!")." $t[$i] ".t("Tilinumerossa saa olla vain kirjaimia A-Z ja/tai numeroita 0-9");
 				$errori = 1;
 			}
-
-			// generoidaan ibanista vanhanaikainen kotimainen tilinumero
-			if (!isset($errori) and isset($tmp_tilinumeropos) and $tmp_maakoodi == strtoupper($yhtiorow['maa'])) {
-				$t[$tmp_tilinumeropos] = substr($t[$i], 4);
-				unset($virhe[$tmp_tilinumeropos]);
-			}
-			elseif (isset($tmp_tilinumeropos)) {
-				$virhe[$tmp_tilinumeropos] = t("Tieto puuttuu");
-				$errori = 1;
-			}
 		}
 
 		if (mysql_field_name($result, $i) == "swift") {
@@ -131,6 +117,7 @@ if(!function_exists("toimitarkista")) {
 
 		if ((mysql_field_name($result, $i) == "ytunnus") and trim($t[$i])!='') {
 			$ytunnus = trim($t[$i]);
+			$ytunnus_ind = $i;
 
 			if ($tmp_maakoodi == 'FI' and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "T")) {
 
@@ -146,7 +133,6 @@ if(!function_exists("toimitarkista")) {
 						$virhe[$i] = t("Virheellinen henkilötunnus!");
 						$errori = 1;
 					}
-
 				}
 				else {
 					require ("tarkistaytunnus.inc");
@@ -198,18 +184,14 @@ if(!function_exists("toimitarkista")) {
 
 				$query = "	SELECT ytunnus, tunnus
 							FROM toimi
-							WHERE yhtio		= '$kukarow[yhtio]'
-							and ovttunnus	= '$t[$i]'
-							and tyyppi 	   != 'P'";
+							WHERE yhtio	  = '$kukarow[yhtio]'
+							and ovttunnus = '$t[$i]'
+							and tyyppi 	 != 'P'
+							and tunnus   != '$tunnus'";
 				$sresult = pupe_query($query);
 
-				if (mysql_num_rows($sresult)>0) {
-					$srowapu = mysql_fetch_assoc($sresult);
-
-					// ei löydetty itteämme
-					if ($srowapu['tunnus'] != $tunnus) {
-						$virhe[$i] = t("Samalla ytunnuksella '$tmp_ytunnus' on useita toimittajia! Lisää tarkenne ovt-tunnkseen.");
-					}
+				if (mysql_num_rows($sresult) > 0) {
+					$virhe[$i] = t("Samalla ytunnuksella %s on useita toimittajia! Lisää tarkenne ovt-tunnukseen.", "", $tmp_ytunnus);
 				}
 			}
 		}
@@ -230,6 +212,21 @@ if(!function_exists("toimitarkista")) {
 
 		if (mysql_field_name($result, $i) == "tyyppi") {
 			$toimtyyppi = $t[$i]; // otetaan tää talteen
+
+			if ($toimtyyppi == "K") {
+				$query = "	SELECT ytunnus
+							FROM toimi
+							WHERE yhtio = '$kukarow[yhtio]'
+							and ytunnus = '$ytunnus'
+							and tyyppi  = 'K'
+							and tunnus != '$tunnus'";
+				$vres = pupe_query($query);
+
+				if (mysql_num_rows($vres) > 0)	{
+					$virhe[$i] = $virhe[$ytunnus_ind] = t("Henkilö on jo olemassa!");
+					$errori = 1;
+				}
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "tyyppi_tieto") {
@@ -297,20 +294,16 @@ if(!function_exists("toimitarkista")) {
 				}
 			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "edi_kuvaus") {
 			$tmp_asn = $t[$i];
-	}
-		
+		}
+
 		if (mysql_field_name($result, $i) == "asn_sanomat") {
 			$asn_tyyppi = trim($t[$i]);
 			if ($tmp_asn == "editilaus_out_teccom.inc" and $asn_tyyppi == "") {
 				$virhe[$i] = t("Toimittajalle on laitettu TecCom-editilaus. Mitä sanomia toimittaja lähettää")." ?";
-}
-
-		}		
+			}
+		}
 	}
 }
-
-
-?>

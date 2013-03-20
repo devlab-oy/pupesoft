@@ -159,7 +159,7 @@
 
 	echo "<font class='message'>Vaihe 1: Lähetä yhtiötiedot APIX:lle</font><hr>";
 
-	echo "<form method = 'post'>";
+	echo "<form method = 'post' class='multisubmit'>";
 	echo "<input type='hidden' name='tee' value='SendRegistrationInfo'>";
 	echo "<input type='submit' value='Lähetä yhtiötiedot klikkaamalla tästä'>";
 	echo "</form>";
@@ -176,7 +176,7 @@
 
 	echo "<font class='message'>Vaihe 3: Ota APIX laskutus käyttöön Pupesoft:issa antamalla APIX käyttäjätietosi</font><hr>";
 
-	echo "<form method = 'post'>";
+	echo "<form method = 'post' class='multisubmit'>";
 	echo "<input type='hidden' name='tee' value='RetrieveTransferID'>";
 	echo "<table>";
 	echo "<tr><th>Käyttäjätunnus</th><td><input type='text' size='20' name='username' value='$username'></td></tr>";

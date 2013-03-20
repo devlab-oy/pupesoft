@@ -441,7 +441,7 @@
 
 			echo "<table><tr><th>".t("Siirrä paikalle")."</th></tr>
 			<tr><td>
-			".t("Alue")." <input type = 'text' name = 'hyllyalue' size = '5' maxlength='5' value = ''>
+			".t("Alue")." ",hyllyalue("hyllyalue", ''),"
 			".t("Nro")."  <input type = 'text' name = 'hyllynro'  size = '5' maxlength='5' value = ''>
 			".t("Väli")." <input type = 'text' name = 'hyllyvali' size = '5' maxlength='5' value = ''>
 			".t("Taso")." <input type = 'text' name = 'hyllytaso' size = '5' maxlength='5' value = ''>
@@ -776,14 +776,14 @@
 		echo "<input type='hidden' name='tee' value='LISTAA'>";
 
 		echo "<tr><th>".t("Alkuvarastopaikka:")."</th>
-				<td><input type='text' size='6' name='ahyllyalue'>
+				<td>",hyllyalue("ahyllyalue", ''),"
 				<input type='text' size='6' name='ahyllynro'>
 				<input type='text' size='6' name='ahyllyvali'>
 				<input type='text' size='6' name='ahyllytaso'>
 				</td></tr>";
 
 		echo "<tr><th>".t("Loppuvarastopaikka:")."</th>
-				<td><input type='text' size='6' name='lhyllyalue'>
+				<td>",hyllyalue("lhyllyalue", ''),"
 				<input type='text' size='6' name='lhyllynro'>
 				<input type='text' size='6' name='lhyllyvali'>
 				<input type='text' size='6' name='lhyllytaso'>
@@ -902,5 +902,3 @@
 	}
 
 	require ("inc/footer.inc");
-
-?>

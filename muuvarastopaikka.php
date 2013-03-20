@@ -792,7 +792,6 @@
 
 		if (mysql_num_rows($result) == 0) {
 			if (kuuluukovarastoon($ahyllyalue, $ahyllynro) != 0 and $ahyllyalue != '' and $ahyllynro != '' and $ahyllyvali != '' and $ahyllytaso != '' and $ahyllyalue != "!!M") {
-				echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
 
 				$kaikki_ok = true;
 
@@ -803,16 +802,12 @@
 					$ahyllyvali = strtoupper($ahyllyvali);
 					$ahyllytaso = strtoupper($ahyllytaso);
 
-					if (!isset($select_varasto) or trim($select_varasto) == "") {
-						$kaikki_ok = false;
+					$kaikki_ok = tarkista_varaston_hyllypaikka($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso);
 					}
-					else {
 
-						$select_varasto = (int) $select_varasto;
-
-						$kaikki_ok = tarkista_varaston_hyllypaikka($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso);
+				if ($yhtiorow['varastontunniste'] != '') {
+					if (!isset($select_varastontunniste) or trim($select_varastontunniste) == "") $kaikki_ok = false;
 					}
-				}
 
 				if ($kaikki_ok) {
 					echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
@@ -1213,36 +1208,10 @@
 				<input type='hidden' name='tuoteno' value='$tuoteno'>
 				<tr><th>".t("Lis‰‰ uusi varastopaikka")."</th></tr>
 				<tr><td>
-				".t("Alue")." <input type = 'text' name = 'ahyllyalue' size = '5' maxlength='5' value = '$ahyllyalue'>
+				".t("Alue")." ",hyllyalue('ahyllyalue', $ahyllyalue),"
 				".t("Nro")."  <input type = 'text' name = 'ahyllynro'  size = '5' maxlength='5' value = '$ahyllynro'>
 				".t("V‰li")." <input type = 'text' name = 'ahyllyvali' size = '5' maxlength='5' value = '$ahyllyvali'>
 				".t("Taso")." <input type = 'text' name = 'ahyllytaso' size = '5' maxlength='5' value = '$ahyllytaso'>";
-
-		if ($yhtiorow['kerayserat'] == 'K') {
-
-			echo "&nbsp;<select name='select_varasto'>";
-
-			echo "<option value=''>",t("Valitse varasto"),"</option>";
-
-			$varastopaikkalisa = $oletusvarasto_chk != '' ? "AND tunnus = '{$oletusvarasto_chk}'" : "";
-
-			$query = "	SELECT tunnus, nimitys
-						FROM varastopaikat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tyyppi != 'P'
-						{$varastopaikkalisa}
-						ORDER BY tyyppi, nimitys";
-			$varastores = pupe_query($query);
-
-			while ($varastorow = mysql_fetch_assoc($varastores)) {
-
-				$sel = $select_varasto == $varastorow['tunnus'] ? " selected" : ($kukarow['oletus_varasto'] == $varastorow['tunnus'] ? " selected" : "");
-
-				echo "<option value='{$varastorow['tunnus']}'{$sel}>{$varastorow['nimitys']}</option>";
-			}
-
-			echo "</select>";
-		}
 
 		echo "	</td></tr>
 				<tr><td><input type = 'submit' value = '".t("Lis‰‰")."'></td></tr>

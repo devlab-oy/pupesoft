@@ -69,6 +69,49 @@
 		}
 	}
 
+	if ($tee == 'paivita_kaikki_yhteen') {
+
+		$uusi_pakkaus = array();
+		$kilot = $kuutiot = $lavametrit = 0;
+
+		foreach ($uusi_pakkaus_kaikki_yhteen as $sscc => $pak) {
+
+			if ($pak != "") {
+
+				$query = "	SELECT DISTINCT IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) sscc
+							FROM kerayserat
+							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+							AND kerayserat.otunnus IN ({$otunnukset})
+							GROUP BY 1
+							ORDER BY 1";
+				$keraysera_res = pupe_query($query);
+
+				while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
+					$uusi_pakkaus[$keraysera_row['sscc']] = "{$pak}####{$sscc}";
+				}
+
+				unset($uusi_pakkaus[$sscc]);
+
+				$uusi_pakkaus = array($sscc => $pak) + $uusi_pakkaus;
+
+				$tee = 'paivita';
+			}
+		}
+
+		$query = "	SELECT SUM(kilot) kilot,
+					SUM(kuutiot) kuutiot,
+					SUM(lavametri) lavametri
+					FROM rahtikirjat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND otsikkonro IN ({$otunnukset})";
+		$sumres = pupe_query($query);
+		$sumrow = mysql_fetch_assoc($sumres);
+
+		$kilot = $sumrow['kilot'];
+		$kuutiot = $sumrow['kuutiot'];
+		$lavametrit = $sumrow['lavametri'];
+	}
+
 	if ($tee == 'paivita') {
 
 		foreach ($uusi_pakkaus as $sscc => $pak) {
@@ -117,7 +160,8 @@
 				$check_res = pupe_query($query);
 
 				$rahtikirjarivit = $otunnukset = array();
-				$kilot = $kuutiot = $lavametrit = 0;
+
+				if (count($uusi_pakkaus_kaikki_yhteen) == 0) $kilot = $kuutiot = $lavametrit = 0;
 
 				while ($check_row = mysql_fetch_assoc($check_res)) {
 
@@ -132,9 +176,11 @@
 					while ($rahtikirjat_row = mysql_fetch_assoc($rahtikirjat_res)) {
 						$rahtikirjarivit[$rahtikirjat_row['otsikkonro']] = $rahtikirjat_row;
 
-						$kilot += $rahtikirjat_row['kilot'];
-						$kuutiot += $rahtikirjat_row['kuutiot'];
-						$lavametrit += $rahtikirjat_row['lavametri'];
+						if (count($uusi_pakkaus_kaikki_yhteen) == 0) {
+							$kilot += $rahtikirjat_row['kilot'];
+							$kuutiot += $rahtikirjat_row['kuutiot'];
+							$lavametrit += $rahtikirjat_row['lavametri'];
+						}
 
 						if ($toisen_sscc == "") {
 							$query = "	DELETE FROM rahtikirjat
@@ -175,6 +221,17 @@
 
 						if ($kilot == 0 and $kuutiot == 0 and $lavametrit == 0) continue;
 
+						if (count($uusi_pakkaus_kaikki_yhteen) > 0) {
+							$updlisa = "kilot = {$kilot},
+										kuutiot = {$kuutiot},
+										lavametri = {$lavametrit}";
+						}
+						else {
+							$updlisa = "kilot = kilot + {$kilot},
+										kuutiot = kuutiot + {$kuutiot},
+										lavametri = lavametri + {$lavametrit}";
+						}
+
 						// Tarkistetaan aluksi montako riviä kyseisellä rahtikirjalla on
 						// Jos rivejä on > 1, päivitetään vaan ensimmäistä löytyvää riviä
 						$query = "	SELECT tunnus
@@ -190,18 +247,14 @@
 							$row_count_chk_row = mysql_fetch_assoc($row_count_chk_res);
 
 							$query = "	UPDATE rahtikirjat SET
-										kilot = kilot + {$kilot},
-										kuutiot = kuutiot + {$kuutiot},
-										lavametri = lavametri + {$lavametrit}
+										{$updlisa}
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row_count_chk_row['tunnus']}'";
 							$updres = pupe_query($query);
 						}
 						else {
 							$query = "	UPDATE rahtikirjat SET
-										kilot = kilot + {$kilot},
-										kuutiot = kuutiot + {$kuutiot},
-										lavametri = lavametri + {$lavametrit}
+										{$updlisa}
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND otsikkonro = '{$toisen_row['otunnus']}'
 										AND pakkaus = '{$pak_row['pakkaus']}'
@@ -271,6 +324,8 @@
 		echo "<th>",t("Uusi pakkaus"),"</th>";
 		echo "</tr>";
 
+		$kaikki_yhteen_pakkaukseen_sscc = "";
+
 		while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
 
 			$query = "	SELECT IFNULL(pakkaus.pakkaus, 'MUU KOLLI') pakkaus,
@@ -329,12 +384,41 @@
 			echo "</select></td>";
 
 			echo "</tr>";
+
+			$kaikki_yhteen_pakkaukseen_sscc = $keraysera_row['sscc'];
 		}
 
 		echo "<tr><th colspan='5'><input type='submit' value='",t("Tee"),"' /></th></tr>";
-
 		echo "</table>";
 		echo "</form>";
+
+		if ($kaikki_yhteen_pakkaukseen_sscc != "") {
+			echo "<br /><br />";
+			echo "<form method='post' action='?tee=paivita_kaikki_yhteen&select_varasto={$select_varasto}&checkbox_parent[]={$checkbox_parent[0]}&otunnukset={$otunnukset}&lopetus={$lopetus}'>";
+
+			echo "<table>";
+			echo "<tr>";
+			echo "<th>",t("Kaikki pakkaukset yhteen"),"</th>";
+			echo "</tr>";
+
+			echo "<tr><td><select name='uusi_pakkaus_kaikki_yhteen[{$kaikki_yhteen_pakkaukseen_sscc}]'>";
+			echo "<option value=''>",t("Valitse"),"</option>";
+			echo "<option value='muu_kolli'>",t("Yksin keräilyalustalle"),"</option>";
+
+			$query = "	SELECT *
+						FROM pakkaus
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						ORDER BY pakkaus, pakkauskuvaus";
+			$pak_res = pupe_query($query);
+
+			while ($pak_row = mysql_fetch_assoc($pak_res)) {
+				echo "<option value='{$pak_row['tunnus']}'>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
+			}
+
+			echo "</select></td></tr>";
+			echo "<tr><th><input type='submit' value='",t("Tee"),"' /></th></tr>";
+			echo "</table></form>";
+		}
 	}
 
 	if ($tee == '' and isset($checkbox_parent) and count($checkbox_parent) == 1) {

@@ -182,7 +182,7 @@ if ($korjataan != '') {
 						<input type='hidden' name='tilattava[$id]' value='$tilattava[$id]'>
 						<input type='hidden' name='rivipaikka[$id]' value=''>
 						<input type='hidden' name='uusipaikka[$id]' value='uusi'>
-						<input type='text' name='hyllyalue[$id]' value='$hyllyalue[$id]' maxlength='3' size='3'>
+						",hyllyalue("hyllyalue[{$id}]", $hyllyalue[$id]),"
 						<input type='text' name='hyllynro[$id]' value='$hyllynro[$id]' maxlength='2' size='2'>
 						<input type='text' name='hyllyvali[$id]' value='$hyllyvali[$id]' maxlength='2' size='2'>
 						<input type='text' name='hyllytaso[$id]' value='$hyllytaso[$id]' maxlength='2' size='2'></td>";
@@ -298,7 +298,7 @@ else {
 			<br>";
 
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data'> <table>";
-			echo "<tr><td>".t("Valitse varasto:")."</td>
+			echo "<tr><th>".t("Valitse varasto:")."</th>
 				<td><select name='tuvarasto'>";
 
 	$query = "	SELECT tunnus, nimitys
@@ -333,5 +333,3 @@ else {
 }
 
 require ("inc/footer.inc");
-
-?>

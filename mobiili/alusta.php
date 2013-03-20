@@ -38,7 +38,14 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
-			$error['alusta'] = "<font class='error'>".t("Alustaa ei ole olemassa.")."</font>";
+			$return2 = etsi_kasittelemattomat_asn_sanomat(trim($alusta));
+
+			if(!empty($return2)) {
+				$error['alusta'] = "<font class='error'>".t("Alustaa ei voida vielä ottaa käsittelyyn (käsittelemätön ASN-sanoma). Hae uudestaan.").".</font>";
+			}
+			else {
+				$error['alusta'] = "<font class='error'>".t("Alustaa ei ole olemassa.")."</font>";
+			}
 		}
 		else {
 			$return = etsi_suuntalava_sscc(trim($alusta));
@@ -58,7 +65,7 @@ echo "<div class='header'>
 </div>";
 
 echo "<div class='main'>
-	<form method='post' action=''>
+	<form method='post' action='' id='haku_formi'>
 	<table>
 		<tr>
 			<th>ALUSTA</th>
@@ -102,13 +109,22 @@ echo "</table>";
 echo "</div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='submit' class='button' onclick='submit();'>",t($valinta, $browkieli),"</button>
+	<button name='submit' id='haku_nappi' value='submit' class='button' onclick='submit();'>",t($valinta, $browkieli),"</button>
 	</form>
 </div>";
 
-# Autofocus opera mobileen
+// Autofocus opera mobileen
 echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
 echo "<script type='text/javascript'>
+
+	$(document).ready(function() {
+		$('#alusta').on('keyup', function() {
+			// Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
+			if ($('#alusta').val().length > 6) {
+				document.getElementById('haku_nappi').click();
+			}
+		});
+	});
 
 	function doFocus() {
 	        var focusElementId = 'alusta';

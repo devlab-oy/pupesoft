@@ -9,9 +9,12 @@
 	# 3 -> viitesiirto
 	# 5 -> suoraveloitus
 	# 9 -> summatietue
-	$type = substr($tietue,0,1);
+    # S -> factoringrivi, alatyyppi positiossa 88 (numerointi alkaa yhdestä)
 
-	if ($type == 0) {
+	$type = substr($tietue,0,1);
+    $factoring_oikaisutunnus = substr($tietue, 87, 1);
+
+	if ($type == '0') {
 		#print "Tietuetunnus => $type\n";
 		#print "Aineston luontipv => ".substr($tietue,1,6)."\n";
 		#print "Aineston luontiaika => ".substr($tietue,7,4)."\n";
@@ -20,13 +23,19 @@
 		#print "Rahayksikön koodi => ".substr($tietue,22,1)."\n";
 		#print "Varalla => ".substr($tietue,23,67)."\n";
 	}
-	elseif ($type == 3) {
+	elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
 
 		#viitesiirto
 		#print "Oikaisutunnus => ".substr($tietue,87,1)."\n";
 		#print "Välitystapa => ".substr($tietue,88,1)."\n";
 		#print "Palautekoodi => ".substr($tietue,89,1)."\n";
-		$account = substr($tietue,1,14);
+
+        if ($type == 'S') {
+            $account = $tiliotedatarow['tilino'];
+        }
+        else {
+            $account = substr($tietue,1,14);
+        }
 
 		$payer_name = substr($tietue,63,12);
 
@@ -99,7 +108,7 @@
 		$dataupdres = pupe_query($query);
 
 	}
-	elseif ($type == 9) {
+	elseif ($type == '9') {
 		#print "Tietuetunnus => $type\n";
 		#print "Tapahtumien kpl => ".substr($tietue,1,6)."\n";
 		#print "Tapahtumien määrä => ".substr($tietue,7,11)."\n";

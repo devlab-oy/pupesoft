@@ -473,14 +473,14 @@
 		if ($toim == 'VASTAANOTA_REKLAMAATIO') {
 			for ($a=0; $a < count($kerivi); $a++) {
 				// varastorekla on dropdown ja vertaushylly on kannasta
-				if ((trim($varastorekla[$kerivi[$a]]) == trim($vertaus_hylly[$kerivi[$a]])) and $rekla_hyllyalue[$kerivi[$a]] != '' and $rekla_hyllynro[$kerivi[$a]] != '') {
-					if (kuuluukovarastoon($rekla_hyllyalue[$kerivi[$a]], $rekla_hyllynro[$kerivi[$a]], '') == 0) {
-						echo "<font class='error'>".t("VIRHE: Tuotenumerolle")." ".$rivin_tuoteno[$kerivi[$a]]." ".t("annettu paikka")." ".$rekla_hyllyalue[$kerivi[$a]]."-".$rekla_hyllynro[$kerivi[$a]]."-".$rekla_hyllyvali[$kerivi[$a]]."-".$rekla_hyllytaso[$kerivi[$a]]." ".t("ei kuulu mihink‰‰n varastoon")."!</font><br>";
+				if ((trim($varastorekla[$kerivi[$a]]) == trim($vertaus_hylly[$kerivi[$a]])) and $reklahyllyalue[$kerivi[$a]] != '' and $reklahyllynro[$kerivi[$a]] != '') {
+					if (kuuluukovarastoon($reklahyllyalue[$kerivi[$a]], $reklahyllynro[$kerivi[$a]], '') == 0) {
+						echo "<font class='error'>".t("VIRHE: Tuotenumerolle")." ".$rivin_tuoteno[$kerivi[$a]]." ".t("annettu paikka")." ".$reklahyllyalue[$kerivi[$a]]."-".$reklahyllynro[$kerivi[$a]]."-".$reklahyllyvali[$kerivi[$a]]."-".$reklahyllytaso[$kerivi[$a]]." ".t("ei kuulu mihink‰‰n varastoon")."!</font><br>";
 						$virherivi++;
 					}
 				}
 
-				if ((trim($varastorekla[$kerivi[$a]]) != trim($vertaus_hylly[$kerivi[$a]])) and $rekla_hyllyalue[$kerivi[$a]] != '') {
+				if ((trim($varastorekla[$kerivi[$a]]) != trim($vertaus_hylly[$kerivi[$a]])) and $reklahyllyalue[$kerivi[$a]] != '') {
 					echo "<font class='error'>".t("VIRHE: Tuotenumerolle")." ".$rivin_tuoteno[$kerivi[$a]]." ".t("voi antaa vain yhden paikan per rivi")."</font><br>";
 					$virherivi++;
 				}
@@ -1143,22 +1143,22 @@
 
 							if (trim($varastorekla[$apui]) != '' and trim($vertaus_hylly[$apui]) != trim($varastorekla[$apui])) {
 								// Ollaan valittu varastopaikka dropdownista
-								list($rekla_hyllyalue, $rekla_hyllynro, $rekla_hyllyvali, $rekla_hyllytaso) = explode("###", $varastorekla[$apui]);
+								list($reklahyllyalue, $reklahyllynro, $reklahyllyvali, $reklahyllytaso) = explode("###", $varastorekla[$apui]);
 							}
-							elseif (trim($vertaus_hylly[$apui]) == trim($varastorekla[$apui]) and $rekla_hyllyalue[$apui] != '') {
+							elseif (trim($vertaus_hylly[$apui]) == trim($varastorekla[$apui]) and $reklahyllyalue[$apui] != '') {
 								// Ollaan syˆtetty varastopaikka k‰sin
-								$rekla_hyllyalue = $rekla_hyllyalue[$apui];
-								$rekla_hyllynro  = $rekla_hyllynro[$apui];
-								$rekla_hyllyvali = $rekla_hyllyvali[$apui];
-								$rekla_hyllytaso = $rekla_hyllytaso[$apui];
+								$reklahyllyalue = $reklahyllyalue[$apui];
+								$reklahyllynro  = $reklahyllynro[$apui];
+								$reklahyllyvali = $reklahyllyvali[$apui];
+								$reklahyllytaso = $reklahyllytaso[$apui];
 							}
 							else {
 								// Otetaan tuotteen oletuspaikka
-								list($rekla_hyllyalue, $rekla_hyllynro, $rekla_hyllyvali, $rekla_hyllytaso) = explode("###", $vertaus_hylly[$apui]);
+								list($reklahyllyalue, $reklahyllynro, $reklahyllyvali, $reklahyllytaso) = explode("###", $vertaus_hylly[$apui]);
 							}
 
 							// Lis‰t‰‰n paikat tilausriville
-							$query .= ", hyllyalue = '$rekla_hyllyalue', hyllynro = '$rekla_hyllynro', hyllyvali = '$rekla_hyllyvali', hyllytaso = '$rekla_hyllytaso'";
+							$query .= ", hyllyalue = '$reklahyllyalue', hyllynro = '$reklahyllynro', hyllyvali = '$reklahyllyvali', hyllytaso = '$reklahyllytaso'";
 						}
 
 						//p‰ivitet‰‰n alkuper‰inen rivi
@@ -1219,10 +1219,10 @@
 							$select = "	SELECT *
 										FROM tuotepaikat
 										WHERE yhtio 	= '$kukarow[yhtio]'
-										AND hyllyalue 	= '$rekla_hyllyalue'
-										AND hyllynro 	= '$rekla_hyllynro'
-										AND hyllyvali 	= '$rekla_hyllyvali'
-										AND hyllytaso 	= '$rekla_hyllytaso'
+										AND hyllyalue 	= '$reklahyllyalue'
+										AND hyllynro 	= '$reklahyllynro'
+										AND hyllyvali 	= '$reklahyllyvali'
+										AND hyllytaso 	= '$reklahyllytaso'
 										AND tuoteno 	= '{$rivin_puhdas_tuoteno[$apui]}'";
 							$hakures = pupe_query($select);
 							$sresults = mysql_fetch_assoc($hakures);
@@ -1232,10 +1232,10 @@
 								$select = "	INSERT into tuotepaikat set
 											yhtio 		= '$yhtiorow[yhtio]',
 											tuoteno 	= '{$rivin_puhdas_tuoteno[$apui]}',
-											hyllyalue	= '$rekla_hyllyalue',
-											hyllynro	= '$rekla_hyllynro',
-											hyllyvali	= '$rekla_hyllyvali',
-											hyllytaso	= '$rekla_hyllytaso',
+											hyllyalue	= '$reklahyllyalue',
+											hyllynro	= '$reklahyllynro',
+											hyllyvali	= '$reklahyllyvali',
+											hyllytaso	= '$reklahyllytaso',
 											laatija 	= '$kukarow[kuka]',
 											luontiaika 	= now(),
 											muutospvm 	= now(),
@@ -1250,11 +1250,11 @@
 											kplhinta	= '0',
 											hinta 		= '0',
 											laji 		= 'uusipaikka',
-											hyllyalue	= '$rekla_hyllyalue',
-											hyllynro	= '$rekla_hyllynro',
-											hyllyvali	= '$rekla_hyllyvali',
-											hyllytaso	= '$rekla_hyllytaso',
-											selite 		= '".t("Lis‰ttiin tuotepaikka")." $rekla_hyllyalue $rekla_hyllynro $rekla_hyllyvali $rekla_hyllytaso',
+											hyllyalue	= '$reklahyllyalue',
+											hyllynro	= '$reklahyllynro',
+											hyllyvali	= '$reklahyllyvali',
+											hyllytaso	= '$reklahyllytaso',
+											selite 		= '".t("Lis‰ttiin tuotepaikka")." $reklahyllyalue $reklahyllynro $reklahyllyvali $reklahyllytaso',
 											laatija 	= '$kukarow[kuka]',
 											laadittu 	= now()";
 								$result = pupe_query($select);
@@ -1718,6 +1718,7 @@
 
 					$tilausnumeroita_backup 	= $tilausnumeroita;
 					$lahete_tulostus_paperille 	= 0;
+					$lahete_tulostus_paperille_vak = 0;
 					$lahete_tulostus_emailiin 	= 0;
 					$laheteprintterinimi 		= "";
 					$onko_nouto 				= "";
@@ -1740,7 +1741,9 @@
 							$kirrow  = mysql_fetch_assoc($kirres);
 							$vakadr_komento = $kirrow['komento'];
 
-							tulosta_vakadr_erittely($laskurow["tunnus"], $vakadr_komento, $tee);
+							$onko_vak = tulosta_vakadr_erittely($laskurow["tunnus"], $vakadr_komento, $tee);
+
+							if ($vakadr_komento != 'email' and $onko_vak) $lahete_tulostus_paperille_vak++;
 						}
 
 						if ($valittu_tulostin != "") {
@@ -2236,11 +2239,13 @@
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='kerayspvm'; document.forms['find'].submit();\">",t("Ker‰ysaika"),"</a><br>
 						<a href='#' onclick=\"getElementById('jarj').value='toimaika'; document.forms['find'].submit();\">",t("Toimitusaika"),"</a></th>";
 
-				echo "	<th valign='top'>
-							<a href='#' onclick=\"getElementById('jarj').value='keraaja_nimi'; document.forms['find'].submit();\">",t("Ker‰‰j‰n nimi"),"</a>
-							<br/>
-							<a href='#' onclick=\"getElementById('jarj').value='keraaja_nro'; document.forms['find'].submit();\">",t("Ker‰‰j‰n numero"),"</a>
-						</th>";
+				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+					echo "	<th valign='top'>
+								<a href='#' onclick=\"getElementById('jarj').value='keraaja_nimi'; document.forms['find'].submit();\">",t("Ker‰‰j‰n nimi"),"</a>
+								<br/>
+								<a href='#' onclick=\"getElementById('jarj').value='keraaja_nro'; document.forms['find'].submit();\">",t("Ker‰‰j‰n numero"),"</a>
+							</th>";
+				}
 
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">",t("Toimitustapa"),"</a></th>";
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">",t("Riv"),"</a></th>";
@@ -2307,7 +2312,10 @@
 						echo "<td valign='top' nowrap align='right'>",tv1dateconv($row["kerayspvm"], "", "LYHYT"),"<br />",tv1dateconv($row["toimaika"], "", "LYHYT"),"</td>";
 					}
 
-					echo "<td valign='top'>{$row['keraaja_nimi']}<br/>{$row['keraaja_nro']}</td>";
+					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+						echo "<td valign='top'>{$row['keraaja_nimi']}<br/>{$row['keraaja_nro']}</td>";
+					}
+
 					echo "<td valign='top'>{$row['toimitustapa']}</td>";
 					echo "<td valign='top'>{$row['riveja']}</td>";
 
@@ -2740,10 +2748,10 @@
 
 						if ($toim == 'VASTAANOTA_REKLAMAATIO') {
 
-							if (!isset($rekla_hyllyalue[$row["tunnus"]])) $rekla_hyllyalue[$row["tunnus"]] = "";
-							if (!isset($rekla_hyllynro[$row["tunnus"]]))  $rekla_hyllynro[$row["tunnus"]]  = "";
-							if (!isset($rekla_hyllyvali[$row["tunnus"]])) $rekla_hyllyvali[$row["tunnus"]] = "";
-							if (!isset($rekla_hyllytaso[$row["tunnus"]])) $rekla_hyllytaso[$row["tunnus"]] = "";
+							if (!isset($reklahyllyalue[$row["tunnus"]])) $reklahyllyalue[$row["tunnus"]] = "";
+							if (!isset($reklahyllynro[$row["tunnus"]]))  $reklahyllynro[$row["tunnus"]]  = "";
+							if (!isset($reklahyllyvali[$row["tunnus"]])) $reklahyllyvali[$row["tunnus"]] = "";
+							if (!isset($reklahyllytaso[$row["tunnus"]])) $reklahyllytaso[$row["tunnus"]] = "";
 
 							$query = "	SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso,
 										concat_ws(' ',hyllyalue, hyllynro, hyllyvali, hyllytaso) varastopaikka,
@@ -2766,10 +2774,10 @@
 							}
 
 							echo "</select><br />";
-							echo "<input type='text' size='5' name='rekla_hyllyalue[$row[tunnus]]' value = '{$rekla_hyllyalue[$row["tunnus"]]}'>
-	                              <input type='text' size='5' name='rekla_hyllynro[$row[tunnus]]'  value = '{$rekla_hyllynro[$row["tunnus"]]}'>
-	                              <input type='text' size='5' name='rekla_hyllyvali[$row[tunnus]]' value = '{$rekla_hyllyvali[$row["tunnus"]]}'>
-	                              <input type='text' size='5' name='rekla_hyllytaso[$row[tunnus]]' value = '{$rekla_hyllytaso[$row["tunnus"]]}'>";
+							echo hyllyalue("reklahyllyalue[{$row['tunnus']}]", $reklahyllyalue[$row["tunnus"]]),"
+	                              <input type='text' size='5' name='reklahyllynro[$row[tunnus]]'  value = '{$reklahyllynro[$row["tunnus"]]}'>
+	                              <input type='text' size='5' name='reklahyllyvali[$row[tunnus]]' value = '{$reklahyllyvali[$row["tunnus"]]}'>
+	                              <input type='text' size='5' name='reklahyllytaso[$row[tunnus]]' value = '{$reklahyllytaso[$row["tunnus"]]}'>";
 						}
 						else {
 							echo "$row[varastopaikka]";

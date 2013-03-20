@@ -149,7 +149,10 @@
 						round(sum(tilausrivi.kpl * if(tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
 						round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
-						round(sum(tilausrivi.kpl * tilausrivi.hinta * {$alennukset}), 0) rivihinta_laskutusarvo,
+						if (round(sum(tilausrivi.rivihinta / (1 + (lasku.rahti / 100))),0) > 0.50,
+							if (valuu.intrastat_kurssi = 0,
+								round(sum(tilausrivi.rivihinta / (1 + (lasku.rahti / 100)) / lasku.vienti_kurssi),0),
+								round(sum(tilausrivi.rivihinta / (1 + (lasku.rahti / 100)) / valuu.intrastat_kurssi),0)), 1) as rivihinta_laskutusarvo,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
 						group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet";
@@ -163,6 +166,7 @@
 							LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
 							and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'), lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
 							and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'), lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0')))
+							LEFT JOIN valuu ON (lasku.yhtio=valuu.yhtio and lasku.valkoodi=valuu.nimi)
 							WHERE lasku.kohdistettu = 'X'
 							and lasku.tila = 'K'
 							and lasku.vanhatunnus = 0
@@ -180,6 +184,7 @@
 							LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
 							and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'), lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
 							and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'), lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0')))
+							LEFT JOIN valuu ON (lasku.yhtio=valuu.yhtio and lasku.valkoodi=valuu.nimi)
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.tyyppi = 'O'
 							and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'

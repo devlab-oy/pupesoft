@@ -18444,6 +18444,51 @@ if (!function_exists("kopioitiliointi")) {
 	}
 }
 
+if (!function_exists("kopioitapahtuma")) {
+	function kopioitapahtuma ($tunnus, $params = array()) {
+		//Tehdään kopio tapahtumasta $tunnus
+
+		global $kukarow, $jalkilaskenta_debug, $jalkilaskenta_debug_text;
+
+		$query = "	SELECT *
+					FROM tapahtuma
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus  = '{$tunnus}'";
+		$result = pupe_query($query);
+		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+
+		if (mysql_num_rows($result) != 1) {
+			echo t("Tapahtuma kateissa, systeemivirhe!");
+		}
+		else {
+			$tapahtumarow = mysql_fetch_assoc($result);
+
+			$query = "INSERT INTO tapahtuma SET ";
+
+			for ($i = 0; $i < mysql_num_fields($result); $i++) {
+
+				$kennimi = mysql_field_name($result, $i);
+
+				if ($kennimi != 'tunnus') {
+					if (isset($params[$kennimi]) and $params[$kennimi] != "") {
+						$query .= "{$kennimi} ='{$params[$kennimi]}',";
+					}
+					else {
+						$query .= $kennimi." = '".$tiliointirow[$kennimi]."',";
+					}
+				}
+			}
+
+			$query  = substr($query,0,-1);
+			$result = pupe_query($query);
+
+			if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+
+			return mysql_insert_id();
+		}
+	}
+}
+
 if (!function_exists("etsi_kuuluvat_tilioinnit")) {
 	function etsi_kuuluvat_tilioinnit($tunnus, $ylikirjataanko = true) {
 		global $kukarow;

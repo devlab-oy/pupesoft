@@ -33,8 +33,6 @@
 	$kuljetus		= $srow["kuljetus"];
 	$tnimi			= "";
 
-$hinta;
-
 	$query	= "	SELECT nimi
 				from yhteyshenkilo
 				where yhtio				 = '$kukarow[yhtio]'
@@ -121,10 +119,12 @@ $hinta;
 	$tuotere = pupe_query($query);
 	$tuoterow = mysql_fetch_array($tuotere);
 	
-//otetaan tuoteen kertoimet huomioon - eli jaetaan myyntihinta kertoimella, jotta saadaan yksikköhinta
-if ($tuoterow["myyntihinta_maara"] != 0 and $osstu["ostohinta"] != 0) {
-		$hinta = ($osstu["ostohinta"] / $tuoterow["myyntihinta_maara"]);
-}	
+	$hinta = $osstu["ostohinta"];
+	
+	//otetaan tuoteen kertoimet huomioon - eli jaetaan myyntihinta kertoimella, jotta saadaan yksikköhinta
+	if ($tuoterow["myyntihinta_maara"] != 0 and $osstu["ostohinta"] != 0) {
+		$hinta = hintapyoristys($osstu["ostohinta"] / $tuoterow["myyntihinta_maara"]);
+	}	
 
 	// lisätään ostotilausrivi
 	$query = "	INSERT into tilausrivi

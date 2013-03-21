@@ -436,12 +436,12 @@ function echo_arvot(&$request) {
 //	$varaston_hyllypaikkojen_lukumaara = hae_varaston_hyllypaikkojen_lukumaara($request);
 //	$inventointeja_per_paiva = ($varaston_hyllypaikkojen_lukumaara['varaston_hyllypaikkojen_lukumaara'] - $inventointien_lukumaara_tilikausi) / $tyopaivien_lukumaara;
 
-	$inventointien_lukumaara_12kk = hae_inventoitavien_lukumaara($request, '12kk');
-	$inventointien_lukumaara_tilikausi = hae_inventoitavien_lukumaara($request, 'tilikausi');
+	$inventointien_lukumaara_12kk = count(hae_inventoitavien_lukumaara($request, '12kk'));
+	$inventointien_lukumaara_tilikausi = count(hae_inventoitavien_lukumaara($request, 'tilikausi'));
 	$tuotepaikkojen_lukumaara = hae_tuotepaikkojen_lukumaara($request);
 
-	echo "<input type='hidden' id='inventointien_lukumaara_12kk' value='{$inventointien_lukumaara_12kk['inventoitavien_lukumaara']}' />";
-	echo "<input type='hidden' id='inventointien_lukumaara_tilikausi' value='{$inventointien_lukumaara_tilikausi['inventoitavien_lukumaara']}' />";
+	echo "<input type='hidden' id='inventointien_lukumaara_12kk' value='{$inventointien_lukumaara_12kk}' />";
+	echo "<input type='hidden' id='inventointien_lukumaara_tilikausi' value='{$inventointien_lukumaara_tilikausi}' />";
 	echo "<input type='hidden' id='tuotepaikkojen_lukumaara' value='{$tuotepaikkojen_lukumaara}' />";
 
 	$inventointeja_per_paiva = ($tuotepaikkojen_lukumaara - $inventointien_lukumaara_tilikausi['inventoitavien_lukumaara']) / $tyopaivien_lukumaara;
@@ -769,7 +769,7 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
 		$request['loppu_aika'] = $request['tamanhetkinen_tilikausi']['tilikausi_loppu'];
 	}
 
-	$query = "	SELECT count(*) as inventoitavien_lukumaara
+	$query = "	SELECT DISTINCT tuotepaikat.tunnus
 				FROM   tapahtuma USE INDEX (yhtio_laji_laadittu)
 				JOIN tuotepaikat
 				ON ( tuotepaikat.yhtio = tapahtuma.yhtio

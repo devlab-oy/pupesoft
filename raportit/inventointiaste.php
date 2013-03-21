@@ -436,8 +436,8 @@ function echo_arvot(&$request) {
 //	$varaston_hyllypaikkojen_lukumaara = hae_varaston_hyllypaikkojen_lukumaara($request);
 //	$inventointeja_per_paiva = ($varaston_hyllypaikkojen_lukumaara['varaston_hyllypaikkojen_lukumaara'] - $inventointien_lukumaara_tilikausi) / $tyopaivien_lukumaara;
 
-	$inventointien_lukumaara_12kk = count(hae_inventoitavien_lukumaara($request, '12kk'));
-	$inventointien_lukumaara_tilikausi = count(hae_inventoitavien_lukumaara($request, 'tilikausi'));
+	$inventointien_lukumaara_12kk = hae_inventoitavien_lukumaara($request, '12kk');
+	$inventointien_lukumaara_tilikausi = hae_inventoitavien_lukumaara($request, 'tilikausi');
 	$tuotepaikkojen_lukumaara = hae_tuotepaikkojen_lukumaara($request);
 
 	echo "<input type='hidden' id='inventointien_lukumaara_12kk' value='{$inventointien_lukumaara_12kk}' />";
@@ -805,7 +805,7 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
 				AND tapahtuma.laji = 'Inventointi'";
 	$result = pupe_query($query);
 
-	return mysql_fetch_assoc($result);
+	return mysql_num_rows($result);
 }
 
 function hae_tuotepaikkojen_lukumaara(&$request) {

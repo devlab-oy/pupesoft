@@ -518,19 +518,7 @@ if ($tuoteno != '') {
 
 					$mitenkavi = korjaalaskut($tuoteno, $uusihinta, $rivirow["laadittu"], $rivirow["laadittu"], $rivirow["tunnus"]);
 
-					korjaatapahtuma($sarjarow['myyntirivitunnus'], $uusihinta, array('laskutus'), "", "", FALSE, FALSE);
-
-					korjaatapahtuma($sarjarow['myyntirivitunnus'], $uusihinta, array('tulo', 'valmistus', 'inventointi', 'siirto'), "", "", FALSE, FALSE);
-
-
-					// $query = "	UPDATE tapahtuma
-					// 			SET hinta = '$uusihinta'
-					// 			WHERE yhtio = '$kukarow[yhtio]'
-					// 			and rivitunnus = '$sarjarow[myyntirivitunnus]'
-					// 			and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi', 'siirto')
-					// 			and laadittu >= '$yhtiorow[tilikausi_alku]'";
-					// if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
-					// $upresu = pupe_query($query);
+					korjaatapahtuma($sarjarow['myyntirivitunnus'], $uusihinta, array('laskutus', 'tulo', 'valmistus', 'inventointi', 'siirto'), "", "", FALSE, FALSE);
 				}
 				else {
 					if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Ei korjattavaa (tuotetta ei ole myyty)! Uusi hinta: $uusihinta $rivirow[uusiotunnus]</font><br>";

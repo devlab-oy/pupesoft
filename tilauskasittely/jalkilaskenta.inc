@@ -27,7 +27,15 @@ if (!function_exists("korjaalaskut")) {
 		}
 
 		// etsitään tuotteen kaikki myyntitilausrivit
-		$query = "	SELECT tilausrivi.otunnus oltunnus, tilausrivi.uusiotunnus ltunnus, tilausrivi.tunnus ttunnus, tilausrivi.kpl, tilausrivi.kate, tilausrivi.rivihinta, tilausrivi.laskutettuaika, alv
+		$query = "	SELECT tilausrivi.otunnus oltunnus,
+					tilausrivi.uusiotunnus ltunnus,
+					tilausrivi.tunnus ttunnus,
+					tilausrivi.kpl,
+					tilausrivi.kate,
+					tilausrivi.rivihinta,
+					tilausrivi.laskutettuaika,
+					tilausrivi.alv,
+					LEFT(tapahtuma.laadittu, 10) laadittu
 					FROM tapahtuma
 					JOIN tilausrivi ON tapahtuma.yhtio = tilausrivi.yhtio and tapahtuma.rivitunnus = tilausrivi.tunnus and tilausrivi.tyyppi = 'L'
 					WHERE tapahtuma.yhtio   = '$kukarow[yhtio]'
@@ -74,7 +82,7 @@ if (!function_exists("korjaalaskut")) {
 			// katotaan saadaanko tehdä tiliöintejä
 			// tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
 			list($tkvv,$tkkk,$tkpp) = explode("-",$yhtiorow["tilikausi_alku"]);
-			list($klvv,$klkk,$klpp) = explode("-",$tilausrivi["laskutettuaika"]);
+			list($klvv,$klkk,$klpp) = explode("-",$tilausrivi["laadittu"]);
 
 			$tilikausi_alku = (int) date('Ymd',mktime(0,0,0,$tkkk,$tkpp,$tkvv));
 			$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
@@ -91,7 +99,7 @@ if (!function_exists("korjaalaskut")) {
 		 				AND kohde 		= '$xrivi[kohde]'
 		 				AND projekti 	= '$xrivi[projekti]'
 						AND korjattu 	= ''
-						ORDER BY summa DESC
+						ORDER BY tapvm DESC, summa DESC
 						LIMIT 1";
 			$result = pupe_query($query);
 
@@ -117,7 +125,7 @@ if (!function_exists("korjaalaskut")) {
 			 				and ltunnus  = '$tilausrivi[ltunnus]'
 			 				and tilino   = '$yhtiorow[varastonmuutos]'
 							and korjattu = ''
-							ORDER BY summa DESC
+							ORDER BY tapvm DESC, summa DESC
 							LIMIT 1";
 				$result = pupe_query($query);
 
@@ -131,7 +139,7 @@ if (!function_exists("korjaalaskut")) {
 					katsotaan onko $lasku[tapvm] suljetulla tilikaudella, jos on, laitetaan pvm ensimmäinen sallittu pvm (eli avoimen tilikauden ensimmäinen pvm)
 					*/
 
-					$pvm = $tilikausi_alku > $lasku['tapvm'] ? $yhtiorow['tilikausi_alku'] : $lasku['tapvm'];
+					$pvm = $tilikausi_alku > $korjaus_alku ? $yhtiorow['tilikausi_alku'] : $lasku['tapvm'];
 
 					// ei löydetty yhtään varastonmuutos tiliöintiä.. lisätään se nyt.
 					$tiliointisumma = $muutos;
@@ -214,7 +222,7 @@ if (!function_exists("korjaalaskut")) {
 							and kohde 		= '$xrivi[kohde]'
 							and projekti 	= '$xrivi[projekti]'
 							and korjattu 	= ''
-							ORDER BY summa asc
+							ORDER BY tapvm DESC, summa DESC
 							LIMIT 1";
 				$result = pupe_query($query);
 
@@ -226,7 +234,7 @@ if (!function_exists("korjaalaskut")) {
 								and ltunnus		= '$tilausrivi[ltunnus]'
 								and tilino 		= '$yhtiorow[varasto]'
 								and korjattu 	= ''
-								ORDER BY summa asc
+								ORDER BY tapvm DESC, summa DESC
 								LIMIT 1";
 					$result = pupe_query($query);
 				}
@@ -245,6 +253,9 @@ if (!function_exists("korjaalaskut")) {
 					if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>".t("Laskun")." $tilausrivi[ltunnus] ".t("varastotiliöinti löytyi").".</font><br>";
 
 					$tiliointi2 = mysql_fetch_assoc($result);
+
+					list($klvv,$klkk,$klpp) = explode("-",$tiliointi1["tapvm"]);
+					$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
 
 					$pvm = $tilikausi_alku > $korjaus_alku ? $yhtiorow['tilikausi_alku'] : "";
 
@@ -290,7 +301,7 @@ if (!function_exists("korjaalaskut")) {
 							'laadittu' => date('Y-m-d H:i:s'),
 						);
 
-						// korjataan varastonmuutostiliöinti
+						// Tehdään vastakirjaus alkuperäiselle varastonmuutostiliöinnille
 						kopioitiliointi($tiliointi1['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
 
 						$params = array(
@@ -301,7 +312,7 @@ if (!function_exists("korjaalaskut")) {
 							'laadittu' => date('Y-m-d H:i:s'),
 						);
 
-						// korjataan varastonmuutostiliöinti
+						// Tehdään uusi varastonmuutostiliöinti oikeilla arvoilla
 						kopioitiliointi($tiliointi1['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
 
 						$params = array(
@@ -312,7 +323,7 @@ if (!function_exists("korjaalaskut")) {
 							'laadittu' => date('Y-m-d H:i:s'),
 						);
 
-						// korjataan varastotiliöinti
+						//  Tehdään vastakirjaus alkuperäiselle varastotiliöinnille
 						kopioitiliointi($tiliointi2['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
 
 						$params = array(
@@ -323,7 +334,7 @@ if (!function_exists("korjaalaskut")) {
 							'laadittu' => date('Y-m-d H:i:s'),
 						);
 
-						// korjataan varastotiliöinti
+						// Tehdään uusi varastotiliöinti oikeilla arvoilla
 						kopioitiliointi($tiliointi2['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
 					}
 				}

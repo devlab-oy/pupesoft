@@ -448,12 +448,12 @@ function echo_arvot(&$request) {
 
 	echo "<table>";
 	echo "<tr>";
-	echo "<th>".t("Hyllypaikkojen inventointeja pit‰‰ suorittaa per p‰iv‰")."</th>";
+	echo "<th>".t("Tuotepaikkojen inventointeja pit‰‰ suorittaa per p‰iv‰")."</th>";
 	echo "<td>".round($inventointeja_per_paiva, 0)."</td>";
 	echo "</tr>";
 
 	echo "<tr>";
-	echo "<th>".t("Hyllypaikkoja valituissa varastoissa")."</th>";
+	echo "<th>".t("Tuotepaikkoja valituissa varastoissa")."</th>";
 	echo "<td>{$tuotepaikkojen_lukumaara}</td>";
 	echo "</tr>";
 	echo "</table>";

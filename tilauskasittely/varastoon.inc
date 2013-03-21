@@ -433,7 +433,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	$varastoonvientipva_tsek  = (int) date('Ymd',mktime(0,0,0, $tkvpkk, $tkvppp, $tkvpvv));
 
-	if (($tee == "varma" or $tee == "varastoon") and ($varastoonvientipva_tsek < $tilikausi_alku or $varastoonvientipva_tsek > $tilikausi_loppu)) {
+	if ($tee == "varastoon" and ($varastoonvientipva_tsek < $tilikausi_alku or $varastoonvientipva_tsek > $tilikausi_loppu)) {
 
 		if ($tv_kaytossa) $vcspan = 10;
 		else $vcspan = 8;

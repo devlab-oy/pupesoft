@@ -18474,7 +18474,7 @@ if (!function_exists("kopioitapahtuma")) {
 						$query .= "{$kennimi} ='{$params[$kennimi]}',";
 					}
 					else {
-						$query .= $kennimi." = '".$tiliointirow[$kennimi]."',";
+						$query .= $kennimi." = '".$tapahtumarow[$kennimi]."',";
 					}
 				}
 			}

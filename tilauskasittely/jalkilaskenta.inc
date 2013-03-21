@@ -375,7 +375,7 @@ if (!function_exists('korjaatapahtuma')) {
 		$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
 
 		// Hanskataan toistaiseksi vain myyntipuoli
-		if ($tilikausi_alku > $korjaus_alku and in_array('laskutus', $lajit)) {
+		if ($tilikausi_alku > $korjaus_alku) {
 
 			// Korjataan viimeinen tapahtuma
 			$query = "	SELECT tunnus, selite, kplhinta, hinta, kpl
@@ -391,12 +391,17 @@ if (!function_exists('korjaatapahtuma')) {
 
 			$params = array(
 				'kpl' => ($tun_chk_row['kpl'] * -1),
+				'selite' => "{$tun_chk_row['selite']}{$selite_txt}",
+				'laadittu' => "{$yhtiorow['tilikausi_alku']} 00:00:00",
+				'laatija' => $kukarow['kuka'],
 			);
 
 			kopioitapahtuma($tun_chk_row['tunnus'], $params);
 
 			$params = array(
 				'selite' => "{$tun_chk_row['selite']}{$selite_txt}",
+				'laadittu' => "{$yhtiorow['tilikausi_alku']} 00:00:00",
+				'laatija' => $kukarow['kuka'],
 			);
 
 			if ($upd_kplhinta) $params['kplhinta'] = $uusihinta;
@@ -581,18 +586,6 @@ if ($tuoteno != '') {
 		else {
 			$tapahtuma = mysql_fetch_assoc($result);
 			$pvm = $tapahtuma["laadittu"]; // kääntöpisteen tarkka aika talteen
-
-			// verrataan vähän aikoja
-			// list($tkvv,$tkkk,$tkpp) = explode("-", $yhtiorow["tilikausi_alku"]);
-			// list($klvv,$klkk,$klpp) = explode("-", substr($tapahtuma["laadittu"], 0, 10));
-
-			// $tilikausi_alku = (int) date('Ymd',mktime(0,0,0,$tkkk,$tkpp,$tkvv));
-			// $korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
-
-			// yritetään korjata jotain joka on lukitulla tilikaudella.. kerrotaan siitä
-			// if ($korjaus_alku < $tilikausi_alku) {
-			// 	echo "<font class='error'>".t("Korjauksia kaikkiin tuotteen %s tapahtumiin ei voida tehdä, koska tapahtumia on lukitulla tilikaudella", "", $tuoteno)."!</font><br>";
-			// }
 		}
 
 		if (($tuote['epakurantti25pvm'] != '0000-00-00') or ($tuote['epakurantti50pvm'] != '0000-00-00') or ($tuote['epakurantti75pvm'] != '0000-00-00') or ($tuote['epakurantti100pvm'] != '0000-00-00')) {
@@ -662,13 +655,6 @@ if ($tuoteno != '') {
 				if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<br><font class='error'>".t("Olemme kääntöpisteessä. Saldo kääntöpisteessä:")." $uusisaldo $seliselilisa ".t("Kehahin kääntöpisteessä:")." $uusikehahin</font><br>";
 
 				if ($jlerror == 0) {
-					// Päivitetään korjattava tapahtuma
-					$selite_txt = ",<br>Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")";
-
-					// $query = "UPDATE tapahtuma SET kplhinta = '$uusihinta', selite = concat(selite, '$selite_txt') WHERE tunnus = '$tapahtuma[tunnus]' and laadittu >= '$yhtiorow[tilikausi_alku]'";
-					// $result = pupe_query($query);
-
-					korjaatapahtuma($rivitunnus, $uusihinta, array(), "", $selite_txt, TRUE, TRUE, FALSE);
 
 					// haetaan ostotilausrivin tiedot
 					$query = "SELECT * from tilausrivi WHERE yhtio='$kukarow[yhtio]' and tunnus='$rivitunnus'";
@@ -708,6 +694,7 @@ if ($tuoteno != '') {
 							if (($trow['laji'] == 'tulo' or $trow['laji'] == 'valmistus') and $eka == 1) {
 								$vlaadittu = $trow['laadittu'];
 								$eka = 0;
+								$trow['kplhinta'] = $uusihinta;
 							}
 
 							// jos kyseessä on tulo ja ollaan jo löydetty eka tulo
@@ -809,16 +796,6 @@ if ($tuoteno != '') {
 									// Lasketaan onko luku muuttunut
 									$inventoinnin_varastonmuutos = round($trow["kpl"] * $uusikehahin - $invrow['summa'], 2);
 
-									// yritetään korjata jotain joka on lukitulla tilikaudella.. estetään se
-									// if ($korjaus_alku < $tilikausi_alku) {
-
-
-									// 	echo "<font class='error'>".t("Korjauksia tiliöinteihin ei voida tehdä, koska tapahtuma on lukitulla tilikaudella")."! (".t("Inventointi").": $trow[laadittu])</font><br>";
-
-
-
-									// }
-									// elseif ($inventoinnin_varastonmuutos != 0) {
 									if ($inventoinnin_varastonmuutos != 0) {
 										// Tehdään muutoksia vaan jos summa muuttuu
 										$query = "	SELECT count(*) luku
@@ -1089,24 +1066,15 @@ if ($tuoteno != '') {
 							// jos ollaa löydetty eka tulo voidaan aina päivitetään tapahtuma jos se on tulo, valmistus, laskutus, inventointi, kulutus tai siirto
 							if ($eka == 0) {
 
-								// if ($trow["laji"] == "kulutus") {
-								// 	$kulutuslisa = ", kplhinta='$uusikehahin' ";
-								// }
-								// else {
-								// 	$kulutuslisa = "";
-								// }
-
 								// päivitetään hinta vain jos hinta on eri
+								// tai korjataan tapahtumat jos tapahtuma on lukitulla tilikaudella
 								if ($trow["hinta"] != $uusikehahin) {
-									// $query = "UPDATE tapahtuma SET hinta = '$uusikehahin' $kulutuslisa WHERE tunnus = '$trow[tunnus]' and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi', 'kulutus', 'siirto') and laadittu >= '$yhtiorow[tilikausi_alku]'";
+									$upd_kplhinta = in_array($trow["laji"], array("kulutus", "tulo", "valmistus")) ? TRUE : FALSE;
 
-									$upd_kplhinta = $trow["laji"] == "kulutus" ? TRUE : FALSE;
+									$selite_txt = in_array($trow['laji'], array('tulo', 'valmistus')) ? ",<br>Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")" : "";
 
-									korjaatapahtuma($trow['tunnus'], $uusikehahin, array('laskutus'), "", "", TRUE, $upd_kplhinta);
-									korjaatapahtuma($trow['tunnus'], $uusikehahin, array('tulo', 'valmistus', 'inventointi', 'kulutus', 'siirto'), "", "", TRUE, $upd_kplhinta);
-
-									// if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
-									// $upresu = pupe_query($query);
+									// Päivitetään korjattava tapahtuma
+									korjaatapahtuma($trow['tunnus'], $uusikehahin, array($trow["laji"]), "", $selite_txt, TRUE, $upd_kplhinta);
 								}
 							}
 

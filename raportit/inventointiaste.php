@@ -444,7 +444,7 @@ function echo_arvot(&$request) {
 	echo "<input type='hidden' id='inventointien_lukumaara_tilikausi' value='{$inventointien_lukumaara_tilikausi}' />";
 	echo "<input type='hidden' id='tuotepaikkojen_lukumaara' value='{$tuotepaikkojen_lukumaara}' />";
 
-	$inventointeja_per_paiva = ($tuotepaikkojen_lukumaara - $inventointien_lukumaara_tilikausi['inventoitavien_lukumaara']) / $tyopaivien_lukumaara;
+	$inventointeja_per_paiva = ($tuotepaikkojen_lukumaara - $inventointien_lukumaara_tilikausi) / $tyopaivien_lukumaara;
 
 	echo "<table>";
 	echo "<tr>";
@@ -456,6 +456,24 @@ function echo_arvot(&$request) {
 	echo "<th>".t("Tuotepaikkoja valituissa varastoissa")."</th>";
 	echo "<td>{$tuotepaikkojen_lukumaara}</td>";
 	echo "</tr>";
+
+	/* debuggaukseen
+	echo "<tr>";
+	echo "<th>".t("inventointien_lukumaara_tilikausi")."</th>";
+	echo "<td>{$inventointien_lukumaara_tilikausi}</td>";
+	echo "</tr>";
+
+	
+	echo "<tr>";
+	echo "<th>".t("tyopaivien_lukumaara")."</th>";
+	echo "<td>{$tyopaivien_lukumaara}</td>";
+	echo "</tr>";
+	
+	echo "<tr>";
+	echo "<th>".t("Tuotepaikkoja Valituissa Varastoissa - Inventointien_lukumaara_tilikausi")."</th>";
+	echo "<td>{$eee}</td>";
+	echo "</tr>";
+	*/
 	echo "</table>";
 }
 
@@ -788,18 +806,6 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
 					AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
 					AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
 					AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
-				LEFT JOIN kuka
-				ON ( kuka.yhtio = tapahtuma.yhtio
-					AND kuka.kuka = tapahtuma.laatija )
-				LEFT JOIN varaston_hyllypaikat AS vh
-				ON ( vh.yhtio = tapahtuma.yhtio
-					AND vh.hyllyalue = tapahtuma.hyllyalue
-					AND vh.hyllynro = tapahtuma.hyllynro
-					AND vh.hyllytaso = tapahtuma.hyllytaso
-					AND vh.hyllyvali = tapahtuma.hyllyvali )
-				LEFT JOIN keraysvyohyke
-				ON ( keraysvyohyke.yhtio = vh.yhtio
-					AND keraysvyohyke.tunnus = vh.keraysvyohyke )
 				WHERE  tapahtuma.yhtio = '{$kukarow['yhtio']}'
 				AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
 				AND tapahtuma.laji = 'Inventointi'";
@@ -811,10 +817,19 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
 function hae_tuotepaikkojen_lukumaara(&$request) {
 	global $kukarow;
 
-	$query = "	SELECT DISTINCT concat(tuoteno,hyllyalue,hyllynro,hyllytaso,hyllyvali) as tuotepaikkojen_lukumaara
+	$query = "	SELECT DISTINCT tuotepaikat.tunnus
 				FROM   tuotepaikat
-				WHERE  yhtio = '{$kukarow['yhtio']}'
-				   AND saldo != 0";
+				JOIN tuote
+				ON ( tuote.yhtio = tuotepaikat.yhtio
+					AND tuote.tuoteno = tuotepaikat.tuoteno
+					AND tuote.ei_saldoa = ''
+					AND tuote.status = 'A' )
+				JOIN varastopaikat
+				ON ( varastopaikat.yhtio = tuotepaikat.yhtio
+					AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+					AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+					AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
+				WHERE  tuotepaikat.yhtio = '{$kukarow['yhtio']}'";
 
  	$result = pupe_query($query);
 

@@ -472,17 +472,8 @@ if ($tuoteno != '') {
 
 			$selite_txt = ",<br>Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")";
 
-			korjaatapahtuma($rivitunnus, $uusihinta, array('tulo','valmistus'), $tuoteno, $selite_txt);
-
 			// Päivitetään korjattava tapahtuma
-			// $query = "	UPDATE tapahtuma
-			// 			SET kplhinta = '$uusihinta', hinta = '$uusihinta', selite = concat(selite, '$selite_txt')
-			// 			WHERE yhtio 	= '$kukarow[yhtio]'
-			// 			and laji  	   in ('tulo','valmistus')
-			// 			and laadittu   >= '$yhtiorow[tilikausi_alku]'
-			// 			and tuoteno 	= '$tuoteno'
-			// 			and rivitunnus 	= '$rivitunnus'";
-			// $paivresult = pupe_query($query);
+			korjaatapahtuma($rivitunnus, $uusihinta, array('tulo','valmistus'), $tuoteno, $selite_txt);
 
 			// Haetaan kaikki tiedot sarjanumerosta
 			$query = "	SELECT distinct myyntirivitunnus

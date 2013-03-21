@@ -838,6 +838,13 @@
 
 			echo "</select></td></tr>";
 
+			if(isset($srow['ryhma'])) {
+				echo "<tr>";
+				echo "<td valign='top'>".t("Asiakasryhmä")."</td>";
+				echo "<td>{$srow['ryhma']}</td>";
+				echo "</tr>";
+			}
+
 			$query  = "	SELECT laji
 						FROM asiakas
 						WHERE yhtio='$kukarow[yhtio]' and tunnus='$srow[liitostunnus]'";
@@ -1737,7 +1744,8 @@
 			$query  = "	SELECT *
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
-						$varastot_lisa_query AND tyyppi != 'P'
+						$varastot_lisa_query
+						AND tyyppi != 'P'
 						order by tyyppi, nimitys";
 			$vares = pupe_query($query);
 
@@ -1747,8 +1755,17 @@
 
 					$sel = '';
 
-					// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
-					if ($varow['tunnus'] == $srow["varasto"] or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '')) $sel = 'selected';
+					// Jos kukarow varasto on vain YKSI varasto ja oletus varasto ei valittu, niin silloin valitaan $kukarow['varasto']
+					if ($kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '') {
+						$sel = 'selected';
+					}
+					// jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletus varasto
+					elseif ($kukarow["kesken"] == 0 and $yhtiorow['oletusvarasto_tilaukselle'] == 'O' and $varow['tunnus'] == $kukarow['oletus_varasto'] and $srow['varasto'] == '') {
+						$sel = 'selected';
+					}
+					elseif ($varow['tunnus'] == $srow["varasto"]) {
+						$sel = 'selected';
+					}
 
 					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 				}

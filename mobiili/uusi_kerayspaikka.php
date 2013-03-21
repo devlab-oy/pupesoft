@@ -46,14 +46,53 @@ if (isset($submit) and trim($submit) != '') {
 	switch ($submit) {
 		case 'submit':
 
-			# Ei saa olla tyhjiä kenttiä
-			if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
-				$errors[] = t("Hyllypaikka ei saa olla tyhjä").'.';
+			// Parsitaan uusi tuotepaikka
+			// Jos tuotepaikka on luettu viivakoodina, muotoa (C21 045) tai (21C 03V)
+			if (preg_match('/^([a-zåäö#0-9]{2,4} [a-zåäö#0-9]{2,4})/i', $tuotepaikka)) {
+
+				// Pilkotaan viivakoodilla luettu tuotepaikka välilyönnistä
+				list($alku, $loppu) = explode(' ', $tuotepaikka);
+
+				// Mätsätään numerot ja kirjaimet erilleen
+				preg_match_all('/([0-9]+)|([a-z]+)/i', $alku, $alku);
+				preg_match_all('/([0-9]+)|([a-z]+)/i', $loppu, $loppu);
+
+				// Hyllyn tiedot oikeisiin muuttujiin
+				$hyllyalue = $alku[0][0];
+				$hyllynro = $alku[0][1];
+				$hyllyvali = $loppu[0][0];
+				$hyllytaso = $loppu[0][1];
+
+				// Kaikkia tuotepaikkoja ei pystytä parsimaan
+				if (empty($hyllyalue) or empty($hyllynro) or empty($hyllyvali) or empty($hyllytaso)) {
+					$errors[] = t("Tuotepaikan haussa virhe, yritä syöttää tuotepaikka käsin") . " ($tuotepaikka)";
+				}
 			}
-			# Tarkistetaan että tuotepaikka on olemassa
-			if (!tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
-				$errors[] = t("Varaston tuotepaikkaa ei ole perustettu").'.';
+			// Tuotepaikka syötetty manuaalisesti (C-21-04-5) tai (C 21 04 5)
+			elseif (strstr($tuotepaikka, '-') or strstr($tuotepaikka, ' ')) {
+				// Parsitaan tuotepaikka omiin muuttujiin (erotelto välilyönnillä)
+				if (preg_match('/\w+\s\w+\s\w+\s\w+/i', $tuotepaikka)) {
+					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode(' ', $tuotepaikka);
+				}
+				// (erotelto väliviivalla)
+				elseif (preg_match('/\w+-\w+-\w+-\w+/i', $tuotepaikka)) {
+					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode('-', $tuotepaikka);
+				}
+
+				// Ei saa olla tyhjiä kenttiä
+				if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
+					$errors[] = t("Virheellinen tuotepaikka") . ". ($tuotepaikka)";
+				}
 			}
+			else {
+				$errors[] = t("Virheellinen tuotepaikka, yritä syöttää tuotepaikka käsin") . " ($tuotepaikka)";
+			}
+
+			// Tarkistetaan että tuotepaikka on olemassa
+			if (count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
+				$errors[] = t("Varaston tuotepaikkaa ($hyllyalue-$hyllynro-$hyllyvali-$hyllytaso) ei ole perustettu").'.';
+			}
+
 			if (count($errors) == 0) {
 				$oletus = $oletuspaikka != '' ? 'X' : '';
 
@@ -143,19 +182,8 @@ echo "<div class='main'>
 			<td colspan='3'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
 		</tr>
 		<tr>
-			<th>",t("Alue"),"</th>
-			<td><input type='text' name='hyllyalue' value='' /></td>
-		</tr>
-		<tr>
-			<th>",t("Nro"),"</td>
-			<td><input type='text' name='hyllynro' value='' /></th>
-		</tr>
-			<th>",t("Väli"),"</th>
-			<td><input type='text' name='hyllyvali' value='' /></td>
-		</tr>
-		<tr>
-			<th>",t("Taso"),"</td>
-			<td><input type='text' name='hyllytaso' value='' /></th>
+			<th>",t("Uusi tuotepaikka"),"</td>
+			<td><input type='text' name='tuotepaikka' /></td>
 		</tr>
 		<tr>
 			<th>",t("Hälytysraja"),"</td>

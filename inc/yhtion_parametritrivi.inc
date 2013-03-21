@@ -3172,6 +3172,22 @@
 		$jatko = 0;
 	}
 
+    if (mysql_field_name($result, $i) == 'erapaivan_ylityksen_toimenpide') {
+
+        $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+        $sel = array_fill_keys(array('K', 'E'), '');
+        $sel[$trow[$i]] = " SELECTED";
+
+        $ulos .= "<option value = ''>".t("Myynti‰ ei estet‰, vaikka er‰p‰iv‰ olisi liikaa ylitetty")."</option>";
+        $ulos .= "<option value = 'K' {$sel["K"]}>".t("Kaikki myynti estet‰‰n, jos er‰p‰iv‰ on liikaa ylitetty")."</option>";
+        $ulos .= "<option value = 'E' {$sel["E"]}>".t("Muu kuin myyjien tekem‰ myynti estet‰‰n, jos er‰p‰iv‰ on liikaa ylitetty")."</option>";
+        $ulos .= "</select></td>";
+
+        $jatko = 0;
+
+	}
+
 	if (mysql_field_name($result, $i) == 'naytayhteensamaarat') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3275,7 +3291,6 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
-
 	}
 
 	if (mysql_field_name($result, $i) == 'epakurantoinnin_myyntihintaleikkuri') {
@@ -3289,7 +3304,19 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
+	}
 
+	if (mysql_field_name($result, $i) == 'seuraava_tuotenumero') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Ei ehdoteta seuraavaa vapaata tuotenumeroa tuotetta perustettaessa")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa")."</option>";
+		$ulos .= "<option value = 'O' {$sel}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa (vain ostotilauksella)")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
@@ -3303,5 +3330,4 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
-
 	}

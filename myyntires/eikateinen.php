@@ -360,12 +360,10 @@ function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
 	$tasmays_query = "	SELECT group_concat(distinct lasku.tunnus) ltunnukset,
 						group_concat(distinct tiliointi.selite) selite
 						FROM lasku
-						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
-						AND tiliointi.ltunnus = lasku.tunnus
-						AND tiliointi.selite LIKE '$kassalipasrow[nimi] %'
-						AND tiliointi.korjattu = '')
+						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.selite LIKE '$kassalipasrow[nimi] %' AND tiliointi.korjattu = '')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.tila 	  = 'X'
+						AND lasku.alatila = 'K'
 						AND lasku.tapvm   = '$paiva'";
 	$tasmays_result = pupe_query($tasmays_query);
 	$tasmaysrow = mysql_fetch_assoc($tasmays_result);
@@ -418,10 +416,10 @@ function hae_lasku2($laskuno, $toim) {
 					FROM lasku
 					JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus)
 					JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
 					AND	lasku.laskunro = '{$laskuno}'
-					AND lasku.tila = 'U'
-					AND lasku.alatila = 'X'
+					AND lasku.tila     = 'U'
+					AND lasku.alatila  = 'X'
 					AND lasku.saldo_maksettu = 0";
 	}
 	else {
@@ -446,10 +444,10 @@ function hae_lasku2($laskuno, $toim) {
 					FROM lasku
 					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus AND maksuehto.kateinen != ''
 					JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
 					AND lasku.laskunro = '{$laskuno}'
-					AND lasku.tila = 'U'
-					AND lasku.alatila = 'X'
+					AND lasku.tila     = 'U'
+					AND lasku.alatila  = 'X'
 					AND lasku.saldo_maksettu = 0";
 	}
 

@@ -185,12 +185,12 @@ gauge();
 		gauge.init(args, options);
 
 		var lukumaara_string = 'inventointien_lukumaara_' + type;
-		if (!isNaN($('#' + lukumaara_string).val()) && $('#varaston_hyllypaikkojen_lukumaara').val() !== 0) {
+		if (!isNaN($('#' + lukumaara_string).val()) && $('#tuotepaikkojen_lukumaara').val() !== 0) {
 			var draw_options = {
 				max: options.max,
 				type: 'custom_parseint'
 			};
-			var inventointiaste = ($('#' + lukumaara_string).val() / $('#varaston_hyllypaikkojen_lukumaara').val()) * 100;
+			var inventointiaste = ($('#' + lukumaara_string).val() / $('#tuotepaikkojen_lukumaara').val()) * 100;
 			gauge.draw(inventointiaste, draw_options);
 		}
 
@@ -426,18 +426,25 @@ function init(&$request) {
 
 function echo_arvot(&$request) {
 
-	$inventointien_lukumaara_12kk = count(hae_inventoinnit($request, '12kk'));
-	$inventointien_lukumaara_tilikausi = count(hae_inventoinnit($request, 'tilikausi'));
-	$varaston_hyllypaikkojen_lukumaara = hae_varaston_hyllypaikkojen_lukumaara($request);
-
-	echo "<input type='hidden' id='inventointien_lukumaara_12kk' value='{$inventointien_lukumaara_12kk}' />";
-	echo "<input type='hidden' id='inventointien_lukumaara_tilikausi' value='{$inventointien_lukumaara_tilikausi}' />";
-	echo "<input type='hidden' id='varaston_hyllypaikkojen_lukumaara' value='{$varaston_hyllypaikkojen_lukumaara['varaston_hyllypaikkojen_lukumaara']}' />";
-
 	//haetaan tämän tilikauden jäljellä olevien työpäivien lukumäärä
 	$tyopaivien_lukumaara = hae_tyopaivien_lukumaara($request['tamanhetkinen_tilikausi']['tilikausi_alku'], $request['tamanhetkinen_tilikausi']['tilikausi_loppu']);
+	
+	//näitä käytetään, jos halutaan laskea inventoitavien varaston_hyllypaikkojen määrä
+	//ei poisteta näitä koska nämä tiedot saattavat olla myöhemmässä vaiheessa tarpeellisia.
+//	$inventointien_lukumaara_12kk = count(hae_inventoinnit($request, '12kk'));
+//	$inventointien_lukumaara_tilikausi = count(hae_inventoinnit($request, 'tilikausi'));
+//	$varaston_hyllypaikkojen_lukumaara = hae_varaston_hyllypaikkojen_lukumaara($request);
+//	$inventointeja_per_paiva = ($varaston_hyllypaikkojen_lukumaara['varaston_hyllypaikkojen_lukumaara'] - $inventointien_lukumaara_tilikausi) / $tyopaivien_lukumaara;
 
-	$inventointeja_per_paiva = ($varaston_hyllypaikkojen_lukumaara['varaston_hyllypaikkojen_lukumaara'] - $inventointien_lukumaara_tilikausi) / $tyopaivien_lukumaara;
+	$inventointien_lukumaara_12kk = hae_inventoitavien_lukumaara($request, '12kk');
+	$inventointien_lukumaara_tilikausi = hae_inventoitavien_lukumaara($request, 'tilikausi');
+	$tuotepaikkojen_lukumaara = hae_tuotepaikkojen_lukumaara($request);
+
+	echo "<input type='hidden' id='inventointien_lukumaara_12kk' value='{$inventointien_lukumaara_12kk['inventoitavien_lukumaara']}' />";
+	echo "<input type='hidden' id='inventointien_lukumaara_tilikausi' value='{$inventointien_lukumaara_tilikausi['inventoitavien_lukumaara']}' />";
+	echo "<input type='hidden' id='tuotepaikkojen_lukumaara' value='{$tuotepaikkojen_lukumaara}' />";
+
+	$inventointeja_per_paiva = ($tuotepaikkojen_lukumaara - $inventointien_lukumaara_tilikausi['inventoitavien_lukumaara']) / $tyopaivien_lukumaara;
 
 	echo "<table>";
 	echo "<tr>";
@@ -447,7 +454,7 @@ function echo_arvot(&$request) {
 
 	echo "<tr>";
 	echo "<th>".t("Hyllypaikkoja valituissa varastoissa")."</th>";
-	echo "<td>{$varaston_hyllypaikkojen_lukumaara['varaston_hyllypaikkojen_lukumaara']}</td>";
+	echo "<td>{$tuotepaikkojen_lukumaara}</td>";
 	echo "</tr>";
 	echo "</table>";
 }
@@ -750,9 +757,75 @@ function parsi_paivat(&$request) {
 	}
 }
 
+function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
+	global $kukarow;
+
+	if ($aikavali_tyyppi == '12kk') {
+		$request['alku_aika'] = date('Y-m-d', strtotime('now - 12 month'));
+		$request['loppu_aika'] = date('Y-m-d');
+	}
+	elseif ($aikavali_tyyppi == 'tilikausi') {
+		$request['alku_aika'] = $request['tamanhetkinen_tilikausi']['tilikausi_alku'];
+		$request['loppu_aika'] = $request['tamanhetkinen_tilikausi']['tilikausi_loppu'];
+	}
+
+	$query = "	SELECT count(*) as inventoitavien_lukumaara
+				FROM   tapahtuma USE INDEX (yhtio_laji_laadittu)
+				JOIN tuotepaikat
+				ON ( tuotepaikat.yhtio = tapahtuma.yhtio
+					AND tuotepaikat.tuoteno = tapahtuma.tuoteno
+					AND tuotepaikat.hyllyalue = tapahtuma.hyllyalue
+					AND tuotepaikat.hyllynro = tapahtuma.hyllynro
+					AND tuotepaikat.hyllyvali = tapahtuma.hyllyvali
+					AND tuotepaikat.hyllytaso = tapahtuma.hyllytaso )
+				JOIN tuote
+				ON ( tuote.yhtio = tapahtuma.yhtio
+					AND tuote.tuoteno = tapahtuma.tuoteno
+					AND tuote.ei_saldoa = ''
+					AND tuote.status = 'A' )
+				JOIN varastopaikat
+				ON ( varastopaikat.yhtio = tapahtuma.yhtio
+					AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
+					AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
+					AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
+				LEFT JOIN kuka
+				ON ( kuka.yhtio = tapahtuma.yhtio
+					AND kuka.kuka = tapahtuma.laatija )
+				LEFT JOIN varaston_hyllypaikat AS vh
+				ON ( vh.yhtio = tapahtuma.yhtio
+					AND vh.hyllyalue = tapahtuma.hyllyalue
+					AND vh.hyllynro = tapahtuma.hyllynro
+					AND vh.hyllytaso = tapahtuma.hyllytaso
+					AND vh.hyllyvali = tapahtuma.hyllyvali )
+				LEFT JOIN keraysvyohyke
+				ON ( keraysvyohyke.yhtio = vh.yhtio
+					AND keraysvyohyke.tunnus = vh.keraysvyohyke )
+				WHERE  tapahtuma.yhtio = '{$kukarow['yhtio']}'
+				AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
+				AND tapahtuma.laji = 'Inventointi'";
+	$result = pupe_query($query);
+
+	return mysql_fetch_assoc($result);
+}
+
+function hae_tuotepaikkojen_lukumaara(&$request) {
+	global $kukarow;
+
+	$query = "	SELECT DISTINCT concat(tuoteno,hyllyalue,hyllynro,hyllytaso,hyllyvali) as tuotepaikkojen_lukumaara
+				FROM   tuotepaikat
+				WHERE  yhtio = '{$kukarow['yhtio']}'
+				   AND saldo != 0";
+
+ 	$result = pupe_query($query);
+
+	return mysql_num_rows($result);
+}
+
 function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {
 	global $kukarow;
 
+	//toistaiseksi, tätä funktiota ajetaan aina ilman aikavali_tyyppia, tämä tarkoittaa, että if ja elseiffiin ei ikinä mennä
+	//ei poisteta näitä koska, näiden avulla saadaan laskettua inventoitavien varaston_hyllypaikkojen määrä
 	if ($aikavali_tyyppi == '12kk') {
 		$request['alku_aika'] = date('Y-m-d', strtotime('now - 12 month'));
 		$request['loppu_aika'] = date('Y-m-d');

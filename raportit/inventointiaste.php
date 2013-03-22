@@ -129,6 +129,8 @@ gauge();
 <script>
 	(function($) {
 		var InventointiastePlugin = function(element) {
+			//TODO varasto, inventointilaji ja tilikausi toiminnallisuudet pit‰‰ koodata omiin plugareihin.
+			//TODO HTML generointi pit‰‰ kirjoittaa omaan plugariin, jolle passataan data.
 			var element = $(element);
 			var obj = this;
 			var yhtio;

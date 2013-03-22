@@ -272,14 +272,23 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
 			// Tuotteita ei ole miss‰‰n ketjussa
 			if (mysql_num_rows($hresult) == 0) {
-				$fquery = "	SELECT max(id)
-							FROM $table
-							WHERE yhtio = '{$kukarow['yhtio']}'";
-				$fresult = pupe_query($fquery);
-				$frow =  mysql_fetch_array($fresult);
 
-				$id = $frow[0] + 1;
-				#echo t("Ei viel‰ miss‰‰n")," $id!<br>";
+				// Jos vastaavia koitetaan muokata tai poistaa ja "p‰‰tuotteella" ei lˆytynyt ketjua,
+				// ei voida tehd‰ mit‰‰n.
+				if ($table == "vastaavat" and $rivi[$postoiminto] != 'LISAA') {
+					echo t("Ketjua ei lˆydy, et voi muuttaa / poistaa")."<br>";
+					$id = 0;
+				}
+				else {
+					$fquery = "	SELECT max(id)
+								FROM $table
+								WHERE yhtio = '{$kukarow['yhtio']}'";
+					$fresult = pupe_query($fquery);
+					$frow =  mysql_fetch_array($fresult);
+
+					$id = $frow[0] + 1;
+					#echo t("Ei viel‰ miss‰‰n")," $id!<br>";
+				}
 			}
 			// Tuotteita lˆytyy yhdest‰ ketjusta
 			elseif (mysql_num_rows($hresult) == 1) {
@@ -359,8 +368,14 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
 									// P‰ivitet‰‰n j‰rjestyksi‰ jonossa +1 jos j‰rjestys ei ole nolla, mutta ei kuitenkaan kosketa j‰rjestys=0 riveihin
 									if ($jarjestys != 0) {
-										$uquery = "UPDATE $table SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
-													WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND jarjestys >= $jarjestys";
+										$uquery = "UPDATE $table SET
+													jarjestys = jarjestys+1,
+													muuttaja  = '{$kukarow['kuka']}',
+													muutospvm = now()
+													WHERE jarjestys != 0
+													AND id          = '$id'
+													AND yhtio       = '{$kukarow['yhtio']}'
+													AND jarjestys   >= $jarjestys";
 										$result = pupe_query($uquery);
 									}
 
@@ -408,6 +423,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
 								$kquery = "	UPDATE $table
 											SET jarjestys = $jarjestys,
+											vaihtoehtoinen = '$vaihtoehtoinen',
 											muuttaja = '$kukarow[kuka]',
 											muutospvm = now()
 											WHERE tuoteno = '$rivi[$j]'

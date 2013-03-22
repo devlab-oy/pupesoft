@@ -90,6 +90,9 @@
 				case "F":
 					$alatila = "Odottaa hyv‰ksynt‰‰";
 					break;
+				case "G":
+					$alatila = "Odottaa asiakkaan suoritusta";
+					break;
 				case "J":
 					$alatila = "JT poiminnassa";
 					break;

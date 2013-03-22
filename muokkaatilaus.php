@@ -267,6 +267,9 @@
 		elseif ($toim == 'TOSI_KESKEN') {
 			$otsikko = t("keskeneräisiä myyntitilauksia");
 		}
+		elseif ($toim == 'ODOTTAA_SUORITUSTA') {
+			$otsikko = t("suoritusta odottavia tilauksia");
+		}
 		else {
 			$otsikko = t("myyntitilausta");
 			$toim = "";
@@ -1352,7 +1355,7 @@
 
 			$miinus = 7;
 		}
-		else if ($toim == 'TOSI_KESKEN') {
+		elseif ($toim == 'TOSI_KESKEN') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,
 						if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
 						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka1.extranet extra, lasku.mapvm, lasku.tilaustyyppi, lasku.label
@@ -1376,6 +1379,36 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'N' and lasku.alatila = ''";
+				$sumresult = pupe_query($sumquery);
+				$sumrow = mysql_fetch_assoc($sumresult);
+			}
+
+			$miinus = 7;
+		}
+		elseif ($toim == 'ODOTTAA_SUORITUSTA') {
+			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,
+						if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
+						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka1.extranet extra, lasku.mapvm, lasku.tilaustyyppi, lasku.label
+						FROM lasku use index (tila_index)
+						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
+						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila = 'N'
+						and lasku.alatila = 'G'
+						$haku
+						HAVING extra = '' or extra is null
+						order by lasku.luontiaika desc
+						$rajaus";
+
+			// haetaan tilausten arvo
+			if ($kukarow['hinnat'] == 0) {
+				$sumquery = "	SELECT
+								round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
+								round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa,
+								count(distinct lasku.tunnus) kpl
+								FROM lasku use index (tila_index)
+								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
+								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'N' and lasku.alatila = 'G'";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -1982,6 +2015,13 @@
 					elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
 						$aputoim1 = $whiletoim;
 						$lisa1 = t("Vastaanota");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					elseif ($toim == "ODOTTAA_SUORITUSTA") {
+						$aputoim1 = "RIVISYOTTO";
+						$lisa1 = t("Muokkaa");
 
 						$aputoim2 = "";
 						$lisa2 = "";

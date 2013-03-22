@@ -130,8 +130,17 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
 	$lopetus = "";
 }
 elseif ($luottorajavirhe != '' or $ylivito > 0) {
+
+	$toimitustavan_lahto_update = "";
+	
 	if ($kutsuja == "EDITILAUS" or $kukarow["extranet"] != "") {
 		$alatila = "F";
+	}
+	elseif (($yhtiorow["luottorajan_ylitys"] == "K"             or ($yhtiorow["luottorajan_ylitys"] == "E"             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI")))) {
+		//laitetaan tilaan Odottaa asiakkaan suoritusta
+		$alatila = "G";
+		//nollataan toimitustava_lahto
+		$toimitustavan_lahto_update = ",toimitustavan_lahto = 0, toimitustavan_lahto_siirto = 0";
 	}
 	else {
 		$alatila = "";
@@ -139,6 +148,7 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
 
 	$query = "	UPDATE lasku SET
 				alatila = '$alatila'
+				{$toimitustavan_lahto_update}
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND tunnus = '$laskurow[tunnus]'";
 	$myyntikielto_res = pupe_query($query);

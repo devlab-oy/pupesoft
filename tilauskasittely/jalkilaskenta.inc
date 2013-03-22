@@ -298,19 +298,19 @@ if (!function_exists("korjaalaskut")) {
 						kopioitiliointi($tiliointi2['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
 
 						// korjataan laskun kate
-						// $query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate WHERE tunnus='$tilausrivi[ltunnus]'";
-						// if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
-						// $katekorjres = pupe_query($query);
+						$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate WHERE tunnus='$tilausrivi[ltunnus]'";
+						if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+						$katekorjres = pupe_query($query);
 
-						// // korjataan tilauksen kate
-						// $query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate WHERE tunnus='$tilausrivi[oltunnus]'";
-						// if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
-						// $katekorjres = pupe_query($query);
+						// korjataan tilauksen kate
+						$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate WHERE tunnus='$tilausrivi[oltunnus]'";
+						if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+						$katekorjres = pupe_query($query);
 
-						// // ja lopuksi korjataan tilausrivin kate
-						// $query = "UPDATE tilausrivi SET kate = $uusikate WHERE tunnus='$tilausrivi[ttunnus]'";
-						// if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
-						// $katekorjres = pupe_query($query);
+						// ja lopuksi korjataan tilausrivin kate
+						$query = "UPDATE tilausrivi SET kate = $uusikate WHERE tunnus='$tilausrivi[ttunnus]'";
+						if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+						$katekorjres = pupe_query($query);
 					}
 					else {
 

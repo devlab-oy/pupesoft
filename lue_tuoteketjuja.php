@@ -106,6 +106,13 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 		case "vastaavat" :
 			$pakolliset = array("TUOTENO");
 			$kielletyt = array("");
+
+			// Vastaavien sis‰‰nluvussa vain 2 tuoteno saraketta joista ensimm‰isell‰ etsit‰‰n haluttu ketju
+			$headers_count = array_count_values($headers);
+			if ($headers_count['TUOTENO'] > 2) {
+				exit("Vastaavia sis‰‰nluettassa ei voi olla kuin 2 tuotenumero saraketta");
+			}
+
 			break;
 		case "tuoteperhe" :
 			$pakolliset = array("ISATUOTENO", "TUOTENO");
@@ -219,6 +226,8 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 	#exit;
 	*/
 
+	$vastaava_paatuote = "";
+
 	// luetaan tiedosto loppuun...
 	foreach ($taulunrivit as $rivinumero => $rivi) {
 
@@ -231,6 +240,12 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 				if ($headers[$j] == "TUOTENO" and $rivi[$j] != "") {
 					$haku .= "'$rivi[$j]',";
 				}
+
+				// Vastaavien sis‰‰nluvussa otetaan haettava tuoteno talteen
+				// Ensimm‰isell‰ tuotenumerolla etsit‰‰n ketjua johon toinen tuoteno lis‰t‰‰n
+				if ($table == "vastaavat" and $headers[0] == "TUOTENO" and $rivi[0] != "") {
+					$vastaava_paatuote = $rivi[0];
+				}
 			}
 			$haku = substr($haku, 0, -1);
 
@@ -241,7 +256,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 			if ($table == "vastaavat") {
 				$fquery = "	SELECT distinct id
 							FROM $table
-							WHERE tuoteno in ($haku)
+							WHERE tuoteno = '$vastaava_paatuote'
 							AND jarjestys = 1
 							and yhtio = '{$kukarow['yhtio']}'";
 			}
@@ -304,11 +319,17 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 				for ($j = 0; $j < count($rivi); $j++) {
 					if ($headers[$j] == "TUOTENO" and trim($rivi[$j]) != '') {
 
-						$jarjestys = 0;
+						$jarjestys      = 0;
+						$vaihtoehtoinen = '';
 
 						// Katotaan onko seuraava sarake j‰rjestys
 						if ($headers[$j+1] == "JARJESTYS") {
 							$jarjestys = $taulunrivit[$rivinumero][$j+1];
+
+							// ja jos j‰rjestyst‰ seuraa vaihtoehtoinen sarake
+							if ($headers[$j+2] == "VAIHTOEHTOINEN") {
+								$vaihtoehtoinen = $taulunrivit[$rivinumero][$j+2];
+							}
 						}
 
 						//katotaan, ett‰ tuote lˆytyy
@@ -336,12 +357,16 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 										$jarjestys = 1;
 									}
 
-									// P‰ivitet‰‰n j‰rjestyksi‰ jonossa +1, mutta ei kosketa j‰rjestys=0 riveihin
-									$uquery = "UPDATE $table SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
-												WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND jarjestys >= $jarjestys";
-									$result = pupe_query($uquery);
+									// P‰ivitet‰‰n j‰rjestyksi‰ jonossa +1 jos j‰rjestys ei ole nolla, mutta ei kuitenkaan kosketa j‰rjestys=0 riveihin
+									if ($jarjestys != 0) {
+										$uquery = "UPDATE $table SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
+													WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND jarjestys >= $jarjestys";
+										$result = pupe_query($uquery);
+									}
 
-									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
+									if ($vastaava_paatuote == $rivi[$j]) $jarjestys = 1;
+
+									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys', vaihtoehtoinen='$vaihtoehtoinen', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 								}
 								else {
 									$kysely = " and tuoteno='$rivi[$j]' ";

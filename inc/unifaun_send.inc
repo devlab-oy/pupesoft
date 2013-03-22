@@ -22,7 +22,7 @@ class Unifaun {
 	private $kirjoitin;
 
 	//rahdinkuljettajat, joilla pakkauksen minimi on 0,25 x 0,25 x 0,25
-	private $rahdinkuljettajat_025;
+	private $rahdinkuljettajien_dimensiot;
 
 	public function __construct($hostname, $username, $password, $ftppath, $ftpport, $ftpfail, $ftpsucc) {
 		$this->hostname = $hostname;
@@ -99,8 +99,8 @@ class Unifaun {
 		$this->setAsiakasRow();
 	}
 
-	public function setRahdinKuljettaja025Rows(array $rahdinkuljettajat_025 = array()) {
-		$this->rahdinkuljettajat_025 = $rahdinkuljettajat_025;
+	public function setRahdinKuljettajaDimensiot(array $rahdinkuljettajat = array()) {
+		$this->rahdinkuljettajien_dimensiot = $rahdinkuljettajat;
 	}
 
 	public function setKirjoitin($kirjoitin) {
@@ -788,11 +788,14 @@ class Unifaun {
 		#$uni_par_val = $uni_parcel->addChild('val', ""); # Loadmeter. Can only be specified for entire shipment.
 		#$uni_par_val->addAttribute('n', "area");
 
-		if(in_array($this->toitarow['rahdinkuljettaja'], $this->rahdinkuljettajat_025)) {
-			$minimi_dimensio = 0.25;
+		$dimensio = search_array_key_for_value_recursive($this->rahdinkuljettajien_dimensiot, 'koodi', $this->toitarow['rahdinkuljettaja']);
+		//rahdinkuljettajalla on vain yksi minimi_dimensio. tällöin voimme viitata 0 indeksillä
+		if(empty($dimensio[0]['minimi_dimensio'])) {
+			$minimi_dimensio = 0.01;
 		}
 		else {
-			$minimi_dimensio = 0.01;
+
+			$minimi_dimensio = $dimensio[0]['minimi_dimensio'];
 		}
 
 		$pakkaustiedot['syvyys'] = $pakkaustiedot['syvyys'] < $minimi_dimensio ? $minimi_dimensio : $pakkaustiedot['syvyys'];

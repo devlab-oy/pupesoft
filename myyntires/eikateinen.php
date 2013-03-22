@@ -261,7 +261,9 @@ function tee_kirjanpito_muutokset($params) {
 				WHERE yhtio	 = '$kukarow[yhtio]'
 				AND ltunnus	 = '{$params['tunnus']}'
 				AND tilino	 IN {$vanhatili}
-				AND korjattu = ''";
+				AND korjattu = ''
+				ORDER BY tapvm DESC, tunnus DESC
+				LIMIT 1";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 1) {
@@ -271,9 +273,9 @@ function tee_kirjanpito_muutokset($params) {
 		$tilid = kopioitiliointi($vanharow['tunnus'], "");
 
 		$query = "	UPDATE tiliointi
-					SET summa = summa * -1,
-					laatija = '{$kukarow['kuka']}',
-					laadittu = now()
+					SET summa 	= summa * -1,
+					laatija 	= '{$kukarow['kuka']}',
+					laadittu 	= now()
 					{$tapvmlisa}
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and tunnus	= '{$tilid}'";
@@ -285,10 +287,10 @@ function tee_kirjanpito_muutokset($params) {
 		$kustplisa = $params['kustp'] != '' ? ", kustp = '{$params['kustp']}'" : "";
 
 		$query = "	UPDATE tiliointi
-					SET tilino = '{$uusitili}',
-					summa = '{$params['laskurow']['summa']}',
-					laatija = '{$kukarow['kuka']}',
-					laadittu = now()
+					SET tilino 	= '{$uusitili}',
+					summa 		= '{$params['laskurow']['summa']}',
+					laatija 	= '{$kukarow['kuka']}',
+					laadittu 	= now()
 					{$tapvmlisa}
 					{$kustplisa}
 					WHERE yhtio	= '$kukarow[yhtio]'

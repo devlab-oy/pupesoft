@@ -17,10 +17,8 @@
 			}
 
 			if (mysql_field_name($result, $i) == 'minimi_dimensio') {
-				if(is_numeric($t[$i])) {
-					$t[$i] = str_replace(',', '.', $t[$i]);
-				}
-				else {
+				$t[$i] = str_replace(',', '.', $t[$i]);
+				if(!is_numeric($t[$i])) {
 					$virhe[$i] = t("Tietue pit‰‰ olla numero");
 				}
 			}

@@ -398,44 +398,27 @@ if (!function_exists("korjaalaskut")) {
 }
 
 if (!function_exists('korjaatapahtuma')) {
-	function korjaatapahtuma($rivitunnus, $uusihinta, $lajit = array(), $tuoteno = "", $selite_txt = "", $tarkkatunnus = FALSE, $upd_kplhinta = TRUE, $upd_hinta = TRUE) {
+	function korjaatapahtuma($tapahtuma_tunnus, $uusihinta, $selite_txt, $upd_kplhinta = TRUE, $upd_hinta = TRUE) {
 		global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text;
 
-		$lajilisa = count($lajit) > 0 ? "AND laji IN ('".implode("','", $lajit)."')" : "";
-
-		$kumpitunnus = $tarkkatunnus ? "tunnus" : "rivitunnus";
-
 		// Haetaan ensimm‰inen
-		$query = "	SELECT MIN(SUBSTRING(laadittu, 1, 10)) laadittu
+		$query = "	SELECT SUBSTRING(laadittu, 1, 10) laadittu, rivitunnus, tunnus, selite, kplhinta, hinta, kpl
 					FROM tapahtuma
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND {$kumpitunnus} = '{$rivitunnus}'
-					{$lajilisa}";
-		$laadittu_chk_res = pupe_query($query);
-		$laadittu_chk_row = mysql_fetch_assoc($laadittu_chk_res);
+					AND tunnus = '{$tapahtuma_tunnus}'";
+		$tun_chk_res = pupe_query($query);
+		$tun_chk_row = mysql_fetch_assoc($tun_chk_res);
 
 		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 		list($tkvv,$tkkk,$tkpp) = explode("-",$yhtiorow["tilikausi_alku"]);
-		list($klvv,$klkk,$klpp) = explode("-",$laadittu_chk_row["laadittu"]);
+		list($klvv,$klkk,$klpp) = explode("-",$tun_chk_row["laadittu"]);
 
 		$tilikausi_alku = (int) date('Ymd',mktime(0,0,0,$tkkk,$tkpp,$tkvv));
 		$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
 
-		// Hanskataan toistaiseksi vain myyntipuoli
+		// Korjataan tapahtumia suljetulla tilikaudella
 		if ($tilikausi_alku > $korjaus_alku) {
-
-			// Korjataan viimeinen tapahtuma
-			$query = "	SELECT tunnus, selite, kplhinta, hinta, kpl
-						FROM tapahtuma
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND {$kumpitunnus} = '{$rivitunnus}'
-						{$lajilisa}
-						ORDER BY tunnus DESC
-						LIMIT 1";
-			if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
-			$tun_chk_res = pupe_query($query);
-			$tun_chk_row = mysql_fetch_assoc($tun_chk_res);
 
 			$params = array(
 				'kpl' => ($tun_chk_row['kpl'] * -1),
@@ -458,13 +441,10 @@ if (!function_exists('korjaatapahtuma')) {
 			if ($upd_hinta) $params['hinta'] = $uusihinta;
 
 			kopioitapahtuma($tun_chk_row['tunnus'], $params);
-
 		}
 		else {
 
 			$selitelisa = $selite_txt != "" ? ", selite = concat(selite, '{$selite_txt}')" : "";
-			$tuotenolisa = $tuoteno != "" ? ", AND tuoteno = '{$tuoteno}'" : "";
-
 			$kplhintalisa = $upd_kplhinta ? ", kplhinta = '{$uusihinta}'" : "";
 
 			// P‰ivitet‰‰n korjattava tapahtuma
@@ -473,13 +453,19 @@ if (!function_exists('korjaatapahtuma')) {
 						{$kplhintalisa}
 						{$selitelisa}
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND laadittu   >= '{$yhtiorow['tilikausi_alku']}'
-						AND {$kumpitunnus} 	= '{$rivitunnus}'
-						{$lajilisa}
-						{$tuotenolisa}";
+						AND tunnus = '{$tapahtuma_tunnus}'";
 			$paivresult = pupe_query($query);
 
 			if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+
+			// Poistetaan lopuksi vanhat korjaustapahtumat
+			// T‰m‰ keissi on t‰rke‰, jos tilikauden alkua ollaan siirretty taaksep‰in historiaan
+			$query = "	DELETE FROM tapahtuma
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji = 'korjaus'
+						AND rivitunnus != 0
+						AND rivitunnus = '{$tun_chk_row['rivitunnus']}'";
+			$del_res = pupe_query($query);
 		}
 	}
 }
@@ -502,16 +488,20 @@ if ($tuoteno != '') {
 		//T‰h‰n haaraan menn‰‰n jos tuotteella on sarjanumeroseurantaa ja varastonarvo lasketaan suoraan osto ja myyntiriveilt‰
 		if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "Tuotenumero $tuoteno on sarjanumeroseurannassa<br>";
 
-		$query  = "	SELECT yhtio
+		$query  = "	SELECT tilausrivi.yhtio, tapahtuma.tunnus tapahtuma_tunnus
 					FROM tilausrivi
-					WHERE yhtio 		= '$kukarow[yhtio]'
-					and ((tyyppi = 'O' and kpl > 0) or (tyyppi = 'L' and kpl < 0))
-					and laskutettuaika != '0000-00-00'
-					and tunnus 			= '$rivitunnus'
-					and tuoteno 		= '$tuoteno'";
+					JOIN tapahtuma ON (tapahtuma.yhtio = tilausrivi.yhtio and tapahtuma.rivitunnus = tilausrivi.tunnus)
+					WHERE tilausrivi.yhtio 		= '$kukarow[yhtio]'
+					and ((tilausrivi.tyyppi = 'O' and tilausrivi.kpl > 0) or (tilausrivi.tyyppi = 'L' and tilausrivi.kpl < 0))
+					and tilausrivi.laskutettuaika != '0000-00-00'
+					and tilausrivi.tunnus 			= '$rivitunnus'
+					and tilausrivi.tuoteno 		= '$tuoteno'";
 		$rxiviresult = pupe_query($query);
 
 		if (mysql_num_rows($rxiviresult) == 1 and is_numeric($uusihinta)) {
+
+			$rxivirow = mysql_fetch_assoc($rxiviresult);
+
 			// P‰ivitet‰‰n ostotilausrivin rivihinta
 			$query  = "	UPDATE tilausrivi
 						SET rivihinta = round($uusihinta*kpl,2)
@@ -523,7 +513,7 @@ if ($tuoteno != '') {
 			$selite_txt = ",<br>J‰lkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")";
 
 			// P‰ivitet‰‰n korjattava tapahtuma
-			korjaatapahtuma($rivitunnus, $uusihinta, array('tulo','valmistus'), $tuoteno, $selite_txt);
+			korjaatapahtuma($rxivirow['tapahtuma_tunnus'], $uusihinta, $selite_txt);
 
 			// Haetaan kaikki tiedot sarjanumerosta
 			$query = "	SELECT distinct myyntirivitunnus
@@ -537,7 +527,7 @@ if ($tuoteno != '') {
 
 			while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 				// Hetaaan laskutetut myntirivit
-				$query = "	SELECT tilausrivi.*, tapahtuma.laadittu
+				$query = "	SELECT tilausrivi.*, tapahtuma.laadittu, tapahtuma.tunnus tapahtuma_tunnus
 							FROM tilausrivi
 							JOIN tapahtuma ON tapahtuma.yhtio = tilausrivi.yhtio and tapahtuma.rivitunnus = tilausrivi.tunnus
 							WHERE tilausrivi.yhtio	 		 = '$kukarow[yhtio]'
@@ -568,7 +558,7 @@ if ($tuoteno != '') {
 
 					$mitenkavi = korjaalaskut($tuoteno, $uusihinta, $rivirow["laadittu"], $rivirow["laadittu"], $rivirow["tunnus"]);
 
-					korjaatapahtuma($sarjarow['myyntirivitunnus'], $uusihinta, array('laskutus', 'tulo', 'valmistus', 'inventointi', 'siirto'), "", "", FALSE, FALSE);
+					korjaatapahtuma($rivirow['tapahtuma_tunnus'], $uusihinta, "", FALSE);
 				}
 				else {
 					if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Ei korjattavaa (tuotetta ei ole myyty)! Uusi hinta: $uusihinta $rivirow[uusiotunnus]</font><br>";
@@ -1103,7 +1093,7 @@ if ($tuoteno != '') {
 									$selite_txt = in_array($trow['laji'], array('tulo', 'valmistus')) ? ",<br>J‰lkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")" : "";
 
 									// P‰ivitet‰‰n korjattava tapahtuma
-									korjaatapahtuma($trow['tunnus'], $uusikehahin, array($trow["laji"]), "", $selite_txt, TRUE, $upd_kplhinta);
+									korjaatapahtuma($trow['tunnus'], $uusikehahin, $selite_txt, $upd_kplhinta);
 								}
 							}
 

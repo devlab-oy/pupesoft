@@ -261,7 +261,9 @@ function tee_kirjanpito_muutokset($params) {
 				WHERE yhtio	 = '$kukarow[yhtio]'
 				AND ltunnus	 = '{$params['tunnus']}'
 				AND tilino	 IN {$vanhatili}
-				AND korjattu = ''";
+				AND korjattu = ''
+				ORDER BY tapvm DESC, tunnus DESC
+				LIMIT 1";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 1) {
@@ -271,9 +273,9 @@ function tee_kirjanpito_muutokset($params) {
 		$tilid = kopioitiliointi($vanharow['tunnus'], "");
 
 		$query = "	UPDATE tiliointi
-					SET summa = summa * -1,
-					laatija = '{$kukarow['kuka']}',
-					laadittu = now()
+					SET summa 	= summa * -1,
+					laatija 	= '{$kukarow['kuka']}',
+					laadittu 	= now()
 					{$tapvmlisa}
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and tunnus	= '{$tilid}'";
@@ -285,10 +287,10 @@ function tee_kirjanpito_muutokset($params) {
 		$kustplisa = $params['kustp'] != '' ? ", kustp = '{$params['kustp']}'" : "";
 
 		$query = "	UPDATE tiliointi
-					SET tilino = '{$uusitili}',
-					summa = '{$params['laskurow']['summa']}',
-					laatija = '{$kukarow['kuka']}',
-					laadittu = now()
+					SET tilino 	= '{$uusitili}',
+					summa 		= '{$params['laskurow']['summa']}',
+					laatija 	= '{$kukarow['kuka']}',
+					laadittu 	= now()
 					{$tapvmlisa}
 					{$kustplisa}
 					WHERE yhtio	= '$kukarow[yhtio]'
@@ -360,12 +362,10 @@ function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
 	$tasmays_query = "	SELECT group_concat(distinct lasku.tunnus) ltunnukset,
 						group_concat(distinct tiliointi.selite) selite
 						FROM lasku
-						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
-						AND tiliointi.ltunnus = lasku.tunnus
-						AND tiliointi.selite LIKE '$kassalipasrow[nimi] %'
-						AND tiliointi.korjattu = '')
+						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.selite LIKE '$kassalipasrow[nimi] %' AND tiliointi.korjattu = '')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.tila 	  = 'X'
+						AND lasku.alatila = 'K'
 						AND lasku.tapvm   = '$paiva'";
 	$tasmays_result = pupe_query($tasmays_query);
 	$tasmaysrow = mysql_fetch_assoc($tasmays_result);
@@ -418,10 +418,10 @@ function hae_lasku2($laskuno, $toim) {
 					FROM lasku
 					JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus)
 					JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
 					AND	lasku.laskunro = '{$laskuno}'
-					AND lasku.tila = 'U'
-					AND lasku.alatila = 'X'
+					AND lasku.tila     = 'U'
+					AND lasku.alatila  = 'X'
 					AND lasku.saldo_maksettu = 0";
 	}
 	else {
@@ -446,10 +446,10 @@ function hae_lasku2($laskuno, $toim) {
 					FROM lasku
 					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus AND maksuehto.kateinen != ''
 					JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
 					AND lasku.laskunro = '{$laskuno}'
-					AND lasku.tila = 'U'
-					AND lasku.alatila = 'X'
+					AND lasku.tila     = 'U'
+					AND lasku.alatila  = 'X'
 					AND lasku.saldo_maksettu = 0";
 	}
 

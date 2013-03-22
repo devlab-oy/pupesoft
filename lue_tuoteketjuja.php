@@ -543,6 +543,9 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 		}
 	}
 
+	// Tiivistet‰‰n vastaavat ketjusta v‰lit pois
+	tiivista_vastaavat_tuoteketju($id);
+
 	echo t("P‰ivitettiin")," $lask ",t("rivi‰"),"!";
 }
 else {

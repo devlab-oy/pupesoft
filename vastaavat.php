@@ -241,33 +241,8 @@ if ($tee == 'muutaprio') {
                     WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
-    // Tiivistet‰‰n ketjut
-    // Haetaan koko ketju
-    $query = "SELECT * FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND id='$id' AND jarjestys!=0 ORDER BY jarjestys";
-    $result = pupe_query($query);
-
-    while($tuote = mysql_fetch_assoc($result)) {
-        // Aloitetaan pienimm‰st‰ ei nollasta (useimmiten 1)
-        // Pienimp‰‰n ei kosketa ja muut j‰rk‰t‰‰n siit‰ eteenp‰in
-        if (!isset($edellinen)) {
-            $edellinen = $tuote['jarjestys'];
-            continue;
-        }
-
-        // P‰ivitet‰‰n j‰rjestykseksi edellinen+1
-        $uusi_jarjestys = ($edellinen + 1);
-
-        // Ei p‰ivitet‰ j‰rjestyst‰ turhaan
-        if ($tuote['jarjestys'] <> $uusi_jarjestys) {
-            $query = "UPDATE vastaavat
-                        SET jarjestys = $uusi_jarjestys, muutospvm = now()
-                        WHERE yhtio='{$kukarow['yhtio']}' AND tunnus={$tuote['tunnus']}";
-            if( ! pupe_query($query) ) {
-                exit("Virhe ketjujen uudelleenj‰rjestelyss‰");
-            }
-        }
-        $edellinen = $uusi_jarjestys;
-    }
+    // Tiivistet‰‰n vastaavat ketjusta v‰lit pois
+    tiivista_vastaavat_tuoteketju($id);
 }
 
 if ($tee == 'add') {

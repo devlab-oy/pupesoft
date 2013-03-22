@@ -788,14 +788,21 @@ class Unifaun {
 		#$uni_par_val = $uni_parcel->addChild('val', ""); # Loadmeter. Can only be specified for entire shipment.
 		#$uni_par_val->addAttribute('n', "area");
 
-		$dimensio = search_array_key_for_value_recursive($this->rahdinkuljettajien_dimensiot, 'koodi', $this->toitarow['rahdinkuljettaja']);
-		//rahdinkuljettajalla on vain yksi minimi_dimensio. tällöin voimme viitata 0 indeksillä
-		if(empty($dimensio[0]['minimi_dimensio'])) {
+		$query = "	SELECT koodi,
+					minimi_dimensio
+					FROM rahdinkuljettajat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND koodi = '{$this->toitarow['rahdinkuljettaja']}'";
+		$rahdinkuljettajat_result = pupe_query($query);
+		$rahdinkuljettajat_rivit = array();
+		$rahdinkuljettaja_rivi = mysql_fetch_assoc($rahdinkuljettajat_result);
+
+		if(empty($rahdinkuljettaja_rivi['minimi_dimensio'])) {
 			$minimi_dimensio = 0.01;
 		}
 		else {
 
-			$minimi_dimensio = $dimensio[0]['minimi_dimensio'];
+			$minimi_dimensio = $rahdinkuljettaja_rivi['minimi_dimensio'];
 		}
 
 		$pakkaustiedot['syvyys'] = $pakkaustiedot['syvyys'] < $minimi_dimensio ? $minimi_dimensio : $pakkaustiedot['syvyys'];

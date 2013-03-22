@@ -190,21 +190,6 @@
 							continue;
 						}
 
-						$query = "	SELECT koodi,
-									minimi_dimensio
-									FROM rahdinkuljettajat
-									WHERE yhtio = '{$kukarow['yhtio']}'";
-						$rahdinkuljettajat_result = pupe_query($query);
-						$rahdinkuljettajat_rivit = array();
-
-						while ($rahdinkuljettaja_rivi = mysql_fetch_assoc($rahdinkuljettajat_result)) {
-							$rahdinkuljettajat_rivit[] = array(
-								'koodi' => $rahdinkuljettaja_rivi['koodi'],
-								'minimi_dimensio' => $rahdinkuljettaja_rivi['minimi_dimensio'],
-							);
-						}
-
-						$unifaun->setRahdinKuljettajaDimensiot($rahdinkuljettajat_rivit);
 						$unifaun->setYhtioRow($yhtiorow);
 						$unifaun->setKukaRow($kukarow);
 						$unifaun->setPostiRow($row);

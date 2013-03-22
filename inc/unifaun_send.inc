@@ -21,9 +21,6 @@ class Unifaun {
 	private $xml;
 	private $kirjoitin;
 
-	//rahdinkuljettajat, joilla pakkauksen minimi on 0,25 x 0,25 x 0,25
-	private $rahdinkuljettajien_dimensiot;
-
 	public function __construct($hostname, $username, $password, $ftppath, $ftpport, $ftpfail, $ftpsucc) {
 		$this->hostname = $hostname;
 		$this->username = $username;
@@ -32,7 +29,6 @@ class Unifaun {
 		$this->ftpport 	= $ftpport;
 		$this->ftpfail 	= $ftpfail;
 		$this->ftpsucc 	= $ftpsucc;
-
 	}
 
 	public function setYhtioRow($yhtiorow) {
@@ -97,10 +93,6 @@ class Unifaun {
 		}
 
 		$this->setAsiakasRow();
-	}
-
-	public function setRahdinKuljettajaDimensiot(array $rahdinkuljettajat = array()) {
-		$this->rahdinkuljettajien_dimensiot = $rahdinkuljettajat;
 	}
 
 	public function setKirjoitin($kirjoitin) {
@@ -794,14 +786,12 @@ class Unifaun {
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND koodi = '{$this->toitarow['rahdinkuljettaja']}'";
 		$rahdinkuljettajat_result = pupe_query($query);
-		$rahdinkuljettajat_rivit = array();
 		$rahdinkuljettaja_rivi = mysql_fetch_assoc($rahdinkuljettajat_result);
 
-		if(empty($rahdinkuljettaja_rivi['minimi_dimensio'])) {
+		if (empty($rahdinkuljettaja_rivi['minimi_dimensio'])) {
 			$minimi_dimensio = 0.01;
 		}
 		else {
-
 			$minimi_dimensio = $rahdinkuljettaja_rivi['minimi_dimensio'];
 		}
 

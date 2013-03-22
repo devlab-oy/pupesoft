@@ -18384,7 +18384,7 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 }
 
 if (!function_exists("kopioitiliointi")) {
-	function kopioitiliointi ($tunnus, $viivaaja, $params = array()) {
+	function kopioitiliointi ($tunnus, $viivaaja = "", $params = array()) {
 		//Tehdään kopio tiliöinnistä $tunnus
 		//Jos $viivaajassa on jotain tehdään uusi vienti yliviivattuna
 
@@ -18418,7 +18418,7 @@ if (!function_exists("kopioitiliointi")) {
 							$query .= $kennimi." = '".$tiliointirow[$kennimi]."',";
 						}
 					}
-					elseif (isset($params[$kennimi]) and $params[$kennimi] != "") {
+					elseif (isset($params[$kennimi])) {
 						$query .= "{$kennimi} ='{$params[$kennimi]}',";
 					}
 					else {

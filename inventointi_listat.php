@@ -824,7 +824,7 @@
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
 			mt_srand((float) $sec + ((float) $usec * 100000));
-			$filenimi = "/tmp/".t("Inventointilista")."-".md5(uniqid(mt_rand(), true)).".txt";
+			$filenimi = "/tmp/".preg_replace("/[^a-z0-9\-_]/i", "", t("Inventointilista")."-".md5(uniqid(mt_rand(), true))).".txt";
 			$fh = fopen($filenimi, "w+");
 
 			$pp = date('d');

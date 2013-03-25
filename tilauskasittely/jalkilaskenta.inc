@@ -428,7 +428,7 @@ if (!function_exists('korjaatapahtuma')) {
 				'laji' => "korjaus",
 			);
 
-			kopioitapahtuma($tun_chk_row['tunnus'], $params);
+			kopioitapahtuma($tapahtuma_tunnus, $params);
 
 			$params = array(
 				'selite' => "{$tun_chk_row['selite']}{$selite_txt}",
@@ -440,7 +440,7 @@ if (!function_exists('korjaatapahtuma')) {
 			if ($upd_kplhinta) $params['kplhinta'] = $uusihinta;
 			if ($upd_hinta) $params['hinta'] = $uusihinta;
 
-			kopioitapahtuma($tun_chk_row['tunnus'], $params);
+			kopioitapahtuma($tapahtuma_tunnus, $params);
 		}
 		else {
 
@@ -693,6 +693,7 @@ if ($tuoteno != '') {
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$tuoteno'
 								and laadittu >= '$pvm'
+								AND laji != 'korjaus'
 								and kpl <> 0
 								ORDER BY laadittu";
 					$result = pupe_query($query);

@@ -122,8 +122,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
 
 		$varasto 		= $data['tulostuspaikka'][0];
 		$toimitustapa	= $data['toimitustapa'][0];
-		$tulostin 		= 100;
-		$oslappkpl 		= 1;
+		$tulostin 		= $kopiotulostin;
 
 		if ($varasto == 0) {
 			$query = "	SELECT tunnus

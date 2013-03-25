@@ -767,6 +767,17 @@
 			}
 		}
 
+		if ($yhtiorow["kerataanko_valmistukset"] == "E" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON")) {
+			//jos valmistuksia ei kerätä, laitetaan valmistus tilaan kerätty
+			$query = "	UPDATE lasku
+						SET alatila='C', lahetepvm=now()
+						where yhtio='$kukarow[yhtio]'
+						and tunnus = '$laskurow[tunnus]'
+						and tila='$tvs_tila'
+						and alatila in ('','J')";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+
 		// ollaan käsitelty projektin osatoimitus joten palataan tunnusnipun otsikolle..
 		if ($kukarow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $projektilla > 0) {
 

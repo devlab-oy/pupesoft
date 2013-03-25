@@ -133,17 +133,14 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
 
 	$toimitustavan_lahto_update = "";
 	
-	if ($kutsuja == "EDITILAUS" or $kukarow["extranet"] != "") {
+	if (($kutsuja == "EDITILAUS" or $kukarow["extranet"] != "") and $yhtiorow["luottorajan_ylitys"] == "E") {
 		$alatila = "F";
 	}
-	elseif (($yhtiorow["luottorajan_ylitys"] == "K"             or ($yhtiorow["luottorajan_ylitys"] == "E"             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI")))) {
+	else {
 		//laitetaan tilaan Odottaa asiakkaan suoritusta
 		$alatila = "G";
 		//nollataan toimitustava_lahto
 		$toimitustavan_lahto_update = ",toimitustavan_lahto = 0, toimitustavan_lahto_siirto = 0";
-	}
-	else {
-		$alatila = "";
 	}
 
 	$query = "	UPDATE lasku SET

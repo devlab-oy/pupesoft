@@ -579,8 +579,7 @@
 			pupe_query($tapahtuma_query);
 		}
 
-		echo date("d.m.Y @ G:i:s").": Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.\n";
-
+		if ($poistettu > 0) echo date("d.m.Y @ G:i:s").": Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.\n";
 	}
 
 	if (!$php_cli) {

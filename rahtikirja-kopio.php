@@ -291,9 +291,7 @@
 			echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 			echo "</select><br><br>";
 
-
 			echo t("Tulosta osoitelaput"),"<br>";
-
 
 			mysql_data_seek($kirre, 0);
 

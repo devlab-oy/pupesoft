@@ -120,6 +120,27 @@
 
 					if ($yhtiorow['kerayserat'] == 'K') {
 
+						// Jos paketilla on jo ulkoinen sscc, lähetetään discardParcel-sanoma
+						$query = "	SELECT *
+									FROM kerayserat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND sscc = '{$sscc}'
+									AND nro = '{$eranumero}'
+									AND sscc_ulkoinen != ''
+									AND sscc_ulkoinen != 0
+									LIMIT 1";
+						$sscc_ulkoinen_chk_res = pupe_query($query);
+
+						if (mysql_num_rows($sscc_ulkoinen_chk_res) == 1) {
+
+							$sscc_ulkoinen_chk_row = mysql_fetch_assoc($sscc_ulkoinen_chk_res);
+
+							$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
+
+							$unifaun->_discardParcel("", $sscc_ulkoinen_chk_row['sscc_ulkoinen']);
+							$unifaun->ftpSend();
+						}
+
 						list($eranumero, $sscc) = explode("_", $eranumero_sscc);
 
 						$query = "	UPDATE kerayserat SET

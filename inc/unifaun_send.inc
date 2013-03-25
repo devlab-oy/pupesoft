@@ -161,7 +161,7 @@ class Unifaun {
 		$this->xml = $xml;
 	}
 
-	public function _discardParcel($mergeid, $parcelno) {
+	public function _discardParcel($mergeid = "", $parcelno) {
 
 		$xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';
 

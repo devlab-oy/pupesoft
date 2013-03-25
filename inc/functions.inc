@@ -3,17 +3,17 @@
 if (!function_exists("pupesoft_login")) {
 	function pupesoft_login($params) {
 
-		$user = $params['user'];
-		$salasana = $params['salasana'];
-		$salamd5 = $params['salamd5'];
-		$mikayhtio = $params['mikayhtio'];
-		$uusi1 = $params['uusi1'];
-		$uusi2 = $params['uusi2'];
-		$yhtio = $params['yhtio'];
-		$browkieli = $params['browkieli'];
-		$palvelin = $params['palvelin'];
-		$palvelin2 = $params['palvelin2'];
-		$mobile = $params['mobile'];
+		$user 		= $params['user'];
+		$salasana 	= $params['salasana'];
+		$salamd5 	= $params['salamd5'];
+		$mikayhtio 	= $params['mikayhtio'];
+		$uusi1 		= $params['uusi1'];
+		$uusi2 		= $params['uusi2'];
+		$yhtio 		= $params['yhtio'];
+		$browkieli 	= $params['browkieli'];
+		$palvelin 	= $params['palvelin'];
+		$palvelin2 	= $params['palvelin2'];
+		$mobile 	= $params['mobile'];
 
 		$session = "";
 		$usea 	 = 0;
@@ -32,7 +32,7 @@ if (!function_exists("pupesoft_login")) {
 					where kuka.kuka		= '{$user}'
 					and kuka.extranet 	= ''
 					GROUP BY 1,2,3,4";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$krow = mysql_fetch_assoc($result);
 
 		if (isset($salamd5) and $salamd5 != '') $vertaa = $salamd5;
@@ -83,7 +83,7 @@ if (!function_exists("pupesoft_login")) {
 					$query = "	UPDATE kuka
 								SET salasana = '{$uusi1}'
 								WHERE kuka = '{$user}'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					$vertaa = trim($uusi1);
 					$salasana = trim($uusi2);
@@ -111,7 +111,7 @@ if (!function_exists("pupesoft_login")) {
 					if (isset($yhtio) and strlen($yhtio) > 0) $query .= " and yhtio = '{$yhtio}'";
 					else $query .= " and yhtio = '{$krow['yhtio']}'";
 
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
 
@@ -124,7 +124,7 @@ if (!function_exists("pupesoft_login")) {
 						$query = "	SELECT oletus_ohjelma
 									FROM kuka
 									WHERE session = '{$session}'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 						$row = mysql_fetch_assoc($result);
 
 						if ($row["oletus_ohjelma"] != "") {
@@ -18088,7 +18088,7 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 
 		if ($kieli == '') {
 			$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
-			$kielresult = mysql_query($querykiel) or pupe_error($querykiel);
+			$kielresult = pupe_query($querykiel);
 			$kielrow = mysql_fetch_assoc($kielresult);
 			$kieli = strtolower($kielrow['kieli']);
 		}
@@ -19240,7 +19240,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 					muutospvm		= now()
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$tuoteno'";
-		$upresult = mysql_query($query) or pupe_error($query);
+		$upresult = pupe_query($query);
 
 		# Asetetaan uusi oletuspaikka
 		# ostorivienvarastopaikat.inc, rivi 289
@@ -19256,7 +19256,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 					and hyllyvali	= '$hylly[hyllyvali]'
 					and hyllytaso	= '$hylly[hyllytaso]'
 					LIMIT 1";
-		$upresult = mysql_query($query) or pupe_error($query);
+		$upresult = pupe_query($query);
 
 		# Haetaan tuotepaikat missä oletus ei ole '', eli nykyiset oletuspaikat
 		$query = "	SELECT *
@@ -19264,7 +19264,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$tuoteno'
 					and oletus != ''";
-		$upresult = mysql_query($query) or pupe_error($query);
+		$upresult = pupe_query($query);
 
 		# Jos oletuspaikkaa ei löytynyt, asetetaan ensimmäinen oletuspaikaksi.
 		if (mysql_num_rows($upresult) == 0) {
@@ -19276,7 +19276,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoteno'
 						ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";
-			$upresult = mysql_query($query) or pupe_error($query);
+			$upresult = pupe_query($query);
 		}
 
 		return 1;

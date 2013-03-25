@@ -115,6 +115,8 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
 		);
 	}
 
+	$osoitelappurow = array();
+
 	if (isset($tulostakopio)) {
 		$osoitelappurow = unserialize($data['tyhjanrahtikirjan_otsikkotiedot'][0]);
 

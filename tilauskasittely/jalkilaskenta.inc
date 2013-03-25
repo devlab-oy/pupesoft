@@ -402,7 +402,7 @@ if (!function_exists('korjaatapahtuma')) {
 		global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text;
 
 		// Haetaan ensimmäinen
-		$query = "	SELECT SUBSTRING(laadittu, 1, 10) laadittu, rivitunnus, tunnus, selite, kplhinta, hinta, kpl
+		$query = "	SELECT SUBSTRING(laadittu, 1, 10) laadittu, rivitunnus, tunnus, selite, kplhinta, hinta, kpl, laji
 					FROM tapahtuma
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$tapahtuma_tunnus}'";
@@ -413,6 +413,9 @@ if (!function_exists('korjaatapahtuma')) {
 		$tun_chk_row = mysql_fetch_assoc($tun_chk_res);
 
 		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+
+		// Inventoinnissa korjaustapahtuman rivitunnus on alkuperäisen inventointitapahtuman tunnus (kaikissa muissa keisseissä rivitunnus pointtaa tilausriviin)
+		if ($tun_chk_row['laji'] == 'Inventointi') $tun_chk_row['rivitunnus'] = $tun_chk_row['tunnus'];
 
 		// Poistetaan vanhat korjaustapahtumat
 		// Tämä keissi on tärkeä, jos tilikauden alkua ollaan siirretty taaksepäin historiaan
@@ -442,6 +445,9 @@ if (!function_exists('korjaatapahtuma')) {
 				'laji' => "korjaus",
 			);
 
+			// Laitetaan inventoinnin korjaustapahtumassa alkuperäisen tapahtuman tunnus rivitunnukseksi
+			if ($tun_chk_row['laji'] == 'Inventointi') $params['rivitunnus'] = $tun_chk_row['tunnus'];
+
 			kopioitapahtuma($tapahtuma_tunnus, $params);
 
 			$params = array(
@@ -450,6 +456,9 @@ if (!function_exists('korjaatapahtuma')) {
 				'laatija' => $kukarow['kuka'],
 				'laji' => "korjaus",
 			);
+
+			// Laitetaan inventoinnin korjaustapahtumassa alkuperäisen tapahtuman tunnus rivitunnukseksi
+			if ($tun_chk_row['laji'] == 'Inventointi') $params['rivitunnus'] = $tun_chk_row['tunnus'];
 
 			if ($upd_kplhinta) $params['kplhinta'] = $uusihinta;
 			if ($upd_hinta) $params['hinta'] = $uusihinta;

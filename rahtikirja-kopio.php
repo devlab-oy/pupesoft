@@ -388,54 +388,54 @@
 		echo "<input type='submit' value='".t("Tulosta")."'>";
 		echo "</form><br><br><hr>";
 
+		if ($yhtiorow['kerayserat'] == 'K') {
+			echo t("Tulosta kopiot rahtikirjaerittelystä").":";
+			echo "<br><form action='rahtikirja-kopio.php' method='post'>";
+			echo "<input type='hidden' name='tee' value='erittelykopsu'>";
+			echo "<table>";
 
-		echo t("Tulosta kopiot rahtikirjaerittelystä").":";
-		echo "<br><form action='rahtikirja-kopio.php' method='post'>";
-		echo "<input type='hidden' name='tee' value='erittelykopsu'>";
-		echo "<table>";
+			$query  = "	SELECT lahdot.*, toimitustapa.selite
+						FROM lahdot
+						JOIN toimitustapa ON (lahdot.yhtio=toimitustapa.yhtio and lahdot.liitostunnus=toimitustapa.tunnus and lahdot.aktiivi='S')
+						WHERE lahdot.yhtio = '$kukarow[yhtio]'
+						AND lahdot.pvm     = curdate()
+						ORDER BY lahdot.lahdon_kellonaika, toimitustapa.selite";
+			$result = mysql_query($query) or pupe_error($query);
 
-		$query  = "	SELECT lahdot.*, toimitustapa.selite
-					FROM lahdot
-					JOIN toimitustapa ON (lahdot.yhtio=toimitustapa.yhtio and lahdot.liitostunnus=toimitustapa.tunnus and lahdot.aktiivi='S')
-					WHERE lahdot.yhtio = '$kukarow[yhtio]'
-					AND lahdot.pvm     = curdate()
-					ORDER BY lahdot.lahdon_kellonaika, toimitustapa.selite";
-		$result = mysql_query($query) or pupe_error($query);
+			echo "<tr><th>".t("Valitse lähto").":</th>";
+			echo "<td><select name='lahto'>";
 
-		echo "<tr><th>".t("Valitse lähto").":</th>";
-		echo "<td><select name='lahto'>";
+			while ($row = mysql_fetch_array($result)) {
+				if ($lahto == $row['tunnus']) $sel = " selected ";
+				else $sel = "";
 
-		while ($row = mysql_fetch_array($result)) {
-			if ($lahto == $row['tunnus']) $sel = " selected ";
-			else $sel = "";
+				echo "<option value='$row[tunnus]' $sel>$row[tunnus] $row[lahdon_kellonaika] $row[selite]</option>";
+			}
 
-			echo "<option value='$row[tunnus]' $sel>$row[tunnus] $row[lahdon_kellonaika] $row[selite]</option>";
+			echo "</select></td></tr>";
+
+			$query = "	SELECT *
+						FROM kirjoittimet
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND komento != 'EDI'
+						ORDER BY kirjoitin";
+			$kirre = mysql_query($query) or pupe_error($query);
+
+			echo "<tr><th>".t("Tulostin"),"</th>";
+			echo "<td><select name='kirjoitin'>";
+
+			while ($kirrow = mysql_fetch_array($kirre)) {
+				if ($kirjoitin == $kirrow['komento']) $sel = " selected ";
+				else $sel = "";
+
+				echo "<option value='$kirrow[komento]' $sel>$kirrow[kirjoitin]</option>";
+			}
+
+			echo "</select></td></tr>";
+			echo "</table><br>";
+			echo "<input type='submit' value='".t("Tulosta")."'>";
+			echo "</form>";
 		}
-
-		echo "</select></td></tr>";
-
-		$query = "	SELECT *
-					FROM kirjoittimet
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND komento != 'EDI'
-					ORDER BY kirjoitin";
-		$kirre = mysql_query($query) or pupe_error($query);
-
-		echo "<tr><th>".t("Tulostin"),"</th>";
-		echo "<td><select name='kirjoitin'>";
-
-		while ($kirrow = mysql_fetch_array($kirre)) {
-			if ($kirjoitin == $kirrow['komento']) $sel = " selected ";
-			else $sel = "";
-
-			echo "<option value='$kirrow[komento]' $sel>$kirrow[kirjoitin]</option>";
-		}
-
-		echo "</select></td></tr>";
-		echo "</table><br>";
-		echo "<input type='submit' value='".t("Tulosta")."'>";
-		echo "</form>";
-
 	}
 
 	require("inc/footer.inc");

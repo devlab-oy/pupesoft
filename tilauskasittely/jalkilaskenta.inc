@@ -407,7 +407,21 @@ if (!function_exists('korjaatapahtuma')) {
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$tapahtuma_tunnus}'";
 		$tun_chk_res = pupe_query($query);
+
+		if (mysql_num_rows($tun_chk_res) != 1) return FALSE;
+
 		$tun_chk_row = mysql_fetch_assoc($tun_chk_res);
+
+		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+
+		// Poistetaan vanhat korjaustapahtumat
+		// Tämä keissi on tärkeä, jos tilikauden alkua ollaan siirretty taaksepäin historiaan
+		$query = "	DELETE FROM tapahtuma
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'korjaus'
+					AND rivitunnus != 0
+					AND rivitunnus = '{$tun_chk_row['rivitunnus']}'";
+		$del_res = pupe_query($query);
 
 		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
@@ -457,15 +471,6 @@ if (!function_exists('korjaatapahtuma')) {
 			$paivresult = pupe_query($query);
 
 			if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
-
-			// Poistetaan lopuksi vanhat korjaustapahtumat
-			// Tämä keissi on tärkeä, jos tilikauden alkua ollaan siirretty taaksepäin historiaan
-			$query = "	DELETE FROM tapahtuma
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND laji = 'korjaus'
-						AND rivitunnus != 0
-						AND rivitunnus = '{$tun_chk_row['rivitunnus']}'";
-			$del_res = pupe_query($query);
 		}
 	}
 }

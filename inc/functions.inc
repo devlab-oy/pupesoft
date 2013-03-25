@@ -18449,7 +18449,7 @@ if (!function_exists("kopioitapahtuma")) {
 		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 		if (mysql_num_rows($result) != 1) {
-			echo t("Tapahtuma kateissa, systeemivirhe!");
+			echo t("Tapahtuma kateissa, systeemivirhe!")."<br>";
 		}
 		else {
 			$tapahtumarow = mysql_fetch_assoc($result);

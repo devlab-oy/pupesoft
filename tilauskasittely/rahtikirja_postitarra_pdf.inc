@@ -7,7 +7,7 @@
 	// $rakir_row:sta löytyy asiakkaan tiedot ja $rivi:stä ytunnus
 	//
 	// muuttujat:
-	// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
+	// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kollityht, kilotyht, kuutiotyht, kirjoitin
 	// jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
 	//
 	// tulostetaan rahtikirja

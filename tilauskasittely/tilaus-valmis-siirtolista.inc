@@ -775,7 +775,7 @@
 						and tunnus = '$laskurow[tunnus]'
 						and tila='$tvs_tila'
 						and alatila in ('','J')";
-			$result = mysql_query($query) or pupe_error($query);
+			pupe_error($query);
 		}
 
 		// ollaan käsitelty projektin osatoimitus joten palataan tunnusnipun otsikolle..

@@ -288,7 +288,8 @@ $debug = 1;
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-											AND lasku.tunnus = tilausrivi.otunnus)
+											AND lasku.tunnus = tilausrivi.otunnus
+											AND lasku.tila = 'O' AND lasku.alatila = 'A')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -321,9 +322,11 @@ $debug = 1;
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-											AND lasku.tunnus = tilausrivi.otunnus)
+											AND lasku.tunnus = tilausrivi.otunnus
+											AND lasku.tila = 'O' AND lasku.alatila = 'A')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 											AND lasku2.tunnus = tilausrivi.otunnus
+											AND lasku2.tila = 'O' AND lasku2.alatila = 'A'
 											AND lasku2.comments LIKE '%{$data['ostotilausnro']}%')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
@@ -356,7 +359,8 @@ $debug = 1;
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-											AND lasku.tunnus = tilausrivi.otunnus)
+											AND lasku.tunnus = tilausrivi.otunnus
+											AND lasku.tila = 'O' AND lasku.alatila = 'A')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -388,9 +392,11 @@ $debug = 1;
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-											AND lasku.tunnus = tilausrivi.otunnus)
+											AND lasku.tunnus = tilausrivi.otunnus
+											AND lasku.tila = 'O' AND lasku.alatila = 'A')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 											AND lasku2.tunnus = tilausrivi.otunnus
+											AND lasku2.tila = 'O' AND lasku2.alatila = 'A'
 											AND lasku2.comments LIKE '%{$data['ostotilausnro']}%')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
@@ -422,7 +428,8 @@ $debug = 1;
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-											AND lasku.tunnus = tilausrivi.otunnus)
+											AND lasku.tunnus = tilausrivi.otunnus
+											AND lasku.tila = 'O' AND lasku.alatila = 'A')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -1233,7 +1240,7 @@ $debug = 1;
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus,
 									tilausrivi.laadittu
 									FROM tilausrivi
-									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.tila = 'O' AND lasku.alatila = 'A')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.tunnus = '{$trow['tunnus']}'

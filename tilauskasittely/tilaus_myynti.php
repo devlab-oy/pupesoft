@@ -217,28 +217,24 @@ if ($tee == 'DELKESKEN') {
 	}
 }
 
-// Katostaan, ett‰ tilaus on viel‰ samassa tilassa jossa se oli kun se klikattiin auku muokkaatilaus-ohjelmassa
-if ($tee == 'AKTIVOI' and $mista == "muokkaatilaus") {
-	$query = "	SELECT tila, alatila
-				FROM lasku
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND tunnus  = '$tilausnumero'
-				AND tila 	= '$orig_tila'
-				AND alatila = '$orig_alatila'";
-	$result = pupe_query($query);
+// Katsotaan, ett‰ tilaus on viel‰ samassa tilassa joss se oli kun klikattiin auki muokkaatilaus-ohjelmassa
+// if ($tee == 'AKTIVOI') {
+// 	echo "AKTIVOI 1.<br>";
 
-	if (mysql_num_rows($result) != 1) {
-		echo "<font class='error'>".t("Tilauksen tila on vaihtunut. Ole hyv‰ avaa tilaus uudestaan").".</font><br>";
-
-		// poistetaan aktiiviset tilaukset jota t‰ll‰ k‰ytt‰j‰ll‰ oli
-		$query = "UPDATE kuka SET kesken='' WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
-		$result = pupe_query($query);
-		exit;
-	}
-}
+// 	# TODO: T‰t‰ $mista tsekkia ei en‰‰ v‰ltt‰m‰tt‰ tarvita?
+// 	# if ($mista == "muokkaatilaus") {
+// 		// Onko tilauksen tila muuttunut
+// 		if ( ! tarkista_tilauksen_tila($tilausnumero, $orig_tila, $orig_alatila)) {
+// 			echo "<font class='error'>" . t("Tilauksen tila on vaihtunut. Ole hyv‰ ja avaa tilaus uudestaan") . "</font><br>";
+// 			exit();
+// 		}
+// 	# }
+// }
 
 // aktivoidaan saatu id
 if ($tee == 'AKTIVOI') {
+	echo "AKTIVOI <br>";
+
 	// katsotaan onko muilla aktiivisena
 	$query = "	SELECT *
 				FROM kuka
@@ -253,7 +249,9 @@ if ($tee == 'AKTIVOI') {
 		$row = mysql_fetch_assoc($result);
 	}
 
-	if (isset($row) and $row['kuka'] != $kukarow['kuka']) {
+	// Jos tilausnumero on jollain muulla k‰ytt‰j‰ll‰ kesken
+	# if (isset($row) and $row['kuka'] != $kukarow['kuka']) {
+	if (! aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
 		echo "<font class='error'>".t("Tilaus on aktiivisena k‰ytt‰j‰ll‰")." $row[nimi] ($row[kuka]). ".t("Tilausta ei voi t‰ll‰ hetkell‰ muokata").".</font><br>";
 
 		if (tarkista_oikeus("kayttajat.php", "", "1")) {
@@ -266,19 +264,11 @@ if ($tee == 'AKTIVOI') {
 		}
 
 		// poistetaan aktiiviset tilaukset jota t‰ll‰ k‰ytt‰j‰ll‰ oli
-		$query = "UPDATE kuka set kesken='' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-		$result = pupe_query($query);
-
-		exit;
+		# $query = "UPDATE kuka set kesken='' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+		# $result = pupe_query($query);
+		exit();
 	}
 	else {
-		$query = "	UPDATE kuka
-					SET kesken = '$tilausnumero'
-					WHERE yhtio = '$kukarow[yhtio]' AND
-					kuka = '$kukarow[kuka]' AND
-					session = '$session'";
-		$result = pupe_query($query);
-
 		// N‰in ostataan valita pikatilaus
 		if ($toim == "RIVISYOTTO" and isset($PIKATILAUS)) {
 			$toim = "PIKATILAUS";
@@ -288,7 +278,7 @@ if ($tee == 'AKTIVOI') {
 			$projektilla = $tilausnumero;
 		}
 		elseif ($toim == "VALMISTAASIAKKAALLE" and $tilausnumero != "") {
-			$tyyppiquery = "select tilaustyyppi from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";
+			$tyyppiquery = "SELECT tilaustyyppi FROM lasku WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$tilausnumero'";
 			$tyyppiresult = pupe_query($tyyppiquery);
 
 			if (mysql_num_rows($tyyppiresult) != 0) {
@@ -304,7 +294,7 @@ if ($tee == 'AKTIVOI') {
 			}
 		}
 
-		$kukarow['kesken'] 	 = $tilausnumero;
+		# $kukarow['kesken'] = $tilausnumero; # ei tartte kun setataan aktivoi_tilaus() funkkarissa
 		$tee = "";
 	}
 }
@@ -393,10 +383,22 @@ if ($kukarow["extranet"] != '') {
 	}
 }
 
-//katsotaan ett‰ kukarow kesken, $tilausnumero ja $kukarow[kesken] stemmaavat kesken‰‰n
+echo "### DEBUG ### <br>";
+echo "tee: $tee<br>";
+echo "toim: $toim<br>";
+echo "tilausnumero: $tilausnumero<br>";
+echo "kukarow[kesken]: $kukarow[kesken]<br>";
+echo "orig_tila: $orig_tila<br>";
+echo "orig_alatila: $orig_alatila<br>";
+echo "### /DEBUG ### <br>";
+
+// Katsotaan ett‰ kukarow kesken, $tilausnumero ja $kukarow[kesken] stemmaavat kesken‰‰n
 if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
-	echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
-	exit;
+
+	if (! aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
+		echo "<br><br><br>".t("398 VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
+		exit();
+	}
 }
 
 if ((int) $valitsetoimitus_vaihdarivi > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0 and $toim != "TARJOUS") {
@@ -1880,11 +1882,13 @@ if ($tee == '') {
 
 	echo "<font class='head'>$otsikko</font><hr>";
 
-	//katsotaan ett‰ kukarow kesken ja $kukarow[kesken] stemmaavat kesken‰‰n
-	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
-		echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").". $tilausnumero / $kukarow[kesken]<br><br><br>";
-		exit;
-	}
+#	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
+		if (! aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
+			echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").". $tilausnumero / $kukarow[kesken]<br><br><br>";
+			exit();
+		}
+#	}
+
 	if ($kukarow['kesken'] != '0') {
 		$tilausnumero = $kukarow['kesken'];
 	}
@@ -2097,6 +2101,8 @@ if ($tee == '') {
 					<input type='hidden' name='mista' value='$mista'>
 					<input type='hidden' name='tee' value='OTSIK'>
 					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='orig_tila' value='$orig_tila'>
+					<input type='hidden' name='orig_alatila' value='$orig_alatila'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
 					<input type='hidden' name='projektilla' value='$projektilla'>
@@ -2119,6 +2125,8 @@ if ($tee == '') {
 				echo "	<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
 						<input type='hidden' name='toim' value='$vaihdatoim'>
 						<input type='hidden' name='tee' value='AKTIVOI'>
+						<input type='hidden' name='orig_tila' value='$orig_tila'>
+						<input type='hidden' name='orig_alatila' value='$orig_alatila'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 						<input type='hidden' name='mista' value='$mista'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
@@ -6010,6 +6018,8 @@ if ($tee == '') {
 								<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
 								<input type='hidden' name='menutila' 		value = '$menutila'>
 								<input type='hidden' name='tuotenimitys' 	value = '$row[nimitys]'>
+								<input type='hidden' name='orig_tila'		value = '$orig_tila'>
+								<input type='hidden' name='orig_alatila'	value = '$orig_alatila'>
 								<input type='hidden' name='tila' 			value = 'MUUTA'>
 								<input type='hidden' name='tapa' 			value = 'MUOKKAA'>
 								<input type='Submit' value='".t("Muokkaa")."'>
@@ -6025,6 +6035,8 @@ if ($tee == '') {
 								<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
 								<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
 								<input type='hidden' name='menutila'	 	value = '$menutila'>
+								<input type='hidden' name='orig_tila'		value = '$orig_tila'>
+								<input type='hidden' name='orig_alatila'	value = '$orig_alatila'>
 								<input type='hidden' name='tila' 			value = 'MUUTA'>
 								<input type='hidden' name='tapa' 			value = 'POISTA'>
 								<input type='Submit' value='".t("Poista")."'>

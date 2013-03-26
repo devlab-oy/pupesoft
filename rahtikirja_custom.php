@@ -540,13 +540,12 @@ else {
 	$kirre = pupe_query($query);
 
 	if (mysql_num_rows($kirre) > 0) {
-
 		$prirow = mysql_fetch_assoc($kirre);
 
 		$sel_lahete[$prirow['printteri1']] = "SELECTED";
 	}
 	else {
-		$sel_lahete[$tulostin] 					= "SELECTED";
+		$sel_lahete[$tulostin] = "SELECTED";
 	}
 
     $query = "	SELECT *
@@ -594,6 +593,7 @@ else {
 	echo "<tr><th>".t("Kollia")."</th><th>".t("Kg")."</th><th>m&sup3;</th><th>m</th><th align='left' colspan='3'>".t("Pakkaus")."</th></tr>";
 
 	$i = 0;
+
 	while ($row = mysql_fetch_assoc($result)) {
     	echo "<tr>
             <td>

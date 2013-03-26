@@ -10,7 +10,7 @@ class Edi {
 	 */
 	static function create($order) {
 
-		global $magentoEdiPolku;
+		global $magento_api_edi;
 
 		// require 'magento_salasanat.php' muuttujat
 		$verkkokauppa_asiakasnro	= "WEBSTORE";
@@ -192,7 +192,7 @@ class Edi {
 
 	   	$edi_order = iconv("UTF-8", "ISO-8859-1", $edi_order);
 
-		$filename = $magentoEdiPolku."/magento-order".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+		$filename = $magento_api_edi."/magento-order".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 		file_put_contents($filename, $edi_order);
 
 		return true;

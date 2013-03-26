@@ -29,12 +29,12 @@
 	if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
 		// Varmistetaan, että kaikki muuttujat on kunnossa
-		if (empty($magentoEdiPolku) or empty($magentoSoapUrl) or empty($magentoSoapUser) or empty($magentoSoapPass)) {
+		if (empty($magento_api_edi) or empty($magento_api_url) or empty($magento_api_usr) or empty($magento_api_pas)) {
 			exit;
 		}
 
 		// Testataan vielä, että yhteys toimii ennenkun ajellaan queryjä
-		$magento_client = new MagentoClient($magentoSoapUrl, $magentoSoapUser, $magentoSoapPass);
+		$magento_client = new MagentoClient($magento_api_url, $magento_api_usr, $magento_api_pas);
 	}
 
 	$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
@@ -406,7 +406,7 @@
 
 		echo "Päivitetään Magento verkkokauppaa!\n";
 
-		$magento_client = new MagentoClient($magentoSoapUrl, $magentoSoapUser, $magentoSoapPass);
+		$magento_client = new MagentoClient($magento_api_url, $magento_api_usr, $magento_api_pas);
 
 		// Kategoriat
 		if (count($dnsryhma) > 0) {

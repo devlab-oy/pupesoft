@@ -12,12 +12,12 @@ require ("{$pupe_root_polku}/inc/functions.inc");
 require ("{$pupe_root_polku}/rajapinnat/magento_client.php");
 require ("{$pupe_root_polku}/rajapinnat/edi.php");
 
-if (empty($magentoEdiPolku) or empty($magentoSoapUrl) or empty($magentoSoapUser) or empty($magentoSoapPass)) {
+if (empty($magento_api_edi) or empty($magento_api_url) or empty($magento_api_usr) or empty($magento_api_pas)) {
 	exit;
 }
 
 // Magenton soap client
-$magento = new MagentoClient($magentoSoapUrl, $magentoSoapUser, $magentoSoapPass);
+$magento = new MagentoClient($magento_api_url, $magento_api_usr, $magento_api_pas);
 
 // Haetaan maksetut tilaukset magentosta
 $tilaukset = $magento->hae_tilaukset('paid');

@@ -2196,6 +2196,9 @@ if (!function_exists("synkronoi")) {
 			$where = "";
 
 			if (is_array($wherelliset)) {
+				//pakolliset arrayn perusteella muodostetaan $where, jonka avulla tarkastetaan löytyykö rivi muista tietokannoista.
+				//tähän whereen ei voi kuitenkaan tulla sellaisia tietoja mukaan, joita ei haluta synkronoida.
+				$pakolliset = array_diff($pakolliset, array_map('strtoupper', $synkronoi_kiellot[$table]));
 				$indeksi = array_merge($wherelliset, $pakolliset);
 				$indeksi = array_unique($indeksi);
 			}

@@ -507,6 +507,8 @@
 		echo "<input type='hidden' name='from' value='$from'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 		echo "<input type='hidden' name='mista' value='$mista'>";
+		echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
+		echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 
 		if ($asiakasid != "" or $kukarow["kesken"] != 0 or $kopioitava_otsikko != 0) {
 
@@ -2590,7 +2592,10 @@
 			echo "</table><br>";
 
 			echo "<table>";
-			echo "<tr><td class='back'><input type='submit' ACCESSKEY='J' name='jatka' value='".t("Jatka")."'></td>";
+			echo "<tr><td class='back'>";
+			echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
+			echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+			echo "<input type='submit' ACCESSKEY='J' name='jatka' value='".t("Jatka")."'></td>";
 			echo "<td class='back'><input type='submit' name='vaihdatoim_asiakas' value='".t("Hae toimitusosoite")."'></td>";
 			echo "</form>";
 
@@ -2604,6 +2609,8 @@
 				echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 				echo "<input type='hidden' name='mista' value='$mista'>";
 				echo "<input type='hidden' name='tila' value='vaihdaasiakas'>";
+				echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
+				echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 				echo "<td class='back'><input type='submit' ACCESSKEY='A' value='".t("Vaihda asiakas")."'></td></form>";
 			}
 

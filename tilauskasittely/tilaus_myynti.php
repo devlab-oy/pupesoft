@@ -2177,6 +2177,8 @@ if ($tee == '') {
 		echo "<form action='tuote_selaus_haku.php' method='post'>
 				<input type='hidden' name='toim_kutsu' value='$toim'>
 				<input type='hidden' name='tyojono' value='$tyojono'>
+				<input type='hidden' name='orig_tila' value = '$orig_tila'>
+				<input type='hidden' name='orig_alatila' value = '$orig_alatila'>
 				<input type='submit' value='".t("Selaa tuotteita")."'>
 				</form>";
 
@@ -2395,7 +2397,9 @@ if ($tee == '') {
 						<input type='hidden' name='aktivoinnista' value='true'>
 						<input type='hidden' name='tyojono' value='$tyojono'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-						<input type='hidden' name='mista' value='$mista'>";
+						<input type='hidden' name='mista' value='$mista'>
+						<input type='hidden' name='orig_tila' value='$orig_tila'>
+						<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 
 				if (!isset($jt_kayttoliittyma) and $kukarow['extranet'] != '') {
 					$jt_kayttoliittyma = 'kylla';
@@ -2589,6 +2593,8 @@ if ($tee == '') {
 			echo ":</th><td>";
 
 			if ($laskurow["liitostunnus"] == 0) {
+				echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
+				echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 				echo "<input type='submit' name='liitaasiakasnappi' value='".t("Liitä asiakas")."'>";
 			}
 			else {

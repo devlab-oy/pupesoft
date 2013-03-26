@@ -1859,7 +1859,10 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 			$varasto = explode(",", $vtrow['tunnukset']);
 		}
 
-		jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varasto, "", "", "tosi_automaaginen", "JATKA", "automaattinen_poiminta");
+		//laitetaan myyntitilaukset jaksotettu talteen, ett‰ sit‰ voidaan k‰ytt‰‰ jtselaus.php:ss‰
+		$myyntitilaus_jaksotettu = $laskurow['jaksotettu'];
+
+		jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varasto, "", "", "tosi_automaaginen", "JATKA", "automaattinen_poiminta", '', '', 'MYYNTITILAUKSELTA');
 		echo "<br>";
 
 		$tyhjenna 	= "JOO";

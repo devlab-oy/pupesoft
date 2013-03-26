@@ -879,6 +879,7 @@
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
 							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
 							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
+							tilausrivi.jaksotettu,
 							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa $summarajauslisa)
@@ -903,6 +904,7 @@
 							tilausrivin_lisatiedot.tilausrivilinkki,
 							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
 							tilausrivi.kerayspvm,
+							tilausrivi.jaksotettu,
 							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -943,6 +945,7 @@
 							lasku.toim_postino,
 							lasku.toim_postitp,
 							lasku.toim_maa,
+							tilausrivi.jaksotettu,
 							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -1075,6 +1078,18 @@
 						}
 						else {
 							$voiko_toimittaa = true;
+						}
+
+						//jtrivin jaksotuksen tarkistus tehdään vain kun ollaan tulossa myyntitilaukselta, koska jaksotetut tilausrivit eivät saa mennä väärien myyntitilaus otsikoiden alle.
+						//jtrivit pitää kuitenkin pystyä toimittamaan jtselaus ohjelmasta käsin.
+						if($mista_tullaan == 'MYYNTITILAUKSELTA' and !empty($jtrow['jaksotettu'])) {
+							//jos käsittelyssä oleva jt-rivi on jaksotettu, voidaan se liittää vain sellaiseen myyntitilaukseen ($myyntitilaus_jaksotettu), jossa jaksotus on sama kuin jtrivin jaksotus
+							if($myyntitilaus_jaksotettu == $jtrow['jaksotettu'] and $voiko_toimittaa) {
+								$voiko_toimittaa = true;
+							}
+							else {
+								$voiko_toimittaa = false;
+							}
 						}
 
 						if (isset($lapsires) and mysql_num_rows($lapsires) > 0) {

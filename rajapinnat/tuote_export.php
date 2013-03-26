@@ -8,6 +8,7 @@
 	$pupe_root_polku = dirname(dirname(__FILE__));
 	require ("{$pupe_root_polku}/inc/connect.inc");
 	require ("{$pupe_root_polku}/inc/functions.inc");
+	require ("{$pupe_root_polku}/rajapinnat/magento_client.php");
 
 	if (trim($argv[1]) != '') {
 		$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
@@ -23,6 +24,17 @@
 	}
 	else {
 		die ("Et antanut verkkokaupan tyyppiä.\n");
+	}
+
+	if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
+
+		// Varmistetaan, että kaikki muuttujat on kunnossa
+		if (empty($magentoEdiPolku) or empty($magentoSoapUrl) or empty($magentoSoapUser) or empty($magentoSoapPass)) {
+			exit;
+		}
+
+		// Testataan vielä, että yhteys toimii ennenkun ajellaan queryjä
+		$magento_client = new MagentoClient($magentoSoapUrl, $magentoSoapUser, $magentoSoapPass);
 	}
 
 	$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
@@ -394,8 +406,6 @@
 
 		echo "Päivitetään Magento verkkokauppaa!\n";
 
-		// Magento SOAP-client
-		require 'magento_client.php';
 		$magento_client = new MagentoClient($magentoSoapUrl, $magentoSoapUser, $magentoSoapPass);
 
 		// Kategoriat
@@ -426,7 +436,6 @@
 			echo "Päivitettiin $count tuotteen saldot\n";
 		}
 
-
 		// Hinnastot
 		if (count($dnshinnasto) > 0) {
 			echo "Päivitetään tuotteiden tietoja\n";
@@ -436,9 +445,10 @@
 
 		$time_end = microtime(true);
 		$time = $time_end - $time_start;
-		echo 'Magenton päivitys kesti '.$time.' sekunttia';
+
+		echo 'Magenton päivitys kesti '.$time.' sekuntia';
 	}
-	else if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
+	elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
 
 		if (isset($anvia_ftphost, $anvia_ftpuser, $anvia_ftppass, $anvia_ftppath)) {
 			$ftphost = $anvia_ftphost;
@@ -478,5 +488,4 @@
 		if (count($dnslajitelma) > 0) {
 			require ("{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc");
 		}
-
 	}

@@ -6,21 +6,21 @@ if (php_sapi_name() != 'cli') {
 }
 
 $pupe_root_polku = dirname(dirname(__FILE__));
+
 require ("{$pupe_root_polku}/inc/connect.inc");
 require ("{$pupe_root_polku}/inc/functions.inc");
+require ("{$pupe_root_polku}/rajapinnat/magento_client.php");
+require ("{$pupe_root_polku}/rajapinnat/edi.php");
 
-require 'magento_client.php';
-require 'edi.php';
-
-$url = 'http://127.0.0.1/~antti/magento/index.php/api/soap/?wsdl';
-$user = 'anti';
-$pass = '123456';
+if (empty($magentoEdiPolku) or empty($magentoSoapUrl) or empty($magentoSoapUser) or empty($magentoSoapPass)) {
+	exit;
+}
 
 // Magenton soap client
-$magento= new MagentoClient($url, $user, $pass);
+$magento = new MagentoClient($magentoSoapUrl, $magentoSoapUser, $magentoSoapPass);
 
 // Haetaan maksetut tilaukset magentosta
-$tilaukset = $magento->hae_tilaukset('canceled');
+$tilaukset = $magento->hae_tilaukset('paid');
 
 // Tehdään EDI-tilaukset
 foreach($tilaukset as $tilaus) {

@@ -1133,7 +1133,7 @@ $debug = 1;
 						echo "KAPPALEITA!!! $kappaleerotus = $tilausrivirow[varattu] - {$rtuoteno[$i]["kpl"]}<br><br>";
 					}
 
-					paivita_ja_splittaa($tilausrivirow, $rtuoteno[$i], $kappaleerotus);
+					paivita_ja_splittaa($tilausrivirow, $rtuoteno[$i]["kpl"], $kappaleerotus);
 
 					$update_asn = "	UPDATE asn_sanomat SET
 									tilausrivi = '{$tilausrivirow['tunnus']}',

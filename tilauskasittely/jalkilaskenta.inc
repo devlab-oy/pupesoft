@@ -439,6 +439,10 @@ if (!function_exists('korjaatapahtuma')) {
 		if ($tilikausi_alku > $korjaus_alku) {
 
 			// Etsit‰‰n tuorein t‰m‰n tapahtumanrivin hinta
+			// Koska voidaan j‰lkilaskea tulo uudestaan, mutta avoin kausi on eri
+			// Esim. aluksi tilikausi on suljettu 10.03.2013, tehd‰‰n korjaukset 10.03.2013 p‰iv‰lle
+			// T‰m‰n j‰lkeen siirret‰‰n tilikausi alkamaan 20.03.2013, uudet korjaukset tehd‰‰n 20.03.2013 p‰iv‰lle
+			// Hinta halutaan hakea kuitenkin 10.03.2013 korjauksilta
 			$query = "	SELECT kplhinta, hinta
 						FROM tapahtuma
 						WHERE yhtio = '{$kukarow['yhtio']}'

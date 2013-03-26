@@ -39,7 +39,7 @@
 					WHERE yhtio 	= '$kukarow[yhtio]'
 					and laji 		IN ('kulutus', 'korjaus')
 					and rivitunnus	= '$raakaainerow[tunnus]'
-					ORDER BY tunnus DESC
+					ORDER BY laadittu DESC, tunnus DESC
 					LIMIT 1";
 		$tuoteresult = pupe_query($query);
 

@@ -423,7 +423,8 @@ if (!function_exists('korjaatapahtuma')) {
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laji = 'korjaus'
 					AND rivitunnus != 0
-					AND rivitunnus = '{$tun_chk_row['rivitunnus']}'";
+					AND rivitunnus = '{$tun_chk_row['rivitunnus']}'
+					AND laadittu >= '{$yhtiorow['tilikausi_alku']} 00:00:00'";
 		$del_res = pupe_query($query);
 
 		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
@@ -437,6 +438,18 @@ if (!function_exists('korjaatapahtuma')) {
 		// Korjataan tapahtumia suljetulla tilikaudella
 		if ($tilikausi_alku > $korjaus_alku) {
 
+			// Etsitään tuorein tämän tapahtumanrivin hinta
+			$query = "	SELECT kplhinta, hinta
+						FROM tapahtuma
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji IN ('{$tun_chk_row['laji']}', 'korjaus')
+						AND rivitunnus != 0
+						AND rivitunnus = '{$tun_chk_row['rivitunnus']}'
+						ORDER BY laadittu DESC, tunnus DESC
+						LIMIT 1";
+			$hinta_chk_res = pupe_query($query);
+			$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
+
 			$params = array(
 				'kpl' => ($tun_chk_row['kpl'] * -1),
 				'selite' => "{$tun_chk_row['selite']}{$selite_txt}",
@@ -444,6 +457,9 @@ if (!function_exists('korjaatapahtuma')) {
 				'laatija' => $kukarow['kuka'],
 				'laji' => "korjaus",
 			);
+
+			if ($upd_kplhinta) $params['kplhinta'] = $hinta_chk_row['kplhinta'];
+			if ($upd_hinta) $params['hinta'] = $hinta_chk_row['hinta'];
 
 			// Laitetaan inventoinnin korjaustapahtumassa alkuperäisen tapahtuman tunnus rivitunnukseksi
 			if ($tun_chk_row['laji'] == 'Inventointi') $params['rivitunnus'] = $tun_chk_row['tunnus'];

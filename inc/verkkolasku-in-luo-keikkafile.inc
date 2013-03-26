@@ -81,8 +81,8 @@ $debug = 1;
 	}
 
 	if (!function_exists('etsi_sopivat_tilausrivit')) {
-		function etsi_sopivat_tilausrivit($data, $lajilisa, $trow, $isalisa = "") {
-			global $kukarow, $toim_tuotenolisa ,$debug;
+		function etsi_sopivat_tilausrivit($data, $lajilisa, $trow, $toim_tuotenolisa, $isalisa = "") {
+			global $kukarow ,$debug;
 			
 			if ($debug == 1) {
 				echo "<br>etsi_sopivat_tilausrivit<br>";
@@ -1037,7 +1037,7 @@ $debug = 1;
 			if ($debug == 1) {
 				echo "<br>Katotaa etsi_sopivat_tilausrivit<br>";
 			}
-			$kaytettavat_tilausrivit = etsi_sopivat_tilausrivit($rtuoteno[$i], $lajilisa, $trow, $isalisa);
+			$kaytettavat_tilausrivit = etsi_sopivat_tilausrivit($rtuoteno[$i], $lajilisa, $trow, $toim_tuotenolisa, $isalisa);
 			if ($debug == 1) {
 				echo "<br>Katottiin etsi_sopivat_tilausrivit<br>";
 				echo "<pre>",var_dump($kaytettavat_tilausrivit),"</pre>";

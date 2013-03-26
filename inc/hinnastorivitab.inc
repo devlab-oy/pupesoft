@@ -12,13 +12,11 @@ function hinnastoriviotsikot() {
 	$out .= t('tuotemerkki')."\t";		// tuotemerkki
 	$out .= t('osasto')."\t";	   		// tuotteen osasto
 	$out .= t('try')."\t";				// tuoteryhmä
+	$out .= t('korvaava tuote')."\t";	// korvaava tuote
 	if($saatavuus == 'kylla') {
-		$out .= t('korvaava tuote')."\t";	// korvaava tuote
-		$out .= t('onko saatavilla')."\t\n";//saatavuus
+		$out .= t('onko saatavilla')."\t";//saatavuus
 	}
-	else {
-		$out .= t('korvaava tuote')."\t\n";	// korvaava tuote
-	}
+	$out .= "\n";
 
 	return $out;
 }
@@ -87,16 +85,9 @@ function hinnastorivi($tuote, $laskurow) {
 function hae_saatavuus($laskurow, $tuoteno) {
 	global $kukarow, $yhtiorow;
 
-	if ($yhtiorow["saldo_kasittely"] == "T") {
-		$saldoaikalisa = date("Y-m-d");
-	}
-	else {
-		$saldoaikalisa = "";
-	}
+	list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, "", 0, "", "", "", "", "", $laskurow["toim_maa"], '');
 
-	list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
-
-	if ($myytavissa >= 0) {
+	if ($myytavissa > 0) {
 		return t("Kyllä");
 	}
 	else {
@@ -112,13 +103,11 @@ function hae_saatavuus($laskurow, $tuoteno) {
 		$tulossa_row = mysql_fetch_assoc($tulossa_result);
 
 		if (empty($tulossa_row['paivamaara'])) {
-			$tulossa = t("Toimitusaika ei tiedossa");
+			return t("Ei");
 		}
 		else {
-			$tulossa = $tulossa_row['paivamaara'];
+			return t("Tulossa") . ' ' . $tulossa_row['paivamaara'];
 		}
-
-		return t("Ei").' '.$tulossa;
 	}
 }
 ?>

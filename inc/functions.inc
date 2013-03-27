@@ -20368,8 +20368,6 @@ if (!function_exists('aktivoi_tilaus')) {
 
 		// Jos result palautti jotain ja se ei ole nykyinen käyttäjä
 		if (isset($row) and $row['kuka'] != $kukarow['kuka']) {
-			// tilaus on aktiivisena käyttäjällä $row[nimi]
-			// tarkista_oikeus("kayttajat.php", "", "1")) {} # formi pois
 			// Poistetaan aktiiviset tilaukset joita tällä käyttäjällä oli
 			$query = "UPDATE kuka SET kesken='' WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
 			$result = pupe_query($query);

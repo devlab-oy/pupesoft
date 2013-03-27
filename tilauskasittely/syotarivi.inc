@@ -109,8 +109,6 @@
 				<input type='hidden' name='perheid' value = '$perheid'>
 				<input type='hidden' name='perheid2' value = '$perheid2'>
 				<input type='hidden' name='takaisin' value = '$takaisin'>
-				<input type='hidden' name='orig_tila' value = '$orig_tila'>
-				<input type='hidden' name='orig_alatila' value = '$orig_alatila'>
 				<input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'> <font class='error'>$varaosavirhe</font></td>
 			</tr>";
 
@@ -379,7 +377,7 @@
 
 		echo "<td valign='top' class='back'>";
 		echo "<input type='hidden' name='orig_tila' value = '$orig_tila'>";
-		echo "<input type='hidden' name='orig_alatila' value = '$orig_alatila'>";
+		echo "<input type='hidden' name='orig_alatila'value = '$orig_alatila'>";
 		echo "<input type='hidden' name='aputapa' value='$tapa'>";
 		echo "<input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 

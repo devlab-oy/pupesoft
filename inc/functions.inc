@@ -17268,14 +17268,14 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			}
 
 			if ($onko_kerayserat_kaytossa === true) {
-				$koontiselect	= " ifnull(kerayserat.sscc, 0) sscc, ifnull(kerayserat.sscc_ulkoinen, 0) sscc_ulkoinen, pakkaus.pakkaus, kerayserat.kpl_keratty AS varattu, 0 AS kpl, 0 as jt, ifnull(kerayserat.kpl, tilausrivi.tilkpl) AS tilkpl,";
+				$koontiselect	= " ifnull(kerayserat.sscc, 0) sscc, ifnull(kerayserat.sscc_ulkoinen, 99999999) sscc_ulkoinen, pakkaus.pakkaus, kerayserat.kpl_keratty AS varattu, 0 AS kpl, 0 as jt, ifnull(kerayserat.kpl, tilausrivi.tilkpl) AS tilkpl,";
 				$koontirivihinta = "round(tilausrivi.hinta * ifnull(kerayserat.kpl_keratty, (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)) * {$query_ale_lisa},'{$yhtiorow['hintapyoristys']}') rivihinta,";
 				$koontijoin 	= " LEFT JOIN kerayserat ON (kerayserat.tilausrivi = tilausrivi.tunnus AND kerayserat.yhtio = tilausrivi.yhtio)
 									LEFT JOIN pakkaus ON (kerayserat.pakkaus = pakkaus.tunnus)";
 				$koontisort 	= " sscc_ulkoinen, ";
 			}
 		}
-		
+
 		// Nämä menee Toimituskulut:-otsikon alle
 		$query = "	SELECT GROUP_CONCAT(DISTINCT kuljetusvakuutus_tuotenumero SEPARATOR '\',\'') kuljetusvakuutus_tuotenumerot
 					FROM toimitustapa
@@ -17283,11 +17283,11 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					AND kuljetusvakuutus_tuotenumero != ''";
 		$toimitustapa_res = pupe_query($query);
 		$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
-		
+
 		if ($toimitustapa_row['kuljetusvakuutus_tuotenumerot'] != "") {
 			$kvaktuotteet = ",'{$toimitustapa_row['kuljetusvakuutus_tuotenumerot']}'";
 		}
-		
+
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot
 		$query = "  SELECT tilausrivi.*, {$koontiselect}
 					round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
@@ -17372,7 +17372,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
 			// Mikäli kolli vaihtuu, tulostetaan kollirivi
 			if ($koontilahete != 0 and $onko_kerayserat_kaytossa and (!isset($sscc) or $sscc != $row['sscc'])) {
-				
+
 				if ($row['sscc'] != 0) {
 					$params_lahete = kollirivi_lahete($params_lahete);
 					$params_lahete['kala'] = $params_lahete['kala'] -= 5;
@@ -17380,7 +17380,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 				else {
 					$params_lahete['kala'] = $params_lahete['kala'] -= 20;
 				}
-				
+
 				$params_lahete = rivi_otsikot_lahete($params_lahete);
 			}
 

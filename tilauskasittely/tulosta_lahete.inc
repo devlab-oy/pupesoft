@@ -1241,7 +1241,7 @@ if (!function_exists('rivi_lahete')) {
 		// Rahtituote pikkasen alaspäin omalla otsikolla
 		if (isset($jtid) and $jtid != 2 and $row["jtsort"] == 2) {
 
-			$kala = $kala-10;
+			$kala = $kala-5;
 
 			$xkoord[0] = 20;
 			$xkoord[1] = 580;

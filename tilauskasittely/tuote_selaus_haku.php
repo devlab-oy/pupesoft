@@ -137,8 +137,6 @@
 					<input type='hidden' name='toim' value='$toim_kutsu'>
 					<input type='hidden' name='aktivoinnista' value='true'>
 					<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
-					<input type='hidden' name='orig_tila' value = '$orig_tila'>
-					<input type='hidden' name='orig_alatila' value = '$orig_alatila'>
 					<input type='hidden' name='tyojono' value='$tyojono'>
 					<input type='submit' value='".t("Takaisin tilaukselle")."'>
 					</form><br><br>";

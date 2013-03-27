@@ -555,8 +555,6 @@ if ($monta > 1 and $monta <= $limit) {
 			echo "<input type='hidden' name='tuoteno' 		  value='$tuoteno'>";
 			echo "<input type='hidden' name='lasku_yhtio'	  value='$asiakas[yhtio]'>";
 			echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
-			echo "<input type='hidden' name='orig_tila' 	  value='$orig_tila'>";
-			echo "<input type='hidden' name='orig_alatila' 	  value='$orig_alatila'>";
 
 			if (is_array($varastosta)) {
 				foreach ($varastosta as $varatunnu) {

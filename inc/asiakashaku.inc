@@ -362,6 +362,21 @@ elseif ($asiakasnro != '') {
 }
 
 if ($monta == 0) {
+	//viivakoodi lukee henkilötunnuksen viivan (-) plussana (+) fix
+	//jos seittemäs merkki on + niin lisätään queryyn hakuehto joka hakee miinuksella. tässä vaiheessa plussallinen (1800-luvulla) syntynyt olisi löytynyt jo
+	if (substr($ytunnus, 6, 1) == '+') {
+		$query = "	SELECT asiakas.*, yhtio.nimi yhtionimi
+					FROM asiakas
+					JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+					WHERE asiakas.$konsyhtiot
+					and asiakas.ytunnus like '%".str_replace('+', '-', $ytunnus2)."%'
+					and asiakas.asiakasnro not in ('0','')";
+		$result = pupe_query($query);
+		$monta  = mysql_num_rows($result);
+	}
+}
+
+if ($monta == 0) {
 	if ($ytunnus and strpos($_SERVER["PHP_SELF"], "lue_data.php") === FALSE) {
 		echo "<font class='error'>".t("Asiakas")." ". tarkistahetu($ytunnus)." ".t("ei löydy")."!</font> ";
 	}

@@ -217,20 +217,6 @@ if ($tee == 'DELKESKEN') {
 	}
 }
 
-// Katsotaan, ett‰ tilaus on viel‰ samassa tilassa joss se oli kun klikattiin auki muokkaatilaus-ohjelmassa
-// if ($tee == 'AKTIVOI') {
-// 	echo "AKTIVOI 1.<br>";
-
-// 	# TODO: T‰t‰ $mista tsekkia ei en‰‰ v‰ltt‰m‰tt‰ tarvita?
-// 	# if ($mista == "muokkaatilaus") {
-// 		// Onko tilauksen tila muuttunut
-// 		if ( ! tarkista_tilauksen_tila($tilausnumero, $orig_tila, $orig_alatila)) {
-// 			echo "<font class='error'>" . t("Tilauksen tila on vaihtunut. Ole hyv‰ ja avaa tilaus uudestaan") . "</font><br>";
-// 			exit();
-// 		}
-// 	# }
-// }
-
 // aktivoidaan saatu id
 if ($tee == 'AKTIVOI') {
 	echo "AKTIVOI <br>";
@@ -250,7 +236,6 @@ if ($tee == 'AKTIVOI') {
 	}
 
 	// Jos tilausnumero on jollain muulla k‰ytt‰j‰ll‰ kesken
-	# if (isset($row) and $row['kuka'] != $kukarow['kuka']) {
 	if (! aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
 		echo "<font class='error'>".t("Tilaus on aktiivisena k‰ytt‰j‰ll‰")." $row[nimi] ($row[kuka]). ".t("Tilausta ei voi t‰ll‰ hetkell‰ muokata").".</font><br>";
 
@@ -264,8 +249,6 @@ if ($tee == 'AKTIVOI') {
 		}
 
 		// poistetaan aktiiviset tilaukset jota t‰ll‰ k‰ytt‰j‰ll‰ oli
-		# $query = "UPDATE kuka set kesken='' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-		# $result = pupe_query($query);
 		exit();
 	}
 	else {
@@ -1882,12 +1865,12 @@ if ($tee == '') {
 
 	echo "<font class='head'>$otsikko</font><hr>";
 
-#	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
+	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
 		if (! aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
 			echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").". $tilausnumero / $kukarow[kesken]<br><br><br>";
 			exit();
 		}
-#	}
+	}
 
 	if ($kukarow['kesken'] != '0') {
 		$tilausnumero = $kukarow['kesken'];

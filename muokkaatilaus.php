@@ -1226,7 +1226,7 @@
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 						and lasku.tila		 	= 'O'
-						and lasku.alatila		= ''
+						and lasku.alatila IN ('', 'G')
 						and lasku.tilaustyyppi != 'O'
 						$haku
 						GROUP BY 1,2,3,4,5,6,7,8

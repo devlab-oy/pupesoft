@@ -143,6 +143,29 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
 		$toimitustavan_lahto_update = ",toimitustavan_lahto = 0, toimitustavan_lahto_siirto = 0";
 	}
 
+	//tarkastetaan onko myyntitilaus naitettu ostoon.
+	$query = "	SELECT tilausrivin_lisatiedot.tilausrivilinkki,
+				tilausrivi.otunnus
+				FROM tilausrivin_lisatiedot
+				JOIN tilausrivi
+				ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+					AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki
+				)
+				WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivin_lisatiedot.vanha_otunnus = '{$laskurow['tunnus']}'
+				AND tilausrivin_lisatiedot.tilausrivilinkki != 0
+				LIMIT 1";
+	$suoratoimitus_result = pupe_query($query);
+
+	if ($tilausrivin_lisatieto_row = mysql_fetch_assoc($suoratoimitus_result)) {
+		$query = "	UPDATE lasku
+					SET tila = 'O',
+					alatila = 'G'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tilausrivin_lisatieto_row['otunnus']}'";
+		pupe_query($query);
+	}
+
 	$query = "	UPDATE lasku SET
 				alatila = '$alatila'
 				{$toimitustavan_lahto_update}

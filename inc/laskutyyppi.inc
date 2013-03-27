@@ -279,6 +279,9 @@
 				case "B":
 					$alatila = "";
 					break;
+				case "G":
+					$alatila = "Odottaa asiakkaan suoritusta";
+					break;
 				case "X":
 					$alatila = "Valmis";
 					break;

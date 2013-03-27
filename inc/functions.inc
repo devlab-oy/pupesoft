@@ -17377,7 +17377,10 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					$params_lahete = kollirivi_lahete($params_lahete);
 					$params_lahete['kala'] = $params_lahete['kala'] -= 5;
 				}
-				else {
+				elseif (isset($sscc)) {					
+					$params_lahete['kala'] = $params_lahete['kala'] -= 60;
+				}
+				else {					
 					$params_lahete['kala'] = $params_lahete['kala'] -= 20;
 				}
 

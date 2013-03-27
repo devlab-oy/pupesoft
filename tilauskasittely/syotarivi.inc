@@ -376,8 +376,6 @@
 		}
 
 		echo "<td valign='top' class='back'>";
-		echo "<input type='hidden' name='orig_tila' value = '$orig_tila'>";
-		echo "<input type='hidden' name='orig_alatila'value = '$orig_alatila'>";
 		echo "<input type='hidden' name='aputapa' value='$tapa'>";
 		echo "<input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 

@@ -20348,7 +20348,7 @@ if (!function_exists('aktivoi_tilaus')) {
 		global $kukarow;
 
 		// Tarkistetaan että tilauksen tila ei ole muuttunut
-		if (! tarkista_tilauksen_tila($tilausnumero, $alkup_tila, $alkup_alatila)) {
+		if ($tilausnumero != '' and ! tarkista_tilauksen_tila($tilausnumero, $alkup_tila, $alkup_alatila)) {
 			echo "<font class='error'>" . t("Tilauksen tila on vaihtunut. Ole hyvä ja avaa tilaus uudestaan") . "</font><br>";
 			exit();
 		}

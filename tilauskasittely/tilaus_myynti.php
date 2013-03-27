@@ -368,9 +368,11 @@ if ($kukarow["extranet"] != '') {
 }
 
 // Katsotaan ett‰ kukarow kesken, $tilausnumero ja $kukarow[kesken] stemmaavat kesken‰‰n
-if (! aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
-	echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
-	exit();
+if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
+	if (! aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
+		echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
+		exit();
+	}
 }
 
 if ((int) $valitsetoimitus_vaihdarivi > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0 and $toim != "TARJOUS") {

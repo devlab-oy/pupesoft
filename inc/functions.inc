@@ -20342,11 +20342,11 @@ if (!function_exists('tarkista_tilauksen_tila')) {
  * Palauttaa false jos tilausnumero on kesken jollain toisella käyttäjällä
  */
 if (!function_exists('aktivoi_tilaus')) {
-	function aktivoi_tilaus($tilausnumero, $session = '', $alkup_tila = '', $alkup_alatila = '') {
+	function aktivoi_tilaus($tilausnumero, $session, $alkup_tila = '', $alkup_alatila = '') {
 		global $kukarow;
 
 		// Tarkistetaan että tilauksen tila ei ole muuttunut
-		if ($tilausnumero != '' and ! tarkista_tilauksen_tila($tilausnumero, $alkup_tila, $alkup_alatila)) {
+		if ($tilausnumero != '' and !tarkista_tilauksen_tila($tilausnumero, $alkup_tila, $alkup_alatila)) {
 			echo "<font class='error'>" . t("Tilauksen tila on vaihtunut. Ole hyvä ja avaa tilaus uudestaan") . "</font><br>";
 			exit();
 		}
@@ -20356,7 +20356,8 @@ if (!function_exists('aktivoi_tilaus')) {
 					FROM kuka
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND kesken  = '$tilausnumero'
-					AND kesken != 0";
+					AND kesken != 0
+					AND kuka   != '{$kukarow['kuka']}'";
 		$result = pupe_query($query);
 
 		// Jos löytyy osuma
@@ -20367,7 +20368,10 @@ if (!function_exists('aktivoi_tilaus')) {
 		// Jos result palautti jotain ja se ei ole nykyinen käyttäjä
 		if (isset($row) and $row['kuka'] != $kukarow['kuka']) {
 			// Poistetaan aktiiviset tilaukset joita tällä käyttäjällä oli
-			$query = "UPDATE kuka SET kesken='' WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+			$query = "UPDATE kuka SET
+						kesken      = ''
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND kuka    = '{$kukarow['kuka']}'";
 			$result = pupe_query($query);
 
 			// Tilaus kesken jollain toisella käyttäjällä

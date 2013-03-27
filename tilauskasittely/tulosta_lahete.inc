@@ -1248,7 +1248,7 @@ if (!function_exists('rivi_lahete')) {
 			$ykoord[0] = $ykoord[1] = $kala - 4;
 			$pdf->draw_line($xkoord, $ykoord, $page[$sivu], $rectparam);
 
-			$pdf->draw_text(25,  $kala, "#",									$thispage, $norm);
+			$pdf->draw_text(25,  $kala, "#",								$thispage, $norm);
 			$pdf->draw_text(45,  $kala, t("Toimituskulut", $kieli).":",		$thispage, $norm);
 			$kala = $kala-$rivinkorkeus;
 		}
@@ -1851,7 +1851,7 @@ if (!function_exists('rivi_lahete')) {
 		if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_custom.inc") {
 			$xkoord[0] = 20;
 			$xkoord[1] = 580;
-			$ykoord[0] = $ykoord[1] = $return["kala"] + $return["rivinkorkeus"] - 4;
+			$ykoord[0] = $ykoord[1] = $return["kala"] + $return["rivinkorkeus"] - 5;
 			$pdf->draw_line($xkoord, $ykoord, $return["thispage"], $return["rectparam"]);
 		}
 		return $return;

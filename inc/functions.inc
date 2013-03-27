@@ -17275,14 +17275,26 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 				$koontisort 	= " sscc_ulkoinen, ";
 			}
 		}
-
+		
+		// Nämä menee Toimituskulut:-otsikon alle
+		$query = "	SELECT GROUP_CONCAT(DISTINCT kuljetusvakuutus_tuotenumero SEPARATOR '\',\'') kuljetusvakuutus_tuotenumerot
+					FROM toimitustapa
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND kuljetusvakuutus_tuotenumero != ''";
+		$toimitustapa_res = pupe_query($query);
+		$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
+		
+		if ($toimitustapa_row['kuljetusvakuutus_tuotenumerot'] != "") {
+			$kvaktuotteet = ",'{$toimitustapa_row['kuljetusvakuutus_tuotenumerot']}'";
+		}
+		
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot
 		$query = "  SELECT tilausrivi.*, {$koontiselect}
 					round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 					{$koontirivihinta}
 					$sorttauskentta,
-					if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
+					if (tilausrivi.tuoteno in ('$yhtiorow[rahti_tuotenumero]' $kvaktuotteet), 2, if(tilausrivi.var='J', 1, 0)) jtsort,
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 					tuote.sarjanumeroseuranta
@@ -17296,7 +17308,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					$tyyppilisa
 					{$koontilisa}
 					AND (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-					ORDER BY $koontisort jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+					ORDER BY jtsort, $koontisort $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$riresult = pupe_query($query);
 
 		$params_lahete = array(

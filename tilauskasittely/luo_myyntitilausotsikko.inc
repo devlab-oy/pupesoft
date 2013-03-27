@@ -13,36 +13,36 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		if (mysql_num_rows($result) == 1) {
 			$asiakasrow  = mysql_fetch_assoc($result);
 
-			$ytunnus 							= $asiakasrow["ytunnus"];
-			$nimi 			   					= $asiakasrow["nimi"];
-			$nimitark 		   					= $asiakasrow["nimitark"];
-			$osoite 		   					= $asiakasrow["osoite"];
-			$postino 		   					= $asiakasrow["postino"];
-			$postitp 		   					= $asiakasrow["postitp"];
-			$maa 			   					= $asiakasrow["maa"];
-			$tnimi 			   					= $asiakasrow["toim_nimi"];
-			$tnimitark 		   					= $asiakasrow["toim_nimitark"];
-			$tosoite 		   					= $asiakasrow["toim_osoite"];
-			$tpostino 		   					= $asiakasrow["toim_postino"];
-			$tpostitp 		   					= $asiakasrow["toim_postitp"];
-			$toim_maa 		   					= $asiakasrow["toim_maa"];
-			$laskutus_nimi						= $asiakasrow["laskutus_nimi"];
-			$laskutus_nimitark					= $asiakasrow["laskutus_nimitark"];
-			$laskutus_osoite					= $asiakasrow["laskutus_osoite"];
-			$laskutus_postino					= $asiakasrow["laskutus_postino"];
-			$laskutus_postitp					= $asiakasrow["laskutus_postitp"];
-			$laskutus_maa						= $asiakasrow["laskutus_maa"];
-			$kolm_nimi							= $asiakasrow["kolm_nimi"];
-			$kolm_nimitark						= $asiakasrow["kolm_nimitark"];
-			$kolm_osoite						= $asiakasrow["kolm_osoite"];
-			$kolm_postino						= $asiakasrow["kolm_postino"];
-			$kolm_postitp						= $asiakasrow["kolm_postitp"];
-			$kolm_maa							= $asiakasrow["kolm_maa"];
-			$kolm_ovttunnus						= $asiakasrow["kolm_maa"];
-			$verkkotunnus 	   					= $asiakasrow["verkkotunnus"];
-			$piiri 								= $asiakasrow["piiri"];
-			$kohde								= $asiakasrow["kohde"];
+			$ytunnus 		   = $asiakasrow["ytunnus"];
+			$nimi 			   = $asiakasrow["nimi"];
+			$nimitark 		   = $asiakasrow["nimitark"];
+			$osoite 		   = $asiakasrow["osoite"];
+			$postino 		   = $asiakasrow["postino"];
+			$postitp 		   = $asiakasrow["postitp"];
+			$maa 			   = $asiakasrow["maa"];
+			$tnimi 			   = $asiakasrow["toim_nimi"];
+			$tnimitark 		   = $asiakasrow["toim_nimitark"];
+			$tosoite 		   = $asiakasrow["toim_osoite"];
+			$tpostino 		   = $asiakasrow["toim_postino"];
+			$tpostitp 		   = $asiakasrow["toim_postitp"];
+			$toim_maa 		   = $asiakasrow["toim_maa"];
+			$laskutus_nimi	   = $asiakasrow["laskutus_nimi"];
+			$laskutus_nimitark = $asiakasrow["laskutus_nimitark"];
+			$laskutus_osoite   = $asiakasrow["laskutus_osoite"];
+			$laskutus_postino  = $asiakasrow["laskutus_postino"];
+			$laskutus_postitp  = $asiakasrow["laskutus_postitp"];
+			$laskutus_maa	   = $asiakasrow["laskutus_maa"];
+			$kolm_nimi		   = $asiakasrow["kolm_nimi"];
+			$kolm_nimitark	   = $asiakasrow["kolm_nimitark"];
+			$kolm_osoite	   = $asiakasrow["kolm_osoite"];
+			$kolm_postino	   = $asiakasrow["kolm_postino"];
+			$kolm_postitp	   = $asiakasrow["kolm_postitp"];
+			$kolm_maa		   = $asiakasrow["kolm_maa"];
+			$kolm_ovttunnus	   = $asiakasrow["kolm_maa"];
+			$verkkotunnus 	   = $asiakasrow["verkkotunnus"];
+			$piiri 			   = $asiakasrow["piiri"];
 
+			$kohde  = "";
 			$eilahe = "";
 
 			if ($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") {

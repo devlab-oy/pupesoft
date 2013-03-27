@@ -219,7 +219,6 @@ if ($tee == 'DELKESKEN') {
 
 // aktivoidaan saatu id
 if ($tee == 'AKTIVOI') {
-	echo "AKTIVOI <br>";
 
 	// katsotaan onko muilla aktiivisena
 	$query = "	SELECT *
@@ -279,7 +278,7 @@ if ($tee == 'AKTIVOI') {
 			}
 		}
 
-		# $kukarow['kesken'] = $tilausnumero; # ei tartte kun setataan aktivoi_tilaus() funkkarissa
+		// Jatketaan
 		$tee = "";
 	}
 }
@@ -368,18 +367,9 @@ if ($kukarow["extranet"] != '') {
 	}
 }
 
-echo "### DEBUG ### <br>";
-echo "tee: $tee<br>";
-echo "toim: $toim<br>";
-echo "tilausnumero: $tilausnumero<br>";
-echo "kukarow[kesken]: $kukarow[kesken]<br>";
-echo "orig_tila: $orig_tila<br>";
-echo "orig_alatila: $orig_alatila<br>";
-echo "### /DEBUG ### <br>";
-
 // Katsotaan ett‰ kukarow kesken, $tilausnumero ja $kukarow[kesken] stemmaavat kesken‰‰n
 if (! aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
-	echo "<br><br><br>".t("398 VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
+	echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
 	exit();
 }
 

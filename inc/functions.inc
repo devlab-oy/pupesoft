@@ -20305,13 +20305,10 @@ if (!function_exists('search_array_key_recursive')) {
  * Tarkistaa onko tilauksen tila muuttunut
  *
  * Jos tila on vaihtunut, nollataan käyttäjän keskeneräinen tilaus.
- *
  */
 if (!function_exists('tarkista_tilauksen_tila')) {
 	function tarkista_tilauksen_tila($tilausnumero, $alkup_tila, $alkup_alatila) {
 		global $kukarow;
-
-		echo "tarkistetaan tilauksen tila alkup_tila: $alkup_tila, alkup_alatila: $alkup_alatila<br>";
 
 		// Tarkistetaan että tilaus on samassa tilassa jossa se oli kun se klikattiin auki muokkaatilaus-ohjelmassa
 		$query = "SELECT tila, alatila
@@ -20340,6 +20337,7 @@ if (!function_exists('tarkista_tilauksen_tila')) {
 
 /**
  * Aktivoi tilaus
+ *
  * Palauttaa truen jos tilausnumero on aktivoitu käyttäjälle ja asettaa tilausnumeron käyttäjälle kesken
  * Palauttaa false jos tilausnumero on kesken jollain toisella käyttäjällä
  */

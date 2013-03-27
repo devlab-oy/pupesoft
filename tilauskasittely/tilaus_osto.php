@@ -619,24 +619,39 @@
 					require ('lisaarivi.inc');
 				}
 
-				if (!empty($rivitunnus_temp)) {
-					// p‰ivitet‰‰n myyntitilausrivi, jos se on liitetty ostotilausriviin (nollarivej‰ ei elvytet‰...)
-					$query = "	UPDATE tilausrivi
-								JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.vanha_otunnus = tilausrivi.otunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '{$rivitunnus_temp}')
-								SET tilausrivi.tyyppi = 'L'
-								WHERE tilausrivi.yhtio = 'artr'
-								AND tilausrivi.tyyppi = 'D'
-								AND tilausrivi.varattu+tilausrivi.jt != 0
-								AND tilausrivi.kerattyaika    = '0000-00-00 00:00:00'
-								AND tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
-								AND tilausrivi.laskutettuaika = '0000-00-00'";
-					pupe_query($query);
+				if (!empty($lisatyt_rivit2)) {
+					foreach ($lisatyt_rivit2 as $rivitunnus_temp) {
 
-					if (mysql_affected_rows() > 0) {
-						echo "<font class='error'>".t("Myyntitilausriville p‰ivitettiin m‰‰r‰t")."</font><br/><br/>";
-					}
-					else {
-						echo "<font class='error'>".t("Myyntitilausrivi on keratty, toimitettu tai laskutettu, joten sit‰ ei p‰ivitetty")."</font><br/><br/>";
+						// Haetaan myyntirivi
+						$query = "	SELECT tilausrivin_lisatiedot.tilausrivitunnus
+									FROM tilausrivin_lisatiedot
+									JOIN tilausrivi ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
+									WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivin_lisatiedot.tilausrivilinkki = '{$rivitunnus_temp}'";
+						$result = pupe_query($query);
+						$tilausrivin_lisatiedot_row = mysql_fetch_assoc($result);
+
+						//jos ostorivi on naitettu myyntiriviin
+						if (!empty($tilausrivin_lisatiedot_row)) {
+							// p‰ivitet‰‰n myyntitilausrivi, jos se on liitetty ostotilausriviin (nollarivej‰ ei elvytet‰...)
+							$query = "	UPDATE tilausrivi
+										SET tilausrivi.tyyppi  = 'L'
+										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+										AND tilausrivi.tunnus  = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'
+										AND tilausrivi.tyyppi  = 'D'
+										AND tilausrivi.varattu+tilausrivi.jt != 0
+										AND tilausrivi.kerattyaika    = '0000-00-00 00:00:00'
+										AND tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
+										AND tilausrivi.laskutettuaika = '0000-00-00'";
+							pupe_query($query);
+
+							if (mysql_affected_rows() > 0) {
+								echo "<font class='error'>".t("Myyntitilausriville p‰ivitettiin m‰‰r‰t")."</font><br/><br/>";
+							}
+							else {
+								echo "<font class='error'>".t("Myyntitilausrivi on ker‰tty, toimitettu tai laskutettu, joten sit‰ ei p‰ivitetty")."</font><br/><br/>";
+							}
+						}
 					}
 				}
 

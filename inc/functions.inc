@@ -19926,7 +19926,19 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 					echo "<font class='error'>".t("Rivi poistettiin myös myyntitilaukselta")."</font><br/><br/>";
 				}
 				else {
-					echo "<font class='error'>".t("Myyntitilausrivi on kerätty, toimitettu tai laskutettu")."!</font><br/><br/>";
+					$query = "	SELECT *
+								FROM tilausrivi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus  = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'";
+					$result = pupe_query($query);
+					$myyntitilausrivi = mysql_fetch_assoc($result);
+					
+					if($myyntitilausrivi['tyyppi'] == 'D') {
+						echo "<font class='error'>".t("Myyntitilausrivi oli jo poistettu")."!</font><br/><br/>";
+					}
+					else {
+						echo "<font class='error'>".t("Myyntitilausrivi on kerätty, toimitettu tai laskutettu")."!</font><br/><br/>";
+					}
 				}
 			}
 			else {

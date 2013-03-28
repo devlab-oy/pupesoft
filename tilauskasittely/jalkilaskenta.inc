@@ -708,19 +708,36 @@ if ($tuoteno != '') {
 				}
 
 				// haetaan tuotteelle edellinen kehahin
-				$query = "	SELECT hinta
+				$query = "	SELECT hinta, tunnus, rivitunnus
 							FROM tapahtuma
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$tuoteno'
 							and laadittu < '$pvm'
 							and laji not in ('poistettupaikka', 'uusipaikka')
-							ORDER BY laadittu desc
+							ORDER BY laadittu DESC, tunnus DESC
 							LIMIT 1";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {
 					$trow = mysql_fetch_assoc($result);
 					$uusikehahin = $trow["hinta"];
+
+					// Katsotaan löytyykö tälle tapahtumariville korjausrivi ja otetaan edellinen kehahin sieltä
+					$query = "	SELECT hinta
+								FROM tapahtuma
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND laji = 'korjaus'
+								AND rivitunnus != 0
+								AND rivitunnus = '{$trow['rivitunnus']}'
+								ORDER BY laadittu DESC, tunnus DESC
+								LIMIT 1";
+					$hinta_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($hinta_chk_res) == 1) {
+						$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
+						$uusikehahin = $hinta_chk_row['hinta'];
+					}
+
 				}
 				else {
 					$uusikehahin = 0;
@@ -751,7 +768,7 @@ if ($tuoteno != '') {
 								and laadittu >= '$pvm'
 								AND laji != 'korjaus'
 								and kpl <> 0
-								ORDER BY laadittu";
+								ORDER BY laadittu, tunnus";
 					$result = pupe_query($query);
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";

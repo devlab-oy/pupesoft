@@ -1396,7 +1396,6 @@
 						and lasku.tila = 'N'
 						and lasku.alatila = 'G'
 						$haku
-						HAVING extra = '' or extra is null
 						order by lasku.luontiaika desc
 						$rajaus";
 

@@ -45,6 +45,20 @@
 			break;
 		case "X":
 			$laskutyyppi = "Muu tosite";
+			switch($alatila) {
+				case "E":
+					$alatila = "Epäkurantointi";
+					break;
+				case "I":
+					$alatila = "Inventointi";
+					break;
+				case "K":
+					$alatila = "Kassalipaan täsmäytys";
+					break;
+				case "O":
+					$alatila = "Käteisotto";
+					break;
+		}
 			break;
 		case "L":
 			$laskutyyppi = "Myyntitilaus";

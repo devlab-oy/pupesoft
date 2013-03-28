@@ -520,8 +520,8 @@
 		$pdf->draw_text(62, 382 , "Kuljetusohjeet Transportinstruktioner",				$firstpage, $norm);
 
 		if ($postirow['tilausyhteyshenkilo'] != "") {
-			$pdf->draw_text(62, 372 , "Tilausyhteyshenkilö:",							$firstpage, $norm);
-			$pdf->draw_text(115, 372 , $postirow['tilausyhteyshenkilo'],				$firstpage, $norm);
+			$pdf->draw_text(62, 372 , "Tilausyhteyshenkilö:",							$firstpage, $kirj);
+			$pdf->draw_text(135, 372 , $postirow['tilausyhteyshenkilo'],				$firstpage, $kirj);
 		}
 
 		$pdf->draw_paragraph(368, 62, 325, 410, $kuljetusohjeet,						$firstpage, $kirj);

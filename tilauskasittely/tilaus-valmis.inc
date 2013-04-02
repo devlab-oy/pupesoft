@@ -4,6 +4,7 @@
 $tilaus_valmis_ulos = "";
 $ohjausmerkkilisa 	= "";
 $luottorajavirhe 	= "";
+$jtkielto 			= "";
 
 ///* Reload ja back-nappulatsekki *///
 if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
@@ -17,11 +18,17 @@ if ($laskurow['tilaustyyppi'] == "2" AND trim($laskurow['ohjausmerkki']) == "") 
 	$laskurow["ohjausmerkki"] = "Varastot‰ydennys";
 }
 
-// p‰ivitet‰‰n vanhatunnus laskulle
-$query  = "	UPDATE lasku SET vanhatunnus=tunnus $ohjausmerkkilisa
-			WHERE yhtio='$kukarow[yhtio]'
-			AND tunnus='$laskurow[tunnus]'
-			AND vanhatunnus=0";
+// p‰ivitet‰‰n jtkielto jos jaksotettu, niin ei vahingossakaan lis‰t‰ jt-rivej‰ v‰‰rille otsikoille esim editilauksiin jt_automatiikan kautta.
+if ($laskurow['jaksotettu'] > 0) {
+	$jtkielto = ", jtkielto = 'Y'";
+	$laskurow["jtkielto"] = "Y";
+}
+
+// p‰ivitet‰‰n vanhatunnus ja v‰h‰n muutakin laskulle
+$query  = "	UPDATE lasku SET vanhatunnus=tunnus $ohjausmerkkilisa $jtkielto
+			WHERE yhtio     = '$kukarow[yhtio]'
+			AND tunnus      = '$laskurow[tunnus]'
+			AND vanhatunnus = 0";
 $oldtur = pupe_query($query);
 
 $query = "	SELECT tarkenne

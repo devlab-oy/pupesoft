@@ -9764,7 +9764,7 @@ if (!function_exists("t_maanimi")) {
 
 if (!function_exists("jt_toimita")) {
 	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $jtrivit_paikat, $automaaginen, $tee, $automaattinen_poiminta = '', $tuotenumero = '', $huomioi_pvm = '', $mista_tullaan = '') {
-		global $yhtiorow, $kukarow, $oikeurow;
+		global $yhtiorow, $kukarow, $oikeurow, $myyntitilaus_jaksotettu;
 
 		if (!is_array($jtrivit)) $jtrivit = array();
 		if (!is_array($jtrivit_paikat)) $jtrivit_paikat = array();

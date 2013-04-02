@@ -21,6 +21,7 @@ if ($laskurow['tilaustyyppi'] == "2" AND trim($laskurow['ohjausmerkki']) == "") 
 // p‰ivitet‰‰n jtkielto jos jaksotettu, niin ei vahingossakaan lis‰t‰ jt-rivej‰ v‰‰rille otsikoille esim editilauksiin jt_automatiikan kautta.
 if ($laskurow['jaksotettu'] > 0) {
 	$jtkielto = ", jtkielto = 'Y'";
+	$laskurow["jtkielto"] = "Y";
 }
 
 // p‰ivitet‰‰n vanhatunnus ja v‰h‰n muutakin laskulle

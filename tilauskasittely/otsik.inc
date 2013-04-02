@@ -3301,6 +3301,10 @@
 		$result = pupe_query($query);
 		$id = mysql_insert_id();
 
+		// Setataan laskun aluper‰iset tilat
+		$orig_tila    = $ylatila;
+		$orig_alatila = $alatila;
+
 		// Jos erikoisalennus muuttuu
 		if ($laskurow["erikoisale"] != $erikoisale) {
 			// p‰ivitet‰‰n erikoisale tilausriveille

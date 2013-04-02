@@ -146,7 +146,7 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
 	}
 
 	//tarkastetaan onko myyntitilaus naitettu ostoon.
-	$query = "	SELECT tilausrivi.otunnus
+	$query = "	SELECT group_concat(DISTINCT tilausrivi.otunnus) ostotilaukset
 				FROM tilausrivin_lisatiedot
 				JOIN tilausrivi
 				ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
@@ -157,12 +157,13 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
 				AND tilausrivin_lisatiedot.tilausrivilinkki != 0
 				LIMIT 1";
 	$suoratoimitus_result = pupe_query($query);
+	$tilausrivin_lisatieto_row = mysql_fetch_assoc($suoratoimitus_result);
 
-	if ($tilausrivin_lisatieto_row = mysql_fetch_assoc($suoratoimitus_result)) {
+	if ($tilausrivin_lisatieto_row['ostotilaukset'] != "") {
 		$query = "	UPDATE lasku
 					SET alatila = 'G'
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus  = '{$tilausrivin_lisatieto_row['otunnus']}'
+					AND tunnus  IN ({$tilausrivin_lisatieto_row['ostotilaukset']})
 					AND tila    = 'O'
 					AND alatila = ''";
 		pupe_query($query);

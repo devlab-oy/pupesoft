@@ -131,21 +131,22 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
 }
 elseif ($luottorajavirhe != '' or $ylivito > 0) {
 
+	// nollataan toimitustavan_lahto
 	$toimitustavan_lahto_update = "";
-	
-	if (($kutsuja == "EDITILAUS" or $kukarow["extranet"] != "") and $yhtiorow["luottorajan_ylitys"] == "E") {
+
+	// Jos myyjät saa hyväksyä, mutta EDI/EXTRANET ei mee läpi jos luottotiedot on kuralla niin laitetaan F-alatilaan.
+	// Jos kukaan ei saa myydä kun luottotiedot on kuralla niin sillo laitetaan kaikki G-alatilaan
+	if (($tilausvalmiskutsuja == "EDITILAUS" or $tilausvalmiskutsuja == "VERKKOKAUPPA" or $kukarow["extranet"] != "") and (($luottorajavirhe != '' and $yhtiorow["luottorajan_ylitys"] == "E") or ($ylivito > 0 and $yhtiorow["erapaivan_ylityksen_toimenpide"] == "E"))) {
+		// laitetaan tilaan Odottaa hyväksyntää
 		$alatila = "F";
 	}
 	else {
-		//laitetaan tilaan Odottaa asiakkaan suoritusta
+		// laitetaan tilaan Odottaa asiakkaan suoritusta
 		$alatila = "G";
-		//nollataan toimitustava_lahto
-		$toimitustavan_lahto_update = ",toimitustavan_lahto = 0, toimitustavan_lahto_siirto = 0";
 	}
 
 	//tarkastetaan onko myyntitilaus naitettu ostoon.
-	$query = "	SELECT tilausrivin_lisatiedot.tilausrivilinkki,
-				tilausrivi.otunnus
+	$query = "	SELECT tilausrivi.otunnus
 				FROM tilausrivin_lisatiedot
 				JOIN tilausrivi
 				ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
@@ -159,18 +160,19 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
 
 	if ($tilausrivin_lisatieto_row = mysql_fetch_assoc($suoratoimitus_result)) {
 		$query = "	UPDATE lasku
-					SET tila = 'O',
-					alatila = 'G'
+					SET alatila = 'G'
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$tilausrivin_lisatieto_row['otunnus']}'";
+					AND tunnus  = '{$tilausrivin_lisatieto_row['otunnus']}'
+					AND tila    = 'O'
+					AND alatila = ''";
 		pupe_query($query);
 	}
 
 	$query = "	UPDATE lasku SET
-				alatila = '$alatila'
-				{$toimitustavan_lahto_update}
+				alatila = '$alatila',
+				toimitustavan_lahto = 0
 				WHERE yhtio = '$kukarow[yhtio]'
-				AND tunnus = '$laskurow[tunnus]'";
+				AND tunnus  = '$laskurow[tunnus]'";
 	$myyntikielto_res = pupe_query($query);
 
     $errortext = "";

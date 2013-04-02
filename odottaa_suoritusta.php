@@ -52,7 +52,7 @@ function hae_suoritusta_odottavat_tilaukset() {
 function kasittele_tilaukset($tilaukset) {
 	global $kukarow, $yhtiorow;
 
-	echo t("Otetaan").' '.count($tilaukset).' '.t("myyntitilausta käsittelyyn")."\n";
+	echo "\n".t("Otetaan").' '.count($tilaukset).' '.t("myyntitilausta käsittelyyn")."\n";
 
 	foreach ($tilaukset as $laskurow) {
 

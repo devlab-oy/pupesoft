@@ -3334,11 +3334,13 @@
 	if (mysql_field_name($result, $i) == 'seuraava_tuotenumero') {
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = $trow[$i] == 'K' ? 'selected' : '';
+		$sel = array();
+		$sel['K'] = $trow[$i] == 'K' ? 'selected' : '';
+		$sel['O'] = $trow[$i] == 'O' ? 'selected' : '';
 
 		$ulos .= "<option value = ''>".t("Ei ehdoteta seuraavaa vapaata tuotenumeroa tuotetta perustettaessa")."</option>";
-		$ulos .= "<option value = 'K' {$sel}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa")."</option>";
-		$ulos .= "<option value = 'O' {$sel}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa (vain ostotilauksella)")."</option>";
+		$ulos .= "<option value = 'K' {$sel['K']}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa")."</option>";
+		$ulos .= "<option value = 'O' {$sel['O']}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa (vain ostotilauksella)")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -1,10 +1,12 @@
 <?php
 
-//debuggi pitää olla jotta voidaan ajaa selaimesta ja käyttää debuggeria
-$debug = false;
-if (php_sapi_name() != 'cli' and !$debug) {
-	die("T?t? scripti? voi ajaa vain komentorivilt?!");
+if (php_sapi_name() != 'cli') {
+	die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
+
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
+error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+ini_set("display_errors", 0);
 
 require_once ('inc/connect.inc');
 require_once ('inc/functions.inc');
@@ -16,17 +18,12 @@ require_once ('inc/functions.inc');
  *
  */
 
-if ((!isset($argv[1]) or $argv[1] == '') and !$debug) {
-	echo "Anna yhti?!!!\n";
+if (!isset($argv[1]) or $argv[1] == '') {
+	echo "Anna yhtiö!!!\n";
 	die;
 }
 
-if (!$debug) {
-	$yhtiorow = hae_yhtion_parametrit($argv[1]);
-}
-else {
-	$yhtiorow = hae_yhtion_parametrit('artr');
-}
+$yhtiorow = hae_yhtion_parametrit($argv[1]);
 
 $tilaukset = hae_suoritusta_odottavat_tilaukset();
 

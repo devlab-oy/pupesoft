@@ -26,6 +26,8 @@
 		$ulos .= "<option value='pakkauskoko2' $sel[pakkauskoko2]>".t("Tuotteen pakkauskoko 2")."</option>";
 		$ulos .= "<option value='pakkauskoko3' $sel[pakkauskoko3]>".t("Tuotteen pakkauskoko 3")."</option>";
 		$ulos .= "<option value='hammastus' $sel[hammastus]>".t("Tuotteen hammastus")."</option>";
+		$ulos .= "<option value='sammutin_tyyppi' $sel[sammutin_tyyppi]>".t("Vaahtosammuttimen tyyppi")."</option>";
+		$ulos .= "<option value='sammutin_koko' $sel[sammutin_koko]>".t("Vaahtosammuttimen koko")."</option>";
 
 		$sresult = t_avainsana("TUOTEULK");
 

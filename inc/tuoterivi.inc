@@ -50,7 +50,9 @@
 
 				if (isset($kaatokoodi_tuotteen_tuotenumeron_alku) and trim($kaatokoodi_tuotteen_tuotenumeron_alku) != '') {
 					$autom_wherelisa = "AND tuote.tuoteno LIKE '{$kaatokoodi_tuotteen_tuotenumeron_alku}%'";
-					$autom_selectlisa = "CONCAT({$kaatokoodi_tuotteen_tuotenumeron_alku}, SUBSTRING(MAX(CAST(tuote.tuoteno AS UNSIGNED)), 4) + 1)";
+
+					$autom_tuoteno_len = strlen($kaatokoodi_tuotteen_tuotenumeron_alku) + 1;
+					$autom_selectlisa = "CONCAT({$kaatokoodi_tuotteen_tuotenumeron_alku}, SUBSTRING(MAX(CAST(tuote.tuoteno AS UNSIGNED)), {$autom_tuoteno_len}) + 1)";
 				}
 
 				$etsitaan = true;

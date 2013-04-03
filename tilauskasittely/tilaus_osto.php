@@ -788,11 +788,17 @@
 						</td>";
 			}
 
+			$query = "	SELECT a.fakta, l.ytunnus, l.tila, l.alatila
+						FROM toimi a, lasku l
+						WHERE l.tunnus='$kukarow[kesken]' and l.yhtio='$kukarow[yhtio]' and a.yhtio = l.yhtio and a.tunnus = l.liitostunnus";
+			$faktaresult = pupe_query($query);
+			$faktarow = mysql_fetch_array($faktaresult);
+
 			if (tarkista_oikeus('yllapito.php', 'tuote')) {
 
 				echo "<td class='back'>";
 				echo "<form method='POST' action='{$palvelin2}yllapito.php?toim=tuote&from=tilausmyynti&ohje=off&uusi=1'>
-						<input type='hidden' name='lopetus' value='{$tilost_lopetus}//from=muokkaatilaus//tee=AKTIVOI//tilausnumero={$tilausnumero}'>
+						<input type='hidden' name='lopetus' value='{$tilost_lopetus}//from=muokkaatilaus//tee=AKTIVOI//tilausnumero={$tilausnumero}//orig_tila={$faktarow['tila']}//orig_alatila={$faktarow['alatila']}'>
 						<input type='hidden' name='toim_kutsu' value='{$toim}'>
 						<input type='hidden' name='liitostunnus' value='{$laskurow['liitostunnus']}' />
 						<input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='JOO' />
@@ -804,12 +810,6 @@
 
 			echo "</tr>";
 			echo "</table><br>";
-
-			$query = "	SELECT a.fakta, l.ytunnus
-						FROM toimi a, lasku l
-						WHERE l.tunnus='$kukarow[kesken]' and l.yhtio='$kukarow[yhtio]' and a.yhtio = l.yhtio and a.tunnus = l.liitostunnus";
-			$faktaresult = pupe_query($query);
-			$faktarow = mysql_fetch_array($faktaresult);
 
 			echo "<table>";
 

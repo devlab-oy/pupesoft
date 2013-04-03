@@ -1510,12 +1510,17 @@
 			echo "<td>".t("Myyjä")."</td>";
 			echo "<td><select name='myyja'>";
 
-			$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja
+			$query = " (SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
+						FROM kuka
+						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND kuka.tunnus  = '$srow[myyja]')
+						UNION
+					   (SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
 						JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
-						AND (kuka.extranet = '' or kuka.tunnus='$srow[myyja]')
-						ORDER BY kuka.nimi";
+						AND kuka.extranet = '')
+						ORDER BY nimi";
 			$yresult = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($yresult)) {

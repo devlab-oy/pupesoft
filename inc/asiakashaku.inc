@@ -229,6 +229,20 @@ elseif ($ytunnus != '') {
 		$monta  = mysql_num_rows($result);
 	}
 
+	if ($monta == 0) {
+		// kokeillaan tunnuksella
+		$query	= "	SELECT asiakas.*, yhtio.nimi yhtionimi
+					FROM asiakas
+					JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+					WHERE asiakas.$konsyhtiot
+					and asiakas.tunnus = '$ytunnus'
+					$lajilisa
+					$asiakasrajaus
+					ORDER BY asiakas.nimi";
+		$result = pupe_query($query);
+		$monta  = mysql_num_rows($result);
+	}
+
 	if ($monta == 0 and is_string($ytunnus)) {
 
 		// ei rikota alkuperäistä ytunnus-muuttuja

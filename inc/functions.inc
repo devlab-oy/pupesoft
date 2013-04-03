@@ -3,17 +3,17 @@
 if (!function_exists("pupesoft_login")) {
 	function pupesoft_login($params) {
 
-		$user = $params['user'];
-		$salasana = $params['salasana'];
-		$salamd5 = $params['salamd5'];
-		$mikayhtio = $params['mikayhtio'];
-		$uusi1 = $params['uusi1'];
-		$uusi2 = $params['uusi2'];
-		$yhtio = $params['yhtio'];
-		$browkieli = $params['browkieli'];
-		$palvelin = $params['palvelin'];
-		$palvelin2 = $params['palvelin2'];
-		$mobile = $params['mobile'];
+		$user 		= $params['user'];
+		$salasana 	= $params['salasana'];
+		$salamd5 	= $params['salamd5'];
+		$mikayhtio 	= $params['mikayhtio'];
+		$uusi1 		= $params['uusi1'];
+		$uusi2 		= $params['uusi2'];
+		$yhtio 		= $params['yhtio'];
+		$browkieli 	= $params['browkieli'];
+		$palvelin 	= $params['palvelin'];
+		$palvelin2 	= $params['palvelin2'];
+		$mobile 	= $params['mobile'];
 
 		$session = "";
 		$usea 	 = 0;
@@ -32,7 +32,7 @@ if (!function_exists("pupesoft_login")) {
 					where kuka.kuka		= '{$user}'
 					and kuka.extranet 	= ''
 					GROUP BY 1,2,3,4";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$krow = mysql_fetch_assoc($result);
 
 		if (isset($salamd5) and $salamd5 != '') $vertaa = $salamd5;
@@ -83,7 +83,7 @@ if (!function_exists("pupesoft_login")) {
 					$query = "	UPDATE kuka
 								SET salasana = '{$uusi1}'
 								WHERE kuka = '{$user}'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					$vertaa = trim($uusi1);
 					$salasana = trim($uusi2);
@@ -111,7 +111,7 @@ if (!function_exists("pupesoft_login")) {
 					if (isset($yhtio) and strlen($yhtio) > 0) $query .= " and yhtio = '{$yhtio}'";
 					else $query .= " and yhtio = '{$krow['yhtio']}'";
 
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
 
@@ -124,7 +124,7 @@ if (!function_exists("pupesoft_login")) {
 						$query = "	SELECT oletus_ohjelma
 									FROM kuka
 									WHERE session = '{$session}'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 						$row = mysql_fetch_assoc($result);
 
 						if ($row["oletus_ohjelma"] != "") {
@@ -9764,7 +9764,7 @@ if (!function_exists("t_maanimi")) {
 
 if (!function_exists("jt_toimita")) {
 	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $jtrivit_paikat, $automaaginen, $tee, $automaattinen_poiminta = '', $tuotenumero = '', $huomioi_pvm = '', $mista_tullaan = '') {
-		global $yhtiorow, $kukarow, $oikeurow;
+		global $yhtiorow, $kukarow, $oikeurow, $myyntitilaus_jaksotettu;
 
 		if (!is_array($jtrivit)) $jtrivit = array();
 		if (!is_array($jtrivit_paikat)) $jtrivit_paikat = array();
@@ -18102,7 +18102,7 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 
 		if ($kieli == '') {
 			$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
-			$kielresult = mysql_query($querykiel) or pupe_error($querykiel);
+			$kielresult = pupe_query($querykiel);
 			$kielrow = mysql_fetch_assoc($kielresult);
 			$kieli = strtolower($kielrow['kieli']);
 		}
@@ -19302,14 +19302,15 @@ if (!function_exists('paivita_oletuspaikka')) {
 					muutospvm		= now()
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$tuoteno'";
-		$upresult = mysql_query($query) or pupe_error($query);
+		$upresult = pupe_query($query);
 
 		# Asetetaan uusi oletuspaikka
 		# ostorivienvarastopaikat.inc, rivi 289
 		$query = "	UPDATE tuotepaikat
 					SET oletus 	= 'X',
 					muuttaja	= '$kukarow[kuka]',
-					muutospvm	= now()
+					muutospvm	= now(),
+					poistettava = ''
 					WHERE yhtio 	= '$kukarow[yhtio]'
 					and tuoteno 	= '$tuoteno'
 					and hyllyalue	= '$hylly[hyllyalue]'
@@ -19317,7 +19318,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 					and hyllyvali	= '$hylly[hyllyvali]'
 					and hyllytaso	= '$hylly[hyllytaso]'
 					LIMIT 1";
-		$upresult = mysql_query($query) or pupe_error($query);
+		$upresult = pupe_query($query);
 
 		# Haetaan tuotepaikat missä oletus ei ole '', eli nykyiset oletuspaikat
 		$query = "	SELECT *
@@ -19325,18 +19326,19 @@ if (!function_exists('paivita_oletuspaikka')) {
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$tuoteno'
 					and oletus != ''";
-		$upresult = mysql_query($query) or pupe_error($query);
+		$upresult = pupe_query($query);
 
 		# Jos oletuspaikkaa ei löytynyt, asetetaan ensimmäinen oletuspaikaksi.
 		if (mysql_num_rows($upresult) == 0) {
 			$query = "	UPDATE tuotepaikat
 						SET oletus 	= 'X',
 						muuttaja	= '$kukarow[kuka]',
-						muutospvm	= now()
+						muutospvm	= now(),
+						poistettava = ''
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoteno'
 						ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";
-			$upresult = mysql_query($query) or pupe_error($query);
+			$upresult = pupe_query($query);
 		}
 
 		return 1;
@@ -19762,7 +19764,7 @@ if (!function_exists('luottotilanne')) {
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))	# Kaikki myyntitilaukset, paitsi laskutetut
-					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))					# Myyntitilaus kesken, tulostusjonossa tai odottaa hyväksyntää
+					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F', 'G'))					# Myyntitilaus kesken, tulostusjonossa, odottaa hyväksyntää tai odottaa asiakkaan suoritusta
 					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))			# Valmistukset
 					)
 					AND lasku.liitostunnus in ($liitostunnus)";

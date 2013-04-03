@@ -162,6 +162,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_VAKIOTE") 	$ulos .= "<option value='TARJOUS_VAKIOTE' {$avain_sel['TARJOUS_VAKIOTE']}>	".t("Tarjouksen vakioteksti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KATEISOTTO")		$ulos .= "<option value='KATEISOTTO' {$avain_sel['KATEISOTTO']}>			".t("Käteisoton luonne")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KOHDE_TYYPPI")  	$ulos .= "<option value='KOHDE_TYYPPI' {$avain_sel['KOHDE_TYYPPI']}>        ".t("Kohteen tyyppi")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "OLOSUHDE")		  	$ulos .= "<option value='OLOSUHDE' {$avain_sel['OLOSUHDE']}>				".t("Olosuhde")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -597,4 +598,17 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
+	}
+
+	if ($avain_sel['OLOSUHDE'] == 'SELECTED') {
+		if (mysql_field_name($result, $i) == "selite") {
+			$ulos = "<td>";
+			$ulos .= "<select name='{$nimi}'>";
+			$ulos .= "<option value='X'>".t("Olosuhde").": ".t("Ulkona")." / ".t("Tärinässä")."</option>";
+			$ulos .= "<option value='A'>".t("Olosuhde").": ".t("Sisällä")."</option>";
+			$ulos .= "</select>";
+			$ulos .= "</td>";
+
+			$jatko = 0;
+		}
 	}

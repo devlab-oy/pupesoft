@@ -792,7 +792,7 @@
 
 				echo "<td class='back'>";
 				echo "<form method='POST' action='{$palvelin2}yllapito.php?toim=tuote&from=tilausmyynti&ohje=off&uusi=1'>
-						<input type='hidden' name='lopetus' value='{$tilost_lopetus}//from=LASKUTATILAUS'>
+						<input type='hidden' name='lopetus' value='{$tilost_lopetus}//from=muokkaatilaus//tee=AKTIVOI//tilausnumero={$tilausnumero}'>
 						<input type='hidden' name='toim_kutsu' value='{$toim}'>
 						<input type='hidden' name='liitostunnus' value='{$laskurow['liitostunnus']}' />
 						<input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='JOO' />

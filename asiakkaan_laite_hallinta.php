@@ -79,18 +79,21 @@ echo "<font class='head'>".t("Laite hallinta")."</font><hr>";
 	}
 
 	function bind_paikka_tr_click() {
-		$('.paikat_tr').bind('click', function() {
-			if ($(this).children().find('.laitteet_table_hidden').length > 0) {
-				$(this).children().find('.laitteet_table_hidden').addClass('laitteet_table_not_hidden');
-				$(this).children().find('.laitteet_table_hidden').removeClass('laitteet_table_hidden');
+		$('.paikat_tr').bind('click', function(event) {
+			//paikat_tr sisällä on buttoni uuden laitteen luomiseen paikalle. jos sitä klikataan, emme halua triggeröidä tätä.
+			if (event.target.nodeName === 'TD') {
+				if ($(this).children().find('.laitteet_table_hidden').length > 0) {
+					$(this).children().find('.laitteet_table_hidden').addClass('laitteet_table_not_hidden');
+					$(this).children().find('.laitteet_table_hidden').removeClass('laitteet_table_hidden');
 
-				$(this).find('.porautumis_img').attr('src', $('#right_arrow').val());
-			}
-			else {
-				$(this).children().find('.laitteet_table_not_hidden').addClass('laitteet_table_hidden');
-				$(this).children().find('.laitteet_table_hidden').removeClass('laitteet_table_not_hidden');
+					$(this).find('.porautumis_img').attr('src', $('#right_arrow').val());
+				}
+				else {
+					$(this).children().find('.laitteet_table_not_hidden').addClass('laitteet_table_hidden');
+					$(this).children().find('.laitteet_table_hidden').removeClass('laitteet_table_not_hidden');
 
-				$(this).find('.porautumis_img').attr('src', $('#down_arrow').val());
+					$(this).find('.porautumis_img').attr('src', $('#down_arrow').val());
+				}
 			}
 
 		});
@@ -112,7 +115,7 @@ if ($tee == 'hae_asiakas' or ($tee == '' and !empty($valitse_asiakas))) {
 if (!empty($request['haettu_asiakas'])) {
 	$kohteet = hae_asiakkaan_kohteet_joissa_laitteita($request);
 
-	echo_kohteet_table($kohteet);
+	echo_kohteet_table($kohteet, $request['haettu_asiakas']);
 }
 
 echo "<div id='wrapper'>";
@@ -120,7 +123,7 @@ echo_kayttoliittyma($request);
 echo "</div>";
 
 function echo_kayttoliittyma($request = array()) {
-	global $kukarow, $yhtiorow;
+	global $kukarow, $yhtiorow, $palvelin2;
 
 	echo "<input type='hidden' id='down_arrow' value='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
 	echo "<input type='hidden' id='right_arrow' value='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />";
@@ -129,14 +132,14 @@ function echo_kayttoliittyma($request = array()) {
 
 	echo "<input type='hidden' id='tee' name='tee' value='hae_asiakas' />";
 	echo "<input type='text' id='ytunnus' name='ytunnus' />";
-	echo "<input type='submit' value='".t("Hae")."'";
+	echo "<input type='submit' value='".t("Hae")."' />";
 
 	echo "</form>";
 }
 
-function echo_kohteet_table($kohteet = array()) {
+function echo_kohteet_table($kohteet = array(), $haettu_asiakas = array()) {
 	global $palvelin2;
-	
+
 	echo "<table>";
 
 	echo "<tr>";
@@ -147,7 +150,7 @@ function echo_kohteet_table($kohteet = array()) {
 
 	echo "<tr>";
 	echo "<td>";
-	echo "<button>".t("Luo uusi kohde")."</button>";
+	echo "<a href='yllapito.php?toim=kohde&uusi=1&valittu_asiakas={$haettu_asiakas['tunnus']}'><button>".t("Luo uusi kohde")."</button></a>";
 	echo "</td>";
 
 	echo "<td>";
@@ -167,7 +170,7 @@ function echo_kohteet_table($kohteet = array()) {
 
 function kohde_tr($kohde_index, $kohde) {
 	global $palvelin2;
-	
+
 	echo "<tr class='kohde_tr hidden'>";
 
 	echo "<td>";
@@ -192,7 +195,7 @@ function kohde_tr($kohde_index, $kohde) {
 function paikka_tr($kohde_index, $paikat) {
 	echo "<tr class='paikka_tr_hidden paikat_{$kohde_index}'>";
 	echo "<td>";
-	echo "<button>".t("Luo kohteelle uusi paikka")."</button>";
+	echo "<a href='yllapito.php?toim=paikka&uusi=1&valittu_kohde={$kohde_index}'><button>".t("Luo kohteelle uusi paikka")."</button></a>";
 	echo "</td>";
 
 	echo "<td>";
@@ -202,7 +205,7 @@ function paikka_tr($kohde_index, $paikat) {
 	echo "</td>";
 
 	echo "</tr>";
-	foreach ($paikat as $paikka) {
+	foreach ($paikat as $paikka_index => $paikka) {
 		echo "<tr class='paikat_tr paikka_tr_hidden paikat_{$kohde_index}'>";
 
 		echo "<td>";
@@ -215,7 +218,7 @@ function paikka_tr($kohde_index, $paikat) {
 		echo "</td>";
 
 		echo "<td>";
-		echo "<button>".t("Luo paikkaan uusi laite")."</button>";
+		echo "<a href='yllapito.php?toim=laite&uusi=1&valittu_paikka={$paikka_index}'><button>".t("Luo paikkaan uusi laite")."</button></a>";
 		echo "<br/>";
 		laitteet_table($paikka['laitteet']);
 		echo "</td>";
@@ -274,13 +277,13 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 				tuote.nimitys as tuote_nimi,
 				laite.*
 				FROM kohde
-				JOIN paikka
+				LEFT JOIN paikka
 				ON ( paikka.yhtio = kohde.yhtio
 					AND paikka.kohde = kohde.tunnus)
-				JOIN laite
+				LEFT JOIN laite
 				ON ( laite.yhtio = paikka.yhtio
 					AND laite.paikka = paikka.tunnus )
-				JOIN tuote
+				LEFT JOIN tuote
 				ON ( tuote.yhtio = laite.yhtio
 					AND tuote.tuoteno = laite.tuoteno )
 				WHERE kohde.yhtio = '{$kukarow['yhtio']}'

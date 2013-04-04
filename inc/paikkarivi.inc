@@ -20,20 +20,30 @@ if (mysql_field_name($result, $i) == "kohde") {
 	$kohde_result = pupe_query($query);
 	$kohteet = array();
 	while ($kohde = mysql_fetch_assoc($kohde_result)) {
+		if (empty($valittu_kohde)) {
+			if ($trow[$i] == $kohde['tunnus']) {
+				$kohde['selected'] = "SELECTED";
+			}
+			else {
+				$kohde['selected'] = "";
+			}
+		}
+		else {
+			//jos valittu_kohde setattu ollaan tulossa asikkaan_laite_hallinnasta
+			if ($valittu_kohde == $kohde['tunnus']) {
+				$kohde['selected'] = "SELECTED";
+			}
+			else {
+				$kohde['selected'] = "";
+			}
+		}
 		$kohteet[] = $kohde;
 	}
 
 	$ulos = "<td>";
 	$ulos .= "<select name='{$nimi}'>";
 	foreach ($kohteet as $kohde) {
-		//jos valittu_kohde setattu ollaan tulossa asikkaan_laite_hallinnasta
-		if (!empty($valittu_kohde) and $valittu_kohde == $kohde['tunnus']) {
-			$sel = "SELECTED";
-		}
-		else {
-			$sel = "";
-		}
-		$ulos .= "<option {$sel} value='{$kohde['tunnus']}'>{$kohde['dropdown_text']}</option>";
+		$ulos .= "<option {$kohde['selected']} value='{$kohde['tunnus']}'>{$kohde['dropdown_text']}</option>";
 	}
 	$ulos .= "</select>";
 	$ulos .= "</td>";
@@ -75,13 +85,19 @@ if (mysql_field_name($result, $i) == "olosuhde") {
 	$olosuhde_result = pupe_query($query);
 	$olosuhteet = array();
 	while ($olosuhde = mysql_fetch_assoc($olosuhde_result)) {
+		if ($trow[$i] == $olosuhde['tunnus']) {
+			$olosuhde['selected'] = "SELECTED";
+		}
+		else {
+			$olosuhde['selected'] = "";
+		}
 		$olosuhteet[] = $olosuhde;
 	}
 
 	$ulos = "<td>";
 	$ulos .= "<select name='{$nimi}'>";
 	foreach ($olosuhteet as $olosuhde) {
-		$ulos .= "<option value='{$olosuhde['selite']}'>{$olosuhde['selitetark']}</option>";
+		$ulos .= "<option value='{$olosuhde['selite']}' {$olosuhde['selected']}>{$olosuhde['selitetark']}</option>";
 	}
 	$ulos .= "</select>";
 	$ulos .= "</td>";

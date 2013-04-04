@@ -14,21 +14,28 @@ if (mysql_field_type($result, $i) == "blob") {
 }
 
 //tyyppi pitää löytyä tuotteen_avainsanat taulusta
-if (mysql_field_type($result, $i) == "tyyppi") {
+if (mysql_field_name($result, $i) == "tyyppi") {
 	$query = "	SELECT *
 				FROM tuotteen_avainsanat
 				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND laji = 'sammutin_tyyppi'";
+				AND laji = 'sammutin_tyyppi'
+				GROUP BY selite";
 	$tyyppi_result = pupe_query($query);
 	$tyypit = array();
-	while ($tyyppi = mysql_fetch_assoc($tyyppi_result)) {
-		$tyypit[] = $tyyppi;
+	while ($tyyppi_row = mysql_fetch_assoc($tyyppi_result)) {
+		if ($trow[$i] == $tyyppi_row['selite']) {
+			$tyyppi_row['selected'] = "SELECTED";
+		}
+		else {
+			$tyyppi_row['selected'] = "";
+		}
+		$tyypit[] = $tyyppi_row;
 	}
 
 	$ulos = "<td>";
 	$ulos .= "<select name='{$nimi}'>";
-	foreach ($tyypit as $tyyppi) {
-		$ulos .= "<option value='{$tyyppi['selite']}'>".t($tyyppi['selite'])."</option>";
+	foreach ($tyypit as $tyyppi_row) {
+		$ulos .= "<option value='{$tyyppi_row['selite']}' {$tyyppi_row['selected']}>".t($tyyppi_row['selite'])."</option>";
 	}
 	$ulos .= "</select>";
 	$ulos .= "</td>";
@@ -37,47 +44,82 @@ if (mysql_field_type($result, $i) == "tyyppi") {
 }
 
 //koko on numero??
-if (mysql_field_type($result, $i) == "koko") {
+if (mysql_field_name($result, $i) == "koko") {
 
 }
 
 //olosuhde pitää löytyä avainsanat taulusta OLOSUHDE
-if (mysql_field_type($result, $i) == "olosuhde") {
+if (mysql_field_name($result, $i) == "olosuhde") {
 	$query = "	SELECT *
 				FROM avainsana
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND laji = 'OLOSUHDE'";
 	$olosuhde_result = pupe_query($query);
 	$olosuhteet = array();
-	while ($olosuhde = mysql_fetch_assoc($result)) {
+	while ($olosuhde = mysql_fetch_assoc($olosuhde_result)) {
+		if ($trow[$i] == $olosuhde['tunnus']) {
+			$olosuhde['selected'] = "SELECTED";
+		}
+		else {
+			$olosuhde['selected'] = "";
+		}
 		$olosuhteet[] = $olosuhde;
 	}
 
 	$ulos = "<td>";
 	$ulos .= "<select name='{$nimi}'>";
 	foreach ($olosuhteet as $olosuhde) {
-		$ulos .= "<option value='{$olosuhde['selite']}'>".t($olosuhde['selite_tark'])."</option>";
+		$ulos .= "<option value='{$olosuhde['selite']}' {$olosuhde['selected']}>".t($olosuhde['selitetark'])."</option>";
 	}
 	$ulos .= "</select>";
 	$ulos .= "</td>";
+
+	$jatko = 0;
 }
 
-//toimenpide????
-if (mysql_field_type($result, $i) == "toimenpide") {
+//toimenpide on palvelu tuote joka pitää löytyä tuote taulusta
+if (mysql_field_name($result, $i) == "toimenpide") {
+	$query = "	SELECT *
+				FROM tuote
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tuotetyyppi = 'K'";
+	$toimenpide_result = pupe_query($query);
+	$toimenpiteet = array();
+	while($toimenpide = mysql_fetch_assoc($toimenpide_result)) {
+		if ($trow[$i] == $toimenpide['tuoteno']) {
+			$toimenpide['selected'] = "SELECTED";
+		}
+		else {
+			$toimenpide['selected'] = "";
+		}
+		
+		$toimenpiteet[] = $toimenpide;
+	}
 
+	$ulos = "<td>";
+	$ulos .= "<select name='{$nimi}'>";
+	foreach($toimenpiteet as $toimenpide) {
+		$ulos .= "<option value='{$toimenpide['tuoteno']}' {$toimenpide['selected']}>{$toimenpide['nimitys']}</option>";
+	}
+	$ulos .= "</select>";
+	$ulos .= "</td>";
+
+	$jatko = 0;
 }
 
 //huoltoväli float aluksi annetaan päivissä, myöhemmin voi olla mittarilukema, käyttökerta
-if (mysql_field_type($result, $i) == "huoltovali") {
+if (mysql_field_name($result, $i) == "huoltovali") {
 
 }
 
 //pakollisuus kyllä / ei
-if (mysql_field_type($result, $i) == "tyyppi") {
+if (mysql_field_name($result, $i) == "pakollisuus") {
 	$ulos = "<td>";
 	$ulos .= "<select name='{$nimi}'>";
 	$ulos .= "<option value=1>".t("Kyllä")."</option>";
 	$ulos .= "<option value=0>".t("Ei")."</option>";
 	$ulos .= "</select>";
 	$ulos .= "</td>";
+
+	$jatko = 0;
 }

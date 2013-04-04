@@ -49,31 +49,37 @@ echo "<font class='head'>".t("Laite hallinta")."</font><hr>";
 	$(document).ready(function() {
 		bind_kohde_tr_click();
 		bind_paikka_tr_click();
+
+		bind_poista_kohde_button();
+		bind_poista_paikka_button();
 	});
 
 	function bind_kohde_tr_click() {
-		$('.kohde_tr').bind('click', function() {
-			var paikat = '.paikat_' + $(this).find('.kohde_tunnus').val();
+		$('.kohde_tr').bind('click', function(event) {
+			if (event.target.nodeName === 'TD') {
+				var paikat = '.paikat_' + $(this).find('.kohde_tunnus').val();
 
-			if ($(this).hasClass('hidden')) {
-				//TODO yhteinäistä bind_tr_click logiikka. ei yhdistä vaan _yhtenäistä_
-				$(this).parent().find(paikat).removeClass('paikka_tr_hidden');
-				$(this).parent().find(paikat).addClass('paikka_tr_not_hidden');
+				if ($(this).hasClass('hidden')) {
+					//TODO yhteinäistä bind_tr_click logiikka. ei yhdistä vaan _yhtenäistä_
+					$(this).parent().find(paikat).removeClass('paikka_tr_hidden');
+					$(this).parent().find(paikat).addClass('paikka_tr_not_hidden');
 
-				$(this).addClass('not_hidden');
-				$(this).removeClass('hidden');
+					$(this).addClass('not_hidden');
+					$(this).removeClass('hidden');
 
-				$(this).find('.porautumis_img').attr('src', $('#right_arrow').val());
+					$(this).find('.porautumis_img').attr('src', $('#right_arrow').val());
+				}
+				else {
+					$(this).parent().find(paikat).removeClass('paikka_tr_not_hidden');
+					$(this).parent().find(paikat).addClass('paikka_tr_hidden');
+
+					$(this).addClass('hidden');
+					$(this).removeClass('not_hidden');
+
+					$(this).find('.porautumis_img').attr('src', $('#down_arrow').val());
+				}
 			}
-			else {
-				$(this).parent().find(paikat).removeClass('paikka_tr_not_hidden');
-				$(this).parent().find(paikat).addClass('paikka_tr_hidden');
 
-				$(this).addClass('hidden');
-				$(this).removeClass('not_hidden');
-
-				$(this).find('.porautumis_img').attr('src', $('#down_arrow').val());
-			}
 
 		});
 	}
@@ -96,6 +102,37 @@ echo "<font class='head'>".t("Laite hallinta")."</font><hr>";
 				}
 			}
 
+		});
+	}
+
+	function bind_poista_kohde_button() {
+		$('.poista_kohde').click(function() {
+			var ok = confirm($('#oletko_varma_confirm_message').val());
+			if (ok) {
+				var button = $(this);
+				var kohde_tunnus = button.parent().find('.kohde_tunnus').val();
+				$.ajax({
+					type: 'GET',
+					url: 'yllapito.php?toim=kohde&del=1&tunnus=' + kohde_tunnus,
+					success: function() {
+						//poistetaan kohde_tr:n paikka_tr:t
+						button.parent().parent().parent().find('.paikat_' + kohde_tunnus).remove();
+
+						//poistetaan itse kohde_tr
+						button.parent().parent().remove();
+					},
+					async: false
+				});
+			}
+		});
+	}
+
+	function bind_poista_paikka_button() {
+		$('.poista_paikka').click(function() {
+			var ok = confirm($('#oletko_varma_confirm_message').val());
+			if (ok) {
+				
+			}
 		});
 	}
 
@@ -127,6 +164,7 @@ function echo_kayttoliittyma($request = array()) {
 
 	echo "<input type='hidden' id='down_arrow' value='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
 	echo "<input type='hidden' id='right_arrow' value='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />";
+	echo "<input type='hidden' id='oletko_varma_confirm_message' value='".t("Oletko varma")."' />";
 
 	echo "<form method='POST' action='' name='asiakas_haku'>";
 
@@ -178,6 +216,7 @@ function kohde_tr($kohde_index, $kohde) {
 	echo $kohde['kohde_nimi'];
 	echo "&nbsp";
 	echo "<img class='porautumis_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
+	echo "<button class='poista_kohde'>".t("Poista kohde")."</button>";
 	echo "</td>";
 
 	echo "<td>";
@@ -189,7 +228,9 @@ function kohde_tr($kohde_index, $kohde) {
 	echo "</td>";
 
 	echo "</tr>";
-	echo paikka_tr($kohde_index, $kohde['paikat']);
+	if(count($kohde['paikat']) > 0) {
+		paikka_tr($kohde_index, $kohde['paikat']);
+	}
 }
 
 function paikka_tr($kohde_index, $paikat) {

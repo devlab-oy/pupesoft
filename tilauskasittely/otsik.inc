@@ -3308,13 +3308,14 @@
 			$upd_erikoisale_res = pupe_query($query_erikoisale);
 		}
 
-		if ((int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
+		if ((int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE) {
 
 			$query = "	UPDATE kuka
 						SET kesken = '$id'
 						WHERE yhtio = '$kukarow[yhtio]' AND
 						kuka = '$kukarow[kuka]' AND
-						session = '$session'";
+						session = '$session' AND
+						session != ''";
 			$result = pupe_query($query);
 
 			$kukarow["kesken"] = $id;

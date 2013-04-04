@@ -194,7 +194,7 @@
 		$result = pupe_query($query);
 
 		// Jos poistamme ifamesta tietoja niin p‰ivitet‰‰n varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, ett‰ tietoja on muutettu
-		if ($lukitse_avaimeen != "") {
+		if (!empty($lukitse_avaimeen)) {
 			if ($toim == "tuotteen_avainsanat" or $toim == "tuotteen_toimittajat") {
 				$query = "	UPDATE tuote
 							SET muuttaja = '$kukarow[kuka]', muutospvm=now()

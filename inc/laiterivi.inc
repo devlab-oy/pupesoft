@@ -20,20 +20,30 @@ if (mysql_field_name($result, $i) == "paikka") {
 	$paikka_result = pupe_query($query);
 	$paikat = array();
 	while($paikka = mysql_fetch_assoc($paikka_result)) {
+		if(empty($valittu_paikka)) {
+			if ($trow[$i] == $paikka['tunnus']) {
+				$paikka['selected'] = "SELECTED";
+			}
+			else {
+				$paikka['selected'] = "";
+			}
+		}
+		else {
+			//jos valittu_paikka setattu ollaan tulossa asikkaan_laite_hallinnasta
+			if($valittu_paikka == $paikka['tunnus']) {
+				$paikka['selected'] = "SELECTED";
+			}
+			else {
+				$paikka['selected'] = "";
+			}
+		}
 		$paikat[] = $paikka;
 	}
 
 	$ulos = "<td>";
 	$ulos .= "<select name='{$nimi}'>";
 	foreach ($paikat as $paikka) {
-		//jos valittu_paikka setattu ollaan tulossa asikkaan_laite_hallinnasta
-		if(!empty($valittu_paikka) and $valittu_paikka == $paikka['tunnus']) {
-			$sel = "SELECTED";
-		}
-		else {
-			$sel = "";
-		}
-		$ulos .= "<option {$sel} value='{$paikka['tunnus']}'>{$paikka['dropdown_text']}</option>";
+		$ulos .= "<option {$paikka['selected']} value='{$paikka['tunnus']}'>{$paikka['dropdown_text']}</option>";
 	}
 	$ulos .= "</select>";
 	$ulos .= "</td>";

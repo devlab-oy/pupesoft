@@ -505,7 +505,7 @@ function echo_lasku_table($laskurow, $toim) {
 
 	if ($laskurow['saldo_maksettu'] != 0) {
 		$osasuoritus_string = "<tr><th>".t("Osasuoritukset")."</th><td>{$laskurow['saldo_maksettu']}</td></tr>";
-		$osasuoritus_string .= "<tr><th>".t("Osasuorituksia jäljellä")."</th><td>".($laskurow['summa'] - $laskurow['saldo_maksettu'])."</td></tr>";
+		$osasuoritus_string .= "<tr><th>".t("Laskua maksamatta")."</th><td>".($laskurow['summa'] - $laskurow['saldo_maksettu'])."</td></tr>";
 	}
 
 	echo "<table>";

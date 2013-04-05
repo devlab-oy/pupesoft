@@ -4395,7 +4395,7 @@ if ($tee == '') {
 					echo "<tr><th>".t("Myytävissä")."</th><td><font class='error'>".t("Tuote loppu")."</font></td></tr>";
 					}
 				}
-				
+
 				echo "</table>";
 				echo "</td>";
 

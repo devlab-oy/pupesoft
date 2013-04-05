@@ -369,8 +369,7 @@ if ($monta == 0) {
 					FROM asiakas
 					JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 					WHERE asiakas.$konsyhtiot
-					and asiakas.ytunnus like '%".str_replace('+', '-', $ytunnus2)."%'
-					and asiakas.asiakasnro not in ('0','')";
+					and asiakas.ytunnus like '%".str_replace('+', '-', $ytunnus2)."%'";
 		$result = pupe_query($query);
 		$monta  = mysql_num_rows($result);
 	}

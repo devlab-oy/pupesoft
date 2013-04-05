@@ -4388,9 +4388,14 @@ if ($tee == '') {
 				}
 
 				if ($myytavissa_sum == 0) {
+					if ($trow["ei_saldoa"] != ""){
+					echo "<tr><th>".t("Myytävissä")."</th><td><font class='error'>".t("Saldoton tuote")."</font></td></tr>";
+					}
+					else {
 					echo "<tr><th>".t("Myytävissä")."</th><td><font class='error'>".t("Tuote loppu")."</font></td></tr>";
+					}
 				}
-
+				
 				echo "</table>";
 				echo "</td>";
 

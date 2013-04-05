@@ -76,7 +76,6 @@
 					postitp				= '',
 					maa   				= '',
 					toim_ovttunnus 		= '',
-                    toim_kohde          = 0,
 					toim_nimi      		= '',
 					toim_nimitark  		= '',
 					toim_osoite    		= '',
@@ -692,7 +691,7 @@
 
 					if ($key == "toimpp") 			$srow["toimaika"] = $_POST["toimvv"]."-".$_POST["toimkk"]."-".$_POST["toimpp"];
 					elseif ($key == "kerpp") 		$srow["kerayspvm"] = $_POST["kervv"]."-".$_POST["kerkk"]."-".$_POST["kerpp"];
-					elseif ($key == "tkohde") 		$srow["toim_kohde"] = $val;
+					elseif ($key == "tkohde") 		$srow["asiakkaan_kohde"] = $val;
 					elseif ($key == "tnimi") 		$srow["toim_nimi"] = $val;
 					elseif ($key == "tnimitark") 	$srow["toim_nimitark"] = $val;
 					elseif ($key == "tosoite") 		$srow["toim_osoite"] = $val;
@@ -934,7 +933,7 @@
             $kohde_res = pupe_query($kohde_query);
 
 			while( $krow = mysql_fetch_assoc($kohde_res)) {
-                if ($krow['tunnus'] == $srow['toim_kohde']) {
+                if ($krow['tunnus'] == $srow['asiakkaan_kohde']) {
 
                     $sel = "SELECTED";
                     $srow['toim_nimi'] = $krow['nimi'];
@@ -3231,7 +3230,6 @@
 					toimitustapa 						= '$toimitustapa',
 					toimvko	 							= '$toimvko',
 					toim_maa 							= '$toim_maa',
-					toim_kohde 							= '$tkohde',
 					toim_nimi 							= '$tnimi',
 					toim_nimitark 						= '$tnimitark',
 					toim_osoite 						= '$tosoite',
@@ -3602,6 +3600,7 @@
 							rivihintoja_ei_nayteta		= '$rivihintoja_ei_nayteta',
 							kasinsyotetty_viite			= '$kasinsyotetty_viite',
 							kantaasiakastunnus			= '$kantaasiakastunnus',
+							asiakkaan_kohde				= '{$tkohde}',
 							otunnus 					= '$kukarow[kesken]'";
 				$query3 .= $postquery3;
 				$result = pupe_query($query3);

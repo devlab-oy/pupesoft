@@ -969,14 +969,7 @@
 				}
 			}
 			elseif (trim($array[$i]) == 'ytunnus' and !$tarkkahaku) {
-				$lisa .= " and REPLACE({$array[$i]}, '-', '') like '%".str_replace('-', '', $haku[$i])."%' ";
-
-				//viivakoodi lukee henkilötunnuksen viivan (-) plussana (+) fix
-				//jos seittemäs merkki on + niin lisätään queryyn hakuehto joka hakee myös miinuksella
-				if(substr($haku[$i], 6, 1) == '+') {
-					$lisa .= " or {$array[$i]} LIKE '%".str_replace('+', '-', $haku[$i])."%' ";
-				}
-
+				$lisa .= " and REPLACE(REPLACE({$array[$i]}, '-', ''), '+', '') like '%".str_replace(array('-','+'), '', $haku[$i])."%' ";
 			}
 			elseif ($from == "yllapito" and $toim == "tuotteen_toimittajat_tuotenumerot" and trim($array[$i]) == "tuoteno") {
 				$lisa .= " and toim_tuoteno_tunnus {$hakuehto} ";

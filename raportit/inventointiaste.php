@@ -1019,31 +1019,25 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
 		$yhtio = $kukarow['yhtio'];
 	}
 
-	$query = "	SELECT DISTINCT tuotepaikat.tunnus
-				FROM   tapahtuma USE INDEX (yhtio_laji_laadittu)
-				JOIN tuotepaikat
-				ON ( tuotepaikat.yhtio = tapahtuma.yhtio
-					AND tuotepaikat.tuoteno = tapahtuma.tuoteno
-					AND tuotepaikat.hyllyalue = tapahtuma.hyllyalue
-					AND tuotepaikat.hyllynro = tapahtuma.hyllynro
-					AND tuotepaikat.hyllyvali = tapahtuma.hyllyvali
-					AND tuotepaikat.hyllytaso = tapahtuma.hyllytaso )
+	$query = "	SELECT tapahtuma.hyllyalue AS hyllyalue, tapahtuma.hyllynro AS hyllynro, count(*) AS kpl
+				FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
 				JOIN tuote
 				ON ( tuote.yhtio = tapahtuma.yhtio
-					AND tuote.tuoteno = tapahtuma.tuoteno
-					AND tuote.ei_saldoa = ''
-					AND tuote.status = 'A' )
-				JOIN varastopaikat
-				ON ( varastopaikat.yhtio = tapahtuma.yhtio
-					AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-					AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-					AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
-				WHERE  tapahtuma.yhtio = '{$yhtio}'
+				AND tuote.tuoteno = tapahtuma.tuoteno
+				AND tuote.ei_saldoa = ''
+				AND tuote.status = 'A' )
+				WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 				AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
-				AND tapahtuma.laji = 'Inventointi'";
+				AND tapahtuma.laji = 'Inventointi'
+				GROUP BY 1,2";
 	$result = pupe_query($query);
 
-	return mysql_num_rows($result);
+	$count = 0;
+	while ($varasto_row = mysql_fetch_assoc($result)) {
+		$count += kuuluuko_hylly_varastoon($request, $varasto_row);
+	}
+
+	return $count;
 }
 
 function hae_tuotepaikkojen_lukumaara(&$request) {
@@ -1057,23 +1051,40 @@ function hae_tuotepaikkojen_lukumaara(&$request) {
 		$yhtio = $kukarow['yhtio'];
 	}
 
-	$query = "	SELECT DISTINCT tuotepaikat.tunnus
-				FROM   tuotepaikat
-				JOIN tuote
-				ON ( tuote.yhtio = tuotepaikat.yhtio
-					AND tuote.tuoteno = tuotepaikat.tuoteno
-					AND tuote.ei_saldoa = ''
-					AND tuote.status = 'A' )
-				JOIN varastopaikat
-				ON ( varastopaikat.yhtio = tuotepaikat.yhtio
-					AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-					AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-					AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
-				WHERE  tuotepaikat.yhtio = '{$yhtio}'";
-
+	$query = "	SELECT tuotepaikat.hyllyalue as hyllyalue, tuotepaikat.hyllynro as hyllynro, count(*) as kpl
+				FROM tuote
+				JOIN tuotepaikat
+				USING (yhtio, tuoteno)
+				WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+				AND tuote.ei_saldoa = ''
+				AND tuote.status = 'A'
+				GROUP BY 1,2";
 	$result = pupe_query($query);
 
-	return mysql_num_rows($result);
+	$count = 0;
+	while ($varasto_row = mysql_fetch_assoc($result)) {
+		$count += kuuluuko_hylly_varastoon($request, $varasto_row);
+	}
+
+	return $count;
+}
+
+function kuuluuko_hylly_varastoon($request, $varasto_row) {
+	global $kukarow;
+
+	$query = "	SELECT varastopaikat.tunnus
+				FROM varastopaikat
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper('{$varasto_row['hyllyalue']}'), 5, '0'),lpad(upper('{$varasto_row['hyllynro']}'), 5, '0'))
+				AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper('{$varasto_row['hyllyalue']}'), 5, '0'),lpad(upper('{$varasto_row['hyllynro']}'), 5, '0'))
+				AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).")";
+	$varasto_result = pupe_query($query);
+	$count = 0;
+	if (mysql_num_rows($varasto_result) != 0) {
+		$count = $varasto_row['kpl'];
+	}
+
+	return $count;
 }
 
 function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {

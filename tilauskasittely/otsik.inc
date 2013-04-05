@@ -1793,7 +1793,9 @@
 			$jtki = "";
 			$rahtivapaa_chk = '';
 
-			if ($srow['eilahetetta'] != '') $eilah          = 'CHECKED';
+			if ($srow['eilahetetta'] != ''
+					or $yhtiorow["kerataanko_valmistukset"] == "E"
+					and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON"))  $eilah          = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';

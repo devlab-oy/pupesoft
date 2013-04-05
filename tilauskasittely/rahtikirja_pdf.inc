@@ -174,7 +174,7 @@
 		$firstpage = $pdf->new_page("a4");
 
 		if ($toitarow['sopimusnro'] != '') {
-			$toitarow['sopimusnro'] = sprintf("%06d",$toitarow['sopimusnro']);	// sopimunumeron tulee olla kuus pitk‰
+			$toitarow['sopimusnro'] = sprintf("%06s",$toitarow['sopimusnro']);	// sopimunumeron tulee olla kuus pitk‰
 		}
 
 		//tehd‰‰n viivakoodi joka 9 merkki‰ pitk‰.

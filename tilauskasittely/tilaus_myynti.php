@@ -2874,16 +2874,21 @@ if ($tee == '') {
 				echo "<th align='left'>".t("Laatija").":</th>";
 			}
 
-			echo "<td><input type='text' name='myyjanro' size='8' $state> ".t("tai")." ";
-			echo "<select name='myyja' onchange='submit();' $state>";
-
-			$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
+			$query = " (SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
+						FROM kuka
+						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						AND kuka.tunnus  = '$laskurow[myyja]')
+						UNION
+					   (SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
 						JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
-						AND (kuka.extranet = '' or kuka.tunnus='$laskurow[myyja]')
-						ORDER BY kuka.nimi";
+						AND kuka.extranet = '')
+						ORDER BY nimi";
 			$yresult = pupe_query($query);
+
+			echo "<td><input type='text' name='myyjanro' size='8' $state> ".t("tai")." ";
+			echo "<select name='myyja' onchange='submit();' $state>";
 
 			while ($row = mysql_fetch_assoc($yresult)) {
 				$sel = "";

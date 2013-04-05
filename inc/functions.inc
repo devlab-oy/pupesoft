@@ -6100,6 +6100,36 @@ if (!function_exists("size_readable")) {
 	}
 }
 
+if (!function_exists("seconds_readable")) {
+	function seconds_readable($seconds) {
+
+		$parts = array();
+		$periods = array('day'    => 86400,
+						 'hour'   => 3600,
+						 'minute' => 60,
+						 'second' => 1);
+
+		foreach ($periods as $name => $duration) {
+
+			$div = floor($seconds / $duration);
+
+			if ($div == 0) {
+				continue;
+			}
+			elseif ($div == 1) {
+				$parts[] = "{$div} {$name}";
+			}
+			else {
+				$parts[] = "{$div} {$name}s";
+			}
+
+			$seconds = $seconds % $duration;
+		}
+
+		return implode(', ', $parts);
+	}
+}
+
 if (!function_exists("sarjanumeron_ostohinta")) {
 	function sarjanumeron_ostohinta($kentta, $arvo, $eikululaskuja="", $pvm="") {
 		global $kukarow, $yhtiorow;
@@ -10269,7 +10299,12 @@ if (!function_exists("lue_kurssit")) {
 // textmode progress palkki
 if (!function_exists("progress_bar")) {
 	function progress_bar($current_item, $total_items, $bar_length = 60) {
+
 		static $microtime_start = NULL;
+		static $microtime_current = 0;
+		static $microtime_current_last = 0;
+		static $microtime_total = 0;
+		static $microtime_remaining = 0;
 
 		if ($microtime_start === NULL) {
 			$timeparts = explode(" ", microtime());
@@ -10283,7 +10318,18 @@ if (!function_exists("progress_bar")) {
 		$microtime_current = round($microtime_stop - $microtime_start, 0);
 		$microtime_total = round($microtime_current / $current_item * $total_items, 0);
 
-		printf("|%-60s| [$current_item/$total_items] ($microtime_current sec, total $microtime_total sec)          \r", sprintf("%'#".round($current_item / $total_items * $bar_length)."s", ''));
+		// Printataan vaan sekunnin välein
+		if ($microtime_current != $microtime_current_last) {
+			$hash = sprintf("%'#".round($current_item / $total_items * $bar_length)."s", '');
+
+			printf("|%-{$bar_length}s| [$current_item/$total_items]\n\n  elapsed: %-{$bar_length}s\nremaining: %-{$bar_length}s\n    total: %-{$bar_length}s\r".chr(27)."[4A",
+				$hash,
+				seconds_readable($microtime_current),
+				seconds_readable($microtime_total - $microtime_current),
+				seconds_readable($microtime_total));
+		}
+
+		$microtime_current_last = $microtime_current;
 	}
 }
 
@@ -17377,10 +17423,10 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					$params_lahete = kollirivi_lahete($params_lahete);
 					$params_lahete['kala'] = $params_lahete['kala'] -= 5;
 				}
-				elseif (isset($sscc)) {					
+				elseif (isset($sscc)) {
 					$params_lahete['kala'] = $params_lahete['kala'] -= 60;
 				}
-				else {					
+				else {
 					$params_lahete['kala'] = $params_lahete['kala'] -= 20;
 				}
 
@@ -19982,7 +20028,7 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 								AND tunnus  = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'";
 					$result = pupe_query($query);
 					$myyntitilausrivi = mysql_fetch_assoc($result);
-					
+
 					if($myyntitilausrivi['tyyppi'] == 'D') {
 						echo "<font class='error'>".t("Myyntitilausrivi oli jo poistettu")."!</font><br/><br/>";
 					}

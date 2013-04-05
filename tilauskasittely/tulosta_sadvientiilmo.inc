@@ -55,7 +55,7 @@
 	if (!function_exists('print_ytunnus')) {
 		function print_ytunnus ($ytunnus) {
 			//kääntää ytunnuksen kauniseen muotoon
-			$ytunnus = sprintf('%08d', $ytunnus);
+			$ytunnus = sprintf('%08s', $ytunnus);
 			return substr($ytunnus,0,7)."-".substr($ytunnus,-1);
 		}
 	}

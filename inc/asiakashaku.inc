@@ -173,7 +173,7 @@ elseif ($ytunnus != '') {
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
-						and asiakas.ytunnus = '$ytunnus'
+						and REPLACE(REPLACE(asiakas.ytunnus, '-', ''), '+', '') like '%".str_replace(array('-','+'), '', $ytunnus)."%'
 						and asiakas.ytunnus!=''
 						$lajilisa $asiakasrajaus)
 					UNION

@@ -183,6 +183,13 @@
 	// Tietue poistetaan
 	if ($del == 1) {
 
+		if (!empty($del_relaatiot)) {
+			$funktio = $toim . '_poista_relaatiot';
+			if(function_exists($funktio)) {
+				$funktio($toim, $tunnus);
+			}
+		}
+
 		$query = "	SELECT *
 					FROM $toim
 					WHERE tunnus = '$tunnus'";

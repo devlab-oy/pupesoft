@@ -52,11 +52,12 @@ echo "<font class='head'>".t("Laite hallinta")."</font><hr>";
 
 		bind_poista_kohde_button();
 		bind_poista_paikka_button();
+		bind_poista_laite_button();
 	});
 
 	function bind_kohde_tr_click() {
 		$('.kohde_tr').bind('click', function(event) {
-			if (event.target.nodeName === 'TD') {
+			if (event.target.nodeName === 'TD' || event.target.nodeName === 'IMG') {
 				var paikat = '.paikat_' + $(this).find('.kohde_tunnus').val();
 
 				if ($(this).hasClass('hidden')) {
@@ -87,7 +88,7 @@ echo "<font class='head'>".t("Laite hallinta")."</font><hr>";
 	function bind_paikka_tr_click() {
 		$('.paikat_tr').bind('click', function(event) {
 			//paikat_tr sisällä on buttoni uuden laitteen luomiseen paikalle. jos sitä klikataan, emme halua triggeröidä tätä.
-			if (event.target.nodeName === 'TD') {
+			if (event.target.nodeName === 'TD' || event.target.nodeName === 'IMG') {
 				if ($(this).children().find('.laitteet_table_hidden').length > 0) {
 					$(this).children().find('.laitteet_table_hidden').addClass('laitteet_table_not_hidden');
 					$(this).children().find('.laitteet_table_hidden').removeClass('laitteet_table_hidden');
@@ -113,7 +114,7 @@ echo "<font class='head'>".t("Laite hallinta")."</font><hr>";
 				var kohde_tunnus = button.parent().find('.kohde_tunnus').val();
 				$.ajax({
 					type: 'GET',
-					url: 'yllapito.php?toim=kohde&del=1&tunnus=' + kohde_tunnus,
+					url: 'yllapito.php?toim=kohde&del=1&del_relaatiot=1&tunnus=' + kohde_tunnus,
 					success: function() {
 						//poistetaan kohde_tr:n paikka_tr:t
 						button.parent().parent().parent().find('.paikat_' + kohde_tunnus).remove();
@@ -121,7 +122,7 @@ echo "<font class='head'>".t("Laite hallinta")."</font><hr>";
 						//poistetaan itse kohde_tr
 						button.parent().parent().remove();
 					},
-					async: false
+					async: true
 				});
 			}
 		});
@@ -131,7 +132,34 @@ echo "<font class='head'>".t("Laite hallinta")."</font><hr>";
 		$('.poista_paikka').click(function() {
 			var ok = confirm($('#oletko_varma_confirm_message').val());
 			if (ok) {
-				
+				var button = $(this);
+				var paikka_tunnus = button.parent().find('.paikka_tunnus').val();
+				$.ajax({
+					type: 'GET',
+					url: 'yllapito.php?toim=paikka&del=1&del_relaatiot=1&tunnus=' + paikka_tunnus,
+					success: function() {
+						button.parent().parent().remove();
+					},
+					async: true
+				});
+			}
+		});
+	}
+
+	function bind_poista_laite_button() {
+		$('.poista_laite').click(function() {
+			var ok = confirm($('#oletko_varma_confirm_message').val());
+			if (ok) {
+				var button = $(this);
+				var paikka_tunnus = button.parent().find('.paikka_tunnus').val();
+				$.ajax({
+					type: 'GET',
+					url: 'yllapito.php?toim=paikka&del=1&del_relaatiot=1&tunnus=' + paikka_tunnus,
+					success: function() {
+						button.parent().parent().remove();
+					},
+					async: true
+				});
 			}
 		});
 	}
@@ -212,11 +240,12 @@ function kohde_tr($kohde_index, $kohde) {
 	echo "<tr class='kohde_tr hidden'>";
 
 	echo "<td>";
+	echo "<button class='poista_kohde'>".t("Poista kohde")."</button>";
+	echo "&nbsp";
 	echo "<input type='hidden' class='kohde_tunnus' value='{$kohde_index}' />";
-	echo $kohde['kohde_nimi'];
+	echo "<a href='yllapito.php?toim=kohde&tunnus={$kohde_index}'>".$kohde['kohde_nimi']."</a>";
 	echo "&nbsp";
 	echo "<img class='porautumis_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
-	echo "<button class='poista_kohde'>".t("Poista kohde")."</button>";
 	echo "</td>";
 
 	echo "<td>";
@@ -228,9 +257,7 @@ function kohde_tr($kohde_index, $kohde) {
 	echo "</td>";
 
 	echo "</tr>";
-	if(count($kohde['paikat']) > 0) {
-		paikka_tr($kohde_index, $kohde['paikat']);
-	}
+	paikka_tr($kohde_index, $kohde['paikat']);
 }
 
 function paikka_tr($kohde_index, $paikat) {
@@ -250,10 +277,12 @@ function paikka_tr($kohde_index, $paikat) {
 		echo "<tr class='paikat_tr paikka_tr_hidden paikat_{$kohde_index}'>";
 
 		echo "<td>";
+		echo "<input type='hidden' class='paikka_tunnus' value='{$paikka_index}' />";
+		echo "<button class='poista_paikka'>".t("Poista paikka")."</button>";
 		echo "</td>";
 
 		echo "<td>";
-		echo $paikka['paikka_nimi'];
+		echo "<a href='yllapito.php?toim=paikka&tunnus={$paikka_index}'>{$paikka['paikka_nimi']}</a>";
 		echo "&nbsp";
 		echo "<img class='porautumis_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
 		echo "</td>";
@@ -274,13 +303,14 @@ function laitteet_table($laitteet) {
 	echo "<th>".t("Tuotenumero")."</th>";
 	echo "<th>".t("Tuotteen nimi")."</th>";
 	echo "<th>".t("Sijainti")."</th>";
+	echo "<th>".t("Poista")."</th>";
 	echo "</tr>";
 
 	foreach ($laitteet as $laite) {
 		echo "<tr>";
 
 		echo "<td>";
-		echo $laite['tuoteno'];
+		echo "<a href='yllapito.php?toim=laite&tunnus={$laite['laite_tunnus']}'>{$laite['tuoteno']}</a>";
 		echo "</td>";
 
 		echo "<td>";
@@ -289,6 +319,11 @@ function laitteet_table($laitteet) {
 
 		echo "<td>";
 		echo $laite['sijainti'];
+		echo "</td>";
+
+		echo "<td>";
+		echo "<input type='hidden' class='laite_tunnus' value='{$laite['laite_tunnus']}' />";
+		echo "<button class='poista_laite'>".t("Poista laite")."</button>";
 		echo "</td>";
 
 		echo "</tr>";
@@ -316,6 +351,7 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 				paikka.tunnus as paikka_tunnus,
 				paikka.nimi as paikka_nimi,
 				tuote.nimitys as tuote_nimi,
+				laite.tunnus as laite_tunnus,
 				laite.*
 				FROM kohde
 				LEFT JOIN paikka
@@ -333,9 +369,12 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 
 	$kohteet = array();
 	while ($kohde = mysql_fetch_assoc($result)) {
-		$kohteet[$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['laitteet'][] = $kohde;
 		$kohteet[$kohde['kohde_tunnus']]['kohde_nimi'] = $kohde['kohde_nimi'];
-		$kohteet[$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_nimi'] = $kohde['paikka_nimi'];
+
+		if (!empty($kohde['paikka_tunnus'])) {
+			$kohteet[$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['laitteet'][] = $kohde;
+			$kohteet[$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_nimi'] = $kohde['paikka_nimi'];
+		}
 	}
 
 	return $kohteet;

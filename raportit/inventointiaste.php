@@ -1159,6 +1159,7 @@ function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {
 				  AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
 				  AND tapahtuma.laji = 'Inventointi'
 				{$tapahtuma_where}
+				{$inventointilaji_rajaus}
 				{$group}";
 	$result = pupe_query($query);
 

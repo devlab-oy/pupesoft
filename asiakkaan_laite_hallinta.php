@@ -204,8 +204,9 @@ function echo_kayttoliittyma($request = array()) {
 }
 
 function echo_kohteet_table($kohteet = array(), $haettu_asiakas = array()) {
-	global $palvelin2;
+	global $palvelin2, $lopetus;
 
+	$lopetus = "{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//ytunnus={$haettu_asiakas['tunnus']}";
 	echo "<table>";
 
 	echo "<tr>";
@@ -216,7 +217,7 @@ function echo_kohteet_table($kohteet = array(), $haettu_asiakas = array()) {
 
 	echo "<tr>";
 	echo "<td>";
-	echo "<a href='yllapito.php?toim=kohde&uusi=1&valittu_asiakas={$haettu_asiakas['tunnus']}'><button>".t("Luo uusi kohde")."</button></a>";
+	echo "<a href='yllapito.php?toim=kohde&uusi=1&lopetus={$lopetus}&valittu_asiakas={$haettu_asiakas['tunnus']}'><button>".t("Luo uusi kohde")."</button></a>";
 	echo "</td>";
 
 	echo "<td>";
@@ -235,7 +236,7 @@ function echo_kohteet_table($kohteet = array(), $haettu_asiakas = array()) {
 }
 
 function kohde_tr($kohde_index, $kohde) {
-	global $palvelin2;
+	global $palvelin2, $lopetus;
 
 	echo "<tr class='kohde_tr hidden'>";
 
@@ -243,7 +244,7 @@ function kohde_tr($kohde_index, $kohde) {
 	echo "<button class='poista_kohde'>".t("Poista kohde")."</button>";
 	echo "&nbsp";
 	echo "<input type='hidden' class='kohde_tunnus' value='{$kohde_index}' />";
-	echo "<a href='yllapito.php?toim=kohde&tunnus={$kohde_index}'>".$kohde['kohde_nimi']."</a>";
+	echo "<a href='yllapito.php?toim=kohde&lopetus={$lopetus}&tunnus={$kohde_index}'>".$kohde['kohde_nimi']."</a>";
 	echo "&nbsp";
 	echo "<img class='porautumis_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
 	echo "</td>";
@@ -261,9 +262,11 @@ function kohde_tr($kohde_index, $kohde) {
 }
 
 function paikka_tr($kohde_index, $paikat) {
+	global $palvelin2, $lopetus;
+	
 	echo "<tr class='paikka_tr_hidden paikat_{$kohde_index}'>";
 	echo "<td>";
-	echo "<a href='yllapito.php?toim=paikka&uusi=1&valittu_kohde={$kohde_index}'><button>".t("Luo kohteelle uusi paikka")."</button></a>";
+	echo "<a href='yllapito.php?toim=paikka&uusi=1&&lopetus={$lopetus}valittu_kohde={$kohde_index}'><button>".t("Luo kohteelle uusi paikka")."</button></a>";
 	echo "</td>";
 
 	echo "<td>";
@@ -282,13 +285,13 @@ function paikka_tr($kohde_index, $paikat) {
 		echo "</td>";
 
 		echo "<td>";
-		echo "<a href='yllapito.php?toim=paikka&tunnus={$paikka_index}'>{$paikka['paikka_nimi']}</a>";
+		echo "<a href='yllapito.php?toim=paikka&lopetus={$lopetus}&tunnus={$paikka_index}'>{$paikka['paikka_nimi']}</a>";
 		echo "&nbsp";
 		echo "<img class='porautumis_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
 		echo "</td>";
 
 		echo "<td>";
-		echo "<a href='yllapito.php?toim=laite&uusi=1&valittu_paikka={$paikka_index}'><button>".t("Luo paikkaan uusi laite")."</button></a>";
+		echo "<a href='yllapito.php?toim=laite&uusi=1&lopetus={$lopetus}&valittu_paikka={$paikka_index}'><button>".t("Luo paikkaan uusi laite")."</button></a>";
 		echo "<br/>";
 		laitteet_table($paikka['laitteet']);
 		echo "</td>";
@@ -298,6 +301,8 @@ function paikka_tr($kohde_index, $paikat) {
 }
 
 function laitteet_table($laitteet) {
+	global $palvelin2, $lopetus;
+	
 	echo "<table class='laitteet_table_hidden'>";
 	echo "<tr>";
 	echo "<th>".t("Tuotenumero")."</th>";
@@ -310,7 +315,7 @@ function laitteet_table($laitteet) {
 		echo "<tr>";
 
 		echo "<td>";
-		echo "<a href='yllapito.php?toim=laite&tunnus={$laite['laite_tunnus']}'>{$laite['tuoteno']}</a>";
+		echo "<a href='yllapito.php?toim=laite&lopetus={$lopetus}&tunnus={$laite['laite_tunnus']}'>{$laite['tuoteno']}</a>";
 		echo "</td>";
 
 		echo "<td>";

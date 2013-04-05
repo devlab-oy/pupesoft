@@ -211,8 +211,7 @@ function tarkista_loytyyko_tyomaarays($laite) {
 					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
 					AND tilausrivin_lisatiedot.asiakkaan_positio = '{$laite['laite_tunnus']}')
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-				AND lasku.tila = 'A'
-				AND lasku.alatila IN ('A', '')";
+				AND lasku.tila = 'A'";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {

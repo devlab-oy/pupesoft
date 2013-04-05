@@ -265,7 +265,7 @@ function kohde_tr($kohde_index, $kohde) {
 	paikka_tr($kohde_index, $kohde['paikat']);
 }
 
-function paikka_tr($kohde_index, $paikat) {
+function paikka_tr($kohde_index, $paikat = array()) {
 	global $palvelin2, $lopetus;
 	
 	echo "<tr class='paikka_tr_hidden paikat_{$kohde_index}'>";
@@ -304,7 +304,7 @@ function paikka_tr($kohde_index, $paikat) {
 	}
 }
 
-function laitteet_table($laitteet) {
+function laitteet_table($laitteet = array()) {
 	global $palvelin2, $lopetus;
 	
 	echo "<table class='laitteet_table_hidden'>";

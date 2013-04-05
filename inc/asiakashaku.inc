@@ -173,7 +173,7 @@ elseif ($ytunnus != '') {
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
-						and asiakas.ytunnus = '$ytunnus'
+						and REPLACE(REPLACE(asiakas.ytunnus, '-', ''), '+', '') like '%".str_replace(array('-','+'), '', $ytunnus)."%'
 						and asiakas.ytunnus!=''
 						$lajilisa $asiakasrajaus)
 					UNION
@@ -359,20 +359,6 @@ elseif ($asiakasnro != '') {
 				$asiakasrajaus";
 	$result = pupe_query($query);
 	$monta  = mysql_num_rows($result);
-}
-
-if ($monta == 0) {
-	//viivakoodi lukee henkilötunnuksen viivan (-) plussana (+) fix
-	//jos seittemäs merkki on + niin lisätään queryyn hakuehto joka hakee miinuksella. tässä vaiheessa plussallinen (1800-luvulla) syntynyt olisi löytynyt jo
-	if (substr($ytunnus, 6, 1) == '+') {
-		$query = "	SELECT asiakas.*, yhtio.nimi yhtionimi
-					FROM asiakas
-					JOIN yhtio on asiakas.yhtio=yhtio.yhtio
-					WHERE asiakas.$konsyhtiot
-					and asiakas.ytunnus like '%".str_replace('+', '-', $ytunnus2)."%'";
-		$result = pupe_query($query);
-		$monta  = mysql_num_rows($result);
-	}
 }
 
 if ($monta == 0) {

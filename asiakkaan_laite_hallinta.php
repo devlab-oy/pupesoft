@@ -207,6 +207,8 @@ function echo_kohteet_table($kohteet = array(), $haettu_asiakas = array()) {
 	global $palvelin2, $lopetus;
 
 	$lopetus = "{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//ytunnus={$haettu_asiakas['tunnus']}";
+
+	echo "<font class='head'>{$haettu_asiakas['nimi']}</font><hr>";
 	echo "<table>";
 
 	echo "<tr>";

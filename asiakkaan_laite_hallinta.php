@@ -151,10 +151,10 @@ echo "<font class='head'>".t("Laite hallinta")."</font><hr>";
 			var ok = confirm($('#oletko_varma_confirm_message').val());
 			if (ok) {
 				var button = $(this);
-				var paikka_tunnus = button.parent().find('.paikka_tunnus').val();
+				var laite_tunnus = button.parent().find('.laite_tunnus').val();
 				$.ajax({
 					type: 'GET',
-					url: 'yllapito.php?toim=paikka&del=1&del_relaatiot=1&tunnus=' + paikka_tunnus,
+					url: 'yllapito.php?toim=laite&del=1&del_relaatiot=1&tunnus=' + laite_tunnus,
 					success: function() {
 						button.parent().parent().remove();
 					},
@@ -267,10 +267,10 @@ function kohde_tr($kohde_index, $kohde) {
 
 function paikka_tr($kohde_index, $paikat = array()) {
 	global $palvelin2, $lopetus;
-	
+
 	echo "<tr class='paikka_tr_hidden paikat_{$kohde_index}'>";
 	echo "<td>";
-	echo "<a href='yllapito.php?toim=paikka&uusi=1&&lopetus={$lopetus}valittu_kohde={$kohde_index}'><button>".t("Luo kohteelle uusi paikka")."</button></a>";
+	echo "<a href='yllapito.php?toim=paikka&uusi=1&&lopetus={$lopetus}&valittu_kohde={$kohde_index}'><button>".t("Luo kohteelle uusi paikka")."</button></a>";
 	echo "</td>";
 
 	echo "<td>";
@@ -280,33 +280,35 @@ function paikka_tr($kohde_index, $paikat = array()) {
 	echo "</td>";
 
 	echo "</tr>";
-	foreach ($paikat as $paikka_index => $paikka) {
-		echo "<tr class='paikat_tr paikka_tr_hidden paikat_{$kohde_index}'>";
+	if (!empty($paikat)) {
+		foreach ($paikat as $paikka_index => $paikka) {
+			echo "<tr class='paikat_tr paikka_tr_hidden paikat_{$kohde_index}'>";
 
-		echo "<td>";
-		echo "<input type='hidden' class='paikka_tunnus' value='{$paikka_index}' />";
-		echo "<button class='poista_paikka'>".t("Poista paikka")."</button>";
-		echo "</td>";
+			echo "<td>";
+			echo "<input type='hidden' class='paikka_tunnus' value='{$paikka_index}' />";
+			echo "<button class='poista_paikka'>".t("Poista paikka")."</button>";
+			echo "</td>";
 
-		echo "<td>";
-		echo "<a href='yllapito.php?toim=paikka&lopetus={$lopetus}&tunnus={$paikka_index}'>{$paikka['paikka_nimi']}</a>";
-		echo "&nbsp";
-		echo "<img class='porautumis_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
-		echo "</td>";
+			echo "<td>";
+			echo "<a href='yllapito.php?toim=paikka&lopetus={$lopetus}&tunnus={$paikka_index}'>{$paikka['paikka_nimi']}</a>";
+			echo "&nbsp";
+			echo "<img class='porautumis_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
+			echo "</td>";
 
-		echo "<td>";
-		echo "<a href='yllapito.php?toim=laite&uusi=1&lopetus={$lopetus}&valittu_paikka={$paikka_index}'><button>".t("Luo paikkaan uusi laite")."</button></a>";
-		echo "<br/>";
-		laitteet_table($paikka['laitteet']);
-		echo "</td>";
+			echo "<td>";
+			echo "<a href='yllapito.php?toim=laite&uusi=1&lopetus={$lopetus}&valittu_paikka={$paikka_index}'><button>".t("Luo paikkaan uusi laite")."</button></a>";
+			echo "<br/>";
+			laitteet_table($paikka['laitteet']);
+			echo "</td>";
 
-		echo "</tr>";
+			echo "</tr>";
+		}
 	}
 }
 
 function laitteet_table($laitteet = array()) {
 	global $palvelin2, $lopetus;
-	
+
 	echo "<table class='laitteet_table_hidden'>";
 	echo "<tr>";
 	echo "<th>".t("Tuotenumero")."</th>";
@@ -331,8 +333,10 @@ function laitteet_table($laitteet = array()) {
 		echo "</td>";
 
 		echo "<td>";
-		echo "<input type='hidden' class='laite_tunnus' value='{$laite['laite_tunnus']}' />";
-		echo "<button class='poista_laite'>".t("Poista laite")."</button>";
+		if (!empty($laite['laite_tunnus'])) {
+			echo "<input type='hidden' class='laite_tunnus' value='{$laite['laite_tunnus']}' />";
+			echo "<button class='poista_laite'>".t("Poista laite")."</button>";
+		}
 		echo "</td>";
 
 		echo "</tr>";

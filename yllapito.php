@@ -2009,6 +2009,17 @@
 		$jcsmaxheigth = "";
 	}
 
+	//redirect funktio kutsu pitää olla tässä, koska jos updatesta tulee virheitä niin ne pitää händälätä ja passata redirect funkkarille, jotta osataan echottaa / jättää echottama redirecti
+	$funktio = "echo_".$toim."_redirect";
+	if(function_exists($funktio)) {
+		$params = array(
+			'redirct_to' => $redirect_to,
+			'errori' => $errori,
+			'valittu_asiakas' => $valittu_asiakas,
+		);
+		$funktio($params);
+	}
+
 	if ($from == "yllapito" and $toim == "laskun_lisatiedot") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('laskun_lisatiedot_iframe' $jcsmaxheigth);</script>";
 	}

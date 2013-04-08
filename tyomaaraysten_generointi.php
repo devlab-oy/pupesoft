@@ -41,7 +41,17 @@ if (mysql_num_rows($result) == 0) {
 // Adminin oletus, mutta kuka konversio
 $kukarow = mysql_fetch_assoc($result);
 
-$request = array();
+//generoidaan debug moodissa vain testi tuotteen tyˆm‰‰r‰yksi‰
+if ($debug) {
+	$laitteet = array(
+		'TESTI',
+		'TESTI2',
+	);
+}
+
+$request = array(
+	'laitteet' => $laitteet,
+);
 
 $laitteet = hae_laitteet_joiden_huolto_lahestyy($request);
 
@@ -55,7 +65,7 @@ function hae_laitteet_joiden_huolto_lahestyy($request = array()) {
 	global $kukarow;
 
 	if (!empty($request['laitteet'])) {
-		$laitteet_where = "AND laite.tuoteno IN (".implode(',', $request['laitteet']).")";
+		$laitteet_where = "AND laite.tuoteno IN ('".implode("', '", $request['laitteet'])."')";
 	}
 	else {
 		$laitteet_where = "";
@@ -104,7 +114,7 @@ function hae_laitteet_joiden_huolto_lahestyy($request = array()) {
 					AND asiakas.tunnus = kohde.asiakas)
 				WHERE  laite.yhtio = '{$kukarow['yhtio']}'
 				/*haetaan laitteet, joiden viimenen tapahtuma on huoltovali - kuukausi sitten tehty. esim 365 - 30 = 11kk*/
-				AND laite.viimeinen_tapahtuma < Date_sub(CURRENT_DATE, INTERVAL (huoltosykli.huoltovali-30) DAY)
+				AND IFNULL(laite.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosykli.huoltovali-30) DAY)
 				{$laitteet_where}";
 	$result = pupe_query($query);
 
@@ -137,16 +147,24 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet) {
 	foreach ($laitteet as $laite) {
 		$onko_tyomaarays_jo_luotu_talle_laitteelle = tarkista_loytyyko_tyomaarays($laite);
 		if ($onko_tyomaarays_jo_luotu_talle_laitteelle) {
-			if($debug) {
-				echo "T‰lle laitteelle " . $laite['laite_tunnus'] . " on jo luotu tyˆm‰‰r‰ys";
+			if ($debug) {
+				echo "T‰lle laitteelle ".$laite['laite_tunnus']." on jo luotu tyˆm‰‰r‰ys";
+				echo "<br/>";
 			}
 			continue;
 		}
 
+		$kukarow['kesken'] = 0;
+
 		$tyomaarays_tunnus = luo_myyntitilausotsikko("TYOMAARAYS", $laite['asiakas_tunnus']);
 
+		//jos uusi laite, niin laitetaan tyˆm‰‰r‰yksen toimitusajankohta NOW
+		if (empty($laite['viimeinen_tapahtuma'])) {
+			aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date('Y-m-d'));
+		}
+
 		if ($debug and !empty($tyomaarays_tunnus)) {
-			echo "Tyom‰‰r‰ys".$tyomaarays_tunnus." luotu";
+			echo "Tyom‰‰r‰ys ".$tyomaarays_tunnus." luotu";
 			echo "<br/>";
 		}
 
@@ -166,10 +184,12 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet) {
 				'kpl'		 => 1,
 				'tuoteno'	 => $trow['tuoteno'],
 				'hinta'		 => $trow['hinta'],
+				'netto'		 => '',
 			);
 			$rivit = lisaa_rivi($parametrit);
 
 			paivita_laite_tunnus_toimenpiteen_tilausriville($laite, $rivit);
+			paivita_viimenen_tapahtuma_laitteelle($laite);
 
 			if ($debug) {
 				echo "Lis‰t‰‰n palvelutuoterivi";
@@ -192,6 +212,16 @@ function paivita_laite_tunnus_toimenpiteen_tilausriville($laite, $tilausrivit) {
 					AND tilausrivi.tunnus = '{$tilausrivit['lisatyt_rivit1'][0]}')
 				SET asiakkaan_positio = {$laite['laite_tunnus']}
 				WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'";
+	pupe_query($query);
+}
+
+function paivita_viimenen_tapahtuma_laitteelle($laite) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	UPDATE laite
+				SET viimeinen_tapahtuma = CURRENT_DATE
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$laite['laite_tunnus']}'";
 	pupe_query($query);
 }
 
@@ -221,6 +251,16 @@ function tarkista_loytyyko_tyomaarays($laite) {
 	return true;
 }
 
+function aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, $ajankohta) {
+	global $kukarow;
+
+	$query = "	UPDATE lasku
+				SET toimaika = '{$ajankohta}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$tyomaarays_tunnus}'";
+	pupe_query($query);
+}
+
 function hae_tyomaarays($tyomaarays_tunnus) {
 	global $kukarow;
 
@@ -248,10 +288,10 @@ function hae_tuote($tuoteno) {
 function hae_paikka($paikka_tunnus) {
 	global $kukarow;
 
-	$query = "		SELECT *
-					FROM paikka
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$paikka_tunnus}'";
+	$query = "	SELECT *
+				FROM paikka
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$paikka_tunnus}'";
 	$paikka_result = pupe_query($query);
 	return mysql_fetch_assoc($paikka_result);
 }
@@ -259,10 +299,10 @@ function hae_paikka($paikka_tunnus) {
 function hae_kohde($kohde_tunnus) {
 	global $kukarow;
 
-	$query = "		SELECT *
-					FROM kohde
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$kohde_tunnus}'";
+	$query = "	SELECT *
+				FROM kohde
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$kohde_tunnus}'";
 	$kohde_result = pupe_query($query);
 	return mysql_fetch_assoc($kohde_result);
 }

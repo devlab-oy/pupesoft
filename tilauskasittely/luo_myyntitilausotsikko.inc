@@ -362,7 +362,7 @@ if(!function_exists("lisaa_rivi")) {
 		$toimaika = (!empty($parametrit['toimaika'])) ? $parametrit['toimaika'] : '';//			--> arvioitu toimitusaika
 		$kerayspvm = (!empty($parametrit['kerayspvm'])) ? $parametrit['kerayspvm'] : '';//			--> toivottu keräysaika
 		$hinta = (!empty($parametrit['hinta'])) ? $parametrit['hinta'] : 0;//				--> käyttäjän syöttämä hinta
-		$netto = (!empty($parametrit['netto'])) ? $parametrit['netto'] : 0;//				--> käyttäjän syöttämä netto
+		$netto = (!empty($parametrit['netto'])) ? $parametrit['netto'] : '';//				--> käyttäjän syöttämä netto
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			$ale_temp = str_replace(',', '.', $parametrit{'ale'.$alepostfix});

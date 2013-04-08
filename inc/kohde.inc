@@ -1,10 +1,5 @@
 <?php
 
-//jos syötetään asiakkaalle uusia kohteita asiakkaan_laite_hallinta.php:stä halutaan redirecti sinne takaisin
-if (isset($redirect_to)) {
-	echo '<meta http-equiv="refresh" content="0;url='.$palvelin2.'asiakkaan_laite_hallinta.php?tee=hae_asiakas&ytunnus='.$valittu_asiakas.'"/>';
-}
-
 $otsikko = 'Kohteet';
 $otsikko_nappi = 'Kohde';
 
@@ -27,24 +22,37 @@ if (!function_exists('kohde_poista_relaatiot')) {
 
 		global $kukarow, $yhtiorow;
 
-		$query = "	SELECT group_concat(tunnus)
+		$query = "	SELECT group_concat(tunnus) as paikka_tunnukset
 					FROM paikka
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND kohde = '{$tunnus}'";
 		$result = pupe_query($query);
 		$paikka_tunnukset = mysql_fetch_assoc($result);
 
-		$query = "	UPDATE laite
-					SET paikka = 0
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND paikka IN ({$paikka_tunnukset})";
-		pupe_query($query);
-		
-		$query = "	DELETE
-					FROM paikka
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND kohde = '{$tunnus}'";
-		pupe_query($query);
+		if (!empty($paikka_tunnukset['paikka_tunnukset'])) {
+			$query = "	UPDATE laite
+						SET paikka = 0
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND paikka IN ({$paikka_tunnukset['paikka_tunnukset']})";
+			pupe_query($query);
+
+			$query = "	DELETE
+						FROM paikka
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND kohde = '{$tunnus}'";
+			pupe_query($query);
+		}
+	}
+}
+
+if (!function_exists('echo_laite_redirect')) {
+
+	function echo_laite_redirect($params) {
+		global $palvelin2;
+		//jos syötetään asiakkaalle uusia kohteita asiakkaan_laite_hallinta.php:stä halutaan redirecti sinne takaisin
+		if (isset($params['redirect_to']) and $params['errori'] == 0) {
+			echo '<meta http-equiv="refresh" content="0;url='.$palvelin2.'asiakkaan_laite_hallinta.php?tee=hae_asiakas&ytunnus='.$params['valittu_asiakas'].'"/>';
+		}
 	}
 }
 ?>

@@ -6534,6 +6534,15 @@ if (!function_exists("enable_ajax")) {
 <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
 
 	var toggled = Array();
+
+	var delay_ms = function() {
+	    var timer = 0;
+	    return function(callback, ms) {
+	        clearTimeout (timer);
+	        timer = setTimeout(callback, ms);
+	    }
+	}();
+
 	function AJAXInteraction(urli, id, data, href) {
 
 		var http = createRequestObject();
@@ -8357,6 +8366,9 @@ if (!function_exists("livesearch_tuotehaku")) {
 		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 
+		$timeparts = explode(" ", microtime());
+		$starttime = $timeparts[1].substr($timeparts[0], 1);
+
 		if (mb_detect_encoding($haku, mb_detect_order(), TRUE) == "UTF-8") {
 			$haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
 		}
@@ -8438,7 +8450,18 @@ if (!function_exists("livesearch_tuotehaku")) {
 						LIMIT 500";
 			$result = pupe_query($query);
 
-			if (mysql_num_rows($result) > 0) {
+			$tuote_search_count = mysql_num_rows($result);
+
+			$timeparts = explode(" ", microtime());
+			$endtime   = $timeparts[1].substr($timeparts[0], 1);
+			$aika      = "";
+
+			// Aika messiin jos debug päällä
+			if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0) {
+				$aika = " (".sprintf("%.04f", round($endtime - $starttime, 4))." sec)";
+			}
+
+			if ($tuote_search_count > 0) {
 
 				while ($row = mysql_fetch_assoc($result)) {
 
@@ -8476,10 +8499,16 @@ if (!function_exists("livesearch_tuotehaku")) {
 
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ".t("tuotetta").", ".t("näytetään")." 500 ".t("tarkinta osumaa").".</font></div>";
+				$tuote_search_info = t("Haulla löytyi")." {$tuote_search_count} ".t("tuotetta");
+
+				if ($tuote_search_count > 500) {
+					$tuote_search_info .= ", ".t("näytetään")." 500 ".t("tarkinta osumaa");
+				}
+
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>{$tuote_search_info}.{$aika}</font></div>";
 			}
 			else {
-				echo "<div style='padding:2px'><font class='message'>".t("Ei tuotteita.")."</font></div>";
+				echo "<div style='padding:2px'><font class='message'>".t("Ei tuotteita.")."{$aika}</font></div>";
 			}
 		}
 		else {
@@ -8772,7 +8801,10 @@ if (!function_exists("livesearch_kentta")) {
 		$return = "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
 					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit', '$vero_field');\"
 					onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
-							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&livesearch_vero_field=$vero_field&ohje=off&toim=$toim&livesearch_haku='+this.value);
+							var inputti_value = this.value;
+							delay_ms(function() {
+								sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&livesearch_vero_field=$vero_field&ohje=off&toim=$toim&livesearch_haku='+inputti_value);
+							}, 500);
 							keyStrokeIndex = -1;";
 		if ($vero_field) {
 			$return .= "hae_oletusalv('$hakuID', '$vero_field');";

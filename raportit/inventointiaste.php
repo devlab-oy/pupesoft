@@ -905,7 +905,6 @@ function kasittele_rivit($rivit) {
 	$rivit_temp = array();
 	foreach ($rivit as &$rivi) {
 		if (!empty($rivi['inventointilaji'])) {
-			//@TODO siirr‰ preg_replace mysql:n puolelle
 			$inventointilaji = preg_replace('/[^a-zA-Z0-9]/', '_', $rivi['inventointilaji']);
 		}
 		else {
@@ -993,7 +992,6 @@ function parsi_paivat(&$request) {
 		$request['loppu_aika'] = $tilikausi_temp[0]['tilikausi_loppu'];
 	}
 	else {
-		//TODO onko formista tulevilla alku loppu ajoilla jotain maksimi arvoja? esim saa hakea inventointeja korkeintaan vuoden p‰‰h‰n tjsp
 		$request['alku_aika'] = $request['vva'].'-'.$request['kka'].'-'.$request['ppa'];
 		$request['loppu_aika'] = $request['vvl'].'-'.$request['kkl'].'-'.$request['ppl'];
 	}

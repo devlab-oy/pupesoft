@@ -5,11 +5,7 @@
 		if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
-	$_POST["toim"] = $_GET["toim"] = $_REQUEST["toim"] = "";
-
 	require("../inc/parametrit.inc");
-
-	$toim = "KK";
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);
@@ -289,17 +285,23 @@
 
 			var tilaatuote = function() {
 				if ($(this).attr(\"disabled\") == undefined) {
-					var submitid 	= $(this).attr(\"id\");
-					var osat 	 	= submitid.split(\"_\");
-					var tuoteno 	= $(\"#tuoteno_\"+osat[1]).html();
-					var toimittaja 	= $(\"#toimittaja_\"+osat[1]).html();
-					var maara 		= $(\"#ostettavat_\"+osat[1]).val();
+					var submitid 		= $(this).attr(\"id\");
+					var osat 	 		= submitid.split(\"_\");
+					var tuoteno 		= $(\"#tuoteno_\"+osat[1]).html();
+					var toimittaja 		= $(\"#toimittaja_\"+osat[1]).html();
+					var maara 			= $(\"#ostettavat_\"+osat[1]).val();
+					var valittuvarasto	= 0;
+
+					if (\"$toim\" == \"KK\") {
+						valittuvarasto = $(\"#valitutvarastot_valittu\").val();
+					}
 
 					$.post('{$_SERVER['SCRIPT_NAME']}',
 						{ 	tee: 'TILAA_AJAX',
 							tuoteno: tuoteno,
 							toimittaja: toimittaja,
 							maara: maara,
+							valittuvarasto: valittuvarasto,
 							no_head: 'yes',
 							ohje: 'off' },
 						function(return_value) {
@@ -657,13 +659,16 @@
 
 				echo "<td valign='top' $btr align='right'>".(float) $toimirow["toimitusaika"]." ".t("pva")."</td>";
 
-				if ($useampi_yhtio == 1 and $yhtiorow['yhtio'] == $row['yhtio']) {
+				if ($useampi_yhtio == 1 and $toimirow['toimittaja'] != '' and $yhtiorow['yhtio'] == $row['yhtio']) {
 					if ($toimirow["pakkauskoko"] != 0) {
 						echo "<td valign='top' $bt align='right'><input type='text' size='10' id='ostettavat_$indeksi' name='ostettavat[$row[tuoteno]]' value='".ceil($ostoehdotus)."'></td>";
 					}
 					else {
 						echo "<td valign='top' $bt align='right'><input type='text' size='10' id='ostettavat_$indeksi' name='ostettavat[$row[tuoteno]]' value='$ostoehdotus'></td>";
 					}
+				}
+				else {
+					echo "<td></td>";
 				}
 
 				echo "</tr>\n";
@@ -696,7 +701,7 @@
 					echo "<input type='button' value='".t("Tilaa tuotetta")."' class='tilaa' id='submit_$indeksi'></td>";
 				}
 				else {
-					echo "<td>$useampi_yhtio == 1 and $toimirow[toimittaja] != '' and $yhtiorow[yhtio] == $row[yhtio]</td>";
+					echo "<td></td>";
 				}
 
 				echo "</tr>";
@@ -746,8 +751,6 @@
 					echo "<input type='hidden' name='tuotteen_yhtiot[$row[tuoteno]]' value='$row[yhtio]'>";
 					echo "</table>";
 
-
-
 					echo "</div>";
 					echo "</td></tr>";
 				}
@@ -762,7 +765,7 @@
 		echo "<input type='hidden' name='mul_osasto' value='".urlencode(serialize($paivitys_mul_osasto))."'>";
 		echo "<input type='hidden' name='mul_try' value='".urlencode(serialize($paivitys_mul_try))."'>";
 		echo "<input type='hidden' name='valitutyhtiot' value='".urlencode(serialize($valitutyhtiot))."'>";
-		echo "<input type='hidden' name='valitutvarastot' value='".urlencode(serialize($valitutvarastot))."'>";
+		echo "<input type='hidden' name='valitutvarastot' value='$valitutvarastot' id='valitutvarastot_valittu'>";
 		echo "<input type='hidden' name='tuotemerkki' value='$tuotemerkki'>";
 		echo "<input type='hidden' name='poistetut' value='$poistetut'>";
 		echo "<input type='hidden' name='poistuva' value='$poistuva'>";

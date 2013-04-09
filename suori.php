@@ -146,7 +146,7 @@
 					WHERE ltunnus	= '$tunnus'
 					and yhtio 		= '$kukarow[yhtio]'
 					and tapvm		= '$laskurow[tapvm]'
-					and abs(summa + $laskurow[vietysumma]) <= 0.02
+					and abs((summa * $kurssi) + $laskurow[vietysumma]) <= 0.02
 					and tilino in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
 					and korjattu	= ''";
 		$xresult = pupe_query($query);

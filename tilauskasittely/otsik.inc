@@ -3107,8 +3107,28 @@
 		$yhtiotoimipaikka	= isset($yhtiotoimipaikka) ? $yhtiotoimipaikka : $kukarow["toimipaikka"];
 		$yhtioalv_tilino	= $yhtiorow["alv"];
 
+		// Halutaan yhtiön tiedot, koska ei valittu yhtiön toimipaikkaa otsikolla (alasvetovalikosta valittuna $yhtiotoimipaikka = "")
+		if (isset($yhtiotoimipaikka) and $yhtiotoimipaikka == "") {
+
+			$_tmp_kukarow_toimipaikka = $kukarow['toimipaikka'];
+			$kukarow['toimipaikka'] = 0;
+			$yhtion_osoitetiedot = hae_yhtion_parametrit($kukarow['yhtio']);
+
+			$yhtionimi 			= $yhtion_osoitetiedot["nimi"];
+			$yhtioosoite 		= $yhtion_osoitetiedot["osoite"];
+			$yhtiopostino		= $yhtion_osoitetiedot["postino"];
+			$yhtiopostitp		= $yhtion_osoitetiedot["postitp"];
+			$yhtiomaa 			= $yhtion_osoitetiedot["maa"];
+			$yhtioovttunnus 	= $yhtion_osoitetiedot["ovttunnus"];
+			$yhtiokotipaikka	= $yhtion_osoitetiedot["kotipaikka"];
+			$yhtiotoimipaikka	= 0;
+			$yhtioalv_tilino	= $yhtion_osoitetiedot["alv"];
+
+			$kukarow['toimipaikka'] = $_tmp_kukarow_toimipaikka;
+		}
+
 		// poikkeava laskutusosoite
-		if ($alv_velvollisuus != "" or (isset($yhtiotoimipaikka) and $yhtiotoimipaikka != $kukarow['toimipaikka'])) {
+		if ($alv_velvollisuus != "" or (isset($yhtiotoimipaikka) and $yhtiotoimipaikka != "" and $yhtiotoimipaikka != $kukarow['toimipaikka'])) {
 
 			$wherelisa = "";
 

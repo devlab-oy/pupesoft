@@ -2055,19 +2055,19 @@
 					echo "<td>",t("Yhtiön toimipaikka"),"</td>";
 
 					echo "<td><select name='yhtiotoimipaikka'>";
-					echo "<option value=''>",t("Valitse toimipaikka"),"</option>";
+					echo "<option value=''>",t("Valitse"),"</option>";
 
 					while ($yht_toimpaik_row = mysql_fetch_assoc($yht_toimpaik_res)) {
 
-						$sel = ($kukarow['toimipaikka'] != "" and $kukarow['toimipaikka'] == $yht_toimpaik_row['tunnus']) ? " selected" : "";
-						$sel = ($srow['yhtio_toimipaikka'] == $yht_toimpaik_row['tunnus']) ? " selected" : "";
+						if ($srow['yhtio_toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
+						if (!isset($srow['yhtio_toimipaikka']) and $kukarow['toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
 
-						echo "<option value='{$yht_toimpaik_row['tunnus']}'{$sel}>{$yht_toimpaik_row['nimi']}</option>";
+						echo "<option value='{$yht_toimpaik_row['tunnus']}' {$sel}>{$yht_toimpaik_row['nimi']}</option>";
 					}
 
 					echo "</select></td>";
 
-					echo "<td></td>";
+					echo "<td></td><td></td>";
 
 					echo "</tr>";
 				}
@@ -3104,14 +3104,23 @@
 		$yhtiomaa 			= $yhtiorow["maa"];
 		$yhtioovttunnus 	= $yhtiorow["ovttunnus"];
 		$yhtiokotipaikka	= $yhtiorow["kotipaikka"];
-		$yhtiotoimipaikka	= (isset($yhtiotoimipaikka) and trim($yhtiotoimipaikka) != "") ? $yhtiotoimipaikka : $kukarow["toimipaikka"];
+		$yhtiotoimipaikka	= isset($yhtiotoimipaikka) ? $yhtiotoimipaikka : $kukarow["toimipaikka"];
 		$yhtioalv_tilino	= $yhtiorow["alv"];
 
 		// poikkeava laskutusosoite
-		if ($alv_velvollisuus != "") {
+		if ($alv_velvollisuus != "" or (isset($yhtiotoimipaikka) and $yhtiotoimipaikka != $kukarow['toimipaikka'])) {
+
+			$wherelisa = "";
+
+			if (isset($yhtiotoimipaikka) and $yhtiotoimipaikka != $kukarow['toimipaikka']) {
+				$wherelisa = "AND tunnus = '{$yhtiotoimipaikka}'";
+			}
+			else {
+				$wherelisa = "AND maa='{$maa}' AND vat_numero = '{$alv_velvollisuus}'";
+			}
 
 			// haetaan sen yhteystiedot
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$maa' and vat_numero = '$alv_velvollisuus'";
+			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' {$wherelisa}";
 			$alhire = pupe_query($alhqur);
 
 			if (mysql_num_rows($alhire) == 1) {

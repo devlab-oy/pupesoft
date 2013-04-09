@@ -2041,12 +2041,9 @@
 
 			if ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") {
 
-				$chk_maa = isset($maa) ? $maa : $srow['maa'];
-
 				$query = "	SELECT tunnus, nimi
 							FROM yhtion_toimipaikat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND maa = '{$chk_maa}'";
+							WHERE yhtio = '{$kukarow['yhtio']}'";
 				$yht_toimpaik_res = pupe_query($query);
 
 				if (mysql_num_rows($yht_toimpaik_res) > 0) {
@@ -2055,9 +2052,11 @@
 					echo "<td>",t("Yhtiön toimipaikka"),"</td>";
 
 					echo "<td><select name='yhtiotoimipaikka'>";
-					echo "<option value=''>",t("Valitse"),"</option>";
+					echo "<option value=''>",t("Yhtiön perustiedot"),"</option>";
 
 					while ($yht_toimpaik_row = mysql_fetch_assoc($yht_toimpaik_res)) {
+
+						$sel = "";
 
 						if ($srow['yhtio_toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
 						if (!isset($srow['yhtio_toimipaikka']) and $kukarow['toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";

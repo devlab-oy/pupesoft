@@ -8366,9 +8366,6 @@ if (!function_exists("livesearch_tuotehaku")) {
 		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 
-		$timeparts = explode(" ", microtime());
-		$starttime = $timeparts[1].substr($timeparts[0], 1);
-
 		if (mb_detect_encoding($haku, mb_detect_order(), TRUE) == "UTF-8") {
 			$haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
 		}
@@ -8452,15 +8449,6 @@ if (!function_exists("livesearch_tuotehaku")) {
 
 			$tuote_search_count = mysql_num_rows($result);
 
-			$timeparts = explode(" ", microtime());
-			$endtime   = $timeparts[1].substr($timeparts[0], 1);
-			$aika      = "";
-
-			// Aika messiin jos debug p‰‰ll‰
-			if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0) {
-				$aika = " (".sprintf("%.04f", round($endtime - $starttime, 4))." sec)";
-			}
-
 			if ($tuote_search_count > 0) {
 
 				while ($row = mysql_fetch_assoc($result)) {
@@ -8505,10 +8493,10 @@ if (!function_exists("livesearch_tuotehaku")) {
 					$tuote_search_info .= ", ".t("n‰ytet‰‰n")." 500 ".t("tarkinta osumaa");
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>{$tuote_search_info}.{$aika}</font></div>";
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>{$tuote_search_info}.</font></div>";
 			}
 			else {
-				echo "<div style='padding:2px'><font class='message'>".t("Ei tuotteita.")."{$aika}</font></div>";
+				echo "<div style='padding:2px'><font class='message'>".t("Ei tuotteita.")."</font></div>";
 			}
 		}
 		else {

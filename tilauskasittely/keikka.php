@@ -6,6 +6,15 @@ if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 	require ("../inc/parametrit.inc");
 }
 
+if ($tee == 'lataa_tiedosto') {
+	$filepath = "/tmp/".$tmpfilenimi;
+	if (file_exists($filepath)) {
+		readfile($filepath);
+		unlink($filepath);
+	}
+	exit;
+}
+
 if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
 	require ("../inc/keikan_toiminnot.inc");
 }
@@ -402,7 +411,7 @@ if ($toiminto == "tulosta") {
 		$toimittajaid = $laskurow["liitostunnus"];
 	}
 
-	if ($komento["Purkulista"] != '') {
+	if ($komento["Purkulista"] != '' or !empty($tee_excel)) {
 		require('tulosta_purkulista.inc');
 	}
 

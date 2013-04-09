@@ -216,6 +216,8 @@ unset($alv_laskelman_sallittu_erotus);
 unset($e3_params);
 unset($tee_keraysera_debugdir);
 
+unset($myyntiseuranta_access_list);
+
 $pupe_query_debug = 0;
 $aika_debug_array = array();
 $quer_debug_array = array();

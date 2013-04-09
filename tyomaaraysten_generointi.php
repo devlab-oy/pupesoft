@@ -75,7 +75,7 @@ function hae_laitteet_joiden_huolto_lahestyy($request = array()) {
 				laite.tunnus as laite_tunnus,
 				ta.laji,
 				ta.selite,
-				paikka.nimi,
+				paikka.nimi as paikka_nimi,
 				paikka.olosuhde,
 				huoltosykli.tyyppi,
 				huoltosykli.koko,
@@ -83,6 +83,7 @@ function hae_laitteet_joiden_huolto_lahestyy($request = array()) {
 				huoltosykli.toimenpide as toimenpide,
 				huoltosykli.huoltovali,
 				tuote.*,
+				kohde.nimi as kohde_nimi,
 				kohde.*,
 				asiakas.tunnus as asiakas_tunnus,
 				asiakas.*
@@ -154,6 +155,16 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet) {
 			continue;
 		}
 
+		//laitteen toimenpidetuote pit‰‰ olla saldoton
+		$onko_toimenpide_tuote_saldoton = tarkista_toimenpide_saldo($laite);
+		if (!$onko_toimenpide_tuote_saldoton) {
+			if ($debug) {
+				echo "Toimenpide tuote ".$laite['laite_tunnus']." pit‰‰ olla saldoton! Tyˆm‰‰r‰yst‰ t‰lle tuotteelle ei lis‰tty";
+				echo "<br/>";
+			}
+			continue;
+		}
+
 		$kukarow['kesken'] = 0;
 
 		$tyomaarays_tunnus = luo_myyntitilausotsikko("TYOMAARAYS", $laite['asiakas_tunnus']);
@@ -188,7 +199,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet) {
 			);
 			$rivit = lisaa_rivi($parametrit);
 
-			paivita_laite_tunnus_toimenpiteen_tilausriville($laite, $rivit);
+			paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($laite, $rivit);
 			paivita_viimenen_tapahtuma_laitteelle($laite);
 
 			if ($debug) {
@@ -202,7 +213,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet) {
 	}
 }
 
-function paivita_laite_tunnus_toimenpiteen_tilausriville($laite, $tilausrivit) {
+function paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($laite, $tilausrivit) {
 	global $kukarow, $yhtiorow;
 
 	$query = "	UPDATE tilausrivin_lisatiedot
@@ -212,6 +223,13 @@ function paivita_laite_tunnus_toimenpiteen_tilausriville($laite, $tilausrivit) {
 					AND tilausrivi.tunnus = '{$tilausrivit['lisatyt_rivit1'][0]}')
 				SET asiakkaan_positio = {$laite['laite_tunnus']}
 				WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'";
+	pupe_query($query);
+
+	$laiteen_kohde_ja_paikka_tiedot = t("Laite")." ".$laite['tuoteno']." ".t("kohteessa").": {$laite['kohde_nimi']} ".t("paikalla").": {$laite['paikka_nimi']}";
+	$query = "	UPDATE tilausrivi
+				SET kommentti = '{$laiteen_kohde_ja_paikka_tiedot}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$tilausrivit['lisatyt_rivit1'][0]}'";
 	pupe_query($query);
 }
 
@@ -251,6 +269,23 @@ function tarkista_loytyyko_tyomaarays($laite) {
 	return true;
 }
 
+function tarkista_toimenpide_saldo($laite) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	SELECT ei_saldoa
+				FROM tuote
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tuoteno = '{$laite['toimenpide']}'
+				AND ei_saldoa = 'o'";
+	$result = pupe_query($query);
+
+	if (mysql_num_rows($result) > 0) {
+		return true;
+	}
+
+	return false;
+}
+
 function aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, $ajankohta) {
 	global $kukarow;
 
@@ -269,7 +304,6 @@ function hae_tyomaarays($tyomaarays_tunnus) {
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tunnus = '{$tyomaarays_tunnus}'
 				AND tila != 'D'";
-	//TODO KORJAA WHERET
 	$result = pupe_query($query);
 	return mysql_fetch_assoc($result);
 }

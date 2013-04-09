@@ -560,6 +560,9 @@
 			if (strtoupper($yhtiorow['maa']) == 'EE' and substr($popvm_row['yriti_iban'], 0, 2) == "EE") {
 				$kaunisnimi = "EESEPA-$kukarow[yhtio]-".$popvm_dmy.".xml";
 			}
+			if (isset($pankkifilenimi)){
+				$kaunisnimi = $pankkifilenimi;
+			}
 			else {
 				$kaunisnimi = "SEPA-$kukarow[yhtio]-".$popvm_dmy.".xml";
 			}

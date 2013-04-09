@@ -2036,9 +2036,42 @@
 			if ($yhtiorow['laskutuskielto'] != 0 and $toim != "MYYNTITILI") {
 				echo "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
 			}
+
 			echo "</tr>";
 
 			if ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") {
+
+				$chk_maa = isset($maa) ? $maa : $srow['maa'];
+
+				$query = "	SELECT tunnus, nimi
+							FROM yhtion_toimipaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND maa = '{$chk_maa}'";
+				$yht_toimpaik_res = pupe_query($query);
+
+				if (mysql_num_rows($yht_toimpaik_res) > 0) {
+
+					echo "<tr>";
+					echo "<td>",t("Yhtiön toimipaikka"),"</td>";
+
+					echo "<td><select name='yhtiotoimipaikka'>";
+					echo "<option value=''>",t("Valitse toimipaikka"),"</option>";
+
+					while ($yht_toimpaik_row = mysql_fetch_assoc($yht_toimpaik_res)) {
+
+						$sel = ($kukarow['toimipaikka'] != "" and $kukarow['toimipaikka'] == $yht_toimpaik_row['tunnus']) ? " selected" : "";
+						$sel = ($srow['yhtio_toimipaikka'] == $yht_toimpaik_row['tunnus']) ? " selected" : "";
+
+						echo "<option value='{$yht_toimpaik_row['tunnus']}'{$sel}>{$yht_toimpaik_row['nimi']}</option>";
+					}
+
+					echo "</select></td>";
+
+					echo "<td></td>";
+
+					echo "</tr>";
+				}
+
 				$labels = t_avainsana("LABEL");
 
 				if (mysql_num_rows($labels) > 0) {
@@ -2219,6 +2252,7 @@
 				echo "</select>";
 				echo "</td></tr>";
 			}
+
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
 				//Täysin dynaaminen osio
 				$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != ''");
@@ -3070,7 +3104,7 @@
 		$yhtiomaa 			= $yhtiorow["maa"];
 		$yhtioovttunnus 	= $yhtiorow["ovttunnus"];
 		$yhtiokotipaikka	= $yhtiorow["kotipaikka"];
-		$yhtiotoimipaikka	= $kukarow["toimipaikka"];
+		$yhtiotoimipaikka	= (isset($yhtiotoimipaikka) and trim($yhtiotoimipaikka) != "") ? $yhtiotoimipaikka : $kukarow["toimipaikka"];
 		$yhtioalv_tilino	= $yhtiorow["alv"];
 
 		// poikkeava laskutusosoite

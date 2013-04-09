@@ -5,7 +5,7 @@
 
 	require_once('pdflib/phppdflib.class.php');
 
-	require_once('../inc/pupeExcel.inc');
+	require_once('inc/pupeExcel.inc');
 
 	// jos php-gd on installoitu niin loidataab barcode library
 	if (in_array("gd", get_loaded_extensions())) {
@@ -15,13 +15,6 @@
 			include_once("Barcode.php");
 		}
 	}
-
-	$pdf = new pdffile;
-	$pdf->set_default('margin-top', 	0);
-	$pdf->set_default('margin-bottom', 	0);
-	$pdf->set_default('margin-left', 	0);
-	$pdf->set_default('margin-right', 	0);
-	$rectparam["width"] = 0.3;
 
 	if (!function_exists('alku_purku')) {
 		function alku_purku () {
@@ -143,7 +136,7 @@
 					$kutsu = t("Purkulista", $kieli);
 				}
 
-				require("../inc/sahkoposti.inc");
+				require("inc/sahkoposti.inc");
 
 			}
 			elseif ($tee == 'NAYTATILAUS') {
@@ -188,8 +181,6 @@
 	else {
 		$mitkalisa = "";
 	}
-
-
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_array($suuntalavat) and count($suuntalavat) > 0) {
 
@@ -269,7 +260,7 @@
 	}
 	else {
 		$query = "	SELECT tuotteen_toimittajat.toim_tuoteno,
-					tuotteen_toimittajat.toimittaja as toim_ytunnus,
+					tuotteen_toimittajat.toimittaja as toim_ytunnu,
 					tuote.tullinimike1 as tullinimike1,
 					tuote.tullinimike2 as tullinimike2,
 					tilausrivi.hinta as ostohinta,
@@ -298,7 +289,7 @@
 					FROM tilausrivi
 					$suuntalavajoin
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno $eanlisa
-					LEFT JOIN tuotteen_toimittajat ON tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+					JOIN tuotteen_toimittajat ON tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 					JOIN lasku ON lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus
 					WHERE {$otunnuslisa}
 					and tilausrivi.yhtio='$kukarow[yhtio]'
@@ -338,7 +329,7 @@
 					'header' => t('Tullinimike 2'),
 					'order' => 40
 				),
-				'toim_ytunnus' => array(
+				'toim_ytunnu' => array(
 					'header' => t('Toimittajan Ytunnus'),
 					'order' => 50
 				),
@@ -364,6 +355,7 @@
 				'toim_tuoteno',
 				'tullinimike1',
 				'tullinimike2',
+				'toim_ytunnu',
 			);
 			$tiedosto = generoi_excel_tiedosto($rows, $header_values, $force_to_string);
 
@@ -381,7 +373,16 @@
 			echo "<font class='message'>" . t("Yht‰‰n rivi‰ ei lˆytynyt") . "</font>";
 		}
 	}
-	else {
+
+	if ($komento["Purkulista"] != '') {
+
+		$pdf = new pdffile;
+		$pdf->set_default('margin-top', 	0);
+		$pdf->set_default('margin-bottom', 	0);
+		$pdf->set_default('margin-left', 	0);
+		$pdf->set_default('margin-right', 	0);
+		$rectparam["width"] = 0.3;
+
 		$kala 		= 500;
 		$total 		= 0;
 		$sivu 		= 1;
@@ -818,12 +819,12 @@
 
 			print_pdf_purku();
 		}
-	}
 
-	//p‰‰dyt‰‰n taas selailemaan toimittajia
-	if ($mista == "vastaanota") {
-		echo t("Vastaanotetut lista tulostuu")."...<br>";
-	}
-	else {
-		echo t("Purkulista tulostuu")."...<br>";
+		//p‰‰dyt‰‰n taas selailemaan toimittajia
+		if ($mista == "vastaanota") {
+			echo t("Vastaanotetut lista tulostuu")."...<br>";
+		}
+		else {
+			echo t("Purkulista tulostuu")."...<br>";
+		}
 	}

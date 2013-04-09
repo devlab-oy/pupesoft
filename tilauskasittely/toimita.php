@@ -142,6 +142,7 @@
 				$tee 			= "TARKISTA";
 				$laskutakaikki 	= "KYLLA";
 				$silent		 	= "KYLLA";
+				$tulosta_lasku_kpl = $laskukpl;
 
 				if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == "") {
 					$valittu_tulostin = $kukarow["kirjoitin"];
@@ -595,7 +596,19 @@
 		}
 
 		echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'></td>";
-		echo "</tr></table><br><br>";
+		echo "</tr>";
+
+		if ($row['kateinen'] != '' and $row["vienti"] == '') {
+			echo "<tr>";
+			echo "<th>".t("Lasku")."</th>";
+			echo "<td>";
+			echo t("Kpl").": <input type='text' size='4' name='laskukpl' value='{$yhtiorow['laskun_kopiomaara']}' />";
+			echo "</td>";
+			echo "</tr>";
+		}
+
+		echo "</table>";
+		echo "<br><br>";
 
 		echo "$virhe";
 		echo "<input type='submit' value='".t("Merkkaa toimitetuksi")."'></form>";

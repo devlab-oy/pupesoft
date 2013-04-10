@@ -28,7 +28,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $korjataan ==
 		// luetaan rivi tiedostosta..
 		$poista	  = array("'", "\\","\"");
 		$rivi	  = str_replace($poista,"",$rivi);
-		$rivi	  = explode("\t", trim($rivi));
+		$rivi	  = explode(",", trim($rivi));
 
 		if ((trim($rivi[0]) != '') and ((trim($rivi[1]) != '') or (trim($rivi[2]) != ''))) {
 			$tuoteno[$id] = trim($rivi[0]);
@@ -57,7 +57,7 @@ if ($korjataan != '') {
 				var formi = document.getElementById(tfield).form;
 
 				for (var elementIdx=0; elementIdx<formi.elements.length; elementIdx++) {
-					if (formi.elements[elementIdx].type == 'text' && formi.elements[elementIdx].name.substring(0,8) == tcolumn) {
+					if (formi.elements[elementIdx].type == 'text' && formi.elements[elementIdx].id.substring(0,8) == tcolumn) {
 						formi.elements[elementIdx].value = document.getElementById(tfield).value;
 					}
 				}
@@ -183,9 +183,9 @@ if ($korjataan != '') {
 						<input type='hidden' name='rivipaikka[$id]' value=''>
 						<input type='hidden' name='uusipaikka[$id]' value='uusi'>
 						",hyllyalue("hyllyalue[{$id}]", $hyllyalue[$id]),"
-						<input type='text' name='hyllynro[$id]' value='$hyllynro[$id]' maxlength='2' size='2'>
-						<input type='text' name='hyllyvali[$id]' value='$hyllyvali[$id]' maxlength='2' size='2'>
-						<input type='text' name='hyllytaso[$id]' value='$hyllytaso[$id]' maxlength='2' size='2'></td>";
+						<input type='text' id='hyllynro[$id]' name='hyllynro[$id]' value='$hyllynro[$id]' maxlength='2' size='2'>
+						<input type='text' id='hyllyvali[$id]' name='hyllyvali[$id]' value='$hyllyvali[$id]' maxlength='2' size='2'>
+						<input type='text' id='hyllytaso[$id]' name='hyllytaso[$id]' value='$hyllytaso[$id]' maxlength='2' size='2'></td>";
 
 				$paikkasyot++;
 			}

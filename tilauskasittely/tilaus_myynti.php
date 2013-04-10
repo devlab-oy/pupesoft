@@ -489,7 +489,18 @@ if (($tee == "" or ($myos_prospektit == "TRUE" and $toim == "TARJOUS")) and (($k
 }
 
 //Luodaan otsikko
-if (($tee == "" and (($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and ($tuoteno != '' or $asiakasid != '')) or ((int) $kukarow["kesken"] != 0 and $asiakasid != '' and $kukarow["extranet"] == "")) or ($from == "CRM" and $asiakasid != ''))) or ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0)) {
+if (
+        ($tee == "" and 
+            (
+                ($toim == "PIKATILAUS" and 
+                    ((int) $kukarow["kesken"] == 0 and ($tuoteno != '' or $asiakasid != '')) or 
+                    ((int) $kukarow["kesken"] != 0 and $asiakasid != '' and $kukarow["extranet"] == "")
+                ) or 
+                ($from == "CRM" and $asiakasid != '')
+             )
+        ) or 
+        ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0)
+   ) {
 
 	require("{$tilauskaslisa}luo_myyntitilausotsikko.inc");
 

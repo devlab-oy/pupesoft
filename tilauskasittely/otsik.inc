@@ -2062,6 +2062,8 @@
 					echo "<tr>";
 					echo "<td>",t("Yhtiön toimipaikka"),"</td>";
 
+					$predefined_yhtiotoimipaikka = 0;
+
 					echo "<td><select name='yhtiotoimipaikka'>";
 					echo "<option value='0'>",t("Yhtiön perustiedot"),"</option>";
 
@@ -2077,10 +2079,14 @@
 							if ($srow['yhtio_toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
 						}
 
+						if ($sel != "") $predefined_yhtiotoimipaikka = $yht_toimpaik_row['tunnus'];
+
 						echo "<option value='{$yht_toimpaik_row['tunnus']}' {$sel}>{$yht_toimpaik_row['nimi']}</option>";
 					}
 
-					echo "</select></td>";
+					echo "</select>";
+					echo "<input type='hidden' name='predefined_yhtiotoimipaikka' value='{$predefined_yhtiotoimipaikka}' />";
+					echo "</td>";
 
 					echo "<td></td><td></td>";
 
@@ -3148,12 +3154,16 @@
 			$yhtioalv_tilino = $alhiro['toim_alv'];
 		}
 
-		if (isset($yhtiotoimipaikka) and isset($otsikon_laskurow['yhtio_toimipaikka']) and $otsikon_laskurow['yhtio_toimipaikka'] != $yhtiotoimipaikka and ($yhtiorow['maa'] != $srow['maa'] or $yhtiorow['vat_numero'] == '')) {
+		if (isset($yhtiotoimipaikka) and (
+				($kukarow['kesken'] == 0 and isset($predefined_yhtiotoimipaikka) and $predefined_yhtiotoimipaikka != $yhtiotoimipaikka) or
+				(isset($otsikon_laskurow['yhtio_toimipaikka']) and $otsikon_laskurow['yhtio_toimipaikka'] != $yhtiotoimipaikka and ($yhtiorow['maa'] != $srow['maa'] or $yhtiorow['vat_numero'] == ''))
+			)
+		) {
 
 			$alhqur = "	SELECT alv, vienti
 						FROM asiakas
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$otsikon_laskurow['liitostunnus']}'";
+						AND tunnus = '{$liitostunnus}'";
 			$alhire = pupe_query($alhqur);
 			$alhiro  = mysql_fetch_assoc($alhire);
 

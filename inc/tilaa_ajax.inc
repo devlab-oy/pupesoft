@@ -19,6 +19,10 @@
 	$varasto 		= 0;
 	$toimipiste 	= 0;
 
+	if (isset($valittuvarasto) and $valittuvarasto > 0) {
+		$varasto = $valittuvarasto;
+	}
+
 	// tarvittavat muuttujat otsikolle
 	$ytunnus 		= $srow['ytunnus'];
 	$ovttunnus 		= $srow["ovttunnus"];
@@ -104,13 +108,39 @@
 		$rivi = $trivirow['tilaajanrivinro'] + 1;
 	}
 
-	// haetaan oletuspaikan tiedot niin laitetaan se riville
-	$query = "SELECT * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and oletus!=''";
-	$jtsre = pupe_query($query);
-	$jtstu = mysql_fetch_array($jtsre);
+	unset($jtsre);
+
+	// Jos varasto on syötetty niin ostetaan siihen varastoon
+	if ($varasto > 0) {
+		$query = "	SELECT tuotepaikat.*
+		 			FROM tuotepaikat
+					JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+					and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+					and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+					and varastopaikat.tunnus = $varasto
+					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+					and tuotepaikat.tuoteno = '$tuoteno'";
+		$jtsre = pupe_query($query);
+		$jtstu = mysql_fetch_array($jtsre);
+	}
+
+	if (!isset($jtsre) or mysql_num_rows($jtsre) == 0) {
+		// haetaan oletuspaikan tiedot niin laitetaan se riville
+		$query = "	SELECT *
+					FROM tuotepaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tuoteno = '$tuoteno'
+					AND oletus!=''";
+		$jtsre = pupe_query($query);
+		$jtstu = mysql_fetch_array($jtsre);
+	}
 
 	//haetaan tuotteen ostohinta
-	$query = "SELECT * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and liitostunnus='$toimittaja'";
+	$query = "	SELECT *
+				FROM tuotteen_toimittajat
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tuoteno = '$tuoteno'
+				AND liitostunnus = '$toimittaja'";
 	$ossre = pupe_query($query);
 	$osstu = mysql_fetch_array($ossre);
 
@@ -118,13 +148,13 @@
 	$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
 	$tuotere = pupe_query($query);
 	$tuoterow = mysql_fetch_array($tuotere);
-	
+
 	$hinta = $osstu["ostohinta"];
-	
+
 	//otetaan tuoteen kertoimet huomioon - eli jaetaan myyntihinta kertoimella, jotta saadaan yksikköhinta
 	if ($tuoterow["myyntihinta_maara"] != 0 and $osstu["ostohinta"] != 0) {
 		$hinta = hintapyoristys($osstu["ostohinta"] / $tuoterow["myyntihinta_maara"]);
-	}	
+	}
 
 	// lisätään ostotilausrivi
 	$query = "	INSERT into tilausrivi

@@ -653,13 +653,6 @@ function echo_arvot(&$request) {
 	//haetaan tämän tilikauden jäljellä olevien työpäivien lukumäärä
 	$tyopaivien_lukumaara = hae_tyopaivien_lukumaara($request['tamanhetkinen_tilikausi']['tilikausi_alku'], $request['tamanhetkinen_tilikausi']['tilikausi_loppu']);
 
-	//näitä käytetään, jos halutaan laskea inventoitavien varaston_hyllypaikkojen määrä
-	//ei poisteta näitä koska nämä tiedot saattavat olla myöhemmässä vaiheessa tarpeellisia.
-//	$inventointien_lukumaara_12kk = count(hae_inventoinnit($request, '12kk'));
-//	$inventointien_lukumaara_tilikausi = count(hae_inventoinnit($request, 'tilikausi'));
-//	$varaston_hyllypaikkojen_lukumaara = hae_varaston_hyllypaikkojen_lukumaara($request);
-//	$inventointeja_per_paiva = ($varaston_hyllypaikkojen_lukumaara['varaston_hyllypaikkojen_lukumaara'] - $inventointien_lukumaara_tilikausi) / $tyopaivien_lukumaara;
-
 	$inventointien_lukumaara_12kk = hae_inventoitavien_lukumaara($request, '12kk');
 	$inventointien_lukumaara_tilikausi = hae_inventoitavien_lukumaara($request, 'tilikausi');
 	$tuotepaikkojen_lukumaara = hae_tuotepaikkojen_lukumaara($request);
@@ -1076,11 +1069,19 @@ function kuuluuko_hylly_varastoon($request, $varasto_row) {
 				AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper('{$varasto_row['hyllyalue']}'), 5, '0'),lpad(upper('{$varasto_row['hyllynro']}'), 5, '0'))
 				AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper('{$varasto_row['hyllyalue']}'), 5, '0'),lpad(upper('{$varasto_row['hyllynro']}'), 5, '0'))
 				AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).")";
-	$varasto_result = pupe_query($query);
+
 	$count = 0;
-	if (mysql_num_rows($varasto_result) != 0) {
+	//jos ollaan valittu kaikki varastot tiedetään, että se kuuluu varmasti valittuihin varastoihin
+	if (count($request['varastot']) == count($request['valitut_varastot'])) {
 		$count = $varasto_row['kpl'];
 	}
+	else {
+		$varasto_result = pupe_query($query);
+		if (mysql_num_rows($varasto_result) != 0) {
+			$count = $varasto_row['kpl'];
+		}
+	}
+	
 
 	return $count;
 }

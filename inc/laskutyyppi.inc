@@ -45,6 +45,20 @@
 			break;
 		case "X":
 			$laskutyyppi = "Muu tosite";
+			switch($alatila) {
+				case "E":
+					$alatila = "Ep‰kurantointi";
+					break;
+				case "I":
+					$alatila = "Inventointi";
+					break;
+				case "K":
+					$alatila = "Kassalipaan t‰sm‰ytys";
+					break;
+				case "O":
+					$alatila = "K‰teisotto";
+					break;
+		}
 			break;
 		case "L":
 			$laskutyyppi = "Myyntitilaus";
@@ -89,6 +103,9 @@
 					break;
 				case "F":
 					$alatila = "Odottaa hyv‰ksynt‰‰";
+					break;
+				case "G":
+					$alatila = "Odottaa asiakkaan suoritusta";
 					break;
 				case "J":
 					$alatila = "JT poiminnassa";
@@ -275,6 +292,9 @@
 					break;
 				case "B":
 					$alatila = "";
+					break;
+				case "G":
+					$alatila = "Odottaa asiakkaan suoritusta";
 					break;
 				case "X":
 					$alatila = "Valmis";

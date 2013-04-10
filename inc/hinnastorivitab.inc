@@ -1,6 +1,8 @@
 <?php
 
 function hinnastoriviotsikot() {
+	global $saatavuus;
+
 	$out  = t('tuoteno')."\t";			// tuotenumero
 	$out .= t('nimitys')."\t";			// tuotteen nimitys
 	$out .= t('eankoodi')."\t";			// tuotteen eankoodi alennusryhmä kahteen merkkiin asti zeropaddattuna
@@ -10,13 +12,17 @@ function hinnastoriviotsikot() {
 	$out .= t('tuotemerkki')."\t";		// tuotemerkki
 	$out .= t('osasto')."\t";	   		// tuotteen osasto
 	$out .= t('try')."\t";				// tuoteryhmä
-	$out .= t('korvaava tuote')."\t\n";	// korvaava tuote
+	$out .= t('korvaava tuote')."\t";	// korvaava tuote
+	if($saatavuus == 'kylla') {
+		$out .= t('onko saatavilla')."\t";//saatavuus
+	}
+	$out .= "\n";
 
 	return $out;
 }
 
 function hinnastorivi($tuote, $laskurow) {
-    global $kukarow;
+    global $kukarow, $yhtiorow, $saatavuus;
 
 
 	//korvaavat tuotteet
@@ -68,9 +74,40 @@ function hinnastorivi($tuote, $laskurow) {
 	$out .= $tuote['osasto']."\t";	   	// tuotteen osasto
 	$out .= $tuote['try']."\t";			// tuoteryhmä
 	$out .= $seuraava;					// korvaava tuote
+	if($saatavuus == 'kylla') {
+		$out .= "\t" . hae_saatavuus($laskurow, $tuote['tuoteno']);			// saatavuus
+	}
 	$out .= "\n";
 
     return $out;
 }
 
+function hae_saatavuus($laskurow, $tuoteno) {
+	global $kukarow, $yhtiorow;
+
+	list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, "", 0, "", "", "", "", "", $laskurow["toim_maa"], '');
+
+	if ($myytavissa > 0) {
+		return t("Kyllä");
+	}
+	else {
+		//HUOM! palauttaa vain yhden rivin
+		$tulossa_query = " 	SELECT min(toimaika) paivamaara
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow[yhtio]}'
+							AND tuoteno = '{$tuoteno}'
+							AND varattu > 0
+							AND tyyppi = 'O'
+							AND toimaika >= curdate()";
+		$tulossa_result = pupe_query($tulossa_query);
+		$tulossa_row = mysql_fetch_assoc($tulossa_result);
+
+		if (empty($tulossa_row['paivamaara'])) {
+			return t("Ei");
+		}
+		else {
+			return t("Tulossa") . ' ' . $tulossa_row['paivamaara'];
+		}
+	}
+}
 ?>

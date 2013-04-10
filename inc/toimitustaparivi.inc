@@ -828,7 +828,7 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = ''>".t("Yhtiön oletus")."</option>";
-		$ulos .= "<option value = 'E'>".t("Ei kuljetusvakuutusta")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Ei kuljetusvakuutusta")."</option>";
 		$ulos .= "<option value = 'A' $sel[A]>".t("Valuuttamääräinen kuljetusvakuutus lisätään")."</option>";
 		$ulos .= "<option value = 'B' $sel[B]>".t("Prosentuaalinen kuljetusvakuutus lisätään")."</option>";
 		$ulos .= "<option value = 'F' $sel[F]>".t("Valuuttamääräinen kuljetusvakuutus lisätään. Käytetään kuljetusvakuutustuotteen asiakashintaa ja alennusta")."</option>";

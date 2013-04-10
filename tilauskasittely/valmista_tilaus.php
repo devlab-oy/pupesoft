@@ -878,7 +878,7 @@
 
 	if (!isset($from_kaikkikorj)) {
 		if ($tee == "VALMISTA" and $valmistettavat != "") {
-			//Haetaan otsikoiden tiedot
+			// Haetaan otsikoiden tiedot
 			$query = "	SELECT
 						GROUP_CONCAT(DISTINCT lasku.tunnus SEPARATOR ', ') 'Tilaus',
 						GROUP_CONCAT(DISTINCT lasku.nimi SEPARATOR ', ') 'Asiakas/Nimi',
@@ -887,18 +887,19 @@
 						FROM tilausrivi, lasku
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and	tilausrivi.tunnus in ($valmistettavat)
-						and lasku.tunnus=tilausrivi.otunnus
-						and lasku.yhtio=tilausrivi.yhtio";
+						and lasku.tunnus = tilausrivi.otunnus
+						and lasku.yhtio  = tilausrivi.yhtio";
 			$result = mysql_query($query) or pupe_error($query);
+			$row = mysql_fetch_assoc($result);
 
-			if (mysql_num_rows($result) == 0) {
-				echo "<font class='error'>Yhtään tilausta ei löytynyt</font><br>";
+			if (empty($row["Tilaus"])) {
+				echo "<font class='error'>".t("Yhtään tilausta ei löytynyt")."</font><br>";
 				$tee = "";
 			}
 		}
 
 		if ($tee == "VALMISTA" and $valmistettavat != "") {
-			$row = mysql_fetch_assoc($result);
+
 
 			//Päivitetään lasku niin, että se on tilassa korjataan
 			if ($toim == "KORJAA") {

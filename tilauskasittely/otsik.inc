@@ -739,36 +739,47 @@
 
 		// katsotaan miten vienti ja ALV käsitellään
 		$alv_velvollisuus = "";
+		$alkuperainen_toimipaikka = $yhtiorow['toimipaikka'];
+
+		if (!isset($srow['yhtio_toimipaikka'])) {
+			$alhqur = "SELECT tunnus from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$srow[maa]' and vat_numero != ''";
+			$alhire = pupe_query($alhqur);
+			$alhiro  = mysql_fetch_assoc($alhire);
+			$kukarow['toimipaikka'] = $alhiro['tunnus'];
+		}
+		else {
+			$kukarow['toimipaikka'] = $srow['yhtio_toimipaikka'];
+		}
+
+		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 		// jos meillä on lasku menossa ulkomaille
-		if (isset($srow["maa"]) and $srow["maa"] != "" and $srow["maa"] != $yhtiorow["maa"]) {
-			// tutkitaan ollaanko siellä alv-rekisteröity
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$srow[maa]' and vat_numero != ''";
-			$alhire = pupe_query($alhqur);
+		if ($yhtiorow['maa'] == $srow['maa'] and $yhtiorow['vat_numero'] != '') {
+			// haetaan maan oletusalvi
+			$query = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark='o' and selitetark_2='$srow[maa]'";
+			$alhire = pupe_query($query);
 
-			// ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista
-			if (mysql_num_rows($alhire) == 1) {
-
-				$alhiro  = mysql_fetch_assoc($alhire);
-
-				// haetaan maan oletusalvi
-				$query = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark='o' and selitetark_2='$srow[maa]'";
-				$alhire = pupe_query($query);
-
-				// jos ei löydy niin mennään erroriin
-				if (mysql_num_rows($alhire) == 0) {
-					echo "<font class='error'>".t("VIRHE: Oletus ALV-kantaa ei löydy asiakkaan maahan")." $srow[maa]! ".t("Ei voida jatkaa")."!</font><br>";
-					exit;
-				}
-				else {
-					$apuro  = mysql_fetch_assoc($alhire);
-					// nämä tässä keisissä aina näin
-					$alv    = $apuro["selite"];
-					$vienti = "";
-					$alv_velvollisuus = $alhiro["vat_numero"];
-					echo "<input type='hidden' name='alv_velvollisuus' value='$alhiro[vat_numero]'>";
-				}
+			// jos ei löydy niin mennään erroriin
+			if (mysql_num_rows($alhire) == 0) {
+				echo "<font class='error'>".t("VIRHE: Oletus ALV-kantaa ei löydy asiakkaan maahan")." $srow[maa]! ".t("Ei voida jatkaa")."!</font><br>";
+				exit;
 			}
+
+			$apuro  = mysql_fetch_assoc($alhire);
+			// nämä tässä keisissä aina näin
+			$alv    = $apuro["selite"];
+			$vienti = "";
+			$alv_velvollisuus = $yhtiorow["vat_numero"];
+
+			echo "<input type='hidden' name='alv_velvollisuus' value='{$yhtiorow['vat_numero']}'>";
+		}
+		elseif (isset($yhtiotoimipaikka) and $srow['yhtio_toimipaikka'] != $yhtiotoimipaikka) {
+			$alhqur = "SELECT alv, vienti from asiakas where yhtio='$kukarow[yhtio]' and tunnus = '{$srow['liitostunnus']}'";
+			$alhire = pupe_query($alhqur);
+			$alhiro  = mysql_fetch_assoc($alhire);
+
+			$alv = $srow['alv'] = $alhiro['alv'];
+			$vienti = $srow['vienti'] = $alhiro['vienti'];
 		}
 
 		//jos käyttäjällä on oletusaiskas
@@ -2052,14 +2063,19 @@
 					echo "<td>",t("Yhtiön toimipaikka"),"</td>";
 
 					echo "<td><select name='yhtiotoimipaikka'>";
-					echo "<option value=''>",t("Yhtiön perustiedot"),"</option>";
+					echo "<option value='0'>",t("Yhtiön perustiedot"),"</option>";
 
 					while ($yht_toimpaik_row = mysql_fetch_assoc($yht_toimpaik_res)) {
 
 						$sel = "";
 
-						if ($srow['yhtio_toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
-						if (!isset($srow['yhtio_toimipaikka']) and $kukarow['toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
+						if (!isset($srow['yhtio_toimipaikka'])) {
+							if ($alv_velvollisuus != "" and $yht_toimpaik_row['tunnus'] == $alhiro['tunnus']) $sel = "selected";
+							if ($sel == "" and $kukarow['toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
+						}
+						else {
+							if ($srow['yhtio_toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
+						}
 
 						echo "<option value='{$yht_toimpaik_row['tunnus']}' {$sel}>{$yht_toimpaik_row['nimi']}</option>";
 					}
@@ -2659,6 +2675,8 @@
 		$meapu = pupe_query($apuqu);
 		$apuro = mysql_fetch_assoc($meapu);
 
+		$otsikon_laskurow = $apuro;
+
 		$apuval = $apuro["valkoodi"];
 		$apukurssi = $apuro["vienti_kurssi"];
 
@@ -3095,6 +3113,24 @@
 			$toimitusehto2 = trim($toimitusehto2." ".$kasitoimehto2);
 		}
 
+		if ($alv_velvollisuus != "") {
+			// haetaan sen yhteystiedot
+			$alhqur = "	SELECT tunnus, vat_numero, toim_alv
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND maa = '{$maa}'
+						AND vat_numero = '{$alv_velvollisuus}'";
+			$alhire = pupe_query($alhqur);
+			$alhiro = mysql_fetch_assoc($alhire);
+
+			$kukarow['toimipaikka'] = $alhiro['tunnus'];
+		}
+
+		// Käyttäjän toimipaikka ALV-velvollisuuden takaa tai alasvetovalikosta
+		$kukarow['toimipaikka'] = empty($yhtiotoimipaikka) ? 0 : $yhtiotoimipaikka;
+
+		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+
 		// yhtiön tiedot
 		$yhtionimi 			= $yhtiorow["nimi"];
 		$yhtioosoite 		= $yhtiorow["osoite"];
@@ -3103,57 +3139,28 @@
 		$yhtiomaa 			= $yhtiorow["maa"];
 		$yhtioovttunnus 	= $yhtiorow["ovttunnus"];
 		$yhtiokotipaikka	= $yhtiorow["kotipaikka"];
-		$yhtiotoimipaikka	= isset($yhtiotoimipaikka) ? $yhtiotoimipaikka : $kukarow["toimipaikka"];
 		$yhtioalv_tilino	= $yhtiorow["alv"];
+		$yhtiotoimipaikka	= $kukarow['toimipaikka'];
 
-		// Halutaan yhtiön tiedot, koska ei valittu yhtiön toimipaikkaa otsikolla (alasvetovalikosta valittuna $yhtiotoimipaikka = "")
-		if (isset($yhtiotoimipaikka) and $yhtiotoimipaikka == "") {
-
-			$_tmp_kukarow_toimipaikka = $kukarow['toimipaikka'];
-			$kukarow['toimipaikka'] = 0;
-			$yhtion_osoitetiedot = hae_yhtion_parametrit($kukarow['yhtio']);
-
-			$yhtionimi 			= $yhtion_osoitetiedot["nimi"];
-			$yhtioosoite 		= $yhtion_osoitetiedot["osoite"];
-			$yhtiopostino		= $yhtion_osoitetiedot["postino"];
-			$yhtiopostitp		= $yhtion_osoitetiedot["postitp"];
-			$yhtiomaa 			= $yhtion_osoitetiedot["maa"];
-			$yhtioovttunnus 	= $yhtion_osoitetiedot["ovttunnus"];
-			$yhtiokotipaikka	= $yhtion_osoitetiedot["kotipaikka"];
-			$yhtiotoimipaikka	= 0;
-			$yhtioalv_tilino	= $yhtion_osoitetiedot["alv"];
-
-			$kukarow['toimipaikka'] = $_tmp_kukarow_toimipaikka;
+		// Jos ollaan ALV-velvollisia ja ei olla vaihdettu otsikolla alasvetovalikosta toimipaikkaa, laitetaan ALV-tiedot toimipaikan mukaan
+		if ($alv_velvollisuus != "" and $kukarow['toimipaikka'] == $alhiro['tunnus']) {
+			$yhtioovttunnus = $alhiro['vat_numero'];
+			$yhtioalv_tilino = $alhiro['toim_alv'];
 		}
 
-		// poikkeava laskutusosoite
-		if ($alv_velvollisuus != "" or (isset($yhtiotoimipaikka) and $yhtiotoimipaikka != "" and $yhtiotoimipaikka != $kukarow['toimipaikka'])) {
+		if (isset($yhtiotoimipaikka) and isset($otsikon_laskurow['yhtio_toimipaikka']) and $otsikon_laskurow['yhtio_toimipaikka'] != $yhtiotoimipaikka and ($yhtiorow['maa'] != $srow['maa'] or $yhtiorow['vat_numero'] == '')) {
 
-			$wherelisa = "";
-
-			if (isset($yhtiotoimipaikka) and $yhtiotoimipaikka != $kukarow['toimipaikka']) {
-				$wherelisa = "AND tunnus = '{$yhtiotoimipaikka}'";
-			}
-			else {
-				$wherelisa = "AND maa='{$maa}' AND vat_numero = '{$alv_velvollisuus}'";
-			}
-
-			// haetaan sen yhteystiedot
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' {$wherelisa}";
+			$alhqur = "	SELECT alv, vienti
+						FROM asiakas
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$otsikon_laskurow['liitostunnus']}'";
 			$alhire = pupe_query($alhqur);
+			$alhiro  = mysql_fetch_assoc($alhire);
 
-			if (mysql_num_rows($alhire) == 1) {
-				$apualvrow  = mysql_fetch_assoc($alhire);
-				$yhtionimi 		    = $apualvrow["nimi"];
-				$yhtioosoite 	    = $apualvrow["osoite"];
-				$yhtiopostino	    = $apualvrow["postino"];
-				$yhtiopostitp	    = $apualvrow["postitp"];
-				$yhtiomaa 		    = $apualvrow["maa"];
-				$yhtioovttunnus  	= $apualvrow["vat_numero"];
-				$yhtiokotipaikka 	= $apualvrow["kotipaikka"];
-				$yhtiotoimipaikka	= $apualvrow["tunnus"]; // ylikirjoitetaan myös käyttäjän oletustoimipaikka
-				$yhtioalv_tilino	= $apualvrow["toim_alv"];
-			}
+			$alv = $alhiro['alv'];
+			$vienti = $alhiro['vienti'];
+
+			echo "<br /><font class='info'>".t("HUOM: Vaihdoit toimipaikkaa. Vienti- ja ALV-tiedot haettiin asiakastiedoista")."!</font><br /><br />";
 		}
 
 		// Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella

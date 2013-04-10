@@ -182,7 +182,7 @@ if ($korjataan != '') {
 						<input type='hidden' name='tilattava[$id]' value='$tilattava[$id]'>
 						<input type='hidden' name='rivipaikka[$id]' value=''>
 						<input type='hidden' name='uusipaikka[$id]' value='uusi'>
-						",hyllyalue("hyllyalue[{$id}]", $hyllyalue[$id]),"
+						<input type='text' name='hyllyalue[$id]' value='$hyllyalue[$id]' maxlenght='3' size='3'>
 						<input type='text' name='hyllynro[$id]' value='$hyllynro[$id]' maxlength='2' size='2'>
 						<input type='text' name='hyllyvali[$id]' value='$hyllyvali[$id]' maxlength='2' size='2'>
 						<input type='text' name='hyllytaso[$id]' value='$hyllytaso[$id]' maxlength='2' size='2'></td>";

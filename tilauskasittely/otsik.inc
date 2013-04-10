@@ -148,10 +148,9 @@
     if ($tnimi == "" and isset($tkohde) and $tkohde > 0) {
         $kohde_query = "SELECT *
                         FROM kohde
-                        WHERE yhtio='$kukarow[yhtio]'
-                        AND tunnus = '$tkohde'
+                        WHERE yhtio = '$kukarow[yhtio]'
+                        AND tunnus  = '$tkohde'
                         LIMIT 1";
-
         $kohde_res = pupe_query($kohde_query);
 
 		$krow = mysql_fetch_assoc($kohde_res);
@@ -924,27 +923,27 @@
 			echo "<tr>
 					<th colspan='2' align='left' valign='top'>".t("Toimitusosoite").":</td></tr>";
 
-/* jos asiakkaalle ei ole tallennettu kohteita, ei piirret‰ kentt‰‰ */
+			/* jos asiakkaalle ei ole tallennettu kohteita, ei piirret‰ kentt‰‰ */
             $kohde_ui = "";
-            $kohde_query = "SELECT *
+
+			$kohde_query = "SELECT *
                             FROM kohde
-                            WHERE yhtio='$kukarow[yhtio]'
+                            WHERE yhtio = '$kukarow[yhtio]'
                             AND asiakas = '$asiakasid'";
             $kohde_res = pupe_query($kohde_query);
 
-			while( $krow = mysql_fetch_assoc($kohde_res)) {
-                if ($krow['tunnus'] == $srow['asiakkaan_kohde']) {
+			while ($krow = mysql_fetch_assoc($kohde_res)) {
+                $sel = "";
 
+				if ($krow['tunnus'] == $srow['asiakkaan_kohde']) {
                     $sel = "SELECTED";
-                    $srow['toim_nimi'] = $krow['nimi'];
-                    $srow['toim_nimitark'] = $krow['nimitark'];
-                    $srow['toim_osoite'] = $krow['osoite'];
-                    $srow['toim_postino'] = $rkow['postino'];
-                    $srow['toim_postitp'] = $krow['postitp'];
+                    $srow['toim_nimi'] 		= $krow['nimi'];
+                    $srow['toim_nimitark'] 	= $krow['nimitark'];
+                    $srow['toim_osoite'] 	= $krow['osoite'];
+                    $srow['toim_postino'] 	= $krow['postino'];
+                    $srow['toim_postitp'] 	= $krow['postitp'];
                 }
-                else {
-                    $sel = "";
-                }
+
                 $kohde_ui .= "<option value = '{$krow['tunnus']}' $sel>{$krow["nimi"]}</option>";
             }
 

@@ -5,9 +5,9 @@ $debug = 1;
 
 	if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 		function teccom_kaytettavat_tilausrivit($checkres, $lajilisa) {
-			
+
 			global $kukarow, $debug;
-			
+
 			if ($debug == 1) {
 				echo "<br>teccom_kaytettavat_tilausrivit<br>";
 			}
@@ -83,11 +83,11 @@ $debug = 1;
 	if (!function_exists('etsi_sopivat_tilausrivit')) {
 		function etsi_sopivat_tilausrivit($data, $lajilisa, $trow, $toim_tuotenolisa, $isalisa = "") {
 			global $kukarow ,$debug;
-			
+
 			if ($debug == 1) {
 				echo "<br>etsi_sopivat_tilausrivit<br>";
 			}
-			
+
 			$kaytettavat_tilausrivit = array();
 
 			// tiukka 1
@@ -553,11 +553,11 @@ $debug = 1;
 	if (!function_exists('ostoilla_vai_keikoilla')) {
 		function ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tunnus, $row, $data) {
 			global $kukarow, $debug;
-			
+
 			if ($debug == 1) {
 				echo "<br>ostoilla_vai_keikoilla<br>";
 			}
-			
+
 			if ($row['uusiotunnus'] == 0) {
 
 				$indx = count($ostoilla);
@@ -602,11 +602,11 @@ $debug = 1;
 	if (!function_exists('kopioi_tapahtuma')) {
 		function kopioi_tapahtuma($_arr, $kappaleerotus, $kpl) {
 			global $kukarow, $debug;
-			
+
 			if ($debug == 1) {
 				echo "<br>kopioi_tapahtuma<br>";
 			}
-			
+
 			foreach ($_arr as $_ktunnus => $_vid) {
 				$query = "	SELECT *
 							FROM tapahtuma
@@ -656,7 +656,7 @@ $debug = 1;
 	if (!function_exists('paivita_ja_splittaa')) {
 		function paivita_ja_splittaa($row, $datan_kpl, $kappaleerotus) {
 			global $kukarow, $debug;
-			
+
 			if ($debug == 1) {
 				echo "<br>paivita_ja_splittaa<br>";
 			}
@@ -830,7 +830,7 @@ $debug = 1;
 							echo "<br>splitattavalle myyntilapselle poikkeukset: <br>";
 							echo "<br><pre>",var_dump($myynti_rivi_row['tunnus'], $poikkeukset),"</pre><br><br>";
 						}
-						
+
 						$myynti_tilausrivi_id_lapsi = kopioi_tilausrivi($myynti_rivi_row['tunnus'], $poikkeukset);
 
 						$query = "	UPDATE tilausrivin_lisatiedot SET
@@ -1029,7 +1029,7 @@ $debug = 1;
 
 			// ei käsitellä erolistalle siirrettyjä rivejä.
 			if ($rtuoteno[$i]['status'] == 'E') continue;
-			
+
 			$toim_tuotenolisa = "'{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'";
 			if (isset($data['tuoteno3']) and trim($rtuoteno[$i]['tuoteno3']) != "") $toim_tuotenolisa .= ",'{$rtuoteno[$i]['tuoteno3']}'";
 
@@ -1148,7 +1148,7 @@ $debug = 1;
 					if ($debug == 1) {
 						echo "<pre>",str_replace("\t", "", $update_asn),"</pre><br><br>";
 					}
-					
+
 					$foo = pupe_query($update_asn);
 
 					list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilausrivirow['tunnus'], $tilausrivirow, $rtuoteno[$i]);
@@ -1162,7 +1162,7 @@ $debug = 1;
 					if ($debug == 1) {
 						echo "Tuli enemmän kuin tilattu. Kohdistamatta $kohdistamatta<br><br>";
 					}
-					
+
 					// Lasketaan ensin kaikki rivit yhteen ja sen jälkeen katsotaan tarvitaanko lisäriviä
 					foreach ($kaytettavat_tilausrivit as $tilriv1) {
 
@@ -1392,7 +1392,7 @@ $debug = 1;
 						if ($debug == 1) {
 							echo "<pre>$kysely</pre>";
 						}
-						
+
 						$uusires = pupe_query($kysely);
 						$extraa = mysql_insert_id();
 						$lisa_array[]			= $extraa;
@@ -1593,7 +1593,6 @@ $debug = 1;
 			$_uusiotunnus = $keikan_tunnus;
 
 			$loop_array = array($ostoilla);
-
 		}
 		elseif (count($keikoilla) > 0 and $virheet == 0) {
 			if ($debug == 1) {
@@ -1759,6 +1758,7 @@ $debug = 1;
 									ale1 = 0,
 									ale2 = 0,
 									ale3 = 0,
+									erikoisale = 0,
 									netto = '',
 									uusiotunnus = '{$_uusiotunnus}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1797,6 +1797,7 @@ $debug = 1;
 					$update = "	UPDATE tilausrivi SET
 								hinta = '{$pointteri['hinta']}',
 								netto = '',
+								erikoisale = 0,
 								{$ale1lisa}
 								{$ale2lisa}
 								{$ale3lisa}

@@ -46,6 +46,7 @@ if ($debug) {
 	$laitteet = array(
 		'TESTI',
 		'TESTI2',
+		'TESTI3',
 	);
 }
 
@@ -121,6 +122,8 @@ function hae_laitteet_joiden_huolto_lahestyy($request = array()) {
 
 	$laitteet = array();
 	while ($laite = mysql_fetch_assoc($result)) {
+		//@TODO suorittajan m‰‰ritt‰miseen pit‰‰ tehd‰ algoritmi jne jne.
+		$laite['tyojono'] = 'joonas';
 		$laitteet[] = $laite;
 	}
 
@@ -200,6 +203,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet) {
 			$rivit = lisaa_rivi($parametrit);
 
 			paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($laite, $rivit);
+			paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $laite);
 			paivita_viimenen_tapahtuma_laitteelle($laite);
 
 			if ($debug) {
@@ -230,6 +234,17 @@ function paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($lait
 				SET kommentti = '{$laiteen_kohde_ja_paikka_tiedot}'
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tunnus = '{$tilausrivit['lisatyt_rivit1'][0]}'";
+	pupe_query($query);
+}
+
+function paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $laite) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	UPDATE tyomaarays
+				SET tyojono = '{$laite['tyojono']}',
+				tyostatus = 'A'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus = '{$tyomaarays_tunnus}'";
 	pupe_query($query);
 }
 

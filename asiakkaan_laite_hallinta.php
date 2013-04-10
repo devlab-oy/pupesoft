@@ -113,16 +113,24 @@ echo "<font class='head'>".t("Laite hallinta")."</font><hr>";
 				var button = $(this);
 				var kohde_tunnus = button.parent().find('.kohde_tunnus').val();
 				$.ajax({
+					async: true,
 					type: 'GET',
-					url: 'yllapito.php?toim=kohde&del=1&del_relaatiot=1&tunnus=' + kohde_tunnus,
-					success: function() {
-						//poistetaan kohde_tr:n paikka_tr:t
-						button.parent().parent().parent().find('.paikat_' + kohde_tunnus).remove();
+					url: 'yllapito.php?toim=kohde&del=1&del_relaatiot=1&tunnus=' + kohde_tunnus
+				}).done(function() {
+					if (console && console.log) {
+						console.log('Kohteen poisto onnistui');
+					}
+					//poistetaan kohde_tr:n paikka_tr:t
+					button.parent().parent().parent().find('.paikat_' + kohde_tunnus).remove();
 
-						//poistetaan itse kohde_tr
-						button.parent().parent().remove();
-					},
-					async: true
+					//poistetaan itse kohde_tr
+					button.parent().parent().remove();
+
+				}).fail(function() {
+					if (console && console.log) {
+						console.log('Kohteen poisto EPÄONNISTUI');
+					}
+					alert($('#poisto_epaonnistui_message').val());
 				});
 			}
 		});
@@ -133,14 +141,22 @@ echo "<font class='head'>".t("Laite hallinta")."</font><hr>";
 			var ok = confirm($('#oletko_varma_confirm_message').val());
 			if (ok) {
 				var button = $(this);
-				var paikka_tunnus = button.parent().find('.paikka_tunnus').val();
+				var paikka_tunnus = button.parent().parent().find('.paikka_tunnus').val();
 				$.ajax({
+					async: true,
 					type: 'GET',
-					url: 'yllapito.php?toim=paikka&del=1&del_relaatiot=1&tunnus=' + paikka_tunnus,
-					success: function() {
-						button.parent().parent().remove();
-					},
-					async: true
+					url: 'yllapito.php?toim=paikka&del=1&del_relaatiot=1&tunnus=' + paikka_tunnus
+				}).done(function() {
+					if (console && console.log) {
+						console.log('Paikan poisto onnistui');
+					}
+					button.parent().parent().remove();
+
+				}).fail(function() {
+					if (console && console.log) {
+						console.log('Paikan poisto EPÄONNISTUI');
+					}
+					alert($('#poisto_epaonnistui_message').val());
 				});
 			}
 		});
@@ -153,12 +169,20 @@ echo "<font class='head'>".t("Laite hallinta")."</font><hr>";
 				var button = $(this);
 				var laite_tunnus = button.parent().find('.laite_tunnus').val();
 				$.ajax({
+					async: true,
 					type: 'GET',
-					url: 'yllapito.php?toim=laite&del=1&del_relaatiot=1&tunnus=' + laite_tunnus,
-					success: function() {
-						button.parent().parent().remove();
-					},
-					async: true
+					url: 'yllapito.php?toim=laite&del=1&del_relaatiot=1&tunnus=' + laite_tunnus
+				}).done(function() {
+					if (console && console.log) {
+						console.log('Laitteen poisto onnistui');
+					}
+					button.parent().parent().remove();
+
+				}).fail(function() {
+					if (console && console.log) {
+						console.log('Laitteen poisto EPÄONNISTUI');
+					}
+					alert($('#poisto_epaonnistui_message').val());
 				});
 			}
 		});
@@ -193,6 +217,7 @@ function echo_kayttoliittyma($request = array()) {
 	echo "<input type='hidden' id='down_arrow' value='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
 	echo "<input type='hidden' id='right_arrow' value='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />";
 	echo "<input type='hidden' id='oletko_varma_confirm_message' value='".t("Oletko varma")."' />";
+	echo "<input type='hidden' id='poisto_epaonnistui_message' value='".t("Poisto epäonnistui")."' />";
 
 	echo "<form method='POST' action='' name='asiakas_haku'>";
 
@@ -286,13 +311,14 @@ function paikka_tr($kohde_index, $paikat = array()) {
 
 			echo "<td>";
 			echo "<input type='hidden' class='paikka_tunnus' value='{$paikka_index}' />";
-			echo "<button class='poista_paikka'>".t("Poista paikka")."</button>";
 			echo "</td>";
 
 			echo "<td>";
 			echo "<a href='yllapito.php?toim=paikka&lopetus={$lopetus}&tunnus={$paikka_index}'>{$paikka['paikka_nimi']}</a>";
 			echo "&nbsp";
 			echo "<img class='porautumis_img' src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />";
+			echo "<br/>";
+			echo "<button class='poista_paikka'>".t("Poista paikka")."</button>";
 			echo "</td>";
 
 			echo "<td>";

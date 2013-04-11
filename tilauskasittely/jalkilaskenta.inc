@@ -81,13 +81,8 @@ if (!function_exists("korjaalaskut")) {
 
 			// katotaan saadaanko tehdä tiliöintejä
 			// tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
-			list($tkvv,$tkkk,$tkpp) = explode("-",$yhtiorow["tilikausi_alku"]);
-			list($klvv,$klkk,$klpp) = explode("-",$tilausrivi["laadittu"]);
-
-			$tilikausi_alku = (int) date('Ymd',mktime(0,0,0,$tkkk,$tkpp,$tkvv));
-			$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
-
-			// yritetään korjata jotain joka on lukitulla tilikaudella.. estetään se
+			$tilikausi_alku = (int) str_replace("-", "", $yhtiorow["tilikausi_alku"]);
+			$korjaus_alku = (int) str_replace("-", "", $tilausrivi["laadittu"]);
 
 			// Ok, löydämmekö vastaavan tiliöinnin laskulta
 			$query = "	SELECT *
@@ -288,10 +283,7 @@ if (!function_exists("korjaalaskut")) {
 
 				if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>".t("Laskun")." $tilausrivi[ltunnus] ".t("varastotiliöinti löytyi").".</font><br>";
 
-				list($klvv,$klkk,$klpp) = explode("-",$tiliointi1["tapvm"]);
-				$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
-
-				$pvm = $tilikausi_alku > $korjaus_alku ? $yhtiorow['tilikausi_alku'] : "";
+				$pvm = $tilikausi_alku > (int) str_replace("-", "", $tiliointi1["tapvm"]) ? $yhtiorow['tilikausi_alku'] : "";
 
 				// Ollaan avoimella tilikaudella
 				if ($pvm == "") {
@@ -430,7 +422,7 @@ if (!function_exists('korjaatapahtuma')) {
 		global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text;
 
 		// Haetaan ensimmäinen
-		$query = "	SELECT SUBSTRING(laadittu, 1, 10) laadittu, rivitunnus, tunnus, selite, kplhinta, hinta, kpl, laji
+		$query = "	SELECT LEFT(laadittu, 10) laadittu, rivitunnus, tunnus, selite, kplhinta, hinta, kpl, laji
 					FROM tapahtuma
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$tapahtuma_tunnus}'";
@@ -457,11 +449,8 @@ if (!function_exists('korjaatapahtuma')) {
 
 		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
-		list($tkvv,$tkkk,$tkpp) = explode("-",$yhtiorow["tilikausi_alku"]);
-		list($klvv,$klkk,$klpp) = explode("-",$tun_chk_row["laadittu"]);
-
-		$tilikausi_alku = (int) date('Ymd',mktime(0,0,0,$tkkk,$tkpp,$tkvv));
-		$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
+		$tilikausi_alku = (int) str_replace("-", "", $yhtiorow["tilikausi_alku"]);
+		$korjaus_alku   = (int) str_replace("-", "", $tun_chk_row["laadittu"]);
 
 		// Korjataan tapahtumia suljetulla tilikaudella
 		if ($tilikausi_alku > $korjaus_alku) {
@@ -787,7 +776,7 @@ if ($tuoteno != '') {
 
 						if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Lasketaan uudet hinnat tuotteelle: $tuote[tuoteno] Sort: Asc</font><br><br>";
 
-						while (($trow = mysql_fetch_assoc($result)) and ($jlerror == 0)) {
+						while ($trow = mysql_fetch_assoc($result) and $jlerror == 0) {
 
 							// kun löydetään eka tulo, voidaan alkaa hommiin...
 							if (($trow['laji'] == 'tulo' or $trow['laji'] == 'valmistus') and $eka == 1) {
@@ -886,11 +875,8 @@ if ($tuoteno != '') {
 
 									// katotaan saadaanko tehdä tiliöintejä
 									// tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
-									list($tkvv,$tkkk,$tkpp) = explode("-",$yhtiorow["tilikausi_alku"]);
-									list($klvv,$klkk,$klpp) = explode("-", substr($trow["laadittu"], 0, 10));
-
-									$tilikausi_alku = (int) date('Ymd',mktime(0,0,0, $tkkk, $tkpp, $tkvv));
-									$korjaus_alku   = (int) date('Ymd',mktime(0,0,0, $klkk, $klpp, $klvv));
+									$tilikausi_alku = (int) str_replace("-", "", $yhtiorow["tilikausi_alku"]);
+									$korjaus_alku   = (int) str_replace("-", "", substr($trow["laadittu"], 0, 10));
 
 									// Lasketaan onko luku muuttunut
 									$inventoinnin_varastonmuutos = round($trow["kpl"] * $uusikehahin - $invrow['summa'], 2);

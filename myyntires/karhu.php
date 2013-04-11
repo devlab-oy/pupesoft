@@ -18,6 +18,11 @@ if (!isset($lpvm_aikaa)) {
 	$lpvm_aikaa = 7;
 }
 
+// n‰in monta kertaa karhutun j‰lkeen ehdotetaan asiakkaalle myyntikieltoa
+if (!isset($karhu_kertaa)) {
+	$karhu_kertaa = 2;
+}
+
 if ($kukarow["kirjoitin"] == 0) {
 	echo "<font class='error'>".t("Sinulla pit‰‰ olla henkilˆkohtainen tulostin valittuna, ett‰ voit tulostaa karhuja").".</font><br>";
 	$tee = "";
@@ -465,7 +470,7 @@ if ($tee == 'KARHUA')  {
 		echo "</tr>\n";
 
 		// jos yht‰k‰‰n laskua on karhuttu kolmeen kertaan, tarjotaan asiakkaan asettamista myyntikieltoon
-		if ($lasku["karhuttu"] > 2) {
+		if ($lasku["karhuttu"] > $karhu_kertaa) {
 			$ehdota_maksukielto = 1;
 		}
 
@@ -486,7 +491,8 @@ if ($tee == 'KARHUA')  {
 	echo "</table><br>";
 
 	if ($ehdota_maksukielto) {
-		echo "<font class='error'><input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["ytunnus"]}'> " . t("Asiakkaalla on v‰hint‰‰n kolme kertaa karhuttu lasku. Aseta myyntikielto asiakkaille ytunnuksella").": {$asiakastiedot["ytunnus"]}</font>";
+		$karhuttu = $karhu_kertaa + 1;
+ 		echo "<font class='error'><input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["ytunnus"]}'> " . t("Asiakkaalla on v‰hint‰‰n ")." $karhuttu ". t(" kertaa karhuttu lasku. Aseta myyntikielto asiakkaille ytunnuksella").": {$asiakastiedot["ytunnus"]}</font>";
 	}
 
 	echo "<table>";

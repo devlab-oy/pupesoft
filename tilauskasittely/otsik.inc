@@ -1570,7 +1570,7 @@
 
 			//	Jos halutaan niin voidaan liittää hieman yhteyshenkilöitä
 			if ($yhtiorow["tilauksen_yhteyshenkilot"] == "K") {
-				$vasen_sarake[$vasen] .= "<td>".t("Tekninen yhteyshenkilö").":</td>
+				$vasen_sarake[$vasen] = "<td>".t("Tekninen yhteyshenkilö").":</td>
 											<td><select id='yhteyshenkilo_tekninen' name='yhteyshenkilo_tekninen'>";
 
 				$query = "	SELECT tunnus, if (titteli != '', concat_ws(', ' ,nimi, titteli), nimi) nimi
@@ -1600,7 +1600,7 @@
 				$vasen_sarake[$vasen] .= "</td>";
 				$vasen++;
 
-				$oikea_sarake[$oikea] .= "<td>".t("Projektipaallikko").":</td>
+				$oikea_sarake[$oikea] = "<td>".t("Projektipaallikko").":</td>
 					<td><select name='projektipaallikko'>";
 
 				$oikea_sarake[$oikea] .= "<option value=''>".t("Ei projektipäällikköä")."</option>";
@@ -1626,7 +1626,7 @@
 				$oikea_sarake[$oikea] .= "</td>";
 				$oikea++;
 
-				$vasen_sarake[$vasen] .= "<td>".t("Kaupallinen yhteyshenkilö").":</td>
+				$vasen_sarake[$vasen] = "<td>".t("Kaupallinen yhteyshenkilö").":</td>
 										<td><select id='yhteyshenkilo_kaupallinen' name='yhteyshenkilo_kaupallinen'>";
 
 				$vasen_sarake[$vasen] .= "<option value=''>".t("Ei kaupallista käsittelijää")."</option>";
@@ -1660,7 +1660,7 @@
 				$vasen++;
 			}
 			elseif ($toim == "REKLAMAATIO") {
-				$vasen_sarake[$vasen] .= "<td>".t("Tilaustyyppi").":</td>";
+				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 
 				//Jos kyseessä on työmääräys
 				echo "<input type='hidden' name='tilaustyyppi' value='R'>";
@@ -1670,7 +1670,7 @@
 			}
 
 			elseif ($toim == "EXTRANET_REKLAMAATIO") {
-				$vasen_sarake[$vasen] .= "<td>".t("Tilaustyyppi").":</td>";
+				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 
 				//Jos kyseessä on työmääräys
 				echo "<input type='hidden' name='tilaustyyppi' value='R'>";
@@ -1679,7 +1679,7 @@
 				$vasen++;
 			}
 			elseif ($toim == "TARJOUS") {
-				$vasen_sarake[$vasen] .= "<td>".t("Tilaustyyppi").":</td>";
+				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 
 				//Jos kyseessä on tarjous
 				echo "<input type='hidden' name='tilaustyyppi' value='T'>";
@@ -1688,7 +1688,7 @@
 				$vasen++;
 			}
 			elseif ($toim == "PROJEKTI") {
-				$vasen_sarake[$vasen] .= "<td>".t("Tilaustyyppi").":</td>";
+				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 
 				//Jos kyseessä on tarjous
 				echo "<input type='hidden' name='tilaustyyppi' value='P'>";
@@ -1697,7 +1697,7 @@
 				$vasen++;
 			}
 			elseif ($toim == "YLLAPITO") {
-				$vasen_sarake[$vasen] .= "<td>".t("Tilaustyyppi").":</td>";
+				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 
 				//Jos kyseessä on ylläpitosopimus
 				echo "<input type='hidden' name='tilaustyyppi' value='0'>";
@@ -1706,7 +1706,7 @@
 				$vasen++;
 			}
 			elseif ($toim == "MYYNTITILI") {
-				$vasen_sarake[$vasen] .= "<td>".t("Tilaustyyppi").":</td>";
+				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 
 				//Jos kyseessä on myyntitili niin laitetaan tilaustyypiksi M
 				echo "<input type='hidden' name='tilaustyyppi' value='M'>";
@@ -1726,7 +1726,7 @@
 				$vasen++;
 			}
 			elseif ($toim == "VALMISTAASIAKKAALLE") {
-				$vasen_sarake[$vasen] .= "<td>".t("Tilaustyyppi").":</td>";
+				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 
 				//Jos kyseessä on valmistus asiakkaalle niin laitetaan tilaustyypiksi V
 				echo "<input type='hidden' name='tilaustyyppi' value='V'>";
@@ -1740,7 +1740,7 @@
 					echo "<input type='hidden' name='clearing' value='$srow[clearing]'>";
 				}
 
-				$vasen_sarake[$vasen] .= "<td>".t("Tilaustyyppi").":</td>";
+				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 				echo "<input type='hidden' name='tilaustyyppi' value='E'>";
 				$vasen_sarake[$vasen] .= "<td>".t("Ennakkotilaus")."</td>";
 				$vasen++;
@@ -1752,7 +1752,7 @@
 					echo "<input type='hidden' name='clearing' value='$srow[clearing]'>";
 				}
 
-				$vasen_sarake[$vasen] .= "<td>".t("Tilaustyyppi").":</td>";
+				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 				$vasen_sarake[$vasen] .= "<td><select name='tilaustyyppi'>";
 
 				$sel = array();
@@ -1829,7 +1829,7 @@
 
 			$vasen_sarake[$vasen] .= "</select></td>";
 			$vasen++;
-			
+
 			if ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") {
 
 				$query = "	SELECT tunnus, nimi
@@ -2015,7 +2015,7 @@
 				$oikea++;
 			}
 
-			$vasen_sarake[$vasen] .= "<td>".t("Asiakkaan piiri").":</td><td>";
+			$vasen_sarake[$vasen] = "<td>".t("Asiakkaan piiri").":</td><td>";
 
 			$pres = t_avainsana("PIIRI");
 
@@ -2072,7 +2072,7 @@
 			$vasen_sarake[$vasen] .= "</select></td>";
 			$vasen++;
 
-			$oikea_sarake[$oikea] .= "<td>".t("Rahtivapaa").":</td>";
+			$oikea_sarake[$oikea] = "<td>".t("Rahtivapaa").":</td>";
 			$oikea_sarake[$oikea] .= "<td>";
 			$oikea_sarake[$oikea] .= "<input type='checkbox' id='rahtivapaa' name='rahtivapaa' $rahtivapaa_chk {$state_chk}>";
 

@@ -41,31 +41,27 @@
 		exit;
 	}
 
-	// m‰‰ritell‰‰n polut
-	if (!isset($verkkolaskut_in)) {
-		$verkkolaskut_in = "/home/verkkolaskut";
-	}
-	if (!isset($verkkolaskut_reject)){
-		$verkkolaskut_reject = "/home/verkkolaskut/reject";
-	}
-	if (!isset($verkkolaskut_error)) {
-		$verkkolaskut_error = "/home/verkkolaskut/error";
-	}
+	// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ss‰
+	$verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut"        : rtrim($verkkolaskut_in, "/");
+	$verkkolaskut_ok     = empty($verkkolaskut_ok)     ? "/home/verkkolaskut/ok"     : rtrim($verkkolaskut_ok, "/");
+	$verkkolaskut_orig   = empty($verkkolaskut_orig)   ? "/home/verkkolaskut/orig"   : rtrim($verkkolaskut_orig, "/");
+	$verkkolaskut_error  = empty($verkkolaskut_error)  ? "/home/verkkolaskut/error"  : rtrim($verkkolaskut_error, "/");
+	$verkkolaskut_reject = empty($verkkolaskut_reject) ? "/home/verkkolaskut/reject" : rtrim($verkkolaskut_reject, "/");
 
 	$verkkolaskuvirheet_kasittele	= $verkkolaskut_in;
 	$verkkolaskuvirheet_vaarat		= $verkkolaskut_error;
 	$verkkolaskuvirheet_poistetut	= $verkkolaskut_reject;
 
-
-	// ekotetaan javascripti‰ jotta saadaan pdf:‰t uuteen ikkunaan
-	js_openFormInNewWindow();
-
 	echo "<font class='head'>".t("Virheelliset verkkolaskut")."</font><hr>";
 
+	// VIRHE: verkkolasku-kansiot on v‰‰rin m‰‰ritelty!
 	if (!is_dir($verkkolaskuvirheet_poistetut) or !is_dir($verkkolaskuvirheet_vaarat) or !is_dir($verkkolaskuvirheet_kasittele)) {
 		echo t("Kansioissa ongelmia").": $verkkolaskuvirheet_poistetut, $verkkolaskuvirheet_vaarat, $verkkolaskuvirheet_kasittele<br>";
 		exit;
 	}
+
+	// ekotetaan javascripti‰ jotta saadaan pdf:‰t uuteen ikkunaan
+	js_openFormInNewWindow();
 
 	if (isset($tiedosto)) {
 		if ($tapa == 'U') {

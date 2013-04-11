@@ -558,11 +558,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			echo "<meta http-equiv='pragma' content='no-cache'>\n";
 			echo "<meta http-equiv='expires' content='-1'>\n";
 			echo "<meta http-equiv='content-type' content='text/html; charset=$charset'>\n";
+
 			# Jos mobile on setattu, otetaan auto-zoom pois käytöstä
 			if (isset($mobile) and $mobile) {
 				echo "<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>\n";
 				echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";
 			}
+
 			if (!isset($_GET["no_css"]) or $_GET["no_css"] != "yes") {
 				echo "<style type='text/css'>\n";
 				echo $css;
@@ -641,7 +643,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 						if (varastontunniste == undefined) varastontunniste = '';
 
-						$('#'+hyllyalue+'_hidden').val(varastontunniste+hyllyalue_val);
+						$('#hidden_'+hyllyalue).val(varastontunniste+hyllyalue_val);
 					};
 
 					$('input.hyllyalue').on('keyup change blur', hyllyalue_function);

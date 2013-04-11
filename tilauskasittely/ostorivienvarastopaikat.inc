@@ -449,34 +449,24 @@ if ($tee == "") {
 	else {
 		echo "<table>";
 
-		echo "	<script language='javascript'>
-				function WriteText(sarake) {
-					var count = document.varastopaikkaformi.elements.length;
-
-					for (j=0; j<count; j++) {
-						var element = document.varastopaikkaformi.elements[j];
-
-						if (sarake == 't1' && element.id.substring(0,2) == 't1') {
-							element.value=document.varastopaikkaformi.t1_kaikki.value;
-						}
-
-						if (sarake == 't2' && element.id.substring(0,2) == 't2') {
-							element.value=document.varastopaikkaformi.t2_kaikki.value;
-						}
-
-						if (sarake == 't3' && element.id.substring(0,2) == 't3') {
-							element.value=document.varastopaikkaformi.t3_kaikki.value;
-						}
-
-						if (sarake == 't4' && element.id.substring(0,2) == 't4') {
-							element.value=document.varastopaikkaformi.t4_kaikki.value;
-						}
-					}
-				}
-			</script> ";
-
 		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 				<!--
+				$(document).ready(function(){
+					var taytasarake = function() {
+
+						var sarake_id = $(this).attr('id').replace('taytasarake_', '');
+						var teksti = $(this).val();
+
+						$('input[id^='+sarake_id+']').each(
+							function() {
+								$(this).val(teksti);
+								$(this).trigger('change');
+							}
+						);
+					};
+
+					$('input[id^=taytasarake_]').on('keyup change blur', taytasarake);
+				});
 
 				function toggleAll(toggleBox) {
 
@@ -707,10 +697,10 @@ if ($tee == "") {
 		echo "</tr><tr>";
 		echo "<td colspan='3' class='back'></td>";
 		echo "<td colspan='2' align='right' class='back'>".t("Täytä kaikki kentät").":</td>";
-		echo "<td align='right'><input type='text' name='t1_kaikki' onKeyUp='WriteText(\"t1\");' value='' maxlength='5' size='5'></td>";
-		echo "<td><input type='text' name='t2_kaikki' onKeyUp='WriteText(\"t2\");' value='' maxlength='5' size='5'></td>";
-		echo "<td><input type='text' name='t3_kaikki' onKeyUp='WriteText(\"t3\");' value='' maxlength='5' size='5'></td>";
-		echo "<td><input type='text' name='t4_kaikki' onKeyUp='WriteText(\"t4\");' value='' maxlength='5' size='5'></td>";
+		echo "<td align='right'><input type='text' id='taytasarake_t1' maxlength='5' size='5'></td>";
+		echo "<td><input type='text' id='taytasarake_t2' maxlength='5' size='5'></td>";
+		echo "<td><input type='text' id='taytasarake_t3' maxlength='5' size='5'></td>";
+		echo "<td><input type='text' id='taytasarake_t4' maxlength='5' size='5'></td>";
 
 		echo "</tr>";
 		echo "</table>";

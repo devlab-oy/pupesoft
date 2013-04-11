@@ -19411,7 +19411,7 @@ if (!function_exists('hyllyalue')) {
 			$hyllyalue_value = substr("{$hyllyalue_value}", (int) $yhtiorow['varastontunniste']);
 
 			$input_html .= "	<input type='text' class='hyllyalue' id='{$hyllyalue_key}' size='{$size}' maxlength='{$maxlength}' value = '{$hyllyalue_value}' />
-								<input type='hidden' id='{$hyllyalue_key}_hidden' name='{$hyllyalue_key}' value='{$varastolisa}{$hyllyalue_value}' />";
+								<input type='hidden' id='hidden_{$hyllyalue_key}' name='{$hyllyalue_key}' value='{$varastolisa}{$hyllyalue_value}' />";
 
 			return $input_html;
 		}

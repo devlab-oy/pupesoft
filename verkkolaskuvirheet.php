@@ -42,11 +42,11 @@
 	}
 
 	// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ssä
-	$verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut/"        : $verkkolaskut_in;
-	$verkkolaskut_ok     = empty($verkkolaskut_ok)     ? "/home/verkkolaskut/ok/"     : $verkkolaskut_ok;
-	$verkkolaskut_orig   = empty($verkkolaskut_orig)   ? "/home/verkkolaskut/orig/"   : $verkkolaskut_orig;
-	$verkkolaskut_error  = empty($verkkolaskut_error)  ? "/home/verkkolaskut/error/"  : $verkkolaskut_error;
-	$verkkolaskut_reject = empty($verkkolaskut_reject) ? "/home/verkkolaskut/reject/" : $verkkolaskut_reject;
+	$verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut"        : rtrim($verkkolaskut_in, "/");
+	$verkkolaskut_ok     = empty($verkkolaskut_ok)     ? "/home/verkkolaskut/ok"     : rtrim($verkkolaskut_ok, "/");
+	$verkkolaskut_orig   = empty($verkkolaskut_orig)   ? "/home/verkkolaskut/orig"   : rtrim($verkkolaskut_orig, "/");
+	$verkkolaskut_error  = empty($verkkolaskut_error)  ? "/home/verkkolaskut/error"  : rtrim($verkkolaskut_error, "/");
+	$verkkolaskut_reject = empty($verkkolaskut_reject) ? "/home/verkkolaskut/reject" : rtrim($verkkolaskut_reject, "/");
 
 	$verkkolaskuvirheet_kasittele	= $verkkolaskut_in;
 	$verkkolaskuvirheet_vaarat		= $verkkolaskut_error;

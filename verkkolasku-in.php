@@ -16,8 +16,6 @@
 	}
 	else {
 
-		touch("/tmp/##verkkolasku-in.lock");
-
 		// Kutsutaanko CLI:st‰
 		$php_cli = FALSE;
 
@@ -25,42 +23,39 @@
 			$php_cli = TRUE;
 		}
 
+		// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ss‰
+		$verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut"        : rtrim($verkkolaskut_in, "/");
+		$verkkolaskut_ok     = empty($verkkolaskut_ok)     ? "/home/verkkolaskut/ok"     : rtrim($verkkolaskut_ok, "/");
+		$verkkolaskut_orig   = empty($verkkolaskut_orig)   ? "/home/verkkolaskut/orig"   : rtrim($verkkolaskut_orig, "/");
+		$verkkolaskut_error  = empty($verkkolaskut_error)  ? "/home/verkkolaskut/error"  : rtrim($verkkolaskut_error, "/");
+		$verkkolaskut_reject = empty($verkkolaskut_reject) ? "/home/verkkolaskut/reject" : rtrim($verkkolaskut_reject, "/");
+
+		// VIRHE: verkkolasku-kansiot on v‰‰rin m‰‰ritelty!
+		if (!is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) exit;
+		if (!is_dir($verkkolaskut_ok) or !is_writable($verkkolaskut_ok)) exit;
+		if (!is_dir($verkkolaskut_orig) or !is_writable($verkkolaskut_orig)) exit;
+		if (!is_dir($verkkolaskut_error) or !is_writable($verkkolaskut_error)) exit;
+		if (!is_dir($verkkolaskut_reject) or !is_writable($verkkolaskut_reject)) exit;
+
+		$laskut     = $verkkolaskut_in;
+		$oklaskut   = $verkkolaskut_ok;
+		$origlaskut = $verkkolaskut_orig;
+		$errlaskut  = $verkkolaskut_error;
+
+		touch("/tmp/##verkkolasku-in.lock");
+
 		if ($php_cli) {
-			//Komentorivilt‰
+			// Komentorivilt‰
 			// otetaan includepath aina rootista
 			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 			error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 			ini_set("display_errors", 0);
 
 			require ("inc/connect.inc"); // otetaan tietokantayhteys
-
-			// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ss‰
-			$verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut/"        : $verkkolaskut_in;
-			$verkkolaskut_ok     = empty($verkkolaskut_ok)     ? "/home/verkkolaskut/ok/"     : $verkkolaskut_ok;
-			$verkkolaskut_orig   = empty($verkkolaskut_orig)   ? "/home/verkkolaskut/orig/"   : $verkkolaskut_orig;
-			$verkkolaskut_error  = empty($verkkolaskut_error)  ? "/home/verkkolaskut/error/"  : $verkkolaskut_error;
-			$verkkolaskut_reject = empty($verkkolaskut_reject) ? "/home/verkkolaskut/reject/" : $verkkolaskut_reject;
-
-			// VIRHE: verkkolasku-kansiot on v‰‰rin m‰‰ritelty!
-			if (!is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) exit;
-			if (!is_dir($verkkolaskut_ok) or !is_writable($verkkolaskut_ok)) exit;
-			if (!is_dir($verkkolaskut_orig) or !is_writable($verkkolaskut_orig)) exit;
-			if (!is_dir($verkkolaskut_error) or !is_writable($verkkolaskut_error)) exit;
-			if (!is_dir($verkkolaskut_reject) or !is_writable($verkkolaskut_reject)) exit;
-
-			$laskut     = $verkkolaskut_in;
-			$oklaskut   = $verkkolaskut_ok;
-			$origlaskut = $verkkolaskut_orig;
-			$errlaskut  = $verkkolaskut_error;
 		}
 		elseif (strpos($_SERVER['SCRIPT_NAME'], "tiliote.php") !== FALSE and $verkkolaskut_in != "" and $verkkolaskut_ok != "" and $verkkolaskut_orig != "" and $verkkolaskut_error != "") {
 			//Pupesoftista
 			echo "Aloitetaan verkkolaskun sis‰‰nluku...<br>\n<br>\n";
-
-			$laskut     = $verkkolaskut_in;
-			$oklaskut   = $verkkolaskut_ok;
-			$origlaskut = $verkkolaskut_orig;
-			$errlaskut  = $verkkolaskut_error;
 
 			// Kopsataan uploadatta faili verkkoalskudirikkaan
 			$copy_boob = copy($filenimi, $laskut."/".$userfile);
@@ -122,7 +117,7 @@
 						}
 						$alku = $loppu = "";
 						list($alku,$loppu) = explode("####",$laskuvirhe);
-						
+
 						if (trim($loppu) == "ASN") {
 							// ei tehd‰ mit‰‰n vaan annetaan j‰‰d‰ roikkumaan kansioon seuraavaan kierrokseen saakka, tai kunnes joku lukee postit.
 						}

@@ -151,6 +151,20 @@ if(!function_exists("yhtion_parametrittarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "apix_tunnus") {
+			if ($verkkolasku_lah_talteen == "apix" and trim($t[$i]) == "") {
+				$virhe[$i] = t("Pakollinen: apix_tunnus!");
+				$virhe[$verkkolasku_lah_talteen_i] = t("Pakollisia: apix_tunnus ja apix_avain!!");
+			}
+		}
+
+		if (mysql_field_name($result, $i) == "apix_avain") {
+			if ($verkkolasku_lah_talteen == "apix" and trim($t[$i]) == "") {
+				$virhe[$i] = t("Pakollinen: apix_avain!");
+				$virhe[$verkkolasku_lah_talteen_i] = t("Pakollisia: apix_tunnus ja apix_avain!");
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "verkkolasku_lah") {
 			$verkkolasku_lah_talteen = trim($t[$i]);
 			$verkkolasku_lah_talteen_i = $i;

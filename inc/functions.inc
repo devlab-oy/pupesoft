@@ -6534,6 +6534,15 @@ if (!function_exists("enable_ajax")) {
 <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
 
 	var toggled = Array();
+
+	var delay_ms = function() {
+	    var timer = 0;
+	    return function(callback, ms) {
+	        clearTimeout (timer);
+	        timer = setTimeout(callback, ms);
+	    }
+	}();
+
 	function AJAXInteraction(urli, id, data, href) {
 
 		var http = createRequestObject();
@@ -8438,7 +8447,9 @@ if (!function_exists("livesearch_tuotehaku")) {
 						LIMIT 500";
 			$result = pupe_query($query);
 
-			if (mysql_num_rows($result) > 0) {
+			$tuote_search_count = mysql_num_rows($result);
+
+			if ($tuote_search_count > 0) {
 
 				while ($row = mysql_fetch_assoc($result)) {
 
@@ -8476,7 +8487,13 @@ if (!function_exists("livesearch_tuotehaku")) {
 
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ".t("tuotetta").", ".t("näytetään")." 500 ".t("tarkinta osumaa").".</font></div>";
+				$tuote_search_info = t("Haulla löytyi")." {$tuote_search_count} ".t("tuotetta");
+
+				if ($tuote_search_count > 500) {
+					$tuote_search_info .= ", ".t("näytetään")." 500 ".t("tarkinta osumaa");
+				}
+
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>{$tuote_search_info}.</font></div>";
 			}
 			else {
 				echo "<div style='padding:2px'><font class='message'>".t("Ei tuotteita.")."</font></div>";
@@ -8772,7 +8789,10 @@ if (!function_exists("livesearch_kentta")) {
 		$return = "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
 					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit', '$vero_field');\"
 					onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
-							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&livesearch_vero_field=$vero_field&ohje=off&toim=$toim&livesearch_haku='+this.value);
+							var inputti_value = this.value;
+							delay_ms(function() {
+								sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&livesearch_vero_field=$vero_field&ohje=off&toim=$toim&livesearch_haku='+inputti_value);
+							}, 500);
 							keyStrokeIndex = -1;";
 		if ($vero_field) {
 			$return .= "hae_oletusalv('$hakuID', '$vero_field');";
@@ -17556,7 +17576,7 @@ if (!function_exists("pupeFileReader")) {
 
         	while ($rivi = fgets($file)) {
         		// luetaan rivi tiedostosta..
-        		$rivi = explode("\t", str_replace(array("'", "\\"), "", $rivi));
+        		$rivi = explode("\t", pupesoft_cleanstring($rivi));
 
         		for ($colIndex = 0; $colIndex < count($rivi); $colIndex++) {
         			$excelrivit[$rowIndex][$colIndex] = trim($rivi[$colIndex]);
@@ -19439,7 +19459,7 @@ if (!function_exists('hyllyalue')) {
 			$hyllyalue_value = substr("{$hyllyalue_value}", (int) $yhtiorow['varastontunniste']);
 
 			$input_html .= "	<input type='text' class='hyllyalue' id='{$hyllyalue_key}' size='{$size}' maxlength='{$maxlength}' value = '{$hyllyalue_value}' />
-								<input type='hidden' id='{$hyllyalue_key}_hidden' name='{$hyllyalue_key}' value='{$varastolisa}{$hyllyalue_value}' />";
+								<input type='hidden' id='hidden_{$hyllyalue_key}' name='{$hyllyalue_key}' value='{$varastolisa}{$hyllyalue_value}' />";
 
 			return $input_html;
 		}

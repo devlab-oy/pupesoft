@@ -17576,7 +17576,7 @@ if (!function_exists("pupeFileReader")) {
 
         	while ($rivi = fgets($file)) {
         		// luetaan rivi tiedostosta..
-        		$rivi = explode("\t", str_replace(array("'", "\\"), "", $rivi));
+        		$rivi = explode("\t", pupesoft_cleanstring($rivi));
 
         		for ($colIndex = 0; $colIndex < count($rivi); $colIndex++) {
         			$excelrivit[$rowIndex][$colIndex] = trim($rivi[$colIndex]);

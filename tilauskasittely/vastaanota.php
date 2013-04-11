@@ -122,9 +122,7 @@
 				$bvarasto	= '';
 
 				// luetaan rivi tiedostosta..
-				$poista	  = array("'", "\\");
-				$rivi	  = str_replace($poista,"",$rivi);
-				$rivi	  = explode("\t", trim($rivi));
+				$rivi = explode("\t", pupesoft_cleanstring($rivi));
 
 				$tuoteno  = $rivi[0];
 				$varattu  = $rivi[1];

@@ -297,7 +297,7 @@
 			if (mysql_num_rows($sresult) == 0) {
 				$nimitys 		= t($posrow["kuvaus"], $kielirow["kieli"]);
 				$rivikommentti 	= t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"],2)."% ";
-				
+
 				if ($posrow["lisatiedot"] != "") {
 					$rivikommentti .= "\n ".$posrow["lisatiedot"];
 				}
@@ -322,12 +322,12 @@
 					else {
 						$nimitys 		= t($posrow["kuvaus"], $kielirow["kieli"]);
 						$rivikommentti 	= t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"],2)."% ";
-						
+
 						if ($posrow["lisatiedot"] != "") {
 							$rivikommentti .= "\n ".$posrow["lisatiedot"];
 						}
 					}
-					
+
 					$varattu = $yhtiorow['ennakkolaskun_tyyppi'] == 'E' ? $row['varattu'] : 1;
 					$tilkpl = $yhtiorow['ennakkolaskun_tyyppi'] == 'E' ? $row['tilkpl'] : 1;
 

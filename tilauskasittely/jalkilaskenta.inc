@@ -545,8 +545,8 @@ if ($tuoteno != '') {
 					WHERE tilausrivi.yhtio 		= '$kukarow[yhtio]'
 					and ((tilausrivi.tyyppi = 'O' and tilausrivi.kpl > 0) or (tilausrivi.tyyppi = 'L' and tilausrivi.kpl < 0))
 					and tilausrivi.laskutettuaika != '0000-00-00'
-					and tilausrivi.tunnus 			= '$rivitunnus'
-					and tilausrivi.tuoteno 		= '$tuoteno'";
+					and tilausrivi.tunnus  = '$rivitunnus'
+					and tilausrivi.tuoteno = '$tuoteno'";
 		$rxiviresult = pupe_query($query);
 
 		if (mysql_num_rows($rxiviresult) == 1 and is_numeric($uusihinta)) {
@@ -625,19 +625,33 @@ if ($tuoteno != '') {
 		//Tähän haaraan mennään jos tuotteella ei ole sarjanumeroseurantaa eli ylläpidetään keskihankintahintaa tuotteella
 
 		//Alkusaldo
-		$query  = "SELECT sum(saldo) saldo FROM tuotepaikat WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+		$query  = "	SELECT sum(saldo) saldo
+					FROM tuotepaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tuoteno = '$tuoteno'";
 		$result = pupe_query($query);
 		$saldo  = mysql_fetch_assoc ($result);
 
 		//Kääntöpiste
-		$query = "SELECT * FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and laji in ('tulo','valmistus') and tuoteno = '$tuoteno' and rivitunnus='$rivitunnus'";
+		$query = "	SELECT *
+					FROM tapahtuma
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND laji in ('tulo','valmistus')
+					AND tuoteno = '$tuoteno'
+					AND rivitunnus = '$rivitunnus'";
 		$result = pupe_query($query);
 
 		//taaksepäin yhteensopivuuden vuoksi kokeillaan vielä näin jos ei rivitunnuksella löydy
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Tarkkaa kääntöpisteen tapahtumaa ei löytynyt! Käytetään päivän ensimmäistä tuloa")." $rivitunnus @ $pvm.</font><br>";
 
-			$query = "SELECT * FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and left(laadittu,10)='$pvm' and laji in ('tulo','valmistus') limit 1";
+			$query = "	SELECT * 
+						FROM tapahtuma 
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND tuoteno = '$tuoteno' 
+						AND left(laadittu,10) = '$pvm' 
+						AND laji in ('tulo','valmistus') 
+						LIMIT 1";
 			$result = pupe_query($query);
 		}
 		//Jos samalla rivitunuksella löytyy monta tapahtumaa, niin oletamme että olemme saaneet sisään $tapahtumatunnus muuttujan

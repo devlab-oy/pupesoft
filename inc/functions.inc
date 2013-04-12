@@ -18550,7 +18550,7 @@ if (!function_exists("kopioitapahtuma")) {
 				$kennimi = mysql_field_name($result, $i);
 
 				if ($kennimi != 'tunnus') {
-					if (isset($params[$kennimi]) and $params[$kennimi] != "") {
+					if (isset($params[$kennimi])) {
 						$query .= "{$kennimi} ='{$params[$kennimi]}',";
 					}
 					else {

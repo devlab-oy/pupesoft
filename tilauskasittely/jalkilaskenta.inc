@@ -443,7 +443,8 @@ if (!function_exists('korjaatapahtuma')) {
 
 		// Poistetaan vanhat korjaustapahtumat
 		// Tämä keissi on tärkeä, jos tilikauden alkua ollaan siirretty taaksepäin historiaan
-		$query = "	DELETE FROM tapahtuma
+		$query = "	DELETE
+					FROM tapahtuma
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laji = 'korjaus'
 					AND rivitunnus != 0
@@ -634,7 +635,7 @@ if ($tuoteno != '') {
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tuoteno = '$tuoteno'";
 		$result = pupe_query($query);
-		$saldo  = mysql_fetch_assoc ($result);
+		$saldo  = mysql_fetch_assoc($result);
 
 		//Kääntöpiste
 		$query = "	SELECT *
@@ -649,12 +650,12 @@ if ($tuoteno != '') {
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Tarkkaa kääntöpisteen tapahtumaa ei löytynyt! Käytetään päivän ensimmäistä tuloa")." $rivitunnus @ $pvm.</font><br>";
 
-			$query = "	SELECT * 
-						FROM tapahtuma 
-						WHERE yhtio = '$kukarow[yhtio]' 
-						AND tuoteno = '$tuoteno' 
-						AND left(laadittu,10) = '$pvm' 
-						AND laji in ('tulo','valmistus') 
+			$query = "	SELECT *
+						FROM tapahtuma
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tuoteno = '$tuoteno'
+						AND left(laadittu,10) = '$pvm'
+						AND laji in ('tulo','valmistus')
 						LIMIT 1";
 			$result = pupe_query($query);
 		}
@@ -662,7 +663,13 @@ if ($tuoteno != '') {
 		elseif (mysql_num_rows($result) > 1) {
 			echo "<font class='error'>".t("Samalla rivitunnuksella löytyi useita kääntöpisteitä! Käytämme sekä rivitunnusta että tapahtumatunnusta.")."</font><br>";
 
-			$query = "SELECT * FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and laji in ('tulo','valmistus') and tuoteno = '$tuoteno' and rivitunnus='$rivitunnus' and tunnus='$tapahtumatunnus'";
+			$query = "	SELECT *
+						FROM tapahtuma
+						WHERE yhtio    = '$kukarow[yhtio]'
+						and laji in ('tulo','valmistus')
+						and tuoteno    = '$tuoteno'
+						and rivitunnus = '$rivitunnus'
+						and tunnus     = '$tapahtumatunnus'";
 			$result = pupe_query($query);
 		}
 
@@ -690,8 +697,7 @@ if ($tuoteno != '') {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoteno'
 						and laadittu >= '$pvm'
-						and kpl <> 0
-						ORDER BY laadittu desc";
+						and kpl <> 0";
 			$result = pupe_query($query);
 
 			if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
@@ -700,7 +706,7 @@ if ($tuoteno != '') {
 
 				$trow = mysql_fetch_assoc($result);
 
-				// epäkuranttisuutta ei osata poistaa --> We are fucked!
+				// epäkuranttisuutta ei osata poistaa --> ai ai!
 				if ($trow['epaku'] > 0) {
 					echo "<font class='error'>".t("Tuotteella on epäkuranttisuuden muutos. Emme osaa toimia!")."</font><br>";
 					$jlerror=1;
@@ -715,7 +721,7 @@ if ($tuoteno != '') {
 				}
 
 				// tämä muuttuja tulee valmistusten korjauksesta, ja muutellaan saldoa jos niin pitää tehdä
-				if ($kaantopisteen_saldomuutos != 0) {
+				if (isset($kaantopisteen_saldomuutos) and $kaantopisteen_saldomuutos != 0) {
 					$uusisaldo += $kaantopisteen_saldomuutos;
 					$seliselilisa .= " + $kaantopisteen_saldomuutos ";
 				}
@@ -762,7 +768,10 @@ if ($tuoteno != '') {
 				if ($jlerror == 0) {
 
 					// haetaan ostotilausrivin tiedot
-					$query = "SELECT * from tilausrivi WHERE yhtio='$kukarow[yhtio]' and tunnus='$rivitunnus'";
+					$query = "	SELECT *
+								FROM tilausrivi
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus  = '$rivitunnus'";
 					$result = pupe_query($query);
 					$apujlrow = mysql_fetch_assoc($result);
 
@@ -770,7 +779,10 @@ if ($tuoteno != '') {
 					$testiapukala = round($uusihinta * $apujlrow["kpl"], $yhtiorow['hintapyoristys']);
 
 					// päivitetään ostotilausrivin rivihinta
-					$query  = "UPDATE tilausrivi set rivihinta = '$testiapukala' WHERE yhtio='$kukarow[yhtio]' and tunnus='$rivitunnus'";
+					$query  = "	UPDATE tilausrivi
+								SET rivihinta = '$testiapukala'
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus  = '$rivitunnus'";
 					$result = pupe_query($query);
 
 					// Nyt lasketaan kaikki hankintahinnat uusiksi
@@ -851,6 +863,7 @@ if ($tuoteno != '') {
 											and tunnus 	= '$trow[rivitunnus]'";
 								$myyntitil_apures = pupe_query($query);
 								$myyntitil_apurow = mysql_fetch_assoc($myyntitil_apures);
+								
 								$myyntitil_uusikate = $myyntitil_apurow['rivihinta'] - $myyntitil_apurow['kpl'] * $uusikehahin;
 
 								// plussaillaan tätä vaan jos keskihankintahinta tai kate muuttuu, niin tiedetään pitääkö tehdä jälkilaskentaa

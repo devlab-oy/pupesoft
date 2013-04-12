@@ -115,6 +115,8 @@ if (!function_exists("korjaalaskut")) {
 			// otetaan löydettyjen rivien määrä talteen
 			$tilikpl = mysql_num_rows($result);
 
+			$uusi_varastonmuutos = 0;
+
 			// Haetaan tunnukset ja sitten uusi varastonmuutos
 			$query = "	SELECT GROUP_CONCAT(tilausrivi.tunnus) tunnukset
 						FROM tilausrivi USE INDEX (uusiotunnus_index)
@@ -124,16 +126,18 @@ if (!function_exists("korjaalaskut")) {
 			$tunnukset_res = pupe_query($query);
 			$tunnukset_row = mysql_fetch_assoc($tunnukset_res);
 
-			// Haetaan uusi varastonmuutos
-			$query = "	SELECT SUM(tapahtuma.hinta * tapahtuma.kpl) * -1 AS tapahtuman_hinta
-						FROM tapahtuma USE INDEX (yhtio_laji_rivitunnus)
-						WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
-						AND tapahtuma.laji IN ('laskutus', 'korjaus')
-						AND tapahtuma.rivitunnus IN ({$tunnukset_row['tunnukset']})";
-			$hinta_chk_res = pupe_query($query);
-			$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
+			if (trim($tunnukset_row['tunnukset']) != '') {
+				// Haetaan uusi varastonmuutos
+				$query = "	SELECT SUM(tapahtuma.hinta * tapahtuma.kpl) * -1 AS tapahtuman_hinta
+							FROM tapahtuma USE INDEX (yhtio_laji_rivitunnus)
+							WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
+							AND tapahtuma.laji IN ('laskutus', 'korjaus')
+							AND tapahtuma.rivitunnus IN ({$tunnukset_row['tunnukset']})";
+				$hinta_chk_res = pupe_query($query);
+				$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
 
-			$uusi_varastonmuutos = $hinta_chk_row['tapahtuman_hinta'];
+				$uusi_varastonmuutos = $hinta_chk_row['tapahtuman_hinta'];
+			}
 
 			// lasketaan uusi kate
 			$uusikate = $tilausrivi['rivihinta'] - $tilausrivi['kpl'] * $kehahin;

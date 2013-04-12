@@ -2677,7 +2677,25 @@ if (!function_exists("jalkilaskentafunktio")) {
 		$rivitunnus = mikä on tapahtuman tehneen rivin tunnus (ostorivitunnus)
 		*/
 
+		// Taulut lukkoon.
+		$qu = "	LOCK TABLE asiakas READ,
+				lasku WRITE,
+				sarjanumeroseuranta READ,
+				tapahtuma WRITE,
+				tilausrivi WRITE,
+				tilausrivin_lisatiedot READ,
+				tiliointi WRITE,
+				tuote WRITE,
+				tuotepaikat READ,
+				tuotteen_alv READ,
+				yhtio READ,
+				yhtion_toimipaikat READ";
+		$re = pupe_query($qu);
+
 		require("tilauskasittely/jalkilaskenta.inc");
+
+		$qu = "UNLOCK TABLES";
+		$re = pupe_query($qu);
 
 		return $uusikehahin;
 	}

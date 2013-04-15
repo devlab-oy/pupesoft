@@ -28,6 +28,8 @@ if ($php_cli) {
 
 	// laitetaan pupe-rootti ja tilauskäsittely mukaan includepathiin
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname($argv[0])).PATH_SEPARATOR.dirname($argv[0]));
+	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+	ini_set("display_errors", 0);
 }
 
 if (!function_exists('jt_toimita_editilaus')) {

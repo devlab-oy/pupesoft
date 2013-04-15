@@ -1565,10 +1565,10 @@
 			$sel4 = "selected";
 		}
 
-		$ulos .= "<option value='1' $sel1>".t("Rahtikirjasta tulostetaan 1 kopiota.")."</option>";
-		$ulos .= "<option value='2' $sel2>".t("Rahtikirjasta tulostetaan 2 kopiota.")."</option>";
-		$ulos .= "<option value='3' $sel3>".t("Rahtikirjasta tulostetaan 3 kopiota.")."</option>";
-		$ulos .= "<option value='4' $sel4>".t("Rahtikirjasta tulostetaan 4 kopiota.")."</option>";
+		$ulos .= "<option value='1' $sel1>".t("Laskusta tulostetaan 1 kopio.")."</option>";
+		$ulos .= "<option value='2' $sel2>".t("Laskusta tulostetaan 2 kopiota.")."</option>";
+		$ulos .= "<option value='3' $sel3>".t("Laskusta tulostetaan 3 kopiota.")."</option>";
+		$ulos .= "<option value='4' $sel4>".t("Laskusta tulostetaan 4 kopiota.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

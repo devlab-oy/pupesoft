@@ -341,6 +341,9 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 							}
 						}
 
+						// Vain vastaavat taulussa on vaihtoehtoinen kenttä
+						$vaihtoehtoinen_lisa = ($table == 'vastaavat') ? "vaihtoehtoinen = '$vaihtoehtoinen'," : '';
+
 						//katotaan, että tuote löytyy
 						$tquery = "	SELECT tuoteno
 									FROM tuote
@@ -381,7 +384,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
 									if ($vastaava_paatuote == $rivi[$j]) $jarjestys = 1;
 
-									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys', vaihtoehtoinen='$vaihtoehtoinen', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
+									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys', $vaihtoehtoinen_lisa laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 								}
 								else {
 									$kysely = " and tuoteno='$rivi[$j]' ";
@@ -423,7 +426,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
 								$kquery = "	UPDATE $table
 											SET jarjestys = $jarjestys,
-											vaihtoehtoinen = '$vaihtoehtoinen',
+											$vaihtoehtoinen_lisa
 											muuttaja = '$kukarow[kuka]',
 											muutospvm = now()
 											WHERE tuoteno = '$rivi[$j]'
@@ -434,6 +437,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 								$lask++;
 							}
 							else {
+								if ($table == 'vastaavat' and $j == 0) continue; // Skipataan virhe vastaavat ketjua etsittävällä tuotteella
 								echo t("Tuote")," {$rivi[$j]} ",t("on jo tässä ketjussa"),"!<br>";
 							}
 						}
@@ -546,7 +550,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 	// Tiivistetään vastaavat ketjusta välit pois
 	tiivista_vastaavat_tuoteketju($id);
 
-	echo t("Päivitettiin")," $lask ",t("riviä"),"!";
+	echo t("Päivitettiin")," $lask ",t("riviä"),"! ($id)";
 }
 else {
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data'>

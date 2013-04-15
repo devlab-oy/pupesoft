@@ -388,7 +388,9 @@
 			if (mysql_num_rows($uvresult) > 0) {
 				while ($valmisteet = mysql_fetch_assoc($uvresult)) {
 					$kaikenkaikkiaan_arvot_silloin[$tilrivirow["perheid"]][$valmisteet["tuoteno"]] = $valmisteet["summa"];
-					$kaikenkaikkiaan_arvot_silloin_yht[$tilrivirow["perheid"]] += $valmisteet["summa"];
+
+					if (!isset($kaikenkaikkiaan_arvot_silloin_yht[$tilrivirow["perheid"]])) $kaikenkaikkiaan_arvot_silloin_yht[$tilrivirow["perheid"]] = $valmisteet["summa"];
+					else $kaikenkaikkiaan_arvot_silloin_yht[$tilrivirow["perheid"]] += $valmisteet["summa"];
 				}
 			}
 		}

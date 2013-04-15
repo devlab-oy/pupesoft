@@ -394,8 +394,9 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	// Osuus kululaskuista # Osuus eturahdista
 	$hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'] * $osuus, 6);
 
-	$tulliprossa = 0;
-	$tv_nimrow	 = "";
+	$tulliprossa   = 0;
+	$aputullimaara = 0;
+	$tv_nimrow	   = "";
 
 	if ($tv_kaytossa and $tilrivirow["var"] == "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 		// lis‰t‰‰n tulli
@@ -409,14 +410,12 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	// Tulli% # Aputullim‰‰r‰
 	$hankintakulut .= "#".sprintf('%.02f',$tulliprossa)."#".sprintf('%.02f',$aputullimaara);
+	$kuluteksti = "";
 
 	// lis‰t‰‰n riville extra kulu, jos sellanen oli annettu
 	if ($tilrivirow["kate"] != 0) {
 		$kuluteksti = "($ohinta + $tilrivirow[kate])";
 		$ohinta = $ohinta + $tilrivirow['kate'];
-	}
-	else {
-		//$kuluteksti = "";
 	}
 
 	// Varastoonvientip‰iv‰
@@ -905,21 +904,21 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	$varastoon_msg .= "	<td valign='top'>$tilrivirow[tuoteno]</td>
 						<td align='right' valign='top'>$tilrivirow[varattu]<br>".sprintf('%.2f', $tilrivirow['varattu']*$tuorow['tuotekerroin'])."</td>
-						<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta'])."<br>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta']*$tuorow['tuotekerroin'])."</td>
+						<td align='right' valign='top'>".sprintf('%.'.$yhtiorow['hintapyoristys'].'f', $tilrivirow['hinta'])."<br>".sprintf('%.'.$yhtiorow['hintapyoristys'].'f', $tilrivirow['hinta']*$tuorow['tuotekerroin'])."</td>
 						<td align='right' valign='top'>".$tilrivirow["alennuksetyht"]."%</td>
 						<td align='right' valign='top'>".sprintf('%.6f', $osuus)."</td>
 						<td align='right' valign='top'>".sprintf('%.6f', $osuus*$rahtikulut)."</td>";
 
 	if ($tv_kaytossa) $varastoon_msg .= "<td align='right' valign='top'>$tv_nimrow[maara] $tv_nimrow[rahayksikko]</td>";
 
-	$varastoon_msg .= "<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $ohinta)."</td>
-						<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $ohinta*$tilrivirow['varattu']) . " $kuluteksti</td>";
+	$varastoon_msg .= "<td align='right' valign='top'>".sprintf('%.'.$yhtiorow['hintapyoristys'].'f', $ohinta)."</td>
+						<td align='right' valign='top'>".sprintf('%.'.$yhtiorow['hintapyoristys'].'f', $ohinta*$tilrivirow['varattu']) . " $kuluteksti</td>";
 
 	if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
 		$varastoon_msg .= "	<td align='right'></td>";
 	}
 	else {
-		if ($uusikehahin == "") {
+		if (!isset($uusikehahin) or $uusikehahin == "") {
 
 			$varastoon_fontti = "";
 			if ($kehahin <= 0) {
@@ -1159,6 +1158,9 @@ if ($mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tullaan_automaattik
 }
 
 if ($tee == "") {
+
+	if (!isset($suuntalavan_tunnus)) $suuntalavan_tunnus = "";
+
 	echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavan_tunnus}' />";
 
 	if ($yhtiorow['suuntalavat'] == 'S' and $tee == '' and trim($suuntalavan_tunnus) != '' and trim($koko_suuntalava) == 'X') {

@@ -1193,7 +1193,12 @@ if ($tuoteno != '') {
 					} // end if numrows > 0
 
 					// päivitetään lopulta tuotteelle uusi kehahin ja vihahin
-					$query = "UPDATE tuote SET kehahin = '$uusikehahin', vihahin = round('$uusihinta','$yhtiorow[hintapyoristys]'), vihapvm = now() WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+					$query = "	UPDATE tuote
+								SET kehahin = '$uusikehahin',
+								vihahin     = round('$uusihinta','$yhtiorow[hintapyoristys]'),
+								vihapvm     = now()
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$tuoteno'";
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 					$result = pupe_query($query);
 				}

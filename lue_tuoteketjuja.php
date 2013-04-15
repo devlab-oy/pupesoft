@@ -275,7 +275,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
 				// Jos vastaavia koitetaan muokata tai poistaa ja "päätuotteella" ei löytynyt ketjua,
 				// ei voida tehdä mitään.
-				if ($table == "vastaavat" and $rivi[$postoiminto] != 'LISAA') {
+				if ($table == "vastaavat" and strtoupper(trim($rivi[$postoiminto])) != 'LISAA') {
 					echo t("Ketjua ei löydy, et voi muuttaa / poistaa")."<br>";
 					$id = 0;
 				}

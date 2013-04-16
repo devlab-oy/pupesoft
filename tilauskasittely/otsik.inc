@@ -759,13 +759,16 @@
 		$alv_velvollisuus = "";
 		$alkuperainen_toimipaikka = $yhtiorow['toimipaikka'];
 
-		if (!isset($srow['yhtio_toimipaikka'])) {
+		if (!isset($srow['yhtio_toimipaikka']) and !empty($srow['maa'])) {
 			$alhqur = "SELECT tunnus from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$srow[maa]' and vat_numero != ''";
 			$alhire = pupe_query($alhqur);
-			$alhiro  = mysql_fetch_assoc($alhire);
-			$kukarow['toimipaikka'] = $alhiro['tunnus'];
+
+			if (mysql_num_rows($alhire) > 0) {
+				$alhiro  = mysql_fetch_assoc($alhire);
+				$kukarow['toimipaikka'] = $alhiro['tunnus'];
+			}
 		}
-		else {
+		elseif (!empty($srow['yhtio_toimipaikka'])) {
 			$kukarow['toimipaikka'] = $srow['yhtio_toimipaikka'];
 		}
 

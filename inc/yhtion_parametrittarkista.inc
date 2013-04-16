@@ -129,11 +129,11 @@ if(!function_exists("yhtion_parametrittarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "lasku_logo") {
-			$tiedostopaate = array("JPG","PNG");
+			$tiedostopaate = array("JPG");
 		}
 
 		if (mysql_field_name($result, $i) == "logo") {
-			$tiedostopaate = array("JPG","PNG", "GIF");
+			$tiedostopaate = array("JPG", "PNG", "GIF");
 		}
 
 		if (mysql_field_name($result, $i) == "maventa_api_avain") {

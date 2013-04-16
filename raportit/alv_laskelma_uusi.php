@@ -834,6 +834,22 @@
 						$vero += $trow['bruttosumma'];
 					}
 				}
+
+				// Vähennetään mahdolliset tehdaspalautukset
+				$query = "SELECT vero, sum(round(tiliointi.summa * vero / 100 * -1, 2)) veronmaara, count(*) kpl
+							FROM tiliointi
+							JOIN lasku on (lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus)
+							WHERE tiliointi.yhtio='artr'
+							AND tiliointi.korjattu = ''
+							AND tiliointi.tilino in ('31111','31112','31116','31118','32111','32112','32113')
+							AND tiliointi.tapvm >= '2013-04-01'
+							AND tiliointi.tapvm <= '2013-04-30'
+							AND lasku.tilaustyyppi='9'";
+				$palautukset = pupe_query($query);
+
+				while ($palautus = mysql_fetch_assoc($palautukset)) {
+					$vero -= $palautus['veronmaara'];
+				}
 			}
 
 			if ($cleantaso == 'fi312' or $cleantaso == 'fi311') {
@@ -878,14 +894,15 @@
 			$tilirow = mysql_fetch_assoc($tilires);
 
 			if ($tilirow['tilit'] != '') {
-				$query = "	SELECT vero, sum(round(summa * vero / 100 * -1, 2)) veronmaara, count(*) kpl
+				$query = "	SELECT vero, sum(round(tiliointi.summa * vero / 100 * -1, 2)) veronmaara, count(*) kpl
 							FROM tiliointi
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND korjattu = ''
-							AND tilino in ($tilirow[tilit])
-							AND tapvm >= '$startmonth'
-							AND tapvm <= '$endmonth'
-							AND vero > 0
+							JOIN lasku on (lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tilaustyyppi!=9)
+							WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+							AND tiliointi.korjattu = ''
+							AND tiliointi.tilino in ($tilirow[tilit])
+							AND tiliointi.tapvm >= '$startmonth'
+							AND tiliointi.tapvm <= '$endmonth'
+							AND tiliointi.vero > 0
 							GROUP BY vero
 							ORDER BY vero DESC";
 				$verores = pupe_query($query);

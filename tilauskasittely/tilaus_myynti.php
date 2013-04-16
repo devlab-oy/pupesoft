@@ -1863,7 +1863,8 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
+						AND (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')
+						AND varastopaikat.tyyppi==''";
 			$vtresult = pupe_query($query);
 			$vtrow = mysql_fetch_assoc($vtresult);
 

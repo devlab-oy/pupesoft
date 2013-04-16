@@ -1413,7 +1413,7 @@ $debug = 1;
 						if (!empty($rtuoteno[$i]["isa_olemassa_split"])) {
 
 							$query = "	UPDATE tilausrivi SET
-										perheid = {$rtuoteno[$i]["isa_olemassa"]}
+										perheid = {$rtuoteno[$i]["isa_olemassa_split"]}
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus IN ({$rtuoteno[$i]["isa_olemassa_split"]}, {$extraa})";
 							$upd_res = pupe_query($query);

@@ -387,6 +387,17 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 		$kukarow = mysql_fetch_assoc($result);
 
+		// Tehd‰‰n cookieita, jos tarvitaan
+
+		// Muokka Tilaus
+		if ($phpnimi == "muokkaatilaus.php") {
+			// Muistetaan asiakastietojen valinta
+			if (!empty($asiakastiedot)) {
+				// tehd‰‰n cookie, voimassa 30 pv
+				setcookie("pupesoft_muokkaatilaus", $asiakastiedot, time()+60*60*24*30, "/");
+			}
+		}
+
 		// Unohdetaan tallennettu state jos tullaan suoraan indexsvassista
 		if (isset($pupe_DataTables) and isset($indexvas) and $indexvas == 1) {
 

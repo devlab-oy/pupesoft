@@ -4,7 +4,7 @@
 $debug = 1;
 
 	if (!function_exists("teccom_kaytettavat_tilausrivit")) {
-		function teccom_kaytettavat_tilausrivit($checkres, $lajilisa) {
+		function teccom_kaytettavat_tilausrivit($checkres, $lajilisa, $debug = 0) {
 
 			global $kukarow, $debug;
 
@@ -81,7 +81,7 @@ $debug = 1;
 	}
 
 	if (!function_exists('etsi_sopivat_tilausrivit')) {
-		function etsi_sopivat_tilausrivit($data, $lajilisa, $trow, $toim_tuotenolisa, $isalisa = "") {
+		function etsi_sopivat_tilausrivit($data, $lajilisa, $trow, $toim_tuotenolisa, $isalisa = "", $debug = 0) {
 			global $kukarow ,$debug;
 
 			if ($debug == 1) {
@@ -125,7 +125,7 @@ $debug = 1;
  					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				}
 
-				$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
+				$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 			}
 
 			if (count($kaytettavat_tilausrivit) == 0) {
@@ -163,7 +163,7 @@ $debug = 1;
 					if ($debug == 1) {
 	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 				}
 			}
 
@@ -201,7 +201,7 @@ $debug = 1;
 					if ($debug == 1) {
 	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 				}
 			}
 
@@ -239,7 +239,7 @@ $debug = 1;
 					if ($debug == 1) {
 	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 				}
 			}
 
@@ -276,7 +276,7 @@ $debug = 1;
 					if ($debug == 1) {
 	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 				}
 			}
 
@@ -310,7 +310,7 @@ $debug = 1;
 					if ($debug == 1) {
 	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 				}
 			}
 
@@ -347,7 +347,7 @@ $debug = 1;
 					if ($debug == 1) {
 	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 				}
 			}
 
@@ -380,7 +380,7 @@ $debug = 1;
 					if ($debug == 1) {
 	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 				}
 			}
 
@@ -416,7 +416,7 @@ $debug = 1;
 					if ($debug == 1) {
 	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 				}
 			}
 
@@ -448,7 +448,7 @@ $debug = 1;
 					if ($debug == 1) {
 	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 				}
 			}
 
@@ -457,7 +457,7 @@ $debug = 1;
 	}
 
 	if (!function_exists('tuoteperhe_check')) {
-		function tuoteperhe_check($tunnus) {
+		function tuoteperhe_check($tunnus, $debug = 0) {
 			global $kukarow, $debug;
 
 			if ($debug == 1) {
@@ -551,7 +551,7 @@ $debug = 1;
 	}
 
 	if (!function_exists('ostoilla_vai_keikoilla')) {
-		function ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tunnus, $row, $data) {
+		function ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tunnus, $row, $data, $debug = 0) {
 			global $kukarow, $debug;
 
 			if ($debug == 1) {
@@ -600,7 +600,7 @@ $debug = 1;
 	}
 
 	if (!function_exists('kopioi_tapahtuma')) {
-		function kopioi_tapahtuma($_arr, $kappaleerotus, $kpl) {
+		function kopioi_tapahtuma($_arr, $kappaleerotus, $kpl, $debug = 0) {
 			global $kukarow, $debug;
 
 			if ($debug == 1) {
@@ -654,7 +654,7 @@ $debug = 1;
 	}
 
 	if (!function_exists('paivita_ja_splittaa')) {
-		function paivita_ja_splittaa($row, $datan_kpl, $kappaleerotus) {
+		function paivita_ja_splittaa($row, $datan_kpl, $kappaleerotus, $debug = 0) {
 			global $kukarow, $debug;
 
 			if ($debug == 1) {
@@ -745,7 +745,7 @@ $debug = 1;
 
 				if ($myynti_tilausrivi_id_isa != 0) $_arr[$myynti_rivi_row_isa['tunnus']] = $myynti_tilausrivi_id_isa;
 
-				kopioi_tapahtuma($_arr, $kappaleerotus, $datan_kpl);
+				kopioi_tapahtuma($_arr, $kappaleerotus, $datan_kpl, $debug);
 			}
 
 			// katsotaan onko tuoteperheen is‰tuote
@@ -866,7 +866,7 @@ $debug = 1;
 
 						if ($myynti_tilausrivi_id_lapsi != 0) $_arr[$myynti_rivi_row['tunnus']] = $myynti_tilausrivi_id_lapsi;
 
-						kopioi_tapahtuma($_arr, $kappaleerotus, $datan_kpl);
+						kopioi_tapahtuma($_arr, $kappaleerotus, $datan_kpl, $debug);
 					}
 				}
 			}
@@ -1037,7 +1037,7 @@ $debug = 1;
 			if ($debug == 1) {
 				echo "<br>Katotaa etsi_sopivat_tilausrivit<br>";
 			}
-			$kaytettavat_tilausrivit = etsi_sopivat_tilausrivit($rtuoteno[$i], $lajilisa, $trow, $toim_tuotenolisa, $isalisa);
+			$kaytettavat_tilausrivit = etsi_sopivat_tilausrivit($rtuoteno[$i], $lajilisa, $trow, $toim_tuotenolisa, $isalisa, $debug);
 			if ($debug == 1) {
 				echo "<br>Katottiin etsi_sopivat_tilausrivit<br>";
 				echo "<pre>",var_dump($kaytettavat_tilausrivit),"</pre>";
@@ -1083,7 +1083,7 @@ $debug = 1;
 					$tilausrivirow = mysql_fetch_assoc($tilausrivires);
 				}
 
-				$tilausrivirow['perheid'] = tuoteperhe_check($tilausrivirow['tunnus']);
+				$tilausrivirow['perheid'] = tuoteperhe_check($tilausrivirow['tunnus'], $debug);
 
 				if ($tilausrivirow['perheid'] == $tilausrivirow['tunnus']) {
 
@@ -1123,7 +1123,7 @@ $debug = 1;
 									AND laji = '{$lajilisa}'";
 					pupe_query($update_asn);
 
-					list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilausrivirow['tunnus'], $tilausrivirow, $rtuoteno[$i]);
+					list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilausrivirow['tunnus'], $tilausrivirow, $rtuoteno[$i], $debug);
 				}
 				elseif ($rtuoteno[$i]["kpl"] < $tilausrivirow["varattu"]) {
 					// Splitataan tilausrivi, tallennetaan vanha rivitunnus tilausrivi.tilaajanrivinro kentt‰‰n
@@ -1133,7 +1133,7 @@ $debug = 1;
 						echo "KAPPALEITA!!! $kappaleerotus = $tilausrivirow[varattu] - {$rtuoteno[$i]["kpl"]}<br><br>";
 					}
 
-					paivita_ja_splittaa($tilausrivirow, $rtuoteno[$i]["kpl"], $kappaleerotus);
+					paivita_ja_splittaa($tilausrivirow, $rtuoteno[$i]["kpl"], $kappaleerotus, $debug);
 
 					$update_asn = "	UPDATE asn_sanomat SET
 									tilausrivi = '{$tilausrivirow['tunnus']}',
@@ -1151,7 +1151,7 @@ $debug = 1;
 
 					$foo = pupe_query($update_asn);
 
-					list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilausrivirow['tunnus'], $tilausrivirow, $rtuoteno[$i]);
+					list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilausrivirow['tunnus'], $tilausrivirow, $rtuoteno[$i], $debug);
 				}
 				else {
 					// tuli enemm‰n kuin tilattu
@@ -1260,6 +1260,7 @@ $debug = 1;
 						}
 						$kokeillaan = pupe_query($query);
 
+						$laskuri_tmp = $laskuri;
 						$laskuri = 0;
 
 						while ($kokeiltiin = mysql_fetch_assoc($kokeillaan)) {
@@ -1337,6 +1338,9 @@ $debug = 1;
 								echo "ylimaaraista ".($ylimaaraista - $laskuri)." = {$ylimaaraista} - $laskuri<br><br>";
 							}
 							$ylimaaraista = $ylimaaraista - $laskuri;
+
+							// Kokonaislaskurim‰‰r‰
+							$laskuri += $laskuri_tmp;
 						}
 					}
 
@@ -1378,6 +1382,7 @@ $debug = 1;
 									break;
 								case 'kpl':
 								case 'rivihinta':
+								case 'perheid':
 									$values .= ", 0";
 									break;
 								case 'laskutettuaika':
@@ -1396,6 +1401,23 @@ $debug = 1;
 						$uusires = pupe_query($kysely);
 						$extraa = mysql_insert_id();
 						$lisa_array[]			= $extraa;
+
+						// Tarkistetaan onko t‰m‰ is‰rivi ($i+1 tarkoittaa sit‰ ett‰ ollaan laitettu lapsialkiolle is‰n tunnus talteen "isa_olemassa"-kentt‰‰n)
+						// Otetaan is‰n splitattuneen osion tunnus talteen, ett‰ osataan seuraavalla kierroksella p‰ivitt‰‰ tuoteperhe kuntoon
+						if (!empty($rtuoteno[$i+1]["isa_olemassa"])) {
+							$rtuoteno[$i+1]["isa_olemassa_split"] = $extraa;
+						}
+
+						// Tarkistetaan onko t‰m‰ lapsirivi
+						// Jos on, laitetaan perheid kuntoon
+						if (!empty($rtuoteno[$i]["isa_olemassa_split"])) {
+
+							$query = "	UPDATE tilausrivi SET
+										perheid = {$rtuoteno[$i]["isa_olemassa"]}
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus IN ({$rtuoteno[$i]["isa_olemassa_split"]}, {$extraa})";
+							$upd_res = pupe_query($query);
+						}
 
 						$upd_tuoteno = $tilausrivirow['tuoteno'];
 					}
@@ -1422,7 +1444,7 @@ $debug = 1;
 							echo "Ylim‰‰r‰ist‰ < 0 (eli $ylimaaraista)<br><br>";
 						}
 
-						paivita_ja_splittaa($split_row, $erotus, $positiivinen_arvo);
+						paivita_ja_splittaa($split_row, $erotus, $positiivinen_arvo, $debug);
 
 						$upd_tuoteno = $split_row['tuoteno'];
 						if ($debug == 1) {
@@ -1450,7 +1472,7 @@ $debug = 1;
 						$uusiotunnus_res = pupe_query($query);
 						$uusiotunnus_row = mysql_fetch_assoc($uusiotunnus_res);
 
-						list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilriv, $tilausrivirow, $rtuoteno[$i]);
+						list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilriv, $tilausrivirow, $rtuoteno[$i], $debug);
 					}
 				}
 			}

@@ -532,6 +532,11 @@
 				if ($kk_row['laji'] == 'K') {
 					$korvaavat_kiellot = "KIELTO";
 				}
+				// Korvaavia tuotteita myyd‰‰n, mik‰li korvaavuusketjusta lˆytyy tilattu m‰‰r‰"
+				elseif ($kk_row['laji'] == 'O') {
+					$korvaavat_kiellot = "KORVAAVAT";
+					$kaikkituotteet = array(); // Nollataan kaikkituotteet array
+				}
 				// Korvaavia tuotteidenta myyd‰‰n, mik‰li yksitt‰ist‰ korvaavaa lˆytyy tilattu m‰‰r‰‰
 				elseif ($kk_row['laji'] == 'Q') {
 					$korvaavat_kiellot = "UNIIKKI";
@@ -566,13 +571,23 @@
 			// Haetaan vastaavuusketjut korvaavat ketjun p‰‰tuotteella
 			require 'vastaavat.class.php';
 
-
 			// Vastaavat tuotteet array
 			$vastaavat_tuotteet = array();
 			$kommentti_lisa = "";
 
+			// Jos tuote on vain vastaavat ketjussa niin sit‰ voidaan myyd‰ vaikka korvaavat kieltoja olisi
+			if ($korvaavat_kiellot == "UNIIKKI" or $korvaavat_kiellot == "KORVAAVAT") {
+				if (empty($korvaavat_tuotteet)) {
+					$vastaavat = new Vastaavat($tuoteno);
+					$tuote = $vastaavat->tuotteet();
+
+					if (!empty($tuote[0])) {
+						$vastaavat_tuotteet[] = $tuote[0];
+					}
+				}
+			}
 			// Vastaavien automaattinen myynti, eli haetaanko vastaavat
-			if ($korvaavat_kiellot == "VASTAAVAT") {
+			elseif ($korvaavat_kiellot == "VASTAAVAT") {
 
 				// Jos tilatulla tuotteella ei korvaavia lˆydy, haetaan vastaavat myyt‰v‰ll‰ tuotteella.
 				// Muulloin etsit‰‰n vastaavat lˆydetyn korvaavuusketjun p‰‰tuotteen mukaan.
@@ -602,7 +617,7 @@
 
 						// Lis‰t‰‰n vain samaaa tyyppi‰ olevia tuotteita
 						if ($vastaavat->getTyyppi() == $_tuote['vaihtoehtoinen']) {
-								$vastaavat_tuotteet[] = $_tuote;
+							$vastaavat_tuotteet[] = $_tuote;
 						}
 					}
 				}
@@ -610,7 +625,6 @@
 
 			// Yhdistet‰‰n korvaavat ja vastaavat (ja vaihtoehtoiset?) ketjut
 			$tuote_ketju = array_merge($korvaavat_tuotteet, $vastaavat_tuotteet);
-
 
 			// Tuotteen korvaavat ja vastaavat ketju
 			foreach ($tuote_ketju as $krow2) {
@@ -1235,7 +1249,7 @@
 					and ytunnus in ('$laskurow[ytunnus]','*')
 					and osasto in ('$trow[osasto]','*')
 					and try in ('$trow[try]','*')
-					and laji in ('O', 'Q')";
+					and laji in ('Q')";
 		$kkres = pupe_query($query);
 
 		// jos result on nolla, saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi

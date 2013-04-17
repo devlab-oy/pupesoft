@@ -1406,6 +1406,9 @@ $debug = 1;
 						// Otetaan is‰n splitattuneen osion tunnus talteen, ett‰ osataan seuraavalla kierroksella p‰ivitt‰‰ tuoteperhe kuntoon
 						if (!empty($rtuoteno[$i+1]["isa_olemassa"])) {
 							$rtuoteno[$i+1]["isa_olemassa_split"] = $extraa;
+							if ($debug == 1) {
+								echo "isa_olemassa_split:".$rtuoteno[$i+1]["isa_olemassa_split"] ." = " . $extraa . "<br>";
+							}
 						}
 
 						// Tarkistetaan onko t‰m‰ lapsirivi
@@ -1417,6 +1420,10 @@ $debug = 1;
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus IN ({$rtuoteno[$i]["isa_olemassa_split"]}, {$extraa})";
 							$upd_res = pupe_query($query);
+							
+							if ($debug == 1) {
+								echo "<pre>$query</pre>";
+							}
 						}
 
 						$upd_tuoteno = $tilausrivirow['tuoteno'];

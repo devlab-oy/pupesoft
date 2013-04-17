@@ -1932,7 +1932,7 @@ if (!function_exists('alvierittely')) {
 			$where = " tilausrivi.otunnus='$laskurow[tunnus]' and tilausrivi.tyyppi in ('L','W','E') and ((tilausrivi.varattu+tilausrivi.jt != 0 and tilausrivi.laskutettuaika = '0000-00-00') or (tilausrivi.kpl != 0 and tilausrivi.laskutettuaika != '0000-00-00'))";
 		}
 		else {
-			$where = " uusiotunnus = '$laskurow[tunnus]' ";
+			$where = " tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.tyyppi='L' ";
 		}
 
 		//Haetaan kaikki alvikannat riveiltä
@@ -1940,7 +1940,6 @@ if (!function_exists('alvierittely')) {
 						FROM tilausrivi
 						WHERE $where
 						and yhtio	= '$kukarow[yhtio]'
-						and tyyppi	= 'L'
 						ORDER BY alv";
 		$alvresult = pupe_query($alvquery);
 		$kala -= 10;
@@ -1956,7 +1955,7 @@ if (!function_exists('alvierittely')) {
 							sum(round(tilausrivi.rivihinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1),2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
+							WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and $where";
 			}
 			elseif ($alvrow["alv"] >= 500) {
 				$aquery = "	SELECT
@@ -1972,7 +1971,7 @@ if (!function_exists('alvierittely')) {
 							sum(tilausrivi.rivihinta $kassa_ale_lisa) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
+							WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and $where";
 			}
 			elseif ($alvrow["alv"] < 500 and $toim != 'PROFORMA' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 				$aquery = "	SELECT
@@ -1980,7 +1979,7 @@ if (!function_exists('alvierittely')) {
 							sum(round((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa},2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
+							WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and $where";
 			}
 			else {
 				$aquery = "	SELECT

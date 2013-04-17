@@ -76,6 +76,10 @@
 				</script>";
 
 
+		if (!isset($piilotetut_varastot)) {
+			$piilotetut_varastot = "";
+		}
+
 		if (isset($supertee) and $supertee == "RAPORTOI" and !isset($laske_varastonarvot)) {
 			$supertee = "";
 		}
@@ -250,7 +254,7 @@
 
 		echo "</select></td></tr>";
 
-		if($piilotetut_varastot != 'on') {
+		if ($piilotetut_varastot != 'on') {
 			$piilotetut_varastot_where = ' AND tyyppi != "P"';
 		}
 
@@ -733,8 +737,10 @@
 			$bruttovaraston_arvo = 0;
 			$lask++;
 
-			if (!isset($ed_variaatio)) $ed_variaatio = $row['variaatio'];
-			if (!isset($ed_vari)) $ed_vari = $row['vari'];
+			if ($variaatiosummaus != "") {
+				if (!isset($ed_variaatio)) $ed_variaatio = $row['variaatio'];
+				if (!isset($ed_vari)) $ed_vari = $row['vari'];
+			}
 
 			if (!$php_cli and $elements > 0) {
 				$bar->increase();

@@ -824,7 +824,7 @@
 						<input type='hidden' name = 'asiakasid' value='{$asiakasrow['tunnus']}' />
 						<input type='hidden' name = 'ytunnus' value='{$ytunnus}' />
 						<input type='hidden' name = 'valintra' value='{$valintra}' />
-						<input type='submit' value='",t("Lähetä sähköpostilla valitut laskut"),"' />";
+						<input type='submit' value='",t("Lähetä asiakkaan sähköpostiin valitut laskut"),"' />";
 					echo "</td>";
 					echo "</tr>";
 					echo "</table>";

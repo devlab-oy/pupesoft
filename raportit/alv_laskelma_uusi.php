@@ -841,9 +841,8 @@
 							JOIN lasku on (lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus)
 							WHERE tiliointi.yhtio='artr'
 							AND tiliointi.korjattu = ''
-							AND tiliointi.tilino in ('31111','31112','31116','31118','32111','32112','32113')
-							AND tiliointi.tapvm >= '2013-04-01'
-							AND tiliointi.tapvm <= '2013-04-30'
+							AND tiliointi.tapvm >= '$startmonth'
+							AND tiliointi.tapvm <= '$endmonth'
 							AND lasku.tilaustyyppi='9'";
 				$palautukset = pupe_query($query);
 

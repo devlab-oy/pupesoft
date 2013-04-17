@@ -1165,7 +1165,7 @@ if ($tuoteno != '') {
 											$korjattavat_valmistukset[] = $invrow["otunnus"];
 										}
 
-										if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>".t("Törmättiin kulutustapahtumaan, valmistus pitäisi laskea uudestaan").": $invrow[otunnus]!</font><br>";
+										if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>".t("Törmättiin kulutustapahtumaan, valmistus pitäisi laskea uudestaan").": $invrow[otunnus]! Vanha hinta: $trow[hinta], uusi hinta: $uusikehahin</font><br>";
 									}
 								}
 
@@ -1179,6 +1179,9 @@ if ($tuoteno != '') {
 								// päivitetään hinta vain jos hinta on eri
 								// tai korjataan tapahtumat jos tapahtuma on lukitulla tilikaudella
 								if ($trow["hinta"] != $uusikehahin) {
+
+									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjataan tapahtuma! Keskihinta: $uusikehahin Vanha hinta: $trow[hinta]</font><br>";
+
 									$upd_kplhinta = in_array($trow["laji"], array("kulutus", "tulo", "valmistus")) ? TRUE : FALSE;
 
 									$selite_txt = in_array($trow['laji'], array('tulo', 'valmistus')) ? ",<br>Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")" : "";

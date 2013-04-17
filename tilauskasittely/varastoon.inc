@@ -283,7 +283,7 @@ $jtrivit	 	 = array();
 $jtrivit_paikat	 = array();
 $jtvarastot	 	 = array();
 $rivia 		 	 = 0;
-$korjattavat_valmistukset 	  = array();
+$korjattavat_valmistukset = array();
 $korjattavat_valmistukset_ind = 0;
 $suoralisa 	= "";
 
@@ -328,7 +328,10 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	}
 
 	// lasketaan keskihankintahinta, tarvitaan tuotteen saldo ja tuotteen tiedot
-	$query  = "SELECT sum(saldo) saldo from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]'";
+	$query  = "	SELECT sum(saldo) saldo
+				FROM tuotepaikat
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tuoteno = '$tilrivirow[tuoteno]'";
 	$salres = pupe_query($query);
 	$salrow = mysql_fetch_assoc($salres);
 
@@ -478,7 +481,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		}
 	}
 
-	$summa += round($ohinta*$tilrivirow['varattu'],2);
+	$summa += round($ohinta*$tilrivirow['varattu'], 2);
 
 	if ($toiminto == "kaikkiok" and $tee == "varma") {
 		// tarvitaan
@@ -509,7 +512,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 			}
 		}
 	}
-	elseif($toiminto == "kalkyyli" and $tee == "varastoon") {
+	elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
 		// p‰ivitet‰‰n tilausrivin rivihintaa
 		$query  = "	UPDATE tilausrivi set
@@ -529,7 +532,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 					$kehalis
 					vihahin     = round('$ohinta','$yhtiorow[hintapyoristys]'),
 					vihapvm     = '$varastoonvientipva'
-					WHERE yhtio = '$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$tilrivirow[tuoteno]'";
 		$result = pupe_query($query);
 
 		if ($tuorow["sarjanumeroseuranta"] == "E" or $tuorow["sarjanumeroseuranta"] == "F" or $tuorow["sarjanumeroseuranta"] == "G") {
@@ -571,10 +575,10 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 					hinta      = '$kehahin',
 					kplhinta   = '$ohinta',
 					laji       = 'tulo',
-					hyllyalue 	= '$tilrivirow[hyllyalue]',
-					hyllynro 	= '$tilrivirow[hyllynro]',
-					hyllytaso 	= '$tilrivirow[hyllytaso]',
-					hyllyvali 	= '$tilrivirow[hyllyvali]',
+					hyllyalue  = '$tilrivirow[hyllyalue]',
+					hyllynro   = '$tilrivirow[hyllynro]',
+					hyllytaso  = '$tilrivirow[hyllytaso]',
+					hyllyvali  = '$tilrivirow[hyllyvali]',
 					selite     = '$laskurow[nimi] $laskurow[nimitark], ".t("Tilaus").": $tilrivirow[otunnus], ".t("Ostohinta").": $ohinta $lisavartlisa',
 					laatija    = '$kukarow[kuka]',
 					rivitunnus = '$tilrivirow[tunnus]',
@@ -587,10 +591,10 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 			$query = "	SELECT *
 						FROM tuotepaikat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tuoteno = '{$tilrivirow['tuoteno']}'
+						WHERE yhtio   = '{$kukarow['yhtio']}'
+						AND tuoteno   = '{$tilrivirow['tuoteno']}'
 						AND hyllyalue = '{$tilrivirow['hyllyalue']}'
-						AND hyllynro = '{$tilrivirow['hyllynro']}'
+						AND hyllynro  = '{$tilrivirow['hyllynro']}'
 						AND hyllytaso = '{$tilrivirow['hyllytaso']}'
 						AND hyllyvali = '{$tilrivirow['hyllyvali']}'
 						LIMIT 1";
@@ -911,8 +915,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	if ($tv_kaytossa) $varastoon_msg .= "<td align='right' valign='top'>$tv_nimrow[maara] $tv_nimrow[rahayksikko]</td>";
 
-	$varastoon_msg .= "<td align='right' valign='top'>".sprintf('%.'.$yhtiorow['hintapyoristys'].'f', $ohinta)."</td>
-						<td align='right' valign='top'>".sprintf('%.'.$yhtiorow['hintapyoristys'].'f', $ohinta*$tilrivirow['varattu']) . " $kuluteksti</td>";
+	$varastoon_msg .= "<td align='right' valign='top'>".sprintf('%.6f', $ohinta)."</td>
+						<td align='right' valign='top'>".sprintf('%.6f', $ohinta*$tilrivirow['varattu']) . " $kuluteksti</td>";
 
 	if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
 		$varastoon_msg .= "	<td align='right'></td>";

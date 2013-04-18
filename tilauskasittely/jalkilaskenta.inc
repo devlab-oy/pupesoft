@@ -298,14 +298,18 @@ if (!function_exists("korjaalaskut")) {
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
+					if (stripos($tiliointi1['selite'], t("Jälkilaskennan korjaus")) === FALSE and stripos($tiliointi1['selite'], "Jälkilaskennan korjaus") === FALSE) {
+						$tiliointi1['selite'] = "{$tiliointi1['selite']} ".t("Jälkilaskennan korjaus");
+					}
+
 					// Tehdään uusi varastonmuutostiliöinti
 					$params = array(
-						'summa' => ($tiliointi1['summa'] + $muutos),
-						'korjattu' => '',
-						'korjausaika' => '',
-						'laatija' => $kukarow['kuka'],
-						'laadittu' => date('Y-m-d H:i:s'),
-						'selite' => "{$tiliointi1['selite']} ".t("Jälkilaskennan korjaus"),
+						'summa' 		=> ($tiliointi1['summa'] + $muutos),
+						'korjattu' 		=> '',
+						'korjausaika' 	=> '',
+						'laatija' 		=> $kukarow['kuka'],
+						'laadittu' 		=> date('Y-m-d H:i:s'),
+						'selite' 		=> $tiliointi1['selite'],
 					);
 
 					// Tehdään vastakirjaus alkuperäiselle varastonmuutostiliöinnille
@@ -317,14 +321,18 @@ if (!function_exists("korjaalaskut")) {
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
+					if (stripos($tiliointi2['selite'], t("Jälkilaskennan korjaus")) === FALSE and stripos($tiliointi2['selite'], "Jälkilaskennan korjaus") === FALSE) {
+						$tiliointi2['selite'] = "{$tiliointi2['selite']} ".t("Jälkilaskennan korjaus");
+					}
+
 					// Tehdään uusi varastotiliöinti
 					$params = array(
-						'summa' => ($tiliointi2['summa'] - $muutos),
-						'korjattu' => '',
-						'korjausaika' => '',
-						'laatija' => $kukarow['kuka'],
-						'laadittu' => date('Y-m-d H:i:s'),
-						'selite' => "{$tiliointi2['selite']} ".t("Jälkilaskennan korjaus"),
+						'summa' 		=> ($tiliointi2['summa'] - $muutos),
+						'korjattu' 		=> '',
+						'korjausaika' 	=> '',
+						'laatija' 		=> $kukarow['kuka'],
+						'laadittu' 		=> date('Y-m-d H:i:s'),
+						'selite' 		=> $tiliointi2['selite'],
 					);
 
 					// Tehdään vastakirjaus alkuperäiselle varastonmuutostiliöinnille

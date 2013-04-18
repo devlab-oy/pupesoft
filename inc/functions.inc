@@ -2710,21 +2710,21 @@ if (!function_exists("jalkilaske_valmistus")) {
 		$tee 			 = "VALMISTA";
 
 		$query = "	SELECT lasku.tunnus,
+					lasku.alatila,
 					sum(if (tilausrivi.tyyppi in ('V','W'), 1, 0)) valmistusriveja,
 					GROUP_CONCAT(DISTINCT tilausrivi.tunnus SEPARATOR ',') valmistettavat
-					from tilausrivi, lasku
-					where tilausrivi.yhtio = '$kukarow[yhtio]'
-					and lasku.yhtio = tilausrivi.yhtio
-					and lasku.tunnus = tilausrivi.otunnus
-					and lasku.tila 	in ('V', 'L')
-					and lasku.alatila  in ('V', 'K', 'X')
-					and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi='D') and lasku.tilaustyyppi in ('V','W','N')
+					FROM lasku
+					JOIN tilausrivi	ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi = 'D')
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila in ('V','L')
+					and lasku.tilaustyyppi in ('V','W','N')
 					and lasku.tunnus = '$valmistettava_tilaus'
-					GROUP BY lasku.tunnus
+					GROUP BY 1,2
 					HAVING valmistusriveja > 0";
 		$tilre = pupe_query($query);
 		$tilrow = mysql_fetch_assoc($tilre);
 
+		$orig_alatila   = $tilrow["alatila"];
 		$valmistettavat = $tilrow["valmistettavat"];
 
 		if ($tee == "VALMISTA" and $valmistettavat != "") {
@@ -2737,8 +2737,8 @@ if (!function_exists("jalkilaske_valmistus")) {
 						FROM tilausrivi, lasku
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and	tilausrivi.tunnus in ($valmistettavat)
-						and lasku.tunnus=tilausrivi.otunnus
-						and lasku.yhtio=tilausrivi.yhtio";
+						and lasku.tunnus = tilausrivi.otunnus
+						and lasku.yhtio  = tilausrivi.yhtio";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -2761,8 +2761,7 @@ if (!function_exists("jalkilaske_valmistus")) {
 						SET alatila	= 'K'
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus  in ($row[Tilaus])
-						and tila	in ('V','L')
-						and alatila in ('V','X')";
+						and tila	in ('V','L')";
 			$chkresult4 = pupe_query($query);
 
 			$korjataan = " and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi='D') ";
@@ -2796,8 +2795,7 @@ if (!function_exists("jalkilaske_valmistus")) {
 						tilausrivi.hyllytaso,
 						tilausrivi.hyllynro
 						FROM tilausrivi, tuote
-						WHERE
-						tilausrivi.otunnus in ($row[Tilaus])
+						WHERE tilausrivi.otunnus in ($row[Tilaus])
 						and tilausrivi.tunnus in ($valmistettavat)
 						and tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tuote.yhtio = tilausrivi.yhtio
@@ -2942,6 +2940,13 @@ if (!function_exists("jalkilaske_valmistus")) {
 				echo "<td colspan='5'><font class='ok'>$retval</font></td>";
 				echo "</tr>";
 			}
+
+			$query = "	UPDATE lasku
+						SET alatila	= '$orig_alatila'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus  = '$valmistettava_tilaus'
+						and tila	in ('V','L')";
+			$chkresult4 = pupe_query($query);
 		}
 	}
 }

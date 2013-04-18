@@ -20310,6 +20310,11 @@ if (!function_exists('tarkista_tilauksen_tila')) {
 	function tarkista_tilauksen_tila($tilausnumero, $alkup_tila, $alkup_alatila) {
 		global $kukarow;
 
+		// Tyhjät tilat, todennäköisesti tultu eri ohjelmasta ja ei tarkisteta tiloja
+		if ($alkup_tila == '' and $alkup_alatila == '') {
+			return true;
+		}
+
 		// Tarkistetaan että tilaus on samassa tilassa jossa se oli kun se klikattiin auki muokkaatilaus-ohjelmassa
 		$query = "SELECT tila, alatila
 					FROM lasku

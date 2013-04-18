@@ -437,7 +437,7 @@
 					$trow = mysql_fetch_assoc($result);
 				}
 			}
-			
+
 			if (!isset($trow) and $laskuttajan_toimittajanumero != "") {
 				// 9 etsitään toimittaja teccomi-specific
 				$query = "	SELECT *
@@ -451,7 +451,7 @@
 					$trow = mysql_fetch_assoc($result);
 				}
 			}
-			
+
 			if (!isset($trow) and $laskuttajan_nimi != "") {
 				// 7 etsitään toimittaja nimellä
 				$query = "	SELECT *
@@ -1276,6 +1276,8 @@
 
 							$vero = (float) $vero;
 
+							$summa_varasto = $summa;
+
 							if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') and ($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0)) {
 
 								if (!isset($ei_oteta_kulua_pois) or !$ei_oteta_kulua_pois) {
@@ -1288,6 +1290,8 @@
 									$summa_vero_chk = $summa_vero_chk - $summa;
 
 									$summa = $summa - $summa_vero_chk;
+
+									if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '') $summa_varasto = $summa;
 
 									foreach($_arr as $_k => $_v) {
 										if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
@@ -1342,7 +1346,7 @@
 											kohde	 		 = '{$kohde_ins}',
 											projekti 		 = '{$projekti_ins}',
 											tapvm 			 = '$tpv-$tpk-$tpp',
-											summa 			 = '$vtonsumma',
+											summa 			 = '$summa_varasto',
 											summa_valuutassa = '$vtonsumma_valuutassa',
 											valkoodi 		 = '$valkoodi',
 											selite 			 = '$selite',
@@ -1373,7 +1377,7 @@
 											kohde	 		 = '{$kohde_ins}',
 											projekti 		 = '{$projekti_ins}',
 											tapvm 			 = '$tpv-$tpk-$tpp',
-											summa 			 = $vtonsumma *-1,
+											summa 			 = $summa_varasto *-1,
 											summa_valuutassa = $vtonsumma_valuutassa*-1,
 											valkoodi 		 = '$valkoodi',
 											selite 			 = '$selite',

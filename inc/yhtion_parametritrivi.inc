@@ -3267,6 +3267,18 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'ostolaskun_kulutilit_kayttaytyminen') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'E' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Vaihto-omaisuuslaskun kulut vähennetään varastotiliöinneistä")."</option>";
+		$ulos .= "<option value = 'E' {$sel}>".t("Vaihto-omaisuuslaskun kuluja ei vähennetä varastotiliöinneistä")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'maksusopimus_toimitus') {
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

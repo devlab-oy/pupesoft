@@ -32,11 +32,14 @@
 		}
 
 		// Katsotaan mikä tuotteen keskihankintahinta oli valmistusta tehdessä
+		// Uusin hinta voi olla myös korjaustapahtumalla
+		// Otetaan viimeisin tapahtuma
 		$query = "	SELECT *
 					FROM tapahtuma
 					WHERE yhtio 	= '$kukarow[yhtio]'
-					and laji 		= 'kulutus'
+					and laji 		IN ('kulutus', 'korjaus')
 					and rivitunnus	= '$raakaainerow[tunnus]'
+					ORDER BY laadittu DESC, tunnus DESC
 					LIMIT 1";
 		$tuoteresult = pupe_query($query);
 
@@ -372,7 +375,7 @@
 
 		// Katsotaan onko useita valmisteita ja tallennetaan arvot muuttujaan niin kuin ne oli!
 		if (!isset($kaikenkaikkiaan_arvot_silloin[$tilrivirow["perheid"]])) {
-			$query = "	SELECT tapahtuma.tuoteno, sum(tapahtuma.kplhinta*tapahtuma.kpl) summa
+			$query = "	SELECT tapahtuma.tuoteno, SUM(tapahtuma.kplhinta*tapahtuma.kpl) summa
 						FROM tilausrivi
 						JOIN tapahtuma ON tapahtuma.yhtio = tilausrivi.yhtio and tapahtuma.laji='valmistus' and tapahtuma.tuoteno = tilausrivi.tuoteno and tapahtuma.rivitunnus = tilausrivi.tunnus
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -385,7 +388,9 @@
 			if (mysql_num_rows($uvresult) > 0) {
 				while ($valmisteet = mysql_fetch_assoc($uvresult)) {
 					$kaikenkaikkiaan_arvot_silloin[$tilrivirow["perheid"]][$valmisteet["tuoteno"]] = $valmisteet["summa"];
-					$kaikenkaikkiaan_arvot_silloin_yht[$tilrivirow["perheid"]] += $valmisteet["summa"];
+
+					if (!isset($kaikenkaikkiaan_arvot_silloin_yht[$tilrivirow["perheid"]])) $kaikenkaikkiaan_arvot_silloin_yht[$tilrivirow["perheid"]] = $valmisteet["summa"];
+					else $kaikenkaikkiaan_arvot_silloin_yht[$tilrivirow["perheid"]] += $valmisteet["summa"];
 				}
 			}
 		}

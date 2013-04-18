@@ -2152,7 +2152,7 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
 
 if (!function_exists("tulosta_lasku")) {
 	function tulosta_lasku ($lasku, $kieli = "", $tee = "", $toim = "", $valittu_tulostin = "", $valittu_kopio_tulostin = "", $saatekirje = "") {
-		GLOBAL $kukarow, $yhtiorow;
+		GLOBAL $kukarow, $yhtiorow, $tulosta_lasku_kpl;
 
 		if (substr($lasku,0,6) == "LASKU:") {
 			$lasku = substr($lasku, 6);
@@ -2557,6 +2557,10 @@ if (!function_exists("tulosta_lasku")) {
 			}
 			elseif ($komento != "" and $komento != "email") {
 				// itse print komento...
+				if (!empty($tulosta_lasku_kpl) and strpos($komento, "-#") === FALSE) {
+					$komento .= " -#{$tulosta_lasku_kpl}";
+				}
+
 				$line = exec("$komento $pdf_laskufilenimi");
 			}
 

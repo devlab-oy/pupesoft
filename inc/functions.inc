@@ -20446,6 +20446,28 @@ if(!function_exists('_two_dimensional_array_sort_by_key')) {
 	}
 }
 
+if (!function_exists('hae_maa')) {
+	function hae_maa($params) {
+
+		$maakoodi = !empty($params['maakoodi']) ? $params['maakoodi'] : '';
+
+		if ($maakoodi == '') return array();
+
+		$maan_tiedot = array();
+
+		$query = "	SELECT *
+					FROM maat
+					WHERE koodi = '{$maakoodi}'
+					LIMIT 1";
+		$maa_res = pupe_query($query);
+		$maa_row = mysql_fetch_assoc($maa_res);
+
+		$maan_tiedot['nimi'] = $maa_row['name'] != '' ? $maa_row['name'] : $maa_row['koodi'];
+
+		return $maan_tiedot;
+	}
+}
+
 //etsii halutun array keyn arraysta ja palauttaa kyseisen keyn parentit arrayssa jos key löytyy
 //esim voit etsiä funktiolla order ja funktio palauttaa kaikki ensimmäisen tason (tuoteno) arrayt jos order löytyy
 /**

@@ -20192,6 +20192,7 @@ if(!function_exists('_xls_jarjestetty_headerit')) {
 
 if (!function_exists('_xls_rivit')) {
 	function _xls_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $force_to_string = array()) {
+		require_once 'ProgressBar.class.php';
 		$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
 		$xls_progress_bar->initialize(count($rivit));
 

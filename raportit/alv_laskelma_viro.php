@@ -550,17 +550,8 @@
 
 			if ($taso == 'ee510') {
 				// Vähennetään mahdolliset tehdaspalautukset (verot)
-				$query = "SELECT vero, sum(round(tiliointi.summa * vero / 100 * -1, 2)) veronmaara, count(*) kpl
-							FROM tiliointi
-							JOIN lasku on (lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus)
-							WHERE tiliointi.yhtio='{$kukarow['yhtio']}'
-							AND tiliointi.korjattu = ''
-							AND tiliointi.tapvm >= '$startmonth'
-							AND tiliointi.tapvm <= '$endmonth'
-							AND lasku.tilaustyyppi = '9'";
-				$palautukset = pupe_query($query);
-
-				while ($palautus = mysql_fetch_assoc($palautukset)) {
+				$palautukset = tehdaspalautukset($startmonth, $endmonth);
+				foreach ($palautukset as $palautus) {
 					$vero -= $palautus['veronmaara'];
 				}
 			}

@@ -835,19 +835,12 @@
 					}
 				}
 
-				// Vähennetään mahdolliset tehdaspalautukset
-				$query = "SELECT vero, sum(round(tiliointi.summa * vero / 100 * -1, 2)) veronmaara, count(*) kpl
-							FROM tiliointi
-							JOIN lasku on (lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus)
-							WHERE tiliointi.yhtio='artr'
-							AND tiliointi.korjattu = ''
-							AND tiliointi.tapvm >= '$startmonth'
-							AND tiliointi.tapvm <= '$endmonth'
-							AND lasku.tilaustyyppi='9'";
-				$palautukset = pupe_query($query);
-
-				while ($palautus = mysql_fetch_assoc($palautukset)) {
-					$vero -= $palautus['veronmaara'];
+				// Vähennetään mahdolliset tehdaspalautukset (tavaraostot muista EU-maista)
+				if ($cleantaso == 'fi313') {
+					$palautukset = tehdaspalautukset($startmonth, $endmonth);
+					foreach ($palautukset as $palautus) {
+						$vero -= $palautus['veronmaara'];
+					}
 				}
 			}
 

@@ -602,7 +602,7 @@
 			echo "<tr>";
 			echo "<th>".t("Lasku")."</th>";
 			echo "<td>";
-			echo t("Kpl").": <input type='text' size='4' name='laskukpl' value='{$yhtiorow['laskun_kopiomaara']}' />";
+			echo t("Kpl").": <input type='text' size='4' name='laskukpl' value='{$yhtiorow['oletus_toimitus_laskukpl']}' />";
 			echo "</td>";
 			echo "</tr>";
 		}

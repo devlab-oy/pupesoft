@@ -1545,7 +1545,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "laskun_kopiomaara") {
+	if (mysql_field_name($result, $i) == "oletus_toimitus_laskukpl") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

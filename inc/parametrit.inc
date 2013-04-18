@@ -416,7 +416,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				$dtpalvelin .= $dtpathparts["dirname"]."/";
 			}
 
-			if (basename($phpnimi) == "keikka.php") {
+			if (basename($phpnimi) == "keikka.php" or basename($phpnimi) == "tilauskanta.php") {
 				$dtpalvelin .= "tilauskasittely/";
 			}
 

@@ -12142,6 +12142,29 @@ if (!function_exists("pupe_DataTables")) {
 								$('#tyom_yhteensa2').html(tun2+\":\"+min2+\"&nbsp;\");
 							}
 
+							if (tableid == \"tilauskanta\")†{
+								var summa = 0;
+								var arvo  = 0;
+
+								// Summataan vain ruudulla n‰kyv‰t luvut
+								for (var i=iStart; i<iEnd; i++) {
+									var summat = aaData[aiDisplay[i]][6].split('<br>');
+
+									arvo += parseFloat(summat[0]);
+									summa += parseFloat(summat[1]);
+								}
+
+								// Tyhjennet‰‰n kaikki summat
+								$('td[id$=\"_yhteensa\"]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								$('#arvo_yhteensa').html(arvo.toFixed(2));
+								$('#summa_yhteensa').html(summa.toFixed(2));
+							}
+
 							if (tableid == \"avoimet0\")†{
 								var avoimety = new Array();
 								var valuutat = new Array();

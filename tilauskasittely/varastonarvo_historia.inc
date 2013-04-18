@@ -31,14 +31,17 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 			//merkataan ne rivit joille ei pidä laskea tullia
 			$query = "	UPDATE tilausrivi
 						SET var = ''
-						WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]'";
+						WHERE uusiotunnus = '$laskurow[tunnus]' 
+						AND yhtio = '$kukarow[yhtio]'";
 			$varresult = mysql_query($query) or pupe_error($query);
 
-			if (count($eitullia) > 0) {
-				foreach($eitullia as $eitul) {
+			if (isset($eitullia) and count($eitullia) > 0) {
+				foreach ($eitullia as $eitul) {
 					$query = "	UPDATE tilausrivi
 								SET var = 'T'
-								WHERE tunnus = '$eitul' and uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]'";
+								WHERE tunnus = '$eitul' 
+								AND uusiotunnus = '$laskurow[tunnus]' 
+								AND yhtio = '$kukarow[yhtio]'";
 					$varresult = mysql_query($query) or pupe_error($query);
 				}
 			}
@@ -124,7 +127,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 		require ("varastoon.inc");
 
 		echo "<form method='post'>";
-		echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
+		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value='kaikkiok'>";
 		echo "<input type='hidden' name='tee' value='varma'>";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
@@ -132,7 +135,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 		echo "</form>";
 
 		echo "<form method='post'>";
-		echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
+		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
 		echo "<input type='submit' value='".t("Peruuta")."'>";

@@ -218,12 +218,16 @@ if (!function_exists("tsekit")) {
 	}
 }
 
-if (!isset($toiminto)) $toiminto = "";
-if (!isset($keikkarajaus)) $keikkarajaus = "";
-if (!isset($ytunnus)) $ytunnus = "";
-if (!isset($keikka)) $keikka = "";
-if (!isset($ostotil)) $ostotil = "";
-if (!isset($toimittajaid)) $toimittajaid = "";
+
+if (!isset($tee)) 				$tee = "";
+if (!isset($toiminto)) 			$toiminto = "";
+if (!isset($keikkarajaus)) 		$keikkarajaus = "";
+if (!isset($ytunnus)) 			$ytunnus = "";
+if (!isset($keikka)) 			$keikka = "";
+if (!isset($ostotil)) 			$ostotil = "";
+if (!isset($toimittajaid)) 		$toimittajaid = "";
+if (!isset($kauttalaskutus)) 	$kauttalaskutus = "";
+if (!isset($mobiili_keikka)) 	$mobiili_keikka = "";
 
 echo "<font class='head'>".t("Saapumiset")."</font><hr>";
 

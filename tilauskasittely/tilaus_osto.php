@@ -1481,4 +1481,10 @@
 		}
 	}
 
-	require("../inc/footer.inc");
+	// Laitetaan focus kpl kenttään jos tuotenumero on syötetty
+	if (!empty($tuoteno) and empty($kpl)) {
+		$formi = "rivi";
+		$kentta = "kpl";
+	}
+
+	require("inc/footer.inc");

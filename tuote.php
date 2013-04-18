@@ -349,6 +349,14 @@
 				$tuoterow['ei_varastoida'] = "<font style='color:#00FF00;'>".t("Kyllä")."</font>";
 			}
 
+			// Ostoehdotukselle
+			if ($tuoterow['ostoehdotus'] == 'E') {
+				$tuoterow['ostoehdotus'] = "<font style='color:#FF0000;'>".t("Ei")."</font>";
+			}
+			else {
+				$tuoterow['ostoehdotus'] = "<font style='color:#00FF00;'>".t("Kyllä")."</font>";
+			}
+
 			//tullinimike
 			$cn1 = $tuoterow["tullinimike1"];
 			$cn2 = substr($tuoterow["tullinimike1"],0,6);
@@ -716,7 +724,7 @@
 			echo "<th>".t("Leveys")."</th>";
 			echo "<th>".t("Syvyys")."</th>";
 			echo "<th>".t("Paino")."</th>";
-			echo "<th></th>";
+			echo "<th>".t("Ostoehdotus")."</th>";
 			echo "<th></th>";
 			echo "</tr>";
 
@@ -725,7 +733,7 @@
 			echo "<td>$tuoterow[tuoteleveys] m</td>";
 			echo "<td>$tuoterow[tuotesyvyys] m</td>";
 			echo "<td>$tuoterow[tuotemassa] kg</td>";
-			echo "<td></td>";
+			echo "<td>$tuoterow[ostoehdotus]</td>";
 			echo "<td></td>";
 			echo "</tr>";
 

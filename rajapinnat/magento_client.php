@@ -25,6 +25,7 @@ class MagentoClient {
 			$this->_attributeSet = current($attributeSets);
 		} catch (Exception $e) {
 			echo $e->getMessage();
+			exit;
 		}
 	}
 

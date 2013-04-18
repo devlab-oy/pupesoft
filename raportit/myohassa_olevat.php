@@ -2,6 +2,7 @@
 
 	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 	$useslave = 1;
+	$usemastertoo = 1;
 
 	if (isset($_POST["supertee"])) {
 		if($_POST["supertee"] == 'lataa_tiedosto') $lataa_tiedosto=1;

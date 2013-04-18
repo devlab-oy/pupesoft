@@ -13,42 +13,42 @@
 		}
 	}
 
-	if(!isset($asiakasid))          	$asiakasid = "";
-	if(!isset($asiakasmaa)) 			$asiakasmaa = "";
-	if(!isset($asiakasno))	 			$asiakasno = "";
-	if(!isset($automaaginen))       	$automaaginen = "";
-	if(!isset($borderlask) )        	$borderlask = "";
-	if(!isset($ei_limiittia))       	$ei_limiittia = "";
-	if(!isset($from_varastoon_inc)) 	$from_varastoon_inc = "";
-	if(!isset($ins))                	$ins = "";
-	if(!isset($jarj)) 		 			$jarj = "";
-	if(!isset($kpl))                	$kpl = "";
-	if(!isset($lapsires))           	$lapsires = "";
-	if(!isset($loput))              	$loput = "";
-	if(!isset($maa)) 		 			$maa = "";
-	if(!isset($pkrow))              	$pkrow = array();
-	if(!isset($suoratoimit))        	$suoratoimit = "";
-	if(!isset($jt_huomioi_pvm))        	$jt_huomioi_pvm = "";
-	if(!isset($tee))                	$tee = "";
-	if(!isset($tilaus)) 	 			$tilaus = "";
-	if(!isset($tilausnumero))       	$tilausnumero = "";
-	if(!isset($tilaus_on_jo))       	$tilaus_on_jo = "";
-	if(!isset($toim)) 		 			$toim = "";
-	if(!isset($toimi))              	$toimi = "";
-	if(!isset($toimittaja))         	$toimittaja = "";
-	if(!isset($toimittajaid))       	$toimittajaid = "";
-	if(!isset($tuotemerkki)) 			$tuotemerkki = "";
-	if(!isset($tuotenumero)) 			$tuotenumero = "";
-	if(!isset($tuoteosasto)) 			$tuoteosasto = "";
-	if(!isset($saldolaskenta)) 			$saldolaskenta = "";
-	if(!isset($tuoteryhma))  			$tuoteryhma = "";
-	if(!isset($vainvarastosta))     	$vainvarastosta = "";
-	if(!isset($suoratoimitus_rivit))	$suoratoimitus_rivit  = array();
-	if(!isset($suoratoimitus_paikat))	$suoratoimitus_paikat = array();
-	if(!isset($varastosta))  			$varastosta = "";
-	if(!isset($ytunnus)) 	 			$ytunnus = "";
-	if(!isset($myyja))					$myyja = "";
-	if(!isset($automaattinen_poiminta))	$automaattinen_poiminta = "";
+	if (!isset($asiakasid))          	$asiakasid = "";
+	if (!isset($asiakasmaa)) 			$asiakasmaa = "";
+	if (!isset($asiakasno))	 			$asiakasno = "";
+	if (!isset($automaaginen))       	$automaaginen = "";
+	if (!isset($borderlask) )        	$borderlask = "";
+	if (!isset($ei_limiittia))       	$ei_limiittia = "";
+	if (!isset($from_varastoon_inc)) 	$from_varastoon_inc = "";
+	if (!isset($ins))                	$ins = "";
+	if (!isset($jarj)) 		 			$jarj = "";
+	if (!isset($kpl))                	$kpl = "";
+	if (!isset($lapsires))           	$lapsires = "";
+	if (!isset($loput))              	$loput = "";
+	if (!isset($maa)) 		 			$maa = "";
+	if (!isset($pkrow))              	$pkrow = array();
+	if (!isset($suoratoimit))        	$suoratoimit = "";
+	if (!isset($jt_huomioi_pvm))        	$jt_huomioi_pvm = "";
+	if (!isset($tee))                	$tee = "";
+	if (!isset($tilaus)) 	 			$tilaus = "";
+	if (!isset($tilausnumero))       	$tilausnumero = "";
+	if (!isset($tilaus_on_jo))       	$tilaus_on_jo = "";
+	if (!isset($toim)) 		 			$toim = "";
+	if (!isset($toimi))              	$toimi = "";
+	if (!isset($toimittaja))         	$toimittaja = "";
+	if (!isset($toimittajaid))       	$toimittajaid = "";
+	if (!isset($tuotemerkki)) 			$tuotemerkki = "";
+	if (!isset($tuotenumero)) 			$tuotenumero = "";
+	if (!isset($tuoteosasto)) 			$tuoteosasto = "";
+	if (!isset($saldolaskenta)) 			$saldolaskenta = "";
+	if (!isset($tuoteryhma))  			$tuoteryhma = "";
+	if (!isset($vainvarastosta))     	$vainvarastosta = "";
+	if (!isset($suoratoimitus_rivit))	$suoratoimitus_rivit  = array();
+	if (!isset($suoratoimitus_paikat))	$suoratoimitus_paikat = array();
+	if (!isset($varastosta))  			$varastosta = "";
+	if (!isset($ytunnus)) 	 			$ytunnus = "";
+	if (!isset($myyja))					$myyja = "";
+	if (!isset($automaattinen_poiminta))	$automaattinen_poiminta = "";
 	if (!isset($mista_tullaan))			$mista_tullaan = "";
 
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
@@ -178,7 +178,7 @@
 			// "Osatoimitus kielletty"-tilauksella, mutta nyt kaikki JT-rivit on poimittu, joten laitetaan tilaus eteenp‰in
 			$query = "	SELECT lasku.tunnus tilaus,
 						count(tilausrivi.tunnus) tot_riveja,
-						sum(if(tilausrivi.var != 'J',1,0)) toimitettavia_riveja
+						sum(if (tilausrivi.var != 'J',1,0)) toimitettavia_riveja
 						FROM lasku use index (tila_index)
 						JOIN tilausrivi ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and tilausrivi.tyyppi='L'
 						WHERE lasku.yhtio 	= '$kukarow[yhtio]'
@@ -371,7 +371,7 @@
 			// "Osatoimitus kielletty"-tilauksella, mutta nyt kaikki JT-rivit on poimittu, joten laitetaan tilaus eteenp‰in
 			$query = "	SELECT lasku.tunnus tilaus,
 						count(tilausrivi.tunnus) tot_riveja,
-						sum(if(tilausrivi.var != 'J',1,0)) toimitettavia_riveja
+						sum(if (tilausrivi.var != 'J',1,0)) toimitettavia_riveja
 						FROM lasku use index (tila_index)
 						JOIN tilausrivi ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and tilausrivi.tyyppi='L'
 						WHERE lasku.yhtio 	= '$kukarow[yhtio]'
@@ -879,6 +879,7 @@
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
 							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
 							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
+							tilausrivi.jaksotettu,
 							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa $summarajauslisa)
@@ -903,6 +904,7 @@
 							tilausrivin_lisatiedot.tilausrivilinkki,
 							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
 							tilausrivi.kerayspvm,
+							tilausrivi.jaksotettu,
 							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -943,6 +945,7 @@
 							lasku.toim_postino,
 							lasku.toim_postitp,
 							lasku.toim_maa,
+							tilausrivi.jaksotettu,
 							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -1077,6 +1080,18 @@
 							$voiko_toimittaa = true;
 						}
 
+						//jtrivin jaksotuksen tarkistus tehd‰‰n vain kun ollaan tulossa myyntitilaukselta, koska jaksotetut tilausrivit eiv‰t saa menn‰ v‰‰rien myyntitilaus otsikoiden alle.
+						//jtrivit pit‰‰ kuitenkin pysty‰ toimittamaan jtselaus ohjelmasta k‰sin.
+						if ($mista_tullaan == 'MYYNTITILAUKSELTA' and !empty($jtrow['jaksotettu'])) {
+							//jos k‰sittelyss‰ oleva jt-rivi on jaksotettu, voidaan se liitt‰‰ vain sellaiseen myyntitilaukseen ($myyntitilaus_jaksotettu), jossa jaksotus on sama kuin jtrivin jaksotus
+							if ($myyntitilaus_jaksotettu == $jtrow['jaksotettu'] and $voiko_toimittaa) {
+								$voiko_toimittaa = true;
+							}
+							else {
+								$voiko_toimittaa = false;
+							}
+						}
+
 						if (isset($lapsires) and mysql_num_rows($lapsires) > 0) {
 							while ($perherow = mysql_fetch_assoc($lapsires)) {
 								$lapsitoimittamatta = $perherow["jt"];
@@ -1123,6 +1138,59 @@
 								}
 								else {
 									$kokonaismyytavissa += $myytavissa;
+								}
+							}
+
+							// Tarkistetaan, ett‰ yhtiˆ parametrit on (Jt_automatiikka = "kohdistetaan.." ja Automaattinen_jt_toimitus = "J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰ ker‰ysp‰iv‰n mukaisesti")
+							if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+
+								// Loopata kaikki jt-rivit l‰pi tuotteen perusteella jat katsoa, onko joku tilannut tuotetta aikaisemmin ja v‰hent‰‰ saldoa jos on
+								$jt_muiden_mukana_query = "	SELECT tilausrivi.tunnus,
+															tilausrivi.tuoteno,
+															tilausrivi.nimitys,
+															tilausrivi.tilkpl,
+															tilausrivi.kerayspvm,
+															tilausrivi.jt + tilausrivi.varattu jt,
+															lasku.ytunnus,
+															lasku.nimi,
+															lasku.toim_nimi
+															FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
+															JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+																AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+															JOIN lasku USE INDEX (primary) ON (lasku.yhtio = tilausrivi.yhtio
+																AND lasku.tunnus = tilausrivi.otunnus
+																AND (lasku.tila != 'N' OR lasku.alatila != ''))
+															JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
+																AND tuote.tuoteno = tilausrivi.tuoteno)
+															WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+															AND tilausrivi.tyyppi IN ('L', 'G')
+															AND tilausrivi.tuoteno = '{$jtrow['tuoteno']}'
+															AND tilausrivi.var = 'J'
+															AND tilausrivi.keratty = ''
+															AND tilausrivi.uusiotunnus = 0
+															AND tilausrivi.kpl = 0
+															AND tilausrivi.jt $lisavarattu > 0
+															AND ((tilausrivi.tunnus = tilausrivi.perheid AND tilausrivi.perheid2 = 0)
+																OR (tilausrivi.tunnus = tilausrivi.perheid2)
+																OR (tilausrivi.perheid = 0 AND tilausrivi.perheid2 = 0))
+															ORDER BY lasku.luontiaika";
+								$jt_muiden_mukana_result = pupe_query($jt_muiden_mukana_query);
+
+								while ($jt_muiden_mukana_row = mysql_fetch_assoc($jt_muiden_mukana_result)) {
+
+									// Jos ennen t‰t‰ k‰sittelyss‰ olevaa rivi‰ (jtrow) lˆytyy tilauksia, joissa on jt rivej‰ n‰m‰ varaavat saldoa
+									if ($jt_muiden_mukana_row['tunnus'] != $jtrow['tunnus']) {
+										$kokonaismyytavissa -= $jt_muiden_mukana_row['jt'];
+									}
+									else {
+										// Tuli jtrow vuoro. $kokonaismyytavissa pit‰‰ sis‰ll‰‰n nyt todellisen myyt‰viss‰ olevan saldon. breakataan
+										// Mutta jos jtrow on jt-muiden mukana, niin sit‰ ei voida toimittaa eli $kokonaismyytavissa = 0;
+										// Mutta jos ollaan tulossa esim pikatilauksesta niin myytavissa oleva saldo pit‰‰ pysty‰ lis‰‰m‰‰n uudelle tilaukselle eli iffiin ei menn‰
+										if ($jtrow['kerayspvm'] > date('Y-m-d') and empty($tilaus_on_jo)) {
+											$kokonaismyytavissa = 0;
+										}
+										break;
+									}
 								}
 							}
 						}
@@ -1389,7 +1457,7 @@
 										$eiliittymaa 	 = "ON";
 										$luottorajavirhe = "";
 										$jvvirhe 		 = "";
-										$ylivito 		 = "";
+										$ylivito 		 = 0;
 										$trattavirhe 	 = "";
 										$laji 			 = "MA";
 										$grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
@@ -1420,7 +1488,7 @@
 
 									if ($ylivito > 0) {
 										echo "<br/>";
-										echo "<font class='message'>".t("Yli 15 pv sitten er‰‰ntyneit‰ laskuja")."</font>";
+										echo "<font class='message'>".t("Yli %s pv sitten er‰‰ntyneit‰ laskuja", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."</font>";
 									}
 
 									if ($trattavirhe != '') {
@@ -1542,13 +1610,13 @@
 											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lis‰ttiin tilaukseen").". (".t("Tuotetta riitti kaikille JT-riveille").")</font><br>";
 										}
 
-										if($automaaginen == 'vakisin') {
+										if ($automaaginen == 'vakisin') {
 											$loput[$tunnukset] 	= "VAKISIN";
 										}
 										else {
 											$loput[$tunnukset] 	= "KAIKKI";
 										}
-										
+
 										$kpl[$tunnukset] 	= 0;
 										$tunnusarray 		= explode(',', $tunnukset);
 
@@ -1623,7 +1691,7 @@
 										}
 
 										$loput[$tunnukset] 	= "KAIKKI";
-										
+
 										$kpl[$tunnukset] 	= 0;
 										$tunnusarray 		= explode(',', $tunnukset);
 

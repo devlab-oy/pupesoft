@@ -200,6 +200,7 @@
 			$ruk100chk 				= "";
 			$ruk110chk 				= "";
 			$nimchk   				= "";
+			$mitatchk				= "";
 			$katchk   				= "";
 			$nettokatchk			= "";
 			$tarchk   				= "";
@@ -234,6 +235,7 @@
 			if ($ruksit[140] != '')			$ruk140chk 				= "CHECKED";
 
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
+			if ($mitat != '')				$mitatchk				= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
 			if ($nettokateprossat != '')	$nettokatchk			= "CHECKED";
 			if ($osoitetarrat != '') 		$tarchk   				= "CHECKED";
@@ -252,13 +254,15 @@
 			if ($piilotanollarivit != '')	$einollachk 			= "CHECKED";
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
 			if ($vertailubu != '')			${"sel_".$vertailubu}	= "SELECTED";
-			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
+			if ($naytakaikkiasiakkaat != '') $naytakaikkiasiakkaatchk = "CHECKED";
+			if ($naytakaikkituotteet != '') $naytakaikkituotteetchk	= "CHECKED";
 			if ($laskutuspaiva != '')		$laskutuspaivachk		= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
 			if ($liitetiedostot != '')		$liitetiedostotchk		= "CHECKED";
 			if ($ytun_laajattied != '')		$ytun_laajattiedchk		= "CHECKED";
+			if ($naytatoimtuoteno != '')	$naytatoimtuotenochk 	= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -403,6 +407,10 @@
 				<td colspan='3'><input type='checkbox' name='nimitykset' {$nimchk}></td>
 				<td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
 				</tr>
+				<th>",t("Näytä tuotteiden mittatiedot"),"</th>
+				<td colspan='3'><input type='checkbox' name='mitat' {$mitatchk}></td>
+				<td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
+				</tr>
 				<tr>
 				<th>",t("Näytä sarjanumerot"),"</th>
 				<td colspan='3'><input type='checkbox' name='sarjanumerot' {$sarjachk}></td>
@@ -449,9 +457,19 @@
 				<td class='back'></td>
 				</tr>
 				<tr>
-				<th>",t("Näytä kaikki tuotetyypit"),"</th>
-				<td colspan='3'><input type='checkbox' name='naytakaikkityypit' {$naytakaikkityypitchk}></td>
+				<th>",t("Näytä myös toimittajan tuoteno"),"</th>
+				<td colspan='3'><input type='checkbox' name='naytatoimtuoteno' {$naytatoimtuotenochk}></td>
 				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>",t("Näytä kaikki asiakkaat"),"</th>
+				<td colspan='3'><input type='checkbox' name='naytakaikkiasiakkaat' {$naytakaikkiasiakkaatchk}></td>
+				<td class='back'>",t("(Näyttää myös asiakkaat joita ei huomioida myynninseurannassa)"),"</td>
+				</tr>
+				<tr>
+				<th>",t("Näytä kaikki tuotteet"),"</th>
+				<td colspan='3'><input type='checkbox' name='naytakaikkituotteet' {$naytakaikkituotteetchk}></td>
+				<td class='back'>",t("(Näyttää tuotteet joita ei huomioida myynninseurannassa)"),"</td>
 				</tr>
 				<th>",t("Näytä laskutuspäivä"),"</th>
 				<td colspan='3'><input type='checkbox' name='laskutuspaiva' {$laskutuspaivachk}></td>
@@ -796,6 +814,7 @@
 				$gluku  			= 0;
 				$varasto_join 		= "";
 				$kantaasiakas_join 	= "";
+				$maksuehto_join 	= "";
 
 				// näitä käytetään queryssä
 				$sel_osasto = "";
@@ -1018,19 +1037,23 @@
 					}
 
 					if ($mukaan == "tuote") {
-						if ($nimitykset == "") {
-							$group .= ",tuote.tuoteno";
-							$select .= "tuote.tuoteno tuoteno, ";
-							if (strpos($select, "'tuotelista',") === FALSE) $select .= "concat('\'',tuote.tuoteno,'\'') 'tuotelista', ";
-							$order  .= "tuote.tuoteno,";
+
+						$group .= ",tuote.tuoteno";
+						$select .= "tuote.tuoteno tuoteno, ";
+						if (strpos($select, "'tuotelista',") === FALSE) $select .= "concat('\'',tuote.tuoteno,'\'') 'tuotelista', ";
+						$order  .= "tuote.tuoteno,";
+						$gluku++;
+
+						if ($nimitykset != "") {
+							$group .= ",tuote.nimitys";
+							$select .= "tuote.nimitys nimitys, ";
 							$gluku++;
 						}
-						else {
-							$group .= ",tuote.tuoteno, tuote.nimitys";
-							$select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
-							if (strpos($select, "'tuotelista',") === FALSE) $select .= "concat('\'',tuote.tuoteno,'\'') 'tuotelista', ";
-							$order  .= "tuote.tuoteno,";
-							$gluku++;
+
+						if ($mitat != "") {
+							$group .= ",tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.tuotemassa";
+							$select .= "tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.tuotemassa, ";
+							$gluku += 4;
 						}
 
 						if ($varastonarvo != '') {
@@ -1204,14 +1227,16 @@
 
 					//**  Maksuehtogrouppaukset start **//
 					if ($mukaan == "maksuehdoittain") {
-						$group  .= ",lasku.maksuteksti";
-						$select .= "lasku.maksuteksti maksuehto, ";
-						$order  .= "lasku.maksuteksti,";
+						$group  .= ",maksuehto.teksti";
+						$select .= "maksuehto.teksti maksuehto, ";
+						$order  .= "maksuehto.teksti,";
 						$gluku++;
 
 						if ($rajaus[$i] != "") {
-							$lisa .= " and lasku.maksuteksti='{$rajaus[$i]}' ";
+							$lisa .= " and maksuehto.teksti='{$rajaus[$i]}' ";
 						}
+
+						$maksuehto_join = "JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)\n";
 					}
 					//**  Maksuehtogrouppaukset loppu **//
 
@@ -1257,6 +1282,18 @@
 					$select .= "lasku.mapvm maksupvm, ";
 					$gluku++;
 					$muutgroups++;
+				}
+
+				if ($naytatoimtuoteno != "") {
+					$group .= ",toim_tuoteno";
+					$select .= "(SELECT tuotteen_toimittajat.toim_tuoteno
+								FROM tuotteen_toimittajat use index (yhtio_tuoteno)
+								WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio
+								AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+								ORDER BY IF(jarjestys = 0, 999, jarjestys)
+								LIMIT 1) toim_tuoteno, ";
+					$order  .= "toim_tuoteno,";
+					$gluku++;
 				}
 
 				// Näytetään sarjanumerot
@@ -1474,15 +1511,16 @@
 					}
 				}
 
-				if ($naytakaikkityypit != "") {
-					$lisa .= " and tuote.tuotetyyppi in ('','R','K','M','N') ";
+				if ($naytakaikkituotteet == "") {
+					$lisa .= " and tuote.myynninseuranta = '' ";
 				}
-				else {
-					$lisa .= " and tuote.tuotetyyppi in ('','R','K','M') ";
+
+				if ($naytakaikkiasiakkaat == "") {
+					$asiakaslisa = " and asiakas.myynninseuranta = '' ";
 				}
 
 				if ($naytaennakko == "") {
-					$lisa .= " and tilausrivi.tuoteno !='{$yhtiorow['ennakkomaksu_tuotenumero']}'";
+					$lisa .= " and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}' ";
 				}
 
 				if ($tee == 'go') {
@@ -1761,11 +1799,12 @@
 								JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
 								JOIN tilausrivi use index ({$index}) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$ouusio}=lasku.tunnus and tilausrivi.tyyppi={$tyyppi})
 								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno)
-								JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
+								JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus {$asiakaslisa})
 								LEFT JOIN toimitustapa ON (lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite)
 								{$lisatiedot_join}
 								{$varasto_join}
 								{$kantaasiakas_join}
+								{$maksuehto_join}
 								{$lisa_parametri}
 								WHERE lasku.yhtio in ({$yhtio})
 								and lasku.tila in ({$tila})";
@@ -2227,7 +2266,8 @@
 									// jos kyseessa on tuote
 									if ($ken_nimi == "tuoteno") {
 										$koskematon_tuoteno = $row["tuoteno"];
-										$row[$ken_nimi] = "<a href='../tuote.php?tee=Z&tuoteno=".urlencode($row[$ken_nimi])."'>{$row[$ken_nimi]}</a>";
+
+										$row[$ken_nimi] = "<a href='#' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row[$ken_nimi])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$row[$ken_nimi]}</a>";
 									}
 
 									if ($ken_nimi == "laskutuspvm") {

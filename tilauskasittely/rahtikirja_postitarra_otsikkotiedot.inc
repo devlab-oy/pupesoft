@@ -274,7 +274,7 @@
 		list($toitarow['sopimusnro'], $toitarow['tunhalnro']) = explode("@", $toitarow['sopimusnro']);
 	}
 
-	$toitarow['sopimusnro'] = sprintf("%06d",$toitarow['sopimusnro']);	// sopimunumeron tulee olla kuus pitkä
+	$toitarow['sopimusnro'] = sprintf("%06s",$toitarow['sopimusnro']);	// sopimunumeron tulee olla kuus pitkä
 	$sopnro  = $toitarow['sopimusnro']; // käytetään edi sanomassa
 
 ?>

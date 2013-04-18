@@ -2,11 +2,16 @@
 
 require ("../inc/parametrit.inc");
 
+if (!isset($toim)) $toim = "";
+if (!isset($maksuehto)) $maksuehto = 0;
+if (!isset($laskuno)) $laskuno = 0;
+if (!isset($tunnus)) $tunnus = 0;
+
 if ($toim == 'KATEINEN') {
-	echo "<font class='head'>".t("Lasku halutaankin maksaa käteisellä")."</font><hr>";
+	echo "<font class='head'>",t("Lasku halutaankin maksaa käteisellä"),"</font><hr />";
 }
 else {
-	echo "<font class='head'>".t("Lasku ei ollutkaan käteistä")."</font><hr>";
+	echo "<font class='head'>",t("Lasku ei ollutkaan käteistä"),"</font><hr />";
 }
 
 if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
@@ -256,12 +261,14 @@ function tee_kirjanpito_muutokset($params) {
 		$tapvmlisa = "";
 	}
 
-	$query = "	SELECT tunnus
+	$query = "	SELECT tunnus, summa
 				FROM tiliointi
 				WHERE yhtio	 = '$kukarow[yhtio]'
 				AND ltunnus	 = '{$params['tunnus']}'
 				AND tilino	 IN {$vanhatili}
-				AND korjattu = ''";
+				AND korjattu = ''
+				ORDER BY tapvm DESC, tunnus DESC
+				LIMIT 1";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 1) {
@@ -270,10 +277,17 @@ function tee_kirjanpito_muutokset($params) {
 		// Tehdään vastakirjaus alkuperäiselle tiliöinnille
 		$tilid = kopioitiliointi($vanharow['tunnus'], "");
 
+		if ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) {
+			$summalisa = $params['laskurow']['summa'] - $params['laskurow']['saldo_maksettu'];
+		}
+		else {
+			$summalisa = "summa";
+		}
+
 		$query = "	UPDATE tiliointi
-					SET summa = summa * -1,
-					laatija = '{$kukarow['kuka']}',
-					laadittu = now()
+					SET summa 	= {$summalisa} * -1,
+					laatija 	= '{$kukarow['kuka']}',
+					laadittu 	= now()
 					{$tapvmlisa}
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and tunnus	= '{$tilid}'";
@@ -284,11 +298,18 @@ function tee_kirjanpito_muutokset($params) {
 
 		$kustplisa = $params['kustp'] != '' ? ", kustp = '{$params['kustp']}'" : "";
 
+		if ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) {
+			$summalisa = $params['laskurow']['summa'] - $params['laskurow']['saldo_maksettu'];
+		}
+		else {
+			$summalisa = $vanharow['summa'];
+		}
+
 		$query = "	UPDATE tiliointi
-					SET tilino = '{$uusitili}',
-					summa = '{$params['laskurow']['summa']}',
-					laatija = '{$kukarow['kuka']}',
-					laadittu = now()
+					SET tilino 	= '{$uusitili}',
+					summa 		= '{$summalisa}',
+					laatija 	= '{$kukarow['kuka']}',
+					laadittu 	= now()
 					{$tapvmlisa}
 					{$kustplisa}
 					WHERE yhtio	= '$kukarow[yhtio]'
@@ -301,6 +322,14 @@ function tee_kirjanpito_muutokset($params) {
 		else {
 			echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehdä! Korjaa kirjanpito käsin")."!</font><br>";
 		}
+
+		$summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] - abs($vanharow['summa']));
+
+		$query = "	UPDATE lasku SET
+					saldo_maksettu = {$summalisa}
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$params['laskurow']['tunnus']}'";
+		$updres = pupe_query($query);
 	}
 }
 
@@ -360,12 +389,10 @@ function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
 	$tasmays_query = "	SELECT group_concat(distinct lasku.tunnus) ltunnukset,
 						group_concat(distinct tiliointi.selite) selite
 						FROM lasku
-						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
-						AND tiliointi.ltunnus = lasku.tunnus
-						AND tiliointi.selite LIKE '$kassalipasrow[nimi] %'
-						AND tiliointi.korjattu = '')
+						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.selite LIKE '$kassalipasrow[nimi] %' AND tiliointi.korjattu = '')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.tila 	  = 'X'
+						AND lasku.alatila = 'K'
 						AND lasku.tapvm   = '$paiva'";
 	$tasmays_result = pupe_query($tasmays_query);
 	$tasmaysrow = mysql_fetch_assoc($tasmays_result);
@@ -418,11 +445,10 @@ function hae_lasku2($laskuno, $toim) {
 					FROM lasku
 					JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus)
 					JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
 					AND	lasku.laskunro = '{$laskuno}'
-					AND lasku.tila = 'U'
-					AND lasku.alatila = 'X'
-					AND lasku.saldo_maksettu = 0";
+					AND lasku.tila     = 'U'
+					AND lasku.alatila  = 'X'";
 	}
 	else {
 		$query = "	SELECT lasku.ytunnus,
@@ -446,11 +472,10 @@ function hae_lasku2($laskuno, $toim) {
 					FROM lasku
 					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus AND maksuehto.kateinen != ''
 					JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
 					AND lasku.laskunro = '{$laskuno}'
-					AND lasku.tila = 'U'
-					AND lasku.alatila = 'X'
-					AND lasku.saldo_maksettu = 0";
+					AND lasku.tila     = 'U'
+					AND lasku.alatila  = 'X'";
 	}
 
 	$result = pupe_query($query);
@@ -476,13 +501,21 @@ function echo_lasku_table($laskurow, $toim) {
 		$asiakas_string = "<tr><td>$laskurow[asiakas_ytunnus]<br> $laskurow[asiakas_nimi] $laskurow[asiakas_nimitark]<br> $laskurow[asiakas_osoite]<br> $laskurow[asiakas_postino] $laskurow[asiakas_postitp]</td><td>$laskurow[asiakas_ytunnus]<br> $laskurow[asiakas_nimi] $laskurow[asiakas_nimitark]<br> $laskurow[asiakas_osoite]<br> $laskurow[asiakas_postino] $laskurow[asiakas_postitp]</td></tr>";
 	}
 
-	echo "<table>
-			<tr><th>".t("Laskutusosoite")."</th><th>".t("Toimitusosoite")."</th></tr>
-			{$asiakas_string}
-			<tr><th>".t("Laskunumero")."</th><td>$laskurow[laskunro]</td></tr>
-			<tr><th>".t("Laskun summa")."</th><td>$laskurow[summa]</td></tr>
-			<tr><th>".t("Laskun summa (veroton)")."</th><td>$laskurow[arvo]</td></tr>
-			<tr><th>".t("Maksuehto")."</th><td>".t_tunnus_avainsanat($laskurow, "teksti", "MAKSUEHTOKV")."</td></tr>";
+	$osasuoritus_string = "";
+
+	if ($laskurow['saldo_maksettu'] != 0) {
+		$osasuoritus_string = "<tr><th>".t("Osasuoritukset")."</th><td>{$laskurow['saldo_maksettu']}</td></tr>";
+		$osasuoritus_string .= "<tr><th>".t("Laskua maksamatta")."</th><td>".($laskurow['summa'] - $laskurow['saldo_maksettu'])."</td></tr>";
+	}
+
+	echo "<table>";
+	echo "<tr><th>",t("Laskutusosoite"),"</th><th>",t("Toimitusosoite"),"</th></tr>";
+	echo $asiakas_string;
+	echo "<tr><th>",t("Laskunumero"),"</th><td>{$laskurow['laskunro']}</td></tr>";
+	echo "<tr><th>",t("Laskun summa"),"</th><td>{$laskurow['summa']}</td></tr>";
+	echo "<tr><th>",t("Laskun summa (veroton)"),"</th><td>{$laskurow['arvo']}</td></tr>";
+	echo $osasuoritus_string;
+	echo "<tr><th>",t("Maksuehto"),"</th><td>",t_tunnus_avainsanat($laskurow, "teksti", "MAKSUEHTOKV"),"</td></tr>";
 
 	if ($toim == 'KATEINEN') {
 		$now = date('Y-m-d');

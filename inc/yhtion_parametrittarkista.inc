@@ -129,11 +129,11 @@ if(!function_exists("yhtion_parametrittarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "lasku_logo") {
-			$tiedostopaate = array("JPG","PNG");
+			$tiedostopaate = array("JPG");
 		}
 
 		if (mysql_field_name($result, $i) == "logo") {
-			$tiedostopaate = array("JPG","PNG", "GIF");
+			$tiedostopaate = array("JPG", "PNG", "GIF");
 		}
 
 		if (mysql_field_name($result, $i) == "maventa_api_avain") {
@@ -151,12 +151,30 @@ if(!function_exists("yhtion_parametrittarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "apix_tunnus") {
+			if ($verkkolasku_lah_talteen == "apix" and trim($t[$i]) == "") {
+				$virhe[$i] = t("Pakollinen: apix_tunnus!");
+				$virhe[$verkkolasku_lah_talteen_i] = t("Pakollisia: apix_tunnus ja apix_avain!!");
+			}
+		}
+
+		if (mysql_field_name($result, $i) == "apix_avain") {
+			if ($verkkolasku_lah_talteen == "apix" and trim($t[$i]) == "") {
+				$virhe[$i] = t("Pakollinen: apix_avain!");
+				$virhe[$verkkolasku_lah_talteen_i] = t("Pakollisia: apix_tunnus ja apix_avain!");
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "verkkolasku_lah") {
 			$verkkolasku_lah_talteen = trim($t[$i]);
 			$verkkolasku_lah_talteen_i = $i;
 		}
 
+        if (mysql_field_name($result, $i) == "erapaivan_ylityksen_raja") {
+            $t[$i] = (int) trim($t[$i]);
+			if ($t[$i] < 1) {
+				$virhe[$i] = t("Arvon oltava kokonaisluku ja vähintään 1") . "!";
+			}
+        }
 	}
 }
-
-?>

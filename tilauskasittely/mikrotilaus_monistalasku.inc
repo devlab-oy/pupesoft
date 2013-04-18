@@ -31,9 +31,7 @@ if ($tee == "file") {
 			$valinta='';
 
 			// luetaan rivi tiedostosta..
-			$poista	  	= array("'", "\\", " ");
-			$rivi	  	= str_replace($poista,"",$rivi);
-			$rivi	  	= explode("\t", trim($rivi));
+			$rivi = explode("\t", pupesoft_cleanstring($rivi));
 
 			$lasku = trim($rivi[0]);
 			$alvik = trim($rivi[1]);

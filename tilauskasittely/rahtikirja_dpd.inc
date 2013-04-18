@@ -145,9 +145,9 @@ if ($kollityht > 0) {
 
 		//$prefix = "(00)"; // t‰‰ on turha
 		$sscc = 1;
-		$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
-		$sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
-		$sscc .= sprintf('%02.02d', $tulostuskpl);
+		$sscc .= sprintf("%08.8s",$yhtiorow["ytunnus"]);
+		$sscc .= sprintf('%06.6s', substr($laskurow["tunnus"], -6));
+		$sscc .= sprintf('%02.2s', $tulostuskpl);
 		$loppu = tarkiste($sscc);
 		$sscc = $sscc.$loppu;
 

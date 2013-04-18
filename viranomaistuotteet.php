@@ -306,6 +306,9 @@ if ($tee == "synkronoi") {
 	}
 
 	fclose($file);
+}
+
+if ($tee == "synkronoi" or $tee == "synkronoimaat") {
 
 	echo t("P‰ivitet‰‰n maat tietokantaan")."...<br>";
 
@@ -328,16 +331,20 @@ if ($tee == "synkronoi") {
 	$rivi = fgets($file);
 
 	while ($rivi = fgets($file)) {
-		list($koodi, $nimi, $eu, $ryhma_tunnus) = explode("\t", trim($rivi));
+		list($koodi, $nimi, $eu, $ryhma_tunnus, $iso3, $iso_name) = explode("\t", trim($rivi));
 
 		$query  = "	INSERT INTO maat SET
 					koodi			= '$koodi',
+					iso3			= '$iso3',
 					nimi            = '$nimi',
+					name			= '$iso_name',
 					eu              = '$eu',
 					ryhma_tunnus    = '$ryhma_tunnus'
 					ON DUPLICATE KEY UPDATE
 					koodi			= '$koodi',
+					iso3			= '$iso3',
 					nimi            = '$nimi',
+					name			= '$iso_name',
 					eu              = '$eu',
 					ryhma_tunnus    = '$ryhma_tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -385,6 +392,14 @@ if ($tee == '') {
 	echo "<input type='hidden' name='tee' value='synkronoi'><tr>";
 	echo "</table>";
 	echo "</form>";
+
+	echo "<br><br><br>";
+	echo t("P‰ivit‰ j‰rjestelm‰n maat").":<br><br>";
+	echo "<form method='post'>";
+	echo "<input type='submit' value='".t("P‰ivit‰ maat referenssist‰")."'>";
+	echo "<input type='hidden' name='tee' value='synkronoimaat'><tr>";
+	echo "</form>";
+
 }
 
 require ("inc/footer.inc");

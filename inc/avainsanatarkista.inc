@@ -61,10 +61,15 @@ if(!function_exists("avainsanatarkista")) {
 				$virhe[$i] = t("Selite on liian pitkä, maksimipituus on yksi merkki")."!";
 			}
 
-			if (!is_numeric($tem_selite) and in_array($tem_laji, array("TRY", "OSASTO", "PIIRI", "VALMISTUSLINJA"))) {
-				$virhe[$i] = t("Selitteen on oltava numeerinen")."!";
+			if (in_array($tem_laji, array("TRY", "OSASTO", "PIIRI", "VALMISTUSLINJA"))) {
+				if (!is_numeric($tem_selite)) {
+					$virhe[$i] = t("Selitteen on oltava numeerinen")."!";
+				}
+				else {
+					$t[$i] = (int) $t[$i];
+				}
 			}
-
+			
 			if (($tem_laji == 'VAKIOVIESTI' or $tem_laji == 'VAKIOVIESTI_TIL') and trim($tem_selite) == '') {
 				$virhe[$i] = t("Selite on pakollinen");
 			}

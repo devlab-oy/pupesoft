@@ -286,7 +286,7 @@
 
 			if ($valitse == 'asn') {
 				$kolli = mysql_real_escape_string($kolli);
-				$wherelisa = "AND paketintunniste = '{$kolli}'";
+				$wherelisa = "AND paketintunniste != '' AND paketintunniste = '{$kolli}'";
 			}
 			else {
 				$wherelisa = "AND asn_numero = '".mysql_real_escape_string($lasku)."'";

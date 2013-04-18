@@ -310,7 +310,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$laskurow[tunnus]'
 					and tila in ('N','L')
-					and alatila in ('','A','F','U')";
+					and alatila in ('','A','F','U', 'G')";
 		$result = pupe_query($query);
 
 		///* T‰h‰n menn‰‰n jos l‰hete tosiaan tulostetaan *///

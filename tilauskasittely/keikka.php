@@ -6,6 +6,15 @@ if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 	require ("../inc/parametrit.inc");
 }
 
+if ($tee == 'lataa_tiedosto') {
+	$filepath = "/tmp/".$tmpfilenimi;
+	if (file_exists($filepath)) {
+		readfile($filepath);
+		unlink($filepath);
+	}
+	exit;
+}
+
 if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
 	require ("../inc/keikan_toiminnot.inc");
 }
@@ -218,12 +227,16 @@ if (!function_exists("tsekit")) {
 	}
 }
 
-if (!isset($toiminto)) $toiminto = "";
-if (!isset($keikkarajaus)) $keikkarajaus = "";
-if (!isset($ytunnus)) $ytunnus = "";
-if (!isset($keikka)) $keikka = "";
-if (!isset($ostotil)) $ostotil = "";
-if (!isset($toimittajaid)) $toimittajaid = "";
+
+if (!isset($tee)) 				$tee = "";
+if (!isset($toiminto)) 			$toiminto = "";
+if (!isset($keikkarajaus)) 		$keikkarajaus = "";
+if (!isset($ytunnus)) 			$ytunnus = "";
+if (!isset($keikka)) 			$keikka = "";
+if (!isset($ostotil)) 			$ostotil = "";
+if (!isset($toimittajaid)) 		$toimittajaid = "";
+if (!isset($kauttalaskutus)) 	$kauttalaskutus = "";
+if (!isset($mobiili_keikka)) 	$mobiili_keikka = "";
 
 echo "<font class='head'>".t("Saapumiset")."</font><hr>";
 
@@ -402,7 +415,7 @@ if ($toiminto == "tulosta") {
 		$toimittajaid = $laskurow["liitostunnus"];
 	}
 
-	if ($komento["Purkulista"] != '') {
+	if ($komento["Purkulista"] != '' or !empty($tee_excel)) {
 		require('tulosta_purkulista.inc');
 	}
 
@@ -739,7 +752,19 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 	if (!isset($lisarajaus)) $lisarajaus = "";
 
-	$sel = array_fill_keys(array($lisarajaus), ' selected') + array_fill_keys(array('riveja_viematta_varastoon', 'liitetty_lasku', 'liitetty_lasku_rivitok_kohdistus_eiok', 'liitetty_lasku_rivitok_kohdistus_ok'), '');
+	if($toim != 'AVOIMET') {
+		$sel = array_fill_keys(array($lisarajaus), ' selected') + array_fill_keys(array('riveja_viematta_varastoon', 'liitetty_lasku', 'liitetty_lasku_rivitok_kohdistus_eiok', 'liitetty_lasku_rivitok_kohdistus_ok'), '');
+	}
+	else {
+		$sel = array(
+			'riveja_viematta_varastoon' => 'selected',
+			'liitetty_lasku' => '',
+			'liitetty_lasku_rivitok_kohdistus_eiok' => '',
+			'liitetty_lasku_rivitok_kohdistus_ok' => '',
+		);
+
+		$lisarajaus = 'riveja_viematta_varastoon';
+	}
 
 	echo "<td><select name='lisarajaus' ",js_alasvetoMaxWidth('lisarajaus', 250),">";
 	echo "<option value=''>",t("Näytä kaikki"),"</option>";

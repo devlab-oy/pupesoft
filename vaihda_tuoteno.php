@@ -43,9 +43,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file
 
 	while ($rivi = fgets($file)) {
 		// luetaan rivi tiedostosta..
-		$poista	  = array("'", "\\","\"");
-		$rivi	  = str_replace($poista,"", $rivi);
-		$rivi	  = explode("\t", $rivi);
+		$rivi = explode("\t", pupesoft_cleanstring($rivi));
 
 		if (trim($rivi[0]) != '' and trim($rivi[1]) != '') {
 
@@ -238,9 +236,7 @@ if ($error == 0 and $tee == "file") {
 
 	while ($rivi = fgets($file)) {
 		// luetaan rivi tiedostosta..
-		$poista	  = array("'", "\\","\"");
-		$rivi	  = str_replace($poista,"",$rivi);
-		$rivi	  = explode("\t", trim($rivi));
+		$rivi = explode("\t", pupesoft_cleanstring($rivi));
 
 		if (trim($rivi[0]) != '' and trim($rivi[1]) != '') {
 

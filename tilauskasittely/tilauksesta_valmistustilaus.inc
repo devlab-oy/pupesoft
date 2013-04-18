@@ -89,6 +89,10 @@
 						$toim_postitp		= $myytilrow['toim_postitp'];
 						$toim_maa			= $myytilrow['toim_maa'];
 
+						if ($yhtiorow["kerataanko_valmistukset"] == "E" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON")) {
+							$eilahe = 'CHECKED';
+						}
+
 						list($toimvv, $toimkk, $toimpp) = explode('-', $myytilrow["toimaika"]);
 						list($kervv, $kerkk, $kerpp)    = explode('-', $myytilrow["kerayspvm"]);
 
@@ -132,6 +136,7 @@
 					$varasto			= "";
 					$paikka				= "";
 					$varataan_saldoa	= "EI";
+					$kommentti			= $valmlisaarivi['kommentti'];
 
 					// $perheid_lisaarivi on perustetun rivin tunnus
 					require ("lisaarivi.inc");

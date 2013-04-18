@@ -2558,9 +2558,10 @@ if (!function_exists("tulosta_lasku")) {
 			}
 			elseif ($komento != "" and $komento != "email") {
 				// itse print komento...
-				if (!empty($tulosta_lasku_kpl)) {
+				if (!empty($tulosta_lasku_kpl) and strpos($komento, "-#") === FALSE) {
 					$komento .= " -#{$tulosta_lasku_kpl}";
 				}
+
 				$line = exec("$komento $pdf_laskufilenimi");
 			}
 

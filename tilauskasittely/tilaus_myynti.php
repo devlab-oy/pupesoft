@@ -1860,10 +1860,13 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 		else {
 			$asiakasmaa = $laskurow["toim_nimi"] == "" ? $laskurow["maa"] : $laskurow["toim_maa"];
 
+			$varastolisa = $toim == 'EXTRANET' ? " and varastopaikat.tyyppi='' " : "";
+
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
+						AND (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')
+						{$varastolisa}";
 			$vtresult = pupe_query($query);
 			$vtrow = mysql_fetch_assoc($vtresult);
 

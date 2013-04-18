@@ -575,7 +575,7 @@
 			}
 
 			if (is_string($etsi))  {
-				$haku = " and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%' or kuka1.nimi like '%$etsi%' or kuka2.nimi like '%$etsi%' $myyntitili_haku) ";
+				$haku = " and (lasku.nimi like '%$etsi%' or lasku.nimitark like '%$etsi%' or lasku.toim_nimi like '%$etsi%' or lasku.toim_nimitark like '%$etsi%' or lasku.laatija like '%$etsi%' or kuka1.nimi like '%$etsi%' or kuka2.nimi like '%$etsi%' $myyntitili_haku) ";
 			}
 			if (is_numeric($etsi)) {
 				$haku = " and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%' $myyntitili_haku) ";
@@ -606,8 +606,12 @@
 			}
 		}
 
-		if ($asiakastiedot == "KAIKKI") {
-			$asiakasstring = " concat_ws('<br>', lasku.ytunnus, concat_ws(' ',lasku.nimi, lasku.nimitark), if(lasku.nimi!=lasku.toim_nimi, concat_ws(' ',lasku.toim_nimi, lasku.toim_nimitark), NULL), if(lasku.postitp!=lasku.toim_postitp, lasku.toim_postitp, NULL)) ";
+		if (empty($asiakastiedot)) {
+			$asiakastiedot = isset($_COOKIE["pupesoft_muokkaatilaus"]) ? $_COOKIE["pupesoft_muokkaatilaus"] : "";
+		}
+
+		if ($asiakastiedot == "toimitus") {
+			$asiakasstring = " concat_ws('<br>', lasku.ytunnus, concat_ws(' ', lasku.nimi, lasku.nimitark), if(lasku.nimi != lasku.toim_nimi, concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark, if(lasku.postitp != lasku.toim_postitp, lasku.toim_postitp, NULL)), NULL))";
 			$assel1 = "";
 			$assel2 = "CHECKED";
 		}
@@ -634,8 +638,8 @@
 		echo "<br><form method='post'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='limit' value='$limit'>
-				".t("Näytä vain laskutustiedot")." <input type='radio' name='asiakastiedot' value='NORMI' onclick='submit();' $assel1>
-				".t("Näytä myös toimitusasiakkaan tiedot")." <input type='radio' name='asiakastiedot' value='KAIKKI' onclick='submit();' $assel2>
+				".t("Näytä vain laskutustiedot")." <input type='radio' name='asiakastiedot' value='laskutus' onclick='submit();' $assel1>
+				".t("Näytä myös toimitusasiakkaan tiedot")." <input type='radio' name='asiakastiedot' value='toimitus' onclick='submit();' $assel2>
 				</form>";
 
 		$query_ale_lisa = generoi_alekentta('M');
@@ -1452,6 +1456,7 @@
 
 			$miinus = 7;
 		}
+
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 0) {

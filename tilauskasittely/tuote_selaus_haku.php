@@ -231,6 +231,7 @@
 					if ($toim_kutsu != "YLLAPITO") {
 						$toimaika = $laskurow["toimaika"];
 						$kerayspvm = $laskurow["kerayspvm"];
+						$toim = "RIVISYOTTO"; 
 					}
 					else {
 						$toim = "YLLAPITO";
@@ -273,7 +274,37 @@
 
 					$toim = $yllapita_toim_stash;
 					echo "<font class='message'>".t("Lisättiin")." $kpl_echo ".t_avainsana("Y", "", " and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("tuotetta")." $tiltuoteno[$yht_i].</font><br>";
+					
+					if (isset($myyntierahuom) and is_array($myyntierahuom)) {
 
+						$mimyhuom = "HUOM: Rivin määrä on pyöristetty";
+
+						if ($trow["minimi_era"] > 0) {
+							$mimyhuom .= " minimierään";
+						}
+
+						if ($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') {
+							if ($trow["minimi_era"] > 0) {
+								$mimyhuom .= " tai";
+							}
+
+							$mimyhuom .= " täyteen myyntierään";
+						}
+
+						// Käännetään teksti
+						$mimyhuom = t($mimyhuom)."!";
+
+						if ($trow['myynti_era'] > 0) {
+							$mimyhuom .= " ".t("Myyntierä on").": $trow[myynti_era]";
+						}
+
+						if ($trow["minimi_era"] > 0) {
+							$mimyhuom .= " ".t("Minimierä on").": $trow[minimi_era]";
+						}
+
+						echo "<font class='error'>".$mimyhuom."</font><br>";
+					}
+					
 					//Hanskataan sarjanumerollisten tuotteiden lisävarusteet
 					if ($tilsarjatunnus[$yht_i] > 0 and $lisatty_tun > 0) {
 						require("sarjanumeron_lisavarlisays.inc");

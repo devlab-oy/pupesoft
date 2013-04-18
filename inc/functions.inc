@@ -2684,6 +2684,7 @@ if (!function_exists("jalkilaskentafunktio")) {
 				tapahtuma WRITE,
 				tilausrivi WRITE,
 				tilausrivin_lisatiedot READ,
+				tili READ,
 				tiliointi WRITE,
 				tuote WRITE,
 				tuotepaikat READ,

@@ -2681,6 +2681,7 @@ if (!function_exists("jalkilaskentafunktio")) {
 		$qu = "	LOCK TABLE asiakas READ,
 				lasku WRITE,
 				sarjanumeroseuranta READ,
+				sanakirja WRITE,
 				tapahtuma WRITE,
 				tilausrivi WRITE,
 				tilausrivin_lisatiedot READ,

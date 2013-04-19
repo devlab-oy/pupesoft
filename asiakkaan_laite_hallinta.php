@@ -192,8 +192,9 @@ echo "<font class='head'>".t("Laitehallinta")."</font><hr>";
 <?php
 
 $request = array(
-	'ytunnus'	 => $ytunnus,
-	'asiakasid'	 => $asiakasid
+	'ytunnus'		 => $ytunnus,
+	'asiakasid'		 => $asiakasid,
+	'asiakas_tunnus' => $asiakas_tunnus
 );
 
 if ($tee == 'hae_asiakas' or ($tee == '' and !empty($valitse_asiakas))) {
@@ -202,9 +203,15 @@ if ($tee == 'hae_asiakas' or ($tee == '' and !empty($valitse_asiakas))) {
 
 
 if (!empty($request['haettu_asiakas'])) {
-	$kohteet = hae_asiakkaan_kohteet_joissa_laitteita($request);
+	$asiakkaan_kohteet = hae_asiakkaan_kohteet_joissa_laitteita($request);
 
-	echo_kohteet_table($kohteet, $request['haettu_asiakas']);
+	echo_kohteet_table($asiakkaan_kohteet, $request['haettu_asiakas']);
+
+	if ($ala_tee == 'tulosta_kalustoraportti') {
+		$asiakkaan_kohteet['yhtio'] = $yhtiorow;
+		$asiakkaan_kohteet['asiakas'] = $request['haettu_asiakas'];
+		tulosta_kalustoraportti($asiakkaan_kohteet);
+	}
 }
 
 echo "<div id='wrapper'>";
@@ -228,7 +235,25 @@ function echo_kayttoliittyma($request = array()) {
 	echo "</form>";
 }
 
-function echo_kohteet_table($kohteet = array(), $haettu_asiakas = array()) {
+function echo_kalustoraportti_form($haettu_asiakas) {
+	global $kukarow, $yhtiorow;
+
+	echo "<form method='POST' action='' name='tulosta_kalustoraportti'>";
+	echo "<input type='hidden' id='tee' name='tee' value='hae_asiakas' />";
+	echo "<input type='hidden' id='ala_tee' name='ala_tee' value='tulosta_kalustoraportti' />";
+	echo "<input type='hidden' id='ytunnus' name='ytunnus' value='{$haettu_asiakas['tunnus']}' />";
+	echo "<input type='submit' value='".t("Tulosta kalustoraportti")."' />";
+	echo "</form>";
+}
+
+function tulosta_kalustoraportti($kohteet) {
+	global $kukarow, $yhtiorow;
+
+	$filepath = kirjoita_json_tiedosto($kohteet);
+	aja_ruby($filepath);
+}
+
+function echo_kohteet_table($asiakkaan_kohteet = array(), $haettu_asiakas = array()) {
 	global $palvelin2, $lopetus;
 
 	$lopetus = "{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//ytunnus={$haettu_asiakas['tunnus']}";
@@ -236,6 +261,11 @@ function echo_kohteet_table($kohteet = array(), $haettu_asiakas = array()) {
 	echo "<font class='head'>{$haettu_asiakas['nimi']}</font>";
 	echo "<br/>";
 	echo "<br/>";
+
+	echo_kalustoraportti_form($haettu_asiakas);
+	echo "<br/>";
+	echo "<br/>";
+
 	echo "<table>";
 
 	echo "<tr>";
@@ -257,7 +287,7 @@ function echo_kohteet_table($kohteet = array(), $haettu_asiakas = array()) {
 
 	echo "</tr>";
 
-	foreach ($kohteet as $kohde_index => $kohde) {
+	foreach ($asiakkaan_kohteet['kohteet'] as $kohde_index => $kohde) {
 		kohde_tr($kohde_index, $kohde);
 	}
 
@@ -406,16 +436,43 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 				AND kohde.asiakas = {$request['haettu_asiakas']['tunnus']}";
 	$result = pupe_query($query);
 
-	$kohteet = array();
+	$asiakkaan_kohteet = array();
 	while ($kohde = mysql_fetch_assoc($result)) {
-		$kohteet[$kohde['kohde_tunnus']]['kohde_nimi'] = $kohde['kohde_nimi'];
+		$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['kohde_nimi'] = $kohde['kohde_nimi'];
+		$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['kohde_tunnus'] = $kohde['kohde_tunnus'];
 
 		if (!empty($kohde['paikka_tunnus'])) {
-			$kohteet[$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['laitteet'][] = $kohde;
-			$kohteet[$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_nimi'] = $kohde['paikka_nimi'];
+			$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['laitteet'][] = $kohde;
+			$asiakkaan_kohteet['kohteet'][$kohde['kohde_tunnus']]['paikat'][$kohde['paikka_tunnus']]['paikka_nimi'] = $kohde['paikka_nimi'];
 		}
 	}
 
-	return $kohteet;
+	return $asiakkaan_kohteet;
 }
+
+function kirjoita_json_tiedosto($data) {
+	$filename = "kalustoraportti_{$data['tunnus']}.json";
+	$filepath = "/tmp/{$filename}";
+
+	array_walk_recursive($data, 'array_utf8_encode');
+
+	file_put_contents($filepath, json_encode($data));
+
+	return $filepath;
+}
+
+function array_utf8_encode(&$item, $key) {
+	$item = utf8_encode($item);
+}
+
+function aja_ruby($filepath) {
+	//@TODO pupe_root kö
+	$lol = system("ruby /Users/joonas/Dropbox/Sites/pupesoft/pdfs/ruby/kalustoraportti.rb {$filepath}");
+	echo "<html>";
+	echo "<body>";
+	echo $lol;
+	echo "</body>";
+	echo "</html>";
+}
+
 require ("inc/footer.inc");

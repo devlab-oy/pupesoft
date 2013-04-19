@@ -726,7 +726,7 @@
 						$tee			= "UV";
 
 						// Perheid sen takia, että perutaan myös useat valmisteet perutaan
-						if ($perutamakorj[$tilrivirow["perheid"]] != "") {
+						if (isset($perutamakorj[$tilrivirow["perheid"]]) and $perutamakorj[$tilrivirow["perheid"]] != "") {
 							$perutaan = "JOO";
 							$peruttiinko = TRUE;
 						}

@@ -323,7 +323,7 @@ if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
 	}
 
 	echo "<table><form method='POST' action='rahtikirja_custom.php' name='haku'>
-	    	<tr><th>".t('Hae asiakas')."</th><td><input type='text' name='ytunnus' value=''></td>
+	    	<tr><th>".t('Hae asiakas')."</th><td><input type='text' name='ytunnus' value=''><input type='hidden' name='rahtikirja_ilman_asiakasta' value='0' /></td>
 	        <td class='back'><input type='submit' value=".t('Etsi')."></td>
 	    	</tr></form></table>";
 
@@ -403,7 +403,7 @@ if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
 
 if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 
-	if (!$rahtikirja_ilman_asiakasta and empty($asiakasrow['toim_postitp'])) {
+	if (empty($asiakasrow['toim_postitp'])) {
 		$asiakasrow['toim_postitp']  = $asiakasrow['postitp'];
 		$asiakasrow['toim_postino']  = $asiakasrow['postino'];
 		$asiakasrow['toim_osoite']   = $asiakasrow['osoite'];
@@ -411,7 +411,8 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 		$asiakasrow['toim_nimi']     = $asiakasrow['nimi'];
 		$asiakasrow['toim_maa']      = $asiakasrow['maa'];
 	}
-	else {
+
+	if ($rahtikirja_ilman_asiakasta) {
 		$asiakasrow['toim_postitp']	 = '';
 		$asiakasrow['toim_postino']  = '';
 		$asiakasrow['toim_osoite']   = '';

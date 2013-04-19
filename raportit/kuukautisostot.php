@@ -245,6 +245,17 @@
 			$_x++;
 		}
 
+		$korvaavat_column_count = $_x - $_x_k;
+
+		$sarakkeet["SARAKE{$_x}"] = t("Vastaava Tuoteno #1")."\t";
+		$_x++;
+
+		$sarakkeet["SARAKE{$_x}"] = t("Vastaava Tuoteno #2")."\t";
+		$_x++;
+
+		$sarakkeet["SARAKE{$_x}"] = t("Vastaava Tuoteno #3")."\t";
+		$_x++;
+
 
 		//	Haetaan kaikki varastot ja luodaan kysely paljonko ko. varastoon on tilattu tavaraa..
 		$varastolisa = "";
@@ -706,6 +717,8 @@
 			}
 
 			flush();
+
+			require('vastaavat.class.php');
 
 			require('inc/ProgressBar.class.php');
 
@@ -1663,6 +1676,38 @@
 								}
 
 								$_x++;
+							}
+						}
+					}
+					else {
+						// Jos korvaavia ei ole, siirretään columnicountia eteenpäin
+						$_x += $korvaavat_column_count;
+						$excelsarake += $korvaavat_column_count;
+					}
+
+					$vastaavat = new Vastaavat($row['tuoteno']);
+					$vastaavat_ketjut = $vastaavat->ketjut();
+
+					if (!empty($vastaavat_ketjut)) {
+						$vastaavat_tuotteet = $vastaavat->find_by_ketju($vastaavat_ketjut[0]);
+
+						$i = 1;
+
+						foreach ($vastaavat_tuotteet as $_tuoteno_arr) {
+
+							if ($_tuoteno_arr['tuoteno'] != $row['tuoteno']) {
+
+								if ($i == 4) break;
+
+								if ($valitut["SARAKE{$_x}"] != '') {
+									$rivi .= "\"{$_tuoteno_arr['tuoteno']}\"\t";
+
+									$worksheet->write($excelrivi, $excelsarake, $_tuoteno_arr["tuoteno"]);
+									$excelsarake++;
+								}
+
+								$_x++;
+								$i++;
 							}
 						}
 					}

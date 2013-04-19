@@ -89,9 +89,9 @@
 	
 	$otsikko 	= 'Asiakkaat';
 	
-	$kentat 	= "tunnus, ytunnus, concat_ws('<br>', concat_ws(' ',nimi,nimitark), concat_ws(' ',toim_nimi,toim_nimitark)) 'Nimi/Toim_nimi', concat_ws('<br>', postitp, toim_postitp) 'Postitp/Toim_postitp', asiakasnro 'Asiakasnumero', concat_ws('<br>', ovttunnus, toim_ovttunnus) 'Ovttunnus/Toim_ovttunnus', laji HIDDEN_laji ";
-	$hakukentat = "tunnus, ytunnus, nimi/toim_nimi, postitp/toim_postitp, asiakasnro, ovttunnus/toim_ovttunnus";
-	
+	$kentat 	= "tunnus, ytunnus, concat_ws('<br>', concat_ws(' ', nimi, nimitark), concat_ws(' ', toim_nimi, toim_nimitark)) 'Nimi/Toim_nimi', concat_ws('<br>', postitp, toim_postitp) 'Postitp/Toim_postitp', asiakasnro 'Asiakasnumero', concat_ws('<br>', ovttunnus, toim_ovttunnus) 'Ovttunnus/Toim_ovttunnus', laji HIDDEN_laji ";
+	$hakukentat = "tunnus, ytunnus, nimi/nimitark/toim_nimi/toim_nimitark, postitp/toim_postitp, asiakasnro, ovttunnus/toim_ovttunnus";
+
 	$jarjestys 	= 'selaus, nimi';
 
 

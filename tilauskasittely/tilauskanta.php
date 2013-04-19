@@ -3,6 +3,9 @@
 	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 	$useslave = 1;
 
+	// DataTables p‰‰lle
+	$pupe_DataTables = "tilauskanta";
+
 	require('../inc/parametrit.inc');
 
 	echo "<font class='head'>".t("Tilauskanta")."</font><hr>";
@@ -44,24 +47,19 @@
 			}
 		}
 
-		$jarjestys = " 1, 3 ";
-
-		if (strlen($kojarj) > 0) {
-			$jarjestys = $kojarj;
-		}
-
-		$query = "	(select lasku.toimaika as 'Toimitusaika',
+		$query = "	(SELECT lasku.toimaika as 'Toimitusaika',
 					concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
 					lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti
 					from lasku use index (tila_index)
 					$tuotelisa
 					where lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tila = 'L' and lasku.alatila = 'A'
+					and lasku.tila in ('L','N','V')
+					and lasku.alatila not in ('X','V')
 					and lasku.toimaika >= '$alkupvm' and lasku.toimaika <= '$loppupvm')
 
 					UNION
 
-					(select lasku.toimaika as 'Toimitusaika',
+					(SELECT lasku.toimaika as 'Toimitusaika',
 					concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
 					lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti
 					from lasku use index (yhtio_tila_tapvm)
@@ -73,7 +71,7 @@
 
 					UNION
 
-					(select lasku.toimaika as 'Toimitusaika',
+					(SELECT lasku.toimaika as 'Toimitusaika',
 					concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
 					lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti
 					from lasku use index (yhtio_tila_tapvm)
@@ -83,42 +81,26 @@
 					and tapvm = '0000-00-00'
 					and lasku.toimaika >= '$alkupvm' and lasku.toimaika <= '$loppupvm')
 
-					UNION
-
-					(select lasku.toimaika as 'Toimitusaika',
-					concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
-					lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti
-					from lasku use index (tila_index)
-					$tuotelisa
-					where lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tila = 'V' and lasku.alatila != 'V'
-					and lasku.toimaika >= '$alkupvm' and lasku.toimaika <= '$loppupvm')
-
-					ORDER BY $jarjestys ";
-
-
-		//echo "<pre>+-+-+-+<br>".str_replace('	','',$query)."<br>+-+-+-+</pre><br><br>";
-
+					ORDER BY 1, 3 ";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<table><tr>";
+		pupe_DataTables(array(array($pupe_DataTables, 7, 7, false, false)));
 
-		$vanhaojarj = $kojarj;
+		echo "<table class='display dataTable' id='$pupe_DataTables'><thead><tr>";
 
 		for ($i = 0; $i < mysql_num_fields($result)-3; $i++) {
-			$kojarj=$i+1; // sortti numeron mukaan niin ei tuu onglemia
-			echo "<th align='left'><a href = '$PHP_SELF?tee=$tee&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuotealku=$tuotealku&tuoteloppu=$tuoteloppu&osasto=$osasto&try=$try&kojarj=$kojarj'>".t(mysql_field_name($result,$i))."</a></th>";
+			echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
 		}
 
-		$kojarj = $vanhaojarj;
-
-		echo "<th align='left'><a href = '$PHP_SELF?tee=$tee&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuotealku=$tuotealku&tuoteloppu=$tuoteloppu&osasto=$osasto&try=$try&kojarj=4,5'>".t("Tyyppi")."</a></th>";
+		echo "<th align='left'>".t("Tyyppi")."</th>";
 		echo "<th align='left'>".t("Viesti")."</th>";
 		echo "<th align='left'>".t("Summa")."</th>";
-		echo "</tr>";
+		echo "</tr></thead>";
 
 		$summat = 0;
 		$arvot  = 0;
+
+		echo "<tbody>";
 
 		while ($prow = mysql_fetch_array($result)) {
 
@@ -128,22 +110,19 @@
 			echo "<tr class='aktiivi'>";
 
 			for ($i=0; $i < mysql_num_fields($result)-3; $i++) {
-				if (mysql_field_name($result,$i) == 'Toimitusaika') {
-					echo "<$ero valign='top'>".tv1dateconv($prow[$i],"pitka")."</$ero>";
-				}
-				elseif (mysql_field_name($result,$i) == 'Nimi/Toim. nimi' and substr($prow[$i],-4) == '<br>') {
+				if (mysql_field_name($result,$i) == 'Nimi/Toim. nimi' and substr($prow[$i],-4) == '<br>') {
 					echo "<$ero valign='top'>".substr($prow[$i],0,-4)."</$ero>";
 				}
 				elseif (mysql_field_name($result,$i) == 'Tilausnro') {
-					echo "<$ero valign='top'><a href = '$PHP_SELF?tee=NAYTATILAUS&tunnus=$prow[$i]&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuotealku=$tuotealku&tuoteloppu=$tuoteloppu&osasto=$osasto&try=$try&kojarj=$kojarj'>$prow[$i]</a></$ero>";
+					echo "<$ero valign='top'><a href = '$PHP_SELF?tee=NAYTATILAUS&tunnus=$prow[$i]&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuotealku=$tuotealku&tuoteloppu=$tuoteloppu&osasto=$osasto&try=$try'>$prow[$i]</a></$ero>";
 				}
 				else {
 					echo "<$ero valign='top'>".str_replace(".",",",$prow[$i])."</$ero>";
 				}
 			}
 
-			$laskutyyppi=$prow["tila"];
-			$alatila=$prow["alatila"];
+			$laskutyyppi = $prow["tila"];
+			$alatila     = $prow["alatila"];
 
 			//tehd‰‰n selv‰kielinen tila/alatila
 			require "inc/laskutyyppi.inc";
@@ -173,25 +152,29 @@
 								FROM lasku
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
-								and lasku.tunnus = '$prow[Tilausnro]'";
+								and lasku.tunnus  = '$prow[Tilausnro]'";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
 				$sumrow = mysql_fetch_array($sumresult);
 
-				echo "<$ero align='right' valign='top'>$sumrow[arvo]</$ero>";
+				echo "<$ero align='right' valign='top'>$sumrow[arvo]<br>$sumrow[summa]</$ero>";
 
 				$summat += $sumrow["summa"];
 				$arvot  += $sumrow["arvo"];
 			}
 			else {
-				echo "<$ero align='right' valign='top'></$ero>";
+				echo "<$ero align='right' valign='top'>0<br>0</$ero>";
 			}
 
 			echo "</tr>";
 
 		}
 
-		echo "<tr><td class='back' colspan='5'><th>".t("Veroton").":</th><th>".sprintf('%.2f', $arvot)."</th></tr>";
-		echo "<tr><td class='back' colspan='5'><th>".t("Verollinen").":</th><th>".sprintf('%.2f', $summat)."</th></tr>";
+		echo "</tbody>";
+
+		echo "<tfoot>";
+		echo "<tr><td class='back' colspan='5'><th>".t("Veroton").":</th><td class='tumma' align='right' id='arvo_yhteensa'>".sprintf('%.2f', $arvot)."</th></tr>";
+		echo "<tr><td class='back' colspan='5'><th>".t("Verollinen").":</th><td class='tumma' align='right' id='summa_yhteensa'>".sprintf('%.2f', $summat)."</th></tr>";
+		echo "</tfoot>";
 
 		echo "</table><br><br><br><br>";
 	}

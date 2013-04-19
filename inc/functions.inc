@@ -2677,7 +2677,26 @@ if (!function_exists("jalkilaskentafunktio")) {
 		$rivitunnus = mikä on tapahtuman tehneen rivin tunnus (ostorivitunnus)
 		*/
 
+		// Taulut lukkoon.
+		$qu = "	LOCK TABLE asiakas READ,
+				lasku WRITE,
+				sarjanumeroseuranta READ,
+				tapahtuma WRITE,
+				tilausrivi WRITE,
+				tilausrivin_lisatiedot READ,
+				tili READ,
+				tiliointi WRITE,
+				tuote WRITE,
+				tuotepaikat READ,
+				tuotteen_alv READ,
+				yhtio READ,
+				yhtion_toimipaikat READ";
+		$re = pupe_query($qu);
+
 		require("tilauskasittely/jalkilaskenta.inc");
+
+		$qu = "UNLOCK TABLES";
+		$re = pupe_query($qu);
 
 		return $uusikehahin;
 	}
@@ -2692,21 +2711,21 @@ if (!function_exists("jalkilaske_valmistus")) {
 		$tee 			 = "VALMISTA";
 
 		$query = "	SELECT lasku.tunnus,
+					lasku.alatila,
 					sum(if (tilausrivi.tyyppi in ('V','W'), 1, 0)) valmistusriveja,
 					GROUP_CONCAT(DISTINCT tilausrivi.tunnus SEPARATOR ',') valmistettavat
-					from tilausrivi, lasku
-					where tilausrivi.yhtio = '$kukarow[yhtio]'
-					and lasku.yhtio = tilausrivi.yhtio
-					and lasku.tunnus = tilausrivi.otunnus
-					and lasku.tila 	in ('V', 'L')
-					and lasku.alatila  in ('V', 'K', 'X')
-					and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi='D') and lasku.tilaustyyppi in ('V','W','N')
+					FROM lasku
+					JOIN tilausrivi	ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi = 'D')
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila in ('V','L')
+					and lasku.tilaustyyppi in ('V','W','N')
 					and lasku.tunnus = '$valmistettava_tilaus'
-					GROUP BY lasku.tunnus
+					GROUP BY 1,2
 					HAVING valmistusriveja > 0";
 		$tilre = pupe_query($query);
 		$tilrow = mysql_fetch_assoc($tilre);
 
+		$orig_alatila   = $tilrow["alatila"];
 		$valmistettavat = $tilrow["valmistettavat"];
 
 		if ($tee == "VALMISTA" and $valmistettavat != "") {
@@ -2719,8 +2738,8 @@ if (!function_exists("jalkilaske_valmistus")) {
 						FROM tilausrivi, lasku
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and	tilausrivi.tunnus in ($valmistettavat)
-						and lasku.tunnus=tilausrivi.otunnus
-						and lasku.yhtio=tilausrivi.yhtio";
+						and lasku.tunnus = tilausrivi.otunnus
+						and lasku.yhtio  = tilausrivi.yhtio";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -2743,8 +2762,7 @@ if (!function_exists("jalkilaske_valmistus")) {
 						SET alatila	= 'K'
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus  in ($row[Tilaus])
-						and tila	in ('V','L')
-						and alatila in ('V','X')";
+						and tila	in ('V','L')";
 			$chkresult4 = pupe_query($query);
 
 			$korjataan = " and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi='D') ";
@@ -2778,8 +2796,7 @@ if (!function_exists("jalkilaske_valmistus")) {
 						tilausrivi.hyllytaso,
 						tilausrivi.hyllynro
 						FROM tilausrivi, tuote
-						WHERE
-						tilausrivi.otunnus in ($row[Tilaus])
+						WHERE tilausrivi.otunnus in ($row[Tilaus])
 						and tilausrivi.tunnus in ($valmistettavat)
 						and tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tuote.yhtio = tilausrivi.yhtio
@@ -2924,6 +2941,13 @@ if (!function_exists("jalkilaske_valmistus")) {
 				echo "<td colspan='5'><font class='ok'>$retval</font></td>";
 				echo "</tr>";
 			}
+
+			$query = "	UPDATE lasku
+						SET alatila	= '$orig_alatila'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus  = '$valmistettava_tilaus'
+						and tila	in ('V','L')";
+			$chkresult4 = pupe_query($query);
 		}
 	}
 }
@@ -12118,6 +12142,29 @@ if (!function_exists("pupe_DataTables")) {
 								$('#tyom_yhteensa2').html(tun2+\":\"+min2+\"&nbsp;\");
 							}
 
+							if (tableid == \"tilauskanta\") {
+								var summa = 0;
+								var arvo  = 0;
+
+								// Summataan vain ruudulla näkyvät luvut
+								for (var i=iStart; i<iEnd; i++) {
+									var summat = aaData[aiDisplay[i]][6].split('<br>');
+
+									arvo += parseFloat(summat[0]);
+									summa += parseFloat(summat[1]);
+								}
+
+								// Tyhjennetään kaikki summat
+								$('td[id$=\"_yhteensa\"]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								$('#arvo_yhteensa').html(arvo.toFixed(2));
+								$('#summa_yhteensa').html(summa.toFixed(2));
+							}
+
 							if (tableid == \"avoimet0\") {
 								var avoimety = new Array();
 								var valuutat = new Array();
@@ -18478,7 +18525,7 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 }
 
 if (!function_exists("kopioitiliointi")) {
-	function kopioitiliointi ($tunnus, $viivaaja) {
+	function kopioitiliointi ($tunnus, $viivaaja = "", $params = array()) {
 		//Tehdään kopio tiliöinnistä $tunnus
 		//Jos $viivaajassa on jotain tehdään uusi vienti yliviivattuna
 
@@ -18512,6 +18559,9 @@ if (!function_exists("kopioitiliointi")) {
 							$query .= $kennimi." = '".$tiliointirow[$kennimi]."',";
 						}
 					}
+					elseif (isset($params[$kennimi])) {
+						$query .= "{$kennimi} ='{$params[$kennimi]}',";
+					}
 					else {
 						$query .= $kennimi." = '".$tiliointirow[$kennimi]."',";
 					}
@@ -18520,6 +18570,51 @@ if (!function_exists("kopioitiliointi")) {
 
 			$query  = substr($query,0,-1);
 			$result = pupe_query($query);
+
+			return mysql_insert_id();
+		}
+	}
+}
+
+if (!function_exists("kopioitapahtuma")) {
+	function kopioitapahtuma ($tunnus, $params = array()) {
+		//Tehdään kopio tapahtumasta $tunnus
+
+		global $kukarow, $jalkilaskenta_debug, $jalkilaskenta_debug_text;
+
+		$query = "	SELECT *
+					FROM tapahtuma
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus  = '{$tunnus}'";
+		$result = pupe_query($query);
+		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+
+		if (mysql_num_rows($result) != 1) {
+			echo t("Tapahtuma kateissa, systeemivirhe!")."<br>";
+		}
+		else {
+			$tapahtumarow = mysql_fetch_assoc($result);
+
+			$query = "INSERT INTO tapahtuma SET ";
+
+			for ($i = 0; $i < mysql_num_fields($result); $i++) {
+
+				$kennimi = mysql_field_name($result, $i);
+
+				if ($kennimi != 'tunnus') {
+					if (isset($params[$kennimi])) {
+						$query .= "{$kennimi} ='{$params[$kennimi]}',";
+					}
+					else {
+						$query .= $kennimi." = '".$tapahtumarow[$kennimi]."',";
+					}
+				}
+			}
+
+			$query  = substr($query,0,-1);
+			$result = pupe_query($query);
+
+			if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 			return mysql_insert_id();
 		}
@@ -20045,6 +20140,7 @@ if(!function_exists('_xls_jarjestetty_headerit')) {
 
 if (!function_exists('_xls_rivit')) {
 	function _xls_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $force_to_string = array()) {
+		require_once 'ProgressBar.class.php';
 		$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
 		$xls_progress_bar->initialize(count($rivit));
 
@@ -20295,6 +20391,28 @@ if(!function_exists('_two_dimensional_array_sort_by_key')) {
 		}
 
 		$array = $_return_array;
+	}
+}
+
+if (!function_exists('hae_maa')) {
+	function hae_maa($params) {
+
+		$maakoodi = !empty($params['maakoodi']) ? $params['maakoodi'] : '';
+
+		if ($maakoodi == '') return array();
+
+		$maan_tiedot = array();
+
+		$query = "	SELECT *
+					FROM maat
+					WHERE koodi = '{$maakoodi}'
+					LIMIT 1";
+		$maa_res = pupe_query($query);
+		$maa_row = mysql_fetch_assoc($maa_res);
+
+		$maan_tiedot['nimi'] = $maa_row['name'] != '' ? $maa_row['name'] : $maa_row['koodi'];
+
+		return $maan_tiedot;
 	}
 }
 

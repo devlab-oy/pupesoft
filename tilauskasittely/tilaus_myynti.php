@@ -490,15 +490,15 @@ if (($tee == "" or ($myos_prospektit == "TRUE" and $toim == "TARJOUS")) and (($k
 
 //Luodaan otsikko
 if (
-        ($tee == "" and 
+        ($tee == "" and
             (
-                ($toim == "PIKATILAUS" and 
-                    ((int) $kukarow["kesken"] == 0 and ($tuoteno != '' or $asiakasid != '')) or 
+                ($toim == "PIKATILAUS" and
+                    ((int) $kukarow["kesken"] == 0 and ($tuoteno != '' or $asiakasid != '')) or
                     ((int) $kukarow["kesken"] != 0 and $asiakasid != '' and $kukarow["extranet"] == "")
-                ) or 
+                ) or
                 ($from == "CRM" and $asiakasid != '')
              )
-        ) or 
+        ) or
         ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0)
    ) {
 
@@ -1860,10 +1860,13 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 		else {
 			$asiakasmaa = $laskurow["toim_nimi"] == "" ? $laskurow["maa"] : $laskurow["toim_maa"];
 
+			$varastolisa = $toim == 'EXTRANET' ? " and varastopaikat.tyyppi='' " : "";
+
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
+						AND (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')
+						{$varastolisa}";
 			$vtresult = pupe_query($query);
 			$vtrow = mysql_fetch_assoc($vtresult);
 
@@ -4299,7 +4302,7 @@ if ($tee == '') {
 				}
 
 				if ($trow["ei_saldoa"] == ""){
-				
+
 					$sallitut_maat_lisa = "";
 
 					if ($laskurow["toim_maa"] != '') {
@@ -5814,7 +5817,7 @@ if ($tee == '') {
 							echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle</td>";
 						}
 					}
-					elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE" or $toim == "RIVISYOTTO") {
+					elseif (in_array($toim, array('VALMISTAVARASTOON','VALMISTAASIAKKAALLE','RIVISYOTTO','PIKATILAUS'))) {
 						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle ".strtolower($row["yksikko"])."</td>";
 					}
 					else {

@@ -834,14 +834,6 @@
 						$vero += $trow['bruttosumma'];
 					}
 				}
-
-				// V‰hennet‰‰n mahdolliset tehdaspalautukset (tavaraostot muista EU-maista)
-				if ($cleantaso == 'fi313') {
-					$palautukset = tehdaspalautukset($startmonth, $endmonth);
-					foreach ($palautukset as $palautus) {
-						$vero -= $palautus['veronmaara'];
-					}
-				}
 			}
 
 			if ($cleantaso == 'fi312' or $cleantaso == 'fi311') {

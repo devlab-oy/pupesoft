@@ -20402,28 +20402,3 @@ if (!function_exists('search_array_key_recursive')) {
 		return $results;
 	}
 }
-
-if (!function_exists('tehdaspalautukset')) {
-	function tehdaspalautukset($startmonth, $endmonth) {
-		global $kukarow;
-
-		// Haetaan tehdaspalautukset (tilaustyyppi='9')
-		$query = "SELECT vero, sum(round(tiliointi.summa * vero / 100 * -1, 2)) veronmaara, count(*) kpl
-					FROM tiliointi
-					JOIN lasku on (lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus)
-					WHERE tiliointi.yhtio='{$kukarow['yhtio']}'
-					AND tiliointi.korjattu = ''
-					AND tiliointi.tapvm >= '$startmonth'
-					AND tiliointi.tapvm <= '$endmonth'
-					AND lasku.tilaustyyppi = '9'";
-		$result = pupe_query($query);
-
-		$palautukset = array();
-
-		while($palautus = mysql_fetch_assoc($result)) {
-			$palautukset[] = $palautus;
-		}
-
-		return $palautukset;
-	}
-}

@@ -548,14 +548,6 @@
 
 			$vero = 0.0;
 
-			if ($taso == 'ee510') {
-				// V‰hennet‰‰n mahdolliset tehdaspalautukset (verot)
-				$palautukset = tehdaspalautukset($startmonth, $endmonth);
-				foreach ($palautukset as $palautus) {
-					$vero -= $palautus['veronmaara'];
-				}
-			}
-
 			$query = "	SELECT
 						ifnull(group_concat(if(alv_taso like '%ee100%' or alv_taso like '%ee110%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit100,
 						ifnull(group_concat(if(alv_taso not like '%ee100%' and alv_taso not like '%ee110%', concat(\"'\",tilino,\"'\"), NULL)), '') tilitMUU

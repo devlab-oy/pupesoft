@@ -2462,7 +2462,6 @@
 
 					if ($toim == 'VASTAANOTA_REKLAMAATIO') {
 						echo "<br><form action='tilaus_myynti.php' method='POST'>";
-						echo "<input type='hidden' name='tee' value = 'AKTIVOI'>";
 						echo "<input type='hidden' name='toim' value = 'REKLAMAATIO'>";
 						echo "<input type='hidden' name='tilausnumero' value = '{$tilausnumeroita}'>";
 						echo "<input type='hidden' name='mista' value = 'keraa'>";

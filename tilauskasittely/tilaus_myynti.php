@@ -120,6 +120,65 @@ if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 	enable_ajax();
 }
 
+// Jos tilausnumero on jollain muulla käyttäjällä kesken
+if (!aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
+
+	// katsotaan onko muilla aktiivisena
+	$query = "	SELECT *
+				FROM kuka
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND kesken  = '$tilausnumero'
+				AND kesken != 0";
+	$result = pupe_query($query);
+
+	if (mysql_num_rows($result) != 0) {
+		$row = mysql_fetch_assoc($result);
+
+		echo "<font class='error'>".t("Tilaus on aktiivisena käyttäjällä")." $row[nimi] ($row[kuka]). ".t("Tilausta ei voi tällä hetkellä muokata").".</font><br>";
+
+		if (tarkista_oikeus("kayttajat.php", "", "1")) {
+			echo "<br><form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
+				<input type='hidden' name='selkuka' value='{$row['kuka']}'>
+				<input type='hidden' name='toim' value='{$toim}'>
+				<input type='hidden' name='tee' value='DELKESKEN'>
+				<input type='hidden' name='orig_tila' value='$orig_tila'>
+				<input type='hidden' name='orig_alatila' value='$orig_alatila'>
+				<input type='submit' value='* ",t("Vapauta käyttäjän")," $row[nimi] ($row[kuka]). ",t("keskenoleva tilaus")," *'>
+				</form>";
+		}
+	}
+
+	echo "ERROR!<br>";
+
+	exit();
+}
+else {
+	// Näin ostataan valita pikatilaus
+	if ($toim == "RIVISYOTTO" and isset($PIKATILAUS)) {
+		$toim = "PIKATILAUS";
+	}
+	// Jos tullaan projektille pitää myös aktivoida $projektilla
+	elseif ($toim == "PROJEKTI") {
+		$projektilla = $tilausnumero;
+	}
+	elseif ($toim == "VALMISTAASIAKKAALLE" and $tilausnumero != "") {
+		$tyyppiquery  = "SELECT tilaustyyppi FROM lasku WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$tilausnumero'";
+		$tyyppiresult = pupe_query($tyyppiquery);
+
+		if (mysql_num_rows($tyyppiresult) != 0) {
+			$tyyppirow = mysql_fetch_assoc($tyyppiresult);
+
+			if (strtoupper($tyyppirow['tilaustyyppi']) == 'W') {
+				$toim = "VALMISTAVARASTOON";
+			}
+		}
+		else {
+			echo "<font class='error'>".t("Tilaus katosi")."!</font><br>";
+			$tilausnumero = "";
+		}
+	}
+}
+
 if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0) {
 	$query = "	UPDATE lasku
 				SET tunnusnippu = tunnus
@@ -217,82 +276,19 @@ if ($tee == 'DELKESKEN') {
 	}
 }
 
-// aktivoidaan saatu id
-if ($tee == 'AKTIVOI') {
-
-	// katsotaan onko muilla aktiivisena
-	$query = "	SELECT *
-				FROM kuka
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND kesken  = '$tilausnumero'
-				AND kesken != 0";
-	$result = pupe_query($query);
-
-	unset($row);
-
-	if (mysql_num_rows($result) != 0) {
-		$row = mysql_fetch_assoc($result);
-	}
-
-	// Jos tilausnumero on jollain muulla käyttäjällä kesken
-	if (! aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
-		echo "<font class='error'>".t("Tilaus on aktiivisena käyttäjällä")." $row[nimi] ($row[kuka]). ".t("Tilausta ei voi tällä hetkellä muokata").".</font><br>";
-
-		if (tarkista_oikeus("kayttajat.php", "", "1")) {
-			echo "<br><form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
-				<input type='hidden' name='selkuka' value='{$row['kuka']}'>
-				<input type='hidden' name='toim' value='{$toim}'>
-				<input type='hidden' name='tee' value='DELKESKEN'>
-				<input type='hidden' name='orig_tila' value='$orig_tila'>
-				<input type='hidden' name='orig_alatila' value='$orig_alatila'>
-				<input type='submit' value='* ",t("Vapauta käyttäjän")," $row[nimi] ($row[kuka]). ",t("keskenoleva tilaus")," *'>
-				</form>";
-		}
-
-		// poistetaan aktiiviset tilaukset jota tällä käyttäjällä oli
-		exit();
-	}
-	else {
-		// Näin ostataan valita pikatilaus
-		if ($toim == "RIVISYOTTO" and isset($PIKATILAUS)) {
-			$toim = "PIKATILAUS";
-		}
-		// Jos tullaan projektille pitää myös aktivoida $projektilla
-		elseif ($toim == "PROJEKTI") {
-			$projektilla = $tilausnumero;
-		}
-		elseif ($toim == "VALMISTAASIAKKAALLE" and $tilausnumero != "") {
-			$tyyppiquery = "SELECT tilaustyyppi FROM lasku WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$tilausnumero'";
-			$tyyppiresult = pupe_query($tyyppiquery);
-
-			if (mysql_num_rows($tyyppiresult) != 0) {
-				$tyyppirow=mysql_fetch_assoc($tyyppiresult);
-
-				if (strtoupper($tyyppirow['tilaustyyppi']) == 'W') {
-					$toim = "VALMISTAVARASTOON";
-				}
-			}
-			else {
-				echo "<font class='error'>".t("Tilaus katosi")."!</font><br>";
-				$tilausnumero = "";
-			}
-		}
-
-		// Jatketaan
-		$tee = "";
-	}
-}
-
 // jos ei olla postattu mitään, niin halutaan varmaan tehdä kokonaan uusi tilaus..
 if ($kukarow["extranet"] == "" and count($_POST) == 0 and ($from != "ASIAKASYLLAPITO" and $from != "LASKUTATILAUS" and $from != "VALITSETOIMITUS")) {
-	$tila				= '';
-	$tilausnumero		= '';
-	$laskurow			= '';
-	$kukarow["kesken"]	= '';
+
+	echo "NYT OLTAIS TEKEMÄSSÄ UUTTA!<br>";
+
+	#$tila				= '';
+	#$tilausnumero		= '';
+	#$laskurow			= '';
+	#$kukarow["kesken"]	= '';
 
 	//varmistellaan ettei vanhat kummittele...
-	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-	$result = pupe_query($query);
+	#$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+	#$result = pupe_query($query);
 }
 
 // Extranet keississä asiakasnumero tulee käyttäjän takaa
@@ -364,14 +360,6 @@ if ($kukarow["extranet"] != '') {
 	else {
 		echo t("VIRHE: Käyttäjätiedoissasi on virhe! Ota yhteys järjestelmän ylläpitäjään.")."<br><br>";
 		exit;
-	}
-}
-
-// Katsotaan että kukarow kesken, $tilausnumero ja $kukarow[kesken] stemmaavat keskenään
-if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
-	if (! aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
-		echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("Käy aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
-		exit();
 	}
 }
 
@@ -1864,14 +1852,6 @@ if ($tee == '') {
 
 	echo "<font class='head'>$otsikko</font><hr>";
 
-	// Käyttäjällä ei ole tätä tilausta kesken
-	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
-		if (! aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
-			echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("Käy aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").". $tilausnumero / $kukarow[kesken]<br><br><br>";
-			exit();
-		}
-	}
-
 	if ($kukarow['kesken'] != '0') {
 		$tilausnumero = $kukarow['kesken'];
 	}
@@ -2163,6 +2143,7 @@ if ($tee == '') {
 
 		echo "<form action='tuote_selaus_haku.php' method='post'>
 				<input type='hidden' name='toim_kutsu' value='$toim'>
+				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='tyojono' value='$tyojono'>
 				<input type='hidden' name='orig_tila' value = '$orig_tila'>
 				<input type='hidden' name='orig_alatila' value = '$orig_alatila'>
@@ -2397,7 +2378,6 @@ if ($tee == '') {
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
 						<input type='hidden' name='projektilla' value='$projektilla'>
-						<input type='hidden' name='aktivoinnista' value='true'>
 						<input type='hidden' name='tyojono' value='$tyojono'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 						<input type='hidden' name='mista' value='$mista'>
@@ -7528,7 +7508,7 @@ if ($tee == '') {
 			// jos kyseessä on käteiskauppaa
 			$kateinen = "";
 
-			if ($maksuehtorow['kateinen']!='') {
+			if ($maksuehtorow['kateinen'] != '') {
 				$kateinen = "X";
 			}
 

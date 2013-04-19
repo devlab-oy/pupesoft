@@ -490,14 +490,14 @@
 					}
 
 					if ($toim == "OSTO" or $toim == "OSTOSUPER") {
-						echo "<form method='post' action='tilauskasittely/tilaus_osto.php'>";
+						echo "<form method='post' action='tilauskasittely/tilaus_osto.php'>
+								<input type='hidden' name='tee' value='AKTIVOI'>";
 					}
 					else {
 						echo "<form method='post' action='tilauskasittely/tilaus_myynti.php'>";
 					}
 
-					echo "	<input type='hidden' name='toim' value='$aputoim1'>
-							<input type='hidden' name='tee' value='AKTIVOI'>";
+					echo "<input type='hidden' name='toim' value='$aputoim1'>";
 
 					echo "<br><table>
 							<tr>
@@ -2013,7 +2013,8 @@
 					echo "<td class='back' nowrap>";
 
 					if ($whiletoim == "OSTO" or $whiletoim == "OSTOSUPER" or $whiletoim == "HAAMU") {
-						echo "<form method='post' action='tilauskasittely/tilaus_osto.php' $javalisa>";
+						echo "<form method='post' action='tilauskasittely/tilaus_osto.php' $javalisa>
+								<input type='hidden' name='tee' value='AKTIVOI'>";
 					}
 					else {
 						echo "<form method='post' action='tilauskasittely/tilaus_myynti.php' $javalisa>";
@@ -2027,7 +2028,6 @@
 					echo "	<input type='hidden' name='lopetus' 	 value='{$palvelin2}muokkaatilaus.php////toim=$toim//asiakastiedot=$asiakastiedot//limit=$limit//etsi=$etsi'>
 							<input type='hidden' name='mista'		 value='muokkaatilaus'>
 							<input type='hidden' name='toim'		 value='$aputoim1'>
-							<input type='hidden' name='tee'			 value='AKTIVOI'>
 							<input type='hidden' name='orig_tila'	 value='{$row["tila"]}'>
 							<input type='hidden' name='orig_alatila' value='{$row["alatila"]}'>
 							<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";

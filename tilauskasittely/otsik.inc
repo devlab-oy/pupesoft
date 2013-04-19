@@ -58,7 +58,7 @@
 	}
 
 	//katsotaan ett‰ kukarow kesken ja $tilausnumero stemmaavat kesken‰‰n
-	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
+	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0)) {
 		echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
 		exit;
 	}

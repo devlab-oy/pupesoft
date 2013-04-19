@@ -6,7 +6,7 @@ $debug = 1;
 	if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 		function teccom_kaytettavat_tilausrivit($checkres, $lajilisa, $debug = 0) {
 
-			global $kukarow, $debug;
+			global $kukarow;
 
 			if ($debug == 1) {
 				echo "<br>teccom_kaytettavat_tilausrivit<br>";
@@ -82,7 +82,7 @@ $debug = 1;
 
 	if (!function_exists('etsi_sopivat_tilausrivit')) {
 		function etsi_sopivat_tilausrivit($data, $lajilisa, $trow, $toim_tuotenolisa, $isalisa = "", $debug = 0) {
-			global $kukarow ,$debug;
+			global $kukarow;
 
 			if ($debug == 1) {
 				echo "<br>etsi_sopivat_tilausrivit<br>";
@@ -458,7 +458,7 @@ $debug = 1;
 
 	if (!function_exists('tuoteperhe_check')) {
 		function tuoteperhe_check($tunnus, $debug = 0) {
-			global $kukarow, $debug;
+			global $kukarow;
 
 			if ($debug == 1) {
 				echo "<br>tuoteperhe_check<br>";
@@ -472,7 +472,7 @@ $debug = 1;
 								tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
 								tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
 								tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu, tilausrivi.kpl,
-								tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
+								tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali, tilausrivi.uusiotunnus
 								FROM tilausrivi
 								JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
 								JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
@@ -535,7 +535,8 @@ $debug = 1;
 								hyllynro		= '{$lapsitieto['hyllynro']}',
 								hyllytaso		= '{$lapsitieto['hyllytaso']}',
 								hyllyvali		= '{$lapsitieto['hyllyvali']}',
-								perheid			= '{$lapsitieto['tunnus']}'";
+								perheid			= '{$lapsitieto['tunnus']}',
+								uusiotunnus		= '{$lapsitieto['uusiotunnus']}'";
 				if ($debug == 1) {
  					echo "<pre>",str_replace("\t", "", $lisainsert),"</pre>";
 				}
@@ -552,7 +553,7 @@ $debug = 1;
 
 	if (!function_exists('ostoilla_vai_keikoilla')) {
 		function ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tunnus, $row, $data, $debug = 0) {
-			global $kukarow, $debug;
+			global $kukarow;
 
 			if ($debug == 1) {
 				echo "<br>ostoilla_vai_keikoilla<br>";
@@ -601,7 +602,7 @@ $debug = 1;
 
 	if (!function_exists('kopioi_tapahtuma')) {
 		function kopioi_tapahtuma($_arr, $kappaleerotus, $kpl, $debug = 0) {
-			global $kukarow, $debug;
+			global $kukarow;
 
 			if ($debug == 1) {
 				echo "<br>kopioi_tapahtuma<br>";
@@ -655,7 +656,7 @@ $debug = 1;
 
 	if (!function_exists('paivita_ja_splittaa')) {
 		function paivita_ja_splittaa($row, $datan_kpl, $kappaleerotus, $debug = 0) {
-			global $kukarow, $debug;
+			global $kukarow;
 
 			if ($debug == 1) {
 				echo "<br>paivita_ja_splittaa<br>";
@@ -1197,7 +1198,7 @@ $debug = 1;
 						$query = "	(SELECT DISTINCT tilausrivi.tunnus, toimi.asn_sanomat,
 									IF(tilausrivi.laskutettuaika = '0000-00-00', '9999-12-31', tilausrivi.laskutettuaika) AS laskutettuaika,
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus,
-									tilausrivi.laadittu
+									tilausrivi.laadittu, tilausrivi.perheid
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.uusiotunnus AND lasku.mapvm = '0000-00-00' AND lasku.tapvm = '0000-00-00' AND lasku.alatila != 'X')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
@@ -1217,7 +1218,7 @@ $debug = 1;
 									(SELECT DISTINCT tilausrivi.tunnus, toimi.asn_sanomat,
 									IF(tilausrivi.laskutettuaika = '0000-00-00', '9999-12-31', tilausrivi.laskutettuaika) AS laskutettuaika,
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus,
-									tilausrivi.laadittu
+									tilausrivi.laadittu, tilausrivi.perheid
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.uusiotunnus AND lasku.mapvm = '0000-00-00' AND lasku.tapvm = '0000-00-00' AND lasku.alatila != 'X')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
@@ -1238,7 +1239,7 @@ $debug = 1;
 									(SELECT DISTINCT tilausrivi.tunnus, toimi.asn_sanomat,
 									IF(tilausrivi.laskutettuaika = '0000-00-00', '9999-12-31', tilausrivi.laskutettuaika) AS laskutettuaika,
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus,
-									tilausrivi.laadittu
+									tilausrivi.laadittu, tilausrivi.perheid
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.tila = 'O' AND lasku.alatila = 'A')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
@@ -1288,7 +1289,8 @@ $debug = 1;
 
 								if (mysql_num_rows($chk_res) == 0) {
 									if ($debug == 1) {
-										echo "3 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br><br>";
+										echo "3 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] (perheid: $tilausrivirow[perheid]) tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br>";
+										echo "3 Debug Kokeiltiin $kokeiltiin[tunnus] riviä jonka perheid oli $kokeiltiin[perheid] ja uusiotunnus $kokeiltiin[uusiotunnus] ja otunnus $kokeiltiin[otunnus]<br><br>";
 									}
 									// $virheet++;
 
@@ -1306,14 +1308,14 @@ $debug = 1;
 
 										if (mysql_num_rows($chk_res) == 0) {
 											if ($debug == 1) {
-												echo "<br>continue1 <br><br>";
+												echo "continue1 <br><br>";
 											}
 											continue;
 										}
 									}
 									else {
 										if ($debug == 1) {
-											echo "<br>continue2 <br><br>";
+											echo "continue2 <br><br>";
 										}
 										continue;
 									}
@@ -1323,6 +1325,15 @@ $debug = 1;
 							$query = "SELECT kpl+varattu AS varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$kokeiltiin['tunnus']}'";
 							$kpl_chk_res = pupe_query($query);
 							$kpl_chk_row = mysql_fetch_assoc($kpl_chk_res);
+							
+							if ($debug == 1) {
+								echo "kpl+varattu kokeiltiin tunnuksella:<br>";
+								query_dump($query);
+							}
+							
+							if ($kokeiltiin["perheid"] != 0 and $kokeiltiin["tunnus"] == $kokeiltiin["perheid"]) {
+								$haukionkalaapuapuakalasyorapua = tuoteperhe_check($kokeiltiin["tunnus"], $debug);
+							}
 
 							$laskuri += $kpl_chk_row["varattu"];
 							$lisa_array[] = $kokeiltiin['tunnus'];

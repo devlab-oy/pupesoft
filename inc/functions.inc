@@ -8978,7 +8978,7 @@ if (!function_exists("hae_rahtimaksu")) {
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.erikoistoimitus_myynti = 0)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						AND tilausrivi.tyyppi in ('L', 'E')
+						AND tilausrivi.tyyppi in ('L', 'E', 'T')
 						AND tilausrivi.otunnus in ($otsikot)";
 			$painoresult = pupe_query($query);
 			$painorow = mysql_fetch_assoc($painoresult);

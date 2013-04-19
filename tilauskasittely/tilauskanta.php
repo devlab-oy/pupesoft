@@ -156,6 +156,9 @@
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
 				$sumrow = mysql_fetch_array($sumresult);
 
+				$sumrow["arvo"]  = (float) $sumrow["arvo"];
+				$sumrow["summa"] = (float) $sumrow["summa"];
+
 				echo "<$ero align='right' valign='top'>$sumrow[arvo]<br>$sumrow[summa]</$ero>";
 
 				$summat += $sumrow["summa"];

@@ -108,7 +108,6 @@ function echo_tyojono_table($request = array()) {
 			<th>".t("Kohde")."</th>
 			<th>".t("Toimitetaan")."</th>
 			<th>".t("Työjono")."/<br>".t("Työstatus")."</th>
-			<th>".t("Muokkaa")."</th>
 		</tr>";
 
 	echo "<tr>";
@@ -134,8 +133,6 @@ function echo_tyojono_table($request = array()) {
 	echo "</select>";
 	echo "</td>";
 
-	echo "<td><input type='hidden' class='search_field' name='search_muokkaa_haku'></td>";
-	echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_statusjono_haku'></td>";
 	echo "</tr>";
 
 	echo "</thead>";
@@ -184,10 +181,6 @@ function echo_tyojono_table($request = array()) {
 		}
 		echo "</select>";
 
-		echo "</td>";
-
-		echo "<td>";
-		echo "Muokkaa";
 		echo "</td>";
 
 		echo "</tr>";

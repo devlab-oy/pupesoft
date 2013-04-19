@@ -28,7 +28,7 @@ if ($ajax_request) {
 
 }
 
-echo "<font class='head'>".t("Laite hallinta")."</font><hr>";
+echo "<font class='head'>".t("Laitehallinta")."</font><hr>";
 ?>
 <style>
 	.paikka_tr_hidden {

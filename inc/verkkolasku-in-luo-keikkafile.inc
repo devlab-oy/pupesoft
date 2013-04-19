@@ -1084,8 +1084,17 @@ $debug = 1;
 					$tilausrivirow = mysql_fetch_assoc($tilausrivires);
 				}
 
-				$tilausrivirow['perheid'] = tuoteperhe_check($tilausrivirow['tunnus'], $debug);
+				if (empty($rtuoteno[$i]["isa_olemassa"])) {
+					
+					unset($riv);
+					
+					foreach ($kaytettavat_tilausrivit as $riv) {
+						$_perheid = tuoteperhe_check($riv, $debug);
 
+						if ($riv == $tilausrivirow['tunnus']) $tilausrivirow['perheid'] = $_perheid;
+					}
+				}
+				
 				if ($tilausrivirow['perheid'] == $tilausrivirow['tunnus']) {
 
 					// etsitään lapset ja splitataan ne isän mukaan
@@ -1263,7 +1272,15 @@ $debug = 1;
 
 						$laskuri_tmp = $laskuri;
 						$laskuri = 0;
+						
+						if ($debug == 1) {
+							while ($kokeiltiin = mysql_fetch_assoc($kokeillaan)) {
+								echo "<pre>" . var_dump($kokeiltiin) . "</pre><br>";
+							}
 
+							mysql_data_seek($kokeillaan,0);
+						}
+						
 						while ($kokeiltiin = mysql_fetch_assoc($kokeillaan)) {
 
 							// tilausrivi ei saa olla jo kohdistettu
@@ -1295,14 +1312,14 @@ $debug = 1;
 									// $virheet++;
 
 									// TÄMÄ ON PUUKOTUS
-									if ($tilausrivirow['perheid'] != 0 and $tilausrivirow['perheid'] != $tilausrivirow['tunnus']) {
+									if ($kokeiltiin['perheid'] != 0 and $kokeiltiin['perheid'] != $kokeiltiin['tunnus']) {
 
 										// isä pitää olla jo kohdistettu
 										$query = "	SELECT tunnus
 													FROM asn_sanomat
 													WHERE yhtio = '{$kukarow['yhtio']}'
 													AND laji = 'asn'
-													AND tilausrivi LIKE '%{$tilausrivirow['perheid']}%'
+													AND tilausrivi LIKE '%{$kokeiltiin['perheid']}%'
 													AND status = 'X'";
 										$chk_res = pupe_query($query);
 
@@ -1332,7 +1349,7 @@ $debug = 1;
 							}
 							
 							if ($kokeiltiin["perheid"] != 0 and $kokeiltiin["tunnus"] == $kokeiltiin["perheid"]) {
-								$haukionkalaapuapuakalasyorapua = tuoteperhe_check($kokeiltiin["tunnus"], $debug);
+								tuoteperhe_check($kokeiltiin["tunnus"], $debug);
 							}
 
 							$laskuri += $kpl_chk_row["varattu"];

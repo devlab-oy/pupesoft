@@ -2,6 +2,7 @@
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
+$usemastertoo = 1;
 
 if (isset($_POST["tee"])) {
 	if ($_POST["tee"] == 'lataa_tiedosto') {
@@ -62,11 +63,10 @@ if ($ajax_request) {
 	}
 }
 
-require ("../inc/functions.inc");
-
 echo "<font class='head'>".t("Inventointiaste")."</font><hr>";
 
 gauge();
+
 ?>
 <style>
 	#wrapper {
@@ -94,6 +94,7 @@ gauge();
 	.inventointilajeittain_tr {
 		display: none;
 	}
+
 	.inventointilajeittain_tr_not_hidden {
 		background: none repeat scroll 0 0 #DADDDE;
 	}
@@ -481,7 +482,9 @@ $request = array(
 	'valitut_varastot'			 => $varastot,
 	'valitut_inventointilajit'	 => $inventointilajit,
 );
+
 echo "<div id='wrapper'>";
+
 init($request);
 
 echo "<div id='table_div'>";
@@ -494,7 +497,9 @@ echo "<br/>";
 echo "<br/>";
 
 if ($request['tee'] == 'aja_raportti') {
+
 	$rivit = hae_inventoinnit($request);
+
 	if ($request['tallenna_exceliin']) {
 		$header_values = array(
 			'vuosi'						 => array(
@@ -821,7 +826,7 @@ function echo_kayttoliittyma($request) {
 	echo "<form method='POST' action='' name='inventointiaste_form'>";
 	echo "<input type='hidden' action = '' name='tee' value='aja_raportti' />";
 
-	echo "<table>";
+	echo "<br><br><table>";
 
 	echo "<tr>";
 	echo "<th>".t("Tallenna exceliin")."</th>";
@@ -1012,11 +1017,7 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
 
 	$query = "	SELECT tapahtuma.hyllyalue AS hyllyalue, tapahtuma.hyllynro AS hyllynro, count(*) AS kpl
 				FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
-				JOIN tuote
-				ON ( tuote.yhtio = tapahtuma.yhtio
-				AND tuote.tuoteno = tapahtuma.tuoteno
-				AND tuote.ei_saldoa = ''
-				AND tuote.status = 'A' )
+				JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio AND tuote.tuoteno = tapahtuma.tuoteno AND tuote.ei_saldoa = '' AND tuote.status != 'P')
 				WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 				AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
 				AND tapahtuma.laji = 'Inventointi'
@@ -1044,11 +1045,10 @@ function hae_tuotepaikkojen_lukumaara(&$request) {
 
 	$query = "	SELECT tuotepaikat.hyllyalue as hyllyalue, tuotepaikat.hyllynro as hyllynro, count(*) as kpl
 				FROM tuote
-				JOIN tuotepaikat
-				USING (yhtio, tuoteno)
+				JOIN tuotepaikat USING (yhtio, tuoteno)
 				WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 				AND tuote.ei_saldoa = ''
-				AND tuote.status = 'A'
+				AND tuote.status != 'P'
 				GROUP BY 1,2";
 	$result = pupe_query($query);
 
@@ -1081,7 +1081,7 @@ function kuuluuko_hylly_varastoon($request, $varasto_row) {
 			$count = $varasto_row['kpl'];
 		}
 	}
-	
+
 
 	return $count;
 }
@@ -1147,7 +1147,7 @@ function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {
 				ON ( tuote.yhtio = tapahtuma.yhtio
 				  AND tuote.tuoteno = tapahtuma.tuoteno
 				  AND tuote.ei_saldoa = ''
-				  AND tuote.status = 'A' )
+				  AND tuote.status != 'P' )
 				JOIN varastopaikat
 				ON ( varastopaikat.yhtio = tapahtuma.yhtio
 				  AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))

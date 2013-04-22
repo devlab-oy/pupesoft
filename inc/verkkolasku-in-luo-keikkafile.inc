@@ -501,7 +501,11 @@ $debug = 1;
 						AND varattu = '{$lapsitieto['varattu']}'
 						AND tyyppi = 'O'";
 			$loytyiko_lapsi_res = pupe_query($query);
-
+			
+			if ($debug == 1) {
+				echo "loytyiko_lapsi query: $query<br><br>";
+			}
+			
 			// Jos luodaan lapsirivi tässä kohtaa, ja isä on jo tuloutettu, lapsi ei saa olla tuloutettu!!
 			if (mysql_num_rows($loytyiko_lapsi_res) == 0) {
 				if ($debug == 1) {

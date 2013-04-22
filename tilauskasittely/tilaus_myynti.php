@@ -120,6 +120,60 @@ if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 	enable_ajax();
 }
 
+if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0) {
+	$query = "	UPDATE lasku
+				SET tunnusnippu = tunnus
+				where yhtio		= '$kukarow[yhtio]'
+				and tunnus		= '$kukarow[kesken]'
+				and tunnusnippu = 0";
+	$result = pupe_query($query);
+
+	$valitsetoimitus = $toim;
+}
+
+// Vaihdetaan tietyn projektin toiseen toimitukseen
+//	HUOM: tämä käyttää aktivointia joten tämä on oltava aika alussa!! (valinta on onchage submit rivisyötössä joten noita muita paremetreja ei oikein voi passata eteenpäin..)
+if ((int) $valitsetoimitus > 0 and $valitsetoimitus != $tilausnumero) {
+	$tilausnumero = $valitsetoimitus;
+	$from 		  = "VALITSETOIMITUS";
+	$mista 		  = "";
+
+	$query = "	SELECT tila, alatila, tilaustyyppi
+				FROM lasku
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus = '$tilausnumero'";
+	$result = pupe_query($query);
+	$toimrow = mysql_fetch_assoc($result);
+
+	$orig_tila	  = $toimrow["tila"];
+	$orig_alatila = $toimrow["alatila"];
+
+	if ($toimrow["tila"] == "A" or (($toimrow["tila"] == "L" or $toimrow["tila"] == "N") and $toimrow["tilaustyyppi"] == "A")) {
+		$toim = (strtolower($asentaja) == 'tyomaarays_asentaja' or $toim == 'TYOMAARAYS_ASENTAJA') ? "TYOMAARAYS_ASENTAJA" : "TYOMAARAYS";
+	}
+	elseif ($toimrow["tila"] == "L" or $toimrow["tila"] == "N") {
+		if ($toim != "RIVISYOTTO" and $toim != "PIKATILAUS") $toim = "RIVISYOTTO";
+	}
+	elseif ($toimrow["tila"] == "T") {
+		$toim = "TARJOUS";
+	}
+	elseif ($toimrow["tila"] == "C") {
+		$toim = "REKLAMAATIO";
+	}
+	elseif ($toimrow["tila"] == "V") {
+		$toim = "VALMISTAASIAKKAALLE";
+	}
+	elseif ($toimrow["tila"] == "W") {
+		$toim = "VALMISTAVARASTOON";
+	}
+	elseif ($toimrow["tila"] == "R") {
+		$toim = "PROJEKTI";
+	}
+}
+elseif (in_array($valitsetoimitus, array("ENNAKKO","TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO","PROJEKTI"))) {
+	$uusitoimitus = $valitsetoimitus;
+}
+
 // Jos tilausnumero on jollain muulla käyttäjällä kesken
 if (!aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
 
@@ -179,61 +233,6 @@ else {
 	}
 }
 
-if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0) {
-	$query = "	UPDATE lasku
-				SET tunnusnippu = tunnus
-				where yhtio		= '$kukarow[yhtio]'
-				and tunnus		= '$kukarow[kesken]'
-				and tunnusnippu = 0";
-	$result = pupe_query($query);
-
-	$valitsetoimitus = $toim;
-}
-
-// Vaihdetaan tietyn projektin toiseen toimitukseen
-//	HUOM: tämä käyttää aktivointia joten tämä on oltava aika alussa!! (valinta on onchage submit rivisyötössä joten noita muita paremetreja ei oikein voi passata eteenpäin..)
-if ((int) $valitsetoimitus > 0) {
-	$tee 			= "AKTIVOI";
-	$tilausnumero 	= $valitsetoimitus;
-	$from 			= "VALITSETOIMITUS";
-	$mista 			= "";
-
-	$query = "	SELECT tila, alatila, tilaustyyppi
-				FROM lasku
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND tunnus = '$tilausnumero'";
-	$result = pupe_query($query);
-	$toimrow = mysql_fetch_assoc($result);
-
-	$orig_tila		= $toimrow["tila"];
-	$orig_alatila	= $toimrow["alatila"];
-
-	if ($toimrow["tila"] == "A" or (($toimrow["tila"] == "L" or $toimrow["tila"] == "N") and $toimrow["tilaustyyppi"] == "A")) {
-		$toim = (strtolower($asentaja) == 'tyomaarays_asentaja' or $toim == 'TYOMAARAYS_ASENTAJA') ? "TYOMAARAYS_ASENTAJA" : "TYOMAARAYS";
-	}
-	elseif ($toimrow["tila"] == "L" or $toimrow["tila"] == "N") {
-		if ($toim != "RIVISYOTTO" and $toim != "PIKATILAUS") $toim = "RIVISYOTTO";
-	}
-	elseif ($toimrow["tila"] == "T") {
-		$toim = "TARJOUS";
-	}
-	elseif ($toimrow["tila"] == "C") {
-		$toim = "REKLAMAATIO";
-	}
-	elseif ($toimrow["tila"] == "V") {
-		$toim = "VALMISTAASIAKKAALLE";
-	}
-	elseif ($toimrow["tila"] == "W") {
-		$toim = "VALMISTAVARASTOON";
-	}
-	elseif ($toimrow["tila"] == "R") {
-		$toim = "PROJEKTI";
-	}
-}
-elseif (in_array($valitsetoimitus, array("ENNAKKO","TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO","PROJEKTI"))) {
-	$uusitoimitus = $valitsetoimitus;
-}
-
 if (($kukarow["extranet"] != '' and $toim != 'EXTRANET' and $toim != 'EXTRANET_REKLAMAATIO') or ($kukarow["extranet"] == "" and ($toim == "EXTRANET" or $toim == "EXTRANET_REKLAMAATIO"))) {
 	//aika jännä homma jos tänne jouduttiin
 	exit;
@@ -274,21 +273,6 @@ if ($tee == 'DELKESKEN') {
 		echo "<b>",t("Käyttäjän")," {$selkuka} ",t("keskenoleva tilaus vapautettu"),"!</b><br><br>";
 		$tee = "";
 	}
-}
-
-// jos ei olla postattu mitään, niin halutaan varmaan tehdä kokonaan uusi tilaus..
-if ($kukarow["extranet"] == "" and count($_POST) == 0 and ($from != "ASIAKASYLLAPITO" and $from != "LASKUTATILAUS" and $from != "VALITSETOIMITUS")) {
-
-	echo "NYT OLTAIS TEKEMÄSSÄ UUTTA!<br>";
-
-	#$tila				= '';
-	#$tilausnumero		= '';
-	#$laskurow			= '';
-	#$kukarow["kesken"]	= '';
-
-	//varmistellaan ettei vanhat kummittele...
-	#$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-	#$result = pupe_query($query);
 }
 
 // Extranet keississä asiakasnumero tulee käyttäjän takaa
@@ -1645,6 +1629,7 @@ if ($uusitoimitus != "") {
 					JOIN lasku valmistukset ON valmistukset.yhtio=lasku.yhtio and valmistukset.tunnusnippu=lasku.tunnusnippu and valmistukset.tila IN ('W','V')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus='$tilausnumero' and lasku.tunnusnippu>0";
 		$ares = pupe_query($aquery);
+
 		if (mysql_num_rows($ares) > 0) {
 			$arow = mysql_fetch_assoc($ares);
 			$kopioitava_otsikko = $arow["tunnus"];

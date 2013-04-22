@@ -1034,10 +1034,22 @@ $debug = 1;
 			$toim_tuotenolisa = "'{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'";
 			if (isset($data['tuoteno3']) and trim($rtuoteno[$i]['tuoteno3']) != "") $toim_tuotenolisa .= ",'{$rtuoteno[$i]['tuoteno3']}'";
 
-			$isalisa = (isset($rtuoteno[$i]["isa_olemassa"]) and trim($rtuoteno[$i]["isa_olemassa"]) != "") ? "and tilausrivi.perheid = '".(int) $rtuoteno[$i]["isa_olemassa"]."' and tilausrivi.perheid != tilausrivi.tunnus" : "";
+			$isalisa = "";
+
+			if (isset($rtuoteno[$i]["isa_olemassa"]) and trim($rtuoteno[$i]["isa_olemassa"]) != "") {
+				$isalisa = "and tilausrivi.perheid IN (".(int) $rtuoteno[$i]["isa_olemassa"];
+
+				if (isset($rtuoteno[$i]["isat_array"]) and count($rtuoteno[$i]["isat_array"]) > 0) {
+					$isalisa .= ",".implode(",", $rtuoteno[$i]["isat_array"]);
+				}
+
+				$isalisa .= ") and tilausrivi.perheid != tilausrivi.tunnus";
+			}
+
 			if ($debug == 1) {
 				echo "<br>Katotaa etsi_sopivat_tilausrivit<br>";
 			}
+
 			$kaytettavat_tilausrivit = etsi_sopivat_tilausrivit($rtuoteno[$i], $lajilisa, $trow, $toim_tuotenolisa, $isalisa, $debug);
 			if ($debug == 1) {
 				echo "<br>Katottiin etsi_sopivat_tilausrivit<br>";
@@ -1085,16 +1097,16 @@ $debug = 1;
 				}
 
 				if (empty($rtuoteno[$i]["isa_olemassa"])) {
-					
+
 					unset($riv);
-					
+
 					foreach ($kaytettavat_tilausrivit as $riv) {
 						$_perheid = tuoteperhe_check($riv, $debug);
 
 						if ($riv == $tilausrivirow['tunnus']) $tilausrivirow['perheid'] = $_perheid;
 					}
 				}
-				
+
 				if ($tilausrivirow['perheid'] == $tilausrivirow['tunnus']) {
 
 					// etsit‰‰n lapset ja splitataan ne is‰n mukaan
@@ -1113,6 +1125,7 @@ $debug = 1;
 								echo "<br>isalis‰ tuotteella $tilausrivirow[tuoteno] (tunnus $tilausrivirow[tunnus])<br><br>";
 							}
 							$rtuoteno[$i+1]["isa_olemassa"] = $tilausrivirow['tunnus'];
+							$rtuoteno[$i+1]["isat_array"] = array($tilausrivirow['tunnus']);
 							break;
 						}
 					}
@@ -1272,7 +1285,7 @@ $debug = 1;
 
 						$laskuri_tmp = $laskuri;
 						$laskuri = 0;
-						
+
 						if ($debug == 1) {
 							while ($kokeiltiin = mysql_fetch_assoc($kokeillaan)) {
 								echo "<pre>" . var_dump($kokeiltiin) . "</pre><br>";
@@ -1280,7 +1293,7 @@ $debug = 1;
 
 							mysql_data_seek($kokeillaan,0);
 						}
-						
+
 						while ($kokeiltiin = mysql_fetch_assoc($kokeillaan)) {
 
 							// tilausrivi ei saa olla jo kohdistettu
@@ -1342,14 +1355,18 @@ $debug = 1;
 							$query = "SELECT kpl+varattu AS varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$kokeiltiin['tunnus']}'";
 							$kpl_chk_res = pupe_query($query);
 							$kpl_chk_row = mysql_fetch_assoc($kpl_chk_res);
-							
+
 							if ($debug == 1) {
 								echo "kpl+varattu kokeiltiin tunnuksella:<br>";
 								query_dump($query);
 							}
-							
+
 							if ($kokeiltiin["perheid"] != 0 and $kokeiltiin["tunnus"] == $kokeiltiin["perheid"]) {
 								tuoteperhe_check($kokeiltiin["tunnus"], $debug);
+
+								if (!empty($rtuoteno[$i+1]["isa_olemassa"])) {
+									$rtuoteno[$i+1]["isat_array"][] = $kokeiltiin['tunnus'];
+								}
 							}
 
 							$laskuri += $kpl_chk_row["varattu"];
@@ -1448,7 +1465,7 @@ $debug = 1;
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus IN ({$rtuoteno[$i]["isa_olemassa_split"]}, {$extraa})";
 							$upd_res = pupe_query($query);
-							
+
 							if ($debug == 1) {
 								echo "<pre>$query</pre>";
 							}

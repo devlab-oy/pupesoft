@@ -546,7 +546,10 @@ $debug = 1;
 			// p‰ivitet‰‰n is‰
 			$updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
 			$updateres = pupe_query($updateisa);
-
+			if ($debug == 1) {
+				echo "p‰ivitet‰‰n is‰: $updateisa<br>";
+			}
+			
 			return $tunnus;
 		}
 	}
@@ -760,6 +763,9 @@ $debug = 1;
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$tilausrivi_id}'";
 				$upd_res = pupe_query($query);
+				if ($debug == 1) {
+					echo $query."<br>";
+				}
 
 				if ($myynti_tilausrivi_id_isa != 0) {
 					$query = "	UPDATE tilausrivi SET
@@ -767,6 +773,9 @@ $debug = 1;
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$myynti_tilausrivi_id_isa}'";
 					$upd_res = pupe_query($query);
+					if ($debug == 1) {
+						echo "myynti_tilausrivi_id_isa update: $query<br>";
+					}
 				}
 
 				// etsit‰‰n lapset ja splitataan ne is‰n mukaan
@@ -774,11 +783,19 @@ $debug = 1;
 							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND perheid = '{$row['perheid']}'
-							AND tunnus != '{$row['perheid']}'";
+							AND tunnus != '{$row['perheid']}'
+							AND tyyppi = 'O'";
 				$lapsi_chk_res = pupe_query($query);
 				if ($debug == 1) {
 					echo "<br>Etsit‰‰n lapsia!<br>";
 					echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
+				}
+
+				if ($debug == 1) {
+					while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
+						echo var_dump($lapsi_chk_row) . "<br>";
+					}
+					mysql_data_seek($lapsi_chk_res,0);
 				}
 
 				while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
@@ -813,6 +830,9 @@ $debug = 1;
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '{$lapsi_chk_row['tunnus']}'";
 					$upres = pupe_query($query);
+					if ($debug == 1) {
+						echo "P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰: $query<br>";
+					}
 
 					$myynti_tilausrivi_id_lapsi = 0;
 

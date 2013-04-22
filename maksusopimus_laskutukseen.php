@@ -294,13 +294,13 @@
 				$kielirow["kieli"]="fi";
 			}
 
-			if ($posrow["lisatiedot"] != "") {
-				$rivikommentti .= "\n ".$posrow["lisatiedot"];
-			}
-
 			if (mysql_num_rows($sresult) == 0) {
 				$nimitys 		= t($posrow["kuvaus"], $kielirow["kieli"]);
 				$rivikommentti 	= t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"],2)."% ";
+
+				if ($posrow["lisatiedot"] != "") {
+					$rivikommentti .= "\n ".$posrow["lisatiedot"];
+				}
 
 				echo "<font class = 'error'>".t("VIRHE: Ennakkolaskulla ei ole yht‰‰n jaksotettua tilausrivi‰!")." $tunnus</font><br>";
 				echo "<font class = 'message'>".t("K‰y tekem‰ss‰ ennakkolasku manuaalisesti. Ennakkolaskulle perustetun laskun tunnus on")." $id</font><br>";
@@ -322,6 +322,10 @@
 					else {
 						$nimitys 		= t($posrow["kuvaus"], $kielirow["kieli"]);
 						$rivikommentti 	= t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"],2)."% ";
+
+						if ($posrow["lisatiedot"] != "") {
+							$rivikommentti .= "\n ".$posrow["lisatiedot"];
+						}
 					}
 
 					$varattu = $yhtiorow['ennakkolaskun_tyyppi'] == 'E' ? $row['varattu'] : 1;

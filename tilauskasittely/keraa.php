@@ -2137,7 +2137,10 @@
 							GROUP_CONCAT(DISTINCT lasku.tunnus ORDER BY lasku.tunnus SEPARATOR ', ') AS 'tunnus',
 							COUNT(DISTINCT tilausrivi.tunnus) AS 'riveja',
 							kuka.nimi as keraaja_nimi,
-							kuka.keraajanro as keraaja_nro
+							kuka.keraajanro as keraaja_nro,
+							min(lasku.toimaika) toimaika,
+							min(lasku.ytunnus) ytunnus,
+							min(lasku.kerayspvm) kerayspvm
 							FROM lasku USE INDEX (tila_index)
 							JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (
 								tilausrivi.yhtio = lasku.yhtio AND

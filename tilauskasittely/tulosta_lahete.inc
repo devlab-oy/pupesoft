@@ -171,14 +171,22 @@ if (!function_exists('alku_lahete')) {
 				$pdf->draw_text(50, 707, $asiakas_tunnus_row["nimitark"],			$thispage, $norm);
 				$pdf->draw_text(50, 697, $asiakas_tunnus_row["osoite"], 			$thispage, $norm);
 				$pdf->draw_text(50, 687, $asiakas_tunnus_row["postino"]." ".$asiakas_tunnus_row["postitp"], $thispage, $norm);
-				$pdf->draw_text(50, 677, $asiakas_tunnus_row["maa"], 				$thispage, $norm);
+
+				if ($yhtiorow['maa'] != $asiakas_tunnus_row['maa']) {
+					$maan_tiedot = hae_maa(array('maakoodi' => $asiakas_tunnus_row['maa']));
+					$pdf->draw_text(50, 677, $maan_tiedot["nimi"], 				$thispage, $norm);
+				}
 			}
 			else {
 				$pdf->draw_text(50, 717, $laskurow["nimi"], 			$thispage, $norm);
 				$pdf->draw_text(50, 707, $laskurow["nimitark"],			$thispage, $norm);
 				$pdf->draw_text(50, 697, $laskurow["osoite"], 			$thispage, $norm);
 				$pdf->draw_text(50, 687, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
-				$pdf->draw_text(50, 677, $laskurow["maa"], 				$thispage, $norm);
+
+				if ($yhtiorow['maa'] != $laskurow['maa']) {
+					$maan_tiedot = hae_maa(array('maakoodi' => $laskurow['maa']));
+					$pdf->draw_text(50, 677, $maan_tiedot["nimi"], 				$thispage, $norm);
+				}
 			}
 
 			$pdf->draw_text(50, 656, t("Toimitusosoite", $kieli), 	$thispage, $pieni);
@@ -186,7 +194,11 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_text(50, 634, $laskurow["toim_nimitark"], 	$thispage, $boldi);
 			$pdf->draw_text(50, 624, $laskurow["toim_osoite"],	 	$thispage, $boldi);
 			$pdf->draw_text(50, 614, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $thispage, $boldi);
-			$pdf->draw_text(50, 604, $laskurow["toim_maa"], 		$thispage, $boldi);
+
+			if ($yhtiorow['maa'] != $laskurow['toim_maa']) {
+				$maan_tiedot = hae_maa(array('maakoodi' => $laskurow['toim_maa']));
+				$pdf->draw_text(50, 604, $maan_tiedot["nimi"], 		$thispage, $boldi);
+			}
 		}
 
 		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
@@ -202,8 +214,8 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_rectangle(800, 420, 779, 580, $thispage, $rectparam);
 
 			if (isset($koontilahete) and $koontilahete != 0) {
-				$pdf->draw_text(310, 792, t("Tilausnumero/toimitus", $kieli),        $thispage, $pieni);
-				$pdf->draw_text(310, 782, array_shift(explode(",", $koontilahete))." / ".$laskurow["tunnus"],	        $thispage, $boldi);
+				$pdf->draw_text(310, 792, t("Tilausnumero", $kieli),        		$thispage, $pieni);
+				$pdf->draw_text(310, 782, array_shift(explode(",", $koontilahete)),	$thispage, $boldi);
 			}
 			elseif ($laskurow["tunnusnippu"] > 0) {
 				if ($tyyppi == "YLLAPITOSOPIMUS" or $laskurow["nippu"] > 0) {
@@ -1175,10 +1187,7 @@ if (!function_exists('kollirivi_lahete')) {
 			$page[$sivu] = $thispage;
 		}
 
-		$xkoord = $xkoord + 22;
-		$ykoord = $kala - 5;
-
-		$return = compact(array_keys($params));
+		$kala -= 5;
 
 		$teksti = t("Kolli", $kieli).": ".$row['pakkaus']." - ".$row['sscc_ulkoinen']." ";
 
@@ -1193,20 +1202,9 @@ if (!function_exists('kollirivi_lahete')) {
 
 		$teksti .= t("sisältäen").":";
 
-		$pdf->draw_text($xkoord, $ykoord, $teksti, $thispage, $font);
+		$pdf->draw_text(25, $kala, $teksti, $thispage, $font);
 
-		$kala -= $rivinkorkeus*2;
-		$ykoord -= $rivinkorkeus*2;
-
-		$pdf->draw_line($xkoord, $kala, $thispage, $rectparam);
-
-		// Rivin loppuviiva
-		if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_custom.inc") {
-			$xkoord[0] = 20;
-			$xkoord[1] = 580;
-			$ykoord[0] = $ykoord[1] = $return["kala"] + $return["rivinkorkeus"] - 4;
-			$pdf->draw_line($xkoord, $ykoord, $return["thispage"], $return["rectparam"]);
-		}
+		$kala -= 30;
 
 		$return = compact(array_keys($params));
 
@@ -1255,14 +1253,14 @@ if (!function_exists('rivi_lahete')) {
 		// Rahtituote pikkasen alaspäin omalla otsikolla
 		if (isset($jtid) and $jtid != 2 and $row["jtsort"] == 2) {
 
-			$kala = $kala-10;
+			$kala = $kala-5;
 
 			$xkoord[0] = 20;
 			$xkoord[1] = 580;
 			$ykoord[0] = $ykoord[1] = $kala - 4;
 			$pdf->draw_line($xkoord, $ykoord, $page[$sivu], $rectparam);
 
-			$pdf->draw_text(25,  $kala, "#",									$thispage, $norm);
+			$pdf->draw_text(25,  $kala, "#",								$thispage, $norm);
 			$pdf->draw_text(45,  $kala, t("Toimituskulut", $kieli).":",		$thispage, $norm);
 			$kala = $kala-$rivinkorkeus;
 		}
@@ -1274,10 +1272,10 @@ if (!function_exists('rivi_lahete')) {
 		$row["kommentti"] = trim($row["kommentti"]);
 
 		// Otetaan yhteensäkommentti pois lähetteeltä (tämä tieto löytyy riviltä jos tilaus on laskutettu, mutta lähetteellä sitä ei voi näyttää)
-		$row["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-		$row["kommentti"] = preg_replace("/ ".t("yhteensä", $asrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-		$row["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-		$row["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+		$row["kommentti"] = preg_replace("/".t("Tilaus", $kieli)." ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+		$row["kommentti"] = preg_replace("/".t("Tilaus", $asrow["kieli"])." ".t("yhteensä", $asrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+		$row["kommentti"] = preg_replace("/".t("Tilaus")." ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+		$row["kommentti"] = preg_replace("/Tilaus [0-9]* "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
 
 		//Kommentissa voi olla jotain sanoja jotka pitää käääntää:
 		if ($kieli != $yhtiorow["kieli"]) {
@@ -1368,7 +1366,7 @@ if (!function_exists('rivi_lahete')) {
 
         // Koontilähetteelle mikä alkuperöinen toimitus on ollut kyseessä
         if (isset($koontilahete) and $koontilahete != 0) {
-            $row["kommentti"] = t("Toimitus", $kieli).": $row[otunnus] ".$row["kommentti"];
+            $row["kommentti"] = t("Toimitus", $kieli).": $row[otunnus]\n".trim($row["kommentti"]);
         }
 
 		// Trimmataan uudestaan
@@ -1865,7 +1863,7 @@ if (!function_exists('rivi_lahete')) {
 		if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_custom.inc") {
 			$xkoord[0] = 20;
 			$xkoord[1] = 580;
-			$ykoord[0] = $ykoord[1] = $return["kala"] + $return["rivinkorkeus"] - 4;
+			$ykoord[0] = $ykoord[1] = $return["kala"] + $return["rivinkorkeus"] - 5;
 			$pdf->draw_line($xkoord, $ykoord, $return["thispage"], $return["rectparam"]);
 		}
 		return $return;
@@ -3380,12 +3378,14 @@ if (!function_exists('loppu_lahete')) {
 			$pdf->draw_text(40, 85, $allekirjoitus_row['asema'], $thispage, $norm);
 		}
 
-		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
-			$yhteystiedot_len = $pdf->strlen("$y_nimi, $y_osoite, $y_postino $y_postitp, $y_maa", $pieni);
-			$pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 55, "$y_nimi, $y_osoite, $y_postino $y_postitp, $y_maa", $thispage, $pieni);
+		$maan_tiedot = hae_maa(array('maakoodi' => $y_maa));
+		$yhteystiedot_teksti = "{$y_nimi}, {$y_osoite}, {$y_postino} {$y_postitp}, {$maan_tiedot['nimi']}";
+		$yhteystiedot_len = $pdf->strlen($yhteystiedot_teksti, $pieni);
+		$yhteystiedot_len_www = $pdf->strlen($y_www, $pieni);
 
-			$yhteystiedot_len = $pdf->strlen($y_www, $pieni);
-			$pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 42, $y_www, $thispage, $pieni);
+		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
+			$pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 55, $yhteystiedot_teksti, $thispage, $pieni);
+			$pdf->draw_text((595 / 2) - ($yhteystiedot_len_www / 2), 42, $y_www, $thispage, $pieni);
 		}
 		else {
 			//Alimmat kolme laatikkoa, yhtiötietoja
@@ -3395,8 +3395,8 @@ if (!function_exists('loppu_lahete')) {
 
 			$pdf->draw_text(30, 55, $y_nimi,		$thispage, $pieni);
 			$pdf->draw_text(30, 45, $y_osoite,		$thispage, $pieni);
-			$pdf->draw_text(30, 35, $y_postino."  ".$y_postitp,	$thispage, $pieni);
-			$pdf->draw_text(30, 25, $y_maa,			$thispage, $pieni);
+			$pdf->draw_text(30, 35, "{$y_postino}  {$y_postitp}",	$thispage, $pieni);
+			$pdf->draw_text(30, 25, $maan_tiedot['nimi'],			$thispage, $pieni);
 
 			$pdf->draw_text(217, 55, t("Puhelin", $kieli).":",			$thispage, $pieni);
 			$pdf->draw_text(257, 55, $y_puhelin,						$thispage, $pieni);
@@ -3451,11 +3451,8 @@ if (!function_exists('loppu_lahete')) {
 				}
 
 				if ($sivu != $ed_sivu) {
-					$yhteystiedot_len = $pdf->strlen("$y_nimi, $y_osoite, $y_postino $y_postitp, $y_maa", $pieni);
-					$pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 55, "$y_nimi, $y_osoite, $y_postino $y_postitp, $y_maa", $thispage, $pieni);
-
-					$yhteystiedot_len = $pdf->strlen($y_www, $pieni);
-					$pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 42, $y_www, $thispage, $pieni);
+					$pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 55, $yhteystiedot_teksti, $thispage, $pieni);
+					$pdf->draw_text((595 / 2) - ($yhteystiedot_len_www / 2), 42, $y_www, $thispage, $pieni);
 				}
 
 				if ($kala-90 <= 100) {
@@ -3479,11 +3476,8 @@ if (!function_exists('loppu_lahete')) {
 					$ei_otsikoita = "";
 					$tots = 1;
 
-					$yhteystiedot_len = $pdf->strlen("$y_nimi, $y_osoite, $y_postino $y_postitp, $y_maa", $pieni);
-					$pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 55, "$y_nimi, $y_osoite, $y_postino $y_postitp, $y_maa", $thispage, $pieni);
-
-					$yhteystiedot_len = $pdf->strlen($y_www, $pieni);
-					$pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 42, $y_www, $thispage, $pieni);
+					$pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 55, $yhteystiedot_teksti, $thispage, $pieni);
+					$pdf->draw_text((595 / 2) - ($yhteystiedot_len_www / 2), 42, $y_www, $thispage, $pieni);
 
 					$kala += 36;
 				}
@@ -3532,11 +3526,8 @@ if (!function_exists('loppu_lahete')) {
 					$ei_otsikoita = "";
 					$tots = 1;
 
-					$yhteystiedot_len = $pdf->strlen("$y_nimi, $y_osoite, $y_postino $y_postitp, $y_maa", $pieni);
-					$pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 55, "$y_nimi, $y_osoite, $y_postino $y_postitp, $y_maa", $thispage, $pieni);
-
-					$yhteystiedot_len = $pdf->strlen($y_www, $pieni);
-					$pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 42, $y_www, $thispage, $pieni);
+					$pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 55, $yhteystiedot_teksti, $thispage, $pieni);
+					$pdf->draw_text((595 / 2) - ($yhteystiedot_len_www / 2), 42, $y_www, $thispage, $pieni);
 
 					$kala += 110;
 				}
@@ -4020,8 +4011,8 @@ if (!function_exists('print_pdf_lahete')) {
 						$kutsu = t("Lähete %s", $kieli, $laskurow["tunnus"]);
 
 						if (isset($koontilahete) and $koontilahete != 0) {
-            				$content_body .= t("Tilausnumero/toimitus", $kieli).": ";
-							$content_body .= array_shift(explode(",", $koontilahete))." / ".$laskurow["tunnus"].".\n\n";
+            				$content_body .= t("Tilausnumero", $kieli).": ";
+							$content_body .= array_shift(explode(",", $koontilahete))."\n\n";
             			}
             			elseif ($laskurow["tunnusnippu"] > 0) {
 							$content_body .= t("Tilausnumero/toimitus", $kieli).": ";

@@ -46,12 +46,18 @@
 			if ($trow[$i] == '' and ($yhtiorow['seuraava_tuotenumero'] == 'K' or ($yhtiorow['seuraava_tuotenumero'] == 'O' and isset($tee_myos_tuotteen_toimittaja_liitos)))) {
 
 				$autom_wherelisa = "";
+				$autom_selectlisa = "MAX(CAST(tuote.tuoteno AS UNSIGNED)) + 1";
 
 				if (isset($kaatokoodi_tuotteen_tuotenumeron_alku) and trim($kaatokoodi_tuotteen_tuotenumeron_alku) != '') {
 					$autom_wherelisa = "AND tuote.tuoteno LIKE '{$kaatokoodi_tuotteen_tuotenumeron_alku}%'";
+
+					$autom_tuoteno_len = strlen($kaatokoodi_tuotteen_tuotenumeron_alku) + 1;
+					$autom_selectlisa = "CONCAT({$kaatokoodi_tuotteen_tuotenumeron_alku}, SUBSTRING(MAX(CAST(tuote.tuoteno AS UNSIGNED)), {$autom_tuoteno_len}) + 1)";
 				}
 
-				$query = "	SELECT MAX(CAST(tuote.tuoteno AS unsigned)) + 1 AS seuraava_tuoteno
+				$etsitaan = true;
+
+				$query = "	SELECT {$autom_selectlisa} AS seuraava_tuoteno
 							FROM tuote
 							WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 							AND tuote.tuoteno REGEXP '[^0-9]' = 0

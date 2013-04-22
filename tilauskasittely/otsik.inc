@@ -3135,7 +3135,7 @@
 		$label = !isset($label) ? "" : $label;
 		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
 
-		if($naytetaanko_tarjouksella != 'on' and $toim == "TARJOUS") {
+		if ($naytetaanko_tarjouksella != 'on' and $toim == "TARJOUS") {
 			$toimvv = '0000';
 			$toimkk = '00';
 			$toimpp = '00';
@@ -3478,7 +3478,8 @@
 			if ($tunnusnippu == "" and $toim == "PROJEKTI" or ($toim=="TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"] != "") or (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA")) and $yhtiorow["myyntitilaus_osatoimitus"] == "K")) {
 				$query = "	UPDATE lasku
 							SET tunnusnippu = '$kukarow[kesken]'
-							WHERE tunnus = '$kukarow[kesken]' and tunnusnippu = 0";
+							WHERE tunnus    = '$kukarow[kesken]'
+							and tunnusnippu = 0";
 				$result = pupe_query($query);
 
 				if ($toim == "PROJEKTI") {

@@ -202,8 +202,6 @@ if (!aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
 		}
 	}
 
-	echo "ERROR!<br>";
-
 	exit();
 }
 else {

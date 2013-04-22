@@ -1683,10 +1683,11 @@
 					}
 					else {
 
+						$_x = $korvaavat_column_count_loppu + 1;
+
 						// Jos korvaavia ei ole, siirret‰‰n columnicountia eteenp‰in
 						for ($i = $korvaavat_column_count_alku; $i <= $korvaavat_column_count_loppu; $i++) {
-							if ($valitut["SARAKE{$i}"] != '') {
-								$_x++;
+							if (!empty($valitut["SARAKE{$i}"])) {
 								$excelsarake++;
 							}
 						}

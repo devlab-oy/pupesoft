@@ -20350,8 +20350,10 @@ if (!function_exists('aktivoi_tilaus')) {
 	function aktivoi_tilaus($tilausnumero, $session, $alkup_tila = '', $alkup_alatila = '') {
 		global $kukarow;
 
+		$tilausnumero = (int) $tilausnumero;
+
 		// Tarkistetaan ett‰ tilauksen tila ei ole muuttunut
-		if ($tilausnumero != '' and !tarkista_tilauksen_tila($tilausnumero, $alkup_tila, $alkup_alatila)) {
+		if ($tilausnumero > 0 and !tarkista_tilauksen_tila($tilausnumero, $alkup_tila, $alkup_alatila)) {
 			echo "<font class='error'>" . t("Tilauksen tila on vaihtunut. Ole hyv‰ ja avaa tilaus uudestaan") . "</font><br>";
 			exit();
 		}
@@ -20360,7 +20362,7 @@ if (!function_exists('aktivoi_tilaus')) {
 		$query = "SELECT *
 					FROM kuka
 					WHERE yhtio = '$kukarow[yhtio]'
-					AND kesken  = '$tilausnumero'
+					AND kesken  = $tilausnumero
 					AND kesken != 0
 					AND kuka   != '{$kukarow['kuka']}'";
 		$result = pupe_query($query);
@@ -20373,7 +20375,7 @@ if (!function_exists('aktivoi_tilaus')) {
 		// Jos result palautti jotain ja se ei ole nykyinen k‰ytt‰j‰
 		if (isset($row) and $row['kuka'] != $kukarow['kuka']) {
 			// Poistetaan aktiiviset tilaukset joita t‰ll‰ k‰ytt‰j‰ll‰ oli
-			$query = "UPDATE kuka SET
+			$query = "	UPDATE kuka SET
 						kesken      = ''
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND kuka    = '{$kukarow['kuka']}'";
@@ -20384,8 +20386,8 @@ if (!function_exists('aktivoi_tilaus')) {
 		}
 		else {
 			// P‰ivitet‰‰n nykyiselle k‰ytt‰jlle tilausnumero keskener‰iseksi
-			$query = "UPDATE kuka SET
-						kesken      = '$tilausnumero'
+			$query = "	UPDATE kuka SET
+						kesken      = $tilausnumero
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND kuka    = '$kukarow[kuka]'
 						AND session = '$session'";

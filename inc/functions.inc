@@ -20334,3 +20334,21 @@ if (!function_exists('search_array_key_recursive')) {
 		return $results;
 	}
 }
+
+if (!function_exists('')) {
+	function echo_tallennus_formi($filepath, $new_filename, $file_extension) {
+		echo "<form method='post' class='multisubmit'>";
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Tallenna {$file_extension} aineisto").":</th>";
+		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+		echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
+		echo "<input type='hidden' name='kaunisnimi' value='".t($new_filename).".{$file_extension}'>";
+		echo "<input type='hidden' name='tmpfilenimi' value='{$filepath}'>";
+		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td>";
+		echo "</tr>";
+		echo "</table>";
+		echo "</form>";
+		echo "<br/>";
+	}
+}

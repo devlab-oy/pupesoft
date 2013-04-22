@@ -194,7 +194,8 @@ echo "<font class='head'>".t("Laitehallinta")."</font><hr>";
 $request = array(
 	'ytunnus'		 => $ytunnus,
 	'asiakasid'		 => $asiakasid,
-	'asiakas_tunnus' => $asiakas_tunnus
+	'asiakas_tunnus' => $asiakas_tunnus,
+	'ala_tee'		 => $ala_tee,
 );
 
 if ($tee == 'hae_asiakas' or ($tee == '' and !empty($valitse_asiakas))) {
@@ -205,13 +206,13 @@ if ($tee == 'hae_asiakas' or ($tee == '' and !empty($valitse_asiakas))) {
 if (!empty($request['haettu_asiakas'])) {
 	$asiakkaan_kohteet = hae_asiakkaan_kohteet_joissa_laitteita($request);
 
-	echo_kohteet_table($asiakkaan_kohteet, $request['haettu_asiakas']);
-
-	if ($ala_tee == 'tulosta_kalustoraportti') {
+	if ($request['ala_tee'] == 'tulosta_kalustoraportti') {
 		$asiakkaan_kohteet['yhtio'] = $yhtiorow;
 		$asiakkaan_kohteet['asiakas'] = $request['haettu_asiakas'];
-		tulosta_kalustoraportti($asiakkaan_kohteet);
+		$request['pdf_filepath'] = tulosta_kalustoraportti($asiakkaan_kohteet);
 	}
+
+	echo_kohteet_table($asiakkaan_kohteet, $request);
 }
 
 echo "<div id='wrapper'>";
@@ -250,11 +251,13 @@ function tulosta_kalustoraportti($kohteet) {
 	global $kukarow, $yhtiorow;
 
 	$filepath = kirjoita_json_tiedosto($kohteet);
-	aja_ruby($filepath);
+	return aja_ruby($filepath);
 }
 
-function echo_kohteet_table($asiakkaan_kohteet = array(), $haettu_asiakas = array()) {
+function echo_kohteet_table($asiakkaan_kohteet = array(), $request = array()) {
 	global $palvelin2, $lopetus;
+
+	$haettu_asiakas = $request['haettu_asiakas'];
 
 	$lopetus = "{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//ytunnus={$haettu_asiakas['tunnus']}";
 
@@ -265,6 +268,13 @@ function echo_kohteet_table($asiakkaan_kohteet = array(), $haettu_asiakas = arra
 	echo_kalustoraportti_form($haettu_asiakas);
 	echo "<br/>";
 	echo "<br/>";
+
+	if(!empty($request['pdf_filepath'])) {
+		$tiedostot = explode(' ', $request['pdf_filepath']);
+		foreach ($tiedostot as $tiedosto) {
+			echo_tallennus_formi($tiedosto, t("Kalustoraportti"), 'pdf');
+		}
+	}
 
 	echo "<table>";
 
@@ -415,12 +425,35 @@ function hae_asiakas($request) {
 function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 	global $kukarow;
 
+	$select = "";
+	$join = "";
+	if (!empty($request['ala_tee'])) {
+		$select = "ta1.selite as sammutin_tyyppi,
+					ta2.selite as sammutin_koko,
+					huoltosykli.huoltovali as huoltovali,";
+
+		$join = "	LEFT JOIN tuotteen_avainsanat ta1
+					ON ( ta1.yhtio = tuote.yhtio
+						AND ta1.tuoteno = tuote.tuoteno
+						AND ta1.laji = 'sammutin_tyyppi' )
+					LEFT JOIN tuotteen_avainsanat ta2
+					ON ( ta2.yhtio = tuote.yhtio
+						AND ta2.tuoteno = tuote.tuoteno
+						AND ta2.laji = 'sammutin_koko' )
+					LEFT JOIN huoltosykli
+					ON ( huoltosykli.yhtio = laite.yhtio
+						AND huoltosykli.tyyppi = ta1.selite
+						AND huoltosykli.koko = ta2.selite
+						AND huoltosykli.olosuhde = paikka.olosuhde )";
+	}
+
 	$query = "	SELECT kohde.tunnus as kohde_tunnus,
 				kohde.nimi as kohde_nimi,
 				paikka.tunnus as paikka_tunnus,
 				paikka.nimi as paikka_nimi,
 				tuote.nimitys as tuote_nimi,
 				laite.tunnus as laite_tunnus,
+				{$select}
 				laite.*
 				FROM kohde
 				LEFT JOIN paikka
@@ -432,6 +465,7 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 				LEFT JOIN tuote
 				ON ( tuote.yhtio = laite.yhtio
 					AND tuote.tuoteno = laite.tuoteno )
+				{$join}
 				WHERE kohde.yhtio = '{$kukarow['yhtio']}'
 				AND kohde.asiakas = {$request['haettu_asiakas']['tunnus']}";
 	$result = pupe_query($query);
@@ -466,13 +500,7 @@ function array_utf8_encode(&$item, $key) {
 }
 
 function aja_ruby($filepath) {
-	//@TODO pupe_root kö
-	$lol = system("ruby /Users/joonas/Dropbox/Sites/pupesoft/pdfs/ruby/kalustoraportti.rb {$filepath}");
-	echo "<html>";
-	echo "<body>";
-	echo $lol;
-	echo "</body>";
-	echo "</html>";
+	global $pupe_root_polku;
+	return exec("ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}");
 }
-
 require ("inc/footer.inc");

@@ -19,8 +19,8 @@ if (!isset($lpvm_aikaa)) {
 }
 
 // n‰in monta kertaa karhutun j‰lkeen ehdotetaan asiakkaalle myyntikieltoa
-if (!isset($karhu_kertaa)) {
-	$karhu_kertaa = 2;
+if (!isset($karhu_kertaa_myyntikielto)) {
+	$karhu_kertaa_myyntikielto = 2;
 }
 
 if ($kukarow["kirjoitin"] == 0) {
@@ -470,7 +470,7 @@ if ($tee == 'KARHUA')  {
 		echo "</tr>\n";
 
 		// jos yht‰k‰‰n laskua on karhuttu kolmeen kertaan, tarjotaan asiakkaan asettamista myyntikieltoon
-		if ($lasku["karhuttu"] > $karhu_kertaa) {
+		if ($lasku["karhuttu"] > $karhu_kertaa_myyntikielto) {
 			$ehdota_maksukielto = 1;
 		}
 
@@ -491,8 +491,7 @@ if ($tee == 'KARHUA')  {
 	echo "</table><br>";
 
 	if ($ehdota_maksukielto) {
-		$karhuttu = $karhu_kertaa + 1;
- 		echo "<font class='error'><input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["ytunnus"]}'> " . t("Asiakkaalla on v‰hint‰‰n ")." $karhuttu ". t(" kertaa karhuttu lasku. Aseta myyntikielto asiakkaille ytunnuksella").": {$asiakastiedot["ytunnus"]}</font>";
+		echo "<font class='error'><input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["ytunnus"]}'> " . t("Asiakkaalla on v‰hint‰‰n %s kertaa karhuttu lasku. Aseta myyntikielto asiakkaille ytunnuksella", "", ($karhu_kertaa_myyntikielto + 1)).": {$asiakastiedot["ytunnus"]}</font>";
 	}
 
 	echo "<table>";
@@ -513,7 +512,7 @@ if ($tee == 'KARHUA')  {
 	if (isset($ekirje_config) and is_array($ekirje_config)) {
 		echo "<input type='submit' name='ekirje_laheta' value='" . t('L‰het‰ eKirje') . "'>";
 	}
-	
+
 	if ($yhtiorow["verkkolasku_lah"] == "maventa") {
 		echo "<input type='submit' name='maventa_laheta' value='" . t('L‰het‰ Maventaan') . "'>";
 	}

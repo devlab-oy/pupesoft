@@ -113,7 +113,7 @@
 			echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_osto.php'>
 					<input type='hidden' name='aktivoinnista' value='true'>
 					<input type='hidden' name='tee' value='AKTIVOI'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
 					<input type='submit' value='".t("Takaisin tilaukselle")."'>
 					</form><br><br>";
 		}
@@ -135,7 +135,7 @@
 
 			echo "	<form method='post' action='".$palvelin2.$tilauskasittely."tilaus_myynti.php'>
 					<input type='hidden' name='toim' value='$toim_kutsu'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
 					<input type='hidden' name='tyojono' value='$tyojono'>
 					<input type='submit' value='".t("Takaisin tilaukselle")."'>
 					</form><br><br>";
@@ -606,7 +606,7 @@
 		}
 
 		echo "<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>";
-		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+		echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 
 		if (!isset($tultiin)) {
@@ -713,7 +713,7 @@
 
 		echo "<input type='Submit' name='submit_button' id='submit_button' value = '".t("Etsi")."'></form>";
 		echo "&nbsp;<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>
-				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
 				<input type='submit' name='submit_button2' id='submit_button2' value = '".t("Tyhjennä")."'>
 				</form>";
 
@@ -1054,7 +1054,7 @@
 
 			echo "<input type='hidden' name='tee' value = 'TI'>";
 			echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
-			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+			echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
 			echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 
 			if ($tultiin == "futur") {

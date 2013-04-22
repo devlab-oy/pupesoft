@@ -74,7 +74,6 @@
 				if ($row["alatila"] == '' or $row["alatila"] == 'A' or $row["alatila"] == 'B' or $row["alatila"] == 'C' or $row["alatila"] == 'J') {
 					echo "<td valign='top'>
 							<form method='post' action='../tilauskasittely/tilaus_myynti.php'>
-							<input type='hidden' name='tee' value='AKTIVOI'>
 							<input type='hidden' name='toim' value='TYOMAARAYS'>
 							<input type='hidden' name='tilausnumero' value='$row[laskutunnus]'>
 							<input type='submit' value = '".t("Muokkaa")."'></form></td>";

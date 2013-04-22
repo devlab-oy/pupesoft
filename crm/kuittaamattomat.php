@@ -381,7 +381,6 @@
 					echo "<br><br><a href='".$palvelin2."tilauskasittely/tilaus_myynti.php?toim=TARJOUS&asiakasid=$prow[liitostunnus]'>".t("Tee tarjous")."</a>";
 				}
 
-
 				echo "</td>";
 				echo "<td valign='top'>$prow[tyyppi]<br>$prow[tapa]</td>";
 				echo "<td valign='top'>$prow[asiakas] $aslisa</td>";

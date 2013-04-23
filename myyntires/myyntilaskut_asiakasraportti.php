@@ -40,6 +40,10 @@
 			);
 
 			pupesoft_sahkoposti($params);
+
+			echo "<font class='info'>";
+			echo t("Tiliote lähetettiin osoitteeseen").": {$asiakasrow['email']}<br><br>";
+			echo "</font>";
 		}
 
 		$tee = "";
@@ -58,8 +62,8 @@
 
 		echo "<font class='info'>";
 
-		if (strpos($laskunrot, ",") !== FALSE) echo t("Laskut lähetettiin osoitteeseen")," {$asiakasemail}";
-		else echo t("Lasku lähetettiin osoitteeseen")," {$asiakasemail}";
+		if (strpos($laskunrot, ",") !== FALSE) echo t("Laskut lähetettiin osoitteeseen"),": {$asiakasemail}";
+		else echo t("Lasku lähetettiin osoitteeseen"),": {$asiakasemail}";
 
 		echo "</font><br /><br />";
 
@@ -412,11 +416,10 @@
 						<input type = 'text' name = 'pp' id = 'pp' value='{$pp}' size=2 class='date'>
 						<input type = 'text' name = 'kk' id = 'kk' value='{$kk}' size=2 class='date'>
 						<input type = 'text' name = 'vv' id = 'vv' value='{$vv}' size=4 class='date'>
-						<input type='submit' value='",t("Tulosta tiliote"),"' onClick=\"js_openFormInNewWindow('tulosta_tiliote', ''); return false;\"></form>
-						</td>";
+						<input type='submit' value='",t("Tulosta tiliote"),"' onClick=\"js_openFormInNewWindow('tulosta_tiliote', ''); return false;\">
+						</form>";
 
 				if ($asiakasrow['email'] != '') {
-					echo "<td style='vertical-align: middle;'>";
 					echo "<form id='tulosta_tiliote_email' name='tulosta_tiliote_email' method='post'>
 						<input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL'>
 						<input type='hidden' name = 'ytunnus' value = '{$ytunnus}'>
@@ -425,11 +428,11 @@
 						<input type='hidden' name = 'pp' id='pp_hidden' value='{$pp}' size=2>
 						<input type='hidden' name = 'kk' id='kk_hidden' value='{$kk}' size=2>
 						<input type='hidden' name = 'vv' id='vv_hidden' value='{$vv}' size=4>
-						<input type='submit' value='",t("Lähetä sähköposti"),"' /></form>";
-					echo "</td>";
+						<input type='submit' value='",t("Lähetä tiliote asiakkaan sähköpostiin"),": {$asiakasrow['email']}' />
+						</form>";
 				}
 
-				echo "</tr>";
+				echo "</td></tr>";
 
 				echo "</table>";
 
@@ -824,7 +827,7 @@
 						<input type='hidden' name = 'asiakasid' value='{$asiakasrow['tunnus']}' />
 						<input type='hidden' name = 'ytunnus' value='{$ytunnus}' />
 						<input type='hidden' name = 'valintra' value='{$valintra}' />
-						<input type='submit' value='",t("Lähetä asiakkaan sähköpostiin valitut laskut"),"' />";
+						<input type='submit' value='",t("Lähetä laskukopiot valituista laskuista asiakkaan sähköpostiin"),": {$asiakasrow['email']}' />";
 					echo "</td>";
 					echo "</tr>";
 					echo "</table>";

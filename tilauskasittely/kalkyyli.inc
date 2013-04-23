@@ -137,7 +137,6 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 		echo "<input type='hidden' name='tee' value='varastoon'>";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 		echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavan_tunnus}' />";
-		echo "<input type='hidden' name='oikeasti_varastoon' value='1' />";
 
 		if ($yhtiorow['suuntalavat'] == 'S' and $tee == '' and trim($suuntalavan_tunnus) != '' and trim($koko_suuntalava) == 'X') {
 

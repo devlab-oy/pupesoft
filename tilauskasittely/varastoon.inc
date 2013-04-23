@@ -983,8 +983,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	echo "<br/>";
 }
 
-if ($toiminto == "kalkyyli" and $tee == "varastoon" and $oikeasti_varastoon == 1) {
-
+// Ollaan viemässä tuotteita saldoille, katsotaan voidaanko toimittaa osatoimituskiellossa olevia tilauksia
+if ($toiminto == "kalkyyli" and $tee == "varastoon") {
 	$lasku_tunnukset = heti_toimitus_voiko_toimittaa($varastoon_viedyt_tuotteet);
 
 	if (!empty($lasku_tunnukset)) {

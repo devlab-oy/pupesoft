@@ -1929,9 +1929,6 @@
 			$eilah = '';
 			$eiket = '';
 			$sisah = '';
-			$osath = '';
-			$osath1 = '';
-			$osath2 = '';
 			$laskkielto = '';
 			$jtki = "";
 			$rahtivapaa_chk = '';

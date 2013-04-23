@@ -355,7 +355,6 @@ else {
 			//Muutetaan tulostettavaksi
 			$query = "UPDATE lasku SET alatila = '' where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
 			$result = pupe_query($query);
-			
 			$laskurow["alatila"] = "";
 		}
 	}

@@ -244,6 +244,7 @@
 						and lasku.tapvm >= '$alkupvm'
 						and lasku.tapvm <= '$loppupvm'
 						and lasku.vienti = 'E'
+						and lasku.tilaustyyppi != '9'
 						GROUP BY 1, 2, 3
 						ORDER BY maa, valuutta, vero";
 			$result = pupe_query($query);
@@ -546,6 +547,8 @@
 				$eetasolisa = " or alv_taso like '%ee610%'";
 			}
 
+			$vero = 0.0;
+
 			$query = "	SELECT
 						ifnull(group_concat(if(alv_taso like '%ee100%' or alv_taso like '%ee110%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit100,
 						ifnull(group_concat(if(alv_taso not like '%ee100%' and alv_taso not like '%ee110%', concat(\"'\",tilino,\"'\"), NULL)), '') tilitMUU
@@ -554,8 +557,6 @@
 						and (alv_taso like '%$taso%' $eetasolisa)";
 			$tilires = pupe_query($query);
 			$tilirow = mysql_fetch_assoc($tilires);
-
-			$vero = 0.0;
 
 			if ($tilirow['tilit100'] != '' or $tilirow['tilitMUU'] != '') {
 				if ($tuotetyyppilisa != '') {
@@ -568,6 +569,7 @@
 								and lasku.tapvm >= '$startmonth'
 								and lasku.tapvm <= '$endmonth'
 								and lasku.vienti = 'E'
+								and lasku.tilaustyyppi != '9'
 								GROUP BY 1,2";
 				}
 				else {
@@ -622,14 +624,15 @@
 		$verot = array();
 
 		if ($tilirow['tilit'] != '') {
-			$query = "	SELECT vero, sum(round(-1 * summa, 2)) summa, count(*) kpl
+			$query = "	SELECT vero, sum(round(-1 * tiliointi.summa, 2)) summa, count(*) kpl
 						FROM tiliointi
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND korjattu = ''
-						AND tilino in ($tilirow[tilit])
-						AND tapvm >= '$startmonth'
-						AND tapvm <= '$endmonth'
-						AND vero > 0
+						JOIN lasku on (lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tilaustyyppi != '9')
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						AND tiliointi.korjattu = ''
+						AND tiliointi.tilino in ($tilirow[tilit])
+						AND tiliointi.tapvm >= '$startmonth'
+						AND tiliointi.tapvm <= '$endmonth'
+						AND tiliointi.vero > 0
 						GROUP BY vero
 						ORDER BY vero DESC";
 			$verores = pupe_query($query);

@@ -244,6 +244,7 @@
 						and lasku.tapvm >= '$alkupvm'
 						and lasku.tapvm <= '$loppupvm'
 						and lasku.vienti = 'E'
+						and lasku.tilaustyyppi != '9'
 						GROUP BY 1, 2, 3
 						ORDER BY maa, valuutta, vero";
 			$result = pupe_query($query);
@@ -568,6 +569,7 @@
 								and lasku.tapvm >= '$startmonth'
 								and lasku.tapvm <= '$endmonth'
 								and lasku.vienti = 'E'
+								and lasku.tilaustyyppi != '9'
 								GROUP BY 1,2";
 				}
 				else {
@@ -624,7 +626,7 @@
 		if ($tilirow['tilit'] != '') {
 			$query = "	SELECT vero, sum(round(-1 * tiliointi.summa, 2)) summa, count(*) kpl
 						FROM tiliointi
-						JOIN lasku on (lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tilaustyyppi!=9)
+						JOIN lasku on (lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tilaustyyppi != '9')
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						AND tiliointi.korjattu = ''
 						AND tiliointi.tilino in ($tilirow[tilit])

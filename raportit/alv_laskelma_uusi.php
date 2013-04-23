@@ -880,7 +880,7 @@
 			if ($tilirow['tilit'] != '') {
 				$query = "	SELECT vero, sum(round(tiliointi.summa * vero / 100 * -1, 2)) veronmaara, count(*) kpl
 							FROM tiliointi
-							JOIN lasku on (lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tilaustyyppi!=9)
+							JOIN lasku on (lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tilaustyyppi != '9')
 							WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 							AND tiliointi.korjattu = ''
 							AND tiliointi.tilino in ($tilirow[tilit])

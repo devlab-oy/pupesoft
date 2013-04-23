@@ -614,8 +614,7 @@
 							// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 							$query = "	UPDATE tilausrivi SET
 										varattu = '{$erotus}',
-										tilkpl	= '{$erotus}',
-										kommentti = CONCAT(IFNULL(kommentti, ''),' ennen splittausta {$myynti_rivi_row_isa['tilkpl']} : {$myynti_rivi_row_isa['varattu']}, kohdistettiin {$erotus}')
+										tilkpl	= '{$erotus}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$myynti_rivi_row_isa['tunnus']}'";
 							$upres = pupe_query($query);
@@ -670,8 +669,7 @@
 									// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 									$query = "	UPDATE tilausrivi SET
 												varattu = '{$erotus}',
-												tilkpl	= '{$erotus}',
-												kommentti = CONCAT(IFNULL(kommentti, ''),' ennen splittausta {$myynti_rivi_row['tilkpl']} : {$myynti_rivi_row['varattu']}, kohdistettiin {$erotus}')
+												tilkpl	= '{$erotus}'
 												WHERE yhtio = '{$kukarow['yhtio']}'
 												AND tunnus = '{$myynti_rivi_row['tunnus']}'";
 									$upres = pupe_query($query);

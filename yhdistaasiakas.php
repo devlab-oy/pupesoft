@@ -582,8 +582,7 @@
 									and liitos 		= '$jrow[tunnus]'
 									and kieli 		= '$ahrow[kieli]'
 									and laji 		= '$ahrow[laji]'
-									and puun_tunnus = '$ahrow[puun_tunnus]'
-									and jarjestys 	= '$ahrow[jarjestys]'";
+									and puun_tunnus = '$ahrow[puun_tunnus]'";
 						$tarkesult = pupe_query($tarksql);
 						$ahy = mysql_num_rows($tarkesult);
 

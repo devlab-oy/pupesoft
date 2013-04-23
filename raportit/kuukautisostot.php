@@ -229,6 +229,8 @@
 
 		$_x_k = $_x;
 
+		$korvaavat_column_count_alku = $_x;
+
 		$sarakkeet["SARAKE{$_x}"] = t("Korvaavat Tuoteno")."\t";
 		$_x++;
 		$sarakkeet["SARAKE{$_x}"] = t("Korvaavat Saldo")."\t";
@@ -245,7 +247,7 @@
 			$_x++;
 		}
 
-		$korvaavat_column_count = $_x - $_x_k;
+		$korvaavat_column_count_loppu = $_x - 1;
 
 		$sarakkeet["SARAKE{$_x}"] = t("Vastaava Tuoteno #1")."\t";
 		$_x++;
@@ -1680,9 +1682,15 @@
 						}
 					}
 					else {
+
+						$_x = $korvaavat_column_count_loppu + 1;
+
 						// Jos korvaavia ei ole, siirret‰‰n columnicountia eteenp‰in
-						$_x += $korvaavat_column_count;
-						$excelsarake += $korvaavat_column_count;
+						for ($i = $korvaavat_column_count_alku; $i <= $korvaavat_column_count_loppu; $i++) {
+							if (!empty($valitut["SARAKE{$i}"])) {
+								$excelsarake++;
+							}
+						}
 					}
 
 					$vastaavat = new Vastaavat($row['tuoteno']);

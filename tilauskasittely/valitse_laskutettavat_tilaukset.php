@@ -623,8 +623,7 @@
 				}
 
 				echo "<td>$row[toimitustapa] $rahti_hinta</td>";
-
-				echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$row[tunnus]'>".t("Muokkaa")."</a></td>";
+				echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$row[tunnus]&lopetus={$palvelin2}tilauskasittely/valitse_laskutettavat_tilaukset.php////tee=$tee//toim=$toim//tunnukset=$tunnukset'>".t("Muokkaa")."</a></td>";
 
 				//Tsekataan voidaanko antaa mahdollisuus laskuttaa kaikki maksupotitiot kerralla
 				if ($jaksotettuja) {
@@ -868,10 +867,10 @@
 				}
 				echo "</select></td></tr>";
 			}
-			
-			if ($toim == "VIENTI") { 
-				echo "<tr><th>",t("Tulosta myös tullinimike ja alkuperämaa")."</th>"; 
-				echo "<td colspan='3'><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>"; 
+
+			if ($toim == "VIENTI") {
+				echo "<tr><th>",t("Tulosta myös tullinimike ja alkuperämaa")."</th>";
+				echo "<td colspan='3'><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
 			}
 
 			echo "<tr><th>".t("Syötä poikkeava laskutuspäivämäärä (pp-kk-vvvv)").":</th>

@@ -51,6 +51,8 @@
 								and toim_postino	= '$myytilrow[toim_postino]'
 								and toim_postitp	= '$myytilrow[toim_postitp]'
 								and toim_maa		= '$myytilrow[toim_maa]'
+								and toimaika		= '$myytilrow[toimaika]'
+								and kerayspvm		= '$myytilrow[kerayspvm]'
 								and viesti			= '$viesti'
 								and left(luontiaika,10) = left(now(),10)
 								and laatija 		= '$kukarow[kuka]'";

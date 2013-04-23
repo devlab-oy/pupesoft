@@ -2681,6 +2681,8 @@ if (!function_exists("jalkilaskentafunktio")) {
 		$qu = "	LOCK TABLE asiakas READ,
 				lasku WRITE,
 				sarjanumeroseuranta READ,
+				sarjanumeroseuranta_arvomuutos READ,
+				sanakirja WRITE,
 				tapahtuma WRITE,
 				tilausrivi WRITE,
 				tilausrivin_lisatiedot READ,
@@ -8977,7 +8979,7 @@ if (!function_exists("hae_rahtimaksu")) {
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.erikoistoimitus_myynti = 0)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						AND tilausrivi.tyyppi in ('L', 'E')
+						AND tilausrivi.tyyppi in ('L', 'E', 'T')
 						AND tilausrivi.otunnus in ($otsikot)";
 			$painoresult = pupe_query($query);
 			$painorow = mysql_fetch_assoc($painoresult);
@@ -20080,9 +20082,17 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
 	$force_to_string = array(
 		'tuoteno'
 	);
+ *
+ * $sulje_pois: ƒLƒ tulosta n‰it‰ kolumneja
+ * $sulje_pois = array(
+ *		'tuoteno',
+ *		'nimitys',
+ * );
  */
 if (!function_exists('generoi_excel_tiedosto')) {
-	function generoi_excel_tiedosto(&$rivit, $header_values, $force_to_string) {
+	function generoi_excel_tiedosto(&$rivit, $header_values, $force_to_string = array(), $sulje_pois = array()) {
+		require_once('pupeExcel.inc');
+		require_once('ProgressBar.class.php');
 		$xls = new pupeExcel();
 		$rivi_numero = 0;
 		$sarake_numero = 0;
@@ -20091,12 +20101,12 @@ if (!function_exists('generoi_excel_tiedosto')) {
 		if(!empty($_temp)) {
 			_two_dimensional_array_sort_by_key($header_values, 'order');
 
-			_xls_jarjestetty_headerit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values);
-			_xls_jarjestetty_rivit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values, $force_to_string);
+			_xls_jarjestetty_headerit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values, $sulje_pois);
+			_xls_jarjestetty_rivit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values, $force_to_string, $sulje_pois);
 		}
 		else {
-			_xls_headerit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values);
-			_xls_rivit($xls, $rivit, $rivi_numero, $sarake_numero, $force_to_string);
+			_xls_headerit($xls, $rivit, $rivi_numero, $sarake_numero, $header_values, $sulje_pois);
+			_xls_rivit($xls, $rivit, $rivi_numero, $sarake_numero, $force_to_string, $sulje_pois);
 		}
 
 		$xls_tiedosto = $xls->close();
@@ -20106,16 +20116,16 @@ if (!function_exists('generoi_excel_tiedosto')) {
 }
 
 if (!function_exists('_xls_headerit')) {
-	function _xls_headerit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values) {
+	function _xls_headerit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values, $sulje_pois) {
 		$style = array("bold" => TRUE);
-		foreach ($rivit[0] as $header_text => $value) {
-			if (!stristr($header_text, 'tunnus')) {
-				if (array_key_exists($header_text, $header_values)) {
-					_kirjoita_header_solu($xls, $header_values[$header_text], $rivi_numero, $sarake_numero, $style);
+		foreach ($rivit[0] as $column_name => $value) {
+			if (!stristr($column_name, 'tunnus') and !in_array($column_name, $sulje_pois)) {
+				if (array_key_exists($column_name, $header_values)) {
+					_kirjoita_header_solu($xls, $header_values[$column_name], $rivi_numero, $sarake_numero, $style);
 				}
 				else {
 					//fail safe
-					_kirjoita_header_solu($xls, $header_text, $rivi_numero, $sarake_numero, $style);
+					_kirjoita_header_solu($xls, $column_name, $rivi_numero, $sarake_numero, $style);
 				}
 			}
 		}
@@ -20125,10 +20135,10 @@ if (!function_exists('_xls_headerit')) {
 }
 
 if(!function_exists('_xls_jarjestetty_headerit')) {
-	function _xls_jarjestetty_headerit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values) {
+	function _xls_jarjestetty_headerit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values, $sulje_pois) {
 		$style = array("bold" => TRUE);
 		foreach($header_values as $column_name => $value) {
-			if (!stristr($column_name, 'tunnus') and array_key_exists($column_name, $rivit[0])) {
+			if (!stristr($column_name, 'tunnus') and array_key_exists($column_name, $rivit[0]) and !in_array($column_name, $sulje_pois)) {
 				_kirjoita_header_solu($xls, $value['header'], $rivi_numero, $sarake_numero, $style);
 			}
 		}
@@ -20139,15 +20149,16 @@ if(!function_exists('_xls_jarjestetty_headerit')) {
 }
 
 if (!function_exists('_xls_rivit')) {
-	function _xls_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $force_to_string = array()) {
+	function _xls_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $force_to_string = array(), $sulje_pois) {
 		require_once 'ProgressBar.class.php';
+
 		$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
 		$xls_progress_bar->initialize(count($rivit));
 
 		foreach ($rivit as $rivi) {
-			foreach ($rivi as $header => $solu) {
-				if (!stristr($header, 'tunnus')) {
-					_kirjoita_solu($xls, $header, $solu, $rivi_numero, $sarake_numero, $force_to_string);
+			foreach ($rivi as $column_name => $solu) {
+				if (!stristr($column_name, 'tunnus') and !in_array($column_name, $sulje_pois)) {
+					_kirjoita_solu($xls, $column_name, $solu, $rivi_numero, $sarake_numero, $force_to_string);
 				}
 			}
 			$rivi_numero++;
@@ -20161,7 +20172,7 @@ if (!function_exists('_xls_rivit')) {
 }
 
 if (!function_exists('_xls_jarjestetty_rivit')) {
-	function _xls_jarjestetty_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values, $force_to_string = array()) {
+	function _xls_jarjestetty_rivit(pupeExcel &$xls, &$rivit, &$rivi_numero, &$sarake_numero, $header_values, $force_to_string, $sulje_pois) {
 		if (php_sapi_name() != 'cli') {
 			require_once 'ProgressBar.class.php';
 			$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
@@ -20170,7 +20181,7 @@ if (!function_exists('_xls_jarjestetty_rivit')) {
 
 		foreach ($rivit as $rivi) {
 			foreach($header_values as $column_name => $value) {
-				if (!stristr($column_name, 'tunnus') and isset($rivi[$column_name])) {
+				if (!stristr($column_name, 'tunnus') and isset($rivi[$column_name]) and !in_array($column_name, $sulje_pois)) {
 					_kirjoita_solu($xls, $column_name, $rivi[$column_name], $rivi_numero, $sarake_numero, $force_to_string);
 				}
 			}
@@ -20438,6 +20449,222 @@ if (!function_exists('search_array_key_recursive')) {
 
 			foreach ($array as $subarray) {
 				$results = array_merge($results, search_array_key_recursive($subarray, $key));
+			}
+		}
+
+		return $results;
+	}
+}
+
+/**
+ * Tarkistaa onko tilauksen tila muuttunut
+ *
+ * Jos tila on vaihtunut, nollataan k‰ytt‰j‰n keskener‰inen tilaus.
+ */
+if (!function_exists('tarkista_tilauksen_tila')) {
+	function tarkista_tilauksen_tila($tilausnumero, $alkup_tila, $alkup_alatila) {
+		global $kukarow;
+
+		// Tyhj‰t tilat, todenn‰kˆisesti tultu eri ohjelmasta ja ei tarkisteta tiloja
+		if ($alkup_tila == '' and $alkup_alatila == '') {
+			return true;
+		}
+
+		// Tarkistetaan ett‰ tilaus on samassa tilassa jossa se oli kun se klikattiin auki muokkaatilaus-ohjelmassa
+		$query = "SELECT tila, alatila
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus  = '$tilausnumero'
+					AND tila    = '$alkup_tila'
+					AND alatila = '$alkup_alatila'";
+		$result = pupe_query($query);
+
+		// Jos resulttia ei lˆydy on tilauksen tila vaihtunut
+		if (mysql_num_rows($result) != 1) {
+
+			// Poistetaan aktiiviset tilaukset joita t‰ll‰ k‰ytt‰j‰ll‰ oli
+			$query = "UPDATE kuka SET kesken='' WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+			$result = pupe_query($query);
+
+			// Tilausta ei voida aktivoida
+			return false;
+		}
+
+		// Tila ei ole muuttunut
+		return true;
+	}
+}
+
+/**
+ * Aktivoi tilaus
+ *
+ * Palauttaa truen jos tilausnumero on aktivoitu k‰ytt‰j‰lle ja asettaa tilausnumeron k‰ytt‰j‰lle kesken
+ * Palauttaa false jos tilausnumero on kesken jollain toisella k‰ytt‰j‰ll‰
+ */
+if (!function_exists('aktivoi_tilaus')) {
+	function aktivoi_tilaus($tilausnumero, $session, $alkup_tila = '', $alkup_alatila = '') {
+		global $kukarow;
+
+		$tilausnumero = (int) $tilausnumero;
+
+		// Tarkistetaan ett‰ tilauksen tila ei ole muuttunut
+		if ($tilausnumero > 0 and !tarkista_tilauksen_tila($tilausnumero, $alkup_tila, $alkup_alatila)) {
+			echo "<font class='error'>" . t("Tilauksen tila on vaihtunut. Ole hyv‰ ja avaa tilaus uudestaan") . "</font><br>";
+			exit();
+		}
+
+		// Katsotaan ett‰ tilaus ei ole kell‰‰n toisella k‰ytt‰j‰ll‰ aktiivisena
+		$query = "SELECT *
+					FROM kuka
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND kesken  = $tilausnumero
+					AND kesken != 0
+					AND kuka   != '{$kukarow['kuka']}'";
+		$result = pupe_query($query);
+
+		// Jos lˆytyy osuma
+		if (mysql_num_rows($result) != 0) {
+			$row = mysql_fetch_assoc($result);
+		}
+
+		// Jos result palautti jotain ja se ei ole nykyinen k‰ytt‰j‰
+		if (isset($row) and $row['kuka'] != $kukarow['kuka']) {
+			// Poistetaan aktiiviset tilaukset joita t‰ll‰ k‰ytt‰j‰ll‰ oli
+			$query = "	UPDATE kuka SET
+						kesken      = ''
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND kuka    = '{$kukarow['kuka']}'";
+			$result = pupe_query($query);
+
+			// Tilaus kesken jollain toisella k‰ytt‰j‰ll‰
+			return false;
+		}
+		else {
+			// P‰ivitet‰‰n nykyiselle k‰ytt‰jlle tilausnumero keskener‰iseksi
+			$query = "	UPDATE kuka SET
+						kesken      = $tilausnumero
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND kuka    = '$kukarow[kuka]'
+						AND session = '$session'";
+			$result = pupe_query($query);
+
+			$kukarow['kesken'] = $tilausnumero;
+
+			// Tilaus aktivoitu k‰ytt‰j‰lle
+			return true;
+		}
+	}
+}
+
+/**
+ * HOW TO:
+ * $holidays = array(
+ * 		"2008-12-25",
+ * 		"2008-12-26",
+ * 		"2009-01-01"
+ * );
+ *
+ * $tyopaivien_lukumaara = hae_tyopaivien_lukumaara('2012-01-01', '2012-01-31', $holidays);
+ *
+ */
+//The function returns the no. of business days between two dates and it skips the holidays
+if (!function_exists('hae_tyopaivien_lukumaara')) {
+
+	function hae_tyopaivien_lukumaara($alku_aika, $loppu_aika, $lomat = array()) {
+		if (!empty($alku_aika) and !empty($loppu_aika)) {
+			// do strtotime calculations just once
+			$loppu_aika = strtotime($loppu_aika);
+			$alku_aika = strtotime($alku_aika);
+
+
+			//The total number of days between the two dates. We compute the no. of seconds and divide it to 60*60*24
+			//We add one to inlude both dates in the interval.
+			$paivat = ($loppu_aika - $alku_aika) / 86400 + 1;
+
+			$taysien_viikkojen_lkm = floor($paivat / 7);
+			$jaljella_olevien_paivien_lkm = fmod($paivat, 7);
+
+			//It will return 1 if it's Monday,.. ,7 for Sunday
+			$viikon_ensimmainen_paiva = date("N", $alku_aika);
+			$viikon_viimeinen_paiva = date("N", $loppu_aika);
+
+			//---->The two can be equal in leap years when february has 29 days, the equal sign is added here
+			//In the first case the whole interval is within a week, in the second case the interval falls in two weeks.
+			if ($viikon_ensimmainen_paiva <= $viikon_viimeinen_paiva) {
+				if ($viikon_ensimmainen_paiva <= 6 && 6 <= $viikon_viimeinen_paiva)
+					$jaljella_olevien_paivien_lkm--;
+				if ($viikon_ensimmainen_paiva <= 7 && 7 <= $viikon_viimeinen_paiva)
+					$jaljella_olevien_paivien_lkm--;
+			}
+			else {
+				// (edit by Tokes to fix an edge case where the start day was a Sunday
+				// and the end day was NOT a Saturday)
+				// the day of the week for start is later than the day of the week for end
+				if ($viikon_ensimmainen_paiva == 7) {
+					// if the start date is a Sunday, then we definitely subtract 1 day
+					$jaljella_olevien_paivien_lkm--;
+
+					if ($viikon_viimeinen_paiva == 6) {
+						// if the end date is a Saturday, then we subtract another day
+						$jaljella_olevien_paivien_lkm--;
+					}
+				}
+				else {
+					// the start date was a Saturday (or earlier), and the end date was (Mon..Fri)
+					// so we skip an entire weekend and subtract 2 days
+					$jaljella_olevien_paivien_lkm -= 2;
+				}
+			}
+
+			//The no. of business days is: (number of weeks between the two dates) * (5 working days) + the remainder
+			//---->february in none leap years gave a remainder of 0 but still calculated weekends between first and last day, this is one way to fix it
+			$tyo_paivat = $taysien_viikkojen_lkm * 5;
+			if ($jaljella_olevien_paivien_lkm > 0) {
+				$tyo_paivat += $jaljella_olevien_paivien_lkm;
+			}
+
+			//We subtract the holidays
+			foreach ($lomat as $holiday) {
+				$time_stamp = strtotime($holiday);
+				//If the holiday doesn't fall in weekend
+				if ($alku_aika <= $time_stamp && $time_stamp <= $loppu_aika && date("N", $time_stamp) != 6 && date("N", $time_stamp) != 7)
+					$tyo_paivat--;
+			}
+		}
+		return $tyo_paivat;
+	}
+}
+
+// etsii halutun array keyn arraysta jonka arvo t‰sm‰‰ valuen kanssa ja palauttaa kyseisen keyn parentit arrayssa
+// esim voit etsi‰ funktiolla order ja funktio palauttaa kaikki ensimm‰isen tason (tuoteno) arrayt jos order lˆytyy
+/**
+ * $tilikaudet = array(
+ *		0 => array(
+ *			'tunnus' => 94,
+ *			'nimi' => 'Eka'
+ *		),
+ *		1 => array(
+ *			'tunnus' => 95,
+ *			'nimi' => 'Toka'
+ *		),
+ * );
+ *
+ * $halutut_tilikaudet = search_array_key_for_value_recursive($tilikaudet, 'tunnus', 94);
+ *
+ * @TODO: T‰n vois mergett‰‰ search_array_key_recursive funktion kanssa ja refaktoroida koodin.
+ *
+ */
+if (!function_exists('search_array_key_for_value_recursive')) {
+	function search_array_key_for_value_recursive($array, $key, $value) {
+		$results = array();
+
+		if (is_array($array)) {
+			if (isset($array[$key]) and $array[$key] == $value) {
+				$results[] = $array;
+			}
+
+			foreach ($array as $subarray) {
+				$results = array_merge($results, search_array_key_for_value_recursive($subarray, $key, $value));
 			}
 		}
 

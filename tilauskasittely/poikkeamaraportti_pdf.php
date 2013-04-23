@@ -7,7 +7,9 @@ $tyomaarays = hae_tyomaarays($lasku_tunnus);
 
 $filepath = kirjoita_json_tiedosto($tyomaarays);
 
-aja_ruby($filepath);
+$generoitu_tiedosto = aja_ruby($filepath);
+
+echo $generoitu_tiedosto;
 
 function hae_tyomaarays($lasku_tunnus) {
 	global $kukarow, $yhtiorow;
@@ -19,10 +21,13 @@ function hae_tyomaarays($lasku_tunnus) {
 	$result = pupe_query($query);
 
 	$tyomaarays = mysql_fetch_assoc($result);
+	$tyomaarays_temp = $tyomaarays;
+	unset($tyomaarays);
+	$tyomaarays['tyomaarays'] = $tyomaarays_temp;
 	$tyomaarays['rivit'] = hae_tyomaarayksen_rivit($lasku_tunnus);
 	$laite_tunnus = $tyomaarays['rivit'][0]['laite']['tunnus'];
 	$tyomaarays['kohde'] = hae_tyomaarayksen_kohde($laite_tunnus);
-	$tyomaarays['asiakas'] = hae_tyomaarayksen_asiakas($tyomaarays['liitostunnus']);
+	$tyomaarays['asiakas'] = hae_tyomaarayksen_asiakas($tyomaarays['tyomaarays']['liitostunnus']);
 	$tyomaarays['yhtio'] = $yhtiorow;
 
 	return $tyomaarays;
@@ -74,7 +79,7 @@ function hae_tyomaarayksen_asiakas($asiakas_tunnus) {
 }
 
 function kirjoita_json_tiedosto($tyomaarays) {
-	$filename = "tyomaarays_{$tyomaarays['tunnus']}.json";
+	$filename = "poikkeamaraportti_{$tyomaarays['tyomaarays']['tunnus']}.json";
 	$filepath = "/tmp/{$filename}";
 
 	array_walk_recursive($tyomaarays, 'array_utf8_encode');
@@ -109,13 +114,7 @@ function array_utf8_encode(&$item, $key) {
 function aja_ruby($filepath) {
 	global $pupe_root_polku;
 
-	$lol = exec("ruby {$pupe_root_polku}/pdfs/ruby/tarkastuspoytakirja_pdf.rb {$filepath}");
-	echo "<html>";
-	echo $lol;
-	echo "<pre>";
-	echo $lol;
-	echo "</pre>";
-	echo "</html>";
+	return exec("ruby {$pupe_root_polku}/pdfs/ruby/poikkeamaraportti_pdf.rb {$filepath}");
 }
 
 ?>

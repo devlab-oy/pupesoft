@@ -306,7 +306,6 @@ end
 
 if !ARGV[0].empty?
 
-puts 'mörök'
   spots = SpotDAO.new(ARGV[0])
 
   files = ''

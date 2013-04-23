@@ -622,23 +622,23 @@
 
 						}
 
-						// katsotaan onko tuoteperheen isätuote
-						if ($tilausrivirow['perheid'] == $tilausrivirow['tunnus']) {
+						// katsotaan onko tuoteperheen isätuote (splitattu rivi!)
+						if ($split_row['perheid'] == $split_row['tunnus']) {
 
 							// etsitään lapset ja splitataan ne isän mukaan
 							$query = "	SELECT *
 										FROM tilausrivi
 										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND perheid = '{$tilausrivirow['perheid']}'
-										AND tunnus != '{$tilausrivirow['perheid']}'";
+										AND perheid = '{$split_row['perheid']}'
+										AND tunnus != '{$split_row['perheid']}'";
 							$lapsi_chk_res = pupe_query($query);
 
 							while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
 
 								$poikkeukset = array(
-									'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $positiivinen_arvo : 0),
+									'tilausrivi.varattu' => ($split_row['kpl'] == 0 ? $positiivinen_arvo : 0),
 									'tilausrivi.tilkpl' => $positiivinen_arvo,
-									'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $positiivinen_arvo : 0),
+									'tilausrivi.kpl' => ($split_row['kpl'] != 0 ? $positiivinen_arvo : 0),
 									'tilausrivi.perheid' => $tilausrivi_id,
 									'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],
 								);

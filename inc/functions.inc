@@ -2601,6 +2601,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 
 				// Jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
 				$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'], 6);
+				$rahtikulut += $round($laskurow['pyoristys_erot'] * $laskurow['vienti_kurssi'], 6);
 
 				while ($tilrivirow = mysql_fetch_assoc($presult)) {
 

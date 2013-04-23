@@ -1202,9 +1202,9 @@ if ($tee == 'E' or $tee == 'F') {
 
 		if ($trow["ultilno"] != "") echo $trow['ultilno'];
 		else echo $trow['tilinumero'];
-		
+
 		echo "</td></tr>";
-		
+
 		//Ulkomaan ostolaskuille
 		if (strtoupper($trow["maa"]) != strtoupper($yhtiorow["maa"])) {
 			if ($trow["pankki_haltija"] != "") echo "<tr><th>".t("Pankkihaltija")."</th><td>$trow[pankki_haltija]</td></tr>";
@@ -1269,6 +1269,7 @@ if ($tee == 'E' or $tee == 'F') {
 			echo "<tr><th>".t("KT")."</th><td>$keikrow[kauppatapahtuman_luonne]</td></tr>";
 			if ($keikrow["rahti"] != 0) echo "<tr><th>".t("Rahti")."</th><td>$keikrow[rahti]</td></tr>";
 			if ($keikrow["rahti_etu"] != 0) echo "<tr><th>".t("Eturahti")."</th><td>$keikrow[rahti_etu]</td></tr>";
+			if ($keikrow["pyoristys_erot"] != 0) echo "<tr><th>".t("Pyöristyserot")."</th><td>$keikrow[pyoristys_erot]</td></tr>";
 			if ($keikrow["rahti_huolinta"] != 0) echo "<tr><th>".t("Huolinta")."</th><td>$keikrow[rahti_huolinta]</td></tr>";
 			if ($keikrow["erikoisale_saapuminen"] != 0) echo "<tr><th>".t("Alennus")."</th><td>$keikrow[erikoisale_saapuminen]</td></tr>";
 			if ($keikrow["bruttopaino"] != 0) echo "<tr><th>".t("Paino")."</th><td>$keikrow[bruttopaino]</td></tr>";

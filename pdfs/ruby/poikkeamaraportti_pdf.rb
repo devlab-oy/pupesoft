@@ -55,6 +55,33 @@ class PoikkeamaraporttiPDF
   end
 
   def print_table
+    customer_table = @pdf.make_table([
+      [
+        @pdf.make_cell(:content => 'Asiakas/Kund', :width => 150),
+        @pdf.make_cell(:content => @customer['nimi'], :font_style => :normal)
+      ]
+    ], :width => @pdf.bounds.right, :cell_style => { :borders => [] })
+
+    contact_person_table = @pdf.make_table([
+      [
+        @pdf.make_cell(:content => 'Yhteyshenkilö/Kontaktperson', :width => 150),
+        @pdf.make_cell(:content => 'nimi', :font_style => :normal, :width => 400),
+        @pdf.make_cell(:content => 'Hoitojakso/Tidsperiod', :width => 100),
+        @pdf.make_cell(:content => 'aikaväli', :font_style => :normal),
+        @pdf.make_cell(:content => '')
+      ]
+    ], :width => @pdf.bounds.right, :cell_style => { :borders => [] })
+
+    performer_table = @pdf.make_table([
+      [
+        @pdf.make_cell(:content => 'Työnsuorittaja/Arbetetsutförare', :width => 150),
+        @pdf.make_cell(:content => 'nimi', :font_style => :normal, :width => 400),
+        @pdf.make_cell(:content => 'Päiväys/Datum', :width => 100),
+        @pdf.make_cell(:content => 'aika', :font_style => :normal),
+        @pdf.make_cell(:content => '')
+      ]
+    ], :width => @pdf.bounds.right, :cell_style => { :borders => [] })
+
     table1 = @pdf.make_table([
       [
         @pdf.make_cell(:content => 'Kohde/Plats', :width => 150),
@@ -75,9 +102,9 @@ class PoikkeamaraporttiPDF
     ], :width => @pdf.bounds.right)
 
     table_data = [
-      ['Asiakas/Kund' + @customer['nimi']],
-      ['Yhteyshenkilö/Kontaktperson'],
-      ['Työnsuorittaja/Arbetetsutförare'],
+      [customer_table],
+      [contact_person_table],
+      [performer_table],
       [table1],
       [@pdf.make_cell(:content => rows_table, :height => 300)],
       [table2]
@@ -90,11 +117,11 @@ class PoikkeamaraporttiPDF
     rows = []
     @data['rivit'].each do |value|
       row = [
-        @pdf.make_cell(:content => 'Kohde/Plats', :width => 150),
-        @pdf.make_cell(:content => value['laite']['sijainti'], :width => 150),
-        @pdf.make_cell(:content => 'Kalusto/Produkt', :width => 100),
-        @pdf.make_cell(:content => value['laite']['sarjanro'], :width => 100),
-        @pdf.make_cell(:content => 'Poikkeama ja toimenpide/Avvikelse och åtgärd')
+        @pdf.make_cell(:content => 'Kohde/Plats', :width => 150, :font_style => :normal),
+        @pdf.make_cell(:content => value['laite']['sijainti'], :width => 150, :font_style => :normal),
+        @pdf.make_cell(:content => 'Kalusto/Produkt', :width => 100, :font_style => :normal),
+        @pdf.make_cell(:content => value['laite']['sarjanro'], :width => 100, :font_style => :normal),
+        @pdf.make_cell(:content => 'Poikkeama ja toimenpide/Avvikelse och åtgärd', :font_style => :normal)
       ]
 
       rows << row

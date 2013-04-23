@@ -62,5 +62,3 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
 		$proxy->call($sessionId, 'sales_order_invoice.capture', $newInvoiceId);
 	}
 }
-
-?>

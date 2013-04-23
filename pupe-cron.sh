@@ -17,6 +17,9 @@ fi
 # Teh‰‰n pupesoftin iltasiivo
 cd ${POLKU};php iltasiivo.php $YHTIO
 
+# K‰yd‰‰n luottoraja_t‰ynn‰ tilaukset l‰pi ja laukaistaan ne eteenp‰in jotka on ok
+cd ${POLKU};php odottaa_suoritusta.php $YHTIO
+
 echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
 echo ": ABC Aputaulujen rakennus."
 

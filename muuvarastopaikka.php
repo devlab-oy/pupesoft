@@ -18,7 +18,7 @@
 					sarjanumeroseuranta_arvomuutos READ,
 					lasku READ,
 					asiakas READ";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 	}
 	else {
 
@@ -62,7 +62,7 @@
 					HAVING status NOT IN ('P','X') or saldo > 0
 					ORDER BY tuote.tuoteno " . $suun . "
 					LIMIT 1";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 			$trow = mysql_fetch_array ($result);
@@ -83,7 +83,7 @@
 					WHERE tuoteno = '$tuoteno'
 					and yhtio 	= '$kukarow[yhtio]'
 					and oletus != ''";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$oletusrow = mysql_fetch_array($result);
 
 		// Saldot per varastopaikka
@@ -97,7 +97,7 @@
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 					and tuotepaikat.tuoteno = '$tuoteno'
 					ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
-		$paikatresult1 = mysql_query($query) or pupe_error($query);
+		$paikatresult1 = pupe_query($query);
 
 		$saldot = array();
 
@@ -154,14 +154,39 @@
 								selite 		= '$poisto_texti',
 								laatija 	= '$kukarow[kuka]',
 								laadittu 	= now()";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					$query = "	DELETE FROM tuotepaikat
 								WHERE tuoteno 	= '$tuoteno'
 								and yhtio 		= '$kukarow[yhtio]'
 								and tunnus 		= '$poistetaan'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 				}
+			}
+		}
+
+		if (count($flagaa_poistettavaksi_undo) > 0) {
+			foreach ($flagaa_poistettavaksi_undo as $poistetaan => $undoataan) {
+
+				if ($undoataan != "" and !isset($flagaa_poistettavaksi[$poistetaan])) {
+					$query = "	UPDATE tuotepaikat
+								SET poistettava = ''
+								WHERE tuoteno 	= '$tuoteno'
+								and yhtio 		= '$kukarow[yhtio]'
+								and tunnus 		= '$poistetaan'";
+					$result = pupe_query($query);
+				}
+			}
+		}
+
+		if (count($flagaa_poistettavaksi) > 0) {
+			foreach ($flagaa_poistettavaksi as $poistetaan) {
+				$query = "	UPDATE tuotepaikat
+							SET poistettava = 'D'
+							WHERE tuoteno 	= '$tuoteno'
+							and yhtio 		= '$kukarow[yhtio]'
+							and tunnus 		= '$poistetaan'";
+				$result = pupe_query($query);
 			}
 		}
 
@@ -170,7 +195,7 @@
 			$query = "	SELECT *
 						FROM tuotepaikat
 						WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$oletus'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 				// Tehdään päivitykset
@@ -181,14 +206,14 @@
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 							WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				$query = "	UPDATE tuotepaikat
 							SET oletus = 'X',
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 							WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$oletus'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 			else {
 				echo "<font class='error'>".t("Uusi oletuspaikka on kadonnut")."</font><br><br>";
@@ -202,7 +227,7 @@
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 
@@ -213,7 +238,7 @@
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 
@@ -224,7 +249,7 @@
 							muuttaja	= '{$kukarow['kuka']}',
 							muutospvm	= now()
 							WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 
@@ -292,7 +317,7 @@
 		$query = "	SELECT *
 					FROM tuotepaikat
 					WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$otetaan[0]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$mistarow = mysql_fetch_array($result);
 
 		if (mysql_num_rows($result) == 0) {
@@ -304,7 +329,7 @@
 		$query = "	SELECT *
 					FROM tuotepaikat
 					WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$siirretaan[0]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$minnerow = mysql_fetch_array($result);
 
 		if (mysql_num_rows($result) == 0) {
@@ -326,7 +351,7 @@
 					WHERE tuoteno = '$tuoteno'
 					and yhtio = '$kukarow[yhtio]'
 					and sarjanumeroseuranta != ''";
-		$sarjaresult = mysql_query($query) or pupe_error($query);
+		$sarjaresult = pupe_query($query);
 		$sarjacheck_row = mysql_fetch_array($sarjaresult);
 
 		if ($sarjacheck_row["sarjat"] > 0 and (!is_array($sarjano_array) or count($sarjano_array) != $asaldo)) {
@@ -339,7 +364,7 @@
 						FROM sarjanumeroseuranta
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus = '$sarjano_array[0]'";
-			$siirrettava_era_res = mysql_query($query) or pupe_error($query);
+			$siirrettava_era_res = pupe_query($query);
 			$siirrettava_era_row = mysql_fetch_assoc($siirrettava_era_res);
 
 			if (!is_array($sarjano_array) or $sarjano_kpl_array[$sarjano_array[0]] < $asaldo) {
@@ -361,7 +386,7 @@
 							JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.tunnus = tilausrivi_osto.perheid2
 							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 							and sarjanumeroseuranta.tunnus  = '$sarjatun'";
-				$sarjares = mysql_query($query) or pupe_error($query);
+				$sarjares = pupe_query($query);
 
 				if (mysql_num_rows($sarjares) == 1) {
 					$sarjarow = mysql_fetch_array($sarjares);
@@ -372,7 +397,7 @@
 								WHERE yhtio  = '$kukarow[yhtio]'
 								and tunnus   = '$sarjarow[perheid2]'
 								and perheid2 != 0";
-					$sarjares = mysql_query($query) or pupe_error($query);
+					$sarjares = pupe_query($query);
 					$ostorow = mysql_fetch_array($sarjares);
 
 					// Haetaan muut lisävarusteet
@@ -387,7 +412,7 @@
 								and tilausrivi.tyyppi != 'D'
 								and tilausrivi.tunnus != '$sarjarow[perheid2]'
 								and tilausrivi.perheid2 != 0";
-					$sarjares = mysql_query($query) or pupe_error($query);
+					$sarjares = pupe_query($query);
 
 					while ($lisavarrow = mysql_fetch_array($sarjares)) {
 						if ($lisavarrow["tyyppi"] == 'G' and $lisavarrow["sistyomaarayskpl"] > 0) {
@@ -422,7 +447,7 @@
 						and hyllynro 	= '$mistarow[hyllynro]'
 						and hyllyvali 	= '$mistarow[hyllyvali]'
 						and hyllytaso	= '$mistarow[hyllytaso]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuotteet[$iii], 'JTSPEC', '', '', $mistarow["hyllyalue"], $mistarow["hyllynro"], $mistarow["hyllyvali"], $mistarow["hyllytaso"]);
@@ -465,7 +490,7 @@
 							and hyllynro 	= '$minnerow[hyllynro]'
 							and hyllyvali 	= '$minnerow[hyllyvali]'
 							and hyllytaso	= '$minnerow[hyllytaso]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				// Vastaanottavaa paikkaa ei löydy, perustetaan se
 				if (mysql_num_rows($result) == 0) {
@@ -479,7 +504,7 @@
 								'$tuotteet[$iii]',
 								'$kukarow[kuka]',
 								now())";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 					$lisatty_tun = mysql_insert_id();
 
 					// Tuotepaikka jonne lisävaruste viedään
@@ -501,7 +526,7 @@
 								selite 		= '".t("Lisättiin tuotepaikka")." $minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso]',
 								laatija 	= '$kukarow[kuka]',
 								laadittu 	= now()";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					echo t("Uusi varastopaikka luotiin tuotteelle").": $tuotteet[$iii] ($minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso])<br>";
 				}
@@ -547,7 +572,7 @@
 	                  	WHERE tuoteno 	= '$tuotteet[$iii]'
 						and yhtio 		= '$kukarow[yhtio]'
 						and tunnus		= '$otetaan[$iii]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			// Minne varastoon viedään?
 			$query = "	UPDATE tuotepaikat
@@ -559,7 +584,7 @@
 						WHERE tuoteno 	= '$tuotteet[$iii]'
 						and yhtio 		= '$kukarow[yhtio]'
 						and tunnus		= '$siirretaan[$iii]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if ($minnerow["hyllyalue"] == "!!M") {
 				$asiakkaan_tunnus = (int) $minnerow["hyllynro"].$minnerow["hyllyvali"].$minnerow["hyllytaso"];
@@ -603,7 +628,7 @@
 								FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$tuotteet[$iii]'";
-			$kehahin_result = mysql_query($kehahin_query) or pupe_error($kehahin_query);
+			$kehahin_result = pupe_query($kehahin_query);
 			$kehahin_row = mysql_fetch_array($kehahin_result);
 
 			$keskihankintahinta = $kehahin_row['kehahin'];
@@ -633,7 +658,7 @@
 						selite 		= '".t("Paikasta")." $mista_texti ".t("vähennettiin")." $kappaleet[$iii]',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$query = "	INSERT into tapahtuma set
 						yhtio 		= '$kukarow[yhtio]',
@@ -649,7 +674,7 @@
 						selite 		= '".t("Paikalle")." $minne_texti ".t("lisättiin")." $kappaleet[$iii]',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 
 		//Päivitetään sarjanumerot
@@ -665,7 +690,7 @@
 								muutospvm		= now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$sarjano'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 				}
 			}
 		}
@@ -676,7 +701,7 @@
 								FROM sarjanumeroseuranta
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '$sarjano'";
-					$sarrr_res = mysql_query($query) or pupe_error($query);
+					$sarrr_res = pupe_query($query);
 					$sarrr_row = mysql_fetch_assoc($sarrr_res);
 
 					$sarjaquerylisa = '';
@@ -693,7 +718,7 @@
 								muutospvm		= now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$sarjano'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					$query = "	SELECT *
 								FROM sarjanumeroseuranta
@@ -707,7 +732,7 @@
 								AND hyllytaso = '$minnerow[hyllytaso]'
 								AND myyntirivitunnus = 0
 								AND era_kpl != 0";
-					$sarrr_res2 = mysql_query($query) or pupe_error($query);
+					$sarrr_res2 = pupe_query($query);
 
 					if (mysql_num_rows($sarrr_res2) == 1) {
 						$sarrr_row2 = mysql_fetch_assoc($sarrr_res2);
@@ -718,7 +743,7 @@
 									muutospvm		= now()
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '$sarrr_row2[tunnus]'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 					}
 					else {
 						$query = "	INSERT INTO sarjanumeroseuranta SET
@@ -738,7 +763,7 @@
 									muutospvm		= now(),
 									laatija 		= '$kukarow[kuka]',
 									luontiaika		= now()";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 					}
 				}
 			}
@@ -758,7 +783,7 @@
 								muutospvm		= now()
 								WHERE yhtio		= '$kukarow[yhtio]'
 								and tunnus		= '$sarjano'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 				}
 			}
 		}
@@ -788,7 +813,7 @@
 					and hyllynro = '$ahyllynro'
 					and hyllytaso = '$ahyllytaso'
 					and hyllyvali = '$ahyllyvali'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			if (kuuluukovarastoon($ahyllyalue, $ahyllynro) != 0 and $ahyllyalue != '' and $ahyllynro != '' and $ahyllyvali != '' and $ahyllytaso != '' and $ahyllyalue != "!!M") {
@@ -817,7 +842,7 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$tuoteno'
 								and oletus != ''";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) > 0) {
 						$oletus = "";
@@ -838,7 +863,7 @@
 								'$tuoteno',
 								'$kukarow[kuka]',
 								now())";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					$query = "	INSERT into tapahtuma set
 								yhtio 		= '$kukarow[yhtio]',
@@ -854,7 +879,7 @@
 								selite 		= '".t("Lisättiin tuotepaikka")." $ahyllyalue $ahyllynro $ahyllyvali $ahyllytaso',
 								laatija 	= '$kukarow[kuka]',
 								laadittu 	= now()";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 				}
 				else {
 					echo "<font class='error'>",("Uusi varastopaikka ei löydy tai ei kuulu mihinkään varastoon"),": {$tuoteno} ({$ahyllyalue}, {$ahyllynro}, {$ahyllyvali}, {$ahyllytaso})</font><br />";
@@ -872,7 +897,7 @@
 
 	if ($tee != "") {
 		$query  = "UNLOCK TABLES";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 	}
 
 	if ($tee == 'M' or $tee == 'Q') {
@@ -965,7 +990,7 @@
 					and tuotepaikat.tuoteno = '$tuoteno'
 					and tuotepaikat.hyllyalue != '!!M'
 					ORDER BY sorttauskentta";
-		$paikatresult1 = mysql_query($query) or pupe_error($query);
+		$paikatresult1 = pupe_query($query);
 
 		echo "<tr>";
 		echo "<td valign='top'><select name='mista'>";
@@ -1007,7 +1032,7 @@
 					and tuotepaikat.tuoteno = '$tuoteno'
 					and tuotepaikat.hyllyalue != '!!M'
 					ORDER BY sorttauskentta";
-		$paikatresult2 = mysql_query($query) or pupe_error($query);
+		$paikatresult2 = pupe_query($query);
 
 		if (mysql_num_rows($paikatresult2) > 0) {
 			while ($saldorow = mysql_fetch_array ($paikatresult2)) {
@@ -1068,7 +1093,7 @@
 							and tilausrivi_osto.laskutettuaika != '0000-00-00'";
 			}
 
-			$sarjares = mysql_query($query) or pupe_error($query);
+			$sarjares = pupe_query($query);
 
 			if (mysql_num_rows($sarjares) > 0) {
 				echo "<td valign='top' style='padding:0px;'>";
@@ -1147,7 +1172,7 @@
 						WHERE tuoteno = '$tuoteno'
 						and yhtio 	= '$kukarow[yhtio]'
 						and oletus != ''";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$oletusrow = mysql_fetch_array($result);
 
 			mysql_data_seek($paikatresult1, 0);
@@ -1185,8 +1210,19 @@
 				}
 
 				// Ei näytetä boxia, jos sitä ei saa käyttää
-				if ($saldorow["saldo"] != 0) {
+				if ($saldorow["saldo"] != 0 and $saldorow["oletus"] != "") {
 					echo "<td></td>";
+				}
+				elseif ($saldorow["saldo"] != 0) {
+
+					$chk = "";
+
+					if ($saldorow["poistettava"] != "") {
+						$chk = "CHECKED";
+					}
+
+					echo "<td><input type = 'checkbox' name='flagaa_poistettavaksi[$saldorow[tunnus]]' value='$saldorow[tunnus]' $chk> (".t("Poistetaan kun saldo loppuu").")
+							<input type = 'hidden' name='flagaa_poistettavaksi_undo[$saldorow[tunnus]]' value='$saldorow[poistettava]'></td>";
 				}
 				else {
 					echo "<td><input type = 'checkbox' name='poista[$saldorow[tunnus]]' value='$saldorow[tunnus]'></td>";

@@ -2137,7 +2137,10 @@
 							GROUP_CONCAT(DISTINCT lasku.tunnus ORDER BY lasku.tunnus SEPARATOR ', ') AS 'tunnus',
 							COUNT(DISTINCT tilausrivi.tunnus) AS 'riveja',
 							kuka.nimi as keraaja_nimi,
-							kuka.keraajanro as keraaja_nro
+							kuka.keraajanro as keraaja_nro,
+							min(lasku.toimaika) toimaika,
+							min(lasku.ytunnus) ytunnus,
+							min(lasku.kerayspvm) kerayspvm
 							FROM lasku USE INDEX (tila_index)
 							JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (
 								tilausrivi.yhtio = lasku.yhtio AND
@@ -2462,7 +2465,6 @@
 
 					if ($toim == 'VASTAANOTA_REKLAMAATIO') {
 						echo "<br><form action='tilaus_myynti.php' method='POST'>";
-						echo "<input type='hidden' name='tee' value = 'AKTIVOI'>";
 						echo "<input type='hidden' name='toim' value = 'REKLAMAATIO'>";
 						echo "<input type='hidden' name='tilausnumero' value = '{$tilausnumeroita}'>";
 						echo "<input type='hidden' name='mista' value = 'keraa'>";

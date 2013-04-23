@@ -441,6 +441,14 @@
 			if ($yhtiorow['viivakoodi_purkulistaan'] == 'K') {
 				echo "<tr><td><input type='radio' name='mitkarivit' value='koodittomat'> ".t("Viivakoodittomat rivit")."</td></tr>";
 			}
+
+			echo "<tr>";
+			echo "<th>".t("Tee excel tullinimikkeistä")."</th>";
+			
+			echo "<td>";
+			echo "<input type='checkbox' name='tee_excel' value='1' />";
+			echo "</td>";
+			echo "</tr>";
 		}
 	}
 

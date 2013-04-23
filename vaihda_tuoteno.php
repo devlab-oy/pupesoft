@@ -43,9 +43,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file
 
 	while ($rivi = fgets($file)) {
 		// luetaan rivi tiedostosta..
-		$poista	  = array("'", "\\","\"");
-		$rivi	  = str_replace($poista,"", $rivi);
-		$rivi	  = explode("\t", $rivi);
+		$rivi = explode("\t", pupesoft_cleanstring($rivi));
 
 		if (trim($rivi[0]) != '' and trim($rivi[1]) != '') {
 
@@ -238,9 +236,7 @@ if ($error == 0 and $tee == "file") {
 
 	while ($rivi = fgets($file)) {
 		// luetaan rivi tiedostosta..
-		$poista	  = array("'", "\\","\"");
-		$rivi	  = str_replace($poista,"",$rivi);
-		$rivi	  = explode("\t", trim($rivi));
+		$rivi = explode("\t", pupesoft_cleanstring($rivi));
 
 		if (trim($rivi[0]) != '' and trim($rivi[1]) != '') {
 
@@ -425,15 +421,39 @@ if ($error == 0 and $tee == "file") {
 								$result2 = pupe_query($query);
 							}
 							elseif ($taulu == 'puun_alkio') {
-								$query = "	UPDATE $taulu
-											SET
-											$sarake	= '$uustuoteno'
-											WHERE
-											yhtio = '$kukarow[yhtio]'
-											and kieli in ($kielet)
-											and $sarake	= '$vantuoteno'
-											and laji = 'tuote'";
-								$result2 = pupe_query($query);
+
+								$hquery = "	SELECT *
+											FROM puun_alkio
+											WHERE yhtio = '$kukarow[yhtio]'
+											AND laji    = 'Tuote'
+											AND liitos  = '$vantuoteno'";
+								$hresult = pupe_query($hquery);
+
+								while ($ahrow = mysql_fetch_assoc($hresult)) {
+
+									$tarksql = "SELECT *
+												FROM puun_alkio
+												where yhtio		= '$kukarow[yhtio]'
+												and liitos 		= '$uustuoteno'
+												and kieli 		= '$ahrow[kieli]'
+												and laji 		= '$ahrow[laji]'
+												and puun_tunnus = '$ahrow[puun_tunnus]'";
+									$tarkesult = pupe_query($tarksql);
+
+									if (mysql_num_rows($tarkesult) == 0) {
+										$query = "	UPDATE puun_alkio
+													SET liitos	= '$uustuoteno'
+													WHERE yhtio = '$kukarow[yhtio]'
+													and tunnus  = '$ahrow[tunnus]'";
+										$result2 = pupe_query($query);
+									}
+									else {
+										$query = "	DELETE FROM puun_alkio
+													WHERE yhtio = '$kukarow[yhtio]'
+													and tunnus  = '$ahrow[tunnus]'";
+										$result2 = pupe_query($query);
+									}
+								}
 							}
 							else {
 								$query = "	UPDATE $taulu
@@ -511,7 +531,7 @@ if ($error == 0 and $tee == "file") {
 										muutospvm 	= now()";
 							$result4 = pupe_query($query);
 						}
-						
+
 						// p‰ivitet‰‰n j‰rjestykset muille paitsi "p‰‰tuotteelle", "vanhatuotteelle", nollille ja isommille j‰rjestyksille kuin mik‰ on "vanhatuotteella"
 						$query = "	UPDATE korvaavat
 									SET jarjestys = jarjestys + 1

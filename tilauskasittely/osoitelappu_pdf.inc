@@ -199,9 +199,9 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 	// kollityht (2)
 	// tarkiste (1)
 	$sscc = 1;
-	$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
-	$sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
-	$sscc .= sprintf('%02.02d', $uniq_merkki);
+	$sscc .= sprintf("%08.8s",$yhtiorow["ytunnus"]);
+	$sscc .= sprintf('%06.6s', substr($laskurow["tunnus"], -6));
+	$sscc .= sprintf('%02.2s', $uniq_merkki);
 	$loppu = tarkiste($sscc);
 	$sscc = $sscc.$loppu;
 

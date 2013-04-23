@@ -300,9 +300,9 @@
 					}
 
 					$sscc = 1;
-					$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
-					$sscc .= sprintf('%06.06d', substr($rakirrow['rahtikirjanro'], -6));
-					$sscc .= sprintf('%02.02d', $dpdi);
+					$sscc .= sprintf("%08.8s", $yhtiorow["ytunnus"]);
+					$sscc .= sprintf('%06.6s', substr($rakirrow['rahtikirjanro'], -6));
+					$sscc .= sprintf('%02.2s', $dpdi);
 					$loppu = tarkiste($sscc);
 					$sscc = $sscc.$loppu;
 
@@ -455,9 +455,9 @@
 	}
 
 	if ($laskurow["sisviesti2"] != "" and $kukarow["extranet"] == "") {
-		
+
 		$pregit = FALSE;
-		
+
 		if (strpos($_SERVER['SCRIPT_NAME'], "asiakkaantilaukset.php") !== FALSE and (preg_match_all("/Tilaus jakaantunut [0-9]* tilaukseksi: ([0-9, ]*) Tilaus:/", $laskurow['sisviesti2'], $tilausnumerotlista))) {
 			foreach ($tilausnumerotlista[1] as $tilausnumerolis) {
 				foreach (explode(",", $tilausnumerolis) as $tilnro) {
@@ -469,7 +469,7 @@
 				}
 			}
 		}
-		
+
 		if (!$pregit) $komm .= "\n".t("Kommentti")." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 90, "\n###");
 		else $komm .= "\n".t("Kommentti")." 2:###".$laskurow["sisviesti2"];
 	}
@@ -477,7 +477,7 @@
 	if ($laskurow["sisviesti1"] != "") {
 		$komm .= "\n".t("Kommentti")." 3:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 90, "\n###");
 	}
-	
+
 	if ($laskurow["sisviesti3"] != "" and $kukarow["extranet"] == "") {
 		$komm .= "\n".t("Sisäinen viesti").":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti3']), 90, "\n###");
 	}

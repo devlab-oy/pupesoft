@@ -141,6 +141,8 @@
 			$kirjoitin_tunnus = $print["printteri6"]; // Rahtikirja A4
 		}
 
+		$mediatyyppi = "";
+
 		if ($komento != "PDF_RUUDULLE") {
 			// haetaan printterille tulostuskomento
 			$query = "	SELECT *
@@ -151,6 +153,7 @@
 
 			$kirjoitin = $print['komento'];
 			$merkisto  = $print['merkisto'];
+			$mediatyyppi = $print['mediatyyppi'];
 		}
 
 		$pvm = date("j.n.Y");

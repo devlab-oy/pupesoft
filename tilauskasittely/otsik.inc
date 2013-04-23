@@ -3216,7 +3216,7 @@
 		}
 
 		// K‰ytt‰j‰n toimipaikka ALV-velvollisuuden takaa tai alasvetovalikosta
-		$kukarow['toimipaikka'] = empty($yhtiotoimipaikka) ? 0 : $yhtiotoimipaikka;
+		if (isset($yhtiotoimipaikka)) $kukarow['toimipaikka'] = $yhtiotoimipaikka;
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
@@ -3237,10 +3237,8 @@
 			$yhtioalv_tilino = $alhiro['toim_alv'];
 		}
 
-		if (isset($yhtiotoimipaikka) and (
-				($kukarow['kesken'] == 0 and isset($predefined_yhtiotoimipaikka) and $predefined_yhtiotoimipaikka != $yhtiotoimipaikka) or
-				(isset($otsikon_laskurow['yhtio_toimipaikka']) and $otsikon_laskurow['yhtio_toimipaikka'] != $yhtiotoimipaikka and ($yhtiorow['maa'] != $srow['maa'] or $yhtiorow['vat_numero'] == ''))
-			)
+		if (($kukarow['kesken'] == 0 and isset($predefined_yhtiotoimipaikka) and $predefined_yhtiotoimipaikka != $yhtiotoimipaikka) or
+			(isset($otsikon_laskurow['yhtio_toimipaikka']) and $otsikon_laskurow['yhtio_toimipaikka'] != $yhtiotoimipaikka and ($yhtiorow['maa'] != $srow['maa'] or $yhtiorow['vat_numero'] == ''))
 		) {
 
 			$alhqur = "	SELECT alv, vienti
@@ -3253,7 +3251,7 @@
 			$alv = $alhiro['alv'];
 			$vienti = $alhiro['vienti'];
 
-			echo "<br /><font class='info'>".t("HUOM: Vaihdoit toimipaikkaa. Vienti- ja ALV-tiedot haettiin asiakastiedoista")."!</font><br /><br />";
+			echo "<br /><font class='info'>",t("HUOM: Vaihdoit toimipaikkaa. Vienti- ja ALV-tiedot haettiin asiakastiedoista"),"!</font><br /><br />";
 		}
 
 		// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella

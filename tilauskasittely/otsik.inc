@@ -1822,6 +1822,7 @@
 				$vasen_sarake[$vasen] .= "<option value='S' $sel[S]>".t("Sarjatilaus")."</option>";
 				$vasen_sarake[$vasen] .= "<option value='8' $sel[8]>".t("Muiden mukana")."</option>";
 				$vasen_sarake[$vasen] .= "<option value='A' $sel[A]>".t("Työmääräys")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='9' $sel[9]>".t("Tehdaspalautus")."</option>";
 				$vasen_sarake[$vasen] .= "</select></td>";
 				$vasen++;
 			}

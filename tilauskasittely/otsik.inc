@@ -1942,23 +1942,6 @@
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
 			if ($srow['chn'] == '999')      $laskkielto     = 'CHECKED';
 
-			// Tarjouksia ei oletuksena osatoimiteta
-			if ($srow['osatoimitus'] == 'o' or ((in_array($toim, array("TARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) {
-				$osath  = 'selected="SELECTED"';
-				$osath1 = '';
-				$osath2 = '';
-			}
-			elseif($srow['osatoimitus'] == 'e') {
-				$osath  = '';
-				$osath1 = '';
-				$osath2 = 'selected="SELECTED"';
-			}
-			else {
-				$osath  = '';
-				$osath1 = 'selected="SELECTED"';
-				$osath2 = '';
-			}
-
 			// Pit‰‰ olla myyntitilaus ja k‰ytt‰j‰ll‰ oikeus laskuttaa tilaus
 			if (($toim == "PIKATILAUS" or $toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim =="REKLAMAATIO") and (tarkista_oikeus("valitse_laskutettavat_tilaukset.php") or
 				tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VAINLASKUTA") or
@@ -2083,12 +2066,28 @@
 			}
 
 			if ($toim != "MYYNTITILI") {
+
+				$osatoimitus_selected = array_fill_keys(array('', 'o', 'e'), '');
+
+				// Jos meill‰ on uusi otsikko ja defaultittina ei haluta osatoimittaa myynittilauksia
+				if ($kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $yhtiorow['myyntitilaus_osatoimitus'] == 'E') {
+					$osatoimitus_selected['o'] = " selected";
+				}
+				// Jos meill‰ on uusi otsikko, niin tarjouksia ei oletuksena osatoimiteta
+				elseif ($kukarow['kesken'] == 0 and in_array($toim, array("TARJOUS", "PROJEKTI"))) {
+					$osatoimitus_selected['o'] = " selected";
+				}
+				// Muuten valitaan se mik‰ tulee kannasta (default valuu "voidaan osatoimittaa")
+				else {
+					$osatoimitus_selected[$srow['osatoimitus']] = " selected";
+				}
+
 				$oikea_sarake[$oikea]  = "<td>".t("Osatoimitus").":</td>";
 				$oikea_sarake[$oikea] .= "<td>";
 				$oikea_sarake[$oikea] .= "<select name='osatoimitus' id='osatoimitus' ".js_alasvetoMaxWidth("osatoimitus", 200).">";
-				$oikea_sarake[$oikea] .= "<option value=''  $osath1>".t("Voidaan osatoimittaa")."</option>";
-				$oikea_sarake[$oikea] .= "<option value='o'  $osath>".t("Ei osatoimiteta")."</option>";
-				$oikea_sarake[$oikea] .= "<option value='e' $osath2>".t("Ei osatoimiteta").'. '.t("Tilaus toimitetaan automaattisesti kun kaikkia tuotteita on varastossa")."</option>";
+				$oikea_sarake[$oikea] .= "<option value=''>".t("Voidaan osatoimittaa")."</option>";
+				$oikea_sarake[$oikea] .= "<option value='o'{$osatoimitus_selected['o']}>".t("Ei osatoimiteta")."</option>";
+				$oikea_sarake[$oikea] .= "<option value='e'{$osatoimitus_selected['e']}>".t("Ei osatoimiteta").', '.t("tilaus toimitetaan automaattisesti kun kaikkia tuotteita on varastossa")."</option>";
 				$oikea_sarake[$oikea] .= "</select>";
 				$oikea_sarake[$oikea] .= "</td>";
 				$oikea++;

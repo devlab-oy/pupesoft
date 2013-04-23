@@ -3267,7 +3267,7 @@
 			$kurssi = $apukurssi;
 		}
 
-		if($toim != 'TARJOUS') {
+		if ($toim != 'TARJOUS') {
 			//Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
 			//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
 			if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
@@ -3298,6 +3298,11 @@
 			$toimvv = '0000';
 			$toimkk = '00';
 			$toimpp = '00';
+		}
+
+		// Tehdaspalautuksia ei ketjuteta
+		if ($kukarow["kesken"] == 0 and $tilaustyyppi == "9") {
+			$ketjutus = 'o';
 		}
 
 		$query .= "	lasku SET

@@ -78,6 +78,9 @@
 				case "J":
 					$alatila = "Odottaa loppulaskutusta";
 					break;
+				case "K":
+					$alatila = "korjaus kesken";
+					break;
 				case "E":
 					$alatila = "Vientitiedot syötetty";
 					break;
@@ -127,7 +130,7 @@
 					$alatila = "kesken";
 					break;
 				case "K":
-					$alatila = "korjattu";
+					$alatila = "korjaus kesken";
 					break;
 				case "J":
 					$alatila = "tulostusjonossa";

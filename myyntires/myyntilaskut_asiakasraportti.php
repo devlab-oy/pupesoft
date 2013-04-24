@@ -145,22 +145,14 @@
 
 					$(function() {
 
-						$('.laskunro_checkall').on('click', function() {
-
-							if ($(this).is(':checked')) $('.laskunro').prop('checked', true);
-							else $('.laskunro').prop('checked', false);
-
-						});
-
 						$('.date').on('keyup change blur', function() {
-							console.log($(this).attr('id'));
 
 							var id = $(this).attr('id');
 
 							$('#'+id+'_hidden').val($(this).val());
 						});
 
-						$('.laskunro').on('click', function() {
+						var laskunrot_loop = function() {
 
 							var nrot = [], i = 0;
 
@@ -171,7 +163,22 @@
 
 							$('#laskunrot').val(nrot.join(','));
 
+						}
+
+						$('.laskunro').on('click', laskunrot_loop);
+
+						$('.laskunro_checkall').on('click', function() {
+
+							if ($(this).is(':checked')) {
+								$('.laskunro').prop('checked', true);
+							}
+							else {
+								$('.laskunro').prop('checked', false);
+							}
+
+							laskunrot_loop();
 						});
+
 					});
 
 					</script>";

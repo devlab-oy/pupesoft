@@ -694,6 +694,7 @@ $debug = 1;
 						{$splitlisa}
 						{$splitlisa2}
 						{$rivihintalisa}
+						, tilkpl = '{$datan_kpl}' 
 						, hinta_alkuperainen = '{$hinta_alkuperainenlisa}'
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus = '{$row['tunnus']}'";
@@ -1244,7 +1245,7 @@ $debug = 1;
 						$query = "	(SELECT DISTINCT tilausrivi.tunnus, toimi.asn_sanomat,
 									IF(tilausrivi.laskutettuaika = '0000-00-00', '9999-12-31', tilausrivi.laskutettuaika) AS laskutettuaika,
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus,
-									tilausrivi.laadittu, tilausrivi.perheid
+									tilausrivi.laadittu, tilausrivi.perheid, '1' jarjestys
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.uusiotunnus AND lasku.mapvm = '0000-00-00' AND lasku.tapvm = '0000-00-00' AND lasku.alatila != 'X')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
@@ -1265,7 +1266,7 @@ $debug = 1;
 									(SELECT DISTINCT tilausrivi.tunnus, toimi.asn_sanomat,
 									IF(tilausrivi.laskutettuaika = '0000-00-00', '9999-12-31', tilausrivi.laskutettuaika) AS laskutettuaika,
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus,
-									tilausrivi.laadittu, tilausrivi.perheid
+									tilausrivi.laadittu, tilausrivi.perheid, '2' jarjestys
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.uusiotunnus AND lasku.mapvm = '0000-00-00' AND lasku.tapvm = '0000-00-00' AND lasku.alatila != 'X')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
@@ -1287,7 +1288,7 @@ $debug = 1;
 									(SELECT DISTINCT tilausrivi.tunnus, toimi.asn_sanomat,
 									IF(tilausrivi.laskutettuaika = '0000-00-00', '9999-12-31', tilausrivi.laskutettuaika) AS laskutettuaika,
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus,
-									tilausrivi.laadittu, tilausrivi.perheid
+									tilausrivi.laadittu, tilausrivi.perheid, '3' jarjestys
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.tila = 'O' AND lasku.alatila = 'A')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
@@ -1304,7 +1305,7 @@ $debug = 1;
 									AND tilausrivi.tyyppi = 'O'
 									AND tilausrivi.uusiotunnus = 0
 									{$isalisa})
-									ORDER BY uusiotunnus ASC, laskutettuaika ASC, laadittu ASC";
+									ORDER BY jarjestys, uusiotunnus ASC, laskutettuaika ASC, laadittu ASC";
 						if ($debug == 1) {
 							echo "<pre>",str_replace("\t", "", $query),"</pre><br>";
 						}

@@ -223,7 +223,7 @@ if (!function_exists("pupe_error")) {
 		$debuggi = array_reverse(debug_backtrace());
 
 		// tehd‰‰n errorimessage
-		$puperror  = "User:   $kukarow[nimi] ($kukarow[kuka]) @ $yhtiorow[nimi] ($yhtiorow[yhtio])\n\n";
+		$puperror  = "SQL-ERROR\n\nUser:   $kukarow[nimi] ($kukarow[kuka]) @ $yhtiorow[nimi] ($yhtiorow[yhtio])\n\n";
 
 		$nro = 1;
 		foreach ($debuggi as $debuggii) {

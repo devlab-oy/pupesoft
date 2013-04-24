@@ -2087,7 +2087,6 @@ if ($tee == '') {
 
 				echo "	<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
 						<input type='hidden' name='toim' value='$vaihdatoim'>
-						<input type='hidden' name='tee' value='AKTIVOI'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 						<input type='hidden' name='mista' value='$mista'>
 						<input type='hidden' name='lopetus' value='$lopetus'>

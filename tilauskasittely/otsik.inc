@@ -1822,6 +1822,7 @@
 				$vasen_sarake[$vasen] .= "<option value='S' $sel[S]>".t("Sarjatilaus")."</option>";
 				$vasen_sarake[$vasen] .= "<option value='8' $sel[8]>".t("Muiden mukana")."</option>";
 				$vasen_sarake[$vasen] .= "<option value='A' $sel[A]>".t("Työmääräys")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='9' $sel[9]>".t("Tehdaspalautus")."</option>";
 				$vasen_sarake[$vasen] .= "</select></td>";
 				$vasen++;
 			}
@@ -3216,7 +3217,7 @@
 		}
 
 		// Käyttäjän toimipaikka ALV-velvollisuuden takaa tai alasvetovalikosta
-		$kukarow['toimipaikka'] = empty($yhtiotoimipaikka) ? 0 : $yhtiotoimipaikka;
+		if (isset($yhtiotoimipaikka)) $kukarow['toimipaikka'] = $yhtiotoimipaikka;
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
@@ -3237,10 +3238,8 @@
 			$yhtioalv_tilino = $alhiro['toim_alv'];
 		}
 
-		if (isset($yhtiotoimipaikka) and (
-				($kukarow['kesken'] == 0 and isset($predefined_yhtiotoimipaikka) and $predefined_yhtiotoimipaikka != $yhtiotoimipaikka) or
-				(isset($otsikon_laskurow['yhtio_toimipaikka']) and $otsikon_laskurow['yhtio_toimipaikka'] != $yhtiotoimipaikka and ($yhtiorow['maa'] != $srow['maa'] or $yhtiorow['vat_numero'] == ''))
-			)
+		if (($kukarow['kesken'] == 0 and isset($predefined_yhtiotoimipaikka) and $predefined_yhtiotoimipaikka != $yhtiotoimipaikka) or
+			(isset($otsikon_laskurow['yhtio_toimipaikka']) and $otsikon_laskurow['yhtio_toimipaikka'] != $yhtiotoimipaikka and ($yhtiorow['maa'] != $srow['maa'] or $yhtiorow['vat_numero'] == ''))
 		) {
 
 			$alhqur = "	SELECT alv, vienti
@@ -3253,7 +3252,7 @@
 			$alv = $alhiro['alv'];
 			$vienti = $alhiro['vienti'];
 
-			echo "<br /><font class='info'>".t("HUOM: Vaihdoit toimipaikkaa. Vienti- ja ALV-tiedot haettiin asiakastiedoista")."!</font><br /><br />";
+			echo "<br /><font class='info'>",t("HUOM: Vaihdoit toimipaikkaa. Vienti- ja ALV-tiedot haettiin asiakastiedoista"),"!</font><br /><br />";
 		}
 
 		// Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
@@ -3268,7 +3267,7 @@
 			$kurssi = $apukurssi;
 		}
 
-		if($toim != 'TARJOUS') {
+		if ($toim != 'TARJOUS') {
 			//Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
 			//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
 			if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
@@ -3299,6 +3298,11 @@
 			$toimvv = '0000';
 			$toimkk = '00';
 			$toimpp = '00';
+		}
+
+		// Tehdaspalautuksia ei ketjuteta
+		if ($kukarow["kesken"] == 0 and $tilaustyyppi == "9") {
+			$ketjutus = 'o';
 		}
 
 		$query .= "	lasku SET

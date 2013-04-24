@@ -455,6 +455,36 @@
 			$iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $myyntitili myyntitiliä valmiiksi.\n";
 		}
 
+		// Tsekataan jos joku valmistus tai valmistusmyynti on jäänyt alatila = K tilaan
+		$query = "	SELECT distinct tunnus, tila
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					and	tila in ('L','V')
+					and alatila = 'K'";
+		$result = pupe_query($query);
+
+		while ($row = mysql_fetch_assoc($result)) {
+			if ($row["tila"] == "L") {
+				$kalatila = "X";
+			}
+			else {
+				$kalatila = "V";
+			}
+
+			$query = "	UPDATE lasku
+						SET alatila	= '$kalatila'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus 	= '$row[tunnus]'
+						and tila	= '$row[tila]'
+						and alatila = 'K'";
+			pupe_query($query);
+			$valmkorj++;
+		}
+
+		if ($valmkorj > 0) {
+			$iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $valmkorj vaömistustilausta takaisin alkuperäisille alatiloille.\n";
+		}
+
 		// Poistetaan kaikki myyntitili-varastopaikat, jos niiden saldo on nolla
 		$query = "	SELECT tunnus, tuoteno
 					FROM tuotepaikat

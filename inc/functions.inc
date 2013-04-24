@@ -2681,6 +2681,7 @@ if (!function_exists("jalkilaskentafunktio")) {
 		$qu = "	LOCK TABLE asiakas READ,
 				lasku WRITE,
 				sarjanumeroseuranta READ,
+				sarjanumeroseuranta_arvomuutos READ,
 				sanakirja WRITE,
 				tapahtuma WRITE,
 				tilausrivi WRITE,
@@ -13923,6 +13924,13 @@ if (!function_exists('tulosta_hrx')) {
 		$ot_yhteyshenkilo = t("Yhteyshenkilö", $yhtiorow['kieli']);
 		$ot_puhelin = t("Puhelin", $yhtiorow['kieli']);
 
+		if (!empty($mediatyyppi) and in_array($mediatyyppi, array('LSN149X104','LSN59X40'))) {
+			$nauha = "2";
+		}
+		else {
+			$nauha = "0";
+		}
+
 		/*
 			Yhteyshenkilö ja puhelinnumero toimitusosoite-kohdassa tulee jostakin
 		*/
@@ -13998,7 +14006,7 @@ if (!function_exists('tulosta_hrx')) {
 					{RC016;{$monesko_laatikko} / {$montako_laatikkoa_yht} {$pakkauskoodi}|}
 
 					*** TULOSTUS  ***
-					{XS;I,0001,0002C3210|}
+					{XS;I,0001,0002C3{$nauha}10|}
 					".chr(12);
 
 		if (trim($reittietikettitulostin) != '' and $reittietikettitulostin != 'email') {

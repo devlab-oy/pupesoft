@@ -158,7 +158,7 @@
 			system("rm -f $pdffilenimi");
 		}
 	}
-
+echo "$komento[Purkulista], $komento[Vastaanotetut] <br><br> ";
 	if ($sorttaus == 'paikka') {
 		$sorttauskentta = generoi_sorttauskentta("1");
 	}
@@ -374,7 +374,7 @@
 		}
 	}
 
-	if ($komento["Purkulista"] != '') {
+	if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
 
 		$pdf = new pdffile;
 		$pdf->set_default('margin-top', 	0);

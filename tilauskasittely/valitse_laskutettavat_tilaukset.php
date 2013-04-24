@@ -27,31 +27,24 @@
 
 		$alatilat = " 	and lasku.alatila in ('B','C','D') ";
 		$vientilisa = " and lasku.vienti = '' ";
-		$muutlisa = "	and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
-						and tilausrivi.varattu  != 0";
 	}
 	elseif ($toim == "VAINLASKUTA") {
 		echo "<font class='head'>".t("Laskuta tilaus").":</font><hr>";
 
 		$alatilat = " 	and (lasku.alatila = 'D' or (lasku.alatila = 'C' and lasku.eilahetetta != ''))";
 		$vientilisa = " and lasku.vienti = '' ";
-		$muutlisa = "	and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
-						and tilausrivi.varattu  != 0";
 	}
 	elseif ($toim == "VAINOMATLASKUTA") {
 		echo "<font class='head'>".t("Laskuta tilaus").":</font><hr>";
 
 		$alatilat = " 	and (lasku.alatila = 'D' or (lasku.alatila = 'C' and lasku.eilahetetta != ''))";
 		$vientilisa = " and lasku.vienti = '' and (lasku.laatija = '$kukarow[kuka]' or lasku.myyja = '$kukarow[tunnus]')";
-		$muutlisa = "	and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
-						and tilausrivi.varattu  != 0";
 	}
 	elseif ($toim == "VIENTI") {
 		echo "<font class='head'>".t("Tulosta vientilaskuja").":</font><hr>";
 
 		$alatilat = " 	and lasku.alatila in ('E','D') ";
 		$vientilisa = " and lasku.vienti != '' ";
- 		$muutlisa = "	and tilausrivi.laskutettu = '' ";
 	}
 	else {
 		exit;
@@ -368,9 +361,10 @@
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
 					and lasku.tunnus in ($tunnukset)
+					and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
+					and tilausrivi.varattu  != 0
 					$alatilat
 					$vientilisa
-					$muutlisa
 					GROUP BY ketjutuskentta, lasku.tunnus,lasku.luontiaika,lasku.chn,lasku.ytunnus,lasku.nimi,lasku.osoite,lasku.postino,lasku.postitp,lasku.maa,lasku.toim_nimi,lasku.toim_osoite,lasku.toim_postino,lasku.toim_postitp,lasku.toim_maa,lasku.laskutusvkopv,lasku.rahtivapaa,lasku.toimitustapa,
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
 					maksuehto.teksti,maksuehto.itsetulostus,maksuehto.kateinen,kuka.nimi,lasku.valkoodi,lasku.liitostunnus,lasku.tila,lasku.vienti,lasku.alv,lasku.kohdistettu,lasku.jaksotettu,lasku.verkkotunnus,lasku.erikoisale
@@ -1068,9 +1062,10 @@
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
 					and lasku.chn != '999'
+					and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
+					and tilausrivi.varattu  != 0
 					$alatilat
 					$vientilisa
-					$muutlisa
 					$haku
 					GROUP BY lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 					lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,

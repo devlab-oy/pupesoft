@@ -175,7 +175,13 @@ if (!function_exists("toimitarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "ovttunnus") {
-			if ($tmp_maakoodi=='FI') {
+			if ($tmp_maakoodi == 'FI') {
+
+				if (trim($t[$i]) == '' and !isset($hetuok)) {
+					// täytetään ovttunnus jos sitä ei ole, eikä ytunnus oo henkilötunnus
+					$t[$i] = "0037".sprintf("%08d", preg_replace("/[^0-9]/", "", $tmp_ytunnus));
+				}
+
 				$query = "	SELECT ytunnus, tunnus
 							FROM toimi
 							WHERE yhtio	  = '$kukarow[yhtio]'

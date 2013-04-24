@@ -58,7 +58,7 @@
 	}
 
 	//katsotaan että kukarow kesken ja $tilausnumero stemmaavat keskenään
-	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
+	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0)) {
 		echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("Käy aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
 		exit;
 	}
@@ -524,6 +524,8 @@
 		echo "<input type='hidden' name='from' value='$from'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 		echo "<input type='hidden' name='mista' value='$mista'>";
+		echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
+		echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 
 		if ($asiakasid != "" or $kukarow["kesken"] != 0 or $kopioitava_otsikko != 0) {
 
@@ -1820,6 +1822,7 @@
 				$vasen_sarake[$vasen] .= "<option value='S' $sel[S]>".t("Sarjatilaus")."</option>";
 				$vasen_sarake[$vasen] .= "<option value='8' $sel[8]>".t("Muiden mukana")."</option>";
 				$vasen_sarake[$vasen] .= "<option value='A' $sel[A]>".t("Työmääräys")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='9' $sel[9]>".t("Tehdaspalautus")."</option>";
 				$vasen_sarake[$vasen] .= "</select></td>";
 				$vasen++;
 			}
@@ -1932,7 +1935,7 @@
 			$jtki = "";
 			$rahtivapaa_chk = '';
 
-			if ($srow['eilahetetta'] != '') $eilah          = 'CHECKED';
+			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE")) $eilah = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
@@ -2726,7 +2729,10 @@
 			echo "</table><br>";
 
 			echo "<table>";
-			echo "<tr><td class='back'><input type='submit' ACCESSKEY='J' name='jatka' value='".t("Jatka")."'></td>";
+			echo "<tr><td class='back'>";
+			echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
+			echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+			echo "<input type='submit' ACCESSKEY='J' name='jatka' value='".t("Jatka")."'></td>";
 			echo "<td class='back'><input type='submit' name='vaihdatoim_asiakas' value='".t("Hae toimitusosoite")."'></td>";
 			echo "</form>";
 
@@ -2740,6 +2746,8 @@
 				echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 				echo "<input type='hidden' name='mista' value='$mista'>";
 				echo "<input type='hidden' name='tila' value='vaihdaasiakas'>";
+				echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
+				echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 				echo "<td class='back'><input type='submit' ACCESSKEY='A' value='".t("Vaihda asiakas")."'></td></form>";
 			}
 
@@ -3209,7 +3217,7 @@
 		}
 
 		// Käyttäjän toimipaikka ALV-velvollisuuden takaa tai alasvetovalikosta
-		$kukarow['toimipaikka'] = empty($yhtiotoimipaikka) ? 0 : $yhtiotoimipaikka;
+		if (isset($yhtiotoimipaikka)) $kukarow['toimipaikka'] = $yhtiotoimipaikka;
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
@@ -3230,10 +3238,8 @@
 			$yhtioalv_tilino = $alhiro['toim_alv'];
 		}
 
-		if (isset($yhtiotoimipaikka) and (
-				($kukarow['kesken'] == 0 and isset($predefined_yhtiotoimipaikka) and $predefined_yhtiotoimipaikka != $yhtiotoimipaikka) or
-				(isset($otsikon_laskurow['yhtio_toimipaikka']) and $otsikon_laskurow['yhtio_toimipaikka'] != $yhtiotoimipaikka and ($yhtiorow['maa'] != $srow['maa'] or $yhtiorow['vat_numero'] == ''))
-			)
+		if (($kukarow['kesken'] == 0 and isset($predefined_yhtiotoimipaikka) and $predefined_yhtiotoimipaikka != $yhtiotoimipaikka) or
+			(isset($otsikon_laskurow['yhtio_toimipaikka']) and $otsikon_laskurow['yhtio_toimipaikka'] != $yhtiotoimipaikka and ($yhtiorow['maa'] != $srow['maa'] or $yhtiorow['vat_numero'] == ''))
 		) {
 
 			$alhqur = "	SELECT alv, vienti
@@ -3246,7 +3252,7 @@
 			$alv = $alhiro['alv'];
 			$vienti = $alhiro['vienti'];
 
-			echo "<br /><font class='info'>".t("HUOM: Vaihdoit toimipaikkaa. Vienti- ja ALV-tiedot haettiin asiakastiedoista")."!</font><br /><br />";
+			echo "<br /><font class='info'>",t("HUOM: Vaihdoit toimipaikkaa. Vienti- ja ALV-tiedot haettiin asiakastiedoista"),"!</font><br /><br />";
 		}
 
 		// Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
@@ -3261,7 +3267,7 @@
 			$kurssi = $apukurssi;
 		}
 
-		if($toim != 'TARJOUS') {
+		if ($toim != 'TARJOUS') {
 			//Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
 			//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
 			if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
@@ -3288,10 +3294,15 @@
 		$label = !isset($label) ? "" : $label;
 		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
 
-		if($naytetaanko_tarjouksella != 'on' and $toim == "TARJOUS") {
+		if ($naytetaanko_tarjouksella != 'on' and $toim == "TARJOUS") {
 			$toimvv = '0000';
 			$toimkk = '00';
 			$toimpp = '00';
+		}
+
+		// Tehdaspalautuksia ei ketjuteta
+		if ($kukarow["kesken"] == 0 and $tilaustyyppi == "9") {
+			$ketjutus = 'o';
 		}
 
 		$query .= "	lasku SET
@@ -3453,6 +3464,10 @@
 		$query .= $postquery;
 		$result = pupe_query($query);
 		$id = mysql_insert_id();
+
+		// Setataan laskun aluperäiset tilat
+		$orig_tila    = $ylatila;
+		$orig_alatila = $alatila;
 
 		// Jos erikoisalennus muuttuu
 		if ($laskurow["erikoisale"] != $erikoisale) {
@@ -3627,7 +3642,8 @@
 			if ($tunnusnippu == "" and $toim == "PROJEKTI" or ($toim=="TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"] != "") or (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA")) and $yhtiorow["myyntitilaus_osatoimitus"] == "K")) {
 				$query = "	UPDATE lasku
 							SET tunnusnippu = '$kukarow[kesken]'
-							WHERE tunnus = '$kukarow[kesken]' and tunnusnippu = 0";
+							WHERE tunnus    = '$kukarow[kesken]'
+							and tunnusnippu = 0";
 				$result = pupe_query($query);
 
 				if ($toim == "PROJEKTI") {

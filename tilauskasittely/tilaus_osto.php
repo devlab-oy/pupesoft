@@ -910,6 +910,7 @@
 						tilausrivi.var2,
 						tilausrivi.jaksotettu,
 						tilausrivi.yksikko,
+						tuotteen_toimittajat.toim_yksikko,
 						tuote.tuotemassa,
 						tuote.kehahin keskihinta,
 						tuotteen_toimittajat.ostohinta,
@@ -1147,7 +1148,7 @@
 							echo "</ul></div>";
 						}
 						echo "</td>";
-						echo "<td valign='top' $class align='right'>".($prow["tilattu"]*1)."<br>".($prow["tilattu_ulk"]*1)."</td>";
+						echo "<td valign='top' $class align='right'>".($prow["tilattu"]*1)." ",strtolower($prow['yksikko']),"<br />".($prow["tilattu_ulk"]*1)." ",strtolower($prow['toim_yksikko']),"</td>";
 						echo "<td valign='top' $class align='right'>".hintapyoristys($prow["hinta"])."</td>";
 
 						$alespan = 8;
@@ -1480,4 +1481,10 @@
 		}
 	}
 
-	require("../inc/footer.inc");
+	// Laitetaan focus kpl kenttään jos tuotenumero on syötetty
+	if (!empty($tuoteno) and empty($kpl)) {
+		$formi = "rivi";
+		$kentta = "kpl";
+	}
+
+	require("inc/footer.inc");

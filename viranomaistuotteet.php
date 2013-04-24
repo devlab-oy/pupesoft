@@ -306,6 +306,9 @@ if ($tee == "synkronoi") {
 	}
 
 	fclose($file);
+}
+
+if ($tee == "synkronoi" or $tee == "synkronoimaat") {
 
 	echo t("P‰ivitet‰‰n maat tietokantaan")."...<br>";
 
@@ -389,6 +392,14 @@ if ($tee == '') {
 	echo "<input type='hidden' name='tee' value='synkronoi'><tr>";
 	echo "</table>";
 	echo "</form>";
+
+	echo "<br><br><br>";
+	echo t("P‰ivit‰ j‰rjestelm‰n maat").":<br><br>";
+	echo "<form method='post'>";
+	echo "<input type='submit' value='".t("P‰ivit‰ maat referenssist‰")."'>";
+	echo "<input type='hidden' name='tee' value='synkronoimaat'><tr>";
+	echo "</form>";
+
 }
 
 require ("inc/footer.inc");

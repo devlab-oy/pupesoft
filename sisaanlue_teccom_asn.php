@@ -131,6 +131,9 @@
 															#AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
 															AND tuotteen_toimittajat.toim_tuoteno {$poikkeus_tuoteno}
 															AND tuotteen_toimittajat.toim_tuoteno != '')
+								JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
+												AND tuote.tuoteno = tuotteen_toimittajat.tuoteno
+												AND tuote.status != 'P')
 								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
 								AND toimi.toimittajanro = '{$tavarantoimittajanumero}'
 								AND toimi.tyyppi != 'P'

@@ -102,6 +102,7 @@
 	}
 
 	// Katsotaanko voiko tilauksen laittaa ker‰ysjonoon. e = Ei osatoimiteta, tilaus toimitetaan automaattisesti kun kaikkia tuotteita on varastossa
+	// Pit‰‰ varmistaa, ett‰ meill‰ ei ole toisia tuotteita odottamassa toimitusta jotta ei vedet‰ niiden saldoa v‰list‰
 	if ($laskurow['osatoimitus'] == 'e' and $laskurow['tila'] == 'N') {
 
 		// Haetaan kaikki t‰m‰n tilauksen tuotteet

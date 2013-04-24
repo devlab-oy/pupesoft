@@ -2082,9 +2082,16 @@
 				$oikea_sarake[$oikea]  = "<td>".t("Osatoimitus").":</td>";
 				$oikea_sarake[$oikea] .= "<td>";
 				$oikea_sarake[$oikea] .= "<select name='osatoimitus' id='osatoimitus' ".js_alasvetoMaxWidth("osatoimitus", 200).">";
-				$oikea_sarake[$oikea] .= "<option value=''>".t("Voidaan osatoimittaa")."</option>";
-				$oikea_sarake[$oikea] .= "<option value='o'{$osatoimitus_selected['o']}>".t("Ei osatoimiteta")."</option>";
-				$oikea_sarake[$oikea] .= "<option value='e'{$osatoimitus_selected['e']}>".t("Ei osatoimiteta").', '.t("tilaus toimitetaan automaattisesti kun kaikkia tuotteita on varastossa")."</option>";
+				$oikea_sarake[$oikea] .= "<option value=''>".t("Tilauksen saa osatoimittaa")."</option>";
+				$oikea_sarake[$oikea] .= "<option value='o'{$osatoimitus_selected['o']}>".t("Tilausta ei saa osatoimittaa")."</option>";
+
+				// Jos ei käytetä JT-rivejä, voidaan tehdä automaattitoimituksia myös "normiriveillä"
+				// H = "Jos varastosaldo ei riitä, tilausrivi myydään normaalisti"
+				// O = "Kaikki myydään aina oletuspaikalta"
+				if ($yhtiorow['puute_jt_oletus'] == 'H' or $yhtiorow['puute_jt_oletus'] == 'O') {
+					$oikea_sarake[$oikea] .= "<option value='e'{$osatoimitus_selected['e']}>".t("Tilausta ei saa osatoimittaa").', '.t("tilaus toimitetaan automaattisesti kun kaikkia tuotteita on varastossa")."</option>";
+				}
+
 				$oikea_sarake[$oikea] .= "</select>";
 				$oikea_sarake[$oikea] .= "</td>";
 				$oikea++;

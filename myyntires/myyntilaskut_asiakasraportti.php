@@ -154,11 +154,10 @@
 
 						var laskunrot_loop = function() {
 
-							var nrot = [], i = 0;
+							var nrot = [];
 
 							$('.laskunro:checked').each(function() {
-								nrot[i] = $(this).val();
-								i++;
+								nrot.push($(this).val());
 							});
 
 							$('#laskunrot').val(nrot.join(','));

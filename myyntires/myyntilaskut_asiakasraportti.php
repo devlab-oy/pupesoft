@@ -145,6 +145,13 @@
 
 					$(function() {
 
+						$('.laskunro_checkall').on('click', function() {
+
+							if ($(this).is(':checked')) $('.laskunro').prop('checked', true);
+							else $('.laskunro').prop('checked', false);
+
+						});
+
 						$('.date').on('keyup change blur', function() {
 							console.log($(this).attr('id'));
 
@@ -667,7 +674,17 @@
 					echo "<td><input type='text' size='$kentankoko[$i]' name = 'haku[$i]' value = '$haku[$i]'></td>";
 				}
 
-				echo "<td></td><td class='back'></td><td class='back'><input type='submit' value='".t("Etsi")."'></td></tr>";
+				echo "<td></td>";
+
+				echo "<td class='back'>";
+
+				if ($asiakasrow['email'] != '') {
+					echo "<input class='laskunro_checkall' type='checkbox' />";
+				}
+
+				echo "</td>";
+
+				echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td></tr>";
 
 				$totaali = array();
                 $avoimet = array();

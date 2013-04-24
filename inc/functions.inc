@@ -20335,7 +20335,7 @@ if (!function_exists('search_array_key_recursive')) {
 	}
 }
 
-if (!function_exists('')) {
+if (!function_exists('echo_tallennus_formi')) {
 	function echo_tallennus_formi($filepath, $new_filename, $file_extension) {
 		echo "<form method='post' class='multisubmit'>";
 		echo "<table>";

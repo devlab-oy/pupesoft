@@ -169,12 +169,7 @@
 
 						$('.laskunro_checkall').on('click', function() {
 
-							if ($(this).is(':checked')) {
-								$('.laskunro').prop('checked', true);
-							}
-							else {
-								$('.laskunro').prop('checked', false);
-							}
+							$('.laskunro').prop('checked', $(this).is(':checked'));
 
 							laskunrot_loop();
 						});

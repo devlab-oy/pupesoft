@@ -196,21 +196,22 @@
 		$sel = array();
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = '0'  $sel[0]>".t("Normaali laskupohja");
-		$ulos .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");
+		$ulos .= "<option value = '0'  $sel[0]>".t("Normaali laskupohja")."</option>";
+		$ulos .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)")."</option>";
 		$ulos .= "<option value = '5'  $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
 		$ulos .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
 		$ulos .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)")."</option>";
-		$ulos .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1");
-		#$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
-		$ulos .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3");
+		$ulos .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1")."</option>";
+		#$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)")."</option>";
+		$ulos .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3")."</option>";
 		$ulos .= "<option value = '8'  $sel[8]>".t("Ruotsin laskupohja")."</option>";
-		$ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)");
-		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)");
-		$ulos .= "<option value = '13' $sel[13]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja");
-		$ulos .= "<option value = '14' $sel[14]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)");
-		$ulos .= "<option value = '15' $sel[15]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja");
-		$ulos .= "<option value = '16' $sel[16]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)");
+		$ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)")."</option>";
+		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)")."</option>";
+		$ulos .= "<option value = '13' $sel[13]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
+		$ulos .= "<option value = '14' $sel[14]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)")."</option>";
+		$ulos .= "<option value = '15' $sel[15]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
+		$ulos .= "<option value = '16' $sel[16]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)")."</option>";
+		$ulos .= "<option value = '17' {$sel[17]}>".t("Normaali laskupohja (lihavoidut ja kursivoidut tekstit)")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1310,12 +1311,21 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "lahete_nouto_allekirjoitus") {
+	if (mysql_field_name($result, $i) == "lahete_allekirjoitus") {
 
-		$sela = $selb = "";
+		$sela = $selb = $selc = $seld = $sele = "";
 
 		if ($trow[$i] == 'K') {
 			$selb = "selected";
+		}
+		elseif ($trow[$i] == 'A') {
+			$selc = "selected";
+		}
+		elseif($trow[$i] == 'E') {
+			$seld = "selected";
+		}
+		elseif($trow[$i] == 'S') {
+			$sele = "selected";
 		}
 		else {
 			$sela = "selected";
@@ -1323,7 +1333,10 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
 					<option value='' $sela>".t("Ei tulosteta allekirjoitussivua")."</option>
-					<option value='K' $selb>".t("Tulostetaan allekirjoitussivu")."</option>
+					<option value='A' $selc>".t("Tulostetaan allekirjoitus samalle sivulle vain kun toimitustapa on nouto")."</option>
+					<option value='K' $selb>".t("Tulostetaan erillinen allekirjoitussivu vain kun toimitustapa on nouto")."</option>
+					<option value='E' $seld>".t("Tulostetaan erillinen allekirjoitussivu kaikilla toimitustavoilla")."</option>
+					<option value='S' $sele>".t("Tulostetaan allekirjoitussivu samalle sivulle kaikilla toimitustavoilla")."</option>
 				</select></td>";
 
 		$jatko = 0;
@@ -1528,6 +1541,35 @@
 
 		$ulos .= "<option value='3' $sel1>".t("Rahtikirjasta tulostetaan 3 kopiota.")."</option>";
 		$ulos .= "<option value='4' $sel2>".t("Rahtikirjasta tulostetaan 4 kopiota.")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "oletus_laskukpl_toimitatilaus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == 1) {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == 2) {
+			$sel2 = "selected";
+		}
+		elseif ($trow[$i] == 3) {
+			$sel3 = "selected";
+		}
+		elseif ($trow[$i] == 4) {
+			$sel4 = "selected";
+		}
+
+		$ulos .= "<option value='1' $sel1>".t("Laskusta tulostetaan 1 kopio.")."</option>";
+		$ulos .= "<option value='2' $sel2>".t("Laskusta tulostetaan 2 kopiota.")."</option>";
+		$ulos .= "<option value='3' $sel3>".t("Laskusta tulostetaan 3 kopiota.")."</option>";
+		$ulos .= "<option value='4' $sel4>".t("Laskusta tulostetaan 4 kopiota.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3027,6 +3069,19 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == 'oletusvarasto_tilaukselle') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'O' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Ei esivalita myyntitilaukselle k‰ytt‰j‰n oletusvarastoa")."</option>";
+		$ulos .= "<option value = 'O' {$sel}>".t("Esivalitaan myyntitilaukselle k‰ytt‰j‰n oletusvarasto")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'siirtolistatyyppi') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3309,11 +3364,13 @@
 	if (mysql_field_name($result, $i) == 'seuraava_tuotenumero') {
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = $trow[$i] == 'K' ? 'selected' : '';
+		$sel = array();
+		$sel['K'] = $trow[$i] == 'K' ? 'selected' : '';
+		$sel['O'] = $trow[$i] == 'O' ? 'selected' : '';
 
 		$ulos .= "<option value = ''>".t("Ei ehdoteta seuraavaa vapaata tuotenumeroa tuotetta perustettaessa")."</option>";
-		$ulos .= "<option value = 'K' {$sel}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa")."</option>";
-		$ulos .= "<option value = 'O' {$sel}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa (vain ostotilauksella)")."</option>";
+		$ulos .= "<option value = 'K' {$sel['K']}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa")."</option>";
+		$ulos .= "<option value = 'O' {$sel['O']}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa (vain ostotilauksella)")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

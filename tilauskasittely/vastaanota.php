@@ -122,9 +122,7 @@
 				$bvarasto	= '';
 
 				// luetaan rivi tiedostosta..
-				$poista	  = array("'", "\\");
-				$rivi	  = str_replace($poista,"",$rivi);
-				$rivi	  = explode("\t", trim($rivi));
+				$rivi = explode("\t", pupesoft_cleanstring($rivi));
 
 				$tuoteno  = $rivi[0];
 				$varattu  = $rivi[1];
@@ -825,34 +823,28 @@
 		$result = pupe_query($query);
 		$row = mysql_fetch_array($result);
 
+		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+				<!--
+				$(document).ready(function(){
+					var taytasarake = function() {
+
+						var sarake_id = $(this).attr('id').replace('taytasarake_', '');
+						var teksti = $(this).val();
+
+						$('input[id^='+sarake_id+']').each(
+							function() {
+								$(this).val(teksti);
+								$(this).trigger('change');
+							}
+						);
+					};
+
+					$('input[id^=taytasarake_]').on('keyup change blur', taytasarake);
+				});
+				//-->
+				</script>";
+
 		echo "<table>";
-
-		echo "	<script language='javascript'>
-				function WriteText(sarake) {
-					var count = document.siirtolistaformi.elements.length;
-
-					for (j=0; j<count; j++) {
-						var element = document.siirtolistaformi.elements[j];
-
-						if(sarake == 't1' && element.name.substring(0,2) == 't1') {
-							element.value=document.siirtolistaformi.t1_kaikki.value;
-						}
-
-						if(sarake == 't2' && element.name.substring(0,2) == 't2') {
-							element.value=document.siirtolistaformi.t2_kaikki.value;
-						}
-
-						if(sarake == 't3' && element.name.substring(0,2) == 't3') {
-							element.value=document.siirtolistaformi.t3_kaikki.value;
-						}
-
-						if(sarake == 't4' && element.name.substring(0,2) == 't4') {
-							element.value=document.siirtolistaformi.t4_kaikki.value;
-						}
-					}
-				}
-			</script> ";
-
 		echo "<tr>";
 
 		for ($y=0; $y < mysql_num_fields($result)-1; $y++) {
@@ -1078,10 +1070,10 @@
 					echo "<input type='hidden' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxlength='5' size='5'>";
 				}
 				else {
-					echo "<td><input type='text' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxlength='5' size='5'></td>";
-					echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$privirow[t2]' maxlength='5' size='5'></td>";
-					echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$privirow[t3]' maxlength='5' size='5'></td>";
-					echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$privirow[t4]' maxlength='5' size='5'></td>";
+					echo "<td><input type='text' id='t1[$rivirow[tunnus]]' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxlength='5' size='5'></td>";
+					echo "<td><input type='text' id='t2[$rivirow[tunnus]]' name='t2[$rivirow[tunnus]]' value='$privirow[t2]' maxlength='5' size='5'></td>";
+					echo "<td><input type='text' id='t3[$rivirow[tunnus]]' name='t3[$rivirow[tunnus]]' value='$privirow[t3]' maxlength='5' size='5'></td>";
+					echo "<td><input type='text' id='t4[$rivirow[tunnus]]' name='t4[$rivirow[tunnus]]' value='$privirow[t4]' maxlength='5' size='5'></td>";
 
 					//Missä tuotetta on?
 					$query  = "	SELECT *
@@ -1146,10 +1138,10 @@
 
 		if ($toim != "MYYNTITILI") {
 			echo "<tr><td colspan='4' class='back' align='right' valign='center'>",t("Täytä kaikki kentät"),":</td>";
-			echo "<td><input type='text' name='t1_kaikki' onKeyUp='WriteText(\"t1\");' value='' maxlength='5' size='5'></td>";
-			echo "<td><input type='text' name='t2_kaikki' onKeyUp='WriteText(\"t2\");' value='' maxlength='5' size='5'></td>";
-			echo "<td><input type='text' name='t3_kaikki' onKeyUp='WriteText(\"t3\");' value='' maxlength='5' size='5'></td>";
-			echo "<td><input type='text' name='t4_kaikki' onKeyUp='WriteText(\"t4\");' value='' maxlength='5' size='5'></td>";
+			echo "<td><input type='text' id='taytasarake_t1' maxlength='5' size='5'></td>";
+			echo "<td><input type='text' id='taytasarake_t2' maxlength='5' size='5'></td>";
+			echo "<td><input type='text' id='taytasarake_t3' maxlength='5' size='5'></td>";
+			echo "<td><input type='text' id='taytasarake_t4' maxlength='5' size='5'></td>";
 			echo "</tr>";
 		}
 

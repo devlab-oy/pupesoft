@@ -740,6 +740,12 @@
 		$laskurow["tapvm"] = date("Y-m-d");
 		$laskurow["erpcm"] = date("Y-m-d");
 		$laskurow["kapvm"] = date("Y-m-d");
+		if ($laskurow["toim_nimi"] == '') {
+			$laskurow["toim_nimi"]   = $laskurow["nimi"];
+			$laskurow["toim_osoite"] = $laskurow["osoite"];
+			$laskurow["toim_postitp"] = $laskurow["postitp"];
+			$laskurow["toim_postino"] = $laskurow["postino"];
+		}
 
 		$alvrow = array(
 			'rivihinta'		 => 0,

@@ -656,7 +656,6 @@
 				echo "<td class='back'>
 						<form method='post' action='tilaus_myynti.php'>
 						<input type='hidden' name='toim' value='SIIRTOTYOMAARAYS'>
-						<input type='hidden' name='tee' value='AKTIVOI'>
 						<input type='hidden' name='tilausnumero' value='$row[tilaus]'>
 						<input type='submit' value='".t("Muokkaa")."'>
 						</form>

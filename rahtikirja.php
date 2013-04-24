@@ -439,8 +439,7 @@
 			$tee  = "";
 			$toim = "";
 			$id   = 0;
-			// karsee h‰kki mutta pit‰‰ sanoa, ett‰ from on laskutatilaus niin p‰‰st‰‰n takasin muokkaukseen
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tilauskasittely/tilaus_myynti.php?toim=$rahtikirjan_esisyotto&aktivoinnista=true&from=LASKUTATILAUS'>";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tilauskasittely/tilaus_myynti.php?toim=$rahtikirjan_esisyotto'>";
 		}
 	}
 

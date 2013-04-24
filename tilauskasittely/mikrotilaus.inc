@@ -70,9 +70,7 @@
 
 				while ($rivi = fgets($file)) {
 					// luetaan rivi tiedostosta..
-					$poista	 = array("'", "\\");
-					$rivi	 = str_replace($poista,"",$rivi);
-					$rivi	 = explode("\t", trim($rivi));
+					$rivi = explode("\t", pupesoft_cleanstring($rivi));
 
 					$excej = 0;
 					foreach ($rivi as $riv) {

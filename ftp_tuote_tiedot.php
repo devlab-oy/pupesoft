@@ -43,8 +43,10 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
 
 	// jos login ok kokeillaan uploadata
 	if ($login_result) {
-		$kokonimi = $dirri."/".$tiedostonnimi;
 
+		ftp_pasv($conn_id, true);
+
+		$kokonimi = $dirri."/".$tiedostonnimi;
 
 		if (!file_exists($kokonimi)) {
 			$handle = fopen("$kokonimi", "x");

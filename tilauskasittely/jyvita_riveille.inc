@@ -14,7 +14,7 @@
 		'T' = Alennus annetaan tuotteella aina
 */
 
-if(strpos($jysum, "%") !== false) {
+if (strpos($jysum, "%") !== false) {
 	$jysum = str_replace("%","", $jysum);
 	$anna_ea = "TOKI";
 }
@@ -32,7 +32,7 @@ else {
 	$hinta_riv2 = "tilausrivi.hinta";
 }
 
-//jos radiobutton verottomat hinnat on päällä ja yhtion parametri verolliset myyntihinnat
+// jos radiobutton verottomat hinnat on päällä ja yhtion parametri verolliset myyntihinnat
 // eli otetaan verot pois
 if ($tilausrivi_alvillisuus == 'E' and $yhtiorow['alv_kasittely'] == '') {
 	$hinta_riv .= " / (1 + (tilausrivi.alv / 100)) ";
@@ -171,32 +171,28 @@ else {
 
 			while ($tirow = mysql_fetch_array($result)) {
 				$uushinta = round($tirow['hinta'] * $jypro, $yhtiorow['hintapyoristys']);
+
 				$query = "UPDATE tilausrivi SET hinta = '$uushinta' WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tirow[tunnus]'";
 				$upresult = mysql_query($query) or pupe_error($query);
 			}
 
-			if ($jyvitetaan_ristiin == "X") {
-				$muutos_prosentti = $jysum / $tarow['koko_summa'];
-				$jysum = $tarow['koko_oma_summa'] * $muutos_prosentti;
+			//  Päivitetään laskulle hinta-kenttään syötetty summa, mutta vain siinä tapauksessa, että syötetty summa on verollinen.
+			if ($yhtiorow['alv_kasittely'] == '' or ($yhtiorow['alv_kasittely'] != '' and $jyvitetaan_ristiin == "X")) {
+				$query = "UPDATE lasku SET hinta = '$jysum' WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
+				$result = mysql_query($query) or pupe_error($query);
+
+				$laskurow["hinta"] = $jysum;
 			}
-
-			$jysum = round($jysum, 2);
-
-			//  Päivitetään laskulle hinta-kenttään syötetty summa
-			$query = "UPDATE lasku SET hinta = '$jysum' WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-
-			$laskurow["hinta"] = $jysum;
 		}
 	}
 }
 
-$jysum		= '';
-$tila		= '';
-$tee		= '';
-$kiekat 	= "";
-$summa 		= "";
-$anna_ea 	= "";
-$hinta		= "";
+$jysum	 = '';
+$tila	 = '';
+$tee	 = '';
+$kiekat  = "";
+$summa 	 = "";
+$anna_ea = "";
+$hinta	 = "";
 
 ?>

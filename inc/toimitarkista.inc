@@ -3,7 +3,7 @@
 if (!function_exists("toimitarkista")) {
 	function toimitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $toimtyyppi;
-		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_nimi, $tmp_ultilno_maa, $ytunnus_ind;
+		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_nimi, $tmp_ultilno_maa, $ytunnus_ind, $hetuok;
 
 		if ((mysql_field_name($result, $i) == "nimi") or
 			(mysql_field_name($result, $i) == "maa") or
@@ -115,7 +115,7 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if ((mysql_field_name($result, $i) == "ytunnus") and trim($t[$i])!='') {
+		if (mysql_field_name($result, $i) == "ytunnus" and trim($t[$i]) != '') {
 			$ytunnus = trim($t[$i]);
 			$ytunnus_ind = $i;
 
@@ -175,16 +175,17 @@ if (!function_exists("toimitarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "ovttunnus") {
-			if ($tmp_maakoodi=='FI') {
+			if ($tmp_maakoodi == 'FI') {
 
-				if (trim($t[$i]) == '') {
-					// täytetään ovttunnus jos sitä ei ole
+				if (trim($t[$i]) == '' and !isset($hetuok)) {
+					// täytetään ovttunnus jos sitä ei ole, eikä ytunnus oo henkilötunnus
 					$t[$i] = "0037".sprintf("%08d", preg_replace("/[^0-9]/", "", $tmp_ytunnus));
 				}
 
 				$query = "	SELECT ytunnus, tunnus
 							FROM toimi
 							WHERE yhtio	  = '$kukarow[yhtio]'
+							and ytunnus   = '$tmp_ytunnus'
 							and ovttunnus = '$t[$i]'
 							and tyyppi 	 != 'P'
 							and tunnus   != '$tunnus'";

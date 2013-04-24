@@ -141,6 +141,8 @@
 			$kirjoitin_tunnus = $print["printteri6"]; // Rahtikirja A4
 		}
 
+		$mediatyyppi = "";
+
 		if ($komento != "PDF_RUUDULLE") {
 			// haetaan printterille tulostuskomento
 			$query = "	SELECT *
@@ -151,6 +153,7 @@
 
 			$kirjoitin = $print['komento'];
 			$merkisto  = $print['merkisto'];
+			$mediatyyppi = $print['mediatyyppi'];
 		}
 
 		$pvm = date("j.n.Y");
@@ -685,7 +688,7 @@
 				////ja $rivi:stä ytunnus
 				//
 				// muuttujat:
-				// otunnukset, pvm, rahdinmaksaja, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
+				// otunnukset, pvm, rahdinmaksaja, toimitustapa, kollityht, kilotyht, kuutiotyht, kirjoitin
 				// jv tapauksissa on myös aputeksti, rahtihinta, rahdinhinta, yhteensa, summa, jvhinta, jvtext, lasno ja viite muuttujat
 				// rtunnus jossa on uniikki numero
 				//

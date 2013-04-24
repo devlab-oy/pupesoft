@@ -645,7 +645,7 @@
 			$karhuja = (int) $karhuja;
 
             // Halutaanko vain luottovakuutetut asiakkaat
-            $luottovakuutuslisa = ($luottovakuutettu == "K") ? " asiakas.luottovakuutettu = 'K' " : "";
+            $luottovakuutuslisa = ($luottovakuutettu == "K") ? " and asiakas.luottovakuutettu = 'K' " : "";
 
 			if ($karhuja > 0) {
 

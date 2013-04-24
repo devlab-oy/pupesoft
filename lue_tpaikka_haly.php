@@ -43,35 +43,38 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $korjataan ==
 
 	if ($tuvarasto== '') {
 		$korjataan = '';
-		echo "<font class='error'>".t("Et ole valinnut varastoa")."!!!!!<br><br></font>";
+		echo "<font class='error'>".t("Et ole valinnut varastoa")."!<br><br></font>";
 	}
 }
 
 if ($korjataan != '') {
 
-	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-			<!--
-
-			function fill_all(tcolumn, tfield) {
-
-				var formi = document.getElementById(tfield).form;
-
-				for (var elementIdx=0; elementIdx<formi.elements.length; elementIdx++) {
-					if (formi.elements[elementIdx].type == 'text' && formi.elements[elementIdx].name.substring(0,8) == tcolumn) {
-						formi.elements[elementIdx].value = document.getElementById(tfield).value;
-					}
-				}
-			}
-
-			//-->
-			</script>";
-
-
 	$countti = count($tuoteno);
 	$korj = 0;
 	$paikkasyot = 0;
 
-	echo "<table><form method='post'>";
+	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+			<!--
+			$(document).ready(function(){
+				var taytasarake = function() {
+
+					var sarake_id = $(this).attr('id').replace('taytasarake_', '');
+					var teksti = $(this).val();
+
+					$('input[id^='+sarake_id+']').each(
+						function() {
+							$(this).val(teksti);
+							$(this).trigger('change');
+						}
+					);
+				};
+
+				$('input[id^=taytasarake_]').on('keyup change blur', taytasarake);
+			});
+			//-->
+			</script>";
+
+	echo "<form method='post'><table>";
 
 	for ($id = 0; $id < $countti; $id++) {
 		$error = '';
@@ -100,6 +103,7 @@ if ($korjataan != '') {
 				else {
 					$oletus = '';
 				}
+
 				$query = "	INSERT INTO tuotepaikat SET
 							yhtio 		= '$kukarow[yhtio]',
 							tuoteno 	= '$tuoteno[$id]',
@@ -132,7 +136,7 @@ if ($korjataan != '') {
 				$korjres = pupe_query($query);
 			}
 			else {
-				$error ="<font class='error'>".t("Antamasi varastopaikka ei ole k‰sitelt‰v‰ss‰ varastossa")."</font>";
+				$error = "<font class='error'>".t("Antamasi varastopaikka ei ole k‰sitelt‰v‰ss‰ varastossa")."</font>";
 			}
 		}
 
@@ -155,8 +159,9 @@ if ($korjataan != '') {
 			$korj++;
 
 			if ($korj== 1) {
-				echo "<tr><th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("H‰lytysraja")."</th><th>".t("Tilausm‰‰r‰")."</th><th>".t("Huomautus")."</th><th>".t("Paikka")."</th>";
+				echo "<tr><th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("H‰lytysraja")."</th><th>".t("Tilausm‰‰r‰")."</th><th>".t("Huomautus")."</th><th>".t("Paikka")."</th></tr>";
 			}
+
 			echo "<tr><td>$id $tuoteno[$id]</td>";
 
 			$query = "	SELECT tuoteno, nimitys
@@ -182,10 +187,10 @@ if ($korjataan != '') {
 						<input type='hidden' name='tilattava[$id]' value='$tilattava[$id]'>
 						<input type='hidden' name='rivipaikka[$id]' value=''>
 						<input type='hidden' name='uusipaikka[$id]' value='uusi'>
-						",hyllyalue("hyllyalue[{$id}]", $hyllyalue[$id]),"
-						<input type='text' name='hyllynro[$id]' value='$hyllynro[$id]' maxlength='2' size='2'>
-						<input type='text' name='hyllyvali[$id]' value='$hyllyvali[$id]' maxlength='2' size='2'>
-						<input type='text' name='hyllytaso[$id]' value='$hyllytaso[$id]' maxlength='2' size='2'></td>";
+						",hyllyalue("hyllyalue[$id]", $hyllyalue[$id]),"
+						<input type='text' id='hyllynro[$id]'  name='hyllynro[$id]'  value='$hyllynro[$id]'  maxlength='2' size='2'>
+						<input type='text' id='hyllyvali[$id]' name='hyllyvali[$id]' value='$hyllyvali[$id]' maxlength='2' size='2'>
+						<input type='text' id='hyllytaso[$id]' name='hyllytaso[$id]' value='$hyllytaso[$id]' maxlength='2' size='2'></td>";
 
 				$paikkasyot++;
 			}
@@ -199,8 +204,8 @@ if ($korjataan != '') {
 			if ($rivipaikka[$id]== '') {
 				$korj++;
 
-				if ($korj== 1) {
-					echo "<tr><th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("H‰lytysraja")."</th><th>".t("Tilausm‰‰r‰")."</th><th>".t("Huomautus")."</th><th>".t("Paikka")."</th>";
+				if ($korj == 1) {
+					echo "<tr><th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("H‰lytysraja")."</th><th>".t("Tilausm‰‰r‰")."</th><th>".t("Huomautus")."</th><th>".t("Paikka")."</th></tr>";
 				}
 
 				echo "<tr><td>$id $tuoteno[$id]</td>";
@@ -233,6 +238,7 @@ if ($korjataan != '') {
 				else {
 					echo "<td></td><td></td><td>".t("TUOTENUMERO EI L÷YDY VAIKKA TUOTEPAIKKA ON")."!!!</td><td></td>";
 				}
+
 				echo "</tr>";
 			}
 			else {
@@ -267,22 +273,23 @@ if ($korjataan != '') {
 		}
 	}
 
-	echo "<input type='hidden' name='korjataan' value='ok'>";
-	echo "<input type='hidden' name='tuvarasto' value='$tuvarasto'>";
-
 	if ($korj > 0) {
 		if ($paikkasyot > 0) {
 			echo "<tr>
 					<td colspan='5' class='spec' align='right'>".t("Syˆt‰ paikat kaikille riveille")."</td><td>
-					<input type='text' id='kpl_js' onKeyUp='fill_all(\"hyllyalu\", \"kpl_js\");' size='3'>
-					<input type='text' id='var_js' onKeyUp='fill_all(\"hyllynro\", \"var_js\");' size='2'>
-					<input type='text' id='hin_js' onKeyUp='fill_all(\"hyllyval\", \"hin_js\");' size='2'>
-					<input type='text' id='ale_js' onKeyUp='fill_all(\"hyllytas\", \"ale_js\");' size='2'></td></tr>";
+					<input type='text' id='taytasarake_hyllyalue' size='6'>
+					<input type='text' id='taytasarake_hyllynro'  size='2'>
+					<input type='text' id='taytasarake_hyllyvali' size='2'>
+					<input type='text' id='taytasarake_hyllytaso' size='2'></td></tr>";
 
 		}
 
-		echo "<tr><td class='back'><input type='submit' value='".t("Jatka")."'></td></tr>";
-		echo "</form></table><br><br><br>";
+		echo "</table><br>";
+
+		echo "<input type='hidden' name='korjataan' value='ok'>";
+		echo "<input type='hidden' name='tuvarasto' value='$tuvarasto'>";
+		echo "<input type='submit' value='".t("Jatka")."'>";
+		echo "</form><br><br><br>";
 	}
 	else {
 		echo "<font class='message'>".t("Valmista tuli, kaikki rivit ajettu")."<br><br></font>";

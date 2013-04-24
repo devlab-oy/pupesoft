@@ -209,6 +209,7 @@
 			$ruk100chk 				= "";
 			$ruk110chk 				= "";
 			$nimchk   				= "";
+			$mitatchk				= "";
 			$katchk   				= "";
 			$nettokatchk			= "";
 			$tarchk   				= "";
@@ -243,6 +244,7 @@
 			if ($ruksit[140] != '')			$ruk140chk 				= "CHECKED";
 
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
+			if ($mitat != '')				$mitatchk				= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
 			if ($nettokateprossat != '')	$nettokatchk			= "CHECKED";
 			if ($osoitetarrat != '') 		$tarchk   				= "CHECKED";
@@ -418,6 +420,10 @@
 				<tr>
 				<th>",t("Näytä tuotteiden nimitykset"),"</th>
 				<td colspan='3'><input type='checkbox' name='nimitykset' {$nimchk}></td>
+				<td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
+				</tr>
+				<th>",t("Näytä tuotteiden mittatiedot"),"</th>
+				<td colspan='3'><input type='checkbox' name='mitat' {$mitatchk}></td>
 				<td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
 				</tr>
 				<tr>
@@ -1046,19 +1052,23 @@
 					}
 
 					if ($mukaan == "tuote") {
-						if ($nimitykset == "") {
-							$group .= ",tuote.tuoteno";
-							$select .= "tuote.tuoteno tuoteno, ";
-							if (strpos($select, "'tuotelista',") === FALSE) $select .= "concat('\'',tuote.tuoteno,'\'') 'tuotelista', ";
-							$order  .= "tuote.tuoteno,";
+
+						$group .= ",tuote.tuoteno";
+						$select .= "tuote.tuoteno tuoteno, ";
+						if (strpos($select, "'tuotelista',") === FALSE) $select .= "concat('\'',tuote.tuoteno,'\'') 'tuotelista', ";
+						$order  .= "tuote.tuoteno,";
+						$gluku++;
+
+						if ($nimitykset != "") {
+							$group .= ",tuote.nimitys";
+							$select .= "tuote.nimitys nimitys, ";
 							$gluku++;
 						}
-						else {
-							$group .= ",tuote.tuoteno, tuote.nimitys";
-							$select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
-							if (strpos($select, "'tuotelista',") === FALSE) $select .= "concat('\'',tuote.tuoteno,'\'') 'tuotelista', ";
-							$order  .= "tuote.tuoteno,";
-							$gluku++;
+
+						if ($mitat != "") {
+							$group .= ",tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.tuotemassa";
+							$select .= "tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.tuotemassa, ";
+							$gluku += 4;
 						}
 
 						if ($varastonarvo != '') {

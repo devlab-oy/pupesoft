@@ -582,8 +582,7 @@
 									and liitos 		= '$jrow[tunnus]'
 									and kieli 		= '$ahrow[kieli]'
 									and laji 		= '$ahrow[laji]'
-									and puun_tunnus = '$ahrow[puun_tunnus]'
-									and jarjestys 	= '$ahrow[jarjestys]'";
+									and puun_tunnus = '$ahrow[puun_tunnus]'";
 						$tarkesult = pupe_query($tarksql);
 						$ahy = mysql_num_rows($tarkesult);
 
@@ -669,19 +668,27 @@
 
 	require ("tilauskasittely/monivalintalaatikot.inc");
 
-	$kentat    = "asiakas.ytunnus::asiakas.ytunnus::asiakas.nimi::asiakas.osoite::asiakas.postino::asiakas.asiakasnro::asiakas.toim_postino";
+	$kentat    = "asiakas.ytunnus::asiakas.ytunnus::asiakas.nimi>>asiakas.toim_nimi::asiakas.osoite>>asiakas.toim_osoite::asiakas.postino>>asiakas.toim_postino::asiakas.postitp>>asiakas.toim_postitp::asiakas.asiakasnro";
 	$jarjestys = 'ytunnus, nimi, selaus, tunnus';
 
 	$array = explode("::", $kentat);
 	$count = count($array);
-
+	
 	for ($i = 0; $i <= $count; $i++) {
 		if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
-			$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
-			$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+			if ($array[$i] == "asiakas.ytunnus" || $array[$i] == "asiakas.asiakasnro") {
+				$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+				$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+			}else{
+				$toimlisa = explode(">>", $array[$i]);
+				$lisa .= " and (" . $toimlisa[0] . " like '%" . $haku[$i] . "%'";
+				$lisa .= " or " . $toimlisa[1] . " like '%" . $haku[$i] . "%')";
+				$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+			}
 		}
+		
 	}
-
+	
 	if (strlen($ojarj) > 0) {
 		$jarjestys = $ojarj;
 	}

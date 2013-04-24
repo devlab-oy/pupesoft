@@ -286,7 +286,7 @@
 
 			if ($valitse == 'asn') {
 				$kolli = mysql_real_escape_string($kolli);
-				$wherelisa = "AND paketintunniste = '{$kolli}'";
+				$wherelisa = "AND paketintunniste != '' AND paketintunniste = '{$kolli}'";
 			}
 			else {
 				$wherelisa = "AND asn_numero = '".mysql_real_escape_string($lasku)."'";
@@ -2091,7 +2091,7 @@
 						AND asn_sanomat.laji = 'tec'
 						AND asn_sanomat.status NOT IN ('X', 'E', 'D')
 						GROUP BY asn_sanomat.asn_numero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
-						ORDER BY toimi.nimi, toimi.ytunnus, asn_sanomat.saapumispvm";
+						ORDER BY toimi.nimi, toimi.ytunnus, asn_sanomat.saapumispvm, asn_sanomat.asn_numero";
 			$result = pupe_query($query);
 
 			echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse=ostolasku&tee=' id='formi'>";
@@ -2123,7 +2123,6 @@
 						echo "<input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' />&nbsp;";
 					}
 
-					echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$ed_tilausnumero}' value='",t("Poista"),"' /></span>";
 					echo "</th></tr>";
 					echo "<tr><td class='back' colspan='7'>&nbsp;</td></tr>";
 				}
@@ -2138,6 +2137,7 @@
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
 				echo "<td class='back'>";
 				echo "<input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' />";
+				echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$row['tilausnumero']}' value='",t("Poista"),"' /></span>";
 				echo "</td>";
 				echo "</tr>";
 
@@ -2155,7 +2155,6 @@
 				echo "<input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' />&nbsp;";
 			}
 
-			echo "<span style='float:right;'><input type='button' class='poistabutton' id='{$ed_tilausnumero}' value='",t("Poista"),"' /></span>";
 			echo "</th></tr>";
 
 			echo "</table>";

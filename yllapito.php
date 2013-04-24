@@ -976,7 +976,7 @@
 				}
 			}
 			elseif (trim($array[$i]) == 'ytunnus' and !$tarkkahaku) {
-				$lisa .= " and REPLACE({$array[$i]}, '-', '') like '%".str_replace('-', '', $haku[$i])."%' ";
+				$lisa .= " and REPLACE(REPLACE({$array[$i]}, '-', ''), '+', '') like '%".str_replace(array('-','+'), '', $haku[$i])."%' ";
 			}
 			elseif ($from == "yllapito" and $toim == "tuotteen_toimittajat_tuotenumerot" and trim($array[$i]) == "tuoteno") {
 				$lisa .= " and toim_tuoteno_tunnus {$hakuehto} ";

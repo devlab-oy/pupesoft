@@ -64,19 +64,16 @@
 					round(sum(rivihinta), 2) summa,
 					count(distinct(lasku.tunnus)) laskuja
 					FROM lasku USE INDEX (yhtio_tila_tapvm)
-					JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio
-						AND tilausrivi.uusiotunnus = lasku.tunnus)
-					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
-						AND tuote.tuoteno = tilausrivi.tuoteno
-						AND tuote.tuoteno != '{$yhtiorow["ennakkomaksu_tuotenumero"]}')
-					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
-						AND lasku.liitostunnus = asiakas.tunnus)
+					JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus)
+					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuoteno != '{$yhtiorow["ennakkomaksu_tuotenumero"]}')
+					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND lasku.liitostunnus = asiakas.tunnus)
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila = 'U'
 					AND lasku.alatila = 'X'
 					AND lasku.tapvm >= '$alkupvm'
 					AND lasku.tapvm <= '$loppupvm'
 					AND lasku.vienti = 'E'
+					and lasku.tilaustyyppi != '9'
 					GROUP BY 1, 2, 3, 4";
 		$result = pupe_query($query);
 

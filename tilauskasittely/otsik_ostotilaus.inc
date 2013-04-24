@@ -280,12 +280,13 @@
 
 			$query  = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND tyyppi != 'P'
 						ORDER BY tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
 
 			while ($varow = mysql_fetch_array($vares)) {
-				if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"])) {
+				if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"]) or ($varow['tunnus']==$srow["varasto"])) {
 
 					$sel = '';
 					// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se

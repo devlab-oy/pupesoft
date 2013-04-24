@@ -51,6 +51,8 @@
 								and toim_postino	= '$myytilrow[toim_postino]'
 								and toim_postitp	= '$myytilrow[toim_postitp]'
 								and toim_maa		= '$myytilrow[toim_maa]'
+								and toimaika		= '$myytilrow[toimaika]'
+								and kerayspvm		= '$myytilrow[kerayspvm]'
 								and viesti			= '$viesti'
 								and left(luontiaika,10) = left(now(),10)
 								and laatija 		= '$kukarow[kuka]'";
@@ -88,6 +90,10 @@
 						$toim_postino		= $myytilrow['toim_postino'];
 						$toim_postitp		= $myytilrow['toim_postitp'];
 						$toim_maa			= $myytilrow['toim_maa'];
+
+						if ($yhtiorow["kerataanko_valmistukset"] == "E" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON")) {
+							$eilahe = 'CHECKED';
+						}
 
 						list($toimvv, $toimkk, $toimpp) = explode('-', $myytilrow["toimaika"]);
 						list($kervv, $kerkk, $kerpp)    = explode('-', $myytilrow["kerayspvm"]);

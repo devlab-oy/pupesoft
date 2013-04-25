@@ -12019,6 +12019,12 @@ if (!function_exists("laskutuspaiva")) {
 	}
 }
 
+if (!function_exists("pupe_DataTablesEchoSort")) {
+	function pupe_DataTablesEchoSort($string) {
+		return "<span class='dataTablesSpecial'><!--".sprintf("%015s", $string)."--></span>";
+	}
+}
+
 if (!function_exists("pupe_DataTables")) {
 	function pupe_DataTables($parametrit) {
 		global $yhtiorow;
@@ -12052,26 +12058,42 @@ if (!function_exists("pupe_DataTables")) {
 
 				var datatablesit = [];
 				var parametrit 	 = ".json_encode($json_pass).";
+				var spessusortit = [];
 
 				// Loopataan läpi kaikki datatablesit
 				$('.dataTable').each(function(t) {
 
 					var tableid = $(this).attr(\"id\");
+					var sarake  = 0;
+
+					// Käydään läpi ne sarakkeet jossa on kutsuttu pupe_DataTablesEchoSort-funkkaria
+					$('#'+tableid+' > tbody > tr:first-child > td').each(function() {
+						if ($(this).children('span.dataTablesSpecial').length > 0) {
+							spessusortit[sarake] = true;
+						}
+						else {
+							spessusortit[sarake] = false;
+						}
+						sarake++;
+					});
 
 					var aoColumns = [];
 
 					for (var i = 1; i <= parametrit[tableid][0]; i++) {
 						// Keikalla eka sarake on kohdistusnappula....
 						if (i == 1 && tableid == \"keikka\") {
-							aoColumns[i-1] = \"{\\\"bSortable\\\": false, \\\"bSearchable\\\": false, \\\"sWidth\\\": 20px}\";
+							aoColumns[i-1] = {\"bSortable\": false, \"bSearchable\": false, \"sWidth\": \"20px\"};
+						}
+						else if (spessusortit[i-1]) {
+							aoColumns[i-1] = {\"bSortable\": true, \"bSearchable\": true, \"sType\": \"string\"};
 						}
 						else {
-							aoColumns[i-1] = \"{\\\"bSortable\\\": true, \\\"bSearchable\\\": true}\";
+							aoColumns[i-1] = {\"bSortable\": true, \"bSearchable\": true};
 						}
 					}
 
 					for (var i = parametrit[tableid][0]+1; i <= parametrit[tableid][1]; i++) {
-						aoColumns[i-1] = \"{\\\"bSortable\\\": false, \\\"bSearchable\\\": false}\";
+						aoColumns[i-1] = {\"bSortable\": false, \"bSearchable\": false};
 					}
 
 					datatablesit[t] = $(this).dataTable( {
@@ -12106,7 +12128,6 @@ if (!function_exists("pupe_DataTables")) {
 								var minsat1 = 0;
 								var tunnit2 = 0;
 								var minsat2 = 0;
-
 
 								for (var i=iStart; i<iEnd; i++) {
 									puperegexp = new RegExp(\"<span class=\\\"yhteensa\\\">(.*)<\\/span>\");

@@ -286,19 +286,13 @@
 
 	if ($id > 0 and $tunnukset != "") {
 
-		$vakquery = "	SELECT IFNULL(group_concat(DISTINCT tuote.tuoteno), '') vaktuotteet_imdg
+		$vakquery = "	SELECT 
+						IFNULL(group_concat(DISTINCT if(tuote.vakkoodi not in ('','0'), tuote.vakkoodi, null)), '') vaktuotteet,
+						IFNULL(group_concat(DISTINCT if(tuote.vak_imdg_koodi not in ('','0'), tuote.vak_imdg_koodi, null)), '') vaktuotteet_imdg
 						FROM tilausrivi
-						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vak_imdg_koodi not in ('','0'))
-						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-						AND tilausrivi.otunnus IN ({$tunnukset})
-						AND tilausrivi.tyyppi IN ('L','G')
-						AND tilausrivi.var NOT IN ('P', 'J')";
-		$vakresult = pupe_query($vakquery);
-		$vakimdgrow = mysql_fetch_assoc($vakresult);
-
-		$vakquery = "	SELECT ifnull(group_concat(DISTINCT tuote.tuoteno), '') vaktuotteet
-						FROM tilausrivi
-						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi not in ('','0'))
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio 
+							AND tuote.tuoteno = tilausrivi.tuoteno 
+							AND (tuote.vakkoodi not in ('','0') OR tuote.vak_imdg_koodi not in ('','0')))
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus IN ({$tunnukset})
 						AND tilausrivi.tyyppi IN ('L','G')
@@ -3099,7 +3093,7 @@
 				echo "</select> ".t("Kpl").": <input type='text' size='4' name='termoslappkpl' value='$termoslappkpl'></td></tr>";
 			}
 
-			if ($vakimdgrow['vaktuotteet_imdg'] != '') {
+			if ($vakrow['vaktuotteet_imdg'] != '') {
 
 				echo "<tr><th>",t("DGD-lomake"),":</th><td>";
 				echo "<select name='rakirsyotto_dgd_tulostin'>";

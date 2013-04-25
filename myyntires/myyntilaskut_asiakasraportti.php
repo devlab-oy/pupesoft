@@ -605,6 +605,22 @@
 				echo "<th valign='top'>".t("Korkolasku")."<br>".t("pvm")."</th>";
 				echo "<th valign='top'>".t("Osasuoritukset")."</th>";
 				echo "</tr>";
+
+				echo "<tr>
+				<td><input type='text' class='search_field' name='search_Laskunro'></td>
+				<td><input type='text' class='search_field' name='search_Pvm'></td>
+				<td><input type='text' class='search_field' name='search_Erapaiva'></td>
+				<td><input type='text' class='search_field' name='search_Summa'></td>
+				<td><input type='text' class='search_field' name='search_Avoinsumma'></td>
+				<td><input type='text' class='search_field' name='search_Kale1'></td>
+				<td><input type='text' class='search_field' name='search_Kale2'></td>
+				<td><input type='text' class='search_field' name='search_Mapvm'></td>
+				<td><input type='text' class='search_field' name='search_Ika'></td>
+				<td><input type='text' class='search_field' name='search_Korko'></td>
+				<td><input type='text' class='search_field' name='search_Korkolasku'></td>
+				<td><input type='text' class='search_field' name='search_Osasuor'></td>
+				</tr>";
+
 				echo "</thead>";
 
 				echo "<tbody>";

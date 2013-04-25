@@ -336,7 +336,7 @@
 								$query .= "vanhatunnus='',";
 							}
 						}
-						
+
 						// nämä kentät tyhjennetään aina
 						elseif ($fieldname == 'kapvm' or
 								$fieldname == 'tapvm' or
@@ -596,10 +596,10 @@
 							}
 							$rivitres = pupe_query($query);
 							$lisataanrow = mysql_fetch_assoc($rivitres);
-							
+
 							// jos maksupositioilla tehty jälkitoimitustilaus, laitetaan uudelle riville kanssa jaksotettu, jotta löydetään maksusopimuksissa tämä ja ei anneta loppulaskuttaa liian aikaisin.
 							$jaksotettu = $lisataanrow['jaksotettu'];
-							
+
 							if ($toim == "ENNAKKO") {
 								$lisataanrow_kpl = round($lisataanrow["varattu"] * $isa_kerroin,2);
 							}
@@ -891,7 +891,7 @@
 													$values .= "";
 													break;
 												case 'positio':
-													if ($kukarow['extranet'] != '' and $tilaus_on_jo == "KYLLA") {
+													if (($kukarow['extranet'] != '' or $yhtiorow['jt_muiden_mukana'] == 'E') and $tilaus_on_jo == "KYLLA") {
 														$kysely .= "positio='JT',";
 													}
 													else {

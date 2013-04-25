@@ -286,11 +286,21 @@
 
 	if ($id > 0 and $tunnukset != "") {
 
+		$vakquery = "	SELECT IFNULL(group_concat(DISTINCT tuote.tuoteno), '') vaktuotteet_imdg
+						FROM tilausrivi
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vak_imdg_koodi not in ('','0'))
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus IN ({$tunnukset})
+						AND tilausrivi.tyyppi IN ('L','G')
+						AND tilausrivi.var NOT IN ('P', 'J')";
+		$vakresult = pupe_query($vakquery);
+		$vakimdgrow = mysql_fetch_assoc($vakresult);
+
 		$vakquery = "	SELECT ifnull(group_concat(DISTINCT tuote.tuoteno), '') vaktuotteet
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi not in ('','0'))
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						AND tilausrivi.otunnus IN ($tunnukset)
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus IN ({$tunnukset})
 						AND tilausrivi.tyyppi IN ('L','G')
 						AND tilausrivi.var NOT IN ('P', 'J')";
 		$vakresult = pupe_query($vakquery);
@@ -3089,26 +3099,27 @@
 				echo "</select> ".t("Kpl").": <input type='text' size='4' name='termoslappkpl' value='$termoslappkpl'></td></tr>";
 			}
 
-			if ($vakrow['vaktuotteet'] != '') {
+			if ($vakimdgrow['vaktuotteet_imdg'] != '') {
 
-				echo "<tr><th>".t("DGD-lomake").":</th><td>";
+				echo "<tr><th>",t("DGD-lomake"),":</th><td>";
 				echo "<select name='rakirsyotto_dgd_tulostin'>";
-				echo "<option value=''>".t("Ei tulosteta")."</option>";
+				echo "<option value=''>",t("Ei tulosteta"),"</option>";
 
 				while ($kirrow = mysql_fetch_assoc($kirre)) {
-					$sel = "";
-					if ($kirrow['tunnus'] == $rakirsyotto_dgd_tulostin) {
-						$sel = "SELECTED";
-					}
 
-					echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
+					$sel = $kirrow['tunnus'] == $rakirsyotto_dgd_tulostin ? "selected" : "";
+
+					echo "<option value='{$kirrow['tunnus']}' {$sel}>{$kirrow['kirjoitin']}</option>";
 				}
+
 				mysql_data_seek($kirre, 0);
 
 				if (!isset($dgdkpl)) $dgdkpl = 1;
 
-				echo "</select> ".t("Kpl").": <input type='text' size='4' name='dgdkpl' value='$dgdkpl'></td></tr>";
+				echo "</select> ",t("Kpl"),": <input type='text' size='4' name='dgdkpl' value='{$dgdkpl}'></td></tr>";
+			}
 
+			if ($vakrow['vaktuotteet'] != '') {
 				echo "<tr><td class='back'><font class='info'>",t("Tulosta myös yleisrahtikirja"),"<br/>",t("VAK-postipaketille"),":</font></td>";
 			    echo "<td class='back'><input type='checkbox' name='tulosta_vak_yleisrahtikirja' id='tulosta_vak_yleisrahtikirja'></td></tr>";
 			}

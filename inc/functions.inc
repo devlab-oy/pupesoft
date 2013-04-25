@@ -16749,6 +16749,7 @@ if (!function_exists("tee_keraysera")) {
 							}
 							else {
 								// Yhtään erää ei mahtunut....
+								unset($kaytettavat_pakkaukset[$kaytettava_pakkaus][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']]);
 								$ii--;
 								break;
 							}

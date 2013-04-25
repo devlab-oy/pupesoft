@@ -291,7 +291,7 @@
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi not in ('','0'))
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						AND tilausrivi.otunnus IN ($tunnukset)
-						AND tilausrivi.tyyppi = 'L'
+						AND tilausrivi.tyyppi IN ('L','G')
 						AND tilausrivi.var NOT IN ('P', 'J')";
 		$vakresult = pupe_query($vakquery);
 		$vakrow = mysql_fetch_assoc($vakresult);

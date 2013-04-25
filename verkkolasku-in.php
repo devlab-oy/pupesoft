@@ -21,6 +21,14 @@
 
 		if (php_sapi_name() == 'cli') {
 			$php_cli = TRUE;
+
+			// otetaan includepath aina rootista
+			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
+			error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+			ini_set("display_errors", 0);
+
+			// otetaan tietokantayhteys
+			require ("inc/connect.inc");
 		}
 
 		// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ss‰
@@ -45,13 +53,7 @@
 		touch("/tmp/##verkkolasku-in.lock");
 
 		if ($php_cli) {
-			// Komentorivilt‰
-			// otetaan includepath aina rootista
-			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
-			error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
-			ini_set("display_errors", 0);
-
-			require ("inc/connect.inc"); // otetaan tietokantayhteys
+			// Ei tehd‰ mit‰‰n. T‰ll‰set iffit on sit‰ parasta koodia.
 		}
 		elseif (strpos($_SERVER['SCRIPT_NAME'], "tiliote.php") !== FALSE and $verkkolaskut_in != "" and $verkkolaskut_ok != "" and $verkkolaskut_orig != "" and $verkkolaskut_error != "") {
 			//Pupesoftista

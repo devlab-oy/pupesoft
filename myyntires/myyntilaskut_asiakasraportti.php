@@ -7,6 +7,9 @@
 		$nayta_pdf = 1;
 	}
 
+	// DataTables p‰‰lle
+	$pupe_DataTables = "astilmyrerap";
+
 	require ("../inc/parametrit.inc");
 
 	if ((isset($tiliote) and $tiliote == '1') or (!empty($tee) and $tee == 'TULOSTA_EMAIL' and !empty($asiakasid))) {
@@ -76,7 +79,6 @@
 	if (!isset($tila)) $tila = "";
 	if (!isset($asiakasid)) $asiakasid = 0;
 	if (!isset($savalkoodi)) $savalkoodi = "";
-	if (!isset($valuutassako)) $valuutassako = "";
 	if (!isset($valintra)) $valintra = "";
 
 	if ($tee == "") {
@@ -183,7 +185,7 @@
 							}
 
 							$('#tulosta_lasku_email').submit();
-						});
+					});
 
 					});
 
@@ -503,50 +505,6 @@
 				echo "<br>$naama<br>$nopeushtml</td>";
 				echo "</tr></table><br>";
 
-				//avoimet laskut
-				$kentat = 'laskunro, tapvm, erpcm, summa, avoinsumma, kapvm, kasumma, mapvm, ika, korko, olmapvm, tunnus';
-				$kentankoko = array(7,8,8,10,10,8,8,8,4,5,8);
-
-				$lisa = "";
-				$havlisa = "";
-				$ulisa = "";
-				$ojarj = "";
-
-				$array = explode(",", $kentat);
-				$count = count($array);
-
-				for ($i=0; $i<=$count; $i++) {
-					// tarkastetaan onko hakukent‰ss‰ jotakin
-					if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
-						if (trim($array[$i]) == "ika") {
-							$havlisa .= " and abs(ika) = '$haku[$i]'";
-						}
-						elseif (trim($array[$i]) == "avoinsumma" OR trim($array[$i]) == "korko") {
-							$havlisa .= " and ".$array[$i]." like '%".$haku[$i]."%'";
-						}
-						else {
-							$lisa .= " and ".$array[$i]." like '%".$haku[$i]."%'";
-						}
-
-						$ulisa .= "&haku[".$i."] = ".$haku[$i];
-					}
-					else {
-						$haku[$i] = "";
-					}
-				}
-
-				if ($havlisa != "") {
-					$havlisa = "HAVING ".substr($havlisa, 5);
-				}
-
-
-				if (strlen($ojarj) > 0) {
-					$jarjestys = $array[$ojarj];
-				}
-				else{
-					$jarjestys = 'erpcm';
-				}
-
 				//n‰ytet‰‰nkˆ maksetut vai avoimet
 				$chk1 = $chk2 = $chk3 = $chk4 = '';
 
@@ -567,17 +525,9 @@
 					$mapvmlisa = " and mapvm = '0000-00-00' ";
 				}
 
-				if ($valuutassako == 'V') {
-					$chk4 = "SELECTED";
-				}
-
 				if ($savalkoodi != "") {
 					$salisa = " and lasku.valkoodi='$savalkoodi' ";
 				}
-
-                if (!isset($jarjestys_suunta) or $jarjestys_suunta != "desc") {
-                    $jarjestys_suunta = "asc";
-                }
 
 				$query = "	SELECT laskunro, tapvm, erpcm,
 							summa loppusumma,
@@ -599,13 +549,11 @@
 							and liitostunnus in ($tunnukset)
 							and tapvm > '0000-00-00'
 							$mapvmlisa
-							$lisa
 							$salisa
-							$havlisa
-							ORDER BY $jarjestys $jarjestys_suunta";
+							ORDER BY laskunro desc";
 				$result = pupe_query($query);
 
-				echo "<form action = '?ojarj=".$ojarj.$ulisa."' method = 'post'>
+				echo "<br><form action = 'myyntilaskut_asiakasraportti.php' method = 'post'>
 						<input type='hidden' name = 'tila' value='$tila'>
 						<input type='hidden' name = 'ytunnus' value = '$ytunnus'>
 						<input type='hidden' name = 'asiakasid' value = '$asiakasid'>
@@ -653,41 +601,49 @@
 
 				echo "<form method = 'post'>
 						<input type='hidden' name = 'tila' value='$tila'>
-						<input type='hidden' name = 'ojarj' value='$ojarj'>
-						<input type='hidden' name = 'jarjestys_suunta' value='$jarjestys_suunta'>
 						<input type='hidden' name = 'ytunnus' value = '$ytunnus'>
 						<input type='hidden' name = 'asiakasid' value = '$asiakasid'>
 						<input type='hidden' name = 'valintra' value = '$valintra'>
-						<input type='hidden' name = 'valuutassako' value = '$valuutassako'>
 						<input type='hidden' name = 'savalkoodi' value = '$savalkoodi'>
 						<input type='hidden' name = 'alatila' value = '$alatila'>
 						<input type='hidden' name = 'lopetus' value = '$lopetus'>";
 
-                $jarjestys_suunta = ($jarjestys_suunta == "asc") ? "desc" : "asc";
+				pupe_DataTables(array(array($pupe_DataTables, 12, 12, false, false)));
 
-				echo "<table>";
+				echo "<table class='display dataTable' id='$pupe_DataTables'><thead>";
 				echo "<tr>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=0&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Laskunro")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=1&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=2&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Er‰p‰iv‰")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=3&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Summa")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=4&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Avoinsaldo")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=5&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=6&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("summa")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=7&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Maksu")."<br>".t("pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=8&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Ik‰")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=9&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Korko")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=10&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Korkolasku")."<br>".t("pvm")."</a></th>";
+				echo "<th valign='top'>".t("Laskunro")."</th>";
+				echo "<th valign='top'>".t("Pvm")."</th>";
+				echo "<th valign='top'>".t("Er‰p‰iv‰")."</th>";
+				echo "<th valign='top'>".t("Summa")."</th>";
+				echo "<th valign='top'>".t("Avoinsaldo")."</th>";
+				echo "<th valign='top'>".t("Kassa-ale")."<br>".t("pvm")."</th>";
+				echo "<th valign='top'>".t("Kassa-ale")."<br>".t("summa")."</th>";
+				echo "<th valign='top'>".t("Maksu")."<br>".t("pvm")."</th>";
+				echo "<th valign='top'>".t("Ik‰")."</th>";
+				echo "<th valign='top'>".t("Korko")."</th>";
+				echo "<th valign='top'>".t("Korkolasku")."<br>".t("pvm")."</th>";
 				echo "<th valign='top'>".t("Osasuoritukset")."</th>";
+				echo "</tr>";
 
-				echo "<td class='back'></td></tr>";
-				echo "<tr>";
+				echo "<tr>
+				<td><input type='text' class='search_field' name='search_Laskunro'></td>
+				<td><input type='text' class='search_field' name='search_Pvm'></td>
+				<td><input type='text' class='search_field' name='search_Erapaiva'></td>
+				<td><input type='text' class='search_field' name='search_Summa'></td>
+				<td><input type='text' class='search_field' name='search_Avoinsumma'></td>
+				<td><input type='text' class='search_field' name='search_Kale1'></td>
+				<td><input type='text' class='search_field' name='search_Kale2'></td>
+				<td><input type='text' class='search_field' name='search_Mapvm'></td>
+				<td><input type='text' class='search_field' name='search_Ika'></td>
+				<td><input type='text' class='search_field' name='search_Korko'></td>
+				<td><input type='text' class='search_field' name='search_Korkolasku'></td>
+				<td><input type='text' class='search_field' name='search_Osasuor'></td>
+				</tr>";
 
-				for ($i = 0; $i < mysql_num_fields($result)-7; $i++) {
-					echo "<td><input type='text' size='$kentankoko[$i]' name = 'haku[$i]' value = '$haku[$i]'></td>";
-				}
+				echo "</thead>";
 
-				echo "<td></td>";
+				echo "<tbody>";
 
 				echo "<td class='back'>";
 
@@ -715,11 +671,18 @@
 				while ($maksurow = mysql_fetch_array($result)) {
 
 					echo "<tr class='aktiivi'>";
-					echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>$maksurow[laskunro]</a></td>";
+					echo "<td>".pupe_DataTablesEchoSort($maksurow['laskunro']);
 
-					echo "<td align='right'>".tv1dateconv($maksurow["tapvm"])."</td>";
-					echo "<td align='right'>".tv1dateconv($maksurow["erpcm"])."</td>";
-					echo "<td align='right'>$maksurow[loppusumma] {$yhtiorow['valkoodi']}";
+					if ($asiakasrow['email'] != '') {
+						echo "<input class='laskunro' type='checkbox' value='{$maksurow['laskunro']}' /> ";
+					}
+
+					echo "<a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>$maksurow[laskunro]</a>";
+					echo "</td>";
+
+					echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['tapvm']).tv1dateconv($maksurow["tapvm"])."</td>";
+					echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['erpcm']).tv1dateconv($maksurow["erpcm"])."</td>";
+					echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['loppusumma'])."$maksurow[loppusumma] {$yhtiorow['valkoodi']}";
 
 					if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
 						echo "<br />{$maksurow['loppusumma_valuutassa']} {$maksurow['valkoodi']}";
@@ -739,11 +702,11 @@
 
 					echo "</td>";
 
-					if ($maksurow["kapvm"] != '0000-00-00') echo "<td align='right'>".tv1dateconv($maksurow["kapvm"])."</td>";
+					if ($maksurow["kapvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['kapvm']).tv1dateconv($maksurow["kapvm"])."</td>";
 					else echo "<td></td>";
 
 					if ($maksurow["kasumma"] != 0) {
-						echo "<td align='right'>$maksurow[kasumma]";
+						echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['kasumma'])."$maksurow[kasumma]";
 
 						if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
 							echo "<br />" . $maksurow['kasumma_valuutassa'] . ' ' . $maksurow['valkoodi'];
@@ -754,7 +717,7 @@
 						 echo "<td></td>";
 					}
 
-					if ($maksurow["mapvm"] != '0000-00-00') echo "<td align='right'>".tv1dateconv($maksurow["mapvm"])."</td>";
+					if ($maksurow["mapvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['mapvm']).tv1dateconv($maksurow["mapvm"])."</td>";
 					else echo "<td></td>";
 
 					echo "<td align='right'>$maksurow[ika]</td>";
@@ -762,7 +725,7 @@
 					if ($maksurow["korko"] > 0) echo "<td align='right'>$maksurow[korko]</td>";
 					else echo "<td></td>";
 
-					if ($maksurow["korkolaspvm"] != '0000-00-00') echo "<td align='right'>".tv1dateconv($maksurow["korkolaspvm"])."</td>";
+					if ($maksurow["korkolaspvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['korkolaspvm']).tv1dateconv($maksurow["korkolaspvm"])."</td>";
 					else echo "<td></td>";
 
 					echo "<td align='right'>";
@@ -790,14 +753,7 @@
 						}
 					}
 					echo "</td>";
-
-					echo "<td class='back'>";
-
-					if ($asiakasrow['email'] != '') {
-						echo "<input class='laskunro' type='checkbox' value='{$maksurow['laskunro']}' />";
-					}
-
-					echo "</td></tr>";
+					echo "</tr>";
 
 					if (!isset($totaali[$maksurow['valkoodi']])) $totaali[$maksurow['valkoodi']] = 0;
 					if (!isset($avoimet[$maksurow['valkoodi']])) $avoimet[$maksurow['valkoodi']] = 0;
@@ -814,6 +770,9 @@
 					$korkoja += $maksurow['korko'];
 				}
 
+				echo "</tbody>";
+
+				echo "<tfoot>";
 				echo "<tr><th colspan='3'>".t("Yhteens‰")."</th>";
 				echo "<th style='text-align:right'>";
 
@@ -841,7 +800,10 @@
 
 				echo "<th colspan='2'></th>";
 
-				echo "</tr></table>";
+				echo "</tr>";
+				echo "</tfoot>";
+
+				echo "</table>";
 				echo "</form>";
 
 				if ($asiakasrow['email'] != '') {
@@ -898,5 +860,3 @@
 	}
 
 	require ("inc/footer.inc");
-
-?>

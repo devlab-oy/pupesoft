@@ -1291,8 +1291,6 @@
 
 									$summa = $summa - $summa_vero_chk;
 
-									if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '') $summa_varasto = $summa;
-
 									foreach($_arr as $_k => $_v) {
 										if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
 
@@ -1303,6 +1301,8 @@
 									}
 								}
 							}
+
+							if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '') $summa_varasto = $summa;
 
 							$verkkolaskuveroton				+= $summa;
 							$verkkolaskuveroton_valuutassa	+= $summa_valuutassa;

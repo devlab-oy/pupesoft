@@ -223,7 +223,7 @@ if (!function_exists("pupe_error")) {
 		$debuggi = array_reverse(debug_backtrace());
 
 		// tehdään errorimessage
-		$puperror  = "User:   $kukarow[nimi] ($kukarow[kuka]) @ $yhtiorow[nimi] ($yhtiorow[yhtio])\n\n";
+		$puperror  = "SQL-ERROR\n\nUser:   $kukarow[nimi] ($kukarow[kuka]) @ $yhtiorow[nimi] ($yhtiorow[yhtio])\n\n";
 
 		$nro = 1;
 		foreach ($debuggi as $debuggii) {
@@ -13468,7 +13468,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-					and tilausrivi.tyyppi  = 'L'
+					and tilausrivi.tyyppi  IN ('L','G')
 					and tilausrivi.otunnus IN ($otunnus)
 					and tuote.{$vak_kentta} not in ('','0')
 					and (tilausrivi.varattu+tilausrivi.kpl) > 0

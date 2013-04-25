@@ -34,6 +34,20 @@
 		$cleantoim = $toim;
 	}
 
+	if (!isset($kka))
+		$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if (!isset($vva))
+		$vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if (!isset($ppa))
+		$ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+
+	if (!isset($kkl))
+		$kkl = date("m");
+	if (!isset($vvl))
+		$vvl = date("Y");
+	if (!isset($ppl))
+		$ppl = date("d");
+
 	$til = "";
 
 	if ($cleantoim == 'MYYNTI') {
@@ -68,10 +82,10 @@
 	}
 
 	if ($til == "" or $cleantoim == "") {
-	  echo "<p><font class='error'>".t("J‰rjestelm‰virhe, t‰m‰n modulin suorittaminen suoralla urlilla on kielletty")." !!!</font></p>";
-	  require ("inc/footer.inc");
-	  exit;
-	 }
+		echo "<p><font class='error'>".t("J‰rjestelm‰virhe, t‰m‰n modulin suorittaminen suoralla urlilla on kielletty")." !!!</font></p>";
+		require ("inc/footer.inc");
+		exit;
+	}
 
 	//	Voidaan n‰ytt‰‰ vain tilaus ilman hakuja yms. Haluamme kuitenkin tarkastaa oikeudet.
 	if ($tee == "NAYTA" and $til != "") {
@@ -84,9 +98,13 @@
 	js_popup();
 	enable_ajax();
 
-	if ($ytunnus == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
+	if ($tee != 'NAYTATILAUS' and $ytunnus == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
 
-		$query = "SELECT ytunnus, liitostunnus FROM lasku WHERE $logistiikka_yhtiolisa and tunnus = '$kukarow[kesken]' and $til";
+		$query = "	SELECT ytunnus, liitostunnus
+					FROM lasku
+					WHERE $logistiikka_yhtiolisa
+					and tunnus = '$kukarow[kesken]'
+					and $til";
 		$keskenresult = pupe_query($query);
 
 		if (mysql_num_rows($keskenresult) == 1) {
@@ -95,25 +113,11 @@
 			$ytunnus = $keskenrow['ytunnus'];
 
 			if ($cleantoim == 'OSTO') {
-				$toimittajaid 	= $keskenrow['liitostunnus'];
+				$toimittajaid = $keskenrow['liitostunnus'];
 			}
 			else {
-				$asiakasid 		= $keskenrow['liitostunnus'];
+				$asiakasid 	  = $keskenrow['liitostunnus'];
 			}
-
-			if (!isset($kka))
-				$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-			if (!isset($vva))
-				$vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-			if (!isset($ppa))
-				$ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-
-			if (!isset($kkl))
-				$kkl = date("m");
-			if (!isset($vvl))
-				$vvl = date("Y");
-			if (!isset($ppl))
-				$ppl = date("d");
 		}
 	}
 
@@ -121,6 +125,8 @@
 		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 
 		require ("naytatilaus.inc");
+
+		$otunnus = $tunnus;
 
 		if ($cleantoim == "MYYNTI" or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI') {
 			$query = "	SELECT *
@@ -320,20 +326,6 @@
 		}
 
 		echo "<table>";
-
-		if (!isset($kka))
-			$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-		if (!isset($vva))
-			$vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-		if (!isset($ppa))
-			$ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-
-		if (!isset($kkl))
-			$kkl = date("m");
-		if (!isset($vvl))
-			$vvl = date("Y");
-		if (!isset($ppl))
-			$ppl = date("d");
 
 		$chk = "";
 
@@ -722,7 +714,8 @@
 	if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
 		// N‰ytet‰‰n muuten vaan sopivia tilauksia
 
-		echo "<form method = 'post'>
+		echo "<form action = 'asiakkaantilaukset.php' method = 'post'>
+			<input type='hidden' name='lopetus' value='$lopetus'>
 			<input type='hidden' name='toim' value='$toim'>";
 
 		echo "<br><table>";
@@ -750,11 +743,11 @@
 	}
 	else {
 		echo "<br>";
-		echo "<form method = 'post'>
-			<input type='hidden' name='toim' value='$toim'>";
+		echo "<form action = 'asiakkaantilaukset.php' method = 'post'>
+			<input type='hidden' name='toim' value='$toim'>
+			<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<br><input type='submit' value='".t("Tee uusi haku")."'>";
 		echo "</form>";
 	}
 
-	require ("../inc/footer.inc");
-?>
+	require ("inc/footer.inc");

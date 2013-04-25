@@ -1054,6 +1054,8 @@
 				$result = pupe_query($query);
 				$ostovelkatiliointitunnus = mysql_insert_id();
 
+				$summa_varasto = abs($vassumma);
+
 				// Onko rivikohtaisia tiliöintisääntöjä
 				$query = "	SELECT *
 							FROM tiliointisaanto
@@ -1275,8 +1277,6 @@
 							else $vero = $oletusalvi;
 
 							$vero = (float) $vero;
-
-							$summa_varasto = $summa;
 
 							if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') and ($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0)) {
 

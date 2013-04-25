@@ -173,6 +173,18 @@
 							laskunrot_loop();
 						});
 
+						$('#laskunrot_submit').on('click', function(event) {
+
+							event.preventDefault();
+
+							if ($('#laskunrot').val() == '') {
+								alert('".t("Et valinnut yht‰‰n laskua")."!');
+								return false;
+							}
+
+							$('#tulosta_lasku_email').submit();
+						});
+
 					});
 
 					</script>";
@@ -835,7 +847,7 @@
 				if ($asiakasrow['email'] != '') {
 
 					echo "<br />";
-					echo "<form id='tulosta_tiliote_email' name='tulosta_tiliote_email' method='post'>";
+					echo "<form id='tulosta_lasku_email' name='tulosta_lasku_email' method='post'>";
 					echo "<table>";
 					echo "<tr>";
 					echo "<td style='vertical-align: middle;' class='back'>";
@@ -845,7 +857,7 @@
 						<input type='hidden' name = 'asiakasid' value='{$asiakasrow['tunnus']}' />
 						<input type='hidden' name = 'ytunnus' value='{$ytunnus}' />
 						<input type='hidden' name = 'valintra' value='{$valintra}' />
-						<input type='submit' value='",t("L‰het‰ laskukopiot valituista laskuista asiakkaan s‰hkˆpostiin"),": {$asiakasrow['email']}' />";
+						<input type='submit' id='laskunrot_submit' value='",t("L‰het‰ laskukopiot valituista laskuista asiakkaan s‰hkˆpostiin"),": {$asiakasrow['email']}' />";
 					echo "</td>";
 					echo "</tr>";
 					echo "</table>";

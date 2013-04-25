@@ -599,236 +599,231 @@
 				echo "</tr>";
 				echo "</table></form><br>";
 
-				echo "<form method = 'post'>
-						<input type='hidden' name = 'tila' value='$tila'>
-						<input type='hidden' name = 'ytunnus' value = '$ytunnus'>
-						<input type='hidden' name = 'asiakasid' value = '$asiakasid'>
-						<input type='hidden' name = 'valintra' value = '$valintra'>
-						<input type='hidden' name = 'savalkoodi' value = '$savalkoodi'>
-						<input type='hidden' name = 'alatila' value = '$alatila'>
-						<input type='hidden' name = 'lopetus' value = '$lopetus'>";
+				if (mysql_num_rows($result) > 0) {
+					echo "<form method = 'post'>
+							<input type='hidden' name = 'tila' value='$tila'>
+							<input type='hidden' name = 'ytunnus' value = '$ytunnus'>
+							<input type='hidden' name = 'asiakasid' value = '$asiakasid'>
+							<input type='hidden' name = 'valintra' value = '$valintra'>
+							<input type='hidden' name = 'savalkoodi' value = '$savalkoodi'>
+							<input type='hidden' name = 'alatila' value = '$alatila'>
+							<input type='hidden' name = 'lopetus' value = '$lopetus'>";
 
-				pupe_DataTables(array(array($pupe_DataTables, 12, 12, false, false)));
+					pupe_DataTables(array(array($pupe_DataTables, 12, 12, false, false)));
 
-				echo "<table class='display dataTable' id='$pupe_DataTables'><thead>";
-				echo "<tr>";
-				echo "<th valign='top'>".t("Laskunro")."</th>";
-				echo "<th valign='top'>".t("Pvm")."</th>";
-				echo "<th valign='top'>".t("Eräpäivä")."</th>";
-				echo "<th valign='top'>".t("Summa")."</th>";
-				echo "<th valign='top'>".t("Avoinsaldo")."</th>";
-				echo "<th valign='top'>".t("Kassa-ale")."<br>".t("pvm")."</th>";
-				echo "<th valign='top'>".t("Kassa-ale")."<br>".t("summa")."</th>";
-				echo "<th valign='top'>".t("Maksu")."<br>".t("pvm")."</th>";
-				echo "<th valign='top'>".t("Ikä")."</th>";
-				echo "<th valign='top'>".t("Korko")."</th>";
-				echo "<th valign='top'>".t("Korkolasku")."<br>".t("pvm")."</th>";
-				echo "<th valign='top'>".t("Osasuoritukset")."</th>";
-				echo "</tr>";
+					echo "<table class='display dataTable' id='$pupe_DataTables'><thead>";
+					echo "<tr>";
+					echo "<th valign='top'>".t("Laskunro")."</th>";
+					echo "<th valign='top'>".t("Pvm")."</th>";
+					echo "<th valign='top'>".t("Eräpäivä")."</th>";
+					echo "<th valign='top'>".t("Summa")."</th>";
+					echo "<th valign='top'>".t("Avoinsaldo")."</th>";
+					echo "<th valign='top'>".t("Kassa-ale")."<br>".t("pvm")."</th>";
+					echo "<th valign='top'>".t("Kassa-ale")."<br>".t("summa")."</th>";
+					echo "<th valign='top'>".t("Maksu")."<br>".t("pvm")."</th>";
+					echo "<th valign='top'>".t("Ikä")."</th>";
+					echo "<th valign='top'>".t("Korko")."</th>";
+					echo "<th valign='top'>".t("Korkolasku")."<br>".t("pvm")."</th>";
+					echo "<th valign='top'>".t("Osasuoritukset")."</th>";
+					echo "</tr>";
 
-				echo "<tr>
-				<td><input type='text' class='search_field' name='search_Laskunro'></td>
-				<td><input type='text' class='search_field' name='search_Pvm'></td>
-				<td><input type='text' class='search_field' name='search_Erapaiva'></td>
-				<td><input type='text' class='search_field' name='search_Summa'></td>
-				<td><input type='text' class='search_field' name='search_Avoinsumma'></td>
-				<td><input type='text' class='search_field' name='search_Kale1'></td>
-				<td><input type='text' class='search_field' name='search_Kale2'></td>
-				<td><input type='text' class='search_field' name='search_Mapvm'></td>
-				<td><input type='text' class='search_field' name='search_Ika'></td>
-				<td><input type='text' class='search_field' name='search_Korko'></td>
-				<td><input type='text' class='search_field' name='search_Korkolasku'></td>
-				<td><input type='text' class='search_field' name='search_Osasuor'></td>
-				</tr>";
+					echo "<tr>
+					<td><input type='text' class='search_field' name='search_Laskunro'></td>
+					<td><input type='text' class='search_field' name='search_Pvm'></td>
+					<td><input type='text' class='search_field' name='search_Erapaiva'></td>
+					<td><input type='text' class='search_field' name='search_Summa'></td>
+					<td><input type='text' class='search_field' name='search_Avoinsumma'></td>
+					<td><input type='text' class='search_field' name='search_Kale1'></td>
+					<td><input type='text' class='search_field' name='search_Kale2'></td>
+					<td><input type='text' class='search_field' name='search_Mapvm'></td>
+					<td><input type='text' class='search_field' name='search_Ika'></td>
+					<td><input type='text' class='search_field' name='search_Korko'></td>
+					<td><input type='text' class='search_field' name='search_Korkolasku'></td>
+					<td><input type='text' class='search_field' name='search_Osasuor'></td>
+					</tr>";
 
-				echo "</thead>";
+					echo "</thead>";
 
-				echo "<tbody>";
+					echo "<tbody>";
 
-				echo "<td class='back'>";
+					$totaali = array();
+	                $avoimet = array();
+	 				$korkoja = 0;
 
-				if ($asiakasrow['email'] != '') {
-					echo "<input class='laskunro_checkall' type='checkbox' />";
-				}
+					// haetaan kaikki yrityksen rahatilit mysql muodossa
+					$query  = "	SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
+								FROM yriti
+								WHERE yhtio = '$kukarow[yhtio]'
+								and kaytossa = ''
+								and oletus_rahatili != ''";
+					$ratire = pupe_query($query);
+					$ratiro = mysql_fetch_array($ratire);
 
-				echo "</td>";
+					while ($maksurow = mysql_fetch_array($result)) {
 
-				echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td></tr>";
+						echo "<tr class='aktiivi'>";
+						echo "<td>".pupe_DataTablesEchoSort($maksurow['laskunro']);
 
-				$totaali = array();
-                $avoimet = array();
- 				$korkoja = 0;
-
-				// haetaan kaikki yrityksen rahatilit mysql muodossa
-				$query  = "	SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
-							FROM yriti
-							WHERE yhtio = '$kukarow[yhtio]'
-							and kaytossa = ''
-							and oletus_rahatili != ''";
-				$ratire = pupe_query($query);
-				$ratiro = mysql_fetch_array($ratire);
-
-				while ($maksurow = mysql_fetch_array($result)) {
-
-					echo "<tr class='aktiivi'>";
-					echo "<td>".pupe_DataTablesEchoSort($maksurow['laskunro']);
-
-					if ($asiakasrow['email'] != '') {
-						echo "<input class='laskunro' type='checkbox' value='{$maksurow['laskunro']}' /> ";
-					}
-
-					echo "<a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>$maksurow[laskunro]</a>";
-					echo "</td>";
-
-					echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['tapvm']).tv1dateconv($maksurow["tapvm"])."</td>";
-					echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['erpcm']).tv1dateconv($maksurow["erpcm"])."</td>";
-					echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['loppusumma'])."$maksurow[loppusumma] {$yhtiorow['valkoodi']}";
-
-					if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
-						echo "<br />{$maksurow['loppusumma_valuutassa']} {$maksurow['valkoodi']}";
-					}
-
-					echo "</td>";
-
-					echo "<td align='right'>";
-
-					if ($maksurow["avoinsumma"] != 0) {
-						echo "$maksurow[avoinsumma] {$yhtiorow['valkoodi']}";
-
-						if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
-							echo "<br />{$maksurow['avoinsumma_valuutassa']} {$maksurow['valkoodi']}";
+						if ($asiakasrow['email'] != '') {
+							echo "<input class='laskunro' type='checkbox' value='{$maksurow['laskunro']}' /> ";
 						}
-					}
 
-					echo "</td>";
-
-					if ($maksurow["kapvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['kapvm']).tv1dateconv($maksurow["kapvm"])."</td>";
-					else echo "<td></td>";
-
-					if ($maksurow["kasumma"] != 0) {
-						echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['kasumma'])."$maksurow[kasumma]";
-
-						if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
-							echo "<br />" . $maksurow['kasumma_valuutassa'] . ' ' . $maksurow['valkoodi'];
-						}
+						echo "<a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>$maksurow[laskunro]</a>";
 						echo "</td>";
-					}
-					else {
-						 echo "<td></td>";
-					}
 
-					if ($maksurow["mapvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['mapvm']).tv1dateconv($maksurow["mapvm"])."</td>";
-					else echo "<td></td>";
+						echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['tapvm']).tv1dateconv($maksurow["tapvm"])."</td>";
+						echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['erpcm']).tv1dateconv($maksurow["erpcm"])."</td>";
+						echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['loppusumma'])."$maksurow[loppusumma] {$yhtiorow['valkoodi']}";
 
-					echo "<td align='right'>$maksurow[ika]</td>";
+						if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
+							echo "<br />{$maksurow['loppusumma_valuutassa']} {$maksurow['valkoodi']}";
+						}
 
-					if ($maksurow["korko"] > 0) echo "<td align='right'>$maksurow[korko]</td>";
-					else echo "<td></td>";
+						echo "</td>";
 
-					if ($maksurow["korkolaspvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['korkolaspvm']).tv1dateconv($maksurow["korkolaspvm"])."</td>";
-					else echo "<td></td>";
+						echo "<td align='right'>";
 
-					echo "<td align='right'>";
+						if ($maksurow["avoinsumma"] != 0) {
+							echo "$maksurow[avoinsumma] {$yhtiorow['valkoodi']}";
 
-					// jos rahatilejä löytyy etsitään suoritukst
-					if ($ratiro["rahatilit"] != "") {
-						$query = "	SELECT *
-									FROM tiliointi USE INDEX (tositerivit_index)
-									WHERE yhtio = '$kukarow[yhtio]' and
-									ltunnus = '$maksurow[tunnus]' and
-									tilino in ($ratiro[rahatilit]) and
-									korjattu = ''";
-						$lasktilitre = pupe_query($query);
+							if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
+								echo "<br />{$maksurow['avoinsumma_valuutassa']} {$maksurow['valkoodi']}";
+							}
+						}
 
-						// listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on oli yks
-						if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 1) {
-							while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
-								if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
-									echo "$lasktilitro[summa_valuutassa] $lasktilitro[valkoodi] ($lasktilitro[summa] $yhtiorow[valkoodi]) ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
-								}
-								else {
-									echo "$lasktilitro[summa] $yhtiorow[valkoodi] ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
+						echo "</td>";
+
+						if ($maksurow["kapvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['kapvm']).tv1dateconv($maksurow["kapvm"])."</td>";
+						else echo "<td></td>";
+
+						if ($maksurow["kasumma"] != 0) {
+							echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['kasumma'])."$maksurow[kasumma]";
+
+							if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
+								echo "<br />" . $maksurow['kasumma_valuutassa'] . ' ' . $maksurow['valkoodi'];
+							}
+							echo "</td>";
+						}
+						else {
+							 echo "<td></td>";
+						}
+
+						if ($maksurow["mapvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['mapvm']).tv1dateconv($maksurow["mapvm"])."</td>";
+						else echo "<td></td>";
+
+						echo "<td align='right'>$maksurow[ika]</td>";
+
+						if ($maksurow["korko"] > 0) echo "<td align='right'>$maksurow[korko]</td>";
+						else echo "<td></td>";
+
+						if ($maksurow["korkolaspvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['korkolaspvm']).tv1dateconv($maksurow["korkolaspvm"])."</td>";
+						else echo "<td></td>";
+
+						echo "<td align='right'>";
+
+						// jos rahatilejä löytyy etsitään suoritukst
+						if ($ratiro["rahatilit"] != "") {
+							$query = "	SELECT *
+										FROM tiliointi USE INDEX (tositerivit_index)
+										WHERE yhtio = '$kukarow[yhtio]' and
+										ltunnus = '$maksurow[tunnus]' and
+										tilino in ($ratiro[rahatilit]) and
+										korjattu = ''";
+							$lasktilitre = pupe_query($query);
+
+							// listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on oli yks
+							if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 1) {
+								while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
+									if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
+										echo "$lasktilitro[summa_valuutassa] $lasktilitro[valkoodi] ($lasktilitro[summa] $yhtiorow[valkoodi]) ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
+									}
+									else {
+										echo "$lasktilitro[summa] $yhtiorow[valkoodi] ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
+									}
 								}
 							}
 						}
+						echo "</td>";
+						echo "</tr>";
+
+						if (!isset($totaali[$maksurow['valkoodi']])) $totaali[$maksurow['valkoodi']] = 0;
+						if (!isset($avoimet[$maksurow['valkoodi']])) $avoimet[$maksurow['valkoodi']] = 0;
+
+						if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
+							$totaali[$maksurow['valkoodi']] += $maksurow['loppusumma_valuutassa'];
+							$avoimet[$maksurow['valkoodi']] += $maksurow['avoinsumma_valuutassa'];
+						}
+						else {
+							$totaali[$maksurow['valkoodi']] += $maksurow['loppusumma'];
+							$avoimet[$maksurow['valkoodi']] += $maksurow['avoinsumma'];
+						}
+
+						$korkoja += $maksurow['korko'];
 					}
-					echo "</td>";
+
+					echo "</tbody>";
+
+					echo "<tfoot>";
+					echo "<tr><th colspan='3'>".t("Yhteensä")."</th>";
+					echo "<th style='text-align:right'>";
+
+					if (count($totaali) > 0) {
+						foreach ($totaali as $valuutta => $valsumma) {
+							echo sprintf('%.2f', $valsumma)." $valuutta<br>";
+						}
+					}
+					echo "</th>";
+
+					echo "<th style='text-align:right'>";
+
+					if (count($avoimet) > 0) {
+						foreach ($avoimet as $valuutta => $valsumma) {
+							echo sprintf('%.2f', $valsumma)." $valuutta<br>";
+						}
+					}
+					echo "</th>";
+
+					echo "<th colspan='4'></th>";
+
+					echo "<th style='text-align:right'>";
+					echo sprintf('%.2f', $korkoja)."<br>";
+					echo "</th>";
+
+					echo "<th colspan='2'></th>";
+
 					echo "</tr>";
+					echo "</tfoot>";
 
-					if (!isset($totaali[$maksurow['valkoodi']])) $totaali[$maksurow['valkoodi']] = 0;
-					if (!isset($avoimet[$maksurow['valkoodi']])) $avoimet[$maksurow['valkoodi']] = 0;
-
-					if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
-						$totaali[$maksurow['valkoodi']] += $maksurow['loppusumma_valuutassa'];
-						$avoimet[$maksurow['valkoodi']] += $maksurow['avoinsumma_valuutassa'];
-					}
-					else {
-						$totaali[$maksurow['valkoodi']] += $maksurow['loppusumma'];
-						$avoimet[$maksurow['valkoodi']] += $maksurow['avoinsumma'];
-					}
-
-					$korkoja += $maksurow['korko'];
-				}
-
-				echo "</tbody>";
-
-				echo "<tfoot>";
-				echo "<tr><th colspan='3'>".t("Yhteensä")."</th>";
-				echo "<th style='text-align:right'>";
-
-				if (count($totaali) > 0) {
-					foreach ($totaali as $valuutta => $valsumma) {
-						echo sprintf('%.2f', $valsumma)." $valuutta<br>";
-					}
-				}
-				echo "</th>";
-
-				echo "<th style='text-align:right'>";
-
-				if (count($avoimet) > 0) {
-					foreach ($avoimet as $valuutta => $valsumma) {
-						echo sprintf('%.2f', $valsumma)." $valuutta<br>";
-					}
-				}
-				echo "</th>";
-
-				echo "<th colspan='4'></th>";
-
-				echo "<th style='text-align:right'>";
-				echo sprintf('%.2f', $korkoja)."<br>";
-				echo "</th>";
-
-				echo "<th colspan='2'></th>";
-
-				echo "</tr>";
-				echo "</tfoot>";
-
-				echo "</table>";
-				echo "</form>";
-
-				if ($asiakasrow['email'] != '') {
-
-					echo "<br />";
-					echo "<form id='tulosta_lasku_email' name='tulosta_lasku_email' method='post'>";
-					echo "<table>";
-					echo "<tr>";
-					echo "<td style='vertical-align: middle;' class='back'>";
-					echo "<input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL_LASKUT'>
-						<input type='hidden' name = 'laskunrot' id='laskunrot' value = ''>
-						<input type='hidden' name = 'asiakasemail' value = '{$asiakasrow['email']}' />
-						<input type='hidden' name = 'asiakasid' value='{$asiakasrow['tunnus']}' />
-						<input type='hidden' name = 'ytunnus' value='{$ytunnus}' />
-						<input type='hidden' name = 'valintra' value='{$valintra}' />
-						<input type='submit' id='laskunrot_submit' value='",t("Lähetä laskukopiot valituista laskuista asiakkaan sähköpostiin"),": {$asiakasrow['email']}' />";
-					echo "</td>";
-					echo "</tr>";
 					echo "</table>";
 					echo "</form>";
+
+					if ($asiakasrow['email'] != '') {
+						echo "<br>";
+						echo "<input class='laskunro_checkall' type='checkbox' /> ".t("Valitse kaikki listatut laskut");
+						echo "<br />";
+						echo "<form id='tulosta_lasku_email' name='tulosta_lasku_email' method='post'>";
+						echo "<table>";
+						echo "<tr>";
+						echo "<td style='vertical-align: middle;' class='back'>";
+						echo "<input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL_LASKUT'>
+							<input type='hidden' name = 'laskunrot' id='laskunrot' value = ''>
+							<input type='hidden' name = 'asiakasemail' value = '{$asiakasrow['email']}' />
+							<input type='hidden' name = 'asiakasid' value='{$asiakasrow['tunnus']}' />
+							<input type='hidden' name = 'ytunnus' value='{$ytunnus}' />
+							<input type='hidden' name = 'valintra' value='{$valintra}' />
+							<input type='submit' id='laskunrot_submit' value='",t("Lähetä laskukopiot valituista laskuista asiakkaan sähköpostiin"),": {$asiakasrow['email']}' />";
+						echo "</td>";
+						echo "</tr>";
+						echo "</table>";
+						echo "</form>";
+					}
+
+
 				}
-
-				echo "<script LANGUAGE='JavaScript'>document.forms[0][0].focus()</script>";
+				else {
+					echo t("Ei laskuja")."!<br>";
+				}
 			}
-
 		}
 
 		if ($ytunnus == '') {

@@ -1462,26 +1462,15 @@
 		if (mysql_num_rows($result) != 0) {
 
 			if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
-				if(@include('Spreadsheet/Excel/Writer.php')) {
+				include('inc/pupeExcel.inc');
 
-					//keksitään failille joku varmasti uniikki nimi:
-					list($usec, $sec) = explode(' ', microtime());
-					mt_srand((float) $sec + ((float) $usec * 100000));
-					$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-					$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-					$workbook->setVersion(8);
-					$worksheet = $workbook->addWorksheet('Sheet 1');
-
-					$format_bold = $workbook->addFormat();
-					$format_bold->setBold();
-
-					$excelrivi = 0;
-				}
+				$worksheet 	 = new pupeExcel();
+				$format_bold = array("bold" => TRUE);
+				$excelrivi 	 = 0;
 			}
 
 			if ($toim == 'OSTO') {
-				$ext_chk = '';
+				$ext_chk  = '';
 				$temp_row = mysql_fetch_assoc($result);
 
 				if ($temp_row['kuka_ext'] != '' and $temp_row['kuka_ext'] == 0) {
@@ -1504,7 +1493,7 @@
 			for ($i = 0; $i < mysql_num_fields($result)-$miinus; $i++) {
 				echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
 
-				if (isset($workbook)) {
+				if (isset($worksheet)) {
 
 					if (mysql_field_name($result,$i) == "asiakas") {
 						$worksheet->write($excelrivi, $ii, t("Ytunnus"), $format_bold);
@@ -1842,7 +1831,7 @@
 							echo "<td class='$class' valign='top'>".$row[$fieldname]."</td>";
 						}
 
-						if (isset($workbook)) {
+						if (isset($worksheet)) {
 
 							if ($fieldname == "asiakas") {
 								$nimiosat = explode("<br>", $row[$fieldname]);
@@ -1871,7 +1860,7 @@
 						if ($jtok == 0) {
 							echo "<td class='$class' valign='top'><font style='color:#00FF00;'>".t("Voidaan toimittaa")."</font></td>";
 
-							if (isset($workbook)) {
+							if (isset($worksheet)) {
 								$worksheet->writeString($excelrivi, $ii, "Voidaan toimittaa");
 								$ii++;
 							}
@@ -1879,7 +1868,7 @@
 						else {
 							echo "<td class='$class' valign='top'><font style='color:#FF0000;'>".t("Ei voida toimittaa")."</font></td>";
 
-							if (isset($workbook)) {
+							if (isset($worksheet)) {
 								$worksheet->writeString($excelrivi, $ii, t("Ei voida toimittaa"));
 								$ii++;
 							}
@@ -1930,7 +1919,7 @@
 
 						echo "<td class='$class' valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila</td>";
 
-						if (isset($workbook)) {
+						if (isset($worksheet)) {
 							$worksheet->writeString($excelrivi, $ii, t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila");
 							$ii++;
 						}
@@ -2164,14 +2153,13 @@
 							</form>";
 				}
 
-				if (isset($workbook)) {
+				if (isset($worksheet)) {
 
-					// We need to explicitly close the workbook
-					$workbook->close();
+					$excelnimi = $worksheet->close();
 
 					echo "<form method='post' class='multisubmit'>";
 					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-					echo "<input type='hidden' name='kaunisnimi' value='Tilauslista.xls'>";
+					echo "<input type='hidden' name='kaunisnimi' value='Tilauslista.xlsx'>";
 					echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 					echo "<br><table>";
 					echo "<tr><th>".t("Tallenna lista").":</th>";

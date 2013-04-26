@@ -903,7 +903,7 @@ if (!function_exists('rivi_original')) {
 			$loop_i = -10;
 
 			//Nimitys
-			foreach (str_split($row['nimitys'], 30) as $nimitys_split) {
+			foreach (str_split($row['nimitys'], 40) as $nimitys_split) {
 				$loop_i += 10;
 
 				$pdf_lasku->draw_text(35,  $kala - $loop_i, $nimitys_split, $thispage, $norm);
@@ -1044,7 +1044,7 @@ if (!function_exists('rivi_original')) {
 
 				if ($laskutyyppi == 18 and ($kala >= $kuinka_alhaalla_kaytiin_tuoteno)) {
 					$rpit1 = 200;
-					$rpit2 = 195;
+					$rpit2 = 190;
 				}
 				elseif ($akey == 0) {
 					$rpit1 = 300;

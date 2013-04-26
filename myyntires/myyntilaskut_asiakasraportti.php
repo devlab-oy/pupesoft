@@ -550,7 +550,7 @@
 							and tapvm > '0000-00-00'
 							$mapvmlisa
 							$salisa
-							ORDER BY laskunro desc";
+							ORDER BY erpcm";
 				$result = pupe_query($query);
 
 				echo "<br><form action = 'myyntilaskut_asiakasraportti.php' method = 'post'>

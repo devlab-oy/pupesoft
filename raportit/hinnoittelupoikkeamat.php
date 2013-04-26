@@ -90,7 +90,7 @@
 		echo "</tr>";
 
 		echo "<tr>";
-		echo "<th>",t("Eroprosentti v‰hint‰‰n"),"</th>";
+		echo "<th>",t("Ero % v‰hint‰‰n"),"</th>";
 		echo "<td style='vertical-align: middle;'><input type='text' name='eropros_vahintaan' value='{$eropros_vahintaan}' maxlength='6' size='7' /> %</td>";
 		echo "</tr>";
 

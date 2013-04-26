@@ -122,6 +122,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
 	$uusiotunnuslisa = "tilausrivi.uusiotunnus = '{$laskurow['tunnus']}'";
 	$suuntalavajoin = "";
+	$runkotunnukset = "";
 
 	# Jos tilausrivi ei ole nolla, viedään vain yksi rivi varastoon.
 	if ($tilausrivi > 0) {
@@ -161,6 +162,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				and tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				and tilausrivi.tyyppi = 'O'
 				and tilausrivi.netto = ''
+				$varastoon_tilausrivirajaus
 				ORDER BY tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 	$chk_res = pupe_query($query);
 
@@ -212,7 +214,12 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 								suuntalava		= '{$chk_row['suuntalava']}',
 								uusiotunnus		= '{$chk_row['uusiotunnus']}'";
 				$inskres = pupe_query($lisainsert);
-
+				
+				if (!empty($varastoon_tilausrivirajaus)) {
+					$runkoinsert = mysql_insert_id();
+					$runkotunnukset .= $runkoinsert . ",";
+				}
+				
 				// päivitetään isä
 				$updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$chk_row['tunnus']}'";
 				$updateres = pupe_query($updateisa);
@@ -231,6 +238,10 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$loytyiko_lapsi_row['tunnus']}'";
 				$updres = pupe_query($query);
+				
+				if (!empty($varastoon_tilausrivirajaus)) {
+					$runkotunnukset .= $loytyiko_lapsi_row['tunnus'] . ",";
+				}
 			}
 
 			$query = "	SELECT *
@@ -336,6 +347,11 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				$paikka_chk_res = pupe_query($query);
 			}
 		}
+	}
+
+	if (!empty($varastoon_tilausrivirajaus) and $runkotunnukset != "") {
+		$runkotunnukset = substr($runkotunnukset, 0, -1);
+		$varastoon_tilausrivirajaus = "AND tilausrivi.tunnus in ($tilausrivi,$runkotunnukset)";
 	}
 
 	// tavallinen laskenta.. VARATTU PITÄÄ OLLA != 0 ja varastoon-kenttä 1!

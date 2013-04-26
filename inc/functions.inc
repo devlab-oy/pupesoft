@@ -12082,7 +12082,7 @@ if (!function_exists("pupe_DataTables")) {
 					for (var i = 1; i <= parametrit[tableid][0]; i++) {
 						// Keikalla eka sarake on kohdistusnappula....
 						if (i == 1 && tableid == \"keikka\") {
-							aoColumns[i-1] = {\"bSortable\": false, \"bSearchable\": false, \"sWidth\": \"20px\"};
+							aoColumns[i-1] = {\"bSortable\": true, \"bSearchable\": false, \"sWidth\": \"20px\"};
 						}
 						else if (spessusortit[i-1]) {
 							aoColumns[i-1] = {\"bSortable\": true, \"bSearchable\": true, \"sType\": \"string\"};

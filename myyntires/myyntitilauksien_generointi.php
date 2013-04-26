@@ -1,76 +1,97 @@
 <?php
 /*
  * HOW TO CLI:
- * php myyntitilauksien_generointi.php yhtio to@example.com from@example.com
+ * php myyntitilauksien_generointi.php yhtio to@example.com
  */
 
-require "../inc/functions.inc";
-require "../inc/pupeExcel.inc";
-
 if (php_sapi_name() == 'cli') {
-	require "../inc/connect.inc";
-	$php_cli = true;
+
+	// otetaan includepath aina rootista
+	$pupe_root_polku = dirname(dirname(__FILE__));
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear");
+	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+	ini_set("display_errors", 0);
+
+	// otetaan tietokantayhteys ja funkkarit
+	require("inc/connect.inc");
+	require("inc/functions.inc");
+
 	$yhtio = $argv[1];
 	$email = $argv[2];
-	$from = $argv[3];
-	$pupe_root_polku = dirname(dirname(__FILE__));
 
 	//yhtiötä tai sähköpostia ei ole annettu
-	if(empty($yhtio) and empty($email)) {
-		$php_cli = false;
+	if (empty($yhtio) or empty($email)) {
+		echo "\nUsage: php ".basename($argv[0])." yhtio to@example.com\n\n";
+		die;
 	}
+
+	$yhtiorow = hae_yhtion_parametrit($yhtio);
+
+	// Haetaan käyttäjän tiedot
+	$query = "	SELECT *
+				FROM kuka
+				WHERE yhtio = '$yhtio'
+				AND kuka = 'admin'";
+	$result = pupe_query($query);
+
+	if (mysql_num_rows($result) == 0) {
+		die ("User admin not found");
+	}
+
+	// Adminin oletus
+	$kukarow = mysql_fetch_assoc($result);
+
+	$tee = 'hae_keraysaineisto';
+
+	$php_cli = true;
 }
 else {
-	require "../inc/parametrit.inc";
+	require("../inc/parametrit.inc");
 
 	echo "<font class='head'>".t('Keräysaineiston generointi')."</font><hr>";
-	
+
+	// Vastaanottajan email käyttöliittymästä
+	if (!empty($vastaanottava_email)) {
+		$email = $vastaanottava_email;
+	}
+
 	$php_cli = false;
-	$yhtio = '';
-	$email = '';
 }
 
-if($tee == 'hae_keraysaineisto' or $php_cli == true) {
-	$myyntitilaukset = hae_tamanpaivan_webstore_myyntitilaukset($yhtio);
-	if(!empty($myyntitilaukset)) {
-		$excel_file_path = generoi_excel_tiedosto($myyntitilaukset);
+require("inc/pupeExcel.inc");
 
+if ($tee == 'hae_keraysaineisto') {
+
+	$myyntitilaukset = hae_tamanpaivan_webstore_myyntitilaukset();
+
+	if (!empty($myyntitilaukset)) {
+
+		$excel_file_path = generoi_excel_tiedosto($myyntitilaukset);
 		$excel_file_path = "/tmp/".$excel_file_path;
 
-		//jos ei ajeta cronista
-		if($tee == 'hae_keraysaineisto') {
-			$email = $vastaanottava_email;
-		}
+		$email_ok = laheta_sahkoposti($excel_file_path, $email);
 
-		$email_ok = laheta_sahkoposti($excel_file_path, $email, $yhtio, $from);
-
-		if($email_ok) {
-			merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset, $yhtio);
+		if ($email_ok) {
+			merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset);
 			echo "<font class='message'>".t("Sähköposti lähetetty onnistuneesti")."</font>";
+		}
+		else {
+			echo "<font class='error'>".t("Sähköpostia ei voitu lähettää")."! $email</font>";
 		}
 	}
 	else {
 		echo t("Myyntitilauksia ei löytynyt tälle päivälle");
 	}
 }
-else {
+
+if ($php_cli === false) {
 	echo_kayttoliittyma();
 }
 
+function hae_tamanpaivan_webstore_myyntitilaukset() {
+	global $yhtiorow, $kukarow;
 
-function hae_tamanpaivan_webstore_myyntitilaukset($yhtio = '') {
-	global $kukarow;
-
-	//jos ajetaan cronista
-	if(!empty($yhtio)) {
-		$kukarow['yhtio'] = $yhtio;
-	}
-	
-	$now = date('Y-m-d') . ' 00:00:00';
-
-	//for debug
-	$now = date('Y-m-d', strtotime($now .' -1 day')) . ' 00:00:00';
-
+	$now = date('Y-m-d').' 00:00:00';
 
 	$query .= "	SELECT lasku.tunnus as 'Sales order numbers',
 				lasku.asiakkaan_tilausnumero as 'Customer Order reference',
@@ -90,19 +111,21 @@ function hae_tamanpaivan_webstore_myyntitilaukset($yhtio = '') {
 				tilausrivi.tuoteno as 'Part number',
 				tilausrivi.tilkpl as 'Quantity (pieces)',
 				'normal' as 'Stock status',
-				rivihinta_valuutassa as 'SalesPrice',
+				tilausrivi.rivihinta_valuutassa as 'SalesPrice',
 				lasku.valkoodi as 'Currency'
 				FROM lasku
-				JOIN tilausrivi
-				ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus )
-				JOIN asiakas
-				ON ( asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus AND asiakas.ytunnus = 'WEBSTORE' )
+				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+					AND tilausrivi.otunnus = lasku.tunnus)
+				JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
+					AND asiakas.tunnus = lasku.liitostunnus
+					AND asiakas.ytunnus = 'WEBSTORE')
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.luontiaika > '{$now}'
                 AND noutaja != 'X'";
 	$result = pupe_query($query);
 
 	$myyntilaskut = array();
+
 	while ($myyntilasku = mysql_fetch_assoc($result)) {
 		$myyntilaskut[] = $myyntilasku;
 	}
@@ -110,18 +133,18 @@ function hae_tamanpaivan_webstore_myyntitilaukset($yhtio = '') {
 	return $myyntilaskut;
 }
 
-function laheta_sahkoposti($excel_file_path, $email_address, $yhtio = '', $postittaja = '') {
-	global $yhtiorow;
-
-	if($yhtio != '') {
-		$yhtiorow['nimi'] = $yhtio;
-	}
+function laheta_sahkoposti($excel_file_path, $email_address) {
+	global $yhtiorow, $kukarow;
 
 	$subject = "{$yhtiorow['nimi']} Webstore Sales Orders " . date('Y-m-d');
 	$body = "You can find the sales orders as and excel attachment";
 	$new_file_name = "SalesOrders.xlsx";
 	$ctype = "excel";
-	
+
+	if (empty($email_address)) {
+		return false;
+	}
+
 	$params = array(
 		"to"			 => $email_address,
 		"subject"		 => $subject,
@@ -129,11 +152,6 @@ function laheta_sahkoposti($excel_file_path, $email_address, $yhtio = '', $posti
 		"body"			 => $body,
 		"attachements"	 => array()
 	);
-
-	if(php_sapi_name() == 'cli') {
-		$params['yhtio'] = $yhtio;
-		$params['postittaja_email'] = $postittaja;
-	}
 
 	$liitetiedosto = array(
 		'filename'		 => $excel_file_path,
@@ -148,17 +166,15 @@ function laheta_sahkoposti($excel_file_path, $email_address, $yhtio = '', $posti
 	return $email_ok;
 }
 
-function merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset, $yhtio = '') {
-    global $kukarow;
-
-	if($yhtio != '') {
-		$yhtiorow['yhtio'] = $yhtio;
-	}
+function merkkaa_myyntitilaukset_lahetetyksi($myyntitilaukset) {
+    global $yhtiorow, $kukarow;
 
     $myyntitilaus_tunnukset = '';
+
     foreach ($myyntitilaukset as $myyntitilaus) {
         $myyntitilaus_tunnukset .= $myyntitilaus['Sales order numbers'] . ',';
     }
+
     $myyntitilaus_tunnukset = substr($myyntitilaus_tunnukset, 0, -1);
 
     $query = "  UPDATE lasku
@@ -182,5 +198,4 @@ function echo_kayttoliittyma() {
 	echo "</form>";
 }
 
-require '../inc/footer.inc';
-?>
+require("inc/footer.inc");

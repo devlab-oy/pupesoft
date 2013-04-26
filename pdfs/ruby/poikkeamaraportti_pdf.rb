@@ -45,9 +45,9 @@ class PoikkeamaraporttiPDF
     @pdf.move_down(110)
     self.print_table
 
-    filepath = "/tmp/Poikkeamaraportti_" + @data['tyomaarays']['tunnus'].to_s + ".pdf"
+    filepath = "/tmp/Poikkeamaraportti_" + @data['tunnus'].to_s + ".pdf"
     #Filename is a separate variable because pdf.render_file wants full path but in HTML save form we want to force the directory user is able to download files from. this is the reason we only retrun filename
-    filename = "Poikkeamaraportti_" + @data['tyomaarays']['tunnus'].to_s + ".pdf";
+    filename = "Poikkeamaraportti_" + @data['tunnus'].to_s + ".pdf";
 
     @pdf.render_file filepath
 
@@ -65,9 +65,9 @@ class PoikkeamaraporttiPDF
     contact_person_table = @pdf.make_table([
       [
         @pdf.make_cell(:content => 'Yhteyshenkilö/Kontaktperson', :width => 150),
-        @pdf.make_cell(:content => 'nimi', :font_style => :normal, :width => 400),
+        @pdf.make_cell(:content => '??', :font_style => :normal, :width => 400),
         @pdf.make_cell(:content => 'Hoitojakso/Tidsperiod', :width => 100),
-        @pdf.make_cell(:content => 'aikaväli', :font_style => :normal),
+        @pdf.make_cell(:content => '??', :font_style => :normal),
         @pdf.make_cell(:content => '')
       ]
     ], :width => @pdf.bounds.right, :cell_style => { :borders => [] })
@@ -75,9 +75,9 @@ class PoikkeamaraporttiPDF
     performer_table = @pdf.make_table([
       [
         @pdf.make_cell(:content => 'Työnsuorittaja/Arbetetsutförare', :width => 150),
-        @pdf.make_cell(:content => 'nimi', :font_style => :normal, :width => 400),
+        @pdf.make_cell(:content => @data['tyon_suorittaja'], :font_style => :normal, :width => 400),
         @pdf.make_cell(:content => 'Päiväys/Datum', :width => 100),
-        @pdf.make_cell(:content => 'aika', :font_style => :normal),
+        @pdf.make_cell(:content => Time.new.strftime('%d.%m.%Y') , :font_style => :normal),
         @pdf.make_cell(:content => '')
       ]
     ], :width => @pdf.bounds.right, :cell_style => { :borders => [] })
@@ -116,12 +116,13 @@ class PoikkeamaraporttiPDF
   def rows_table
     rows = []
     @data['rivit'].each do |value|
+      #@pdf.make_cell doesnt handel nil values so we need to pass empty string to it if nil
       row = [
-        @pdf.make_cell(:content => 'Kohde/Plats', :width => 150, :font_style => :normal),
-        @pdf.make_cell(:content => value['laite']['sijainti'], :width => 150, :font_style => :normal),
-        @pdf.make_cell(:content => 'Kalusto/Produkt', :width => 100, :font_style => :normal),
-        @pdf.make_cell(:content => value['laite']['sarjanro'], :width => 100, :font_style => :normal),
-        @pdf.make_cell(:content => 'Poikkeama ja toimenpide/Avvikelse och åtgärd', :font_style => :normal)
+        @pdf.make_cell(:content => (@data['kohde']['nimi'].nil?) ? '' : @data['kohde']['nimi'], :width => 150, :font_style => :normal),
+        @pdf.make_cell(:content => (value['laite']['sijainti'].nil?) ? '' : value['laite']['sijainti'], :width => 150, :font_style => :normal),
+        @pdf.make_cell(:content => (value['laite']['tuoteno'].nil?) ? '' : value['laite']['tuoteno'], :width => 100, :font_style => :normal),
+        @pdf.make_cell(:content => (value['laite']['sarjanro'].nil?) ? '' : value['laite']['sarjanro'], :width => 100, :font_style => :normal),
+        @pdf.make_cell(:content => ((value['poikkeama']['nimitys'].nil?) ? '' : value['poikkeama']['nimitys']) + ' -> ' + ((value['nimitys'].nil?) ? '' : value['nimitys']), :font_style => :normal)
       ]
 
       rows << row

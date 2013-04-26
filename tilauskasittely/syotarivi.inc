@@ -376,6 +376,15 @@
 		}
 
 		echo "<td valign='top' class='back'>";
+		if (isset($vaihda_rivi) and $vaihda_rivi or !empty($vaihdettava_rivi)) {
+			if (!empty($vaihdettava_rivi)) {
+				$rivi_tunnus = $vaihdettava_rivi;
+			}
+			else {
+				$rivi_tunnus = $rivitunnus_temp;
+			}
+			echo "<input type='hidden' name='vaihdettava_rivi' value='{$rivi_tunnus}'/>";
+		}
 		echo "<input type='hidden' name='aputapa' value='$tapa'>";
 		echo "<input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 

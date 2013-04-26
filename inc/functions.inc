@@ -20173,7 +20173,7 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
  * );
  */
 if (!function_exists('generoi_excel_tiedosto')) {
-	function generoi_excel_tiedosto(&$rivit, $header_values, $force_to_string = array(), $sulje_pois = array()) {
+	function generoi_excel_tiedosto(array &$rivit, array $header_values, $force_to_string = array(), $sulje_pois = array()) {
 		require_once('pupeExcel.inc');
 		require_once('ProgressBar.class.php');
 		$xls = new pupeExcel();
@@ -20549,7 +20549,7 @@ if (!function_exists('echo_tallennus_formi')) {
 		echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
 		echo "<input type='hidden' name='kaunisnimi' value='".t($new_filename).".{$file_extension}'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='{$filepath}'>";
-		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td>";
+		echo "<td class='back'><input id='aineisto_tallennus_submit' type='submit' value='".t("Tallenna")."'></td>";
 		echo "</tr>";
 		echo "</table>";
 		echo "</form>";

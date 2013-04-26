@@ -133,9 +133,11 @@ class TarkastuspoytakirjaPDF
     self.print_signature_table
 
     filepath = "/tmp/Tarkastuspoytakirja_" + @data['tunnus'].to_s + ".pdf";
+    #Filename is needed because we want to return that straigth to HTML form. We only give filename so that we can force the folder downloads are allowed to make.
+    filename = "Tarkastuspoytakirja_" + @data['tunnus'].to_s + ".pdf";
     @pdf.render_file filepath
 
-    return filepath
+    return filename
   end
 
   def company_info
@@ -326,6 +328,9 @@ class TarkastuspoytakirjaPDF
       #TODO oliko kyseessä painekoe ja sen tuoteno
       @x += 30
       @pdf.draw_text "", :at => [@x, @y]
+
+      @x = 10
+      @y -= 20
     end
   end
 

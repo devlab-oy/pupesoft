@@ -4044,8 +4044,30 @@ if ($tee == '') {
 				$trow["alv"] = $laskurow["alv"];
 			}
 
+			$rivitunnus_temp = $rivitunnus;
 			if ($tuoteno != '' and $kpl != 0) {
 				require ('lisaarivi.inc');
+			}
+
+			if (!empty($vaihdettava_rivi)) {
+				$query = "	SELECT asiakkaan_positio
+							FROM tilausrivin_lisatiedot
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivitunnus = '{$vaihdettava_rivi}'";
+				$lisatiedot_result = pupe_query($query);
+				$tilausrivin_lisatiedot = mysql_fetch_assoc($lisatiedot_result);
+				$query = "	UPDATE tilausrivin_lisatiedot
+							SET tilausrivilinkki = '{$vaihdettava_rivi}',
+							asiakkaan_positio = '{$tilausrivin_lisatiedot['asiakkaan_positio']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivitunnus = '{$lisatty_tun}'";
+				pupe_query($query);
+
+				$query = "	UPDATE tilausrivin_lisatiedot
+							SET asiakkaan_positio = 0
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivitunnus = '{$vaihdettava_rivi}'";
+				pupe_query($query);
 			}
 
 			$hinta 	= '';
@@ -6065,6 +6087,25 @@ if ($tee == '') {
 								<input type='hidden' name='tila' 			value = 'MUUTA'>
 								<input type='hidden' name='tapa' 			value = 'POISTA'>
 								<input type='Submit' value='".t("Poista")."'>
+								</form> ";
+
+						echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='vaihda_rivi'>
+								<input type='hidden' name='toim' 			value = '$toim'>
+								<input type='hidden' name='lopetus' 		value = '$lopetus'>
+								<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+								<input type='hidden' name='projektilla' 	value = '$projektilla'>
+								<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+								<input type='hidden' name='mista' 			value = '$mista'>
+								<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+								<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
+								<input type='hidden' name='menutila'	 	value = '$menutila'>
+								<input type='hidden' name='orig_tila'		value = '$orig_tila'>
+								<input type='hidden' name='orig_alatila'	value = '$orig_alatila'>
+								<input type='hidden' name='tila' 			value = 'MUUTA'>
+								<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
+								<input type='hidden' name='vaihda_rivi' 			value = '1'>
+								<input type='hidden' name='var' 			value = 'P'>
+								<input type='Submit' value='".t("Vaihda rivi")."'>
 								</form> ";
 					}
 

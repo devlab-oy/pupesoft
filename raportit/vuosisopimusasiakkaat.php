@@ -7,7 +7,6 @@
 
 	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 	$useslave = 1;
-	$usemastertoo = 1;
 
 	require "../inc/parametrit.inc";
 	require "tulosta_vuosisopimusasiakkaat.inc";
@@ -609,7 +608,7 @@
 		global $yhtiorow, $kieli;
 
 		$maaranpaa = $GLOBALS['tmpdir'].'Ostoseuranta_raportit.zip';
-				
+
 		$ylikirjoita = true;//ihan varmuuden vuoks
 
 		if(luo_zip($tiedostot, $maaranpaa, $ylikirjoita)) {

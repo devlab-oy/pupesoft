@@ -212,6 +212,7 @@
 		$ulos .= "<option value = '15' $sel[15]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
 		$ulos .= "<option value = '16' $sel[16]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)")."</option>";
 		$ulos .= "<option value = '17' {$sel[17]}>".t("Normaali laskupohja (lihavoidut ja kursivoidut tekstit)")."</option>";
+		$ulos .= "<option value = '18' {$sel[18]}>".t("Normaali laskupohja (nimitykset rivitettynä)")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -831,6 +832,19 @@
 		$ulos .= "<option value='W' $sel[W]>".t("Asiakkaan JT-rivejä kohdistetaan automaattisesti Extranet-myyntitilaukselle ja sisääntulevalle EDI-tilaukselle")."</option>";
 		$ulos .= "<option value='M' $sel[M]>".t("Asiakkaan JT-rivejä kohdistetaan automaattisesti myyntitilaukselle")."</option>";
 		$ulos .= "<option value='K' $sel[K]>".t("Asiakkaan JT-rivejä kohdistetaan automaattisesti myyntitilaukselle ja sisääntulevalle EDI-tilaukselle")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "jt_automatiikka_mitatoi_tilaus") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'E' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Jos myyntitilaus mitätöidään, poistetaan tilauksella olevat JT-rivit (ei koske extranet:ia)")."</option>";
+		$ulos .= "<option value = 'E' {$sel}>".t("Ei mitätöidä JT-rivejä myyntitilauksen mukana, vaan palautetaan ne alkuperäiselle tilaukselle")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

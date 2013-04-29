@@ -2,7 +2,6 @@
 
 	//* Tämä skripti käyttää slave-tietokantapalvelinta JA master kantaa *//
 	$useslave = 1;
-	$usemastertoo = 1;
 
 	//Tehdään tällanen replace jotta parametric.inc ei poista merkkejä
 	$sqlapu = $_POST["sqlhaku"];
@@ -70,7 +69,7 @@
 
 			$bar = new ProgressBar();
 			$bar->initialize(mysql_num_rows($result));
-			
+
 			while ($row = mysql_fetch_row($result)) {
 
 				$bar->increase();

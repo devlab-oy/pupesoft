@@ -952,6 +952,7 @@
 		$ulos .= "<option value = '15' $sel[15]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
 		$ulos .= "<option value = '16' $sel[16]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)")."</option>";
 		$ulos .= "<option value = '17' {$sel[17]}>".t("Normaali laskupohja (lihavoidut ja kursivoidut tekstit)")."</option>";
+		$ulos .= "<option value = '18' {$sel[18]}>".t("Normaali laskupohja (nimitykset rivitettynä)")."</option>";
 
 		$ulos .= "</select></td>";
 

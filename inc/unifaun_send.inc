@@ -778,8 +778,10 @@ class Unifaun {
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['kuutiot'])); # Volume
 		$uni_par_val->addAttribute('n', "volume");
 
-		#$uni_par_val = $uni_parcel->addChild('val', ""); # Loadmeter. Can only be specified for entire shipment.
-		#$uni_par_val->addAttribute('n', "area");
+	   	if ($pakkaustiedot['lavametri'] > 0) {
+			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['lavametri'])); # Loadmeter. Can only be specified for entire shipment.
+			$uni_par_val->addAttribute('n', "area");
+		}	
 
 		$pakkaustiedot['syvyys'] = $pakkaustiedot['syvyys'] < 0.25 ? 0.25 : $pakkaustiedot['syvyys'];
 		$pakkaustiedot['leveys'] = $pakkaustiedot['leveys'] < 0.25 ? 0.25 : $pakkaustiedot['leveys'];

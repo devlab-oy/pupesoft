@@ -20195,7 +20195,7 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
  * );
  */
 if (!function_exists('generoi_excel_tiedosto')) {
-	function generoi_excel_tiedosto(&$rivit, $header_values, $force_to_string = array(), $sulje_pois = array()) {
+	function generoi_excel_tiedosto(&$rivit, $header_values = array(), $force_to_string = array(), $sulje_pois = array()) {
 		require_once('pupeExcel.inc');
 		require_once('ProgressBar.class.php');
 		$xls = new pupeExcel();

@@ -20776,3 +20776,64 @@ if (!function_exists('search_array_key_for_value_recursive')) {
 		return $results;
 	}
 }
+
+if (!function_exists('pupesoft_lisaa_valmisteen_rekursiiviset_reseptit')) {
+	function pupesoft_lisaa_valmisteen_rekursiiviset_reseptit() {
+		global $kukarow, $yhtiorow, $tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array;
+
+		$kommentti_array = array();
+		$lapsenlap_array = array();
+		$riikoko = count($tuoteno_array);
+
+		for ($rii=0; $rii < $riikoko; $rii++) {
+			rekursiivinen_resepti($tuoteno_array[$rii], $kpl_array[$tuoteno_array[$rii]]);
+		}
+	}
+}
+
+if (!function_exists('rekursiivinen_resepti')) {
+	function rekursiivinen_resepti($pertuoteno, $perkpl) {
+		global $kukarow, $tuoteno_array, $riikoko, $kpl_array, $kommentti_array, $lapsenlap_array;
+
+		$query = "	SELECT tuoteno, kerroin
+					FROM tuoteperhe
+					WHERE isatuoteno = '$pertuoteno'
+					and yhtio 		 = '$kukarow[yhtio]'
+					and tyyppi		 = 'R'
+					ORDER by tuoteno";
+		$perheresult = pupe_query($query);
+
+		if (mysql_num_rows($perheresult) > 0) {
+			while ($perherow = mysql_fetch_assoc($perheresult)) {
+				$query = "	SELECT distinct isatuoteno
+							FROM tuoteperhe
+							WHERE isatuoteno = '$perherow[tuoteno]'
+							and yhtio  		 = '$kukarow[yhtio]'
+							and tyyppi 		 = 'R'
+							ORDER by tuoteno";
+				$perheresult2 = pupe_query($query);
+
+				if (mysql_num_rows($perheresult2) > 0) {
+
+					//Tätä tuoteperhettä halutaan myydä
+					if (!in_array(strtoupper($perherow["tuoteno"]), $tuoteno_array)) {
+
+						$lt = strtoupper($perherow["tuoteno"]);
+
+						$tuoteno_array[]		= $lt; // lisätään tuoteno arrayseen
+						$kpl_array[$lt]			= round($perkpl * $perherow["kerroin"],2);
+						$kommentti_array[$lt] 	= "Valmista $pertuoteno:n raaka-aineeksi $kpl_array[$lt] kappaletta.";
+						$lapsenlap_array[$lt] 	= $lt;
+						$riikoko++;
+					}
+					else {
+						$lt = strtoupper($perherow["tuoteno"]);
+
+						$kpl_array[$lt]		   += round($perkpl * $perherow["kerroin"],2);
+						$kommentti_array[$lt]  .= "<br>Valmista $pertuoteno:n raaka-aineeksi ".round($perkpl * $perherow["kerroin"],2)." kappaletta.";
+					}
+				}
+			}
+		}
+	}
+}

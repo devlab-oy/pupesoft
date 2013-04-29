@@ -837,6 +837,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "jt_automatiikka_mitatoi_tilaus") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'E' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Jos myyntitilaus mitätöidään, poistetaan tilauksella olevat JT-rivit (ei koske extranet:ia)")."</option>";
+		$ulos .= "<option value = 'E' {$sel}>".t("Ei mitätöidä JT-rivejä myyntitilauksen mukana, vaan palautetaan ne alkuperäiselle tilaukselle")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "saapumisen_jt_kasittely") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

@@ -2270,6 +2270,7 @@
 				echo "<tr><td class='back'><br></td></tr>";
 				echo "<tr><th colspan='4'>".t("Työmääräyksen lisätiedot").":</th></tr>";
 
+				// Työjono //
 				echo "	<tr>
 						<td>".t("Työjono").":</td><td>";
 
@@ -2308,6 +2309,7 @@
 				}
 				echo "</select>";
 
+				// Työstatus //
 				echo "	</td>
 						<td>".t("Työstatus").":</td><td>";
 
@@ -2331,6 +2333,7 @@
 				echo "</select>";
 				echo "</td></tr>";
 
+				// Prioriteetti //
 				echo "<tr><td>".t("Prioriteetti").":</td><td colspan=3>";
 				echo "<select name='prioriteetti'>";
 
@@ -2353,8 +2356,8 @@
 				echo "</td></tr>";
 			}
 
+			// Täysin dynaaminen osio
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
-				//Täysin dynaaminen osio
 				$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != ''");
 
 				$al_lask = 0;
@@ -2372,6 +2375,7 @@
 
 					$kentta = $al_row["selite"];
 
+					// [TEXT, DATE, DATETIME, DROPDOWN, CHECKBOX]
 					if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
 
 						if ($al_lask == 1) {
@@ -2382,6 +2386,7 @@
 
 						$al_lask++;
 					}
+					// Date
 					elseif (strtoupper($al_row["selitetark_2"]) == "DATE") {
 
 						list($al_vv, $al_kk, $al_pp) = explode('-', $srow["$kentta"]);
@@ -2395,6 +2400,15 @@
 								<input type='text' name='".$kentta."kk' size='3' value='$al_kk'>
 								<input type='text' name='".$kentta."vv' size='5' value='$al_vv'></td>";
 					}
+					// Datetime
+					elseif (strtoupper($al_row["selitetark_2"]) == "DATETIME") {
+						echo "<td>$al_row[selitetark]:</td>";
+						echo "<td>";
+						echo "<input type='datetime' name='$al_row[selitetark]' value=''>";
+						echo "<input type='datetime' name='$al_row[selitetark]' value=''>";
+						echo "</td>";
+					}
+					// Dropdownit
 					elseif (strtoupper($al_row["selitetark_2"]) == "DROPDOWN") {
 						$dropdown_arvot = explode("#", $al_row['selitetark_3']);
 
@@ -2408,6 +2422,28 @@
 
 						echo "</select>";
 						echo "</td>";
+					}
+					// Checkbox
+					elseif (strtoupper($al_row["selitetark_2"]) == "CHECKBOX") {
+						$checkbox_arvot = explode("#", $al_row['selitetark_3']);
+
+						echo "<td>{$al_row['selitetark']}</td>";
+						echo "<td>";
+
+						echo "<table>";
+
+						foreach($checkbox_arvot as $i => $checkbox) {
+							if (($i+1) % 3 == 1) echo "<tr>";
+
+							$selec = ("Mu Ilma" == $checkbox) ? "CHECKED" : "";
+							echo "<td><input type='checkbox' name='{$al_row['selite']}[]' value='" . str_replace(" ", "", $checkbox) . "' $selec>$checkbox</td>";
+
+							if (($i+1) % 3 == 0) echo "</tr>"; // Joka kolmas rivi break
+						}
+						echo "</table>";
+
+						echo "</td>";
+
 					}
 					elseif ($kentta == "suorittaja") {
 
@@ -2490,6 +2526,7 @@
 				}
 			}
 
+			// Työn kuvaus //
 			if ($toim == "REKLAMAATIO" or (($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
 				echo "	<tr>
 						<td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='6' cols='50'>$srow[komm1]</textarea></td>

@@ -1,7 +1,7 @@
 <?php
 
-// debuggia
-$debug = 1;
+// debuggia (1)
+$debug = 0;
 
 	if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 		function teccom_kaytettavat_tilausrivit($checkres, $lajilisa, $debug = 0) {

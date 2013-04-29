@@ -135,7 +135,7 @@
 
 		if ($php_cli) {
 			# laitetaan käyttöoikeudet kuntoon
-			system("chown -R root:apache $verkkolaskut_in; chmod -R 770 $verkkolaskut_in;");
+			system("chown -R :apache $verkkolaskut_in; chmod -R 770 $verkkolaskut_in;");
 		}
 
 		# siivotaan yli 90 päivää vanhat aineistot

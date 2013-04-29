@@ -20481,6 +20481,35 @@ if (!function_exists('_echo_ordered_table_rows')) {
 	}
 }
 
+if  (!function_exists('hae_chn_teksti')) {
+	function hae_chn_teksti($chn) {
+
+		switch ($chn) {
+			case '100':
+				return t("Verkkolasku, tulostuspalvelu");
+			case '010':
+				return t("Verkkolasku");
+			case '020':
+				return t("Vienti-Verkkolasku (EU)");
+			case '030':
+				return t("Vienti-Verkkolasku, tulostuspalvelu (EU)");
+			case '111':
+				return t("Itella EDI: EIH-1.4 sähköinen lasku");
+			case '112':
+				return t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin");
+			case '666':
+				return t("Sähköposti");
+			case '667':
+				return t("Paperilasku, tulostetaan manuaalisesti");
+			case '999':
+				return t("Laskutuskielto, laskutusta ei tehdä");
+			default:
+				return FALSE;
+		}
+
+	}
+}
+
 // Sorttaa kaksiulotteisen arrayn annetun keyn perusteella
 //esim
 /**

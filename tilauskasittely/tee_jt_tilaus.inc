@@ -891,7 +891,7 @@
 													$values .= "";
 													break;
 												case 'positio':
-													if (($kukarow['extranet'] != '' or $yhtiorow['jt_muiden_mukana'] == 'E') and $tilaus_on_jo == "KYLLA") {
+													if (($kukarow['extranet'] != '' or $yhtiorow['jt_automatiikka_mitatoi_tilaus'] == 'E') and $tilaus_on_jo == "KYLLA") {
 														$kysely .= "positio='JT',";
 													}
 													else {

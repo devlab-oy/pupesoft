@@ -1054,7 +1054,7 @@
 				$result = pupe_query($query);
 				$ostovelkatiliointitunnus = mysql_insert_id();
 
-				$summa_varasto = abs($vassumma);
+				$summa_varasto = round($vassumma * -1, 2);
 
 				// Onko rivikohtaisia tiliöintisääntöjä
 				$query = "	SELECT *
@@ -1377,8 +1377,8 @@
 											kohde	 		 = '{$kohde_ins}',
 											projekti 		 = '{$projekti_ins}',
 											tapvm 			 = '$tpv-$tpk-$tpp',
-											summa 			 = $summa_varasto *-1,
-											summa_valuutassa = $vtonsumma_valuutassa*-1,
+											summa 			 = $summa_varasto * -1,
+											summa_valuutassa = $vtonsumma_valuutassa * -1,
 											valkoodi 		 = '$valkoodi',
 											selite 			 = '$selite',
 											vero 			 = 0,

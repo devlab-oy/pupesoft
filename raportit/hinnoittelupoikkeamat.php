@@ -30,6 +30,7 @@
 
 		if (!isset($myyja)) $myyja = 0;
 		if (!isset($tee)) $tee = '';
+		if (!isset($eropros_vahintaan)) $eropros_vahintaan = 3;
 
 		// Tarkistetaan viel‰ p‰iv‰m‰‰r‰t
 		if (!checkdate($akk, $app, $avv)) {
@@ -88,6 +89,11 @@
 		echo "</select></td>";
 		echo "</tr>";
 
+		echo "<tr>";
+		echo "<th>",t("Ero % v‰hint‰‰n"),"</th>";
+		echo "<td style='vertical-align: middle;'><input type='text' name='eropros_vahintaan' value='{$eropros_vahintaan}' maxlength='6' size='7' /> %</td>";
+		echo "</tr>";
+
 		echo "<tr><td class='back' colspan='2'>";
 		echo "<input type='hidden' name='tee' value='hae' />";
 		echo "<input type='submit' value='",t("Hae"),"' />";
@@ -99,6 +105,7 @@
 		if ($tee == 'hae') {
 
 			$myyja = (int) $myyja;
+			$eropros_vahintaan = (float) str_replace(",", ".", $eropros_vahintaan);
 
 			$myyjalisa = $myyja != 0 ? "AND lasku.myyja = '{$myyja}'" : "";
 
@@ -114,6 +121,14 @@
 						{$myyjalisa}
 						ORDER BY lasku.myyja, lasku.tapvm, lasku.tunnus";
 			$laskures = pupe_query($query);
+
+			if (mysql_num_rows($laskures) == 0) {
+
+				echo "<br /><font class='info'>",t("Yht‰‰n tilausta ei lˆytynyt"),"!</font><br />";
+
+				require("inc/footer.inc");
+				exit;
+			}
 
 			flush();
 
@@ -202,6 +217,8 @@
 					$data[$i]['sis‰inen_kommentti'] = $laskurow['sisviesti3'];
 
 					$eropros = $tilausrivirow['hinta'] == 0 ? 100 : abs(round((($ero) / $tilausrivirow['hinta']) * 100, 2));
+
+					if ($eropros_vahintaan > $eropros) continue;
 
 					$lis_hinta = hintapyoristys($lis_hinta);
 					$tilausrivirow['hinta'] = hintapyoristys($tilausrivirow['hinta']);

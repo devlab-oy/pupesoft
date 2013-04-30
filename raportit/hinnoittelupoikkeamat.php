@@ -30,7 +30,7 @@
 
 		if (!isset($myyja)) $myyja = 0;
 		if (!isset($tee)) $tee = '';
-		if (!isseT($eropros_vahintaan)) $eropros_vahintaan = 0;
+		if (!isset($eropros_vahintaan)) $eropros_vahintaan = 0;
 
 		// Tarkistetaan viel‰ p‰iv‰m‰‰r‰t
 		if (!checkdate($akk, $app, $avv)) {

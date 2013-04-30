@@ -1499,7 +1499,7 @@
 
 					require ("inc/teetiliointi.inc");
 
-					$tiliointirow['summa'] = $summa;
+					$tiliointirow['summa'] = $yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '' ? $summa : $tiliointirow['summa'];
 
 					// Kulutilionnin kustp
 					$kustp_kulutiliointi 	= $kustp;

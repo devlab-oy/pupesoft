@@ -9,6 +9,18 @@
 		require("inc/parametrit.inc");
 	}
 
+	// Työmääräysten listausta filtteröidään tyomaarays.tyostatus kentän mukaan
+	$tyomaarays_tyostatus = '';
+
+	// Jos alanimi sisältää _-viivan niin splitataan se osiin
+	if (strstr($oikeurow['alanimi'], '_')) {
+		$parts = explode('_', $oikeurow['alanimi']);
+		$oikeurow['alanimi'] = $parts[0];
+		$oikeurow[3] = $parts[0];
+		$toim = $parts[0];
+		$tyomaarays_tyostatus = $parts[1];
+	}
+
 	if (!isset($toim)) $toim = '';
 
 	if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
@@ -1013,6 +1025,11 @@
 			}
 			else {
 				$tyomalatlat = " and lasku.alatila in ('','A','B','C','J') ";
+
+				// Rajataan työmääräykset työstatuksen mukaan
+				if ($tyomaarays_tyostatus != '') {
+					$tyomalatlat .= "and tyomaarays.tyostatus='$tyomaarays_tyostatus'";
+				}
 			}
 
 			$query = "	SELECT lasku.tunnus tilaus,

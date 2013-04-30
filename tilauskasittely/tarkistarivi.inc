@@ -1036,7 +1036,7 @@
 
 			while ($vrow = mysql_fetch_array($vasta2result)) {
 
-				$vaihtoehtoinen = ($vrow['vaihtoehtoinen'] == 'K') ? '<font color=#F00>Vaihtoehtoinen</font>' : '';
+				$vaihtoehtoinen = ($vrow['vaihtoehtoinen'] == 'K') ? '<font color=#F00>Vaihtoehtoinen, tarkista sopivuus</font>' : '';
 				list(, , $vmyytavissa) = saldo_myytavissa($vrow["tuoteno"]);
 
 				if ($vmyytavissa > 0) {

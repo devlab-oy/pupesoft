@@ -3311,6 +3311,18 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'ostolaskun_kulutilit_kayttaytyminen') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'E' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Vaihto-omaisuuslaskun rahdit/kulut ei vied‰ varastonarvoon")."</option>";
+		$ulos .= "<option value = 'E' {$sel}>".t("Vaihto-omaisuuslaskun rahdit/kulut vied‰‰n kirjanpidon varastonarvoon, mutta ei vied‰ tuotteiden varastonarvoon")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'maksusopimus_toimitus') {
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

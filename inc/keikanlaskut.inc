@@ -560,6 +560,13 @@
 
 	echo "<font class='head'>".t("Laskut joiden varastokirjaukset eiv‰t t‰sm‰‰")."</font><hr>";
 
+	if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == 'E') {
+		$havinglisa = "abs(summa1 + summa2) > 0.01 or abs(summaeur-summa3+summa1) > 0.01 or abs(summaeur-summa3-summa2) > 0.01";
+	}
+	else {
+		$havinglisa = "abs(summa1 + summa2) > 0.01 or abs(summaeur-summa3-osto_rahti-osto_kulu-osto_rivi_kulu+summa1) > 0.01 or abs(summaeur-summa3-osto_rahti-osto_kulu-osto_rivi_kulu-summa2) > 0.01";
+	}
+
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*lasku.vienti_kurssi 'summaeur',
 				lasku.tapvm, lasku.vienti, lasku.tunnus latunnus,
 				lasku.osto_rahti/(1+lasku.osto_rahti_alv/100) osto_rahti,
@@ -582,7 +589,7 @@
 				and lasku.tila in ('H','Y','M','P','Q')
 				and lasku.tapvm >= '$avv-$akk-$app'
 				and lasku.tapvm <= '$lvv-$lkk-$lpp'
-				HAVING abs(summa1 + summa2) > 0.01 or abs(summaeur-summa3-osto_rahti-osto_kulu-osto_rivi_kulu+summa1) > 0.01 or abs(summaeur-summa3-osto_rahti-osto_kulu-osto_rivi_kulu-summa2) > 0.01
+				HAVING {$havinglisa}
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 	$result = pupe_query($query);
 
@@ -628,10 +635,31 @@
 			echo "<td>$trow[nimi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])."</td>";
-			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"]-$trow["summa3"]-$trow["osto_rahti"]-$trow["osto_kulu"]-$trow["osto_rivi_kulu"])."</td>";
+
+			echo "<td style='text-align: right;' nowrap>";
+
+			if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == 'E') {
+				echo sprintf("%.2f", $trow["summaeur"]-$trow["summa3"]);
+			}
+			else {
+				echo sprintf("%.2f", $trow["summaeur"]-$trow["summa3"]-$trow["osto_rahti"]-$trow["osto_kulu"]-$trow["osto_rivi_kulu"]);
+			}
+
+			echo "</td>";
+
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa1"]*-1)."</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa2"])."</td>";
-			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", ($trow["summaeur"]-$trow["summa3"]-$trow["osto_rahti"]-$trow["osto_kulu"]-$trow["osto_rivi_kulu"]+$trow["summa1"]))." $yhtiorow[valkoodi]</td>";
+
+			echo "<td style='text-align: right;' nowrap>";
+
+			if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == 'E') {
+				echo sprintf("%.2f", ($trow["summaeur"]-$trow["summa3"]+$trow["summa1"]))." {$yhtiorow['valkoodi']}";
+			}
+			else {
+				echo sprintf("%.2f", ($trow["summaeur"]-$trow["summa3"]-$trow["osto_rahti"]-$trow["osto_kulu"]-$trow["osto_rivi_kulu"]+$trow["summa1"]))." {$yhtiorow['valkoodi']}";
+			}
+
+			echo "</td>";
 			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
 			echo "<td>$vienti</td>";
 			echo "</tr>";

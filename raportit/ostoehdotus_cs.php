@@ -580,15 +580,21 @@
 			list($enp, $vku) = myynnit($valvarasto);
 
 			if ($toim == "KK") {
-				if (($saldot - $enp + $ostot) <= $row["tpaikka_halyraja"]) {
 
-					// Lisätään varatut tilaukseen ja verrataan tilauspistettä vapaasaldoon
-					$vapaasaldo = ($saldot - $enp + $ostot);
+				// Lisätään varatut tilaukseen ja verrataan tilauspistettä vapaasaldoon
+				$vapaasaldo = ($saldot - $enp + $ostot);
+
+				if ($vapaasaldo <= $row["tpaikka_halyraja"]) {
 
 					$lisa = (float) $row["tpaikka_halyraja"] - $vapaasaldo;
 
 					if ($row["status"] != "T" or $lisa != 0) {
-						$ostoehdotus = round($row["tpaikka_tilausmaara"] - $vapaasaldo, 2);
+
+						$osto_era = (float) $toimirow['osto_era'];
+						$osto_era = $osto_era == 0 ? 1 : $osto_era;
+
+						$ostoehdotus = $row["tpaikka_tilausmaara"] - $vapaasaldo;
+						$ostoehdotus = floor($ostoehdotus / $osto_era) * $osto_era;
 					}
 				}
 				else {

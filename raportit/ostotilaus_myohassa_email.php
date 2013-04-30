@@ -42,6 +42,7 @@ if (php_sapi_name() == 'cli') {
 	$php_cli = true;
 }
 else {
+	//Debuggaamista varten
 	require("../inc/parametrit.inc");
 
 	echo "<font class='head'>".t('Myöhässä olevien ostotilausten lähetys sähköpostiin')."</font><hr>";
@@ -150,18 +151,18 @@ function generoi_email_body($ostotilaukset) {
 
 	//index:ssä on ostotilaus ostaja kuka
 	foreach ($ostotilaukset as $ostaja => $ostajan_ostotilaukset) {
-		$email_bodys[$ostaja] = t("Seuraavat ostotilausrivit ovat myöhässä").".<br/><br/>";
+		$email_bodys[$ostaja] = t("Seuraavat ostotilausrivit ovat myöhässä").".\n\n";
 		foreach ($ostajan_ostotilaukset as $ostotilaus_tunnus => $ostotilaus) {
-			$email_bodys[$ostaja] .= "-----------------------<br/>";
-			$email_bodys[$ostaja] .= t("Ostotilaus")." $ostotilaus_tunnus<br/>";
+			$email_bodys[$ostaja] .= "-----------------------\n";
+			$email_bodys[$ostaja] .= t("Ostotilaus")." $ostotilaus_tunnus\n";
 			//toimittaja voidaan hakea rivin ekalta solulta koska se on ostotilauksen kaikille riveille aina sama
-			$email_bodys[$ostaja] .= t("Toimittaja")." {$ostotilaus['rivit'][0]['toimittaja']}<br/><br/>";
+			$email_bodys[$ostaja] .= t("Toimittaja")." {$ostotilaus['rivit'][0]['toimittaja']}\n\n";
 
-			$email_bodys[$ostaja] .= t("Tuoteno").', '.t("Kpl").', '.t("Toimitusaika").', '.t("Vahvistettu")."<br/>";
+			$email_bodys[$ostaja] .= t("Tuoteno").', '.t("Kpl").', '.t("Toimitusaika").', '.t("Vahvistettu")."\n";
 			foreach ($ostotilaus['rivit'] as $ostotilaus_rivi) {
-				$email_bodys[$ostaja] .= $ostotilaus_rivi['tuoteno'].', '.$ostotilaus_rivi['tilkpl'].', '.$ostotilaus_rivi['toimitusaika'].', '.($ostotilaus_rivi['vahvistettu'] == 1 ? t("Vahvistettu") : t("Vahvistamatta"))."<br/>";
+				$email_bodys[$ostaja] .= $ostotilaus_rivi['tuoteno'].', '.$ostotilaus_rivi['tilkpl'].', '.$ostotilaus_rivi['toimitusaika'].', '.($ostotilaus_rivi['vahvistettu'] == 1 ? t("Vahvistettu") : t("Vahvistamatta"))."\n";
 			}
-			$email_bodys[$ostaja] .= "<br/>";
+			$email_bodys[$ostaja] .= "\n";
 		}
 	}
 
@@ -179,7 +180,7 @@ function laheta_sahkopostit($email_bodys) {
 		$parametrit = array(
 			"to"		 => $to,
 			"subject"	 => t("Myöhässä olevat ostotilaukset"),
-			"ctype"		 => "html",
+			"ctype"		 => "plain",
 			"body"		 => $email_body);
 		pupesoft_sahkoposti($parametrit);
 	}

@@ -1528,7 +1528,7 @@ while ($tietue = fgets($fd)) {
 				// T‰m‰ hinta on aina veroton, joten lasketaan vero p‰‰lle jos myyntihinnat ovat verollisia
 				$editilaus_hinta = (float) trim($tieto);
 
-				if ($yhtiorow["alv_kasittely"] == '') {
+				if ($yhtiorow["alv_kasittely"] == '' and !isset($verkkokauppa_hinnatedifailistaverollisina)) {
 					$editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
 				}
 			}

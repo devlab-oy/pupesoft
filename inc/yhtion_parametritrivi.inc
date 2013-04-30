@@ -3316,8 +3316,8 @@
 
 		$sel = $trow[$i] == 'E' ? "selected" : "";
 
-		$ulos .= "<option value = ''>".t("Vaihto-omaisuuslaskun kulut vähennetään varastotiliöinneistä")."</option>";
-		$ulos .= "<option value = 'E' {$sel}>".t("Vaihto-omaisuuslaskun kuluja ei vähennetä varastotiliöinneistä")."</option>";
+		$ulos .= "<option value = ''>".t("Vaihto-omaisuuslaskun rahdit/kulut ei viedä varastonarvoon")."</option>";
+		$ulos .= "<option value = 'E' {$sel}>".t("Vaihto-omaisuuslaskun rahdit/kulut viedään kirjanpidon varastonarvoon, mutta ei viedä tuotteiden varastonarvoon")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -2438,7 +2438,7 @@
 			}
 
 			// Korvaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			if ($yhtiorow["korvaavusketjun_puutekasittely"] == "K") {
+			if ($yhtiorow["korvaavuusketjun_puutekasittely"] == "K") {
 				$query = "SELECT id
 			              FROM korvaavat
 			              WHERE yhtio = '{$kukarow['yhtio']}'

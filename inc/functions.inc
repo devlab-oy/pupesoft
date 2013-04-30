@@ -18396,7 +18396,7 @@ if (!function_exists("pupesoft_sahkoposti")) {
 		$liitteet		= (isset($parametrit["attachements"]) and is_array($parametrit["attachements"])) ? $parametrit["attachements"] : "";
 
 		// Kaikki pitää tulla kunnossa (paitsi body ja cc)
-		if ($email_to == "" or $email_subject == "" or $email_ctype == "" or $liitteet == "") {
+		if ($email_to == "" or $email_subject == "" or $email_ctype == "") {
 			return false;
 		}
 
@@ -18425,71 +18425,74 @@ if (!function_exists("pupesoft_sahkoposti")) {
 
 		$content .= "--$bound";
 
-		foreach ($liitteet as $liite) {
+		if (!empty($liitteet)) {
+			foreach ($liitteet as $liite) {
 
-			// Tarkistetaan $liite arrayn oikeellisuus
-			$attachement_filename		= isset($liite["filename"]) ? $liite["filename"] : "";
-			$attachement_newfilename	= isset($liite["newfilename"]) ? $liite["newfilename"] : "";
-			$attachement_ctype			= isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
+				// Tarkistetaan $liite arrayn oikeellisuus
+				$attachement_filename		= isset($liite["filename"]) ? $liite["filename"] : "";
+				$attachement_newfilename	= isset($liite["newfilename"]) ? $liite["newfilename"] : "";
+				$attachement_ctype			= isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
 
-			// Jos tiedostoa ei löydy tai ctype on tyjää, hypätään filen yli.
-			if (!file_exists($attachement_filename) or !is_readable($attachement_filename) or $attachement_ctype == "") {
-				continue;
-			}
+				// Jos tiedostoa ei löydy tai ctype on tyjää, hypätään filen yli.
+				if (!file_exists($attachement_filename) or !is_readable($attachement_filename) or $attachement_ctype == "") {
+					continue;
+				}
 
-			// Otetaan tiedoston sisältö muuttujaan
-			$attachement_content = chunk_split(base64_encode(file_get_contents($attachement_filename)));
+				// Otetaan tiedoston sisältö muuttujaan
+				$attachement_content = chunk_split(base64_encode(file_get_contents($attachement_filename)));
 
-			// Tiedostosta vain nimi
-			$attachement_name = basename($attachement_filename);
+				// Tiedostosta vain nimi
+				$attachement_name = basename($attachement_filename);
 
-			// Jos on poikkeava nimi, otetaan se
-			if ($attachement_newfilename != "") {
-				$attachement_name = basename($attachement_newfilename);
-			}
+				// Jos on poikkeava nimi, otetaan se
+				if ($attachement_newfilename != "") {
+					$attachement_name = basename($attachement_newfilename);
+				}
 
-			// Boundin jälkeen aina rivinvaihto
-			$content .= "\n";
+				// Boundin jälkeen aina rivinvaihto
+				$content .= "\n";
 
-			if ($attachement_ctype == "TEXT") {
-				$content .= "Content-Type: text/plain; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "PS") {
-				$content .= "Content-Type: application/ps; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "JPG" or $attachement_ctype == "JPEG") {
-				$content .= "Content-Type: image/jpeg; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "PNG") {
-				$content .= "Content-Type: image/png; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "GIF") {
-				$content .= "Content-Type: image/gif; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "TIF" or $attachement_ctype == "TIFF") {
-				$content .= "Content-Type: image/tiff; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "BMP") {
-				$content .= "Content-Type: image/bmp; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "EXCEL") {
-				$content .= "Content-Type: application/excel; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "PDF") {
-				$content .= "Content-Type: application/pdf; name=\"$attachement_name\"\n";
-			}
-			else {
-				//Defaulttina katotaa mitä tyyppiä tiedosto on ja laitetaa headerit sen mukaan
-				$mime_type = mime_content_type($attachement_filename);
-				$content .= "Content-Type: $mime_type; name=\"$attachement_name\"\n";
-			}
+				if ($attachement_ctype == "TEXT") {
+					$content .= "Content-Type: text/plain; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "PS") {
+					$content .= "Content-Type: application/ps; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "JPG" or $attachement_ctype == "JPEG") {
+					$content .= "Content-Type: image/jpeg; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "PNG") {
+					$content .= "Content-Type: image/png; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "GIF") {
+					$content .= "Content-Type: image/gif; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "TIF" or $attachement_ctype == "TIFF") {
+					$content .= "Content-Type: image/tiff; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "BMP") {
+					$content .= "Content-Type: image/bmp; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "EXCEL") {
+					$content .= "Content-Type: application/excel; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "PDF") {
+					$content .= "Content-Type: application/pdf; name=\"$attachement_name\"\n";
+				}
+				else {
+					//Defaulttina katotaa mitä tyyppiä tiedosto on ja laitetaa headerit sen mukaan
+					$mime_type = mime_content_type($attachement_filename);
+					$content .= "Content-Type: $mime_type; name=\"$attachement_name\"\n";
+				}
 
-			$content .= "Content-Transfer-Encoding: base64\n";
-			$content .= "Content-Disposition: attachment; filename=\"$attachement_name\"\n\n";
-			$content .= $attachement_content;
-			$content .= "\n";
-			$content .= "--$bound";
+				$content .= "Content-Transfer-Encoding: base64\n";
+				$content .= "Content-Disposition: attachment; filename=\"$attachement_name\"\n\n";
+				$content .= $attachement_content;
+				$content .= "\n";
+				$content .= "--$bound";
+			}
 		}
+		
 
 		// Vikassa boundissa pitää olla -- lopussa.
 		$content .= "--\n";

@@ -197,7 +197,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
 			$osoitelappurow["toim_osoite"] 	= $tosoite;
 		}
 
-		$osoitelappurow["toimitustapa"] 	= $data['toimitustapa'];
+		$osoitelappurow["toimitustapa"] 	= $data['toimitustapa'][0];
 		$osoitelappurow["yhteyshenkilo"] 	= $kukarow["tunnus"];
 		$osoitelappurow["merahti"] 			= $data['merahti'];
 		$osoitelappurow["laatija"] 			= $kukarow['kuka'];

@@ -92,6 +92,15 @@
 				$tuoteno = substr($tuoteno,0,-1);
 
 				$th_lisa1 = " and tuote.tuoteno like '" . $tuoteno . "%' ";
+
+				//Kun kyseessä on ostotilaus ja haetaan tuotelistausta esim. "+1*" haetaan vain ostotilauksen toimittajan tuotteita.
+				$tuotteen_toimittajat_join = "";
+				if (isset($laskurow) and $laskurow['tila'] == 'O') {
+					$tuotteen_toimittajat_join = "	JOIN tuotteen_toimittajat
+													ON ( tuotteen_toimittajat.yhtio = tuote.yhtio
+														AND tuotteen_toimittajat.tuoteno = tuote.tuoteno
+														AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}' )";
+				}
 			}
 			elseif (substr($tuoteno,0,1) == '@') {
 				// Jos ensimmäinen merkki on AT-merkki niin etsitään kyseisellä tuotenumero
@@ -194,6 +203,7 @@
 						IF(tuote.epakurantti100pvm = '0000-00-00', IF(tuote.epakurantti75pvm = '0000-00-00', IF(tuote.epakurantti50pvm = '0000-00-00', IF(tuote.epakurantti25pvm = '0000-00-00', '', '25'), '50'), '75'), '100') epakurantti,
 						(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
 						FROM tuote use index (tuoteno, nimitys)
+						{$tuotteen_toimittajat_join}
 						WHERE tuote.$yhtiot
 						$kieltolisa
 						$th_lisa1

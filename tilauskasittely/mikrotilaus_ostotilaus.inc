@@ -93,12 +93,16 @@
 				if ($tuoteno != '' and $kpl != 0) {
 
 					///* Toimittajan tuotenumerospecial*///
-					if (substr($tuoteno,0,1) == '?') {
+					if ($tiedoston_tuoteno == 'toimittajan_tuoteno') {
 						$query = "	SELECT *
 									FROM tuotteen_toimittajat
 									JOIN tuote USING (yhtio, tuoteno)
-									WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-									and tuotteen_toimittajat.toim_tuoteno='".substr($tuoteno,1)."'";
+									WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+									and tuotteen_toimittajat.toim_tuoteno='{$tuoteno}'
+									AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}'
+									AND tuote.status != 'P'
+									ORDER BY IF(tuotteen_toimittajat.jarjestys=0, 99999999999, tuotteen_toimittajat.jarjestys), tuote.tuoteno
+									LIMIT 1";
 					}
 					else {
 						$query = "	SELECT *, tuote.tuoteno as tuoteno
@@ -155,6 +159,15 @@
 				<font class='message'>".t("Tiedostomuoto").":</font><br><br>
 
 				<table>
+				<tr>
+				<th>".t("Tuoteno")."</th>
+				<td>
+				<select name='tiedoston_tuoteno'>
+				<option value='oma_tuoteno'>".t("Oma tuoteno")."</option>
+				<option value='toimittajan_tuoteno'>".t("Toimittajan tuoteno")."</option>
+				</select>
+				</td>
+				</tr>
 				<tr><th colspan='7'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
 				<tr><td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."</td><td>".t("Arvioitu toimitusp‰iv‰ vvvv-kk-pp")."</td><td>".t("Hinta")."</td><td>".t("Ale")."</td><td>".t("Paikka (#!°!#-eroteltu)")."</td></tr>
 				</table>

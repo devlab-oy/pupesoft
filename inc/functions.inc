@@ -20482,27 +20482,27 @@ if (!function_exists('_echo_ordered_table_rows')) {
 }
 
 if  (!function_exists('hae_chn_teksti')) {
-	function hae_chn_teksti($chn) {
+	function hae_chn_teksti($chn, $kieli = '') {
 
 		switch ($chn) {
 			case '100':
-				return t("Verkkolasku, tulostuspalvelu");
+				return t("Verkkolasku, tulostuspalvelu", $kieli);
 			case '010':
-				return t("Verkkolasku");
+				return t("Verkkolasku", $kieli);
 			case '020':
-				return t("Vienti-Verkkolasku (EU)");
+				return t("Vienti-Verkkolasku (EU)", $kieli);
 			case '030':
-				return t("Vienti-Verkkolasku, tulostuspalvelu (EU)");
+				return t("Vienti-Verkkolasku, tulostuspalvelu (EU)", $kieli);
 			case '111':
-				return t("Itella EDI: EIH-1.4 sähköinen lasku");
+				return t("Itella EDI: EIH-1.4 sähköinen lasku", $kieli);
 			case '112':
-				return t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin");
+				return t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin", $kieli);
 			case '666':
-				return t("Sähköposti");
+				return t("Sähköposti", $kieli);
 			case '667':
-				return t("Paperilasku, tulostetaan manuaalisesti");
+				return t("Paperilasku, tulostetaan manuaalisesti", $kieli);
 			case '999':
-				return t("Laskutuskielto, laskutusta ei tehdä");
+				return t("Laskutuskielto, laskutusta ei tehdä", $kieli);
 			default:
 				return FALSE;
 		}

@@ -450,7 +450,7 @@ if (!function_exists('alku_lahete')) {
 
 				$maksuehtoteksti = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
-				if (!in_array($asiakas_row['chn'], array('100', '667'))) $maksuehtoteksti .= " / ".hae_chn_teksti($asiakas_row['chn']);
+				if (!in_array($asiakas_row['chn'], array('100', '667'))) $maksuehtoteksti .= " / ".hae_chn_teksti($asiakas_row['chn'], $kieli);
 
 				if ($asiakas_row['verkkotunnus'] != '') $maksuehtoteksti .= " / {$asiakas_row['verkkotunnus']}";
 

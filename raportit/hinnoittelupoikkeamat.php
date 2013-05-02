@@ -245,8 +245,6 @@
 				$otsikot = "";
 
 				foreach(array_keys($data[0]) AS $key) {
-					$worksheet->writeString($excelrivi, $excelsarake, $otsikko, $format_bold);
-					$excelsarake++;
 
 					switch($key) {
 						case 'eropros':
@@ -263,6 +261,9 @@
 					}
 
 					$otsikko = ucfirst(t($otsikko));
+
+					$worksheet->writeString($excelrivi, $excelsarake, $otsikko, $format_bold);
+					$excelsarake++;
 
 					$otsikot .= "<th>{$otsikko}</th>";
 				}

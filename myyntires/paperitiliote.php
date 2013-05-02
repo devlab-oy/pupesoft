@@ -29,7 +29,7 @@
 			$pdf->draw_text(50, 677, $asiakastiedot["maa"], 		$firstpage, $norm);
 		}
 
-		if ($alatila == 'T' and $asiakastiedot["laskutus_nimi"] == "") {
+		if ($alatila == 'T' and $asiakastiedot["laskutus_nimi"] != "") {
 
 			$pdf->draw_text(50, 655, t("Ostaja", $kieli), 	$firstpage, $pieni);
 
@@ -67,7 +67,7 @@
 		$pdf->draw_text(430, 740,  $kukarow["eposti"],				$firstpage, $norm);
 
 		//Rivit alkaa täsä kohtaa
-		$kala = ($alatila == 'T' and $asiakastiedot["laskutus_nimi"] == "") ? 570 : 620;
+		$kala = ($alatila == 'T' and $asiakastiedot["laskutus_nimi"] != "") ? 570 : 620;
 
 		//eka rivi
 		$pdf->draw_text(30,  $kala, t("Laskunro", $kieli),			$firstpage, $pieni);

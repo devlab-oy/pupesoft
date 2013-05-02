@@ -29,7 +29,6 @@ class Unifaun {
 		$this->ftpport 	= $ftpport;
 		$this->ftpfail 	= $ftpfail;
 		$this->ftpsucc 	= $ftpsucc;
-
 	}
 
 	public function setYhtioRow($yhtiorow) {
@@ -778,13 +777,13 @@ class Unifaun {
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['kuutiot'])); # Volume
 		$uni_par_val->addAttribute('n', "volume");
 
-	   	if ($pakkaustiedot['lavametri'] > 0) {
+		if ($pakkaustiedot['lavametri'] > 0) {
 			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['lavametri'])); # Loadmeter. Can only be specified for entire shipment.
 			$uni_par_val->addAttribute('n', "area");
-		}	
+		}
 
-		$pakkaustiedot['syvyys'] = $pakkaustiedot['syvyys'] < 0.25 ? 0.25 : $pakkaustiedot['syvyys'];
-		$pakkaustiedot['leveys'] = $pakkaustiedot['leveys'] < 0.25 ? 0.25 : $pakkaustiedot['leveys'];
+		$pakkaustiedot['syvyys']  = $pakkaustiedot['syvyys']  < 0.25 ? 0.25 : $pakkaustiedot['syvyys'];
+		$pakkaustiedot['leveys']  = $pakkaustiedot['leveys']  < 0.25 ? 0.25 : $pakkaustiedot['leveys'];
 		$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < 0.25 ? 0.25 : $pakkaustiedot['korkeus'];
 
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['syvyys'])); # Length

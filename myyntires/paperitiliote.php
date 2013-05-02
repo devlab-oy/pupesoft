@@ -1,7 +1,7 @@
 <?php
 
 	function alku () {
-		global $pdf, $asiakastiedot, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $kieli, $tito_pvm;
+		global $pdf, $asiakastiedot, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $kieli, $tito_pvm, $alatila;
 
 		$firstpage = $pdf->new_page("a4");
 
@@ -27,6 +27,17 @@
 			$pdf->draw_text(50, 697, $asiakastiedot["osoite"], 		$firstpage, $norm);
 			$pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
 			$pdf->draw_text(50, 677, $asiakastiedot["maa"], 		$firstpage, $norm);
+		}
+
+		if ($alatila == 'T' and $asiakastiedot["laskutus_nimi"] == "") {
+
+			$pdf->draw_text(50, 655, t("Ostaja", $kieli), 	$firstpage, $pieni);
+
+			$pdf->draw_text(50, 643, $asiakastiedot["nimi"], 		$firstpage, $norm);
+			$pdf->draw_text(50, 633, $asiakastiedot["nimitark"], 	$firstpage, $norm);
+			$pdf->draw_text(50, 623, $asiakastiedot["osoite"], 		$firstpage, $norm);
+			$pdf->draw_text(50, 613, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
+			$pdf->draw_text(50, 603, $asiakastiedot["maa"], 		$firstpage, $norm);
 		}
 
 		//Oikea sarake
@@ -56,7 +67,7 @@
 		$pdf->draw_text(430, 740,  $kukarow["eposti"],				$firstpage, $norm);
 
 		//Rivit alkaa täsä kohtaa
-		$kala = 620;
+		$kala = ($alatila == 'T' and $asiakastiedot["laskutus_nimi"] == "") ? 570 : 620;
 
 		//eka rivi
 		$pdf->draw_text(30,  $kala, t("Laskunro", $kieli),			$firstpage, $pieni);

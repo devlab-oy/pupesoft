@@ -586,6 +586,34 @@
 				$haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%$etsi%' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%$etsi%' or lasku.asiakkaan_tilausnumero like '%$etsi%') ";
 			}
 
+			if ($toim == 'TARJOUS') {								
+				$tarjous_order_by = "ORDER BY ";
+				if (!empty($tarjous_order)) {
+					if (isset($tarjous_order['tarjous'])) {
+						if ($tarjous_order['tarjous'] == 'DESC') {
+							$tarjous_order_by .= "lasku.tunnus DESC,";
+						}
+						else {
+							$tarjous_order_by .= "lasku.tunnus ASC,";
+						}
+					}
+					
+					if (isset($tarjous_order['voimassa'])) {
+						if ($tarjous_order['voimassa'] == 'DESC') {
+							$tarjous_order_by .= "voimassa DESC, lasku.tunnus DESC,";
+						}
+						else {
+							$tarjous_order_by .= "voimassa ASC, lasku.tunnus DESC,";
+						}
+					}
+				}
+				else {
+					$tarjous_order_by .= "lasku.tunnus DESC,";
+				}
+
+				$tarjous_order_by = substr($tarjous_order_by, 0, -1);
+			}
+
 			$seuranta = "";
 			$seurantalisa = "";
 
@@ -1121,7 +1149,7 @@
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A')
 						$haku
-						ORDER BY lasku.tunnus desc
+						$tarjous_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -1491,7 +1519,25 @@
 
 			$ii = 0;
 			for ($i = 0; $i < mysql_num_fields($result)-$miinus; $i++) {
-				echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+				if (mysql_field_name($result,$i) == 'tarjous') {
+					if ($tarjous_order['tarjous'] == 'ASC') {
+						echo "<th align='left'><a href='muokkaatilaus.php?toim=TARJOUS&indexvas=1&tarjous_order[tarjous]=DESC'>".t(mysql_field_name($result,$i))."<img src='{$palvelin2}pics/lullacons/arrow-small-up-green.png' /></a></th>";
+					}
+					else {
+						echo "<th align='left'><a href='muokkaatilaus.php?toim=TARJOUS&indexvas=1&tarjous_order[tarjous]=ASC'>".t(mysql_field_name($result,$i))."<img src='{$palvelin2}pics/lullacons/arrow-small-down-green.png' /></a></th>";
+					}
+				}
+				else if (mysql_field_name($result,$i) == 'voimassa') {
+					if ($tarjous_order['voimassa'] == 'ASC') {
+						echo "<th align='left'><a href='muokkaatilaus.php?toim=TARJOUS&indexvas=1&tarjous_order[voimassa]=DESC'>".t(mysql_field_name($result,$i))."<img src='{$palvelin2}pics/lullacons/arrow-small-up-green.png' /></a></th>";
+					}
+					else {
+						echo "<th align='left'><a href='muokkaatilaus.php?toim=TARJOUS&indexvas=1&tarjous_order[voimassa]=ASC'>".t(mysql_field_name($result,$i))."<img src='{$palvelin2}pics/lullacons/arrow-small-down-green.png' /></a></th>";
+					}
+				}
+				else {
+					echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+				}
 
 				if (isset($worksheet)) {
 

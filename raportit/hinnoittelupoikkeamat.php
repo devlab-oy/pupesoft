@@ -210,15 +210,15 @@
 
 					if ($ero >= 0) continue;
 
+					$eropros = $tilausrivirow['hinta'] == 0 ? 100 : abs(round((($ero) / $tilausrivirow['hinta']) * 100, 2));
+
+					if ($eropros_vahintaan > $eropros) continue;
+
 					$data[$i]['myyjä'] = $laskurow['myyja'];
 					$data[$i]['tilaus'] = $laskurow['tunnus'];
 					$data[$i]['rivejä'] = $num_rows;
 					$data[$i]['asiakas'] = $laskurow['nimi'];
 					$data[$i]['sisäinen_kommentti'] = $laskurow['sisviesti3'];
-
-					$eropros = $tilausrivirow['hinta'] == 0 ? 100 : abs(round((($ero) / $tilausrivirow['hinta']) * 100, 2));
-
-					if ($eropros_vahintaan > $eropros) continue;
 
 					$lis_hinta = hintapyoristys($lis_hinta);
 					$tilausrivirow['hinta'] = hintapyoristys($tilausrivirow['hinta']);

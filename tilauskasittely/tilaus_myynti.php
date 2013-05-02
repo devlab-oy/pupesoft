@@ -2526,6 +2526,50 @@ if ($tee == '') {
 		}
 	}
 
+	if ($kukarow['extranet'] == '' and ($laskurow["liitostunnus"] > 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS"))) {
+
+		echo "	<script type='text/javascript'>
+
+				$(function() {
+
+					$('#hae_asiakasta_linkki').on('click', function(e) {
+						e.preventDefault();
+
+						$(this).hide();
+						$('#hae_asiakasta_boksi').show().focus();
+						$('#hae_asiakasta_boksi_button').show();
+					});
+
+					$('#hae_asiakasta_boksi').on('keyup', function(e) {
+						e.preventDefault();
+
+						$('#syotetty_ytunnus').val($(this).val());
+					});
+
+					$('#hae_asiakasta_boksi_button').on('click', function(e) {
+						e.preventDefault();
+
+						if ($('#syotetty_ytunnus').val() == '') alert('",t("Kentt‰ ei saa olla tyhj‰"),"');
+						else $('#hae_asiakasta_formi').submit();
+					});
+
+				});
+
+				</script>";
+
+		echo "<form id='hae_asiakasta_formi' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+		echo "	<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
+				<input type='hidden' name='mista' value='{$mista}'>
+				<input type='hidden' name='toim' value='{$toim}'>
+				<input type='hidden' name='lopetus' value='{$lopetus}'>
+				<input type='hidden' name='ruutulimit' value = '{$ruutulimit}'>
+				<input type='hidden' name='projektilla' value='{$projektilla}'>
+				<input type='hidden' name='orig_tila' value='{$orig_tila}'>
+				<input type='hidden' name='orig_alatila' value='{$orig_alatila}'>
+				<input type='hidden' id='syotetty_ytunnus' name='syotetty_ytunnus' value=''>";
+		echo "</form>";
+	}
+
 	// t‰ss‰ alotellaan koko formi.. t‰m‰ pit‰‰ kirjottaa aina
 	echo "<form name='tilaus' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
 			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -2581,12 +2625,22 @@ if ($tee == '') {
 				echo "<input type='submit' name='liitaasiakasnappi' value='".t("Liit‰ asiakas")."'>";
 			}
 			else {
-				echo "$laskurow[ytunnus]";
+
+				if ($kukarow['extranet'] == '') echo "<a id='hae_asiakasta_linkki'>";
+
+				echo $laskurow['ytunnus'];
 
 				if ($faktarow["asiakasnro"] != "") {
 					echo " / $faktarow[asiakasnro]";
 				}
 				echo " / {$faktarow['ryhma']}";
+
+				if ($kukarow['extranet'] == '') {
+					echo "</a>";
+
+					echo "<input type='text' name='hae_asiakasta_boksi' id='hae_asiakasta_boksi' value='' style='display:none;' /> ";
+					echo "<input type='submit' name='hae_asiakasta_boksi_button' id='hae_asiakasta_boksi_button' value='",t("Vaihda asiakas"),"' style='display:none;'>";
+				}
 			}
 
 			echo "</td>";

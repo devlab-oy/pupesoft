@@ -68,9 +68,8 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 
 		foreach ($pakkaus as $indeksi => $pakkaus_selite) {
 
-			$kilot[$indeksi]     = round($kilot[$indeksi]/$kollit[$indeksi], 2);
-			$kuutiot[$indeksi]   = round($kuutiot[$indeksi]/$kollit[$indeksi], 2);
-			$lavametri[$indeksi] = round($lavametri[$indeksi]/$kollit[$indeksi], 2);
+			$kilot[$indeksi]   = round($kilot[$indeksi]/$kollit[$indeksi], 2);
+			$kuutiot[$indeksi] = round($kuutiot[$indeksi]/$kollit[$indeksi], 2);
 
 			// Napataan pakkauksen tiedot
 			$query = "	SELECT pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys, pakkaus.pakkauskuvaus, ifnull(pakkauskoodit.koodi, pakkaus.pakkaus) koodi

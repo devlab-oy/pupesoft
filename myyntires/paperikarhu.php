@@ -456,7 +456,9 @@
 		$ikalaskenta = " TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika, ";
 	}
 
-	$query = "	SELECT l.tunnus, l.tapvm, l.liitostunnus,
+	$query = "	SELECT l.tunnus,
+				l.tapvm,
+				l.liitostunnus,
 				l.summa-l.saldo_maksettu summa,
 				l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa,
 				l.erpcm, l.laskunro, l.viite,
@@ -643,6 +645,24 @@
 	$rivit = array();
 
 	while ($row = mysql_fetch_assoc($result)) {
+
+		if ($tee_pdf == 'tulosta_karhu') {
+			// huomioidaan osasuoritukset jos tulostetaan kopsu jälkikäteen
+			$query = "	SELECT sum(summa) osasuor_summa
+						FROM tiliointi USE INDEX (tositerivit_index)
+						WHERE yhtio = '$kukarow[yhtio]'
+						and ltunnus = '$row[tunnus]'
+						and tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
+						and tapvm >= '$laskutiedot[kpvm]'
+						and korjattu = ''";
+			$lasktilitre = pupe_query($query);
+			$lasktilitro = mysql_fetch_assoc($lasktilitre);
+
+			if ($lasktilitro["osasuor_summa"] != 0) {
+				$row["summa"] += $lasktilitro["osasuor_summa"];
+			}
+		}
+
 		$rivit[] = $row;
 		$summa = rivi($firstpage, $summa);
 	}
@@ -740,6 +760,12 @@
 		$laskurow["tapvm"] = date("Y-m-d");
 		$laskurow["erpcm"] = date("Y-m-d");
 		$laskurow["kapvm"] = date("Y-m-d");
+		if ($laskurow["toim_nimi"] == '') {
+			$laskurow["toim_nimi"]   = $laskurow["nimi"];
+			$laskurow["toim_osoite"] = $laskurow["osoite"];
+			$laskurow["toim_postitp"] = $laskurow["postitp"];
+			$laskurow["toim_postino"] = $laskurow["postino"];
+		}
 
 		$alvrow = array(
 			'rivihinta'		 => 0,
@@ -761,17 +787,17 @@
 		finvoice_otsikko_loput($tootfinvoice, $laskurow, $masrow);
 
 		$tilrow = array(
-			'tuoteno' => 1,
-			'nimitys' => 'Tyhjä',
-			'kpl' => 0,
-			'tilkpl' => 0,
-			'hinta' => 0,
+			'tuoteno' 		 => 1,
+			'nimitys' 		 => 'Tyhjä',
+			'kpl' 			 => 0,
+			'tilkpl' 		 => 0,
+			'hinta' 		 => 0,
 			'hintapyoristys' => 0,
-			'otunnus' => 0,
+			'otunnus' 		 => 0,
 			'toimitettuaika' => date("Y-m-d"),
-			'tilauspaiva' => date("Y-m-d"),
-			'alv' => 0,
-			'rivihinta' => 0,
+			'tilauspaiva' 	 => date("Y-m-d"),
+			'alv' 			 => 0,
+			'rivihinta' 	 => 0,
 			'rivihinta_verollinen' => 0,
 		);
 

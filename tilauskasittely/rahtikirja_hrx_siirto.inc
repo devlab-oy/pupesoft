@@ -171,6 +171,8 @@ if ($kollityht > 0) {
 
 		$lahettaja_maa_nimi = maa($lahettaja_maa, $kukarow['kieli']);
 
+		$mediatyyppi = !empty($mediatyyppi) ? $mediatyyppi : "";
+
 		for ($i = 1; $i <= $kollityht; $i++) {
 			// Tulostetaan Pupen oma kollitarra
 			$params = array(
@@ -189,6 +191,7 @@ if ($kollityht > 0) {
 	 			'lahettaja_maa' => $lahettaja_maa,
 	 			'lahettaja_maa_nimi' => $lahettaja_maa_nimi,
 	 			'reittietikettitulostin' => $kirjoitin,
+	 			'mediatyyppi' => $mediatyyppi,
 	 			'monesko_laatikko' => $i,
 	 			'montako_laatikkoa_yht' => $kollityht,
 	 			'pakkauskoodi' => $pakkaus[0],

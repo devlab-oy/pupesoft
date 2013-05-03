@@ -242,7 +242,7 @@ if (!isset($tee) or $tee == '') {
 			$varilisa = ($tyorow["tyostatusvari"] != "") ? " style='background-color: {$tyorow["tyostatusvari"]};'" : "";
 
 			echo "<tr $varilisa>";
-			echo "<td><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero={$tyorow['tunnus']}'>".$tyorow['tunnus']."</a></td>";
+			echo "<td><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tilausnumero={$tyorow['tunnus']}'>".$tyorow['tunnus']."</a></td>";
 			echo "<td>{$tyorow["tyom_prioriteetti"]}</td>";
 			echo "<td>{$tyorow["tyostatus"]}</td>";
 			echo "<td>{$tyorow["nimi"]}</td>";

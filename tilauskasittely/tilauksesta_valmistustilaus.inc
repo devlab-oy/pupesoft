@@ -5,10 +5,11 @@
 
 	if (!function_exists("tilauksesta_valmistustilaus")) {
 		function tilauksesta_valmistustilaus($otunnus) {
-			global $yhtiorow, $kukarow;
+			global $yhtiorow, $kukarow, $tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array;
 
 			$tilauksesta_valmistustilaus = "";
 			$kukakesken	= $kukarow["kesken"];
+			$tehtiin_uusi_otsikko = false;
 
 			$query = "	SELECT *
 						FROM lasku
@@ -30,8 +31,6 @@
 						ORDER BY tilausrivi.tunnus";
 			$lsresult = mysql_query($query) or pupe_error($query);
 
-			$tehtiin_uusi_otsikko = false;
-
 			if (mysql_num_rows($lsresult) > 0) {
 				while ($valmlisaarivi = mysql_fetch_array($lsresult)) {
 
@@ -51,6 +50,8 @@
 								and toim_postino	= '$myytilrow[toim_postino]'
 								and toim_postitp	= '$myytilrow[toim_postitp]'
 								and toim_maa		= '$myytilrow[toim_maa]'
+								and toimaika		= '$myytilrow[toimaika]'
+								and kerayspvm		= '$myytilrow[kerayspvm]'
 								and viesti			= '$viesti'
 								and left(luontiaika,10) = left(now(),10)
 								and laatija 		= '$kukarow[kuka]'";
@@ -89,6 +90,10 @@
 						$toim_postitp		= $myytilrow['toim_postitp'];
 						$toim_maa			= $myytilrow['toim_maa'];
 
+						if ($yhtiorow["kerataanko_valmistukset"] == "E" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON")) {
+							$eilahe = 'CHECKED';
+						}
+
 						list($toimvv, $toimkk, $toimpp) = explode('-', $myytilrow["toimaika"]);
 						list($kervv, $kerkk, $kerpp)    = explode('-', $myytilrow["kerayspvm"]);
 
@@ -122,20 +127,28 @@
 					$tresult = mysql_query($query) or pupe_error($query);
 					$trow = mysql_fetch_array($tresult);
 
-					$kukarow["kesken"] 	= $tunnus;
-					$kpl 				= $valmlisaarivi["kpl"];
-					$tuoteno			= $valmlisaarivi["tuoteno"];
-					$toimaika			= $myytilrow["kerayspvm"];
-					$kerayspvm			= $myytilrow["kerayspvm"];
-					$hinta				= 0;
-					$var 				= "";
-					$varasto			= "";
-					$paikka				= "";
-					$varataan_saldoa	= "EI";
-					$kommentti			= $valmlisaarivi['kommentti'];
+					//funktio populoi globaalit muuttujat $tuoteno_array $kpl_array $kommentti_array $lapsenlap_array
+					$tuoteno_array = array($valmlisaarivi['tuoteno']);
+					$kpl_array = array(
+						$valmlisaarivi['tuoteno'] => $valmlisaarivi['kpl']
+					);
+					pupesoft_lisaa_valmisteen_rekursiiviset_reseptit();
 
-					// $perheid_lisaarivi on perustetun rivin tunnus
-					require ("lisaarivi.inc");
+					foreach ($tuoteno_array as $tuoteno_temp) {
+						$kukarow["kesken"] 	= $tunnus;
+						$kpl 				= $kpl_array[$tuoteno_temp];
+						$tuoteno			= $tuoteno_temp;
+						$toimaika			= $myytilrow["kerayspvm"];
+						$kerayspvm			= $myytilrow["kerayspvm"];
+						$hinta				= 0;
+						$var 				= "";
+						$varasto			= "";
+						$paikka				= "";
+						$varataan_saldoa	= "EI";
+						$kommentti			= $kommentti_array[$tuoteno_temp];
+
+						require('lisaarivi.inc');
+					}
 
 					// Ainoastaan asiakkaalle valmistetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä
 					$suoraan_laskutukseen_lisa = $yhtiorow['automaattinen_jt_toimitus_valmistus'] == 'S' ? 'o' : '';

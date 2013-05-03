@@ -449,10 +449,10 @@
 
 		if ($toim != 'TYOMAARAYS_ASENTAJA' or $olenko_asentaja_tassa_hommassa) {
 			if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
-				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
+				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tilausnumero=$vrow[tunnus]&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
 			}
 			else {
-				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&tyojono=$tyojono&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
+				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=$toimi&tilausnumero=$vrow[tunnus]&tyojono=$tyojono&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
 			}
 		}
 		else {

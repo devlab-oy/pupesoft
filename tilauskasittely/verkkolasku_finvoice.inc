@@ -51,44 +51,40 @@ if (!function_exists('finvoice_otsik')) {
 				break;
 		}
 
-		//	Aloitellaan aineiston luontia
+		//	Aloitellaan aineiston luontia. Kaikki tiedot pit‰‰ olla kunnossa, tai chn 112 "Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin"
 		if (($senderpartyid != "" and $senderintermediator != "" and $tulostuspalvelu != "") or $lasrow["chn"] == "112") {
-			$receiverpartyid = "";
-			$receiverintermediator = "";
 
+			// Selvitet‰‰n vastaanottajan verkkolaskutunnus sek‰ vastaanottajan operaattori
 			if ($yhtiorow["verkkolasku_lah"] == "iPost") {
 				$receiverpartyid = $lasrow["verkkotunnus"];
 				$receiverintermediator = "003710948874";
 			}
+			elseif (strpos($lasrow["verkkotunnus"], "@") !== FALSE) {
+				list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
+			}
 			else {
-				if (strpos($lasrow["verkkotunnus"], "@") !== FALSE) {
-					list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
-				}
-				else {
-					$receiverpartyid = $lasrow["verkkotunnus"];
-				}
+				$receiverpartyid = $lasrow["verkkotunnus"];
+				$receiverintermediator = "";
 			}
 
-			// Jos receiverintermediaattori puuttuu niin laitetaan APIX:n oma ovt t‰h‰n
-			if ($yhtiorow["verkkolasku_lah"] == "apix" and $receiverintermediator == "") {
+			// Jos vastaanottajan operaattori puuttuu ja k‰ytˆss‰ on Apix, laitetaan Apixin verkkolaskuosoite vastaanottajan operaattoriksi
+			if ($receiverintermediator == "" and $yhtiorow["verkkolasku_lah"] == "apix") {
 				$receiverintermediator = "003723327487";
 			}
 
-			// Jos t‰nne ei saada mit‰‰n arvoja laitetaan se edelleen pankkiin, mutta annetaan lipuksi tulostukseen
-			// Maventa hanskaa myˆs tilanteen jossa intermediaattori puuttuu, joten ei menn‰ silloin t‰h‰n haaraan
-			if ($receiverpartyid == "" or ($receiverintermediator == "" and $yhtiorow["verkkolasku_lah"] != "maventa") or $lasrow["chn"] == "100") {
+			// Jos vastaanottajan operaattori puuttuu laitetaan l‰hett‰j‰n operaattori. Maventalla t‰m‰ saa olla tyhj‰‰.
+			if ($receiverintermediator == "" and $yhtiorow["verkkolasku_lah"] != "maventa") {
+				$receiverintermediator = $senderintermediator;
+			}
+
+			// Jos vastaanottaja on tyhj‰‰ tai ollaan valittu lasku tulostuspalveluun chn 100 "Verkkolasku, tulostuspalvelu"
+			if ($receiverpartyid == "" or $lasrow["chn"] == "100") {
 				$receiverpartyid = $tulostuspalvelu;
+			}
 
-				if ($yhtiorow["verkkolasku_lah"] == "maventa") {
-					$receiverintermediator = "";
-				}
-				else {
-					$receiverintermediator 	= $senderintermediator;
-				}
-
-				if ($lasrow["chn"] != "100" and $lasrow["chn"] != "112" and $silent == "") {
-					$tulos_ulos .= "<font class='error'>".t("Asiakkaalta puuttuu verkkotunnus, lasku menee tulostuspalveluun.")." $lasrow[nimi] $lasrow[laskunro]</font><br>\r\n<br>\r\n";
-				}
+			// Tulostetaan virhe jos pakotettiin lasku tulostuspalveluun
+			if ($receiverpartyid == $tulostuspalvelu and $lasrow["chn"] != "100" and $lasrow["chn"] != "112" and $silent == "") {
+				$tulos_ulos .= "<font class='error'>".t("Asiakkaalta puuttuu verkkotunnus, lasku menee tulostuspalveluun.")." $lasrow[nimi] $lasrow[laskunro]</font><br>\r\n<br>\r\n";
 			}
 
 			// 	Tehd‰‰n SOAP, paitsi jos halutaan vain katsoa ruudulla
@@ -810,5 +806,3 @@ if (!function_exists('finvoice_lasku_loppu')) {
 		}
 	}
 }
-
-?>

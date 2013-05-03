@@ -179,14 +179,11 @@ function tarkista_kassalippaan_tasmaytys($kassalipas_tunnus) {
 	$query = "	SELECT group_concat(distinct lasku.tunnus) ltunnukset,
 				group_concat(distinct tiliointi.selite) selite
 				FROM lasku
-				JOIN kassalipas
-				ON ( kassalipas.yhtio = lasku.yhtio and kassalipas.tunnus = {$kassalipas_tunnus} )
-				JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
-				AND tiliointi.ltunnus = lasku.tunnus
-				AND tiliointi.selite LIKE concat(kassalipas.nimi,'%')
-				AND tiliointi.korjattu = '')
+				JOIN kassalipas ON ( kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = {$kassalipas_tunnus} )
+				JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.selite LIKE concat(kassalipas.nimi,' %') AND tiliointi.korjattu = '')
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.tila 	  = 'X'
+				AND lasku.alatila = 'K'
 				AND lasku.tapvm   = CURDATE()";
 	$result = pupe_query($query);
 
@@ -254,21 +251,17 @@ function tee_kateisotto($kassalipas, $request_params) {
 function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti) {
 	global $kukarow;
 
-	//tila = X ja alatila = '' -> Muu tosite
-	//tila = X alatila = '' tilaustyyppi = O ---> Tämä tarkoittaa, että Käteisotto
 	$query = "	INSERT INTO lasku
-				SET yhtio = '{$kukarow['yhtio']}',
-				summa = '$summa',
-				comments = '{$yleinen_kommentti}',
-				tila = 'X',
-				alatila = '',
-				tilaustyyppi = 'O',
-				laatija = '{$kukarow['kuka']}',
-				luontiaika = NOW(),
-				tapvm = NOW(),
-				kassalipas = '{$kassalipas['tunnus']}',
-				nimi = '".t("Käteisotto kassalippaasta").": {$kassalipas['nimi']}'";
-
+				SET yhtio 	 = '{$kukarow['yhtio']}',
+				summa 		 = '$summa',
+				comments 	 = '{$yleinen_kommentti}',
+				tila 		 = 'X',
+				alatila 	 = 'O',
+				laatija 	 = '{$kukarow['kuka']}',
+				luontiaika 	 = NOW(),
+				tapvm 		 = NOW(),
+				kassalipas   = '{$kassalipas['tunnus']}',
+				nimi 		 = '".t("Käteisotto kassalippaasta").": {$kassalipas['nimi']}'";
 	pupe_query($query);
 
 	return mysql_insert_id();
@@ -277,7 +270,7 @@ function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti) {
 function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false) {
 	global $kukarow, $yhtiorow;
 
-	if($kulu_tiliointi) {
+	if ($kulu_tiliointi) {
 		$kateisoton_luonne_row = hae_kateisoton_luonne($params['kateisoton_luonne']);
 		$kateisoton_luonne_row['kustp'] = $params['kassalipas']['kustp'];
 		$selite = t("Käteisotto kassalippaasta").": " . $params['kassalipas']['nimi'];
@@ -285,7 +278,7 @@ function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false)
 		$kulu_tiliointi_linkki = "";
 		$lukko = "lukko = '',";
 	}
-	else if ($alv_tiliointi) {
+	elseif ($alv_tiliointi) {
 		$kateisoton_luonne_row['tilino'] = $yhtiorow['alv'];
         $kateisoton_luonne_row['kustp'] = 0;
         $selite = t("Käteisotton vero kassalippaasta").": " . $params['kassalipas']['nimi'];
@@ -301,21 +294,22 @@ function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false)
 		$kulu_tiliointi_linkki = "";
 		$lukko = "lukko = '',";
 	}
+	
 	$query = "	INSERT INTO tiliointi
-                SET yhtio = '{$kukarow['yhtio']}',
-                laatija = '{$kukarow['kuka']}',
-                laadittu = NOW(),
-                ltunnus = '{$params['lasku_tunnus']}',
-                tilino = '{$kateisoton_luonne_row['tilino']}',
-                kustp = '{$kateisoton_luonne_row['kustp']}',
-                tapvm = NOW(),
-                summa = {$params['summa']},
+                SET yhtio 	= '{$kukarow['yhtio']}',
+                laatija 	= '{$kukarow['kuka']}',
+                laadittu 	= NOW(),
+                ltunnus 	= '{$params['lasku_tunnus']}',
+                tilino 		= '{$kateisoton_luonne_row['tilino']}',
+                kustp 		= '{$kateisoton_luonne_row['kustp']}',
+                tapvm 		= NOW(),
+                summa 		= {$params['summa']},
                 summa_valuutassa = {$params['summa']},
-                valkoodi = '{$yhtiorow['valkoodi']}',
-                selite = '{$selite}',
+                valkoodi 	= '{$yhtiorow['valkoodi']}',
+                selite 		= '{$selite}',
 				{$kulu_tiliointi_linkki}
 				{$lukko}
-                vero = {$vero}";
+                vero 		= {$vero}";
 
     pupe_query($query);
 

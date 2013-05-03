@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-$sanakirja_kielet = array("en", "se", "de", "dk", "ee");
+$sanakirja_kielet = array("en", "se", "de", "dk", "ee", "no");
 
 echo "<font class='head'>".t("Sanakirja")."</font><hr>";
 

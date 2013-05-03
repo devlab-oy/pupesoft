@@ -343,6 +343,4 @@
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 	fclose($fh);
 
-	echo file_get_contents($pdffilenimi);
-
-?>
+	if (!isset($tee) or $tee != 'TULOSTA_EMAIL') echo file_get_contents($pdffilenimi);

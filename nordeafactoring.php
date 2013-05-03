@@ -58,31 +58,32 @@
 	             	WHERE yhtio 		= '$kukarow[yhtio]'
 					and factoringyhtio 	= '$factoringyhtio'
 					and valkoodi 		= '$valkoodi'";
-		$fres = mysql_query($query) or pupe_error($query);
-		$frow = mysql_fetch_array($fres);
+		$fres = pupe_query($query);
+		$frow = mysql_fetch_assoc($fres);
 
 		$query = "	SELECT min(laskunro) eka, max(laskunro) vika
-					FROM lasku
-					JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='$factoringyhtio'
+					FROM lasku use index (yhtio_tila_tapvm)
+					JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring = '$factoringyhtio'
 					WHERE lasku.yhtio	= '$kukarow[yhtio]'
 					and lasku.tila	  	= 'U'
+					and lasku.tapvm     > date_sub(CURDATE(), interval 6 month)
 					and lasku.alatila	= 'X'
 					and lasku.summa		!= 0
 					and lasku.factoringsiirtonumero = 0
 					and lasku.valkoodi	= '$valkoodi'";
-		$aresult = mysql_query ($query) or pupe_error($query);
-		$arow = mysql_fetch_array($aresult);
+		$aresult = pupe_query($query);
+		$arow = mysql_fetch_assoc($aresult);
 
 		$query = "	SELECT nimi, tunnus
 	                FROM valuu
 	             	WHERE yhtio = '$kukarow[yhtio]'
 	               	ORDER BY jarjestys";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		echo "<tr><th>Sopimusnumero:</th><td>$frow[sopimusnumero]</td>";
 		echo "<tr><th>Valitse valuutta:</th><td><select name='valkoodi' onchange='submit();'>";
 
-		while ($vrow = mysql_fetch_array($vresult)) {
+		while ($vrow = mysql_fetch_assoc($vresult)) {
 			$sel="";
 			if ($vrow['nimi'] == $valkoodi) {
 					$sel = "selected";
@@ -102,14 +103,15 @@
 				</tr>";
 
 		$query = "	SELECT max(factoringsiirtonumero)+1 seuraava
-					FROM lasku
-					WHERE  yhtio		= '$kukarow[yhtio]'
-					and lasku.tila	  	= 'U'
-					and lasku.alatila	= 'X'
-					and lasku.summa		!= 0
+					FROM lasku use index (yhtio_tila_tapvm)
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila	  = 'U'
+					and lasku.tapvm   > date_sub(CURDATE(), interval 6 month)
+					and lasku.alatila = 'X'
+					and lasku.summa	 != 0
 					and lasku.factoringsiirtonumero > 0";
-		$aresult = mysql_query ($query) or pupe_error($query);
-		$arow = mysql_fetch_array($aresult);
+		$aresult = pupe_query($query);
+		$arow = mysql_fetch_assoc($aresult);
 
 		echo "<tr><th>Siirtoluettelon numero:</th>
 				<td><input type='text' name='factoringsiirtonumero' value='$arow[seuraava]' size='6'></td>";
@@ -137,8 +139,8 @@
 	             	WHERE yhtio 		= '$kukarow[yhtio]'
 					and factoringyhtio 	= '$factoringyhtio'
 					and valkoodi 		= '$valkoodi'";
-		$fres = mysql_query($query) or pupe_error($query);
-		$frow = mysql_fetch_array($fres);
+		$fres = pupe_query($query);
+		$frow = mysql_fetch_assoc($fres);
 
 		echo "<tr><th>Sopimusnumero:</th><td>$frow[sopimusnumero]</td>";
 		echo "<tr><th>Valitse valuutta:</th><td><select name='valkoodi' onchange='submit();'>";
@@ -147,9 +149,9 @@
 	                FROM valuu
 	             	WHERE yhtio = '$kukarow[yhtio]'
 	               	ORDER BY jarjestys";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
-		while ($vrow = mysql_fetch_array($vresult)) {
+		while ($vrow = mysql_fetch_assoc($vresult)) {
 			$sel="";
 			if ($vrow['nimi'] == $valkoodi) {
 					$sel = "selected";
@@ -175,8 +177,8 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and factoringyhtio = '$factoringyhtio'
 					and valkoodi = '$valkoodi'";
-		$fres = mysql_query($query) or pupe_error($query);
-		$frow = mysql_fetch_array($fres);
+		$fres = pupe_query($query);
+		$frow = mysql_fetch_assoc($fres);
 
 
 		//Luodaan erätietue
@@ -255,7 +257,7 @@
 					and lasku.summa 	 != 0
 					and lasku.valkoodi	= '$valkoodi'
 					$where";
-		$dresult = mysql_query ($dquery) or pupe_error($dquery);
+		$dresult = pupe_query($dquery);
 
 		if (mysql_num_rows($dresult) == 0) {
 			echo "Huono laskunumeroväli! Yhtään siirettävää laskua ei löytynyt!";
@@ -299,7 +301,7 @@
 					and lasku.valkoodi	= '$valkoodi'
 					$where
 					ORDER BY laskunro";
-		$laskures = mysql_query ($query) or pupe_error($query);
+		$laskures = pupe_query($query);
 
 		if (mysql_num_rows($laskures) > 0) {
 
@@ -318,15 +320,15 @@
 			echo "<table>";
 			echo "<tr><th>Tyyppi</th><th>Laskunumero</th><th>Nimi</th><th>Summa</th><th>Valuutta</th></tr>";
 
-			while ($laskurow = mysql_fetch_array($laskures)) {
+			while ($laskurow = mysql_fetch_assoc($laskures)) {
 
 				// Haetaan asiakkaan tiedot
 				$query  = "	SELECT *
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus  = '$laskurow[liitostunnus]'";
-				$asires = mysql_query($query) or pupe_error($query);
-				$asirow = mysql_fetch_array($asires);
+				$asires = pupe_query($query);
+				$asirow = mysql_fetch_assoc($asires);
 
 				// Valuuttalasku
 				if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -608,7 +610,7 @@
 								and lasku.yhtio = maksuehto.yhtio
 								and lasku.maksuehto = maksuehto.tunnus
 								and maksuehto.factoring = '$factoringyhtio'";
-					$dresult = mysql_query ($dquery) or pupe_error($dquery);
+					$dresult = pupe_query($dquery);
 				}
 				//luodaan summatietue
 				//luodaan laskutietue

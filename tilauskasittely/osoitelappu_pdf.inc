@@ -11,7 +11,7 @@ if ($toim == 'EXTRANET_REKLAMAATIO' and $tunnus == '') {
 
 if ($phpnimi != "rahtikirja_custom.php") {
 	//Tulostetaan standardi kolliosoitelappu
-	$query = "	SELECT lasku.*, if(yhteyshenkilo.nimi!='',concat_ws(' / ', yhteyshenkilo.nimi,if(yhteyshenkilo.gsm!='',yhteyshenkilo.gsm,if(yhteyshenkilo.puh!='',yhteyshenkilo.puh,NULL))),'') yhteyshenkilo
+	$query = "	SELECT lasku.*, if(yhteyshenkilo.nimi != '', concat_ws(' / ', yhteyshenkilo.nimi, if(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, if(yhteyshenkilo.puh != '', yhteyshenkilo.puh, NULL))), lasku.tilausyhteyshenkilo) yhteyshenkilo
 				FROM lasku
 				LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
 				LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen and yhteyshenkilo.tyyppi = 'A'
@@ -199,9 +199,9 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 	// kollityht (2)
 	// tarkiste (1)
 	$sscc = 1;
-	$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
-	$sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
-	$sscc .= sprintf('%02.02d', $uniq_merkki);
+	$sscc .= sprintf("%08.8s",$yhtiorow["ytunnus"]);
+	$sscc .= sprintf('%06.6s', substr($laskurow["tunnus"], -6));
+	$sscc .= sprintf('%02.2s', $uniq_merkki);
 	$loppu = tarkiste($sscc);
 	$sscc = $sscc.$loppu;
 

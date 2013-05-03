@@ -36,6 +36,9 @@
 	// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si myyntihaarassa
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
 
+	// debuggia varten, laita 1 jos haluut messuja
+	$lisaarivi_debug = 0;
+
 	if (!isset($rivitunnus)) $rivitunnus = 0;
 	else $rivitunnus = (int) $rivitunnus;
 
@@ -170,7 +173,7 @@
 
 	if (isset($varasto) and $lisaarivi_debug == 1) echo "Myyd‰‰n varastoista: ",var_dump($varasto),"<br>";
 
-	//katotaan oletuspaikka ja myyd‰‰n tietenkin sielt‰ jos niin halutaan
+	// katotaan oletuspaikka ja myyd‰‰n tietenkin sielt‰ jos niin halutaan
 	if ($olpaikalta != '') {
 		$olquery = "SELECT concat_ws('#!°!#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
 					FROM tuotepaikat
@@ -282,9 +285,6 @@
 	$korkieltokommi = array();
 	$myyntierahuom	= array();
 	$ostoerahuom	= array();
-
-	// debuggia varten, laita 1 jos haluut messuja
-	$lisaarivi_debug = 0;
 
 	if ($laskurow['tila'] == 'O' or $laskurow['tila'] == 'K') {
 		$rivityyppi = 'O';	// Ostotilausrivi
@@ -1157,7 +1157,8 @@
 			if ($paikka != '') {
 				$paikat = explode('#!°!#',$paikka);
 
-				if ($lisaarivi_debug==1) echo "Halutaan myyd‰ paikalta: $paikat[0]-$paikat[1]-$paikat[2]-$paikat[3]<br>";
+				if ($lisaarivi_debug == 1) echo "Halutaan myyd‰ paikalta: $paikat[0]-$paikat[1]-$paikat[2]-$paikat[3]<br>";
+				$paikkakelpasi = FALSE;
 
 				foreach ($myy_tuoteno as $i => $tuoteno) {
 					if ($yhtiorow["puute_jt_oletus"] == "O" or
@@ -1183,9 +1184,14 @@
 						$myy_hyllytaso[] = $paikat[3];
 						$myy_era[] 		 = $paikat[4];
 
+						$paikkakelpasi	 = TRUE;
 						break;
 					}
 				}
+
+				// Jos paikkaa ei lˆytynytk‰‰n tai jos sen saldo ei riitt‰nyt, niin forgetaboutit.
+				if (!$paikkakelpasi) $paikka = "";
+
 			}
 
 			// Myyd‰‰n tietyst‰ varastosta
@@ -1444,7 +1450,7 @@
 								if (trim($tuotenimitys_force) != "") {
 									$trow["nimitys"] = addslashes($tuotenimitys_force);
 								}
-								elseif ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and trim($tuotenimitys) != "") {
+								elseif (!empty($yhtiorow["nimityksen_muutos_tilauksella"]) and trim($tuotenimitys) != "") {
 									// lis‰t‰‰n saatu nimitys kaikille tuotteille
 									$trow["nimitys"] = addslashes($tuotenimitys);
 								}
@@ -1960,6 +1966,11 @@
 			if ($rivityyppi != 'O') {
 				switch ($var) {
 					case 'J' : // J‰lkitoimitukseen
+						// Ollaan painettu JT-muiden mukana nappia, tai meill‰ on parametrit siten, ett‰ se halutaan defaulttina p‰‰lle
+						// (Jt_automatiikka = "kohdistetaan.." ja Automaattinen_jt_toimitus = "J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰ ker‰ysp‰iv‰n mukaisesti")
+						if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
+							$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
+						}
 					case 'R' : // Valmistetaan asiakkaalle
 					case 'U' : // Tilataan toimittajalta asiakkaalle
 					case 'T' : // Tilataan toimittajalta

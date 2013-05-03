@@ -878,7 +878,7 @@
 					}
 
 					if ($memorow["laskutunnus"] == 0 and $memorow["tyyppi"] == "Lead") {
-						echo "<br><br><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TARJOUS&tee=&from=CRM&asiakasid=$asiakasid&lead=$memorow[tunnus]'>".t("Tee tarjous")."</a>";
+						echo "<br><br><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TARJOUS&from=CRM&asiakasid=$asiakasid&lead=$memorow[tunnus]'>".t("Tee tarjous")."</a>";
 					}
 
 					if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $memorow["perheid"] == 0 and ($memorow["tyyppi"] == "Memo" or $memorow["tyyppi"] == "Lead")) {

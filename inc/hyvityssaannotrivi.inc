@@ -62,7 +62,9 @@
 
 		$asiakkaan_kentat = array(
 							'osasto',
-							'ryhma',);
+							'ryhma',
+							'ytunnus',
+							'asiakasnro');
 
 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys($asiakkaan_kentat, '');
 

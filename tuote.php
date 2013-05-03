@@ -150,7 +150,6 @@
 	elseif (strpos($lopetus, "tilaus_myynti.php") === FALSE and $kukarow["kuka"] != "" and $laskurow["tila"] != "" and $laskurow["tila"] != "K" and $toim_kutsu != "") {
 		echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_myynti.php'>
 				<input type='hidden' name='toim' value='$toim_kutsu'>
-				<input type='hidden' name='aktivoinnista' value='true'>
 				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
 				<input type='submit' value='".t("Takaisin tilaukselle")."'>
 				</form><br><br>";
@@ -347,6 +346,14 @@
 			}
 			else {
 				$tuoterow['ei_varastoida'] = "<font style='color:#00FF00;'>".t("Kyllä")."</font>";
+			}
+
+			// Ostoehdotukselle
+			if ($tuoterow['ostoehdotus'] == 'E') {
+				$tuoterow['ostoehdotus'] = "<font style='color:#FF0000;'>".t("Ei")."</font>";
+			}
+			else {
+				$tuoterow['ostoehdotus'] = "<font style='color:#00FF00;'>".t("Kyllä")."</font>";
 			}
 
 			//tullinimike
@@ -716,7 +723,7 @@
 			echo "<th>".t("Leveys")."</th>";
 			echo "<th>".t("Syvyys")."</th>";
 			echo "<th>".t("Paino")."</th>";
-			echo "<th></th>";
+			echo "<th>".t("Ostoehdotus")."</th>";
 			echo "<th></th>";
 			echo "</tr>";
 
@@ -725,7 +732,7 @@
 			echo "<td>$tuoterow[tuoteleveys] m</td>";
 			echo "<td>$tuoterow[tuotesyvyys] m</td>";
 			echo "<td>$tuoterow[tuotemassa] kg</td>";
-			echo "<td></td>";
+			echo "<td>$tuoterow[ostoehdotus]</td>";
 			echo "<td></td>";
 			echo "</tr>";
 

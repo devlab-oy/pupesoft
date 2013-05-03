@@ -331,7 +331,10 @@
 			$row["nimi"] = 'MUUT';
 		}
 		else {
-			$query = "SELECT nimi FROM kassalipas WHERE tunnus='$tasmayskassa' AND yhtio='$kukarow[yhtio]'";
+			$query = "	SELECT nimi
+						FROM kassalipas
+						WHERE tunnus = '$tasmayskassa'
+						AND yhtio = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
 			$row = mysql_fetch_assoc($result);
 		}
@@ -339,9 +342,10 @@
 		$tasmays_query = "	SELECT group_concat(distinct lasku.tunnus) ltunnukset
 							FROM lasku
 							JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.selite LIKE '$row[nimi] %' AND tiliointi.korjattu = '')
-							WHERE lasku.yhtio 	= '$kukarow[yhtio]'
-							AND lasku.tila 		= 'X'
-							AND lasku.tapvm 	= '$vv-$kk-$pp'";
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							AND lasku.tila    = 'X'
+							AND lasku.alatila = 'K'
+							AND lasku.tapvm   = '$vv-$kk-$pp'";
 		$tasmays_result = pupe_query($tasmays_query);
 		$tasmaysrow = mysql_fetch_assoc($tasmays_result);
 
@@ -627,6 +631,7 @@
 					yhtio      = '$kukarow[yhtio]',
 					tapvm      = '$vv-$kk-$pp',
 					tila       = 'X',
+					alatila    = 'K',
 					laatija    = '$kukarow[kuka]',
 					luontiaika = now()";
 		$result = pupe_query($query);
@@ -1174,9 +1179,12 @@
 				$tasmaytys_row = mysql_fetch_assoc($tasmaytys_result);
 
 				$tasmaytys_json_array = explode('##' , $tasmaytys_row['sisviesti2']);
+
 				//emme tiedä missä kohtaa array:tä kassalippaan kaikki elementit on tallessa, etsimme oikean kohdan.
 				foreach($tasmaytys_json_array as $json_elementti) {
+
 					$kassalipas_array = json_decode($json_elementti, true);
+
 					if ($kassalipas_array !== NULL) {
 						//elementti on pystytty json_decoodaamaan
 						if (array_key_exists($row['ktunnus'], $kassalipas_array)) {
@@ -1895,7 +1903,7 @@
 						$kateismaksuyhteensa = $kassalippaan_kateisotot_yhteensa + $kateismaksuyhteensa;
 						$yhteensa = $kassalippaan_kateisotot_yhteensa + $yhteensa;
 						$kassayhteensa = $kassalippaan_kateisotot_yhteensa + $kassayhteensa;
-						
+
 						echo "</table><table width='100%'>";
 						echo "<tr><td colspan='7' class='tumma'>$edtyyppi ".t("yhteensä").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("Näytä / Piilota")."</a></td>";
 						echo "<td align='right' class='tumma' style='width:100px'><b><div id='erotus$i'>".sprintf('%.2f',$kateismaksuyhteensa)."</div></b></td></tr>";
@@ -2041,9 +2049,10 @@
 							JOIN suoritus use index (tositerivit_index) ON (suoritus.yhtio=tiliointi.yhtio and suoritus.ltunnus=tiliointi.aputunnus)
 							LEFT JOIN kuka ON (lasku.laatija=kuka.kuka and lasku.yhtio=kuka.yhtio)
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							and lasku.tila	= 'X'
-							and lasku.tapvm >= '$vva-$kka-$ppa'
-							and lasku.tapvm <= '$vvl-$kkl-$ppl'
+							AND lasku.tila	  = 'X'
+							AND lasku.alatila = ''
+							AND lasku.tapvm  >= '$vva-$kka-$ppa'
+							AND lasku.tapvm  <= '$vvl-$kkl-$ppl'
 							ORDER BY lasku.laskunro";
 				$result = pupe_query($query);
 
@@ -2418,7 +2427,8 @@
 		$pk_query = "	SELECT tunnus, tapvm, sisviesti2
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND tila = 'X'
+						AND tila 	= 'X'
+						AND alatila = 'K'
 						AND tapvm >= date_sub(current_date, interval 7 day)
 						AND sisviesti2 LIKE '$like'
 						ORDER BY tapvm DESC
@@ -2526,7 +2536,7 @@
 
 	function hae_kassalippaiden_kateisotot($tapvm_where) {
 		global $kukarow;
-		
+
 		$kateisotot_query = "	SELECT lasku.nimi,
 								lasku.tapvm,
 								lasku.comments,
@@ -2537,19 +2547,17 @@
 								kassalipas.nimi as kassalipas_nimi,
 								kuka.nimi as kuka_nimi
 								FROM lasku
-								JOIN tiliointi
-								ON ( tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.summa < 0 AND tiliointi.korjattu = '')
-								JOIN kassalipas
-								ON (kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = lasku.kassalipas)
-								JOIN kuka
-								ON ( kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija )
+								JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.summa < 0 AND tiliointi.korjattu = '')
+								JOIN kassalipas ON (kassalipas.yhtio = lasku.yhtio AND kassalipas.tunnus = lasku.kassalipas)
+								JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija)
 								WHERE  lasku.yhtio = '{$kukarow['yhtio']}'
 								{$tapvm_where}
-								AND lasku.tila = 'X'
-								AND lasku.alatila = ''
-								AND lasku.tilaustyyppi = 'O'";
+								AND lasku.tila     = 'X'
+								AND lasku.alatila  = 'O'";
 		$kateisotot_result = pupe_query($kateisotot_query);
+
 		$kateisotot = array();
+
 		while($kateisotto = mysql_fetch_assoc($kateisotot_result)) {
 			$kateisotot[$kateisotto['kassalipas']][] = $kateisotto;
 		}
@@ -2557,4 +2565,4 @@
 		return $kateisotot;
 	}
 
-require ("inc/footer.inc");
+	require ("inc/footer.inc");

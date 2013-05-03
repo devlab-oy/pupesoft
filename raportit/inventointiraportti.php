@@ -714,7 +714,7 @@
 					$mul_check = 'SELECTED';
 				}
 			}
-			echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoterym‰‰")."</option>";
+			echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoteryhm‰‰")."</option>";
 
 			while ($rivi = mysql_fetch_array($res2)) {
 				$mul_check = '';

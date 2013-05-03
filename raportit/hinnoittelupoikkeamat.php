@@ -30,6 +30,7 @@
 
 		if (!isset($myyja)) $myyja = 0;
 		if (!isset($tee)) $tee = '';
+		if (!isset($eropros_vahintaan)) $eropros_vahintaan = 3;
 
 		// Tarkistetaan viel‰ p‰iv‰m‰‰r‰t
 		if (!checkdate($akk, $app, $avv)) {
@@ -88,6 +89,11 @@
 		echo "</select></td>";
 		echo "</tr>";
 
+		echo "<tr>";
+		echo "<th>",t("Ero % v‰hint‰‰n"),"</th>";
+		echo "<td style='vertical-align: middle;'><input type='text' name='eropros_vahintaan' value='{$eropros_vahintaan}' maxlength='6' size='7' /> %</td>";
+		echo "</tr>";
+
 		echo "<tr><td class='back' colspan='2'>";
 		echo "<input type='hidden' name='tee' value='hae' />";
 		echo "<input type='submit' value='",t("Hae"),"' />";
@@ -99,6 +105,7 @@
 		if ($tee == 'hae') {
 
 			$myyja = (int) $myyja;
+			$eropros_vahintaan = (float) str_replace(",", ".", $eropros_vahintaan);
 
 			$myyjalisa = $myyja != 0 ? "AND lasku.myyja = '{$myyja}'" : "";
 
@@ -114,6 +121,14 @@
 						{$myyjalisa}
 						ORDER BY lasku.myyja, lasku.tapvm, lasku.tunnus";
 			$laskures = pupe_query($query);
+
+			if (mysql_num_rows($laskures) == 0) {
+
+				echo "<br /><font class='info'>",t("Yht‰‰n tilausta ei lˆytynyt"),"!</font><br />";
+
+				require("inc/footer.inc");
+				exit;
+			}
 
 			flush();
 
@@ -191,9 +206,12 @@
 					}
 
 					$ero = $tilausrivirow['hinta'] - $lis_hinta;
-					$ero = hintapyoristys($ero);
 
 					if ($ero >= 0) continue;
+
+					$eropros = $tilausrivirow['hinta'] == 0 ? 100 : abs(round((($ero) / $tilausrivirow['hinta']) * 100, 2));
+
+					if ($eropros_vahintaan > $eropros) continue;
 
 					$data[$i]['myyj‰'] = $laskurow['myyja'];
 					$data[$i]['tilaus'] = $laskurow['tunnus'];
@@ -201,18 +219,16 @@
 					$data[$i]['asiakas'] = $laskurow['nimi'];
 					$data[$i]['sis‰inen_kommentti'] = $laskurow['sisviesti3'];
 
-					$eropros = $tilausrivirow['hinta'] == 0 ? 100 : abs(round((($ero) / $tilausrivirow['hinta']) * 100, 2));
-
 					$lis_hinta = hintapyoristys($lis_hinta);
 					$tilausrivirow['hinta'] = hintapyoristys($tilausrivirow['hinta']);
 
-					$data[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
-					$data[$i]['nimitys'] = $tilausrivirow['nimitys'];
-					$data[$i]['kpl'] = $tilausrivirow['kpl'];
-					$data[$i]['koneen_hinta'] = $lis_hinta;
-					$data[$i]['hinta'] = $tilausrivirow['hinta'];
-					$data[$i]['eropros'] = $eropros;
-					$data[$i]['ero'] = $ero * $tilausrivirow['kpl'];
+					$data[$i]['tuoteno'] 		= $tilausrivirow['tuoteno'];
+					$data[$i]['nimitys'] 		= $tilausrivirow['nimitys'];
+					$data[$i]['kpl'] 			= sprintf("%.2f", $tilausrivirow['kpl']);
+					$data[$i]['koneen_hinta'] 	= sprintf("%.2f", $lis_hinta);
+					$data[$i]['hinta'] 			= sprintf("%.2f", $tilausrivirow['hinta']);
+					$data[$i]['eropros'] 		= sprintf("%.2f", $eropros);
+					$data[$i]['ero'] 			= sprintf("%.2f", round($ero * $tilausrivirow['kpl'], 2));
 
 					$i++;
 					$x++;
@@ -228,8 +244,6 @@
 				$otsikot = "";
 
 				foreach(array_keys($data[0]) AS $key) {
-					$worksheet->writeString($excelrivi, $excelsarake, $otsikko, $format_bold);
-					$excelsarake++;
 
 					switch($key) {
 						case 'eropros':
@@ -246,6 +260,9 @@
 					}
 
 					$otsikko = ucfirst(t($otsikko));
+
+					$worksheet->writeString($excelrivi, $excelsarake, $otsikko, $format_bold);
+					$excelsarake++;
 
 					$otsikot .= "<th>{$otsikko}</th>";
 				}
@@ -291,7 +308,9 @@
 							echo "<tr>";
 						}
 
-						$worksheet->write($excelrivi, $excelsarake, $v);
+						if ($excelsarake > 6) $worksheet->writeNumber($excelrivi, $excelsarake, $v);
+						else $worksheet->write($excelrivi, $excelsarake, $v);
+
 						$excelsarake++;
 
 						$stylelisa = $excelsarake > 7 ? " style='text-align: right;' " : "";

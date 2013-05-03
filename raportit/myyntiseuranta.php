@@ -48,7 +48,6 @@
 
 		//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 		$useslave = 1;
-		$usemastertoo = 1;
 
 		require ("inc/connect.inc");
 
@@ -200,6 +199,7 @@
 			$ruk100chk 				= "";
 			$ruk110chk 				= "";
 			$nimchk   				= "";
+			$mitatchk				= "";
 			$katchk   				= "";
 			$nettokatchk			= "";
 			$tarchk   				= "";
@@ -234,6 +234,7 @@
 			if ($ruksit[140] != '')			$ruk140chk 				= "CHECKED";
 
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
+			if ($mitat != '')				$mitatchk				= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
 			if ($nettokateprossat != '')	$nettokatchk			= "CHECKED";
 			if ($osoitetarrat != '') 		$tarchk   				= "CHECKED";
@@ -256,6 +257,7 @@
 			if ($naytakaikkituotteet != '') $naytakaikkituotteetchk	= "CHECKED";
 			if ($laskutuspaiva != '')		$laskutuspaivachk		= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
+			if ($ytunnus_grouppaus != '')	$ytunnus_grouppaus_sel	= "SELECTED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
 			if ($liitetiedostot != '')		$liitetiedostotchk		= "CHECKED";
@@ -276,7 +278,15 @@
 				<td><input type='checkbox' name='ruksit[10]' value='ytunnus' {$ruk10chk}></td>
 				<td><input type='text' name='ytunnus' value='{$ytunnus}'>
 				<br>
-				<table><tr><td class='spec'>".t("Hae asiakastiedot").":</td><td><select name='ytunnus_mistatiedot'>
+				<table>
+
+				<tr><td class='spec'>".t("Summaustaso").":</td><td><select name='ytunnus_grouppaus'>
+				<option value=''>",t("Asiakkaittain"),"</option>
+				<option value='ytunnus' {$ytunnus_grouppaus_sel}>",t("Ytunnuksittain"),"</option>
+				</select></td></tr>
+
+
+				<tr><td class='spec'>".t("Hae asiakastiedot").":</td><td><select name='ytunnus_mistatiedot'>
 				<option value=''>",t("Asiakasrekisterist‰"),"</option>
 				<option value='laskulta' {$ytun_mistatiedot_sel}>",t("Laskuilta"),"</option>
 				</select></td></tr>
@@ -403,6 +413,10 @@
 				<tr>
 				<th>",t("N‰yt‰ tuotteiden nimitykset"),"</th>
 				<td colspan='3'><input type='checkbox' name='nimitykset' {$nimchk}></td>
+				<td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
+				</tr>
+				<th>",t("N‰yt‰ tuotteiden mittatiedot"),"</th>
+				<td colspan='3'><input type='checkbox' name='mitat' {$mitatchk}></td>
 				<td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
 				</tr>
 				<tr>
@@ -901,7 +915,14 @@
 					}
 
 					if ($mukaan == "ytunnus") {
-						$group  .= ",asiakas.tunnus";
+						if ($ytunnus_grouppaus == "ytunnus") {
+							$group .= ",asiakas.ytunnus";
+							$ytgfe  = "max(";
+							$ytgft  = ")";
+						}
+						else {
+							$group  .= ",asiakas.tunnus";
+						}
 
 						if ($osoitetarrat != "" or $asiakaskaynnit != "") $select .= "asiakas.tunnus astunnus, ";
 
@@ -913,18 +934,28 @@
 						}
 
 						if (isset($ytun_laajattied) and $ytun_laajattied != "") {
-							$select .= "{$etuliite}.ytunnus, {$etuliite}.toim_ovttunnus, concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark)) nimi, {$etuliite}.osoite, {$etuliite}.postino, {$etuliite}.postitp, {$etuliite}.maa, ";
-							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, concat_ws('<br>',concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark)), concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark))) toim_nimi, ";
-							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_osoite, {$etuliite}.osoite) toim_osoite, ";
-							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postino, {$etuliite}.postino) toim_postino, ";
-							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postitp, {$etuliite}.postitp) toim_postitp, ";
-							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_maa, {$etuliite}.maa) toim_maa, ";
-							$select .= "if(asiakas.puhelin!='', asiakas.puhelin, asiakas.gsm) puhelin, ";
-							$select .= "asiakas.email, ";
+							$select .= "{$etuliite}.ytunnus ytunnus, ";
+							$select .= "{$ytgfe}{$etuliite}.toim_ovttunnus{$ytgft} toim_ovttunnus, ";
+							$select .= "{$ytgfe}concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark)){$ytgft} nimi, ";
+							$select .= "{$ytgfe}{$etuliite}.osoite{$ytgft} osoite, ";
+							$select .= "{$ytgfe}{$etuliite}.postino{$ytgft} postino, ";
+							$select .= "{$ytgfe}{$etuliite}.postitp{$ytgft} postitp, ";
+							$select .= "{$ytgfe}{$etuliite}.maa{$ytgft} maa, ";
+							$select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, concat_ws('<br>',concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark)), concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark))){$ytgft} toim_nimi, ";
+							$select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_osoite, {$etuliite}.osoite){$ytgft} toim_osoite, ";
+							$select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postino, {$etuliite}.postino){$ytgft} toim_postino, ";
+							$select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postitp, {$etuliite}.postitp){$ytgft} toim_postitp, ";
+							$select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_maa, {$etuliite}.maa){$ytgft} toim_maa, ";
+							$select .= "{$ytgfe}if(asiakas.puhelin!='', asiakas.puhelin, asiakas.gsm){$ytgft} puhelin, ";
+							$select .= "{$ytgfe}asiakas.email{$ytgft} email, ";
 						}
 						else {
-							$select .= "{$etuliite}.ytunnus, {$etuliite}.toim_ovttunnus, concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark),if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark),NULL)) nimi, concat_ws('<br>',{$etuliite}.postitp,if({$etuliite}.toim_postitp!='' and {$etuliite}.postitp!={$etuliite}.toim_postitp,{$etuliite}.toim_postitp,NULL)) postitp, ";
+							$select .= "{$etuliite}.ytunnus ytunnus, ";
+							$select .= "{$ytgfe}{$etuliite}.toim_ovttunnus{$ytgft} toim_ovttunnus, ";
+							$select .= "{$ytgfe}concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark),if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark),NULL)){$ytgft} nimi, ";
+							$select .= "{$ytgfe}concat_ws('<br>',{$etuliite}.postitp,if({$etuliite}.toim_postitp!='' and {$etuliite}.postitp!={$etuliite}.toim_postitp,{$etuliite}.toim_postitp,NULL)){$ytgft} postitp, ";
 						}
+
 						if (strpos($select, "'asiakaslista',") === FALSE) $select .= "asiakas.tunnus 'asiakaslista', ";
 						$order  .= "{$etuliite}.ytunnus,";
 						$gluku++;
@@ -1031,19 +1062,23 @@
 					}
 
 					if ($mukaan == "tuote") {
-						if ($nimitykset == "") {
-							$group .= ",tuote.tuoteno";
-							$select .= "tuote.tuoteno tuoteno, ";
-							if (strpos($select, "'tuotelista',") === FALSE) $select .= "concat('\'',tuote.tuoteno,'\'') 'tuotelista', ";
-							$order  .= "tuote.tuoteno,";
+
+						$group .= ",tuote.tuoteno";
+						$select .= "tuote.tuoteno tuoteno, ";
+						if (strpos($select, "'tuotelista',") === FALSE) $select .= "concat('\'',tuote.tuoteno,'\'') 'tuotelista', ";
+						$order  .= "tuote.tuoteno,";
+						$gluku++;
+
+						if ($nimitykset != "") {
+							$group .= ",tuote.nimitys";
+							$select .= "tuote.nimitys nimitys, ";
 							$gluku++;
 						}
-						else {
-							$group .= ",tuote.tuoteno, tuote.nimitys";
-							$select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
-							if (strpos($select, "'tuotelista',") === FALSE) $select .= "concat('\'',tuote.tuoteno,'\'') 'tuotelista', ";
-							$order  .= "tuote.tuoteno,";
-							$gluku++;
+
+						if ($mitat != "") {
+							$group .= ",tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.tuotemassa";
+							$select .= "tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.tuotemassa, ";
+							$gluku += 4;
 						}
 
 						if ($varastonarvo != '') {

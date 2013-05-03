@@ -104,93 +104,79 @@
 						$rivilisa
 						ORDER BY tilausrivi.osasto, tilausrivi.try $sellisa";
 		}
+
 		$result = mysql_query($query) or pupe_error($query);
 
-		$excelrivi		= "";
-		$excelsarake	= "";
+		include('inc/pupeExcel.inc');
 
-		if (include('Spreadsheet/Excel/Writer.php')) {
+		$worksheet 	 = new pupeExcel();
+		$format_bold = array("bold" => TRUE);
+		$excelrivi 	 = 0;
 
-			//keksitään failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+		$pvm = date("Ymd");
 
-			$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-			$workbook->setVersion(8);
-			$worksheet = $workbook->addWorksheet('Sheet 1');
+		$worksheet->writeString($excelrivi, 0, t("Puutelistaus"));
+		$worksheet->writeString($excelrivi, 1, $pvm);
 
-			$format_bold = $workbook->addFormat();
-			$format_bold->setBold();
+		$excelrivi++;
+		$excelsarake = 0;
 
-			$excelrivi = 0;
+		$worksheet->writeString($excelrivi, $excelsarake, t("Osasto"));
+		$excelsarake++;
+		$worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhmä"));
+		$excelsarake++;
 
-			$pvm = date("Ymd");
-
-			$worksheet->writeString($excelrivi, 0, t("Puutelistaus"));
-			$worksheet->writeString($excelrivi, 1, $pvm);
-
-			$excelrivi++;
-			$excelsarake = 0;
-
-			if (isset($workbook)) {
-				$worksheet->writeString($excelrivi, $excelsarake, t("Osasto"));
-				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhmä"));
-				$excelsarake++;
-
-				if ($raportointitaso == 'tuote') {
-					$worksheet->writeString($excelrivi, $excelsarake, t("Tuotenumero"));
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"));
-					$excelsarake++;
-				}
-
-				if ($try != '') {
-					$worksheet->writeString($excelrivi, $excelsarake, t("Ytunnus"));
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Asiakasnro"));
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Tuotenumero"));
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"));
-					$excelsarake++;
-				}
-
-				$worksheet->writeString($excelrivi, $excelsarake, t("Puute kpl"));
-				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Puute")." $yhtiorow[valkoodi]");
-				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Myynti")." $yhtiorow[valkoodi]");
-				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Puute")." %");
-				$excelsarake++;
-
-				if ($try != '') {
-					$worksheet->writeString($excelrivi, $excelsarake, t("Tilkpl"));
-					$excelsarake++;
-
-					if (table_exists("yhteensopivuus_tuote")) {
-						$worksheet->writeString($excelrivi, $excelsarake, t("Rekisteröidyt"));
-						$excelsarake++;
-					}
-
-					$worksheet->writeString($excelrivi, $excelsarake, t("Korvaava (saldo)"));
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Tähtituote"));
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Hinnastoon"));
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Status"));
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Toimittaja"));
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Toimittajan tuoteno"));
-					$excelsarake++;
-				}
-			}
-			$excelrivi++;
+		if ($raportointitaso == 'tuote') {
+			$worksheet->writeString($excelrivi, $excelsarake, t("Tuotenumero"));
+			$excelsarake++;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"));
+			$excelsarake++;
 		}
+
+		if ($try != '') {
+			$worksheet->writeString($excelrivi, $excelsarake, t("Ytunnus"));
+			$excelsarake++;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Asiakasnro"));
+			$excelsarake++;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Tuotenumero"));
+			$excelsarake++;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"));
+			$excelsarake++;
+		}
+
+		$worksheet->writeString($excelrivi, $excelsarake, t("Puute kpl"));
+		$excelsarake++;
+		$worksheet->writeString($excelrivi, $excelsarake, t("Puute")." $yhtiorow[valkoodi]");
+		$excelsarake++;
+		$worksheet->writeString($excelrivi, $excelsarake, t("Myynti")." $yhtiorow[valkoodi]");
+		$excelsarake++;
+		$worksheet->writeString($excelrivi, $excelsarake, t("Puute")." %");
+		$excelsarake++;
+
+		if ($try != '') {
+			$worksheet->writeString($excelrivi, $excelsarake, t("Tilkpl"));
+			$excelsarake++;
+
+			if (table_exists("yhteensopivuus_tuote")) {
+				$worksheet->writeString($excelrivi, $excelsarake, t("Rekisteröidyt"));
+				$excelsarake++;
+			}
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Korvaava (saldo)"));
+			$excelsarake++;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Tähtituote"));
+			$excelsarake++;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Hinnastoon"));
+			$excelsarake++;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Status"));
+			$excelsarake++;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Toimittaja"));
+			$excelsarake++;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Toimittajan tuoteno"));
+			$excelsarake++;
+		}
+
+		$excelrivi++;
 
 		echo "<table><tr>
 				<th>".t("Osasto")."</th>
@@ -266,29 +252,27 @@
 						<th style='text-align:right'>".sprintf("%.2f",$ospuutepros)."</th>
 						</tr>";
 
-				if (isset($workbook)) {
-					$worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteensä").":");
-					$excelsarake+=$cspan;
-					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutekpl));
-					$excelsarake++;
-					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuute));
-					$excelsarake++;
-					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$osmyynti));
-					$excelsarake++;
-					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutepros));
-					$excelsarake = 0;
-					$excelrivi++;
-				}
+				$worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteensä").":");
+				$excelsarake+=$cspan;
+				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutekpl));
+				$excelsarake++;
+				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuute));
+				$excelsarake++;
+				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$osmyynti));
+				$excelsarake++;
+				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutepros));
+				$excelsarake = 0;
+				$excelrivi++;
 
-				$ospuute  		= 0;
-				$ospuutekpl		= 0;
-				$osmyynti 		= 0;
-				$ospuutepros	= 0;
+				$ospuute  	 = 0;
+				$ospuutekpl	 = 0;
+				$osmyynti 	 = 0;
+				$ospuutepros = 0;
 			}
 
-			$ospuute+=$row["puuteeur"];
-			$osmyynti+=$row["myyeur"];
-			$ospuutekpl+=$row["puutekpl"];
+			$ospuute    +=$row["puuteeur"];
+			$osmyynti   +=$row["myyeur"];
+			$ospuutekpl +=$row["puutekpl"];
 
 			if ($row["myyeur"] > 0) {
 				$puutepros = round($row["puuteeur"]/($row["puuteeur"]+$row["myyeur"])*100,2);
@@ -309,10 +293,8 @@
 
 			echo "<tr><td class='$vari' style='vertical-align:top'>$row[osasto]</td>";
 
-			if (isset($workbook)) {
-				$worksheet->writeString($excelrivi, $excelsarake, $row["osasto"]);
-				$excelsarake++;
-			}
+			$worksheet->writeString($excelrivi, $excelsarake, $row["osasto"]);
+			$excelsarake++;
 
 			if ($try == '') {
 				echo "<td class='$vari' style='vertical-align:top'>";
@@ -326,39 +308,33 @@
 
 				echo "</td>";
 
-				if (isset($workbook)) {
-					$worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
-					$excelsarake++;
-				}
+				$worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
+				$excelsarake++;
 			}
 			else {
 				echo "<td class='$vari' style='vertical-align:top'>$row[try]</td>";
 				echo "<td class='$vari' name='A_$lask' style='vertical-align:top'><a href='asiakasinfo.php?ytunnus=$row[ytunnus]&lopetus=$PHP_SELF////tee=$tee//try=$try//ppa=$ppa//kka=$kka//osasto=$osasto//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//asiakasid=$asiakasid//raportointitaso=$raportointitaso//rivit=$rivit///A_$lask'>$row[ytunnus]</a><br>$row[asiakasnro]</td>";
 				echo "<td class='$vari' name='T_$lask' style='vertical-align:top'><a href='../tuote.php?tuoteno=".urlencode($row["tuoteno"])."&tee=Z&lopetus=$PHP_SELF////tee=$tee//try=$try//osasto=$osasto//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//asiakasid=$asiakasid//raportointitaso=$raportointitaso//rivit=$rivit///T_$lask'>$row[tuoteno]</a><br>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 
-				if (isset($workbook)) {
-					$worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, $row["ytunnus"]);
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, $row["asiakasnro"]);
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"]);
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t_tuotteen_avainsanat($row, 'nimitys'));
-					$excelsarake++;
-				}
+				$worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, $row["ytunnus"]);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, $row["asiakasnro"]);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"]);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, t_tuotteen_avainsanat($row, 'nimitys'));
+				$excelsarake++;
 			}
 
 			if ($raportointitaso == 'tuote') {
 				echo "<td class='$vari' style='vertical-align:top'>$row[tuoteno]</td><td class='$vari' style='vertical-align:top'>$row[nimitys]</td>";
 
-				if (isset($workbook)) {
-					$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"]);
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, $row["nimitys"]);
-					$excelsarake++;
-				}
+				$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"]);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, $row["nimitys"]);
+				$excelsarake++;
 			}
 
 			echo "	<td style='text-align:right; vertical-align:top' class='$vari'>$row[puutekpl]</td>
@@ -366,16 +342,14 @@
 					<td style='text-align:right; vertical-align:top' class='$vari'>$row[myyeur]</td>
 					<td style='text-align:right; vertical-align:top' class='$vari'>".sprintf("%.2f",$puutepros)."</td>";
 
-			if (isset($workbook)) {
-				$worksheet->writeNumber($excelrivi, $excelsarake, (float)$row['puutekpl']);
-				$excelsarake++;
-				$worksheet->writeNumber($excelrivi, $excelsarake, $row['puuteeur']);
-				$excelsarake++;
-				$worksheet->writeNumber($excelrivi, $excelsarake, $row['myyeur']);
-				$excelsarake++;
-				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puutepros));
-				$excelsarake++;
-			}
+			$worksheet->writeNumber($excelrivi, $excelsarake, (float)$row['puutekpl']);
+			$excelsarake++;
+			$worksheet->writeNumber($excelrivi, $excelsarake, $row['puuteeur']);
+			$excelsarake++;
+			$worksheet->writeNumber($excelrivi, $excelsarake, $row['myyeur']);
+			$excelsarake++;
+			$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puutepros));
+			$excelsarake++;
 
 			if ($try != '') {
 				//tilauksessa olevat
@@ -387,10 +361,8 @@
 
 				echo "<td class='$vari' style='vertical-align:top'>". (float) $tulrow['tilattu'] ."</td>";
 
-				if (isset($workbook)) {
-					$worksheet->writeNumber($excelrivi, $excelsarake, (float) $tulrow['tilattu']);
-					$excelsarake++;
-				}
+				$worksheet->writeNumber($excelrivi, $excelsarake, (float) $tulrow['tilattu']);
+				$excelsarake++;
 
 				$query = "	SELECT tahtituote, hinnastoon, status,
 							group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
@@ -416,10 +388,8 @@
 
 					echo "<td class='$vari' style='vertical-align:top'>$rekrow[0]</td>";
 
-					if (isset($workbook)) {
-						$worksheet->writeNumber($excelrivi, $excelsarake, $rekrow[0]);
-						$excelsarake++;
-					}
+					$worksheet->writeNumber($excelrivi, $excelsarake, $rekrow[0]);
+					$excelsarake++;
 				}
 
 				///* Korvaavat tuotteet *///
@@ -463,20 +433,16 @@
 
 					$korvaavat_temp = substr($korvaavat_temp, 0, -2);
 
-					if (isset($workbook)) {
-						$worksheet->writeString($excelrivi, $excelsarake, $korvaavat_temp);
-					}
+					$worksheet->writeString($excelrivi, $excelsarake, $korvaavat_temp);
+					$excelsarake++;
 
 					echo "</td>";
-					$excelsarake++;
 				}
 				else {
 					echo "<td class='$vari' style='vertical-align:top'>".t("Ei korvaavia")."!</td>";
 
-					if (isset($workbook)) {
-						$worksheet->writeString($excelrivi, $excelsarake, t("Ei korvaavia")."!");
-						$excelsarake++;
-					}
+					$worksheet->writeString($excelrivi, $excelsarake, t("Ei korvaavia")."!");
+					$excelsarake++;
 				}
 
 				echo "<td class='$vari' style='vertical-align:top'>$tuoterow[tahtituote]</td>";
@@ -491,23 +457,21 @@
 					echo "</td>";
 				}
 
-				if (isset($workbook)) {
-					$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["tahtituote"]);
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["hinnastoon"]);
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["status"]);
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["toimittaja"]);
-					$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["tahtituote"]);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["hinnastoon"]);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["status"]);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["toimittaja"]);
+				$excelsarake++;
 
-					if ($tuoterow["toim_tuoteno"]) {
-						$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["toim_tuoteno"]);
-						$excelsarake++;
-					}
-
-					$excelsarake = 0;
+				if ($tuoterow["toim_tuoteno"]) {
+					$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["toim_tuoteno"]);
+					$excelsarake++;
 				}
+
+				$excelsarake = 0;
 			}
 
 			echo "</tr>";
@@ -515,11 +479,11 @@
 			$excelrivi++;
 
 			$lask++;
-			$puuteyht		+= $row["puuteeur"];
-			$puutekplyht	+= $row["puutekpl"];
-			$myyntiyht		+= $row["myyeur"];
-			$puuteprosyht	+= $puutepros;
-			$edosasto 		= $row["osasto"];
+			$puuteyht	  += $row["puuteeur"];
+			$puutekplyht  += $row["puutekpl"];
+			$myyntiyht	  += $row["myyeur"];
+			$puuteprosyht += $puutepros;
+			$edosasto 	   = $row["osasto"];
 		}
 
 		if ($try == '') {
@@ -537,21 +501,19 @@
 					<th style='text-align:right'>".sprintf("%.2f", $ospuutepros)."</th>
 					</tr>";
 
-			if (isset($workbook)) {
-				$excelsarake = 0;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteensä").":");
-				$excelsarake++;
-				$excelsarake++;
-				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutekpl));
-				$excelsarake++;
-				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuute));
-				$excelsarake++;
-				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$osmyynti));
-				$excelsarake++;
-				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutepros));
-				$excelsarake = 0;
-				$excelrivi++;
-			}
+			$excelsarake = 0;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteensä").":");
+			$excelsarake++;
+			$excelsarake++;
+			$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutekpl));
+			$excelsarake++;
+			$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuute));
+			$excelsarake++;
+			$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$osmyynti));
+			$excelsarake++;
+			$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$ospuutepros));
+			$excelsarake = 0;
+			$excelrivi++;
 
 			//tähän tullee nyt keskiarvo
 			$puuteprosyht = round($puuteyht/($puuteyht+$myyntiyht)*100,2);
@@ -564,43 +526,37 @@
 					<th style='text-align:right'>".sprintf("%.2f",$puuteprosyht)."</th>
 					</tr>";
 
-			if (isset($workbook)) {
-				$excelsarake = 0;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Kaikki yhteensä").":");
-				$excelsarake++;
-				$excelsarake++;
-				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puutekplyht));
-				$excelsarake++;
-				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puuteyht));
-				$excelsarake++;
-				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$myyntiyht));
-				$excelsarake++;
-				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puuteprosyht));
-				$excelsarake = 0;
-				$excelrivi++;
-			}
+			$excelsarake = 0;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Kaikki yhteensä").":");
+			$excelsarake++;
+			$excelsarake++;
+			$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puutekplyht));
+			$excelsarake++;
+			$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puuteyht));
+			$excelsarake++;
+			$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$myyntiyht));
+			$excelsarake++;
+			$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puuteprosyht));
+			$excelsarake = 0;
+			$excelrivi++;
 		}
 
 		echo "</table>";
 
-		if (isset($workbook)) {
+		$excelnimi = $worksheet->close();
 
-			// We need to explicitly close the workbook
-			$workbook->close();
+		$niminimi = date("Ymd")."-".t("Puutelistaus").".xlsx";
 
-			$niminimi = date("Ymd")."-".t("Puutelistaus").".xls";
+		echo "<br><font class='message'>".t("Luotiin aineisto")." ($niminimi) ".t("joka sisältää")." ".($excelrivi-2)." ".t("riviä")."</font><br>";
 
-			echo "<br><font class='message'>".t("Luotiin aineisto")." ($niminimi) ".t("joka sisältää")." ".($excelrivi-2)." ".t("riviä")."</font><br>";
-
-			echo "<table>";
-			echo "<tr><th>".t("Tallenna tiedosto koneellesi").":</th>";
-			echo "<form method='post' class='multisubmit'>";
-			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='$niminimi'>";
-			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-			echo "</table>";
-		}
+		echo "<table>";
+		echo "<tr><th>".t("Tallenna tiedosto koneellesi").":</th>";
+		echo "<form method='post' class='multisubmit'>";
+		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+		echo "<input type='hidden' name='kaunisnimi' value='$niminimi'>";
+		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+		echo "</table>";
 	}
 
 	//Käyttöliittymä

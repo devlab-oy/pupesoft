@@ -253,10 +253,10 @@ while ($tietue = fgets($fd)) {
 	}
 
 	// tehdään kaikille tiedoille 7 -> 8 bit ääkköskonversio..
-	$from   = array('{','}','|','[',']','\\',chr(179)); // 7bit
-	$to     = array('ä','å','ö','Ä','Å','Ö','|'); 		// 8bit
+	$from   	= array('{','}','|','[',']','\\',chr(179)); // 7bit
+	$to     	= array('ä','å','ö','Ä','Å','Ö','|'); 		// 8bit
 	$orig_tieto = str_replace($from, $to, $tieto);
-	$tieto  = str_replace($from, $to, pupesoft_cleanstring($tieto));
+	$tieto  	= str_replace($from, $to, pupesoft_cleanstring($tieto));
 
 	// Jos kyseessä on UNH (ensimmäinen Orders 91.1 segmentti), niin etsitään tässä vaiheessa NAD SE
 	if ($tunnus == "UNH") {
@@ -292,6 +292,17 @@ while ($tietue = fgets($fd)) {
 				$tunnus = "NADDP"; // Toimitusosoite
 				break;
 		}
+	}
+
+	// Otetaan seuraava rivi muuttujaan
+	$positio	 = ftell($fd);
+	$next_tietue = fgets($fd);
+	$next_tunnus = trim(substr($next_tietue, 0, 3));
+	fseek($fd, $positio);
+
+	// Tuoterivi vaihtuu ilman selkeätä rivinloppumismerkkiä....
+	if ($edi_tyyppi == "edifact911" and $tunnus == "QTY" and $next_tunnus == "LIN") {
+		$tunnus = "QTYLIN";
 	}
 
 	switch ($tunnus) {
@@ -1498,29 +1509,6 @@ while ($tietue = fgets($fd)) {
 			$edi_nimitys = $type[4]; // rivin neljännessä segmentissä tulee oikee info
 			break;
 
-		case 'OLIN21_QT' :
-		case 'OSTOTILRIV.OTR_TILATTUMAARA' :
-		case 'QTY':
-
-			if ($edi_tyyppi != "edifact911") {
-				//Tilattava määrä
-				$tieto = str_replace (",", ".", $tieto);
-			}
-
-			if ($edi_tyyppi == "magento" and (strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $tieto != '') {
-				$kpl = (float) substr($tieto,0,16);
-			}
-			elseif ($edi_tyyppi == "edifact911") {
-				$kentat = explode(":", $tieto);
-				$kpl = (float) abs($kentat[1]);
-			}
-			else {
-				$kpl = (float) abs(substr($tieto,0,16)); // abs() ettei asiakkaat pysty tekemään hyvityksiä!
-			}
-
-			$edi_ulos .= t("tilattiin")." $kpl ".t("kpl").".\n";
-			break;
-
 		case 'OSTOTILRIV.OTR_OSTOHINTA' :
 			// Kun tullaan magentosta ja meillä on rahtikulu, niin otetaan hinta talteeen
 			// TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
@@ -1528,7 +1516,7 @@ while ($tietue = fgets($fd)) {
 				// Tämä hinta on aina veroton, joten lasketaan vero päälle jos myyntihinnat ovat verollisia
 				$editilaus_hinta = (float) trim($tieto);
 
-				if ($yhtiorow["alv_kasittely"] == '') {
+				if ($yhtiorow["alv_kasittely"] == '' and !isset($verkkokauppa_hinnatedifailistaverollisina)) {
 					$editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
 				}
 			}
@@ -1556,11 +1544,39 @@ while ($tietue = fgets($fd)) {
 			$rivikommentti = pupesoft_cleanstring($tieto);
 			break;
 
+		case 'OLIN21_QT' :
+		case 'OSTOTILRIV.OTR_TILATTUMAARA' :
+		case 'QTY':
+		case 'QTYLIN':
+
+			if ($edi_tyyppi != "edifact911") {
+				//Tilattava määrä
+				$tieto = str_replace (",", ".", $tieto);
+			}
+
+			if ($edi_tyyppi == "magento" and (strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $tieto != '') {
+				$kpl = (float) substr($tieto,0,16);
+			}
+			elseif ($edi_tyyppi == "edifact911") {
+				$kentat = explode(":", $tieto);
+				$kpl = (float) abs($kentat[1]);
+			}
+			else {
+				$kpl = (float) abs(substr($tieto,0,16)); // abs() ettei asiakkaat pysty tekemään hyvityksiä!
+			}
+
+			$edi_ulos .= t("tilattiin")." $kpl ".t("kpl").".\n";
+
+			if ($tunnus != "QTYLIN") {
+				break;
+			}
+
 		case 'OLIN__END' :
 		case '*RE OSTOTILRIV' :
 		case 'RFF':
 		case 'PCD':
 		case 'BGM':
+		case 'QTYLIN':
 
 			if ($edi_tyyppi == "edifact911") {
 				$kentat = explode(":", $tieto);
@@ -1581,12 +1597,9 @@ while ($tietue = fgets($fd)) {
 					$viite = $kentat[1]. ' ';
 					break;
 				}
-
-
 			}
 
 			if ($editilaus_otsikko_ok == "KYLLA") {
-
 		 		// jos tuote on löytynyt ok
 				if ($tuoteerror == 0) {
 

@@ -895,6 +895,7 @@
 
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
 		if ($trow[$i] == "") {
 			$sel1 = "selected";
@@ -902,9 +903,13 @@
 		elseif ($trow[$i] == "Y") {
 			$sel2 = "selected";
 		}
+		elseif ($trow[$i] == "T") {
+			$sel3 = "selected";
+		}
 
 		$ulos .= "<option value=''  $sel1>".t("Tuotteen nimityst‰ ei voi muokata tilauksentekovaiheessa")."</option>";
 		$ulos .= "<option value='Y' $sel2>".t("Tuotteen nimityst‰ voi muokata tilauksentekovaiheessa")."</option>";
+		$ulos .= "<option value='T' $sel3>".t("Tuotteen nimityst‰ voi muokata tarjouksentekovaiheessa")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3306,6 +3311,18 @@
 		$ulos .= "<option value = '1' {$sel[1]}>".t("K‰ytet‰‰n vaihto-omaisuuslaskun rahdit tili‰")."</option>";
 		$ulos .= "<option value = '2' {$sel[2]}>".t("K‰ytet‰‰n vaihto-omaisuuslaskun rahdit ja -kulut tilej‰")."</option>";
 		$ulos .= "<option value = '3' {$sel[3]}>".t("K‰ytet‰‰n vaihto-omaisuuslaskun rahdit, -kulut ja -tuoterivikohtaiset kulut tilej‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'ostolaskun_kulutilit_kayttaytyminen') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'E' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Vaihto-omaisuuslaskun rahdit/kulut ei vied‰ varastonarvoon")."</option>";
+		$ulos .= "<option value = 'E' {$sel}>".t("Vaihto-omaisuuslaskun rahdit/kulut vied‰‰n kirjanpidon varastonarvoon, mutta ei vied‰ tuotteiden varastonarvoon")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

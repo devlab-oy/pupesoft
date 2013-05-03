@@ -45,7 +45,7 @@
 		list($komento,$raja,$emailok,$alkupp,$alkukk,$alkuvv,$loppupp,$loppukk,$loppuvv) = explode('#', $muutparametrit);
 	}
 
-	if ($tee == "tulosta" and $raja == "") {
+	if ($tee == "tulosta" and ($raja == "" or !is_numeric($raja))) {
 		echo "<font class='error'>".t('RAJA PUUTTUU' , $kieli)."!!!</font><br><br>";
 		$tee = "";
 	}

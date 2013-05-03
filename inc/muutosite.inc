@@ -1499,7 +1499,7 @@
 
 					require ("inc/teetiliointi.inc");
 
-					$tiliointirow['summa'] = $summa;
+					$tiliointirow['summa'] = $yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '' ? $summa : $tiliointirow['summa'];
 
 					// Kulutilionnin kustp
 					$kustp_kulutiliointi 	= $kustp;
@@ -1887,7 +1887,7 @@
 			and ($trow['vienti'] == 'C' or $trow['vienti'] == 'F' or $trow['vienti'] == 'I')
 			and $yhtiorow['ostolaskun_kulutilit'] != ''
 			and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')
-			and $keikrow["alatila"] != "X") {
+			and empty($keikrow)) {
 
 			echo "<form action='' method='post'>";
 			echo "<input type='hidden' name='lopetus' value='{$lopetus}' />";

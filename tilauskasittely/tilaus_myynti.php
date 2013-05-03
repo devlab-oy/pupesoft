@@ -3756,64 +3756,12 @@ if ($tee == '') {
 		// Valmistuksissa haetaan perheiden perheitä mukaan valmistukseen!!!!!! (vain kun rivi lisätään $rivitunnus == 0)
 		if ($laskurow['tila'] == 'V' and $var != "W" and $yhtiorow["rekursiiviset_reseptit"] == "Y" and (int) $rivitunnus == 0) {
 
-			$kommentti_array = array();
-			$lapsenlap_array = array();
-
-			function rekursiivinen_resepti($pertuoteno, $perkpl) {
-				global $kukarow, $tuoteno_array, $riikoko, $kpl_array, $kommentti_array, $lapsenlap_array;
-
-				$query = "	SELECT tuoteno, kerroin
-							FROM tuoteperhe
-							WHERE isatuoteno = '$pertuoteno'
-							and yhtio 		 = '$kukarow[yhtio]'
-							and tyyppi		 = 'R'
-							ORDER by tuoteno";
-				$perheresult = pupe_query($query);
-
-				if (mysql_num_rows($perheresult) > 0) {
-					while ($perherow = mysql_fetch_assoc($perheresult)) {
-						$query = "	SELECT distinct isatuoteno
-									FROM tuoteperhe
-									WHERE isatuoteno = '$perherow[tuoteno]'
-									and yhtio  		 = '$kukarow[yhtio]'
-									and tyyppi 		 = 'R'
-									ORDER by tuoteno";
-						$perheresult2 = pupe_query($query);
-
-						if (mysql_num_rows($perheresult2) > 0) {
-
-							//Tätä tuoteperhettä halutaan myydä
-							if (!in_array(strtoupper($perherow["tuoteno"]), $tuoteno_array)) {
-
-								$lt = strtoupper($perherow["tuoteno"]);
-
-								$tuoteno_array[]		= $lt; // lisätään tuoteno arrayseen
-								$kpl_array[$lt]			= round($perkpl * $perherow["kerroin"],2);
-								$kommentti_array[$lt] 	= "Valmista $pertuoteno:n raaka-aineeksi $kpl_array[$lt] kappaletta.";
-								$lapsenlap_array[$lt] 	= $lt;
-								$riikoko++;
-							}
-							else {
-								$lt = strtoupper($perherow["tuoteno"]);
-
-								$kpl_array[$lt]		   += round($perkpl * $perherow["kerroin"],2);
-								$kommentti_array[$lt]  .= "<br>Valmista $pertuoteno:n raaka-aineeksi ".round($perkpl * $perherow["kerroin"],2)." kappaletta.";
-							}
-						}
-					}
-				}
+			if ($kpl != '' and !is_array($kpl_array)) {
+				$kpl_array[$tuoteno_array[0]] = $kayttajan_kpl;
 			}
 
-			$riikoko = count($tuoteno_array);
-
-			for ($rii=0; $rii < $riikoko; $rii++) {
-
-				if ($kpl != '' and !is_array($kpl_array) and $rii == 0) {
-					$kpl_array[$tuoteno_array[$rii]] = $kayttajan_kpl;
-				}
-
-				rekursiivinen_resepti($tuoteno_array[$rii], $kpl_array[$tuoteno_array[$rii]]);
-			}
+			//funktio populoi globaalit muuttujat $tuoteno_array $kpl_array $kommentti_array $lapsenlap_array
+			pupesoft_lisaa_valmisteen_rekursiiviset_reseptit();
 		}
 
 		foreach ($tuoteno_array as $tuoteno) {

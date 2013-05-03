@@ -2119,6 +2119,8 @@ if ($tee == 'I') {
 		exit;
 	}
 
+	$isumma_varasto = $isumma;
+
 	for ($i = 1; $i < $maara; $i++) {
 		if (strlen($itili[$i]) > 0) {
 
@@ -2134,6 +2136,8 @@ if ($tee == 'I') {
 				$ialv_valuutassa[$i] = round($isumma_valuutassa[$i] - $isumma_valuutassa[$i] / (1 + ($ivero[$i] / 100)),2);
 
 				$isumma[$i] -= $ialv[$i];
+
+				if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '') $isumma_varasto[$i] = $isumma[$i];
 
 				foreach($_arr as $_k => $_v) {
 					if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
@@ -2222,7 +2226,7 @@ if ($tee == 'I') {
 							kohde	 			= '{$kohde_ins}',
 							projekti 			= '{$projekti_ins}',
 							tapvm 				= '$tpv-$tpk-$tpp',
-							summa 				= $isumma[$i],
+							summa 				= $isumma_varasto[$i],
 							summa_valuutassa	= $isumma_valuutassa[$i],
 							valkoodi			= '$valkoodi',
 							vero 				= 0,
@@ -2241,7 +2245,7 @@ if ($tee == 'I') {
 							kohde 				= '{$ikohde_ins}',
 							projekti 			= '{$iprojekti_ins}',
 							tapvm 				= '$tpv-$tpk-$tpp',
-							summa 				= $isumma[$i] * -1,
+							summa 				= $isumma_varasto[$i] * -1,
 							summa_valuutassa	= $isumma_valuutassa[$i] * -1,
 							valkoodi 			= '$valkoodi',
 							vero 				= 0,

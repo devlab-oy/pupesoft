@@ -60,12 +60,47 @@ if ($ajax_request) {
 		echo json_encode($tilikaudet);
 		exit;
 	}
+	elseif ($hae_inventointien_lukumaara_paivan_perusteella) {
+
+		$onko_validi = false;
+		if (substr_count($paiva, '.') == 2) {
+			list($d, $m, $y) = explode('.', $paiva);
+			$onko_validi = checkdate($m, $d, sprintf('%04u', $y));
+		}
+
+		$request = array(
+			'valittu_yhtio'		 => $yhtio,
+			'valitut_varastot'	 => $valitut_varastot,
+			'valittu_status'	 => $valittu_status,
+		);
+
+		$paiva_1 = date('Y-m-d', strtotime("{$paiva} - 1 day"));
+		$paiva_1 = explode('-', $paiva_1);
+		$request['vva'] = $paiva_1[0];
+		$request['kka'] = $paiva_1[1];
+		$request['ppa'] = $paiva_1[2];
+
+		$paiva_1 = date('Y-m-d', strtotime("{$paiva} + 1 day"));
+		$paiva_1 = explode('-', $paiva_1);
+		$request['vvl'] = $paiva_1[0];
+		$request['kkl'] = $paiva_1[1];
+		$request['ppl'] = $paiva_1[2];
+
+		if ($onko_validi) {
+			$inventointien_lkm = count(hae_inventoinnit($request));
+		}
+		else {
+			$inventointien_lkm = 0;
+		}
+
+		echo $inventointien_lkm;
+		exit;
+	}
 }
 
 echo "<font class='head'>".t("Inventointiaste")."</font><hr>";
 
 gauge();
-
 ?>
 <style>
 	#wrapper {
@@ -312,6 +347,12 @@ gauge();
 		bind_inventointilajeittain_tr();
 
 		bind_varasto_change();
+
+		bind_valitse_kaikki_varastot_checkbox();
+
+		bind_valitse_kaikki_inventointilajit_checkbox();
+
+		bind_inventoitu_yhteensa_pvm_change();
 	});
 
 	function bind_kuukausittain_tr() {
@@ -424,6 +465,82 @@ gauge();
 		});
 	}
 
+	function bind_valitse_kaikki_varastot_checkbox() {
+		$('#valitse_kaikki_varastot').click(function() {
+			var varasto_checkboxit = $(this).parent().next().find('.varastot');
+			if ($(this).is(':checked')) {
+				$(varasto_checkboxit).each(function(index, checkbox) {
+					$(checkbox).attr('checked', 'checked');
+				});
+			}
+			else {
+				$(varasto_checkboxit).each(function(index, checkbox) {
+					$(checkbox).removeAttr('checked');
+				});
+			}
+		});
+	}
+
+	function bind_valitse_kaikki_inventointilajit_checkbox() {
+		$('#valitse_kaikki_inventointilajit').click(function() {
+			var inventointilaji_checkboxit = $(this).parent().next().find('.inventointilajit');
+			if ($(this).is(':checked')) {
+				$(inventointilaji_checkboxit).each(function(index, checkbox) {
+					$(checkbox).attr('checked', 'checked');
+				});
+			}
+			else {
+				$(inventointilaji_checkboxit).each(function(index, checkbox) {
+					$(checkbox).removeAttr('checked');
+				});
+			}
+		});
+	}
+
+	function bind_inventoitu_yhteensa_pvm_change() {
+		$('#inventoitu_yhteensa_pvm').keyup(function() {
+			var valitut_varastot = $('.varastot:checked');
+			var valitut_varasto_tunnukset = [];
+			$(valitut_varastot).each(function(index, varasto) {
+				valitut_varasto_tunnukset.push($(varasto).val());
+			});
+
+			$.ajax({
+				async: true,
+				type: 'GET',
+				data: {
+					yhtio: $('#yhtio').find(':selected').attr('data-yhtio'),
+					paiva: $(this).val(),
+					valittu_status: $('#status').val(),
+					valitut_varastot: valitut_varasto_tunnukset
+				},
+				url: 'inventointiaste.php?ajax_request=1&hae_inventointien_lukumaara_paivan_perusteella=1&no_head=yes'
+			}).done(function(data) {
+				if (console && console.log) {
+					console.log('Inventointien m‰‰r‰ onnistui');
+					console.log(data);
+				}
+				$('#paiva_inventoitu_yhteensa_td').html(data);
+			});
+		});
+	}
+
+	function isValidDate(date) {
+		var matches = /^(\d{2})[-\/](\d{2})[-\/](\d{4})$/.exec(date);
+		if (matches === null) {
+			return false;
+		}
+
+		var d = matches[2];
+		var m = matches[1] - 1;
+		var y = matches[3];
+		var composedDate = new Date(y, m, d);
+		return composedDate.getDate() === d &&
+				composedDate.getMonth() === m &&
+				composedDate.getFullYear() === y;
+	}
+
+
 	function tarkista() {
 		var ok = true;
 
@@ -480,6 +597,7 @@ $request = array(
 	'yhtio'						 => $yhtio,
 	'valitut_varastot'			 => $varastot,
 	'valitut_inventointilajit'	 => $inventointilajit,
+	'valittu_status'			 => $valittu_status,
 );
 
 echo "<div id='wrapper'>";
@@ -540,6 +658,10 @@ if ($request['tee'] == 'aja_raportti') {
 			'kpl'						 => array(
 				'header' => t('Inventointi m‰‰r‰'),
 				'order'	 => 50
+			),
+			'tuoteryhma'				 => array(
+				'header' => t('Tuoteryhm‰'),
+				'order'	 => 21
 			),
 			'hyllypaikka'				 => array(
 				'header' => t('Hyllypaikka'),
@@ -650,6 +772,13 @@ function init(&$request) {
 			}
 		}
 	}
+
+	$request['statukset'] = hae_tuote_statukset($request);
+
+	if (empty($request['valittu_status'])) {
+		//ensimm‰inen sivulataus, requestista ei ole tullut valittuja statuksia, rajataan k‰yttˆliittym‰‰n esivalitun statuksen eli ensimm‰isen statuksen perusteella
+		$request['valittu_status'] = $request['statukset'][0]['selite'];
+	}
 }
 
 function echo_arvot(&$request) {
@@ -667,6 +796,44 @@ function echo_arvot(&$request) {
 
 	$inventointeja_per_paiva = ($tuotepaikkojen_lukumaara - $inventointien_lukumaara_tilikausi) / $tyopaivien_lukumaara;
 
+	//Hae_inventoinnit hakee valitun tilikauden tai annetun p‰iv‰m‰‰r‰ v‰lin perusteella inventoinnit.
+	//Koska hae_inventoinnit funktiota kutsutaan t‰m‰n funktion j‰lkeen uudestaan pit‰‰ tilikausi ja p‰iv‰m‰‰r‰t laittaa talteen, jotta ohjelma toimii oikein.
+	$valittu_tilikausi_temp = $request['valittu_tilikausi'];
+	$vva_temp = $request['vva'];
+	$kka_temp = $request['kka'];
+	$ppa_temp = $request['ppa'];
+
+	$vvl_temp = $request['vvl'];
+	$kkl_temp = $request['kkl'];
+	$ppl_temp = $request['ppl'];
+	//unsetataan valittu_tilikausi jotta parsi_paivat-funktiossa k‰ytet‰‰n vva kka jne.
+	unset($request['valittu_tilikausi']);
+	//Defaulttina halutaan eilisen p‰iv‰n inventoinnit. Koska queryss‰ on BETWEEN alku AND loppu niin ajat pit‰‰ antaa allaolevan mukaisella tavalla
+	$eilen = date('d.m.Y', strtotime('now - 1 day'));
+
+	$toissa_paiva = date('Y-m-d', strtotime('now - 2 day'));
+	$toissa_paiva = explode('-', $toissa_paiva);
+	$request['vva'] = $toissa_paiva[0];
+	$request['kka'] = $toissa_paiva[1];
+	$request['ppa'] = $toissa_paiva[2];
+
+	$tanaan = date('Y-m-d', strtotime('now'));
+	$tanaan = explode('-', $tanaan);
+	$request['vvl'] = $tanaan[0];
+	$request['kkl'] = $tanaan[1];
+	$request['ppl'] = $tanaan[2];
+	$eilen_inventoitu_yhteensa = count(hae_inventoinnit($request));
+
+	//asetetaan tempist‰ value takaisin omille paikoilleen.
+	$request['valittu_tilikausi'] = $valittu_tilikausi_temp;
+	$request['vva'] = $vva_temp;
+	$request['kka'] = $kka_temp;
+	$request['ppa'] = $ppa_temp;
+
+	$request['vvl'] = $vvl_temp;
+	$request['kkl'] = $kkl_temp;
+	$request['ppl'] = $ppl_temp;
+
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>".t("Tuotepaikkojen inventointeja pit‰‰ suorittaa per p‰iv‰")."</th>";
@@ -678,23 +845,11 @@ function echo_arvot(&$request) {
 	echo "<td>{$tuotepaikkojen_lukumaara}</td>";
 	echo "</tr>";
 
-	/* debuggaukseen
-	  echo "<tr>";
-	  echo "<th>".t("inventointien_lukumaara_tilikausi")."</th>";
-	  echo "<td>{$inventointien_lukumaara_tilikausi}</td>";
-	  echo "</tr>";
+	echo "<tr>";
+	echo "<th><input type='text' id='inventoitu_yhteensa_pvm' size=10 value='{$eilen}'/> ".t("inventoitu yhteens‰")."</th>";
+	echo "<td id='paiva_inventoitu_yhteensa_td'>{$eilen_inventoitu_yhteensa}</td>";
+	echo "</tr>";
 
-
-	  echo "<tr>";
-	  echo "<th>".t("tyopaivien_lukumaara")."</th>";
-	  echo "<td>{$tyopaivien_lukumaara}</td>";
-	  echo "</tr>";
-
-	  echo "<tr>";
-	  echo "<th>".t("Tuotepaikkoja Valituissa Varastoissa - Inventointien_lukumaara_tilikausi")."</th>";
-	  echo "<td>{$eee}</td>";
-	  echo "</tr>";
-	 */
 	echo "</table>";
 }
 
@@ -793,6 +948,7 @@ function echo_table_third_layer($inventointilaji) {
 	echo "<tr>";
 	echo "<th>".t("Tuoteno")."</th>";
 	echo "<th>".t("Nimitys")."</th>";
+	echo "<th>".t("Tuoteryhm‰")."</th>";
 	echo "<th>".t("Hyllypaikka")."</th>";
 	echo "<th>".t("Ker‰ysvyˆhyke")."</th>";
 	echo "<th>".t("Kpl")."</th>";
@@ -806,6 +962,7 @@ function echo_table_third_layer($inventointilaji) {
 		echo "<tr class='tapahtuma_tr'>";
 		echo "<td>{$tapahtuma['tuoteno']}</td>";
 		echo "<td>{$tapahtuma['tuote_nimitys']}</td>";
+		echo "<td>{$tapahtuma['tuoteryhma']}</td>";
 		echo "<td>{$tapahtuma['hyllypaikka']}</td>";
 		echo "<td>{$tapahtuma['keraysvyohyke_nimitys']}</td>";
 		echo "<td>{$tapahtuma['kpl']}</td>";
@@ -858,6 +1015,17 @@ function echo_kayttoliittyma($request) {
 	echo "</tr>";
 
 	echo "<tr>";
+	echo "<th>".t("Statukset")."</th>";
+	echo "<td>";
+	echo "<select id='status' name='valittu_status'>";
+	foreach ($request['statukset'] as $status) {
+		echo "<option value='{$status['selite']}' {$status['selected']}>{$status['selitetark']}</option>";
+	}
+	echo "</select>";
+	echo "</td>";
+	echo "</tr>";
+
+	echo "<tr>";
 	echo "<th>".t("Valitse yhtiˆ")."</th>";
 	echo "<td>";
 	echo "<select id='yhtio' name='yhtio'>";
@@ -869,7 +1037,12 @@ function echo_kayttoliittyma($request) {
 	echo "<tr>";
 
 	echo "<tr>";
-	echo "<th>".t("Varastot")."</th>";
+	echo "<th>";
+	echo t("Varastot");
+	echo "<br/>";
+	echo t("Valitse kaikki");
+	echo "<input type='checkbox' id='valitse_kaikki_varastot' checked='checked' />";
+	echo "</th>";
 	echo "<td id='varastot_td'>";
 	foreach ($request['varastot'] as $varasto) {
 		echo "<input class='varastot' type='checkbox' name='varastot[]' value='{$varasto['tunnus']}' {$varasto['checked']} />";
@@ -880,7 +1053,12 @@ function echo_kayttoliittyma($request) {
 	echo "</tr>";
 
 	echo "<tr>";
-	echo "<th>".t("Inventointilajit")."</th>";
+	echo "<th>";
+	echo t("Inventointilajit");
+	echo "<br/>";
+	echo t("Valitse kaikki");
+	echo "<input type='checkbox' id='valitse_kaikki_inventointilajit' checked='checked' />";
+	echo "</th>";
 	echo "<td id='inventointilajit_td'>";
 	foreach ($request['inventointilajit'] as $inventointilaji) {
 		echo "<input class='inventointilajit' type='checkbox' name='inventointilajit[]' value='{$inventointilaji['selite']}' {$inventointilaji['checked']} />";
@@ -1014,9 +1192,13 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
 		$yhtio = $kukarow['yhtio'];
 	}
 
-	$query = "	SELECT tapahtuma.hyllyalue AS hyllyalue, tapahtuma.hyllynro AS hyllynro, count(*) AS kpl
+	$query = "	SELECT tapahtuma.hyllyalue AS hyllyalue, tapahtuma.hyllynro AS hyllynro, COUNT(DISTINCT CONCAT(tapahtuma.tuoteno, tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso)) AS kpl
 				FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
-				JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio AND tuote.tuoteno = tapahtuma.tuoteno AND tuote.ei_saldoa = '' AND tuote.status != 'P')
+				JOIN tuote
+				ON ( tuote.yhtio = tapahtuma.yhtio
+					AND tuote.tuoteno = tapahtuma.tuoteno
+					AND tuote.ei_saldoa = ''
+					AND tuote.status = '{$request['valittu_status']}' )
 				WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 				AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
 				AND tapahtuma.laji = 'Inventointi'
@@ -1044,7 +1226,8 @@ function hae_tuotepaikkojen_lukumaara(&$request) {
 
 	$query = "	SELECT tuotepaikat.hyllyalue as hyllyalue, tuotepaikat.hyllynro as hyllynro, count(*) as kpl
 				FROM tuote
-				JOIN tuotepaikat USING (yhtio, tuoteno)
+				JOIN tuotepaikat
+				USING (yhtio, tuoteno)
 				WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 				AND tuote.ei_saldoa = ''
 				AND tuote.status != 'P'
@@ -1085,28 +1268,12 @@ function kuuluuko_hylly_varastoon($request, $varasto_row) {
 	return $count;
 }
 
-function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {
+function hae_inventoinnit(&$request) {
 	global $kukarow;
 
-	//toistaiseksi, t‰t‰ funktiota ajetaan aina ilman aikavali_tyyppia, t‰m‰ tarkoittaa, ett‰ if ja elseiffiin ei ikin‰ menn‰
-	//ei poisteta n‰it‰ koska, n‰iden avulla saadaan laskettua inventoitavien varaston_hyllypaikkojen m‰‰r‰
-	if ($aikavali_tyyppi == '12kk') {
-		$request['alku_aika'] = date('Y-m-d', strtotime('now - 12 month'));
-		$request['loppu_aika'] = date('Y-m-d');
-		$tapahtuma_where = "";
-		$group = "GROUP BY hyllypaikka";
-	}
-	elseif ($aikavali_tyyppi == 'tilikausi') {
-		$request['alku_aika'] = $request['tamanhetkinen_tilikausi']['tilikausi_alku'];
-		$request['loppu_aika'] = $request['tamanhetkinen_tilikausi']['tilikausi_loppu'];
-		$tapahtuma_where = "";
-		$group = "GROUP BY hyllypaikka";
-	}
-	else {
-		parsi_paivat($request);
-		$tapahtuma_where = "AND tapahtuma.kpl != 0";
-		$group = "";
-	}
+	parsi_paivat($request);
+	$tapahtuma_where = "AND tapahtuma.kpl != 0";
+	$group = "";
 
 	if (!empty($request['valitut_inventointilajit'])) {
 		$inventointilaji_rajaus = "AND ( ";
@@ -1126,6 +1293,13 @@ function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {
 		$yhtio = $kukarow['yhtio'];
 	}
 
+	if ($request['valittu_status'] == 'EIPOISTETTUJA') {
+		$tuote_join = "AND tuote.status != 'P'";
+	}
+	else {
+		$tuote_join = "AND tuote.status = '{$request['valittu_status']}'";
+	}
+
 	$query = "	SELECT DATE(tapahtuma.laadittu) laadittu_pvm,
 				tapahtuma.laadittu,
 				YEAR(tapahtuma.laadittu) as vuosi,
@@ -1137,6 +1311,7 @@ function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {
 				substring( tapahtuma.selite, ( length(tapahtuma.selite)-locate( '>rb<',reverse(tapahtuma.selite)) ) +2 ) AS inventointilaji,
 				tapahtuma.tuoteno,
 				tuote.nimitys AS tuote_nimitys,
+				concat_ws(' - ', tuote.try, avainsana.selitetark) as tuoteryhma,
 				tapahtuma.kpl,
 				Concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllytaso, tapahtuma.hyllyvali) AS hyllypaikka,
 				IFNULL(kuka.nimi, '".t("Poistettu k‰ytt‰j‰")."') as laatija,
@@ -1146,7 +1321,11 @@ function hae_inventoinnit(&$request, $aikavali_tyyppi = '') {
 				ON ( tuote.yhtio = tapahtuma.yhtio
 				  AND tuote.tuoteno = tapahtuma.tuoteno
 				  AND tuote.ei_saldoa = ''
-				  AND tuote.status != 'P' )
+				  {$tuote_join} )
+				LEFT JOIN avainsana
+				ON ( avainsana.yhtio = tuote.yhtio
+					AND avainsana.selite = tuote.try
+					AND avainsana.laji = 'TRY')
 				JOIN varastopaikat
 				ON ( varastopaikat.yhtio = tapahtuma.yhtio
 				  AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
@@ -1378,6 +1557,26 @@ function hae_inventointilajit($request = array(), $yhtio = '') {
 	}
 
 	return $inventointilajit;
+}
+
+function hae_tuote_statukset($request = array()) {
+	global $kukarow, $yhtiorow;
+
+	$result = t_avainsana("S");
+	$statukset = array();
+	while ($status = mysql_fetch_array($result)) {
+		$status['selected'] = '';
+		if (!empty($request['valittu_status']) and $request['valittu_status'] == $status['selite']) {
+			$status['selected'] = 'selected';
+		}
+		$statukset[] = $status;
+	}
+	$statukset[] = array(
+		'selite'	 => 'EIPOISTETTUJA',
+		'selitetark' => t('Ei poistettuja')
+	);
+
+	return $statukset;
 }
 
 function echo_tallennus_formi($xls_filename) {

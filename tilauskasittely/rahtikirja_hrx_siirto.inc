@@ -124,8 +124,12 @@ if ($kollityht > 0) {
 		if (substr($hrx_path,-1) != '/') {
 			$hrx_path .= '/';
 		}
-
-		$filenimi = "/tmp/hrx-import-".md5(uniqid(rand(),true)).".dat";
+		if ($kukarow['yhtio'] == 'mergr') {
+			$filenimi = "/tmp/MG-".date("Ymd-His").".dat";
+		}
+		else {
+			$filenimi = "/tmp/hrx-import-".md5(uniqid(rand(),true)).".dat";
+		}
 
 		//kirjoitetaan faili levylle..
 		if (file_put_contents($filenimi, $sanoma) === FALSE) {

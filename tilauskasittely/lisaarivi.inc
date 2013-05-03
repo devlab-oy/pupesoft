@@ -1450,7 +1450,7 @@
 								if (trim($tuotenimitys_force) != "") {
 									$trow["nimitys"] = addslashes($tuotenimitys_force);
 								}
-								elseif ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and trim($tuotenimitys) != "") {
+								elseif (!empty($yhtiorow["nimityksen_muutos_tilauksella"]) and trim($tuotenimitys) != "") {
 									// lis‰t‰‰n saatu nimitys kaikille tuotteille
 									$trow["nimitys"] = addslashes($tuotenimitys);
 								}

@@ -513,7 +513,7 @@
 
 		// Rivi on lisataan tietokantaan
 		if ($tee == 'TI' and $tuoteno != "") {
-			//Jos radio-button: Tuotenumerot on tuotteentoimittajat tuotenumerot -asennossa, lisätään $tuoteno eteen kysymysmerkki. Tällöin järjestelmä hakee toimittajan tuotenumeron perusteella.
+			//HUOM!! Jos radio-button -> Tuotenumerot: on tuotteentoimittajat tuotenumerot -asennossa, lisätään $tuoteno eteen kysymysmerkki. Tällöin järjestelmä hakee toimittajan tuotenumeron perusteella.
 			if ($toim_tuoteno == 'toim_tuoteno_toimittajan') {
 				$tuoteno = '?'.$tuoteno;
 			}
@@ -835,7 +835,7 @@
 			echo "</table><br>";
 
 			echo "<font class='head'>".t("Lisää rivi").": </font><hr>";
-			if (!isset($toim_tuoteno)) {
+			if (empty($toim_tuoteno)) {
 				$toim_tuoteno = "toim_tuoteno_omat";
 			}
 			$sel = array();

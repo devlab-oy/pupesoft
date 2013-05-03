@@ -93,7 +93,7 @@
 				if ($tuoteno != '' and $kpl != 0) {
 
 					///* Toimittajan tuotenumerospecial*///
-					if ($tiedoston_tuoteno == 'toimittajan_tuoteno') {
+					if (substr($tuoteno,0,1) == '?' or $tiedoston_tuoteno == 'toimittajan_tuoteno') {
 						$query = "	SELECT *
 									FROM tuotteen_toimittajat
 									JOIN tuote USING (yhtio, tuoteno)

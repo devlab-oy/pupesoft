@@ -472,7 +472,6 @@
 
 			///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 			$useslave = 1;
-			$usemastertoo = 1;
 
 			// Eli haetaan connect.inc uudestaan t‰ss‰
 			require("../inc/connect.inc");

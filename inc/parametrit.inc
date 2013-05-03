@@ -430,7 +430,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				$dtpalvelin .= "raportit/";
 			}
 
-			if (basename($phpnimi) == "luottotappiot.php" or basename($phpnimi) == "myyntilaskuhaku.php") {
+			if (basename($phpnimi) == "luottotappiot.php" or basename($phpnimi) == "myyntilaskuhaku.php" or basename($phpnimi) == "myyntilaskut_asiakasraportti.php") {
 				$dtpalvelin .= "myyntires/";
 			}
 

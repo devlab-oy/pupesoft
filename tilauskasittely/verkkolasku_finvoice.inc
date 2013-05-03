@@ -77,9 +77,8 @@ if (!function_exists('finvoice_otsik')) {
 				$receiverintermediator = $senderintermediator;
 			}
 
-			// Apixilla saa vastaanottajan verkkolaskutunnus olla tyhj‰‰. Silloin Apix selvitt‰‰ tuleeko laittaa tulostukseen vai verkkolaskuna.
-			// Muilla pakotetaan tulostuspalveluun
-			if ($receiverpartyid == "" and $yhtiorow["verkkolasku_lah"] != "apix") {
+			// Jos vastaanottaja on tyhj‰‰ tai ollaan valittu lasku tulostuspalveluun chn 100 "Verkkolasku, tulostuspalvelu"
+			if ($receiverpartyid == "" or $lasrow["chn"] == "100") {
 				$receiverpartyid = $tulostuspalvelu;
 			}
 

@@ -280,7 +280,7 @@
 
 			$query  = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]' 
+						WHERE yhtio = '$kukarow[yhtio]'
 						AND tyyppi != 'P'
 						ORDER BY tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
@@ -534,17 +534,18 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$id = mysql_insert_id();
 
-
 		// Jos erikoisalennus muuttuu
 		if ($laskurow["erikoisale"] != $erikoisale) {
 			// p‰ivitet‰‰n erikoisale tilausriveille
 			$erikoisale_query_otunnus = (int) $kukarow['kesken'] != 0 ? $kukarow['kesken'] : $id;
+
 			$query_erikoisale = "	UPDATE tilausrivi
 									SET erikoisale = '{$erikoisale}'
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND otunnus = '{$erikoisale_query_otunnus}'
-									AND netto  != 'N'
-									AND tyyppi != 'D'";
+									WHERE yhtio     = '{$kukarow['yhtio']}'
+									AND otunnus     = '{$erikoisale_query_otunnus}'
+									AND netto      != 'N'
+									AND tyyppi     != 'D'
+									AND uusiotunnus = 0";
 			$upd_erikoisale_res = pupe_query($query_erikoisale);
 		}
 

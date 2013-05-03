@@ -125,7 +125,7 @@ if ($kollityht > 0) {
 			$hrx_path .= '/';
 		}
 		if ($kukarow['yhtio'] == 'mergr') {
-			$filenimi = "/tmp/MG-".date("Ymd-His").".dat";
+			$filenimi = "/tmp/MG-".md5(uniqid(rand(),true)).".dat";
 		}
 		else {
 			$filenimi = "/tmp/hrx-import-".md5(uniqid(rand(),true)).".dat";

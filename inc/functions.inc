@@ -18401,7 +18401,7 @@ if (!function_exists("pupesoft_sahkoposti")) {
 		$liitteet		= (isset($parametrit["attachements"]) and is_array($parametrit["attachements"])) ? $parametrit["attachements"] : "";
 
 		// Kaikki pitää tulla kunnossa (paitsi body ja cc)
-		if ($email_to == "" or $email_subject == "" or $email_ctype == "" or $liitteet == "") {
+		if ($email_to == "" or $email_subject == "" or $email_ctype == "") {
 			return false;
 		}
 
@@ -18430,71 +18430,74 @@ if (!function_exists("pupesoft_sahkoposti")) {
 
 		$content .= "--$bound";
 
-		foreach ($liitteet as $liite) {
+		if (!empty($liitteet)) {
+			foreach ($liitteet as $liite) {
 
-			// Tarkistetaan $liite arrayn oikeellisuus
-			$attachement_filename		= isset($liite["filename"]) ? $liite["filename"] : "";
-			$attachement_newfilename	= isset($liite["newfilename"]) ? $liite["newfilename"] : "";
-			$attachement_ctype			= isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
+				// Tarkistetaan $liite arrayn oikeellisuus
+				$attachement_filename		= isset($liite["filename"]) ? $liite["filename"] : "";
+				$attachement_newfilename	= isset($liite["newfilename"]) ? $liite["newfilename"] : "";
+				$attachement_ctype			= isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
 
-			// Jos tiedostoa ei löydy tai ctype on tyjää, hypätään filen yli.
-			if (!file_exists($attachement_filename) or !is_readable($attachement_filename) or $attachement_ctype == "") {
-				continue;
-			}
+				// Jos tiedostoa ei löydy tai ctype on tyjää, hypätään filen yli.
+				if (!file_exists($attachement_filename) or !is_readable($attachement_filename) or $attachement_ctype == "") {
+					continue;
+				}
 
-			// Otetaan tiedoston sisältö muuttujaan
-			$attachement_content = chunk_split(base64_encode(file_get_contents($attachement_filename)));
+				// Otetaan tiedoston sisältö muuttujaan
+				$attachement_content = chunk_split(base64_encode(file_get_contents($attachement_filename)));
 
-			// Tiedostosta vain nimi
-			$attachement_name = basename($attachement_filename);
+				// Tiedostosta vain nimi
+				$attachement_name = basename($attachement_filename);
 
-			// Jos on poikkeava nimi, otetaan se
-			if ($attachement_newfilename != "") {
-				$attachement_name = basename($attachement_newfilename);
-			}
+				// Jos on poikkeava nimi, otetaan se
+				if ($attachement_newfilename != "") {
+					$attachement_name = basename($attachement_newfilename);
+				}
 
-			// Boundin jälkeen aina rivinvaihto
-			$content .= "\n";
+				// Boundin jälkeen aina rivinvaihto
+				$content .= "\n";
 
-			if ($attachement_ctype == "TEXT") {
-				$content .= "Content-Type: text/plain; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "PS") {
-				$content .= "Content-Type: application/ps; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "JPG" or $attachement_ctype == "JPEG") {
-				$content .= "Content-Type: image/jpeg; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "PNG") {
-				$content .= "Content-Type: image/png; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "GIF") {
-				$content .= "Content-Type: image/gif; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "TIF" or $attachement_ctype == "TIFF") {
-				$content .= "Content-Type: image/tiff; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "BMP") {
-				$content .= "Content-Type: image/bmp; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "EXCEL") {
-				$content .= "Content-Type: application/excel; name=\"$attachement_name\"\n";
-			}
-			elseif ($attachement_ctype == "PDF") {
-				$content .= "Content-Type: application/pdf; name=\"$attachement_name\"\n";
-			}
-			else {
-				//Defaulttina katotaa mitä tyyppiä tiedosto on ja laitetaa headerit sen mukaan
-				$mime_type = mime_content_type($attachement_filename);
-				$content .= "Content-Type: $mime_type; name=\"$attachement_name\"\n";
-			}
+				if ($attachement_ctype == "TEXT") {
+					$content .= "Content-Type: text/plain; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "PS") {
+					$content .= "Content-Type: application/ps; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "JPG" or $attachement_ctype == "JPEG") {
+					$content .= "Content-Type: image/jpeg; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "PNG") {
+					$content .= "Content-Type: image/png; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "GIF") {
+					$content .= "Content-Type: image/gif; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "TIF" or $attachement_ctype == "TIFF") {
+					$content .= "Content-Type: image/tiff; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "BMP") {
+					$content .= "Content-Type: image/bmp; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "EXCEL") {
+					$content .= "Content-Type: application/excel; name=\"$attachement_name\"\n";
+				}
+				elseif ($attachement_ctype == "PDF") {
+					$content .= "Content-Type: application/pdf; name=\"$attachement_name\"\n";
+				}
+				else {
+					//Defaulttina katotaa mitä tyyppiä tiedosto on ja laitetaa headerit sen mukaan
+					$mime_type = mime_content_type($attachement_filename);
+					$content .= "Content-Type: $mime_type; name=\"$attachement_name\"\n";
+				}
 
-			$content .= "Content-Transfer-Encoding: base64\n";
-			$content .= "Content-Disposition: attachment; filename=\"$attachement_name\"\n\n";
-			$content .= $attachement_content;
-			$content .= "\n";
-			$content .= "--$bound";
+				$content .= "Content-Transfer-Encoding: base64\n";
+				$content .= "Content-Disposition: attachment; filename=\"$attachement_name\"\n\n";
+				$content .= $attachement_content;
+				$content .= "\n";
+				$content .= "--$bound";
+			}
 		}
+		
 
 		// Vikassa boundissa pitää olla -- lopussa.
 		$content .= "--\n";
@@ -20119,7 +20122,7 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
  * );
  */
 if (!function_exists('generoi_excel_tiedosto')) {
-	function generoi_excel_tiedosto(&$rivit, $header_values, $force_to_string = array(), $sulje_pois = array()) {
+	function generoi_excel_tiedosto(&$rivit, $header_values = array(), $force_to_string = array(), $sulje_pois = array()) {
 		require_once('pupeExcel.inc');
 		require_once('ProgressBar.class.php');
 		$xls = new pupeExcel();
@@ -20698,5 +20701,66 @@ if (!function_exists('search_array_key_for_value_recursive')) {
 		}
 
 		return $results;
+	}
+}
+
+if (!function_exists('pupesoft_lisaa_valmisteen_rekursiiviset_reseptit')) {
+	function pupesoft_lisaa_valmisteen_rekursiiviset_reseptit() {
+		global $kukarow, $yhtiorow, $tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array;
+
+		$kommentti_array = array();
+		$lapsenlap_array = array();
+		$riikoko = count($tuoteno_array);
+
+		for ($rii=0; $rii < $riikoko; $rii++) {
+			rekursiivinen_resepti($tuoteno_array[$rii], $kpl_array[$tuoteno_array[$rii]]);
+		}
+	}
+}
+
+if (!function_exists('rekursiivinen_resepti')) {
+	function rekursiivinen_resepti($pertuoteno, $perkpl) {
+		global $kukarow, $tuoteno_array, $riikoko, $kpl_array, $kommentti_array, $lapsenlap_array;
+
+		$query = "	SELECT tuoteno, kerroin
+					FROM tuoteperhe
+					WHERE isatuoteno = '$pertuoteno'
+					and yhtio 		 = '$kukarow[yhtio]'
+					and tyyppi		 = 'R'
+					ORDER by tuoteno";
+		$perheresult = pupe_query($query);
+
+		if (mysql_num_rows($perheresult) > 0) {
+			while ($perherow = mysql_fetch_assoc($perheresult)) {
+				$query = "	SELECT distinct isatuoteno
+							FROM tuoteperhe
+							WHERE isatuoteno = '$perherow[tuoteno]'
+							and yhtio  		 = '$kukarow[yhtio]'
+							and tyyppi 		 = 'R'
+							ORDER by tuoteno";
+				$perheresult2 = pupe_query($query);
+
+				if (mysql_num_rows($perheresult2) > 0) {
+
+					//Tätä tuoteperhettä halutaan myydä
+					if (!in_array(strtoupper($perherow["tuoteno"]), $tuoteno_array)) {
+
+						$lt = strtoupper($perherow["tuoteno"]);
+
+						$tuoteno_array[]		= $lt; // lisätään tuoteno arrayseen
+						$kpl_array[$lt]			= round($perkpl * $perherow["kerroin"],2);
+						$kommentti_array[$lt] 	= "Valmista $pertuoteno:n raaka-aineeksi $kpl_array[$lt] kappaletta.";
+						$lapsenlap_array[$lt] 	= $lt;
+						$riikoko++;
+					}
+					else {
+						$lt = strtoupper($perherow["tuoteno"]);
+
+						$kpl_array[$lt]		   += round($perkpl * $perherow["kerroin"],2);
+						$kommentti_array[$lt]  .= "<br>Valmista $pertuoteno:n raaka-aineeksi ".round($perkpl * $perherow["kerroin"],2)." kappaletta.";
+					}
+				}
+			}
+		}
 	}
 }

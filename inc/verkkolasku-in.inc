@@ -1057,6 +1057,8 @@
 				$result = pupe_query($query);
 				$ostovelkatiliointitunnus = mysql_insert_id();
 
+				$summa_varasto = round($vassumma * -1, 2);
+
 				// Onko rivikohtaisia tiliöintisääntöjä
 				$query = "	SELECT *
 							FROM tiliointisaanto
@@ -1303,6 +1305,8 @@
 								}
 							}
 
+							if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '') $summa_varasto = $summa;
+
 							$verkkolaskuveroton				+= $summa;
 							$verkkolaskuveroton_valuutassa	+= $summa_valuutassa;
 							$vtonsumma						 = $summa;
@@ -1345,7 +1349,7 @@
 											kohde	 		 = '{$kohde_ins}',
 											projekti 		 = '{$projekti_ins}',
 											tapvm 			 = '$tpv-$tpk-$tpp',
-											summa 			 = '$vtonsumma',
+											summa 			 = '$summa_varasto',
 											summa_valuutassa = '$vtonsumma_valuutassa',
 											valkoodi 		 = '$valkoodi',
 											selite 			 = '$selite',
@@ -1376,8 +1380,8 @@
 											kohde	 		 = '{$kohde_ins}',
 											projekti 		 = '{$projekti_ins}',
 											tapvm 			 = '$tpv-$tpk-$tpp',
-											summa 			 = $vtonsumma *-1,
-											summa_valuutassa = $vtonsumma_valuutassa*-1,
+											summa 			 = $summa_varasto * -1,
+											summa_valuutassa = $vtonsumma_valuutassa * -1,
 											valkoodi 		 = '$valkoodi',
 											selite 			 = '$selite',
 											vero 			 = 0,

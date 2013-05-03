@@ -229,6 +229,8 @@
 
 		$_x_k = $_x;
 
+		$korvaavat_column_count_alku = $_x;
+
 		$sarakkeet["SARAKE{$_x}"] = t("Korvaavat Tuoteno")."\t";
 		$_x++;
 		$sarakkeet["SARAKE{$_x}"] = t("Korvaavat Saldo")."\t";
@@ -244,6 +246,17 @@
 
 			$_x++;
 		}
+
+		$korvaavat_column_count_loppu = $_x - 1;
+
+		$sarakkeet["SARAKE{$_x}"] = t("Vastaava Tuoteno #1")."\t";
+		$_x++;
+
+		$sarakkeet["SARAKE{$_x}"] = t("Vastaava Tuoteno #2")."\t";
+		$_x++;
+
+		$sarakkeet["SARAKE{$_x}"] = t("Vastaava Tuoteno #3")."\t";
+		$_x++;
 
 
 		//	Haetaan kaikki varastot ja luodaan kysely paljonko ko. varastoon on tilattu tavaraa..
@@ -419,7 +432,6 @@
 
 			///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 			$useslave = 1;
-			$usemastertoo = 1;
 
 			// Eli haetaan connect.inc uudestaan t‰ss‰
 			require("../inc/connect.inc");
@@ -706,6 +718,8 @@
 			}
 
 			flush();
+
+			require('vastaavat.class.php');
 
 			require('inc/ProgressBar.class.php');
 
@@ -1663,6 +1677,44 @@
 								}
 
 								$_x++;
+							}
+						}
+					}
+					else {
+
+						$_x = $korvaavat_column_count_loppu + 1;
+
+						// Jos korvaavia ei ole, siirret‰‰n columnicountia eteenp‰in
+						for ($i = $korvaavat_column_count_alku; $i <= $korvaavat_column_count_loppu; $i++) {
+							if (!empty($valitut["SARAKE{$i}"])) {
+								$excelsarake++;
+							}
+						}
+					}
+
+					$vastaavat = new Vastaavat($row['tuoteno']);
+					$vastaavat_ketjut = $vastaavat->ketjut();
+
+					if (!empty($vastaavat_ketjut)) {
+						$vastaavat_tuotteet = $vastaavat->find_by_ketju($vastaavat_ketjut[0]);
+
+						$i = 1;
+
+						foreach ($vastaavat_tuotteet as $_tuoteno_arr) {
+
+							if ($_tuoteno_arr['tuoteno'] != $row['tuoteno']) {
+
+								if ($i == 4) break;
+
+								if ($valitut["SARAKE{$_x}"] != '') {
+									$rivi .= "\"{$_tuoteno_arr['tuoteno']}\"\t";
+
+									$worksheet->write($excelrivi, $excelsarake, $_tuoteno_arr["tuoteno"]);
+									$excelsarake++;
+								}
+
+								$_x++;
+								$i++;
 							}
 						}
 					}

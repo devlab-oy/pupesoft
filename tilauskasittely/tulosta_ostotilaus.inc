@@ -101,8 +101,11 @@
 				$pdf->draw_text(50, 707, $laskurow["nimitark"],			$thispage, $norm);
 				$pdf->draw_text(50, 697, $laskurow["osoite"], 			$thispage, $norm);
 				$pdf->draw_text(50, 687, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
-				$pdf->draw_text(50, 677, $laskurow["maa"], 				$thispage, $norm);
 
+				if ($yhtiorow['maa'] != $laskurow['maa']) {
+					$maan_tiedot = hae_maa(array('maakoodi' => $laskurow['maa']));
+					$pdf->draw_text(50, 677, $maan_tiedot["nimi"], 				$thispage, $norm);
+				}
 
 				//$pdf->draw_rectangle(674, 20,  611, 300, $thispage, $rectparam);
 				$pdf->draw_text(50, 656, t("Vastaanottaja", $kieli), 	$thispage, $pieni);
@@ -110,7 +113,11 @@
 				$pdf->draw_text(50, 634, $laskurow["toim_nimitark"], 	$thispage, $norm);
 				$pdf->draw_text(50, 624, $laskurow["toim_osoite"],	 	$thispage, $norm);
 				$pdf->draw_text(50, 614, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $thispage, $norm);
-				$pdf->draw_text(50, 604, $laskurow["toim_maa"], 		$thispage, $norm);
+
+				if ($yhtiorow['maa'] != $laskurow['toim_maa']) {
+					$maan_tiedot = hae_maa(array('maakoodi' => $laskurow['toim_maa']));
+					$pdf->draw_text(50, 604, $maan_tiedot["nimi"], 		$thispage, $norm);
+				}
 
 				$query = "	SELECT *
 							FROM toimi
@@ -502,7 +509,9 @@
 				$pdf->draw_text(30, 55, $yhtiorow["nimi"], $thispage, $pieni);
 				$pdf->draw_text(30, 45, $yhtiorow["osoite"], $thispage, $pieni);
 				$pdf->draw_text(30, 35, $yhtiorow["postino"]."  ".$yhtiorow["postitp"],	$thispage, $pieni);
-				$pdf->draw_text(30, 25, $yhtiorow["maa"], $thispage, $pieni);
+
+				$maan_tiedot = hae_maa(array('maakoodi' => $yhtiorow['maa']));
+				$pdf->draw_text(30, 25, $maan_tiedot["nimi"], $thispage, $pieni);
 
 				$pdf->draw_text(217, 55, t("Puhelin", $kieli).":", $thispage, $pieni);
 				$pdf->draw_text(257, 55, $yhtiorow["puhelin"],$thispage, $pieni);

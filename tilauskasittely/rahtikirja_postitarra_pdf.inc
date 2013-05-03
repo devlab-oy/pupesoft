@@ -7,7 +7,7 @@
 	// $rakir_row:sta löytyy asiakkaan tiedot ja $rivi:stä ytunnus
 	//
 	// muuttujat:
-	// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
+	// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kollityht, kilotyht, kuutiotyht, kirjoitin
 	// jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
 	//
 	// tulostetaan rahtikirja
@@ -66,13 +66,13 @@
 	// tulostetaan niin monta lappua kun on kollejakin
 	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
-		$kuka = sprintf("%02d",$tulostuskpl); 		// laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
+		$kuka = sprintf("%02s", $tulostuskpl); 		// laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
 
-		if (substr($rivi["rahtikirjanro"], 0, 4) == "JJFI") {
-			$oma = sprintf("%09d", substr($rivi["rahtikirjanro"], -9));
+		if (substr(trim($rivi["rahtikirjanro"]), 0, 4) == "JJFI") {
+			$oma = sprintf("%09s", substr(trim($rivi["rahtikirjanro"]), -9));
 		}
 		else {
-			$oma = sprintf("%09d", $rtunnus); // 9, pitkä numero tulee rahtikirja taulun tunnuksesta, pitää olaa uniikki
+			$oma = sprintf("%09s", $rtunnus); // 9, pitkä numero tulee rahtikirja taulun tunnuksesta, pitää ollaa uniikki
 		}
 
 		// tehdään viivakoodit

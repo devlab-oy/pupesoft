@@ -239,6 +239,7 @@
 								and lasku.vienti	 	= '$otsikkorivi[vienti]'
 								and lasku.alv		 	= '$otsikkorivi[alv]'
 								and lasku.ketjutus 		= '$otsikkorivi[ketjutus]'
+								and lasku.jaksotettu	= '$otsikkorivi[jaksotettu]'
 								and lasku.toimitusehto	= '$otsikkorivi[toimitusehto]'
 								and lasku.valkoodi 		= '$otsikkorivi[valkoodi]'
 								and lasku.vienti_kurssi	= '$otsikkorivi[vienti_kurssi]'
@@ -326,6 +327,16 @@
 								$query .= "erpcm='',";
 							}
 						}
+						// jaksotetuissa on hyvä pistää vanhatunnus alk.per. otsikon vanhatunnukseksi, että maksusopimuksissa osataan ketjuttaa tilaukset loppulaskutuksen kohdalla
+						elseif ($fieldname == 'vanhatunnus') {
+							if ($otsikkorivi['jaksotettu'] > 0) {
+								$query .= "vanhatunnus='$otsikkorivi[vanhatunnus]',";
+							}
+							else {
+								$query .= "vanhatunnus='',";
+							}
+						}
+
 						// nämä kentät tyhjennetään aina
 						elseif ($fieldname == 'kapvm' or
 								$fieldname == 'tapvm' or
@@ -357,7 +368,6 @@
 								$fieldname == 'sisamaan_kuljetus' or
 								$fieldname == 'sisamaan_kuljetusmuoto' or
 								$fieldname == 'poistumistoimipaikka' or
-								$fieldname == 'vanhatunnus' or
 								$fieldname == 'poistumistoimipaikka_koodi') {
 							$query .= $fieldname."='',";
 						}
@@ -586,6 +596,9 @@
 							}
 							$rivitres = pupe_query($query);
 							$lisataanrow = mysql_fetch_assoc($rivitres);
+
+							// jos maksupositioilla tehty jälkitoimitustilaus, laitetaan uudelle riville kanssa jaksotettu, jotta löydetään maksusopimuksissa tämä ja ei anneta loppulaskuttaa liian aikaisin.
+							$jaksotettu = $lisataanrow['jaksotettu'];
 
 							if ($toim == "ENNAKKO") {
 								$lisataanrow_kpl = round($lisataanrow["varattu"] * $isa_kerroin,2);
@@ -878,7 +891,7 @@
 													$values .= "";
 													break;
 												case 'positio':
-													if ($kukarow['extranet'] != '' and $tilaus_on_jo == "KYLLA") {
+													if (($kukarow['extranet'] != '' or $yhtiorow['jt_automatiikka_mitatoi_tilaus'] == 'E') and $tilaus_on_jo == "KYLLA") {
 														$kysely .= "positio='JT',";
 													}
 													else {

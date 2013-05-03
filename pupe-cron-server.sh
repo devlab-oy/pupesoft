@@ -11,11 +11,23 @@ if [ -z $BACKUPSAVEDAYS ]; then
 	BACKUPSAVEDAYS=30
 fi
 
+# Siirryt‰‰n pupesoft hakemistoon varmuuden vuoksi
+cd ${POLKU}
+
 # Tarkistetaan mysql-tietokannan taulut
-cd ${POLKU};php check-tables.php
+php ${POLKU}/check-tables.php
 
 # P‰ivitet‰‰n pupesoftin valuuttakurssit
-cd ${POLKU};php hae_valuutat_cron.php
+php ${POLKU}/hae_valuutat_cron.php
+
+# Haetaan APIX -laskut
+php ${POLKU}/apix-api.php
+
+# Haetaan Maventa -laskut
+php ${POLKU}/maventa-api.php
+
+# Ajetaan verkkolaskut sis‰‰n Pupesoftiin
+php ${POLKU}/verkkolasku-in.php
 
 # Siivotaan dataout dirikasta vanhat failit pois
 touch ${POLKU}/dataout

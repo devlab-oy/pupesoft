@@ -21,6 +21,14 @@
 
 		if (php_sapi_name() == 'cli') {
 			$php_cli = TRUE;
+
+			// otetaan includepath aina rootista
+			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
+			error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+			ini_set("display_errors", 0);
+
+			// otetaan tietokantayhteys
+			require ("inc/connect.inc");
 		}
 
 		// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ssä
@@ -45,13 +53,7 @@
 		touch("/tmp/##verkkolasku-in.lock");
 
 		if ($php_cli) {
-			// Komentoriviltä
-			// otetaan includepath aina rootista
-			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
-			error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
-			ini_set("display_errors", 0);
-
-			require ("inc/connect.inc"); // otetaan tietokantayhteys
+			// Ei tehdä mitään. Tälläset iffit on sitä parasta koodia.
 		}
 		elseif (strpos($_SERVER['SCRIPT_NAME'], "tiliote.php") !== FALSE and $verkkolaskut_in != "" and $verkkolaskut_ok != "" and $verkkolaskut_orig != "" and $verkkolaskut_error != "") {
 			//Pupesoftista
@@ -133,7 +135,7 @@
 
 		if ($php_cli) {
 			# laitetaan käyttöoikeudet kuntoon
-			system("chown -R root:apache $verkkolaskut_in; chmod -R 770 $verkkolaskut_in;");
+			system("chown -R :apache $verkkolaskut_in; chmod -R 770 $verkkolaskut_in;");
 		}
 
 		# siivotaan yli 90 päivää vanhat aineistot

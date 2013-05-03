@@ -374,7 +374,7 @@
 		}
 	}
 
-	if ($komento["Purkulista"] != '') {
+	if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
 
 		$pdf = new pdffile;
 		$pdf->set_default('margin-top', 	0);

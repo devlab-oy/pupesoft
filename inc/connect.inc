@@ -30,13 +30,11 @@ if ($useslave > 0) {
 
 // Käytetään slave kantaa
 if ($useslave > 0) {
-	if (isset($usemastertoo) and $usemastertoo > 0) {
-		// Tässä tapauksessa käytetään MYÖS master-kantaa
-		$masterlink = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
-		mysql_select_db($dbkanta, $masterlink) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
-		mysql_set_charset("latin1", $masterlink);
-		mysql_query("set group_concat_max_len=1000000", $masterlink);
-	}
+	// Tässä tapauksessa käytetään MYÖS master-kantaa koska esim excel-library tarvii master-yhteyden
+	$masterlink = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
+	mysql_select_db($dbkanta, $masterlink) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
+	mysql_set_charset("latin1", $masterlink);
+	mysql_query("set group_concat_max_len=1000000", $masterlink);
 
 	$link = mysql_connect($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die ("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
 }

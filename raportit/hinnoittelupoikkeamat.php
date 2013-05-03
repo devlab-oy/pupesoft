@@ -206,7 +206,6 @@
 					}
 
 					$ero = $tilausrivirow['hinta'] - $lis_hinta;
-					$ero = hintapyoristys($ero);
 
 					if ($ero >= 0) continue;
 
@@ -223,13 +222,13 @@
 					$lis_hinta = hintapyoristys($lis_hinta);
 					$tilausrivirow['hinta'] = hintapyoristys($tilausrivirow['hinta']);
 
-					$data[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
-					$data[$i]['nimitys'] = $tilausrivirow['nimitys'];
-					$data[$i]['kpl'] = $tilausrivirow['kpl'];
-					$data[$i]['koneen_hinta'] = $lis_hinta;
-					$data[$i]['hinta'] = $tilausrivirow['hinta'];
-					$data[$i]['eropros'] = $eropros;
-					$data[$i]['ero'] = $ero * $tilausrivirow['kpl'];
+					$data[$i]['tuoteno'] 		= $tilausrivirow['tuoteno'];
+					$data[$i]['nimitys'] 		= $tilausrivirow['nimitys'];
+					$data[$i]['kpl'] 			= sprintf("%.2f", $tilausrivirow['kpl']);
+					$data[$i]['koneen_hinta'] 	= sprintf("%.2f", $lis_hinta);
+					$data[$i]['hinta'] 			= sprintf("%.2f", $tilausrivirow['hinta']);
+					$data[$i]['eropros'] 		= sprintf("%.2f", $eropros);
+					$data[$i]['ero'] 			= sprintf("%.2f", round($ero * $tilausrivirow['kpl'], 2));
 
 					$i++;
 					$x++;
@@ -309,7 +308,9 @@
 							echo "<tr>";
 						}
 
-						$worksheet->write($excelrivi, $excelsarake, $v);
+						if ($excelsarake > 6) $worksheet->writeNumber($excelrivi, $excelsarake, $v);
+						else $worksheet->write($excelrivi, $excelsarake, $v);
+
 						$excelsarake++;
 
 						$stylelisa = $excelsarake > 7 ? " style='text-align: right;' " : "";

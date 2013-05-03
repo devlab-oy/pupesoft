@@ -895,6 +895,7 @@
 
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
 		if ($trow[$i] == "") {
 			$sel1 = "selected";
@@ -902,9 +903,13 @@
 		elseif ($trow[$i] == "Y") {
 			$sel2 = "selected";
 		}
+		elseif ($trow[$i] == "T") {
+			$sel3 = "selected";
+		}
 
 		$ulos .= "<option value=''  $sel1>".t("Tuotteen nimitystä ei voi muokata tilauksentekovaiheessa")."</option>";
 		$ulos .= "<option value='Y' $sel2>".t("Tuotteen nimitystä voi muokata tilauksentekovaiheessa")."</option>";
+		$ulos .= "<option value='T' $sel3>".t("Tuotteen nimitystä voi muokata tarjouksentekovaiheessa")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

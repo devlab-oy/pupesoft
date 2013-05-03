@@ -565,6 +565,7 @@
 
 			$haku = "";
 			$myyntitili_haku = "";
+			$etsi = mysql_real_escape_string($etsi);
 
 			if ($toim == "MYYNTITILITOIMITA") {
 				$myyntitili_haku = " or tilausrivi.tuoteno like '%$etsi%' ";
@@ -584,6 +585,27 @@
 			if ($toim == 'YLLAPITO' and $etsi != "" and $haku != "") {
 				$haku = substr($haku, 0, -2); // Poistetaan vika sulku $hausta
 				$haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%$etsi%' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%$etsi%' or lasku.asiakkaan_tilausnumero like '%$etsi%') ";
+			}
+
+			if (!empty($mt_order)) {
+				$hakusarake = mysql_real_escape_string(key($mt_order));
+				$hakusuunta = mysql_real_escape_string($mt_order[$hakusarake]);
+
+				if ($hakusarake == "asiakas") {
+					$hakusarake = "lasku.nimi";
+				}
+
+				$mt_order_by = "ORDER BY $hakusarake $hakusuunta";
+			}
+			else {
+				$mt_order_by = "ORDER BY lasku.luontiaika DESC";
+
+				if ($toim == "OSTO" or $toim == "OSTOSUPER") {
+					$mt_order_by = "ORDER BY kuka_ext, lasku.luontiaika DESC";
+				}
+				elseif ($toim == "PROJEKTI") {
+					$mt_order_by = "ORDER BY lasku.tunnusnippu DESC, tunnus ASC";
+				}
 			}
 
 			$seuranta = "";
@@ -681,7 +703,7 @@
 						or (lasku.tila = 'G' and lasku.tilaustyyppi = 'M' and lasku.alatila = 'V'))
 						$haku
 						GROUP BY lasku.tunnus
-						ORDER BY lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -715,7 +737,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'
 						$haku
 						GROUP BY lasku.tunnus
-						ORDER BY lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -746,7 +768,7 @@
 						and lasku.tilaustyyppi = 'E'
 						$haku
 						GROUP BY lasku.tunnus
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -771,7 +793,7 @@
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.alatila in ('','A','J')
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 			$miinus = 3;
 		}
@@ -782,7 +804,7 @@
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.alatila in ('','A','B','C','D','J','T')
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 			$miinus = 3;
 		}
@@ -794,7 +816,7 @@
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila in ('','A','B','J')
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -819,7 +841,7 @@
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila in ('','A','B','C','J')
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -850,7 +872,7 @@
 						and lasku.alatila = 'V'
 						$haku
 						GROUP BY lasku.tunnus
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 			$miinus = 4;
 		}
@@ -863,7 +885,7 @@
 						and lasku.tila = 'N'
 						and lasku.alatila in ('U','T')
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -890,7 +912,7 @@
 						and lasku.tila = 'V'
 						and lasku.alatila in ('','A','B','J')
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -920,7 +942,7 @@
 						and lasku.tila = 'V'
 						and lasku.alatila in ('','A','B','C','J')
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -953,7 +975,7 @@
 						and ((tila='V' and alatila in ('','A','B','J')) or (lasku.tila in ('L','N') and lasku.alatila in ('A','')))
 						$haku
 						HAVING extra = '' or extra is null
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -985,7 +1007,7 @@
 						and tila in ('L','N','V')
 						and alatila not in ('X','V')
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -1030,7 +1052,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('A','L','N') and lasku.tilaustyyppi='A' $tyomalatlat
 						$haku
 						GROUP BY lasku.tunnus
-						ORDER BY lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -1073,7 +1095,7 @@
 						and lasku.tilaustyyppi = 'R'
 						$rekla_tila
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -1104,7 +1126,7 @@
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='S' and alatila in ('','A','B','J','C')
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 			$miinus = 3;
 		}
@@ -1121,7 +1143,7 @@
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A')
 						$haku
-						ORDER BY lasku.tunnus desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -1152,7 +1174,7 @@
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A','X')
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan kaikkien avoimien tilausten arvo
@@ -1177,7 +1199,7 @@
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'N' and lasku.alatila = 'F'
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -1202,7 +1224,7 @@
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('N','L') and lasku.alatila != 'X' and lasku.chn = '999'
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 		   // haetaan tilausten arvo
@@ -1234,7 +1256,7 @@
 						and lasku.tilaustyyppi != 'O'
 						$haku
 						GROUP BY 1,2,3,4,5,6,7,8
-						ORDER by kuka_ext, lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 			$miinus = 6;
 		}
@@ -1252,7 +1274,7 @@
 						and lasku.tilaustyyppi != 'O'
 						$haku
 						GROUP BY 1,2,3,4,5,6,7,8
-						ORDER by kuka_ext, lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 			$miinus = 6;
 		}
@@ -1266,7 +1288,7 @@
 						and lasku.alatila		= ''
 						and lasku.tilaustyyppi	= 'O'
 						$haku
-						ORDER by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 			$miinus = 4;
 		}
@@ -1279,7 +1301,7 @@
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila IN ('R','L','N','A') and alatila NOT IN ('X') and lasku.tilaustyyppi!='9'
 						$haku
-						ORDER by lasku.tunnusnippu desc, tunnus asc
+						$mt_order_by
 						$rajaus";
 			$miinus = 5;
 		}
@@ -1308,7 +1330,7 @@
 						AND alatila NOT IN ('D')
 						$haku
 						GROUP BY 1,2,3,4,5,6
-						ORDER by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -1341,7 +1363,7 @@
 						and lasku.alatila in ('A','','T','U','G')
 						$haku
 						HAVING extra = '' or extra is null
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -1373,7 +1395,7 @@
 						and lasku.alatila in ('','G')
 						$haku
 						HAVING extra = '' or extra is null
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -1404,7 +1426,7 @@
 						and lasku.tila = 'N'
 						and lasku.alatila = 'G'
 						$haku
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -1436,7 +1458,7 @@
 						and lasku.alatila in ('A','','T','U','G')
 						$haku
 						HAVING extra = '' or extra is null
-						order by lasku.luontiaika desc
+						$mt_order_by
 						$rajaus";
 
 			// haetaan tilausten arvo
@@ -1491,7 +1513,16 @@
 
 			$ii = 0;
 			for ($i = 0; $i < mysql_num_fields($result)-$miinus; $i++) {
-				echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+
+				if (isset($mt_order[mysql_field_name($result,$i)]) and $mt_order[mysql_field_name($result,$i)] == 'ASC') {
+					echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&mt_order[".mysql_field_name($result,$i)."]=DESC'>".t(mysql_field_name($result,$i))."<img src='{$palvelin2}pics/lullacons/arrow-small-up-green.png' /></a></th>";
+				}
+				elseif (isset($mt_order[mysql_field_name($result,$i)]) and $mt_order[mysql_field_name($result,$i)] == 'DESC') {
+					echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&mt_order[".mysql_field_name($result,$i)."]=ASC'>".t(mysql_field_name($result,$i))."<img src='{$palvelin2}pics/lullacons/arrow-small-down-green.png' /></a></th>";
+				}
+				else {
+					echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&mt_order[".mysql_field_name($result,$i)."]=ASC'>".t(mysql_field_name($result,$i))."</a></th>";
+				}
 
 				if (isset($worksheet)) {
 
@@ -1511,9 +1542,9 @@
 
 			echo "<th align='left'>".t("tyyppi")."</th><th class='back'></th></tr>";
 
-			$lisattu_tunnusnippu  = array();
+			$lisattu_tunnusnippu  	= array();
 			$toimitettavat_ennakot  = array();
-			$nakyman_tunnukset = array();
+			$nakyman_tunnukset 		= array();
 
 			while ($row = mysql_fetch_assoc($result)) {
 

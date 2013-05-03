@@ -49,6 +49,8 @@ if ($kukarow['extranet'] == '') {
 
 $sel[$hinnasto] = "SELECTED";
 
+$saatavuus_select[$saatavuus] = "SELECTED";
+
 echo "<tr>
 	<th>" .t('Muutospäivämäärä') . "</th>
 	<td>
@@ -67,6 +69,16 @@ echo "<tr>
 			<option value='vienti' $sel[vienti]>" . t('Vientihinnasto') . "</option>
 			<option value='tab' $sel[tab]>" . t('Tab eroteltu') . "</option>
 		</select>
+	</td>
+	</tr>
+	<tr>
+	<th>" . t("Näytetään myös saatavuus") . "</th>
+	<td>
+		<select name='saatavuus'>
+			<option value='ei' {$saatavuus_select['ei']}>" . t("Ei") . "</option>
+			<option value='kylla' {$saatavuus_select['kylla']}>" . t("Kyllä") . "</option>
+		</select>
+		" . t("Toimii vain tab-erotellussa hinnastossa") . "
 	</td>
 	</tr>
 </table>";

@@ -135,7 +135,6 @@
 
 			echo "	<form method='post' action='".$palvelin2.$tilauskasittely."tilaus_myynti.php'>
 					<input type='hidden' name='toim' value='$toim_kutsu'>
-					<input type='hidden' name='aktivoinnista' value='true'>
 					<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
 					<input type='hidden' name='tyojono' value='$tyojono'>
 					<input type='submit' value='".t("Takaisin tilaukselle")."'>
@@ -231,6 +230,7 @@
 					if ($toim_kutsu != "YLLAPITO") {
 						$toimaika = $laskurow["toimaika"];
 						$kerayspvm = $laskurow["kerayspvm"];
+						$toim = "RIVISYOTTO";
 					}
 					else {
 						$toim = "YLLAPITO";
@@ -273,6 +273,36 @@
 
 					$toim = $yllapita_toim_stash;
 					echo "<font class='message'>".t("Lisättiin")." $kpl_echo ".t_avainsana("Y", "", " and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("tuotetta")." $tiltuoteno[$yht_i].</font><br>";
+
+					if (isset($myyntierahuom) and count($myyntierahuom) > 0) {
+
+						$mimyhuom = "HUOM: Rivin määrä on pyöristetty";
+
+						if ($trow["minimi_era"] > 0) {
+							$mimyhuom .= " minimierään";
+						}
+
+						if ($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') {
+							if ($trow["minimi_era"] > 0) {
+								$mimyhuom .= " tai";
+							}
+
+							$mimyhuom .= " täyteen myyntierään";
+						}
+
+						// Käännetään teksti
+						$mimyhuom = t($mimyhuom)."!";
+
+						if ($trow['myynti_era'] > 0) {
+							$mimyhuom .= " ".t("Myyntierä on").": $trow[myynti_era]";
+						}
+
+						if ($trow["minimi_era"] > 0) {
+							$mimyhuom .= " ".t("Minimierä on").": $trow[minimi_era]";
+						}
+
+						echo "<font class='error'>".$mimyhuom."</font><br>";
+					}
 
 					//Hanskataan sarjanumerollisten tuotteiden lisävarusteet
 					if ($tilsarjatunnus[$yht_i] > 0 and $lisatty_tun > 0) {
@@ -607,6 +637,7 @@
 		}
 
 		echo "<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>";
+		echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 
 		if (!isset($tultiin)) {
@@ -712,7 +743,10 @@
 		}
 
 		echo "<input type='Submit' name='submit_button' id='submit_button' value = '".t("Etsi")."'></form>";
-		echo "&nbsp;<form><input type='submit' name='submit_button2' id='submit_button2' value = '".t("Tyhjennä")."'></form>";
+		echo "&nbsp;<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>
+				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
+				<input type='submit' name='submit_button2' id='submit_button2' value = '".t("Tyhjennä")."'>
+				</form>";
 
 		if ($hae_ja_selaa_row['selite'] == 'B') {
 			echo "</div>";
@@ -1051,6 +1085,7 @@
 
 			echo "<input type='hidden' name='tee' value = 'TI'>";
 			echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
+			echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
 			echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 
 			if ($tultiin == "futur") {

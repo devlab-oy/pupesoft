@@ -460,7 +460,7 @@
 				$alvires = pupe_query($query);
 				$alvirow = mysql_fetch_assoc($alvires);
 
-				$rahtipros = $keekrow["rahtilaskusumma"] / ($k2prow["rahtilaskusummakokonaan"]-$alvirow["summa"]);
+				$rahtipros = (float) ($keekrow["rahtilaskusumma"] / ($k2prow["rahtilaskusummakokonaan"]-$alvirow["summa"]));
 
 				$query = "	SELECT round(sum(summa) * $rahtipros, 2) varastonmuutosrahti
 							FROM tiliointi

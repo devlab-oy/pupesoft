@@ -26,7 +26,7 @@ if ($tee == "update") {
 			$nappikeikalla = '';
 		}
 	}
-	
+
 	if ((float) $erikoisale_saapuminen < 0 or (float) $erikoisale_saapuminen > 100) {
 		echo "<font class='message'>".t("VIRHE: Erikoisale pit‰‰ olla alle 100% ja yli 0%")."!</font><br><br>";
 
@@ -36,6 +36,20 @@ if ($tee == "update") {
 		if ($nappikeikalla == 'ollaan') {
 			$nappikeikalle = 'menossa';
 			$nappikeikalla = '';
+		}
+	}
+
+	foreach ($tilauksen_erikoisale as $etil => $eale) {
+		if ((float) $eale < 0 or (float) $eale > 100) {
+			echo "<font class='message'>".t("VIRHE: Erikoisale pit‰‰ olla alle 100% ja yli 0%")."! ".t("Tilaus").": $etil</font><br><br>";
+
+			$tee = "";
+			$toiminto = "lisatiedot";
+
+			if ($nappikeikalla == 'ollaan') {
+				$nappikeikalle = 'menossa';
+				$nappikeikalla = '';
+			}
 		}
 	}
 }
@@ -92,14 +106,26 @@ if ($tee == "update") {
 							AND tyyppi != 'D'";
 	$upd_erikoisale_res = pupe_query($query_erikoisale);
 
+	foreach ($tilauksen_erikoisale as $etil => $eale) {
+		$query_erikoisale = "	UPDATE tilausrivi
+								SET erikoisale = '{$eale}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND uusiotunnus = '{$otunnus}'
+								AND otunnus = '{$etil}'
+								AND netto  != 'N'
+								AND tyyppi != 'D'";
+		$upd_erikoisale_res = pupe_query($query_erikoisale);
+	}
+
 	$toiminto = "";
 }
 
 if ($tee == "") {
 
-	$query = "SELECT *
-			  FROM lasku
-			  WHERE tunnus = '$otunnus' and yhtio = '$kukarow[yhtio]'";
+	$query = "	SELECT *
+			  	FROM lasku
+			  	WHERE tunnus = '$otunnus'
+				and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array ($result);
 
@@ -191,7 +217,7 @@ if ($tee == "") {
 	if ($laskurow["maa_maara"] == "") {
 		$query = "	SELECT varastopaikat.maa, count(*) kpl
 					FROM lasku
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus)
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
 					JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
 						AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
 						AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))
@@ -273,7 +299,9 @@ if ($tee == "") {
 		$query  = "	SELECT round(sum(tuotemassa*(varattu+kpl)),2) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.uusiotunnus = '$laskurow[tunnus]'";
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					AND tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+					AND tilausrivi.tyyppi != 'D'";
 		$painoresult = mysql_query($query) or pupe_error($query);
 		$painorow = mysql_fetch_array($painoresult);
 
@@ -317,11 +345,23 @@ if ($tee == "") {
 
 	echo "<tr><th>".t("Kommentti").":</th><td colspan='3'><input type='text' name='kommentti' size='40' value='$laskurow[comments]'></td></tr>";
 
-	echo "</table>";
+	echo "<tr><td class='back'><br>".t("Ostotilausten erikoisalennukset").":</td></tr>";
 
+	$query  = "	SELECT otunnus, round(avg(erikoisale), 2) erikoisale
+				FROM tilausrivi
+				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				AND tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+				AND tilausrivi.tyyppi != 'D'
+				GROUP BY 1
+				ORDER BY 1";
+	$painoresult = mysql_query($query) or pupe_error($query);
+
+	while ($painorow = mysql_fetch_array($painoresult)) {
+		echo "<tr><th>".t("Tilaus").": {$painorow['otunnus']}</th><td colspan='3'><input type='text' name='tilauksen_erikoisale[{$painorow['otunnus']}]' size='5' value='{$painorow['erikoisale']}'></td></tr>";
+	}
+
+	echo "</table>";
 
 	echo "<br><input type='submit' value='".t("P‰ivit‰ tiedot")."'>";
 	echo "</form>";
 }
-
-?>

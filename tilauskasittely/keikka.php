@@ -6,6 +6,15 @@ if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 	require ("../inc/parametrit.inc");
 }
 
+if ($tee == 'lataa_tiedosto') {
+	$filepath = "/tmp/".$tmpfilenimi;
+	if (file_exists($filepath)) {
+		readfile($filepath);
+		unlink($filepath);
+	}
+	exit;
+}
+
 if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
 	require ("../inc/keikan_toiminnot.inc");
 }
@@ -218,12 +227,16 @@ if (!function_exists("tsekit")) {
 	}
 }
 
-if (!isset($toiminto)) $toiminto = "";
-if (!isset($keikkarajaus)) $keikkarajaus = "";
-if (!isset($ytunnus)) $ytunnus = "";
-if (!isset($keikka)) $keikka = "";
-if (!isset($ostotil)) $ostotil = "";
-if (!isset($toimittajaid)) $toimittajaid = "";
+
+if (!isset($tee)) 				$tee = "";
+if (!isset($toiminto)) 			$toiminto = "";
+if (!isset($keikkarajaus)) 		$keikkarajaus = "";
+if (!isset($ytunnus)) 			$ytunnus = "";
+if (!isset($keikka)) 			$keikka = "";
+if (!isset($ostotil)) 			$ostotil = "";
+if (!isset($toimittajaid)) 		$toimittajaid = "";
+if (!isset($kauttalaskutus)) 	$kauttalaskutus = "";
+if (!isset($mobiili_keikka)) 	$mobiili_keikka = "";
 
 echo "<font class='head'>".t("Saapumiset")."</font><hr>";
 
@@ -402,7 +415,7 @@ if ($toiminto == "tulosta") {
 		$toimittajaid = $laskurow["liitostunnus"];
 	}
 
-	if ($komento["Purkulista"] != '') {
+	if ($komento["Purkulista"] != '' or !empty($tee_excel)) {
 		require('tulosta_purkulista.inc');
 	}
 
@@ -740,12 +753,13 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	if (!isset($lisarajaus)) $lisarajaus = "";
 
 	if($toim != 'AVOIMET') {
-		$sel = array_fill_keys(array($lisarajaus), ' selected') + array_fill_keys(array('riveja_viematta_varastoon', 'liitetty_lasku', 'liitetty_lasku_rivitok_kohdistus_eiok', 'liitetty_lasku_rivitok_kohdistus_ok'), '');
+		$sel = array_fill_keys(array($lisarajaus), ' selected') + array_fill_keys(array('riveja_viematta_varastoon', 'liitetty_lasku', 'ei_liitetty_lasku', 'liitetty_lasku_rivitok_kohdistus_eiok', 'liitetty_lasku_rivitok_kohdistus_ok'), '');
 	}
 	else {
 		$sel = array(
 			'riveja_viematta_varastoon' => 'selected',
 			'liitetty_lasku' => '',
+			'ei_liitetty_lasku' => '',
 			'liitetty_lasku_rivitok_kohdistus_eiok' => '',
 			'liitetty_lasku_rivitok_kohdistus_ok' => '',
 		);
@@ -757,6 +771,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	echo "<option value=''>",t("N‰yt‰ kaikki"),"</option>";
 	echo "<option value='riveja_viematta_varastoon'{$sel['riveja_viematta_varastoon']}>",t("Saapumiset joissa on rivej‰ viem‰tt‰ varastoon"),"</option>";
 	echo "<option value='liitetty_lasku'{$sel['liitetty_lasku']}>",t("Saapumiset joihin on liitetty lasku"),"</option>";
+	echo "<option value='ei_liitetty_lasku'{$sel['ei_liitetty_lasku']}>",t("Saapumiset joihin ei ole liitetty laskua"),"</option>";
 	echo "<option value='liitetty_lasku_rivitok_kohdistus_eiok'{$sel['liitetty_lasku_rivitok_kohdistus_eiok']}>",t("Saapumiset joihin on liitetty lasku ja kaikki rivit on viety varastoon ja kohdistus ei ole ok"),"</option>";
 	echo "<option value='liitetty_lasku_rivitok_kohdistus_ok'{$sel['liitetty_lasku_rivitok_kohdistus_ok']}>",t("Saapumiset joihin on liitetty lasku ja kaikki rivit on viety varastoon ja kohdistus on ok"),"</option>";
 	echo "</select></td>";
@@ -800,8 +815,10 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 	$joinlisa = "";
 
-	if ($lisarajaus == 'liitetty_lasku' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+	if ($lisarajaus == 'liitetty_lasku' or $lisarajaus == 'ei_liitetty_lasku' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
 		$joinlisa = "JOIN lasku AS liitetty_lasku ON (liitetty_lasku.yhtio = lasku.yhtio AND liitetty_lasku.tila = 'K' AND liitetty_lasku.laskunro = lasku.laskunro AND liitetty_lasku.vanhatunnus <> 0 AND liitetty_lasku.vienti IN ('C','F','I','J','K','L'))";
+
+		if ($lisarajaus == 'ei_liitetty_lasku') $joinlisa = "LEFT {$joinlisa}";
 	}
 
 	$kohdistuslisa = "";
@@ -820,8 +837,16 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		$tilriv_joinlisa = "";
 	}
 
+	$havinglisa = $selectlisa = "";
+
+	if ($lisarajaus == 'ei_liitetty_lasku') {
+		$selectlisa = "count(distinct liitetty_lasku.tunnus) liitetty_lasku_kpl,";
+		$havinglisa = "HAVING liitetty_lasku_kpl = 0";
+	}
+
 	// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
 	$query = "	SELECT lasku.liitostunnus,
+				{$selectlisa}
 				max(lasku.ytunnus)  ytunnus,
 				max(lasku.nimi)     nimi,
 				max(lasku.nimitark) nimitark,
@@ -847,6 +872,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				$laatijalisa
 				{$kohdistuslisa}
 				GROUP BY lasku.liitostunnus
+				{$havinglisa}
 				ORDER BY lasku.nimi, lasku.nimitark, lasku.ytunnus";
 	$result = pupe_query($query);
 
@@ -992,7 +1018,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 	if (!isset($lisarajaus)) $lisarajaus = "";
 
-	$sel = array_fill_keys(array($lisarajaus), ' selected') + array_fill_keys(array('riveja_viematta_varastoon', 'liitetty_lasku', 'liitetty_lasku_rivitok_kohdistus_eiok', 'liitetty_lasku_rivitok_kohdistus_ok'), '');
+	$sel = array_fill_keys(array($lisarajaus), ' selected') + array_fill_keys(array('riveja_viematta_varastoon', 'liitetty_lasku', 'ei_liitetty_lasku', 'liitetty_lasku_rivitok_kohdistus_eiok', 'liitetty_lasku_rivitok_kohdistus_ok'), '');
 
 	echo "<tr>";
 	echo "<th>",t("Lis‰rajaus"),"</th>";
@@ -1004,6 +1030,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 	echo "<option value=''>",t("N‰yt‰ kaikki"),"</option>";
 	echo "<option value='riveja_viematta_varastoon'{$sel['riveja_viematta_varastoon']}>",t("Saapumiset joissa on rivej‰ viem‰tt‰ varastoon"),"</option>";
 	echo "<option value='liitetty_lasku'{$sel['liitetty_lasku']}>",t("Saapumiset joihin on liitetty lasku"),"</option>";
+	echo "<option value='ei_liitetty_lasku'{$sel['ei_liitetty_lasku']}>",t("Saapumiset joihin ei ole liitetty laskua"),"</option>";
 	echo "<option value='liitetty_lasku_rivitok_kohdistus_eiok'{$sel['liitetty_lasku_rivitok_kohdistus_eiok']}>",t("Saapumiset joihin on liitetty lasku ja kaikki rivit on viety varastoon ja kohdistus ei ole ok"),"</option>";
 	echo "<option value='liitetty_lasku_rivitok_kohdistus_ok'{$sel['liitetty_lasku_rivitok_kohdistus_ok']}>",t("Saapumiset joihin on liitetty lasku ja kaikki rivit on viety varastoon ja kohdistus on ok"),"</option>";
 	echo "</select></form></td></tr>";
@@ -1012,12 +1039,18 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 	$joinlisa = $havinglisa = $selectlisa = $groupbylisa = "";
 
-	if (in_array($lisarajaus, array('riveja_viematta_varastoon','liitetty_lasku_rivitok_kohdistus_eiok','liitetty_lasku_rivitok_kohdistus_ok','liitetty_lasku'))) {
+	if (in_array($lisarajaus, array('riveja_viematta_varastoon','liitetty_lasku_rivitok_kohdistus_eiok','liitetty_lasku_rivitok_kohdistus_ok','liitetty_lasku','ei_liitetty_lasku'))) {
 
-		if ($lisarajaus == 'liitetty_lasku') {
+		if ($lisarajaus == 'liitetty_lasku' or $lisarajaus == 'ei_liitetty_lasku') {
 
 			$joinlisa = "JOIN lasku AS liitetty_lasku ON (liitetty_lasku.yhtio = lasku.yhtio AND liitetty_lasku.tila = 'K' AND liitetty_lasku.laskunro = lasku.laskunro AND liitetty_lasku.vanhatunnus <> 0 AND liitetty_lasku.vienti IN ('C','F','I','J','K','L'))";
 			$groupbylisa = "GROUP BY 1,2,3,4,5,6";
+
+			if ($lisarajaus == 'ei_liitetty_lasku') {
+				$joinlisa = "LEFT {$joinlisa}";
+				$selectlisa = ", liitetty_lasku.tunnus liitetty_lasku_tunnus";
+				$havinglisa = "HAVING liitetty_lasku_tunnus IS NULL";
+			}
 		}
 		else {
 

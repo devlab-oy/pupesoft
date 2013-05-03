@@ -78,6 +78,9 @@
 				case "J":
 					$alatila = "Odottaa loppulaskutusta";
 					break;
+				case "K":
+					$alatila = "korjaus kesken";
+					break;
 				case "E":
 					$alatila = "Vientitiedot syötetty";
 					break;
@@ -104,6 +107,9 @@
 				case "F":
 					$alatila = "Odottaa hyväksyntää";
 					break;
+				case "G":
+					$alatila = "Odottaa asiakkaan suoritusta";
+					break;
 				case "J":
 					$alatila = "JT poiminnassa";
 					break;
@@ -124,7 +130,7 @@
 					$alatila = "kesken";
 					break;
 				case "K":
-					$alatila = "korjattu";
+					$alatila = "korjaus kesken";
 					break;
 				case "J":
 					$alatila = "tulostusjonossa";
@@ -289,6 +295,9 @@
 					break;
 				case "B":
 					$alatila = "";
+					break;
+				case "G":
+					$alatila = "Odottaa asiakkaan suoritusta";
 					break;
 				case "X":
 					$alatila = "Valmis";

@@ -112,9 +112,9 @@ else {
 
 			// Jos rename epäonnistuu, koitetaan poistaa .TMP tiedosto
 			if ($rename1 === FALSE) {
-				$rename1 = ftp_delete($conn_id, "{$ftppath}{$ftpfile_tmp}");
+				$delete1 = ftp_delete($conn_id, "{$ftppath}{$ftpfile_tmp}");
 
-				if ($rename1 === FALSE) {
+				if ($delete1 === FALSE) {
 					$raw = ftp_raw($conn_id, "quote dele {$ftppath}{$ftpfile_tmp}");
 				}
 			}
@@ -164,6 +164,9 @@ else {
 	if (isset($rename2) and $rename2 === FALSE) {
 		$palautus = 5;
 	}
+	if (isset($delete1) and $delete1 === FALSE) {
+		$palautus = 6;
+	}
 
 	// Siirto onnistui
 	if ($palautus == 0 and isset($ftpsucc) and $ftpsucc != "") {
@@ -194,6 +197,9 @@ else {
 				break;
 			case  5:
 				$syy = "Rename failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$renameftpfile})";
+				break;
+			case  6:
+				$syy = "Delete failed ({$ftppath}{$ftpfile_tmp})";
 				break;
 			default:
 				$syy = t("Tuntematon errorkoodi")." ($palautus)!!";

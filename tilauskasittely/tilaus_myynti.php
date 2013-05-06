@@ -3303,10 +3303,19 @@ if ($tee == '') {
 	}
 
 	//Kuitataan OK-var riville
-	if (($kukarow["extranet"] == "" or $yhtiorow["korvaavat_hyvaksynta"] != ""  or $yhtiorow["vientikiellon_ohitus"] == "K" or $vastaavienkasittely == "kylla") and $tila == "OOKOOAA") {
+	if (($kukarow["extranet"] == "" or $yhtiorow["korvaavat_hyvaksynta"] != ""  or $yhtiorow["vientikiellon_ohitus"] == "K" or $vastaavienkasittely == "kylla") and ($tila == "OOKOOAA" or $tila == "OOKOOAAKAIKKI")) {
+
+		if ($tila == "OOKOOAAKAIKKI" and $tilausnumero != "" and $tilausnumero != 0) {
+			$wherelisa = "AND otunnus = '{$tilausnumero}'";
+		}
+		else {
+			$wherelisa = "AND tunnus = '{$rivitunnus}'";
+		}
+
 		$query = "	UPDATE tilausrivi
 					SET var2 = 'OK'
-					WHERE tunnus = '$rivitunnus'";
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					{$wherelisa}";
 		$result = pupe_query($query);
 
 		$tapa 		= "";
@@ -7686,6 +7695,24 @@ if ($tee == '') {
 		}
 		else {
 			$projektilask = 0;
+		}
+
+		if (isset($saako_hyvaksya) and $saako_hyvaksya > 0) {
+			echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='hyvaksy'>
+					<input type='hidden' name='toim' 			value = '{$toim}'>
+					<input type='hidden' name='lopetus' 		value = '{$lopetus}'>
+					<input type='hidden' name='ruutulimit' 		value = '{$ruutulimit}'>
+					<input type='hidden' name='projektilla' 	value = '{$projektilla}'>
+					<input type='hidden' name='tilausnumero' 	value = '{$tilausnumero}'>
+					<input type='hidden' name='mista' 			value = '{$mista}'>
+					<input type='hidden' name='rivitunnus' 		value = '{$row['tunnus']}'>
+					<input type='hidden' name='rivilaadittu' 	value = '{$row['laadittu']}'>
+					<input type='hidden' name='menutila' 		value = '{$menutila}'>
+					<input type='hidden' name='orig_tila' 		value = '{$orig_tila}'>
+					<input type='hidden' name='orig_alatila' 	value = '{$orig_alatila}'>
+					<input type='hidden' name='tila' 			value = 'OOKOOAAKAIKKI'>
+					<input type='Submit' value='",t("Hyväksy kaikki rivit"),"'>
+					</form> ";
 		}
 
 		if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "") {

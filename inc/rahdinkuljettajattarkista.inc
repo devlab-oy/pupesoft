@@ -16,7 +16,7 @@
 				$t[$i] = trim($t[$i]) == '' ? "" : $t[$i];
 			}
 
-			if (mysql_field_name($result, $i) == 'minimi_dimensio') {
+			if (mysql_field_name($result, $i) == 'pakkauksen_sarman_minimimitta') {
 				$t[$i] = str_replace(',', '.', $t[$i]);
 				if(!is_numeric($t[$i])) {
 					$virhe[$i] = t("Tietue pit‰‰ olla numero");

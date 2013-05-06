@@ -773,22 +773,22 @@ class Unifaun {
 		$uni_par_val->addAttribute('n', "weight");
 
 		$query = "	SELECT koodi,
-					minimi_dimensio
+					pakkauksen_sarman_minimimitta
 					FROM rahdinkuljettajat
 					WHERE yhtio = '{$this->kukarow['yhtio']}'
 					AND koodi = '{$this->toitarow['rahdinkuljettaja']}'";
 		$rahdinkuljettajat_result = pupe_query($query);
 		$rahdinkuljettaja_rivi = mysql_fetch_assoc($rahdinkuljettajat_result);
 
-		if (empty($rahdinkuljettaja_rivi['minimi_dimensio'])) {
-			$minimi_dimensio = 0.01;
+		if (empty($rahdinkuljettaja_rivi['pakkauksen_sarman_minimimitta'])) {
+			$pakkauksen_sarman_minimimitta = 0.01;
 		}
 		else {
-			$minimi_dimensio = $rahdinkuljettaja_rivi['minimi_dimensio'];
+			$pakkauksen_sarman_minimimitta = $rahdinkuljettaja_rivi['pakkauksen_sarman_minimimitta'];
 		}
 
-		$pakkaustiedot['syvyys'] = $pakkaustiedot['syvyys'] < $minimi_dimensio ? $minimi_dimensio : $pakkaustiedot['syvyys'];
-		$pakkaustiedot['leveys'] = $pakkaustiedot['leveys'] < $minimi_dimensio ? $minimi_dimensio : $pakkaustiedot['leveys'];
+		$pakkaustiedot['syvyys'] = $pakkaustiedot['syvyys'] < $pakkauksen_sarman_minimimitta ? $pakkauksen_sarman_minimimitta : $pakkaustiedot['syvyys'];
+		$pakkaustiedot['leveys'] = $pakkaustiedot['leveys'] < $pakkauksen_sarman_minimimitta ? $pakkauksen_sarman_minimimitta : $pakkaustiedot['leveys'];
 
 		/*
 		Otamme pakkauksen kaksi mittaa (pohjan mitat) syvyys ja leveys, korkeuden laskemme tilavuudesta jakamalla tilavuuden pohjan alalla.
@@ -799,11 +799,11 @@ class Unifaun {
 		if ($pakkaustiedot['kuutiot'] > 0) {
 			$pakkaustiedot['korkeus'] = $pakkaustiedot['kuutiot'] / ($pakkaustiedot['syvyys'] * $pakkaustiedot['leveys']);
 
-			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < $minimi_dimensio ? $minimi_dimensio : round($pakkaustiedot['korkeus'], 2);
+			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < $pakkauksen_sarman_minimimitta ? $pakkauksen_sarman_minimimitta : round($pakkaustiedot['korkeus'], 2);
 		}
 		else {
-			$pakkaustiedot['korkeus'] = $minimi_dimensio;
-			$pakkaustiedot['kuutiot'] = $minimi_dimensio * $minimi_dimensio * $minimi_dimensio;
+			$pakkaustiedot['korkeus'] = $pakkauksen_sarman_minimimitta;
+			$pakkaustiedot['kuutiot'] = $pakkauksen_sarman_minimimitta * $pakkauksen_sarman_minimimitta * $pakkauksen_sarman_minimimitta;
 			$pakkaustiedot['kuutiot'] = $pakkaustiedot['kuutiot'] < 0.01 ? 0.01 : $pakkaustiedot['kuutiot'];
 		}
 

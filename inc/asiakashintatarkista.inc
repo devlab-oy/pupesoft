@@ -2,7 +2,7 @@
 
 if(!function_exists("asiakashintatarkista")) {
 	function asiakashintatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $alasveto;
+		global $kukarow, $yhtiorow, $alias_set, $alasveto, $asiakkaanvalinta;
 
 		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind, $chsegmentti, $chpiiri;
 
@@ -30,7 +30,7 @@ if(!function_exists("asiakashintatarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "asiakas") {
+		if (mysql_field_name($result, $i) == "asiakas" and $asiakkaanvalinta < 4) {
 			$chastunn = trim($t[$i]);
 
 			// Ei tsekata turhaan kun rivi dellataan luedatasta

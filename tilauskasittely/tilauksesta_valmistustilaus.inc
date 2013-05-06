@@ -5,10 +5,11 @@
 
 	if (!function_exists("tilauksesta_valmistustilaus")) {
 		function tilauksesta_valmistustilaus($otunnus) {
-			global $yhtiorow, $kukarow;
+			global $yhtiorow, $kukarow, $tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array;
 
 			$tilauksesta_valmistustilaus = "";
 			$kukakesken	= $kukarow["kesken"];
+			$tehtiin_uusi_otsikko = false;
 
 			$query = "	SELECT *
 						FROM lasku
@@ -29,8 +30,6 @@
 						and tilausrivi.perheid2 = 0
 						ORDER BY tilausrivi.tunnus";
 			$lsresult = mysql_query($query) or pupe_error($query);
-
-			$tehtiin_uusi_otsikko = false;
 
 			if (mysql_num_rows($lsresult) > 0) {
 				while ($valmlisaarivi = mysql_fetch_array($lsresult)) {
@@ -128,20 +127,28 @@
 					$tresult = mysql_query($query) or pupe_error($query);
 					$trow = mysql_fetch_array($tresult);
 
-					$kukarow["kesken"] 	= $tunnus;
-					$kpl 				= $valmlisaarivi["kpl"];
-					$tuoteno			= $valmlisaarivi["tuoteno"];
-					$toimaika			= $myytilrow["kerayspvm"];
-					$kerayspvm			= $myytilrow["kerayspvm"];
-					$hinta				= 0;
-					$var 				= "";
-					$varasto			= "";
-					$paikka				= "";
-					$varataan_saldoa	= "EI";
-					$kommentti			= $valmlisaarivi['kommentti'];
+					//funktio populoi globaalit muuttujat $tuoteno_array $kpl_array $kommentti_array $lapsenlap_array
+					$tuoteno_array = array($valmlisaarivi['tuoteno']);
+					$kpl_array = array(
+						$valmlisaarivi['tuoteno'] => $valmlisaarivi['kpl']
+					);
+					pupesoft_lisaa_valmisteen_rekursiiviset_reseptit();
 
-					// $perheid_lisaarivi on perustetun rivin tunnus
-					require ("lisaarivi.inc");
+					foreach ($tuoteno_array as $tuoteno_temp) {
+						$kukarow["kesken"] 	= $tunnus;
+						$kpl 				= $kpl_array[$tuoteno_temp];
+						$tuoteno			= $tuoteno_temp;
+						$toimaika			= $myytilrow["kerayspvm"];
+						$kerayspvm			= $myytilrow["kerayspvm"];
+						$hinta				= 0;
+						$var 				= "";
+						$varasto			= "";
+						$paikka				= "";
+						$varataan_saldoa	= "EI";
+						$kommentti			= $kommentti_array[$tuoteno_temp];
+
+						require('lisaarivi.inc');
+					}
 
 					// Ainoastaan asiakkaalle valmistetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä
 					$suoraan_laskutukseen_lisa = $yhtiorow['automaattinen_jt_toimitus_valmistus'] == 'S' ? 'o' : '';

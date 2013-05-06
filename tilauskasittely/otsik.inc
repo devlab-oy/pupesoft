@@ -277,7 +277,7 @@
 				unset($jatka);
 			}
 
-			//	Denial by maa
+			// Denial by maa
 			$query = "SELECT maa FROM varastopaikat WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
 			$result = pupe_query($query);
 			$vara = mysql_fetch_assoc($result);
@@ -829,6 +829,7 @@
 			);
 		}
 
+		// Ostaja //
 		echo "<table>";
 		echo "<tr><td style='padding:0px;'>";
 
@@ -978,6 +979,8 @@
                         {$kohde_ui}
                         </select></td></tr>";
             }
+
+            // Toimitusosoite //
             echo "<tr>
 					<td valign='top'> ".t("Nimi").": </td>
 					<td><input type='text' name='tnimi' size='35' value='$srow[toim_nimi]'></td></tr>";
@@ -1016,6 +1019,7 @@
 			echo "</table>";
 			echo "</td>";
 
+			// Laskun postitusosoite //
 			echo "<td valign='top' style='padding:0px;'>";
 			echo "<table>";
 			echo "<tr>
@@ -1062,7 +1066,7 @@
 
 			echo "</table><br>";
 
-
+			// Tarjous //
 			if ((($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") and $yhtiorow["rinnakkaisostaja_myynnissa"] == "") or $srow["vienti"] =='K') {
 				echo "<table>";
 				echo "<tr><td style='padding:0px;'>";
@@ -1117,6 +1121,7 @@
 
 			echo "<table>";
 
+			// Tiedot //
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 				echo "<tr><th colspan='4'>".t("Työmääräyksen tiedot").":</th></tr>";
 			}
@@ -2266,6 +2271,9 @@
 			}
 
 
+			/**
+			 * Työmääräyksen lisätiedot
+			 */
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or (($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
 				echo "<tr><td class='back'><br></td></tr>";
 				echo "<tr><th colspan='4'>".t("Työmääräyksen lisätiedot").":</th></tr>";
@@ -2375,7 +2383,7 @@
 
 					$kentta = $al_row["selite"];
 
-					// [TEXT, DATE, DATETIME, DROPDOWN, CHECKBOX]
+					// Text
 					if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
 
 						if ($al_lask == 1) {
@@ -2445,6 +2453,7 @@
 						echo "</td>";
 
 					}
+					// Työn suorittaja
 					elseif ($kentta == "suorittaja") {
 
 						$query = "	SELECT DISTINCT if (avainsana.selitetark is null,'b','a') sort, kuka.kuka, kuka.nimi
@@ -2483,6 +2492,7 @@
 
 						echo "</select></td>";
 					}
+					// Merkki
 					elseif ($kentta == "merkki") {
 
 						echo "<td>$al_row[selitetark]:</td><td>";
@@ -2514,6 +2524,7 @@
 
 						echo "<input type='text' name='$kentta' size='15' value='$srow[$kentta]'></td>";
 					}
+					// Muut
 					else {
 						echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='$srow[$kentta]'></td>";
 					}

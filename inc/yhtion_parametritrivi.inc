@@ -384,6 +384,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'tyomaarayksen_kayttaytyminen') {
+		$ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos .= "<option value = ''>" . t("Normaali") . "</option>";
+		$ulos .= "<option value = 'K' $sel[K]>" . t("Kopioidaan myyntitilaus") . "</option>";
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "viivakoodi_purkulistaan") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

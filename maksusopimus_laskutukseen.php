@@ -484,7 +484,7 @@
 			$kielirow = mysql_fetch_assoc($kielires);
 
 			if ($kielirow["kieli"] == "") {
-				$kielirow["kieli"]="fi";
+				$kielirow["kieli"] = $yhtiorow["kieli"];
 			}
 
 			$nimitys 		= t($posrow["kuvaus"], $kielirow["kieli"]);
@@ -500,7 +500,7 @@
 							values  ('$row[laskutettu]', 'N', '-1', '-1', '$vikatunnus', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now(), '$kukarow[kuka]', now(), '$kukarow[kuka]', now())";
 				$addtil = pupe_query($query);
 
-				if ($debug==1) echo t("Loppulaskuun lis‰ttiin ennakkolaskun hyvitys")." -$row[laskutettu] alv $row[alv]% otunnus $vimppa<br>";
+				if ($debug == 1) echo t("Loppulaskuun lis‰ttiin ennakkolaskun hyvitys")." -$row[laskutettu] alv $row[alv]% otunnus $vimppa<br>";
 			}
 
 			// P‰ivitet‰‰n positiolle laskutustunnus

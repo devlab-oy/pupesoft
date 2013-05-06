@@ -96,7 +96,7 @@ $lisavat	 	= array("");
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		// tuotekoodi
-		$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ArticleIdentifier);
+		$rtuoteno[$i]["tuoteno"] = empty($tuotetieto->ArticleIdentifier) ? utf8_decode($tuotetieto->ArticleName) : utf8_decode($tuotetieto->ArticleIdentifier);
 
 		if ($rtuoteno[$i]["tuoteno"] != "") {
 

@@ -3766,4 +3766,8 @@
 		}
 	}
 
+	// Palutetaan puhtaat kukarow ja yhtiörow
+	$kukarow  = hae_kukarow($kukarow['kuka'], $kukarow['yhtio']);
+	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+
 	unset($alv);

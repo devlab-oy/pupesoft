@@ -772,20 +772,10 @@ class Unifaun {
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['paino'])); # Weight
 		$uni_par_val->addAttribute('n', "weight");
 
-		$pakkaustiedot['kuutiot'] = $pakkaustiedot['kuutiot'] < 0.01 ? 0.01 : $pakkaustiedot['kuutiot'];
-
-		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['kuutiot'])); # Volume
-		$uni_par_val->addAttribute('n', "volume");
-
-		if ($pakkaustiedot['lavametri'] > 0) {
-			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['lavametri'])); # Loadmeter. Can only be specified for entire shipment.
-			$uni_par_val->addAttribute('n', "area");
-		}
-
 		$query = "	SELECT koodi,
 					minimi_dimensio
 					FROM rahdinkuljettajat
-					WHERE yhtio = '{$kukarow['yhtio']}'
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
 					AND koodi = '{$this->toitarow['rahdinkuljettaja']}'";
 		$rahdinkuljettajat_result = pupe_query($query);
 		$rahdinkuljettaja_rivi = mysql_fetch_assoc($rahdinkuljettajat_result);
@@ -813,6 +803,16 @@ class Unifaun {
 		}
 		else {
 			$pakkaustiedot['korkeus'] = $minimi_dimensio;
+			$pakkaustiedot['kuutiot'] = $minimi_dimensio * $minimi_dimensio * $minimi_dimensio;
+			$pakkaustiedot['kuutiot'] = $pakkaustiedot['kuutiot'] < 0.01 ? 0.01 : $pakkaustiedot['kuutiot'];
+		}
+
+		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['kuutiot'])); # Volume
+		$uni_par_val->addAttribute('n', "volume");
+
+		if ($pakkaustiedot['lavametri'] > 0) {
+			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['lavametri'])); # Loadmeter. Can only be specified for entire shipment.
+			$uni_par_val->addAttribute('n', "area");
 		}
 
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['syvyys'])); # Length

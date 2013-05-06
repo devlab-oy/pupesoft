@@ -14455,7 +14455,9 @@ if (!function_exists("hae_hyvityshinta")) {
 
 		foreach ($tilausrivit as $tilausrivi_index => $tilausrivi_arvo) {
 
-			$ale = $kommentti = $palautuskielto = "";
+			unset($ale);
+
+			$kommentti = $palautuskielto = "";
 
 			$sql = "SELECT tuote_kentta,
 					tuote_arvo,

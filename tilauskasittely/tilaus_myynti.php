@@ -1535,10 +1535,6 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 			$asiakas_chk_res = pupe_query($query);
 			$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
 
-			#$query = "SELECT herminator FROM toimitustapa WHERE yhtio = '{$kukarow['yhtio']}' AND selite = '{$laskurow_edi['toimitustapa']}'";
-			#$toimitustapa_chk_res = pupe_query($query);
-			#$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
-
 			$query = "	SELECT *
 						FROM laskun_lisatiedot
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1547,12 +1543,11 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 			$laskun_lisatiedot = mysql_fetch_assoc($lisatiedot_result);
 
 			$params = array(
-				'laskurow' => $laskurow_edi,
-				'lisatiedot' => $laskun_lisatiedot,
-				'asiakasrow' => $asiakas_chk_row,
-				'tilaustyyppi' => 3,
-				#'toimitustapa' => $toimitustapa_chk_row['herminator'],
-				'toim' => $toim,
+				'laskurow' 		=> $laskurow_edi,
+				'lisatiedot' 	=> $laskun_lisatiedot,
+				'asiakasrow' 	=> $asiakas_chk_row,
+				'tilaustyyppi' 	=> 3,
+				'toim' 			=> $toim,
 			);
 
 			require("{$tilauskaslisa}editilaus_out_futur.inc");
@@ -1859,6 +1854,7 @@ if ($tee == '') {
 	// Tässä päivitetään 'pikaotsikkoa' jos kenttiin on jotain syötetty ja arvoja vaihdettu
 	if ($kukarow["kesken"] > 0 and (
 		(isset($toimitustapa) and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
+		(isset($rahtisopimus) and $rahtisopimus != '' and $rahtisopimus != $laskurow["rahtisopimus"]) or
 		(isset($viesti) and $viesti != $laskurow["viesti"]) or
 		(isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
 		(isset($myyjanro) and $myyjanro > 0) or
@@ -1975,6 +1971,7 @@ if ($tee == '') {
 
 		$query  = "	UPDATE lasku SET
 					toimitustapa		= '$toimitustapa',
+					rahtisopimus		= '$rahtisopimus',
 					viesti 				= '$viesti',
 					tilausvahvistus 	= '$tilausvahvistus',
 					$pika_paiv_merahti
@@ -2656,7 +2653,7 @@ if ($tee == '') {
 				$state_chk = 'disabled';
 			}
 
-			echo "<td><select name='toimitustapa' onchange='submit()' {$state_chk}>";
+			echo "<td><select name='toimitustapa' onchange='submit()' {$state_chk} ".js_alasvetoMaxWidth("toimitustapa", 200).">";
 
 			// Otetaan toimitustavan tiedot ja käytetään niitä läpi tilausmyynnin!
 			$tm_toimitustaparow = mysql_fetch_assoc($tresult);
@@ -2689,18 +2686,27 @@ if ($tee == '') {
 			}
 
 			if ($kukarow["extranet"] == "") {
-				//etsitään löytyykö rahtisopimusta
-				$rahsoprow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
 
-				if ($rahsoprow > 0) {
-					$ylisa = "&tunnus={$rahsoprow['tunnus']}";
-				}
-				else {
-					$ylisa = "&uusi=1&ytunnus={$laskurow['ytunnus']}&toimitustapa={$laskurow['toimitustapa']}";
-					$rahsoprow["rahtisopimus"] = t("Rahtisopimus");
-				}
+				// näytetään vain jos ollaan menossa asiakkaan sopparilla
+				if ($laskurow["kohdistettu"] == "") {
+					//etsitään löytyykö rahtisopimusta
+					$rahsop = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"], true, "");
 
-				echo " <a href='{$palvelin2}yllapito.php?toim=rahtisopimukset{$ylisa}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$rahsoprow['rahtisopimus']}</a>";
+					if (mysql_num_rows($rahsop) > 0) {
+						echo " <select name='rahtisopimus' onchange='submit()' {$state_chk} ".js_alasvetoMaxWidth("rahtisopimus", 200).">";
+
+						while ($rahsoprow = mysql_fetch_assoc($rahsop)) {
+							$sel = "";
+							if ($rahsoprow['rahtisopimus'] == $laskurow['rahtisopimus']) $sel = "SELECTED";
+
+							echo "<option value='{$rahsoprow['rahtisopimus']}' $sel>{$rahsoprow['rahtisopimus']} {$rahsoprow['selite']}</option>";
+						}
+
+						echo "</select>";
+					}
+
+					echo " <a href='{$palvelin2}yllapito.php?toim=rahtisopimukset&uusi=1&ytunnus={$laskurow['ytunnus']}&toimitustapa={$laskurow['toimitustapa']}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>".t("Uusi Rahtisopimus")."</a>";
+				}
 			}
 
 			echo "</td>";

@@ -298,7 +298,7 @@ if (!function_exists('alku_kerayslista')) {
 
 
 			//etsitään löytyykö rahtisopimusta
-			$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
+			$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"], false, $laskurow["rahtisopimus"]);
 
 			$laskurow['toimitustapa'] = t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli);
 

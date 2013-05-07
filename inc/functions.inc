@@ -8869,7 +8869,7 @@ if (!function_exists("on_puhelinnumero")) {
 }
 
 if (!function_exists("hae_rahtisopimusnumero")) {
-	function hae_rahtisopimusnumero ($toimitustapa, $ytunnus = "", $asiakastunnus = "") {
+	function hae_rahtisopimusnumero ($toimitustapa, $ytunnus = "", $asiakastunnus = "", $kaikki = false, $valittusoppari = "") {
 		global $kukarow;
 
 		// Pelk‰ll‰ toimitustavalla haettuna palautetaan firman oma sopimusnumero
@@ -8880,23 +8880,48 @@ if (!function_exists("hae_rahtisopimusnumero")) {
 						AND selite = '{$toimitustapa}'";
 		}
 		else {
-			$query = "	(SELECT *, '1' prio
+
+			$query = "";
+
+			if ($valittusoppari != "") {
+				$query .= "( SELECT *, '1' prio
+								FROM rahtisopimukset as rahtisopimukset3
+								WHERE toimitustapa = '$toimitustapa'
+								AND asiakas 	   = '$asiakastunnus'
+								AND asiakas 	  != ''
+								AND rahtisopimus   = '$valittusoppari'
+								AND yhtio          = '{$kukarow["yhtio"]}')
+								UNION
+								(SELECT *, '2' prio
+								FROM rahtisopimukset as rahtisopimukset4
+								WHERE toimitustapa  = '$toimitustapa'
+								AND ytunnus         = '$ytunnus'
+								AND ytunnus        != ''
+								AND rahtisopimus    = '$valittusoppari'
+								AND yhtio           = '{$kukarow["yhtio"]}')
+								UNION";
+			}
+
+
+			$query .= "( SELECT *, '3' prio
 						FROM rahtisopimukset
 						WHERE toimitustapa = '$toimitustapa'
 						AND asiakas = '$asiakastunnus'
 						AND asiakas != ''
 						AND yhtio = '{$kukarow["yhtio"]}')
 						UNION
-						(SELECT *, '2' prio
+						(SELECT *, '4' prio
 						FROM rahtisopimukset as rahtisopimukset2
 						WHERE toimitustapa = '$toimitustapa'
 						AND ytunnus = '$ytunnus'
 						AND ytunnus != ''
 						AND yhtio = '{$kukarow["yhtio"]}')
-						ORDER BY prio
-						LIMIT 1";
+						ORDER BY prio, tunnus desc";
 		}
 		$rares = pupe_query($query);
+
+		if ($kaikki) return $rares;
+
 		$rarow = mysql_fetch_assoc($rares);
 
  		return $rarow;
@@ -15305,6 +15330,8 @@ if (!function_exists("tee_keraysera")) {
 					maat READ,
 					rahtisopimukset READ,
 					rahtisopimukset AS rahtisopimukset2 READ,
+					rahtisopimukset AS rahtisopimukset3 READ,
+					rahtisopimukset AS rahtisopimukset4 READ,
 					pakkaamo WRITE,
 					avainsana as avainsana_kieli READ,
 					lasku as vanha_lasku READ,
@@ -18494,7 +18521,7 @@ if (!function_exists("pupesoft_sahkoposti")) {
 				$content .= "--$bound";
 			}
 		}
-		
+
 
 		// Vikassa boundissa pit‰‰ olla -- lopussa.
 		$content .= "--\n";

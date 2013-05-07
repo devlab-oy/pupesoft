@@ -2443,10 +2443,10 @@
 						foreach($checkbox_arvot as $i => $checkbox) {
 							if (($i+1) % 3 == 1) echo "<tr>";
 
-							$selec = ("Mu Ilma" == $checkbox) ? "CHECKED" : "";
+							$selec = ($srow[$kentta] == $checkbox) ? "CHECKED" : "";
 							echo "<td><input type='checkbox' name='{$al_row['selite']}[]' value='" . str_replace(" ", "", $checkbox) . "' $selec>$checkbox</td>";
 
-							if (($i+1) % 3 == 0) echo "</tr>"; // Joka kolmas rivi break
+							if (($i+1) % 3 == 0) echo "</tr>"; // Joka kolmanella rivill‰ break
 						}
 						echo "</table>";
 
@@ -2523,6 +2523,35 @@
 						}
 
 						echo "<input type='text' name='$kentta' size='15' value='$srow[$kentta]'></td>";
+					}
+					// Laskennallinen kentt‰
+					elseif ($kentta == "toimintavarmuus") {
+						echo "<td>$al_row[selitetark]</td>";
+						echo "<td>";
+						echo 1;
+						echo "</td>";
+					}
+					// Laskennallinen kentt‰
+					elseif ($kentta == "palautusvarmuus") {
+						echo "<td>$al_row[selitetark]</td>";
+						echo "<td>";
+
+						/** Palautusvarmuus laskenta.
+						* Jos palautus on alle 7 p‰iv‰ss‰ niin palautusvarmuus on 100%
+						* muuten 7 / palautus-p‰iv‰t */
+
+						// vaurio ilmoitus tullut pv‰ - p‰‰ttyi pv‰
+						$palautus = 8;
+
+						if ($palautus <= 7) {
+							$palautusvarmuus = 1;
+						}
+						else {
+							$palautusvarmuus =  7 / $palautus;
+						}
+
+						echo round($palautusvarmuus * 100, 2) . " %";
+						echo "</td>";
 					}
 					// Muut
 					else {

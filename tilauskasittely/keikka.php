@@ -1095,7 +1095,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 	if (mysql_num_rows($result) > 0) {
 
-		pupe_DataTables(array(array($pupe_DataTables, 9, 9, false)));
+		pupe_DataTables(array(array($pupe_DataTables, 10, 10, false)));
 
 		echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 		echo "<thead>";
@@ -1108,18 +1108,20 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		echo "<th valign='top'>".t("kohdistettu")." /<br>".t("varastossa")."</th>";
 		echo "<th valign='top'>".t("tilaukset")."</th>";
 		echo "<th valign='top'>".t("ostolaskuja")." /<br>".t("kululaskuja")."</th>";
+		echo "<th valign='top'>".t("laadittu")." /<br>".t("viety varastoon")."</th>";
 		echo "<th valign='top'>".t("toiminto")."</th>";
 		echo "</tr>";
 
 		echo "<tr>";
-		echo "<td><input type='text' class='search_field' name='search_saapuminen'></td>";
+		echo "<td><input type='text'   class='search_field' name='search_saapuminen'></td>";
 		echo "<td><input type='hidden' class='search_field' name='search_eimitaan'></td>";
-		echo "<td><input type='text' class='search_field' name='search_ytunnus'></td>";
-		echo "<td><input type='text' class='search_field' name='search_kohdistus'></td>";
-		echo "<td><input type='text' class='search_field' name='search_paikat'></td>";
-		echo "<td><input type='text' class='search_field' name='search_kohdistettu'></td>";
-		echo "<td><input type='text' class='search_field' name='search_tilaukset'></td>";
-		echo "<td><input type='text' class='search_field' name='search_laskuja'></td>";
+		echo "<td><input type='text'   class='search_field' name='search_ytunnus'></td>";
+		echo "<td><input type='text'   class='search_field' name='search_kohdistus'></td>";
+		echo "<td><input type='text'   class='search_field' name='search_paikat'></td>";
+		echo "<td><input type='text'   class='search_field' name='search_kohdistettu'></td>";
+		echo "<td><input type='text'   class='search_field' name='search_tilaukset'></td>";
+		echo "<td><input type='text'   class='search_field' name='search_laskuja'></td>";
+		echo "<td><input type='text'   class='search_field' name='search_pvm'></td>";
 		echo "<td><input type='hidden' class='search_field' name='search_eimitaan'></td>";
 		echo "</tr>";
 
@@ -1236,6 +1238,16 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 			}
 
 			echo "<td valign='top'>$laskujen_tiedot</td>";
+			
+			$query = "	SELECT min(laskutettuaika) laskutettuaika
+						FROM tilausrivi
+						WHERE yhtio 	= '{$kukarow['yhtio']}'
+						AND uusiotunnus = {$row['tunnus']}
+						AND tyyppi 		= 'O'";
+			$result2 = pupe_query($query);
+			$tilausrivirow = mysql_fetch_assoc($result2);
+			
+			echo "<td valign='top'>",tv1dateconv($row['luontiaika']),"<br>",tv1dateconv($tilausrivirow['laskutettuaika']),"</td>";
 
 			// jos tätä keikkaa ollaan just viemässä varastoon ei tehdä dropdownia
 			if ($keikkakesken == $row["tunnus"]) {

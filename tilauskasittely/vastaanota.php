@@ -756,7 +756,7 @@
 						echo "</tr>";
 					}
 
-					echo "<tr>";
+					echo "<tr class='aktiivi'>";
 
 					for ($y=0; $y<mysql_num_fields($result); $y++)
 						echo "<td>$row[$y]</td>";

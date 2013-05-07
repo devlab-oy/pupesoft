@@ -296,7 +296,7 @@
 	if (mysql_num_rows($vakioviesti_result) == 1) {
 		$vakioviesti_row = mysql_fetch_assoc($vakioviesti_result);
 
-		if (stripos($sisviestit1, $vakioviesti_row["selite"]) === FALSE) $lisa_comments .= $vakioviesti_row["selite"]." \n";
+		if (stripos($sisviestit1, $vakioviesti_row["selite"]) === FALSE) $lisa_comments .= trim($vakioviesti_row["selite"]." ".$vakioviesti_row["selitetark"])." \n";
 	}
 
 	// Lis‰t‰‰n j‰rjestelm‰n generoimat kommentit laskun kommenttikentt‰‰n

@@ -384,7 +384,7 @@ if (!function_exists('alku_lahete')) {
 				}
 				else {
 					// Käytetään VASTAANOTTAJAN rahtisopimusta, näytetään sopparinumero.
-					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
+					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"], false, $laskurow["rahtisopimus"]);
 
 					$pdf->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), $thispage, $pieni);
 					$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa']. " {$rahtivapaa}", "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],	 $thispage, $boldi);
@@ -409,7 +409,7 @@ if (!function_exists('alku_lahete')) {
 					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"]);
 				}
 				else {
-					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
+					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"], false, $laskurow["rahtisopimus"]);
 				}
 
 				$pdf->draw_rectangle(695, 420, 674, 580, $thispage, $rectparam);

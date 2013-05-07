@@ -2332,7 +2332,7 @@
 			echo "<th align='left'>".t("Rahtisopimus")."</th><td>";
 
 			//etsitään löytyykö rahtisopimusta
-			$rsop = hae_rahtisopimusnumero($toimitustapa, $rahtihaku, $otsik["liitostunnus"]);
+			$rsop = hae_rahtisopimusnumero($toimitustapa, $rahtihaku, $otsik["liitostunnus"], false, $otsik["rahtisopimus"]);
 			$rahtisopimus = $rsop["rahtisopimus"];
 
 			if ($otsik['rahtisopimus'] != '') {

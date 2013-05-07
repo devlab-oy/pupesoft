@@ -8803,7 +8803,7 @@ if (!function_exists("livesearch_varastohaku")) {
 }
 
 if (!function_exists("livesearch_kentta")) {
-	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $vero_field = '') {
+	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $vero_field = '', $class = '', $break_all_div = '') {
 		global $kukarow, $toim;
 
 		if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE) {
@@ -8812,7 +8812,7 @@ if (!function_exists("livesearch_kentta")) {
 
 		$hakuID = "haku".uniqid();
 
-		$return = "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
+		$return = "<input type='text' id='$hakuID' class='$class' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
 					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit', '$vero_field');\"
 					onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
 							var inputti_value = this.value;
@@ -8824,9 +8824,11 @@ if (!function_exists("livesearch_kentta")) {
 			$return .= "hae_oletusalv('$hakuID', '$vero_field');";
 		}
 		$return .= "}\"
-					onblur=\"setTimeout('livesearch_blurhandler(\'$hakuID\')', 100);\">
-				<div style='break:all'></div>
-				<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($width * 2)."px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10);\"></div>";
+					onblur=\"setTimeout('livesearch_blurhandler(\'$hakuID\')', 100);\">";
+		if (empty($break_all_div)) {
+			$return .= "<div class='break_all_div' style='break:all'></div>";
+		}
+		$return .= "<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($width * 2)."px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10);\"></div>";
 
 		return $return;
 	}

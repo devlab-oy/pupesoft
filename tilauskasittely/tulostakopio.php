@@ -926,7 +926,7 @@
 					lasku.yhtio_nimi,
 					lasku.erikoisale,
 					lasku.liitostunnus,
-					lasku.viite
+					lasku.viesti
 					FROM lasku $use
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
 					$joinlisa
@@ -992,7 +992,7 @@
 			echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.laatija'>",t("Laatija"),"</a></th>";
 
 			if ($toim == "SIIRTOLISTA") {
-				echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.viite'>",t("Viite"),"</a></th>";
+				echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.viesti'>",t("Viite"),"</a></th>";
 			}
 
 			if ($kukarow['hinnat'] == 0) {
@@ -1035,7 +1035,7 @@
 				echo "<$ero valign='top'>$row[laatija]</$ero>";
 
 				if ($toim == "SIIRTOLISTA") {
-					echo "<{$ero} valign='top'>{$row['viite']}</{$ero}>";
+					echo "<{$ero} valign='top'>{$row['viesti']}</{$ero}>";
 				}
 
 				if ($kukarow['hinnat'] == 0) {

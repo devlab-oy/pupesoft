@@ -716,7 +716,7 @@
 					GROUP BY tilausrivi.otunnus";
 		$tilre = pupe_query($query);
 
-		$selectlisa = $toim == "" ? ", Viite" : "";
+		$selectlisa = $toim == "" ? ", Viesti" : "";
 
 		while ($tilrow = mysql_fetch_assoc($tilre)) {
 

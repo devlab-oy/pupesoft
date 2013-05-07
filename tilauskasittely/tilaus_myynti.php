@@ -2693,9 +2693,7 @@ if ($tee == '') {
 					$rahsop = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"], true, "");
 
 					if (mysql_num_rows($rahsop) > 0) {
-
 						echo " <select name='rahtisopimus' onchange='submit()' {$state_chk} ".js_alasvetoMaxWidth("rahtisopimus", 200).">";
-
 
 						while ($rahsoprow = mysql_fetch_assoc($rahsop)) {
 							$sel = "";
@@ -2705,8 +2703,6 @@ if ($tee == '') {
 						}
 
 						echo "</select>";
-
-
 					}
 
 					echo " <a href='{$palvelin2}yllapito.php?toim=rahtisopimukset&uusi=1&ytunnus={$laskurow['ytunnus']}&toimitustapa={$laskurow['toimitustapa']}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>".t("Uusi Rahtisopimus")."</a>";

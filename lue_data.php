@@ -2208,6 +2208,10 @@ if (!$cli and !isset($api_kentat)) {
 		$taulut['yhteensopivuus_valmistenumero']   = 'Yhteensopivuus valmistenumero';
 	}
 
+	if (table_exists('td_pc') and table_exists('autoid_lisatieto')) {
+		$taulut['autoid_lisatieto'] = 'Autoid-lisatieto';
+	}
+
 	// Taulut aakkosjärjestykseen
 	asort($taulut);
 

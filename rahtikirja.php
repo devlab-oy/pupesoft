@@ -286,12 +286,12 @@
 
 	if ($id > 0 and $tunnukset != "") {
 
-		$vakquery = "	SELECT 
+		$vakquery = "	SELECT
 						IFNULL(group_concat(DISTINCT if(tuote.vakkoodi not in ('','0'), tuote.vakkoodi, null)), '') vaktuotteet,
 						IFNULL(group_concat(DISTINCT if(tuote.vak_imdg_koodi not in ('','0'), tuote.vak_imdg_koodi, null)), '') vaktuotteet_imdg
 						FROM tilausrivi
-						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio 
-							AND tuote.tuoteno = tilausrivi.tuoteno 
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+							AND tuote.tuoteno = tilausrivi.tuoteno
 							AND (tuote.vakkoodi not in ('','0') OR tuote.vak_imdg_koodi not in ('','0')))
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus IN ({$tunnukset})
@@ -2331,27 +2331,35 @@
 			//tehdään rahtisopimuksen syöttö
 			echo "<th align='left'>".t("Rahtisopimus")."</th><td>";
 
-			//etsitään löytyykö rahtisopimusta
-			$rsop = hae_rahtisopimusnumero($toimitustapa, $rahtihaku, $otsik["liitostunnus"], false, $otsik["rahtisopimus"]);
-			$rahtisopimus = $rsop["rahtisopimus"];
+			// Näytetään vain jos käytetään vastaanottajan sopparia
+			if ($nesel != "") {
+				//etsitään löytyykö rahtisopimusta
+				$rsop = hae_rahtisopimusnumero($toimitustapa, $rahtihaku, $otsik["liitostunnus"], false, $otsik["rahtisopimus"]);
+				$rahtisopimus = $rsop["rahtisopimus"];
 
-			if ($otsik['rahtisopimus'] != '') {
-				$rahtisopimus = $otsik['rahtisopimus'];
-			}
+				if ($otsik['rahtisopimus'] != '') {
+					$rahtisopimus = $otsik['rahtisopimus'];
+				}
 
-			if ($rsop > 0) {
-				$ylisa = "&tunnus=$rsop[tunnus]";
+				if ($rsop > 0) {
+					$ylisa = "&tunnus=$rsop[tunnus]";
+				}
+				else {
+					$ylisa = "&uusi=1&ytunnus=$rahtihaku&toimitustapa=$toimitustapa";
+					$rsop["rahtisopimus"] = t("Lisää rahtisopimus");
+				}
+
+				if ($kukarow['yhtio'] == $lasku_yhtio_originaali) {
+					echo "<a href='".$palvelin2."yllapito.php?toim=rahtisopimukset$ylisa&tee=add&lopetus=$PHP_SELF////toim=$toim//tunnukset=$tunnukset//lopetus=$lopetus//id=$id//tee=$tee//merahti=$merahti//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>$rsop[rahtisopimus] $rsop[selite]</a><br/>";
+				}
+
+				echo "<input value='$rahtisopimus' type='text' name='rahtisopimus' size='20'>";
 			}
 			else {
-				$ylisa = "&uusi=1&ytunnus=$rahtihaku&toimitustapa=$toimitustapa";
-				$rsop["rahtisopimus"] = t("Lisää rahtisopimus");
+				echo t("Käytetään lähettäjän rahtisopimusta");
 			}
 
-			if ($kukarow['yhtio'] == $lasku_yhtio_originaali) {
-				echo "<a href='".$palvelin2."yllapito.php?toim=rahtisopimukset$ylisa&tee=add&lopetus=$PHP_SELF////toim=$toim//tunnukset=$tunnukset//lopetus=$lopetus//id=$id//tee=$tee//merahti=$merahti//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>$rsop[rahtisopimus]</a><br/>";
-			}
-
-			echo "<input value='$rahtisopimus' type='text' name='rahtisopimus' size='20'></td></tr>";
+			echo "</td></tr>";
 
 			$varastolisa = "";
 

@@ -890,7 +890,7 @@
 			}
 		}
 
-		if (!isset($ascdesc)) $ascdesc = "asc";
+		if (!isset($ascdesc)) $ascdesc = "desc";
 
 		// Mihin järjestykseen laitetaan
 		if ($jarj != ''){

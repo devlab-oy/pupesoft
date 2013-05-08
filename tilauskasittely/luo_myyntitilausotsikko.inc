@@ -341,67 +341,68 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 	}
 }
 
-if(!function_exists("lisaa_rivi")) {
-	function lisaa_rivi($parametrit) {
+if (!function_exists("pupesoft_lisaa_rivi")) {
+	function pupesoft_lisaa_rivi($parametrit) {
+
 		global $kukarow, $yhtiorow;
 
-		if(empty($kukarow['kesken'])) {
+		if (empty($kukarow['kesken'])) {
 			echo "Kukarow kesken on pakollinen";
 			exit;
 		}
 
-		//TODO tee muut pakolliset ylläolevan mukaisesti trow, laskurow, tuoteno, kpl, 
-		
+		if (empty($yhtiorow)) {
+			echo "Yhtiorow on pakollinen";
+			exit;
+		}
+
+		//TODO tee muut pakolliset ylläolevan mukaisesti trow, laskurow, tuoteno, kpl,
+
 		// Tarvitsemme:
-		$trow = (!empty($parametrit['trow'])) ? $parametrit['trow'] : ''; // jossa on tuotteen kaikki tiedot
-		$rivinumero = (!empty($parametrit['rivinumero'])) ? $parametrit['rivinumero'] : 0; //kentässä on joko tilaajan rivinumero tai konserninsisäisissä kaupoissa sisäinen toimittajanumero
-		$laskurow = (!empty($parametrit['laskurow'])) ? $parametrit['laskurow'] : ''; //			--> jossa on laskun kaikki tiedot
-		
-		$kpl = (!empty($parametrit['kpl'])) ? $parametrit['kpl'] : 0; //					--> jossa on tilattu kappalemäärä
-		$tuoteno = (!empty($parametrit['tuoteno'])) ? $parametrit['tuoteno'] : '';//				--> jossa on tilattava tuotenumero
-		$toimaika = (!empty($parametrit['toimaika'])) ? $parametrit['toimaika'] : '';//			--> arvioitu toimitusaika
-		$kerayspvm = (!empty($parametrit['kerayspvm'])) ? $parametrit['kerayspvm'] : '';//			--> toivottu keräysaika
-		$hinta = (!empty($parametrit['hinta'])) ? $parametrit['hinta'] : 0;//				--> käyttäjän syöttämä hinta
-		$netto = (!empty($parametrit['netto'])) ? $parametrit['netto'] : '';//				--> käyttäjän syöttämä netto
+		$trow               = (!empty($parametrit['trow']))               ? $parametrit['trow'] : '';                // tuote.*
+		$rivinumero         = (!empty($parametrit['rivinumero']))         ? $parametrit['rivinumero'] : 0;           // joko tilaajan rivinumero tai konserninsisäisissä kaupoissa sisäinen toimittajanumero
+		$laskurow           = (!empty($parametrit['laskurow']))           ? $parametrit['laskurow'] : '';            // lasku.*
+		$kpl                = (!empty($parametrit['kpl']))                ? $parametrit['kpl'] : 0;                  // --> tilattu kappalemäärä
+		$tuoteno            = (!empty($parametrit['tuoteno']))            ? $parametrit['tuoteno'] : '';             // --> tilattava tuotenumero
+		$toimaika           = (!empty($parametrit['toimaika']))           ? $parametrit['toimaika'] : '';            // --> arvioitu toimitusaika
+		$kerayspvm          = (!empty($parametrit['kerayspvm']))          ? $parametrit['kerayspvm'] : '';           // --> toivottu keräysaika
+		$hinta              = (!empty($parametrit['hinta']))              ? $parametrit['hinta'] : 0;                // --> käyttäjän syöttämä hinta
+		$netto              = (!empty($parametrit['netto']))              ? $parametrit['netto'] : '';               // --> käyttäjän syöttämä netto
+		$var                = (!empty($parametrit['var']))                ? $parametrit['var'] : '';                 // H,J,P varrit
+		$varasto            = (!empty($parametrit['varasto']))            ? $parametrit['varasto'] : '';             // myydään vain tästä/näistä varastosta
+		$paikka             = (!empty($parametrit['paikka']))             ? $parametrit['paikka'] : '';              // myydään vain tältä paikalta
+		$rivitunnus         = (!empty($parametrit['rivitunnus']))         ? $parametrit['rivitunnus'] : '';          // tietokannan tunnus jolle rivi lisätään
+		$rivilaadittu       = (!empty($parametrit['rivilaadittu']))       ? $parametrit['rivilaadittu'] : '';        // vanhan rivin laadittuaika, säilytetään se
+		$korvaavakielto     = (!empty($parametrit['korvaavakielto']))     ? $parametrit['korvaavakielto'] : '';      // Jos erisuuri kuin tyhjä niin ei myydä korvaavia
+		$jtkielto           = (!empty($parametrit['jtkielto']))           ? $parametrit['jtkielto'] : '';            // Jos erisuuri kuin tyhjä niin ei laiteta JT:Seen
+		$perhekielto        = (!empty($parametrit['perhekielto']))        ? $parametrit['perhekielto'] : '';         // Jos erisuuri kuin tyhjä niin ei etsitä ollenkaan perheitä
+		$varataan_saldoa    = (!empty($parametrit['varataan_saldoa']))    ? $parametrit['varataan_saldoa'] : '';     // Jos == (!empty(EI niin ei varata saldoa (tietyissä keisseissä), tai siis ei ainakan tehdä saldotsekkiä
+		$kutsuja            = (!empty($parametrit['kutsuja']))            ? $parametrit['kutsuja'] : '';             // Kuka tätä skriptiä kutsuu
+		$myy_sarjatunnus    = (!empty($parametrit['myy_sarjatunnus']))    ? $parametrit['myy_sarjatunnus'] : '';     // Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
+		$osto_sarjatunnus   = (!empty($parametrit['osto_sarjatunnus']))   ? $parametrit['osto_sarjatunnus'] : '';    // Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
+		$jaksotettu         = (!empty($parametrit['jaksotettu']))         ? $parametrit['jaksotettu'] : '';          // Kuuluuko tilausrivi mukaan jaksotukseen
+		$perheid            = (!empty($parametrit['perheid']))            ? $parametrit['perheid'] : '';             // Tuoteperheen perheid
+		$perheid2           = (!empty($parametrit['perheid2']))           ? $parametrit['perheid2'] : '';            // Lisävarusteryhmän perheid2
+		$orvoteikiinnosta   = (!empty($parametrit['orvoteikiinnosta']))   ? $parametrit['orvoteikiinnosta'] : '';    // Meitä ei kiinnosta orvot jos tämä ei ole tyhjä.
+		$osatoimkielto      = (!empty($parametrit['osatoimkielto']))      ? $parametrit['osatoimkielto'] : '';       // Jos saldo ei riitä koko riville niin ei lisätä riviä ollenkaan
+		$olpaikalta         = (!empty($parametrit['olpaikalta']))         ? $parametrit['olpaikalta'] : '';          // pakotetaan myymään oletuspaikalta
+		$tuotenimitys       = (!empty($parametrit['tuotenimitys']))       ? $parametrit['tuotenimitys'] : '';        // tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
+		$tuotenimitys_force = (!empty($parametrit['tuotenimitys_force'])) ? $parametrit['tuotenimitys_force'] : '';  // tuotteen nimitys muutetaan systemitasolla
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			$ale_temp = str_replace(',', '.', $parametrit{'ale'.$alepostfix});
 			${'ale'.$alepostfix} = (!empty($ale_temp)) ? $ale_temp : 0;
 			${'alkupera_ale'.$alepostfix} = (!empty($parametrit{'ale'.$alepostfix})) ? $parametrit{'ale'.$alepostfix} : 0;
-		}// $ale1,2,3,4,5...		--> käyttäjän syöttämä ale
+		}
 
-		$var = (!empty($parametrit['var'])) ? $parametrit['var'] : '';//					--> H,J,P varrit
-		$varasto = (!empty($parametrit['varasto'])) ? $parametrit['varasto'] : '';//				--> myydään vain tästä/näistä varastosta
-		$paikka = (!empty($parametrit['paikka'])) ? $parametrit['paikka'] : '';//				--> myydään vain tältä paikalta
-		$rivitunnus = (!empty($parametrit['rivitunnus'])) ? $parametrit['rivitunnus'] : '';//			--> tietokannan tunnus jolle rivi lisätään
-		$rivilaadittu = (!empty($parametrit['rivilaadittu'])) ? $parametrit['rivilaadittu'] : '';//		--> vanhan rivin laadittuaika, säilytetään se
-		$korvaavakielto = (!empty($parametrit['korvaavakielto'])) ? $parametrit['korvaavakielto'] : '';//		--> Jos erisuuri kuin tyhjä niin ei myydä korvaavia
-		$jtkielto = (!empty($parametrit['jtkielto'])) ? $parametrit['jtkielto'] : '';//			--> Jos erisuuri kuin tyhjä niin ei laiteta JT:Seen
-		$perhekielto = (!empty($parametrit['perhekielto'])) ? $parametrit['perhekielto'] : '';//			--> Jos erisuuri kuin tyhjä niin ei etsitä ollenkaan perheitä
-		$varataan_saldoa = (!empty($parametrit['varataan_saldoa'])) ? $parametrit['varataan_saldoa'] : '';//		--> Jos == (!empty(EI niin ei varata saldoa (tietyissä keisseissä), tai siis ei ainakan tehdä saldotsekkiä
-		$kutsuja = (!empty($parametrit['kutsuja'])) ? $parametrit['kutsuja'] : '';//				--> Kuka tätä skriptiä kutsuu
-		$myy_sarjatunnus = (!empty($parametrit['myy_sarjatunnus'])) ? $parametrit['myy_sarjatunnus'] : '';//		--> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
-		$osto_sarjatunnus = (!empty($parametrit['osto_sarjatunnus'])) ? $parametrit['osto_sarjatunnus'] : '';//	--> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
-		$jaksotettu = (!empty($parametrit['jaksotettu'])) ? $parametrit['jaksotettu'] : '';//			--> Kuuluuko tilausrivi mukaan jaksotukseen
-		$perheid = (!empty($parametrit['perheid'])) ? $parametrit['perheid'] : '';//				--> Tuoteperheen perheid
-		$perheid2 = (!empty($parametrit['perheid2'])) ? $parametrit['perheid2'] : '';//			--> Lisävarusteryhmän perheid2
-		$orvoteikiinnosta = (!empty($parametrit['orvoteikiinnosta'])) ? $parametrit['orvoteikiinnosta'] : '';//	--> Meitä ei kiinnosta orvot jos tämä ei ole tyhjä.
-		$osatoimkielto = (!empty($parametrit['osatoimkielto'])) ? $parametrit['osatoimkielto'] : '';//		--> Jos saldo ei riitä koko riville niin ei lisätä riviä ollenkaan
-		$olpaikalta = (!empty($parametrit['olpaikalta'])) ? $parametrit['olpaikalta'] : '';//			--> pakotetaan myymään oletuspaikalta
-		$tuotenimitys = (!empty($parametrit['tuotenimitys'])) ? $parametrit['tuotenimitys'] : '';//		--> tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
-		$tuotenimitys_force = (!empty($parametrit['tuotenimitys_force'])) ? $parametrit['tuotenimitys_force'] : '';//	--> tuotteen nimitys muutetaan systemitasolla
+		require('tilauskasittely/lisaarivi.inc');
 
-		require('lisaarivi.inc');
-
-		$mur = $lisatyt_rivit1;
-		$sur = $lisatyt_rivit2;
 		return array(
 			'lisatyt_rivit1' => $lisatyt_rivit1,
 			'lisatyt_rivit2' => $lisatyt_rivit2,
 		);
+
 		// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi myyntihaarassa
 		// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
 	}
 }
-
-?>

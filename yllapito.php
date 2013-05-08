@@ -1883,6 +1883,7 @@
 		if ($toim == "auto_vari" or
 			$toim == "auto_vari_tuote" or
 			$toim == "auto_vari_korvaavat" or
+			$toim == "autoid_lisatieto" or
 			$toim == "puun_alkio" or
 			$toim == "toimitustavan_lahdot" or
 			$toim == "pakkauskoodit" or

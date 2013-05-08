@@ -471,11 +471,11 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 			else {
 				if ($valmisterow['kokonaissaldo'] + $isavarattu > 0 and $valmisterow['kokonaissaldo'] > 0) {
 					// kehahin matikka (tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen, ett‰ kehahin lasketaan)
-					$kehahin = round(($valmisterow['kokonaissaldo'] * $valmisterow['kehahin'] + $uusiarvo) / ($valmisterow['kokonaissaldo'] + $isavarattu), 4);
+					$kehahin = round(($valmisterow['kokonaissaldo'] * $valmisterow['kehahin'] + $uusiarvo) / ($valmisterow['kokonaissaldo'] + $isavarattu), 6);
 				}
 				else {
 					// jos j‰‰d‰‰n saldossa t‰m‰nkin tulon j‰lkeen miinukselle tai nollille, laitetaan kehahin suoraan t‰m‰n valmistuksen hinnasta
-					$kehahin = round($uusiarvo/$isavarattu, 4);
+					$kehahin = round($uusiarvo/$isavarattu, 6);
 				}
 
 				$selite = t("Valmistettiin tuotetta tyˆm‰‰r‰yksell‰")." $tilrivirow[otunnus] ($valmisterow[kehahin] --> $kehahin)";
@@ -502,7 +502,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 			$query = "	UPDATE tuote
 						SET kehahin	= $kehahin,
-						vihahin		= round($uusiarvo/$isavarattu, 2),
+						vihahin		= round($uusiarvo/$isavarattu, '$yhtiorow[hintapyoristys]'),
 						vihapvm		= now()
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$isatuoteno'";

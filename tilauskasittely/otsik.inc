@@ -2453,6 +2453,23 @@
 						echo "</td>";
 
 					}
+					// Radio button
+					elseif (strtoupper($al_row["selitetark_2"]) == "RADIO") {
+						$radio_values = explode("#", $al_row['selitetark_3']);
+
+						echo "<td>{$al_row['selitetark']}</td>";
+						echo "<td>";
+						echo "<table>";
+
+						foreach ($radio_values as $value) {
+							$selec = ($srow[$kentta] == $value) ? "CHECKED" : "";
+							echo "<td><input type='radio' name='{$al_row['selite']}' value='$value' $selec>$value</input>";
+						}
+
+						echo "</table>";
+						echo "</td>";
+
+					}
 					// Työn suorittaja
 					elseif ($kentta == "suorittaja") {
 

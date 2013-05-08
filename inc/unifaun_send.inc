@@ -802,8 +802,8 @@ class Unifaun {
 			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < $pakkauksen_sarman_minimimitta ? $pakkauksen_sarman_minimimitta : round($pakkaustiedot['korkeus'], 2);
 		}
 		else {
-			$pakkaustiedot['korkeus'] = $pakkauksen_sarman_minimimitta;
-			$pakkaustiedot['kuutiot'] = $pakkauksen_sarman_minimimitta * $pakkauksen_sarman_minimimitta * $pakkauksen_sarman_minimimitta;
+			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < $pakkauksen_sarman_minimimitta ? $pakkauksen_sarman_minimimitta : $pakkaustiedot['korkeus'];
+			$pakkaustiedot['kuutiot'] = $pakkaustiedot['korkeus'] * $pakkaustiedot['leveys'] * $pakkaustiedot['syvyys'];
 			$pakkaustiedot['kuutiot'] = $pakkaustiedot['kuutiot'] < 0.01 ? 0.01 : $pakkaustiedot['kuutiot'];
 		}
 

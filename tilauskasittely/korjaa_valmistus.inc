@@ -516,4 +516,3 @@
 			$updresult = pupe_query($query);
 		}
 	}
-?>

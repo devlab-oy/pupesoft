@@ -14,14 +14,14 @@ if (isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {
 
 if ($ajax_request) {
 	if ($palkinto_rivi) {
-		$return = hae_liveseach_kentta($rivi_kohde, 'palkinto', $saanto_rivi_id);
+		$return = hae_liveseach_kentta($rivi_kohde, 'palkinto', $ehto_rivi_id);
 	}
 	else {
-		if (isset($alisaanto_rivi_id)) {
-			$return = hae_liveseach_kentta($rivi_kohde, 'aliehto', $saanto_rivi_id, $alisaanto_rivi_id);
+		if (isset($aliehto_rivi_id)) {
+			$return = hae_liveseach_kentta($rivi_kohde, 'aliehto', $ehto_rivi_id, $aliehto_rivi_id);
 		}
 		else {
-			$return = hae_liveseach_kentta($rivi_kohde, 'ehto', $saanto_rivi_id);
+			$return = hae_liveseach_kentta($rivi_kohde, 'ehto', $ehto_rivi_id);
 		}
 	}
 
@@ -36,60 +36,62 @@ enable_ajax();
 echo "<font class='head'>".t("Kampanjat")."</font><hr>";
 ?>
 <style>
-	#saanto_rivi_template {
+	#ehto_rivi_template {
 		display: none;
 	}
-	#alisaanto_rivi_template {
+	#aliehto_rivi_template {
 		display: none;
 	}
 
 	#palkinto_table_template {
 		display: none;
 	}
-	.saanto_arvo {
+	.ehto_arvo {
 		width: 140px;
 	}
 </style>
 <script>
 
 	$(document).ready(function() {
-		bind_uusi_saanto_button();
-		bind_uusi_alisaanto_button();
+		bind_uusi_ehto_button();
+		bind_uusi_aliehto_button();
 
-		bind_poista_saanto_button();
-		bind_poista_alisaanto_button();
+		bind_poista_ehto_button();
+		bind_poista_aliehto_button();
 
 		bind_uusi_palkinto_button();
 		bind_poista_palkinto_button();
 
-		if ($('#saannot:has(div)').length === 0) {
-			$('#uusi_saanto').click();
+		if ($('#ehdot:has(div)').length === 0) {
+			$('#uusi_ehto').click();
 		}
 
 		if ($('#palkinto_table tbody tr').length <= 1) {
 			$('#uusi_palkinto').click();
 		}
 
-		bind_saanto_kohde_change();
-		bind_alisaanto_kohde_change();
+		bind_ehto_kohde_change();
+		bind_aliehto_kohde_change();
 	});
 
-	function bind_saanto_kohde_change() {
-		$('.saanto_kohde').live('change', function() {
-			var saanto_rivi = $(this).parent();
-			hae_saannon_arvo_input(saanto_rivi);
+	function bind_ehto_kohde_change() {
+		$('.ehto_kohde').live('change', function() {
+			var ehto_rivi = $(this).parent();
+			hae_ehdon_arvo_input(ehto_rivi);
+
+			filteroi_aliehdon_kohteet($(this).val());
 		});
 	}
 
-	function hae_saannon_arvo_input(saanto_rivi) {
+	function hae_ehdon_arvo_input(ehto_rivi) {
 		$.ajax({
 			async: true,
 			type: 'GET',
 			data: {
 				ajax_request: 1,
 				no_head: 'yes',
-				rivi_kohde: $(saanto_rivi).find('.saanto_kohde').val(),
-				saanto_rivi_id: $(saanto_rivi).find('.saanto_id').val()
+				rivi_kohde: $(ehto_rivi).find('.ehto_kohde').val(),
+				ehto_rivi_id: $(ehto_rivi).find('.ehto_id').val()
 			},
 			url: 'kampanja.php'
 		}).done(function(data) {
@@ -98,52 +100,50 @@ echo "<font class='head'>".t("Kampanjat")."</font><hr>";
 				console.log(data);
 			}
 			if (data.length !== 0) {
-				$(saanto_rivi).find('.saanto_arvo').remove();
-				$(saanto_rivi).find('.liveSearch').remove();
-				$(saanto_rivi).find('.saanto_rajoitin').after(data);
-
-				//$(saanto_rivi).find('.break_all_div').remove();
+				$(ehto_rivi).find('.ehto_arvo').remove();
+				$(ehto_rivi).find('.liveSearch').remove();
+				$(ehto_rivi).find('.ehto_rajoitin').after(data);
 			}
 		});
 	}
 
-	function bind_uusi_saanto_button() {
-		$('#uusi_saanto').click(function(event) {
+	function bind_uusi_ehto_button() {
+		$('#uusi_ehto').click(function(event) {
 			event.preventDefault();
 
-			var id = generoi_saanto_id();
+			var id = generoi_ehto_id();
 
-			populoi_saanto_rivi(id);
+			populoi_ehto_rivi(id);
 		});
 	}
 
-	function populoi_saanto_rivi(saanto_id) {
-		var saanto_rivi = $('#saanto_rivi_template').clone();
+	function populoi_ehto_rivi(ehto_id) {
+		var ehto_rivi = $('#ehto_rivi_template').clone();
 
-		$(saanto_rivi).css('display', 'block');
-		$(saanto_rivi).removeAttr('id');
-		$(saanto_rivi).attr('class', 'saanto_rivi');
+		$(ehto_rivi).css('display', 'block');
+		$(ehto_rivi).removeAttr('id');
+		$(ehto_rivi).attr('class', 'ehto_rivi');
 
-		$(saanto_rivi).find('.saanto_kohde').attr('name', 'kampanja_ehdot[' + saanto_id + '][kohde]');
-		$(saanto_rivi).find('.saanto_rajoitin').attr('name', 'kampanja_ehdot[' + saanto_id + '][rajoitin]');
+		$(ehto_rivi).find('.ehto_kohde').attr('name', 'kampanja_ehdot[' + ehto_id + '][kohde]');
+		$(ehto_rivi).find('.ehto_rajoitin').attr('name', 'kampanja_ehdot[' + ehto_id + '][rajoitin]');
 
-		$(saanto_rivi).find('.saanto_id_template').attr('class', 'saanto_id');
-		$(saanto_rivi).find('.saanto_id_template').removeClass('saanto_id_template');
+		$(ehto_rivi).find('.ehto_id_template').attr('class', 'ehto_id');
+		$(ehto_rivi).find('.ehto_id_template').removeClass('ehto_id_template');
 
-		$(saanto_rivi).find('.saanto_id').val(saanto_id);
+		$(ehto_rivi).find('.ehto_id').val(ehto_id);
 
-		$('#saannot').append(saanto_rivi);
+		$('#ehdot').append(ehto_rivi);
 
-		hae_saannon_arvo_input(saanto_rivi);
+		hae_ehdon_arvo_input(ehto_rivi);
 	}
 
-	function generoi_saanto_id() {
-		var saanto_rivit = $('.saanto_rivi');
+	function generoi_ehto_id() {
+		var ehto_rivit = $('.ehto_rivi');
 
 		var max = 0;
-		$(saanto_rivit).each(function(index, saanto_rivi) {
-			if (max < $(saanto_rivi).find('.saanto_id').val()) {
-				max = $(saanto_rivi).find('.saanto_id').val();
+		$(ehto_rivit).each(function(index, ehto_rivi) {
+			if (max < $(ehto_rivi).find('.ehto_id').val()) {
+				max = $(ehto_rivi).find('.ehto_id').val();
 			}
 		});
 
@@ -152,23 +152,23 @@ echo "<font class='head'>".t("Kampanjat")."</font><hr>";
 		return max;
 	}
 
-	function bind_alisaanto_kohde_change() {
-		$('.alisaanto_kohde').live('change', function() {
-			var alisaanto_rivi = $(this).parent();
-			hae_alikohteen_arvo_input(alisaanto_rivi);
+	function bind_aliehto_kohde_change() {
+		$('.aliehto_kohde').live('change', function() {
+			var aliehto_rivi = $(this).parent();
+			hae_alikohteen_arvo_input(aliehto_rivi);
 		});
 	}
 
-	function hae_alikohteen_arvo_input(alisaanto_rivi) {
+	function hae_alikohteen_arvo_input(aliehto_rivi) {
 		$.ajax({
 			async: true,
 			type: 'GET',
 			data: {
 				ajax_request: 1,
 				no_head: 'yes',
-				rivi_kohde: $(alisaanto_rivi).find('.alisaanto_kohde').val(),
-				saanto_rivi_id: $(alisaanto_rivi).parent().parent().find('.saanto_id').val(),
-				alisaanto_rivi_id: $(alisaanto_rivi).find('.alisaanto_id').val()
+				rivi_kohde: $(aliehto_rivi).find('.aliehto_kohde').val(),
+				ehto_rivi_id: $(aliehto_rivi).parent().parent().find('.ehto_id').val(),
+				aliehto_rivi_id: $(aliehto_rivi).find('.aliehto_id').val()
 			},
 			url: 'kampanja.php'
 		}).done(function(data) {
@@ -177,54 +177,52 @@ echo "<font class='head'>".t("Kampanjat")."</font><hr>";
 				//console.log(data);
 			}
 			if (data.length !== 0) {
-				$(alisaanto_rivi).find('.alisaanto_arvo').remove();
-				$(alisaanto_rivi).find('.liveSearch').remove();
-				$(alisaanto_rivi).find('.alisaanto_rajoitin').after(data);
-
-				//$(alisaanto_rivi).find('.break_all_div').remove();
+				$(aliehto_rivi).find('.aliehto_arvo').remove();
+				$(aliehto_rivi).find('.liveSearch').remove();
+				$(aliehto_rivi).find('.aliehto_rajoitin').after(data);
 			}
 		});
 	}
 
-	function bind_uusi_alisaanto_button() {
+	function bind_uusi_aliehto_button() {
 		//Käytetään liveä, koska kyseessä on dynaaminen elementti.
-		$('.uusi_alisaanto').live('click', function(event) {
+		$('.uusi_aliehto').live('click', function(event) {
 			event.preventDefault();
 
-			//parametrinä div.alisaannot
-			var alisaanto_id = generoi_alisaanto_id($(this).parent().find('.alisaannot'));
-			//parametrinä div.saanto_rivi
-			populoi_alisaanto_rivi($(this).parent(), alisaanto_id);
+			//parametrinä div.aliehdot
+			var aliehto_id = generoi_aliehto_id($(this).parent().find('.aliehdot'));
+			//parametrinä div.ehto_rivi
+			populoi_aliehto_rivi($(this).parent(), aliehto_id);
 		});
 	}
 
-	function populoi_alisaanto_rivi(saanto_rivi, alisaanto_id) {
-		var alisaanto_rivi = $('#alisaanto_rivi_template').clone();
-		var saanto_id = $(saanto_rivi).find('.saanto_id').val();
+	function populoi_aliehto_rivi(ehto_rivi, aliehto_id) {
+		var aliehto_rivi = $('#aliehto_rivi_template').clone();
+		var ehto_id = $(ehto_rivi).find('.ehto_id').val();
 
-		$(alisaanto_rivi).css('display', 'block');
-		$(alisaanto_rivi).removeAttr('id');
-		$(alisaanto_rivi).attr('class', 'alisaanto_rivi');
+		$(aliehto_rivi).css('display', 'block');
+		$(aliehto_rivi).removeAttr('id');
+		$(aliehto_rivi).attr('class', 'aliehto_rivi');
 
-		$(alisaanto_rivi).find('.alisaanto_kohde').attr('name', 'kampanja_ehdot[' + saanto_id + '][alisaanto_rivit][' + alisaanto_id + '][kohde]');
-		$(alisaanto_rivi).find('.alisaanto_rajoitin').attr('name', 'kampanja_ehdot[' + saanto_id + '][alisaanto_rivit][' + alisaanto_id + '][rajoitin]');
+		$(aliehto_rivi).find('.aliehto_kohde').attr('name', 'kampanja_ehdot[' + ehto_id + '][aliehto_rivit][' + aliehto_id + '][kohde]');
+		$(aliehto_rivi).find('.aliehto_rajoitin').attr('name', 'kampanja_ehdot[' + ehto_id + '][aliehto_rivit][' + aliehto_id + '][rajoitin]');
 
 
-		$(alisaanto_rivi).find('.alisaanto_id_template').attr('class', 'alisaanto_id');
-		$(alisaanto_rivi).find('.alisaanto_id_template').removeClass('alisaanto_id_template');
+		$(aliehto_rivi).find('.aliehto_id_template').attr('class', 'aliehto_id');
+		$(aliehto_rivi).find('.aliehto_id_template').removeClass('aliehto_id_template');
 
-		$(alisaanto_rivi).find('.alisaanto_id').val(alisaanto_id);
+		$(aliehto_rivi).find('.aliehto_id').val(aliehto_id);
 
-		$(saanto_rivi).find('.alisaannot').append(alisaanto_rivi);
+		$(ehto_rivi).find('.aliehdot').append(aliehto_rivi);
 
-		hae_alikohteen_arvo_input(alisaanto_rivi);
+		hae_alikohteen_arvo_input(aliehto_rivi);
 	}
 
-	function generoi_alisaanto_id(alisaanto_rivit) {
+	function generoi_aliehto_id(aliehto_rivit) {
 		var max = 0;
-		$(alisaanto_rivit).each(function(index, alisaanto_rivi) {
-			if (max < $(alisaanto_rivi).find('.alisaanto_id').val()) {
-				max = $(alisaanto_rivi).find('.alisaanto_id').val();
+		$(aliehto_rivit).each(function(index, aliehto_rivi) {
+			if (max < $(aliehto_rivi).find('.aliehto_id').val()) {
+				max = $(aliehto_rivi).find('.aliehto_id').val();
 			}
 		});
 
@@ -233,16 +231,16 @@ echo "<font class='head'>".t("Kampanjat")."</font><hr>";
 		return max;
 	}
 
-	function bind_poista_saanto_button() {
-		$('.poista_saanto').live('click', function(event) {
+	function bind_poista_ehto_button() {
+		$('.poista_ehto').live('click', function(event) {
 			event.preventDefault();
 
 			$(this).parent().remove();
 		});
 	}
 
-	function bind_poista_alisaanto_button() {
-		$('.poista_alisaanto').live('click', function(event) {
+	function bind_poista_aliehto_button() {
+		$('.poista_aliehto').live('click', function(event) {
 			event.preventDefault();
 
 			$(this).parent().remove();
@@ -298,7 +296,7 @@ echo "<font class='head'>".t("Kampanjat")."</font><hr>";
 				no_head: 'yes',
 				rivi_kohde: 'tuote',
 				palkinto_rivi: true,
-				saanto_rivi_id: $(palkinto_rivi).find('.palkinto_rivi_id').val()
+				ehto_rivi_id: $(palkinto_rivi).find('.palkinto_rivi_id').val()
 			},
 			url: 'kampanja.php'
 		}).done(function(data) {
@@ -310,8 +308,6 @@ echo "<font class='head'>".t("Kampanjat")."</font><hr>";
 				$(palkinto_rivi).find('.palkinto_rivi_nimi').remove();
 				$(palkinto_rivi).find('.liveSearch').remove();
 				$(palkinto_rivi).find('td:first').append(data);
-
-				//$(palkinto_rivi).find('.break_all_div').remove();
 			}
 		});
 	}
@@ -370,7 +366,7 @@ function luo_uusi_kampanja($request) {
 	foreach ($request['kampanja_ehdot'] as $kampanja_ehto) {
 		$kampanja_ehto_tunnus = luo_kampanja_ehto($kampanja_ehto, $kampanja_tunnus);
 
-		foreach ($kampanja_ehto['alisaanto_rivit'] as $kampanja_aliehto) {
+		foreach ($kampanja_ehto['aliehto_rivit'] as $kampanja_aliehto) {
 			luo_kampanja_aliehto($kampanja_aliehto, $kampanja_ehto_tunnus);
 		}
 	}
@@ -457,7 +453,7 @@ function muokkaa_kampanjaa($request) {
 	foreach ($request['kampanja_ehdot'] as $kampanja_ehto) {
 		$kampanja_ehto_tunnus = luo_kampanja_ehto($kampanja_ehto, $request['kampanja_tunnus']);
 
-		foreach ($kampanja_ehto['alisaanto_rivit'] as $kampanja_aliehto) {
+		foreach ($kampanja_ehto['aliehto_rivit'] as $kampanja_aliehto) {
 			luo_kampanja_aliehto($kampanja_aliehto, $kampanja_ehto_tunnus);
 		}
 	}
@@ -501,9 +497,9 @@ function poista_kampanja_palkinnot($kampanja_tunnus) {
 
 function echo_kayttoliittyma($request = array()) {
 	//Templatet on javascriptiä varten, että voidaan kutsua .clone()
-	echo_saanto_rivi_template();
+	echo_ehto_rivi_template();
 
-	echo_saanto_alirivi_template();
+	echo_ehto_alirivi_template();
 
 	echo_palkinto_rivi_template();
 
@@ -526,8 +522,8 @@ function echo_kayttoliittyma($request = array()) {
 	echo "<hr/>";
 	echo "<br/>";
 
-	echo "<div id='saannot'>";
-	echo "<button id='uusi_saanto'>".t("Uusi sääntö")."</button>";
+	echo "<div id='ehdot'>";
+	echo "<button id='uusi_ehto'>".t("Uusi ehto")."</button>";
 	if (!empty($request['kampanja']['kampanja_ehdot'])) {
 		foreach ($request['kampanja']['kampanja_ehdot'] as $index => $kampanja_ehto) {
 			echo_kampanja_ehto($index, $kampanja_ehto);
@@ -567,11 +563,11 @@ function echo_kampanja_ehto($index, $kampanja_ehto) {
 	$rajoittimet = hae_ehdon_rajoittimet();
 	$arvo_input = hae_liveseach_kentta($kampanja_ehto['kohde'], 'ehto', $index, 0, $kampanja_ehto['arvo']);
 
-	echo "<div id='saanto_rivi'>";
+	echo "<div id='ehto_rivi'>";
 
-	echo "<input type='hidden' class='saanto_id' value='{$index}'/>";
+	echo "<input type='hidden' class='ehto_id' value='{$index}'/>";
 
-	echo "<select class='saanto_kohde' name='kampanja_ehdot[{$index}][kohde]'>";
+	echo "<select class='ehto_kohde' name='kampanja_ehdot[{$index}][kohde]'>";
 	foreach ($ehdot as $ehto) {
 		$sel = "";
 		if ($ehto['value'] == $kampanja_ehto['kohde']) {
@@ -581,7 +577,7 @@ function echo_kampanja_ehto($index, $kampanja_ehto) {
 	}
 	echo "</select>";
 
-	echo "<select class='saanto_rajoitin' name='kampanja_ehdot[{$index}][rajoitin]'>";
+	echo "<select class='ehto_rajoitin' name='kampanja_ehdot[{$index}][rajoitin]'>";
 	foreach ($rajoittimet as $rajoitin) {
 		$sel = "";
 		if ($rajoitin['value'] == $kampanja_ehto['rajoitin']) {
@@ -592,12 +588,12 @@ function echo_kampanja_ehto($index, $kampanja_ehto) {
 	echo "</select>";
 
 	echo $arvo_input;
-	//echo "<input type='text' class='saanto_arvo' value='{$kampanja_ehto['arvo']}' name='kampanja_ehdot[{$index}][arvo]'/>";
+	//echo "<input type='text' class='ehto_arvo' value='{$kampanja_ehto['arvo']}' name='kampanja_ehdot[{$index}][arvo]'/>";
 
-	echo "<button class='uusi_alisaanto'>".t("Uusi alisääntö")."</button>";
-	echo "<button class='poista_saanto'>".t("Poista sääntö")."</button>";
+	echo "<button class='uusi_aliehto'>".t("Uusi aliehto")."</button>";
+	echo "<button class='poista_ehto'>".t("Poista ehto")."</button>";
 
-	echo "<div class='alisaannot'>";
+	echo "<div class='aliehdot'>";
 	foreach ($kampanja_ehto['aliehdot'] as $aliehto_index => $aliehto) {
 		echo_kampanja_aliehto($index, $aliehto_index, $aliehto);
 	}
@@ -611,12 +607,12 @@ function echo_kampanja_aliehto($ehto_index, $aliehto_index, $aliehto) {
 	$rajoittimet = hae_ehdon_rajoittimet();
 	$arvo_input = hae_liveseach_kentta($aliehto['kohde'], 'aliehto', $ehto_index, $aliehto_index, $aliehto['arvo']);
 
-	echo "<div id='alisaanto_rivi'>";
+	echo "<div id='aliehto_rivi'>";
 
-	echo "<input type='hidden' class='alisaanto_id' value='{$aliehto_index}'/>";
+	echo "<input type='hidden' class='aliehto_id' value='{$aliehto_index}'/>";
 
 	echo "AND------>  ";
-	echo "<select class='alisaanto_kohde' name='kampanja_ehdot[{$ehto_index}][alisaanto_rivit][{$aliehto_index}][kohde]'>";
+	echo "<select class='aliehto_kohde' name='kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][kohde]'>";
 	foreach ($ehdot as $ehto) {
 		$sel = "";
 		if ($ehto['value'] == $aliehto['kohde']) {
@@ -626,7 +622,7 @@ function echo_kampanja_aliehto($ehto_index, $aliehto_index, $aliehto) {
 	}
 	echo "</select>";
 
-	echo "<select class='alisaanto_rajoitin' name='kampanja_ehdot[{$ehto_index}][alisaanto_rivit][{$aliehto_index}][rajoitin]'>";
+	echo "<select class='aliehto_rajoitin' name='kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][rajoitin]'>";
 	foreach ($rajoittimet as $rajoitin) {
 		$sel = "";
 		if ($rajoitin['value'] == $aliehto['rajoitin']) {
@@ -637,68 +633,67 @@ function echo_kampanja_aliehto($ehto_index, $aliehto_index, $aliehto) {
 	echo "</select>";
 
 	echo $arvo_input;
-	//echo "<input type='text' class='alisaanto_arvo' value='{$aliehto['arvo']}' name='kampanja_ehdot[{$ehto_index}][alisaanto_rivit][{$aliehto_index}][arvo]'/>";
 
-	echo "<button class='poista_alisaanto'>".t("Poista alisääntö")."</button>";
+	echo "<button class='poista_aliehto'>".t("Poista aliehto")."</button>";
 
 	echo "</div>";
 }
 
-function echo_saanto_rivi_template() {
+function echo_ehto_rivi_template() {
 	$ehdot = hae_ehdon_kohteet();
 	$rajoittimet = hae_ehdon_rajoittimet();
 
-	echo "<div id='saanto_rivi_template'>";
+	echo "<div id='ehto_rivi_template'>";
 
-	echo "<input type='hidden' class='saanto_id_template' />";
+	echo "<input type='hidden' class='ehto_id_template' />";
 
-	echo "<select class='saanto_kohde'>";
+	echo "<select class='ehto_kohde'>";
 	foreach ($ehdot as $ehto) {
 		echo "<option value='{$ehto['value']}'>{$ehto['text']}</option>";
 	}
 	echo "</select>";
 
-	echo "<select class='saanto_rajoitin'>";
+	echo "<select class='ehto_rajoitin'>";
 	foreach ($rajoittimet as $rajoitin) {
 		echo "<option value='{$rajoitin['value']}'>{$rajoitin['text']}</option>";
 	}
 	echo "</select>";
 
-	echo "<input type='text' class='saanto_arvo' />";
+	echo "<input type='text' class='ehto_arvo' />";
 
-	echo "<button class='uusi_alisaanto'>".t("Uusi alisääntö")."</button>";
-	echo "<button class='poista_saanto'>".t("Poista sääntö")."</button>";
+	echo "<button class='uusi_aliehto'>".t("Uusi aliehto")."</button>";
+	echo "<button class='poista_ehto'>".t("Poista ehto")."</button>";
 
-	echo "<div class='alisaannot'>";
+	echo "<div class='aliehdot'>";
 	echo "</div>";
 
 	echo "</div>";
 }
 
-function echo_saanto_alirivi_template() {
+function echo_ehto_alirivi_template() {
 	$ehdot = hae_ehdon_kohteet();
 	$rajoittimet = hae_ehdon_rajoittimet();
 
-	echo "<div id='alisaanto_rivi_template'>";
+	echo "<div id='aliehto_rivi_template'>";
 
-	echo "<input type='hidden' class='alisaanto_id_template' />";
+	echo "<input type='hidden' class='aliehto_id_template' />";
 
 	echo "AND------>  ";
-	echo "<select class='alisaanto_kohde'>";
+	echo "<select class='aliehto_kohde'>";
 	foreach ($ehdot as $ehto) {
 		echo "<option value='{$ehto['value']}'>{$ehto['text']}</option>";
 	}
 	echo "</select>";
 
-	echo "<select class='alisaanto_rajoitin'>";
+	echo "<select class='aliehto_rajoitin'>";
 	foreach ($rajoittimet as $rajoitin) {
 		echo "<option value='{$rajoitin['value']}'>{$rajoitin['text']}</option>";
 	}
 	echo "</select>";
 
-	echo "<input type='text' class='alisaanto_arvo' />";
+	echo "<input type='text' class='aliehto_arvo' />";
 
-	echo "<button class='poista_alisaanto'>".t("Poista alisääntö")."</button>";
+	echo "<button class='poista_aliehto'>".t("Poista aliehto")."</button>";
 
 	echo "</div>";
 }
@@ -747,24 +742,24 @@ function echo_palkinto_rivi_template() {
 function hae_liveseach_kentta($kohde, $tyyppi, $ehto_index, $aliehto_index = 0, $value = '') {
 	if ($tyyppi == 'ehto') {
 		if ($kohde == 'asiakas') {
-			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'saanto_arvo', 'ei_break_all');
+			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
 		}
 		else if ($kohde == 'tuote') {
-			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'saanto_arvo', 'ei_break_all');
+			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
 		}
 		else {
-			$return = "<input type='text' class='saanto_arvo' name='kampanja_ehdot[{$ehto_index}][arvo]' value='{$value}' />";
+			$return = "<input type='text' class='ehto_arvo' name='kampanja_ehdot[{$ehto_index}][arvo]' value='{$value}' />";
 		}
 	}
 	else if ($tyyppi == 'aliehto') {
 		if ($kohde == 'asiakas') {
-			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASHAKU", "kampanja_ehdot[{$ehto_index}][alisaanto_rivit][{$aliehto_index}][arvo]", 140, $value, '', '', 'alisaanto_arvo', 'ei_break_all');
+			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASHAKU", "kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][arvo]", 140, $value, '', '', 'aliehto_arvo', 'ei_break_all');
 		}
 		else if ($kohde == 'tuote') {
-			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEHAKU", "kampanja_ehdot[{$ehto_index}][alisaanto_rivit][{$aliehto_index}][arvo]", 140, $value, '', '', 'alisaanto_arvo', 'ei_break_all');
+			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEHAKU", "kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][arvo]", 140, $value, '', '', 'aliehto_arvo', 'ei_break_all');
 		}
 		else {
-			$return = "<input type='text' class='alisaanto_arvo' name='kampanja_ehdot[{$ehto_index}][alisaanto_rivit][{$aliehto_index}][arvo]' value='{$value}' />";
+			$return = "<input type='text' class='aliehto_arvo' name='kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][arvo]' value='{$value}' />";
 		}
 	}
 	else {
@@ -846,80 +841,12 @@ function hae_kampanja($kampanja_tunnus) {
 	return $kampanja;
 }
 
-function hae_kampanjan_ehdot($kampanja_tunnus) {
-	global $kukarow, $yhtiorow;
-
-	$query = "	SELECT *
-				FROM kampanja_ehto
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND kampanja = '{$kampanja_tunnus}'";
-	$result = pupe_query($query);
-
-	$kampanja_ehdot = array();
-	while ($kampanja_ehto = mysql_fetch_assoc($result)) {
-		$kampanja_ehto['aliehdot'] = hae_kampanja_ehdon_aliehdot($kampanja_ehto['tunnus']);
-		$kampanja_ehdot[] = $kampanja_ehto;
-	}
-
-	return $kampanja_ehdot;
-}
-
-function hae_kampanja_ehdon_aliehdot($kampanja_ehto_tunnus) {
-	global $kukarow, $yhtiorow;
-
-	$query = "	SELECT *
-				FROM kampanja_ehto
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND isatunnus = '{$kampanja_ehto_tunnus}'";
-	$result = pupe_query($query);
-
-	$kampanja_aliehdot = array();
-	while ($kampanja_aliehto = mysql_fetch_assoc($result)) {
-		$kampanja_aliehdot[] = $kampanja_aliehto;
-	}
-
-	return $kampanja_aliehdot;
-}
-
-function hae_kampanjan_palkinnot($kampanja_tunnus) {
-	global $kukarow, $yhtiorow;
-
-	$query = "	SELECT *
-				FROM kampanja_palkinto
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND kampanja = '{$kampanja_tunnus}'";
-	$result = pupe_query($query);
-
-	$kampanja_palkinnot = array();
-	while ($kampanja_palkinto = mysql_fetch_assoc($result)) {
-		$kampanja_palkinnot[] = $kampanja_palkinto;
-	}
-
-	return $kampanja_palkinnot;
-}
-
 function nayta_kampanjat() {
 	global $kukarow, $yhtiorow;
 
 	$kampanjat = hae_kampanjat();
 
 	echo_kampanjat($kampanjat);
-}
-
-function hae_kampanjat() {
-	global $kukarow, $yhtiorow;
-
-	$query = "	SELECT *
-				FROM kampanja
-				WHERE yhtio = '{$kukarow['yhtio']}'";
-	$result = pupe_query($query);
-
-	$kampanjat = array();
-	while ($kampanja = mysql_fetch_assoc($result)) {
-		$kampanjat[] = $kampanja;
-	}
-
-	return $kampanjat;
 }
 
 function echo_kampanjat($kampanjat) {

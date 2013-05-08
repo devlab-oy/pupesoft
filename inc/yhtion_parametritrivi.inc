@@ -1873,6 +1873,8 @@
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
 
+		// 'K' ja '' vaikuttaa siihen, tuleeko tilaus_myynti n‰kym‰‰n dropdown, josta voi tehd‰ manuaalisesti tilaukselle osatoimituksia
+		// 'E' valitsee myyntitilauksen otsikolla osatoimitus dropdownin defaultiksi "ei osatoimiteta"
 		$ulos .= "<option value = ''>".t("Myyntitilauksesta ei voi tehd‰ osatoimitusta k‰sin")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilauksesta voi tehd‰ osatoimituksia k‰sin")."</option>";
 		$ulos .= "<option value = 'E' $sel[E]>".t("Tilauksia ei osatoimiteta")."</option>";

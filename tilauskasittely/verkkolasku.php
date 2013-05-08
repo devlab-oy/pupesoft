@@ -596,7 +596,7 @@
 				$sarjares1 = pupe_query($query);
 				$srow1 = mysql_fetch_assoc($sarjares1);
 
-				if ($srow1["jteet"] > 0 and $laskurow["osatoimitus"] != '') {
+				if ($srow1["jteet"] > 0 and $laskurow["osatoimitus"] == 'o') {
 					// Jos tilauksella oli yksikin jt-rivi ja osatoimitus on kielletty
 					$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 

@@ -821,7 +821,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 
 		// Katsotaan eka kanssa valmisteiden nykyinen varastonarvo
 		if ($valmisterow["kehahin"]  > 0) {
-			$kaikenkaikkiaan_arvot = $valmisterow["kehahin"];
+			$kaikenkaikkiaan_arvot = $isavarattu * $valmisterow["kehahin"];
 		}
 		else {
 			unset($kaikenkaikkiaan_arvot);

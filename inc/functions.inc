@@ -8826,7 +8826,7 @@ if (!function_exists("livesearch_kentta")) {
 		$return .= "}\"
 					onblur=\"setTimeout('livesearch_blurhandler(\'$hakuID\')', 100);\">";
 		if (empty($break_all_div)) {
-			$return .= "<div class='break_all_div' style='break:all'></div>";
+			$return .= "<div style='break:all'></div>";
 		}
 		$return .= "<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($width * 2)."px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10);\"></div>";
 
@@ -20844,3 +20844,7 @@ if (!function_exists('rekursiivinen_resepti')) {
 		}
 	}
 }
+
+require('inc/lasku_functions.inc');
+require('inc/tuote_functions.inc');
+require('inc/kampanja_functions.inc');

@@ -13,7 +13,8 @@ if (isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {
 }
 
 if ($ajax_request) {
-	if ($palkinto_rivi) {
+	//javascript l‰hett‰‰ kaiken stringin‰
+	if ($palkinto_rivi == 'true') {
 		$return = hae_liveseach_kentta($rivi_kohde, 'palkinto', $ehto_rivi_id);
 	}
 	else {
@@ -77,9 +78,97 @@ echo "<font class='head'>".t("Kampanjat")."</font><hr>";
 	function bind_ehto_kohde_change() {
 		$('.ehto_kohde').live('change', function() {
 			var ehto_rivi = $(this).parent();
-			hae_ehdon_arvo_input(ehto_rivi);
+			//hae_ehdon_arvo_input(ehto_rivi);
+			hae_arvo_input(ehto_rivi);
 
-			filteroi_aliehdon_kohteet($(this).val());
+			if ($(this).val() === 'tuote'
+					|| $(this).val() === 'tuotekategoria'
+					|| $(this).val() === 'tuoteosasto'
+					|| $(this).val() === 'tuoteryhma') {
+
+				if ($(this).parent().find('.uusi_aliehto').css('display') === 'none') {
+					$(this).parent().find('.uusi_aliehto').show();
+				}
+				var aliehto_rivit = $(this).parent().find('.aliehto_rivi');
+				filteroi_aliehdon_kohteet(aliehto_rivit);
+			}
+			else {
+				//piilotetaan uusi aliehto-nappi
+				$(this).parent().find('.uusi_aliehto').hide();
+
+				//poistetaan aliehdot jos niit‰ on
+				$(this).parent().find('.aliehdot').html('');
+			}
+		});
+	}
+
+	function filteroi_aliehdon_kohteet($aliehto_rivit) {
+		//haetaan jokainen aliehdon kohde dropdown ja looptaan ne l‰pi
+		if ($aliehto_rivit.length > 0) {
+			$aliehto_rivit.each(function(index, aliehto_rivi) {
+				//poistetaan kaikki muut paitsi arvo ja kappaleet
+				$(aliehto_rivi).find('.aliehto_kohde option').filter(function(index2, value) {
+					return $(value).val() === 'asiakas'
+							|| $(value).val() === 'asiakas_ytunnus'
+							|| $(value).val() === 'asiakaskategoria'
+							|| $(value).val() === 'tuote'
+							|| $(value).val() === 'tuotekategoria'
+							|| $(value).val() === 'tuoteosasto'
+							|| $(value).val() === 'tuoteryhma';
+				}).remove();
+
+			});
+		}
+	}
+
+	function hae_arvo_input(rivi) {
+		var palkinto_rivi = false;
+		var rivi_kohde, ehto_rivi_id, aliehto_rivi_id, arvo_class, rajoitin_class;
+		if($(rivi).hasClass('ehto_rivi')) {
+			rivi_kohde = $(rivi).find('.ehto_kohde').val();
+			ehto_rivi_id = $(rivi).find('.ehto_id').val();
+			aliehto_rivi_id = undefined;
+			arvo_class = '.ehto_arvo';
+			rajoitin_class = '.ehto_rajoitin';
+		}
+		else if ($(rivi).hasClass('aliehto_rivi')) {
+			rivi_kohde = $(rivi).find('.aliehto_kohde').val();
+			ehto_rivi_id = $(rivi).parent().parent().find('.ehto_id').val();
+			aliehto_rivi_id = $(rivi).find('.aliehto_id').val();
+			arvo_class = '.aliehto_arvo';
+			rajoitin_class = '.aliehto_rajoitin';
+		}
+		else if ($(rivi).hasClass('palkinto_rivi')) {
+			rivi_kohde = 'tuote';
+			ehto_rivi_id = $(rivi).find('.palkinto_rivi_id').val();
+			aliehto_rivi_id = undefined;
+			palkinto_rivi = true;
+			arvo_class = '.palkinto_rivi_nimi';
+			rajoitin_class = '.td:first';
+		}
+
+		$.ajax({
+			async: true,
+			type: 'GET',
+			data: {
+				ajax_request: 1,
+				no_head: 'yes',
+				rivi_kohde: rivi_kohde,
+				ehto_rivi_id: ehto_rivi_id,
+				aliehto_rivi_id: aliehto_rivi_id,
+				palkinto_rivi: palkinto_rivi
+			},
+			url: 'kampanja.php'
+		}).done(function(data) {
+			if (console && console.log) {
+				console.log('Input kent‰n haku onnistui');
+				//console.log(data);
+			}
+			if (data.length !== 0) {
+				$(rivi).find(arvo_class).remove();
+				$(rivi).find('.liveSearch').remove();
+				$(rivi).find(rajoitin_class).after(data);
+			}
 		});
 	}
 
@@ -97,7 +186,7 @@ echo "<font class='head'>".t("Kampanjat")."</font><hr>";
 		}).done(function(data) {
 			if (console && console.log) {
 				console.log('Input kent‰n haku onnistui');
-				console.log(data);
+				//console.log(data);
 			}
 			if (data.length !== 0) {
 				$(ehto_rivi).find('.ehto_arvo').remove();
@@ -134,7 +223,19 @@ echo "<font class='head'>".t("Kampanjat")."</font><hr>";
 
 		$('#ehdot').append(ehto_rivi);
 
-		hae_ehdon_arvo_input(ehto_rivi);
+		if ($(ehto_rivi).find('.ehto_kohde').val() === 'tuote'
+				|| $(ehto_rivi).find('.ehto_kohde').val() === 'tuotekategoria'
+				|| $(ehto_rivi).find('.ehto_kohde').val() === 'tuoteosasto'
+				|| $(ehto_rivi).find('.ehto_kohde').val() === 'tuoteryhma') {
+			filteroi_aliehdon_kohteet($(ehto_rivi).parent().find('.aliehto_rivi'));
+		}
+		else {
+			//piilotetaan uusi aliehto-nappi
+			$(ehto_rivi).parent().find('.uusi_aliehto').hide();
+		}
+
+		//hae_ehdon_arvo_input(ehto_rivi);
+		hae_arvo_input(ehto_rivi);
 	}
 
 	function generoi_ehto_id() {
@@ -155,7 +256,8 @@ echo "<font class='head'>".t("Kampanjat")."</font><hr>";
 	function bind_aliehto_kohde_change() {
 		$('.aliehto_kohde').live('change', function() {
 			var aliehto_rivi = $(this).parent();
-			hae_alikohteen_arvo_input(aliehto_rivi);
+			//hae_alikohteen_arvo_input(aliehto_rivi);
+			hae_arvo_input(aliehto_rivi);
 		});
 	}
 
@@ -213,9 +315,15 @@ echo "<font class='head'>".t("Kampanjat")."</font><hr>";
 
 		$(aliehto_rivi).find('.aliehto_id').val(aliehto_id);
 
+		var ehto_kohde_value = $(ehto_rivi).find('.ehto_kohde').val();
+		if (ehto_kohde_value === 'tuote' || ehto_kohde_value === 'tuotekategoria' || ehto_kohde_value === 'tuoteosasto' || ehto_kohde_value === 'tuoteryhma') {
+			filteroi_aliehdon_kohteet(aliehto_rivi);
+		}
+
 		$(ehto_rivi).find('.aliehdot').append(aliehto_rivi);
 
-		hae_alikohteen_arvo_input(aliehto_rivi);
+		//hae_alikohteen_arvo_input(aliehto_rivi);
+		hae_arvo_input(aliehto_rivi);
 	}
 
 	function generoi_aliehto_id(aliehto_rivit) {
@@ -336,7 +444,7 @@ if ($request['tee'] == 'uusi_kampanja') {
 	//TODO make some sense into this
 	if (!empty($request['kampanja_nimi'])) {
 		luo_uusi_kampanja($request);
-		
+
 		$request['tee'] = 'nayta_kampanjat';
 	}
 	else {
@@ -772,31 +880,39 @@ function hae_liveseach_kentta($kohde, $tyyppi, $ehto_index, $aliehto_index = 0, 
 
 function hae_ehdon_kohteet() {
 	return array(
-		0	 => array(
+		array(
 			'text'	 => t("Asiakas"),
 			'value'	 => 'asiakas'
 		),
-		1	 => array(
+		array(
 			'text'	 => t("Asiakas ytunnus"),
 			'value'	 => 'asiakas_ytunnus'
 		),
-		2	 => array(
+		array(
 			'text'	 => t("Asiakaskategoria"),
 			'value'	 => 'asiakaskategoria'
 		),
-		3	 => array(
+		array(
 			'text'	 => t("Tuote"),
 			'value'	 => 'tuote'
 		),
-		4	 => array(
+		array(
 			'text'	 => t("Tuotekategoria"),
 			'value'	 => 'tuotekategoria'
 		),
-		5	 => array(
+		array(
+			'text'	 => t("Tuoteosasto"),
+			'value'	 => 'tuoteosasto'
+		),
+		array(
+			'text'	 => t("Tuoteryhm‰"),
+			'value'	 => 'tuoteryhma'
+		),
+		array(
 			'text'	 => t("Kappaleet"),
 			'value'	 => 'kappaleet'
 		),
-		6	 => array(
+		array(
 			'text'	 => t("Arvo"),
 			'value'	 => 'arvo'
 		),

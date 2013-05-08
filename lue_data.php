@@ -1550,14 +1550,33 @@ if ($kasitellaan_tiedosto) {
 												AND laji	= 'asiakas'
 												AND koodi	= '{$taulunrivit[$taulu][$eriviindex][$r]}'";
 								$etsiresult = pupe_query($etsitunnus);
-								$etsirow = mysql_fetch_assoc($etsiresult);
+								if (mysql_num_rows($etsiresult) == 1 and $asiakkaanvalinta == 4) {
+									$etsirow = mysql_fetch_assoc($etsiresult);
 
-								$chsegmentti = $etsirow['tunnus'];
+									$chsegmentti = $etsirow['tunnus'];
+								}
+								else {
+									$chasiakas = -1;
+								}
+								
 							}
 
 							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '2' and (int) $taulunrivit[$taulu][$eriviindex][$r] > 0) {
 								// 2 tarkoittaa dynaamisen puun TUNNUSTA
-								$chsegmentti = $taulunrivit[$taulu][$eriviindex][$r];
+								$etsitunnus = " SELECT tunnus
+												FROM dynaaminen_puu
+												WHERE yhtio	= '$kukarow[yhtio]'
+												AND laji	= 'asiakas'
+												AND tunnus	= '{$taulunrivit[$taulu][$eriviindex][$r]}'";
+								$etsiresult = pupe_query($etsitunnus);
+								if (mysql_num_rows($etsiresult) == 1 and $asiakkaanvalinta == 4) {
+									$etsirow = mysql_fetch_assoc($etsiresult);
+
+									$chsegmentti = $etsirow['tunnus'];
+								}
+								else {
+									$chasiakas = -1;
+								}
 							}
 
 							if ($otsikko == 'PIIRI' and $taulunrivit[$taulu][$eriviindex][$r] != '') {
@@ -2269,6 +2288,7 @@ if (!$cli and !isset($api_kentat)) {
 					<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
 					<option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
 					<option value='3'>".t("Asiakas-sarakkeessa asiakkaan asiakasnumero")."</option>
+					<option value='4'>".t("Päivitys vain asiakassegmentillä")."</option>
 					</select></td>
 			</tr>";
 	}

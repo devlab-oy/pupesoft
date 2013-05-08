@@ -129,6 +129,13 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_text(310, 803, t("Sivu", $kieli), 					$thispage, $norm);
 		}
 
+		$query = "	SELECT gsm, puhelin, ytunnus, verkkotunnus, chn
+					FROM asiakas
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$laskurow['liitostunnus']}'";
+		$asiakas_res = pupe_query($query);
+		$asiakas_row = mysql_fetch_assoc($asiakas_res);
+
 		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
 
 			//Vasen sarake
@@ -141,21 +148,14 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_text(150, 599, $laskurow["osoite"], $thispage, $norm);
 			$pdf->draw_text(150, 586, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
 
-			$query = "	SELECT gsm, puhelin, ytunnus
-						FROM asiakas
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$laskurow['liitostunnus']}'";
-			$puh_res = pupe_query($query);
-			$puh_row = mysql_fetch_assoc($puh_res);
-
 			$pdf->draw_text(50, 573, t("Puhelinnumero", $kieli), $thispage, $norm);
-			$pdf->draw_text(150, 573, $puh_row['puhelin'], $thispage, $norm);
+			$pdf->draw_text(150, 573, $asiakas_row['puhelin'], $thispage, $norm);
 
 			$pdf->draw_text(50, 560, t("GSM", $kieli), $thispage, $norm);
-			$pdf->draw_text(150, 560, $puh_row['gsm'], $thispage, $norm);
+			$pdf->draw_text(150, 560, $asiakas_row['gsm'], $thispage, $norm);
 
 			$pdf->draw_text(50, 547, t("Y-tunnus/Sotu", $kieli), $thispage, $norm);
-			$pdf->draw_text(150, 547, $puh_row['ytunnus'], $thispage, $norm);
+			$pdf->draw_text(150, 547, $asiakas_row['ytunnus'], $thispage, $norm);
 
 			$pdf->draw_text(350, 625, t("Toimitusosoite", $kieli), 	$thispage, $boldi);
 			$pdf->draw_text(350, 612, $laskurow["toim_nimi"].' '.$laskurow["toim_nimitark"], $thispage, $norm);
@@ -447,7 +447,15 @@ if (!function_exists('alku_lahete')) {
 
 				$pdf->draw_rectangle(674, 300, 653, 580, $thispage, $rectparam);
 				$pdf->draw_text(310, 666, t("Maksuehto", $kieli), 	$thispage, $pieni);
-				$pdf->draw_text(310, 656, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli), 		$thispage, $boldi);
+
+				$maksuehtoteksti = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
+
+				if (!in_array($asiakas_row['chn'], array('100', '667'))) $maksuehtoteksti .= " / ".hae_chn_teksti($asiakas_row['chn'], $kieli);
+
+				if ($asiakas_row['verkkotunnus'] != '') $maksuehtoteksti .= " / {$asiakas_row['verkkotunnus']}";
+
+				list($ff_string, $ff_font) = pdf_fontfit($maksuehtoteksti, 265, $pdf, $norm);
+				$pdf->draw_text(310, 656, $ff_string, $thispage, $ff_font);
 			}
 
 			if ((str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc" or str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_ean.inc" or str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_ean_eiale.inc") or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc")) {

@@ -2543,10 +2543,10 @@ if ($tee == '') {
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] > 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
-		$query = "	SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma
+		$query = "	SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma, verkkotunnus, chn
 					FROM asiakas
-					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus = '$laskurow[liitostunnus]'";
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus = '{$laskurow['liitostunnus']}'";
 		$faktaresult = pupe_query($query);
 		$faktarow = mysql_fetch_assoc($faktaresult);
 
@@ -2607,6 +2607,16 @@ if ($tee == '') {
 			}
 
 			if ($laskurow["toim_nimi"] != $laskurow["nimi"]) echo "<br>{$laskurow['toim_nimi']}";
+
+			if ($kukarow['extranet'] == "") {
+
+				echo "<br />";
+
+				echo hae_chn_teksti($faktarow['chn']);
+
+				if ($faktarow['verkkotunnus'] != '') echo " / {$faktarow['verkkotunnus']}";
+			}
+
 			echo "</td>";
 
 			echo "<th align='left'>".t("Toimitustapa").":</th>";

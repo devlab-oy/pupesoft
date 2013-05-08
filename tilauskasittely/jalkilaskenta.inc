@@ -430,7 +430,7 @@ if (!function_exists("korjaalaskut")) {
 }
 
 if (!function_exists('korjaatapahtuma')) {
-	function korjaatapahtuma($tapahtuma_tunnus, $uusihinta, $selite_txt, $upd_kplhinta = TRUE, $upd_hinta = TRUE) {
+	function korjaatapahtuma($tapahtuma_tunnus, $selite_txt, $upd_hinta, $upd_kplhinta = FALSE) {
 		global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text;
 
 		// Haetaan ensimm‰inen
@@ -485,15 +485,15 @@ if (!function_exists('korjaatapahtuma')) {
 			$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
 
 			$params = array(
-				'kpl' => ($tun_chk_row['kpl'] * -1),
-				'selite' => "{$tun_chk_row['selite']}{$selite_txt}",
-				'laadittu' => "{$yhtiorow['tilikausi_alku']} 00:00:00",
-				'laatija' => $kukarow['kuka'],
-				'laji' => "korjaus",
+				'kpl' 		=> ($tun_chk_row['kpl'] * -1),
+				'selite' 	=> "{$tun_chk_row['selite']}{$selite_txt}",
+				'laadittu' 	=> "{$yhtiorow['tilikausi_alku']} 00:00:00",
+				'laatija' 	=> $kukarow['kuka'],
+				'laji'		=> "korjaus",
 			);
 
-			if ($upd_kplhinta) $params['kplhinta'] = $hinta_chk_row['kplhinta'];
-			if ($upd_hinta) $params['hinta'] = $hinta_chk_row['hinta'];
+			$params['hinta'] = $hinta_chk_row['hinta'];
+			if ($upd_kplhinta !== FALSE) $params['kplhinta'] = $hinta_chk_row['kplhinta'];
 
 			// Laitetaan inventoinnin korjaustapahtumassa alkuper‰isen tapahtuman tunnus rivitunnukseksi
 			if ($tun_chk_row['laji'] == 'Inventointi') $params['rivitunnus'] = $tun_chk_row['tunnus'];
@@ -501,28 +501,28 @@ if (!function_exists('korjaatapahtuma')) {
 			kopioitapahtuma($tapahtuma_tunnus, $params);
 
 			$params = array(
-				'selite' => "{$tun_chk_row['selite']}{$selite_txt}",
-				'laadittu' => "{$yhtiorow['tilikausi_alku']} 00:00:00",
-				'laatija' => $kukarow['kuka'],
-				'laji' => "korjaus",
+				'selite' 	=> "{$tun_chk_row['selite']}{$selite_txt}",
+				'laadittu'	=> "{$yhtiorow['tilikausi_alku']} 00:00:00",
+				'laatija' 	=> $kukarow['kuka'],
+				'laji' 		=> "korjaus",
 			);
 
 			// Laitetaan inventoinnin korjaustapahtumassa alkuper‰isen tapahtuman tunnus rivitunnukseksi
 			if ($tun_chk_row['laji'] == 'Inventointi') $params['rivitunnus'] = $tun_chk_row['tunnus'];
 
-			if ($upd_kplhinta) $params['kplhinta'] = $uusihinta;
-			if ($upd_hinta) $params['hinta'] = $uusihinta;
+			$params['hinta'] = $upd_hinta;
+			if ($upd_kplhinta !== FALSE) $params['kplhinta'] = $upd_kplhinta;
 
 			kopioitapahtuma($tapahtuma_tunnus, $params);
 		}
 		else {
 
 			$selitelisa = $selite_txt != "" ? ", selite = concat(selite, '{$selite_txt}')" : "";
-			$kplhintalisa = $upd_kplhinta ? ", kplhinta = '{$uusihinta}'" : "";
+			$kplhintalisa = $upd_kplhinta !== FALSE ? ", kplhinta = '{$upd_kplhinta}'" : "";
 
 			// P‰ivitet‰‰n korjattava tapahtuma
 			$query = "	UPDATE tapahtuma SET
-						hinta = '{$uusihinta}'
+						hinta = '{$upd_hinta}'
 						{$kplhintalisa}
 						{$selitelisa}
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -577,7 +577,7 @@ if ($tuoteno != '') {
 			$selite_txt = ",<br>J‰lkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")";
 
 			// P‰ivitet‰‰n korjattava tapahtuma
-			korjaatapahtuma($rxivirow['tapahtuma_tunnus'], $uusihinta, $selite_txt);
+			korjaatapahtuma($rxivirow['tapahtuma_tunnus'], $selite_txt, $uusihinta, $uusihinta);
 
 			// Haetaan kaikki tiedot sarjanumerosta
 			$query = "	SELECT distinct myyntirivitunnus
@@ -622,7 +622,7 @@ if ($tuoteno != '') {
 
 					$mitenkavi = korjaalaskut($tuoteno, $uusihinta, $rivirow["laadittu"], $rivirow["laadittu"], $rivirow["tunnus"]);
 
-					if ($mitenkavi == 0) korjaatapahtuma($rivirow['tapahtuma_tunnus'], $uusihinta, "", FALSE);
+					if ($mitenkavi == 0) korjaatapahtuma($rivirow['tapahtuma_tunnus'], "", $uusihinta, FALSE);
 				}
 				else {
 					if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Ei korjattavaa (tuotetta ei ole myyty)! Uusi hinta: $uusihinta $rivirow[uusiotunnus]</font><br>";
@@ -1190,12 +1190,12 @@ if ($tuoteno != '') {
 
 									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjataan tapahtuma! Keskihinta: $uusikehahin Vanha hinta: $trow[hinta]</font><br>";
 
-									$upd_kplhinta = in_array($trow["laji"], array("kulutus", "tulo", "valmistus")) ? TRUE : FALSE;
+									$upd_kplhinta = in_array($trow["laji"], array("kulutus", "tulo", "valmistus")) ? $uusihinta : FALSE;
 
 									$selite_txt = in_array($trow['laji'], array('tulo', 'valmistus')) ? ",<br>J‰lkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")" : "";
 
 									// P‰ivitet‰‰n korjattava tapahtuma
-									korjaatapahtuma($trow['tunnus'], $uusikehahin, $selite_txt, $upd_kplhinta);
+									korjaatapahtuma($trow['tunnus'], $selite_txt, $uusikehahin, $upd_kplhinta);
 								}
 							}
 						}

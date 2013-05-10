@@ -2535,7 +2535,7 @@ if ($tee == '') {
 					$('#hae_asiakasta_linkki').on('click', function(e) {
 						e.preventDefault();
 
-						$(this).hide();
+						$('#hae_asiakasta_spani').hide();
 						$('#hae_asiakasta_boksi').show().focus();
 						$('#hae_asiakasta_boksi_button').show();
 					});
@@ -2626,20 +2626,14 @@ if ($tee == '') {
 			}
 			else {
 
-				if ($kukarow['extranet'] == '') echo "<a id='hae_asiakasta_linkki'>";
-
 				echo $laskurow['ytunnus'];
 
 				if ($faktarow["asiakasnro"] != "") {
 					echo " / $faktarow[asiakasnro]";
 				}
-				echo " / {$faktarow['ryhma']}";
 
-				if ($kukarow['extranet'] == '') {
-					echo "</a>";
-
-					echo "<input type='text' name='hae_asiakasta_boksi' id='hae_asiakasta_boksi' value='' style='display:none;' /> ";
-					echo "<input type='submit' name='hae_asiakasta_boksi_button' id='hae_asiakasta_boksi_button' value='",t("Vaihda asiakas"),"' style='display:none;'>";
+				if ($faktarow["ryhma"] != "") {
+					echo " / {$faktarow['ryhma']}";
 				}
 			}
 
@@ -2653,22 +2647,32 @@ if ($tee == '') {
 			echo "<tr>{$jarjlisa}";
 			echo "<th align='left'>",t("Asiakas"),":</th>";
 
+			echo "<td>";
+			echo "<span id='hae_asiakasta_spani'>";
+
 			if ($kukarow["extranet"] == "") {
-				echo "<td><a href='{$palvelin2}crm/asiakasmemo.php?ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&from={$toim}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$laskurow['nimi']}</a>";
+				echo "<a href='{$palvelin2}crm/asiakasmemo.php?ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&from={$toim}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$laskurow['nimi']}</a>";
+				echo " <a id='hae_asiakasta_linkki'><img src='".$palvelin2."pics/lullacons/user-multiple.png'></a>";
  			}
 			else {
-				echo "<td>{$laskurow['nimi']}";
+				echo "{$laskurow['nimi']}";
 			}
 
-			if ($laskurow["toim_nimi"] != $laskurow["nimi"]) echo "<br>{$laskurow['toim_nimi']}";
+			if ($laskurow["toim_nimi"] != $laskurow["nimi"]) {
+				echo "<br>{$laskurow['toim_nimi']}";
+			}
 
-			if ($kukarow['extranet'] == "") {
-
+			if ($kukarow['extranet'] == "" and $yhtiorow['konserni'] == "indu") {
 				echo "<br />";
-
 				echo hae_chn_teksti($faktarow['chn']);
-
 				if ($faktarow['verkkotunnus'] != '') echo " / {$faktarow['verkkotunnus']}";
+			}
+
+			echo "</span>";
+
+			if ($kukarow["extranet"] == "") {
+				echo "<input type='text' name='hae_asiakasta_boksi' id='hae_asiakasta_boksi' value='' style='display:none;' /> ";
+				echo "<input type='submit' name='hae_asiakasta_boksi_button' id='hae_asiakasta_boksi_button' value='",t("Vaihda asiakas"),"' style='display:none;'>";
 			}
 
 			echo "</td>";

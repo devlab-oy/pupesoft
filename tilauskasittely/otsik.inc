@@ -2543,31 +2543,18 @@
 					}
 					// Laskennallinen kentt‰
 					elseif ($kentta == "toimintavarmuus") {
+						$_paivat = (strtotime($srow['valmis']) - strtotime($srow['luvattu'])) / 3600 / 24;
 						echo "<td>$al_row[selitetark]</td>";
 						echo "<td>";
-						echo 1;
+						echo round(tyomaarays_toimintavarmuus($srow['prioriteetti'], $_paivat) * 100, 2) . " %";
 						echo "</td>";
 					}
 					// Laskennallinen kentt‰
 					elseif ($kentta == "palautusvarmuus") {
+						$_paivat = (strtotime($srow['vpk_valmis']) - strtotime($srow['poistui'])) / 3600 / 24;
 						echo "<td>$al_row[selitetark]</td>";
 						echo "<td>";
-
-						/** Palautusvarmuus laskenta.
-						* Jos palautus on alle 7 p‰iv‰ss‰ niin palautusvarmuus on 100%
-						* muuten 7 / palautus-p‰iv‰t */
-
-						// vaurio ilmoitus tullut pv‰ - p‰‰ttyi pv‰
-						$palautus = 8;
-
-						if ($palautus <= 7) {
-							$palautusvarmuus = 1;
-						}
-						else {
-							$palautusvarmuus =  7 / $palautus;
-						}
-
-						echo round($palautusvarmuus * 100, 2) . " %";
+						echo round(tyomaarays_palautusvarmuus($_paivat) * 100, 2) . " %";
 						echo "</td>";
 					}
 					// Muut

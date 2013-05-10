@@ -2546,11 +2546,15 @@ if ($tee == '') {
 						$('#syotetty_ytunnus').val($(this).val());
 					});
 
+					$('#hae_asiakasta_boksi').keypress(function(e) {
+					    if(e.keyCode == 13) {
+					        $('#hae_asiakasta_formi').submit();
+					    }
+					});
+
 					$('#hae_asiakasta_boksi_button').on('click', function(e) {
 						e.preventDefault();
-
-						if ($('#syotetty_ytunnus').val() == '') alert('",t("Kenttä ei saa olla tyhjä"),"');
-						else $('#hae_asiakasta_formi').submit();
+						$('#hae_asiakasta_formi').submit();
 					});
 
 				});
@@ -2672,7 +2676,7 @@ if ($tee == '') {
 
 			if ($kukarow["extranet"] == "") {
 				echo "<input type='text' name='hae_asiakasta_boksi' id='hae_asiakasta_boksi' value='' style='display:none;' /> ";
-				echo "<input type='submit' name='hae_asiakasta_boksi_button' id='hae_asiakasta_boksi_button' value='",t("Vaihda asiakas"),"' style='display:none;'>";
+				echo "<input type='button' name='hae_asiakasta_boksi_button' id='hae_asiakasta_boksi_button' value='",t("Vaihda asiakas"),"' style='display:none;'>";
 			}
 
 			echo "</td>";

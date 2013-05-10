@@ -710,7 +710,10 @@
 			if (isset($toim_asiakasid) and $toim_asiakasid != 0) {
 
 				$toim_asiakasid = mysql_real_escape_string($toim_asiakasid);
-				$toimasiakas_query = "SELECT * from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$toim_asiakasid'";
+				$toimasiakas_query = "	SELECT *
+										FROM asiakas
+										WHERE yhtio = '{$kukarow["yhtio"]}'
+										AND tunnus = '{$toim_asiakasid}'";
 				$toimasiakas_result = pupe_query($toimasiakas_query);
 				$toimasiakas_row = mysql_fetch_assoc($toimasiakas_result);
 
@@ -730,6 +733,8 @@
 					$srow["toim_postitp"]	= $toimasiakas_row["postitp"];
 					$srow["toim_maa"]		= $toimasiakas_row["maa"];
 				}
+
+				$srow["toimitustapa"] = $toimasiakas_row["toimitustapa"];
 
 				if ($tilausnumero == 0) {
 					echo "<font class='message'>".t("HUOM: Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisteristä.")."</font><br>";

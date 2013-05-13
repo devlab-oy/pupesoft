@@ -200,7 +200,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet) {
 				'hinta'		 => $trow['hinta'],
 				'netto'		 => '',
 			);
-			$rivit = lisaa_rivi($parametrit);
+			$rivit = pupesoft_lisaa_rivi($parametrit);
 
 			paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($laite, $rivit);
 			paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $laite);

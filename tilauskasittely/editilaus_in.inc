@@ -835,11 +835,9 @@ while ($tietue = fgets($fd)) {
 			break;
 
 		case 'OSTOTIL.OT_VIITTEENNE':
-			// halutaan futur-aineistosta tämä tieto sisviesti2-kenttään
-			if ($edi_tyyppi == "futursoft") {
-				$orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
-				$lopviesti = trim($orig_tieto);
-			}
+			// halutaan futur ja magento-aineistoista tämä tieto sisviesti2-kenttään
+			$orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
+			$lopviesti = trim($orig_tieto);
 			break;
 
 		//Tilaus päättyy. Aika tehdä se kantaan
@@ -1081,8 +1079,10 @@ while ($tietue = fgets($fd)) {
 				// Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
 				if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
 
-				// Oletuksena näin
-				$ohjausmerkki = $lopviesti;
+				// Oletuksena näin Futursoft keississä
+				if ($edi_tyyppi == 'futursoft') {
+					$ohjausmerkki = $lopviesti;
+				}
 
 				if ($tilaustyyppilisa == 2) {
 					$ohjausmerkki = 'VARASTOTÄYDENNYS';

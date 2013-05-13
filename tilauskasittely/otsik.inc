@@ -3773,6 +3773,7 @@
 							takuunumero		= '$takuunumero',
 							tyokoodi		= '$tyokoodi',
 							hyvaksy			= '$hyvaksy',
+							lisakuluprosentti = '{$yhtiorow['lisakuluprosentti']}',
 							otunnus 		= '$kukarow[kesken]'";
 				$query2 .= $postquery2;
 				$result = pupe_query($query2);

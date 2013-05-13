@@ -3420,14 +3420,18 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
+	if (mysql_field_name($result, $i) == "lisakuluprosentti") {
+
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
+		$apu = $trow[$i];
 		$sel = array();
-		$sel['Z'] = $trow[$i] == 'Z' ? 'selected' : '';
+		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = ''>".t("Matkalaskun tarkastaja ei voi muokata matkalaskua")."</option>";
-		$ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Matkalaskun tarkastaja voi muokata matkalaskua")."</option>";
+		foreach(range(0,99) as $kulu) {
+			$ulos .= "<option value='$kulu' $sel[$kulu]>$kulu %</option>";
+		}
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

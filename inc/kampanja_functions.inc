@@ -70,7 +70,6 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 				$ehto_rajaus = "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus {$asiakas_ehto})";
 				break;
 			case 'tuote':
-				//jos tuote pit‰‰ loopata laskun tilausrivit l‰pi ja katsoa t‰sm‰‰kˆ mik‰‰n tuote
 				if (!empty($kampanja_ehto['aliehdot'])) {
 					$having_ehdot = "HAVING";
 					foreach ($kampanja_ehto['aliehdot'] as $aliehto) {

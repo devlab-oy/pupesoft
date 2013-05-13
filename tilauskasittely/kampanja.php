@@ -12,6 +12,11 @@ if (isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {
 	exit;
 }
 
+if (isset($livesearch_tee) and $livesearch_tee == "TUOTEKATEGORIAHAKU") {
+	livesearch_tuotekategoriahaku();
+	exit;
+}
+
 if ($ajax_request) {
 	//javascript l‰hett‰‰ kaiken stringin‰
 	if ($palkinto_rivi == 'true') {
@@ -855,6 +860,9 @@ function hae_liveseach_kentta($kohde, $tyyppi, $ehto_index, $aliehto_index = 0, 
 		else if ($kohde == 'tuote') {
 			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
 		}
+		else if ($kohde == 'tuotekategoria') {
+			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEKATEGORIAHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
+		}
 		else {
 			$return = "<input type='text' class='ehto_arvo' name='kampanja_ehdot[{$ehto_index}][arvo]' value='{$value}' />";
 		}
@@ -865,6 +873,9 @@ function hae_liveseach_kentta($kohde, $tyyppi, $ehto_index, $aliehto_index = 0, 
 		}
 		else if ($kohde == 'tuote') {
 			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEHAKU", "kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][arvo]", 140, $value, '', '', 'aliehto_arvo', 'ei_break_all');
+		}
+		else if ($kohde == 'tuotekategoria') {
+			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEKATEGORIAHAKU", "kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
 		}
 		else {
 			$return = "<input type='text' class='aliehto_arvo' name='kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][arvo]' value='{$value}' />";

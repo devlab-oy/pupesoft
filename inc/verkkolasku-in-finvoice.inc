@@ -241,7 +241,7 @@ if (count($tuotetiedot) > 0) {
 					$tuotekerroin_chk_row = mysql_fetch_assoc($tuotekerroin_chk_res);
 
 					if ($tuotekerroin_chk_row['tuotekerroin'] != 0) {
-						$rtuoteno[$i]['kpl'] /= $tuotekerroin_chk_row['tuotekerroin'];
+						$rtuoteno[$i]['kpl'] = round($rtuoteno[$i]['kpl'] / $tuotekerroin_chk_row['tuotekerroin'], 2);
 					}
 				}
 			}

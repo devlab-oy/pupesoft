@@ -14508,7 +14508,10 @@ if (!function_exists("hae_hyvityshinta")) {
 								$segmentti = false;
 
 								while ($as_seg_row = mysql_fetch_assoc($as_seg_res)) {
-									if ($as_seg_row['tunnus'] == $arvo) $segmentti = true;
+									if ($as_seg_row['tunnus'] == $arvo) {
+										$segmentti = true;
+										break;
+									}
 								}
 							}
 

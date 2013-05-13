@@ -1348,7 +1348,7 @@
 					function alku () {
 						global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $kaikkikaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev, $sarakkeet, $ei_yhteensa, $leveysarray;
 
-						if ((count($kaudet) > 5 and ($kaikkikaudet == "KY" or $kaikkikaudet == "K")) or count($sarakkeet) > 2) {
+						if ((count($kaudet) > 5 and $kaikkikaudet == "joo") or count($sarakkeet) > 2) {
 							$firstpage = $pdf->new_page("842x595");
 							$bottom = "535";
 						}
@@ -1381,6 +1381,9 @@
 
 							if (!$image) {
 								echo t("Logokuvavirhe");
+							}
+							elseif ($bottom == "535") {
+								tulosta_logo_pdf($pdf, $firstpage, "", 575, 0, 25, 120);
 							}
 							else {
 								tulosta_logo_pdf($pdf, $firstpage, "", 0, 0, 25, 120);

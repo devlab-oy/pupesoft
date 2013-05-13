@@ -701,7 +701,6 @@ function echo_kampanja_ehto($index, $kampanja_ehto) {
 	echo "</select>";
 
 	echo $arvo_input;
-	//echo "<input type='text' class='ehto_arvo' value='{$kampanja_ehto['arvo']}' name='kampanja_ehdot[{$index}][arvo]'/>";
 
 	echo "<button class='uusi_aliehto'>".t("Uusi aliehto")."</button>";
 	echo "<button class='poista_ehto'>".t("Poista ehto")."</button>";

@@ -487,7 +487,7 @@ function luo_uusi_kampanja($request) {
 function luo_kampanja_otsikko($kampanja_nimi) {
 	global $kukarow, $yhtiorow;
 
-	$query = "	INSERT INTO kampanja
+	$query = "	INSERT INTO kampanjat
 				SET yhtio = '{$kukarow['yhtio']}',
 				nimi = '{$kampanja_nimi}',
 				laatija = '{$kukarow['kuka']}',
@@ -500,7 +500,7 @@ function luo_kampanja_otsikko($kampanja_nimi) {
 function luo_kampanja_ehto($kampanja_ehto, $kampanja_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$query = "	INSERT INTO kampanja_ehto
+	$query = "	INSERT INTO kampanja_ehdot
 				SET yhtio = '{$kukarow['yhtio']}',
 				kampanja = '{$kampanja_tunnus}',
 				isatunnus = 0,
@@ -517,7 +517,7 @@ function luo_kampanja_ehto($kampanja_ehto, $kampanja_tunnus) {
 function luo_kampanja_aliehto($kampanja_aliehto, $kampanja_ehto_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$query = "	INSERT INTO kampanja_ehto
+	$query = "	INSERT INTO kampanja_ehdot
 				SET yhtio = '{$kukarow['yhtio']}',
 				kampanja = 0,
 				isatunnus = {$kampanja_ehto_tunnus},
@@ -534,7 +534,7 @@ function luo_kampanja_aliehto($kampanja_aliehto, $kampanja_ehto_tunnus) {
 function luo_palkinto_rivi($palkinto_rivi, $kampanja_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$query = "	INSERT INTO kampanja_palkinto
+	$query = "	INSERT INTO kampanja_palkinnot
 				SET yhtio = '{$kukarow['yhtio']}',
 				kampanja = '{$kampanja_tunnus}',
 				tuoteno = '{$palkinto_rivi['tuoteno']}',
@@ -547,7 +547,7 @@ function luo_palkinto_rivi($palkinto_rivi, $kampanja_tunnus) {
 function muokkaa_kampanjaa($request) {
 	global $kukarow, $yhtirow;
 
-	$query = "	UPDATE kampanja
+	$query = "	UPDATE kampanjat
 				SET nimi = '{$request['kampanja_nimi']}',
 				muuttaja = '{$kukarow['kuka']}',
 				muutospvm = CURRENT_DATE
@@ -576,19 +576,19 @@ function poista_kampanja_ehdot($kampanja_tunnus) {
 
 	//Poistetaan aliehdot
 	$query = "	SELECT tunnus
-				FROM kampanja_ehto
+				FROM kampanja_ehdot
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND kampanja = '{$kampanja_tunnus}'";
 	$result = pupe_query($query);
 	while ($kampanja = mysql_fetch_assoc($result)) {
-		$query = "	DELETE FROM kampanja_ehto
+		$query = "	DELETE FROM kampanja_ehdot
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND isatunnus = '{$kampanja['tunnus']}'";
 		pupe_query($query);
 	}
 
 	//Poistetaan ehdot
-	$query = "	DELETE FROM kampanja_ehto
+	$query = "	DELETE FROM kampanja_ehdot
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND kampanja = '{$kampanja_tunnus}'";
 	pupe_query($query);
@@ -597,7 +597,7 @@ function poista_kampanja_ehdot($kampanja_tunnus) {
 function poista_kampanja_palkinnot($kampanja_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$query = "	DELETE FROM kampanja_palkinto
+	$query = "	DELETE FROM kampanja_palkinnot
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND kampanja = '{$kampanja_tunnus}'";
 	pupe_query($query);
@@ -944,7 +944,7 @@ function hae_kampanja($kampanja_tunnus) {
 	global $kukarow, $yhtirow;
 
 	$query = "	SELECT *
-				FROM kampanja
+				FROM kampanjat
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tunnus = '{$kampanja_tunnus}'";
 	$result = pupe_query($query);

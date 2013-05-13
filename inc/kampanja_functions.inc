@@ -173,7 +173,7 @@ if (!function_exists('hae_kampanjat')) {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT *
-					FROM kampanja
+					FROM kampanjat
 					WHERE yhtio = '{$kukarow['yhtio']}'";
 		$result = pupe_query($query);
 
@@ -202,7 +202,7 @@ if (!function_exists('hae_kampanjan_ehdot')) {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT *
-					FROM kampanja_ehto
+					FROM kampanja_ehdot
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND kampanja = '{$kampanja_tunnus}'";
 		$result = pupe_query($query);
@@ -232,7 +232,7 @@ if (!function_exists('hae_kampanja_ehdon_aliehdot')) {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT *
-					FROM kampanja_ehto
+					FROM kampanja_ehdot
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND isatunnus = '{$kampanja_ehto_tunnus}'";
 		$result = pupe_query($query);
@@ -261,7 +261,7 @@ if (!function_exists('hae_kampanjan_palkinnot')) {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT *
-					FROM kampanja_palkinto
+					FROM kampanja_palkinnot
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND kampanja = '{$kampanja_tunnus}'";
 		$result = pupe_query($query);

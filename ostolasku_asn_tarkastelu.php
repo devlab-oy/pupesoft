@@ -1435,7 +1435,7 @@
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tilausrivi.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
 
 			// Ostotilaukset ja suoraan saapumiselle lis‰tyt, mutta ei saa olla saapumiselle kohdistettu
-			$query1 = "	SELECT DISTINCT tilausrivi.tunnus,
+			$query1 = "	(SELECT DISTINCT tilausrivi.tunnus,
 						tilausrivi.tuoteno,
 						tilausrivi.otunnus,
 						tilausrivi.varattu,
@@ -1447,9 +1447,26 @@
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.uusiotunnus = 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
-						AND ((lasku.tila = 'O' AND lasku.alatila = 'A') OR lasku.tila = 'K')
+						AND lasku.tila = 'O'
+						AND lasku.alatila = 'A'
 						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
-						{$tilausnrolisa}";
+						{$tilausnrolisa})
+						UNION
+						(SELECT DISTINCT tilausrivi.tunnus,
+						tilausrivi.tuoteno,
+						tilausrivi.otunnus,
+						tilausrivi.varattu,
+						tilausrivi.kpl,
+						tilausrivi.tilaajanrivinro,
+						tilausrivi.uusiotunnus,
+						lasku.tunnus laskutunnus
+						FROM lasku
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.uusiotunnus = 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
+						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
+						AND lasku.tila = 'K'
+						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
+						{$tilausnrolisa})";
 
 			// Saapumiset, ei loppulasketut eik‰ sellaset joihin on jo vaihto-omaisuuslasku liitetty, pit‰‰ olla saapumiselle kohdistettu
 			$query2 = "	SELECT DISTINCT tilausrivi.tunnus,
@@ -1471,10 +1488,10 @@
 						{$tilausnrolisa}";
 
 			if ($valitse == 'asn') {
-				$query = $query1." ORDER BY tunnus, uusiotunnus, laskutunnus";
+				$query = "{$query1} ORDER BY tunnus, uusiotunnus, laskutunnus";
 			}
 			else {
-				$query = "($query1) UNION ($query2) ORDER BY tunnus, uusiotunnus, laskutunnus";
+				$query = "{$query1} UNION ({$query2}) ORDER BY tunnus, uusiotunnus, laskutunnus";
 			}
 
 			$result = pupe_query($query);

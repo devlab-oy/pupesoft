@@ -436,7 +436,6 @@
 						$query = "	SELECT tilausrivi.tunnus
 									FROM tilausrivi
 									JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tuoteperhe.isatuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
-									JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									and tilausrivi.tyyppi = 'O'
 									and tilausrivi.netto = ''
@@ -475,7 +474,6 @@
 						$query = "	SELECT tilausrivi.tunnus
 									FROM tilausrivi
 									JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tuoteperhe.isatuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
-									JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									and tilausrivi.tyyppi = 'O'
 									and tilausrivi.netto = ''

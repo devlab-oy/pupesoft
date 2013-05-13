@@ -22,11 +22,13 @@ if (!function_exists('tarkista_osuuko_myyntitilaus_kampanjaan')) {
 		$lisattavat_tuotteet = array();
 
 		foreach ($kampanjat as $kampanja) {
+
 			foreach ($kampanja['kampanja_ehdot'] as $kampanja_ehto) {
+
 				$onko_kampanja_ok = tarkista_kampanja_ehto($tilausnumero, $kampanja_ehto);
 
 				if ($onko_kampanja_ok === false) {
-					break 2;
+					continue 2;
 				}
 			}
 
@@ -61,17 +63,21 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 				$asiakas_ehto = " AND asiakas.tunnus {$kampanja_ehto['rajoitin']} {$kampanja_ehto['arvo']}";
 				$ehto_rajaus = "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus {$asiakas_ehto})";
 				break;
+
 			case 'asiakas_ytunnus':
 				$asiakas_ehto = " AND asiakas.ytunnus {$kampanja_ehto['rajoitin']} {$kampanja_ehto['arvo']}";
 				$ehto_rajaus = "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus {$asiakas_ehto})";
 				break;
+
 			case 'asiakaskategoria':
 				$asiakas_ehto = " AND asiakas.kategoria {$kampanja_ehto['rajoitin']} {$kampanja_ehto['arvo']}";
 				$ehto_rajaus = "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus {$asiakas_ehto})";
 				break;
+
 			case 'tuote':
 				if (!empty($kampanja_ehto['aliehdot'])) {
 					$having_ehdot = "HAVING";
+
 					foreach ($kampanja_ehto['aliehdot'] as $aliehto) {
 						$aliehto['rajoitin'] = konvertoi_rajoitin($aliehto['rajoitin']);
 
@@ -85,6 +91,7 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 							echo "Rikki meni";
 							return false;
 						}
+
 						$having_ehdot .= " AND";
 					}
 					$having_ehdot = substr($having_ehdot, 0, -3);
@@ -93,13 +100,17 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 				$tuote_ehto .= " AND tilausrivi.tuoteno {$kampanja_ehto['rajoitin']} '{$kampanja_ehto['arvo']}'";
 
 				break;
+
 			case 'tuotekategoria':
+
 				$query = "	SELECT tuoteno
 							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND otunnus = '{$tilausnumero}'";
 				$result = pupe_query($query);
-				while($tilausrivi = mysql_fetch_assoc($result)) {
+
+				while ($tilausrivi = mysql_fetch_assoc($result)) {
+					
 					$query = "	SELECT group_concat(parent.tunnus) tunnukset
 								FROM puun_alkio
 								JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
@@ -108,8 +119,10 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 								AND puun_alkio.laji    = 'Tuote'
 								AND puun_alkio.liitos  = '{$tilausrivi['tuoteno']}'";
 					$result2 = pupe_query($query);
+
 					$puun_tunnukset = mysql_fetch_assoc($result2);
 					$puun_tunnukset = explode(',', $puun_tunnukset['tunnukset']);
+
 					if (in_array($kampanja_ehto['arvo'], $puun_tunnukset)) {
 						//tilausrivin tuote on kampanjan ehdon tuotekategoriassa
 						return true;
@@ -118,24 +131,31 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 				return false;
 				
 				break;
+
 			case 'tuoteosasto':
 				$ehto_rajaus = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.osasto {$kampanja_ehto['rajoitin']} '{$kampanja_ehto['arvo']})";
 				break;
+
 			case 'tuoteryhma':
 				$ehto_rajaus = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.try {$kampanja_ehto['rajoitin']} '{$kampanja_ehto['arvo']})";
 				break;
+
 			case 'kappaleet':
 				$having_ehdot = "HAVING kpl {$kampanja_ehto['rajoitin']} {$kampanja_ehto['arvo']}";
 				break;
+
 			case 'arvo':
 				$having_ehdot = "HAVING arvo {$kampanja_ehto['rajoitin']} {$kampanja_ehto['arvo']}";
 				break;
+
 			default:
+				echo "Rikki meni";
+				return false;
 				break;
 		}
 
 		$query = "	SELECT lasku.tunnus,
-					sum(tilausrivi.varattu+tilausrivi.jt) kpl,
+					sum(tilausrivi.varattu + tilausrivi.jt) kpl,
 					sum(tilausrivi.hinta) arvo
 					FROM lasku
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus {$tuote_ehto})
@@ -143,12 +163,10 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus = {$tilausnumero}
 					AND lasku.tila = 'N'
-					#AND lasku.alatila = ''
+					AND lasku.alatila = ''
 					GROUP BY lasku.tunnus
 					{$having_ehdot}";
-
 		$result = pupe_query($query);
-
 		$row = mysql_fetch_assoc($result);
 
 		if ($row['tunnus'] == NULL) {
@@ -177,6 +195,7 @@ if (!function_exists('hae_kampanjat')) {
 		$result = pupe_query($query);
 
 		$kampanjat = array();
+
 		while ($kampanja = mysql_fetch_assoc($result)) {
 			$kampanja['kampanja_ehdot'] = hae_kampanjan_ehdot($kampanja['tunnus']);
 			$kampanja['kampanja_palkinnot'] = hae_kampanjan_palkinnot($kampanja['tunnus']);
@@ -207,6 +226,7 @@ if (!function_exists('hae_kampanjan_ehdot')) {
 		$result = pupe_query($query);
 
 		$kampanja_ehdot = array();
+
 		while ($kampanja_ehto = mysql_fetch_assoc($result)) {
 			$kampanja_ehto['aliehdot'] = hae_kampanja_ehdon_aliehdot($kampanja_ehto['tunnus']);
 			$kampanja_ehdot[] = $kampanja_ehto;
@@ -237,6 +257,7 @@ if (!function_exists('hae_kampanja_ehdon_aliehdot')) {
 		$result = pupe_query($query);
 
 		$kampanja_aliehdot = array();
+		
 		while ($kampanja_aliehto = mysql_fetch_assoc($result)) {
 			$kampanja_aliehdot[] = $kampanja_aliehto;
 		}
@@ -266,6 +287,7 @@ if (!function_exists('hae_kampanjan_palkinnot')) {
 		$result = pupe_query($query);
 
 		$kampanja_palkinnot = array();
+		
 		while ($kampanja_palkinto = mysql_fetch_assoc($result)) {
 			$kampanja_palkinnot[] = $kampanja_palkinto;
 		}
@@ -277,25 +299,17 @@ if (!function_exists('hae_kampanjan_palkinnot')) {
 if (!function_exists('konvertoi_rajoitin')) {
 
 	function konvertoi_rajoitin($rajoitin) {
-		$return_rajoitin = "";
 		switch ($rajoitin) {
 			case 'on':
-				$return_rajoitin = "=";
-				break;
+				return "=";
 			case 'ei_ole':
-				$return_rajoitin = "!=";
-				break;
+				return "!=";
 			case 'suurempi_kuin':
-				$return_rajoitin = ">";
-				break;
+				return ">";
 			case 'pienempi_kuin':
-				$return_rajoitin = "<";
-				break;
+				return "<";
 			default:
-				$return_rajoitin = "=";
-				break;
+				return "=";
 		}
-
-		return $return_rajoitin;
 	}
 }

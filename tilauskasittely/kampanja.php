@@ -450,7 +450,7 @@ if ($request['tee'] == 'uusi_kampanja') {
 	if (!empty($request['kampanja_nimi'])) {
 		luo_uusi_kampanja($request);
 
-		$request['tee'] = 'nayta_kampanjat';
+		$request['tee'] = '';
 	}
 	else {
 		if (!empty($request['kampanja_tunnus'])) {
@@ -463,11 +463,11 @@ if ($request['tee'] == 'uusi_kampanja') {
 if ($request['tee'] == 'muokkaa_kampanjaa') {
 	if ($request['kampanja_tunnus']) {
 		muokkaa_kampanjaa($request);
-		$request['tee'] = 'nayta_kampanjat';
+		$request['tee'] = '';
 	}
 }
 
-if ($request['tee'] == 'nayta_kampanjat') {
+if ($request['tee'] == '') {
 	nayta_kampanjat();
 }
 
@@ -478,6 +478,8 @@ function luo_uusi_kampanja($request) {
 
 	foreach ($request['kampanja_ehdot'] as $kampanja_ehto) {
 		$kampanja_ehto_tunnus = luo_kampanja_ehto($kampanja_ehto, $kampanja_tunnus);
+
+		if (empty($kampanja_ehto['aliehto_rivit'])) continue;
 
 		foreach ($kampanja_ehto['aliehto_rivit'] as $kampanja_aliehto) {
 			luo_kampanja_aliehto($kampanja_aliehto, $kampanja_ehto_tunnus);
@@ -1012,16 +1014,35 @@ function nayta_kampanjat() {
 function echo_kampanjat($kampanjat) {
 	global $kukarow, $yhtiorow;
 
-	echo "<div id='kampanjat'>";
+	echo "<table>";
+
+	echo "<tr>";
+	echo "<th>",t("Nimi"),"</th>";
+	echo "<th></th>";
+	echo "<tr>";
+
 	foreach ($kampanjat as $kampanja) {
-		echo "<div id='kampanja'>";
-		echo $kampanja['nimi']." <a href='kampanja.php?tee=uusi_kampanja&kampanja_tunnus={$kampanja['tunnus']}'>".t("Muokkaa")."</a>";
-		echo "</div>";
-		echo "<br/>";
-		echo "<br/>";
+		echo "<tr class='aktiivi'>";
+		echo "<td>";
+		echo $kampanja['nimi'];
+		echo "</td>";
+		echo "<td>";
+		echo "<form method='get' action='kampanja.php'>";
+		echo "<input type='hidden' name='tee' value='uusi_kampanja'>";
+		echo "<input type='hidden' name='kampanja_tunnus' value='{$kampanja['tunnus']}'>";
+		echo "<input type='submit' value='".t("Muokkaa")."'>";
+		echo "</form>";
+		echo "</td>";
+		echo "<tr>";
 	}
 
-	echo "<a href='kampanja.php?tee=uusi_kampanja'>".t("Uusi kampanja")."</a>";
+	echo "</table>";
 
-	echo "</div>";
+	echo "<hr>";
+	echo "<br>";
+
+	echo "<form method='get' action='kampanja.php'>";
+	echo "<input type='hidden' name='tee' value='uusi_kampanja'>";
+	echo "<input type='submit' value='".t("Uusi kampanja")."'>";
+	echo "</form>";
 }

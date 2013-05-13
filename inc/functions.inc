@@ -14496,7 +14496,7 @@ if (!function_exists("hae_hyvityshinta")) {
 							if ($arvo != 0) {
 
 								// haetaan asiakkaan segmentit
-								$query = "	SELECT group_concat(parent.tunnus) tunnukset
+								$query = "	SELECT parent.tunnus
 											FROM puun_alkio
 											JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
 											JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
@@ -14504,9 +14504,14 @@ if (!function_exists("hae_hyvityshinta")) {
 											AND puun_alkio.laji    = 'asiakas'
 											AND puun_alkio.liitos  = '{$liitostunnus}'";
 								$as_seg_res = pupe_query($query);
-								$as_seg_row = mysql_fetch_assoc($as_seg_res);
-                                
-								if (strpos($as_seg_row['tunnukset'], $arvo) === FALSE) $segmentti = false;
+
+								$osuko = false;
+
+								while ($as_seg_row = mysql_fetch_assoc($as_seg_res)) {
+									if ($as_seg_row['tunnus'] == $arvo) $osuko = true;
+								}
+
+								$segmentti = $osuko;
 							}
 
 							break;

@@ -1192,13 +1192,20 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
 		$yhtio = $kukarow['yhtio'];
 	}
 
+	if ($request['valittu_status'] == 'EIPOISTETTUJA') {
+		$status_where = "AND tuote.status != 'P'";
+	}
+	else {
+		$status_where = "AND tuote.status = '{$request['valittu_status']}'";
+	}
+
 	$query = "	SELECT tapahtuma.hyllyalue AS hyllyalue, tapahtuma.hyllynro AS hyllynro, COUNT(DISTINCT CONCAT(tapahtuma.tuoteno, tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso)) AS kpl
 				FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
 				JOIN tuote
 				ON ( tuote.yhtio = tapahtuma.yhtio
 					AND tuote.tuoteno = tapahtuma.tuoteno
 					AND tuote.ei_saldoa = ''
-					AND tuote.status = '{$request['valittu_status']}' )
+					{$status_where} )
 				WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 				AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
 				AND tapahtuma.laji = 'Inventointi'
@@ -1224,13 +1231,20 @@ function hae_tuotepaikkojen_lukumaara(&$request) {
 		$yhtio = $kukarow['yhtio'];
 	}
 
+	if ($request['valittu_status'] == 'EIPOISTETTUJA') {
+		$status_where = "AND tuote.status != 'P'";
+	}
+	else {
+		$status_where = "AND tuote.status = '{$request['valittu_status']}'";
+	}
+
 	$query = "	SELECT tuotepaikat.hyllyalue as hyllyalue, tuotepaikat.hyllynro as hyllynro, count(*) as kpl
 				FROM tuote
 				JOIN tuotepaikat
 				USING (yhtio, tuoteno)
 				WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 				AND tuote.ei_saldoa = ''
-				AND tuote.status != 'P'
+				{$status_where}
 				GROUP BY 1,2";
 	$result = pupe_query($query);
 
@@ -1571,8 +1585,14 @@ function hae_tuote_statukset($request = array()) {
 		}
 		$statukset[] = $status;
 	}
+
+	$selected = "";
+	if (!empty($request['valittu_status']) and $request['valittu_status'] == 'EIPOISTETTUJA') {
+		$selected = "selected";
+	}
 	$statukset[] = array(
 		'selite'	 => 'EIPOISTETTUJA',
+		'selected'	 => $selected,
 		'selitetark' => t('Ei poistettuja')
 	);
 

@@ -625,7 +625,7 @@
 
 			// Yhdistet‰‰n korvaavat ja vastaavat (ja vaihtoehtoiset?) ketjut
 			$tuote_ketju = array_merge($korvaavat_tuotteet, $vastaavat_tuotteet);
-
+			var_dump($tuote_ketju);
 			// Tuotteen korvaavat ja vastaavat ketju
 			foreach ($tuote_ketju as $krow2) {
 
@@ -2458,20 +2458,22 @@
 			              limit 1";
 		        $presult = pupe_query($query);
 		        $prow = mysql_fetch_assoc($presult);
-
-		        $query = "SELECT *
-			              FROM korvaavat
-			              JOIN tuote ON korvaavat.yhtio=tuote.yhtio AND korvaavat.tuoteno=tuote.tuoteno
-			              WHERE korvaavat.yhtio = '{$kukarow['yhtio']}'
-			              AND id = '{$prow['id']}'
-			              order by if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys), korvaavat.tuoteno
-			              limit 1";
-		        $tresult = pupe_query($query);
-		        $korvaava_row = mysql_fetch_assoc($tresult);
-
-		        $kommentti .= " HUOM! Korvaa tuotteen {$alkupera_trow['tuoteno']}";
-
-		        $trow = $korvaava_row;
+		
+				// Jos ei ole korvaavia, ei vaihdeta tilattavaa tuotetta
+				if (mysql_num_rows($presult)) {
+		        	$query = "SELECT *
+			    	          FROM korvaavat
+			    	          JOIN tuote ON korvaavat.yhtio=tuote.yhtio AND korvaavat.tuoteno=tuote.tuoteno
+			    	          WHERE korvaavat.yhtio = '{$kukarow['yhtio']}'
+			    	          AND id = '{$prow['id']}'
+			    	          order by if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys), korvaavat.tuoteno
+			    	          limit 1";
+		        	$tresult = pupe_query($query);
+		        	$korvaava_row = mysql_fetch_assoc($tresult);
+		        	
+					$kommentti .= " HUOM! Korvaa tuotteen {$alkupera_trow['tuoteno']}";
+			    	$trow = $korvaava_row;
+				}
 			}
 			####
 

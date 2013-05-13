@@ -291,7 +291,6 @@
 								JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								and tilausrivi.tyyppi = 'O'
-								and tilausrivi.netto = ''
 								and tilausrivi.tunnus = '{$tilausrivirow['tunnus']}'
 								LIMIT 1";
 					$chk_res = pupe_query($query);

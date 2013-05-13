@@ -40,6 +40,7 @@ if ($ajax_request) {
 enable_ajax();
 
 echo "<font class='head'>".t("Kampanjat")."</font><hr>";
+
 ?>
 <style>
 	#ehto_rivi_template {
@@ -617,6 +618,7 @@ function echo_kayttoliittyma($request = array()) {
 	echo_palkinto_rivi_template();
 
 	echo "<form name='kampanja_form' method='POST' action=''>";
+
 	if (!empty($request['kampanja']['tunnus'])) {
 		echo "<input type='hidden' name='tee' value='muokkaa_kampanjaa' />";
 	}
@@ -624,19 +626,22 @@ function echo_kayttoliittyma($request = array()) {
 		echo "<input type='hidden' name='tee' value='uusi_kampanja' />";
 	}
 
-	echo "<div id='kampanja_header'>";
-	echo t("Kampanjan nimi").':';
+	echo "<font class='message'>",t("Nimi"),"</font>";
 	echo "<br/>";
+	echo "<br/>";
+
+	echo "<div id='kampanja_header'>";
+
 	echo "<input type='hidden' size=50 name='kampanja_tunnus' value='{$request['kampanja']['tunnus']}'/>";
 	echo "<input type='text' size=50 name='kampanja_nimi' value='{$request['kampanja']['nimi']}'/>";
 	echo "</div>";
 
-	echo "<br/>";
 	echo "<hr/>";
+	echo "<font class='message'>",t("Ehdot"),"</font>";
+	echo "<br/>";
 	echo "<br/>";
 
 	echo "<div id='ehdot'>";
-	echo "<button id='uusi_ehto'>".t("Uusi ehto")."</button>";
 	if (!empty($request['kampanja']['kampanja_ehdot'])) {
 		foreach ($request['kampanja']['kampanja_ehdot'] as $index => $kampanja_ehto) {
 			echo_kampanja_ehto($index, $kampanja_ehto);
@@ -645,12 +650,15 @@ function echo_kayttoliittyma($request = array()) {
 	echo "</div>";
 
 	echo "<br/>";
+	echo "<button id='uusi_ehto'>".t("Uusi ehto")."</button>";
+
 	echo "<hr/>";
+	echo "<font class='message'>",t("Palkinnot"),"</font>";
+	echo "<br/>";
 	echo "<br/>";
 
 	echo "<div id='palkinnot'>";
-	echo "<button id='uusi_palkinto'>".t("Uusi palkinto")."</button>";
-
+	
 	echo "<table id='palkinto_table'>";
 	echo "<tr>";
 	echo "<th>".t("Tuoteno")."</th>";
@@ -666,8 +674,11 @@ function echo_kayttoliittyma($request = array()) {
 	echo "</div>";
 
 	echo "<br/>";
+	echo "<button id='uusi_palkinto'>".t("Uusi palkinto")."</button>";
+	echo "<hr>";
 
-	echo "<input type='submit' value='".t("Luo")."' />";
+	echo "<br/>";
+	echo "<input type='submit' value='".t("Tallenna kampanja")."' />";
 	echo "</form>";
 }
 
@@ -723,7 +734,7 @@ function echo_kampanja_aliehto($ehto_index, $aliehto_index, $aliehto) {
 
 	echo "<input type='hidden' class='aliehto_id' value='{$aliehto_index}'/>";
 
-	echo "AND------>  ";
+	echo " &raquo; ";
 	echo "<select class='aliehto_kohde' name='kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][kohde]'>";
 	foreach ($ehdot as $ehto) {
 		$sel = "";
@@ -790,7 +801,7 @@ function echo_ehto_alirivi_template() {
 
 	echo "<input type='hidden' class='aliehto_id_template' />";
 
-	echo "AND------>  ";
+	echo " &raquo; ";
 	echo "<select class='aliehto_kohde'>";
 	foreach ($ehdot as $ehto) {
 		echo "<option value='{$ehto['value']}'>{$ehto['text']}</option>";
@@ -936,7 +947,7 @@ function hae_ehdon_rajoittimet() {
 			'value'	 => 'on'
 		),
 		1	 => array(
-			'text'	 => t("Ei ole"),
+			'text'	 => t("ei ole"),
 			'value'	 => 'ei_ole'
 		),
 		2	 => array(

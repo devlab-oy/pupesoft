@@ -567,6 +567,8 @@ function muokkaa_kampanjaa($request) {
 	foreach ($request['kampanja_ehdot'] as $kampanja_ehto) {
 		$kampanja_ehto_tunnus = luo_kampanja_ehto($kampanja_ehto, $request['kampanja_tunnus']);
 
+		if (empty($kampanja_ehto['aliehto_rivit'])) continue;
+
 		foreach ($kampanja_ehto['aliehto_rivit'] as $kampanja_aliehto) {
 			luo_kampanja_aliehto($kampanja_aliehto, $kampanja_ehto_tunnus);
 		}

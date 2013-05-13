@@ -625,7 +625,7 @@
 
 			// Yhdistet‰‰n korvaavat ja vastaavat (ja vaihtoehtoiset?) ketjut
 			$tuote_ketju = array_merge($korvaavat_tuotteet, $vastaavat_tuotteet);
-			var_dump($tuote_ketju);
+
 			// Tuotteen korvaavat ja vastaavat ketju
 			foreach ($tuote_ketju as $krow2) {
 

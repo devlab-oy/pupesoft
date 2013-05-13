@@ -114,6 +114,7 @@ $ltoim_maa				= "";
 $yhteyshenkilon_puhelin = "";
 $tilausyhteyshenkilo	= "";
 $lopviesti            	= "";
+$ohjausmerkki			= "";
 $ketjutus             	= "";
 $editilaus_maksuehto	= "";
 $editilaus_maksuteksti	= "";
@@ -1987,6 +1988,7 @@ while ($tietue = fgets($fd)) {
 			$yhteyshenkilon_puhelin = "";
 			$tilausyhteyshenkilo	= "";
 			$lopviesti            	= "";
+			$ohjausmerkki			= "";
 			$ketjutus             	= "";
 			$editilaus_maksuehto	= "";
 			$editilaus_maksuteksti	= "";
@@ -2003,7 +2005,7 @@ while ($tietue = fgets($fd)) {
 			$editilaus_loppuhinta	= "";
 			$kieltolisa				= "";
 			$OT_ASIAKASNRO			= "";
-			$merkkitieto = "";
+			$merkkitieto 			= "";
 			break;
 	}
 }

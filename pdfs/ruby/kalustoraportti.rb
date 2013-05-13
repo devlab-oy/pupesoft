@@ -80,7 +80,7 @@ class KalustoraporttiPDF
     other_data = [
       {
         :header => 'Pvm',
-        :value => 'tähän tämä päivä'
+        :value => DateTime.now.strftime('%d.%m.%Y')
       },
       {
         :header => 'Asiakasvastaava',

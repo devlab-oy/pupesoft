@@ -436,7 +436,6 @@
 									JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tuoteperhe.isatuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									and tilausrivi.tyyppi = 'O'
-									and tilausrivi.netto = ''
 									and tilausrivi.tunnus IN ({$siistitty},{$extraa})";
 						$chk_res = pupe_query($query);
 
@@ -474,7 +473,6 @@
 									JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tuoteperhe.isatuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									and tilausrivi.tyyppi = 'O'
-									and tilausrivi.netto = ''
 									and tilausrivi.tunnus IN ({$siistitty})";
 						$chk_res = pupe_query($query);
 
@@ -528,10 +526,8 @@
 						$query = "	SELECT tilausrivi.tunnus
 									FROM tilausrivi
 									JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tuoteperhe.isatuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
-									JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									and tilausrivi.tyyppi = 'O'
-									and tilausrivi.netto = ''
 									and tilausrivi.tunnus IN ({$siistitty})";
 						$chk_res = pupe_query($query);
 

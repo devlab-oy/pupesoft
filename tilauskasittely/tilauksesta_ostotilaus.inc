@@ -354,7 +354,7 @@
 							}
 
 							// SATULA-RUNKO case
-							// jos tuoteperhe joinissa tuoteperhe.ohita_kerays != ''
+							// jos tilausrivin_lisatiedot joinissa tilausrivin_lisatiedot.ohita_kerays != ''
 							if ($tilrivirow['rivitunnus'] == $tilrivirow['perheid'] and $tilrivirow['ohita_kerays'] != '') {
 								$perheid = $lisatty_tun;
 

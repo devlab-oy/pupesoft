@@ -49,7 +49,6 @@ echo "<font class='head'>".t("Kampanjat")."</font><hr>";
 	#aliehto_rivi_template {
 		display: none;
 	}
-
 	#palkinto_table_template {
 		display: none;
 	}
@@ -643,6 +642,7 @@ function echo_kayttoliittyma($request = array()) {
 	echo "<br/>";
 	echo "<br/>";
 
+	echo "<table>";
 	echo "<div id='ehdot'>";
 	if (!empty($request['kampanja']['kampanja_ehdot'])) {
 		foreach ($request['kampanja']['kampanja_ehdot'] as $index => $kampanja_ehto) {
@@ -650,6 +650,7 @@ function echo_kayttoliittyma($request = array()) {
 		}
 	}
 	echo "</div>";
+	echo "</table>";
 
 	echo "<br/>";
 	echo "<button id='uusi_ehto'>".t("Uusi ehto")."</button>";
@@ -660,7 +661,7 @@ function echo_kayttoliittyma($request = array()) {
 	echo "<br/>";
 
 	echo "<div id='palkinnot'>";
-	
+
 	echo "<table id='palkinto_table'>";
 	echo "<tr>";
 	echo "<th>".t("Tuoteno")."</th>";
@@ -691,6 +692,8 @@ function echo_kampanja_ehto($index, $kampanja_ehto) {
 
 	echo "<div id='ehto_rivi'>";
 
+	echo "<tr><td>";
+
 	echo "<input type='hidden' class='ehto_id' value='{$index}'/>";
 
 	echo "<select class='ehto_kohde' name='kampanja_ehdot[{$index}][kohde]'>";
@@ -703,6 +706,8 @@ function echo_kampanja_ehto($index, $kampanja_ehto) {
 	}
 	echo "</select>";
 
+	echo "</td><td>";
+
 	echo "<select class='ehto_rajoitin' name='kampanja_ehdot[{$index}][rajoitin]'>";
 	foreach ($rajoittimet as $rajoitin) {
 		$sel = "";
@@ -713,10 +718,16 @@ function echo_kampanja_ehto($index, $kampanja_ehto) {
 	}
 	echo "</select>";
 
+	echo "</td><td>";
+
 	echo $arvo_input;
+
+	echo "</td><td>";
 
 	echo "<button class='uusi_aliehto'>".t("Uusi aliehto")."</button>";
 	echo "<button class='poista_ehto'>".t("Poista ehto")."</button>";
+
+	echo "</td></tr>";
 
 	echo "<div class='aliehdot'>";
 	foreach ($kampanja_ehto['aliehdot'] as $aliehto_index => $aliehto) {
@@ -734,10 +745,13 @@ function echo_kampanja_aliehto($ehto_index, $aliehto_index, $aliehto) {
 
 	echo "<div id='aliehto_rivi'>";
 
+	echo "<tr><td>";
 	echo "<input type='hidden' class='aliehto_id' value='{$aliehto_index}'/>";
 
 	echo " &raquo; ";
+
 	echo "<select class='aliehto_kohde' name='kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][kohde]'>";
+
 	foreach ($ehdot as $ehto) {
 		$sel = "";
 		if ($ehto['value'] == $aliehto['kohde']) {
@@ -747,6 +761,7 @@ function echo_kampanja_aliehto($ehto_index, $aliehto_index, $aliehto) {
 	}
 	echo "</select>";
 
+	echo "</td><td>";
 	echo "<select class='aliehto_rajoitin' name='kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][rajoitin]'>";
 	foreach ($rajoittimet as $rajoitin) {
 		$sel = "";
@@ -757,9 +772,15 @@ function echo_kampanja_aliehto($ehto_index, $aliehto_index, $aliehto) {
 	}
 	echo "</select>";
 
+	echo "</td><td>";
+
 	echo $arvo_input;
 
+	echo "</td><td>";
+
 	echo "<button class='poista_aliehto'>".t("Poista aliehto")."</button>";
+
+	echo "</td></tr>";
 
 	echo "</div>";
 }

@@ -14505,13 +14505,11 @@ if (!function_exists("hae_hyvityshinta")) {
 											AND puun_alkio.liitos  = '{$liitostunnus}'";
 								$as_seg_res = pupe_query($query);
 
-								$osuko = false;
+								$segmentti = false;
 
 								while ($as_seg_row = mysql_fetch_assoc($as_seg_res)) {
-									if ($as_seg_row['tunnus'] == $arvo) $osuko = true;
+									if ($as_seg_row['tunnus'] == $arvo) $segmentti = true;
 								}
-
-								$segmentti = $osuko;
 							}
 
 							break;

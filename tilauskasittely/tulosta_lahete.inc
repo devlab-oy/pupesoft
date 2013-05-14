@@ -4001,7 +4001,7 @@ if (!function_exists('print_pdf_lahete')) {
 							$subjnumero = $laskurow["tunnus"];
 						}
 
-						$kutsu = t("Tilausvahvistus %s", $kieli, $subjnumero)." - Ostaja: ".$laskurow["nimi"];
+						$kutsu = t("Tilausvahvistus %s", $kieli, $subjnumero);
 
 						$content_body = t("Kiitos tilauksestanne", $kieli).",\n\n";
 						$content_body .= t("Tilausnumeronne on", $kieli)." $subjnumero\n\n";

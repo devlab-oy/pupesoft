@@ -1679,6 +1679,7 @@
 
 					//työmääräyksen rivit
 					$query = "  SELECT tilausrivi.*,
+								tuotteen_avainsanat.selite tyomaarays_ryhmittely,
 								round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 								$sorttauskentta,
 								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
@@ -1687,6 +1688,7 @@
 								FROM tilausrivi
 								JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 								JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+								LEFT JOIN tuotteen_avainsanat ON tilausrivi.yhtio=tuotteen_avainsanat.yhtio and tilausrivi.tuoteno=tuotteen_avainsanat.tuoteno
 								WHERE tilausrivi.otunnus = '{$laskurow["tunnus"]}'
 								and tilausrivi.yhtio 	= '$kukarow[yhtio]'
 								and tilausrivi.tyyppi  != 'D'
@@ -1726,6 +1728,7 @@
 					$params_tyomaarays = array( "asrow"           => $asrow,
 												"boldi"           => $boldi,
 												"edtuotetyyppi"   => "",
+												"edryhmittely"	  => "",
 												"iso"             => $iso,
 												"kala"            => 0,
 												"kieli"           => $kieli,

@@ -538,8 +538,10 @@ function echo_kampanja_ehto($index, $kampanja_ehto) {
 
 	echo "</tr>";
 
-	foreach ($kampanja_ehto['aliehdot'] as $aliehto_index => $aliehto) {
-		echo_kampanja_aliehto($index, $aliehto_index, $aliehto);
+	if (!empty($kampanja_ehto['aliehdot'])) {
+		foreach ($kampanja_ehto['aliehdot'] as $aliehto_index => $aliehto) {
+			echo_kampanja_aliehto($index, $aliehto_index, $aliehto);
+		}
 	}
 
 	echo "</tr>";

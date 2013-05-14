@@ -606,7 +606,7 @@
 					// itse print komento...
 					if ($komento["Ostotilaus"] == 'email') {
 						$liite = $pdffilenimi;
-						$kutsu = t("Ostotilaus", $kieli)." $laskurow[tunnus]";
+						$kutsu = t("Ostotilaus", $kieli)." $laskurow[tunnus]"." - Toimittaja: ". $laskurow["nimi"];
 
 						if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
 							$kutsu .= ", ".trim($laskurow["nimi"]).", ".trim($laskurow["toim_nimi"]);

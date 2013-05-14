@@ -1079,7 +1079,7 @@ if (!function_exists('tyomaarays_print_pdf')) {
 		if ($komento == 'email') {
 			$liite = $pdffilenimi;
 
-			$kutsu = t("Työmääräys", $kieli);
+			$kutsu = t("Työmääräys", $kieli)." $laskurow[tunnus]". " - Ostaja: ".$laskurow["nimi"];
 
 			if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
 				$kutsu .= ", ".trim($laskurow["nimi"]);

@@ -347,13 +347,13 @@
 		$konsel = array("AT" => "", "T" => "", "A" => "");
 		$konsel[$konsernirajaus] = "SELECTED";
 
-		echo "<td><select name='konsernirajaus'>
+		echo "<td><select name='konsernirajaus' DISABLED>
 				<option value=''>".t("Näytetään kaikki tiliöinnit")."</option>
 				<option value='AT' $konsel[AT]>".t("Näytetään konserniasiakkaiden ja konsernitoimittajien tiliöinnit")."</option>
 				<option value='T'  $konsel[T]>".t("Näytetään konsernitoimitajien tiliöinnit")."</option>
 				<option value='A'  $konsel[A]>".t("Näytetään konserniasiakkaiden tiliöinnit")."</option>
 				</select>
-				</td></tr>";
+				HUOM: Ominaisuus huollossa!</td></tr>";
 
 		echo "<tr><th valign='top'>".t("Sarakkeet")."</th>";
 
@@ -369,8 +369,8 @@
 		echo "&nbsp;<input type='checkbox' name='sarakebox[KUSTP]' $bchek[KUSTP]> ".t("Kustannuspaikoittain");
 		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[KOHDE]' $bchek[KOHDE]> ".t("Kohteittain");
 		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[PROJEKTI]' $bchek[PROJEKTI]> ".t("Projekteittain");
-		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASOSASTO]' $bchek[ASOSASTO]> ".t("Asiakasosastoittain");
-		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASRYHMA]' $bchek[ASRYHMA]> ".t("Asiakasryhmittäin");
+		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASOSASTO]' $bchek[ASOSASTO] DISABLED> ".t("Asiakasosastoittain");
+		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASRYHMA]' $bchek[ASRYHMA] DISABLED> ".t("Asiakasryhmittäin");
 		echo "</td></tr>";
 
 		if ($teepdf != "") $vchek = "CHECKED";
@@ -384,7 +384,9 @@
 
 		echo "</table><br>";
 
-		$monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI", "ASIAKASOSASTO", "ASIAKASRYHMA");
+		// HUOM: ASIAKASRAJAUKSET HUOLLOSSA!
+		// $monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI", "ASIAKASOSASTO", "ASIAKASRYHMA");
+		$monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI");
 		$noautosubmit = TRUE;
 
 		require ("tilauskasittely/monivalintalaatikot.inc");

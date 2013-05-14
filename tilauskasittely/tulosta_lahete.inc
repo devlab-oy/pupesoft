@@ -452,9 +452,8 @@ if (!function_exists('alku_lahete')) {
 
 				if (!in_array($asiakas_row['chn'], array('100', '667')) and $kukarow['extranet'] == "" and $yhtiorow['konserni'] == "indu") {
 					$maksuehtoteksti .= " / ".hae_chn_teksti($asiakas_row['chn'], $kieli);
+					if ($asiakas_row['verkkotunnus'] != '') $maksuehtoteksti .= " / {$asiakas_row['verkkotunnus']}";
 				}
-
-				if ($asiakas_row['verkkotunnus'] != '') $maksuehtoteksti .= " / {$asiakas_row['verkkotunnus']}";
 
 				list($ff_string, $ff_font) = pdf_fontfit($maksuehtoteksti, 265, $pdf, $norm);
 				$pdf->draw_text(310, 656, $ff_string, $thispage, $ff_font);

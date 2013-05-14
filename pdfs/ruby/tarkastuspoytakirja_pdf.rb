@@ -1,8 +1,10 @@
+#!/bin/env ruby
+# encoding: utf-8
+
 require 'rubygems'
 require 'prawn'
 require 'json'
 require 'logger'
-
 
 class TarkastuspoytakirjaPDF
 
@@ -155,7 +157,7 @@ class TarkastuspoytakirjaPDF
       @pdf.draw_text value[:header], :style => :bold, :at => [@x, @y]
       @pdf.draw_text value[:value], :style => :normal, :at => [@x+100, @y]
 
-      @y -= 15      
+      @y -= 15
     end
   end
 
@@ -164,7 +166,7 @@ class TarkastuspoytakirjaPDF
       @pdf.draw_text value[:header], :style => :bold, :at => [@x, @y]
       @pdf.draw_text value[:value], :style => :normal, :at => [@x+100, @y]
 
-      @y -= 15      
+      @y -= 15
     end
   end
 
@@ -173,7 +175,7 @@ class TarkastuspoytakirjaPDF
       @pdf.draw_text value[:header], :style => :bold, :at => [@x, @y]
       @pdf.draw_text value[:value], :style => :normal, :at => [@x+100, @y]
 
-      @y -= 15      
+      @y -= 15
     end
   end
 
@@ -366,7 +368,8 @@ class TarkastuspoytakirjaPDF
   end
 
   def logo
-    @pdf.image "/Users/joonas/Dropbox/Devlab yleiset/Projektit/Turvata/safetyeasy dokumentaatiot/Raporttimallit/turvanasi_logo.png", :scale => 0.7, :at => [0, 540]
+    #@pdf.image "/Users/joonas/Dropbox/Devlab yleiset/Projektit/Turvata/safetyeasy dokumentaatiot/Raporttimallit/turvanasi_logo.png", :scale => 0.7, :at => [0, 540]
+    @pdf.image File.dirname(__FILE__) + '/../../pics/turvanasi_logo.png', :scale => 0.7, :at => [0, 540]
   end
 
   def tarkastuspoytakirja_header

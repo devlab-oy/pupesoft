@@ -1,3 +1,6 @@
+#!/bin/env ruby
+# encoding: utf-8
+
 require 'rubygems'
 require 'prawn'
 require 'json'
@@ -138,7 +141,8 @@ class PoikkeamaraporttiPDF
   end
 
   def logo
-    @pdf.image "/Users/joonas/Dropbox/Devlab yleiset/Projektit/Turvata/safetyeasy dokumentaatiot/Raporttimallit/turvanasi_logo.png", :scale => 0.7, :at => [@pdf_x, @pdf_y]
+    #@pdf.image "/Users/joonas/Dropbox/Devlab yleiset/Projektit/Turvata/safetyeasy dokumentaatiot/Raporttimallit/turvanasi_logo.png", :scale => 0.7, :at => [@pdf_x, @pdf_y]
+    @pdf.image File.dirname(__FILE__) + '/../../pics/turvanasi_logo.png', :scale => 0.7, :at => [@pdf_x, @pdf_y]
   end
 
   def company_info

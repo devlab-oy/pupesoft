@@ -1,3 +1,6 @@
+#!/bin/env ruby
+# encoding: utf-8
+
 require 'rubygems'
 require 'prawn'
 require 'json'
@@ -91,7 +94,8 @@ class KalustoraporttiPDF
   end
 
   def logo
-    @pdf.image "/Users/joonas/Dropbox/Devlab yleiset/Projektit/Turvata/safetyeasy dokumentaatiot/Raporttimallit/turvanasi_logo.png", :scale => 0.7, :at => [@pdf_x, @pdf_y]
+    #@pdf.image "/Users/joonas/Dropbox/Devlab yleiset/Projektit/Turvata/safetyeasy dokumentaatiot/Raporttimallit/turvanasi_logo.png", :scale => 0.7, :at => [@pdf_x, @pdf_y]
+    @pdf.image File.dirname(__FILE__) + '/../../pics/turvanasi_logo.png', :scale => 0.7, :at => [@pdf_x, @pdf_y]
   end
 
   def company_info
@@ -107,7 +111,7 @@ class KalustoraporttiPDF
       @pdf.draw_text value[:header], :style => :bold, :at => [@pdf_x, @pdf_y]
       @pdf.draw_text value[:value], :style => :normal, :at => [@pdf_x+100, @pdf_y]
 
-      @pdf_y -= 15      
+      @pdf_y -= 15
     end
   end
 
@@ -319,6 +323,5 @@ if !ARGV[0].empty?
   end
   puts files
 else
-  #error
-  #exit
+  puts 'argv0 is empty'
 end

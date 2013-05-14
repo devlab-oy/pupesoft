@@ -416,6 +416,11 @@ function echo_kayttoliittyma($request = array()) {
 
 	echo_palkinto_rivi_template();
 
+	echo "<input type='hidden' id='ehto_arvo_tyhja_message' value='".t("Ehdon arvo on tyhjä")."' />";
+	echo "<input type='hidden' id='aliehto_arvo_tyhja_message' value='".t("Aliehdon arvo on tyhjä")."' />";
+	echo "<input type='hidden' id='ehto_minimi_message' value='".t("Ehtoja pitää olla vähintään yksi")."' />";
+	echo "<input type='hidden' id='nimi_tyhja_message' value='".t("Nimi on tyhjä")."' />";
+
 	echo "<form name='kampanja_form' method='POST' action='' class='multisubmit'>";
 
 	if (!empty($request['kampanja']['tunnus'])) {

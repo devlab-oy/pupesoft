@@ -342,27 +342,26 @@ function bind_kampanja_form_submit() {
 function tarkista() {
 	var ok = true;
 	if ($('#kampanja_nimi').val() === '') {
-		alert("Nimi on tyhjä");
+		alert($('#nimi_tyhja_message').val());
 		ok = false;
 	}
 
 	$('#ehdot .ehto_arvo').each(function(index, ehto_input) {
-		console.log(ehto_input);
 		if ($(ehto_input).val() === '') {
-			alert("Ehdon arvo on tyhjä");
+			alert($('#ehto_arvo_tyhja_message').val());
 			ok = false;
 		}
 	});
 
 	$('#ehdot .aliehto_arvo').each(function(index, aliehto_input) {
 		if ($(aliehto_input).val() === '') {
-			alert("Aliehdon arvo on tyhjä");
+			alert($('#aliehto_arvo_tyhja_message').val());
 			ok = false;
 		}
 	});
 
 	if ($('#ehdot .ehto_rivi').length < 1) {
-		alert("Ehtoja pitää olla vähintään yksi");
+		alert($('#ehto_minimi_message').val());
 		ok = false;
 	}
 

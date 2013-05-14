@@ -28,13 +28,15 @@ $request = array(
 	'tilausrivi_tunnus'	 => $tilausrivi_tunnus,
 	'lasku_tunnus'		 => $lasku_tunnus,
 	'uusi_laite'		 => $uusi_laite,
+	'vanha_laite_tunnus' => $vanha_laite_tunnus,
 );
 
 if ($request['tee'] == 'vaihda_laite') {
 	$request['uusi_laite'] = luo_uusi_laite($request['uusi_laite']);
 
-	//vanha työmääräys rivi pitää asettaa var P tilaan
+	//vanha työmääräys rivi pitää asettaa var P tilaan, jotta tekemätön työmääräys rivi ei mene laskutukseen ja tyomaarayksen status Laite vaihdettu tilaan, jotta käyttöliittymä on selkeämpi
 	aseta_tyomaarays_var($request['tilausrivi_tunnus'], 'P');
+	aseta_tyomaarays_status($request['tilausrivi_tunnus'], 'V');
 
 	//pitää luoda uusi työmääräys rivi johon tulee laitteen vaihto tuote tjsp
 	$request['vaihto_toimenpide'] = hae_vaihtotoimenpide_tuote();
@@ -43,8 +45,22 @@ if ($request['tee'] == 'vaihda_laite') {
 	//vaihtotoimenpide ja uusi laite pitää linkata toisiinsa
 	linkkaa_uusi_laite_vaihtotoimenpiteeseen($request['uusi_laite'], $request['vaihto_toimenpide_tyomaarays_tilausrivi_tunnus']);
 
+	//@TODO: en ole ihan varma pitääkö laite unlinkata tekemättömästä työmääräys rivistä
+	//nollaa_vanhan_toimenpiderivin_asiakas_positio($request['tilausrivi_tunnus']);
+
 	//työmääräykselle pitää liittää uusi laite
-	luo_uusi_tyomaarays_rivi($request['uusi_laite'], $request['lasku_tunnus']);
+	$request['uusi_laite_tyomaarays_tilausrivi_tunnus'] = luo_uusi_tyomaarays_rivi($request['uusi_laite'], $request['lasku_tunnus']);
+
+	//kun toimenpide vaihtuu työmääräyksellä niin vanha toimenpide laitetaan P tilaan ja se linkataan uuteen toimenpide riviin tilausrivin_lisatiedot.tilausrivilinkki kentän avulla, jotta raportit osaavat näyttää mikä toimenpide vaihdettiin mihin.
+	paivita_uuden_toimenpide_rivin_tilausrivi_linkki($request['vaihto_toimenpide_tyomaarays_tilausrivi_tunnus'], $request['tilausrivi_tunnus']);
+
+	//työmääräykselle lisätään myös uusi laite. tähän rivin pitää linkata vanha toimenpide tilausrivi
+	paivita_uuden_toimenpide_rivin_tilausrivi_linkki($request['uusi_laite_tyomaarays_tilausrivi_tunnus'], $request['tilausrivi_tunnus']);
+
+	//@TODO tee tämä funktio loppuun
+	aseta_vanha_laite_poistettu_tilaan($request['vanha_laite_tunnus']);
+
+	echo '<font class="message">'.t("Laite vaihdettu").'</font>';
 
 	//@TODO SELVITÄ PITÄÄKÖ TYÖJONO NÄKYMÄSSÄ NYKÄ VAR P TUOTTEITA.
 	//@TODO TODELLA TÄRKEÄÄ. KOSKA VANHA LAITE ON POISTETTU NIIN PITÄÄ KÄYDÄ SEN TYÖMÄÄRÄYKSET LÄPI JA MERKATA NE POISTETUKSI KOSKA LAITETTA EI SIIS OLE OLEMASSA ENÄÄ.
@@ -92,6 +108,22 @@ function aseta_tyomaarays_var($tilausrivi_tunnus, $var) {
 	pupe_query($query);
 }
 
+function aseta_tyomaarays_status($tilausrivi_tunnus, $status) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	UPDATE tyomaarays
+				JOIN lasku
+				ON ( lasku.yhtio = tyomaarays.yhtio
+					AND lasku.tunnus = tyomaarays.otunnus )
+				JOIN tilausrivi
+				ON ( tilausrivi.yhtio = lasku.yhtio
+					AND tilausrivi.otunnus = lasku.tunnus
+					AND tilausrivi.tunnus = '{$tilausrivi_tunnus}')
+				SET tyomaarays.tyostatus = '{$status}'
+				WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'";
+	pupe_query($query);
+}
+
 function luo_uusi_tyomaarays_rivi($tuote, $lasku_tunnus) {
 	global $kukarow, $yhtiorow;
 
@@ -131,13 +163,13 @@ function luo_uusi_tyomaarays_rivi($tuote, $lasku_tunnus) {
 				jaksotettu= ''";
 	pupe_query($query);
 
-	$toimenpide_tilausrivi_tunnus = mysql_insert_id();
+	$tilausrivi_tunnus = mysql_insert_id();
 
 	$query = "	INSERT INTO tilausrivin_lisatiedot
 				SET yhtio= '{$kukarow['yhtio']}',
 				positio = '',
 				toimittajan_tunnus= '',
-				tilausrivitunnus= '{$toimenpide_tilausrivi_tunnus}',
+				tilausrivitunnus= '{$tilausrivi_tunnus}',
 				jarjestys= '0',
 				vanha_otunnus= '{$lasku_tunnus}',
 				ei_nayteta= '',
@@ -146,13 +178,14 @@ function luo_uusi_tyomaarays_rivi($tuote, $lasku_tunnus) {
 				laatija = '{$kukarow['kuka']}'";
 	pupe_query($query);
 
-	return $toimenpide_tilausrivi_tunnus;
+	return $tilausrivi_tunnus;
 }
 
 function hae_laite_ja_asiakastiedot($tilausrivi_tunnus) {
 	global $kukarow, $yhtiorow;
 
 	$query = "	SELECT laite.*,
+				laite.tunnus as laite_tunnus,
 				tilausrivi.tunnus as tilausrivi_tunnus,
 				paikka.nimi as paikka_nimi,
 				paikka.tunnus as paikka_tunnus,
@@ -211,6 +244,32 @@ function linkkaa_uusi_laite_vaihtotoimenpiteeseen($uusi_laite, $tilausrivi_tunnu
 	pupe_query($query);
 }
 
+function nollaa_vanhan_toimenpiderivin_asiakas_positio($tilausrivi_tunnus) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	UPDATE tilausrivi
+				JOIN tilausrivin_lisatiedot
+				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+				SET tilausrivin_lisatiedot.asiakkaan_positio = '0'
+				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.tunnus = '{$tilausrivi_tunnus}'";
+	pupe_query($query);
+}
+
+function paivita_uuden_toimenpide_rivin_tilausrivi_linkki($toimenpide_tilausrivi_tunnus, $vanha_tilausrivi_tunnus) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	UPDATE tilausrivi
+				JOIN tilausrivin_lisatiedot
+				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+				SET tilausrivin_lisatiedot.tilausrivilinkki = '{$vanha_tilausrivi_tunnus}'
+				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.tunnus = '{$toimenpide_tilausrivi_tunnus}'";
+	pupe_query($query);
+}
+
 function hae_paikat() {
 	global $kukarow, $yhtiorow;
 
@@ -227,6 +286,12 @@ function hae_paikat() {
 	return $paikat;
 }
 
+function aseta_vanha_laite_poistettu_tilaan($vanha_laite_tunnus) {
+	global $kukarow, $yhtiorow;
+
+	//@TODO tee tämä loppuun, laitteelle uusi kenttää jne.
+}
+
 function echo_laitteen_vaihto_form($request = array()) {
 	global $kukarow, $yhtiorow, $oikeurow;
 
@@ -234,6 +299,7 @@ function echo_laitteen_vaihto_form($request = array()) {
 	echo "<input type='hidden' name='tee' value='vaihda_laite' />";
 	echo "<input type='hidden' name='tilausrivi_tunnus' value='{$request['laite']['tilausrivi_tunnus']}' />";
 	echo "<input type='hidden' name='lasku_tunnus' value='{$request['laite']['lasku_tunnus']}' />";
+	echo "<input type='hidden' name='vanha_laite_tunnus' value='{$request['laite']['laite_tunnus']}' />";
 	echo "<table>";
 
 	echo "<tr>";

@@ -781,7 +781,7 @@
 
 			// Haetaan kaikki tiliöinnit
 			$query = "	SELECT tiliointi.tilino, $groupsarake groupsarake, $alkuquery1
-		 	            FROM tiliointi USE INDEX (yhtio_tilino_tapvm)
+		 	            FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
 			            $laskujoini
 			            $asiakasjoini
 			            $konsernijoini
@@ -816,7 +816,7 @@
 
 				// Haetaan firman tulos
 				$query = "	SELECT $groupsarake groupsarake, $alkuquery1
-			 	            FROM tiliointi USE INDEX (yhtio_tilino_tapvm)
+			 	            FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
 				            $laskujoini
 				            $asiakasjoini
 				            $konsernijoini

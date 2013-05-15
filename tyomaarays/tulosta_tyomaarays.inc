@@ -241,7 +241,7 @@ if (!function_exists('tyomaarays_alku')) {
 					}
 
 					$pdf->draw_text($al_lask, $kala, $al_row["selitetark"].":",	$thispage, $norm);
-					$pdf->draw_text($al_lask+70, $kala, $laskurow[$kentta], 	$thispage, $norm);
+					$pdf->draw_text($al_lask+110, $kala, $laskurow[$kentta], 	$thispage, $norm);
 					$al_fask++;
 					$al_lask += 275;
 				}

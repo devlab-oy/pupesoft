@@ -48,6 +48,8 @@
 		mysql_field_name($result, $i) == "rahti" or
 		mysql_field_name($result, $i) == "rahti_etu" or
 		mysql_field_name($result, $i) == "rahti_etu_alv" or
+		mysql_field_name($result, $i) == "pyoristys_erot" or
+		mysql_field_name($result, $i) == "pyoristys_erot_alv" or
 		mysql_field_name($result, $i) == "maa_lahetys" or
 		mysql_field_name($result, $i) == "maa_maara" or
 		mysql_field_name($result, $i) == "maa_alkupera" or

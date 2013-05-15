@@ -538,6 +538,12 @@ function aja_ruby2($filepath) {
 
 function aja_ruby($filepath) {
 	global $pupe_root_polku;
-	return system("ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}");
+
+	$cmd = "ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}";
+	$return = exec($cmd, $output, $return_code);
+
+	// Palautetaan ensimmäinen rivi outputista, siinä on filenimet
+	return $output[0];
 }
+
 require ("inc/footer.inc");

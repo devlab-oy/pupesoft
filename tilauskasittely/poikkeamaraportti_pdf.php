@@ -176,6 +176,13 @@ function array_utf8_encode(&$item, $key) {
 function aja_ruby($filepath) {
 	global $pupe_root_polku;
 
-	return exec("ruby {$pupe_root_polku}/pdfs/ruby/poikkeamaraportti_pdf.rb {$filepath}");
+	$cmd = "ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}";
+	$return = exec($cmd, $output, $return_code);
+
+	//poistetaan json tiedosto
+	unlink($filepath);
+
+	// Palautetaan ensimmäinen rivi outputista, siinä on filenimet
+	return $output[0];
 }
 ?>

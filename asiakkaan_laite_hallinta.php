@@ -485,7 +485,7 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 }
 
 function kirjoita_json_tiedosto($data) {
-	$filename = "kalustoraportti_{$data['tunnus']}.json";
+	$filename = "Kalustoraportti.json";
 	$filepath = "/tmp/{$filename}";
 
 	array_walk_recursive($data, 'array_utf8_encode');
@@ -499,47 +499,14 @@ function array_utf8_encode(&$item, $key) {
 	$item = utf8_encode($item);
 }
 
-function aja_ruby2($filepath) {
-	global $pupe_root_polku;
-	echo "ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}";
-//	return proc_open("sudo ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}");
-
-	$descriptorspec = array(
-		0	 => array("pipe", "r"), // stdin is a pipe that the child will read from
-		1	 => array("pipe", "w"), // stdout is a pipe that the child will write to
-		2	 => array("file", "/tmp/error.txt", "a") // stderr is a file to write to
-	);
-
-	$cwd = '/tmp';
-	$env = array('some_option' => 'aeiou');
-
-	$process = proc_open("ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}", $descriptorspec, $pipes, $cwd, $env);
-
-	if (is_resource($process)) {
-		// $pipes now looks like this:
-		// 0 => writeable handle connected to child stdin
-		// 1 => readable handle connected to child stdout
-		// Any error output will be appended to /tmp/error-output.txt
-
-		fwrite($pipes[0], '<?php print_r($_ENV); ?>');
-		fclose($pipes[0]);
-
-		echo stream_get_contents($pipes[1]);
-		fclose($pipes[1]);
-
-		// It is important that you close any pipes before calling
-		// proc_close in order to avoid a deadlock
-		$return_value = proc_close($process);
-
-		//echo "command returned $return_value\n";
-	}
-}
-
 function aja_ruby($filepath) {
 	global $pupe_root_polku;
 
 	$cmd = "ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}";
 	$return = exec($cmd, $output, $return_code);
+
+	//poistetaan json tiedosto
+	unlink($filepath);
 
 	// Palautetaan ensimmäinen rivi outputista, siinä on filenimet
 	return $output[0];

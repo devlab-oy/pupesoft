@@ -538,8 +538,6 @@ function aja_ruby2($filepath) {
 
 function aja_ruby($filepath) {
 	global $pupe_root_polku;
-	$return = array();
-	exec("ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}", $return);
-	return $return;
+	return system("ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}");
 }
 require ("inc/footer.inc");

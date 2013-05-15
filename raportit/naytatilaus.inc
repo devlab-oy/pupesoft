@@ -100,6 +100,7 @@
 
 	if ($laskurow["tila"] == "O") {
 		echo "<th>".t("Eturahti")."</th>";
+		echo "<th>".t("Pyoristyserot")."</th>";
 	}
 
 	echo "</tr>";
@@ -134,6 +135,7 @@
 
 	if ($laskurow["tila"] == "O") {
 		echo "<td>$laskurow[rahti_etu]</td>";
+		echo "<td>$laskurow[pyoristys_erot]</td>";
 	}
 
 	echo "</tr>";

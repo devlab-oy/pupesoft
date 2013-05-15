@@ -27,6 +27,19 @@ if ($tee == "update") {
 		}
 	}
 
+	// Pyöristysero tarkistus
+	if ($llrow['volasku'] > 0 and abs($pyoristys_erot) > abs($llrow['vosumma_valuutassa'])) {
+		echo "<font class='message'>".t("VIRHE: Pyöristysero ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br><br>";
+
+		$tee = "";
+		$toiminto = "lisatiedot";
+
+		if ($nappikeikalla == 'ollaan') {
+			$nappikeikalle = 'menossa';
+			$nappikeikalla = '';
+		}
+	}
+
 	if ((float) $erikoisale_saapuminen < 0 or (float) $erikoisale_saapuminen > 100) {
 		echo "<font class='message'>".t("VIRHE: Erikoisale pitää olla alle 100% ja yli 0%")."!</font><br><br>";
 
@@ -55,7 +68,7 @@ if ($tee == "update") {
 }
 
 if ($tee == "update") {
-	if ($laskurow["erikoisale_saapuminen"] == $erikoisale_saapuminen and $laskurow["rahti_etu"] == $rahti_etu and $laskurow["rahti_etu_alv"] == $rahti_etu_alv) {
+	if ($laskurow["erikoisale_saapuminen"] == $erikoisale_saapuminen and $laskurow["rahti_etu"] == $rahti_etu and $laskurow["rahti_etu_alv"] == $rahti_etu_alv and $laskurow['pyoristys_erot'] == $pyoristys_erot and $laskurow['pyoristys_erot_alv'] == $pyoristys_erot_alv) {
 		$kohdistettu = $laskurow["kohdistettu"];
 	}
 	else {
@@ -72,28 +85,32 @@ if ($tee == "update") {
 	// Hoidetaan pilkut pisteiksi....
 	$rahti_etu 				= str_replace (",", ".", $rahti_etu);
 	$rahti 					= str_replace (",", ".", $rahti);
-	$rahti_huolinta 		= str_replace (",", ".", $rahti_huolinta);
-	$erikoisale_saapuminen 	= str_replace (",", ".", $erikoisale_saapuminen);
+	$rahti_huolinta			= str_replace (",", ".", $rahti_huolinta);
+	$pyoristys_erot			= str_replace (",", ".", $pyoristys_erot);
+	$pyoristys_erot_alv		= str_replace (",", ".", $pyoristys_erot_alv);
+	$erikoisale_saapuminen	= str_replace (",", ".", $erikoisale_saapuminen);
 	$bruttopaino 			= str_replace (",", ".", $bruttopaino);
 
 	$toimaika 		= $vv."-".$kk."-".$pp;
 	$ultilno 		= tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
 	$query = "	UPDATE lasku
-				SET maa_lahetys 		= '$maa_lahetys',
-				maa_maara 				= '$maa_maara',
+				SET maa_lahetys			= '$maa_lahetys',
+				maa_maara				= '$maa_maara',
 				kauppatapahtuman_luonne = '$ktapahtuman_luonne',
-				kuljetusmuoto 			= '$kuljetusmuoto',
-				bruttopaino 			= '$bruttopaino',
-				rahti_huolinta 			= '$rahti_huolinta',
+				kuljetusmuoto			= '$kuljetusmuoto',
+				bruttopaino				= '$bruttopaino',
+				rahti_huolinta			= '$rahti_huolinta',
 				rahti_etu 				= '$rahti_etu',
-				rahti_etu_alv 			= '$rahti_etu_alv',
+				rahti_etu_alv			= '$rahti_etu_alv',
 				rahti 					= '$rahti',
-				erikoisale_saapuminen 	= '$erikoisale_saapuminen',
-				toimaika 				= '$toimaika',
-				kohdistettu 			= '$kohdistettu',
-				comments	 			= '$kommentti',
-				ultilno 				= '$ultilno'
+				pyoristys_erot			= '$pyoristys_erot',
+				pyoristys_erot_alv		= '$pyoristys_erot_alv',
+				erikoisale_saapuminen	= '$erikoisale_saapuminen',
+				toimaika				= '$toimaika',
+				kohdistettu				= '$kohdistettu',
+				comments				= '$kommentti',
+				ultilno					= '$ultilno'
 				WHERE tunnus = '$otunnus'
 				and yhtio 	 = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -122,8 +139,8 @@ if ($tee == "update") {
 
 if ($tee == "") {
 
-	$query = "	SELECT *
-			  	FROM lasku
+	$query = "SELECT *
+			  FROM lasku
 			  	WHERE tunnus = '$otunnus'
 				and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -321,8 +338,18 @@ if ($tee == "") {
 		$lisatiedot = "<font class='message'>".t("VIRHE: Eturahti ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br>";
 	}
 
+	if (abs($laskurow['pyoristys_erot']) > abs($llrow['vosumma_valuutassa'])) {
+		$pyoristusero_lisatiedot .= "<font class='message'>".t("VIRHE: Pyöristysero ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br>";
+	}
+
 	echo "<tr><th valign='top'>".t("Nettopaino").":</th><td valign='top' colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td><td valign='top' class='back' width='450'>$lisamassa</td></tr>";
-	echo "<tr><th valign='top'>".t("Veroton")." ".t("Eturahti").":</th><td valign='top'><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td colspan='2' valign='top' nowrap>".t("Eturahdin ALV").": ".alv_popup('rahti_etu_alv', $laskurow["rahti_etu_alv"])."</td><td class='back'> $lisatiedot </td></tr>";
+
+	// Näytetään eturahti vain jos yhtiönparametri jalkilaskenta_kuluperuste == ''
+	if ($yhtiorow['jalkilaskenta_kuluperuste'] == '' or $laskurow['rahti_etu'] != 0) {
+		echo "<tr><th valign='top'>".t("Veroton")." ".t("Eturahti").":</th><td valign='top'><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td colspan='2' valign='top' nowrap>".t("Eturahdin ALV").": ".alv_popup('rahti_etu_alv', $laskurow["rahti_etu_alv"])."</td><td class='back'> $lisatiedot </td></tr>";
+	}
+
+	echo "<tr><th valign='top'>".t("Veroton")." ".t("Pyöristysero").":</th><td valign='top'><input type='text' id='pyoristys_erot' name='pyoristys_erot' value='$laskurow[pyoristys_erot]'></td><td colspan='2' valign='top' nowrap>".t("Pyöristyseron ALV").": ".alv_popup('pyoristys_erot_alv', $laskurow["pyoristys_erot_alv"])."</td><td class='back'>$pyoristusero_lisatiedot</td></tr>";
 	echo "<tr><th valign='top'>".t("Arvioitu kuluprosentti").":</th><td valign='top' colspan='3'><input type='text' name='rahti' value='$laskurow[rahti]'> n.nn %</td></tr>";
 	echo "<tr><th valign='top'>".t("Kulusumma")." $yhtiorow[valkoodi]:</th><td valign='top' colspan='3'><input type='text' name='rahti_huolinta' value='$laskurow[rahti_huolinta]'> ".t("ohittaa kuluprosentin")."</td></tr>";
 	echo "<tr><th valign='top'>".t("Erikoisalennus").":</th><td valign='top' colspan='3'><input type='text' name='erikoisale_saapuminen' value='$laskurow[erikoisale_saapuminen]'></td></tr>";
@@ -362,6 +389,24 @@ if ($tee == "") {
 
 	echo "</table>";
 
-	echo "<br><input type='submit' value='".t("Päivitä tiedot")."'>";
+	echo "<br><input type='submit' id='paivita' value='".t("Päivitä tiedot")."'>";
 	echo "</form>";
+
+	echo "
+		<script type='text/javascript'>
+
+			// Tarkistetaan onko pyöristyseroja muutettu ja varmistetaan
+			// käyttäjältä että tämä on ok.
+			var muutettu_pyoristyseroja = false;
+			$('#pyoristys_erot').on('change', function() {
+				muutettu_pyoristyseroja = true;
+			});
+
+			$('#paivita').on('click', function() {
+				if(muutettu_pyoristyseroja) {
+					return confirm('Olet lisännyt tai muuttanut pöyristyseroja, oletko varma?');
+				}
+			});
+
+		</script>";
 }

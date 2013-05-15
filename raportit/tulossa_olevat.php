@@ -76,6 +76,7 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 				where tilausrivi.yhtio	= '{$kukarow['yhtio']}'
 				and tilausrivi.varattu 	> '0'
 				and tilausrivi.tyyppi 	= 'O'
+				and tilausrivi.rivihinta = 0
 				{$lisa}
 				group by 1,2,3,4,5
 				order by {$sorttaus} lasku.nimi, tilausrivi.tuoteno";

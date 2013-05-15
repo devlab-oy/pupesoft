@@ -499,7 +499,7 @@ function array_utf8_encode(&$item, $key) {
 	$item = utf8_encode($item);
 }
 
-function aja_ruby($filepath) {
+function aja_ruby2($filepath) {
 	global $pupe_root_polku;
 	echo "ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}";
 //	return proc_open("sudo ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}");
@@ -534,10 +534,11 @@ function aja_ruby($filepath) {
 		//echo "command returned $return_value\n";
 	}
 }
-//function aja_ruby($filepath) {
-//	global $pupe_root_polku;
-//	$lol = exec("ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}");
-//	echo $lol;
-//	return $lol;
-//}
+
+function aja_ruby($filepath) {
+	global $pupe_root_polku;
+	$lol = passthru("ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}");
+	echo $lol;
+	return $lol;
+}
 require ("inc/footer.inc");

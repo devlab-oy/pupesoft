@@ -502,6 +502,8 @@ function array_utf8_encode(&$item, $key) {
 function aja_ruby($filepath) {
 	global $pupe_root_polku;
 	$lol = exec("ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}");
+	echo "fdsfdssd";
+	error_log('fdsfdds');
 	echo $lol;
 	return $lol;
 }

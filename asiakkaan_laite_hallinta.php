@@ -270,6 +270,7 @@ function echo_kohteet_table($asiakkaan_kohteet = array(), $request = array()) {
 	echo "<br/>";
 
 	if (!empty($request['pdf_filepath'])) {
+		var_dump($request['pdf_filepath']);
 		$tiedostot = explode(' ', $request['pdf_filepath']);
 		foreach ($tiedostot as $tiedosto) {
 			echo_tallennus_formi($tiedosto, t("Kalustoraportti"), 'pdf');
@@ -538,7 +539,6 @@ function aja_ruby2($filepath) {
 function aja_ruby($filepath) {
 	global $pupe_root_polku;
 	$lol = passthru("ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}");
-	echo $lol;
 	return $lol;
 }
 require ("inc/footer.inc");

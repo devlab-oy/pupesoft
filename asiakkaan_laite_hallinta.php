@@ -269,7 +269,7 @@ function echo_kohteet_table($asiakkaan_kohteet = array(), $request = array()) {
 	echo "<br/>";
 	echo "<br/>";
 
-	if(!empty($request['pdf_filepath'])) {
+	if (!empty($request['pdf_filepath'])) {
 		$tiedostot = explode(' ', $request['pdf_filepath']);
 		foreach ($tiedostot as $tiedosto) {
 			echo_tallennus_formi($tiedosto, t("Kalustoraportti"), 'pdf');
@@ -501,10 +501,43 @@ function array_utf8_encode(&$item, $key) {
 
 function aja_ruby($filepath) {
 	global $pupe_root_polku;
-	$lol = exec("ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}");
-	echo "fdsfdssd";
-	error_log('fdsfdds');
-	echo $lol;
-	return $lol;
+	echo "ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}";
+//	return proc_open("sudo ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}");
+
+	$descriptorspec = array(
+		0	 => array("pipe", "r"), // stdin is a pipe that the child will read from
+		1	 => array("pipe", "w"), // stdout is a pipe that the child will write to
+		2	 => array("file", "/var/log/httpd/demo.devlab.fi_error_log", "a") // stderr is a file to write to
+	);
+
+	$cwd = '/tmp';
+	$env = array('some_option' => 'aeiou');
+
+	$process = proc_open("ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}", $descriptorspec, $pipes, $cwd, $env);
+
+	if (is_resource($process)) {
+		// $pipes now looks like this:
+		// 0 => writeable handle connected to child stdin
+		// 1 => readable handle connected to child stdout
+		// Any error output will be appended to /tmp/error-output.txt
+
+		fwrite($pipes[0], '<?php print_r($_ENV); ?>');
+		fclose($pipes[0]);
+
+		echo stream_get_contents($pipes[1]);
+		fclose($pipes[1]);
+
+		// It is important that you close any pipes before calling
+		// proc_close in order to avoid a deadlock
+		$return_value = proc_close($process);
+
+		//echo "command returned $return_value\n";
+	}
 }
+//function aja_ruby($filepath) {
+//	global $pupe_root_polku;
+//	$lol = exec("ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}");
+//	echo $lol;
+//	return $lol;
+//}
 require ("inc/footer.inc");

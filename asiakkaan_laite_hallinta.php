@@ -270,7 +270,6 @@ function echo_kohteet_table($asiakkaan_kohteet = array(), $request = array()) {
 	echo "<br/>";
 
 	if (!empty($request['pdf_filepath'])) {
-		var_dump($request['pdf_filepath']);
 		$tiedostot = explode(' ', $request['pdf_filepath']);
 		foreach ($tiedostot as $tiedosto) {
 			echo_tallennus_formi($tiedosto, t("Kalustoraportti"), 'pdf');

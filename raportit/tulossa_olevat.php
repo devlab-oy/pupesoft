@@ -71,12 +71,12 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 
 	$query = "	SELECT lasku.tunnus, lasku.ytunnus, lasku.nimi, tilausrivi.tuoteno, tilausrivi.toimaika, lasku.valkoodi,
 				count(*) maara, sum(tilausrivi.varattu) tilattu, sum(tilausrivi.varattu * tilausrivi.hinta * {$query_ale_lisa}) arvo
-				from tilausrivi
+				from tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 				JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 				where tilausrivi.yhtio	= '{$kukarow['yhtio']}'
 				and tilausrivi.varattu 	> '0'
 				and tilausrivi.tyyppi 	= 'O'
-				and tilausrivi.rivihinta = 0
+				and tilausrivi.laskutettuaika = '0000-00-00'
 				{$lisa}
 				group by 1,2,3,4,5
 				order by {$sorttaus} lasku.nimi, tilausrivi.tuoteno";

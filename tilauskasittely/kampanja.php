@@ -852,32 +852,35 @@ function nayta_kampanjat() {
 function echo_kampanjat($kampanjat) {
 	global $kukarow, $yhtiorow;
 
-	echo "<table id='ehdot'>";
+	if (count($kampanjat) > 0) {
 
-	echo "<tr>";
-	echo "<th>", t("Nimi"), "</th>";
-	echo "<th></th>";
-	echo "<tr>";
+		echo "<table id='ehdot'>";
 
-	foreach ($kampanjat as $kampanja) {
-		echo "<tr class='aktiivi'>";
-		echo "<td>";
-		echo $kampanja['nimi'];
-		echo "</td>";
-		echo "<td>";
-		echo "<form method='get' action='kampanja.php'>";
-		echo "<input type='hidden' name='tee' value='uusi_kampanja'>";
-		echo "<input type='hidden' name='kampanja_tunnus' value='{$kampanja['tunnus']}'>";
-		echo "<input type='submit' value='".t("Muokkaa")."'>";
-		echo "</form>";
-		echo "</td>";
 		echo "<tr>";
+		echo "<th>", t("Nimi"), "</th>";
+		echo "<th></th>";
+		echo "<tr>";
+
+		foreach ($kampanjat as $kampanja) {
+			echo "<tr class='aktiivi'>";
+			echo "<td>";
+			echo $kampanja['nimi'];
+			echo "</td>";
+			echo "<td>";
+			echo "<form method='get' action='kampanja.php'>";
+			echo "<input type='hidden' name='tee' value='uusi_kampanja'>";
+			echo "<input type='hidden' name='kampanja_tunnus' value='{$kampanja['tunnus']}'>";
+			echo "<input type='submit' value='".t("Muokkaa")."'>";
+			echo "</form>";
+			echo "</td>";
+			echo "<tr>";
+		}
+
+		echo "</table>";
+
+		echo "<hr>";
+		echo "<br>";
 	}
-
-	echo "</table>";
-
-	echo "<hr>";
-	echo "<br>";
 
 	echo "<form method='get' action='kampanja.php'>";
 	echo "<input type='hidden' name='tee' value='uusi_kampanja'>";

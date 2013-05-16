@@ -1236,7 +1236,41 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	}
 	elseif ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO")) {
 		// Työmääräys valmis
-		require("tyomaarays/tyomaarays.inc");
+		if ($yhtiorow['tyomaarayksen_kayttaytyminen'] == 'K' and $tyomaarayksen_kayttaytyminen == 'K') {
+
+			require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
+
+			$kukarow['kesken'] = '';
+
+			// Luodaan uusi myyntitilaus
+			$id = luo_myyntitilausotsikko("RIVISYOTTO", $laskurow['liitostunnus']);
+
+			// Päivitetään työmääräyksen tunnus myyntilaskulle
+
+			// Haetaan työmääräyksen rivit
+			$query = "SELECT * FROM tilausrivi WHERE yhtio='{$kukarow['yhtio']}' AND otunnus='{$laskurow['tunnus']}'";
+			$result = pupe_query($query);
+
+			// Lisätään rivit uudelle laskutunnukselle
+			$lasku_query = "SELECT * FROM lasku WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='$id'";
+			$lasku_result = pupe_query($lasku_query);
+			$laskurow = mysql_fetch_assoc($lasku_result);
+
+			// Kopsataan työmääräyksen rivit
+			while($row = mysql_fetch_assoc($result)) {
+				// Tarvitaan tuoterow
+				$tuote_query = "SELECT * FROM tuote WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$row['tuoteno']}'";
+				$tuote_result = pupe_query($query);
+				$tuote_row = mysql_fetch_assoc($tuote_result);
+
+				$params = array('trow' => $tuote_row, 'laskurow' => $laskurow, 'tuoteno' => $row['tuoteno'], 'kpl' => $row['tilkpl']);
+				$lisatyt_rivi = pupesoft_lisaa_rivi($params);
+			}
+
+		}
+		else {
+			require("tyomaarays/tyomaarays.inc");
+		}
 	}
 	elseif ($kukarow["extranet"] == "" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") and $msiirto == "") {
 		// Siirtolista, myyntitili, valmistus valmis
@@ -7635,6 +7669,17 @@ if ($tee == '') {
 				}
 
 				echo "</form>";
+
+				// Kopioidaan myyntitilaus työmääräyksesta ja talletetaan työmääräyksen tunnus laskun_lisatietoihin
+				if ($yhtiorow['tyomaarayksen_kayttaytyminen'] == 'K') {
+					echo "<form>";
+					echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+					echo "<input type='hidden' name='toim' value='$toim'>";
+					echo "<input type='hidden' name='tee' value='VALMIS'>";
+					echo "<input type='hidden' name='tyomaarayksen_kayttaytyminen' value='K'>";
+					echo "<input type='submit' value='Kopio työmääräysestä myyntitilaus'>";
+					echo "</form>";
+				}
 			}
 
 			echo "</td>";

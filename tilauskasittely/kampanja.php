@@ -162,18 +162,21 @@ function luo_uusi_kampanja($request) {
 function validoi_kampanja_ehto_tai_aliehto($ehto) {
 	global $kukarow, $yhtiorow;
 
+	$echo = "";
 	switch ($ehto['kohde']) {
 		case 'asiakas':
 			$query = "	SELECT *
 						FROM asiakas
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$ehto['arvo']}'";
+			$echo = t('Asiakasta ei löydy');
 			break;
 		case 'asiakas_ytunnus':
 			$query = "	SELECT *
 						FROM asiakas
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND ytunnus = '{$ehto['arvo']}'";
+			$echo = t('Asiakasta ei löydy');
 			break;
 		case 'asiakaskategoria':
 			$query = "	SELECT *
@@ -181,12 +184,14 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND laji = 'Asiakas'
 						AND tunnus = '{$ehto['arvo']}'";
+			$echo = t('Asiakaskategoriaa ei löydy');
 			break;
 		case 'tuote':
 			$query = "	SELECT *
 						FROM tuote
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tuoteno = '{$ehto['arvo']}'";
+			$echo = t('Tuotetta ei löydy');
 			break;
 		case 'tuotekategoria':
 			$query = "	SELECT *
@@ -194,6 +199,7 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND laji = 'Tuote'
 						AND tunnus = '{$ehto['arvo']}'";
+			$echo = t('Tuotekategoriaa ei löydy');
 			break;
 		case 'tuoteosasto':
 			$query = "	SELECT *
@@ -201,6 +207,7 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND laji = 'OSASTO'
 						AND selite = '{$ehto['arvo']}'";
+			$echo = t('Tuoteosastoa ei löydy');
 			break;
 		case 'tuoteryhma':
 			$query = "	SELECT *
@@ -208,6 +215,7 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND laji = 'TRY'
 						AND selite = '{$ehto['arvo']}'";
+			$echo = t('Tuoteryhmää ei löydy');
 			break;
 		case 'kappaleet':
 			if (!is_numeric($ehto['arvo'])) {
@@ -229,6 +237,7 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
+			echo "<font class='error'>$echo</font>";
 			return false;
 		}
 	}
@@ -246,10 +255,12 @@ function validoi_palkinto_rivi($palkinto_rivi) {
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
+		echo t('Palkintorivin tuotetta ei löydy');
 		return false;
 	}
 
 	if (!is_numeric($palkinto_rivi['kpl'])) {
+		echo t('Palkintorivin kpl ei ole numero');
 		return false;
 	}
 
@@ -463,7 +474,7 @@ function echo_kayttoliittyma($request = array()) {
 	echo "</table>";
 
 	echo "<br/>";
-	echo "<button id='uusi_ehto'>".t("Uusi ehto")."</button>";
+	echo "<button type='button' id='uusi_ehto'>".t("Uusi ehto")."</button>";
 
 	echo "<hr/>";
 	echo "<font class='message'>", t("Palkinnot"), "</font>";
@@ -487,11 +498,11 @@ function echo_kayttoliittyma($request = array()) {
 	echo "</div>";
 
 	echo "<br/>";
-	echo "<button id='uusi_palkinto'>".t("Uusi palkinto")."</button>";
+	echo "<button type='button' id='uusi_palkinto'>".t("Uusi palkinto")."</button>";
 	echo "<hr>";
 
 	echo "<br/>";
-	echo "<input type='submit' value='".t("Tallenna kampanja")."' />";
+	echo "<input id='submit_button' type='submit' value='".t("Tallenna kampanja")."' />";
 	echo "</form>";
 }
 
@@ -533,12 +544,12 @@ function echo_kampanja_ehto($index, $kampanja_ehto) {
 
 	echo "<td>";
 	if ($kampanja_ehto['kohde'] === 'tuote' || $kampanja_ehto['kohde'] === 'tuotekategoria' || $kampanja_ehto['kohde'] === 'tuoteosasto' || $kampanja_ehto['kohde'] === 'tuoteryhma') {
-		echo "<button class='uusi_aliehto'>".t("Uusi aliehto")."</button>";
+		echo "<button type='button' class='uusi_aliehto'>".t("Uusi aliehto")."</button>";
 	}
 	echo "</td>";
 
 	echo "<td>";
-	echo "<button class='poista_ehto'>".t("Poista ehto")."</button>";
+	echo "<button type='button' class='poista_ehto'>".t("Poista ehto")."</button>";
 	echo "</td>";
 
 	echo "</tr>";
@@ -595,7 +606,7 @@ function echo_kampanja_aliehto($ehto_index, $aliehto_index, $aliehto) {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<button class='poista_aliehto'>".t("Poista aliehto")."</button>";
+	echo "<button type='button' class='poista_aliehto'>".t("Poista aliehto")."</button>";
 	echo "</td>";
 
 	echo"</tr>";
@@ -632,11 +643,11 @@ function echo_ehto_rivi_template() {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<button class='uusi_aliehto'>".t("Uusi aliehto")."</button>";
+	echo "<button type='button' class='uusi_aliehto'>".t("Uusi aliehto")."</button>";
 	echo "</td>";
 
 	echo "<td>";
-	echo "<button class='poista_ehto'>".t("Poista ehto")."</button>";
+	echo "<button type='button' class='poista_ehto'>".t("Poista ehto")."</button>";
 	echo "</td>";
 
 	echo "</tr>";
@@ -677,7 +688,7 @@ function echo_ehto_alirivi_template() {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<button class='poista_aliehto'>".t("Poista aliehto")."</button>";
+	echo "<button type='button' class='poista_aliehto'>".t("Poista aliehto")."</button>";
 	echo "</td>";
 
 	echo "</tr>";
@@ -700,7 +711,7 @@ function echo_kampanja_palkinto($palkinto_index, $palkinto) {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<button class='poista_palkinto'>".t("Poista palkinto")."</button>";
+	echo "<button type='button' class='poista_palkinto'>".t("Poista palkinto")."</button>";
 	echo "</td>";
 	echo "</tr>";
 }
@@ -718,7 +729,7 @@ function echo_palkinto_rivi_template() {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<button class='poista_palkinto'>".t("Poista palkinto")."</button>";
+	echo "<button type='button' class='poista_palkinto'>".t("Poista palkinto")."</button>";
 	echo "</td>";
 	echo "</tr>";
 

@@ -326,7 +326,7 @@
 
 			$query = "	INSERT into kuka
 						SET nimi 						= '{$firname}',
-						kuka 							= '{$ktunnus}',
+						kuka 							= trim('{$ktunnus}'),
 						puhno 							= '{$phonenum}',
 						eposti 							= '{$email}',
 						kieli 							= '{$lang}',
@@ -423,7 +423,7 @@
 
 						if (mysql_num_rows($tarkesult) == 0) {
 							$query = "	INSERT into oikeu SET
-										kuka		= '{$ktunnus}',
+										kuka		= trim('{$ktunnus}'),
 										sovellus	= '{$trow['sovellus']}',
 										nimi		= '{$trow['nimi']}',
 										alanimi 	= '{$trow['alanimi']}',

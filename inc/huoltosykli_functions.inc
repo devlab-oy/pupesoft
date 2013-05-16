@@ -81,7 +81,7 @@ function js_huoltosykli_dropdown_huoltovali_change() {
 				async: true,
 				dataType: 'json',
 				type: 'GET',
-				url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&hae_huoltosykli=1&huoltosykli_tunnus=' + huoltosykli_tunnus
+				url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli&huoltosykli_tunnus=' + huoltosykli_tunnus
 			}).done(function(data) {
 				if (console && console.log) {
 					console.log('Huoltoväli haku onnistui');

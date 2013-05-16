@@ -1,6 +1,6 @@
 <?php
 
-if ($hae_huoltosykli) {
+if ($action == 'hae_huoltosykli') {
 	$huoltosykli = hae_huoltosykli($huoltosykli_tunnus);
 
 	array_walk_recursive($huoltosykli, 'array_utf8_encode');

@@ -427,6 +427,7 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 
 	$select = "";
 	$join = "";
+	$group = "";
 	if (!empty($request['ala_tee'])) {
 		$select = "ta1.selite as sammutin_tyyppi,
 					ta2.selite as sammutin_koko,
@@ -445,6 +446,9 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 						AND huoltosykli.tyyppi = ta1.selite
 						AND huoltosykli.koko = ta2.selite
 						AND huoltosykli.olosuhde = paikka.olosuhde )";
+
+		//groupataan laite_tunnuksen mukaan koska laitteella voi olla monta huoltosykliä
+		$group = "GROUP BY laite.tunnus";
 	}
 
 	$query = "	SELECT kohde.tunnus as kohde_tunnus,
@@ -467,7 +471,8 @@ function hae_asiakkaan_kohteet_joissa_laitteita($request) {
 					AND tuote.tuoteno = laite.tuoteno )
 				{$join}
 				WHERE kohde.yhtio = '{$kukarow['yhtio']}'
-				AND kohde.asiakas = {$request['haettu_asiakas']['tunnus']}";
+				AND kohde.asiakas = {$request['haettu_asiakas']['tunnus']}
+				{$group}";
 	$result = pupe_query($query);
 
 	$asiakkaan_kohteet = array();

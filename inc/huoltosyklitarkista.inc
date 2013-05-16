@@ -6,16 +6,18 @@ if (!function_exists("huoltosykli")) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto, $asiakasid;
 
 		//tämän avulla tarkistetaan, että kantaan ei mene kahta huoltosykliä samoilla atribuuteilla
-		//merkitseviä atribuutteja on laitteen koko, paikan olosuhde ja laitteen tyyppi
+		//merkitseviä atribuutteja on laitteen koko, paikan olosuhde, laitteen tyyppi ja huoltosyklin toimenpide
 		if (mysql_field_name($result, $i) == "tunnus") {
 			$query = "	SELECT koko,
 						olosuhde,
-						tyyppi
+						tyyppi,
+						toimenpide
 						FROM huoltosykli
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND koko = '{$t['koko']}'
 						AND olosuhde = '{$t['olosuhde']}'
-						AND tyyppi = '{$t['tyyppi']}'";
+						AND tyyppi = '{$t['tyyppi']}'
+						AND toimenpide = '{$t['toimenpide']}'";
 			$vanha_huoltosykli_result = pupe_query($query);
 
 			if (mysql_num_rows($vanha_huoltosykli_result) > 0) {

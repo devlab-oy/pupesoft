@@ -20858,3 +20858,13 @@ if (!function_exists('rekursiivinen_resepti')) {
 		}
 	}
 }
+
+if (!function_exists('array_utf8_encode')) {
+	function array_utf8_encode(&$item, $key) {
+		$item = utf8_encode($item);
+	}
+}
+
+require_once('huoltosykli_functions.inc');
+require_once('laite_functions.inc');
+require_once('paikka_functions.inc');

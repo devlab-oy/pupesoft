@@ -23,6 +23,10 @@
 		enable_ajax();
 	}
 
+	if (isset($ajax_request) and file_exists("inc/{$toim}_ajax.inc")) {
+		require ("inc/{$toim}_ajax.inc");
+	}
+
 	if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
 		exit;
@@ -1521,6 +1525,9 @@
 		$result = pupe_query($query);
 		$trow = mysql_fetch_array($result);
 
+		if ($toim == 'huoltosyklit_laitteet') {
+			js_huoltosykli_dropdown_huoltovali_change();
+		}
 		echo "<table><tr><td class='back' valign='top' style='padding: 0px;'>";
 
 		echo "<table>";
@@ -1658,7 +1665,7 @@
 				echo $ulos;
 			}
 			elseif ($tyyppi == 1) {
-				echo "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
+				echo "<td><input type = 'text' class='$otsikko' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
 			}
 			elseif ($tyyppi == 1.5) {
 				$vva = substr($trow[$i],0,4);
@@ -1847,6 +1854,14 @@
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'pakkaus') {
 			if (($toikrow = tarkista_oikeus("yllapito.php", "pakkauskoodit%", "", "OK")) !== FALSE) {
 				echo "<iframe id='pakkauskoodit_iframe' name='pakkauskoodit_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+		}
+
+		if ($trow["tunnus"] > 0 and $errori == "" and $toim == "laite") {
+			if (($toikrow = tarkista_oikeus("yllapito.php", "huoltosyklit_laitteet%", "", "OK")) !== FALSE) {
+				$lukitse_avaimeen = $tunnus;
+				echo "<iframe id='laitteen_huoltosyklit_iframe' name='laitteen_huoltosyklit_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; height: 400px; border: 0px; display: block;' border='0' frameborder='0'>";
+				echo "</iFrame><br />";
 			}
 		}
 

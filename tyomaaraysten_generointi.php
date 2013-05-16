@@ -71,6 +71,7 @@ function hae_laitteet_joiden_huolto_lahestyy($request = array()) {
 	else {
 		$laitteet_where = "";
 	}
+
 	$query = "	SELECT laite.tuoteno,
 				laite.viimeinen_tapahtuma,
 				laite.tunnus as laite_tunnus,
@@ -100,11 +101,12 @@ function hae_laitteet_joiden_huolto_lahestyy($request = array()) {
 				JOIN paikka
 				ON ( paikka.yhtio = laite.yhtio
 					AND paikka.tunnus = laite.paikka )
+				JOIN huoltosyklit_laitteet
+				ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
+					AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
 				JOIN huoltosykli
 				ON ( huoltosykli.yhtio = laite.yhtio
-					AND huoltosykli.tyyppi = ta.selite
-					AND huoltosykli.koko = ta2.selite
-					AND huoltosykli.olosuhde = paikka.olosuhde )
+					AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
 				JOIN tuote
 				ON ( tuote.yhtio = laite.yhtio
 					AND tuote.tuoteno = laite.tuoteno)

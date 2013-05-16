@@ -907,7 +907,8 @@ if ($tuoteno != '') {
 												AND ltunnus  = '$invrow[tunnus]'
 												AND tilino   = '$yhtiorow[varasto]'
 												and korjattu = ''
-												ORDER BY tapvm DESC, tunnus DESC";
+												ORDER BY tapvm DESC, tunnus DESC
+												LIMIT 1";
 									$invupd = pupe_query($query);
 									$invrow = mysql_fetch_assoc($invupd);
 
@@ -992,7 +993,8 @@ if ($tuoteno != '') {
 															AND tilino  != '{$yhtiorow['varasto']}'
 															AND ltunnus  = '{$invrow['ltunnus']}'
 															AND korjattu = ''
-															ORDER BY tapvm DESC, tunnus DESC";
+															ORDER BY tapvm DESC, tunnus DESC
+															LIMIT 1";
 												$sum_chk_res = pupe_query($query);
 												$sum_chk_row = mysql_fetch_assoc($sum_chk_res);
 

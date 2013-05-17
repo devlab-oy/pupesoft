@@ -501,11 +501,11 @@ $debug = 0;
 						AND varattu = '{$lapsitieto['varattu']}'
 						AND tyyppi = 'O'";
 			$loytyiko_lapsi_res = pupe_query($query);
-			
+
 			if ($debug == 1) {
 				echo "loytyiko_lapsi query: $query<br><br>";
 			}
-			
+
 			// Jos luodaan lapsirivi tässä kohtaa, ja isä on jo tuloutettu, lapsi ei saa olla tuloutettu!!
 			if (mysql_num_rows($loytyiko_lapsi_res) == 0) {
 				if ($debug == 1) {
@@ -694,7 +694,7 @@ $debug = 0;
 						{$splitlisa}
 						{$splitlisa2}
 						{$rivihintalisa}
-						, tilkpl = '{$datan_kpl}' 
+						, tilkpl = '{$datan_kpl}'
 						, hinta_alkuperainen = '{$hinta_alkuperainenlisa}'
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus = '{$row['tunnus']}'";
@@ -1217,11 +1217,8 @@ $debug = 0;
 						if ($kohdistamatta <= 0) break;
 
 						$query = "SELECT kpl+varattu AS varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv1}'";
-						#echo "<pre>$query</pre>";
 						$kpl_chk_res = pupe_query($query);
 						$kpl_chk_row = mysql_fetch_assoc($kpl_chk_res);
-
-						#echo "varattu: $kpl_chk_row[varattu]<br>";
 
 						$laskuri += $kpl_chk_row["varattu"];
 						$lisa_array[] = $tilriv1;

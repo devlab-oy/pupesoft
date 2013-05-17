@@ -67,6 +67,32 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "verkkolasku_vienti") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1 = "";
+		$sel2 = "";
+		$sel3 = "";
+
+		if ($trow[$i] == 'K') {
+			$sel3 = "selected";
+		}
+		elseif ($trow[$i] == 'E') {
+			$sel2 = "selected";
+		}
+		else {
+			$sel1 = "selected";
+		}
+
+		$ulos .= "<option value = ''  $sel1>".t("Vientilaskut (EU) siirret‰‰n verkkolaskuoperaattorille vain jos se asiakkaan takana on sallittu");
+		$ulos .= "<option value = 'E' $sel2>".t("Vientilaskut (EU) siirret‰‰n verkkolaskuoperaattorille");
+		$ulos .= "<option value = 'K' $sel3>".t("Kaikki vientilaskut siirret‰‰n verkkolaskuoperaattorille");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "lahetteen_tulostustapa") {
 

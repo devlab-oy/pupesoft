@@ -450,7 +450,7 @@
 		$olhires = pupe_query($query);
 		$olhirow = mysql_fetch_assoc($olhires);
 
-		// käyttäjän ma
+		// käyttäjän maa
 		$oleasrow["varastomaa"] = $laskurow["toim_maa"];
 
 		if ($oleasrow["varastomaa"] == "") {
@@ -1757,7 +1757,8 @@
 											FROM varastopaikat
 											WHERE yhtio = '$kukarow[yhtio]'
 											AND maa 	= '{$oleasrow["varastomaa"]}'
-											AND nouto 	= '1' AND tyyppi != 'P'
+											AND nouto 	= '1'
+											AND tyyppi != 'P'
 											ORDER BY tyyppi, nimitys";
 								$noutovarres = pupe_query($query);
 							}
@@ -1882,7 +1883,7 @@
 
 						echo "<td valign='top' class='$vari' $classrigh>";
 
-						if ($myytavissa > 0) {
+						if ($myytavissa > 0 or $noutolisa != "") {
 
 							if ($verkkokauppa != "" and $verkkokauppa_saldoluku) {
 								echo "<font class='green'>";

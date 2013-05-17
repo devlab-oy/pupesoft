@@ -227,6 +227,17 @@ if (@include_once("inc/functions.inc"));
 elseif (@include_once("functions.inc"));
 else exit;
 
+// Pupesoft autoloader funktio
+if(!function_exists('pupesoft_autoloader')) {
+	function pupesoft_autoloader($classname) {
+		$filename = "models/" . $classname . ".php";
+		include ($filename);
+	}
+}
+
+// Rekisteröidään autoloader
+spl_autoload_register('pupesoft_autoloader');
+
 $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteyttä. Se on pois päältä tai käyttäjätietosi ovat virheelliset.");
 mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (parametrit.inc)");
 mysql_set_charset("latin1");

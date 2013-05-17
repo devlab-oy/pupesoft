@@ -1050,7 +1050,7 @@
 
 				// Rajataan työmääräykset työstatuksen mukaan
 				if ($tyomaarays_tyostatus != '') {
-					$tyomalatlat .= "and tyomaarays.tyostatus='$tyomaarays_tyostatus'";
+					$tyomstatus = " and tyomaarays.tyostatus='$tyomaarays_tyostatus'";
 				}
 			}
 
@@ -1066,7 +1066,7 @@
 						LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('A','L','N') and lasku.tilaustyyppi='A' $tyomalatlat
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('A','L','N') and lasku.tilaustyyppi='A' $tyomalatlat $tyomstatus
 						$haku
 						GROUP BY lasku.tunnus
 						$mt_order_by

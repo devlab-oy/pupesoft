@@ -1177,7 +1177,7 @@ function parsi_paivat(&$request) {
 	}
 	else {
 		$request['alku_aika'] = $request['vva'].'-'.$request['kka'].'-'.$request['ppa'];
-		$request['loppu_aika'] = $request['vvl'].'-'.$request['kkl'].'-'.$request['ppl'];
+		$request['loppu_aika'] = date('Y-m-d', strtotime($request['vvl'].'-'.$request['kkl'].'-'.$request['ppl'] . ' + 1 day'));
 	}
 }
 

@@ -27,7 +27,7 @@
 	if (function_exists("js_popup")) {
 		echo js_popup(-100);
 	}
-
+	
 	echo "<SCRIPT type='text/javascript'>
 			<!--
 				function sarjanumeronlisatiedot_popup(tunnus) {
@@ -1891,7 +1891,7 @@
 								echo "</font>";
 							}
 							else {
-								echo ($hinta_rajaus != "") ? "<font class='green'>".t("P‰‰varasto").": ".t("On")."</font>": "<font class='green'>".t("On")."</font>";
+								echo ($hinta_rajaus != "" and $myytavissa > 0) ? "<font class='green'>".t("P‰‰varasto").": ".t("On")."</font>": "<font class='green'>".t("On")."</font>";
 							}
 						}
 						elseif ($tilauslisa != "") {

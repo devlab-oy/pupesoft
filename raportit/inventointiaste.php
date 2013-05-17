@@ -74,7 +74,7 @@ if ($ajax_request) {
 			'valittu_status'	 => $valittu_status,
 		);
 
-		$paiva_1 = date('Y-m-d', strtotime("{$paiva} - 1 day"));
+		$paiva_1 = date('Y-m-d', strtotime("{$paiva}"));
 		$paiva_1 = explode('-', $paiva_1);
 		$request['vva'] = $paiva_1[0];
 		$request['kka'] = $paiva_1[1];
@@ -87,6 +87,8 @@ if ($ajax_request) {
 		$request['ppl'] = $paiva_1[2];
 
 		if ($onko_validi) {
+			//requestiin pitää setata pvm_inventointeja_yhteensa jossa queryssä osataan laskea mukaan myös inventoinnit joiden saldo ei muuttunut
+			$request['pvm_inventointeja_yhteensa'] = true;
 			$inventointien_lkm = count(hae_inventoinnit($request));
 		}
 		else {
@@ -811,17 +813,19 @@ function echo_arvot(&$request) {
 	//Defaulttina halutaan eilisen päivän inventoinnit. Koska queryssä on BETWEEN alku AND loppu niin ajat pitää antaa allaolevan mukaisella tavalla
 	$eilen = date('d.m.Y', strtotime('now - 1 day'));
 
-	$toissa_paiva = date('Y-m-d', strtotime('now - 2 day'));
-	$toissa_paiva = explode('-', $toissa_paiva);
-	$request['vva'] = $toissa_paiva[0];
-	$request['kka'] = $toissa_paiva[1];
-	$request['ppa'] = $toissa_paiva[2];
+	$eilen_array = explode('.', $eilen);
+	$request['vva'] = $eilen_array[2];
+	$request['kka'] = $eilen_array[1];
+	$request['ppa'] = $eilen_array[0];
 
 	$tanaan = date('Y-m-d', strtotime('now'));
 	$tanaan = explode('-', $tanaan);
 	$request['vvl'] = $tanaan[0];
 	$request['kkl'] = $tanaan[1];
 	$request['ppl'] = $tanaan[2];
+
+	//requestiin pitää setata pvm_inventointeja_yhteensa jossa queryssä osataan laskea mukaan myös inventoinnit joiden saldo ei muuttunut
+	$request['pvm_inventointeja_yhteensa'] = true;
 	$eilen_inventoitu_yhteensa = count(hae_inventoinnit($request));
 
 	//asetetaan tempistä value takaisin omille paikoilleen.
@@ -874,7 +878,7 @@ function echo_raportin_tulokset($rivit) {
 }
 
 function echo_table_first_layer($rivi_index, $rivi) {
-	global $palvelin2;
+	global $palvelin2, $kukarow;
 
 	echo "<tr class='kuukausittain_tr aktiivi'>";
 
@@ -905,7 +909,7 @@ function echo_table_first_layer($rivi_index, $rivi) {
 }
 
 function echo_table_second_layer($rivi, $rivi_index) {
-	global $palvelin2;
+	global $palvelin2, $kukarow;
 
 	foreach ($rivi['inventointilajit'] as $inventointilaji) {
 		echo "<tr class='inventointilajeittain_tr aktiivi {$rivi_index}'>";
@@ -943,6 +947,8 @@ function echo_table_second_layer($rivi, $rivi_index) {
 }
 
 function echo_table_third_layer($inventointilaji) {
+	global $kukarow;
+	
 	echo "<table class='tapahtumat_table'>";
 
 	echo "<tr>";
@@ -957,12 +963,15 @@ function echo_table_third_layer($inventointilaji) {
 	echo "<th>".t("Kuka inventoi")."</th>";
 	echo "<th>".t("Koska inventoitiin")."</th>";
 	echo "</tr>";
-
+	$tuoteryhma_array = array();
 	foreach ($inventointilaji['tapahtumat'] as $tapahtuma) {
+		if (empty($tuoteryhma_array[$tapahtuma['tuoteryhma']])) {
+			$tuoteryhma_array[$tapahtuma['tuoteryhma']] = mysql_fetch_assoc(t_avainsana('TRY', $kukarow['kieli'], "AND avainsana.selite = '{$tapahtuma['tuoteryhma']}'"));
+		}
 		echo "<tr class='tapahtuma_tr'>";
 		echo "<td>{$tapahtuma['tuoteno']}</td>";
 		echo "<td>{$tapahtuma['tuote_nimitys']}</td>";
-		echo "<td>{$tapahtuma['tuoteryhma']}</td>";
+		echo "<td>{$tuoteryhma_array[$tapahtuma['tuoteryhma']]['selite']} - {$tuoteryhma_array[$tapahtuma['tuoteryhma']]['selitetark']}</td>";
 		echo "<td>{$tapahtuma['hyllypaikka']}</td>";
 		echo "<td>{$tapahtuma['keraysvyohyke_nimitys']}</td>";
 		echo "<td>{$tapahtuma['kpl']}</td>";
@@ -1283,10 +1292,13 @@ function kuuluuko_hylly_varastoon($request, $varasto_row) {
 }
 
 function hae_inventoinnit(&$request) {
-	global $kukarow;
+	global $kukarow, $yhtiorow;
 
 	parsi_paivat($request);
-	$tapahtuma_where = "AND tapahtuma.kpl != 0";
+	//kun inventointeja haetaan päivän perusteella Inventointeja yhteensä kenttään, halutaan näyttää myös inventoinnit joiden inventoitu saldo on ollut 0
+	if (empty($request['pvm_inventointeja_yhteensa'])) {
+		$tapahtuma_where = "AND tapahtuma.kpl != 0";
+	}
 	$group = "";
 
 	if (!empty($request['valitut_inventointilajit'])) {
@@ -1325,7 +1337,7 @@ function hae_inventoinnit(&$request) {
 				substring( tapahtuma.selite, ( length(tapahtuma.selite)-locate( '>rb<',reverse(tapahtuma.selite)) ) +2 ) AS inventointilaji,
 				tapahtuma.tuoteno,
 				tuote.nimitys AS tuote_nimitys,
-				concat_ws(' - ', tuote.try, avainsana.selitetark) as tuoteryhma,
+				tuote.try AS tuoteryhma,
 				tapahtuma.kpl,
 				Concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllytaso, tapahtuma.hyllyvali) AS hyllypaikka,
 				IFNULL(kuka.nimi, '".t("Poistettu käyttäjä")."') as laatija,
@@ -1339,7 +1351,8 @@ function hae_inventoinnit(&$request) {
 				LEFT JOIN avainsana
 				ON ( avainsana.yhtio = tuote.yhtio
 					AND avainsana.selite = tuote.try
-					AND avainsana.laji = 'TRY')
+					AND avainsana.laji = 'TRY'
+					AND avainsana.kieli = '{$yhtiorow['kieli']}')
 				JOIN varastopaikat
 				ON ( varastopaikat.yhtio = tapahtuma.yhtio
 				  AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
@@ -1362,6 +1375,7 @@ function hae_inventoinnit(&$request) {
 				  AND tapahtuma.laji = 'Inventointi'
 				{$tapahtuma_where}
 				{$inventointilaji_rajaus}
+				ORDER BY inventointilaji ASC
 				{$group}";
 	$result = pupe_query($query);
 

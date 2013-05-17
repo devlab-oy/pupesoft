@@ -3252,7 +3252,7 @@
 
         $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-        $sel = array_fill_keys(array('K', 'E'), '');
+        $sel = array_fill_keys(array('K', 'E', 'J', 'F'), '');
         $sel[$trow[$i]] = " SELECTED";
 
         $ulos .= "<option value = ''>".t("Myyntiä ei estetä, vaikka eräpäivä olisi liikaa ylitetty")."</option>";

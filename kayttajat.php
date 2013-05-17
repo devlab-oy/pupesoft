@@ -236,7 +236,7 @@
 	if ($tee == 'UUSI') {
 
 		$yhtio = $kukarow['yhtio'];
-
+		$ktunnus = trim($ktunnus);
 		$query   = "SELECT * FROM kuka WHERE kuka = '{$ktunnus}' and yhtio <> '{$yhtio}'";
 		$reskuka = pupe_query($query);
 

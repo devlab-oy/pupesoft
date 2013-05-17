@@ -20553,6 +20553,51 @@ if  (!function_exists('hae_chn_teksti')) {
 	}
 }
 
+if  (!function_exists('verkkolaskuputkeen')) {
+	function verkkolaskuputkeen($lasrow, $masrow) {
+		global $yhtiorow;
+
+		// Tässä pohditaan laitetaanko verkkolaskuputkeen...
+
+		// Maksuehdon takaa voidaan säätää, että laskut eivät mene verkkolaskuputkeen
+		if ($masrow["itsetulostus"] != "") {
+			return FALSE;
+		}
+
+		// Sisäiset laskut eivät mene verkkolaskuputkeen
+		if ($lasrow["sisainen"] != "") {
+			return FALSE;
+		}
+
+		// Käteislaskut eivät mene verkkolaskuputkeen
+		if ($masrow["kateinen"] != "") {
+			return FALSE;
+		}
+
+		// Sähköposti- ja 'chn-itsetulostus'-laskut eivät mene verkkolaskuputkeen
+		if ($lasrow["chn"] == '666' or $lasrow["chn"] == '667') {
+			return FALSE;
+		}
+
+		// Nollasummalaskut eivät mene verkkolaskuputkeen
+		if (abs($lasrow["summa"]) == 0) {
+			return FALSE;
+		}
+
+		// EU-viennit eivät mene verkkolaskuputkeen, paitsko jos CHN tai verkkolasku_vienti salii verkkolaskutuksen
+		if ($lasrow["vienti"] == "E" and $yhtiorow['verkkolasku_vienti'] == "" and $lasrow["chn"] != "020" and $lasrow["chn"] != "030") {
+			return FALSE;
+		}
+
+		// EI-EU-viennit eivät mene verkkolaskuputkeen, paitsko jos verkkolasku_vienti sallii verkkolaskutuksen
+		if ($lasrow["vienti"] == "K" and $yhtiorow['verkkolasku_vienti'] != "K") {
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+}
+
 // Sorttaa kaksiulotteisen arrayn annetun keyn perusteella
 //esim
 /**

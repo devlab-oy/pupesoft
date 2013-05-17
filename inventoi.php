@@ -124,8 +124,6 @@
 	//tuotteen varastostatus
 	if ($tee == 'VALMIS') {
 
-		$inven_laji_tilino = t_avainsana('INVEN_LAJI', '', "and selite = '{$inven_laji}'", '', '', "selitetark_2");
-
 		$virhe = 0;
 
 		// Inventoidaan EAN-koodilla
@@ -171,6 +169,13 @@
 					}
 					else {
 						$tuoteno = $tuote_row["tuoteno"];
+					}
+
+					$inven_laji_tilino = t_avainsana('INVEN_LAJI', '', "and selite = '{$inven_laji}'", '', '', "selitetark_2");
+
+					if ($inven_laji != "" and t_avainsana('INVEN_LAJI', '', "and selite = '{$inven_laji}'", '', '', "selite") == "") {
+						echo "<font class='error'>".t("VIRHE: valittua inventointilajia %s ei löydy!", "", $inven_laji).": $tuoteno!</font><br>";
+						$virhe = 1;
 					}
 
 					if ($tuote_row['sarjanumeroseuranta'] != '' and !is_array($sarjanumero_kaikki[$i]) and !is_array($eranumero_kaikki[$i]) and (substr($kpl,0,1) == '+' or substr($kpl,0,1) == '-' or (float) $kpl != 0)) {

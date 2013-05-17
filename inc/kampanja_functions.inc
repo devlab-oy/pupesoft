@@ -40,10 +40,10 @@ if (!function_exists('tarkista_osuuko_myyntitilaus_kampanjaan')) {
 
 		foreach ($lisattavat_tuotteet as $lisattava_tuote) {
 			$parametrit = array(
-				'trow' => hae_tuote($lisattava_tuote['tuoteno']),
-				'laskurow' => hae_lasku($tilausnumero),
-				'kpl' => $lisattava_tuote['kpl'],
-				'tuoteno' => $lisattava_tuote['tuoteno'],
+				'trow'		 => hae_tuote($lisattava_tuote['tuoteno']),
+				'laskurow'	 => hae_lasku($tilausnumero),
+				'kpl'		 => $lisattava_tuote['kpl'],
+				'tuoteno'	 => $lisattava_tuote['tuoteno'],
 			);
 			lisaa_rivi($parametrit);
 		}
@@ -110,7 +110,7 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 				$result = pupe_query($query);
 
 				while ($tilausrivi = mysql_fetch_assoc($result)) {
-					
+
 					$query = "	SELECT group_concat(parent.tunnus) tunnukset
 								FROM puun_alkio
 								JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
@@ -129,7 +129,7 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 					}
 				}
 				return false;
-				
+
 				break;
 
 			case 'tuoteosasto':
@@ -209,7 +209,7 @@ if (!function_exists('hae_kampanjat')) {
 if (!function_exists('hae_kampanjan_ehdot')) {
 
 	/**
-	 * Hakee kampanjan ehdot sek‰ aliehdot
+	 * Hakee kampanjan ehdot, aliehdot sek‰ ehtojen kohde resurssit
 	 *
 	 * @global array $kukarow
 	 * @global array $yhtiorow
@@ -228,6 +228,7 @@ if (!function_exists('hae_kampanjan_ehdot')) {
 		$kampanja_ehdot = array();
 
 		while ($kampanja_ehto = mysql_fetch_assoc($result)) {
+			$kampanja_ehto['resurssi'] = hae_ehdon_tai_aliehdon_kohteen_resurssi($kampanja_ehto);
 			$kampanja_ehto['aliehdot'] = hae_kampanja_ehdon_aliehdot($kampanja_ehto['tunnus']);
 			$kampanja_ehdot[] = $kampanja_ehto;
 		}
@@ -257,8 +258,9 @@ if (!function_exists('hae_kampanja_ehdon_aliehdot')) {
 		$result = pupe_query($query);
 
 		$kampanja_aliehdot = array();
-		
+
 		while ($kampanja_aliehto = mysql_fetch_assoc($result)) {
+			$kampanja_aliehto['resurssi'] = hae_ehdon_tai_aliehdon_kohteen_resurssi($kampanja_aliehto);
 			$kampanja_aliehdot[] = $kampanja_aliehto;
 		}
 
@@ -266,6 +268,90 @@ if (!function_exists('hae_kampanja_ehdon_aliehdot')) {
 	}
 }
 
+if (!function_exists('hae_ehdon_tai_aliehdon_kohteen_resurssi')) {
+
+	/**
+	 * Hakee ehdon tai aliehdon kohteen resurssin. Eli jos kohde on tuote niin funktio palauttaa kohteen arvon m‰‰r‰‰m‰n tuotteen
+	 *
+	 * @global array $kukarow
+	 * @global array $yhtiorow
+	 * @param array $ehto
+	 * @return array
+	 */
+	function hae_ehdon_tai_aliehdon_kohteen_resurssi($ehto) {
+		global $kukarow, $yhtiorow;
+
+		//Jokaiselle resurssille annetaan info sarake, jotta kampanjan muokkaus n‰kym‰ss‰ voidaan n‰ytt‰‰ inputin yl‰puolella selkokielisen‰ valittu arvo
+		switch ($ehto['kohde']) {
+			case 'asiakas':
+				$query = "	SELECT asiakas.*,
+							concat_ws(' - ', asiakas.nimi, asiakas.ytunnus, asiakas.asiakasnro) as info
+							FROM asiakas
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$ehto['arvo']}'";
+				break;
+			case 'asiakas_ytunnus':
+				$query = "	SELECT asiakas.*,
+							concat_ws(' - ', asiakas.nimi, asiakas.ytunnus, asiakas.asiakasnro) as info
+							FROM asiakas
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND ytunnus = '{$ehto['arvo']}'";
+				break;
+			case 'asiakaskategoria':
+				$query = "	SELECT dynaaminen_puu.*,
+							dynaaminen_puu.nimi as info
+							FROM dynaaminen_puu
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji = 'Asiakas'
+							AND tunnus = '{$ehto['arvo']}'";
+				break;
+			case 'tuote':
+				$query = "	SELECT tuote.*,
+							tuote.nimitys as info
+							FROM tuote
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$ehto['arvo']}'";
+				break;
+			case 'tuotekategoria':
+				$query = "	SELECT dynaaminen_puu.*,
+							dynaaminen_puu.nimi as info
+							FROM dynaaminen_puu
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji = 'Tuote'
+							AND tunnus = '{$ehto['arvo']}'";
+				break;
+			case 'tuoteosasto':
+				$query = "	SELECT avainsana.*,
+							avainsana.selitetark as info
+							FROM avainsana
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji = 'OSASTO'
+							AND selite = '{$ehto['arvo']}'";
+				break;
+			case 'tuoteryhma':
+				$query = "	SELECT avainsana.*,
+							avainsana.selitetark as info
+							FROM avainsana
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji = 'TRY'
+							AND selite = '{$ehto['arvo']}'";
+				break;
+			case 'kappaleet':
+				return false;
+				break;
+			case 'arvo':
+				return false;
+				break;
+			default:
+				return false;
+				break;
+		}
+
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
 
 if (!function_exists('hae_kampanjan_palkinnot')) {
 
@@ -287,7 +373,7 @@ if (!function_exists('hae_kampanjan_palkinnot')) {
 		$result = pupe_query($query);
 
 		$kampanja_palkinnot = array();
-		
+
 		while ($kampanja_palkinto = mysql_fetch_assoc($result)) {
 			$kampanja_palkinnot[] = $kampanja_palkinto;
 		}

@@ -129,11 +129,11 @@ function luo_uusi_kampanja($request) {
 		}
 		$kampanja_ehto_tunnus = luo_kampanja_ehto($kampanja_ehto, $kampanja_tunnus);
 
-		if (empty($kampanja_ehto['aliehto_rivit'])) {
+		if (empty($kampanja_ehto['aliehdot'])) {
 			continue;
 		}
 
-		foreach ($kampanja_ehto['aliehto_rivit'] as $kampanja_aliehto) {
+		foreach ($kampanja_ehto['aliehdot'] as $kampanja_aliehto) {
 			$onko_aliehto_ok = validoi_kampanja_ehto_tai_aliehto($kampanja_aliehto);
 			if (!$onko_aliehto_ok) {
 				poista_kampanja_otsikko($kampanja_tunnus);
@@ -219,11 +219,13 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
 			break;
 		case 'kappaleet':
 			if (!is_numeric($ehto['arvo'])) {
+				echo "<font class='error'>".t("Arvo ei ole numero")."</font>";
 				return false;
 			}
 			break;
 		case 'arvo':
 			if (!is_numeric($ehto['arvo'])) {
+				echo "<font class='error'>".t("Arvo ei ole numero")."</font>";
 				return false;
 			}
 			break;
@@ -336,11 +338,11 @@ function muokkaa_kampanjaa($request) {
 			return false;
 		}
 
-		if (empty($kampanja_ehto['aliehto_rivit'])) {
+		if (empty($kampanja_ehto['aliehdot'])) {
 			continue;
 		}
 
-		foreach ($kampanja_ehto['aliehto_rivit'] as $kampanja_aliehto) {
+		foreach ($kampanja_ehto['aliehdot'] as $kampanja_aliehto) {
 			$onko_aliehto_ok = validoi_kampanja_ehto_tai_aliehto($kampanja_aliehto);
 			if (!$onko_aliehto_ok) {
 				return false;
@@ -362,10 +364,10 @@ function muokkaa_kampanjaa($request) {
 	foreach ($request['kampanja_ehdot'] as $kampanja_ehto) {
 		$kampanja_ehto_tunnus = luo_kampanja_ehto($kampanja_ehto, $request['kampanja_tunnus']);
 
-		if (empty($kampanja_ehto['aliehto_rivit']))
+		if (empty($kampanja_ehto['aliehdot']))
 			continue;
 
-		foreach ($kampanja_ehto['aliehto_rivit'] as $kampanja_aliehto) {
+		foreach ($kampanja_ehto['aliehdot'] as $kampanja_aliehto) {
 			luo_kampanja_aliehto($kampanja_aliehto, $kampanja_ehto_tunnus);
 		}
 	}
@@ -539,6 +541,12 @@ function echo_kampanja_ehto($index, $kampanja_ehto) {
 	echo "</td>";
 
 	echo "<td>";
+	echo "<div class='kohteen_arvo_selite'>";
+	if (isset($kampanja_ehto['resurssi']['info'])) {
+		echo $kampanja_ehto['resurssi']['info'];
+		echo "<br/>";
+	}
+	echo "<div>";
 	echo $arvo_input;
 	echo "</td>";
 
@@ -573,7 +581,7 @@ function echo_kampanja_aliehto($ehto_index, $aliehto_index, $aliehto) {
 	echo "<td>";
 	echo "<input type='hidden' class='aliehto_id' value='{$aliehto_index}'/>";
 	echo " &raquo; ";
-	echo "<select class='aliehto_kohde' name='kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][kohde]'>";
+	echo "<select class='aliehto_kohde' name='kampanja_ehdot[{$ehto_index}][aliehdot][{$aliehto_index}][kohde]'>";
 	foreach ($ehdot as $ehto) {
 		if ($ehto['value'] === 'kappaleet' || $ehto['value'] === 'arvo') {
 			$sel = "";
@@ -587,7 +595,7 @@ function echo_kampanja_aliehto($ehto_index, $aliehto_index, $aliehto) {
 	echo "</td>";
 
 	echo "<td>";
-	echo "<select class='aliehto_rajoitin' name='kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][rajoitin]'>";
+	echo "<select class='aliehto_rajoitin' name='kampanja_ehdot[{$ehto_index}][aliehdot][{$aliehto_index}][rajoitin]'>";
 	foreach ($rajoittimet as $rajoitin) {
 		$sel = "";
 		if ($rajoitin['value'] == $aliehto['rajoitin']) {
@@ -753,16 +761,16 @@ function hae_liveseach_kentta($kohde, $tyyppi, $ehto_index, $aliehto_index = 0, 
 	}
 	else if ($tyyppi == 'aliehto') {
 		if ($kohde == 'asiakas') {
-			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASHAKU", "kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][arvo]", 140, $value, '', '', 'aliehto_arvo', 'ei_break_all');
+			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASHAKU", "kampanja_ehdot[{$ehto_index}][aliehdot][{$aliehto_index}][arvo]", 140, $value, '', '', 'aliehto_arvo', 'ei_break_all');
 		}
 		else if ($kohde == 'tuote') {
-			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEHAKU", "kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][arvo]", 140, $value, '', '', 'aliehto_arvo', 'ei_break_all');
+			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEHAKU", "kampanja_ehdot[{$ehto_index}][aliehdot][{$aliehto_index}][arvo]", 140, $value, '', '', 'aliehto_arvo', 'ei_break_all');
 		}
 		else if ($kohde == 'tuotekategoria') {
-			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEKATEGORIAHAKU", "kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
+			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEKATEGORIAHAKU", "kampanja_ehdot[{$ehto_index}][aliehdot][{$aliehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
 		}
 		else {
-			$return = "<input type='text' class='aliehto_arvo' name='kampanja_ehdot[{$ehto_index}][aliehto_rivit][{$aliehto_index}][arvo]' value='{$value}' />";
+			$return = "<input type='text' class='aliehto_arvo' name='kampanja_ehdot[{$ehto_index}][aliehdot][{$aliehto_index}][arvo]' value='{$value}' />";
 		}
 	}
 	else {

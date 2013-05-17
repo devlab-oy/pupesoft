@@ -25,6 +25,9 @@ $(document).ready(function() {
 function bind_ehto_kohde_change() {
 	$('.ehto_kohde').live('change', function() {
 		var ehto_rivi = $(this).parent().parent();
+
+		ehto_rivi.find('.kohteen_arvo_selite').html('');
+
 		hae_arvo_input(ehto_rivi);
 
 		if ($(this).val() === 'tuote'
@@ -229,8 +232,8 @@ function populoi_aliehto_rivi(ehto_rivi, aliehto_id) {
 	$(aliehto_rivi).removeAttr('id');
 	$(aliehto_rivi).attr('class', 'aliehto_rivi');
 
-	$(aliehto_rivi).find('.aliehto_kohde').attr('name', 'kampanja_ehdot[' + ehto_id + '][aliehto_rivit][' + aliehto_id + '][kohde]');
-	$(aliehto_rivi).find('.aliehto_rajoitin').attr('name', 'kampanja_ehdot[' + ehto_id + '][aliehto_rivit][' + aliehto_id + '][rajoitin]');
+	$(aliehto_rivi).find('.aliehto_kohde').attr('name', 'kampanja_ehdot[' + ehto_id + '][aliehdot][' + aliehto_id + '][kohde]');
+	$(aliehto_rivi).find('.aliehto_rajoitin').attr('name', 'kampanja_ehdot[' + ehto_id + '][aliehdot][' + aliehto_id + '][rajoitin]');
 
 
 	$(aliehto_rivi).find('.aliehto_id_template').attr('class', 'aliehto_id');

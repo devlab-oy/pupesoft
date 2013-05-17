@@ -236,7 +236,7 @@
 	if ($tee == 'UUSI') {
 
 		$yhtio = $kukarow['yhtio'];
-
+		$ktunnus = trim($ktunnus);
 		$query   = "SELECT * FROM kuka WHERE kuka = '{$ktunnus}' and yhtio <> '{$yhtio}'";
 		$reskuka = pupe_query($query);
 
@@ -326,7 +326,7 @@
 
 			$query = "	INSERT into kuka
 						SET nimi 						= '{$firname}',
-						kuka 							= trim('{$ktunnus}'),
+						kuka 							= '{$ktunnus}',
 						puhno 							= '{$phonenum}',
 						eposti 							= '{$email}',
 						kieli 							= '{$lang}',
@@ -423,7 +423,7 @@
 
 						if (mysql_num_rows($tarkesult) == 0) {
 							$query = "	INSERT into oikeu SET
-										kuka		= trim('{$ktunnus}'),
+										kuka		= '{$ktunnus}',
 										sovellus	= '{$trow['sovellus']}',
 										nimi		= '{$trow['nimi']}',
 										alanimi 	= '{$trow['alanimi']}',

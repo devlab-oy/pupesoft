@@ -306,8 +306,6 @@
 					$lisa_array = array();
 					$split_array = array();
 
-					echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
-
 					// Lasketaan ensin kaikki rivit yhteen ja sen j‰lkeen katsotaan tarvitaanko lis‰rivi‰
 					$olen_apu_result = pupe_query($query);
 
@@ -322,8 +320,6 @@
 					}
 
 					$ylimaaraista = $row["kappalemaara"] - $laskuri; // liikaa miinus tilauksella
-
-					echo "<br>Ylim‰‰r‰ist‰1: $ylimaaraista = {$row["kappalemaara"]} - $laskuri (kohdistamatta: $kohdistamatta)<br>";
 
 					// haetaan viel‰ varmuudeksi lˆysimm‰ll‰ queryll‰ lis‰rivej‰.
 					if ($ylimaaraista > 0) {
@@ -352,14 +348,11 @@
 									AND tilausrivi.uusiotunnus = 0
 									{$loysan_tilausrivi_muuttuja}
 									ORDER BY laadittu ASC";
-						echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 						$loysa_result = pupe_query($query);
 
 						$laskuri = 0;
 
 						while ($loysatpois = mysql_fetch_assoc($loysa_result)) {
-
-							echo "loop (kohdistamatta: $kohdistamatta)<br>";
 
 							if ($kohdistamatta <= 0) break;
 
@@ -369,9 +362,7 @@
 							$kohdistamatta 	-= $loysatpois["varattu"];
 						}
 
-						echo "<br>Ylim‰‰r‰ist‰2: ".($ylimaaraista-$laskuri)." = {$ylimaaraista} - $laskuri<br>";
 						$ylimaaraista = $ylimaaraista - $laskuri; // liikaa miinus tilauksella
-
 					}
 
 					if ($ylimaaraista > 0) {
@@ -406,8 +397,6 @@
 						$inskres = pupe_query($lisaaquery);
 						$extraa = mysql_insert_id();
 
-						echo "<br>Ylim‰‰r‰ist‰ > 0 haara<br><pre>",str_replace("\t", "", $query),"</pre><br>";
-
 						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
 						$paketin_rivit			= array_unique(array_merge($paketin_rivit, $lisa_array));
 						$siistitty 				= implode(",", $lisa_array);
@@ -419,7 +408,6 @@
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row['tunnus']}'";
-						echo "<br>Siistitty: $siistitty, extraa: $extraa<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 						$upd_res = pupe_query($updatequery);
 						$kaytetyt_tilausrivit[] = $extraa;
 						$paketin_rivit[]		= $extraa;
@@ -441,7 +429,6 @@
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus = '{$chk_row['tunnus']}'";
 								$upd_res = pupe_query($query);
-								echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 							}
 						}
 
@@ -458,7 +445,6 @@
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row['tunnus']}'";
-						echo "<br>Ylim‰‰r‰ist‰ == 0 haara<br><pre>",str_replace("\t", "", $updatequery),"</pre><br>";
 						$upd_res = pupe_query($updatequery);
 
 						// Satula-Runko case
@@ -477,7 +463,6 @@
 											perheid = tunnus
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus = '{$chk_row['tunnus']}'";
-								echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 								$upd_res = pupe_query($query);
 							}
 						}
@@ -500,7 +485,6 @@
 									kommentti = CONCAT(IFNULL(kommentti,''),' Ennen splittausta {$split_row['tilkpl']} : kohdistettiin {$erotus}')
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$split_row['tunnus']}'";
-						echo "<br>Ylim‰‰r‰ist‰ < 0 haara<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 						$upres = pupe_query($query);
 
 						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
@@ -513,7 +497,6 @@
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row['tunnus']}'";
-						echo "<br><pre>",str_replace("\t", "", $updatequery),"</pre><br>";
 						$upd_res = pupe_query($updatequery);
 
 						// Satula-Runko case
@@ -533,7 +516,6 @@
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus = '{$chk_row['tunnus']}'";
 								$upd_res = pupe_query($query);
-								echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 							}
 						}
 
@@ -1128,14 +1110,12 @@
 							suuntalava = '{$uusi_suuntalavan_tunnus}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus IN (".implode(",", $paketin_rivit).")";
-				echo "<pre>$query</pre>";
 				$updateres = pupe_query($query);
 
 				$query = "	UPDATE asn_sanomat SET
 							status = 'X'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus IN (".implode(",", $paketin_tunnukset).")";
-				echo "<pre>$query</pre>";
 				$updateres = pupe_query($query);
 
 				// Laitetaan suuntalava siirtovalmiiksi.

@@ -404,7 +404,7 @@ if ($tee == "") {
 
 			$('#paivita').on('click', function() {
 				if(muutettu_pyoristyseroja) {
-					return confirm('Olet lisännyt tai muuttanut pöyristyseroja, oletko varma?');
+					return confirm('".t("Olet lisännyt tai muuttanut pöyristyseroja, oletko varma")."?');
 				}
 			});
 

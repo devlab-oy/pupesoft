@@ -281,7 +281,7 @@
 			$tv_kaytossa = TRUE;
 		}
 
-		if ($tuoterow["tuoteno"] != "" and (!in_array($tuoterow["status"], array('P', 'X')) or $salro["saldo"] != 0)) {
+		if ($tuoterow["tuoteno"] != "") {
 
 			if ($yhtiorow["saldo_kasittely"] == "T") {
 				$saldoaikalisa = date("Y-m-d");
@@ -407,7 +407,6 @@
 				while ($hintarow = mysql_fetch_assoc($hintaresult)) {
 					$valuuttalisa .= "<br>$hintarow[maa]: ".hintapyoristys($hintarow["hinta"])." $hintarow[valkoodi]";
 				}
-
 			}
 
 			if ($tv_kaytossa and $tullirow1['cn'] != '') {
@@ -508,7 +507,13 @@
 			echo "</td>";
 
 			echo "<td>$tuoterow[eankoodi]</td><td colspan='2' style='font-weight:bold;'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td>";
-			echo "<td>$tuoterow[hinnastoon]<br>".t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark")."</td>";
+			echo "<td>$tuoterow[hinnastoon]<br>";
+
+			if ($tuoterow["status"] == "P") echo "<font class='error'>";
+			echo t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark");
+			if ($tuoterow["status"] == "P") echo "</font>";
+
+			echo "</td>";
 			echo "</tr>";
 
 			//2

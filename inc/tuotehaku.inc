@@ -1,6 +1,11 @@
 <?php
 
-	$enarimatch = FALSE;
+	$enarimatch   = FALSE;
+	$poistetulisa = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
+
+	if (strpos($_SERVER['SCRIPT_NAME'], "tuote.php") !== FALSE and $kukarow["extranet"] == "") {
+		$poistetulisa = "";
+	}
 
 	// Etsitän enarilla jos kappaleita ei ole syötetty eikä hakuja käytetty
 	if ((!isset($kpl) or $kpl == "") and !is_array($kpl_array) and substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#' and substr($tuoteno,0,1) != '@') {
@@ -8,8 +13,8 @@
 		$query = "	SELECT *
 					FROM tuote
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
-					and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
-					and tuote.eankoodi = '$tuoteno'";
+					and tuote.eankoodi = '$tuoteno'
+					{$poistetulisa}";
 		$tresult = pupe_query($query);
 
 		if (mysql_num_rows($tresult) == 1) {
@@ -22,13 +27,12 @@
 	}
 
 	if (!$enarimatch) {
-
 		if (substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#' and substr($tuoteno,0,1) != '@' and $yhtiorow["automaattinen_tuotehaku"] != '') {
 			$query = "	SELECT *
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						and tuote.tuoteno = '$tuoteno'
-						and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
+						{$poistetulisa}";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -36,7 +40,7 @@
 							FROM tuote
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
 							and tuote.tuoteno LIKE '$tuoteno%'
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
+							{$poistetulisa}";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 1) {
@@ -137,7 +141,7 @@
 
 			if ($kaikkituhaku != "KYLLA") {
 
-				$poislisa = " HAVING (tuote.status not in ('P','X') or saldo > 0) ";
+				if ($poistetulisa != "") $poislisa = " HAVING (tuote.status not in ('P','X') or saldo > 0) ";
 
 				if ($kukarow["kesken"] > 0) {
 					$query  = "	SELECT if (toim_maa != '', toim_maa, maa) maa
@@ -179,20 +183,20 @@
 						ifnull((SELECT id FROM korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) korvaavat,
 						tuote.tuoteno,
 						tuote.nimitys,
-						tuote.osasto,
-						tuote.try,
-						tuote.myyntihinta,
+ 						tuote.osasto,
+  						tuote.try,
+ 						tuote.myyntihinta,
 						tuote.nettohinta,
-						tuote.aleryhma,
-						tuote.status,
-						tuote.ei_saldoa,
-						tuote.yksikko,
-						tuote.tunnus,
-						(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
+ 						tuote.aleryhma,
+ 						tuote.status,
+ 						tuote.ei_saldoa,
+ 						tuote.yksikko,
+ 						tuote.tunnus,
+ 						(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 						tuote.sarjanumeroseuranta,
-						tuote.status,
-						IF(tuote.epakurantti100pvm = '0000-00-00', IF(tuote.epakurantti75pvm = '0000-00-00', IF(tuote.epakurantti50pvm = '0000-00-00', IF(tuote.epakurantti25pvm = '0000-00-00', '', '25'), '50'), '75'), '100') epakurantti,
-						(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
+  						tuote.status,
+ 						IF(tuote.epakurantti100pvm = '0000-00-00', IF(tuote.epakurantti75pvm = '0000-00-00', IF(tuote.epakurantti50pvm = '0000-00-00', IF(tuote.epakurantti25pvm = '0000-00-00', '', '25'), '50'), '75'), '100') epakurantti,
+ 						(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
 						FROM tuote use index (tuoteno, nimitys)
 						WHERE tuote.$yhtiot
 						$kieltolisa
@@ -401,7 +405,7 @@
 				$query = "	SELECT tuote.tuoteno
 							FROM tuote
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poistetulisa}
 							$th_lisa1";
 				$tresult = pupe_query($query);
 
@@ -436,7 +440,7 @@
 						FROM tuote
 						WHERE tuote.yhtio = '$hakyhtio'
 						and tuote.tuoteno = '$tuoteno'
-						and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
+						{$poistetulisa}";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) != 1) {

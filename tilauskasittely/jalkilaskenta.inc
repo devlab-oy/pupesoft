@@ -31,6 +31,7 @@ if (!function_exists("korjaalaskut")) {
 					tilausrivi.tunnus ttunnus,
 					tilausrivi.kpl,
 					tilausrivi.kate,
+					tilausrivi.kate_korjattu,
 					tilausrivi.rivihinta,
 					tilausrivi.laskutettuaika,
 					tilausrivi.alv,
@@ -117,28 +118,6 @@ if (!function_exists("korjaalaskut")) {
 
 			$uusi_varastonmuutos = 0;
 
-			// Haetaan tunnukset ja sitten uusi varastonmuutos
-			// $query = "	SELECT GROUP_CONCAT(tilausrivi.tunnus) tunnukset
-			// 			FROM tilausrivi USE INDEX (uusiotunnus_index)
-			// 			WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-			// 			AND tilausrivi.tyyppi = 'L'
-			// 			AND tilausrivi.uusiotunnus = '{$tilausrivi['ltunnus']}'";
-			// $tunnukset_res = pupe_query($query);
-			// $tunnukset_row = mysql_fetch_assoc($tunnukset_res);
-
-			// if (trim($tunnukset_row['tunnukset']) != '') {
-			// 	// Haetaan uusi varastonmuutos
-			// 	$query = "	SELECT SUM(tapahtuma.hinta * tapahtuma.kpl) * -1 AS tapahtuman_hinta
-			// 				FROM tapahtuma USE INDEX (yhtio_laji_rivitunnus)
-			// 				WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
-			// 				AND tapahtuma.laji IN ('laskutus', 'korjaus')
-			// 				AND tapahtuma.rivitunnus IN ({$tunnukset_row['tunnukset']})";
-			// 	$hinta_chk_res = pupe_query($query);
-			// 	$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
-
-			// 	$uusi_varastonmuutos = $hinta_chk_row['tapahtuman_hinta'];
-			// }
-
 			$query = "	SELECT IFNULL(SUM(tapahtuma.hinta * tapahtuma.kpl) * -1, 0) AS tapahtuman_hinta
 						FROM tapahtuma USE INDEX (yhtio_laji_rivitunnus)
 						WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
@@ -148,6 +127,9 @@ if (!function_exists("korjaalaskut")) {
 			$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
 
 			$uusi_varastonmuutos = $hinta_chk_row['tapahtuman_hinta'];
+
+			$kate_muuttuja = $tilausrivi['kate_korjattu'] === NULL ? $tilausrivi['kate'] : $tilausrivi['kate_korjattu'];
+			$vanha_varastonmuutos = ($tilausrivi['rivihinta'] - $kate_muuttuja);
 
 			// lasketaan uusi kate
 			$uusikate = $tilausrivi['rivihinta'] - $tilausrivi['kpl'] * $kehahin;
@@ -207,17 +189,17 @@ if (!function_exists("korjaalaskut")) {
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 				// korjataan laskun kate
-				$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate WHERE tunnus='$tilausrivi[ltunnus]'";
+				$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate, kate_korjattu = kate WHERE tunnus='$tilausrivi[ltunnus]'";
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 				$katekorjres = pupe_query($query);
 
 				// korjataan tilauksen kate
-				$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate WHERE tunnus='$tilausrivi[oltunnus]'";
+				$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate, kate_korjattu = kate WHERE tunnus='$tilausrivi[oltunnus]'";
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 				$katekorjres = pupe_query($query);
 
 				// ja lopuksi korjataan tilausrivin kate
-				$query = "UPDATE tilausrivi SET kate = $uusikate WHERE tunnus='$tilausrivi[ttunnus]'";
+				$query = "UPDATE tilausrivi SET kate = $uusikate, kate_korjattu = kate WHERE tunnus='$tilausrivi[ttunnus]'";
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 				$katekorjres = pupe_query($query);
 
@@ -277,7 +259,6 @@ if (!function_exists("korjaalaskut")) {
 				}
 
 				// Lasketaan muutos
-				$vanha_varastonmuutos = $tiliointi1['summa'];
 				$muutos = $uusi_varastonmuutos - $vanha_varastonmuutos;
 
 				$tiliointi2 = mysql_fetch_assoc($result);
@@ -349,19 +330,19 @@ if (!function_exists("korjaalaskut")) {
 					kopioitiliointi($tiliointi2['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
 
 					// korjataan laskun kate
-					$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate WHERE tunnus='$tilausrivi[ltunnus]'";
+					$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate, kate_korjattu = kate WHERE tunnus='$tilausrivi[ltunnus]'";
 					$katekorjres = pupe_query($query);
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 					// korjataan tilauksen kate
-					$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate WHERE tunnus='$tilausrivi[oltunnus]'";
+					$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate, kate_korjattu = kate WHERE tunnus='$tilausrivi[oltunnus]'";
 					$katekorjres = pupe_query($query);
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 					// ja lopuksi korjataan tilausrivin kate
-					$query = "UPDATE tilausrivi SET kate = $uusikate WHERE tunnus='$tilausrivi[ttunnus]'";
+					$query = "UPDATE tilausrivi SET kate = $uusikate, kate_korjattu = kate WHERE tunnus='$tilausrivi[ttunnus]'";
 					$katekorjres = pupe_query($query);
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
@@ -431,6 +412,25 @@ if (!function_exists("korjaalaskut")) {
 
 					// Tehdään uusi varastotiliöinti oikeilla arvoilla
 					kopioitiliointi($tiliointi2['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
+
+					/*
+						Ollaan suljetulla kaudella ja päivitetään vain kate_korjattu
+					*/
+					$query = "UPDATE lasku SET kate_korjattu = kate_korjattu - $tilausrivi[kate_korjattu] + $uusikate WHERE tunnus='$tilausrivi[ltunnus]'";
+					$katekorjres = pupe_query($query);
+
+					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+
+					$query = "UPDATE lasku SET kate_korjattu = kate_korjattu - $tilausrivi[kate_korjattu] + $uusikate WHERE tunnus='$tilausrivi[oltunnus]'";
+					$katekorjres = pupe_query($query);
+
+					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+
+					$query = "UPDATE tilausrivi SET kate_korjattu = $uusikate WHERE tunnus='$tilausrivi[ttunnus]'";
+					$katekorjres = pupe_query($query);
+
+					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+
 				}
 			}
 		}

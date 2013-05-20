@@ -219,13 +219,13 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
 			break;
 		case 'kappaleet':
 			if (!is_numeric($ehto['arvo'])) {
-				echo "<font class='error'>".t("Arvo ei ole numero")."</font>";
+				echo "<font class='error'>".t("Arvo ei ole numero")."!</font><br><br>";
 				return false;
 			}
 			break;
 		case 'arvo':
 			if (!is_numeric($ehto['arvo'])) {
-				echo "<font class='error'>".t("Arvo ei ole numero")."</font>";
+				echo "<font class='error'>".t("Arvo ei ole numero")."!</font><br><br>";
 				return false;
 			}
 			break;
@@ -239,7 +239,7 @@ function validoi_kampanja_ehto_tai_aliehto($ehto) {
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<font class='error'>$echo</font>";
+			echo "<font class='error'>$echo!</font><br><br>";
 			return false;
 		}
 	}
@@ -257,12 +257,12 @@ function validoi_palkinto_rivi($palkinto_rivi) {
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
-		echo t('Palkintorivin tuotetta ei löydy');
+		echo "<font class='error'>", t('Palkintorivin tuotetta ei löydy'), "!</font><br><br>";
 		return false;
 	}
 
 	if (!is_numeric($palkinto_rivi['kpl'])) {
-		echo t('Palkintorivin kpl ei ole numero');
+		echo "<font class='error'>", t('Palkintorivin kpl ei ole numero'), "!</font><br><br>";
 		return false;
 	}
 

@@ -118,6 +118,7 @@ if (!function_exists("korjaalaskut")) {
 
 			$uusi_varastonmuutos = 0;
 
+			// Haetaan tapahtumalta tämän tuotteen uusi varastonmuutos, koska tapahtuma on päivitetty jo aiemmassa loopissa (tämän funktiokutsun ulkopuolella)
 			$query = "	SELECT IFNULL(SUM(tapahtuma.hinta * tapahtuma.kpl) * -1, 0) AS tapahtuman_hinta
 						FROM tapahtuma USE INDEX (yhtio_laji_rivitunnus)
 						WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'

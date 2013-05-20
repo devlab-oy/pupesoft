@@ -1265,13 +1265,38 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			while($row = mysql_fetch_assoc($result)) {
 				// Tarvitaan tuoterow
 				$tuote_query = "SELECT * FROM tuote WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$row['tuoteno']}'";
-				$tuote_result = pupe_query($query);
+				$tuote_result = pupe_query($tuote_query);
 				$tuote_row = mysql_fetch_assoc($tuote_result);
 
-				$params = array('trow' => $tuote_row, 'laskurow' => $laskurow, 'tuoteno' => $row['tuoteno'], 'kpl' => $row['tilkpl']);
+				$params = array('trow' => $tuote_row, 'laskurow' => $laskurow, 'tuoteno' => $row['tuoteno'], 'kpl' => $row['tilkpl'], 'hinta' => $row['hinta']);
 				$lisatyt_rivi = pupesoft_lisaa_rivi($params);
 			}
 
+			// Jos on asetettu lisäkuluprosentti niin lisätään se myyntitilaukselle
+			if ($yhtiorow['lisakuluprosentti'] != 0) {
+
+				// Lasketaan laskun summa ja lisätään lisäkuluprosentti
+				$hinta_query = "SELECT sum(hinta * tilkpl * ({$yhtiorow['lisakuluprosentti']} / 100)) as hinta FROM tilausrivi
+								WHERE yhtio='{$kukarow['yhtio']}' AND otunnus='{$laskurow['tunnus']}'";
+				$hinta_result = pupe_query($hinta_query);
+				$lisakulu = mysql_fetch_assoc($hinta_result);
+
+				// Lisäkuluprosentin tiedot
+				$kulutuote = array('tuoteno' => 'kulu',
+					'nimitys' => 'Lisäkuluprosentti',
+					'yksikko' => 'KPL',
+					'ei_saldoa' => 'o',
+					'tuotetyyppi' => 'M');
+
+				$params = array('trow' => $kulutuote,
+					'laskurow' => $laskurow,
+					'tuoteno' => 'kulu',
+					'kpl' => '1',
+					'hinta' => $lisakulu['hinta'],
+					'var' => '',
+					'varataan_saldoa' => 'EI');
+				$lisatyt_rivi = pupesoft_lisaa_rivi($params);
+			}
 		}
 		else {
 			require("tyomaarays/tyomaarays.inc");

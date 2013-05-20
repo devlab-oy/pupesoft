@@ -260,7 +260,7 @@ if (!function_exists("korjaalaskut")) {
 				}
 
 				// Lasketaan muutos
-				$muutos = $uusi_varastonmuutos - $vanha_varastonmuutos;
+				$muutos = round($uusi_varastonmuutos - $vanha_varastonmuutos, 2);
 
 				$tiliointi2 = mysql_fetch_assoc($result);
 			}

@@ -82,8 +82,8 @@
 				$sqlquery = "	UPDATE tilausrivi SET
 								tilaajanrivinro = $lask
 								WHERE yhtio = '$kukarow[yhtio]'
-								AND tunnus = '$tilausrivirow[tunnus]'";
-				$tresult = pupe_query($sqlquery);
+								AND tunnus  = '$tilausrivirow[tunnus]'";
+				$tresult = pupe_query($sqlquery, $masterlink);
 
 				$lask++;
 			}
@@ -92,7 +92,7 @@
 							SET kirjoitin = 'edi'
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus  = '$laskurow[tunnus]'";
-			$result = mysql_query($sqlquery) or pupe_error($sqlquery);
+			$result = pupe_query($sqlquery, $masterlink);
 		}
 		else {
 			echo "<font class='error'>".t("Tilauksen lähetys epäonnistui")."!</font><br>";
@@ -100,9 +100,6 @@
 	}
 
 	// Nollataan tarkoituksella lopetusmuuttuja
-	$lopetus = "";
-
+	$lopetus 		  = "";
 	$teccom_editilaus = "";
-	$out = "";
-
-?>
+	$out 			  = "";

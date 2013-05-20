@@ -55,80 +55,81 @@
 
 			$result = mysql_query($sqlhaku) or die ("<font class='error'>".mysql_error()."</font>");
 
-			require('inc/ProgressBar.class.php');
+			if (mysql_num_rows($result) > 0) {
 
-			include('inc/pupeExcel.inc');
+				require('inc/ProgressBar.class.php');
 
-			$worksheet 	 = new pupeExcel();
-			$format_bold = array("bold" => TRUE);
-			$excelrivi 	 = 0;
-			$sarakemaara = mysql_num_fields($result);
+				include('inc/pupeExcel.inc');
 
-			for ($i=0; $i < $sarakemaara; $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
-			$excelrivi++;
+				$worksheet 	 = new pupeExcel();
+				$format_bold = array("bold" => TRUE);
+				$excelrivi 	 = 0;
+				$sarakemaara = mysql_num_fields($result);
 
-			$bar = new ProgressBar();
-			$bar->initialize(mysql_num_rows($result));
-
-			while ($row = mysql_fetch_row($result)) {
-
-				$bar->increase();
-
-				for ($i=0; $i < $sarakemaara; $i++) {
-					if (mysql_field_type($result,$i) == 'real') {
-						$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
-					}
-					else {
-						$worksheet->writeString($excelrivi, $i, $row[$i]);
-					}
-				}
+				for ($i=0; $i < $sarakemaara; $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 				$excelrivi++;
-			}
 
-			$excelnimi = $worksheet->close();
+				$bar = new ProgressBar();
+				$bar->initialize(mysql_num_rows($result));
 
-			echo "<br><br><table>";
-			echo "<tr><th>".t("Tallenna tulos").":</th>";
-			echo "<form method='post' class='multisubmit'>";
-			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xlsx'>";
-			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-			echo "</table><br>";
+				while ($row = mysql_fetch_row($result)) {
 
-			echo "<font class='message'>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br>";
+					$bar->increase();
 
-			mysql_data_seek($result,0);
-
-			echo "<pre>";
-
-			for ($i = 0; $i < $sarakemaara; $i++) {
-				echo mysql_field_name($result,$i)."\t";
-			}
-			echo "\n";
-
-			while ($row = mysql_fetch_array($result)) {
-
-				for ($i=0; $i<$sarakemaara; $i++) {
-
-					// desimaaliluvuissa muutetaan pisteet pilkuiks...
-					if (mysql_field_type($result, $i) == 'real') {
-						echo str_replace(".",",", $row[$i])."\t";
+					for ($i=0; $i < $sarakemaara; $i++) {
+						if (mysql_field_type($result,$i) == 'real') {
+							$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
+						}
+						else {
+							$worksheet->writeString($excelrivi, $i, $row[$i]);
+						}
 					}
-					else {
-						echo str_replace(array("\n", "\r", "<br>"), " ", $row[$i])."\t";
-					}
+					$excelrivi++;
+				}
+
+				$excelnimi = $worksheet->close();
+
+				echo "<br><br><table>";
+				echo "<tr><th>".t("Tallenna tulos").":</th>";
+				echo "<form method='post' class='multisubmit'>";
+				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+				echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xlsx'>";
+				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table><br>";
+
+				echo "<font class='message'>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br>";
+
+				mysql_data_seek($result,0);
+
+				echo "<pre>";
+
+				for ($i = 0; $i < $sarakemaara; $i++) {
+					echo mysql_field_name($result,$i)."\t";
 				}
 				echo "\n";
-			}
-			echo "</pre>";
-		}
 
-		// kursorinohjausta
-		$formi  = "sql";
-		$kentta = "sqlhaku";
+				while ($row = mysql_fetch_array($result)) {
+
+					for ($i=0; $i<$sarakemaara; $i++) {
+
+						// desimaaliluvuissa muutetaan pisteet pilkuiks...
+						if (mysql_field_type($result, $i) == 'real') {
+							echo str_replace(".",",", $row[$i])."\t";
+						}
+						else {
+							echo str_replace(array("\n", "\r", "<br>"), " ", $row[$i])."\t";
+						}
+					}
+					echo "\n";
+				}
+				echo "</pre>";
+			}
+
+			// kursorinohjausta
+			$formi  = "sql";
+			$kentta = "sqlhaku";
+		}
 
 		require("../inc/footer.inc");
 	}
-
-?>

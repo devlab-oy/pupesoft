@@ -1246,6 +1246,11 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			$id = luo_myyntitilausotsikko("RIVISYOTTO", $laskurow['liitostunnus']);
 
 			// Päivitetään työmääräyksen tunnus myyntilaskulle
+			$query = "UPDATE laskun_lisatiedot
+						SET tyomaarayksen_tunnus = {$laskurow['tunnus']}
+						WHERE yhtio='{$kukarow['yhtio']}'
+						AND otunnus=$id";
+			$result = pupe_query($query);
 
 			// Haetaan työmääräyksen rivit
 			$query = "SELECT * FROM tilausrivi WHERE yhtio='{$kukarow['yhtio']}' AND otunnus='{$laskurow['tunnus']}'";

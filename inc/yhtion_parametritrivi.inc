@@ -67,7 +67,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "verkkolasku_vienti") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -1351,6 +1351,19 @@
 		$ulos .= "<option value = ''>".t("Yhdessä");
 		$ulos .= "<option value = 'E' $sel[E]>".t("Erikseen");
 
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "valmistuksessa_kaytetaan_tilakoodeja") {
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+		$ulos .= "<option value=''>" .t("Ei"). "</option>";
+		$ulos .= "<option value='K' $sel[K]>" .t("Kyllä"). "</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

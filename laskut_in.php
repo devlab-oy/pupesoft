@@ -39,7 +39,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 					FROM lasku
 					WHERE yhtio='{$kukarow['yhtio']}'
 					AND mapvm = '0000-00-00 00:00'
-					AND tila = 'L'
+					AND tila = 'U'
 					AND alatila = 'X'";
 		$result = pupe_query($query);
 
@@ -57,10 +57,9 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 					SET mapvm = now()
 					WHERE yhtio='{$kukarow['yhtio']}'
 					AND mapvm = '0000-00-00 00:00'
-					AND tila = 'L'
+					AND tila = 'U'
 					AND alatila = 'X'
 					AND laskunro NOT IN (" . implode(', ', $maksamattomat_laskut) . ")";
-		#echo $query."<br>";
 		$result = pupe_query($query);
 
 		echo "<font class='message'>";
@@ -72,11 +71,10 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 		$query = "UPDATE lasku
 					SET mapvm = '0000-00-00 00:00'
 					WHERE yhtio='{$kukarow['yhtio']}'
-					AND tila = 'L'
+					AND tila = 'U'
 					AND alatila = 'X'
 					AND mapvm != '0000-00-00 00:00'
 					AND laskunro IN (" . implode(', ', $maksamattomat_laskut) . ")";
-		#echo $query."<br>";
 		$result = pupe_query($query);
 
 		echo "<font class='message'>";

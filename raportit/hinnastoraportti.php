@@ -18,16 +18,13 @@
 	echo "<font class='head'>".t("Hinnastoajo").":</font><hr>";
 
 	if ($raptee == "AJA") {
-		if (include('Spreadsheet/Excel/Writer.php')) {
-		    $excelnimi = "$kukarow[yhtio]-".date("YmdHis").".xls";
-		    $workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-		    $workbook->setVersion(8);
-		    $worksheet = $workbook->addWorksheet('Hinnasto');
-		    $format_bold = $workbook->addFormat();
-		    $format_bold->setBold();
-		    $excelrivi = 0;
-		    $i = 0;
-		}
+
+		include('inc/pupeExcel.inc');
+
+		$worksheet 	 = new pupeExcel();
+		$format_bold = array("bold" => TRUE);
+		$excelrivi 	 = 0;
+	    $i 			 = 0;
 
 		// Tarkastetaan yhtion parametreista tuotteiden_jarjestys_raportoinnissa (V = variaation, koon ja varin mukaan)
 		if ($yhtiorow['tuotteiden_jarjestys_raportoinnissa'] == 'V') {
@@ -86,29 +83,27 @@
 			echo "</tr>";
 		}
 
-		if (isset($workbook)) {
-		    $worksheet->write($excelrivi, $i, t('Tuoteno'), $format_bold);
-		    $i++;
-		    $worksheet->write($excelrivi, $i, t('Nimitys'), $format_bold);
-		    $i++;
+		$worksheet->write($excelrivi, $i, t('Tuoteno'), $format_bold);
+	    $i++;
+	    $worksheet->write($excelrivi, $i, t('Nimitys'), $format_bold);
+	    $i++;
 
-			if ($kehahinnat != "") {
-				$worksheet->write($excelrivi, $i, t('Kehahin'), $format_bold);
-		    	$i++;
-	    	}
+		if ($kehahinnat != "") {
+			$worksheet->write($excelrivi, $i, t('Kehahin'), $format_bold);
+	    	$i++;
+    	}
 
-			$worksheet->write($excelrivi, $i, t('Myyntihinta'), $format_bold);
-		    $i++;
-		    $worksheet->write($excelrivi, $i, t('Saldo'), $format_bold);
-		    $i++;
-		    $worksheet->write($excelrivi, $i, t('Tryno'), $format_bold);
-		    $i++;
-		    $worksheet->write($excelrivi, $i, t('Try'), $format_bold);
-		    $i++;
-		    $worksheet->write($excelrivi, $i, t('EAN'), $format_bold);
-		    $i=0;
-		    $excelrivi++;
-		}
+		$worksheet->write($excelrivi, $i, t('Myyntihinta'), $format_bold);
+	    $i++;
+	    $worksheet->write($excelrivi, $i, t('Saldo'), $format_bold);
+	    $i++;
+	    $worksheet->write($excelrivi, $i, t('Tryno'), $format_bold);
+	    $i++;
+	    $worksheet->write($excelrivi, $i, t('Try'), $format_bold);
+	    $i++;
+	    $worksheet->write($excelrivi, $i, t('EAN'), $format_bold);
+	    $i=0;
+	    $excelrivi++;
 
 	    while ($productrow = mysql_fetch_array($productqueryresult)) {
 
@@ -118,29 +113,27 @@
 			$srow = mysql_fetch_array($sresult);
 
 			if ($myytavissao == "" or $apu_myytavissa > 0) {
-				if (isset($workbook)) {
-					$worksheet->writeString($excelrivi, $i, $productrow['tuoteno']);
-					$i++;
-					$worksheet->writeString($excelrivi, $i, $productrow['nimitys']);
-					$i++;
+				$worksheet->writeString($excelrivi, $i, $productrow['tuoteno']);
+				$i++;
+				$worksheet->writeString($excelrivi, $i, $productrow['nimitys']);
+				$i++;
 
-					if ($kehahinnat != "") {
-						$worksheet->writeNumber($excelrivi, $i, $productrow['kehahin']);
-						$i++;
-					}
-
-					$worksheet->writeNumber($excelrivi, $i, $productrow['myyntihinta']);
+				if ($kehahinnat != "") {
+					$worksheet->writeNumber($excelrivi, $i, $productrow['kehahin']);
 					$i++;
-					$worksheet->writeNumber($excelrivi, $i, $apu_myytavissa);
-					$i++;
-					$worksheet->writeString($excelrivi, $i, $productrow["try"]);
-					$i++;
-					$worksheet->writeString($excelrivi, $i, $srow["selitetark"]);
-					$i++;
-					$worksheet->writeString($excelrivi, $i, $productrow['eankoodi']);
-					$i=0;
-					$excelrivi++;
 				}
+
+				$worksheet->writeNumber($excelrivi, $i, $productrow['myyntihinta']);
+				$i++;
+				$worksheet->writeNumber($excelrivi, $i, $apu_myytavissa);
+				$i++;
+				$worksheet->writeString($excelrivi, $i, $productrow["try"]);
+				$i++;
+				$worksheet->writeString($excelrivi, $i, $srow["selitetark"]);
+				$i++;
+				$worksheet->writeString($excelrivi, $i, $productrow['eankoodi']);
+				$i=0;
+				$excelrivi++;
 
 				if ($showprod) {
 					echo "<tr class='aktiivi'>";
@@ -160,21 +153,17 @@
 			}
 		}
 
-		if ($showprod) echo "</table>";
+		$excelnimi = $worksheet->close();
 
-		if (isset($workbook)) {
-		    $workbook->close();
-
-			echo "<br><br>";
-			echo "<font class='message'>".t("Tallenna raportti (xls)").": </font>";
-			echo "<form method='post' class='multisubmit'>";
-			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='hinnastoraportti.xls'>";
-			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-			echo "<input type='submit' value='".t("Tallenna")."'>";
-			echo "</form>";
-			echo "<br><br>";
-		}
+		echo "<br><br>";
+		echo "<font class='message'>".t("Tallenna raportti (xls)").": </font>";
+		echo "<form method='post' class='multisubmit'>";
+		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+		echo "<input type='hidden' name='kaunisnimi' value='hinnastoraportti.xlsx'>";
+		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+		echo "<input type='submit' value='".t("Tallenna")."'>";
+		echo "</form>";
+		echo "<br><br>";
 	}
 
 	if (isset($kehahinnat) and $kehahinnat != "") {

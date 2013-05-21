@@ -444,6 +444,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "jt_toimitusaika_email_vahvistus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Ostotilauksen toimitusajan vahvistuksesta ei lähetetä asiakkaalle myyntitilauksien JT-rivien toimitusajan vahvistus sähköpostia")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Ostotilauksen toimitusajan vahvistuksesta lähetetään asiakkaalle myyntitilauksien JT-rivien toimitusajan vahvistus sähköposti")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "toimitusvahvistus") {
 			$vresult = t_avainsana("TOIMVAHVISTUS");
 

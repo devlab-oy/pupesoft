@@ -157,6 +157,17 @@
 				echo "<font class='error'>".t("Toimituksella ei ollut vahvistettavia rivejä")."</font><br><br>";
 			}
 
+			//aina kun ostotilauksen tilausrivit vahvistetaan, päivitetään tilausrivin_lisatietoihin timestamp,
+			//jotta asiakkaalle osataan lähettää vahvistetuista riveistä niihin liittyvien jt myyntitilausrivien toimitusajan vahvistus sähköposti
+			$query = "	UPDATE tilausrivin_lisatiedot
+						JOIN tilausrivi
+						ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+							AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+							AND tilausrivi.otunnus = '{$kukarow['kesken']}' )
+						SET tilausrivin_lisatiedot.toimitusaika_paivitetty = NOW()
+						WHERE tilausrivin_lisatiedot. yhtio = '{$kukarow['yhtio']}'";
+			pupe_query($query);
+
 			$tee = "Y";
 		}
 

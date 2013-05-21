@@ -25,7 +25,7 @@ class Tapahtumat {
         if (empty($errors)) {
             $query = "INSERT INTO laskun_tapahtumat
                     SET yhtio = '{$kukarow['yhtio']}',
-                    tyomaarays_numero = $tyomaarayksen_numero,
+                    tyomaarays_numero = '$tyomaarayksen_numero',
                     muuttaja = '{$kukarow['kuka']}',
                     muutettu = now()";
             pupe_query($query);

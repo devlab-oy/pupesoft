@@ -2255,6 +2255,9 @@
 				$vasen++;
 			}
 
+			$vasen_sarake[$vasen] = "<td>".t("Perintäesto"). "</td><td><input type='text' name='estopp' value='$estopp' size='3'><input type='text' name='estokk' value='$estokk' size='3'><input type='text' name='estovv' value='$estovv' size='6'></td>";
+			$vasen++;
+
 			// Ekotetan sarakkeet!
 			$rivicount = count($vasen_sarake) > count($oikea_sarake) ? count($vasen_sarake) : count($oikea_sarake);
 
@@ -3549,6 +3552,9 @@
 		// Setataan laskun aluperäiset tilat
 		$orig_tila    = $ylatila;
 		$orig_alatila = $alatila;
+
+		// Tehdään laskun tapahtuma
+		Tapahtumat::lasku($laskurow['tunnus']);
 
 		// Jos erikoisalennus muuttuu
 		if ($laskurow["erikoisale"] != $erikoisale) {

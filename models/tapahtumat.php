@@ -28,10 +28,7 @@ class Tapahtumat {
                     tyomaarays_numero = $tyomaarayksen_numero,
                     muuttaja = '{$kukarow['kuka']}',
                     muutettu = now()";
-
-            echo $query."\n";
-
-            #pupe_query($query);
+            pupe_query($query);
             return true;
         }
         else {

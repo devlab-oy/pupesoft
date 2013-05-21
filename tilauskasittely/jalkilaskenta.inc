@@ -717,6 +717,7 @@ if ($tuoteno != '') {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoteno'
 						and laadittu >= '$pvm'
+						AND tunnus >= {$tapahtuma['tunnus']}
 						and kpl <> 0";
 			$result = pupe_query($query);
 
@@ -811,6 +812,7 @@ if ($tuoteno != '') {
 								and tuoteno = '$tuoteno'
 								and laadittu >= '$pvm'
 								AND laji != 'korjaus'
+								AND tunnus >= {$tapahtuma['tunnus']}
 								and kpl <> 0
 								ORDER BY laadittu, tunnus";
 					$result = pupe_query($query);

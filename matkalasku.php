@@ -1256,7 +1256,7 @@ if ($tee == "MUOKKAA") {
 						ORDER BY koodi";
 			$vresult = pupe_query($query);
 
-				echo "<td><select name='maa' onchange='submit();' style='width: 150px;'>";
+			echo "<td><select name='maa' onchange='submit();' style='width: 150px;'>";
 
 			while ($vrow = mysql_fetch_assoc($vresult)) {
 				$sel = "";
@@ -1270,7 +1270,7 @@ if ($tee == "MUOKKAA") {
 				echo "<option value = '$vrow[koodi]' $sel>".t($vrow["nimi"])."</option>";
 			}
 
-				echo "</select></td>";
+			echo "</select></td>";
 			echo "<td><input type='text' name='kpl' value='$kpl' size='6'></td>";
 
 			//	Hinta saadaan antaa, jos meillä ei ole ennettu hintaa
@@ -2415,7 +2415,8 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 			$hinta = $trow["myyntihinta"];
 		}
 
-		$hinta = str_replace ( ",", ".", $hinta);
+		$hinta = (float) str_replace(",", ".", $hinta);
+		$kpl = (float) str_replace(",", ".", $kpl);
 
 		if ($hinta <= 0) {
 			$errori .= "<font class='error'>".t("VIRHE: Kulun hinta puuttuu")."</font><br>";
@@ -2502,7 +2503,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 						$_alkuaika  = date('Y-m-d H:i:s');
 						$_loppuaika = date('Y-m-d H:i:s');
 						$ins_kpl    = $kpl_array[$indeksi];
-						$i 		    = $kpl_array[$indeksi];
+						$i 		    = $kpl_array[$indeksi];											
 					}
 					else {
 						$ins_kpl = 1;

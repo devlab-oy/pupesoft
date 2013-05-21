@@ -2,8 +2,6 @@
 
 if (php_sapi_name() == 'cli') {
 	$pupe_root_polku = dirname(dirname(__FILE__));
-//	//for debug
-	$pupe_root_polku = "/Users/joonas/Dropbox/Sites/pupesoft";
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear");
 	error_reporting(E_ALL ^ E_WARNING ^ E_NOTICE);
 	ini_set("display_errors", 0);
@@ -36,6 +34,7 @@ if (php_sapi_name() == 'cli') {
 	$kukarow = mysql_fetch_assoc($result);
 }
 else if (php_sapi_name() != 'cli') {
+	//for debug reasons
 	require('inc/parametrit.inc');
 
 	echo "<font class='head'>".t('Asiakkaan jt-rivien toimitusajan vahvistus')."</font><hr>";

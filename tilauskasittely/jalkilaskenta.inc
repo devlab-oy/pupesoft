@@ -565,7 +565,7 @@ if ($tuoteno != '') {
 
 		$query  = "	SELECT tilausrivi.yhtio, tapahtuma.tunnus tapahtuma_tunnus
 					FROM tilausrivi
-					JOIN tapahtuma ON (tapahtuma.yhtio = tilausrivi.yhtio and tapahtuma.rivitunnus = tilausrivi.tunnus)
+					JOIN tapahtuma ON (tapahtuma.yhtio = tilausrivi.yhtio and tapahtuma.rivitunnus = tilausrivi.tunnus AND tapahtuma.laji != 'korjaus')
 					WHERE tilausrivi.yhtio 		= '$kukarow[yhtio]'
 					and ((tilausrivi.tyyppi = 'O' and tilausrivi.kpl > 0) or (tilausrivi.tyyppi = 'L' and tilausrivi.kpl < 0))
 					and tilausrivi.laskutettuaika != '0000-00-00'
@@ -601,10 +601,11 @@ if ($tuoteno != '') {
 			if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 			while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+
 				// Hetaaan laskutetut myntirivit
 				$query = "	SELECT tilausrivi.*, tapahtuma.laadittu, tapahtuma.tunnus tapahtuma_tunnus
 							FROM tilausrivi
-							JOIN tapahtuma ON tapahtuma.yhtio = tilausrivi.yhtio and tapahtuma.rivitunnus = tilausrivi.tunnus
+							JOIN tapahtuma ON (tapahtuma.yhtio = tilausrivi.yhtio and tapahtuma.rivitunnus = tilausrivi.tunnus and tapahtuma.laji != 'korjaus')
 							WHERE tilausrivi.yhtio	 		 = '$kukarow[yhtio]'
 							and tilausrivi.tunnus 			 = '$sarjarow[myyntirivitunnus]'
 							and tilausrivi.tyyppi 			 = 'L'
@@ -612,6 +613,7 @@ if ($tuoteno != '') {
 							and tilausrivi.laskutettuaika	!= '0000-00-00'
 							and tilausrivi.kpl 				!= 0";
 				$rivires = pupe_query($query);
+
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 				if (mysql_num_rows($rivires) == 1) {
@@ -631,9 +633,8 @@ if ($tuoteno != '') {
 					// Korjaus
 					if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjataan in-out hintoja! Laskuja (1) Uusi hinta: $uusihinta $rivirow[uusiotunnus]</font><br>";
 
-					$mitenkavi = korjaalaskut($tuoteno, $uusihinta, $rivirow["laadittu"], $rivirow["laadittu"], $rivirow["tunnus"]);
-
-					if ($mitenkavi == 0) korjaatapahtuma($rivirow['tapahtuma_tunnus'], "", $uusihinta, FALSE);
+					korjaatapahtuma($rivirow['tapahtuma_tunnus'], "", $uusihinta, FALSE);
+					korjaalaskut($tuoteno, $uusihinta, $rivirow["laadittu"], $rivirow["laadittu"], $rivirow["tunnus"]);
 				}
 				else {
 					if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Ei korjattavaa (tuotetta ei ole myyty)! Uusi hinta: $uusihinta $rivirow[uusiotunnus]</font><br>";
@@ -1201,9 +1202,33 @@ if ($tuoteno != '') {
 							// jos ollaa löydetty eka tulo voidaan aina päivitetään tapahtuma jos se on tulo, valmistus, laskutus, inventointi, kulutus tai siirto
 							if ($eka == 0) {
 
+								// Inventoinnissa korjaustapahtuman rivitunnus on alkuperäisen inventointitapahtuman tunnus (kaikissa muissa keisseissä rivitunnus pointtaa tilausriviin)
+								$rivitunnuslisa = $trow['laji'] == 'Inventointi' ? $trow['tunnus'] : $trow['rivitunnus'];
+
+								// Haetaan tuotteen edellinen kehari
+								// Katsotaan löytyykö tälle tapahtumariville korjausrivi ja otetaan edellinen kehahin sieltä
+								$query = "	SELECT hinta
+											FROM tapahtuma
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND laji = 'korjaus'
+											AND rivitunnus != 0
+											AND rivitunnus = '{$rivitunnuslisa}'
+											ORDER BY laadittu DESC, tunnus DESC
+											LIMIT 1";
+								$hinta_chk_res = pupe_query($query);
+
+								if (mysql_num_rows($hinta_chk_res) == 1) {
+									$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
+									$edellinen_tapahtuman_kehahin = $hinta_chk_row['hinta'];
+								}
+								else {
+									$edellinen_tapahtuman_kehahin = $trow['hinta'];
+								}
+
 								// päivitetään hinta vain jos hinta on eri
 								// tai korjataan tapahtumat jos tapahtuma on lukitulla tilikaudella
-								if ($trow["hinta"] != $uusikehahin) {
+								// tai meillä on riville korjaustapahtumia
+								if ($edellinen_tapahtuman_kehahin != $uusikehahin or mysql_num_rows($hinta_chk_res) == 1) {
 
 									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjataan tapahtuma! Keskihinta: $uusikehahin Vanha hinta: $trow[hinta]</font><br>";
 

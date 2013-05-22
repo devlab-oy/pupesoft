@@ -121,17 +121,13 @@
 
 					// $myy_sarjatunnus  --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
 					// $osto_sarjatunnus --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
-					$query = "	SELECT *
-								FROM tuote
-								WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$valmlisaarivi[tuoteno]'";
-					$tresult = mysql_query($query) or pupe_error($query);
-					$trow = mysql_fetch_array($tresult);
 
 					//funktio populoi globaalit muuttujat $tuoteno_array $kpl_array $kommentti_array $lapsenlap_array
 					$tuoteno_array = array($valmlisaarivi['tuoteno']);
 					$kpl_array = array(
 						$valmlisaarivi['tuoteno'] => $valmlisaarivi['kpl']
 					);
+
 					pupesoft_lisaa_valmisteen_rekursiiviset_reseptit();
 
 					foreach ($tuoteno_array as $tuoteno_temp) {
@@ -146,6 +142,13 @@
 						$paikka				= "";
 						$varataan_saldoa	= "EI";
 						$kommentti			= $kommentti_array[$tuoteno_temp];
+
+						$query = "	SELECT *
+									FROM tuote
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tuoteno = '$tuoteno'";
+						$tuoteres = pupe_query($query);
+						$trow = mysql_fetch_assoc($tuoteres);
 
 						require('lisaarivi.inc');
 					}

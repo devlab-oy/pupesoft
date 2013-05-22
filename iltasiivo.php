@@ -18,6 +18,10 @@
 		$kukarow['yhtio'] = $argv[1];
 		$kukarow['kuka'] = "crond";
 
+		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
+		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+		ini_set("display_errors", 0);
+
 		// otetaan tietokanta connect
 		require ("inc/connect.inc");
 		require ("inc/functions.inc");
@@ -462,6 +466,8 @@
 					and	tila in ('L','V')
 					and alatila = 'K'";
 		$result = pupe_query($query);
+
+		$valmkorj = 0;
 
 		while ($row = mysql_fetch_assoc($result)) {
 			if ($row["tila"] == "L") {

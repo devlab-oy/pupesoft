@@ -10,13 +10,13 @@
 		die;
 	}
 
-	// otetaan tietokanta connect
-	require ("../inc/connect.inc");
-	require ("../inc/functions.inc");
-
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
 	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 	ini_set("display_errors", 0);
+
+	// otetaan tietokanta connect
+	require ("../inc/connect.inc");
+	require ("../inc/functions.inc");
 
 	// hmm.. j‰nn‰‰
 	$kukarow['yhtio'] 		= $argv[1];
@@ -43,5 +43,3 @@
 	// echotaan outputti
 	$laskuta_message = str_replace("<br>", "\n", $laskuta_message);
 	echo strip_tags($laskuta_message);
-
-?>

@@ -824,7 +824,37 @@ if ($tuoteno != '') {
 
 						if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Lasketaan uudet hinnat tuotteelle: $tuote[tuoteno] Sort: Asc</font><br><br>";
 
+						$alkuperainen_hinta_ostotilaukselta = $uusihinta;
+
 						while ($trow = mysql_fetch_assoc($result) and $jlerror == 0) {
+
+							// Jos samalla sekunilla on useita tuloja, joudumme muokkaamaan $uusihinta-muuttujaa (rivi ~873). Tässä palautetaan oikea arvo.
+							$uusihinta = $alkuperainen_hinta_ostotilaukselta;
+
+							// Inventoinnissa korjaustapahtuman rivitunnus on alkuperäisen inventointitapahtuman tunnus (kaikissa muissa keisseissä rivitunnus pointtaa tilausriviin)
+							$rivitunnuslisa = $trow['laji'] == 'Inventointi' ? $trow['tunnus'] : $trow['rivitunnus'];
+
+							// Haetaan tuotteen edellinen kehari
+							// Katsotaan löytyykö tälle tapahtumariville korjausrivi ja otetaan edellinen kehahin sieltä
+							// Ei muuteta tapahtuman lajia 'korjaukseksi'
+							$query = "	SELECT kplhinta, hinta
+										FROM tapahtuma
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND laji = 'korjaus'
+										AND rivitunnus != 0
+										AND rivitunnus = '{$rivitunnuslisa}'
+										ORDER BY laadittu DESC, tunnus DESC
+										LIMIT 1";
+							$hinta_chk_res = pupe_query($query);
+
+							if (mysql_num_rows($hinta_chk_res) == 1) {
+								$trow_temp = mysql_fetch_assoc($hinta_chk_res);
+
+								$trow['hinta'] = $trow_temp['hinta'];
+								$trow['kplhinta'] = $trow_temp['kplhinta'];
+							}
+
+							$edellinen_tapahtuman_kehahin = $trow['hinta'];
 
 							// kun löydetään eka tulo, voidaan alkaa hommiin...
 							if (($trow['laji'] == 'tulo' or $trow['laji'] == 'valmistus') and $eka == 1) {
@@ -836,7 +866,12 @@ if ($tuoteno != '') {
 							if (($trow['laji'] == 'tulo' or $trow['laji'] == 'valmistus') and $eka == 0) {
 
 								// Jos ollaan käsittelemässä kääntöpistettä laitetaan keskihankintahinnaksi uusi OIKEA keskihankintahinta
-								if ($trow['rivitunnus'] == $rivitunnus) $trow['kplhinta'] = $uusihinta;
+								if ($trow['rivitunnus'] == $rivitunnus) {
+									$trow['kplhinta'] = $uusihinta;
+								}
+								else {
+									$uusihinta = $trow['kplhinta'];
+								}
 
 								// jos ollaan käsitelty jo jotain laskuja, niin nyt on sitte alkamassa uusi tulo ni korjataan laskut ja nollataan laskurit
 								if ($korjattavia_laskuja != 0) {
@@ -1202,29 +1237,6 @@ if ($tuoteno != '') {
 
 							// jos ollaa löydetty eka tulo voidaan aina päivitetään tapahtuma jos se on tulo, valmistus, laskutus, inventointi, kulutus tai siirto
 							if ($eka == 0) {
-
-								// Inventoinnissa korjaustapahtuman rivitunnus on alkuperäisen inventointitapahtuman tunnus (kaikissa muissa keisseissä rivitunnus pointtaa tilausriviin)
-								$rivitunnuslisa = $trow['laji'] == 'Inventointi' ? $trow['tunnus'] : $trow['rivitunnus'];
-
-								// Haetaan tuotteen edellinen kehari
-								// Katsotaan löytyykö tälle tapahtumariville korjausrivi ja otetaan edellinen kehahin sieltä
-								$query = "	SELECT hinta
-											FROM tapahtuma
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND laji = 'korjaus'
-											AND rivitunnus != 0
-											AND rivitunnus = '{$rivitunnuslisa}'
-											ORDER BY laadittu DESC, tunnus DESC
-											LIMIT 1";
-								$hinta_chk_res = pupe_query($query);
-
-								if (mysql_num_rows($hinta_chk_res) == 1) {
-									$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
-									$edellinen_tapahtuman_kehahin = $hinta_chk_row['hinta'];
-								}
-								else {
-									$edellinen_tapahtuman_kehahin = $trow['hinta'];
-								}
 
 								// päivitetään hinta vain jos hinta on eri
 								// tai korjataan tapahtumat jos tapahtuma on lukitulla tilikaudella

@@ -4592,9 +4592,9 @@ if ($tee == '') {
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
 		if (isset($ruutulimit) and $ruutulimit > 0) {
-			list($ruutulimitalk, $ruutulimitlop) = explode("##", $ruutulimit);
+			list($ruutulimitalk, $ruutulimitlop) = explode("!¡!", $ruutulimit);
 
-			$limitlisa = "LIMIT ".($ruutulimitalk-1).", $ruutulimitlop";
+			$limitlisa = "LIMIT ".(int) ($ruutulimitalk-1).", ". (int) $ruutulimitlop;
 		}
 		else {
 			$limitlisa = "";
@@ -4917,10 +4917,10 @@ if ($tee == '') {
 
 					if ($ruulask2 == 25) {
 
-						if ($ruutulimit == (($ruulask3+1)."##".($ruulask1+1-$ruulask3))) $ruutusel = "SELECTED";
+						if ($ruutulimit == (($ruulask3+1)."!¡!".($ruulask1+1-$ruulask3))) $ruutusel = "SELECTED";
 						else $ruutusel = "";
 
-						echo "<option value='".($ruulask3+1)."##".($ruulask1+1-$ruulask3)."' $ruutusel>".($ruulask3+1)." - ".($ruulask1+1)."</option>";
+						echo "<option value='".($ruulask3+1)."!¡!".($ruulask1+1-$ruulask3)."' $ruutusel>".($ruulask3+1)." - ".($ruulask1+1)."</option>";
 
 						$ruulask2 = 0;
 						$ruulask3 = $ruulask1+1;

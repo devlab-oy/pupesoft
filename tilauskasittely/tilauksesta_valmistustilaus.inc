@@ -138,6 +138,7 @@
 						$kukarow["kesken"] 	= $tunnus;
 						$kpl 				= $kpl_array[$tuoteno_temp];
 						$tuoteno			= $tuoteno_temp;
+						$trow["tuoteno"] = $tuoteno;
 						$toimaika			= $myytilrow["kerayspvm"];
 						$kerayspvm			= $myytilrow["kerayspvm"];
 						$hinta				= 0;

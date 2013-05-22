@@ -836,7 +836,6 @@ if ($tuoteno != '') {
 
 							// Haetaan tuotteen edellinen kehari
 							// Katsotaan löytyykö tälle tapahtumariville korjausrivi ja otetaan edellinen kehahin sieltä
-							// Ei muuteta tapahtuman lajia 'korjaukseksi'
 							$query = "	SELECT kplhinta, hinta
 										FROM tapahtuma
 										WHERE yhtio = '{$kukarow['yhtio']}'

@@ -417,21 +417,20 @@ if (!function_exists("korjaalaskut")) {
 					/*
 						Ollaan suljetulla kaudella ja päivitetään vain kate_korjattu
 					*/
-					$query = "UPDATE lasku SET kate_korjattu = kate_korjattu - $tilausrivi[kate_korjattu] + $uusikate WHERE tunnus='$tilausrivi[ltunnus]'";
+					$query = "UPDATE lasku SET kate_korjattu = IFNULL(kate_korjattu, kate) - {$kate_muuttuja} + {$uusikate} WHERE tunnus = '{$tilausrivi['ltunnus']}'";
 					$katekorjres = pupe_query($query);
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
-					$query = "UPDATE lasku SET kate_korjattu = kate_korjattu - $tilausrivi[kate_korjattu] + $uusikate WHERE tunnus='$tilausrivi[oltunnus]'";
+					$query = "UPDATE lasku SET kate_korjattu = IFNULL(kate_korjattu, kate) - {$kate_muuttuja} + {$uusikate} WHERE tunnus = '{$tilausrivi['oltunnus']}'";
 					$katekorjres = pupe_query($query);
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
-					$query = "UPDATE tilausrivi SET kate_korjattu = $uusikate WHERE tunnus='$tilausrivi[ttunnus]'";
+					$query = "UPDATE tilausrivi SET kate_korjattu = {$uusikate} WHERE tunnus = '{$tilausrivi['ttunnus']}'";
 					$katekorjres = pupe_query($query);
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
-
 				}
 			}
 		}
@@ -717,7 +716,6 @@ if ($tuoteno != '') {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoteno'
 						and laadittu >= '$pvm'
-						AND tunnus >= {$tapahtuma['tunnus']}
 						and kpl <> 0";
 			$result = pupe_query($query);
 
@@ -812,7 +810,6 @@ if ($tuoteno != '') {
 								and tuoteno = '$tuoteno'
 								and laadittu >= '$pvm'
 								AND laji != 'korjaus'
-								AND tunnus >= {$tapahtuma['tunnus']}
 								and kpl <> 0
 								ORDER BY laadittu, tunnus";
 					$result = pupe_query($query);
@@ -833,11 +830,13 @@ if ($tuoteno != '') {
 							if (($trow['laji'] == 'tulo' or $trow['laji'] == 'valmistus') and $eka == 1) {
 								$vlaadittu = $trow['laadittu'];
 								$eka = 0;
-								$trow['kplhinta'] = $uusihinta;
 							}
 
 							// jos kyseessä on tulo ja ollaan jo löydetty eka tulo
 							if (($trow['laji'] == 'tulo' or $trow['laji'] == 'valmistus') and $eka == 0) {
+
+								// Jos ollaan käsittelemässä kääntöpistettä laitetaan keskihankintahinnaksi uusi OIKEA keskihankintahinta
+								if ($trow['rivitunnus'] == $rivitunnus) $trow['kplhinta'] = $uusihinta;
 
 								// jos ollaan käsitelty jo jotain laskuja, niin nyt on sitte alkamassa uusi tulo ni korjataan laskut ja nollataan laskurit
 								if ($korjattavia_laskuja != 0) {

@@ -7,6 +7,7 @@
 			<input type='hidden' name='lopetus' 			value = '$lopetus'>
 			<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 			<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+			<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 			<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 			<input type='hidden' name='toiminto' 			value = '$toiminto'>
 			<input type='hidden' name='tee' 				value = 'TI'>

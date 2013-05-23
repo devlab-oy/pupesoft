@@ -2315,7 +2315,6 @@
 
 			echo "<input type='hidden' name='ed_toimtapa' value='$toimitustapa'>";
 			echo "<input type='hidden' name='ed_merahti' value='$merahti'>";
-
 			echo "</td></tr>\n";
 
 			// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella

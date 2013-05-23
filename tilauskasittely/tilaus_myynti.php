@@ -453,6 +453,14 @@ if (
 	$tilausnumero = luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero, $myyjanumero, '', $kantaasiakastunnus);
 	$kukarow["kesken"] = $tilausnumero;
 	$kaytiin_otsikolla = "NOJOO!";
+
+	// Setataan lopetuslinkki uudestaan t‰ss‰, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
+	$tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
+
+	if ($lopetus != "") {
+		// Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+		$tilmyy_lopetus = $lopetus."/SPLIT/".$tilmyy_lopetus;
+	}
 }
 
 //Haetaan otsikon kaikki tiedot
@@ -2213,7 +2221,7 @@ if ($tee == '') {
 			echo "<form action='../rahtikirja.php' method='post'>
 					<input type='hidden' name='tee' value=''>
 					<input type='hidden' name='toim' value='lisaa'>
-					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=LASKUTATILAUS'>
 					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
 					<input type='hidden' name='projektilla' value='$projektilla'>
 					<input type='hidden' name='rahtikirjan_esisyotto' value='$toim'>

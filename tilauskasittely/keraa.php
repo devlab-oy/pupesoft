@@ -1958,10 +1958,12 @@
 			$formi	= "find";
 			$kentta	= "etsi";
 
-			echo "<table>";
+			echo "<span id='hakutable'>";
 			echo "<form name='find' method='post'>";
 			echo "<input type='hidden' name='toim' value='{$toim}'>";
 			echo "<input type='hidden' id='jarj' name='jarj' value='{$jarj}'>";
+
+			echo "<table>";
 			echo "<tr><th>",t("Valitse varasto"),":</th><td><select name='tuvarasto' onchange='submit()'>";
 
 			$query = "	SELECT yhtio, tunnus, nimitys
@@ -2053,8 +2055,10 @@
 			echo "</select></td>";
 
 			echo "<th>",t("Etsi tilausta"),":</th><td><input type='text' name='etsi'>";
-			echo "<input type='submit' value='",t("Etsi"),"'></form></td></tr>";
+			echo "<input type='submit' value='",t("Etsi"),"'></td></tr>";
 			echo "</table>";
+			echo "</form>";
+			echo "</span>";
 
 			$haku = '';
 			$kerayserahaku = '';
@@ -2202,12 +2206,17 @@
 			//jos haetaan numerolla ja lˆydet‰‰n yksi osuma, siirryt‰‰n suoraan ker‰‰m‰‰n
 			if (mysql_num_rows($result) == 1 AND is_numeric($etsi) and $etsi != '') {
 				$row = mysql_fetch_assoc($result);
+				
 				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 					$id = $row["keraysera"];
 				}
 				else {
 					$id = $row["tunnus"];
 				}
+				
+				echo "	<script language='javascript'>
+						$('#hakutable').hide();
+					</script> ";
 			}
 			else if (mysql_num_rows($result) > 0) {
 				//piirret‰‰n taulukko...

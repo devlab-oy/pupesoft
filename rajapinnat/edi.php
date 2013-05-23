@@ -10,7 +10,7 @@ class Edi {
 	 */
 	static function create($order) {
 
-		global $magento_api_edi;
+		global $magento_api_edi, $ovt_tunnus, $pupesoft_tilaustyyppi;
 
 		// require 'magento_salasanat.php' muuttujat
 		$verkkokauppa_asiakasnro	= "WEBSTORE";

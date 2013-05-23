@@ -345,7 +345,7 @@ if ($tee == "") {
 	echo "<tr><th valign='top'>".t("Nettopaino").":</th><td valign='top' colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td><td valign='top' class='back' width='450'>$lisamassa</td></tr>";
 
 	// Näytetään eturahti vain jos yhtiönparametri jalkilaskenta_kuluperuste == ''
-	if ($yhtiorow['jalkilaskenta_kuluperuste'] == '' or $laskurow['rahti_etu'] != 0) {
+	if (($yhtiorow['yhtio'] != 'artr' and $yhtiorow['yhtio'] != 'mergr') or $laskurow['rahti_etu'] != 0) {
 		echo "<tr><th valign='top'>".t("Veroton")." ".t("Eturahti").":</th><td valign='top'><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td colspan='2' valign='top' nowrap>".t("Eturahdin ALV").": ".alv_popup('rahti_etu_alv', $laskurow["rahti_etu_alv"])."</td><td class='back'> $lisatiedot </td></tr>";
 	}
 

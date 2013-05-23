@@ -59,6 +59,12 @@ if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "
 	}
 
 	if ($canInvoice) {
-		$proxy->call($sessionId, 'sales_order_invoice.capture', $newInvoiceId);
+		try {
+			$proxy->call($sessionId, 'sales_order_invoice.capture', $newInvoiceId);
+		}
+		catch (Exception $e) {
+			echo $e->faultstring."\n";
+			echo $e->faultcode."\n";
+		}
 	}
 }

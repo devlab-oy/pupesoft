@@ -122,7 +122,7 @@ elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "
 				$result = pupe_query($query);
 				$uussaldorow = mysql_fetch_array($result);
 
-				if (($uustuoterow["kehahin"] == 0 and $vantuoterow["kehahin"] == 0) or ($vansaldorow["saldo"] == 0 and $uussaldorow["saldo"] == 0)) {
+				if ($uustuoterow["kehahin"] == 0 and $vantuoterow["kehahin"] == 0) {
 					$uusi_on_jo = "OK";
 				}
 				else {

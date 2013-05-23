@@ -9,13 +9,24 @@
 
 class MagentoClient {
 
+	// Kutsujen määrä multicall kutsulla
+	const MULTICALL_BATCH_SIZE = 100;
+
 	// Soap-clientin sessio
 	private $_session;
+
 	// Oletus attribuutti setti
 	private $_attributeSet;
+
 	// SOAP-clientin proxy
 	private $_proxy;
 
+	// Kategoriat puu
+	private $_category_tree;
+
+	/**
+	 * Magento client
+	 */
 	function __construct($url, $user, $pass)
 	{
 		try {
@@ -135,25 +146,28 @@ class MagentoClient {
 	 */
 	public function lisaa_simple_tuotteet(array $dnstuote)
 	{
-		$count = 1;
+		// Tuote countteri
+		$tuote_count = 1;
 
+		// Array multicall kutsuille
 		$calls = array();
+
+		$category_tree = $this->get_category_tree();
 
 		// Lisätään tuotteet erissä
 		foreach($dnstuote as $tuote) {
 
+			// Lyhytkuvaus ei saa olla magentossa tyhjä.
+			// Käytetään kuvaus kentän tietoja jos lyhytkuvaus on tyhjä.
+			if ($tuote['lyhytkuvaus'] == '') {
+				$tuote['lyhytkuvaus'] = '&nbsp;';
+			}
+
+			// Etsitään kategoria_id tuoteryhmällä
+			$category_id = $this->find_category($tuote['try_nimi'], $category_tree['children']);
+
+			// Lisätään tai päivitetään tuote
 			try {
-				// Lisätään tai päivitetään tuote
-
-				// Lyhytkuvaus ei saa olla tyhjä.
-				// Käytetään kuvaus kentän tietoja jos lyhytkuvaus on tyhjä.
-				if ($tuote['lyhytkuvaus'] == '') {
-					$tuote['lyhytkuvaus'] = $tuote['kuvaus'];
-				}
-
-				// Etsitään kategoria mihin tuote lisätään
-				$category_id = $this->find_category($tuote['try_nimi'], $this->_category_tree['children']);
-
 				// Lisätään tuote
 				// Jos tuotteen lisäys ei onnistu ei tuotekuviakaan lisätä.
 				$product_id = $this->_proxy->call($this->_session, 'catalog_product.create',
@@ -179,7 +193,6 @@ class MagentoClient {
 						)
 					);
 
-				// Lisätään tuotekuvat
 				// Haetaan tuotekuvat
 				if ($tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus'])) {
 					// Multicallilla kaikki kuvat yhdellä kertaa.
@@ -191,7 +204,7 @@ class MagentoClient {
 							array($product_id,
 								array(
 									'file'     => $tuotekuva,
-									'label'    => 'tuotekuva_teksti',
+									'label'    => '',
 									'position' => 0,
 									'types'    => $types,
 									'exclude'  => 0
@@ -211,7 +224,7 @@ class MagentoClient {
 				}
 
 				// Lisätään tuote countteria
-				$count++;
+				$tuote_count++;
 
 			} catch (Exception $e) {
 				echo $e->getMessage()."\n";
@@ -239,12 +252,40 @@ class MagentoClient {
 									)
 								)
 							);
-						$count++;
+
+						if ($tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus'])) {
+							// Multicallilla kaikki kuvat yhdellä kertaa.
+							foreach($tuotekuvat as $tuotekuva) {
+								$types = array('image', 'small_image', 'thumbnail');
+
+								$calls[] = array('catalog_product_attribute_media.create',
+									array($product_id,
+										array(
+											'file'     => $tuotekuva,
+											'label'    => '',
+											'position' => 0,
+											'types'    => $types,
+											'exclude'  => 0
+										)
+									)
+								);
+							}
+
+							// Lisätään tuotekuvat
+							try {
+								$filenames = $this->_proxy->multicall($this->_session, $calls);
+								$calls = array();
+
+							} catch (Exception $e) {
+								echo $e->getMessage();
+							}
+						}
+						// Lisätään tuote countteria
+						$tuote_count++;
 						echo "tuote päivitetty\n";
 					} catch (Exception $e) {
 						echo $e->getMessage();
 					}
-
 				}
 			}
 		}
@@ -286,8 +327,8 @@ class MagentoClient {
 					// Päivitetään Simple tuote
 					$result = $this->_proxy->call($this->_session, 'catalog_product.update', array($tuote['tuoteno'],
 						array(
-								'short_description' => "koko: $koko, vari: $vari",
-								'visibility'		=> 0,
+								'short_description' => "$tuote[lyhytkuvaus]",
+								'visibility'		=> 1,
 								'additional_attributes' => array(
 									'multi_data' => array(
 										'koko' => $koko,
@@ -312,7 +353,7 @@ class MagentoClient {
 					'short_description'     => $tuotteet[0]['lyhytkuvaus'],
 					'weight'                => $tuotteet[0]['tuotemassa'],
 					'status'                => 1,
-					'visibility'            => '1', #nakyvyys
+					'visibility'            => '4', #nakyvyys
 					'price'                 => $tuotteet[0]['myymalahinta'],
 					'tax_class_id'          => '4', # 24%
 					'meta_title'            => 'meta_title',
@@ -342,7 +383,7 @@ class MagentoClient {
 							array($product_id,
 								array(
 									'file'     => $tuotekuva,
-									'label'    => 'tuotekuva_teksti',
+									'label'    => '',
 									'position' => 0,
 									'types'    => $types,
 									'exclude'  => 0
@@ -376,18 +417,24 @@ class MagentoClient {
 	 */
 	public function hae_tilaukset($status)
 	{
+		// HUOM: invoicella on state ja orderilla on status
+		// Invoicen statet 'pending' => 1, 'paid' => 2, 'canceled' => 3
 		$orders = array();
 
-		// Haetaan lista maksetuista laskuista
+		// Toimii ordersilla
 		$filter = array(array('status' => array('eq' => $status)));
-		$orders_list = $this->_proxy->call($this->_session, 'order.list', $filter);
 
-		// Haetaan lasku tarkemmat tiedot
-		foreach ($orders_list as $order) {
+		$fetched_orders = $this->_proxy->call($this->_session, 'sales_order.list', $filter);
+
+		foreach ($fetched_orders as $order) {
+			// Haetaan tilauksen tiedot (orders)
 			$orders[] = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);
 
+			// Päivitetään tilaus tilaan processing
+			$this->_proxy->call($this->_session, 'sales_order.addComment', array('orderIncrementId' => $order['increment_id'], 'status' => 'processing'));
 		}
 
+		// Palautetaan löydetyt tilaukset
 		return $orders;
 	}
 
@@ -404,16 +451,19 @@ class MagentoClient {
 		// Loopataan päivitettävät tuotteet läpi (simplet)
 		foreach ($dnstock as $tuote) {
 
-			// $dnstock sisältää tuotenoon ja myytävissä määrän
+			// $tuote muuttuja sisältää tuotenumeron ja myytävissä määrän
 			$product_sku = $tuote['tuoteno'];
-			$qty = $tuote['myytavissa'];
+			$qty         = $tuote['myytavissa'];
+
+			// Out of stock jos määrä on tuotteella ei ole myytavissa saldoa
 			$is_in_stock = ($qty > 0) ? 1 : 0;
 
+			// Päivitetään saldo
 			try {
 				$stock_data = array(
-				    'qty' => $qty,
-				    'is_in_stock ' => $is_in_stock,
-				    'manage_stock ' => 1
+					'qty'          => $qty,
+					'is_in_stock'  => $is_in_stock,
+					'manage_stock' => 1
 				);
 
 				$result = $this->_proxy->call(
@@ -445,6 +495,7 @@ class MagentoClient {
 	public function paivita_hinnat(array $dnshinnasto)
 	{
 		$count = 0;
+		$batch_count = 0;
 
 		// Päivitetään tuotteen hinnastot
 		foreach($dnshinnasto as $tuote) {
@@ -453,17 +504,20 @@ class MagentoClient {
 			// $tuote['hinta_veroton']
 			$calls[] = array('catalog_product.update', array($tuote['tuoteno'], array('price' => $tuote['hinta'])));
 
-			$count++;
-			if ($count > 10) break;
-		}
+			$batch_count++;
+			if ($batch_count > self::MULTICALL_BATCH_SIZE) {
 
-		$calls[] = array('catalog_product.update', array('ei oo tuotetta', array('price' => $tuote['hinta'])));
+				try {
+					$result = $this->_proxy->multicall($this->_session, $calls);
+					var_dump($result);
+				}
+				catch (Exception $e) {
+					echo $e->getMessage()."\n";
+				}
 
-		try {
-			$result = $this->_proxy->multicall($this->_session, $calls);
-			var_dump($result);
-		} catch (Exception $e) {
-			echo $e->getMessage()."\n";
+				$batch_count = 0;
+				$calls = array();
+			}
 		}
 
 		return $count;
@@ -558,20 +612,25 @@ class MagentoClient {
 	}
 
 	/**
+	 * Hakee magenton kategoriat
 	 *
 	 */
 	private function get_category_tree()
 	{
-		try {
-			$category_tree = $this->_proxy->call($this->_session, 'catalog_category.tree', 2);
-			return $category_tree;
-		} catch(Exception $e) {
-			$e->getMessage();
-			return 0;
+		if (empty($this->_category_tree)) {
+			try {
+				$this->_category_tree = $this->_proxy->call($this->_session, 'catalog_category.tree', 2);
+				return $this->_category_tree;
+			} catch(Exception $e) {
+				$e->getMessage();
+				return 0;
+			}
 		}
-
-
+		else {
+			return $this->_category_tree;
+		}
 	}
+
 	/**
 	 * Hakee tuotteen tuotekuvat
 	 *

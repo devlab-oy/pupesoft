@@ -200,7 +200,7 @@
 		$tila = 'L';
 	}
 
-	// Jos kerayserät on päällä ja tilaus on jäänyt tänne, niin triggeröidään muutos-muuttuja koska keröyksessä tilaukselle on jo auto-insertöity rahtikirjan tiedot.
+	// Jos kerayserät on päällä ja tilaus on jäänyt tänne, niin triggeröidään muutos-muuttuja koska keräyksessä tilaukselle on jo auto-insertöity rahtikirjan tiedot.
 	if ($yhtiorow['kerayserat'] == 'K' and $tila == "L") {
 		$muutos = 'yes';
 	}
@@ -443,7 +443,8 @@
 			$tee  = "";
 			$toim = "";
 			$id   = 0;
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tilauskasittely/tilaus_myynti.php?toim=$rahtikirjan_esisyotto'>";
+
+			lopetus($lopetus, "META");
 		}
 	}
 
@@ -624,6 +625,12 @@
 				}
 			}
 
+			// Poistetaan etukäteen syötetyt rahtikirjatiedot, ku nyt tässä ne menis muuten toistamiseen kantaan
+			if ((!isset($muutos) or $muutos != 'yes') and $tutkimus > 0) {
+				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro IN ({$tunnuslisa}) and rahtikirjanro IN ({$rakirnolisa}) and poikkeava = -9";
+				$result = pupe_query($query);
+			}
+
 			for ($i=0; $i<count($pakkaus); $i++) {
 
 				// katotaan että ollaan syötetty jotain
@@ -664,10 +671,10 @@
 								$result = pupe_query($query);
 							}
 
-							if ($kollit[$i] == '')		$kollit[$i]		= 0;
-							if ($kilot[$i] == '')		$kilot[$i]		= 0;
-							if ($lavametri[$i] == '')	$lavametri[$i]	= 0;
-							if ($kuutiot[$i] == '')		$kuutiot[$i]	= 0;
+							if ($kollit[$i] == '')	  $kollit[$i]    = 0;
+							if ($kilot[$i] == '')	  $kilot[$i]     = 0;
+							if ($lavametri[$i] == '') $lavametri[$i] = 0;
+							if ($kuutiot[$i] == '')	  $kuutiot[$i]   = 0;
 
 							// Lisätään myös pakkausveloitus, mikäli sellainen on annettu
 							$query = "	SELECT pakkaus.*
@@ -2226,6 +2233,7 @@
 		echo "<input type='hidden' name='tee' value='add'>";
 		echo "<input type='hidden' name='mista' value='$mista'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
 		if ($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
 			echo "<input type='hidden' name='toimitustapa_varasto' value='$toimitustapa_varasto'>";
@@ -2493,18 +2501,19 @@
 
 			echo "</tr>";
 
-			if ($tee == 'change') {
-				$query = "	SELECT GROUP_CONCAT(DISTINCT if(viesti!='',viesti,NULL) separator '. ') viesti
-							FROM rahtikirjat use index (otsikko_index)
-							WHERE yhtio			= '$kukarow[yhtio]'
-							AND otsikkonro		= '$id'
-							AND rahtikirjanro	= '$rakirno'";
-				$viestirar = pupe_query($query);
-				$viestirarrow = mysql_fetch_assoc($viestirar);
+			$rviesti1 = "";
+			$rviesti2 = "";
 
-				$viesti = trim($viestirarrow["viesti"]);
-			}
-			else {
+			$query = "	SELECT GROUP_CONCAT(DISTINCT if(viesti!='',viesti,NULL) separator '. ') viesti
+						FROM rahtikirjat use index (otsikko_index)
+						WHERE yhtio			= '$kukarow[yhtio]'
+						AND otsikkonro		= '$id'
+						AND rahtikirjanro	= '$rakirno'";
+			$viestirar = pupe_query($query);
+			$viestirarrow = mysql_fetch_assoc($viestirar);
+			$rviesti1 = trim($viestirarrow["viesti"]);
+
+			if ($tee != 'change') {
 				$query = "	SELECT GROUP_CONCAT(DISTINCT if(tuote.kuljetusohje!='',tuote.kuljetusohje,NULL) separator '. ') viesti
 							FROM tilausrivi
 							JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
@@ -2513,9 +2522,10 @@
 							AND tilausrivi.tyyppi  != 'D'";
 				$viestirar = pupe_query($query);
 				$viestirarrow = mysql_fetch_assoc($viestirar);
-
-				$viesti = trim("$asiakkaan_kuljetusohje $viestirarrow[viesti]");
+				$rviesti2 = trim($viestirarrow["viesti"]);
 			}
+
+			$viesti = trim("$asiakkaan_kuljetusohje $rviesti1 $rviesti2");
 
 			echo "<tr><th>".t("Kuljetusohje")."</th><td colspan='3'><textarea name='viesti' cols='60' rows='3'>$viesti</textarea></td></tr>";
 

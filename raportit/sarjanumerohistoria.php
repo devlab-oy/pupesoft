@@ -12,8 +12,8 @@ if (isset($_POST["tee"])) {
 	}
 }
 
-
 require '../inc/parametrit.inc';
+require '../validation/Validation.php';
 
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
@@ -51,12 +51,39 @@ $request = array(
 	'loppu_pvm'		 => $loppu_pvm
 );
 
-echo_kayttoliittyma($request);
+if ($request['tee'] == 'nayta_tilaus') {
+	require 'naytatilaus.inc';
+}
+else {
+	echo_kayttoliittyma($request);
 
-if ($request['tee'] == 'hae_tilaukset') {
-	$tilaukset = hae_tilaukset($request);
+	if ($request['tee'] == 'hae_tilaukset') {
+		$validations = array(
+			'sarjanro'	 => 'mitavaan',
+			'asiakas'	 => 'mitavaan',
+			'toimittaja' => 'mitavaan',
+			'tuote'		 => 'mitavaan',
+			'alku_pvm'	 => 'paiva',
+			'loppu_pvm'	 => 'paiva'
+		);
+		$required = array('alku_pvm', 'loppu_pvm');
 
-	echo_tilaukset_raportti($tilaukset);
+		$validator = new FormValidator($validations, $required);
+
+		if ($validator->validate($request)) {
+			$tilaukset = hae_tilaukset($request);
+			//esitellään tilaus tyypit tässä jotta validaatio luokka ei yritä valitoida niitä.
+			$request['tyypit'] = array(
+				'L'	 => t("Myyntitilaus"),
+				'O'	 => t("Ostotilaus"),
+				'A'	 => t("Työmääräys"),
+			);
+			echo_tilaukset_raportti($tilaukset, $request);
+		}
+		else {
+			echo $validator->getScript();
+		}
+	}
 }
 
 function hae_tilaukset($request) {
@@ -64,7 +91,7 @@ function hae_tilaukset($request) {
 
 	$sarjanumero_where = "";
 	if (!empty($request['sarjanumero'])) {
-		$sarjanumero_where = " AND sarjanumero.sarjanumero LIKE '%{$request['sarjanumero']}%'";
+		$sarjanumero_where = " AND sarjanumeroseuranta.sarjanumero LIKE '%{$request['sarjanumero']}%'";
 	}
 
 	$asiakas_where = "";
@@ -79,93 +106,187 @@ function hae_tilaukset($request) {
 
 	$tuoteno_where = "";
 	if (!empty($request['tuote'])) {
-		$tuoteno_where = " AND tilausrivi.tuoteno LIKE '%{$request['tuote']}%'";
+		$tuoteno_where = " AND tilausrivi.nimitys LIKE '%{$request['tuote']}%'";
 	}
 
 	$lasku_where = "";
 	if ($request['alku_pvm'] and $request['loppu_pvm']) {
+		//loppu_pvm + 1 day, koska queryssä between ja luontiaika on datetime
 		$lasku_where = " AND lasku.luontiaika BETWEEN '".date('Y-m-d', strtotime($request['alku_pvm']))."' AND '".date('Y-m-d', strtotime($request['loppu_pvm'].' + 1 day'))."'";
 	}
 
-	$query = "	(SELECT lasku.tunnus,
-				asiakas.nimi as nimi,
-				lasku.luontiaika,
-				lasku.summa,
-				lasku.tila as tyyppi,
-				group_concat(sarjanumeroseuranta.sarjanumero) as sarjanumerot
-				FROM sarjanumeroseuranta
-				JOIN tilausrivi
-				ON ( tilausrivi.yhtio = sarjanumeroseuranta.yhtio
-					AND tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus
-					{$tuoteno_where} )
-				JOIN lasku
-				ON ( lasku.yhtio = tilausrivi.yhtio
-					AND lasku.tunnus = tilausrivi.otunnus
-					AND lasku.tila = 'L'
-					{$lasku_where} )
-				JOIN asiakas
-				ON ( asiakas.yhtio = lasku.yhtio
-					AND asiakas.tunnus = lasku.liitostunnus
-					{$asiakas_where} )
-				WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
-				{$sarjanumero_where}
-				GROUP BY lasku.tunnus
-				)
-				UNION
-				(SELECT lasku.tunnus,
-				toimi.nimi as nimi,
-				lasku.luontiaika,
-				lasku.summa,
-				lasku.tila as tyyppi,
-				group_concat(sarjanumeroseuranta.sarjanumero) as sarjanumerot
-				FROM sarjanumeroseuranta
-				JOIN tilausrivi
-				ON ( tilausrivi.yhtio = sarjanumeroseuranta.yhtio
-					AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
-					{$tuoteno_where} )
-				JOIN lasku
-				ON ( lasku.yhtio = tilausrivi.yhtio
-					AND lasku.tunnus = tilausrivi.otunnus
-					AND lasku.tila = 'O'
-					{$lasku_where} )
-				JOIN toimi
-				ON ( toimi.yhtio = lasku.yhtio
-					AND toimi.tunnus = lasku.liitostunnus
-					{$toimittaja_where} )
-				WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
-				{$sarjanumero_where}
-				GROUP BY lasku.tunnus
-				)";
+	$queryt = array();
+	//jos haetaan asiakkaita haetaan vain myyntitilauksia ja työmääräyksiä koska ostotilauksilla ei ole asiakasta
+	if (!empty($request['asiakas'])) {
+		$queryt[] = "	(
+						SELECT lasku.tunnus,
+						toimi.nimi as nimi,
+						lasku.luontiaika,
+						lasku.summa,
+						'A' as tyyppi,
+						sarjanumeroseuranta.sarjanumero as sarjanumerot,
+						tilausrivi.nimitys as tuote
+						FROM sarjanumeroseuranta
+						JOIN tilausrivi
+						ON ( tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+							AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+							AND tilausrivi.tyyppi = 'L'
+							{$tuoteno_where} )
+						JOIN lasku
+						ON ( lasku.yhtio = tilausrivi.yhtio
+							AND lasku.tunnus = tilausrivi.otunnus
+							{$lasku_where} )
+						JOIN toimi
+						ON ( toimi.yhtio = lasku.yhtio
+							AND toimi.tunnus = lasku.liitostunnus
+							{$toimittaja_where} )
+						WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+						{$sarjanumero_where}
+						)";
+		$queryt[] = "	(
+						SELECT lasku.tunnus,
+						asiakas.nimi as nimi,
+						lasku.luontiaika,
+						lasku.summa,
+						'L' as tyyppi,
+						sarjanumeroseuranta.sarjanumero as sarjanumerot,
+						tilausrivi.nimitys as tuote
+						FROM sarjanumeroseuranta
+						JOIN tilausrivi
+						ON ( tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+							AND tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus
+							AND tilausrivi.tyyppi = 'L'
+							{$tuoteno_where} )
+						JOIN lasku
+						ON ( lasku.yhtio = tilausrivi.yhtio
+							AND lasku.tunnus = tilausrivi.otunnus
+							{$lasku_where} )
+						JOIN asiakas
+						ON ( asiakas.yhtio = lasku.yhtio
+							AND asiakas.tunnus = lasku.liitostunnus
+							{$asiakas_where} )
+						WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+						{$sarjanumero_where}
+						)";
+	}
 
+	//jos haetaan toimittajia haetaan vain ostotilauksia koska myyntitilauksia ja työmääräyksiä ei ole toimittajia
+	if (!empty($request['toimittaja'])) {
+		$queryt[] = "	(
+						SELECT lasku.tunnus,
+						toimi.nimi as nimi,
+						lasku.luontiaika,
+						lasku.summa,
+						'O' as tyyppi,
+						sarjanumeroseuranta.sarjanumero as sarjanumerot,
+						tilausrivi.nimitys as tuote
+						FROM sarjanumeroseuranta
+						JOIN tilausrivi
+						ON ( tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+							AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+							AND tilausrivi.tyyppi = 'O'
+							{$tuoteno_where} )
+						JOIN lasku
+						ON ( lasku.yhtio = tilausrivi.yhtio
+							AND lasku.tunnus = tilausrivi.otunnus
+							{$lasku_where} )
+						JOIN toimi
+						ON ( toimi.yhtio = lasku.yhtio
+							AND toimi.tunnus = lasku.liitostunnus
+							{$toimittaja_where} )
+						WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+						{$sarjanumero_where}
+						)";
+	}
 
-//	$query = "	SELECT lasku.tunnus,
-//				lasku.liitostunnus,
-//				lasku.luontiaika,
-//				lasku.summa,
-//				lasku.tila as tyyppi,
-//				tilausrivi.tuoteno,
-//				asiakas.nimi AS asiakas_nimi,
-//				toimi.nimi AS toimi_nimi
-//				FROM lasku
-//				JOIN tilausrivi
-//					ON ( tilausrivi.yhtio = lasku.yhtio
-//					AND tilausrivi.otunnus = lasku.tunnus
-//					{$tilausrivi_join} )
-//				LEFT JOIN asiakas
-//				ON ( asiakas.yhtio = lasku.yhtio
-//					AND asiakas.tunnus = lasku.liitostunnus )
-//				LEFT JOIN toimi
-//				ON ( toimi.yhtio = lasku.yhtio
-//					AND toimi.tunnus = lasku.liitostunnus )
-//				LEFT JOIN tyomaarays
-//				ON ( tyomaarays.yhtio = lasku.yhtio
-//					AND tyomaarays.otunnus = lasku.tunnus )
-//				{$tilausrivi_join}
-//				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-//				AND lasku.tila != 'D'
-//				AND lasku.tila IN ('O', 'L', 'N', 'A')
-//				{$lasku_where}
-//				GROUP BY lasku.tunnus";
+	if (!empty($queryt)) {
+		foreach ($queryt as $q) {
+			$query = $q.' UNION';
+		}
+		//poistetaan vika " UNION"
+		$query = substr($query, 0, -6);
+	}
+	else {
+		//jos queryt on empty asiakkaaseen tai toimittajaan ei ole syötetty mitään. tällöin haetaan kaikista tilaustyypeistä
+		$query = "	(
+						SELECT lasku.tunnus,
+						asiakas.nimi as nimi,
+						lasku.luontiaika,
+						lasku.summa,
+						'L' as tyyppi,
+						sarjanumeroseuranta.sarjanumero as sarjanumerot,
+						tilausrivi.nimitys as tuote
+						FROM sarjanumeroseuranta
+						JOIN tilausrivi
+						ON ( tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+							AND tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus
+							AND tilausrivi.tyyppi = 'L'
+							{$tuoteno_where} )
+						JOIN lasku
+						ON ( lasku.yhtio = tilausrivi.yhtio
+							AND lasku.tunnus = tilausrivi.otunnus
+							{$lasku_where} )
+						JOIN asiakas
+						ON ( asiakas.yhtio = lasku.yhtio
+							AND asiakas.tunnus = lasku.liitostunnus
+							{$asiakas_where} )
+						WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+						{$sarjanumero_where}
+						)
+						UNION
+						(
+						SELECT lasku.tunnus,
+						toimi.nimi as nimi,
+						lasku.luontiaika,
+						lasku.summa,
+						'A' as tyyppi,
+						sarjanumeroseuranta.sarjanumero as sarjanumerot,
+						tilausrivi.nimitys as tuote
+						FROM sarjanumeroseuranta
+						JOIN tilausrivi
+						ON ( tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+							AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+							AND tilausrivi.tyyppi = 'L'
+							{$tuoteno_where} )
+						JOIN lasku
+						ON ( lasku.yhtio = tilausrivi.yhtio
+							AND lasku.tunnus = tilausrivi.otunnus
+							{$lasku_where} )
+						JOIN toimi
+						ON ( toimi.yhtio = lasku.yhtio
+							AND toimi.tunnus = lasku.liitostunnus
+							{$toimittaja_where} )
+						WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+						{$sarjanumero_where}
+						)
+						UNION
+						(
+						SELECT lasku.tunnus,
+						toimi.nimi as nimi,
+						lasku.luontiaika,
+						lasku.summa,
+						'O' as tyyppi,
+						sarjanumeroseuranta.sarjanumero as sarjanumerot,
+						tilausrivi.nimitys as tuote
+						FROM sarjanumeroseuranta
+						JOIN tilausrivi
+						ON ( tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+							AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+							AND tilausrivi.tyyppi = 'O'
+							{$tuoteno_where} )
+						JOIN lasku
+						ON ( lasku.yhtio = tilausrivi.yhtio
+							AND lasku.tunnus = tilausrivi.otunnus
+							{$lasku_where} )
+						JOIN toimi
+						ON ( toimi.yhtio = lasku.yhtio
+							AND toimi.tunnus = lasku.liitostunnus
+							{$toimittaja_where} )
+						WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+						{$sarjanumero_where}
+						)";
+	}
+	$query = $query."ORDER BY tyyppi, luontiaika";
 	$result = pupe_query($query);
 
 	$tilaukset = array();
@@ -176,29 +297,32 @@ function hae_tilaukset($request) {
 	return $tilaukset;
 }
 
-function echo_tilaukset_raportti($tilaukset) {
+function echo_tilaukset_raportti($tilaukset, $request = array()) {
 	global $kukarow, $yhtiorow;
 
-	//tilausnro, asiakkaan/toimittajan nimi, luontiaika, summa sekä tyyppi (osto/myynti/työmääräys).
+	$lopetus = "{$_SERVER['PHP_SELF']}////tee=hae_tilaukset//sarjanumero={$request['sarjanumero']}//asiakas={$request['asiakas']}//toimittaja={$request['toimittaja']}//tuote={$request['tuote']}//alku_pvm={$request['alku_pvm']}//loppu_pvm={$request['loppu_pvm']}";
+
 	echo "<table>";
 	echo "<thead>";
 	echo "<tr>";
 	echo "<th>".t('Tilausnumero')."</th>";
 	echo "<th>".t('Asiakkaan')." / ".t('toimittajan nimi')."</th>";
-	echo "<th>".t('Sarjanumerot')."</th>";
+	echo "<th>".t('Tuote')."</th>";
+	echo "<th>".t('Sarjanumero')."</th>";
 	echo "<th>".t('Luontiaika')."</th>";
 	echo "<th>".t('Summa')."</th>";
 	echo "<th>".t('Tyyppi')."</th>";
 	echo "</tr>";
 	echo "</thead>";
 	foreach ($tilaukset as $tilaus) {
-		echo "<tr>";
-		echo "<td><a href='#'>{$tilaus['tunnus']}</a></td>";
-		echo "<td>".(!empty($tilaus['asiakas']) ? $tilaus['asiakas_nimi'] : $tilaus['toimi_nimi'])."</td>";
+		echo "<tr class='aktiivi'>";
+		echo "<td><a href='sarjanumerohistoria.php?tee=nayta_tilaus&tunnus={$tilaus['tunnus']}&lopetus={$lopetus}'>{$tilaus['tunnus']}</a></td>";
+		echo "<td>{$tilaus['nimi']}</td>";
+		echo "<td>{$tilaus['tuote']}</td>";
 		echo "<td>{$tilaus['sarjanumerot']}</td>";
 		echo "<td>{$tilaus['luontiaika']}</td>";
 		echo "<td>{$tilaus['summa']}</td>";
-		echo "<td>{$tilaus['tyyppi']}</td>";
+		echo "<td>{$request['tyypit'][$tilaus['tyyppi']]}</td>";
 		echo "</tr>";
 	}
 	echo "</table>";
@@ -253,5 +377,4 @@ function echo_kayttoliittyma($request) {
 	echo "<input type='submit' value='".t('Hae')."' />";
 	echo "</form>";
 }
-
 require '../inc/footer.inc';

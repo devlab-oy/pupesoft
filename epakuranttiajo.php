@@ -65,6 +65,7 @@
 
 		// Haetaan kaikki saldolliset tuotteet
 		$query  = "	SELECT tuote.tuoteno,
+					tuote.try,
 					tuote.epakurantti25pvm,
 					tuote.epakurantti50pvm,
 					tuote.epakurantti75pvm,
@@ -79,7 +80,7 @@
 					AND tuote.ei_saldoa = ''
 					AND tuote.epakurantti100pvm = '0000-00-00'
 					AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
-					GROUP BY 1,2,3,4,5,6,7,8
+					GROUP BY 1,2,3,4,5,6,7,8,9
 					HAVING saldo > 0
 					ORDER BY tuoteno";
 		$epakurantti_result = mysql_query($query) or pupe_error($query);
@@ -95,6 +96,7 @@
 			echo "<br><table>";
 			echo "<tr>";
 			echo "<th>".t("Tuote")."</th>";
+			echo "<th>".t("Try")."</th>";
 			echo "<th>".t("Viimeisin saapuminen")."</th>";
 			echo "<th>".t("Viimeisin laskutus")."</th>";
 			echo "<th>".t("Viim. tapahtuma")."</th>";
@@ -112,6 +114,7 @@
 		}
 
 		$worksheet->writeString($excelrivi, $excelsarake++, t("Tuote"), $format_bold);
+		$worksheet->writeString($excelrivi, $excelsarake++, t("Try"), $format_bold);
 		$worksheet->writeString($excelrivi, $excelsarake++, t("Viimeisin saapuminen"), $format_bold);
 		$worksheet->writeString($excelrivi, $excelsarake++, t("Viimeisin laskutus"), $format_bold);
 		$worksheet->writeString($excelrivi, $excelsarake++, t("Viim. tapahtuma"), $format_bold);
@@ -247,6 +250,13 @@
 					if (!$php_cli) echo "<tr><td><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($epakurantti_row['tuoteno'])."'>{$epakurantti_row['tuoteno']}</a></td>";
 
 					$worksheet->writeString($excelrivi, $excelsarake++, $epakurantti_row['tuoteno']);
+					
+					$try = t_avainsana("TRY", '', "and selite = '{$epakurantti_row['try']}'", '', '', "selitetark");
+
+					$try_teksti = $try != "" ? "{$epakurantti_row['try']} - $try" : $epakurantti_row['try'];
+
+					if (!$php_cli) echo "<td>{$try_teksti}</td>";
+					$worksheet->writeString($excelrivi, $excelsarake++, $try_teksti);
 
 					if ($tulorow['laadittu'] == "1970-01-01") {
 						if (!$php_cli) echo "<td></td>";
@@ -332,14 +342,14 @@
 
 		if ($epa_tuotemaara > 0) {
 
-			if (!$php_cli) echo "<tr><td class='tumma' colspan='7'>".t("Yhteensä").":</td>";
-			$worksheet->writeString($excelrivi, 6, t("Yhteensä"));
+			if (!$php_cli) echo "<tr><td class='tumma' colspan='8'>".t("Yhteensä").":</td>";
+			$worksheet->writeString($excelrivi, 7, t("Yhteensä"));
 
 			if (!$php_cli) echo "<td class='tumma' align='right'>$vararvot_nyt</td>";
-			$worksheet->writeNumber($excelrivi, 7, $vararvot_nyt);
+			$worksheet->writeNumber($excelrivi, 8, $vararvot_nyt);
 
 			if (!$php_cli) echo "<td class='tumma' align='right'>$vararvot_sit</td>";
-			$worksheet->writeNumber($excelrivi, 8, $vararvot_sit);
+			$worksheet->writeNumber($excelrivi, 9, $vararvot_sit);
 
 			if (!$php_cli and isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
 				echo "<td class='tumma'></td>";
@@ -348,11 +358,11 @@
 			if (!$php_cli) echo "</tr>";
 			$excelrivi++;
 
-			if (!$php_cli) echo "<tr><td class='tumma' colspan='8'>".t("Epäkuranttimuutos yhteensä").":</td>";
-			$worksheet->writeString($excelrivi, 6, t("Epäkuranttimuutos yhteensä"));
+			if (!$php_cli) echo "<tr><td class='tumma' colspan='9'>".t("Epäkuranttimuutos yhteensä").":</td>";
+			$worksheet->writeString($excelrivi, 7, t("Epäkuranttimuutos yhteensä"));
 
 			if (!$php_cli) echo "<td class='tumma' align='right'>",($vararvot_sit-$vararvot_nyt),"</td>";
-			$worksheet->writeNumber($excelrivi, 8, ($vararvot_sit-$vararvot_nyt));
+			$worksheet->writeNumber($excelrivi, 9, ($vararvot_sit-$vararvot_nyt));
 
 			if (!$php_cli and isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
 				echo "<td class='tumma'></td>";

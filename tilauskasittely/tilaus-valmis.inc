@@ -1271,10 +1271,10 @@ else {
 					}
 
 					if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
-						$toimitustavan_lahto = $toimitustavan_lahto[$varasto];
+						$toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
 					}
 					else {
-						$toimitustavan_lahto = 0;
+						$toimitustavan_lahto_arvo = 0;
 					}
 
 					// Ei monisteta tunnusta
@@ -1301,7 +1301,7 @@ else {
 								$values .= ", '$tulostusalue'";
 								break;
 							case 'toimitustavan_lahto':
-								$values .= ", '$toimitustavan_lahto'";
+								$values .= ", '$toimitustavan_lahto_arvo'";
 								break;
 							case 'ohjausmerkki':
 								if ($row['omalle_tilaukselle'] > 0 and trim($laskurow['ohjausmerkki']) != "") {
@@ -1450,10 +1450,10 @@ else {
 			$toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o', kohdistettu = 'K' " : '';
 
 			if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
-				$toimitustavan_lahto = $toimitustavan_lahto[$varasto];
+				$toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
 			}
 			else {
-				$toimitustavan_lahto = 0;
+				$toimitustavan_lahto_arvo = 0;
 			}
 
 			$ohjausmerkkilisa = "";
@@ -1467,7 +1467,7 @@ else {
 			$query = "	UPDATE lasku set
 						varasto 							= '$varasto',
 						tulostusalue						= '$tulostusalue',
-						toimitustavan_lahto					= '$toimitustavan_lahto',
+						toimitustavan_lahto					= '$toimitustavan_lahto_arvo',
 						ultilno 							= '$laskurow[ultilno]',
 						aktiivinen_kuljetus 				= '$laskurow[aktiivinen_kuljetus]',
 						aktiivinen_kuljetus_kansallisuus	= '$laskurow[aktiivinen_kuljetus_kansallisuus]',

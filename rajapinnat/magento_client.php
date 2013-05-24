@@ -180,7 +180,7 @@ class MagentoClient {
 								'websites'              => 'default',
 								'name'                  => $tuote['nimi'],
 								'description'           => $tuote['kuvaus'],
-								'short_description'     => $tuote['lyhytkuvaus'],
+								'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
 								'weight'                => $tuote['tuotemassa'],
 								'status'                => '1',
 								'visibility'            => '1',
@@ -196,31 +196,7 @@ class MagentoClient {
 				// Haetaan tuotekuvat
 				if ($tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus'])) {
 					// Multicallilla kaikki kuvat yhdellä kertaa.
-					foreach($tuotekuvat as $tuotekuva) {
-
-						$types = array('image', 'small_image', 'thumbnail');
-
-						$calls[] = array('catalog_product_attribute_media.create',
-							array($product_id,
-								array(
-									'file'     => $tuotekuva,
-									'label'    => '',
-									'position' => 0,
-									'types'    => $types,
-									'exclude'  => 0
-								)
-							)
-						);
-					}
-
-					// Lisätään tuotekuvat
-					try {
-						$filenames = $this->_proxy->multicall($this->_session, $calls);
-						$calls = array();
-
-					} catch (Exception $e) {
-						echo $e->getMessage();
-					}
+					$this->lisaa_tuotekuvat($product_id, $tuotekuvat);
 				}
 
 				// Lisätään tuote countteria
@@ -240,7 +216,7 @@ class MagentoClient {
 										'websites'              => 'default',
 										'name'                  => $tuote['nimi'],
 										'description'           => $tuote['kuvaus'],
-										'short_description'     => $tuote['lyhytkuvaus'],
+										'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
 										'weight'                => $tuote['tuotemassa'],
 										'status'                => '1',
 										'visibility'            => '1',
@@ -255,30 +231,7 @@ class MagentoClient {
 
 						if ($tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus'])) {
 							// Multicallilla kaikki kuvat yhdellä kertaa.
-							foreach($tuotekuvat as $tuotekuva) {
-								$types = array('image', 'small_image', 'thumbnail');
-
-								$calls[] = array('catalog_product_attribute_media.create',
-									array($product_id,
-										array(
-											'file'     => $tuotekuva,
-											'label'    => '',
-											'position' => 0,
-											'types'    => $types,
-											'exclude'  => 0
-										)
-									)
-								);
-							}
-
-							// Lisätään tuotekuvat
-							try {
-								$filenames = $this->_proxy->multicall($this->_session, $calls);
-								$calls = array();
-
-							} catch (Exception $e) {
-								echo $e->getMessage();
-							}
+							$this->lisaa_tuotekuvat($product_id, $tuotekuvat);
 						}
 						// Lisätään tuote countteria
 						$tuote_count++;
@@ -289,6 +242,9 @@ class MagentoClient {
 				}
 			}
 		}
+
+		// Palautetaan pävitettyjen tuotteiden määrä
+		return $tuote_count;
 	}
 
 	/**
@@ -327,7 +283,7 @@ class MagentoClient {
 					// Päivitetään Simple tuote
 					$result = $this->_proxy->call($this->_session, 'catalog_product.update', array($tuote['tuoteno'],
 						array(
-								'short_description' => "$tuote[lyhytkuvaus]",
+								'short_description' => utf8_encode($tuote[lyhytkuvaus]),
 								'visibility'		=> 1,
 								'additional_attributes' => array(
 									'multi_data' => array(
@@ -350,7 +306,7 @@ class MagentoClient {
 					'websites'				=> 'default',
 					'name'					=> $tuotteet[0]['nimitys'],
 					'description'           => $tuotteet[0]['kuvaus'],
-					'short_description'     => $tuotteet[0]['lyhytkuvaus'],
+					'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
 					'weight'                => $tuotteet[0]['tuotemassa'],
 					'status'                => 1,
 					'visibility'            => '4', #nakyvyys
@@ -375,31 +331,10 @@ class MagentoClient {
 				// Lisää tuotekuva configurablelle
 				// Multicallilla kaikki kuvat yhdellä kertaa.
 				if ($tuotekuvat = $this->hae_tuotekuvat($tuotteet[0]['tunnus'])) {
-					foreach($tuotekuvat as $tuotekuva) {
-
-						$types = array('image', 'small_image', 'thumbnail');
-
-						$calls[] = array('catalog_product_attribute_media.create',
-							array($product_id,
-								array(
-									'file'     => $tuotekuva,
-									'label'    => '',
-									'position' => 0,
-									'types'    => $types,
-									'exclude'  => 0
-								)
-							)
-						);
-					}
-
-					// Multi call kutsu, jonka jälkeen nollataan calls muuttuja
-					try {
-						$filenames = $this->_proxy->multicall($this->_session, $calls);
-						$calls = array();
-					} catch (Exception $e) {
-						echo $e->getMessage();
-					}
+					lisaa_tuotekuvat($product_id, $tuotekuvat);
 				}
+
+				// Lisätään countteria
 				$count++;
 
 			} catch (Exception $e) {
@@ -448,7 +383,7 @@ class MagentoClient {
 	{
 		$count = 0;
 
-		// Loopataan päivitettävät tuotteet läpi (simplet)
+		// Loopataan päivitettävät tuotteet läpi (aina simplejä)
 		foreach ($dnstock as $tuote) {
 
 			// $tuote muuttuja sisältää tuotenumeron ja myytävissä määrän
@@ -629,6 +564,43 @@ class MagentoClient {
 		else {
 			return $this->_category_tree;
 		}
+	}
+
+	/**
+	 * Lisää tuotteen tuotekuvat
+	 * @param  string 	$product_id Tuotteen tunnus
+	 * @param  array 	$tuotekuvat Tuotteen kuvatiedostot
+	 * @return array    			Tiedostonimet
+	 */
+	private function lisaa_tuotekuvat($product_id, $tuotekuvat) {
+
+		echo "lisätään tuotekuvat tuotteelle $product_id\n";
+		$calls = array();
+
+		foreach($tuotekuvat as $kuva) {
+			$types = array('image', 'small', 'thumbnail');
+
+			$calls[] = array(
+				'catalog_product_attribute_media.create',
+				array($product_id,
+					array(	'file' 		=> $kuva,
+							'label'		=> '',
+							'position' 	=> 0,
+							'types' 	=> $types,
+							'exclude' 	=> 0
+						)
+					)
+			);
+		}
+
+		// Lisätään tuotekuvat
+		try {
+			$filenames = $this->_proxy->multicall($this->_session, $calls);
+		} catch (Exception $e) {
+			echo $e->getMessage();
+		}
+
+		return $filenames;
 	}
 
 	/**

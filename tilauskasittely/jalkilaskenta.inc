@@ -190,17 +190,17 @@ if (!function_exists("korjaalaskut")) {
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 				// korjataan laskun kate
-				$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate, kate_korjattu = kate WHERE tunnus='$tilausrivi[ltunnus]'";
+				$query = "UPDATE lasku SET kate = round(kate - $tilausrivi[kate] + $uusikate, 6), kate_korjattu = kate WHERE tunnus='$tilausrivi[ltunnus]'";
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 				$katekorjres = pupe_query($query);
 
 				// korjataan tilauksen kate
-				$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate, kate_korjattu = kate WHERE tunnus='$tilausrivi[oltunnus]'";
+				$query = "UPDATE lasku SET kate = round(kate - $tilausrivi[kate] + $uusikate, 6), kate_korjattu = kate WHERE tunnus='$tilausrivi[oltunnus]'";
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 				$katekorjres = pupe_query($query);
 
 				// ja lopuksi korjataan tilausrivin kate
-				$query = "UPDATE tilausrivi SET kate = $uusikate, kate_korjattu = kate WHERE tunnus='$tilausrivi[ttunnus]'";
+				$query = "UPDATE tilausrivi SET kate = round($uusikate, 6), kate_korjattu = kate WHERE tunnus='$tilausrivi[ttunnus]'";
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 				$katekorjres = pupe_query($query);
 
@@ -331,19 +331,19 @@ if (!function_exists("korjaalaskut")) {
 					kopioitiliointi($tiliointi2['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
 
 					// korjataan laskun kate
-					$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate, kate_korjattu = kate WHERE tunnus='$tilausrivi[ltunnus]'";
+					$query = "UPDATE lasku SET kate = round(kate - $tilausrivi[kate] + $uusikate, 2), kate_korjattu = kate WHERE tunnus='$tilausrivi[ltunnus]'";
 					$katekorjres = pupe_query($query);
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 					// korjataan tilauksen kate
-					$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate, kate_korjattu = kate WHERE tunnus='$tilausrivi[oltunnus]'";
+					$query = "UPDATE lasku SET kate = round(kate - $tilausrivi[kate] + $uusikate, 2), kate_korjattu = kate WHERE tunnus='$tilausrivi[oltunnus]'";
 					$katekorjres = pupe_query($query);
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 					// ja lopuksi korjataan tilausrivin kate
-					$query = "UPDATE tilausrivi SET kate = $uusikate, kate_korjattu = kate WHERE tunnus='$tilausrivi[ttunnus]'";
+					$query = "UPDATE tilausrivi SET kate = round($uusikate, 6), kate_korjattu = kate WHERE tunnus='$tilausrivi[ttunnus]'";
 					$katekorjres = pupe_query($query);
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
@@ -417,17 +417,17 @@ if (!function_exists("korjaalaskut")) {
 					/*
 						Ollaan suljetulla kaudella ja päivitetään vain kate_korjattu
 					*/
-					$query = "UPDATE lasku SET kate_korjattu = IFNULL(kate_korjattu, kate) - {$kate_muuttuja} + {$uusikate} WHERE tunnus = '{$tilausrivi['ltunnus']}'";
+					$query = "UPDATE lasku SET kate_korjattu = round(IFNULL(kate_korjattu, kate) - {$kate_muuttuja} + {$uusikate}, 2) WHERE tunnus = '{$tilausrivi['ltunnus']}'";
 					$katekorjres = pupe_query($query);
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
-					$query = "UPDATE lasku SET kate_korjattu = IFNULL(kate_korjattu, kate) - {$kate_muuttuja} + {$uusikate} WHERE tunnus = '{$tilausrivi['oltunnus']}'";
+					$query = "UPDATE lasku SET kate_korjattu = round(IFNULL(kate_korjattu, kate) - {$kate_muuttuja} + {$uusikate}, 2) WHERE tunnus = '{$tilausrivi['oltunnus']}'";
 					$katekorjres = pupe_query($query);
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
-					$query = "UPDATE tilausrivi SET kate_korjattu = {$uusikate} WHERE tunnus = '{$tilausrivi['ttunnus']}'";
+					$query = "UPDATE tilausrivi SET kate_korjattu = round({$uusikate}, 6) WHERE tunnus = '{$tilausrivi['ttunnus']}'";
 					$katekorjres = pupe_query($query);
 
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";

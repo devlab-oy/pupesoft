@@ -7,6 +7,16 @@ if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
 	exit;
 }
 
+if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASYTUNNUSHAKU") {
+	livesearch_asiakasytunnushaku();
+	exit;
+}
+
+if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASKATEGORIAHAKU") {
+	livesearch_asiakaskategoriahaku();
+	exit;
+}
+
 if (isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {
 	livesearch_tuotehaku();
 	exit;
@@ -14,6 +24,11 @@ if (isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {
 
 if (isset($livesearch_tee) and $livesearch_tee == "TUOTEKATEGORIAHAKU") {
 	livesearch_tuotekategoriahaku();
+	exit;
+}
+
+if (isset($livesearch_tee) and $livesearch_tee == "TUOTEOSASTO") {
+	livesearch_tuoteosastohaku();
 	exit;
 }
 
@@ -748,6 +763,12 @@ function hae_liveseach_kentta($kohde, $tyyppi, $ehto_index, $aliehto_index = 0, 
 	if ($tyyppi == 'ehto') {
 		if ($kohde == 'asiakas') {
 			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
+		}
+		else if ($kohde == 'asiakas_ytunnus') {
+			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASYTUNNUSHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
+		}
+		else if ($kohde == 'asiakaskategoria') {
+			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "ASIAKASKATEGORIAHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');
 		}
 		else if ($kohde == 'tuote') {
 			$return = livesearch_kentta("eisaaollaoikeaforminnimi", "TUOTEHAKU", "kampanja_ehdot[{$ehto_index}][arvo]", 140, $value, '', '', 'ehto_arvo', 'ei_break_all');

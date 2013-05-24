@@ -20956,3 +20956,33 @@ if (!function_exists('rekursiivinen_resepti')) {
 		}
 	}
 }
+
+if (!function_exists('onko_rahtituote_syotetty')) {
+	function onko_rahtituote_syotetty($laskurow, $whateverhinta = FALSE) {
+		global $kukarow, $yhtiorow;
+
+		// Palautetaan Rahti-tuoterivien lukumäärätilausvalmis
+		$query = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND selite  = '$laskurow[toimitustapa]'";
+		$result = pupe_query($query);
+		$torow = mysql_fetch_assoc($result);
+
+		$rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
+
+		$hintalisa = $whateverhinta === FALSE ? " AND hinta != 0 " : "";
+
+		// katsotaan onko rahtituotenumero syötetty jo käsin
+		$query = "	SELECT tunnus
+					FROM tilausrivi
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND otunnus = '$laskurow[tunnus]'
+					AND tyyppi != 'D'
+					{$hintalisa}
+					AND tuoteno IN ({$rahtinro_tuoteno_lisa})";
+		$result = pupe_query($query);
+
+		return mysql_num_rows($result);
+	}
+}

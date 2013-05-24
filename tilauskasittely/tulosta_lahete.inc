@@ -372,7 +372,7 @@ if (!function_exists('alku_lahete')) {
 			$rahtivapaa = "";
 
 			// Jos rahtivapaa
-			if ($laskurow['rahtivapaa'] == 'o') {
+			if ($laskurow['rahtivapaa'] == 'o' and onko_rahtituote_syotetty($laskurow) == 0) {
 				$rahtivapaa = "Rahtivapaa";
 			}
 

@@ -190,12 +190,12 @@ if (!function_exists("korjaalaskut")) {
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 				// korjataan laskun kate
-				$query = "UPDATE lasku SET kate = round(kate - $tilausrivi[kate] + $uusikate, 6), kate_korjattu = kate WHERE tunnus='$tilausrivi[ltunnus]'";
+				$query = "UPDATE lasku SET kate = round(kate - $tilausrivi[kate] + $uusikate, 2), kate_korjattu = kate WHERE tunnus='$tilausrivi[ltunnus]'";
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 				$katekorjres = pupe_query($query);
 
 				// korjataan tilauksen kate
-				$query = "UPDATE lasku SET kate = round(kate - $tilausrivi[kate] + $uusikate, 6), kate_korjattu = kate WHERE tunnus='$tilausrivi[oltunnus]'";
+				$query = "UPDATE lasku SET kate = round(kate - $tilausrivi[kate] + $uusikate, 2), kate_korjattu = kate WHERE tunnus='$tilausrivi[oltunnus]'";
 				if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 				$katekorjres = pupe_query($query);
 

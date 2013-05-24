@@ -847,6 +847,13 @@
 					function chk_varaston_saldo($arr, $kpl) {
 						global $varasto;
 
+						//jos $varasto on asetettu ja se ei ole array niin asetetaan se arrayksi
+						//koska if ($chk_row['varasto'] == $chk_oletus_var and (!isset($varasto) or in_array($chk_row['varasto'], $varasto))) {
+						//heittää noticea jos in_array param 2 on jotain muuta kuin array
+						if (isset($varasto) and !is_array($varasto)) {
+							$varasto = array();
+						}
+
 						reset($arr);
 
 						// Katotaan missä varastossa "oletuspaikka" on.

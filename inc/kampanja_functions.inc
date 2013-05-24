@@ -39,10 +39,13 @@ if (!function_exists('tarkista_osuuko_myyntitilaus_kampanjaan')) {
 		}
 
 		foreach ($lisattavat_tuotteet as $lisattava_tuote) {
+			$haettu_tuote = hae_tuote($lisattava_tuote['tuoteno']);
 			$parametrit = array(
-				'trow'		 => hae_tuote($lisattava_tuote['tuoteno']),
+				'trow'		 => $haettu_tuote,
 				'laskurow'	 => hae_lasku($tilausnumero),
 				'kpl'		 => $lisattava_tuote['kpl'],
+				'hinta'		 => $haettu_tuote['myyntihinta'],
+				'ale1'		 => 100,
 				'tuoteno'	 => $lisattava_tuote['tuoteno'],
 			);
 			lisaa_rivi($parametrit);
@@ -125,6 +128,46 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 
 					if (in_array($kampanja_ehto['arvo'], $puun_tunnukset)) {
 						//tilausrivin tuote on kampanjan ehdon tuotekategoriassa
+						//tarkistetaan osuuko aliehdot
+						if (!empty($kampanja_ehto['aliehdot'])) {
+							$having_ehdot = "HAVING";
+
+							foreach ($kampanja_ehto['aliehdot'] as $aliehto) {
+								$aliehto['rajoitin'] = konvertoi_rajoitin($aliehto['rajoitin']);
+
+								if ($aliehto['kohde'] == 'arvo') {
+									$having_ehdot .= " arvo {$aliehto['rajoitin']} {$aliehto['arvo']}";
+								}
+								elseif ($aliehto['kohde'] == 'kappaleet') {
+									$having_ehdot .= " kpl {$aliehto['rajoitin']} {$aliehto['arvo']}";
+								}
+								else {
+									echo "Rikki meni";
+									return false;
+								}
+
+								$having_ehdot .= " AND";
+							}
+							$having_ehdot = substr($having_ehdot, 0, -3);
+							
+							$query = "	SELECT lasku.tunnus,
+										sum(tilausrivi.varattu + tilausrivi.jt) kpl,
+										sum(tilausrivi.hinta) arvo
+										FROM lasku
+										JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus )
+										WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+										AND lasku.tunnus = {$tilausnumero}
+										AND lasku.tila = 'N'
+										AND lasku.alatila = ''
+										GROUP BY lasku.tunnus
+										{$having_ehdot}";
+							$result = pupe_query($query);
+							$row = mysql_fetch_assoc($result);
+
+							if ($row['tunnus'] == NULL) {
+								return false;
+							}
+						}
 						return true;
 					}
 				}

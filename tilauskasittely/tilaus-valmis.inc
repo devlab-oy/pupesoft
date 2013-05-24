@@ -723,28 +723,8 @@ else {
 
 		}
 		else {
-
-			$query = "	SELECT *
-						FROM toimitustapa
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND selite = '$laskurow[toimitustapa]'";
-			$result = pupe_query($query);
-			$torow = mysql_fetch_assoc($result);
-
-			$rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
-
-			// meillä on rahdituksessa syötettävään painoon perustuva rahtimaksu
-			// katsotaan onko rahtituotenumero syötetty jo käsin
-			$query = "	SELECT tunnus
-						from tilausrivi
-						where yhtio = '$kukarow[yhtio]'
-						and otunnus = '$laskurow[tunnus]'
-						AND tyyppi != 'D'
-						and tuoteno IN ({$rahtinro_tuoteno_lisa})";
-			$result = pupe_query($query);
-
 			// jos tilauksella on jo rahtikulu niin merkataan se rahtivapaaksi, ettei rahtikulu mene uudestaan laskutuksen yhteydessä!
-			if (mysql_num_rows($result) > 0) {
+			if ($laskurow["rahtivapaa"] == '' and onko_rahtituote_syotetty($laskurow, TRUE) > 0) {
 				$tilaus_valmis_ulos .= t("Tilauksella oli käsin syötetty rahtikulu! Merkattiin tilaus rahtivapaaksi, ettei kulua lisätä enää automaattisesti laskutuksessa.")."<br>";
 
 				// Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
@@ -752,7 +732,7 @@ else {
 							SET rahtivapaa = 'O',
 							kohdistettu = 'K'
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND tunnus = '$laskurow[tunnus]'";
+							AND tunnus  = '$laskurow[tunnus]'";
 				$rahtivapres = pupe_query($query);
 
 				$laskurow["kohdistettu"] = 'K';

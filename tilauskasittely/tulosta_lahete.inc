@@ -520,7 +520,7 @@ if (!function_exists('alku_lahete')) {
 		if (mysql_num_rows($vakioviesti_result) == 1) {
 			$vakioviesti_row = mysql_fetch_assoc($vakioviesti_result);
 
-			$komm .= "\n".t("Viesti", $kieli).":###".trim($vakioviesti_row['selite']." ".$vakioviesti_row['selitetark']);
+			$komm .= "\n".t("Viesti", $kieli).":###".wordwrap(str_replace("\n","\n###", trim($vakioviesti_row['selite']." ".$vakioviesti_row['selitetark'])), 90, "\n###");
 		}
 
 		if ($yhtiorow["vak_kasittely"] != "" and $tyyppi != "TILAUSVAHVISTUS") {

@@ -126,8 +126,6 @@
 
 		require ("naytatilaus.inc");
 
-		$otunnus = $tunnus;
-
 		if ($cleantoim == "MYYNTI" or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI') {
 			$query = "	SELECT *
 						FROM rahtikirjat

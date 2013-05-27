@@ -450,6 +450,7 @@
 						<input type='hidden' name = 'pp' id='pp_hidden' value='{$pp}' size=2>
 						<input type='hidden' name = 'kk' id='kk_hidden' value='{$kk}' size=2>
 						<input type='hidden' name = 'vv' id='vv_hidden' value='{$vv}' size=4>
+						<input type='hidden' name = 'valintra' value='{$valintra}' />
 						<input type='submit' value='",t("Lähetä tiliote asiakkaan sähköpostiin"),": {$asiakasrow['email']}' />
 						</form>";
 				}

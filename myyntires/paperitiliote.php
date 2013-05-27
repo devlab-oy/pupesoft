@@ -258,6 +258,22 @@
 		$tito_pvm = date("Y-m-d", mktime(0, 0, 0, $kk, $pp, $vv));
 	}
 
+	if (!isset($valintra)) $valintra = "";
+
+	if ($valintra == 'maksetut') {
+		$mapvmlisa = " and lasku.mapvm > '0000-00-00' ";
+	}
+	elseif ($valintra == 'kaikki') {
+		$mapvmlisa = " ";
+	}
+	elseif ($valintra == "eraantyneet") {
+		$mapvmlisa = " and lasku.erpcm < now() and lasku.mapvm = '0000-00-00' ";
+	}
+	else {
+		$mapvmlisa = " and lasku.mapvm = '0000-00-00' ";
+	}
+
+
 	$query = "	SELECT
 				lasku.ytunnus,
 				lasku.maa,
@@ -285,8 +301,7 @@
 					and tiliointi.korjattu  = ''
 					and tiliointi.tapvm    <= '$tito_pvm' )
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
-				and (lasku.mapvm  > '$tito_pvm' or lasku.mapvm = '0000-00-00')
-				and lasku.tapvm	  <= '$tito_pvm'
+				{$mapvmlisa}
 				and lasku.tapvm	  > '0000-00-00'
 				and lasku.tila	  = 'U'
 				and lasku.alatila = 'X'

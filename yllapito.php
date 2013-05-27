@@ -1056,6 +1056,25 @@
 
 				$lisa = substr($lisa, 0, -3).")";
 			}
+			elseif ($toim == 'vaihtoehtoiset_verkkolaskutunnukset' and trim($array[$i]) == 'toimi_tunnus') {
+				if ($from == "") {
+					if (!is_numeric($haku[$i])) {
+						$ashak = "	SELECT group_concat(concat(\"'\",tunnus,\"'\")) tunnukset
+									FROM toimi
+									WHERE yhtio = '$kukarow[yhtio]'
+									and nimi {$hakuehto}";
+						$ashakres = pupe_query($ashak);
+						$ashakrow = mysql_fetch_assoc($ashakres);
+
+						if ($ashakrow["tunnukset"] != "") {
+							$lisa .= " AND vaihtoehtoiset_verkkolaskutunnukset.toimi_tunnus IN ({$ashakrow["tunnukset"]})";
+						}
+					}
+				}
+				elseif ($from == 'yllapito') {
+					$lisa .= " AND vaihtoehtoiset_verkkolaskutunnukset.toimi_tunnus {$hakuehto}";
+				}
+			}
 			else {
 				$lisa .= " and {$array[$i]} {$hakuehto} ";
 			}
@@ -1785,6 +1804,13 @@
 				}
 
 				echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&laji=$laji&ohje=off&haku[6]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+		}
+
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimi") {
+			
+			if (($toikrow = tarkista_oikeus("yllapito.php", "vaihtoehtoiset_verkkolaskutunnukset%", "", "OK")) !== FALSE) {
+				echo "<iframe id='vaihtoehtoiset_verkkolaskutunnukset_iframe' name='vaihtoehtoiset_verkkolaskutunnukset_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&laji=$laji&ohje=off&haku[1]=@$tunnus&lukitse_avaimeen=$tunnus' style='height: 300px; width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
 

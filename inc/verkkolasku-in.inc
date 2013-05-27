@@ -485,6 +485,29 @@
 				}
 			}
 
+			// vaihtoehtoiset_verkkolaskutunnukset poikkeus tarkistus
+			if (!isset($trow)) {
+				$poikkeus_arvot = array(
+					'nimi' => $laskuttajan_nimi,
+					'ytunnus' => $laskuttajan_vat,
+					'ovt_tunnus' => $laskuttajan_ovt
+				);
+
+				foreach ($poikkeus_arvot as $poikkeus_arvo) {
+					$query = "	SELECT *
+								FROM vaihtoehtoiset_verkkolaskutunnukset
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND arvo = '{$poikkeus_arvo}'
+								LIMIT 1";
+					$result = pupe_query($query);
+					$poikkeus = mysql_fetch_assoc($result);
+					if (!empty($poikkeus)) {
+						$trow = hae_toimittaja($poikkeus['toimi_tunnus']);
+						break;
+					}
+				}
+			}
+
 			// Tätä voi ajaa myös verkkolaskuvirheetohjelmasta silloin $luolasku on FALSE ja lopetetaan tässä vaiheessa
 			if ($luolasku === TRUE) {
 				if (!isset($trow)) {

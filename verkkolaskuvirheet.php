@@ -22,6 +22,12 @@
 
 	require ("inc/parametrit.inc");
 
+	if (isset($livesearch_tee) and $livesearch_tee == "TOIMITTAJAHAKU") {
+		livesearch_toimittajahaku();
+		exit;
+	}
+	enable_ajax();
+
 	if ($_REQUEST["tee"] == "NAYTATILAUS" and isset($_REQUEST["xml"])) {
 		$xml = urldecode($_REQUEST["xml"]);
 
@@ -95,6 +101,23 @@
 
 		require ("inc/verkkolasku-in.inc");
 
+		echo "<form name='toimittajahaku_form' action='' method='POST'>";
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>";
+		echo t('Hae toimittajan nimellä').': ';
+		echo "</th>";
+		echo "<td>";
+		echo "<input type='hidden' name='tee' value='hae_toimittajalla' />";
+		echo livesearch_kentta("toimittajahaku_form", "TOIMITTAJAHAKU", "toimittaja_haku", 140, $toimittaja_haku, '', '', 'toimittaja_haku', 'ei_break_all');
+		echo "</td>";
+		echo "</tr>";
+		echo "</table>";
+		echo "<input type='submit' value='".t("Hae")."' />";
+		echo "</form>";
+		echo "<br/>";
+		echo "<br/>";
+
 		echo "<table><tr>";
 		echo "<th>".t("Vastaanottaja")."<br>".t("Yhtiö")."</th><th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
 
@@ -106,7 +129,7 @@
 
 				list($lasku_yhtio, $lasku_toimittaja) = verkkolasku_in($verkkolaskuvirheet_vaarat."/".$file, FALSE);
 
-				if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"] or $lasku_yhtio["yhtio"] == "") {
+				if (($lasku_yhtio["yhtio"] == $kukarow["yhtio"] or $lasku_yhtio["yhtio"] == "") and ( (empty($toimittaja_haku) or $toimittaja_haku == $lasku_toimittaja['tunnus']) )) {
 
 					$valitutlaskut++;
 

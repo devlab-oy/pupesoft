@@ -283,7 +283,7 @@ class MagentoClient {
 					// P‰ivitet‰‰n Simple tuote
 					$result = $this->_proxy->call($this->_session, 'catalog_product.update', array($tuote['tuoteno'],
 						array(
-								'short_description' => utf8_encode($tuote[lyhytkuvaus]),
+								'short_description' => utf8_encode($tuote['lyhytkuvaus']),
 								'visibility'		=> 1,
 								'additional_attributes' => array(
 									'multi_data' => array(
@@ -298,7 +298,7 @@ class MagentoClient {
 
 				// Jos lyhytkuvaus on tyhj‰, k‰ytet‰‰n kuvausta?
 				if ($tuotteet[0]['lyhytkuvaus'] == '') {
-					$tuotteet[0]['lyhytkuvaus'] = $tuotteet[0]['kuvaus'];
+					$tuotteet[0]['lyhytkuvaus'] = '&nbsp';
 				}
 
 				$configurable = array(
@@ -574,8 +574,9 @@ class MagentoClient {
 	 */
 	private function lisaa_tuotekuvat($product_id, $tuotekuvat) {
 
-		echo "lis‰t‰‰n tuotekuvat tuotteelle $product_id\n";
+		// Multicall array
 		$calls = array();
+		$filenames = '';
 
 		foreach($tuotekuvat as $kuva) {
 			$types = array('image', 'small', 'thumbnail');

@@ -1998,7 +1998,7 @@
 		// n‰ytet‰‰n tilauksia jota voisi muokata, tila L alatila B tai E tai sitten alatila D jos toimitustapa on HETI
 		$query = "	SELECT lasku.yhtio yhtio,
 					lasku.yhtio_nimi yhtio_nimi,
-					rahtikirjat.rahtikirjanro rakirno,
+					if(rahtikirjat.rahtikirjanro='', rahtikirjat.otsikkonro, rahtikirjat.rahtikirjanro) rakirno,
 		 			group_concat(distinct lasku.tunnus SEPARATOR ', ') 'tilaus',
 					group_concat(distinct lasku.liitostunnus) asiakkaat,
 					max(lasku.nimi) asiakas,

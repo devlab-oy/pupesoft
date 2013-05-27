@@ -253,7 +253,7 @@ if ($tee == 'VIIVA') {
 
 		// Toistaiseksi osataan vaan tarkistaa suomalaisten pankkitilien oikeellisuutta
 		if (strtoupper($yhtiorow['maa']) == 'FI') {
-			if ($versio == '2'){
+			if ($versio == '2') {
 				$pankkitili = $tilino;
 				require("inc/pankkitilinoikeellisuus.php");
 				$tilino = $pankkitili;
@@ -654,7 +654,7 @@ if ($tee == 'I') {
 	}
 
 	if ($maara > 1) {
-		if ($syottotyyppi=='prosentti') {
+		if ($syottotyyppi == 'prosentti') {
 			$viimeinensumma=0;
 			for ($i=1; $i<$maara; $i++) {
 				$viimeinensumma += (float) $isumma[$i];
@@ -783,6 +783,10 @@ if ($tee == 'I') {
 			$trow['swift']      = $iban['swift'];
 			$pankkitiliok 		= TRUE;
 		}
+	}
+	elseif (strtoupper($yhtiorow['maa']) == 'SE' and $trow['tilinumero'] != '') {
+		// Ruotsin keississä ei tehdä Bankgirolle eikä Plusgirolle tsekkiä
+		$pankkitiliok = TRUE;
 	}
 
 	// IBAN / BBAN

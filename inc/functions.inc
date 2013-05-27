@@ -19952,9 +19952,8 @@ if (!function_exists('luottotilanne')) {
 					FROM lasku
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))	# Kaikki myyntitilaukset, paitsi laskutetut
-					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F', 'G'))					# Myyntitilaus kesken, tulostusjonossa, odottaa hyv‰ksynt‰‰ tai odottaa asiakkaan suoritusta
-					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))			# Valmistukset
+					AND ((lasku.tila in ('L', 'N') and lasku.alatila != 'X')			# Kaikki myyntitilaukset, paitsi laskutetut
+					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))	# Valmistukset
 					)
 					AND lasku.liitostunnus in ($liitostunnus)";
 		$avoimettilauksetres = pupe_query($query);

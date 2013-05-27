@@ -452,8 +452,8 @@
 		$apu = $trow[$i];
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = ''>".t("Ostotilauksen toimitusajan vahvistuksesta ei lähetetä asiakkaalle myyntitilauksien JT-rivien toimitusajan vahvistus sähköpostia")."</option>";
-		$ulos .= "<option value = 'K' $sel[K]>".t("Ostotilauksen toimitusajan vahvistuksesta lähetetään asiakkaalle myyntitilauksien JT-rivien toimitusajan vahvistus sähköposti")."</option>";
+		$ulos .= "<option value = ''>".t("JT-rivien toimitusajan vahvistussähköpostia ei lähetetä")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Ostotilauksen toimitusajan vahvistuksesta lähetetään asiakkaalle JT-rivien toimitusajan vahvistussähköposti")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

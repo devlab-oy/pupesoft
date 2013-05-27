@@ -83,7 +83,7 @@
 	while ($row = mysql_fetch_array($res)) {
 
 		// Jos yhtiön hinnat eivät sisällä alv:tä
-		if ($yhtiorow["alv_kasittely"] != "") {
+		if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
 			$myyntihinta					= hintapyoristys($row["myyntihinta"] * (1+($row["alv"]/100)));
 			$myyntihinta_veroton 			= $row["myyntihinta"];
 
@@ -278,7 +278,7 @@
 	while ($row = mysql_fetch_array($res)) {
 
 		// Jos yhtiön hinnat eivät sisällä alv:tä
-		if ($yhtiorow["alv_kasittely"] != "") {
+		if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
 			$hinta					= hintapyoristys($row["hinta"] * (1+($row["alv"]/100)));
 			$hinta_veroton 			= $row["hinta"];
 		}
@@ -366,7 +366,7 @@
 			}
 
 			// Jos yhtiön hinnat eivät sisällä alv:tä
-			if ($yhtiorow["alv_kasittely"] != "") {
+			if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
 				$myyntihinta					= hintapyoristys($alirow["myyntihinta"] * (1+($alirow["alv"]/100)));
 				$myyntihinta_veroton 			= $alirow["myyntihinta"];
 
@@ -434,13 +434,6 @@
 			echo "Päivitetään tuotteiden saldot\n";
 			$count = $magento_client->paivita_saldot($dnstock);
 			echo "Päivitettiin $count tuotteen saldot\n";
-		}
-
-		// Hinnastot
-		if (count($dnshinnasto) > 0) {
-			echo "Päivitetään tuotteiden tietoja\n";
-			$count = $magento_client->paivita_hinnat($dnshinnasto);
-			echo "Päivitettiin $count tuotteen hinnat\n";
 		}
 
 		$time_end = microtime(true);

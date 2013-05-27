@@ -2414,6 +2414,20 @@
 						echo "</select>";
 						echo "</td>";
 					}
+					elseif (strtoupper($al_row["selitetark_2"]) == "LIVESEARCH") {
+						$mika_livesearch = $al_row["selitetark_3"];
+						echo "<td>";
+						echo $al_row["selitetark"];
+						echo "</td>";
+						echo "<td>";
+						if (!empty($laskurow['sarjanumero'])) {
+							$sarjanumero_row = hae_sarjanumero($laskurow['sarjanumero']);
+							echo $sarjanumero_row['tuoteno'] . ' - ' . $sarjanumero_row['sarjanumero'];
+							echo "<br/>";
+						}
+						echo livesearch_kentta("eisaaollaoikeaforminnimi", $mika_livesearch, "sarjanumero", 140, $laskurow['sarjanumero'], '', '', '', 'ei_break_all');
+						echo "</td>";
+					}
 					elseif ($kentta == "suorittaja") {
 
 						$query = "	SELECT DISTINCT if (avainsana.selitetark is null,'b','a') sort, kuka.kuka, kuka.nimi
@@ -3677,6 +3691,7 @@
 							mittarilukema 	= '$mittarilukema',
 							merkki 			= '$merkki',
 							mallivari 		= '$mallivari',
+							sarjanumero     = '{$sarjanumero}',
 							valmnro 		= '$valmnro',
 							tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
 							luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',

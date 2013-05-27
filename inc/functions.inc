@@ -20986,3 +20986,5 @@ if (!function_exists('onko_rahtituote_syotetty')) {
 		return mysql_num_rows($result);
 	}
 }
+
+require 'sarjanumero_functions.inc';

@@ -38,34 +38,34 @@ echo "<font class='head'>".t('Matkalaskuraportti')."</font><hr>";
 echo "<div id='paivamaara_vaarin' style='display:none;'>".t("Antamasi p‰iv‰m‰‰r‰ on virheellinen")."</div>";
 
 $request_params = array(
-	"ajotapa" => $ajotapa,
-	"tuotetyypit" => $tuotetyypit,
-	"jarjestys" => $jarjestys,
-	"mul_kustp" => $mul_kustp,
-	"kenelta_kustp" => $kenelta_kustp,
-	"ruksit" => $ruksit,
-	"tuotenro" => $tuotenro,
-	"toimittajanro" => $toimittajanro,
-	"matkalaskunro" => $matkalaskunro,
-	"tuotteet_lista" => $tuotteet_lista,
-	"piilota_kappaleet" => $piilota_kappaleet,
-	"nimitykset" => $nimitykset,
-	"laskunro" => $laskunro,
-	"maksutieto" => $maksutieto,
-	"tapahtumapaiva" => $tapahtumapaiva,
-	"ppa" => $ppa,
-	"kka" => $kka,
-	"vva" => $vva,
-	"ppl" => $ppl,
-	"kkl" => $kkl,
-	"vvl" => $vvl,
-	"tmpfilenimi" => $tmpfilenimi,
-	"kaunisnimi" => $kaunisnimi,
-	"uusi_kysely" => $uusi_kysely,
-	"hakukysely" => $haku_kysely,
-	"aja_kysely" => $aja_kysely,
+	"ajotapa" 			 => $ajotapa,
+	"tuotetyypit" 		 => $tuotetyypit,
+	"jarjestys" 		 => $jarjestys,
+	"mul_kustp" 		 => $mul_kustp,
+	"kenelta_kustp" 	 => $kenelta_kustp,
+	"ruksit" 			 => $ruksit,
+	"tuotenro" 			 => $tuotenro,
+	"toimittajanro" 	 => $toimittajanro,
+	"matkalaskunro" 	 => $matkalaskunro,
+	"tuotteet_lista" 	 => $tuotteet_lista,
+	"piilota_kappaleet"  => $piilota_kappaleet,
+	"nimitykset" 		 => $nimitykset,
+	"laskunro" 			 => $laskunro,
+	"maksutieto" 		 => $maksutieto,
+	"tapahtumapaiva" 	 => $tapahtumapaiva,
+	"ppa" 				 => $ppa,
+	"kka" 				 => $kka,
+	"vva" 				 => $vva,
+	"ppl" 				 => $ppl,
+	"kkl" 				 => $kkl,
+	"vvl" 				 => $vvl,
+	"tmpfilenimi" 		 => $tmpfilenimi,
+	"kaunisnimi" 		 => $kaunisnimi,
+	"uusi_kysely" 		 => $uusi_kysely,
+	"hakukysely" 		 => $haku_kysely,
+	"aja_kysely" 		 => $aja_kysely,
 	"tallenna_muutokset" => $tallenna_muutokset,
-	"poista_kysely" => $poista_kysely,
+	"poista_kysely" 	 => $poista_kysely,
 	"debug" => 0,
 );
 
@@ -93,19 +93,19 @@ if ($tee == 'aja_raportti') {
 
 	if (count($rivit) > 0) {
 		$header_values = array(
-			'lasku_tyyppi' => t('Laskun tyyppi'),
-			'laskunro' => t('Laskunumero'),
-			'tapvm' => t('Tapahtumap‰iv‰'),
-			'summa' => t('Summa'),
-			'nimitys' => t('Nimitys'),
-			'tuotetyyppi' => t('Tyyppi'),
-			'matkustaja_nimi' => t('Nimi'),
-			'kustp_nimi' => t('Kustannuspaikka'),
-			'tuoteno' => t('Tuotenumero'),
-			'kommentti' => t('Kommentti'),
-			'kpl' => t('M‰‰r‰'),
-			'ilmaiset_lounaat' => t('Ilmaiset ateriat'),
-			'hinta' => t('Summa'),
+			'lasku_tyyppi'		=> t('Laskun tyyppi'),
+			'laskunro' 			=> t('Laskunumero'),
+			'tapvm' 			=> t('Tapahtumap‰iv‰'),
+			'summa' 			=> t('Summa'),
+			'nimitys' 			=> t('Nimitys'),
+			'tuotetyyppi' 		=> t('Tyyppi'),
+			'matkustaja_nimi' 	=> t('Nimi'),
+			'kustp_nimi' 		=> t('Kustannuspaikka'),
+			'tuoteno' 			=> t('Tuotenumero'),
+			'kommentti' 		=> t('Kommentti'),
+			'kpl' 				=> t('M‰‰r‰'),
+			'ilmaiset_lounaat' 	=> t('Ilmaiset ateriat'),
+			'hinta' 			=> t('Summa'),
 		);
 		$force_to_string = array(
 			'laskunro'
@@ -136,28 +136,23 @@ require ("../inc/footer.inc");
 function generoi_matkalaskuraportti_rivit($request_params) {
 	global $kukarow;
 
-	$where = generoi_where_ehdot($request_params);
-	$select = generoi_select($request_params);
-	$group = generoi_group_by($request_params);
-	$tuote_join = generoi_tuote_join($request_params);
-	$toimi_join = generoi_toimi_join($request_params);
-	$kuka_join = generoi_kuka_join($request_params);
-	$kustannuspaikka_join = generoi_kustannuspaikka_join($request_params);
+	$where 					= generoi_where_ehdot($request_params);
+	$select 				= generoi_select($request_params);
+	$group 					= generoi_group_by($request_params);
+	$tuote_join 			= generoi_tuote_join($request_params);
+	$toimi_join 			= generoi_toimi_join($request_params);
+	$kuka_join 				= generoi_kuka_join($request_params);
+	$kustannuspaikka_join 	= generoi_kustannuspaikka_join($request_params);
 
 	$query = "	SELECT
 				{$select}
 				FROM lasku
-				JOIN tilausrivi
-				ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi = 'M')
-				JOIN tilausrivin_lisatiedot
-				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
-				JOIN tuote
-				{$tuote_join}
-				JOIN toimi
-				{$toimi_join}
+				JOIN tilausrivi ON ( tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi = 'M')
+				JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+				JOIN tuote {$tuote_join}
+				JOIN toimi {$toimi_join}
 				{$kuka_join}
-				JOIN kustannuspaikka
-				{$kustannuspaikka_join}
+				LEFT JOIN kustannuspaikka {$kustannuspaikka_join}
 				{$where}
 				{$group}";
 
@@ -302,13 +297,11 @@ function generoi_tuote_join($request_params) {
 function generoi_kustannuspaikka_join($request_params) {
 	$kustannuspaikka_join = "ON ( kustannuspaikka.yhtio = lasku.yhtio ";
 
-	switch($request_params['kenelta_kustp']) {
-		case 'toimittajilta':
-			$kustannuspaikka_join .= "AND kustannuspaikka.tunnus = toimi.kustannuspaikka";
-			break;
-		case 'tuotteilta':
-			$kustannuspaikka_join .= " AND kustannuspaikka.tunnus = tuote.kustp";
-			break;
+	if ($request_params['kenelta_kustp'] == "tuotteilta") {
+		$kustannuspaikka_join .= " AND kustannuspaikka.tunnus = tuote.kustp";
+	}
+	else {
+		$kustannuspaikka_join .= "AND kustannuspaikka.tunnus = toimi.kustannuspaikka";
 	}
 
 	$kustannuspaikka_join .= " )";

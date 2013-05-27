@@ -31,6 +31,14 @@ if (!function_exists('hae_toimittajat')) {
 }
 
 if (!function_exists('hae_toimittaja')) {
+	/**
+	 * Hakee toimittajan tunnuksen perusteella
+	 *
+	 * @global array $kukarow
+	 * @global array $yhtiorow
+	 * @param int $tunnus
+	 * @return array
+	 */
 	function hae_toimittaja($tunnus) {
 		global $kukarow, $yhtiorow;
 

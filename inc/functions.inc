@@ -13973,6 +13973,16 @@ if (!function_exists('tulosta_hrx')) {
 		$ot_yhteyshenkilo = t("Yhteyshenkilö", $yhtiorow['kieli']);
 		$ot_puhelin = t("Puhelin", $yhtiorow['kieli']);
 
+		if ($yhtiorow['yhtio'] == 'mergr') {
+
+			if ($pakkauskoodi == 'CLL') {
+				$pakkauskoodi = $montako_laatikkoa_yht > 1 ? 'PAKKI' : 'PAKK';
+			}
+			elseif ($pakkauskoodi == 'PLL') {
+				$pakkauskoodi = 'LAVA';
+			}
+		}
+
 		if (!empty($mediatyyppi) and in_array($mediatyyppi, array('LSN149X104','LSN59X40'))) {
 			$nauha = "2";
 		}
@@ -13991,7 +14001,7 @@ if (!function_exists('tulosta_hrx')) {
 					{C|}
 
 				 	*** TOIMITUSOSOITE ***
-				 	{PC000;0070,0140,1,1,G,00,B|}
+				 	{PC000;0070,0140,05,05,J,00,B|}
 					{RC000;{$ot_toimosoite}|}
 
 				 	{PC001;0070,0200,1,1,A,00,B|}
@@ -14004,15 +14014,15 @@ if (!function_exists('tulosta_hrx')) {
 					{RC003;{$toim_postino} {$toim_postitp}|}
 
 				 	{PC004;0070,0380,1,1,A,00,B|}
-					{RC004;{$ot_yhteyshenkilo}: |}
+					{RC004;{$ot_yhteyshenkilo}: {$yh_nimi}|}
 
 				 	{PC005;0070,0430,1,1,A,00,B|}
-					{RC005;{$ot_puhelin}: |}
+					{RC005;{$ot_puhelin}: {$yh_puh}|}
 
 				 	*** VAAKAVIIVA ***
 				 	{LC;0070,0450,0920,0450,0,2|}
 
-				 	{PC006;0070,0490,1,1,G,00,B|}
+				 	{PC006;0070,0490,05,05,J,00,B|}
 					{RC006;{$ot_lahettaja}|}
 
 				 	{PC007;0070,0535,1,1,A,00,B|}
@@ -14024,7 +14034,7 @@ if (!function_exists('tulosta_hrx')) {
 				 	*** VAAKAVIIVA ***
 				 	{LC;0070,0600,0920,0600,0,2|}
 
-				 	{PC009;0070,0640,1,1,G,00,B|}
+				 	{PC009;0070,0640,05,05,J,00,B|}
 					{RC009;{$ot_kuljetusliike}|}
 
 				 	{PC010;0070,0700,1,1,A,00,B|}
@@ -14049,7 +14059,7 @@ if (!function_exists('tulosta_hrx')) {
 			     	{RB00;{$viivakoodi1}|}
 
 				 	{PC015;0070,1210,1,1,A,00,B|}
-					{RC015;CMR: {$viivakoodi1}|}
+					{RC015;CMR: *{$viivakoodi1}*|}
 
 				 	{PC016;0070,1310,1,1,A,00,B|}
 					{RC016;{$monesko_laatikko} / {$montako_laatikkoa_yht} {$pakkauskoodi}|}

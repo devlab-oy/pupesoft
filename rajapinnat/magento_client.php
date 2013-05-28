@@ -57,7 +57,7 @@ class MagentoClient {
 				foreach ($tuoteryhmat as $kategoria) {
 
 					// Haetaan kategoriat joka kerta koska lisättäessä puu muuttuu
-					$category_tree = $this->get_category_tree();
+					$category_tree = $this->getCategories();
 
 					// Jos osastoa ei löydy magenton category_treestä, niin lisätään se
 					$parent_id = $this->find_category($kategoria['osasto_fi'], $category_tree['children']);
@@ -128,7 +128,7 @@ class MagentoClient {
 				}
 			}
 
-			$this->_category_tree = $this->get_category_tree();
+			$this->_category_tree = $this->getCategories();
 
 			// Palautetaan monta kategoriaa lisättiin.
 			return $count;
@@ -149,10 +149,7 @@ class MagentoClient {
 		// Tuote countteri
 		$tuote_count = 1;
 
-		// Array multicall kutsuille
-		$calls = array();
-
-		$category_tree = $this->get_category_tree();
+		$category_tree = $this->getCategories();
 
 		// Lisätään tuotteet erissä
 		foreach($dnstuote as $tuote) {
@@ -203,7 +200,8 @@ class MagentoClient {
 				$tuote_count++;
 
 			} catch (Exception $e) {
-				echo $e->getMessage()."\n";
+
+				$this->log("Simple tuotteen (tuoteno: " . $tuote['tuoteno'] . " product_id: " . $product_id . ") lisäys epäonnistui. " . $e->getMessage());
 
 				// Jos tuote on jo olemassa
 				if(strstr($e->getMessage(), "must be unique")) {
@@ -235,9 +233,9 @@ class MagentoClient {
 						}
 						// Lisätään tuote countteria
 						$tuote_count++;
-						echo "tuote päivitetty\n";
+
 					} catch (Exception $e) {
-						echo $e->getMessage();
+						$this->log("Simple tuotteen (tuoteno: " . $tuote['tuoteno'] . " product_id: " . $product_id . ") päivitys epäonnistui. " . $e->getMessage());
 					}
 				}
 			}
@@ -301,6 +299,7 @@ class MagentoClient {
 					$tuotteet[0]['lyhytkuvaus'] = '&nbsp';
 				}
 
+				// Configurable tuotteen tiedot
 				$configurable = array(
 					'categories'			=> array($category_id),
 					'websites'				=> 'default',
@@ -318,7 +317,6 @@ class MagentoClient {
 				);
 
 				// Luodaan configurable
-				// Configurablen jonku lapsituotteen tietoja
 				$product_id = $this->_proxy->call($this->_session, 'catalog_product.create',
 					array(
 						'configurable',
@@ -331,17 +329,18 @@ class MagentoClient {
 				// Lisää tuotekuva configurablelle
 				// Multicallilla kaikki kuvat yhdellä kertaa.
 				if ($tuotekuvat = $this->hae_tuotekuvat($tuotteet[0]['tunnus'])) {
-					lisaa_tuotekuvat($product_id, $tuotekuvat);
+					$this->lisaa_tuotekuvat($product_id, $tuotekuvat);
 				}
 
 				// Lisätään countteria
 				$count++;
 
 			} catch (Exception $e) {
-				echo $e->getMessage()."\n";
+				$this->log("Configurable tuotteen (tuoteno: " . $tuotteet[0]['tuoteno'] . " product_id: " . $product_id . ") lisäys epäonnistui. " . $e->getMessage());
 			}
 		}
 
+		// Palautetaan lisättyjen configurable tuotteiden määrä
 		return $count;
 	}
 
@@ -365,8 +364,8 @@ class MagentoClient {
 			// Haetaan tilauksen tiedot (orders)
 			$orders[] = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);
 
-			// Päivitetään tilaus tilaan processing
-			$this->_proxy->call($this->_session, 'sales_order.addComment', array('orderIncrementId' => $order['increment_id'], 'status' => 'processing'));
+			// Päivitetään tilaus uuteen tilaan
+			$this->_proxy->call($this->_session, 'sales_order.addComment', array('orderIncrementId' => $order['increment_id'], 'status' => 'pending_pupesoft'));
 		}
 
 		// Palautetaan löydetyt tilaukset
@@ -410,7 +409,7 @@ class MagentoClient {
 				    )
 				);
 			} catch (Exception $e) {
-				echo $e->getMessage()."\n";
+				$this->log("Saldojen päivityksessä (tuoteno: " . $tuote['tuoteno'] . ") päivitys epäonnistui. " . $e->getMessage());
 			}
 
 			$count++;
@@ -447,7 +446,7 @@ class MagentoClient {
 					var_dump($result);
 				}
 				catch (Exception $e) {
-					echo $e->getMessage()."\n";
+					$this->log("Hintojen päivityksessä tapahtui virhe (tuoteno: " . $tuote['tuoteno'] . "). " . $e->getMessage());
 				}
 
 				$batch_count = 0;
@@ -457,6 +456,8 @@ class MagentoClient {
 
 		return $count;
 	}
+
+	/** Private functions **/
 
 	/**
 	 * Etsii kategoriaa nimeltä Magenton kategoria puusta.
@@ -490,6 +491,21 @@ class MagentoClient {
 	}
 
 	/**
+	 * Hakee kaikki attribuutit magentosta
+	 */
+	private function getAttributeList() {
+		if (empty($this->_attribute_list)) {
+			$this->_attribute_list = $this->_proxy->call(
+				$this->_session,
+				"product_attribute.list",
+				array($this->_attributeSet['set_id'])
+			);
+		}
+
+		return $this->_attribute_list;
+	}
+
+	/**
 	 * Palauttaa attribuutin option id:n
 	 *
 	 * Esimerkiksi koko, S palauttaa jonkun numeron jolla tuotteen päivityksessä saadaan attribuutti
@@ -501,69 +517,60 @@ class MagentoClient {
 	 */
 	private function get_option_id($name, $value)
 	{
-		try {
-			// Haetaan lista attribuuteista vain tarvittaessa
-			if (empty($this->_attribute_list)) {
-				$this->_attribute_list = $this->_proxy->call(
-				    $this->_session,
-				    "product_attribute.list",
-				    array(
-				         $this->_attributeSet['set_id']
-				    )
-				);
+		$attribute_list = $this->getAttributeList();
+		$attribute_id = '';
+
+		// Etsitään halutun attribuutin id
+		foreach($attribute_list as $attribute) {
+			if (strcasecmp($attribute['code'], $name) == 0) {
+				$attribute_id = $attribute['attribute_id'];
+				break;
 			}
-
-			// Etsitään halutun attribuutin id
-			foreach($this->_attribute_list as $attribute) {
-				if (strtolower($attribute['code']) == strtolower($name)) {
-					$attribute_id = $attribute['attribute_id'];
-					break;
-				}
-				// ei löytynyt
-				return 0;
-			}
-
-			// Haetaan halutun attribuutin optionssit
-			$options = $this->_proxy->call(
-			    $this->_session,
-			    "product_attribute.options",
-			    array(
-			         $attribute_id
-			    )
-			);
-
-			// Etitään optionsin value
-			foreach($options as $option) {
-				if (strtolower($option['label']) == strtolower($value)) {
-					return $option['value'];
-				}
-			}
-
-			return 0;
-
-		} catch (Exception $e) {
-			echo $e->getMessage();
 		}
+
+		// Jos attribuuttia ei löytynyt niin turha ettiä option valuea
+		if (empty($attribute_id)) return 0;
+
+		// Haetaan kaikki attribuutin optionssit
+		$options = $this->_proxy->call(
+		    $this->_session,
+		    "product_attribute.options",
+		    array(
+		         $attribute_id
+		    )
+		);
+
+		// Etitään optionsin value
+		foreach($options as $option) {
+			if (strcasecmp($option['label'], $value) == 0) {
+				return $option['value'];
+			}
+		}
+
+		// Mitään ei löytyny
+		return 0;
 	}
 
 	/**
-	 * Hakee magenton kategoriat
-	 *
+	 * Hakee kaikki tuotteet
 	 */
-	private function get_category_tree()
+	private function getProducts()
+	{
+		$products = $this->_proxy->call($this->_session, 'catalog_product.list');
+		return $products;
+	}
+
+	/**
+	 * Hakee kaikki kategoriat
+	 */
+	private function getCategories()
 	{
 		if (empty($this->_category_tree)) {
-			try {
-				$this->_category_tree = $this->_proxy->call($this->_session, 'catalog_category.tree', 2);
-				return $this->_category_tree;
-			} catch(Exception $e) {
-				$e->getMessage();
-				return 0;
-			}
+			// Haetaan kaikki defaulttia suuremmat kategoriat (2)
+			$this->_category_tree = $this->_proxy->call($this->_session, 'catalog_category.tree', 2);
 		}
-		else {
-			return $this->_category_tree;
-		}
+
+		return $this->_category_tree;
 	}
 
 	/**
@@ -572,7 +579,8 @@ class MagentoClient {
 	 * @param  array 	$tuotekuvat Tuotteen kuvatiedostot
 	 * @return array    			Tiedostonimet
 	 */
-	private function lisaa_tuotekuvat($product_id, $tuotekuvat) {
+	private function lisaa_tuotekuvat($product_id, $tuotekuvat)
+	{
 
 		// Multicall array
 		$calls = array();
@@ -643,5 +651,14 @@ class MagentoClient {
 		}
 
 		return $tuotekuvat;
+	}
+
+	/**
+	 * Virhelogi
+	 */
+	private function log($message)
+	{
+		$message .= "\n";
+		error_log($message, 3, 'magento_log.txt');
 	}
 }

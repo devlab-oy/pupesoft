@@ -12,8 +12,8 @@ if (isset($_POST["tee"])) {
 	}
 }
 
-require '../inc/parametrit.inc';
-require '../validation/Validation.php';
+require('../inc/parametrit.inc');
+require('validation/Validation.php');
 
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
@@ -423,4 +423,4 @@ function echo_kayttoliittyma($request) {
 	echo "<input type='submit' value='".t('Hae')."' />";
 	echo "</form>";
 }
-require '../inc/footer.inc';
+require('inc/footer.inc');

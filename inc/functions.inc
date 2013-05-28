@@ -20109,8 +20109,8 @@ if (!function_exists('triangulation')) {
 					JOIN asiakas ON (asiakas.yhtio = las.yhtio AND asiakas.ytunnus = las.ytunnus)
 					JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 					JOIN tilausrivi as t3 ON (t3.yhtio = tilausrivi.yhtio AND t3.tunnus = tilausrivin_lisatiedot.tilausrivilinkki AND t3.tyyppi = 'O')
-					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = t3.otunnus AND lasku.toim_maa != '{$yhtiorow['maa']}')
-					JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.ytunnus = lasku.ytunnus)
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = t3.otunnus)
+					JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.ytunnus = lasku.ytunnus AND toimi.maa != '{$yhtiorow['maa']}')
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.tyyppi  = 'L'
 					AND tilausrivi.otunnus IN ({$tunnukset})

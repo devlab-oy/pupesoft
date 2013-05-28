@@ -34,7 +34,13 @@ if ($ajax_request) {
 echo "<font class='head'>".t("Sarjanumerohistoria")."</font><hr>";
 ?>
 <style>
+	.date_input {
+		width: 25px;
+	}
 
+	.date_year_input {
+		width: 50px;
+	}
 </style>
 <script>
 
@@ -47,9 +53,34 @@ $request = array(
 	'asiakas'		 => $asiakas,
 	'toimittaja'	 => $toimittaja,
 	'tuote'			 => $tuote,
-	'alku_pvm'		 => $alku_pvm,
-	'loppu_pvm'		 => $loppu_pvm
+	'ppa'			 => $ppa,
+	'kka'			 => $kka,
+	'vva'			 => $vva,
+	'ppl'			 => $ppl,
+	'kkl'			 => $kkl,
+	'vvl'			 => $vvl,
 );
+
+$request['alku_pvm'] = $request['ppa'].'.'.$request['kka'].'.'.$request['vva'];
+$request['loppu_pvm'] = $request['ppl'].'.'.$request['kkl'].'.'.$request['vvl'];
+
+//jos requestista ei tule p‰iv‰‰ niin asetetaan t‰m‰p‰iv‰ - 30
+if (empty($request['ppa']) or empty($request['kka']) or empty($request['vva'])) {
+	$request['alku_pvm'] = date('d.m.Y', strtotime('now - 30 day'));
+	$pvm_array = explode('.', $request['alku_pvm']);
+	$request['ppa'] = $pvm_array[0];
+	$request['kka'] = $pvm_array[1];
+	$request['vva'] = $pvm_array[2];
+}
+
+//jos requestista ei tule p‰iv‰‰ niin asetetaan t‰m‰p‰iv‰
+if (empty($request['ppl']) or empty($request['kkl']) or empty($request['vvl'])) {
+	$request['loppu_pvm'] = date('d.m.Y', strtotime('now'));
+	$pvm_array = explode('.', $request['loppu_pvm']);
+	$request['ppl'] = $pvm_array[0];
+	$request['kkl'] = $pvm_array[1];
+	$request['vvl'] = $pvm_array[2];
+}
 
 if ($request['tee'] == 'nayta_tilaus') {
 	require 'naytatilaus.inc';
@@ -124,7 +155,7 @@ function hae_tilaukset($request) {
 						lasku.luontiaika,
 						lasku.summa,
 						'A' as tyyppi,
-						sarjanumeroseuranta.sarjanumero as sarjanumerot,
+						sarjanumeroseuranta.sarjanumero as sarjanumero,
 						tilausrivi.nimitys as tuote
 						FROM sarjanumeroseuranta
 						JOIN tilausrivi
@@ -149,7 +180,7 @@ function hae_tilaukset($request) {
 						lasku.luontiaika,
 						lasku.summa,
 						'L' as tyyppi,
-						sarjanumeroseuranta.sarjanumero as sarjanumerot,
+						sarjanumeroseuranta.sarjanumero as sarjanumero,
 						tilausrivi.nimitys as tuote
 						FROM sarjanumeroseuranta
 						JOIN tilausrivi
@@ -178,7 +209,7 @@ function hae_tilaukset($request) {
 						lasku.luontiaika,
 						lasku.summa,
 						'O' as tyyppi,
-						sarjanumeroseuranta.sarjanumero as sarjanumerot,
+						sarjanumeroseuranta.sarjanumero as sarjanumero,
 						tilausrivi.nimitys as tuote
 						FROM sarjanumeroseuranta
 						JOIN tilausrivi
@@ -214,7 +245,7 @@ function hae_tilaukset($request) {
 						lasku.luontiaika,
 						lasku.summa,
 						'L' as tyyppi,
-						sarjanumeroseuranta.sarjanumero as sarjanumerot,
+						sarjanumeroseuranta.sarjanumero as sarjanumero,
 						tilausrivi.nimitys as tuote
 						FROM sarjanumeroseuranta
 						JOIN tilausrivi
@@ -240,7 +271,7 @@ function hae_tilaukset($request) {
 						lasku.luontiaika,
 						lasku.summa,
 						'A' as tyyppi,
-						sarjanumeroseuranta.sarjanumero as sarjanumerot,
+						sarjanumeroseuranta.sarjanumero as sarjanumero,
 						tilausrivi.nimitys as tuote
 						FROM sarjanumeroseuranta
 						JOIN tilausrivi
@@ -266,7 +297,7 @@ function hae_tilaukset($request) {
 						lasku.luontiaika,
 						lasku.summa,
 						'O' as tyyppi,
-						sarjanumeroseuranta.sarjanumero as sarjanumerot,
+						sarjanumeroseuranta.sarjanumero as sarjanumero,
 						tilausrivi.nimitys as tuote
 						FROM sarjanumeroseuranta
 						JOIN tilausrivi
@@ -298,7 +329,7 @@ function hae_tilaukset($request) {
 }
 
 function echo_tilaukset_raportti($tilaukset, $request = array()) {
-	global $kukarow, $yhtiorow;
+	global $kukarow, $yhtiorow, $palvelin2;
 
 	$lopetus = "{$_SERVER['PHP_SELF']}////tee=hae_tilaukset//sarjanumero={$request['sarjanumero']}//asiakas={$request['asiakas']}//toimittaja={$request['toimittaja']}//tuote={$request['tuote']}//alku_pvm={$request['alku_pvm']}//loppu_pvm={$request['loppu_pvm']}";
 
@@ -319,9 +350,11 @@ function echo_tilaukset_raportti($tilaukset, $request = array()) {
 		echo "<td><a href='sarjanumerohistoria.php?tee=nayta_tilaus&tunnus={$tilaus['tunnus']}&lopetus={$lopetus}'>{$tilaus['tunnus']}</a></td>";
 		echo "<td>{$tilaus['nimi']}</td>";
 		echo "<td>{$tilaus['tuote']}</td>";
-		echo "<td>{$tilaus['sarjanumerot']}</td>";
-		echo "<td>{$tilaus['luontiaika']}</td>";
-		echo "<td>{$tilaus['summa']}</td>";
+		echo "<td>";
+		echo "<a href='{$palvelin2}tilauskasittely/sarjanumeroseuranta.php?indexvas=1&sarjanumero_haku={$tilaus['sarjanumero']}&lopetus={$lopetus}'>{$tilaus['sarjanumero']}</a>";
+		echo "</td>";
+		echo "<td>".tv1dateconv($tilaus['luontiaika'])."</td>";
+		echo "<td td align='right'>{$tilaus['summa']}</td>";
 		echo "<td>{$request['tyypit'][$tilaus['tyyppi']]}</td>";
 		echo "</tr>";
 	}
@@ -366,9 +399,22 @@ function echo_kayttoliittyma($request) {
 	echo "<tr>";
 	echo "<th>".t("P‰iv‰m‰‰r‰v‰li")."</th>";
 	echo "<td>";
-	echo "<input type='text' name='alku_pvm' value='".(!empty($request['alku_pvm']) ? $request['alku_pvm'] : date('d.m.Y', strtotime('now - 30 day')))."' />";
+	echo "<input type='text' class='date_input' name='ppa' value='{$request['ppa']}' />";
+	echo " ";
+	echo "<input type='text' class='date_input' name='kka' value='{$request['kka']}' />";
+	echo " ";
+	echo "<input type='text' class='date_year_input' name='vva' value='{$request['vva']}' />";
+
+	//echo "<input type='text' name='alku_pvm' value='".(!empty($request['alku_pvm']) ? $request['alku_pvm'] : date('d.m.Y', strtotime('now - 30 day')))."' />";
 	echo " - ";
-	echo "<input type='text' name='loppu_pvm' value='".(!empty($request['loppu_pvm']) ? $request['loppu_pvm'] : date('d.m.Y', strtotime('now')))."' />";
+
+	echo "<input type='text' class='date_input' name='ppl' value='{$request['ppl']}' />";
+	echo " ";
+	echo "<input type='text' class='date_input' name='kkl' value='{$request['kkl']}' />";
+	echo " ";
+	echo "<input type='text' class='date_year_input' name='vvl' value='{$request['vvl']}' />";
+
+	//echo "<input type='text' name='loppu_pvm' value='".(!empty($request['loppu_pvm']) ? $request['loppu_pvm'] : date('d.m.Y', strtotime('now')))."' />";
 	echo "</td>";
 	echo "</tr>";
 

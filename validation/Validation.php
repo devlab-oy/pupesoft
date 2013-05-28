@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * http://stackoverflow.com/questions/737385/easiest-form-validation-library-for-php
+ * 
  * Pork Formvalidator. validates fields by regexes and can sanatize them. Uses PHP filter_var built-in functions and extra regexes
  * @package pork
  */
@@ -173,6 +175,10 @@ class FormValidator {
 		if (array_key_exists($type, self::$regexes)) {
 			$returnval = filter_var($var, FILTER_VALIDATE_REGEXP, array("options" => array(
 							"regexp" => '!'.self::$regexes[$type].'!i'))) !== false;
+			if ($returnval) {
+				$returnval = self::validateContent($var, $type);
+			}
+			
 			return($returnval);
 		}
 		$filter = false;
@@ -195,5 +201,27 @@ class FormValidator {
 				break;
 		}
 		return ($filter === false) ? false : filter_var($var, $filter) !== false ? true : false;
+	}
+
+	public static function validateContent($var, $type) {
+
+		switch ($type) {
+			case 'paiva':
+				//for now this function can only validate dates in dd.-/mm.-/YYYY format
+				//regexp allows user to give days in mm.-/dd.-/YYYY format
+				if ($date_array = explode('.', $var)) {
+					$is_ok = checkdate($date_array[1], $date_array[0], $date_array[2]);
+				}
+				elseif ($date_array = explode('-', $var)) {
+					$is_ok = checkdate($date_array[1], $date_array[0], $date_array[2]);
+				}
+				else {
+					$date_array = explode('/', $var);
+					$is_ok = checkdate($date_array[1], $date_array[0], $date_array[2]);
+				}
+				break;
+		}
+
+		return $is_ok;
 	}
 }

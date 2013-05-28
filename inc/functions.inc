@@ -13979,7 +13979,7 @@ if (!function_exists('tulosta_hrx')) {
 				$pakkauskoodi = $montako_laatikkoa_yht > 1 ? 'PAKKI' : 'PAKK';
 			}
 			elseif ($pakkauskoodi == 'PLL') {
-				$pakkauskoodi == 'LAVA';
+				$pakkauskoodi = 'LAVA';
 			}
 		}
 

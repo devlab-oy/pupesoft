@@ -27,6 +27,7 @@ if ($tee == 'lataa_tiedosto') {
 	exit;
 }
 
+//ajax requestit tänne
 if ($ajax_request) {
 
 }

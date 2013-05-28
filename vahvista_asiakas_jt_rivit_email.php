@@ -20,18 +20,7 @@ if (php_sapi_name() == 'cli') {
 	$yhtiorow = hae_yhtion_parametrit($yhtio);
 
 	// Haetaan käyttäjän tiedot
-	$query = "	SELECT *
-				FROM kuka
-				WHERE yhtio = '$yhtio'
-				AND kuka = 'admin'";
-	$result = pupe_query($query);
-
-	if (mysql_num_rows($result) == 0) {
-		die("User admin not found");
-	}
-
-	// Adminin oletus
-	$kukarow = mysql_fetch_assoc($result);
+	$kukarow = hae_kukarow('admin', $yhtio);
 }
 else if (php_sapi_name() != 'cli') {
 	//for debug reasons
@@ -40,12 +29,11 @@ else if (php_sapi_name() != 'cli') {
 	echo "<font class='head'>".t('Asiakkaan jt-rivien toimitusajan vahvistus')."</font><hr>";
 }
 
-//tarkistetaan onko yhtiolla sähköpostien lähetys parametri päällä
-$yhtiokohtainen_jt_toimitusaika_email_vahvistus = tarkista_yhtion_jt_toimitusaika_email_vahvistus();
-
 //haetaan ostotilaukset ja niiden tilausrivit joiden toimitusaika on päivittynyt viimeisein 24h aikana
 $ostotilauksien_tilausrivit = hae_ostotilauksien_tilausrivit_joiden_toimitusaika_on_muuttunut_tai_vahvistettu();
-if (!$yhtiokohtainen_jt_toimitusaika_email_vahvistus) {
+
+//tarkistetaan onko yhtiolla sähköpostien lähetys parametri päällä
+if ($yhtiorow['jt_toimitusaika_email_vahvistus'] != 'K') {
 	//haetaan asiakkaat joilla kyseinen parametri on päällä ja joilla on jt rivejä
 	$myyntitilaukset = hae_myyntitilaukset_joiden_asiakkailla_jt_toimitusaika_email_vahvistus_paalla_ja_jt_riveja();
 }
@@ -57,30 +45,6 @@ else {
 $asiakkaille_lahtevat_sahkopostit = generoi_asiakas_emailit($ostotilauksien_tilausrivit, $myyntitilaukset);
 
 laheta_asiakas_emailit($asiakkaille_lahtevat_sahkopostit);
-
-/**
- * Tarkistaa onko yhtiöllä parametri jt_toimitusaika_email_vahvistus päällä
- *
- * @global array $kukarow
- * @global array $yhtiorow
- * @return boolean
- */
-function tarkista_yhtion_jt_toimitusaika_email_vahvistus() {
-	global $kukarow, $yhtiorow;
-
-	$query = "	SELECT jt_toimitusaika_email_vahvistus
-				FROM yhtion_parametrit
-				WHERE yhtio = '{$kukarow['yhtio']}'";
-	$result = pupe_query($query);
-
-	$jt_toimitusaika_email_vahvistus = mysql_fetch_assoc($result);
-
-	if ($jt_toimitusaika_email_vahvistus['jt_toimitusaika_email_vahvistus'] == 'K') {
-		return true;
-	}
-
-	return false;
-}
 
 /**
  * Hakee ostotilaukset ja niiden rivit joiden toimaika on muuttunut viimeisen päivän aikana
@@ -166,10 +130,9 @@ function hae_myyntitilaukset_joiden_asiakkailla_jt_toimitusaika_email_vahvistus_
 				JOIN tilausrivi
 				ON ( tilausrivi.yhtio = lasku.yhtio
 					AND tilausrivi.otunnus = lasku.tunnus
-					AND tilausrivi.var = 'J')
+					AND tilausrivi.var = 'J'
+					AND tilausrivi.tyyppi != 'D')
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-				AND lasku.tila = 'N'
-				AND lasku.alatila IN ('T', 'U')
 				GROUP BY lasku.tunnus
 				ORDER BY lasku.luontiaika ASC";
 	$result = pupe_query($query);
@@ -195,17 +158,21 @@ function hae_myyntitilaukset_joiden_asiakkailla_jt_toimitusaika_email_vahvistus_
 function hae_myyntitilaukset_joilla_jt_riveja() {
 	global $kukarow, $yhtiorow;
 
+	//Haetaan kaikki myyntilaskut joiden asiakkaan jt_toimitusaika_email_vahvistus on Käytetään yhtiön oletus parametriä tai saa lähettää sähköposteja
 	$query = "	SELECT lasku.tunnus,
 				lasku.nimi,
 				lasku.liitostunnus
 				FROM lasku
+				JOIN asiakas
+				ON ( asiakas.yhtio = lasku.yhtio
+					AND asiakas.tunnus = lasku.liitostunnus
+					AND (asiakas.jt_toimitusaika_email_vahvistus IN ('K', '')) )
 				JOIN tilausrivi
 				ON ( tilausrivi.yhtio = lasku.yhtio
 					AND tilausrivi.otunnus = lasku.tunnus
-					AND tilausrivi.var = 'J')
+					AND tilausrivi.var = 'J'
+					AND tilausrivi.tyyppi != 'D')
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-				AND lasku.tila = 'N'
-				AND lasku.alatila IN ('T', 'U')
 				GROUP BY lasku.tunnus
 				ORDER BY lasku.luontiaika ASC";
 	$result = pupe_query($query);
@@ -338,6 +305,7 @@ function generoi_asiakas_emailit($tuotteet_ja_niiden_ostotilausrivit, $myyntitil
 function populoi_asiakkaan_email_array(&$asiakkaille_lahtevat_sahkopostit, $myyntitilaus, $myyntitilausrivi, $ostotilausrivi) {
 	global $kukarow, $yhtiorow;
 
+	$kieli = $myyntitilaus['asiakas']['kieli'];
 	//jos kaikki ostotilausrivin tuotteet riittää
 	if ($ostotilausrivi['tilkpl_jaljella'] >= $myyntitilausrivi['tilkpl_jaljella']) {
 		$kappaleet_jotka_riittaa = $myyntitilausrivi['tilkpl_jaljella'];
@@ -351,13 +319,14 @@ function populoi_asiakkaan_email_array(&$asiakkaille_lahtevat_sahkopostit, $myyn
 		$asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['tilaukset'][$myyntitilaus['tunnus']]['tilausrivit'][$myyntitilausrivi['tuoteno']] .= '<td>'.$myyntitilausrivi['tuoteno'].'</td>'
 				.'<td>'.$myyntitilausrivi['nimitys'].'</td>'
 				.'<td>'.$myyntitilausrivi['tilkpl'].'</td>'
-				.'<td>'.t("Toimitusaika").': '.$ostotilausrivi['toimaika'].' '.(number_format($kappaleet_jotka_riittaa, 0)).' '.t("kpl").' '; //HUOM JÄTETÄÄN VIIMEINEN TD PRINTTAAMATTA, jotta viimeiseen soluun voidaan appendaa lisää toimituksia. viimeinen td printataan emailin luomis vaiheessa
+				.'<td>'.t("Toimitusaika", $kieli).': '.date('d.m.Y', strtotime($ostotilausrivi['toimaika'])).' '.(number_format($kappaleet_jotka_riittaa, 0)).' '.t("kpl", $kieli).' '; //HUOM JÄTETÄÄN VIIMEINEN TD PRINTTAAMATTA, jotta viimeiseen soluun voidaan appendaa lisää toimituksia. viimeinen td printataan emailin luomis vaiheessa
 	}
 	else {
 		$asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['tilaukset'][$myyntitilaus['tunnus']]['tilausrivit'][$myyntitilausrivi['tuoteno']] .= '<br/>'
-				.t("Toimitusaika").': '.$ostotilausrivi['toimaika'].' '.(number_format($kappaleet_jotka_riittaa, 0)).' '.t("kpl").' '; //HUOM JÄTETÄÄN VIIMEINEN TD PRINTTAAMATTA, jotta viimeiseen soluun voidaan appendaa lisää toimituksia. viimeinen td printataan emailin luomis vaiheessa
+				.t("Toimitusaika", $kieli).': '.date('d.m.Y', strtotime($ostotilausrivi['toimaika'])).' '.(number_format($kappaleet_jotka_riittaa, 0)).' '.t("kpl", $kieli).' '; //HUOM JÄTETÄÄN VIIMEINEN TD PRINTTAAMATTA, jotta viimeiseen soluun voidaan appendaa lisää toimituksia. viimeinen td printataan emailin luomis vaiheessa
 	}
 
+	$asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['kieli'] = $kieli;
 	$asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['email'] = $myyntitilaus['asiakas']['email'];
 }
 
@@ -372,16 +341,16 @@ function laheta_asiakas_emailit($asiakkaille_lahtevat_sahkopostit = array()) {
 	global $kukarow, $yhtiorow;
 
 	foreach ($asiakkaille_lahtevat_sahkopostit as $asiakas_sahkoposti) {
-		$body = t('Hei').',<br/><br/>';
-		$body .= t("Seuraavien tuotteiden toimitusaika on muuttunut").'.<br/><br/>';
+		$body = t('Hei', $asiakas_sahkoposti['kieli']).',<br/><br/>';
+		$body .= t("Seuraavien tuotteiden toimitusaika on muuttunut", $asiakas_sahkoposti['kieli']).'.<br/><br/>';
 		foreach ($asiakas_sahkoposti['tilaukset'] as $tilaustunnus => $tilaus) {
-			$body .= t('Tilaus').": {$tilaustunnus}"."<br/>";
+			$body .= t('Tilaus', $asiakas_sahkoposti['kieli']).": {$tilaustunnus}"."<br/>";
 			$body .= "<table border=1>";
 			$body .= "<tr>";
-			$body .= "<td>".t("Tuoteno")."</td>";
-			$body .= "<td>".t("Nimitys")."</td>";
-			$body .= "<td>".t("Tilattu kpl")."</td>";
-			$body .= "<td>".t("Saapumiset")."</td>";
+			$body .= "<td>".t("Tuoteno", $asiakas_sahkoposti['kieli'])."</td>";
+			$body .= "<td>".t("Nimitys", $asiakas_sahkoposti['kieli'])."</td>";
+			$body .= "<td>".t("Tilattu kpl", $asiakas_sahkoposti['kieli'])."</td>";
+			$body .= "<td>".t("Saapumiset", $asiakas_sahkoposti['kieli'])."</td>";
 			$body .= "</tr>";
 			foreach ($tilaus['tilausrivit'] as $tilausrivi) {
 				$body .= "<tr>";
@@ -391,16 +360,16 @@ function laheta_asiakas_emailit($asiakkaille_lahtevat_sahkopostit = array()) {
 			$body .= "</table>";
 			$body .= "<br/>";
 			$body .= "<br/>";
-			$body .= t("Ystävällisin terveisin");
+			$body .= t("Ystävällisin terveisin", $asiakas_sahkoposti['kieli']);
 			$body .= "<br/>";
 			$body .= $yhtiorow['nimi'];
 			$body .= "<br/>";
 			$body .= "<br/>";
-			$body .= t("Puh").': '.$yhtiorow['puhelin'];
+			$body .= t("Puh", $asiakas_sahkoposti['kieli']).': '.$yhtiorow['puhelin'];
 			$body .= "<br/>";
-			$body .= t("Mail").': '.$yhtiorow['email'];
+			$body .= t("Mail", $asiakas_sahkoposti['kieli']).': '.$yhtiorow['email'];
 			$body .= "<br/>";
-			$body .= t("Www").': '.$yhtiorow['www'];
+			$body .= t("Www", $asiakas_sahkoposti['kieli']).': '.$yhtiorow['www'];
 		}
 		laheta_sahkoposti($asiakas_sahkoposti['email'], $body);
 	}

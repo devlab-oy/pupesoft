@@ -452,7 +452,8 @@
 		$apu = $trow[$i];
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = ''>".t("JT-rivien toimitusajan vahvistussähköpostia ei lähetetä")."</option>";
+		$ulos .= "<option value = ''>".t("Käytetään yhtiön oletus parametriä")."</option>";
+		$ulos .= "<option value = 'E'>".t("JT-rivien toimitusajan vahvistussähköpostia ei lähetetä")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Ostotilauksen toimitusajan vahvistuksesta lähetetään asiakkaalle JT-rivien toimitusajan vahvistussähköposti")."</option>";
 		$ulos .= "</select></td>";
 

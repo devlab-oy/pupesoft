@@ -299,7 +299,7 @@
 	// haetaan tuotteen variaatiot
 	$query = "	SELECT distinct selite
 				FROM tuotteen_avainsanat
-				WHERE yhtio = '{$kukarow["yhtio"]}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND laji = 'parametri_variaatio'
 				AND trim(selite) != ''";
 	$resselite = pupe_query($query);
@@ -310,6 +310,9 @@
 	else {
 		$muutoslisa = "";
 	}
+
+	// Magentoon vain tuotteet joiden näkyvyys != ''
+	$nakyvyys_lisa = ($verkkokauppatyyppi == 'magento') ? "AND tuote.nakyvyys != ''" : "";
 
 	// loopataan variaatio-nimitykset
 	while ($rowselite = mysql_fetch_assoc($resselite)) {
@@ -333,12 +336,13 @@
 							AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
 							AND tuote.status != 'P'
 							AND tuote.tuotetyyppi NOT in ('A','B')
-							AND tuote.tuoteno != '')
+							AND tuote.tuoteno != ''
+							$nakyvyys_lisa)
 						LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio and try_fi.selite = tuote.try and try_fi.laji = 'try' and try_fi.kieli = 'fi')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys' and ta_nimitys_se.kieli = 'se')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en')
-						WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
-						AND tuotteen_avainsanat.selite = '{$rowselite["selite"]}'
+						WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
+						AND tuotteen_avainsanat.selite = '{$rowselite['selite']}'
 						{$muutoslisa}
 						ORDER BY tuote.tuoteno";
 		$alires = pupe_query($aliselect);
@@ -351,11 +355,11 @@
 							JOIN avainsana ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
 								AND avainsana.laji = 'PARAMETRI'
 								AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
-							WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
+							WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
 							AND tuotteen_avainsanat.laji != 'parametri_variaatio'
 							AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
 							AND tuotteen_avainsanat.laji like 'parametri_%'
-							AND tuotteen_avainsanat.tuoteno = '{$alirow["tuoteno"]}'
+							AND tuotteen_avainsanat.tuoteno = '{$alirow['tuoteno']}'
 							ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
 			$alinres = pupe_query($alinselect);
 			$properties = array();

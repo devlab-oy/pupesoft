@@ -2234,6 +2234,15 @@ if (!$cli and !isset($api_kentat)) {
 	echo "</td>";
 	echo "</tr>";
 
+	if ($table == 'autoid_lisatieto') {
+		echo "<tr><th>",t("Valitse liitos"),":</th>
+					<td><select name='autoid_liitos'>
+					<option value=''>",t("Autoid"),"</option>
+					<option value='malli'>",t("Mallinumero"),"</option>
+					</select></td>
+			</tr>";
+	}
+
 	if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri"))) {
 		echo "<tr><th>".t("Ytunnus-tarkkuus").":</th>
 					<td><select name='ytunnustarkkuus'>

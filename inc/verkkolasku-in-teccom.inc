@@ -427,7 +427,7 @@
 
 							if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx core value") or
 								($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
-								($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
+								($laskuttajan_toimittajanumero == "123007" and ($charge_code == "zcwr" or strpos($charge_description, "at.wert (rechnung)") !== FALSE)) or
 								(in_array($laskuttajan_toimittajanumero, array("123084","123007")) and strpos($charge_description, "core value") !== FALSE)) {
 
 								// Jos rivill‰ tulee runkoveloitus, niin pit‰‰ tehd‰ rungosta oma lapsirivi

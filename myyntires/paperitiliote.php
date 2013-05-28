@@ -261,18 +261,17 @@
 	if (!isset($valintra)) $valintra = "";
 
 	if ($valintra == 'maksetut') {
-		$mapvmlisa = " and lasku.mapvm > '0000-00-00' ";
+		$mapvmlisa = " and lasku.mapvm > '0000-00-00' and lasku.mapvm  > '{$tito_pvm}' ";
 	}
 	elseif ($valintra == 'kaikki') {
-		$mapvmlisa = " ";
+		$mapvmlisa = " and lasku.mapvm  > '{$tito_pvm}' ";
 	}
 	elseif ($valintra == "eraantyneet") {
-		$mapvmlisa = " and lasku.erpcm < now() and lasku.mapvm = '0000-00-00' ";
+		$mapvmlisa = " and lasku.erpcm < now() and (lasku.mapvm  > '{$tito_pvm}' or lasku.mapvm = '0000-00-00') ";
 	}
 	else {
-		$mapvmlisa = " and lasku.mapvm = '0000-00-00' ";
+		$mapvmlisa = " and (lasku.mapvm  > '{$tito_pvm}' or lasku.mapvm = '0000-00-00') ";
 	}
-
 
 	$query = "	SELECT
 				lasku.ytunnus,
@@ -302,6 +301,7 @@
 					and tiliointi.tapvm    <= '$tito_pvm' )
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				{$mapvmlisa}
+				and lasku.tapvm	  <= '{$tito_pvm}'
 				and lasku.tapvm	  > '0000-00-00'
 				and lasku.tila	  = 'U'
 				and lasku.alatila = 'X'

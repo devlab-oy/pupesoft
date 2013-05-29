@@ -14,7 +14,7 @@
 					FROM tuote
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					and tuote.eankoodi = '$tuoteno'
-					{$poistetulisa}";
+					and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
 		$tresult = pupe_query($query);
 
 		if (mysql_num_rows($tresult) == 1) {
@@ -28,6 +28,7 @@
 
 	if (!$enarimatch) {
 		if (substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#' and substr($tuoteno,0,1) != '@' and $yhtiorow["automaattinen_tuotehaku"] != '') {
+
 			$query = "	SELECT *
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -40,7 +41,7 @@
 							FROM tuote
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
 							and tuote.tuoteno LIKE '$tuoteno%'
-							{$poistetulisa}";
+							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 1) {
@@ -58,7 +59,6 @@
 
 			$th_lisa1	= "";
 			$ulos  		= "";
-			$poislisa	= "";
 			$kieltolisa	= "";
 
 			if (substr($tuoteno,0,1) == '?') {
@@ -150,8 +150,6 @@
 
 			if ($kaikkituhaku != "KYLLA") {
 
-				if ($poistetulisa != "") $poislisa = " HAVING (tuote.status not in ('P','X') or saldo > 0) ";
-
 				if ($kukarow["kesken"] > 0) {
 					$query  = "	SELECT if (toim_maa != '', toim_maa, maa) maa
 								FROM lasku
@@ -211,7 +209,7 @@
 						WHERE tuote.$yhtiot
 						$kieltolisa
 						$th_lisa1
-						$poislisa
+						HAVING (tuote.status not in ('P','X') or saldo > 0)
 						ORDER BY tuote.tuoteno
 						LIMIT 201";
 			$thresult = pupe_query($query);
@@ -250,7 +248,7 @@
 									and korvaavat.id = '$mrow[korvaavat]'
 									and korvaavat.tuoteno != '$mrow[tuoteno]'
 									$kieltolisa
-									$poislisa
+									HAVING (tuote.status not in ('P','X') or saldo > 0)
 									ORDER BY korvaavat.jarjestys, korvaavat.tuoteno";
 						$kores = pupe_query($query);
 
@@ -415,7 +413,7 @@
 				$query = "	SELECT tuote.tuoteno
 							FROM tuote
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
-							{$poistetulisa}
+							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 							$th_lisa1";
 				$tresult = pupe_query($query);
 

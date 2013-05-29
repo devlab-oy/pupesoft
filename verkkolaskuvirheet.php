@@ -79,18 +79,27 @@
 			// P‰ivitet‰‰n toimittajan tunnus aineistoon, niin saadaan lasku reskontraan
 			if ($kumpivoice == "FINVOICE") {
 				$finkkari = simplexml_load_file($verkkolaskuvirheet_vaarat."/".$tiedosto);
-				$finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $tunnus);
 
-				file_put_contents($verkkolaskuvirheet_vaarat."/".$tiedosto, $finkkari->asXML());
-				$muutos_ok = true;
+				if (!isset($toimittaja_haku)) {
+					$finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $tunnus);
+					$muutos_ok = true;
+				}
+				else {
+					$toimittaja = hae_toimittaja($toimittaja_haku);
+
+					if (!empty($toimittaja['toimittajanro'])) {
+						$finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $toimittaja['toimittajanro']);
+						$muutos_ok = true;
+					}
+					//unsetataan, ettei p‰ivity domin formeihin
+					unset($toimittaja_haku);
+				}
 			}
 			elseif ($kumpivoice == 'TECCOM') {
 				$toimittaja = hae_toimittaja($toimittaja_haku);
-				$finkkari = simplexml_load_file($verkkolaskuvirheet_vaarat."/".$tiedosto);
 
 				if (isset($finkkari->InvoiceHeader->SellerParty->PartyNumber) and !empty($toimittaja['toimittajanro'])) {
 					$finkkari->InvoiceHeader->SellerParty->PartyNumber = $toimittaja['toimittajanro'];
-					file_put_contents($verkkolaskuvirheet_vaarat."/".$tiedosto, $finkkari->asXML());
 					$muutos_ok = true;
 				}
 				//unsetataan, ettei p‰ivity domin formeihin
@@ -98,6 +107,8 @@
 			}
 
 			if ($muutos_ok) {
+				file_put_contents($verkkolaskuvirheet_vaarat."/".$tiedosto, $finkkari->asXML());
+				
 				rename($verkkolaskuvirheet_vaarat."/".$tiedosto, $verkkolaskuvirheet_kasittele."/".$tiedosto);
 				echo "<font class='message'>".t("Tiedosto k‰sitell‰‰n uudestaan")."</font><br>";
 			}

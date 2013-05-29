@@ -12,6 +12,13 @@
 				return ("Tiedostoa $file ei löydy!");
 			}
 
+			$file_array = explode('.', $file);
+			//explodataan pisteellä, jolloin arrayn viimeinen solu on file extension
+			if (stristr($file_array[count($file_array)-1], 'xml') == false) {
+				echo ("Tiedosto $file ei ole xml tiedosto!\n");
+				return ("Tiedosto $file ei ole xml tiedosto!!");
+			}
+
 			// luetaan file muuttujaan
 			$xmlstr = file_get_contents($file);
 

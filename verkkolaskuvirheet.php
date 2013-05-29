@@ -82,10 +82,28 @@
 				$finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $tunnus);
 
 				file_put_contents($verkkolaskuvirheet_vaarat."/".$tiedosto, $finkkari->asXML());
+				$muutos_ok = true;
+			}
+			elseif ($kumpivoice == 'TECCOM') {
+				$toimittaja = hae_toimittaja($toimittaja_haku);
+				$finkkari = simplexml_load_file($verkkolaskuvirheet_vaarat."/".$tiedosto);
+
+				if (isset($finkkari->InvoiceHeader->SellerParty->PartyNumber) and !empty($toimittaja['toimittajanro'])) {
+					$finkkari->InvoiceHeader->SellerParty->PartyNumber = $toimittaja['toimittajanro'];
+					file_put_contents($verkkolaskuvirheet_vaarat."/".$tiedosto, $finkkari->asXML());
+					$muutos_ok = true;
+				}
+				//unsetataan, ettei päivity domin formeihin
+				unset($toimittaja_haku);
 			}
 
-			rename($verkkolaskuvirheet_vaarat."/".$tiedosto, $verkkolaskuvirheet_kasittele."/".$tiedosto);
-			echo "<font class='message'>".t("Tiedosto käsitellään uudestaan")."</font><br>";
+			if ($muutos_ok) {
+				rename($verkkolaskuvirheet_vaarat."/".$tiedosto, $verkkolaskuvirheet_kasittele."/".$tiedosto);
+				echo "<font class='message'>".t("Tiedosto käsitellään uudestaan")."</font><br>";
+			}
+			else {
+				echo "<font class='message'>".t("Tiedoston korjaamisessa tapahtui virhe")."</font><br>";
+			}
 		}
 
 		if ($tapa == 'P') {
@@ -101,23 +119,6 @@
 
 		require ("inc/verkkolasku-in.inc");
 
-		echo "<form name='toimittajahaku_form' action='' method='POST'>";
-		echo "<table>";
-		echo "<tr>";
-		echo "<th>";
-		echo t('Hae toimittajan nimellä').': ';
-		echo "</th>";
-		echo "<td>";
-		echo "<input type='hidden' name='tee' value='hae_toimittajalla' />";
-		echo livesearch_kentta("toimittajahaku_form", "TOIMITTAJAHAKU", "toimittaja_haku", 140, $toimittaja_haku, '', '', 'toimittaja_haku', 'ei_break_all');
-		echo "</td>";
-		echo "</tr>";
-		echo "</table>";
-		echo "<input type='submit' value='".t("Hae")."' />";
-		echo "</form>";
-		echo "<br/>";
-		echo "<br/>";
-
 		echo "<table><tr>";
 		echo "<th>".t("Vastaanottaja")."<br>".t("Yhtiö")."</th><th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
 
@@ -129,7 +130,7 @@
 
 				list($lasku_yhtio, $lasku_toimittaja) = verkkolasku_in($verkkolaskuvirheet_vaarat."/".$file, FALSE);
 
-				if (($lasku_yhtio["yhtio"] == $kukarow["yhtio"] or $lasku_yhtio["yhtio"] == "") and ( (empty($toimittaja_haku) or $toimittaja_haku == $lasku_toimittaja['tunnus']) )) {
+				if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"] or $lasku_yhtio["yhtio"] == "") {
 
 					$valitutlaskut++;
 
@@ -375,6 +376,25 @@
 							echo "</select><input type='submit' value ='".t("Päivitä")."'></form><br><br>";
 						}
 
+						echo "<form name='toimittajahaku_form' action='' method='POST'>";
+						echo "<input type='hidden' name = 'tiedosto' value='$file'>";
+						echo "<input type='hidden' name = 'kumpivoice' value='$kumpivoice'>";
+						echo "<input type='hidden' name='tapa' value='U_JA_P' />";
+						echo "<table>";
+						echo "<tr>";
+						echo "<th>";
+						echo t('Liitä toimittajan nimellä').': ';
+						echo "</th>";
+						echo "<td>";
+						echo livesearch_kentta("eisaaollaoikee", "TOIMITTAJAHAKU", "toimittaja_haku", 140, $toimittaja_haku, '', '', 'toimittaja_haku', 'ei_break_all');
+						echo "</td>";
+						echo "</tr>";
+						echo "</table>";
+						echo "<input type='submit' value='".t("Liitä")."' />";
+						echo "</form>";
+						echo "<br/>";
+						echo "<br/>";
+						
 						echo t("Perusta uusi toimittaja").":<br>";
 						echo "<form action='{$palvelin2}yllapito.php' method='post'>
 								<input type = 'hidden' name = 'toim' value = 'toimi'>

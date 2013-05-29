@@ -1,4 +1,4 @@
-/* V. 28.2.2011 19:41 */
+/* Modified 3.11.2012 15:45 */
 
 body
 {
@@ -53,6 +53,9 @@ table.invoiceTopRight, table.invoiceTotal
 }
 
 table.InvoiceDetails { width:100%; }
+
+table.DiscountDetails {}
+table.DiscountDetails td { padding-right: 1em; }
 
 table.VatSpecificationDetails {}
 
@@ -203,7 +206,9 @@ div.PartialPaymentDetails { margin:2ex 0ex 0ex 0ex; }
 
 div.partialPaymentDetailsSeparator { height:1ex; }
 
-table.PartialPaymentDetails td { padding:0px 2em 0px 0px; }
+table.PartialPaymentDetails td { padding:0px 2em 0px 0px;}
+table.PartialPaymentDetail td { padding:0px 0px 0px 0px;}
+table.PartialPaymentDetail td.titlePad { padding:0px 0.4em 0px 0px;}
 
 .alignRight { text-align:right; }
 
@@ -222,3 +227,11 @@ div.sellerDetails.afterSpecificationDetails
 table.sellerDetails { width:100%; } 
 
 table.sellerDetails td { padding:0px 1em 0px 0px; }
+
+div.stamps
+{
+	margin:2ex 0ex 0ex 0ex;
+	border-top:2px solid black;
+}
+
+/*.isNewVersion { background-color:blue; color:yellow; }*/

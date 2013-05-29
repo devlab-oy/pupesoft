@@ -438,6 +438,7 @@
 						<input type = 'text' name = 'pp' id = 'pp' value='{$pp}' size=2 class='date'>
 						<input type = 'text' name = 'kk' id = 'kk' value='{$kk}' size=2 class='date'>
 						<input type = 'text' name = 'vv' id = 'vv' value='{$vv}' size=4 class='date'>
+						<input type='hidden' name = 'valintra' value='{$valintra}' />
 						<input type='submit' value='",t("Tulosta tiliote"),"' onClick=\"js_openFormInNewWindow('tulosta_tiliote', ''); return false;\">
 						</form>";
 
@@ -543,12 +544,12 @@
 							saldo_maksettu,
 							saldo_maksettu_valuutassa,
 							valkoodi
-							FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+							FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
 							WHERE yhtio ='$kukarow[yhtio]'
 							and tila = 'U'
 							and alatila = 'X'
 							and liitostunnus in ($tunnukset)
-							and tapvm > '0000-00-00'
+							AND tapvm > '0000-00-00'
 							$mapvmlisa
 							$salisa
 							ORDER BY erpcm";

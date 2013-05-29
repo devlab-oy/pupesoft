@@ -20985,3 +20985,8 @@ if (!function_exists('onko_rahtituote_syotetty')) {
 		return mysql_num_rows($result);
 	}
 }
+
+require('inc/tuote_functions.inc');
+require('inc/lasku_functions.inc');
+require('inc/kuka_functions.inc');
+require('tilauskasittely/luo_myyntitilausotsikko.inc');

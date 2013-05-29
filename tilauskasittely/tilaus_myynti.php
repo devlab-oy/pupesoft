@@ -131,6 +131,10 @@ if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukar
 	$valitsetoimitus = $toim;
 }
 
+if (file_exists($pupe_root_polku . '/tilauskasittely/varaosaselain_napit.inc')) {
+	require_once('tilauskasittely/ostoskorin_haku.inc');
+}
+
 // Vaihdetaan tietyn projektin toiseen toimitukseen
 //	HUOM: tämä käyttää aktivointia joten tämä on oltava aika alussa!! (valinta on onchage submit rivisyötössä joten noita muita paremetreja ei oikein voi passata eteenpäin..)
 if ((int) $valitsetoimitus > 0 and $valitsetoimitus != $tilausnumero) {
@@ -2217,6 +2221,10 @@ if ($tee == '') {
 
 		echo "</form>";
 
+		if (file_exists($pupe_root_polku . '/tilauskasittely/varaosaselain_napit.inc')) {
+			require_once('tilauskasittely/varaosaselain_napit.inc');
+		}
+		
 		if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and $yhtiorow["rahtikirjojen_esisyotto"] == "M") {
 			echo "<form action='../rahtikirja.php' method='post'>
 					<input type='hidden' name='tee' value=''>

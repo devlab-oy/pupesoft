@@ -1,5 +1,16 @@
 <?php
+
+	if (isset($_POST["tee"])) {
+		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+	}
+
 	require ("inc/parametrit.inc");
+
+	if (isset($tee) and $tee == "lataa_tiedosto") {
+		readfile("/tmp/".$tmpfilenimi);
+		exit;
+	}
 
 	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
@@ -659,36 +670,82 @@
 				echo "</tr></table><br>";
 
 
+				include('inc/pupeExcel.inc');
+
+				$worksheet 	 = new pupeExcel();
+				$format_bold = array("bold" => TRUE);
+				$excelrivi 	 = 0;
+				$excelsarake = 0;
+
 				echo "<table><tr>";
+				$worksheet->writeString($excelrivi, $excelsarake++, t("Isätuote"));
 
 				if ($toim == "PERHE") {
 					echo "<th>".t("Lapset")."</th><th>".t("Nimitys")."</th><th>".t("Määräkerroin")."</th><th>".t("Hintakerroin")."</th><th>".t("Alennuskerroin")."</th>";
 					#echo "<th>".t("Rivikommentti")."</th>";
 					echo "<th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>",t("Ohita keräys"),"</th><td class='back'></td></tr>";
 
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Lapset"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Määräkerroin"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Hintakerroin"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Alennuskerroin"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Ohita keräys"));
+
 				}
 				elseif ($toim == "LISAVARUSTE") {
 					echo "<th>".t("Lisävarusteet")."</th><th>".t("Nimitys")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><td class='back'></td></tr>";
+
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Lisävarusteet"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
 				}
 				elseif ($toim == "OSALUETTELO") {
 					echo "<th>".t("Osaluettelot")."</th><th>".t("Nimitys")."</th><th>".t("Kerroin")."</th><th>".t("Kehahin*Kerroin")."</th><td class='back'></td></tr>";
+
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Osaluettelot"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Kerroin"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
 				}
 				elseif ($toim == "TUOTEKOOSTE") {
 					echo "<th>".t("Tuotekoosteet")."</th><th>".t("Nimitys")."</th><th>".t("Kerroin")."</th><th>".t("Kehahin*Kerroin")."</th><td class='back'></td></tr>";
+
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Tuotekoosteet"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Kerroin"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
 				}
 				elseif ($toim == "VSUUNNITTELU") {
 					echo "<th>".t("Samankaltaisuudet")."</th><th>".t("Nimitys")."</th><th>".t("Kerroin")."</th><td class='back'></td></tr>";
+
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Samankaltaisuudet"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Kerroin"));
 				}
 				else {
 					echo "<th>".t("Raaka-aineet")."</th><th>".t("Nimitys")."</th><th>".t("Määräkerroin")."</th><th>".t("Yksikkö")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>".t("Pituus kerroin")."</th><td class='back'></td></tr>";
+
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Raaka-aineet"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Määräkerroin"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Yksikkö"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
+					$worksheet->writeString($excelrivi, $excelsarake++, t("Pituus kerroin"));
 				}
+
+				$excelrivi++;
 
 				$query = "	SELECT *
 							FROM tuoteperhe
 							WHERE isatuoteno = '$row[isatuoteno]'
-							and yhtio = '$kukarow[yhtio]'
-							and tyyppi = '$hakutyyppi'
-							order by isatuoteno, tuoteno";
+							AND yhtio		 = '$kukarow[yhtio]'
+							AND tyyppi 		 = '$hakutyyppi'
+							ORDER BY isatuoteno, tuoteno";
 				$res   = pupe_query($query);
 
 				$resyht = 0;
@@ -739,6 +796,10 @@
 							</tr>";
 				}
 
+				if (mysql_num_rows($res) > 0) {
+
+				}
+
 				while ($prow = mysql_fetch_array($res)) {
 					//Tarkistetaan löytyyko tuote enää rekisteristä
 					$query = "SELECT * from tuote where tuoteno='$prow[tuoteno]' and yhtio='$kukarow[yhtio]'";
@@ -769,38 +830,56 @@
 					$lapsiyht = $tuoterow['kehahin']*$prow['kerroin'];
 					$resyht += $lapsiyht;
 
+
+					$excelsarake = 0;
+					$worksheet->writeString($excelrivi, $excelsarake++, $prow["isatuoteno"]);
+
 					if ($tunnus != $prow["tunnus"]) {
 						echo "<tr class='aktiivi'><td>$prow[tuoteno] $error</td><td>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td>";
 
+						$worksheet->writeString($excelrivi, $excelsarake++, $prow["tuoteno"]);
+						$worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["nimitys"]);
+
 						if ($toim != "LISAVARUSTE") {
 							echo "<td align='right'>$prow[kerroin]</td>";
+							$worksheet->writeNumber($excelrivi, $excelsarake++, $prow["kerroin"]);
 						}
 
 						if ($toim == "PERHE") {
 							echo"<td align='right'>$prow[hintakerroin]</td><td align='right'>$prow[alekerroin]</td>";
+							$worksheet->writeNumber($excelrivi, $excelsarake++, $prow["hintakerroin"]);
+							$worksheet->writeNumber($excelrivi, $excelsarake++, $prow["alekerroin"]);
 							#echo "<td align='right'>$prow[rivikommentti]</td>";
 						}
 
 						if ($toim == "RESEPTI") {
 							echo "<td align='left'>$tuoterow[yksikko]</td>";
+							$worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["yksikko"]);
 					    }
 						if ($toim != "VSUUNNITTELU") {
 							echo "<td align='right'>$tuoterow[kehahin]</td><td align='right'>".round($lapsiyht, 6)."</td>";
+							$worksheet->writeNumber($excelrivi, $excelsarake++, $tuoterow["kehahin"]);
+							$worksheet->writeNumber($excelrivi, $excelsarake++, round($lapsiyht, 6));
 						}
 
 						if ($toim == "PERHE") {
 							$chk_ohita_kerays = (isset($prow['ohita_kerays']) and trim($prow['ohita_kerays']) != '') ? t("Kyllä") : t("Ei");
 							echo "<td>{$chk_ohita_kerays}</td>";
+							$worksheet->writeString($excelrivi, $excelsarake++, $chk_ohita_kerays);
 						}
 
 						if ($toim == "RESEPTI") {
 							if ($prow["omasivu"] != "") {
 								echo "<td>".t("Ei kerrota")."</td>";
+								$worksheet->writeString($excelrivi, $excelsarake++, t("Ei kerrota"));
 							}
 							else {
-								echo "<td>".("Kerrotaan")."</td>";
+								echo "<td>".t("Kerrotaan")."</td>";
+								$worksheet->writeString($excelrivi, $excelsarake++, t("Kerrotaan"));
 							}
 						}
+
+						$excelrivi++;
 
 						echo "<form method='post' action='tuoteperhe.php' autocomplete='off'>
 								<td class='back'>
@@ -910,6 +989,18 @@
 				}
 
 				echo "</table>";
+
+				$excelnimi = $worksheet->close();
+
+				echo "<br><br><table>";
+				echo "<tr><th>".t("Tallenna exceliin").":</th>";
+				echo "<form method='post' class='multisubmit'>";
+				echo "<input type='hidden' name='toim' value='$toim'>";
+				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+				echo "<input type='hidden' name='kaunisnimi' value='{$row['isatuoteno']}.xlsx'>";
+				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table><br>";
 
 				echo "<br><br>";
 				echo "	<form method='post' action='tuoteperhe.php' autocomplete='off'>

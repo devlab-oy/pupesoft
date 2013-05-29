@@ -267,7 +267,7 @@
 		$mapvmlisa = " and lasku.mapvm  > '{$tito_pvm}' ";
 	}
 	elseif ($valintra == "eraantyneet") {
-		$mapvmlisa = " and lasku.erpcm < now() and (lasku.mapvm  > '{$tito_pvm}' or lasku.mapvm = '0000-00-00') ";
+		$mapvmlisa = " and lasku.erpcm < '{$tito_pvm}' and (lasku.mapvm  > '{$tito_pvm}' or lasku.mapvm = '0000-00-00') ";
 	}
 	else {
 		$mapvmlisa = " and (lasku.mapvm  > '{$tito_pvm}' or lasku.mapvm = '0000-00-00') ";

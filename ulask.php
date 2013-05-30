@@ -1912,7 +1912,7 @@ if ($tee == 'I') {
 	}
 
 	if ($komm != "") {
-		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") " . trim($komm);
+		$komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") " . trim($komm);
 	}
 
 	if ($kuva) {

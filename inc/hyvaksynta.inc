@@ -59,9 +59,9 @@ if ($tee == 'T') {
 			echo "<font class='error'>".t("Muutettavaa laskua ei löytynyt")."!</font>";
 			exit;
 		}
-		$trow=mysql_fetch_array ($result);
 
-		$mita="";
+		$trow = mysql_fetch_array($result);
+		$mita = "";
 
 		// Aikaikkunan poisto, joku muu ehti ennen meitä
 		if ($trow['hyvaksyja_nyt'] == $kuka) {

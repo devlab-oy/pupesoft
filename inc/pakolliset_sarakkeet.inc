@@ -326,7 +326,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$saakopoistaa = TRUE;
 				break;
 			case "autoid_lisatieto" :
-				$pakolliset = array("TYYPPI","TYPNR","PRE","STD","ECO","AUTOID_LUKITTU");
+				$pakolliset = array("TYPNR");
 				$wherelliset = array("TYYPPI","TYPNR","PRE","STD","ECO","AUTOID_LUKITTU");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$saakopoistaa = TRUE;

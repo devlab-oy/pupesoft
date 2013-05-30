@@ -12,7 +12,7 @@
 						$t[$i] = 0;
 					}
 					else {
-						unset($t[$i][0]);
+						if (isset($t[$i][0])) unset($t[$i][0]);
 						$t[$i] = 1;
 					}
 				}

@@ -11,7 +11,7 @@
 
 	if (mysql_field_name($result, $i) == "tyyppi") {
 
-		$sel = $trow[$i] == 'cv' ? "selected" : "";
+		$sel = strtolower($trow[$i]) == 'cv' ? "selected" : "";
 
 		$ulos  = "<td><select name='{$nimi}'>";
 		$ulos .= "<option value='pc'>".t("PC")."</option>";

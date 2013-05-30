@@ -36,7 +36,11 @@ if (mysql_field_name($result, $i) == "kohde_sarake") {
 	$ulos = "<td>";
 	$ulos .= "<select name='{$nimi}'>";
 	foreach ($kohde_sarakkeet as $kohde_sarake_index => $kohde_sarake) {
-		$ulos .= "<option value='{$kohde_sarake_index}'>{$kohde_sarake}</option>";
+		$sel = "";
+		if ($kohde_sarake_index == $trow[$i]) {
+			$sel = "SELECTED";
+		}
+		$ulos .= "<option value='{$kohde_sarake_index}' $sel>{$kohde_sarake}</option>";
 	}
 	$ulos .= "</select>";
 	$ulos .= "</td>";

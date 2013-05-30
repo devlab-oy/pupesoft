@@ -37,9 +37,10 @@ if (!function_exists("vaihtoehtoiset_verkkolaskutunnuksettarkista")) {
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND arvo = '{$t[$i]}'";
 				$arvo_result = pupe_query($query);
+				$vaihtoehtoinen_verkkolaskutunnus = mysql_fetch_assoc($arvo_result);
 
-				if (mysql_num_rows($arvo_result) > 0) {
-					$virhe[$i] = t("Arvo löytyy jo tietokannasta");
+				if (!empty($vaihtoehtoinen_verkkolaskutunnus) and $vaihtoehtoinen_verkkolaskutunnus['toimi_tunnus'] != $t['toimi_tunnus']) {
+					$virhe[$i] = t("Arvo löytyy jo toiselta toimittajalta tietokannasta");
 				}
 			}
 		}

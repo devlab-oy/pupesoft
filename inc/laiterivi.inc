@@ -66,10 +66,6 @@ if (mysql_field_name($result, $i) == "omistaja") {
 
 }
 
-if (mysql_field_name($result, $i) == "viimeinen_tapahtuma") {
-	$tyyppi = 0;
-}
-
 if (!isset($redirect_echoed)) {
 	$redirect_echoed = 1;
 	if (!empty($valittu_paikka)) {

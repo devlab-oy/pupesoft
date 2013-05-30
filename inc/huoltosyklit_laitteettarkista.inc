@@ -36,7 +36,14 @@ if (!function_exists("huoltosyklit_laitteet")) {
 			}
 
 			if (empty($t[$i])) {
-				$virhe[$i] = t("Huoltoväli ei voi olla tyhjä!");
+				$virhe[$i] = t("Huoltoväli ei voi olla tyhjä").'!';
+			}
+
+			//huoltoväli ei voi olla pidempi kuin huoltoskyli_tunnus:ksen huoltoväli
+			$huoltosykli = hae_huoltosykli($t['huoltosykli_tunnus']);
+
+			if ($t[$i] > $huoltosykli['huoltovali']) {
+				$virhe[$i] = t("Annettu huoltoväli ei voi olla pidmepi kuin oletushuoltosyklin huoltoväli") . " {$huoltosykli['huoltovali']}";
 			}
 		}
 

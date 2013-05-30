@@ -1,5 +1,6 @@
 <?php
 
+require_once('validation/Validation.php');
 if (!function_exists("laitetarkista")) {
 
 	function laitetarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
@@ -31,7 +32,7 @@ if (!function_exists("laitetarkista")) {
 				$kohde_result = pupe_query($query);
 
 				if (mysql_num_rows($kohde_result) != 1) {
-					$virhe[$i] = t("Paikka puuttuu tai sit‰ ei lˆydy!");
+					$virhe[$i] = t("Paikka puuttuu tai sit‰ ei lˆydy").'!';
 				}
 			}
 		}
@@ -47,7 +48,35 @@ if (!function_exists("laitetarkista")) {
 				$tuote_result = pupe_query($query);
 
 				if (mysql_num_rows($tuote_result) != 1) {
-					$virhe[$i] = t("Tuote puuttuu tai sit‰ ei lˆydy!");
+					$virhe[$i] = t("Tuote puuttuu tai sit‰ ei lˆydy").'!';
+				}
+			}
+		}
+
+		if (mysql_field_name($result, $i) == "valm_pvm") {
+			$valm_pvm = trim($t[$i]);
+
+			if (empty($valm_pvm)) {
+				$virhe[$i] = t("Valmistusp‰iv‰ on pakollinen").'!';
+			}
+			else {
+				$validator = new FormValidator();
+				if (!$validator->validateItem($valm_pvm, 'paiva')) {
+					$virhe[$i] = t("Virheellinen p‰iv‰m‰‰r‰").'!';
+				}
+			}
+		}
+
+		if (mysql_field_name($result, $i) == "sarjanro") {
+			$sarjanro = trim($t[$i]);
+
+			if (empty($sarjanro)) {
+				$virhe[$i] = t("Sarjanumero on pakollinen").'!';
+			}
+			else {
+				$validator = new FormValidator();
+				if (!$validator->validateItem($sarjanro, 'numero')) {
+					$virhe[$i] = t("Sarjanumero pit‰‰ olla numero").'!';
 				}
 			}
 		}

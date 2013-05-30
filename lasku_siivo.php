@@ -19,7 +19,7 @@ else {
 		"DELETE FROM tyomaarays WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus != ''",
 		"DELETE FROM laskun_lisatiedot WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus != ''",
 		"DELETE FROM tilausrivin_lisatiedot WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus != ''",
-		"UPDATE laite SET viimeinen_tapahtuma = NULL WHERE yhtio = '{$kukarow['yhtio']}'",
+		"UPDATE huoltosyklit_laitteet SET viimeinen_tapahtuma = NULL WHERE yhtio = '{$kukarow['yhtio']}'",
 	);
 		
 	foreach ($query as $q) {

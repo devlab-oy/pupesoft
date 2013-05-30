@@ -297,8 +297,10 @@ function echo_kohteet_table($asiakkaan_kohteet = array(), $request = array()) {
 
 	echo "</tr>";
 
-	foreach ($asiakkaan_kohteet['kohteet'] as $kohde_index => $kohde) {
-		kohde_tr($kohde_index, $kohde);
+	if (!empty($asiakkaan_kohteet['kohteet'])) {
+		foreach ($asiakkaan_kohteet['kohteet'] as $kohde_index => $kohde) {
+			kohde_tr($kohde_index, $kohde);
+		}
 	}
 
 	echo "</table>";
@@ -516,5 +518,4 @@ function aja_ruby($filepath) {
 	// Palautetaan ensimmäinen rivi outputista, siinä on filenimet
 	return $output[0];
 }
-
 require ("inc/footer.inc");

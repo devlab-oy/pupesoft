@@ -60,7 +60,8 @@ function js_huoltosykli_dropdown_huoltovali_change() {
 			bind_huoltosykli_change();
 
 			//jos ollaan muokkaustilassa niin ensimmäisellä sivulatauksella ei päivitetä huoltosykliä, koska kentässä saattaa olla poikkeava huoltoväli ja sitä ei haluta kadottaa
-			if ($('input[name=tunnus]').val().length === 0) {
+			//ja jos iframen domista löytyy classilla error mitä tahansa.
+			if ($('input[name=tunnus]').val().length === 0 && $('.error').length === 0) {
 				$('.huoltosykli_tunnus').change();
 			}
 		});

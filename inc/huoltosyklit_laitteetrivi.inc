@@ -125,3 +125,6 @@ if (mysql_field_name($result, $i) == "pakollisuus") {
 	$jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "viimeinen_tapahtuma") {
+	$tyyppi = 0;
+}

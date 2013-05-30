@@ -73,53 +73,34 @@ function hae_laitteet_joiden_huolto_lahestyy($request = array()) {
 	}
 
 	$query = "	SELECT laite.tuoteno,
-				laite.viimeinen_tapahtuma,
-				laite.tunnus as laite_tunnus,
-				ta.laji,
-				ta.selite,
-				paikka.nimi as paikka_nimi,
-				paikka.olosuhde,
-				huoltosykli.tyyppi,
-				huoltosykli.koko,
-				huoltosykli.olosuhde,
-				huoltosykli.toimenpide as toimenpide,
-				huoltosykli.huoltovali,
-				tuote.*,
-				kohde.nimi as kohde_nimi,
-				kohde.*,
-				asiakas.tunnus as asiakas_tunnus,
-				asiakas.*
+				huoltosyklit_laitteet.viimeinen_tapahtuma,
+				laite.tunnus AS laite_tunnus,
+				huoltosyklit_laitteet.huoltosykli_tunnus,
+				huoltosyklit_laitteet.huoltovali AS huoltovali,
+				huoltosykli.toimenpide,
+				huoltosykli.huoltovali AS toimenpide_oletus_huoltovali,
+				asiakas.tunnus AS asiakas_tunnus,
+				kohde.nimi AS kohde_nimi,
+				paikka.nimi AS paikka_nimi
 				FROM   laite
-				JOIN tuotteen_avainsanat ta
-				ON ( ta.yhtio = laite.yhtio
-					AND ta.tuoteno = laite.tuoteno
-					AND ta.laji = 'sammutin_tyyppi' )
-				JOIN tuotteen_avainsanat ta2
-				ON ( ta2.yhtio = laite.yhtio
-					AND ta2.tuoteno = laite.tuoteno
-					AND ta2.laji = 'sammutin_koko' )
-				JOIN paikka
-				ON ( paikka.yhtio = laite.yhtio
-					AND paikka.tunnus = laite.paikka )
 				JOIN huoltosyklit_laitteet
 				ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
 					AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
 				JOIN huoltosykli
 				ON ( huoltosykli.yhtio = laite.yhtio
 					AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
-				JOIN tuote
-				ON ( tuote.yhtio = laite.yhtio
-					AND tuote.tuoteno = laite.tuoteno)
+				JOIN paikka
+				ON ( paikka.yhtio = laite.yhtio
+					AND paikka.tunnus = laite.paikka )
 				JOIN kohde
 				ON ( kohde.yhtio = paikka.yhtio
 					AND kohde.tunnus = paikka.kohde )
 				JOIN asiakas
 				ON ( asiakas.yhtio = kohde.yhtio
-					AND asiakas.tunnus = kohde.asiakas)
+					AND asiakas.tunnus = kohde.asiakas )
 				WHERE  laite.yhtio = '{$kukarow['yhtio']}'
-				/*haetaan laitteet, joiden viimenen tapahtuma on huoltovali - kuukausi sitten tehty. esim 365 - 30 = 11kk*/
-				AND IFNULL(laite.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosykli.huoltovali-30) DAY)
-				{$laitteet_where}";
+				{$laitteet_where}
+				HAVING IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosyklit_laitteet.huoltovali-30) DAY)";
 	$result = pupe_query($query);
 
 	$laitteet = array();
@@ -206,7 +187,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteet) {
 
 			paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($laite, $rivit);
 			paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $laite);
-			paivita_viimenen_tapahtuma_laitteelle($laite);
+			paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite['laite_tunnus'], $laite['huoltosykli_tunnus']);
 
 			if ($debug) {
 				echo "Lisätään palvelutuoterivi";
@@ -250,13 +231,14 @@ function paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $laite
 	pupe_query($query);
 }
 
-function paivita_viimenen_tapahtuma_laitteelle($laite) {
+function paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huoltosykli_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$query = "	UPDATE laite
+	$query = "	UPDATE huoltosyklit_laitteet
 				SET viimeinen_tapahtuma = CURRENT_DATE
 				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$laite['laite_tunnus']}'";
+				AND laite_tunnus = '{$laite_tunnus}'
+				AND huoltosykli_tunnus = '{$huoltosykli_tunnus}'";
 	pupe_query($query);
 }
 

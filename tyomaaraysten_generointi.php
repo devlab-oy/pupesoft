@@ -2,7 +2,7 @@
 
 ini_set("memory_limit", "5G");
 
-$debug = true;
+$debug = false;
 if (php_sapi_name() != 'cli' and !$debug) {
 	die("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }

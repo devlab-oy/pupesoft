@@ -87,8 +87,8 @@
 				else {
 					$toimittaja = hae_toimittaja($toimittaja_haku);
 
-					if (!empty($toimittaja['toimittajanro'])) {
-						$finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $toimittaja['toimittajanro']);
+					if (!empty($toimittaja['tunnus'])) {
+						$finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $toimittaja['tunnus']);
 						$muutos_ok = true;
 					}
 					//unsetataan, ettei päivity domin formeihin

@@ -415,6 +415,9 @@
 		echo "Päivitetään Magento verkkokauppaa!\n";
 
 		$magento_client = new MagentoClient($magento_api_url, $magento_api_usr, $magento_api_pas);
+		// tax_class_id, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
+		if (! isset($magento_class_id)) $magento_class_id = 0;
+		$magento_client->setTaxClassID($magento_class_id);
 
 		// Kategoriat
 		if (count($dnsryhma) > 0) {

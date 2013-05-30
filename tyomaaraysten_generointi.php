@@ -2,7 +2,7 @@
 
 ini_set("memory_limit", "5G");
 
-$debug = false;
+$debug = true;
 if (php_sapi_name() != 'cli' and !$debug) {
 	die("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
@@ -42,13 +42,13 @@ if (mysql_num_rows($result) == 0) {
 $kukarow = mysql_fetch_assoc($result);
 
 //generoidaan debug moodissa vain testi tuotteen työmääräyksiä
-if ($debug) {
-	$laitteet = array(
-		'TESTI',
-		'TESTI2',
-		'TESTI3',
-	);
-}
+//if ($debug) {
+//	$laitteet = array(
+//		'TESTI',
+//		'TESTI2',
+//		'TESTI3',
+//	);
+//}
 
 $request = array(
 	'laitteet' => $laitteet,

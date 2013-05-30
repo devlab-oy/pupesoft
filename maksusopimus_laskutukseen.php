@@ -146,6 +146,9 @@
 						$fieldname == 'poistumistoimipaikka_koodi') {
 					$query .= $fieldname."='',";
 				}
+				elseif ($fieldname == 'kate_korjattu') {
+					$query .= $fieldname." = NULL,";
+				}
 				// maksuehto tulee tältä positiolta
 				elseif ($fieldname == 'maksuehto') {
 					$query .= "maksuehto = '$posrow[maksuehto]',";

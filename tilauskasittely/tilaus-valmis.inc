@@ -1305,6 +1305,9 @@ else {
 							case 'toimitustapa':
 								$values .= ", '$split_toimitustapa'";
 								break;
+							case 'kate_korjattu':
+								$values .= ", NULL";
+								break;								
 							default:
 								$values .= ", '".$laskurow[$fieldname]."'";
 						}

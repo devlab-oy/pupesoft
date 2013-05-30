@@ -15014,6 +15014,9 @@ if (!function_exists("splittaa_tilaus")) {
 				$fields .= ", {$fieldname}";
 
 				switch ($fieldname) {
+					case "kate_korjattu":
+						$values .= ", NULL";
+						break;
 					default:
 						$values .= ", '".$laskusplitrow[$fieldname]."'";
 				}
@@ -15046,7 +15049,7 @@ if (!function_exists("splittaa_tilaus")) {
 				switch ($fieldname) {
 					case 'otunnus':
 						$values .= ", '{$uusitunnus}'";
-						break;
+						break;						
 					default:
 						$values .= ", '{$lisatiedot_row[$fieldname]}'";
 				}

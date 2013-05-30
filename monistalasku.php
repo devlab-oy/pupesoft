@@ -816,6 +816,9 @@ if ($tee == 'MONISTA') {
 					case 'maksuaika':
 						$values .= ", ''";
 						break;
+					case 'kate_korjattu':
+						$values .= ", NULL";
+						break;
 					case 'clearing':
 						if ($kumpi == 'HYVITA') {
 							$values .= ", 'HYVITYS'";

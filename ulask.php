@@ -2455,6 +2455,8 @@ if ($tee == 'I') {
 						}
 						elseif (mysql_field_name($result, $i) == 'olmapvm') {
 						}
+						elseif (mysql_field_name($result, $i) == 'kate_korjattu') {
+						}
 						else {
 							$query .= mysql_field_name($result,$i) . "='".$laskurow[mysql_field_name($result,$i)]."',";
 						}

@@ -3554,6 +3554,9 @@
 								case "toimaika";
 									$values .= ", '$toimvv-$toimkk-$toimpp'";
 									break;
+								case "kate_korjattu";
+									$values .= ", NULL";
+									break;								
 								default;
 									$values .= ", '".$monistarow[$fieldname]."'";
 									break;

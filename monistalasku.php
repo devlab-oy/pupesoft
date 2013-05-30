@@ -1207,6 +1207,9 @@ if ($tee == 'MONISTA') {
 						case 'jaksotettu':
 							$rvalues .= ", ''";
 							break;
+						case 'kate_korjattu':
+							$rvalues .= ", NULL";
+							break;
 						case 'kommentti':
 							if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS' or $toim == 'OSTOTILAUS' or $toim == 'ENNAKKOTILAUS') {
 								$rvalues .= ", '{$rivirow['kommentti']}'";

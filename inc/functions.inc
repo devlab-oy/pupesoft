@@ -14287,6 +14287,9 @@ if (!function_exists("kopioi_tilausrivi")) {
 					case 'laadittu':
 						$rvalues .= "now(),";
 						break;
+					case 'kate_korjattu':
+						$rvalues .= "NULL,";
+						break;
 					default:
 						$rvalues .= "'";
 
@@ -15089,6 +15092,9 @@ if (!function_exists("splittaa_tilaus")) {
 							case 'tilkpl':
 								$values .= ", '".($tilausrivisplitrow['varattu'] - $splitattava_tilausrivi_kpl)."'";
 								break;
+							case 'kate_korjattu':
+								$values .= ", NULL";
+								break;
 							default:
 								$values .= ", '{$tilausrivisplitrow[$fieldname]}'";
 						}
@@ -15169,6 +15175,9 @@ if (!function_exists("splittaa_tilaus")) {
 										break;
 									case 'perheid':
 										$values .= ", {$uusitunnus_tilausrivi}";
+										break;
+									case 'kate_korjattu':
+										$values .= ", NULL";
 										break;
 									default:
 										$values .= ", '{$lapsirow[$fieldname]}'";
@@ -19024,6 +19033,8 @@ if (!function_exists('splittaa_tilausrivi')) {
 					$query .= " laadittu = now(),";
 					break;
 				case 'tunnus':
+					break;
+				case 'kate_korjattu':
 					break;
 				case 'hinta_alkuperainen':
 					if ($rivi['hinta_alkuperainen'] != 0) {

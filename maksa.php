@@ -852,7 +852,7 @@
 
 		$trow = mysql_fetch_assoc ($result);
 
-		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Poisti laskun")."<br>" . $trow['comments'];
+		$komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Poisti laskun")."<br>" . $trow['comments'];
 
 		// Ylikirjoitetaan tiliöinnit
 		$query = "	UPDATE tiliointi SET

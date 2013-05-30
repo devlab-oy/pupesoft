@@ -61,6 +61,7 @@
 				tuote.osasto,
 				tuote.try,
 				tuote.alv,
+				tuote.nakyvyys,
 				tuote.tuotemassa,
 				tuote.tunnus,
 				ta_nimitys_se.selite nimi_swe,
@@ -113,6 +114,7 @@
 							'try'					=> $row["try"],
 							'try_nimi'				=> $row["try_nimi"],
 							'alv'					=> $row["alv"],
+							'nakyvyys'				=> $row["nakyvyys"],
 							'nimi_swe'				=> $row["nimi_swe"],
 							'nimi_eng'				=> $row["nimi_eng"],
 							'tunnus'				=> $row['tunnus']
@@ -330,6 +332,7 @@
 						tuote.myymalahinta,
 						tuote.eankoodi,
 						tuote.alv,
+						tuote.nakyvyys,
 						try_fi.selitetark try_nimi
 						FROM tuotteen_avainsanat
 						JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio
@@ -391,6 +394,7 @@
 															'kuvaus'				=> $alirow["kuvaus"],
 															'lyhytkuvaus'			=> $alirow["lyhytkuvaus"],
 															'tuotemassa'			=> $alirow["tuotemassa"],
+															'nakyvyys'				=> $alirow["nakyvyys"],
 															'try_nimi'				=> $alirow["try_nimi"],
 															'nimi_swe'				=> $alirow["nimi_swe"],
 															'nimi_eng'				=> $alirow["nimi_eng"],

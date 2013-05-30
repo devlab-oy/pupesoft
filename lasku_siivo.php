@@ -19,8 +19,29 @@ else {
 		"DELETE FROM tyomaarays WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus != ''",
 		"DELETE FROM laskun_lisatiedot WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus != ''",
 		"DELETE FROM tilausrivin_lisatiedot WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus != ''",
-		"UPDATE huoltosyklit_laitteet SET viimeinen_tapahtuma = NULL WHERE yhtio = '{$kukarow['yhtio']}'",
+		"	UPDATE huoltosyklit_laitteet
+			JOIN huoltosykli
+			ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
+				AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
+			JOIN tuote
+			ON ( tuote.yhtio = huoltosykli.yhtio
+				AND tuote.tuoteno = huoltosykli.toimenpide)
+			LEFT JOIN tuotteen_avainsanat AS tt
+			ON ( tt.yhtio = tuote.yhtio
+				AND tt.tuoteno = tuote.tuoteno)
+			SET huoltosyklit_laitteet.viimeinen_tapahtuma = NULL
+			WHERE huoltosyklit_laitteet.yhtio = '{$kukarow['yhtio']}'
+			AND tt.selite IS NULL",
+		"	UPDATE huoltosyklit_laitteet
+			JOIN laite
+			ON ( laite.yhtio = huoltosyklit_laitteet.yhtio
+				AND laite.tunnus = huoltosyklit_laitteet.laite_tunnus )
+			SET huoltosyklit_laitteet.viimeinen_tapahtuma = laite.valm_pvm
+			WHERE huoltosyklit_laitteet.yhtio = '{$kukarow['yhtio']}'
+			AND huoltosyklit_laitteet.viimeinen_tapahtuma IS NOT NULL",
 	);
+	//toka vika query: ei p‰ivitet‰ koeponnistus huoltosyklien viimeist‰ tapahtumap‰iv‰‰ nulliksi.
+	//vika query: p‰ivitet‰‰n laite.valm_pvm koeponnistuksen huoltosyklit_laitteet riville
 		
 	foreach ($query as $q) {
 		pupe_query($q);

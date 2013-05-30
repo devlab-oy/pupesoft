@@ -244,6 +244,72 @@ function hae_tyomaaraykset($request) {
 		$lasku_where .= "	AND lasku.tila = 'A'";
 	}
 
+//	$query = "	SELECT
+//				lasku.tunnus as lasku_tunnus,
+//				lasku.ytunnus as asiakas_ytunnus,
+//				lasku.nimi as asiakas_nimi,
+//				kohde.tunnus as kohde_tunnus,
+//				kohde.nimi as kohde_nimi,
+//				paikka.nimi as paikka_nimi,
+//				a3.selitetark as paikka_olosuhde,
+//				laite.tuoteno,
+//				laite.oma_numero,
+//				laite.sijainti as laite_sijainti,
+//				tuote.nimitys as toimenpide_tuote_nimitys,
+//				lasku.toimaika,
+//				a1.selite as tyojonokoodi,
+//				a1.selitetark as tyojono,
+//				a2.selite as tyostatus_koodi,
+//				a2.selitetark as tyostatus,
+//				a2.selitetark_2 as tyostatusvari,
+//				tilausrivi.tunnus as tilausrivi_tunnus,
+//				tilausrivin_lisatiedot.tilausrivilinkki as poikkeus_tunnus
+//				FROM lasku
+//				JOIN tyomaarays
+//				ON ( tyomaarays.yhtio = lasku.yhtio
+//					AND tyomaarays.otunnus = lasku.tunnus )
+//				JOIN laskun_lisatiedot
+//				ON ( laskun_lisatiedot.yhtio = lasku.yhtio
+//					AND laskun_lisatiedot.otunnus = lasku.tunnus )
+//				JOIN tilausrivi
+//				ON ( tilausrivi.yhtio = lasku.yhtio
+//					AND tilausrivi.otunnus = lasku.tunnus )
+//				JOIN tilausrivin_lisatiedot
+//				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+//					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+//				JOIN laite
+//				ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
+//					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
+//				JOIN paikka
+//				ON ( paikka.yhtio = laite.yhtio
+//					AND paikka.tunnus = laite.paikka )
+//				JOIN avainsana a3
+//				ON ( a3.yhtio = paikka.yhtio
+//					AND a3.selite = paikka.olosuhde
+//					AND a3.laji = 'OLOSUHDE')
+//				JOIN kohde
+//				ON ( kohde.yhtio = paikka.yhtio
+//					AND kohde.tunnus = paikka.kohde )
+//				LEFT JOIN avainsana a1
+//				ON ( a1.yhtio = tyomaarays.yhtio
+//					AND a1.laji = 'TYOM_TYOJONO'
+//					AND a1.selite = tyomaarays.tyojono )
+//				LEFT JOIN avainsana a2
+//				ON ( a2.yhtio = tyomaarays.yhtio
+//					AND a2.laji = 'TYOM_TYOSTATUS'
+//					AND a2.selite = tyomaarays.tyostatus )
+//				JOIN huoltosyklit_laitteet
+//				ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
+//					AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
+//				JOIN huoltosykli
+//				ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
+//					AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
+//				JOIN tuote
+//				ON ( tuote.yhtio = huoltosykli.yhtio
+//					AND tuote.tuoteno = huoltosykli.toimenpide )
+//				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+//				{$lasku_where}";
+
 	$query = "	SELECT
 				lasku.tunnus as lasku_tunnus,
 				lasku.ytunnus as asiakas_ytunnus,
@@ -251,7 +317,7 @@ function hae_tyomaaraykset($request) {
 				kohde.tunnus as kohde_tunnus,
 				kohde.nimi as kohde_nimi,
 				paikka.nimi as paikka_nimi,
-				paikka.olosuhde as paikka_olosuhde,
+				a3.selitetark as paikka_olosuhde,
 				laite.tuoteno,
 				laite.oma_numero,
 				laite.sijainti as laite_sijainti,
@@ -282,6 +348,10 @@ function hae_tyomaaraykset($request) {
 				JOIN paikka
 				ON ( paikka.yhtio = laite.yhtio
 					AND paikka.tunnus = laite.paikka )
+				JOIN avainsana a3
+				ON ( a3.yhtio = paikka.yhtio
+					AND a3.selite = paikka.olosuhde
+					AND a3.laji = 'OLOSUHDE')
 				JOIN kohde
 				ON ( kohde.yhtio = paikka.yhtio
 					AND kohde.tunnus = paikka.kohde )
@@ -544,6 +614,7 @@ function echo_laitteet_table($request, $laitteet) {
 	echo "<th>".t("Laite")."</th>";
 	echo "<th>".t("Paikka")."</th>";
 	echo "<th>".t("Sijainti")."</th>";
+	echo "<th>".t("Tehtävä työ")."</th>";
 	echo "<th>".t("Työjono")."/<br>".t("Työstatus")."</th>";
 	echo "<th>".t("Poikkeama")."</th>";
 	echo "</tr>";
@@ -572,6 +643,10 @@ function echo_laitteet_table($request, $laitteet) {
 
 		echo "<td>";
 		echo $laite['sijainti'];
+		echo "</td>";
+
+		echo "<td>";
+		//echo $laite['toimenpide_tuote_nimitys'];
 		echo "</td>";
 
 		if ($request['toim'] == 'TEHDYT_TYOT') {

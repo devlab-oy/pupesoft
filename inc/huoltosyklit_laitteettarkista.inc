@@ -15,6 +15,35 @@ if (!function_exists("huoltosyklit_laitteet")) {
 			if (mysql_num_rows($huoltosykli_result) == 0) {
 				$virhe[$i] .= t("Huoltosykliä ei ole olemassa");
 			}
+
+			if (empty($virhe[$i])) {
+				//jos ei virheitä, asetetaan koeponnistus toimenpiteellisten huoltosyklien viimeinen_tapahtuma = laite.valm_pvm
+				//tällöin työmääräysten generoiminen helpottuu, jos laitteelle ei ole ikinä ennen generoitu koeponnistus työmääräystä
+				$query = "	SELECT tuotteen_avainsanat.selite as toimenpide_tuotteen_tyyppi
+							FROM huoltosykli
+							JOIN tuote
+							ON ( tuote.yhtio = huoltosykli.yhtio
+								AND tuote.tuoteno = huoltosykli.toimenpide )
+							JOIN tuotteen_avainsanat
+							ON ( tuotteen_avainsanat.yhtio = tuote.yhtio
+								AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+								AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely')
+							WHERE huoltosykli.yhtio = '{$kukarow['yhtio']}'
+							AND huoltosykli.tunnus = '{$t[$i]}'";
+				$result = pupe_query($query);
+				$huoltosykli = mysql_fetch_assoc($result);
+
+				if ($huoltosykli['toimenpide_tuotteen_tyyppi'] == 'koeponnistus') {
+					$query = "	SELECT valm_pvm
+								FROM laite
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$t['laite_tunnus']}'";
+					$result = pupe_query($query);
+					$laite = mysql_fetch_assoc($result);
+
+					$t['viimeinen_tapahtuma'] = $laite['valm_pvm'];
+				}
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "laite_tunnus") {

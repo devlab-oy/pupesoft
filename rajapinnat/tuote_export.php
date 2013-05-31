@@ -416,10 +416,10 @@
 
 		$magento_client = new MagentoClient($magento_api_url, $magento_api_usr, $magento_api_pas);
 		// tax_class_id, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
-		if (! isset($magento_class_id)) $magento_class_id = 0;
-		$magento_client->setTaxClassID($magento_class_id);
+		if (! isset($magento_tax_class_id)) $magento_tax_class_id = 0;
+		$magento_client->setTaxClassID($magento_tax_class_id);
 
-		// Kategoriat
+		// lisaa_kategoriat
 		if (count($dnsryhma) > 0) {
 			echo "Päivitetään tuotekategoriat\n";
 			$count = $magento_client->lisaa_kategoriat($dnsryhma);

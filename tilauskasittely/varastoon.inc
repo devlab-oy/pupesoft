@@ -61,16 +61,8 @@ if ($tee == "" and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta)
 
 if ($kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
 
-	// Tarkastetaan onko taricit k‰ytˆss‰
-	$tv_kaytossa = FALSE;
-
-	$query = "SELECT count(*) kpl from taric_veroperusteet";
-	$tv_res = pupe_query($query);
-	$tv_row = mysql_fetch_assoc($tv_res);
-
-	if ($tv_row["kpl"] > 0) {
-		$tv_kaytossa = TRUE;
-	}
+	require_once('inc/keikan_toiminnot.inc');
+	$tv_kaytossa = tarkista_onko_taric_veroperusteet_kaytossa();
 
 	$varastoon_msg .= "	<table><tr>
 						<th valign='top'>".t("Varastoon")."</th>
@@ -107,10 +99,11 @@ $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'O');
 
 if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) {
 	// virallinen laskenta, heetaan ihan kaikki rivit uudestaan (varattu=0) kaikki pit‰‰ olla viety varastoon jo ennen t‰t‰..
-	$query = "	SELECT tilausrivi.*, tilausrivi.kpl varattu, {$ale_query_select_lisa} alennuksetyht
+	$query = "	SELECT tilausrivi.*, tilausrivi.kpl varattu, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tullipronsetti
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
+				LEFT JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
 				WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 				and tilausrivi.varattu = 0
 				and tilausrivi.kpl != 0
@@ -145,10 +138,11 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
 	// tavallinen laskenta.. VARATTU PITƒƒ OLLA != 0 ja varastoon-kentt‰ 1!
 	// jos varastoon-kent‰ss‰ on 0 niin t‰t‰ rivi‰ ei haluttu viel‰ vied‰ varastoon
-	$query = "	SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht
+	$query = "	SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
+				LEFT JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
 				{$suuntalavajoin}
 				WHERE {$uusiotunnuslisa}
 				and tilausrivi.varattu <> 0
@@ -179,10 +173,11 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 	}
 
 	// N‰ytet‰‰n ruudulla
-	$query = "	SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht
+	$query = "	SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
+				LEFT JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
 				{$suuntalavajoin}
 				WHERE {$uusiotunnuslisa}
 				and tilausrivi.varattu <> 0
@@ -418,12 +413,16 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	if ($tv_kaytossa and $tilrivirow["var"] == "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 		// lis‰t‰‰n tulli
-		require ("tilauskasittely/taric_veroperusteet.inc");
-
+		if (isset($tilrivirow['poikkeava_tulliprosentti'])) {
+			$tulliprossa = $tilrivirow['poikkeava_tulliprosentti'];
+		}
+		else {
+			require ("tilauskasittely/taric_veroperusteet.inc");
+		}
+		
 		$aputullimaara = $ohinta * ($tulliprossa/100);
 		$ohinta = $ohinta * (1 + ($tulliprossa/100));
 		$tv_nimrow["maara"] = $tv_nimrow["maara"] * 1; // teh‰‰n numero, ett‰ lista n‰ytt‰‰ kivemmalta
-
 	}
 
 	// Tulli% # Aputullim‰‰r‰

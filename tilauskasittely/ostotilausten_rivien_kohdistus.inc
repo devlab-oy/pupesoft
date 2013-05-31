@@ -851,6 +851,16 @@ if ($tila == 'tee_kohdistus') {
 		}
 	}
 
+	if (is_array($rivi_poikkeava_tulliprosentti)) {
+		// poikkeava_tulliprosentti
+		foreach ($rivi_poikkeava_tulliprosentti as $tunnus => $poikkeava_tulliprosentti) {
+			if (is_numeric($poikkeava_tulliprosentti)) {
+				$query  = "UPDATE tilausrivin_lisatiedot SET poikkeava_tulliprosentti=$poikkeava_tulliprosentti WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus='$tunnus'";
+				$result = pupe_query($query);
+			}
+		}
+	}
+
 	// katotaan päivitetäänkö toimitettuaikoja
 	if (is_array($rivi_toimitettuaika_vv)) {
 		foreach ($rivi_toimitettuaika_vv as $tunnus => $toimitettuvv) {
@@ -1071,6 +1081,7 @@ if ($tila == '') {
 
 	$kennim_array[] = t('Alv');
 	$kennim_array[] = t('Tilauksen')."<br>".t('Erikoisale');
+	$kennim_array[] = t('Tulliprosentti');
 	$kennim_array[] = t('Rivihinta');
 	$kennim_array[] = t('+Alv -Ale');
 	#$kennim_array[] = t('Extrakulu');
@@ -1091,6 +1102,7 @@ if ($tila == '') {
 		$kenhak_array[] = t('Ale').$alepostfix;
 	}
 
+	$kenhak_array[] = 'tullipronsetti';
 	$kenhak_array[] = 'alv';
 	$kenhak_array[] = 'rivihinta';
 	$kenhak_array[] = 'alerivihinta';
@@ -1215,6 +1227,8 @@ if ($tila == '') {
 				concat_ws('/', tilkpl, round(tilkpl * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu',
 				round((varattu+jt) * tilausrivi.hinta * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]') rivihinta,
 				tuote.kehahin keskihinta,
+				tuote.tullinimike1,
+				tuote.tullinimike2,
 				tuotteen_toimittajat.ostohinta,
 				tuotteen_toimittajat.valuutta,
 				tilausrivi.erikoisale,
@@ -1223,6 +1237,7 @@ if ($tila == '') {
 				tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.hyllyvali,
 				tuote.keraysvyohyke,
 				tilausrivin_lisatiedot.suoratoimitettuaika,
+				tilausrivin_lisatiedot.poikkeava_tulliprosentti,
 				lasku.comments
 				FROM lasku
 				JOIN tilausrivi use index ($tilriindex) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$uusilisa}otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
@@ -1505,6 +1520,9 @@ if ($tila == '') {
 
 	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a></th>";
 	$pointteri++;
+	
+	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a></th>";
+	$pointteri++;
 
 	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a><br>";
 	$pointteri++;
@@ -1549,6 +1567,9 @@ if ($tila == '') {
 
 		echo "</td>";
 	}
+
+	echo "<td><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
+	$pointteri++;
 
 	echo "<td><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
 	$pointteri++;
@@ -1910,6 +1931,17 @@ if ($tila == '') {
 
 		echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_erikoisale[$rivirow[rivitunnus]]' value='". (float) $rivirow["erikoisale"]."' style='text-align:right'></$td>";
 
+		//tulliprosentti td. haetaan oletusarvot
+		require_once('inc/keikan_toiminnot.inc');
+		$tulliprosentti = hae_poikkeava_tulliprosentti($laskurow,$rivirow);
+		if (!empty($rivirow['poikkeava_tulliprosentti']) and $rivirow['poikkeava_tulliprosentti'] != (int)$tulliprosentti) {
+			$tulpros = $rivirow['poikkeava_tulliprosentti'];
+		}
+		else {
+			$tulpros = $tulliprosentti;
+		}
+
+		echo "<td><input size='4' type='text' name='rivi_poikkeava_tulliprosentti[{$rivirow['rivitunnus']}]' value='".(int) $tulpros."' style='text-align:right'/></td>";
 		echo "<$td $class valign='top' align='right'>". (float) $rivirow["rivihinta"]."<br>". (float) $rivirow["alerivihinta"]."</$td>";
 		//echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_kuluhinta[$rivirow[rivitunnus]]' value='$rivirow[kuluhinta]' style='text-align:right'><br>$yhtiorow[valkoodi]</$td>";
 		echo "<$td $class valign='top'>";

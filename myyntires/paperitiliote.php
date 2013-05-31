@@ -93,14 +93,15 @@
 	}
 
 	function rivi ($tyyppi, $firstpage, $row) {
-		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni,$kieli, $yhtiorow, $tito_pvm;
+		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni,$kieli, $yhtiorow, $tito_pvm, $alatila, $asiakastiedot;
 
-		if ($lask == 39) {
+		if ($lask == 35) {
 			$sivu++;
 			loppu($firstpage, array());
 			$firstpage = alku();
-			$kala = 605;
+			$kala = ($alatila == 'T' and $asiakastiedot["laskutus_nimi"] != "") ? 570 : 620;
 			$lask = 1;
+			$kala -= 15;
 		}
 
 		if ($tyyppi==1) {
@@ -142,10 +143,9 @@
 	}
 
 	function loppu ($firstpage, $summat) {
-
 		global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $lask, $kala;
 
-		if (count($summat) > 1 and  $lask > 35) { //Valuuttaerittely ei mahdu! Rekursio! IIK!
+		if (count($summat) > 1 and  $lask > 35) {
 			$sivu++;
 			loppu($firstpage, array());
 			$firstpage = alku();
@@ -258,6 +258,21 @@
 		$tito_pvm = date("Y-m-d", mktime(0, 0, 0, $kk, $pp, $vv));
 	}
 
+	if (!isset($valintra)) $valintra = "";
+
+	if ($valintra == 'maksetut') {
+		$mapvmlisa = " and lasku.mapvm > '0000-00-00' and lasku.mapvm  <= '{$tito_pvm}' ";
+	}
+	elseif ($valintra == 'kaikki') {
+		$mapvmlisa = "";
+	}
+	elseif ($valintra == "eraantyneet") {
+		$mapvmlisa = " and lasku.erpcm < '{$tito_pvm}' and (lasku.mapvm  > '{$tito_pvm}' or lasku.mapvm = '0000-00-00') ";
+	}
+	else {
+		$mapvmlisa = " and (lasku.mapvm  > '{$tito_pvm}' or lasku.mapvm = '0000-00-00') ";
+	}
+
 	$query = "	SELECT
 				lasku.ytunnus,
 				lasku.maa,
@@ -285,8 +300,8 @@
 					and tiliointi.korjattu  = ''
 					and tiliointi.tapvm    <= '$tito_pvm' )
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
-				and (lasku.mapvm  > '$tito_pvm' or lasku.mapvm = '0000-00-00')
-				and lasku.tapvm	  <= '$tito_pvm'
+				{$mapvmlisa}
+				and lasku.tapvm	  <= '{$tito_pvm}'
 				and lasku.tapvm	  > '0000-00-00'
 				and lasku.tila	  = 'U'
 				and lasku.alatila = 'X'

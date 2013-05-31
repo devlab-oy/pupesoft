@@ -872,8 +872,10 @@ if ($tuoteno != '') {
 								// Jos ollaan käsittelemässä kääntöpistettä laitetaan keskihankintahinnaksi uusi OIKEA keskihankintahinta
 								if ($trow['rivitunnus'] == $rivitunnus) {
 									$trow['kplhinta'] = $uusihinta;
+									$selite_txt = ",<br>Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")";
 								}
 								else {
+									$selite_txt = "";
 									$uusihinta = $trow['kplhinta'];
 								}
 
@@ -1250,8 +1252,6 @@ if ($tuoteno != '') {
 									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjataan tapahtuma! Keskihinta: $uusikehahin Vanha hinta: $trow[hinta]</font><br>";
 
 									$upd_kplhinta = in_array($trow["laji"], array("kulutus", "tulo", "valmistus")) ? $uusihinta : FALSE;
-
-									$selite_txt = in_array($trow['laji'], array('tulo', 'valmistus')) ? ",<br>Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")" : "";
 
 									// Päivitetään korjattava tapahtuma
 									korjaatapahtuma($trow['tunnus'], $selite_txt, $uusikehahin, $upd_kplhinta);

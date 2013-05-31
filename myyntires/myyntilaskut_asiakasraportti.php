@@ -147,6 +147,25 @@
 
 					$(function() {
 
+						var val = $('#valintra').val();
+
+						if (val == 'eraantyneet') {
+							$('#infoteksti').html('",t("Er‰‰ntyneet laskut"),"');
+						}
+						else if (val == 'maksetut') {
+							$('#infoteksti').html('",t("Maksetut laskut"),"');
+						}
+						else if (val == 'kaikki') {
+							$('#infoteksti').html('",t("Kaikki laskut"),"');
+						}
+						else {
+							$('#infoteksti').html('",t("Avoimet laskut"),"');
+						}
+
+						$('#valintra').on('change', function() {
+							$('#riviformi').submit();
+						});
+
 						$('.date').on('keyup change blur', function() {
 
 							var id = $(this).attr('id');
@@ -185,7 +204,7 @@
 							}
 
 							$('#tulosta_lasku_email').submit();
-					});
+						});
 
 					});
 
@@ -419,43 +438,46 @@
 					}
 				}
 
-				echo "<tr><td colspan='3' class='back'><br></td></tr>";
+				echo "</table><br>";
 
 				if (!isset($vv)) $vv = date("Y");
 				if (!isset($kk)) $kk = date("n");
 				if (!isset($pp)) $pp = date("j");
 
-				$colspan = $asiakasrow['email'] != '' ? 1 : 2;
-
-				echo "<tr><th>".t("Tiliote p‰iv‰lle").":</th>
-						<td colspan='{$colspan}'>
+				echo "<table>";
+				echo "<tr><th>",t("Tiliote p‰iv‰lle"),"</th>
+						<td>
 						<form id='tulosta_tiliote' name='tulosta_tiliote' method='post'>
 						<input type='hidden' name = 'tee' value = 'NAYTATILAUS'>
 						<input type='hidden' name = 'tiliote' value = '1'>
 						<input type='hidden' name = 'ytunnus' value = '{$ytunnus}'>
 						<input type='hidden' name = 'asiakasid' value = '{$asiakasid}'>
 						<input type='hidden' name = 'alatila' value = '{$alatila}'>
-						<input type = 'text' name = 'pp' id = 'pp' value='{$pp}' size=2 class='date'>
-						<input type = 'text' name = 'kk' id = 'kk' value='{$kk}' size=2 class='date'>
-						<input type = 'text' name = 'vv' id = 'vv' value='{$vv}' size=4 class='date'>
+						<input type = 'text' name = 'pp' id = 'pp' value='{$pp}' size=3 class='date'>
+						<input type = 'text' name = 'kk' id = 'kk' value='{$kk}' size=3 class='date'>
+						<input type = 'text' name = 'vv' id = 'vv' value='{$vv}' size=5 class='date'>
+						</td>
+						<td class='back'>
 						<input type='submit' value='",t("Tulosta tiliote"),"' onClick=\"js_openFormInNewWindow('tulosta_tiliote', ''); return false;\">
-						</form>";
+						</form>
+						</td>";
 
 				if ($asiakasrow['email'] != '') {
-					echo "<form id='tulosta_tiliote_email' name='tulosta_tiliote_email' method='post'>
-						<input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL'>
-						<input type='hidden' name = 'ytunnus' value = '{$ytunnus}'>
-						<input type='hidden' name = 'asiakasid' value = '{$asiakasid}'>
-						<input type='hidden' name = 'alatila' value = '{$alatila}'>
-						<input type='hidden' name = 'pp' id='pp_hidden' value='{$pp}' size=2>
-						<input type='hidden' name = 'kk' id='kk_hidden' value='{$kk}' size=2>
-						<input type='hidden' name = 'vv' id='vv_hidden' value='{$vv}' size=4>
-						<input type='submit' value='",t("L‰het‰ tiliote asiakkaan s‰hkˆpostiin"),": {$asiakasrow['email']}' />
-						</form>";
+					echo "<td class='back'>
+							<form id='tulosta_tiliote_email' name='tulosta_tiliote_email' method='post'>
+							<input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL'>
+							<input type='hidden' name = 'ytunnus' value = '{$ytunnus}'>
+							<input type='hidden' name = 'asiakasid' value = '{$asiakasid}'>
+							<input type='hidden' name = 'alatila' value = '{$alatila}'>
+							<input type='hidden' name = 'pp' id='pp_hidden' value='{$pp}' size=2>
+							<input type='hidden' name = 'kk' id='kk_hidden' value='{$kk}' size=2>
+							<input type='hidden' name = 'vv' id='vv_hidden' value='{$vv}' size=4>
+							<input type='submit' value='",t("L‰het‰ tiliote asiakkaan s‰hkˆpostiin"),": {$asiakasrow['email']}' />
+							</form>
+						</td>";
 				}
 
-				echo "</td></tr>";
-
+				echo "</tr>";
 				echo "</table>";
 
 				echo "<table><tr><td class='back'>";
@@ -542,18 +564,18 @@
 							saldo_maksettu,
 							saldo_maksettu_valuutassa,
 							valkoodi
-							FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+							FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
 							WHERE yhtio ='$kukarow[yhtio]'
 							and tila = 'U'
 							and alatila = 'X'
 							and liitostunnus in ($tunnukset)
-							and tapvm > '0000-00-00'
+							AND tapvm > '0000-00-00'
 							$mapvmlisa
 							$salisa
 							ORDER BY erpcm";
 				$result = pupe_query($query);
 
-				echo "<br><form action = 'myyntilaskut_asiakasraportti.php' method = 'post'>
+				echo "<form action = 'myyntilaskut_asiakasraportti.php' method = 'post' id='riviformi'>
 						<input type='hidden' name = 'tila' value='$tila'>
 						<input type='hidden' name = 'ytunnus' value = '$ytunnus'>
 						<input type='hidden' name = 'asiakasid' value = '$asiakasid'>
@@ -564,7 +586,7 @@
 				echo "<tr>
 						<th>".t("N‰yt‰").":</th>
 						<td>
-						<select name='valintra' onchange='submit();'>
+						<select name='valintra' id='valintra'>
 						<option value='' $chk1>".t("Avoimet laskut")."</option>
 						<option value='eraantyneet' $chk4>".t("Er‰‰ntyneet laskut")."</option>
 						<option value='maksetut' $chk2>".t("Maksetut laskut")."</option>
@@ -797,28 +819,55 @@
 					echo "</table>";
 					echo "</form>";
 
+					echo "<br><table>";
+
 					if ($asiakasrow['email'] != '') {
-						echo "<br>";
-						echo "<input class='laskunro_checkall' type='checkbox' /> ".t("Valitse kaikki listatut laskut");
-						echo "<br />";
-						echo "<form id='tulosta_lasku_email' name='tulosta_lasku_email' method='post'>";
-						echo "<table>";
-						echo "<tr>";
-						echo "<td style='vertical-align: middle;' class='back'>";
-						echo "<input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL_LASKUT'>
-							<input type='hidden' name = 'laskunrot' id='laskunrot' value = ''>
-							<input type='hidden' name = 'asiakasemail' value = '{$asiakasrow['email']}' />
-							<input type='hidden' name = 'asiakasid' value='{$asiakasrow['tunnus']}' />
-							<input type='hidden' name = 'ytunnus' value='{$ytunnus}' />
-							<input type='hidden' name = 'valintra' value='{$valintra}' />
-							<input type='submit' id='laskunrot_submit' value='",t("L‰het‰ laskukopiot valituista laskuista asiakkaan s‰hkˆpostiin"),": {$asiakasrow['email']}' />";
-						echo "</td>";
-						echo "</tr>";
-						echo "</table>";
-						echo "</form>";
+						echo "<tr><th style='width:200px;'>",t("Laskukopiot"),"</th>
+								<td><input class='laskunro_checkall' type='checkbox' /> ".t("Valitse kaikki listatut laskut"),"</td>
+								<td>
+								<form id='tulosta_lasku_email' name='tulosta_lasku_email' method='post'>
+								<input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL_LASKUT'>
+								<input type='hidden' name = 'laskunrot' id='laskunrot' value = ''>
+								<input type='hidden' name = 'asiakasemail' value = '{$asiakasrow['email']}' />
+								<input type='hidden' name = 'asiakasid' value='{$asiakasrow['tunnus']}' />
+								<input type='hidden' name = 'ytunnus' value='{$ytunnus}' />
+								<input type='hidden' name = 'valintra' value='{$valintra}' />
+								<input type='submit' id='laskunrot_submit' value='",t("L‰het‰ laskukopiot valituista laskuista asiakkaan s‰hkˆpostiin"),": {$asiakasrow['email']}' />
+								</form>
+								</td>
+								</tr>";
 					}
 
+					echo "<tr><th style='width:200px;'>",t("Laskuraportti"),"<br>(<span id='infoteksti'></span>)</th>
+							<td>
+								<form id='tulosta_myra' name='tulosta_myra' method='post'>
+								<input type='hidden' name = 'tee' value = 'NAYTATILAUS'>
+								<input type='hidden' name = 'tiliote' value = '1'>
+								<input type='hidden' name = 'ytunnus' value = '{$ytunnus}'>
+								<input type='hidden' name = 'asiakasid' value = '{$asiakasid}'>
+								<input type='hidden' name = 'alatila' value = '{$alatila}'>
+								<input type='hidden' name = 'valintra' value='{$valintra}' />
+								<input type='submit' value='",t("Tulosta"),"' onClick=\"js_openFormInNewWindow('tulosta_myra', ''); return false;\">
+							</form>
+							</td>";
 
+					if ($asiakasrow['email'] != '') {
+						echo "<td><form id='tulosta_tiliote_email' name='tulosta_tiliote_email' method='post'>
+							<input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL'>
+							<input type='hidden' name = 'ytunnus' value = '{$ytunnus}'>
+							<input type='hidden' name = 'asiakasid' value = '{$asiakasid}'>
+							<input type='hidden' name = 'alatila' value = '{$alatila}'>
+							<input type='hidden' name = 'pp' id='pp_hidden' value='{$pp}' size=2>
+							<input type='hidden' name = 'kk' id='kk_hidden' value='{$kk}' size=2>
+							<input type='hidden' name = 'vv' id='vv_hidden' value='{$vv}' size=4>
+							<input type='hidden' name = 'valintra' value='{$valintra}' />
+							<input type='submit' value='",t("L‰het‰ asiakkaan s‰hkˆpostiin"),": {$asiakasrow['email']}' />
+							</form>
+							</td>";
+					}
+					
+					echo "</tr>";
+					echo "</table>";
 				}
 				else {
 					echo t("Ei laskuja")."!<br>";

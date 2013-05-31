@@ -454,6 +454,11 @@ if (!function_exists('korjaatapahtuma')) {
 
 		$tun_chk_row = mysql_fetch_assoc($tun_chk_res);
 
+		// Jos tämä selite on jo selitteessä, ei lisätä sitä uudestaan
+		if ($selite_txt != "" and strpos($tun_chk_row['selite'], $selite_txt) !== FALSE) {
+			$selite_txt = "";
+		}
+
 		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 		// Inventoinnissa korjaustapahtuman rivitunnus on alkuperäisen inventointitapahtuman tunnus (kaikissa muissa keisseissä rivitunnus pointtaa tilausriviin)

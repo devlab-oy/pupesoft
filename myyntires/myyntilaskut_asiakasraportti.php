@@ -150,16 +150,16 @@
 						var val = $('#valintra').val();
 
 						if (val == 'eraantyneet') {
-							$('#infoteksti').html('Er‰‰ntyneet laskut');
+							$('#infoteksti').html('",t("Er‰‰ntyneet laskut"),"');
 						}
 						else if (val == 'maksetut') {
-							$('#infoteksti').html('Maksetut laskut');
+							$('#infoteksti').html('",t("Maksetut laskut"),"');
 						}
 						else if (val == 'kaikki') {
-							$('#infoteksti').html('Kaikki laskut');
+							$('#infoteksti').html('",t("Kaikki laskut"),"');
 						}
 						else {
-							$('#infoteksti').html('Avoimet laskut');
+							$('#infoteksti').html('",t("Avoimet laskut"),"');
 						}
 
 						$('#valintra').on('change', function() {

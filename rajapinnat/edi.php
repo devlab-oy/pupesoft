@@ -10,12 +10,12 @@ class Edi {
 	 */
 	static function create($order) {
 
-		global $magento_api_edi, $ovt_tunnus, $pupesoft_tilaustyyppi;
-
 		// require 'magento_salasanat.php' muuttujat
-		$verkkokauppa_asiakasnro	= "WEBSTORE";
-		$rahtikulu_tuoteno			= "Cargo";
-		$rahtikulu_nimitys			= "Shipping";
+		global $magento_api_edi, $ovt_tunnus, $pupesoft_tilaustyyppi;
+		global $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys;
+
+		if (empty($magento_api_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) exit("Parametrejä puuttuu\n");
+		if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) exit("Parametrejä puuttuu\n");
 
 		// Miten storen nimi?
 		#$storenimi = (isset($_COOKIE["store_name"])) ? $_COOKIE["store_name"] : "";

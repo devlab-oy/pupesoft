@@ -459,24 +459,25 @@
 						</td>
 						<td class='back'>
 						<input type='submit' value='",t("Tulosta tiliote"),"' onClick=\"js_openFormInNewWindow('tulosta_tiliote', ''); return false;\">
-						</td>
-						</form>";
+						</form>
+						</td>";
 
 				if ($asiakasrow['email'] != '') {
-					echo "</td><td class='back'><form id='tulosta_tiliote_email' name='tulosta_tiliote_email' method='post'>
-						<input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL'>
-						<input type='hidden' name = 'ytunnus' value = '{$ytunnus}'>
-						<input type='hidden' name = 'asiakasid' value = '{$asiakasid}'>
-						<input type='hidden' name = 'alatila' value = '{$alatila}'>
-						<input type='hidden' name = 'pp' id='pp_hidden' value='{$pp}' size=2>
-						<input type='hidden' name = 'kk' id='kk_hidden' value='{$kk}' size=2>
-						<input type='hidden' name = 'vv' id='vv_hidden' value='{$vv}' size=4>
-						<input type='submit' value='",t("Lähetä tiliote asiakkaan sähköpostiin"),": {$asiakasrow['email']}' />
-						</form>";
+					echo "<td class='back'>
+							<form id='tulosta_tiliote_email' name='tulosta_tiliote_email' method='post'>
+							<input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL'>
+							<input type='hidden' name = 'ytunnus' value = '{$ytunnus}'>
+							<input type='hidden' name = 'asiakasid' value = '{$asiakasid}'>
+							<input type='hidden' name = 'alatila' value = '{$alatila}'>
+							<input type='hidden' name = 'pp' id='pp_hidden' value='{$pp}' size=2>
+							<input type='hidden' name = 'kk' id='kk_hidden' value='{$kk}' size=2>
+							<input type='hidden' name = 'vv' id='vv_hidden' value='{$vv}' size=4>
+							<input type='submit' value='",t("Lähetä tiliote asiakkaan sähköpostiin"),": {$asiakasrow['email']}' />
+							</form>
+						</td>";
 				}
 
-				echo "</td></tr>";
-
+				echo "</tr>";
 				echo "</table>";
 
 				echo "<table><tr><td class='back'>";

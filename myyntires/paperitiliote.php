@@ -93,14 +93,15 @@
 	}
 
 	function rivi ($tyyppi, $firstpage, $row) {
-		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni,$kieli, $yhtiorow, $tito_pvm;
+		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni,$kieli, $yhtiorow, $tito_pvm, $alatila, $asiakastiedot;
 
 		if ($lask == 35) {
 			$sivu++;
 			loppu($firstpage, array());
 			$firstpage = alku();
-			$kala = 555;
+			$kala = ($alatila == 'T' and $asiakastiedot["laskutus_nimi"] != "") ? 570 : 620;
 			$lask = 1;
+			$kala -= 15;
 		}
 
 		if ($tyyppi==1) {
@@ -142,10 +143,9 @@
 	}
 
 	function loppu ($firstpage, $summat) {
-
 		global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $lask, $kala;
 
-		if (count($summat) > 1 and  $lask > 35) { //Valuuttaerittely ei mahdu! Rekursio! IIK!
+		if (count($summat) > 1 and  $lask > 35) {
 			$sivu++;
 			loppu($firstpage, array());
 			$firstpage = alku();

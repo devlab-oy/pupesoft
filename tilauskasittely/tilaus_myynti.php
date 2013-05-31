@@ -2221,7 +2221,7 @@ if ($tee == '') {
 
 		echo "</form>";
 
-		if (file_exists($pupe_root_polku . '/tilauskasittely/varaosaselain_napit.inc')) {
+		if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and file_exists($pupe_root_polku . '/tilauskasittely/varaosaselain_napit.inc')) {
 			require_once('tilauskasittely/varaosaselain_napit.inc');
 		}
 		

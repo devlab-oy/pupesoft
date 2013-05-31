@@ -9074,6 +9074,13 @@ if (!function_exists("livesearch_kentta")) {
 			return "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'>";
 		}
 
+		if ($tee == 'TUOTEKATEGORIAHAKU' or $tee == 'ASIAKASKATEGORIAHAKU') {
+			$result_width = $width * 3;
+		}
+		else {
+			$result_width = $width * 2;
+		}
+
 		$hakuID = "haku".uniqid();
 
 		$return = "<input type='text' id='$hakuID' class='$class' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
@@ -9092,7 +9099,7 @@ if (!function_exists("livesearch_kentta")) {
 		if (empty($break_all_div)) {
 			$return .= "<div style='break:all'></div>";
 		}
-		$return .= "<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($tee == 'TUOTEKATEGORIAHAKU' or $tee == 'ASIAKASKATEGORIAHAKU'  ? 700: $width * 2)."px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10);\"></div>";
+		$return .= "<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:{$result_width}px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10);\"></div>";
 		return $return;
 	}
 }
@@ -18759,7 +18766,7 @@ if (!function_exists("pupesoft_sahkoposti")) {
 				$content .= "--$bound";
 			}
 		}
-		
+
 
 		// Vikassa boundissa pit‰‰ olla -- lopussa.
 		$content .= "--\n";

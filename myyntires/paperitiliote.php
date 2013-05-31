@@ -95,11 +95,11 @@
 	function rivi ($tyyppi, $firstpage, $row) {
 		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni,$kieli, $yhtiorow, $tito_pvm;
 
-		if ($lask == 39) {
+		if ($lask == 35) {
 			$sivu++;
 			loppu($firstpage, array());
 			$firstpage = alku();
-			$kala = 605;
+			$kala = 555;
 			$lask = 1;
 		}
 
@@ -261,10 +261,10 @@
 	if (!isset($valintra)) $valintra = "";
 
 	if ($valintra == 'maksetut') {
-		$mapvmlisa = " and lasku.mapvm > '0000-00-00' and lasku.mapvm  > '{$tito_pvm}' ";
+		$mapvmlisa = " and lasku.mapvm > '0000-00-00' and lasku.mapvm  <= '{$tito_pvm}' ";
 	}
 	elseif ($valintra == 'kaikki') {
-		$mapvmlisa = " and lasku.mapvm  > '{$tito_pvm}' ";
+		$mapvmlisa = "";
 	}
 	elseif ($valintra == "eraantyneet") {
 		$mapvmlisa = " and lasku.erpcm < '{$tito_pvm}' and (lasku.mapvm  > '{$tito_pvm}' or lasku.mapvm = '0000-00-00') ";

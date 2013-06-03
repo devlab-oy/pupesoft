@@ -15541,7 +15541,7 @@ if (!function_exists("tee_keraysera")) {
 						(TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, CURTIME())) / 60) as erotus,
 						lasku1.ohjausmerkki,
 						lasku1.liitostunnus,
-						TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark)) as asiakas_nimi,
+						TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark, ' ', lasku1.toim_osoite, ' ', lasku1.toim_postino, ' ', lasku1.toim_postitp)) as asiakas_nimi,
 						CONCAT_WS('!¡!', lahdot3.tunnus, lahdot3.asiakasluokka, lahdot3.lahdon_kellonaika) as lahdon_tiedot,
 						AVG(DATE_FORMAT(lasku1.h1time, '%y%m%d%H%i')) h1time,
 						GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
@@ -15574,7 +15574,7 @@ if (!function_exists("tee_keraysera")) {
 						0 as erotus,
 						lasku2.ohjausmerkki,
 						lasku2.liitostunnus,
-						TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark)) as asiakas_nimi,
+						TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark, ' ', lasku2.toim_osoite, ' ', lasku2.toim_postino, ' ', lasku2.toim_postitp)) as asiakas_nimi,
 						CONCAT_WS('!¡!', 999999999999, 999999999999, 999999999999) lahdon_tiedot,
 						AVG(DATE_FORMAT(lasku2.h1time, '%y%m%d%H%i')) h1time,
 						GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus

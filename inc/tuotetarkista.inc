@@ -460,6 +460,101 @@ if(!function_exists("tuotetarkista")) {
 					}
 				}
 			}
+
+			$query = "	(
+						SELECT *
+						FROM avainsana
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji = 'OLETUSPAIKKA'
+						AND selitetark = 'X'
+						AND selitetark_2 = ''
+						)
+						UNION
+						(
+						SELECT *
+						FROM avainsana
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji = 'OLETUSPAIKKA'
+						AND (selitetark = '{$tem_status}' OR selitetark_2 = '{$trow['try']}' )
+						)";
+			$kaikkien_tuotteiden_oletus_tuotepaikat_result = pupe_query($query);
+
+			$onko_tuotteella_oletuspaikka = onko_tuotteella_oletuspaikka($tem_tuoteno);
+			while ($kaikkien_tuotteiden_oletus_tuotepaikat_row = mysql_fetch_assoc($kaikkien_tuotteiden_oletus_tuotepaikat_result)) {
+				$kaikkien_tuotteiden_oletus_tuotepaikka_array = explode(',', $kaikkien_tuotteiden_oletus_tuotepaikat_row['selite']);
+				foreach ($kaikkien_tuotteiden_oletus_tuotepaikka_array as $kaikkien_tuotteiden_oletus_tuotepaikka) {
+					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", trim($kaikkien_tuotteiden_oletus_tuotepaikka));
+
+					if ($hyllyalue == "" or !isset($hyllyalue)) {
+						$hyllyalue = 0;
+					}
+					if ($hyllynro == "" or !isset($hyllynro)) {
+						$hyllynro = 0;
+					}
+					if ($hyllyvali == "" or !isset($hyllyvali)) {
+						$hyllyvali = 0;
+					}
+					if ($hyllytaso == "" or !isset($hyllytaso)) {
+						$hyllytaso = 0;
+					}
+
+					if (!$onko_tuotteella_oletuspaikka) {
+						$oletus_insert = "oletus = 'X',";
+						$onko_tuotteella_oletuspaikka = true;
+					}
+					else {
+						$oletus_insert = "";
+					}
+
+					$tuotepaikka_query = "	INSERT INTO tuotepaikat SET
+											yhtio			= '{$kukarow['yhtio']}',
+											tuoteno     	= '{$tem_tuoteno}',
+											{$oletus_insert}
+											saldoaika   	= now(),
+											hyllyalue   	= '{$hyllyalue}',
+											hyllynro    	= '{$hyllynro}',
+											hyllyvali   	= '{$hyllyvali}',
+											hyllytaso   	= '{$hyllytaso}',
+											luontiaika		= now(),
+											laatija			= '{$kukarow['kuka']}',
+											muutospvm		= now(),
+											muuttaja		= '{$kukarow['kuka']}'";
+					pupe_query($tuotepaikka_query);
+
+					$tapahtumaquery = "	INSERT into tapahtuma set
+										yhtio 		= '{$kukarow['yhtio']}',
+										tuoteno 	= '{$tem_tuoteno}',
+										kpl 		= 0,
+										kplhinta	= 0,
+										hinta 		= 0,
+										laji 		= 'uusipaikka',
+										hyllyalue   = '{$hyllyalue}',
+										hyllynro    = '{$hyllynro}',
+										hyllyvali   = '{$hyllyvali}',
+										hyllytaso   = '{$hyllytaso}',
+										selite 		= '".t("Tuoteylläpidossa lisättiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
+										laatija 	= '$kukarow[kuka]',
+										laadittu 	= now()";
+					pupe_query($tapahtumaquery);
+				}
+			}
+
+//			$query = "	SELECT *
+//						FROM avainsana
+//						WHERE yhtio = '{$kukarow['yhtio']}'
+//						AND laji = 'OLETUSPAIKKA'
+//						AND (selitetark = '{$tem_status}' OR selitetark_2 = '{$trow['try']}' )";
+//			$result = pupe_query($query);
+//
+//			$onko_tuotteella_oletuspaikka = onko_tuotteella_oletuspaikka($tem_tuoteno);
+//			while ($kaikkien_tuotteiden_oletus_tuotepaikat_row = mysql_fetch_assoc($kaikkien_tuotteiden_oletus_tuotepaikat_result)) {
+//				$kaikkien_tuotteiden_oletus_tuotepaikka_array = explode(',', $kaikkien_tuotteiden_oletus_tuotepaikat_row['selite']);
+//				foreach ($kaikkien_tuotteiden_oletus_tuotepaikka_array as $kaikkien_tuotteiden_oletus_tuotepaikka) {
+//					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", trim($kaikkien_tuotteiden_oletus_tuotepaikka));
+//
+//
+//				}
+//			}
 		}
 	}
 }

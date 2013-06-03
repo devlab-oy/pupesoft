@@ -20956,3 +20956,5 @@ if (!function_exists('rekursiivinen_resepti')) {
 		}
 	}
 }
+
+require('inc/tuote_functions.inc');

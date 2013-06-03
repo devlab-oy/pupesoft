@@ -74,6 +74,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "TARRATYYPPI") 		$ulos .= "<option value='TARRATYYPPI' $avain_sel[TARRATYYPPI]>				".t("Tuotteen tarratyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "VALMISTUSLINJA") 	$ulos .= "<option value='VALMISTUSLINJA' $avain_sel[VALMISTUSLINJA]>		".t("Tuotteen valmistuslinja")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "HAMMASTUS") 		$ulos .= "<option value='HAMMASTUS' $avain_sel[HAMMASTUS]>					".t("Tuotteen hammastus")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "OLETUSPAIKKA") 		$ulos .= "<option value='OLETUSPAIKKA' $avain_sel[OLETUSPAIKKA]>			".t("Tuoteryhmän tai tuotestatuksen oletuspaikka")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";
@@ -198,6 +199,35 @@
 		}
 
 		$jatko = 0;
+	}
+
+	if ($avain_sel['OLETUSPAIKKA'] == 'SELECTED') {
+		if (mysql_field_name($result, $i) == "selitetark") {
+			$sel = array();
+			$sel[$trow[$i]] = "SELECTED";
+
+			$query = "	SELECT selite,
+						selitetark
+						FROM avainsana
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji = 'S'";
+			$tuote_status_result = pupe_query($query);
+
+			$ulos = "<td><select name = '$nimi'>";
+			$ulos .= "<option value = 'X'>".t("Mikä vain")."</option>";
+			while($tuote_status = mysql_fetch_assoc($tuote_status_result)) {
+				$ulos .= "<option value = '{$tuote_status['selite']}' {$sel[$tuote_status['selite']]}>".t($tuote_status['selitetark'])."</option>";
+			}
+			$ulos .= "</select></td>";
+
+			$jatko = 0;
+		}
+
+		if (mysql_field_name($result, $i) == "selitetark_2") {
+			$ulos = '<td>';
+			$ulos .= livesearch_kentta('a', 'TUOTEKATEGORIAHAKU', $nimi, '', $trow[$i], '', '');
+			$ulos .= '</td>';
+		}
 	}
 
 	if (mysql_field_name($result, $i) == "kieli") {

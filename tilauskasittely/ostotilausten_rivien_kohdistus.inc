@@ -858,6 +858,9 @@ if ($tila == 'tee_kohdistus') {
 				$query  = "UPDATE tilausrivin_lisatiedot SET poikkeava_tulliprosentti=$poikkeava_tulliprosentti WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus='$tunnus'";
 				$result = pupe_query($query);
 			}
+			else {
+				echo "<font class='error'>".t('Poikkeava tullipronsetti ei ollut numero').". ".t('Riville ei päivitetty poikkeavaa prosenttia')."!</font>";
+			}
 		}
 	}
 

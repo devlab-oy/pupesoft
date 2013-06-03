@@ -22,6 +22,20 @@ class MagentoClient {
 	const LOGGING = true;
 
 	/**
+	 * Visibility
+	 */
+	const NOT_VISIBLE_INDIVIDUALLY = 1;
+	const CATALOG                  = 2;
+	const SEARCH                   = 3;
+	const CATALOG_SEARCH           = 4;
+
+	/**
+	 * Status
+	 */
+	const ENABLED  = 1;
+	const DISABLED = 2;
+
+	/**
 	 * Soap client
 	 */
 	private $_proxy;
@@ -93,28 +107,25 @@ class MagentoClient {
 					$category_tree = $this->getCategories();
 
 					// Jos osastoa ei löydy magenton category_treestä, niin lisätään se
-					$parent_id = $this->find_category($kategoria['osasto_fi'], $category_tree['children']);
+					$parent_id = $this->findCategory($kategoria['osasto_fi'], $category_tree['children']);
 
 					// Jos kategoria löytyi, lisätään tuoteryhmä sen alle
 					if ($parent_id) {
 
 						// Tarkastetaan ettei tuoteryhmää ole jo lisätty
-						if (!$this->find_category($kategoria['try_fi'], $category_tree['children'])) {
+						if (!$this->findCategory($kategoria['try_fi'], $category_tree['children'])) {
 							$category_data = array(
-								'name' => $kategoria['try_fi'],
-								'is_active' => 1,
-								'position' => 1,
-								'default_sort_by' => 'position',
+								'name'              => $kategoria['try_fi'],
+								'is_active'         => 1,
+								'position'          => 1,
+								'default_sort_by'   => 'position',
 								'available_sort_by' => 'position',
-								'include_in_menu' => 1
+								'include_in_menu'   => 1
 							);
 
 							// Kutsutaan soap rajapintaa
 							$category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
-								array(
-									$parent_id,
-									$category_data
-									)
+								array($parent_id, $category_data)
 							);
 							$count++;
 						}
@@ -122,39 +133,33 @@ class MagentoClient {
 					// Muuten lisätään ensin osasto ja sen alle tuoteryhmä.
 					else {
 						$category_data = array(
-							'name' => $kategoria['osasto_fi'],
-							'is_active' => 1,
-							'position' => 1,
-							'default_sort_by' => 'position',
+							'name'              => $kategoria['osasto_fi'],
+							'is_active'         => 1,
+							'position'          => 1,
+							'default_sort_by'   => 'position',
 							'available_sort_by' => 'position',
-							'include_in_menu' => 0
+							'include_in_menu'   => 0
 						);
 
 						// Kutsutaan soap rajapintaa
 						$category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
-							array(
-								2,
-								$category_data
-								)
+							array(2, $category_data)
 						);
 						$count++;
 
 						// Lisätään tuoteryhmä lisätyn osaston alle
 						$category_data = array(
-							'name' => $kategoria['try_fi'],
-							'is_active' => 1,
-							'position' => 1,
-							'default_sort_by' => 'position',
+							'name'              => $kategoria['try_fi'],
+							'is_active'         => 1,
+							'position'          => 1,
+							'default_sort_by'   => 'position',
 							'available_sort_by' => 'position',
-							'include_in_menu' => 1
+							'include_in_menu'   => 1
 						);
 
 						// Kutsutaan soap rajapintaa
 						$category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
-							array(
-								$category_id,
-								$category_data
-								)
+							array($category_id, $category_data)
 						);
 						$count++;
 					}
@@ -184,17 +189,21 @@ class MagentoClient {
 		$this->log("Lisätään tuotteita (simple)");
 
 		// Tuote countteri
-		$count = 1;
+		$count = 0;
 
-		// Tarvitaan kategoriat
-		$category_tree = $this->getCategories();
+		try {
+			// Tarvitaan kategoriat
+			$category_tree = $this->getCategories();
 
-		// Populoidaan attributeSet
-		$this->_attributeSet = $this->getAttributeSet();
+			// Populoidaan attributeSet
+			$this->_attributeSet = $this->getAttributeSet();
 
-		// Haetaan storessa olevat tuotenumerot
-		$skus_in_store = $this->getProductList(true);
-
+			// Haetaan storessa olevat tuotenumerot
+			$skus_in_store = $this->getProductList(true);
+		} catch (Exception $e) {
+			$this->log("Virhe tuotteiden lisäyksessä", $e);
+			exit();
+		}
 		// Lisätään tuotteet erissä
 		foreach($dnstuote as $tuote) {
 
@@ -205,11 +214,10 @@ class MagentoClient {
 			}
 
 			// Etsitään kategoria_id tuoteryhmällä
-			$category_id = $this->find_category($tuote['try_nimi'], $category_tree['children']);
+			$category_id = $this->findCategory($tuote['try_nimi'], $category_tree['children']);
 
 			// Lisätään tai päivitetään tuote
 			try {
-
 				// Jos tuotetta ei ole olemassa niin lisätään se
 				if ( ! in_array($tuote['tuoteno'], $skus_in_store)) {
 					// Jos tuotteen lisäys ei onnistu ei tuotekuviakaan lisätä.
@@ -225,8 +233,8 @@ class MagentoClient {
 									'description'           => $tuote['kuvaus'],
 									'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
 									'weight'                => $tuote['tuotemassa'],
-									'status'                => '1',
-									'visibility'            => '1',
+									'status'                => self::ENABLED,
+									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
 									'price'                 => $tuote['myymalahinta'],
 									'tax_class_id'          => $this->getTaxClassID(),
 									'meta_title'            => '',
@@ -248,8 +256,8 @@ class MagentoClient {
 									'description'           => $tuote['kuvaus'],
 									'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
 									'weight'                => $tuote['tuotemassa'],
-									'status'                => '1',
-									'visibility'            => '1',
+									'status'                => self::ENABLED,
+									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
 									'price'                 => $tuote['myymalahinta'],
 									'tax_class_id'          => $this->getTaxClassID(),
 									'meta_title'            => '',
@@ -258,7 +266,6 @@ class MagentoClient {
 								)
 							)
 						);
-
 				}
 
 				// Lisätään tuotekuvat
@@ -326,7 +333,7 @@ class MagentoClient {
 						array(
 								'price'				=> $tuote['myymalahinta'],
 								'short_description' => utf8_encode($tuote['lyhytkuvaus']),
-								'visibility'		=> 1,
+								'visibility'		=> self::NOT_VISIBLE_INDIVIDUALLY,
 								'additional_attributes' => array(
 									'multi_data' => array(
 										'koko' => $koko,
@@ -344,7 +351,7 @@ class MagentoClient {
 				}
 
 				// Etsitään kategoria mihin tuote lisätään
-				$category_id = $this->find_category($tuotteet[0]['try_nimi'], $this->_category_tree['children']);
+				$category_id = $this->findCategory($tuotteet[0]['try_nimi'], $this->_category_tree['children']);
 
 				// Configurable tuotteen tiedot
 				$configurable = array(
@@ -354,8 +361,8 @@ class MagentoClient {
 					'description'           => $tuotteet[0]['kuvaus'],
 					'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
 					'weight'                => $tuotteet[0]['tuotemassa'],
-					'status'                => 1,
-					'visibility'            => '4', # Configurablet nakyy kaikkialla
+					'status'                => self::ENABLED,
+					'visibility'            => self::CATALOG_SEARCH, # Configurablet nakyy kaikkialla
 					'price'                 => $tuotteet[0]['myymalahinta'],
 					'tax_class_id'          => $this->getTaxClassID(), # 24%
 					'meta_title'            => '',
@@ -416,19 +423,17 @@ class MagentoClient {
 	{
 		$this->log("Haetaan tilauksia");
 
-		// HUOM: invoicella on state ja orderilla on status
-		// Invoicen statet 'pending' => 1, 'paid' => 2, 'canceled' => 3
 		$orders = array();
 
 		// Toimii ordersilla
 		$filter = array(array('status' => array('eq' => $status)));
-
-		// Invoicella on state
-		# $filter = array(array('state' => array('eq' => 'paid')));
-
 		// Haetaan tilaukset (orders.status = 'processing')
 		$fetched_orders = $this->_proxy->call($this->_session, 'sales_order.list', $filter);
 
+		// HUOM: invoicella on state ja orderilla on status
+		// Invoicen statet 'pending' => 1, 'paid' => 2, 'canceled' => 3
+		// Invoicella on state
+		# $filter = array(array('state' => array('eq' => 'paid')));
 		// Haetaan laskut (invoices.state = 'paid')
 
 		foreach ($fetched_orders as $order) {
@@ -581,34 +586,46 @@ class MagentoClient {
 	}
 
 	/**
-	 * Etsii kategoriaa nimeltä Magenton kategoria puusta.
-	 *
-	 * @param 	string 	$name          	Etsittävän kategorian nimi
-	 * @param  	array  	$category_tree 	Magenton kategoria puu
-	 * @return 	mixed                 	Löydetty category_id tai false
+	 * Hakee kaikki kategoriat
 	 */
-	private function find_category($name, array $category_tree)
+	private function getCategories()
 	{
-		// Etsitään ensin default_categoryn alta
-		foreach ($category_tree as $category) {
-
-			// Jos kategoria löytyy pääkategorian alta
-			if ($category['name'] == $name) {
-				return $category['category_id'];
+		try {
+			if (empty($this->_category_tree)) {
+				// Haetaan kaikki defaulttia suuremmat kategoriat (2)
+				$this->_category_tree = $this->_proxy->call($this->_session, 'catalog_category.tree');
+				#$this->_category_tree = $this->_category_tree['children'][0]; # Skipataan rootti categoria
 			}
 
-			// Jos kategorialla on lapsia, etsitään niiden alta
-			if (!empty($category['children'])) {
+			return $this->_category_tree;
+		} catch (Exception $e) {
+			$this->log("Virhe kategorioiden hakemisessa", $e);
+		}
+	}
 
-				foreach ($category['children'] as $sub_category) {
-					if ($sub_category['name'] == $name) {
-						return $sub_category['category_id'];
-					}
-				}
+	/**
+	 * Etsii kategoriaa nimeltä Magenton kategoria puusta.
+	 */
+	private function findCategory($name, $root) {
+
+		$category_id = false;
+
+		foreach($root as $i => $category) {
+
+			// Jos löytyy tästä tasosta nii palautetaan id
+			if (strcasecmp($name, $category['name']) == 0) {
+				return $category_id = $category['category_id'];
+			}
+
+			// Muuten jatketaan ettimistä
+			$r = $this->findCategory($name, $category['children']);
+			if ($r != null) {
+				return $r;
 			}
 		}
 
-		return false;
+		// Mitään ei löytyny
+		return $category_id;
 	}
 
 	/**
@@ -655,19 +672,6 @@ class MagentoClient {
 
 		// Mitään ei löytyny
 		return 0;
-	}
-
-	/**
-	 * Hakee kaikki kategoriat
-	 */
-	private function getCategories()
-	{
-		if (empty($this->_category_tree)) {
-			// Haetaan kaikki defaulttia suuremmat kategoriat (2)
-			$this->_category_tree = $this->_proxy->call($this->_session, 'catalog_category.tree', 2);
-		}
-
-		return $this->_category_tree;
 	}
 
 	/**
@@ -800,6 +804,30 @@ class MagentoClient {
 			return $result;
 		} catch (Exception $e) {
 			return null;
+		}
+	}
+
+	/**
+	 * Hakee storen tiedot
+	 */
+	private function getStoreInfo($store_id = 1) {
+		try {
+			$result = $this->_proxy->call($this->_session, 'store.info', $store_id);
+			return $result;
+		} catch (Exception $e) {
+			$this->log(__METHOD__, $e);
+		}
+	}
+
+	/**
+	 * Verkkokaupan lista luoduista storeista
+	 */
+	private function getStoreList() {
+		try {
+			$result = $this->_proxy->call($this->_session, 'store.list');
+			return $result;
+		} catch (Exception $e) {
+			$this->log(__METHOD__, $e);
 		}
 	}
 

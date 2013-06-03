@@ -857,11 +857,18 @@ if ($tila == 'tee_kohdistus') {
 		// poikkeava_tulliprosentti
 		foreach ($rivi_poikkeava_tulliprosentti as $tunnus => $poikkeava_tulliprosentti) {
 			if (is_numeric($poikkeava_tulliprosentti)) {
-				$query  = "UPDATE tilausrivin_lisatiedot SET poikkeava_tulliprosentti=$poikkeava_tulliprosentti WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus='$tunnus'";
+				$query = "	SELECT poikkeava_tulliprosentti FROM tilausrivin_lisatiedot WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus='$tunnus'";
 				$result = pupe_query($query);
+				$poikkeava_tulliprosentti_db = mysql_fetch_assoc($result);
+				//ei p‰ivitet‰ poikkeus_tulliprosenttia kantaan jos se on sama kuin oletusprosentti, paitsi jos kantaan on jo p‰ivitetty poikkeus prosentti.
+				//kannasta pit‰‰ tarkistaa, onko siell‰ poikkeus_tulliprosentti, koska oletus --> poikkeus ja takaisin poikkeus --> oletus ei p‰ivity kantaan ilman olemassaolevan poikkeuksen tarkistusta.
+				if (!empty($poikkeava_tulliprosentti_db) or $rivi_oletus_tulliprosentti[$tunnus] != $poikkeava_tulliprosentti) {
+					$query  = "UPDATE tilausrivin_lisatiedot SET poikkeava_tulliprosentti=$poikkeava_tulliprosentti WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus='$tunnus'";
+					$result = pupe_query($query);
+				}
 			}
 			else {
-				echo "<font class='error'>".t('Poikkeava tullipronsetti ei ollut numero').". ".t('Riville ei p‰ivitetty poikkeavaa prosenttia')."!</font>";
+				echo "<font class='error'>".t('Poikkeava tullipronsetti ei ollut numero').". ".t('Riville ei p‰ivitetty poikkeavaa prosenttia')."!</font><br/>";
 			}
 		}
 	}
@@ -1948,16 +1955,19 @@ if ($tila == '') {
 		echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_erikoisale[$rivirow[rivitunnus]]' value='". (float) $rivirow["erikoisale"]."' style='text-align:right'></$td>";
 
 		//tulliprosentti td. haetaan oletusarvot
-		$poikkeava_tulliprosentti = hae_poikkeava_tulliprosentti($laskurow,$rivirow);
+		$oletus_tulliprosentti = hae_oletus_tulliprosentti($laskurow,$rivirow);
 		//jos ostotilausrivin lis‰tietoihin on tallennettu poikkeava_tullipronsetti niin k‰ytet‰‰n sit‰. Muuten k‰ytet‰‰n taric_veroperusteet oletusta.
-		if (!empty($rivirow['poikkeava_tulliprosentti']) and $rivirow['poikkeava_tulliprosentti'] != (int)$poikkeava_tulliprosentti) {
+		if (!empty($rivirow['poikkeava_tulliprosentti']) and $rivirow['poikkeava_tulliprosentti'] != (int)$oletus_tulliprosentti) {
 			$tulliprosentti = $rivirow['poikkeava_tulliprosentti'];
 		}
 		else {
-			$tulliprosentti = $poikkeava_tulliprosentti;
+			$tulliprosentti = $oletus_tulliprosentti;
 		}
 
-		echo "<td><input size='4' type='text' name='rivi_poikkeava_tulliprosentti[{$rivirow['rivitunnus']}]' value='".(int) $tulliprosentti."' style='text-align:right'/></td>";
+		echo "<td>";
+		echo "<input type='hidden' name='rivi_oletus_tulliprosentti[{$rivirow['rivitunnus']}]' value='".(int)$oletus_tulliprosentti."' />";
+		echo "<input size='4' type='text' name='rivi_poikkeava_tulliprosentti[{$rivirow['rivitunnus']}]' value='".(int) $tulliprosentti."' style='text-align:right'/>";
+		echo "</td>";
 		echo "<$td $class valign='top' align='right'>". (float) $rivirow["rivihinta"]."<br>". (float) $rivirow["alerivihinta"]."</$td>";
 		//echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_kuluhinta[$rivirow[rivitunnus]]' value='$rivirow[kuluhinta]' style='text-align:right'><br>$yhtiorow[valkoodi]</$td>";
 		echo "<$td $class valign='top'>";

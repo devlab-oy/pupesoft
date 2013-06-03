@@ -267,7 +267,7 @@
 	}
 
 	if (!function_exists('hae_poikkeava_tulliprosentti')) {
-		function hae_poikkeava_tulliprosentti($laskurow,$tuorow) {
+		function hae_oletus_tulliprosentti($laskurow,$tuorow) {
 			global $kukarow, $yhtiorow;
 
 			// Sis‰‰n otetaan

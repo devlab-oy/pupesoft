@@ -6,17 +6,12 @@ class pupeExcel {
 	var $_exceldblink;
 
 	function __construct() {
-		global $masterlink, $link;
+		global $temporarylink;
 
-		if (isset($masterlink) and is_resource($masterlink)) {
-			$this->_exceldblink = $masterlink;
-		}
-		else {
-			$this->_exceldblink = $link;
-		}
+		$this->_exceldblink = $temporarylink;
 
 		// Tehdään Excel dataa varten temporary tietokantataulu
-		$query = "	CREATE temporary table excel_data (
+		$query = "	CREATE temporary table temporary_excel_data (
 					excelrivi int(11) default null,
 					excelsarake int(11) default null,
 					type char(1) default null,
@@ -26,7 +21,7 @@ class pupeExcel {
 		$result = pupe_query($query, $this->_exceldblink);
 
 		// Tehdään Excel stringejä varten temporary tietokantataulu
-		$query = "	CREATE temporary table excel_sharedstrings (
+		$query = "	CREATE temporary table temporary_excel_sharedstrings (
 					string_key varchar(100) not null,
 					string text default null,
 					id int(11) not null AUTO_INCREMENT,
@@ -71,7 +66,7 @@ class pupeExcel {
 		// Hardcoodataan style
 		$style = array("date" => TRUE);
 
-		$query = "	INSERT INTO excel_data SET
+		$query = "	INSERT INTO temporary_excel_data SET
 					excelrivi 	= $excelrivi,
 					excelsarake = $excelsarake,
 					type 		= 'D',
@@ -90,7 +85,7 @@ class pupeExcel {
 		$excelrivi++;
 		$excelsarake++;
 
-		$query = "	INSERT INTO excel_data SET
+		$query = "	INSERT INTO temporary_excel_data SET
 					excelrivi 	= $excelrivi,
 					excelsarake = $excelsarake,
 					type 		= 'N',
@@ -107,10 +102,10 @@ class pupeExcel {
 
 		if ($string == "") $string = NULL;
 		else $string = xmlentities($string);
-		
+
 		$string_key = md5($string);
 
-		$query = "	INSERT INTO excel_data SET
+		$query = "	INSERT INTO temporary_excel_data SET
 					excelrivi 	= $excelrivi,
 					excelsarake = $excelsarake,
 					type 		= 'S',
@@ -118,7 +113,7 @@ class pupeExcel {
 					style 		= '".mysql_real_escape_string(serialize($style))."'";
 		$result = pupe_query($query, $this->_exceldblink);
 
-		$query = "	INSERT INTO excel_sharedstrings SET
+		$query = "	INSERT INTO temporary_excel_sharedstrings SET
 					string_key  = '$string_key',
 					string 		= '$string',
 					times_used 	= 1
@@ -145,15 +140,15 @@ class pupeExcel {
 		$sharedStrings = simplexml_load_file($sharedStringsFile);
 
 		// Päivitetään excel dataan string_id:t
-		$query = "	UPDATE excel_data
-					JOIN excel_sharedstrings ON (excel_sharedstrings.string_key = excel_data.value)
-					SET excel_data.string_id = (excel_sharedstrings.id-1)
-					WHERE excel_data.type = 'S'";
+		$query = "	UPDATE temporary_excel_data
+					JOIN temporary_excel_sharedstrings ON (temporary_excel_sharedstrings.string_key = temporary_excel_data.value)
+					SET temporary_excel_data.string_id = (temporary_excel_sharedstrings.id-1)
+					WHERE temporary_excel_data.type = 'S'";
 		$result = pupe_query($query, $this->_exceldblink);
 
 		// Tehdään Shared Strings XML
 		$query = "	SELECT *
-					FROM excel_sharedstrings";
+					FROM temporary_excel_sharedstrings";
 		$result = pupe_query($query, $this->_exceldblink);
 
 		$stringCount = 0;
@@ -168,7 +163,7 @@ class pupeExcel {
 
 		// Tehdään Excel taulukko XML
 		$query = "	SELECT *
-					FROM excel_data
+					FROM temporary_excel_data
 					ORDER BY excelrivi, excelsarake";
 		$result = pupe_query($query, $this->_exceldblink);
 
@@ -254,10 +249,10 @@ class pupeExcel {
 
 		exec("cd /tmp/{$foldername}; find . -name .DS_Store -delete; /usr/bin/zip -r /tmp/{$xlsxfile} *; rm -rf /tmp/{$foldername};");
 
-		$query = "DROP TABLE excel_sharedstrings;";
+		$query = "DROP TABLE temporary_excel_sharedstrings;";
 		$result = pupe_query($query, $this->_exceldblink);
 
-		$query = "DROP TABLE excel_data;";
+		$query = "DROP TABLE temporary_excel_data;";
 		$result = pupe_query($query, $this->_exceldblink);
 
 		return $xlsxfile;

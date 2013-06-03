@@ -200,7 +200,7 @@
 		$tila = 'L';
 	}
 
-	// Jos kerayser‰t on p‰‰ll‰ ja tilaus on j‰‰nyt t‰nne, niin triggerˆid‰‰n muutos-muuttuja koska kerˆyksess‰ tilaukselle on jo auto-insertˆity rahtikirjan tiedot.
+	// Jos kerayser‰t on p‰‰ll‰ ja tilaus on j‰‰nyt t‰nne, niin triggerˆid‰‰n muutos-muuttuja koska ker‰yksess‰ tilaukselle on jo auto-insertˆity rahtikirjan tiedot.
 	if ($yhtiorow['kerayserat'] == 'K' and $tila == "L") {
 		$muutos = 'yes';
 	}
@@ -286,12 +286,12 @@
 
 	if ($id > 0 and $tunnukset != "") {
 
-		$vakquery = "	SELECT 
+		$vakquery = "	SELECT
 						IFNULL(group_concat(DISTINCT if(tuote.vakkoodi not in ('','0'), tuote.vakkoodi, null)), '') vaktuotteet,
 						IFNULL(group_concat(DISTINCT if(tuote.vak_imdg_koodi not in ('','0'), tuote.vak_imdg_koodi, null)), '') vaktuotteet_imdg
 						FROM tilausrivi
-						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio 
-							AND tuote.tuoteno = tilausrivi.tuoteno 
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+							AND tuote.tuoteno = tilausrivi.tuoteno
 							AND (tuote.vakkoodi not in ('','0') OR tuote.vak_imdg_koodi not in ('','0')))
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus IN ({$tunnukset})
@@ -443,7 +443,8 @@
 			$tee  = "";
 			$toim = "";
 			$id   = 0;
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tilauskasittely/tilaus_myynti.php?toim=$rahtikirjan_esisyotto'>";
+
+			lopetus($lopetus, "META");
 		}
 	}
 
@@ -624,6 +625,12 @@
 				}
 			}
 
+			// Poistetaan etuk‰teen syˆtetyt rahtikirjatiedot, ku nyt t‰ss‰ ne menis muuten toistamiseen kantaan
+			if ((!isset($muutos) or $muutos != 'yes') and $tutkimus > 0) {
+				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro IN ({$tunnuslisa}) and rahtikirjanro IN ({$rakirnolisa}) and poikkeava = -9";
+				$result = pupe_query($query);
+			}
+
 			for ($i=0; $i<count($pakkaus); $i++) {
 
 				// katotaan ett‰ ollaan syˆtetty jotain
@@ -664,10 +671,10 @@
 								$result = pupe_query($query);
 							}
 
-							if ($kollit[$i] == '')		$kollit[$i]		= 0;
-							if ($kilot[$i] == '')		$kilot[$i]		= 0;
-							if ($lavametri[$i] == '')	$lavametri[$i]	= 0;
-							if ($kuutiot[$i] == '')		$kuutiot[$i]	= 0;
+							if ($kollit[$i] == '')	  $kollit[$i]    = 0;
+							if ($kilot[$i] == '')	  $kilot[$i]     = 0;
+							if ($lavametri[$i] == '') $lavametri[$i] = 0;
+							if ($kuutiot[$i] == '')	  $kuutiot[$i]   = 0;
 
 							// Lis‰t‰‰n myˆs pakkausveloitus, mik‰li sellainen on annettu
 							$query = "	SELECT pakkaus.*
@@ -1991,7 +1998,7 @@
 		// n‰ytet‰‰n tilauksia jota voisi muokata, tila L alatila B tai E tai sitten alatila D jos toimitustapa on HETI
 		$query = "	SELECT lasku.yhtio yhtio,
 					lasku.yhtio_nimi yhtio_nimi,
-					rahtikirjat.rahtikirjanro rakirno,
+					if(rahtikirjat.rahtikirjanro='', rahtikirjat.otsikkonro, rahtikirjat.rahtikirjanro) rakirno,
 		 			group_concat(distinct lasku.tunnus SEPARATOR ', ') 'tilaus',
 					group_concat(distinct lasku.liitostunnus) asiakkaat,
 					max(lasku.nimi) asiakas,
@@ -2226,6 +2233,7 @@
 		echo "<input type='hidden' name='tee' value='add'>";
 		echo "<input type='hidden' name='mista' value='$mista'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
 		if ($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
 			echo "<input type='hidden' name='toimitustapa_varasto' value='$toimitustapa_varasto'>";
@@ -2307,7 +2315,6 @@
 
 			echo "<input type='hidden' name='ed_toimtapa' value='$toimitustapa'>";
 			echo "<input type='hidden' name='ed_merahti' value='$merahti'>";
-
 			echo "</td></tr>\n";
 
 			// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
@@ -2331,27 +2338,35 @@
 			//tehd‰‰n rahtisopimuksen syˆttˆ
 			echo "<th align='left'>".t("Rahtisopimus")."</th><td>";
 
-			//etsit‰‰n lˆytyykˆ rahtisopimusta
-			$rsop = hae_rahtisopimusnumero($toimitustapa, $rahtihaku, $otsik["liitostunnus"]);
-			$rahtisopimus = $rsop["rahtisopimus"];
+			// N‰ytet‰‰n vain jos k‰ytet‰‰n vastaanottajan sopparia
+			if ($nesel != "") {
+				//etsit‰‰n lˆytyykˆ rahtisopimusta
+				$rsop = hae_rahtisopimusnumero($toimitustapa, $rahtihaku, $otsik["liitostunnus"], false, $otsik["rahtisopimus"]);
+				$rahtisopimus = $rsop["rahtisopimus"];
 
-			if ($otsik['rahtisopimus'] != '') {
-				$rahtisopimus = $otsik['rahtisopimus'];
-			}
+				if ($otsik['rahtisopimus'] != '') {
+					$rahtisopimus = $otsik['rahtisopimus'];
+				}
 
-			if ($rsop > 0) {
-				$ylisa = "&tunnus=$rsop[tunnus]";
+				if ($rsop > 0) {
+					$ylisa = "&tunnus=$rsop[tunnus]";
+				}
+				else {
+					$ylisa = "&uusi=1&ytunnus=$rahtihaku&toimitustapa=$toimitustapa";
+					$rsop["rahtisopimus"] = t("Lis‰‰ rahtisopimus");
+				}
+
+				if ($kukarow['yhtio'] == $lasku_yhtio_originaali) {
+					echo "<a href='".$palvelin2."yllapito.php?toim=rahtisopimukset$ylisa&tee=add&lopetus=$PHP_SELF////toim=$toim//tunnukset=$tunnukset//lopetus=$lopetus//id=$id//tee=$tee//merahti=$merahti//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>$rsop[rahtisopimus] $rsop[selite]</a><br/>";
+				}
+
+				echo "<input value='$rahtisopimus' type='text' name='rahtisopimus' size='20'>";
 			}
 			else {
-				$ylisa = "&uusi=1&ytunnus=$rahtihaku&toimitustapa=$toimitustapa";
-				$rsop["rahtisopimus"] = t("Lis‰‰ rahtisopimus");
+				echo t("K‰ytet‰‰n l‰hett‰j‰n rahtisopimusta");
 			}
 
-			if ($kukarow['yhtio'] == $lasku_yhtio_originaali) {
-				echo "<a href='".$palvelin2."yllapito.php?toim=rahtisopimukset$ylisa&tee=add&lopetus=$PHP_SELF////toim=$toim//tunnukset=$tunnukset//lopetus=$lopetus//id=$id//tee=$tee//merahti=$merahti//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>$rsop[rahtisopimus]</a><br/>";
-			}
-
-			echo "<input value='$rahtisopimus' type='text' name='rahtisopimus' size='20'></td></tr>";
+			echo "</td></tr>";
 
 			$varastolisa = "";
 
@@ -2485,18 +2500,19 @@
 
 			echo "</tr>";
 
-			if ($tee == 'change') {
-				$query = "	SELECT GROUP_CONCAT(DISTINCT if(viesti!='',viesti,NULL) separator '. ') viesti
-							FROM rahtikirjat use index (otsikko_index)
-							WHERE yhtio			= '$kukarow[yhtio]'
-							AND otsikkonro		= '$id'
-							AND rahtikirjanro	= '$rakirno'";
-				$viestirar = pupe_query($query);
-				$viestirarrow = mysql_fetch_assoc($viestirar);
+			$rviesti1 = "";
+			$rviesti2 = "";
 
-				$viesti = trim($viestirarrow["viesti"]);
-			}
-			else {
+			$query = "	SELECT GROUP_CONCAT(DISTINCT if(viesti!='',viesti,NULL) separator '. ') viesti
+						FROM rahtikirjat use index (otsikko_index)
+						WHERE yhtio			= '$kukarow[yhtio]'
+						AND otsikkonro		= '$id'
+						AND rahtikirjanro	= '$rakirno'";
+			$viestirar = pupe_query($query);
+			$viestirarrow = mysql_fetch_assoc($viestirar);
+			$rviesti1 = trim($viestirarrow["viesti"]);
+
+			if ($tee != 'change') {
 				$query = "	SELECT GROUP_CONCAT(DISTINCT if(tuote.kuljetusohje!='',tuote.kuljetusohje,NULL) separator '. ') viesti
 							FROM tilausrivi
 							JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
@@ -2505,9 +2521,10 @@
 							AND tilausrivi.tyyppi  != 'D'";
 				$viestirar = pupe_query($query);
 				$viestirarrow = mysql_fetch_assoc($viestirar);
-
-				$viesti = trim("$asiakkaan_kuljetusohje $viestirarrow[viesti]");
+				$rviesti2 = trim($viestirarrow["viesti"]);
 			}
+
+			$viesti = trim("$asiakkaan_kuljetusohje $rviesti1 $rviesti2");
 
 			echo "<tr><th>".t("Kuljetusohje")."</th><td colspan='3'><textarea name='viesti' cols='60' rows='3'>$viesti</textarea></td></tr>";
 

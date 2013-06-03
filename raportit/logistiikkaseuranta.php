@@ -87,7 +87,7 @@
 			if ($toimtaparow["nouto"] == "" and $toimtaparow["rahtikirja"] != "rahtikirja_tyhja.inc") {
 
 				if ($toimtaparow["merahti"] == "K") $rahsoprow = hae_rahtisopimusnumero($asiakasrow["toimitustapa"], "", "");
-				else $rahsoprow = hae_rahtisopimusnumero($asiakasrow["toimitustapa"], $asiakasrow["ytunnus"], $asiakasrow["tunnus"]);
+				else $rahsoprow = hae_rahtisopimusnumero($asiakasrow["toimitustapa"], $asiakasrow["ytunnus"], $asiakasrow["tunnus"], false, "");
 
 				$kumman = ($toimtaparow["merahti"] == "") ? "Vastaanottajan" : "Lähettäjän";
 

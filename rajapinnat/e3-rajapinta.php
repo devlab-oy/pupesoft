@@ -930,5 +930,3 @@
 		$data = implode("\t", $cols) . "\n";
 		fwrite($fp, $data);
 	}
-
-?>

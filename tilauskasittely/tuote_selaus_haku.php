@@ -27,7 +27,7 @@
 	if (function_exists("js_popup")) {
 		echo js_popup(-100);
 	}
-
+	
 	echo "<SCRIPT type='text/javascript'>
 			<!--
 				function sarjanumeronlisatiedot_popup(tunnus) {
@@ -450,7 +450,7 @@
 		$olhires = pupe_query($query);
 		$olhirow = mysql_fetch_assoc($olhires);
 
-		// k‰ytt‰j‰n ma
+		// k‰ytt‰j‰n maa
 		$oleasrow["varastomaa"] = $laskurow["toim_maa"];
 
 		if ($oleasrow["varastomaa"] == "") {
@@ -1757,7 +1757,8 @@
 											FROM varastopaikat
 											WHERE yhtio = '$kukarow[yhtio]'
 											AND maa 	= '{$oleasrow["varastomaa"]}'
-											AND nouto 	= '1' AND tyyppi != 'P'
+											AND nouto 	= '1'
+											AND tyyppi != 'P'
 											ORDER BY tyyppi, nimitys";
 								$noutovarres = pupe_query($query);
 							}
@@ -1882,7 +1883,7 @@
 
 						echo "<td valign='top' class='$vari' $classrigh>";
 
-						if ($myytavissa > 0) {
+						if ($myytavissa > 0 or $noutolisa != "") {
 
 							if ($verkkokauppa != "" and $verkkokauppa_saldoluku) {
 								echo "<font class='green'>";
@@ -1890,7 +1891,7 @@
 								echo "</font>";
 							}
 							else {
-								echo ($hinta_rajaus != "") ? "<font class='green'>".t("P‰‰varasto").": ".t("On")."</font>": "<font class='green'>".t("On")."</font>";
+								echo ($hinta_rajaus != "" and $myytavissa > 0) ? "<font class='green'>".t("P‰‰varasto").": ".t("On")."</font>": "<font class='green'>".t("On")."</font>";
 							}
 						}
 						elseif ($tilauslisa != "") {

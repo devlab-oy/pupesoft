@@ -2044,14 +2044,14 @@ $debug = 0;
 		}
 
 		if ($laskunsumma != 0) {
-			$rahti_etu = $laskunsumma;
+			$pyoristys_erot = $laskunsumma;
 		}
 		else {
-			$rahti_etu = 0;
+			$pyoristys_erot = 0;
 		}
 
 		// p‰ivitet‰‰n samantien t‰m‰ tieto laskulle
-		$query   = "UPDATE lasku set summa='$hintarow[hinta]', rahti_etu='$rahti_etu', kohdistettu='K' where yhtio ='$kukarow[yhtio]' and tunnus='$otunnus'";
+		$query   = "UPDATE lasku set summa='$hintarow[hinta]', pyoristys_erot='$pyoristys_erot', kohdistettu='K' where yhtio ='$kukarow[yhtio]' and tunnus='$otunnus'";
 		$hinresu = pupe_query($query);
 
 		if ($kauttalaskutus == "kylla") {

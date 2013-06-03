@@ -8809,7 +8809,6 @@ if (!function_exists("livesearch_asiakashaku")) {
 	}
 }
 
-
 if (!function_exists('livesearch_asiakasytunnushaku')) {
 	function livesearch_asiakasytunnushaku() {
 		global $yhtiorow, $kukarow, $palvelin2;
@@ -8895,7 +8894,6 @@ if (!function_exists('livesearch_asiakasytunnushaku')) {
 		}
 	}
 }
-
 
 if (!function_exists('livesearch_asiakaskategoriahaku')) {
 	function livesearch_asiakaskategoriahaku() {

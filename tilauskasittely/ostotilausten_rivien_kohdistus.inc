@@ -1,5 +1,7 @@
 <?php
 
+require_once('inc/keikan_toiminnot.inc');
+
 echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 			function submit_tallenna(){
 				document.paaformi.action='$PHP_SELF';
@@ -851,7 +853,7 @@ if ($tila == 'tee_kohdistus') {
 		}
 	}
 
-	if (is_array($rivi_poikkeava_tulliprosentti)) {
+	if (isset($rivi_poikkeava_tulliprosentti) and is_array($rivi_poikkeava_tulliprosentti)) {
 		// poikkeava_tulliprosentti
 		foreach ($rivi_poikkeava_tulliprosentti as $tunnus => $poikkeava_tulliprosentti) {
 			if (is_numeric($poikkeava_tulliprosentti)) {
@@ -1041,6 +1043,8 @@ if ($tila == '') {
 		$laskunsumma = 0.00;
 	}
 
+	$tv_kaytossa = tarkista_onko_taric_veroperusteet_kaytossa();
+	
 	// Tietokannan kent‰t on m‰‰ritelt‰v‰ n‰in jotta meid‰n dynaamiset haut toimisivat
 	$kentat_array = array();
 	$kentat_array[] = "tilausrivi.otunnus otunnus";
@@ -1084,7 +1088,9 @@ if ($tila == '') {
 
 	$kennim_array[] = t('Alv');
 	$kennim_array[] = t('Tilauksen')."<br>".t('Erikoisale');
-	$kennim_array[] = t('Tulliprosentti');
+	if ($tv_kaytossa) {
+		$kennim_array[] = t('Tulliprosentti');
+	}
 	$kennim_array[] = t('Rivihinta');
 	$kennim_array[] = t('+Alv -Ale');
 	#$kennim_array[] = t('Extrakulu');
@@ -1105,8 +1111,11 @@ if ($tila == '') {
 		$kenhak_array[] = t('Ale').$alepostfix;
 	}
 
-	$kenhak_array[] = 'tulliprosentti';
 	$kenhak_array[] = 'alv';
+	$kenhak_array[] = 'erikoisale';
+	if ($tv_kaytossa) {
+		$kenhak_array[] = 'poikkeava_tulliprosentti';
+	}
 	$kenhak_array[] = 'rivihinta';
 	$kenhak_array[] = 'alerivihinta';
 	#$kenhak_array[] = 'kuluhinta';
@@ -1523,9 +1532,11 @@ if ($tila == '') {
 
 	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a></th>";
 	$pointteri++;
-	
-	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a></th>";
-	$pointteri++;
+
+	if ($tv_kaytossa) {
+		echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a></th>";
+		$pointteri++;
+	}
 
 	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a><br>";
 	$pointteri++;
@@ -1574,8 +1585,10 @@ if ($tila == '') {
 	echo "<td><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
 	$pointteri++;
 
-	echo "<td><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
-	$pointteri++;
+	if ($tv_kaytossa) {
+		echo "<td><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
+		$pointteri++;
+	}
 
 	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'><br>";
 	$pointteri++;
@@ -1935,7 +1948,6 @@ if ($tila == '') {
 		echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_erikoisale[$rivirow[rivitunnus]]' value='". (float) $rivirow["erikoisale"]."' style='text-align:right'></$td>";
 
 		//tulliprosentti td. haetaan oletusarvot
-		require_once('inc/keikan_toiminnot.inc');
 		$poikkeava_tulliprosentti = hae_poikkeava_tulliprosentti($laskurow,$rivirow);
 		//jos ostotilausrivin lis‰tietoihin on tallennettu poikkeava_tullipronsetti niin k‰ytet‰‰n sit‰. Muuten k‰ytet‰‰n taric_veroperusteet oletusta.
 		if (!empty($rivirow['poikkeava_tulliprosentti']) and $rivirow['poikkeava_tulliprosentti'] != (int)$poikkeava_tulliprosentti) {

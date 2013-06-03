@@ -1458,6 +1458,9 @@ $debug = 0;
 								case 'laskutettuaika':
 									$values .= ", '0000-00-00'";
 									break;
+								case 'kate_korjattu':
+									$rvalues .= "NULL,";
+									break;
 								default:
 									$values .= ", '".$tilausrivirow[$fieldname]."'";
 							}

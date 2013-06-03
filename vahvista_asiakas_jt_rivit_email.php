@@ -35,12 +35,14 @@ $ostotilauksien_tilausrivit = hae_ostotilauksien_tilausrivit_joiden_toimitusaika
 //tarkistetaan onko yhtiolla sähköpostien lähetys parametri päällä
 if ($yhtiorow['jt_toimitusaika_email_vahvistus'] != 'K') {
 	//haetaan asiakkaat joilla kyseinen parametri on päällä ja joilla on jt rivejä
-	$myyntitilaukset = hae_myyntitilaukset_joiden_asiakkailla_jt_toimitusaika_email_vahvistus_paalla_ja_jt_riveja();
+	$kaikki_myyntitilaukset = false;
 }
 else {
 	//haetaan yhtion kaikki myyntitilaukset joilla on jt_rivejä
-	$myyntitilaukset = hae_myyntitilaukset_joilla_jt_riveja();
+	$kaikki_myyntitilaukset = true;
 }
+
+$myyntitilaukset = hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset);
 
 $asiakkaille_lahtevat_sahkopostit = generoi_asiakas_emailit($ostotilauksien_tilausrivit, $myyntitilaukset);
 
@@ -109,55 +111,28 @@ function kasittele_ostotilaukset($ostolaskut) {
 }
 
 /**
+ * Hakee kaikki myyntitilaukset ja niiden rivit, joissa on jt-rivejä
+ * Tätä funktiota käytetään kun yhtiöparametri jt_toimitusaika_email_vahvistus on päällä
+ *
+ * TAI
+ *
  * Hakee myyntitilaukset ja niiden rivit joiden asiakkailla on jt_toimitusaika_email_vahvistus päällä sekä myyntitilauksia, joissa on jt-rivejä
  * Tätä funktiota käytetään jos yhtiöparametri jt_toimitusaika_email_vahvistus ei ole päällä
  *
  * @global array $kukarow
  * @global array $yhtiorow
+ * @param bool $kaikki_myyntitilaukset
  * @return array
  */
-function hae_myyntitilaukset_joiden_asiakkailla_jt_toimitusaika_email_vahvistus_paalla_ja_jt_riveja() {
+function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
 	global $kukarow, $yhtiorow;
 
-	$query = "	SELECT lasku.tunnus,
-				lasku.nimi,
-				lasku.liitostunnus
-				FROM lasku
-				JOIN asiakas
-				ON ( asiakas.yhtio = lasku.yhtio
-					AND asiakas.tunnus = lasku.liitostunnus
-					AND asiakas.jt_toimitusaika_email_vahvistus = 'K' )
-				JOIN tilausrivi
-				ON ( tilausrivi.yhtio = lasku.yhtio
-					AND tilausrivi.otunnus = lasku.tunnus
-					AND tilausrivi.var = 'J'
-					AND tilausrivi.tyyppi != 'D')
-				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-				GROUP BY lasku.tunnus
-				ORDER BY lasku.luontiaika ASC";
-	$result = pupe_query($query);
-
-	$myyntitilaukset = array();
-	while ($myyntitilaus = mysql_fetch_assoc($result)) {
-		$myyntitilaus['tilausrivit'] = hae_myyntitilausrivit($myyntitilaus['tunnus']);
-		$myyntitilaus['asiakas'] = hae_myyntitilauksen_asiakas($myyntitilaus['liitostunnus']);
-		$myyntitilaukset[] = $myyntitilaus;
+	if ($kaikki_myyntitilaukset) {
+		$asiakas_join = "AND (asiakas.jt_toimitusaika_email_vahvistus IN ('K', ''))";
 	}
-
-	return $myyntitilaukset;
-}
-
-/**
- * Hakee kaikki myyntitilaukset ja niiden rivit, joissa on jt-rivejä
- * Tätä funktiota käytetään kun yhtiöparametri jt_toimitusaika_email_vahvistus on päällä
- *
- * @global array $kukarow
- * @global array $yhtiorow
- * @return array
- */
-function hae_myyntitilaukset_joilla_jt_riveja() {
-	global $kukarow, $yhtiorow;
-
+	else {
+		$asiakas_join = "AND asiakas.jt_toimitusaika_email_vahvistus = 'K'";
+	}
 	//Haetaan kaikki myyntilaskut joiden asiakkaan jt_toimitusaika_email_vahvistus on Käytetään yhtiön oletus parametriä tai saa lähettää sähköposteja
 	$query = "	SELECT lasku.tunnus,
 				lasku.nimi,
@@ -166,7 +141,7 @@ function hae_myyntitilaukset_joilla_jt_riveja() {
 				JOIN asiakas
 				ON ( asiakas.yhtio = lasku.yhtio
 					AND asiakas.tunnus = lasku.liitostunnus
-					AND (asiakas.jt_toimitusaika_email_vahvistus IN ('K', '')) )
+					{$asiakas_join} )
 				JOIN tilausrivi
 				ON ( tilausrivi.yhtio = lasku.yhtio
 					AND tilausrivi.otunnus = lasku.tunnus

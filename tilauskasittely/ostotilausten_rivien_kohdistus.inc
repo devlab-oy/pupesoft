@@ -1102,7 +1102,7 @@ if ($tila == '') {
 		$kenhak_array[] = t('Ale').$alepostfix;
 	}
 
-	$kenhak_array[] = 'tullipronsetti';
+	$kenhak_array[] = 'tulliprosentti';
 	$kenhak_array[] = 'alv';
 	$kenhak_array[] = 'rivihinta';
 	$kenhak_array[] = 'alerivihinta';
@@ -1933,15 +1933,16 @@ if ($tila == '') {
 
 		//tulliprosentti td. haetaan oletusarvot
 		require_once('inc/keikan_toiminnot.inc');
-		$tulliprosentti = hae_poikkeava_tulliprosentti($laskurow,$rivirow);
-		if (!empty($rivirow['poikkeava_tulliprosentti']) and $rivirow['poikkeava_tulliprosentti'] != (int)$tulliprosentti) {
-			$tulpros = $rivirow['poikkeava_tulliprosentti'];
+		$poikkeava_tulliprosentti = hae_poikkeava_tulliprosentti($laskurow,$rivirow);
+		//jos ostotilausrivin lis‰tietoihin on tallennettu poikkeava_tullipronsetti niin k‰ytet‰‰n sit‰. Muuten k‰ytet‰‰n taric_veroperusteet oletusta.
+		if (!empty($rivirow['poikkeava_tulliprosentti']) and $rivirow['poikkeava_tulliprosentti'] != (int)$poikkeava_tulliprosentti) {
+			$tulliprosentti = $rivirow['poikkeava_tulliprosentti'];
 		}
 		else {
-			$tulpros = $tulliprosentti;
+			$tulliprosentti = $poikkeava_tulliprosentti;
 		}
 
-		echo "<td><input size='4' type='text' name='rivi_poikkeava_tulliprosentti[{$rivirow['rivitunnus']}]' value='".(int) $tulpros."' style='text-align:right'/></td>";
+		echo "<td><input size='4' type='text' name='rivi_poikkeava_tulliprosentti[{$rivirow['rivitunnus']}]' value='".(int) $tulliprosentti."' style='text-align:right'/></td>";
 		echo "<$td $class valign='top' align='right'>". (float) $rivirow["rivihinta"]."<br>". (float) $rivirow["alerivihinta"]."</$td>";
 		//echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_kuluhinta[$rivirow[rivitunnus]]' value='$rivirow[kuluhinta]' style='text-align:right'><br>$yhtiorow[valkoodi]</$td>";
 		echo "<$td $class valign='top'>";

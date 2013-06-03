@@ -12,6 +12,11 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
 	exit;
 }
 
+if ($laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
+	//Kampanjoiden tarkistus ja tuotteiden lisäys jos osuu johonkin.
+	tarkista_osuuko_myyntitilaus_kampanjaan($laskurow['tunnus']);
+}
+
 //jos tilaustyyppi on 2 ja ohjausmerkki on tyhjää, niin pistetään ohjausmerkiksi tilaustyypin selkokielinen nimi
 if ($laskurow['tilaustyyppi'] == "2" AND trim($laskurow['ohjausmerkki']) == "") {
 	$ohjausmerkkilisa = ", ohjausmerkki = 'Varastotäydennys'";
@@ -723,28 +728,8 @@ else {
 
 		}
 		else {
-
-			$query = "	SELECT *
-						FROM toimitustapa
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND selite = '$laskurow[toimitustapa]'";
-			$result = pupe_query($query);
-			$torow = mysql_fetch_assoc($result);
-
-			$rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
-
-			// meillä on rahdituksessa syötettävään painoon perustuva rahtimaksu
-			// katsotaan onko rahtituotenumero syötetty jo käsin
-			$query = "	SELECT tunnus
-						from tilausrivi
-						where yhtio = '$kukarow[yhtio]'
-						and otunnus = '$laskurow[tunnus]'
-						AND tyyppi != 'D'
-						and tuoteno IN ({$rahtinro_tuoteno_lisa})";
-			$result = pupe_query($query);
-
 			// jos tilauksella on jo rahtikulu niin merkataan se rahtivapaaksi, ettei rahtikulu mene uudestaan laskutuksen yhteydessä!
-			if (mysql_num_rows($result) > 0) {
+			if ($laskurow["rahtivapaa"] == '' and onko_rahtituote_syotetty($laskurow, TRUE) > 0) {
 				$tilaus_valmis_ulos .= t("Tilauksella oli käsin syötetty rahtikulu! Merkattiin tilaus rahtivapaaksi, ettei kulua lisätä enää automaattisesti laskutuksessa.")."<br>";
 
 				// Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
@@ -752,7 +737,7 @@ else {
 							SET rahtivapaa = 'O',
 							kohdistettu = 'K'
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND tunnus = '$laskurow[tunnus]'";
+							AND tunnus  = '$laskurow[tunnus]'";
 				$rahtivapres = pupe_query($query);
 
 				$laskurow["kohdistettu"] = 'K';
@@ -975,6 +960,9 @@ else {
 								case 'varattu':
 									$values .= ", 1";
 									break;
+								case 'kate_korjattu':
+									$values .= ", NULL";
+									break;
 								default:
 									$values .= ", '{$splitrow[$fieldname]}'";
 							}
@@ -1048,6 +1036,9 @@ else {
 											break;
 										case 'perheid':
 											$values .= ", {$split_tilausrivin_tunnus}";
+											break;
+										case 'kate_korjattu':
+											$values .= ", NULL";
 											break;
 										default:
 											$values .= ", '{$lapsirow[$fieldname]}'";
@@ -1271,10 +1262,10 @@ else {
 					}
 
 					if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
-						$toimitustavan_lahto = $toimitustavan_lahto[$varasto];
+						$toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
 					}
 					else {
-						$toimitustavan_lahto = 0;
+						$toimitustavan_lahto_arvo = 0;
 					}
 
 					// Ei monisteta tunnusta
@@ -1301,7 +1292,7 @@ else {
 								$values .= ", '$tulostusalue'";
 								break;
 							case 'toimitustavan_lahto':
-								$values .= ", '$toimitustavan_lahto'";
+								$values .= ", '$toimitustavan_lahto_arvo'";
 								break;
 							case 'ohjausmerkki':
 								if ($row['omalle_tilaukselle'] > 0 and trim($laskurow['ohjausmerkki']) != "") {
@@ -1325,6 +1316,9 @@ else {
 							case 'toimitustapa':
 								$values .= ", '$split_toimitustapa'";
 								break;
+							case 'kate_korjattu':
+								$values .= ", NULL";
+								break;								
 							default:
 								$values .= ", '".$laskurow[$fieldname]."'";
 						}
@@ -1450,10 +1444,10 @@ else {
 			$toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o', kohdistettu = 'K' " : '';
 
 			if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
-				$toimitustavan_lahto = $toimitustavan_lahto[$varasto];
+				$toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
 			}
 			else {
-				$toimitustavan_lahto = 0;
+				$toimitustavan_lahto_arvo = 0;
 			}
 
 			$ohjausmerkkilisa = "";
@@ -1467,7 +1461,7 @@ else {
 			$query = "	UPDATE lasku set
 						varasto 							= '$varasto',
 						tulostusalue						= '$tulostusalue',
-						toimitustavan_lahto					= '$toimitustavan_lahto',
+						toimitustavan_lahto					= '$toimitustavan_lahto_arvo',
 						ultilno 							= '$laskurow[ultilno]',
 						aktiivinen_kuljetus 				= '$laskurow[aktiivinen_kuljetus]',
 						aktiivinen_kuljetus_kansallisuus	= '$laskurow[aktiivinen_kuljetus_kansallisuus]',

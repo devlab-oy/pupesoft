@@ -22,7 +22,7 @@
 	if ($ytunnus != '') {
 
 		if ($valittuytunnus != "" and $valittuytunnus != $ytunnus) $toimittajaid = "";
-		
+
 		require ("inc/kevyt_toimittajahaku.inc");
 
 		// Toimittaja löytyi
@@ -62,7 +62,7 @@
 	echo "<th>".t("Toimittaja")."</th>";
 	echo "<td><input type='text' name='ytunnus' value='$ytunnus'> ";
 	echo "{$toimittajarow["nimi"]} {$toimittajarow["nimitark"]} {$toimittajarow["postitp"]}";
-	
+
 	echo "<input type='hidden' name='valittuytunnus' value='$ytunnus'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "</td>";
@@ -116,22 +116,11 @@
 
 		if ($total_rows > 0) {
 
-			if (@include('Spreadsheet/Excel/Writer.php')) {
+			include('inc/pupeExcel.inc');
 
-				//keksitään failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-				$workbook->setVersion(8);
-				$worksheet =& $workbook->addWorksheet('Varastoluettelo');
-
-				$format_bold =& $workbook->addFormat();
-				$format_bold->setBold();
-
-				$excelrivi = 0;
-			}
+			$worksheet 	 = new pupeExcel();
+			$format_bold = array("bold" => TRUE);
+			$excelrivi 	 = 0;
 
 			$varastotilasto_table = "<table>";
 			$varastotilasto_table .= "<th>".t("Osasto")."</th>";
@@ -150,25 +139,23 @@
 			$varastotilasto_table .= "<th>".t("Myynti")."<br>6kk</th>";
 			$varastotilasto_table .= "<th>".t("Myynti")."<br>3kk</th>";
 
-			if (isset($workbook)) {
-				$excelsarake = 0;
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhmä"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Varastosaldo"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Varastonarvo"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Myyntihinta"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Varmuusvarasto"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Tilattu määrä"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Toimitus aika"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Varattu saldo"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $vvl");
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 12kk"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 6kk"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 3kk"));
-				$excelrivi++;
-			}
+			$excelsarake = 0;
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhmä"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Varastosaldo"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Varastonarvo"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Myyntihinta"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Varmuusvarasto"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Tilattu määrä"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Toimitus aika"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Varattu saldo"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $vvl");
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 12kk"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 6kk"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 3kk"));
+			$excelrivi++;
 
 			echo "<font class='message'>", t("Käsitellään"), " $total_rows ", t("tuotetta"), ".</font>";
 			require('inc/ProgressBar.class.php');
@@ -272,42 +259,39 @@
 				$varastotilasto_table .= "<td align='right'>$myyntirivi[myynti3kk]</td>";
 				$varastotilasto_table .= "</tr>";
 
-				if (isset($workbook)) {
-					$excelsarake = 0;
-					$worksheet->writeString($excelrivi, $excelsarake++, $row["osasto"]);
-					$worksheet->writeString($excelrivi, $excelsarake++, $row["try"]);
-					$worksheet->writeString($excelrivi, $excelsarake++, $row["tuoteno"]);
-					$worksheet->writeString($excelrivi, $excelsarake++, $row["nimitys"]);
-					$worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);
-					$worksheet->writeNumber($excelrivi, $excelsarake++, $varastonarvo);
-					$worksheet->writeNumber($excelrivi, $excelsarake++, $row["myyntihinta"]);
-					$worksheet->writeNumber($excelrivi, $excelsarake++, $row["varmuus_varasto"]);
-					$worksheet->writeNumber($excelrivi, $excelsarake++, $ostorivi["tulossa"]);
-					$worksheet->writeString($excelrivi, $excelsarake++, $ostorivi["toimaika"]);
-					$worksheet->writeNumber($excelrivi, $excelsarake++, $varattu);
-					$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myyntiVA"]);
-					$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti12kk"]);
-					$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti6kk"]);
-					$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti3kk"]);
-					$excelrivi++;
-				}
+				$excelsarake = 0;
+				$worksheet->writeString($excelrivi, $excelsarake++, $row["osasto"]);
+				$worksheet->writeString($excelrivi, $excelsarake++, $row["try"]);
+				$worksheet->writeString($excelrivi, $excelsarake++, $row["tuoteno"]);
+				$worksheet->writeString($excelrivi, $excelsarake++, $row["nimitys"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $varastonarvo);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $row["myyntihinta"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $row["varmuus_varasto"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $ostorivi["tulossa"]);
+				$worksheet->writeString($excelrivi, $excelsarake++, $ostorivi["toimaika"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $varattu);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myyntiVA"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti12kk"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti6kk"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti3kk"]);
+				$excelrivi++;
 			}
 
 			$varastotilasto_table .= "</table>";
 
 			echo "<br>";
 
-			if (isset($workbook)) {
-				$workbook->close();
-				echo "<table>";
-				echo "<tr><th>".t("Tallenna excel").":</th>";
-				echo "<form method='post' class='multisubmit'>";
-				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='Varastotilasto.xls'>";
-				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table><br>";
-			}
+			$excelnimi = $worksheet->close();
+
+			echo "<table>";
+			echo "<tr><th>".t("Tallenna excel").":</th>";
+			echo "<form method='post' class='multisubmit'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='".t("Varastotilasto").".xlsx'>";
+			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+			echo "</table><br>";
 
 			if ($current_row > 10000000) {
 				echo "<font class='error'>", t("Hakutulos oli liian suuri"), ". " ,t("Tulos vain excelissä"), ".</font><br><br>";

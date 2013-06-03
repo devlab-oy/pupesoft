@@ -81,63 +81,34 @@
 
 	echo "<font class='head'>".t("Tuotekysely")."</font><hr>";
 
-	if ($tee == 'Z' and (!isset($tyyppi) or $tyyppi == '')) {
-		require "inc/tuotehaku.inc";
-	}
-
 	if ($tee == 'Z' and isset($tyyppi) and $tyyppi != '') {
-
 		if ($tyyppi == 'TOIMTUOTENO') {
-
-			$query = "	SELECT tuotteen_toimittajat.tuoteno
-						FROM tuotteen_toimittajat
-						JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
-						WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-						AND tuotteen_toimittajat.toim_tuoteno = '{$tuoteno}'
-						AND (tuote.status NOT IN ('P','X') OR (SELECT SUM(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0) > 0)
-						ORDER BY tuote.tuoteno";
-			$result = pupe_query($query);
-
-			if (mysql_num_rows($result) == 0) {
-				$query = "	SELECT tuote.tuoteno
-							FROM tuotteen_toimittajat_tuotenumerot AS ttt
-							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
-							JOIN tuote ON (tuote.yhtio = tt.yhtio AND tuote.tuoteno = tt.tuoteno)
-							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
-							AND (ttt.tuoteno = '{$tuoteno}' or ttt.viivakoodi = '{$tuoteno}')
-							AND (tuote.status NOT IN ('P','X') OR (SELECT SUM(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0) > 0)";
-				$chk_res = pupe_query($query);
-
-				if (mysql_num_rows($chk_res) != 0) {
-					$result = $chk_res;
-				}
-			}
-
-			if (mysql_num_rows($result) == 0) {
-				$varaosavirhe = t("VIRHE: Tiedolla ei löytynyt tuotetta")."!";
-				$tee = 'Y';
-			}
-			elseif (mysql_num_rows($result) > 1) {
-				$varaosavirhe = t("VIRHE: Tiedolla löytyi useita tuotteita")."!";
-				$tee = 'Y';
-			}
-			else {
-				$tr = mysql_fetch_assoc($result);
-				$tuoteno = $tr["tuoteno"];
-			}
+			$tuoteno = "?".$tuoteno;
 		}
 	}
 
-	if ($tee=='Y') echo "<font class='error'>$varaosavirhe</font>";
+	if ($tee == 'Z' and $tuoteno != "") {
+		require "inc/tuotehaku.inc";
+	}
+
+	if ($tee == 'Y') echo "<font class='error'>$varaosavirhe</font>";
 
 	 //syotetaan tuotenumero
 	$formi  = 'formi';
 	$kentta = 'tuoteno';
 
-	//Paluu nappi osto/myyntitilaukselle
-	$query    = "SELECT * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
-	$result   = pupe_query($query);
-	$laskurow = mysql_fetch_assoc($result);
+	// Paluu nappi osto/myyntitilaukselle
+	if ($kukarow["kesken"] > 0) {
+		$query    = "	SELECT *
+						FROM lasku
+						WHERE tunnus = '$kukarow[kesken]'
+						AND yhtio = '$kukarow[yhtio]'";
+		$result   = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($result);
+	}
+	else {
+		$laskurow = array();
+	}
 
 	if ($kukarow["kuka"] != "" and $laskurow["tila"] == "O") {
 		echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_osto.php'>

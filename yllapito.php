@@ -675,6 +675,8 @@
 							$otsikrow["oletus_olmapvm"] = $oletus_erapvm;
 						}
 
+						$komm = "";
+
 						// Jos lasku on hyv‰ksytty ja muutetaan hyvˆksynt‰‰n liittyvi‰ tietoja
 						if ($laskuorow["hyvak1"] != "" and $laskuorow["hyvak1"] != "verkkolas" and $laskuorow["h1time"] != "0000-00-00 00:00:00" and (
 							($oletus_erapvm > 0 and $laskuorow["erpcm"] != $oletus_erapvm) or
@@ -725,6 +727,8 @@
 							$laskuorow["h5time"]	= "0000-00-00 00:00:00";
 
 							$laskuorow["hyvaksyja_nyt"] = $otsikrow["oletus_hyvak1"];
+
+							$komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyv‰ksynt‰‰n koska toimittajan tietojen p‰ivitys muutti laskun tietoja.")."<br>";
 						}
 
 						// Matkalasku
@@ -777,6 +781,7 @@
 									pankki2 			= '$otsikrow[pankki2]',
 									pankki3 			= '$otsikrow[pankki3]',
 									pankki4 			= '$otsikrow[pankki4]',
+									comments			= trim(concat('$komm', comments)),
 									hyvaksynnanmuutos 	= '$otsikrow[oletus_hyvaksynnanmuutos]',
 									suoraveloitus 		= '$otsikrow[oletus_suoraveloitus]',
 									sisviesti1 			= '$otsikrow[ohjeitapankille]'

@@ -550,7 +550,7 @@
 		echo "<br><font class='message'>".t("Luotiin aineisto")." ($niminimi) ".t("joka sis‰lt‰‰")." ".($excelrivi-2)." ".t("rivi‰")."</font><br>";
 
 		echo "<table>";
-		echo "<tr><th>".t("Tallenna tiedosto koneellesi").":</th>";
+		echo "<tr><th>".t("Tallenna excel").":</th>";
 		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='kaunisnimi' value='$niminimi'>";

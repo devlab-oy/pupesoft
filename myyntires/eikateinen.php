@@ -15,7 +15,8 @@ else {
 }
 
 if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
-	$laskupvmerror   = FALSE;
+	$laskupvmerror      = FALSE;
+	$laskumaksettuerror = FALSE;
 
 	if ($toim == 'KATEINEN') {
 		$tapahtumapaiva  = date('Y-m-d', mktime(0,0,0,$tapahtumapaiva_kk,$tapahtumapaiva_pp,$tapahtumapaiva_vv));
@@ -31,12 +32,16 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		$laskupvmerror = TRUE;
 	}
 
+	if ($toim == 'KATEINEN' and $laskurow['mapvm'] != '0000-00-00') {
+		$laskumaksettuerror = TRUE;
+	}
+
 	$tilikausi = tarkista_saako_laskua_muuttaa($tapahtumapaiva);
 
-	if (empty($tilikausi) and !$laskupvmerror) {
-		$mehtorow = hae_maksuehto($maksuehto);
-		$konsrow  = hae_asiakas($laskurow);
-		$kassalipasrow = hae_kassalipas($kassalipas);
+	if (empty($tilikausi) and !$laskupvmerror and !$laskumaksettuerror) {
+		$mehtorow 		= hae_maksuehto($maksuehto);
+		$konsrow  		= hae_asiakas($laskurow);
+		$kassalipasrow 	= hae_kassalipas($kassalipas);
 
 		$params = array(
 			'konsrow'		 => $konsrow,
@@ -55,7 +60,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 			$_tmp = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
 		}
 		else {
-			$myysaatili  = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
+			$myysaatili = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
 		}
 
 		list($_kassalipas, $kustp) = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow);
@@ -87,6 +92,9 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 
 		$laskuno = 0;
 		echo "<br>";
+	}
+	elseif ($laskumaksettuerror) {
+		echo "<font class='error'>".t("VIRHE: Lasku on jo maksettu")."!</font>";
 	}
 	elseif ($laskupvmerror) {
 		echo "<font class='error'>".t("VIRHE: Syötetty päivämäärä on pienempi kuin laskun päivämäärä %s", "", $laskurow['tapvm'])."!</font>";
@@ -482,9 +490,21 @@ function hae_lasku2($laskuno, $toim) {
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<font class='error'>".t("Laskunumerolla")." '$laskuno' ".t("ei löydy sopivaa laskua")."!</font><br><br>";
+		return FALSE;
 	}
 
-	return mysql_fetch_assoc($result);
+	$row = mysql_fetch_assoc($result);
+
+	if ($toim == 'KATEINEN' and $row['kateinen'] != '') {
+		echo "<font class='error'>".t("VIRHE: Lasku on jo käteislasku")."!</font><br><br>";
+		return FALSE;
+	}
+	elseif ($toim == 'KATEINEN' and $row['mapvm'] != '0000-00-00') {
+		echo "<font class='error'>".t("VIRHE: Lasku on jo maksettu")."!</font><br><br>";
+		return FALSE;
+	}
+
+	return $row;
 }
 
 function echo_lasku_table($laskurow, $toim) {

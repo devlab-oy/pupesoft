@@ -286,7 +286,8 @@ if (!function_exists('alku_kerayslista')) {
 				//etsitään myyjän nimi
 				$query  = "	SELECT nimi, kuka
 							FROM kuka
-							WHERE tunnus='$laskurow[myyja]' AND yhtio='$kukarow[yhtio]'";
+							WHERE tunnus = '$laskurow[myyja]'
+							AND yhtio    = '$kukarow[yhtio]'";
 				$myyresult = mysql_query($query) or pupe_error($query);
 				$myyrow = mysql_fetch_assoc($myyresult);
 
@@ -296,19 +297,21 @@ if (!function_exists('alku_kerayslista')) {
 			$pdf->draw_text(430, 729, t("Tilauspvm", $kieli),							 	$thispage, $pieni);
 			$pdf->draw_text(430, 719, tv1dateconv($laskurow["luontiaika"], "pitka"), 		$thispage, $norm);
 
+			$ttapae = $laskurow["toimitustapa"];
 
 			//etsitään löytyykö rahtisopimusta
-			$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"], false, $laskurow["rahtisopimus"]);
-
-			$laskurow['toimitustapa'] = t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli);
+			$rahtirow = hae_rahtisopimusnumero($ttapae, $laskurow["ytunnus"], $laskurow["liitostunnus"], false, $laskurow["rahtisopimus"]);
 
 			if ($rahtirow["rahtisopimus"] != "") {
-				$laskurow["toimitustapa"] .= " / ".$rahtirow["rahtisopimus"];
+				$ttapae .= " / ".$rahtirow["rahtisopimus"];
+			}
+			if ($laskurow["rahtivapaa"] == 'o' and onko_rahtituote_syotetty($laskurow) == 0) {
+				$ttapae .= " / ". t("Rahtivapaa", $kieli);
 			}
 
 			$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
 			$pdf->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), $thispage, $pieni);
-			$pdf->draw_text(310, 698, $laskurow["toimitustapa"], 		$thispage, $boldi);
+			$pdf->draw_text(310, 698, $ttapae, 		$thispage, $boldi);
 
 			$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
 

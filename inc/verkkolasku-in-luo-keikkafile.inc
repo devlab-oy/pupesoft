@@ -697,6 +697,9 @@
 								$hinta_alkuperainenlisa = round(($tilausrivirow['hinta_alkuperainen'] / ($tilausrivirow['kpl']+$tilausrivirow['varattu'])) * $kappaleerotus, 6);
 								$values .= ", '{$hinta_alkuperainenlisa}'";
 								break;
+							case 'kate_korjattu':
+								$values .= ", NULL";
+								break;
 							default:
 								$values .= ", '".$tilausrivirow[$fieldname]."'";
 						}
@@ -1060,6 +1063,9 @@
 								case 'laskutettuaika':
 									$values .= ", '0000-00-00'";
 									break;
+								case 'kate_korjattu':
+									$values .= ", NULL";
+									break;
 								default:
 									$values .= ", '".$tilausrivirow[$fieldname]."'";
 							}
@@ -1295,6 +1301,9 @@
 									break;
 								case 'laadittu':
 									$values .= ", now()";
+									break;
+								case 'kate_korjattu':
+									$values .= ", NULL";
 									break;
 								default:
 									$values .= ", '".$split_row[$fieldname]."'";

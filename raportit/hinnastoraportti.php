@@ -156,10 +156,10 @@
 		$excelnimi = $worksheet->close();
 
 		echo "<br><br>";
-		echo "<font class='message'>".t("Tallenna raportti (xls)").": </font>";
+		echo "<font class='message'>".t("Tallenna excel").": </font>";
 		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-		echo "<input type='hidden' name='kaunisnimi' value='hinnastoraportti.xlsx'>";
+		echo "<input type='hidden' name='kaunisnimi' value='".t("hinnastoraportti").".xlsx'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 		echo "<input type='submit' value='".t("Tallenna")."'>";
 		echo "</form>";

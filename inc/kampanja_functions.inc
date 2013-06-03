@@ -377,11 +377,19 @@ if (!function_exists('hae_ehdon_tai_aliehdon_kohteen_resurssi')) {
 				break;
 			case 'asiakaskategoria':
 				$query = "	SELECT dynaaminen_puu.*,
+							group_concat(parent.nimi SEPARATOR ' &raquo; ') polku,
 							dynaaminen_puu.nimi as info
 							FROM dynaaminen_puu
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND laji = 'Asiakas'
-							AND tunnus = '{$ehto['arvo']}'";
+							JOIN dynaaminen_puu AS parent
+							ON ( parent.yhtio = dynaaminen_puu.yhtio
+								AND parent.laji = dynaaminen_puu.laji
+								AND parent.lft <= dynaaminen_puu.lft
+								AND parent.rgt >= dynaaminen_puu.lft
+								AND parent.lft > 0
+								AND parent.syvyys != 0 )
+							WHERE dynaaminen_puu.yhtio = '{$kukarow['yhtio']}'
+							AND dynaaminen_puu.laji = 'Asiakas'
+							AND dynaaminen_puu.tunnus = '{$ehto['arvo']}'";
 				break;
 			case 'tuote':
 				$query = "	SELECT tuote.*,
@@ -392,11 +400,19 @@ if (!function_exists('hae_ehdon_tai_aliehdon_kohteen_resurssi')) {
 				break;
 			case 'tuotekategoria':
 				$query = "	SELECT dynaaminen_puu.*,
+							group_concat(parent.nimi SEPARATOR ' &raquo; ') polku,
 							dynaaminen_puu.nimi as info
 							FROM dynaaminen_puu
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND laji = 'Tuote'
-							AND tunnus = '{$ehto['arvo']}'";
+							JOIN dynaaminen_puu AS parent
+							ON ( parent.yhtio = dynaaminen_puu.yhtio
+								AND parent.laji = dynaaminen_puu.laji
+								AND parent.lft <= dynaaminen_puu.lft
+								AND parent.rgt >= dynaaminen_puu.lft
+								AND parent.lft > 0
+								AND parent.syvyys != 0 )
+							WHERE dynaaminen_puu.yhtio = '{$kukarow['yhtio']}'
+							AND dynaaminen_puu.laji = 'Tuote'
+							AND dynaaminen_puu.tunnus = '{$ehto['arvo']}'";
 				break;
 			case 'tuoteosasto':
 				$query = "	SELECT avainsana.*,
@@ -427,7 +443,12 @@ if (!function_exists('hae_ehdon_tai_aliehdon_kohteen_resurssi')) {
 
 		$result = pupe_query($query);
 
-		return mysql_fetch_assoc($result);
+		$resurssi = mysql_fetch_assoc($result);
+
+		if ($ehto['kohde'] == 'asiakaskategoria' or $ehto['kohde'] == 'tuotekategoria') {
+			$resurssi['info'] = $resurssi['polku'] . ' &raquo; ' . $resurssi['info'];
+		}
+		return $resurssi;
 	}
 }
 

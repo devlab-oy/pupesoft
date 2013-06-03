@@ -168,7 +168,9 @@ function luo_uusi_kampanja($request) {
 			poista_kampanja_palkinnot($kampanja_tunnus);
 			return false;
 		}
-		luo_palkinto_rivi($palkinto_rivi, $kampanja_tunnus);
+		else {
+			luo_palkinto_rivi($palkinto_rivi, $kampanja_tunnus);
+		}
 	}
 
 	return true;
@@ -362,6 +364,13 @@ function muokkaa_kampanjaa($request) {
 			if (!$onko_aliehto_ok) {
 				return false;
 			}
+		}
+	}
+
+	foreach ($request['palkinto_rivit'] as $palkinto_rivi) {
+		$onko_palkinto_ok = validoi_palkinto_rivi($palkinto_rivi);
+		if (!$onko_palkinto_ok) {
+			return false;
 		}
 	}
 

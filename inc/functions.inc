@@ -8973,7 +8973,7 @@ if (!function_exists('livesearch_asiakaskategoriahaku')) {
 				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("asiakaskategoriaa"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
 			}
 			else {
-				echo "<div style='padding:2px'><font class='message'>".t("Ei tuotekategorioita").".</font></div>";
+				echo "<div style='padding:2px'><font class='message'>".t("Ei asiakaskategorioita").".</font></div>";
 			}
 		}
 		else {

@@ -2399,9 +2399,11 @@ if ($tee == 'I') {
 
 				for ($i=0; $i<mysql_num_fields($result); $i++) {
 
-					if (mysql_field_name($result, $i) != 'tunnus') {
+					$fieldname = mysql_field_name($result, $i);
 
-						if (mysql_field_name($result, $i) == 'tapvm') {
+					if (!in_array($fieldname, array('tunnus','olmapvm','kate_korjattu'))) {
+
+						if ($fieldname == 'tapvm') {
 							$kopiotpk = $tpk + $kopio;
 
 							if ($kopiotpk > 12) {
@@ -2415,7 +2417,7 @@ if ($tee == 'I') {
 
 							$query .= "tapvm ='$kopiotpv-$kopiotpk-$kopiotpp',";
 						}
-						elseif (mysql_field_name($result, $i) == 'erpcm') {
+						elseif ($fieldname == 'erpcm') {
 
 							$kopioerk = $erk + $kopio;
 
@@ -2434,7 +2436,7 @@ if ($tee == 'I') {
 								$query .= "olmapvm ='$kopioerv-$kopioerk-$kopioerp',";
 							}
 						}
-						elseif (mysql_field_name($result, $i) == 'kapvm') {
+						elseif ($fieldname == 'kapvm') {
 
 							if ($laskurow['kapvm'] != '0000-00-00') {
 
@@ -2453,12 +2455,8 @@ if ($tee == 'I') {
 								$query .= "olmapvm ='$kopiokav-$kopiokak-$kopiokap',";
 							}
 						}
-						elseif (mysql_field_name($result, $i) == 'olmapvm') {
-						}
-						elseif (mysql_field_name($result, $i) == 'kate_korjattu') {
-						}
 						else {
-							$query .= mysql_field_name($result,$i) . "='".$laskurow[mysql_field_name($result,$i)]."',";
+							$query .= $fieldname . "='{$laskurow[$fieldname]}',";
 						}
 					}
 				}

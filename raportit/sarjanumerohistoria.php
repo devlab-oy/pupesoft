@@ -332,7 +332,7 @@ function hae_tilaukset($request) {
 function echo_tilaukset_raportti($tilaukset, $request = array()) {
 	global $kukarow, $yhtiorow, $palvelin2;
 
-	$lopetus = "{$_SERVER['PHP_SELF']}////tee=hae_tilaukset//sarjanumero={$request['sarjanumero']}//asiakas={$request['asiakas']}//toimittaja={$request['toimittaja']}//tuote={$request['tuote']}//alku_pvm={$request['alku_pvm']}//loppu_pvm={$request['loppu_pvm']}";
+	$lopetus = "{$_SERVER['PHP_SELF']}////tee=hae_tilaukset//sarjanumero={$request['sarjanumero']}//asiakas={$request['asiakas']}//toimittaja={$request['toimittaja']}//tuote={$request['tuote']}//ppa={$request['ppa']}//kka={$request['kka']}//vva={$request['vva']}//ppl={$request['ppl']}//kkl={$request['kkl']}//vvl={$request['vvl']}";
 
 	echo "<table>";
 	echo "<thead>";

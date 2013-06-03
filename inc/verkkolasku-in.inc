@@ -533,7 +533,7 @@
 							WHERE ttunnus 	= '$trow[tunnus]'
 							and tyyppi 		= 'k'
 							and yhtio 		= '$yhtio'
-							and tilino 		= '0'
+							and tilino 	   in ('0','')
 							and kuvaus 		= '".mysql_real_escape_string($kauttalaskutus)."'";
 				$result = pupe_query($query);
 
@@ -660,7 +660,7 @@
 									WHERE ttunnus 	= '$trow[tunnus]'
 									and tyyppi 		= 'a'
 									and yhtio 		= '$yhtio'
-									and tilino 		= '0'
+									and tilino 	   in ('0','')
 									and kuvaus 		= '".mysql_real_escape_string($laskun_asiakastunnus)."'";
 						$result = pupe_query($query);
 
@@ -1062,7 +1062,7 @@
 							WHERE ttunnus	= '$trow[tunnus]'
 							and yhtio 		= '$yhtio'
 							and tyyppi 		= 't'
-							and tilino	   != '0'";
+							and tilino not in ('0','')";
 				$result = pupe_query($query);
 
 				// Onko laskuriveillä useita alv-verokantoja?
@@ -1210,7 +1210,7 @@
 										and yhtio 		= '$yhtio'
 										and mintuote   <= '$tuote'
 										and maxtuote   >= '$tuote'
-										and tilino 	   != '0'";
+										and tilino not in ('0','')";
 							$result = pupe_query($query);
 
 	 						// Sopiva sääntöä ei löytynyt
@@ -1222,7 +1222,7 @@
 											and tyyppi 		= 't'
 											and yhtio 		= '$yhtio'
 											and kuvaus like '%$selite%'
-											and tilino     != '0'";
+											and tilino not in ('0','')";
 								$result = pupe_query($query);
 
 	 							// Hmm, mikään sääntö ei kelpaa

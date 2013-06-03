@@ -1407,6 +1407,7 @@ if (!function_exists("saldo_myytavissa")) {
 										ifnull(sum(if (tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 										JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero) ON sarjanumeroseuranta.yhtio = tilausrivi.yhtio
+										JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and lasku.valmistuksen_tila='')
 										and sarjanumeroseuranta.tuoteno 			= tilausrivi.tuoteno
 										and sarjanumeroseuranta.hyllyalue 			= tilausrivi.hyllyalue
 										and sarjanumeroseuranta.hyllynro  			= tilausrivi.hyllynro
@@ -1429,6 +1430,7 @@ if (!function_exists("saldo_myytavissa")) {
 							$query = "	SELECT
 										ifnull(sum(if (tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+										JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and lasku.valmistuksen_tila='')
 										WHERE tilausrivi.yhtio = '$yhtiolisa'
 										and tilausrivi.tyyppi in ('L','G','V')
 										and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
@@ -2601,6 +2603,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 
 				// Jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
 				$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'], 6);
+				$rahtikulut += $round($laskurow['pyoristys_erot'] * $laskurow['vienti_kurssi'], 6);
 
 				while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
@@ -9139,7 +9142,7 @@ if (!function_exists("on_puhelinnumero")) {
 }
 
 if (!function_exists("hae_rahtisopimusnumero")) {
-	function hae_rahtisopimusnumero ($toimitustapa, $ytunnus = "", $asiakastunnus = "") {
+	function hae_rahtisopimusnumero ($toimitustapa, $ytunnus = "", $asiakastunnus = "", $kaikki = false, $valittusoppari = "") {
 		global $kukarow;
 
 		// Pelkällä toimitustavalla haettuna palautetaan firman oma sopimusnumero
@@ -9150,23 +9153,48 @@ if (!function_exists("hae_rahtisopimusnumero")) {
 						AND selite = '{$toimitustapa}'";
 		}
 		else {
-			$query = "	(SELECT *, '1' prio
+
+			$query = "";
+
+			if ($valittusoppari != "") {
+				$query .= "( SELECT *, '1' prio
+								FROM rahtisopimukset as rahtisopimukset3
+								WHERE toimitustapa = '$toimitustapa'
+								AND asiakas 	   = '$asiakastunnus'
+								AND asiakas 	  != ''
+								AND rahtisopimus   = '$valittusoppari'
+								AND yhtio          = '{$kukarow["yhtio"]}')
+								UNION
+								(SELECT *, '2' prio
+								FROM rahtisopimukset as rahtisopimukset4
+								WHERE toimitustapa  = '$toimitustapa'
+								AND ytunnus         = '$ytunnus'
+								AND ytunnus        != ''
+								AND rahtisopimus    = '$valittusoppari'
+								AND yhtio           = '{$kukarow["yhtio"]}')
+								UNION";
+			}
+
+
+			$query .= "( SELECT *, '3' prio
 						FROM rahtisopimukset
 						WHERE toimitustapa = '$toimitustapa'
 						AND asiakas = '$asiakastunnus'
 						AND asiakas != ''
 						AND yhtio = '{$kukarow["yhtio"]}')
 						UNION
-						(SELECT *, '2' prio
+						(SELECT *, '4' prio
 						FROM rahtisopimukset as rahtisopimukset2
 						WHERE toimitustapa = '$toimitustapa'
 						AND ytunnus = '$ytunnus'
 						AND ytunnus != ''
 						AND yhtio = '{$kukarow["yhtio"]}')
-						ORDER BY prio
-						LIMIT 1";
+						ORDER BY prio, tunnus desc";
 		}
 		$rares = pupe_query($query);
+
+		if ($kaikki) return $rares;
+
 		$rarow = mysql_fetch_assoc($rares);
 
  		return $rarow;
@@ -14215,6 +14243,16 @@ if (!function_exists('tulosta_hrx')) {
 		$ot_yhteyshenkilo = t("Yhteyshenkilö", $yhtiorow['kieli']);
 		$ot_puhelin = t("Puhelin", $yhtiorow['kieli']);
 
+		if ($yhtiorow['yhtio'] == 'mergr') {
+
+			if ($pakkauskoodi == 'CLL') {
+				$pakkauskoodi = $montako_laatikkoa_yht > 1 ? 'PAKKI' : 'PAKK';
+			}
+			elseif ($pakkauskoodi == 'PLL') {
+				$pakkauskoodi = 'LAVA';
+			}
+		}
+
 		if (!empty($mediatyyppi) and in_array($mediatyyppi, array('LSN149X104','LSN59X40'))) {
 			$nauha = "2";
 		}
@@ -14233,7 +14271,7 @@ if (!function_exists('tulosta_hrx')) {
 					{C|}
 
 				 	*** TOIMITUSOSOITE ***
-				 	{PC000;0070,0140,1,1,G,00,B|}
+				 	{PC000;0070,0140,05,05,J,00,B|}
 					{RC000;{$ot_toimosoite}|}
 
 				 	{PC001;0070,0200,1,1,A,00,B|}
@@ -14246,15 +14284,15 @@ if (!function_exists('tulosta_hrx')) {
 					{RC003;{$toim_postino} {$toim_postitp}|}
 
 				 	{PC004;0070,0380,1,1,A,00,B|}
-					{RC004;{$ot_yhteyshenkilo}: |}
+					{RC004;{$ot_yhteyshenkilo}: {$yh_nimi}|}
 
 				 	{PC005;0070,0430,1,1,A,00,B|}
-					{RC005;{$ot_puhelin}: |}
+					{RC005;{$ot_puhelin}: {$yh_puh}|}
 
 				 	*** VAAKAVIIVA ***
 				 	{LC;0070,0450,0920,0450,0,2|}
 
-				 	{PC006;0070,0490,1,1,G,00,B|}
+				 	{PC006;0070,0490,05,05,J,00,B|}
 					{RC006;{$ot_lahettaja}|}
 
 				 	{PC007;0070,0535,1,1,A,00,B|}
@@ -14266,7 +14304,7 @@ if (!function_exists('tulosta_hrx')) {
 				 	*** VAAKAVIIVA ***
 				 	{LC;0070,0600,0920,0600,0,2|}
 
-				 	{PC009;0070,0640,1,1,G,00,B|}
+				 	{PC009;0070,0640,05,05,J,00,B|}
 					{RC009;{$ot_kuljetusliike}|}
 
 				 	{PC010;0070,0700,1,1,A,00,B|}
@@ -14291,7 +14329,7 @@ if (!function_exists('tulosta_hrx')) {
 			     	{RB00;{$viivakoodi1}|}
 
 				 	{PC015;0070,1210,1,1,A,00,B|}
-					{RC015;CMR: {$viivakoodi1}|}
+					{RC015;CMR: *{$viivakoodi1}*|}
 
 				 	{PC016;0070,1310,1,1,A,00,B|}
 					{RC016;{$monesko_laatikko} / {$montako_laatikkoa_yht} {$pakkauskoodi}|}
@@ -14518,6 +14556,9 @@ if (!function_exists("kopioi_tilausrivi")) {
 						break;
 					case 'laadittu':
 						$rvalues .= "now(),";
+						break;
+					case 'kate_korjattu':
+						$rvalues .= "NULL,";
 						break;
 					default:
 						$rvalues .= "'";
@@ -14764,15 +14805,25 @@ if (!function_exists("hae_hyvityshinta")) {
 							break;
 						case 'asiakas_segmentti':
 							if ($arvo != 0) {
-								$query = "	SELECT tunnus
-											FROM puun_alkio
-											WHERE yhtio	= '{$kukarow['yhtio']}'
-											AND liitos = '{$liitostunnus}'
-											AND laji = 'asiakas'
-											AND puun_tunnus = '{$arvo}'
-											AND kieli = '{$yhtiorow['kieli']}'";
 
-								if (mysql_num_rows(pupe_query($query)) == 0) $segmentti = false;
+								// haetaan asiakkaan segmentit
+								$query = "	SELECT parent.tunnus
+											FROM puun_alkio
+											JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
+											JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
+											WHERE puun_alkio.yhtio = '$kukarow[yhtio]'
+											AND puun_alkio.laji    = 'asiakas'
+											AND puun_alkio.liitos  = '{$liitostunnus}'";
+								$as_seg_res = pupe_query($query);
+
+								$segmentti = false;
+
+								while ($as_seg_row = mysql_fetch_assoc($as_seg_res)) {
+									if ($as_seg_row['tunnus'] == $arvo) {
+										$segmentti = true;
+										break;
+									}
+								}
 							}
 
 							break;
@@ -15236,6 +15287,9 @@ if (!function_exists("splittaa_tilaus")) {
 				$fields .= ", {$fieldname}";
 
 				switch ($fieldname) {
+					case "kate_korjattu":
+						$values .= ", NULL";
+						break;
 					default:
 						$values .= ", '".$laskusplitrow[$fieldname]."'";
 				}
@@ -15307,6 +15361,9 @@ if (!function_exists("splittaa_tilaus")) {
 							case 'varattu':
 							case 'tilkpl':
 								$values .= ", '".($tilausrivisplitrow['varattu'] - $splitattava_tilausrivi_kpl)."'";
+								break;
+							case 'kate_korjattu':
+								$values .= ", NULL";
 								break;
 							default:
 								$values .= ", '{$tilausrivisplitrow[$fieldname]}'";
@@ -15388,6 +15445,9 @@ if (!function_exists("splittaa_tilaus")) {
 										break;
 									case 'perheid':
 										$values .= ", {$uusitunnus_tilausrivi}";
+										break;
+									case 'kate_korjattu':
+										$values .= ", NULL";
 										break;
 									default:
 										$values .= ", '{$lapsirow[$fieldname]}'";
@@ -15575,6 +15635,8 @@ if (!function_exists("tee_keraysera")) {
 					maat READ,
 					rahtisopimukset READ,
 					rahtisopimukset AS rahtisopimukset2 READ,
+					rahtisopimukset AS rahtisopimukset3 READ,
+					rahtisopimukset AS rahtisopimukset4 READ,
 					pakkaamo WRITE,
 					avainsana as avainsana_kieli READ,
 					lasku as vanha_lasku READ,
@@ -15749,7 +15811,7 @@ if (!function_exists("tee_keraysera")) {
 						(TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, CURTIME())) / 60) as erotus,
 						lasku1.ohjausmerkki,
 						lasku1.liitostunnus,
-						TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark)) as asiakas_nimi,
+						TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark, ' ', lasku1.toim_osoite, ' ', lasku1.toim_postino, ' ', lasku1.toim_postitp)) as asiakas_nimi,
 						CONCAT_WS('!¡!', lahdot3.tunnus, lahdot3.asiakasluokka, lahdot3.lahdon_kellonaika) as lahdon_tiedot,
 						AVG(DATE_FORMAT(lasku1.h1time, '%y%m%d%H%i')) h1time,
 						GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
@@ -15782,7 +15844,7 @@ if (!function_exists("tee_keraysera")) {
 						0 as erotus,
 						lasku2.ohjausmerkki,
 						lasku2.liitostunnus,
-						TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark)) as asiakas_nimi,
+						TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark, ' ', lasku2.toim_osoite, ' ', lasku2.toim_postino, ' ', lasku2.toim_postitp)) as asiakas_nimi,
 						CONCAT_WS('!¡!', 999999999999, 999999999999, 999999999999) lahdon_tiedot,
 						AVG(DATE_FORMAT(lasku2.h1time, '%y%m%d%H%i')) h1time,
 						GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus
@@ -19242,6 +19304,8 @@ if (!function_exists('splittaa_tilausrivi')) {
 					break;
 				case 'tunnus':
 					break;
+				case 'kate_korjattu':
+					break;
 				case 'hinta_alkuperainen':
 					if ($rivi['hinta_alkuperainen'] != 0) {
 						$_tmp_hinta_alkuperainen = round(($rivi['hinta_alkuperainen'] / $vanhan_rivin_kpl) * $uuden_rivin_kpl, 6);
@@ -20182,9 +20246,8 @@ if (!function_exists('luottotilanne')) {
 					FROM lasku
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))	# Kaikki myyntitilaukset, paitsi laskutetut
-					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F', 'G'))					# Myyntitilaus kesken, tulostusjonossa, odottaa hyväksyntää tai odottaa asiakkaan suoritusta
-					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))			# Valmistukset
+					AND ((lasku.tila in ('L', 'N') and lasku.alatila != 'X')			# Kaikki myyntitilaukset, paitsi laskutetut
+					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))	# Valmistukset
 					)
 					AND lasku.liitostunnus in ($liitostunnus)";
 		$avoimettilauksetres = pupe_query($query);
@@ -20336,12 +20399,14 @@ if (!function_exists('triangulation')) {
 		# Katsotaan onko kyseessä kolmikantakauppa
 		$query = "	SELECT lasku.tunnus, lasku.toim_maa
 					FROM tilausrivi
+					JOIN lasku AS las ON (las.yhtio = tilausrivi.yhtio AND las.tunnus = tilausrivi.otunnus AND las.toim_maa != '{$yhtiorow['maa']}')
 					JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 					JOIN tilausrivi as t3 ON (t3.yhtio = tilausrivi.yhtio AND t3.tunnus = tilausrivin_lisatiedot.tilausrivilinkki AND t3.tyyppi = 'O')
-					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = t3.otunnus AND lasku.toim_maa != '{$yhtiorow['maa']}')
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = t3.otunnus AND lasku.maa != '{$yhtiorow['maa']}')
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.tyyppi  = 'L'
-					AND tilausrivi.otunnus IN ({$tunnukset})";
+					AND tilausrivi.otunnus IN ({$tunnukset})
+					AND las.maa != lasku.maa";
 		$result = pupe_query($query);
 
 		return mysql_num_rows($result) > 0 ? "VAT 0% Triangulation.\n" : "";
@@ -20756,6 +20821,80 @@ if (!function_exists('_echo_ordered_table_rows')) {
 	}
 }
 
+if  (!function_exists('hae_chn_teksti')) {
+	function hae_chn_teksti($chn, $kieli = '') {
+
+		switch ($chn) {
+			case '100':
+				return t("Verkkolasku, tulostuspalvelu", $kieli);
+			case '010':
+				return t("Verkkolasku", $kieli);
+			case '020':
+				return t("Vienti-Verkkolasku (EU)", $kieli);
+			case '030':
+				return t("Vienti-Verkkolasku, tulostuspalvelu (EU)", $kieli);
+			case '111':
+				return t("Itella EDI: EIH-1.4 sähköinen lasku", $kieli);
+			case '112':
+				return t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin", $kieli);
+			case '666':
+				return t("Sähköposti", $kieli);
+			case '667':
+				return t("Paperilasku, tulostetaan manuaalisesti", $kieli);
+			case '999':
+				return t("Laskutuskielto, laskutusta ei tehdä", $kieli);
+			default:
+				return FALSE;
+		}
+
+	}
+}
+
+if  (!function_exists('verkkolaskuputkeen')) {
+	function verkkolaskuputkeen($lasrow, $masrow) {
+		global $yhtiorow;
+
+		// Tässä pohditaan laitetaanko verkkolaskuputkeen...
+
+		// Maksuehdon takaa voidaan säätää, että laskut eivät mene verkkolaskuputkeen
+		if ($masrow["itsetulostus"] != "") {
+			return FALSE;
+		}
+
+		// Sisäiset laskut eivät mene verkkolaskuputkeen
+		if ($lasrow["sisainen"] != "") {
+			return FALSE;
+		}
+
+		// Käteislaskut eivät mene verkkolaskuputkeen
+		if ($masrow["kateinen"] != "") {
+			return FALSE;
+		}
+
+		// Sähköposti- ja 'chn-itsetulostus'-laskut eivät mene verkkolaskuputkeen
+		if ($lasrow["chn"] == '666' or $lasrow["chn"] == '667') {
+			return FALSE;
+		}
+
+		// Nollasummalaskut eivät mene verkkolaskuputkeen
+		if (abs($lasrow["summa"]) == 0) {
+			return FALSE;
+		}
+
+		// EU-viennit eivät mene verkkolaskuputkeen, paitsko jos CHN tai verkkolasku_vienti salii verkkolaskutuksen
+		if ($lasrow["vienti"] == "E" and $yhtiorow['verkkolasku_vienti'] == "" and $lasrow["chn"] != "020" and $lasrow["chn"] != "030") {
+			return FALSE;
+		}
+
+		// EI-EU-viennit eivät mene verkkolaskuputkeen, paitsko jos verkkolasku_vienti sallii verkkolaskutuksen
+		if ($lasrow["vienti"] == "K" and $yhtiorow['verkkolasku_vienti'] != "K") {
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+}
+
 // Sorttaa kaksiulotteisen arrayn annetun keyn perusteella
 //esim
 /**
@@ -21116,3 +21255,33 @@ if (!function_exists('rekursiivinen_resepti')) {
 require('inc/lasku_functions.inc');
 require('inc/tuote_functions.inc');
 require('inc/kampanja_functions.inc');
+
+if (!function_exists('onko_rahtituote_syotetty')) {
+	function onko_rahtituote_syotetty($laskurow, $whateverhinta = FALSE) {
+		global $kukarow, $yhtiorow;
+
+		// Palautetaan Rahti-tuoterivien lukumäärätilausvalmis
+		$query = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND selite  = '$laskurow[toimitustapa]'";
+		$result = pupe_query($query);
+		$torow = mysql_fetch_assoc($result);
+
+		$rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
+
+		$hintalisa = $whateverhinta === FALSE ? " AND hinta != 0 " : "";
+
+		// katsotaan onko rahtituotenumero syötetty jo käsin
+		$query = "	SELECT tunnus
+					FROM tilausrivi
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND otunnus = '$laskurow[tunnus]'
+					AND tyyppi != 'D'
+					{$hintalisa}
+					AND tuoteno IN ({$rahtinro_tuoteno_lisa})";
+		$result = pupe_query($query);
+
+		return mysql_num_rows($result);
+	}
+}

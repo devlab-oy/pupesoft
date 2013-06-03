@@ -14,6 +14,7 @@
 					rahti,
 					rahti_etu,
 					rahti_huolinta,
+					pyoristys_erot,
 					saldo_maksettu,
 					vienti_kurssi,
 					mapvm
@@ -58,6 +59,7 @@
 			if ($row["mapvm"] != "0000-00-00") {
 				// Jos virallinen varastonarvolaskenta on tehty
 				$rahtikulut = $row['saldo_maksettu'] + round($row['rahti_etu'] * $row['vienti_kurssi'], 2);
+				$rahtikulut += round($row['pyoristys_erot'] * $row['vienti_kurssi'], 2);
 			}
 			else {
 				// Jos ollaan annettu t‰lle batchille kulusumma, k‰ytet‰‰nkin vaan sit‰!

@@ -359,6 +359,21 @@
 
 			$('.paivita').live('click', paivitatuote);
 
+			var hailaittaa = function() {
+
+				var linksu_id = $(this).attr('id');
+
+				$('.hailaitimg').each(
+					function() {
+						$(this).css('background-color', 'transparent');
+					}
+				);
+
+				$('#'+linksu_id).css('background-color', '#00FF00');
+			};
+
+			$('.hailaitimg').live('click', hailaittaa);
+
 			</script>";
 
 		$lisaa  = ""; // tuote-rajauksia
@@ -533,6 +548,7 @@
 		$bbl = " style='border-bottom: 1px solid; border-left: 1px solid; margin-bottom: 20px;' ";
 
 		$indeksi = 0;
+
 		// loopataan tuotteet läpi
 		while ($row = mysql_fetch_assoc($res)) {
 
@@ -644,10 +660,10 @@
 
 				if ($useampi_yhtio > 1) {
 					echo "<td valign='top' $btl>$row[yhtio]</td>";
-					echo "<td valign='top' $bt><a name='A_$indeksi'></a>$row[tuoteno] <img onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=600'); return false;\" src='{$palvelin2}pics/lullacons/info.png'></td>";
+					echo "<td valign='top' $bt><a name='A_$indeksi'></a>$row[tuoteno] <img class='hailaitimg' id='HI_$indeksi' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=600'); return false;\" src='{$palvelin2}pics/lullacons/info.png'></td>";
 				}
 				else {
-					echo "<td valign='top' $btl><a name='A_$indeksi'></a>$row[tuoteno] <img onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=600'); return false;\" src='{$palvelin2}pics/lullacons/info.png'></td>";
+					echo "<td valign='top' $btl><a name='A_$indeksi'></a>$row[tuoteno] <img class='hailaitimg' id='HI_$indeksi' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=600'); return false;\" src='{$palvelin2}pics/lullacons/info.png'></td>";
 				}
 
 				if ($toim == "KK") echo "<td valign='top' $bt  align='right'>".(float) $row["tpaikka_halyraja"]."</td>";

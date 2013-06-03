@@ -314,7 +314,7 @@
 			}
 
 			// t‰ss‰ pohditaan laitetaanko verkkolaskuputkeen
-			if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and ($lasrow["chn"] == "020" or $lasrow["chn"] == "030"))) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == ""  and $lasrow["chn"] != '666' and $lasrow["chn"] != '667' and abs($lasrow["summa"]) != 0) {
+			if (verkkolaskuputkeen($lasrow, $masrow)) {
 
 				// Nyt meill‰ on:
 				// $lasrow array on U-laskun tiedot
@@ -324,7 +324,8 @@
 				// Etsit‰‰n myyj‰n nimi
 				$mquery  = "SELECT nimi, puhno, eposti
 							FROM kuka
-							WHERE tunnus='$lasrow[myyja]' and yhtio='$kukarow[yhtio]'";
+							WHERE tunnus = '$lasrow[myyja]'
+							and yhtio    = '$kukarow[yhtio]'";
 				$myyresult = mysql_query($mquery) or pupe_error($mquery);
 				$myyrow = mysql_fetch_assoc($myyresult);
 

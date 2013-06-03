@@ -124,8 +124,6 @@
 	//tuotteen varastostatus
 	if ($tee == 'VALMIS') {
 
-		$inven_laji_tilino = t_avainsana('INVEN_LAJI', '', "and selite = '{$inven_laji}'", '', '', "selitetark_2");
-
 		$virhe = 0;
 
 		// Inventoidaan EAN-koodilla
@@ -142,14 +140,15 @@
 				$tuotetiedot = explode("###", $tuotteet);
 
 				//näitä muuttujia me tarvitaan
-				$tuoteno 	= $tuotetiedot[0];
-				$hyllyalue 	= $tuotetiedot[1];
-				$hyllynro	= $tuotetiedot[2];
-				$hyllyvali  = $tuotetiedot[3];
-				$hyllytaso	= $tuotetiedot[4];
-				$kpl		= str_replace(",", ".", $maara[$i]);
-				$poikkeama  = 0;
-				$skp		= 0;
+				$tuoteno 			= $tuotetiedot[0];
+				$hyllyalue 			= $tuotetiedot[1];
+				$hyllynro			= $tuotetiedot[2];
+				$hyllyvali  		= $tuotetiedot[3];
+				$hyllytaso			= $tuotetiedot[4];
+				$kpl				= str_replace(",", ".", $maara[$i]);
+				$poikkeama  		= 0;
+				$skp				= 0;
+				$inven_laji_tilino	= "";
 
 				if ($fileesta == "ON") {
 					$inven_laji = $lajis[$i];
@@ -171,6 +170,25 @@
 					}
 					else {
 						$tuoteno = $tuote_row["tuoteno"];
+					}
+
+					if ($inven_laji != "") {
+						$query = "	SELECT selitetark_2
+									FROM avainsana
+									WHERE yhtio = '$kukarow[yhtio]'
+									and laji    = 'INVEN_LAJI'
+									and kieli  in ('$yhtiorow[kieli]', '')
+									and selite  = '$inven_laji'";
+						$avain_res = pupe_query($query);
+
+						if (mysql_num_rows($avain_res) == 0) {
+							echo "<font class='error'>".t("VIRHE: valittua inventointilajia %s ei löydy!", "", $inven_laji).": $tuoteno!</font><br>";
+							$virhe = 1;
+						}
+						else {
+							$avain_row = mysql_fetch_assoc($avain_res);
+							$inven_laji_tilino = $avain_row["selitetark_2"];
+						}
 					}
 
 					if ($tuote_row['sarjanumeroseuranta'] != '' and !is_array($sarjanumero_kaikki[$i]) and !is_array($eranumero_kaikki[$i]) and (substr($kpl,0,1) == '+' or substr($kpl,0,1) == '-' or (float) $kpl != 0)) {

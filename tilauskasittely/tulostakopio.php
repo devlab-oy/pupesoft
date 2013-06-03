@@ -444,7 +444,7 @@
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'
 						 and lasku.ytunnus = '$ytunnus'";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -456,7 +456,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -469,7 +469,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -482,7 +482,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -495,7 +495,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -506,7 +506,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -519,7 +519,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -532,7 +532,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -545,7 +545,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -558,7 +558,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -576,7 +576,7 @@
 				$where2 .= " and lasku.clearing = '$vastaanottava_varasto'";
 			}
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -594,7 +594,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -616,7 +616,7 @@
 			$where3 .= " and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.tapvm <='$vvl-$kkl-$ppl 23:59:59' ";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_tapvm) ";
 		}
 
@@ -634,7 +634,7 @@
 			$where3 .= " and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.tapvm <='$vvl-$kkl-$ppl 23:59:59'";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_tapvm) ";
 		}
 
@@ -652,7 +652,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -671,7 +671,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -689,7 +689,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -707,7 +707,7 @@
 			$where3 .= " and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.tapvm <='$vvl-$kkl-$ppl 23:59:59'";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_tapvm) ";
 		}
 
@@ -725,7 +725,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -743,7 +743,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -761,7 +761,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -779,7 +779,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -799,7 +799,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -821,7 +821,7 @@
 						 JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
 						 JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -831,7 +831,7 @@
 
 			$where3 = "";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (lasno_index) ";
 		}
 		elseif ($laskunro > 0) {
@@ -839,7 +839,7 @@
 
 			$where3 = "";
 
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (lasno_index) ";
 		}
 
@@ -856,7 +856,7 @@
 
 				$where3 = "";
 
-				if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+				if (!isset($jarj)) $jarj = " lasku.tunnus ";
 				$use = " use index (lasno_index) ";
 			}
 			else {
@@ -864,7 +864,7 @@
 
 				$where3 = "";
 
-				if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+				if (!isset($jarj)) $jarj = " lasku.tunnus ";
 				$use = " use index (PRIMARY) ";
 			}
 		}
@@ -890,9 +890,11 @@
 			}
 		}
 
+		if (!isset($ascdesc)) $ascdesc = "desc";
+
 		// Mihin järjestykseen laitetaan
 		if ($jarj != ''){
-			$jarj = "ORDER BY $jarj";
+			$jarj = "ORDER BY {$jarj} {$ascdesc}";
 		}
 
 		if ($toim != "HAAMU") {
@@ -925,14 +927,15 @@
 					lasku.yhtio,
 					lasku.yhtio_nimi,
 					lasku.erikoisale,
-					lasku.liitostunnus
-					FROM lasku $use
-					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
-					$joinlisa
-					WHERE $where1 $where2 $where3 $where5
-					and lasku.$logistiikka_yhtiolisa
-					$where4
-					$jarj
+					lasku.liitostunnus,
+					lasku.viesti
+					FROM lasku {$use}
+					LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija)
+					{$joinlisa}
+					WHERE {$where1} {$where2} {$where3} {$where5}
+					and lasku.{$logistiikka_yhtiolisa}
+					{$where4}
+					{$jarj}
 					LIMIT 300";
 		$result = pupe_query($query);
 
@@ -983,16 +986,35 @@
 				echo "<th valign='top'>",t("Yhtiö"),"</th>";
 			}
 
-			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.tunnus'>".t("Tilausnro")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.laskunro'>".t("Laskunro")."</a></th>";
-			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.ytunnus'>".t("Ytunnus")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.nimi'>".t("Nimi")."</a></th>";
-			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=pvm'>".t("Pvm")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.toimaika'>".t("Toimaika")."</a></th>";
-			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.laatija'>".t("Laatija")."</a></th>";
+			$hreffi = "{$PHP_SELF}?tee={$tee}&ppl={$ppl}&vvl={$vvl}&kkl={$kkl}&ppa={$ppa}&vva={$vva}&kka={$kka}&toim={$toim}&ytunnus={$ytunnus}&asiakasid={$asiakasid}&toimittajaid={$toimittajaid}";
 
-			if ($kukarow['hinnat'] == 0) {
-				echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=summa'>".t("Summa")."</a></th>";
+			if (isset($lahettava_varasto) and $lahettava_varasto != '') {
+				$hreffi .= "&lahettava_varasto={$lahettava_varasto}";
 			}
 
-			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.tila,lasku.alatila'>".t("Tyyppi")."</a></th>";
+			if (isset($vastaanottava_varasto) and $vastaanottava_varasto != '') {
+				$hreffi .= "&vastaanottava_varasto={$vastaanottava_varasto}";
+			}
+
+			if ($ascdesc == "desc") $ascdesc = "asc";
+			else $ascdesc = "desc";
+
+			$hreffi .= "&ascdesc={$ascdesc}";
+
+			echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.tunnus'>",t("Tilausnro"),"</a><br><a href='{$hreffi}&jarj=lasku.laskunro'>",t("Laskunro"),"</a></th>";
+			echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.ytunnus'>",t("Ytunnus"),"</a><br><a href='{$hreffi}&jarj=lasku.nimi'>",t("Nimi"),"</a></th>";
+			echo "<th valign='top'><a href='{$hreffi}&jarj=pvm'>",t("Pvm"),"</a><br><a href='{$hreffi}&jarj=lasku.toimaika'>",t("Toimaika"),"</a></th>";
+			echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.laatija'>",t("Laatija"),"</a></th>";
+
+			if ($toim == "SIIRTOLISTA") {
+				echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.viesti'>",t("Viite"),"</a></th>";
+			}
+
+			if ($kukarow['hinnat'] == 0) {
+				echo "<th valign='top'><a href='{$hreffi}&jarj=summa'>",t("Summa"),"</a></th>";
+			}
+
+			echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.tila,lasku.alatila'>",t("Tyyppi"),"</a></th>";
 
 			if ($tila == 'monta') {
 				echo "<th valign='top'>".t("Tulosta")."</th>";
@@ -1026,6 +1048,10 @@
 				echo "<$ero valign='top'>$row[ytunnus]<br>$row[nimi]<br>$row[nimitark]</$ero>";
 				echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
 				echo "<$ero valign='top'>$row[laatija]</$ero>";
+
+				if ($toim == "SIIRTOLISTA") {
+					echo "<{$ero} valign='top'>{$row['viesti']}</{$ero}>";
+				}
 
 				if ($kukarow['hinnat'] == 0) {
 					if ($toim != "LASKU" and $toim != "VIENTILASKU" and $row["summa"] == 0) {

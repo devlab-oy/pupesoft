@@ -1126,6 +1126,9 @@
 								if ($yks_rivihinta != 0) $values .= ", '".($yks_rivihinta * $erotus)."'";
 								else $values .= ", 0";
 								break;
+							case 'kate_korjattu':
+								$values .= ", NULL";
+								break;							
 							default:
 								$values .= ", '".$ostotilausrivirow[$fieldname]."'";
 						}

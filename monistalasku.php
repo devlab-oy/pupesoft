@@ -816,6 +816,9 @@ if ($tee == 'MONISTA') {
 					case 'maksuaika':
 						$values .= ", ''";
 						break;
+					case 'kate_korjattu':
+						$values .= ", NULL";
+						break;
 					case 'clearing':
 						if ($kumpi == 'HYVITA') {
 							$values .= ", 'HYVITYS'";
@@ -1203,6 +1206,9 @@ if ($tee == 'MONISTA') {
 						case 'uusiotunnus':
 						case 'jaksotettu':
 							$rvalues .= ", ''";
+							break;
+						case 'kate_korjattu':
+							$rvalues .= ", NULL";
 							break;
 						case 'kommentti':
 							if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS' or $toim == 'OSTOTILAUS' or $toim == 'ENNAKKOTILAUS') {

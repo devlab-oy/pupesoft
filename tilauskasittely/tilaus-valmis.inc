@@ -12,8 +12,10 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
 	exit;
 }
 
-//Kampanjoiden tarkistus ja tuotteiden lis‰ys jos osuu johonkin.
-tarkista_osuuko_myyntitilaus_kampanjaan($laskurow['tunnus']);
+if ($laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
+	//Kampanjoiden tarkistus ja tuotteiden lis‰ys jos osuu johonkin.
+	tarkista_osuuko_myyntitilaus_kampanjaan($laskurow['tunnus']);
+}
 
 //jos tilaustyyppi on 2 ja ohjausmerkki on tyhj‰‰, niin pistet‰‰n ohjausmerkiksi tilaustyypin selkokielinen nimi
 if ($laskurow['tilaustyyppi'] == "2" AND trim($laskurow['ohjausmerkki']) == "") {

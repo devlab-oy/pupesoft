@@ -18759,6 +18759,13 @@ if (!function_exists("pupesoft_sahkoposti")) {
 				$content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\n";
 			}
 			$content .= "Content-Transfer-Encoding: quoted-printable\n\n";
+
+			if ($email_ctype == "HTML") {
+				$content .= "\n<head>\n";
+				$content .= "<style type='text/css'>{$yhtiorow['css']}</style>\n";
+				$content .= "</head>\n";
+			}
+
 			$content .= "$email_body\n\n";
 		}
 

@@ -17,6 +17,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 					$query = "	SELECT *
 								FROM maksuehto
 								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND kaytossa = ''
 								ORDER BY jarjestys ASC
 								LIMIT 1";
 					$result = pupe_query($query);

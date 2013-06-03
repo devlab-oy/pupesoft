@@ -955,6 +955,9 @@ else {
 								case 'varattu':
 									$values .= ", 1";
 									break;
+								case 'kate_korjattu':
+									$values .= ", NULL";
+									break;
 								default:
 									$values .= ", '{$splitrow[$fieldname]}'";
 							}
@@ -1028,6 +1031,9 @@ else {
 											break;
 										case 'perheid':
 											$values .= ", {$split_tilausrivin_tunnus}";
+											break;
+										case 'kate_korjattu':
+											$values .= ", NULL";
 											break;
 										default:
 											$values .= ", '{$lapsirow[$fieldname]}'";
@@ -1305,6 +1311,9 @@ else {
 							case 'toimitustapa':
 								$values .= ", '$split_toimitustapa'";
 								break;
+							case 'kate_korjattu':
+								$values .= ", NULL";
+								break;								
 							default:
 								$values .= ", '".$laskurow[$fieldname]."'";
 						}

@@ -371,6 +371,9 @@
 								$fieldname == 'poistumistoimipaikka_koodi') {
 							$query .= $fieldname."='',";
 						}
+						elseif ($fieldname == 'kate_korjattu') {
+							$query .= $fieldname." = NULL,";
+						}
 						elseif ($fieldname == 'tilausvahvistus') {
 
 							$tv_query = "	SELECT tilausvahvistus, tilausvahvistus_jttoimituksista

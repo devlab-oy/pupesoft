@@ -65,7 +65,12 @@ if (!function_exists("kopioi_tilaus")) {
 				}
 			}
 
-			$values .= ", '$monistarow[$i]'";
+			if ($field == "kate_korjattu") {
+				$values .= ", NULL";
+			}
+			else {
+				$values .= ", '$monistarow[$i]'";
+			}
 		}
 
 		$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
@@ -108,6 +113,10 @@ if (!function_exists("kopioi_tilaus")) {
 				if (mysql_field_name($rivires, $i) == "otunnus") {
 					$rfields .= ", $field";
 					$rvalues .= ", '$utunnus'";
+				}
+				elseif (mysql_field_name($rivires, $i) == "kate_korjattu") {
+					$rfields .= ", $field";
+					$rvalues .= ", NULL";
 				}
 				else {
 

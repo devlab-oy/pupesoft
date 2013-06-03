@@ -104,6 +104,9 @@
 					case 'laatija':
 						$values .= ", '$kukarow[kuka]'";
 						break;
+					case 'kate_korjattu':
+						$values .= ", NULL";
+						break;
 					default:
 						$values .= ", '".$monistarow[$i]."'";
 				}

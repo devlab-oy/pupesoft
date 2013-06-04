@@ -331,7 +331,7 @@ function tee_kirjanpito_muutokset($params) {
 			echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehdä! Korjaa kirjanpito käsin")."!</font><br>";
 		}
 
-		$summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] - abs($vanharow['summa']));
+		$summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] - $vanharow['summa']);
 
 		$query = "	UPDATE lasku SET
 					saldo_maksettu = {$summalisa}

@@ -839,6 +839,9 @@ if ($tuoteno != '') {
 							// Inventoinnissa korjaustapahtuman rivitunnus on alkuperäisen inventointitapahtuman tunnus (kaikissa muissa keisseissä rivitunnus pointtaa tilausriviin)
 							$rivitunnuslisa = $trow['laji'] == 'Inventointi' ? $trow['tunnus'] : $trow['rivitunnus'];
 
+							// Nollataan selite
+							$selite_txt = "";
+
 							// Haetaan tuotteen edellinen kehari
 							// Katsotaan löytyykö tälle tapahtumariville korjausrivi ja otetaan edellinen kehahin sieltä
 							$query = "	SELECT kplhinta, hinta
@@ -875,7 +878,6 @@ if ($tuoteno != '') {
 									$selite_txt = ",<br>Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")";
 								}
 								else {
-									$selite_txt = "";
 									$uusihinta = $trow['kplhinta'];
 								}
 

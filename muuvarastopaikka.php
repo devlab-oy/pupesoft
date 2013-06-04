@@ -161,6 +161,8 @@
 								and yhtio 		= '$kukarow[yhtio]'
 								and tunnus 		= '$poistetaan'";
 					$result = pupe_query($query);
+
+					unset($saldot[$poistetaan]);
 				}
 			}
 		}
@@ -258,7 +260,7 @@
 		$ahyllyvali	= '';
 		$ahyllytaso	= '';
 
-		if ($kutsuja == "vastaanota.php") {
+		if ($kutsuja == "vastaanota.php" or $kutsuja == "tuotetarkista.inc" ) {
 			$tee = "OK";
 		}
 		else {

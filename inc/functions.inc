@@ -8625,6 +8625,88 @@ if (!function_exists('livesearch_tuotekategoriahaku')) {
 	}
 }
 
+
+if (!function_exists('livesearch_tuoteryhmahaku')) {
+	function livesearch_tuoteryhmahaku() {
+		global $yhtiorow, $kukarow, $palvelin2;
+
+		$tee = $_REQUEST["livesearch_tee"];
+		$nimi = $_REQUEST["livesearch_nimi"];
+		$formi = $_REQUEST["livesearch_form"];
+		$hakuid = $_REQUEST["livesearch_hakuid"];
+		$submit = $_REQUEST["livesearch_submit"];
+		$haku = trim($_REQUEST["livesearch_haku"]);
+
+		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+			</script>";
+
+			if (empty($kukarow['kieli'])) {
+				$kieli = 'fi';
+			}
+			else {
+				$kieli = $kukarow['kieli'];
+			}
+
+			$query = "	SELECT selite,
+						selitetark
+						FROM avainsana
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji = 'TRY'
+						AND kieli = '{$kieli}'
+						AND selitetark LIKE '%{$haku}%'";
+			$result = pupe_query($query);
+
+			$limit = 0;
+			if (mysql_num_rows($result) > 0) {
+				while ($row = mysql_fetch_assoc($result)) {
+					echo "	<div id='tuoteryhma_valinta_$row[selite]'
+								name='selectOptions$hakuid'
+								onmouseover=\"this.className='liveSearchSelectedItem';
+									keyStrokeIndex = -1;
+									var aEls = document.getElementsByName('selectOptions$hakuid');
+									for (var iEl = 0; iEl < aEls.length; iEl++) {
+										if (aEls[iEl].id.substring(0,14) == 'tuoteryhma_valinta_' && aEls[iEl].id != 'tuoteryhma_valinta_$row[selite]') {
+											document.getElementById(aEls[iEl].id).className='';
+										}
+									} \"
+								onmouseout=\"this.className='';\"
+								onclick=\"document.getElementById('$hakuid').value='$row[selite]';";
+								if ($submit == "") {
+									echo "document.$formi.submit();";
+								}
+								else {
+									echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+								}
+								echo "\"
+								style='padding:2px;'>
+								<font style='font-weight:bold'>{$row['selite']} - {$row['selitetark']}</font>
+							</div><div name='selectValues$hakuid' id='$row[selite]'></div>";
+					$limit++;
+
+					if ($limit > 49) {
+						break;
+					}
+				}
+
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("tuoteryhmää"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+			}
+			else {
+				echo "<div style='padding:2px'><font class='message'>".t("Ei tuoteryhmiä").".</font></div>";
+			}
+		}
+		else {
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+			</script>";
+		}
+	}
+}
+
 if (!function_exists("livesearch_kayttajahaku")) {
 	function livesearch_kayttajahaku($toim = '') {
 		global $yhtiorow, $kukarow, $palvelin2;
@@ -21252,11 +21334,6 @@ if (!function_exists('rekursiivinen_resepti')) {
 	}
 }
 
-require('inc/tuote_functions.inc');
-require('inc/lasku_functions.inc');
-require('inc/tuote_functions.inc');
-require('inc/kampanja_functions.inc');
-
 if (!function_exists('onko_rahtituote_syotetty')) {
 	function onko_rahtituote_syotetty($laskurow, $whateverhinta = FALSE) {
 		global $kukarow, $yhtiorow;
@@ -21286,3 +21363,8 @@ if (!function_exists('onko_rahtituote_syotetty')) {
 		return mysql_num_rows($result);
 	}
 }
+
+require('inc/tuote_functions.inc');
+require('inc/lasku_functions.inc');
+require('inc/tuote_functions.inc');
+require('inc/kampanja_functions.inc');

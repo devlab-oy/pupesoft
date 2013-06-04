@@ -225,8 +225,10 @@
 
 		if (mysql_field_name($result, $i) == "selitetark_2") {
 			$ulos = '<td>';
-			$ulos .= livesearch_kentta('a', 'TUOTEKATEGORIAHAKU', $nimi, '', $trow[$i], '', '');
+			$ulos .= livesearch_kentta('a', 'TUOTERYHMAHAKU', $nimi, 251, $trow[$i], '', '', '', 'ei');
 			$ulos .= '</td>';
+
+			$jatko = 0;
 		}
 	}
 

@@ -21197,6 +21197,30 @@ if (!function_exists('hae_lasku')) {
 	}
 }
 
+if (!function_exists('hae_laskun_tilausrivit')) {
+	function hae_laskun_tilausrivit($otunnus, $tyypit = array()) {
+		global $kukarow, $yhtiorow;
+
+		$tilausrivi_where = "";
+		if (!empty($tyypit)) {
+			$tilausrivi_where = "	AND tyyppi IN ('".implode("','", $tyypit)."')";
+		}
+		$query = "	SELECT *
+					FROM tilausrivi
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND otunnus = '{$otunnus}'
+					{$tilausrivi_where}";
+		$result = pupe_query($query);
+		$tilausrivit = array();
+
+		while($tilausrivi = mysql_fetch_assoc($result)) {
+			$tilausrivit[] = $tilausrivi;
+		}
+
+		return $tilausrivit;
+	}
+}
+
 if (!function_exists('hae_tuote')) {
 	/**
 	 * Hakee tuotteen

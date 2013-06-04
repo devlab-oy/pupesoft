@@ -1056,25 +1056,6 @@
 
 				$lisa = substr($lisa, 0, -3).")";
 			}
-			elseif ($toim == 'vaihtoehtoiset_verkkolaskutunnukset' and trim($array[$i]) == 'toimi_tunnus') {
-				if ($from == "") {
-					if (!is_numeric($haku[$i])) {
-						$ashak = "	SELECT group_concat(concat(\"'\",tunnus,\"'\")) tunnukset
-									FROM toimi
-									WHERE yhtio = '$kukarow[yhtio]'
-									and nimi {$hakuehto}";
-						$ashakres = pupe_query($ashak);
-						$ashakrow = mysql_fetch_assoc($ashakres);
-
-						if ($ashakrow["tunnukset"] != "") {
-							$lisa .= " AND vaihtoehtoiset_verkkolaskutunnukset.toimi_tunnus IN ({$ashakrow["tunnukset"]})";
-						}
-					}
-				}
-				elseif ($from == 'yllapito') {
-					$lisa .= " AND vaihtoehtoiset_verkkolaskutunnukset.toimi_tunnus {$hakuehto}";
-				}
-			}
 			else {
 				$lisa .= " and {$array[$i]} {$hakuehto} ";
 			}

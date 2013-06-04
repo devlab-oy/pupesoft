@@ -9,20 +9,9 @@ if (mysql_field_name($result, $i) == "yhtio") {
 }
 
 if (mysql_field_name($result, $i) == "toimi_tunnus") {
-	$toimittajat = hae_toimittajat(array('','K'));
-
-	$ulos = "<td>";
-	$ulos .= "<select name='{$nimi}'>";
-	foreach ($toimittajat as $toimittaja) {
-		$sel = "";
-		if ($lukitse_avaimeen == $toimittaja['tunnus'] or $trow[$i] == $toimittaja['tunnus']) {
-			$sel = "SELECTED";
-		}
-		$ulos .= "<option value='{$toimittaja['tunnus']}' {$sel}>{$toimittaja['nimi']}</option>";
-	}
-	$ulos .= "</select>";
-	$ulos .= "</td>";
-
+	$ulos = "<input type='hidden' name='$nimi' value='{$lukitse_avaimeen}'>";
+	
+	$tyyppi = 4;
 	$jatko = 0;
 }
 

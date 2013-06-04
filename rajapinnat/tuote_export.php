@@ -57,6 +57,7 @@
 				tuote.yksikko,
 				tuote.kuvaus,
 				tuote.myymalahinta,
+				tuote.kuluprosentti,
 				tuote.eankoodi,
 				tuote.osasto,
 				tuote.try,
@@ -109,6 +110,7 @@
 							'myyntihinta_veroton'	=> $myyntihinta_veroton,
 							'myymalahinta'			=> $myymalahinta,
 							'myymalahinta_veroton'	=> $myymalahinta_veroton,
+							'kuluprosentti'			=> $row['kuluprosentti'],
 							'ean'					=> $row["eankoodi"],
 							'osasto'				=> $row["osasto"],
 							'try'					=> $row["try"],
@@ -330,6 +332,7 @@
 						ta_nimitys_en.selite nimi_eng,
 						tuote.myyntihinta,
 						tuote.myymalahinta,
+						tuote.kuluprosentti,
 						tuote.eankoodi,
 						tuote.alv,
 						tuote.nakyvyys,
@@ -402,6 +405,7 @@
 															'myyntihinta_veroton'	=> $myyntihinta_veroton,
 															'myymalahinta'			=> $myymalahinta,
 															'myymalahinta_veroton'	=> $myymalahinta_veroton,
+															'kuluprosentti'			=> $alirow['kuluprosentti'],
 															'ean'					=> $alirow["eankoodi"],
 															'parametrit'			=> $properties);
 		}
@@ -415,6 +419,7 @@
 		echo "Päivitetään Magento verkkokauppaa!\n";
 
 		$magento_client = new MagentoClient($magento_api_url, $magento_api_usr, $magento_api_pas);
+
 		// tax_class_id, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
 		if (! isset($magento_tax_class_id)) $magento_tax_class_id = 0;
 		$magento_client->setTaxClassID($magento_tax_class_id);

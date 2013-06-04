@@ -213,6 +213,8 @@ class MagentoClient {
 				$tuote['lyhytkuvaus'] = '&nbsp;';
 			}
 
+			$tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
+
 			// Etsitään kategoria_id tuoteryhmällä
 			$category_id = $this->findCategory($tuote['try_nimi'], $category_tree['children']);
 
@@ -236,6 +238,7 @@ class MagentoClient {
 									'status'                => self::ENABLED,
 									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
 									'price'                 => $tuote['myymalahinta'],
+									'special_price'			=> $tuote['kuluprosentti'],
 									'tax_class_id'          => $this->getTaxClassID(),
 									'meta_title'            => '',
 									'meta_keyword'          => '',
@@ -259,6 +262,7 @@ class MagentoClient {
 									'status'                => self::ENABLED,
 									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
 									'price'                 => $tuote['myymalahinta'],
+									'special_price'			=> $tuote['kuluprosentti'],
 									'tax_class_id'          => $this->getTaxClassID(),
 									'meta_title'            => '',
 									'meta_keyword'          => '',
@@ -350,6 +354,9 @@ class MagentoClient {
 					$tuotteet[0]['lyhytkuvaus'] = '&nbsp';
 				}
 
+				// Erikoishinta
+				$tuotteet[0]['kuluprosentti'] = ($tuotteet[0]['kuluprosentti'] == 0) ? '' : $tuotteet[0]['kuluprosentti'];
+
 				// Etsitään kategoria mihin tuote lisätään
 				$category_id = $this->findCategory($tuotteet[0]['try_nimi'], $this->_category_tree['children']);
 
@@ -364,12 +371,12 @@ class MagentoClient {
 					'status'                => self::ENABLED,
 					'visibility'            => self::CATALOG_SEARCH, # Configurablet nakyy kaikkialla
 					'price'                 => $tuotteet[0]['myymalahinta'],
+					'special_price'			=> $tuotteet[0]['kuluprosentti'],
 					'tax_class_id'          => $this->getTaxClassID(), # 24%
 					'meta_title'            => '',
 					'meta_keyword'          => '',
 					'meta_description'      => '',
 				);
-
 
 				// Jos configurable tuotetta ei löydy, niin lisätään uusi tuote.
 				if ( ! in_array($nimitys, $skus_in_store)) {
@@ -427,6 +434,10 @@ class MagentoClient {
 
 		// Toimii ordersilla
 		$filter = array(array('status' => array('eq' => $status)));
+
+		// Uusia voi hakea? state => 'new'
+		#$filter = array(array('state' => array('eq' => 'new')));
+
 		// Haetaan tilaukset (orders.status = 'processing')
 		$fetched_orders = $this->_proxy->call($this->_session, 'sales_order.list', $filter);
 
@@ -441,7 +452,7 @@ class MagentoClient {
 			$orders[] = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);
 
 			// Päivitetään tilauksen tila että se on noudettu pupesoftiin
-			$this->_proxy->call($this->_session, 'sales_order.addComment', array('orderIncrementId' => $order['increment_id'], 'status' => 'processing_pupesoft'));
+			$this->_proxy->call($this->_session, 'sales_order.addComment', array('orderIncrementId' => $order['increment_id'], 'status' => 'processing_pupesoft', 'Tilaus noudettu Pupesoftiin'));
 		}
 
 		$this->log(count($orders) . " tilausta haettu");
@@ -541,6 +552,7 @@ class MagentoClient {
 	 * Poistaa magentosta tuotteita
 	 *
 	 * @param array $poistetut_tuotteet Poistettavat tuotteet
+	 * @return   Poistettujen tuotteiden määrä
 	 */
 	public function poista_poistetut(array $poistetut_tuotteet) {
 		$count = 0;
@@ -614,6 +626,13 @@ class MagentoClient {
 
 			// Jos löytyy tästä tasosta nii palautetaan id
 			if (strcasecmp($name, $category['name']) == 0) {
+
+				// Jos kyseisen kategorian alla on saman niminen kategoria,
+				// palautetaan sen id nykyisen sijasta (osasto ja try voivat olla saman niminisä).
+				if (!empty($category['children']) and strcasecmp($category['children'][0]['name'], $name) == 0) {
+					return $category['children'][0]['category_id'];
+				}
+
 				return $category_id = $category['category_id'];
 			}
 

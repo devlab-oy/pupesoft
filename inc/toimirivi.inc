@@ -542,6 +542,7 @@
 		$ulos .= "<option value='editilaus_out_wabco.inc' $sel[editilaus_out_wabco]>".t("Wabco sähköinen tilaus")."</option>";
 		$ulos .= "<option value='editilaus_out_excel.inc' $sel[editilaus_out_excel]>".t("Excel-ostotilaus")."</option>";
 		$ulos .= "<option value='editilaus_out_elma.inc' $sel[editilaus_out_elma]>".t("Elma-editilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_xml.inc' $sel[editilaus_out_xml]>".t("Xml-ostotilaus")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -112,10 +112,10 @@
 		echo "Tuotteet ...";
 
 		$query = "	SELECT
-					tuote.tuoteno        	nimiketunnus,
-        			tuote.nimitys           nimitys,
-			        tuote.yksikko           yksikko,
-			        tuote.try				tuoteryhma,
+					tuote.tuoteno			nimiketunnus,
+					tuote.nimitys			nimitys,
+					tuote.yksikko			yksikko,
+					tuote.try				tuoteryhma,
 					avainsana.selitetark	tuoteryhma_nimi,
 					tuote.kustp				kustannuspaikka,
 					''						toimittajatunnus,
@@ -123,12 +123,12 @@
 					'0'						toimittajannimiketunnus,
 					'1'						hintayksikko,
 					if(tuote.status = 'T', '0', '1') varastoimiskoodi,
-			        tuote.tuotetyyppi    	nimikelaji,
-			        kuka.kuka      			ostaja,
-			        tuote.tuotemassa     	paino,
+					tuote.tuotetyyppi		nimikelaji,
+					kuka.kuka				ostaja,
+					tuote.tuotemassa		paino,
 					tuote.status			status
-			        FROM tuote
-			        LEFT JOIN avainsana ON (avainsana.selite = tuote.try
+					FROM tuote
+					LEFT JOIN avainsana ON (avainsana.selite = tuote.try
 						AND avainsana.yhtio = tuote.yhtio)
 					LEFT JOIN kuka ON (kuka.myyja = tuote.ostajanro
 						AND kuka.yhtio = tuote.yhtio

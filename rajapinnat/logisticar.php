@@ -122,14 +122,18 @@
 					'0'						varastotunnus,
 					'0'						toimittajannimiketunnus,
 					'1'						hintayksikko,
-					if(tuote.status = 'T', 'T', '') varastoimiskoodi,
+					if(tuote.status = 'T', '0', '1') varastoimiskoodi,
 			        tuote.tuotetyyppi    	nimikelaji,
 			        kuka.kuka      			ostaja,
-			        tuote.tuotemassa     	paino
+			        tuote.tuotemassa     	paino,
+					tuote.status			status
 			        FROM tuote
-			        LEFT JOIN avainsana ON avainsana.selite=tuote.try and avainsana.yhtio=tuote.yhtio
-					LEFT JOIN kuka ON kuka.myyja=tuote.ostajanro and kuka.yhtio=tuote.yhtio and kuka.myyja > 0
-					WHERE tuote.yhtio='$yhtio'
+			        LEFT JOIN avainsana ON (avainsana.selite = tuote.try
+						AND avainsana.yhtio = tuote.yhtio)
+					LEFT JOIN kuka ON (kuka.myyja = tuote.ostajanro
+						AND kuka.yhtio = tuote.yhtio
+						AND kuka.myyja > 0)
+					WHERE tuote.yhtio = '$yhtio'
 					$limit";
 		$rest = mysql_query($query) or pupe_error($query);
 		$rows = mysql_num_rows($rest);
@@ -156,7 +160,8 @@
 			'varastoimiskoodi' 			=> null,
 			'nimikelaji'       			=> null,
 			'ostaja'           			=> null,
-			'paino'            			=> null
+			'paino'            			=> null,
+			'status'           			=> null
 		);
 
 		create_headers($fp, array_keys($headers));
@@ -176,20 +181,12 @@
 			$tuot_toim_res = mysql_query($query) or pupe_error($query);
 			$tuot_toim_row = mysql_fetch_assoc($tuot_toim_res);
 
-			if (trim($tuote['varastoimiskoodi']) != '') {
-				// tuotetta ei varastoida
-				$tuote['varastoimiskoodi'] = '0';
-			}
-			else {
-				$tuote['varastoimiskoodi'] = '1';
-			}
-
 			$query = "	SELECT hyllyalue, hyllynro
-						from tuotepaikat
-						where tuoteno = '{$tuote['tuoteno']}'
-						and oletus != ''
-						and yhtio='$yhtio'
-						limit 1";
+						FROM tuotepaikat
+						WHERE tuoteno = '{$tuote['tuoteno']}'
+						AND oletus != ''
+						AND yhtio = '$yhtio'
+						LIMIT 1";
 			$res = mysql_query($query) or pupe_error($query);
 			$paikka = mysql_fetch_assoc($res);
 
@@ -205,16 +202,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$progress = floor(($row/$rows) * 40);
-			$str = sprintf("%10s", "$row/$rows");
-
-			$hash = '';
-			for ($i=0; $i < (int) $progress; $i++) {
-				$hash .= "#";
-			}
-
-//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
 		fclose($fp);
@@ -268,16 +255,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$progress = floor(($row/$rows) * 40);
-			$str = sprintf("%10s", "$row/$rows");
-
-			$hash = '';
-			for ($i=0; $i < (int) $progress; $i++) {
-				$hash .= "#";
-			}
-
-//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
 		fclose($fp);
@@ -325,16 +302,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$progress = floor(($row/$rows) * 40);
-			$str = sprintf("%10s", "$row/$rows");
-
-			$hash = '';
-			for ($i=0; $i < (int) $progress; $i++) {
-				$hash .= "#";
-			}
-
-//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
 		fclose($fp);
@@ -415,14 +382,6 @@
 			if (! fwrite($fp, $data . "\n")) {
 				echo "Failed writing row.\n";
 				die();
-			}
-
-			$progress = floor(($row/$rows) * 40);
-			$str = sprintf("%10s", "$row/$rows");
-
-			$hash = '';
-			for ($i=0; $i < (int) $progress; $i++) {
-				$hash .= "#";
 			}
 		}
 
@@ -580,16 +539,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$progress = floor(($row/$rows) * 40);
-			$str = sprintf("%10s", "$row/$rows");
-
-			$hash = '';
-			for ($i=0; $i < (int) $progress; $i++) {
-				$hash .= "#";
-			}
-
-//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 	    }
 
 		fclose($fp);
@@ -724,16 +673,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$progress = floor(($row/$rows) * 40);
-			$str = sprintf("%10s", "$row/$rows");
-
-			$hash = '';
-			for ($i=0; $i < (int) $progress; $i++) {
-				$hash .= "#";
-			}
-
-//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 	    }
 
 		fclose($fp);
@@ -744,4 +683,3 @@
 		$data = implode("\t", $cols) . "\n";
 		fwrite($fp, $data);
 	}
-?>

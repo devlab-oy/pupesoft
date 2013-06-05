@@ -948,6 +948,9 @@
 												case 'tila':
 													$values .= ", 'N'";
 													break;
+												case 'kate_korjattu':
+													$values .= ", NULL";
+													break;
 												default:
 													$values .= ", '".$laskusplitrow[$fieldname]."'";
 											}

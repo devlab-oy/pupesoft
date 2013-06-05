@@ -182,6 +182,7 @@
 												$rvalues .= ", -".($pantti_kpl - $vanhin_pantti_row['kpl']);
 												break;
 											case 'tunnus':
+											case 'kate_korjattu':
 												$rvalues .= ", NULL";
 												break;
 											default:
@@ -219,6 +220,7 @@
 													$rvalues .= ", '{$insid_uusi}'";
 													break;
 												case 'tunnus':
+												case 'kate_korjattu':
 													$rvalues .= ", NULL";
 													break;
 												default:

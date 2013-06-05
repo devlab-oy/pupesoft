@@ -646,6 +646,9 @@ if ($kasitellaan_tiedosto) {
 			$bar->initialize($rivimaara);
 		}
 
+		$lisatyt_indeksit = array();
+
+
 		for ($eriviindex = 0; $eriviindex < ($rivimaara + $puun_alkio_index_plus); $eriviindex++) {
 
 			// Komentorivillä piirretään progressbar, ellei ole output loggaus päällä
@@ -1459,6 +1462,48 @@ if ($kasitellaan_tiedosto) {
 								$toimi_liitostunnus = $tpttrow["tunnus"];
 								$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 							}
+						}
+
+						if ($table_mysql == 'autoid_lisatieto' and $otsikko == 'TYPNR' and $taulunrivit[$taulu][$eriviindex][$r] != '' AND !in_array($eriviindex, $lisatyt_indeksit) AND isset($autoid_liitos) and $autoid_liitos == 'malli') {
+
+							echo "eriviindex: $eriviindex<br>";
+
+							$query_chk = "	SELECT DISTINCT ktypnr
+											FROM td_pc
+											WHERE kmodnr = '{$taulunrivit[$taulu][$eriviindex][$r]}'";
+							$loop_res = pupe_query($query_chk);
+
+							$eka_loop = true;
+
+							while ($loop_row = mysql_fetch_assoc($loop_res)) {
+
+								$query_chk = "	SELECT autoid_lukittu
+												FROM autoid_lisatieto
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND typnr = '{$loop_row['ktypnr']}'";
+								$chk_res = pupe_query($query_chk);
+
+								while ($chk_row = mysql_fetch_assoc($chk_res)) if ($chk_row['autoid_lukittu']) continue;
+
+								$_arr = $taulunrivit[$taulu][$eriviindex];
+								$_arr[$r] = $loop_row['ktypnr'];
+
+								if ($eka_loop) {
+									$taulunrivit[$taulu][$eriviindex] = $_arr;
+									$eka_loop = false;
+									$lisatyt_indeksit[] = $eriviindex;
+								}
+								else {
+									$taulunrivit[$taulu][] = $_arr;
+									$lisatyt_indeksit[] = count($taulunrivit[$taulu])-1;
+
+									$rivimaara++;
+								}
+							}
+
+							echo "<pre>",var_dump($lisatyt_indeksit),"</pre><br><br>";
+
+
 						}
 
 						//tarkistetaan asiakasalennus ja asiakashinta juttuja

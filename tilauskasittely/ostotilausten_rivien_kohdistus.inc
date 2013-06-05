@@ -862,7 +862,7 @@ if ($tila == 'tee_kohdistus') {
 				$poikkeava_tulliprosentti_db = mysql_fetch_assoc($result);
 				//ei päivitetä poikkeus_tulliprosenttia kantaan jos se on sama kuin oletusprosentti, paitsi jos kantaan on jo päivitetty poikkeus prosentti.
 				//kannasta pitää tarkistaa, onko siellä poikkeus_tulliprosentti, koska oletus --> poikkeus ja takaisin poikkeus --> oletus ei päivity kantaan ilman olemassaolevan poikkeuksen tarkistusta.
-				if (!empty($poikkeava_tulliprosentti_db) or $rivi_oletus_tulliprosentti[$tunnus] != $poikkeava_tulliprosentti) {
+				if ($poikkeava_tulliprosentti_db['poikkeava_tulliprosentti'] != null or $rivi_oletus_tulliprosentti[$tunnus] != $poikkeava_tulliprosentti) {
 					$query  = "UPDATE tilausrivin_lisatiedot SET poikkeava_tulliprosentti=$poikkeava_tulliprosentti WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus='$tunnus'";
 					$result = pupe_query($query);
 				}

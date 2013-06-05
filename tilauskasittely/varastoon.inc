@@ -412,12 +412,12 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	$tv_nimrow	   = "";
 
 	if ($tv_kaytossa and $tilrivirow["var"] == "" and $laskurow["maa"] != $yhtiorow["maa"]) {
+		require ("tilauskasittely/taric_veroperusteet.inc");
+		
 		// lis‰t‰‰n tulli
-		if (isset($tilrivirow['poikkeava_tulliprosentti'])) {
+		if ($tilrivirow['poikkeava_tulliprosentti'] != null) {
 			$tulliprossa = $tilrivirow['poikkeava_tulliprosentti'];
-		}
-		else {
-			require ("tilauskasittely/taric_veroperusteet.inc");
+			$tv_nimrow["maara"] = $tulliprossa;
 		}
 		
 		$aputullimaara = $ohinta * ($tulliprossa/100);

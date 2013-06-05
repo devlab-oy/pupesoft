@@ -266,7 +266,7 @@
 		}
 	}
 
-	if (!function_exists('hae_poikkeava_tulliprosentti')) {
+	if (!function_exists('hae_oletus_tulliprosentti')) {
 		function hae_oletus_tulliprosentti($laskurow,$tuorow) {
 			global $kukarow, $yhtiorow;
 

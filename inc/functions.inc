@@ -6262,7 +6262,7 @@ if (!function_exists("liitettyjen_kululaskujen_summa")) {
 					and alatila 		= 'T'";
 		$keikkares = pupe_query($query);
 
-		while($kulukeikkarow = mysql_fetch_assoc($keikkares)) {
+		while ($kulukeikkarow = mysql_fetch_assoc($keikkares)) {
 			// Haetaan kaikki saapumiseen liitettyjen laskujen summa
 			$query = "	SELECT sum(arvo*vienti_kurssi) kulusumma
 						FROM lasku
@@ -6457,7 +6457,7 @@ if (!function_exists("paivita_toimitukset")) {
 					if (mysql_num_rows($result) > 0) {
 
 						//	Rullataan kaikki toimitukset läpi
-						while($row = mysql_fetch_assoc($result)) {
+						while ($row = mysql_fetch_assoc($result)) {
 
 							//	Rullataan kaikki muutokset läpi..
 							$updquery = "";
@@ -7770,7 +7770,7 @@ if (!function_exists("aja_kysely")) {
 						WHERE yhtio='$kukarow[yhtio]' and haku = '$hakukysely' and kuka = '$kukarow[kuka]' and nimi = '$aja_kysely'";
 			$result = pupe_query($query);
 			if (mysql_num_rows($result)>0) {
-				while($row = mysql_fetch_assoc($result)) {
+				while ($row = mysql_fetch_assoc($result)) {
 					global ${$row["var"]};
 					if ($row["array"] != "") {
 						$row["value"] = unserialize($row["value"]);
@@ -7815,7 +7815,7 @@ if (!function_exists("nayta_kyselyt")) {
 					WHERE yhtio='$kukarow[yhtio]' and haku = '$haku' and kuka = '$kukarow[kuka]' and nimi != 'tmpquery'";
 		$result = pupe_query($query);
 		if (mysql_num_rows($result)>0) {
-			while($row = mysql_fetch_assoc($result)) {
+			while ($row = mysql_fetch_assoc($result)) {
 				$ulos .= "<option value='$row[nimi]'>$row[nimi]</option>\n";
 			}
 		}
@@ -10958,7 +10958,7 @@ if (!function_exists("hae_kaikki_alvit")) {
 		$vresult = pupe_query($query);
 
 		$alvit = array();
-		while($alv = mysql_fetch_assoc($vresult)) {
+		while ($alv = mysql_fetch_assoc($vresult)) {
 			$alvit[] = $alv;
 		}
 
@@ -20429,7 +20429,7 @@ if (!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
  * HOW TO:
  * $rivit :
  * $rivit = array();
- * while($rivi = mysql_fetch_assoc($result)) {
+ * while ($rivi = mysql_fetch_assoc($result)) {
  *			$rivit[] = $rivi;
  * }
  *
@@ -20611,7 +20611,7 @@ if (!function_exists('valid_date')) {
  * HOW TO:
  * $rivit :
  * $rivit = array();
- * while($rivi = mysql_fetch_assoc($result)) {
+ * while ($rivi = mysql_fetch_assoc($result)) {
  *			$rivit[] = $rivi;
  * }
  *
@@ -21203,8 +21203,9 @@ if (!function_exists('hae_laskun_tilausrivit')) {
 
 		$tilausrivi_where = "";
 		if (!empty($tyypit)) {
-			$tilausrivi_where = "	AND tyyppi IN ('".implode("','", $tyypit)."')";
+			$tilausrivi_where = " AND tyyppi IN ('".implode("','", $tyypit)."') ";
 		}
+
 		$query = "	SELECT *
 					FROM tilausrivi
 					WHERE yhtio = '{$kukarow['yhtio']}'
@@ -21213,7 +21214,7 @@ if (!function_exists('hae_laskun_tilausrivit')) {
 		$result = pupe_query($query);
 		$tilausrivit = array();
 
-		while($tilausrivi = mysql_fetch_assoc($result)) {
+		while ($tilausrivi = mysql_fetch_assoc($result)) {
 			$tilausrivit[] = $tilausrivi;
 		}
 
@@ -21283,6 +21284,7 @@ if (!function_exists('tarkista_osuuko_myyntitilaus_kampanjaan')) {
 
 		foreach ($lisattavat_tuotteet as $lisattava_tuote) {
 			$haettu_tuote = hae_tuote($lisattava_tuote['tuoteno']);
+
 			$parametrit = array(
 				'trow'		 => $haettu_tuote,
 				'laskurow'	 => hae_lasku($tilausnumero),
@@ -21291,6 +21293,7 @@ if (!function_exists('tarkista_osuuko_myyntitilaus_kampanjaan')) {
 				'ale1'		 => 100,
 				'tuoteno'	 => $lisattava_tuote['tuoteno'],
 			);
+
 			lisaa_rivi($parametrit);
 		}
 	}
@@ -21767,5 +21770,66 @@ if (!function_exists('onko_rahtituote_syotetty')) {
 		$result = pupe_query($query);
 
 		return mysql_num_rows($result);
+	}
+}
+
+if (!function_exists('hae_tuote')) {
+
+	/**
+	 * Hakee tuotteen
+	 *
+	 * @global array $kukarow
+	 * @global array $yhtiorow
+	 * @param string $tuoteno
+	 * @return array
+	 */
+	function hae_tuote($tuoteno) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT *
+					FROM tuote
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$tuoteno}'";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+
+if (!function_exists('poista_lasku')) {
+	function poista_lasku($tilausnumero) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	UPDATE lasku
+					SET alatila = tila,
+					tila 		= 'D',
+					muutospvm   = now()
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus  = '{$tilausnumero}'";
+		pupe_query($query);
+
+		$query = "	UPDATE tilausrivi
+					SET tyyppi = 'D'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND otunnus = '{$tilausnumero}'";
+		pupe_query($query);
+	}
+}
+
+if (!function_exists('hae_kayttajaan_linkitetty_extranet_kayttaja')) {
+	function hae_kayttajaan_linkitetty_extranet_kayttaja($kuka) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT kuka.*
+					FROM kuka
+					JOIN extranet_kayttajan_lisatiedot
+					ON ( extranet_kayttajan_lisatiedot.yhtio = kuka.yhtio
+					AND extranet_kayttajan_lisatiedot.liitostunnus = kuka.tunnus
+					AND extranet_kayttajan_lisatiedot.selite = '{$kuka}'
+					AND extranet_kayttajan_lisatiedot.laji = 'LINKITYS' )
+					WHERE kuka.yhtio = '{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
 	}
 }

@@ -856,14 +856,22 @@ if ($tila == 'tee_kohdistus') {
 	if (isset($rivi_poikkeava_tulliprosentti) and is_array($rivi_poikkeava_tulliprosentti)) {
 		// poikkeava_tulliprosentti
 		foreach ($rivi_poikkeava_tulliprosentti as $tunnus => $poikkeava_tulliprosentti) {
+
 			if (is_numeric($poikkeava_tulliprosentti)) {
-				$query = "	SELECT poikkeava_tulliprosentti FROM tilausrivin_lisatiedot WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus='$tunnus'";
+				$query = "	SELECT poikkeava_tulliprosentti
+							FROM tilausrivin_lisatiedot
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tilausrivitunnus = '$tunnus'";
 				$result = pupe_query($query);
 				$poikkeava_tulliprosentti_db = mysql_fetch_assoc($result);
+
 				//ei p‰ivitet‰ poikkeus_tulliprosenttia kantaan jos se on sama kuin oletusprosentti, paitsi jos kantaan on jo p‰ivitetty poikkeus prosentti.
 				//kannasta pit‰‰ tarkistaa, onko siell‰ poikkeus_tulliprosentti, koska oletus --> poikkeus ja takaisin poikkeus --> oletus ei p‰ivity kantaan ilman olemassaolevan poikkeuksen tarkistusta.
 				if ($poikkeava_tulliprosentti_db['poikkeava_tulliprosentti'] != null or $rivi_oletus_tulliprosentti[$tunnus] != $poikkeava_tulliprosentti) {
-					$query  = "UPDATE tilausrivin_lisatiedot SET poikkeava_tulliprosentti=$poikkeava_tulliprosentti WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus='$tunnus'";
+					$query  = "	UPDATE tilausrivin_lisatiedot
+								SET poikkeava_tulliprosentti = $poikkeava_tulliprosentti
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tilausrivitunnus = '$tunnus'";
 					$result = pupe_query($query);
 				}
 			}
@@ -1051,7 +1059,7 @@ if ($tila == '') {
 	}
 
 	$tv_kaytossa = tarkista_onko_taric_veroperusteet_kaytossa();
-	
+
 	// Tietokannan kent‰t on m‰‰ritelt‰v‰ n‰in jotta meid‰n dynaamiset haut toimisivat
 	$kentat_array = array();
 	$kentat_array[] = "tilausrivi.otunnus otunnus";

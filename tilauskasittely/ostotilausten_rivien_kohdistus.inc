@@ -574,6 +574,9 @@ if ($tila == 'tee_siirto') {
 									case 'kpl':
 										$rvalues .= ", '$jaljelle_jaa'";
 										break;
+									case 'kate_korjattu':
+										$rvalues .= ", NULL";
+										break;
 									default:
 										$rvalues .= ", '".$rivirow[$fieldname]."'";
 								}
@@ -1311,9 +1314,9 @@ if ($tila == '') {
 
 	js_popup();
 
-	$query = "	SELECT l2.ebid, l2.nimi, l2.summa, l2.tunnus
+	$query = "	SELECT l2.tunnus
 				FROM lasku l1
-				JOIN lasku l2 ON l1.yhtio=l2.yhtio and l1.vanhatunnus=l2.tunnus and l2.ebid!=''
+				JOIN lasku l2 ON l1.yhtio=l2.yhtio and l1.vanhatunnus=l2.tunnus
 				WHERE l1.yhtio		= '$kukarow[yhtio]'
 				and l1.tila			= 'K'
 				and l1.laskunro		= '$laskurow[laskunro]'
@@ -1321,7 +1324,6 @@ if ($tila == '') {
 	$muutkeikres = pupe_query($query);
 
 	while ($muutkeikrow = mysql_fetch_assoc($muutkeikres)) {
-		$ebid = $muutkeikrow['ebid'];
 		echo ebid($muutkeikrow['tunnus']);
 	}
 

@@ -12,9 +12,15 @@ if (php_sapi_name() == 'cli') {
 
 // jos meillä ei ole sessiota ja meillä on komentoriviparametri annettuna
 if ($php_cli) {
+
+	// laitetaan pupe-rootti ja tilauskäsittely mukaan includepathiin
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+	ini_set("display_errors", 0);
+
 	// otetaan tietokanta connect
-	require ("../inc/connect.inc");
-	require ("../inc/functions.inc");
+	require ("inc/connect.inc");
+	require ("inc/functions.inc");
 
 	// ja parametri komentoriviltä
 	$filename = $argv[1];
@@ -25,11 +31,6 @@ if ($php_cli) {
 
 	// ja toinen parametri komentoriviltä
 	$edi_tyyppi	= $argv[2];
-
-	// laitetaan pupe-rootti ja tilauskäsittely mukaan includepathiin
-	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname($argv[0])).PATH_SEPARATOR.dirname($argv[0]));
-	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
-	ini_set("display_errors", 0);
 }
 
 if (!function_exists('jt_toimita_editilaus')) {

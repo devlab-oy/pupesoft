@@ -266,7 +266,7 @@
 
 		if ($trow["tapvm"] >= $yhtiorow["ostoreskontrakausi_alku"] or ($trow["tapvm"]=="0000-00-00" and $trow["laskutyyppi"] == "M")) {
 
-			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Poisti laskun")."<br>" . $trow['comments'];
+			$komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Poisti laskun")."<br>" . $trow['comments'];
 
 			// Ylikirjoitetaan tiliöinnit
 			$query = "	UPDATE tiliointi SET
@@ -319,33 +319,30 @@
 
 		$query = "	SELECT *
 					FROM lasku
-					WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
-					yhtio = '$kukarow[yhtio]' and
-					tunnus = '$tunnus'";
+					WHERE hyvaksyja_nyt = '$kukarow[kuka]'
+					AND yhtio			= '$kukarow[yhtio]'
+					AND tunnus			= '$tunnus'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
-
 			require ("inc/footer.inc");
 			exit;
 		}
 
 		$lrow = mysql_fetch_assoc($result);
 
-		if ($viesti == "" or (int) $hyvaksyja == 0) {
+		if (trim($viesti) == "" or (int) $hyvaksyja == 0) {
 
 			if ($formilta == "true") {
 				if ((int) $hyvaksyja == 0) echo "<font class='error'>".t("Valitse kenelle lasku palautetaan.")."</font><br>";
-
-				if ($viesti == "") echo "<font class='error'>".t("Anna syy palautukseen.")."</font><br>";
+				if (trim($viesti) == "") echo "<font class='error'>".t("Anna syy palautukseen.")."</font><br>";
 			}
 
 			$hyvaksyjat = "	<table>
 							<tr>
 								<th>".t("Kenelle lasku palautetaan")."</th>
 							</tr>";
-
 
 			//	Valitse kenelle palautetaan
 			for ($i=1; $i<5; $i++) {
@@ -392,7 +389,7 @@
 					</table>
 					<input type = 'submit' value = '".t("Palauta")."'>
 					</form>
-					<br>
+					<br><br>
 					<form method='post'>
 					<input type='hidden' name='tunnus' value='$tunnus'>
 					<input type = 'submit' value = '".t("Palaa laskun hyväksyntään")."'>
@@ -412,15 +409,18 @@
 
 			$query = "	SELECT *
 						FROM kuka
-						WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukahyvak'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kuka    = '$kukahyvak'";
 			$result = pupe_query($query);
 			$krow = mysql_fetch_assoc($result);
 
-			// Merkataan lasku poistetuksi
+			$komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Palautti laskun hyväksyjälle").": $krow[nimi], $viesti<br>";
+
 			$query = "	UPDATE lasku SET
-						$upd
-						WHERE tunnus = '$tunnus' and
-						yhtio = '$kukarow[yhtio]'";
+						$upd,
+						comments = trim(concat('$komm', comments))
+						WHERE tunnus = '$tunnus'
+						AND yhtio = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
 			echo "<font class='message'>".t('Palauttettiin lasku käyttäjälle')." $krow[nimi]</font><br>";
@@ -514,7 +514,7 @@
 
 		$trow = mysql_fetch_assoc($result);
 
-		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") " . trim($komm) . "<br>" . $trow['comments'];
+		$komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") " . trim($komm) . "<br>" . $trow['comments'];
 
 		$query = "UPDATE lasku set comments = '$komm', alatila='H' WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
 		$result = pupe_query($query);
@@ -541,7 +541,7 @@
 
 		$trow = mysql_fetch_assoc($result);
 
-		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") " . trim($komm) . "<br>" . $trow['comments'];
+		$komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") " . trim($komm) . "<br>" . $trow['comments'];
 
 		$query = "UPDATE lasku set comments = '$komm' WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
 		$result = pupe_query($query);

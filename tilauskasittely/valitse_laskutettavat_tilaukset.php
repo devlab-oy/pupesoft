@@ -656,23 +656,27 @@
 					echo "<td class='back'>&nbsp;<font class='error'>".t("HUOM: Tilauksella on nollahintaisia rivej‰!")."</font></td>";
 				}
 
-				if ($row["chn"] == "010") {
-					//Varmistetaan, ett‰ meill‰ on verkkotunnus laskulla jos pit‰isi l‰hett‰‰ verkkolaskuja!
-					if($row["verkkotunnus"] == "") {
-						$query = "	SELECT verkkotunnus
-									FROM asiakas
-									WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[liitostunnus]' and verkkotunnus!=''";
-						$asres = pupe_query($query);
-						if(mysql_num_rows($asres) == 1) {
-							$asrow = mysql_fetch_array($asres);
-							$query = "	UPDATE lasku SET
-							 				verkkotunnus = '$asrow[verkkotunnus]'
-										WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]' and verkkotunnus=''";
-							$upres = pupe_query($query);
-						}
-						else {
-							echo "<td class='back'>&nbsp;<font class='message'>".t("VIRHE: Verkkotunnus puuttuu asiakkaalta ja laskulta!")."</font></td>";
-						}
+				//Varmistetaan, ett‰ meill‰ on verkkotunnus laskulla jos pit‰isi l‰hett‰‰ verkkolaskuja!
+				if ($row["chn"] == "010" and $yhtiorow['verkkolasku_lah'] != 'apix') {
+					$query = "	SELECT verkkotunnus
+								FROM asiakas
+								WHERE yhtio 	  = '$kukarow[yhtio]'
+								and tunnus  	  = '$row[liitostunnus]'
+								and verkkotunnus !=''";
+					$asres = pupe_query($query);
+
+					if (mysql_num_rows($asres) == 1) {
+						$asrow = mysql_fetch_array($asres);
+
+						$query = "	UPDATE lasku SET
+						 			verkkotunnus = '$asrow[verkkotunnus]'
+									WHERE yhtio 	 = '$kukarow[yhtio]'
+									AND tunnus  	 = '$row[tunnus]'
+									and verkkotunnus = ''";
+						$upres = pupe_query($query);
+					}
+					else {
+						echo "<td class='back'>&nbsp;<font class='message'>".t("VIRHE: Verkkotunnus puuttuu asiakkaalta ja laskulta!")."</font></td>";
 					}
 				}
 

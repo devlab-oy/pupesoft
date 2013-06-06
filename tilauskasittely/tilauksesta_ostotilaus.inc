@@ -31,20 +31,23 @@
 			$result = pupe_query($query);
 			$myytilrow = mysql_fetch_assoc($result);
 
-			//otetaan ensin vain lisävarusteettomat tuotteet tai lisävarusteperheiden isät
-			$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, tuote.ei_saldoa, tuote.sarjanumeroseuranta
+			//otetaan ensin vain lisävarusteettomat tuotteet, lisävarusteperheiden isät tai rungolliset tuotteet
+			$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, tuote.ei_saldoa, tuote.sarjanumeroseuranta, tuoteperhe.isatuoteno
 						FROM tilausrivi
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+						LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.tuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.otunnus = '$otunnus'
 						and tilausrivi.tyyppi != 'D'
 						$vars
-						and (tilausrivi.perheid2 = tilausrivi.tunnus or tilausrivi.perheid2 = 0)
-						ORDER BY tilausrivi.perheid2, tilausrivi.tunnus";
+						and (tilausrivi.perheid2 = tilausrivi.tunnus or tilausrivi.perheid2 = 0 or (tuoteperhe.isatuoteno != '' and tilausrivi.perheid != 0 and tilausrivi.perheid != tilausrivi.tunnus))
+						ORDER BY tilausrivi.perheid2, tilausrivi.perheid, tilausrivi.tunnus";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
+
+				$perheid = 0;
 
 				while ($rivi = mysql_fetch_assoc($result)) {
 
@@ -222,17 +225,20 @@
 						//Haetaan myös ns. lisävarusteperheet.
 						$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl
 									FROM tilausrivi
-									LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+									LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays != '')
 									where tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.otunnus = '$otunnus'
 									and tilausrivi.tyyppi != 'D'
 									and (tilausrivi.tunnus='$rivi[tunnus]' or tilausrivi.perheid2='$rivi[tunnus]')
-									order by tilausrivi.perheid2, tilausrivi.tunnus";
+									order by tilausrivi.perheid2, tilausrivi.perheid, tilausrivi.tunnus";
 						$tilrivires = pupe_query($query);
 
 						$pid = 0;
 
 						while ($tilrivirow = mysql_fetch_assoc($tilrivires)) {
+
+							if ($tilrivirow['perheid'] == 0) $perheid = 0;
+
 							// haetaan oletuspaikan tiedot niin laitetaan se riville
 							$query = "SELECT * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]' and oletus!=''";
 							$jtsre = pupe_query($query);
@@ -301,7 +307,7 @@
 											var 			= '',
 											try				= '$tilrivirow[try]',
 											osasto			= '$tilrivirow[osasto]',
-											perheid			= '',
+											perheid			= '{$perheid}',
 											perheid2		= '$pid',
 											nimitys 		= '$tilrivirow[nimitys]',
 											jaksotettu		= ''";
@@ -344,6 +350,17 @@
 								$query = "	UPDATE tilausrivi
 											set perheid2 = $pid
 											where yhtio = '$kukarow[yhtio]' and tunnus=$pid";
+								$perheres = pupe_query($query);
+							}
+
+							// SATULA-RUNKO case
+							// jos tilausrivin_lisatiedot joinissa tilausrivin_lisatiedot.ohita_kerays != ''
+							if ($tilrivirow['rivitunnus'] == $tilrivirow['perheid'] and $tilrivirow['ohita_kerays'] != '') {
+								$perheid = $lisatty_tun;
+
+								$query = "	UPDATE tilausrivi
+											SET perheid = '{$perheid}'
+											WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$perheid}'";
 								$perheres = pupe_query($query);
 							}
 						}

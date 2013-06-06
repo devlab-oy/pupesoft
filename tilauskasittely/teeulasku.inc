@@ -362,6 +362,9 @@
 			case 'kate':
 				$values .= ", '$kate'";
 				break;
+			case 'kate_korjattu':
+				$values .= ", NULL";
+				break;
 			case 'kohde':
 				$values .= ", '$kohde'";
 				break;

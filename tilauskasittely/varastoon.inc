@@ -158,10 +158,10 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
 				JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
 				WHERE {$uusiotunnuslisa}
-				and tilausrivi.varattu <> 0
-				and tilausrivi.yhtio = '{$kukarow['yhtio']}'
-				and tilausrivi.tyyppi = 'O'
-				and tilausrivi.netto = ''
+				and tilausrivi.varattu  <> 0
+				and tilausrivi.yhtio     = '{$kukarow['yhtio']}'
+				and tilausrivi.tyyppi    = 'O'
+				and tilausrivi.varastoon = 1
 				$varastoon_tilausrivirajaus
 				ORDER BY tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 	$chk_res = pupe_query($query);
@@ -214,12 +214,12 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 								suuntalava		= '{$chk_row['suuntalava']}',
 								uusiotunnus		= '{$chk_row['uusiotunnus']}'";
 				$inskres = pupe_query($lisainsert);
-				
+
 				if (!empty($varastoon_tilausrivirajaus)) {
 					$runkoinsert = mysql_insert_id();
 					$runkotunnukset .= $runkoinsert . ",";
 				}
-				
+
 				// p‰ivitet‰‰n is‰
 				$updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$chk_row['tunnus']}'";
 				$updateres = pupe_query($updateisa);
@@ -238,7 +238,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$loytyiko_lapsi_row['tunnus']}'";
 				$updres = pupe_query($query);
-				
+
 				if (!empty($varastoon_tilausrivirajaus)) {
 					$runkotunnukset .= $loytyiko_lapsi_row['tunnus'] . ",";
 				}

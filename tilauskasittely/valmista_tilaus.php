@@ -1533,6 +1533,14 @@
 					$lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 180 DAY) ";
 					$laskuindex = "yhtio_tila_luontiaika";
 				}
+
+				// Jos valmistuksessa k‰ytet‰‰n tilakoodeja, n‰ytet‰‰n pelk‰st‰‰n tarkistettu
+				// tilassa olevat valmistukset
+				if ($yhtiorow['valmistuksessa_kaytetaan_tilakoodeja'] == 'K') {
+					$valmistuksen_tila = "and lasku.valmistuksen_tila = 'TA'";
+				} else {
+					$valmistuksen_tila = '';
+				}
 			}
 
 			$query .= "	FROM lasku use index ($laskuindex)
@@ -1542,6 +1550,7 @@
 						and lasku.alatila  in ($alatilat)
 						$lisa
 						$haku
+						$valmistuksen_tila
 						$grouppi
 						$orderby
 						LIMIT 100";

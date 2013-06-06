@@ -106,21 +106,18 @@
 
 	if (mysql_field_name($result, $i) == "chn") {
 
-		$sel = array();
-		$apu = $trow[$i];
-		$sel[$apu] = "SELECTED";
+		$sel = array($trow[$i] => ' selected') + array_fill_keys(array('100', '010', '020', '030', '111', '112', '666', '667', '999'), '');
 
-		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-		$ulos .= "<option value='100' $sel[100]>".t("Verkkolasku, tulostuspalvelu")."</option>";
-		$ulos .= "<option value='010' $sel[010]>".t("Verkkolasku")."</option>";
-		#$ulos .= "<option value='001' $sel[001]>".t("Itella Pupevoice: EDI, sähköinen lasku")."</option>";
-		$ulos .= "<option value='020' $sel[020]>".t("Vienti-Verkkolasku (EU)")."</option>";
-		$ulos .= "<option value='030' $sel[030]>".t("Vienti-Verkkolasku, tulostuspalvelu (EU)")."</option>";
-		$ulos .= "<option value='111' $sel[111]>".t("Itella EDI: EIH-1.4 sähköinen lasku")."</option>";
-		$ulos .= "<option value='112' $sel[112]>".t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin")."</option>";
-		$ulos .= "<option value='666' $sel[666]>".t("Sähköposti")."</option>";
-		$ulos .= "<option value='667' $sel[667]>".t("Paperilasku, tulostetaan manuaalisesti")."</option>";
-		$ulos .= "<option value='999' $sel[999]>".t("Laskutuskielto, laskutusta ei tehdä")."</option>";
+		$ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value='100' {$sel['100']}>".hae_chn_teksti('100')."</option>";
+		$ulos .= "<option value='010' {$sel['010']}>".hae_chn_teksti('010')."</option>";
+		$ulos .= "<option value='020' {$sel['020']}>".hae_chn_teksti('020')."</option>";
+		$ulos .= "<option value='030' {$sel['030']}>".hae_chn_teksti('030')."</option>";
+		$ulos .= "<option value='111' {$sel['111']}>".hae_chn_teksti('111')."</option>";
+		$ulos .= "<option value='112' {$sel['112']}>".hae_chn_teksti('112')."</option>";
+		$ulos .= "<option value='666' {$sel['666']}>".hae_chn_teksti('666')."</option>";
+		$ulos .= "<option value='667' {$sel['667']}>".hae_chn_teksti('667')."</option>";
+		$ulos .= "<option value='999' {$sel['999']}>".hae_chn_teksti('999')."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -442,6 +439,22 @@
 		$ulos .= "<option value = ''>".t("Käytetään yhtiön oletusta")."</option>";
 		$ulos .= "<option value = 'E' $sel[E]>".t("JT-toimituksista ei lähetetä tilausvahvistusta")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("JT-toimituksista lähetetään tilausvahvistus")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "jt_toimitusaika_email_vahvistus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Käytetään yhtiön oletus parametriä")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("JT-rivien toimitusajan vahvistussähköpostia ei lähetetä")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Ostotilauksen toimitusajan vahvistuksesta lähetetään asiakkaalle JT-rivien toimitusajan vahvistussähköposti")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

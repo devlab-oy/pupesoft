@@ -12,9 +12,15 @@ if (php_sapi_name() == 'cli') {
 
 // jos meillä ei ole sessiota ja meillä on komentoriviparametri annettuna
 if ($php_cli) {
+
+	// laitetaan pupe-rootti ja tilauskäsittely mukaan includepathiin
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+	ini_set("display_errors", 0);
+
 	// otetaan tietokanta connect
-	require ("../inc/connect.inc");
-	require ("../inc/functions.inc");
+	require ("inc/connect.inc");
+	require ("inc/functions.inc");
 
 	// ja parametri komentoriviltä
 	$filename = $argv[1];
@@ -25,11 +31,6 @@ if ($php_cli) {
 
 	// ja toinen parametri komentoriviltä
 	$edi_tyyppi	= $argv[2];
-
-	// laitetaan pupe-rootti ja tilauskäsittely mukaan includepathiin
-	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname($argv[0])).PATH_SEPARATOR.dirname($argv[0]));
-	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
-	ini_set("display_errors", 0);
 }
 
 if (!function_exists('jt_toimita_editilaus')) {
@@ -114,6 +115,7 @@ $ltoim_maa				= "";
 $yhteyshenkilon_puhelin = "";
 $tilausyhteyshenkilo	= "";
 $lopviesti            	= "";
+$ohjausmerkki			= "";
 $ketjutus             	= "";
 $editilaus_maksuehto	= "";
 $editilaus_maksuteksti	= "";
@@ -835,11 +837,9 @@ while ($tietue = fgets($fd)) {
 			break;
 
 		case 'OSTOTIL.OT_VIITTEENNE':
-			// halutaan futur-aineistosta tämä tieto sisviesti2-kenttään
-			if ($edi_tyyppi == "futursoft") {
-				$orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
-				$lopviesti = trim($orig_tieto);
-			}
+			// halutaan futur ja magento-aineistoista tämä tieto sisviesti2-kenttään
+			$orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
+			$lopviesti = trim($orig_tieto);
 			break;
 
 		//Tilaus päättyy. Aika tehdä se kantaan
@@ -1081,8 +1081,10 @@ while ($tietue = fgets($fd)) {
 				// Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
 				if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
 
-				// Oletuksena näin
-				$ohjausmerkki = $lopviesti;
+				// Oletuksena näin Futursoft keississä
+				if ($edi_tyyppi == 'futursoft') {
+					$ohjausmerkki = $lopviesti;
+				}
 
 				if ($tilaustyyppilisa == 2) {
 					$ohjausmerkki = 'VARASTOTÄYDENNYS';
@@ -1987,6 +1989,7 @@ while ($tietue = fgets($fd)) {
 			$yhteyshenkilon_puhelin = "";
 			$tilausyhteyshenkilo	= "";
 			$lopviesti            	= "";
+			$ohjausmerkki			= "";
 			$ketjutus             	= "";
 			$editilaus_maksuehto	= "";
 			$editilaus_maksuteksti	= "";
@@ -2003,7 +2006,7 @@ while ($tietue = fgets($fd)) {
 			$editilaus_loppuhinta	= "";
 			$kieltolisa				= "";
 			$OT_ASIAKASNRO			= "";
-			$merkkitieto = "";
+			$merkkitieto 			= "";
 			break;
 	}
 }

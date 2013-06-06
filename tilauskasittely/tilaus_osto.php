@@ -115,7 +115,7 @@
 	}
 
 	// Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
-	$tilost_lopetus = "{$palvelin2}tilauskasittely/tilaus_osto.php////toim=$toim//tilausnumero=$tilausnumero//toim_nimitykset=$toim_nimitykset//naytetaankolukitut=$naytetaankolukitut";
+	$tilost_lopetus = "{$palvelin2}tilauskasittely/tilaus_osto.php////toim=$toim//tilausnumero=$tilausnumero//toim_nimitykset=$toim_nimitykset//toim_tuoteno=$toim_tuoteno//naytetaankolukitut=$naytetaankolukitut";
 
 	if ($lopetus != "") {
 		// Lis‰t‰‰n t‰m‰ lopetuslinkkiin
@@ -156,6 +156,17 @@
 			else {
 				echo "<font class='error'>".t("Toimituksella ei ollut vahvistettavia rivej‰")."</font><br><br>";
 			}
+
+			//aina kun ostotilauksen tilausrivit vahvistetaan, p‰ivitet‰‰n tilausrivin_lisatietoihin timestamp,
+			//jotta asiakkaalle osataan l‰hett‰‰ vahvistetuista riveist‰ niihin liittyvien jt myyntitilausrivien toimitusajan vahvistus s‰hkˆposti
+			$query = "	UPDATE tilausrivin_lisatiedot
+						JOIN tilausrivi
+						ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+							AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+							AND tilausrivi.otunnus = '{$kukarow['kesken']}' )
+						SET tilausrivin_lisatiedot.toimitusaika_paivitetty = NOW()
+						WHERE tilausrivin_lisatiedot. yhtio = '{$kukarow['yhtio']}'";
+			pupe_query($query);
 
 			$tee = "Y";
 		}
@@ -513,6 +524,10 @@
 
 		// Rivi on lisataan tietokantaan
 		if ($tee == 'TI' and $tuoteno != "") {
+			//HUOM!! Jos radio-button -> Tuotenumerot: on tuotteentoimittajat tuotenumerot -asennossa, lis‰t‰‰n $tuoteno eteen kysymysmerkki. T‰llˆin j‰rjestelm‰ hakee toimittajan tuotenumeron perusteella.
+			if ($toim_tuoteno == 'toim_tuoteno_toimittajan') {
+				$tuoteno = '?'.$tuoteno;
+			}
 			if ($toim != "HAAMU") {
 				$multi = "TRUE";
 				require("inc/tuotehaku.inc");
@@ -743,6 +758,7 @@
 					<input type='hidden' name='lopetus' 			value = '$lopetus'>
 					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 					<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+					<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 					<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 					<input type='hidden' name='tee' 				value = 'MUUOTAOSTIKKOA'>
 					<input type='hidden' name='tila' 				value = 'Muuta'>
@@ -764,6 +780,7 @@
 					<input type='hidden' name='lopetus' 			value = '$lopetus'>
 					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 					<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+					<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 					<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 					<input type='hidden' name='tee' 				value = 'mikrotila'>
 					<input type='Submit' value='".t("Lue tilausrivit tiedostosta")."'>
@@ -829,6 +846,22 @@
 			echo "</table><br>";
 
 			echo "<font class='head'>".t("Lis‰‰ rivi").": </font><hr>";
+			if (empty($toim_tuoteno)) {
+				$toim_tuoteno = "toim_tuoteno_omat";
+			}
+			$sel = array();
+			$sel[$toim_tuoteno] = "CHECKED";
+			echo "<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
+					<input type='hidden' name='toim' 				value = '$toim'>
+					<input type='hidden' name='lopetus' 			value = '$lopetus'>
+					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+					<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+					<input type='hidden' name='toim_nimitykset'		value = '$toim_nimitykset'>
+					<input type='hidden' name='tee' 				value = 'Y'>";
+			echo "<font class='info'>";
+			echo t("Tuotenumerot").": <input onclick='submit();' type='radio' name='toim_tuoteno' value='toim_tuoteno_omat' {$sel["toim_tuoteno_omat"]}> ".t("Tuoteno")." <input onclick='submit();' type='radio' name='toim_tuoteno' value='toim_tuoteno_toimittajan' {$sel["toim_tuoteno_toimittajan"]}> ".t("Toimittajan tuoteno")."";
+			echo "</font>";
+			echo "</form>";
 
 			require('syotarivi_ostotilaus.inc');
 
@@ -851,6 +884,7 @@
 					<input type='hidden' name='lopetus' 			value = '$lopetus'>
 					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 					<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+					<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 					<input type='hidden' name='tee' 				value = 'Y'>";
 
 			echo "<font class='info'>";
@@ -879,6 +913,7 @@
 						<input type='hidden' name='lopetus' 			value = '$lopetus'>
 						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 						<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+						<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 						<input type='hidden' name='tee' 				value = 'Y'>";
 
 				echo "<font class='info'>".t("N‰ytet‰‰nkˆ lukitut rivit").": <input onclick='submit();' type='radio' name='naytetaankolukitut' value='kylla' $sel_ky> ".t("Kyll‰")." <input onclick='submit();' type='radio' name='naytetaankolukitut' value='EI' $sel_ei> ".t("Ei");
@@ -1180,6 +1215,7 @@
 									<input type='hidden' name='lopetus' 			value = '$lopetus'>
 									<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 									<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+									<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 									<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 									<input type='hidden' name='rivitunnus' 			value = '$prow[tunnus]'>
 									<input type='hidden' name='tee' 				value = 'PV'>
@@ -1192,6 +1228,7 @@
 									<input type='hidden' name='lopetus' 			value = '$lopetus'>
 									<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 									<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+									<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 									<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 									<input type='hidden' name='rivitunnus' 			value = '$prow[tunnus]'>
 									<input type='hidden' name='tee' 				value = 'POISTA_RIVI'>
@@ -1205,6 +1242,7 @@
 										<input type='hidden' name='lopetus' 			value = '$lopetus'>
 										<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 										<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+										<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 										<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 										<input type='hidden' name='rivitunnus' 			value = '$prow[tunnus]'>
 										<input type='hidden' name='tee' 				value = 'OOKOOAA'>
@@ -1236,6 +1274,7 @@
 											<input type='hidden' name='lopetus' 		value = '$lopetus'>
 											<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 											<input type='hidden' name='toim_nimitykset' value = '$toim_nimitykset'>
+											<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 											<input type='hidden' name='tee' 			value = 'TI'>
 											<input type='hidden' name='lisavarusteita' 	value = 'ON'>
 											<input type='hidden' name='perheid2'	 	value = '$prow[tunnus]'>";
@@ -1274,6 +1313,7 @@
 											<input type='hidden' name='lopetus' 			value = '$lopetus'>
 											<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 											<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+											<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 											<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 											<input type='hidden' name='tee' 				value = 'LISLISAV'>
 											<input type='hidden' name='rivitunnus' 			value = '$prow[tunnus]'>
@@ -1341,6 +1381,7 @@
 						<input type='hidden' name='otunnus' 		value = '$tilausnumero'>
 						<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 						<input type='hidden' name='toim_nimitykset' value = '$toim_nimitykset'>
+						<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 						<input type='hidden' name='toimittajaid' 	value = '$laskurow[liitostunnus]'>
 						<input type='hidden' name='toim' 			value = '$kopiotoim'>
 						<input type='hidden' name='tee' 			value = 'TULOSTA'>
@@ -1408,6 +1449,7 @@
 							<input type='hidden' name='lopetus' 			value = '$lopetus'>
 							<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 							<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+							<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 							<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 							<input type='hidden' name='toimittajaid' 		value = '$laskurow[liitostunnus]'>
 							<input type='hidden' name='tee' 				value = 'valmis'>
@@ -1422,6 +1464,7 @@
 							<input type='hidden' name='lopetus' 			value = '$lopetus'>
 							<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 							<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+							<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 							<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 							<input type='hidden' name='tee' 				value = 'vahvista'>
 							<input type='Submit' value='".t("Vahvista toimitus")."'>
@@ -1451,6 +1494,7 @@
 						<input type='hidden' name='lopetus' 			value = '$lopetus'>
 						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 						<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+						<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 						<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 						<input type='hidden' name='tee' 				value = 'poista'>
 						<input type='Submit' value='*".t("Mit‰tˆi koko tilaus")."*'>
@@ -1465,6 +1509,7 @@
 						<input type='hidden' name='lopetus' 			value = '$lopetus'>
 						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 						<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+						<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 						<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 						<input type='hidden' name='tee' 				value = 'poista_kohdistamattomat'>
 						<input type='Submit' value='*".t("Mit‰tˆi kohdistamattomat rivit")."*'>

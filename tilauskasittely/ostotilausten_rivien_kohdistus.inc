@@ -574,6 +574,9 @@ if ($tila == 'tee_siirto') {
 									case 'kpl':
 										$rvalues .= ", '$jaljelle_jaa'";
 										break;
+									case 'kate_korjattu':
+										$rvalues .= ", NULL";
+										break;
 									default:
 										$rvalues .= ", '".$rivirow[$fieldname]."'";
 								}
@@ -1008,15 +1011,20 @@ if ($tila == '') {
 	$query   = "UPDATE lasku set summa='$hintarow[hinta]', kohdistettu='' where yhtio ='$kukarow[yhtio]' and tunnus='$otunnus'";
 	$hinresu = pupe_query($query);
 
-	//Jos käyttäjä on syöttänyt alvillisen hinnan niin lisätään alvi
+	// Jos käyttäjä on syöttänyt alvillisen hinnan niin lisätään alvi
 	if ((int) $laskurow["rahti_etu_alv"] != 0) {
-		$laskurow["rahti_etu"] = round($laskurow["rahti_etu"]*(1+($laskurow["rahti_etu_alv"]/100)), 6);
+		$laskurow["rahti_etu"] = round($laskurow["rahti_etu"] * (1 + ($laskurow["rahti_etu_alv"] / 100)), 6);
+	}
+
+	// Jos käyttäjä on syöttänyt alvillisen pyöristyksen niin lisätään alvi
+	if ((int) $laskurow["pyoristys_erot_alv"] != 0) {
+		$laskurow["pyoristys_erot"] = round($laskurow["pyoristys_erot"] * (1 + ($laskurow["pyoristys_erot_alv"] / 100)), 6);
 	}
 
 	$valittusumma 			= sprintf("%.2f", round($hintarow["hinta"],2));
-	$laskunsumma  			= sprintf("%.2f", round($kulurow["summa"]-$laskurow["rahti_etu"]-$valittusumma-$kulurow['osto_kulut'], 2));
-	$checksumma   			= $kulurow["summa"]-$laskurow["rahti_etu"]-$hintarow["hinta"]-$kulurow['osto_kulut'];
-	$kohdistettava_summa 	= sprintf("%.2f", round($kulurow["summa"] - $laskurow["rahti_etu"] - $kulurow['osto_kulut'], 2));
+	$laskunsumma  			= sprintf("%.2f", round($kulurow["summa"] - $laskurow["rahti_etu"] - $laskurow['pyoristys_erot']- $valittusumma - $kulurow['osto_kulut'], 2));
+	$checksumma   			= $kulurow["summa"] - $laskurow["rahti_etu"] - $laskurow['pyoristys_erot'] - $hintarow["hinta"] - $kulurow['osto_kulut'];
+	$kohdistettava_summa 	= sprintf("%.2f", round($kulurow["summa"] - $laskurow["rahti_etu"] - $laskurow['pyoristys_erot'] - $kulurow['osto_kulut'], 2));
 	$valitutrivit 			= mysql_num_rows($result);
 
 	if ($laskunsumma != 0.00 and $checksumma < 0.01 and $checksumma > -0.01 and $kohdistettava_summa == $valittusumma) {
@@ -1298,7 +1306,7 @@ if ($tila == '') {
 	</tr>
 	<tr>
 		<th>".t("Toimittaja").":</th><td>$laskurow[nimi]</td>
-		<th>".t("Laskun kulut").":</th><td style='text-align:right'><span id='laskun_kulut'>{$kulurow['osto_kulut']}</span> $kulurow[valkoodi]</td>
+		<th>".t("Laskun kulut").":</th><td style='text-align:right'><span id='laskun_kulut'>".sprintf("%.2f", $kulurow['osto_kulut'])."</span> $kulurow[valkoodi]</td>
 		<th>".t("Näytä kaikki kohdistetut").":</th><td><INPUT type='radio' $chk1 name='nayta_kohdistetut' value='jees' onclick='submit()'></td>
 	</tr>
 	<tr>
@@ -1306,9 +1314,9 @@ if ($tila == '') {
 
 	js_popup();
 
-	$query = "	SELECT l2.ebid, l2.nimi, l2.summa, l2.tunnus
+	$query = "	SELECT l2.tunnus
 				FROM lasku l1
-				JOIN lasku l2 ON l1.yhtio=l2.yhtio and l1.vanhatunnus=l2.tunnus and l2.ebid!=''
+				JOIN lasku l2 ON l1.yhtio=l2.yhtio and l1.vanhatunnus=l2.tunnus
 				WHERE l1.yhtio		= '$kukarow[yhtio]'
 				and l1.tila			= 'K'
 				and l1.laskunro		= '$laskurow[laskunro]'
@@ -1316,17 +1324,16 @@ if ($tila == '') {
 	$muutkeikres = pupe_query($query);
 
 	while ($muutkeikrow = mysql_fetch_assoc($muutkeikres)) {
-		$ebid = $muutkeikrow['ebid'];
 		echo ebid($muutkeikrow['tunnus']);
 	}
 
 	echo "</td>
-		<th>".t("Eturahti").":</th><td style='text-align:right'>$laskurow[rahti_etu] $kulurow[valkoodi]</td>
+		<th>".t("Eturahti").":</th><td style='text-align:right'>".sprintf("%.2f", $laskurow["rahti_etu"])." $kulurow[valkoodi]</td>
 		<th>".t("Näytä vain kohdistamattomat").":</th><td><INPUT type='radio' $chk2 name='nayta_kohdistetut' value='eitod' onclick='submit()'></td>
 		</tr>
 		<tr>
 		<th>".t("Saapumisen erikoisale").":</th><td><span id='keikan_erikoisale'>".($laskurow["erikoisale_saapuminen"]*1)."</span>%</td>
-		<th>".t("Kohdistettava summa").":</th><td style='text-align:right'><span id='kohdistettava_summa'>$kohdistettava_summa</span> $kulurow[valkoodi]</td>
+		<th>".t("Pyöristyserot").":</th><td style='text-align:right'>".sprintf("%.2f", $laskurow["pyoristys_erot"])." $kulurow[valkoodi]</td>
 		<th>".t("Näytä kaikki yhdellä sivulla").":</th><td><INPUT type='checkbox' $chk3 name='nayta_kaikki' value='kaikki' onclick='submit()'></td>
 		</tr>
 		<tr>";
@@ -1344,23 +1351,24 @@ if ($tila == '') {
 	}
 
  	echo "<td>{$alku} - {$loppu}  ",t("Sivu"),": {$sivu}</td>";
-
-	echo "<th>".t("Kohdistettu summa (riv/kpl)").":</th><td id='kohdistettu_summa_td' style='text-align:right'>$ok <span id='kohdistettu_summa'>$valittusumma</span> $kulurow[valkoodi] (<span id='kohdistettu_rivit'>$kappaleetrow[rivit]</span>/<span id='kohdistettu_kpl'>".(float) $kappaleetrow['kappaleet']."</span>)$okend</td>
+	echo "<th>".t("Kohdistettava summa").":</th><td style='text-align:right'><span id='kohdistettava_summa'>$kohdistettava_summa</span> $kulurow[valkoodi]</td>
 		<th></th><td></td>
 		</tr>";
 
 	echo "<tr>";
-
 	echo "<th></th><td></td>";
+	echo "<th>".t("Kohdistettu summa").":</th><td id='kohdistettu_summa_td' style='text-align:right'>$ok <span id='kohdistettu_summa'>$valittusumma</span> $kulurow[valkoodi]$okend</td>";
+	echo "<th>".t("Rivejä").":</th><td style='text-align:right'><span id='kohdistettu_rivit'>$kappaleetrow[rivit]</span></td>";
+	echo "</tr>";
 
+	echo "<tr>";
+	echo "<th></th><td></td>";
 	echo "<th>".t("Jäljellä").":</th><td style='text-align:right'>$ok $laskunsumma $kulurow[valkoodi]$okend</td>";
-
-	echo "<th></th><td></td>";
-	echo "</form>";
-
+	echo "<th>".t("Kappaleita").":</th><td style='text-align:right'><span id='kohdistettu_kpl'>".(float) $kappaleetrow['kappaleet']."</span></td>";
 	echo "</tr>";
 
 	echo "</table>";
+	echo "</form>";
 
 	// otsikko valmis
 

@@ -74,11 +74,14 @@
 			echo "<td valign='top'>$ulos</td>";
 		}
 
-
 		echo "	<td valign='top'><input type='text' name='kpl' size='5' maxlength='13' value='$kpl'></td>
 				<td valign='top'><input type='text' name='var' size='2' maxlength='1' value='$var'></td>";
 
-		if ($kukarow['hinnat'] == 0) echo "<td valign='top'><input type='text' name='hinta' size='".(5+$yhtiorow['hintapyoristys']-2)."' maxlength='".(12+$yhtiorow['hintapyoristys']-2)."' value='$hinta'></td>";
+		if ($kukarow['hinnat'] == 0) {
+			$siemenluku = strlen((int) $hinta) > 5 ? strlen((int) $hinta) : 5;
+
+			echo "<td valign='top'><input type='text' name='hinta' size='".($siemenluku+$yhtiorow['hintapyoristys'])."' maxlength='".(12+$yhtiorow['hintapyoristys']-2)."' value='$hinta'></td>";
+		}
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			echo "<td valign='top'>";
@@ -315,7 +318,11 @@
 
 		echo "</select></td>";
 
-		if ($kukarow['hinnat'] == 0) echo "<td valign='top'><input type='text' size='".(5+$yhtiorow['hintapyoristys']-2)."' name='hinta' value='$hinta'></td>";
+		if ($kukarow['hinnat'] == 0) {
+			$siemenluku = strlen((int) $hinta) > 5 ? strlen((int) $hinta) : 5;
+
+			echo "<td valign='top'><input type='text' size='".($siemenluku+$yhtiorow['hintapyoristys'])."' name='hinta' value='$hinta'></td>";
+		}
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			echo "<td valign='top'>";

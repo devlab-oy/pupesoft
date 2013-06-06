@@ -131,6 +131,10 @@ if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukar
 	$valitsetoimitus = $toim;
 }
 
+if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and file_exists($pupe_root_polku . '/tilauskasittely/ostoskorin_haku.inc')) {
+	require_once('tilauskasittely/ostoskorin_haku.inc');
+}
+
 // Vaihdetaan tietyn projektin toiseen toimitukseen
 //	HUOM: t‰m‰ k‰ytt‰‰ aktivointia joten t‰m‰ on oltava aika alussa!! (valinta on onchage submit rivisyˆtˆss‰ joten noita muita paremetreja ei oikein voi passata eteenp‰in..)
 if ((int) $valitsetoimitus > 0 and $valitsetoimitus != $tilausnumero) {
@@ -453,6 +457,14 @@ if (
 	$tilausnumero = luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero, $myyjanumero, '', $kantaasiakastunnus);
 	$kukarow["kesken"] = $tilausnumero;
 	$kaytiin_otsikolla = "NOJOO!";
+
+	// Setataan lopetuslinkki uudestaan t‰ss‰, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
+	$tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
+
+	if ($lopetus != "") {
+		// Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+		$tilmyy_lopetus = $lopetus."/SPLIT/".$tilmyy_lopetus;
+	}
 }
 
 //Haetaan otsikon kaikki tiedot
@@ -2209,11 +2221,15 @@ if ($tee == '') {
 
 		echo "</form>";
 
+		if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and file_exists($pupe_root_polku . '/tilauskasittely/varaosaselain_napit.inc')) {
+			require_once('tilauskasittely/varaosaselain_napit.inc');
+		}
+
 		if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and $yhtiorow["rahtikirjojen_esisyotto"] == "M") {
 			echo "<form action='../rahtikirja.php' method='post'>
 					<input type='hidden' name='tee' value=''>
 					<input type='hidden' name='toim' value='lisaa'>
-					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=LASKUTATILAUS'>
 					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
 					<input type='hidden' name='projektilla' value='$projektilla'>
 					<input type='hidden' name='rahtikirjan_esisyotto' value='$toim'>
@@ -2526,6 +2542,54 @@ if ($tee == '') {
 		}
 	}
 
+	if ($kukarow['extranet'] == '' and ($laskurow["liitostunnus"] > 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS"))) {
+
+		echo "	<script type='text/javascript'>
+
+				$(function() {
+
+					$('#hae_asiakasta_linkki').on('click', function(e) {
+						e.preventDefault();
+
+						$('#hae_asiakasta_spani').hide();
+						$('#hae_asiakasta_boksi').show().focus();
+						$('#hae_asiakasta_boksi_button').show();
+					});
+
+					$('#hae_asiakasta_boksi').on('keyup', function(e) {
+						e.preventDefault();
+
+						$('#syotetty_ytunnus').val($(this).val());
+					});
+
+					$('#hae_asiakasta_boksi').keypress(function(e) {
+					    if(e.keyCode == 13) {
+					        $('#hae_asiakasta_formi').submit();
+					    }
+					});
+
+					$('#hae_asiakasta_boksi_button').on('click', function(e) {
+						e.preventDefault();
+						$('#hae_asiakasta_formi').submit();
+					});
+
+				});
+
+				</script>";
+
+		echo "<form id='hae_asiakasta_formi' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+		echo "	<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
+				<input type='hidden' name='mista' value='{$mista}'>
+				<input type='hidden' name='toim' value='{$toim}'>
+				<input type='hidden' name='lopetus' value='{$lopetus}'>
+				<input type='hidden' name='ruutulimit' value = '{$ruutulimit}'>
+				<input type='hidden' name='projektilla' value='{$projektilla}'>
+				<input type='hidden' name='orig_tila' value='{$orig_tila}'>
+				<input type='hidden' name='orig_alatila' value='{$orig_alatila}'>
+				<input type='hidden' id='syotetty_ytunnus' name='syotetty_ytunnus' value=''>";
+		echo "</form>";
+	}
+
 	// t‰ss‰ alotellaan koko formi.. t‰m‰ pit‰‰ kirjottaa aina
 	echo "<form name='tilaus' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
 			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -2543,10 +2607,10 @@ if ($tee == '') {
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] > 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
-		$query = "	SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma
+		$query = "	SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma, verkkotunnus, chn
 					FROM asiakas
-					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus = '$laskurow[liitostunnus]'";
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus = '{$laskurow['liitostunnus']}'";
 		$faktaresult = pupe_query($query);
 		$faktarow = mysql_fetch_assoc($faktaresult);
 
@@ -2581,12 +2645,16 @@ if ($tee == '') {
 				echo "<input type='submit' name='liitaasiakasnappi' value='".t("Liit‰ asiakas")."'>";
 			}
 			else {
-				echo "$laskurow[ytunnus]";
+
+				echo $laskurow['ytunnus'];
 
 				if ($faktarow["asiakasnro"] != "") {
 					echo " / $faktarow[asiakasnro]";
 				}
-				echo " / {$faktarow['ryhma']}";
+
+				if ($faktarow["ryhma"] != "") {
+					echo " / {$faktarow['ryhma']}";
+				}
 			}
 
 			echo "</td>";
@@ -2599,14 +2667,34 @@ if ($tee == '') {
 			echo "<tr>{$jarjlisa}";
 			echo "<th align='left'>",t("Asiakas"),":</th>";
 
+			echo "<td>";
+			echo "<span id='hae_asiakasta_spani'>";
+
 			if ($kukarow["extranet"] == "") {
-				echo "<td><a href='{$palvelin2}crm/asiakasmemo.php?ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&from={$toim}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$laskurow['nimi']}</a>";
+				echo "<a href='{$palvelin2}crm/asiakasmemo.php?ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&from={$toim}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$laskurow['nimi']}</a>";
+				echo " <a id='hae_asiakasta_linkki'><img src='".$palvelin2."pics/lullacons/user-multiple.png'></a>";
  			}
 			else {
-				echo "<td>{$laskurow['nimi']}";
+				echo "{$laskurow['nimi']}";
 			}
 
-			if ($laskurow["toim_nimi"] != $laskurow["nimi"]) echo "<br>{$laskurow['toim_nimi']}";
+			if ($laskurow["toim_nimi"] != $laskurow["nimi"]) {
+				echo "<br>{$laskurow['toim_nimi']}";
+			}
+
+			if ($kukarow['extranet'] == "" and $yhtiorow['konserni'] == "indu") {
+				echo "<br />";
+				echo hae_chn_teksti($faktarow['chn']);
+				if ($faktarow['verkkotunnus'] != '') echo " / {$faktarow['verkkotunnus']}";
+			}
+
+			echo "</span>";
+
+			if ($kukarow["extranet"] == "") {
+				echo "<input type='text' name='hae_asiakasta_boksi' id='hae_asiakasta_boksi' value='' style='display:none;' /> ";
+				echo "<input type='button' name='hae_asiakasta_boksi_button' id='hae_asiakasta_boksi_button' value='",t("Vaihda asiakas"),"' style='display:none;'>";
+			}
+
 			echo "</td>";
 
 			echo "<th align='left'>".t("Toimitustapa").":</th>";
@@ -3309,10 +3397,19 @@ if ($tee == '') {
 	}
 
 	//Kuitataan OK-var riville
-	if (($kukarow["extranet"] == "" or $yhtiorow["korvaavat_hyvaksynta"] != ""  or $yhtiorow["vientikiellon_ohitus"] == "K" or $vastaavienkasittely == "kylla") and $tila == "OOKOOAA") {
+	if (($kukarow["extranet"] == "" or $yhtiorow["korvaavat_hyvaksynta"] != ""  or $yhtiorow["vientikiellon_ohitus"] == "K" or $vastaavienkasittely == "kylla") and ($tila == "OOKOOAA" or $tila == "OOKOOAAKAIKKI")) {
+
+		if ($tila == "OOKOOAAKAIKKI" and $tilausnumero != "" and $tilausnumero != 0) {
+			$wherelisa = "AND otunnus = '{$tilausnumero}'";
+		}
+		else {
+			$wherelisa = "AND tunnus = '{$rivitunnus}'";
+		}
+
 		$query = "	UPDATE tilausrivi
 					SET var2 = 'OK'
-					WHERE tunnus = '$rivitunnus'";
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					{$wherelisa}";
 		$result = pupe_query($query);
 
 		$tapa 		= "";
@@ -4511,9 +4608,9 @@ if ($tee == '') {
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
 		if (isset($ruutulimit) and $ruutulimit > 0) {
-			list($ruutulimitalk, $ruutulimitlop) = explode("##", $ruutulimit);
+			list($ruutulimitalk, $ruutulimitlop) = explode("!°!", $ruutulimit);
 
-			$limitlisa = "LIMIT ".($ruutulimitalk-1).", $ruutulimitlop";
+			$limitlisa = "LIMIT ".(int) ($ruutulimitalk-1).", ". (int) $ruutulimitlop;
 		}
 		else {
 			$limitlisa = "";
@@ -4836,10 +4933,10 @@ if ($tee == '') {
 
 					if ($ruulask2 == 25) {
 
-						if ($ruutulimit == (($ruulask3+1)."##".($ruulask1+1-$ruulask3))) $ruutusel = "SELECTED";
+						if ($ruutulimit == (($ruulask3+1)."!°!".($ruulask1+1-$ruulask3))) $ruutusel = "SELECTED";
 						else $ruutusel = "";
 
-						echo "<option value='".($ruulask3+1)."##".($ruulask1+1-$ruulask3)."' $ruutusel>".($ruulask3+1)." - ".($ruulask1+1)."</option>";
+						echo "<option value='".($ruulask3+1)."!°!".($ruulask1+1-$ruulask3)."' $ruutusel>".($ruulask3+1)." - ".($ruulask1+1)."</option>";
 
 						$ruulask2 = 0;
 						$ruulask3 = $ruulask1+1;
@@ -7692,6 +7789,24 @@ if ($tee == '') {
 		}
 		else {
 			$projektilask = 0;
+		}
+
+		if (isset($saako_hyvaksya) and $saako_hyvaksya > 0) {
+			echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='hyvaksy'>
+					<input type='hidden' name='toim' 			value = '{$toim}'>
+					<input type='hidden' name='lopetus' 		value = '{$lopetus}'>
+					<input type='hidden' name='ruutulimit' 		value = '{$ruutulimit}'>
+					<input type='hidden' name='projektilla' 	value = '{$projektilla}'>
+					<input type='hidden' name='tilausnumero' 	value = '{$tilausnumero}'>
+					<input type='hidden' name='mista' 			value = '{$mista}'>
+					<input type='hidden' name='rivitunnus' 		value = '{$row['tunnus']}'>
+					<input type='hidden' name='rivilaadittu' 	value = '{$row['laadittu']}'>
+					<input type='hidden' name='menutila' 		value = '{$menutila}'>
+					<input type='hidden' name='orig_tila' 		value = '{$orig_tila}'>
+					<input type='hidden' name='orig_alatila' 	value = '{$orig_alatila}'>
+					<input type='hidden' name='tila' 			value = 'OOKOOAAKAIKKI'>
+					<input type='Submit' value='",t("Hyv‰ksy kaikki rivit"),"'>
+					</form> ";
 		}
 
 		if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "") {

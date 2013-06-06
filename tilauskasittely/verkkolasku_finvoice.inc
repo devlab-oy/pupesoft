@@ -78,7 +78,7 @@ if (!function_exists('finvoice_otsik')) {
 			}
 
 			// Jos vastaanottaja on tyhj‰‰ tai ollaan valittu lasku tulostuspalveluun chn 100 "Verkkolasku, tulostuspalvelu"
-			if ($receiverpartyid == "" or $lasrow["chn"] == "100") {
+			if (($receiverpartyid == "" and $yhtiorow["verkkolasku_lah"] != "apix") or $lasrow["chn"] == "100") {
 				$receiverpartyid = $tulostuspalvelu;
 			}
 

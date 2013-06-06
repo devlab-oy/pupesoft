@@ -267,13 +267,12 @@
 	}
 
 	if (!function_exists('hae_oletus_tulliprosentti')) {
-		function hae_oletus_tulliprosentti($laskurow,$tuorow) {
+		function hae_oletus_tulliprosentti($laskurow, $tuorow) {
 			global $kukarow, $yhtiorow;
 
 			// Sis‰‰n otetaan
-			// $ohinta jossa on yhden tilausrivin tullausarvo.
 			// $tuorow jossa on tuotteen kaikki tiedot.
-			// $laskurow jossa on laskun kaikki tiedot.
+			// $laskurow jossa on saapumisen tiedot.
 
 			require('tilauskasittely/taric_veroperusteet.inc');
 

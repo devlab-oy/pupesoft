@@ -147,6 +147,7 @@ $edi_nimitys     	= "";
 $sallitaanjt	 	= "";
 $editilaus_hinta	= "";
 $editilaus_alennus	= "";
+$rivikommentti		= "";
 
 // fiilataan parametrej‰ joita tarvitaan require fileiss‰
 $tulos_ulos = "edi"; // t‰‰ on ftp-send.inciss‰
@@ -1785,6 +1786,7 @@ while ($tietue = fgets($fd)) {
 			$sallitaanjt	 	= "";
 			$editilaus_hinta	= "";
 			$editilaus_alennus	= "";
+			$rivikommentti		= "";
 			break;
 
 		case 'OMSG__END' :

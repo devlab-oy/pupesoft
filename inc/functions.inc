@@ -8823,7 +8823,7 @@ if (!function_exists("livesearch_toimittajahaku")) {
 				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
 			</script>";
 
-			$query = "	SELECT *
+			$query = "	SELECT *, concat_ws(', ', nimi, if(trim(nimitark)='', NULL, nimitark)) nimi
 						FROM toimi
 						WHERE toimi.yhtio = '{$kukarow['yhtio']}'
 						AND toimi.nimi LIKE '%{$haku}%'";
@@ -8852,7 +8852,7 @@ if (!function_exists("livesearch_toimittajahaku")) {
 								}
 								echo "\"
 								style='padding:2px;'>
-								<font style='font-weight:bold'>$row[nimi]</font> &raquo; ($row[kuka])
+								<font style='font-weight:bold'>$row[nimi]</font>
 							</div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
 					$limit++;
 

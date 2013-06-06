@@ -135,7 +135,7 @@
 
 		while (($file = readdir($handle)) !== FALSE) {
 
-			if (is_file($verkkolaskuvirheet_vaarat."/".$file)) {
+			if (is_file($verkkolaskuvirheet_vaarat."/".$file) and substr($file,0,1) != ".") {
 				unset($yhtiorow);
 				unset($xmlstr);
 
@@ -207,7 +207,7 @@
 					else {
 						echo "<td>$yhtio<br>{$ostaja_asiakkaantiedot["nimi"]}<br><font class='error'>".t("HUOM: Laskun vastaanottaja ep‰selv‰")."!</font></td>";
 					}
-
+					
 					echo "<td nowrap>";
 
 					// Olisiko toimittaja sittenkin jossain (v‰‰rin perustettu)
@@ -378,6 +378,7 @@
 							echo t("Muuta toimittajan tietoja").":<br>";
 							echo "<form action='{$palvelin2}yllapito.php' method='post'>
 									<input type = 'hidden' name = 'toim' value = 'toimi'>
+									<input type = 'hidden' name = 'lopetus' value = '".$palvelin2."verkkolaskuvirheet.php////'>
 									<select name='tunnus'>";
 
 							foreach ($toimittaja_array as $lahellarow) {
@@ -391,17 +392,10 @@
 						echo "<input type='hidden' name = 'tiedosto' value='$file'>";
 						echo "<input type='hidden' name = 'kumpivoice' value='$kumpivoice'>";
 						echo "<input type='hidden' name='tapa' value='U_JA_P' />";
-						echo "<table>";
-						echo "<tr>";
-						echo "<th>";
-						echo t('Liit‰ toimittajan nimell‰').': ';
-						echo "</th>";
-						echo "<td>";
+						
+						echo t('Etsi toimittaja ja k‰sittele lasku uudestaan').':<br>';
 						echo livesearch_kentta("eisaaollaoikee", "TOIMITTAJAHAKU", "toimittaja_haku", 140, $toimittaja_haku, '', '', 'toimittaja_haku', 'ei_break_all');
-						echo "</td>";
-						echo "</tr>";
-						echo "</table>";
-						echo "<input type='submit' value='".t("Liit‰")."' />";
+						echo "<input type='submit' value='".t("K‰sittele uudestaan")."' />";
 						echo "</form>";
 						echo "<br/>";
 						echo "<br/>";

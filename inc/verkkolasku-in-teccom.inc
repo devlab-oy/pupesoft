@@ -114,9 +114,11 @@
 		foreach ($xml->InvoiceDetail as $riveilta) {
 			$rivi[] = $riveilta->OrderRef->BuyerOrderNumber;
 		}
-		$rivi = array_unique($rivi); // otetaan uniikit
-		$rivi = array_values($rivi); // poistetaan turhat välit
-		$laskun_tilausviite = implode(",",$rivi);
+		if (is_array($rivi)) {
+			$rivi = array_unique($rivi); // otetaan uniikit
+			$rivi = array_values($rivi); // poistetaan turhat välit
+			$laskun_tilausviite = implode(",",$rivi);
+		}
 	}
 
 	$onko_hyvityslasku_kerroin = 1;

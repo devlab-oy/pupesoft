@@ -320,11 +320,11 @@
 			// $laskuttajan_vat --> voisi olla vatnumero
 			// $laskuttajan_nimi --> voisi olla laskuttajan nimi
 			// $laskuttajan_toimittajanumero --> toimittajanumero
-			$laskuttajan_ovt  = trim($laskuttajan_ovt);
-			$laskuttajan_vat  = trim($laskuttajan_vat);
-			$laskuttajan_nimi = trim($laskuttajan_nimi);
-			$laskuttajan_toimittajanumero = trim($laskuttajan_toimittajanumero);
-			$laskun_toimitunnus = (int) $laskun_toimitunnus;
+			$laskuttajan_ovt  				= trim($laskuttajan_ovt);
+			$laskuttajan_vat  				= trim($laskuttajan_vat);
+			$laskuttajan_nimi 				= trim($laskuttajan_nimi);
+			$laskuttajan_toimittajanumero	= trim($laskuttajan_toimittajanumero);
+			$laskun_toimitunnus 			= (int) $laskun_toimitunnus;
 
 			if ($laskun_toimitunnus > 0) {
 				// 0 etsitään toimittaja tunnuksella
@@ -482,6 +482,39 @@
 
 				if (mysql_num_rows($result) == 1) {
 					$trow = mysql_fetch_assoc($result);
+				}
+			}
+
+			// vaihtoehtoiset_verkkolaskutunnukset poikkeus tarkistus
+			if (!isset($trow)) {
+				$poikkeus_arvot = array(
+					'nimi' => $laskuttajan_nimi,
+					'ytunnus' => $laskuttajan_vat,
+					'ovt_tunnus' => $laskuttajan_ovt
+				);
+
+				foreach ($poikkeus_arvot as $poikkeus_sarake => $poikkeus_arvo) {
+					$query = "	SELECT *
+								FROM vaihtoehtoiset_verkkolaskutunnukset
+								WHERE yhtio 	 = '$yhtio'
+								AND kohde_sarake = '{$poikkeus_sarake}'
+								AND arvo 		 = '{$poikkeus_arvo}'";
+					$result = pupe_query($query);
+					$poikkeus = mysql_fetch_assoc($result);
+
+					if (!empty($poikkeus)) {
+						$query = "	SELECT *
+									FROM toimi
+									WHERE yhtio = '$yhtio'
+									and tunnus  = '{$poikkeus['toimi_tunnus']}'
+									and tyyppi != 'P'";
+						$result = pupe_query($query);
+
+						if (mysql_num_rows($result) == 1) {
+							$trow = mysql_fetch_assoc($result);
+							break;
+						}
+					}
 				}
 			}
 

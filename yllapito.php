@@ -1793,6 +1793,13 @@
 			}
 		}
 
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimi") {
+			
+			if (($toikrow = tarkista_oikeus("yllapito.php", "vaihtoehtoiset_verkkolaskutunnukset%", "", "OK")) !== FALSE) {
+				echo "<iframe id='vaihtoehtoiset_verkkolaskutunnukset_iframe' name='vaihtoehtoiset_verkkolaskutunnukset_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&laji=$laji&ohje=off&haku[3]=@$tunnus&lukitse_avaimeen=$tunnus' style='height: 400px; width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+		}
+
 		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto" or $toim == "pakkaus" or ($toim == "avainsana" and $from != "yllapito"))) {
 
 			if (isset($perhe) and $perhe > 0) {
@@ -1910,6 +1917,7 @@
 			$toim == "etaisyydet" or
 			$toim == "tuotteen_avainsanat" or
 			$toim == "toimittajaalennus" or
+			$toim == "vaihtoehtoiset_verkkolaskutunnukset" or
 			$toim == "toimittajahinta" or
 			$toim == "varaston_tulostimet" or
 			$toim == "pakkaamo" or

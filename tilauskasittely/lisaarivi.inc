@@ -527,6 +527,8 @@
 						and try in ('$trow[try]','*')";
 			$kkres = pupe_query($query);
 
+			$korvaavat_kiellot = '';
+
 			if ($kk_row = mysql_fetch_assoc($kkres)) {
 				// Ei myyd‰ mit‰‰n korvaavia
 				if ($kk_row['laji'] == 'K') {
@@ -551,9 +553,6 @@
 				else {
 					$korvaavat_kiellot = "";
 				}
-			}
-			else {
-				$korvaavat_kiellot = "";
 			}
 
 			// Otetaan alkuper‰isen tuotteen hinta talteen
@@ -677,48 +676,49 @@
 						}
 					}
 
-					// Jos tilatulla tuotteella on saldoa toimitetaan se aina ensin loppuun
-					if (strtoupper($krow2[tuoteno]) == strtoupper($tuoteno) and $krmyytavissa > 0) {
+					// Myyd‰‰nkˆ aina halvin tuote
+					// Asiakas saa aina halvemman hinnan mukaan tuotteen, mikâli alkuperâinen tuote on P toistuva tai puute.
+					if ($yhtiorow["korvaavan_hinta_ylaraja"] == 'MIN') {
+
+						// T‰h‰n hintaan asiakas saisi tuotteen
+						if ($korva_hinta > 0) {
+							$korvaavan_hinta_ylaraja_hinta = $korva_hinta * generoi_alekentta_php($korva_ale_kaikki, 'M', 'kerto');
+						}
+						else {
+							unset($korvaavan_hinta_ylaraja_hinta);
+						}
+
+						// Otetaan koko ketjun halvin hinta/alennus talteen (ei poistetut tuotteet)
+						if (isset($korvaavan_hinta_ylaraja_hinta) and $krow2["status"] != "P" and (!isset($korvaavan_hinta_ylaraja_halvin_alehinta) or $korvaavan_hinta_ylaraja_halvin_alehinta > $korvaavan_hinta_ylaraja_hinta)) {
+							$korvaavan_hinta_ylaraja_halvin_alehinta = $korvaavan_hinta_ylaraja_hinta;
+							$korvaavan_hinta_ylaraja_halvin_hinta = $korva_hinta;
+							$korvaavan_hinta_ylaraja_halvin_ale = $korva_ale_kaikki;
+							$korvaavan_hinta_ylaraja_halvin_netto = $korva_netto;
+						}
+
+					 	if ($krmyytavissa > 0 and !in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
+							$kaikkituotteet[] = strtoupper($krow2["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
+						}
+					}
+					elseif ($yhtiorow["korvaavan_hinta_ylaraja"] != '' and $yhtiorow["korvaavan_hinta_ylaraja"] != 'MIN' and ($if_ale_korva_isa_chk1) != 0 and (($if_ale_korva_isa_chk2) / ($if_ale_korva_isa_chk1)) > (1+($yhtiorow["korvaavan_hinta_ylaraja"]/100))) {
+						//Korvaavien myynti kielletty koska korvaava tuote on liian kallis
+						if ($krmyytavissa > 0) {
+							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])");
+						}
+					}
+					else {
+						//Yritet‰‰n myyd‰ korvaava tuote
+						$korvattiin_korvaavalla = "HIIOHEI!";
+
+						if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) $kaikkituotteet[]=strtoupper($krow2["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
+					}
+
+					// Jos tilatulla tuotteella on saldoa toimitetaan se aina ensin loppuun.
+					// T‰m‰ yliajaa kaikki ylemm‰t kohdat.
+					if (strtoupper($krow2['tuoteno']) == strtoupper($tuoteno) and $krmyytavissa > 0) {
 						$kaikkituotteet = array(); // Nollataan array ja tilataan vaan tilattu
 						$kaikkituotteet[] = strtoupper($krow2["tuoteno"]);
 					}
-
-				}
-
-				// Asiakas saa aina halvemman hinnan mukaan tuotteen, mikâli alkuperâinen tuote on P toistuva tai puute.
-				elseif ($yhtiorow["korvaavan_hinta_ylaraja"] == 'MIN') {
-
-					// T‰h‰n hintaan asiakas saisi tuotteen
-					if ($korva_hinta > 0) {
-						$korvaavan_hinta_ylaraja_hinta = $korva_hinta * generoi_alekentta_php($korva_ale_kaikki, 'M', 'kerto');
-					}
-					else {
-						unset($korvaavan_hinta_ylaraja_hinta);
-					}
-
-					// Otetaan koko ketjun halvin hinta/alennus talteen (ei poistetut tuotteet)
-					if (isset($korvaavan_hinta_ylaraja_hinta) and $krow2["status"] != "P" and (!isset($korvaavan_hinta_ylaraja_halvin_alehinta) or $korvaavan_hinta_ylaraja_halvin_alehinta > $korvaavan_hinta_ylaraja_hinta)) {
-						$korvaavan_hinta_ylaraja_halvin_alehinta = $korvaavan_hinta_ylaraja_hinta;
-						$korvaavan_hinta_ylaraja_halvin_hinta = $korva_hinta;
-						$korvaavan_hinta_ylaraja_halvin_ale = $korva_ale_kaikki;
-						$korvaavan_hinta_ylaraja_halvin_netto = $korva_netto;
-					}
-
-				 	if ($krmyytavissa > 0 and !in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
-						$kaikkituotteet[] = strtoupper($krow2["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
-					}
-				}
-				elseif ($yhtiorow["korvaavan_hinta_ylaraja"] != '' and $yhtiorow["korvaavan_hinta_ylaraja"] != 'MIN' and ($if_ale_korva_isa_chk1) != 0 and (($if_ale_korva_isa_chk2) / ($if_ale_korva_isa_chk1)) > (1+($yhtiorow["korvaavan_hinta_ylaraja"]/100))) {
-					//Korvaavien myynti kielletty koska korvaava tuote on liian kallis
-					if ($krmyytavissa > 0) {
-						$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])");
-					}
-				}
-				else {
-					//Yritet‰‰n myyd‰ korvaava tuote
-					$korvattiin_korvaavalla = "HIIOHEI!";
-
-					if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) $kaikkituotteet[]=strtoupper($krow2["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
 				}
 
 				$uusin_korvaava_tuote = $krow2['tuoteno'];
@@ -2458,7 +2458,7 @@
 			              limit 1";
 		        $presult = pupe_query($query);
 		        $prow = mysql_fetch_assoc($presult);
-		
+
 				// Jos ei ole korvaavia, ei vaihdeta tilattavaa tuotetta
 				if (mysql_num_rows($presult)) {
 		        	$query = "SELECT *
@@ -2470,7 +2470,7 @@
 			    	          limit 1";
 		        	$tresult = pupe_query($query);
 		        	$korvaava_row = mysql_fetch_assoc($tresult);
-		        	
+
 					$kommentti .= " HUOM! Korvaa tuotteen {$alkupera_trow['tuoteno']}";
 			    	$trow = $korvaava_row;
 				}

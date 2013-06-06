@@ -1,11 +1,10 @@
 <?php
 
 $otsikko = t("Vaihtoehtoiset verkkolaskutunnukset");
-$otsikko_nappi = t("Vaihtoehtoiset verkkolaskutunnukset");
+$otsikko_nappi = t("Vaihtoehtoinen verkkolaskutunnus");
 
-$kentat = "tunnus, (SELECT toimi.nimi FROM toimi WHERE toimi.yhtio = vaihtoehtoiset_verkkolaskutunnukset.yhtio AND toimi.tunnus = vaihtoehtoiset_verkkolaskutunnukset.toimi_tunnus) AS toimi_tunnus, kohde_sarake, arvo";
-$hakukentat = "tunnus, toimi_tunnus, kohde_sarake, arvo";
+// HUOM HUOM: ethän muuta näitä ilman, että korjaat myös yllapito.php:ssä iframen lukitse_avaimeen muuttujat
+$kentat = "tunnus, kohde_sarake, arvo";
+$hakukentat = "tunnus, kohde_sarake, arvo, toimi_tunnus";
 
 $jarjestys = 'toimi_tunnus';
-
-?>

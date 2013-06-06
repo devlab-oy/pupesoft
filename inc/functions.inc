@@ -21859,6 +21859,10 @@ if (!function_exists('hae_toimittajat')) {
 		if (!empty($tyypit)) {
 			$toimi_tyyppi_where = "AND tyyppi IN ('".implode("','", $tyypit)."')";
 		}
+		else {
+			$toimi_tyyppi_where = "AND tyyppi != 'P'";
+		}
+
 		$query = "	SELECT *
 					FROM toimi
 					WHERE yhtio = '{$kukarow['yhtio']}'
@@ -21885,11 +21889,12 @@ if (!function_exists('hae_toimittaja')) {
 	 * @return array
 	 */
 	function hae_toimittaja($tunnus) {
-		global $kukarow, $yhtiorow;
+		global $kukarow;
 
 		$query = "	SELECT *
 					FROM toimi
 					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tyyppi != 'P'
 					AND tunnus  = '{$tunnus}'";
 		$result = pupe_query($query);
 

@@ -4,6 +4,7 @@ if (!function_exists("vaihtoehtoiset_verkkolaskutunnuksettarkista")) {
 
 	function vaihtoehtoiset_verkkolaskutunnuksettarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto, $asiakasid;
+		static $tem_kohdesarake;
 
 		if (mysql_field_name($result, $i) == "toimi_tunnus") {
 			$toimittaja = hae_toimittaja($t[$i]);
@@ -23,6 +24,8 @@ if (!function_exists("vaihtoehtoiset_verkkolaskutunnuksettarkista")) {
 			if (!in_array($t[$i], $kohde_sarakkeet)) {
 				$virhe[$i] = t("Kohde sarake ei ole sallittujen listalla").'(nimi, ytunnus, ovt_tunnus)';
 			}
+
+			$tem_kohdesarake = $t[$i];
 		}
 
 		if (mysql_field_name($result, $i) == "arvo") {
@@ -34,8 +37,9 @@ if (!function_exists("vaihtoehtoiset_verkkolaskutunnuksettarkista")) {
 				//tarkistetaan, että kyseistä arvoa ei ole jo kannassa
 				$query = "	SELECT *
 							FROM vaihtoehtoiset_verkkolaskutunnukset
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND arvo = '{$t[$i]}'";
+							WHERE yhtio 	 = '{$kukarow['yhtio']}'
+							AND kohde_sarake = '$tem_kohdesarake'
+							AND arvo		 = '{$t[$i]}'";
 				$arvo_result = pupe_query($query);
 				$vaihtoehtoinen_verkkolaskutunnus = mysql_fetch_assoc($arvo_result);
 

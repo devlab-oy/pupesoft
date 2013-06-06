@@ -1464,6 +1464,10 @@ if ($kasitellaan_tiedosto) {
 							}
 						}
 
+						if ($table_mysql == 'autoid_lisatieto' and $otsikko == 'AUTOID_LUKITTU' AND isset($autoid_liitos) and $autoid_liitos == '') {
+							$taulunrivit[$taulu][$eriviindex][$r] = 1;
+						}
+
 						if ($table_mysql == 'autoid_lisatieto' and $otsikko == 'TYPNR' and $taulunrivit[$taulu][$eriviindex][$r] != '' AND !in_array($eriviindex, $lisatyt_indeksit) AND isset($autoid_liitos) and $autoid_liitos == 'malli') {
 
 							echo "eriviindex: $eriviindex<br>";

@@ -25,7 +25,7 @@ else {
 	$order->appendChild($sales_order);
 
 	$address_for_shipment = $xml->createElement('addressForShipment');
-	$address_for_shipment->nodeValue = 5050;
+	$address_for_shipment->nodeValue = "802005050 100002184";
 	$order->appendChild($address_for_shipment);
 
 	$positions = $xml->createElement('Positions');

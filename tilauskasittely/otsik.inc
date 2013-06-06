@@ -2547,9 +2547,10 @@
 					// Laskennallinen kenttä
 					elseif ($kentta == "toimintavarmuus") {
 						$_paivat = (strtotime($srow['valmis']) - strtotime($srow['luvattu'])) / 3600 / 24;
+						$kiireellisyys = $srow['prioriteetti'];
 						echo "<td>$al_row[selitetark]</td>";
 						echo "<td>";
-						echo round(tyomaarays_toimintavarmuus($srow['mittarilukema'], $_paivat) * 100, 2) . " %";
+						echo round(tyomaarays_toimintavarmuus($kiireellisyys, $_paivat) * 100, 2) . " %";
 						echo "</td>";
 					}
 					// Laskennallinen kenttä

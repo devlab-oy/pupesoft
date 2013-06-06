@@ -158,10 +158,9 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
 				JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
 				WHERE {$uusiotunnuslisa}
-				and tilausrivi.varattu <> 0
-				and tilausrivi.yhtio = '{$kukarow['yhtio']}'
-				and tilausrivi.tyyppi = 'O'
-				and tilausrivi.netto = ''
+				and tilausrivi.varattu  <> 0
+				and tilausrivi.yhtio     = '{$kukarow['yhtio']}'
+				and tilausrivi.tyyppi    = 'O'
 				and tilausrivi.varastoon = 1
 				$varastoon_tilausrivirajaus
 				ORDER BY tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";

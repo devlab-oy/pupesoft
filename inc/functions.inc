@@ -21261,7 +21261,8 @@ if (!function_exists('hae_lasku')) {
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$tilausnumero}'";
+					AND tunnus  = '{$tilausnumero}'
+					AND tila   != 'D'";
 		$result = pupe_query($query);
 
 		return mysql_fetch_assoc($result);
@@ -21272,9 +21273,11 @@ if (!function_exists('hae_laskun_tilausrivit')) {
 	function hae_laskun_tilausrivit($otunnus, $tyypit = array()) {
 		global $kukarow, $yhtiorow;
 
-		$tilausrivi_where = "";
 		if (!empty($tyypit)) {
 			$tilausrivi_where = " AND tyyppi IN ('".implode("','", $tyypit)."') ";
+		}
+		else {
+			$tilausrivi_where = " AND tyyppi != 'D' ";
 		}
 
 		$query = "	SELECT *

@@ -1585,6 +1585,12 @@
 			if ($toim == "TILAUSVAHVISTUS" or $toim == "YLLAPITOSOPIMUS") {
 
 				if (isset($seltvtyyppi) and $seltvtyyppi != "") {
+					// Jos alkuperäisessä TV-ssä oli JT-rivit optzione täpätty niin laitetaan se tännekin.
+					if (strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE) $seltvtyyppi .= "JT";
+
+					// Jos alkuperäisessä TV-ssä oli tuotperheet yhdessä optzione täpätty niin laitetaan se tännekin.
+					if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) $seltvtyyppi .= "Y";
+
 					$laskurow['tilausvahvistus'] = $seltvtyyppi;
 				}
 

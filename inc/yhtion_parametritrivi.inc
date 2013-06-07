@@ -2164,6 +2164,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "jt_toimitusaika_email_vahvistus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("JT-rivien toimitusajan vahvistuss‰hkˆpostia ei l‰hetet‰")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Ostotilauksen toimitusajan vahvistuksesta l‰hetet‰‰n asiakkaalle JT-rivien toimitusajan vahvistuss‰hkˆposti")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "tilausvahvistus_tallenna") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3279,7 +3294,9 @@
 
 		$ulos .= "<option value = ''>".t("Myynti‰ ei estet‰, vaikka luottoraja on ylitetty")."</option>";
 		$ulos .= "<option value = 'K' {$sel["K"]}>".t("Kaikki myynti estet‰‰n, jos luottoraja on ylitetty")."</option>";
+		$ulos .= "<option value = 'J' {$sel["J"]}>".t("Kaikki myynti estet‰‰n, jos luottoraja on ylitetty. Tilaus j‰tet‰‰n kesken")."</option>";
 		$ulos .= "<option value = 'E' {$sel["E"]}>".t("Muu kuin myyjien tekem‰ myynti estet‰‰n, jos luottoraja on ylitetty")."</option>";
+		$ulos .= "<option value = 'F' {$sel["F"]}>".t("Muu kuin myyjien tekem‰ myynti estet‰‰n, jos luottoraja on ylitetty. Tilaus j‰tet‰‰n kesken")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3289,12 +3306,14 @@
 
         $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-        $sel = array_fill_keys(array('K', 'E'), '');
+        $sel = array_fill_keys(array('K', 'E', 'J', 'F'), '');
         $sel[$trow[$i]] = " SELECTED";
 
         $ulos .= "<option value = ''>".t("Myynti‰ ei estet‰, vaikka er‰p‰iv‰ olisi liikaa ylitetty")."</option>";
         $ulos .= "<option value = 'K' {$sel["K"]}>".t("Kaikki myynti estet‰‰n, jos er‰p‰iv‰ on liikaa ylitetty")."</option>";
+        $ulos .= "<option value = 'J' {$sel["J"]}>".t("Kaikki myynti estet‰‰n, jos er‰p‰iv‰ on liikaa ylitetty. Tilaus j‰tet‰‰n kesken")."</option>";
         $ulos .= "<option value = 'E' {$sel["E"]}>".t("Muu kuin myyjien tekem‰ myynti estet‰‰n, jos er‰p‰iv‰ on liikaa ylitetty")."</option>";
+        $ulos .= "<option value = 'F' {$sel["F"]}>".t("Muu kuin myyjien tekem‰ myynti estet‰‰n, jos er‰p‰iv‰ on liikaa ylitetty. Tilaus j‰tet‰‰n kesken")."</option>";
         $ulos .= "</select></td>";
 
         $jatko = 0;

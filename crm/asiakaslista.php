@@ -24,7 +24,6 @@
 
 	$monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "ASIAKASMYYJA", "ASIAKASTILA", "<br>DYNAAMINEN_ASIAKAS");
 	$monivalintalaatikot_normaali = array();
-	$noautosubmit = TRUE;
 
 	require ("tilauskasittely/monivalintalaatikot.inc");
 

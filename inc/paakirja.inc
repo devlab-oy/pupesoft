@@ -480,7 +480,8 @@
 					kustp.koodi kustp_koodi, kohde.koodi kohde_koodi, projekti.koodi projekti_koodi, tili.alv_taso,
 					lasku.tapvm laskutapvm,
 					lasku.mapvm laskumapvm,
-					lasku.summa laskusumma
+					lasku.summa laskusumma,
+					lasku.tila
 					FROM tiliointi
 					LEFT JOIN tili ON tili.tilino = tiliointi.tilino and tili.yhtio = tiliointi.yhtio
 					LEFT JOIN lasku ON lasku.tunnus = tiliointi.ltunnus
@@ -698,7 +699,7 @@
 					echo "<td valign='top' align='right' class='back' nowrap>$trow[valkoodi]</td>";
 
 
-					if ($trow["xtilino"] == $yhtiorow['ostovelat'] or $trow["xtilino"] == $yhtiorow['konserniostovelat']) {
+					if ($trow["tila"] != "X" and $trow["xtilino"] == $yhtiorow['ostovelat'] or $trow["xtilino"] == $yhtiorow['konserniostovelat']) {
 
 						$virhe = "";
 

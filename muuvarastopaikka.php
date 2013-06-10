@@ -655,7 +655,7 @@
 						hyllyvali	= '$mistarow[hyllyvali]',
 						hyllytaso	= '$mistarow[hyllytaso]',
 						rivitunnus	= '$tun',
-						selite 		= '".t("Paikasta")." $mista_texti ".t("vähennettiin")." $kappaleet[$iii]',
+						selite 		= '".t("Paikasta")." $mista_texti ".t("vähennettiin")." $kappaleet[$iii]: {$selite}',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$result = pupe_query($query);
@@ -671,7 +671,7 @@
 						hyllyvali	= '$minnerow[hyllyvali]',
 						hyllytaso	= '$minnerow[hyllytaso]',
 						rivitunnus	= '$tun',
-						selite 		= '".t("Paikalle")." $minne_texti ".t("lisättiin")." $kappaleet[$iii]',
+						selite 		= '".t("Paikalle")." $minne_texti ".t("lisättiin")." $kappaleet[$iii]: {$selite}',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$result = pupe_query($query);
@@ -1142,6 +1142,11 @@
 			$sncspan = 3;
 		}
 
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<th>".t("Selite")."</th>";
+		echo "<td colspan='2' ><input type='text' name='selite' size='50' value='{$selite}' /></td>";
 		echo "</tr>";
 
 		echo "	<tr><td colspan='$sncspan'><input type = 'submit' value = '".t("Siirrä")."'></td>

@@ -4099,6 +4099,28 @@ if ($tee == '') {
 				require ('lisaarivi.inc');
 			}
 
+			//tarkistetaan löytyykö myyntitilaukseen linkitettyä ostotilausta.
+			$query = "	SELECT tilausrivin_lisatiedot.tilausrivilinkki
+						FROM tilausrivi
+						JOIN tilausrivin_lisatiedot
+						ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+							AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.tunnus = {$lisatty_tun}
+						AND tilausrivi.tyyppi = 'L'";
+			$result = pupe_query($query);
+
+			$ostotilausrivi = mysql_fetch_assoc($result);
+
+			if (!empty($ostotilausrivi['tilausrivilinkki'])) {
+				$query = "	UPDATE tilausrivi
+							SET tyyppi = 'O'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tyyppi = 'D'
+							AND tunnus = '{$ostotilausrivi['tilausrivilinkki']}'";
+				pupe_query($query);
+			}
+
 			$hinta 	= '';
 			$netto 	= '';
 			$var 	= '';

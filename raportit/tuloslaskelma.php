@@ -903,19 +903,61 @@
 							ORDER BY tilino";
 				$tilires = pupe_query($query);
 
-				while ($tilirow = mysql_fetch_assoc($tilires)) {
+				if (mysql_num_rows($tilires) > 0) {
+					while ($tilirow = mysql_fetch_assoc($tilires)) {
 
-					$tilirow_summat = array();
+						$tilirow_summat = array();
 
-					if (isset($tilioinnit[(string) $tilirow["tilino"]])) {
-						$tilirow_summat = $tilioinnit[(string) $tilirow["tilino"]];
+						if (isset($tilioinnit[(string) $tilirow["tilino"]])) {
+							$tilirow_summat = $tilioinnit[(string) $tilirow["tilino"]];
+						}
+						elseif (isset($budjetit[(string) $tasorow["taso"]])) {
+							$tilirow_summat = $budjetit[(string) $tasorow["taso"]];
+						}
+						elseif ($toim == "TASOMUUTOS") {
+							$tilirow_summat = array("$firstgroup" => 0);
+						}
+
+						foreach ($tilirow_summat as $sarake => $tilirow_sum) {
+							// summataan kausien saldot
+							foreach ($kaudet as $kausi) {
+								if (substr($kausi,0,4) == "budj") {
+									$i = $tasoluku - 1;
+
+									$summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
+								}
+								else {
+									// Summataan kaikkia pienempiä summaustasoja
+									for ($i = $tasoluku - 1; $i >= 0; $i--) {
+										// Summat per kausi/taso
+										if (isset($summa[$kausi][$taso[$i]][(string) $sarake])) $summa[$kausi][$taso[$i]][(string) $sarake] += $tilirow_sum[$kausi];
+										else $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
+
+										//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
+										if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
+											$summa[$kausi][$taso[$i]][(string) $sarake] += $tulokset[$sarake][$kausi];
+										}
+									}
+
+									// Summat per taso/tili/kausi
+									$i = $tasoluku - 1;
+									$summakey = $tilirow["tilino"]."###".$tilirow["nimi"];
+
+									if (isset($tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake])) $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tilirow_sum[$kausi];
+									else $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] = $tilirow_sum[$kausi];
+
+									// Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
+									if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
+										$tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tulokset[$sarake][$kausi];
+									}
+								}
+							}
+						}
 					}
-					elseif (isset($budjetit[(string) $tasorow["taso"]])) {
-						$tilirow_summat = $budjetit[(string) $tasorow["taso"]];
-					}
-					elseif ($toim == "TASOMUUTOS") {
-						$tilirow_summat = array("$firstgroup" => 0);
-					}
+				}
+				else {
+					// vaikka ei ois yhtään tiliä niin voi olla, että budjetti on syötetty
+					$tilirow_summat = $budjetit[(string) $tasorow["taso"]];
 
 					foreach ($tilirow_summat as $sarake => $tilirow_sum) {
 						// summataan kausien saldot
@@ -924,31 +966,6 @@
 								$i = $tasoluku - 1;
 
 								$summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
-							}
-							else {
-								// Summataan kaikkia pienempiä summaustasoja
-								for ($i = $tasoluku - 1; $i >= 0; $i--) {
-									// Summat per kausi/taso
-									if (isset($summa[$kausi][$taso[$i]][(string) $sarake])) $summa[$kausi][$taso[$i]][(string) $sarake] += $tilirow_sum[$kausi];
-									else $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
-
-									//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
-									if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
-										$summa[$kausi][$taso[$i]][(string) $sarake] += $tulokset[$sarake][$kausi];
-									}
-								}
-
-								// Summat per taso/tili/kausi
-								$i = $tasoluku - 1;
-								$summakey = $tilirow["tilino"]."###".$tilirow["nimi"];
-
-								if (isset($tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake])) $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tilirow_sum[$kausi];
-								else $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] = $tilirow_sum[$kausi];
-
-								//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
-								if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
-									$tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tulokset[$sarake][$kausi];
-								}
 							}
 						}
 					}

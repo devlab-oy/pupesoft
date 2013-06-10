@@ -26,6 +26,9 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 		$toimittajaid 	= "";
 	}
 	else {
+		if (isset($poikkeavat_tulliprosentit) and is_array($poikkeavat_tulliprosentit)) {
+			paivita_poikkeavat_tulliprosentit($poikkeavat_tulliprosentit, $eitullia, $rivi_oletus_tulliprosentti);
+		}
 
 		if ($tee == "eitullia") {
 			//merkataan ne rivit joille ei pidä laskea tullia

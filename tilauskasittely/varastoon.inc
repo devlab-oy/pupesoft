@@ -99,11 +99,12 @@ $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'O');
 
 if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) {
 	// virallinen laskenta, heetaan ihan kaikki rivit uudestaan (varattu=0) kaikki pit‰‰ olla viety varastoon jo ennen t‰t‰..
-	$query = "	SELECT tilausrivi.*, tilausrivi.kpl varattu, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti
+	$query = "	SELECT tilausrivi.*, tilausrivi.kpl varattu, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
 				LEFT JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+				JOIN tuote ON ( tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno )
 				WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 				and tilausrivi.varattu = 0
 				and tilausrivi.kpl != 0
@@ -349,11 +350,12 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
 	// tavallinen laskenta.. VARATTU PITƒƒ OLLA != 0 ja varastoon-kentt‰ 1!
 	// jos varastoon-kent‰ss‰ on 0 niin t‰t‰ rivi‰ ei haluttu viel‰ vied‰ varastoon
-	$query = "	SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti
+	$query = "	SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
 				LEFT JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+				JOIN tuote ON ( tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno )
 				{$suuntalavajoin}
 				WHERE {$uusiotunnuslisa}
 				and tilausrivi.varattu <> 0
@@ -384,11 +386,12 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 	}
 
 	// N‰ytet‰‰n ruudulla
-	$query = "	SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti
+	$query = "	SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
 				LEFT JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+				JOIN tuote ON ( tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno )
 				{$suuntalavajoin}
 				WHERE {$uusiotunnuslisa}
 				and tilausrivi.varattu <> 0
@@ -624,12 +627,6 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	if ($tv_kaytossa and $tilrivirow["var"] == "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 		require ("tilauskasittely/taric_veroperusteet.inc");
-		
-		// lis‰t‰‰n tulli
-		if ($tilrivirow['poikkeava_tulliprosentti'] != null) {
-			$tulliprossa = $tilrivirow['poikkeava_tulliprosentti'];
-			$tv_nimrow["maara"] = $tulliprossa;
-		}
 		
 		$aputullimaara = $ohinta * ($tulliprossa/100);
 		$ohinta = $ohinta * (1 + ($tulliprossa/100));
@@ -1138,7 +1135,25 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 						<td align='right' valign='top'>".sprintf('%.6f', $osuus)."</td>
 						<td align='right' valign='top'>".sprintf('%.6f', $osuus*$rahtikulut)."</td>";
 
-	if ($tv_kaytossa) $varastoon_msg .= "<td align='right' valign='top'>$tv_nimrow[maara] $tv_nimrow[rahayksikko]</td>";
+	if ($tv_kaytossa) {
+		//tulliprosentti td. haetaan oletusarvot
+		$oletus_tulliprosentti = hae_oletus_tulliprosentti($laskurow,$tilrivirow);
+		//jos ostotilausrivin lis‰tietoihin on tallennettu poikkeava_tullipronsetti niin k‰ytet‰‰n sit‰. Muuten k‰ytet‰‰n taric_veroperusteet oletusta.
+		if (!empty($tilrivirow['poikkeava_tulliprosentti']) and $tilrivirow['poikkeava_tulliprosentti'] != (int)$oletus_tulliprosentti) {
+			$tulliprosentti = $tilrivirow['poikkeava_tulliprosentti'];
+		}
+		else {
+			$tulliprosentti = $oletus_tulliprosentti;
+		}
+
+		if (empty($tee)) {
+			$varastoon_msg .= "<input type='hidden' name='rivi_oletus_tulliprosentti[{$tilrivirow['tunnus']}]' value='".(float) $oletus_tulliprosentti."' />";
+			$varastoon_msg .= "<td align='right' valign='top'><input type='text' name='poikkeavat_tulliprosentit[{$tilrivirow['tunnus']}]' value='".(float) $tulliprosentti."' size='5' style='text-align:right'/> {$tv_nimrow['rahayksikko']}</td>";
+		}
+		else {
+			$varastoon_msg .= "<td align='right' valign='top'>".(float) $tulliprosentti." {$tv_nimrow['rahayksikko']}</td>";
+		}
+	}
 
 	$varastoon_msg .= "<td align='right' valign='top'>".sprintf('%.6f', $ohinta)."</td>
 						<td align='right' valign='top'>".sprintf('%.6f', $ohinta*$tilrivirow['varattu']) . " $kuluteksti</td>";

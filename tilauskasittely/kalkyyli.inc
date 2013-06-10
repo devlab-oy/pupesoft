@@ -18,6 +18,11 @@ list(,,,$kohok,,,,$lisok,,$sarjanrook,,,,,,$varok) = tsekit($laskurow, 0, 0);
 
 if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 
+	if (isset($poikkeavat_tulliprosentit) and is_array($poikkeavat_tulliprosentit)) {
+		// poikkeava_tulliprosentti
+		paivita_poikkeavat_tulliprosentit($poikkeavat_tulliprosentit, $eitullia, $rivi_oletus_tulliprosentti);
+	}
+	
 	if ($tee == "varastoon") {
 		require ("varastoon.inc");
 
@@ -28,7 +33,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 	}
 	else {
 
-		if ($tee == "eitullia") {
+		if ($tee == "eitullia") {			
 			//merkataan ne rivit joille ei pidä laskea tullia
 			$query = "	UPDATE tilausrivi
 						SET var = '', varastoon = 0

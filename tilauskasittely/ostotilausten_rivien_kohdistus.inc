@@ -856,34 +856,6 @@ if ($tila == 'tee_kohdistus') {
 		}
 	}
 
-	if (isset($rivi_poikkeava_tulliprosentti) and is_array($rivi_poikkeava_tulliprosentti)) {
-		// poikkeava_tulliprosentti
-		foreach ($rivi_poikkeava_tulliprosentti as $tunnus => $poikkeava_tulliprosentti) {
-
-			if (is_numeric($poikkeava_tulliprosentti)) {
-				$query = "	SELECT poikkeava_tulliprosentti
-							FROM tilausrivin_lisatiedot
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND tilausrivitunnus = '$tunnus'";
-				$result = pupe_query($query);
-				$poikkeava_tulliprosentti_db = mysql_fetch_assoc($result);
-
-				//ei p‰ivitet‰ poikkeus_tulliprosenttia kantaan jos se on sama kuin oletusprosentti, paitsi jos kantaan on jo p‰ivitetty poikkeus prosentti.
-				//kannasta pit‰‰ tarkistaa, onko siell‰ poikkeus_tulliprosentti, koska oletus --> poikkeus ja takaisin poikkeus --> oletus ei p‰ivity kantaan ilman olemassaolevan poikkeuksen tarkistusta.
-				if ($poikkeava_tulliprosentti_db['poikkeava_tulliprosentti'] != null or $rivi_oletus_tulliprosentti[$tunnus] != $poikkeava_tulliprosentti) {
-					$query  = "	UPDATE tilausrivin_lisatiedot
-								SET poikkeava_tulliprosentti = $poikkeava_tulliprosentti
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tilausrivitunnus = '$tunnus'";
-					$result = pupe_query($query);
-				}
-			}
-			else {
-				echo "<font class='error'>".t('Poikkeava tullipronsetti ei ollut numero').". ".t('Riville ei p‰ivitetty poikkeavaa prosenttia')."!</font><br/>";
-			}
-		}
-	}
-
 	// katotaan p‰ivitet‰‰nkˆ toimitettuaikoja
 	if (is_array($rivi_toimitettuaika_vv)) {
 		foreach ($rivi_toimitettuaika_vv as $tunnus => $toimitettuvv) {
@@ -1106,9 +1078,6 @@ if ($tila == '') {
 
 	$kennim_array[] = t('Alv');
 	$kennim_array[] = t('Tilauksen')."<br>".t('Erikoisale');
-	if ($tv_kaytossa) {
-		$kennim_array[] = t('Tulliprosentti');
-	}
 	$kennim_array[] = t('Rivihinta');
 	$kennim_array[] = t('+Alv -Ale');
 	#$kennim_array[] = t('Extrakulu');
@@ -1131,9 +1100,6 @@ if ($tila == '') {
 
 	$kenhak_array[] = 'alv';
 	$kenhak_array[] = 'erikoisale';
-	if ($tv_kaytossa) {
-		$kenhak_array[] = 'poikkeava_tulliprosentti';
-	}
 	$kenhak_array[] = 'rivihinta';
 	$kenhak_array[] = 'alerivihinta';
 	#$kenhak_array[] = 'kuluhinta';
@@ -1257,8 +1223,6 @@ if ($tila == '') {
 				concat_ws('/', tilkpl, round(tilkpl * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu',
 				round((varattu+jt) * tilausrivi.hinta * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]') rivihinta,
 				tuote.kehahin keskihinta,
-				tuote.tullinimike1,
-				tuote.tullinimike2,
 				tuotteen_toimittajat.ostohinta,
 				tuotteen_toimittajat.valuutta,
 				tilausrivi.erikoisale,
@@ -1267,7 +1231,6 @@ if ($tila == '') {
 				tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.hyllyvali,
 				tuote.keraysvyohyke,
 				tilausrivin_lisatiedot.suoratoimitettuaika,
-				tilausrivin_lisatiedot.poikkeava_tulliprosentti,
 				lasku.comments
 				FROM lasku
 				JOIN tilausrivi use index ($tilriindex) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$uusilisa}otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
@@ -1551,11 +1514,6 @@ if ($tila == '') {
 	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a></th>";
 	$pointteri++;
 
-	if ($tv_kaytossa) {
-		echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a></th>";
-		$pointteri++;
-	}
-
 	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a><br>";
 	$pointteri++;
 	echo "$kennim_array[$pointteri]</th>";
@@ -1602,11 +1560,6 @@ if ($tila == '') {
 
 	echo "<td><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
 	$pointteri++;
-
-	if ($tv_kaytossa) {
-		echo "<td><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
-		$pointteri++;
-	}
 
 	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'><br>";
 	$pointteri++;
@@ -1964,21 +1917,6 @@ if ($tila == '') {
 		}
 
 		echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_erikoisale[$rivirow[rivitunnus]]' value='". (float) $rivirow["erikoisale"]."' style='text-align:right'></$td>";
-
-		//tulliprosentti td. haetaan oletusarvot
-		$oletus_tulliprosentti = hae_oletus_tulliprosentti($laskurow,$rivirow);
-		//jos ostotilausrivin lis‰tietoihin on tallennettu poikkeava_tullipronsetti niin k‰ytet‰‰n sit‰. Muuten k‰ytet‰‰n taric_veroperusteet oletusta.
-		if (!empty($rivirow['poikkeava_tulliprosentti']) and $rivirow['poikkeava_tulliprosentti'] != (int)$oletus_tulliprosentti) {
-			$tulliprosentti = $rivirow['poikkeava_tulliprosentti'];
-		}
-		else {
-			$tulliprosentti = $oletus_tulliprosentti;
-		}
-
-		echo "<td>";
-		echo "<input type='hidden' name='rivi_oletus_tulliprosentti[{$rivirow['rivitunnus']}]' value='".(int)$oletus_tulliprosentti."' />";
-		echo "<input size='4' type='text' name='rivi_poikkeava_tulliprosentti[{$rivirow['rivitunnus']}]' value='".(int) $tulliprosentti."' style='text-align:right'/>";
-		echo "</td>";
 		echo "<$td $class valign='top' align='right'>". (float) $rivirow["rivihinta"]."<br>". (float) $rivirow["alerivihinta"]."</$td>";
 		//echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_kuluhinta[$rivirow[rivitunnus]]' value='$rivirow[kuluhinta]' style='text-align:right'><br>$yhtiorow[valkoodi]</$td>";
 		echo "<$td $class valign='top'>";

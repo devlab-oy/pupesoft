@@ -1099,7 +1099,6 @@ if ($tila == '') {
 	}
 
 	$kenhak_array[] = 'alv';
-	$kenhak_array[] = 'erikoisale';
 	$kenhak_array[] = 'rivihinta';
 	$kenhak_array[] = 'alerivihinta';
 	#$kenhak_array[] = 'kuluhinta';

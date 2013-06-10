@@ -33,7 +33,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 	}
 	else {
 
-		if ($tee == "eitullia") {			
+		if ($tee == "eitullia") {
 			//merkataan ne rivit joille ei pidä laskea tullia
 			$query = "	UPDATE tilausrivi
 						SET var = '', varastoon = 0

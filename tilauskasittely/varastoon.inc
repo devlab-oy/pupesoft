@@ -627,7 +627,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	if ($tv_kaytossa and $tilrivirow["var"] == "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 		require ("tilauskasittely/taric_veroperusteet.inc");
-		
+
 		$aputullimaara = $ohinta * ($tulliprossa/100);
 		$ohinta = $ohinta * (1 + ($tulliprossa/100));
 		$tv_nimrow["maara"] = $tv_nimrow["maara"] * 1; // teh‰‰n numero, ett‰ lista n‰ytt‰‰ kivemmalta

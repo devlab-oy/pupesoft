@@ -1917,6 +1917,7 @@ if ($tila == '') {
 		}
 
 		echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_erikoisale[$rivirow[rivitunnus]]' value='". (float) $rivirow["erikoisale"]."' style='text-align:right'></$td>";
+
 		echo "<$td $class valign='top' align='right'>". (float) $rivirow["rivihinta"]."<br>". (float) $rivirow["alerivihinta"]."</$td>";
 		//echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_kuluhinta[$rivirow[rivitunnus]]' value='$rivirow[kuluhinta]' style='text-align:right'><br>$yhtiorow[valkoodi]</$td>";
 		echo "<$td $class valign='top'>";

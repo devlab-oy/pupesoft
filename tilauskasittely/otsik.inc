@@ -405,6 +405,25 @@
 		unset($jatka);
 	}
 
+	if (isset($jatka) and isset($sarjanumero)) {
+		//jos requestista tulee "dynaaminen"kentt‰: sarjanumero, niin k‰yd‰‰n katsomassa avainsanoista onko se m‰‰ritelty pakolliseksi
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'TYOM_TYOKENTAT'
+					AND selite = 'sarjanumero'";
+		$sarjanumero_avainsana_result = pupe_query($query);
+
+		$sarjanumero_avainsana_row = mysql_fetch_assoc($sarjanumero_avainsana_result);
+
+		if (!empty($sarjanumero_avainsana_row) and $sarjanumero_avainsana_row['selitetark_4'] != '') {
+			if (empty($sarjanumero)) {
+				echo "<font class='error'>".t("Sarjanumero ei saa olla tyhj‰")."!</font><br/><br/>";
+				unset($jatka);
+			}
+		}
+	}
+
 	// tehd‰‰n oikeellisuus
 	if ($toim == "YLLAPITO") {
 
@@ -2425,7 +2444,7 @@
 							echo $sarjanumero_row['tuoteno'] . ' - ' . $sarjanumero_row['sarjanumero'];
 							echo "<br/>";
 						}
-						echo livesearch_kentta("eisaaollaoikeaforminnimi", $mika_livesearch, "sarjanumero", 140, $laskurow['sarjanumero'], '', '', '', 'ei_break_all');
+						echo livesearch_kentta("eisaaollaoikeaforminnimi", $mika_livesearch, $al_row['selite'], 140, $laskurow['sarjanumero'], '', '', '', 'ei_break_all');
 						echo "</td>";
 					}
 					elseif ($kentta == "suorittaja") {

@@ -2124,9 +2124,10 @@
 						$javalisa = "onSubmit = \"return lahetys_verify('$pitaako_varmistaa')\"";
 					}
 
-					// Tarkastetaan riittääkö saldo keräyspäivänä
-					if ($yhtiorow['saldo_kasittely'] == 'T' and $toim == '' and $naytetaanko_saldot == 'kylla') {
-						$_query = "SELECT tilausrivi.tuoteno, tilausrivi.tilkpl
+					// Tarkastetaan riittääkö saldo keräyspäivänä.
+					// Haetaan ensin tilauksen tilausrivit ja tarkistetaan jokaisen tuotteen saldot erikseen.
+						if ($yhtiorow['saldo_kasittely'] == 'T' and $toim == '' and $naytetaanko_saldot == 'kylla') {
+						$_query = "SELECT tilausrivi.nimitys, tilausrivi.tuoteno, tilausrivi.tilkpl, tilausrivi.kerayspvm, tilausrivi.yksikko
 									FROM tilausrivi
 									JOIN tuote ON (tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno and tuote.ei_saldoa = '')
 									WHERE tilausrivi.yhtio='{$kukarow['yhtio']}'
@@ -2139,11 +2140,17 @@
 
 						echo "<td>";
 						while($rivi = mysql_fetch_assoc($_result)) {
-
 							list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($rivi["tuoteno"], '', '', '', '', '', '', '', '', $row['kerayspvm']);
 
-							if ($rivi['tilkpl'] > $myytavissa) {
-								$puutteet[] = $rivi['tuoteno'];
+							// saldo_myytavissa funktio ottaa huomioon kyseisen myyntitilauksen varaaman saldon.
+							// Joten myyntitilauksen keräyspvm ylittäviin saldokyselyihin lisätään tilauksen vaarama saldo takaisin.
+							if (strtotime($rivi['kerayspvm']) <= strtotime($row['kerayspvm'])) {
+								$myytavissa = $myytavissa + $rivi['tilkpl']; // Lisätään myytavissa saldoon tämän tilauksen saldo
+							}
+
+							// Jos tilattu määrä on suurempi kuin myytävissä oleva määrä, niin lisätään tuote puutelistaan.
+							if (($rivi['tilkpl']) > $myytavissa) {
+								$puutteet[] = "{$rivi['tuoteno']} {$rivi['nimitys']} ({$myytavissa} {$rivi['yksikko']})";
 								$riittaako_saldo = false;
 							}
 						}

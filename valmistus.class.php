@@ -320,6 +320,13 @@ class Valmistus {
 				// Tarkastettu
 				case Valmistus::TARKASTETTU:
 					#echo "valmistus merkattu tarkastetuksi!";
+					// poistetaan valmistus kalenterista
+					$delete_query = "DELETE FROM kalenteri
+									 WHERE yhtio='{$kukarow['yhtio']}'
+									 AND tyyppi='valmistus'
+									 AND otunnus='{$this->tunnus}'";
+					$result = pupe_query($delete_query);
+
 					break;
 
 				// Muut

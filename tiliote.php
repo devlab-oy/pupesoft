@@ -487,8 +487,8 @@
 
 			if ($xtyyppi == 1) {
 				$tkesken = 0;
-				$maara = $vastavienti;
-				$kohdm = $vastavienti_valuutassa;
+				$maara   = $vastavienti;
+				$kohdm   = $vastavienti_valuutassa;
 
 				echo "<tr><td colspan = '6'>";
 				require("inc/teeselvittely.inc");
@@ -498,8 +498,8 @@
 
 			if ($xtyyppi == 2) {
 				$tkesken = 0;
-				$maara = $vastavienti;
-				$kohdm = $vastavienti_valuutassa;
+				$maara   = $vastavienti;
+				$kohdm   = $vastavienti_valuutassa;
 
 				require("inc/teeselvittely.inc");
 				echo "</table><br>\n<br>\n";

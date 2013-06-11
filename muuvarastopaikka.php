@@ -644,6 +644,13 @@
 				$keskihankintahinta = round($keskihankintahinta / count($sarjano_array), 6);
 			}
 
+			if ($selite != '') {
+				$selite = ": {$selite}";
+			}
+			else {
+				$selite = "";
+			}
+
 			$query = "	INSERT into tapahtuma set
 						yhtio 		= '$kukarow[yhtio]',
 						tuoteno 	= '$tuotteet[$iii]',
@@ -655,7 +662,7 @@
 						hyllyvali	= '$mistarow[hyllyvali]',
 						hyllytaso	= '$mistarow[hyllytaso]',
 						rivitunnus	= '$tun',
-						selite 		= '".t("Paikasta")." $mista_texti ".t("vähennettiin")." $kappaleet[$iii]: {$selite}',
+						selite 		= '".t("Paikasta")." $mista_texti ".t("vähennettiin")." $kappaleet[$iii]{$selite}',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$result = pupe_query($query);
@@ -671,7 +678,7 @@
 						hyllyvali	= '$minnerow[hyllyvali]',
 						hyllytaso	= '$minnerow[hyllytaso]',
 						rivitunnus	= '$tun',
-						selite 		= '".t("Paikalle")." $minne_texti ".t("lisättiin")." $kappaleet[$iii]: {$selite}',
+						selite 		= '".t("Paikalle")." $minne_texti ".t("lisättiin")." $kappaleet[$iii]{$selite}',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$result = pupe_query($query);

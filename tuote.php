@@ -387,11 +387,11 @@
 						$mista = 'tuote.php';
 
 						include('tilauskasittely/taric_veroperusteet.inc');
-						
+
 						$prossa_str = trim($tulliprossa, "0");
-						
+
 						if (strlen($prossa_str) > 1) {
-							$prossat .= "<br>".trim($tulliprossa, "0")." ".$alkupmaa;
+							$prossat .= "<br>$prossa_str $alkupmaa";
 						}
 					}
 				}

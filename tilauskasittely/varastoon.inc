@@ -624,8 +624,17 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	$tv_nimrow	   = "";
 
 	if ($tv_kaytossa and $laskurow["maa"] != $yhtiorow["maa"]) {
-		require ("tilauskasittely/taric_veroperusteet.inc");
-		
+		// Tulliprosentti
+		$oletus_tulliprosentti = hae_oletus_tulliprosentti($laskurow, $tilrivirow);
+
+		//jos ostotilausrivin lis‰tietoihin on tallennettu poikkeava_tullipronsetti niin k‰ytet‰‰n sit‰. Muuten k‰ytet‰‰n taric_veroperusteet oletusta.
+		if (!empty($tilrivirow['poikkeava_tulliprosentti']) and $tilrivirow['poikkeava_tulliprosentti'] != (int) $oletus_tulliprosentti) {
+			$tulliprossa = $tilrivirow['poikkeava_tulliprosentti'];
+		}
+		else {
+			$tulliprossa = $oletus_tulliprosentti;
+		}
+
 		$aputullimaara = $ohinta * ($tulliprossa/100);
 		$ohinta = $ohinta * (1 + ($tulliprossa/100));
 		$tv_nimrow["maara"] = $tv_nimrow["maara"] * 1; // teh‰‰n numero, ett‰ lista n‰ytt‰‰ kivemmalta
@@ -737,7 +746,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		// p‰ivitet‰‰n tilausrivin rivihintaa
 		$query  = "	UPDATE tilausrivi set
 					rivihinta = '$rivihin'
-					WHERE yhtio='$kukarow[yhtio]' and tunnus='$tilrivirow[tunnus]'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus  = '$tilrivirow[tunnus]'";
 		$resultxxx = pupe_query($query);
 
 		if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
@@ -1134,7 +1144,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 						<td align='right' valign='top'>".sprintf('%.6f', $osuus*$rahtikulut)."</td>";
 
 	if ($tv_kaytossa) {
-		//tulliprosentti td. haetaan oletusarvot
+		// Tulliprosentti
 		$oletus_tulliprosentti = hae_oletus_tulliprosentti($laskurow, $tilrivirow);
 
 		//jos ostotilausrivin lis‰tietoihin on tallennettu poikkeava_tullipronsetti niin k‰ytet‰‰n sit‰. Muuten k‰ytet‰‰n taric_veroperusteet oletusta.

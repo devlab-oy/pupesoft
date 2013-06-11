@@ -21990,7 +21990,7 @@ if (!function_exists('hae_oletus_tulliprosentti')) {
 
 		require('tilauskasittely/taric_veroperusteet.inc');
 
-		return $tulliprossa;
+		return (float) $tulliprossa;
 	}
 }
 
@@ -22003,26 +22003,25 @@ if (!function_exists('paivita_poikkeavat_tulliprosentit')) {
 
 			$poikkeava_tulliprosentti = str_replace(',', '.', $poikkeava_tulliprosentti);
 
-			if (is_numeric($poikkeava_tulliprosentti)) {
-				$query = "	SELECT poikkeava_tulliprosentti
-							FROM tilausrivin_lisatiedot
+			if (!is_numeric($poikkeava_tulliprosentti)) {
+				$poikkeava_tulliprosentti = 'NULL';
+			}
+
+			$query = "	SELECT poikkeava_tulliprosentti
+						FROM tilausrivin_lisatiedot
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tilausrivitunnus = '$tunnus'";
+			$result = pupe_query($query);
+			$poikkeava_tulliprosentti_db = mysql_fetch_assoc($result);
+
+			//ei päivitetä poikkeus_tulliprosenttia kantaan jos se on sama kuin oletusprosentti, paitsi jos kantaan on jo päivitetty poikkeus prosentti.
+			//kannasta pitää tarkistaa, onko siellä poikkeus_tulliprosentti, koska oletus --> poikkeus ja takaisin poikkeus --> oletus ei päivity kantaan ilman olemassaolevan poikkeuksen tarkistusta.
+			if ($poikkeava_tulliprosentti_db['poikkeava_tulliprosentti'] != NULL or $rivi_oletus_tulliprosentti[$tunnus] != $poikkeava_tulliprosentti) {
+				$query  = "	UPDATE tilausrivin_lisatiedot
+							SET poikkeava_tulliprosentti = $poikkeava_tulliprosentti
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tilausrivitunnus = '$tunnus'";
-				$result = pupe_query($query);
-				$poikkeava_tulliprosentti_db = mysql_fetch_assoc($result);
-
-				//ei päivitetä poikkeus_tulliprosenttia kantaan jos se on sama kuin oletusprosentti, paitsi jos kantaan on jo päivitetty poikkeus prosentti.
-				//kannasta pitää tarkistaa, onko siellä poikkeus_tulliprosentti, koska oletus --> poikkeus ja takaisin poikkeus --> oletus ei päivity kantaan ilman olemassaolevan poikkeuksen tarkistusta.
-				if ($poikkeava_tulliprosentti_db['poikkeava_tulliprosentti'] != null or $rivi_oletus_tulliprosentti[$tunnus] != $poikkeava_tulliprosentti) {
-					$query  = "	UPDATE tilausrivin_lisatiedot
-								SET poikkeava_tulliprosentti = $poikkeava_tulliprosentti
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tilausrivitunnus = '$tunnus'";
-					$result = pupe_query($query);
-				}
-			}
-			else {
-				echo "<font class='error'>".t('Poikkeava tullipronsetti ei ollut numero').". ".t('Riville ei päivitetty poikkeavaa prosenttia')."!</font><br/>";
+				pupe_query($query);
 			}
 		}
 	}

@@ -256,15 +256,37 @@ class Valmistus {
 							throw new Exception("Kalenteri merkintää ei poistettu");
 						}
 					}
+					// Jos työ on keskeytetty ja siirretään takaisin parkkiin
+					// nollataan kalenterista valmistuslinja (kalenteri.henkilo)
 					elseif($this->getTila() == 'TK') {
-						// Jos työ on keskeytetty ja siirretään takaisin parkkiin
-						// nollataan kalenterista valmistuslinja (kalenteri.henkilo)
-
 						$query = "UPDATE kalenteri SET
 									henkilo=''
 									WHERE yhtio='{$kukarow['yhtio']}'
 									AND otunnus='{$this->tunnus}'";
-						pupe_query($query);
+						if (!pupe_query($query)) {
+							throw new Exception("Tilan vaihtamisessa tapahtui virhe. (kalenteri)");
+						}
+
+						// Valmistuksen keskeytys nollaa myös laskun ja tilausrivin keräyspäivät,
+						// jolloin saldojen laskenta menee oikein.
+						$update_lasku_query = "UPDATE lasku
+										SET kerayspvm ='2099-01-01',
+										toimaika      ='2099-01-01'
+										WHERE yhtio   ='{$kukarow['yhtio']}'
+										AND tunnus    ='{$this->tunnus}'
+										AND tila      = 'V'";
+						if (!pupe_query($update_lasku_query)) {
+							throw new Exception("Tilan vaihtamisessa tapahtui virhe. (valmistus)");
+						}
+
+						$update_tilausrivi_query = "UPDATE tilausrivi
+										SET kerayspvm ='2099-01-01',
+										toimaika      ='2099-01-01'
+										WHERE yhtio   ='{$kukarow['yhtio']}'
+										AND otunnus   ='{$this->tunnus}'";
+						if (!pupe_query($update_tilausrivi_query)) {
+							throw new Exception("Tilan vaihtamisessa tapahtui virhe. (valmisteet)");
+						}
 					}
 
 					break;
@@ -320,6 +342,13 @@ class Valmistus {
 				// Tarkastettu
 				case Valmistus::TARKASTETTU:
 					#echo "valmistus merkattu tarkastetuksi!";
+					// poistetaan valmistus kalenterista
+					$delete_query = "DELETE FROM kalenteri
+									 WHERE yhtio='{$kukarow['yhtio']}'
+									 AND tyyppi='valmistus'
+									 AND otunnus='{$this->tunnus}'";
+					$result = pupe_query($delete_query);
+
 					break;
 
 				// Muut

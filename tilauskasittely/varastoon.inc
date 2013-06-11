@@ -61,7 +61,6 @@ if ($tee == "" and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta)
 
 if ($kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
 
-	require_once('inc/keikan_toiminnot.inc');
 	$tv_kaytossa = tarkista_onko_taric_veroperusteet_kaytossa();
 
 	$varastoon_msg .= "	<table><tr>

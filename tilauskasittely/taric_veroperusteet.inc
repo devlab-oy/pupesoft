@@ -1,11 +1,10 @@
 <?php
 
 	// Sisään otetaan
-	// $ohinta jossa on yhden tilausrivin tullausarvo.
 	// $tuorow jossa on tuotteen kaikki tiedot.
-	// $laskurow jossa on laskun kaikki tiedot.
+	// $laskurow jossa on saapumisen tiedot.
 
-	//palauttaa $tulliprossa jossa on veroperusteprosentti tai euromäärä/kp tai jotain sinne päin
+	// palauttaa $tulliprossa jossa on veroperusteprosentti tai euromäärä/kp tai jotain sinne päin
 
 	$nimike_taso1 = $tuorow["tullinimike1"].$tuorow["tullinimike2"];
 	$nimike_taso2 = $tuorow["tullinimike1"]."00";

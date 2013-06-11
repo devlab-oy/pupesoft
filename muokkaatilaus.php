@@ -2139,7 +2139,8 @@
 						$puutteet = array();
 
 						echo "<td>";
-						while($rivi = mysql_fetch_assoc($_result)) {
+
+						while ($rivi = mysql_fetch_assoc($_result)) {
 							list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($rivi["tuoteno"], '', '', '', '', '', '', '', '', $row['kerayspvm']);
 
 							// saldo_myytavissa funktio ottaa huomioon kyseisen myyntitilauksen varaaman saldon.
@@ -2156,10 +2157,12 @@
 						}
 
 						echo "<div id='div_{$row['tunnus']}' class='popup'>";
-							echo t("Keräyspäivä") . ": {$row['kerayspvm']}<br>";
-							foreach($puutteet as $puute) {
-								echo $puute . "<br>";
-							}
+						echo t("Keräyspäivä") . ": {$row['kerayspvm']}<br>";
+
+						foreach($puutteet as $puute) {
+							echo $puute . "<br>";
+						}
+
 						echo "</div>";
 
 						if ($riittaako_saldo) {

@@ -1146,7 +1146,7 @@
 
 		echo "<tr>";
 		echo "<th>".t("Selite")."</th>";
-		echo "<td colspan='2' ><input type='text' name='selite' size='50' value='{$selite}' /></td>";
+		echo "<td colspan='2' ><input type='text' name='selite' size='50' /></td>";
 		echo "</tr>";
 
 		echo "	<tr><td colspan='$sncspan'><input type = 'submit' value = '".t("Siirrä")."'></td>

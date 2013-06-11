@@ -214,6 +214,27 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tiliotteen_selvittelyt") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == '') {
+			$sel1 = "selected";
+		}
+		if ($trow[$i] == 'E') {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value = '' $sel1>".t("Tiliotteen kaikki selvittelytiliöinnit tehdään yhdelle tositteelle")."";
+		$ulos .= "<option value = 'E' $sel2>".t("Tiliotteen kaikki selvittelytiliöinnit tehdään omille tositteilleen")."";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "laskutyyppi") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

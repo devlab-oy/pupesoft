@@ -4149,21 +4149,17 @@ if ($tee == '') {
 			$suoratoimresult = pupe_query($query);
 
 			if ($suoratoimrow = mysql_fetch_assoc($suoratoimresult)) {
-				$toimitettuaika = " '$suoratoimrow[suoratoimitettuaika]' ";
-			}
-			else {
-				$toimitettuaika = " now() ";
-			}
 
-			$toimquery = "	UPDATE tilausrivi
-							SET keratty 	= '$kukarow[kuka]',
-							kerattyaika 	= $toimitettuaika,
-							toimitettu 		= '$kukarow[kuka]',
-							toimitettuaika 	= $toimitettuaika
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND otunnus = '$kukarow[kesken]'
-							AND tunnus  = '$lisatty_tun'";
-			$toimupdres = pupe_query($toimquery);
+				$toimquery = "	UPDATE tilausrivi
+								SET keratty 	= '$kukarow[kuka]',
+								kerattyaika 	= '$suoratoimrow[suoratoimitettuaika]',
+								toimitettu 		= '$kukarow[kuka]',
+								toimitettuaika 	= '$suoratoimrow[suoratoimitettuaika]'
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND otunnus = '$kukarow[kesken]'
+								AND tunnus  = '$lisatty_tun'";
+				$toimupdres = pupe_query($toimquery);
+			}		
 		}
 
 		if ($lisavarusteita == "ON" and $perheid2 > 0) {

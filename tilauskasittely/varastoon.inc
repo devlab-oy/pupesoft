@@ -90,8 +90,6 @@ if ($kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
 		$varastoon_msg .= "<th valign='top'>".t("Vanha")." ".t("saldo")."<br>".t("Uusi")." ".t("saldo")."</th>";
 	}
 
-	if ($tv_kaytossa) $varastoon_msg .= "<th valign='top'>".t("Ei tullia")."</th>";
-
 	$varastoon_msg .= "</tr>";
 }
 
@@ -625,9 +623,9 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	$aputullimaara = 0;
 	$tv_nimrow	   = "";
 
-	if ($tv_kaytossa and $tilrivirow["var"] == "" and $laskurow["maa"] != $yhtiorow["maa"]) {
+	if ($tv_kaytossa and $laskurow["maa"] != $yhtiorow["maa"]) {
 		require ("tilauskasittely/taric_veroperusteet.inc");
-
+		
 		$aputullimaara = $ohinta * ($tulliprossa/100);
 		$ohinta = $ohinta * (1 + ($tulliprossa/100));
 		$tv_nimrow["maara"] = $tv_nimrow["maara"] * 1; // teh‰‰n numero, ett‰ lista n‰ytt‰‰ kivemmalta
@@ -1137,9 +1135,10 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	if ($tv_kaytossa) {
 		//tulliprosentti td. haetaan oletusarvot
-		$oletus_tulliprosentti = hae_oletus_tulliprosentti($laskurow,$tilrivirow);
+		$oletus_tulliprosentti = hae_oletus_tulliprosentti($laskurow, $tilrivirow);
+
 		//jos ostotilausrivin lis‰tietoihin on tallennettu poikkeava_tullipronsetti niin k‰ytet‰‰n sit‰. Muuten k‰ytet‰‰n taric_veroperusteet oletusta.
-		if (!empty($tilrivirow['poikkeava_tulliprosentti']) and $tilrivirow['poikkeava_tulliprosentti'] != (int)$oletus_tulliprosentti) {
+		if (!empty($tilrivirow['poikkeava_tulliprosentti']) and $tilrivirow['poikkeava_tulliprosentti'] != (int) $oletus_tulliprosentti) {
 			$tulliprosentti = $tilrivirow['poikkeava_tulliprosentti'];
 		}
 		else {
@@ -1190,25 +1189,6 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		}
 
 		$varastoon_msg .= "<td align='right'>$varastoon_saldo<br><font class='$varastoon_fontti'>$varastoon_saldo_uusi$varastoon_saldo_viesti</font></td>";
-	}
-
-	if ($tv_kaytossa) {
-		if ($tee == "") {
-			$chk = "";
-			if ($tilrivirow["var"] != '') {
-				$chk = "CHECKED";
-			}
-
-			$varastoon_msg .= "<td align='center' valign='top'><input type='checkbox' name='eitullia[]' value='$tilrivirow[tunnus]' $chk></td>";
-		}
-		else {
-			if ($tilrivirow["var"] != '') {
-				$varastoon_msg .= "<td valign='top'>".t("ei tullia")."</td>";
-			}
-			else {
-				$varastoon_msg .= "<td></td>";
-			}
-		}
 	}
 
 	$varastoon_msg .= "</tr>";
@@ -1391,7 +1371,6 @@ if ($toiminto == "kalkyyli" and $tee == "") {
 	else {
 		echo ". ".t("HUOM").":<img src='../pics/lullacons/alert.png' alt='",t("Huomio"),"' title='",t("HUOM: Rivi‰ ei vied‰ automaattisesti varastoon."),"' /> = ",t("Rivi‰ ei vied‰ automaattisesti varastoon");
 		echo "<br />",t("HUOM: Jos muutit varastoonviet‰vi‰ m‰‰ri‰, muista p‰ivitt‰‰ rivit ennen varastoonvienti‰");
-		echo "</td><td valign='top' class='tumma' nowrap>";
 	}
 
 	echo "</td></tr>";
@@ -1606,4 +1585,3 @@ if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tull
 	echo "<input type='submit' value='".t("Takaisin toimittajan valintaan")."'>";
 	echo "</form>";
 }
-

@@ -4,7 +4,7 @@
 file_put_contents("/tmp/$kukarow[yhtio]-keikka.lock", "$otunnus");
 
 $query  = "SELECT * from lasku where tunnus='$otunnus' and yhtio='$kukarow[yhtio]' and tila='K' and alatila=''";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
 	$laskurow = mysql_fetch_array($result);
@@ -26,28 +26,13 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 		$toimittajaid 	= "";
 	}
 	else {
-		if (isset($poikkeavat_tulliprosentit) and is_array($poikkeavat_tulliprosentit)) {
-			paivita_poikkeavat_tulliprosentit($poikkeavat_tulliprosentit, $eitullia, $rivi_oletus_tulliprosentti);
-		}
-
 		if ($tee == "eitullia") {
-			//merkataan ne rivit joille ei pidä laskea tullia
-			$query = "	UPDATE tilausrivi
-						SET var = ''
-						WHERE uusiotunnus = '$laskurow[tunnus]' 
-						AND yhtio = '$kukarow[yhtio]'";
-			$varresult = mysql_query($query) or pupe_error($query);
 
-			if (isset($eitullia) and count($eitullia) > 0) {
-				foreach ($eitullia as $eitul) {
-					$query = "	UPDATE tilausrivi
-								SET var = 'T'
-								WHERE tunnus = '$eitul' 
-								AND uusiotunnus = '$laskurow[tunnus]' 
-								AND yhtio = '$kukarow[yhtio]'";
-					$varresult = mysql_query($query) or pupe_error($query);
-				}
+			if (isset($poikkeavat_tulliprosentit) and is_array($poikkeavat_tulliprosentit)) {
+				// poikkeava_tulliprosentti
+				paivita_poikkeavat_tulliprosentit($poikkeavat_tulliprosentit, $rivi_oletus_tulliprosentti);
 			}
+
 			$tee = "";
 		}
 
@@ -60,7 +45,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 					and vanhatunnus <> 0
 					and laskunro = '$laskurow[laskunro]'
 					and vienti not in ('C','F','I','J','K','L')";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$summa = 0;
 
@@ -77,7 +62,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 					<th>".t("Viite")."</th>
 					<th>".t("Vienti")."</th></tr>";
 
-			while($llrow = mysql_fetch_array($result)) {
+			while ($llrow = mysql_fetch_array($result)) {
 
 				// tsekataan vielä
 				if ($llrow["vienti_kurssi"] == 0) {
@@ -118,13 +103,13 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 		// päivitetään kululaskujen summa kenttään saldo_maksettu keikan otsikolle
 		$query  = "	UPDATE lasku set saldo_maksettu='$summa', valkoodi='$yhtiorow[valkoodi]'
 					where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0 and laskunro='$laskurow[laskunro]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		// haetaan keikan otsikko laskurowhun
 		$query  = "	SELECT *
 					from lasku
 					where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0 and laskunro='$laskurow[laskunro]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$laskurow = mysql_fetch_array($result);
 
 		require ("varastoon.inc");
@@ -151,5 +136,3 @@ else {
 
 // poistetaan lock file
 unlink("/tmp/$kukarow[yhtio]-keikka.lock");
-
-?>

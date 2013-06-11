@@ -249,37 +249,6 @@
 	    return $data;
 	}
 
-	if (!function_exists('tarkista_onko_taric_veroperusteet_kaytossa')) {
-		function tarkista_onko_taric_veroperusteet_kaytossa() {
-			global $kukarow, $yhtiorow;
-			// Tarkastetaan onko taricit k‰ytˆss‰
-
-			$query = "SELECT count(*) kpl from taric_veroperusteet";
-			$tv_res = pupe_query($query);
-			$tv_row = mysql_fetch_assoc($tv_res);
-
-			if ($tv_row["kpl"] > 0) {
-				return true;
-			}
-
-			return false;
-		}
-	}
-
-	if (!function_exists('hae_oletus_tulliprosentti')) {
-		function hae_oletus_tulliprosentti($laskurow, $tuorow) {
-			global $kukarow, $yhtiorow;
-
-			// Sis‰‰n otetaan
-			// $tuorow jossa on tuotteen kaikki tiedot.
-			// $laskurow jossa on saapumisen tiedot.
-
-			require('tilauskasittely/taric_veroperusteet.inc');
-
-			return $tulliprossa;
-		}
-	}
-
 	if ($_POST['ajax_toiminto'] == 'suuntalava') {
 		$tunnus = mysql_real_escape_string($_POST['tunnus']);
 		$suuntalava = mysql_real_escape_string($_POST['suuntalava']);

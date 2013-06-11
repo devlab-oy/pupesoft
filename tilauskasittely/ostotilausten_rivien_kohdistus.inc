@@ -1,7 +1,5 @@
 <?php
 
-require_once('inc/keikan_toiminnot.inc');
-
 echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 			function submit_tallenna(){
 				document.paaformi.action='$PHP_SELF';
@@ -1032,8 +1030,6 @@ if ($tila == '') {
 	if ($laskunsumma != 0.00 and $checksumma < 0.01 and $checksumma > -0.01 and $kohdistettava_summa == $valittusumma) {
 		$laskunsumma = 0.00;
 	}
-
-	$tv_kaytossa = tarkista_onko_taric_veroperusteet_kaytossa();
 
 	// Tietokannan kentät on määriteltävä näin jotta meidän dynaamiset haut toimisivat
 	$kentat_array = array();
@@ -2075,5 +2071,3 @@ if ($tila == '') {
 
 	$tila = "eityhja";
 }
-
-?>

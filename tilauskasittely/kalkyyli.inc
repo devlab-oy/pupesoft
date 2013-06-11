@@ -3,8 +3,13 @@
 // tehd‰‰n lock file, ettei voi kerralla ajaa kuin yks per firma
 file_put_contents("/tmp/$kukarow[yhtio]-keikka.lock", "$otunnus");
 
-$query  = "SELECT * from lasku where tunnus='$otunnus' and yhtio='$kukarow[yhtio]' and tila='K' and alatila=''";
-$result = mysql_query($query) or pupe_error($query);
+$query  = "	SELECT *
+			FROM lasku
+			WHERE tunnus = '$otunnus'
+			AND yhtio	 = '$kukarow[yhtio]'
+			AND tila	 = 'K'
+			AND alatila	 = ''";
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
 	$laskurow = mysql_fetch_array($result);
@@ -18,11 +23,6 @@ list(,,,$kohok,,,,$lisok,,$sarjanrook,,,,,,$varok) = tsekit($laskurow, 0, 0);
 
 if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 
-	if (isset($poikkeavat_tulliprosentit) and is_array($poikkeavat_tulliprosentit)) {
-		// poikkeava_tulliprosentti
-		paivita_poikkeavat_tulliprosentit($poikkeavat_tulliprosentit, $eitullia, $rivi_oletus_tulliprosentti);
-	}
-	
 	if ($tee == "varastoon") {
 		require ("varastoon.inc");
 
@@ -34,35 +34,37 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 	else {
 
 		if ($tee == "eitullia") {
-			//merkataan ne rivit joille ei pid‰ laskea tullia
-			$query = "	UPDATE tilausrivi
-						SET var = '', varastoon = 0
-						WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and kpl = 0";
-			$varresult = mysql_query($query) or pupe_error($query);
 
-			if (count($eitullia) > 0) {
-				foreach ($eitullia as $eitul) {
-					$query = "	UPDATE tilausrivi
-								SET var = 'T'
-								WHERE tunnus = '$eitul' and uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and kpl = 0";
-					$varresult = mysql_query($query) or pupe_error($query);
-				}
+			if (isset($poikkeavat_tulliprosentit) and is_array($poikkeavat_tulliprosentit)) {
+				// poikkeava_tulliprosentti
+				paivita_poikkeavat_tulliprosentit($poikkeavat_tulliprosentit, $rivi_oletus_tulliprosentti);
 			}
+
+			//merkataan ne rivit joita ei haluta vied‰ varastoon
+			$query = "	UPDATE tilausrivi
+						SET varastoon = 0
+						WHERE uusiotunnus = '$laskurow[tunnus]'
+						and yhtio 		  = '$kukarow[yhtio]'
+						and kpl 		  = 0";
+			pupe_query($query);
 
 			if (count($varastoonko) > 0) {
 				foreach ($varastoonko as $varas) {
 					$query = "	UPDATE tilausrivi
-								SET varastoon = 1
-								WHERE tunnus = '$varas' and uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and kpl = 0";
-					$varresult = mysql_query($query) or pupe_error($query);
+								SET varastoon	= 1
+								WHERE tunnus 	= '$varas'
+								and uusiotunnus = '$laskurow[tunnus]'
+								and yhtio 		= '$kukarow[yhtio]'
+								and kpl 		= 0";
+					pupe_query($query);
 				}
 			}
 
 			if ($yhtiorow["varastoonvientipaiva"] == "K" and count($vva) > 0) {
 				foreach ($vva as $varas => $vuosi) {
 
-					$kuukausi	= $kka[$varas];
-					$paiva		= $ppa[$varas];
+					$kuukausi = $kka[$varas];
+					$paiva	  = $ppa[$varas];
 
 					if (!checkdate($kuukausi, $paiva, $vuosi)) {
 						echo "<font class='error'>".t("VIRHE: Virheellinen p‰iv‰m‰‰r‰")." $vuosi-$kuukausi-$paiva</font><br>";
@@ -71,8 +73,10 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 						$query = "	UPDATE tilausrivi
 									SET toimitettuaika = '$vuosi-$kuukausi-$paiva 00:00:10',
 									toimitettu = '$kukarow[kuka]'
-									WHERE tunnus = '$varas' and uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]'";
-						$varresult = mysql_query($query) or pupe_error($query);
+									WHERE tunnus 	= '$varas'
+									and uusiotunnus = '$laskurow[tunnus]'
+									and yhtio 		= '$kukarow[yhtio]'";
+						pupe_query($query);
 					}
 				}
 			}

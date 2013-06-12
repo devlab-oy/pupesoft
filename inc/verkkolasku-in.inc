@@ -285,6 +285,11 @@
 			// $yhtiossa on nyt yhtio.yhtio
 			$yhtio = $yhtiorow['yhtio'];
 
+			// tietyssä tapauksessa triggeröidään tämä
+			if (strpos($file, "maventa") !== false and $yhtio == "artr" and $laskun_ebid == "FINVOICEXML") {
+				$laskun_ebid = "MAVENTAXML";
+			}
+
 			// Perusta lasku
 			$summa = $laskun_summa_eur;
 
@@ -1110,7 +1115,6 @@
 				}
 
 	 			// Tehdän pelkät oletustiliöinnit
-	 			// Pitää hardkoodata UNIKKO ohittamaan tämän.
 				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE" and $laskun_tyyppi != "TECCOM-INVOICE" and $ebid != "MAVENTAXML") {
 
 					if ($oletustili > 0) {
@@ -1212,6 +1216,7 @@
 					}
 				}
 				else {
+
 					// Tehdään rivikohtaiset tiliöinnit
 					$i								= 0;
 					$totsumma 						= 0;
@@ -1495,10 +1500,8 @@
 												tuoteno				= '',
 												vastaanottaja 		= '{$ostaja_asiakkaantiedot['nimi']}',
 												yhtio 				= '{$yhtio}'";
-							#echo "<pre>",str_replace("\t", "", $insertquery),"</pre>";
 							$asn_ins_res = pupe_query($insertquery);
 							$rtuoteno[$i]["insert_id"] = mysql_insert_id();
-							#echo "insert_id: {$rtuoteno[$i]["insert_id"]}<br><br>";
 						}
 
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
@@ -1518,7 +1521,6 @@
 					}
 
 					if (count($laskun_kulut) > 0) {
-
 						foreach ($laskun_kulut as $vero => $_array) {
 							foreach ($_array as $key => $value) {
 
@@ -1534,8 +1536,6 @@
 								require ("inc/teetiliointi.inc");
 							}
 						}
-
-						#echo "Tuliko pyöristyseroja $omasumma - $totsumma<br><br>";
 					}
 
 	 				// Tuli pyöristyseroja

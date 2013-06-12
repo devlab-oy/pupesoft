@@ -675,6 +675,8 @@
 							$otsikrow["oletus_olmapvm"] = $oletus_erapvm;
 						}
 
+						$komm = "";
+
 						// Jos lasku on hyv‰ksytty ja muutetaan hyvˆksynt‰‰n liittyvi‰ tietoja
 						if ($laskuorow["hyvak1"] != "" and $laskuorow["hyvak1"] != "verkkolas" and $laskuorow["h1time"] != "0000-00-00 00:00:00" and (
 							($oletus_erapvm > 0 and $laskuorow["erpcm"] != $oletus_erapvm) or
@@ -725,6 +727,8 @@
 							$laskuorow["h5time"]	= "0000-00-00 00:00:00";
 
 							$laskuorow["hyvaksyja_nyt"] = $otsikrow["oletus_hyvak1"];
+
+							$komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyv‰ksynt‰‰n koska toimittajan tietojen p‰ivitys muutti laskun tietoja.")."<br>";
 						}
 
 						// Matkalasku
@@ -777,6 +781,7 @@
 									pankki2 			= '$otsikrow[pankki2]',
 									pankki3 			= '$otsikrow[pankki3]',
 									pankki4 			= '$otsikrow[pankki4]',
+									comments			= trim(concat('$komm', comments)),
 									hyvaksynnanmuutos 	= '$otsikrow[oletus_hyvaksynnanmuutos]',
 									suoraveloitus 		= '$otsikrow[oletus_suoraveloitus]',
 									sisviesti1 			= '$otsikrow[ohjeitapankille]'
@@ -1788,6 +1793,13 @@
 			}
 		}
 
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimi") {
+			
+			if (($toikrow = tarkista_oikeus("yllapito.php", "vaihtoehtoiset_verkkolaskutunnukset%", "", "OK")) !== FALSE) {
+				echo "<iframe id='vaihtoehtoiset_verkkolaskutunnukset_iframe' name='vaihtoehtoiset_verkkolaskutunnukset_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&laji=$laji&ohje=off&haku[3]=@$tunnus&lukitse_avaimeen=$tunnus' style='height: 400px; width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+		}
+
 		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto" or $toim == "pakkaus" or ($toim == "avainsana" and $from != "yllapito"))) {
 
 			if (isset($perhe) and $perhe > 0) {
@@ -1905,6 +1917,7 @@
 			$toim == "etaisyydet" or
 			$toim == "tuotteen_avainsanat" or
 			$toim == "toimittajaalennus" or
+			$toim == "vaihtoehtoiset_verkkolaskutunnukset" or
 			$toim == "toimittajahinta" or
 			$toim == "varaston_tulostimet" or
 			$toim == "pakkaamo" or

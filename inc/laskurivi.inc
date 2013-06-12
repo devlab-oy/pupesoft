@@ -156,4 +156,30 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tilaustyyppi") {
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+
+		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value='0' $sel[0]>".t("Ylläpitosopimus")."</option>";
+		$ulos .= "<option value='2' $sel[2]>".t("Varastotäydennys")."</option>";
+		$ulos .= "<option value='7' $sel[7]>".t("Tehdastilaus")."</option>";
+		$ulos .= "<option value='8' $sel[8]>".t("Muiden mukana")."</option>";
+		$ulos .= "<option value='9' $sel[9]>".t("Tehdaspalautus")."</option>";
+		$ulos .= "<option value='A' $sel[A]>".t("Työmääräys")."</option>";
+		$ulos .= "<option value='E' $sel[E]>".t("Ennakkotilaus")."</option>";
+		$ulos .= "<option value='M' $sel[M]>".t("Myyntitili")."</option>";
+		$ulos .= "<option value='N' $sel[N]>".t("Normaalitilaus")."</option>";
+		$ulos .= "<option value='P' $sel[P]>".t("Projekti")."</option>";
+		$ulos .= "<option value='R' $sel[R]>".t("Reklamaatio")."</option>";
+		$ulos .= "<option value='S' $sel[S]>".t("Sarjatilaus")."</option>";
+		$ulos .= "<option value='T' $sel[T]>".t("Tarjoustilaus")."</option>";
+		$ulos .= "<option value='V' $sel[V]>".t("Valmistus-Tilaus")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

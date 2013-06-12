@@ -167,6 +167,9 @@
 							case 'tulostusalue':
 								$values .= ", '$tulostusalue'";
 								break;
+							case 'kate_korjattu':
+								$values .= ", NULL";
+								break;
 							default:
 								$values .= ", '".$laskurow[$fieldname]."'";
 						}

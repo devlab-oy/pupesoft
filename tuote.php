@@ -242,15 +242,7 @@
 		}
 
 		// Tarkastetaan onko taricit käytössä
-		$tv_kaytossa = FALSE;
-
-		$query = "SELECT count(*) kpl from taric_veroperusteet";
-		$tv_res = pupe_query($query);
-		$tv_row = mysql_fetch_assoc($tv_res);
-
-		if ($tv_row["kpl"] > 0) {
-			$tv_kaytossa = TRUE;
-		}
+		$tv_kaytossa = tarkista_onko_taric_veroperusteet_kaytossa();
 
 		if ($tuoterow["tuoteno"] != "") {
 
@@ -382,7 +374,7 @@
 
 			if ($tv_kaytossa and $tullirow1['cn'] != '') {
 				$alkuperamaat 	= array();
-				$alkuperamaat[] = explode(',',$tuoterow['alkuperamaa']);
+				$alkuperamaat[] = explode(',', $tuoterow['alkuperamaa']);
 				$tuorow 		= $tuoterow;
 				$prossat 		= '';
 				$prossa_str 	= '';
@@ -396,9 +388,10 @@
 
 						include('tilauskasittely/taric_veroperusteet.inc');
 
-						$prossa_str = trim($tulliprossa,"0");
+						$prossa_str = trim($tulliprossa, "0");
+
 						if (strlen($prossa_str) > 1) {
-							$prossat .= "<br>".trim($tulliprossa,"0")." ".$alkupmaa;
+							$prossat .= "<br>$prossa_str $alkupmaa";
 						}
 					}
 				}

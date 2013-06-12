@@ -12,6 +12,11 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
 	exit;
 }
 
+if ($laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
+	//Kampanjoiden tarkistus ja tuotteiden lisäys jos osuu johonkin.
+	tarkista_osuuko_myyntitilaus_kampanjaan($laskurow['tunnus']);
+}
+
 //jos tilaustyyppi on 2 ja ohjausmerkki on tyhjää, niin pistetään ohjausmerkiksi tilaustyypin selkokielinen nimi
 if ($laskurow['tilaustyyppi'] == "2" AND trim($laskurow['ohjausmerkki']) == "") {
 	$ohjausmerkkilisa = ", ohjausmerkki = 'Varastotäydennys'";
@@ -76,8 +81,8 @@ $tilausvalmis_asiakas_row = mysql_fetch_assoc($tilausvalmis_asiakas_res);
 
 // Myynti esteteään jos luottoraja on ylitetty (K - kaikki estetään, E -  kaikki muu ku myyjien tekemä estetään)
 // samma på erapaivan_ylityksen_raja
-$luottoraja_chk = (($yhtiorow["luottorajan_ylitys"] == "K"             or ($yhtiorow["luottorajan_ylitys"] == "E"             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) ? 1 : 0;
-$erapaiva_chk   =  ($yhtiorow["erapaivan_ylityksen_toimenpide"] == "K" or ($yhtiorow["erapaivan_ylityksen_toimenpide"] == "E" and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) ? 1 : 0;
+$luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K","J"))             or (in_array($yhtiorow["luottorajan_ylitys"], array("E","F"))             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) ? 1 : 0;
+$erapaiva_chk   =  (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("K","J")) or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E","F")) and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) ? 1 : 0;
 
 if ($luottoraja_chk or $erapaiva_chk) {
 
@@ -143,13 +148,23 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
 
 	// Jos myyjät saa hyväksyä, mutta EDI/EXTRANET ei mee läpi jos luottotiedot on kuralla niin laitetaan F-alatilaan.
 	// Jos kukaan ei saa myydä kun luottotiedot on kuralla niin sillo laitetaan kaikki G-alatilaan
-	if (($tilausvalmiskutsuja == "EDITILAUS" or $tilausvalmiskutsuja == "VERKKOKAUPPA" or $kukarow["extranet"] != "") and (($luottorajavirhe != '' and $yhtiorow["luottorajan_ylitys"] == "E") or ($ylivito > 0 and $yhtiorow["erapaivan_ylityksen_toimenpide"] == "E"))) {
-		// laitetaan tilaan Odottaa hyväksyntää
-		$alatila = "F";
+	if (($tilausvalmiskutsuja == "EDITILAUS" or $tilausvalmiskutsuja == "VERKKOKAUPPA" or $kukarow["extranet"] != "") and (($luottorajavirhe != '' and in_array($yhtiorow["luottorajan_ylitys"], array("E","F"))) or ($ylivito > 0 and in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E","F"))))) {
+		// laitetaan tilaan Odottaa hyväksyntää tai kesken
+		if ($yhtiorow["luottorajan_ylitys"] == "F" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "F") {
+			$alatila = "";
+		}
+		else {
+			$alatila = "F";
+		}
 	}
 	else {
-		// laitetaan tilaan Odottaa asiakkaan suoritusta
-		$alatila = "G";
+		// laitetaan tilaan Odottaa asiakkaan suoritusta tai kesken
+		if ($yhtiorow["luottorajan_ylitys"] == "J" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "J") {
+			$alatila = "";
+		}
+		else {
+			$alatila = "G";
+		}
 	}
 
 	//tarkastetaan onko myyntitilaus naitettu ostoon.
@@ -955,6 +970,9 @@ else {
 								case 'varattu':
 									$values .= ", 1";
 									break;
+								case 'kate_korjattu':
+									$values .= ", NULL";
+									break;
 								default:
 									$values .= ", '{$splitrow[$fieldname]}'";
 							}
@@ -1028,6 +1046,9 @@ else {
 											break;
 										case 'perheid':
 											$values .= ", {$split_tilausrivin_tunnus}";
+											break;
+										case 'kate_korjattu':
+											$values .= ", NULL";
 											break;
 										default:
 											$values .= ", '{$lapsirow[$fieldname]}'";
@@ -1251,10 +1272,10 @@ else {
 					}
 
 					if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
-						$toimitustavan_lahto = $toimitustavan_lahto[$varasto];
+						$toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
 					}
 					else {
-						$toimitustavan_lahto = 0;
+						$toimitustavan_lahto_arvo = 0;
 					}
 
 					// Ei monisteta tunnusta
@@ -1281,7 +1302,7 @@ else {
 								$values .= ", '$tulostusalue'";
 								break;
 							case 'toimitustavan_lahto':
-								$values .= ", '$toimitustavan_lahto'";
+								$values .= ", '$toimitustavan_lahto_arvo'";
 								break;
 							case 'ohjausmerkki':
 								if ($row['omalle_tilaukselle'] > 0 and trim($laskurow['ohjausmerkki']) != "") {
@@ -1305,6 +1326,9 @@ else {
 							case 'toimitustapa':
 								$values .= ", '$split_toimitustapa'";
 								break;
+							case 'kate_korjattu':
+								$values .= ", NULL";
+								break;								
 							default:
 								$values .= ", '".$laskurow[$fieldname]."'";
 						}
@@ -1430,10 +1454,10 @@ else {
 			$toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o', kohdistettu = 'K' " : '';
 
 			if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
-				$toimitustavan_lahto = $toimitustavan_lahto[$varasto];
+				$toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
 			}
 			else {
-				$toimitustavan_lahto = 0;
+				$toimitustavan_lahto_arvo = 0;
 			}
 
 			$ohjausmerkkilisa = "";
@@ -1447,7 +1471,7 @@ else {
 			$query = "	UPDATE lasku set
 						varasto 							= '$varasto',
 						tulostusalue						= '$tulostusalue',
-						toimitustavan_lahto					= '$toimitustavan_lahto',
+						toimitustavan_lahto					= '$toimitustavan_lahto_arvo',
 						ultilno 							= '$laskurow[ultilno]',
 						aktiivinen_kuljetus 				= '$laskurow[aktiivinen_kuljetus]',
 						aktiivinen_kuljetus_kansallisuus	= '$laskurow[aktiivinen_kuljetus_kansallisuus]',

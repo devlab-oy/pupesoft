@@ -95,6 +95,22 @@
 		}
 	}
 
+	if (isset($tee) and $tee == 'ipost_siirto') {
+
+		// siirretaan laskutiedosto operaattorille
+		$ftphost 		= "ftp.itella.net";
+		$ftpuser 		= $yhtiorow['verkkotunnus_lah'];
+		$ftppass 		= $yhtiorow['verkkosala_lah'];
+		$ftppath 		= "out/finvoice/data/";
+		$ftpfile 		= $pupe_root_polku."/dataout/".basename($filenimi);
+		$renameftpfile 	= str_replace("TRANSFER_IPOST", "DELIVERED_IPOST", basename($filenimi));
+		$ftpfail 		= "{$pupe_root_polku}/dataout/ipost_error/";
+
+		$tulos_ulos     = "";
+
+		require("inc/ftp-send.inc");
+	}
+
 	if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumerot != '') {
 
 		$tulostettavat_apix  = array();
@@ -998,17 +1014,6 @@
 				}
 			}
 			elseif ($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
-				//siirretaan laskutiedosto operaattorille
-				$ftphost = "ftp.itella.net";
-				$ftpuser = $yhtiorow['verkkotunnus_lah'];
-				$ftppass = $yhtiorow['verkkosala_lah'];
-				$ftppath = "out/finvoice/data/";
-				$ftpfile = realpath($nimifinvoice);
-				$renameftpfile = $nimifinvoice_delivered;
-
-				// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
-				echo "<pre>mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."</pre>";
-
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna finvoice-aineisto").":</th>";
 				echo "<form method='post' class='multisubmit'>";
@@ -1016,6 +1021,14 @@
 				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
 				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table><br><br>";
+
+				echo "<table>";
+				echo "<tr><th>".t("L‰het‰ iPost-aineisto uudestaan Itellaan").":</th>";
+				echo "<form method='post'>";
+				echo "<input type='hidden' name='tee' value='ipost_siirto'>";
+				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
+				echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr></form>";
 				echo "</table>";
 			}
 
@@ -1053,5 +1066,3 @@
 	}
 
 	if (!isset($tee) or $tee != "NAYTATILAUS") require("inc/footer.inc");
-
-?>

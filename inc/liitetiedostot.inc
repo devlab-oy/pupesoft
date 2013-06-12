@@ -65,6 +65,9 @@
 
 		if ($del == 1 or ($tunnus != "" and $_FILES["liite_data"]["size"] > 0)) {
 			if (in_array($lasrow['tila'], array('H','M')) and $kukarow["taso"] != 3) {
+
+				$komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyv‰ksynt‰‰n koska laskun liitteit‰ muutettiin.")."<br>";
+
 				// nollataan hyv‰ksyj‰t jos jokin n‰ist‰ tiloista
 				$query = "	UPDATE lasku
 							SET h1time 		= '',
@@ -73,7 +76,8 @@
 							h4time 			= '',
 							h5time 			= '',
 							hyvaksyja_nyt 	= hyvak1,
-							tila 			= if(tila='M', 'H', tila)
+							tila 			= if(tila='M', 'H', tila),
+							comments		= trim(concat('$komm', comments))
 							WHERE tunnus 	= $lasrow[tunnus]
 							and yhtio		= '$kukarow[yhtio]'
 							and tila in ('H','M')";

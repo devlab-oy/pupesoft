@@ -285,6 +285,11 @@
 			// $yhtiossa on nyt yhtio.yhtio
 			$yhtio = $yhtiorow['yhtio'];
 
+			// tietyssä tapauksessa triggeröidään tämä
+			if (strpos($file, "maventa") !== false and $yhtio == "artr" and $laskun_ebid == "FINVOICEXML") {
+				$laskun_ebid = "MAVENTAXML";
+			}
+
 			// Perusta lasku
 			$summa = $laskun_summa_eur;
 
@@ -320,11 +325,11 @@
 			// $laskuttajan_vat --> voisi olla vatnumero
 			// $laskuttajan_nimi --> voisi olla laskuttajan nimi
 			// $laskuttajan_toimittajanumero --> toimittajanumero
-			$laskuttajan_ovt  = trim($laskuttajan_ovt);
-			$laskuttajan_vat  = trim($laskuttajan_vat);
-			$laskuttajan_nimi = trim($laskuttajan_nimi);
-			$laskuttajan_toimittajanumero = trim($laskuttajan_toimittajanumero);
-			$laskun_toimitunnus = (int) $laskun_toimitunnus;
+			$laskuttajan_ovt  				= trim($laskuttajan_ovt);
+			$laskuttajan_vat  				= trim($laskuttajan_vat);
+			$laskuttajan_nimi 				= trim($laskuttajan_nimi);
+			$laskuttajan_toimittajanumero	= trim($laskuttajan_toimittajanumero);
+			$laskun_toimitunnus 			= (int) $laskun_toimitunnus;
 
 			if ($laskun_toimitunnus > 0) {
 				// 0 etsitään toimittaja tunnuksella
@@ -482,6 +487,39 @@
 
 				if (mysql_num_rows($result) == 1) {
 					$trow = mysql_fetch_assoc($result);
+				}
+			}
+
+			// vaihtoehtoiset_verkkolaskutunnukset poikkeus tarkistus
+			if (!isset($trow)) {
+				$poikkeus_arvot = array(
+					'nimi' => $laskuttajan_nimi,
+					'ytunnus' => $laskuttajan_vat,
+					'ovt_tunnus' => $laskuttajan_ovt
+				);
+
+				foreach ($poikkeus_arvot as $poikkeus_sarake => $poikkeus_arvo) {
+					$query = "	SELECT *
+								FROM vaihtoehtoiset_verkkolaskutunnukset
+								WHERE yhtio 	 = '$yhtio'
+								AND kohde_sarake = '{$poikkeus_sarake}'
+								AND arvo 		 = '{$poikkeus_arvo}'";
+					$result = pupe_query($query);
+					$poikkeus = mysql_fetch_assoc($result);
+
+					if (!empty($poikkeus)) {
+						$query = "	SELECT *
+									FROM toimi
+									WHERE yhtio = '$yhtio'
+									and tunnus  = '{$poikkeus['toimi_tunnus']}'
+									and tyyppi != 'P'";
+						$result = pupe_query($query);
+
+						if (mysql_num_rows($result) == 1) {
+							$trow = mysql_fetch_assoc($result);
+							break;
+						}
+					}
 				}
 			}
 
@@ -856,11 +894,14 @@
 					}
 
 					// katsotaan onko Teccom-lasku jo asn_sanomat-taulussa
-					if ($laskun_tyyppi == 'TECCOM-INVOICE') {
+					if ($laskun_tyyppi == 'TECCOM-INVOICE' or $ebid == 'MAVENTAXML') {
+
+						$lajilisa = $ebid == "MAVENTAXML" ? "mav" : "tec";
+
 						$query = "	SELECT *
 									FROM asn_sanomat
 									WHERE yhtio 		 = '{$yhtio}'
-									AND laji 			 = 'tec'
+									AND laji 			 = '{$lajilisa}'
 									AND asn_numero 		 = '{$laskun_numero}'
 									AND toimittajanumero = '{$laskuttajan_toimittajanumero}'";
 						$duplikaattilasku_check_res = pupe_query($query);
@@ -1074,8 +1115,7 @@
 				}
 
 	 			// Tehdän pelkät oletustiliöinnit
-	 			// Pitää hardkoodata UNIKKO ohittamaan tämän.
-				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE" and $laskun_tyyppi != "TECCOM-INVOICE") {
+				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE" and $laskun_tyyppi != "TECCOM-INVOICE" and $ebid != "MAVENTAXML") {
 
 					if ($oletustili > 0) {
 						$tili = $oletustili;
@@ -1176,6 +1216,7 @@
 					}
 				}
 				else {
+
 					// Tehdään rivikohtaiset tiliöinnit
 					$i								= 0;
 					$totsumma 						= 0;
@@ -1269,7 +1310,7 @@
 							// Hyvityslasku tai summa alle nolla
 							// FINVOICE-laskuilla rivihinta on aina valmiiksi oikeinpäin
 							// LISÄTTY VIELÄ:  and $summa > 0 koska nyt rivihinnat näyttäisi olevan myös INVOIC.D.96A laskulla miinusta kun se on hyväri????????
-							if (($laskun_tyyppi == "381" or $omasumma < 0) and $laskuformaatti != "FINVOICE" and $summa > 0) {
+							if (($laskun_tyyppi == "381" or $omasumma < 0) and $laskuformaatti != "FINVOICE" and $ebid != "MAVENTAXML" and $summa > 0) {
 								$summa = $summa * -1;
 							}
 
@@ -1389,7 +1430,7 @@
 							}
 						}
 
-						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999 and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
+						if ($rtuoteno[$i]["tuoteno"] != "" and ($laskun_tyyppi == "TECCOM-INVOICE" or $ebid == "MAVENTAXML") and $sanomantarkistin != 999 and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
 
 							if (!isset($rtuoteno[$i]['ale1'])) $rtuoteno[$i]['ale1'] = 0;
 							if (!isset($rtuoteno[$i]['ale2'])) $rtuoteno[$i]['ale2'] = 0;
@@ -1427,6 +1468,8 @@
 							// osto_rahti = invoiceSummary rahti
 							// osto_rivi_kulu  = ($laskun_rahtikulu, $rtuoteno[$i]['kulu'])
 
+							$lajilisa = $ebid == "MAVENTAXML" ? "mav" : "tec";
+
 							$insertquery = "	INSERT INTO asn_sanomat SET
 												asn_numero 			= '{$laskun_numero}',
 												hinta 				= '{$asn_hinta}',
@@ -1435,7 +1478,7 @@
 												kulu 				= '{$rtuoteno[$i]['kulu']}',
 												laatija 			= 'crond',
 												lahetyslistannro 	= '',
-												laji 				= 'tec',
+												laji 				= '{$lajilisa}',
 												lasku_ale1			= '{$rtuoteno[$i]['ale1']}',
 												lasku_ale2			= '{$rtuoteno[$i]['ale2']}',
 												lasku_ale3			= '{$rtuoteno[$i]['ale3']}',
@@ -1457,10 +1500,8 @@
 												tuoteno				= '',
 												vastaanottaja 		= '{$ostaja_asiakkaantiedot['nimi']}',
 												yhtio 				= '{$yhtio}'";
-							#echo "<pre>",str_replace("\t", "", $insertquery),"</pre>";
 							$asn_ins_res = pupe_query($insertquery);
 							$rtuoteno[$i]["insert_id"] = mysql_insert_id();
-							#echo "insert_id: {$rtuoteno[$i]["insert_id"]}<br><br>";
 						}
 
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
@@ -1480,7 +1521,6 @@
 					}
 
 					if (count($laskun_kulut) > 0) {
-
 						foreach ($laskun_kulut as $vero => $_array) {
 							foreach ($_array as $key => $value) {
 
@@ -1496,8 +1536,6 @@
 								require ("inc/teetiliointi.inc");
 							}
 						}
-
-						#echo "Tuliko pyöristyseroja $omasumma - $totsumma<br><br>";
 					}
 
 	 				// Tuli pyöristyseroja
@@ -1648,7 +1686,7 @@
 					$filename = array_pop(explode("/", $file));
 					$xmlstr   = mysql_real_escape_string($xmlstr);
 
-					if ($ebid == "FINVOICEXML") {
+					if ($ebid == "FINVOICEXML" or $ebid == 'MAVENTAXML') {
 						$kayttotarkoitus = 'FINVOICE';
 					}
 					elseif ($ebid == "TECCOM-INVOICE") {

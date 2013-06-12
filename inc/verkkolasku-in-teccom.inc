@@ -114,9 +114,11 @@
 		foreach ($xml->InvoiceDetail as $riveilta) {
 			$rivi[] = $riveilta->OrderRef->BuyerOrderNumber;
 		}
-		$rivi = array_unique($rivi); // otetaan uniikit
-		$rivi = array_values($rivi); // poistetaan turhat v‰lit
-		$laskun_tilausviite = implode(",",$rivi);
+		if (is_array($rivi)) {
+			$rivi = array_unique($rivi); // otetaan uniikit
+			$rivi = array_values($rivi); // poistetaan turhat v‰lit
+			$laskun_tilausviite = implode(",",$rivi);
+		}
 	}
 
 	$onko_hyvityslasku_kerroin = 1;
@@ -305,7 +307,7 @@
 							$charge_description = strtolower(trim($node_x->AllowOrChargeDescription));
 							$charge_code = strtolower(trim($node_x->AllowOrChargeCode));
 
-							if ($charge_code == "zcwr" or $charge_code == 'zfwa' or strpos($charge_description, "core value") !== FALSE) {
+							if ($charge_code == "zcwr" or $charge_code == 'zfwa' or strpos($charge_description, "core value") !== FALSE  or strpos($charge_description, "at.wert (rechnung)") !== FALSE) {
 								$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node_x->Amount);
 							}
 						}
@@ -427,7 +429,7 @@
 
 							if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx core value") or
 								($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
-								($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
+								($laskuttajan_toimittajanumero == "123007" and ($charge_code == "zcwr" or strpos($charge_description, "at.wert (rechnung)") !== FALSE)) or
 								(in_array($laskuttajan_toimittajanumero, array("123084","123007")) and strpos($charge_description, "core value") !== FALSE)) {
 
 								// Jos rivill‰ tulee runkoveloitus, niin pit‰‰ tehd‰ rungosta oma lapsirivi
@@ -475,6 +477,7 @@
 									$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
 									$rtuoteno[$x]['status']				= '';
 									$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
+									$rtuoteno[$x]["lapsi"]				= "yes";
 									$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
 
 									if ($onko_hyvityslasku_kerroin != 1) {

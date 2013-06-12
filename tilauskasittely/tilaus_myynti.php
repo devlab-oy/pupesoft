@@ -9,6 +9,13 @@ if (@include("../inc/parametrit.inc"));
 elseif (@include("parametrit.inc"));
 else exit;
 
+if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
+	livesearch_sarjanumerohaku();
+	exit;
+}
+
+enable_ajax();
+
 $tilauskaslisa = "";
 
 // extranet vai normipupe?

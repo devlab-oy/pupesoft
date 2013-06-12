@@ -17746,19 +17746,22 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			$lahetetyyppi = pupesoft_lahetetyyppi($otunnus, $laskurow['liitostunnus']);
 		}
 
-		#Testausta varten.....
-		#$lahetetyyppi = "tulosta_lahete.inc";
+		# Testausta varten.....
+		#$lahetetyyppi = "tulosta_lahete.inc"; 					# N‰ytet‰‰n asiakkaan hinta ja alennus
 		#$lahetetyyppi = "tulosta_lahete_ean.inc";
-		#$lahetetyyppi = "tulosta_lahete_brutto.inc";
-		#$lahetetyyppi = "tulosta_lahete_eialeja.inc";
-		#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
+		#$lahetetyyppi = "tulosta_lahete_brutto.inc"; 			# N‰ytet‰‰n tuotteen myym‰l‰hinta/(asiakkaan hinta)
+		#$lahetetyyppi = "tulosta_lahete_eialeja.inc"; 			# N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰
+		#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc"; 		# Ei n‰ytet‰ hintoja eik‰ alennuksia, EAN-koodi tulostetaan viivakoodina
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
 		#$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
-		#$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";
+		#$lahetetyyppi = "tulosta_lahete_eialehintoja.inc"; 	# Ei n‰ytet‰ hintoja eik‰ alennuksia
 		#$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
 		#$lahetetyyppi = "tulosta_lahete_custom.inc";
-		#$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
+		#$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc"; 	# Ei n‰ytet‰ hintoja eik‰ alennuksia
+		#$lahetetyyppi = "tulosta_lahete_verollinen.inc"; 		# N‰ytet‰‰n asiakkaan hinta ja alennus (Verolliset hinnat)
+		#$lahetetyyppi = "perhe_tulosta_lahete.inc"; 			# N‰ytet‰‰n asiakkaan hinta ja alennus (Tuoteperheet yhdess‰)
+		#$lahetetyyppi = "perhe_tulosta_lahete_verollinen.inc"; # N‰ytet‰‰n asiakkaan hinta ja alennus (Tuoteperheet yhdess‰, Verolliset hinnat)
 
 		if (@include("tilauskasittely/tulosta_lahete.inc"));
 		else require("tulosta_lahete.inc");

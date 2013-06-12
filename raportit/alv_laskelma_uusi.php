@@ -164,10 +164,19 @@
 		$alvk			 = $kk;
 		$alvp			 = 0;
 		$tiliointilisa 	 = '';
-		$alkupvm  		 = date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
-		$loppupvm 		 = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
-		$kerroin		 = '';
 
+		if (isset($etsivirheita) and (int) $etsivirheita > 0) {
+			$alkupvm  	 = date("Y-m-d", mktime(0, 0, 0, $alvk, $etsivirheita, $alvv));
+			$loppupvm 	 = date("Y-m-d", mktime(0, 0, 0, $alvk, $etsivirheita, $alvv));
+			$virhelisa	 = "&alvp=".sprintf("%02d", $etsivirheita);
+		}
+		else {
+			$alkupvm  	 = date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
+			$loppupvm 	 = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
+			$virhelisa	 = "";
+		}
+
+		$kerroin		 = '';
 		$maalisa	 	 = '';
 		$_309lisa	 	 = '';
 		$vainveroton 	 = '';
@@ -339,7 +348,7 @@
 				echo "<td valign='top'>$trow[maa]</td>";
 				echo "<td valign='top'>$trow[valuutta]</td>";
 				echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-				echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
+				echo "<td valign='top'><a href='{$palvelin2}raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk$virhelisa&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]//etsivirheita=$etsivirheita'>$trow[tilino]</a></td>";
 				echo "<td valign='top'>$trow[nimi]</td>";
 				echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['bruttosumma']),"</td>";
 				echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot']),"</td>";
@@ -401,7 +410,7 @@
 						echo "<td valign='top'>$trow[maa]</td>";
 						echo "<td valign='top'>$trow[valuutta]</td>";
 						echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-						echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
+						echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk$virhelisa&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]//etsivirheita=$etsivirheita'>$trow[tilino]</a></td>";
 						echo "<td valign='top'>$trow[nimi]</td>";
 						echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['bruttosumma']),"</td>";
 						echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot']),"</td>";
@@ -617,7 +626,7 @@
 					echo "<td valign='top'>$trow[maa]</td>";
 					echo "<td valign='top'>$trow[valuutta]</td>";
 					echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-					echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
+					echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk$virhelisa&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]//etsivirheita=$etsivirheita'>$trow[tilino]</a></td>";
 					echo "<td valign='top'>$trow[nimi]</td>";
 					echo "<td valign='top' align='right' nowrap>$trow[bruttosumma]</td>";
 					echo "<td valign='top' align='right' nowrap>$trow[verot]</td>";
@@ -668,7 +677,7 @@
 						echo "<td valign='top'>$trow[maa]</td>";
 						echo "<td valign='top'>$trow[valuutta]</td>";
 						echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-						echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
+						echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk$virhelisa&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]//etsivirheita=$etsivirheita'>$trow[tilino]</a></td>";
 						echo "<td valign='top'>$trow[nimi]</td>";
 						echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['bruttosumma']),"</td>";
 						echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot']),"</td>";
@@ -854,14 +863,25 @@
 	}
 
 	function alvlaskelma($kk, $vv) {
-		global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta, $maksettava_alv_tili, $palvelin2, $erotus_tili, $alv_laskelman_sallittu_erotus;
+		global $yhtiorow, $kukarow, $startmonth, $endmonth, $etsivirheita, $oletus_verokanta, $maksettava_alv_tili, $palvelin2, $erotus_tili, $alv_laskelman_sallittu_erotus;
 
 		echo "<font class='head'>".t("ALV-laskelma")."</font><hr>";
 
 		if (isset($kk) and $kk != '') {
+			if (isset($etsivirheita) and (int) $etsivirheita > 0) {
 
-			$startmonth	= date("Y-m-d", mktime(0, 0, 0, $kk,   1, $vv));
-			$endmonth 	= date("Y-m-d", mktime(0, 0, 0, $kk+1, 0, $vv));
+				echo "<br><a href='{$palvelin2}raportit/alv_laskelma_uusi.php?kk=$kk&vv=$vv&etsivirheita=".($etsivirheita-1)."'>".t("Edellinen päivä")."</a> ";
+				echo t("ALV-laskelma")." ".t("päivältä")." $etsivirheita.$kk.$vv ";
+				echo "<a href='{$palvelin2}raportit/alv_laskelma_uusi.php?kk=$kk&vv=$vv&etsivirheita=".($etsivirheita+1)."'>".t("Seuraava päivä")."</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+				echo "<a href='{$palvelin2}raportit/tilioinnit_lajeittain.php?tee=raportti&laji=myynti&pp=$etsivirheita&kk=$kk&vv=$vv&lpp=$etsivirheita&lkk=$kk&lvv=$vv&lopetus={$palvelin2}raportit/alv_laskelma_uusi.php////tee=VSRALVKK_UUSI//vv=$vv//kk=$kk//etsivirheita=$etsivirheita'>".t("Näytä tiliöinnit lajeittain")."</a><br><br>";
+
+				$startmonth	= date("Y-m-d", mktime(0, 0, 0, $kk, $etsivirheita, $vv));
+				$endmonth   = date("Y-m-d", mktime(0, 0, 0, $kk, $etsivirheita, $vv));
+			}
+			else {
+				$startmonth	= date("Y-m-d", mktime(0, 0, 0, $kk, 1, $vv));
+				$endmonth   = date("Y-m-d", mktime(0, 0, 0, $kk+1, 0, $vv));
+			}
 
 			// 301-303 sääntö fi300
 			$query = "	SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
@@ -970,19 +990,19 @@
 			echo "<tr><th colspan='2'>",t("Vero kotimaan myynnistä verokannoittain"),"</th></tr>";
 
 			if ($oletus_verokanta == 22) {
-				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi301&vv=$vv&kk=$kk'>301</a> ",t("22% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi301)."</td></tr>";
-				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk'>302</a> ",t("12% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi302)."</td></tr>";
-				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk'>303</a> ",t("8% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi303)."</td></tr>";
+				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi301&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>301</a> ",t("22% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi301)."</td></tr>";
+				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>302</a> ",t("12% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi302)."</td></tr>";
+				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>303</a> ",t("8% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi303)."</td></tr>";
 			}
 			elseif ($oletus_verokanta == 23) {
-				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi301&vv=$vv&kk=$kk'>301</a> ",t("23% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi301)."</td></tr>";
-				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk'>302</a> ",t("13% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi302)."</td></tr>";
-				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk'>303</a> ",t("9% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi303)."</td></tr>";
+				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi301&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>301</a> ",t("23% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi301)."</td></tr>";
+				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>302</a> ",t("13% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi302)."</td></tr>";
+				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>303</a> ",t("9% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi303)."</td></tr>";
 			}
 			else {
-				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi301&vv=$vv&kk=$kk'>301</a> ",t("24% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi301)."</td></tr>";
-				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk'>302</a> ",t("14% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi302)."</td></tr>";
-				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk'>303</a> ",t("10% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi303)."</td></tr>";
+				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi301&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>301</a> ",t("24% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi301)."</td></tr>";
+				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>302</a> ",t("14% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi302)."</td></tr>";
+				echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>303</a> ",t("10% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi303)."</td></tr>";
 			}
 
 			foreach ($fi3xx as $fikey => $fival) {
@@ -990,31 +1010,31 @@
 			}
 
 			echo "<tr><th colspan='2'></th></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi305&vv=$vv&kk=$kk'>305</a> ",t("Vero tavaraostoista muista EU-maista"),"</td><td align='right'>".sprintf('%.2f',$fi305)."</td></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi306&vv=$vv&kk=$kk'>306</a> ",t("Vero palveluostoista muista EU-maista"),"</td><td align='right'>".sprintf('%.2f',$fi306)."</td></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi318&vv=$vv&kk=$kk'>318</a> ",t("Vero rakentamispalveluiden ostoista"),"</td><td align='right'>".sprintf('%.2f',$fi318)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi305&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>305</a> ",t("Vero tavaraostoista muista EU-maista"),"</td><td align='right'>".sprintf('%.2f',$fi305)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi306&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>306</a> ",t("Vero palveluostoista muista EU-maista"),"</td><td align='right'>".sprintf('%.2f',$fi306)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi318&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>318</a> ",t("Vero rakentamispalveluiden ostoista"),"</td><td align='right'>".sprintf('%.2f',$fi318)."</td></tr>";
 
 			echo "<tr><th colspan='2'></th></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi307&vv=$vv&kk=$kk'>307</a> ",t("Kohdekuukauden vähennettävä vero"),"</td><td align='right'>".sprintf('%.2f',$fi307)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi307&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>307</a> ",t("Kohdekuukauden vähennettävä vero"),"</td><td align='right'>".sprintf('%.2f',$fi307)."</td></tr>";
 
 			echo "<tr><th colspan='2'></th></tr>";
 			echo "<tr class='aktiivi'><td>308 ",t("Maksettava vero")," / ",t("Palautukseen oikeuttava vero")," (-)</td><td align='right'>".sprintf('%.2f',$fi308)."</td></tr>";
 
 			echo "<tr><th colspan='2'></th></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi309&vv=$vv&kk=$kk'>309</a> ",t("0-verokannan alainen liikevaihto"),"</td><td align='right'>".sprintf('%.2f',$fi309)."</td></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi310&vv=$vv&kk=$kk'>310</a> ",t("Muu arvonlisäveroton liikevaihto"),"</td><td align='right'>".sprintf('%.2f',$fi310)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi309&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>309</a> ",t("0-verokannan alainen liikevaihto"),"</td><td align='right'>".sprintf('%.2f',$fi309)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi310&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>310</a> ",t("Muu arvonlisäveroton liikevaihto"),"</td><td align='right'>".sprintf('%.2f',$fi310)."</td></tr>";
 
 			echo "<tr><th colspan='2'></th></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi311&vv=$vv&kk=$kk'>311</a> ",t("Tavaran myynti muihin EU-maihin"),"</td><td align='right'>".sprintf('%.2f',$fi311)."</td></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi312&vv=$vv&kk=$kk'>312</a> ",t("Palveluiden myynti muihin EU-maihin"),"</td><td align='right'>".sprintf('%.2f',$fi312)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi311&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>311</a> ",t("Tavaran myynti muihin EU-maihin"),"</td><td align='right'>".sprintf('%.2f',$fi311)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi312&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>312</a> ",t("Palveluiden myynti muihin EU-maihin"),"</td><td align='right'>".sprintf('%.2f',$fi312)."</td></tr>";
 
 			echo "<tr><th colspan='2'></th></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi313&vv=$vv&kk=$kk'>313</a> ",t("Tavaraostot muista EU-maista"),"</td><td align='right'>".sprintf('%.2f',$fi313)."</td></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi314&vv=$vv&kk=$kk'>314</a> ",t("Palveluostot muista EU-maista"),"</td><td align='right'>".sprintf('%.2f',$fi314)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi313&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>313</a> ",t("Tavaraostot muista EU-maista"),"</td><td align='right'>".sprintf('%.2f',$fi313)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi314&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>314</a> ",t("Palveluostot muista EU-maista"),"</td><td align='right'>".sprintf('%.2f',$fi314)."</td></tr>";
 
 			echo "<tr><th colspan='2'></th></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi319&vv=$vv&kk=$kk'>319</a> ",t("Rakentamispalvelun myynti"),"</td><td align='right'>".sprintf('%.2f',$fi319)."</td></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi320&vv=$vv&kk=$kk'>320</a> ",t("Rakentamispalvelun ostot"),"</td><td align='right'>".sprintf('%.2f',$fi320)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi319&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>319</a> ",t("Rakentamispalvelun myynti"),"</td><td align='right'>".sprintf('%.2f',$fi319)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi320&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>320</a> ",t("Rakentamispalvelun ostot"),"</td><td align='right'>".sprintf('%.2f',$fi320)."</td></tr>";
 
 			echo "</table><br>";
 
@@ -1040,7 +1060,7 @@
 				echo "</table><br>";
 			}
 
-			if (tarkista_oikeus("muutosite.php")) {
+			if (tarkista_oikeus("muutosite.php") and (!isset($etsivirheita) or $etsivirheita == 0)) {
 
 				$query = "	SELECT lasku.tunnus
 							FROM lasku
@@ -1169,12 +1189,13 @@
 				<option $sel[12] value = '12'>12</option>
 				</select>";
 		echo "</td>";
-
 		echo "<td class='back' style='text-align:bottom;'><input type = 'submit' value = '".t("Näytä")."'></td>";
 		echo "</tr>";
 
+		echo "<tr>";
+		echo "<th>".t("Aja laskelma per päivä")."</th>";
+		echo "<td><input type = 'checkbox' name='etsivirheita' value = '1'></td></tr>";
 		echo "</table>";
-
 		echo "</form><br>";
 	}
 

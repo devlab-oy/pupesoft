@@ -269,7 +269,7 @@
 					}
 
 					if ($laji == "myynti") {
-						if ($alvit_logistiikka > 0 and $row['maa'] != 'FI') {
+						if ($alvit_logistiikka != 0 and $row['maa'] != 'FI') {
 							echo "<td nowrap valign='top' class='back'><font class='error'>VIRHE: Verollinen lasku toimitettu ulkomaille!</font></td>";
 						}
 

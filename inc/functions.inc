@@ -8824,27 +8824,28 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
 				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
 			</script>";
 
-			$query = "	SELECT *
+			$query = "	SELECT DISTINCT sarjanumero
 						FROM sarjanumeroseuranta
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND sarjanumero LIKE '%{$haku}%'";
+						AND sarjanumero LIKE '%{$haku}%'
+						GROUP BY sarjanumero";
 			$result = pupe_query($query);
 
 			$limit = 0;
 			if (mysql_num_rows($result) > 0) {
 				while ($row = mysql_fetch_assoc($result)) {
-					echo "	<div id='sarjanumero_valinta_$row[tunnus]'
+					echo "	<div id='sarjanumero_valinta_$row[sarjanumero]'
 								name='selectOptions$hakuid'
 								onmouseover=\"this.className='liveSearchSelectedItem';
 									keyStrokeIndex = -1;
 									var aEls = document.getElementsByName('selectOptions$hakuid');
 									for (var iEl = 0; iEl < aEls.length; iEl++) {
-										if (aEls[iEl].id.substring(0,14) == 'kayttaja_valinta_' && aEls[iEl].id != 'sarjanumero_valinta_$row[tunnus]') {
+										if (aEls[iEl].id.substring(0,14) == 'kayttaja_valinta_' && aEls[iEl].id != 'sarjanumero_valinta_$row[sarjanumero]') {
 											document.getElementById(aEls[iEl].id).className='';
 										}
 									} \"
 								onmouseout=\"this.className='';\"
-								onclick=\"document.getElementById('$hakuid').value='$row[tunnus]';";
+								onclick=\"document.getElementById('$hakuid').value='$row[sarjanumero]';";
 					if ($submit == "") {
 						echo "document.$formi.submit();";
 					}
@@ -8853,8 +8854,8 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
 					}
 					echo "\"
 								style='padding:2px;'>
-								<font style='font-weight:bold'>{$row['tuoteno']} - {$row['sarjanumero']}</font>
-							</div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
+								<font style='font-weight:bold'>{$row['sarjanumero']}</font>
+							</div><div name='selectValues$hakuid' id='$row[sarjanumero]'></div>";
 					$limit++;
 
 					if ($limit > 49) {
@@ -8874,22 +8875,6 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
 				document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
 			</script>";
 		}
-	}
-}
-
-
-if (!function_exists('hae_sarjanumero')) {
-
-	function hae_sarjanumero($tunnus) {
-		global $kukarow, $yhtiorow;
-
-		$query = "	SELECT *
-					FROM sarjanumeroseuranta
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$tunnus}'";
-		$result = pupe_query($query);
-
-		return mysql_fetch_assoc($result);
 	}
 }
 

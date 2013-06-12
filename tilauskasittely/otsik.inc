@@ -405,21 +405,25 @@
 		unset($jatka);
 	}
 
-	if (isset($jatka) and isset($sarjanumero)) {
-		//jos requestista tulee "dynaaminen"kentt‰: sarjanumero, niin k‰yd‰‰n katsomassa avainsanoista onko se m‰‰ritelty pakolliseksi
-		$query = "	SELECT *
-					FROM avainsana
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND laji = 'TYOM_TYOKENTAT'
-					AND selite = 'sarjanumero'";
-		$sarjanumero_avainsana_result = pupe_query($query);
-
-		$sarjanumero_avainsana_row = mysql_fetch_assoc($sarjanumero_avainsana_result);
-
-		if (!empty($sarjanumero_avainsana_row) and $sarjanumero_avainsana_row['selitetark_4'] != '') {
-			if (empty($sarjanumero)) {
-				echo "<font class='error'>".t("Sarjanumero ei saa olla tyhj‰")."!</font><br/><br/>";
-				unset($jatka);
+	if (isset($jatka) and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A")) {
+		//k‰yd‰‰n avainsanoista kaikki mahdolliset dynaamiset kent‰t l‰pi ja tarkastetaan onko ne pakollisia (selitetark_4)
+		$dynaamiset_tyomaarays_kentat_result = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selite != ''");
+		while($dynaamiset_tyomaarays_kentat_row = mysql_fetch_assoc($dynaamiset_tyomaarays_kentat_result)) {
+			if ($dynaamiset_tyomaarays_kentat_row['selitetark_2'] == 'DATE') {
+				if (isset(${$dynaamiset_tyomaarays_kentat_row['selite'].'pp'}) and $dynaamiset_tyomaarays_kentat_row['selitetark_4'] != '') {
+					if (${$dynaamiset_tyomaarays_kentat_row['selite'].'pp'} == '' or ${$dynaamiset_tyomaarays_kentat_row['selite'].'kk'} == '' or ${$dynaamiset_tyomaarays_kentat_row['selite'].'vv'} == '') {
+						echo "<font class='error'>".t("{$dynaamiset_tyomaarays_kentat_row['selitetark']} ei saa olla tyhj‰")."!</font><br/><br/>";
+						unset($jatka);
+					}
+				}
+			}
+			else {
+				if (isset(${$dynaamiset_tyomaarays_kentat_row['selite']}) and $dynaamiset_tyomaarays_kentat_row['selitetark_4'] != '') {
+					if (${$dynaamiset_tyomaarays_kentat_row['selite']} == '') {
+						echo "<font class='error'>".t("{$dynaamiset_tyomaarays_kentat_row['selitetark']} ei saa olla tyhj‰")."!</font><br/><br/>";
+						unset($jatka);
+					}
+				}
 			}
 		}
 	}
@@ -2439,12 +2443,14 @@
 						echo $al_row["selitetark"];
 						echo "</td>";
 						echo "<td>";
-						if (!empty($laskurow['sarjanumero'])) {
-							$sarjanumero_row = hae_sarjanumero($laskurow['sarjanumero']);
-							echo $sarjanumero_row['tuoteno'] . ' - ' . $sarjanumero_row['sarjanumero'];
-							echo "<br/>";
+						//jos requestista tulee arvo valitaan se, muuten valitaan laskulta lˆytyv‰ arvo
+						if (isset(${$al_row['selite']})) {
+							$livesearch_value = ${$al_row['selite']};
 						}
-						echo livesearch_kentta("eisaaollaoikeaforminnimi", $mika_livesearch, $al_row['selite'], 140, $laskurow['sarjanumero'], '', '', '', 'ei_break_all');
+						else {
+							$livesearch_value = $srow[$kentta];
+						}
+						echo livesearch_kentta("paaformi", $mika_livesearch, $al_row['selite'], 140, $livesearch_value, 'EISUBMIT', '', '', 'ei_break_all');
 						echo "</td>";
 					}
 					elseif ($kentta == "suorittaja") {
@@ -3710,7 +3716,6 @@
 							mittarilukema 	= '$mittarilukema',
 							merkki 			= '$merkki',
 							mallivari 		= '$mallivari',
-							sarjanumero     = '{$sarjanumero}',
 							valmnro 		= '$valmnro',
 							tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
 							luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',

@@ -1149,7 +1149,7 @@
 		}
 
 		// tehdään käyttöliittymä, näytetään aina
-		echo "<form method='post'><input type='hidden' name='tee' value ='VSRALVKK_UUSI'>";
+		echo "<form method='post' action='{$palvelin2}raportit/alv_laskelma_uusi.php'><input type='hidden' name='tee' value ='VSRALVKK_UUSI'>";
 		echo "<table>";
 
 		if (!isset($vv)) $vv = date("Y");

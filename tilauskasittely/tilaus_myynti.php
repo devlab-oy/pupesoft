@@ -120,6 +120,8 @@ if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 	enable_ajax();
 }
 
+echo "<script src='../js/tilaus_myynti/tilaus_myynti.js'></script>";
+
 if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0) {
 	$query = "	UPDATE lasku
 				SET tunnusnippu = tunnus
@@ -1786,7 +1788,19 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS","PIK
 }
 
 if ($kukarow["extranet"] == "" and $tee == 'jyvita') {
-	require("jyvita_riveille.inc");
+	if ((isset($valitut_rivit_jyvitys) and !empty($valitut_tilausrivi_tunnukset)) or (!isset($valitut_rivit_jyvitys) and empty($valitut_tilausrivi_tunnukset))) {
+		require("jyvita_riveille.inc");
+	}
+	else {
+		echo "<font class='error'>".t("Rivejä ei voitu jyvittää koska yhtään riviä ei oltu valittu")."</font><br/><br/>";
+		$jysum	 = '';
+		$tila	 = '';
+		$tee	 = '';
+		$kiekat  = "";
+		$summa 	 = "";
+		$anna_ea = "";
+		$hinta	 = "";
+	}
 }
 
 // Lisätään tän asiakkaan valitut JT-rivit tälle tilaukselle
@@ -5343,7 +5357,23 @@ if ($tee == '') {
 						if ($row['perheid'] != 0 and ($tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '0' or $tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '5')) {
 							$tuoteperhe_kayty = $row['perheid'];
 						}
-						echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;'>$echorivino</td>";
+						echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;'>$echorivino";
+						echo "<br/>";
+						//haetaan perheen kaikki rivitunnukset, jotta niitä voidaan käyttää pyöristä valitut rivit toiminnallisuudessa
+						//otunnus on queryssä mukana indeksien takia
+						$query = "	SELECT tunnus
+									FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$row['otunnus']}'
+									AND perheid = {$row['perheid']}";
+						$perhe_result = pupe_query($query);
+						$perheen_kaikki_tunnukset = "";
+						while($perhe_row = mysql_fetch_assoc($perhe_result)) {
+							$perheen_kaikki_tunnukset .= $perhe_row['tunnus'] . ',';
+						}
+						$perheen_kaikki_tunnukset = substr($perheen_kaikki_tunnukset, 0, -1);
+						echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$perheen_kaikki_tunnukset}' />";
+						echo "</td>";
 					}
 				}
 				// normirivit tai jos tuoteperheitä ei pidetä yhdessä, näytetään lapsille rivinumerot
@@ -5375,6 +5405,8 @@ if ($tee == '') {
 						}
 
 						echo "<td $class valign='top'>$echorivino";
+						echo "<br/>";
+						echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$row['tunnus']}'/>";
 					}
 
 					if ($toim != "TARJOUS") {
@@ -7234,6 +7266,32 @@ if ($tee == '') {
 
 					}
 					echo "</tr>";
+
+					//jos vain tietyt henkilöt saavat jyvittää ja henkilöllä on jyvitys sekä osajyvitys päällä TAI kaikki saavat jyvittää
+					if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "K") {
+						echo "<tr>";
+						echo "<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>";
+						echo "<th colspan='5'>".t("Pyöristä valitut rivit").":</th>";
+						echo "<td>";
+						echo "<form id='jyvita_valitut_form' name='pyorista' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
+											<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+											<input type='hidden' name='mista' 		value = '$mista'>
+											<input type='hidden' name='tee' 		value = 'jyvita'>
+											<input type='hidden' name='valitut_rivit_jyvitys' 		value = '1'>
+											<input type='hidden' name='toim' 		value = '$toim'>
+											<input type='hidden' name='lopetus' 	value = '$lopetus'>
+											<input type='hidden' name='ruutulimit' 	value = '$ruutulimit'>
+											<input type='hidden' name='tilausrivi_alvillisuus' value='$tilausrivi_alvillisuus'>
+											<input type='hidden' name='projektilla' value='$projektilla'>
+											<input type='hidden' name='orig_tila' 	value='$orig_tila'>
+											<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+						echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",$jysum)."' Style='text-align:right' $state></td>";
+						echo "</td>";
+						echo "<td></td>";
+						echo "<td class='spec'>$laskurow[valkoodi]</td>";
+						echo "<td class='back' colspan='2'><input type='submit' value='".t("Jyvitä")."' $state></form></td>";
+						echo "</tr>";
+					}
 				}
 
 				if ($kukarow["extranet"] == "" and $yhtiorow["myytitilauksen_kululaskut"] == "K") {

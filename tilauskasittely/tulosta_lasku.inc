@@ -738,7 +738,7 @@ if (!function_exists('rivi_lasku')) {
 		if ($laskutyyppi == 1) {
 			list($thispage, $kala, $summa, $arvo) = rivi_plain($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
-		elseif ($laskutyyppi == 2 or $laskutyyppi == 12 or $laskutyyppi == 14 or $laskutyyppi == 16) {
+		elseif ($laskutyyppi == 2 or $laskutyyppi == 12 or $laskutyyppi == 14 or $laskutyyppi == 16 or $laskutyyppi == 19) {
 			list($thispage, $kala, $summa, $arvo) = rivi_perhe($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
 		elseif ($laskutyyppi == 4 or $laskutyyppi == 8) {
@@ -961,35 +961,37 @@ if (!function_exists('rivi_original')) {
 			$veroton_hinta = $row["hinta"];
 		}
 
-		// A-hinta
-		$pdf_lasku->draw_text(390, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
+		if (($asiakasrow['laskutyyppi'] == 19 and (empty($row['perheid']) or $row['tunnus'] == $row['perheid'])) or $asiakasrow['laskutyyppi'] != 19) {
+			// A-hinta
+			$pdf_lasku->draw_text(390, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
 
-		//Alennus
-		$alennukset_yhteensa = generoi_alekentta_php($row, 'M', 'plain');
-		if ($alennukset_yhteensa != 0) {
-			$pdf_lasku->draw_text(450, $kala, $alennukset_yhteensa, $thispage, $norm);
-		}
+			//Alennus
+			$alennukset_yhteensa = generoi_alekentta_php($row, 'M', 'plain');
+			if ($alennukset_yhteensa != 0) {
+				$pdf_lasku->draw_text(450, $kala, $alennukset_yhteensa, $thispage, $norm);
+			}
 
-		if ($kurssi != 1) {
-			//Veroton Rivihinta Valuutassa
-			$oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta_valuutassa"]), $norm);
-			$pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta_valuutassa"]), $thispage, $norm);
-		}
-		else {
-			// Veroton Rivihinta
-			$oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"]), $norm);
-			$pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
-		}
+			if ($kurssi != 1) {
+				//Veroton Rivihinta Valuutassa
+				$oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta_valuutassa"]), $norm);
+				$pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta_valuutassa"]), $thispage, $norm);
+			}
+			else {
+				// Veroton Rivihinta
+				$oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"]), $norm);
+				$pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
+			}
 
-		//Arvonlisävero
-		if ($row["alv"] >= 600) {
-			$pdf_lasku->draw_text(550, $kala, t("K.V.", $kieli), $thispage, $norm);
-		}
-		elseif ($row["alv"] >= 500) {
-			$pdf_lasku->draw_text(550, $kala, t("M.V.", $kieli), $thispage, $norm);
-		}
-		else {
-			$pdf_lasku->draw_text(550, $kala, ($row["alv"]*1)."%", $thispage, $norm);
+			//Arvonlisävero
+			if ($row["alv"] >= 600) {
+				$pdf_lasku->draw_text(550, $kala, t("K.V.", $kieli), $thispage, $norm);
+			}
+			elseif ($row["alv"] >= 500) {
+				$pdf_lasku->draw_text(550, $kala, t("M.V.", $kieli), $thispage, $norm);
+			}
+			else {
+				$pdf_lasku->draw_text(550, $kala, ($row["alv"]*1)."%", $thispage, $norm);
+			}
 		}
 
 		if ($row["myyntihinta_maara"] > 1) {
@@ -1013,7 +1015,7 @@ if (!function_exists('rivi_original')) {
 		}
 
 		// Verollinen rivihinta
-		if ($laskutyyppi != 5 and $row["alv"] < 500) {
+		if ($laskutyyppi != 5 and $laskutyyppi != 19 and $row["alv"] < 500 or ($laskutyyppi == 19 and (empty($row['perheid']) or $row['tunnus'] == $row['perheid']))) {
 			//Lasketaan saman kaavan mukaan kuin laskutus.inc:ssä, eli pyöristetään kaikki kerralla lopuksi!
 			if ($kurssi != 1) {
 				$verollrivi = $row["rivihinta_valuutassa"] * (1 + ($row["alv"] / 100));
@@ -1604,8 +1606,23 @@ if (!function_exists('rivi_perhe')) {
 				$row["erikoisale"] = "";
 			}
 			else {
-				// lapsia ei lisätä
-				$lisataa = 1;
+				if ($laskutyyppi == 19) {
+					//lapset lisätään ilman hintoja
+					$lisataa = 0;
+					//asetetaan alkioihin string null, jotta hintapyöristys osaa palauttaa: ''
+					$row["hinta"] = 'null';
+					$row["rivihinta"] = 'null';
+					$row["rivihinta_verollinen"] = 'null';
+					$row["rivihinta_valuutassa"] = 'null';
+					$row['toimitettuaika'] = "";
+					for ($alepostfix = 0; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						$row['ale'.$alepostfix] = '';
+					}
+				}
+				else {
+					// lapsia ei lisätä
+					$lisataa = 1;
+				}
 			}
 		}
 
@@ -2311,12 +2328,17 @@ if (!function_exists("tulosta_lasku")) {
 			$where  = " and tilausrivi.otunnus='$laskurow[tunnus]' and tilausrivi.tyyppi in ('L','W','E') and ((tilausrivi.varattu+tilausrivi.jt != 0 and tilausrivi.laskutettuaika = '0000-00-00') or (tilausrivi.kpl != 0 and tilausrivi.laskutettuaika != '0000-00-00'))";
 		}
 
-		// Laskutyyppi
-		if (isset($asiakasrow['laskutyyppi']) and $asiakasrow['laskutyyppi'] != -9) {
-			$laskutyyppi = $asiakasrow['laskutyyppi'];
+		if ($laskurow['laskutyyppi'] == -9) {
+			//jos laskulta löytyvät laskutyyppi on Oletus käytetään asiakkaan tai yhtiön oletus laskutyyppiä
+			if (isset($asiakasrow['laskutyyppi']) and $asiakasrow['laskutyyppi'] != -9) {
+				$laskutyyppi = $asiakasrow['laskutyyppi'];
+			}
+			else {
+				$laskutyyppi = $yhtiorow['laskutyyppi'];
+			}
 		}
 		else {
-			$laskutyyppi = $yhtiorow['laskutyyppi'];
+			$laskutyyppi = $laskurow['laskutyyppi'];
 		}
 
 		// katotaan miten halutaan sortattavan

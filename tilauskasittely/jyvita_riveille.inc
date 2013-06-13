@@ -3,7 +3,7 @@
 /*
 	T‰nne tarvitaan:
 	$jysum joka on loppusumma joka tilaukselle halutaan
-	$tilausnumero
+	$tilausnumero TAI $valitut_tilausrivi_tunnukset
 
 	Jos jyvsumma on negatiivinen on se alennuksen m‰‰r‰
 	Jos jyvsumma sis‰lt‰‰ % merkin annetaan erikoisalennusta
@@ -14,7 +14,7 @@
 		'T' = Alennus annetaan tuotteella aina
 */
 
-if (strpos($jysum, "%") !== false) {
+if (strpos($jysum, "%") !== false and empty($valitut_tilausrivi_tunnukset)) {
 	$jysum = str_replace("%","", $jysum);
 	$anna_ea = "TOKI";
 }
@@ -47,6 +47,13 @@ elseif ($tilausrivi_alvillisuus != 'E' and $yhtiorow['alv_kasittely'] != '') {
 
 $query_ale_lisa = generoi_alekentta('M');
 
+if (!empty($valitut_tilausrivi_tunnukset)) {
+	$tilausrivi_where = "	AND tilausrivi.tunnus IN ('".implode("','", $valitut_tilausrivi_tunnukset)."')";
+}
+else {
+	$tilausrivi_where = "	AND otunnus = '$tilausnumero'";
+}
+
 $query = "	SELECT
 			sum($hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) koko_summa,
 			sum($hinta_riv2 * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) koko_oma_summa,
@@ -54,7 +61,7 @@ $query = "	SELECT
 			sum(if(varattu+jt<0, $hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) nega_summa
 			FROM tilausrivi
 			WHERE yhtio = '$kukarow[yhtio]'
-			and otunnus = '$tilausnumero'
+			{$tilausrivi_where}
 			and rivihinta = 0
 			and uusiotunnus = 0";
 $result = mysql_query($query) or pupe_error($query);

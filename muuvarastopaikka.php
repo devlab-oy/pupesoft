@@ -1143,20 +1143,19 @@
 				echo "<td valign='top'></td>";
 			}
 
-			$sncspan = 4;
+			$sncspan = 3;
 		}
 		else {
-			$sncspan = 3;
+			$sncspan = 2;
 		}
 
 		echo "</tr>";
 
 		echo "<tr>";
 		echo "<th>".t("Selite")."</th>";
-		echo "<td colspan='2' ><input type='text' name='selite' size='50' /></td>";
-		echo "</tr>";
+		echo "<td colspan='$sncspan' ><input type='text' name='selite' size='50' /></td>";
 
-		echo "	<tr><td colspan='$sncspan'><input type = 'submit' value = '".t("Siirrä")."'></td>
+		echo "<td class='back'><input type = 'submit' value = '".t("Siirrä")."'></td>
 				</tr></table></form><br>";
 
 		// Tehdään käyttöliittymä paikkojen muutoksille (otetus tai pois)

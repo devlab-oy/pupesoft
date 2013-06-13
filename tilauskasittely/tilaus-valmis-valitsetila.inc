@@ -164,11 +164,28 @@
 			$toimitusvahvitus_laheta = TRUE;
 		}
 		elseif ($rivirow["riveja"] == $rivirow["jteet"]) {
-			// Jos tilauksella oli vain jt-rivej‰ niin poistetaan rahtikulurivi jos sellanen on
-			$query  = "	DELETE FROM tilausrivi
-						WHERE otunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
+			//tarkastetaan onko yrityksell‰ k‰ytˆss‰ rahtikulujen k‰sinsyˆtt‰, jos n‰in on niin tilauksen jakaminen estet‰‰n => rahtikulu ei j‰‰ yksin tilaukselle => se ei katoa//j‰‰ yksin roikkumaan
+			//katsotaan onko tilaukselle jo syˆtettyn‰ rahtimaksu == yrityksell‰ on k‰ytˆss‰ rahtikulujen k‰sinsyˆttˆ == eli tilanne, jossa rahtikulu on jo t‰ss‰ vaiheessa syˆtettyn‰
+			$rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
+			$query = "	SELECT tunnus
+						from tilausrivi
+						where yhtio = '$kukarow[yhtio]'
+						and otunnus = '$laskurow[tunnus]'
+						AND tyyppi != 'D'
+						and tuoteno IN ({$rahtinro_tuoteno_lisa})";
 			$result = pupe_query($query);
-
+			if (mysql_num_rows($result) > 0) {
+				$query = "	UPDATE lasku
+							SET osatoimitus = 'o', 
+							tila='N', alatila='T'
+							WHERE tunnus='$laskurow[tunnus]'
+							AND yhtio='$kukarow[yhtio]'";
+				$result = pupe_query($query);
+							
+				$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli pelk‰st‰‰n JT-rivej‰ ja rahtikulu, joten se laitettiin osatoimituskieltoon ja se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
+				
+			} else {
+			// Jos tilauksella oli vain jt-rivej‰ + tilauksella ei ollut rahtikulurivej‰ => p‰ivitell‰‰n vain tilat ja annetaan ilmotus siit‰
 			$query  = "	UPDATE lasku
 						SET tila='N', alatila='T'
 						where tunnus='$laskurow[tunnus]'
@@ -176,6 +193,7 @@
 			$result = pupe_query($query);
 
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli pelk‰st‰‰n JT-rivej‰ ja se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
+			}
 		}
 		elseif ($rivirow["riveja"] == $rivirow["jteet"] + $rivirow["puutteet"]) {
 			// Tilauskella on pelk‰st‰‰n jt-rivej‰ ja puutteita joita ei ker‰t‰

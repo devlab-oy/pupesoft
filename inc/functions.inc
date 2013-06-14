@@ -20896,6 +20896,30 @@ if (!function_exists('_echo_ordered_table_rows')) {
 	}
 }
 
+if (!function_exists('echo_tallennus_formi')) {
+
+	/**
+	 * Echoo formin, jonka avulla voidaan ladata tiedosto palvelimelta
+	 *
+	 * @param string $xls_filename
+	 */
+	function echo_tallennus_formi($xls_filename, $kaunisnimi) {
+		echo "<form id='tallennus_form' method='post' class='multisubmit'>";
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Tallenna excel aineisto").":</th>";
+		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+		echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
+		echo "<input type='hidden' name='kaunisnimi' value='".t($kaunisnimi).".xlsx'>";
+		echo "<input type='hidden' name='tmpfilenimi' value='{$xls_filename}'>";
+		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td>";
+		echo "</tr>";
+		echo "</table>";
+		echo "</form>";
+		echo "<br/>";
+	}
+}
+
 if  (!function_exists('hae_chn_teksti')) {
 	function hae_chn_teksti($chn, $kieli = '') {
 

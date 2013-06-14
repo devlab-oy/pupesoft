@@ -283,7 +283,9 @@
 			}
 
 			// $yhtiossa on nyt yhtio.yhtio
-			$yhtio = $yhtiorow['yhtio'];
+			$yhtio 			  = $yhtiorow['yhtio'];
+			$kukarow['yhtio'] = $yhtio;
+			$kukarow['kuka']  = 'verkkolas';
 
 			// tietyssä tapauksessa triggeröidään tämä
 			if (strpos($file, "maventa") !== false and $yhtio == "artr" and $laskun_ebid == "FINVOICEXML") {
@@ -989,13 +991,9 @@
 					$olmapvm = $krv."-".$krk."-".$krp;
 				}
 
-				#echo "osto_kulu ennen alustusta: $osto_kulu<br><br>";
-
 				$osto_kulu	= (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : $osto_kulu;
 				$osto_rahti = (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : $osto_rahti;
 				$osto_rivi_kulu = (!isset($osto_rivi_kulu) or trim($osto_rivi_kulu) == '') ? 0 : $osto_rivi_kulu;
-
-				#echo "osto_kulu jälkeen alustuksen: $osto_kulu<br><br>";
 
 				$osto_kulu_alv	= (!isset($osto_kulu_alv) or trim($osto_kulu_alv) == '') ? 0 : $osto_kulu_alv;
 				$osto_rahti_alv = (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : $osto_rahti_alv;
@@ -1129,8 +1127,8 @@
 
 					$vero = (float) $vero;
 
-					$kukarow['yhtio']   = $yhtio;
-					$kukarow['kuka']    = 'verkkolas';
+					$kukarow['yhtio']	= $yhtio;
+					$kukarow['kuka']	= 'verkkolas';
 
 					$verkkolaskuveroton = round($omasumma / (1 + ($vero / 100)),2);
 					$verkkolaskuveroton_valuutassa = round($summa / (1 + ($vero / 100)),2);
@@ -1161,7 +1159,7 @@
 
 						// Varasto
 						$query = "	INSERT into tiliointi set
-									yhtio 			 = '$kukarow[yhtio]',
+									yhtio 			 = '$yhtio',
 									ltunnus 		 = '$tunnus',
 									tilino 			 = '$varastotili',
 									kustp    		 = '{$kustp_ins}',
@@ -1192,7 +1190,7 @@
 
 						// Varastonmuutos
 						$query = "	INSERT into tiliointi set
-									yhtio 			 = '$kukarow[yhtio]',
+									yhtio 			 = '$yhtio',
 									ltunnus 		 = '$tunnus',
 									tilino 			 = '$varastonmuutostili',
 									kustp    		 = '{$kustp_ins}',
@@ -1380,7 +1378,7 @@
 
 								// Varasto
 								$query = "	INSERT into tiliointi set
-											yhtio 			 = '$kukarow[yhtio]',
+											yhtio 			 = '$yhtio',
 											ltunnus 		 = '$tunnus',
 											tilino 			 = '$varastotili',
 											kustp    		 = '{$kustp_ins}',
@@ -1411,7 +1409,7 @@
 
 								// Varastonmuutos
 								$query = "	INSERT into tiliointi set
-											yhtio 			 = '$kukarow[yhtio]',
+											yhtio 			 = '$yhtio',
 											ltunnus 		 = '$tunnus',
 											tilino 			 = '$varastonmuutostili',
 											kustp    		 = '{$kustp_ins}',
@@ -1442,25 +1440,16 @@
 
 							$asn_hinta = round($summa_valuutassa/$rtuoteno[$i]['kpl'], 2);
 
-							#echo "Lasketaan nettohintaa...<br>";
-							#echo "{$asn_hinta} = round({$summa_valuutassa}/{$rtuoteno[$i]['kpl']}, 2)<br><br>";
-
 							// Laitetaan bruttohinta asn_sanomat-tauluun
 							if (isset($rtuoteno[$i]['ale1']) and trim($rtuoteno[$i]['ale1']) != 0) {
-								#echo "Ale1 löytyi!<br>";
-								#echo "{$asn_hinta} / ((100 - {$rtuoteno[$i]['ale1']}) / 100)<br><br>";
 								$asn_hinta = $asn_hinta / ((100 - $rtuoteno[$i]['ale1']) / 100);
 							}
 
 							if (isset($rtuoteno[$i]['ale2']) and trim($rtuoteno[$i]['ale2']) != 0) {
-								#echo "Ale2 löytyi!<br>";
-								#echo "{$asn_hinta} / ((100 - {$rtuoteno[$i]['ale2']}) / 100)<br><br>";
 								$asn_hinta = $asn_hinta / ((100 - $rtuoteno[$i]['ale2']) / 100);
 							}
 
 							if (isset($rtuoteno[$i]['ale3']) and trim($rtuoteno[$i]['ale3']) != 0) {
-								#echo "Ale3 löytyi!<br>";
-								#echo "{$asn_hinta} / ((100 - {$rtuoteno[$i]['ale3']}) / 100)<br><br>";
 								$asn_hinta = $asn_hinta / ((100 - $rtuoteno[$i]['ale3']) / 100);
 							}
 
@@ -1523,7 +1512,6 @@
 					if (count($laskun_kulut) > 0) {
 						foreach ($laskun_kulut as $vero => $_array) {
 							foreach ($_array as $key => $value) {
-
 								if ($value == 0) continue;
 
 								$tili = $yhtiorow[$key];
@@ -1540,7 +1528,6 @@
 
 	 				// Tuli pyöristyseroja
 					if (round(abs($totsumma - $omasumma), 2) >= 0.01) {
-
 						$vero = 0;
 
 						$summa = $omasumma - $totsumma;
@@ -1572,7 +1559,7 @@
 
 							$query = "	UPDATE lasku SET
 										vienti = '{$trow['oletus_vienti']}'
-										WHERE yhtio = '{$kukarow['yhtio']}'
+										WHERE yhtio = '{$yhtio}'
 										AND tunnus  = '{$tunnus}'";
 							$vienti_upd_res = pupe_query($query);
 						}
@@ -1603,7 +1590,6 @@
 							AND tunnus  = '{$ostovelkatiliointitunnus}'";
 				$vienti_upd_res = pupe_query($query);
 
-
 				// Jos meillä on suoraveloitus
 				if ($trow['oletus_suoraveloitus'] != '') {
 
@@ -1615,7 +1601,7 @@
 						// Oletustiliöinnit
 						// Ostovelat
 						$query = "	INSERT into tiliointi set
-									yhtio 			 = '$kukarow[yhtio]',
+									yhtio 			 = '$yhtio',
 									ltunnus 		 = '$tunnus',
 									tilino			 = '$ostovelat',
 									kustp    		 = '{$kustp_ins}',
@@ -1635,7 +1621,7 @@
 
 						// Rahatili
 						$query = "	INSERT into tiliointi set
-									yhtio 			 = '$kukarow[yhtio]',
+									yhtio 			 = '$yhtio',
 									ltunnus 		 = '$tunnus',
 									tilino 			 = '$yhtiorow[selvittelytili]',
 									kustp    		 = '{$kustp_ins}',
@@ -1671,7 +1657,7 @@
 					}
 				}
 
-				$query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+				$query = "SELECT * FROM lasku WHERE yhtio = '$yhtio' and tunnus = '$tunnus'";
 				$kuvalaskures = pupe_query($query);
 
 				if (mysql_num_rows($kuvalaskures) > 0) {
@@ -1706,7 +1692,7 @@
 					}
 
 					$query = "	INSERT INTO liitetiedostot SET
-								yhtio    			= '$kukarow[yhtio]',
+								yhtio    			= '$yhtio',
 								liitos   			= 'lasku',
 								liitostunnus 		= '$tunnus',
 								data     			= '$xmlstr',
@@ -1750,7 +1736,7 @@
 
 							// lisätään kuva
 							$query = "	INSERT INTO liitetiedostot SET
-										yhtio    			= '$kukarow[yhtio]',
+										yhtio    			= '$yhtio',
 										liitos   			= 'lasku',
 										liitostunnus 		= '$tunnus',
 										data     			= '$data',
@@ -1791,7 +1777,7 @@
 
 									// Lisätään kuva
 									$query = "	INSERT INTO liitetiedostot SET
-												yhtio    			= '$kukarow[yhtio]',
+												yhtio    			= '$yhtio',
 												liitos   			= 'lasku',
 												liitostunnus 		= '$tunnus',
 												data     			= '$data',
@@ -1833,7 +1819,7 @@
 									$data  = mysql_real_escape_string($editilaus_laskulle_data);
 
 									$query = "	INSERT INTO liitetiedostot SET
-												yhtio    			= '$kukarow[yhtio]',
+												yhtio    			= '$yhtio',
 												liitos   			= 'lasku',
 												liitostunnus 		= '$tunnus',
 												data     			= '$data',

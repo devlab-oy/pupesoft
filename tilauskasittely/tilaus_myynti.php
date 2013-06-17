@@ -127,7 +127,9 @@ if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 	enable_ajax();
 }
 
-echo "<script src='../js/tilaus_myynti/tilaus_myynti.js'></script>";
+if ($kukarow["extranet"] == "") {
+	echo "<script src='../js/tilaus_myynti/tilaus_myynti.js'></script>";
+}
 
 if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0) {
 	$query = "	UPDATE lasku

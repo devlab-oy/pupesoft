@@ -405,6 +405,29 @@
 		unset($jatka);
 	}
 
+	if (isset($jatka) and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A")) {
+		//käydään avainsanoista kaikki mahdolliset dynaamiset kentät läpi ja tarkastetaan onko ne pakollisia (selitetark_4)
+		$dynaamiset_tyomaarays_kentat_result = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selite != ''");
+		while($dynaamiset_tyomaarays_kentat_row = mysql_fetch_assoc($dynaamiset_tyomaarays_kentat_result)) {
+			if ($dynaamiset_tyomaarays_kentat_row['selitetark_2'] == 'DATE') {
+				if (isset(${$dynaamiset_tyomaarays_kentat_row['selite'].'pp'}) and $dynaamiset_tyomaarays_kentat_row['selitetark_4'] != '') {
+					if (${$dynaamiset_tyomaarays_kentat_row['selite'].'pp'} == '' or ${$dynaamiset_tyomaarays_kentat_row['selite'].'kk'} == '' or ${$dynaamiset_tyomaarays_kentat_row['selite'].'vv'} == '') {
+						echo "<font class='error'>".t("{$dynaamiset_tyomaarays_kentat_row['selitetark']} ei saa olla tyhjä")."!</font><br/><br/>";
+						unset($jatka);
+					}
+				}
+			}
+			else {
+				if (isset(${$dynaamiset_tyomaarays_kentat_row['selite']}) and $dynaamiset_tyomaarays_kentat_row['selitetark_4'] != '') {
+					if (${$dynaamiset_tyomaarays_kentat_row['selite']} == '') {
+						echo "<font class='error'>".t("{$dynaamiset_tyomaarays_kentat_row['selitetark']} ei saa olla tyhjä")."!</font><br/><br/>";
+						unset($jatka);
+					}
+				}
+			}
+		}
+	}
+
 	// tehdään oikeellisuus
 	if ($toim == "YLLAPITO") {
 
@@ -2440,6 +2463,22 @@
 						}
 
 						echo "</select>";
+						echo "</td>";
+					}
+					elseif (strtoupper($al_row["selitetark_2"]) == "LIVESEARCH") {
+						$mika_livesearch = $al_row["selitetark_3"];
+						echo "<td>";
+						echo $al_row["selitetark"];
+						echo "</td>";
+						echo "<td>";
+						//jos requestista tulee arvo valitaan se, muuten valitaan laskulta löytyvä arvo
+						if (isset(${$al_row['selite']})) {
+							$livesearch_value = ${$al_row['selite']};
+						}
+						else {
+							$livesearch_value = $srow[$kentta];
+						}
+						echo livesearch_kentta("paaformi", $mika_livesearch, $al_row['selite'], 140, $livesearch_value, 'EISUBMIT', '', '', 'ei_break_all');
 						echo "</td>";
 					}
 					elseif ($kentta == "suorittaja") {

@@ -196,16 +196,27 @@
 			$laskutettavat = substr($laskutettavat,0,-1); // vika pilkku pois
 		}
 
-		//tarkistetaan ekaks ettei yksik‰‰n tilauksista ole jo toimitettu/laskutettu
-		$query = "	SELECT yhtio
-		            FROM tilausrivi
-					WHERE otunnus in ($laskutettavat)
-					and yhtio 		= '$kukarow[yhtio]'
-					and laskutettu != ''
-					and tyyppi		= 'L'";
-		$result = pupe_query($query);
+		$laskutettavaa_on = TRUE;
 
-		if (mysql_num_rows($result) == 0) {
+		if ($laskutettavat != "") {
+			//tarkistetaan ekaks ettei yksik‰‰n tilauksista ole jo toimitettu/laskutettu
+			$query = "	SELECT yhtio
+			            FROM tilausrivi
+						WHERE otunnus in ($laskutettavat)
+						and yhtio 		= '$kukarow[yhtio]'
+						and laskutettu != ''
+						and tyyppi		= 'L'";
+			$result = pupe_query($query);
+
+			if (mysql_num_rows($result) != 0) {
+				$laskutettavaa_on = FALSE;
+			}
+		}
+		else {
+			$laskutettavaa_on = FALSE;
+		}
+
+		if ($laskutettavaa_on) {
 			// merkataan t‰ss‰ vaiheessa toimittamattomat rivi toimitetuiksi
 			$query = "	UPDATE tilausrivi
 						SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()

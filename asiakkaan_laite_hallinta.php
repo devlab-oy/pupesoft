@@ -382,6 +382,7 @@ function laitteet_table($laitteet = array()) {
 	echo "<th>".t("Tuotenumero")."</th>";
 	echo "<th>".t("Tuotteen nimi")."</th>";
 	echo "<th>".t("Sijainti")."</th>";
+	echo "<th>".t("Tila")."</th>";
 	echo "<th>".t("Poista")."</th>";
 	echo "</tr>";
 
@@ -398,6 +399,10 @@ function laitteet_table($laitteet = array()) {
 
 		echo "<td>";
 		echo $laite['sijainti'];
+		echo "</td>";
+
+		echo "<td>";
+		echo $laite['tila'];
 		echo "</td>";
 
 		echo "<td>";

@@ -19,8 +19,8 @@ if (mysql_field_name($result, $i) == "paikka") {
 				WHERE yhtio = '{$kukarow['yhtio']}'";
 	$paikka_result = pupe_query($query);
 	$paikat = array();
-	while($paikka = mysql_fetch_assoc($paikka_result)) {
-		if(empty($valittu_paikka)) {
+	while ($paikka = mysql_fetch_assoc($paikka_result)) {
+		if (empty($valittu_paikka)) {
 			if ($trow[$i] == $paikka['tunnus']) {
 				$paikka['selected'] = "SELECTED";
 			}
@@ -30,7 +30,7 @@ if (mysql_field_name($result, $i) == "paikka") {
 		}
 		else {
 			//jos valittu_paikka setattu ollaan tulossa asikkaan_laite_hallinnasta
-			if($valittu_paikka == $paikka['tunnus']) {
+			if ($valittu_paikka == $paikka['tunnus']) {
 				$paikka['selected'] = "SELECTED";
 			}
 			else {
@@ -64,6 +64,32 @@ if (mysql_field_name($result, $i) == "oma_numero") {
 //TODO omistaja. voi olla asiakas tai huoltofirma. ei ole relaatio. tekstikenttä johon voidaan syöttää poikkeava omistaja. tämän avulla saadaan esim. selville kuuluukoo joltain paikalta löytyvä laite ylipäätänsä huollon piiriin.
 if (mysql_field_name($result, $i) == "omistaja") {
 
+}
+
+if (mysql_field_name($result, $i) == "tila") {
+	$tilat = array(
+		array(
+			'value' => '',
+			'text' => t("Normaali"),
+		),
+		array(
+			'value' => 'P',
+			'text' => t("Poistettu"),
+		),
+	);
+	$ulos = "<td>";
+	$ulos .= "<select name='{$nimi}'>";
+	foreach ($tilat as $tila) {
+		$sel = "";
+		if ($tila['value'] == $trow['tila']) {
+			$sel = "SELECTED";
+		}
+		$ulos .= "<option {$sel} value='{$tila['value']}'>{$tila['text']}</option>";
+	}
+	$ulos .= "</select>";
+	$ulos .= "</td>";
+
+	$jatko = 0;
 }
 
 if (!isset($redirect_echoed)) {

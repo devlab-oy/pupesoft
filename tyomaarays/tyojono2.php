@@ -1,6 +1,7 @@
 <?php
 
 require('../inc/parametrit.inc');
+require('validation/Validation.php');
 
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
@@ -119,7 +120,20 @@ $request = array(
 	'tee'				 => $tee,
 	'toim'				 => $toim,
 	'lasku_tunnukset'	 => $lasku_tunnukset,
+	'toimitusaika_haku'	 => $toimitusaika_haku,
 );
+
+$validations = array(
+	'tee'				 => 'sanoja',
+	'toim'				 => 'sanoja',
+	'toimitusaika_haku'	 => 'numero',
+);
+$validator = new FormValidator($validations);
+
+if (!$validator->validate($request)) {
+	//jos validationit ei mene läpi niin todennäköisesti joku yrittää hakkeroida
+	exit;
+}
 
 $request['tyojonot'] = hae_tyojonot($request);
 
@@ -129,9 +143,7 @@ if ($toim == 'TEHDYT_TYOT') {
 	if ($request['tee'] == 'tulosta_tarkastuspyotakirja' or $request['tee'] == 'tulosta_poikkeamaraportti') {
 		$request['lasku_tunnukset'] = explode(',', $request['lasku_tunnukset']);
 
-
 		$pdf_tiedostot = ($request['tee'] == 'tulosta_tarkastuspyotakirja' ? PDF\Tarkastuspoytakirja\hae_tarkastuspoytakirjat($request['lasku_tunnukset']) : PDF\Poikkeamaraportti\hae_poikkeamaraportit($request['lasku_tunnukset']));
-		//$pdf_tiedostot = hae_tarkastuspoytakirjat($request['lasku_tunnukset']);
 
 		foreach ($pdf_tiedostot as $pdf_tiedosto) {
 			if (!empty($pdf_tiedosto)) {
@@ -244,71 +256,9 @@ function hae_tyomaaraykset($request) {
 		$lasku_where .= "	AND lasku.tila = 'A'";
 	}
 
-//	$query = "	SELECT
-//				lasku.tunnus as lasku_tunnus,
-//				lasku.ytunnus as asiakas_ytunnus,
-//				lasku.nimi as asiakas_nimi,
-//				kohde.tunnus as kohde_tunnus,
-//				kohde.nimi as kohde_nimi,
-//				paikka.nimi as paikka_nimi,
-//				a3.selitetark as paikka_olosuhde,
-//				laite.tuoteno,
-//				laite.oma_numero,
-//				laite.sijainti as laite_sijainti,
-//				tuote.nimitys as toimenpide_tuote_nimitys,
-//				lasku.toimaika,
-//				a1.selite as tyojonokoodi,
-//				a1.selitetark as tyojono,
-//				a2.selite as tyostatus_koodi,
-//				a2.selitetark as tyostatus,
-//				a2.selitetark_2 as tyostatusvari,
-//				tilausrivi.tunnus as tilausrivi_tunnus,
-//				tilausrivin_lisatiedot.tilausrivilinkki as poikkeus_tunnus
-//				FROM lasku
-//				JOIN tyomaarays
-//				ON ( tyomaarays.yhtio = lasku.yhtio
-//					AND tyomaarays.otunnus = lasku.tunnus )
-//				JOIN laskun_lisatiedot
-//				ON ( laskun_lisatiedot.yhtio = lasku.yhtio
-//					AND laskun_lisatiedot.otunnus = lasku.tunnus )
-//				JOIN tilausrivi
-//				ON ( tilausrivi.yhtio = lasku.yhtio
-//					AND tilausrivi.otunnus = lasku.tunnus )
-//				JOIN tilausrivin_lisatiedot
-//				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-//					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
-//				JOIN laite
-//				ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
-//					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
-//				JOIN paikka
-//				ON ( paikka.yhtio = laite.yhtio
-//					AND paikka.tunnus = laite.paikka )
-//				JOIN avainsana a3
-//				ON ( a3.yhtio = paikka.yhtio
-//					AND a3.selite = paikka.olosuhde
-//					AND a3.laji = 'OLOSUHDE')
-//				JOIN kohde
-//				ON ( kohde.yhtio = paikka.yhtio
-//					AND kohde.tunnus = paikka.kohde )
-//				LEFT JOIN avainsana a1
-//				ON ( a1.yhtio = tyomaarays.yhtio
-//					AND a1.laji = 'TYOM_TYOJONO'
-//					AND a1.selite = tyomaarays.tyojono )
-//				LEFT JOIN avainsana a2
-//				ON ( a2.yhtio = tyomaarays.yhtio
-//					AND a2.laji = 'TYOM_TYOSTATUS'
-//					AND a2.selite = tyomaarays.tyostatus )
-//				JOIN huoltosyklit_laitteet
-//				ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
-//					AND huoltosyklit_laitteet.laite_tunnus = laite.tunnus )
-//				JOIN huoltosykli
-//				ON ( huoltosykli.yhtio = huoltosyklit_laitteet.yhtio
-//					AND huoltosykli.tunnus = huoltosyklit_laitteet.huoltosykli_tunnus )
-//				JOIN tuote
-//				ON ( tuote.yhtio = huoltosykli.yhtio
-//					AND tuote.tuoteno = huoltosykli.toimenpide )
-//				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-//				{$lasku_where}";
+	if (!empty($request['toimitusaika_haku'])) {
+		$lasku_where .= "	AND lasku.toimaika > DATE_ADD(NOW(), INTERVAL {$request['toimitusaika_haku']} DAY)";
+	}
 
 	$query = "	SELECT
 				lasku.tunnus as lasku_tunnus,
@@ -320,6 +270,7 @@ function hae_tyomaaraykset($request) {
 				a3.selitetark as paikka_olosuhde,
 				laite.tuoteno,
 				laite.oma_numero,
+				laite.sarjanro as sarjanumero,
 				laite.sijainti as laite_sijainti,
 				lasku.toimaika,
 				a1.selite as tyojonokoodi,
@@ -328,7 +279,9 @@ function hae_tyomaaraykset($request) {
 				a2.selitetark as tyostatus,
 				a2.selitetark_2 as tyostatusvari,
 				tilausrivi.tunnus as tilausrivi_tunnus,
-				tilausrivin_lisatiedot.tilausrivilinkki as poikkeus_tunnus
+				tilausrivin_lisatiedot.tilausrivilinkki as poikkeus_tunnus,
+				IF(tilausrivin_lisatiedot.tilausrivilinkki != 0, concat_ws(' -> ', poikkeus_rivi.nimitys, tilausrivi.nimitys), '') as poikkeus_teksti,
+				poistettu_laite.tuoteno as poistettu_laite
 				FROM lasku
 				JOIN tyomaarays
 				ON ( tyomaarays.yhtio = lasku.yhtio
@@ -338,10 +291,20 @@ function hae_tyomaaraykset($request) {
 					AND laskun_lisatiedot.otunnus = lasku.tunnus )
 				JOIN tilausrivi
 				ON ( tilausrivi.yhtio = lasku.yhtio
-					AND tilausrivi.otunnus = lasku.tunnus )
+					AND tilausrivi.otunnus = lasku.tunnus
+					AND tilausrivi.var != 'P' )
 				JOIN tilausrivin_lisatiedot
 				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
 					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+				LEFT JOIN tilausrivi as poikkeus_rivi
+				ON ( poikkeus_rivi.yhtio = tilausrivin_lisatiedot.yhtio
+					AND poikkeus_rivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
+				LEFT JOIN tilausrivin_lisatiedot as poikkeus_toimenpide_tilausrivi_lisatiedot
+				ON ( poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio = poikkeus_rivi.yhtio
+					AND poikkeus_toimenpide_tilausrivi_lisatiedot.tilausrivitunnus = poikkeus_rivi.tunnus )
+				LEFT JOIN laite as poistettu_laite
+				ON ( poistettu_laite.yhtio = poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio
+					AND poistettu_laite.tunnus = poikkeus_toimenpide_tilausrivi_lisatiedot.asiakkaan_positio )
 				JOIN laite
 				ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
 					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
@@ -380,15 +343,21 @@ function kasittele_tyomaaraykset($request) {
 
 	$tyomaaraykset_temp = array();
 	foreach ($request['tyomaaraykset'] as $tyomaarays) {
+
+		if (!empty($tyomaarays['poistettu_laite'])) {
+			$tyomaarays['poikkeus_teksti'] .= '<br/>'.$tyomaarays['poistettu_laite'].' -> '.$tyomaarays['tuoteno'];
+		}
+
 		if (!isset($tyomaaraykset_temp[$tyomaarays['kohde_tunnus']])) {
 			$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']] = array(
 				'asiakas_ytunnus'	 => $tyomaarays['asiakas_ytunnus'],
 				'asiakas_nimi'		 => $tyomaarays['asiakas_nimi'],
 				'kohde_tunnus'		 => $tyomaarays['kohde_tunnus'],
 				'kohde_nimi'		 => $tyomaarays['kohde_nimi'],
-				'toimaika'			 => $tyomaarays['toimaika'],
 			);
 		}
+
+		$tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['toimajat'][] = $tyomaarays['toimaika'];
 
 		//jos kohteen kaikilla työmääräyksillä on sama työstatus, asetetaan se myös kohteelle, jotta se voidaan näyttää ylemmällä tasolla taulukko näkymässä
 		if (isset($tyomaaraykset_temp[$tyomaarays['kohde_tunnus']]['tyostatus'])) {
@@ -458,6 +427,12 @@ function merkkaa_tyomaarays_tehdyksi($request) {
 function echo_tyomaaraykset_table($request = array()) {
 	global $kukarow, $yhtiorow, $palvelin2;
 
+	$toimitusaika_haku_array = array(
+		''	 => t('Näytä kaikki'),
+		7	 => t('7 päivän päästä erääntyvät'),
+		30	 => t('30 päivän päästä erääntyvät'),
+	);
+
 	echo "<table class='display dataTable'>";
 	echo "<thead>";
 
@@ -476,11 +451,23 @@ function echo_tyomaaraykset_table($request = array()) {
 
 	echo "<tr>";
 
-	echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_tyomaarays_haku'></td>";
+	echo "<td valign='top'><input type='text' size='10' name='tyomaarays_haku'></td>";
 
-	echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_asiakasnimi_haku'></td>";
-	echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_kohde_haku'></td>";
-	echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_toimitetaan_haku'></td>";
+	echo "<td valign='top'><input type='text' size='10' name='asiakasnimi_haku'></td>";
+	echo "<td valign='top'><input type='text' size='10' name='kohde_haku'></td>";
+	echo "<td valign='top'>";
+	echo "<form name='' method='POST' action=''>";
+	echo "<select id='toimitusaika_select' name='toimitusaika_haku' onchange='this.form.submit()' >";
+	foreach ($toimitusaika_haku_array as $toimitusaika_value => $toimitusaika) {
+		$sel = "";
+		if ($toimitusaika_value == $request['toimitusaika_haku']) {
+			$sel = "SELECTED";
+		}
+		echo "<option value='{$toimitusaika_value}' {$sel}>{$toimitusaika}</option>";
+	}
+	echo "</select>";
+	echo "</form>";
+	echo "</td>";
 
 	echo "<td>";
 
@@ -527,7 +514,7 @@ function echo_tyomaaraykset_table($request = array()) {
 		echo "</td>";
 
 		echo "<td>";
-		echo $tyomaarays['toimaika'];
+		echo implode('<br/>', $tyomaarays['toimajat']);
 		echo "</td>";
 
 		if ($request['toim'] == 'TEHDYT_TYOT') {
@@ -611,10 +598,12 @@ function echo_laitteet_table($request, $laitteet) {
 	}
 	echo "</th>";
 	echo "<th>".t("Oma numero")."</th>";
+	echo "<th>".t("Sarjanumero")."</th>";
 	echo "<th>".t("Laite")."</th>";
 	echo "<th>".t("Paikka")."</th>";
 	echo "<th>".t("Sijainti")."</th>";
 	echo "<th>".t("Tehtävä työ")."</th>";
+	echo "<th>".t("Poikkeus")."</th>";
 	echo "<th>".t("Työjono")."/<br>".t("Työstatus")."</th>";
 	echo "<th>".t("Poikkeama")."</th>";
 	echo "</tr>";
@@ -634,6 +623,10 @@ function echo_laitteet_table($request, $laitteet) {
 		echo "</td>";
 
 		echo "<td>";
+		echo $laite['sarjanumero'];
+		echo "</td>";
+
+		echo "<td>";
 		echo $laite['tuoteno'];
 		echo "</td>";
 
@@ -647,6 +640,10 @@ function echo_laitteet_table($request, $laitteet) {
 
 		echo "<td>";
 		//echo $laite['toimenpide_tuote_nimitys'];
+		echo "</td>";
+
+		echo "<td>";
+		echo "<font class='error'>{$laite['poikkeus_teksti']}</font>";
 		echo "</td>";
 
 		if ($request['toim'] == 'TEHDYT_TYOT') {

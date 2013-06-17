@@ -34,7 +34,9 @@ $request = array(
 if ($request['tee'] == 'vaihda_laite') {
 	$request['uusi_laite'] = luo_uusi_laite($request['uusi_laite']);
 
-	//vanha työmääräys rivi pitää asettaa var P tilaan, jotta tekemätön työmääräys rivi ei mene laskutukseen ja tyomaarayksen status Laite vaihdettu tilaan, jotta käyttöliittymä on selkeämpi
+	//vanha työmääräys rivi pitää asettaa var P tilaan,
+	//jotta tekemätön työmääräys rivi ei mene laskutukseen
+	//ja tyomaarayksen status Laite vaihdettu tilaan, jotta käyttöliittymä on selkeämpi
 	aseta_tyomaarays_var($request['tilausrivi_tunnus'], 'P');
 	aseta_tyomaarays_status($request['tilausrivi_tunnus'], 'V');
 
@@ -45,19 +47,22 @@ if ($request['tee'] == 'vaihda_laite') {
 	//vaihtotoimenpide ja uusi laite pitää linkata toisiinsa
 	linkkaa_uusi_laite_vaihtotoimenpiteeseen($request['uusi_laite'], $request['vaihto_toimenpide_tyomaarays_tilausrivi_tunnus']);
 
-	//@TODO: en ole ihan varma pitääkö laite unlinkata tekemättömästä työmääräys rivistä
+	//@TODO: en ole ihan varma pitääkö vanha laite unlinkata tekemättömästä työmääräys rivistä
 	//nollaa_vanhan_toimenpiderivin_asiakas_positio($request['tilausrivi_tunnus']);
 
-	//työmääräykselle pitää liittää uusi laite
+	//työmääräykselle pitää liittää uusi laite.
+	//HUOM uudesta laitteesta ei ehkä aina haluta luoda uutta työmääräys riviä,
+	//jos esim laitetta ei myydä asiakkaalle vaan se menee vain lainaan
 	$request['uusi_laite_tyomaarays_tilausrivi_tunnus'] = luo_uusi_tyomaarays_rivi($request['uusi_laite'], $request['lasku_tunnus']);
 
-	//kun toimenpide vaihtuu työmääräyksellä niin vanha toimenpide laitetaan P tilaan ja se linkataan uuteen toimenpide riviin tilausrivin_lisatiedot.tilausrivilinkki kentän avulla, jotta raportit osaavat näyttää mikä toimenpide vaihdettiin mihin.
+	//kun toimenpide vaihtuu työmääräyksellä niin vanha toimenpide laitetaan P tilaan (ylempänä)
+	//ja se linkataan uuteen toimenpide riviin tilausrivin_lisatiedot.tilausrivilinkki kentän avulla,
+	//jotta raportit osaavat näyttää mikä toimenpide vaihdettiin mihin.
 	paivita_uuden_toimenpide_rivin_tilausrivi_linkki($request['vaihto_toimenpide_tyomaarays_tilausrivi_tunnus'], $request['tilausrivi_tunnus']);
 
 	//työmääräykselle lisätään myös uusi laite. tähän rivin pitää linkata vanha toimenpide tilausrivi
 	paivita_uuden_toimenpide_rivin_tilausrivi_linkki($request['uusi_laite_tyomaarays_tilausrivi_tunnus'], $request['tilausrivi_tunnus']);
 
-	//@TODO tee tämä funktio loppuun
 	aseta_vanha_laite_poistettu_tilaan($request['vanha_laite_tunnus']);
 
 	echo '<font class="message">'.t("Laite vaihdettu").'</font>';
@@ -289,7 +294,11 @@ function hae_paikat() {
 function aseta_vanha_laite_poistettu_tilaan($vanha_laite_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	//@TODO tee tämä loppuun, laitteelle uusi kenttää jne.
+	$query = "	UPDATE laite
+				SET tila = 'P'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$vanha_laite_tunnus}'";
+	pupe_query($query);
 }
 
 function echo_laitteen_vaihto_form($request = array()) {

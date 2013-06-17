@@ -107,6 +107,7 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($request = a
 					AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
 					AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely' )
 				WHERE  laite.yhtio = '{$kukarow['yhtio']}'
+				AND laite.tila != 'P'
 				{$laitteet_where}
 				HAVING IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosyklit_laitteet.huoltovali-30) DAY)";
 	$result = pupe_query($query);
@@ -149,7 +150,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteiden_huoltosyklirivit) {
 				continue;
 			}
 		}
-		
+
 		$onko_tyomaarays_jo_luotu_talle_laitteelle = tarkista_loytyyko_tyomaarays($huoltosyklirivi);
 		if ($onko_tyomaarays_jo_luotu_talle_laitteelle) {
 			if ($debug) {
@@ -176,7 +177,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteiden_huoltosyklirivit) {
 		//jos uusi laite, niin laitetaan työmääräyksen toimitusajankohta NOW
 		//HUOM jos huoltosyklirivin toimenpide_tuotteen_tyyppi = koeponnistus niin viimeinen_tapahtuma ei ole ikinä tyhjä. Luonti vaiheessa sinne asetetaan laite.valm_pvm
 		if (empty($huoltosyklirivi['viimeinen_tapahtuma']) and $huoltosyklirivi['toimenpide_tuotteen_tyyppi'] != 'koeponnistus') {
-			aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date('Y-m-d'));
+			aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", rand(strtotime('now + 1 month'), strtotime('now - 7 day'))));
 		}
 
 		if ($debug and !empty($tyomaarays_tunnus)) {

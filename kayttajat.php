@@ -1334,16 +1334,24 @@
 						if ($krow['jyvitys'] == "") {
 							$sel1 = "SELECTED";
 							$sel2 = "";
+							$sel3 = "";
+						}
+						else if ($krow['jyvitys'] == "S") {
+							$sel1 = "";
+							$sel2 = "";
+							$sel3 = "SELECTED";
 						}
 						else {
 							$sel1 = "";
 							$sel2 = "SELECTED";
+							$sel3 = "";
 						}
 
 						echo "<tr><th align='left'>",t("Jyvitys"),":</td>";
 						echo "<td><select name='jyvitys'>
 								<option value='' {$sel1}>",t("Ei saa jyvitt‰‰ myyntitilauksella"),"</option>
-								<option value='X' {$sel2}>",t("Saa jyvitt‰‰ myyntitilauksella"),"</option>";
+								<option value='X' {$sel2}>",t("Saa jyvitt‰‰ myyntitilauksella"),"</option>
+								<option value='S' {$sel3}>",t("Saa jyvitt‰‰ sek‰ osajyvitt‰‰ myyntitilauksella"),"</option>";
 						echo "</select></td></tr>";
 					}
 				}

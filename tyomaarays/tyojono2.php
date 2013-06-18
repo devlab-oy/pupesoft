@@ -255,7 +255,7 @@ function hae_tyomaaraykset($request) {
 	}
 
 	if (!empty($request['toimitusaika_haku'])) {
-		$lasku_where .= "	AND lasku.toimaika > DATE_ADD(NOW(), INTERVAL {$request['toimitusaika_haku']} DAY)";
+		$lasku_where .= "	AND lasku.toimaika < DATE_ADD(NOW(), INTERVAL {$request['toimitusaika_haku']} DAY)";
 	}
 
 	$query = "	SELECT
@@ -434,8 +434,10 @@ function echo_tyomaaraykset_table($request = array()) {
 
 	$toimitusaika_haku_array = array(
 		''	 => t('N‰yt‰ kaikki'),
-		7	 => t('7 p‰iv‰n p‰‰st‰ er‰‰ntyv‰t'),
-		30	 => t('30 p‰iv‰n p‰‰st‰ er‰‰ntyv‰t'),
+		7	 => t('1 viikon p‰‰st‰ er‰‰ntyv‰t'),
+		14	 => t('2 viikon p‰‰st‰ er‰‰ntyv‰t'),
+		21	 => t('3 viikon p‰‰st‰ er‰‰ntyv‰t'),
+		28	 => t('4 viikon p‰‰st‰ er‰‰ntyv‰t'),
 	);
 
 	echo "<table class='display dataTable'>";

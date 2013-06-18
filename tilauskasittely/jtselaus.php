@@ -880,6 +880,7 @@
 							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
 							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
 							tilausrivi.jaksotettu,
+							tuote.status,
 							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa $summarajauslisa)
@@ -905,6 +906,7 @@
 							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
 							tilausrivi.kerayspvm,
 							tilausrivi.jaksotettu,
+							tuote.status,
 							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -946,6 +948,7 @@
 							lasku.toim_postitp,
 							lasku.toim_maa,
 							tilausrivi.jaksotettu,
+							tuote.status,
 							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -1195,6 +1198,7 @@
 							}
 						}
 
+						$saapumisaika = hae_tuotteen_saapumisaika($jtrow['tuoteno'], $jtrow['status'], $kokonaismyytavissa);
 						// Saldoa on tai halutaan nähdä kaikki rivit
 						if ($kokonaismyytavissa > 0 or $toimi == '') {
 
@@ -1229,7 +1233,7 @@
 
 								echo "</th>";
 
-								echo "<th valign='top'>".t("Status")."<br>".t("Toimaika")."</th>";
+								echo "<th valign='top'>".t("Status")."<br>".t("Luontiaika")."<br/>".t("Toimaika")."</th>";
 
 								if ($jtselaus_paivitys_oikeus) {
 									if ($kukarow["extranet"] == "") {
@@ -1639,6 +1643,8 @@
 											}
 											else {
 												echo tv1dateconv($toimaika);
+												echo "<br/>";
+												echo $saapumisaika;
 											}
 
 											echo "</td>";
@@ -1711,6 +1717,8 @@
 										}
 										else {
 											echo tv1dateconv($toimaika);
+											echo "<br/>";
+											echo $saapumisaika;
 										}
 										echo "</td>";
 
@@ -1745,6 +1753,8 @@
 										}
 										else {
 											echo tv1dateconv($toimaika);
+											echo "<br/>";
+											echo $saapumisaika;
 										}
 										echo "</td>";
 
@@ -1779,6 +1789,8 @@
 										}
 										else {
 											echo tv1dateconv($toimaika);
+											echo "<br/>";
+											echo $saapumisaika;
 										}
 										echo "</td>";
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";

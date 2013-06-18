@@ -22107,6 +22107,106 @@ if (!function_exists('paivita_poikkeavat_tulliprosentit')) {
 	}
 }
 
+if (!function_exists('hae_tuotteen_arvioitu_saapumisaika')) {
+	function hae_tuotteen_saapumisaika($tuoteno, $tuote_status, $myytavissa) {
+		global $kukarow, $yhtiorow, $laskurow, $verkkokauppa, $kieli;
+
+		$tilauslisa = "";
+		$tulossalisa = "";
+		if ($verkkokauppa == "" and ($tuote_status == 'A' or $tuote_status == '') and $myytavissa <= 0) {
+
+			$tulossa_query = " 	SELECT min(toimaika) paivamaara
+								FROM tilausrivi
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tuoteno = '$tuoteno'
+								AND varattu > 0
+								AND tyyppi = 'O'
+								AND toimaika >= curdate()";
+			$tulossa_result = pupe_query($tulossa_query);
+			$tulossa_row = mysql_fetch_assoc($tulossa_result);
+
+			if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '') {
+				$tulossalisa .= "<br/><br/>".t("TULOSSA")."<br/>";
+				$tulossalisa .= t("Arvioitu saapumispäivä")." ".tv1dateconv($tulossa_row['paivamaara']);
+
+				return $tulossalisa;
+			}
+			else {
+				$tulossa_query = " 	SELECT DATE_ADD(curdate(), INTERVAL (if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika)+if(tuotteen_toimittajat.tilausvali > 0, tuotteen_toimittajat.tilausvali, toimi.oletus_tilausvali)) DAY) paivamaara,
+									if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
+									FROM tuotteen_toimittajat
+									JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+									WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+									AND tuotteen_toimittajat.tuoteno = '$tuoteno'
+									AND (tuotteen_toimittajat.toimitusaika+toimi.oletus_toimaika) > 0
+									AND (tuotteen_toimittajat.tilausvali+toimi.oletus_tilausvali) > 0
+									ORDER BY sorttaus
+									LIMIT 1";
+				$tulossa_result = pupe_query($tulossa_query);
+				$tulossa_row = mysql_fetch_assoc($tulossa_result);
+
+				if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '') {
+					$tulossalisa .= "<br/><br/>".t("TULOSSA")."<br/>";
+					$tulossalisa .= t("Arvioitu saapumispäivä")." ".tv1dateconv($tulossa_row['paivamaara']);
+
+					return $tulossalisa;
+				}
+			}
+		}
+		elseif ($verkkokauppa == "" and $tuote_status == 'T' and $myytavissa <= 0) {
+			$query = "	SELECT if(tuotteen_toimittajat.tehdas_saldo_toimaika != 0, tuotteen_toimittajat.tehdas_saldo_toimaika, if (tuotteen_toimittajat.toimitusaika != 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika)) toimaika,
+						if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
+						FROM tuotteen_toimittajat
+						JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+						WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+						and tuotteen_toimittajat.tuoteno = '$tuoteno'
+						ORDER BY sorttaus
+						LIMIT 1";
+			$tulossa_result = pupe_query($query);
+			$tulossa_row = mysql_fetch_assoc($tulossa_result);
+
+			if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["toimaika"] > 0) {
+				$tilauslisa .= "<font color='orange'>".t("TILAUSTUOTE")."</font>";
+				$tilauslisa .= "<br/>".t("Arvioitu toimitusaika")." {$tulossa_row["toimaika"]} ".t("päivää");
+
+				return $tilauslisa;
+			}
+		}
+		elseif ($verkkokauppa != "") {
+			$tulossa_query = " 	SELECT IFNULL(MIN(toimaika),'') paivamaara
+								FROM tilausrivi
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tuoteno = '$tuoteno'
+								AND varattu > 0
+								AND tyyppi  = 'O'";
+			$tulossa_result = pupe_query($tulossa_query);
+			$tulossa_row = mysql_fetch_assoc($tulossa_result);
+
+			if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '') {
+				$tulossalisa = ", <font class='info'>".t("Saapuu")." ".tv1dateconv($tulossa_row['paivamaara'])."</font>";
+
+				return $tulossalisa;
+			}
+			elseif ((float) $myytavissa <= 0) {
+				$query = "	SELECT toimitusaika
+							FROM tuotteen_toimittajat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$tuoteno'
+							and toimitusaika > 0
+							LIMIT 1";
+				$tulossa_result = pupe_query($query);
+				$tulossa_row = mysql_fetch_assoc($tulossa_result);
+
+				if ($tulossa_row["toimitusaika"] > 0) {
+					$tulossalisa = ", <font class='info'>".t("Toimaika: %s pv.", $kieli, $tulossa_row["toimitusaika"])."</font>";
+
+					return $tulossalisa;
+				}
+			}
+		}
+	}
+}
+
 if (!function_exists("lisaa_rivi")) {
 	function lisaa_rivi($parametrit) {
 

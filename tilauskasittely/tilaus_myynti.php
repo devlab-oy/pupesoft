@@ -5356,10 +5356,22 @@ if ($tee == '') {
 						$borderlask = 0;
 
 						if ($row["kommentti"] != "" or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
-							echo "<td valign='top' rowspan = '2' $class>$echorivino</td>";
+							echo "<td valign='top' rowspan = '2' $class>$echorivino";
+
+							if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+								echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$row['tunnus']}' />";
+							}
+							
+							echo "</td>";
 						}
 						else {
-							echo "<td valign='top' $class>$echorivino</td>";
+							echo "<td valign='top' $class>$echorivino";
+							
+							if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+								echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$row['tunnus']}' />";
+							}
+							
+							echo "</td>";
 						}
 					}
 					else {
@@ -5367,18 +5379,23 @@ if ($tee == '') {
 							$tuoteperhe_kayty = $row['perheid'];
 						}
 						echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;'>$echorivino";
-						echo "<br/>";
-						//haetaan perheen kaikki rivitunnukset, jotta niitä voidaan käyttää pyöristä valitut rivit toiminnallisuudessa
-						//otunnus on queryssä mukana indeksien takia
-						$query = "	SELECT group_concat(tunnus) tunnukset
-									FROM tilausrivi
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND otunnus = '{$row['otunnus']}'
-									AND perheid = {$row['perheid']}";
-						$perhe_result = pupe_query($query);
-						$perhe_row = mysql_fetch_assoc($perhe_result);
 
-						echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$perhe_row['tunnukset']}' />";
+
+						if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+							echo "<br/>";
+							//haetaan perheen kaikki rivitunnukset, jotta niitä voidaan käyttää pyöristä valitut rivit toiminnallisuudessa
+							//otunnus on queryssä mukana indeksien takia
+							$query = "	SELECT group_concat(tunnus) tunnukset
+										FROM tilausrivi
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND otunnus = '{$row['otunnus']}'
+										AND (tunnus = '{$row['tunnus']}' OR perheid = '{$row['perheid']}')";
+							$perhe_result = pupe_query($query);
+							$perhe_row = mysql_fetch_assoc($perhe_result);
+
+							echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$perhe_row['tunnukset']}' />";
+						}
+
 						echo "</td>";
 					}
 				}
@@ -5401,6 +5418,10 @@ if ($tee == '') {
 						}
 
 						echo "<td $class rowspan = '2' valign='top'>$echorivino";
+						
+						if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+							echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$row['tunnus']}' />";
+						}						
 					}
 					elseif ($tilauksen_jarjestys == '1' and $row['perheid'] != 0) {
 						echo "<td $class>&nbsp;</td>";
@@ -5411,8 +5432,11 @@ if ($tee == '') {
 						}
 
 						echo "<td $class valign='top'>$echorivino";
-						echo "<br/>";
-						echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$row['tunnus']}'/>";
+
+						if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+							echo "<br/>";
+							echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$row['tunnus']}'/>";
+						}
 					}
 
 					if ($toim != "TARJOUS") {
@@ -7137,9 +7161,28 @@ if ($tee == '') {
 					echo "</tr>";
 				}
 
+				$sallijyvitys = FALSE;
+
+				if ($kukarow["extranet"] == "") {
+					if ($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '') {
+						$sallijyvitys = TRUE;
+					}
+
+					if ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') {
+						$sallijyvitys = TRUE;
+					}
+
+					if ($yhtiorow["salli_jyvitys_myynnissa"] == "K" or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+						$sallijyvitys = TRUE;
+					}
+
+					if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
+						$sallijyvitys = TRUE;
+					}
+				}
 
 				//annetaan mahdollisuus antaa loppusumma joka jyvitetään riveille arvoosuuden mukaan
-				if ($kukarow["extranet"] == "" and (($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "K") or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI")) {
+				if ($sallijyvitys) {
 
 					echo "<tr>$jarjlisa";
 
@@ -7175,9 +7218,11 @@ if ($tee == '') {
 								echo "<option value='TARJOUS!!!BR'>".t("Tarjous BR")."</option>";
 							}
 						}
+
 						if (file_exists("tulosta_tilausvahvistus_pdf.inc")) {
 							echo "<option value='TILAUSVAHVISTUS'>".t("Tilausvahvistus")."</option>";
 						}
+
 						if (file_exists("tulosta_myyntisopimus.inc")) {
 							echo "<option value='MYYNTISOPIMUS'>".t("Myyntisopimus")."</option>";
 
@@ -7271,10 +7316,11 @@ if ($tee == '') {
 						echo "<td class='back' colspan='2'><input type='submit' value='".t("Jyvitä")."' $state></form></td>";
 
 					}
+
 					echo "</tr>";
 
 					//jos vain tietyt henkilöt saavat jyvittää ja henkilöllä on jyvitys sekä osajyvitys päällä TAI kaikki saavat jyvittää
-					if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "K") {
+					if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
 						echo "<tr>";
 						echo "<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>";
 						echo "<th colspan='5'>".t("Pyöristä valitut rivit").":</th>";

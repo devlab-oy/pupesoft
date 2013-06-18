@@ -41,7 +41,7 @@ if (!function_exists('alku_lahete')) {
 		extract($params);
 
 		$base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
-		
+
 		$lahetetyyppi_avainsana = t_avainsana("LAHETETYYPPI", "", " and selite='$lahetetyyppi'", "", "", "selitetark_2");
 
 		//PDF parametrit
@@ -850,7 +850,7 @@ if (!function_exists('rivi_otsikot_lahete')) {
 		extract($params);
 
 		$base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
-		
+
 		if ($base_lahetetyyppi == "tulosta_lahete.inc" or $base_lahetetyyppi == "tulosta_lahete_ean.inc") {
 			// tulosta_lahete.inc
 
@@ -1233,7 +1233,7 @@ if (!function_exists('rivi_lahete')) {
 		extract($params);
 
 		$base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
-		
+
 		// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
 		if ($kala <= 70) {
 			$sivu++;
@@ -1702,21 +1702,26 @@ if (!function_exists('rivi_lahete')) {
 			if ($base_lahetetyyppi == "tulosta_lahete.inc") {
 				// tulosta_lahete.inc
 				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
-					if (strpos($lahetetyyppi, "_verollinen")) {
-						$row['hinta'] = $row['hinta'] * (1 + $row['alv'] / 100);
-						$row['rivihinta'] = $row['rivihinta'] * (1 + $row['alv'] / 100);
-						$return['row'] = $row;
+
+					// Myyntihinnat sis‰lt‰v‰t arvonlis‰veron
+					if ($yhtiorow['alv_kasittely'] == '') {
 
 						$return["summa"] += $row['rivihinta'];
 						$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
 					}
-					elseif ($yhtiorow['alv_kasittely'] == '') {
-						$return["summa"] += $row['rivihinta'];
-						$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
-					}
+					// Myyntihinnat ovat arvonlis‰verottomia
 					else {
+
 						$return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
 						$return["arvo"]  += $row['rivihinta'];
+
+						// Verollinen l‰hetetyyppi, lis‰t‰‰n alvit rivihintoihin
+						if (strpos($lahetetyyppi, "_verollinen")) {
+							$row['hinta'] = $row['hinta'] * (1 + $row['alv'] / 100);
+							$row['rivihinta'] = $row['rivihinta'] * (1 + $row['alv'] / 100);
+							$return['row'] = $row;
+						}
+
 					}
 				}
 				else {
@@ -2530,7 +2535,7 @@ if (!function_exists('rivi_ei_ale_ei_hinta_lahete')) {
 		extract($params);
 
 		$base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
-		
+
 		$lisarivi = 0;
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]], $thispage, $pieni);
@@ -3618,14 +3623,8 @@ if (!function_exists('loppu_lahete')) {
 				extract($params);
 			}
 			else {
-				// N‰yt‰ verolliset hinnat
-				if (strpos($lahetetyyppi, '_verollinen')) {
-					$pdf->draw_text(410, 72, t("Yhteens‰ verollinen", $kieli).":", $thispage, $norm);
-					$oikpos = $pdf->strlen(sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $norm);
-					$pdf->draw_text(575-$oikpos, 72, sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $thispage, $norm);
-				}
-				// Verolliset hinnat yhtiˆnparametreist‰
-				elseif ($laskurow['alv'] > 0 and $yhtiorow["alv_kasittely"] == '') {
+				// Verolliset hinnat yhtiˆnparametreist‰ tai l‰hetetyypist‰
+				if (($laskurow['alv'] > 0 and $yhtiorow["alv_kasittely"] == '') or strpos($lahetetyyppi, "_verollinen")) {
 					$pdf->draw_text(410, 72, t("Yhteens‰ verollinen", $kieli).":", $thispage, $norm);
 					$oikpos = $pdf->strlen(sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $norm);
 					$pdf->draw_text(575-$oikpos, 72, sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $thispage, $norm);
@@ -3987,7 +3986,7 @@ if (!function_exists('print_pdf_lahete')) {
 		extract($params);
 
 		$base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
-		
+
 		$oslapp		 = '';
 		$returnvalue = 0;
 

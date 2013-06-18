@@ -249,7 +249,7 @@ else {
 				ORDER BY tilikausi_alku";
 	$vresult = pupe_query($query);
 
-	echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
+	echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa");
 
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
@@ -277,7 +277,7 @@ else {
 				ORDER BY koodi+0, koodi, nimi";
 	$vresult = pupe_query($query);
 
-	echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa")."";
+	echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa");
 
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
@@ -312,7 +312,7 @@ else {
 				ORDER BY koodi+0, koodi, nimi";
 	$vresult = pupe_query($query);
 
-	echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa")."";
+	echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa");
 
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
@@ -334,7 +334,7 @@ else {
 				ORDER BY koodi+0, koodi, nimi";
 	$vresult = pupe_query($query);
 
-	echo "<td><select name='proj'><option value=' '>".t("Ei valintaa")."";
+	echo "<td><select name='proj'><option value=' '>".t("Ei valintaa");
 
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";

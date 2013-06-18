@@ -256,7 +256,7 @@ if ($tee == "SYOTA") {
 			
 		}
 		else {
-			echo "".t("VIRHE: Et voi muokata ruokalistaa")."!<br>";
+			echo t("VIRHE: Et voi muokata ruokalistaa")."!<br>";
 		}
 	}
 		

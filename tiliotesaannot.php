@@ -330,7 +330,7 @@
 				<input type='hidden' name='lopetus' value = '$lopetus'>
 				<table>
 				<td>
-				<select name = 'pankkitili'><option value = 'x'>".t("Viiteaineisto")."";
+				<select name = 'pankkitili'><option value = 'x'>".t("Viiteaineisto");
 
 		while ($yritirow=mysql_fetch_array ($result)) {
 			$valittu = "";

@@ -6,7 +6,7 @@ if(!function_exists("asiakaskommenttitarkista")) {
 
 		if (mysql_field_name($result, $i) == "kommentti") {
 			if (trim($t[$i]) == '') {
-				$virhe[$i] = "".t("Tieto puuttuu")."";
+				$virhe[$i] = t("Tieto puuttuu");
 			}
 		}
 
@@ -17,7 +17,7 @@ if(!function_exists("asiakaskommenttitarkista")) {
 			$sresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($sresult) == 0) {
-				$virhe[$i] = "".t("Asiakas puuttuu tai sitä ei löydy!")."";
+				$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
 			}
 		}
 
@@ -27,7 +27,7 @@ if(!function_exists("asiakaskommenttitarkista")) {
 							WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
 				$sresult = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($sresult) != 1) {
-					$virhe[$i] = "".t("Tuotenumero puuttuu tai sitä ei löydy!")."";
+					$virhe[$i] = t("Tuotenumero puuttuu tai sitä ei löydy!");
 				}
 		}
 	}

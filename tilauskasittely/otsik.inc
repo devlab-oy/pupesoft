@@ -2186,6 +2186,34 @@
 			$vasen_sarake[$vasen] .= "</select></td>";
 			$vasen++;
 
+			$sel = array();
+			$sel[$srow['laskutyyppi']] = "selected";
+
+			$vasen_sarake[$vasen] = "<td>".t("Laskutyyppi").":</td>";
+			$vasen_sarake[$vasen] .= "<td><select name='laskutyyppi' style='max-width: 300px' >";
+
+			$vasen_sarake[$vasen] .= "<option value = '-9'>".t("Oletus")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '99' $sel[99]>".t("Normaali laskupohja")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '5'  $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1")."</option>";
+			#$vasen_sarake[$vasen] .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '13' $sel[13]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '14' $sel[14]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '15' $sel[15]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '16' $sel[16]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '17' {$sel[17]}>".t("Normaali laskupohja (lihavoidut ja kursivoidut tekstit)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '18' {$sel[18]}>".t("Normaali laskupohja (nimitykset rivitettyn‰)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '19' {$sel[19]}>".t("Normaali laskupohja (Tuoteperheen hinnat is‰tuotteella, lapsituotteet n‰ytet‰‰n ilman hintoja)")."</option>";
+
+			$vasen_sarake[$vasen] .= "</select></td>";
+			$vasen++;
+
 			if ($yhtiorow['laskutuskielto'] != 0 and $toim != "MYYNTITILI") {
 				$oikea_sarake[$oikea] = "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
 				$oikea++;
@@ -3360,6 +3388,7 @@
 					comments 							= '$comments',
 					eilahetetta 						= '$eilahe',
 					lahetetyyppi 						= '$lahetetyyppi',
+					laskutyyppi							= '{$laskutyyppi}',
 					erikoisale 							= '$erikoisale',
 					erpcm								= '$erpcmvv-$erpcmkk-$erpcmpp',
 					huolitsija 							= '$huolitsija',
@@ -3595,7 +3624,7 @@
 									break;
 								case "kate_korjattu";
 									$values .= ", NULL";
-									break;								
+									break;
 								default;
 									$values .= ", '".$monistarow[$fieldname]."'";
 									break;

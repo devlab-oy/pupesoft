@@ -54,6 +54,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$kolm_ovttunnus	   = $asiakasrow["kolm_maa"];
 			$verkkotunnus 	   = $asiakasrow["verkkotunnus"];
 			$piiri 			   = $asiakasrow["piiri"];
+			$laskutyyppi	   = $asiakasrow["laskutyyppi"];
 
 			$kohde  = "";
 			$eilahe = "";

@@ -3,7 +3,7 @@
 /*
 	Tänne tarvitaan:
 	$jysum joka on loppusumma joka tilaukselle halutaan
-	$tilausnumero
+	$tilausnumero TAI $valitut_tilausrivi_tunnukset
 
 	Jos jyvsumma on negatiivinen on se alennuksen määrä
 	Jos jyvsumma sisältää % merkin annetaan erikoisalennusta
@@ -14,7 +14,7 @@
 		'T' = Alennus annetaan tuotteella aina
 */
 
-if (strpos($jysum, "%") !== false) {
+if (strpos($jysum, "%") !== false and empty($valitut_tilausrivi_tunnukset)) {
 	$jysum = str_replace("%","", $jysum);
 	$anna_ea = "TOKI";
 }
@@ -47,6 +47,12 @@ elseif ($tilausrivi_alvillisuus != 'E' and $yhtiorow['alv_kasittely'] != '') {
 
 $query_ale_lisa = generoi_alekentta('M');
 
+$tilausrivi_where = "";
+
+if (!empty($valitut_tilausrivi_tunnukset)) {
+	$tilausrivi_where = " AND tilausrivi.tunnus IN ('".implode("','", $valitut_tilausrivi_tunnukset)."') ";
+}
+
 $query = "	SELECT
 			sum($hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) koko_summa,
 			sum($hinta_riv2 * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) koko_oma_summa,
@@ -54,11 +60,12 @@ $query = "	SELECT
 			sum(if(varattu+jt<0, $hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) nega_summa
 			FROM tilausrivi
 			WHERE yhtio = '$kukarow[yhtio]'
-			and otunnus = '$tilausnumero'
+			AND otunnus = '$tilausnumero'
+			{$tilausrivi_where}
 			and rivihinta = 0
 			and uusiotunnus = 0";
-$result = mysql_query($query) or pupe_error($query);
-$tarow = mysql_fetch_array($result);
+$result = pupe_query($query);
+$tarow = mysql_fetch_assoc($result);
 
 $plus_summa = $tarow["plus_summa"];
 $nega_summa = $tarow["nega_summa"];
@@ -70,7 +77,7 @@ elseif ($jysum == 0) {
 	if ($yhtiorow["jyvita_alennus"] == "") {
 		// Nollataan jyvitys
 		$query = "UPDATE lasku SET hinta = '0' WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$laskurow["hinta"] = 0;
 	}
@@ -89,7 +96,7 @@ else {
 	if ($anna_ea == "TOKI") {
 		// 	Annetaan erikoisale
 		$query = "UPDATE lasku SET erikoisale = '$jysum' WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero' and tilaustyyppi = 'N' and tila IN ('V','N','G','L') and alatila NOT IN ('V','X')";
-		$upresult = mysql_query($query) or pupe_error($query);
+		$upresult = pupe_query($query);
 
 		$laskurow["erikoisale"] = $jysum;
 	}
@@ -97,10 +104,10 @@ else {
 		// 	Alennus lisätään alennustuotteelle
 		//	TODO tämä on osittain turhaa koska projektia ei ole vielä köytössä, kohta on!
 		$query = "SELECT * FROM tuote WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$yhtiorow[alennus_tuotenumero]'";
-		$rhire = mysql_query($query) or pupe_error($query);
+		$rhire = pupe_query($query);
 
 		if (mysql_num_rows($rhire) == 1) {
-			$trow  = mysql_fetch_array($rhire);
+			$trow  = mysql_fetch_assoc($rhire);
 
 			$hinta		 = round(($plus_summa+$nega_summa - $jysum), $yhtiorow['hintapyoristys']);
 			$trow["alv"] = $laskurow["alv"];
@@ -116,7 +123,7 @@ else {
 			}
 
 			$query  = "INSERT INTO tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) VALUES (now(), '$hinta', 'N', '-1', '-1', '$tilausnumero', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', '$rivityyppi', '$alv', '')";
-			$addtil = mysql_query($query) or pupe_error($query);
+			$addtil = pupe_query($query);
 		}
 		else {
 			echo t("VIRHE: Alennusta ei voitu antaa alennustuote puuttuu")."!<br>";
@@ -142,6 +149,7 @@ else {
 						WHERE yhtio 	 = '$kukarow[yhtio]'
 						and varattu + jt < 0
 						and otunnus 	 = '$tilausnumero'
+						{$tilausrivi_where}
 						and rivihinta 	 = 0
 						and uusiotunnus  = 0
 						ORDER BY hinta";
@@ -157,6 +165,7 @@ else {
 						WHERE yhtio 	 = '$kukarow[yhtio]'
 						and varattu + jt > 0
 						and otunnus 	 = '$tilausnumero'
+						{$tilausrivi_where}
 						and rivihinta 	 = 0
 						and uusiotunnus  = 0
 						ORDER BY hinta";
@@ -167,19 +176,19 @@ else {
 		}
 
 		if ($boob_jyva == 0) {
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
-			while ($tirow = mysql_fetch_array($result)) {
+			while ($tirow = mysql_fetch_assoc($result)) {
 				$uushinta = round($tirow['hinta'] * $jypro, $yhtiorow['hintapyoristys']);
 
 				$query = "UPDATE tilausrivi SET hinta = '$uushinta' WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tirow[tunnus]'";
-				$upresult = mysql_query($query) or pupe_error($query);
+				$upresult = pupe_query($query);
 			}
 
 			//  Päivitetään laskulle hinta-kenttään syötetty summa, mutta vain siinä tapauksessa, että syötetty summa on verollinen.
 			if ($yhtiorow['alv_kasittely'] == '' or ($yhtiorow['alv_kasittely'] != '' and $jyvitetaan_ristiin == "X")) {
 				$query = "UPDATE lasku SET hinta = '$jysum' WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				$laskurow["hinta"] = $jysum;
 			}

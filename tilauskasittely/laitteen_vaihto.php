@@ -43,6 +43,7 @@ if ($request['tee'] == 'vaihda_laite') {
 	//pitää luoda uusi työmääräys rivi johon tulee laitteen vaihto tuote tjsp
 	$request['vaihto_toimenpide'] = hae_vaihtotoimenpide_tuote();
 	$request['vaihto_toimenpide_tyomaarays_tilausrivi_tunnus'] = luo_uusi_tyomaarays_rivi($request['vaihto_toimenpide'], $request['lasku_tunnus']);
+	aseta_uuden_tyomaarays_rivin_kommentti($request['vaihto_toimenpide_tyomaarays_tilausrivi_tunnus'], $request['uusi_laite']['kommentti']);
 
 	//vaihtotoimenpide ja uusi laite pitää linkata toisiinsa
 	linkkaa_uusi_laite_vaihtotoimenpiteeseen($request['uusi_laite'], $request['vaihto_toimenpide_tyomaarays_tilausrivi_tunnus']);
@@ -56,7 +57,7 @@ if ($request['tee'] == 'vaihda_laite') {
 	$request['uusi_laite_tyomaarays_tilausrivi_tunnus'] = luo_uusi_tyomaarays_rivi($request['uusi_laite'], $request['lasku_tunnus']);
 
 	//kun toimenpide vaihtuu työmääräyksellä niin vanha toimenpide laitetaan P tilaan (ylempänä)
-	//ja se linkataan uuteen toimenpide riviin tilausrivin_lisatiedot.tilausrivilinkki kentän avulla,
+	//ja vanha toimenpide linkataan uuteen toimenpide riviin tilausrivin_lisatiedot.tilausrivilinkki kentän avulla,
 	//jotta raportit osaavat näyttää mikä toimenpide vaihdettiin mihin.
 	paivita_uuden_toimenpide_rivin_tilausrivi_linkki($request['vaihto_toimenpide_tyomaarays_tilausrivi_tunnus'], $request['tilausrivi_tunnus']);
 
@@ -67,7 +68,6 @@ if ($request['tee'] == 'vaihda_laite') {
 
 	echo '<font class="message">'.t("Laite vaihdettu").'</font>';
 
-	//@TODO SELVITÄ PITÄÄKÖ TYÖJONO NÄKYMÄSSÄ NYKÄ VAR P TUOTTEITA.
 	//@TODO TODELLA TÄRKEÄÄ. KOSKA VANHA LAITE ON POISTETTU NIIN PITÄÄ KÄYDÄ SEN TYÖMÄÄRÄYKSET LÄPI JA MERKATA NE POISTETUKSI KOSKA LAITETTA EI SIIS OLE OLEMASSA ENÄÄ.
 }
 else {
@@ -82,6 +82,7 @@ require('../inc/footer.inc');
 function luo_uusi_laite($uusi_laite) {
 	global $kukarow, $yhtiorow;
 
+	unset($uusi_laite['kommentti']);
 	$uusi_laite['yhtio'] = $kukarow['yhtio'];
 	$query = "INSERT INTO
 				laite (".implode(", ", array_keys($uusi_laite)).")
@@ -126,6 +127,16 @@ function aseta_tyomaarays_status($tilausrivi_tunnus, $status) {
 					AND tilausrivi.tunnus = '{$tilausrivi_tunnus}')
 				SET tyomaarays.tyostatus = '{$status}'
 				WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'";
+	pupe_query($query);
+}
+
+function aseta_uuden_tyomaarays_rivin_kommentti($tilausrivi_tunnus, $kommentti) {
+	global $kukarow, $yhtiorow;
+
+	$query = "	UPDATE tilausrivi
+				SET kommentti = '{$kommentti}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = {$tilausrivi_tunnus}";
 	pupe_query($query);
 }
 
@@ -343,42 +354,42 @@ function echo_laitteen_vaihto_form($request = array()) {
 	<tbody>
 
 	<tr>
-	<th align="left">tuoteno</th>
+	<th align="left">'.t("Tuotenumero").'</th>
 	<td>
 	<input type="text" name="uusi_laite[tuoteno]" value="" size="35" maxlength="60">
 	</td>
 	</tr>
 
 	<tr>
-	<th align="left">sarjanro</th>
+	<th align="left">'.t("Sarjanumero").'</th>
 	<td>
 	<input type="text" name="uusi_laite[sarjanro]" value="" size="35" maxlength="60">
 	</td>
 	</tr>
 
 	<tr>
-	<th align="left">valm_pvm</th>
+	<th align="left">'.t("Valmistus päivä").'</th>
 	<td>
 	<input type="text" name="uusi_laite[valm_pvm]" value="" size="10" maxlength="10">
 	</td>
 	</tr>
 
 	<tr>
-	<th align="left">oma_numero</th>
+	<th align="left">'.t("Oma numero").'</th>
 	<td>
 	<input type="text" name="uusi_laite[oma_numero]" value="" size="35" maxlength="20">
 	</td>
 	</tr>
 
 	<tr>
-	<th align="left">omistaja</th>
+	<th align="left">'.t("Omistaja").'</th>
 	<td>
 	<input type="text" name="uusi_laite[omistaja]" value="" size="35" maxlength="60">
 	</td>
 	</tr>
 
 	<tr>
-	<th align="left">paikka</th>
+	<th align="left">'.t("Paikka").'</th>
 	<td>';
 	echo "<select name='uusi_laite[paikka]>";
 	foreach ($request['paikat'] as $paikka) {
@@ -390,9 +401,16 @@ function echo_laitteen_vaihto_form($request = array()) {
 	</tr>
 
 	<tr>
-	<th align="left">sijainti</th>
+	<th align="left">'.t("Sijainti").'</th>
 	<td>
 	<input type="text" name="uusi_laite[sijainti]" value="" size="35" maxlength="60">
+	</td>
+	</tr>
+
+	<tr>
+	<th align="left">'.t("Kommentti").'</th>
+	<td>
+	<input type="text" name="uusi_laite[kommentti]" value="" size="35" maxlength="60">
 	</td>
 	</tr>
 

@@ -5,6 +5,7 @@ require 'rubygems'
 require 'prawn'
 require 'json'
 require 'logger'
+require 'date'
 
 class TarkastuspoytakirjaPDF
 
@@ -108,7 +109,7 @@ class TarkastuspoytakirjaPDF
     other_data = [
       {
         :header => 'Pvm',
-        :value => 'tähän tämä päivä'
+        :value => Time.new.strftime('%d.%m.%Y')
       },
       {
         :header => 'Tilausnumero',

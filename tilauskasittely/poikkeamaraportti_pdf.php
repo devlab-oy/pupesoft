@@ -72,6 +72,8 @@ function pdf_hae_tyomaarays($lasku_tunnukset) {
 			$tyomaarays['kohde'] = \PDF\Poikkeamaraportti\hae_tyomaarayksen_kohde($tyomaarays['laite_tunnus']);
 			$tyomaarays['asiakas'] = \PDF\Poikkeamaraportti\hae_tyomaarayksen_asiakas($tyomaarays['liitostunnus']);
 			$tyomaarays['yhtio'] = $yhtiorow;
+			//tyomääräys otsikolle voidaan asettaa toimitettuaika ekalta riviltä, koska työmääräys pitää sisällään toistaiseksi aina vain yhden rivin
+			$tyomaarays['toimitettuaika'] = $tyomaarays['rivit'][0]['toimitettuaika'];
 			$tyomaaraykset[$tyomaarays['kohde_tunnus']] = $tyomaarays;
 		}
 	}
@@ -82,11 +84,34 @@ function pdf_hae_tyomaarays($lasku_tunnukset) {
 function hae_tyomaarayksen_rivit($lasku_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$query = "	SELECT *
+	//tilausrivin_lisatiedot.asiakkaan_positio != 0, koska queryllä ei haluta hakea
+	//työmääräykselle lisättyjä laite rivejä. haemme ainoastaan toimenpide rivit, jotka liittyvät johonkin laitteeseen (asiakkaan_positio)
+
+	//jos tilausrivilinkki == 0 tämä tarkoittaa, että kyseessä ei ole ollut laitteen vaihto
+	$query = "	SELECT tilausrivi.*,
+				tilausrivin_lisatiedot.asiakkaan_positio,
+				tilausrivin_lisatiedot.tilausrivilinkki,
+				IF(poistettu_laite.tuoteno IS NOT NULL,
+					CONCAT_WS(' ".t("Laite").": ', CONCAT_WS(' -> ', CONCAT('".t("Toimenpide").": ', poikkeus_rivi.nimitys), tilausrivi.nimitys), CONCAT_WS(' -> ', poistettu_laite.tuoteno, laite.tuoteno)),
+					CONCAT_WS(' -> ', poikkeus_rivi.nimitys, tilausrivi.nimitys)
+				) AS poikkeus_teksti
 				FROM tilausrivi
 				JOIN tilausrivin_lisatiedot
 				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+					AND tilausrivin_lisatiedot.asiakkaan_positio != 0 )
+				LEFT JOIN tilausrivi as poikkeus_rivi
+				ON ( poikkeus_rivi.yhtio = tilausrivin_lisatiedot.yhtio
+					AND poikkeus_rivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
+				LEFT JOIN tilausrivin_lisatiedot as poikkeus_toimenpide_tilausrivi_lisatiedot
+				ON ( poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio = poikkeus_rivi.yhtio
+					AND poikkeus_toimenpide_tilausrivi_lisatiedot.tilausrivitunnus = poikkeus_rivi.tunnus )
+				LEFT JOIN laite as poistettu_laite
+				ON ( poistettu_laite.yhtio = poikkeus_toimenpide_tilausrivi_lisatiedot.yhtio
+					AND poistettu_laite.tunnus = poikkeus_toimenpide_tilausrivi_lisatiedot.asiakkaan_positio )
+				LEFT JOIN laite
+				ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
+					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				AND tilausrivi.otunnus = '{$lasku_tunnus}'
 				AND tilausrivi.var != 'P'";
@@ -94,6 +119,7 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 
 	$rivit = array();
 	while ($rivi = mysql_fetch_assoc($result)) {
+
 		$rivi['laite'] = \PDF\Poikkeamaraportti\hae_rivin_laite($rivi['asiakkaan_positio']);
 		$rivi['poikkeama'] = \PDF\Poikkeamaraportti\hae_rivin_poikkeama($rivi['tilausrivilinkki']);
 		$rivit[] = $rivi;
@@ -176,7 +202,7 @@ function array_utf8_encode(&$item, $key) {
 function aja_ruby($filepath) {
 	global $pupe_root_polku;
 
-	$cmd = "ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}";
+	$cmd = "ruby {$pupe_root_polku}/pdfs/ruby/poikkeamaraportti_pdf.rb {$filepath}";
 	$return = exec($cmd, $output, $return_code);
 
 	//poistetaan json tiedosto

@@ -32,7 +32,8 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
 					AND tilausrivi.otunnus = lasku.tunnus )
 				JOIN tilausrivin_lisatiedot
 				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+					AND tilausrivin_lisatiedot.tilausrivilinkki != 0 )
 				JOIN laite
 				ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
 					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )
@@ -78,7 +79,8 @@ function hae_tyomaarayksen_rivit($lasku_tunnus) {
 				FROM tilausrivi
 				JOIN tilausrivin_lisatiedot
 				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+					AND tilausrivin_lisatiedot.asiakkaan_positio != 0 )
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				AND tilausrivi.otunnus = '{$lasku_tunnus}'
 				AND tilausrivi.var != 'P'";
@@ -153,7 +155,7 @@ function array_utf8_encode(&$item, $key) {
 function aja_ruby($filepath) {
 	global $pupe_root_polku;
 
-	$cmd = "ruby {$pupe_root_polku}/pdfs/ruby/kalustoraportti.rb {$filepath}";
+	$cmd = "ruby {$pupe_root_polku}/pdfs/ruby/tarkastuspoytakirja_pdf.rb {$filepath}";
 	$return = exec($cmd, $output, $return_code);
 
 	//poistetaan json tiedosto

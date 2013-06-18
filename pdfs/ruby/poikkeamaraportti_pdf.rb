@@ -68,9 +68,7 @@ class PoikkeamaraporttiPDF
     contact_person_table = @pdf.make_table([
       [
         @pdf.make_cell(:content => 'Yhteyshenkilö/Kontaktperson', :width => 150),
-        @pdf.make_cell(:content => '??', :font_style => :normal, :width => 400),
-        @pdf.make_cell(:content => 'Hoitojakso/Tidsperiod', :width => 100),
-        @pdf.make_cell(:content => '??', :font_style => :normal),
+        @pdf.make_cell(:content => @data['kohde']['yhteyshlo'], :font_style => :normal, :width => 400),
         @pdf.make_cell(:content => '')
       ]
     ], :width => @pdf.bounds.right, :cell_style => { :borders => [] })
@@ -90,19 +88,24 @@ class PoikkeamaraporttiPDF
         @pdf.make_cell(:content => 'Kohde/Plats', :width => 150),
         @pdf.make_cell(:content => 'Sijainti/Placering', :width => 150),
         @pdf.make_cell(:content => 'Kalusto/Produkt', :width => 100),
-        @pdf.make_cell(:content => 'Numero/Nummer', :width => 100),
+        @pdf.make_cell(:content => 'Numero/Nummer' + "\n" + 'Sarjanumero/Radnummer', :width => 100),
         @pdf.make_cell(:content => 'Poikkeama ja toimenpide/Avvikelse och åtgärd')
       ]
     ], :width => @pdf.bounds.right)
 
     rows_table = self.rows_table
 
+    toimitettuaika = Date.parse(@data['toimitettuaika'])
     table2 = @pdf.make_table([
       [
-        @pdf.make_cell(:content => 'Pvm', :width => 100, :height => 50),
-        @pdf.make_cell(:content => 'Työn suorittajan kuittaus / nimen selvennys Arbetsutförares kvittering / namnförtydligande', :height => 50)
+        @pdf.make_cell(:content => 'Pvm', :width => 100, :height => 25),
+        @pdf.make_cell(:content => 'Työn suorittajan kuittaus / nimen selvennys Arbetsutförares kvittering / namnförtydligande', :height => 25),
+      ],
+      [
+        @pdf.make_cell(:content => toimitettuaika.strftime('%d.%m.%Y'), :width => 100, :height => 25),
+        @pdf.make_cell(:content => @data['tyon_suorittaja'], :height => 25),
       ]
-    ], :width => @pdf.bounds.right)
+    ], :width => @pdf.bounds.right, :cell_style => { :borders => [:right] })
 
     table_data = [
       [customer_table],
@@ -120,12 +123,19 @@ class PoikkeamaraporttiPDF
     rows = []
     @data['rivit'].each do |value|
       #@pdf.make_cell doesnt handel nil values so we need to pass empty string to it if nil
+      exception_text = (value['poikkeus_teksti'].nil?) ? '' : value['poikkeus_teksti']
+      exception_text += "\n"
+      exception_text += (value['kommentti'].nil?) ? '' : value['kommentti']
+
+      own_number_and_serial_number = (value['laite']['oma_numero'].nil?) ? '' : value['laite']['oma_numero']
+      own_number_and_serial_number += "\n"
+      own_number_and_serial_number += (value['laite']['sarjanro'].nil?) ? '' : value['laite']['sarjanro']
       row = [
         @pdf.make_cell(:content => (@data['kohde']['nimi'].nil?) ? '' : @data['kohde']['nimi'], :width => 150, :font_style => :normal),
         @pdf.make_cell(:content => (value['laite']['sijainti'].nil?) ? '' : value['laite']['sijainti'], :width => 150, :font_style => :normal),
         @pdf.make_cell(:content => (value['laite']['tuoteno'].nil?) ? '' : value['laite']['tuoteno'], :width => 100, :font_style => :normal),
-        @pdf.make_cell(:content => (value['laite']['sarjanro'].nil?) ? '' : value['laite']['sarjanro'], :width => 100, :font_style => :normal),
-        @pdf.make_cell(:content => ((value['poikkeama']['nimitys'].nil?) ? '' : value['poikkeama']['nimitys']) + ' -> ' + ((value['nimitys'].nil?) ? '' : value['nimitys']), :font_style => :normal)
+        @pdf.make_cell(:content => own_number_and_serial_number, :width => 100, :font_style => :normal),
+        @pdf.make_cell(:content => exception_text, :font_style => :normal)
       ]
 
       rows << row

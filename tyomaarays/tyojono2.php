@@ -17,10 +17,8 @@ if ($ajax_request) {
 	exit;
 }
 
-//functionc.inc require pitää olla ajax requestin jälkeen koska muute mennee headerit ketuiks
-require('../inc/functions.inc');
-require('../tilauskasittely/tarkastuspoytakirja_pdf.php');
-require('../tilauskasittely/poikkeamaraportti_pdf.php');
+require('tilauskasittely/tarkastuspoytakirja_pdf.php');
+require('tilauskasittely/poikkeamaraportti_pdf.php');
 
 echo "<font class='head'>".t("Työjono2").":</font>";
 echo "<hr/>";
@@ -419,6 +417,13 @@ function merkkaa_tyomaarays_tehdyksi($request) {
 				alatila = 'D'
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
+	pupe_query($query);
+
+	$query = "	UPDATE tilausrivi
+				SET toimitettu = '{$kukarow['kuka']}',
+				toimitettuaika = NOW()
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus IN ('".implode("','", $request['lasku_tunnukset'])."')";
 	pupe_query($query);
 
 	aseta_tyomaaraysten_status($request['lasku_tunnukset'], 'X');

@@ -607,8 +607,10 @@ if (!function_exists('rivi_lasku')) {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
 		if ($laskutyyppi == 10 or $laskutyyppi == 12) {
-			$row["hinta"] = 0;
-			$row["rivihinta"] = 0;
+			$row["hinta"] 	  			 = 0;
+			$row["rivihinta"] 			 = 0;
+			$row["rivihinta_valuutassa"] = 0;
+			$row["rivihinta_verollinen"] = 0;
 
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 				$row["ale{$alepostfix}"] = 0;

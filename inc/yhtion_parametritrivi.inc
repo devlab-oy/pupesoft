@@ -243,7 +243,7 @@
 		$sel = array();
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = '0'  $sel[0]>".t("Normaali laskupohja")."</option>";
+		$ulos .= "<option value = '99' $sel[99]>".t("Normaali laskupohja")."</option>";
 		$ulos .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)")."</option>";
 		$ulos .= "<option value = '5'  $sel[5]>".t("Normaali laskupohja (Ei näytetä verollista rivihintaa)")."</option>";
 		$ulos .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei näytetä tilausnumeroa/toimitusaikaa)")."</option>";

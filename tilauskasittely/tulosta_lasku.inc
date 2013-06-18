@@ -441,7 +441,7 @@ if (!function_exists('alku')) {
 			$komm .= "\n";
 		}
 
-		if ($laskurow['laskutyyppi'] == -9) {
+		if ($laskurow['laskutyyppi'] == -9 or $laskurow['laskutyyppi'] == 0) {
 			//jos laskulta löytyvät laskutyyppi on Oletus käytetään asiakkaan tai yhtiön oletus laskutyyppiä
 			if (isset($asiakasrow['laskutyyppi']) and $asiakasrow['laskutyyppi'] != -9) {
 				$laskutyyppi = $asiakasrow['laskutyyppi'];
@@ -767,7 +767,7 @@ if (!function_exists('rivi_otsikot')) {
 	function rivi_otsikot ($laskurow, $asiakasrow, $kieli, $pdf_lasku, $thispage, $kala) {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
-		if ($laskurow['laskutyyppi'] == -9) {
+		if ($laskurow['laskutyyppi'] == -9 or $laskurow['laskutyyppi'] == 0) {
 			//jos laskulta löytyvät laskutyyppi on Oletus käytetään asiakkaan tai yhtiön oletus laskutyyppiä
 			if (isset($asiakasrow['laskutyyppi']) and $asiakasrow['laskutyyppi'] != -9) {
 				$laskutyyppi = $asiakasrow['laskutyyppi'];
@@ -2341,7 +2341,7 @@ if (!function_exists("tulosta_lasku")) {
 			$where  = " and tilausrivi.otunnus='$laskurow[tunnus]' and tilausrivi.tyyppi in ('L','W','E') and ((tilausrivi.varattu+tilausrivi.jt != 0 and tilausrivi.laskutettuaika = '0000-00-00') or (tilausrivi.kpl != 0 and tilausrivi.laskutettuaika != '0000-00-00'))";
 		}
 
-		if ($laskurow['laskutyyppi'] == -9) {
+		if ($laskurow['laskutyyppi'] == -9 or $laskurow['laskutyyppi'] == 0) {
 			//jos laskulta löytyvät laskutyyppi on Oletus käytetään asiakkaan tai yhtiön oletus laskutyyppiä
 			if (isset($asiakasrow['laskutyyppi']) and $asiakasrow['laskutyyppi'] != -9) {
 				$laskutyyppi = $asiakasrow['laskutyyppi'];

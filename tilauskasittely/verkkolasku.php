@@ -2148,7 +2148,7 @@
 							}
 
 							// Asiakkaan / yhtiön laskutyyppi
-							if ($lasrow['laskutyyppi'] == -9) {
+							if ($lasrow['laskutyyppi'] == -9 or $lasrow['laskutyyppi'] == 0) {
 								//jos laskulta löytyvät laskutyyppi on Oletus käytetään asiakkaan tai yhtiön oletus laskutyyppiä
 								if (isset($asiakas_apu_row['laskutyyppi']) and $asiakas_apu_row['laskutyyppi'] != -9) {
 									$laskutyyppi = $asiakas_apu_row['laskutyyppi'];

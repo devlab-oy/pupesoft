@@ -1,7 +1,7 @@
 <?php
 
-	$ulos = "";
-	$jatko = 1; // oletetaan normaali k‰sittely
+	$ulos   = "";
+	$jatko  = 1; // oletetaan normaali k‰sittely
 	$tyyppi = 1; // oletetaan rivin n‰kyvyys
 
 	if ($i == 0) { //yhtiˆt‰ ei n‰ytet‰
@@ -1234,27 +1234,13 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel1 = "";
-		$sel2 = "";
-		$sel3 = "";
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
 
-		if ($trow[$i] == 'K') {
-			$sel1 = "selected";
-		}
-		if ($trow[$i] == 'V') {
-			$sel2 = "selected";
-		}
-		if ($trow[$i] == 'S') {
-			$sel3 = "selected";
-		}
-		else {
-			$sel = "selected";
-		}
-
-		$ulos .= "<option value = '' $sel>".t("Kassamyyj‰ saa jyvitt‰‰ myyntitilauksella");
-		$ulos .= "<option value = 'K' $sel1>".t("Kaikki saa jyvitt‰‰ myyntitilauksella");
-		$ulos .= "<option value = 'S' $sel1>".t("Kaikki saa jyvitt‰‰ sek‰ osajyvitt‰‰ myyntitilauksella");
-		$ulos .= "<option value = 'V' $sel2>".t("Vain valitut k‰ytt‰j‰t saa jyvitt‰‰ myyntitilauksella");
+		$ulos .= "<option value = ''>".t("Kassamyyj‰ saa jyvitt‰‰ myyntitilauksella");
+		$ulos .= "<option value = 'K' $sel[K]>".t("Kaikki saa jyvitt‰‰ myyntitilauksella");
+		$ulos .= "<option value = 'S' $sel[S]>".t("Kaikki saa jyvitt‰‰ sek‰ osajyvitt‰‰ myyntitilauksella");
+		$ulos .= "<option value = 'V' $sel[V]>".t("Vain valitut k‰ytt‰j‰t saa jyvitt‰‰ myyntitilauksella");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

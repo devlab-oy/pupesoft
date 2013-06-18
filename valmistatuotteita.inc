@@ -636,7 +636,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 								FROM sarjanumeroseuranta
 								WHERE yhtio = '$kukarow[yhtio]'
 								and ostorivitunnus = '$tilrivirow[tunnus]'
-								LIMIT ".(int) $isavarattu."";
+								LIMIT ".(int) $isavarattu;
 					$sarjares = pupe_query($query);
 
 					while ($sarjarow = mysql_fetch_assoc($sarjares)) {

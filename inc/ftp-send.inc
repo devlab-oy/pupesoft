@@ -229,7 +229,7 @@ else {
 	elseif ($palautus_pyynto != "") {
 		$rivi  = "{$_SERVER['SCRIPT_NAME']}\n";
 		$rivi .= "\n";
-		$rivi .= "".t("Tiedoston")." '$ftpfile' ".t("lähetys onnistui")."!\n";
+		$rivi .= t("Tiedoston")." '$ftpfile' ".t("lähetys onnistui")."!\n";
 		$rivi .= "\n";
 		$rivi .= "$ftpuser @ $ftphost : $ftppath\n";
 		$rivi .= "\n";

@@ -82,7 +82,7 @@ if(!function_exists("yrititarkista")) {
 					require 'pankkitilinoikeellisuus.php';
 
 					if ($pankkitili == '') {
-						$virhe[$i] = "".t("Pankkitili on virheellinen")."";
+						$virhe[$i] = t("Pankkitili on virheellinen");
 					}
 					else {
 						$t[$i]=$pankkitili;

@@ -33,7 +33,7 @@
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
 		}
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei kustannuspaikkaa")."";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei kustannuspaikkaa");
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -61,7 +61,7 @@
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
 		}
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei kohdetta")."";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei kohdetta");
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -89,7 +89,7 @@
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
 		}
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei projektia")."";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei projektia");
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";

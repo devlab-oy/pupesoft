@@ -1534,7 +1534,7 @@
 						}
 
 						if ($muutos_abs<>0) {
-							$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."";
+							$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite");
 						}
 
 						if ($muutos_suht<>0 and $erittely[$kk]<>0 and $ed_erittely[$kk]<>0) {
@@ -1815,7 +1815,7 @@
 				if ($tilalehinta != '') {
 					echo "<th>".t("Hinta / Ale / Rivihinta")."</th>";
 				}
-				echo "<th>".t("Selite")."";
+				echo "<th>".t("Selite");
 
 				echo "</th></form>";
 				echo "</tr>";

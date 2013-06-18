@@ -221,7 +221,7 @@
 
 	$vresult = t_avainsana("ALV");
 
-	echo "<td colspan='3'><select name='alv'><option value='tyhja'>".t("Ei valintaa")."";
+	echo "<td colspan='3'><select name='alv'><option value='tyhja'>".t("Ei valintaa");
 
 	while ($vrow = mysql_fetch_array($vresult)) {
 		$sel="";

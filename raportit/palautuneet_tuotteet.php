@@ -163,7 +163,7 @@ function init(&$request) {
 }
 
 function hae_palautuneet_tuotteet($request) {
-	global $kukarow, $yhtiorow;
+	global $kukarow, $yhtiorow, $palvelin2;
 
 	$query_limit = "";
 	if (!empty($request['osumien_maara_rajaus'])) {
@@ -192,6 +192,9 @@ function hae_palautuneet_tuotteet($request) {
 
 	while ($palautunut_tuote = mysql_fetch_assoc($result)) {
 		$palautunut_tuote['ajoneuvosoveltuvuus_kpl'] = hae_ajoneuvosoveltuvuus_kpl($palautunut_tuote['tuoteno']);
+		
+		$palautunut_tuote['tuoteno'] = "<a href='#' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($palautunut_tuote['tuoteno'])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">".$palautunut_tuote['tuoteno']."</a>";
+				
 		$palautuneet_tuotteet[] = $palautunut_tuote;
 	}
 

@@ -132,6 +132,8 @@ $budweg_runkotuotteiden_alut = array(
 	'904',
 );
 
+$rivien_summa_yhteensa = 0;
+
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		// tuotekoodi
@@ -202,6 +204,8 @@ if (count($tuotetiedot) > 0) {
 			$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ArticleName);
 			$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->RowVatExcludedAmount);
 
+			$rivien_summa_yhteensa += $rtuoteno[$i]["rivihinta"];
+
 			$xvati = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 
 			$rtuoteno[$i]["alv"] = $xvati;
@@ -264,6 +268,11 @@ if (count($tuotetiedot) > 0) {
 			$i--;
 		}
 		$i++;
+	}
+
+	if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123099" and $laskun_summa_eur > $rivien_summa_yhteensa) {
+		$osto_rahti = $laskun_summa_eur - $rivien_summa_yhteensa;
+		$osto_rahti_alv = (float) str_replace(",", ".", $xml->InvoiceDetails->VatSpecificationDetails->VatRatePercent);
 	}
 }
 

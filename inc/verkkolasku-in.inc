@@ -519,6 +519,7 @@
 
 						if (mysql_num_rows($result) == 1) {
 							$trow = mysql_fetch_assoc($result);
+							$laskuttajan_toimittajanumero = $trow['toimittajanro'];
 							break;
 						}
 					}
@@ -896,7 +897,7 @@
 					}
 
 					// katsotaan onko Teccom-lasku jo asn_sanomat-taulussa
-					if ($laskun_tyyppi == 'TECCOM-INVOICE' or $ebid == 'MAVENTAXML') {
+					if ($laskun_tyyppi == 'TECCOM-INVOICE' or ($ebid == 'MAVENTAXML' and $trow['asn_sanomat'] == 'M')) {
 
 						$lajilisa = $ebid == "MAVENTAXML" ? "mav" : "tec";
 
@@ -1428,7 +1429,7 @@
 							}
 						}
 
-						if ($rtuoteno[$i]["tuoteno"] != "" and ($laskun_tyyppi == "TECCOM-INVOICE" or $ebid == "MAVENTAXML") and $sanomantarkistin != 999 and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
+						if ($rtuoteno[$i]["tuoteno"] != "" and ($laskun_tyyppi == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M')) and $sanomantarkistin != 999 and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
 
 							if (!isset($rtuoteno[$i]['ale1'])) $rtuoteno[$i]['ale1'] = 0;
 							if (!isset($rtuoteno[$i]['ale2'])) $rtuoteno[$i]['ale2'] = 0;
@@ -1544,7 +1545,7 @@
 					}
 
 					// jos kyseessä on tavaraa
-					if ((!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I' or $trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L')) {
+					if (($ebid != 'MAVENTAXML' or $trow['asn_sanomat'] == 'M') and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I' or $trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L')) {
 						/**
 						 * Jos Unikkoinvoice, muutetaan oletus_vienti
 						 * C => A

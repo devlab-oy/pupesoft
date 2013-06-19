@@ -648,7 +648,6 @@ if ($kasitellaan_tiedosto) {
 
 		$lisatyt_indeksit = array();
 
-
 		for ($eriviindex = 0; $eriviindex < ($rivimaara + $puun_alkio_index_plus); $eriviindex++) {
 
 			// Komentorivillä piirretään progressbar, ellei ole output loggaus päällä
@@ -744,6 +743,10 @@ if ($kasitellaan_tiedosto) {
 					$tuoteno = $taulunrivit[$taulu][$eriviindex][$j];
 
 					$valinta .= " and TUOTENO='$tuoteno'";
+				}
+				elseif ($table_mysql == 'autoid_lisatieto' and ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA" or $taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA") and file_exists("lue_data_autoid.php") AND !in_array($eriviindex, $lisatyt_indeksit)) {
+					$tee = "pre_rivi_loop";
+					require("lue_data_autoid.php");
 				}
 				elseif ($taulunotsikot[$taulu][$j] == "TOIM_TUOTENO") {
 					$toim_tuoteno = $taulunrivit[$taulu][$eriviindex][$j];
@@ -1465,6 +1468,9 @@ if ($kasitellaan_tiedosto) {
 						}
 
 						if (file_exists("lue_data_autoid.php")) {
+
+							$tee = "rivi_loop";
+
 							require("lue_data_autoid.php");
 						}
 

@@ -1165,7 +1165,7 @@
 
 				if ($variaatiosummaus != "") {
  					foreach ($kaikkikoot as $kokonimi => $koko) {
- 				        if (isset($koot[$kokonimi])) $worksheet->writeNumber($excelrivi, $excelsarake, $koot[$kokonimi]);
+ 				        if (isset($koot[$kokonimi])) $worksheet->writeString($excelrivi, $excelsarake, $koot[$kokonimi]);
  				        $excelsarake++;
  					}
 				}

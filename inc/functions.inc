@@ -928,7 +928,7 @@ if (!function_exists("vapauta_sarjanumerot")) {
 					JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-					and tilausrivi.otunnus = '$kukarow[kesken]'
+					and tilausrivi.otunnus = '$tilausnumero'
 					$lisa ";
 		$sres = pupe_query($query);
 
@@ -937,17 +937,17 @@ if (!function_exists("vapauta_sarjanumerot")) {
 			if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 				// merktaan siirtolistatunnus nollaks
 				$query = "UPDATE sarjanumeroseuranta set siirtorivitunnus = 0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and siirtorivitunnus='$srow[tunnus]'";
-				$sarjares = pupe_query($query);
+				pupe_query($query);
 			}
 			elseif ($srow["varattu"] < 0) {
 				// dellataan koko rivi jos sitä ei ole vielä myyty
 				$query = "DELETE from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
-				$sarjares = pupe_query($query);
+				pupe_query($query);
 
 				if (mysql_affected_rows() == 0) {
 					// merkataan osorivitunnus nollaksi
 					$query = "UPDATE sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
-					$sarjares = pupe_query($query);
+					pupe_query($query);
 				}
 			}
 			else {
@@ -957,7 +957,7 @@ if (!function_exists("vapauta_sarjanumerot")) {
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$srow[tuoteno]'
 								and myyntirivitunnus = '$srow[tunnus]'";
-					$sarjares = pupe_query($query);
+					pupe_query($query);
 				}
 				else {
 					$query = "	UPDATE sarjanumeroseuranta
@@ -965,7 +965,7 @@ if (!function_exists("vapauta_sarjanumerot")) {
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$srow[tuoteno]'
 								and myyntirivitunnus = '$srow[tunnus]'";
-					$sarjares = pupe_query($query);
+					pupe_query($query);
 				}
 			}
 
@@ -977,7 +977,7 @@ if (!function_exists("vapauta_sarjanumerot")) {
 							and tunnus  	= '$srow[tilausrivilinkki]'
 							and tyyppi 		= 'O'
 							and uusiotunnus = 0";
-				$siirtores = pupe_query($query);
+				pupe_query($query);
 			}
 		}
 	}
@@ -9067,6 +9067,150 @@ if (!function_exists("livesearch_varastohaku")) {
 	}
 }
 
+if (!function_exists("livesearch_toimittajahaku")) {
+	function livesearch_toimittajahaku($toim = '') {
+		global $yhtiorow, $kukarow, $palvelin2;
+
+		$tee = $_REQUEST["livesearch_tee"];
+		$nimi = $_REQUEST["livesearch_nimi"];
+		$formi = $_REQUEST["livesearch_form"];
+		$hakuid = $_REQUEST["livesearch_hakuid"];
+		$submit = $_REQUEST["livesearch_submit"];
+		$haku = trim($_REQUEST["livesearch_haku"]);
+
+		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+			</script>";
+
+			$query = "	SELECT *, concat_ws(', ', nimi, if(trim(nimitark)='', NULL, nimitark)) nimi
+						FROM toimi
+						WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+						AND toimi.nimi LIKE '%{$haku}%'";
+			$result = pupe_query($query);
+
+			$limit = 0;
+			if (mysql_num_rows($result) > 0) {
+				while ($row = mysql_fetch_assoc($result)) {
+					echo "	<div id='toimittaja_valinta_$row[tunnus]'
+								name='selectOptions$hakuid'
+								onmouseover=\"this.className='liveSearchSelectedItem';
+									keyStrokeIndex = -1;
+									var aEls = document.getElementsByName('selectOptions$hakuid');
+									for (var iEl = 0; iEl < aEls.length; iEl++) {
+										if (aEls[iEl].id.substring(0,14) == 'toimittaja_valinta_' && aEls[iEl].id != 'toimittaja_valinta_$row[tunnus]') {
+											document.getElementById(aEls[iEl].id).className='';
+										}
+									} \"
+								onmouseout=\"this.className='';\"
+								onclick=\"document.getElementById('$hakuid').value='$row[tunnus]';";
+								if ($submit == "") {
+									echo "document.$formi.submit();";
+								}
+								else {
+									echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+								}
+								echo "\"
+								style='padding:2px;'>
+								<font style='font-weight:bold'>$row[nimi]</font>
+							</div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
+					$limit++;
+
+					if ($limit > 49) {
+						break;
+					}
+				}
+
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("toimittajaa"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+			}
+			else {
+				echo "<div style='padding:2px'><font class='message'>".t("Ei toimittajia").".</font></div>";
+			}
+		}
+		else {
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+			</script>";
+		}
+	}
+}
+
+if (!function_exists("livesearch_sarjanumerohaku")) {
+
+	function livesearch_sarjanumerohaku($toim = '') {
+		global $yhtiorow, $kukarow, $palvelin2;
+
+		$tee = $_REQUEST["livesearch_tee"];
+		$nimi = $_REQUEST["livesearch_nimi"];
+		$formi = $_REQUEST["livesearch_form"];
+		$hakuid = $_REQUEST["livesearch_hakuid"];
+		$submit = $_REQUEST["livesearch_submit"];
+		$haku = trim($_REQUEST["livesearch_haku"]);
+
+		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+			</script>";
+
+			$query = "	SELECT DISTINCT sarjanumero
+						FROM sarjanumeroseuranta
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND sarjanumero LIKE '%{$haku}%'
+						GROUP BY sarjanumero";
+			$result = pupe_query($query);
+
+			$limit = 0;
+			if (mysql_num_rows($result) > 0) {
+				while ($row = mysql_fetch_assoc($result)) {
+					echo "	<div id='sarjanumero_valinta_$row[sarjanumero]'
+								name='selectOptions$hakuid'
+								onmouseover=\"this.className='liveSearchSelectedItem';
+									keyStrokeIndex = -1;
+									var aEls = document.getElementsByName('selectOptions$hakuid');
+									for (var iEl = 0; iEl < aEls.length; iEl++) {
+										if (aEls[iEl].id.substring(0,14) == 'kayttaja_valinta_' && aEls[iEl].id != 'sarjanumero_valinta_$row[sarjanumero]') {
+											document.getElementById(aEls[iEl].id).className='';
+										}
+									} \"
+								onmouseout=\"this.className='';\"
+								onclick=\"document.getElementById('$hakuid').value='$row[sarjanumero]';";
+					if ($submit == "") {
+						echo "document.$formi.submit();";
+					}
+					else {
+						echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+					}
+					echo "\"
+								style='padding:2px;'>
+								<font style='font-weight:bold'>{$row['sarjanumero']}</font>
+							</div><div name='selectValues$hakuid' id='$row[sarjanumero]'></div>";
+					$limit++;
+
+					if ($limit > 49) {
+						break;
+					}
+				}
+
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>", t("Haulla löytyi"), " ".mysql_num_rows($result)." ", t("sarjanumeroa"), ", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+			}
+			else {
+				echo "<div style='padding:2px'><font class='message'>".t("Ei sarjanumeroita").".</font></div>";
+			}
+		}
+		else {
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+			</script>";
+		}
+	}
+}
+
 if (!function_exists("livesearch_kentta")) {
 	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $vero_field = '', $class = '', $break_all_div = '') {
 		global $kukarow, $toim;
@@ -13603,6 +13747,10 @@ if (!function_exists("hintapyoristys")) {
 	function hintapyoristys($luku, $desimaalit=0, $loppunollat_pois=FALSE) {
 		global $yhtiorow;
 
+		if ($luku == 'null') {
+			return '';
+		}
+
 		$luku = (float) $luku;
 
 		if ((int) $desimaalit > 0) {
@@ -17662,7 +17810,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					asiakasnro as asiakasnro_aito,
 					kieli
 					FROM asiakas
-					WHERE tunnus = '$laskurow[liitostunnus]' and yhtio = '$kukarow[yhtio]'";
+					WHERE tunnus = '$laskurow[liitostunnus]'
+					and yhtio 	 = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 		$asrow = mysql_fetch_assoc($result);
 
@@ -17675,19 +17824,25 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			$lahetetyyppi = pupesoft_lahetetyyppi($otunnus, $laskurow['liitostunnus']);
 		}
 
-		#Testausta varten.....
-		#$lahetetyyppi = "tulosta_lahete.inc";
+		# Testausta varten.....
+		$lahetetyyppi = "tulosta_lahete.inc"; 					# Näytetään asiakkaan hinta ja alennus
 		#$lahetetyyppi = "tulosta_lahete_ean.inc";
-		#$lahetetyyppi = "tulosta_lahete_brutto.inc";
-		#$lahetetyyppi = "tulosta_lahete_eialeja.inc";
-		#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
+		#$lahetetyyppi = "tulosta_lahete_brutto.inc"; 			# Näytetään tuotteen myymälähinta/(asiakkaan hinta)
+		#$lahetetyyppi = "tulosta_lahete_eialeja.inc"; 			# Näytetään tuotteen myyntihinta ja alennusryhmä
+		#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc"; 		# Ei näytetä hintoja eikä alennuksia, EAN-koodi tulostetaan viivakoodina
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
 		#$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
-		#$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";
+		#$lahetetyyppi = "tulosta_lahete_eialehintoja.inc"; 	# Ei näytetä hintoja eikä alennuksia
 		#$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
 		#$lahetetyyppi = "tulosta_lahete_custom.inc";
-		#$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
+		#$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc"; 	# Ei näytetä hintoja eikä alennuksia
+		#$lahetetyyppi = "perhe_tulosta_lahete.inc"; 			# Näytetään asiakkaan hinta ja alennus (Tuoteperheet yhdessä)
+		#$lahetetyyppi = "perhe_tulosta_lahete_verollinen.inc"; # Näytetään asiakkaan hinta ja alennus (Tuoteperheet yhdessä, Verolliset hinnat)
+
+		#$lahetetyyppi = substr($lahetetyyppi, 0, -4)."_verollinen.inc";	# Verolliset hinnat
+		#$lahetetyyppi = "perhe_".$lahetetyyppi; 							# Perheet yhdessä, vain isät näytetään
+		#$lahetetyyppi = "hinnat_isalla_".$lahetetyyppi; 					# PErheetä näytetään, mutta hinnat summataan isälle
 
 		if (@include("tilauskasittely/tulosta_lahete.inc"));
 		else require("tulosta_lahete.inc");
@@ -21190,7 +21345,8 @@ if (!function_exists('hae_lasku')) {
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$tilausnumero}'";
+					AND tunnus  = '{$tilausnumero}'
+					AND tila   != 'D'";
 		$result = pupe_query($query);
 
 		return mysql_fetch_assoc($result);
@@ -21201,9 +21357,11 @@ if (!function_exists('hae_laskun_tilausrivit')) {
 	function hae_laskun_tilausrivit($otunnus, $tyypit = array()) {
 		global $kukarow, $yhtiorow;
 
-		$tilausrivi_where = "";
 		if (!empty($tyypit)) {
 			$tilausrivi_where = " AND tyyppi IN ('".implode("','", $tyypit)."') ";
+		}
+		else {
+			$tilausrivi_where = " AND tyyppi != 'D' ";
 		}
 
 		$query = "	SELECT *
@@ -21747,7 +21905,7 @@ if (!function_exists('onko_rahtituote_syotetty')) {
 	function onko_rahtituote_syotetty($laskurow, $whateverhinta = FALSE) {
 		global $kukarow, $yhtiorow;
 
-		// Palautetaan Rahti-tuoterivien lukumäärätilausvalmis
+		// Palautetaan Rahti-tuoterivien lukum??r?tilausvalmis
 		$query = "	SELECT *
 					FROM toimitustapa
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -21759,7 +21917,7 @@ if (!function_exists('onko_rahtituote_syotetty')) {
 
 		$hintalisa = $whateverhinta === FALSE ? " AND hinta != 0 " : "";
 
-		// katsotaan onko rahtituotenumero syötetty jo käsin
+		// katsotaan onko rahtituotenumero sy?tetty jo k?sin
 		$query = "	SELECT tunnus
 					FROM tilausrivi
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -21770,6 +21928,64 @@ if (!function_exists('onko_rahtituote_syotetty')) {
 		$result = pupe_query($query);
 
 		return mysql_num_rows($result);
+	}
+}
+
+if (!function_exists('hae_toimittajat')) {
+	/**
+	 * Hakee kaikki toimittajat tyypin mukaan
+	 *
+	 * @global array $kukarow
+	 * @global array $yhtiorow
+	 * @param array $tyyppi
+	 * @return array
+	 */
+	function hae_toimittajat($tyypit = array()) {
+		global $kukarow, $yhtiorow;
+
+		if (!empty($tyypit)) {
+			$toimi_tyyppi_where = "AND tyyppi IN ('".implode("','", $tyypit)."')";
+		}
+		else {
+			$toimi_tyyppi_where = "AND tyyppi != 'P'";
+		}
+
+		$query = "	SELECT *
+					FROM toimi
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					{$toimi_tyyppi_where}";
+		$result = pupe_query($query);
+
+		$toimittajat = array();
+
+		while ($toimittaja = mysql_fetch_assoc($result)) {
+			$toimittajat[] = $toimittaja;
+		}
+
+		return $toimittajat;
+	}
+}
+
+if (!function_exists('hae_toimittaja')) {
+	/**
+	 * Hakee toimittajan tunnuksen perusteella
+	 *
+	 * @global array $kukarow
+	 * @global array $yhtiorow
+	 * @param int $tunnus
+	 * @return array
+	 */
+	function hae_toimittaja($tunnus) {
+		global $kukarow;
+
+		$query = "	SELECT *
+					FROM toimi
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tyyppi != 'P'
+					AND tunnus  = '{$tunnus}'";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
 	}
 }
 
@@ -21831,5 +22047,134 @@ if (!function_exists('hae_kayttajaan_linkitetty_extranet_kayttaja')) {
 		$result = pupe_query($query);
 
 		return mysql_fetch_assoc($result);
+	}
+}
+
+if (!function_exists('tarkista_onko_taric_veroperusteet_kaytossa')) {
+	function tarkista_onko_taric_veroperusteet_kaytossa() {
+		global $kukarow, $yhtiorow;
+		// Tarkastetaan onko taricit käytössä
+
+		$query = "SELECT count(*) kpl from taric_veroperusteet";
+		$tv_res = pupe_query($query);
+		$tv_row = mysql_fetch_assoc($tv_res);
+
+		if ($tv_row["kpl"] > 0) {
+			return true;
+		}
+
+		return false;
+	}
+}
+
+if (!function_exists('hae_oletus_tulliprosentti')) {
+	function hae_oletus_tulliprosentti($laskurow, $tuorow) {
+		global $kukarow, $yhtiorow;
+
+		// Sisään otetaan
+		// $tuorow jossa on tuotteen kaikki tiedot.
+		// $laskurow jossa on saapumisen tiedot.
+
+		require('tilauskasittely/taric_veroperusteet.inc');
+
+		return (float) $tulliprossa;
+	}
+}
+
+if (!function_exists('paivita_poikkeavat_tulliprosentit')) {
+	function paivita_poikkeavat_tulliprosentit($poikkeavat_tulliprosentit, $rivi_oletus_tulliprosentti) {
+		global $kukarow, $yhtiorow;
+
+		// poikkeava_tulliprosentti
+		foreach ($poikkeavat_tulliprosentit as $tunnus => $poikkeava_tulliprosentti) {
+
+			$poikkeava_tulliprosentti = str_replace(',', '.', $poikkeava_tulliprosentti);
+
+			if (!is_numeric($poikkeava_tulliprosentti)) {
+				$poikkeava_tulliprosentti = 'NULL';
+			}
+
+			$query = "	SELECT poikkeava_tulliprosentti
+						FROM tilausrivin_lisatiedot
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tilausrivitunnus = '$tunnus'";
+			$result = pupe_query($query);
+			$poikkeava_tulliprosentti_db = mysql_fetch_assoc($result);
+
+			//ei päivitetä poikkeus_tulliprosenttia kantaan jos se on sama kuin oletusprosentti, paitsi jos kantaan on jo päivitetty poikkeus prosentti.
+			//kannasta pitää tarkistaa, onko siellä poikkeus_tulliprosentti, koska oletus --> poikkeus ja takaisin poikkeus --> oletus ei päivity kantaan ilman olemassaolevan poikkeuksen tarkistusta.
+			if ($poikkeava_tulliprosentti_db['poikkeava_tulliprosentti'] != NULL or $rivi_oletus_tulliprosentti[$tunnus] != $poikkeava_tulliprosentti) {
+				$query  = "	UPDATE tilausrivin_lisatiedot
+							SET poikkeava_tulliprosentti = $poikkeava_tulliprosentti
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tilausrivitunnus = '$tunnus'";
+				pupe_query($query);
+			}
+		}
+	}
+}
+
+if (!function_exists("lisaa_rivi")) {
+	function lisaa_rivi($parametrit) {
+
+		global $kukarow, $yhtiorow;
+
+		if (empty($kukarow['kesken'])) {
+			echo "Kukarow kesken on pakollinen";
+			exit;
+		}
+
+		if (empty($yhtiorow)) {
+			echo "Yhtiorow on pakollinen";
+			exit;
+		}
+
+		//TODO tee muut pakolliset ylläolevan mukaisesti trow, laskurow, tuoteno, kpl,
+
+		// Tarvitsemme:
+		$trow               = (!empty($parametrit['trow']))               ? $parametrit['trow'] : '';                // tuote.*
+		$rivinumero         = (!empty($parametrit['rivinumero']))         ? $parametrit['rivinumero'] : 0;           // joko tilaajan rivinumero tai konserninsisäisissä kaupoissa sisäinen toimittajanumero
+		$laskurow           = (!empty($parametrit['laskurow']))           ? $parametrit['laskurow'] : '';            // lasku.*
+		$kpl                = (!empty($parametrit['kpl']))                ? $parametrit['kpl'] : 0;                  // --> tilattu kappalemäärä
+		$tuoteno            = (!empty($parametrit['tuoteno']))            ? $parametrit['tuoteno'] : '';             // --> tilattava tuotenumero
+		$toimaika           = (!empty($parametrit['toimaika']))           ? $parametrit['toimaika'] : '';            // --> arvioitu toimitusaika
+		$kerayspvm          = (!empty($parametrit['kerayspvm']))          ? $parametrit['kerayspvm'] : '';           // --> toivottu keräysaika
+		$hinta              = (!empty($parametrit['hinta']))              ? $parametrit['hinta'] : '';                // --> käyttäjän syöttämä hinta
+		$netto              = (!empty($parametrit['netto']))              ? $parametrit['netto'] : '';               // --> käyttäjän syöttämä netto
+		$var                = (!empty($parametrit['var']))                ? $parametrit['var'] : '';                 // H,J,P varrit
+		$varasto            = (!empty($parametrit['varasto']))            ? $parametrit['varasto'] : '';             // myydään vain tästä/näistä varastosta
+		$paikka             = (!empty($parametrit['paikka']))             ? $parametrit['paikka'] : '';              // myydään vain tältä paikalta
+		$rivitunnus         = (!empty($parametrit['rivitunnus']))         ? $parametrit['rivitunnus'] : '';          // tietokannan tunnus jolle rivi lisätään
+		$rivilaadittu       = (!empty($parametrit['rivilaadittu']))       ? $parametrit['rivilaadittu'] : '';        // vanhan rivin laadittuaika, säilytetään se
+		$korvaavakielto     = (!empty($parametrit['korvaavakielto']))     ? $parametrit['korvaavakielto'] : '';      // Jos erisuuri kuin tyhjä niin ei myydä korvaavia
+		$jtkielto           = (!empty($parametrit['jtkielto']))           ? $parametrit['jtkielto'] : '';            // Jos erisuuri kuin tyhjä niin ei laiteta JT:Seen
+		$perhekielto        = (!empty($parametrit['perhekielto']))        ? $parametrit['perhekielto'] : '';         // Jos erisuuri kuin tyhjä niin ei etsitä ollenkaan perheitä
+		$varataan_saldoa    = (!empty($parametrit['varataan_saldoa']))    ? $parametrit['varataan_saldoa'] : '';     // Jos == (!empty(EI niin ei varata saldoa (tietyissä keisseissä), tai siis ei ainakan tehdä saldotsekkiä
+		$kutsuja            = (!empty($parametrit['kutsuja']))            ? $parametrit['kutsuja'] : '';             // Kuka tätä skriptiä kutsuu
+		$myy_sarjatunnus    = (!empty($parametrit['myy_sarjatunnus']))    ? $parametrit['myy_sarjatunnus'] : '';     // Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
+		$osto_sarjatunnus   = (!empty($parametrit['osto_sarjatunnus']))   ? $parametrit['osto_sarjatunnus'] : '';    // Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
+		$jaksotettu         = (!empty($parametrit['jaksotettu']))         ? $parametrit['jaksotettu'] : '';          // Kuuluuko tilausrivi mukaan jaksotukseen
+		$perheid            = (!empty($parametrit['perheid']))            ? $parametrit['perheid'] : '';             // Tuoteperheen perheid
+		$perheid2           = (!empty($parametrit['perheid2']))           ? $parametrit['perheid2'] : '';            // Lisävarusteryhmän perheid2
+		$orvoteikiinnosta   = (!empty($parametrit['orvoteikiinnosta']))   ? $parametrit['orvoteikiinnosta'] : '';    // Meitä ei kiinnosta orvot jos tämä ei ole tyhjä.
+		$osatoimkielto      = (!empty($parametrit['osatoimkielto']))      ? $parametrit['osatoimkielto'] : '';       // Jos saldo ei riitä koko riville niin ei lisätä riviä ollenkaan
+		$olpaikalta         = (!empty($parametrit['olpaikalta']))         ? $parametrit['olpaikalta'] : '';          // pakotetaan myymään oletuspaikalta
+		$tuotenimitys       = (!empty($parametrit['tuotenimitys']))       ? $parametrit['tuotenimitys'] : '';        // tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
+		$tuotenimitys_force = (!empty($parametrit['tuotenimitys_force'])) ? $parametrit['tuotenimitys_force'] : '';  // tuotteen nimitys muutetaan systemitasolla
+
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			$ale_temp = str_replace(',', '.', $parametrit{'ale'.$alepostfix});
+			${'ale'.$alepostfix} = (!empty($ale_temp)) ? $ale_temp : "";
+		}
+
+		require('tilauskasittely/lisaarivi.inc');
+
+		return array(
+			'lisatyt_rivit1' => $lisatyt_rivit1,
+			'lisatyt_rivit2' => $lisatyt_rivit2,
+		);
+
+		// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi myyntihaarassa
+		// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
 	}
 }

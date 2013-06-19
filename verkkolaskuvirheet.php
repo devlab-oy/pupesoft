@@ -22,6 +22,12 @@
 
 	require ("inc/parametrit.inc");
 
+	if (isset($livesearch_tee) and $livesearch_tee == "TOIMITTAJAHAKU") {
+		livesearch_toimittajahaku();
+		exit;
+	}
+	enable_ajax();
+
 	if ($_REQUEST["tee"] == "NAYTATILAUS" and isset($_REQUEST["xml"])) {
 		$xml = urldecode($_REQUEST["xml"]);
 
@@ -73,13 +79,42 @@
 			// P‰ivitet‰‰n toimittajan tunnus aineistoon, niin saadaan lasku reskontraan
 			if ($kumpivoice == "FINVOICE") {
 				$finkkari = simplexml_load_file($verkkolaskuvirheet_vaarat."/".$tiedosto);
-				$finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $tunnus);
 
-				file_put_contents($verkkolaskuvirheet_vaarat."/".$tiedosto, $finkkari->asXML());
+				if (!isset($toimittaja_haku)) {
+					$finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $tunnus);
+					$muutos_ok = true;
+				}
+				else {
+					$toimittaja = hae_toimittaja($toimittaja_haku);
+
+					if (!empty($toimittaja['tunnus'])) {
+						$finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $toimittaja['tunnus']);
+						$muutos_ok = true;
+					}
+					//unsetataan, ettei p‰ivity domin formeihin
+					unset($toimittaja_haku);
+				}
+			}
+			elseif ($kumpivoice == 'TECCOM') {
+				$toimittaja = hae_toimittaja($toimittaja_haku);
+
+				if (isset($finkkari->InvoiceHeader->SellerParty->PartyNumber) and !empty($toimittaja['toimittajanro'])) {
+					$finkkari->InvoiceHeader->SellerParty->PartyNumber = $toimittaja['toimittajanro'];
+					$muutos_ok = true;
+				}
+				//unsetataan, ettei p‰ivity domin formeihin
+				unset($toimittaja_haku);
 			}
 
-			rename($verkkolaskuvirheet_vaarat."/".$tiedosto, $verkkolaskuvirheet_kasittele."/".$tiedosto);
-			echo "<font class='message'>".t("Tiedosto k‰sitell‰‰n uudestaan")."</font><br>";
+			if ($muutos_ok) {
+				file_put_contents($verkkolaskuvirheet_vaarat."/".$tiedosto, $finkkari->asXML());
+
+				rename($verkkolaskuvirheet_vaarat."/".$tiedosto, $verkkolaskuvirheet_kasittele."/".$tiedosto);
+				echo "<font class='message'>".t("Tiedosto k‰sitell‰‰n uudestaan")."</font><br>";
+			}
+			else {
+				echo "<font class='message'>".t("Tiedoston korjaamisessa tapahtui virhe")."</font><br>";
+			}
 		}
 
 		if ($tapa == 'P') {
@@ -100,7 +135,7 @@
 
 		while (($file = readdir($handle)) !== FALSE) {
 
-			if (is_file($verkkolaskuvirheet_vaarat."/".$file)) {
+			if (is_file($verkkolaskuvirheet_vaarat."/".$file) and substr($file,0,1) != ".") {
 				unset($yhtiorow);
 				unset($xmlstr);
 
@@ -178,20 +213,24 @@
 					// Olisiko toimittaja sittenkin jossain (v‰‰rin perustettu)
 					if ($lasku_toimittaja["tunnus"] == 0) {
 
-						$laskuttajan_ovt  = trim($laskuttajan_ovt);
-						$laskuttajan_vat  = trim($laskuttajan_vat);
-						$laskuttajan_nimi = trim($laskuttajan_nimi);
-						$laskuttajan_toimittajanumero = trim($laskuttajan_toimittajanumero);
-
 						$toimittaja_array = array();
 
-						if ($laskuttajan_ovt != "") {
-							// 1 etsit‰‰n toimittaja ovttunnuksella
+						// $laskuttajan_ovt --> voi olla ovttunnus, ytunnus, tai vatnumero
+						// $laskuttajan_vat --> voisi olla vatnumero
+						// $laskuttajan_nimi --> voisi olla laskuttajan nimi
+						// $laskuttajan_toimittajanumero --> toimittajanumero
+						$laskuttajan_ovt  				= trim($laskuttajan_ovt);
+						$laskuttajan_vat  				= trim($laskuttajan_vat);
+						$laskuttajan_nimi 				= trim($laskuttajan_nimi);
+						$laskuttajan_toimittajanumero	= trim($laskuttajan_toimittajanumero);
+						$laskun_toimitunnus 			= (int) $laskun_toimitunnus;
+
+						if ($laskun_toimitunnus > 0) {
+							// 0 etsit‰‰n toimittaja tunnuksella
 							$query  = "	SELECT *
 										FROM toimi
-										WHERE ovttunnus = '$laskuttajan_ovt'
-										and ovttunnus not in ('','0')
-										and yhtio = '$yhtiorow[yhtio]'
+										WHERE tunnus = '{$laskun_toimitunnus}'
+										and yhtio = '{$kukarow["yhtio"]}'
 										and tyyppi != 'P'";
 							$result = pupe_query($query);
 
@@ -200,7 +239,22 @@
 							}
 						}
 
-						if ($laskuttajan_ovt != "") {
+						if (!isset($trow) and $laskuttajan_ovt != "") {
+							// 1 etsit‰‰n toimittaja ovttunnuksella
+							$query  = "	SELECT *
+										FROM toimi
+										WHERE ovttunnus = '$laskuttajan_ovt'
+										and ovttunnus not in ('','0')
+										and yhtio = '{$kukarow["yhtio"]}'
+										and tyyppi != 'P'";
+							$result = pupe_query($query);
+
+							while ($trow = mysql_fetch_assoc($result)) {
+								$toimittaja_array[$trow["tunnus"]] = $trow;
+							}
+						}
+
+						if (!isset($trow) and $laskuttajan_ovt != "") {
 							// 2 etsit‰‰n toimittaja ovt-tunnuksella ilman tarkenteita
 							$yovt = substr($laskuttajan_ovt, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
 
@@ -208,7 +262,7 @@
 										FROM toimi
 										WHERE ovttunnus = '$yovt'
 										and ovttunnus not in ('','0')
-										and yhtio = '$yhtiorow[yhtio]'
+										and yhtio = '{$kukarow["yhtio"]}'
 										and tyyppi != 'P'";
 							$result = pupe_query($query);
 
@@ -217,13 +271,13 @@
 							}
 						}
 
-						if ($laskuttajan_vat != "") {
+						if (!isset($trow) and $laskuttajan_vat != "") {
 							// 3 etsit‰‰n toimittaja vat-numerolla
 							$query  = "	SELECT *
 										FROM toimi
 										WHERE ovttunnus = '$laskuttajan_vat'
 										and ovttunnus not in ('','0')
-										and yhtio = '$yhtiorow[yhtio]'
+										and yhtio = '{$kukarow["yhtio"]}'
 										and tyyppi != 'P'";
 							$result = pupe_query($query);
 
@@ -232,13 +286,13 @@
 							}
 						}
 
-						if ($laskuttajan_vat != "") {
+						if (!isset($trow) and $laskuttajan_vat != "") {
 							// 4 etsit‰‰n toimittaja vat-numerolla
 							$query  = "	SELECT *
 										FROM toimi
 										WHERE ytunnus = '$laskuttajan_vat'
 										and ytunnus not in ('','0')
-										and yhtio = '$yhtiorow[yhtio]'
+										and yhtio = '{$kukarow["yhtio"]}'
 										and tyyppi != 'P'";
 							$result = pupe_query($query);
 
@@ -247,7 +301,7 @@
 							}
 						}
 
-						if ($laskuttajan_ovt != "") {
+						if (!isset($trow) and $laskuttajan_ovt != "") {
 							// 5 etsit‰‰n toimittaja ytunnuksella
 							$yovt1 = substr(str_replace("0037", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
 							$yovt2 = (int) $yovt1; // ilman etunollaa
@@ -256,7 +310,7 @@
 										FROM toimi
 										WHERE ytunnus in ('$yovt1', '$yovt2')
 										and ytunnus not in ('','0')
-										and yhtio = '$yhtiorow[yhtio]'
+										and yhtio = '{$kukarow["yhtio"]}'
 										and tyyppi != 'P'";
 							$result = pupe_query($query);
 
@@ -265,7 +319,7 @@
 							}
 						}
 
-						if ($laskuttajan_vat != "") {
+						if (!isset($trow) and $laskuttajan_vat != "") {
 							$intvat = preg_replace("/[^0-9]/", "", $laskuttajan_vat);
 							$intvat2 = (int) $intvat; // ilman etunollaa
 
@@ -274,7 +328,7 @@
 										FROM toimi
 										WHERE REPLACE(REPLACE(REPLACE(ytunnus,'FI',''),'fi',''),'-','') in ('$intvat', '$intvat2')
 										and ytunnus not in ('','0')
-										and yhtio = '$yhtiorow[yhtio]'
+										and yhtio = '{$kukarow["yhtio"]}'
 										and tyyppi != 'P'";
 							$result = pupe_query($query);
 
@@ -283,17 +337,26 @@
 							}
 						}
 
-						if ($laskuttajan_nimi != "") {
-							$siivottu = preg_replace('/\b(oy|ab|ltd)\b/i', '', strtolower($laskuttajan_nimi));
-							$siivottu = preg_replace('/^\s*/', '', $siivottu);
-							$siivottu = preg_replace('/\s*$/', '', $siivottu);
+						if (!isset($trow) and $laskuttajan_toimittajanumero != "") {
+							// 9 etsit‰‰n toimittaja teccomi-specific
+							$query = "	SELECT *
+										FROM toimi
+										WHERE yhtio = '{$kukarow["yhtio"]}'
+										and toimittajanro = '$laskuttajan_toimittajanumero'
+										and tyyppi != 'P'";
+							$result = pupe_query($query);
 
+							while ($trow = mysql_fetch_assoc($result)) {
+								$toimittaja_array[$trow["tunnus"]] = $trow;
+							}
+						}
 
+						if (!isset($trow) and $laskuttajan_nimi != "") {
 							// 7 etsit‰‰n toimittaja nimell‰
 							$query = "	SELECT *
 										FROM toimi
-										WHERE yhtio = '$yhtiorow[yhtio]'
-										and nimi like '%$siivottu%'
+										WHERE yhtio = '{$kukarow["yhtio"]}'
+										and nimi = '$laskuttajan_nimi'
 										and nimi not in ('','0')
 										and tyyppi != 'P'";
 							$result = pupe_query($query);
@@ -303,14 +366,14 @@
 							}
 						}
 
-						if ($laskuttajan_nimi != "") {
+						if (!isset($trow) and $laskuttajan_nimi != "") {
 
 							$laskuttajan_nimi = str_replace(" ", "", $laskuttajan_nimi);
 
 							// 8 etsit‰‰n IBAN-numerolla. (Maventa special: Jos laskulta puuttuu ytunnus, niin IBAN-tyˆnnetaan laskun nimi-kentt‰‰n...)
 							$query = "	SELECT *
 										FROM toimi
-										WHERE yhtio = '$yhtiorow[yhtio]'
+										WHERE yhtio = '{$kukarow["yhtio"]}'
 										and ultilno = '$laskuttajan_nimi'
 										and ultilno not in ('','0')
 										and tyyppi != 'P'";
@@ -318,6 +381,38 @@
 
 							while ($trow = mysql_fetch_assoc($result)) {
 								$toimittaja_array[$trow["tunnus"]] = $trow;
+							}
+						}
+
+						// vaihtoehtoiset_verkkolaskutunnukset poikkeus tarkistus
+						if (!isset($trow)) {
+							$poikkeus_arvot = array(
+								'nimi' => $laskuttajan_nimi,
+								'ytunnus' => $laskuttajan_vat,
+								'ovt_tunnus' => $laskuttajan_ovt
+							);
+
+							foreach ($poikkeus_arvot as $poikkeus_sarake => $poikkeus_arvo) {
+								$query = "	SELECT *
+											FROM vaihtoehtoiset_verkkolaskutunnukset
+											WHERE yhtio 	 = '{$kukarow["yhtio"]}'
+											AND kohde_sarake = '{$poikkeus_sarake}'
+											AND arvo 		 = '{$poikkeus_arvo}'";
+								$result = pupe_query($query);
+								$poikkeus = mysql_fetch_assoc($result);
+
+								if (!empty($poikkeus)) {
+									$query = "	SELECT *
+												FROM toimi
+												WHERE yhtio = '{$kukarow["yhtio"]}'
+												and tunnus  = '{$poikkeus['toimi_tunnus']}'
+												and tyyppi != 'P'";
+									$result = pupe_query($query);
+
+									if (mysql_num_rows($result) == 1) {
+										$toimittaja_array[$trow["tunnus"]] = $trow;
+									}
+								}
 							}
 						}
 					}
@@ -343,6 +438,7 @@
 							echo t("Muuta toimittajan tietoja").":<br>";
 							echo "<form action='{$palvelin2}yllapito.php' method='post'>
 									<input type = 'hidden' name = 'toim' value = 'toimi'>
+									<input type = 'hidden' name = 'lopetus' value = '".$palvelin2."verkkolaskuvirheet.php////'>
 									<select name='tunnus'>";
 
 							foreach ($toimittaja_array as $lahellarow) {
@@ -351,6 +447,18 @@
 
 							echo "</select><input type='submit' value ='".t("P‰ivit‰")."'></form><br><br>";
 						}
+
+						echo "<form name='toimittajahaku_form' action='' method='POST'>";
+						echo "<input type='hidden' name = 'tiedosto' value='$file'>";
+						echo "<input type='hidden' name = 'kumpivoice' value='$kumpivoice'>";
+						echo "<input type='hidden' name='tapa' value='U_JA_P' />";
+
+						echo t('Etsi toimittaja ja k‰sittele lasku uudestaan').':<br>';
+						echo livesearch_kentta("eisaaollaoikee", "TOIMITTAJAHAKU", "toimittaja_haku", 140, $toimittaja_haku, '', '', 'toimittaja_haku', 'ei_break_all');
+						echo "<input type='submit' value='".t("K‰sittele uudestaan")."' />";
+						echo "</form>";
+						echo "<br/>";
+						echo "<br/>";
 
 						echo t("Perusta uusi toimittaja").":<br>";
 						echo "<form action='{$palvelin2}yllapito.php' method='post'>

@@ -398,7 +398,7 @@ if ($tee == '') {
 			echo "</form>";
 		}
 		else {
-			echo t("Valmistuslinjalla") . "<br>" . $valmistus->alkupvm() . " - " . $valmistus->loppupvm();
+			echo t("Valmistuslinjalla") . " " . $valmistus->valmistuslinja() . "<br>" . $valmistus->alkupvm() . " - " . $valmistus->loppupvm();
 		}
 		echo "</td>";
 		echo "</tr>";

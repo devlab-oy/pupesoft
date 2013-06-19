@@ -107,6 +107,16 @@ if ($request['tee'] == 'uusi_kampanja') {
 	}
 }
 
+if ($request['tee'] == 'poista_kampanja') {
+	if ($request['kampanja_tunnus']) {
+		$kampanja_tunnus = $request['kampanja_tunnus'];
+		poista_kampanja_otsikko($kampanja_tunnus);
+		poista_kampanja_ehdot($kampanja_tunnus);
+		poista_kampanja_palkinnot($kampanja_tunnus);
+		nayta_kampanjat();
+	}
+}
+
 if ($request['tee'] == 'muokkaa_kampanjaa') {
 	if ($request['kampanja_tunnus']) {
 		$onko_kampanja_ok = muokkaa_kampanjaa($request);
@@ -530,6 +540,13 @@ function echo_kayttoliittyma($request = array()) {
 	echo "<br/>";
 	echo "<input id='submit_button' type='submit' value='".t("Tallenna kampanja")."' />";
 	echo "</form>";
+
+	echo "<br /><br /><form name='poista_formi' method='post'>";
+	echo "<input type='hidden' name='tee' value='poista_kampanja' />";
+	echo "<input type='hidden' size=50 name='kampanja_tunnus' value='{$request['kampanja']['tunnus']}'/>";
+	echo "<input type='submit' value='",t("Poista kampanja"),"' />";
+	echo "</form>";
+
 }
 
 function echo_kampanja_ehto($index, $kampanja_ehto) {
@@ -936,3 +953,5 @@ function echo_kampanjat($kampanjat) {
 	echo "<input type='submit' value='".t("Uusi kampanja")."'>";
 	echo "</form>";
 }
+
+require ("inc/footer.inc");

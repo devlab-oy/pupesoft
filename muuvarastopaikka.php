@@ -644,6 +644,13 @@
 				$keskihankintahinta = round($keskihankintahinta / count($sarjano_array), 6);
 			}
 
+			if ($selite != '') {
+				$selite = ": {$selite}";
+			}
+			else {
+				$selite = "";
+			}
+
 			$query = "	INSERT into tapahtuma set
 						yhtio 		= '$kukarow[yhtio]',
 						tuoteno 	= '$tuotteet[$iii]',
@@ -655,7 +662,7 @@
 						hyllyvali	= '$mistarow[hyllyvali]',
 						hyllytaso	= '$mistarow[hyllytaso]',
 						rivitunnus	= '$tun',
-						selite 		= '".t("Paikasta")." $mista_texti ".t("vähennettiin")." $kappaleet[$iii]',
+						selite 		= '".t("Paikasta")." $mista_texti ".t("vähennettiin")." $kappaleet[$iii]{$selite}',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$result = pupe_query($query);
@@ -671,7 +678,7 @@
 						hyllyvali	= '$minnerow[hyllyvali]',
 						hyllytaso	= '$minnerow[hyllytaso]',
 						rivitunnus	= '$tun',
-						selite 		= '".t("Paikalle")." $minne_texti ".t("lisättiin")." $kappaleet[$iii]',
+						selite 		= '".t("Paikalle")." $minne_texti ".t("lisättiin")." $kappaleet[$iii]{$selite}',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$result = pupe_query($query);
@@ -1136,15 +1143,19 @@
 				echo "<td valign='top'></td>";
 			}
 
-			$sncspan = 4;
+			$sncspan = 3;
 		}
 		else {
-			$sncspan = 3;
+			$sncspan = 2;
 		}
 
 		echo "</tr>";
 
-		echo "	<tr><td colspan='$sncspan'><input type = 'submit' value = '".t("Siirrä")."'></td>
+		echo "<tr>";
+		echo "<th>".t("Selite")."</th>";
+		echo "<td colspan='$sncspan' ><input type='text' name='selite' size='50' /></td>";
+
+		echo "<td class='back'><input type = 'submit' value = '".t("Siirrä")."'></td>
 				</tr></table></form><br>";
 
 		// Tehdään käyttöliittymä paikkojen muutoksille (otetus tai pois)

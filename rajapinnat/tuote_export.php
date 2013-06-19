@@ -57,10 +57,12 @@
 				tuote.yksikko,
 				tuote.kuvaus,
 				tuote.myymalahinta,
+				tuote.kuluprosentti,
 				tuote.eankoodi,
 				tuote.osasto,
 				tuote.try,
 				tuote.alv,
+				tuote.nakyvyys,
 				tuote.tuotemassa,
 				tuote.tunnus,
 				ta_nimitys_se.selite nimi_swe,
@@ -83,7 +85,7 @@
 	while ($row = mysql_fetch_array($res)) {
 
 		// Jos yhtiön hinnat eivät sisällä alv:tä
-		if ($yhtiorow["alv_kasittely"] != "") {
+		if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
 			$myyntihinta					= hintapyoristys($row["myyntihinta"] * (1+($row["alv"]/100)));
 			$myyntihinta_veroton 			= $row["myyntihinta"];
 
@@ -108,11 +110,13 @@
 							'myyntihinta_veroton'	=> $myyntihinta_veroton,
 							'myymalahinta'			=> $myymalahinta,
 							'myymalahinta_veroton'	=> $myymalahinta_veroton,
+							'kuluprosentti'			=> $row['kuluprosentti'],
 							'ean'					=> $row["eankoodi"],
 							'osasto'				=> $row["osasto"],
 							'try'					=> $row["try"],
 							'try_nimi'				=> $row["try_nimi"],
 							'alv'					=> $row["alv"],
+							'nakyvyys'				=> $row["nakyvyys"],
 							'nimi_swe'				=> $row["nimi_swe"],
 							'nimi_eng'				=> $row["nimi_eng"],
 							'tunnus'				=> $row['tunnus']
@@ -278,7 +282,7 @@
 	while ($row = mysql_fetch_array($res)) {
 
 		// Jos yhtiön hinnat eivät sisällä alv:tä
-		if ($yhtiorow["alv_kasittely"] != "") {
+		if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
 			$hinta					= hintapyoristys($row["hinta"] * (1+($row["alv"]/100)));
 			$hinta_veroton 			= $row["hinta"];
 		}
@@ -299,7 +303,7 @@
 	// haetaan tuotteen variaatiot
 	$query = "	SELECT distinct selite
 				FROM tuotteen_avainsanat
-				WHERE yhtio = '{$kukarow["yhtio"]}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND laji = 'parametri_variaatio'
 				AND trim(selite) != ''";
 	$resselite = pupe_query($query);
@@ -310,6 +314,9 @@
 	else {
 		$muutoslisa = "";
 	}
+
+	// Magentoon vain tuotteet joiden näkyvyys != ''
+	$nakyvyys_lisa = ($verkkokauppatyyppi == 'magento') ? "AND tuote.nakyvyys != ''" : "";
 
 	// loopataan variaatio-nimitykset
 	while ($rowselite = mysql_fetch_assoc($resselite)) {
@@ -325,20 +332,23 @@
 						ta_nimitys_en.selite nimi_eng,
 						tuote.myyntihinta,
 						tuote.myymalahinta,
+						tuote.kuluprosentti,
 						tuote.eankoodi,
 						tuote.alv,
+						tuote.nakyvyys,
 						try_fi.selitetark try_nimi
 						FROM tuotteen_avainsanat
 						JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio
 							AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
 							AND tuote.status != 'P'
 							AND tuote.tuotetyyppi NOT in ('A','B')
-							AND tuote.tuoteno != '')
+							AND tuote.tuoteno != ''
+							$nakyvyys_lisa)
 						LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio and try_fi.selite = tuote.try and try_fi.laji = 'try' and try_fi.kieli = 'fi')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys' and ta_nimitys_se.kieli = 'se')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en')
-						WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
-						AND tuotteen_avainsanat.selite = '{$rowselite["selite"]}'
+						WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
+						AND tuotteen_avainsanat.selite = '{$rowselite['selite']}'
 						{$muutoslisa}
 						ORDER BY tuote.tuoteno";
 		$alires = pupe_query($aliselect);
@@ -351,11 +361,11 @@
 							JOIN avainsana ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
 								AND avainsana.laji = 'PARAMETRI'
 								AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
-							WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
+							WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
 							AND tuotteen_avainsanat.laji != 'parametri_variaatio'
 							AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
 							AND tuotteen_avainsanat.laji like 'parametri_%'
-							AND tuotteen_avainsanat.tuoteno = '{$alirow["tuoteno"]}'
+							AND tuotteen_avainsanat.tuoteno = '{$alirow['tuoteno']}'
 							ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
 			$alinres = pupe_query($alinselect);
 			$properties = array();
@@ -366,7 +376,7 @@
 			}
 
 			// Jos yhtiön hinnat eivät sisällä alv:tä
-			if ($yhtiorow["alv_kasittely"] != "") {
+			if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
 				$myyntihinta					= hintapyoristys($alirow["myyntihinta"] * (1+($alirow["alv"]/100)));
 				$myyntihinta_veroton 			= $alirow["myyntihinta"];
 
@@ -387,6 +397,7 @@
 															'kuvaus'				=> $alirow["kuvaus"],
 															'lyhytkuvaus'			=> $alirow["lyhytkuvaus"],
 															'tuotemassa'			=> $alirow["tuotemassa"],
+															'nakyvyys'				=> $alirow["nakyvyys"],
 															'try_nimi'				=> $alirow["try_nimi"],
 															'nimi_swe'				=> $alirow["nimi_swe"],
 															'nimi_eng'				=> $alirow["nimi_eng"],
@@ -394,6 +405,7 @@
 															'myyntihinta_veroton'	=> $myyntihinta_veroton,
 															'myymalahinta'			=> $myymalahinta,
 															'myymalahinta_veroton'	=> $myymalahinta_veroton,
+															'kuluprosentti'			=> $alirow['kuluprosentti'],
 															'ean'					=> $alirow["eankoodi"],
 															'parametrit'			=> $properties);
 		}
@@ -408,7 +420,11 @@
 
 		$magento_client = new MagentoClient($magento_api_url, $magento_api_usr, $magento_api_pas);
 
-		// Kategoriat
+		// tax_class_id, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
+		if (! isset($magento_tax_class_id)) $magento_tax_class_id = 0;
+		$magento_client->setTaxClassID($magento_tax_class_id);
+
+		// lisaa_kategoriat
 		if (count($dnsryhma) > 0) {
 			echo "Päivitetään tuotekategoriat\n";
 			$count = $magento_client->lisaa_kategoriat($dnsryhma);
@@ -434,13 +450,6 @@
 			echo "Päivitetään tuotteiden saldot\n";
 			$count = $magento_client->paivita_saldot($dnstock);
 			echo "Päivitettiin $count tuotteen saldot\n";
-		}
-
-		// Hinnastot
-		if (count($dnshinnasto) > 0) {
-			echo "Päivitetään tuotteiden tietoja\n";
-			$count = $magento_client->paivita_hinnat($dnshinnasto);
-			echo "Päivitettiin $count tuotteen hinnat\n";
 		}
 
 		$time_end = microtime(true);

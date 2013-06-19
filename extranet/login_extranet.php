@@ -158,7 +158,7 @@ if (isset($usea) and $usea == 1) {
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
-		echo "".t("Sinulle löytyi monta käyttäjätunnusta, muttei yhtään yritystä")."!";
+		echo t("Sinulle löytyi monta käyttäjätunnusta, muttei yhtään yritystä")."!";
 		exit;
 	}
 

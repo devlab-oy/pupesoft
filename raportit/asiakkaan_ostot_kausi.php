@@ -15,7 +15,7 @@ $row    = mysql_fetch_array($result);
 
 if ($row["ero"] > 366) {
 	echo "<font class='error'>".t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentaväli!")."</font><br>";
-	echo "".t("Annetut rajaukset").": $ytunnus $asosasto $apvm $lpvm<br>";
+	echo t("Annetut rajaukset").": $ytunnus $asosasto $apvm $lpvm<br>";
 	$tee = '';
 }
 

@@ -2071,5 +2071,3 @@ if ($tila == '') {
 
 	$tila = "eityhja";
 }
-
-?>

@@ -72,7 +72,6 @@ if(!function_exists("yrititarkista")) {
 
 			if (mysql_num_rows($sresult) > 0) {
 				$virhe[$i] = t("Tili on jo perustettu järjestelmään")."!";
-				$errori = 1;
 			}
 
 			if (strtoupper($yhtiorow['maa']) == 'FI') {
@@ -83,7 +82,7 @@ if(!function_exists("yrititarkista")) {
 					require 'pankkitilinoikeellisuus.php';
 
 					if ($pankkitili == '') {
-						$virhe[$i] = "".t("Pankkitili on virheellinen")."";
+						$virhe[$i] = t("Pankkitili on virheellinen");
 					}
 					else {
 						$t[$i]=$pankkitili;
@@ -93,6 +92,3 @@ if(!function_exists("yrititarkista")) {
 		}
 	}
 }
-
-
-?>

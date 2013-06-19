@@ -173,7 +173,7 @@ function hae_palautuneet_tuotteet($request) {
 	$query = "	SELECT tilausrivi.tuoteno,
 				tilausrivi.nimitys,
 				sum(tilausrivi.tilkpl) as palautettu_kpl,
-				sum((tilausrivi.tilkpl * tilausrivi.rivihinta)) as palautettu_hinta
+				sum((tilausrivi.rivihinta)) as palautettu_hinta
 				FROM   lasku
 				JOIN tilausrivi
 				ON ( tilausrivi.yhtio = lasku.yhtio

@@ -22107,9 +22107,9 @@ if (!function_exists('paivita_poikkeavat_tulliprosentit')) {
 	}
 }
 
-if (!function_exists('hae_tuotteen_arvioitu_saapumisaika')) {
+if (!function_exists('hae_tuotteen_saapumisaika')) {
 	function hae_tuotteen_saapumisaika($tuoteno, $tuote_status, $myytavissa) {
-		global $kukarow, $yhtiorow, $laskurow, $verkkokauppa, $kieli;
+		global $kukarow, $yhtiorow, $verkkokauppa;
 
 		$tilauslisa = "";
 		$tulossalisa = "";
@@ -22198,7 +22198,7 @@ if (!function_exists('hae_tuotteen_arvioitu_saapumisaika')) {
 				$tulossa_row = mysql_fetch_assoc($tulossa_result);
 
 				if ($tulossa_row["toimitusaika"] > 0) {
-					$tulossalisa = ", <font class='info'>".t("Toimaika: %s pv.", $kieli, $tulossa_row["toimitusaika"])."</font>";
+					$tulossalisa = ", <font class='info'>".t("Toimaika: %s pv.", $kukarow['kieli'], $tulossa_row["toimitusaika"])."</font>";
 
 					return $tulossalisa;
 				}

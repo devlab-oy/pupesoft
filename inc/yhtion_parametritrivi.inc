@@ -404,7 +404,7 @@
 		$sel = array("0" => "", "1" => "", "2" => "");
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = '0'  $sel[0]>".t("Ostolaskun valuuttakurssi syöttöpäivämäärän mukaan");
+		$ulos .= "<option value = '0' $sel[0]>".t("Ostolaskun valuuttakurssi syöttöpäivämäärän mukaan");
 		$ulos .= "<option value = '1' $sel[1]>".t("Ostolaskun valuuttakurssi kirjauspäivämäärän mukaan");
 		$ulos .= "<option value = '2' $sel[2]>".t("Ostolaskun valuuttakurssi laskun päiväyksen mukaan");
 
@@ -422,6 +422,7 @@
 		$sel[$trow[$i]] = "selected";
 
 		$ulos .= "<option value = ''>".t("Tuotetiedot, hinnat ja alennukset");
+		$ulos .= "<option value = 'Q' $sel[Q]>".t("Tuotetiedot, hinnat ja alennukset (Verolliset hinnat)");
 		$ulos .= "<option value = 'O' $sel[O]>".t("Tuotetiedot");
 		$ulos .= "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka");
 

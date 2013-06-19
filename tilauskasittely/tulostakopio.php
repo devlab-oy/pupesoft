@@ -2077,9 +2077,15 @@
 								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 								if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 								tuote.sarjanumeroseuranta,
-								tuote.eankoodi
+								tuote.eankoodi,
+								kerayserat.kpl as tilkpl,
+								kerayserat.kpl as varattu,
+								kerayserat.tunnus as ker_tunnus,
+								kerayserat.pakkaus,
+								kerayserat.pakkausnro
 								FROM tilausrivi
 								JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+								LEFT JOIN kerayserat ON ( kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus )
 								WHERE tilausrivi.otunnus in ($tilausnumeroita)
 								and tilausrivi.yhtio   = '$kukarow[yhtio]'
 								and tilausrivi.tyyppi  != 'D'

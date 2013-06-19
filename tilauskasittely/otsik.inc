@@ -86,7 +86,8 @@
 					chn					= '',
 					verkkotunnus		= '',
 					toimitustapa		= '',
-					toimitustavan_lahto = ''
+					toimitustavan_lahto = '',
+					tilausyhteyshenkilo = ''
 					WHERE yhtio 		= '$kukarow[yhtio]'
 					and tunnus	 		= '$kukarow[kesken]'";
 		$result = pupe_query($query);
@@ -560,6 +561,19 @@
 							WHERE tunnus = '$asiakasid'";
 				$assresult = pupe_query($squery);
 				$assrow = mysql_fetch_assoc($assresult);
+				
+				$yhtquery = "	SELECT nimi
+								FROM yhteyshenkilo
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND liitostunnus = '$assrow[tunnus]'
+								AND tyyppi = 'A'
+								AND tilausyhteyshenkilo != ''
+								AND oletusyhteyshenkilo != ''
+								ORDER BY nimi
+								LIMIT 1";
+								
+				$yhtresult = pupe_query($yhtquery);
+				$yhtnimi = mysql_fetch_assoc($yhtresult);
 
 				if (!checkdate($toimkk,$toimpp,$toimvv)) {
 					$toimpp = date("j");
@@ -630,7 +644,8 @@
 							rahtivapaa			= '$assrow[rahtivapaa]',
 							toimaika 			= '$toimpvm',
 							kerayspvm			= '$kerpvm',
-							toimitusehto		= '$assrow[toimitusehto]'
+							toimitusehto		= '$assrow[toimitusehto]',
+							tilausyhteyshenkilo	= '$yhtnimi[nimi]'
 							WHERE yhtio 		= '$kukarow[yhtio]'
 							and tunnus	 		= '$kukarow[kesken]'
 							and liitostunnus	= 0";
@@ -2747,10 +2762,10 @@
 
 			$yhteysquery = "SELECT *
 							FROM yhteyshenkilo
-							where yhtio = '$kukarow[yhtio]'
-							and liitostunnus = '$srow[liitostunnus]'
-							and tyyppi = 'A'
-							and tilausyhteyshenkilo != ''
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND liitostunnus = '$srow[liitostunnus]'
+							AND tyyppi = 'A'
+							AND tilausyhteyshenkilo != ''
 							ORDER BY nimi";
 			$yhteysresult = pupe_query($yhteysquery);
 

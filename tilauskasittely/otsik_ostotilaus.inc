@@ -49,7 +49,13 @@
 		$tunnus = $toimittajaid;
 		$tila = 'Muuta';
 	}
-
+	
+	if (isset($jatka) AND !checkdate($toimkk, $toimpp, $toimvv)) {
+		echo "<font class='error'>".t("VIRHE: Syötetty toimituspäivä on virheellinen")."!</font><br><br>";
+		$tee = "otsik_ostotilaus";
+		unset($jatka);
+		$tila = "Muuta";
+	}
 
 	if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
 		if($toim == "HAAMU") {

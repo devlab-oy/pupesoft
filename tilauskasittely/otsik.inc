@@ -564,7 +564,14 @@
 				
 				$yhtquery = "	SELECT nimi
 								FROM yhteyshenkilo
-								WHERE liitostunnus = '$assrow[tunnus]'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND liitostunnus = '$assrow[tunnus]'
+								AND tyyppi = 'A'
+								AND tilausyhteyshenkilo != ''
+								AND oletusyhteyshenkilo != ''
+								ORDER BY nimi
+								LIMIT 1";
+								
 				$yhtresult = pupe_query($yhtquery);
 				$yhtnimi = mysql_fetch_assoc($yhtresult);
 
@@ -2755,10 +2762,10 @@
 
 			$yhteysquery = "SELECT *
 							FROM yhteyshenkilo
-							where yhtio = '$kukarow[yhtio]'
-							and liitostunnus = '$srow[liitostunnus]'
-							and tyyppi = 'A'
-							and tilausyhteyshenkilo != ''
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND liitostunnus = '$srow[liitostunnus]'
+							AND tyyppi = 'A'
+							AND tilausyhteyshenkilo != ''
 							ORDER BY nimi";
 			$yhteysresult = pupe_query($yhteysquery);
 

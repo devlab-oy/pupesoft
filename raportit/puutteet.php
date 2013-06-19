@@ -343,18 +343,18 @@
 				$excelsarake++;
 			}
 
-			echo "	<td style='text-align:right; vertical-align:top' class='$vari'>$row[puutekpl]</td>
+			echo "	<td style='text-align:right; vertical-align:top' class='$vari'>". (float) $row['puutekpl']."</td>
 					<td style='text-align:right; vertical-align:top' class='$vari'>$row[puuteeur]</td>
 					<td style='text-align:right; vertical-align:top' class='$vari'>$row[myyeur]</td>
-					<td style='text-align:right; vertical-align:top' class='$vari'>".sprintf("%.2f",$puutepros)."</td>";
+					<td style='text-align:right; vertical-align:top' class='$vari'>".sprintf("%.1f",$puutepros)."</td>";
 
-			$worksheet->writeNumber($excelrivi, $excelsarake, (float)$row['puutekpl']);
+			$worksheet->writeNumber($excelrivi, $excelsarake, (float) $row['puutekpl']);
 			$excelsarake++;
 			$worksheet->writeNumber($excelrivi, $excelsarake, $row['puuteeur']);
 			$excelsarake++;
 			$worksheet->writeNumber($excelrivi, $excelsarake, $row['myyeur']);
 			$excelsarake++;
-			$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puutepros));
+			$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.1f",$puutepros));
 			$excelsarake++;
 
 			if ($try != '') {
@@ -366,9 +366,9 @@
 				$saldores = pupe_query($query);
 				$saldorow = mysql_fetch_assoc($saldores);
 
-				echo "<td style='text-align:right; vertical-align:top' class='$vari'>" . $saldorow['kokonaissaldo'] . "</td>";
+				echo "<td style='text-align:right; vertical-align:top' class='$vari'>". (float) $saldorow['kokonaissaldo']."</td>";
 
-				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$saldorow['kokonaissaldo']));
+				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $saldorow['kokonaissaldo']));
 				$excelsarake++;
 
 				//tilauksessa olevat
@@ -378,7 +378,7 @@
 				$tulresult = mysql_query($query) or pupe_error($query);
 				$tulrow = mysql_fetch_array($tulresult);
 
-				echo "<td class='$vari' style='vertical-align:top'>". (float) $tulrow['tilattu'] ."</td>";
+				echo "<td class='$vari' style='text-align:right; vertical-align:top'>". (float) $tulrow['tilattu']."</td>";
 
 				$worksheet->writeNumber($excelrivi, $excelsarake, (float) $tulrow['tilattu']);
 				$excelsarake++;
@@ -405,7 +405,7 @@
 					$rekresult = mysql_query($query) or pupe_error($query);
 					$rekrow = mysql_fetch_array($rekresult);
 
-					echo "<td class='$vari' style='vertical-align:top'>$rekrow[0]</td>";
+					echo "<td class='$vari' style='text-align:right; vertical-align:top'>$rekrow[0]</td>";
 
 					$worksheet->writeNumber($excelrivi, $excelsarake, $rekrow[0]);
 					$excelsarake++;

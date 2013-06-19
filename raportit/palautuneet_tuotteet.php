@@ -29,7 +29,7 @@ if ($tee == 'lataa_tiedosto') {
 
 //tänne tämän tiedoston ajax_requestit
 if ($ajax_request) {
-	
+
 }
 
 echo '<font class="head">'.t('Palautuneet tuotteet').'</font><hr>';
@@ -189,12 +189,11 @@ function hae_palautuneet_tuotteet($request) {
 	$result = pupe_query($query);
 
 	$palautuneet_tuotteet = array();
+	$onkoyhteensop 		  = table_exists("yhteensopivuus_tuote");
 
 	while ($palautunut_tuote = mysql_fetch_assoc($result)) {
-		$palautunut_tuote['ajoneuvosoveltuvuus_kpl'] = hae_ajoneuvosoveltuvuus_kpl($palautunut_tuote['tuoteno']);
-		
+		if ($onkoyhteensop) $palautunut_tuote['ajoneuvosoveltuvuus_kpl'] = hae_ajoneuvosoveltuvuus_kpl($palautunut_tuote['tuoteno']);
 		$palautunut_tuote['tuoteno'] = "<a href='#' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($palautunut_tuote['tuoteno'])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">".$palautunut_tuote['tuoteno']."</a>";
-				
 		$palautuneet_tuotteet[] = $palautunut_tuote;
 	}
 

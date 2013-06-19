@@ -135,7 +135,7 @@ if ($request['tee'] == 'aja_raportti') {
 			}
 		}
 
-		echo_rows_in_table($palautuneet_tuotteet, $header_values, $force_to_string);
+		echo_rows_in_table($palautuneet_tuotteet, $header_values, $force_to_string, 'right_align_numbers');
 	}
 }
 else {
@@ -250,4 +250,21 @@ function echo_kayttoliittyma($request) {
 	echo "<br/>";
 	echo "<input type='submit' value='".t('Hae')."' />";
 	echo "</form>";
+}
+
+//callback function table td:lle
+function right_align_numbers($header, $solu, $force_to_string) {
+    if (!stristr($header, 'tunnus')) {
+        if (is_numeric($solu) and !in_array($header, $force_to_string)) {
+			if (!ctype_digit($solu)) {
+				echo "<td align='right'>".number_format($solu, 2)."</td>";
+			}
+			else {
+				echo "<td align='right'>$solu</td>";
+			}
+        }
+        else {
+			echo "<td>{$solu}</td>";
+        }
+	}
 }

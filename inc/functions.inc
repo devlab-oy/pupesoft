@@ -13750,7 +13750,7 @@ if (!function_exists("hintapyoristys")) {
 		if ($luku == 'null') {
 			return '';
 		}
-		
+
 		$luku = (float) $luku;
 
 		if ((int) $desimaalit > 0) {
@@ -17810,7 +17810,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					asiakasnro as asiakasnro_aito,
 					kieli
 					FROM asiakas
-					WHERE tunnus = '$laskurow[liitostunnus]' and yhtio = '$kukarow[yhtio]'";
+					WHERE tunnus = '$laskurow[liitostunnus]'
+					and yhtio 	 = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 		$asrow = mysql_fetch_assoc($result);
 
@@ -17824,7 +17825,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		}
 
 		# Testausta varten.....
-		#$lahetetyyppi = "tulosta_lahete.inc"; 					# N‰ytet‰‰n asiakkaan hinta ja alennus
+		$lahetetyyppi = "tulosta_lahete.inc"; 					# N‰ytet‰‰n asiakkaan hinta ja alennus
 		#$lahetetyyppi = "tulosta_lahete_ean.inc";
 		#$lahetetyyppi = "tulosta_lahete_brutto.inc"; 			# N‰ytet‰‰n tuotteen myym‰l‰hinta/(asiakkaan hinta)
 		#$lahetetyyppi = "tulosta_lahete_eialeja.inc"; 			# N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰
@@ -17836,9 +17837,12 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		#$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
 		#$lahetetyyppi = "tulosta_lahete_custom.inc";
 		#$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc"; 	# Ei n‰ytet‰ hintoja eik‰ alennuksia
-		#$lahetetyyppi = "tulosta_lahete_verollinen.inc"; 		# N‰ytet‰‰n asiakkaan hinta ja alennus (Verolliset hinnat)
 		#$lahetetyyppi = "perhe_tulosta_lahete.inc"; 			# N‰ytet‰‰n asiakkaan hinta ja alennus (Tuoteperheet yhdess‰)
 		#$lahetetyyppi = "perhe_tulosta_lahete_verollinen.inc"; # N‰ytet‰‰n asiakkaan hinta ja alennus (Tuoteperheet yhdess‰, Verolliset hinnat)
+
+		#$lahetetyyppi = substr($lahetetyyppi, 0, -4)."_verollinen.inc";	# Verolliset hinnat
+		#$lahetetyyppi = "perhe_".$lahetetyyppi; 							# Perheet yhdess‰, vain is‰t n‰ytet‰‰n
+		#$lahetetyyppi = "hinnat_isalla_".$lahetetyyppi; 					# PErheet‰ n‰ytet‰‰n, mutta hinnat summataan is‰lle
 
 		if (@include("tilauskasittely/tulosta_lahete.inc"));
 		else require("tulosta_lahete.inc");

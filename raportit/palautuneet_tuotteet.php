@@ -146,9 +146,9 @@ require('inc/footer.inc');
 
 function init(&$request) {
 	if (empty($request['ppa']) and empty($request['kka']) and empty($request['vva'])) {
-		$request['ppa'] = date('d', strtotime('now - 30 day'));
-		$request['kka'] = date('m', strtotime('now - 30 day'));
-		$request['vva'] = date('Y', strtotime('now - 30 day'));
+		$request['ppa'] = date('d', strtotime('now - 365 day'));
+		$request['kka'] = date('m', strtotime('now - 365 day'));
+		$request['vva'] = date('Y', strtotime('now - 365 day'));
 
 		$request['alku_pvm'] = $request['vva'].'-'.$request['kka'].'-'.$request['ppa'];
 	}
@@ -184,7 +184,7 @@ function hae_palautuneet_tuotteet($request) {
 				AND lasku.tilaustyyppi = 'R'
 				AND lasku.tapvm BETWEEN '{$request['alku_pvm']}' AND '{$request['loppu_pvm']}'
 				GROUP BY tilausrivi.tuoteno, tilausrivi.nimitys
-				ORDER BY tilausrivi.tuoteno ASC
+				ORDER BY palautettu_kpl ASC
 				{$query_limit}";
 	$result = pupe_query($query);
 

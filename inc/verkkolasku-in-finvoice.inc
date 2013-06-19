@@ -124,6 +124,14 @@ $osto_rivi_kulu_alv = 0;
 
 $ei_oteta_kulua_pois = true;
 
+$edellinen_tuoteno = "";
+$budweg_runkotuotteiden_alut = array(
+	'901',
+	'902',
+	'903',
+	'904',
+);
+
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		// tuotekoodi
@@ -176,6 +184,11 @@ if (count($tuotetiedot) > 0) {
 					$tuoteno_chk_row = mysql_fetch_assoc($tuoteno_chk_res);
 					$rtuoteno[$i]['tuoteno'] = $tuoteno_chk_row['toim_tuoteno'];
 				}
+			}
+
+			// Budweg-case
+			if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123099" and $edellinen_tuoteno != "" and substr($edellinen_tuoteno, -3) == substr($rtuoteno[$i]['tuoteno'], -3) and in_array(substr($rtuoteno[$i]['tuoteno'], 0, 3), $budweg_runkotuotteiden_alut)) {
+				$rtuoteno[$i]["lapsi"] = "yes";
 			}
 
 			// maventa-case
@@ -242,6 +255,8 @@ if (count($tuotetiedot) > 0) {
 
 			$rtuoteno[$i]["yksikko"] = $tuotetieto->DeliveredQuantity->attributes()->QuantityUnitCode;
 			$rtuoteno[$i]["tilaajanrivinro"] = $tuotetieto->RowIdentifier;
+
+			$edellinen_tuoteno = $rtuoteno[$i]["tuoteno"];
 		}
 		else {
 			//	Poistetaan tämä tietue

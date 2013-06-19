@@ -1779,17 +1779,8 @@
 						}
 
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
-						$saapumisaika = hae_tuotteen_saapumisaika($row['tuoteno'], $row['status'], $myytavissa);
 
-						if ($verkkokauppa == "" and ($row['status'] == 'A' or $row['status'] == '') and $myytavissa <= 0) {
-							$tulossalisa .= $saapumisaika;
-						}
-						elseif ($verkkokauppa == "" and $row['status'] == 'T' and $myytavissa <= 0) {
-							$tilauslisa .= $saapumisaika;
-						}
-						elseif ($verkkokauppa != "") {
-							$tulossalisa = $saapumisaika;
-						}
+						$tulossalisa = hae_tuotteen_saapumisaika($row['tuoteno'], $row['status'], $myytavissa);
 
 						// Tehtaan saldo n‰ytet‰‰n vain jos $myytavissa < $yhtiorow['tehdas_saldo_alaraja'] sek‰ tuotteen_toimittajat.tehdas_saldo > 0
 						if ($verkkokauppa == "" and $myytavissa < $yhtiorow['tehdas_saldo_alaraja'] and $yhtiorow['tehdas_saldo_alaraja'] > 0) {
@@ -1813,7 +1804,6 @@
 						echo "<td valign='top' class='$vari' $classrigh>";
 
 						if ($myytavissa > 0 or $noutolisa != "") {
-
 							if ($verkkokauppa != "" and $verkkokauppa_saldoluku) {
 								echo "<font class='green'>";
 								echo $myytavissa;
@@ -1823,10 +1813,7 @@
 								echo ($hinta_rajaus != "" and $myytavissa > 0) ? "<font class='green'>".t("P‰‰varasto").": ".t("On")."</font>": "<font class='green'>".t("On")."</font>";
 							}
 						}
-						elseif ($tilauslisa != "") {
-							echo "$tilauslisa";
-						}
-						else {
+						elseif ($row['status'] != 'T') {
 							echo "<font class='red'>".t("Ei")."</font>";
 						}
 

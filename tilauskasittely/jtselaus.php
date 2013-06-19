@@ -1199,6 +1199,7 @@
 						}
 
 						$saapumisaika = hae_tuotteen_saapumisaika($jtrow['tuoteno'], $jtrow['status'], $kokonaismyytavissa);
+
 						// Saldoa on tai halutaan nähdä kaikki rivit
 						if ($kokonaismyytavissa > 0 or $toimi == '') {
 

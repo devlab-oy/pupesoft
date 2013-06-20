@@ -13747,7 +13747,7 @@ if (!function_exists("hintapyoristys")) {
 	function hintapyoristys($luku, $desimaalit=0, $loppunollat_pois=FALSE) {
 		global $yhtiorow;
 
-		if ($luku == 'null') {
+		if (!is_numeric($luku) and $luku == 'null') {
 			return '';
 		}
 

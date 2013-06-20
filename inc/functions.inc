@@ -21498,6 +21498,8 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 		//kampanjoiden ehtojen ja aliehtojen rajoittimet pitää konvertoida, jotta niitä voidaan käyttää suoraan queryissä
 		$kampanja_ehto['rajoitin'] = konvertoi_rajoitin($kampanja_ehto['rajoitin']);
 
+		$group_by = "";
+
 		switch ($kampanja_ehto['kohde']) {
 			case 'asiakas':
 				$asiakas_ehto = " AND asiakas.tunnus {$kampanja_ehto['rajoitin']} {$kampanja_ehto['arvo']}";
@@ -21541,68 +21543,53 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 			case 'tuote':
 				$having_ehdot = populoi_aliehto_having($kampanja_ehto['aliehdot']);
 				$tuote_ehto .= " AND tilausrivi.tuoteno {$kampanja_ehto['rajoitin']} '{$kampanja_ehto['arvo']}'";
+				$group_by = "GROUP BY tilausrivi.tuoteno";
 				break;
 
 			case 'tuotekategoria':
 
-				$query = "	SELECT tuoteno
-							FROM tilausrivi
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND otunnus = '{$tilausnumero}'";
+				$having_ehdot = "";
+
+				if (!empty($kampanja_ehto['aliehdot'])) {
+					$having_ehdot = populoi_aliehto_having($kampanja_ehto['aliehdot']);
+				}
+
+				$query = "	SELECT group_concat(DISTINCT concat('\'', t2.tuoteno, '\'')) tuotteet
+							FROM dynaaminen_puu AS node
+							JOIN dynaaminen_puu AS child ON (child.yhtio = node.yhtio
+								AND child.laji = node.laji
+								AND child.lft >= node.lft
+								AND child.rgt <= node.rgt)
+							JOIN puun_alkio ON (puun_alkio.yhtio = child.yhtio
+								AND puun_alkio.laji = child.laji
+								AND puun_alkio.puun_tunnus = child.tunnus)
+							JOIN tilausrivi as t2 ON (t2.yhtio = puun_alkio.yhtio
+								AND t2.tuoteno = puun_alkio.liitos
+								AND t2.otunnus = {$tilausnumero})
+							WHERE  node.yhtio = '{$kukarow['yhtio']}'
+							AND node.tunnus = {$kampanja_ehto['arvo']}";
 				$result = pupe_query($query);
 
-				while ($tilausrivi = mysql_fetch_assoc($result)) {
-
-					$query = "	SELECT group_concat(parent.tunnus) tunnukset
-								FROM puun_alkio
-								JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
-								JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
-								WHERE puun_alkio.yhtio = '$kukarow[yhtio]'
-								AND puun_alkio.laji    = 'Tuote'
-								AND puun_alkio.liitos  = '{$tilausrivi['tuoteno']}'";
-					$result2 = pupe_query($query);
-
-					$puun_tunnukset = mysql_fetch_assoc($result2);
-					$puun_tunnukset = explode(',', $puun_tunnukset['tunnukset']);
-
-					if (in_array($kampanja_ehto['arvo'], $puun_tunnukset)) {
-						//tilausrivin tuote on kampanjan ehdon tuotekategoriassa
-						//tarkistetaan osuuko aliehdot
-						if (!empty($kampanja_ehto['aliehdot'])) {
-							$having_ehdot = populoi_aliehto_having($kampanja_ehto['aliehdot']);
-							$query = "	SELECT lasku.tunnus,
-										sum(tilausrivi.varattu + tilausrivi.jt) kpl,
-										sum(tilausrivi.hinta) arvo
-										FROM lasku
-										JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus )
-										WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-										AND lasku.tunnus = {$tilausnumero}
-										AND lasku.tila = 'N'
-										AND lasku.alatila = ''
-										GROUP BY lasku.tunnus
-										{$having_ehdot}";
-							$result = pupe_query($query);
-							$row = mysql_fetch_assoc($result);
-
-							if ($row['tunnus'] == NULL) {
-								return false;
-							}
-						}
-						return true;
-					}
+				if (mysql_num_rows($result) > 0) {
+					$row = mysql_fetch_assoc($result);
+					$tuote_ehto = " AND tilausrivi.tuoteno IN ({$row['tuotteet']})";
 				}
-				return false;
+				else {
+					return false;
+				}
 
 				break;
 
 			case 'tuoteosasto':
 				$having_ehdot = populoi_aliehto_having($kampanja_ehto['aliehdot']);
 				$ehto_rajaus = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.osasto {$kampanja_ehto['rajoitin']} '{$kampanja_ehto['arvo']}')";
+				$group_by = "GROUP BY tuote.osasto";
 				break;
 
 			case 'tuoteryhma':
 				$having_ehdot = populoi_aliehto_having($kampanja_ehto['aliehdot']);
 				$ehto_rajaus = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.try {$kampanja_ehto['rajoitin']} '{$kampanja_ehto['arvo']}')";
+				$group_by = "GROUP BY tuote.try";
 				break;
 
 			case 'kappaleet':

@@ -86,7 +86,7 @@ if (strpos($file, "maventa") !== false and trim($xml->SellerPartyDetails->Seller
 				if (mysql_num_rows($result) == 1) {
 					$toimittajanro_chk_row = mysql_fetch_assoc($result);
 					$laskuttajan_toimittajanumero = $toimittajanro_chk_row['toimittajanro'];
-				break;
+					break;
 				}
 			}
 		}

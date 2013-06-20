@@ -21388,11 +21388,15 @@ if (!function_exists('hae_laskun_tilausrivit')) {
 			$tilausrivi_where = " AND tyyppi != 'D' ";
 		}
 
-		$query = "	SELECT *
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow["ostotilauksen_jarjestys"]);
+
+		$query = "	SELECT tilausrivi.*,
+					$sorttauskentta
 					FROM tilausrivi
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND otunnus = '{$otunnus}'
-					{$tilausrivi_where}";
+					{$tilausrivi_where}
+					ORDER BY sorttauskentta {$yhtiorow['ostotilauksen_jarjestys_suunta']}, tilausrivi.tunnus";
 		$result = pupe_query($query);
 		$tilausrivit = array();
 

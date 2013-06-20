@@ -193,6 +193,8 @@ elseif (isset($api_kentat) and count($api_kentat) > 0) {
 
 if ($kasitellaan_tiedosto) {
 
+	$lue_data_autoid = file_exists("lue_data_autoid.php");
+
 	/** Käsiteltävän filen nimi **/
 	$kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
 
@@ -744,7 +746,7 @@ if ($kasitellaan_tiedosto) {
 
 					$valinta .= " and TUOTENO='$tuoteno'";
 				}
-				elseif ($table_mysql == 'autoid_lisatieto' and ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA" or $taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA") and file_exists("lue_data_autoid.php") AND !in_array($eriviindex, $lisatyt_indeksit)) {
+				elseif ($table_mysql == 'autoid_lisatieto' and $lue_data_autoid and ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA" or $taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA") AND !in_array($eriviindex, $lisatyt_indeksit)) {
 					$tee = "pre_rivi_loop";
 					require("lue_data_autoid.php");
 				}
@@ -1467,10 +1469,8 @@ if ($kasitellaan_tiedosto) {
 							}
 						}
 
-						if (file_exists("lue_data_autoid.php")) {
-
+						if ($lue_data_autoid) {
 							$tee = "rivi_loop";
-
 							require("lue_data_autoid.php");
 						}
 

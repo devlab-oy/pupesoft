@@ -150,94 +150,126 @@ if (count($tuotetiedot) > 0) {
 
 		if ($rtuoteno[$i]["tuoteno"] != "") {
 
-			// Telko-case
-			// 300013 = rahtiveloitus
-			// 300023 = pakkauskulu
-			// 300027 = pakkauskulu
-			if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123335" and ($rtuoteno[$i]["tuoteno"] == "300013" or $rtuoteno[$i]["tuoteno"] == "300023" or $rtuoteno[$i]["tuoteno"] == "300027")) {
+			if ($laskun_ebid == "MAVENTAXML") {
 
-				if ($rtuoteno[$i]["tuoteno"] == "300013") {
-					$laskun_rahtikulu += (float) str_replace(",", ".", $tuotetieto->RowAmount);
-					$osto_rivi_kulu += (float) str_replace(",", ".", $tuotetieto->RowAmount);
-					$osto_rahti_alv = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
+				// Telko-case
+				// 300013 = rahtiveloitus
+				// 300023 = pakkauskulu
+				// 300027 = pakkauskulu
+				if ($laskuttajan_toimittajanumero == "123335" and ($rtuoteno[$i]["tuoteno"] == "300013" or $rtuoteno[$i]["tuoteno"] == "300023" or $rtuoteno[$i]["tuoteno"] == "300027")) {
+
+					if ($rtuoteno[$i]["tuoteno"] == "300013") {
+						$laskun_rahtikulu += (float) str_replace(",", ".", $tuotetieto->RowAmount);
+						$osto_rivi_kulu += (float) str_replace(",", ".", $tuotetieto->RowAmount);
+						$osto_rahti_alv = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
+					}
+					else {
+						$osto_kulu += (float) str_replace(",", ".", $tuotetieto->RowAmount);
+						$osto_kulu_alv = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
+					}
+
+					unset($rtuoteno[$i]);
+					continue;
 				}
-				else {
-					$osto_kulu += (float) str_replace(",", ".", $tuotetieto->RowAmount);
-					$osto_kulu_alv = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
+
+				// Brembo-case
+				if ($laskuttajan_toimittajanumero == "123098") {
+
+					$query = "	SELECT tuotteen_toimittajat.toim_tuoteno
+								FROM toimi
+								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+															AND tuotteen_toimittajat.tuoteno = '{$rtuoteno[$i]['tuoteno']}'
+															AND tuotteen_toimittajat.tuoteno != '')
+								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+								AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
+								AND toimi.tyyppi != 'P'
+								AND toimi.asn_sanomat = 'M'";
+					$tuoteno_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($tuoteno_chk_res) > 0) {
+						$tuoteno_chk_row = mysql_fetch_assoc($tuoteno_chk_res);
+						$rtuoteno[$i]['tuoteno'] = $tuoteno_chk_row['toim_tuoteno'];
+					}
 				}
 
-				unset($rtuoteno[$i]);
-				continue;
-			}
+				// Budweg-case
+				// FTE-case
+				if (($laskuttajan_toimittajanumero == "123099" and $edellinen_tuoteno != "" and substr($edellinen_tuoteno, -3) == substr($rtuoteno[$i]['tuoteno'], -3) and in_array(substr($rtuoteno[$i]['tuoteno'], 0, 3), $budweg_runkotuotteiden_alut))
+					or
+					($laskuttajan_toimittajanumero == "123014" and trim(strtolower($rtuoteno[$i]["tuoteno"])) == "corecharge")) {
 
-			// Brembo-case
-			if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123098") {
+					// Katsotaan löytyykö runkotuote (tuoteperheen lapsituote)
+					$query = "	SELECT tuote.tuoteno, tuote.nimitys
+								FROM toimi
+								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+									AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+									AND tuotteen_toimittajat.toim_tuoteno IN ('{$edellinen_tuoteno}')
+									AND tuotteen_toimittajat.toim_tuoteno != '')
+								JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio
+									AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno
+									AND tuoteperhe.tyyppi IN ('P','')
+									AND tuoteperhe.ohita_kerays != '')
+								JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
+								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+								AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
+								AND toimi.tyyppi != 'P'
+								AND toimi.asn_sanomat = 'M'";
+					$child_chk_res = pupe_query($query);
 
-				$query = "	SELECT tuotteen_toimittajat.toim_tuoteno
-							FROM toimi
-							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
-														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-														AND tuotteen_toimittajat.tuoteno = '{$rtuoteno[$i]['tuoteno']}'
-														AND tuotteen_toimittajat.tuoteno != '')
-							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
-							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
-							AND toimi.tyyppi != 'P'
-							AND toimi.asn_sanomat = 'M'";
-				$tuoteno_chk_res = pupe_query($query);
+					if (mysql_num_rows($child_chk_res) > 0) {
 
-				if (mysql_num_rows($tuoteno_chk_res) > 0) {
-					$tuoteno_chk_row = mysql_fetch_assoc($tuoteno_chk_res);
-					$rtuoteno[$i]['tuoteno'] = $tuoteno_chk_row['toim_tuoteno'];
+						$child_chk_row = mysql_fetch_assoc($child_chk_res);
+
+						$rtuoteno[$i]['tuoteno'] = $child_chk_row['tuoteno'];
+						$rtuoteno[$i]['tuoteno2'] = $child_chk_row['tuoteno'];
+						$rtuoteno[$i]["lapsi"] = "yes";
+					}
 				}
-			}
 
-			// Budweg-case
-			if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123099" and $edellinen_tuoteno != "" and substr($edellinen_tuoteno, -3) == substr($rtuoteno[$i]['tuoteno'], -3) and in_array(substr($rtuoteno[$i]['tuoteno'], 0, 3), $budweg_runkotuotteiden_alut)) {
-				$rtuoteno[$i]["lapsi"] = "yes";
-			}
+				// Horger Christiansen-case
+				if ($laskuttajan_toimittajanumero == "123029") {
 
-			// Horger Christiansen-case
-			if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123029") {
+					// Katsotaan löytyykö runkotuote (tuoteperheen lapsituote)
+					$query = "	SELECT tuote.tuoteno, tuote.nimitys
+								FROM toimi
+								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+									AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+									AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}')
+									AND tuotteen_toimittajat.toim_tuoteno != '')
+								JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio
+									AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno
+									AND tuoteperhe.tyyppi IN ('P','')
+									AND tuoteperhe.ohita_kerays != '')
+								JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
+								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+								AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
+								AND toimi.tyyppi != 'P'
+								AND toimi.asn_sanomat = 'M'";
+					$child_chk_res = pupe_query($query);
 
-				// Katsotaan löytyykö runkotuote (tuoteperheen lapsituote)
-				$query = "	SELECT tuote.tuoteno, tuote.nimitys
-							FROM toimi
-							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
-								AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-								AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}')
-								AND tuotteen_toimittajat.toim_tuoteno != '')
-							JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio
-								AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno
-								AND tuoteperhe.tyyppi IN ('P','')
-								AND tuoteperhe.ohita_kerays != '')
-							JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
-							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
-							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
-							AND toimi.tyyppi != 'P'
-							AND toimi.asn_sanomat = 'M'";
-				$child_chk_res = pupe_query($query);
+					if (mysql_num_rows($child_chk_res) > 0) {
 
-				if (mysql_num_rows($child_chk_res) > 0) {
+						$runkotuotteita += $rtuoteno[$i]['kpl'];
 
-					$runkotuotteita += $rtuoteno[$i]['kpl'];
+						$child_chk_row = mysql_fetch_assoc($child_chk_res);
 
-					$child_chk_row = mysql_fetch_assoc($child_chk_res);
+						$x = $i + 1;
 
-					$x = $i + 1;
+						$rtuoteno[$x]['tuoteno'] 			= $child_chk_row['tuoteno'];
+						$rtuoteno[$x]['tuoteno2'] 			= $child_chk_row['tuoteno'];
+						$rtuoteno[$x]['ostotilausnro'] 		= $rtuoteno[$i]['ostotilausnro'];
+						$rtuoteno[$x]['tilaajanrivinro'] 	= $rtuoteno[$i]['tilaajanrivinro'];
+						$rtuoteno[$x]['kpl'] 				= $rtuoteno[$i]['kpl'];
 
-					$rtuoteno[$x]['tuoteno'] 			= $child_chk_row['tuoteno'];
-					$rtuoteno[$x]['tuoteno2'] 			= $child_chk_row['tuoteno'];
-					$rtuoteno[$x]['ostotilausnro'] 		= $rtuoteno[$i]['ostotilausnro'];
-					$rtuoteno[$x]['tilaajanrivinro'] 	= $rtuoteno[$i]['tilaajanrivinro'];
-					$rtuoteno[$x]['kpl'] 				= $rtuoteno[$i]['kpl'];
+						$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
+						$rtuoteno[$x]['status']				= '';
+						$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
+						$rtuoteno[$x]["lapsi"]				= "yes";
+						$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
 
-					$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
-					$rtuoteno[$x]['status']				= '';
-					$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
-					$rtuoteno[$x]["lapsi"]				= "yes";
-					$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
-
-					$runkotuotteiden_indeksit[$x] = $x;
+						$runkotuotteiden_indeksit[$x] = $x;
+					}
 				}
 			}
 

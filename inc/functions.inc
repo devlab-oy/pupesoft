@@ -21570,13 +21570,13 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 							AND node.tunnus = {$kampanja_ehto['arvo']}";
 				$result = pupe_query($query);
 
-				if (mysql_num_rows($result) > 0) {
-					$row = mysql_fetch_assoc($result);
-					$tuote_ehto = " AND tilausrivi.tuoteno IN ({$row['tuotteet']})";
-				}
-				else {
+				$row = mysql_fetch_assoc($result);
+
+				if ($row['tuotteet'] === NULL) {
 					return false;
 				}
+
+				$tuote_ehto = " AND tilausrivi.tuoteno IN ({$row['tuotteet']})";
 
 				break;
 
@@ -21621,7 +21621,7 @@ if (!function_exists('tarkista_kampanja_ehto')) {
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 
-		if ($row['tunnus'] == NULL) {
+		if ($row['tunnus'] === NULL) {
 			return false;
 		}
 

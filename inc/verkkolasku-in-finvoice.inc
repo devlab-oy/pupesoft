@@ -131,6 +131,7 @@ $budweg_runkotuotteiden_alut = array(
 	'903',
 	'904',
 );
+$runkotuotteita = 0;
 
 $rivien_summa_yhteensa = 0;
 
@@ -179,7 +180,7 @@ if (count($tuotetiedot) > 0) {
 							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
 							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
 							AND toimi.tyyppi != 'P'
-							AND toimi.asn_sanomat IN ('K', 'L')";
+							AND toimi.asn_sanomat = 'M'";
 				$tuoteno_chk_res = pupe_query($query);
 
 				if (mysql_num_rows($tuoteno_chk_res) > 0) {
@@ -191,6 +192,32 @@ if (count($tuotetiedot) > 0) {
 			// Budweg-case
 			if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123099" and $edellinen_tuoteno != "" and substr($edellinen_tuoteno, -3) == substr($rtuoteno[$i]['tuoteno'], -3) and in_array(substr($rtuoteno[$i]['tuoteno'], 0, 3), $budweg_runkotuotteiden_alut)) {
 				$rtuoteno[$i]["lapsi"] = "yes";
+			}
+
+			// Horger Christiansen-case
+			if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123029") {
+
+				// Katsotaan löytyykö runkotuote (tuoteperheen lapsituote)
+				$query = "	SELECT tuote.tuoteno, tuote.nimitys
+							FROM toimi
+							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+								AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+								AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}')
+								AND tuotteen_toimittajat.toim_tuoteno != '')
+							JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio
+								AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno
+								AND tuoteperhe.tyyppi IN ('P','')
+								AND tuoteperhe.ohita_kerays != '')
+							JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
+							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
+							AND toimi.tyyppi != 'P'
+							AND toimi.asn_sanomat = 'M'";
+				$child_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($child_chk_res) > 0) {
+					$runkotuotteita++;
+				}
 			}
 
 			// maventa-case
@@ -245,7 +272,7 @@ if (count($tuotetiedot) > 0) {
 							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
 							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
 							AND toimi.tyyppi != 'P'
-							AND toimi.asn_sanomat IN ('K', 'L')";
+							AND toimi.asn_sanomat = 'M'";
 				$tuotekerroin_chk_res = pupe_query($query);
 
 				if (mysql_num_rows($tuotekerroin_chk_res) > 0) {
@@ -273,6 +300,10 @@ if (count($tuotetiedot) > 0) {
 	if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123099" and $laskun_summa_eur > $rivien_summa_yhteensa) {
 		$osto_rahti = $laskun_summa_eur - $rivien_summa_yhteensa;
 		$osto_rahti_alv = (float) str_replace(",", ".", $xml->InvoiceDetails->VatSpecificationDetails->VatRatePercent);
+	}
+
+	if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123029" and abs($laskun_summa_eur - $rivien_summa_yhteensa) != 0) {
+
 	}
 }
 

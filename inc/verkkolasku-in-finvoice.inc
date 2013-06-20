@@ -103,6 +103,7 @@ if ($laskun_tyyppi == "INV02") {
 // Käsitellään tuoterivit
 $tuotetiedot	= $xml->InvoiceRow;
 $i				= 0;
+$x 				= 0;
 $rtuoteno		= array();
 $ealvi		 	= array("");
 $lisavat	 	= array("");
@@ -132,6 +133,7 @@ $budweg_runkotuotteiden_alut = array(
 	'904',
 );
 $runkotuotteita = 0;
+$runkotuotteiden_indeksit = array();
 
 $rivien_summa_yhteensa = 0;
 
@@ -216,7 +218,26 @@ if (count($tuotetiedot) > 0) {
 				$child_chk_res = pupe_query($query);
 
 				if (mysql_num_rows($child_chk_res) > 0) {
-					$runkotuotteita++;
+
+					$runkotuotteita += $rtuoteno[$i]['kpl'];
+
+					$child_chk_row = mysql_fetch_assoc($child_chk_res);
+
+					$x = $i + 1;
+
+					$rtuoteno[$x]['tuoteno'] 			= $child_chk_row['tuoteno'];
+					$rtuoteno[$x]['tuoteno2'] 			= $child_chk_row['tuoteno'];
+					$rtuoteno[$x]['ostotilausnro'] 		= $rtuoteno[$i]['ostotilausnro'];
+					$rtuoteno[$x]['tilaajanrivinro'] 	= $rtuoteno[$i]['tilaajanrivinro'];
+					$rtuoteno[$x]['kpl'] 				= $rtuoteno[$i]['kpl'];
+
+					$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
+					$rtuoteno[$x]['status']				= '';
+					$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
+					$rtuoteno[$x]["lapsi"]				= "yes";
+					$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
+
+					$runkotuotteiden_indeksit[$x] = $x;
 				}
 			}
 
@@ -294,7 +315,13 @@ if (count($tuotetiedot) > 0) {
 			unset($rtuoteno[$i]);
 			$i--;
 		}
+
 		$i++;
+
+		if ($x != 0) {
+			$x = 0;
+			$i++;
+		}
 	}
 
 	if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123099" and $laskun_summa_eur > $rivien_summa_yhteensa) {
@@ -302,8 +329,14 @@ if (count($tuotetiedot) > 0) {
 		$osto_rahti_alv = (float) str_replace(",", ".", $xml->InvoiceDetails->VatSpecificationDetails->VatRatePercent);
 	}
 
-	if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123029" and abs($laskun_summa_eur - $rivien_summa_yhteensa) != 0) {
+	if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123029" and abs($laskun_summa_eur - $rivien_summa_yhteensa) != 0 and count($runkotuotteiden_indeksit) > 0 and $runkotuotteita > 0) {
 
+		$rungon_hinta = abs($laskun_summa_eur - $rivien_summa_yhteensa) / $runkotuotteita;
+
+		foreach ($runkotuotteiden_indeksit as $indx) {
+			$rtuoteno[$indx]['hinta'] = $rungon_hinta;
+			$rtuoteno[$indx]['rivihinta'] = $rtuoteno[$indx]['kpl'] * $rungon_hinta;
+		}
 	}
 }
 

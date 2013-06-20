@@ -12,12 +12,12 @@ require ("{$pupe_root_polku}/inc/functions.inc");
 require ("{$pupe_root_polku}/rajapinnat/magento_client.php");
 require ("{$pupe_root_polku}/rajapinnat/edi.php");
 
-if (empty($magento_api_edi) or empty($magento_api_url) or empty($magento_api_usr) or empty($magento_api_pas)) {
+if (empty($magento_api_ana_edi) or empty($magento_api_ana_url) or empty($magento_api_ana_usr) or empty($magento_api_ana_pas)) {
 	exit("Parametrejä puuttuu\n");
 }
 
 // Magenton soap client
-$magento = new MagentoClient($magento_api_url, $magento_api_usr, $magento_api_pas);
+$magento = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 
 // Haetaan maksetut tilaukset magentosta
 $tilaukset = $magento->hae_tilaukset('pending');

@@ -1140,7 +1140,7 @@
 								break;
 							case 'kate_korjattu':
 								$values .= ", NULL";
-								break;							
+								break;
 							default:
 								$values .= ", '".$ostotilausrivirow[$fieldname]."'";
 						}
@@ -1964,7 +1964,7 @@
 
 			echo "<tr><th colspan='9'><input type='button' class='vahvistavakisinbutton' value='",t("Aja automaattikohdistus uudestaan kaikille riveille"),"' /></th></tr>";
 
-			echo ebid($laskurow['tunnus']);
+			if ($laskurow['tunnus'] != '') echo "<tr><th colspan='9'>",ebid($laskurow['tunnus']),"</th></tr>";
 
 			echo "</table>";
 			echo "</form>";

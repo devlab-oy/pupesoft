@@ -489,6 +489,7 @@
 
 				if (mysql_num_rows($result) == 1) {
 					$trow = mysql_fetch_assoc($result);
+					$laskuttajan_toimittajanumero = $trow['toimittajanro'];
 				}
 			}
 

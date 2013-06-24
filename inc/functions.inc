@@ -21378,7 +21378,7 @@ if (!function_exists('hae_lasku')) {
 }
 
 if (!function_exists('hae_laskun_tilausrivit')) {
-	function hae_laskun_tilausrivit($otunnus, $tyypit = array()) {
+	function hae_laskun_tilausrivit($otunnus, $tyypit = array(), $sorttauskentta = "", $sorttaussuunta = "") {
 		global $kukarow, $yhtiorow;
 
 		if (!empty($tyypit)) {
@@ -21388,11 +21388,15 @@ if (!function_exists('hae_laskun_tilausrivit')) {
 			$tilausrivi_where = " AND tyyppi != 'D' ";
 		}
 
-		$query = "	SELECT *
+		if ($sorttauskentta == "") $sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
+
+		$query = "	SELECT tilausrivi.*,
+					$sorttauskentta
 					FROM tilausrivi
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND otunnus = '{$otunnus}'
-					{$tilausrivi_where}";
+					{$tilausrivi_where}
+					ORDER BY sorttauskentta {$sorttaussuunta}, tunnus";
 		$result = pupe_query($query);
 		$tilausrivit = array();
 

@@ -290,7 +290,7 @@ if (count($tuotetiedot) > 0) {
 
 					if (mysql_num_rows($child_chk_res) > 0) {
 
-						$runkotuotteita += $rtuoteno[$i]['kpl'];
+						$runkotuotteita += (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
 
 						$child_chk_row = mysql_fetch_assoc($child_chk_res);
 
@@ -299,7 +299,7 @@ if (count($tuotetiedot) > 0) {
 						$rtuoteno[$x]['tuoteno'] 			= $child_chk_row['tuoteno'];
 						$rtuoteno[$x]['tuoteno2'] 			= $child_chk_row['tuoteno'];
 						$rtuoteno[$x]['ostotilausnro'] 		= $laskun_asiakkaan_tilausnumero;
-						$rtuoteno[$x]['tilaajanrivinro'] 	= $tuotetieto->RowIdentifier;
+						$rtuoteno[$x]['tilaajanrivinro'] 	= (isset($tuotetieto->RowIdentifier) and trim($tuotetieto->RowIdentifier) != "") ? $tuotetieto->RowIdentifier : "";
 						$rtuoteno[$x]['kpl'] 				= (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
 
 						$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];

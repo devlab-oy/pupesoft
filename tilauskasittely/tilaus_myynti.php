@@ -822,7 +822,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 	$query = "DELETE from rahtikirjat WHERE yhtio='$kukarow[yhtio]' and otsikkonro='$kukarow[kesken]'";
 	$result = pupe_query($query);
 
-	$query = "UPDATE lasku SET tila='D', alatila='L', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ohjelmassa tilaus_myynti.php ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+	$query = "UPDATE lasku SET tila='D', alatila='L', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa tilaus_myynti.php")." ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 	$result = pupe_query($query);
 
 	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
@@ -6564,7 +6564,7 @@ if ($tee == '') {
 
 				}
 			}
-			
+
 			$summa 					= 0; 	// Tilauksen verollinen loppusumma tilauksen valuutassa
 			$summa_eieri			= 0;	// Tilauksen verollinen loppusumma tilauksen valuutassa ilman erikoisalennusta
 			$arvo  					= 0;	// Tilauksen veroton loppusumma tilauksen valuutassa

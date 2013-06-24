@@ -384,6 +384,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 								and tunnus  = '$erajaljella_row[tunnus]'";
 					$lisa_res = pupe_query($query);
 
+					$raakaerarow = array('tunnus' => 0, 'ostorivitunnus' => 0);
+
 					if ($ederaostorivi == 0 and $lisa_row['era_kpl'] == 0) {
 						// T‰m‰ on loopin eka kierros, silloin p‰ivitet‰‰n aina alunperin raaka-aineriviin liitetty er‰numerorivi
 						$raakaerarow = $lisa_row;

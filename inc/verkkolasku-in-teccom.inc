@@ -281,6 +281,8 @@
 
 				$rtuoteno[$i]["ostotilausnro"] = (string) $tuotetieto->OrderRef->BuyerOrderNumber;
 
+				if ($rtuoteno[$i]["ostotilausnro"] == "") (string) $xml->InvoiceHeader->OrderRef->BuyerOrderNumber;
+
 				$rtuoteno[$i]["tilaajanrivinro"] = (string) $tuotetieto->OrderItemRef->BuyerOrderItemRef;
 
 				$rtuoteno[$i]["kpl"] = (int) str_replace(",", ".", $tuotetieto->Quantity);

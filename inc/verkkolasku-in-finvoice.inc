@@ -298,9 +298,9 @@ if (count($tuotetiedot) > 0) {
 
 						$rtuoteno[$x]['tuoteno'] 			= $child_chk_row['tuoteno'];
 						$rtuoteno[$x]['tuoteno2'] 			= $child_chk_row['tuoteno'];
-						$rtuoteno[$x]['ostotilausnro'] 		= $rtuoteno[$i]['ostotilausnro'];
-						$rtuoteno[$x]['tilaajanrivinro'] 	= $rtuoteno[$i]['tilaajanrivinro'];
-						$rtuoteno[$x]['kpl'] 				= $rtuoteno[$i]['kpl'];
+						$rtuoteno[$x]['ostotilausnro'] 		= $laskun_asiakkaan_tilausnumero;
+						$rtuoteno[$x]['tilaajanrivinro'] 	= $tuotetieto->RowIdentifier;
+						$rtuoteno[$x]['kpl'] 				= (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
 
 						$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
 						$rtuoteno[$x]['status']				= '';

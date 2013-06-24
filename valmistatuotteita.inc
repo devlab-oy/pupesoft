@@ -357,7 +357,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 							and hyllynro    	 = '$tuoterow[hyllynro]'
 							and hyllyvali   	 = '$tuoterow[hyllyvali]'
 							and hyllytaso   	 = '$tuoterow[hyllytaso]'
-							ORDER BY era_kpl, tunnus";
+							ORDER BY era_kpl DESC, tunnus";
 				$erajaljella_res = pupe_query($query);
 
 				// jos löytyy ostettuja eriä myytäväks niin mennään tänne

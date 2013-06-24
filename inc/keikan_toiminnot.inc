@@ -194,6 +194,35 @@
 	                AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
 	    $result = pupe_query($query);
 
+	    if ($otunnus == 0 and $valittutunnus != '') {
+
+	    	// Katsotaan löytyykö rivi asn_sanomat-tauluun kohdistettuna
+	    	// Jos löytyy, poistetaan kohdistus
+	    	$query = "	SELECT *
+	    				FROM asn_sanomat
+	    				WHERE yhtio = '{$kukarow['yhtio']}'
+	    				AND laji = 'tec'
+	    				AND tilausrivi LIKE '%{$valittutunnus}%'";
+	    	$chk_exist_res = pupe_query($query);
+
+	    	if (mysql_num_rows($chk_exist_res) > 0) {
+
+	    		while ($chk_exist_row = mysql_fetch_assoc($chk_exist_res)) {
+
+	    			$arr = explode(",", $chk_exist_row['tilausrivi']);
+	    			array_flip($arr);
+	    			unset($arr[$valittutunnus]);
+	    			array_flip($arr);
+
+	    			$query = "	UPDATE asn_sanomat SET
+	    						tilausrivi = '".implode(",", $arr)."'
+	    						WHERE yhtio = '{$kukarow['yhtio']}'
+	    						AND tunnus = '{$chk_exist_row['tunnus']}'";
+	    			pupe_query($query);
+	    		}
+	    	}
+	    }
+
 	    // Haetaan päivitetyt rivit
 	    $uudethinnat = array();
 	    mysql_data_seek($selresult, 0);

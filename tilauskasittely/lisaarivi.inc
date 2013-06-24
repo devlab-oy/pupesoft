@@ -514,9 +514,12 @@
 		}
 
 		if ($lisaarivi_debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
+		
+		$saako_myyda_korvaavaa = FALSE;
+		$saako_myyda_korvaavaa = saako_myyda_private_label($laskurow["liitostunnus"], $tuoteno);
 
 		// Etsit‰‰n korvaavia tuotteita
-		if ($trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L') {
+		if ($trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L' AND $saako_myyda_korvaavaa) {
 
 			// Tutkitaan ensin saako t‰lle asiakkaalle myyd‰ korvaavia t‰st‰ tuoteryhm‰st‰
 			$query = " SELECT yhtio

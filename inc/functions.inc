@@ -22206,3 +22206,77 @@ if (!function_exists("lisaa_rivi")) {
 		// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
 	}
 }
+
+if (!function_exists("saako_myyda_private_label")) {
+	function saako_myyda_private_label($asiakastunnus, $tuotenro){
+		global $kukarow, $yhtiorow;
+
+		$temp_laskurowwi;
+		if (!is_array($temp_laskurowwi)) {
+			$query = "	SELECT *
+						FROM asiakas
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus = '$asiakastunnus'";
+			$asiakastempres = pupe_query($query);
+			$asiakastemprow = mysql_fetch_assoc($asiakastempres);
+
+			$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
+			$temp_laskurowwi['ytunnus']			= $asiakastemprow['ytunnus'];
+			$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
+			$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
+
+		}
+			
+		$query = "SELECT id
+					FROM korvaavat
+					WHERE yhtio	= '$kukarow[yhtio]'
+					AND tuoteno	= '$tuotenro'";
+		$temp = pupe_query($query);
+		$tempr = mysql_fetch_assoc($temp);
+
+		$query = "	SELECT *
+					FROM korvaavat
+					WHERE yhtio = 	'$kukarow[yhtio]'
+					AND tuoteno != '$tuotenro'
+					AND id = '$tempr[id]'";
+		$temp = pupe_query($query);
+		$tempr = mysql_fetch_assoc($temp);
+
+		$tuotenro = $tempr["tuoteno"];
+			
+		$query = "	SELECT *
+					FROM tuote
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tuoteno = '$tuotenro'";
+		$tuotetempres = pupe_query($query);
+		$temptrow = mysql_fetch_assoc($tuotetempres);
+
+
+		$haettavat_kentat = "hinta,hintaperuste,aleperuste";
+
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			$haettavat_kentat .= ",ale{$alepostfix}";
+		}
+
+		$onko_asiakkaalla_alennuksia = FALSE;
+		
+		$hinnat = alehinta($temp_laskurowwi, $temptrow, 1, '', '', '', $haettavat_kentat);
+
+
+
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+				$onko_asiakkaalla_alennuksia = TRUE;
+					break;
+			}
+		}
+
+		// Jos tuote n‰ytet‰‰n vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei lˆydy
+		if ($temptrow["hinnastoon"] == "V" and (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE)) {
+			return $onko_asiakkaalla_alennuksia;
+		}
+	
+	return $onko_asiakkaalla_alennuksia;
+		
+	}
+}

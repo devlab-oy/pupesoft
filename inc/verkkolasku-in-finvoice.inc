@@ -356,6 +356,8 @@ if (count($tuotetiedot) > 0) {
 
 			if ($laskun_ebid == "MAVENTAXML") {
 
+				if ($laskuttajan_toimittajanumero == "123099" and $rtuoteno[$i]["kpl"] > 1 and $rtuoteno[$i]["rivihinta"] == $rtuoteno[$i]["hinta"]) $rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"] / $rtuoteno[$i]["kpl"];
+
 				$query = "	SELECT tuotteen_toimittajat.tuotekerroin
 							FROM toimi
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio

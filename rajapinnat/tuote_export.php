@@ -29,12 +29,12 @@
 	if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
 		// Varmistetaan, ett‰ kaikki muuttujat on kunnossa
-		if (empty($magento_api_edi) or empty($magento_api_url) or empty($magento_api_usr) or empty($magento_api_pas)) {
+		if (empty($magento_api_ana_url) or empty($magento_api_ana_usr) or empty($magento_api_ana_pas)) {
 			exit;
 		}
 
 		// Testataan viel‰, ett‰ yhteys toimii ennenkun ajellaan queryj‰
-		$magento_client = new MagentoClient($magento_api_url, $magento_api_usr, $magento_api_pas);
+		$magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 	}
 
 	$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
@@ -418,7 +418,7 @@
 
 		echo "P‰ivitet‰‰n Magento verkkokauppaa!\n";
 
-		$magento_client = new MagentoClient($magento_api_url, $magento_api_usr, $magento_api_pas);
+		$magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 
 		// tax_class_id, magenton API ei anna hakea t‰t‰ mist‰‰n. Pit‰‰ k‰yd‰ katsomassa magentosta
 		if (! isset($magento_tax_class_id)) $magento_tax_class_id = 0;

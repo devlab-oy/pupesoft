@@ -13747,7 +13747,7 @@ if (!function_exists("hintapyoristys")) {
 	function hintapyoristys($luku, $desimaalit=0, $loppunollat_pois=FALSE) {
 		global $yhtiorow;
 
-		if ($luku == 'null') {
+		if (!is_numeric($luku) and $luku == 'null') {
 			return '';
 		}
 
@@ -20907,6 +20907,30 @@ if (!function_exists('_echo_ordered_table_rows')) {
 	}
 }
 
+if (!function_exists('echo_tallennus_formi')) {
+
+	/**
+	 * Echoo formin, jonka avulla voidaan ladata tiedosto palvelimelta
+	 *
+	 * @param string $xls_filename
+	 */
+	function echo_tallennus_formi($xls_filename, $kaunisnimi) {
+		echo "<form id='tallennus_form' method='post' class='multisubmit'>";
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Tallenna excel aineisto").":</th>";
+		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+		echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
+		echo "<input type='hidden' name='kaunisnimi' value='".t($kaunisnimi).".xlsx'>";
+		echo "<input type='hidden' name='tmpfilenimi' value='{$xls_filename}'>";
+		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td>";
+		echo "</tr>";
+		echo "</table>";
+		echo "</form>";
+		echo "<br/>";
+	}
+}
+
 if  (!function_exists('hae_chn_teksti')) {
 	function hae_chn_teksti($chn, $kieli = '') {
 
@@ -21354,7 +21378,7 @@ if (!function_exists('hae_lasku')) {
 }
 
 if (!function_exists('hae_laskun_tilausrivit')) {
-	function hae_laskun_tilausrivit($otunnus, $tyypit = array()) {
+	function hae_laskun_tilausrivit($otunnus, $tyypit = array(), $sorttauskentta = "", $sorttaussuunta = "") {
 		global $kukarow, $yhtiorow;
 
 		if (!empty($tyypit)) {
@@ -21364,11 +21388,15 @@ if (!function_exists('hae_laskun_tilausrivit')) {
 			$tilausrivi_where = " AND tyyppi != 'D' ";
 		}
 
-		$query = "	SELECT *
+		if ($sorttauskentta == "") $sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
+
+		$query = "	SELECT tilausrivi.*,
+					$sorttauskentta
 					FROM tilausrivi
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND otunnus = '{$otunnus}'
-					{$tilausrivi_where}";
+					{$tilausrivi_where}
+					ORDER BY sorttauskentta {$sorttaussuunta}, tunnus";
 		$result = pupe_query($query);
 		$tilausrivit = array();
 

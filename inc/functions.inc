@@ -3249,6 +3249,51 @@ if (!function_exists("etayhtio_hinta")) {
 	}
 }
 
+if (!function_exists("hae_alehinta_minkpl")) {
+	function hae_alehinta_minkpl($laskurow, $trow) {
+		global $kukarow, $yhtiorow;
+
+		$hinnasto = array();
+
+		list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', '', array());
+
+		$hinnasto[1] = array(
+			'hinta' => $hinta,
+			'netto' => $netto,
+			'ale' => $ale,
+			'alehinta_alv' => $alehinta_alv,
+			'alehinta_val' => $alehinta_val,
+		);
+
+		unset($hinta, $netto, $ale, $alehinta_alv, $alehinta_val);
+
+		$query = "	SELECT *
+					FROM hinnasto
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$trow['tuoteno']}'
+					AND minkpl > 0
+					ORDER BY minkpl";
+		$kpl_chk_res = pupe_query($query);
+
+		while ($kpl_chk_row = mysql_fetch_assoc($kpl_chk_res)) {
+
+			list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $kpl_chk_row['minkpl'], '', '', array());
+
+			$hinnasto[$kpl_chk_row['minkpl']] = array(
+				'hinta' => $hinta,
+				'netto' => $netto,
+				'ale' => $ale,
+				'alehinta_alv' => $alehinta_alv,
+				'alehinta_val' => $alehinta_val,
+			);
+
+			unset($hinta, $netto, $ale, $alehinta_alv, $alehinta_val);
+		}
+
+		return $hinnasto;
+	}
+}
+
 if (!function_exists("alehinta")) {
 	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="", $onlapsi="") {
 		global $yhtiorow, $kukarow;

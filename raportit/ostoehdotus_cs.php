@@ -649,18 +649,18 @@
 
 			if ($toim == "KK") {
 
+				// V‰hennet‰‰n saldosta varastosta l‰hteneet keskener‰iset varastosiirrot
+				if (isset($varastosta[$row['tuoteno']])) {
+					$saldot -= $varastosta[$row['tuoteno']];
+				}
+
+				// Lis‰t‰‰n saldoon varastoon matkalla olevat keskener‰iset varastosiirrot
+				if (isset($varastoon[$row['tuoteno']])) {
+					$saldot += $varastoon[$row['tuoteno']];
+				}
+
 				// Lis‰t‰‰n varatut tilaukseen ja verrataan tilauspistett‰ vapaasaldoon
 				$vapaasaldo = ($saldot - $enp + $ostot);
-
-				// V‰hennet‰‰n vapaasta saldosta varastosta l‰hteneet keskener‰iset varastosiirrot
-				if (isset($varastosta[$row['tuoteno']])) {
-					$vapaasaldo -= $varastosta[$row['tuoteno']];
-				}
-
-				// Lis‰t‰‰n vapaaseen saldoon varastoon matkalla olevat keskener‰iset varastosiirrot
-				if (isset($varastoon[$row['tuoteno']])) {
-					$vapaasaldo += $varastoon[$row['tuoteno']];
-				}
 
 				if ($vapaasaldo <= $row["tpaikka_halyraja"]) {
 

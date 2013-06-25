@@ -515,11 +515,14 @@
 
 		if ($lisaarivi_debug==1) echo "Mennään myyntihaaraan: $tuoteno<br>";
 		
-		$saako_myyda_korvaavaa = FALSE;
-		$saako_myyda_korvaavaa = saako_myyda_private_label($laskurow["liitostunnus"], $tuoteno);
 
 		// Etsitään korvaavia tuotteita
-		if ($trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L' AND $saako_myyda_korvaavaa) {
+		if ($trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L') {
+			
+			$saako_myyda_korvaavaa = TRUE;
+			$saako_myyda_korvaavaa = saako_myyda_private_label($laskurow["liitostunnus"], $tuoteno);
+			
+			if ($saako_myyda_korvaavaa){
 
 			// Tutkitaan ensin saako tälle asiakkaalle myydä korvaavia tästä tuoteryhmästä
 			$query = " SELECT yhtio
@@ -625,6 +628,7 @@
 			}
 			elseif (count($korkieltokommi) > 1) {
 				$korkieltokommi = t("Voit tilata korvaavia tuotteita").": ".implode(", ",$korkieltokommi);
+			}
 			}
 		} // end etsitäänkö korvaavia
 

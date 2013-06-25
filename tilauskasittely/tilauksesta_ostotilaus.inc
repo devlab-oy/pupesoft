@@ -223,9 +223,9 @@
 						}
 
 						//Haetaan myös ns. lisävarusteperheet.
-						$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl
+						$query = "	SELECT tuoteperhe.ohita_kerays, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl
 									FROM tilausrivi
-									LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays != '')
+									LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
 									where tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.otunnus = '$otunnus'
 									and tilausrivi.tyyppi != 'D'

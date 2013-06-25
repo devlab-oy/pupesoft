@@ -66,6 +66,49 @@
 		$lisavarattu = "";
 	}
 
+	function varastosiirrot($yhtiot, $varasto_tunnus = '') {
+
+		//varasto on syötettävä
+		if ($varasto_tunnus == '') {
+			return array(0, 0);
+		}
+
+		// Varastoon tulossa olevat siirrot
+		$varastoon_query = "SELECT
+							nimitys, tuoteno, clearing, varasto, kpl, kpl2, tilkpl, varattu, jt
+							FROM lasku
+							JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus)
+							WHERE lasku.yhtio in ($yhtiot)
+							AND lasku.tila='G'
+							AND lasku.alatila IN ('C', 'D')
+							AND lasku.clearing='$varasto_tunnus'";
+		$varastoon_result = pupe_query($varastoon_query);
+
+		$varastoon = array();
+		while ($row = mysql_fetch_assoc($varastoon_result)) {
+			$varastoon[] = $row;
+		}
+
+		// Varastosta lähtevät siirrot
+		$varastosta_query = "SELECT
+							nimitys, tuoteno, clearing, varasto, kpl, kpl2, tilkpl, varattu, jt
+							FROM lasku
+							JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus)
+							WHERE lasku.yhtio in ($yhtiot)
+							AND lasku.tila='G'
+							AND lasku.alatila IN ('C', 'D')
+							AND lasku.varasto='$varasto_tunnus'";
+		$varastosta_result = pupe_query($varastosta_query);
+
+		$varastosta = array();
+		while ($row = mysql_fetch_assoc($varastosta_result)) {
+			$varastosta[] = $row;
+		}
+
+		$siirrot = array($varastoon, $varastosta);
+		return $siirrot;
+	}
+
 	function myynnit($myynti_varasto = '', $myynti_maa = '') {
 
 		// otetaan kaikki muuttujat mukaan funktioon mitä on failissakin
@@ -549,6 +592,9 @@
 
 		$indeksi = 0;
 
+		// Haetaan varastosiirrot ennen looppia
+		list($varastoon, $varastosta) = varastosiirrot($yhtiot, $valvarasto);
+
 		// loopataan tuotteet läpi
 		while ($row = mysql_fetch_assoc($res)) {
 
@@ -599,6 +645,20 @@
 
 				// Lisätään varatut tilaukseen ja verrataan tilauspistettä vapaasaldoon
 				$vapaasaldo = ($saldot - $enp + $ostot);
+
+				// Varastosta
+				foreach($varastosta as $siirto) {
+					if($siirto['tuoteno'] == $row['tuoteno']) {
+						$vapaasaldo -= $siirto['varattu'];
+					}
+				}
+
+				// Varastoon
+				foreach($varastoon as $siirto) {
+					if($siirto['tuoteno'] == $row['tuoteno']) {
+						$vapaasaldo += $siirto['varattu'];
+					}
+				}
 
 				if ($vapaasaldo <= $row["tpaikka_halyraja"]) {
 

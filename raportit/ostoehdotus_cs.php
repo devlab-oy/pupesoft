@@ -649,14 +649,14 @@
 
 			if ($toim == "KK") {
 
-				// V‰hennet‰‰n saldosta varastosta l‰hteneet keskener‰iset varastosiirrot
+				// Lis‰t‰‰n ennakkopoistoihin varastosta l‰hteneet keskener‰iset varastosiirrot
 				if (isset($varastosta[$row['tuoteno']])) {
-					$saldot -= $varastosta[$row['tuoteno']];
+					$enp += $varastosta[$row['tuoteno']];
 				}
 
-				// Lis‰t‰‰n saldoon varastoon matkalla olevat keskener‰iset varastosiirrot
+				// V‰hennet‰‰n ennakkopoistoista varastoon matkalla olevat keskener‰iset varastosiirrot
 				if (isset($varastoon[$row['tuoteno']])) {
-					$saldot += $varastoon[$row['tuoteno']];
+					$enp -= $varastoon[$row['tuoteno']];
 				}
 
 				// Lis‰t‰‰n varatut tilaukseen ja verrataan tilauspistett‰ vapaasaldoon

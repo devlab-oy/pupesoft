@@ -290,9 +290,9 @@ if (count($tuotetiedot) > 0) {
 
 					if (mysql_num_rows($child_chk_res) > 0) {
 
-						$runkotuotteita += (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
-
 						$child_chk_row = mysql_fetch_assoc($child_chk_res);
+
+						$runkotuotteita += (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
 
 						$x = $i + 1;
 
@@ -403,9 +403,9 @@ if (count($tuotetiedot) > 0) {
 		$osto_rahti_alv = (float) str_replace(",", ".", $xml->InvoiceDetails->VatSpecificationDetails->VatRatePercent);
 	}
 
-	if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123029" and abs($laskun_summa_eur - $rivien_summa_yhteensa) != 0 and count($runkotuotteiden_indeksit) > 0 and $runkotuotteita > 0) {
+	if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123029" and $laskun_summa_eur - $rivien_summa_yhteensa != 0 and count($runkotuotteiden_indeksit) > 0 and $runkotuotteita > 0) {
 
-		$rungon_hinta = abs($laskun_summa_eur - $rivien_summa_yhteensa) / $runkotuotteita;
+		$rungon_hinta = ($laskun_summa_eur - $rivien_summa_yhteensa) / $runkotuotteita;
 
 		foreach ($runkotuotteiden_indeksit as $indx) {
 			$rtuoteno[$indx]['hinta'] = $rungon_hinta;

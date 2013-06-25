@@ -822,7 +822,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 	$query = "DELETE from rahtikirjat WHERE yhtio='$kukarow[yhtio]' and otsikkonro='$kukarow[kesken]'";
 	$result = pupe_query($query);
 
-	$query = "UPDATE lasku SET tila='D', alatila='L', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ohjelmassa tilaus_myynti.php ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+	$query = "UPDATE lasku SET tila='D', alatila='L', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa tilaus_myynti.php")." ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 	$result = pupe_query($query);
 
 	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
@@ -2651,6 +2651,13 @@ if ($tee == '') {
 			echo "<td>";
 			echo tv1dateconv($laskurow["toimaika"]);
 			echo "</td>";
+
+			$query = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus  = 0";
+			$tresult = pupe_query($query);
+			$tm_toimitustaparow = mysql_fetch_assoc($tresult);
 		}
 		else {
 
@@ -4533,6 +4540,8 @@ if ($tee == '') {
 	// jos ollaan jo saatu tilausnumero aikaan listataan kaikki tilauksen rivit..
 	if ((int) $kukarow["kesken"] != 0) {
 
+		$laskentalisa_riveille = "";
+
 		if (($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $laskurow["tunnusnippu"] > 0 and $projektilla == "") {
 			$tilrivity	= "'L','E'";
 
@@ -4599,7 +4608,6 @@ if ($tee == '') {
 			}
 			else {
 				$kommentti_select = "tilausrivi.kommentti,";
-				$laskentalisa_riveille = "";
 			}
 
 			$tilrivity	= "'L','0'";
@@ -5361,16 +5369,16 @@ if ($tee == '') {
 							if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
 								echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$row['tunnus']}' />";
 							}
-							
+
 							echo "</td>";
 						}
 						else {
 							echo "<td valign='top' $class>$echorivino";
-							
+
 							if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
 								echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$row['tunnus']}' />";
 							}
-							
+
 							echo "</td>";
 						}
 					}
@@ -5418,10 +5426,10 @@ if ($tee == '') {
 						}
 
 						echo "<td $class rowspan = '2' valign='top'>$echorivino";
-						
+
 						if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
 							echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$row['tunnus']}' />";
-						}						
+						}
 					}
 					elseif ($tilauksen_jarjestys == '1' and $row['perheid'] != 0) {
 						echo "<td $class>&nbsp;</td>";
@@ -6555,7 +6563,36 @@ if ($tee == '') {
 					echo "</tr>";
 
 				}
-						}
+			}
+
+			$summa 					= 0; 	// Tilauksen verollinen loppusumma tilauksen valuutassa
+			$summa_eieri			= 0;	// Tilauksen verollinen loppusumma tilauksen valuutassa ilman erikoisalennusta
+			$arvo  					= 0;	// Tilauksen veroton loppusumma tilauksen valuutassa
+			$arvo_eieri				= 0;	// Tilauksen veroton loppusumma tilauksen valuutassa ilman erikoisalennusta
+			$kotiarvo				= 0;	// Tilauksen veroton loppusumma yhtiön valuutassa
+			$kotiarvo_eieri			= 0;	// Tilauksen veroton loppusumma yhtiön valuutassa ilman erikoisalennusta
+			$kate					= 0;	// Tilauksen kate yhtiön valuutassa
+			$kate_eieri				= 0;	// Tilauksen kate yhtiön valuutassa ilman erikoisalennusta
+			$ostot					= 0;	// Tilauksen Ostot tilauksen valuutassa
+			$ostot_eieri			= 0;	// Tilauksen Ostot tilauksen valuutassa ilman erikoisalennusta
+
+			$summa_kotimaa 			= 0;	// Kotimaan toimitusten verollinen loppusumma tilauksen valuutassa
+			$summa_kotimaa_eieri 	= 0;	// Kotimaan toimitusten verollinen loppusumma tilauksen valuutassa ilman erikoisalennusta
+			$arvo_kotimaa			= 0;	// Kotimaan toimitusten veroton loppusumma tilauksen valuutassa
+			$arvo_kotimaa_eieri		= 0;	// Kotimaan toimitusten veroton loppusumma tilauksen valuutassa ilman erikoisalennusta
+			$kotiarvo_kotimaa		= 0;	// Kotimaan toimitusten veroton loppusumma yhtiön valuutassa
+			$kotiarvo_kotimaa_eieri	= 0;	// Kotimaan toimitusten veroton loppusumma yhtiön valuutassa ilman erikoisalennusta
+			$kate_kotimaa			= 0;	// Kotimaan toimitusten kate yhtiön valuutassa
+			$kate_kotimaa_eieri		= 0;	// Kotimaan toimitusten kate yhtiön valuutassa ilman erikoisalennusta
+
+			$summa_ulkomaa			= 0;	// Ulkomaan toimitusten verollinen loppusumma tilauksen valuutassa
+			$summa_ulkomaa_eieri	= 0;	// Ulkomaan toimitusten verollinen loppusumma tilauksen valuutassa ilman erikoisalennusta
+			$arvo_ulkomaa			= 0;	// Ulkomaan toimitusten veroton loppusumma tilauksen valuutassa
+			$arvo_ulkomaa_eieri		= 0;	// Ulkomaan toimitusten veroton loppusumma tilauksen valuutassa ilman erikoisalennusta
+			$kotiarvo_ulkomaa		= 0;	// Ulkomaan toimitusten veroton loppusumma yhtiön valuutassa
+			$kotiarvo_ulkomaa_eieri	= 0;	// Ulkomaan toimitusten veroton loppusumma yhtiön valuutassa ilman erikoisalennusta
+			$kate_ulkomaa			= 0;	// Ulkomaan toimitusten kate yhtiön valuutassa
+			$kate_ulkomaa_eieri		= 0;	// Ulkomaan toimitusten kate yhtiön valuutassa ilman erikoisalennusta
 
 			if ($kukarow['hinnat'] != -1 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 				// Laskeskellaan tilauksen loppusummaa (mitätöidyt ja raaka-aineet eivät kuulu jengiin)
@@ -6571,35 +6608,6 @@ if ($tee == '') {
 								GROUP BY 1
 								ORDER BY 1";
 				$alvresult = pupe_query($alvquery);
-
-				$summa 					= 0; 	// Tilauksen verollinen loppusumma tilauksen valuutassa
-				$summa_eieri			= 0;	// Tilauksen verollinen loppusumma tilauksen valuutassa ilman erikoisalennusta
-				$arvo  					= 0;	// Tilauksen veroton loppusumma tilauksen valuutassa
-				$arvo_eieri				= 0;	// Tilauksen veroton loppusumma tilauksen valuutassa ilman erikoisalennusta
-				$kotiarvo				= 0;	// Tilauksen veroton loppusumma yhtiön valuutassa
-				$kotiarvo_eieri			= 0;	// Tilauksen veroton loppusumma yhtiön valuutassa ilman erikoisalennusta
-				$kate					= 0;	// Tilauksen kate yhtiön valuutassa
-				$kate_eieri				= 0;	// Tilauksen kate yhtiön valuutassa ilman erikoisalennusta
-				$ostot					= 0;	// Tilauksen Ostot tilauksen valuutassa
-				$ostot_eieri			= 0;	// Tilauksen Ostot tilauksen valuutassa ilman erikoisalennusta
-
-				$summa_kotimaa 			= 0;	// Kotimaan toimitusten verollinen loppusumma tilauksen valuutassa
-				$summa_kotimaa_eieri 	= 0;	// Kotimaan toimitusten verollinen loppusumma tilauksen valuutassa ilman erikoisalennusta
-				$arvo_kotimaa			= 0;	// Kotimaan toimitusten veroton loppusumma tilauksen valuutassa
-				$arvo_kotimaa_eieri		= 0;	// Kotimaan toimitusten veroton loppusumma tilauksen valuutassa ilman erikoisalennusta
-				$kotiarvo_kotimaa		= 0;	// Kotimaan toimitusten veroton loppusumma yhtiön valuutassa
-				$kotiarvo_kotimaa_eieri	= 0;	// Kotimaan toimitusten veroton loppusumma yhtiön valuutassa ilman erikoisalennusta
-				$kate_kotimaa			= 0;	// Kotimaan toimitusten kate yhtiön valuutassa
-				$kate_kotimaa_eieri		= 0;	// Kotimaan toimitusten kate yhtiön valuutassa ilman erikoisalennusta
-
-				$summa_ulkomaa			= 0;	// Ulkomaan toimitusten verollinen loppusumma tilauksen valuutassa
-				$summa_ulkomaa_eieri	= 0;	// Ulkomaan toimitusten verollinen loppusumma tilauksen valuutassa ilman erikoisalennusta
-				$arvo_ulkomaa			= 0;	// Ulkomaan toimitusten veroton loppusumma tilauksen valuutassa
-				$arvo_ulkomaa_eieri		= 0;	// Ulkomaan toimitusten veroton loppusumma tilauksen valuutassa ilman erikoisalennusta
-				$kotiarvo_ulkomaa		= 0;	// Ulkomaan toimitusten veroton loppusumma yhtiön valuutassa
-				$kotiarvo_ulkomaa_eieri	= 0;	// Ulkomaan toimitusten veroton loppusumma yhtiön valuutassa ilman erikoisalennusta
-				$kate_ulkomaa			= 0;	// Ulkomaan toimitusten kate yhtiön valuutassa
-				$kate_ulkomaa_eieri		= 0;	// Ulkomaan toimitusten kate yhtiön valuutassa ilman erikoisalennusta
 
 				// typekästätään koska joskus tulee spacena.. en tajua.
 				$laskurow["erikoisale"] = (float) $laskurow["erikoisale"];

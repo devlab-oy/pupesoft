@@ -17825,7 +17825,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		}
 
 		# Testausta varten.....
-		$lahetetyyppi = "tulosta_lahete.inc"; 					# N‰ytet‰‰n asiakkaan hinta ja alennus
+		#$lahetetyyppi = "tulosta_lahete.inc"; 					# N‰ytet‰‰n asiakkaan hinta ja alennus
 		#$lahetetyyppi = "tulosta_lahete_ean.inc";
 		#$lahetetyyppi = "tulosta_lahete_brutto.inc"; 			# N‰ytet‰‰n tuotteen myym‰l‰hinta/(asiakkaan hinta)
 		#$lahetetyyppi = "tulosta_lahete_eialeja.inc"; 			# N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰

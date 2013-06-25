@@ -66,47 +66,51 @@
 		$lisavarattu = "";
 	}
 
-	function varastosiirrot($yhtiot, $varasto_tunnus = '') {
+	function varastosiirrot($yhtiot, $varasto_tunnus) {
+
+		$varasto_tunnus = (int) $varasto_tunnus;
 
 		//varasto on syˆtett‰v‰
-		if ($varasto_tunnus == '') {
+		if ($varasto_tunnus == 0) {
 			return array(0, 0);
 		}
 
+		$varastoon = array();
+		$varastosta = array();
+
 		// Varastoon tulossa olevat siirrot
-		$varastoon_query = "SELECT
-							nimitys, tuoteno, clearing, varasto, kpl, kpl2, tilkpl, varattu, jt
-							FROM lasku
-							JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus)
-							WHERE lasku.yhtio in ($yhtiot)
-							AND lasku.tila='G'
-							AND lasku.alatila IN ('C', 'D')
-							AND lasku.clearing='$varasto_tunnus'";
+		$varastoon_query = "	SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) kpl
+								FROM lasku
+								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+									AND tilausrivi.otunnus = lasku.tunnus)
+								WHERE lasku.yhtio in ($yhtiot)
+								AND lasku.tila = 'G'
+								AND lasku.alatila IN ('C', 'D')
+								AND lasku.clearing = '$varasto_tunnus'
+								GROUP BY tilausrivi.tuoteno";
 		$varastoon_result = pupe_query($varastoon_query);
 
-		$varastoon = array();
 		while ($row = mysql_fetch_assoc($varastoon_result)) {
-			$varastoon[] = $row;
+			$varastoon[$row['tuoteno']] = $row['kpl'];
 		}
 
 		// Varastosta l‰htev‰t siirrot
-		$varastosta_query = "SELECT
-							nimitys, tuoteno, clearing, varasto, kpl, kpl2, tilkpl, varattu, jt
-							FROM lasku
-							JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus)
-							WHERE lasku.yhtio in ($yhtiot)
-							AND lasku.tila='G'
-							AND lasku.alatila IN ('C', 'D')
-							AND lasku.varasto='$varasto_tunnus'";
+		$varastosta_query = "	SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) kpl
+								FROM lasku
+								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+									AND tilausrivi.otunnus = lasku.tunnus)
+								WHERE lasku.yhtio in ($yhtiot)
+								AND lasku.tila = 'G'
+								AND lasku.alatila IN ('C', 'D')
+								AND lasku.varasto = $varasto_tunnus
+								GROUP BY tilausrivi.tuoteno";
 		$varastosta_result = pupe_query($varastosta_query);
 
-		$varastosta = array();
 		while ($row = mysql_fetch_assoc($varastosta_result)) {
-			$varastosta[] = $row;
+			$varastosta[$row['tuoteno']] = $row['kpl'];
 		}
 
-		$siirrot = array($varastoon, $varastosta);
-		return $siirrot;
+		return array($varastoon, $varastosta);
 	}
 
 	function myynnit($myynti_varasto = '', $myynti_maa = '') {
@@ -593,7 +597,9 @@
 		$indeksi = 0;
 
 		// Haetaan varastosiirrot ennen looppia
-		list($varastoon, $varastosta) = varastosiirrot($yhtiot, $valvarasto);
+		if ($toim == "KK") {
+			list($varastoon, $varastosta) = varastosiirrot($yhtiot, $valvarasto);
+		}
 
 		// loopataan tuotteet l‰pi
 		while ($row = mysql_fetch_assoc($res)) {
@@ -646,18 +652,14 @@
 				// Lis‰t‰‰n varatut tilaukseen ja verrataan tilauspistett‰ vapaasaldoon
 				$vapaasaldo = ($saldot - $enp + $ostot);
 
-				// Varastosta
-				foreach($varastosta as $siirto) {
-					if($siirto['tuoteno'] == $row['tuoteno']) {
-						$vapaasaldo -= $siirto['varattu'];
-					}
+				// V‰hennet‰‰n vapaasta saldosta varastosta l‰hteneet keskener‰iset varastosiirrot
+				if (isset($varastosta[$row['tuoteno']])) {
+					$vapaasaldo -= $varastosta[$row['tuoteno']];
 				}
 
-				// Varastoon
-				foreach($varastoon as $siirto) {
-					if($siirto['tuoteno'] == $row['tuoteno']) {
-						$vapaasaldo += $siirto['varattu'];
-					}
+				// Lis‰t‰‰n vapaaseen saldoon varastoon matkalla olevat keskener‰iset varastosiirrot
+				if (isset($varastoon[$row['tuoteno']])) {
+					$vapaasaldo += $varastoon[$row['tuoteno']];
 				}
 
 				if ($vapaasaldo <= $row["tpaikka_halyraja"]) {

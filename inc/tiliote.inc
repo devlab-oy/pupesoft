@@ -1063,6 +1063,12 @@
 					}
 
 					$sisviite = (int) $sisviite;
+
+					 // Jos EndToEndId on isompi ku isoin laskun tunnus, niin hylätään se, koska se ei voi olla oikein
+					if ($sisviite > $meteidrow['maxEndToEndId']) {
+						$sisviite = "";
+					}
+
 					break;
 
 				// Pankin antamat lisätiedot

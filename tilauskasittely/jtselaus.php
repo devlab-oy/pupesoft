@@ -1234,7 +1234,7 @@
 
 								echo "</th>";
 
-								echo "<th valign='top'>".t("Status")."<br>".t("Luontiaika")."<br/>".t("Toimaika")."</th>";
+								echo "<th valign='top'>".t("Status")."<br>".t("Toimaika")."<br/>".t("Saapumispäivä")."</th>";
 
 								if ($jtselaus_paivitys_oikeus) {
 									if ($kukarow["extranet"] == "") {

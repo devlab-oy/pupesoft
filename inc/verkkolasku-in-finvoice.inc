@@ -185,7 +185,28 @@ if (count($tuotetiedot) > 0) {
 		$rtuoteno[$i]["tuoteno2"] = "";
 
 		if ($laskun_ebid == "MAVENTAXML") {
-			$rtuoteno[$i]["tuoteno2"] = $rtuoteno[$i]["tuoteno"];
+
+			$query = "	SELECT *
+						FROM tuotteen_toimittajat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
+			$chk_res = pupe_query($query);
+
+			if (mysql_num_rows($chk_res) == 0) {
+
+				// tuotteen toimittajat tuotenumerot
+				$query = "	SELECT tt.*
+							FROM tuotteen_toimittajat_tuotenumerot AS ttt
+							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
+							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
+							AND ttt.tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
+				$chk_res = pupe_query($query);
+
+				if (mysql_num_rows($chk_res) != 0) {
+					$chk_row = mysql_fetch_assoc($chk_res);
+					$rtuoteno[$i]['tuoteno'] = $chk_row['toim_tuoteno'];
+				}
+			}
 		}
 
 		if ($rtuoteno[$i]["tuoteno"] != "") {

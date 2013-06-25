@@ -3399,7 +3399,10 @@ if (!function_exists("hae_alehinta_minkpl")) {
 			$ei_loydy = TRUE;
 
 			foreach ($hinnasto as $_arr) {
-				if ($_arr['hinta'] == $hinta) $ei_loydy = FALSE;
+				if ($_arr['hinta'] == $hinta) {
+					$ei_loydy = FALSE;
+					break;
+				}
 			}
 
 			if ($ei_loydy) {

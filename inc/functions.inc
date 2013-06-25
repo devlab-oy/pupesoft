@@ -3267,11 +3267,74 @@ if (!function_exists("hae_alehinta_minkpl")) {
 
 		unset($hinta, $netto, $ale, $alehinta_alv, $alehinta_val);
 
-		$query = "	SELECT *
+		// haetaan asiakkaan segmentit
+		$query = "	SELECT group_concat(parent.tunnus) tunnukset
+	   				FROM puun_alkio
+					JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
+	   				JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
+	   				WHERE puun_alkio.yhtio = '{$kukarow['yhtio']}'
+					AND puun_alkio.laji    = 'asiakas'
+					AND puun_alkio.liitos  = '{$laskurow['liitostunnus']}'";
+		$almight = pupe_query($query);
+		$alehi_assegmenttirow = mysql_fetch_assoc($almight);
+
+		$segmenttilisa = "";
+
+		if ($alehi_assegmenttirow["tunnukset"] != "") {
+			$segmenttilisa = "
+					UNION
+					(SELECT DISTINCT minkpl
+					FROM asiakashinta
+					WHERE yhtio = '{$kukarow['yhtio']}'
+				    AND asiakas_segmentti in ({$alehi_assegmenttirow['tunnukset']})
+					AND asiakas_segmentti != ''
+					and minkpl > 1
+					and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+					UNION
+					(SELECT DISTINCT minkpl
+					FROM asiakasalennus
+					WHERE yhtio = '$kukarow[yhtio]'
+				    AND asiakas_segmentti in ({$alehi_assegmenttirow['tunnukset']})
+					AND asiakas_segmentti != ''
+					and minkpl > 1
+					and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))";
+		}
+
+		$query = "	(SELECT DISTINCT minkpl
 					FROM hinnasto
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tuoteno = '{$trow['tuoteno']}'
-					AND minkpl > 0
+					AND minkpl > 1
+					AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+					UNION
+					(SELECT DISTINCT minkpl
+					FROM asiakasalennus
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND asiakas = '{$laskurow['liitostunnus']}'
+					AND minkpl > 1
+					AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+					UNION
+					(SELECT DISTINCT minkpl
+					FROM asiakasalennus
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND ytunnus = '{$laskurow['ytunnus']}'
+					AND minkpl > 1
+					AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+					UNION
+					(SELECT DISTINCT minkpl
+					FROM asiakashinta
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND asiakas = '{$laskurow['liitostunnus']}'
+					AND minkpl > 1
+					AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+					UNION
+					(SELECT DISTINCT minkpl
+					FROM asiakashinta
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND ytunnus = '{$laskurow['ytunnus']}'
+					AND minkpl > 1
+					AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+					{$segmenttilisa}
 					ORDER BY minkpl";
 		$kpl_chk_res = pupe_query($query);
 

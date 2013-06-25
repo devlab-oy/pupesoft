@@ -1227,7 +1227,7 @@ $debug = 0;
 
 						if ($kohdistamatta <= 0) break;
 
-						$query = "SELECT kpl+varattu AS varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv1}'";
+						$query = "SELECT kpl+varattu AS varattu, perheid FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv1}'";
 						$kpl_chk_res = pupe_query($query);
 						$kpl_chk_row = mysql_fetch_assoc($kpl_chk_res);
 
@@ -1235,6 +1235,11 @@ $debug = 0;
 						$lisa_array[] = $tilriv1;
 						$split_array[] = $tilriv1;
 						$kohdistamatta -= $kpl_chk_row["varattu"];
+
+						if ($tilriv1 == $kpl_chk_row['perheid'] and !empty($rtuoteno[$i+1]["isa_olemassa"])) {
+							$rtuoteno[$i+1]["isat_array"][] = $tilriv1;
+						}
+
 						if ($debug == 1) {
 							echo "Laskuri: $laskuri Kohdistamatta: $kohdistamatta<br><br>";
 						}

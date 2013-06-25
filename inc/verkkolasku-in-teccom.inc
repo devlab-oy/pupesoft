@@ -227,47 +227,32 @@
 	$pituus			= "";
 
 	if (count($tuotetiedot) > 0) {
+
 		foreach ($tuotetiedot as $tuotetieto) {
+
 			// tuotekoodi
-			// Tehdään poikkeustapaksien käsittely
-			if ($laskuttajan_toimittajanumero == "123085") {
-				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
-			}
-			elseif ($laskuttajan_toimittajanumero == "123067") {
-				$rtuoteno[$i]["tuoteno"] = substr(utf8_decode($tuotetieto->ProductId->ProductNumber),0,-3);
-				$rtuoteno[$i]["tuoteno2"] = "{$rtuoteno[$i]["tuoteno"]}090";
-			}
-			elseif ($laskuttajan_toimittajanumero == "123007") {
-				$aputuoteno = utf8_decode($tuotetieto->ProductId->ProductNumber);
-				$pituus 	= strlen(trim($aputuoteno));
+			$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
 
-				if ($pituus == 8 and strpos(' ',$aputuoteno) == 6) {
-					$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = substr($aputuoteno,0,5);
-				}
-				else {
-					$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = $aputuoteno;
-				}
-			}
-			elseif ($laskuttajan_toimittajanumero == "123453") {
-				if (strpos($tuotetieto->ProductId->ProductNumber, "-") !== FALSE) {
-					$rtuoteno[$i]["tuoteno"] = str_replace("-", "", $tuotetieto->ProductId->ProductNumber);
-				}
-				else {
-					$rtuoteno[$i]["tuoteno"] = substr($tuotetieto->ProductId->ProductNumber,0,3)."-".substr($tuotetieto->ProductId->ProductNumber,3);
-				}
+			$query = "	SELECT *
+						FROM tuotteen_toimittajat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
+			$chk_res = pupe_query($query);
 
-				$rtuoteno[$i]["tuoteno2"] = $tuotetieto->ProductId->ProductNumber;
-			}
-			elseif ($laskuttajan_toimittajanumero == "123178") {
-				$rtuoteno[$i]["tuoteno"] = substr($tuotetieto->ProductId->ProductNumber,3);
-				$rtuoteno[$i]["tuoteno2"] = $tuotetieto->ProductId->ProductNumber;
-			}
-			elseif ($laskuttajan_toimittajanumero == "123084") {
-				$rtuoteno[$i]["tuoteno"] = $tuotetieto->ProductId->ProductNumber;
-				$rtuoteno[$i]["tuoteno2"] = ltrim($tuotetieto->ProductId->ProductNumber, '0');
-			}
-			else {
-				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
+			if (mysql_num_rows($chk_res) == 0) {
+
+				// tuotteen toimittajat tuotenumerot
+				$query = "	SELECT tt.*
+							FROM tuotteen_toimittajat_tuotenumerot AS ttt
+							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
+							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
+							AND ttt.tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
+				$chk_res = pupe_query($query);
+
+				if (mysql_num_rows($chk_res) != 0) {
+					$chk_row = mysql_fetch_assoc($chk_res);
+					$rtuoteno[$i]['tuoteno'] = $chk_row['toim_tuoteno'];
+				}
 			}
 
 			if ($rtuoteno[$i]["tuoteno"] != "") {
@@ -330,8 +315,7 @@
 							FROM toimi
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
 														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-														#AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-														AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}')
+														AND tuotteen_toimittajat.toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'
 														AND tuotteen_toimittajat.toim_tuoteno != '')
 							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
 							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
@@ -437,7 +421,7 @@
 											FROM toimi
 											JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
 												AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-												AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}')
+												AND tuotteen_toimittajat.toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'
 												AND tuotteen_toimittajat.toim_tuoteno != '')
 											JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio
 												AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno

@@ -972,8 +972,9 @@
 
 			if (mysql_num_rows($isaresult) > 0) {
 
-				$jt_rivilaskuri = 1;
+				$jt_rivilaskuri  = 1;
 				$jt_hintalaskuri = 0;
+				$saapumisajat    = array();
 
 				while ($jtrow = mysql_fetch_assoc($isaresult)) {
 
@@ -1197,8 +1198,6 @@
 								}
 							}
 						}
-
-						$saapumisaika = hae_tuotteen_saapumisaika($jtrow['tuoteno'], $jtrow['status'], $kokonaismyytavissa);
 
 						// Saldoa on tai halutaan nähdä kaikki rivit
 						if ($kokonaismyytavissa > 0 or $toimi == '') {
@@ -1602,6 +1601,16 @@
 
 								if (!isset($kpl[$tunnukset])) $kpl[$tunnukset] = "";
 
+								if ($automaaginen == '' and !isset($saapumisajat[$jtrow['tuoteno']])) {
+
+									$tulossalisa = hae_tuotteen_saapumisaika($jtrow['tuoteno'], $jtrow['status'], $kokonaismyytavissa);
+									$saapumisajat[$jtrow['tuoteno']] = "";
+
+									foreach($tulossalisa as $oikea => $vasen) {
+										$saapumisajat[$jtrow['tuoteno']] .= "$oikea: $vasen<br>";
+									}
+								}
+
 								// Riittää kaikille
 								if ((($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0 and $voiko_toimittaa !== false) or $automaaginen == 'vakisin') {
 
@@ -1645,7 +1654,7 @@
 											else {
 												echo tv1dateconv($toimaika);
 												echo "<br/>";
-												echo $saapumisaika;
+												echo $saapumisajat[$jtrow['tuoteno']];
 											}
 
 											echo "</td>";
@@ -1719,7 +1728,7 @@
 										else {
 											echo tv1dateconv($toimaika);
 											echo "<br/>";
-											echo $saapumisaika;
+											echo $saapumisajat[$jtrow['tuoteno']];
 										}
 										echo "</td>";
 
@@ -1755,7 +1764,7 @@
 										else {
 											echo tv1dateconv($toimaika);
 											echo "<br/>";
-											echo $saapumisaika;
+											echo $saapumisajat[$jtrow['tuoteno']];
 										}
 										echo "</td>";
 
@@ -1791,7 +1800,7 @@
 										else {
 											echo tv1dateconv($toimaika);
 											echo "<br/>";
-											echo $saapumisaika;
+											echo $saapumisajat[$jtrow['tuoteno']];
 										}
 										echo "</td>";
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";

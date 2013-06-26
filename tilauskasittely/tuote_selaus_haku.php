@@ -1945,7 +1945,7 @@
 						$tulossalisat = hae_tuotteen_saapumisaika($row['tuoteno'], $row['status'], $myytavissa_sum, $loytyko, $loytyko_normivarastosta);
 
 					 	foreach ($tulossalisat as $tulossalisa) {
-							list($o, $v) = explode("!¡!", $tulossalisa);
+							list($o, $v) = explode("!¡!", $tulossalisa);							
 							echo "<tr><td>$o</td><td>$v</td></tr>";
 						}
 

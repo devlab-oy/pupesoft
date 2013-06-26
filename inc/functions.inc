@@ -22229,7 +22229,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 
 						if ($tulossa_row["nimi"] != '') {
 							if ($tulossa_row["suoraan_laskutukseen"] != "") {
-								$tulossalisa[] = t("Suoratoimitus asiakkaalle").":<br>$tulossa_row[nimi]";
+								$tulind = t("Suoratoimitus asiakkaalle").":<br>$tulossa_row[nimi]";
 							}
 							else {
 								$tulind = t("Tilattu asiakkaalle").":<br>$tulossa_row[nimi]";
@@ -22239,7 +22239,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 							$tulind = t("TULOSSA");
 						}
 
-						$tulossalisa[] = "$tulind!°!$tulossa_row[tilattu]".t_avainsana("Y", "", " and avainsana.selite='$tulossa_row[yksikko]'", "", "", "selite");
+						$tulossalisa[] = "<hr>$tulind!°!<hr>$tulossa_row[tilattu]".t_avainsana("Y", "", " and avainsana.selite='$tulossa_row[yksikko]'", "", "", "selite");
 
 						if ($tulossa_row["jaksotettu"] == '1') $tarkkuus = "Vahvistettu";
 						else $tarkkuus = "Arvioitu";
@@ -22263,7 +22263,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 					$tulossa_row = mysql_fetch_assoc($tulossa_result);
 
 					if (mysql_num_rows($tulossa_result) > 0) {
-						$tulossalisa[] = t("TULOSSA")."!°!"."";
+						$tulossalisa[] = "<hr>".t("TULOSSA")."!°!"."<hr>";
 						$tulossalisa[] = t("Arvioitu saapumisp‰iv‰")."!°!".tv1dateconv($tulossa_row['paivamaara']);
 					}
 				}
@@ -22282,7 +22282,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 				$tulossa_row = mysql_fetch_assoc($tulossa_result);
 
 				if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["toimaika"] > 0) {
-					$tulossalisa[] = "<font color='orange'>".t("TILAUSTUOTE")."</font>!°!";
+					$tulossalisa[] = "<hr><font color='orange'>".t("TILAUSTUOTE")."</font>!°!<hr>";
 					$tulossalisa[] = t("Arvioitu toimitusaika")."!°!{$tulossa_row["toimaika"]} ".t("p‰iv‰‰");
 				}
 			}
@@ -22304,7 +22304,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 			$tehdassaldo_res = pupe_query($query);
 
 			while ($tehdassaldo_row = mysql_fetch_assoc($tehdassaldo_res)) {
-				$tulossalisa[] = t("Tehtaalla")."!°!".sprintf("%.2f", $tehdassaldo_row['tehdas_saldo'])." ".t_avainsana("Y", "", " and avainsana.selite='$tehdassaldo_row[yksikko]'", "", "", "selite");
+				$tulossalisa[] = "<hr>".t("Tehtaalla")."!°!<hr>".sprintf("%.2f", $tehdassaldo_row['tehdas_saldo'])." ".t_avainsana("Y", "", " and avainsana.selite='$tehdassaldo_row[yksikko]'", "", "", "selite");
 				$tulossalisa[] = t("Arvioitu toimitusaika")."!°!{$tehdassaldo_row['toimaika']} ".t("p‰iv‰‰");
 			}
 		}

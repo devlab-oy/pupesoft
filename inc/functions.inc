@@ -920,7 +920,7 @@ if (!function_exists("apix_invoice_put_file")) {
 }
 
 if (!function_exists("vapauta_sarjanumerot")) {
-	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="", $dellaa_ostorivi = TRUE) {
+	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="") {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu, tilausrivi.tuoteno, tuote.sarjanumeroseuranta, tilausrivin_lisatiedot.tilausrivilinkki
@@ -937,17 +937,17 @@ if (!function_exists("vapauta_sarjanumerot")) {
 			if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 				// merktaan siirtolistatunnus nollaks
 				$query = "UPDATE sarjanumeroseuranta set siirtorivitunnus = 0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and siirtorivitunnus='$srow[tunnus]'";
-				$sarjares = pupe_query($query);
+				pupe_query($query);
 			}
 			elseif ($srow["varattu"] < 0) {
 				// dellataan koko rivi jos sitä ei ole vielä myyty
 				$query = "DELETE from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
-				$sarjares = pupe_query($query);
+				pupe_query($query);
 
 				if (mysql_affected_rows() == 0) {
 					// merkataan osorivitunnus nollaksi
 					$query = "UPDATE sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
-					$sarjares = pupe_query($query);
+					pupe_query($query);
 				}
 			}
 			else {
@@ -957,7 +957,7 @@ if (!function_exists("vapauta_sarjanumerot")) {
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$srow[tuoteno]'
 								and myyntirivitunnus = '$srow[tunnus]'";
-					$sarjares = pupe_query($query);
+					pupe_query($query);
 				}
 				else {
 					$query = "	UPDATE sarjanumeroseuranta
@@ -965,19 +965,8 @@ if (!function_exists("vapauta_sarjanumerot")) {
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$srow[tuoteno]'
 								and myyntirivitunnus = '$srow[tunnus]'";
-					$sarjares = pupe_query($query);
+					pupe_query($query);
 				}
-			}
-
-			// Onko tätä ostotilauksella?
-			if ($dellaa_ostorivi and $srow["tilausrivilinkki"] > 0) {
-				$query = "	UPDATE tilausrivi
-							SET tyyppi = 'D'
-							WHERE yhtio 	= '$kukarow[yhtio]'
-							and tunnus  	= '$srow[tilausrivilinkki]'
-							and tyyppi 		= 'O'
-							and uusiotunnus = 0";
-				$siirtores = pupe_query($query);
 			}
 		}
 	}

@@ -912,6 +912,20 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "jt_toimitus_varastorajaus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = " SELECTED";
+
+		$ulos .= "<option value=''>".t("Jälkitoimituksia toimitetaan kaikista varastoista")."</option>";
+		$ulos .= "<option value='K'{$sel['K']}>".t("Jälkitoimituksia toimitaan ainoastaan myyntitilauksen otsikolle valitusta varastosta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "naytetaan_katteet_tilauksella") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

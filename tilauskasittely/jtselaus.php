@@ -758,6 +758,10 @@
 			$laskulisa .= " and lasku.myyja = '{$myyja}' ";
 		}
 
+		if ($yhtiorow['jt_toimitus_varastorajaus'] == 'K') {
+			$laskulisa .= " and lasku.varasto in (0, ".implode(", ", $varastosta).") ";
+		}
+
 		if ($automaaginen != '' or $ei_limiittia != '') {
 			$limit = "";
 		}

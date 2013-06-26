@@ -25,7 +25,7 @@
 		$query = "	UPDATE lasku
 					SET tila = 'D',
 					alatila  = 'T',
-					comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) mitätöi tilauksen ohjelmassa muokkaatilaus.php 1')
+					comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa muokkaatilaus.php")." 1')
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila    = 'T'
 					AND tunnus IN {$tunnukset}";
@@ -287,16 +287,16 @@
 			$button_disabled = "disabled";
 		}
 
-		if(empty($oikeurow['paivitys'])) {
+		if (empty($oikeurow['paivitys'])) {
 			$button_disabled = "disabled";
 		}
 
-		if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $kukarow["kesken"] != 0 and $tilausnumero != "") {
+		if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $tilausnumero != "") {
 			$query_tarjous = "	UPDATE lasku
 								SET alatila = tila,
 								tila = 'D',
 								muutospvm = now(),
-								comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) mitätöi tilauksen ohjelmassa muokkaatilaus.php 2')
+								comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa muokkaatilaus.php")." 2')
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus  = $tilausnumero";
 			pupe_query($query_tarjous);

@@ -982,24 +982,49 @@
 
 	//	Onko tätä ostotilauksella?
 	if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tilausrivilinkki"] > 0) {
-		$query = "	SELECT tilausrivi.otunnus, lasku.nimi, lasku.tila
+		$query = "	SELECT tilausrivi.otunnus,
+					lasku.nimi,
+					lasku.liitostunnus,
+		            lasku.tila,
+		            lasku.alatila,
+		            lasku.toim_nimi,
+		            lasku.toim_nimitark,
+		            lasku.toim_osoite,
+		            lasku.toim_postino,
+		            lasku.toim_postitp,
+		            lasku.toim_maa,
+	            	left(lasku.luontiaika, 10) luontiaika,
+		            lasku.laatija
 					FROM tilausrivi
 					JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-					and tilausrivi.tunnus  = '$row[tilausrivilinkki]'";
-		$siirtores = pupe_query($query);
+					and tilausrivi.tunnus  = '$row[tilausrivilinkki]'
+					and tilausrivi.tyyppi  = 'O'";
+		$suoratoimostores = pupe_query($query);
 
-		if (mysql_num_rows($siirtores) > 0) {
-			$siirtorow = mysql_fetch_assoc($siirtores);
-			if ($siirtorow["tila"] == "O") {
+		if (mysql_num_rows($suoratoimostores) > 0) {
+			$suoratoimostorow = mysql_fetch_assoc($suoratoimostores);
+
+			if ($suoratoimostorow["tila"] == "O") {
 				$tilaustyypilla = t("Ostotilauksella");
+				
+				if ($suoratoimostorow["luontiaika"] == date("Y-m-d") and
+					$suoratoimostorow["tila"]    	== 'O' and
+					$suoratoimostorow["alatila"]    == '' and
+					$suoratoimostorow["laatija"]    == $kukarow['kuka']
+				) {
+					$nayta_sostolisateksti = "TOTTA";
+				}
+				else {
+					$nayta_sostolisateksti = "HUOM";
+				}
+
 			}
-			elseif($siirtorow["tila"] == "V" or $siirtorow["tila"] == "W") {
+			elseif($suoratoimostorow["tila"] == "V" or $suoratoimostorow["tila"] == "W") {
 				$tilaustyypilla = t("Valmistuksella");
 			}
 
-			$nayta_sostolisateksti = "TOTTA";
-			$varaosakommentti .= "$tilaustyypilla: $siirtorow[nimi] $siirtorow[otunnus]<br>";
+			$varaosakommentti .= "$tilaustyypilla: $suoratoimostorow[nimi] $suoratoimostorow[otunnus]<br>";
 		}
 	}
 

@@ -81,8 +81,7 @@
 		// Varastoon tulossa olevat siirrot
 		$varastoon_query = "	SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) kpl
 								FROM lasku
-								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
-									AND tilausrivi.otunnus = lasku.tunnus)
+								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
 								WHERE lasku.yhtio in ($yhtiot)
 								AND lasku.tila = 'G'
 								AND lasku.alatila IN ('C', 'D')
@@ -97,8 +96,7 @@
 		// Varastosta lähtevät siirrot
 		$varastosta_query = "	SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) kpl
 								FROM lasku
-								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
-									AND tilausrivi.otunnus = lasku.tunnus)
+								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
 								WHERE lasku.yhtio in ($yhtiot)
 								AND lasku.tila = 'G'
 								AND lasku.alatila IN ('C', 'D')

@@ -1798,11 +1798,11 @@
 							echo "<br><br>".t("Noutovarastot").":<br><table style='width:100%;'>$noutolisa</table>";
 						}
 
-						$tulossalisat = hae_tuotteen_saapumisaika($row['tuoteno'], $row['status'], 0);
+						$tulossalisat = hae_tuotteen_saapumisaika($row['tuoteno'], $row['status'], $myytavissa);
 
 						foreach ($tulossalisat as $tulossalisa) {
 							list($o, $v) = explode("!¡!", $tulossalisa);
-							echo "<br>$o $v";
+							echo "<br>$o ".strip_tags($v);
 						}
 
 						echo "</td>";
@@ -1945,7 +1945,7 @@
 						$tulossalisat = hae_tuotteen_saapumisaika($row['tuoteno'], $row['status'], $myytavissa_sum, $loytyko, $loytyko_normivarastosta);
 
 					 	foreach ($tulossalisat as $tulossalisa) {
-							list($o, $v) = explode("!¡!", $tulossalisa);							
+							list($o, $v) = explode("!¡!", $tulossalisa);
 							echo "<tr><td>$o</td><td>$v</td></tr>";
 						}
 

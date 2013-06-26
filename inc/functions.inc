@@ -22128,7 +22128,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 				$tulossa_row = mysql_fetch_assoc($tulossa_result);
 
 				if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '') {
-					$tulossalisa[] = t("TULOSSA")."!°!";
+					$tulossalisa[] = "<hr>".t("TULOSSA")."!°!";
 					$tulossalisa[] = t("Arvioitu saapumisp‰iv‰")."!°!".tv1dateconv($tulossa_row['paivamaara']);
 				}
 				else {
@@ -22146,7 +22146,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 					$tulossa_row = mysql_fetch_assoc($tulossa_result);
 
 					if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '') {
-						$tulossalisa[] = t("TULOSSA")."!°!";
+						$tulossalisa[] = "<hr>".t("TULOSSA")."!°!";
 						$tulossalisa[] = t("Arvioitu saapumisp‰iv‰")."!°!".tv1dateconv($tulossa_row['paivamaara']);
 					}
 				}
@@ -22164,7 +22164,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 				$tulossa_row = mysql_fetch_assoc($tulossa_result);
 
 				if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["toimaika"] > 0) {
-					$tulossalisa[] = t("TILAUSTUOTE")."!°!";
+					$tulossalisa[] = "<hr><font color='orange'>".t("TILAUSTUOTE")."</font>!°!";
 					$tulossalisa[] = t("Arvioitu toimitusaika")."!°!{$tulossa_row["toimaika"]} ".t("p‰iv‰‰");
 				}
 			}

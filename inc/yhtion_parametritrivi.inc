@@ -926,10 +926,6 @@
 		$jatko = 0;
 	}
 
-	if ($yhtiorow['jt_tilausten_varastorajaus'] == 'K') {
-		$laskulisa .= " and lasku.varasto in (0, ".implode(", ", $varastosta).") ";
-	}
-
 	if (mysql_field_name($result, $i) == "naytetaan_katteet_tilauksella") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

@@ -261,7 +261,7 @@ if (count($tuotetiedot) > 0) {
 					($laskuttajan_toimittajanumero == "123014" and trim(strtolower($rtuoteno[$i]["tuoteno"])) == "corecharge")) {
 
 					// Katsotaan löytyykö runkotuote (tuoteperheen lapsituote)
-					$query = "	SELECT tuote.tuoteno, tuote.nimitys
+					$query = "	SELECT tt.toim_tuoteno AS tuoteno, tuote.nimitys
 								FROM toimi
 								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
 									AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
@@ -272,6 +272,10 @@ if (count($tuotetiedot) > 0) {
 									AND tuoteperhe.tyyppi IN ('P','')
 									AND tuoteperhe.ohita_kerays != '')
 								JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
+								JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = toimi.yhtio
+									AND tt.liitostunnus = toimi.tunnus
+									AND tt.tuoteno = tuote.tuoteno
+									AND tt.toim_tuoteno != '')
 								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
 								AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
 								AND toimi.tyyppi != 'P'
@@ -292,7 +296,7 @@ if (count($tuotetiedot) > 0) {
 				if ($laskuttajan_toimittajanumero == "123029") {
 
 					// Katsotaan löytyykö runkotuote (tuoteperheen lapsituote)
-					$query = "	SELECT tuote.tuoteno, tuote.nimitys
+					$query = "	SELECT tt.toim_tuoteno AS tuoteno, tuote.nimitys
 								FROM toimi
 								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
 									AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
@@ -303,6 +307,10 @@ if (count($tuotetiedot) > 0) {
 									AND tuoteperhe.tyyppi IN ('P','')
 									AND tuoteperhe.ohita_kerays != '')
 								JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
+								JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = toimi.yhtio
+									AND tt.liitostunnus = toimi.tunnus
+									AND tt.tuoteno = tuote.tuoteno
+									AND tt.toim_tuoteno != '')
 								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
 								AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
 								AND toimi.tyyppi != 'P'

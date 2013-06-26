@@ -86,7 +86,8 @@
 					chn					= '',
 					verkkotunnus		= '',
 					toimitustapa		= '',
-					toimitustavan_lahto = ''
+					toimitustavan_lahto = '',
+					tilausyhteyshenkilo = ''
 					WHERE yhtio 		= '$kukarow[yhtio]'
 					and tunnus	 		= '$kukarow[kesken]'";
 		$result = pupe_query($query);
@@ -560,6 +561,19 @@
 							WHERE tunnus = '$asiakasid'";
 				$assresult = pupe_query($squery);
 				$assrow = mysql_fetch_assoc($assresult);
+				
+				$yhtquery = "	SELECT nimi
+								FROM yhteyshenkilo
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND liitostunnus = '$assrow[tunnus]'
+								AND tyyppi = 'A'
+								AND tilausyhteyshenkilo != ''
+								AND oletusyhteyshenkilo != ''
+								ORDER BY nimi
+								LIMIT 1";
+								
+				$yhtresult = pupe_query($yhtquery);
+				$yhtnimi = mysql_fetch_assoc($yhtresult);
 
 				if (!checkdate($toimkk,$toimpp,$toimvv)) {
 					$toimpp = date("j");
@@ -630,7 +644,8 @@
 							rahtivapaa			= '$assrow[rahtivapaa]',
 							toimaika 			= '$toimpvm',
 							kerayspvm			= '$kerpvm',
-							toimitusehto		= '$assrow[toimitusehto]'
+							toimitusehto		= '$assrow[toimitusehto]',
+							tilausyhteyshenkilo	= '$yhtnimi[nimi]'
 							WHERE yhtio 		= '$kukarow[yhtio]'
 							and tunnus	 		= '$kukarow[kesken]'
 							and liitostunnus	= 0";
@@ -2187,20 +2202,20 @@
 			$vasen++;
 
 			$sel = array();
-			$sel[$laskurow['laskutyyppi']] = "selected";
-			
+			$sel[$srow['laskutyyppi']] = "selected";
+
 			$vasen_sarake[$vasen] = "<td>".t("Laskutyyppi").":</td>";
 			$vasen_sarake[$vasen] .= "<td><select name='laskutyyppi' style='max-width: 300px' >";
 
 			$vasen_sarake[$vasen] .= "<option value = '-9'>".t("Oletus")."</option>";
-			$vasen_sarake[$vasen] .= "<option value = '0' $sel[0]>".t("Normaali laskupohja")."</option>";
-			$vasen_sarake[$vasen] .= "<option value = '2' $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)")."</option>";
-			$vasen_sarake[$vasen] .= "<option value = '5' $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
-			$vasen_sarake[$vasen] .= "<option value = '6' $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
-			$vasen_sarake[$vasen] .= "<option value = '7' $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)")."</option>";
-			$vasen_sarake[$vasen] .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '99' $sel[99]>".t("Normaali laskupohja")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '5'  $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1")."</option>";
 			#$vasen_sarake[$vasen] .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)")."</option>";
-			$vasen_sarake[$vasen] .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3")."</option>";
 			$vasen_sarake[$vasen] .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)")."</option>";
 			$vasen_sarake[$vasen] .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)")."</option>";
 			$vasen_sarake[$vasen] .= "<option value = '13' $sel[13]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
@@ -2747,10 +2762,10 @@
 
 			$yhteysquery = "SELECT *
 							FROM yhteyshenkilo
-							where yhtio = '$kukarow[yhtio]'
-							and liitostunnus = '$srow[liitostunnus]'
-							and tyyppi = 'A'
-							and tilausyhteyshenkilo != ''
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND liitostunnus = '$srow[liitostunnus]'
+							AND tyyppi = 'A'
+							AND tilausyhteyshenkilo != ''
 							ORDER BY nimi";
 			$yhteysresult = pupe_query($yhteysquery);
 
@@ -3624,7 +3639,7 @@
 									break;
 								case "kate_korjattu";
 									$values .= ", NULL";
-									break;								
+									break;
 								default;
 									$values .= ", '".$monistarow[$fieldname]."'";
 									break;

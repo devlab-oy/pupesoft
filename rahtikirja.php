@@ -461,7 +461,7 @@
 		}
 
 		// jos ollaan muokkaamassa rivejä poistetaan eka vanhat rahtikirjatiedot..
-		if ($tutkimus > 0) {
+		if ($tutkimus > 0 and $tunnukset != "") {
 
 			if ($yhtiorow['kerayserat'] == 'K' and strpos($tunnukset, ',') !== FALSE) {
 				$tunnuslisa = $tunnukset;

@@ -737,7 +737,7 @@
 		for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
 
 			if ($i == 1) {
-				if (trim($trow[1]) == '') $trow[1] = "".t("*tyhjä*")."";
+				if (trim($trow[1]) == '') $trow[1] = t("*tyhjä*");
 				echo "<td><a name='2_$kalalask' href='".$palvelin2."yllapito.php?toim=asiakas&tunnus=$trow[tunnus]&lopetus=".$palvelin2."yhdistaasiakas.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."///2_$kalalask'>$trow[$i]</a></td>";
 			}
 			elseif (mysql_field_name($result,$i) == 'ytunnus') {

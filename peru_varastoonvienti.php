@@ -22,7 +22,7 @@
 		$laskurow = mysql_fetch_array($res);
 
 		// Laskun tiedot
-		echo t("Laskun tiedot")."";
+		echo t("Laskun tiedot");
 		echo "<table>";
 		echo "<tr><th>".t("Tunnus").":</th>			<td>$laskurow[tunnus]</td></tr>";
 		echo "<tr><th>".t("Laskunro").":</th>		<td>$laskurow[laskunro]</td></tr>";

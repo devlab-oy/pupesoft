@@ -968,9 +968,9 @@ if (!function_exists("vapauta_sarjanumerot")) {
 					pupe_query($query);
 				}
 			}
-			}
 		}
 	}
+}
 
 if (!function_exists("viikonpaiva")) {
 	function viikonpaiva($day="", $now="") {

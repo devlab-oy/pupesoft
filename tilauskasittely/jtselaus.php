@@ -1603,11 +1603,12 @@
 
 								if ($automaaginen == '' and !isset($saapumisajat[$jtrow['tuoteno']])) {
 
-									$tulossalisa = hae_tuotteen_saapumisaika($jtrow['tuoteno'], $jtrow['status'], $kokonaismyytavissa);
+									$tulossalisat = hae_tuotteen_saapumisaika($jtrow['tuoteno'], $jtrow['status'], $kokonaismyytavissa);
 									$saapumisajat[$jtrow['tuoteno']] = "";
 
-									foreach($tulossalisa as $oikea => $vasen) {
-										$saapumisajat[$jtrow['tuoteno']] .= "$oikea: $vasen<br>";
+									foreach ($tulossalisat as $tulossalisa) {
+										list($o, $v) = explode("!¡!", strip_tags($tulossalisa));
+										$saapumisajat[$jtrow['tuoteno']] .= "<br>$o $v";
 									}
 								}
 

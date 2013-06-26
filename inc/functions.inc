@@ -920,7 +920,7 @@ if (!function_exists("apix_invoice_put_file")) {
 }
 
 if (!function_exists("vapauta_sarjanumerot")) {
-	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="", $dellaa_ostorivi = TRUE) {
+	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="") {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu, tilausrivi.tuoteno, tuote.sarjanumeroseuranta, tilausrivin_lisatiedot.tilausrivilinkki
@@ -967,17 +967,6 @@ if (!function_exists("vapauta_sarjanumerot")) {
 								and myyntirivitunnus = '$srow[tunnus]'";
 					pupe_query($query);
 				}
-			}
-
-			// Onko tätä ostotilauksella?
-			if ($dellaa_ostorivi and $srow["tilausrivilinkki"] > 0) {
-				$query = "	UPDATE tilausrivi
-							SET tyyppi = 'D'
-							WHERE yhtio 	= '$kukarow[yhtio]'
-							and tunnus  	= '$srow[tilausrivilinkki]'
-							and tyyppi 		= 'O'
-							and uusiotunnus = 0";
-				pupe_query($query);
 			}
 		}
 	}

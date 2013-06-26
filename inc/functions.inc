@@ -22109,7 +22109,7 @@ if (!function_exists('paivita_poikkeavat_tulliprosentit')) {
 
 if (!function_exists('hae_tuotteen_saapumisaika')) {
 	function hae_tuotteen_saapumisaika($tuoteno, $tuote_status, $myytavissa, $loytyko=FALSE, $loytyko_normivarastosta=FALSE) {
-		global $kukarow, $yhtiorow, $verkkokauppa, $vari;
+		global $kukarow, $yhtiorow, $verkkokauppa;
 
 		$tulossalisa = array();
 

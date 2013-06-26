@@ -1607,8 +1607,8 @@
 									$saapumisajat[$jtrow['tuoteno']] = "";
 
 									foreach ($tulossalisat as $tulossalisa) {
-										list($o, $v) = explode("!¡!", strip_tags($tulossalisa));
-										$saapumisajat[$jtrow['tuoteno']] .= "<br>$o $v";
+										list($o, $v) = explode("!¡!", $tulossalisa);
+										$saapumisajat[$jtrow['tuoteno']] .= "<br>$o ".strip_tags($v);
 									}
 								}
 
@@ -1654,7 +1654,6 @@
 											}
 											else {
 												echo tv1dateconv($toimaika);
-												echo "<br/>";
 												echo $saapumisajat[$jtrow['tuoteno']];
 											}
 
@@ -1728,7 +1727,6 @@
 										}
 										else {
 											echo tv1dateconv($toimaika);
-											echo "<br/>";
 											echo $saapumisajat[$jtrow['tuoteno']];
 										}
 										echo "</td>";
@@ -1764,7 +1762,6 @@
 										}
 										else {
 											echo tv1dateconv($toimaika);
-											echo "<br/>";
 											echo $saapumisajat[$jtrow['tuoteno']];
 										}
 										echo "</td>";
@@ -1800,7 +1797,6 @@
 										}
 										else {
 											echo tv1dateconv($toimaika);
-											echo "<br/>";
 											echo $saapumisajat[$jtrow['tuoteno']];
 										}
 										echo "</td>";

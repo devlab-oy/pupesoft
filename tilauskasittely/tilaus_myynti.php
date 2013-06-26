@@ -7667,6 +7667,24 @@ if ($tee == '') {
 				$tilausjavalisa = "onClick = 'return ostotilaus_verify()'";
 			}
 
+			if ($nayta_sostolisateksti == "HUOM" and $kukarow["extranet"] == "") {
+				echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
+						function ostotilaus_verify(){
+							msg = '".t("HUOM: Päivittämällä tätä myyntitilausta olet tekemässä uuden ostotilauksen vaikka sellainen on jo olemassa")."! ".t("Oletko varma, että haluat tehdä uuden ostotilauksen")."?';
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
+						}
+						</SCRIPT>";
+
+				$tilausjavalisa = "onClick = 'return ostotilaus_verify()'";
+			}
+
 			echo "<td class='back' valign='top'>";
 
 			// otetaan maksuehto selville.. käteinen muuttaa asioita
@@ -7787,8 +7805,9 @@ if ($tee == '') {
 				echo "<input type='submit' ACCESSKEY='V' value='$otsikko ".t("valmis")."$laskelisa'>";
 
 				if ($kukarow["extranet"] == "" and ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Q") and in_array($toim, array("PROJEKTI","RIVISYOTTO", "PIKATILAUS"))) {
-					$lisateksti = ($nayta_sostolisateksti == "TOTTA") ? " & ".t("Päivitä ostotilausta samalla") : "";
-					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." & ".t("Tee tilauksesta ostotilaus")."$lisateksti' $tilausjavalisa> ";
+					$lisateksti = ($nayta_sostolisateksti == "TOTTA") ? " & ".t("Päivitä ostotilausta samalla") : " & ".t("Tee tilauksesta ostotilaus");
+
+					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." $lisateksti' $tilausjavalisa> ";
 				}
 
 				if (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {

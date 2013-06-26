@@ -20,9 +20,9 @@
 			$ksel = "selected";
 		}
 
-		$ulos = "<td><select name='$nimi'><option value='K' $ksel>".t("Kustannuspaikka")."";
-		$ulos .= "<option value='O'" . $osel . ">".t("Kohde")."";
-		$ulos .= "<option value='P'" . $psel . ">".t("Projekti")."";
+		$ulos = "<td><select name='$nimi'><option value='K' $ksel>".t("Kustannuspaikka");
+		$ulos .= "<option value='O'" . $osel . ">".t("Kohde");
+		$ulos .= "<option value='P'" . $psel . ">".t("Projekti");
                 $ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -64,8 +64,8 @@
 			$sel = "selected";
 		}
 
-        $ulos = "<td><select name='$nimi'><option value='o' $sel>".t("Kyllä")."";
-		$ulos .= "<option value='E' " . $osel . ">".t("Ei")."";
+        $ulos = "<td><select name='$nimi'><option value='o' $sel>".t("Kyllä");
+		$ulos .= "<option value='E' " . $osel . ">".t("Ei");
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

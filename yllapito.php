@@ -1386,7 +1386,7 @@
 						if (mysql_field_name($result,$i) == 'liitedata') {
 
 							if ($lukitse_laji == "tuote" and $lukitse_avaimeen > 0 and in_array($trow[1], array("image/jpeg","image/jpg","image/gif","image/png","image/bmp"))) {
-								echo "<img src='".$palvelin2."view.php?id=$trow[0]' height='80px'><br>".t("Muokkaa liitettä")."";
+								echo "<img src='".$palvelin2."view.php?id=$trow[0]' height='80px'><br>".t("Muokkaa liitettä");
 							}
 							else {
 								list($liitedata1, $liitedata2) = explode("/", $trow[1]);

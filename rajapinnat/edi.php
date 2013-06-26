@@ -11,10 +11,10 @@ class Edi {
 	static function create($order) {
 
 		// require 'magento_salasanat.php' muuttujat
-		global $magento_api_edi, $ovt_tunnus, $pupesoft_tilaustyyppi;
+		global $magento_api_ana_edi, $ovt_tunnus, $pupesoft_tilaustyyppi;
 		global $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys;
 
-		if (empty($magento_api_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) exit("Parametrejä puuttuu\n");
+		if (empty($magento_api_ana_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) exit("Parametrejä puuttuu\n");
 		if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) exit("Parametrejä puuttuu\n");
 
 		// Miten storen nimi?
@@ -192,7 +192,7 @@ class Edi {
 
 	   	$edi_order = iconv("UTF-8", "ISO-8859-1", $edi_order);
 
-		$filename = $magento_api_edi."/magento-order".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+		$filename = $magento_api_ana_edi."/magento-order".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 		file_put_contents($filename, $edi_order);
 
 		return true;

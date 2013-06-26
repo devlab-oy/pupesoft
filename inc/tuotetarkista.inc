@@ -126,7 +126,6 @@ if(!function_exists("tuotetarkista")) {
 
 			if (mysql_num_rows($sresult) != 1) {
 				$virhe[$i] = t("Tiliä ei löydy");
-				$errori = 1;
 			}
 		}
 
@@ -295,7 +294,6 @@ if(!function_exists("tuotetarkista")) {
 			if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J'))) {
 				if (!in_array($t[$i], array('S','U','X',''))) {
 					$virhe[$i] = t("Suoratoimitustieto virheellinen");
-					$errori = 1;
 				}
 			}
 		}

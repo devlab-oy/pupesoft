@@ -33,7 +33,7 @@
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
 		}
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei kustannuspaikkaa")."";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei kustannuspaikkaa");
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -61,7 +61,7 @@
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
 		}
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei kohdetta")."";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei kohdetta");
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -89,7 +89,7 @@
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
 		}
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei projektia")."";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei projektia");
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -950,14 +950,14 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = '-9'>".t("Oletus")."</option>";
-		$ulos .= "<option value = '0' $sel[0]>".t("Normaali laskupohja")."</option>";
-		$ulos .= "<option value = '2' $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)")."</option>";
-		$ulos .= "<option value = '5' $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
-		$ulos .= "<option value = '6' $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
-		$ulos .= "<option value = '7' $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)")."</option>";
-		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1")."</option>";
+		$ulos .= "<option value = '99' $sel[99]>".t("Normaali laskupohja")."</option>";
+		$ulos .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)")."</option>";
+		$ulos .= "<option value = '5'  $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
+		$ulos .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
+		$ulos .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)")."</option>";
+		$ulos .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1")."</option>";
 		#$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)")."</option>";
-		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3")."</option>";
+		$ulos .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3")."</option>";
 		$ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)")."</option>";
 		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)")."</option>";
 		$ulos .= "<option value = '13' $sel[13]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
@@ -966,6 +966,7 @@
 		$ulos .= "<option value = '16' $sel[16]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)")."</option>";
 		$ulos .= "<option value = '17' {$sel[17]}>".t("Normaali laskupohja (lihavoidut ja kursivoidut tekstit)")."</option>";
 		$ulos .= "<option value = '18' {$sel[18]}>".t("Normaali laskupohja (nimitykset rivitettyn‰)")."</option>";
+		$ulos .= "<option value = '19' {$sel[19]}>".t("Normaali laskupohja (Tuoteperheen hinnat is‰tuotteella, lapsituotteet n‰ytet‰‰n ilman hintoja)")."</option>";
 
 		$ulos .= "</select></td>";
 

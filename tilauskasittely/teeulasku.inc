@@ -467,28 +467,42 @@
 	// katotaan montako tilausta ollaan käsittelemässä
 	$montakotilausta = explode(",", $tunnukset);
 
-	// jos meillä on enemmän kuin yksi tilaus ja kyseessä ei ole laskutyyppi PLAIN, lasketaan välisummat tilausriveillä
-	if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
+	$asiakas_apu_query = "	SELECT *
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus = '$laskurow[liitostunnus]'";
+	$asiakas_apu_res = pupe_query($asiakas_apu_query);
+	$asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
 
-		// katotaan miten halutaan sortattavan
-		// haetaan asiakkaan tietojen takaa sorttaustiedot
-		$order_sorttaus = '';
+	// katotaan miten halutaan sortattavan
+	// haetaan asiakkaan tietojen takaa sorttaustiedot
+	$order_sorttaus = '';
 
-		$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta
-								FROM asiakas
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tunnus = '$laskurow[liitostunnus]'";
-		$asiakas_apu_res = pupe_query($asiakas_apu_query);
+	if (mysql_num_rows($asiakas_apu_res) == 1) {
+		$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["laskun_jarjestys"] != "" ? $asiakas_apu_row["laskun_jarjestys"] : $yhtiorow["laskun_jarjestys"]);
+		$order_sorttaus = $asiakas_apu_row["laskun_jarjestys_suunta"] != "" ? $asiakas_apu_row["laskun_jarjestys_suunta"] : $yhtiorow["laskun_jarjestys_suunta"];
+	}
+	else {
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
+		$order_sorttaus = $yhtiorow["laskun_jarjestys_suunta"];
+	}
 
-		if (mysql_num_rows($asiakas_apu_res) == 1) {
-			$asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
-			$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["laskun_jarjestys"] != "" ? $asiakas_apu_row["laskun_jarjestys"] : $yhtiorow["laskun_jarjestys"]);
-			$order_sorttaus = $asiakas_apu_row["laskun_jarjestys_suunta"] != "" ? $asiakas_apu_row["laskun_jarjestys_suunta"] : $yhtiorow["laskun_jarjestys_suunta"];
+	// Asiakkaan / yhtiön laskutyyppi
+	if ($laskurow['laskutyyppi'] == -9 or $laskurow['laskutyyppi'] == 0) {
+		//jos laskulta löytyvät laskutyyppi on Oletus käytetään asiakkaan tai yhtiön oletus laskutyyppiä
+		if (isset($asiakas_apu_row['laskutyyppi']) and $asiakas_apu_row['laskutyyppi'] != -9) {
+			$laskutyyppi = $asiakas_apu_row['laskutyyppi'];
 		}
 		else {
-			$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
-			$order_sorttaus = $yhtiorow["laskun_jarjestys_suunta"];
+			$laskutyyppi = $yhtiorow['laskutyyppi'];
 		}
+	}
+	else {
+		$laskutyyppi = $laskurow['laskutyyppi'];
+	}
+
+	// jos meillä on enemmän kuin yksi tilaus ja kyseessä ei ole laskutyyppi PLAIN, lasketaan välisummat tilausriveillä
+	if (count($montakotilausta) > 1 and $laskutyyppi != 1) {
 
 		if ($yhtiorow["laskun_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
 		else $pjat_sortlisa = "";
@@ -610,12 +624,7 @@
 	$lasku = $laskurow;
 
 	// haetaan asiakkaan tiedot (esim konserniyhtiö)
-	$query = "	SELECT konserniyhtio
-				FROM asiakas
-				WHERE yhtio = '{$kukarow["yhtio"]}'
-				AND tunnus = '{$laskurow["liitostunnus"]}'";
-	$konsres = pupe_query($query);
-	$konsrow = mysql_fetch_assoc($konsres);
+	$konsrow = $asiakas_apu_row;
 
 	require('teelaskuntiliointi.inc');
 

@@ -10,7 +10,7 @@ if(!function_exists("maksuehtotarkista")) {
 			$prossa = (int) $t[$i];
 
 			if ($yhtiorow["maksuehto_tuotenumero"] == "" and $prossa != 0) {
-				$virhe[$i] = "".t("Et voi tehdä moniehto-maksuehtoa koska yhtiöltä puuttuu maksuehto_tuotenumero!");	
+				$virhe[$i] = t("Et voi tehdä moniehto-maksuehtoa koska yhtiöltä puuttuu maksuehto_tuotenumero!");	
 			}
 			if ($prossa!= 0) {
 			    $moniehto = 1;

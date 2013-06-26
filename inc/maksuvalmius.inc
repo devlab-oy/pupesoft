@@ -55,7 +55,7 @@
 			$trow = mysql_fetch_array($result);
 		}
 		else {
-			echo t("Yhtiöitä löytyi monta tai ei lainkaan! Virhe!")."";
+			echo t("Yhtiöitä löytyi monta tai ei lainkaan! Virhe!");
 			exit;
 		}
 

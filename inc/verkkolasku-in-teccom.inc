@@ -5,6 +5,8 @@
 
 	$laskuformaatti 		= "TECCOM-INVOICE";
 
+	$kukarow['yhtio'] = 'artr';
+
 	// parseroidaan xml
 	$yhtio 					= "20428100"; 		//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber;
 	$verkkotunnus_vas		= "003720428100";	//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber; 	// joissakin materiaaleissa viallista materiaalia.
@@ -233,10 +235,11 @@
 			// tuotekoodi
 			$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
 
-			$query = "	SELECT *
-						FROM tuotteen_toimittajat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
+			$query = "	SELECT tt.*
+						FROM tuotteen_toimittajat AS tt
+						JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}' AND toimi.tyyppi != 'P')
+						WHERE tt.yhtio = '{$kukarow['yhtio']}'
+						AND tt.toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
 			$chk_res = pupe_query($query);
 
 			if (mysql_num_rows($chk_res) == 0) {
@@ -245,6 +248,7 @@
 				$query = "	SELECT tt.*
 							FROM tuotteen_toimittajat_tuotenumerot AS ttt
 							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
+							JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}' AND toimi.tyyppi != 'P')
 							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
 							AND ttt.tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
 				$chk_res = pupe_query($query);

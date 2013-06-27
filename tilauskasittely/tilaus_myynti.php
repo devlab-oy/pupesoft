@@ -4087,20 +4087,7 @@ if ($tee == '') {
 						$alemaara = $kpl;
 					}
 
-					$hinnat = alehinta($laskurow, $trow, $alemaara, '', '', '',"hintaperuste,aleperuste");
-
-					$onko_asiakkaalla_alennuksia = FALSE;
-
-					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
-							$onko_asiakkaalla_alennuksia = TRUE;
-							break;
-						}
-					}
-
-					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-					if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE) {
-
+					if (!saako_myyda_private_label($laskurow['liitostunnus'], $trow["tuoteno"], $alemaara)) {
 						if ($kukarow['extranet'] != '') {
 							$varaosavirhe .= t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
 						}
@@ -6564,7 +6551,7 @@ if ($tee == '') {
 
 				}
 			}
-			
+
 			$summa 					= 0; 	// Tilauksen verollinen loppusumma tilauksen valuutassa
 			$summa_eieri			= 0;	// Tilauksen verollinen loppusumma tilauksen valuutassa ilman erikoisalennusta
 			$arvo  					= 0;	// Tilauksen veroton loppusumma tilauksen valuutassa

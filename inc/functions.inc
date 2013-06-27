@@ -3279,8 +3279,7 @@ if (!function_exists("alehinta")) {
 		*/
 
 		/*
-		HUOM: tarkista kaikki nämä koodit "if ($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {" kun muutat ale ja hintaperusteita!
-		REGEXP: if \(\$[^\[]*\["hinnastoon"\] == "V" and \(\$[^\[]*\["hintaperuste"\] > 13 or \$[^\[]*\["hintaperuste"\] === FALSE\) and \(\$[^\[]*\["aleperuste"\] > 12 or \$[^\[]*\["aleperuste"\] === FALSE\)\)
+		HUOM: tarkista saako_myyda_private_label-funkkari ja kaikki nämä koodit "if ($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {" kun muutat ale ja hintaperusteita!
 		*/
 
 		// Varmistetaan, että määrä on ok
@@ -22208,32 +22207,27 @@ if (!function_exists("lisaa_rivi")) {
 }
 
 if (!function_exists("saako_myyda_private_label")) {
-	function saako_myyda_private_label($asiakastunnus, $tuotenro){
+	function saako_myyda_private_label($asiakastunnus, $tuotenro, $alemaara = 1) {
 		global $kukarow, $yhtiorow;
-		
+
 		//haetaan ensin tutkittavan tuotteen tiedot
 		$query = "	SELECT *
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tuoteno = '$tuotenro'";
 		$tuotetempres = pupe_query($query);
-		$temptrow = mysql_fetch_assoc($tuotetempres);
-		
+		$trow = mysql_fetch_assoc($tuotetempres);
+
 		//katotaan kannattako edes tutkia - jos tuote ei ole private label sitä saa myydä => ei kannata tutkia | eli tutkitaan jos on private label
-		if ($temptrow["hinnastoon"] == "V"){
-			
+		if ($trow["hinnastoon"] == "V") {
+
 			//haetaan asiakkaan tiedot
-			$query = "	SELECT *
+			$query = "	SELECT tunnus liitostunnus, ytunnus, valkoodi, maa, ryhma, piiri
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus = '$asiakastunnus'";
-			$asiakastempres = pupe_query($query);
-			$asiakastemprow = mysql_fetch_assoc($asiakastempres);
-
-			$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
-			$temp_laskurowwi['ytunnus']			= $asiakastemprow['ytunnus'];
-			$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
-			$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
+			$asiakasres = pupe_query($query);
+			$asiakasrow = mysql_fetch_assoc($asiakasres);
 
 			$haettavat_kentat = "hinta,hintaperuste,aleperuste";
 
@@ -22241,22 +22235,27 @@ if (!function_exists("saako_myyda_private_label")) {
 				$haettavat_kentat .= ",ale{$alepostfix}";
 			}
 
-			$hinnat = alehinta($temp_laskurowwi, $temptrow, 1, '', '', '', $haettavat_kentat);
+			$hinnat = alehinta($asiakasrow, $trow, $alemaara, '', '', '', $haettavat_kentat);
+
+			$onko_asiakkaalla_alennuksia = FALSE;
 
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 				if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
-					return TRUE;
+					$onko_asiakkaalla_alennuksia = TRUE;
 				}
 			}
 
 			// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-			if ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) {
+			if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE) {
 				return FALSE;
 			}
-			
-		}else {
-		//tänne tullaan, jos tuote ei ees oo private label => saa myydä!
-			return TRUE;	
+			else {
+				return TRUE;
+			}
+		}
+		else {
+			//tänne tullaan, jos tuote ei ees oo private label => saa myydä!
+			return TRUE;
 		}
 	}
 }

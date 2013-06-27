@@ -84,7 +84,7 @@
 								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
 								WHERE lasku.yhtio in ($yhtiot)
 								AND lasku.tila = 'G'
-								AND lasku.alatila IN ('C', 'D')
+								AND lasku.alatila IN ('J','A','B','C', 'D')
 								AND lasku.clearing = '$varasto_tunnus'
 								GROUP BY tilausrivi.tuoteno";
 		$varastoon_result = pupe_query($varastoon_query);
@@ -99,7 +99,7 @@
 								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
 								WHERE lasku.yhtio in ($yhtiot)
 								AND lasku.tila = 'G'
-								AND lasku.alatila IN ('C', 'D')
+								AND lasku.alatila IN ('J','A','B','C', 'D')
 								AND lasku.varasto = $varasto_tunnus
 								GROUP BY tilausrivi.tuoteno";
 		$varastosta_result = pupe_query($varastosta_query);

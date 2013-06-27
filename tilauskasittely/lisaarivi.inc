@@ -514,10 +514,10 @@
 		}
 
 		if ($lisaarivi_debug==1) echo "Mennään myyntihaaraan: $tuoteno<br>";
-		
+
 		// Etsitään korvaavia tuotteita
 		if ($trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L') {
-			
+
 			// Tutkitaan ensin saako tälle asiakkaalle myydä korvaavia tästä tuoteryhmästä
 			$query = " SELECT yhtio
 						from korvaavat_kiellot
@@ -550,15 +550,15 @@
 				$query = "	SELECT tuote.*
 							FROM korvaavat
 							JOIN tuote ON korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno
-							WHERE korvaavat.id	='$krow1[id]'
-							and korvaavat.yhtio	='$kukarow[yhtio]'
+							WHERE korvaavat.id	= '$krow1[id]'
+							and korvaavat.yhtio	= '$kukarow[yhtio]'
 							order by korvaavat.jarjestys, korvaavat.tuoteno";
 				$kres2 = pupe_query($query);
-				
+
 				while ($krow2 = mysql_fetch_assoc($kres2)) {
-					
+
 					//katotaan tässä välissä saako tuotetta myydä asiakkaalle - eli jos ei saa myydä siirrytään seuraavaan tuotteeseen (jos on)...
-					if (!(saako_myyda_private_label($laskurow["liitostunnus"], $krow2["tuoteno"]))){
+					if (!saako_myyda_private_label($laskurow["liitostunnus"], $krow2["tuoteno"])) {
 						continue;
 					}
 
@@ -628,7 +628,7 @@
 			elseif (count($korkieltokommi) > 1) {
 				$korkieltokommi = t("Voit tilata korvaavia tuotteita").": ".implode(", ",$korkieltokommi);
 			}
-			
+
 		} // end etsitäänkö korvaavia
 
 		// Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhjä niin vaihdetaan vain jonkun tuotteen paikkaa eikä päivitetä tuoteperheitä
@@ -859,7 +859,7 @@
 						if (isset($varasto) and !is_array($varasto)) {
 							$varasto = array();
 						}
-						
+
 						reset($arr);
 
 						// Katotaan missä varastossa "oletuspaikka" on.

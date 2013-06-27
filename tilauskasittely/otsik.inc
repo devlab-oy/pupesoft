@@ -561,7 +561,7 @@
 							WHERE tunnus = '$asiakasid'";
 				$assresult = pupe_query($squery);
 				$assrow = mysql_fetch_assoc($assresult);
-				
+
 				$yhtquery = "	SELECT nimi
 								FROM yhteyshenkilo
 								WHERE yhtio = '$kukarow[yhtio]'
@@ -571,7 +571,7 @@
 								AND oletusyhteyshenkilo != ''
 								ORDER BY nimi
 								LIMIT 1";
-								
+
 				$yhtresult = pupe_query($yhtquery);
 				$yhtnimi = mysql_fetch_assoc($yhtresult);
 
@@ -2893,28 +2893,9 @@
 
 					$paivitetaanko = TRUE;
 
-					// hinnat p‰ivitet‰‰n vain jos asiakkaalla on asiakashinta tai asiakasalennus
+					// hinnat p‰ivitet‰‰n vain jos asiakkaalla on asiakashinta tai asiakasalennus (saako_myyda_private_label palauttaa TRUE jos on asiakashinta tai alennus)
 					if ($yhtiorow["vaihda_asiakas_hintapaiv"] == "A") {
-
-						$haettavat_kentat = "hinta,hintaperuste,aleperuste";
-
-						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-							$haettavat_kentat .= ",ale{$alepostfix}";
-						}
-
-						$hinnat = alehinta($laskurow, $trow, $row['tilkpl'], '', '', '', $haettavat_kentat);
-
-						$onko_asiakkaalla_alennuksia = FALSE;
-
-						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
-								$onko_asiakkaalla_alennuksia = TRUE;
-								break;
-							}
-						}
-
-						// Jos tuote n‰ytet‰‰n vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei lˆydy
-						if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE) {
+						if (!saako_myyda_private_label($laskurow['liitostunnus'], $trow["tuoteno"], $row['tilkpl'])) {
 							$paivitetaanko = FALSE;
 						}
 					}

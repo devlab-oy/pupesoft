@@ -1339,48 +1339,7 @@
 				}
 
 				if ($hae_ja_selaa_asiakas != 0) {
-					$query = "	SELECT *
-								FROM tuote
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tuoteno = '$row[tuoteno]'";
-					$tuotetempres = pupe_query($query);
-					$temptrow = mysql_fetch_assoc($tuotetempres);
-
-					$temp_laskurowwi = $laskurow;
-
-					if (!is_array($temp_laskurowwi)) {
-						$query = "	SELECT *
-									FROM asiakas
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND tunnus = '$kukarow[oletus_asiakas]'";
-						$asiakastempres = pupe_query($query);
-						$asiakastemprow = mysql_fetch_assoc($asiakastempres);
-
-						$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
-						$temp_laskurowwi['ytunnus']			= $asiakastemprow['ytunnus'];
-						$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
-						$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
-					}
-
-					$haettavat_kentat = "hinta,hintaperuste,aleperuste";
-
-					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						$haettavat_kentat .= ",ale{$alepostfix}";
-					}
-
-					$hinnat = alehinta($temp_laskurowwi, $temptrow, 1, '', '', '', $haettavat_kentat);
-
-					$onko_asiakkaalla_alennuksia = FALSE;
-
-					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
-							$onko_asiakkaalla_alennuksia = TRUE;
-							break;
-						}
-					}
-
-					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-					if ($temptrow["hinnastoon"] == "V" and (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE)) {
+					if (!saako_myyda_private_label($hae_ja_selaa_asiakas, $row["tuoteno"])) {
 						continue;
 					}
 				}

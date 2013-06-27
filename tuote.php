@@ -682,8 +682,31 @@
 			echo "</tr>";
 
 			echo "<tr>";
+
 			echo "<td>$tuoterow[muuta]&nbsp;</td>";
-			echo "<td colspan='5'>".wordwrap($tuoterow["lyhytkuvaus"], 70, "<br>")."</td>";
+			echo "<td colspan='5'>";
+			echo wordwrap($tuoterow["lyhytkuvaus"], 70, "<br>");
+
+			$palautus = t_tuotteen_avainsanat($tuoterow, "laatuluokka");
+
+			if (trim($palautus) != "") {
+
+				echo $tuoterow["lyhytkuvaus"] != "" ? "<br>" : "";
+
+				switch($palautus) {
+					case 0:
+						echo "Premium";
+						break;
+					case 1:
+						echo "Standard";
+						break;
+					case 2:
+						echo "Economy";
+						break;
+				}
+			}
+
+			echo "</td>";
 			echo "</tr>";
 
 			//9

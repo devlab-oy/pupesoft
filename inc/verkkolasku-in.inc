@@ -287,11 +287,6 @@
 			$kukarow['yhtio'] = $yhtio;
 			$kukarow['kuka']  = 'verkkolas';
 
-			// tietyssä tapauksessa triggeröidään tämä
-			if (strpos($file, "maventa") !== false and $yhtio == "artr" and $laskun_ebid == "FINVOICEXML") {
-				$laskun_ebid = "MAVENTAXML";
-			}
-
 			// Perusta lasku
 			$summa = $laskun_summa_eur;
 
@@ -520,6 +515,82 @@
 						if (mysql_num_rows($result) == 1) {
 							$trow = mysql_fetch_assoc($result);
 							break;
+						}
+					}
+				}
+			}
+
+			if (strpos($file, "maventa") !== false and $yhtio == "artr" and $laskun_ebid == "FINVOICEXML") {
+				$laskun_ebid = "MAVENTAXML";
+
+				$query = "	SELECT toimittajanro
+							FROM toimi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND ytunnus = '{$laskuttajan_toimittajanumero}'
+							AND toimittajanro != ''";
+				$toimittajanro_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($toimittajanro_chk_res) != 0) {
+					$toimittajanro_chk_row = mysql_fetch_assoc($toimittajanro_chk_res);
+					$laskuttajan_toimittajanumero = $toimittajanro_chk_row['toimittajanro'];
+				}
+
+				foreach ($rtuoteno as $i => $_arr) {
+
+					// Brembo-case
+					if ($laskuttajan_toimittajanumero == "123098") {
+
+						$query = "	SELECT tuotteen_toimittajat.toim_tuoteno
+									FROM toimi
+									JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+																AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+																AND tuotteen_toimittajat.tuoteno = '{$_arr['tuoteno']}'
+																AND tuotteen_toimittajat.tuoteno != '')
+									WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+									AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
+									AND toimi.tyyppi != 'P'
+									AND toimi.asn_sanomat IN ('K', 'L')";
+						$tuoteno_chk_res = pupe_query($query);
+
+						if (mysql_num_rows($tuoteno_chk_res) > 0) {
+							$tuoteno_chk_row = mysql_fetch_assoc($tuoteno_chk_res);
+							$rtuoteno[$i]['tuoteno'] = $tuoteno_chk_row['toim_tuoteno'];
+						}
+					}
+
+					if ($laskuttajan_toimittajanumero == "123335" and ($_arr["tuoteno"] == "300013" or $_arr["tuoteno"] == "300023" or $_arr["tuoteno"] == "300027")) {
+
+						if ($_arr["tuoteno"] == "300013") {
+							if (isset($_arr['laskun_rahtikulu'])) $laskun_rahtikulu += (float) $_arr['laskun_rahtikulu'];
+							if (isset($_arr['osto_rivi_kulu'])) $osto_rivi_kulu += (float) $_arr['osto_rivi_kulu'];
+							if (isset($_arr['osto_rahti_alv'])) $osto_rahti_alv = $_arr['osto_rahti_alv'];
+						}
+						else {
+							if (isset($_arr['osto_kulu'])) $osto_kulu += (float) $_arr['osto_kulu'];
+							if (isset($_arr['osto_kulu_alv'])) $osto_kulu_alv = $_arr['osto_kulu_alv'];
+						}
+
+						unset($rtuoteno[$i]);
+						continue;
+					}
+
+					$query = "	SELECT tuotteen_toimittajat.tuotekerroin
+								FROM toimi
+								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+															AND tuotteen_toimittajat.toim_tuoteno IN ('{$_arr['tuoteno']}')
+															AND tuotteen_toimittajat.toim_tuoteno != '')
+								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+								AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
+								AND toimi.tyyppi != 'P'
+								AND toimi.asn_sanomat IN ('K', 'L')";
+					$tuotekerroin_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($tuotekerroin_chk_res) > 0) {
+						$tuotekerroin_chk_row = mysql_fetch_assoc($tuotekerroin_chk_res);
+
+						if ($tuotekerroin_chk_row['tuotekerroin'] != 0) {
+							$rtuoteno[$i]['kpl'] = round($_arr['kpl'] / $tuotekerroin_chk_row['tuotekerroin'], 2);
 						}
 					}
 				}

@@ -515,15 +515,9 @@
 
 		if ($lisaarivi_debug==1) echo "Mennään myyntihaaraan: $tuoteno<br>";
 		
-
 		// Etsitään korvaavia tuotteita
 		if ($trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L') {
 			
-			$saako_myyda_korvaavaa = TRUE;
-			$saako_myyda_korvaavaa = saako_myyda_private_label($laskurow["liitostunnus"], $tuoteno);
-			
-			if ($saako_myyda_korvaavaa){
-
 			// Tutkitaan ensin saako tälle asiakkaalle myydä korvaavia tästä tuoteryhmästä
 			$query = " SELECT yhtio
 						from korvaavat_kiellot
@@ -560,8 +554,13 @@
 							and korvaavat.yhtio	='$kukarow[yhtio]'
 							order by korvaavat.jarjestys, korvaavat.tuoteno";
 				$kres2 = pupe_query($query);
-
+				
 				while ($krow2 = mysql_fetch_assoc($kres2)) {
+					
+					//katotaan tässä välissä saako tuotetta myydä asiakkaalle - eli jos ei saa myydä siirrytään seuraavaan tuotteeseen (jos on)...
+					if (!(saako_myyda_private_label($laskurow["liitostunnus"], $krow2["tuoteno"]))){
+						continue;
+					}
 
 					list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
 					list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
@@ -629,7 +628,7 @@
 			elseif (count($korkieltokommi) > 1) {
 				$korkieltokommi = t("Voit tilata korvaavia tuotteita").": ".implode(", ",$korkieltokommi);
 			}
-			}
+			
 		} // end etsitäänkö korvaavia
 
 		// Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhjä niin vaihdetaan vain jonkun tuotteen paikkaa eikä päivitetä tuoteperheitä

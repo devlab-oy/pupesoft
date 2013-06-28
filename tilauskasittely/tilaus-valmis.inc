@@ -5,7 +5,7 @@ $tilaus_valmis_ulos = "";
 $ohjausmerkkilisa 	= "";
 $luottorajavirhe 	= "";
 $jtkielto 			= "";
-// $myy_varastosta_varasto = $laskurow['varasto'];
+$myy_varastosta_varasto = $laskurow['varasto'];
 
 ///* Reload ja back-nappulatsekki *///
 if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
@@ -1435,12 +1435,13 @@ else {
 			$varasto_kpl_array = array_keys($varasto_kpl_array);
 			$tulalue_kpl_array = array_keys($tulalue_kpl_array);
 
-			$varasto = array_pop($varasto_kpl_array);
-
 			// Jos tilauksella ei ole yhtään sopivaa riviä (esim vaan JT/PUUTE), säilytetään varasto jonka käyttäjä valitsi
-			//if (count($varasto_kpl_array) == 0) {
-				//$varasto = $myy_varastosta_varasto;
-			//}
+			if (count($varasto_kpl_array) == 0) {
+				$varasto = $myy_varastosta_varasto;
+			}
+			else {
+				$varasto = array_pop($varasto_kpl_array);
+			}
 
 			$tulostusalue = array_pop($tulalue_kpl_array);
 

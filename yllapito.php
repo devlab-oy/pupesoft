@@ -935,6 +935,7 @@
 	}
 
 	$count = count($array);
+	$jarjestys_apu = "";
 
 	for ($i=0; $i<=$count; $i++) {
 		if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
@@ -1065,9 +1066,13 @@
 				$lisa .= " and {$array[$i]} {$hakuehto} ";
 			}
 
+			$jarjestys_apu = "$jarjestys_apu $array[$i],";
+
 			$ulisa .= "&haku[$i]=".urlencode($haku[$i]);
     	}
     }
+
+	$jarjestys = "$jarjestys_apu $jarjestys";
 
     //	Säilytetään ohjeen tila
 	if ($from != "") {

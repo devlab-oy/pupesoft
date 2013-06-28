@@ -694,13 +694,13 @@
 				echo $tuoterow["lyhytkuvaus"] != "" ? "<br>" : "";
 
 				switch($palautus) {
-					case 0:
+					case '0':
 						echo "Premium";
 						break;
-					case 1:
+					case '1':
 						echo "Standard";
 						break;
-					case 2:
+					case '2':
 						echo "Economy";
 						break;
 				}

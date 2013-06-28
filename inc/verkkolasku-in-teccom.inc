@@ -232,6 +232,13 @@
 
 		foreach ($tuotetiedot as $tuotetieto) {
 
+			if ($laskuttajan_toimittajanumero == "123085") {
+				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
+			}
+			elseif ($laskuttajan_toimittajanumero == "123067") {
+				$rtuoteno[$i]["tuoteno"] = substr(utf8_decode($tuotetieto->ProductId->ProductNumber),0,-3);
+			}
+
 			// tuotekoodi
 			$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
 

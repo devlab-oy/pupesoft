@@ -3,10 +3,6 @@
 $laskuformaatti = "FINVOICE";
 $laskun_ebid    = "FINVOICEXML";
 
-if (strpos($file, "maventa") !== false) {
-	$laskun_ebid = "MAVENTAXML";
-}
-
 // parseroidaan xml
 $yhtio 					= $xml->BuyerOrganisationUnitNumber;
 $verkkotunnus_vas		= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
@@ -165,16 +161,6 @@ $osto_rivi_kulu_alv = 0;
 
 $ei_oteta_kulua_pois = true;
 
-$edellinen_tuoteno = "";
-$budweg_runkotuotteiden_alut = array(
-	'901',
-	'902',
-	'903',
-	'904',
-);
-$runkotuotteita = 0;
-$runkotuotteiden_indeksit = array();
-
 $rivien_summa_yhteensa = 0;
 
 if (count($tuotetiedot) > 0) {
@@ -184,160 +170,24 @@ if (count($tuotetiedot) > 0) {
 
 		$rtuoteno[$i]["tuoteno2"] = "";
 
-		if ($laskun_ebid == "MAVENTAXML") {
-
-			$query = "	SELECT *
-						FROM tuotteen_toimittajat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
-			$chk_res = pupe_query($query);
-
-			if (mysql_num_rows($chk_res) == 0) {
-
-				// tuotteen toimittajat tuotenumerot
-				$query = "	SELECT tt.*
-							FROM tuotteen_toimittajat_tuotenumerot AS ttt
-							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
-							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
-							AND ttt.tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
-				$chk_res = pupe_query($query);
-
-				if (mysql_num_rows($chk_res) != 0) {
-					$chk_row = mysql_fetch_assoc($chk_res);
-					$rtuoteno[$i]['tuoteno'] = $chk_row['toim_tuoteno'];
-				}
-			}
-		}
-
 		if ($rtuoteno[$i]["tuoteno"] != "") {
 
-			if ($laskun_ebid == "MAVENTAXML") {
+			if (strpos($file, "maventa") !== false) {
 
 				// Telko-case
 				// 300013 = rahtiveloitus
 				// 300023 = pakkauskulu
 				// 300027 = pakkauskulu
-				if ($laskuttajan_toimittajanumero == "123335" and ($rtuoteno[$i]["tuoteno"] == "300013" or $rtuoteno[$i]["tuoteno"] == "300023" or $rtuoteno[$i]["tuoteno"] == "300027")) {
+				if (strpos($file, "maventa") !== false and ($laskuttajan_toimittajanumero == "123335" or str_replace(array("-"," "), "", $laskuttajan_toimittajanumero) == "09871371") and ($rtuoteno[$i]["tuoteno"] == "300013" or $rtuoteno[$i]["tuoteno"] == "300023" or $rtuoteno[$i]["tuoteno"] == "300027")) {
 
 					if ($rtuoteno[$i]["tuoteno"] == "300013") {
-						$laskun_rahtikulu += (float) str_replace(",", ".", $tuotetieto->RowAmount);
-						$osto_rivi_kulu += (float) str_replace(",", ".", $tuotetieto->RowAmount);
-						$osto_rahti_alv = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
+						$rtuoteno[$i]["laskun_rahtikulu"] = (float) str_replace(",", ".", $tuotetieto->RowAmount);
+						$rtuoteno[$i]['osto_rivi_kulu'] = (float) str_replace(",", ".", $tuotetieto->RowAmount);
+						$rtuoteno[$i]['osto_rahti_alv'] = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 					}
 					else {
-						$osto_kulu += (float) str_replace(",", ".", $tuotetieto->RowAmount);
-						$osto_kulu_alv = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
-					}
-
-					unset($rtuoteno[$i]);
-					continue;
-				}
-
-				// Brembo-case
-				if ($laskuttajan_toimittajanumero == "123098") {
-
-					$query = "	SELECT tuotteen_toimittajat.toim_tuoteno
-								FROM toimi
-								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
-															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-															AND tuotteen_toimittajat.tuoteno = '{$rtuoteno[$i]['tuoteno']}'
-															AND tuotteen_toimittajat.tuoteno != '')
-								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
-								AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
-								AND toimi.tyyppi != 'P'
-								AND toimi.asn_sanomat = 'M'";
-					$tuoteno_chk_res = pupe_query($query);
-
-					if (mysql_num_rows($tuoteno_chk_res) > 0) {
-						$tuoteno_chk_row = mysql_fetch_assoc($tuoteno_chk_res);
-						$rtuoteno[$i]['tuoteno'] = $tuoteno_chk_row['toim_tuoteno'];
-					}
-				}
-
-				// Budweg-case
-				// FTE-case
-				if (($laskuttajan_toimittajanumero == "123099" and $edellinen_tuoteno != "" and substr($edellinen_tuoteno, -3) == substr($rtuoteno[$i]['tuoteno'], -3) and in_array(substr($rtuoteno[$i]['tuoteno'], 0, 3), $budweg_runkotuotteiden_alut))
-					or
-					($laskuttajan_toimittajanumero == "123014" and trim(strtolower($rtuoteno[$i]["tuoteno"])) == "corecharge")) {
-
-					// Katsotaan löytyykö runkotuote (tuoteperheen lapsituote)
-					$query = "	SELECT tt.toim_tuoteno AS tuoteno, tuote.nimitys
-								FROM toimi
-								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
-									AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-									AND tuotteen_toimittajat.toim_tuoteno IN ('{$edellinen_tuoteno}')
-									AND tuotteen_toimittajat.toim_tuoteno != '')
-								JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio
-									AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno
-									AND tuoteperhe.tyyppi IN ('P','')
-									AND tuoteperhe.ohita_kerays != '')
-								JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
-								JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = toimi.yhtio
-									AND tt.liitostunnus = toimi.tunnus
-									AND tt.tuoteno = tuote.tuoteno
-									AND tt.toim_tuoteno != '')
-								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
-								AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
-								AND toimi.tyyppi != 'P'
-								AND toimi.asn_sanomat = 'M'";
-					$child_chk_res = pupe_query($query);
-
-					if (mysql_num_rows($child_chk_res) > 0) {
-
-						$child_chk_row = mysql_fetch_assoc($child_chk_res);
-
-						$rtuoteno[$i]['tuoteno'] = $child_chk_row['tuoteno'];
-						$rtuoteno[$i]['tuoteno2'] = $child_chk_row['tuoteno'];
-						$rtuoteno[$i]["lapsi"] = "yes";
-					}
-				}
-
-				// Horger Christiansen-case
-				if ($laskuttajan_toimittajanumero == "123029") {
-
-					// Katsotaan löytyykö runkotuote (tuoteperheen lapsituote)
-					$query = "	SELECT tt.toim_tuoteno AS tuoteno, tuote.nimitys
-								FROM toimi
-								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
-									AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-									AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}')
-									AND tuotteen_toimittajat.toim_tuoteno != '')
-								JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio
-									AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno
-									AND tuoteperhe.tyyppi IN ('P','')
-									AND tuoteperhe.ohita_kerays != '')
-								JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
-								JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = toimi.yhtio
-									AND tt.liitostunnus = toimi.tunnus
-									AND tt.tuoteno = tuote.tuoteno
-									AND tt.toim_tuoteno != '')
-								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
-								AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
-								AND toimi.tyyppi != 'P'
-								AND toimi.asn_sanomat = 'M'";
-					$child_chk_res = pupe_query($query);
-
-					if (mysql_num_rows($child_chk_res) > 0) {
-
-						$child_chk_row = mysql_fetch_assoc($child_chk_res);
-
-						$runkotuotteita += (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
-
-						$x = $i + 1;
-
-						$rtuoteno[$x]['tuoteno'] 			= $child_chk_row['tuoteno'];
-						$rtuoteno[$x]['tuoteno2'] 			= $child_chk_row['tuoteno'];
-						$rtuoteno[$x]['ostotilausnro'] 		= $laskun_asiakkaan_tilausnumero;
-						$rtuoteno[$x]['tilaajanrivinro'] 	= (isset($tuotetieto->RowIdentifier) and trim($tuotetieto->RowIdentifier) != "") ? $tuotetieto->RowIdentifier : "";
-						$rtuoteno[$x]['kpl'] 				= (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
-
-						$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
-						$rtuoteno[$x]['status']				= '';
-						$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
-						$rtuoteno[$x]["lapsi"]				= "yes";
-						$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
-
-						$runkotuotteiden_indeksit[$x] = $x;
+						$rtuoteno[$i]['osto_kulu'] = (float) str_replace(",", ".", $tuotetieto->RowAmount);
+						$rtuoteno[$i]['osto_kulu_alv'] = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 					}
 				}
 			}
@@ -383,35 +233,8 @@ if (count($tuotetiedot) > 0) {
 
 			$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
 
-			if ($laskun_ebid == "MAVENTAXML") {
-
-				if ($laskuttajan_toimittajanumero == "123099" and $rtuoteno[$i]["kpl"] > 1 and $rtuoteno[$i]["rivihinta"] == $rtuoteno[$i]["hinta"]) $rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"] / $rtuoteno[$i]["kpl"];
-
-				$query = "	SELECT tuotteen_toimittajat.tuotekerroin
-							FROM toimi
-							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
-														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-														AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}')
-														AND tuotteen_toimittajat.toim_tuoteno != '')
-							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
-							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
-							AND toimi.tyyppi != 'P'
-							AND toimi.asn_sanomat = 'M'";
-				$tuotekerroin_chk_res = pupe_query($query);
-
-				if (mysql_num_rows($tuotekerroin_chk_res) > 0) {
-					$tuotekerroin_chk_row = mysql_fetch_assoc($tuotekerroin_chk_res);
-
-					if ($tuotekerroin_chk_row['tuotekerroin'] != 0) {
-						$rtuoteno[$i]['kpl'] = round($rtuoteno[$i]['kpl'] / $tuotekerroin_chk_row['tuotekerroin'], 2);
-					}
-				}
-			}
-
 			$rtuoteno[$i]["yksikko"] = $tuotetieto->DeliveredQuantity->attributes()->QuantityUnitCode;
 			$rtuoteno[$i]["tilaajanrivinro"] = $tuotetieto->RowIdentifier;
-
-			$edellinen_tuoteno = $rtuoteno[$i]["tuoteno"];
 		}
 		else {
 			//	Poistetaan tämä tietue
@@ -424,21 +247,6 @@ if (count($tuotetiedot) > 0) {
 		if ($x != 0) {
 			$x = 0;
 			$i++;
-		}
-	}
-
-	if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123099" and $laskun_summa_eur > $rivien_summa_yhteensa) {
-		$osto_rahti = $laskun_summa_eur - $rivien_summa_yhteensa;
-		$osto_rahti_alv = (float) str_replace(",", ".", $xml->InvoiceDetails->VatSpecificationDetails->VatRatePercent);
-	}
-
-	if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123029" and $laskun_summa_eur - $rivien_summa_yhteensa != 0 and count($runkotuotteiden_indeksit) > 0 and $runkotuotteita > 0) {
-
-		$rungon_hinta = ($laskun_summa_eur - $rivien_summa_yhteensa) / $runkotuotteita;
-
-		foreach ($runkotuotteiden_indeksit as $indx) {
-			$rtuoteno[$indx]['hinta'] = $rungon_hinta;
-			$rtuoteno[$indx]['rivihinta'] = $rtuoteno[$indx]['kpl'] * $rungon_hinta;
 		}
 	}
 }

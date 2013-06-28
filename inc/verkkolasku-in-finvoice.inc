@@ -127,7 +127,7 @@ if (count($tuotetiedot) > 0) {
 			// 300023 = pakkauskulu
 			// 300027 = pakkauskulu
 
-			if (strpos($file, "maventa") !== false and $laskuttajan_toimittajanumero == "123335" and ($rtuoteno[$i]["tuoteno"] == "300013" or $rtuoteno[$i]["tuoteno"] == "300023" or $rtuoteno[$i]["tuoteno"] == "300027")) {
+			if (strpos($file, "maventa") !== false and ($laskuttajan_toimittajanumero == "123335" or str_replace(array("-"," "), "", $laskuttajan_toimittajanumero) == "09871371") and ($rtuoteno[$i]["tuoteno"] == "300013" or $rtuoteno[$i]["tuoteno"] == "300023" or $rtuoteno[$i]["tuoteno"] == "300027")) {
 
 				if ($rtuoteno[$i]["tuoteno"] == "300013") {
 					$rtuoteno[$i]["laskun_rahtikulu"] = (float) str_replace(",", ".", $tuotetieto->RowAmount);

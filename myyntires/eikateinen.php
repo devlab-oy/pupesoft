@@ -311,7 +311,6 @@ function tee_kirjanpito_muutokset($params) {
 		}
 		else {
 			$summalisa = $vanharow['summa'];
-
 		}
 
 		$query = "	UPDATE tiliointi

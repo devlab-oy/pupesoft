@@ -978,20 +978,23 @@ if ($tuoteno != '') {
 									// Lasketaan onko luku muuttunut
 									$inventoinnin_varastonmuutos = round($trow["kpl"] * $uusikehahin - $invrow['summa'], 2);
 
+									// Tehdään muutoksia vaan jos summa muuttuu
 									if ($inventoinnin_varastonmuutos != 0) {
-										// Tehdään muutoksia vaan jos summa muuttuu
+
+										// Katsotaan onko tositteella muita kun varastokirjauksia
 										$query = "	SELECT count(*) luku
 													FROM tiliointi
-													WHERE yhtio  = '$kukarow[yhtio]'
-													AND ltunnus  = '$invrow[ltunnus]'
+													WHERE yhtio  = '{$kukarow['yhtio']}'
+													AND ltunnus  = '{$invrow['ltunnus']}'
+													AND tilino NOT IN ('{$yhtiorow['varasto']}', '{$yhtiorow['varastonmuutos']}', '{$yhtiorow['varastonmuutos_inventointi']}')
 													AND korjattu = ''";
 										$invupd = pupe_query($query);
 										$invcount = mysql_fetch_assoc($invupd);
 
 										$pvm_chk = $tilikausi_alku > $korjaus_alku ? $yhtiorow['tilikausi_alku'] : "";
 
-										// jos tähän tositteeseen ei olla koskettu pahemmin, niin korjataan koko tosite (voi olla esim omaan käyttöönottoa tms)
-										if ($invcount['luku'] == 2) {
+										// jos tositteella on vaan varastokirjauksia, niin korjataan tosite
+										if ($invcount['luku'] == 0) {
 
 											// Ollaan avoimella tilikaudella
 											if ($pvm_chk == "") {
@@ -1099,8 +1102,9 @@ if ($tuoteno != '') {
 												kopioitiliointi($invrow['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
 											}
 										}
-										elseif ($invcount['luku'] > 2) {
-											// jos kirjauksia on enemmän, korjataan vaan VARASTO kirjaus, niin tosite jää heittämään ja sen löytää helposti
+										else {
+											// Jos on jotain muita kirjauksia (käsin säädetty, omaan käyttöönotto, tms)
+											// korjataan vaan VARASTO kirjaus, niin tosite jää heittämään ja sen löytää helposti
 
 											// Ollaan avoimella tilikaudella
 											if ($pvm_chk == "") {

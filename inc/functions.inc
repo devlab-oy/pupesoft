@@ -21600,7 +21600,10 @@ if (!function_exists('tarkista_osuuko_myyntitilaus_kampanjaan')) {
 	function tarkista_osuuko_myyntitilaus_kampanjaan($tilausnumero) {
 		global $kukarow, $yhtiorow;
 
-		require('luo_myyntitilausotsikko.inc');
+		if (@include("tilauskasittely/luo_myyntitilausotsikko.inc"));
+		elseif (@include("luo_myyntitilausotsikko.inc"));
+		else exit;
+
 		$kampanjat = hae_kampanjat();
 
 		if (empty($kampanjat)) {

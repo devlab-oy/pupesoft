@@ -19,6 +19,8 @@
  */
 class FormValidator {
 
+	//^[0-9]{1,2}[-/.][0-9]{1,2}[-/.][0-9]{4}|^[0-9]{4}[-/.][0-9]{1,2}[-/.][0-9]{1,2}
+	//^[0-9]{1,2}[-/.][0-9]{1,2}[-/.][0-9]{4}
 	public static $regexes = array(
 		'paiva'			 => "^[0-9]{1,2}[-/.][0-9]{1,2}[-/.][0-9]{4}|^[0-9]{4}[-/.][0-9]{1,2}[-/.][0-9]{1,2}",
 		'summa'			 => "^[-]?[0-9]+\$",
@@ -66,7 +68,7 @@ class FormValidator {
 		$havefailures = false;
 		foreach ($items as $key => $val) {
 			if (!is_array($val)) {
-				if ((strlen($val) == 0 || array_search($key, $this->validations) === false) && array_search($key, $this->mandatories) === false) {
+				if ((strlen($val) == 0 || array_key_exists($key, $this->validations) === false) && array_key_exists($key, $this->mandatories) === false) {
 					$this->corrects[] = $key;
 					continue;
 				}
@@ -204,7 +206,6 @@ class FormValidator {
 
 	public static function validateContent($var, $type) {
 
-		$is_ok = true;
 		switch ($type) {
 			case 'paiva':
 				if (strpos($var, '.')) {

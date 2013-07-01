@@ -135,7 +135,7 @@ if(!function_exists("yhtiotarkista")) {
 			require ("tarkistaytunnus.inc");
 
 			if ($ok==0) {
-				$virhe[$i] = "".t("Virheellinen y-tunnus!")." $t[$i] -> $ytunnus";
+				$virhe[$i] = t("Virheellinen y-tunnus!")." $t[$i] -> $ytunnus";
 			}
 			else {
 				$t[$i] = $ytunnus;

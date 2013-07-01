@@ -458,7 +458,7 @@ if (!function_exists('tyomaarays_rivi_otsikot')) {
 			}
 		}
 
-		if ($tyyppi == "") {
+		if ($tyyppi == "" or $tyyppi == "Q") {
 			$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,  	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 40,  $kala+10, 320, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 320, $kala+10, 370, 	$thispage, $rectparam);
@@ -659,7 +659,7 @@ if (!function_exists('tyomaarays_rivi')) {
 			}
 		}
 
-		if ($tyyppi == "") {
+		if ($tyyppi == "" or $tyyppi == "Q") {
 			$pdf->draw_text(45,  $kala, $row["tuoteno"],										$thispage, $norm);
 
 			$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
@@ -670,8 +670,14 @@ if (!function_exists('tyomaarays_rivi')) {
 			$oikpos = $pdf->strlen($row["varattu"], $norm);
 			$pdf->draw_text(415-$oikpos, $kala, $row["varattu"], 								$thispage, $norm);
 
-			$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
-			$pdf->draw_text(465-$oikpos, $kala, hintapyoristys($row["hinta"]), 				$thispage, $norm);
+			if ($tyyppi == 'Q') {
+				$oikpos = $pdf->strlen(hintapyoristys($row["hinta"] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100)), $norm);
+				$pdf->draw_text(465-$oikpos, $kala, hintapyoristys($row["hinta"] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100)), 				$thispage, $norm);
+			}
+			else {
+				$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
+				$pdf->draw_text(465-$oikpos, $kala, hintapyoristys($row["hinta"]), 				$thispage, $norm);
+			}
 
 			$ed_ale = array();
 			$lisakala = '';
@@ -705,8 +711,14 @@ if (!function_exists('tyomaarays_rivi')) {
 				$pdf->draw_text(515-$oikpos, $kala, $ff_string, $thispage, $norm);
 			}
 
-			$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
-			$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), 			$thispage, $norm);
+			if ($tyyppi == 'Q') {
+				$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100)), $norm);
+				$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100)), 			$thispage, $norm);
+			}
+			else {
+				$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
+				$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), 			$thispage, $norm);
+			}
 
 			$kala = $kala - $rivinkorkeus + 5;
 			$pdf->draw_text(45, $kala, $row["nimitys"], 										$thispage, $norm);
@@ -1084,7 +1096,7 @@ if (!function_exists('tyomaarays_print_pdf')) {
 		if ($komento == 'email') {
 			$liite = $pdffilenimi;
 
-			$kutsu = t("Työmääräys", $kieli);
+			$kutsu = t("Työmääräys", $kieli)." $laskurow[tunnus]";
 
 			if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
 				$kutsu .= ", ".trim($laskurow["nimi"]);

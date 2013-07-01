@@ -225,7 +225,7 @@ if ($korjataan != '') {
 							<td align='right'>$tilattava[$id]</td>
 							<td>".t("Valitse paikka jota haluat p‰ivitt‰‰")."</td>";
 
-					echo "<td><select name='rivipaikka[$id]'><option value=''>".t("Ei Valintaa")."";
+					echo "<td><select name='rivipaikka[$id]'><option value=''>".t("Ei Valintaa");
 
 					while ($varow = mysql_fetch_assoc($result2)) {
 						$sel='';

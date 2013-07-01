@@ -37,7 +37,7 @@
 		$query = "	UPDATE lasku
 					SET tila = 'D',
 					alatila  = 'T',
-					comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) mitätöi tilauksen ohjelmassa muokkaatilaus.php 1')
+					comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa muokkaatilaus.php")." 1')
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila    = 'T'
 					AND tunnus IN {$tunnukset}";
@@ -49,6 +49,11 @@
 					AND tyyppi  = 'T'
 					AND otunnus IN {$tunnukset}";
 		pupe_query($query);
+
+		foreach(explode(",", preg_replace("/[^0-9,]/", "", $tunnukset)) as $sarjatun) {
+			//Nollataan sarjanumerolinkit
+			vapauta_sarjanumerot("", $sarjatun);
+		}
 	}
 
 	if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and $yhtiorow["ennakkotilausten_toimitus"] == "M") {
@@ -294,21 +299,31 @@
 			$button_disabled = "disabled";
 		}
 
-		if(empty($oikeurow['paivitys'])) {
+		if (empty($oikeurow['paivitys'])) {
 			$button_disabled = "disabled";
 		}
 
-		if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $kukarow["kesken"] != 0 and $tilausnumero != "") {
+		if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $tilausnumero != "") {
 			$query_tarjous = "	UPDATE lasku
 								SET alatila = tila,
 								tila = 'D',
 								muutospvm = now(),
-								comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) mitätöi tilauksen ohjelmassa muokkaatilaus.php 2')
-								WHERE	yhtio = '$kukarow[yhtio]'
-								AND		tunnus = $tilausnumero";
-			$result_tarjous = pupe_query($query_tarjous);
+								comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa muokkaatilaus.php")." 2')
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus  = $tilausnumero";
+			pupe_query($query_tarjous);
 
-			echo "<font class='message'>".t("Mitätöitiin lasku")." $tilausnumero</font><br><br>";
+			$query = "	UPDATE tilausrivi
+						SET tyyppi = 'D'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tyyppi  = 'T'
+						AND tunnus  = $tilausnumero";
+			pupe_query($query);
+
+			//Nollataan sarjanumerolinkit
+			vapauta_sarjanumerot("", $tilausnumero);
+
+			echo "<font class='message'>".t("Mitätöitiin tilaus").": $tilausnumero</font><br><br>";
 		}
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
@@ -645,7 +660,7 @@
 		}
 
 		if ($asiakastiedot == "toimitus") {
-			$asiakasstring = " concat_ws('<br>', lasku.ytunnus, concat_ws(' ', lasku.nimi, lasku.nimitark), if(lasku.nimi != lasku.toim_nimi, concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark, if(lasku.postitp != lasku.toim_postitp, lasku.toim_postitp, NULL)), NULL))";
+			$asiakasstring = " concat_ws('<br>', lasku.ytunnus, lasku.nimi, lasku.nimitark, if(lasku.nimi != lasku.toim_nimi, concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark, if(lasku.postitp != lasku.toim_postitp, lasku.toim_postitp, NULL)), NULL))";
 			$assel1 = "";
 			$assel2 = "CHECKED";
 		}
@@ -653,6 +668,10 @@
 			$asiakasstring = " concat_ws('<br>', lasku.ytunnus, lasku.nimi, lasku.nimitark) ";
 			$assel1 = "CHECKED";
 			$assel2 = "";
+		}
+
+		if (empty($naytetaanko_saldot)) {
+			$naytetaanko_saldot = isset($_COOKIE["naytetaanko_saldot"]) ? $_COOKIE["naytetaanko_saldot"] : "";
 		}
 
 		echo "	<script language=javascript>
@@ -669,12 +688,25 @@
 				}
 			</script>";
 
-		echo "<br><form method='post'>
-				<input type='hidden' name='toim' value='$toim'>
-				<input type='hidden' name='limit' value='$limit'>
-				".t("Näytä vain laskutustiedot")." <input type='radio' name='asiakastiedot' value='laskutus' onclick='submit();' $assel1>
-				".t("Näytä myös toimitusasiakkaan tiedot")." <input type='radio' name='asiakastiedot' value='toimitus' onclick='submit();' $assel2>
-				</form>";
+		echo "<br>";
+
+		// Näytetään asiakastiedot linkki
+		if ($asiakastiedot == 'toimitus') {
+			echo " <a href='muokkaatilaus.php?toim=$toim&asiakastiedot=laskutus&limit=$limit&etsi=$etsi'>" .t("Näytä vain laskutustiedot") . "</a>";
+		}
+		else {
+			echo " <a href='muokkaatilaus.php?toim=$toim&asiakastiedot=toimitus&limit=$limit&etsi=$etsi'>" . t("Näytä myös toimitusasiakkaan tiedot") . "</a>";
+		}
+
+		// Näytetäänkö saldot linkki
+		if ($toim == '' and $naytetaanko_saldot == 'kylla') {
+			echo " <a href='muokkaatilaus.php?toim=$toim&limit=$limit&etsi=$etsi&naytetaanko_saldot=ei'>" . t("Piilota saldot keräypäivänä") . "</a>";
+		}
+		elseif ($yhtiorow['saldo_kasittely'] == 'T' and $toim == '') {
+			echo " <a href='muokkaatilaus.php?toim=$toim&limit=$limit&etsi=$etsi&naytetaanko_saldot=kylla'>" .t("Näytä saldot keräyspäivänä") . "</a>";
+		}
+
+		echo "<br><br>";
 
 		$query_ale_lisa = generoi_alekentta('M');
 
@@ -1464,7 +1496,7 @@
 		else {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,
 						if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
-						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka1.extranet extra, lasku.mapvm, lasku.tilaustyyppi, lasku.label
+						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka1.extranet extra, lasku.mapvm, lasku.tilaustyyppi, lasku.label, lasku.kerayspvm
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
@@ -1493,7 +1525,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 7;
+			$miinus = 8;
 		}
 
 		$result = pupe_query($query);
@@ -1557,7 +1589,16 @@
 			}
 			$excelrivi++;
 
-			echo "<th align='left'>".t("tyyppi")."</th><th class='back'></th></tr>";
+			echo "<th align='left'>".t("tyyppi")."</th>";
+
+			// Jos yhtiönparametri saldo_kasittely on asetettu tilaan
+			// "myytävissä-kpl lasketaan keräyspäivän mukaan", näytetään onko tuotteita saldoilla
+			// syötettynä keräyspäivänä.
+			if ($yhtiorow['saldo_kasittely'] == 'T' and $toim == '' and $naytetaanko_saldot == 'kylla') {
+				echo "<th>".t("Riittääkö saldot keräyspäivänä")."?</th>";
+			}
+
+			echo "<th class='back'></th></tr>";
 
 			$lisattu_tunnusnippu  	= array();
 			$toimitettavat_ennakot  = array();
@@ -1811,8 +1852,26 @@
 								$row_comments["viesti"] = preg_replace("/[^0-9]/", "", $row_comments["viesti"]);
 
 								if ($row_comments["viesti"] != "") {
-									echo "<br><a target='_blank' href='https://devlab.zendesk.com/tickets/{$row_comments["viesti"]}'>{$row_comments["viesti"]}</a>";
+									echo "<br><a target='_blank' href='https://devlab.zendesk.com/agent/#/tickets/{$row_comments["viesti"]}'>{$row_comments["viesti"]}</a>";
 									$zendesk_viesti = TRUE;
+								}
+								else {
+									// Haetaan tikettinumerot tilausriviltä
+									$query_comments = "	SELECT tilausrivi.kommentti
+														FROM tilausrivi use index (yhtio_otunnus)
+														WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+														AND tilausrivi.otunnus in ({$row[$fieldname]})
+														AND left(tilausrivi.kommentti, 1) = '#'";
+									$result_comments = pupe_query($query_comments);
+
+									while ($row_comments = mysql_fetch_assoc($result_comments)) {
+										list($row_ticket, $row_dummy) = explode(" ", $row_comments['kommentti'], 2);
+										$row_ticket = preg_replace("/[^0-9]/", "", $row_ticket);
+
+										if ($row_ticket != "") {
+											echo "<br><a target='_blank' href='https://devlab.zendesk.com/agent/#/tickets/{$row_ticket}'>{$row_ticket}</a>";
+										}
+									}
 								}
 							}
 							echo "</td>";
@@ -2095,6 +2154,58 @@
 
 					if ($pitaako_varmistaa != "") {
 						$javalisa = "onSubmit = \"return lahetys_verify('$pitaako_varmistaa')\"";
+					}
+
+					// Tarkastetaan riittääkö saldo keräyspäivänä.
+					// Haetaan ensin tilauksen tilausrivit ja tarkistetaan jokaisen tuotteen saldot erikseen.
+					if ($yhtiorow['saldo_kasittely'] == 'T' and $toim == '' and $naytetaanko_saldot == 'kylla') {
+						$_query = "SELECT tilausrivi.nimitys, tilausrivi.tuoteno, tilausrivi.tilkpl, tilausrivi.kerayspvm, tilausrivi.yksikko
+									FROM tilausrivi
+									JOIN tuote ON (tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno and tuote.ei_saldoa = '')
+									WHERE tilausrivi.yhtio='{$kukarow['yhtio']}'
+									AND tilausrivi.otunnus={$row['tunnus']}
+									AND tilausrivi.tyyppi='L'";
+						$_result = pupe_query($_query);
+
+						$riittaako_saldo = true;
+						$puutteet = array();
+
+						echo "<td>";
+
+						while ($rivi = mysql_fetch_assoc($_result)) {
+							list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($rivi["tuoteno"], '', '', '', '', '', '', '', '', $row['kerayspvm']);
+
+							// saldo_myytavissa funktio ottaa huomioon kyseisen myyntitilauksen varaaman saldon.
+							// Joten myyntitilauksen keräyspvm ylittäviin saldokyselyihin lisätään tilauksen vaarama saldo takaisin.
+							if (strtotime($rivi['kerayspvm']) <= strtotime($row['kerayspvm'])) {
+								$myytavissa = $myytavissa + $rivi['tilkpl']; // Lisätään myytavissa saldoon tämän tilauksen saldo
+							}
+
+							// Jos tilattu määrä on suurempi kuin myytävissä oleva määrä, niin lisätään tuote puutelistaan.
+							if (($rivi['tilkpl']) > $myytavissa) {
+								$puutteet[] = "{$rivi['tuoteno']} {$rivi['nimitys']} ({$myytavissa} {$rivi['yksikko']})";
+								$riittaako_saldo = false;
+							}
+						}
+
+						echo "<div id='div_{$row['tunnus']}' class='popup'>";
+						echo t("Keräyspäivä") . ": {$row['kerayspvm']}<br>";
+
+						foreach($puutteet as $puute) {
+							echo $puute . "<br>";
+						}
+
+						echo "</div>";
+
+						if ($riittaako_saldo) {
+							echo t("Kyllä");
+						}
+						else {
+							echo t("Ei");
+							echo " <img class='tooltip' id='{$row['tunnus']}' src='$palvelin2/pics/lullacons/info.png'>";
+						}
+
+						echo "</td>";
 					}
 
 					echo "<td class='back' nowrap>";

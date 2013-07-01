@@ -78,7 +78,7 @@ if (!function_exists('finvoice_otsik')) {
 			}
 
 			// Jos vastaanottaja on tyhj‰‰ tai ollaan valittu lasku tulostuspalveluun chn 100 "Verkkolasku, tulostuspalvelu"
-			if ($receiverpartyid == "" or $lasrow["chn"] == "100") {
+			if (($receiverpartyid == "" and $yhtiorow["verkkolasku_lah"] != "apix") or $lasrow["chn"] == "100") {
 				$receiverpartyid = $tulostuspalvelu;
 			}
 
@@ -319,7 +319,14 @@ if (!function_exists('finvoice_otsik')) {
 
 				fputs($tootfinvoice, "<InvoiceRecipientPartyDetails>\r\n");
 				xml_add("InvoiceRecipientPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),							$tootfinvoice, 35);
-				xml_add("InvoiceRecipientOrganisationName", trim($tarkrow["laskutus_nimi"]." ".$tarkrow["laskutus_nimitark"]), 			$tootfinvoice, 35, 1);
+
+				$laskutus_nimitieto = trim($tarkrow["laskutus_nimi"]." ".$tarkrow["laskutus_nimitark"]);
+				$laskutus_nimitieto_array = str_split($laskutus_nimitieto, 35);
+
+				foreach ($laskutus_nimitieto_array as $laskutus_nimi_osa) {
+					xml_add("InvoiceRecipientOrganisationName", $laskutus_nimi_osa, $tootfinvoice, 35, 1);
+				}
+
 				if ($yhtiorow["verkkolasku_lah"] != "maventa") {
 					xml_add("InvoiceRecipientOrganisationTaxCode", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"),	$tootfinvoice, 35); // Maventa ei salli tyhj‰n‰, optionaalinen
 				}
@@ -344,7 +351,14 @@ if (!function_exists('finvoice_otsik')) {
 
 			fputs($tootfinvoice, "<BuyerPartyDetails>\r\n");
 			xml_add("BuyerPartyIdentifier",	tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']), 				$tootfinvoice, 35);
-			xml_add("BuyerOrganisationName",        trim($lasrow['nimi']." ".$lasrow['nimitark']),    			$tootfinvoice, 35, 2);
+
+			$asiakas_nimitieto = trim($lasrow['nimi']." ".$lasrow['nimitark']);
+			$asiakas_nimitieto_array = str_split($asiakas_nimitieto, 35);
+
+			foreach ($asiakas_nimitieto_array as $asiakas_nimi_osa) {
+				xml_add("BuyerOrganisationName", $asiakas_nimi_osa, $tootfinvoice, 35, 2);
+			}
+
 			xml_add("BuyerOrganisationTaxCode", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"),$tootfinvoice, 35);
 
 			fputs($tootfinvoice, "<BuyerPostalAddressDetails>\r\n");

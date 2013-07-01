@@ -570,34 +570,23 @@
 			else {
 				$yritirow = mysql_fetch_assoc($result);
 
-				$query = "	SELECT *
-							FROM yhtio
-							WHERE yhtio = '$yritirow[yhtio]'";
-				$result = pupe_query($query);
+				$yhtiorow =	hae_yhtion_parametrit($yritirow["yhtio"]);
 
-				if (mysql_num_rows($result) != 1) {
-					echo "<font class='error'>".t("Yritystä")." '$yritirow[yhtio]' ".t("ei löytynyt")."!</font><br>\n";
-					$toim = 'E';
+				// Setataan kukarow-yhtiö
+				$kukarow["yhtio"] = $yritirow["yhtio"];
+
+				if ($silent == "") {
+					echo "<font class='message'>".t("Tiliote yritykselle")." $yhtiorow[nimi].<br>\n";
 				}
-				else {
-					$yhtiorow = mysql_fetch_assoc($result);
 
-					// Setataan kukarow-yhtiö
-					$kukarow["yhtio"] = $yritirow["yhtio"];
-
+				if ($yritirow["hyvak"] != "") {
 					if ($silent == "") {
-						echo "<font class='message'>".t("Tiliote yritykselle")." $yhtiorow[nimi].<br>\n";
+						echo t("Vastuussa")." '$yritirow[hyvak]'.<br>\n";
 					}
+				}
 
-					if ($yritirow["hyvak"] != "") {
-						if ($silent == "") {
-							echo t("Vastuussa")." '$yritirow[hyvak]'.<br>\n";
-						}
-					}
-
-					if ($silent == "") {
-						echo t("Ostovelat")." $yhtiorow[ostovelat], ".t("Konserniostovelat")." $yhtiorow[konserniostovelat], </font>";
-					}
+				if ($silent == "") {
+					echo t("Ostovelat")." $yhtiorow[ostovelat], ".t("Konserniostovelat")." $yhtiorow[konserniostovelat], </font>";
 				}
 
  				// Tarkistetaan tilit
@@ -1074,6 +1063,12 @@
 					}
 
 					$sisviite = (int) $sisviite;
+
+					 // Jos EndToEndId on isompi ku isoin laskun tunnus, niin hylätään se, koska se ei voi olla oikein
+					if ($sisviite > $meteidrow['maxEndToEndId']) {
+						$sisviite = "";
+					}
+
 					break;
 
 				// Pankin antamat lisätiedot

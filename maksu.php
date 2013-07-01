@@ -11,7 +11,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 		
 		if (mysql_num_rows($result) == 0) {
-			echo "".t("Maksua ei löydy")."!";
+			echo t("Maksua ei löydy")."!";
 			exit;
 		}
 		
@@ -41,7 +41,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($result) == 0) {
-				echo "".t("Yritystä ei löydy")."!";
+				echo t("Yritystä ei löydy")."!";
 				exit;
 			}
 			$yrow=mysql_fetch_array($result);

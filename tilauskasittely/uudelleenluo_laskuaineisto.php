@@ -95,6 +95,22 @@
 		}
 	}
 
+	if (isset($tee) and $tee == 'ipost_siirto') {
+
+		// siirretaan laskutiedosto operaattorille
+		$ftphost 		= "ftp.itella.net";
+		$ftpuser 		= $yhtiorow['verkkotunnus_lah'];
+		$ftppass 		= $yhtiorow['verkkosala_lah'];
+		$ftppath 		= "out/finvoice/data/";
+		$ftpfile 		= $pupe_root_polku."/dataout/".basename($filenimi);
+		$renameftpfile 	= str_replace("TRANSFER_IPOST", "DELIVERED_IPOST", basename($filenimi));
+		$ftpfail 		= "{$pupe_root_polku}/dataout/ipost_error/";
+
+		$tulos_ulos     = "";
+
+		require("inc/ftp-send.inc");
+	}
+
 	if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumerot != '') {
 
 		$tulostettavat_apix  = array();
@@ -314,7 +330,7 @@
 			}
 
 			// tässä pohditaan laitetaanko verkkolaskuputkeen
-			if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and ($lasrow["chn"] == "020" or $lasrow["chn"] == "030"))) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == ""  and $lasrow["chn"] != '666' and $lasrow["chn"] != '667' and abs($lasrow["summa"]) != 0) {
+			if (verkkolaskuputkeen($lasrow, $masrow)) {
 
 				// Nyt meillä on:
 				// $lasrow array on U-laskun tiedot
@@ -324,7 +340,8 @@
 				// Etsitään myyjän nimi
 				$mquery  = "SELECT nimi, puhno, eposti
 							FROM kuka
-							WHERE tunnus='$lasrow[myyja]' and yhtio='$kukarow[yhtio]'";
+							WHERE tunnus = '$lasrow[myyja]'
+							and yhtio    = '$kukarow[yhtio]'";
 				$myyresult = mysql_query($mquery) or pupe_error($mquery);
 				$myyrow = mysql_fetch_assoc($myyresult);
 
@@ -508,11 +525,17 @@
 				}
 
 				// Asiakkaan / yhtiön laskutyyppi
-				if (isset($asiakas_apu_row['laskutyyppi']) and $asiakas_apu_row['laskutyyppi'] != -9) {
-					$laskutyyppi = $asiakas_apu_row['laskutyyppi'];
+				if ($lasrow['laskutyyppi'] == -9 or $lasrow['laskutyyppi'] == 0) {
+					//jos laskulta löytyvät laskutyyppi on Oletus käytetään asiakkaan tai yhtiön oletus laskutyyppiä
+					if (isset($asiakas_apu_row['laskutyyppi']) and $asiakas_apu_row['laskutyyppi'] != -9) {
+						$laskutyyppi = $asiakas_apu_row['laskutyyppi'];
+					}
+					else {
+						$laskutyyppi = $yhtiorow['laskutyyppi'];
+					}
 				}
 				else {
-					$laskutyyppi = $yhtiorow['laskutyyppi'];
+					$laskutyyppi = $lasrow['laskutyyppi'];
 				}
 
 				if ($yhtiorow["laskun_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
@@ -997,17 +1020,6 @@
 				}
 			}
 			elseif ($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
-				//siirretaan laskutiedosto operaattorille
-				$ftphost = "ftp.itella.net";
-				$ftpuser = $yhtiorow['verkkotunnus_lah'];
-				$ftppass = $yhtiorow['verkkosala_lah'];
-				$ftppath = "out/finvoice/data/";
-				$ftpfile = realpath($nimifinvoice);
-				$renameftpfile = $nimifinvoice_delivered;
-
-				// tätä ei ajata eikä käytetä, mutta jos tulee ftp errori niin echotaan tää meiliin, niin ei tartte käsin kirjotella resendiä
-				echo "<pre>mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."</pre>";
-
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna finvoice-aineisto").":</th>";
 				echo "<form method='post' class='multisubmit'>";
@@ -1015,6 +1027,14 @@
 				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
 				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table><br><br>";
+
+				echo "<table>";
+				echo "<tr><th>".t("Lähetä iPost-aineisto uudestaan Itellaan").":</th>";
+				echo "<form method='post'>";
+				echo "<input type='hidden' name='tee' value='ipost_siirto'>";
+				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
+				echo "<td class='back'><input type='submit' value='".t("Lähetä")."'></td></tr></form>";
 				echo "</table>";
 			}
 
@@ -1052,5 +1072,3 @@
 	}
 
 	if (!isset($tee) or $tee != "NAYTATILAUS") require("inc/footer.inc");
-
-?>

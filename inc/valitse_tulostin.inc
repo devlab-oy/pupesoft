@@ -339,7 +339,7 @@
 			}
 		}
 
-		if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and (preg_match("/(excel|wabco)/", $editoimrow['edi_kuvaus']) or ($editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != ''))) {
+		if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and (preg_match("/(excel|wabco|xml)/", $editoimrow['edi_kuvaus']) or ($editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != ''))) {
 			$rajaus = "";
 			$valittu = "edi";
 		}
@@ -382,9 +382,10 @@
 			$sel = array();
 			$sel[$yhtiorow["tyomaaraystyyppi"]] = "selected";
 
-			echo "<option value = 'A'>".t("Tuotetiedot, hinnat ja alennukset");
-			echo "<option value = 'O' $sel[O]>".t("Tuotetiedot");
-			echo "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka");
+			echo "<option value = 'A'>".t("Tuotetiedot, hinnat ja alennukset")."</option>";
+			echo "<option value = 'Q' $sel[Q]>".t("Tuotetiedot, hinnat ja alennukset (Verolliset hinnat)")."</option>";
+			echo "<option value = 'O' $sel[O]>".t("Tuotetiedot")."</option>";
+			echo "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka")."</option>";
 
 			// Katsotaan onko Zebra-tulostinta käytössä.
 			// Oletetaan että silloin merkistö ei ole 0
@@ -444,7 +445,7 @@
 
 			echo "<tr>";
 			echo "<th>".t("Tee excel tullinimikkeistä")."</th>";
-			
+
 			echo "<td>";
 			echo "<input type='checkbox' name='tee_excel' value='1' />";
 			echo "</td>";

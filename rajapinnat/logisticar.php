@@ -14,6 +14,8 @@
 
 	$yhtio = $argv[1];
 
+	ini_set("memory_limit", "1G");
+
 	// otetaan includepath aina rootista
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
 	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
@@ -37,15 +39,7 @@
 	$path_tapahtumat = $path . 'TRANSACTION.txt';
 	$path_myynti     = $path . 'ORDER.txt';
 
-	$query = "SELECT * from yhtio where yhtio='$yhtio'";
-	$res = mysql_query($query) or pupe_error($query);
-	$yhtiorow = mysql_fetch_assoc($res);
-
-	$query = "SELECT * from yhtion_parametrit where yhtio='$yhtio'";
-	$res = mysql_query($query) or pupe_error($query);
-	$params = mysql_fetch_assoc($res);
-
-	$yhtiorow = array_merge($yhtiorow, $params);
+	$yhtiorow = hae_yhtion_parametrit($yhtio);
 
 	// Jos jt-rivit varaavat saldoa niin se vaikuttaa asioihin
 	if ($yhtiorow["varaako_jt_saldoa"] != "") {
@@ -58,6 +52,7 @@
 	echo "Logisticar siirto: $yhtio\n";
 
 	//testausta varten limit
+	$limit = "";
 	//$limit = "limit 200";
 
 	// Ajetaan kaikki operaatiot
@@ -69,8 +64,10 @@
 	myynti($limit);
 
 	//Siirretään failit logisticar palvelimelle
-	siirto($path);
+	//siirto($path);
+	ftpsiirto($path);
 
+	// sambajakosiirto, ei käytössä tällä hetkellä.
 	function siirto ($path) {
 		GLOBAL $logisticar, $yhtio;
 
@@ -104,6 +101,30 @@
 		}
 	}
 
+	// ftp-siirto
+	function ftpsiirto ($path) {
+		GLOBAL $logisticar, $yhtio;
+
+		if ($handle = opendir($path)) {
+			while (($file = readdir($handle)) !== FALSE) {
+				if (is_file($path."/".$file)) {
+					// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
+					// palautetaan $palautus ja $syy
+					$ftphost  = $logisticar[$yhtio]["host"];
+					$ftpuser  = $logisticar[$yhtio]["user"];
+					$ftppass  = $logisticar[$yhtio]["pass"];
+					$ftppath  = $logisticar[$yhtio]["path"];
+					$ftpport  = "";
+					$ftpfail  = "";
+					$ftpsucc  = "";
+					$ftpfile  = realpath($path."/".$file);
+
+					require ("inc/ftp-send.inc");
+				}
+			}
+		}
+	}
+
 	function nimike($limit = '') {
 		global $path_nimike, $yhtio, $logisticar;
 
@@ -112,26 +133,28 @@
 		echo "Tuotteet ...";
 
 		$query = "	SELECT
-					tuote.tuoteno        	nimiketunnus,
-        			tuote.nimitys           nimitys,
-			        tuote.yksikko           yksikko,
-			        tuote.try				tuoteryhma,
+					tuote.tuoteno			nimiketunnus,
+					tuote.nimitys			nimitys,
+					tuote.yksikko			yksikko,
+					tuote.try				tuoteryhma,
 					avainsana.selitetark	tuoteryhma_nimi,
 					tuote.kustp				kustannuspaikka,
 					''						toimittajatunnus,
 					'0'						varastotunnus,
 					'0'						toimittajannimiketunnus,
 					'1'						hintayksikko,
-					if(tuote.status = 'T', 'T', '') varastoimiskoodi,
-			        tuote.tuotetyyppi    	nimikelaji,
-			        kuka.kuka      			ostaja,
-			        tuote.tuotemassa     	paino
-			        FROM tuote
-			        LEFT JOIN avainsana ON avainsana.selite=tuote.try and avainsana.yhtio=tuote.yhtio
-					LEFT JOIN kuka ON kuka.myyja=tuote.ostajanro and kuka.yhtio=tuote.yhtio and kuka.myyja > 0
-					WHERE tuote.yhtio='$yhtio'
+					if(tuote.status = 'T', '0', '1') varastoimiskoodi,
+					tuote.tuotetyyppi		nimikelaji,
+					kuka.kuka				ostaja,
+					tuote.tuotemassa		paino,
+					tuote.status			status
+					FROM tuote
+					LEFT JOIN avainsana ON (avainsana.selite = tuote.try AND avainsana.yhtio = tuote.yhtio)
+					LEFT JOIN kuka ON (kuka.myyja = tuote.ostajanro AND kuka.yhtio = tuote.yhtio AND kuka.myyja > 0)
+					WHERE tuote.yhtio = '$yhtio'
+					AND tuote.tuotetyyppi NOT IN ('A','B')
 					$limit";
-		$rest = mysql_query($query) or pupe_error($query);
+		$rest = pupe_query($query);
 		$rows = mysql_num_rows($rest);
 
 		if ($rows == 0) {
@@ -156,7 +179,8 @@
 			'varastoimiskoodi' 			=> null,
 			'nimikelaji'       			=> null,
 			'ostaja'           			=> null,
-			'paino'            			=> null
+			'paino'            			=> null,
+			'status'           			=> null
 		);
 
 		create_headers($fp, array_keys($headers));
@@ -173,24 +197,16 @@
 						WHERE tuoteno = '{$tuote['nimiketunnus']}'
 						AND yhtio = '$yhtio'
 						LIMIT 1";
-			$tuot_toim_res = mysql_query($query) or pupe_error($query);
+			$tuot_toim_res = pupe_query($query);
 			$tuot_toim_row = mysql_fetch_assoc($tuot_toim_res);
 
-			if (trim($tuote['varastoimiskoodi']) != '') {
-				// tuotetta ei varastoida
-				$tuote['varastoimiskoodi'] = '0';
-			}
-			else {
-				$tuote['varastoimiskoodi'] = '1';
-			}
-
 			$query = "	SELECT hyllyalue, hyllynro
-						from tuotepaikat
-						where tuoteno = '{$tuote['tuoteno']}'
-						and oletus != ''
-						and yhtio='$yhtio'
-						limit 1";
-			$res = mysql_query($query) or pupe_error($query);
+						FROM tuotepaikat
+						WHERE tuoteno = '{$tuote['nimiketunnus']}'
+						AND oletus != ''
+						AND yhtio = '$yhtio'
+						LIMIT 1";
+			$res = pupe_query($query);
 			$paikka = mysql_fetch_assoc($res);
 
 			// mikä varasto
@@ -205,16 +221,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$progress = floor(($row/$rows) * 40);
-			$str = sprintf("%10s", "$row/$rows");
-
-			$hash = '';
-			for ($i=0; $i < (int) $progress; $i++) {
-				$hash .= "#";
-			}
-
-//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
 		fclose($fp);
@@ -237,7 +243,7 @@
 					LEFT JOIN kuka ON kuka.myyja=asiakas.myyjanro and kuka.yhtio=asiakas.yhtio and kuka.myyja > 0
 					where asiakas.yhtio='$yhtio'
 					$limit";
-		$rest = mysql_query($query) or pupe_error($query);
+		$rest = pupe_query($query);
 
 		$rows = mysql_num_rows($rest);
 		$row = 0;
@@ -268,16 +274,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$progress = floor(($row/$rows) * 40);
-			$str = sprintf("%10s", "$row/$rows");
-
-			$hash = '';
-			for ($i=0; $i < (int) $progress; $i++) {
-				$hash .= "#";
-			}
-
-//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
 		fclose($fp);
@@ -297,7 +293,7 @@
 					from toimi
 					where yhtio='$yhtio'
 					$limit";
-		$rest = mysql_query($query) or pupe_error($query);
+		$rest = pupe_query($query);
 
 		$rows = mysql_num_rows($rest);
 		$row = 0;
@@ -325,16 +321,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$progress = floor(($row/$rows) * 40);
-			$str = sprintf("%10s", "$row/$rows");
-
-			$hash = '';
-			for ($i=0; $i < (int) $progress; $i++) {
-				$hash .= "#";
-			}
-
-//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
 		fclose($fp);
@@ -370,7 +356,7 @@
 					GROUP BY 1,3,4,5,6,7
 					ORDER BY 1
 					$limit";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		$rows = mysql_num_rows($res);
 		$row = 0;
@@ -403,7 +389,7 @@
 	 					and tyyppi in ('L','V','O','G')
 						and tuoteno = '{$trow['nimiketunnus']}'
 						and laskutettuaika = '0000-00-00'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$ennp = mysql_fetch_assoc($result);
 
 			$trow['tilattu'] = $ennp['tilattu'];
@@ -415,14 +401,6 @@
 			if (! fwrite($fp, $data . "\n")) {
 				echo "Failed writing row.\n";
 				die();
-			}
-
-			$progress = floor(($row/$rows) * 40);
-			$str = sprintf("%10s", "$row/$rows");
-
-			$hash = '';
-			for ($i=0; $i < (int) $progress; $i++) {
-				$hash .= "#";
 			}
 		}
 
@@ -482,7 +460,7 @@
 					$pvmlisa
 					ORDER BY tapahtumapaiva, nimiketunnus ASC
 					$limit";
-	    $res = mysql_query($query) or pupe_error($query);
+	    $res = pupe_query($query);
 
 		$rows = mysql_num_rows($res);
 		$row = 0;
@@ -580,16 +558,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$progress = floor(($row/$rows) * 40);
-			$str = sprintf("%10s", "$row/$rows");
-
-			$hash = '';
-			for ($i=0; $i < (int) $progress; $i++) {
-				$hash .= "#";
-			}
-
-//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 	    }
 
 		fclose($fp);
@@ -640,7 +608,7 @@
 					AND tilausrivi.yhtio = '$yhtio'
 					ORDER BY tilausrivi.laadittu
 					$limit";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		$rows = mysql_num_rows($res);
 		$row = 0;
@@ -724,16 +692,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$progress = floor(($row/$rows) * 40);
-			$str = sprintf("%10s", "$row/$rows");
-
-			$hash = '';
-			for ($i=0; $i < (int) $progress; $i++) {
-				$hash .= "#";
-			}
-
-//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 	    }
 
 		fclose($fp);
@@ -744,4 +702,3 @@
 		$data = implode("\t", $cols) . "\n";
 		fwrite($fp, $data);
 	}
-?>

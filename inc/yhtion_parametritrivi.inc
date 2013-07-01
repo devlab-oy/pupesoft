@@ -1,7 +1,7 @@
 <?php
 
-	$ulos = "";
-	$jatko = 1; // oletetaan normaali k‰sittely
+	$ulos   = "";
+	$jatko  = 1; // oletetaan normaali k‰sittely
 	$tyyppi = 1; // oletetaan rivin n‰kyvyys
 
 	if ($i == 0) { //yhtiˆt‰ ei n‰ytet‰
@@ -68,6 +68,32 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "verkkolasku_vienti") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1 = "";
+		$sel2 = "";
+		$sel3 = "";
+
+		if ($trow[$i] == 'K') {
+			$sel3 = "selected";
+		}
+		elseif ($trow[$i] == 'E') {
+			$sel2 = "selected";
+		}
+		else {
+			$sel1 = "selected";
+		}
+
+		$ulos .= "<option value = ''  $sel1>".t("Vientilaskut (EU) siirret‰‰n verkkolaskuoperaattorille vain jos se asiakkaan takana on sallittu");
+		$ulos .= "<option value = 'E' $sel2>".t("Vientilaskut (EU) siirret‰‰n verkkolaskuoperaattorille");
+		$ulos .= "<option value = 'K' $sel3>".t("Kaikki vientilaskut siirret‰‰n verkkolaskuoperaattorille");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "lahetteen_tulostustapa") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -113,8 +139,8 @@
 			$sel2 = "selected";
 		}
 
-		$ulos .= "<option value = 'K' $sel2>".t("Myyntitilien ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa")."";
-		$ulos .= "<option value = 'A' $sel1>".t("Myyntitilien ker‰yslistat tulostetaan automaattisesti")."";
+		$ulos .= "<option value = 'K' $sel2>".t("Myyntitilien ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa");
+		$ulos .= "<option value = 'A' $sel1>".t("Myyntitilien ker‰yslistat tulostetaan automaattisesti");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -134,8 +160,8 @@
 			$sel2 = "selected";
 		}
 
-		$ulos .= "<option value = 'K' $sel2>".t("Valmistuksien ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa")."";
-		$ulos .= "<option value = 'A' $sel1>".t("Valmistuksien ker‰yslistat tulostetaan automaattisesti")."";
+		$ulos .= "<option value = 'K' $sel2>".t("Valmistuksien ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa");
+		$ulos .= "<option value = 'A' $sel1>".t("Valmistuksien ker‰yslistat tulostetaan automaattisesti");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -155,8 +181,8 @@
 			$sel2 = "selected";
 		}
 
-		$ulos .= "<option value = 'K' $sel2>".t("Siirtolistojen tulostukseen k‰ytet‰‰n tulostusjonoa")."";
-		$ulos .= "<option value = 'A' $sel1>".t("Siirtolistat tulostetaan automaattisesti")."";
+		$ulos .= "<option value = 'K' $sel2>".t("Siirtolistojen tulostukseen k‰ytet‰‰n tulostusjonoa");
+		$ulos .= "<option value = 'A' $sel1>".t("Siirtolistat tulostetaan automaattisesti");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -180,9 +206,30 @@
 			$sel3 = "selected";
 		}
 
-		$ulos .= "<option value = '' $sel1>".t("Pankit ja p‰iv‰t yhdistet‰‰n")."";
-		$ulos .= "<option value = 'E' $sel2>".t("Jokainen pankki ja p‰iv‰ omaan tiedostoon")."";
-		$ulos .= "<option value = 'F' $sel3>".t("P‰iv‰t yhdistet‰‰n, yksi tiedosto per pankki")."";
+		$ulos .= "<option value = '' $sel1>".t("Pankit ja p‰iv‰t yhdistet‰‰n");
+		$ulos .= "<option value = 'E' $sel2>".t("Jokainen pankki ja p‰iv‰ omaan tiedostoon");
+		$ulos .= "<option value = 'F' $sel3>".t("P‰iv‰t yhdistet‰‰n, yksi tiedosto per pankki");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "tiliotteen_selvittelyt") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == '') {
+			$sel1 = "selected";
+		}
+		if ($trow[$i] == 'E') {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value = '' $sel1>".t("Tiliotteen kaikki selvittelytiliˆinnit tehd‰‰n yhdelle tositteelle");
+		$ulos .= "<option value = 'E' $sel2>".t("Tiliotteen kaikki selvittelytiliˆinnit tehd‰‰n omille tositteilleen");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -196,7 +243,7 @@
 		$sel = array();
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = '0'  $sel[0]>".t("Normaali laskupohja")."</option>";
+		$ulos .= "<option value = '99' $sel[99]>".t("Normaali laskupohja")."</option>";
 		$ulos .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)")."</option>";
 		$ulos .= "<option value = '5'  $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
 		$ulos .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
@@ -357,7 +404,7 @@
 		$sel = array("0" => "", "1" => "", "2" => "");
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = '0'  $sel[0]>".t("Ostolaskun valuuttakurssi syˆttˆp‰iv‰m‰‰r‰n mukaan");
+		$ulos .= "<option value = '0' $sel[0]>".t("Ostolaskun valuuttakurssi syˆttˆp‰iv‰m‰‰r‰n mukaan");
 		$ulos .= "<option value = '1' $sel[1]>".t("Ostolaskun valuuttakurssi kirjausp‰iv‰m‰‰r‰n mukaan");
 		$ulos .= "<option value = '2' $sel[2]>".t("Ostolaskun valuuttakurssi laskun p‰iv‰yksen mukaan");
 
@@ -375,6 +422,7 @@
 		$sel[$trow[$i]] = "selected";
 
 		$ulos .= "<option value = ''>".t("Tuotetiedot, hinnat ja alennukset");
+		$ulos .= "<option value = 'Q' $sel[Q]>".t("Tuotetiedot, hinnat ja alennukset (Verolliset hinnat)");
 		$ulos .= "<option value = 'O' $sel[O]>".t("Tuotetiedot");
 		$ulos .= "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka");
 
@@ -877,6 +925,20 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "jt_toimitus_varastorajaus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = " SELECTED";
+
+		$ulos .= "<option value=''>".t("J‰lkitoimituksia toimitetaan kaikista varastoista")."</option>";
+		$ulos .= "<option value='K'{$sel['K']}>".t("J‰lkitoimituksia toimitaan ainoastaan myyntitilauksen otsikolle valitusta varastosta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "naytetaan_katteet_tilauksella") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -1135,8 +1197,8 @@
 			$sel2 = "selected";
 		}
 
-		$ulos .= "<option value = '0' $sel1>".t("Ei k‰ytet‰ laskutuskieltoa")."";
-		$ulos .= "<option value = '1' $sel2>".t("K‰ytet‰‰n laskutuskieltoa")."";
+		$ulos .= "<option value = '0' $sel1>".t("Ei k‰ytet‰ laskutuskieltoa");
+		$ulos .= "<option value = '1' $sel2>".t("K‰ytet‰‰n laskutuskieltoa");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1164,8 +1226,8 @@
 
 		$sel = array($trow[$i] => "SELECTED");
 
-		$ulos .= "<option value = ''>".t("Valmistuksille ei tulosteta etusivua")."";
-		$ulos .= "<option value = 'E' $sel[E]>".t("Valmistuksille tulostetaan etusivu")."";
+		$ulos .= "<option value = ''>".t("Valmistuksille ei tulosteta etusivua");
+		$ulos .= "<option value = 'E' $sel[E]>".t("Valmistuksille tulostetaan etusivu");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1188,9 +1250,9 @@
 			$sel = "selected";
 		}
 
-		$ulos .= "<option value = '' $sel>".t("Alennus jyvitet‰‰n tilausriveille")."";
-		$ulos .= "<option value = 'T' $sel1>".t("Alennus jyvitet‰‰n aina tuotteella")."";
-		$ulos .= "<option value = 'P' $sel2>".t("Alennus jyvitet‰‰n Projektilla tuotteella")."";
+		$ulos .= "<option value = '' $sel>".t("Alennus jyvitet‰‰n tilausriveille");
+		$ulos .= "<option value = 'T' $sel1>".t("Alennus jyvitet‰‰n aina tuotteella");
+		$ulos .= "<option value = 'P' $sel2>".t("Alennus jyvitet‰‰n Projektilla tuotteella");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1200,22 +1262,13 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel1 = "";
-		$sel2 = "";
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
 
-		if ($trow[$i] == 'K') {
-			$sel1 = "selected";
-		}
-		if ($trow[$i] == 'V') {
-			$sel2 = "selected";
-		}
-		else {
-			$sel = "selected";
-		}
-
-		$ulos .= "<option value = '' $sel>".t("Kassamyyj‰ saa jyvitt‰‰ myyntitilauksella")."";
-		$ulos .= "<option value = 'K' $sel1>".t("Kaikki saa jyvitt‰‰ myyntitilauksella")."";
-		$ulos .= "<option value = 'V' $sel2>".t("Vain valitut k‰ytt‰j‰t saa jyvitt‰‰ myyntitilauksella")."";
+		$ulos .= "<option value = ''>".t("Kassamyyj‰ saa jyvitt‰‰ myyntitilauksella");
+		$ulos .= "<option value = 'K' $sel[K]>".t("Kaikki saa jyvitt‰‰ myyntitilauksella");
+		$ulos .= "<option value = 'S' $sel[S]>".t("Kaikki saa jyvitt‰‰ sek‰ osajyvitt‰‰ myyntitilauksella");
+		$ulos .= "<option value = 'V' $sel[V]>".t("Vain valitut k‰ytt‰j‰t saa jyvitt‰‰ myyntitilauksella");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1235,8 +1288,8 @@
 			$sel2 = "selected";
 		}
 
-		$ulos .= "<option value = '' $sel>".t("Rivinumeroita ei voi syˆtt‰‰ tilaukselle")."";
-		$ulos .= "<option value = 'K' $sel1>".t("Rivinumeroita voi syˆtt‰‰ tilaukselle")."";
+		$ulos .= "<option value = '' $sel>".t("Rivinumeroita ei voi syˆtt‰‰ tilaukselle");
+		$ulos .= "<option value = 'K' $sel1>".t("Rivinumeroita voi syˆtt‰‰ tilaukselle");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1256,8 +1309,8 @@
 			$sel1 = "selected";
 		}
 
-		$ulos .= "<option value = 'P' $sel1>".t("SAD-lomake pdf-muodossa")."";
-		$ulos .= "<option value = 'T' $sel2>".t("SAD-lomake tekstimuodossa")."";
+		$ulos .= "<option value = 'P' $sel1>".t("SAD-lomake pdf-muodossa");
+		$ulos .= "<option value = 'T' $sel2>".t("SAD-lomake tekstimuodossa");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1338,6 +1391,19 @@
 		$ulos .= "<option value = ''>".t("Yhdess‰");
 		$ulos .= "<option value = 'E' $sel[E]>".t("Erikseen");
 
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "valmistuksessa_kaytetaan_tilakoodeja") {
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+		$ulos .= "<option value=''>" .t("Ei"). "</option>";
+		$ulos .= "<option value='K' $sel[K]>" .t("Kyll‰"). "</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2133,6 +2199,21 @@
 
 		$ulos .= "<option value = ''>".t("Salli kaikki toiminnot")."</option>";
 		$ulos .= "<option value = 'E' $sel[E]>".t("Est‰ jt-rivien mit‰tˆiminen extranetiss‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "jt_toimitusaika_email_vahvistus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("JT-rivien toimitusajan vahvistuss‰hkˆpostia ei l‰hetet‰")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Ostotilauksen toimitusajan vahvistuksesta l‰hetet‰‰n asiakkaalle JT-rivien toimitusajan vahvistuss‰hkˆposti")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3253,7 +3334,9 @@
 
 		$ulos .= "<option value = ''>".t("Myynti‰ ei estet‰, vaikka luottoraja on ylitetty")."</option>";
 		$ulos .= "<option value = 'K' {$sel["K"]}>".t("Kaikki myynti estet‰‰n, jos luottoraja on ylitetty")."</option>";
+		$ulos .= "<option value = 'J' {$sel["J"]}>".t("Kaikki myynti estet‰‰n, jos luottoraja on ylitetty. Tilaus j‰tet‰‰n kesken")."</option>";
 		$ulos .= "<option value = 'E' {$sel["E"]}>".t("Muu kuin myyjien tekem‰ myynti estet‰‰n, jos luottoraja on ylitetty")."</option>";
+		$ulos .= "<option value = 'F' {$sel["F"]}>".t("Muu kuin myyjien tekem‰ myynti estet‰‰n, jos luottoraja on ylitetty. Tilaus j‰tet‰‰n kesken")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3263,12 +3346,14 @@
 
         $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-        $sel = array_fill_keys(array('K', 'E'), '');
+        $sel = array_fill_keys(array('K', 'E', 'J', 'F'), '');
         $sel[$trow[$i]] = " SELECTED";
 
         $ulos .= "<option value = ''>".t("Myynti‰ ei estet‰, vaikka er‰p‰iv‰ olisi liikaa ylitetty")."</option>";
         $ulos .= "<option value = 'K' {$sel["K"]}>".t("Kaikki myynti estet‰‰n, jos er‰p‰iv‰ on liikaa ylitetty")."</option>";
+        $ulos .= "<option value = 'J' {$sel["J"]}>".t("Kaikki myynti estet‰‰n, jos er‰p‰iv‰ on liikaa ylitetty. Tilaus j‰tet‰‰n kesken")."</option>";
         $ulos .= "<option value = 'E' {$sel["E"]}>".t("Muu kuin myyjien tekem‰ myynti estet‰‰n, jos er‰p‰iv‰ on liikaa ylitetty")."</option>";
+        $ulos .= "<option value = 'F' {$sel["F"]}>".t("Muu kuin myyjien tekem‰ myynti estet‰‰n, jos er‰p‰iv‰ on liikaa ylitetty. Tilaus j‰tet‰‰n kesken")."</option>";
         $ulos .= "</select></td>";
 
         $jatko = 0;

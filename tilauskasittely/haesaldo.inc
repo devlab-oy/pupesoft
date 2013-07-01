@@ -39,7 +39,7 @@ $jtssa = "";
 $jtsum = 0;
 
 while($jsrow  = mysql_fetch_array($jsres)) {	
-	$jtssa .= "".t("HUOM: Asiakkaalle")." $jsrow[ytunnus] ".t("on ennaltavarattu")." $jsrow[jt] ".t("kpl tätä tuotetta")."!<br>";
+	$jtssa .= t("HUOM: Asiakkaalle")." $jsrow[ytunnus] ".t("on ennaltavarattu")." $jsrow[jt] ".t("kpl tätä tuotetta")."!<br>";
 	$jtsum += $jsrow["jt"];
 }
 

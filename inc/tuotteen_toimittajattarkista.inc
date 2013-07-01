@@ -68,7 +68,6 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 
 						if (mysql_num_rows($sresult) > 0) {
 							$virhe[$i] = t("Tämä toimittaja on jo tällä tuotteella")."!";
-							$errori = 1;
 						}
 					}
 				}
@@ -120,7 +119,6 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 
 					if (mysql_num_rows($sresult) == 0) {
 						$virhe[$i] = t("Toimittaja puuttuu!");
-						$errori = 1;
 					}
 					elseif (mysql_num_rows($sresult) == 1) {
 						$srow = mysql_fetch_assoc($sresult);
@@ -138,7 +136,6 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 
 							if (mysql_num_rows($sresult) > 0 and $lue_datasta != 'MUUTA') {
 								$virhe[$i] = t("Tämä toimittaja on jo tällä tuotteella")."!";
-								$errori = 1;
 							}
 						}
 					}
@@ -156,13 +153,11 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 						$alasveto[$i] .= "</select>";
 
 						$virhe[$i] = t("Valitse toimittaja")."!";
-						$errori = 1;
 					}
 				}
 			}
 			else {
 				$virhe[$i] = t("Toimittaja puuttuu!");
-				$errori = 1;
 			}
 		}
 
@@ -173,7 +168,6 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 		if (mysql_field_name($result, $i) == "alkuperamaa") {
 			if ($t[$i] == "") {
 				$virhe[$i] =  t("Tieto puuttuu")."!";
-				$errori = 1;
 			}
 		}
 
@@ -185,10 +179,7 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 
 			if ($t[$i] == "" and $tuotoimirow["tyyppi"] != "") {
 				$virhe[$i] = t("Online/sisäinen toimittaja vaatii aina toimittajan tuotenumeron")."!";
-				$errori = 1;
 			}
 		}
 	}
 }
-
-?>

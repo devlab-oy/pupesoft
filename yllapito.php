@@ -686,6 +686,8 @@
 							$otsikrow["oletus_olmapvm"] = $oletus_erapvm;
 						}
 
+						$komm = "";
+
 						// Jos lasku on hyv‰ksytty ja muutetaan hyvˆksynt‰‰n liittyvi‰ tietoja
 						if ($laskuorow["hyvak1"] != "" and $laskuorow["hyvak1"] != "verkkolas" and $laskuorow["h1time"] != "0000-00-00 00:00:00" and (
 							($oletus_erapvm > 0 and $laskuorow["erpcm"] != $oletus_erapvm) or
@@ -736,6 +738,8 @@
 							$laskuorow["h5time"]	= "0000-00-00 00:00:00";
 
 							$laskuorow["hyvaksyja_nyt"] = $otsikrow["oletus_hyvak1"];
+
+							$komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyv‰ksynt‰‰n koska toimittajan tietojen p‰ivitys muutti laskun tietoja.")."<br>";
 						}
 
 						// Matkalasku
@@ -788,6 +792,7 @@
 									pankki2 			= '$otsikrow[pankki2]',
 									pankki3 			= '$otsikrow[pankki3]',
 									pankki4 			= '$otsikrow[pankki4]',
+									comments			= trim(concat('$komm', comments)),
 									hyvaksynnanmuutos 	= '$otsikrow[oletus_hyvaksynnanmuutos]',
 									suoraveloitus 		= '$otsikrow[oletus_suoraveloitus]',
 									sisviesti1 			= '$otsikrow[ohjeitapankille]'
@@ -1392,7 +1397,7 @@
 						if (mysql_field_name($result,$i) == 'liitedata') {
 
 							if ($lukitse_laji == "tuote" and $lukitse_avaimeen > 0 and in_array($trow[1], array("image/jpeg","image/jpg","image/gif","image/png","image/bmp"))) {
-								echo "<img src='".$palvelin2."view.php?id=$trow[0]' height='80px'><br>".t("Muokkaa liitett‰")."";
+								echo "<img src='".$palvelin2."view.php?id=$trow[0]' height='80px'><br>".t("Muokkaa liitett‰");
 							}
 							else {
 								list($liitedata1, $liitedata2) = explode("/", $trow[1]);
@@ -1802,6 +1807,13 @@
 			}
 		}
 
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimi") {
+
+			if (($toikrow = tarkista_oikeus("yllapito.php", "vaihtoehtoiset_verkkolaskutunnukset%", "", "OK")) !== FALSE) {
+				echo "<iframe id='vaihtoehtoiset_verkkolaskutunnukset_iframe' name='vaihtoehtoiset_verkkolaskutunnukset_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&laji=$laji&ohje=off&haku[3]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+		}
+
 		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto" or $toim == "pakkaus" or ($toim == "avainsana" and $from != "yllapito"))) {
 
 			if (isset($perhe) and $perhe > 0) {
@@ -1845,7 +1857,7 @@
 			}
 		}
 
-		if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and ($toim == 'lasku' or $toim == 'asiakas' or $toim == "sarjanumeron_lisatiedot" or $toim == "tuote" or $toim == "avainsana")) {
+		if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and ($toim == 'lasku' or $toim == 'asiakas' or $toim == "sarjanumeron_lisatiedot" or $toim == "tuote" or $toim == "avainsana" or $toim == "toimi")) {
 			if (($toikrow = tarkista_oikeus("yllapito.php", "liitetiedostot%", "", "OK")) !== FALSE) {
 				echo "<iframe id='liitetiedostot_iframe' name='liitetiedostot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[7]=@$toim&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=$toim' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
@@ -1905,6 +1917,7 @@
 		if ($toim == "auto_vari" or
 			$toim == "auto_vari_tuote" or
 			$toim == "auto_vari_korvaavat" or
+			$toim == "autoid_lisatieto" or
 			$toim == "puun_alkio" or
 			$toim == "toimitustavan_lahdot" or
 			$toim == "pakkauskoodit" or
@@ -1927,6 +1940,7 @@
 			$toim == "etaisyydet" or
 			$toim == "tuotteen_avainsanat" or
 			$toim == "toimittajaalennus" or
+			$toim == "vaihtoehtoiset_verkkolaskutunnukset" or
 			$toim == "toimittajahinta" or
 			$toim == "varaston_tulostimet" or
 			$toim == "pakkaamo" or
@@ -2019,117 +2033,29 @@
 				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
 	}
 
-
-	if ((int) $tunnus == 0 and (int) $uusi == 0 and $errori == '') {
-		$jcsmaxheigth = ", 300";
-	}
-	else {
-		$jcsmaxheigth = "";
-	}
-
 	//redirect funktio kutsu pit‰‰ olla t‰ss‰, koska jos updatesta tulee virheit‰ niin ne pit‰‰ h‰nd‰l‰t‰ ja passata redirect funkkarille, jotta osataan echottaa / j‰tt‰‰ echottama redirecti
 	$funktio = "echo_".$toim."_redirect";
-	if(function_exists($funktio)) {
+
+	if (function_exists($funktio)) {
 		$params = array(
 			'redirct_to' => $redirect_to,
 			'errori' => $errori,
 			'valittu_asiakas' => $valittu_asiakas,
 		);
+
 		$funktio($params);
 	}
 
-	if ($from == "yllapito" and $toim == "laskun_lisatiedot") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('laskun_lisatiedot_iframe' $jcsmaxheigth);</script>";
-	}
+	if ($from == "yllapito") {
+		if ((int) $tunnus == 0 and (int) $uusi == 0 and $errori == '') {
+			$jcsmaxheigth = ", 300";
+		}
+		else {
+			$jcsmaxheigth = "";
+		}
 
-	if ($from == "yllapito" and $toim == "yhtion_toimipaikat") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('yhtion_toimipaikat_iframe' $jcsmaxheigth);</script>";
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('{$toim}_iframe' $jcsmaxheigth);</script>";
 	}
-
-	if ($from == "yllapito" and $toim == "yhteyshenkilo") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('yhteyshenkilo_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "tuotteen_avainsanat") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_avainsanat_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "toimittajaalennus") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('toimittajaalennus_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "toimittajahinta") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('toimittajahinta_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "tuotteen_toimittajat") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_toimittajat_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "tuotteen_toimittajat_tuotenumerot") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_toimittajat_tuotenumerot_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "liitetiedostot") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('liitetiedostot_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "asiakashinta") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('asiakashinta_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "asiakasalennus") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('asiakasalennus_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "perusalennus") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('perusalennus_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "asiakaskommentti") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('asiakaskommentti_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "asiakkaan_avainsanat") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('asiakkaan_avainsanat_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "rahtisopimukset") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('rahtisopimukset_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "avainsana") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('avainsana_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "toimitustavan_lahdot") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('toimitustavan_lahdot_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "pakkauskoodit") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('pakkauskoodit_iframe' {$jcsmaxheigth});</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "auto_vari_tuote") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('auto_vari_tuote_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "auto_vari_korvaavat") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('auto_vari_korvaavat_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "puun_alkio") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('puun_alkio_iframe' $jcsmaxheigth);</script>";
-	}
-
-	if ($from == "yllapito" and $toim == "yhteensopivuus_tuote_lisatiedot") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('yhteensopivuus_tuote_lisatiedot_iframe' $jcsmaxheigth);</script>";
-	}
-
-    if ($from == "yllapito" and $toim == "kohde") {
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('kohde_iframe' $jcsmaxheigth);</script>";
-	}
-
 	elseif ($from != "yllapito") {
 		require ("inc/footer.inc");
 	}

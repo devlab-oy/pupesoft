@@ -110,7 +110,7 @@
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
 		}
-		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kukaan")."";
+		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kukaan");
 
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel="";
@@ -542,6 +542,7 @@
 		$ulos .= "<option value='editilaus_out_wabco.inc' $sel[editilaus_out_wabco]>".t("Wabco s‰hkˆinen tilaus")."</option>";
 		$ulos .= "<option value='editilaus_out_excel.inc' $sel[editilaus_out_excel]>".t("Excel-ostotilaus")."</option>";
 		$ulos .= "<option value='editilaus_out_elma.inc' $sel[editilaus_out_elma]>".t("Elma-editilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_xml.inc' $sel[editilaus_out_xml]>".t("Xml-ostotilaus")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -554,7 +555,6 @@
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Toimittajalta ei tule ASN-sanomia eik‰ laskuja")."</option>";
 		$ulos .= "<option value='K' $sel[K]>".t("Toimittaja l‰hett‰‰ ASN-sanoman ja TecCom-laskun")."</option>";
-		$ulos .= "<option value='S' $sel[S]>".t("Toimittaja l‰hett‰‰ vain ASN-sanoman")."</option>";
 		$ulos .= "<option value='L' $sel[L]>".t("Toimittaja l‰hett‰‰ vain TecCom-laskun")."</option>";
 		$ulos .= "</select></td>";
 

@@ -7,7 +7,7 @@ if(!function_exists("rahtisopimuksettarkista")) {
 		static $chytunnus;
 		if (mysql_field_name($result, $i) == "rahtisopimus") {
 			if (trim($t[$i]) == '') {
-				$virhe[$i] = "".t("Tieto puuttuu")."";
+				$virhe[$i] = t("Tieto puuttuu");
 			}
 		}
 

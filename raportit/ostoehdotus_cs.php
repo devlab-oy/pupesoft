@@ -66,6 +66,51 @@
 		$lisavarattu = "";
 	}
 
+	function varastosiirrot($yhtiot, $varasto_tunnus) {
+
+		$varasto_tunnus = (int) $varasto_tunnus;
+
+		//varasto on syötettävä
+		if ($varasto_tunnus == 0) {
+			return array(0, 0);
+		}
+
+		$varastoon = array();
+		$varastosta = array();
+
+		// Varastoon tulossa olevat siirrot
+		$varastoon_query = "	SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) kpl
+								FROM lasku
+								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
+								WHERE lasku.yhtio in ($yhtiot)
+								AND lasku.tila = 'G'
+								AND lasku.alatila IN ('J','A','B','C', 'D')
+								AND lasku.clearing = '$varasto_tunnus'
+								GROUP BY tilausrivi.tuoteno";
+		$varastoon_result = pupe_query($varastoon_query);
+
+		while ($row = mysql_fetch_assoc($varastoon_result)) {
+			$varastoon[$row['tuoteno']] = $row['kpl'];
+		}
+
+		// Varastosta lähtevät siirrot
+		$varastosta_query = "	SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) kpl
+								FROM lasku
+								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
+								WHERE lasku.yhtio in ($yhtiot)
+								AND lasku.tila = 'G'
+								AND lasku.alatila IN ('J','A','B','C', 'D')
+								AND lasku.varasto = $varasto_tunnus
+								GROUP BY tilausrivi.tuoteno";
+		$varastosta_result = pupe_query($varastosta_query);
+
+		while ($row = mysql_fetch_assoc($varastosta_result)) {
+			$varastosta[$row['tuoteno']] = $row['kpl'];
+		}
+
+		return array($varastoon, $varastosta);
+	}
+
 	function myynnit($myynti_varasto = '', $myynti_maa = '') {
 
 		// otetaan kaikki muuttujat mukaan funktioon mitä on failissakin
@@ -359,6 +404,21 @@
 
 			$('.paivita').live('click', paivitatuote);
 
+			var hailaittaa = function() {
+
+				var linksu_id = $(this).attr('id');
+
+				$('.hailaitimg').each(
+					function() {
+						$(this).css('background-color', 'transparent');
+					}
+				);
+
+				$('#'+linksu_id).css('background-color', '#00FF00');
+			};
+
+			$('.hailaitimg').live('click', hailaittaa);
+
 			</script>";
 
 		$lisaa  = ""; // tuote-rajauksia
@@ -533,6 +593,12 @@
 		$bbl = " style='border-bottom: 1px solid; border-left: 1px solid; margin-bottom: 20px;' ";
 
 		$indeksi = 0;
+
+		// Haetaan varastosiirrot ennen looppia
+		if ($toim == "KK") {
+			list($varastoon, $varastosta) = varastosiirrot($yhtiot, $valvarasto);
+		}
+
 		// loopataan tuotteet läpi
 		while ($row = mysql_fetch_assoc($res)) {
 
@@ -580,6 +646,16 @@
 			list($enp, $vku) = myynnit($valvarasto);
 
 			if ($toim == "KK") {
+
+				// Lisätään ennakkopoistoihin varastosta lähteneet keskeneräiset varastosiirrot
+				if (isset($varastosta[$row['tuoteno']])) {
+					$enp += $varastosta[$row['tuoteno']];
+				}
+
+				// Vähennetään ennakkopoistoista varastoon matkalla olevat keskeneräiset varastosiirrot
+				if (isset($varastoon[$row['tuoteno']])) {
+					$enp -= $varastoon[$row['tuoteno']];
+				}
 
 				// Lisätään varatut tilaukseen ja verrataan tilauspistettä vapaasaldoon
 				$vapaasaldo = ($saldot - $enp + $ostot);
@@ -644,10 +720,10 @@
 
 				if ($useampi_yhtio > 1) {
 					echo "<td valign='top' $btl>$row[yhtio]</td>";
-					echo "<td valign='top' $bt><a name='A_$indeksi'></a>$row[tuoteno] <img onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=600'); return false;\" src='{$palvelin2}pics/lullacons/info.png'></td>";
+					echo "<td valign='top' $bt><a name='A_$indeksi'></a>$row[tuoteno] <img class='hailaitimg' id='HI_$indeksi' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=600'); return false;\" src='{$palvelin2}pics/lullacons/info.png'></td>";
 				}
 				else {
-					echo "<td valign='top' $btl><a name='A_$indeksi'></a>$row[tuoteno] <img onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=600'); return false;\" src='{$palvelin2}pics/lullacons/info.png'></td>";
+					echo "<td valign='top' $btl><a name='A_$indeksi'></a>$row[tuoteno] <img class='hailaitimg' id='HI_$indeksi' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=600'); return false;\" src='{$palvelin2}pics/lullacons/info.png'></td>";
 				}
 
 				if ($toim == "KK") echo "<td valign='top' $bt  align='right'>".(float) $row["tpaikka_halyraja"]."</td>";

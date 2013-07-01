@@ -226,7 +226,7 @@ if ($tee=="" or $tee=="LASKE") {
 				ORDER BY tilikausi_alku";
 	$vresult = mysql_query($query) or pupe_error($query);
 
-	echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
+	echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa");
 
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
@@ -238,7 +238,7 @@ if ($tee=="" or $tee=="LASKE") {
 	echo "</select></td></tr>";
 
 	echo "<tr><td>".t("Vain seurannasta")."</td>";
-	echo "<td><select name='seuranta'><option value=''>".t("Kaikista")."";
+	echo "<td><select name='seuranta'><option value=''>".t("Kaikista");
 
 	$vresult = t_avainsana("SEURANTA");
 

@@ -288,7 +288,7 @@
 
 		for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
 			if ($i == 1) {
-				if (trim($trow[1]) == '') $trow[1] = "".t("*tyhjä*")."";
+				if (trim($trow[1]) == '') $trow[1] = t("*tyhjä*");
 				echo "<td><a name='1_$kalalask' href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[tunnus]&lopetus=".$palvelin2."crm/asiakaslista.php////konserni=$konserni//ojarj=$ojarj".str_replace("&", "//", $ulisa)."///1_$kalalask'>$trow[1]</a></td>";
 			}
 			elseif (mysql_field_name($result,$i) == 'ytunnus') {

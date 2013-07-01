@@ -12,8 +12,13 @@
 
 		// Tarkistetaan
 		$errori = '';
+
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
 			require "inc/toimitarkista.inc";
+
+			if ($virhe[$i] != "") {
+				$errori = 1;
+			}
 		}
 
 		if ($errori != '') {

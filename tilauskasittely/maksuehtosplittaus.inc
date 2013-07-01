@@ -120,6 +120,9 @@
 				elseif ($fieldname == 'tila') {
 					$query .= $fieldname."='L',";
 				}
+				elseif ($fieldname == 'kate_korjattu') {
+					$query .= $fieldname."=NULL,";
+				}
 				elseif ($fieldname != 'tunnus') {
 					$query .= $fieldname."='".$laskufetch_row[$fieldname]."',";
 				}

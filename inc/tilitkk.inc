@@ -29,7 +29,7 @@
 					ORDER BY koodi+0, koodi, nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa")."";
+		echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa");
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -50,7 +50,7 @@
 					ORDER BY koodi+0, koodi, nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa")."";
+		echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa");
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -72,7 +72,7 @@
 					ORDER BY koodi+0, koodi, nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		echo "<td><select name='proj'><option value=' '>".t("Ei valintaa")."";
+		echo "<td><select name='proj'><option value=' '>".t("Ei valintaa");
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";

@@ -18,7 +18,7 @@
 		$rajauslisa = " and liitetiedostot.tunnus = -1 ";
 	}
 
-	if (($lukitse_laji == "tuote" or $lukitse_laji == "sarjanumeron_lisatiedot" or $lukitse_laji == 'asiakas' or $lukitse_laji == "avainsana") and $lukitse_avaimeen > 0) {
+	if (($lukitse_laji == "tuote" or $lukitse_laji == "sarjanumeron_lisatiedot" or $lukitse_laji == 'asiakas' or $lukitse_laji == "avainsana" or $lukitse_laji == 'toimi') and $lukitse_avaimeen > 0) {
 		$uusilukko = "";
 		$poistolukko   = "";
 	}
@@ -85,5 +85,3 @@
 			}
 		}
 	}
-
-?>

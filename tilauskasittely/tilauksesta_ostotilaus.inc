@@ -376,7 +376,7 @@
 
 						// Vapautetaan JT-rivin erät jos niitä on
 						if ($rivi["sarjanumeroseuranta"] == "E" or $rivi["sarjanumeroseuranta"] == "F" or $rivi["sarjanumeroseuranta"] == "G") {
-							vapauta_sarjanumerot($toim, $rivi["otunnus"], " and tilausrivi.tunnus = '$rivi[rivitunnus]' ", FALSE);
+							vapauta_sarjanumerot($toim, $rivi["otunnus"], " and tilausrivi.tunnus = '$rivi[rivitunnus]' ");
 						}
 
 						if ($yhtiorow["varaako_jt_saldoa"] == "") {

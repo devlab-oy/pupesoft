@@ -462,6 +462,13 @@
 
 			$tilioterivilaskuri = 1;
 			$tilioterivimaara	= mysql_num_rows($tiliotedataresult);
+			
+			
+			// Haetaan kannan isoin lasku.tunnus, nin voidaan tehdän sanity-checki EndToEndId:lle.
+			$query = "	SELECT max(tunnus) maxEndToEndId
+						FROM lasku";
+			$meteidres = pupe_query($query);
+			$meteidrow = mysql_fetch_assoc($meteidres);
 
 			while ($tiliotedatarow = mysql_fetch_assoc($tiliotedataresult)) {
 				$tietue = $tiliotedatarow['tieto'];

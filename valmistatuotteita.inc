@@ -331,7 +331,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 			if (in_array($raakaainerow["sarjanumeroseuranta"], array("E","F","G"))) {
 
 				// Haetaan eka raaka-aineriviin liitetyn er‰n tiedot
-				$query = "	SELECT ostorivitunnus, myyntirivitunnus, sarjanumero, tunnus
+				$query = "	SELECT *
 							FROM sarjanumeroseuranta
 							WHERE yhtio			 = '$kukarow[yhtio]'
 							and tuoteno			 = '$raakaainerow[tuoteno]'
@@ -342,6 +342,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 				// luodaan muuttuja jota pienennet‰‰n luupissa
 				$eraayht = $kpl;
+				$ederaostorivi = 0;
 
 				// koitetaan lˆyt‰‰ vapaita ostettuja eri‰ mit‰ kuluttaa
 				$query = "	SELECT era_kpl, tunnus, ostorivitunnus
@@ -383,18 +384,69 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 								and tunnus  = '$erajaljella_row[tunnus]'";
 					$lisa_res = pupe_query($query);
 
-					// lis‰t‰‰n raaka-aineriviin liitetylle er‰lle m‰‰r‰, ja samalla p‰ivitet‰‰n ostorivitunnus oikeaksi
-					$query = "	UPDATE sarjanumeroseuranta
-								SET era_kpl	    = era_kpl+$eravahennetaan,
-								ostorivitunnus  = '$erajaljella_row[ostorivitunnus]',
-								muutospvm	    = now(),
-								muuttaja	    = '$kukarow[kuka]'
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tunnus  = '$lisa_row[tunnus]'";
-					$lisa_res = pupe_query($query);
+					$raakaerarow = array('tunnus' => 0, 'ostorivitunnus' => 0);
+
+					if ($ederaostorivi == 0 and $lisa_row['era_kpl'] == 0) {
+						// T‰m‰ on loopin eka kierros, silloin p‰ivitet‰‰n aina alunperin raaka-aineriviin liitetty er‰numerorivi
+						$raakaerarow = $lisa_row;
+					}
+					else {
+						// Onko n‰ill‰ tiedoilla jo er‰ t‰ll‰ raaka-ainerivill‰? (Raaka-ainerivill‰ voi olla useampi er‰numerorivi jos joudutaan k‰ytt‰‰ useampaa er‰‰)
+						$query = "	SELECT *
+									FROM sarjanumeroseuranta
+									WHERE yhtio			 = '$kukarow[yhtio]'
+									and tuoteno			 = '$raakaainerow[tuoteno]'
+									and myyntirivitunnus = '$raakaainerow[tunnus]'
+									and ostorivitunnus   = '$erajaljella_row[ostorivitunnus]'
+									LIMIT 1";
+						$lisa_res = pupe_query($query);
+						$raakaerarow = mysql_fetch_assoc($lisa_res);
+					}
+
+					if ($raakaerarow['ostorivitunnus'] == $erajaljella_row['ostorivitunnus']) {
+						// lis‰t‰‰n raaka-aineriviin liitetylle er‰lle m‰‰r‰, ja samalla p‰ivitet‰‰n ostorivitunnus oikeaksi
+						$query = "	UPDATE sarjanumeroseuranta
+									SET era_kpl	    = era_kpl+$eravahennetaan,
+									ostorivitunnus  = '$erajaljella_row[ostorivitunnus]',
+									muutospvm	    = now(),
+									muuttaja	    = '$kukarow[kuka]'
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus  = '$raakaerarow[tunnus]'";
+						$lisa_res = pupe_query($query);
+					}
+					else {
+						// lis‰t‰‰n er‰ oikealla ostorivitunnuksella ja er‰n m‰‰r‰ll‰
+						$query = "	INSERT into sarjanumeroseuranta
+									SET yhtio 		 = '$kukarow[yhtio]',
+									tuoteno			 = '$lisa_row[tuoteno]',
+									lisatieto 		 = '$lisa_row[lisatieto]',
+									myyntirivitunnus = '$lisa_row[myyntirivitunnus]',
+									ostorivitunnus   = '$erajaljella_row[ostorivitunnus]',
+									kaytetty		 = '$lisa_row[kaytetty]',
+									era_kpl			 = $eravahennetaan,
+									laatija			 = '$kukarow[kuka]',
+									luontiaika		 = now(),
+									takuu_alku 		 = '$lisa_row[takuu_alku]',
+									takuu_loppu		 = '$lisa_row[takuu_loppu]',
+									parasta_ennen	 = '$lisa_row[parasta_ennen]',
+									hyllyalue   	 = '$lisa_row[hyllyalue]',
+									hyllynro    	 = '$lisa_row[hyllynro]',
+									hyllytaso   	 = '$lisa_row[hyllytaso]',
+									hyllyvali   	 = '$lisa_row[hyllyvali]',
+									sarjanumero 	 = '$lisa_row[sarjanumero]'";
+						$lisa_res = pupe_query($query);
+					}
 
 					// v‰hennet‰‰n luupattavaa m‰‰r‰‰
 					$eraayht -= $eravahennetaan;
+
+					// t‰t‰ ostorivitunnaria k‰ytettiin
+					$ederaostorivi = $erajaljella_row["ostorivitunnus"];
+
+					// Jos kaikki on jo allokoitu niin breikataan
+					if ($eraayht <= 0) {
+						break;
+					}
 				}
 
 				// Ei lˆytynyt riitt‰v‰sti ostettuja eri‰, eli "myyty pakkaselle" niin luodaan uusi er‰rivi jossa ostorivitunnus on nolla jonne laitetaan loppum‰‰r‰.

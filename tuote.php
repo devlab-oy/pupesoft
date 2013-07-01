@@ -81,63 +81,34 @@
 
 	echo "<font class='head'>".t("Tuotekysely")."</font><hr>";
 
-	if ($tee == 'Z' and (!isset($tyyppi) or $tyyppi == '')) {
-		require "inc/tuotehaku.inc";
-	}
-
 	if ($tee == 'Z' and isset($tyyppi) and $tyyppi != '') {
-
 		if ($tyyppi == 'TOIMTUOTENO') {
-
-			$query = "	SELECT tuotteen_toimittajat.tuoteno
-						FROM tuotteen_toimittajat
-						JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
-						WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-						AND tuotteen_toimittajat.toim_tuoteno = '{$tuoteno}'
-						AND (tuote.status NOT IN ('P','X') OR (SELECT SUM(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0) > 0)
-						ORDER BY tuote.tuoteno";
-			$result = pupe_query($query);
-
-			if (mysql_num_rows($result) == 0) {
-				$query = "	SELECT tuote.tuoteno
-							FROM tuotteen_toimittajat_tuotenumerot AS ttt
-							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
-							JOIN tuote ON (tuote.yhtio = tt.yhtio AND tuote.tuoteno = tt.tuoteno)
-							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
-							AND (ttt.tuoteno = '{$tuoteno}' or ttt.viivakoodi = '{$tuoteno}')
-							AND (tuote.status NOT IN ('P','X') OR (SELECT SUM(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0) > 0)";
-				$chk_res = pupe_query($query);
-
-				if (mysql_num_rows($chk_res) != 0) {
-					$result = $chk_res;
-				}
-			}
-
-			if (mysql_num_rows($result) == 0) {
-				$varaosavirhe = t("VIRHE: Tiedolla ei löytynyt tuotetta")."!";
-				$tee = 'Y';
-			}
-			elseif (mysql_num_rows($result) > 1) {
-				$varaosavirhe = t("VIRHE: Tiedolla löytyi useita tuotteita")."!";
-				$tee = 'Y';
-			}
-			else {
-				$tr = mysql_fetch_assoc($result);
-				$tuoteno = $tr["tuoteno"];
-			}
+			$tuoteno = "?".$tuoteno;
 		}
 	}
 
-	if ($tee=='Y') echo "<font class='error'>$varaosavirhe</font>";
+	if ($tee == 'Z' and $tuoteno != "") {
+		require "inc/tuotehaku.inc";
+	}
+
+	if ($tee == 'Y') echo "<font class='error'>$varaosavirhe</font>";
 
 	 //syotetaan tuotenumero
 	$formi  = 'formi';
 	$kentta = 'tuoteno';
 
-	//Paluu nappi osto/myyntitilaukselle
-	$query    = "SELECT * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
-	$result   = pupe_query($query);
-	$laskurow = mysql_fetch_assoc($result);
+	// Paluu nappi osto/myyntitilaukselle
+	if ($kukarow["kesken"] > 0) {
+		$query    = "	SELECT *
+						FROM lasku
+						WHERE tunnus = '$kukarow[kesken]'
+						AND yhtio = '$kukarow[yhtio]'";
+		$result   = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($result);
+	}
+	else {
+		$laskurow = array();
+	}
 
 	if ($kukarow["kuka"] != "" and $laskurow["tila"] == "O") {
 		echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_osto.php'>
@@ -271,17 +242,9 @@
 		}
 
 		// Tarkastetaan onko taricit käytössä
-		$tv_kaytossa = FALSE;
+		$tv_kaytossa = tarkista_onko_taric_veroperusteet_kaytossa();
 
-		$query = "SELECT count(*) kpl from taric_veroperusteet";
-		$tv_res = pupe_query($query);
-		$tv_row = mysql_fetch_assoc($tv_res);
-
-		if ($tv_row["kpl"] > 0) {
-			$tv_kaytossa = TRUE;
-		}
-
-		if ($tuoterow["tuoteno"] != "" and (!in_array($tuoterow["status"], array('P', 'X')) or $salro["saldo"] != 0)) {
+		if ($tuoterow["tuoteno"] != "") {
 
 			if ($yhtiorow["saldo_kasittely"] == "T") {
 				$saldoaikalisa = date("Y-m-d");
@@ -407,12 +370,11 @@
 				while ($hintarow = mysql_fetch_assoc($hintaresult)) {
 					$valuuttalisa .= "<br>$hintarow[maa]: ".hintapyoristys($hintarow["hinta"])." $hintarow[valkoodi]";
 				}
-
 			}
 
 			if ($tv_kaytossa and $tullirow1['cn'] != '') {
 				$alkuperamaat 	= array();
-				$alkuperamaat[] = explode(',',$tuoterow['alkuperamaa']);
+				$alkuperamaat[] = explode(',', $tuoterow['alkuperamaa']);
 				$tuorow 		= $tuoterow;
 				$prossat 		= '';
 				$prossa_str 	= '';
@@ -426,9 +388,10 @@
 
 						include('tilauskasittely/taric_veroperusteet.inc');
 
-						$prossa_str = trim($tulliprossa,"0");
+						$prossa_str = trim($tulliprossa, "0");
+
 						if (strlen($prossa_str) > 1) {
-							$prossat .= "<br>".trim($tulliprossa,"0")." ".$alkupmaa;
+							$prossat .= "<br>$prossa_str $alkupmaa";
 						}
 					}
 				}
@@ -508,7 +471,13 @@
 			echo "</td>";
 
 			echo "<td>$tuoterow[eankoodi]</td><td colspan='2' style='font-weight:bold;'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td>";
-			echo "<td>$tuoterow[hinnastoon]<br>".t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark")."</td>";
+			echo "<td>$tuoterow[hinnastoon]<br>";
+
+			if ($tuoterow["status"] == "P") echo "<font class='error'>";
+			echo t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark");
+			if ($tuoterow["status"] == "P") echo "</font>";
+
+			echo "</td>";
 			echo "</tr>";
 
 			//2
@@ -713,8 +682,31 @@
 			echo "</tr>";
 
 			echo "<tr>";
+
 			echo "<td>$tuoterow[muuta]&nbsp;</td>";
-			echo "<td colspan='5'>".wordwrap($tuoterow["lyhytkuvaus"], 70, "<br>")."</td>";
+			echo "<td colspan='5'>";
+			echo wordwrap($tuoterow["lyhytkuvaus"], 70, "<br>");
+
+			$palautus = t_tuotteen_avainsanat($tuoterow, "laatuluokka");
+
+			if (trim($palautus) != "") {
+
+				echo $tuoterow["lyhytkuvaus"] != "" ? "<br>" : "";
+
+				switch($palautus) {
+					case '0':
+						echo "Premium";
+						break;
+					case '1':
+						echo "Standard";
+						break;
+					case '2':
+						echo "Economy";
+						break;
+				}
+			}
+
+			echo "</td>";
 			echo "</tr>";
 
 			//9
@@ -1039,7 +1031,6 @@
 
 				while ($row = mysql_fetch_assoc($vasta2result)) {
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
-
 					echo "<tr>";
 					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
 					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
@@ -1566,7 +1557,7 @@
 						}
 
 						if ($muutos_abs<>0) {
-							$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."";
+							$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite");
 						}
 
 						if ($muutos_suht<>0 and $erittely[$kk]<>0 and $ed_erittely[$kk]<>0) {
@@ -1847,7 +1838,7 @@
 				if ($tilalehinta != '') {
 					echo "<th>".t("Hinta / Ale / Rivihinta")."</th>";
 				}
-				echo "<th>".t("Selite")."";
+				echo "<th>".t("Selite");
 
 				echo "</th></form>";
 				echo "</tr>";

@@ -196,16 +196,27 @@
 			$laskutettavat = substr($laskutettavat,0,-1); // vika pilkku pois
 		}
 
-		//tarkistetaan ekaks ettei yksik‰‰n tilauksista ole jo toimitettu/laskutettu
-		$query = "	SELECT yhtio
-		            FROM tilausrivi
-					WHERE otunnus in ($laskutettavat)
-					and yhtio 		= '$kukarow[yhtio]'
-					and laskutettu != ''
-					and tyyppi		= 'L'";
-		$result = pupe_query($query);
+		$laskutettavaa_on = TRUE;
 
-		if (mysql_num_rows($result) == 0) {
+		if ($laskutettavat != "") {
+			//tarkistetaan ekaks ettei yksik‰‰n tilauksista ole jo toimitettu/laskutettu
+			$query = "	SELECT yhtio
+			            FROM tilausrivi
+						WHERE otunnus in ($laskutettavat)
+						and yhtio 		= '$kukarow[yhtio]'
+						and laskutettu != ''
+						and tyyppi		= 'L'";
+			$result = pupe_query($query);
+
+			if (mysql_num_rows($result) != 0) {
+				$laskutettavaa_on = FALSE;
+			}
+		}
+		else {
+			$laskutettavaa_on = FALSE;
+		}
+
+		if ($laskutettavaa_on) {
 			// merkataan t‰ss‰ vaiheessa toimittamattomat rivi toimitetuiksi
 			$query = "	UPDATE tilausrivi
 						SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
@@ -656,23 +667,27 @@
 					echo "<td class='back'>&nbsp;<font class='error'>".t("HUOM: Tilauksella on nollahintaisia rivej‰!")."</font></td>";
 				}
 
-				if ($row["chn"] == "010") {
-					//Varmistetaan, ett‰ meill‰ on verkkotunnus laskulla jos pit‰isi l‰hett‰‰ verkkolaskuja!
-					if($row["verkkotunnus"] == "") {
-						$query = "	SELECT verkkotunnus
-									FROM asiakas
-									WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[liitostunnus]' and verkkotunnus!=''";
-						$asres = pupe_query($query);
-						if(mysql_num_rows($asres) == 1) {
-							$asrow = mysql_fetch_array($asres);
-							$query = "	UPDATE lasku SET
-							 				verkkotunnus = '$asrow[verkkotunnus]'
-										WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]' and verkkotunnus=''";
-							$upres = pupe_query($query);
-						}
-						else {
-							echo "<td class='back'>&nbsp;<font class='message'>".t("VIRHE: Verkkotunnus puuttuu asiakkaalta ja laskulta!")."</font></td>";
-						}
+				//Varmistetaan, ett‰ meill‰ on verkkotunnus laskulla jos pit‰isi l‰hett‰‰ verkkolaskuja!
+				if ($row["chn"] == "010" and $yhtiorow['verkkolasku_lah'] != 'apix') {
+					$query = "	SELECT verkkotunnus
+								FROM asiakas
+								WHERE yhtio 	  = '$kukarow[yhtio]'
+								and tunnus  	  = '$row[liitostunnus]'
+								and verkkotunnus !=''";
+					$asres = pupe_query($query);
+
+					if (mysql_num_rows($asres) == 1) {
+						$asrow = mysql_fetch_array($asres);
+
+						$query = "	UPDATE lasku SET
+						 			verkkotunnus = '$asrow[verkkotunnus]'
+									WHERE yhtio 	 = '$kukarow[yhtio]'
+									AND tunnus  	 = '$row[tunnus]'
+									and verkkotunnus = ''";
+						$upres = pupe_query($query);
+					}
+					else {
+						echo "<td class='back'>&nbsp;<font class='message'>".t("VIRHE: Verkkotunnus puuttuu asiakkaalta ja laskulta!")."</font></td>";
 					}
 				}
 
@@ -1070,7 +1085,7 @@
 					GROUP BY lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 					lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 					lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
-					lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
+					lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi, lasku.laskutyyppi,
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
 					$ketjutus_group
 					ORDER BY lasku.nimi";

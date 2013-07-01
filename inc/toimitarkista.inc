@@ -43,7 +43,6 @@ if (!function_exists("toimitarkista")) {
 
 			if (mysql_num_rows($sresult) != 1) {
 				$virhe[$i] = t("Tiliä ei löydy");
-				$errori = 1;
 			}
 		}
 
@@ -90,11 +89,9 @@ if (!function_exists("toimitarkista")) {
 			// Jos SEPA-maa, tarkistetaan IBAN
 			if (tarkista_sepa($ibanmaa) and tarkista_iban($t[$i]) != $t[$i]) {
 				$virhe[$i] = t("Virheellinen IBAN!")." $t[$i]";
-				$errori = 1;
 			}
 			elseif (tarkista_bban($t[$i]) === FALSE) {
 				$virhe[$i] = t("Virheellinen BBAN!")." $t[$i] ".t("Tilinumerossa saa olla vain kirjaimia A-Z ja/tai numeroita 0-9");
-				$errori = 1;
 			}
 		}
 
@@ -111,7 +108,6 @@ if (!function_exists("toimitarkista")) {
 			// Jos SEPA-maa, tarkistetaan BIC
 			if (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE) {
 				$virhe[$i] = t("Virheellinen BIC!")." $t[$i]";
-				$errori = 1;
 			}
 		}
 
@@ -131,7 +127,6 @@ if (!function_exists("toimitarkista")) {
 					// ei ollu oikee hetukaan
 					if ($hetuok == 1) {
 						$virhe[$i] = t("Virheellinen henkilötunnus!");
-						$errori = 1;
 					}
 				}
 				else {
@@ -203,7 +198,6 @@ if (!function_exists("toimitarkista")) {
 
 			if ($email_virhe != "") {
 				$virhe[$i] = t("Sähköpostin domain ei löydy")."! ($email_virhe)";
-				$errori = 1;
 			}
 		}
 
@@ -225,7 +219,6 @@ if (!function_exists("toimitarkista")) {
 
 				if (mysql_num_rows($vres) > 0)	{
 					$virhe[$i] = $virhe[$ytunnus_ind] = t("Henkilö on jo olemassa!");
-					$errori = 1;
 				}
 			}
 		}

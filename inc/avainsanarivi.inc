@@ -436,7 +436,7 @@
 		$jatko = 0;
 	}
 
-	if (($avain_sel['VAKIOVIESTI'] == "SELECTED" or $avain_sel['VAKIOVIESTI_TIL']) and mysql_field_name($result, $i) == "selite") {
+	if (($avain_sel['VAKIOVIESTI'] == "SELECTED" or $avain_sel['VAKIOVIESTI_TIL']) and (mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark")) {
 		$ulos = "<td><textarea rows=5 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}

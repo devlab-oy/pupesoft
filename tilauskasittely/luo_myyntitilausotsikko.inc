@@ -13,6 +13,19 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		if (mysql_num_rows($result) == 1) {
 			$asiakasrow  = mysql_fetch_assoc($result);
 
+			if(empty($asiakasrow['maksuehto'])) {
+					$query = "	SELECT *
+								FROM maksuehto
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND kaytossa = ''
+								ORDER BY jarjestys ASC
+								LIMIT 1";
+					$result = pupe_query($query);
+
+					$maksuehto_row = mysql_fetch_assoc($result);
+					$asiakasrow['maksuehto'] = $maksuehto_row['tunnus'];
+			}
+
 			$ytunnus 		   = $asiakasrow["ytunnus"];
 			$nimi 			   = $asiakasrow["nimi"];
 			$nimitark 		   = $asiakasrow["nimitark"];
@@ -41,6 +54,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$kolm_ovttunnus	   = $asiakasrow["kolm_maa"];
 			$verkkotunnus 	   = $asiakasrow["verkkotunnus"];
 			$piiri 			   = $asiakasrow["piiri"];
+			$laskutyyppi	   = $asiakasrow["laskutyyppi"];
 
 			$kohde  = "";
 			$eilahe = "";
@@ -303,11 +317,14 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		if ($toim == "TARJOUS") {
 			$tilaustyyppi = 'T';
 		}
-		if ($toim == "EXTRANET_REKLAMAATIO") {
+		elseif ($toim == "EXTRANET_REKLAMAATIO") {
 			$tilaustyyppi = 'R';
 		}
-		if ($toim == "MYYNTITILI") {
+		elseif ($toim == "MYYNTITILI") {
 			$tilaustyyppi = "M";
+		}
+		elseif ($toim == "TYOMAARAYS") {
+			$tilaustyyppi = "A";
 		}
 
 		$jatka	= "JATKA";
@@ -325,5 +342,3 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		}
 	}
 }
-
-?>

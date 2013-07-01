@@ -396,6 +396,14 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				// tehd‰‰n cookie, voimassa 30 pv
 				setcookie("pupesoft_muokkaatilaus", $asiakastiedot, time()+60*60*24*30, "/");
 			}
+
+			// N‰ytet‰‰n riitt‰‰kˆ saldo ker‰ysp‰iv‰n‰
+			if ($naytetaanko_saldot == 'kylla') {
+				setcookie("naytetaanko_saldot", $naytetaanko_saldot, time()+60*60*24*30, "/");
+			}
+			elseif ($naytetaanko_saldot == 'ei') {
+				setcookie("naytetaanko_saldot", '', time()+60*60*24*30, "/");
+			}
 		}
 
 		// Unohdetaan tallennettu state jos tullaan suoraan indexsvassista

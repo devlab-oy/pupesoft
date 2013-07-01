@@ -2,13 +2,12 @@
 
 if(!function_exists("yhteyshenkilotarkista")) {
 	function yhteyshenkilotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $errori;
+		global $kukarow, $yhtiorow, $alias_set;
 
 		static $liitostunnus_tarkista, $tyyppi_tarkista;
 
 		if (mysql_field_name($result, $i) == "nimi" and $t[$i] == "") {
 			$virhe[$i] = t("Tieto puuttuu");
-			$errori = 1;
 		}
 
 		if (mysql_field_name($result, $i) == "tyyppi") {
@@ -16,7 +15,6 @@ if(!function_exists("yhteyshenkilotarkista")) {
 
 			if ($t[$i] != "A" and $t[$i] != "T") {
 				$virhe[$i] = t("Virheellinen tyyppi");
-				$errori = 1;
 			}
 		}
 
@@ -35,10 +33,7 @@ if(!function_exists("yhteyshenkilotarkista")) {
 
 			if (mysql_num_rows($result) > 1) {
 				$virhe[$i] = t("Oletusyhteyshenkilö on jo valittu")."!";
-				$errori = 1;
 			}
 		}
 	}
 }
-
-?>

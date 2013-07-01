@@ -231,7 +231,7 @@ if (!function_exists('alku_tarjous')) {
 			$pdf_tarjous->draw_text(310, 729, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), 		$page_tarjous[$sivu], $pieni);
 
 			//etsitään löytyykö rahtisopimusta
-			$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
+			$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"], false, $laskurow["rahtisopimus"]);
 			$pdf_tarjous->draw_text(310, 719, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],	 	$page_tarjous[$sivu], $norm);
 
 			$pdf_tarjous->draw_rectangle(716, 300, 695, 580, $page_tarjous[$sivu], $rectparam);

@@ -111,6 +111,7 @@ if ($tee == "valmis") {
 										$insert_query .= "laadittu=now(),";
 										break;
 									case 'tunnus':
+									case 'kate_korjattu':
 										break;
 									default:
 										$insert_query .= "{$key}='$val',";

@@ -158,7 +158,7 @@
 							$kateVApros = sprintf("%.02f",round($kateVA/$myynVA*100,2));
 
 
-						$ulos .= "".t("Osasto")." $edosasto ".t("yhteensä").":\t\t";
+						$ulos .= t("Osasto")." $edosasto ".t("yhteensä").":\t\t";
 						$ulos .= "$myyn30\t";
 						$ulos .= "$kate30\t";
 						$ulos .= "$kate30pros\t";
@@ -267,7 +267,7 @@
 				if ($myynVA > 0)
 					$kateVApros = sprintf("%.02f",round($kateVA/$myynVA*100,2));
 
-				$ulos .= "".t("Osasto")." $edosasto ".t("yhteensä").":\t\t";
+				$ulos .= t("Osasto")." $edosasto ".t("yhteensä").":\t\t";
 				$ulos .= "$myyn30\t";
 				$ulos .= "$kate30\t";
 				$ulos .= "$kate30pros\t";
@@ -295,7 +295,7 @@
 
 
 				///* Kaikkiyhteensä *///
-				$ulos .= "".t("Kaikki yhteensä").":\t\t";
+				$ulos .= t("Kaikki yhteensä").":\t\t";
 				$ulos .= "$yhtmyyn30\t";
 				$ulos .= "$yhtkate30\t";
 				$ulos .= "$yhtkate30pros\t";

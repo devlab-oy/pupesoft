@@ -154,6 +154,8 @@
 		$excelsarake++;
 
 		if ($try != '') {
+			$worksheet->writeString($excelrivi, $excelsarake, t("Saldo"));
+			$excelsarake++;
 			$worksheet->writeString($excelrivi, $excelsarake, t("Tilkpl"));
 			$excelsarake++;
 
@@ -169,6 +171,8 @@
 			$worksheet->writeString($excelrivi, $excelsarake, t("Hinnastoon"));
 			$excelsarake++;
 			$worksheet->writeString($excelrivi, $excelsarake, t("Status"));
+			$excelsarake++;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Ostoehdotus"));
 			$excelsarake++;
 			$worksheet->writeString($excelrivi, $excelsarake, t("Toimittaja"));
 			$excelsarake++;
@@ -198,6 +202,7 @@
 				<th nowrap>".t("Puute")." %</th>";
 
 		if ($try != '') {
+			echo "<th>".t("Saldo")."</th>";
 			echo "<th>".t("Tilkpl")."</th>";
 
 			if (table_exists("yhteensopivuus_tuote")) {
@@ -208,6 +213,7 @@
 			echo "<th>".t("T‰htituote")."</th>";
 			echo "<th>".t("Hinnastoon")."</th>";
 			echo "<th>".t("Status")."</th>";
+			echo "<th>".t("Ostoehdotus")."</th>";
 			echo "<th>".t("Toimittaja")."<br>(".t("Toimittajan tuoteno").")</th>";
 		}
 		echo "</tr>";
@@ -337,21 +343,34 @@
 				$excelsarake++;
 			}
 
-			echo "	<td style='text-align:right; vertical-align:top' class='$vari'>$row[puutekpl]</td>
+			echo "	<td style='text-align:right; vertical-align:top' class='$vari'>". (float) $row['puutekpl']."</td>
 					<td style='text-align:right; vertical-align:top' class='$vari'>$row[puuteeur]</td>
 					<td style='text-align:right; vertical-align:top' class='$vari'>$row[myyeur]</td>
-					<td style='text-align:right; vertical-align:top' class='$vari'>".sprintf("%.2f",$puutepros)."</td>";
+					<td style='text-align:right; vertical-align:top' class='$vari'>".sprintf("%.1f",$puutepros)."</td>";
 
-			$worksheet->writeNumber($excelrivi, $excelsarake, (float)$row['puutekpl']);
+			$worksheet->writeNumber($excelrivi, $excelsarake, (float) $row['puutekpl']);
 			$excelsarake++;
 			$worksheet->writeNumber($excelrivi, $excelsarake, $row['puuteeur']);
 			$excelsarake++;
 			$worksheet->writeNumber($excelrivi, $excelsarake, $row['myyeur']);
 			$excelsarake++;
-			$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f",$puutepros));
+			$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.1f",$puutepros));
 			$excelsarake++;
 
 			if ($try != '') {
+				// Tuotteen kokonaissaldo
+				$query = "	SELECT sum(saldo) kokonaissaldo
+							FROM tuotepaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$row[tuoteno]'";
+				$saldores = pupe_query($query);
+				$saldorow = mysql_fetch_assoc($saldores);
+
+				echo "<td style='text-align:right; vertical-align:top' class='$vari'>". (float) $saldorow['kokonaissaldo']."</td>";
+
+				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $saldorow['kokonaissaldo']));
+				$excelsarake++;
+
 				//tilauksessa olevat
 				$query = "	SELECT sum(varattu) tilattu
 							FROM tilausrivi
@@ -359,12 +378,12 @@
 				$tulresult = mysql_query($query) or pupe_error($query);
 				$tulrow = mysql_fetch_array($tulresult);
 
-				echo "<td class='$vari' style='vertical-align:top'>". (float) $tulrow['tilattu'] ."</td>";
+				echo "<td class='$vari' style='text-align:right; vertical-align:top'>". (float) $tulrow['tilattu']."</td>";
 
 				$worksheet->writeNumber($excelrivi, $excelsarake, (float) $tulrow['tilattu']);
 				$excelsarake++;
 
-				$query = "	SELECT tahtituote, hinnastoon, status,
+				$query = "	SELECT tahtituote, hinnastoon, status, ostoehdotus,
 							group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
 							group_concat(distinct tuotteen_toimittajat.toimittaja order by tuotteen_toimittajat.tunnus separator '<br>') toimittaja
 							FROM tuote
@@ -386,7 +405,7 @@
 					$rekresult = mysql_query($query) or pupe_error($query);
 					$rekrow = mysql_fetch_array($rekresult);
 
-					echo "<td class='$vari' style='vertical-align:top'>$rekrow[0]</td>";
+					echo "<td class='$vari' style='text-align:right; vertical-align:top'>$rekrow[0]</td>";
 
 					$worksheet->writeNumber($excelrivi, $excelsarake, $rekrow[0]);
 					$excelsarake++;
@@ -445,9 +464,13 @@
 					$excelsarake++;
 				}
 
+				// N‰ytet‰‰n ostoehdotus sarakkeessa kyll‰ / ei
+				$ostoehdotus = ($tuoterow['ostoehdotus'] == 'E') ? t("Ei") : t("Kyll‰");
+
 				echo "<td class='$vari' style='vertical-align:top'>$tuoterow[tahtituote]</td>";
 				echo "<td class='$vari' style='vertical-align:top'>$tuoterow[hinnastoon]</td>";
 				echo "<td class='$vari' style='vertical-align:top'>$tuoterow[status]</td>";
+				echo "<td class='$vari' style='vertical-align:top'>$ostoehdotus</td>";
 				echo "<td class='$vari' style='vertical-align:top'>$tuoterow[toimittaja]";
 
 				if ($tuoterow["toim_tuoteno"]) {
@@ -462,6 +485,8 @@
 				$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["hinnastoon"]);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["status"]);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, $ostoehdotus);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["toimittaja"]);
 				$excelsarake++;

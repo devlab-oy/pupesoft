@@ -1717,7 +1717,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 			if (mysql_num_rows($vresult) > 0) {
 				echo "<select name='ikustp[$i]'>";
-				echo "<option value =' '>".t("Ei kustannuspaikkaa")."";
+				echo "<option value =' '>".t("Ei kustannuspaikkaa");
 
 				while ($vrow = mysql_fetch_assoc($vresult)) {
 					$sel = "";
@@ -1741,7 +1741,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 			if (mysql_num_rows($vresult) > 0) {
 				echo "<select name='ikohde[$i]'>";
-				echo "<option value =' '>".t("Ei kohdetta")."";
+				echo "<option value =' '>".t("Ei kohdetta");
 
 				while ($vrow = mysql_fetch_assoc($vresult)) {
 					$sel = "";
@@ -1765,7 +1765,7 @@ if ($tee == 'P' or $tee == 'E') {
 			if (mysql_num_rows($vresult) > 0) {
 
 				echo "<select name='iprojekti[$i]'>";
-				echo "<option value =' '>".t("Ei projektia")."";
+				echo "<option value =' '>".t("Ei projektia");
 
 				while ($vrow = mysql_fetch_assoc($vresult)) {
 					$sel = "";

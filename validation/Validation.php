@@ -19,8 +19,10 @@
  */
 class FormValidator {
 
+	//^[0-9]{1,2}[-/.][0-9]{1,2}[-/.][0-9]{4}|^[0-9]{4}[-/.][0-9]{1,2}[-/.][0-9]{1,2}
+	//^[0-9]{1,2}[-/.][0-9]{1,2}[-/.][0-9]{4}
 	public static $regexes = array(
-		'paiva'			 => "^[0-9]{1,2}[-/.][0-9]{1,2}[-/.][0-9]{4}",
+		'paiva'			 => "^[0-9]{1,2}[-/.][0-9]{1,2}[-/.][0-9]{4}|^[0-9]{4}[-/.][0-9]{1,2}[-/.][0-9]{1,2}",
 		'summa'			 => "^[-]?[0-9]+\$",
 		'numero'		 => "^[-]?[0-9,]+\$",
 		'kirjain_numero' => "^[0-9a-zA-Z ,.-_\\s\?\!]+\$",
@@ -67,7 +69,7 @@ class FormValidator {
 		$havefailures = false;
 		foreach ($items as $key => $val) {
 			if (!is_array($val)) {
-				if ((strlen($val) == 0 || array_search($key, $this->validations) === false) && array_search($key, $this->mandatories) === false) {
+				if ((strlen($val) == 0 || array_key_exists($key, $this->validations) === false) && array_key_exists($key, $this->mandatories) === false) {
 					$this->corrects[] = $key;
 					continue;
 				}
@@ -207,16 +209,27 @@ class FormValidator {
 
 		switch ($type) {
 			case 'paiva':
-				//for now this function can only validate dates in dd.-/mm.-/YYYY format
-				//regexp allows user to give days in mm.-/dd.-/YYYY format
-				if ($date_array = explode('.', $var)) {
-					$is_ok = checkdate($date_array[1], $date_array[0], $date_array[2]);
+				if (strpos($var, '.')) {
+					$delimiter = '.';
 				}
-				elseif ($date_array = explode('-', $var)) {
-					$is_ok = checkdate($date_array[1], $date_array[0], $date_array[2]);
+				elseif (strpos($var, '-')) {
+					$delimiter = '-';
+				}
+				elseif (strpos($var, '/')) {
+					$delimiter = '/';
 				}
 				else {
-					$date_array = explode('/', $var);
+					return false;
+				}
+
+				$date_array = explode($delimiter, $var);
+
+				if (strlen($date_array[0]) > 2) {
+					//YYYY-mm-dd
+					$is_ok = checkdate($date_array[1], $date_array[2], $date_array[0]);
+				}
+				else {
+					//dd-mm-YYYY or mm-dd-YYYY
 					$is_ok = checkdate($date_array[1], $date_array[0], $date_array[2]);
 				}
 				break;

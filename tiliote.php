@@ -462,6 +462,13 @@
 
 			$tilioterivilaskuri = 1;
 			$tilioterivimaara	= mysql_num_rows($tiliotedataresult);
+			
+			
+			// Haetaan kannan isoin lasku.tunnus, nin voidaan tehdän sanity-checki EndToEndId:lle.
+			$query = "	SELECT max(tunnus) maxEndToEndId
+						FROM lasku";
+			$meteidres = pupe_query($query);
+			$meteidrow = mysql_fetch_assoc($meteidres);
 
 			while ($tiliotedatarow = mysql_fetch_assoc($tiliotedataresult)) {
 				$tietue = $tiliotedatarow['tieto'];
@@ -487,8 +494,8 @@
 
 			if ($xtyyppi == 1) {
 				$tkesken = 0;
-				$maara = $vastavienti;
-				$kohdm = $vastavienti_valuutassa;
+				$maara   = $vastavienti;
+				$kohdm   = $vastavienti_valuutassa;
 
 				echo "<tr><td colspan = '6'>";
 				require("inc/teeselvittely.inc");
@@ -498,8 +505,8 @@
 
 			if ($xtyyppi == 2) {
 				$tkesken = 0;
-				$maara = $vastavienti;
-				$kohdm = $vastavienti_valuutassa;
+				$maara   = $vastavienti;
+				$kohdm   = $vastavienti_valuutassa;
 
 				require("inc/teeselvittely.inc");
 				echo "</table><br>\n<br>\n";

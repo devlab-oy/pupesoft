@@ -114,9 +114,11 @@
 		foreach ($xml->InvoiceDetail as $riveilta) {
 			$rivi[] = $riveilta->OrderRef->BuyerOrderNumber;
 		}
-		$rivi = array_unique($rivi); // otetaan uniikit
-		$rivi = array_values($rivi); // poistetaan turhat välit
-		$laskun_tilausviite = implode(",",$rivi);
+		if (is_array($rivi)) {
+			$rivi = array_unique($rivi); // otetaan uniikit
+			$rivi = array_values($rivi); // poistetaan turhat välit
+			$laskun_tilausviite = implode(",",$rivi);
+		}
 	}
 
 	$onko_hyvityslasku_kerroin = 1;
@@ -306,7 +308,13 @@
 							$charge_code = strtolower(trim($node_x->AllowOrChargeCode));
 
 							if ($charge_code == "zcwr" or $charge_code == 'zfwa' or strpos($charge_description, "core value") !== FALSE  or strpos($charge_description, "at.wert (rechnung)") !== FALSE) {
-								$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node_x->Amount);
+
+								if (strpos($charge_description, "core value") !== FALSE) {
+									$rtuoteno[$i]['rivihinta'] -= ((float) str_replace(",", ".", $node_x->Amount) * $rtuoteno[$i]["kpl"]);
+								}
+								else {
+									$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node_x->Amount);
+								}
 							}
 						}
 					}

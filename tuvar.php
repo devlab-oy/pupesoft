@@ -617,7 +617,7 @@
 			echo "<th>".t("K‰ytt‰j‰@Pvm")."</th>";
 			echo "<th>".t("Tyyppi")."</th>";
 			echo "<th>".t("M‰‰r‰")."</th>";
-			echo "<th>".t("Selite")."";
+			echo "<th>".t("Selite");
 
 			echo "</th></form>";
 			echo "</tr>";

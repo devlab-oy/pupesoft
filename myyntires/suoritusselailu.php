@@ -429,7 +429,7 @@
 		echo "<th valign='top'>".t("avoimia")."<br>".t("laskuja")."</th>";
 		echo "<th valign='top'>".t("saamisettili")."</th>";
 		echo "<td class='back'><input type='submit' value = '".t("Etsi")."'>";
-		echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='checkbox' name='poisetsi' $petsichk> ".t("Etsi myös poistettuja asiakkaita")."";
+		echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='checkbox' name='poisetsi' $petsichk> ".t("Etsi myös poistettuja asiakkaita");
 		echo "</td>";
 		echo "</tr>";
 

@@ -28,14 +28,14 @@
 
 		if (mysql_num_rows($tresult) >  100) {
 			$kentta='tuoteno';
-			$varaosavirhe = "".t("VIRHE: Hakuehdolla löytyi liikaa tuotteita!")."";
+			$varaosavirhe = t("VIRHE: Hakuehdolla löytyi liikaa tuotteita!");
 			$tuoteno='';
 			$tee = 'Y';
 		}
 		else {
 			if (mysql_num_rows($tresult) == 0) {
 				$kentta='tuoteno';
-				$varaosavirhe = "".t("VIRHE: Hakuehdolla ei löytynyt yhtään tuotetta")."!";
+				$varaosavirhe = t("VIRHE: Hakuehdolla ei löytynyt yhtään tuotetta")."!";
 				$tuoteno='';
 				$tee = 'Y';
 			}
@@ -62,14 +62,14 @@
 
 		if (mysql_num_rows($tresult) >  100) {
 			$kentta='tuoteno';
-			$varaosavirhe = "".t("VIRHE: Hakuehdolla löytyi liikaa tuotteita")."!";
+			$varaosavirhe = t("VIRHE: Hakuehdolla löytyi liikaa tuotteita")."!";
 			$tuoteno='';
 			$tee = 'Y';
 		}
 		else {
 			if (mysql_num_rows($tresult) == 0) {
 				$kentta='tuoteno';
-				$varaosavirhe = "".t("VIRHE: Hakuehdolla ei löytynyt yhtään tuotetta")."!";
+				$varaosavirhe = t("VIRHE: Hakuehdolla ei löytynyt yhtään tuotetta")."!";
 				$tuoteno='';
 				$tee = 'Y';
 			}
@@ -97,14 +97,14 @@
 
 				if (mysql_num_rows($tresult) > 1) {
 					$kentta='tuoteno';
-					$varaosavirhe = "".t("Useita tuotteita samalla Toimittajan tuotenumerolla")."!<br>";
+					$varaosavirhe = t("Useita tuotteita samalla Toimittajan tuotenumerolla")."!<br>";
 					$tuoteno='';
 					$tee = 'Y';
 				}
 				else {
 					if (mysql_num_rows($tresult) == 0) {
 						$kentta='tuoteno';
-						$varaosavirhe = "".t("VIRHE: Hakuehdolla ei löytynyt yhtään tuotetta")."!";
+						$varaosavirhe = t("VIRHE: Hakuehdolla ei löytynyt yhtään tuotetta")."!";
 						$tuoteno='';
 						$tee = 'Y';
 					}
@@ -123,7 +123,7 @@
 
 			if (mysql_num_rows($result) == 0) {
 				$kentta = 'tuoteno';
-				$varaosavirhe .= "".t("VIRHE: Tuotenumeroa")." $tuoteno ".t("ei löydy järjestelmästä")."!<br>";
+				$varaosavirhe .= t("VIRHE: Tuotenumeroa")." $tuoteno ".t("ei löydy järjestelmästä")."!<br>";
 				$tuoteno = '';
 				$tee = "Y";
 			}
@@ -135,7 +135,7 @@
 			if ($atil == 0) {
 				if ($kentta == '') $kentta = 'atil'; // Kursori
 
-				$varaosavirhe .= "".t("VIRHE: Syötä tilattava määrä")."!<br>";
+				$varaosavirhe .= t("VIRHE: Syötä tilattava määrä")."!<br>";
 				$tee = "Y";
 			}
 	}

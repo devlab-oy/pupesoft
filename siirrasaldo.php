@@ -96,7 +96,7 @@
 				$maara	 = $rivi[1];
 
 				if ($tuoteno == '') {
-					echo "".t("Tuotenumero puuttui")."!<br>";
+					echo t("Tuotenumero puuttui")."!<br>";
 					$virhe++;
 				}
 				else {

@@ -100,7 +100,7 @@
 		// Jaaha p‰ivit‰mme maksutilin!
 		if ($tila == 'T') {
 
-			$kommentti = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ". sprintf(t('Laskun maksutili muutettiin. Vanha oli %s.'), tilinumero_print($trow['tilinumero'])." ".$ultilno) ."<br>" . $trow['comments'];
+			$kommentti = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ". sprintf(t('Laskun maksutili muutettiin. Vanha oli %s.'), tilinumero_print($trow['tilinumero'])." ".$ultilno) ."<br>" . $trow['comments'];
 
 			//P‰ivitet‰‰n lasku
 			$query = "	UPDATE lasku
@@ -114,6 +114,7 @@
 
 			$tee = 'M';
 			$tila = 'nollaahyvak';
+			$nollaahyvak = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyv‰ksynt‰‰n koska laskun maksutili muutettiin.")."<br>";
 		}
 
 		// Laskun maksutilintarkastus (ulkomaat)
@@ -166,7 +167,7 @@
 
 			$trow = mysql_fetch_assoc($result);
 
-			$kommentti = "($kukarow[kuka]@".date('Y-m-d').") ".t("Laskun maksutili muutettiin. Vanha oli").": $trow[pankki_haltija], $trow[ultilno], $trow[swift], $trow[pankki1], $trow[pankki2], $trow[pankki3], $trow[pankki4], $trow[sisviesti1].<br>$trow[comments]";
+			$kommentti = "($kukarow[nimi]@".date('Y-m-d').") ".t("Laskun maksutili muutettiin. Vanha oli").": $trow[pankki_haltija], $trow[ultilno], $trow[swift], $trow[pankki1], $trow[pankki2], $trow[pankki3], $trow[pankki4], $trow[sisviesti1].<br>$trow[comments]";
 
 			//P‰ivitet‰‰n lasku
 			$query = "UPDATE lasku SET
@@ -185,6 +186,7 @@
 
 			$tee  = 'M';
 			$tila = 'nollaahyvak';
+			$nollaahyvak = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyv‰ksynt‰‰n koska laskun maksutili muutettiin.")."<br>";
 		}
 
 		// Jaaha tarkastamme viestin!
@@ -1031,15 +1033,15 @@
 				exit;
 			}
 
-			$trow=mysql_fetch_assoc($result);
+			$trow = mysql_fetch_assoc($result);
 
 			if ($komm != '') {
-				$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") " . trim($komm) . "<br>" . $trow['comments'];
+				$komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") " . trim($komm) . "<br>" . $trow['comments'];
 				$query = "UPDATE lasku set comments = '$komm' WHERE tunnus='$tunnus'";
 				$result = pupe_query($query);
 			}
 
-			$tee = 'E';
+			$tee  = 'E';
 			$tila = 'X';
 	}
 
@@ -1151,16 +1153,22 @@
 	}
 
 	if ($tila == 'nollaahyvak') {
+
+		if (!isset($nollaahyvak) or $nollaahyvak == "") {
+			$nollaahyvak = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Palautti laskun hyv‰ksynt‰‰n")."<br>";
+		}
+
 		$query = "	UPDATE lasku SET
-					tila = 'H',
+					tila 		  = 'H',
 					hyvaksyja_nyt = hyvak1,
-					h1time = '',
-					h2time = '',
-					h3time = '',
-					h4time = '',
-					h5time = ''
+					h1time		  = '',
+					h2time 		  = '',
+					h3time 		  = '',
+					h4time 		  = '',
+					h5time 		  = '',
+					comments	  = trim(concat('$nollaahyvak', comments))
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus = '$tunnus'";
+					AND tunnus  = '$tunnus'";
 		$result = pupe_query($query);
 
 		// haetaan laskun tiedot uudestaan
@@ -1176,7 +1184,7 @@
 		}
 
 		$trow = mysql_fetch_assoc($result);
-		$tee = 'E';
+		$tee  = 'E';
 		$tila = 'X';
 	}
 

@@ -95,6 +95,9 @@
 							case 'varattu':
 								$values .= ", '$erotus'";
 								break;
+							case 'kate_korjattu':
+								$values .= ", NULL";
+								break;
 							default:
 								$values .= ", '".$qrow[$i]."'";
 						}

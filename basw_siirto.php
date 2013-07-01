@@ -137,7 +137,7 @@
 				ORDER BY tilikausi_alku DESC";
 	$vresult = pupe_query($query);
 
-	echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
+	echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa");
 
 	while ($vrow=mysql_fetch_assoc($vresult)) {
 		$sel="";

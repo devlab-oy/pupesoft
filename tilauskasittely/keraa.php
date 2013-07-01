@@ -948,6 +948,9 @@
 												case 'tila':
 													$values .= ", 'N'";
 													break;
+												case 'kate_korjattu':
+													$values .= ", NULL";
+													break;
 												default:
 													$values .= ", '".$laskusplitrow[$fieldname]."'";
 											}
@@ -1958,10 +1961,12 @@
 			$formi	= "find";
 			$kentta	= "etsi";
 
-			echo "<table>";
+			echo "<span id='hakutable'>";
 			echo "<form name='find' method='post'>";
 			echo "<input type='hidden' name='toim' value='{$toim}'>";
 			echo "<input type='hidden' id='jarj' name='jarj' value='{$jarj}'>";
+
+			echo "<table>";
 			echo "<tr><th>",t("Valitse varasto"),":</th><td><select name='tuvarasto' onchange='submit()'>";
 
 			$query = "	SELECT yhtio, tunnus, nimitys
@@ -2053,8 +2058,10 @@
 			echo "</select></td>";
 
 			echo "<th>",t("Etsi tilausta"),":</th><td><input type='text' name='etsi'>";
-			echo "<input type='submit' value='",t("Etsi"),"'></form></td></tr>";
+			echo "<input type='submit' value='",t("Etsi"),"'></td></tr>";
 			echo "</table>";
+			echo "</form>";
+			echo "</span>";
 
 			$haku = '';
 			$kerayserahaku = '';
@@ -2202,12 +2209,17 @@
 			//jos haetaan numerolla ja lˆydet‰‰n yksi osuma, siirryt‰‰n suoraan ker‰‰m‰‰n
 			if (mysql_num_rows($result) == 1 AND is_numeric($etsi) and $etsi != '') {
 				$row = mysql_fetch_assoc($result);
+
 				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 					$id = $row["keraysera"];
 				}
 				else {
 					$id = $row["tunnus"];
 				}
+
+				echo "	<script language='javascript'>
+						$('#hakutable').hide();
+					</script> ";
 			}
 			else if (mysql_num_rows($result) > 0) {
 				//piirret‰‰n taulukko...
@@ -2871,24 +2883,37 @@
 								echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($row["puhdas_tuoteno"])."&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id#".urlencode($sarjarow["sarjanumero"])."'>".t("S:nro")."</a>)";
 							}
 						}
-						elseif ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") {
+						elseif (in_array($row["sarjanumeroseuranta"], array("E","F","G"))) {
 
 							if ($row["sarjanumeroseuranta"] == "F") {
 								$pepvmlisa1 = " sarjanumeroseuranta.parasta_ennen, ";
-								$pepvmlisa2 = ", 17";
+								$pepvmlisa2 = ", 18";
 							}
 							else {
 								$pepvmlisa1 = "";
 								$pepvmlisa2 = "";
 							}
 
-							$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
-										tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+							$query = "	SELECT
 										sarjanumeroseuranta.sarjanumero era,
-										sarjanumeroseuranta.ostorivitunnus,
-										$pepvmlisa1
+										tuote.ei_saldoa,
+										tuote.tuoteno,
+										tuote.vakkoodi,
+										tuote.yhtio,
+										tuotepaikat.hyllyalue,
+										tuotepaikat.hyllynro,
+										tuotepaikat.hyllytaso,
+										tuotepaikat.hyllyvali,
+										tuotepaikat.oletus,
+										varastopaikat.erikoistoimitus_alarajasumma,
+										varastopaikat.maa varastomaa,
+										varastopaikat.nimitys,
+										varastopaikat.tunnus varasto,
+										varastopaikat.tyyppi varastotyyppi,
 										concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
-										varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
+										if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+										$pepvmlisa1
+										group_concat(sarjanumeroseuranta.ostorivitunnus) ostorivitunnus
 							 			FROM tuote
 										JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 										JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -2904,7 +2929,7 @@
 										and sarjanumeroseuranta.era_kpl != 0
 										WHERE tuote.yhtio = '$kukarow[yhtio]'
 										and tuote.tuoteno = '$row[puhdas_tuoteno]'
-										GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 $pepvmlisa2
+										GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 $pepvmlisa2
 										ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 							$omavarastores = pupe_query($query);
 
@@ -2938,15 +2963,18 @@
 									list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["puhdas_tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 
 									$myytavissa = (float) $myytavissa;
+									$lisa_row   = array();
 
-									//Jos er‰ on keksitty k‰sin t‰‰lt‰ ker‰yksest‰
-									$query = "	SELECT tyyppi, (varattu+kpl+jt) kpl, tunnus, laskutettu
-												FROM tilausrivi
-												WHERE yhtio = '$kukarow[yhtio]'
-												and tuoteno = '$row[puhdas_tuoteno]'
-												and tunnus	= '$alkurow[ostorivitunnus]'";
-									$lisa_res = pupe_query($query);
-									$lisa_row = mysql_fetch_assoc($lisa_res);
+									if ($alkurow["ostorivitunnus"] != "" and in_array($row["sarjanumeroseuranta"], array("E","F","G"))) {
+										//Jos er‰ on keksitty k‰sin t‰‰lt‰ ker‰yksest‰
+										$query = "	SELECT tyyppi, (varattu+kpl+jt) kpl, tunnus, laskutettu
+													FROM tilausrivi
+													WHERE yhtio = '$kukarow[yhtio]'
+													and tuoteno = '$row[puhdas_tuoteno]'
+													and tunnus in ($alkurow[ostorivitunnus])";
+										$lisa_res = pupe_query($query);
+										$lisa_row = mysql_fetch_assoc($lisa_res);
+									}
 
 									// varmistetaan, ett‰ t‰m‰ er‰ on k‰ytett‰viss‰, eli ostorivitunnus pointtaa ostoriviin, hyvitysriviin tai laskutettuun myyntiriviin tai t‰h‰n riviin itsess‰‰n
 									if (($lisa_row["tyyppi"] == "O" or $lisa_row["kpl"] < 0 or $lisa_row["laskutettu"] != "" or $lisa_row["tunnus"] == $row["tunnus"]) and

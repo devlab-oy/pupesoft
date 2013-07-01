@@ -2671,6 +2671,7 @@ if (!function_exists("jalkilaskentafunktio")) {
 
 		// Taulut lukkoon.
 		$qu = "	LOCK TABLE asiakas READ,
+				avainsana READ,
 				lasku WRITE,
 				sarjanumeroseuranta READ,
 				sarjanumeroseuranta_arvomuutos READ,

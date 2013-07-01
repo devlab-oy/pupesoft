@@ -981,12 +981,28 @@ if ($tuoteno != '') {
 									// Tehdään muutoksia vaan jos summa muuttuu
 									if ($inventoinnin_varastonmuutos != 0) {
 
+										// Haetaan kaikki yhtiön mahdolliset varastotilit
+										$query = "	SELECT ifnull(group_concat(DISTINCT concat('\'', avainsana.selitetark_2, '\'') SEPARATOR ', '), '') tilit
+													FROM avainsana
+													JOIN tili ON (tili.yhtio = avainsana.yhtio AND tili.tilino = avainsana.selitetark_2)
+													WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+													AND avainsana.laji = 'INVEN_LAJI'
+													AND avainsana.selitetark_2 != ''";
+										$invupd = pupe_query($query);
+										$inv_varasto_tilit = mysql_fetch_assoc($invupd);
+
+										$varasto_tilit = "'{$yhtiorow['varasto']}', '{$yhtiorow['varastonmuutos']}', '{$yhtiorow['varastonmuutos_inventointi']}'";
+
+										if ($inv_varasto_tilit['tilit'] != '') {
+											$varasto_tilit .= ", {$inv_varasto_tilit['tilit']}";
+										}
+
 										// Katsotaan onko tositteella muita kun varastokirjauksia
 										$query = "	SELECT count(*) luku
 													FROM tiliointi
 													WHERE yhtio  = '{$kukarow['yhtio']}'
 													AND ltunnus  = '{$invrow['ltunnus']}'
-													AND tilino NOT IN ('{$yhtiorow['varasto']}', '{$yhtiorow['varastonmuutos']}', '{$yhtiorow['varastonmuutos_inventointi']}')
+													AND tilino NOT IN ($varasto_tilit)
 													AND korjattu = ''";
 										$invupd = pupe_query($query);
 										$invcount = mysql_fetch_assoc($invupd);

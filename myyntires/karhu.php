@@ -23,13 +23,8 @@ if (!isset($karhu_kertaa_myyntikielto)) {
 	$karhu_kertaa_myyntikielto = 2;
 }
 
-if ($kukarow["kirjoitin"] == 0) {
-	echo "<font class='error'>".t("Sinulla pitää olla henkilökohtainen tulostin valittuna, että voit tulostaa karhuja").".</font><br>";
-	$tee = "";
-}
-
 // jos jollain laskulla on kolmas tai useampi karhukierros menossa, asetetaan asiakas myyntikieltoon
-$ehdota_maksukielto=0;
+$ehdota_maksukielto = 0;
 
 $query = "SELECT tunnus from avainsana where laji = 'KARHUVIESTI' and yhtio ='$yhtiorow[yhtio]'";
 $res = pupe_query($query);
@@ -268,7 +263,8 @@ if ($tee == 'KARHUA')  {
 				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_nimitark, nimitark) nimitark,
 				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_osoite, osoite) osoite,
 				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_postino, postino) postino,
-				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_postitp, postitp) postitp
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_postitp, postitp) postitp,
+				IF(lasku_email != '', lasku_email, email) karhu_email
 				FROM asiakas
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus  = '$asiakastiedot[liitostunnus]'";
@@ -367,7 +363,7 @@ if ($tee == 'KARHUA')  {
 	echo "<table>";
 	echo "<tr><th>".t("Edellinen karhu väh").".</th><td>$kpvm_aikaa ".t("päivää sitten").".</td></tr>";
 	echo "<tr><th>".t("Eräpäivästä väh").".</th><td>$lpvm_aikaa ".t("päivää").".</td></tr>";
-	echo "<tr><td class='back'></td><td class='back'><br></td></tr>";
+	echo "<tr><th>".t("Sähköposti")."</th><td>$asiakastiedot[karhu_email]</td></tr>";
 	echo "<tr><td class='back'></td><td class='back'><br></td></tr>";
 
 	$query = "	SELECT GROUP_CONCAT(distinct liitostunnus) liitokset
@@ -397,6 +393,10 @@ if ($tee == 'KARHUA')  {
 	echo "<table>";
 	echo "<tr>";
 	echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t('Tulosta paperille')."'></td>";
+
+	if ($asiakastiedot["karhu_email"] != "") {
+		echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.email_laheta.click();' value='".t('Lähetä sähköposti')."'></td>";
+	}
 
 	if (isset($ekirje_config) and is_array($ekirje_config)) {
 		echo "<td class='back'><input type='button' onclick='document.lahetaformi.ekirje_laheta.click();' value='".t('Lähetä eKirje')."'></td>";
@@ -500,13 +500,19 @@ if ($tee == 'KARHUA')  {
 	echo "<input name='karhut_samalle_laskulle' type='hidden' value='".count($valuutat)."'>";
 	echo "<input name='tee' type='hidden' value='LAHETA'>";
 	echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
+	echo "<input name='kirjoitin' type='hidden' value='$kirjoitin'>";
 	echo "<input name='ktunnus' type='hidden' value='$ktunnus'>";
+	echo "<input name='karhu_email' type='hidden' value='{$asiakastiedot["karhu_email"]}'>";
 
-	foreach($karhuttavat as $tunnukset) {
+	foreach ($karhuttavat as $tunnukset) {
 		echo "\n<input type='hidden' name='karhuttavat[]' value='$tunnukset'>";
 	}
 
 	echo "<td class='back'><input name='$kentta' type='submit' value='".t('Tulosta paperille')."'>";
+
+	if ($asiakastiedot["karhu_email"] != "") {
+		echo "<input type='submit' name='email_laheta' value='".t('Lähetä sähköposti')."'>";
+	}
 
 	// voiko lähettää eKirjeen?
 	if (isset($ekirje_config) and is_array($ekirje_config)) {
@@ -522,6 +528,7 @@ if ($tee == 'KARHUA')  {
 	echo "<form name='ohitaformi' method='post'>";
 	echo "<input type='hidden' name='tee' value='KARHUA'>";
 	echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
+	echo "<input name='kirjoitin' type='hidden' value='$kirjoitin'>";
 	echo "<input name='ktunnus' type='hidden' value='$ktunnus'>";
 
 	foreach($karhuttavat as $tunnukset) {
@@ -550,7 +557,7 @@ if ($tee == "") {
 
 	if (mysql_num_rows($meapu) > 0) {
 
-		echo "<tr><th>".t("Karhujen tyyppi").":</th>";
+		echo "<tr><th>".t("Karhujen tyyppi")."</th>";
 		echo "<td><select name='ktunnus'>";
 		echo "<option value='0'>".t("Ei factoroidut")."</option>";
 
@@ -564,7 +571,7 @@ if ($tee == "") {
 		echo "<input type='hidden' name='ktunnus' value='0'>";
 	}
 
-	echo "<tr><th>".t("Karhua vain laskuja maahan").": </th>";
+	echo "<tr><th>".t("Karhua vain laskuja maahan")."</th>";
 	echo "<td><select name='lasku_maa'>";
 	echo "<option value=''>".t("Ei maavalintaa")."</option>";
 
@@ -576,7 +583,7 @@ if ($tee == "") {
 
 	while ($row = mysql_fetch_assoc($meapu)) {
 		$sel = '';
-		if ($row["koodi"] == $lasku_maa) {
+		if (isset($lasku_maa) and $row["koodi"] == $lasku_maa) {
 			$sel = 'selected';
 		}
 		echo "<option value='$row[koodi]' $sel>$row[nimi]</option>";
@@ -594,7 +601,7 @@ if ($tee == "") {
 				order by nimi";
 	$meapu = pupe_query($apuqu);
 
-	echo "<tr><th>".t("Yhteyshenkilö").":</th>";
+	echo "<tr><th>".t("Yhteyshenkilö")."</th>";
 	echo "<td><select name='yhteyshenkilo'>";
 
 	while ($row = mysql_fetch_assoc($meapu)) {
@@ -609,8 +616,24 @@ if ($tee == "") {
 
 	echo "</select></td></tr>";
 
+	echo "<tr><th>",t("Valitse tulostin"),"</th><td><select name='kirjoitin'>";
 
-	echo "<tr><th>".t("Ytunnus").":</th>";
+	$query = "	SELECT *
+				FROM kirjoittimet
+				WHERE yhtio  = '{$kukarow['yhtio']}'
+				AND komento != 'edi'
+				ORDER BY kirjoitin";
+	$kires = mysql_query($query) or pupe_error($query);
+
+	while ($kirow = mysql_fetch_assoc($kires)) {
+		if ($kirow['tunnus'] == $kukarow["kirjoitin"]) $select = ' selected';
+		else $select = '';
+		echo "<option value='{$kirow['tunnus']}'{$select}>{$kirow['kirjoitin']}</option>";
+	}
+
+	echo "</select></td></tr>";
+
+	echo "<tr><th>".t("Ytunnus")."</th>";
 	echo "<td>";
 	echo "<input name='ytunnus_spec' type='text' value=''></td></tr>";
 	echo "<tr><th>" . t('Aloita ytunnuksesta') . "</th><td><input type='text' name='syot_ytunnus' value='$syot_ytunnus'></td></tr>";
@@ -620,5 +643,3 @@ if ($tee == "") {
 }
 
 require ("inc/footer.inc");
-
-?>

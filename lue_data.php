@@ -193,6 +193,8 @@ elseif (isset($api_kentat) and count($api_kentat) > 0) {
 
 if ($kasitellaan_tiedosto) {
 
+	$lue_data_autoid = file_exists("lue_data_autoid.php");
+
 	/** Käsiteltävän filen nimi **/
 	$kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
 
@@ -646,6 +648,8 @@ if ($kasitellaan_tiedosto) {
 			$bar->initialize($rivimaara);
 		}
 
+		$lisatyt_indeksit = array();
+
 		for ($eriviindex = 0; $eriviindex < ($rivimaara + $puun_alkio_index_plus); $eriviindex++) {
 
 			// Komentorivillä piirretään progressbar, ellei ole output loggaus päällä
@@ -741,6 +745,10 @@ if ($kasitellaan_tiedosto) {
 					$tuoteno = $taulunrivit[$taulu][$eriviindex][$j];
 
 					$valinta .= " and TUOTENO='$tuoteno'";
+				}
+				elseif ($table_mysql == 'autoid_lisatieto' and $lue_data_autoid and ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA" or $taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA") AND !in_array($eriviindex, $lisatyt_indeksit)) {
+					$tee = "pre_rivi_loop";
+					require("lue_data_autoid.php");
 				}
 				elseif ($taulunotsikot[$taulu][$j] == "TOIM_TUOTENO") {
 					$toim_tuoteno = $taulunrivit[$taulu][$eriviindex][$j];
@@ -1459,6 +1467,11 @@ if ($kasitellaan_tiedosto) {
 								$toimi_liitostunnus = $tpttrow["tunnus"];
 								$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 							}
+						}
+
+						if ($lue_data_autoid) {
+							$tee = "rivi_loop";
+							require("lue_data_autoid.php");
 						}
 
 						//tarkistetaan asiakasalennus ja asiakashinta juttuja
@@ -2208,6 +2221,10 @@ if (!$cli and !isset($api_kentat)) {
 		$taulut['yhteensopivuus_valmistenumero']   = 'Yhteensopivuus valmistenumero';
 	}
 
+	if (table_exists('td_pc') and table_exists('autoid_lisatieto') and file_exists("lue_data_autoid.php")) {
+		$taulut['autoid_lisatieto'] = 'Autoid-lisatieto';
+	}
+
 	// Taulut aakkosjärjestykseen
 	asort($taulut);
 
@@ -2229,6 +2246,15 @@ if (!$cli and !isset($api_kentat)) {
 	echo "</select>";
 	echo "</td>";
 	echo "</tr>";
+
+	if ($table == 'autoid_lisatieto') {
+		echo "<tr><th>",t("Valitse liitos"),":</th>
+					<td><select name='autoid_liitos'>
+					<option value=''>",t("Autoid"),"</option>
+					<option value='malli'>",t("Mallinumero"),"</option>
+					</select></td>
+			</tr>";
+	}
 
 	if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri"))) {
 		echo "<tr><th>".t("Ytunnus-tarkkuus").":</th>

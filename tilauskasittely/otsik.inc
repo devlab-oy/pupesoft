@@ -86,7 +86,8 @@
 					chn					= '',
 					verkkotunnus		= '',
 					toimitustapa		= '',
-					toimitustavan_lahto = ''
+					toimitustavan_lahto = '',
+					tilausyhteyshenkilo = ''
 					WHERE yhtio 		= '$kukarow[yhtio]'
 					and tunnus	 		= '$kukarow[kesken]'";
 		$result = pupe_query($query);
@@ -405,6 +406,29 @@
 		unset($jatka);
 	}
 
+	if (isset($jatka) and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A")) {
+		//k‰yd‰‰n avainsanoista kaikki mahdolliset dynaamiset kent‰t l‰pi ja tarkastetaan onko ne pakollisia (selitetark_4)
+		$dynaamiset_tyomaarays_kentat_result = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selite != ''");
+		while($dynaamiset_tyomaarays_kentat_row = mysql_fetch_assoc($dynaamiset_tyomaarays_kentat_result)) {
+			if ($dynaamiset_tyomaarays_kentat_row['selitetark_2'] == 'DATE') {
+				if (isset(${$dynaamiset_tyomaarays_kentat_row['selite'].'pp'}) and $dynaamiset_tyomaarays_kentat_row['selitetark_4'] != '') {
+					if (${$dynaamiset_tyomaarays_kentat_row['selite'].'pp'} == '' or ${$dynaamiset_tyomaarays_kentat_row['selite'].'kk'} == '' or ${$dynaamiset_tyomaarays_kentat_row['selite'].'vv'} == '') {
+						echo "<font class='error'>".t("{$dynaamiset_tyomaarays_kentat_row['selitetark']} ei saa olla tyhj‰")."!</font><br/><br/>";
+						unset($jatka);
+					}
+				}
+			}
+			else {
+				if (isset(${$dynaamiset_tyomaarays_kentat_row['selite']}) and $dynaamiset_tyomaarays_kentat_row['selitetark_4'] != '') {
+					if (${$dynaamiset_tyomaarays_kentat_row['selite']} == '') {
+						echo "<font class='error'>".t("{$dynaamiset_tyomaarays_kentat_row['selitetark']} ei saa olla tyhj‰")."!</font><br/><br/>";
+						unset($jatka);
+					}
+				}
+			}
+		}
+	}
+
 	// tehd‰‰n oikeellisuus
 	if ($toim == "YLLAPITO") {
 
@@ -538,6 +562,19 @@
 				$assresult = pupe_query($squery);
 				$assrow = mysql_fetch_assoc($assresult);
 
+				$yhtquery = "	SELECT nimi
+								FROM yhteyshenkilo
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND liitostunnus = '$assrow[tunnus]'
+								AND tyyppi = 'A'
+								AND tilausyhteyshenkilo != ''
+								AND oletusyhteyshenkilo != ''
+								ORDER BY nimi
+								LIMIT 1";
+
+				$yhtresult = pupe_query($yhtquery);
+				$yhtnimi = mysql_fetch_assoc($yhtresult);
+
 				if (!checkdate($toimkk,$toimpp,$toimvv)) {
 					$toimpp = date("j");
 					$toimkk = date("n");
@@ -607,7 +644,8 @@
 							rahtivapaa			= '$assrow[rahtivapaa]',
 							toimaika 			= '$toimpvm',
 							kerayspvm			= '$kerpvm',
-							toimitusehto		= '$assrow[toimitusehto]'
+							toimitusehto		= '$assrow[toimitusehto]',
+							tilausyhteyshenkilo	= '$yhtnimi[nimi]'
 							WHERE yhtio 		= '$kukarow[yhtio]'
 							and tunnus	 		= '$kukarow[kesken]'
 							and liitostunnus	= 0";
@@ -710,7 +748,10 @@
 			if (isset($toim_asiakasid) and $toim_asiakasid != 0) {
 
 				$toim_asiakasid = mysql_real_escape_string($toim_asiakasid);
-				$toimasiakas_query = "SELECT * from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$toim_asiakasid'";
+				$toimasiakas_query = "	SELECT *
+										FROM asiakas
+										WHERE yhtio = '{$kukarow["yhtio"]}'
+										AND tunnus = '{$toim_asiakasid}'";
 				$toimasiakas_result = pupe_query($toimasiakas_query);
 				$toimasiakas_row = mysql_fetch_assoc($toimasiakas_result);
 
@@ -730,6 +771,8 @@
 					$srow["toim_postitp"]	= $toimasiakas_row["postitp"];
 					$srow["toim_maa"]		= $toimasiakas_row["maa"];
 				}
+
+				$srow["toimitustapa"] = $toimasiakas_row["toimitustapa"];
 
 				if ($tilausnumero == 0) {
 					echo "<font class='message'>".t("HUOM: Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisterist‰.")."</font><br>";
@@ -2158,6 +2201,34 @@
 			$vasen_sarake[$vasen] .= "</select></td>";
 			$vasen++;
 
+			$sel = array();
+			$sel[$srow['laskutyyppi']] = "selected";
+
+			$vasen_sarake[$vasen] = "<td>".t("Laskutyyppi").":</td>";
+			$vasen_sarake[$vasen] .= "<td><select name='laskutyyppi' style='max-width: 300px' >";
+
+			$vasen_sarake[$vasen] .= "<option value = '-9'>".t("Oletus")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '99' $sel[99]>".t("Normaali laskupohja")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '5'  $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1")."</option>";
+			#$vasen_sarake[$vasen] .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '13' $sel[13]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '14' $sel[14]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '15' $sel[15]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '16' $sel[16]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '17' {$sel[17]}>".t("Normaali laskupohja (lihavoidut ja kursivoidut tekstit)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '18' {$sel[18]}>".t("Normaali laskupohja (nimitykset rivitettyn‰)")."</option>";
+			$vasen_sarake[$vasen] .= "<option value = '19' {$sel[19]}>".t("Normaali laskupohja (Tuoteperheen hinnat is‰tuotteella, lapsituotteet n‰ytet‰‰n ilman hintoja)")."</option>";
+
+			$vasen_sarake[$vasen] .= "</select></td>";
+			$vasen++;
+
 			if ($yhtiorow['laskutuskielto'] != 0 and $toim != "MYYNTITILI") {
 				$oikea_sarake[$oikea] = "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
 				$oikea++;
@@ -2407,6 +2478,22 @@
 						}
 
 						echo "</select>";
+						echo "</td>";
+					}
+					elseif (strtoupper($al_row["selitetark_2"]) == "LIVESEARCH") {
+						$mika_livesearch = $al_row["selitetark_3"];
+						echo "<td>";
+						echo $al_row["selitetark"];
+						echo "</td>";
+						echo "<td>";
+						//jos requestista tulee arvo valitaan se, muuten valitaan laskulta lˆytyv‰ arvo
+						if (isset(${$al_row['selite']})) {
+							$livesearch_value = ${$al_row['selite']};
+						}
+						else {
+							$livesearch_value = $srow[$kentta];
+						}
+						echo livesearch_kentta("paaformi", $mika_livesearch, $al_row['selite'], 140, $livesearch_value, 'EISUBMIT', '', '', 'ei_break_all');
 						echo "</td>";
 					}
 					elseif ($kentta == "suorittaja") {
@@ -2675,10 +2762,10 @@
 
 			$yhteysquery = "SELECT *
 							FROM yhteyshenkilo
-							where yhtio = '$kukarow[yhtio]'
-							and liitostunnus = '$srow[liitostunnus]'
-							and tyyppi = 'A'
-							and tilausyhteyshenkilo != ''
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND liitostunnus = '$srow[liitostunnus]'
+							AND tyyppi = 'A'
+							AND tilausyhteyshenkilo != ''
 							ORDER BY nimi";
 			$yhteysresult = pupe_query($yhteysquery);
 
@@ -2806,28 +2893,9 @@
 
 					$paivitetaanko = TRUE;
 
-					// hinnat p‰ivitet‰‰n vain jos asiakkaalla on asiakashinta tai asiakasalennus
+					// hinnat p‰ivitet‰‰n vain jos asiakkaalla on asiakashinta tai asiakasalennus (saako_myyda_private_label palauttaa TRUE jos on asiakashinta tai alennus)
 					if ($yhtiorow["vaihda_asiakas_hintapaiv"] == "A") {
-
-						$haettavat_kentat = "hinta,hintaperuste,aleperuste";
-
-						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-							$haettavat_kentat .= ",ale{$alepostfix}";
-						}
-
-						$hinnat = alehinta($laskurow, $trow, $row['tilkpl'], '', '', '', $haettavat_kentat);
-
-						$onko_asiakkaalla_alennuksia = FALSE;
-
-						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
-								$onko_asiakkaalla_alennuksia = TRUE;
-								break;
-							}
-						}
-
-						// Jos tuote n‰ytet‰‰n vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei lˆydy
-						if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE) {
+						if (!saako_myyda_private_label($laskurow['liitostunnus'], $trow["tuoteno"], $row['tilkpl'])) {
 							$paivitetaanko = FALSE;
 						}
 					}
@@ -3316,6 +3384,7 @@
 					comments 							= '$comments',
 					eilahetetta 						= '$eilahe',
 					lahetetyyppi 						= '$lahetetyyppi',
+					laskutyyppi							= '{$laskutyyppi}',
 					erikoisale 							= '$erikoisale',
 					erpcm								= '$erpcmvv-$erpcmkk-$erpcmpp',
 					huolitsija 							= '$huolitsija',
@@ -3549,6 +3618,9 @@
 								case "toimaika";
 									$values .= ", '$toimvv-$toimkk-$toimpp'";
 									break;
+								case "kate_korjattu";
+									$values .= ", NULL";
+									break;
 								default;
 									$values .= ", '".$monistarow[$fieldname]."'";
 									break;
@@ -3765,5 +3837,9 @@
 
 		}
 	}
+
+	// Palutetaan puhtaat kukarow ja yhtiˆrow
+	$kukarow  = hae_kukarow($kukarow['kuka'], $kukarow['yhtio']);
+	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 	unset($alv);

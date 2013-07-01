@@ -82,7 +82,7 @@
 		}
 	}
 
-	if ($yhtiorow["korvaavat_hyvaksynta"] != "" and $alkupera_trow["tuoteno"] != $row["tuoteno"] and !in_array($row["var2"], array("OK", "PK")) and $korvattiin_korvaavalla == "HIIOHEI!") {
+	if (isset($alkupera_trow) and $yhtiorow["korvaavat_hyvaksynta"] != "" and $alkupera_trow["tuoteno"] != $row["tuoteno"] and !in_array($row["var2"], array("OK", "PK")) and $korvattiin_korvaavalla == "HIIOHEI!") {
 		$varaosavirhe .= t("HUOM: tämä on korvaava tuote, haluatko hyväksyä?")."<br>";
 		$riviok++;
 		$tilausok++;
@@ -446,20 +446,33 @@
 
 			if ($trow["sarjanumeroseuranta"] == "F") {
 				$pepvmlisa1 = " sarjanumeroseuranta.parasta_ennen, ";
-				$pepvmlisa2 = ", 17";
+				$pepvmlisa2 = ", 18";
 			}
 			else {
 				$pepvmlisa1 = "";
 				$pepvmlisa2 = "";
 			}
 
-			$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
-						tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+			$query = "	SELECT
 						sarjanumeroseuranta.sarjanumero era,
-						sarjanumeroseuranta.ostorivitunnus,
-						$pepvmlisa1
+						tuote.ei_saldoa,
+						tuote.tuoteno,
+						tuote.vakkoodi,
+						tuote.yhtio,
+						tuotepaikat.hyllyalue,
+						tuotepaikat.hyllynro,
+						tuotepaikat.hyllytaso,
+						tuotepaikat.hyllyvali,
+						tuotepaikat.oletus,
+						varastopaikat.erikoistoimitus_alarajasumma,
+						varastopaikat.maa varastomaa,
+						varastopaikat.nimitys,
+						varastopaikat.tunnus varasto,
+						varastopaikat.tyyppi varastotyyppi,
 						concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
-						varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, tuote.vakkoodi
+						if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+						$pepvmlisa1
+						group_concat(sarjanumeroseuranta.ostorivitunnus) ostorivitunnus
 			 			FROM tuote
 						JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 						JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -538,14 +551,15 @@
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 
 					$myytavissa = (float) $myytavissa;
+					$lisa_row   = array();
 
-					if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") {
+					if ($alkurow["ostorivitunnus"] != "" and in_array($trow["sarjanumeroseuranta"], array("E","F","G"))) {
 						//Jos erä on keksitty käsin täältä keräyksestä
 						$query = "	SELECT tyyppi, (varattu+kpl+jt) kpl, tunnus
 									FROM tilausrivi
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tuoteno = '$row[tuoteno]'
-									and tunnus	= '$alkurow[ostorivitunnus]'";
+									and tunnus in ($alkurow[ostorivitunnus])";
 						$lisa_res = pupe_query($query);
 						$lisa_row = mysql_fetch_assoc($lisa_res);
 					}
@@ -826,6 +840,8 @@
 			$varastot_array = explode(",", $kukarow["varasto"]);
 		}
 
+		if (!isset($paikatlask)) $paikatlask = 0;
+
 		// Käydään läpi oman varaston paikat
 		while ($alkurow = mysql_fetch_assoc($omavarastores)) {
 
@@ -966,24 +982,49 @@
 
 	//	Onko tätä ostotilauksella?
 	if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tilausrivilinkki"] > 0) {
-		$query = "	SELECT tilausrivi.otunnus, lasku.nimi, lasku.tila
+		$query = "	SELECT tilausrivi.otunnus,
+					lasku.nimi,
+					lasku.liitostunnus,
+		            lasku.tila,
+		            lasku.alatila,
+		            lasku.toim_nimi,
+		            lasku.toim_nimitark,
+		            lasku.toim_osoite,
+		            lasku.toim_postino,
+		            lasku.toim_postitp,
+		            lasku.toim_maa,
+	            	left(lasku.luontiaika, 10) luontiaika,
+		            lasku.laatija
 					FROM tilausrivi
 					JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-					and tilausrivi.tunnus  = '$row[tilausrivilinkki]'";
-		$siirtores = pupe_query($query);
+					and tilausrivi.tunnus  = '$row[tilausrivilinkki]'
+					and tilausrivi.tyyppi  = 'O'";
+		$suoratoimostores = pupe_query($query);
 
-		if (mysql_num_rows($siirtores) > 0) {
-			$siirtorow = mysql_fetch_assoc($siirtores);
-			if ($siirtorow["tila"] == "O") {
+		if (mysql_num_rows($suoratoimostores) > 0) {
+			$suoratoimostorow = mysql_fetch_assoc($suoratoimostores);
+
+			if ($suoratoimostorow["tila"] == "O") {
 				$tilaustyypilla = t("Ostotilauksella");
+				
+				if ($suoratoimostorow["luontiaika"] == date("Y-m-d") and
+					$suoratoimostorow["tila"]    	== 'O' and
+					$suoratoimostorow["alatila"]    == '' and
+					$suoratoimostorow["laatija"]    == $kukarow['kuka']
+				) {
+					$nayta_sostolisateksti = "TOTTA";
+				}
+				else {
+					$nayta_sostolisateksti = "HUOM";
+				}
+
 			}
-			elseif($siirtorow["tila"] == "V" or $siirtorow["tila"] == "W") {
+			elseif($suoratoimostorow["tila"] == "V" or $suoratoimostorow["tila"] == "W") {
 				$tilaustyypilla = t("Valmistuksella");
 			}
 
-			$nayta_sostolisateksti = "TOTTA";
-			$varaosakommentti .= "$tilaustyypilla: $siirtorow[nimi] $siirtorow[otunnus]<br>";
+			$varaosakommentti .= "$tilaustyypilla: $suoratoimostorow[nimi] $suoratoimostorow[otunnus]<br>";
 		}
 	}
 

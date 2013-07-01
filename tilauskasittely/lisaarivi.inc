@@ -592,7 +592,8 @@
 				// Muulloin etsit‰‰n vastaavat lˆydetyn korvaavuusketjun p‰‰tuotteen mukaan.
 				if (empty($korvaavat_tuotteet)) {
 					$vastaavat = new Vastaavat($tuoteno);
-				} else {
+				}
+				else {
 					$vastaavat = new Vastaavat($korvaavat->paatuote());
 				}
 
@@ -628,13 +629,18 @@
 			// Tuotteen korvaavat ja vastaavat ketju
 			foreach ($tuote_ketju as $krow2) {
 
+				//katotaan t‰ss‰ v‰liss‰ saako tuotetta myyd‰ asiakkaalle - eli jos ei saa myyd‰ siirryt‰‰n seuraavaan tuotteeseen (jos on)...
+				if (!saako_myyda_private_label($laskurow["liitostunnus"], $krow2["tuoteno"])) {
+					continue;
+				}
+
 				list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
 				list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
 				// Kommenti jos tuote on loppu, joka tilanteessa?
-				if ($krmyytavissa == 0 and $krow2[status] != 'P' and $krow2[tyyppi] == 'korvaava') {
-					if (stripos($kommentti_lisa, t("Tuote {$krow2[tuoteno]} on tilap‰isesti loppu.")) === FALSE) {
-						$kommentti_lisa .= t("Tuote {$krow2[tuoteno]} on tilap‰isesti loppu.")."<br>";
+				if ($krmyytavissa == 0 and $krow2["status"] != 'P' and $krow2["tyyppi"] == 'korvaava') {
+					if (stripos($kommentti_lisa, t("Tuote {$krow2["tuoteno"]} on tilap‰isesti loppu.")) === FALSE) {
+						$kommentti_lisa .= t("Tuote {$krow2["tuoteno"]} on tilap‰isesti loppu.")."<br>";
 					}
 				}
 
@@ -655,7 +661,6 @@
 						$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])");
 					}
 				}
-
 				// Korvaavia tuotteita myyd‰‰n, mik‰li yksitt‰ist‰ tuotetta lˆytyy tilattu m‰‰r‰ (UNIIKKI)
 				// Korvaavia ja vastaavia tuotteita myyd‰‰n mik‰li yksitt‰ist‰ tuotetta lˆytyy tilattu m‰‰r‰ (VASTAAVAT)
 				elseif ($korvaavat_kiellot == "UNIIKKI" or $korvaavat_kiellot == "VASTAAVAT") {
@@ -677,7 +682,7 @@
 					}
 
 					// Myyd‰‰nkˆ aina halvin tuote
-					// Asiakas saa aina halvemman hinnan mukaan tuotteen, mikâli alkuperâinen tuote on P toistuva tai puute.
+					// Asiakas saa aina halvemman hinnan mukaan tuotteen, mik‚li alkuper‚inen tuote on P toistuva tai puute.
 					if ($yhtiorow["korvaavan_hinta_ylaraja"] == 'MIN') {
 
 						// T‰h‰n hintaan asiakas saisi tuotteen
@@ -730,6 +735,7 @@
 			elseif (count($korkieltokommi) > 1) {
 				$korkieltokommi = t("Voit tilata korvaavia tuotteita").": ".implode(", ",$korkieltokommi);
 			}
+
 		} // end etsit‰‰nkˆ korvaavia
 
 		// Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhj‰ niin vaihdetaan vain jonkun tuotteen paikkaa eik‰ p‰ivitet‰ tuoteperheit‰
@@ -953,6 +959,13 @@
 				if (!function_exists('chk_varaston_saldo')) {
 					function chk_varaston_saldo($arr, $kpl) {
 						global $varasto;
+
+						//jos $varasto on asetettu ja se ei ole array niin asetetaan se arrayksi
+						//koska if ($chk_row['varasto'] == $chk_oletus_var and (!isset($varasto) or in_array($chk_row['varasto'], $varasto))) {
+						//heitt‰‰ noticea jos in_array param 2 on jotain muuta kuin array
+						if (isset($varasto) and !is_array($varasto)) {
+							$varasto = array();
+						}
 
 						reset($arr);
 

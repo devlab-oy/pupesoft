@@ -716,6 +716,8 @@
 					GROUP BY tilausrivi.otunnus";
 		$tilre = pupe_query($query);
 
+		$selectlisa = $toim == "" ? ", viesti AS Viite" : "";
+
 		while ($tilrow = mysql_fetch_assoc($tilre)) {
 
 			if ($toim == "MYYNTITILI") {
@@ -728,7 +730,7 @@
 			}
 
 			// etsit‰‰n sopivia tilauksia
-			$query = "	SELECT tunnus '$qnimi1', nimi '$qnimi2', date_format(luontiaika, '%Y-%m-%d') Laadittu, Laatija
+			$query = "	SELECT tunnus '$qnimi1', nimi '$qnimi2' {$selectlisa} , date_format(luontiaika, '%Y-%m-%d') Laadittu, Laatija
 						FROM lasku
 						WHERE tunnus = '$tilrow[otunnus]'
 						and tila = 'G'
@@ -754,7 +756,7 @@
 						echo "</tr>";
 					}
 
-					echo "<tr>";
+					echo "<tr class='aktiivi'>";
 
 					for ($y=0; $y<mysql_num_fields($result); $y++)
 						echo "<td>$row[$y]</td>";

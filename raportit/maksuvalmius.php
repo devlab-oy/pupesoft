@@ -73,7 +73,7 @@
 				//echo "Konserni on '$trow[konserni]'<br>";
 			}
 			else {
-				echo t("Yhtiöitä löytyi monta tai ei lainkaan! Virhe!")."";
+				echo t("Yhtiöitä löytyi monta tai ei lainkaan! Virhe!");
 				exit;
 			}
 

@@ -305,7 +305,8 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND status not in ('E', 'D')
 						{$tilausrivilisa}
-						{$wherelisa}";
+						{$wherelisa}
+						ORDER BY asn_sanomat.tuoteno ASC";
 			$kollires = pupe_query($query);
 
 			$i = $x = 0;
@@ -587,11 +588,14 @@
 			if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "" and $lasku_manuaalisesti_check == 0) {
 
 				if ($tee == 'vahvistavakisinkolli' and !$tullaan_virhetarkistuksesta) {
+
+					$lajilisa = $valitse == 'maventa' ? 'mav' : 'tec';
+
 					$query = "	UPDATE asn_sanomat SET
 								status = '',
 								tilausrivi = ''
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND laji = 'tec'
+								AND laji = '{$lajilisa}'
 								AND asn_numero = '{$lasku}'
 								AND status not in ('E', 'D')";
 					$upd_res = pupe_query($query);
@@ -677,12 +681,12 @@
 		$kolli = mysql_real_escape_string($kolli);
 		$wherelisa = "AND paketintunniste = '{$kolli}'";
 
-		$query = "SELECT * from asn_sanomat where yhtio = '{$kukarow["yhtio"]}' and status != 'D' {$wherelisa}";
+		$query = "SELECT * from asn_sanomat where yhtio = '{$kukarow['yhtio']}' and status != 'D' {$wherelisa}";
 		$kollires = pupe_query($query);
 		$rivi = mysql_fetch_assoc($kollires);
 
 		// poistetaan STATUS-täppä
-		$query = "UPDATE asn_sanomat SET status ='', tilausrivi='' WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
+		$query = "UPDATE asn_sanomat SET status = '', tilausrivi= '' WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
 		$kollires = pupe_query($query);
 
 		$tee = '';
@@ -971,7 +975,6 @@
 			$query = "	UPDATE asn_sanomat SET
 						tuoteno = '{$tuoteno}'
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						#AND laji = 'tec'
 						AND tunnus = '{$rivitunnus}'";
 			$upd_res = pupe_query($query);
 
@@ -1024,14 +1027,23 @@
 			$splitattava_tilausrivi = 0;
 
 			$_tunn = $valitse == 'asn' ? $asn_rivi : $rivitunnus;
-			$lajilisa = $valitse == 'asn' ? "and laji = 'asn'" : "and laji = 'tec'";
+
+			if ($valitse == 'asn') {
+				$lajilisa = 'asn';
+			}
+			elseif ($valitse == 'maventa') {
+				$lajilisa = 'mav';
+			}
+			else {
+				$lajilisa = 'tec';
+			}
 
 			// haetaan ASN-sanomalta kpl määrä
 			$hakuquery = "	SELECT *
 							FROM asn_sanomat
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$_tunn}'
-							{$lajilisa}";
+							AND laji = '{$lajilisa}'";
 			$hakures = pupe_query($hakuquery);
 			$asn_row_haku = mysql_fetch_assoc($hakures);
 
@@ -1126,6 +1138,9 @@
 								if ($yks_rivihinta != 0) $values .= ", '".($yks_rivihinta * $erotus)."'";
 								else $values .= ", 0";
 								break;
+							case 'kate_korjattu':
+								$values .= ", NULL";
+								break;							
 							default:
 								$values .= ", '".$ostotilausrivirow[$fieldname]."'";
 						}
@@ -1423,7 +1438,7 @@
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tilausrivi.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
 
 			// Ostotilaukset ja suoraan saapumiselle lisätyt, mutta ei saa olla saapumiselle kohdistettu
-			$query1 = "	SELECT DISTINCT tilausrivi.tunnus,
+			$query1 = "	(SELECT DISTINCT tilausrivi.tunnus,
 						tilausrivi.tuoteno,
 						tilausrivi.otunnus,
 						tilausrivi.varattu,
@@ -1435,9 +1450,26 @@
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.uusiotunnus = 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
-						AND lasku.tila 		   in ('O','K')
+						AND lasku.tila = 'O'
+						AND lasku.alatila = 'A'
 						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
-						{$tilausnrolisa}";
+						{$tilausnrolisa})
+						UNION
+						(SELECT DISTINCT tilausrivi.tunnus,
+						tilausrivi.tuoteno,
+						tilausrivi.otunnus,
+						tilausrivi.varattu,
+						tilausrivi.kpl,
+						tilausrivi.tilaajanrivinro,
+						tilausrivi.uusiotunnus,
+						lasku.tunnus laskutunnus
+						FROM lasku
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.uusiotunnus = 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
+						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
+						AND lasku.tila = 'K'
+						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
+						{$tilausnrolisa})";
 
 			// Saapumiset, ei loppulasketut eikä sellaset joihin on jo vaihto-omaisuuslasku liitetty, pitää olla saapumiselle kohdistettu
 			$query2 = "	SELECT DISTINCT tilausrivi.tunnus,
@@ -1459,17 +1491,25 @@
 						{$tilausnrolisa}";
 
 			if ($valitse == 'asn') {
-				$query = $query1." ORDER BY tunnus, uusiotunnus, laskutunnus";
+				$query = "{$query1} ORDER BY tunnus, uusiotunnus, laskutunnus";
 			}
 			else {
-				$query = "($query1) UNION ($query2) ORDER BY tunnus, uusiotunnus, laskutunnus";
+				$query = "{$query1} UNION ({$query2}) ORDER BY tunnus, uusiotunnus, laskutunnus";
 			}
 
 			$result = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($result)) {
 
-				$querylisa = $valitse == 'asn' ? " AND laji = 'asn' " : " AND laji = 'tec' ";
+				if ($valitse == 'maventa') {
+					$lajilisa = 'mav';
+				}
+				elseif ($valitse == 'asn') {
+					$lajilisa = 'asn';
+				}
+				else {
+					$lajilisa = 'tec';
+				}
 
 				// katsotaan ettei riviä ole jo kohdistettu muuhun riviin
 				$query = "	SELECT tunnus
@@ -1477,7 +1517,7 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND toimittajanumero = '{$toimittaja}'
 							AND tilausrivi LIKE '%{$row['tunnus']}%'
-							{$querylisa}";
+							AND laji = '{$lajilisa}'";
 				$chkres = pupe_query($query);
 
 				if (mysql_num_rows($chkres) > 0) continue;
@@ -1815,9 +1855,11 @@
 
 			$laskurow = mysql_fetch_assoc($laskures);
 
+			$lajilisa = $valitse == 'maventa' ? "mav" : "tec";
+
 			$query = "	SELECT asn_sanomat.toimittajanumero,
 						asn_sanomat.toim_tuoteno,
-						asn_sanomat.toim_tuoteno2,
+						IF(asn_sanomat.toim_tuoteno2 = '', asn_sanomat.toim_tuoteno, asn_sanomat.toim_tuoteno2) toim_tuoteno2,
 						asn_sanomat.tuoteno,
 						asn_sanomat.tilausrivinpositio,
 						asn_sanomat.status,
@@ -1832,9 +1874,9 @@
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero AND toimi.tyyppi != 'P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.asn_numero LIKE '%{$lasku}'
-						AND asn_sanomat.laji = 'tec'
+						AND asn_sanomat.laji = '{$lajilisa}'
 						#AND asn_sanomat.tilausrivi != ''
-						ORDER BY asn_sanomat.tilausrivinpositio + 0 ASC";
+						ORDER BY asn_sanomat.tuoteno ASC";
 			$result = pupe_query($query);
 
 			$ok = $virhe = 0;
@@ -1937,33 +1979,38 @@
 		elseif (isset($nayta_ostolasku)) {
 			$valitse = "ostolasku";
 		}
+		elseif (isset($nayta_maventa)) {
+			$valitse = "maventa";
+		}
 
 		if ($valitse == '') {
 			echo "<form method='post' action='?tee='>";
 			echo "<table><tr>";
 			echo "<th>",t("Valitse"),"</th>";
+			echo "<td><input type='submit' name='nayta_maventa' value='",t("Maventa"),"' /></td>";
 			echo "<td><input type='submit' name='nayta_ostolasku' value='",t("Ostolaskut"),"' /></td>";
 			echo "<td><input type='submit' name='nayta_asn' value='",t("ASN-sanomat"),"' /></td>";
 			echo "</tr></table>";
 			echo "</form>";
 		}
 		elseif ($valitse == 'asn') {
-				$query = "	SELECT 	toimi.ytunnus,
-								toimi.nimi,
-								toimi.nimitark,
-								toimi.osoite,
-								toimi.osoitetark,
-								toimi.postino,
-								toimi.postitp,
-								toimi.maa,
-								toimi.swift,
-								asn_sanomat.saapumispvm,
-								asn_sanomat.asn_numero,
-								asn_sanomat.paketintunniste,
-								asn_sanomat.toimittajanumero,
-								asn_sanomat.status,
-								count(asn_sanomat.tunnus) AS rivit,
-								sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
+
+			$query = "	SELECT toimi.ytunnus,
+						toimi.nimi,
+						toimi.nimitark,
+						toimi.osoite,
+						toimi.osoitetark,
+						toimi.postino,
+						toimi.postitp,
+						toimi.maa,
+						toimi.swift,
+						asn_sanomat.saapumispvm,
+						asn_sanomat.asn_numero,
+						asn_sanomat.paketintunniste,
+						asn_sanomat.toimittajanumero,
+						asn_sanomat.status,
+						count(asn_sanomat.tunnus) AS rivit,
+						sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
 						FROM asn_sanomat
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi !='P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
@@ -2069,32 +2116,36 @@
 			echo "</table>";
 			echo "</form>";
 		}
-		elseif ($valitse == 'ostolasku') {
-			$query = "	SELECT 	toimi.ytunnus,
-								toimi.nimi,
-								toimi.nimitark,
-								toimi.osoite,
-								toimi.osoitetark,
-								toimi.postino,
-								toimi.postitp,
-								toimi.maa,
-								toimi.swift,
-								asn_sanomat.saapumispvm,
-								asn_sanomat.asn_numero as tilausnumero,
-								asn_sanomat.paketintunniste,
-								asn_sanomat.toimittajanumero,
-								count(asn_sanomat.tunnus) AS rivit,
-								sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
+		elseif ($valitse == 'ostolasku' or $valitse == 'maventa') {
+
+			$lajilisa = $valitse == 'maventa' ? "mav" : "tec";
+
+			$query = "	SELECT toimi.ytunnus,
+						toimi.nimi,
+						toimi.nimitark,
+						toimi.osoite,
+						toimi.osoitetark,
+						toimi.postino,
+						toimi.postitp,
+						toimi.maa,
+						toimi.swift,
+						asn_sanomat.saapumispvm,
+						asn_sanomat.asn_numero as tilausnumero,
+						asn_sanomat.paketintunniste,
+						asn_sanomat.toimittajanumero,
+						count(asn_sanomat.tunnus) AS rivit,
+						sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
 						FROM asn_sanomat
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero AND toimi.tyyppi != 'P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
-						AND asn_sanomat.laji = 'tec'
+						AND asn_sanomat.laji = '{$lajilisa}'
 						AND asn_sanomat.status NOT IN ('X', 'E', 'D')
+						AND asn_sanomat.toimittajanumero != ''
 						GROUP BY asn_sanomat.asn_numero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
 						ORDER BY toimi.nimi, toimi.ytunnus, asn_sanomat.saapumispvm, asn_sanomat.asn_numero";
 			$result = pupe_query($query);
 
-			echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse=ostolasku&tee=' id='formi'>";
+			echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse={$valitse}&tee=' id='formi'>";
 			echo "<input type='hidden' id='tee' name='tee' value='nayta' />";
 			echo "<input type='hidden' id='valitse' name='valitse' value='{$valitse}' />";
 			echo "<input type='hidden' id='lasku' name='lasku' value='' />";

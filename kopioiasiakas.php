@@ -22,7 +22,8 @@
 
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
 			asiakastarkista ($t, $i, $result, $tunnus, $virhe, $trow);
-			if($virhe[$i] != "") {
+
+			if ($virhe[$i] != "") {
 				$errori = 1;
 			}
 		}

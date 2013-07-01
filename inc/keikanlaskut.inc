@@ -732,4 +732,57 @@
 		echo "<font class='message'>".t("Ei saapumisia")."!</font><br><br>";
 	}
 
+	echo "<font class='head'>".t("Saapumisten pyöristyserot")."</font><hr>";
+
+	$query = "	SELECT *, lasku.pyoristys_erot * lasku.vienti_kurssi pyoristys
+				FROM lasku
+				WHERE lasku.yhtio = '$kukarow[yhtio]' and
+				lasku.tila = 'K' and
+				lasku.vanhatunnus = 0 and
+				lasku.tapvm >= '$avv-$akk-$app' and
+				lasku.tapvm <= '$lvv-$lkk-$lpp'
+				HAVING abs(pyoristys) > 0.05
+				ORDER BY lasku.tapvm, lasku.pyoristys_erot";
+	$result = pupe_query($query);
+
+	if (mysql_num_rows($result) > 0 ) {
+		echo mysql_num_rows($result)." ".t("saapumista").". <a href=\"javascript:toggleGroup('pyoristys_erot')\">".t("Näytä")." / ".t("Piilota")."</a><br><br>";
+
+		echo "<div id='pyoristys_erot' style='display:none'>";
+
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Saapuminen")."</th>";
+		echo "<th>".t("Ytunnus")."</th>";
+		echo "<th>".t("Nimi")."</th>";
+		echo "<th>".t("Tapvm")."</th>";
+		echo "<th>".t("Pyöristyserot")."</th>";
+		echo "</tr>";
+
+		$yhteesa = 0;
+
+		while ($trow = mysql_fetch_array($result)) {
+
+			echo "<tr class='aktiivi'>";
+			echo "<td>$trow[laskunro]</td>";
+			echo "<td>$trow[ytunnus]</td>";
+			echo "<td>$trow[nimi]</td>";
+			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
+			echo "<td style='text-align: right;' nowrap>".round($trow["pyoristys"], 6)." $yhtiorow[valkoodi]</td>";
+			echo "</tr>";
+
+			$yhteesa += $trow["pyoristys"];
+		}
+
+		echo "<tr>";
+		echo "<th colspan='4'>".t("Yhteensä")."</th>";
+		echo "<th style='text-align: right;'>".round($yhteesa, 6)." $yhtiorow[valkoodi]</th>";
+		echo "</tr>";
+		echo "</table><br>";
+		echo "</div>";
+	}
+	else {
+		echo "<font class='message'>".t("Ei saapumisia")."!</font><br><br>";
+	}
+
 ?>

@@ -1,0 +1,73 @@
+a {
+	text-decoration: none;
+}
+
+.controls {
+	width: 100%;
+	height: 23px
+}
+
+.vasemmalle {
+	position:relative;
+	top: 6px;
+	padding-right: 5px;
+	float: left;
+}
+.oikealle {
+	position:relative;
+	position:relative;
+	top: 6px;
+	float: right;
+}
+
+.form {
+	width: 100%;
+	text-align: center;
+}
+
+.fc-event-inner {
+	text-align: center;
+}
+
+
+.fc-event-title {
+	float:left;
+	text-align: center;
+	width: 100%;
+}
+
+.fc-resourceName {
+	text-align: center;
+	font-size: 10pt;
+}
+
+.fc-event-prev {
+	float: left;
+}
+.fc-event-next {
+	float: right;
+}
+
+#bubble {
+	display:none;
+	position: fixed;
+	color: black;
+	background-color: #FFF;
+	z-index: 99;
+
+	padding: 10px;
+	border: solid 1px;
+	border-color: #AAA;
+	border-radius: 10px;
+
+	text-align: center;
+}
+
+#info {
+	font-weight: bold;
+	margin: 2px;
+}
+
+#content {
+	padding: 3px;
+}

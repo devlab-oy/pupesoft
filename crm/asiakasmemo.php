@@ -865,7 +865,7 @@
 						echo "</tr>";
 					}
 
-					echo "<tr><td colspan='6'>".str_replace("\n", "<br>", trim($memorow["viesti"]))."";
+					echo "<tr><td colspan='6'>".str_replace("\n", "<br>", trim($memorow["viesti"]));
 
 					if ($memorow["laskutunnus"] > 0) {
 						$laskutyyppi = $memorow["laskutila"];

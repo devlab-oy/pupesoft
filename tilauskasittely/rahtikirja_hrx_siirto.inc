@@ -124,8 +124,12 @@ if ($kollityht > 0) {
 		if (substr($hrx_path,-1) != '/') {
 			$hrx_path .= '/';
 		}
-
-		$filenimi = "/tmp/hrx-import-".md5(uniqid(rand(),true)).".dat";
+		if ($kukarow['yhtio'] == 'mergr') {
+			$filenimi = "/tmp/MG-".md5(uniqid(rand(),true)).".dat";
+		}
+		else {
+			$filenimi = "/tmp/hrx-import-".md5(uniqid(rand(),true)).".dat";
+		}
 
 		//kirjoitetaan faili levylle..
 		if (file_put_contents($filenimi, $sanoma) === FALSE) {
@@ -152,7 +156,7 @@ if ($kollityht > 0) {
 		$tempr = pupe_query($query);
 		$postirow_varasto = mysql_fetch_array($tempr);
 
-		if ($postirow_varasto['nimi'] != "") {
+		if ($postirow_varasto['nimi'] != "" and $yhtiorow['yhtio'] != 'mergr') {
 			$lahettaja_nimi = $postirow_varasto['nimi'];
 			$lahettaja_nimitark = $postirow_varasto['nimitark'];
 			$lahettaja_osoite = $postirow_varasto['osoite'];
@@ -195,6 +199,8 @@ if ($kollityht > 0) {
 	 			'monesko_laatikko' => $i,
 	 			'montako_laatikkoa_yht' => $kollityht,
 	 			'pakkauskoodi' => $pakkaus[0],
+				'yh_nimi' => $yh_nimi,
+				'yh_puh' => $yh_puh, 
 	 		);
 
 			tulosta_hrx($params);

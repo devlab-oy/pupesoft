@@ -49,7 +49,13 @@
 		$tunnus = $toimittajaid;
 		$tila = 'Muuta';
 	}
-
+	
+	if (isset($jatka) AND !checkdate($toimkk, $toimpp, $toimvv)) {
+		echo "<font class='error'>".t("VIRHE: Syötetty toimituspäivä on virheellinen")."!</font><br><br>";
+		$tee = "otsik_ostotilaus";
+		unset($jatka);
+		$tila = "Muuta";
+	}
 
 	if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
 		if($toim == "HAAMU") {
@@ -98,6 +104,7 @@
 				<input type='hidden' name='lopetus' 			value = '$lopetus'>
 				<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 				<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+				<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 				<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 				<input type='hidden' name='tee' 				value = 'MUUOTAOSTIKKOA'>
 				<input type='hidden' name='ovttunnus' 			value = '$srow[ovttunnus]'>
@@ -383,6 +390,7 @@
 						<input type='hidden' name='lopetus' 			value = '$lopetus'>
 						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 						<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+						<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 						<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 						<input type='hidden' name='tila' 				value = 'vaihdaasiakas'>
 						<input type='hidden' name='tee' 				value = 'MUUOTAOSTIKKOA'>

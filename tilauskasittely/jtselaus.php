@@ -758,6 +758,10 @@
 			$laskulisa .= " and lasku.myyja = '{$myyja}' ";
 		}
 
+		if ($yhtiorow['jt_toimitus_varastorajaus'] == 'K') {
+			$laskulisa .= " and lasku.varasto in (0, ".implode(", ", $varastosta).") ";
+		}
+
 		if ($automaaginen != '' or $ei_limiittia != '') {
 			$limit = "";
 		}
@@ -885,6 +889,7 @@
 							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
 							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
 							tilausrivi.jaksotettu,
+							tuote.status,
 							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio
@@ -918,6 +923,7 @@
 							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
 							tilausrivi.kerayspvm,
 							tilausrivi.jaksotettu,
+							tuote.status,
 							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -961,6 +967,7 @@
 							lasku.toim_postitp,
 							lasku.toim_maa,
 							tilausrivi.jaksotettu,
+							tuote.status,
 							lasku.jtkielto
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -991,8 +998,9 @@
 
 			if (mysql_num_rows($isaresult) > 0) {
 
-				$jt_rivilaskuri = 1;
+				$jt_rivilaskuri  = 1;
 				$jt_hintalaskuri = 0;
+				$saapumisajat    = array();
 
 				while ($jtrow = mysql_fetch_assoc($isaresult)) {
 
@@ -1251,7 +1259,7 @@
 
 								echo "</th>";
 
-								echo "<th valign='top'>".t("Status")."<br>".t("Toimaika")."</th>";
+								echo "<th valign='top'>".t("Status")."<br>".t("Toimaika")."<br/>".t("Saapumispäivä")."</th>";
 
 								if ($jtselaus_paivitys_oikeus) {
 									if ($kukarow["extranet"] == "") {
@@ -1619,6 +1627,17 @@
 
 								if (!isset($kpl[$tunnukset])) $kpl[$tunnukset] = "";
 
+								if ($automaaginen == '' and !isset($saapumisajat[$jtrow['tuoteno']])) {
+
+									$tulossalisat = hae_tuotteen_saapumisaika($jtrow['tuoteno'], $jtrow['status'], $kokonaismyytavissa);
+									$saapumisajat[$jtrow['tuoteno']] = "";
+
+									foreach ($tulossalisat as $tulossalisa) {
+										list($o, $v) = explode("!¡!", $tulossalisa);
+										$saapumisajat[$jtrow['tuoteno']] .= "<br>$o ".strip_tags($v);
+									}
+								}
+
 								// Riittää kaikille
 								if ((($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0 and $voiko_toimittaa !== false) or $automaaginen == 'vakisin') {
 
@@ -1661,6 +1680,7 @@
 											}
 											else {
 												echo tv1dateconv($toimaika);
+												echo $saapumisajat[$jtrow['tuoteno']];
 											}
 
 											echo "</td>";
@@ -1733,6 +1753,7 @@
 										}
 										else {
 											echo tv1dateconv($toimaika);
+											echo $saapumisajat[$jtrow['tuoteno']];
 										}
 										echo "</td>";
 
@@ -1767,6 +1788,7 @@
 										}
 										else {
 											echo tv1dateconv($toimaika);
+											echo $saapumisajat[$jtrow['tuoteno']];
 										}
 										echo "</td>";
 
@@ -1801,6 +1823,7 @@
 										}
 										else {
 											echo tv1dateconv($toimaika);
+											echo $saapumisajat[$jtrow['tuoteno']];
 										}
 										echo "</td>";
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";

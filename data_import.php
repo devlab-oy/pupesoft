@@ -37,6 +37,18 @@
 		}
 	}
 
+	if (isset($tee) and $tee == "poistakaikki_filetsut") {
+		if ($files = scandir($pupe_root_polku."/datain")) {
+		    foreach ($files as $file) {
+				// T‰m‰ file on valmis lue-data file
+				if (substr($file, 0, 11+strlen($kukarow["kuka"])+strlen($kukarow["yhtio"])) == "lue-data#{$kukarow["kuka"]}#{$kukarow["yhtio"]}#" and substr($file, -4) == ".LOG") {
+					unlink($pupe_root_polku."/datain/".$file);
+					unlink($pupe_root_polku."/datain/".substr($file,0,-3)."ERR");
+				}
+			}
+		}
+	}
+
 	echo "<font class='head'>".t("Datan sis‰‰nluku")." ".t("er‰ajo")."</font><hr>";
 
 	// Muuttujat
@@ -438,7 +450,7 @@
 					$filen_tiedot = explode("#", $file);
 					$kuka = $filen_tiedot[1];
 					$taulu = $filen_tiedot[3];
-					
+
 					// T‰‰lt‰ voi tulla ties mit‰ lis‰parameja, unohdetaan ne t‰ss‰
 					if (strpos($taulu, ".") !== FALSE) {
 						$cleantaulu = substr($taulu, 0, strpos($taulu, "."));
@@ -446,7 +458,7 @@
 					else {
 						$cleantaulu = $taulu;
 					}
-					
+
 					$orig_file = $filen_tiedot[5];
 
 					$kasitelty[$kasitelty_i]["filename"] = $file;
@@ -501,7 +513,13 @@
 			echo "</tr>";
 		}
 
-		echo "</table>";
+		echo "</table><br><br>";
+
+		echo "<form method='post' onsubmit=\"return confirm('".t("Oletko varma, ett‰ haluat poistaa lokitiedoston?")."')\">";
+		echo "<input type='hidden' name='tee' value='poistakaikki_filetsut'>";
+		echo "<input type='submit' value='".t("Poista kaikki lokitedostot")."'>";
+		echo "</form>";
+
 	}
 
 	require("inc/footer.inc");

@@ -1089,20 +1089,33 @@
 
 					if ($prow["sarjanumeroseuranta"] == "F") {
 						$pepvmlisa1 = " sarjanumeroseuranta.parasta_ennen, ";
-						$pepvmlisa2 = ", 17";
+						$pepvmlisa2 = ", 18";
 					}
 					else {
 						$pepvmlisa1 = "";
 						$pepvmlisa2 = "";
 					}
 
-					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
-								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+					$query = "	SELECT
 								sarjanumeroseuranta.sarjanumero era,
-								sarjanumeroseuranta.ostorivitunnus,
-								$pepvmlisa1
+								tuote.ei_saldoa,
+								tuote.tuoteno,
+								tuote.vakkoodi,
+								tuote.yhtio,
+								tuotepaikat.hyllyalue,
+								tuotepaikat.hyllynro,
+								tuotepaikat.hyllytaso,
+								tuotepaikat.hyllyvali,
+								tuotepaikat.oletus,
+								varastopaikat.erikoistoimitus_alarajasumma,
+								varastopaikat.maa varastomaa,
+								varastopaikat.nimitys,
+								varastopaikat.tunnus varasto,
+								varastopaikat.tyyppi varastotyyppi,
 								concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
-								varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
+								if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+								$pepvmlisa1
+								group_concat(sarjanumeroseuranta.ostorivitunnus) ostorivitunnus
 					 			FROM tuote
 								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -1118,7 +1131,7 @@
 								and sarjanumeroseuranta.era_kpl != 0
 								WHERE tuote.yhtio = '$kukarow[yhtio]'
 								and tuote.tuoteno = '$prow[tuoteno]'
-								GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 $pepvmlisa2
+								GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 $pepvmlisa2
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 					$omavarastores = pupe_query($query);
 
@@ -1150,15 +1163,18 @@
 							list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($prow["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 
 							$myytavissa = (float) $myytavissa;
+							$lisa_row   = array();
 
-							//Jos er‰ on keksitty k‰sin t‰‰lt‰ ker‰yksest‰
-							$query = "	SELECT tyyppi, (varattu+kpl+jt) kpl, tunnus, laskutettu
-										FROM tilausrivi
-										WHERE yhtio = '$kukarow[yhtio]'
-										and tuoteno = '$prow[tuoteno]'
-										and tunnus	= '$alkurow[ostorivitunnus]'";
-							$lisa_res = pupe_query($query);
-							$lisa_row = mysql_fetch_assoc($lisa_res);
+							if ($alkurow["ostorivitunnus"] != "" and in_array($prow["sarjanumeroseuranta"], array("E","F","G"))) {
+								//Jos er‰ on keksitty k‰sin t‰‰lt‰ ker‰yksest‰
+								$query = "	SELECT tyyppi, (varattu+kpl+jt) kpl, tunnus, laskutettu
+											FROM tilausrivi
+											WHERE yhtio = '$kukarow[yhtio]'
+											and tuoteno = '$prow[tuoteno]'
+											and tunnus	in ($alkurow[ostorivitunnus])";
+								$lisa_res = pupe_query($query);
+								$lisa_row = mysql_fetch_assoc($lisa_res);
+							}
 
 							// varmistetaan, ett‰ t‰m‰ er‰ on k‰ytett‰viss‰, eli ostorivitunnus pointtaa ostoriviin, hyvitysriviin tai laskutettuun myyntiriviin tai t‰h‰n riviin itsess‰‰n
 							if (($lisa_row["tyyppi"] == "O" or $lisa_row["kpl"] < 0 or $lisa_row["laskutettu"] != "" or $lisa_row["tunnus"] == $prow["tunnus"]) and

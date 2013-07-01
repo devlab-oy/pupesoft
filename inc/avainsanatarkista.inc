@@ -22,6 +22,28 @@ if(!function_exists("avainsanatarkista")) {
 					$virhe[$i] = t("Synkronoitavien avainsanojen lajia ei saa muuttaa")."!";
 				}
 			}
+
+			if ($t['laji'] == 'TYOM_TYOKENTAT') {
+				$query = "	DESCRIBE tyomaarays";
+				$tyomaarays_result = pupe_query($query);
+
+				$onko_input_ok = false;
+				$sallitut_kentat = "";
+				while($tyomaarays_kentat = mysql_fetch_assoc($tyomaarays_result)) {
+					//dynaaminen kentt‰ ei saa olla yhtio tai otunnus
+					if ($tyomaarays_kentat['Field'] != 'yhtio' and $tyomaarays_kentat['Field'] != 'otunnus') {
+						$sallitut_kentat .= $tyomaarays_kentat['Field'] . ', ';
+						if ($t['selite'] == $tyomaarays_kentat['Field']) {
+							$onko_input_ok = true;
+						}
+					}
+				}
+				$sallitut_kentat = substr($sallitut_kentat, 0, -2);
+
+				if (!$onko_input_ok) {
+					$virhe[$i] = t("Tyom‰‰r‰yksen sallituja kentti‰ on").":" . $sallitut_kentat;
+				}
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "nakyvyys") {

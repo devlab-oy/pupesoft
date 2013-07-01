@@ -1,7 +1,7 @@
 <?php
 
 $ostotilaus = hae_lasku($laskurow['tunnus']);
-$ostotilaus['tilausrivit'] = hae_laskun_tilausrivit($laskurow['tunnus'], array('O'));
+$ostotilaus['tilausrivit'] = hae_laskun_tilausrivit($laskurow['tunnus'], array('O'), generoi_sorttauskentta($yhtiorow["ostotilauksen_jarjestys"]), $yhtiorow['ostotilauksen_jarjestys_suunta']);
 
 if (empty($ostotilaus['tilausrivit'])) {
 	echo "<font class='error'>".t("Lähetettäviä tilausrivejä ei löydy")."</font><br/>";
@@ -25,7 +25,7 @@ else {
 	$order->appendChild($sales_order);
 
 	$address_for_shipment = $xml->createElement('addressForShipment');
-	$address_for_shipment->nodeValue = 5050;
+	$address_for_shipment->nodeValue = "802005050 100002184";
 	$order->appendChild($address_for_shipment);
 
 	$positions = $xml->createElement('Positions');
@@ -63,6 +63,3 @@ else {
 
 // Nollataan tarkoituksella lopetusmuuttuja
 $lopetus = "";
-
-$wabco_editilaus = "";
-$out = "";

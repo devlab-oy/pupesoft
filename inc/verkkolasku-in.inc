@@ -283,7 +283,14 @@
 			}
 
 			// $yhtiossa on nyt yhtio.yhtio
-			$yhtio = $yhtiorow['yhtio'];
+			$yhtio 			  = $yhtiorow['yhtio'];
+			$kukarow['yhtio'] = $yhtio;
+			$kukarow['kuka']  = 'verkkolas';
+
+			// tietyssä tapauksessa triggeröidään tämä
+			if (strpos($file, "maventa") !== false and $yhtio == "artr" and $laskun_ebid == "FINVOICEXML") {
+				$laskun_ebid = "MAVENTAXML";
+			}
 
 			// Perusta lasku
 			$summa = $laskun_summa_eur;
@@ -320,11 +327,11 @@
 			// $laskuttajan_vat --> voisi olla vatnumero
 			// $laskuttajan_nimi --> voisi olla laskuttajan nimi
 			// $laskuttajan_toimittajanumero --> toimittajanumero
-			$laskuttajan_ovt  = trim($laskuttajan_ovt);
-			$laskuttajan_vat  = trim($laskuttajan_vat);
-			$laskuttajan_nimi = trim($laskuttajan_nimi);
-			$laskuttajan_toimittajanumero = trim($laskuttajan_toimittajanumero);
-			$laskun_toimitunnus = (int) $laskun_toimitunnus;
+			$laskuttajan_ovt  				= trim($laskuttajan_ovt);
+			$laskuttajan_vat  				= trim($laskuttajan_vat);
+			$laskuttajan_nimi 				= trim($laskuttajan_nimi);
+			$laskuttajan_toimittajanumero	= trim($laskuttajan_toimittajanumero);
+			$laskun_toimitunnus 			= (int) $laskun_toimitunnus;
 
 			if ($laskun_toimitunnus > 0) {
 				// 0 etsitään toimittaja tunnuksella
@@ -482,6 +489,39 @@
 
 				if (mysql_num_rows($result) == 1) {
 					$trow = mysql_fetch_assoc($result);
+				}
+			}
+
+			// vaihtoehtoiset_verkkolaskutunnukset poikkeus tarkistus
+			if (!isset($trow)) {
+				$poikkeus_arvot = array(
+					'nimi' => $laskuttajan_nimi,
+					'ytunnus' => $laskuttajan_vat,
+					'ovt_tunnus' => $laskuttajan_ovt
+				);
+
+				foreach ($poikkeus_arvot as $poikkeus_sarake => $poikkeus_arvo) {
+					$query = "	SELECT *
+								FROM vaihtoehtoiset_verkkolaskutunnukset
+								WHERE yhtio 	 = '$yhtio'
+								AND kohde_sarake = '{$poikkeus_sarake}'
+								AND arvo 		 = '{$poikkeus_arvo}'";
+					$result = pupe_query($query);
+					$poikkeus = mysql_fetch_assoc($result);
+
+					if (!empty($poikkeus)) {
+						$query = "	SELECT *
+									FROM toimi
+									WHERE yhtio = '$yhtio'
+									and tunnus  = '{$poikkeus['toimi_tunnus']}'
+									and tyyppi != 'P'";
+						$result = pupe_query($query);
+
+						if (mysql_num_rows($result) == 1) {
+							$trow = mysql_fetch_assoc($result);
+							break;
+						}
+					}
 				}
 			}
 
@@ -951,13 +991,9 @@
 					$olmapvm = $krv."-".$krk."-".$krp;
 				}
 
-				#echo "osto_kulu ennen alustusta: $osto_kulu<br><br>";
-
 				$osto_kulu	= (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : $osto_kulu;
 				$osto_rahti = (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : $osto_rahti;
 				$osto_rivi_kulu = (!isset($osto_rivi_kulu) or trim($osto_rivi_kulu) == '') ? 0 : $osto_rivi_kulu;
-
-				#echo "osto_kulu jälkeen alustuksen: $osto_kulu<br><br>";
 
 				$osto_kulu_alv	= (!isset($osto_kulu_alv) or trim($osto_kulu_alv) == '') ? 0 : $osto_kulu_alv;
 				$osto_rahti_alv = (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : $osto_rahti_alv;
@@ -1077,7 +1113,6 @@
 				}
 
 	 			// Tehdän pelkät oletustiliöinnit
-	 			// Pitää hardkoodata UNIKKO ohittamaan tämän.
 				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE" and $laskun_tyyppi != "TECCOM-INVOICE" and $ebid != "MAVENTAXML") {
 
 					if ($oletustili > 0) {
@@ -1092,8 +1127,8 @@
 
 					$vero = (float) $vero;
 
-					$kukarow['yhtio']   = $yhtio;
-					$kukarow['kuka']    = 'verkkolas';
+					$kukarow['yhtio']	= $yhtio;
+					$kukarow['kuka']	= 'verkkolas';
 
 					$verkkolaskuveroton = round($omasumma / (1 + ($vero / 100)),2);
 					$verkkolaskuveroton_valuutassa = round($summa / (1 + ($vero / 100)),2);
@@ -1124,7 +1159,7 @@
 
 						// Varasto
 						$query = "	INSERT into tiliointi set
-									yhtio 			 = '$kukarow[yhtio]',
+									yhtio 			 = '$yhtio',
 									ltunnus 		 = '$tunnus',
 									tilino 			 = '$varastotili',
 									kustp    		 = '{$kustp_ins}',
@@ -1155,7 +1190,7 @@
 
 						// Varastonmuutos
 						$query = "	INSERT into tiliointi set
-									yhtio 			 = '$kukarow[yhtio]',
+									yhtio 			 = '$yhtio',
 									ltunnus 		 = '$tunnus',
 									tilino 			 = '$varastonmuutostili',
 									kustp    		 = '{$kustp_ins}',
@@ -1179,6 +1214,7 @@
 					}
 				}
 				else {
+
 					// Tehdään rivikohtaiset tiliöinnit
 					$i								= 0;
 					$totsumma 						= 0;
@@ -1342,7 +1378,7 @@
 
 								// Varasto
 								$query = "	INSERT into tiliointi set
-											yhtio 			 = '$kukarow[yhtio]',
+											yhtio 			 = '$yhtio',
 											ltunnus 		 = '$tunnus',
 											tilino 			 = '$varastotili',
 											kustp    		 = '{$kustp_ins}',
@@ -1373,7 +1409,7 @@
 
 								// Varastonmuutos
 								$query = "	INSERT into tiliointi set
-											yhtio 			 = '$kukarow[yhtio]',
+											yhtio 			 = '$yhtio',
 											ltunnus 		 = '$tunnus',
 											tilino 			 = '$varastonmuutostili',
 											kustp    		 = '{$kustp_ins}',
@@ -1404,25 +1440,16 @@
 
 							$asn_hinta = round($summa_valuutassa/$rtuoteno[$i]['kpl'], 2);
 
-							#echo "Lasketaan nettohintaa...<br>";
-							#echo "{$asn_hinta} = round({$summa_valuutassa}/{$rtuoteno[$i]['kpl']}, 2)<br><br>";
-
 							// Laitetaan bruttohinta asn_sanomat-tauluun
 							if (isset($rtuoteno[$i]['ale1']) and trim($rtuoteno[$i]['ale1']) != 0) {
-								#echo "Ale1 löytyi!<br>";
-								#echo "{$asn_hinta} / ((100 - {$rtuoteno[$i]['ale1']}) / 100)<br><br>";
 								$asn_hinta = $asn_hinta / ((100 - $rtuoteno[$i]['ale1']) / 100);
 							}
 
 							if (isset($rtuoteno[$i]['ale2']) and trim($rtuoteno[$i]['ale2']) != 0) {
-								#echo "Ale2 löytyi!<br>";
-								#echo "{$asn_hinta} / ((100 - {$rtuoteno[$i]['ale2']}) / 100)<br><br>";
 								$asn_hinta = $asn_hinta / ((100 - $rtuoteno[$i]['ale2']) / 100);
 							}
 
 							if (isset($rtuoteno[$i]['ale3']) and trim($rtuoteno[$i]['ale3']) != 0) {
-								#echo "Ale3 löytyi!<br>";
-								#echo "{$asn_hinta} / ((100 - {$rtuoteno[$i]['ale3']}) / 100)<br><br>";
 								$asn_hinta = $asn_hinta / ((100 - $rtuoteno[$i]['ale3']) / 100);
 							}
 
@@ -1462,10 +1489,8 @@
 												tuoteno				= '',
 												vastaanottaja 		= '{$ostaja_asiakkaantiedot['nimi']}',
 												yhtio 				= '{$yhtio}'";
-							#echo "<pre>",str_replace("\t", "", $insertquery),"</pre>";
 							$asn_ins_res = pupe_query($insertquery);
 							$rtuoteno[$i]["insert_id"] = mysql_insert_id();
-							#echo "insert_id: {$rtuoteno[$i]["insert_id"]}<br><br>";
 						}
 
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
@@ -1485,10 +1510,8 @@
 					}
 
 					if (count($laskun_kulut) > 0) {
-
 						foreach ($laskun_kulut as $vero => $_array) {
 							foreach ($_array as $key => $value) {
-
 								if ($value == 0) continue;
 
 								$tili = $yhtiorow[$key];
@@ -1501,13 +1524,10 @@
 								require ("inc/teetiliointi.inc");
 							}
 						}
-
-						#echo "Tuliko pyöristyseroja $omasumma - $totsumma<br><br>";
 					}
 
 	 				// Tuli pyöristyseroja
 					if (round(abs($totsumma - $omasumma), 2) >= 0.01) {
-
 						$vero = 0;
 
 						$summa = $omasumma - $totsumma;
@@ -1539,7 +1559,7 @@
 
 							$query = "	UPDATE lasku SET
 										vienti = '{$trow['oletus_vienti']}'
-										WHERE yhtio = '{$kukarow['yhtio']}'
+										WHERE yhtio = '{$yhtio}'
 										AND tunnus  = '{$tunnus}'";
 							$vienti_upd_res = pupe_query($query);
 						}
@@ -1570,7 +1590,6 @@
 							AND tunnus  = '{$ostovelkatiliointitunnus}'";
 				$vienti_upd_res = pupe_query($query);
 
-
 				// Jos meillä on suoraveloitus
 				if ($trow['oletus_suoraveloitus'] != '') {
 
@@ -1582,7 +1601,7 @@
 						// Oletustiliöinnit
 						// Ostovelat
 						$query = "	INSERT into tiliointi set
-									yhtio 			 = '$kukarow[yhtio]',
+									yhtio 			 = '$yhtio',
 									ltunnus 		 = '$tunnus',
 									tilino			 = '$ostovelat',
 									kustp    		 = '{$kustp_ins}',
@@ -1602,7 +1621,7 @@
 
 						// Rahatili
 						$query = "	INSERT into tiliointi set
-									yhtio 			 = '$kukarow[yhtio]',
+									yhtio 			 = '$yhtio',
 									ltunnus 		 = '$tunnus',
 									tilino 			 = '$yhtiorow[selvittelytili]',
 									kustp    		 = '{$kustp_ins}',
@@ -1638,7 +1657,7 @@
 					}
 				}
 
-				$query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+				$query = "SELECT * FROM lasku WHERE yhtio = '$yhtio' and tunnus = '$tunnus'";
 				$kuvalaskures = pupe_query($query);
 
 				if (mysql_num_rows($kuvalaskures) > 0) {
@@ -1673,7 +1692,7 @@
 					}
 
 					$query = "	INSERT INTO liitetiedostot SET
-								yhtio    			= '$kukarow[yhtio]',
+								yhtio    			= '$yhtio',
 								liitos   			= 'lasku',
 								liitostunnus 		= '$tunnus',
 								data     			= '$xmlstr',
@@ -1717,7 +1736,7 @@
 
 							// lisätään kuva
 							$query = "	INSERT INTO liitetiedostot SET
-										yhtio    			= '$kukarow[yhtio]',
+										yhtio    			= '$yhtio',
 										liitos   			= 'lasku',
 										liitostunnus 		= '$tunnus',
 										data     			= '$data',
@@ -1758,7 +1777,7 @@
 
 									// Lisätään kuva
 									$query = "	INSERT INTO liitetiedostot SET
-												yhtio    			= '$kukarow[yhtio]',
+												yhtio    			= '$yhtio',
 												liitos   			= 'lasku',
 												liitostunnus 		= '$tunnus',
 												data     			= '$data',
@@ -1800,7 +1819,7 @@
 									$data  = mysql_real_escape_string($editilaus_laskulle_data);
 
 									$query = "	INSERT INTO liitetiedostot SET
-												yhtio    			= '$kukarow[yhtio]',
+												yhtio    			= '$yhtio',
 												liitos   			= 'lasku',
 												liitostunnus 		= '$tunnus',
 												data     			= '$data',

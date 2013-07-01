@@ -984,7 +984,10 @@
 			echo "<td>";
 
 			echo tv1dateconv($laskurow["erpcm"]);
-			if ($laskurow["kapvm"] != "0000-00-00") echo "<br>".tv1dateconv($laskurow["kapvm"]);
+			if ($laskurow["kapvm"] != "0000-00-00") {
+				echo "<br>".tv1dateconv($laskurow["kapvm"]);
+				echo " ({$laskurow["kasumma"]} {$laskurow["valkoodi"]})";
+			} 
 
 			echo "</td>";
 		}

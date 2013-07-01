@@ -2,7 +2,7 @@
 
 if(!function_exists("asiakastarkista")) {
 	function asiakastarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $ytunnus_select, $asiakasnro_select, $toim, $asiak_laji, $errori;
+		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $ytunnus_select, $asiakasnro_select, $toim, $asiak_laji;
 
 		static $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus, $apuverkkotunnusi, $apulasku_email, $apulasku_emaili, $apu_maa, $apu_toim_maa, $laskutus_talteen_i, $laskutus_talteen;
 
@@ -41,11 +41,10 @@ if(!function_exists("asiakastarkista")) {
 				if (mysql_num_rows($sresult) > 0) {
 					if ($alias_set == "VAHITTAISMYYNTI") {
 						$virhe[$i] = t("Valitsemasi asiakasnumero ei ollutkaan vapaa.");
-						$errori = 1;
+
 					}
 					else {
 						$virhe[$i] = t("Valitsemasi ytunnus ei ollutkaan vapaa.");
-						$errori = 1;
 					}
 				}
 				else {
@@ -61,7 +60,6 @@ if(!function_exists("asiakastarkista")) {
 
 			if ($ytunnus == "") {
 				$virhe[$i] = t("Y-tunnus puuttuu")."!";
-				$errori = 1;
 			}
 		}
 
@@ -72,7 +70,6 @@ if(!function_exists("asiakastarkista")) {
 
 			if (mysql_num_rows($sresult) > 0) {
 				$virhe[$i] = t("Samalla tiedoilla on useita asiakkaita!");
-				$errori = 1;
 			}
 		}
 
@@ -127,7 +124,7 @@ if(!function_exists("asiakastarkista")) {
 
 				if (mysql_num_rows($sresult) > 0) {
 					$virhe[$i] = t("Valitsemasi asiakasnumero ei ollutkaan vapaa.");
-					$errori = 1;
+
 				}
 				else {
 					$t[$i] = $asiakasnro_select;
@@ -147,14 +144,11 @@ if(!function_exists("asiakastarkista")) {
 				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) > 0) {
-
 					if ($alias_set == "VAHITTAISMYYNTI") {
 						$virhe[$i] .= t("Samalla tiedoilla on useita asiakkaita! Lisää tarkenne Asiakasnumeroon/Henkilötunnukseen.");
-						$errori = 1;
 					}
 					else {
 						$virhe[$i] .= t("Samalla tiedoilla on useita asiakkaita! Lisää tarkenne Ytunnukseen/Asiakasnumeroon.");
-						$errori = 1;
 					}
 				}
 			}
@@ -172,11 +166,10 @@ if(!function_exists("asiakastarkista")) {
 			if (mysql_num_rows($sresult) > 0) {
 				if ($alias_set == "VAHITTAISMYYNTI") {
 					$virhe[$i] = t("Samalla tiedoilla on useita asiakkaita! Lisää tarkenne Asiakasnumeroon/Henkilötunnukseen.");
-					$errori = 1;
+
 				}
 				else {
 					$virhe[$i] = t("Samalla tiedoilla on useita asiakkaita! Lisää tarkenne Ytunnukseen/Ovttunnukseen/Toim_ovttunnukseen.");
-					$errori = 1;
 				}
 			}
 		}
@@ -207,7 +200,6 @@ if(!function_exists("asiakastarkista")) {
 
 			if (mysql_num_rows($sresult) != 1) {
 				$virhe[$i] = t("Tiliä ei löydy");
-				$errori = 1;
 			}
 		}
 
@@ -217,7 +209,6 @@ if(!function_exists("asiakastarkista")) {
 				if (trim($t[$i]) == '666' and $apulasku_email == "") {
 					// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
 					$virhe[$i] = $virhe[$apulasku_emaili] = t("Olet valinnut laskutustavaksi sähköpostin ja lasku_email on tyhjä! Laskutus ei onnistu")."!";
-					$errori = 1;
 				}
 
 				// jos ollaan valittu jotain muuta kuin PAPERI tai EMAIL niin verkkotunnus pitää syöttää!
@@ -231,7 +222,6 @@ if(!function_exists("asiakastarkista")) {
 						and $yhtiorow['verkkolasku_lah'] != 'apix') {
 					// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
 					$virhe[$i] = $virhe[$apuverkkotunnusi] = t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
-					$errori = 1;
 				}
 			}
 		}
@@ -243,9 +233,7 @@ if(!function_exists("asiakastarkista")) {
 
 			if ($email_virhe != "") {
 				$virhe[$i] = t("Sähköpostin domain ei löydy")."! ($email_virhe)";
-				$errori = 1;
 			}
-
 		}
 
 		if (mysql_field_name($result, $i) == "maksuehto" and $t[$i] > 0) {
@@ -259,7 +247,6 @@ if(!function_exists("asiakastarkista")) {
 
 			if (mysql_num_rows($sresult) == 0) {
 				$virhe[$i] = t("Tätä maksuehtoa ei saa käyttää asiakkaalla tässä maassa.");
-				$errori = 1;
 			}
 		}
 
@@ -273,7 +260,6 @@ if(!function_exists("asiakastarkista")) {
 
 			if (mysql_num_rows($sresult) == 0) {
 				$virhe[$i] = t("Tätä toimitustapaa ei saa käyttää asiakkaalla tässä maassa.");
-				$errori = 1;
 			}
 		}
 
@@ -292,7 +278,7 @@ if(!function_exists("asiakastarkista")) {
 				if ($ok == 0) {
 					// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
 					$virhe[$i] = $virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! $t[$i] -> $ytunnus";
-					$errori = 1;
+
 				}
 				else {
 					 $t[$ytunnus_tunnus] = $ytunnus;
@@ -301,7 +287,6 @@ if(!function_exists("asiakastarkista")) {
 			elseif ($yhtiorow["maa"] == 'FI' and strtoupper($t[$i]) == 'SE' and strtoupper(substr($t[$ytunnus_tunnus], 0, 2)) != "SE" and $asiak_laji != "H") {
 				// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
 				$virhe[$i] = $virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! Laskutusosoite ruotsissa. Ytunnus pitää alkaa SE!";
-				$errori = 1;
 			}
 		}
 

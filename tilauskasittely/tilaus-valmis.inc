@@ -5,6 +5,7 @@ $tilaus_valmis_ulos = "";
 $ohjausmerkkilisa 	= "";
 $luottorajavirhe 	= "";
 $jtkielto 			= "";
+$myy_varastosta_varasto = $laskurow['varasto'];
 
 ///* Reload ja back-nappulatsekki *///
 if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
@@ -81,8 +82,8 @@ $tilausvalmis_asiakas_row = mysql_fetch_assoc($tilausvalmis_asiakas_res);
 
 // Myynti estete‰‰n jos luottoraja on ylitetty (K - kaikki estet‰‰n, E -  kaikki muu ku myyjien tekem‰ estet‰‰n)
 // samma pÂ erapaivan_ylityksen_raja
-$luottoraja_chk = (($yhtiorow["luottorajan_ylitys"] == "K"             or ($yhtiorow["luottorajan_ylitys"] == "E"             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) ? 1 : 0;
-$erapaiva_chk   =  ($yhtiorow["erapaivan_ylityksen_toimenpide"] == "K" or ($yhtiorow["erapaivan_ylityksen_toimenpide"] == "E" and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) ? 1 : 0;
+$luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K","J"))             or (in_array($yhtiorow["luottorajan_ylitys"], array("E","F"))             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) ? 1 : 0;
+$erapaiva_chk   =  (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("K","J")) or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E","F")) and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) ? 1 : 0;
 
 if ($luottoraja_chk or $erapaiva_chk) {
 
@@ -148,13 +149,23 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
 
 	// Jos myyj‰t saa hyv‰ksy‰, mutta EDI/EXTRANET ei mee l‰pi jos luottotiedot on kuralla niin laitetaan F-alatilaan.
 	// Jos kukaan ei saa myyd‰ kun luottotiedot on kuralla niin sillo laitetaan kaikki G-alatilaan
-	if (($tilausvalmiskutsuja == "EDITILAUS" or $tilausvalmiskutsuja == "VERKKOKAUPPA" or $kukarow["extranet"] != "") and (($luottorajavirhe != '' and $yhtiorow["luottorajan_ylitys"] == "E") or ($ylivito > 0 and $yhtiorow["erapaivan_ylityksen_toimenpide"] == "E"))) {
-		// laitetaan tilaan Odottaa hyv‰ksynt‰‰
-		$alatila = "F";
+	if (($tilausvalmiskutsuja == "EDITILAUS" or $tilausvalmiskutsuja == "VERKKOKAUPPA" or $kukarow["extranet"] != "") and (($luottorajavirhe != '' and in_array($yhtiorow["luottorajan_ylitys"], array("E","F"))) or ($ylivito > 0 and in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E","F"))))) {
+		// laitetaan tilaan Odottaa hyv‰ksynt‰‰ tai kesken
+		if ($yhtiorow["luottorajan_ylitys"] == "F" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "F") {
+			$alatila = "";
+		}
+		else {
+			$alatila = "F";
+		}
 	}
 	else {
-		// laitetaan tilaan Odottaa asiakkaan suoritusta
-		$alatila = "G";
+		// laitetaan tilaan Odottaa asiakkaan suoritusta tai kesken
+		if ($yhtiorow["luottorajan_ylitys"] == "J" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "J") {
+			$alatila = "";
+		}
+		else {
+			$alatila = "G";
+		}
 	}
 
 	//tarkastetaan onko myyntitilaus naitettu ostoon.
@@ -1424,7 +1435,14 @@ else {
 			$varasto_kpl_array = array_keys($varasto_kpl_array);
 			$tulalue_kpl_array = array_keys($tulalue_kpl_array);
 
-			$varasto = array_pop($varasto_kpl_array);
+			// Jos tilauksella ei ole yht‰‰n sopivaa rivi‰ (esim vaan JT/PUUTE), s‰ilytet‰‰n varasto jonka k‰ytt‰j‰ valitsi
+			if (count($varasto_kpl_array) == 0) {
+				$varasto = $myy_varastosta_varasto;
+			}
+			else {
+				$varasto = array_pop($varasto_kpl_array);
+			}
+
 			$tulostusalue = array_pop($tulalue_kpl_array);
 
 			$query = "	SELECT ulkoinen_jarjestelma, erikoistoimitus_toimitustapa

@@ -34,6 +34,7 @@
 					asiakashinta AS ashin2 READ,
 					asiakashinta READ,
 					asiakaskommentti READ,
+					asn_sanomat READ,
 					avainsana as a READ,
 					avainsana as avainsana_kieli READ,
 					avainsana as b READ,

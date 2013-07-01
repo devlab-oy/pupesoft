@@ -157,6 +157,17 @@
 				echo "<font class='error'>".t("Toimituksella ei ollut vahvistettavia rivejä")."</font><br><br>";
 			}
 
+			//aina kun ostotilauksen tilausrivit vahvistetaan, päivitetään tilausrivin_lisatietoihin timestamp,
+			//jotta asiakkaalle osataan lähettää vahvistetuista riveistä niihin liittyvien jt myyntitilausrivien toimitusajan vahvistus sähköposti
+			$query = "	UPDATE tilausrivin_lisatiedot
+						JOIN tilausrivi
+						ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+							AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+							AND tilausrivi.otunnus = '{$kukarow['kesken']}' )
+						SET tilausrivin_lisatiedot.toimitusaika_paivitetty = NOW()
+						WHERE tilausrivin_lisatiedot. yhtio = '{$kukarow['yhtio']}'";
+			pupe_query($query);
+
 			$tee = "Y";
 		}
 
@@ -186,7 +197,7 @@
 				tarkista_myynti_osto_liitos_ja_poista($srow['tunnus'], false);
 			}
 
-			$query = "UPDATE lasku SET tila='D', alatila='$laskurow[tila]', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ohjelmassa tilaus_osto.php ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+			$query = "UPDATE lasku SET tila='D', alatila='$laskurow[tila]', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa tilaus_osto.php")." ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 			$result = pupe_query($query);
 
 			$query = "UPDATE kuka SET kesken=0 WHERE session='$session'";
@@ -848,7 +859,7 @@
 					<input type='hidden' name='toim_nimitykset'		value = '$toim_nimitykset'>
 					<input type='hidden' name='tee' 				value = 'Y'>";
 			echo "<font class='info'>";
-			echo t("Tuotenumerot").": <input onclick='submit();' type='radio' name='toim_tuoteno' value='toim_tuoteno_omat' {$sel["toim_tuoteno_omat"]}> ".t("Tuoteno")." <input onclick='submit();' type='radio' name='toim_tuoteno' value='toim_tuoteno_toimittajan' {$sel["toim_tuoteno_toimittajan"]}> ".t("Toimittajan tuoteno")."";
+			echo t("Tuotenumerot").": <input onclick='submit();' type='radio' name='toim_tuoteno' value='toim_tuoteno_omat' {$sel["toim_tuoteno_omat"]}> ".t("Tuoteno")." <input onclick='submit();' type='radio' name='toim_tuoteno' value='toim_tuoteno_toimittajan' {$sel["toim_tuoteno_toimittajan"]}> ".t("Toimittajan tuoteno");
 			echo "</font>";
 			echo "</form>";
 
@@ -877,7 +888,7 @@
 					<input type='hidden' name='tee' 				value = 'Y'>";
 
 			echo "<font class='info'>";
-			echo t("Nimitykset").": <input onclick='submit();' type='radio' name='toim_nimitykset' value='ME' {$sel["ME"]}> ".t("Omat")." <input onclick='submit();' type='radio' name='toim_nimitykset' value='HE' {$sel["HE"]}> ".t("Toimittajan")."";
+			echo t("Nimitykset").": <input onclick='submit();' type='radio' name='toim_nimitykset' value='ME' {$sel["ME"]}> ".t("Omat")." <input onclick='submit();' type='radio' name='toim_nimitykset' value='HE' {$sel["HE"]}> ".t("Toimittajan");
 			echo "</font>";
 			echo "</form>";
 

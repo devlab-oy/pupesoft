@@ -649,7 +649,7 @@ if ($tee == '') {
 					</tr>";
 
 			echo "<tr><th colspan='2'>";
-			echo t("Toimittaja").": $uutinen[nimi]<br>".t("P‰iv‰m‰‰r‰").": ".tv1dateconv($uutinen['pvmalku'], "PITKA")."";
+			echo t("Toimittaja").": $uutinen[nimi]<br>".t("P‰iv‰m‰‰r‰").": ".tv1dateconv($uutinen['pvmalku'], "PITKA");
 
 			if ($toim == "VERKKOKAUPPA") {
 				echo "<br>Osasto: $uutinen[kentta09]";

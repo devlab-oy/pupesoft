@@ -32,7 +32,7 @@
 
 	if (!function_exists("alku")) {
 		function alku ($viesti = null, $karhukierros_tunnus = '') {
-			global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $boldi, $kaatosumma, $kieli, $_POST, $iso;
+			global $pdf, $asiakastiedot, $yhteyshenkilo, $yhteyshenkiloteksti, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $boldi, $kaatosumma, $kieli, $_POST, $iso;
 
 			$firstpage = $pdf->new_page("a4");
 
@@ -178,8 +178,11 @@
 
 	            $i = 0;
 	            $rivit = explode("\n", $viesti);
+
+				$yhteyshenkiloteksti = t("Yhteyshenkilˆmme", $kieli) . ": $yrow[nimi] / $yrow[eposti] / $yrow[puhno]";
+
 				$rivit[] = '';
-				$rivit[] = t("Yhteyshenkilˆmme", $kieli) . ": $yrow[nimi] / $yrow[eposti] / $yrow[puhno]";
+				$rivit[] = $yhteyshenkiloteksti;
 
 				foreach ($rivit as $rivi) {
 					// laitetaan
@@ -396,7 +399,6 @@
 			$pdf->draw_text(404, 25, t("Alv.rek", $kieli),						$firstpage, $pieni);
 
 		}
-
 	}
 
 	require_once('pdflib/phppdflib.class.php');
@@ -760,9 +762,10 @@
 		$laskurow["tapvm"] = date("Y-m-d");
 		$laskurow["erpcm"] = date("Y-m-d");
 		$laskurow["kapvm"] = date("Y-m-d");
+
 		if ($laskurow["toim_nimi"] == '') {
-			$laskurow["toim_nimi"]   = $laskurow["nimi"];
-			$laskurow["toim_osoite"] = $laskurow["osoite"];
+			$laskurow["toim_nimi"]    = $laskurow["nimi"];
+			$laskurow["toim_osoite"]  = $laskurow["osoite"];
 			$laskurow["toim_postitp"] = $laskurow["postitp"];
 			$laskurow["toim_postino"] = $laskurow["postino"];
 		}
@@ -909,26 +912,42 @@
 
 	// tulostetaan jos ei l‰hetet‰ ekirjett‰ eik‰ maventaan
 	if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and $_REQUEST['maventa_laheta'] != 'L‰het‰ Maventaan') {
-		// itse print komento...
-		$query = "	SELECT komento
-					from kirjoittimet
-					where yhtio = '{$kukarow['yhtio']}'
-					and tunnus = '{$kukarow['kirjoitin']}'";
-		$kires = pupe_query($query);
 
-		if (mysql_num_rows($kires) == 1) {
-			$kirow = mysql_fetch_assoc($kires);
+		if (isset($_REQUEST['email_laheta']) and $_REQUEST['karhu_email'] != "") {
+			$liite 		  = $pdffilenimi;
+			$kutsu 		  = t("Maksukehotus", $kieli);
+			$komento 	  = "asiakasemail".$_REQUEST['karhu_email'];
+			$content_body = $karhuviesti."\n\n".$yhteyshenkiloteksti."\n\n\n";
 
-			if ($kirow["komento"] == "email") {
-				$liite = $pdffilenimi;
-				$kutsu = t("Maksukehotus", $kieli)." ".$asiakastiedot["ytunnus"];
-				echo t("Karhukirje l‰hetet‰‰n osoitteeseen")." $kukarow[eposti]...\n<br>";
+			echo t("Karhukirje l‰hetet‰‰n osoitteeseen").": {$_REQUEST['karhu_email']}...\n<br>";
 
-				require("inc/sahkoposti.inc");
-			}
-			else {
-				$line = exec("{$kirow['komento']} $pdffilenimi");
+			require("inc/sahkoposti.inc");
+		}
+		else {
+			$kirjoitin = $kirjoitin = 0 ? $kukarow['kirjoitin'] : $kirjoitin;
+
+			// itse print komento...
+			$query = "	SELECT komento
+						from kirjoittimet
+						where yhtio = '{$kukarow['yhtio']}'
+						and tunnus = '{$kirjoitin}'";
+			$kires = pupe_query($query);
+			
+			error_log($kirjoitin);
+
+			if (mysql_num_rows($kires) == 1) {
+				$kirow = mysql_fetch_assoc($kires);
+
+				if ($kirow["komento"] == "email") {
+					$liite = $pdffilenimi;
+					$kutsu = t("Maksukehotus", $kieli)." ".$asiakastiedot["ytunnus"];
+					echo t("Karhukirje l‰hetet‰‰n osoitteeseen").": $kukarow[eposti]...\n<br>";
+
+					require("inc/sahkoposti.inc");
+				}
+				else {
+					$line = exec("{$kirow['komento']} $pdffilenimi");
+				}
 			}
 		}
 	}
-?>

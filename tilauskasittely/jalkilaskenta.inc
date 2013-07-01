@@ -589,7 +589,7 @@ if ($tuoteno != '') {
 						and tuoteno = '$tuoteno'";
 			$result = pupe_query($query);
 
-			$selite_txt = ",<br>Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")";
+			$selite_txt = ",<br>".t("Jälkilaskennan ostohinta", $yhtiorow['kieli']).": $uusihinta (".tv1dateconv(date("Y-m-d")).")";
 
 			// Päivitetään korjattava tapahtuma
 			korjaatapahtuma($rxivirow['tapahtuma_tunnus'], $selite_txt, $uusihinta, $uusihinta);
@@ -839,6 +839,9 @@ if ($tuoteno != '') {
 							// Inventoinnissa korjaustapahtuman rivitunnus on alkuperäisen inventointitapahtuman tunnus (kaikissa muissa keisseissä rivitunnus pointtaa tilausriviin)
 							$rivitunnuslisa = $trow['laji'] == 'Inventointi' ? $trow['tunnus'] : $trow['rivitunnus'];
 
+							// Nollataan selite
+							$selite_txt = "";
+
 							// Haetaan tuotteen edellinen kehari
 							// Katsotaan löytyykö tälle tapahtumariville korjausrivi ja otetaan edellinen kehahin sieltä
 							$query = "	SELECT kplhinta, hinta
@@ -872,10 +875,9 @@ if ($tuoteno != '') {
 								// Jos ollaan käsittelemässä kääntöpistettä laitetaan keskihankintahinnaksi uusi OIKEA keskihankintahinta
 								if ($trow['rivitunnus'] == $rivitunnus) {
 									$trow['kplhinta'] = $uusihinta;
-									$selite_txt = ",<br>Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")";
+									$selite_txt = ",<br>".t("Jälkilaskennan ostohinta", $yhtiorow['kieli']).": $uusihinta (".tv1dateconv(date("Y-m-d")).")";
 								}
 								else {
-									$selite_txt = "";
 									$uusihinta = $trow['kplhinta'];
 								}
 
@@ -1247,7 +1249,8 @@ if ($tuoteno != '') {
 								// päivitetään hinta vain jos hinta on eri
 								// tai korjataan tapahtumat jos tapahtuma on lukitulla tilikaudella
 								// tai meillä on riville korjaustapahtumia
-								if ($edellinen_tapahtuman_kehahin != $uusikehahin or mysql_num_rows($hinta_chk_res) == 1) {
+								// tai ollaan kääntöpisteessa
+								if ($edellinen_tapahtuman_kehahin != $uusikehahin or mysql_num_rows($hinta_chk_res) == 1 or $trow['rivitunnus'] == $rivitunnus) {
 
 									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjataan tapahtuma! Keskihinta: $uusikehahin Vanha hinta: $trow[hinta]</font><br>";
 

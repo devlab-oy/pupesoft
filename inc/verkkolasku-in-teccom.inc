@@ -310,7 +310,13 @@
 							$charge_code = strtolower(trim($node_x->AllowOrChargeCode));
 
 							if ($charge_code == "zcwr" or $charge_code == 'zfwa' or strpos($charge_description, "core value") !== FALSE  or strpos($charge_description, "at.wert (rechnung)") !== FALSE) {
-								$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node_x->Amount);
+
+								if (strpos($charge_description, "core value") !== FALSE) {
+									$rtuoteno[$i]['rivihinta'] -= ((float) str_replace(",", ".", $node_x->Amount) * $rtuoteno[$i]["kpl"]);
+								}
+								else {
+									$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node_x->Amount);
+								}
 							}
 						}
 					}

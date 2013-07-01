@@ -8,42 +8,64 @@ $limit   = 300; // montako rivi‰ on maksimi
 $monta   = 0;
 
 if (is_numeric($toimittajaid) and $toimittajaid > 0) {
-	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
+	$query	= "	SELECT *
+				FROM toimi
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND tunnus = '{$toimittajaid}'";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
 }
 
 if ($monta == 0 and $ytunnus != '') {
 	//etsit‰‰n eka koko ytunnuksella
-	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' and tyyppi != 'P'";
+	$query	= "	SELECT *
+				FROM toimi
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND ytunnus = '{$ytunnus}'
+				AND tyyppi != 'P'
+				ORDER BY ytunnus, selaus, nimi";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
-
-	if ($monta == 0) {
-		// kokeillaan ytunnuksen alulla
-		$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and ytunnus like '$ytunnus%' and tyyppi != 'P'";
-		$result = mysql_query($query) or pupe_error($query);
-		$monta  = mysql_num_rows($result);
-	}
 }
 
 if ($monta == 0 and $ytunnus != '') {
 	//etsit‰‰n eka koko toimittajanrolla
-	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and toimittajanro='$ytunnus' and tyyppi != 'P'";
+	$query	= "	SELECT *
+				FROM toimi
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND toimittajanro = '{$ytunnus}'
+				AND tyyppi != 'P'
+				ORDER BY toimittajanro, selaus, nimi";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
+}
 
-	if ($monta == 0) {
-		// kokeillaan toimittajanron alulla
-		$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and toimittajanro like '$ytunnus%' and tyyppi != 'P'";
-		$result = mysql_query($query) or pupe_error($query);
-		$monta  = mysql_num_rows($result);
-	}
+if ($monta == 0 and $ytunnus != '') {
+	// kokeillaan ytunnuksen ja toimittajanumeron alulla
+	$query	= "	(SELECT *
+					FROM toimi
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND ytunnus like '{$ytunnus}%'
+					AND tyyppi != 'P')
+				UNION
+				(SELECT *
+					FROM toimi
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND toimittajanro like '{$ytunnus}%'
+					AND tyyppi != 'P')
+				ORDER BY ytunnus, toimittajanro, selaus, nimi";
+	$result = mysql_query($query) or pupe_error($query);
+	$monta  = mysql_num_rows($result);
 }
 
 if ($monta == 0 and $ytunnus != '') {
 	// kokeillaan nimen osalla
-	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and (nimi like '%$ytunnus%' or nimitark like '%$ytunnus%') and tyyppi != 'P'";
+	$query	= "	SELECT *
+				FROM toimi
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND (nimi like '%{$ytunnus}%' or nimitark like '%{$ytunnus}%')
+				AND tyyppi != 'P'
+				ORDER BY selaus, nimi";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
 }

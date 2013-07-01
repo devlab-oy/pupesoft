@@ -325,6 +325,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$saakopoistaa = TRUE;
 				break;
+			case "autoid_lisatieto" :
+				$pakolliset = array("TYPNR");
+				$wherelliset = array("TYPNR");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
+				break;
 			case "vak" :
 			case "vak_imdg" :
 				$pakolliset = array("YK_NRO");

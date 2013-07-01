@@ -44,17 +44,7 @@ $ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode($xml->BuyerPartyDetails
 $laskuttajan_toimittajanumero = "";
 
 if (strpos($file, "maventa") !== false and trim($xml->SellerPartyDetails->SellerPartyIdentifier) != "") {
-	$laskuttajan_toimittajanumero = str_replace("-", "", trim($xml->SellerPartyDetails->SellerPartyIdentifier));
-
-	$query = "	SELECT toimittajanro
-				FROM toimi
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND ytunnus = '{$laskuttajan_toimittajanumero}'
-				AND toimittajanro != ''";
-	$toimittajanro_chk_res = pupe_query($query);
-	$toimittajanro_chk_row = mysql_fetch_assoc($toimittajanro_chk_res);
-
-	$laskuttajan_toimittajanumero = $toimittajanro_chk_row['toimittajanro'];
+	$laskuttajan_toimittajanumero = trim(str_replace("-", "", trim($xml->SellerPartyDetails->SellerPartyIdentifier)));
 }
 
 if ($yhtio == "") {

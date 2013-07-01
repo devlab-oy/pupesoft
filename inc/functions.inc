@@ -9243,10 +9243,17 @@ if (!function_exists("livesearch_toimittajahaku")) {
 				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
 			</script>";
 
-			$query = "	SELECT *, concat_ws(', ', nimi, if(trim(nimitark)='', NULL, nimitark)) nimi
+			$query = "	(SELECT *, concat_ws(', ', nimi, if(trim(nimitark)='', NULL, nimitark)) nimi
 						FROM toimi
 						WHERE toimi.yhtio = '{$kukarow['yhtio']}'
-						AND toimi.nimi LIKE '%{$haku}%'";
+						AND toimi.nimi LIKE '%{$haku}%'
+						and tyyppi != 'P')
+						UNION
+						(SELECT *, concat_ws(', ', nimi, if(trim(nimitark)='', NULL, nimitark)) nimi
+						FROM toimi
+						WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+						AND toimi.nimitark LIKE '%{$haku}%'
+						and tyyppi != 'P')";
 			$result = pupe_query($query);
 
 			$limit = 0;

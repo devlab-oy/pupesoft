@@ -271,31 +271,9 @@
 							$trow = mysql_fetch_array($rarresult);
 
 							$ohitus = 0;
+
 							if ($kukarow["extranet"] != "") {
-								$query = "SELECT * FROM asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
-								$asiakastempres = pupe_query($query);
-								$asiakastemprow = mysql_fetch_array($asiakastempres);
-
-								$temp_laskurowwi = array();
-								$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
-								$temp_laskurowwi['ytunnus']			= $asiakastemprow['ytunnus'];
-								$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
-								$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
-
-
-								$hinnat = alehinta($temp_laskurowwi, $trow, 1, '', '', '', "hintaperuste,aleperuste");
-
-								$onko_asiakkaalla_alennuksia = FALSE;
-
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
-										$onko_asiakkaalla_alennuksia = TRUE;
-										break;
-									}
-								}
-
-								// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-								if ($trow["hinnastoon"] == "V" and (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE)) {
+								if (!saako_myyda_private_label($kukarow["oletus_asiakas"], $trow["tuoteno"], $kpl)) {
 									$ohitus = 1;
 								}
 							}

@@ -110,7 +110,7 @@
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
 		}
-		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kukaan")."";
+		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kukaan");
 
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel="";

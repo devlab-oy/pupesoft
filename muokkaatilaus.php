@@ -25,7 +25,7 @@
 		$query = "	UPDATE lasku
 					SET tila = 'D',
 					alatila  = 'T',
-					comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) mitätöi tilauksen ohjelmassa muokkaatilaus.php 1')
+					comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa muokkaatilaus.php")." 1')
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila    = 'T'
 					AND tunnus IN {$tunnukset}";
@@ -37,6 +37,11 @@
 					AND tyyppi  = 'T'
 					AND otunnus IN {$tunnukset}";
 		pupe_query($query);
+
+		foreach(explode(",", preg_replace("/[^0-9,]/", "", $tunnukset)) as $sarjatun) {
+			//Nollataan sarjanumerolinkit
+			vapauta_sarjanumerot("", $sarjatun);
+		}
 	}
 
 	if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and $yhtiorow["ennakkotilausten_toimitus"] == "M") {
@@ -282,21 +287,31 @@
 			$button_disabled = "disabled";
 		}
 
-		if(empty($oikeurow['paivitys'])) {
+		if (empty($oikeurow['paivitys'])) {
 			$button_disabled = "disabled";
 		}
 
-		if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $kukarow["kesken"] != 0 and $tilausnumero != "") {
+		if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $tilausnumero != "") {
 			$query_tarjous = "	UPDATE lasku
 								SET alatila = tila,
 								tila = 'D',
 								muutospvm = now(),
-								comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) mitätöi tilauksen ohjelmassa muokkaatilaus.php 2')
-								WHERE	yhtio = '$kukarow[yhtio]'
-								AND		tunnus = $tilausnumero";
-			$result_tarjous = pupe_query($query_tarjous);
+								comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa muokkaatilaus.php")." 2')
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus  = $tilausnumero";
+			pupe_query($query_tarjous);
 
-			echo "<font class='message'>".t("Mitätöitiin lasku")." $tilausnumero</font><br><br>";
+			$query = "	UPDATE tilausrivi
+						SET tyyppi = 'D'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tyyppi  = 'T'
+						AND tunnus  = $tilausnumero";
+			pupe_query($query);
+
+			//Nollataan sarjanumerolinkit
+			vapauta_sarjanumerot("", $tilausnumero);
+
+			echo "<font class='message'>".t("Mitätöitiin tilaus").": $tilausnumero</font><br><br>";
 		}
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {

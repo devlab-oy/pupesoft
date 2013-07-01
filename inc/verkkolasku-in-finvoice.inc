@@ -1,13 +1,7 @@
 <?php
 
-$laskuformaatti 		= "FINVOICE";
-
-if (strpos($file, "maventa") !== false) {
-	$laskun_ebid = "MAVENTAXML";
-}
-else {
-	$laskun_ebid 			= "FINVOICEXML";
-}
+$laskuformaatti = "FINVOICE";
+$laskun_ebid    = "FINVOICEXML";
 
 // parseroidaan xml
 $yhtio 					= $xml->BuyerOrganisationUnitNumber;

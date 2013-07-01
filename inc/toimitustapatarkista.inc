@@ -8,7 +8,7 @@ if(!function_exists("toimitustapatarkista")) {
 
 		if ((mysql_field_name($result, $i)=="rahtikirja") and ($t[$i]!='')) {
 			if (!file_exists("tilauskasittely/".$t[$i])) {
-				$virhe[$i] = "".t("Tiedosto tilauskasittely")."/$t[$i] ".t("ei löydy")."!";
+				$virhe[$i] = t("Tiedosto tilauskasittely")."/$t[$i] ".t("ei löydy")."!";
 			}
 		}
 
@@ -30,33 +30,33 @@ if(!function_exists("toimitustapatarkista")) {
 			$updre = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($updre)!=0) {
-				$virhe[$i] = "".t("Et voi muuttaa toimitustaavan nimeä, koska")." '$toita' ".t("on jo olemassa")."!";
+				$virhe[$i] = t("Et voi muuttaa toimitustaavan nimeä, koska")." '$toita' ".t("on jo olemassa")."!";
 			}
 			else {
 				$query = "UPDATE toimitustapa set selite='$toita' where selite='$trow[$i]' and yhtio='$kukarow[yhtio]'";
 				$updre = mysql_query($query) or pupe_error($query);
 
-				echo "<font class='message'>".t("Päivitettiin")." ".mysql_affected_rows()." ".t("toimitustapa")."";
+				echo "<font class='message'>".t("Päivitettiin")." ".mysql_affected_rows()." ".t("toimitustapa");
 
 				$query = "UPDATE asiakas set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]'";
 				$updre = mysql_query($query) or pupe_error($query);
 
-				echo ", ".mysql_affected_rows()." ".t("asiakasta")."";
+				echo ", ".mysql_affected_rows()." ".t("asiakasta");
 
 				$query = "UPDATE asiakkaan_avainsanat set avainsana='$toita' where avainsana='$trow[$i]' and yhtio='$kukarow[yhtio]'";
 				$updre = mysql_query($query) or pupe_error($query);
 
-				echo ", ".mysql_affected_rows()." ".t("asiakkaan avainsanaa")."";
+				echo ", ".mysql_affected_rows()." ".t("asiakkaan avainsanaa");
 
 				$query = "UPDATE lasku set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]' and ((tila='L' and alatila in('A','C')) or tila='N')";
 				$updre = mysql_query($query) or pupe_error($query);
 
-				echo ", ".mysql_affected_rows()." ".t("otsikkoa")."";
+				echo ", ".mysql_affected_rows()." ".t("otsikkoa");
 
 				$query = "UPDATE rahtimaksut set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]'";
 				$updre = mysql_query($query) or pupe_error($query);
 
-				echo ", ".mysql_affected_rows()." ".t("rahtimaksua")."";
+				echo ", ".mysql_affected_rows()." ".t("rahtimaksua");
 
 				$query = "UPDATE rahtisopimukset set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]'";
 				$updre = mysql_query($query) or pupe_error($query);

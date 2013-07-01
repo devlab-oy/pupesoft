@@ -865,7 +865,7 @@ class MagentoClient {
 			}
 
 			$message .= "\n";
-			error_log($timestamp . " " . $message, 3, 'magento_log.txt');
+			error_log($timestamp . " " . $message, 3, '/tmp/magento_log.txt');
 		}
 	}
 }

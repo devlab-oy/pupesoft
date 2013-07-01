@@ -91,8 +91,3 @@
 
 	// Nollataan tarkoituksella lopetusmuuttuja
 	$lopetus = "";
-
-	$wabco_editilaus = "";
-	$out = "";
-
-?>

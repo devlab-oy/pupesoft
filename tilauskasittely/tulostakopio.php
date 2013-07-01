@@ -1751,6 +1751,9 @@
 					elseif (isset($tyomtyyppi) and $tyomtyyppi == "A") {
 						$tyyppi = "";
 					}
+					elseif (isset($tyomtyyppi) and $tyomtyyppi == "Q") {
+						$tyyppi = "Q";
+					}
 					else {
 						$tyyppi = $yhtiorow["tyomaaraystyyppi"];
 					}

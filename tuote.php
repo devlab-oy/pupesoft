@@ -682,8 +682,31 @@
 			echo "</tr>";
 
 			echo "<tr>";
+
 			echo "<td>$tuoterow[muuta]&nbsp;</td>";
-			echo "<td colspan='5'>".wordwrap($tuoterow["lyhytkuvaus"], 70, "<br>")."</td>";
+			echo "<td colspan='5'>";
+			echo wordwrap($tuoterow["lyhytkuvaus"], 70, "<br>");
+
+			$palautus = t_tuotteen_avainsanat($tuoterow, "laatuluokka");
+
+			if (trim($palautus) != "") {
+
+				echo $tuoterow["lyhytkuvaus"] != "" ? "<br>" : "";
+
+				switch($palautus) {
+					case '0':
+						echo "Premium";
+						break;
+					case '1':
+						echo "Standard";
+						break;
+					case '2':
+						echo "Economy";
+						break;
+				}
+			}
+
+			echo "</td>";
 			echo "</tr>";
 
 			//9
@@ -1534,7 +1557,7 @@
 						}
 
 						if ($muutos_abs<>0) {
-							$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."";
+							$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite");
 						}
 
 						if ($muutos_suht<>0 and $erittely[$kk]<>0 and $ed_erittely[$kk]<>0) {
@@ -1815,7 +1838,7 @@
 				if ($tilalehinta != '') {
 					echo "<th>".t("Hinta / Ale / Rivihinta")."</th>";
 				}
-				echo "<th>".t("Selite")."";
+				echo "<th>".t("Selite");
 
 				echo "</th></form>";
 				echo "</tr>";

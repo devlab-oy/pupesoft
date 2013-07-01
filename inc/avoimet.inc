@@ -243,7 +243,7 @@
 	if (substr($laji, 0, 1) != 'O') {
 		echo "<tr><th>".t("Maksuehto").":</th>";
 		echo "<td colspan='3'><select name='maksuehto'>";
-		echo "<option value=''>".t("Ei valintaa")."";
+		echo "<option value=''>".t("Ei valintaa");
 
 		$query = "	SELECT *
 					FROM maksuehto
@@ -267,7 +267,7 @@
 		echo "<tr>";
 		echo "<th>".t("Näytä laskut, joita on karhuttu ainakin")."</th>";
 		echo "<td colspan='3'>";
-		echo "<input type='text' size='5' name='karhuja' value='$karhuja'> ".t("kertaa")."";
+		echo "<input type='text' size='5' name='karhuja' value='$karhuja'> ".t("kertaa");
 		echo "</td>";
 		echo "</tr>";
 

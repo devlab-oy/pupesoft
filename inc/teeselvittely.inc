@@ -21,6 +21,7 @@
 						luontiaika 	= now()";
 			$result = pupe_query($query);
 			$laskuid = mysql_insert_id ($link);
+
 			echo "<font class='message'>*** ".t("Tositteen otsikko luotu")." ***</font><br>\n";
 		}
 
@@ -153,12 +154,41 @@
 				$dummyresult = pupe_query($query);
 			}
 
-			// Merkataan käsitellyiksi & lisätään linkki
-			$vastavienti += $maara;
-			$vastavienti_valuutassa += $kohdm;
-
 			echo "<font class='message'>*** ".t("tiliöinti luotu")." ($tiliotesaantotilino) ***</font><br>\n";
+
+			if ($yhtiorow['tiliotteen_selvittelyt'] == "" and $tiliotedatarow['alku'] == $tiliotedatarow['loppu']) {
+				// Jos yhtiön parametri sallii ja käsittelyssä on yhden päivän tiliote niin voidaan tiliöidä kaikki selvittelyt samalle tositteelle.
+				$vastavienti += $maara;
+				$vastavienti_valuutassa += $kohdm;
+			}
+			else {
+				// Muuten tiliöidään kaikki selivttelyt omille tositteilleen ja tehdään vastavientiki per tosite, tietenki!
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
+
+				// Rahatili
+				$query = "	INSERT into tiliointi set
+			                yhtio 				= '$yritirow[yhtio]',
+			                ltunnus 			= '$laskuid',
+			                tilino 				= '$yritirow[oletus_rahatili]',
+			                kustp    			= '{$kustp_ins}',
+							kohde	 			= '{$kohde_ins}',
+							projekti 			= '{$projekti_ins}',
+			                tapvm 				= '$tpv-$tpk-$tpp',
+			                summa 				= '$maara',
+							summa_valuutassa	= '$kohdm',
+							valkoodi 			= '$tilinvaluutta',
+			                vero 				= 0,
+			                lukko 				= '',
+							selite 				= 'Vastavienti rahatilille',
+			                laatija 			= 'tiliote',
+			                laadittu 			= now()";
+				$result = pupe_query($query);
+
+				$vastavienti 			= 0;
+				$vastavienti_valuutassa = 0;
+				$laskuid 				= 0;
+
+				echo "<font class='message'>*** ".t("Vastavienti luotu")." ($yritirow[oletus_rahatili]) ***</font><br>\n";
+			}
 		}
 	}
-
-?>

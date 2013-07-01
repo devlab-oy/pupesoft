@@ -171,7 +171,7 @@
 		echo "</table>";
 	}
 	else {
-		echo "".t("Yhtään tilausta ei löytynyt")."...<br><br>";
+		echo t("Yhtään tilausta ei löytynyt")."...<br><br>";
 	}
 
 	require ("footer.inc");

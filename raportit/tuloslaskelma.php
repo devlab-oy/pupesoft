@@ -264,7 +264,7 @@
 					ORDER BY tilikausi_alku DESC";
 		$vresult = pupe_query($query);
 
-		echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
+		echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa");
 
 		while ($vrow=mysql_fetch_assoc($vresult)) {
 			$sel="";
@@ -347,13 +347,13 @@
 		$konsel = array("AT" => "", "T" => "", "A" => "");
 		$konsel[$konsernirajaus] = "SELECTED";
 
-		echo "<td><select name='konsernirajaus'>
+		echo "<td><select name='konsernirajaus' DISABLED>
 				<option value=''>".t("Näytetään kaikki tiliöinnit")."</option>
 				<option value='AT' $konsel[AT]>".t("Näytetään konserniasiakkaiden ja konsernitoimittajien tiliöinnit")."</option>
 				<option value='T'  $konsel[T]>".t("Näytetään konsernitoimitajien tiliöinnit")."</option>
 				<option value='A'  $konsel[A]>".t("Näytetään konserniasiakkaiden tiliöinnit")."</option>
 				</select>
-				</td></tr>";
+				HUOM: Ominaisuus huollossa!</td></tr>";
 
 		echo "<tr><th valign='top'>".t("Sarakkeet")."</th>";
 
@@ -369,8 +369,8 @@
 		echo "&nbsp;<input type='checkbox' name='sarakebox[KUSTP]' $bchek[KUSTP]> ".t("Kustannuspaikoittain");
 		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[KOHDE]' $bchek[KOHDE]> ".t("Kohteittain");
 		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[PROJEKTI]' $bchek[PROJEKTI]> ".t("Projekteittain");
-		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASOSASTO]' $bchek[ASOSASTO]> ".t("Asiakasosastoittain");
-		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASRYHMA]' $bchek[ASRYHMA]> ".t("Asiakasryhmittäin");
+		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASOSASTO]' $bchek[ASOSASTO] DISABLED> ".t("Asiakasosastoittain");
+		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASRYHMA]' $bchek[ASRYHMA] DISABLED> ".t("Asiakasryhmittäin");
 		echo "</td></tr>";
 
 		if ($teepdf != "") $vchek = "CHECKED";
@@ -384,7 +384,9 @@
 
 		echo "</table><br>";
 
-		$monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI", "ASIAKASOSASTO", "ASIAKASRYHMA");
+		// HUOM: ASIAKASRAJAUKSET HUOLLOSSA!
+		// $monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI", "ASIAKASOSASTO", "ASIAKASRYHMA");
+		$monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI");
 		$noautosubmit = TRUE;
 
 		require ("tilauskasittely/monivalintalaatikot.inc");
@@ -781,7 +783,7 @@
 
 			// Haetaan kaikki tiliöinnit
 			$query = "	SELECT tiliointi.tilino, $groupsarake groupsarake, $alkuquery1
-		 	            FROM tiliointi USE INDEX (yhtio_tilino_tapvm)
+		 	            FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
 			            $laskujoini
 			            $asiakasjoini
 			            $konsernijoini
@@ -816,7 +818,7 @@
 
 				// Haetaan firman tulos
 				$query = "	SELECT $groupsarake groupsarake, $alkuquery1
-			 	            FROM tiliointi USE INDEX (yhtio_tilino_tapvm)
+			 	            FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
 				            $laskujoini
 				            $asiakasjoini
 				            $konsernijoini
@@ -901,19 +903,61 @@
 							ORDER BY tilino";
 				$tilires = pupe_query($query);
 
-				while ($tilirow = mysql_fetch_assoc($tilires)) {
+				if (mysql_num_rows($tilires) > 0) {
+					while ($tilirow = mysql_fetch_assoc($tilires)) {
 
-					$tilirow_summat = array();
+						$tilirow_summat = array();
 
-					if (isset($tilioinnit[(string) $tilirow["tilino"]])) {
-						$tilirow_summat = $tilioinnit[(string) $tilirow["tilino"]];
+						if (isset($tilioinnit[(string) $tilirow["tilino"]])) {
+							$tilirow_summat = $tilioinnit[(string) $tilirow["tilino"]];
+						}
+						elseif (isset($budjetit[(string) $tasorow["taso"]])) {
+							$tilirow_summat = $budjetit[(string) $tasorow["taso"]];
+						}
+						elseif ($toim == "TASOMUUTOS") {
+							$tilirow_summat = array("$firstgroup" => 0);
+						}
+
+						foreach ($tilirow_summat as $sarake => $tilirow_sum) {
+							// summataan kausien saldot
+							foreach ($kaudet as $kausi) {
+								if (substr($kausi,0,4) == "budj") {
+									$i = $tasoluku - 1;
+
+									$summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
+								}
+								else {
+									// Summataan kaikkia pienempiä summaustasoja
+									for ($i = $tasoluku - 1; $i >= 0; $i--) {
+										// Summat per kausi/taso
+										if (isset($summa[$kausi][$taso[$i]][(string) $sarake])) $summa[$kausi][$taso[$i]][(string) $sarake] += $tilirow_sum[$kausi];
+										else $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
+
+										//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
+										if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
+											$summa[$kausi][$taso[$i]][(string) $sarake] += $tulokset[$sarake][$kausi];
+										}
+									}
+
+									// Summat per taso/tili/kausi
+									$i = $tasoluku - 1;
+									$summakey = $tilirow["tilino"]."###".$tilirow["nimi"];
+
+									if (isset($tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake])) $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tilirow_sum[$kausi];
+									else $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] = $tilirow_sum[$kausi];
+
+									// Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
+									if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
+										$tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tulokset[$sarake][$kausi];
+									}
+								}
+							}
+						}
 					}
-					elseif (isset($budjetit[(string) $tasorow["taso"]])) {
-						$tilirow_summat = $budjetit[(string) $tasorow["taso"]];
-					}
-					elseif ($toim == "TASOMUUTOS") {
-						$tilirow_summat = array("$firstgroup" => 0);
-					}
+				}
+				else {
+					// vaikka ei ois yhtään tiliä niin voi olla, että budjetti on syötetty
+					$tilirow_summat = $budjetit[(string) $tasorow["taso"]];
 
 					foreach ($tilirow_summat as $sarake => $tilirow_sum) {
 						// summataan kausien saldot
@@ -922,31 +966,6 @@
 								$i = $tasoluku - 1;
 
 								$summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
-							}
-							else {
-								// Summataan kaikkia pienempiä summaustasoja
-								for ($i = $tasoluku - 1; $i >= 0; $i--) {
-									// Summat per kausi/taso
-									if (isset($summa[$kausi][$taso[$i]][(string) $sarake])) $summa[$kausi][$taso[$i]][(string) $sarake] += $tilirow_sum[$kausi];
-									else $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
-
-									//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
-									if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
-										$summa[$kausi][$taso[$i]][(string) $sarake] += $tulokset[$sarake][$kausi];
-									}
-								}
-
-								// Summat per taso/tili/kausi
-								$i = $tasoluku - 1;
-								$summakey = $tilirow["tilino"]."###".$tilirow["nimi"];
-
-								if (isset($tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake])) $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tilirow_sum[$kausi];
-								else $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] = $tilirow_sum[$kausi];
-
-								//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
-								if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
-									$tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tulokset[$sarake][$kausi];
-								}
 							}
 						}
 					}
@@ -1348,7 +1367,7 @@
 					function alku () {
 						global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $kaikkikaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev, $sarakkeet, $ei_yhteensa, $leveysarray;
 
-						if ((count($kaudet) > 5 and $kaikkikaudet != "") or count($sarakkeet) > 2) {
+						if ((count($kaudet) > 5 and $kaikkikaudet == "joo") or count($sarakkeet) > 2) {
 							$firstpage = $pdf->new_page("842x595");
 							$bottom = "535";
 						}
@@ -1381,6 +1400,9 @@
 
 							if (!$image) {
 								echo t("Logokuvavirhe");
+							}
+							elseif ($bottom == "535") {
+								tulosta_logo_pdf($pdf, $firstpage, "", 575, 0, 25, 120);
 							}
 							else {
 								tulosta_logo_pdf($pdf, $firstpage, "", 0, 0, 25, 120);

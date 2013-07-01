@@ -226,10 +226,10 @@
 							AND otunnus = '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
-				$query = "	UPDATE lasku SET
+				$query = " UPDATE lasku SET
 							tila     = 'D',
 							alatila  = tila,
-							comments = '{$kukarow['nimi']} ({$kukarow['kuka']}) ".t("mitätöi tilauksen")." ohjelmassa vaihda_tila.php ".date("d.m.y @ G:i:s")."'
+							comments = '{$kukarow['nimi']} ({$kukarow['kuka']}) ".t("mitätöi tilauksen ohjelmassa vaihda_tila.php")." ".date("d.m.y @ G:i:s")."'
 				 			WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);

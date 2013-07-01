@@ -34,11 +34,11 @@ if ($tee == "CHECK") {
 	$errors = 0;
 
 	if ($tilino == 0) {
-	 	$error[] = "".t("Valitse saajan tilinumero").".";
+	 	$error[] = t("Valitse saajan tilinumero").".";
 	}
 
 	if (strlen($summa) == 0) {
-	 	$error[] = "".t("Anna suorituksen summa").".";
+	 	$error[] = t("Anna suorituksen summa").".";
 	}
 	else {
 		preg_match("/^[-+]?[0-9]+([,.][0-9]+)?/", $summa, $tsumma);
@@ -96,7 +96,7 @@ if ($tee == "SYOTTO") {
 	}
 
 	if ($myyntisaamiset == 0) {
-		echo t("Myyntisaamiset-tilin selvittely epäonnistui")."";
+		echo t("Myyntisaamiset-tilin selvittely epäonnistui");
 		exit;
 	}
 
@@ -544,7 +544,7 @@ if ($ytunnus != '' and $tee == "") {
 
 	echo "<tr><th>".t("Kohdistus")."</th><td>";
 	if ($asiakas['konserniyhtio'] != '') {
-		echo "<input type='hidden' name='vastatili' value='konserni'>".t("Konsernimyyntisaamiset")."";
+		echo "<input type='hidden' name='vastatili' value='konserni'>".t("Konsernimyyntisaamiset");
 	}
 	else {
 		echo "<input type='radio' name='vastatili' value='myynti' $sel1> ".t("Myyntisaamiset")."

@@ -30,33 +30,39 @@
 		$query = "	SELECT *
 					FROM lahdot
 					WHERE yhtio = '$kukarow[yhtio]'
-					AND tunnus = '$lahto'";
+					AND tunnus  = '$lahto'";
 		$lahtores = pupe_query($query);
-		$lahtorow = mysql_fetch_assoc($lahtores);
 
-		$query = "	SELECT *
-					FROM toimitustapa
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND tunnus = '$lahtorow[liitostunnus]'";
-		$toitares = pupe_query($query);
-		$toitarow = mysql_fetch_assoc($toitares);
+		if (mysql_num_rows($lahtores) > 0) {
 
+			$lahtorow = mysql_fetch_assoc($lahtores);
 
-		$query = "	SELECT group_concat(tunnus) tilaukset
-					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND tila = 'L'
-					AND alatila != ''
-					AND toimitustavan_lahto = '$lahtorow[tunnus]'";
-		$laskures = pupe_query($query);
-		$laskurow = mysql_fetch_assoc($laskures);
+			$query = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus  = '$lahtorow[liitostunnus]'";
+			$toitares = pupe_query($query);
+			$toitarow = mysql_fetch_assoc($toitares);
 
-		$otunnukset = $laskurow["tilaukset"];
+			$query = "	SELECT group_concat(tunnus) tilaukset
+						FROM lasku
+						WHERE yhtio  = '$kukarow[yhtio]'
+						AND tila     = 'L'
+						AND alatila != ''
+						AND toimitustavan_lahto = '$lahtorow[tunnus]'";
+			$laskures = pupe_query($query);
+			$laskurow = mysql_fetch_assoc($laskures);
 
-		if ($otunnukset != "") {
-			require("tilauskasittely/rahtikirja_erittely_pdf.inc");
+			$otunnukset = $laskurow["tilaukset"];
 
-			echo t("Rahtikirjaerittely tulostuu")."...<br><br>";
+			if ($otunnukset != "") {
+				require("tilauskasittely/rahtikirja_erittely_pdf.inc");
+
+				echo t("Rahtikirjaerittely tulostuu")."...<br><br>";
+			}
+		}
+		else {
+			echo t("VIRHE: Lähtöä ei löydy")."!";
 		}
 
 		$tee = "";

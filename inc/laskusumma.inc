@@ -1,5 +1,5 @@
 <?php
-		echo "".t("Laskujen summahaku")."<hr>";
+		echo t("Laskujen summahaku")."<hr>";
 		$summa1 = str_replace( ",", ".", $summa1);
                 $summa2 = str_replace( ",", ".", $summa2);
 

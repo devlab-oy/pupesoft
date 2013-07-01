@@ -18,7 +18,7 @@
 		$rajauslisa = " and liitetiedostot.tunnus = -1 ";
 	}
 
-	if (($lukitse_laji == "tuote" or $lukitse_laji == "sarjanumeron_lisatiedot" or $lukitse_laji == 'asiakas' or $lukitse_laji == "avainsana") and $lukitse_avaimeen > 0) {
+	if (($lukitse_laji == "tuote" or $lukitse_laji == "sarjanumeron_lisatiedot" or $lukitse_laji == 'asiakas' or $lukitse_laji == "avainsana" or $lukitse_laji == 'toimi') and $lukitse_avaimeen > 0) {
 		$uusilukko = "";
 		$poistolukko   = "";
 	}
@@ -65,6 +65,9 @@
 
 		if ($del == 1 or ($tunnus != "" and $_FILES["liite_data"]["size"] > 0)) {
 			if (in_array($lasrow['tila'], array('H','M')) and $kukarow["taso"] != 3) {
+
+				$komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyväksyntään koska laskun liitteitä muutettiin.")."<br>";
+
 				// nollataan hyväksyjät jos jokin näistä tiloista
 				$query = "	UPDATE lasku
 							SET h1time 		= '',
@@ -73,7 +76,8 @@
 							h4time 			= '',
 							h5time 			= '',
 							hyvaksyja_nyt 	= hyvak1,
-							tila 			= if(tila='M', 'H', tila)
+							tila 			= if(tila='M', 'H', tila),
+							comments		= trim(concat('$komm', comments))
 							WHERE tunnus 	= $lasrow[tunnus]
 							and yhtio		= '$kukarow[yhtio]'
 							and tila in ('H','M')";
@@ -81,5 +85,3 @@
 			}
 		}
 	}
-
-?>

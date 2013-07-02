@@ -681,6 +681,8 @@ if (!function_exists('uusi_sivu_lahete')) {
 
 		// Luodaan muuttujat
 		extract($params);
+		
+		$base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
 		$lahetetyyppi_avainsana = t_avainsana("LAHETETYYPPI", "", " and selite='$lahetetyyppi'", "", "", "selitetark_2");
 

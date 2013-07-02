@@ -117,7 +117,7 @@ $ei_oteta_kulua_pois = true;
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		// tuotekoodi
-		$rtuoteno[$i]["tuoteno"] = empty($tuotetieto->ArticleIdentifier) ? utf8_decode($tuotetieto->ArticleName) : utf8_decode($tuotetieto->ArticleIdentifier);
+		$rtuoteno[$i]["tuoteno"] = empty($tuotetieto->ArticleIdentifier) ? pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName)) : pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleIdentifier));
 
 		$rtuoteno[$i]["tuoteno2"] = "";
 
@@ -176,7 +176,7 @@ if (count($tuotetiedot) > 0) {
 				$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
 			}
 
-			$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ArticleName);
+			$rtuoteno[$i]["nimitys"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName));
 			$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->RowVatExcludedAmount);
 
 			$xvati = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
@@ -203,7 +203,7 @@ if (count($tuotetiedot) > 0) {
 				$rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuperäinen tilausnumero rivikommenttiin mukaan
 			}
 
-			$rtuoteno[$i]["kommentti"] = trim($rtuoteno[$i]["kommentti"]);
+			$rtuoteno[$i]["kommentti"] = trim(pupesoft_cleanstring($rtuoteno[$i]["kommentti"]));
 
 			$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
 

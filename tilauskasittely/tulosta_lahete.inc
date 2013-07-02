@@ -3744,6 +3744,7 @@ if (!function_exists('alvierittely_lahete')) {
 
 			$ei_otsikoita = "";
 			$sivu_vaihtui = TRUE;
+			$tots = 1;
 		}
 
 

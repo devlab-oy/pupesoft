@@ -76,7 +76,7 @@ if (count($tuotetiedot) > 0) {
 		if (array_shift($tuotetieto->xpath('LIN/@eC212.7140')) != NULL) {
 
 			// Tuotekoodi
-			$rtuoteno[$i]["tuoteno"] = array_shift($tuotetieto->xpath('LIN/@eC212.7140'));
+			$rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring(array_shift($tuotetieto->xpath('LIN/@eC212.7140')));
 
 			// Veroton rivihinta
 			$rtuoteno[$i]["rivihinta"] = array_shift($tuotetieto->xpath('Group26/MOA[@eC516.5025="203"]/@eC516.5004'));
@@ -90,7 +90,7 @@ if (count($tuotetiedot) > 0) {
 				$ealvi[$i] = $rtuoteno[$i]["alv"] = "";
 			}
 
-			$rtuoteno[$i]["riviinfo"] = array_shift($tuotetieto-> xpath('IMD/@eC273.7008.1'));
+			$rtuoteno[$i]["riviinfo"] = pupesoft_cleanstring(array_shift($tuotetieto-> xpath('IMD/@eC273.7008.1')));
 
 			// Laskutettu määrä
 			$rtuoteno[$i]["kpl"] = array_shift($tuotetieto-> xpath('QTY[@eC186.6063="12"]/@eC186.6060'));
@@ -100,10 +100,10 @@ if (count($tuotetiedot) > 0) {
 				$rtuoteno[$i]["kpl"] = array_shift($tuotetieto-> xpath('QTY[@eC186.6063="47"]/@eC186.6060'));
 			}
 
-			$rtuoteno[$i]["tilaajanrivinro"] = array_shift($tuotetieto->xpath('Group29/RFF[@eC506.1153="CR"]/@eC506.1154'));
+			$rtuoteno[$i]["tilaajanrivinro"] = pupesoft_cleanstring(array_shift($tuotetieto->xpath('Group29/RFF[@eC506.1153="CR"]/@eC506.1154')));
 
 			//	Viite (EuroCard)
-			$rtuoteno[$i]["riviviite"] = array_shift($tuotetieto->xpath('Group29/RFF[@eC506.1153="VN"]/@eC506.1154'));
+			$rtuoteno[$i]["riviviite"] = pupesoft_cleanstring(array_shift($tuotetieto->xpath('Group29/RFF[@eC506.1153="VN"]/@eC506.1154')));
 
 			//	Tapahtumapäivä
 			$rtuoteno[$i]["laskutettuaika"] = array_shift($tuotetieto->xpath('DTM[@eC507.2005="11"]/@eC507.2380'));

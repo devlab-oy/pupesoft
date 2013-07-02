@@ -44,17 +44,7 @@ $ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode($xml->BuyerPartyDetails
 $laskuttajan_toimittajanumero = "";
 
 if (strpos($file, "maventa") !== false and trim($xml->SellerPartyDetails->SellerPartyIdentifier) != "") {
-	$laskuttajan_toimittajanumero = str_replace("-", "", trim($xml->SellerPartyDetails->SellerPartyIdentifier));
-
-	$query = "	SELECT toimittajanro
-				FROM toimi
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND ytunnus = '{$laskuttajan_toimittajanumero}'
-				AND toimittajanro != ''";
-	$toimittajanro_chk_res = pupe_query($query);
-	$toimittajanro_chk_row = mysql_fetch_assoc($toimittajanro_chk_res);
-
-	$laskuttajan_toimittajanumero = $toimittajanro_chk_row['toimittajanro'];
+	$laskuttajan_toimittajanumero = trim(str_replace("-", "", trim($xml->SellerPartyDetails->SellerPartyIdentifier)));
 }
 
 if ($yhtio == "") {
@@ -127,7 +117,7 @@ $ei_oteta_kulua_pois = true;
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		// tuotekoodi
-		$rtuoteno[$i]["tuoteno"] = empty($tuotetieto->ArticleIdentifier) ? utf8_decode($tuotetieto->ArticleName) : utf8_decode($tuotetieto->ArticleIdentifier);
+		$rtuoteno[$i]["tuoteno"] = empty($tuotetieto->ArticleIdentifier) ? pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName)) : pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleIdentifier));
 
 		$rtuoteno[$i]["tuoteno2"] = "";
 
@@ -186,7 +176,7 @@ if (count($tuotetiedot) > 0) {
 				$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
 			}
 
-			$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ArticleName);
+			$rtuoteno[$i]["nimitys"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName));
 			$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->RowVatExcludedAmount);
 
 			$xvati = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
@@ -213,7 +203,7 @@ if (count($tuotetiedot) > 0) {
 				$rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuperäinen tilausnumero rivikommenttiin mukaan
 			}
 
-			$rtuoteno[$i]["kommentti"] = trim($rtuoteno[$i]["kommentti"]);
+			$rtuoteno[$i]["kommentti"] = trim(pupesoft_cleanstring($rtuoteno[$i]["kommentti"]));
 
 			$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
 

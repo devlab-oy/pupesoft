@@ -63,10 +63,12 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 				if (mysql_num_rows($chk_res) == 0) {
 
 					// tuotteen toimittajat tuotenumerot loop
-					$query = "	SELECT *
+					$query = "	SELECT tuotteen_toimittajat.liitostunnus, tuotteen_toimittajat.toim_tuoteno
 								FROM tuotteen_toimittajat_tuotenumerot
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND viivakoodi = '{$viivakoodi}'";
+								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio 
+									AND tuotteen_toimittajat.tunnus = tuotteen_toimittajat_tuotenumerot.toim_tuoteno_tunnus)
+								WHERE tuotteen_toimittajat_tuotenumerot.yhtio = '{$kukarow['yhtio']}'
+								AND tuotteen_toimittajat_tuotenumerot.viivakoodi = '{$viivakoodi}'";
 					$chk_res = pupe_query($query);
 
 					if (mysql_num_rows($chk_res) != 0) {

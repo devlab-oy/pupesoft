@@ -26,7 +26,6 @@
 		livesearch_toimittajahaku();
 		exit;
 	}
-	enable_ajax();
 
 	if ($_REQUEST["tee"] == "NAYTATILAUS" and isset($_REQUEST["xml"])) {
 		$xml = urldecode($_REQUEST["xml"]);
@@ -46,6 +45,8 @@
 		echo $pdf;
 		exit;
 	}
+
+	enable_ajax();
 
 	// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ssä
 	$verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut"        : rtrim($verkkolaskut_in, "/");

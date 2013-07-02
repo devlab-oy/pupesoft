@@ -140,7 +140,13 @@
 				unset($yhtiorow);
 				unset($xmlstr);
 
+				// Napataan alkuperäinen kukarow
+				$vv_kukarow = $kukarow;
+
 				list($lasku_yhtio, $lasku_toimittaja) = verkkolasku_in($verkkolaskuvirheet_vaarat."/".$file, FALSE);
+
+				// Palautetaan alkuperäinen kukarow
+				$kukarow = $vv_kukarow;
 
 				if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"] or $lasku_yhtio["yhtio"] == "") {
 

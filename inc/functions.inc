@@ -113,7 +113,7 @@ if (!function_exists("pupesoft_login")) {
 
 					$result = pupe_query($query);
 
-					$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
+					$bool = setcookie("pupesoft_session", $session, time()+43200, "/"); // 12 tuntia voimassa
 
 					if ($bool === FALSE) {
 						$return['error'] = t("Selaimesi ei ilmeisesti tue cookieta",$browkieli).".";

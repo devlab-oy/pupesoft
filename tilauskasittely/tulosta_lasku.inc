@@ -2288,16 +2288,23 @@ if (!function_exists("tulosta_lasku")) {
 		$laresult = pupe_query($query);
 		$laskurow = mysql_fetch_assoc($laresult);
 
-		$asiakas_apu_query = "	SELECT *
-								FROM asiakas
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tunnus  = '{$laskurow["liitostunnus"]}'";
+		$asiakas_apu_query = "	SELECT max(asiakas.kieli) kieli,
+								max(asiakas.laskutyyppi) laskutyyppi,
+								max(asiakas.laskunsummapyoristys) laskunsummapyoristys,
+								max(asiakas.laskun_jarjestys_suunta) laskun_jarjestys_suunta,
+								max(asiakas.laskun_jarjestys) laskun_jarjestys,
+								group_concat(DISTINCT asiakas.asiakasnro SEPARATOR ', ') asiakasnro
+								FROM lasku
+								JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
+								AND asiakas.tunnus = lasku.liitostunnus)
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.tila = 'L'
+								AND lasku.alatila = 'X'
+								AND lasku.laskunro = '{$laskurow['laskunro']}'";
 		$asiakas_apu_res = pupe_query($asiakas_apu_query);
+		$asiakasrow = mysql_fetch_assoc($asiakas_apu_res);
 
-		if (mysql_num_rows($asiakas_apu_res) == 1) {
-			$asiakasrow = mysql_fetch_assoc($asiakas_apu_res);
-		}
-		else {
+		if ($asiakasrow['asiakasnro'] == NULL) {
 			$asiakasrow = array();
 		}
 

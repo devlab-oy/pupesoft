@@ -693,7 +693,7 @@
 					echo "</td>";
 				}
 
-				if (isset($worksheet)) $worksheet->write($excelrivi, 6, $trow["summa"]);
+				if (isset($worksheet)) $worksheet->writeNumber($excelrivi, 6, $trow["summa"]);
 
 				if ($trow["summa"] < 0) $summamiinus += $trow["summa"];
 				else $summaplus += $trow["summa"];
@@ -702,7 +702,7 @@
 
 				if (!isset($worksheet)) echo "<td valign='top'>$trow[vero]</td>";
 
-				if (isset($worksheet)) $worksheet->write($excelrivi, 7, $trow["vero"]);
+				if (isset($worksheet)) $worksheet->writeNumber($excelrivi, 7, $trow["vero"]);
 
 				if (strlen(trim($tili)) > 0) {
 					//lasketaan ja echotaan kumulatiivinen summa
@@ -710,7 +710,7 @@
 
 					if (!isset($worksheet)) echo "<td align='right' valign='top'>".sprintf("%.2f",$kumsumma)."</td>";
 
-					if (isset($worksheet)) $worksheet->write($excelrivi, 8, $kumsumma);
+					if (isset($worksheet)) $worksheet->writeNumber($excelrivi, 8, $kumsumma);
 				}
 
 				if ($trow["valkoodi"] == $yhtiorow["valkoodi"]) {

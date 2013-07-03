@@ -43,56 +43,6 @@ $ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode($xml->BuyerPartyDetails
 
 $laskuttajan_toimittajanumero = "";
 
-if (strpos($file, "maventa") !== false and trim($xml->SellerPartyDetails->SellerPartyIdentifier) != "") {
-	$laskuttajan_toimittajanumero = str_replace("-", "", trim($xml->SellerPartyDetails->SellerPartyIdentifier));
-
-	$query = "	SELECT toimittajanro
-				FROM toimi
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND ytunnus = '{$laskuttajan_toimittajanumero}'
-				AND toimittajanro != ''";
-	$toimittajanro_chk_res = pupe_query($query);
-
-	if (mysql_num_rows($toimittajanro_chk_res) == 0) {
-
-		// vaihtoehtoiset_verkkolaskutunnukset poikkeus tarkistus
-		$poikkeus_arvot = array(
-			'nimi' => $laskuttajan_nimi,
-			'ytunnus' => $laskuttajan_vat,
-			'ovt_tunnus' => $laskuttajan_ovt
-		);
-
-		foreach ($poikkeus_arvot as $poikkeus_sarake => $poikkeus_arvo) {
-			$query = "	SELECT *
-						FROM vaihtoehtoiset_verkkolaskutunnukset
-						WHERE yhtio 	 = '{$kukarow['yhtio']}'
-						AND kohde_sarake = '{$poikkeus_sarake}'
-						AND arvo 		 = '{$poikkeus_arvo}'";
-			$result = pupe_query($query);
-			$poikkeus = mysql_fetch_assoc($result);
-
-			if (!empty($poikkeus)) {
-				$query = "	SELECT *
-							FROM toimi
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							and tunnus  = '{$poikkeus['toimi_tunnus']}'
-							and tyyppi != 'P'";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$toimittajanro_chk_row = mysql_fetch_assoc($result);
-					$laskuttajan_toimittajanumero = $toimittajanro_chk_row['toimittajanro'];
-					break;
-				}
-			}
-		}
-	}
-	else {
-		$toimittajanro_chk_row = mysql_fetch_assoc($toimittajanro_chk_res);
-		$laskuttajan_toimittajanumero = $toimittajanro_chk_row['toimittajanro'];
-	}
-}
-
 if ($yhtio == "") {
 	$yhtio = $xml->BuyerPartyDetails->BuyerPartyIdentifier;
 }

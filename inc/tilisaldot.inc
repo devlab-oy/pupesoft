@@ -4,7 +4,7 @@
 
 	if ($tee == '1' and !isset($ajarappari)) {
 		$tee = "";
-	} 
+	}
 
 	if ($tee == '1') {
 		if ($tilino != '') {
@@ -111,7 +111,7 @@
 		echo "<th>".t("Kumulatiivinen")."</font></th>";
 		echo "<th>".t("Summa valuutassa")."</font></th>";
 
-		if(isset($workbook)) {
+		if(isset($worksheet)) {
 			$iiiiii = 0;
 
 			if ($tilino != '') {
@@ -216,7 +216,7 @@
 				}
 				echo "</td>";
 
-				if(isset($workbook)) {
+				if (isset($worksheet)) {
 					$iiiiii = 0;
 
 					if ($tilino != '') {
@@ -339,5 +339,3 @@
 	echo "<tr><th>".t("Tee Excel")."</th>
 			<td><input type = 'checkbox' name = 'excel'  value = 'YES'></td></tr>
 			<tr><th><input type = 'submit' name='ajarappari' value = '".t("Näytä")."'></th><td></td></tr></table></form>";
-
-?>

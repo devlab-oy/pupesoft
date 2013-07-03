@@ -126,7 +126,16 @@
 
 		if (trim($sanomatunniste) != '') {
 
-			$valitse_lisa = $valitse == 'asn' ? 'asn' : 'tec';
+			//$valitse_lisa = $valitse == 'asn' ? 'asn' : 'tec';
+			if ($valitse == 'maventa') {
+				$valitse_lisa = 'mav';
+			}
+			else if ($valitse == 'asn') {
+				$valitse_lisa = 'asn';
+			}
+			else {
+				$valitse_lisa = 'tec';
+			}
 
 			$query = "	DELETE FROM asn_sanomat
 						WHERE yhtio = '{$kukarow['yhtio']}'

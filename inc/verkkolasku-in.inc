@@ -521,6 +521,7 @@
 					}
 				}
 			}
+			$laskun_toimitunnus = $trow['tunnus'];
 
 			if (file_exists("inc/maventa.inc")) {
 				require("inc/maventa.inc");

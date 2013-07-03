@@ -337,5 +337,7 @@
 			<td><input type = 'checkbox' name = 'kustannuspaikoittain' value = 'YES' $chk></td></tr>";
 
 	echo "<tr><th>".t("Tee Excel")."</th>
-			<td><input type = 'checkbox' name = 'excel'  value = 'YES'></td></tr>
-			<tr><th><input type = 'submit' name='ajarappari' value = '".t("Näytä")."'></th><td></td></tr></table></form>";
+			<td><input type = 'checkbox' name = 'excel'  value = 'YES'></td></tr></table>";
+
+
+	echo "<br><input type = 'submit' name='ajarappari' value = '".t("Näytä")."'></form>";

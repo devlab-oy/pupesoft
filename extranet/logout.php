@@ -6,9 +6,6 @@
 	$result = mysql_query($query) or pupe_error($query);
 	$bool = setcookie("pupesoft_session", "", time()-43200, "/");
 
-	// Taaksepäinyhteensopivuus. Poistetaan myös vanha cookie, jossa on path mukana
-	$bool = setcookie("pupesoft_session", "", time()-43200, parse_url($palvelin, PHP_URL_PATH));
-
 	ob_end_flush();
 
 	if ($toim=='change')

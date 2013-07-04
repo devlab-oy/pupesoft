@@ -120,6 +120,8 @@
 
 					if ($yhtiorow['kerayserat'] == 'K') {
 
+						list($eranumero, $sscc) = explode("_", $eranumero_sscc);
+
 						// Jos paketilla on jo ulkoinen sscc, lähetetään discardParcel-sanoma
 						$query = "	SELECT *
 									FROM kerayserat
@@ -135,13 +137,12 @@
 
 							$sscc_ulkoinen_chk_row = mysql_fetch_assoc($sscc_ulkoinen_chk_res);
 
+							require_once("inc/unifaun_send.inc");
 							$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
 
 							$unifaun->_discardParcel("", $sscc_ulkoinen_chk_row['sscc_ulkoinen']);
 							$unifaun->ftpSend();
 						}
-
-						list($eranumero, $sscc) = explode("_", $eranumero_sscc);
 
 						$query = "	UPDATE kerayserat SET
 									sscc_ulkoinen = '{$sscc_ulkoinen}'

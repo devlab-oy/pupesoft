@@ -520,9 +520,17 @@
 				}
 			}
 
+			echo "<pre>",var_dump($rtuoteno),"</pre>----------------------------------------------------------------------------------------------------<br><br>";
+
 			if (@file_exists("inc/maventa.inc")) {
 				require("inc/maventa.inc");
 			}
+
+			echo "<pre>",var_dump($rtuoteno),"</pre>";
+
+			unlink($laskut."/".$file);
+			unlink("/tmp/##verkkolasku-in.lock");
+			exit;
 
 			// Tätä voi ajaa myös verkkolaskuvirheetohjelmasta silloin $luolasku on FALSE ja lopetetaan tässä vaiheessa
 			if ($luolasku === TRUE) {
@@ -1543,7 +1551,7 @@
 					}
 
 					// jos kyseessä on tavaraa
-					if (($ebid != 'MAVENTAXML' or $trow['asn_sanomat'] == 'M') and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I' or $trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L')) {
+					if ((!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and in_array($trow['oletus_vienti'], array('C','F','I','J','K','L'))) {
 						/**
 						 * Jos Unikkoinvoice, muutetaan oletus_vienti
 						 * C => A

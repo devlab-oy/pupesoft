@@ -904,7 +904,7 @@
 									WHERE yhtio 		 = '{$yhtio}'
 									AND laji 			 = '{$lajilisa}'
 									AND asn_numero 		 = '{$laskun_numero}'
-									AND toimittajanumero = '{$laskuttajan_toimittajanumero}'";
+									AND toimittajanumero = '{$trow['toimittajanro']}'";
 						$duplikaattilasku_check_res = pupe_query($query);
 
 						if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
@@ -1482,7 +1482,7 @@
 												tilausnumero 		= '{$rtuoteno[$i]['ostotilausnro']}',
 												tilausrivi 			= '',
 												tilausrivinpositio 	= '{$rtuoteno[$i]['tilaajanrivinro']}',
-												toimittajanumero 	= '{$laskuttajan_toimittajanumero}',
+												toimittajanumero 	= '{$trow['toimittajanro']}',
 												toim_tuoteno 		= '{$rtuoteno[$i]['tuoteno']}',
 												toim_tuoteno2 		= '{$rtuoteno[$i]['tuoteno2']}',
 												tuoteno				= '',

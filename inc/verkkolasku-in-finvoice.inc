@@ -89,7 +89,6 @@ if ($laskun_tyyppi == "INV02") {
 // Käsitellään tuoterivit
 $tuotetiedot	= $xml->InvoiceRow;
 $i				= 0;
-$x 				= 0;
 $rtuoteno		= array();
 $ealvi		 	= array("");
 $lisavat	 	= array("");
@@ -193,11 +192,6 @@ if (count($tuotetiedot) > 0) {
 		}
 
 		$i++;
-
-		if ($x != 0) {
-			$x = 0;
-			$i++;
-		}
 	}
 }
 

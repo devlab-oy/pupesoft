@@ -484,7 +484,6 @@
 
 				if (mysql_num_rows($result) == 1) {
 					$trow = mysql_fetch_assoc($result);
-					$laskuttajan_toimittajanumero = $trow['toimittajanro'];
 				}
 			}
 
@@ -515,15 +514,13 @@
 
 						if (mysql_num_rows($result) == 1) {
 							$trow = mysql_fetch_assoc($result);
-							$laskuttajan_toimittajanumero = $trow['toimittajanro'];
 							break;
 						}
 					}
 				}
 			}
-			$laskun_toimitunnus = $trow['tunnus'];
 
-			if (file_exists("inc/maventa.inc")) {
+			if (@file_exists("inc/maventa.inc")) {
 				require("inc/maventa.inc");
 			}
 

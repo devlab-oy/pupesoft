@@ -520,17 +520,9 @@
 				}
 			}
 
-			echo "<pre>",var_dump($rtuoteno),"</pre>----------------------------------------------------------------------------------------------------<br><br>";
-
 			if (@file_exists("inc/maventa.inc")) {
 				require("inc/maventa.inc");
 			}
-
-			echo "<pre>",var_dump($rtuoteno),"</pre>";
-
-			unlink($laskut."/".$file);
-			unlink("/tmp/##verkkolasku-in.lock");
-			exit;
 
 			// Tätä voi ajaa myös verkkolaskuvirheetohjelmasta silloin $luolasku on FALSE ja lopetetaan tässä vaiheessa
 			if ($luolasku === TRUE) {

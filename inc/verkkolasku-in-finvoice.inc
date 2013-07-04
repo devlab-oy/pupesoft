@@ -87,30 +87,20 @@ if ($laskun_tyyppi == "INV02") {
 }
 
 // Käsitellään tuoterivit
-$tuotetiedot	= $xml->InvoiceRow;
-$i				= 0;
-$rtuoteno		= array();
-$ealvi		 	= array("");
-$lisavat	 	= array("");
-
-$laskun_rahtikulu = 0;
-
-/*
- * osto_kulu = $laskun_pakkauskulu
- * osto_rahti = invoiceSummary rahti
- * osto_rivi_kulu  = ($laskun_rahtikulu, $rtuoteno[$i]['kulu'])
- */
-$osto_kulu = 0;
-$osto_rahti = 0;
-$osto_rivi_kulu = 0;
-
-$osto_kulu_alv = 0;
-$osto_rahti_alv = 0;
-$osto_rivi_kulu_alv = 0;
-
-$ei_oteta_kulua_pois = true;
-
-$rivien_summa_yhteensa = 0;
+$tuotetiedot			= $xml->InvoiceRow;
+$i						= 0;
+$rtuoteno				= array();
+$ealvi		 			= array("");
+$lisavat	 			= array("");
+$laskun_rahtikulu		= 0;
+$osto_kulu 				= 0;
+$osto_rahti 			= 0;
+$osto_rivi_kulu 		= 0;
+$osto_kulu_alv 			= 0;
+$osto_rahti_alv 		= 0;
+$osto_rivi_kulu_alv		= 0;
+$ei_oteta_kulua_pois	= TRUE;
+$rivien_summa_yhteensa	= 0;
 
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {

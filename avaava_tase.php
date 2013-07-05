@@ -320,14 +320,14 @@
 					FROM tili
 					WHERE yhtio = '$kukarow[yhtio]'";
 		$tilires = pupe_query($query);
-		$tilirow = mysql_fetch_assoc($tilires);
+		$tilitrow = mysql_fetch_assoc($tilires);
 
 		// Haetaan firman tulos
 		$query = "	SELECT sum(tiliointi.summa) summa
 	 	            FROM tiliointi use index (yhtio_tilino_tapvm)
 		            WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
 		            and tiliointi.korjattu = ''
-					and tiliointi.tilino in ({$tilirow['tulostilit']})
+					and tiliointi.tilino in ({$tilitrow['tulostilit']})
 					and tiliointi.tapvm >= '{$tilikausi_alku_loppu_row['tilikausi_alku']}'
 		            and tiliointi.tapvm <= '{$tilikausi_alku_loppu_row['tilikausi_loppu']}'
 					and tiliointi.ltunnus != '{$tulostositerow['tunnus']}'";
@@ -338,7 +338,7 @@
 					FROM tiliointi use index (yhtio_tilino_tapvm)
 					WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
 					and tiliointi.korjattu = ''
-					and tiliointi.tilino in ({$tilirow['tasetilit']})
+					and tiliointi.tilino in ({$tilitrow['tasetilit']})
 					and tiliointi.tapvm >= '{$tilikausi_alku_loppu_row['tilikausi_alku']}'
 					and tiliointi.tapvm <= '{$tilikausi_alku_loppu_row['tilikausi_loppu']}'
 					and tiliointi.ltunnus != '{$tulostositerow['tunnus']}'

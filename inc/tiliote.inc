@@ -210,11 +210,11 @@
 
 							if (mysql_num_rows($result) != 1) {
 								// poistetaan oy:t ja ab:t
-								$maksaa = trim(preg_replace('/\b(OY|AB)\b/i', '', strtoupper($maksaa)));
+								$maksaatemp = trim(preg_replace('/\b(OY|AB)\b/i', '', strtoupper($maksaa)));
 
 								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 											FROM lasku
-											WHERE left(nimi,35) LIKE '%$maksaa%'
+											WHERE left(nimi,35) LIKE '%$maksaatemp%'
 											and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
 											and yhtio	= '$yritirow[yhtio]'
 											and tila 	= 'Q'
@@ -225,7 +225,7 @@
 								if (mysql_num_rows($result) != 1) {
 									$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
 												FROM lasku
-												WHERE left(nimi,35) LIKE '%$maksaa%'
+												WHERE left(nimi,35) LIKE '%$maksaatemp%'
 												and ((summa = $kohdm * -1) or (abs(summa + $kohdm) < 0.01))
 												and yhtio	= '$yritirow[yhtio]'
 												and tila 	= 'Q'
@@ -237,16 +237,16 @@
 
 							if (mysql_num_rows($result) != 1) {
 								// konvertoidaan ääkköset
-								$maksaa = str_replace ("å", "a", $maksaa);
-								$maksaa = str_replace ("ä", "a", $maksaa);
-								$maksaa = str_replace ("ö", "o", $maksaa);
-								$maksaa = str_replace ("Å", "A", $maksaa);
-								$maksaa = str_replace ("Ä", "A", $maksaa);
-								$maksaa = str_replace ("Ö", "O", $maksaa);
+								$maksaatemp = str_replace ("å", "a", $maksaatemp);
+								$maksaatemp = str_replace ("ä", "a", $maksaatemp);
+								$maksaatemp = str_replace ("ö", "o", $maksaatemp);
+								$maksaatemp = str_replace ("Å", "A", $maksaatemp);
+								$maksaatemp = str_replace ("Ä", "A", $maksaatemp);
+								$maksaatemp = str_replace ("Ö", "O", $maksaatemp);
 
 								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 											FROM lasku
-											WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'å','a'), 'ä','a'), 'ö','o'), 'Å','A'), 'Ä','A'), 'Ö','O') LIKE '%$maksaa%'
+											WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'å','a'), 'ä','a'), 'ö','o'), 'Å','A'), 'Ä','A'), 'Ö','O') LIKE '%$maksaatemp%'
 											and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
 											and yhtio 	= '$yritirow[yhtio]'
 											and tila 	= 'Q'
@@ -257,7 +257,7 @@
 								if (mysql_num_rows($result) != 1) {
 									$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
 												FROM lasku
-												WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'å','a'), 'ä','a'), 'ö','o'), 'Å','A'), 'Ä','A'), 'Ö','O') LIKE '%$maksaa%'
+												WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'å','a'), 'ä','a'), 'ö','o'), 'Å','A'), 'Ä','A'), 'Ö','O') LIKE '%$maksaatemp%'
 												and ((summa = $kohdm * -1) or (abs(summa + $kohdm) < 0.01))
 												and yhtio 	= '$yritirow[yhtio]'
 												and tila 	= 'Q'

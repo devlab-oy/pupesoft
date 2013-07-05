@@ -849,7 +849,7 @@
 		$kentta = 'tpp';
 
 		if ((isset($gokfrom) and $gokfrom == 'avaavatase') or (isset($avaavatase) and $avaavatase == 'joo')) {
-			echo "<br><br><font class='error'>".t("HUOM: Avaavaa tasetta ei ole vielä kirjattu")."!<br>".t("HUOM: Tarkista tämä tosite ja tee kirjaukset klikkamalla *Tee tosite*-nappia")."!</font><br>";
+			echo "<br><font class='error'>".t("Tilikauden tulos kirjattu")."!<br><br>".t("HUOM: Avaavaa tasetta ei ole vielä kirjattu")."!<br>".t("HUOM: Tarkista tämä tosite ja tee kirjaukset klikkamalla *Tee tosite*-nappia")."!</font><br>";
 		}
 
 		echo "<br>\n";

@@ -237,12 +237,7 @@
 
 							if (mysql_num_rows($result) != 1) {
 								// konvertoidaan ääkköset
-								$maksaatemp = str_replace ("å", "a", $maksaatemp);
-								$maksaatemp = str_replace ("ä", "a", $maksaatemp);
-								$maksaatemp = str_replace ("ö", "o", $maksaatemp);
-								$maksaatemp = str_replace ("Å", "A", $maksaatemp);
-								$maksaatemp = str_replace ("Ä", "A", $maksaatemp);
-								$maksaatemp = str_replace ("Ö", "O", $maksaatemp);
+								$maksaatemp = str_replace (array("å", "ä", "ö", "Å", "Ä", "Ö"), array("a", "a", "o", "A", "A", "O"), $maksaa);
 
 								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 											FROM lasku

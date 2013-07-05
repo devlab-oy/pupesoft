@@ -19455,7 +19455,7 @@ if (!function_exists("suuntalavan_tuotteet")) {
 		$tuotenolisa = trim($tuoteno) != "" ? "and tilausrivi.tuoteno = '{$tuoteno}'" : "";
 		# Haku eankoodilla
 		$eankoodi = mysql_real_escape_string($eankoodi);
-		$eankoodilisa = trim($eankoodi) != "" ? "and tuote.eankoodi = '{$eankoodi}'" : "";
+		$eankoodilisa = trim($eankoodi) != "" ? "and (tuote.eankoodi = '{$eankoodi}' OR tuotteen_toimittajat.viivakoodi = '{$eankoodi}' OR tuotteen_toimittajat_tuotenumerot.viivakoodi = '{$eankoodi}')" : "";
 
 		$tilriv = (int) $tilriv;
 
@@ -19475,6 +19475,7 @@ if (!function_exists("suuntalavan_tuotteet")) {
 					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
 					JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$liitostunnus}')
+					LEFT JOIN tuotteen_toimittajat_tuotenumerot ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio AND tuotteen_toimittajat_tuotenumerot.toim_tuoteno_tunnus = tuotteen_toimittajat.tunnus)
 					LEFT JOIN tilausrivin_lisatiedot
 					ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'

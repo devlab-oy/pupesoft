@@ -44,54 +44,36 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 		// Viivakoodi case
 		if ($viivakoodi != '') {
 
-			// Tuotetaulu-loop
-			$query = "	SELECT *
+			// Haetaan eankoodilla tuotenumeroa kolmesta eri paikkaa
+			$query = "	(SELECT tuoteno
 						FROM tuote
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND eankoodi = '{$viivakoodi}'";
+						AND eankoodi = '{$viivakoodi}')
+						UNION
+						(SELECT tuoteno
+						FROM tuotteen_toimittajat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND viivakoodi = '{$viivakoodi}')
+						UNION
+						(SELECT tuotteen_toimittajat.tuoteno
+						FROM tuotteen_toimittajat_tuotenumerot
+						JOIN tuotteen_toimittajat ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio 
+						AND tuotteen_toimittajat.tunnus = tuotteen_toimittajat_tuotenumerot.toim_tuoteno_tunnus)
+						WHERE tuotteen_toimittajat_tuotenumerot.yhtio = '{$kukarow['yhtio']}'
+						AND tuotteen_toimittajat_tuotenumerot.viivakoodi = '{$viivakoodi}')";
 			$chk_res = pupe_query($query);
 
-			if (mysql_num_rows($chk_res) == 0) {
-
-				// tuotteen toimittajat loop
-				$query = "	SELECT *
-							FROM tuotteen_toimittajat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND viivakoodi = '{$viivakoodi}'";
-				$chk_res = pupe_query($query);
-
-				if (mysql_num_rows($chk_res) == 0) {
-
-					// tuotteen toimittajat tuotenumerot loop
-					$query = "	SELECT tuotteen_toimittajat.liitostunnus, tuotteen_toimittajat.toim_tuoteno
-								FROM tuotteen_toimittajat_tuotenumerot
-								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio 
-									AND tuotteen_toimittajat.tunnus = tuotteen_toimittajat_tuotenumerot.toim_tuoteno_tunnus)
-								WHERE tuotteen_toimittajat_tuotenumerot.yhtio = '{$kukarow['yhtio']}'
-								AND tuotteen_toimittajat_tuotenumerot.viivakoodi = '{$viivakoodi}'";
-					$chk_res = pupe_query($query);
-
-					if (mysql_num_rows($chk_res) != 0) {
-						$chk_row = mysql_fetch_assoc($chk_res);
-					}
+			if (mysql_num_rows($chk_res) != 0) {
+            
+				// laitetaan viivakoodihakuihin tuotenumerot jotka löytyivät, ja haetaan tulokset seuraavassa queryssä. Pistetään tähän max 200, ettei jäädä looppailemaan
+				$params['viivakoodi'] = "(";
+				$i = 0;
+				while ($eankoodi_chk_row = mysql_fetch_assoc($chk_res)) {
+					$i++;
+					$params['viivakoodi'] .= "tuote.tuoteno = '{$eankoodi_chk_row['tuoteno']}' OR ";
+					if ($i == 200) break;
 				}
-				else {
-					$chk_row = mysql_fetch_assoc($chk_res);
-				}
-
-				if (mysql_num_rows($chk_res) != 0) {
-
-					$query = "	SELECT tuote.eankoodi
-								FROM tuotteen_toimittajat
-								JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
-								WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-								AND tuotteen_toimittajat.liitostunnus = '{$chk_row['liitostunnus']}'
-								AND tuotteen_toimittajat.toim_tuoteno = '{$chk_row['toim_tuoteno']}'";
-					$eankoodi_chk_res = pupe_query($query);
-					$eankoodi_chk_row = mysql_fetch_assoc($eankoodi_chk_res);
-
-					$params['viivakoodi'] = "tuote.eankoodi = '{$eankoodi_chk_row['eankoodi']}'";
-				}
+				$params['viivakoodi'] = substr($params['viivakoodi'], 0, -4) . ")";
 			}
 		}
 

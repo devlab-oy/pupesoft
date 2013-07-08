@@ -30,52 +30,20 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 	$hylly = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", "", $tuotepaikka);
 
 	// Hakuehdot
-	if ($viivakoodi != '')	$params['viivakoodi'] = "tuote.eankoodi = '{$viivakoodi}'";
 	if ($tuoteno != '')		$params['tuoteno'] = "tuote.tuoteno = '{$tuoteno}'";
 	if ($tuotepaikka != '') $params['tuotepaikka'] = "concat(tuotepaikat.hyllyalue,
 										 tuotepaikat.hyllynro,
 										 tuotepaikat.hyllyvali,
 										 tuotepaikat.hyllytaso) LIKE '$hylly%'";
+	// Viivakoodi case
+	if ($viivakoodi != '') {
+		$tuotenumerot = hae_viivakoodilla($viivakoodi);
+		$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+	}
 
 	$osumat = array();
 
 	if (!empty($params)) {
-
-		// Viivakoodi case
-		if ($viivakoodi != '') {
-
-			// Haetaan eankoodilla tuotenumeroa kolmesta eri paikkaa
-			$query = "	(SELECT tuoteno
-						FROM tuote
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND eankoodi = '{$viivakoodi}')
-						UNION
-						(SELECT tuoteno
-						FROM tuotteen_toimittajat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND viivakoodi = '{$viivakoodi}')
-						UNION
-						(SELECT tuotteen_toimittajat.tuoteno
-						FROM tuotteen_toimittajat_tuotenumerot
-						JOIN tuotteen_toimittajat ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio 
-						AND tuotteen_toimittajat.tunnus = tuotteen_toimittajat_tuotenumerot.toim_tuoteno_tunnus)
-						WHERE tuotteen_toimittajat_tuotenumerot.yhtio = '{$kukarow['yhtio']}'
-						AND tuotteen_toimittajat_tuotenumerot.viivakoodi = '{$viivakoodi}')";
-			$chk_res = pupe_query($query);
-
-			if (mysql_num_rows($chk_res) != 0) {
-            
-				// laitetaan viivakoodihakuihin tuotenumerot jotka lˆytyiv‰t, ja haetaan tulokset seuraavassa queryss‰. Pistet‰‰n t‰h‰n max 200, ettei j‰‰d‰ looppailemaan
-				$params['viivakoodi'] = "(";
-				$i = 0;
-				while ($eankoodi_chk_row = mysql_fetch_assoc($chk_res)) {
-					$i++;
-					$params['viivakoodi'] .= "tuote.tuoteno = '{$eankoodi_chk_row['tuoteno']}' OR ";
-					if ($i == 200) break;
-				}
-				$params['viivakoodi'] = substr($params['viivakoodi'], 0, -4) . ")";
-			}
-		}
 
 		$haku_ehto = implode($params, " AND ");
 

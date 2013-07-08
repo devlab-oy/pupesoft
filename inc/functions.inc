@@ -19455,7 +19455,10 @@ if (!function_exists("suuntalavan_tuotteet")) {
 		$tuotenolisa = trim($tuoteno) != "" ? "and tilausrivi.tuoteno = '{$tuoteno}'" : "";
 		# Haku eankoodilla
 		$eankoodi = mysql_real_escape_string($eankoodi);
-		$eankoodilisa = trim($eankoodi) != "" ? "and tuote.eankoodi = '{$eankoodi}'" : "";
+		if ($eankoodi != '') {
+			$tuotenumerot = hae_viivakoodilla($eankoodi);
+			$eankoodilisa = "and tilausrivi.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+		}
 
 		$tilriv = (int) $tilriv;
 
@@ -22620,5 +22623,37 @@ if (!function_exists("saako_myyda_private_label")) {
 			//tänne tullaan, jos tuote ei ees oo private label => saa myydä!
 			return TRUE;
 		}
+	}
+}
+
+if (!function_exists("hae_viivakoodilla")) {
+	function hae_viivakoodilla($viivakoodi) {
+		global $kukarow, $yhtiorow;
+
+		// Haetaan eankoodilla tuotenumeroa kolmesta eri paikkaa
+		$query = "	(SELECT tuoteno
+					FROM tuote
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND eankoodi = '{$viivakoodi}')
+					UNION
+					(SELECT tuoteno
+					FROM tuotteen_toimittajat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND viivakoodi = '{$viivakoodi}')
+					UNION
+					(SELECT tuotteen_toimittajat.tuoteno
+					FROM tuotteen_toimittajat_tuotenumerot
+					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio
+					AND tuotteen_toimittajat.tunnus = tuotteen_toimittajat_tuotenumerot.toim_tuoteno_tunnus)
+					WHERE tuotteen_toimittajat_tuotenumerot.yhtio = '{$kukarow['yhtio']}'
+					AND tuotteen_toimittajat_tuotenumerot.viivakoodi = '{$viivakoodi}')
+					LIMIT 200";
+		$chk_res = pupe_query($query);
+
+		while ($row = mysql_fetch_assoc($chk_res)) {
+			$viivakoodit[$row['tuoteno']] = $row['tuoteno'];
+		}
+
+		return $viivakoodit;
 	}
 }

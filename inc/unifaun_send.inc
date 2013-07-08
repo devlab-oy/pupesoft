@@ -772,16 +772,15 @@ class Unifaun {
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['paino'])); # Weight
 		$uni_par_val->addAttribute('n', "weight");
 
-		$query = "	SELECT koodi,
-					pakkauksen_sarman_minimimitta
+		$query = "	SELECT koodi, pakkauksen_sarman_minimimitta
 					FROM rahdinkuljettajat
 					WHERE yhtio = '{$this->kukarow['yhtio']}'
-					AND koodi = '{$this->toitarow['rahdinkuljettaja']}'";
+					AND koodi   = '{$this->toitarow['rahdinkuljettaja']}'";
 		$rahdinkuljettajat_result = pupe_query($query);
 		$rahdinkuljettaja_rivi = mysql_fetch_assoc($rahdinkuljettajat_result);
 
 		if (empty($rahdinkuljettaja_rivi['pakkauksen_sarman_minimimitta'])) {
-			$pakkauksen_sarman_minimimitta = 0.01;
+			$pakkauksen_sarman_minimimitta = 0.25;
 		}
 		else {
 			$pakkauksen_sarman_minimimitta = $rahdinkuljettaja_rivi['pakkauksen_sarman_minimimitta'];
@@ -798,13 +797,13 @@ class Unifaun {
 		*/
 		if ($pakkaustiedot['kuutiot'] > 0) {
 			$pakkaustiedot['korkeus'] = $pakkaustiedot['kuutiot'] / ($pakkaustiedot['syvyys'] * $pakkaustiedot['leveys']);
-
 			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < $pakkauksen_sarman_minimimitta ? $pakkauksen_sarman_minimimitta : round($pakkaustiedot['korkeus'], 2);
 		}
 		else {
 			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < $pakkauksen_sarman_minimimitta ? $pakkauksen_sarman_minimimitta : $pakkaustiedot['korkeus'];
 			$pakkaustiedot['kuutiot'] = $pakkaustiedot['korkeus'] * $pakkaustiedot['leveys'] * $pakkaustiedot['syvyys'];
 		}
+
 		$pakkaustiedot['kuutiot'] = $pakkaustiedot['kuutiot'] < 0.01 ? 0.01 : $pakkaustiedot['kuutiot'];
 
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['kuutiot'])); # Volume

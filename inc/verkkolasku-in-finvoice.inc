@@ -171,9 +171,10 @@ if (count($tuotetiedot) > 0) {
 			$rtuoteno[$i]["kommentti"] = trim($rtuoteno[$i]["kommentti"]);
 
 			$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
-			
+
 			$rtuoteno[$i]["yksikko"] = trim($tuotetieto->DeliveredQuantity->attributes()->QuantityUnitCode);
 			$rtuoteno[$i]["tilaajanrivinro"] = trim($tuotetieto->RowIdentifier);
+			$rtuoteno[$i]["lapsi"] = "";
 		}
 		else {
 			//	Poistetaan tämä tietue

@@ -113,7 +113,7 @@ if (!function_exists("pupesoft_login")) {
 
 					$result = pupe_query($query);
 
-					$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
+					$bool = setcookie("pupesoft_session", $session, time()+43200, "/"); // 12 tuntia voimassa
 
 					if ($bool === FALSE) {
 						$return['error'] = t("Selaimesi ei ilmeisesti tue cookieta",$browkieli).".";
@@ -2671,6 +2671,7 @@ if (!function_exists("jalkilaskentafunktio")) {
 
 		// Taulut lukkoon.
 		$qu = "	LOCK TABLE asiakas READ,
+				avainsana READ,
 				lasku WRITE,
 				sarjanumeroseuranta READ,
 				sarjanumeroseuranta_arvomuutos READ,
@@ -9243,10 +9244,17 @@ if (!function_exists("livesearch_toimittajahaku")) {
 				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
 			</script>";
 
-			$query = "	SELECT *, concat_ws(', ', nimi, if(trim(nimitark)='', NULL, nimitark)) nimi
+			$query = "	(SELECT *, concat_ws(', ', nimi, if(trim(nimitark)='', NULL, nimitark)) nimi
 						FROM toimi
 						WHERE toimi.yhtio = '{$kukarow['yhtio']}'
-						AND toimi.nimi LIKE '%{$haku}%'";
+						AND toimi.nimi LIKE '%{$haku}%'
+						and tyyppi != 'P')
+						UNION
+						(SELECT *, concat_ws(', ', nimi, if(trim(nimitark)='', NULL, nimitark)) nimi
+						FROM toimi
+						WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+						AND toimi.nimitark LIKE '%{$haku}%'
+						and tyyppi != 'P')";
 			$result = pupe_query($query);
 
 			$limit = 0;

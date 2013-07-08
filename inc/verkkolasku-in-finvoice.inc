@@ -43,6 +43,10 @@ $ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode($xml->BuyerPartyDetails
 
 $laskuttajan_toimittajanumero = "";
 
+if (strpos($file, "maventa") !== false and trim($xml->SellerPartyDetails->SellerPartyIdentifier) != "") {
+	$laskuttajan_toimittajanumero = trim(str_replace("-", "", trim($xml->SellerPartyDetails->SellerPartyIdentifier)));
+}
+
 if ($yhtio == "") {
 	$yhtio = $xml->BuyerPartyDetails->BuyerPartyIdentifier;
 }
@@ -50,7 +54,6 @@ if ($yhtio == "") {
 if ($yhtio == "") {
 	$yhtio = $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
 }
-
 
 // Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, että se on ovtmuodossa
 if (strlen($yhtio) != 18 or strtoupper(substr($yhtio,0,2)) != "FI") {
@@ -92,25 +95,23 @@ $i						= 0;
 $rtuoteno				= array();
 $ealvi		 			= array("");
 $lisavat	 			= array("");
-$laskun_rahtikulu		= 0;
+$laskun_rahtikulu 		= 0;
 $osto_kulu 				= 0;
 $osto_rahti 			= 0;
 $osto_rivi_kulu 		= 0;
 $osto_kulu_alv 			= 0;
 $osto_rahti_alv 		= 0;
-$osto_rivi_kulu_alv		= 0;
+$osto_rivi_kulu_alv 	= 0;
 $ei_oteta_kulua_pois	= TRUE;
 $rivien_summa_yhteensa	= 0;
 
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		// tuotekoodi
-		$rtuoteno[$i]["tuoteno"] = empty($tuotetieto->ArticleIdentifier) ? utf8_decode($tuotetieto->ArticleName) : utf8_decode($tuotetieto->ArticleIdentifier);
-
+		$rtuoteno[$i]["tuoteno"]  = empty($tuotetieto->ArticleIdentifier) ? pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName)) : pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleIdentifier));
 		$rtuoteno[$i]["tuoteno2"] = "";
 
 		if ($rtuoteno[$i]["tuoteno"] != "") {
-
 			if (strpos($file, "maventa") !== false) {
 
 				// Telko-case
@@ -139,7 +140,7 @@ if (count($tuotetiedot) > 0) {
 				$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
 			}
 
-			$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ArticleName);
+			$rtuoteno[$i]["nimitys"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName));
 			$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->RowVatExcludedAmount);
 
 			$rivien_summa_yhteensa += $rtuoteno[$i]["rivihinta"];
@@ -168,7 +169,7 @@ if (count($tuotetiedot) > 0) {
 				$rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuperäinen tilausnumero rivikommenttiin mukaan
 			}
 
-			$rtuoteno[$i]["kommentti"] = trim($rtuoteno[$i]["kommentti"]);
+			$rtuoteno[$i]["kommentti"] = trim(pupesoft_cleanstring($rtuoteno[$i]["kommentti"]));
 
 			$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
 

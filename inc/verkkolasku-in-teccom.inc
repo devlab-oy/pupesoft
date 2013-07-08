@@ -231,14 +231,14 @@
 			// tuotekoodi
 			// Tehdään poikkeustapaksien käsittely
 			if ($laskuttajan_toimittajanumero == "123085") {
-				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
+				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductDescription->ProductName1));
 			}
 			elseif ($laskuttajan_toimittajanumero == "123067") {
-				$rtuoteno[$i]["tuoteno"] = substr(utf8_decode($tuotetieto->ProductId->ProductNumber),0,-3);
+				$rtuoteno[$i]["tuoteno"] = substr(pupesoft_cleanstring(utf8_decode($tuotetieto->ProductId->ProductNumber)),0,-3);
 				$rtuoteno[$i]["tuoteno2"] = "{$rtuoteno[$i]["tuoteno"]}090";
 			}
 			elseif ($laskuttajan_toimittajanumero == "123007") {
-				$aputuoteno = utf8_decode($tuotetieto->ProductId->ProductNumber);
+				$aputuoteno = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductId->ProductNumber));
 				$pituus 	= strlen(trim($aputuoteno));
 
 				if ($pituus == 8 and strpos(' ',$aputuoteno) == 6) {
@@ -250,24 +250,24 @@
 			}
 			elseif ($laskuttajan_toimittajanumero == "123453") {
 				if (strpos($tuotetieto->ProductId->ProductNumber, "-") !== FALSE) {
-					$rtuoteno[$i]["tuoteno"] = str_replace("-", "", $tuotetieto->ProductId->ProductNumber);
+					$rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring(str_replace("-", "", $tuotetieto->ProductId->ProductNumber));
 				}
 				else {
-					$rtuoteno[$i]["tuoteno"] = substr($tuotetieto->ProductId->ProductNumber,0,3)."-".substr($tuotetieto->ProductId->ProductNumber,3);
+					$rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring(substr($tuotetieto->ProductId->ProductNumber,0,3)."-".substr($tuotetieto->ProductId->ProductNumber,3));
 				}
 
-				$rtuoteno[$i]["tuoteno2"] = $tuotetieto->ProductId->ProductNumber;
+				$rtuoteno[$i]["tuoteno2"] = pupesoft_cleanstring($tuotetieto->ProductId->ProductNumber);
 			}
 			elseif ($laskuttajan_toimittajanumero == "123178") {
-				$rtuoteno[$i]["tuoteno"] = substr($tuotetieto->ProductId->ProductNumber,3);
-				$rtuoteno[$i]["tuoteno2"] = $tuotetieto->ProductId->ProductNumber;
+				$rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring(substr($tuotetieto->ProductId->ProductNumber,3));
+				$rtuoteno[$i]["tuoteno2"] = pupesoft_cleanstring($tuotetieto->ProductId->ProductNumber);
 			}
 			elseif ($laskuttajan_toimittajanumero == "123084") {
-				$rtuoteno[$i]["tuoteno"] = $tuotetieto->ProductId->ProductNumber;
-				$rtuoteno[$i]["tuoteno2"] = ltrim($tuotetieto->ProductId->ProductNumber, '0');
+				$rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring($tuotetieto->ProductId->ProductNumber);
+				$rtuoteno[$i]["tuoteno2"] = pupesoft_cleanstring(ltrim($tuotetieto->ProductId->ProductNumber, '0'));
 			}
 			else {
-				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
+				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductId->ProductNumber));
 			}
 
 			if ($rtuoteno[$i]["tuoteno"] != "") {
@@ -279,9 +279,9 @@
 					$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
 				}
 
-				$rtuoteno[$i]["ostotilausnro"] = (string) $tuotetieto->OrderRef->BuyerOrderNumber;
+				$rtuoteno[$i]["ostotilausnro"] = (string) pupesoft_cleanstring($tuotetieto->OrderRef->BuyerOrderNumber);
 
-				$rtuoteno[$i]["tilaajanrivinro"] = (string) $tuotetieto->OrderItemRef->BuyerOrderItemRef;
+				$rtuoteno[$i]["tilaajanrivinro"] = (string) pupesoft_cleanstring($tuotetieto->OrderItemRef->BuyerOrderItemRef);
 
 				$rtuoteno[$i]["kpl"] = (int) str_replace(",", ".", $tuotetieto->Quantity);
 
@@ -545,7 +545,7 @@
 
 				$ealvi[$i] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["alv"] = 0; // Oletetaan aina ALV 0%
-				$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
+				$rtuoteno[$i]["nimitys"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductDescription->ProductName1));
 
 				if ($onko_hyvityslasku_kerroin != 1) {
 					$rtuoteno[$i]['rivihinta'] *= $onko_hyvityslasku_kerroin;

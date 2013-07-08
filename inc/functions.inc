@@ -19459,7 +19459,7 @@ if (!function_exists("suuntalavan_tuotteet")) {
 			$tuotenumerot = hae_viivakoodilla($eankoodi);
 			$eankoodilisa = "and tilausrivi.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
 		}
-		
+
 		$tilriv = (int) $tilriv;
 
 		$tilrivlisa = trim($tilriv) != 0 ? " and tilausrivi.tunnus = '{$tilriv}'" : "";
@@ -22629,7 +22629,7 @@ if (!function_exists("saako_myyda_private_label")) {
 if (!function_exists("hae_viivakoodilla")) {
 	function hae_viivakoodilla($viivakoodi) {
 		global $kukarow, $yhtiorow;
-		
+
 		// Haetaan eankoodilla tuotenumeroa kolmesta eri paikkaa
 		$query = "	(SELECT tuoteno
 					FROM tuote
@@ -22643,16 +22643,17 @@ if (!function_exists("hae_viivakoodilla")) {
 					UNION
 					(SELECT tuotteen_toimittajat.tuoteno
 					FROM tuotteen_toimittajat_tuotenumerot
-					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio 
+					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio
 					AND tuotteen_toimittajat.tunnus = tuotteen_toimittajat_tuotenumerot.toim_tuoteno_tunnus)
 					WHERE tuotteen_toimittajat_tuotenumerot.yhtio = '{$kukarow['yhtio']}'
 					AND tuotteen_toimittajat_tuotenumerot.viivakoodi = '{$viivakoodi}')
 					LIMIT 200";
 		$chk_res = pupe_query($query);
-		
-		while($row = mysql_fetch_assoc($chk_res)) {
-			$viivakoodit[] = $row['tuoteno'];
+
+		while ($row = mysql_fetch_assoc($chk_res)) {
+			$viivakoodit[$row['tuoteno']] = $row['tuoteno'];
 		}
+
 		return $viivakoodit;
 	}
 }

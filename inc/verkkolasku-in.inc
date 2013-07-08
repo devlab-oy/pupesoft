@@ -78,7 +78,7 @@
 			echo "29: ".$ostaja_asiakkaantiedot["osoite"]."\n";
 			echo "30: ".$ostaja_asiakkaantiedot["postino"]."\n";
 			echo "31: ".$ostaja_asiakkaantiedot["postitp"]."\n";
-			echo "32: TecCom/Unikko only ".$laskuttajan_toimittajanumero."\n";
+			echo "32: ".$laskuttajan_toimittajanumero."\n";
 			echo "33: ".$laskuttajan_valkoodi."\n";
 			echo "34: ".$laskun_toimitunnus."\n";
 
@@ -451,6 +451,7 @@
 							FROM toimi
 							WHERE yhtio = '$yhtio'
 							and toimittajanro = '$laskuttajan_toimittajanumero'
+							and toimittajanro not in ('','0')
 							and tyyppi != 'P'";
 				$result = pupe_query($query);
 

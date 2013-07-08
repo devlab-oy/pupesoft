@@ -1683,6 +1683,9 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 	if ($toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 		require("otsik_siirtolista.inc");
 	}
+	elseif ($toim == 'EXTTARJOUS') {
+		require('valitse_asiakas.inc');
+	}
 	else {
 		require('otsik.inc');
 	}

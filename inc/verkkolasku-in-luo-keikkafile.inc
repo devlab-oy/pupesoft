@@ -1,7 +1,7 @@
 <?php
 
 // debuggia (1)
-$debug = 0;
+$debug = 1;
 
 	if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 		function teccom_kaytettavat_tilausrivit($checkres, $lajilisa, $debug = 0) {
@@ -1067,7 +1067,12 @@ $debug = 0;
 			// ei käsitellä erolistalle siirrettyjä rivejä.
 			if ($rtuoteno[$i]['status'] == 'E') continue;
 
-			$toim_tuotenolisa = "'{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'";
+			if ($rtuoteno[$i]['tuoteno2'] != '')  {
+				$toim_tuotenolisa = "'{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'";
+			}
+			else {
+				$toim_tuotenolisa = "'{$rtuoteno[$i]['tuoteno']}'";
+			}
 			if (isset($data['tuoteno3']) and trim($rtuoteno[$i]['tuoteno3']) != "") $toim_tuotenolisa .= ",'{$rtuoteno[$i]['tuoteno3']}'";
 
 			$isalisa = "";

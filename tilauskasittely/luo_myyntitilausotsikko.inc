@@ -386,10 +386,26 @@ if(!function_exists("luo_myyntitilausotsikko")) {
             $maksuehto = $asiakasrow['maksuehto'];
             $toimitustapa = $asiakasrow['toimitustapa'];
 
+            $query = "  select lasku.*, laskun_lisatiedot.sopimus_lisatietoja
+                        from lasku
+                        join laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+                        where lasku.yhtio='{$kukarow['yhtio']}'
+                        AND lasku.tunnus = $tilausnumero";
+            $result = pupe_query($query);
+
+            $dummy_tarjous_row = mysql_fetch_assoc($result);
+            $sopimus_lisatietoja = $dummy_tarjous_row['sopimus_lisatietoja'];
+            
             require ("otsik.inc");
             
+            if (!empty($dummy_tarjous_row['sopimus_lisatietoja'])) {
+                $asiakas_tunnukset = $dummy_tarjous_row['sopimus_lisatietoja'] . ',' . implode(',', $valitut_asiakastunnukset);
+            }
+            else {
+                $asiakas_tunnukset = implode(',', $valitut_asiakastunnukset);
+            }
             $query = "  update laskun_lisatiedot
-                        set sopimus_lisatietoja = '".  implode(",", $valitut_asiakastunnukset)."'
+                        set sopimus_lisatietoja = '{$asiakas_tunnukset}'
                         where yhtio = '{$kukarow['yhtio']}'
                         and otunnus = '{$tilausnumero}'";
             pupe_query($query);

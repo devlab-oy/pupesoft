@@ -1684,9 +1684,8 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 		require("otsik_siirtolista.inc");
 	}
 	elseif ($toim == 'EXTTARJOUS') {
-        echo "trolooo";
 		require('inc/valitse_asiakas.inc');
-	}
+	}   
 	else {
 		require('otsik.inc');
 	}
@@ -1714,7 +1713,9 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 
 	$kaytiin_otsikolla = "NOJOO!";
 }
-
+if ($toim == 'EXTTARJOUS') {
+		require('inc/valitse_asiakas.inc');
+	}
 //lis‰t‰‰n rivej‰ tiedostosta
 if ($tee == 'mikrotila' or $tee == 'file') {
 

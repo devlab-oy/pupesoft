@@ -118,7 +118,8 @@ if (count($tuotetiedot) > 0) {
 				// 300013 = rahtiveloitus
 				// 300023 = pakkauskulu
 				// 300027 = pakkauskulu
-				if (strpos($file, "maventa") !== false and ($laskuttajan_toimittajanumero == "123335" or str_replace(array("-"," "), "", $laskuttajan_toimittajanumero) == "09871371") and ($rtuoteno[$i]["tuoteno"] == "300013" or $rtuoteno[$i]["tuoteno"] == "300023" or $rtuoteno[$i]["tuoteno"] == "300027")) {
+				// Holger Christiansen rahti
+ 				if  (($laskuttajan_toimittajanumero == "123335" or str_replace(array("-"," "), "", $laskuttajan_toimittajanumero) == "09871371") and ($rtuoteno[$i]["tuoteno"] == "300013" or $rtuoteno[$i]["tuoteno"] == "300023" or $rtuoteno[$i]["tuoteno"] == "300027")) {
 
 					if ($rtuoteno[$i]["tuoteno"] == "300013") {
 						$rtuoteno[$i]["laskun_rahtikulu"] = (float) str_replace(",", ".", $tuotetieto->RowAmount);
@@ -129,6 +130,11 @@ if (count($tuotetiedot) > 0) {
 						$rtuoteno[$i]['osto_kulu'] = (float) str_replace(",", ".", $tuotetieto->RowAmount);
 						$rtuoteno[$i]['osto_kulu_alv'] = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 					}
+				}
+				else if (($laskuttajan_toimittajanumero == "123029" or str_replace(array("-"," "), "", $laskuttajan_toimittajanumero) == "DK61048154" or str_replace(array("-"," "), "", $laskuttajan_toimittajanumero) == "DK88021614") and $rtuoteno[$i]["tuoteno"] == "Freight") {
+						$rtuoteno[$i]["laskun_rahtikulu"] = (float) str_replace(",", ".", $tuotetieto->RowAmount);
+						$rtuoteno[$i]['osto_rivi_kulu'] = (float) str_replace(",", ".", $tuotetieto->RowAmount);
+						$rtuoteno[$i]['osto_rahti_alv'] = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 				}
 			}
 

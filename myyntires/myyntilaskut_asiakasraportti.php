@@ -780,7 +780,7 @@
 							$avoimet[$maksurow['valkoodi']] += $maksurow['avoinsumma'];
 						}
 
-						$korkoja += $maksurow['korko'];
+						if ($maksurow["korko"] > 0) $korkoja += $maksurow['korko'];
 					}
 
 					echo "</tbody>";

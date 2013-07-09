@@ -6,8 +6,9 @@
 
 		$query = "	SELECT tunnus, tilino
 					FROM tili
-					WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$yhtiorow["tilikauden_tulos"]}'";
-		$tilires = mysql_query($query) or pupe_error($query);
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus  = '{$yhtiorow["tilikauden_tulos"]}'";
+		$tilires = pupe_query($query);
 
 		if (mysql_num_rows($tilires) != 1) {
 			echo  "<br><font class='error'>\n".t("VIRHE: Tiliä ei löydy").": $yhtiorow[tilikauden_tulos]</font><br>\n<br>\n";
@@ -19,8 +20,9 @@
 
 		$query = "	SELECT tunnus
 					FROM tili
-					WHERE yhtio = '{$kukarow['yhtio']}' and tilino = '{$edellisten_tilikausien_voitto_tappio}'";
-		$tilires = mysql_query($query) or pupe_error($query);
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tilino  = '{$edellisten_tilikausien_voitto_tappio}'";
+		$tilires = pupe_query($query);
 
 		if (mysql_num_rows($tilires) != 1) {
 			echo  "<br><font class='error'>\n".t("VIRHE: Tiliä ei löydy").": $edellisten_tilikausien_voitto_tappio</font><br>\n<br>\n";
@@ -29,8 +31,9 @@
 
 		$query = "	SELECT tunnus
 					FROM tili
-					WHERE yhtio = '{$kukarow['yhtio']}' and tilino = '{$tilikauden_tulos_siirto}'";
-		$tilires = mysql_query($query) or pupe_error($query);
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tilino  = '{$tilikauden_tulos_siirto}'";
+		$tilires = pupe_query($query);
 
 		if (mysql_num_rows($tilires) != 1) {
 			echo  "<br><font class='error'>\n".t("VIRHE: Tiliä ei löydy").": $tilikauden_tulos_siirto</font><br>\n<br>\n";
@@ -39,16 +42,12 @@
 
 		$query = "	SELECT tilikausi_alku, tilikausi_loppu, avaava_tase
 					FROM tilikaudet
-					WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tilikausi}'";
-		$tilikausi_alku_loppu_res = mysql_query($query) or pupe_error($query);
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus  = '{$tilikausi}'";
+		$tilikausi_alku_loppu_res = pupe_query($query);
 
 		if (mysql_num_rows($tilikausi_alku_loppu_res) == 1) {
 			$tilikausi_alku_loppu_row = mysql_fetch_assoc($tilikausi_alku_loppu_res);
-
-			if ($tilikausi_alku_loppu_row["avaava_tase"] != 0) {
-				echo  "<br><font class='error'>\n".t("VIRHE: Avaava tase on jo syötetty!")."</font><br>\n<br>\n";
-				$tee = "go";
-			}
 
 			// Vertaillaan tilikauteen
 			list($vv1,$kk1,$pp1) = explode("-",$yhtiorow["tilikausi_alku"]);
@@ -65,6 +64,10 @@
 				echo  "<br><font class='error'>\n".t("VIRHE: Valitun tilikauden viimeinen päivä ei sisälly avoimeen tilikauteen!")."</font><br>\n<br>\n";
 				$tee = "go";
 			}
+		}
+		else {
+			echo t("VIRHE: Tilikausi kateissa")."!<br>";
+			$tee = "go";
 		}
 	}
 
@@ -98,55 +101,71 @@
 					WHERE yhtio 	= '{$kukarow['yhtio']}'
 					and tapvm 		= '{$vv3}-{$kk3}-{$pp3}'
 					and tila 		= 'X'
-					and nimi		= '{$yhtiorow['nimi']}'
-					and alv_tili 	= ''
-					and comments	= '{$iselite[$maara]}'";
-		$result = mysql_query($query) or pupe_error($query);
+					and alatila 	= 'T'";
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
-			// Kirjataan tilikauden tulos
-			$voittosumma 		= $isumma[$maara];
-			$summa				= $voittosumma;
-			$summa_valuutassa	= 0;
-			$tili 				= $itili[$maara];
-			$kustp 				= "";
-			$selite 			= $iselite[$maara];
-			$vero 				= $ivero[$maara];
-			$projekti 			= "";
-			$kohde 				= "";
-			$valkoodi 			= $yhtiorow['valkoodi'];
-
 			$query = "	INSERT into lasku set
 						yhtio 		= '{$kukarow['yhtio']}',
 						tapvm 		= '{$vv3}-{$kk3}-{$pp3}',
 						tila 		= 'X',
+						alatila		= 'T',
 						nimi		= '{$yhtiorow['nimi']}',
 						alv_tili 	= '',
-						comments	= '{$selite}',
+						comments	= '{$iselite[$maara]}',
 						laatija 	= '{$kukarow['kuka']}',
 						luontiaika 	= now()";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$tunnus = mysql_insert_id($link);
-
-			require("inc/teetiliointi.inc");
-
-			$summa				= $voittosumma*-1;
-			$summa_valuutassa	= 0;
-			$tili 				= $tilikauden_tulos_siirto;
-			$kustp 				= "";
-			$selite 			= $iselite[count($iselite)];
-			$vero 				= 0;
-			$projekti 			= "";
-			$kohde 				= "";
-			$valkoodi 			= $yhtiorow['valkoodi'];
-
-			require("inc/teetiliointi.inc");
-
-			echo t("Tilikauden tulos kirjattu")."!<br><br>";
 		}
+		else {
+			$tulos_row = mysql_fetch_assoc($result);
+			$tunnus = $tulos_row['tunnus'];
+
+			// Yliviivataan vanhat tulossiirrot
+			$query = "	UPDATE tiliointi SET
+						korjattu 	= '{$kukarow['kuka']}',
+			      		korjausaika = now()
+			      		WHERE ltunnus 	= '{$tunnus}'
+			      		AND yhtio 		= '{$kukarow['yhtio']}'
+			      		AND korjattu 	= ''";
+			$ylikirjaus_result = pupe_query($query);
+		}
+
+		// Kirjataan tilikauden tulos
+		$voittosumma 		= $isumma[$maara];
+		$summa				= $voittosumma;
+		$summa_valuutassa	= 0;
+		$tili 				= $itili[$maara];
+		$kustp 				= "";
+		$selite 			= $iselite[$maara];
+		$vero 				= $ivero[$maara];
+		$projekti 			= "";
+		$kohde 				= "";
+		$valkoodi 			= $yhtiorow['valkoodi'];
+
+		require("inc/teetiliointi.inc");
+
+		$summa				= $voittosumma*-1;
+		$summa_valuutassa	= 0;
+		$tili 				= $tilikauden_tulos_siirto;
+		$kustp 				= "";
+		$selite 			= $iselite[count($iselite)];
+		$vero 				= 0;
+		$projekti 			= "";
+		$kohde 				= "";
+		$valkoodi 			= $yhtiorow['valkoodi'];
+
+		require("inc/teetiliointi.inc");
 
 		// Kirjataan avaava tase
 		unset($tunnus);
+
+		// Jos kirjataan tase uudestaan, niin tässä on tositteen tunnus
+		if (isset($tilikausi_alku_loppu_row["avaava_tase"]) and $tilikausi_alku_loppu_row["avaava_tase"] != 0) {
+			$tunnus = $tilikausi_alku_loppu_row["avaava_tase"];
+		}
+
 		$summa				= '';
 		$summa_valuutassa	= '';
 		$tili				= '';
@@ -208,9 +227,8 @@
 	$query = "	SELECT tilikausi_alku, tilikausi_loppu, tunnus
 				FROM tilikaudet
 				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND avaava_tase = 0
 				ORDER BY tilikausi_alku DESC";
-	$tilikausi_result = mysql_query($query) or pupe_error($query);
+	$tilikausi_result = pupe_query($query);
 
 	echo "<td><select name='tilikausi'><option value=''>",t("Valitse"),"</option>";
 
@@ -228,8 +246,9 @@
 
 		$query = "	SELECT tilino
 					FROM tili
-					WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$yhtiorow["tilikauden_tulos"]}'";
-		$tilires = mysql_query($query) or pupe_error($query);
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus  = '{$yhtiorow["tilikauden_tulos"]}'";
+		$tilires = pupe_query($query);
 		$tilirow = mysql_fetch_assoc($tilires);
 
 		if ((!isset($edellisten_tilikausien_voitto_tappio) or !isset($tilikauden_tulos_siirto)) or trim($edellisten_tilikausien_voitto_tappio) == '' or trim($tilikauden_tulos_siirto) == '') {
@@ -276,33 +295,56 @@
 
 	if (trim($tee) == 'go') {
 
+		// Haetaan tilikausi
 		$query = "	SELECT tilikausi_alku, tilikausi_loppu, avaava_tase
 					FROM tilikaudet
-					WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tilikausi}'";
-		$tilikausi_alku_loppu_res = mysql_query($query) or pupe_error($query);
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus  = '{$tilikausi}'";
+		$tilikausi_alku_loppu_res = pupe_query($query);
 		$tilikausi_alku_loppu_row = mysql_fetch_assoc($tilikausi_alku_loppu_res);
+
+		// Onko tulos jo kirjattu
+		$query = "	SELECT tunnus
+					FROM lasku
+					WHERE yhtio 	= '{$kukarow['yhtio']}'
+					and tapvm 		= '{$tilikausi_alku_loppu_row['tilikausi_loppu']}'
+					and tila 		= 'X'
+					and alatila 	= 'T'";
+		$result = pupe_query($query);
+		$tulostositerow = mysql_fetch_assoc($result);
+
+		// Hetaan tilit
+		$query = "	SELECT
+					ifnull(group_concat(if(LEFT(ulkoinen_taso, 1) = BINARY '3', concat(\"'\",tilino,\"'\"), NULL)), '') tulostilit,
+					ifnull(group_concat(if(LEFT(ulkoinen_taso, 1) < BINARY '3', concat(\"'\",tilino,\"'\"), NULL)), '') tasetilit
+					FROM tili
+					WHERE yhtio = '$kukarow[yhtio]'";
+		$tilires = pupe_query($query);
+		$tilitrow = mysql_fetch_assoc($tilires);
 
 		// Haetaan firman tulos
 		$query = "	SELECT sum(tiliointi.summa) summa
-	 	            FROM tiliointi USE INDEX (yhtio_tilino_tapvm)
-					JOIN tili ON (tiliointi.yhtio=tili.yhtio and tiliointi.tilino=tili.tilino and LEFT(tili.ulkoinen_taso, 1) = BINARY '3')
-		            WHERE tiliointi.yhtio = '{$kukarow['yhtio']}'
+	 	            FROM tiliointi use index (yhtio_tilino_tapvm)
+		            WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
 		            and tiliointi.korjattu = ''
-		            and tiliointi.tapvm >= '{$tilikausi_alku_loppu_row['tilikausi_alku']}'
-		            and tiliointi.tapvm <= '{$tilikausi_alku_loppu_row['tilikausi_loppu']}'";
-		$tulosres = mysql_query($query) or pupe_error($query);
+					and tiliointi.tilino in ({$tilitrow['tulostilit']})
+					and tiliointi.tapvm >= '{$tilikausi_alku_loppu_row['tilikausi_alku']}'
+		            and tiliointi.tapvm <= '{$tilikausi_alku_loppu_row['tilikausi_loppu']}'
+					and tiliointi.ltunnus != '{$tulostositerow['tunnus']}'";
+		$tulosres = pupe_query($query);
 		$tulosrow = mysql_fetch_assoc($tulosres);
 
-		$query = "	SELECT tili.tilino, tili.nimi, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, count(*) vientejä, sum(summa) saldo
-					FROM tiliointi
-					JOIN tili ON (tili.yhtio = '{$kukarow['yhtio']}' and tiliointi.tilino = tili.tilino and LEFT(ulkoinen_taso, 1) < BINARY '3')
-					WHERE tiliointi.yhtio = '{$kukarow['yhtio']}'
+		$query = "	SELECT tiliointi.tilino, count(*) vientejä, sum(tiliointi.summa) saldo
+					FROM tiliointi use index (yhtio_tilino_tapvm)
+					WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
 					and tiliointi.korjattu = ''
-					and tapvm >= '{$tilikausi_alku_loppu_row['tilikausi_alku']}'
-					and tapvm <= '{$tilikausi_alku_loppu_row['tilikausi_loppu']}'
-					GROUP BY 1,2
-					ORDER BY 1,2";
-		$result = mysql_query($query) or pupe_error($query);
+					and tiliointi.tilino in ({$tilitrow['tasetilit']})
+					and tiliointi.tapvm >= '{$tilikausi_alku_loppu_row['tilikausi_alku']}'
+					and tiliointi.tapvm <= '{$tilikausi_alku_loppu_row['tilikausi_loppu']}'
+					and tiliointi.ltunnus != '{$tulostositerow['tunnus']}'
+					GROUP BY 1
+					ORDER BY 1";
+		$result = pupe_query($query);
 
 		list($tpv, $tpk, $tpp) = explode("-", $tilikausi_alku_loppu_row['tilikausi_loppu']);
 
@@ -343,10 +385,17 @@
 			$itili[$maara] 		= $trow['tilino'];
 			$iselite[$maara] 	= t("Avaavat saldot")." ".tv1dateconv($tpv);
 			$ivero[$maara] 		= 0;
+			
+			$query = "	SELECT nimi
+						FROM tili
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tilino = '{$trow['tilino']}'";
+			$tilires = pupe_query($query);
+			$tilinimirow = mysql_fetch_assoc($tilires);
 
 			echo "<tr class='aktiivi'>";
 			echo "<td><a name='tili2_{$trow['tilino']}' href='raportit.php?toim=paakirja&tee=K&tili={$trow['tilino']}{$linkkilisa}{$lopelink}///tili2_{$trow['tilino']}'>{$trow['tilino']}</a></td>";
-			echo "<td>{$trow['nimi']}</td>";
+			echo "<td>{$tilinimirow['nimi']}</td>";
 			echo "<td>{$trow['vientejä']}</td>";
 			echo "<td align='right'>{$trow['saldo']}</td>";
 			echo "</tr>";
@@ -386,8 +435,31 @@
 			}
 		}
 		else {
-			echo "<tr><td class='back' colspan='5'><font class='message'>",t("Tosite on jo luotu"),"!</font></td></tr>";
+			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
+						function verify(){
+							msg = '".t("HUOM: Avaa tase on jo kirjattu! Oletko varma, että halua kirjata sen uudestaan?")."';
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
+						}
+					</SCRIPT>";
+
+
+			echo "<tr><td colspan='5'><font class='error'>",t("HUOM: Avaava tase on jo kirjattu"),"!</font></td></tr>";
+
+			if (round($summa2, 2) != 0) {
+				echo "<tr><td class='back' colspan='5'><font class='message'>",t("Summat eivät täsmää"),"!</font>$summa2</td></tr>";
+			}
+			else {
+				echo "<tr><th colspan='5'><input type='submit' value='",t("Jatka"),"' onClick='return verify();'/></th></tr>";
+			}
 		}
+
 		echo "</table></form><br /><br />";
 	}
 

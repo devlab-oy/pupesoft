@@ -2895,8 +2895,7 @@
 
 					// hinnat p‰ivitet‰‰n vain jos asiakkaalla on asiakashinta tai asiakasalennus (saako_myyda_private_label palauttaa TRUE jos on asiakashinta tai alennus)
 					if ($yhtiorow["vaihda_asiakas_hintapaiv"] == "A") {
-						$ohituskaista = 1;
-						if (!saako_myyda_private_label($laskurow['liitostunnus'], $trow["tuoteno"], $row['tilkpl'], $ohituskaista)) {
+						if (!saako_myyda_private_label($laskurow['liitostunnus'], $trow["tuoteno"], $row['tilkpl'], TRUE)) {
 							$paivitetaanko = FALSE;
 						}
 					}

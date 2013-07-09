@@ -1,4 +1,5 @@
 <?php
+
 echo "<font class='head'>" . t("Ext-Tarjoukset") . "</font><hr>";
 ?>
 
@@ -16,20 +17,21 @@ $request = array(
     "mul_asiakasryhma" => $mul_asiakasryhma,
     "mul_asiakasmyyja" => $mul_asiakasmyyja,
     "ext_asiakas_haku_tehty" => $ext_asiakas_haku_tehty,
+    "tee" => $tee,
+    "tilausnumero" => $tilausnumero,
 );
 
-$tee = 'nayta_asiakas_valinta';
+$request['tee'] = 'nayta_asiakas_valinta';
 
-if ($tee == 'nayta_asiakas_valinta') {
+if ($request['tee'] == 'nayta_asiakas_valinta') {
     if (isset($request['ext_asiakas_haku_tehty'])) {
-        
+
         $request['asiakkaat'] = hae_asiakkaat_joilla_extranet_kayttajatunnus($request);
-        var_dump($request);
+        //var_dump($request);
     }
-    
+
     echo_asiakas_valinta($request);
-} 
-else {
+} else {
     echo_poimitut_asiakkaat($request);
 }
 
@@ -60,13 +62,13 @@ function echo_asiakas_rajaus($request) {
     echo "<div id='hakuehdot_wrapper'>";
     $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASMYYJA");
     $monivalintalaatikot_normaali = array();
-    
-    
+
+
 
     require ("tilauskasittely/monivalintalaatikot.inc");
-    
+
     echo "<input type='text' name='hakuehto' value='{$request['hakuehto']}'>";
-    echo "<input type='submit' value='".t("Hae")."'>";
+    echo "<input type='submit' value='" . t("Hae") . "'>";
     echo "</div>";
     echo "</form>";
 }
@@ -77,30 +79,86 @@ function echo_poimitut_asiakkaat($request) {
 
 function echo_asiakas_table($request) {
     
+    global $kukarow, $yhtiorow;
+    
+    if (count($request['asiakkaat']) > 0) {
+
+        echo "<form method='post' action='tilaus_myynti.php'>";
+        echo "<input type='hidden' name='dummy_tilausnumero' value='{$request['tilausnumero']}'/>";
+		echo "<input type='hidden' name='toim' value='EXTTARJOUS'/>";
+        echo "<table id='asiakkaat'>";
+
+		echo "<tr>";
+        echo "<th><input type='checkbox' id='valitse_kaikki'></th>";
+		echo "<th>", t("Nimi"), "</th>";
+		echo "<tr>";
+
+		foreach ($request['asiakkaat'] as $asiakas) {
+			echo "<tr class='aktiivi'>";
+            echo "<td>";
+            echo "<input type='checkbox' name='valitut_asiakastunnukset[]'>";
+            echo "</td>";
+			echo "<td>";
+			echo $asiakas['nimi'];
+			echo "</td>";
+			echo "<tr>";
+		}
+
+		echo "</table>";
+        echo "<br>";
+         if ($request['tee'] == 'nayta_asiakas_valinta') {
+             $submitvalue = t("Liitä asiakkaat");
+         }
+         else {
+             $submitvalue = t("Poista asiakkaat");
+         }
+        echo "<input type='submit' value='{$submitvalue}'/>";
+        echo "</form>";
+		echo "<br>";
+        
+        echo "<form method='post' action='tilaus_myynti.php'>";
+        echo "<input type='submit' id='luo_tarjous' value='".t("Luo tarjous")."'/>";
+        echo "</form>";
+        
+       if(true) {
+           echo "<form method='post' action='tilaus_myynti.php'>";
+           echo "<input type='submit' id='nayta_poimitut' value ='".t("Näytä poimitut")."'/>";
+           echo "</form>";
+       }
+	}
+
 }
 
 function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
-    
+
     global $kukarow, $yhtiorow;
     $where = "AND asiakas.laji NOT IN ( 'P' )";
-    
-    if (!empty($request['mul_asiakasosasto'])){
-        $where .= " AND asiakas.osasto IN ('".  implode("','", $request['mul_asiakasosasto'])."')";
+
+    if (!empty($request['mul_asiakasosasto'])) {
+        $where .= " AND asiakas.osasto IN ('" . implode("','", $request['mul_asiakasosasto']) . "')";
     }
-    if (!empty($request['mul_asiakasryhma'])){
-        $where .= " AND asiakas.ryhma IN ('".  implode("','", $request['mul_asiakasryhma'])."')";
+    if (!empty($request['mul_asiakasryhma'])) {
+        $where .= " AND asiakas.ryhma IN ('" . implode("','", $request['mul_asiakasryhma']) . "')";
     }
-    if (!empty($request['mul_asiakasmyyja'])){
-        $where .= " AND asiakas.myyjanro IN ('".  implode("','", $request['mul_asiakasmyyja'])."')";
+    if (!empty($request['mul_asiakasmyyja'])) {
+        $where .= " AND asiakas.myyjanro IN ('" . implode("','", $request['mul_asiakasmyyja']) . "')";
     }
-    $query	= "	(SELECT asiakas.*
+    if (empty($request['hakuehto'])) {
+        $query = "SELECT asiakas.*
+                    FROM asiakas
+                     JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
+                    WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+                     {$where}
+					ORDER BY nimi";
+        
+    } else {
+        $query = "	(SELECT asiakas.*
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                         JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-						and REPLACE(REPLACE(asiakas.ytunnus, '-', ''), '+', '') = '".str_replace(array('-','+'), '', $request['hakuehto'])."'
+						and REPLACE(REPLACE(asiakas.ytunnus, '-', ''), '+', '') = '" . str_replace(array('-', '+'), '', $request['hakuehto']) . "'
 						and asiakas.ytunnus!=''
-						$lajilisa $asiakasrajaus
                         {$where})
 					UNION
 					(SELECT asiakas.*
@@ -110,7 +168,6 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and asiakas.asiakasnro = '{$request['hakuehto']}'
 						and asiakas.asiakasnro not in ('0','')
-						$lajilisa $asiakasrajaus
                         {$where})
 					UNION
 					(SELECT asiakas.*
@@ -118,9 +175,8 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                         JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-						and REPLACE(REPLACE(asiakas.ovttunnus, '-', ''), '+', '') = '".str_replace(array('-','+'), '', $request['hakuehto'])."'
+						and REPLACE(REPLACE(asiakas.ovttunnus, '-', ''), '+', '') = '" . str_replace(array('-', '+'), '', $request['hakuehto']) . "'
 						and asiakas.ovttunnus!=''
-						$lajilisa $asiakasrajaus
                         {$where})
 					UNION
 					(SELECT asiakas.*
@@ -130,7 +186,6 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and asiakas.toim_ovttunnus = '{$request['hakuehto']}'
 						and asiakas.toim_ovttunnus!=''
-						$lajilisa $asiakasrajaus
                         {$where})
 					UNION
 					(SELECT asiakas.*
@@ -141,7 +196,6 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and asiakkaan_avainsanat.avainsana = '{$request['hakuehto']}'
 						and asiakkaan_avainsanat.avainsana!=''
-						$lajilisa $asiakasrajaus
                         {$where})
                     UNION
                     (SELECT asiakas.*
@@ -151,10 +205,11 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
                     AND asiakas.nimi LIKE '%{$request['hakuehto']}%'
                      {$where})
 					ORDER BY nimi";
+    }
     $result = pupe_query($query);
-    
+
     $asiakkaat = array();
-    while ($asiakas = mysql_fetch_assoc($result)){
+    while ($asiakas = mysql_fetch_assoc($result)) {
         $asiakkaat[] = $asiakas;
     }
     return $asiakkaat;

@@ -1684,6 +1684,21 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 		require("otsik_siirtolista.inc");
 	}
 	elseif ($toim == 'EXTTARJOUS') {
+        require('tilauskasittely/luo_myyntitilausotsikko.inc');
+        // Dummytarjous
+        $asiakasid = $kukarow['tunnus']*-1;
+        if (isset($dummy_tilausnumero) and !empty($valitut_asiakastunnukset)) {
+            echo "mur1";
+            luo_myyntitilausotsikko('TARJOUS', $asiakasid, $dummy_tilausnumero);
+        }
+        else {
+            echo "mru2";
+            var_dump($kukarow);
+            if ($kukarow['kesken'] == 0) {
+                echo "mur3";
+                luo_myyntitilausotsikko('TARJOUS', $asiakasid);
+            }
+        }
 		require('inc/valitse_asiakas.inc');
 	}
 	else {

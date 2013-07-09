@@ -22573,7 +22573,8 @@ if (!function_exists("lisaa_rivi")) {
 }
 
 if (!function_exists("saako_myyda_private_label")) {
-	function saako_myyda_private_label($asiakastunnus, $tuotenro, $alemaara = 1) {
+	function saako_myyda_private_label($asiakastunnus, $tuotenro, $alemaara = 1, $tarkistakaikkituotteet = FALSE) {
+		//$tarkistakaikkituotteet muuttujalla voidaan funktio pakottaa tutkimaan onko asiakashintoja/alennuksia olemassa, vaikka tuote olisikin normaali hinnasto-tuote (eli tarkistetaan kaikki tuotteet)
 		global $kukarow, $yhtiorow;
 
 		//haetaan ensin tutkittavan tuotteen tiedot
@@ -22585,7 +22586,7 @@ if (!function_exists("saako_myyda_private_label")) {
 		$trow = mysql_fetch_assoc($tuotetempres);
 
 		//katotaan kannattako edes tutkia - jos tuote ei ole private label sitä saa myydä => ei kannata tutkia | eli tutkitaan jos on private label
-		if ($trow["hinnastoon"] == "V") {
+		if ($trow["hinnastoon"] == "V" OR $tarkistakaikkituotteet) {
 
 			//haetaan asiakkaan tiedot
 			$query = "	SELECT tunnus liitostunnus, ytunnus, valkoodi, maa, ryhma, piiri

@@ -1,5 +1,5 @@
 <?php
-
+require('tilauskasittely/luo_myyntitilausotsikko.inc');
 echo "<font class='head'>" . t("Ext-Tarjoukset") . "</font><hr>";
 ?>
 
@@ -19,10 +19,32 @@ $request = array(
     "ext_asiakas_haku_tehty" => $ext_asiakas_haku_tehty,
     "tee" => $tee,
     "tilausnumero" => $tilausnumero,
+    "liita_asiakkaat_tarjoukseen" => $liita_asiakkaat_tarjoukseen,
 );
 
 $request['tee'] = 'nayta_asiakas_valinta';
+$asiakasid = $kukarow['tunnus'] * -1;
 
+if (isset($request['liita_asiakkaat_tarjoukseen'])) {
+    echo "shiiit";
+    var_dump($request);
+    luo_myyntitilausotsikko('TARJOUS', $asiakasid, $request['tilausnumero']);
+}
+
+$query = "  select tunnus
+            from lasku
+            where yhtio='{$kukarow['yhtio']}'
+            and tila='T'
+            and alatila=''
+            and liitostunnus='{$asiakasid}'";
+$result = pupe_query($query);
+
+if (mysql_num_rows($result) > 0) {
+    $dummy_tarjous_tilausnumero = mysql_fetch_assoc($result);
+    $request['tilausnumero'] = $dummy_tarjous_tilausnumero['tunnus'];
+} else {
+    $request['tilausnumero'] = luo_myyntitilausotsikko('TARJOUS', $asiakasid);
+}
 if ($request['tee'] == 'nayta_asiakas_valinta') {
     if (isset($request['ext_asiakas_haku_tehty'])) {
 
@@ -39,6 +61,8 @@ require ('inc/footer.inc');
 exit;
 
 function echo_asiakas_valinta($request) {
+    
+    global $kukarow, $yhtiorow, $orig_tila, $orig_alatila;
 
     echo "<div id='asiakasvalinta_wrapper'>";
 
@@ -52,9 +76,9 @@ function echo_asiakas_rajaus($request) {
 
     global $kukarow, $yhtiorow, $mul_asiakasosasto, $mul_asiakasryhma, $mul_asiakasmyyja;
     echo "<form method='post' action='tilaus_myynti.php'>";
-    echo "<input type='hidden' name='tee' value='nayta_asiakas_valinta'>";
-    echo "<input type='hidden' name='toim' value='EXTTARJOUS'>";
-    echo "<input type='hidden' name='ext_asiakas_haku_tehty' value='1'>";
+    echo "<input type='hidden' name='tee' value='nayta_asiakas_valinta' />";
+    echo "<input type='hidden' name='toim' value='EXTTARJOUS' />";
+    echo "<input type='hidden' name='ext_asiakas_haku_tehty' value='1' />";
     echo "<div id='infomessage'>";
 
     echo "</div>";
@@ -78,55 +102,56 @@ function echo_poimitut_asiakkaat($request) {
 }
 
 function echo_asiakas_table($request) {
-    
-    global $kukarow, $yhtiorow;
-    
+
+    global $kukarow, $yhtiorow, $orig_tila, $orig_alatila;
+
     if (count($request['asiakkaat']) > 0) {
 
         echo "<form method='post' action='tilaus_myynti.php'>";
-        echo "<input type='hidden' name='dummy_tilausnumero' value='{$request['tilausnumero']}'/>";
-		echo "<input type='hidden' name='toim' value='EXTTARJOUS'/>";
+        echo "<input type='hidden' name='tilausnumero' value='{$request['tilausnumero']}'/>";
+        echo "<input type='hidden' name='toim' value='EXTTARJOUS'/>";
+        echo "<input type='hidden' name='liita_asiakkaat_tarjoukseen' value='1'/>";
+        echo "<input type='hidden' name='orig_tila' value='T' />";
+        echo "<input type='hidden' name='orig_alatila' value='{$orig_alatila}' />";
         echo "<table id='asiakkaat'>";
 
-		echo "<tr>";
+        echo "<tr>";
         echo "<th><input type='checkbox' id='valitse_kaikki'></th>";
-		echo "<th>", t("Nimi"), "</th>";
-		echo "<tr>";
+        echo "<th>", t("Nimi"), "</th>";
+        echo "<tr>";
 
-		foreach ($request['asiakkaat'] as $asiakas) {
-			echo "<tr class='aktiivi'>";
+        foreach ($request['asiakkaat'] as $asiakas) {
+            echo "<tr class='aktiivi'>";
             echo "<td>";
-            echo "<input type='checkbox' name='valitut_asiakastunnukset[]'>";
+            echo "<input type='checkbox' name='valitut_asiakastunnukset[]' value='{$asiakas['tunnus']}'>";
             echo "</td>";
-			echo "<td>";
-			echo $asiakas['nimi'];
-			echo "</td>";
-			echo "<tr>";
-		}
+            echo "<td>";
+            echo $asiakas['nimi'];
+            echo "</td>";
+            echo "<tr>";
+        }
 
-		echo "</table>";
+        echo "</table>";
         echo "<br>";
-         if ($request['tee'] == 'nayta_asiakas_valinta') {
-             $submitvalue = t("Liitä asiakkaat");
-         }
-         else {
-             $submitvalue = t("Poista asiakkaat");
-         }
+        if ($request['tee'] == 'nayta_asiakas_valinta') {
+            $submitvalue = t("Liitä asiakkaat");
+        } else {
+            $submitvalue = t("Poista asiakkaat");
+        }
         echo "<input type='submit' value='{$submitvalue}'/>";
         echo "</form>";
-		echo "<br>";
-        
-        echo "<form method='post' action='tilaus_myynti.php'>";
-        echo "<input type='submit' id='luo_tarjous' value='".t("Luo tarjous")."'/>";
-        echo "</form>";
-        
-       if(true) {
-           echo "<form method='post' action='tilaus_myynti.php'>";
-           echo "<input type='submit' id='nayta_poimitut' value ='".t("Näytä poimitut")."'/>";
-           echo "</form>";
-       }
-	}
+        echo "<br>";
 
+        echo "<form method='post' action='tilaus_myynti.php'>";
+        echo "<input type='submit' id='luo_tarjous' value='" . t("Luo tarjous") . "'/>";
+        echo "</form>";
+
+        if (true) {
+            echo "<form method='post' action='tilaus_myynti.php'>";
+            echo "<input type='submit' id='nayta_poimitut' value ='" . t("Näytä poimitut") . "'/>";
+            echo "</form>";
+        }
+    }
 }
 
 function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
@@ -150,7 +175,6 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
                     WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
                      {$where}
 					ORDER BY nimi";
-        
     } else {
         $query = "	(SELECT asiakas.*
 						FROM asiakas

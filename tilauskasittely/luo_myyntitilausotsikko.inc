@@ -389,7 +389,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
             require ("otsik.inc");
             
             $query = "  update laskun_lisatiedot
-                        set sopimus_lisatietoja = '{$valitut_asiakastunnukset}'
+                        set sopimus_lisatietoja = '".  implode(",", $valitut_asiakastunnukset)."'
                         where yhtio = '{$kukarow['yhtio']}'
                         and otunnus = '{$tilausnumero}'";
             pupe_query($query);

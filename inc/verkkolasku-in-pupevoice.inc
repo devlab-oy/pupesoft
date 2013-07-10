@@ -90,6 +90,7 @@ if (count($tuotetiedot) > 0) {
 				$ealvi[$i] = $rtuoteno[$i]["alv"] = "";
 			}
 
+			$rtuoteno[$i]['rivihinta_verolli'] = round($rtuoteno[$i]['rivihinta'] * (1 + ($ealvi[$i] / 100)), 2);
 			$rtuoteno[$i]["riviinfo"] = pupesoft_cleanstring(array_shift($tuotetieto-> xpath('IMD/@eC273.7008.1')));
 
 			// Laskutettu m‰‰r‰

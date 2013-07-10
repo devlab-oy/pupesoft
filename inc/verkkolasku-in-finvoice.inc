@@ -123,8 +123,9 @@ if (count($tuotetiedot) > 0) {
 
 			$rtuoteno[$i]["nimitys"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName));
 			$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->RowVatExcludedAmount);
+			$rtuoteno[$i]["rivihinta_verolli"] = (float) str_replace(",", ".", $tuotetieto->RowAmount);
 
-			$rivien_summa_yhteensa += $rtuoteno[$i]["rivihinta"];
+			$rivien_summa_yhteensa += $rtuoteno[$i]["rivihinta_verolli"];
 
 			$xvati = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 

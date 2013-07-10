@@ -94,6 +94,7 @@
 			$rtuoteno[]["laskutettuaika"]
 			$rtuoteno[]["nimitys"]
 			$rtuoteno[]["rivihinta"]
+			$rtuoteno[]["rivihinta_verolli"]
 			$rtuoteno[]["riviinfo"]
 			$rtuoteno[]["riviviite"]
 			$rtuoteno[]["tilaajanrivinro"]
@@ -1330,7 +1331,7 @@
 
 									$summa = $summa - $summa_vero_chk;
 
-									foreach($_arr as $_k => $_v) {
+									foreach ($_arr as $_k => $_v) {
 										if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
 
 										$_v = round($_v, 2);

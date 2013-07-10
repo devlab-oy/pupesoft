@@ -385,30 +385,34 @@ if(!function_exists("luo_myyntitilausotsikko")) {
             $tilaustyyppi = 'T';
             $maksuehto = $asiakasrow['maksuehto'];
             $toimitustapa = $asiakasrow['toimitustapa'];
+            if(!empty($tilausnumero)){
+                $query = "  select lasku.*, laskun_lisatiedot.sopimus_lisatietoja
+                            from lasku
+                            join laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+                            where lasku.yhtio='{$kukarow['yhtio']}'
+                            AND lasku.tunnus = $tilausnumero";
+                $result = pupe_query($query);
 
-            $query = "  select lasku.*, laskun_lisatiedot.sopimus_lisatietoja
-                        from lasku
-                        join laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
-                        where lasku.yhtio='{$kukarow['yhtio']}'
-                        AND lasku.tunnus = $tilausnumero";
-            $result = pupe_query($query);
-
-            $dummy_tarjous_row = mysql_fetch_assoc($result);
-            $sopimus_lisatietoja = $dummy_tarjous_row['sopimus_lisatietoja'];
-            
+                $dummy_tarjous_row = mysql_fetch_assoc($result);
+                $sopimus_lisatietoja = $dummy_tarjous_row['sopimus_lisatietoja'];
+            }
             require ("otsik.inc");
-            
-            if (!empty($dummy_tarjous_row['sopimus_lisatietoja'])) {
-                $asiakas_tunnukset = $dummy_tarjous_row['sopimus_lisatietoja'] . ',' . implode(',', $valitut_asiakastunnukset);
+            if (count($valitut_asiakastunnukset) > 0) {
+                if (!empty($dummy_tarjous_row['sopimus_lisatietoja'])) {
+                    
+                    $olemassaolevat = explode(",", $dummy_tarjous_row['sopimus_lisatietoja']);
+                    $lisattavat = array_diff($valitut_asiakastunnukset, $olemassaolevat);
+                    $asiakas_tunnukset = $dummy_tarjous_row['sopimus_lisatietoja'] . ',' . implode(',', $lisattavat);
+                }
+                else {
+                    $asiakas_tunnukset = implode(',', $valitut_asiakastunnukset);
+                }
+                $query = "  update laskun_lisatiedot
+                            set sopimus_lisatietoja = '{$asiakas_tunnukset}'
+                            where yhtio = '{$kukarow['yhtio']}'
+                            and otunnus = '{$tilausnumero}'";
+                pupe_query($query);
             }
-            else {
-                $asiakas_tunnukset = implode(',', $valitut_asiakastunnukset);
-            }
-            $query = "  update laskun_lisatiedot
-                        set sopimus_lisatietoja = '{$asiakas_tunnukset}'
-                        where yhtio = '{$kukarow['yhtio']}'
-                        and otunnus = '{$tilausnumero}'";
-            pupe_query($query);
         }
 	}
 }

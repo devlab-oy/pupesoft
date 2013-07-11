@@ -185,7 +185,7 @@ if ((int) $valitsetoimitus > 0 and $valitsetoimitus != $tilausnumero) {
 		$toim = "PROJEKTI";
 	}
 }
-elseif (in_array($valitsetoimitus, array("ENNAKKO","TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO","PROJEKTI"))) {
+elseif (in_array($valitsetoimitus, array("ENNAKKO", "EXTENNAKKO","TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO","PROJEKTI"))) {
 	$uusitoimitus = $valitsetoimitus;
 }
 
@@ -564,6 +564,9 @@ elseif ($toim == "YLLAPITO") {
 }
 elseif ($toim == "ENNAKKO" or $laskurow["tilaustyyppi"] == "E") {
 	$otsikko = t("Ennakkotilaus");
+}
+elseif ($toim == "EXTENNAKKO" or $laskurow["tilaustyyppi"] == "E") {
+	$otsikko = t("Ext-Ennakkotilaus");
 }
 else {
 	$otsikko = t("Myyntitilaus");
@@ -1690,8 +1693,8 @@ if ($uusitoimitus != "") {
 	if ($toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 		require("otsik_siirtolista.inc");
 	}
-	elseif ($toim == 'EXTTARJOUS') {
-        if ($tarjous_tee != 'luo_dummy_tarjous') {
+	elseif ($toim == 'EXTTARJOUS' or $toim == "EXTENNAKKO") {
+        if (isset($tarjous_tee) and $tarjous_tee != 'luo_dummy_tarjous') {
             require('inc/valitse_asiakas.inc');
         }
         else {
@@ -1727,7 +1730,7 @@ if ($uusitoimitus != "") {
 	$kaytiin_otsikolla = "NOJOO!";
 }
 
-if ($toim == 'EXTTARJOUS' and ((isset($tarjous_tee) and $tarjous_tee != 'luo_dummy_tarjous') or isset($action))) {
+if (($toim == 'EXTTARJOUS' or $toim == "EXTENNAKKO") and ((isset($tarjous_tee) and $tarjous_tee != 'luo_dummy_tarjous') or isset($action))) {
     require('inc/valitse_asiakas.inc');
 }
 
@@ -3285,7 +3288,7 @@ if ($tee == '') {
 				AND tyyppi != 'D'";
 	$numres = pupe_query($query);
 
-	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or mysql_num_rows($numres) == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "ENNAKKO")) {
+	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or mysql_num_rows($numres) == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO")) {
 
 		js_popup();
 

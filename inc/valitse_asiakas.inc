@@ -8,28 +8,29 @@ echo "<font class='head'>" . t("Ext-Tarjoukset") . "</font><hr>";
 
 </style>
 <script>
-$(document).ready(function() {
-	bind_kaikki_asiakkaat_checkbox_click();
-});
-function bind_kaikki_asiakkaat_checkbox_click() {
-    $('#valitse_kaikki').on('click', function() {
-        
-        if ($(this).is(':checked')) {
-            $(this).parent().parent().parent().parent().find('.valitut_asiakastunnukset').each(function(index, value) {
-                $(value).attr('checked', 'checked');
-            });
-		}
-		else {
-			$(this).parent().parent().parent().parent().find('.valitut_asiakastunnukset').each(function(index, value) {
-                $(value).removeAttr('checked');
-            });
-		}
+    $(document).ready(function() {
+        bind_kaikki_asiakkaat_checkbox_click();
     });
-}
+    function bind_kaikki_asiakkaat_checkbox_click() {
+        $('#valitse_kaikki').on('click', function() {
+        
+            if ($(this).is(':checked')) {
+                $(this).parent().parent().parent().parent().find('.valitut_asiakastunnukset').each(function(index, value) {
+                    $(value).attr('checked', 'checked');
+                });
+            }
+            else {
+                $(this).parent().parent().parent().parent().find('.valitut_asiakastunnukset').each(function(index, value) {
+                    $(value).removeAttr('checked');
+                });
+            }
+        });
+    }
 </script>
 <?php
 
 $request = array(
+    "toim" => $toim,
     "hakuehto" => $hakuehto,
     "mul_asiakasosasto" => $mul_asiakasosasto,
     "mul_asiakasryhma" => $mul_asiakasryhma,
@@ -41,45 +42,48 @@ $request = array(
     "valitut_asiakastunnukset" => $valitut_asiakastunnukset,
 );
 
-
 $asiakasid = $kukarow['tunnus'] * -1;
 
+if ($request['toim'] == 'EXTTARJOUS') {
+    $dummy_tyyppi = 'TARJOUS';
+}
+else {
+    $dummy_tyyppi = "ENNAKKO";
+}
+
+// lis‰‰ tai poista asiakkaita dummytarjoukselta
 if ($request['action'] == 'liita_asiakkaat') {
-    luo_myyntitilausotsikko('TARJOUS', $asiakasid, $request['tilausnumero']);
-} elseif ($request['action'] == 'poista_asiakkaat') {
+    luo_myyntitilausotsikko($dummy_tyyppi, $asiakasid, $request['tilausnumero']);
+}
+elseif ($request['action'] == 'poista_asiakkaat') {
     poista_asiakkaita_dummytarjoukselta($request['tilausnumero'], $request['valitut_asiakastunnukset']);
 }
 
-$query = "  select lasku.*, laskun_lisatiedot.sopimus_lisatietoja
-            from lasku
-            join laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
-            where lasku.yhtio='{$kukarow['yhtio']}'
-            and lasku.tila='T'
-            and lasku.alatila=''
-            and lasku.liitostunnus='{$asiakasid}'";
-$result = pupe_query($query);
-
-if (mysql_num_rows($result) > 0) {
-    $dummy_tarjous_row = mysql_fetch_assoc($result);
-    $request['tilausnumero'] = $dummy_tarjous_row['tunnus'];
-    $request['dummytarjous'] = $dummy_tarjous_row;
-} else {
-    $request['tilausnumero'] = luo_myyntitilausotsikko('TARJOUS', $asiakasid);
+// jos k‰ytt‰j‰ navigoi sivulle linkist‰, tarjous_tee on setattu, n‰in estet‰‰n turhan dummytarjouksen teko kun tullaan tarjouksen_splittauksesta
+if (isset($request['tarjous_tee'])) {
+    $dummy_tarjous_row = tarkista_loytyyko_dummytarjous($asiakasid, $request['toim']);
+    if (!empty($dummy_tarjous_row)) {
+        $request['tilausnumero'] = $dummy_tarjous_row['tunnus'];
+        $request['dummytarjous'] = $dummy_tarjous_row;
+    }
+    else {
+        $request['tilausnumero'] = luo_myyntitilausotsikko($dummy_tyyppi, $asiakasid);
+    }
 }
 
-
-
-//var_dump($request);
+//tarkistetaan mik‰ n‰kym‰ n‰ytet‰‰n, poimitut asiakkaat vai asiakkaat joilla extranet k‰ytt‰j‰tunnus
 if ($request['tarjous_tee'] == 'nayta_poimitut_asiakkaat') {
     if (!empty($request['dummytarjous']['sopimus_lisatietoja'])) {
         $request['asiakkaat'] = hae_poimitut_asiakkaat($request['dummytarjous']['sopimus_lisatietoja']);
         echo_asiakas_table($request);
-    } else {
+    }
+    else {
         echo "<font class='message'>" . t("Tarjoukselle ei ole valittu yht‰‰n asiakasta") . "</font>";
         echo "<br>";
         echo_asiakas_table($request);
     }
-} else {
+}
+else {
     if (isset($request['ext_asiakas_haku_tehty'])) {
 
         $request['asiakkaat'] = hae_asiakkaat_joilla_extranet_kayttajatunnus($request);
@@ -90,6 +94,28 @@ if ($request['tarjous_tee'] == 'nayta_poimitut_asiakkaat') {
 
 require ('inc/footer.inc');
 exit;
+
+function tarkista_loytyyko_dummytarjous($asiakasid, $toim) {
+
+    global $kukarow, $yhtiorow;
+
+    $where = "";
+    if ($toim == "EXTTARJOUS") {
+        $where = " and lasku.tila = 'T' and clearing = 'EXTTARJOUS'";
+    }
+    else {
+        $where = " and lasku.tila = 'N' and clearing = 'EXTENNAKKO'";
+    }
+    $query = "  select lasku.*, laskun_lisatiedot.sopimus_lisatietoja
+                from lasku
+                join laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+                where lasku.yhtio='{$kukarow['yhtio']}'
+                {$where}
+                and lasku.alatila=''
+                and lasku.liitostunnus='{$asiakasid}'";
+    $result = pupe_query($query);
+    return mysql_fetch_assoc($result);
+}
 
 function echo_asiakas_lisays_form($request) {
 
@@ -108,12 +134,14 @@ function echo_asiakas_rajaus($request) {
     global $kukarow, $yhtiorow, $mul_asiakasosasto, $mul_asiakasryhma, $mul_asiakasmyyja;
     echo "<form method='post' action='tilaus_myynti.php'>";
     echo "<input type='hidden' name='tarjous_tee' value='nayta_asiakas_valinta' />";
-    echo "<input type='hidden' name='toim' value='EXTTARJOUS' />";
+    //$request['toim'] voi olla EXTTARJOUS tai EXTENNAKKO
+    echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
     echo "<input type='hidden' name='ext_asiakas_haku_tehty' value='1' />";
     echo "<div id='infomessage'>";
     if (!empty($request['dummytarjous']['sopimus_lisatietoja'])) {
         $liitettyjen_asiakkaiden_lkm = count(explode(',', $request['dummytarjous']['sopimus_lisatietoja']));
-    } else {
+    }
+    else {
         $liitettyjen_asiakkaiden_lkm = 0;
     }
     echo t("Sinulla on") . ' ' . $liitettyjen_asiakkaiden_lkm . ' ' . t("poimittua asiakasta");
@@ -123,10 +151,8 @@ function echo_asiakas_rajaus($request) {
     $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASMYYJA");
     $monivalintalaatikot_normaali = array();
 
-
-
     require ("tilauskasittely/monivalintalaatikot.inc");
-    
+
     echo t("Anna y-tunnus, nimi tai asiakasnumero");
     echo "<input type='text' name='hakuehto' value='{$request['hakuehto']}'>";
     echo "<input type='submit' value='" . t("Hae") . "'>";
@@ -156,20 +182,26 @@ function echo_asiakas_table($request) {
     global $kukarow, $yhtiorow, $orig_tila, $orig_alatila;
 
     $raaka_arska = explode(",", $request['dummytarjous']['sopimus_lisatietoja']);
-    
+
     if (count($request['asiakkaat']) > 0) {
 
         echo "<form method='post' action='tilaus_myynti.php'>";
         echo "<input type='hidden' name='tilausnumero' value='{$request['tilausnumero']}'/>";
-        echo "<input type='hidden' name='toim' value='EXTTARJOUS'/>";
+        echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
         //FUNTSI
         echo "<input type='hidden' name='tarjous_tee' value='nayta_poimitut_asiakkaat'/>";
         if ($request['tarjous_tee'] == 'nayta_asiakas_valinta') {
             echo "<input type='hidden' name='action' value='liita_asiakkaat'/>";
-        } else {
+        }
+        else {
             echo "<input type='hidden' name='action' value='poista_asiakkaat'/>";
         }
-        echo "<input type='hidden' name='orig_tila' value='T' />";
+        if ($request['toim'] == "EXTTARJOUS") {
+            echo "<input type='hidden' name='orig_tila' value='T' />";
+        }
+        else {
+            echo "<input type='hidden' name='orig_tila' value='N' />";
+        }
         echo "<input type='hidden' name='orig_alatila' value='{$orig_alatila}' />";
         echo "<table id='asiakkaat'>";
 
@@ -183,7 +215,8 @@ function echo_asiakas_table($request) {
             echo "<td>";
             if (in_array($asiakas['tunnus'], $raaka_arska) and $request['tarjous_tee'] != 'nayta_poimitut_asiakkaat') {
                 echo "X";
-            } else {
+            }
+            else {
                 echo "<input type='checkbox' class='valitut_asiakastunnukset' name='valitut_asiakastunnukset[]' value='{$asiakas['tunnus']}'>";
             }
             echo "</td>";
@@ -197,32 +230,36 @@ function echo_asiakas_table($request) {
         echo "<br>";
         if ($request['tarjous_tee'] == 'nayta_asiakas_valinta') {
             $submitvalue = t("Liit‰ asiakkaat");
-        } else {
+        }
+        else {
             $submitvalue = t("Poista asiakkaat");
         }
         echo "<input type='submit' value='{$submitvalue}'/>";
         echo "</form>";
         echo "<br>";
     }
-    echo "<form method='post' action='tilaus_myynti.php'>";
-    echo "<input type='hidden' name='toim' value='EXTTARJOUS'/>";
-    echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!' />";
-    echo "<input type='hidden' name='tee' value='OTSIK' />";
-    echo "<input type='hidden' name='tarjous_tee' value='luo_dummy_tarjous' />";
-    echo "<input type='hidden' name='tilausnumero' value='{$request['tilausnumero']}' />";
-    echo "<input type='submit' id='luo_tarjous' value='" . t("Luo tarjous") . "'/>";
-    echo "</form>";
 
+    if (!empty($request['dummytarjous']['sopimus_lisatietoja'])) {
+        echo "<form method='post' action='tilaus_myynti.php'>";
+        echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
+        echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!' />";
+        echo "<input type='hidden' name='tee' value='OTSIK' />";
+        echo "<input type='hidden' name='tarjous_tee' value='luo_dummy_tarjous' />";
+        echo "<input type='hidden' name='tilausnumero' value='{$request['tilausnumero']}' />";
+        echo "<input type='submit' id='luo_tarjous' value='" . t("Luo tarjous") . "'/>";
+        echo "</form>";
+    }
 
     if ($request['tarjous_tee'] == 'nayta_poimitut_asiakkaat') {
         echo "<form method='post' action='tilaus_myynti.php'>";
-        echo "<input type='hidden' name='toim' value='EXTTARJOUS'/>";
+        echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
         echo "<input type='hidden' name='tarjous_tee' value='nayta_asiakas_valinta' />";
         echo "<input type='submit' id='takaisin_asiakasvalintaan' value ='" . t("Takaisin asiakasvalintaan") . "'/>";
         echo "</form>";
-    } else {
+    }
+    else {
         echo "<form method='post' action='tilaus_myynti.php'>";
-        echo "<input type='hidden' name='toim' value='EXTTARJOUS'/>";
+        echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
         echo "<input type='hidden' name='tarjous_tee' value='nayta_poimitut_asiakkaat' />";
         echo "<input type='submit' id='nayta_poimitut' value ='" . t("N‰yt‰ poimitut") . "'/>";
         echo "</form>";
@@ -271,7 +308,8 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
                     WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
                      {$where}
 					ORDER BY nimi";
-    } else {
+    }
+    else {
         $query = "	(SELECT asiakas.*
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio

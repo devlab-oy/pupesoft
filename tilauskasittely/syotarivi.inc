@@ -232,7 +232,7 @@
 
 		echo "</table></form>";
 	}
-	elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "ENNAKKO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or (isset($aputoim) and $aputoim == "RIVISYOTTO") or $toim == "YLLAPITO" or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "REKLAMAATIO")) {
+	elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or (isset($aputoim) and $aputoim == "RIVISYOTTO") or $toim == "YLLAPITO" or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "REKLAMAATIO")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
 				<tr>$jarjlisa";

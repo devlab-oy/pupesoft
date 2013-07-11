@@ -382,9 +382,18 @@ if(!function_exists("luo_myyntitilausotsikko")) {
             $tee	= "OTSIK";
             $override_ytunnus_check = "YES";
             $ei_kayttoliittymaa = "kylla";
-            $tilaustyyppi = 'T';
+            
             $maksuehto = $asiakasrow['maksuehto'];
             $toimitustapa = $asiakasrow['toimitustapa'];
+            
+            if ($toim == "TARJOUS") {
+                $clearing = "EXTTARJOUS";
+                $tilaustyyppi = 'T';
+            }
+            else {
+                $clearing = "EXTENNAKKO";
+                $tilaustyyppi = 'E';
+            }
             if(!empty($tilausnumero)){
                 $query = "  select lasku.*, laskun_lisatiedot.sopimus_lisatietoja
                             from lasku

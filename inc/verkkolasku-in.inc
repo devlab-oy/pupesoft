@@ -37,9 +37,6 @@
 			elseif (strpos($file, "teccominvoice") !== false){
 				require("inc/verkkolasku-in-teccom.inc");
 			}
-			elseif (strpos($file, "ORAO") !== false){
-				require("inc/verkkolasku-in-unikko.inc");
-			}
 			else {
 				require("inc/verkkolasku-in-pupevoice.inc");
 			}
@@ -731,8 +728,8 @@
 					}
 				}
 
-				// Laitetaan t‰n‰ p‰iv‰ laskun kirjausp‰iv‰ksi jos yhtiˆn parametri on t‰ss‰ asennossa. (UNIKKO-INVOICE:ssa tapvm tulee erikseen, joten k‰ytet‰‰n sit‰ siin‰ tapauksessa suoraan...)
-				if ($yhtiorow['ostolaskujen_paivays'] == "1" and $laskun_tyyppi != "UNIKKO-INVOICE") {
+				// Laitetaan t‰m‰ p‰iv‰ laskun kirjausp‰iv‰ksi jos yhtiˆn parametri on t‰ss‰ asennossa.
+				if ($yhtiorow['ostolaskujen_paivays'] == "1") {
 					$laskun_tapvm = date("Ymd");
 				}
 
@@ -1114,7 +1111,7 @@
 				}
 
 	 			// Tehd‰n pelk‰t oletustiliˆinnit
-				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE" and $laskun_tyyppi != "TECCOM-INVOICE" and $ebid != "MAVENTAXML") {
+				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "TECCOM-INVOICE" and $ebid != "MAVENTAXML") {
 
 					if ($oletustili > 0) {
 						$tili = $oletustili;
@@ -1237,7 +1234,7 @@
 					$count_rtuoteno = count($rtuoteno);
 
 					for ($i = 0; $i < $count_rtuoteno; $i++) {
-						if ((float) $rtuoteno[$i]["rivihinta"] != 0 or ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0)) {
+						if ((float) $rtuoteno[$i]["rivihinta"] != 0) {
 							$kustp = $oletuskust;
 
 							$selite = isset($rtuoteno[$i]["riviinfo"]) ? mysql_real_escape_string(utf8_decode($rtuoteno[$i]["riviinfo"])) : "";
@@ -1291,12 +1288,7 @@
 								if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
 							}
 
-							if ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0) {
-								// Unikko laskuissa tulee kirjauksetkin valuutassa
-								$summa_valuutassa = (float) $rtuoteno[$i]["rivihinta_valuutassa"];
-								$summa = round($summa_valuutassa * $vrow["kurssi"], 2);
-							}
-							elseif ($vrow["kurssi"] != 1) {
+							if ($vrow["kurssi"] != 1) {
 								// Laskulla olevat rivihinnat ovat valuutassa
 								$summa_valuutassa = (float) $rtuoteno[$i]["rivihinta"];
 								$summa = round($summa_valuutassa * $vrow["kurssi"], 2);
@@ -1546,25 +1538,6 @@
 
 					// jos kyseess‰ on tavaraa
 					if ((!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and in_array($trow['oletus_vienti'], array('C','F','I','J','K','L'))) {
-						/**
-						 * Jos Unikkoinvoice, muutetaan oletus_vienti
-						 * C => A
-						 * F => D
-						 * I => G
-						*/
-						if ($laskun_tyyppi == "UNIKKO-INVOICE" and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I')) {
-
-							if ($trow['oletus_vienti'] == 'C') 		$trow['oletus_vienti'] = 'A';
-							elseif ($trow['oletus_vienti'] == 'F') 	$trow['oletus_vienti'] = 'D';
-							elseif ($trow['oletus_vienti'] == 'I') 	$trow['oletus_vienti'] = 'G';
-
-							$query = "	UPDATE lasku SET
-										vienti = '{$trow['oletus_vienti']}'
-										WHERE yhtio = '{$yhtio}'
-										AND tunnus  = '{$tunnus}'";
-							$vienti_upd_res = pupe_query($query);
-						}
-
 						verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
 					}
 				}
@@ -1678,15 +1651,6 @@
 					}
 					elseif ($ebid == "TECCOM-INVOICE") {
 						$kayttotarkoitus = 'TECCOM-INVOICE';
-						/*
-						Tiedoston alkuun pit‰‰ lis‰t‰ n‰m‰ tiedot, kun saadaan xsl ja dtd
-						<?xml version="1.0" encoding="utf-8"?>
-						<!DOCTYPE Finvoice SYSTEM "datain/teccom.dtd">
-						<?xml-stylesheet type="text/xsl" href="datain/teccom.xsl"?>
-						*/
-					}
-					elseif ($ebid == "UNIKKO-INVOICE") {
-						$kayttotarkoitus = 'UNIKKO-INVOICE';
 					}
 					else {
 						$kayttotarkoitus = 'INVOIC.D.96A';

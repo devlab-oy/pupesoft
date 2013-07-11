@@ -86,6 +86,12 @@
 		$laskun_summa_eur = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceGrossValue->Amount);
 	}
 
+	$laskun_alv = 0;
+
+	if (isset($xml->InvoiceSummary->Tax->Percent) and $xml->InvoiceSummary->Tax->Percent != 0) {
+		$laskun_alv = (float) str_replace(",", ".", $xml->InvoiceSummary->Tax->Percent);
+	}
+
 	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount) and $xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount != 0) {
 		$laskun_pakkauskulu = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount);
 		$osto_kulu = $laskun_pakkauskulu;
@@ -94,12 +100,6 @@
 		if ($laskuttajan_toimittajanumero == "123441") {
 			$ei_oteta_kulua_pois = true;
 		}
-	}
-
-	$laskun_alv = 0;
-
-	if (isset($xml->InvoiceSummary->Tax->Percent) and $xml->InvoiceSummary->Tax->Percent != 0) {
-		$laskun_alv = (float) str_replace(",", ".", $xml->InvoiceSummary->Tax->Percent);
 	}
 
 	if (isset($xml->InvoiceHeader->OrderRef)) {
@@ -472,7 +472,7 @@
 									if ($laskuttajan_toimittajanumero == "123084") {
 										$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $node->Amount) * $rtuoteno[$x]['kpl'];
 										$rtuoteno[$x]['hinta']				= (float) str_replace(",", ".", $node->Amount);
-										}
+									}
 									else {
 										$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $node->Amount);
 										$rtuoteno[$x]['hinta']				= $rtuoteno[$x]['rivihinta'] / $rtuoteno[$x]['kpl'];
@@ -480,14 +480,16 @@
 										if ($laskuttajan_toimittajanumero == "123067") $rtuoteno[$i]['rivihinta'] -= $rtuoteno[$x]['rivihinta'];
 									}
 
-									$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
-									$rtuoteno[$x]['status']				= '';
-									$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
-									$rtuoteno[$x]["lapsi"]				= "yes";
-									$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
+									$rtuoteno[$x]["nimitys"] 			= $child_chk_row['nimitys'];
+									$rtuoteno[$x]['status']	 			= '';
+									$rtuoteno[$x]["alv"] 	 			= $laskun_alv;
+									$rtuoteno[$x]["lapsi"]	 			= "yes";
+									$ealvi[$x] 				 			= $laskun_alv;
+									$rtuoteno[$x]['rivihinta_verolli'] 	= round($rtuoteno[$x]['rivihinta'] * (1 + ($laskun_alv / 100)), 2);
 
 									if ($onko_hyvityslasku_kerroin != 1) {
 										$rtuoteno[$x]['rivihinta'] *= $onko_hyvityslasku_kerroin;
+										$rtuoteno[$x]['rivihinta_verolli'] *= $onko_hyvityslasku_kerroin;
 										$rtuoteno[$x]['hinta'] *= $onko_hyvityslasku_kerroin;
 									}
 								}
@@ -543,12 +545,14 @@
 					$rtuoteno[$i]["documentnumber"] = $tuotetieto->DesAdvRef->DocumentNumber;
 				}
 
-				$ealvi[$i] = 0; // Oletetaan aina ALV 0%
-				$rtuoteno[$i]["alv"] = 0; // Oletetaan aina ALV 0%
-				$rtuoteno[$i]["nimitys"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductDescription->ProductName1));
+				$ealvi[$i] 				 			= $laskun_alv;
+				$rtuoteno[$i]["alv"] 	 			= $laskun_alv;
+				$rtuoteno[$i]["nimitys"] 			= pupesoft_cleanstring(utf8_decode($tuotetieto->ProductDescription->ProductName1));
+				$rtuoteno[$i]['rivihinta_verolli'] 	= round($rtuoteno[$i]['rivihinta'] * (1 + ($laskun_alv / 100)), 2);
 
 				if ($onko_hyvityslasku_kerroin != 1) {
 					$rtuoteno[$i]['rivihinta'] *= $onko_hyvityslasku_kerroin;
+					$rtuoteno[$i]['rivihinta_verolli'] *= $onko_hyvityslasku_kerroin;
 					$rtuoteno[$i]['hinta'] *= $onko_hyvityslasku_kerroin;
 				}
 			}
@@ -567,29 +571,15 @@
 		}
 
 		if ($laskun_alv != 0) {
-			$osto_kulu = round($osto_kulu * (1 + ($laskun_alv / 100)) * $onko_hyvityslasku_kerroin, 2);
-			$osto_rahti = round($osto_rahti * (1 + ($laskun_alv / 100)) * $onko_hyvityslasku_kerroin, 2);
+			$osto_kulu      = round($osto_kulu * (1 + ($laskun_alv / 100)) * $onko_hyvityslasku_kerroin, 2);
+			$osto_rahti     = round($osto_rahti * (1 + ($laskun_alv / 100)) * $onko_hyvityslasku_kerroin, 2);
 			$osto_rivi_kulu = round($osto_rivi_kulu * (1 + ($laskun_alv / 100)) * $onko_hyvityslasku_kerroin, 2);
 		}
 
 		if ($laskun_rahtikulu != 0 and $onko_hyvityslasku_kerroin != 1) $laskun_rahtikulu *= $onko_hyvityslasku_kerroin;
-
-		// lasketaan mätsäävätkö rivihinnat ja laskunloppusumma, jos ei niin lisätään se kuluihin.
-		// $chk_sum = 0;
-
-		// for ($ix = 0; $ix < count($rtuoteno); $ix++) {
-		// 	$chk_sum += $rtuoteno[$ix]['rivihinta'];
-		// }
-
-		// if ($chk_sum > 0 and $chk_sum != $laskun_summa_eur) {
-		// 	$osto_kulu += (abs($chk_sum	- $laskun_summa_eur));
-		// }
 
 		// Valeo
 		if ($laskuttajan_toimittajanumero == "123342") {
 			$osto_rivi_kulu = 0;
 		}
 	}
-
-	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
-	ini_set("display_errors", 0);

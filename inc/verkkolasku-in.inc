@@ -94,6 +94,7 @@
 			$rtuoteno[]["laskutettuaika"]
 			$rtuoteno[]["nimitys"]
 			$rtuoteno[]["rivihinta"]
+			$rtuoteno[]["rivihinta_verolli"]
 			$rtuoteno[]["riviinfo"]
 			$rtuoteno[]["riviviite"]
 			$rtuoteno[]["tilaajanrivinro"]
@@ -286,11 +287,6 @@
 			$yhtio 			  = $yhtiorow['yhtio'];
 			$kukarow['yhtio'] = $yhtio;
 			$kukarow['kuka']  = 'verkkolas';
-
-			// tietyssä tapauksessa triggeröidään tämä
-			if (strpos($file, "maventa") !== false and $yhtio == "artr" and $laskun_ebid == "FINVOICEXML") {
-				$laskun_ebid = "MAVENTAXML";
-			}
 
 			// Perusta lasku
 			$summa = $laskun_summa_eur;
@@ -524,6 +520,10 @@
 						}
 					}
 				}
+			}
+
+			if ($trow['asn_sanomat'] == "M" and @file_exists("inc/maventa.inc")) {
+				require("inc/maventa.inc");
 			}
 
 			// Tätä voi ajaa myös verkkolaskuvirheetohjelmasta silloin $luolasku on FALSE ja lopetetaan tässä vaiheessa
@@ -906,7 +906,7 @@
 									WHERE yhtio 		 = '{$yhtio}'
 									AND laji 			 = '{$lajilisa}'
 									AND asn_numero 		 = '{$laskun_numero}'
-									AND toimittajanumero = '{$laskuttajan_toimittajanumero}'";
+									AND toimittajanumero = '{$trow['toimittajanro']}'";
 						$duplikaattilasku_check_res = pupe_query($query);
 
 						if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
@@ -1331,7 +1331,7 @@
 
 									$summa = $summa - $summa_vero_chk;
 
-									foreach($_arr as $_k => $_v) {
+									foreach ($_arr as $_k => $_v) {
 										if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
 
 										$_v = round($_v, 2);
@@ -1484,7 +1484,7 @@
 												tilausnumero 		= '{$rtuoteno[$i]['ostotilausnro']}',
 												tilausrivi 			= '',
 												tilausrivinpositio 	= '{$rtuoteno[$i]['tilaajanrivinro']}',
-												toimittajanumero 	= '{$laskuttajan_toimittajanumero}',
+												toimittajanumero 	= '{$trow['toimittajanro']}',
 												toim_tuoteno 		= '{$rtuoteno[$i]['tuoteno']}',
 												toim_tuoteno2 		= '{$rtuoteno[$i]['tuoteno2']}',
 												tuoteno				= '',
@@ -1545,7 +1545,7 @@
 					}
 
 					// jos kyseessä on tavaraa
-					if ((!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I' or $trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L')) {
+					if ((!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and in_array($trow['oletus_vienti'], array('C','F','I','J','K','L'))) {
 						/**
 						 * Jos Unikkoinvoice, muutetaan oletus_vienti
 						 * C => A

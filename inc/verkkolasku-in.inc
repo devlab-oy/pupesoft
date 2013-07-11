@@ -522,7 +522,7 @@
 				}
 			}
 
-			if (@file_exists("inc/maventa.inc")) {
+			if ($trow['asn_sanomat'] == "M" and @file_exists("inc/maventa.inc")) {
 				require("inc/maventa.inc");
 			}
 
@@ -897,7 +897,7 @@
 					}
 
 					// katsotaan onko Teccom-lasku jo asn_sanomat-taulussa
-					if ($laskun_tyyppi == 'TECCOM-INVOICE' or ($ebid == 'MAVENTAXML' and $trow['asn_sanomat'] == 'M')) {
+					if ($laskun_tyyppi == 'TECCOM-INVOICE' or $ebid == 'MAVENTAXML') {
 
 						$lajilisa = $ebid == "MAVENTAXML" ? "mav" : "tec";
 
@@ -1429,7 +1429,7 @@
 							}
 						}
 
-						if ($rtuoteno[$i]["tuoteno"] != "" and ($laskun_tyyppi == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M')) and $sanomantarkistin != 999 and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
+						if ($rtuoteno[$i]["tuoteno"] != "" and ($laskun_tyyppi == "TECCOM-INVOICE" or $ebid == "MAVENTAXML") and $sanomantarkistin != 999 and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
 
 							if (!isset($rtuoteno[$i]['ale1'])) $rtuoteno[$i]['ale1'] = 0;
 							if (!isset($rtuoteno[$i]['ale2'])) $rtuoteno[$i]['ale2'] = 0;

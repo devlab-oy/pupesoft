@@ -19200,17 +19200,17 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 
 			if ($ix == 1 and $osto_rahti != 0) {
 				$summa = $osto_rahti * $til_sum_ratio;
-				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+				$tiliointirivin_summa = round($tiliointirivin_summa - $summa, 2);
 				$return_array['osto_rahti'] += $summa;
 			}
 			elseif ($ix == 2 and $osto_kulu != 0) {
 				$summa = $osto_kulu * $til_sum_ratio;
-				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+				$tiliointirivin_summa = round($tiliointirivin_summa - $summa, 2);
 				$return_array['osto_kulu'] += $summa;
 			}
 			elseif ($ix == 3 and $osto_rivi_kulu != 0) {
 				$summa = $osto_rivi_kulu * $til_sum_ratio;
-				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+				$tiliointirivin_summa = round($tiliointirivin_summa - $summa, 2);
 				$return_array['osto_rivi_kulu'] += $summa;
 			}
 		}

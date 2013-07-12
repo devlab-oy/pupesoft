@@ -1,19 +1,41 @@
 <?php
 
 require_once('tilauskasittely/luo_myyntitilausotsikko.inc');
-$query = "  SELECT sopimus_lisatietoja
+$query = "  SELECT laskun_lisatiedot.sopimus_lisatietoja,
+			tilausrivi.*
             FROM laskun_lisatiedot
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND otunnus = '{$tilausnumero}'";
+			JOIN tilausrivi
+			ON ( tilausrivi.yhtio = laskun_lisatiedot.yhtio
+				AND tilausrivi.otunnus = laskun_lisatiedot.otunnus )
+            WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+            AND laskun_lisatiedot.otunnus = '{$tilausnumero}'";
 $result = pupe_query($query);
-$tarjouksen_asiakkaat = mysql_fetch_assoc($result);
-$tarjouksen_asiakkaat = explode(',', $tarjouksen_asiakkaat['sopimus_lisatietoja']);
+
+$tilausrivit = array();
+
+while($tilausrivi = mysql_fetch_assoc($result)) {
+	$tilausrivit[] = $tilausrivi;
+	$tarjouksen_asiakkaat = $tilausrivi['sopimus_lisatietoja'];
+}
+
+$tarjouksen_asiakkaat = explode(',', $tarjouksen_asiakkaat);
 
 $dummy_tarjouksen_tilausnumero = $tilausnumero;
 
 foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
     $kukarow['kesken'] = 0;
     $tilausnumero = luo_myyntitilausotsikko('TARJOUS', $tarjous_asiakas);
+
+	foreach ($tilausrivit as $tilausrivi) {
+		$tilausrivi['otunnus'] = $tilausnumero;
+		unset($tilausrivi['tunnus']);
+		unset($tilausrivi['laadittu']);
+		unset($tilausrivi['sopimus_lisatietoja']);
+		$copy_query = "	INSERT INTO
+						tilausrivi (".implode(", ", array_keys($tilausrivi)).", laadittu)
+						VALUES('".implode("', '", array_values($tilausrivi)). "', now())";
+		pupe_query($copy_query);
+	}
     
     $query = "  SELECT *
                 FROM lasku

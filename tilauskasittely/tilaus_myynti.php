@@ -1693,7 +1693,7 @@ if ($uusitoimitus != "") {
 	if ($toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 		require("otsik_siirtolista.inc");
 	}
-	elseif ($toim == 'EXTTARJOUS' or $toim == "EXTENNAKKO") {
+	elseif (($toim == 'EXTTARJOUS' or $toim == "EXTENNAKKO") and isset($tarjous_tee)) {
         if (isset($tarjous_tee) and $tarjous_tee != 'luo_dummy_tarjous') {
             require('inc/valitse_asiakas.inc');
         }
@@ -1701,7 +1701,7 @@ if ($uusitoimitus != "") {
             $tee = "";
             $kukarow['kesken'] = $tilausnumero;
         }
-	}   
+	}
 	else {
 		require('otsik.inc');
 	}

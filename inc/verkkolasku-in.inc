@@ -988,16 +988,15 @@
 					$olmapvm = $krv."-".$krk."-".$krp;
 				}
 
-				$laskun_kulut = array();
-
-				$osto_kulu	= (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : $osto_kulu;
-				$osto_rahti = (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : $osto_rahti;
+				$laskun_kulut 	= array();
+				$osto_kulu		= (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : $osto_kulu;
+				$osto_rahti 	= (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : $osto_rahti;
 				$osto_rivi_kulu = (!isset($osto_rivi_kulu) or trim($osto_rivi_kulu) == '') ? 0 : $osto_rivi_kulu;
 
-				$osto_kulu_alv	= (!isset($osto_kulu_alv) or trim($osto_kulu_alv) == '') ? 0 : $osto_kulu_alv;
-				$osto_rahti_alv = (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : $osto_rahti_alv;
+				$osto_kulu_alv		= (!isset($osto_kulu_alv) or trim($osto_kulu_alv) == '') ? 0 : $osto_kulu_alv;
+				$osto_rahti_alv 	= (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : $osto_rahti_alv;
 				$osto_rivi_kulu_alv = (!isset($osto_rivi_kulu_alv) or trim($osto_rivi_kulu_alv) == '') ? 0 : $osto_rivi_kulu_alv;
-				
+
 				// Kirjoitetaan lasku
 				$query = "	INSERT into lasku set
 							yhtio 				= '$yhtio',
@@ -1121,37 +1120,38 @@
 
 					if ($ealvi[0] != "") $vero = (float) $ealvi[0];
 					else $vero = (float) $oletusalvi;
-					
-					$summa_varasto = round($omasumma / (1 + ($vero / 100)), 2);
+
+					$kirjattava_summa 		  = round($omasumma / (1 + ($vero / 100)), 2);
+					$summa_varasto 			  = $kirjattava_summa;
 					$summa_varasto_valuutassa = round($summa / (1 + ($vero / 100)), 2);
 
-					if (!$ei_oteta_kulua_pois and $yhtiorow['ostolaskun_kulutilit'] != ''
+					if ($yhtiorow['ostolaskun_kulutilit'] != ''
 						and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')
 						and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I')
 						and ($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0)
 					) {
 
-						list($omasumma, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, $omasumma, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
+						list($kirjattava_summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, $omasumma, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
+						$kirjattava_summa = round($kirjattava_summa / (1 + ($vero / 100)), 2);
 
 						foreach ($_arr as $_k => $_v) {
 							if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
-
 							$laskun_kulut[${"{$_k}_alv"}][$_k] += $_v;
 						}
-					
-						if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '') {
-							$summa_varasto = round($omasumma / (1 + ($vero / 100)), 2);
-						}
-					}										
 
-					$verkkolaskuveroton = round($omasumma / (1 + ($vero / 100)),2);
-					$verkkolaskuveroton_valuutassa = round($summa / (1 + ($vero / 100)),2);
-					$summa              = $omasumma;
-					$kustp              = $oletuskust;
-					$kohde              = $oletuskohde;
-					$projekti           = $oletusprojekti;
-					$kukarow['yhtio']	= $yhtio;
-					$kukarow['kuka']	= 'verkkolas';
+						if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '') {
+							$summa_varasto = $kirjattava_summa;
+						}
+					}
+
+					$summa			  		= $kirjattava_summa;
+					$totsumma 				= $kirjattava_summa;
+					$totsumma_valuutassa 	= $summa;
+					$kustp            		= $oletuskust;
+					$kohde            		= $oletuskohde;
+					$projekti         		= $oletusprojekti;
+					$kukarow['yhtio'] 		= $yhtio;
+					$kukarow['kuka']  		= 'verkkolas';
 
 					require ("inc/teetiliointi.inc");
 
@@ -1184,7 +1184,7 @@
 									projekti 		 = '{$projekti_ins}',
 									tapvm 			 = '$tpv-$tpk-$tpp',
 									summa			 = '$summa_varasto',
-									summa_valuutassa = '$verkkolaskuveroton_valuutassa',
+									summa_valuutassa = '$summa_varasto_valuutassa',
 									valkoodi		 = '$valkoodi',
 									selite 			 = '$selite',
 									vero 			 = 0,
@@ -1215,7 +1215,7 @@
 									projekti 		 = '{$projekti_ins}',
 									tapvm 			 = '$tpv-$tpk-$tpp',
 									summa 			 = $summa_varasto*-1,
-									summa_valuutassa = $verkkolaskuveroton_valuutassa*-1,
+									summa_valuutassa = $summa_varasto_valuutassa*-1,
 									valkoodi 		 = '$valkoodi',
 									selite 			 = '$selite',
 									vero 			 = 0,
@@ -1231,8 +1231,6 @@
 					$i								= 0;
 					$totsumma 						= 0;
 					$totsumma_valuutassa			= 0;
-					$verkkolaskuveroton 			= 0;
-					$verkkolaskuveroton_valuutassa	= 0;
 					$maksimisumma 		 			= 0;
 					$kustp							= $oletuskust;
 					$kohde							= $oletuskohde;
@@ -1315,6 +1313,9 @@
 							if ($rtuoteno[$i]["alv"] != "") $vero = (float) $rtuoteno[$i]["alv"];
 							else $vero = (float) $oletusalvi;
 
+							$summa_varasto 			  = $summa;
+							$summa_varasto_valuutassa = $summa_valuutassa;
+
 							if (!$ei_oteta_kulua_pois and $yhtiorow['ostolaskun_kulutilit'] != ''
 								and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')
 								and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I')
@@ -1329,16 +1330,13 @@
 								foreach ($_arr as $_k => $_v) {
 									if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
 									$laskun_kulut[${"{$_k}_alv"}][$_k] += $_v;
-									$totsumma += round($_v, 2);
+								}
+
+								if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '') {
+									$summa_varasto = $summa;
 								}
 							}
 
-							if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '') {
-								$summa_varasto = $summa;
-							}
-
-							$verkkolaskuveroton				+= $summa;
-							$verkkolaskuveroton_valuutassa	+= $summa_valuutassa;
 							$summa						 	 = round($summa * (1+($vero/100)),2);
 							$totsumma						+= $summa;
 							$totsumma_valuutassa			+= $summa_valuutassa;
@@ -1374,8 +1372,8 @@
 											kohde	 		 = '{$kohde_ins}',
 											projekti 		 = '{$projekti_ins}',
 											tapvm 			 = '$tpv-$tpk-$tpp',
-											summa 			 = '$summa_varasto',
-											summa_valuutassa = '$summa_valuutassa',
+											summa 			 = $summa_varasto,
+											summa_valuutassa = $summa_varasto_valuutassa,
 											valkoodi 		 = '$valkoodi',
 											selite 			 = '$selite',
 											vero 			 = 0,
@@ -1406,7 +1404,7 @@
 											projekti 		 = '{$projekti_ins}',
 											tapvm 			 = '$tpv-$tpk-$tpp',
 											summa 			 = $summa_varasto * -1,
-											summa_valuutassa = $summa_valuutassa * -1,
+											summa_valuutassa = $summa_varasto_valuutassa * -1,
 											valkoodi 		 = '$valkoodi',
 											selite 			 = '$selite',
 											vero 			 = 0,
@@ -1417,9 +1415,18 @@
 							}
 						}
 					}
-				}
 
-				######################################################################
+					// Tässä tapauksessa tehdään kulutiliöinnit könttänä vaikka muut tiliöintiin rivikohtaisesti
+					if ($ei_oteta_kulua_pois and ($osto_kulu != 0 or $osto_rahti != 0 or $osto_rivi_kulu != 0)) {
+						$laskun_kulut = array(
+							$vero => array(
+							'osto_kulu' => $osto_kulu,
+							'osto_rahti' => $osto_rahti,
+							'osto_rivi_kulu' => $osto_rivi_kulu
+							)
+						);
+					}
+				}
 
 				// Tehdään ASN Insertit
 				if (($ebid == "TECCOM-INVOICE" or $ebid == "MAVENTAXML") and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
@@ -1453,9 +1460,9 @@
 								$asn_hinta = $asn_hinta / ((100 - $rtuoteno[$i]['ale3']) / 100);
 							}
 
-							// osto_kulu = $laskun_pakkauskulu
-							// osto_rahti = invoiceSummary rahti
-							// osto_rivi_kulu  = ($laskun_rahtikulu, $rtuoteno[$i]['kulu'])
+							// osto_kulu 		= $laskun_pakkauskulu
+							// osto_rahti 		= invoiceSummary rahti
+							// osto_rivi_kulu 	= ($laskun_rahtikulu, $rtuoteno[$i]['kulu'])
 
 							$lajilisa = $ebid == "MAVENTAXML" ? "mav" : "tec";
 
@@ -1495,26 +1502,14 @@
 					}
 				}
 
-				if ($ei_oteta_kulua_pois and ($osto_kulu != 0 or $osto_rahti != 0 or $osto_rivi_kulu != 0)) {
-
-					$totsumma += ($osto_rahti + $osto_kulu + $osto_rivi_kulu);
-
-					$laskun_kulut = array(
-						$vero => array(
-						'osto_kulu' => $osto_kulu,
-						'osto_rahti' => $osto_rahti,
-						'osto_rivi_kulu' => $osto_rivi_kulu
-						)
-					);
-				}
-
 				if (count($laskun_kulut) > 0) {
 					foreach ($laskun_kulut as $vero => $_array) {
 						foreach ($_array as $key => $value) {
 							if ($value == 0) continue;
 
-							$tili = $yhtiorow[$key];
-							$summa = $value;
+							$tili      = $yhtiorow[$key];
+							$summa     = round($value, 2);
+							$totsumma += $summa;
 
 							// Laitetaan kustannuspaikaksi/kohteeksi/projektiksi aina ensimmäisen tiliöintirivin tiedot.
 							// Jos menevät nollana, funktio osaa ottaa oletuksen tilin takaa.
@@ -1547,9 +1542,6 @@
 				if ((!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and in_array($trow['oletus_vienti'], array('C','F','I','J','K','L'))) {
 					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
 				}
-				######################################################################
-
-
 
 				// Lisätään vielä ostovelkatiliöinnin tarkenteet
 				if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {

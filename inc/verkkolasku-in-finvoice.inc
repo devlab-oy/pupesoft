@@ -89,7 +89,7 @@ if ($laskun_tyyppi == "INV02") {
 	$laskun_tyyppi = "381";
 }
 
-// Käsitellään tuoterivit
+//Tuotetiedot
 $tuotetiedot			= $xml->InvoiceRow;
 $i						= 0;
 $rtuoteno				= array();

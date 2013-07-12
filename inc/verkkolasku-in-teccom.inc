@@ -4,11 +4,9 @@
 	$xml = isset($xml->ArchivedDocument->Invoice) ? $xml->ArchivedDocument->Invoice : $xml;
 
 	$laskuformaatti 		= "TECCOM-INVOICE";
-
-	// parseroidaan xml
 	$yhtio 					= "20428100"; 		//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber;
 	$verkkotunnus_vas		= "003720428100";	//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber; 	// joissakin materiaaleissa viallista materiaalia.
-	$laskun_tyyppi 			= "TECCOM-INVOICE";
+	$laskun_tyyppi 			= "380";
 	$laskun_numero 			= $xml->InvoiceHeader->InvoiceId; // Tämä on lähettäjän laskunnumero
 	$laskun_ebid 			= "TECCOM-INVOICE";
 	$laskun_tilausviite		= "";
@@ -43,11 +41,13 @@
 	 * osto_rahti = invoiceSummary rahti
 	 * osto_rivi_kulu  = ($laskun_rahtikulu, $rtuoteno[$i]['kulu'])
 	 */
-	$osto_kulu = 0;
-	$osto_rahti = 0;
-	$osto_rivi_kulu = 0;
-
-	$ei_oteta_kulua_pois = false;
+	$osto_kulu 			 = 0;
+	$osto_rahti 		 = 0;
+	$osto_rivi_kulu 	 = 0;
+	$osto_kulu_alv 		 = 0;
+	$osto_rahti_alv 	 = 0;
+	$osto_rivi_kulu_alv  = 0;
+	$ei_oteta_kulua_pois = FALSE;
 
 	if (strtoupper($laskuttajan_toimittajanumero) == "ELRING") {
 		$laskuttajan_toimittajanumero = "123312";
@@ -94,11 +94,11 @@
 
 	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount) and $xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount != 0) {
 		$laskun_pakkauskulu = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount);
-		$osto_kulu = $laskun_pakkauskulu;
-		$osto_kulu_alv = $laskun_alv;
+		$osto_kulu			= $laskun_pakkauskulu;
+		$osto_kulu_alv 		= $laskun_alv;
 
 		if ($laskuttajan_toimittajanumero == "123441") {
-			$ei_oteta_kulua_pois = true;
+			$ei_oteta_kulua_pois = TRUE;
 		}
 	}
 
@@ -217,14 +217,13 @@
 	$verkkotunnus_vas = preg_replace("/[^0-9]/", "", $verkkotunnus_vas);
 
 	// Käsitellään tuoterivit
-	$tuotetiedot	= $xml->InvoiceDetail;
-	$i				= 0;
-	$x 				= 0;
-	$rtuoteno		= array();
-	$ealvi		 	= array("");
-	$lisavat		= array("");
-	$aputuoteno		= "";
-	$pituus			= "";
+	$tuotetiedot			= $xml->InvoiceDetail;
+	$i						= 0;
+	$rtuoteno				= array();
+	$ealvi		 			= array("");
+	$lisavat	 			= array("");
+	$rivien_summa_yhteensa	= 0;
+	$x 						= 0;
 
 	if (count($tuotetiedot) > 0) {
 		foreach ($tuotetiedot as $tuotetieto) {
@@ -273,16 +272,8 @@
 			if ($rtuoteno[$i]["tuoteno"] != "") {
 
 				$rtuoteno[$i]['status'] = '';
-
-				// Tallennetaan riville jos tämä on kauttalaskutusta
-				if ($kauttalaskutus == "KAUTTALASKUTUS") {
-					$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
-				}
-
 				$rtuoteno[$i]["ostotilausnro"] = (string) pupesoft_cleanstring($tuotetieto->OrderRef->BuyerOrderNumber);
-
 				$rtuoteno[$i]["tilaajanrivinro"] = (string) pupesoft_cleanstring($tuotetieto->OrderItemRef->BuyerOrderItemRef);
-
 				$rtuoteno[$i]["kpl"] = (int) str_replace(",", ".", $tuotetieto->Quantity);
 
 				if (isset($tuotetieto->TotalValue->Amount)) {
@@ -293,13 +284,11 @@
 				}
 
 				// ZF ja GKN
-				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier) and (float) trim($tuotetieto->AllowOrCharge->Amount) != 0
-					and ($laskuttajan_toimittajanumero == '123007' or $laskuttajan_toimittajanumero == "123084")) {
+				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier) and (float) trim($tuotetieto->AllowOrCharge->Amount) != 0 and ($laskuttajan_toimittajanumero == '123007' or $laskuttajan_toimittajanumero == "123084")) {
 
 					$node_search = $tuotetieto->xpath(".//AllowOrCharge");
 
 					foreach ($node_search as $node_x) {
-
 						$attribute = $node_x->AllowOrChargeIdentifier->attributes()->Value;
 
 						if (strtolower($attribute) == "charge") {
@@ -308,7 +297,6 @@
 							$charge_code = strtolower(trim($node_x->AllowOrChargeCode));
 
 							if ($charge_code == "zcwr" or $charge_code == 'zfwa' or strpos($charge_description, "core value") !== FALSE  or strpos($charge_description, "at.wert (rechnung)") !== FALSE) {
-
 								if (strpos($charge_description, "core value") !== FALSE) {
 									$rtuoteno[$i]['rivihinta'] -= ((float) str_replace(",", ".", $node_x->Amount) * $rtuoteno[$i]["kpl"]);
 								}
@@ -322,7 +310,6 @@
 
 				// BehrHella
 				if ($laskuttajan_toimittajanumero == '123108' and isset($tuotetieto->TotalValue->Amount) and isset($tuotetieto->TotalPrice->Amount)) {
-
 					$chk_sum = (float) str_replace(",", ".", $tuotetieto->TotalValue->Amount) - (float) str_replace(",", ".", $tuotetieto->TotalPrice->Amount);
 
 					if ($chk_sum > 0) {
@@ -395,9 +382,7 @@
 								}
 							}
 							else {
-
 								if (isset($node->Percent)) {
-
 									// 100-(1-50/100)*(1-50/100)*100
 									if (isset($rtuoteno[$i]['ale3'])) {
 
@@ -408,7 +393,6 @@
 									}
 								}
 								else {
-
 									// 100-(1-50/100)*(1-50/100)*100
 									if (isset($rtuoteno[$i]['ale3'])) {
 										$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (((float) str_replace(",", ".", $node->Amount) / (($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"]) - $ale1 - $ale2)) * 100) * 100, 2);
@@ -516,7 +500,7 @@
 
 								// Bosch -keissit
 								if ($charge_description == 'freight costs' or $charge_code == 'freightcharges' or $charge_description == 'freight charges') {
-									$ei_oteta_kulua_pois = true;
+									$ei_oteta_kulua_pois = TRUE;
 								}
 							}
 							else {

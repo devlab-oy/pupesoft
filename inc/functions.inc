@@ -20962,22 +20962,29 @@ if (!function_exists('valid_date')) {
 		'tuoteno'
 	);
  */
-if(!function_exists('echo_rows_in_table')) {
-	function echo_rows_in_table(&$rivit, $header_values = array(), $force_to_string = array(), $callback = '') {
-		echo "<table>";
-		$_temp = search_array_key_recursive($header_values, 'order');
-		if(!empty($_temp)) {
-			_two_dimensional_array_sort_by_key($header_values, 'order');
+if (!function_exists('echo_rows_in_table')) {
 
-			_echo_ordered_table_headers($rivit[0], $header_values);
-			_echo_ordered_table_rows($rivit, $header_values, $force_to_string, $callback);
-		}
-		else {
-			_echo_table_headers($rivit[0], $header_values);
-			_echo_table_rows($rivit, $force_to_string, $callback);
-		}
-		echo "</table>";
-	}
+    function echo_rows_in_table(&$rivit, $header_values = array(), $force_to_string = array(), $callback = '') {
+        echo "<table>";
+        if (count($rivit) > 0) {
+            $_temp = search_array_key_recursive($header_values, 'order');
+            if (!empty($_temp)) {
+                _two_dimensional_array_sort_by_key($header_values, 'order');
+
+                _echo_ordered_table_headers($rivit[0], $header_values);
+                _echo_ordered_table_rows($rivit, $header_values, $force_to_string, $callback);
+            }
+            else {
+                _echo_table_headers($rivit[0], $header_values);
+                _echo_table_rows($rivit, $force_to_string, $callback);
+            }
+        }
+        else {
+            echo "<tr><td>" . t("Ei tulostettavia rivejä") . "</td></tr>";
+        }
+        echo "</table>";
+    }
+
 }
 
 if(!function_exists('_echo_table_headers')) {

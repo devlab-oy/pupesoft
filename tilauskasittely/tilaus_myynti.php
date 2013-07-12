@@ -4134,7 +4134,7 @@ if ($tee == '') {
 				//Tuotetta ei löydy, aravataan muutamia muuttujia
 				$trow["alv"] = $laskurow["alv"];
 			}
-
+            
 			if ($tuoteno != '' and $kpl != 0) {
 				require ('lisaarivi.inc');
 			}

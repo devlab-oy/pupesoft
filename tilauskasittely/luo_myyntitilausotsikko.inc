@@ -3,7 +3,8 @@
 if(!function_exists("luo_myyntitilausotsikko")) {
 	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '') {
 		// valitut_asiakastunnukset on special case tapaus. valitut_asiakastunnukset on setattu ainoastaan silloin kun dummytarjoukselle halutaan liittää asiakkaita.
-        global $kukarow, $yhtiorow, $session, $valitut_asiakastunnukset;
+        // clearing on special case, kun dummy tarjoukselta halutaan luoda asiakkaille oikeat tarjoukset, niin cleargin pitää setata näihin tarjouksiin
+        global $kukarow, $yhtiorow, $session, $valitut_asiakastunnukset, $clearing;
 
         if($asiakasid > 0) {
             $query	= "	SELECT *

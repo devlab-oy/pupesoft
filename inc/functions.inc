@@ -19185,33 +19185,32 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 		# $osto_rivi_kulu
 		## PALAUTETAAN TILIÖINTIRIVIN MUUTETTU ARVO
 
-		$osto_rahti = (float) $osto_rahti;
-		$osto_kulu = (float) $osto_kulu;
-		$osto_rivi_kulu = (float) $osto_rivi_kulu;
-
-		$til_sum_ratio = $tiliointirivin_summa / $laskun_summa;
+		$osto_rahti 	= (float) str_replace(",", ".", $osto_rahti);
+		$osto_kulu 		= (float) str_replace(",", ".", $osto_kulu);
+		$osto_rivi_kulu = (float) str_replace(",", ".", $osto_rivi_kulu);
+		$til_sum_ratio  = $tiliointirivin_summa / $laskun_summa;
 
 		$return_array = array(
-			'osto_rahti' => 0,
-			'osto_kulu' => 0,
+			'osto_rahti'	 => 0,
+			'osto_kulu' 	 => 0,
 			'osto_rivi_kulu' => 0
 		);
 
 		for ($ix = 1; $ix <= $yhtiorow['ostolaskun_kulutilit']; $ix++) {
 
-			if ($ix == 1 and trim($osto_rahti) != 0) {
-				$summa 			= str_replace(",", ".", $osto_rahti) * $til_sum_ratio;
-				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+			if ($ix == 1 and $osto_rahti != 0) {
+				$summa = $osto_rahti * $til_sum_ratio;
+				$tiliointirivin_summa = round($tiliointirivin_summa - $summa, 2);
 				$return_array['osto_rahti'] += $summa;
 			}
-			elseif ($ix == 2 and trim($osto_kulu) != 0) {
-				$summa 			= str_replace(",", ".", $osto_kulu) * $til_sum_ratio;
-				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+			elseif ($ix == 2 and $osto_kulu != 0) {
+				$summa = $osto_kulu * $til_sum_ratio;
+				$tiliointirivin_summa = round($tiliointirivin_summa - $summa, 2);
 				$return_array['osto_kulu'] += $summa;
 			}
-			elseif ($ix == 3 and trim($osto_rivi_kulu) != 0) {
-				$summa 			= str_replace(",", ".", $osto_rivi_kulu) * $til_sum_ratio;
-				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+			elseif ($ix == 3 and $osto_rivi_kulu != 0) {
+				$summa = $osto_rivi_kulu * $til_sum_ratio;
+				$tiliointirivin_summa = round($tiliointirivin_summa - $summa, 2);
 				$return_array['osto_rivi_kulu'] += $summa;
 			}
 		}

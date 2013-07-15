@@ -168,5 +168,3 @@
 					aputunnus 		 = {$isa}";
 		$result = pupe_query($query);
 	}
-
-?>

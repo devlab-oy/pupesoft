@@ -157,10 +157,20 @@
 		$alvk			 = $kk;
 		$alvp			 = 0;
 		$tiliointilisa 	 = '';
-		$alkupvm  		 = date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
-		$loppupvm 		 = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
-		$kerroin 		 = " * -1";
 
+		if (isset($etsivirheita) and (int) $etsivirheita > 0) {
+			$alkupvm  	 = date("Y-m-d", mktime(0, 0, 0, $alvk, $etsivirheita, $alvv));
+			$loppupvm 	 = date("Y-m-d", mktime(0, 0, 0, $alvk, $etsivirheita, $alvv));
+			$virhelisa	 = "&alvp=".sprintf("%02d", $etsivirheita);
+		}
+		else {
+			$alkupvm  	 = date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
+			$loppupvm 	 = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
+			$virhelisa	 = "";
+		}
+
+
+		$kerroin 		 = " * -1";
 		$maalisa	 	 = '';
 		$eetasolisa	 	 = '';
 		$vainveroton 	 = '';
@@ -306,7 +316,7 @@
 				echo "<td valign='top'>$trow[maa]</td>";
 				echo "<td valign='top'>$trow[valuutta]</td>";
 				echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-				echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
+				echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]//etsivirheita=$etsivirheita'>$trow[tilino]</a></td>";
 				echo "<td valign='top'>$trow[nimi]</td>";
 				echo "<td valign='top' align='right' nowrap>$trow[bruttosumma]</td>";
 				echo "<td valign='top' align='right' nowrap>$trow[verot]</td>";
@@ -319,7 +329,7 @@
 					echo "<td valign='top' align='right'></td>";
 					echo "<td valign='top' align='right'></td>";
 				}
-				echo "<td><a href = '".$palvelin2."tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$trow[laskunro]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>".t("Näytä laskut")."</a></td>";
+				echo "<td><a href = '".$palvelin2."tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$trow[laskunro]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]//etsivirheita=$etsivirheita'>".t("Näytä laskut")."</a></td>";
 
 				echo "</tr>";
 
@@ -358,7 +368,7 @@
 					echo "<td valign='top'>$trow[maa]</td>";
 					echo "<td valign='top'>$trow[valuutta]</td>";
 					echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-					echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
+					echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]//etsivirheita=$etsivirheita'>$trow[tilino]</a></td>";
 					echo "<td valign='top'>$trow[nimi]</td>";
 					echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['bruttosumma']),"</td>";
 					echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot']),"</td>";
@@ -472,7 +482,7 @@
 				echo "<td valign='top'>$trow[maa]</td>";
 				echo "<td valign='top'>$trow[valuutta]</td>";
 				echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-				echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
+				echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]//etsivirheita=$etsivirheita'>$trow[tilino]</a></td>";
 				echo "<td valign='top'>$trow[nimi]</td>";
 				echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['nettosumma']),"</td>";
 				echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot']),"</td>";
@@ -646,14 +656,26 @@
 	}
 
 	function alvlaskelma($kk, $vv) {
-		global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta, $maksettava_alv_tili, $palvelin2, $erotus_tili, $alv_laskelman_sallittu_erotus;
+		global $yhtiorow, $kukarow, $startmonth, $endmonth, $etsivirheita, $oletus_verokanta, $maksettava_alv_tili, $palvelin2, $erotus_tili, $alv_laskelman_sallittu_erotus;
 
 		echo "<font class='head'>".t("ALV-laskelma")."</font><hr>";
 
 		if (isset($kk) and $kk != '') {
 
-			$startmonth	= date("Y-m-d", mktime(0, 0, 0, $kk,   1, $vv));
-			$endmonth 	= date("Y-m-d", mktime(0, 0, 0, $kk+1, 0, $vv));
+			if (isset($etsivirheita) and (int) $etsivirheita > 0) {
+
+				echo "<br><a href='{$palvelin2}raportit/alv_laskelma_viro.php?kk=$kk&vv=$vv&etsivirheita=".($etsivirheita-1)."'>".t("Edellinen päivä")."</a> ";
+				echo t("ALV-laskelma")." ".t("päivältä")." $etsivirheita.$kk.$vv ";
+				echo "<a href='{$palvelin2}raportit/alv_laskelma_viro.php?kk=$kk&vv=$vv&etsivirheita=".($etsivirheita+1)."'>".t("Seuraava päivä")."</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+				echo "<a href='{$palvelin2}raportit/tilioinnit_lajeittain.php?tee=raportti&laji=myynti&pp=$etsivirheita&kk=$kk&vv=$vv&lpp=$etsivirheita&lkk=$kk&lvv=$vv&lopetus={$palvelin2}raportit/alv_laskelma_viro.php////tee=VSRALVKK_UUSI//vv=$vv//kk=$kk//etsivirheita=$etsivirheita'>".t("Näytä tiliöinnit lajeittain")."</a><br><br>";
+
+				$startmonth	= date("Y-m-d", mktime(0, 0, 0, $kk, $etsivirheita, $vv));
+				$endmonth   = date("Y-m-d", mktime(0, 0, 0, $kk, $etsivirheita, $vv));
+			}
+			else {
+				$startmonth	= date("Y-m-d", mktime(0, 0, 0, $kk, 1, $vv));
+				$endmonth   = date("Y-m-d", mktime(0, 0, 0, $kk+1, 0, $vv));
+			}
 
 			//1. Sales 20% VAT
 			//2. Sales 9% VAT
@@ -731,10 +753,10 @@
 			echo "<tr><th>",t("Ilmoitettava kausi"),"</th><th>".substr($startmonth,0,4)."/".substr($startmonth,5,2)."</th></tr>";
 
 			// Verollinen myynti
-			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=1&vv=$vv&kk=$kk'>1)</a> 20% määraga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee100["20.00"])."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=1.1&vv=$vv&kk=$kk'>1.1)</a> 20% määraga maksustatav kauba või teenuse omatarve</td><td align='right'>".sprintf('%.2f', $ee110["20.00"])."</td></tr>";
-			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=2&vv=$vv&kk=$kk'>2)</a> 9% määraga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee100["9.00"])."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=2.1&vv=$vv&kk=$kk'>2.1)</a> 9% määraga maksustatav kauba voi teenuse omatarve</td><td align='right'>".sprintf('%.2f', $ee110["9.00"])."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=1&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>1)</a> 20% määraga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee100["20.00"])."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=1.1&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>1.1)</a> 20% määraga maksustatav kauba või teenuse omatarve</td><td align='right'>".sprintf('%.2f', $ee110["20.00"])."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=2&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>2)</a> 9% määraga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee100["9.00"])."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=2.1&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>2.1)</a> 9% määraga maksustatav kauba voi teenuse omatarve</td><td align='right'>".sprintf('%.2f', $ee110["9.00"])."</td></tr>";
 
 			// Väärät alvikannat
 			foreach ($ee100 as $eekey => $eeval) {
@@ -745,18 +767,18 @@
 			}
 
 			// Veroton myynti
-			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=3&vv=$vv&kk=$kk'>3)</a> 0% määraga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee300)."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=3.1&vv=$vv&kk=$kk'>3.1)</a> Kauba ühendusesisene käive ja teise liikmesriigi maksukohustuslase / piiratud maksukohustuslase osutatud teenuste käive kokku, sh</td><td align='right'>".sprintf('%.2f', $ee310)."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; &raquo; <a href = '?tee=erittele&ryhma=3.1.1&vv=$vv&kk=$kk'>3.1.1)</a> Kauba ühendusesisene käive</td><td align='right'>".sprintf('%.2f', $ee311)."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=3.2&vv=$vv&kk=$kk'>3.2)</a> Kauba eksport, sh</td><td align='right'>".sprintf('%.2f', $ee320)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=3&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>3)</a> 0% määraga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee300)."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=3.1&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>3.1)</a> Kauba ühendusesisene käive ja teise liikmesriigi maksukohustuslase / piiratud maksukohustuslase osutatud teenuste käive kokku, sh</td><td align='right'>".sprintf('%.2f', $ee310)."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; &raquo; <a href = '?tee=erittele&ryhma=3.1.1&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>3.1.1)</a> Kauba ühendusesisene käive</td><td align='right'>".sprintf('%.2f', $ee311)."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=3.2&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>3.2)</a> Kauba eksport, sh</td><td align='right'>".sprintf('%.2f', $ee320)."</td></tr>";
 			echo "<tr class='aktiivi'><td>&raquo; &raquo; 3.2.1) Käibemaksutagastusega müük reisijale</td><td align='right'>".sprintf('%.2f', $ee321)."</td></tr>";
 
 			echo "<tr class='aktiivi'><td>4) Käibemaks kokku (20% lahtrist 1 + 9% lahtrist 2) +</td><td align='right'>".sprintf('%.2f', $ee400)."</td></tr>";
 			echo "<tr class='aktiivi'><td>&raquo; 4.1) Impordilt tasumisele kuuluv käibemaks +</td><td align='right'>".sprintf('%.2f', $ee410)."</td></tr>";
 
-			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=5&vv=$vv&kk=$kk'>5)</a> Kokku sisendkäibemaksusumma, mis on seadusega lubatud maha arvata, sh -</td><td align='right'>".sprintf('%.2f', $ee500)."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=5.1&vv=$vv&kk=$kk'>5.1)</a> Impordilt tasutud või tasumisele kuuluv käibemaks</td><td align='right'>".sprintf('%.2f', $ee510)."</td></tr>";
-			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=5.2&vv=$vv&kk=$kk'>5.2)</a> Põhivara soetamiselt tasutud või tasumisele kuuluv käibemaks</td><td align='right'>".sprintf('%.2f', $ee520)."</td></tr>";
+			echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=5&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>5)</a> Kokku sisendkäibemaksusumma, mis on seadusega lubatud maha arvata, sh -</td><td align='right'>".sprintf('%.2f', $ee500)."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=5.1&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>5.1)</a> Impordilt tasutud või tasumisele kuuluv käibemaks</td><td align='right'>".sprintf('%.2f', $ee510)."</td></tr>";
+			echo "<tr class='aktiivi'><td>&raquo; <a href = '?tee=erittele&ryhma=5.2&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>5.2)</a> Põhivara soetamiselt tasutud või tasumisele kuuluv käibemaks</td><td align='right'>".sprintf('%.2f', $ee520)."</td></tr>";
 
 			echo "<tr class='aktiivi'><td>6) Kauba ühendusesisene soetamine ja teise liikmesriigi maksukohustuslaselt saadud teenused kokku, sh</td><td align='right'>".sprintf('%.2f', $ee600)."</td></tr>";
 			echo "<tr class='aktiivi'><td>&raquo; 6.1) Kauba ühendusesisene soetamine</td><td align='right'>".sprintf('%.2f', $ee610)."</td></tr>";
@@ -792,8 +814,17 @@
 			if ($verorow["vero"] != 0 or (($verorow['vero'] - $ee1200) * -1) != $ee1200 or $ee1200 == 0) {
 				echo "<table>";
 				echo "<tr class='aktiivi'><th>",t("Tili")," $yhtiorow[alv] ",t("yhteensä"),"</th><td align='right'>".sprintf('%.2f', $verorow['vero'] * -1)."</td></tr>";
-				echo "<tr class='aktiivi'><th>",t("Maksettava alv"),"</th><td align='right'>".sprintf('%.2f', $ee1200)."</td></tr>";
-				echo "<tr class='aktiivi'><th>",t("Erotus"),"</th><td align='right'>".sprintf('%.2f', (-1 * $verorow['vero']) - $ee1200)."</td></tr>";
+
+
+				if ($ee1200 == 0 and $ee1300 != 0) {
+					echo "<tr class='aktiivi'><th>",t("Palautettava alv"),"</th><td align='right'>".sprintf('%.2f', $ee1300)."</td></tr>";
+					echo "<tr class='aktiivi'><th>",t("Erotus"),"</th><td align='right'>".sprintf('%.2f', (-1 * $verorow['vero']) - $ee1300)."</td></tr>";
+				}
+				else {
+					echo "<tr class='aktiivi'><th>",t("Maksettava alv"),"</th><td align='right'>".sprintf('%.2f', $ee1200)."</td></tr>";
+					echo "<tr class='aktiivi'><th>",t("Erotus"),"</th><td align='right'>".sprintf('%.2f', (-1 * $verorow['vero']) - $ee1200)."</td></tr>";
+				}
+
 				echo "</table><br>";
 			}
 
@@ -810,7 +841,7 @@
 
 				if (mysql_num_rows($tositelinkki_result) > 0) {
 					$tositelinkki_row = mysql_fetch_assoc($tositelinkki_result);
-					echo "<a href='../muutosite.php?tee=E&tunnus={$tositelinkki_row['tunnus']}&lopetus={$palvelin2}raportit/alv_laskelma_viro.php////kk=$kk//vv=$vv'>",t("Katso tositetta"),"</a><br /><br />";
+					echo "<a href='../muutosite.php?tee=E&tunnus={$tositelinkki_row['tunnus']}&lopetus={$palvelin2}raportit/alv_laskelma_viro.php////kk=$kk//vv=$vv//etsivirheita=$etsivirheita'>",t("Katso tositetta"),"</a><br /><br />";
 				}
 				elseif (abs($verorow['vero']) != 0 and abs(round((-1 * $verorow['vero']) - $ee1200, 2)) <= $alv_laskelman_sallittu_erotus and (int) date("Ym") > (int) $vv.$kk) {
 					echo "<form method='post' name='alv_ilmoituksen_kuittaus'>";
@@ -843,7 +874,7 @@
 		}
 
 		// tehdään käyttöliittymä, näytetään aina
-		echo "<form method='post'><input type='hidden' name='tee' value ='VSRALVKK_UUSI'>";
+		echo "<form method='post' action='{$palvelin2}raportit/alv_laskelma_viro.php'><input type='hidden' name='tee' value ='VSRALVKK_UUSI'>";
 		echo "<table>";
 
 		if (!isset($vv)) $vv = date("Y");
@@ -883,12 +914,13 @@
 				<option $sel[12] value = '12'>12</option>
 				</select>";
 		echo "</td>";
-
 		echo "<td class='back' style='text-align:bottom;'><input type = 'submit' value = '".t("Näytä")."'></td>";
 		echo "</tr>";
 
+		echo "<tr>";
+		echo "<th>".t("Aja laskelma per päivä")."</th>";
+		echo "<td><input type = 'checkbox' name='etsivirheita' value = '1'></td></tr>";
 		echo "</table>";
-
 		echo "</form><br>";
 	}
 

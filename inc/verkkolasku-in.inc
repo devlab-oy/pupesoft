@@ -1443,9 +1443,7 @@
 							if (!isset($rtuoteno[$i]['lisakulu']))	$rtuoteno[$i]['lisakulu'] = 0;
 							if (!isset($rtuoteno[$i]['kulu'])) 		$rtuoteno[$i]['kulu'] = 0;
 
-							if ((float) $rtuoteno[$i]["rivihinta"] == 0) $summa_valuutassa = 0;
-
-							$asn_hinta = round($summa_valuutassa/$rtuoteno[$i]['kpl'], 2);
+							$asn_hinta = round($rtuoteno[$i]["rivihinta"]/$rtuoteno[$i]['kpl'], 2);
 
 							// Laitetaan bruttohinta asn_sanomat-tauluun
 							if (isset($rtuoteno[$i]['ale1']) and trim($rtuoteno[$i]['ale1']) != 0) {

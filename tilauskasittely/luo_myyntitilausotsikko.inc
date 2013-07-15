@@ -384,6 +384,11 @@ if(!function_exists("luo_myyntitilausotsikko")) {
             $override_ytunnus_check = "YES";
             $ei_kayttoliittymaa = "kylla";
             
+            $nimi = t("Tarjouspohja");
+            $osoite = t("Tarjouspohjan osoite");
+            $postitp = t("Tarjouspohjan postitoimipaikka");
+            $postino = t("Tarjouspohjan postinumero");
+            
             $maksuehto = $asiakasrow['maksuehto'];
             $toimitustapa = $asiakasrow['toimitustapa'];
             

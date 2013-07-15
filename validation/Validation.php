@@ -31,7 +31,7 @@ class FormValidator {
 		'puh'			 => "^[0-9]{10,11}\$",
 		'postino'		 => "^[1-9][0-9]{3}[a-zA-Z]{2}\$",
 		'hinta'			 => "^[0-9.,]*(([.,][-])|([.,][0-9]{2}))?\$",
-		'2digitopt'		 => "^\d+(\,\d{2})?\$",
+		'2digitopt'		 => "^\d+(\,\d{2})?$",
 		'2digitforce'	 => "^\d+\,\d\d\$",
 		'mitavaan'		 => "^[\d\D]{1,}\$"
 	);
@@ -207,6 +207,7 @@ class FormValidator {
 
 	public static function validateContent($var, $type) {
 
+        $is_ok = true;
 		switch ($type) {
 			case 'paiva':
 				if (strpos($var, '.')) {

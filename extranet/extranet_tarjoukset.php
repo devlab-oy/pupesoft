@@ -10,6 +10,9 @@ echo "<font class='head'>" . t("Ext-tarjoukset") . "</font><hr>";
     .tr_border_top {
         border-top: 1px solid;
     }
+    .text_align_right {
+        text-align: right;
+    }
 </style>
 <script>
     function tarkista() {
@@ -37,14 +40,59 @@ $request = array(
 
 $request['kayttajaan_liitetty_asiakas'] = hae_extranet_kayttajaan_liitetty_asiakas();
 
+if ($tee == "LISAARIVI") {
+
+    $query = "	SELECT *
+						from tuote
+						where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+        //Tuote lˆytyi
+        $trow = mysql_fetch_assoc($result);
+
+        $laskurow["tila"] = 'V';
+        $kukarow["kesken"] = $otunnus;
+        $perheid = $perheid;
+        // Nollataan hinta kun kyseess‰ on asiakkaan ext-ennakkotilaukseen lis‰‰m‰ rivi
+        $hinta = 0;
+
+        require('tilauskasittely/lisaarivi.inc');
+
+        $lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
+
+        if ($lisatyt_rivit[0] > 0) {
+            $valmistettavat .= "," . $lisatyt_rivit[0];
+
+            $query = "	UPDATE tilausrivi
+								SET toimitettu	= '$kukarow[kuka]',
+								toimitettuaika	= now(),
+								keratty			= '$kukarow[kuka]',
+								kerattyaika		= now()
+								WHERE yhtio	= '$kukarow[yhtio]'
+								and tunnus	= '$lisatyt_rivit[0]'";
+            $result = pupe_query($query);
+        }
+    }
+    else {
+        echo t("Tuotetta ei lˆydy") . "!<br>";
+    }
+
+    $tee = "VALMISTA";
+}
 
 if ($request['action'] == 'nayta_tarjous') {
-    nayta_tarjous($request['valittu_tarjous_tunnus']);
+    nayta_tarjous($request['valittu_tarjous_tunnus'], $request['toim']);
 }
 elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 
     if (isset($request['hyvaksy'])) {
-        $onnistuiko_toiminto = hyvaksy_tarjous($request['valittu_tarjous_tunnus'], $syotetyt_lisatiedot);
+        if ($toim == 'EXTTARJOUS') {
+            $onnistuiko_toiminto = hyvaksy_tarjous($request['valittu_tarjous_tunnus'], $syotetyt_lisatiedot);
+        }
+        else {
+            $onnistuiko_toiminto = hyvaksy_ennakko($request['valittu_tarjous_tunnus'], $syotetyt_lisatiedot, $kappalemaarat);
+        }
     }
     else {
         $onnistuiko_toiminto = hylkaa_tarjous($request['valittu_tarjous_tunnus']);
@@ -75,6 +123,110 @@ else {
     );
 
     echo_rows_in_table($request['asiakkaan_tarjoukset'], $header_values, array(), 'tee_tarjouksen_nimesta_linkki');
+}
+
+function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappalemaarat) {
+    global $kukarow, $yhtiorow;
+    //SELECT '' as nro, tunnus, perheid as perheid_tunnus, tuoteno,nimitys, tilkpl as kpl,hinta as rivihinta,alv
+    foreach ($kappalemaarat as &$kappalemaara_temp) {
+        $kappalemaara_temp = round(str_replace(",", ".", pupesoft_cleanstring($kappalemaara_temp)), 2);
+    }
+
+
+    $validations = array(
+        'syotetyt_lisatiedot' => 'kirjain_numero',
+    );
+
+    $validator = new FormValidator($validations);
+
+    if ($validator->validate(array('syotetyt_lisatiedot' => $syotetyt_lisatiedot))) {
+
+        foreach ($kappalemaarat as $kappalemaara) {
+            if (!FormValidator::validateItem($kappalemaara, "2digitopt")) {
+                return false;
+            }
+        }
+        // Haetaan kannasta tilausrivit
+        $muokkaamaton_ennakko = hae_tarjous($valittu_tarjous_tunnus);
+
+        foreach ($kappalemaarat as $key => $value) {
+            // Etsit‰‰n tilausrivitunnuksen perusteella tuotteen kannassa oleva kappalem‰‰r‰
+            $loytynyt_tilausrivi = search_array_key_for_value_recursive($muokkaamaton_ennakko['tilausrivit'], 'tunnus', $key);
+            // Tarkistetaan lˆytyikˆ tilausrivi
+            if (!empty($loytynyt_tilausrivi[0])) {
+                // Muutetaan kappalem‰‰r‰ oikeaan muotoon
+                $kplmaara = round(str_replace(",", ".", pupesoft_cleanstring($loytynyt_tilausrivi[0]['kpl'])), 2);
+                // Tarkistetaan onko kappalem‰‰r‰ s‰ilynyt muuttamattomana, jos ei muutoksia niin toimenpiteit‰ riville ei vaadita
+                if ($kplmaara != $value) {
+                    // Onko tuote tuoteperheen is‰tuote tai normaali tilausrivi JA uusi syˆtetty kappalem‰‰r‰ 0
+                    if (($loytynyt_tilausrivi[0]['tunnus'] == $loytynyt_tilausrivi[0]['perheid_tunnus'] or $loytynyt_tilausrivi[0]['perheid_tunnus'] == 0) and $value == 0.00) {
+                        // Tuoteperheen kappalem‰‰r‰n nollaus tilauksesta
+                        if ($loytynyt_tilausrivi[0]['tunnus'] == $loytynyt_tilausrivi[0]['perheid_tunnus']) {
+                            $andy = "   AND perheid = '{$loytynyt_tilausrivi[0]['tunnus']}'";
+                        }
+                        // Normaalituotteen kappalem‰‰r‰n nollaus tilauksesta  
+                        else {
+                            $andy = "   AND tunnus = '{$loytynyt_tilausrivi[0]['tunnus']}'";
+                        }
+
+                        $query = "  UPDATE tilausrivi
+                                        SET tilkpl = 0,
+                                        kpl = 0,
+                                        jt = 0,
+                                        varattu = 0
+                                        WHERE yhtio = '{$kukarow['yhtio']}'
+                                        AND otunnus = '{$valittu_tarjous_tunnus}'
+                                        {$andy}
+                                        ";
+                        pupe_query($query);
+                    }
+                    // Kun kappalem‰‰r‰‰ muutetaan muuksi kuin nollaksi, poistetaan tilausrivi tilauksesta ja lis‰t‰‰n uudestaan uudella m‰‰r‰ll‰
+                    else {
+                        $kukarow['kesken'] = $valittu_tarjous_tunnus;
+                        // Tuoteperheen tapauksessa rivin poistoa varten
+                        if ($loytynyt_tilausrivi[0]['tunnus'] == $loytynyt_tilausrivi[0]['perheid_tunnus']) {
+                            $andy = "   AND perheid = '{$loytynyt_tilausrivi[0]['tunnus']}'";
+                        }
+                        // Normaalituotteen tapauksessa rivin poistoa varten
+                        else {
+                            $andy = "   AND tunnus = '{$loytynyt_tilausrivi[0]['tunnus']}'";
+                        }
+                        // Rivin poisto
+                        $query = "  DELETE
+                                    FROM tilausrivi
+                                    WHERE yhtio = '{$kukarow['yhtio']}'
+                                    AND otunnus = '{$valittu_tarjous_tunnus}'
+                                    {$andy}
+                                    ";
+
+                        pupe_query($query);
+
+
+                        // Rivin uudelleenlis‰ys
+                        $trow = hae_tuote($loytynyt_tilausrivi[0]['tuoteno']);
+                        $laskurow = $muokkaamaton_ennakko;
+                        $parametrit = array(
+                            'trow' => $trow,
+                            'laskurow' => $laskurow,
+                            'kpl' => $value,
+                            'netto' => "N",
+                            'rivitunnus' => $loytynyt_tilausrivi[0]['tunnus'],
+                            'tuoteno' => $loytynyt_tilausrivi[0]['tuoteno'],
+                            'hinta' => 0,
+                        );
+                        lisaa_rivi($parametrit);
+                    }
+                }
+            }
+        }
+        // P‰ivitet‰‰n k‰ytt‰j‰n lis‰‰m‰t kommentit ja vaihdetaan tila/alatila Ennakko/Lep‰‰m‰ss‰
+        // $query = "UPDATE lasku set sisviesti1='{$syotetyt_lisatiedot}', tila='E', alatila='A' where yhtio='$kukarow[yhtio]' and tunnus='{$valittu_tarjous_tunnus}'";
+        // $result = pupe_query($query);
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
@@ -127,6 +279,9 @@ function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
         }
 
         $query = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+        $result = pupe_query($query);
+
+        $query = "UPDATE lasku set sisviesti1='{$syotetyt_lisatiedot}' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
         $result = pupe_query($query);
 
         $aika = date("d.m.y @ G:i:s", time());
@@ -202,7 +357,7 @@ function hae_extranet_tarjoukset($asiakasid, $toim) {
         $where = "  AND lasku.clearing = 'EXTENNAKKO' AND lasku.tila = 'N'";
     }
     /* AND lasku.clearing = 'EXTTARJOUS' */
-    $query = "  SELECT concat_ws('!!!', lasku.tunnus, lasku.nimi) AS nimi,
+    $query = "  SELECT  concat( concat_ws('!!!', lasku.tunnus, lasku.nimi),'!!!{$toim}') AS nimi,
                 lasku.hinta,
                 lasku.toimaika,
                 lasku.tunnus as tunnus
@@ -252,7 +407,7 @@ function tee_tarjouksen_nimesta_linkki($header, $solu, $force_to_string) {
         if ($header == 'nimi') {
             $tunnus_nimi_array = explode('!!!', $solu);
             echo "<td>";
-            echo "<a href='extranet_tarjoukset.php?action=nayta_tarjous&valittu_tarjous_tunnus={$tunnus_nimi_array[0]}'>{$tunnus_nimi_array[1]}</a>";
+            echo "<a href='extranet_tarjoukset.php?action=nayta_tarjous&valittu_tarjous_tunnus={$tunnus_nimi_array[0]}&toim={$tunnus_nimi_array[2]}'>{$tunnus_nimi_array[1]}</a>";
             echo "</td>";
         }
         else if ($header == 'hinta') {
@@ -268,13 +423,20 @@ function tee_tarjouksen_nimesta_linkki($header, $solu, $force_to_string) {
     }
 }
 
-function nayta_tarjous($valittu_tarjous_tunnus) {
+function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
     global $kukarow, $yhtiorow;
 
     $tarjous = hae_tarjous($valittu_tarjous_tunnus);
 
-    echo_tarjouksen_otsikko($tarjous);
-    echo_tarjouksen_tilausrivit($tarjous);
+    echo_tarjouksen_otsikko($tarjous, $toim);
+    echo "	<form method='post' autocomplete='off'>";
+    echo "	<input type='hidden' name='tee' value='LISAARIVI'>
+					<input type='hidden' name='toim'  value='$toim'>
+					<input type='hidden' name='otunnus'  value='$valittu_tarjous_tunnus'>";
+
+    require('tilauskasittely/syotarivi.inc');
+
+    echo_tarjouksen_tilausrivit($tarjous, $toim);
 }
 
 function hae_tarjous($valittu_tarjous_tunnus) {
@@ -310,11 +472,11 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
     return $tilausrivit;
 }
 
-function echo_tarjouksen_otsikko($tarjous) {
+function echo_tarjouksen_otsikko($tarjous, $toim) {
     global $kukarow, $yhtiorow;
 
     echo "<input type='hidden' id='hyvaksy_hylkaa_message' value='" . t("Oletko varma, ett‰ haluat suorittaa valitun toimenpiteen") . "'/>";
-    echo "<a href=extranet_tarjoukset.php>" . t("Palaa takaisin") . "</a>";
+    echo "<a href=extranet_tarjoukset.php?toim={$toim}>" . t("Palaa takaisin") . "</a>";
     echo "<br>";
     echo "<br>";
     echo "<table>";
@@ -334,15 +496,15 @@ function echo_tarjouksen_otsikko($tarjous) {
     echo "<br>";
 }
 
-function echo_tarjouksen_tilausrivit($tarjous) {
+function echo_tarjouksen_tilausrivit($tarjous, $toim) {
     global $kukarow, $yhtiorow;
 
     echo "<font class='message'>" . t("Tilausrivit") . "</font>";
     echo "<br>";
     echo "<form method='post' action=''>";
     echo "<input type='hidden' name='action' value='hyvaksy_tai_hylkaa' />";
+    echo "<input type='hidden' name='toim' value='{$toim}' />";
     echo "<input type='hidden' name='valittu_tarjous_tunnus' value='{$tarjous['tunnus']}'/ >";
-
     $header_values = array(
         'tuotenro' => t('Tuotenro'),
         'nimi' => t('Nimi'),
@@ -350,22 +512,24 @@ function echo_tarjouksen_tilausrivit($tarjous) {
         'rivihinta' => t('Rivihinta'),
         'alv' => t('Alv'),
     );
-    echo_tarjous_rows_in_table($tarjous['tilausrivit'], $header_values);
+    echo_tarjous_rows_in_table($tarjous['tilausrivit'], $header_values, array(), $toim);
     echo "<br>";
     echo "<textarea rows='4' cols='20' maxlength='1000' name='syotetyt_lisatiedot' placeholder='" . t("Lis‰tietoja") . "'>";
     echo "</textarea>";
     echo "<br>";
     echo "<br>";
     echo "<input type='submit' name='hyvaksy' value='" . t("Hyv‰ksy") . "' onclick='return tarkista();'/>";
-    echo "<input type='submit' name='hylkaa' value='" . t("Hylk‰‰") . "' onclick='return tarkista();'/>";
+    if ($toim == "EXTTARJOUS") {
+        echo "<input type='submit' name='hylkaa' value='" . t("Hylk‰‰") . "' onclick='return tarkista();'/>";
+    }
     echo "</form>";
 }
 
-function echo_tarjous_rows_in_table(&$rivit, $header_values = array(), $force_to_string = array()) {
+function echo_tarjous_rows_in_table(&$rivit, $header_values = array(), $force_to_string = array(), $toim) {
     echo "<table>";
     if (count($rivit) > 0) {
         _echo_tarjous_table_headers($rivit[0], $header_values);
-        _echo_tarjous_table_rows($rivit, $force_to_string);
+        _echo_tarjous_table_rows($rivit, $force_to_string, $toim);
     }
     else {
         echo "<tr><td>" . t("Ei tulostettavia rivej‰") . "</td></tr>";
@@ -389,7 +553,7 @@ function _echo_tarjous_table_headers($rivi, $header_values) {
     echo "</tr>";
 }
 
-function _echo_tarjous_table_rows(&$rivit, $force_to_string = array(), $callback = '') {
+function _echo_tarjous_table_rows(&$rivit, $force_to_string = array(), $toim) {
     $index = 0;
     foreach ($rivit as $rivi) {
         $class = "";
@@ -399,14 +563,15 @@ function _echo_tarjous_table_rows(&$rivit, $force_to_string = array(), $callback
         }
         echo "<tr>";
         foreach ($rivi as $header => &$solu) {
-            _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $index);
+            _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $index, $toim, $rivi['tunnus']);
         }
         echo "</tr>";
     }
 }
 
-function _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $index) {
+function _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $index, $toim, $rivitunnus) {
     if (!stristr($header, 'tunnus')) {
+
         if ($header == 'nro') {
             if ($class != '') {
                 echo "<td class='{$class}'>{$index}</td>";
@@ -415,8 +580,23 @@ function _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $i
                 echo "<td class='{$class}'></td>";
             }
         }
+        elseif ($header == 'kpl' and $toim == "EXTENNAKKO") {
+            if ($class == 'tr_border_top') {
+                if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
+                    $class .= " text_align_right";
+                }
+                echo "<td class='{$class}'><input type='text' name='kappalemaarat[{$rivitunnus}]' value='{$solu}' /></td>";
+            }
+            else {
+                if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
+                    $class .= " text_align_right";
+                }
+                echo "<td class='{$class}'>{$solu}</td>";
+            }
+        }
         else {
             if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
+                $class .= " text_align_right";
                 $solu = number_format($solu, 2);
             }
             echo "<td class='{$class}'>{$solu}</td>";

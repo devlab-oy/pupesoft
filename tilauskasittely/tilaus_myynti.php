@@ -1258,8 +1258,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		$result = pupe_query($query);
 
 	}
-    elseif ($toim == "EXTTARJOUS") {
-        if ($laskurow['tila'] == 'T' and $laskurow['alatila'] == '' and $laskurow['liitostunnus'] < 0) {
+    elseif ($toim == "EXTTARJOUS" or $toim == "EXTENNAKKO") {
+        if (($laskurow['tila'] == 'T' or $laskurow['tila'] == 'N') and $laskurow['alatila'] == '' and $laskurow['liitostunnus'] < 0) {
             require('inc/tarjouksen_splittaus.inc');
         }
     }

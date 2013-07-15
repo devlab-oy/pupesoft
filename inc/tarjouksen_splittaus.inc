@@ -31,7 +31,14 @@ $dummy_tarjouksen_tilausnumero = $tilausnumero;
 foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
     $kukarow['kesken'] = 0;
     
-    $tilausnumero = luo_myyntitilausotsikko('TARJOUS', $tarjous_asiakas);
+    if($toim == "EXTTARJOUS") {
+        $tilausnumero = luo_myyntitilausotsikko('TARJOUS', $tarjous_asiakas);
+        $netto = "";
+    }
+    else {
+        $tilausnumero = luo_myyntitilausotsikko('ENNAKKO', $tarjous_asiakas);
+        $netto = 'N';
+    }
 
     $query = "  SELECT *
                 FROM lasku
@@ -49,13 +56,12 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
     foreach ($tilausrivit as $tilausrivi) {
 
         if ($tilausrivi['tunnus'] == $tilausrivi['perheid'] or $tilausrivi['perheid'] == 0) {
-            //TODO netto check EXTTARJOUS EXTENNAKKO
             $trow = hae_tuote($tilausrivi['tuoteno']);
             $parametrit = array(
                 'trow' => $trow,
                 'laskurow' => $laskurow,
                 'kpl' => ($tilausrivi['varattu'] + $tilausrivi['jt']),
-                'netto' => 'N',
+                'netto' => $netto,
             );
             lisaa_rivi($parametrit);
         }

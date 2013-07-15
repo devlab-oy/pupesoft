@@ -86,6 +86,7 @@ if (count($tuotetiedot) > 0) {
 
 			// Tuotekoodi
 			$rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring(array_shift($tuotetieto->xpath('LIN/@eC212.7140')));
+			$rtuoteno[$i]["kauttalaskutus"] = "";
 
 			// Veroton rivihinta
 			$rtuoteno[$i]["rivihinta"] = array_shift($tuotetieto->xpath('Group26/MOA[@eC516.5025="203"]/@eC516.5004'));

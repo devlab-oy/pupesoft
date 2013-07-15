@@ -272,7 +272,8 @@
 
 			if ($rtuoteno[$i]["tuoteno"] != "") {
 
-				$rtuoteno[$i]['status'] = '';
+				$rtuoteno[$i]["kauttalaskutus"] = "";
+				$rtuoteno[$i]['status'] = "";
 				$rtuoteno[$i]["ostotilausnro"] = (string) pupesoft_cleanstring($tuotetieto->OrderRef->BuyerOrderNumber);
 				$rtuoteno[$i]["tilaajanrivinro"] = (string) pupesoft_cleanstring($tuotetieto->OrderItemRef->BuyerOrderItemRef);
 				$rtuoteno[$i]["kpl"] = (int) str_replace(",", ".", $tuotetieto->Quantity);

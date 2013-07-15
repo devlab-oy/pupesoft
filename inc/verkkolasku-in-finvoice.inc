@@ -120,6 +120,9 @@ if (count($tuotetiedot) > 0) {
 			if ($kauttalaskutus == "KAUTTALASKUTUS") {
 				$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
 			}
+			else {
+				$rtuoteno[$i]["kauttalaskutus"] = "";
+			}
 
 			$rtuoteno[$i]["nimitys"] 			= pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName));
 			$rtuoteno[$i]["rivihinta"] 			= hintapyoristys(str_replace(",", ".", $tuotetieto->RowVatExcludedAmount));

@@ -3321,6 +3321,11 @@ if ($tee == '') {
 		}
 	}
 
+	// Allr specific!
+	if (file_exists("${pupe_root_polku}/allr_kamppikset.php")) {
+		require("${pupe_root_polku}/allr_kamppikset.php");
+	}
+
 	echo "<br>";
 
 	$myyntikielto = '';

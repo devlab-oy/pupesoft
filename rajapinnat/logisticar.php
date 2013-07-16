@@ -118,6 +118,7 @@
 					$ftpfail  = "";
 					$ftpsucc  = "";
 					$ftpfile  = realpath($path."/".$file);
+					$ftptmpr  = FALSE;
 
 					require ("inc/ftp-send.inc");
 				}

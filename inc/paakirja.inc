@@ -238,7 +238,30 @@
 		$sel = "CHECKED";
 	}
 
-	echo "<tr><th>".t("Vain käsin viedyt")."</th><td colspan='3'><input type='checkbox' name='kasin' $sel></td></tr>";
+	echo "<tr><th>".t("Vain käsin viedyt")."</th><td colspan='3'><input type='checkbox' name='kasin' $sel>";
+
+	$query = "	SELECT distinct kuka.kuka, kuka.nimi
+				FROM kuka
+				JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+				WHERE kuka.yhtio = '{$kukarow["yhtio"]}'
+				and kuka.extranet = ''
+				ORDER BY kuka.nimi";
+	$vresult = pupe_query($query);
+
+	echo " <select name='laatija'><option value = '' >".t("Valitse laatija")."</option>";
+
+	if (isset($laatija)) $sel[$laatija] = "SELECTED";
+
+	while ($vrow = mysql_fetch_assoc($vresult)) {
+		echo "<option value = '{$vrow['kuka']}' {$sel[$vrow['kuka']]}>{$vrow['nimi']}</option>";
+	}
+
+	echo "<option value = 'automaatti' {$sel['automaatti']}>".t("Viiteaineistojen käsittely")."</option>";
+	echo "<option value = 'tiliote' {$sel['tiliote']}>".t("Tiliotteiden käsittely")."</option>";
+	echo "<option value = 'verkkolas' {$sel['verkkolas']}>".t("Verkkolaskujen vastaanotto")."</option>";
+	echo "<option value = 'crond' {$sel['crond']}>".t("Cron-ajo")."</option>";
+	echo "</select>";
+	echo "</td></tr>";
 
 	$sel="";
 	if ($excel != "") {
@@ -448,6 +471,10 @@
 			$lisa1 .= " and tiliointi.vero = '$alv' ";
 		}
 
+		if ($laatija != '') {
+			$lisa1 .= " and tiliointi.laatija = '$laatija' ";
+		}
+
 		if ($maarajaus != '') $lisa .= " and if(lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) = '$maarajaus'  ";
 
 		$asiakasjoini  = "";
@@ -500,7 +527,7 @@
 
 		if (mysql_num_rows($result) > 0) {
 
-			if (!isset($workbook)) {
+			if (!isset($worksheet)) {
 				echo "<table><tr>";
 
 				if ($tee == 'P') {
@@ -524,7 +551,7 @@
 				flush();
 			}
 
-			if (isset($workbook)) {
+			if (isset($worksheet)) {
 
 				if ($tee == 'P') {
 					$worksheet->write($excelrivi, 0, ucfirst(t("Pvm")), $format_bold);
@@ -544,15 +571,15 @@
 			}
 
 			if (strlen(trim($tili)) > 0 and isset($tilikaudetrow)) {
-				if (!isset($workbook)) echo "<th>".t("Kum. Summa")."</th>";
-				if (isset($workbook)) $worksheet->write($excelrivi, 8, t("Kum. Summa"), $format_bold);
+				if (!isset($worksheet)) echo "<th>".t("Kum. Summa")."</th>";
+				if (isset($worksheet)) $worksheet->write($excelrivi, 8, t("Kum. Summa"), $format_bold);
 			}
 
-			if (isset($workbook)) {
+			if (isset($worksheet)) {
 				$excelrivi++;
 			}
 
-			if (!isset($workbook)) echo "</tr>";
+			if (!isset($worksheet)) echo "</tr>";
 
 			$summaplus 		  = 0.0;
 			$summamiinus 	  = 0.0;
@@ -566,7 +593,7 @@
 				$tapvm_clean = $trow["tapvm"];
 				$tili_clean  = $trow["tili"];
 
-				if (!isset($workbook)) echo "<tr class='aktiivi'>";
+				if (!isset($worksheet)) echo "<tr class='aktiivi'>";
 
 				if ($tee == 'P' and $edtrow["tapvm"] == $trow["tapvm"]) {
 					$trow["tapvm"] = "";
@@ -576,12 +603,12 @@
 				}
 				else {
 					if ($eka != 0) {
-						if (!isset($workbook)) echo "<td></td><td></td><td></td><td></td><td></td><td></td><td valign='top' align = 'right' nowrap>".sprintf("%.2f", $summa)."</td><td align='right'>*</td>";
+						if (!isset($worksheet)) echo "<td></td><td></td><td></td><td></td><td></td><td></td><td valign='top' align = 'right' nowrap>".sprintf("%.2f", $summa)."</td><td align='right'>*</td>";
 
 						if (strlen(trim($tili)) > 0) {
-							if (!isset($workbook)) echo "<td></td>";
+							if (!isset($worksheet)) echo "<td></td>";
 						}
-						if (!isset($workbook)) echo "</tr><tr class='aktiivi'>";
+						if (!isset($worksheet)) echo "</tr><tr class='aktiivi'>";
 
 						$summa = 0;
 					}
@@ -607,49 +634,49 @@
 					$kumsumma = $alkurow["saldo"];
 
 					// tilin alkusaldo
-					if (!isset($workbook)) {
+					if (!isset($worksheet)) {
 						echo "<td valign='top' colspan='8'></td>";
 						echo "<td valign='top' align='right' nowrap>".sprintf("%.2f",$kumsumma)."</td></tr>";
 						echo "<tr class='aktiivi'>";
 					}
 
-					if (isset($workbook)) {
+					if (isset($worksheet)) {
 						$worksheet->write($excelrivi, 8, $kumsumma);
 						$excelrivi++;
 					}
 				}
 
 				if ($tee == 'P') {
-					if (!isset($workbook)) {
+					if (!isset($worksheet)) {
 						echo "<td valign='top'>".tv1dateconv($trow["tapvm"])."</td>";
 						echo "<td valign='top'>$trow[tili]</td>";
 					}
 
-					if (isset($workbook)) $worksheet->write($excelrivi, 0, $tapvm_clean);
-					if (isset($workbook)) $worksheet->write($excelrivi, 1, $tili_clean);
+					if (isset($worksheet)) $worksheet->write($excelrivi, 0, $tapvm_clean);
+					if (isset($worksheet)) $worksheet->write($excelrivi, 1, $tili_clean);
 
 				}
 				else {
-					if (!isset($workbook)) {
+					if (!isset($worksheet)) {
 						echo "<td valign='top'>$trow[tili]</td>";
 						echo "<td valign='top'>".tv1dateconv($trow["tapvm"])."</td>";
 					}
 
-					if (isset($workbook)) $worksheet->write($excelrivi, 0, $tili_clean);
-					if (isset($workbook)) $worksheet->write($excelrivi, 1, $tapvm_clean);
+					if (isset($worksheet)) $worksheet->write($excelrivi, 0, $tili_clean);
+					if (isset($worksheet)) $worksheet->write($excelrivi, 1, $tapvm_clean);
 				}
 
-				if (!isset($workbook)) {
+				if (!isset($worksheet)) {
 					echo "<td valign='top'>$trow[kustp_koodi] $trow[kustp]</td>";
 					echo "<td valign='top'>$trow[kohde_koodi] $trow[kohde]</td>";
 					echo "<td valign='top'>$trow[projekti_koodi] $trow[projekti]</td>";
 					echo "<td valign='top'>$trow[selite]</td>";
 				}
 
-				if (isset($workbook)) $worksheet->write($excelrivi, 2, $trow["kustp_koodi"]." ".$trow["kustp"]);
-				if (isset($workbook)) $worksheet->write($excelrivi, 3, $trow["kohde_koodi"]." ".$trow["kohde"]);
-				if (isset($workbook)) $worksheet->write($excelrivi, 4, $trow["projekti_koodi"]." ".$trow["projekti"]);
-				if (isset($workbook)) $worksheet->write($excelrivi, 5, $trow["selite"]);
+				if (isset($worksheet)) $worksheet->write($excelrivi, 2, $trow["kustp_koodi"]." ".$trow["kustp"]);
+				if (isset($worksheet)) $worksheet->write($excelrivi, 3, $trow["kohde_koodi"]." ".$trow["kohde"]);
+				if (isset($worksheet)) $worksheet->write($excelrivi, 4, $trow["projekti_koodi"]." ".$trow["projekti"]);
+				if (isset($worksheet)) $worksheet->write($excelrivi, 5, trim(strip_tags($trow["selite"])));
 
 				if ($trow["summa"] < 0) {
 					$class = "error";
@@ -658,7 +685,7 @@
 					$class = "ok";
 				}
 
-				if (!isset($workbook)) {
+				if (!isset($worksheet)) {
 					echo "<td valign='top' align='right'>";
 					if ($mutositelink) echo "<a name='$trow[rivitunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp//llvv=$llvv//llvk=$llvk//llvp=$llvp//tkausi=$tkausi//tili=$tili//tili2=$tili2//asia_ytunnus=$asia_ytunnus//asiakasid=$asiakasid//toim_ytunnus=$toim_ytunnus//toimittajaid=$toimittajaid//alv=$alv//kasin=$kasin//excel=$excel//maarajaus=$maarajaus".str_replace("&","//",$ulisa)."///$trow[rivitunnus]'>";
 					echo "<font class='$class'>".sprintf("%.2f", $trow["summa"])."</font>";
@@ -666,24 +693,24 @@
 					echo "</td>";
 				}
 
-				if (isset($workbook)) $worksheet->write($excelrivi, 6, $trow["summa"]);
+				if (isset($worksheet)) $worksheet->writeNumber($excelrivi, 6, $trow["summa"]);
 
 				if ($trow["summa"] < 0) $summamiinus += $trow["summa"];
 				else $summaplus += $trow["summa"];
 
 				$summa += $trow["summa"];
 
-				if (!isset($workbook)) echo "<td valign='top'>$trow[vero]</td>";
+				if (!isset($worksheet)) echo "<td valign='top'>$trow[vero]</td>";
 
-				if (isset($workbook)) $worksheet->write($excelrivi, 7, $trow["vero"]);
+				if (isset($worksheet)) $worksheet->writeNumber($excelrivi, 7, $trow["vero"]);
 
 				if (strlen(trim($tili)) > 0) {
 					//lasketaan ja echotaan kumulatiivinen summa
 					$kumsumma += $trow["summa"];
 
-					if (!isset($workbook)) echo "<td align='right' valign='top'>".sprintf("%.2f",$kumsumma)."</td>";
+					if (!isset($worksheet)) echo "<td align='right' valign='top'>".sprintf("%.2f",$kumsumma)."</td>";
 
-					if (isset($workbook)) $worksheet->write($excelrivi, 8, $kumsumma);
+					if (isset($worksheet)) $worksheet->writeNumber($excelrivi, 8, $kumsumma);
 				}
 
 				if ($trow["valkoodi"] == $yhtiorow["valkoodi"]) {
@@ -694,7 +721,7 @@
 					$trow["summa_valuutassa"] = "";
 				}
 
-				if (!isset($workbook)) {
+				if (!isset($worksheet)) {
 					echo "<td valign='top' align='right' class='back' nowrap>$trow[summa_valuutassa]</td>";
 					echo "<td valign='top' align='right' class='back' nowrap>$trow[valkoodi]</td>";
 
@@ -738,9 +765,9 @@
 					echo "</tr>";
 				}
 
-				if (isset($workbook)) $worksheet->write($excelrivi, 9, $trow["summa_valuutassa"]);
-				if (isset($workbook)) $worksheet->write($excelrivi, 10, $trow["valkoodi"]);
-				if (isset($workbook)) $excelrivi++;
+				if (isset($worksheet)) $worksheet->write($excelrivi, 9, $trow["summa_valuutassa"]);
+				if (isset($worksheet)) $worksheet->write($excelrivi, 10, $trow["valkoodi"]);
+				if (isset($worksheet)) $excelrivi++;
 
 				if ($trow['valkoodi'] != '' and $trow['summa_valuutassa'] != '') {
 					$summa_valuutassa[$trow['valkoodi']] += $trow['summa_valuutassa'];
@@ -749,7 +776,7 @@
 				$edtili = $trow["xtilino"];
 			}
 
-			if (!isset($workbook)) {
+			if (!isset($worksheet)) {
 				echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td></td><td align = 'right' nowrap>".sprintf("%.2f", $summa)."</td><td align='right'>*</td>";
 
 				if (strlen(trim($tili)) > 0) {
@@ -804,4 +831,3 @@
 			echo t("Ei tapahtumia valitulla kaudella")."!";
 		}
 	}
-?>

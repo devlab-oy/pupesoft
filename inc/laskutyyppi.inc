@@ -58,6 +58,12 @@
 				case "O":
 					$alatila = "Käteisotto";
 					break;
+				case "T":
+					$alatila = "Tilikauden tulos";
+					break;
+				case "A":
+					$alatila = "Avaava tase";
+					break;
 		}
 			break;
 		case "L":

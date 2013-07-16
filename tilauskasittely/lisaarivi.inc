@@ -1687,8 +1687,7 @@
 												toimittajan_tunnus		= '$toimittajan_tunnus',
 												muutospvm				= now(),
 												muuttaja				= '$kukarow[kuka]',
-												erikoistoimitus_myynti	= '$myy_erikoistoimitus[$indeksi]',
-												ohita_kerays 			= '{$myy_ohita_kerays[$indeksi]}'
+												erikoistoimitus_myynti	= '$myy_erikoistoimitus[$indeksi]'
 												{$tlisatied_lisa}
 												{$tlisatied_lisa2}
 												WHERE yhtio			 = '$kukarow[yhtio]'
@@ -2600,8 +2599,7 @@
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							muutospvm			= now(),
 							muuttaja			= '$kukarow[kuka]',
-							ei_nayteta			= '{$puu_ein[$i]}',
-							ohita_kerays 		= '{$puu_ohiker[$i]}'
+							ei_nayteta			= '{$puu_ein[$i]}'
 							{$tlisatied_lisa}
 							{$tlisatied_lisa2}
 							WHERE yhtio			 = '$kukarow[yhtio]'

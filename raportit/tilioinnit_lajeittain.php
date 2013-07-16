@@ -56,6 +56,16 @@
 	echo "<td><input type='text' name='lpp' size='5' value='$lpp'><input type='text' name='lkk' size='5' value='$lkk'><input type='text' name='lvv' size='7' value='$lvv'></td>";
 	echo "</tr>";
 
+	if ($tehdaspalautukset != '') {
+		$chk = "CHECKED";
+	}
+	else {
+		$chk = "";
+	}
+
+	echo "<th>".t("Näytä vain tehdaspalautukset")."</th>";
+	echo "<td><input type = 'checkbox' name='tehdaspalautukset' $chk></td></tr>";
+
 	echo "</table>";
 
 	echo "<br><input type='submit' value='".t("Hae tiliöinnit")."'>";
@@ -90,9 +100,15 @@
 
 		}
 
-		$query = "	SELECT tiliointi.tilino, tili.nimi, sum(tiliointi.summa) summa
+		$tehdaspalautuksetrajaus = "";
+
+		if ($tehdaspalautukset != '') {
+			$tehdaspalautuksetrajaus = "and lasku.tilaustyyppi = '9'";
+		}
+
+		$query = "	SELECT tiliointi.tilino, tili.nimi, sum(tiliointi.summa) summa, sum(tiliointi.summa*(tiliointi.vero/100)) veronmaara
 					FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
-					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus $laskurajaus)
+					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus $laskurajaus $tehdaspalautuksetrajaus)
 					LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tili.tilino = tiliointi.tilino)
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 					AND tiliointi.tapvm >= '$vv-$kk-$pp'
@@ -108,30 +124,32 @@
 			echo "<th>".t("Tilinumero")."</th>";
 			echo "<th>".t("Nimitys")."</th>";
 			echo "<th>".t("Summa")."</th>";
+			echo "<th>".t("Vero")."</th>";
 			echo "</tr>";
 
-			$summa = 0;
-			$alvsumma=array();
+			$summa     = 0;
+			$verosumma = 0;
+			$alvsumma  = array();
+
 			while ($row = mysql_fetch_assoc($result)) {
 				echo "<tr class='aktiivi'>";
 				echo "<td>$row[tilino]</td>";
 				echo "<td>$row[nimi]</td>";
 				echo "<td align='right'>". number_format($row["summa"], 2, ',', ' ')."</td>";
+				echo "<td align='right'>". number_format($row["veronmaara"], 2, ',', ' ')."</td>";
 				echo "</tr>";
+
 				$summa += $row["summa"];
+				$verosumma += $row["veronmaara"];
 			}
 
 			echo "<tr>";
 			echo "<th colspan='2'>".t("Yhteensä")."</th>";
 			echo "<th style='text-align:right;'>". sprintf("%.02f", $summa)."</td>";
+			echo "<th style='text-align:right;'>". sprintf("%.02f", $verosumma)."</td>";
 			echo "</tr>";
-
 			echo "</table>";
 		}
-
-		// erittely
-		$laskurajaus = "";
-		$laskutiedot = "";
 
 		if ($laji == "myynti") {
 			$query = "	SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.tapvm, lasku.arvo summa, '$yhtiorow[valkoodi]' valkoodi, lasku.vienti,
@@ -141,6 +159,7 @@
 						AND lasku.tapvm >= '$vv-$kk-$pp'
 						AND lasku.tapvm <= '$lvv-$lkk-$lpp'
 						AND lasku.tila = 'U'
+						$tehdaspalautuksetrajaus
 						ORDER BY lasku.tapvm, lasku.tunnus";
 		}
 
@@ -269,7 +288,7 @@
 					}
 
 					if ($laji == "myynti") {
-						if ($alvit_logistiikka != 0 and $row['maa'] != 'FI') {
+						if ($alvit_logistiikka != 0 and strtoupper($row['maa']) != strtoupper($yhtiorow['maa'])) {
 							echo "<td nowrap valign='top' class='back'><font class='error'>VIRHE: Verollinen lasku toimitettu ulkomaille!</font></td>";
 						}
 

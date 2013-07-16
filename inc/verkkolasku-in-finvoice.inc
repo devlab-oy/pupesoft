@@ -125,8 +125,8 @@ if (count($tuotetiedot) > 0) {
 			}
 
 			$rtuoteno[$i]["nimitys"] 			= pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName));
-			$rtuoteno[$i]["rivihinta"] 			= hintapyoristys(str_replace(",", ".", $tuotetieto->RowVatExcludedAmount));
-			$rtuoteno[$i]["rivihinta_verolli"]	= hintapyoristys(str_replace(",", ".", $tuotetieto->RowAmount));
+			$rtuoteno[$i]["rivihinta"] 			= round((float) str_replace(",", ".", $tuotetieto->RowVatExcludedAmount), 2);
+			$rtuoteno[$i]["rivihinta_verolli"]	= round((float) str_replace(",", ".", $tuotetieto->RowAmount), 2);
 
 			$rivien_summa_yhteensa += $rtuoteno[$i]["rivihinta_verolli"];
 
@@ -136,7 +136,7 @@ if (count($tuotetiedot) > 0) {
 			$ealvi[$i] = $xvati;
 
 			$rtuoteno[$i]["ale"] = (float) str_replace(",", ".", $tuotetieto->RowDiscountPercent);
-			$rtuoteno[$i]["hinta"] = hintapyoristys(str_replace(",", ".", $tuotetieto->UnitPriceAmount));
+			$rtuoteno[$i]["hinta"] = round((float) str_replace(",", ".", $tuotetieto->UnitPriceAmount), 2);
 
 			// rivikommentti
 			$xrinfo = utf8_decode($tuotetieto->RowFreeText);

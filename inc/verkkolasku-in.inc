@@ -989,13 +989,13 @@
 				}
 
 				$laskun_kulut 	= array();
-				$osto_kulu		= (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : $osto_kulu;
-				$osto_rahti 	= (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : $osto_rahti;
-				$osto_rivi_kulu = (!isset($osto_rivi_kulu) or trim($osto_rivi_kulu) == '') ? 0 : $osto_rivi_kulu;
+				$osto_kulu		= (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : round($osto_kulu, 2);
+				$osto_rahti 	= (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : round($osto_rahti, 2);
+				$osto_rivi_kulu = (!isset($osto_rivi_kulu) or trim($osto_rivi_kulu) == '') ? 0 : round($osto_rivi_kulu, 2);
 
-				$osto_kulu_alv		= (!isset($osto_kulu_alv) or trim($osto_kulu_alv) == '') ? 0 : $osto_kulu_alv;
-				$osto_rahti_alv 	= (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : $osto_rahti_alv;
-				$osto_rivi_kulu_alv = (!isset($osto_rivi_kulu_alv) or trim($osto_rivi_kulu_alv) == '') ? 0 : $osto_rivi_kulu_alv;
+				$osto_kulu_alv		= (!isset($osto_kulu_alv) or trim($osto_kulu_alv) == '') ? 0 : round($osto_kulu_alv, 2);
+				$osto_rahti_alv 	= (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : round($osto_rahti_alv, 2);
+				$osto_rivi_kulu_alv = (!isset($osto_rivi_kulu_alv) or trim($osto_rivi_kulu_alv) == '') ? 0 : round($osto_rivi_kulu_alv, 2);
 
 				// Kirjoitetaan lasku
 				$query = "	INSERT into lasku set

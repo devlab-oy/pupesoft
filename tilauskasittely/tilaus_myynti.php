@@ -1,5 +1,6 @@
 <?php
 
+
 if (isset($_REQUEST['tulosta_maksusopimus']) and is_numeric(trim($_REQUEST['tulosta_maksusopimus']))) {
 	$nayta_pdf = 1;
 	$ohje = 'off';
@@ -22,7 +23,16 @@ $tilauskaslisa = "";
 if (strpos(dirname(__FILE__), "/tilauskasittely") !== FALSE) {
 	$tilauskaslisa = "tilauskasittely/";
 }
+if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
+    liite_popup("AK", $tuotetunnus, $width, $height);
+}
+else {
+    liite_popup("JS");
+}
 
+if (function_exists("js_popup")) {
+    echo js_popup(-100);
+}
 for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 	if (!isset(${'ale'.$alepostfix})) ${'ale'.$alepostfix} = "";
 	if (!isset(${'ale_array'.$alepostfix})) ${'ale_array'.$alepostfix} = "";
@@ -4687,6 +4697,7 @@ if ($tee == '') {
 					tuote.status,
 					tuote.ei_saldoa,
 					tuote.vakkoodi,
+                    tuote.tunnus as tuote_tunnus,
 					$kommentti_select
 					$sorttauskentta
 					FROM tilausrivi use index (yhtio_otunnus)
@@ -5584,7 +5595,17 @@ if ($tee == '') {
 
 				// Tuotteen nimitys näytetään vain jos käyttäjän resoluution on iso
 				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-					echo "<td $class align='left' valign='top'>".t_tuotteen_avainsanat($row, "nimitys")."$extranet_tarkistus_teksti</td>";
+                    // Onko liitetiedostoja
+                    
+                    if ($kukarow['extranet'] != '') {
+                        $liitekuvat = liite_popup("TH", $row['tuote_tunnus']);
+                        $liitekuvat = "<div style='float: left;'>{$liitekuvat}</div>";
+                    }
+                    else {
+                        $liitekuvat = '';
+                    }
+
+					echo "<td $class align='left' valign='top'>{$liitekuvat}".t_tuotteen_avainsanat($row, "nimitys")."$extranet_tarkistus_teksti</td>";
 				}
 
 				if ($kukarow['extranet'] == '' and $toim == "MYYNTITILI" and $laskurow["alatila"] == "V") {

@@ -3,8 +3,6 @@
 require ("../inc/parametrit.inc");
 require ("validation/Validation.php");
 enable_ajax();
-
-echo "<font class='head'>" . t("Ext-tarjoukset") . "</font><hr>";
 ?>
 <style>
     .tr_border_top {
@@ -27,6 +25,24 @@ echo "<font class='head'>" . t("Ext-tarjoukset") . "</font><hr>";
     }
 </script>
 <?php
+
+if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
+    liite_popup("AK", $tuotetunnus, $width, $height);
+}
+else {
+    liite_popup("JS");
+}
+
+if (function_exists("js_popup")) {
+    echo js_popup(-100);
+}
+
+if ($toim == 'EXTTARJOUS') {
+    echo "<font class='head'>" . t("Ext-tarjoukset") . "</font><hr>";
+}
+else {
+    echo "<font class='head'>" . t("Ext-ennakot") . "</font><hr>";
+}
 
 $request = array(
     "toim" => $toim,
@@ -433,8 +449,10 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
     echo "	<input type='hidden' name='tee' value='LISAARIVI'>
 					<input type='hidden' name='toim'  value='$toim'>
 					<input type='hidden' name='otunnus'  value='$valittu_tarjous_tunnus'>";
+    echo "<font class='message'>" . t("Tuotteiden lisäys") . "</font>";
 
     require('tilauskasittely/syotarivi.inc');
+    echo "<br>";
 
     echo_tarjouksen_tilausrivit($tarjous, $toim);
 }
@@ -457,10 +475,13 @@ function hae_tarjous($valittu_tarjous_tunnus) {
 function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
     global $kukarow, $yhtiorow;
 
-    $query = "  SELECT '' as nro, tunnus, perheid as perheid_tunnus, tuoteno,nimitys, tilkpl as kpl,hinta as rivihinta,alv
+    $query = "  SELECT '' as nro, '' as kuva, tilausrivi.tunnus, tilausrivi.perheid as perheid_tunnus, tilausrivi.tuoteno, tilausrivi.nimitys, 
+                tilausrivi.tilkpl as kpl,tilausrivi.hinta as rivihinta,tilausrivi.alv, tuote.tunnus as tuote_tunnus
                 FROM tilausrivi
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otunnus = '{$valittu_tarjous_tunnus}'";
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi.otunnus = '{$valittu_tarjous_tunnus}'";
+    //$query = "  SELECT ''as nro, '' as kuva, tilausrivi.tunnus, tilausrivi.perheid as perheid_tunnus, tilausrivi.tuotenumero, tilausrivi.nimitys, tilausrivi.tilkpl as kpl, tilausrivi.hinta as rivihinta, tilausrivi.alv, tuoteperhe.tyyppi";
     $result = pupe_query($query);
 
     $tilausrivit = array();
@@ -479,6 +500,8 @@ function echo_tarjouksen_otsikko($tarjous, $toim) {
     echo "<a href=extranet_tarjoukset.php?toim={$toim}>" . t("Palaa takaisin") . "</a>";
     echo "<br>";
     echo "<br>";
+    // TODO eri messu EXTENNAKKO / EXTTARJOUS?
+    echo "<font class='message'>" . t("Tarjouksen tiedot") . "</font>";
     echo "<table>";
 
     echo "<tr>";
@@ -500,7 +523,7 @@ function echo_tarjouksen_tilausrivit($tarjous, $toim) {
     global $kukarow, $yhtiorow;
 
     echo "<font class='message'>" . t("Tilausrivit") . "</font>";
-    echo "<br>";
+
     echo "<form method='post' action=''>";
     echo "<input type='hidden' name='action' value='hyvaksy_tai_hylkaa' />";
     echo "<input type='hidden' name='toim' value='{$toim}' />";
@@ -526,6 +549,7 @@ function echo_tarjouksen_tilausrivit($tarjous, $toim) {
 }
 
 function echo_tarjous_rows_in_table(&$rivit, $header_values = array(), $force_to_string = array(), $toim) {
+    global $kukarow, $yhtiorow;
     echo "<table>";
     if (count($rivit) > 0) {
         _echo_tarjous_table_headers($rivit[0], $header_values);
@@ -538,6 +562,7 @@ function echo_tarjous_rows_in_table(&$rivit, $header_values = array(), $force_to
 }
 
 function _echo_tarjous_table_headers($rivi, $header_values) {
+    global $kukarow, $yhtiorow;
     echo "<tr>";
     foreach ($rivi as $header_text => $value) {
         if (!stristr($header_text, 'tunnus')) {
@@ -554,6 +579,7 @@ function _echo_tarjous_table_headers($rivi, $header_values) {
 }
 
 function _echo_tarjous_table_rows(&$rivit, $force_to_string = array(), $toim) {
+    global $kukarow, $yhtiorow;
     $index = 0;
     foreach ($rivit as $rivi) {
         $class = "";
@@ -563,13 +589,59 @@ function _echo_tarjous_table_rows(&$rivit, $force_to_string = array(), $toim) {
         }
         echo "<tr>";
         foreach ($rivi as $header => &$solu) {
-            _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $index, $toim, $rivi['tunnus']);
+            _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $index, $toim, $rivi);
         }
         echo "</tr>";
     }
 }
 
-function _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $index, $toim, $rivitunnus) {
+/* if ($verkkokauppa == '') {
+  // Onko liitetiedostoja
+  $liitteet = liite_popup("TH", $row["tunnus"]);
+
+  if ($liitteet) {
+  $isan_kuva = 'löytyi';
+  }
+  else {
+  $isan_kuva = '';
+  }
+
+  // jos ei löydetä kuvaa isätuotteelta, niin katsotaan ne lapsilta
+  if (trim($liitteet) == '' and (trim($row["tuoteperhe"]) == trim($row["tuoteno"]) or trim($row["osaluettelo"]) == trim($row["tuoteno"])) and $isan_kuva != '') {
+
+  if ($row["osaluettelo"] != "") {
+  $tuoteperhe_tyyppi = "V";
+  }
+  else {
+  $tuoteperhe_tyyppi = "P";
+  }
+
+  $query = "	SELECT tuote.tunnus
+  FROM tuoteperhe
+  JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio and tuote.tuoteno = tuoteperhe.tuoteno )
+  WHERE tuoteperhe.yhtio 	  = '$kukarow[yhtio]'
+  and tuoteperhe.isatuoteno = '$row[tuoteno]'
+  and tuoteperhe.tyyppi = '$tuoteperhe_tyyppi'";
+  $lapsires = pupe_query($query);
+
+  while ($lapsirow = mysql_fetch_assoc($lapsires)) {
+  // Onko lapsien liitetiedostoja
+  $liitteet = liite_popup("TH", $lapsirow["tunnus"]);
+
+  if ($liitteet != '') break;
+  }
+  }
+
+  if ($liitteet != "") {
+  echo "<td class='$vari' style='vertical-align: top;'>$liitteet</td>";
+  }
+  else {
+  echo "<td class='$vari'></td>";
+  }
+  } */
+
+function _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $index, $toim, $rivi) {
+    global $kukarow, $yhtiorow;
     if (!stristr($header, 'tunnus')) {
 
         if ($header == 'nro') {
@@ -585,13 +657,26 @@ function _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $i
                 if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
                     $class .= " text_align_right";
                 }
-                echo "<td class='{$class}'><input type='text' name='kappalemaarat[{$rivitunnus}]' value='{$solu}' /></td>";
+                echo "<td class='{$class}'><input type='text' name='kappalemaarat[{$rivi['tunnus']}]' value='{$solu}' /></td>";
             }
             else {
                 if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
                     $class .= " text_align_right";
                 }
                 echo "<td class='{$class}'>{$solu}</td>";
+            }
+        }
+        elseif ($header == 'kuva') {
+            // Onko liitetiedostoja
+
+            $liitteet = liite_popup("TH", $rivi['tuote_tunnus']);
+
+            $vari = 'spec';
+            if ($liitteet != "") {
+                echo "<td class='$vari' style='vertical-align: top;'>$liitteet</td>";
+            }
+            else {
+                echo "<td class='$vari'></td>";
             }
         }
         else {

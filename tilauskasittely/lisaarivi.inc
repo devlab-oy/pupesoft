@@ -2466,28 +2466,32 @@
 			              FROM korvaavat
 			              WHERE yhtio = '{$kukarow['yhtio']}'
 			              AND tuoteno = '{$trow['tuoteno']}'
-			              order by if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys), korvaavat.tuoteno
-			              limit 1";
+			              ORDER BY if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys), korvaavat.tuoteno
+			              LIMIT 1";
 		        $presult = pupe_query($query);
 		        $prow = mysql_fetch_assoc($presult);
 
 				// Jos ei ole korvaavia, ei vaihdeta tilattavaa tuotetta
 				if (mysql_num_rows($presult)) {
-		        	$query = "SELECT *
+		        	$query = "SELECT tuote.*
 			    	          FROM korvaavat
 			    	          JOIN tuote ON korvaavat.yhtio=tuote.yhtio AND korvaavat.tuoteno=tuote.tuoteno
 			    	          WHERE korvaavat.yhtio = '{$kukarow['yhtio']}'
-			    	          AND id = '{$prow['id']}'
-			    	          order by if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys), korvaavat.tuoteno
-			    	          limit 1";
+			    	          AND korvaavat.id = '{$prow['id']}'
+			    	          ORDER BY if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys), korvaavat.tuoteno
+			    	          LIMIT 1";
 		        	$tresult = pupe_query($query);
 		        	$korvaava_row = mysql_fetch_assoc($tresult);
 
-					$kommentti .= " HUOM! Korvaa tuotteen {$alkupera_trow['tuoteno']}";
-			    	$trow = $korvaava_row;
+					if (strtoupper($korvaava_row["tuoteno"]) != strtoupper($alkupera_trow["tuoteno"])) {
+						if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]") === FALSE) {
+							$kommentti .= " ".t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]";
+						}
+					}
+
+					$trow = $korvaava_row;
 				}
 			}
-			####
 
 			$query_erikoisale_lisa = trim($lis_netto) != 'N' ? " erikoisale = '{$laskurow['erikoisale']}', " : '';
 

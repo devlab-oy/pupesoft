@@ -1121,9 +1121,9 @@
 					if ($ealvi[0] != "") $vero = (float) $ealvi[0];
 					else $vero = (float) $oletusalvi;
 
-					$kirjattava_summa 		  = round($omasumma / (1 + ($vero / 100)), 2);
-					$summa_varasto 			  = $kirjattava_summa;
-					$summa_varasto_valuutassa = round($summa / (1 + ($vero / 100)), 2);
+					$kirjattava_summa 		  = $omasumma;
+					$summa_varasto 			  = round($omasumma / (1 + ($vero / 100)), 2);
+					$summa_varasto_valuutassa = $summa_varasto;
 
 					if ($yhtiorow['ostolaskun_kulutilit'] != ''
 						and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')
@@ -1132,7 +1132,6 @@
 					) {
 
 						list($kirjattava_summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, $omasumma, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
-						$kirjattava_summa = round($kirjattava_summa / (1 + ($vero / 100)), 2);
 
 						foreach ($_arr as $_k => $_v) {
 							if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
@@ -1140,7 +1139,7 @@
 						}
 
 						if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '') {
-							$summa_varasto = $kirjattava_summa;
+							$summa_varasto = round($kirjattava_summa / (1 + ($vero / 100)), 2);
 						}
 					}
 

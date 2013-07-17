@@ -37,7 +37,7 @@
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
 
 	// debuggia varten, laita 1 jos haluut messuja
-	$lisaarivi_debug = 1;
+	$lisaarivi_debug = 0;
 
 	if (!isset($rivitunnus)) $rivitunnus = 0;
 	else $rivitunnus = (int) $rivitunnus;

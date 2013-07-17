@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require ("inc/parametrit.inc");
 require ("validation/Validation.php");
 enable_ajax();
 ?>
@@ -67,13 +67,39 @@ if ($tee == "LISAARIVI") {
         //Tuote löytyi
         $trow = mysql_fetch_assoc($result);
 
-        $laskurow["tila"] = 'V';
+ 
         $kukarow["kesken"] = $otunnus;
-        $perheid = $perheid;
+        
+        $laskurow = hae_lasku($otunnus);
         // Nollataan hinta kun kyseessä on asiakkaan ext-ennakkotilaukseen lisäämä rivi
-        $hinta = 0;
-
-        require('tilauskasittely/lisaarivi.inc');
+        if ($toim == 'EXTENNAKKO') {
+            $query = "  SELECT selite AS ennakko_pros_a
+                        FROM tuotteen_avainsanat
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tuoteno = '{$tuoteno}'
+                        AND laji = 'parametri_ennakkoale_a'
+                        AND selite != ''";
+            $result = pupe_query($query);
+            $tuotteen_hinta = mysql_fetch_assoc($result);
+            $hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
+            $laskurow["tila"] = 'N';
+        }
+        else {
+            $laskurow["tila"] = 'T';
+        }
+        $perhekielto = '';
+        $perheid = 0;
+        $trow = hae_tuote($tuoteno);
+        $parametrit = array(
+            'trow' => $trow,
+            'laskurow' => $laskurow,
+            'kpl' => ($kpl),
+            'netto' => $netto,
+            'hinta' => $hinta,
+            'perhekielto' => $perhekielto,
+            'perheid' => $perheid,
+        );
+        lisaa_rivi($parametrit);
 
         $lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
 
@@ -117,6 +143,12 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
         echo "<font class='error'>" . t("Toiminto epäonnistui") . "</font>";
         echo "<br>";
         echo "<br>";
+    }
+    else {
+        echo "<script>
+					setTimeout(\"parent.location.href='$palvelin2'\",0);
+					</script>";
+        exit;
     }
 
     //$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset($request['kayttajaan_liitetty_asiakas']['tunnus'], $request['toim']);
@@ -372,10 +404,10 @@ function hae_extranet_tarjoukset($asiakasid, $toim) {
     else {
         $where = "  AND lasku.clearing = 'EXTENNAKKO' AND lasku.tila = 'N'";
     }
-    /* AND lasku.clearing = 'EXTTARJOUS' */
+    
     $query = "  SELECT  concat( concat_ws('!!!', lasku.tunnus, lasku.nimi),'!!!{$toim}') AS nimi,
                 lasku.hinta,
-                lasku.toimaika,
+                lasku.olmapvm,
                 lasku.tunnus as tunnus
                 FROM lasku
                 WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -387,6 +419,11 @@ function hae_extranet_tarjoukset($asiakasid, $toim) {
     $haetut_tarjoukset = array();
 
     while ($haettu_tarjous = mysql_fetch_assoc($result)) {
+        $tilrivit = hae_tarjouksen_tilausrivit($haettu_tarjous['tunnus']);
+        $haettu_tarjous['hinta'] = 0;
+        foreach($tilrivit as $tilrivi) {
+            $haettu_tarjous['hinta'] += (float)$tilrivi['rivihinta']; 
+        }
         $haetut_tarjoukset[] = $haettu_tarjous;
     }
     return $haetut_tarjoukset;
@@ -423,7 +460,7 @@ function tee_tarjouksen_nimesta_linkki($header, $solu, $force_to_string) {
         if ($header == 'nimi') {
             $tunnus_nimi_array = explode('!!!', $solu);
             echo "<td>";
-            echo "<a href='extranet_tarjoukset.php?action=nayta_tarjous&valittu_tarjous_tunnus={$tunnus_nimi_array[0]}&toim={$tunnus_nimi_array[2]}'>{$tunnus_nimi_array[1]}</a>";
+            echo "<a href='$_SERVER[PHP_SELF]?action=nayta_tarjous&valittu_tarjous_tunnus={$tunnus_nimi_array[0]}&toim={$tunnus_nimi_array[2]}'>{$tunnus_nimi_array[1]}</a>";
             echo "</td>";
         }
         else if ($header == 'hinta') {
@@ -476,12 +513,11 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
     global $kukarow, $yhtiorow;
 
     $query = "  SELECT '' as nro, '' as kuva, tilausrivi.tunnus, tilausrivi.perheid as perheid_tunnus, tilausrivi.tuoteno, tilausrivi.nimitys, 
-                tilausrivi.tilkpl as kpl,tilausrivi.hinta as rivihinta,tilausrivi.alv, tuote.tunnus as tuote_tunnus
+                tilausrivi.tilkpl as kpl, IF(tilausrivi.alv != 0, ( (1 + ( tilausrivi.alv / 100)     ) * (tilausrivi.tilkpl * tilausrivi.hinta ) ), tilausrivi.tilkpl * tilausrivi.hinta) AS rivihinta, tilausrivi.alv, tuote.tunnus as tuote_tunnus
                 FROM tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                 AND tilausrivi.otunnus = '{$valittu_tarjous_tunnus}'";
-    //$query = "  SELECT ''as nro, '' as kuva, tilausrivi.tunnus, tilausrivi.perheid as perheid_tunnus, tilausrivi.tuotenumero, tilausrivi.nimitys, tilausrivi.tilkpl as kpl, tilausrivi.hinta as rivihinta, tilausrivi.alv, tuoteperhe.tyyppi";
     $result = pupe_query($query);
 
     $tilausrivit = array();
@@ -497,7 +533,7 @@ function echo_tarjouksen_otsikko($tarjous, $toim) {
     global $kukarow, $yhtiorow;
 
     echo "<input type='hidden' id='hyvaksy_hylkaa_message' value='" . t("Oletko varma, että haluat suorittaa valitun toimenpiteen") . "'/>";
-    echo "<a href=extranet_tarjoukset.php?toim={$toim}>" . t("Palaa takaisin") . "</a>";
+    echo "<a href=$_SERVER[PHP_SELF]?toim={$toim}>" . t("Palaa takaisin") . "</a>";
     echo "<br>";
     echo "<br>";
     // TODO eri messu EXTENNAKKO / EXTTARJOUS?
@@ -512,7 +548,7 @@ function echo_tarjouksen_otsikko($tarjous, $toim) {
     echo "{$tarjous['nimi']}";
     echo "</td>";
     echo "<td>";
-    echo "{$tarjous['toimaika']}";
+    echo "{$tarjous['olmapvm']}";
     echo "</td>";
 
     echo "</table>";
@@ -594,51 +630,6 @@ function _echo_tarjous_table_rows(&$rivit, $force_to_string = array(), $toim) {
         echo "</tr>";
     }
 }
-
-/* if ($verkkokauppa == '') {
-  // Onko liitetiedostoja
-  $liitteet = liite_popup("TH", $row["tunnus"]);
-
-  if ($liitteet) {
-  $isan_kuva = 'löytyi';
-  }
-  else {
-  $isan_kuva = '';
-  }
-
-  // jos ei löydetä kuvaa isätuotteelta, niin katsotaan ne lapsilta
-  if (trim($liitteet) == '' and (trim($row["tuoteperhe"]) == trim($row["tuoteno"]) or trim($row["osaluettelo"]) == trim($row["tuoteno"])) and $isan_kuva != '') {
-
-  if ($row["osaluettelo"] != "") {
-  $tuoteperhe_tyyppi = "V";
-  }
-  else {
-  $tuoteperhe_tyyppi = "P";
-  }
-
-  $query = "	SELECT tuote.tunnus
-  FROM tuoteperhe
-  JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio and tuote.tuoteno = tuoteperhe.tuoteno )
-  WHERE tuoteperhe.yhtio 	  = '$kukarow[yhtio]'
-  and tuoteperhe.isatuoteno = '$row[tuoteno]'
-  and tuoteperhe.tyyppi = '$tuoteperhe_tyyppi'";
-  $lapsires = pupe_query($query);
-
-  while ($lapsirow = mysql_fetch_assoc($lapsires)) {
-  // Onko lapsien liitetiedostoja
-  $liitteet = liite_popup("TH", $lapsirow["tunnus"]);
-
-  if ($liitteet != '') break;
-  }
-  }
-
-  if ($liitteet != "") {
-  echo "<td class='$vari' style='vertical-align: top;'>$liitteet</td>";
-  }
-  else {
-  echo "<td class='$vari'></td>";
-  }
-  } */
 
 function _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $index, $toim, $rivi) {
     global $kukarow, $yhtiorow;

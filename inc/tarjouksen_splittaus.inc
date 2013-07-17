@@ -30,14 +30,12 @@ $dummy_tarjouksen_tilausnumero = $tilausnumero;
 
 foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
     $kukarow['kesken'] = 0;
-    
-    if($toim == "EXTTARJOUS") {
+
+    if ($toim == "EXTTARJOUS") {
         $tilausnumero = luo_myyntitilausotsikko('TARJOUS', $tarjous_asiakas);
-        $netto = "";
     }
     else {
         $tilausnumero = luo_myyntitilausotsikko('ENNAKKO', $tarjous_asiakas);
-        $netto = 'N';
     }
 
     $query = "  SELECT *
@@ -52,21 +50,41 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
     $laskurow = mysql_fetch_assoc($result);
 
     $kukarow['kesken'] = $tilausnumero;
-    
-    foreach ($tilausrivit as $tilausrivi) {
 
+    foreach ($tilausrivit as $tilausrivi) {
         if ($tilausrivi['tunnus'] == $tilausrivi['perheid'] or $tilausrivi['perheid'] == 0) {
             $trow = hae_tuote($tilausrivi['tuoteno']);
+            if ($toim == "EXTTARJOUS") {
+                $netto = "N";
+            }
+            else {
+                $netto = '';
+                $query = "  SELECT selite AS ennakko_pros_a
+                        FROM tuotteen_avainsanat
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tuoteno = '{$tuoteno}'
+                        AND laji = 'parametri_ennakkoale_a'
+                        AND selite != ''";
+                $result = pupe_query($query);
+                $tuotteen_hinta = mysql_fetch_assoc($result);
+                if ($tuotteen_hinta === false) {
+                    $hinta = 0;
+                }
+                else {
+                    $hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
+                }
+            }
             $parametrit = array(
                 'trow' => $trow,
                 'laskurow' => $laskurow,
                 'kpl' => ($tilausrivi['varattu'] + $tilausrivi['jt']),
                 'netto' => $netto,
+                'hinta' => $hinta,
             );
             lisaa_rivi($parametrit);
         }
     }
-    
+
     require_once('tilaus-valmis.inc');
 }
 

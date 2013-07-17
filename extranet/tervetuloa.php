@@ -127,6 +127,14 @@ if ($tee == '') {
 			require ("saatanat.php");
 		}
 	}
+    $exttarjousten_lukumaara = hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset(57620); //HALOO
+    if($exttarjousten_lukumaara > 0) {
+        echo "<table border='1'>";
+        echo "<tr>";
+        echo "<td><font class='message'>".t("Sinulla on %s kappaletta hyväksymättömiä tarjouksia", '', $exttarjousten_lukumaara)."</font></td>";
+        echo "</tr>";
+        echo "</table>";
+    }
 
 	echo "<table width='100%'>";
 	echo "<tr>";
@@ -424,7 +432,6 @@ if ($tee == "PRINTTAA") {
 
 		";
 }
-
 
 require("footer.inc");
 

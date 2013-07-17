@@ -176,7 +176,15 @@ while ($orow = mysql_fetch_array($result)) {
 
 
 	$mrow = mysql_fetch_array($xresult);
-
+    
+    if($mrow['nimi'] == 'extranet_tarjoukset_ja_ennakot.php' and stristr($mrow['alanimi'], "EXTTARJOUS")) {
+        $tarjousten_lukumaara = hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset(57620); //$kukarow['tunnus']
+        if ($tarjousten_lukumaara > 0) {
+            
+            $mrow['nimitys'] .= " ({$tarjousten_lukumaara})";
+        }
+    }
+    
 	// alamenuja löytyy, eli tämä on menu
 	if (mysql_num_rows($xresult) > 1) {
 

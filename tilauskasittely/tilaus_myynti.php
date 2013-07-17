@@ -7623,42 +7623,44 @@ if ($tee == '') {
 				else {
 					$tarjouslisa = "";
 				}
+                if($toim != 'EXTTARJOUS') {
+                    echo "	<form name='hyvaksy' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
+                            <input type='hidden' name='toim' value='$toim'>
+                            <input type='hidden' name='lopetus' value='$lopetus'>
+                            <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+                            <input type='hidden' name='projektilla' value='$projektilla'>
+                            <input type='hidden' name='tee' value='HYVAKSYTARJOUS'>
+                            <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+                            <input type='hidden' name='mista' value = '$mista'>
+                            <input type='hidden' name='orig_tila' value='$orig_tila'>
+                            <input type='hidden' name='orig_alatila' value='$orig_alatila'>
 
-				echo "	<form name='hyvaksy' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
-						<input type='hidden' name='toim' value='$toim'>
-						<input type='hidden' name='lopetus' value='$lopetus'>
-						<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
-						<input type='hidden' name='projektilla' value='$projektilla'>
-						<input type='hidden' name='tee' value='HYVAKSYTARJOUS'>
-						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-						<input type='hidden' name='mista' value = '$mista'>
-						<input type='hidden' name='orig_tila' value='$orig_tila'>
-						<input type='hidden' name='orig_alatila' value='$orig_alatila'>
-
-						$tarjouslisa
-						<input type='submit' value='".t("Hyväksy tarjous")."'>
-						</form>";
+                            $tarjouslisa
+                            <input type='submit' value='".t("Hyväksy tarjous")."'>
+                            </form>";
+                }
 			}
 			elseif (mysql_num_rows($optiotarkres) > 0) {
 				echo t("Poista optiot ennen tilauksen tekoa")."<br><br>";
 			}
+            if($toim != 'EXTTARJOUS') {
+                echo "	<br>
+                        <br>
+                        <form name='hylkaa' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onsubmit=\"return confirm('Oletko varma että haluat hylätä tarjouksen $kukarow[kesken]?')\">
+                        <input type='hidden' name='toim' value='$toim'>
+                        <input type='hidden' name='lopetus' value='$lopetus'>
+                        <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+                        <input type='hidden' name='projektilla' value='$projektilla'>
+                        <input type='hidden' name='tee' value='HYLKAATARJOUS'>
+                        <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+                        <input type='hidden' name='mista' value = '$mista'>
+                        <input type='hidden' name='orig_tila' value='$orig_tila'>
+                        <input type='hidden' name='orig_alatila' value='$orig_alatila'>
+                        <input type='submit' value='".t("Hylkää tarjous")."'>
+                        </form>";
 
-			echo "	<br>
-					<br>
-					<form name='hylkaa' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onsubmit=\"return confirm('Oletko varma että haluat hylätä tarjouksen $kukarow[kesken]?')\">
-					<input type='hidden' name='toim' value='$toim'>
-					<input type='hidden' name='lopetus' value='$lopetus'>
-					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
-					<input type='hidden' name='projektilla' value='$projektilla'>
-					<input type='hidden' name='tee' value='HYLKAATARJOUS'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='hidden' name='mista' value = '$mista'>
-					<input type='hidden' name='orig_tila' value='$orig_tila'>
-					<input type='hidden' name='orig_alatila' value='$orig_alatila'>
-					<input type='submit' value='".t("Hylkää tarjous")."'>
-					</form>";
-
-			echo "</td>";
+                echo "</td>";
+            }
 
 		}
 

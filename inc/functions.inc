@@ -22575,6 +22575,23 @@ if (!function_exists("lisaa_rivi")) {
 		// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
 	}
 }
+if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
+    function hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset($kuka_tunnus) {
+        global $kukarow, $yhtiorow;
+
+        $query = "  SELECT count(*) as luku
+                    FROM lasku
+                    JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.tunnus='{$kuka_tunnus}')
+                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                    AND lasku.tila='t'
+                    AND lasku.alatila=''
+                    AND lasku.clearing='exttarjous'"; 
+        $result = pupe_query($query);
+
+        $tarjousten_lukumaara = mysql_fetch_assoc($result);
+        return $tarjousten_lukumaara['luku'];
+    }
+}
 
 if (!function_exists("saako_myyda_private_label")) {
 	function saako_myyda_private_label($asiakastunnus, $tuotenro, $alemaara = 1) {

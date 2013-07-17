@@ -246,17 +246,16 @@
 	$alkupera_netto = $netto;
 	$alkupera_alv 	= $alv;
 
-	$saldoyhteensa			 = 0; 					// tähän summaillaan saldoa yhteensä
+	$saldoyhteensa			 = 0; 					 		// tähän summaillaan saldoa yhteensä
 	$lapsiyhteensa			 = 0;
 	$korvaavan_isaa_myyty	 = 0;
 	$perheid_lisaarivi		 = 0;
 	$lop					 = "";
-	$tuoteperhe				 = array(); 				// Tuoteperheiden lapset menevät tänne
-	$kaikkituotteet			 = array(); 				// tähän arrayseen lisätään kaikki tuotteet ketjusta
-	$kaikkituotteet[]		 = strtoupper($tuoteno); // ekaksi lisätään ketjuun kysytty tuote
+	$tuoteperhe				 = array(); 			 		// Tuoteperheiden lapset menevät tänne
+	$kaikkituotteet			 = array(strtoupper($tuoteno)); // tähän arrayseen lisätään kaikki tuotteet ketjusta
 	$isa_array 				 = array();
-	$var					 = strtoupper($var); 	// varri isoks
-	$netto					 = strtoupper($netto); 	// netto isoks
+	$var					 = strtoupper($var); 	 		// varri isoks
+	$netto					 = strtoupper($netto); 	 		// netto isoks
 	$myyntierahuomatus 		 = FALSE;
 	$ostoerahuomatus 		 = FALSE;
 	$myy_erikoistoim_ok		 = TRUE;
@@ -539,7 +538,7 @@
 					$korvaavat_kiellot = "KORVAAVAT";
 					$kaikkituotteet = array(); // Nollataan kaikkituotteet array
 				}
-				// Korvaavia tuotteidenta myydään, mikäli yksittäistä korvaavaa löytyy tilattu määrää
+				// Korvaavia tuotteita myydään, mikäli yksittäistä korvaavaa löytyy tilattu määrää
 				elseif ($kk_row['laji'] == 'Q') {
 					$korvaavat_kiellot = "UNIIKKI";
 					$kaikkituotteet = array(); // Nollataan kaikkituotteet array
@@ -560,7 +559,7 @@
 
 			// Tehdään homma siten, että etsitään kaikki korvaavat jo tässä vaiheessa arrayseen
 			// Haetaan korvaavuusketju tuotteelle
-			require 'korvaavat.class.php';
+			require_once 'korvaavat.class.php';
 			$korvaavat = new Korvaavat($tuoteno);
 
 			// Korvaavuusketjun järjestyksessä pienempään päin, eli päätuotetta kohden
@@ -568,7 +567,7 @@
 			$korvaavat_tuotteet = $korvaavat->tuotteet($options);
 
 			// Haetaan vastaavuusketjut korvaavat ketjun päätuotteella
-			require 'vastaavat.class.php';
+			require_once 'vastaavat.class.php';
 
 			// Vastaavat tuotteet array
 			$vastaavat_tuotteet = array();
@@ -590,34 +589,28 @@
 
 				// Jos tilatulla tuotteella ei korvaavia löydy, haetaan vastaavat myytävällä tuotteella.
 				// Muulloin etsitään vastaavat löydetyn korvaavuusketjun päätuotteen mukaan.
+				$options = array('skippaa_vaihtoehtoiset' => TRUE);
+
 				if (empty($korvaavat_tuotteet)) {
-					$vastaavat = new Vastaavat($tuoteno);
+					$vastaavat = new Vastaavat($tuoteno, $options);
 				}
 				else {
-					$vastaavat = new Vastaavat($korvaavat->paatuote());
+					$vastaavat = new Vastaavat($korvaavat->paatuote(), $options);
 				}
 
-				$options = array('vastaavuusketjun_jarjestys' => $yhtiorow['vastaavuusketjun_jarjestys']);
+				if ($vastaavat->getIDt() != "") {
 
-				// Haetaan kaikki tuotteen vastaavuusketjut (voi löytyä useampia)
-				foreach ($vastaavat->ketjut() as $ketju) {
+					$options = array('vastaavuusketjun_jarjestys' => $yhtiorow['vastaavuusketjun_jarjestys'], 'skippaa_vaihtoehtoiset' => TRUE);
 
-					// Haetaan tuotteet ketjukohtaisesti
-					$_tuotteet = $vastaavat->find_by_ketju($ketju, $options);
+					// Loopataan kaikki tuotteen vastaavuusketjut
+					foreach (explode(",", $vastaavat->getIDt()) as $ketju) {
 
-					// Lisätään löydetyt vastaavat mahdollisten myytävien joukkoon
-					foreach ($_tuotteet as $_tuote) {
+						// Haetaan tuotteet ketjukohtaisesti
+						$_tuotteet = $vastaavat->tuotteet($ketju, $options);
 
-						// Tarkistetaan tuote ei jo ole myytävien joukossa
-						foreach($vastaavat_tuotteet as $_ketjussa) {
-							if ($_ketjussa['tuoteno'] == $_tuote['tuoteno']) {
-								continue 2;
-							}
-						}
-
-						// Lisätään vain samaaa tyyppiä olevia tuotteita
-						if ($vastaavat->getTyyppi() == $_tuote['vaihtoehtoinen']) {
-							$vastaavat_tuotteet[] = $_tuote;
+						// Lisätään löydetyt vastaavat mahdollisten myytävien joukkoon
+						foreach ($_tuotteet as $_tuote) {
+							$vastaavat_tuotteet[$_tuote['tuoteno']] = $_tuote;
 						}
 					}
 				}
@@ -673,7 +666,7 @@
 
 							// Vastaavista kommentti riville
 							if ($krow2['tyyppi'] == 'vastaava') {
-								$kommentti_lisa .= " ".t("Toimitetaan vastaava tuote $krow2[tuoteno].");
+								$kommentti_lisa .= " ".t("Toimitetaan vastaava tuote")." $krow2[tuoteno].";
 							}
 
 							// Lisätään tuote
@@ -682,7 +675,7 @@
 					}
 
 					// Myydäänkö aina halvin tuote
-					// Asiakas saa aina halvemman hinnan mukaan tuotteen, mikâli alkuperâinen tuote on P toistuva tai puute.
+					// Asiakas saa aina halvemman hinnan mukaan tuotteen, mikäli alkuperäinen tuote on P toistuva tai puute.
 					if ($yhtiorow["korvaavan_hinta_ylaraja"] == 'MIN') {
 
 						// Tähän hintaan asiakas saisi tuotteen

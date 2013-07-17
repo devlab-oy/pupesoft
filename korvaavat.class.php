@@ -12,7 +12,11 @@ class Korvaavat {
 		if (empty($tuoteno)) exit("Korvaavat ketjun haku tarvitsee tuotenumeron");
 
 		// Haetaan haetun tuotteen tiedot korvaavuusketjusta
-		$query = "SELECT * FROM korvaavat WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuoteno}' LIMIT 1";
+		$query = "	SELECT *
+					FROM korvaavat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$tuoteno}'
+					LIMIT 1";
 		$tuote_result = pupe_query($query);
 		$tuote = mysql_fetch_assoc($tuote_result);
 
@@ -29,9 +33,10 @@ class Korvaavat {
 		$tuotteet = array();
 
 		$conditions = '';
+
 		if (!empty($options)) {
 			// Tsekataan tarvittavat parametrit
-			if($options['korvaavuusketjun_jarjestys'] == 'K') {
+			if ($options['korvaavuusketjun_jarjestys'] == 'K') {
 				if ($this->tuote['jarjestys'] == 0) {
 					$this->tuote['jarjestys'] = 9999;
 				}
@@ -42,11 +47,11 @@ class Korvaavat {
 
 		if ($this->id) {
 			// Haetaan korvaavat ketju ja tuotteiden tiedot
-			$query = "SELECT 'korvaava' as tyyppi, if(jarjestys=0, 9999, jarjestys) jarjestys, tuote.*
+			$query = "	SELECT 'korvaava' as tyyppi, if (jarjestys=0, 9999, jarjestys) jarjestys, tuote.*
 						FROM korvaavat
 						JOIN tuote ON korvaavat.yhtio=tuote.yhtio AND korvaavat.tuoteno=tuote.tuoteno
-						WHERE korvaavat.yhtio='{$kukarow['yhtio']}'
-						AND id={$this->id}
+						WHERE korvaavat.yhtio = '{$kukarow['yhtio']}'
+						AND korvaavat.id = {$this->id}
 						$conditions
 						ORDER BY jarjestys desc, tuoteno";
 			$result = pupe_query($query);
@@ -66,11 +71,15 @@ class Korvaavat {
 
 		// Haetaan ketjun päätuote
 		if ($this->id) {
-			$query = "SELECT * FROM korvaavat WHERE yhtio='{$kukarow['yhtio']}' AND id={$this->id}
-						ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno LIMIT 1";
+			$query = "	SELECT *
+						FROM korvaavat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND id = {$this->id}
+						ORDER BY if (jarjestys=0, 9999, jarjestys), tuoteno
+						LIMIT 1";
 			$result = pupe_query($query);
-
 			$ketju = mysql_fetch_assoc($result);
+
 			$this->paatuote = $ketju;
 		}
 

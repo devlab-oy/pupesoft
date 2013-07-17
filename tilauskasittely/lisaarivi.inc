@@ -597,14 +597,12 @@
 			$tuote_ketju = array_merge($korvaavat_tuotteet, $vastaavat_tuotteet);
 
 			// Tuotteen korvaavat ja vastaavat ketju, tsekataan paljonko on myyt‰viss‰ ja yhteens‰ myyt‰viss‰
-			foreach ($tuote_ketju as &$krow2) {
+			foreach ($tuote_ketju as $kindeksi => $krow2) {
 
 				list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
 
-				$krow2["myytavissa"] = $krmyytavissa;
+				$tuote_ketju[$kindeksi]["myytavissa"] = $krmyytavissa;
 				$krkaikkimyytavissa += $krmyytavissa;
-
-				echo "$krow2[tuoteno], $krmyytavissa<br>";
 			}
 
 			// Korvaavia tuotteita myyd‰‰n, mik‰li korvaavuusketjusta lˆytyy tilattu m‰‰r‰
@@ -621,33 +619,26 @@
 					continue;
 				}
 
+				list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
+
+				$if_ale_korva_isa_chk1 = $korva_isa_hinta;
+				$if_ale_korva_isa_chk2 = $korva_hinta;
+
+				$korva_isa_ale_kaikki['netto'] = $netto;
+				$korva_isa_ale_kaikki['erikoisale'] = $laskurow['erikoisale'];
+				$if_ale_korva_isa_chk1 *= generoi_alekentta_php($korva_isa_ale_kaikki, 'M', 'kerto');
+
+				$korva_ale_kaikki['netto'] = $netto;
+				$korva_ale_kaikki['erikoisale'] = $laskurow['erikoisale'];
+				$if_ale_korva_isa_chk2 *= generoi_alekentta_php($korva_ale_kaikki, 'M', 'kerto');
+
 				// Ei saa myyd‰ korvaavia tuotteita eik‰ vastaavia
 				if ($korvaavat_kiellot == "KIELTO") {
-					if ($krow2["myytavissa"] > 0) {
-						$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])");
+					if ($krow2["myytavissa"] > 0 and strtoupper($krow2["tuoteno"]) != strtoupper($tuoteno)) {
+						$korkieltokommi[] = strtoupper($krow2["tuoteno"]." (".sprintf("%.2f", $krow2["myyntihinta"]).")");
 					}
 				}
 				else {
-
-					list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
-
-					// Kommentti jos tuote on loppu, joka tilanteessa?
-					#if ($krow2["myytavissa"] == 0 and $krow2["status"] != 'P' and $krow2["tyyppi"] == 'korvaava') {
-					#	if (stripos($kommentti_lisa, t("Tuote {$krow2["tuoteno"]} on tilap‰isesti loppu.")) === FALSE) {
-					#		$kommentti_lisa .= t("Tuote {$krow2["tuoteno"]} on tilap‰isesti loppu.")."<br>";
-					#	}
-					#}
-
-					$if_ale_korva_isa_chk1 = $korva_isa_hinta;
-					$if_ale_korva_isa_chk2 = $korva_hinta;
-
-					$korva_isa_ale_kaikki['netto'] = $netto;
-					$korva_isa_ale_kaikki['erikoisale'] = $laskurow['erikoisale'];
-					$if_ale_korva_isa_chk1 *= generoi_alekentta_php($korva_isa_ale_kaikki, 'M', 'kerto');
-
-					$korva_ale_kaikki['netto'] = $netto;
-					$korva_ale_kaikki['erikoisale'] = $laskurow['erikoisale'];
-					$if_ale_korva_isa_chk2 *= generoi_alekentta_php($korva_ale_kaikki, 'M', 'kerto');
 
 					// Myyd‰‰nkˆ aina halvin tuote
 					// Asiakas saa aina halvemman hinnan mukaan tuotteen, mik‰li alkuper‰inen tuote on P toistuva tai puute.
@@ -675,8 +666,8 @@
 					}
 					elseif ($yhtiorow["korvaavan_hinta_ylaraja"] != '' and $yhtiorow["korvaavan_hinta_ylaraja"] != 'MIN' and ($if_ale_korva_isa_chk1) != 0 and (($if_ale_korva_isa_chk2) / ($if_ale_korva_isa_chk1)) > (1+($yhtiorow["korvaavan_hinta_ylaraja"]/100))) {
 						//Korvaavien myynti kielletty koska korvaava tuote on liian kallis
-						if ($krow2["myytavissa"] > 0) {
-							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])");
+						if ($krow2["myytavissa"] > 0 and strtoupper($krow2["tuoteno"]) != strtoupper($tuoteno)) {
+							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." (".sprintf("%.2f", $krow2["myyntihinta"]).")");
 						}
 					}
 					else {
@@ -684,13 +675,6 @@
 						$korvattiin_korvaavalla = "HIIOHEI!";
 
 						if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) $kaikkituotteet[]=strtoupper($krow2["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
-					}
-
-					// Jos tilatulla tuotteella on saldoa toimitetaan se aina ensin loppuun.
-					// T‰m‰ yliajaa kaikki ylemm‰t kohdat.
-					if (strtoupper($krow2['tuoteno']) == strtoupper($tuoteno) and $krow2["myytavissa"] > 0) {
-						$kaikkituotteet = array(); // Nollataan array ja tilataan vaan tilattu
-						$kaikkituotteet[] = strtoupper($krow2["tuoteno"]);
 					}
 				}
 
@@ -734,9 +718,6 @@
 
 		//Kaikkien arrayden indeksien ‰iti
 		$i = 0;
-
-		echo "<pre>",var_dump($kaikkituotteet),"</pre>";
-
 
 		// Sitten k‰yd‰‰n kaikkien tuotteiden saldot l‰pi kaikilta varastopaikoilta
 		foreach ($kaikkituotteet as $tuoteno) {

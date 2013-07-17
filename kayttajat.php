@@ -866,23 +866,21 @@
 					}
 
 				}
-				else {
 
-					$sel = array_fill_keys(array($krow['tilaus_valmis']), " selected") + array_fill_keys(array('1','2','3','4','9'), '');
+				$sel = array_fill_keys(array($krow['tilaus_valmis']), " selected") + array_fill_keys(array('1','2','3','4','9'), '');
 
-					echo "<tr><th align='left'>",t("Tilauksen käsittely"),":</th>";
+				echo "<tr><th align='left'>",t("Tilauksen käsittely"),":</th>";
 
-					echo "<td><select name='tilaus_valmis'>";
-					echo "<option value='1' {$sel[1]}>",t("Tehotilaaja, tilaukset menee suoraan tomitukseen"),"</option>";
-					echo "<option value='2' {$sel[2]}>",t("Aloittelijatilaaja, tilaukset hyväksytetään ennen toimitusta"),"</option>";
-					echo "<option value='3' {$sel[3]}>",t("Tehotilaaja, tilaukset menee suoraan toimitukseen MAISTA RIIPPUMATTA"),"</option>";
-					echo "<option value='4' {$sel[4]}>",t("Aloittelijatilaaja, tilauksia ei saa laittaa valmiiksi"),"</option>";
+				echo "<td><select name='tilaus_valmis'>";
+				echo "<option value='1' {$sel[1]}>",t("Tehotilaaja, tilaukset menevät suoraan toimitukseen"),"</option>";
+				echo "<option value='3' {$sel[3]}>",t("Tehotilaaja, tilaukset menevät suoraan toimitukseen maista riippumatta"),"</option>";
+				echo "<option value='2' {$sel[2]}>",t("Aloittelijatilaaja, tilaukset hyväksytään ennen toimitusta"),"</option>";
+				echo "<option value='4' {$sel[4]}>",t("Aloittelijatilaaja, tilauksia ei saa laittaa valmiiksi"),"</option>";
 
-					if ($kukarow['yhtio'] == 'artr') {
-						echo "<option value='9' {$sel[9]}>",t("Tehotilaaja, hyväksytyt työmääräykset tilataan automaattisesti"),"</option>";
-					}
-					echo "</select></td></tr>";
+				if ($kukarow['yhtio'] == 'artr') {
+					echo "<option value='9' {$sel[9]}>",t("Tehotilaaja, hyväksytyt työmääräykset tilataan automaattisesti"),"</option>";
 				}
+				echo "</select></td></tr>";
 
 				$sel0 = $sel1 = $sel2 = "";
 

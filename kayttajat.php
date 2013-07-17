@@ -871,10 +871,10 @@
 
 				echo "<tr><th align='left'>",t("Tilauksen k‰sittely"),":</th>";
 
-				echo "<td><select name='tilaus_valmis'>";
-				echo "<option value='1' {$sel[1]}>",t("Tilaukset menev‰t suoraan toimitukseen"),"</option>";
-				echo "<option value='2' {$sel[2]}>",t("Tilaukset pit‰‰ hyv‰ksy‰ ennen toimitusta"),"</option>";
-				echo "<option value='3' {$sel[3]}>",t("Tilaukset pit‰‰ hyv‰ksy‰ ennen toimitusta, jos tilauksella on tuotteita ulkomaan varastoista (muuten menev‰t suoraan toimitukseen)"),"</option>";
+				echo "<td><select name='tilaus_valmis' ".js_alasvetoMaxWidth("tilaus_valmis", 400).">";
+				echo "<option value='1' {$sel[1]}>",t("Tilaukset menev‰t suoraan ker‰ykseen"),"</option>";
+				echo "<option value='2' {$sel[2]}>",t("Tilaukset pit‰‰ hyv‰ksy‰ ennen ker‰yst‰"),"</option>";
+				echo "<option value='3' {$sel[3]}>",t("Tilaukset pit‰‰ hyv‰ksy‰ ennen ker‰yst‰ jos tilauksella on tuotteita ulkomaan varastoista (muuten menev‰t suoraan ker‰ykseen)"),"</option>";
 				echo "<option value='4' {$sel[4]}>",t("K‰ytt‰j‰ ei saa laittaa tilauksia valmiiksi"),"</option>";
 
 				if ($kukarow['yhtio'] == 'artr') {

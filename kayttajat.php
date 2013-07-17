@@ -872,10 +872,10 @@
 				echo "<tr><th align='left'>",t("Tilauksen k‰sittely"),":</th>";
 
 				echo "<td><select name='tilaus_valmis'>";
-				echo "<option value='1' {$sel[1]}>",t("Tehotilaaja, tilaukset menev‰t suoraan toimitukseen"),"</option>";
-				echo "<option value='3' {$sel[3]}>",t("Tehotilaaja, tilaukset menev‰t suoraan toimitukseen maista riippumatta"),"</option>";
-				echo "<option value='2' {$sel[2]}>",t("Aloittelijatilaaja, tilaukset hyv‰ksyt‰‰n ennen toimitusta"),"</option>";
-				echo "<option value='4' {$sel[4]}>",t("Aloittelijatilaaja, tilauksia ei saa laittaa valmiiksi"),"</option>";
+				echo "<option value='1' {$sel[1]}>",t("Tilaukset menev‰t suoraan toimitukseen"),"</option>";
+				echo "<option value='2' {$sel[2]}>",t("Tilaukset pit‰‰ hyv‰ksy‰ ennen toimitusta"),"</option>";
+				echo "<option value='3' {$sel[3]}>",t("Tilaukset pit‰‰ hyv‰ksy‰ ennen toimitusta, jos tilauksella on tuotteita ulkomaan varastoista (muuten menev‰t suoraan toimitukseen)"),"</option>";
+				echo "<option value='4' {$sel[4]}>",t("K‰ytt‰j‰ ei saa laittaa tilauksia valmiiksi"),"</option>";
 
 				if ($kukarow['yhtio'] == 'artr') {
 					echo "<option value='9' {$sel[9]}>",t("Tehotilaaja, hyv‰ksytyt tyˆm‰‰r‰ykset tilataan automaattisesti"),"</option>";

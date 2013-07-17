@@ -57,7 +57,7 @@ class Korvaavat {
 			$result = pupe_query($query);
 
 			while ($tuote = mysql_fetch_assoc($result)) {
-				$tuotteet[] = $tuote;
+				$tuotteet[$tuote['tuoteno']] = $tuote;
 			}
 		}
 

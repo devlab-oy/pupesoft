@@ -1293,8 +1293,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	}
 	// Myyntitilaus valmis
 	else {
-		//Jos käyttäjä on extranettaaja ja hän ostellut tuotteita useista eri maista niin laitetaan tilaus holdiin
-		if ($kukarow["extranet"] != "" and $toimitetaan_ulkomaailta == "YES" and $kukarow["tilaus_valmis"] != 3) {
+		//Jos käyttäjä on myymässä tuotteita ulkomaan varastoista, niin laitetaan tilaus holdiin
+		if ($toimitetaan_ulkomaailta == "YES" and $kukarow["tilaus_valmis"] == "3") {
 			$kukarow["tilaus_valmis"] = 2;
 		}
 
@@ -1321,8 +1321,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			}
 		}
 
-		// Extranetkäyttäjä jonka tilaukset on hyväksytettävä meidän myyjillä
-		if ($kukarow["extranet"] != "" and $kukarow["tilaus_valmis"] == 2) {
+		// Käyttäjä jonka tilaukset on hyväksytettävä
+		if ($kukarow["tilaus_valmis"] == 2) {
 			$query  = "	UPDATE lasku set
 						tila = 'N',
 						alatila='F'
@@ -7765,7 +7765,7 @@ if ($tee == '') {
 					echo "</form></td>";
 				}
 			}
-			elseif (($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $kukarow['tilaus_valmis'] != '4')) and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U')) {
+			elseif ($kukarow['tilaus_valmis'] != '4' and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U')) {
 
 				echo "<form name='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>
 					<input type='hidden' name='toim' value='$toim'>

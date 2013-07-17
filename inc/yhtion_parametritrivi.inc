@@ -3417,7 +3417,7 @@
 		$sel = $trow[$i] == 'K' ? ' selected' : '';
 
 		$ulos .= "<option value = ''>".t("Vastaavaksi tuotteiksi kelpaa vastaavuusketjun kaikki tuotteet")."</option>";
-		$ulos .= "<option value = 'K' $sel>".t("Vastaavaksi tuotteeksi kelpaa vastaavuusketjun j‰rjestykselt‰‰n pienemm‰t tuotteet")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Vastaavaksi tuotteeksi kelpaa vastaavuusketjun j‰rjestykselt‰‰n suuremmat tuotteet")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

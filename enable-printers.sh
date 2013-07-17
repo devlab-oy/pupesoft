@@ -3,7 +3,9 @@
 DISABLED="$(lpstat -t | awk '/disabled/ { print $2 }')"
 
 for PRINTER in ${DISABLED}
-do
- cancel -a ${PRINTER}
- cupsenable ${PRINTER}
+do	
+ if [ -n ${PRINTER} ]; then
+   cancel -a ${PRINTER}
+   cupsenable ${PRINTER}
+ fi
 done

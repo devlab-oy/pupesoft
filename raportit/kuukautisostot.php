@@ -1693,28 +1693,31 @@
 					}
 
 					$vastaavat = new Vastaavat($row['tuoteno']);
-					$vastaavat_ketjut = $vastaavat->ketjut();
 
-					if (!empty($vastaavat_ketjut)) {
-						$vastaavat_tuotteet = $vastaavat->find_by_ketju($vastaavat_ketjut[0]);
+					if ($vastaavat->getIDt() != "") {
 
 						$i = 1;
 
-						foreach ($vastaavat_tuotteet as $_tuoteno_arr) {
+						// Loopataan kaikki tuotteen vastaavuusketjut
+						foreach (explode(",", $vastaavat->getIDt()) as $ketju) {
 
-							if ($_tuoteno_arr['tuoteno'] != $row['tuoteno']) {
+							// Haetaan tuotteet ketjukohtaisesti
+							$_tuotteet = $vastaavat->tuotteet($ketju);
 
-								if ($i == 4) break;
+							foreach ($_tuotteet as $_tuoteno_arr) {
+								if ($_tuoteno_arr['tuoteno'] != $row['tuoteno']) {
+									if ($i == 4) break;
 
-								if ($valitut["SARAKE{$_x}"] != '') {
-									$rivi .= "\"{$_tuoteno_arr['tuoteno']}\"\t";
+									if ($valitut["SARAKE{$_x}"] != '') {
+										$rivi .= "\"{$_tuoteno_arr['tuoteno']}\"\t";
 
-									$worksheet->write($excelrivi, $excelsarake, $_tuoteno_arr["tuoteno"]);
-									$excelsarake++;
+										$worksheet->write($excelrivi, $excelsarake, $_tuoteno_arr["tuoteno"]);
+										$excelsarake++;
+									}
+
+									$_x++;
+									$i++;
 								}
-
-								$_x++;
-								$i++;
 							}
 						}
 					}

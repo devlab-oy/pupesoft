@@ -65,10 +65,9 @@
 		$selected[$trow[$i]] = "SELECTED";
 
 		$ulos = "<td><select name='$nimi'>";
-		$ulos .= "<option value='K' $selected[K]>".t("Korvaavia tuotteita ei myyd‰")."</option>";
+		$ulos .= "<option value='K' $selected[K]>".t("Korvaavia ja vastaavia tuotteita ei myyd‰")."</option>";
 		$ulos .= "<option value='O' $selected[O]>".t("Korvaavia tuotteita myyd‰‰n, mik‰li korvaavuusketjusta lˆytyy tilattu m‰‰r‰")."</option>";
-		$ulos .= "<option value='Q' $selected[Q]>".t("Korvaavia tuotteita myyd‰‰n, mik‰li yksitt‰ist‰ korvaavaa lˆytyy tilattu m‰‰r‰‰")."</option>";
-		$ulos .= "<option value='X' $selected[X]>".t("Korvaavia ja Vastaavia tuotteita myyd‰‰n, mik‰li yksitt‰ist‰ tuotetta lˆytyy tilattu m‰‰r‰‰")."</option>";
+		$ulos .= "<option value='X' $selected[X]>".t("Korvaavia ja Vastaavia tuotteita myyd‰‰n")."</option>";
 
 		$ulos .= "</select></td>";
 		$jatko = 0;

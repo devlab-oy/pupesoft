@@ -518,39 +518,31 @@
 		if ($trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L') {
 
 			// Tutkitaan ensin saako tälle asiakkaalle myydä korvaavia tästä tuoteryhmästä
-			$query = " SELECT *
-						from korvaavat_kiellot
-						where yhtio = '$kukarow[yhtio]'
-						and ytunnus in ('$laskurow[ytunnus]','*')
-						and osasto in ('$trow[osasto]','*')
-						and try in ('$trow[try]','*')";
+			$query = "	SELECT laji
+						FROM korvaavat_kiellot
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND ytunnus in ('$laskurow[ytunnus]','*')
+						AND osasto in ('$trow[osasto]','*')
+						AND try in ('$trow[try]','*')";
 			$kkres = pupe_query($query);
 
-			$korvaavat_kiellot = '';
+			$korvaavat_kiellot 	= ""; // Korvaavia tuotteita myydään, vastaavia ei
+			$kommentti_lisa		= "";
+			$vastaavat_tuotteet	= array();
+			$krkaikkimyytavissa	= 0;
 
 			if ($kk_row = mysql_fetch_assoc($kkres)) {
 				// Ei myydä mitään korvaavia
 				if ($kk_row['laji'] == 'K') {
 					$korvaavat_kiellot = "KIELTO";
 				}
-				// Korvaavia tuotteita myydään, mikäli korvaavuusketjusta löytyy tilattu määrä"
+				// Korvaavia tuotteita myydään, mikäli korvaavuusketjusta löytyy tilattu määrä
 				elseif ($kk_row['laji'] == 'O') {
 					$korvaavat_kiellot = "KORVAAVAT";
-					$kaikkituotteet = array(); // Nollataan kaikkituotteet array
 				}
-				// Korvaavia tuotteita myydään, mikäli yksittäistä korvaavaa löytyy tilattu määrää
-				elseif ($kk_row['laji'] == 'Q') {
-					$korvaavat_kiellot = "UNIIKKI";
-					$kaikkituotteet = array(); // Nollataan kaikkituotteet array
-				}
-				// Korvaavia ja Vastaavia tuotteita myydään, mikäli yksittäistä tuotetta löytyy tilattu määrää
+				// Korvaavia ja Vastaavia tuotteita myydään
 				elseif ($kk_row['laji'] == 'X') {
 					$korvaavat_kiellot = "VASTAAVAT";
-					$kaikkituotteet = array();	// Nollataan kaikkituotteet array
-				}
-				// Korvaavia tuotteita myydään, mikäli korvaavuusketjusta löytyy tilattu määrä
-				else {
-					$korvaavat_kiellot = "";
 				}
 			}
 
@@ -566,26 +558,11 @@
 			$options = array('korvaavuusketjun_jarjestys' => $yhtiorow['korvaavuusketjun_jarjestys']);
 			$korvaavat_tuotteet = $korvaavat->tuotteet($options);
 
-			// Haetaan vastaavuusketjut korvaavat ketjun päätuotteella
-			require_once 'vastaavat.class.php';
-
-			// Vastaavat tuotteet array
-			$vastaavat_tuotteet = array();
-			$kommentti_lisa = "";
-
-			// Jos tuote on vain vastaavat ketjussa niin sitä voidaan myydä vaikka korvaavat kieltoja olisi
-			if ($korvaavat_kiellot == "UNIIKKI" or $korvaavat_kiellot == "KORVAAVAT") {
-				if (empty($korvaavat_tuotteet)) {
-					$vastaavat = new Vastaavat($tuoteno);
-					$tuote = $vastaavat->tuotteet();
-
-					if (!empty($tuote[0])) {
-						$vastaavat_tuotteet[] = $tuote[0];
-					}
-				}
-			}
 			// Vastaavien automaattinen myynti, eli haetaanko vastaavat
-			elseif ($korvaavat_kiellot == "VASTAAVAT") {
+			if ($korvaavat_kiellot == "VASTAAVAT") {
+
+				// Haetaan vastaavuusketjut korvaavat ketjun päätuotteella
+				require_once 'vastaavat.class.php';
 
 				// Jos tilatulla tuotteella ei korvaavia löydy, haetaan vastaavat myytävällä tuotteella.
 				// Muulloin etsitään vastaavat löydetyn korvaavuusketjun päätuotteen mukaan.
@@ -619,6 +596,23 @@
 			// Yhdistetään korvaavat ja vastaavat (ja vaihtoehtoiset?) ketjut
 			$tuote_ketju = array_merge($korvaavat_tuotteet, $vastaavat_tuotteet);
 
+			// Tuotteen korvaavat ja vastaavat ketju, tsekataan paljonko on myytävissä ja yhteensä myytävissä
+			foreach ($tuote_ketju as &$krow2) {
+
+				list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
+
+				$krow2["myytavissa"] = $krmyytavissa;
+				$krkaikkimyytavissa += $krmyytavissa;
+
+				echo "$krow2[tuoteno], $krmyytavissa<br>";
+			}
+
+			// Korvaavia tuotteita myydään, mikäli korvaavuusketjusta löytyy tilattu määrä
+			if ($korvaavat_kiellot == "KORVAAVAT" and $krkaikkimyytavissa < $kpl) {
+				// Skipataan kaikki korvaavat
+				$tuote_ketju = array();
+			}
+
 			// Tuotteen korvaavat ja vastaavat ketju
 			foreach ($tuote_ketju as $krow2) {
 
@@ -627,52 +621,33 @@
 					continue;
 				}
 
-				list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
-				list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
-
-				// Kommenti jos tuote on loppu, joka tilanteessa?
-				if ($krmyytavissa == 0 and $krow2["status"] != 'P' and $krow2["tyyppi"] == 'korvaava') {
-					if (stripos($kommentti_lisa, t("Tuote {$krow2["tuoteno"]} on tilapäisesti loppu.")) === FALSE) {
-						$kommentti_lisa .= t("Tuote {$krow2["tuoteno"]} on tilapäisesti loppu.")."<br>";
-					}
-				}
-
-				$if_ale_korva_isa_chk1 = $korva_isa_hinta;
-				$if_ale_korva_isa_chk2 = $korva_hinta;
-
-				$korva_isa_ale_kaikki['netto'] = $netto;
-				$korva_isa_ale_kaikki['erikoisale'] = $laskurow['erikoisale'];
-				$if_ale_korva_isa_chk1 *= generoi_alekentta_php($korva_isa_ale_kaikki, 'M', 'kerto');
-
-				$korva_ale_kaikki['netto'] = $netto;
-				$korva_ale_kaikki['erikoisale'] = $laskurow['erikoisale'];
-				$if_ale_korva_isa_chk2 *= generoi_alekentta_php($korva_ale_kaikki, 'M', 'kerto');
-
 				// Ei saa myydä korvaavia tuotteita eikä vastaavia
 				if ($korvaavat_kiellot == "KIELTO") {
-					if ($krmyytavissa > 0) {
+					if ($krow2["myytavissa"] > 0) {
 						$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])");
 					}
 				}
-				// Korvaavia tuotteita myydään, mikäli yksittäistä tuotetta löytyy tilattu määrä (UNIIKKI)
-				// Korvaavia ja vastaavia tuotteita myydään mikäli yksittäistä tuotetta löytyy tilattu määrä (VASTAAVAT)
-				elseif ($korvaavat_kiellot == "UNIIKKI" or $korvaavat_kiellot == "VASTAAVAT") {
+				else {
 
-					// Yksittäistä tuotetta oltava enemmän kuin tilattu määrä
-					if ($krmyytavissa >= $kpl) {
+					list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
-						// Lisätään vain yksi löydetty tuote myytäväksi
-						if (count($kaikkituotteet) <= 1) {
+					// Kommentti jos tuote on loppu, joka tilanteessa?
+					#if ($krow2["myytavissa"] == 0 and $krow2["status"] != 'P' and $krow2["tyyppi"] == 'korvaava') {
+					#	if (stripos($kommentti_lisa, t("Tuote {$krow2["tuoteno"]} on tilapäisesti loppu.")) === FALSE) {
+					#		$kommentti_lisa .= t("Tuote {$krow2["tuoteno"]} on tilapäisesti loppu.")."<br>";
+					#	}
+					#}
 
-							// Vastaavista kommentti riville
-							if ($krow2['tyyppi'] == 'vastaava') {
-								$kommentti_lisa .= " ".t("Toimitetaan vastaava tuote")." $krow2[tuoteno].";
-							}
+					$if_ale_korva_isa_chk1 = $korva_isa_hinta;
+					$if_ale_korva_isa_chk2 = $korva_hinta;
 
-							// Lisätään tuote
-							$kaikkituotteet[] = strtoupper($krow2["tuoteno"]);
-						}
-					}
+					$korva_isa_ale_kaikki['netto'] = $netto;
+					$korva_isa_ale_kaikki['erikoisale'] = $laskurow['erikoisale'];
+					$if_ale_korva_isa_chk1 *= generoi_alekentta_php($korva_isa_ale_kaikki, 'M', 'kerto');
+
+					$korva_ale_kaikki['netto'] = $netto;
+					$korva_ale_kaikki['erikoisale'] = $laskurow['erikoisale'];
+					$if_ale_korva_isa_chk2 *= generoi_alekentta_php($korva_ale_kaikki, 'M', 'kerto');
 
 					// Myydäänkö aina halvin tuote
 					// Asiakas saa aina halvemman hinnan mukaan tuotteen, mikäli alkuperäinen tuote on P toistuva tai puute.
@@ -694,13 +669,13 @@
 							$korvaavan_hinta_ylaraja_halvin_netto = $korva_netto;
 						}
 
-					 	if ($krmyytavissa > 0 and !in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
+					 	if ($krow2["myytavissa"] > 0 and !in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
 							$kaikkituotteet[] = strtoupper($krow2["tuoteno"]); // lisätään tuoteno arrayseen
 						}
 					}
 					elseif ($yhtiorow["korvaavan_hinta_ylaraja"] != '' and $yhtiorow["korvaavan_hinta_ylaraja"] != 'MIN' and ($if_ale_korva_isa_chk1) != 0 and (($if_ale_korva_isa_chk2) / ($if_ale_korva_isa_chk1)) > (1+($yhtiorow["korvaavan_hinta_ylaraja"]/100))) {
 						//Korvaavien myynti kielletty koska korvaava tuote on liian kallis
-						if ($krmyytavissa > 0) {
+						if ($krow2["myytavissa"] > 0) {
 							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])");
 						}
 					}
@@ -713,7 +688,7 @@
 
 					// Jos tilatulla tuotteella on saldoa toimitetaan se aina ensin loppuun.
 					// Tämä yliajaa kaikki ylemmät kohdat.
-					if (strtoupper($krow2['tuoteno']) == strtoupper($tuoteno) and $krmyytavissa > 0) {
+					if (strtoupper($krow2['tuoteno']) == strtoupper($tuoteno) and $krow2["myytavissa"] > 0) {
 						$kaikkituotteet = array(); // Nollataan array ja tilataan vaan tilattu
 						$kaikkituotteet[] = strtoupper($krow2["tuoteno"]);
 					}
@@ -759,6 +734,9 @@
 
 		//Kaikkien arrayden indeksien äiti
 		$i = 0;
+
+		echo "<pre>",var_dump($kaikkituotteet),"</pre>";
+
 
 		// Sitten käydään kaikkien tuotteiden saldot läpi kaikilta varastopaikoilta
 		foreach ($kaikkituotteet as $tuoteno) {

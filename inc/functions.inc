@@ -22630,12 +22630,14 @@ if (!function_exists("saako_myyda_private_label")) {
 if (!function_exists("tuotteen_toimittajat_tuotenumerot_haku")) {
 	function tuotteen_toimittajat_tuotenumerot_haku($tuoteno, $laskuttajan_toimittajanumero, $kpl) {
 		global $kukarow, $yhtiorow;
-
-		$wildcard = "";
-		for ($i = 0; $i<$kpl; $i++) {
-			$wildcard .= "*";
+		
+		if ($kpl > 0) {
+			$wildcard = "";
+			for ($i = 0; $i<$kpl; $i++) {
+				$wildcard .= "*";
+			}
+			$tuoteno = substr($tuoteno, 0, $kpl * -1).$wildcard;
 		}
-		$tuoteno = substr($tuoteno, 0, $kpl * -1).$wildcard;
 		$query = "	SELECT tt.*
 					FROM tuotteen_toimittajat_tuotenumerot AS ttt
 					JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)

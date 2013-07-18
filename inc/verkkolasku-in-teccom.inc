@@ -247,27 +247,15 @@
 			$chk_res = pupe_query($query);
 
 			if (mysql_num_rows($chk_res) == 0) {
-
-				// tuotteen toimittajat tuotenumerot
-				$query = "	SELECT tt.*
-							FROM tuotteen_toimittajat_tuotenumerot AS ttt
-							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
-							JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}' AND toimi.tyyppi != 'P')
-							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
-							AND ttt.tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
-				$chk_res = pupe_query($query);
-
-				if (mysql_num_rows($chk_res) == 0) {
-					// tuotenumero voi olla tallennettu "wildcard" muodossa, joten kokeillaan josko löytyisi eri määrällä villikorttimerkkejä. Tarkka haku kuitenkin!
-					for ($kpl = 1; $kpl < strlen($rtuoteno[$i]['tuoteno']); $kpl++) {
-						$chk_res = tuotteen_toimittajat_tuotenumerot_villikorttihaku($rtuoteno[$i]['tuoteno'], $laskuttajan_toimittajanumero, $kpl);
-						if (mysql_num_rows($chk_res) != 0) break;
-					}					
-				}
-				
-				if (mysql_num_rows($chk_res) != 0) {
-					$chk_row = mysql_fetch_assoc($chk_res);
-					$rtuoteno[$i]['tuoteno'] = $chk_row['toim_tuoteno'];
+				// haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan myös hakea vaihtoehtoinen tuotenumero ilman että 
+				// tiedetään tarkkaa laskuaineistossa tulevaa tuotenumeroa, kunhan tuntemattomat merkit on ilmoitettu tähdillä
+				for ($kpl = 0; $kpl < strlen($rtuoteno[$i]['tuoteno']); $kpl++) {
+					$chk_res = tuotteen_toimittajat_tuotenumerot_haku($rtuoteno[$i]['tuoteno'], $laskuttajan_toimittajanumero, $kpl);
+					if (mysql_num_rows($chk_res) != 0) {
+						$chk_row = mysql_fetch_assoc($chk_res);
+						$rtuoteno[$i]['tuoteno'] = $chk_row['toim_tuoteno'];
+						break;
+					}
 				}
 			}
 

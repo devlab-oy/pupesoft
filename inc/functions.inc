@@ -22615,8 +22615,8 @@ if (!function_exists("saako_myyda_private_label")) {
 	}
 }
 
-if (!function_exists("tuotteen_toimittajat_tuotenumerot_villikorttihaku")) {
-	function tuotteen_toimittajat_tuotenumerot_villikorttihaku($tuoteno, $laskuttajan_toimittajanumero, $kpl) {
+if (!function_exists("tuotteen_toimittajat_tuotenumerot_haku")) {
+	function tuotteen_toimittajat_tuotenumerot_haku($tuoteno, $laskuttajan_toimittajanumero, $kpl) {
 		global $kukarow, $yhtiorow;
 		
 		$wildcard = "";

@@ -3382,6 +3382,10 @@
 			$ketjutus = 'o';
 		}
 
+		if (!isset($clearing)) {
+			$clearing = $laskurow['clearing'];
+		}
+
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',
 					alatila 							= '$alatila',

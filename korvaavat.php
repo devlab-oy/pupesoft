@@ -293,7 +293,7 @@
 					$vastaava = mysql_num_rows($rresult);
 
 					// Jos tuotteella on vastaavat taulussa merkint‰ ja se ei ole korvaavuusketjun p‰‰tuote
-					if ($vastaava > 0 && $row['jarjestys'] != 1) {
+					if ($vastaava > 0 and $row['jarjestys'] != 1) {
 						echo "<td class='back'>
 							<form action='korvaavat.php' method='post'>
 							<input type='hidden' name='tee' value='korvaa_vastaava'>
@@ -303,7 +303,7 @@
 							<input type='submit' value='Korvaa' $disable_korvaa_nappi/>
 							</form>
 							</td>";
-						echo "<td class='back'>Korvaa vastaava t‰m‰n ketjun p‰‰tuotteella</td>";
+						echo "<td class='back'>".t("Korvaa vastaava t‰m‰n ketjun p‰‰tuotteella")."</td>";
 					}
 				}
 

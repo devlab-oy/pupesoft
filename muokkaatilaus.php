@@ -876,7 +876,7 @@
 								count(distinct lasku.tunnus) kpl
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi = 'E')
-								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'E'
+								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila IN ('E', 'N')
                                 and clearing = 'EXTENNAKKO'";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);

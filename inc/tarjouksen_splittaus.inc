@@ -6,7 +6,8 @@ $query = "  SELECT laskun_lisatiedot.sopimus_lisatietoja,
             lasku.olmapvm,
             lasku.clearing,
 			tilausrivi.*,
-			lasku.varasto
+			lasku.varasto,
+			lasku.tilaustyyppi
             FROM laskun_lisatiedot
 			JOIN tilausrivi
 			ON ( tilausrivi.yhtio = laskun_lisatiedot.yhtio
@@ -28,6 +29,7 @@ while ($tilausrivi = mysql_fetch_assoc($result)) {
 	$alkuperainen_varasto = $tilausrivi['varasto'];
     $viimeinen_voimassaolo_pvm = $tilausrivi['olmapvm'];
     $saate_teksti = $tilausrivi['saate'];
+	$tilaustyyppi = $tilausrivi['tilaustyyppi'];
 }
 
 $tarjouksen_asiakkaat = explode(',', $tarjouksen_asiakkaat);
@@ -47,7 +49,11 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 	//Halutaan pit‰‰ asiakkaille kopioitavissa tarjouksissa myyj‰n valitsema varasto
 	$query = "	UPDATE lasku
                 JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
-				SET lasku.varasto = '{$alkuperainen_varasto}', lasku.olmapvm = '{$viimeinen_voimassaolo_pvm}', laskun_lisatiedot.saate = '{$saate_teksti}', lasku.clearing = '{$clearing}'
+				SET lasku.varasto = '{$alkuperainen_varasto}',
+				lasku.olmapvm = '{$viimeinen_voimassaolo_pvm}',
+				laskun_lisatiedot.saate = '{$saate_teksti}',
+				lasku.clearing = '{$clearing}',
+				lasku.tilaustyyppi = '{$tilaustyyppi}'
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.tunnus = '{$tilausnumero}'";
 	pupe_query($query);

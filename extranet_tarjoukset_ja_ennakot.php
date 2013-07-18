@@ -159,7 +159,7 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 	$header_values = array(
 		'nimi'		 => t('Nimi'),
 		'hinta'		 => t('Tarjouksen hinta'),
-		'toimaika'	 => t('Viimeinen voimasssaolop‰iv‰m‰‰r‰'),
+		'olmapvm'	 => t('Viimeinen voimasssaolop‰iv‰m‰‰r‰'),
 	);
 
 	echo_rows_in_table($request['asiakkaan_tarjoukset'], $header_values, array(), 'tee_tarjouksen_nimesta_linkki');
@@ -170,7 +170,7 @@ else {
 	$header_values = array(
 		'nimi'		 => t('Nimi'),
 		'hinta'		 => t('Tarjouksen hinta'),
-		'toimaika'	 => t('Viimeinen voimasssaolop‰iv‰m‰‰r‰'),
+		'olmapvm'	 => t('Viimeinen voimasssaolop‰iv‰m‰‰r‰'),
 	);
 
 	echo_rows_in_table($request['asiakkaan_tarjoukset'], $header_values, array(), 'tee_tarjouksen_nimesta_linkki');
@@ -178,7 +178,7 @@ else {
 
 function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappalemaarat) {
 	global $kukarow, $yhtiorow;
-	//SELECT '' as nro, tunnus, perheid as perheid_tunnus, tuoteno,nimitys, tilkpl as kpl,hinta as rivihinta,alv
+
 	foreach ($kappalemaarat as &$kappalemaara_temp) {
 		$kappalemaara_temp = round(str_replace(",", ".", pupesoft_cleanstring($kappalemaara_temp)), 2);
 	}
@@ -374,15 +374,15 @@ function hylkaa_tarjous($valittu_tarjous_tunnus) {
 function hae_extranet_tarjoukset($asiakasid, $toim) {
 	global $kukarow, $yhtiorow;
 
-    if ($toim == 'EXTTARJOUS') {
-        $where = "  AND lasku.clearing = 'EXTTARJOUS' AND lasku.tila = 'T'";
-    }
-    else {
-        $where = "  AND lasku.clearing = 'EXTENNAKKO' AND lasku.tila = 'N'";
-    }
-    
-    $query = "  SELECT  concat( concat_ws('!!!', lasku.tunnus, lasku.nimi),'!!!{$toim}') AS nimi,
-                laskun_lisatiedot.saate,
+	if ($toim == 'EXTTARJOUS') {
+		$where = "  AND lasku.clearing = 'EXTTARJOUS' AND lasku.tila = 'T'";
+	}
+	else {
+		$where = "  AND lasku.clearing = 'EXTENNAKKO' AND lasku.tila = 'N'";
+	}
+
+	$query = "  SELECT  concat( concat_ws('!!!', lasku.tunnus, laskun_lisatiedot.saate),'!!!{$toim}') AS saate,
+                lasku.nimi as nimi,
                 lasku.hinta,
                 lasku.olmapvm,
                 lasku.tunnus as tunnus
@@ -435,10 +435,19 @@ function tee_tarjouksen_nimesta_linkki($header, $solu, $force_to_string) {
 	global $kukarow, $yhtiorow;
 
 	if (!stristr($header, 'tunnus')) {
-		if ($header == 'nimi') {
+		if ($header == 'saate') {
 			$tunnus_nimi_array = explode('!!!', $solu);
+			if (empty($tunnus_nimi_array[1])) {
+				//jos saate on tyhj‰
+				$tunnus_nimi_array[1] = '*'.t("Tyhj‰").'*';
+			}
 			echo "<td>";
 			echo "<a href='$_SERVER[PHP_SELF]?action=nayta_tarjous&valittu_tarjous_tunnus={$tunnus_nimi_array[0]}&toim={$tunnus_nimi_array[2]}'>{$tunnus_nimi_array[1]}</a>";
+			echo "</td>";
+		}
+		else if ($header == 'olmapvm') {
+			echo "<td>";
+			echo date('d.m.Y', strtotime($solu));
 			echo "</td>";
 		}
 		else if ($header == 'hinta') {
@@ -493,8 +502,16 @@ function hae_tarjous($valittu_tarjous_tunnus) {
 function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$query = "  SELECT '' as nro, '' as kuva, tilausrivi.tunnus, tilausrivi.perheid as perheid_tunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
-                tilausrivi.tilkpl as kpl, IF(tilausrivi.alv != 0, ( (1 + ( tilausrivi.alv / 100)     ) * (tilausrivi.tilkpl * tilausrivi.hinta ) ), tilausrivi.tilkpl * tilausrivi.hinta) AS rivihinta, tilausrivi.alv, tuote.tunnus as tuote_tunnus
+	$query = "  SELECT '' as nro,
+				'' as kuva,
+				tilausrivi.tunnus,
+				tilausrivi.perheid as perheid_tunnus,
+				tilausrivi.tuoteno,
+				tilausrivi.nimitys,
+                tilausrivi.tilkpl as kpl,
+				IF(tilausrivi.alv != 0, ( (1 + ( tilausrivi.alv / 100)     ) * (tilausrivi.tilkpl * tilausrivi.hinta ) ), tilausrivi.tilkpl * tilausrivi.hinta) AS rivihinta,
+				tilausrivi.alv,
+				tuote.tunnus as tuote_tunnus
                 FROM tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -517,8 +534,12 @@ function echo_tarjouksen_otsikko($tarjous, $toim) {
 	echo "<a href=$_SERVER[PHP_SELF]?toim={$toim}>".t("Palaa takaisin")."</a>";
 	echo "<br>";
 	echo "<br>";
-	// TODO eri messu EXTENNAKKO / EXTTARJOUS?
-	echo "<font class='message'>".t("Tarjouksen tiedot")."</font>";
+	if ($toim == 'EXTTARJOUS') {
+		echo "<font class='message'>".t("Tarjouksen tiedot")."</font>";
+	}
+	else {
+		echo "<font class='message'>".t("Ennakon tiedot")."</font>";
+	}
 	echo "<table>";
 
 	echo "<tr>";
@@ -529,7 +550,7 @@ function echo_tarjouksen_otsikko($tarjous, $toim) {
 	echo "{$tarjous['nimi']}";
 	echo "</td>";
 	echo "<td>";
-	echo "{$tarjous['olmapvm']}";
+	echo date('d.m.Y', strtotime($tarjous['olmapvm']));
 	echo "</td>";
 
 	echo "</table>";

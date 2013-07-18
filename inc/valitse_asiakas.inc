@@ -1,7 +1,13 @@
 <?php
 
 require('tilauskasittely/luo_myyntitilausotsikko.inc');
-echo "<font class='head'>" . t("Ext-Tarjoukset") . "</font><hr>";
+if ($toim == 'EXTTARJOUS') {
+	echo "<font class='head'>" . t("Ext-Tarjoukset") . "</font><hr>";
+}
+else {
+	echo "<font class='head'>" . t("Ext-Ennakot") . "</font><hr>";
+}
+
 ?>
 
 <style>
@@ -262,11 +268,19 @@ function echo_asiakas_table($request) {
         echo "<input type='hidden' name='tarjous_tee' value='luo_dummy_tarjous' />";
         echo "<input type='hidden' name='tilausnumero' value='{$request['tilausnumero']}' />";
         if ($request['tarjous_tee'] == 'nayta_poimitut_asiakkaat') {
-            echo "<textarea rows='4' cols='20' maxlength='1000' name='saate_teksti' placeholder='" . t("Tarjouksen saateteksti") . "'>";
+			if ($request['toim'] == 'EXTTARJOUS') {
+				$placeholder = t("Tarjouksen saateteksti");
+				$luo_teksti = t("Luo tarjous");
+			}
+			else {
+				$placeholder = t("Ennakon saateteksti");
+				$luo_teksti = t("Luo ennakko");
+			}
+            echo "<textarea rows='4' cols='20' maxlength='1000' name='saate_teksti' placeholder='{$placeholder}'>";
             echo "</textarea>";
             echo "<br>";
             echo "<br>";
-            echo "<input type='submit' id='luo_tarjous' value='" . t("Luo tarjous") . "'/>";
+            echo "<input type='submit' id='luo_tarjous' value='{$luo_teksti}'/>";
         }
         echo "</form>";
     }

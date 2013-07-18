@@ -235,9 +235,6 @@
 			if ($laskuttajan_toimittajanumero == "123085") {
 				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
 			}
-			elseif ($laskuttajan_toimittajanumero == "123067") {
-				$rtuoteno[$i]["tuoteno"] = substr(utf8_decode($tuotetieto->ProductId->ProductNumber),0,-3);
-			}
 
 			// tuotekoodi
 			$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
@@ -260,6 +257,14 @@
 							AND ttt.tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
 				$chk_res = pupe_query($query);
 
+				if (mysql_num_rows($chk_res) == 0) {
+					// tuotenumero voi olla tallennettu "wildcard" muodossa, joten kokeillaan josko löytyisi eri määrällä villikorttimerkkejä. Tarkka haku kuitenkin!
+					for ($kpl = 1; $kpl < strlen($rtuoteno[$i]['tuoteno']); $kpl++) {
+						$chk_res = tuotteen_toimittajat_tuotenumerot_villikorttihaku($rtuoteno[$i]['tuoteno'], $laskuttajan_toimittajanumero, $kpl);
+						if (mysql_num_rows($chk_res) != 0) break;
+					}					
+				}
+				
 				if (mysql_num_rows($chk_res) != 0) {
 					$chk_row = mysql_fetch_assoc($chk_res);
 					$rtuoteno[$i]['tuoteno'] = $chk_row['toim_tuoteno'];

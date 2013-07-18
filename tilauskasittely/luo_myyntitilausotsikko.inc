@@ -388,6 +388,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
             $osoite = t("Tarjouspohjan osoite");
             $postitp = t("Tarjouspohjan postitoimipaikka");
             $postino = t("Tarjouspohjan postinumero");
+			$maa = $yhtiorow['maa'];
             
             $maksuehto = $asiakasrow['maksuehto'];
             $toimitustapa = $asiakasrow['toimitustapa'];

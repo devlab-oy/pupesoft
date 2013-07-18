@@ -3,7 +3,8 @@
 require_once('tilauskasittely/luo_myyntitilausotsikko.inc');
 $query = "  SELECT laskun_lisatiedot.sopimus_lisatietoja,
             lasku.clearing,
-			tilausrivi.*
+			tilausrivi.*,
+			lasku.varasto
             FROM laskun_lisatiedot
 			JOIN tilausrivi
 			ON ( tilausrivi.yhtio = laskun_lisatiedot.yhtio
@@ -22,6 +23,7 @@ while ($tilausrivi = mysql_fetch_assoc($result)) {
     //setataan muuttujat monta kertaa
     $tarjouksen_asiakkaat = $tilausrivi['sopimus_lisatietoja'];
     $clearing = $tilausrivi['clearing'];
+	$alkuperainen_varasto = $tilausrivi['varasto'];
 }
 
 $tarjouksen_asiakkaat = explode(',', $tarjouksen_asiakkaat);
@@ -37,6 +39,13 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
     else {
         $tilausnumero = luo_myyntitilausotsikko('ENNAKKO', $tarjous_asiakas);
     }
+
+	//Halutaan pit‰‰ asiakkaille kopioitavissa tarjouksissa myyj‰n valitsema varasto
+	$query = "	UPDATE lasku
+				SET varasto = '{$alkuperainen_varasto}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$tilausnumero}'";
+	pupe_query($query);
 
     $query = "  SELECT *
                 FROM lasku

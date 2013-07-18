@@ -240,9 +240,11 @@ function echo_asiakas_table($request) {
     }
 
     if (!empty($request['dummytarjous']['sopimus_lisatietoja'])) {
+		$viimeinen_voimassaolo_pvm = date('Y-m-d', strtotime('now + 30 day'));
         echo "<form method='post' action='tilaus_myynti.php'>";
         echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
         echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!' />";
+		echo "<input type='hidden' name='viimeinen_voimassaolo_pvm' value='{$viimeinen_voimassaolo_pvm}' />";
         echo "<input type='hidden' name='tee' value='OTSIK' />";
         echo "<input type='hidden' name='tarjous_tee' value='luo_dummy_tarjous' />";
         echo "<input type='hidden' name='tilausnumero' value='{$request['tilausnumero']}' />";

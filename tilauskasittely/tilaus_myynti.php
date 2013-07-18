@@ -1710,6 +1710,12 @@ if ($uusitoimitus != "") {
         else {
             $tee = "";
             $kukarow['kesken'] = $tilausnumero;
+
+			$query = "	UPDATE lasku
+						SET olmapvm = '{$viimeinen_voimassaolo_pvm}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tilausnumero}'";
+			pupe_query($query);
         }
 	}
 	else {

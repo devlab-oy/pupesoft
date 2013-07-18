@@ -516,34 +516,25 @@
 
 		// Etsit‰‰n korvaavia tuotteita
 		if ($trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L') {
-
-			// Tutkitaan ensin saako t‰lle asiakkaalle myyd‰ korvaavia t‰st‰ tuoteryhm‰st‰
-			$query = "	SELECT laji
-						FROM korvaavat_kiellot
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND ytunnus in ('$laskurow[ytunnus]','*')
-						AND osasto in ('$trow[osasto]','*')
-						AND try in ('$trow[try]','*')";
-			$kkres = pupe_query($query);
-
 			$korvaavat_kiellot 	= ""; // Korvaavia tuotteita myyd‰‰n, vastaavia ei
 			$kommentti_lisa		= "";
 			$vastaavat_tuotteet	= array();
 			$krkaikkimyytavissa	= 0;
 
-			if ($kk_row = mysql_fetch_assoc($kkres)) {
-				// Ei myyd‰ mit‰‰n korvaavia
-				if ($kk_row['laji'] == 'K') {
-					$korvaavat_kiellot = "KIELTO";
-				}
-				// Korvaavia tuotteita myyd‰‰n, mik‰li korvaavuusketjusta lˆytyy tilattu m‰‰r‰
-				elseif ($kk_row['laji'] == 'O') {
-					$korvaavat_kiellot = "KORVAAVAT";
-				}
-				// Korvaavia ja Vastaavia tuotteita myyd‰‰n
-				elseif ($kk_row['laji'] == 'X') {
-					$korvaavat_kiellot = "VASTAAVAT";
-				}
+			// Tutkitaan ensin saako t‰lle asiakkaalle myyd‰ korvaavia t‰st‰ tuoteryhm‰st‰
+			$kk_laji = korvaavat_kiellot($laskurow['ytunnus'], $trow['osasto'], $trow['try']);
+
+			// Ei myyd‰ mit‰‰n korvaavia
+			if ($kk_laji == 'K') {
+				$korvaavat_kiellot = "KIELTO";
+			}
+			// Korvaavia tuotteita myyd‰‰n, mik‰li korvaavuusketjusta lˆytyy tilattu m‰‰r‰
+			elseif ($kk_laji == 'O') {
+				$korvaavat_kiellot = "KORVAAVAT";
+			}
+			// Korvaavia ja Vastaavia tuotteita myyd‰‰n
+			elseif ($kk_laji == 'X') {
+				$korvaavat_kiellot = "VASTAAVAT";
 			}
 
 			// Otetaan alkuper‰isen tuotteen hinta talteen
@@ -1208,17 +1199,10 @@
 		if ($lisaarivi_debug==1) echo "Kaikkiaan myyt‰viss‰: $saldoyhteensa kappaletta<br>";
 
 		//tutkitaan ensin saako t‰lle asiakkaalle myyd‰ osatoimituksen t‰st‰ tuoteryhm‰st‰
-		$query = " SELECT yhtio
-					from korvaavat_kiellot
-					where yhtio = '$kukarow[yhtio]'
-					and ytunnus in ('$laskurow[ytunnus]','*')
-					and osasto in ('$trow[osasto]','*')
-					and try in ('$trow[try]','*')
-					and laji in ('Q')";
-		$kkres = pupe_query($query);
+		$kko_laji = korvaavat_kiellot($laskurow['ytunnus'], $trow['osasto'], $trow['try'], "Q");
 
 		// jos result on nolla, saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi
-		if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or (mysql_num_rows($kkres) == 0 and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta) {
+		if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($kko_laji == "" and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta) {
 
 			if ($lisaarivi_debug==1) echo "Saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi. Saldoa $saldoyhteensa Toimittamatta $toimittamatta<br>";
 

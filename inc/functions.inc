@@ -22703,3 +22703,129 @@ if (!function_exists("hae_viivakoodilla")) {
 		return $viivakoodit;
 	}
 }
+
+if (!function_exists("korvaavat_kiellot")) {
+	function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
+		global $kukarow;
+
+		$lajilisa = "";
+
+		if ($laji != "") {
+			$lajilisa = " AND laji = '$laji' ";
+		}
+
+		// ytunnus osasto try
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '$ytunnus'
+					AND osasto  = '$osasto'
+					AND try     = '$try'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// ytunnus * try
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '$ytunnus'
+					AND osasto  = '*'
+					AND try     = '$try'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// ytunnus osasto *
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '$ytunnus'
+					AND osasto  = '$osasto'
+					AND try     = '*'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// ytunnus * *
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '$ytunnus'
+					AND osasto  = '*'
+					AND try     = '*'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// * osasto try
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '*'
+					AND osasto  = '$osasto'
+					AND try     = '$try'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// * * try
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '*'
+					AND osasto  = '*'
+					AND try     = '$try'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// * osasto *
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '*'
+					AND osasto  = '$osasto'
+					AND try     = '*'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// ***
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '*'
+					AND osasto  = '*'
+					AND try     = '*'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		return "";
+	}
+}

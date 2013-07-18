@@ -1038,41 +1038,34 @@
 
 	if (($row["var"] == 'J' or $row["var"] == 'P') and $row['tuoteno'] != '' and !in_array($row["var2"], array("OK", "PK"))) {
 
-		//vastaavat tuotteet
-		$query  = "	SELECT *
-					FROM vastaavat
-					WHERE tuoteno = '$row[tuoteno]'
-					AND yhtio = '$kukarow[yhtio]'
-					ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno";
-		$vastaresult = pupe_query($query);
+		// Haetaan vastaavuusketjut korvaavat ketjun päätuotteella
+		require_once 'vastaavat.class.php';
 
-		if (mysql_num_rows($vastaresult) > 0) {
-			while ($vrow = mysql_fetch_assoc($vastaresult)) {
+		$vastaavat = new Vastaavat($row["tuoteno"]);
 
-				// Haetaan vastaavat ketju
-				$query = "	SELECT *
-							FROM vastaavat
-							WHERE id     = '{$vrow['id']}'
-							AND tuoteno != '$row[tuoteno]'
-							AND yhtio    = '$kukarow[yhtio]'
-							ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno";
-				$vasta2result = pupe_query($query);
+		if ($vastaavat->onkovastaavia()) {
+
+			// Loopataan kaikki tuotteen vastaavuusketjut
+			foreach (explode(",", $vastaavat->getIDt()) as $ketju) {
 
 				$vastaavat_table = "";
 
-				while ($vrow = mysql_fetch_array($vasta2result)) {
+				// Haetaan tuotteet ketjukohtaisesti
+				$_tuotteet = $vastaavat->tuotteet($ketju);
 
-					$vaihtoehtoinen = ($vrow['vaihtoehtoinen'] == 'K') ? '<font color=#F00>".t("Vaihtoehtoinen, tarkista sopivuus")."!</font>' : '';
-					list(, , $vmyytavissa) = saldo_myytavissa($vrow["tuoteno"]);
+				foreach ($_tuotteet as $_tuote) {
 
-					if ($vmyytavissa > 0) {
+					$vaihtoehtoinen = ($_tuote['vaihtoehtoinen'] == 'K') ? "<font color=#F00>".t("Vaihtoehtoinen, tarkista sopivuus")."!</font>" : "";
+					list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"]);
 
-						$tvrow = hae_tuote($vrow['tuoteno']);
+					if ($vmyytavissa > 0 and strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"])) {
+
+						$tvrow = hae_tuote($_tuote['tuoteno']);
 
 						list($V_hinta, $V_netto, $V_ale, $V_alehinta_alv, $V_alehinta_val) = alehinta($laskurow, $tvrow, $row['tilkpl'], '', '', '');
 
 						 $vastaavat_table .= "<tr class='aktiivi'>"
-						 			."<td>{$vrow["tuoteno"]} $vaihtoehtoinen</td>"
+						 			."<td>{$_tuote["tuoteno"]} $vaihtoehtoinen</td>"
 									."<td>{$tvrow["nimitys"]}</td>"
 						 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
 						 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>"
@@ -1085,7 +1078,7 @@
 						 			   	<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 						 			   	<input type='hidden' name='mista' 			value = '$mista'>
 						 			   	<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
-						 			   	<input type='hidden' name='vastaavatuoteno' value = '$vrow[tuoteno]'>
+						 			   	<input type='hidden' name='vastaavatuoteno' value = '$_tuote[tuoteno]'>
 						 			   	<input type='hidden' name='menutila' 		value = '$menutila'>
 						 			   	<input type='hidden' name='tila' 			value = 'MUUTA'>
 						 			   	<input type='hidden' name='tapa' 			value = 'MYYVASTAAVA'>
@@ -1124,9 +1117,9 @@
 					$vastaavattuotteet = 1;
 				}
 			}
-		}
 
-		if ($vastaavat_html != "") {
-			$vastaavat_html .= "</table>";
+			if ($vastaavat_html != "") {
+				$vastaavat_html .= "</table>";
+			}
 		}
 	}

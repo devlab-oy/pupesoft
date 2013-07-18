@@ -1694,7 +1694,7 @@
 
 					$vastaavat = new Vastaavat($row['tuoteno']);
 
-					if ($vastaavat->getIDt() != "") {
+					if ($vastaavat->onkovastaavia()) {
 
 						$i = 1;
 

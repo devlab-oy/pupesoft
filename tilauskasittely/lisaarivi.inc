@@ -575,7 +575,7 @@
 					$vastaavat = new Vastaavat($korvaavat->paatuote(), $options);
 				}
 
-				if ($vastaavat->getIDt() != "") {
+				if ($vastaavat->onkovastaavia()) {
 
 					$options = array('vastaavuusketjun_jarjestys' => $yhtiorow['vastaavuusketjun_jarjestys'], 'skippaa_vaihtoehtoiset' => TRUE);
 
@@ -1951,9 +1951,27 @@
 			$kpl = $puu_kpl[$i];
 			$var = $puu_var[$i];
 
+			// Korvaavuusketjun puutekäsittely, lisätään ketjun päätuote puutteeksi
+			if ($yhtiorow["korvaavuusketjun_puutekasittely"] == "K") {
+				require_once 'korvaavat.class.php';
+				$korvaavat = new Korvaavat($tuoteno);
+				$paatuote = $korvaavat->paatuote();
+
+				if ($paatuote != "") {
+					if (strtoupper($paatuote) != strtoupper($tuoteno)) {
+						if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $tuoteno") === FALSE) {
+							$kommentti .= " ".t("HUOM: Korvaa tuotteen")." $tuoteno";
+						}
+					}
+
+					$tuoteno = $paatuote;
+				}
+			}
+
 			$query = "	SELECT *
 						FROM tuote
-						WHERE tuoteno = '$tuoteno' and yhtio='$kukarow[yhtio]'";
+						WHERE tuoteno = '$tuoteno'
+						and yhtio = '$kukarow[yhtio]'";
 			$tuoteresult = pupe_query($query);
 
 			if (mysql_num_rows($tuoteresult) == 0) {
@@ -2409,39 +2427,6 @@
 			else {
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 					$query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
-				}
-			}
-
-			// Korvaavuusketjun puutekäsittely, lisätään ketjun päätuote puutteeksi
-			if ($yhtiorow["korvaavuusketjun_puutekasittely"] == "K") {
-				$query = "SELECT id
-			              FROM korvaavat
-			              WHERE yhtio = '{$kukarow['yhtio']}'
-			              AND tuoteno = '{$trow['tuoteno']}'
-			              ORDER BY if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys), korvaavat.tuoteno
-			              LIMIT 1";
-		        $presult = pupe_query($query);
-		        $prow = mysql_fetch_assoc($presult);
-
-				// Jos ei ole korvaavia, ei vaihdeta tilattavaa tuotetta
-				if (mysql_num_rows($presult)) {
-		        	$query = "SELECT tuote.*
-			    	          FROM korvaavat
-			    	          JOIN tuote ON korvaavat.yhtio=tuote.yhtio AND korvaavat.tuoteno=tuote.tuoteno
-			    	          WHERE korvaavat.yhtio = '{$kukarow['yhtio']}'
-			    	          AND korvaavat.id = '{$prow['id']}'
-			    	          ORDER BY if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys), korvaavat.tuoteno
-			    	          LIMIT 1";
-		        	$tresult = pupe_query($query);
-		        	$korvaava_row = mysql_fetch_assoc($tresult);
-
-					if (strtoupper($korvaava_row["tuoteno"]) != strtoupper($alkupera_trow["tuoteno"])) {
-						if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]") === FALSE) {
-							$kommentti .= " ".t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]";
-						}
-					}
-
-					$trow = $korvaava_row;
 				}
 			}
 

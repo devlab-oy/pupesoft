@@ -41,6 +41,10 @@ class Vastaavat {
 		}
 	}
 
+	function onkovastaavia() {
+		return $this->idt != "";
+	}
+
 	function getIDt() {
 		return $this->idt;
 	}

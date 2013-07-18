@@ -1007,7 +1007,7 @@
 			$vastaavat = new Vastaavat($tuoteno);
 
 			// Jos tuote kuulu useampaan kuin yhteen vastaavuusketjuun
-			if ($vastaavat->getIDt() != "") {
+			if ($vastaavat->onkovastaavia()) {
 				echo "<font class='message'>".t("Vastaavat tuotteet")."</font><hr>";
 
 				// Ketjujen id:t

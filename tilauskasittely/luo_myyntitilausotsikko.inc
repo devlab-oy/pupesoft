@@ -358,7 +358,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
             
             $asiakasrow  = mysql_fetch_assoc($result);
             
-             $query = "	SELECT *
+            $query = "	SELECT *
                         FROM maksuehto
                         WHERE yhtio = '{$kukarow['yhtio']}'
                         AND kaytossa = ''
@@ -423,7 +423,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
                     $asiakas_tunnukset = implode(',', $valitut_asiakastunnukset);
                 }
                 $query = "  update laskun_lisatiedot
-                            set sopimus_lisatietoja = '{$asiakas_tunnukset}'
+                            set sopimus_lisatietoja = '{$asiakas_tunnukset}', saate = '{$saate_teksti}'
                             where yhtio = '{$kukarow['yhtio']}'
                             and otunnus = '{$tilausnumero}'";
                 pupe_query($query);

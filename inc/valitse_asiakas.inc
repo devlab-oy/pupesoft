@@ -40,6 +40,7 @@ $request = array(
     "tilausnumero" => $tilausnumero,
     "action" => $action,
     "valitut_asiakastunnukset" => $valitut_asiakastunnukset,
+    "saate_teksti" => $saate_teksti
 );
 
 $asiakasid = $kukarow['tunnus'] * -1;
@@ -75,6 +76,9 @@ if (isset($request['tarjous_tee'])) {
 if ($request['tarjous_tee'] == 'nayta_poimitut_asiakkaat') {
     if (!empty($request['dummytarjous']['sopimus_lisatietoja'])) {
         $request['asiakkaat'] = hae_poimitut_asiakkaat($request['dummytarjous']['sopimus_lisatietoja']);
+        echo "<font class='message'>" . t("Poimitut asiakkaat") . "</font>";
+        echo "<br>";
+        echo "<br>";
         echo_asiakas_table($request);
     }
     else {
@@ -181,14 +185,13 @@ function echo_asiakas_table($request) {
 
     global $kukarow, $yhtiorow, $orig_tila, $orig_alatila;
 
-    $raaka_arska = explode(",", $request['dummytarjous']['sopimus_lisatietoja']);
+    $tarjouspohjan_asiakkaat = explode(",", $request['dummytarjous']['sopimus_lisatietoja']);
 
     if (count($request['asiakkaat']) > 0) {
 
         echo "<form method='post' action='tilaus_myynti.php'>";
         echo "<input type='hidden' name='tilausnumero' value='{$request['tilausnumero']}'/>";
         echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
-        //FUNTSI
         echo "<input type='hidden' name='tarjous_tee' value='nayta_poimitut_asiakkaat'/>";
         if ($request['tarjous_tee'] == 'nayta_asiakas_valinta') {
             echo "<input type='hidden' name='action' value='liita_asiakkaat'/>";
@@ -208,12 +211,14 @@ function echo_asiakas_table($request) {
         echo "<tr>";
         echo "<th><input type='checkbox' id='valitse_kaikki'></th>";
         echo "<th>", t("Nimi"), "</th>";
+        echo "<th>", t("Asiakasryhmä"), "</th>";
+        echo "<th>", t("Osasto"), "</th>";
         echo "<tr>";
 
         foreach ($request['asiakkaat'] as $asiakas) {
             echo "<tr class='aktiivi'>";
             echo "<td>";
-            if (in_array($asiakas['tunnus'], $raaka_arska) and $request['tarjous_tee'] != 'nayta_poimitut_asiakkaat') {
+            if (in_array($asiakas['tunnus'], $tarjouspohjan_asiakkaat) and $request['tarjous_tee'] != 'nayta_poimitut_asiakkaat') {
                 echo "X";
             }
             else {
@@ -222,6 +227,12 @@ function echo_asiakas_table($request) {
             echo "</td>";
             echo "<td>";
             echo $asiakas['nimi'];
+            echo "</td>";
+            echo "<td>";
+            echo $asiakas['ryhma'];
+            echo "</td>";
+            echo "<td>";
+            echo $asiakas['osasto'];
             echo "</td>";
             echo "<tr>";
         }
@@ -237,6 +248,8 @@ function echo_asiakas_table($request) {
         echo "<input type='submit' value='{$submitvalue}'/>";
         echo "</form>";
         echo "<br>";
+        echo "<br>";
+            echo "<br>";
     }
 
     if (!empty($request['dummytarjous']['sopimus_lisatietoja'])) {
@@ -246,7 +259,13 @@ function echo_asiakas_table($request) {
         echo "<input type='hidden' name='tee' value='OTSIK' />";
         echo "<input type='hidden' name='tarjous_tee' value='luo_dummy_tarjous' />";
         echo "<input type='hidden' name='tilausnumero' value='{$request['tilausnumero']}' />";
-        echo "<input type='submit' id='luo_tarjous' value='" . t("Luo tarjous") . "'/>";
+        if ($request['tarjous_tee'] == 'nayta_poimitut_asiakkaat') {
+            echo "<textarea rows='4' cols='20' maxlength='1000' name='saate_teksti' placeholder='" . t("Tarjouksen saateteksti") . "'>";
+            echo "</textarea>";
+            echo "<br>";
+            echo "<br>";
+            echo "<input type='submit' id='luo_tarjous' value='" . t("Luo tarjous") . "'/>";
+        }
         echo "</form>";
     }
 

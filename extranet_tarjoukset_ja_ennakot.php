@@ -406,10 +406,12 @@ function hae_extranet_tarjoukset($asiakasid, $toim) {
     }
     
     $query = "  SELECT  concat( concat_ws('!!!', lasku.tunnus, lasku.nimi),'!!!{$toim}') AS nimi,
+                laskun_lisatiedot.saate,
                 lasku.hinta,
                 lasku.olmapvm,
                 lasku.tunnus as tunnus
                 FROM lasku
+                JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus	)
                 WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                 AND lasku.liitostunnus = '{$asiakasid}'
                 AND lasku.alatila = ''

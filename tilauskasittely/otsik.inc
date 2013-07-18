@@ -2822,6 +2822,9 @@
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>".t("keräyslista")." + ".t("valmistus")."</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>".t("lasku")."</td></tr>";
 			echo "<tr><td>".t("Sisäinen viesti").":</td><td><textarea name='sisviesti3' rows='2' cols='40'>$srow[sisviesti3]</textarea></td><td></td></tr>";
+            if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "EXTENNAKKO") {
+                echo "<tr><td>".t("Saateteksti").":</td><td><textarea name='saate' rows='2' cols='40'>$srow[saate]</textarea></td><td></td></tr>";
+            }
 			echo "</table><br>";
 
 			echo "<table>";
@@ -3785,7 +3788,7 @@
 				$result = pupe_query($query2);
 			}
 
-			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "ENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE", "WEBTILAUSTARJOUS","EXTRANET_REKLAMAATIO"))) {
+			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "EXTTARJOUS", "ENNAKKO","EXTENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE", "WEBTILAUSTARJOUS","EXTRANET_REKLAMAATIO"))) {
 
 				if (is_array($yllapito_kk)) {
 					$sopimus_kk = implode(",", $yllapito_kk);

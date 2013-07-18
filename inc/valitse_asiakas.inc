@@ -211,6 +211,7 @@ function echo_asiakas_table($request) {
         echo "<tr>";
         echo "<th><input type='checkbox' id='valitse_kaikki'></th>";
         echo "<th>", t("Nimi"), "</th>";
+        echo "<th>", t("Asiakasnumero"), "</th>";
         echo "<th>", t("Asiakasryhmä"), "</th>";
         echo "<th>", t("Osasto"), "</th>";
         echo "<tr>";
@@ -227,6 +228,9 @@ function echo_asiakas_table($request) {
             echo "</td>";
             echo "<td>";
             echo $asiakas['nimi'];
+            echo "</td>";
+            echo "<td>";
+            echo $asiakas['asiakasnro'];
             echo "</td>";
             echo "<td>";
             echo $asiakas['ryhma'];

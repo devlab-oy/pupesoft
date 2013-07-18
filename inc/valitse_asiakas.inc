@@ -332,7 +332,8 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
                      JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
                     WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
                      {$where}
-					ORDER BY nimi";
+					GROUP BY asiakas.tunnus
+					ORDER BY asiakas.nimi";
     }
     else {
         $query = "	(SELECT asiakas.*
@@ -342,7 +343,8 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and REPLACE(REPLACE(asiakas.ytunnus, '-', ''), '+', '') = '" . str_replace(array('-', '+'), '', $request['hakuehto']) . "'
 						and asiakas.ytunnus!=''
-                        {$where})
+                        {$where}
+						GROUP BY asiakas.tunnus)
 					UNION
 					(SELECT asiakas.*
 						FROM asiakas
@@ -351,7 +353,8 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and asiakas.asiakasnro = '{$request['hakuehto']}'
 						and asiakas.asiakasnro not in ('0','')
-                        {$where})
+                        {$where}
+						GROUP BY asiakas.tunnus)
 					UNION
 					(SELECT asiakas.*
 						FROM asiakas
@@ -360,7 +363,8 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and REPLACE(REPLACE(asiakas.ovttunnus, '-', ''), '+', '') = '" . str_replace(array('-', '+'), '', $request['hakuehto']) . "'
 						and asiakas.ovttunnus!=''
-                        {$where})
+                        {$where}
+						GROUP BY asiakas.tunnus)
 					UNION
 					(SELECT asiakas.*
 						FROM asiakas
@@ -369,7 +373,8 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and asiakas.toim_ovttunnus = '{$request['hakuehto']}'
 						and asiakas.toim_ovttunnus!=''
-                        {$where})
+                        {$where}
+						GROUP BY asiakas.tunnus)
 					UNION
 					(SELECT asiakas.*
 						FROM asiakas
@@ -379,14 +384,16 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and asiakkaan_avainsanat.avainsana = '{$request['hakuehto']}'
 						and asiakkaan_avainsanat.avainsana!=''
-                        {$where})
+                        {$where}
+						GROUP BY asiakas.tunnus)
                     UNION
                     (SELECT asiakas.*
                     FROM asiakas
                      JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
                     WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
                     AND asiakas.nimi LIKE '%{$request['hakuehto']}%'
-                     {$where})
+                     {$where}
+					GROUP BY asiakas.tunnus)
 					ORDER BY nimi";
     }
     $result = pupe_query($query);

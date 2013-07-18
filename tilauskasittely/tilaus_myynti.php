@@ -1710,11 +1710,15 @@ if ($uusitoimitus != "") {
         else {
             $tee = "";
             $kukarow['kesken'] = $tilausnumero;
-
+            
+            $saate_teksti = pupesoft_cleanstring($saate_teksti);
+            
 			$query = "	UPDATE lasku
-						SET olmapvm = '{$viimeinen_voimassaolo_pvm}'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$tilausnumero}'";
+                        JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+						SET lasku.olmapvm = '{$viimeinen_voimassaolo_pvm}',
+                        laskun_lisatiedot.saate = '{$saate_teksti}'
+						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+						AND lasku.tunnus = '{$tilausnumero}'";
 			pupe_query($query);
         }
 	}

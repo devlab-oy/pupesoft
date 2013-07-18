@@ -2,6 +2,8 @@
 
 require_once('tilauskasittely/luo_myyntitilausotsikko.inc');
 $query = "  SELECT laskun_lisatiedot.sopimus_lisatietoja,
+            laskun_lisatiedot.saate,
+            lasku.olmapvm,
             lasku.clearing,
 			tilausrivi.*,
 			lasku.varasto
@@ -24,6 +26,8 @@ while ($tilausrivi = mysql_fetch_assoc($result)) {
     $tarjouksen_asiakkaat = $tilausrivi['sopimus_lisatietoja'];
     $clearing = $tilausrivi['clearing'];
 	$alkuperainen_varasto = $tilausrivi['varasto'];
+    $viimeinen_voimassaolo_pvm = $tilausrivi['olmapvm'];
+    $saate_teksti = $tilausrivi['saate'];
 }
 
 $tarjouksen_asiakkaat = explode(',', $tarjouksen_asiakkaat);
@@ -42,9 +46,10 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 
 	//Halutaan pit‰‰ asiakkaille kopioitavissa tarjouksissa myyj‰n valitsema varasto
 	$query = "	UPDATE lasku
-				SET varasto = '{$alkuperainen_varasto}'
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$tilausnumero}'";
+                JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+				SET lasku.varasto = '{$alkuperainen_varasto}', lasku.olmapvm = '{$viimeinen_voimassaolo_pvm}', laskun_lisatiedot.saate = '{$saate_teksti}', lasku.clearing = '{$clearing}'
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND lasku.tunnus = '{$tilausnumero}'";
 	pupe_query($query);
 
     $query = "  SELECT *

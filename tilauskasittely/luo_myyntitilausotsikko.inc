@@ -424,7 +424,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
                     $asiakas_tunnukset = implode(',', $valitut_asiakastunnukset);
                 }
                 $query = "  update laskun_lisatiedot
-                            set sopimus_lisatietoja = '{$asiakas_tunnukset}', saate = '{$saate_teksti}'
+                            set sopimus_lisatietoja = '{$asiakas_tunnukset}'
                             where yhtio = '{$kukarow['yhtio']}'
                             and otunnus = '{$tilausnumero}'";
                 pupe_query($query);

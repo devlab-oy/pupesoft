@@ -24,64 +24,59 @@ if ($oikeurow['paivitys'] != '1') { // Saako päivittää
 
 flush();
 
-$vikaa			= 0;
-$tarkea			= 0;
-$lask			= 0;
-$postoiminto 	= 'X';
-$kielletty		= 0;
-$table_apu		= '';
-$taulunrivit	= array();
+$vikaa		 = 0;
+$tarkea		 = 0;
+$lask		 = 0;
+$postoiminto = 'X';
+$kielletty	 = 0;
+$table_apu	 = '';
+$taulunrivit = array();
 
-if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
+$kasitellaan_tiedosto = FALSE;
+
+if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
+
+	$kasitellaan_tiedosto = TRUE;
+
+	if ($_FILES['userfile']['size'] == 0) {
+		echo "<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>";
+		$kasitellaan_tiedosto = FALSE;
+	}
 
 	$path_parts = pathinfo($_FILES['userfile']['name']);
 	$ext = strtoupper($path_parts['extension']);
 
-	if ($ext != "TXT" and $ext != "XLS" and $ext != "CSV") {
-		die ("<font class='error'><br>".t("Ainoastaan .txt, .csv tai .xls tiedostot sallittuja")."!</font>");
-	}
-
-	if ($_FILES['userfile']['size'] == 0) {
-		die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
-	}
-
-	if ($ext == "XLS") {
-		require_once ('excel_reader/reader.php');
-
-		// ExcelFile
-		$data = new Spreadsheet_Excel_Reader();
-
-		// Set output Encoding.
-		$data->setOutputEncoding('CP1251');
-		$data->setRowColOffset(0);
-		$data->read($_FILES['userfile']['tmp_name']);
-	}
-
-	// luetaan eka rivi tiedostosta..
-	if ($ext == "XLS") {
-		$headers = array();
-
-		for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
-			$headers[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
-		}
-
-		for ($excej = (count($headers)-1); $excej > 0 ; $excej--) {
-			if ($headers[$excej] != "") {
-				break;
-			}
-			else {
-				unset($headers[$excej]);
-			}
-		}
-	}
-	else {
-		$file	 = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
-
-		$rivi    = fgets($file);
-		$headers = explode("\t", strtoupper(trim($rivi)));
-	}
-
 	echo "<font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
+
+	$retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT","DATAIMPORT"));
+
+	if ($retval !== TRUE) {
+		echo "<font class='error'><br>".t("Väärä tiedostomuoto")."!</font>";
+		$kasitellaan_tiedosto = FALSE;
+	}
+}
+
+if ($kasitellaan_tiedosto) {
+
+	/** Käsiteltävän filen nimi **/
+	$kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
+
+	$excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
+
+	/** Otetaan tiedoston otsikkorivi **/
+	$headers = $excelrivit[0];
+	$headers = array_map('trim', $headers);
+	$headers = array_map('strtoupper', $headers);
+
+	// Unsetatan tyhjät sarakkeet
+	for ($i = (count($headers)-1); $i > 0 ; $i--) {
+		if ($headers[$i] != "") {
+			break;
+		}
+		else {
+			unset($headers[$i]);
+		}
+	}
 
 	$table_apu = $table;
 	$table = ($table != 'korvaavat' and $table != "vastaavat") ? 'tuoteperhe' : $table;
@@ -112,14 +107,12 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 			if ($headers_count['TUOTENO'] > 2) {
 				exit("Vastaavia sisäänluettassa ei voi olla kuin 2 tuotenumero saraketta");
 			}
-
 			break;
 		case "tuoteperhe" :
 			$pakolliset = array("ISATUOTENO", "TUOTENO");
 			$kielletyt = array("TYYPPI", "KERROIN", "HINTAKERROIN", "ALEKERROIN", "EI_NAYTETA");
 			break;
 		default :
-			echo t("mitenkäs tälläsen taulun valitsit"),"!?!";
 			exit;
 	}
 	// $trows 	sisältää kaikki taulun sarakkeet tietokannasta
@@ -179,32 +172,19 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 	echo "<font class='message'>",t("Tiedosto ok, aloitellaan päivitys"),"...<br><br></font>";
 	flush();
 
-	// Luetaan tiedosto loppuun ja tehdään taulukohtainen array koko datasta
-	if ($ext == "XLS") {
-		for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
-			for ($excej = 0; $excej < count($headers); $excej++) {
-				$taulunrivit[$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
-			}
+	// rivimäärä excelissä
+	$excelrivimaara = count($excelrivit);
+
+	// sarakemäärä excelissä
+	$excelsarakemaara = count($headers);
+
+	// Luetaan tiedosto loppuun ja tehdään taulukohtainen array koko datasta, tässä kohtaa putsataan jokaisen solun sisältö pupesoft_cleanstring -funktiolla
+	for ($excei = 1; $excei < $excelrivimaara; $excei++) {
+		for ($excej = 0; $excej < $excelsarakemaara; $excej++) {
+			$taulunrivit[$excei-1][] = pupesoft_cleanstring($excelrivit[$excei][$excej]);
 		}
 	}
-	else {
 
-		$excei = 0;
-
-		while ($rivi = fgets($file)) {
-			// luetaan rivi tiedostosta..
-			$rivi = explode("\t", str_replace(array("'", "\\"), "", $rivi));
-
-			for ($excej = 0; $excej < count($rivi); $excej++) {
-				$taulunrivit[$excei][] = trim($rivi[$excej]);
-			}
-
-			$excei++;
-		}
-		fclose($file);
-	}
-
-	/*
 	echo "<table>";
 	echo "<tr>";
 
@@ -224,7 +204,6 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
 	echo "</table><br>";
 	#exit;
-	*/
 
 	$vastaava_paatuote = "";
 
@@ -234,7 +213,10 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 		// näin käsitellään korvaavat taulu (ja vastaavat)
 		if ($table == "korvaavat" or $table == "vastaavat") {
 
+			echo "<br>".t("Käsitellään riviä").": ".($rivinumero+1)." ";
+
 			$haku = '';
+
 			for ($j = 0; $j < count($rivi); $j++) {
 				//otetaan rivin kaikki tuotenumerot talteen
 				if ($headers[$j] == "TUOTENO" and $rivi[$j] != "") {
@@ -258,7 +240,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 							FROM $table
 							WHERE tuoteno = '$vastaava_paatuote'
 							AND jarjestys = 1
-							and yhtio = '{$kukarow['yhtio']}'";
+							and yhtio 	  = '{$kukarow['yhtio']}'";
 			}
 			// Korvaavissa tuote voi kuulu vain yhteen ketjuun
 			else {
@@ -267,7 +249,6 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 							WHERE tuoteno in ($haku)
 							and yhtio = '{$kukarow['yhtio']}'";
 			}
-
 			$hresult = pupe_query($fquery);
 
 			// Tuotteita ei ole missään ketjussa
@@ -276,7 +257,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 				// Jos vastaavia koitetaan muokata tai poistaa ja "päätuotteella" ei löytynyt ketjua,
 				// ei voida tehdä mitään.
 				if ($table == "vastaavat" and strtoupper(trim($rivi[$postoiminto])) != 'LISAA') {
-					echo t("Ketjua ei löydy, et voi muuttaa / poistaa")."<br>";
+					echo t("Ketjua ei löydy, et voi muuttaa / poistaa").". ";
 					$id = 0;
 				}
 				else {
@@ -287,18 +268,16 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 					$frow =  mysql_fetch_array($fresult);
 
 					$id = $frow[0] + 1;
-					#echo t("Ei vielä missään")," $id!<br>";
 				}
 			}
 			// Tuotteita löytyy yhdestä ketjusta
 			elseif (mysql_num_rows($hresult) == 1) {
 				$frow =  mysql_fetch_array($hresult);
 				$id = $frow[0];
-				#echo t("Löytyi")," $id!<br>";
 			}
 			// Tuotteita on useassa ketjussa
 			else {
-				echo t("Joku tuotteista")," ($haku) ",t("on jo useassa ketjussa! Korjaa homma"),"!<br>";
+				echo t("Joku tuotteista")," ($haku) ",t("on jo useassa ketjussa! Korjaa homma"),"! ";
 				$id = 0;
 			}
 
@@ -320,7 +299,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 				}
 				else {
 					//tuntematon toiminto
-					echo t("Tuntematon tai puuttuva toiminto"),"!<br>";
+					echo t("Tuntematon tai puuttuva toiminto"),"! ";
 					unset($rivi);
 					$toiminto 	= "";
 				}
@@ -360,10 +339,12 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 										and yhtio = '{$kukarow['yhtio']}'";
 							$kresult = pupe_query($kquery);
 
-							if ((mysql_num_rows($kresult) == 0 and $toiminto == 'LISAA') or (mysql_num_rows($kresult) == 1 and $toiminto == 'POISTA')) {
+							if ($toiminto == 'LISAA') {
 
-								if ($toiminto == 'LISAA') {
-
+								if (mysql_num_rows($kresult) > 0) {
+									if ($table == 'korvaavat') echo t("Tuote")," {$rivi[$j]} ",t("on jo tässä ketjussa"),"! ";
+								}
+								else {
 									// Korvaavat päätuotteeksi, ellei järjestystä ole annettu
 									if ($table == 'korvaavat' and $jarjestys == 0) {
 										$jarjestys = 1;
@@ -371,7 +352,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
 									// Päivitetään järjestyksiä jonossa +1 jos järjestys ei ole nolla, mutta ei kuitenkaan kosketa järjestys=0 riveihin
 									if ($jarjestys != 0) {
-										$uquery = "UPDATE $table SET
+										$uquery = "	UPDATE $table SET
 													jarjestys = jarjestys+1,
 													muuttaja  = '{$kukarow['kuka']}',
 													muutospvm = now()
@@ -385,64 +366,78 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 									if ($vastaava_paatuote == $rivi[$j]) $jarjestys = 1;
 
 									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys', $vaihtoehtoinen_lisa laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
+									$query = $alku.$kysely.$loppu;
+									$iresult = pupe_query($query);
+
+									echo t("Lisättiin ketjuun")," $id {$rivi[$j]}! ";
+								}
+							}
+							elseif ($toiminto == 'POISTA') {
+
+								if (mysql_num_rows($kresult) == 0) {
+									echo t("Tuotetta")," {$rivi[$j]} ",t("ei voida poistaa, koska se ei löydy tästä ketjusta"),"! ";
 								}
 								else {
 									$kysely = " and tuoteno='$rivi[$j]' ";
+									$query = $alku.$kysely.$loppu;
+									$iresult = pupe_query($query);
+
+									echo t("Poistettiin ketjusta")," $id {$rivi[$j]}! ";
 								}
+							}
+							elseif ($toiminto == "MUUTA" and ($jarjestys > 0 or $vaihtoehtoinen_lisa)) {
 
-								$query = $alku.$kysely.$loppu;
-								$iresult = pupe_query($query);
-
-								if ($toiminto == 'LISAA') {
-									echo t("Lisättiin ketjuun")," $id {$rivi[$j]}!<br>";
+								if (mysql_num_rows($kresult) == 0) {
+									echo t("Tuotetta")," {$rivi[$j]} ",t("ei voida päivittää, koska se ei löydy tästä ketjusta"),"! ";
 								}
 								else {
-									echo t("Poistettiin ketjusta")," $id {$rivi[$j]}!<br>";
-								}
-							}
-							elseif ($toiminto == "MUUTA" and $jarjestys > 0) {
-								// Korjataan muut järjestykset ja tehdään tilaa päivitettävälle tuotteelle
-								$kquery = "	SELECT tunnus, if(jarjestys=0, 999, jarjestys) jarj
-											FROM $table
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											and id = '$id'
-											and tuoteno != '$rivi[$j]'
-											and (jarjestys >= $jarjestys or jarjestys = 0)
-											ORDER BY jarj, tuoteno";
-								$iresult = pupe_query($kquery);
+									
+									$jupdate = "";
+									
+									if ($jarjestys > 0) {
+										// Korjataan muut järjestykset ja tehdään tilaa päivitettävälle tuotteelle
+										$kquery = "	SELECT tunnus, if(jarjestys=0, 999, jarjestys) jarj
+													FROM $table
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													and id = '$id'
+													and tuoteno != '$rivi[$j]'
+													and (jarjestys >= $jarjestys or jarjestys = 0)
+													ORDER BY jarj, tuoteno";
+										$iresult = pupe_query($kquery);
 
-								$siirtojarj = $jarjestys+1;
+										$siirtojarj = $jarjestys+1;
 
-								while ($irow = mysql_fetch_assoc($iresult)) {
+										while ($irow = mysql_fetch_assoc($iresult)) {
+											$kquery = "	UPDATE $table
+														SET jarjestys = $siirtojarj,
+														muuttaja = '$kukarow[kuka]',
+														muutospvm = now()
+														WHERE tunnus = '$irow[tunnus]'
+														and jarjestys != 0";
+											$updres = pupe_query($kquery);
+
+											$siirtojarj++;
+										}
+
+										$jupdate = " jarjestys = $jarjestys, ";
+									}
+
 									$kquery = "	UPDATE $table
-												SET jarjestys = $siirtojarj,
+												SET {$jupdate}
+												{$vaihtoehtoinen_lisa}
 												muuttaja = '$kukarow[kuka]',
 												muutospvm = now()
-												WHERE tunnus = '$irow[tunnus]' and jarjestys!=0";
-									$updres = pupe_query($kquery);
+												WHERE tuoteno = '$rivi[$j]'
+												and id = '$id'
+												and yhtio = '{$kukarow['yhtio']}'";
+									$iresult = pupe_query($kquery);
 
-									$siirtojarj++;
+									$lask++;
 								}
-
-								$kquery = "	UPDATE $table
-											SET jarjestys = $jarjestys,
-											$vaihtoehtoinen_lisa
-											muuttaja = '$kukarow[kuka]',
-											muutospvm = now()
-											WHERE tuoteno = '$rivi[$j]'
-											and id = '$id'
-											and yhtio = '{$kukarow['yhtio']}'";
-								$iresult = pupe_query($kquery);
-
-								$lask++;
-							}
-							else {
-								if ($table == 'vastaavat' and $j == 0) continue; // Skipataan virhe vastaavat ketjua etsittävällä tuotteella
-								echo t("Tuote")," {$rivi[$j]} ",t("on jo tässä ketjussa"),"!<br>";
 							}
 						}
 						else {
-							echo t("Tuotetta")," {$rivi[$j]} ",t("ei löydy"),"!<br>";
+							echo t("Tuotetta")," {$rivi[$j]} ",t("ei löydy"),"! ";
 						}
 					}
 				}
@@ -550,7 +545,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 	// Tiivistetään vastaavat ketjusta välit pois
 	tiivista_vastaavat_tuoteketju($id);
 
-	echo t("Päivitettiin")," $lask ",t("riviä"),"! ($id)";
+	echo t("Päivitettiin")," $lask ",t("tietuetta"),"! ($id)";
 }
 else {
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data'>

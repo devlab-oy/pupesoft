@@ -140,7 +140,7 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 		}
 	}
 	else {
-		$onnistuiko_toiminto = hylkaa_tarjous($request['valittu_tarjous_tunnus']);
+		$onnistuiko_toiminto = hylkaa($request['valittu_tarjous_tunnus']);
 	}
 	if (!$onnistuiko_toiminto) {
 		echo "<font class='error'>".t("Toiminto ep‰onnistui")."</font>";
@@ -154,8 +154,7 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 		exit;
 	}
 
-	//$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset($request['kayttajaan_liitetty_asiakas']['tunnus'], $request['toim']);
-	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset(57620, $request['toim']);
+	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset($request['kayttajaan_liitetty_asiakas']['tunnus'], $request['toim']);
 	$header_values = array(
 		'nimi'		 => t('Nimi'),
 		'hinta'		 => t('Tarjouksen hinta'),
@@ -165,8 +164,7 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 	echo_rows_in_table($request['asiakkaan_tarjoukset'], $header_values, array(), 'tee_tarjouksen_nimesta_linkki');
 }
 else {
-	//$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset($request['kayttajaan_liitetty_asiakas']['tunnus'], $request['toim']);
-	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset(57620, $request['toim']);
+	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset($request['kayttajaan_liitetty_asiakas']['tunnus'], $request['toim']);
 	$header_values = array(
 		'nimi'		 => t('Nimi'),
 		'hinta'		 => t('Tarjouksen hinta'),
@@ -271,8 +269,13 @@ function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappale
 			}
 		}
 		// P‰ivitet‰‰n k‰ytt‰j‰n lis‰‰m‰t kommentit ja vaihdetaan tila/alatila Ennakko/Lep‰‰m‰ss‰
-		// $query = "UPDATE lasku set sisviesti1='{$syotetyt_lisatiedot}', tila='E', alatila='A' where yhtio='$kukarow[yhtio]' and tunnus='{$valittu_tarjous_tunnus}'";
-		// $result = pupe_query($query);
+		 $query = "	UPDATE lasku
+					SET sisviesti1='{$syotetyt_lisatiedot}',
+					tila='E',
+					alatila='A'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$valittu_tarjous_tunnus}'";
+		 pupe_query($query);
 		return true;
 	}
 	else {
@@ -320,49 +323,31 @@ function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
 	return false;
 }
 
-function hylkaa_tarjous($valittu_tarjous_tunnus) {
+function hylkaa($valittu_tarjous_tunnus) {
 	global $kukarow, $yhtiorow;
 
 	$kukarow['kesken'] = $valittu_tarjous_tunnus;
 	$laskurow = hae_extranet_tarjous($valittu_tarjous_tunnus);
 
-	///* Reload ja back-nappulatsekki *///
-	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
-		echo "<font class='error'> ".t("Taisit painaa takaisin tai p‰ivit‰ nappia. N‰in ei saa tehd‰")."! </font>";
-		exit;
-	}
-
-	$query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+	$query = "	UPDATE lasku
+				SET alatila = 'X'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$kukarow['kesken']}'";
 	$result = pupe_query($query);
 
-	$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
+	$query = "	UPDATE tilausrivi
+				SET tyyppi = 'D'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus = '{$kukarow['kesken']}'";
 	$result = pupe_query($query);
 
-	//Nollataan sarjanumerolinkit
-	vapauta_sarjanumerot($toim, $kukarow["kesken"]);
-
-	//	P‰ivitet‰‰n myˆs muut tunnusnipun j‰senet sympatian vuoksi hyl‰tyiksi *** t‰m‰n voisi varmaan tehd‰ myˆs kaikki kerralla? ***
-	$query = "SELECT tunnus from lasku where yhtio = '$kukarow[yhtio]' and tunnusnippu > 0 and tunnusnippu = $laskurow[tunnusnippu] and tunnus != '$kukarow[kesken]'";
-	$abures = pupe_query($query);
-
-	if (mysql_num_rows($abures) > 0) {
-		while ($row = mysql_fetch_assoc($abures)) {
-			$query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus=$row[tunnus]";
-			$result = pupe_query($query);
-
-			$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus=$row[tunnus]";
-			$result = pupe_query($query);
-
-			//Nollataan sarjanumerolinkit
-			vapauta_sarjanumerot($toim, $row["tunnus"]);
-		}
-	}
-
-	$query = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+	$query = "	UPDATE kuka
+				SET kesken = '0'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND kuka = '{$kukarow['kuka']}'";
 	$result = pupe_query($query);
 
-	$aika = date("d.m.y @ G:i:s", time());
-	echo "<font class='message'>$otsikko $kukarow[kesken] ".t("valmis")."!</font><br><br>";
+	echo "<font class='message'>".t("Tarjous")." $kukarow[kesken] ".t("hyl‰tty")."!</font><br><br>";
 
 	$tee = '';
 	$tilausnumero = '';

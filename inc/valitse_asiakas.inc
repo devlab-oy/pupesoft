@@ -160,6 +160,8 @@ function echo_asiakas_rajaus($request) {
     echo t("Anna y-tunnus, nimi tai asiakasnumero");
     echo "<input type='text' name='hakuehto' value='{$request['hakuehto']}'>";
     echo "<input type='submit' value='" . t("Hae") . "'>";
+    echo "<br>";
+    echo t("N‰ytet‰‰n 100 ensimm‰ist‰ hakutulosta");
     echo "</div>";
     echo "</form>";
 }
@@ -168,9 +170,10 @@ function hae_poimitut_asiakkaat($asiakastunnukset) {
 
     global $kukarow, $yhtiorow;
 
-    $query = " select * from asiakas
-                where yhtio = '{$kukarow['yhtio']}'
-                and tunnus IN ({$asiakastunnukset})";
+    $query = "  SELECT asiakas.* , kuka.tunnus as myyjatunnus, kuka.nimi as myyjanimi FROM asiakas
+                LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio AND kuka.myyja = asiakas.myyjanro)
+                WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+                AND asiakas.tunnus IN ({$asiakastunnukset})";
 
     $result = pupe_query($query);
     $asiakkaat = array();
@@ -214,6 +217,8 @@ function echo_asiakas_table($request) {
         echo "<th>", t("Asiakasnumero"), "</th>";
         echo "<th>", t("Asiakasryhm‰"), "</th>";
         echo "<th>", t("Osasto"), "</th>";
+        echo "<th>", t("Myyj‰"), "</th>";
+        echo "<th>", t("Myyj‰tunnus"), "</th>";
         echo "<tr>";
 
         foreach ($request['asiakkaat'] as $asiakas) {
@@ -237,6 +242,12 @@ function echo_asiakas_table($request) {
             echo "</td>";
             echo "<td>";
             echo $asiakas['osasto'];
+            echo "</td>";
+            echo "<td>";
+            echo $asiakas['myyjanimi'];
+            echo "</td>";
+            echo "<td>";
+            echo $asiakas['myyjatunnus'];
             echo "</td>";
             echo "<tr>";
         }
@@ -327,74 +338,83 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
         $where .= " AND asiakas.myyjanro IN ('" . implode("','", $request['mul_asiakasmyyja']) . "')";
     }
     if (empty($request['hakuehto'])) {
-        $query = "SELECT asiakas.*
+        $query = "SELECT asiakas.*,myyjahaku.nimi as myyjanimi, myyjahaku.tunnus as myyjatunnus
                     FROM asiakas
                      JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
+                     LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
                     WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
                      {$where}
 					GROUP BY asiakas.tunnus
-					ORDER BY asiakas.nimi";
+					ORDER BY asiakas.nimi
+                    LIMIT 100";
     }
     else {
         $query = "	(SELECT asiakas.*
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                         JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
+                        LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and REPLACE(REPLACE(asiakas.ytunnus, '-', ''), '+', '') = '" . str_replace(array('-', '+'), '', $request['hakuehto']) . "'
 						and asiakas.ytunnus!=''
                         {$where}
 						GROUP BY asiakas.tunnus)
 					UNION
-					(SELECT asiakas.*
+					(SELECT asiakas.*,myyjahaku.nimi as myyjanimi, myyjahaku.tunnus as myyjatunnus
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                         JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
+                        LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and asiakas.asiakasnro = '{$request['hakuehto']}'
 						and asiakas.asiakasnro not in ('0','')
                         {$where}
 						GROUP BY asiakas.tunnus)
 					UNION
-					(SELECT asiakas.*
+					(SELECT asiakas.*,myyjahaku.nimi as myyjanimi, myyjahaku.tunnus as myyjatunnus
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                         JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
+                        LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and REPLACE(REPLACE(asiakas.ovttunnus, '-', ''), '+', '') = '" . str_replace(array('-', '+'), '', $request['hakuehto']) . "'
 						and asiakas.ovttunnus!=''
                         {$where}
 						GROUP BY asiakas.tunnus)
 					UNION
-					(SELECT asiakas.*
+					(SELECT asiakas.*,myyjahaku.nimi as myyjanimi, myyjahaku.tunnus as myyjatunnus
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                         JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
+                        LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and asiakas.toim_ovttunnus = '{$request['hakuehto']}'
 						and asiakas.toim_ovttunnus!=''
                         {$where}
 						GROUP BY asiakas.tunnus)
 					UNION
-					(SELECT asiakas.*
+					(SELECT asiakas.*,myyjahaku.nimi as myyjanimi, myyjahaku.tunnus as myyjatunnus
 						FROM asiakas
 						JOIN asiakkaan_avainsanat ON (asiakas.yhtio=asiakkaan_avainsanat.yhtio and asiakas.tunnus=asiakkaan_avainsanat.liitostunnus and asiakkaan_avainsanat.laji='kantaasiakastunnus')
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                         JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
+                        LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and asiakkaan_avainsanat.avainsana = '{$request['hakuehto']}'
 						and asiakkaan_avainsanat.avainsana!=''
                         {$where}
 						GROUP BY asiakas.tunnus)
                     UNION
-                    (SELECT asiakas.*
+                    (SELECT asiakas.*,myyjahaku.nimi as myyjanimi, myyjahaku.tunnus as myyjatunnus
                     FROM asiakas
                      JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
+                     LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
                     WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
                     AND asiakas.nimi LIKE '%{$request['hakuehto']}%'
                      {$where}
 					GROUP BY asiakas.tunnus)
-					ORDER BY nimi";
+					ORDER BY nimi
+                    LIMIT 100";
     }
     $result = pupe_query($query);
 

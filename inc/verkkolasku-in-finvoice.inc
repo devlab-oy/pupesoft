@@ -44,7 +44,7 @@ $ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode($xml->BuyerPartyDetails
 $laskuttajan_toimittajanumero = "";
 
 if (strpos($file, "maventa") !== false and trim($xml->SellerPartyDetails->SellerPartyIdentifier) != "") {
-	$laskuttajan_toimittajanumero = str_replace("-", "", trim($xml->SellerPartyDetails->SellerPartyIdentifier));
+	$laskuttajan_toimittajanumero = trim(str_replace("-", "", trim($xml->SellerPartyDetails->SellerPartyIdentifier)));
 }
 
 if ($yhtio == "") {
@@ -89,56 +89,29 @@ if ($laskun_tyyppi == "INV02") {
 	$laskun_tyyppi = "381";
 }
 
-// Käsitellään tuoterivit
-$tuotetiedot	= $xml->InvoiceRow;
-$i				= 0;
-$rtuoteno		= array();
-$ealvi		 	= array("");
-$lisavat	 	= array("");
-
-$laskun_rahtikulu = 0;
-
-/*
- * osto_kulu = $laskun_pakkauskulu
- * osto_rahti = invoiceSummary rahti
- * osto_rivi_kulu  = ($laskun_rahtikulu, $rtuoteno[$i]['kulu'])
- */
-$osto_kulu = 0;
-$osto_rahti = 0;
-$osto_rivi_kulu = 0;
-
-$osto_kulu_alv = 0;
-$osto_rahti_alv = 0;
-$osto_rivi_kulu_alv = 0;
-
-$ei_oteta_kulua_pois = true;
+//Tuotetiedot
+$tuotetiedot			= $xml->InvoiceRow;
+$i						= 0;
+$rtuoteno				= array();
+$ealvi		 			= array("");
+$lisavat	 			= array("");
+$laskun_rahtikulu 		= 0;
+$osto_kulu 				= 0;
+$osto_rahti 			= 0;
+$osto_rivi_kulu 		= 0;
+$osto_kulu_alv 			= 0;
+$osto_rahti_alv 		= 0;
+$osto_rivi_kulu_alv 	= 0;
+$ei_oteta_kulua_pois	= TRUE;
+$rivien_summa_yhteensa	= 0;
 
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		// tuotekoodi
-		$rtuoteno[$i]["tuoteno"] = empty($tuotetieto->ArticleIdentifier) ? utf8_decode($tuotetieto->ArticleName) : utf8_decode($tuotetieto->ArticleIdentifier);
-
+		$rtuoteno[$i]["tuoteno"]  = empty($tuotetieto->ArticleIdentifier) ? pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName)) : pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleIdentifier));
 		$rtuoteno[$i]["tuoteno2"] = "";
 
 		if ($rtuoteno[$i]["tuoteno"] != "") {
-
-			// Telko-case
-			// 300013 = rahtiveloitus
-			// 300023 = pakkauskulu
-			// 300027 = pakkauskulu
-
-			if (strpos($file, "maventa") !== false and ($laskuttajan_toimittajanumero == "123335" or str_replace(array("-"," "), "", $laskuttajan_toimittajanumero) == "09871371") and ($rtuoteno[$i]["tuoteno"] == "300013" or $rtuoteno[$i]["tuoteno"] == "300023" or $rtuoteno[$i]["tuoteno"] == "300027")) {
-
-				if ($rtuoteno[$i]["tuoteno"] == "300013") {
-					$rtuoteno[$i]["laskun_rahtikulu"] = (float) str_replace(",", ".", $tuotetieto->RowAmount);
-					$rtuoteno[$i]['osto_rivi_kulu'] = (float) str_replace(",", ".", $tuotetieto->RowAmount);
-					$rtuoteno[$i]['osto_rahti_alv'] = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
-				}
-				else {
-					$rtuoteno[$i]['osto_kulu'] = (float) str_replace(",", ".", $tuotetieto->RowAmount);
-					$rtuoteno[$i]['osto_kulu_alv'] = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
-				}
-			}
 
 			// maventa-case
 			$rtuoteno[$i]['ostotilausnro'] = $laskun_asiakkaan_tilausnumero;
@@ -147,9 +120,15 @@ if (count($tuotetiedot) > 0) {
 			if ($kauttalaskutus == "KAUTTALASKUTUS") {
 				$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
 			}
+			else {
+				$rtuoteno[$i]["kauttalaskutus"] = "";
+			}
 
-			$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ArticleName);
-			$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->RowVatExcludedAmount);
+			$rtuoteno[$i]["nimitys"] 			= pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName));
+			$rtuoteno[$i]["rivihinta"] 			= round((float) str_replace(",", ".", $tuotetieto->RowVatExcludedAmount), 2);
+			$rtuoteno[$i]["rivihinta_verolli"]	= round((float) str_replace(",", ".", $tuotetieto->RowAmount), 2);
+
+			$rivien_summa_yhteensa += $rtuoteno[$i]["rivihinta_verolli"];
 
 			$xvati = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 
@@ -157,7 +136,7 @@ if (count($tuotetiedot) > 0) {
 			$ealvi[$i] = $xvati;
 
 			$rtuoteno[$i]["ale"] = (float) str_replace(",", ".", $tuotetieto->RowDiscountPercent);
-			$rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->UnitPriceAmount);
+			$rtuoteno[$i]["hinta"] = round((float) str_replace(",", ".", $tuotetieto->UnitPriceAmount), 2);
 
 			// rivikommentti
 			$xrinfo = utf8_decode($tuotetieto->RowFreeText);
@@ -175,18 +154,20 @@ if (count($tuotetiedot) > 0) {
 				$rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuperäinen tilausnumero rivikommenttiin mukaan
 			}
 
-			$rtuoteno[$i]["kommentti"] = trim($rtuoteno[$i]["kommentti"]);
+			$rtuoteno[$i]["kommentti"] = trim(pupesoft_cleanstring($rtuoteno[$i]["kommentti"]));
 
 			$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
 
-			$rtuoteno[$i]["yksikko"] = $tuotetieto->DeliveredQuantity->attributes()->QuantityUnitCode;
-			$rtuoteno[$i]["tilaajanrivinro"] = $tuotetieto->RowIdentifier;
+			$rtuoteno[$i]["yksikko"] = trim($tuotetieto->DeliveredQuantity->attributes()->QuantityUnitCode);
+			$rtuoteno[$i]["tilaajanrivinro"] = trim($tuotetieto->RowIdentifier);
+			$rtuoteno[$i]["lapsi"] = "";
 		}
 		else {
 			//	Poistetaan tämä tietue
 			unset($rtuoteno[$i]);
 			$i--;
 		}
+
 		$i++;
 	}
 }

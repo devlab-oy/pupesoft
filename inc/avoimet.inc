@@ -464,7 +464,7 @@
 			echo "</thead>";
 			echo "<tbody>";
 
-			if (isset($workbook)) {
+			if (isset($worksheet)) {
 				$worksheet->write($excelrivi, 0, t("Ytunnus"), $format_bold);
 				$worksheet->write($excelrivi, 1, t("Nimi"), $format_bold);
 				$worksheet->write($excelrivi, 2, t("Maa"), $format_bold);
@@ -552,7 +552,7 @@
 
 					echo "</tr>";
 
-					if (isset($workbook)) {
+					if (isset($worksheet)) {
 						$worksheet->writeString($excelrivi, 0, tarkistahetu($trow["ytunnus"]));
 						$worksheet->writeString($excelrivi, 1, $trow["nimi"]);
 						$worksheet->writeString($excelrivi, 2, $trow["maa"]);
@@ -784,7 +784,7 @@
 			echo "</thead>";
 			echo "<tbody>";
 
-			if (isset($workbook)) {
+			if (isset($worksheet)) {
 				$worksheet->write($excelrivi,  0, t("Ytunnus"), $format_bold);
 				$worksheet->write($excelrivi,  1, t("Asiakasnro"), $format_bold);
 				$worksheet->write($excelrivi,  2, t("Nimi"), $format_bold);
@@ -856,7 +856,7 @@
 
 					echo "</tr>";
 
-					if (isset($workbook)) {
+					if (isset($worksheet)) {
 						$worksheet->writeString($excelrivi, 0, tarkistahetu($trow["ytunnus"]));
 						$worksheet->writeString($excelrivi, 1, $trow["asiakasnro"]);
 						$worksheet->writeString($excelrivi, 2, $trow["nimi"]);
@@ -968,7 +968,7 @@
 						echo "</td>";
 						echo "</tr>";
 
-						if (isset($workbook)) {
+						if (isset($worksheet)) {
 							if ($trow["tunnus"] != NULL) $worksheet->write($excelrivi, 0, tarkistahetu($trow["ytunnus"]));
 							else $worksheet->write($excelrivi, 0, "*".t("ei asiakasta")."*");
 							$worksheet->write($excelrivi, 1, $trow["asiakasnro"]);
@@ -1071,4 +1071,3 @@
 
 		echo "</table>";
 	}
-?>

@@ -66,6 +66,7 @@
 					tilausrivi AS tilausrivi_osto READ,
 					tilausrivi WRITE,
 					tilausrivin_lisatiedot AS tlt2 READ,
+					tilausrivin_lisatiedot AS tlt3 READ,
 					tilausrivin_lisatiedot WRITE,
 					toimitustapa READ,
 					tuote READ,

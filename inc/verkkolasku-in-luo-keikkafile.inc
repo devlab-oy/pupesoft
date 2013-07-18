@@ -105,7 +105,7 @@ $debug = 0;
 										AND toimi.tunnus = lasku.liitostunnus
 										AND toimi.tunnus = '{$trow['tunnus']}'
 										AND toimi.tyyppi != 'P'
-										AND toimi.asn_sanomat IN ('K', 'L'))
+										AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 						JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 														AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
@@ -139,7 +139,7 @@ $debug = 0;
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
 											AND toimi.tyyppi != 'P'
-											AND toimi.asn_sanomat IN ('K', 'L'))
+											AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
@@ -179,7 +179,7 @@ $debug = 0;
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
 											AND toimi.tyyppi != 'P'
-											AND toimi.asn_sanomat IN ('K', 'L'))
+											AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
@@ -216,7 +216,7 @@ $debug = 0;
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
 											AND toimi.tyyppi != 'P'
-											AND toimi.asn_sanomat IN ('K', 'L'))
+											AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
@@ -254,7 +254,7 @@ $debug = 0;
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
 											AND toimi.tyyppi != 'P'
-											AND toimi.asn_sanomat IN ('K', 'L'))
+											AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
@@ -287,7 +287,7 @@ $debug = 0;
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
 											AND toimi.tyyppi != 'P'
-											AND toimi.asn_sanomat IN ('K', 'L'))
+											AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
@@ -326,7 +326,7 @@ $debug = 0;
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
 											AND toimi.tyyppi != 'P'
-											AND toimi.asn_sanomat IN ('K', 'L'))
+											AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
@@ -362,7 +362,7 @@ $debug = 0;
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
 											AND toimi.tyyppi != 'P'
-											AND toimi.asn_sanomat IN ('K', 'L'))
+											AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
@@ -399,7 +399,7 @@ $debug = 0;
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
 											AND toimi.tyyppi != 'P'
-											AND toimi.asn_sanomat IN ('K', 'L'))
+											AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
@@ -431,7 +431,7 @@ $debug = 0;
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
 											AND toimi.tyyppi != 'P'
-											AND toimi.asn_sanomat IN ('K', 'L'))
+											AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
@@ -1052,6 +1052,7 @@ $debug = 0;
 			// K = tulee asn-sanoma ja lasku
 			// S = tulee vain sanoma   <--- ei tehdä mitään
 			// L = tulee vain lasku
+			// M = tulee vain maventa-lasku
 
 			// ei käsitellä erolistalle siirrettyjä rivejä.
 			if ($rtuoteno[$i]['status'] == 'E') continue;
@@ -1213,7 +1214,7 @@ $debug = 0;
 
 						if ($kohdistamatta <= 0) break;
 
-						$query = "SELECT kpl+varattu AS varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv1}'";
+						$query = "SELECT kpl+varattu AS varattu, perheid FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv1}'";
 						$kpl_chk_res = pupe_query($query);
 						$kpl_chk_row = mysql_fetch_assoc($kpl_chk_res);
 
@@ -1221,6 +1222,11 @@ $debug = 0;
 						$lisa_array[] = $tilriv1;
 						$split_array[] = $tilriv1;
 						$kohdistamatta -= $kpl_chk_row["varattu"];
+
+						if ($tilriv1 == $kpl_chk_row['perheid'] and !empty($rtuoteno[$i+1]["isa_olemassa"])) {
+							$rtuoteno[$i+1]["isat_array"][] = $tilriv1;
+						}
+
 						if ($debug == 1) {
 							echo "Laskuri: $laskuri Kohdistamatta: $kohdistamatta<br><br>";
 						}
@@ -1246,7 +1252,7 @@ $debug = 0;
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.tunnus = '{$trow['tunnus']}'
 													AND toimi.tyyppi != 'P'
-													AND toimi.asn_sanomat IN ('K', 'L'))
+													AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 									JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 																	AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 																	AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
@@ -1267,7 +1273,7 @@ $debug = 0;
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.tunnus = '{$trow['tunnus']}'
 													AND toimi.tyyppi != 'P'
-													AND toimi.asn_sanomat IN ('K', 'L'))
+													AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 									JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 																	AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 																	AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
@@ -1289,7 +1295,7 @@ $debug = 0;
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.tunnus = '{$trow['tunnus']}'
 													AND toimi.tyyppi != 'P'
-													AND toimi.asn_sanomat IN ('K', 'L'))
+													AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 									JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 																	AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 																	AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
@@ -1620,17 +1626,18 @@ $debug = 0;
 		}
 	}
 
-	// Jos kyseessä on TecCom oastolasku
+	// Jos kyseessä on TecCom ostolasku tai Maventa-lasku
 	if ($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == 'MAVENTAXML') {
 
 		// Mikäli toimittajalla on kenttä "asn_sanomat" arvoja, ja ne on
 		// K = tulee asn-sanoma ja lasku
 		// S = tulee vain sanoma   <--- ei tehdä mitään
 		// L = tulee vain lasku
+		// M = tulee vain maventa-lasku
 
 		// ensin ostoilta, sitten keikalta, sitten virheet.
 		// saadaan luoda keikka vain, jos tulee pelkkä lasku (eli toimittajan takana on asn_sanomat = 'L')
-		if ($virheet == 0 and count($ostoilla) > 0 and count($keikoilla) == 0 and ($trow['asn_sanomat'] == 'L' or ($trow['asn_sanomat'] == 'K' and $tullaan_virhetarkistuksesta))) {
+		if ($virheet == 0 and count($ostoilla) > 0 and count($keikoilla) == 0 and ($trow['asn_sanomat'] == 'L' or $trow['asn_sanomat'] == 'M' or ($trow['asn_sanomat'] == 'K' and $tullaan_virhetarkistuksesta))) {
 
 			if ($debug == 1) {
 				echo "Debug: kululaskut haara, count(ostoilla) > 0 and count(keikoilla) == 0 and virheet == 0<br><br>";

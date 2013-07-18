@@ -3321,6 +3321,11 @@ if ($tee == '') {
 		}
 	}
 
+	// Allr specific!
+	if (file_exists("${pupe_root_polku}/allr_kamppikset.php")) {
+		require("${pupe_root_polku}/allr_kamppikset.php");
+	}
+
 	echo "<br>";
 
 	$myyntikielto = '';
@@ -3853,7 +3858,7 @@ if ($tee == '') {
 		}
 
 		$kayttajan_hinta	= $hinta;
-		$kayttajan_netto 	= $netto;
+		$kayttajan_netto 	= strtoupper(trim($netto));
 		$kayttajan_var		= $var;
 		$kayttajan_kpl		= $kpl;
 		$kayttajan_alv		= $alv;
@@ -3971,7 +3976,7 @@ if ($tee == '') {
 			}
 
 			if (is_array($netto_array)) {
-				$netto = $netto_array[$tuoteno];
+				$netto = strtoupper(trim($netto_array[$tuoteno]));
 			}
 			else {
 				$netto = $kayttajan_netto;

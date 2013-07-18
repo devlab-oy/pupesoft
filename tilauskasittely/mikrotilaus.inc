@@ -313,14 +313,14 @@
 									foreach ($tuoteno_array as $tuoteno_temp) {
 
 										$params = array(
-											"trow"				=> $trow,
-											"laskurow"			=> $laskurow,
-											"kpl" 				=> $kpl_array[$tuoteno_temp],
-											"tuoteno"			=> $tuoteno_temp,
-											"hinta"				=> 0,
-											"varasto"			=> $varasto,
-											"varataan_saldoa"	=> "EI",
-											"kommentti"			=> $kommentti_array[$tuoteno_temp],
+											"trow"              => $trow,
+											"laskurow"          => $laskurow,
+											"kpl"               => $kpl_array[$tuoteno_temp],
+											"tuoteno"           => $tuoteno_temp,
+											"hinta"             => 0,
+											"varasto"           => $varasto,
+											"varataan_saldoa"   => "EI",
+											"kommentti"         => $kommentti_array[$tuoteno_temp],
 										);
 										lisaa_rivi($params);
 									}

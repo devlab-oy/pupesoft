@@ -447,8 +447,8 @@ if ($tee == 'I') {
 
 	if ($errormsg == '' and isset($summa) and (isset($osto_rahti) or isset($osto_kulu) or isset($osto_rivi_kulu))) {
 
-		if (!isset($osto_rahti)) $osto_rahti = 0;
-		if (!isset($osto_kulu)) $osto_kulu = 0;
+		if (!isset($osto_rahti)) 	 $osto_rahti = 0;
+		if (!isset($osto_kulu)) 	 $osto_kulu = 0;
 		if (!isset($osto_rivi_kulu)) $osto_rivi_kulu = 0;
 
 		if (abs($summa) - abs($osto_rahti) - abs($osto_kulu) - abs($osto_rivi_kulu) < 0) {
@@ -1924,16 +1924,16 @@ if ($tee == 'I') {
 		$viesti = $toimittajan_laskunumero." ".$viesti;
 	}
 
-	if (!isset($osto_rahti)) $osto_rahti = 0;
-	if (!isset($osto_kulu)) $osto_kulu = 0;
+	if (!isset($osto_rahti)) 	 $osto_rahti 	 = 0;
+	if (!isset($osto_kulu)) 	 $osto_kulu 	 = 0;
 	if (!isset($osto_rivi_kulu)) $osto_rivi_kulu = 0;
 
-	$osto_rahti = (float) $osto_rahti;
-	$osto_kulu = (float) $osto_kulu;
+	$osto_rahti 	= (float) $osto_rahti;
+	$osto_kulu 		= (float) $osto_kulu;
 	$osto_rivi_kulu = (float) $osto_rivi_kulu;
 
-	$osto_rahti_alv = (float) $osto_rahti_alv;
-	$osto_kulu_alv = (float) $osto_kulu_alv;
+	$osto_rahti_alv 	= (float) $osto_rahti_alv;
+	$osto_kulu_alv 		= (float) $osto_kulu_alv;
 	$osto_rivi_kulu_alv = (float) $osto_rivi_kulu_alv;
 
 	if (isset($osto_kulu_alv_verollisuus) and $osto_kulu_alv_verollisuus == 'X') {
@@ -2014,7 +2014,7 @@ if ($tee == 'I') {
 	}
 
 	// Tehdään oletustiliöinnit
-	$omasumma = round($summa * $vrow['kurssi'],2);
+	$omasumma = round($summa * $vrow['kurssi'], 2);
 	$omasumma_valuutassa = $summa;
 
 	$vassumma = -1 * $omasumma;
@@ -2136,16 +2136,15 @@ if ($tee == 'I') {
 
 				list($isumma[$i], $_arr) = ostolaskun_kulujen_tiliointi($summa, $isumma[$i]+$ialv[$i], $osto_rahti, $osto_kulu, $osto_rivi_kulu);
 
-				$ialv[$i] = round($isumma[$i] - $isumma[$i] / (1 + ($ivero[$i] / 100)),2);
+				$ialv[$i] = round($isumma[$i] - $isumma[$i] / (1 + ($ivero[$i] / 100)), 2);
 				$ialv_valuutassa[$i] = round($isumma_valuutassa[$i] - $isumma_valuutassa[$i] / (1 + ($ivero[$i] / 100)),2);
 
 				$isumma[$i] -= $ialv[$i];
 
 				if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == '') $isumma_varasto[$i] = $isumma[$i];
 
-				foreach($_arr as $_k => $_v) {
+				foreach ($_arr as $_k => $_v) {
 					if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
-
 					$laskun_kulut[${"{$_k}_alv"}][$_k] += $_v;
 				}
 			}

@@ -19185,33 +19185,32 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 		# $osto_rivi_kulu
 		## PALAUTETAAN TILIÖINTIRIVIN MUUTETTU ARVO
 
-		$osto_rahti = (float) $osto_rahti;
-		$osto_kulu = (float) $osto_kulu;
-		$osto_rivi_kulu = (float) $osto_rivi_kulu;
-
-		$til_sum_ratio = $tiliointirivin_summa / $laskun_summa;
+		$osto_rahti 	= (float) str_replace(",", ".", $osto_rahti);
+		$osto_kulu 		= (float) str_replace(",", ".", $osto_kulu);
+		$osto_rivi_kulu = (float) str_replace(",", ".", $osto_rivi_kulu);
+		$til_sum_ratio  = $tiliointirivin_summa / $laskun_summa;
 
 		$return_array = array(
-			'osto_rahti' => 0,
-			'osto_kulu' => 0,
+			'osto_rahti'	 => 0,
+			'osto_kulu' 	 => 0,
 			'osto_rivi_kulu' => 0
 		);
 
 		for ($ix = 1; $ix <= $yhtiorow['ostolaskun_kulutilit']; $ix++) {
 
-			if ($ix == 1 and trim($osto_rahti) != 0) {
-				$summa 			= str_replace(",", ".", $osto_rahti) * $til_sum_ratio;
-				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+			if ($ix == 1 and $osto_rahti != 0) {
+				$summa = $osto_rahti * $til_sum_ratio;
+				$tiliointirivin_summa = round($tiliointirivin_summa - $summa, 2);
 				$return_array['osto_rahti'] += $summa;
 			}
-			elseif ($ix == 2 and trim($osto_kulu) != 0) {
-				$summa 			= str_replace(",", ".", $osto_kulu) * $til_sum_ratio;
-				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+			elseif ($ix == 2 and $osto_kulu != 0) {
+				$summa = $osto_kulu * $til_sum_ratio;
+				$tiliointirivin_summa = round($tiliointirivin_summa - $summa, 2);
 				$return_array['osto_kulu'] += $summa;
 			}
-			elseif ($ix == 3 and trim($osto_rivi_kulu) != 0) {
-				$summa 			= str_replace(",", ".", $osto_rivi_kulu) * $til_sum_ratio;
-				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+			elseif ($ix == 3 and $osto_rivi_kulu != 0) {
+				$summa = $osto_rivi_kulu * $til_sum_ratio;
+				$tiliointirivin_summa = round($tiliointirivin_summa - $summa, 2);
 				$return_array['osto_rivi_kulu'] += $summa;
 			}
 		}
@@ -19455,7 +19454,10 @@ if (!function_exists("suuntalavan_tuotteet")) {
 		$tuotenolisa = trim($tuoteno) != "" ? "and tilausrivi.tuoteno = '{$tuoteno}'" : "";
 		# Haku eankoodilla
 		$eankoodi = mysql_real_escape_string($eankoodi);
-		$eankoodilisa = trim($eankoodi) != "" ? "and tuote.eankoodi = '{$eankoodi}'" : "";
+		if ($eankoodi != '') {
+			$tuotenumerot = hae_viivakoodilla($eankoodi);
+			$eankoodilisa = "and tilausrivi.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+		}
 
 		$tilriv = (int) $tilriv;
 
@@ -22556,6 +22558,7 @@ if (!function_exists("lisaa_rivi")) {
 		$olpaikalta         = (!empty($parametrit['olpaikalta']))         ? $parametrit['olpaikalta'] : '';          // pakotetaan myymään oletuspaikalta
 		$tuotenimitys       = (!empty($parametrit['tuotenimitys']))       ? $parametrit['tuotenimitys'] : '';        // tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
 		$tuotenimitys_force = (!empty($parametrit['tuotenimitys_force'])) ? $parametrit['tuotenimitys_force'] : '';  // tuotteen nimitys muutetaan systemitasolla
+		$kommentti          = (!empty($parametrit['kommentti']))          ? $parametrit['kommentti'] : '';           // rivikommentti
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			$ale_temp = str_replace(',', '.', $parametrit{'ale'.$alepostfix});
@@ -22599,7 +22602,8 @@ if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
 }
 
 if (!function_exists("saako_myyda_private_label")) {
-	function saako_myyda_private_label($asiakastunnus, $tuotenro, $alemaara = 1) {
+	function saako_myyda_private_label($asiakastunnus, $tuotenro, $alemaara = 1, $tarkistakaikkituotteet = FALSE) {
+		//$tarkistakaikkituotteet muuttujalla voidaan funktio pakottaa tutkimaan onko asiakashintoja/alennuksia olemassa, vaikka tuote olisikin normaali hinnasto-tuote (eli tarkistetaan kaikki tuotteet)
 		global $kukarow, $yhtiorow;
 
 		//haetaan ensin tutkittavan tuotteen tiedot
@@ -22611,7 +22615,7 @@ if (!function_exists("saako_myyda_private_label")) {
 		$trow = mysql_fetch_assoc($tuotetempres);
 
 		//katotaan kannattako edes tutkia - jos tuote ei ole private label sitä saa myydä => ei kannata tutkia | eli tutkitaan jos on private label
-		if ($trow["hinnastoon"] == "V") {
+		if ($trow["hinnastoon"] == "V" OR $tarkistakaikkituotteet) {
 
 			//haetaan asiakkaan tiedot
 			$query = "	SELECT tunnus liitostunnus, ytunnus, valkoodi, maa, ryhma, piiri
@@ -22649,5 +22653,37 @@ if (!function_exists("saako_myyda_private_label")) {
 			//tänne tullaan, jos tuote ei ees oo private label => saa myydä!
 			return TRUE;
 		}
+	}
+}
+
+if (!function_exists("hae_viivakoodilla")) {
+	function hae_viivakoodilla($viivakoodi) {
+		global $kukarow, $yhtiorow;
+
+		// Haetaan eankoodilla tuotenumeroa kolmesta eri paikkaa
+		$query = "	(SELECT tuoteno
+					FROM tuote
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND eankoodi = '{$viivakoodi}')
+					UNION
+					(SELECT tuoteno
+					FROM tuotteen_toimittajat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND viivakoodi = '{$viivakoodi}')
+					UNION
+					(SELECT tuotteen_toimittajat.tuoteno
+					FROM tuotteen_toimittajat_tuotenumerot
+					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio
+					AND tuotteen_toimittajat.tunnus = tuotteen_toimittajat_tuotenumerot.toim_tuoteno_tunnus)
+					WHERE tuotteen_toimittajat_tuotenumerot.yhtio = '{$kukarow['yhtio']}'
+					AND tuotteen_toimittajat_tuotenumerot.viivakoodi = '{$viivakoodi}')
+					LIMIT 200";
+		$chk_res = pupe_query($query);
+
+		while ($row = mysql_fetch_assoc($chk_res)) {
+			$viivakoodit[$row['tuoteno']] = $row['tuoteno'];
+		}
+
+		return $viivakoodit;
 	}
 }

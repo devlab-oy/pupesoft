@@ -793,7 +793,7 @@ if ($tee == "tilaa") {
 		$laskurow = mysql_fetch_array($result);
 
 		//	Hyväksynnän kautta
-		if ($kukarow["taso"] == 2) {
+		if ($kukarow["tilaus_valmis"] == 2) {
 			$query  = "	UPDATE lasku set
 						tila = 'N',
 						alatila='F'

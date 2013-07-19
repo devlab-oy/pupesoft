@@ -1295,7 +1295,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	else {
 		//Jos käyttäjä on myymässä tuotteita ulkomaan varastoista, niin laitetaan tilaus holdiin
 		if ($toimitetaan_ulkomaailta == "YES" and $kukarow["tilaus_valmis"] == "3") {
-			$kukarow["tilaus_valmis"] = 2;
+			$kukarow["tilaus_valmis"] = "2";
 		}
 
 		//katotaan onko asiakkaalla yli 30 päivää vanhoja maksamattomia laskuja
@@ -1317,12 +1317,12 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 			//ja jos on niin ne siirretään tilaus holdiin
 			if ($saarow['dd'] > 0) {
-				$kukarow["tilaus_valmis"] = 2;
+				$kukarow["tilaus_valmis"] = "2";
 			}
 		}
 
 		// Käyttäjä jonka tilaukset on hyväksytettävä
-		if ($kukarow["tilaus_valmis"] == 2) {
+		if ($kukarow["tilaus_valmis"] == "2") {
 			$query  = "	UPDATE lasku set
 						tila = 'N',
 						alatila='F'
@@ -7765,7 +7765,7 @@ if ($tee == '') {
 					echo "</form></td>";
 				}
 			}
-			elseif ($kukarow['tilaus_valmis'] != '4' and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U')) {
+			elseif ($kukarow['tilaus_valmis'] != "4" and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U')) {
 
 				echo "<form name='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>
 					<input type='hidden' name='toim' value='$toim'>

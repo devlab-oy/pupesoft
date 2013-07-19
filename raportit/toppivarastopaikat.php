@@ -471,7 +471,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), 1, 0)) kpl_12,
 					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), tilausrivi.kpl, 0)) tuo_kpl_12,
 					'".t("Ei tiedossa")."' poistettu,
-					1 as onko_paikalta_keratty
+					0 as onko_paikalta_keratty
 					FROM tuotepaikat
 					JOIN tuote
 					ON (tuotepaikat.yhtio = tuote.yhtio

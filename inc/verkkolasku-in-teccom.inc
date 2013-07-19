@@ -3,6 +3,7 @@
 	// Bosch Teccom -case
 	$xml = isset($xml->ArchivedDocument->Invoice) ? $xml->ArchivedDocument->Invoice : $xml;
 
+	$kukarow['yhtio']		= "artr";
 	$laskuformaatti 		= "TECCOM-INVOICE";
 	$yhtio 					= "20428100"; 		//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber;
 	$verkkotunnus_vas		= "003720428100";	//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber; 	// joissakin materiaaleissa viallista materiaalia.
@@ -233,16 +234,12 @@
 
 			if (mysql_num_rows($chk_res) == 0) {
 				// haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan myös hakea vaihtoehtoinen tuotenumero ilman että
-				// tiedetään tarkkaa laskuaineistossa tulevaa tuotenumeroa, kunhan tuntemattomat merkit on ilmoitettu tähdillä
-				for ($kpl = 0; $kpl < strlen($rtuoteno[$i]['tuoteno']); $kpl++) {
-					$chk_res = tuotteen_toimittajat_tuotenumerot_haku($rtuoteno[$i]['tuoteno'], $laskuttajan_toimittajanumero, $kpl);
-
-					if (mysql_num_rows($chk_res) != 0) {
-						$chk_row = mysql_fetch_assoc($chk_res);
-						$rtuoteno[$i]['tuoteno'] = $chk_row['toim_tuoteno'];
-						break;
-					}
-				}
+				$chk_res = tuotteen_toimittajat_tuotenumerot_haku($rtuoteno[$i]['tuoteno'], $laskuttajan_toimittajanumero);
+				
+				if (mysql_num_rows($chk_res) != 0) {
+					$chk_row = mysql_fetch_assoc($chk_res);
+					$rtuoteno[$i]['tuoteno'] = $chk_row['toim_tuoteno'];
+				}											
 			}
 
 			if ($rtuoteno[$i]["tuoteno"] != "") {

@@ -3347,7 +3347,7 @@
 			$kurssi = $apukurssi;
 		}
 
-		if (!($toim == 'TARJOUS' or $toim == 'EXTTARJOUS')) {
+		if (($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
 			//Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
 			//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
 			if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {

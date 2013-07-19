@@ -22,13 +22,13 @@ $result = pupe_query($query);
 $tilausrivit = array();
 
 while ($tilausrivi = mysql_fetch_assoc($result)) {
-    $tilausrivit[] = $tilausrivi;
-    //setataan muuttujat monta kertaa
-    $tarjouksen_asiakkaat = $tilausrivi['sopimus_lisatietoja'];
-    $clearing = $tilausrivi['clearing'];
+	$tilausrivit[] = $tilausrivi;
+	//setataan muuttujat monta kertaa
+	$tarjouksen_asiakkaat = $tilausrivi['sopimus_lisatietoja'];
+	$clearing = $tilausrivi['clearing'];
 	$alkuperainen_varasto = $tilausrivi['varasto'];
-    $viimeinen_voimassaolo_pvm = $tilausrivi['olmapvm'];
-    $saate_teksti = $tilausrivi['saate'];
+	$viimeinen_voimassaolo_pvm = $tilausrivi['olmapvm'];
+	$saate_teksti = $tilausrivi['saate'];
 	$tilaustyyppi = $tilausrivi['tilaustyyppi'];
 }
 
@@ -37,14 +37,14 @@ $tarjouksen_asiakkaat = explode(',', $tarjouksen_asiakkaat);
 $dummy_tarjouksen_tilausnumero = $tilausnumero;
 
 foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
-    $kukarow['kesken'] = 0;
+	$kukarow['kesken'] = 0;
 
-    if ($toim == "EXTTARJOUS") {
-        $tilausnumero = luo_myyntitilausotsikko('TARJOUS', $tarjous_asiakas);
-    }
-    else {
-        $tilausnumero = luo_myyntitilausotsikko('ENNAKKO', $tarjous_asiakas);
-    }
+	if ($toim == "EXTTARJOUS") {
+		$tilausnumero = luo_myyntitilausotsikko('TARJOUS', $tarjous_asiakas, '', '', '', '', '', '', $clearing);
+	}
+	else {
+		$tilausnumero = luo_myyntitilausotsikko('ENNAKKO', $tarjous_asiakas, '', '', '', '', '', '', $clearing);
+	}
 
 	//Halutaan pitää asiakkaille kopioitavissa tarjouksissa myyjän valitsema varasto
 	$query = "	UPDATE lasku
@@ -58,54 +58,56 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 				AND lasku.tunnus = '{$tilausnumero}'";
 	pupe_query($query);
 
-    $query = "  SELECT *
+	$query = "  SELECT *
                 FROM lasku
                 JOIN laskun_lisatiedot
                 ON ( laskun_lisatiedot.yhtio = lasku.yhtio
                     AND laskun_lisatiedot.otunnus = lasku.tunnus )
                 WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                 AND lasku.tunnus = '{$tilausnumero}'";
-    $result = pupe_query($query);
+	$result = pupe_query($query);
 
-    $laskurow = mysql_fetch_assoc($result);
+	$laskurow = mysql_fetch_assoc($result);
 
-    $kukarow['kesken'] = $tilausnumero;
+	$kukarow['kesken'] = $tilausnumero;
 
-    foreach ($tilausrivit as $tilausrivi) {
-        if ($tilausrivi['tunnus'] == $tilausrivi['perheid'] or $tilausrivi['perheid'] == 0) {
-            $trow = hae_tuote($tilausrivi['tuoteno']);
-            if ($toim == "EXTTARJOUS") {
-                $netto = "N";
-            }
-            else {
-                $netto = '';
-                $query = "  SELECT selite AS ennakko_pros_a
+	foreach ($tilausrivit as $tilausrivi) {
+		if ($tilausrivi['tunnus'] == $tilausrivi['perheid'] or $tilausrivi['perheid'] == 0) {
+			$trow = hae_tuote($tilausrivi['tuoteno']);
+			if ($toim == "EXTTARJOUS") {
+				$netto = "N";
+			}
+			else {
+				$netto = '';
+				$query = "  SELECT selite AS ennakko_pros_a
                         FROM tuotteen_avainsanat
                         WHERE yhtio = '{$kukarow['yhtio']}'
                         AND tuoteno = '{$tuoteno}'
                         AND laji = 'parametri_ennakkoale_a'
                         AND selite != ''";
-                $result = pupe_query($query);
-                $tuotteen_hinta = mysql_fetch_assoc($result);
-                if ($tuotteen_hinta === false) {
-                    $hinta = 0;
-                }
-                else {
-                    $hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
-                }
-            }
-            $parametrit = array(
-                'trow' => $trow,
-                'laskurow' => $laskurow,
-                'kpl' => ($tilausrivi['varattu'] + $tilausrivi['jt']),
-                'netto' => $netto,
-                'hinta' => $hinta,
-            );
-            lisaa_rivi($parametrit);
-        }
-    }
+				$result = pupe_query($query);
+				$tuotteen_hinta = mysql_fetch_assoc($result);
+				if ($tuotteen_hinta === false) {
+					$hinta = 0;
+				}
+				else {
+					$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
+				}
+			}
+			$parametrit = array(
+				'trow'				 => $trow,
+				'tuoteno'			 => $trow['tuoteno'],
+				'laskurow'			 => $laskurow,
+				'kpl'				 => ($tilausrivi['varattu'] + $tilausrivi['jt']),
+				'netto'				 => $netto,
+				'hinta'				 => $hinta,
+				'varataan_saldoa'	 => 'EI',
+			);
+			lisaa_rivi($parametrit);
+		}
+	}
 
-    require_once('tilaus-valmis.inc');
+	require_once('tilaus-valmis.inc');
 }
 
 $query = "  DELETE FROM lasku

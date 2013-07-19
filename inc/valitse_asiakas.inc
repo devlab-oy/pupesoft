@@ -60,7 +60,7 @@ else {
 
 // lis‰‰ tai poista asiakkaita dummytarjoukselta
 if ($request['action'] == 'liita_asiakkaat') {
-    luo_myyntitilausotsikko($dummy_tyyppi, $asiakasid, $request['tilausnumero']);
+    luo_myyntitilausotsikko($dummy_tyyppi, $asiakasid, $request['tilausnumero'], '', '', '', '', $valitut_asiakastunnukset, '');
 }
 elseif ($request['action'] == 'poista_asiakkaat') {
     poista_asiakkaita_dummytarjoukselta($request['tilausnumero'], $request['valitut_asiakastunnukset']);

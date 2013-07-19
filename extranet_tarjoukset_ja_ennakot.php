@@ -269,13 +269,13 @@ function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappale
 			}
 		}
 		// P‰ivitet‰‰n k‰ytt‰j‰n lis‰‰m‰t kommentit ja vaihdetaan tila/alatila Ennakko/Lep‰‰m‰ss‰
-		 $query = "	UPDATE lasku
+		$query = "	UPDATE lasku
 					SET sisviesti1='{$syotetyt_lisatiedot}',
 					tila='E',
 					alatila='A'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$valittu_tarjous_tunnus}'";
-		 pupe_query($query);
+		pupe_query($query);
 		return true;
 	}
 	else {

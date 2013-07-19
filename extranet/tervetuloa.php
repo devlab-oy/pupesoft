@@ -127,7 +127,7 @@ if ($tee == '') {
 			require ("saatanat.php");
 		}
 	}
-    $exttarjousten_lukumaara = hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset(57620); //HALOO
+    $exttarjousten_lukumaara = hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset($kukarow['oletus_asiakas']);
     if($exttarjousten_lukumaara > 0) {
         echo "<table border='1'>";
         echo "<tr>";

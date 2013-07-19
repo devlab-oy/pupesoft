@@ -20963,28 +20963,26 @@ if (!function_exists('valid_date')) {
 	);
  */
 if (!function_exists('echo_rows_in_table')) {
+	function echo_rows_in_table(&$rivit, $header_values = array(), $force_to_string = array(), $callback = '') {
+		echo "<table>";
+		if (count($rivit) > 0) {
+			$_temp = search_array_key_recursive($header_values, 'order');
+			if (!empty($_temp)) {
+				_two_dimensional_array_sort_by_key($header_values, 'order');
 
-    function echo_rows_in_table(&$rivit, $header_values = array(), $force_to_string = array(), $callback = '') {
-        echo "<table>";
-        if (count($rivit) > 0) {
-            $_temp = search_array_key_recursive($header_values, 'order');
-            if (!empty($_temp)) {
-                _two_dimensional_array_sort_by_key($header_values, 'order');
-
-                _echo_ordered_table_headers($rivit[0], $header_values);
-                _echo_ordered_table_rows($rivit, $header_values, $force_to_string, $callback);
-            }
-            else {
-                _echo_table_headers($rivit[0], $header_values);
-                _echo_table_rows($rivit, $force_to_string, $callback);
-            }
-        }
-        else {
-            echo "<tr><td>" . t("Ei tulostettavia rivejä") . "</td></tr>";
-        }
-        echo "</table>";
-    }
-
+				_echo_ordered_table_headers($rivit[0], $header_values);
+				_echo_ordered_table_rows($rivit, $header_values, $force_to_string, $callback);
+			}
+			else {
+				_echo_table_headers($rivit[0], $header_values);
+				_echo_table_rows($rivit, $force_to_string, $callback);
+			}
+		}
+		else {
+			echo "<tr><td>".t("Ei tulostettavia rivejä")."</td></tr>";
+		}
+		echo "</table>";
+	}
 }
 
 if(!function_exists('_echo_table_headers')) {
@@ -22576,16 +22574,23 @@ if (!function_exists("lisaa_rivi")) {
 	}
 }
 if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
-    function hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset($kuka_tunnus) {
+    function hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset($oletus_asiakas) {
         global $kukarow, $yhtiorow;
+
+		if (empty($oletus_asiakas)) {
+			return 0;
+		}
 
         $query = "  SELECT count(*) as luku
                     FROM lasku
-                    JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.tunnus='{$kuka_tunnus}')
+                    JOIN asiakas 
+					ON ( asiakas.yhtio = lasku.yhtio
+						AND asiakas.tunnus = lasku.liitostunnus
+						AND asiakas.tunnus = '{$oletus_asiakas}' )
                     WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                    AND lasku.tila='t'
-                    AND lasku.alatila=''
-                    AND lasku.clearing='exttarjous'"; 
+                    AND lasku.tila = 'T'
+                    AND lasku.alatila = ''
+					AND lasku.clearing = 'EXTTARJOUS'";
         $result = pupe_query($query);
 
         $tarjousten_lukumaara = mysql_fetch_assoc($result);

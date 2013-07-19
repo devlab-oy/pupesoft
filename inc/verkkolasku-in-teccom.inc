@@ -204,19 +204,6 @@
 		$laskuttajan_valkoodi = $xml->InvoiceHeader->Currency;
 	}
 
-	// Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, että se on ovtmuodossa
-	if (strlen($yhtio) != 18 or strtoupper(substr($yhtio,0,2)) != "FI") {
-		// Varmistetaan, että tunnus on ovtunnus muodossa
-		$yhtio = preg_replace("/[^0-9]/", "", $yhtio);
-
-		if (strpos($yhtio, "0037") === FALSE) {
-			$yhtio = "0037".$yhtio;
-		}
-	}
-
-	// Varmistetaan, että tunnus on ytunnus muodossa (Finvoicessa täällä tulee siis vastanottajan ytunnus FI etuliitteellä)
-	$verkkotunnus_vas = preg_replace("/[^0-9]/", "", $verkkotunnus_vas);
-
 	// Käsitellään tuoterivit
 	$tuotetiedot			= $xml->InvoiceDetail;
 	$i						= 0;
@@ -231,7 +218,7 @@
 		foreach ($tuotetiedot as $tuotetieto) {
 
 			if ($laskuttajan_toimittajanumero == "123085") {
-				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductDescription->ProductName1));
+				$rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductDescription->ProductName1));
 			}
 
 			// tuotekoodi
@@ -240,7 +227,7 @@
 			$query = "	SELECT tt.*
 						FROM tuotteen_toimittajat AS tt
 						JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}' AND toimi.tyyppi != 'P')
-						WHERE tt.yhtio = '{$kukarow['yhtio']}'
+						WHERE tt.yhtio = 'artr'
 						AND tt.toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
 			$chk_res = pupe_query($query);
 
@@ -307,7 +294,7 @@
 					}
 				}
 
-				$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"];
+				$rtuoteno[$i]["hinta"] = round($rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"], 2);
 
 				$query = "	SELECT tuotteen_toimittajat.tuotekerroin
 							FROM toimi
@@ -315,7 +302,7 @@
 														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 														AND tuotteen_toimittajat.toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'
 														AND tuotteen_toimittajat.toim_tuoteno != '')
-							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+							WHERE toimi.yhtio = 'artr'
 							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
 							AND toimi.tyyppi != 'P'
 							AND toimi.asn_sanomat IN ('K', 'L')";
@@ -325,7 +312,7 @@
 					$tuotekerroin_chk_row = mysql_fetch_assoc($tuotekerroin_chk_res);
 
 					if ($tuotekerroin_chk_row['tuotekerroin'] != 0) {
-						$rtuoteno[$i]['kpl'] /= $tuotekerroin_chk_row['tuotekerroin'];
+						$rtuoteno[$i]['kpl'] = round($rtuoteno[$i]['kpl'] / $tuotekerroin_chk_row['tuotekerroin'], 2);
 					}
 				}
 
@@ -423,7 +410,7 @@
 												AND tuoteperhe.tyyppi IN ('P','')
 												AND tuoteperhe.ohita_kerays != '')
 											JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
-											WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+											WHERE toimi.yhtio = 'artr'
 											AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
 											AND toimi.tyyppi != 'P'
 											AND toimi.asn_sanomat IN ('K', 'L')";
@@ -436,7 +423,6 @@
 									$x = $i + 1;
 
 									$rtuoteno[$x]['tuoteno'] 			= $child_chk_row['tuoteno'];
-									$rtuoteno[$x]['tuoteno2'] 			= $child_chk_row['tuoteno'];
 									$rtuoteno[$x]['ostotilausnro'] 		= $rtuoteno[$i]['ostotilausnro'];
 									$rtuoteno[$x]['tilaajanrivinro'] 	= $rtuoteno[$i]['tilaajanrivinro'];
 									$rtuoteno[$x]['kpl'] 				= $rtuoteno[$i]['kpl'];

@@ -1354,7 +1354,7 @@ $debug = 0;
 
 								if (mysql_num_rows($chk_res) == 0) {
 									if ($debug == 1) {
-										echo "3 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] (perheid: $tilausrivirow[perheid]) tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br>";
+										echo "3 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] (perheid: $tilausrivirow[perheid]) tuoteno {$rtuoteno[$i]['tuoteno']}<br>";
 										echo "3 Debug Kokeiltiin $kokeiltiin[tunnus] riviä jonka perheid oli $kokeiltiin[perheid] ja uusiotunnus $kokeiltiin[uusiotunnus] ja otunnus $kokeiltiin[otunnus]<br><br>";
 									}
 									// $virheet++;
@@ -1573,7 +1573,7 @@ $debug = 0;
 
 				// ei löydy tai joku muu virhe
 				#echo "Virheellisiä kappalemääriä tilauksella ".$rtuoteno[$i]["ostotilausnro"]." tuote ".$rtuoteno[$i]["tuoteno"]." kpl ".$rtuoteno[$i]["kpl"]."\n";
-				#echo "7 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3: {$rtuoteno[$i]['tuoteno3']}<br><br>";
+				#echo "7 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']}<br><br>";
 				$virheet++;
 				continue;
 			}

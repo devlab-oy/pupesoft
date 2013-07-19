@@ -1240,13 +1240,13 @@ if ($kasitellaan_tiedosto) {
 
 						if (substr($trows[$table_mysql.".".$otsikko],0,7) == "decimal" or substr($trows[$table_mysql.".".$otsikko],0,4) == "real") {
 
-							//korvataan decimal kenttien pilkut pisteillä...
+							// Korvataan decimal kenttien pilkut pisteillä...
 							$taulunrivit[$taulu][$eriviindex][$r] = str_replace(",", ".", $taulunrivit[$taulu][$eriviindex][$r]);
 
 							$desimaali_talteen = (float) $taulunrivit[$taulu][$eriviindex][$r];
 
 							// Jos MySQL kentässä on desimaaleja, pyöristetään luku sallittuun tarkkuuteen
-							if ($tdecimal[$table_mysql.".".$otsikko] > 0) {
+							if ($tdecimal[$table_mysql.".".$otsikko] > 0 and $desimaali_talteen != -0) {
 								$taulunrivit[$taulu][$eriviindex][$r] = round($taulunrivit[$taulu][$eriviindex][$r], $tdecimal[$table_mysql.".".$otsikko]);
 							}
 

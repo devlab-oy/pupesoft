@@ -147,7 +147,8 @@
 				$ok = 1;
 				$projekti = $xrow['projekti'];
 			}
-			if ($xrow['manuaali_esto'] != '') {
+			
+			if ($xrow['manuaali_esto'] != '' and (!isset($avaavatase) or $avaavatase != 'joo')) {
 				$virhe .= t("Tilille on asetettu manuaalisen lisäyksen/muokkauksen esto")."!";
 				$ok = 1;
 			}

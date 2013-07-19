@@ -34,7 +34,7 @@
 	// setataan käytetyt muuttujat:
 	$asn_numero					= "";
 	$kukarow["kuka"] 			= "crond";
-	$poikkeukset 				= array("123001", "123067", "123310", "123312", "123342", "123108", "123036", "123049", "123317","123441","123080","123007","123453");
+	$poikkeukset 				= array("123001", "123067", "123310", "123312", "123342", "123108", "123036", "123049", "123317","123441","123080","123007","123453","123506","123110");
 	$tavarantoimittajanumero 	= "";
 	$tiedosto_sisalto			= "";
 	$toimituspvm				= "";
@@ -190,11 +190,11 @@
 						$laatikko = utf8_decode($laatikko);
 						$koodi = $laatikko;
 
-						if (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123049" or $tavarantoimittajanumero == "123108") and strlen($laatikko) >10) {
+						if (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123049" or $tavarantoimittajanumero == "123108" or $tavarantoimittajanumero == "123506" or $tavarantoimittajanumero == "123110") and strlen($laatikko) >10) {
 							$parameters["sscc"] = $laatikko;
 							$parameters["laatikkoind"] = substr($laatikko,10);
 						}
-						elseif (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123108") and strlen($laatikko) < 10) {
+						elseif (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123108" or $tavarantoimittajanumero == "123506" or $tavarantoimittajanumero == "123110") and strlen($laatikko) < 10) {
 							$parameters["sscc"] = $laatikko;
 							$parameters["laatikkoind"] = '0'.$laatikko;
 						}

@@ -772,6 +772,38 @@ class Unifaun {
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['paino'])); # Weight
 		$uni_par_val->addAttribute('n', "weight");
 
+		$query = "	SELECT koodi, pakkauksen_sarman_minimimitta
+					FROM rahdinkuljettajat
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
+					AND koodi   = '{$this->toitarow['rahdinkuljettaja']}'";
+		$rahdinkuljettajat_result = pupe_query($query);
+		$rahdinkuljettaja_rivi = mysql_fetch_assoc($rahdinkuljettajat_result);
+
+		if (empty($rahdinkuljettaja_rivi['pakkauksen_sarman_minimimitta'])) {
+			$pakkauksen_sarman_minimimitta = 0.25;
+		}
+		else {
+			$pakkauksen_sarman_minimimitta = $rahdinkuljettaja_rivi['pakkauksen_sarman_minimimitta'];
+		}
+
+		$pakkaustiedot['syvyys'] = $pakkaustiedot['syvyys'] < $pakkauksen_sarman_minimimitta ? $pakkauksen_sarman_minimimitta : $pakkaustiedot['syvyys'];
+		$pakkaustiedot['leveys'] = $pakkaustiedot['leveys'] < $pakkauksen_sarman_minimimitta ? $pakkauksen_sarman_minimimitta : $pakkaustiedot['leveys'];
+
+		/*
+		Otamme pakkauksen kaksi mittaa (pohjan mitat) syvyys ja leveys, korkeuden laskemme tilavuudesta jakamalla tilavuuden pohjan alalla.
+		Teoreettisesti ajatelle näin saisimme tarkimmin viedyksi rahtitietoihin kollin mitat.
+		Pohjan alahan ei muutu, mutta pakkausta puukotetaan matalammaksi (pahvilaatikon reunoja leikataan/viikataan matalammaksi)
+		tai lavapakkausta rakennetaan alhaalta ylöspäin niin korkealle kuin tavaraa on laittaa.
+		*/
+		if ($pakkaustiedot['kuutiot'] > 0) {
+			$pakkaustiedot['korkeus'] = $pakkaustiedot['kuutiot'] / ($pakkaustiedot['syvyys'] * $pakkaustiedot['leveys']);
+			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < $pakkauksen_sarman_minimimitta ? $pakkauksen_sarman_minimimitta : round($pakkaustiedot['korkeus'], 2);
+		}
+		else {
+			$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < $pakkauksen_sarman_minimimitta ? $pakkauksen_sarman_minimimitta : $pakkaustiedot['korkeus'];
+			$pakkaustiedot['kuutiot'] = $pakkaustiedot['korkeus'] * $pakkaustiedot['leveys'] * $pakkaustiedot['syvyys'];
+		}
+
 		$pakkaustiedot['kuutiot'] = $pakkaustiedot['kuutiot'] < 0.01 ? 0.01 : $pakkaustiedot['kuutiot'];
 
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['kuutiot'])); # Volume
@@ -781,10 +813,6 @@ class Unifaun {
 			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['lavametri'])); # Loadmeter. Can only be specified for entire shipment.
 			$uni_par_val->addAttribute('n', "area");
 		}
-
-		$pakkaustiedot['syvyys']  = $pakkaustiedot['syvyys']  < 0.25 ? 0.25 : $pakkaustiedot['syvyys'];
-		$pakkaustiedot['leveys']  = $pakkaustiedot['leveys']  < 0.25 ? 0.25 : $pakkaustiedot['leveys'];
-		$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < 0.25 ? 0.25 : $pakkaustiedot['korkeus'];
 
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['syvyys'])); # Length
 		$uni_par_val->addAttribute('n', "length");

@@ -451,12 +451,6 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 
 	$group = substr($group, 0, -1);
 	if (!empty($kerayksettomat_tuotepaikat)) {
-		$kerayksettomat_tuotepaikat_where = str_replace('tilausrivi', 'tuotepaikat', $tuotepaikka_where);
-
-		$kerayksettomat_tuotepaikat_date = str_replace('tilausrivi.laskutettuaika', 'tuotepaikat.luontiaika', $_date);
-
-		$kerayksettomat_tuotepaikat_group = str_replace('tilausrivi', 'tuotepaikat', $group);
-
 		$kerayksettomat_tuotepaikat_varaston_hyllypaikat_join = str_replace('tilausrivi', 'tuotepaikat', $varaston_hyllypaikat_join);
 
 		$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,

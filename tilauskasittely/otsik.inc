@@ -526,7 +526,7 @@
 		elseif ($toim == "TARJOUS") {
 			echo "<font class='head'>".t("Tarjouksen otsikko")."</font><hr>";
 		}
-        elseif ($toim == "EXTTARJOUS") {
+		elseif ($toim == "EXTTARJOUS") {
 			echo "<font class='head'>".t("Ext-Tarjouksen otsikko")."</font><hr>";
 		}
 		elseif ($toim == "PROJEKTI") {
@@ -1188,9 +1188,9 @@
 				echo "<tr><th colspan='4'>".t("Tarjouksen tiedot").":</th></tr>";
 
 			}
-            elseif ($toim == 'EXTTARJOUS') {
-                echo "<tr><th colspan='4'>".t("Ext-Tarjouksen tiedot").":</th></tr>";
-            }
+			elseif ($toim == 'EXTTARJOUS') {
+				echo "<tr><th colspan='4'>".t("Ext-Tarjouksen tiedot").":</th></tr>";
+			}
 			elseif ($toim == "PROJEKTI") {
 				echo "<tr><th colspan='4'>".t("Projektin tiedot").":</th></tr>";
 
@@ -2757,7 +2757,7 @@
 			elseif ($toim == "TARJOUS") {
 				echo "<tr><th colspan='3'>".t("Tarjouksen kommentit").":</th></tr>";
 			}
-            elseif ($toim == "EXTTARJOUS") {
+			elseif ($toim == "EXTTARJOUS") {
 				echo "<tr><th colspan='3'>".t("Ext-Tarjouksen kommentit").":</th></tr>";
 			}
 			elseif ($toim == "PROJEKTI") {
@@ -2822,9 +2822,9 @@
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>".t("keräyslista")." + ".t("valmistus")."</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>".t("lasku")."</td></tr>";
 			echo "<tr><td>".t("Sisäinen viesti").":</td><td><textarea name='sisviesti3' rows='2' cols='40'>$srow[sisviesti3]</textarea></td><td></td></tr>";
-            if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "EXTENNAKKO") {
-                echo "<tr><td>".t("Saateteksti").":</td><td><textarea name='saate' rows='2' cols='40'>$srow[saate]</textarea></td><td></td></tr>";
-            }
+			if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "EXTENNAKKO") {
+				echo "<tr><td>".t("Saateteksti").":</td><td><textarea name='saate' rows='2' cols='40'>$srow[saate]</textarea></td><td></td></tr>";
+			}
 			echo "</table><br>";
 
 			echo "<table>";
@@ -3506,7 +3506,7 @@
 			}
 			$tee = "";
 		}
-        elseif ($toim == "EXTTARJOUS") {
+		elseif ($toim == "EXTTARJOUS") {
 			if ($ylatila=='') {
 				$ylatila='T';
 			}

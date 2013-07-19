@@ -90,6 +90,11 @@ $debug = 0;
 
 			$kaytettavat_tilausrivit = array();
 
+			// Jos tuoteno on tyhjä niin unohdetaan koko juttu
+			if (trim($data['tuoteno']) == "") {
+				return $kaytettavat_tilausrivit;
+			}
+
 			// tiukka 1
 			$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 						FROM tilausrivi
@@ -1074,10 +1079,12 @@ $debug = 0;
 			}
 
 			$kaytettavat_tilausrivit = etsi_sopivat_tilausrivit($rtuoteno[$i], $lajilisa, $trow, $isalisa, $debug);
+
 			if ($debug == 1) {
 				echo "<br>Katottiin etsi_sopivat_tilausrivit<br>";
 				echo "<pre>",var_dump($kaytettavat_tilausrivit),"</pre>";
 			}
+
 			if (count($kaytettavat_tilausrivit) > 0) {
 				if ($debug == 1) {
 					echo "<br>Käytettävät tilausrivit <pre>",var_dump($kaytettavat_tilausrivit),"</pre>";

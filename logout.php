@@ -4,10 +4,13 @@
 
 	require ("inc/parametrit.inc");
 
-	$query = "UPDATE kuka set session='', kesken='' where session='$session'";
-	$result = mysql_query($query) or pupe_error($query);
+	$query = "	UPDATE kuka SET 
+				session = '', 
+				kesken = '' 
+				WHERE session = '$session'";
+	$result = pupe_query($query);
 
-	$bool = setcookie("pupesoft_session", "", time()-43200, parse_url($palvelin, PHP_URL_PATH));
+	$bool = setcookie("pupesoft_session", "", time()-43200, "/");
 
 	echo "<html>
 		<head>
@@ -37,4 +40,3 @@
 	}
 
 	echo "</body>\n</html>";
-?>

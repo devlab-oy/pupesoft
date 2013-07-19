@@ -43,41 +43,27 @@ if ($livesearch_tee == "TILIHAKU") {
 }
 
 if ($excel == "YES") {
-	if (include('Spreadsheet/Excel/Writer.php')) {
+	include('inc/pupeExcel.inc');
 
-		//keksitään failille joku varmasti uniikki nimi:
-		list($usec, $sec) = explode(' ', microtime());
-		mt_srand((float) $sec + ((float) $usec * 100000));
-		$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-		$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-		$workbook->setVersion(8);
-		$worksheet =& $workbook->addWorksheet('Sheet 1');
-
-		$format_bold =& $workbook->addFormat();
-		$format_bold->setBold();
-
-		$excelrivi = 0;
-	}
+	$worksheet 	 = new pupeExcel();
+	$format_bold = array("bold" => TRUE);
+	$excelrivi   = 0;
 }
 
 require ("inc/".$toim.".inc");
 
-if (isset($workbook) and $excelrivi > 0) {
-	// We need to explicitly close the workbook
-	$workbook->close();
+if (isset($worksheet) and $excelrivi > 0) {
+	$excelnimi = $worksheet->close();
 
 	echo "<br><br><table>";
-	echo "<tr><th>".t("Tallenna Excel").":</th>";
+	echo "<tr><th>".t("Tallenna tulos").":</th>";
 	echo "<form method='post' class='multisubmit'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-	echo "<input type='hidden' name='kaunisnimi' value='".ucfirst(strtolower($toim)).".xls'>";
+	echo "<input type='hidden' name='kaunisnimi' value='".ucfirst(strtolower($toim)).".xlsx'>";
 	echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 	echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 	echo "</table><br>";
 }
 
 require ("inc/footer.inc");
-
-?>

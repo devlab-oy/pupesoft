@@ -5,9 +5,9 @@
 	if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
 		require ("inc/tilioinnin_toiminnot.inc");
 	}
-	
+
 	enable_ajax();
-	
+
 	if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
 		exit;
@@ -553,17 +553,22 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$tunnus}'";
 			$result = pupe_query($query);
-
 			$paivitetaanko = true;
-
-			$maara = count($ed_iliitostunnus)+1;
 		}
 		else {
+
+			$tositealatila = "";
+
+			if (isset($avaavatase) and $avaavatase == 'joo') {
+				$tositealatila = "A";
+			}
+
 			$query = "	INSERT into lasku set
 						yhtio 		= '{$kukarow['yhtio']}',
 						tapvm 		= '{$tpv}-{$tpk}-{$tpp}',
 						{$qlisa}
 						tila 		= 'X',
+						alatila 	= '$tositealatila',
 						alv_tili 	= '{$alv_tili}',
 						comments	= '{$comments}',
 						laatija 	= '{$kukarow['kuka']}',
@@ -578,6 +583,20 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$tilikausi}'";
 			$avaavatase_result = pupe_query($query);
+
+			// Kirjataan avaava_tase uudestaan. Yliviivataan vanhat ja tehd‰‰n uudet
+			if ($paivitetaanko) {
+				$query = "	UPDATE tiliointi SET
+							korjattu 	= '{$kukarow['kuka']}',
+				      		korjausaika = now()
+				      		WHERE ltunnus 	= '{$tunnus}'
+				      		AND yhtio 		= '{$kukarow['yhtio']}'
+				      		AND korjattu 	= ''";
+				$ylikirjaus_result = pupe_query($query);
+
+				// Yliviivatiin kaikki, eli tehd‰‰n uudet ei p‰ivitet‰
+				$paivitetaanko = FALSE;
+			}
 		}
 
 		if ($kuva) {
@@ -830,7 +849,7 @@
 		$kentta = 'tpp';
 
 		if ((isset($gokfrom) and $gokfrom == 'avaavatase') or (isset($avaavatase) and $avaavatase == 'joo')) {
-			echo "<br><br><font class='error'>".t("HUOM: Avaavaa tasetta ei ole viel‰ kirjattu")."!<br>".t("HUOM: Tarkista t‰m‰ tosite ja tee kirjaukset klikkamalla *Tee tosite*-nappia")."!</font><br>";
+			echo "<br><font class='error'>".t("Tilikauden tulos kirjattu")."!<br><br>".t("HUOM: Avaavaa tasetta ei ole viel‰ kirjattu")."!<br>".t("HUOM: Tarkista t‰m‰ tosite ja tee kirjaukset klikkamalla *Tee tosite*-nappia")."!</font><br>";
 		}
 
 		echo "<br>\n";

@@ -86,7 +86,7 @@
 			// tässä on tämä "perusnäkymä" mikä tulisi olla kaikissa myynnin raportoinneissa..
 
 			// Jos ajetaan tilauksittain vaihdetaan aina ajotavaksi 'tilaus'
-			if (isset($ruksit[140]) and $ruksit[140] != "") {
+			if (isset($ruksit[140]) AND $ruksit[140] != "" AND $ajotapa == "lasku") {
 				$ajotapa = 'tilaus';
 			}
 
@@ -375,7 +375,7 @@
 				<td><input type='text' name='jarjestys[140]' size='2' value='{$jarjestys[140]}'></td>
 				<td><input type='checkbox' name='ruksit[140]' value='tilauksittain' {$ruk140chk}></td>
 				<td><input type='text' name='rajaus[140]' value='{$rajaus[140]}'></td>
-				<td class='back'>",t("(Toimii vain jos ajotapa on Laskutetuista tilaukista)"),"</td>
+				<td class='back'>",t("(Toimii vain jos ajat raporttia tilauksista)"),"</td>
 				</tr>
 				<tr>
 				<th>",t("Listaa kohteittain"),"</th>
@@ -951,12 +951,14 @@
 						if (isset($ytun_laajattied) and $ytun_laajattied != "") {
 							$select .= "{$etuliite}.ytunnus ytunnus, ";
 							$select .= "{$ytgfe}{$etuliite}.toim_ovttunnus{$ytgft} toim_ovttunnus, ";
-							$select .= "{$ytgfe}concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark)){$ytgft} nimi, ";
+							$select .= "{$ytgfe}concat_ws('<br>',{$etuliite}.nimi){$ytgft} nimi, ";
+							$select .= "{$ytgfe}concat_ws('<br>',{$etuliite}.nimitark){$ytgft} nimitarkenne, ";
 							$select .= "{$ytgfe}{$etuliite}.osoite{$ytgft} osoite, ";
 							$select .= "{$ytgfe}{$etuliite}.postino{$ytgft} postino, ";
 							$select .= "{$ytgfe}{$etuliite}.postitp{$ytgft} postitp, ";
 							$select .= "{$ytgfe}{$etuliite}.maa{$ytgft} maa, ";
-							$select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, concat_ws('<br>',concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark)), concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark))){$ytgft} toim_nimi, ";
+							$select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, concat_ws('<br>',{$etuliite}.toim_nimi), concat_ws('<br>',{$etuliite}.nimi)){$ytgft} toim_nimi, ";
+							$select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, concat_ws('<br>',{$etuliite}.toim_nimitark), concat_ws('<br>',{$etuliite}.nimitark)){$ytgft} toim_nimitark, ";
 							$select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_osoite, {$etuliite}.osoite){$ytgft} toim_osoite, ";
 							$select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postino, {$etuliite}.postino){$ytgft} toim_postino, ";
 							$select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postitp, {$etuliite}.postitp){$ytgft} toim_postitp, ";

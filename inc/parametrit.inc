@@ -304,7 +304,7 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 			 		and yhtio != '$apukukarow[yhtio]'";
 		$result = mysql_query($query) or die ("P‰ivitys ep‰onnistui sis‰‰nkirjautumisessa");
 
-		$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
+		$bool = setcookie("pupesoft_session", $session, time()+43200, "/"); // 12 tuntia voimassa
 
 		if ($bool === FALSE) {
 			die ("Sis‰‰nkirjaus ep‰onnistui!");
@@ -375,7 +375,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				exit;
 			}
 
-			$bool = setcookie("pupesoft_session", "", time()-432000, parse_url($palvelin, PHP_URL_PATH));
+			$bool = setcookie("pupesoft_session", "", time()-43200, "/");
 
 			if ($bool === FALSE) {
 				echo "Your browser does not seem to support cookies.";

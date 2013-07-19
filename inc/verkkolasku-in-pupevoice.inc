@@ -64,10 +64,19 @@ if ($laskun_summa_eur == 0) {
 
 //Tuotetiedot
 $tuotetiedot = $xml->xpath('Group25');
-$i 			 = 0;
-$rtuoteno	 = array();
-$ealvi		 = array("");
-$lisavat	 = array("");
+$i						= 0;
+$rtuoteno				= array();
+$ealvi		 			= array("");
+$lisavat	 			= array("");
+$laskun_rahtikulu 		= 0;
+$osto_kulu 				= 0;
+$osto_rahti 			= 0;
+$osto_rivi_kulu 		= 0;
+$osto_kulu_alv 			= 0;
+$osto_rahti_alv 		= 0;
+$osto_rivi_kulu_alv 	= 0;
+$ei_oteta_kulua_pois	= TRUE;
+$rivien_summa_yhteensa	= 0;
 
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
@@ -77,6 +86,7 @@ if (count($tuotetiedot) > 0) {
 
 			// Tuotekoodi
 			$rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring(array_shift($tuotetieto->xpath('LIN/@eC212.7140')));
+			$rtuoteno[$i]["kauttalaskutus"] = "";
 
 			// Veroton rivihinta
 			$rtuoteno[$i]["rivihinta"] = array_shift($tuotetieto->xpath('Group26/MOA[@eC516.5025="203"]/@eC516.5004'));
@@ -90,6 +100,7 @@ if (count($tuotetiedot) > 0) {
 				$ealvi[$i] = $rtuoteno[$i]["alv"] = "";
 			}
 
+			$rtuoteno[$i]['rivihinta_verolli'] = round($rtuoteno[$i]['rivihinta'] * (1 + ($ealvi[$i] / 100)), 2);
 			$rtuoteno[$i]["riviinfo"] = pupesoft_cleanstring(array_shift($tuotetieto-> xpath('IMD/@eC273.7008.1')));
 
 			// Laskutettu m‰‰r‰

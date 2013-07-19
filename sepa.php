@@ -701,7 +701,7 @@
 			}
 		}
 
-		$netotetut_laskut = implode($netotettava_laskut);
+		$netotetut_laskut = implode(",", $netotettava_laskut);
 
 		// Haetaan poimitut maksut POISLUKIEN netotetut
 		if ($netotetut_laskut != "") {

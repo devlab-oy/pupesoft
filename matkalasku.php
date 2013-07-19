@@ -239,8 +239,8 @@ if ($tee != "") {
 			if ($laskurow["tila"] == "H" and
 				($laskurow["h1time"] == "0000-00-00 00:00:00" or ($laskurow['hyvak2'] == $kukarow['kuka'] and $laskurow["h2time"] == "0000-00-00 00:00:00" and $yhtiorow['matkalaskun_tarkastus'] != '')) and
 				($laskurow["toim_ovttunnus"] == $kukarow["kuka"] or $toim == "SUPER") and
-				strtotime($laskurow["tapvm"]) > strtotime($yhtiorow["ostoreskontrakausi_alku"]) and
-				strtotime($laskurow["tapvm"]) < strtotime($yhtiorow["ostoreskontrakausi_loppu"])
+				strtotime($laskurow["tapvm"]) >= strtotime($yhtiorow["ostoreskontrakausi_alku"]) and
+				strtotime($laskurow["tapvm"]) <= strtotime($yhtiorow["ostoreskontrakausi_loppu"])
 			) {
 				$muokkauslukko = FALSE;
 			}

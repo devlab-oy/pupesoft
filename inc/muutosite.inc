@@ -1,5 +1,17 @@
 <?php
 
+	echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
+				function verify(msg){
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
+				}
+			</SCRIPT>";
+
 	if (!isset($tila)) $tila = "";
 	if (!isset($komm)) $komm = "";
 
@@ -287,17 +299,18 @@
 
 		if ($tila == 'MAKSATUKSEEN') {
 			$query = "	UPDATE lasku set
-						maksaja = '',
-						maksuaika = '0000-00-00',
-						maksu_kurssi = '0',
-						maksu_tili = '',
-						tila = 'M',
-						alatila = '',
-						olmapvm = if(kapvm < now(), erpcm, kapvm),
-						popvm = ''
+						maksaja 		= '',
+						maksuaika 		= '0000-00-00',
+						maksu_kurssi 	= '0',
+						maksu_tili 		= '',
+						tila 			= 'M',
+						alatila 		= '',
+						olmapvm 		= if(kapvm < now(), erpcm, kapvm),
+						popvm 			= '',
+						comments		= trim(concat(comments, '\n $kukarow[nimi] ".t("siirsi laskun takaisin maksatukseen").".'))
 						WHERE tunnus = '$tunnus'
-						and yhtio = '$kukarow[yhtio]'
-						and tila = 'Q'";
+						and yhtio 	 = '$kukarow[yhtio]'
+						and tila 	 = 'Q'";
 			$updresult = pupe_query($query);
 
 			if (mysql_affected_rows() != 1) { // Jotain meni pieleen
@@ -416,7 +429,8 @@
 						$query = "	UPDATE lasku SET
 									mapvm 		 = '0000-00-00',
 									maksu_kurssi = 0,
-									tila 		 = 'Q'
+									tila 		 = 'Q',
+									comments 	 = trim(concat(comments, '\n $kukarow[nimi] ".t("siirsi maksetun laskun takaisin odottamaan suoritusta").".'))
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus  = '{$tunnus}'";
 						$updres = pupe_query($query);
@@ -2183,17 +2197,22 @@
 		}
 
 		if ($trow['tila'] == 'Y' and $trow['mapvm'] != '0000-00-00' and strtotime($trow['mapvm']) > strtotime($trow['tapvm']) and $trow['mapvm'] >= $yhtiorow['tilikausi_alku'] and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
-			echo "<form method='post'>
-					<input type = 'hidden' name='tee' value='M'>
-					<input type = 'hidden' name='tila' value='ODOTTAMAAN_SUORITUSTA'>
-					<input type = 'hidden' name='lopetus' value='{$lopetus}'>
-					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-					<tr>
+
+			$msg = t("Oletko varma, että haluat palauttaa maksetun laskun odottamaan suoritusta tilaan")."?";
+
+			echo "<tr>
 					<th>",t("Palauta odottamaan suoritusta"),"</th>
 					<td></td>
-					<td class='back'><input type = 'submit' value = '",t("Siirrä"),"'></td>
-					</tr>
-					</form>";
+					<td class='back'>
+						<form method='post' onSubmit = 'return verify(\"$msg\");'>
+						<input type = 'hidden' name='tee' value='M'>
+						<input type = 'hidden' name='tila' value='ODOTTAMAAN_SUORITUSTA'>
+						<input type = 'hidden' name='lopetus' value='{$lopetus}'>
+						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+						<input type = 'submit' value = '",t("Siirrä"),"'>
+						</form>
+						</td>
+					</tr>";
 		}
 
 		if (($trow['tila'] == 'M' or $trow['tila'] == 'H') and ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) and $trow["h1time"] != '0000-00-00 00:00:00' and $keikrow["alatila"] != "X") {

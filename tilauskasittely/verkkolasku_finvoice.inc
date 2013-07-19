@@ -318,13 +318,13 @@ if (!function_exists('finvoice_otsik')) {
 				$tarkrow = mysql_fetch_assoc($tarkres);
 
 				fputs($tootfinvoice, "<InvoiceRecipientPartyDetails>\r\n");
-				xml_add("InvoiceRecipientPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),							$tootfinvoice, 35);
+				xml_add("InvoiceRecipientPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),	$tootfinvoice, 35);
 
 				$laskutus_nimitieto = trim($tarkrow["laskutus_nimi"]." ".$tarkrow["laskutus_nimitark"]);
 				$laskutus_nimitieto_array = str_split($laskutus_nimitieto, 35);
 
 				foreach ($laskutus_nimitieto_array as $laskutus_nimi_osa) {
-					xml_add("InvoiceRecipientOrganisationName", $laskutus_nimi_osa, $tootfinvoice, 35, 1);
+					xml_add("InvoiceRecipientOrganisationName", $laskutus_nimi_osa, $tootfinvoice, 35, 2);
 				}
 
 				if ($yhtiorow["verkkolasku_lah"] != "maventa") {

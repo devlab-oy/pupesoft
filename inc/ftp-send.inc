@@ -14,6 +14,7 @@ else exit;
 # $ftpfail --> Kansio jonne laitetaan failit jos siirto feilaa, ei pakollinen
 # $ftpsucc --> Kansio jonne tallennetaan failit jos siirto onnistuu, ei pakollinen
 # $ftptype --> FTP-palvelimen tyyppi esim "AS400", ei pakollinen
+# $ftptmpr --> K‰ytet‰‰nkˆ .TMP p‰‰tett‰ siirron aikana.
 
 // Palautetaan:
 # $palautus
@@ -29,13 +30,14 @@ else exit;
 # echo "ftpfail --> $ftpfail<br>";
 # echo "ftpsucc --> $ftpsucc<br>";
 
-$syy				= "";
-$palautus			= 0;
-$tulos_ulos_ftp		= "";
-$ncftplisa			= "";
-$renameftpfile		= isset($renameftpfile) ? basename(trim($renameftpfile)) : "";
-$palautus_pyynto	= isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
-$filenimi			= basename($ftpfile);
+$syy			 = "";
+$palautus		 = 0;
+$tulos_ulos_ftp	 = "";
+$ncftplisa		 = "";
+$renameftpfile	 = isset($renameftpfile) ? basename(trim($renameftpfile)) : "";
+$palautus_pyynto = isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
+$filenimi		 = basename($ftpfile);
+$ftptmpr		 = !isset($ftptmpr) ? TRUE : $ftptmpr;
 
 if ($ftphost == '' or $ftpuser == '' or $ftppass == '' or $ftppath == '' or $ftpfile == '') {
 	$tulos_ulos_ftp .= "<font class='error'>".t("L‰hetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path, file)</font><br>\n";
@@ -83,8 +85,14 @@ else {
 			$quote = ftp_site($conn_id, "NAMEFMT 1");
 		}
 
-		// K‰ytet‰‰n aina .TMP p‰‰tett‰ kun siirto on kesken
-		$ftpfile_tmp = $filenimi.".TMP";
+		if ($ftptmpr) {
+			// K‰ytet‰‰n aina .TMP p‰‰tett‰ kun siirto on kesken
+			$ftpfile_tmp = $filenimi.".TMP";
+		}
+		else {
+			// Ei k‰ytet‰ .TMP p‰‰tett‰
+			$ftpfile_tmp = $filenimi;
+		}
 
 		// Kokeillaan passiivista siirtoa
 		ftp_pasv($conn_id, TRUE);
@@ -96,26 +104,28 @@ else {
 			$upload = ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), FTP_ASCII);
 		}
 
-		// Otetaan .TMP p‰‰te veks ku siirto on valmis
-		if (isset($ftpport) and (int) $ftpport > 0 and $upload === TRUE) {
-			// Jos $ftpport on k‰ytˆss‰ niin k‰ytet‰‰n n‰it‰ komentoja.
-			// N‰ytt‰‰ silt‰, ett‰ ftp_rename ei osaa hanskata renametusta kun k‰ytet‰‰n custom porttia
-			$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$ftpfile_tmp}");
-            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$filenimi}");
+		if ($ftptmpr) {
+			// Otetaan .TMP p‰‰te veks ku siirto on valmis
+			if (isset($ftpport) and (int) $ftpport > 0 and $upload === TRUE) {
+				// Jos $ftpport on k‰ytˆss‰ niin k‰ytet‰‰n n‰it‰ komentoja.
+				// N‰ytt‰‰ silt‰, ett‰ ftp_rename ei osaa hanskata renametusta kun k‰ytet‰‰n custom porttia
+				$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$ftpfile_tmp}");
+	            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$filenimi}");
 
-			if (stripos($rename[0], "command successful") === FALSE and stripos($rename[0], "file renamed") === FALSE) {
-				$rename1 = FALSE;
+				if (stripos($rename[0], "command successful") === FALSE and stripos($rename[0], "file renamed") === FALSE) {
+					$rename1 = FALSE;
+				}
 			}
-		}
-		elseif ($upload === TRUE) {
-			$rename1 = ftp_rename($conn_id, "{$ftppath}{$ftpfile_tmp}", "{$ftppath}{$filenimi}");
+			elseif ($upload === TRUE) {
+				$rename1 = ftp_rename($conn_id, "{$ftppath}{$ftpfile_tmp}", "{$ftppath}{$filenimi}");
 
-			// Jos rename ep‰onnistuu, koitetaan poistaa .TMP tiedosto
-			if ($rename1 === FALSE) {
-				$delete1 = ftp_delete($conn_id, "{$ftppath}{$ftpfile_tmp}");
+				// Jos rename ep‰onnistuu, koitetaan poistaa .TMP tiedosto
+				if ($rename1 === FALSE) {
+					$delete1 = ftp_delete($conn_id, "{$ftppath}{$ftpfile_tmp}");
 
-				if ($delete1 === FALSE) {
-					$raw = ftp_raw($conn_id, "quote dele {$ftppath}{$ftpfile_tmp}");
+					if ($delete1 === FALSE) {
+						$raw = ftp_raw($conn_id, "quote dele {$ftppath}{$ftpfile_tmp}");
+					}
 				}
 			}
 		}

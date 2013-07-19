@@ -426,7 +426,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 			$slisa = "";
 		}
 		else {
-			$vlisa = "";
+			$vlisa = "and tiliointi.korjattu!=''";
 			$slisa = ", concat_ws('@', korjattu, korjausaika) korjaus";
 		}
 
@@ -1543,7 +1543,7 @@ if ($tee == "") {
 	}
 
 	echo "<tr>
-		  	<td>".t("Näytä muutetut rivit")."</td>
+		  	<td>".t("Näytä yliviivatut rivit")."</td>
 		  	<td><input type = 'checkbox' name = 'viivatut'></td>
 		  	<td><input type = 'submit' value = '".t("Etsi")."'></td></tr>";
 

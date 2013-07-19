@@ -218,10 +218,6 @@
 
 		foreach ($tuotetiedot as $tuotetieto) {
 
-			if ($laskuttajan_toimittajanumero == "123085") {
-				$rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductDescription->ProductName1));
-			}
-
 			// tuotekoodi
 			$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
 

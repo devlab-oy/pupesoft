@@ -47,3 +47,6 @@ if [ -f "/home/nagios/nagios-pupesoft.sh" ]; then
 		chmod 660 /home/nagios/nagios-pupesoft.log
 	fi
 fi
+
+# Enabloidaan kaikki disabloidut printterit
+bash ${POLKU}/enable-printers.sh

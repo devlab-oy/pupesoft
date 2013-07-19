@@ -22629,7 +22629,7 @@ if (!function_exists("saako_myyda_private_label")) {
 
 if (!function_exists("tuotteen_toimittajat_tuotenumerot_haku")) {
 	function tuotteen_toimittajat_tuotenumerot_haku($tuoteno, $laskuttajan_toimittajanumero, $kpl = 0) {
-		global $kukarow;
+		global $kukarow, $yhtiorow;
 
 		if ($kpl > 0) {
 			$wildcard = "";
@@ -22648,11 +22648,10 @@ if (!function_exists("tuotteen_toimittajat_tuotenumerot_haku")) {
 		$chk_res = pupe_query($query);
 
 		if (mysql_num_rows($chk_res) == 0 and $kpl < strlen($tuoteno)) {
-			tuotteen_toimittajat_tuotenumerot_haku($tuoteno, $laskuttajan_toimittajanumero, ($kpl+1));
+			$chk_res = tuotteen_toimittajat_tuotenumerot_haku($tuoteno, $laskuttajan_toimittajanumero, ($kpl+1));
 		}
-		else {
-			return $chk_res;
-		}
+
+		return $chk_res;
 	}
 }
 

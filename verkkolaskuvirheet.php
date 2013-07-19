@@ -26,7 +26,6 @@
 		livesearch_toimittajahaku();
 		exit;
 	}
-	enable_ajax();
 
 	if ($_REQUEST["tee"] == "NAYTATILAUS" and isset($_REQUEST["xml"])) {
 		$xml = urldecode($_REQUEST["xml"]);
@@ -46,6 +45,8 @@
 		echo $pdf;
 		exit;
 	}
+
+	enable_ajax();
 
 	// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ssä
 	$verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut"        : rtrim($verkkolaskut_in, "/");
@@ -139,7 +140,13 @@
 				unset($yhtiorow);
 				unset($xmlstr);
 
+				// Napataan alkuperäinen kukarow
+				$vv_kukarow = $kukarow;
+
 				list($lasku_yhtio, $lasku_toimittaja) = verkkolasku_in($verkkolaskuvirheet_vaarat."/".$file, FALSE);
+
+				// Palautetaan alkuperäinen kukarow
+				$kukarow = $vv_kukarow;
 
 				if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"] or $lasku_yhtio["yhtio"] == "") {
 
@@ -156,10 +163,6 @@
 					elseif (strpos($file, "teccominvoice") !== false){
 						require("inc/verkkolasku-in-teccom.inc");
 						$kumpivoice = "TECCOM";
-					}
-					elseif (strpos($file, "ORAO") !== false){
-						require("inc/verkkolasku-in-unikko.inc");
-						$kumpivoice = "ORAO";
 					}
 					else {
 						require("inc/verkkolasku-in-pupevoice.inc");

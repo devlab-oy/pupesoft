@@ -1357,9 +1357,9 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	}
 	// Myyntitilaus valmis
 	else {
-		//Jos käyttäjä on extranettaaja ja hän ostellut tuotteita useista eri maista niin laitetaan tilaus holdiin
-		if ($kukarow["extranet"] != "" and $toimitetaan_ulkomaailta == "YES" and $kukarow["taso"] != 3) {
-			$kukarow["taso"] = 2;
+		//Jos käyttäjä on myymässä tuotteita ulkomaan varastoista, niin laitetaan tilaus holdiin
+		if ($toimitetaan_ulkomaailta == "YES" and $kukarow["tilaus_valmis"] == "3") {
+			$kukarow["tilaus_valmis"] = "2";
 		}
 
 		//katotaan onko asiakkaalla yli 30 päivää vanhoja maksamattomia laskuja
@@ -1381,12 +1381,12 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 			//ja jos on niin ne siirretään tilaus holdiin
 			if ($saarow['dd'] > 0) {
-				$kukarow["taso"] = 2;
+				$kukarow["tilaus_valmis"] = "2";
 			}
 		}
 
-		// Extranetkäyttäjä jonka tilaukset on hyväksytettävä meidän myyjillä
-		if ($kukarow["extranet"] != "" and $kukarow["taso"] == 2) {
+		// Käyttäjä jonka tilaukset on hyväksytettävä
+		if ($kukarow["tilaus_valmis"] == "2") {
 			$query  = "	UPDATE lasku set
 						tila = 'N',
 						alatila='F'
@@ -3385,6 +3385,11 @@ if ($tee == '') {
 		}
 	}
 
+	// Allr specific!
+	if (file_exists("${pupe_root_polku}/allr_kamppikset.php")) {
+		require("${pupe_root_polku}/allr_kamppikset.php");
+	}
+
 	echo "<br>";
 
 	$myyntikielto = '';
@@ -3917,7 +3922,7 @@ if ($tee == '') {
 		}
 
 		$kayttajan_hinta	= $hinta;
-		$kayttajan_netto 	= $netto;
+		$kayttajan_netto 	= strtoupper(trim($netto));
 		$kayttajan_var		= $var;
 		$kayttajan_kpl		= $kpl;
 		$kayttajan_alv		= $alv;
@@ -4035,7 +4040,7 @@ if ($tee == '') {
 			}
 
 			if (is_array($netto_array)) {
-				$netto = $netto_array[$tuoteno];
+				$netto = strtoupper(trim($netto_array[$tuoteno]));
 			}
 			else {
 				$netto = $kayttajan_netto;
@@ -7824,7 +7829,7 @@ if ($tee == '') {
 					echo "</form></td>";
 				}
 			}
-			elseif (($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $kukarow['taso'] != '4')) and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U')) {
+			elseif ($kukarow['tilaus_valmis'] != "4" and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U')) {
 
 				echo "<form name='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>
 					<input type='hidden' name='toim' value='$toim'>

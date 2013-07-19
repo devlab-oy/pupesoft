@@ -116,7 +116,6 @@
 						laatija 		 = '{$kukarow['kuka']}',
 						laadittu 		 = now()";
 		}
-
 	}
 	else {
 		$query = "	INSERT into tiliointi set
@@ -141,7 +140,7 @@
 	}
 
 	$result = pupe_query($query);
-	$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
+	$isa = mysql_insert_id();
 
 	// Tiliöidään alv
 	if ($vero != 0) {
@@ -169,5 +168,3 @@
 					aputunnus 		 = {$isa}";
 		$result = pupe_query($query);
 	}
-
-?>

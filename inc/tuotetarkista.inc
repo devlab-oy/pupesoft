@@ -286,7 +286,8 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == 'status') {
-			$tem_status = $t[$i];
+			$tem_status = $trow['status'];
+			$tem_try = $trow['try'];
 
 			if (!empty($trow) and $trow[$i] != $t[$i]) {
 				//jos tuotteella status muutetaan ja tuotteella on vain oletuspaikka ja saldo on nolla,
@@ -295,15 +296,16 @@ if(!function_exists("tuotetarkista")) {
 
 				if ($saldo == 0) {
 
-					$query = "	SELECT *
+					$query = "	SELECT tuotepaikat.*,
+								concat_ws('-', hyllyalue, hyllynro, hyllytaso, hyllyvali) as hylly
 								FROM tuotepaikat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tuoteno = '{$t['tuoteno']}'
 								ORDER BY oletus ASC";
 					$tuotepaikat_result = pupe_query($query);
-					$poista = array();
+					$poistettavat = array();
 					while($tuotepaikka = mysql_fetch_assoc($tuotepaikat_result)) {
-						$poista[] = $tuotepaikka['tunnus'];
+						$poistettavat[] = $tuotepaikka;
 					}
 
 					$tee = "MUUTA";
@@ -363,53 +365,7 @@ if(!function_exists("tuotetarkista")) {
 				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) == 0) {
-
-					$query = "	/*Haetaan kaikki oletuspaikat joissa on mik‰ tahansa status ja mik‰ tahansa try*/
-								(SELECT *
-								FROM   avainsana
-								WHERE  yhtio = '{$kukarow['yhtio']}'
-								AND laji = 'OLETUSPAIKKA'
-								AND selitetark = 'X'
-								AND selitetark_2 = '')
-
-								UNION
-
-								/*Haetaan kaikki oletuspaikat joissa status t‰sm‰‰ ja try on mit‰ tahansa*/
-								(SELECT *
-								FROM   avainsana
-								WHERE  yhtio = '{$kukarow['yhtio']}'
-								AND laji = 'OLETUSPAIKKA'
-								AND selitetark = '{$tem_status}'
-								AND selitetark_2 = '')
-
-								UNION
-
-								/*Haetaan kaikki oletuspaikat joissa status on mit‰ tahansa ja try t‰sm‰‰*/
-								(SELECT *
-								FROM   avainsana
-								WHERE  yhtio = '{$kukarow['yhtio']}'
-								AND laji = 'OLETUSPAIKKA'
-								AND selitetark = 'X'
-								AND selitetark_2 = '{$t['try']}')
-
-								UNION
-
-								/*Haetaan kaikki oletuspaikat joissa status ja try t‰sm‰‰*/
-								(SELECT *
-								FROM   avainsana
-								WHERE  yhtio = '{$kukarow['yhtio']}'
-								AND laji = 'OLETUSPAIKKA'
-								AND selitetark = '{$tem_status}'
-								AND selitetark_2 = '{$t['try']}')";
-					$tuotteiden_oletus_tuotepaikat_result = pupe_query($query);
-
-					$oletuspaikat = array();
-					while($oletuspaikka = mysql_fetch_assoc($tuotteiden_oletus_tuotepaikat_result)) {
-						$oletuspaikat[] = $oletuspaikka['selite'];
-					}
-
-					$yhtion_tuotteen_oletuspaikat = explode(",", $yhtiorow["tuotteen_oletuspaikka"]);
-					$kaikki_oletuspaikat = array_merge($oletuspaikat, $yhtion_tuotteen_oletuspaikat);
+					$kaikki_oletuspaikat = hae_kaikki_oletuspaikat_try_tai_status($t['try'], $t['status']);
 					$_counter = 0;
 
 					foreach ($kaikki_oletuspaikat as $_tuotepaikka) {

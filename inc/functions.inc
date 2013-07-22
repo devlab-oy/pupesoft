@@ -22708,6 +22708,61 @@ if (!function_exists("saako_myyda_private_label")) {
 	}
 }
 
+if (!function_exists('murmur')) {
+	function hae_kaikki_oletuspaikat_try_tai_status($try, $status) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	/*Haetaan kaikki oletuspaikat joissa on mik‰ tahansa status ja mik‰ tahansa try*/
+					(SELECT *
+					FROM   avainsana as a1
+					WHERE  yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'OLETUSPAIKKA'
+					AND selitetark = 'X'
+					AND selitetark_2 = '')
+
+					UNION
+
+					/*Haetaan kaikki oletuspaikat joissa status t‰sm‰‰ ja try on mit‰ tahansa*/
+					(SELECT *
+					FROM   avainsana as a2
+					WHERE  yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'OLETUSPAIKKA'
+					AND selitetark = '{$status}'
+					AND selitetark_2 = '')
+
+					UNION
+
+					/*Haetaan kaikki oletuspaikat joissa status on mit‰ tahansa ja try t‰sm‰‰*/
+					(SELECT *
+					FROM   avainsana as a3
+					WHERE  yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'OLETUSPAIKKA'
+					AND selitetark = 'X'
+					AND selitetark_2 = '{$try}')
+
+					UNION
+
+					/*Haetaan kaikki oletuspaikat joissa status ja try t‰sm‰‰*/
+					(SELECT *
+					FROM   avainsana as a4
+					WHERE  yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'OLETUSPAIKKA'
+					AND selitetark = '{$status}'
+					AND selitetark_2 = '{$try}')";
+		$result = pupe_query($query);
+
+		$oletuspaikat = array();
+		while($oletuspaikka = mysql_fetch_assoc($result)) {
+			$oletuspaikat[] = $oletuspaikka['selite'];
+		}
+
+		$yhtion_tuotteen_oletuspaikat = explode(",", $yhtiorow["tuotteen_oletuspaikka"]);
+		$kaikki_oletuspaikat = array_merge($oletuspaikat, $yhtion_tuotteen_oletuspaikat);
+
+		return $kaikki_oletuspaikat;
+	}
+}
+
 if (!function_exists("hae_viivakoodilla")) {
 	function hae_viivakoodilla($viivakoodi) {
 		global $kukarow, $yhtiorow;

@@ -17,7 +17,11 @@
 					sarjanumeroseuranta WRITE,
 					sarjanumeroseuranta_arvomuutos READ,
 					lasku READ,
-					asiakas READ";
+					asiakas READ,
+					avainsana as a1 READ,
+					avainsana as a2 READ,
+					avainsana as a3 READ,
+					avainsana as a4 READ";
 		$result = pupe_query($query);
 	}
 	else {
@@ -111,9 +115,14 @@
 			}
 		}
 
+		//Kun tuotteen statusta muutetaa, poistetaan tuotteelta myös automaattisesti perustetut tuotepaikat. Manuaalisesti perustettuja tuotepaikkoja ei haluta poistaa.
+		//Haetaan edellisen tuote statuksen oletuspaikat
+		$kaikki_oletuspaikat = hae_kaikki_oletuspaikat_try_tai_status($tem_try, $tem_status);
+
 		// Käydään läpi poistettavat paikat
-		if (count($poista) > 0) {
-			foreach ($poista as $poistetaan) {
+		if (count($poistettavat) > 0) {
+			foreach ($poistettavat as $poistettava) {
+				$poistetaan = $poistettava['tunnus'];
 				if ($poistetaan == $oletusrow["tunnus"] and ($saldot[$poistetaan] != 0 or count($saldot) > 1)) {
 					echo "<font class='error'>".t("Et voi poistaa oletuspaikkaa, koska sillä on saldoa tai tuotteella on muitakin paikkoja")."</font><br><br>";
 				}
@@ -122,47 +131,51 @@
 				}
 				else {
 
-					if ($hyllyalue[$poistetaan] == "!!M") {
-						$asiakkaan_tunnus = (int) $hyllynro[$poistetaan].$hyllyvali[$poistetaan].$hyllytaso[$poistetaan];
-						$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
-									FROM asiakas
-									WHERE yhtio = '{$kukarow["yhtio"]}'
-									AND tunnus = '$asiakkaan_tunnus'";
-						$asiakasresult = pupe_query($query);
-						$asiakasrow = mysql_fetch_assoc($asiakasresult);
-						$poisto_texti = t("Poistettiin myyntitili-varastopaikka")." ".$asiakasrow["asiakkaan_nimi"];
+					if (in_array($poistettava['hylly'], $kaikki_oletuspaikat)) {
+						//katsotaan onko poistettava paikka automaattisesti generoitu vai manuaalisesti lisätty. Jos poistettava paikka on manuaalisesti lisätty niin sitä ei poisteta
+						//jos paikka löytyy $try_status_kohtaiset_oletuspaikat niin se voidaan poistaa
+						if ($hyllyalue[$poistetaan] == "!!M") {
+							$asiakkaan_tunnus = (int) $hyllynro[$poistetaan].$hyllyvali[$poistetaan].$hyllytaso[$poistetaan];
+							$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
+										FROM asiakas
+										WHERE yhtio = '{$kukarow["yhtio"]}'
+										AND tunnus = '$asiakkaan_tunnus'";
+							$asiakasresult = pupe_query($query);
+							$asiakasrow = mysql_fetch_assoc($asiakasresult);
+							$poisto_texti = t("Poistettiin myyntitili-varastopaikka")." ".$asiakasrow["asiakkaan_nimi"];
+						}
+						else {
+							$poisto_texti = t("Poistettiin varastopaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]";
+						}
+
+						if ($kutsuja != "vastaanota.php") {
+							echo "<font class='message'>$poisto_texti</font><br><br>";
+						}
+
+						$query = "	INSERT into tapahtuma set
+									yhtio 		= '$kukarow[yhtio]',
+									tuoteno 	= '$tuoteno',
+									kpl 		= '0',
+									kplhinta	= '0',
+									hinta 		= '0',
+									laji 		= 'poistettupaikka',
+									hyllyalue	= '$hyllyalue[$poistetaan]',
+									hyllynro 	= '$hyllynro[$poistetaan]',
+									hyllyvali	= '$hyllyvali[$poistetaan]',
+									hyllytaso	= '$hyllytaso[$poistetaan]',
+									selite 		= '$poisto_texti',
+									laatija 	= '$kukarow[kuka]',
+									laadittu 	= now()";
+						$result = pupe_query($query);
+
+						$query = "	DELETE FROM tuotepaikat
+									WHERE tuoteno 	= '$tuoteno'
+									and yhtio 		= '$kukarow[yhtio]'
+									and tunnus 		= '$poistetaan'";
+						$result = pupe_query($query);
+
+						unset($saldot[$poistetaan]);
 					}
-					else {
-						$poisto_texti = t("Poistettiin varastopaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]";
-					}
-
-					if ($kutsuja != "vastaanota.php") {
-						echo "<font class='message'>$poisto_texti</font><br><br>";
-					}
-
-					$query = "	INSERT into tapahtuma set
-								yhtio 		= '$kukarow[yhtio]',
-								tuoteno 	= '$tuoteno',
-								kpl 		= '0',
-								kplhinta	= '0',
-								hinta 		= '0',
-								laji 		= 'poistettupaikka',
-								hyllyalue	= '$hyllyalue[$poistetaan]',
-								hyllynro 	= '$hyllynro[$poistetaan]',
-								hyllyvali	= '$hyllyvali[$poistetaan]',
-								hyllytaso	= '$hyllytaso[$poistetaan]',
-								selite 		= '$poisto_texti',
-								laatija 	= '$kukarow[kuka]',
-								laadittu 	= now()";
-					$result = pupe_query($query);
-
-					$query = "	DELETE FROM tuotepaikat
-								WHERE tuoteno 	= '$tuoteno'
-								and yhtio 		= '$kukarow[yhtio]'
-								and tunnus 		= '$poistetaan'";
-					$result = pupe_query($query);
-
-					unset($saldot[$poistetaan]);
 				}
 			}
 		}

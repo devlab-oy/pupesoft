@@ -3,7 +3,9 @@
 require ("parametrit.inc");
 require ("Validation.php");
 enable_ajax();
+
 ?>
+
 <style>
 	.tr_border_top {
 		border-top: 1px solid;
@@ -35,6 +37,7 @@ enable_ajax();
 		}
 	}
 </script>
+
 <?php
 
 if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
@@ -165,7 +168,6 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 			setTimeout(\"parent.location.href='$palvelin2'\", 2000);
 			</script>";
 	exit;
-
 }
 else {
 	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset($request['kayttajaan_liitetty_asiakas']['tunnus'], $request['toim']);
@@ -181,7 +183,7 @@ else {
 	else {
 		$params = array("data" => $request['asiakkaan_tarjoukset'],
 						"toim" => $request['toim']);
-		piirra_table($params);
+		piirra_tarjoukset($params);
 	}
 }
 
@@ -427,38 +429,6 @@ function hae_extranet_kayttajaan_liitetty_asiakas() {
 	return mysql_fetch_assoc($result);
 }
 
-function tee_tarjouksen_nimesta_linkki($header, $solu, $force_to_string) {
-	global $kukarow, $yhtiorow;
-
-	if (!stristr($header, 'tunnus')) {
-		if ($header == 'saate') {
-			$tunnus_nimi_array = explode('!!!', $solu);
-			if (empty($tunnus_nimi_array[1])) {
-				//jos saate on tyhjä
-				$tunnus_nimi_array[1] = '*'.t("Tyhjä").'*';
-			}
-			echo "<td>";
-			echo "<a href='$_SERVER[PHP_SELF]?action=nayta_tarjous&valittu_tarjous_tunnus={$tunnus_nimi_array[0]}&toim={$tunnus_nimi_array[2]}'>{$tunnus_nimi_array[1]}</a>";
-			echo "</td>";
-		}
-		else if ($header == 'olmapvm') {
-			echo "<td>";
-			echo date('d.m.Y', strtotime($solu));
-			echo "</td>";
-		}
-		else if ($header == 'hinta') {
-			echo "<td align='right'>";
-			echo $solu;
-			echo "</td>";
-		}
-		else {
-			echo "<td>";
-			echo $solu;
-			echo "</td>";
-		}
-	}
-}
-
 function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 	global $kukarow, $yhtiorow;
 
@@ -477,7 +447,10 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 		echo "<br>";
 	}
 
-	echo_tarjouksen_tilausrivit($tarjous, $toim);
+	$params = array("data" => $tarjous['tilausrivit'],
+					"tarjous_tunnus" => $valittu_tarjous_tunnus,
+					"toim" => $toim);
+	piirra_tarjouksen_tilausrivit($params);
 }
 
 function hae_tarjous($valittu_tarjous_tunnus) {
@@ -529,92 +502,36 @@ function echo_tarjouksen_otsikko($tarjous, $toim) {
 	echo "<input type='hidden' id='hylkaa_tarjous_message' value='".t("Oletko varma, että haluat hylätä tarjouksen?")."'/>";
 	echo "<input type='hidden' id='hyvaksy_ennakko' value='".t("Oletko varma, että haluat hyväksyä ennakon?")."'/>";
 	echo "<input type='hidden' id='hyvaksy_tarjous' value='".t("Oletko varma, että haluat hyväksyä tarjouksen?")."'/>";
+
 	echo "<a href=$_SERVER[PHP_SELF]?toim={$toim}>".t("Palaa takaisin")."</a>";
 	echo "<br>";
 	echo "<br>";
+
 	if ($toim == 'EXTTARJOUS') {
 		echo "<font class='message'>".t("Tarjouksen tiedot")."</font>";
 	}
 	else {
 		echo "<font class='message'>".t("Ennakon tiedot")."</font>";
 	}
+
 	echo "<table>";
 
 	echo "<tr>";
 	echo "<th>".t("Nimi")."</th>";
 	echo "<th>".t("Voimassa")."</th>";
-	echo "<tr>";
-	echo "<td>";
-	echo "{$tarjous['nimi']}";
-	echo "</td>";
-	echo "<td>";
-	echo date('d.m.Y', strtotime($tarjous['olmapvm']));
-	echo "</td>";
-
-	echo "</table>";
-	echo "<br>";
-}
-
-function echo_tarjouksen_tilausrivit($tarjous, $toim) {
-	global $kukarow, $yhtiorow;
-
-	echo "<font class='message'>".t("Tilausrivit")."</font>";
-
-	echo "<form method='post' action=''>";
-	echo "<input type='hidden' name='action' value='hyvaksy_tai_hylkaa' />";
-	echo "<input type='hidden' name='toim' value='{$toim}' />";
-	echo "<input type='hidden' name='valittu_tarjous_tunnus' value='{$tarjous['tunnus']}'/ >";
-	$header_values = array(
-		'tuotenro'	 => t('Tuotenro'),
-		'nimi'		 => t('Nimi'),
-		'kpl'		 => t('Kpl'),
-		'rivihinta'	 => t('Rivihinta'),
-		'alv'		 => t('Alv'),
-	);
-	echo_tarjous_rows_in_table($tarjous['tilausrivit'], $header_values, array(), $toim);
-	echo "<br>";
-	echo "<textarea rows='5' cols='90' maxlength='1000' name='syotetyt_lisatiedot' placeholder='".t("Lisätietoja")."'>";
-	echo "</textarea>";
-	echo "<br>";
-	echo "<br>";
-	echo "<input type='submit' name='hyvaksy' value='".t("Hyväksy")."' onclick='return tarkista(\"hyvaksy\", \"$toim\");'/>";
-	if ($toim == "EXTTARJOUS") {
-		echo "<input type='submit' name='hylkaa' value='".t("Hylkää")."' onclick='return tarkista(\"hylkaa\", \"$toim\");'/>";
-	}
-	echo "</form>";
-}
-
-function echo_tarjous_rows_in_table(&$rivit, $header_values = array(), $force_to_string = array(), $toim) {
-	global $kukarow, $yhtiorow;
-	echo "<table>";
-	if (count($rivit) > 0) {
-		_echo_tarjous_table_headers($rivit[0], $header_values);
-		_echo_tarjous_table_rows($rivit, $force_to_string, $toim);
-	}
-	else {
-		echo "<tr><td>".t("Ei tulostettavia rivejä")."</td></tr>";
-		}
-	echo "</table>";
-}
-
-function _echo_tarjous_table_headers($rivi, $header_values) {
-	global $kukarow, $yhtiorow;
-	echo "<tr>";
-	foreach ($rivi as $header_text => $value) {
-		if (!stristr($header_text, 'tunnus')) {
-			if (array_key_exists($header_text, $header_values)) {
-				echo "<th>{$header_values[$header_text]}</th>";
-			}
-			else {
-				//fail safe
-				echo "<th>{$header_text}</th>";
-			}
-		}
-	}
 	echo "</tr>";
+
+	echo "<tr>";
+	echo "<td>{$tarjous['nimi']}</td>";
+	echo "<td>".tv1dateconv($tarjous['olmapvm'])."</td>";
+	echo "</tr>";
+
+	echo "</table>";
+	echo "<br>";
 }
 
-function piirra_table($params) {
+function piirra_tarjoukset($params) {
+	global $kukarow, $yhtiorow;
 
 	$data = $params['data'];
 	$toim = $params['toim'];
@@ -642,69 +559,81 @@ function piirra_table($params) {
 	echo "</table>";
 }
 
-function _echo_tarjous_table_rows(&$rivit, $force_to_string = array(), $toim) {
+function piirra_tarjouksen_tilausrivit($params) {
 	global $kukarow, $yhtiorow;
-	$index = 0;
-	foreach ($rivit as $rivi) {
-		$class = "";
+
+	$tarjous = $params['data'];
+	$tunnus = $params['tarjous_tunnus'];
+	$toim = $params['toim'];
+	$nro = 0;
+
+	echo "<font class='message'>".t("Tilausrivit")."</font>";
+
+	echo "<form method='post' action=''>";
+	echo "<input type='hidden' name='action' value='hyvaksy_tai_hylkaa' />";
+	echo "<input type='hidden' name='toim' value='{$toim}' />";
+	echo "<input type='hidden' name='valittu_tarjous_tunnus' value='{$tunnus}'/ >";
+
+	echo "<table>";
+
+	echo "<tr>";
+	echo "<th>".t("Numero")."</th>";
+	echo "<th>".t("Kuva")."</th>";
+	echo "<th>".t("Tuoteno")."</th>";
+	echo "<th>".t("Nimitys")."</th>";
+	echo "<th>".t("Kpl")."</th>";
+	echo "<th>".t("Rivihinta")."</th>";
+	echo "<th>".t("Alv")."</th>";
+	echo "</tr>";
+
+	foreach ($tarjous as $rivi) {
+
+		$liitteet = liite_popup("TH", $rivi['tuote_tunnus']);
+
+		// Katsotaan onko tämä tuoteperheen isä tai normituote
 		if ($rivi['tunnus'] == $rivi['perheid_tunnus'] or $rivi['perheid_tunnus'] == 0) {
+			$nro++;
 			$class = "tr_border_top";
-			$index++;
-		}
-		echo "<tr>";
-		foreach ($rivi as $header => &$solu) {
-			_echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $index, $toim, $rivi);
-		}
-		echo "</tr>";
-	}
-}
-
-function _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $index, $toim, $rivi) {
-	global $kukarow, $yhtiorow;
-	if (!stristr($header, 'tunnus')) {
-
-		if ($header == 'nro') {
-			if ($class != '') {
-				echo "<td class='{$class}'>{$index}</td>";
-			}
-			else {
-				echo "<td class='{$class}'></td>";
-			}
-		}
-		elseif ($header == 'kpl' and $toim == "EXTENNAKKO") {
-			if ($class == 'tr_border_top') {
-				if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
-					$class .= " text_align_right";
-				}
-				echo "<td class='{$class}'><input type='text' name='kappalemaarat[{$rivi['tunnus']}]' value='{$solu}' /></td>";
-			}
-			else {
-				if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
-					$class .= " text_align_right";
-				}
-				echo "<td class='{$class}'>{$solu}</td>";
-			}
-		}
-		elseif ($header == 'kuva') {
-			// Onko liitetiedostoja
-
-			$liitteet = liite_popup("TH", $rivi['tuote_tunnus']);
-
-			if ($liitteet != "") {
-				echo "<td class='{$class}' style='vertical-align: top;'>$liitteet</td>";
-			}
-			else {
-				echo "<td class='{$class}'></td>";
-			}
+			$rivinumero = $nro;
 		}
 		else {
-			if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
-				$class .= " text_align_right";
-				$solu = number_format($solu, 2);
-			}
-			echo "<td class='{$class}'>{$solu}</td>";
+			$class = "";
+			$rivinumero = "";
 		}
+
+		echo "<tr class='aktiivi'>";
+		echo "<td class='{$class}'>{$rivinumero}</a>";
+		echo "<td class='{$class}' style='vertical-align: top;'>{$liitteet}</td>";
+		echo "<td class='{$class}'>{$rivi["tuoteno"]}</td>";
+		echo "<td class='{$class}'>{$rivi["nimitys"]}</td>";
+		echo "<td class='{$class}'>";
+
+		if ($toim == "EXTENNAKKO" and $rivinumero != "") {
+			echo "<input type='text' size='4' name='kappalemaarat[{$rivi['tunnus']}]' value='{$rivi["kpl"]}' />";
+		}
+		else {
+			echo "{$rivi["kpl"]}";
+		}
+		echo "</td>";
+
+		echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["rivihinta"], $yhtiorow['hintapyoristys'])."</td>";
+		echo "<td class='{$class}' style='text-align: right;'>{$rivi["alv"]}</td>";
+		echo "</tr>";
 	}
+
+	echo "</table>";
+
+	echo "<br>";
+	echo "<textarea rows='5' cols='90' maxlength='1000' name='syotetyt_lisatiedot' placeholder='".t("Lisätietoja")."'>";
+	echo "</textarea>";
+	echo "<br>";
+	echo "<br>";
+
+	echo "<input type='submit' name='hyvaksy' value='".t("Hyväksy")."' onclick='return tarkista(\"hyvaksy\", \"$toim\");'/>";
+	if ($toim == "EXTTARJOUS") {
+		echo "<input type='submit' name='hylkaa' value='".t("Hylkää")."' onclick='return tarkista(\"hylkaa\", \"$toim\");'/>";
+	}
+	echo "</form>";
 }
 
 require ("footer.inc");

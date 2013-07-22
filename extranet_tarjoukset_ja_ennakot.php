@@ -11,10 +11,6 @@ enable_ajax();
     .text_align_right {
         text-align: right;
     }
-	#syotetyt_lisatiedot {
-		width: 630px;
-		height: 220px;
-	}
 </style>
 <script>
 	function tarkista(type, toim) {
@@ -584,7 +580,7 @@ function echo_tarjouksen_tilausrivit($tarjous, $toim) {
 	);
 	echo_tarjous_rows_in_table($tarjous['tilausrivit'], $header_values, array(), $toim);
 	echo "<br>";
-	echo "<textarea id='syotetyt_lisatiedot' rows='4' cols='20' maxlength='1000' name='syotetyt_lisatiedot' placeholder='".t("Lisätietoja")."'>";
+	echo "<textarea rows='5' cols='90' maxlength='1000' name='syotetyt_lisatiedot' placeholder='".t("Lisätietoja")."'>";
 	echo "</textarea>";
 	echo "<br>";
 	echo "<br>";
@@ -701,12 +697,11 @@ function _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $i
 
 			$liitteet = liite_popup("TH", $rivi['tuote_tunnus']);
 
-			$vari = 'spec';
 			if ($liitteet != "") {
-				echo "<td class='$vari' style='vertical-align: top;'>$liitteet</td>";
+				echo "<td class='{$class}' style='vertical-align: top;'>$liitteet</td>";
 			}
 			else {
-				echo "<td class='$vari'></td>";
+				echo "<td class='{$class}'></td>";
 			}
 		}
 		else {

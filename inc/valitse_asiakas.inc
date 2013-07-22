@@ -177,7 +177,7 @@ function hae_poimitut_asiakkaat($asiakastunnukset) {
     global $kukarow, $yhtiorow;
 
     $query = "  SELECT asiakas.* , kuka.tunnus as myyjatunnus, kuka.nimi as myyjanimi FROM asiakas
-                LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio AND kuka.myyja = asiakas.myyjanro)
+                LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio AND kuka.myyja = asiakas.myyjanro AND kuka.myyja != 0)
                 WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
                 AND asiakas.tunnus IN ({$asiakastunnukset})";
 
@@ -320,21 +320,24 @@ function poista_asiakkaita_dummytarjoukselta($tilausnumero, $valitut_asiakastunn
 
     global $kukarow, $yhtiorow;
 
-    //haetaan dummytarjoukselle jo lisätyt asiakkaat jotta niistä voidaan poistaa valitut asiakkaat
-    $query = "  select sopimus_lisatietoja from laskun_lisatiedot
-                where yhtio='{$kukarow['yhtio']}'
-                and otunnus='{$tilausnumero}'";
+	if (!empty($valitut_asiakastunnukset)) {
+		
+		//haetaan dummytarjoukselle jo lisätyt asiakkaat jotta niistä voidaan poistaa valitut asiakkaat
+		$query = "  select sopimus_lisatietoja from laskun_lisatiedot
+					where yhtio='{$kukarow['yhtio']}'
+					and otunnus='{$tilausnumero}'";
 
-    $result = pupe_query($query);
-    $dummytarjoukselta_loytyvat_asiakastunnukset = mysql_fetch_assoc($result);
-    $dummytarjoukselta_loytyvat_asiakastunnukset = explode(',', $dummytarjoukselta_loytyvat_asiakastunnukset['sopimus_lisatietoja']);
-    $poiston_jalkeiset_asiakkaat = array_diff($dummytarjoukselta_loytyvat_asiakastunnukset, $valitut_asiakastunnukset);
+		$result = pupe_query($query);
+		$dummytarjoukselta_loytyvat_asiakastunnukset = mysql_fetch_assoc($result);
+		$dummytarjoukselta_loytyvat_asiakastunnukset = explode(',', $dummytarjoukselta_loytyvat_asiakastunnukset['sopimus_lisatietoja']);
+		$poiston_jalkeiset_asiakkaat = array_diff($dummytarjoukselta_loytyvat_asiakastunnukset, $valitut_asiakastunnukset);
 
-    $query = "  update laskun_lisatiedot
-                set sopimus_lisatietoja = '" . implode(",", $poiston_jalkeiset_asiakkaat) . "'
-                where yhtio='{$kukarow['yhtio']}'
-                and otunnus='{$tilausnumero}'";
-    pupe_query($query);
+		$query = "  update laskun_lisatiedot
+					set sopimus_lisatietoja = '" . implode(",", $poiston_jalkeiset_asiakkaat) . "'
+					where yhtio='{$kukarow['yhtio']}'
+					and otunnus='{$tilausnumero}'";
+		pupe_query($query);
+	}
 }
 
 function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
@@ -363,7 +366,9 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
                     LIMIT 100";
     }
     else {
-        $query = "	(SELECT asiakas.*
+        $query = "	(SELECT asiakas.*,
+						myyjahaku.nimi   AS myyjanimi,
+						myyjahaku.tunnus AS myyjatunnus
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                         JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )

@@ -109,7 +109,6 @@ if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		// tuotekoodi
 		$rtuoteno[$i]["tuoteno"]  = empty($tuotetieto->ArticleIdentifier) ? pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName)) : pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleIdentifier));
-		$rtuoteno[$i]["tuoteno2"] = "";
 
 		if ($rtuoteno[$i]["tuoteno"] != "") {
 

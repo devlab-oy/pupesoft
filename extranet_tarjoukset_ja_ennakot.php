@@ -1,7 +1,7 @@
 <?php
 
-require ("inc/parametrit.inc");
-require ("validation/Validation.php");
+require ("parametrit.inc");
+require ("Validation.php");
 enable_ajax();
 ?>
 <style>
@@ -301,7 +301,7 @@ function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
 		pupe_query($query);
 
 		// Kopsataan valitut rivit uudelle myyntitilaukselle
-		require("tilauskasittely/tilauksesta_myyntitilaus.inc");
+		require("tilauksesta_myyntitilaus.inc");
 
 		$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($valittu_tarjous_tunnus, '', '', '');
 		if ($tilauksesta_myyntitilaus != '') {
@@ -462,7 +462,7 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 						<input type='hidden' name='otunnus'  value='$valittu_tarjous_tunnus'>";
 		echo "<font class='message'>".t("Tuotteiden lisäys")."</font>";
 
-		require('tilauskasittely/syotarivi.inc');
+		require('syotarivi.inc');
 		echo "<br>";
 	}
 
@@ -666,4 +666,5 @@ function _echo_tarjous_table_row_td($header, $solu, $force_to_string, $class, $i
 		}
 	}
 }
-require ("inc/footer.inc");
+
+require ("footer.inc");

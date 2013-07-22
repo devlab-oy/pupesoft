@@ -156,14 +156,6 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 	if (!$onnistuiko_toiminto) {
 		echo "<font class='error'>".t("Toiminto epäonnistui")."</font>";
 	}
-	else {		
-		if ($request['toim'] == "EXTENNAKKO") {
-			echo "<font class='message'>".t("Ennakkotilaus hyväksytty!")."</font>";
-		}
-		else {
-			echo "<font class='message'>".t("Tarjous hyväksytty!")."</font>";
-		}
-	}
 
 	echo "<br>";
 	echo "<br>";
@@ -172,7 +164,7 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 			setTimeout(\"parent.location.href='$palvelin2'\", 2000);
 			</script>";
 	exit;
-	
+
 }
 else {
 	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset($request['kayttajaan_liitetty_asiakas']['tunnus'], $request['toim']);

@@ -17,8 +17,19 @@ enable_ajax();
 	}
 </style>
 <script>
-	function tarkista() {
-		ok = confirm($('#hyvaksy_hylkaa_message').val());
+	function tarkista(type, toim) {
+		if (type == "hyvaksy" && toim == "EXTTARJOUS") {
+			ok = confirm($('#hylkaa_tarjous_message').val());
+		}
+		else if (type == "hylkaa" && toim == "EXTTARJOUS") {
+			ok = confirm($('#hylkaa_tarjous_message').val());
+		}
+		else if (type == "hyvaksy" && toim == "EXTENNAKKO") {
+			ok = confirm($('#hyvaksy_ennakko').val());
+		}
+		else {
+			ok = true;
+		}
 
 		if (ok) {
 			return true;
@@ -145,34 +156,30 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 	else {
 		$onnistuiko_toiminto = hylkaa($request['valittu_tarjous_tunnus']);
 	}
+
 	if (!$onnistuiko_toiminto) {
 		echo "<font class='error'>".t("Toiminto ep‰onnistui")."</font>";
-		echo "<br>";
-		echo "<br>";
 	}
-	else {
-		echo "	<script>
-				setTimeout(\"parent.location.href='$palvelin2'\",0);
-				</script>";
-		exit;
+	else {		
+		if ($request['toim'] == "EXTENNAKKO") {
+			echo "<font class='message'>".t("Ennakkotilaus hyv‰ksytty!")."</font>";
+		}
+		else {
+			echo "<font class='message'>".t("Tarjous hyv‰ksytty!")."</font>";
+		}
 	}
 
-	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset($request['kayttajaan_liitetty_asiakas']['tunnus'], $request['toim']);
-	$header_values = array(
-		'nimi'		 => t('Nimi'),
-		'hinta'		 => t('Tarjouksen hinta'),
-		'olmapvm'	 => t('Viimeinen voimasssaolop‰iv‰m‰‰r‰'),
-	);
+	echo "<br>";
+	echo "<br>";
 
-	echo_rows_in_table($request['asiakkaan_tarjoukset'], $header_values, array(), 'tee_tarjouksen_nimesta_linkki');
+	echo "	<script>
+			setTimeout(\"parent.location.href='$palvelin2'\", 2000);
+			</script>";
+	exit;
+	
 }
 else {
 	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset($request['kayttajaan_liitetty_asiakas']['tunnus'], $request['toim']);
-	$header_values = array(
-		'nimi'		 => t('Nimi'),
-		'hinta'		 => t('Tarjouksen hinta'),
-		'olmapvm'	 => t('Viimeinen voimasssaolop‰iv‰m‰‰r‰'),
-	);
 
 	if (count($request['asiakkaan_tarjoukset']) == 0) {
 		if ($request['toim'] == "EXTENNAKKO") {
@@ -183,7 +190,9 @@ else {
 		}
 	}
 	else {
-		echo_rows_in_table($request['asiakkaan_tarjoukset'], $header_values, array(), 'tee_tarjouksen_nimesta_linkki');
+		$params = array("data" => $request['asiakkaan_tarjoukset'],
+						"toim" => $request['toim']);
+		piirra_table($params);
 	}
 }
 
@@ -379,13 +388,13 @@ function hae_extranet_tarjoukset($asiakasid, $toim) {
 		$where = "  AND lasku.clearing = 'EXTENNAKKO' AND lasku.tila = 'N'";
 	}
 
-	$query = "  SELECT  concat( concat_ws('!!!', lasku.tunnus, laskun_lisatiedot.saate),'!!!{$toim}') AS saate,
-                lasku.nimi as nimi,
+	$query = "  SELECT laskun_lisatiedot.saate,
+                lasku.nimi,
                 lasku.hinta,
                 lasku.olmapvm,
-                lasku.tunnus as tunnus
+                lasku.tunnus
                 FROM lasku
-                JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus	)
+                JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
                 WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                 AND lasku.liitostunnus = '{$asiakasid}'
                 AND lasku.alatila = ''
@@ -528,7 +537,9 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 function echo_tarjouksen_otsikko($tarjous, $toim) {
 	global $kukarow, $yhtiorow;
 
-	echo "<input type='hidden' id='hyvaksy_hylkaa_message' value='".t("Oletko varma, ett‰ haluat suorittaa valitun toimenpiteen")."'/>";
+	echo "<input type='hidden' id='hylkaa_tarjous_message' value='".t("Oletko varma, ett‰ haluat hyl‰t‰ tarjouksen?")."'/>";
+	echo "<input type='hidden' id='hyvaksy_ennakko' value='".t("Oletko varma, ett‰ haluat hyv‰ksy‰ ennakon?")."'/>";
+	echo "<input type='hidden' id='hyvaksy_tarjous' value='".t("Oletko varma, ett‰ haluat hyv‰ksy‰ tarjouksen?")."'/>";
 	echo "<a href=$_SERVER[PHP_SELF]?toim={$toim}>".t("Palaa takaisin")."</a>";
 	echo "<br>";
 	echo "<br>";
@@ -542,7 +553,7 @@ function echo_tarjouksen_otsikko($tarjous, $toim) {
 
 	echo "<tr>";
 	echo "<th>".t("Nimi")."</th>";
-	echo "<th>".t("Viimeinen voimassaolopvm")."</th>";
+	echo "<th>".t("Voimassa")."</th>";
 	echo "<tr>";
 	echo "<td>";
 	echo "{$tarjous['nimi']}";
@@ -577,9 +588,9 @@ function echo_tarjouksen_tilausrivit($tarjous, $toim) {
 	echo "</textarea>";
 	echo "<br>";
 	echo "<br>";
-	echo "<input type='submit' name='hyvaksy' value='".t("Hyv‰ksy")."' onclick='return tarkista();'/>";
+	echo "<input type='submit' name='hyvaksy' value='".t("Hyv‰ksy")."' onclick='return tarkista(\"hyvaksy\", \"$toim\");'/>";
 	if ($toim == "EXTTARJOUS") {
-		echo "<input type='submit' name='hylkaa' value='".t("Hylk‰‰")."' onclick='return tarkista();'/>";
+		echo "<input type='submit' name='hylkaa' value='".t("Hylk‰‰")."' onclick='return tarkista(\"hylkaa\", \"$toim\");'/>";
 	}
 	echo "</form>";
 }
@@ -612,6 +623,34 @@ function _echo_tarjous_table_headers($rivi, $header_values) {
 		}
 	}
 	echo "</tr>";
+}
+
+function piirra_table($params) {
+
+	$data = $params['data'];
+	$toim = $params['toim'];
+
+	echo "<table>";
+
+	echo "<tr>";
+	echo "<th>".t("Numero")."</th>";
+	echo "<th>".t("Saate")."</th>";
+	echo "<th>".t("Nimi")."</th>";
+	echo "<th>".t("Hinta")."</th>";
+	echo "<th>".t("Voimassa")."</th>";
+	echo "</tr>";
+
+	foreach ($data as $rivi) {
+		echo "<tr>";
+		echo "<td><a href='$_SERVER[PHP_SELF]?action=nayta_tarjous&valittu_tarjous_tunnus={$rivi["tunnus"]}&toim={$toim}'>{$rivi["tunnus"]}</a>";
+		echo "<td>{$rivi["saate"]}</td>";
+		echo "<td>{$rivi["nimi"]}</td>";
+		echo "<td style='text-align: right;'>{$rivi["hinta"]}</td>";
+		echo "<td>".tv1dateconv($rivi["olmapvm"])."</td>";
+		echo "</tr>";
+	}
+
+	echo "</table>";
 }
 
 function _echo_tarjous_table_rows(&$rivit, $force_to_string = array(), $toim) {

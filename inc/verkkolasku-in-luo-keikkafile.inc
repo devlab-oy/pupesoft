@@ -141,7 +141,7 @@ $debug = 0;
 										AND toimi.tunnus = lasku.liitostunnus
 										AND toimi.tunnus = '{$trow['tunnus']}'
 										AND toimi.tyyppi != 'P'
-										AND toimi.asn_sanomat IN ('K', 'L'))
+										AND toimi.asn_sanomat IN ('K', 'L', 'M'))
 						JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 														AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno

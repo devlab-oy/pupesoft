@@ -56,6 +56,7 @@ elseif ($toim == 'EXTENNAKKO') {
 }
 else {
 	echo "<font class='error'>".t("Virheellinen toiminto")."!</font><hr>";
+	exit;
 }
 
 $request = array(

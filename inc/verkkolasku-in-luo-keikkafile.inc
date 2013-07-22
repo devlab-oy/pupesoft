@@ -53,17 +53,21 @@ $debug = 0;
 										AND laji = 'asn'
 										AND tilausrivi LIKE '%{$tilausrivirow['perheid']}%'
 										AND status = 'X'";
-							$chk_res = pupe_query($query);
+							$chk_res3 = pupe_query($query);
 
-							if (mysql_num_rows($chk_res) != 0) {
+							if (mysql_num_rows($chk_res3) != 0) {
 								$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 							}
 							else {
-								$skipatut_tilausrivit[$tilausrivirow['tunnus']] = $tilausrivirow['kpl'] + $tilausrivirow['varattu'];
+								if (mysql_num_rows($chk_res) == 0 and mysql_num_rows($chk_res2) == 0) {
+									$skipatut_tilausrivit[$tilausrivirow['tunnus']] = $tilausrivirow['kpl'] + $tilausrivirow['varattu'];
+								}
 							}
 						}
 						else {
-							$skipatut_tilausrivit[$tilausrivirow['tunnus']] = $tilausrivirow['kpl'] + $tilausrivirow['varattu'];
+							if (mysql_num_rows($chk_res) == 0 and mysql_num_rows($chk_res2) == 0) {
+								$skipatut_tilausrivit[$tilausrivirow['tunnus']] = $tilausrivirow['kpl'] + $tilausrivirow['varattu'];
+							}
 						}
 					}
 				}
@@ -1217,6 +1221,27 @@ $debug = 0;
 						echo "Ylim‰‰r‰ist‰: $ylimaaraista = {$rtuoteno[$i]['kpl']} - $laskuri<br><br>";
 					}
 
+					// Katsotaan ollaanko skipattu tilausrivej‰, ennen kuin aletaan luomaan niit‰ alempana
+					if (count($skipatut_tilausrivit) > 0) {
+
+						// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
+						$updatequery = "UPDATE asn_sanomat SET
+										tilausrivi = '',
+										tuoteno = '{$tilausrivirow['tuoteno']}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
+						$upd_res = pupe_query($updatequery);
+
+						if ($debug == 1) {
+							echo "<pre>$updatequery</pre>";
+						}
+
+						$virheet++;
+
+						// Hyp‰t‰‰n yli t‰m‰ looppikerta ja menn‰‰n seuraavaan for-loopin iteraatioon (rivi ~950)
+						continue 2;
+					}
+
 					if ($ylimaaraista > 0) {
 
 						$query = "	(SELECT DISTINCT tilausrivi.tunnus, toimi.asn_sanomat,
@@ -1391,38 +1416,6 @@ $debug = 0;
 
 							// Kokonaislaskurim‰‰r‰
 							$laskuri += $laskuri_tmp;
-						}
-					}
-
-					// Katsotaan ollaanko skipattu tilausrivej‰, ennen kuin aletaan luomaan niit‰ alempana
-					if (count($skipatut_tilausrivit) > 0) {
-
-						$loop_sum_kpl_maara = 0;
-
-						foreach ($skipatut_tilausrivit as $tilriv_tun => $kpl_maara) {
-
-							$loop_sum_kpl_maara += $kpl_maara;
-
-							// Ei tehd‰ turhaan uutta rivi‰, koska ollaan hyl‰tty liian monta rivi‰ ja kappaletta mit‰ voisi k‰ytt‰‰ n‰iden kohdistamiseen
-							if ($loop_sum_kpl_maara >= $ylimaaraista) {
-
-								// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
-								$updatequery = "UPDATE asn_sanomat SET
-												tilausrivi = '',
-												tuoteno = '{$tilausrivirow['tuoteno']}'
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
-								$upd_res = pupe_query($updatequery);
-
-								if ($debug == 1) {
-									echo "<pre>$updatequery</pre>";
-								}
-
-								$virheet++;
-
-								// Hyp‰t‰‰n yli t‰m‰ foreach ja seuraavaan for-loopin iteraatioon (rivi ~950)
-								continue 2;
-							}
 						}
 					}
 

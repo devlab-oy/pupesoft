@@ -246,7 +246,7 @@
 			$otsikko = t("laskutuskieltoa");
 		}
 		elseif ($toim == "EXTRANET") {
-			$otsikko = t("extranet-tilausta");
+			$otsikko = t("hyväksyttäviä tilauksia");
 		}
 		elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
 			$otsikko = t("osto-tilausta");

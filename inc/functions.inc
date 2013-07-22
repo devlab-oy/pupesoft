@@ -22627,6 +22627,34 @@ if (!function_exists("saako_myyda_private_label")) {
 	}
 }
 
+if (!function_exists("tuotteen_toimittajat_tuotenumerot_haku")) {
+	function tuotteen_toimittajat_tuotenumerot_haku($tuoteno, $laskuttajan_toimittajanumero, $kpl = 0) {
+		global $kukarow, $yhtiorow;
+
+		if ($kpl > 0) {
+			$wildcard = "";
+			for ($i = 0; $i<$kpl; $i++) {
+				$wildcard .= "*";
+			}
+			$tuoteno = substr($tuoteno, 0, $kpl * -1).$wildcard;
+		}
+
+		$query = "	SELECT tt.*
+					FROM tuotteen_toimittajat_tuotenumerot AS ttt
+					JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
+					JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}' AND toimi.tyyppi != 'P')
+					WHERE ttt.yhtio = '{$kukarow['yhtio']}'
+					AND ttt.tuoteno = '$tuoteno'";
+		$chk_res = pupe_query($query);
+
+		if (mysql_num_rows($chk_res) == 0 and $kpl < strlen($tuoteno)) {
+			$chk_res = tuotteen_toimittajat_tuotenumerot_haku($tuoteno, $laskuttajan_toimittajanumero, ($kpl+1));
+		}
+
+		return $chk_res;
+	}
+}
+
 if (!function_exists("hae_viivakoodilla")) {
 	function hae_viivakoodilla($viivakoodi) {
 		global $kukarow, $yhtiorow;

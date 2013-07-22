@@ -171,7 +171,17 @@ else {
 		'olmapvm'	 => t('Viimeinen voimasssaolop‰iv‰m‰‰r‰'),
 	);
 
-	echo_rows_in_table($request['asiakkaan_tarjoukset'], $header_values, array(), 'tee_tarjouksen_nimesta_linkki');
+	if (count($request['asiakkaan_tarjoukset'] == 0)) {
+		if ($request['toim'] == "EXTENNAKKO") {
+			echo t("Sinulle ei ole voimassaolevia ennakkotilauksia.");
+		}
+		else {
+			echo t("Sinulle ei ole voimassaolevia tarjouksia.");
+		}
+	}
+	else {
+		echo_rows_in_table($request['asiakkaan_tarjoukset'], $header_values, array(), 'tee_tarjouksen_nimesta_linkki');
+	}
 }
 
 function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappalemaarat) {
@@ -580,7 +590,7 @@ function echo_tarjous_rows_in_table(&$rivit, $header_values = array(), $force_to
 	}
 	else {
 		echo "<tr><td>".t("Ei tulostettavia rivej‰")."</td></tr>";
-	}
+		}
 	echo "</table>";
 }
 

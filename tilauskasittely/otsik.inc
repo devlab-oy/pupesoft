@@ -2260,9 +2260,9 @@
 				}
 			}
 
-			if (($toim == 'TARJOUS' or $toim == 'EXTTARJOUS')) {
+			if (($toim == 'TARJOUS' or $toim == 'EXTTARJOUS' or $toim == 'EXTENNAKKO')) {
 
-				$vasen_sarake[$vasen] = "<td>".t("Tarjouksen voimassaoloaika").":</td><td>";
+				$vasen_sarake[$vasen] = "<td>".t("Voimassaoloaika").":</td><td>";
 
 				if ($srow["olmapvm"] != "" and $srow["olmapvm"] != "0000-00-00") {
 					list($voimaika_vv, $voimaika_kk, $voimaika_pp) = explode("-",$srow["olmapvm"]);

@@ -174,7 +174,7 @@ else {
 		'olmapvm'	 => t('Viimeinen voimasssaolop‰iv‰m‰‰r‰'),
 	);
 
-	if (count($request['asiakkaan_tarjoukset'] == 0)) {
+	if (count($request['asiakkaan_tarjoukset']) == 0) {
 		if ($request['toim'] == "EXTENNAKKO") {
 			echo t("Sinulle ei ole voimassaolevia ennakkotilauksia.");
 		}

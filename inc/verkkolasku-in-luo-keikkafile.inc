@@ -58,16 +58,12 @@ $debug = 0;
 							if (mysql_num_rows($chk_res3) != 0) {
 								$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 							}
-							else {
-								if (mysql_num_rows($chk_res) == 0 and mysql_num_rows($chk_res2) == 0) {
-									$skipatut_tilausrivit[$tilausrivirow['tunnus']] = $tilausrivirow['kpl'] + $tilausrivirow['varattu'];
-								}
-							}
-						}
-						else {
-							if (mysql_num_rows($chk_res) == 0 and mysql_num_rows($chk_res2) == 0) {
+							elseif (mysql_num_rows($chk_res) == 0 and mysql_num_rows($chk_res2) == 0) {
 								$skipatut_tilausrivit[$tilausrivirow['tunnus']] = $tilausrivirow['kpl'] + $tilausrivirow['varattu'];
 							}
+						}
+						elseif (mysql_num_rows($chk_res) == 0 and mysql_num_rows($chk_res2) == 0) {
+							$skipatut_tilausrivit[$tilausrivirow['tunnus']] = $tilausrivirow['kpl'] + $tilausrivirow['varattu'];
 						}
 					}
 				}

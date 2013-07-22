@@ -138,9 +138,24 @@
 							$sscc_ulkoinen_chk_row = mysql_fetch_assoc($sscc_ulkoinen_chk_res);
 
 							require_once("inc/unifaun_send.inc");
-							$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
 
-							$unifaun->_discardParcel("", $sscc_ulkoinen_chk_row['sscc_ulkoinen']);
+							$query = "	SELECT lasku.toimitustavan_lahto, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp
+										FROM lasku
+										WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+										AND lasku.tunnus = '{$sscc_ulkoinen_chk_row['otunnus']}'";
+							$toitares = pupe_query($query);
+							$toitarow = mysql_fetch_assoc($toitares);
+
+							if ($operaattori == 'unifaun_ps' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
+								$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
+							}
+							elseif ($operaattori == 'unifaun_uo.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+								$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+							}
+
+							$mergeid = md5($toitarow["toimitustavan_lahto"].$toitarow["ytunnus"].$toitarow["toim_osoite"].$toitarow["toim_postino"].$toitarow["toim_postitp"]);
+
+							$unifaun->_discardParcel($mergeid, $sscc_ulkoinen_chk_row['sscc_ulkoinen']);
 							$unifaun->ftpSend();
 						}
 

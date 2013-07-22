@@ -11,8 +11,6 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus  = '$asiakasid'";
-
-
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
@@ -352,32 +350,34 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 						FROM kuka
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus  = '$asiakasid'";
-
 			$result = pupe_query($query);
-
 			$asiakasrow  = mysql_fetch_assoc($result);
 
 			$query = "	SELECT *
 						FROM maksuehto
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND kaytossa = ''
+						AND jv = ''
+						AND kateinen = ''
+						AND jaksotettu = ''
+						AND erapvmkasin = ''
+						AND (sallitut_maat = '' OR sallitut_maat LIKE '%$yhtiorow[maa]%')
 						ORDER BY jarjestys ASC
 						LIMIT 1";
 			$result = pupe_query($query);
-
 			$maksuehto_row = mysql_fetch_assoc($result);
-			$asiakasrow['maksuehto'] = $maksuehto_row['tunnus'];
 
-			$query = "  select *
-						from toimitustapa
-						where yhtio = '{$kukarow['yhtio']}'
-						order by jarjestys asc
-						limit 1";
+			$query = "  SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND nouto = ''
+						AND vak_kielto = ''
+						AND (sallitut_maat = '' OR sallitut_maat LIKE '%$yhtiorow[maa]%')
+						ORDER BY jarjestys ASC
+						LIMIT 1";
 			$result = pupe_query($query);
-
 			$default_toimitustapa_row  = mysql_fetch_assoc($result);
 
-			$asiakasrow['toimitustapa'] = $default_toimitustapa_row['selite'];
 			$jatka	= "JATKA";
 			$tee	= "OTSIK";
 			$override_ytunnus_check = "YES";
@@ -389,8 +389,8 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$postino = t("Tarjouspohjan postinumero");
 			$maa = $yhtiorow['maa'];
 
-			$maksuehto = $asiakasrow['maksuehto'];
-			$toimitustapa = $asiakasrow['toimitustapa'];
+			$maksuehto = $maksuehto_row['tunnus'];
+			$toimitustapa = $default_toimitustapa_row['selite'];
 
 			if ($toim == "TARJOUS") {
 				$clearing = "EXTTARJOUS";
@@ -400,21 +400,23 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				$clearing = "EXTENNAKKO";
 				$tilaustyyppi = 'E';
 			}
-			if(!empty($tilausnumero)){
-				$query = "  select lasku.*, laskun_lisatiedot.sopimus_lisatietoja
-							from lasku
-							join laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
-							where lasku.yhtio='{$kukarow['yhtio']}'
+
+			if (!empty($tilausnumero)) {
+				$query = "  SELECT lasku.*, laskun_lisatiedot.sopimus_lisatietoja
+							FROM lasku
+							JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+							WHERE lasku.yhtio='{$kukarow['yhtio']}'
 							AND lasku.tunnus = $tilausnumero";
 				$result = pupe_query($query);
 
 				$dummy_tarjous_row = mysql_fetch_assoc($result);
 				$sopimus_lisatietoja = $dummy_tarjous_row['sopimus_lisatietoja'];
 			}
-			require ("otsik.inc");
-			if (count($valitut_asiakastunnukset) > 0) {
-				if (!empty($dummy_tarjous_row['sopimus_lisatietoja'])) {
 
+			require ("otsik.inc");
+
+			if (is_array($valitut_asiakastunnukset) and count($valitut_asiakastunnukset) > 0) {
+				if (!empty($dummy_tarjous_row['sopimus_lisatietoja'])) {
 					$olemassaolevat = explode(",", $dummy_tarjous_row['sopimus_lisatietoja']);
 					$lisattavat = array_diff($valitut_asiakastunnukset, $olemassaolevat);
 					$asiakas_tunnukset = $dummy_tarjous_row['sopimus_lisatietoja'] . ',' . implode(',', $lisattavat);
@@ -422,10 +424,10 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				else {
 					$asiakas_tunnukset = implode(',', $valitut_asiakastunnukset);
 				}
-				$query = "  update laskun_lisatiedot
-							set sopimus_lisatietoja = '{$asiakas_tunnukset}'
-							where yhtio = '{$kukarow['yhtio']}'
-							and otunnus = '{$tilausnumero}'";
+				$query = "  UPDATE laskun_lisatiedot
+							SET sopimus_lisatietoja = '{$asiakas_tunnukset}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND otunnus = '{$tilausnumero}'";
 				pupe_query($query);
 			}
 		}

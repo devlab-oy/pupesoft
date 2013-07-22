@@ -22565,8 +22565,13 @@ if (!function_exists("lisaa_rivi")) {
 			${'ale'.$alepostfix} = (!empty($ale_temp)) ? $ale_temp : "";
 		}
 
-		require('tilauskasittely/lisaarivi.inc');
-
+		if (@include("tilauskasittely/lisaarivi.inc"));
+		elseif (@include("lisaarivi.inc"));
+		else {
+			echo "Lisaarivi not found";
+			exit;
+		}
+		
 		return array(
 			'lisatyt_rivit1' => $lisatyt_rivit1,
 			'lisatyt_rivit2' => $lisatyt_rivit2,

@@ -42,10 +42,13 @@ if (function_exists("js_popup")) {
 }
 
 if ($toim == 'EXTTARJOUS') {
-	echo "<font class='head'>".t("Ext-tarjoukset")."</font><hr>";
+	echo "<font class='head'>".t("Tarjoukset")."</font><hr>";
+}
+elseif ($toim == 'EXTENNAKKO') {
+	echo "<font class='head'>".t("Ennakkomyynnit")."</font><hr>";
 }
 else {
-	echo "<font class='head'>".t("Ext-ennakot")."</font><hr>";
+	echo "<font class='error'>".t("Virheellinen toiminto")."!</font><hr>";
 }
 
 $request = array(

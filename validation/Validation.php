@@ -207,7 +207,7 @@ class FormValidator {
 
 	public static function validateContent($var, $type) {
 
-        $is_ok = true;
+		$is_ok = true;
 		switch ($type) {
 			case 'paiva':
 				if (strpos($var, '.')) {

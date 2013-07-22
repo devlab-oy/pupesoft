@@ -19,7 +19,7 @@ enable_ajax();
 <script>
 	function tarkista(type, toim) {
 		if (type == "hyvaksy" && toim == "EXTTARJOUS") {
-			ok = confirm($('#hylkaa_tarjous_message').val());
+			ok = confirm($('#hyvaksy_tarjous').val());
 		}
 		else if (type == "hylkaa" && toim == "EXTTARJOUS") {
 			ok = confirm($('#hylkaa_tarjous_message').val());

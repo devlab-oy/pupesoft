@@ -291,7 +291,7 @@ function echo_asiakas_table($request) {
 				$placeholder = t("Ennakon saateteksti");
 				$luo_teksti = t("Luo ennakko");
 			}
-            echo "<textarea rows='4' cols='20' maxlength='1000' name='saate_teksti' placeholder='{$placeholder}'>";
+            echo "<textarea rows='5' cols='90' maxlength='1000' name='saate_teksti' placeholder='{$placeholder}'>";
             echo "</textarea>";
             echo "<br>";
             echo "<br>";

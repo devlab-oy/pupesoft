@@ -15,7 +15,7 @@ $debug = 0;
 			$kaytettavat_tilausrivit = $skipatut_tilausrivit = array();
 
 			if (!is_resource($checkres) or mysql_num_rows($checkres) == 0) {
-				return $kaytettavat_tilausrivit;
+				return array($kaytettavat_tilausrivit, $skipatut_tilausrivit);
 			}
 
 			while ($tilausrivirow = mysql_fetch_assoc($checkres)) {

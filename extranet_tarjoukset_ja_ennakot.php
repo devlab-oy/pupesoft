@@ -5,12 +5,12 @@ require ("Validation.php");
 enable_ajax();
 ?>
 <style>
-    .tr_border_top {
-        border-top: 1px solid;
-    }
-    .text_align_right {
-        text-align: right;
-    }
+	.tr_border_top {
+		border-top: 1px solid;
+	}
+	.text_align_right {
+		text-align: right;
+	}
 </style>
 <script>
 	function tarkista(type, toim) {
@@ -87,11 +87,11 @@ if ($tee == "LISAARIVI") {
 		// Nollataan hinta kun kyseess‰ on asiakkaan ext-ennakkotilaukseen lis‰‰m‰ rivi
 		if ($toim == 'EXTENNAKKO') {
 			$query = "  SELECT selite AS ennakko_pros_a
-                        FROM tuotteen_avainsanat
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tuoteno = '{$tuoteno}'
-                        AND laji = 'parametri_ennakkoale_a'
-                        AND selite != ''";
+						FROM tuotteen_avainsanat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '{$tuoteno}'
+						AND laji = 'parametri_ennakkoale_a'
+						AND selite != ''";
 			$result = pupe_query($query);
 			$tuotteen_hinta = mysql_fetch_assoc($result);
 			$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
@@ -229,14 +229,14 @@ function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappale
 						}
 
 						$query = "  UPDATE tilausrivi
-                                        SET tilkpl = 0,
-                                        kpl = 0,
-                                        jt = 0,
-                                        varattu = 0
-                                        WHERE yhtio = '{$kukarow['yhtio']}'
-                                        AND otunnus = '{$valittu_tarjous_tunnus}'
-                                        {$andy}
-                                        ";
+										SET tilkpl = 0,
+										kpl = 0,
+										jt = 0,
+										varattu = 0
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND otunnus = '{$valittu_tarjous_tunnus}'
+										{$andy}
+										";
 						pupe_query($query);
 					}
 					// Kun kappalem‰‰r‰‰ muutetaan muuksi kuin nollaksi, poistetaan tilausrivi tilauksesta ja lis‰t‰‰n uudestaan uudella m‰‰r‰ll‰
@@ -252,11 +252,11 @@ function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappale
 						}
 						// Rivin poisto
 						$query = "  DELETE
-                                    FROM tilausrivi
-                                    WHERE yhtio = '{$kukarow['yhtio']}'
-                                    AND otunnus = '{$valittu_tarjous_tunnus}'
-                                    {$andy}
-                                    ";
+									FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$valittu_tarjous_tunnus}'
+									{$andy}
+									";
 
 						pupe_query($query);
 
@@ -377,16 +377,16 @@ function hae_extranet_tarjoukset($asiakasid, $toim) {
 	}
 
 	$query = "  SELECT laskun_lisatiedot.saate,
-                lasku.nimi,
-                lasku.hinta,
-                lasku.olmapvm,
-                lasku.tunnus
-                FROM lasku
-                JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
-                WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                AND lasku.liitostunnus = '{$asiakasid}'
-                AND lasku.alatila = ''
-                {$where}";
+				lasku.nimi,
+				lasku.hinta,
+				lasku.olmapvm,
+				lasku.tunnus
+				FROM lasku
+				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND lasku.liitostunnus = '{$asiakasid}'
+				AND lasku.alatila = ''
+				{$where}";
 	$result = pupe_query($query);
 
 	$haetut_tarjoukset = array();
@@ -406,9 +406,9 @@ function hae_extranet_tarjous($tunnus) {
 	global $kukarow, $yhtiorow;
 
 	$query = "  SELECT *
-                FROM lasku
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$tunnus}'";
+				FROM lasku
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$tunnus}'";
 	$result = pupe_query($query);
 
 	return mysql_fetch_assoc($result);
@@ -418,9 +418,9 @@ function hae_extranet_kayttajaan_liitetty_asiakas() {
 	global $kukarow, $yhtiorow;
 
 	$query = "  SELECT asiakas.*
-                FROM asiakas
-                JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' AND kuka.kuka = '{$kukarow['kuka']}' )
-                WHERE asiakas.yhtio = '{$kukarow['yhtio']}'";
+				FROM asiakas
+				JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' AND kuka.kuka = '{$kukarow['kuka']}' )
+				WHERE asiakas.yhtio = '{$kukarow['yhtio']}'";
 	$result = pupe_query($query);
 
 	return mysql_fetch_assoc($result);
@@ -483,9 +483,9 @@ function hae_tarjous($valittu_tarjous_tunnus) {
 	global $kukarow, $yhtiorow;
 
 	$query = "  SELECT *
-                FROM lasku
-                WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$valittu_tarjous_tunnus}'";
+				FROM lasku
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$valittu_tarjous_tunnus}'";
 	$result = pupe_query($query);
 
 	$tarjous = mysql_fetch_assoc($result);
@@ -503,14 +503,14 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 				tilausrivi.perheid as perheid_tunnus,
 				tilausrivi.tuoteno,
 				tilausrivi.nimitys,
-                tilausrivi.tilkpl as kpl,
-				IF(tilausrivi.alv != 0, ( (1 + ( tilausrivi.alv / 100)     ) * (tilausrivi.tilkpl * tilausrivi.hinta ) ), tilausrivi.tilkpl * tilausrivi.hinta) AS rivihinta,
+				tilausrivi.tilkpl as kpl,
+				IF(tilausrivi.alv != 0, ( (1 + ( tilausrivi.alv / 100)	 ) * (tilausrivi.tilkpl * tilausrivi.hinta ) ), tilausrivi.tilkpl * tilausrivi.hinta) AS rivihinta,
 				tilausrivi.alv,
 				tuote.tunnus as tuote_tunnus
-                FROM tilausrivi
-                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                AND tilausrivi.otunnus = '{$valittu_tarjous_tunnus}'";
+				FROM tilausrivi
+				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.otunnus = '{$valittu_tarjous_tunnus}'";
 	$result = pupe_query($query);
 
 	$tilausrivit = array();

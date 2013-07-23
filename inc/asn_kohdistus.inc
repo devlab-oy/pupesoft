@@ -75,62 +75,6 @@
 
 				// Katsotaan, löytyykö tämä rivi ostotilaukselta
 				// Siirtymävaiheen jälkeen poista lasku.comments tilausnumero ehto !!!!
-				// poikkeuskäsittelyä muutamalle toimittajalle.
-
-				$toinen_tuoteno = "";
-
-				if ($row["toimittajanumero"] == "123067") {
-					$orgtuote = $row["toim_tuoteno"];
-					$lyhennetty_tuoteno = substr($row["toim_tuoteno"], 0, -3);
-					$jatkettu_tuoteno = $lyhennetty_tuoteno."090";
-
-					if ($row["toim_tuoteno2"] != "") {
-						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}'";
-					}
-
-					$poikkeus_tuoteno =" in ('{$orgtuote}','{$lyhennetty_tuoteno}','{$jatkettu_tuoteno}' {$toinen_tuoteno})";
-				}
-				elseif ($row["toimittajanumero"] == "123453") {
-					$suba = substr($row["toim_tuoteno"],0,3);
-					$subb = substr($row["toim_tuoteno"],3);
-					$tuote = $suba."-".$subb;
-					$yhteen = $row["toim_tuoteno"];
-
-					if ($row["toim_tuoteno2"] != "") {
-						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}'";
-					}
-
-					$poikkeus_tuoteno = " in ('{$tuote}','{$yhteen}' {$toinen_tuoteno}) ";
-				}
-				elseif ($row["toimittajanumero"] == "123178") {
-					$orgtuote = $row["toim_tuoteno"];
-					$lyhennetty = substr($row["toim_tuoteno"],3);
-
-					if ($row["toim_tuoteno2"] != "") {
-						$lyhennetty_toinen = substr($row["toim_tuoteno2"],3);
-						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}','{$lyhennetty_toinen}'";
-					}
-
-					$poikkeus_tuoteno = " in ('{$orgtuote}','{$lyhennetty}' {$toinen_tuoteno}) ";
-				}
-				elseif ($row["toimittajanumero"] == "123084") {
-					$orgtuote = $row["toim_tuoteno"];
-					$lyhennetty = ltrim($row["toim_tuoteno"],'0');
-
-					if ($row["toim_tuoteno2"] != "") {
-						$lyhennetty_toinen = ltrim($row["toim_tuoteno2"],'0');
-						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}','{$lyhennetty_toinen}'";
-					}
-
-					$poikkeus_tuoteno = " in ('{$orgtuote}','{$lyhennetty}' {$toinen_tuoteno}) ";
-				}
-				else {
-					if ($row["toim_tuoteno2"] != "") {
-						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}'";
-					}
-
-					$poikkeus_tuoteno = " in ('{$row['toim_tuoteno']}' {$toinen_tuoteno}) ";
-				}
 
 				// tiukka 1
 				$query = "	SELECT tilausrivi.*
@@ -146,7 +90,7 @@
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno {$poikkeus_tuoteno})
+															AND tuotteen_toimittajat.toim_tuoteno = '{$row['toim_tuoteno']}')
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
@@ -172,7 +116,7 @@
 								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 																AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 																AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-																AND tuotteen_toimittajat.toim_tuoteno {$poikkeus_tuoteno})
+																AND tuotteen_toimittajat.toim_tuoteno = '{$row['toim_tuoteno']}')
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tyyppi = 'O'
@@ -199,7 +143,7 @@
 								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 																AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 																AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-																AND tuotteen_toimittajat.toim_tuoteno {$poikkeus_tuoteno})
+																AND tuotteen_toimittajat.toim_tuoteno = '{$row['toim_tuoteno']}')
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tyyppi = 'O'
@@ -225,7 +169,7 @@
 								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 																AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 																AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-																AND tuotteen_toimittajat.toim_tuoteno {$poikkeus_tuoteno})
+																AND tuotteen_toimittajat.toim_tuoteno = '{$row['toim_tuoteno']}')
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tyyppi = 'O'
@@ -251,7 +195,7 @@
 								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 																AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 																AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-																AND tuotteen_toimittajat.toim_tuoteno {$poikkeus_tuoteno})
+																AND tuotteen_toimittajat.toim_tuoteno = '{$row['toim_tuoteno']}')
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tyyppi = 'O'
@@ -341,7 +285,7 @@
 									JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 																	AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 																	AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-																	AND tuotteen_toimittajat.toim_tuoteno {$poikkeus_tuoteno})
+																	AND tuotteen_toimittajat.toim_tuoteno = '{$row['toim_tuoteno']}')
 									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.tyyppi = 'O'

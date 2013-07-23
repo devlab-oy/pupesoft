@@ -245,6 +245,17 @@
 				$desadv_message .= "NAD+CN+$toitarow[toim_ovttunnus]:100++".substr($toitarow["toim_nimi"], 0, 35).":".substr($toitarow["toim_nimitark"], 0, 35)."+".substr($toitarow["toim_osoite"], 0, 35)."+".substr($toitarow["toim_postitp"], 0, 35)."++".substr($toitarow["toim_postino"], 0, 17)."+".substr($toitarow["toim_maa"], 0, 3)."'";
 				$x++;
 			}
+			else if ($desadv_laskurow["asiakastoim_nimi"] != '' and $desadv_laskurow['asiakasovttunnus'] != '') {
+				//asiakkaan toimitusosoite
+				$desadv_message .= "NAD+CN+{$desadv_laskurow['asiakasovttunnus']}:100++"
+				.substr($desadv_laskurow["asiakastoim_nimi"], 0, 35).":"
+				.substr($desadv_laskurow["asiakastoim_nimitark"], 0, 35)."+"
+				.substr($desadv_laskurow["asiakastoim_osoite"], 0, 35)."+"
+				.substr($desadv_laskurow["asiakastoim_postitp"], 0, 35)."++"
+				.substr($desadv_laskurow["asiakastoim_postino"], 0, 17)."+"
+				.substr($desadv_laskurow["asiakastoim_maa"], 0, 3)."'";
+				$x++;
+			}
 			else {
 				$error .= "Toimitustavan toim_ovt-tunnus / toim_nimi puuttui!<br>";
 			}

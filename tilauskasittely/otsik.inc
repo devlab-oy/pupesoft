@@ -523,7 +523,7 @@
 				exit;
 			}
 		}
-		elseif ($toim == "TARJOUS" or $toim == "EXTTARJOUS") {
+		elseif ($toim == "TARJOUS") {
 			echo "<font class='head'>".t("Tarjouksen otsikko")."</font><hr>";
 		}
 		elseif ($toim == "EXTTARJOUS") {
@@ -535,7 +535,7 @@
 		elseif ($toim == "YLLAPITO") {
 			echo "<font class='head'>".t("Ylläpitosopimuksen otsikko")."</font><hr>";
 		}
-		elseif ($toim == "ENNAKKO" or $toim == "EXTENNAKKO" or $srow["tilaustyyppi"] == 'E' or $laskurow["tilaustyyppi"] == 'E') {
+		elseif ($toim == "ENNAKKO" or $srow["tilaustyyppi"] == 'E' or $laskurow["tilaustyyppi"] == 'E') {
 			echo "<font class='head'>".t("Ennakkotilauksen otsikko")."</font><hr>";
 		}
 		else {

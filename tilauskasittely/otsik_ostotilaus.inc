@@ -20,6 +20,13 @@
 		exit;
 	}
 
+	if (!isset($nimi)) $nimi = "";
+	if (!isset($ytunnus)) $ytunnus = "";
+	if (!isset($tunnus)) $tunnus = "";
+	if (!isset($alatila)) $alatila = "";
+	if (!isset($ylatila)) $ylatila = "";
+	if (!isset($toimittajaid)) $toimittajaid = 0;
+
 	///* Etsitään toimittajaa *///
 	if ($nimi == '' and $ytunnus == '' and $tila == '' and !isset($jatka)) {
 		$tila = 'Muuta';
@@ -49,7 +56,7 @@
 		$tunnus = $toimittajaid;
 		$tila = 'Muuta';
 	}
-	
+
 	if (isset($jatka) AND !checkdate($toimkk, $toimpp, $toimvv)) {
 		echo "<font class='error'>".t("VIRHE: Syötetty toimituspäivä on virheellinen")."!</font><br><br>";
 		$tee = "otsik_ostotilaus";
@@ -67,36 +74,72 @@
 
 		if (($tunnus != "") or ($kukarow["kesken"] != 0)) {
 			if ($tunnus != "") {
-				$squery = "	SELECT *, tunnus liitostunnus
+				$squery = "	SELECT *, tunnus liitostunnus,
+							'' alatila,
+							'' tila,
+							'' valkoodi,
+							'' verkkotunnus,
+							'' toimaika,
+							'' tilausyhteyshenkilo,
+							'' viesti,
+							'' sisviesti1,
+							'' comments,
+							'' erikoisale
 							FROM toimi
-							WHERE tunnus = '$tunnus'";
+							WHERE tunnus = '{$tunnus}'";
 			}
 			else {
 				$squery = "	SELECT *
 							FROM lasku
-							WHERE tunnus = '$kukarow[kesken]'";
+							WHERE tunnus = '{$kukarow['kesken']}'";
 			}
 			$sresult = mysql_query($squery) or pupe_error($squery);
 			$srow = mysql_fetch_array($sresult);
 
-			if ($srow["liitostunnus"]>0 and $toimittajaid == 0) $toimittajaid = $srow["liitostunnus"];
+			if ($tunnus != "") {
+				$srow['toim_nimi'] = "";
+				$srow['toim_nimitark'] = "";
+				$srow['toim_osoite'] = "";
+				$srow['toim_postino'] = "";
+				$srow['toim_postitp'] = "";
+				$srow['toim_maa'] = "";
+			}
+
+			if ($srow["liitostunnus"] > 0 and $toimittajaid == 0) $toimittajaid = $srow["liitostunnus"];
+		}
+		else {
+			$srow = array(
+				'nimi' => '',
+				'nimitark' => '',
+				'osoite' => '',
+				'postino' => '',
+				'postitp' => '',
+				'maa' => '',
+				'alatila' => '',
+				'tila' => '',
+				'valkoodi' => '',
+				'oletus_valkoodi' => '',
+				'ovttunnus' => '',
+				'verkkotunnus' => '',
+				'liitostunnus' => '',
+				'ytunnus' => '',
+			);
 		}
 
 		// jos meillä on jo alatila ja tila ei muokkailla niitä!
-		if ($alatila == '') {
-			if ($srow['alatila'] != '') $alatila=$srow['alatila'];
+		if ($alatila == '' and $srow['alatila'] != '') {
+			$alatila = $srow['alatila'];
 		}
-		if ($ylatila == '') {
-			if ($srow['tila'] != '')    $ylatila=$srow['tila'];
+
+		if ($ylatila == '' and $srow['tila'] != '') {
+			$ylatila = $srow['tila'];
 		}
 
 		//laskun valuuttakoodi
 		$valkoodi = $srow["valkoodi"];
+
 		if ($valkoodi == '') {
-			$valkoodi = $srow["oletus_valkoodi"];
-		}
-		if ($valkoodi == '') {
-			$valkoodi = $yhtiorow["valkoodi"];
+			$valkoodi = $srow["oletus_valkoodi"] != '' ? $srow["oletus_valkoodi"] : $yhtiorow["valkoodi"];
 		}
 
 		echo "<form method='post' autocomplete='off'>
@@ -107,13 +150,13 @@
 				<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 				<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 				<input type='hidden' name='tee' 				value = 'MUUOTAOSTIKKOA'>
-				<input type='hidden' name='ovttunnus' 			value = '$srow[ovttunnus]'>
-				<input type='hidden' name='verkkotunnus' 		value = '$srow[verkkotunnus]'>
-				<input type='hidden' name='ytunnus' 			value = '$srow[ytunnus]'>
 				<input type='hidden' name='valkoodi' 			value = '$valkoodi'>
-				<input type='hidden' name='maa' 				value = '$srow[maa]'>
-				<input type='hidden' name='liitostunnus' 		value = '$srow[liitostunnus]'>
 				<input type='hidden' name='ylatila' 			value = '$ylatila'>
+				<input type='hidden' name='ovttunnus' 			value = '{$srow['ovttunnus']}'>
+				<input type='hidden' name='verkkotunnus' 		value = '{$srow['verkkotunnus']}'>
+				<input type='hidden' name='maa' 				value = '{$srow['maa']}'>
+				<input type='hidden' name='liitostunnus' 		value = '{$srow['liitostunnus']}'>
+				<input type='hidden' name='ytunnus' 			value = '{$srow['ytunnus']}'>
 				<input type='hidden' name='alatila' 			value = '$alatila'>";
 
 		echo "<table>";
@@ -128,7 +171,7 @@
 			  	<input type='text' name='postitp' size='21' maxlength='20' value='$srow[postitp]'>
 			  	<input type='hidden' name='maa' value='$srow[maa]'>";
 
-		if($toimittajaid == 0 or $tila == "vaihdaasiakas") {
+		if ($toimittajaid == 0 or $tila == "vaihdaasiakas") {
 			echo "	</td></tr></table></td></tr><tr>
 					<td class='back' colspan = '2' align = 'right'><input type = 'hidden' name = 'tila' value = 'vaihdaasiakas'><input type='submit' value='".t("Hae")."'></td>
 					</tr></table></form>";

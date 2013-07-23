@@ -210,9 +210,9 @@
 	    		while ($chk_exist_row = mysql_fetch_assoc($chk_exist_res)) {
 
 	    			$arr = explode(",", $chk_exist_row['tilausrivi']);
-	    			array_flip($arr);
+	    			$arr = array_flip($arr);
 	    			unset($arr[$valittutunnus]);
-	    			array_flip($arr);
+	    			$arr = array_flip($arr);
 
 	    			$query = "	UPDATE asn_sanomat SET
 	    						tilausrivi = '".implode(",", $arr)."'

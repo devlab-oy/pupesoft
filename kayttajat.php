@@ -976,7 +976,7 @@
 
 				echo "</select></td></tr>";
 
-				echo "<tr><th align='left'>",t("Valitse käyttäjän oletusvarasto"),":</td>";
+				echo "<tr><th align='left'>",t("Valitse käyttäjän oletusostovarasto"),":</td>";
 				echo "<td>";
 
 				mysql_data_seek($vares, 0);
@@ -986,7 +986,7 @@
 
 				while ($varow = mysql_fetch_assoc($vares)) {
 
-					$sel = $varow['tunnus'] == $krow['oletus_varasto'] ? ' selected' : '';
+					$sel = $varow['tunnus'] == $krow['oletus_ostovarasto'] ? ' selected' : '';
 
 					echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
 				}

@@ -48,6 +48,7 @@
 			if (mysql_num_rows($result) > 0) {
 
 				$perheid = 0;
+				$tunnus = 0;
 
 				while ($rivi = mysql_fetch_assoc($result)) {
 
@@ -432,6 +433,22 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$otunnus}'";
 				$upd_res = pupe_query($query);
+
+				// "L‰hetet‰‰n heti"-ominaisuus
+				if (in_array($myytilrow['ostotilauksen_kasittely'], array('1','3','5')) and $tunnus != 0) {
+
+					$otunnus = $tunnus;
+					$komento['Ostotilaus'] = 'edi';
+
+					require('tilauskasittely/tulosta_ostotilaus.inc');
+
+					if (isset($tulosta_ostotilaus_ulos) and $tulosta_ostotilaus_ulos == "") {
+						// p‰ivitet‰‰n t‰ss‰ tilaus tulostetuksi
+						$query = "UPDATE lasku SET lahetepvm = now() WHERE tunnus='{$otunnus}'";
+						$result = pupe_query($query);
+					}
+				}
+
 			}
 
 			return $tilauksesta_ostotilaus;

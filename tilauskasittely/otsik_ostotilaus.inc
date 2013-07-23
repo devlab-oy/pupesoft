@@ -478,7 +478,7 @@
 		}
 
 		// katotaan ollaanko valittu tietty varasto johon kamat tilataan
-		if ($varasto > 0 and strlen(trim($tnimi)) == 0) {
+		if ($varasto > 0) {
 			$edique  = "SELECT *
 						FROM varastopaikat
 						WHERE yhtio	= '$kukarow[yhtio]'
@@ -493,6 +493,8 @@
 				$tpostino  = $varow["postino"];
 				$tpostitp  = $varow["postitp"];
 				$tmaa  	   = $varow["maa"];
+
+				echo "<font class='message'>",t("Toimitusosoitteen tiedot haettiin varaston %s takaa", "", $varow["nimitys"]),".</font><br /><br />";
 			}
 		}
 

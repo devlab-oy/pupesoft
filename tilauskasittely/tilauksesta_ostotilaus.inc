@@ -211,6 +211,7 @@
 										myyja 				= '$myytilrow[myyja]',
 										nimi 				= '$tiltoi[nimi]',
 										nimitark 			= '$tiltoi[nimitark]',
+										ohjausmerkki 		= '{$myytilrow['ohjausmerkki']}',
 										osoite 				= '$tiltoi[osoite]',
 										ovttunnus 			= '$tiltoi[ovttunnus]',
 										postino 			= '$tiltoi[postino]',

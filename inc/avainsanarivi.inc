@@ -353,11 +353,11 @@
 
 		$ulos  = "<td><select name='{$nimi}'>";
 		$ulos .= "<option value='0'>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja per k‰ytt‰j‰ per p‰iv‰")."</option>";
-		$ulos .= "<option value='1' {$sel[1]}>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja per k‰ytt‰j‰ per p‰iv‰ l‰hetet‰‰n heti")."</option>";
-		$ulos .= "<option value='2' {$sel[2]}>".t("Tilauksesta oma ostotilaus per toimittaja")."</option>";
-		$ulos .= "<option value='3' {$sel[3]}>".t("Tilauksesta oma ostotilaus per toimittaja l‰hetet‰‰n heti")."</option>";
+		$ulos .= "<option value='1' {$sel[1]}>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja per k‰ytt‰j‰ per p‰iv‰, l‰hetet‰‰n heti")."</option>";
+		$ulos .= "<option value='2' {$sel[2]}>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja")."</option>";
+		$ulos .= "<option value='3' {$sel[3]}>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja, l‰hetet‰‰n heti")."</option>";
 		$ulos .= "<option value='4' {$sel[4]}>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja per varasto per ohjausmerkki")."</option>";
-		$ulos .= "<option value='5' {$sel[5]}>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja per varasto per ohjausmerkki l‰hetet‰‰n heti")."</option>";
+		$ulos .= "<option value='5' {$sel[5]}>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja per varasto per ohjausmerkki, l‰hetet‰‰n heti")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

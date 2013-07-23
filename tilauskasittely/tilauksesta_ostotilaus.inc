@@ -144,20 +144,51 @@
 
 						$commentsit = trim(t("Myyntitilaus").": $myytilrow[tunnus] \n".t("Myyntitilauksen toimitustapa").": $myytilrow[toimitustapa] \n".$tiltoi["comments"]);
 
+						// Käsitellään myyntitilauksen otsikolla setattu "ostotilauksen käsittely"
+						switch($myytilrow['ostotilauksen_kasittely']) {
+							case '4':
+							case '5':
+								$ostotilauksen_kasittely_wherelisa = "
+								and toim_nimi		= '{$toim_nimi}'
+								and toim_nimitark	= '{$toim_nimitark}'
+								and toim_osoite		= '{$toim_osoite}'
+								and toim_postino	= '{$toim_postino}'
+								and toim_postitp	= '{$toim_postitp}'
+								and toim_maa		= '{$toim_maa}'
+								and varasto 		= '{$kukarow['oletus_ostovarasto']}'
+								and ohjausmerkki 	= '{$myytilrow['ohjausmerkki']}'";
+								break;
+							case '2':
+							case '3':
+								$ostotilauksen_kasittely_wherelisa = "
+								and toim_nimi		= '{$toim_nimi}'
+								and toim_nimitark	= '{$toim_nimitark}'
+								and toim_osoite		= '{$toim_osoite}'
+								and toim_postino	= '{$toim_postino}'
+								and toim_postitp	= '{$toim_postitp}'
+								and toim_maa		= '{$toim_maa}'";
+								break;
+							case '1':
+							default:
+								$ostotilauksen_kasittely_wherelisa = "
+								and toim_nimi		= '{$toim_nimi}'
+								and toim_nimitark	= '{$toim_nimitark}'
+								and toim_osoite		= '{$toim_osoite}'
+								and toim_postino	= '{$toim_postino}'
+								and toim_postitp	= '{$toim_postitp}'
+								and toim_maa		= '{$toim_maa}'
+								and left(luontiaika,10) = left(now(),10)
+								and laatija 		= '{$kukarow['kuka']}'";
+								break;
+						}
+
 						$query = "	SELECT *
 									from lasku
 									where yhtio 		= '$kukarow[yhtio]'
 									and liitostunnus 	= '$tiltoi[tunnus]'
 									and tila 			= 'O'
 									and alatila 		= ''
-									and toim_nimi		= '$toim_nimi'
-									and toim_nimitark	= '$toim_nimitark'
-									and toim_osoite		= '$toim_osoite'
-									and toim_postino	= '$toim_postino'
-									and toim_postitp	= '$toim_postitp'
-									and toim_maa		= '$toim_maa'
-									and left(luontiaika,10) = left(now(),10)
-									and laatija 		= '$kukarow[kuka]'";
+									{$ostotilauksen_kasittely_wherelisa}";
 						$jtsre = pupe_query($query);
 
 						// ei löydy, tehdään uus otsikko
@@ -198,7 +229,7 @@
 										toim_postitp 		= '$toim_postitp',
 										valkoodi 			= '$valkoodi',
 										vanhatunnus			= '',
-										varasto 			= '',
+										varasto 			= '{$kukarow['oletus_ostovarasto']}',
 										verkkotunnus		= '$myytilrow[liitostunnus]',
 									 	vienti_kurssi 		= '$vrow[kurssi]',
 										viesti 				= '$myytilrow[viesti]',

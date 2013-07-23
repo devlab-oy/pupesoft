@@ -297,7 +297,7 @@ if(!function_exists("tuotetarkista")) {
 				if ($saldo == 0) {
 
 					$query = "	SELECT tuotepaikat.*,
-								concat_ws('-', hyllyalue, hyllynro, hyllytaso, hyllyvali) as hylly
+								concat_ws('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) as hylly
 								FROM tuotepaikat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tuoteno = '{$t['tuoteno']}'

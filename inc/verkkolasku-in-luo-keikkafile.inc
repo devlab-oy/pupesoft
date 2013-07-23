@@ -1208,7 +1208,7 @@ $debug = 0;
 					// Katsotaan ollaanko skipattu tilausrivej‰, ennen kuin aletaan luomaan niit‰ alempana
 					if (count($skipatut_tilausrivit) > 0) {
 
-						// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
+						// jos skipattiin v‰h‰nkin niin nollataan kaikki kohdistukset
 						$updatequery = "UPDATE asn_sanomat SET
 										tilausrivi = '',
 										tuoteno = '{$tilausrivirow['tuoteno']}'
@@ -1221,6 +1221,23 @@ $debug = 0;
 						}
 
 						$virheet++;
+						
+						// teh‰‰ lapselle sama jippo ku ylemp‰n‰
+						if ($tilausrivirow['tunnus'] == $tilausrivirow['perheid'] and !empty($rtuoteno[$i+1]["isa_olemassa"])) {
+
+							$i++;
+
+							// jos skipattiin v‰h‰nkin niin nollataan kaikki kohdistukset
+							$updatequery = "UPDATE asn_sanomat SET
+											tilausrivi = ''
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
+							$upd_res = pupe_query($updatequery);
+
+							if ($debug == 1) {
+								echo "<pre>$updatequery</pre>";
+							}
+						}
 
 						// Hyp‰t‰‰n yli t‰m‰ looppikerta ja menn‰‰n seuraavaan for-loopin iteraatioon (rivi ~950)
 						continue;

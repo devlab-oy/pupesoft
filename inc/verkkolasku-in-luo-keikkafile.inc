@@ -1239,7 +1239,7 @@ $debug = 0;
 						$virheet++;
 
 						// Hypätään yli tämä looppikerta ja mennään seuraavaan for-loopin iteraatioon (rivi ~950)
-						continue 2;
+						continue;
 					}
 
 					if ($ylimaaraista > 0) {

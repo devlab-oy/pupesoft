@@ -1489,7 +1489,7 @@
 												tilausrivinpositio 	= '{$rtuoteno[$i]['tilaajanrivinro']}',
 												toimittajanumero 	= '{$trow['toimittajanro']}',
 												toim_tuoteno 		= '{$rtuoteno[$i]['tuoteno']}',
-												toim_tuoteno2 		= '{$rtuoteno[$i]['tuoteno2']}',
+												toim_tuoteno2 		= '',
 												tuoteno				= '',
 												vastaanottaja 		= '{$ostaja_asiakkaantiedot['nimi']}',
 												yhtio 				= '{$yhtio}'";

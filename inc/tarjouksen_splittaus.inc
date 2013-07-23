@@ -111,7 +111,8 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 	require_once('tilaus-valmis.inc');
 }
 
-$query = "  DELETE FROM lasku
+$query = "  UPDATE lasku
+			SET tila = 'D'
 			WHERE yhtio = '{$kukarow['yhtio']}'
 			AND tunnus = '{$dummy_tarjouksen_tilausnumero}'";
 pupe_query($query);

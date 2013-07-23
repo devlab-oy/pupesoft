@@ -196,12 +196,12 @@
 
 	    if ($otunnus == 0 and $valittutunnus != '') {
 
-	    	// Katsotaan löytyykö rivi asn_sanomat-tauluun kohdistettuna
+	    	// Katsotaan löytyykö rivi asn_sanomat-tauluun kohdistettuna laskuun
 	    	// Jos löytyy, poistetaan kohdistus
 	    	$query = "	SELECT *
 	    				FROM asn_sanomat
 	    				WHERE yhtio = '{$kukarow['yhtio']}'
-	    				AND laji = 'tec'
+						AND laji in ('tec','mav')
 	    				AND tilausrivi LIKE '%{$valittutunnus}%'";
 	    	$chk_exist_res = pupe_query($query);
 

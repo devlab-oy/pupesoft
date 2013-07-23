@@ -169,6 +169,7 @@
 								and toim_maa		= '{$toim_maa}'";
 								break;
 							case '1':
+							case '0':
 							default:
 								$ostotilauksen_kasittely_wherelisa = "
 								and toim_nimi		= '{$toim_nimi}'

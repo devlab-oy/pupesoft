@@ -12,10 +12,10 @@ $debug = 0;
 				echo "<br>teccom_kaytettavat_tilausrivit<br>";
 			}
 
-			$kaytettavat_tilausrivit = array();
+			$kaytettavat_tilausrivit = $skipatut_tilausrivit = array();
 
 			if (!is_resource($checkres) or mysql_num_rows($checkres) == 0) {
-				return $kaytettavat_tilausrivit;
+				return array($kaytettavat_tilausrivit, $skipatut_tilausrivit);
 			}
 
 			while ($tilausrivirow = mysql_fetch_assoc($checkres)) {
@@ -53,11 +53,17 @@ $debug = 0;
 										AND laji = 'asn'
 										AND tilausrivi LIKE '%{$tilausrivirow['perheid']}%'
 										AND status = 'X'";
-							$chk_res = pupe_query($query);
+							$chk_res3 = pupe_query($query);
 
-							if (mysql_num_rows($chk_res) != 0) {
+							if (mysql_num_rows($chk_res3) != 0) {
 								$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 							}
+							elseif (mysql_num_rows($chk_res) == 0 and mysql_num_rows($chk_res2) == 0) {
+								$skipatut_tilausrivit[$tilausrivirow['tunnus']] = $tilausrivirow['kpl'] + $tilausrivirow['varattu'];
+							}
+						}
+						elseif (mysql_num_rows($chk_res) == 0 and mysql_num_rows($chk_res2) == 0) {
+							$skipatut_tilausrivit[$tilausrivirow['tunnus']] = $tilausrivirow['kpl'] + $tilausrivirow['varattu'];
 						}
 					}
 				}
@@ -73,10 +79,13 @@ $debug = 0;
 					if (mysql_num_rows($chk_res) == 0) {
 						$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 					}
+					else {
+						$skipatut_tilausrivit[$tilausrivirow['tunnus']] = $tilausrivirow['kpl'] + $tilausrivirow['varattu'];
+					}
 				}
 			}
 
-			return $kaytettavat_tilausrivit;
+			return array($kaytettavat_tilausrivit, $skipatut_tilausrivit);
 		}
 	}
 
@@ -88,7 +97,7 @@ $debug = 0;
 				echo "<br>etsi_sopivat_tilausrivit<br>";
 			}
 
-			$kaytettavat_tilausrivit = array();
+			$kaytettavat_tilausrivit = $skipatut_tilausrivit = array();
 
 			// Jos tuoteno on tyhj‰ niin unohdetaan koko juttu
 			if (trim($data['tuoteno']) == "") {
@@ -96,7 +105,7 @@ $debug = 0;
 			}
 
 			// tiukka 1
-			$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
+			$query = "	(SELECT tilausrivi.*, toimi.asn_sanomat, '1' AS orderi
 						FROM tilausrivi
 						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 										AND lasku.tunnus = tilausrivi.otunnus
@@ -121,55 +130,44 @@ $debug = 0;
 						AND tilausrivi.otunnus LIKE '%{$data['ostotilausnro']}'
 						AND tilausrivi.tilaajanrivinro = '{$data['tilaajanrivinro']}'
 						AND tilausrivi.uusiotunnus != 0
-						{$isalisa}
-						ORDER BY laadittu ASC";
+						{$isalisa})
+						UNION
+						(SELECT tilausrivi.*, toimi.asn_sanomat, '2' AS orderi
+						FROM tilausrivi
+						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+										AND lasku.tunnus = tilausrivi.otunnus
+										AND lasku.tila = 'O' AND lasku.alatila = 'A')
+						JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
+										AND toimi.tunnus = lasku.liitostunnus
+										AND toimi.tunnus = '{$trow['tunnus']}'
+										AND toimi.tyyppi != 'P'
+										AND toimi.asn_sanomat IN ('K', 'L', 'M'))
+						JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
+														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+														AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+														AND tuotteen_toimittajat.toim_tuoteno = '{$data['tuoteno']}')
+						JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.tyyppi = 'O'
+						AND tilausrivi.otunnus LIKE '%{$data['ostotilausnro']}'
+						AND tilausrivi.tilaajanrivinro = '{$data['tilaajanrivinro']}'
+						AND tilausrivi.uusiotunnus = 0
+						{$isalisa})
+						ORDER BY orderi ASC, laadittu ASC";
 			$kokeillaan = pupe_query($query);
 
 			if (mysql_num_rows($kokeillaan) > 0) {
+
 				if ($debug == 1) {
  					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				}
 
-				$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
-			}
-
-			if (count($kaytettavat_tilausrivit) == 0) {
-				// tiukka 1
-				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
-							FROM tilausrivi
-							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-											AND lasku.tunnus = tilausrivi.otunnus
-											AND lasku.tila = 'O' AND lasku.alatila = 'A')
-							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
-											AND toimi.tunnus = lasku.liitostunnus
-											AND toimi.tunnus = '{$trow['tunnus']}'
-											AND toimi.tyyppi != 'P'
-											AND toimi.asn_sanomat IN ('K', 'L', 'M'))
-							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
-															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno = '{$data['tuoteno']}')
-							JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
-							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-							AND tilausrivi.tyyppi = 'O'
-							AND tilausrivi.otunnus LIKE '%{$data['ostotilausnro']}'
-							AND tilausrivi.tilaajanrivinro = '{$data['tilaajanrivinro']}'
-							AND tilausrivi.uusiotunnus = 0
-							{$isalisa}
-							ORDER BY laadittu ASC";
-				$kokeillaan = pupe_query($query);
-
-				if (mysql_num_rows($kokeillaan) > 0) {
-					if ($debug == 1) {
-	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
-					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
-				}
+				list($kaytettavat_tilausrivit, $skipatut_tilausrivit) = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 			}
 
 			if (count($kaytettavat_tilausrivit) == 0) {
 				// tiukka 2
-				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
+				$query = "	(SELECT tilausrivi.*, toimi.asn_sanomat, '1' AS orderi
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.uusiotunnus
@@ -194,21 +192,9 @@ $debug = 0;
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus != 0
 							AND tilausrivi.tilaajanrivinro = '{$data['tilaajanrivinro']}'
-							{$isalisa}
-							ORDER BY laadittu ASC";
-				$kokeillaan = pupe_query($query);
-
-				if (mysql_num_rows($kokeillaan) > 0) {
-					if ($debug == 1) {
-	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
-					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
-				}
-			}
-
-			if (count($kaytettavat_tilausrivit) == 0) {
-				// tiukka 2
-				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
+							{$isalisa})
+							UNION
+							(SELECT tilausrivi.*, toimi.asn_sanomat, '2' AS orderi
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
@@ -231,21 +217,23 @@ $debug = 0;
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.tilaajanrivinro = '{$data['tilaajanrivinro']}'
 							AND tilausrivi.uusiotunnus = 0
-							{$isalisa}
-							ORDER BY laadittu ASC";
+							{$isalisa})
+							ORDER BY orderi ASC, laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
+
 					if ($debug == 1) {
 	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
+
+					list($kaytettavat_tilausrivit, $skipatut_tilausrivit) = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 				}
 			}
 
 			if (count($kaytettavat_tilausrivit) == 0) {
 				// v‰ljempi 1
-				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
+				$query = "	(SELECT tilausrivi.*, toimi.asn_sanomat, '1' AS orderi
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
@@ -269,21 +257,9 @@ $debug = 0;
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.otunnus LIKE '%{$data['ostotilausnro']}'
 							AND tilausrivi.uusiotunnus != 0
-							{$isalisa}
-							ORDER BY laadittu ASC";
-				$kokeillaan = pupe_query($query);
-
-				if (mysql_num_rows($kokeillaan) > 0) {
-					if ($debug == 1) {
-	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
-					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
-				}
-			}
-
-			if (count($kaytettavat_tilausrivit) == 0) {
-				// v‰ljempi 1
-				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
+							{$isalisa})
+							UNION
+							(SELECT tilausrivi.*, toimi.asn_sanomat, '2' AS orderi
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
@@ -302,21 +278,23 @@ $debug = 0;
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.otunnus LIKE '%{$data['ostotilausnro']}'
 							AND tilausrivi.uusiotunnus = 0
-							{$isalisa}
-							ORDER BY laadittu ASC";
+							{$isalisa})
+							ORDER BY orderi ASC, laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
+
 					if ($debug == 1) {
 	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
+
+					list($kaytettavat_tilausrivit, $skipatut_tilausrivit) = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 				}
 			}
 
 			if (count($kaytettavat_tilausrivit) == 0) {
 				// v‰ljempi 2
-				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
+				$query = "	(SELECT tilausrivi.*, toimi.asn_sanomat, '1' AS orderi
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.uusiotunnus
@@ -340,21 +318,9 @@ $debug = 0;
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus != 0
-							{$isalisa}
-							ORDER BY laadittu ASC";
-				$kokeillaan = pupe_query($query);
-
-				if (mysql_num_rows($kokeillaan) > 0) {
-					if ($debug == 1) {
-	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
-					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
-				}
-			}
-
-			if (count($kaytettavat_tilausrivit) == 0) {
-				// v‰ljempi 2
-				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
+							{$isalisa})
+							UNION
+							(SELECT tilausrivi.*, toimi.asn_sanomat, '2' AS orderi
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
@@ -376,21 +342,23 @@ $debug = 0;
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
-							{$isalisa}
-							ORDER BY laadittu ASC";
+							{$isalisa})
+							ORDER BY orderi ASC, laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
+
 					if ($debug == 1) {
 	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
+
+					list($kaytettavat_tilausrivit, $skipatut_tilausrivit) = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 				}
 			}
 
 			if (count($kaytettavat_tilausrivit) == 0) {
 				// lˆys‰
-				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
+				$query = "	(SELECT tilausrivi.*, toimi.asn_sanomat, '1' AS orderi
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
@@ -413,21 +381,9 @@ $debug = 0;
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus != 0
-							{$isalisa}
-							ORDER BY laadittu ASC";
-				$kokeillaan = pupe_query($query);
-
-				if (mysql_num_rows($kokeillaan) > 0) {
-					if ($debug == 1) {
-	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
-					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
-				}
-			}
-
-			if (count($kaytettavat_tilausrivit) == 0) {
-				// lˆys‰
-				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
+							{$isalisa})
+							UNION
+							(SELECT tilausrivi.*, toimi.asn_sanomat, '2' AS orderi
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
@@ -445,19 +401,21 @@ $debug = 0;
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
-							{$isalisa}
-							ORDER BY laadittu ASC";
+							{$isalisa})
+							ORDER BY orderi ASC, laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
+
 					if ($debug == 1) {
 	 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					}
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
+
+					list($kaytettavat_tilausrivit, $skipatut_tilausrivit) = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa, $debug);
 				}
 			}
 
-			return $kaytettavat_tilausrivit;
+			return array($kaytettavat_tilausrivit, $skipatut_tilausrivit);
 		}
 	}
 
@@ -1078,11 +1036,11 @@ $debug = 0;
 				echo "<br>Katotaa etsi_sopivat_tilausrivit<br>";
 			}
 
-			$kaytettavat_tilausrivit = etsi_sopivat_tilausrivit($rtuoteno[$i], $lajilisa, $trow, $isalisa, $debug);
+			list($kaytettavat_tilausrivit, $skipatut_tilausrivit) = etsi_sopivat_tilausrivit($rtuoteno[$i], $lajilisa, $trow, $isalisa, $debug);
 
 			if ($debug == 1) {
-				echo "<br>Katottiin etsi_sopivat_tilausrivit<br>";
-				echo "<pre>",var_dump($kaytettavat_tilausrivit),"</pre>";
+				echo "<br>Katottiin etsi_sopivat_tilausrivit / skipatut_tilausrivit<br>";
+				echo "<pre>",var_dump($kaytettavat_tilausrivit, $skipatut_tilausrivit),"</pre>";
 			}
 
 			if (count($kaytettavat_tilausrivit) > 0) {
@@ -1245,6 +1203,44 @@ $debug = 0;
 					$ylimaaraista = $rtuoteno[$i]["kpl"] - $laskuri; // liikaa miinus tilauksella
 					if ($debug == 1) {
 						echo "Ylim‰‰r‰ist‰: $ylimaaraista = {$rtuoteno[$i]['kpl']} - $laskuri<br><br>";
+					}
+
+					// Katsotaan ollaanko skipattu tilausrivej‰, ennen kuin aletaan luomaan niit‰ alempana
+					if (count($skipatut_tilausrivit) > 0) {
+
+						// jos skipattiin v‰h‰nkin niin nollataan kaikki kohdistukset
+						$updatequery = "UPDATE asn_sanomat SET
+										tilausrivi = '',
+										tuoteno = '{$tilausrivirow['tuoteno']}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
+						$upd_res = pupe_query($updatequery);
+
+						if ($debug == 1) {
+							echo "<pre>$updatequery</pre>";
+						}
+
+						$virheet++;
+						
+						// teh‰‰ lapselle sama jippo ku ylemp‰n‰
+						if ($tilausrivirow['tunnus'] == $tilausrivirow['perheid'] and !empty($rtuoteno[$i+1]["isa_olemassa"])) {
+
+							$i++;
+
+							// jos skipattiin v‰h‰nkin niin nollataan kaikki kohdistukset
+							$updatequery = "UPDATE asn_sanomat SET
+											tilausrivi = ''
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
+							$upd_res = pupe_query($updatequery);
+
+							if ($debug == 1) {
+								echo "<pre>$updatequery</pre>";
+							}
+						}
+
+						// Hyp‰t‰‰n yli t‰m‰ looppikerta ja menn‰‰n seuraavaan for-loopin iteraatioon (rivi ~950)
+						continue;
 					}
 
 					if ($ylimaaraista > 0) {

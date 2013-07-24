@@ -49,7 +49,7 @@
 		$tunnus = $toimittajaid;
 		$tila = 'Muuta';
 	}
-	
+
 	if (isset($jatka) AND !checkdate($toimkk, $toimpp, $toimvv)) {
 		echo "<font class='error'>".t("VIRHE: Syötetty toimituspäivä on virheellinen")."!</font><br><br>";
 		$tee = "otsik_ostotilaus";
@@ -236,14 +236,26 @@
 			}
 
 			if ($toim != "HAAMU") {
-				echo "<tr><td>".t("Tilaustyyppi").":</td>";
+				echo "<tr><td>",t("Tilaustyyppi"),":</td>";
 				echo "<td><select name='tilaustyyppi'>";
 
-				$sel = array();
-				$sel[$srow["tilaustyyppi"]] = "selected";
+				$ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP");
 
-				echo "<option value='2' $sel[2]>".t("Normaalitilaus")."</option>";
-				echo "<option value='1' $sel[1]>".t("Pikalähetys")."</option>";
+				if (mysql_num_rows($ostotil_tiltyyp_res) > 0) {
+
+					while ($ostotil_tiltyyp_row = mysql_fetch_assoc($ostotil_tiltyyp_res)) {
+						$sel = $srow['tilaustyyppi'] == $ostotil_tiltyyp_row['selite'] ? " selected" : "";
+						echo "<option value='{$ostotil_tiltyyp_row['selite']}'{$sel}>{$ostotil_tiltyyp_row['selitetark']}</option>";
+					}
+				}
+				else {
+
+					$sel = array($srow['tilaustyyppi'] => "selected") + array(1 => '', 2 => '');
+
+					echo "<option value='2' {$sel[2]}>",t("Normaalitilaus"),"</option>";
+					echo "<option value='1' {$sel[1]}>",t("Pikalähetys"),"</option>";
+				}
+
 				echo "</select></td>";
 
 				echo "<td>";

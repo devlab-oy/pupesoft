@@ -3,7 +3,6 @@
 require ("parametrit.inc");
 require ("Validation.php");
 enable_ajax();
-
 ?>
 
 <style>
@@ -145,6 +144,18 @@ if ($request['action'] == 'nayta_tarjous') {
 }
 elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 
+	$laskurow = hae_extranet_tarjous($request['valittu_tarjous_tunnus'], $toim);
+
+	if (empty($laskurow)) {
+		if ($toim == 'EXTTARJOUS') {
+			echo "<font class='error'>".t("Tarjous kadonnut")."</font><hr>";
+		}
+		elseif ($toim == 'EXTENNAKKO') {
+			echo "<font class='error'>".t("Ennakko kadonnut")."</font><hr>";
+		}
+		exit;
+	}
+
 	if (isset($request['hyvaksy'])) {
 		if ($toim == 'EXTTARJOUS') {
 			$onnistuiko_toiminto = hyvaksy_tarjous($request['valittu_tarjous_tunnus'], $syotetyt_lisatiedot);
@@ -181,8 +192,8 @@ else {
 		}
 	}
 	else {
-		$params = array("data" => $request['asiakkaan_tarjoukset'],
-						"toim" => $request['toim']);
+		$params = array("data"	 => $request['asiakkaan_tarjoukset'],
+			"toim"	 => $request['toim']);
 		piirra_tarjoukset($params);
 	}
 }
@@ -405,13 +416,20 @@ function hae_extranet_tarjoukset($asiakasid, $toim) {
 	return $haetut_tarjoukset;
 }
 
-function hae_extranet_tarjous($tunnus) {
+function hae_extranet_tarjous($tunnus, $toim) {
 	global $kukarow, $yhtiorow;
 
+	if ($toim == 'EXTTARJOUS') {
+		$where = "	AND tila = 'T' AND alatila = ''";
+	}
+	else if ($toim == 'EXTENNAKKO') {
+		$where = "	AND tila = 'N' AND alatila = ''";
+	}
 	$query = "  SELECT *
 				FROM lasku
 				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$tunnus}'";
+				AND tunnus = '{$tunnus}'
+				{$where}";
 	$result = pupe_query($query);
 
 	return mysql_fetch_assoc($result);
@@ -447,9 +465,9 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 		echo "<br>";
 	}
 
-	$params = array("data" => $tarjous['tilausrivit'],
-					"tarjous_tunnus" => $valittu_tarjous_tunnus,
-					"toim" => $toim);
+	$params = array("data"			 => $tarjous['tilausrivit'],
+		"tarjous_tunnus" => $valittu_tarjous_tunnus,
+		"toim"			 => $toim);
 	piirra_tarjouksen_tilausrivit($params);
 }
 
@@ -635,5 +653,4 @@ function piirra_tarjouksen_tilausrivit($params) {
 	}
 	echo "</form>";
 }
-
 require ("footer.inc");

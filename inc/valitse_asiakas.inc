@@ -358,7 +358,7 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 		$query = "SELECT asiakas.*,myyjahaku.nimi as myyjanimi, myyjahaku.tunnus as myyjatunnus
 					FROM asiakas
 					 JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
-					 LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
+					 LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro AND myyjahaku.myyja != 0)
 					WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 					 {$where}
 					GROUP BY asiakas.tunnus
@@ -372,7 +372,7 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
-						LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
+						LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro AND myyjahaku.myyja != 0)
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and REPLACE(REPLACE(asiakas.ytunnus, '-', ''), '+', '') = '" . str_replace(array('-', '+'), '', $request['hakuehto']) . "'
 						and asiakas.ytunnus!=''
@@ -383,7 +383,7 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
-						LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
+						LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro AND myyjahaku.myyja != 0)
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and asiakas.asiakasnro = '{$request['hakuehto']}'
 						and asiakas.asiakasnro not in ('0','')
@@ -394,7 +394,7 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
-						LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
+						LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro AND myyjahaku.myyja != 0)
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and REPLACE(REPLACE(asiakas.ovttunnus, '-', ''), '+', '') = '" . str_replace(array('-', '+'), '', $request['hakuehto']) . "'
 						and asiakas.ovttunnus!=''
@@ -405,7 +405,7 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
-						LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
+						LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro AND myyjahaku.myyja != 0)
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and asiakas.toim_ovttunnus = '{$request['hakuehto']}'
 						and asiakas.toim_ovttunnus!=''
@@ -417,7 +417,7 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						JOIN asiakkaan_avainsanat ON (asiakas.yhtio=asiakkaan_avainsanat.yhtio and asiakas.tunnus=asiakkaan_avainsanat.liitostunnus and asiakkaan_avainsanat.laji='kantaasiakastunnus')
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
-						LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
+						LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro AND myyjahaku.myyja != 0)
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 						and asiakkaan_avainsanat.avainsana = '{$request['hakuehto']}'
 						and asiakkaan_avainsanat.avainsana!=''
@@ -427,7 +427,7 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 					(SELECT asiakas.*,myyjahaku.nimi as myyjanimi, myyjahaku.tunnus as myyjatunnus
 					FROM asiakas
 					 JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
-					 LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro)
+					 LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro AND myyjahaku.myyja != 0)
 					WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
 					AND asiakas.nimi LIKE '%{$request['hakuehto']}%'
 					 {$where}

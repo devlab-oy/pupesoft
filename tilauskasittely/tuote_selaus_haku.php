@@ -1542,21 +1542,9 @@
 					$myyntihinta = hintapyoristys($row["myyntihinta"]). " $yhtiorow[valkoodi]";
 
 					if ($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
-						//katostaan t‰ll‰ onko asiakkaalle ees asiakashintaa, jos ei oo ni sit laitetaan sinne vaan se normi hinta
-						if (saako_myyda_private_label($kukarow["oletus_asiakas"], $row["tuoteno"], 1,TRUE)){
-							//haetaan asiakkaan tiedot
-							$query = "	SELECT tunnus liitostunnus, ytunnus, valkoodi, maa, ryhma, piiri
-										FROM asiakas
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND tunnus = '$kukarow[oletus_asiakas]'";
-							$asiakasres = pupe_query($query);
-							$asiakasrow = mysql_fetch_assoc($asiakasres);
-							$haettavat_kentat = "hinta,hintaperuste,aleperuste";
-							$alemaara = 1;
-							$hinnat = alehinta($asiakasrow, $row, $alemaara, '', '', '', $haettavat_kentat);
-							$myyntihinta_echotus = $hinnat["hinta"] * generoi_alekentta_php($hinnat, 'M', 'kerto');
-							$myyntihinta = hintapyoristys($myyntihinta_echotus)." $laskurow[valkoodi]";
-						}
+						list($hinta, $netto, $ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($oleasrow, $row, 1, '', '', '');
+						$myyntihinta_echotus = $hinta * generoi_alekentta_php($ale_kaikki, 'M', 'kerto');
+						$myyntihinta = hintapyoristys($myyntihinta_echotus)." $alehinta_val";
 					}
 					elseif ($kukarow["extranet"] != "") {
 						// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa

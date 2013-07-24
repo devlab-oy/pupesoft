@@ -70,6 +70,16 @@ if(!function_exists("avainsanatarkista")) {
 				}
 			}
 
+			if (strtoupper($tem_laji) == "OSTOTIL_TILTYYP") {
+
+				if (trim($tem_selite) == '') {
+					$virhe[$i] = t("Selite on pakollinen");
+				}
+				elseif (strlen($tem_selite) > 1) {
+					$virhe[$i] = t("Selite on liian pitk‰, maksimipituus on yksi merkki");
+				}
+			}
+
 			if (strtoupper($tem_laji) == "ALVULK") {
 				//	ALV pit‰‰ olla pisteell‰, ei pilkulla
 				$t[$i] = round((float) str_replace(",", ".", $tem_selite), 2);
@@ -91,7 +101,7 @@ if(!function_exists("avainsanatarkista")) {
 					$t[$i] = (int) $t[$i];
 				}
 			}
-			
+
 			if (($tem_laji == 'VAKIOVIESTI' or $tem_laji == 'VAKIOVIESTI_TIL') and trim($tem_selite) == '') {
 				$virhe[$i] = t("Selite on pakollinen");
 			}

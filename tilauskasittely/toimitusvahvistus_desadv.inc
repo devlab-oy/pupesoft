@@ -81,6 +81,7 @@
 				// Ton DESADVD00A perässä on 4 plusmerkkiä, mikäli sinne viimeiseksi merkiksi laitetaan ennen hipsua 1 niin se on testisanoma
 				$desadv_message .= "UNB+UNOC:1+{$desadv_laskurow["yhtio_ovttunnus"]}:30+{$desadv_laskurow["asiakasovttunnus"]}:30+{$valpvm}:{$valaika}+{$lahtunniste}++DESADVD00A++++'";
 			}
+
 			// UNH - message header
 			$desadv_message .= "UNH+$desadv_laskurow[laskutunnus]+DESADV:D:00A:UN'";
 			$x++;
@@ -245,15 +246,15 @@
 				$desadv_message .= "NAD+CN+$toitarow[toim_ovttunnus]:100++".substr($toitarow["toim_nimi"], 0, 35).":".substr($toitarow["toim_nimitark"], 0, 35)."+".substr($toitarow["toim_osoite"], 0, 35)."+".substr($toitarow["toim_postitp"], 0, 35)."++".substr($toitarow["toim_postino"], 0, 17)."+".substr($toitarow["toim_maa"], 0, 3)."'";
 				$x++;
 			}
-			else if ($desadv_laskurow["asiakastoim_nimi"] != '' and $desadv_laskurow['asiakasovttunnus'] != '') {
+			elseif ($desadv_laskurow["toim_nimi"] != '' and $desadv_laskurow['asiakasovttunnus'] != '') {
 				//asiakkaan toimitusosoite
 				$desadv_message .= "NAD+CN+{$desadv_laskurow['asiakasovttunnus']}:100++"
-				.substr($desadv_laskurow["asiakastoim_nimi"], 0, 35).":"
-				.substr($desadv_laskurow["asiakastoim_nimitark"], 0, 35)."+"
-				.substr($desadv_laskurow["asiakastoim_osoite"], 0, 35)."+"
-				.substr($desadv_laskurow["asiakastoim_postitp"], 0, 35)."++"
-				.substr($desadv_laskurow["asiakastoim_postino"], 0, 17)."+"
-				.substr($desadv_laskurow["asiakastoim_maa"], 0, 3)."'";
+				.substr($desadv_laskurow["toim_nimi"], 0, 35).":"
+				.substr($desadv_laskurow["toim_nimitark"], 0, 35)."+"
+				.substr($desadv_laskurow["toim_osoite"], 0, 35)."+"
+				.substr($desadv_laskurow["toim_postitp"], 0, 35)."++"
+				.substr($desadv_laskurow["toim_postino"], 0, 17)."+"
+				.substr($desadv_laskurow["toim_maa"], 0, 3)."'";
 				$x++;
 			}
 			else {

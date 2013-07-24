@@ -139,11 +139,7 @@ if ($tee == "LISAARIVI") {
 	$tee = "VALMISTA";
 }
 
-if ($request['action'] == 'nayta_tarjous') {
-	nayta_tarjous($request['valittu_tarjous_tunnus'], $request['toim']);
-}
-elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
-
+if (!empty($request['action'])) {
 	$laskurow = hae_extranet_tarjous($request['valittu_tarjous_tunnus'], $toim);
 
 	if (empty($laskurow)) {
@@ -155,6 +151,13 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 		}
 		exit;
 	}
+}
+
+if ($request['action'] == 'nayta_tarjous') {
+	
+	nayta_tarjous($request['valittu_tarjous_tunnus'], $request['toim']);
+}
+elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 
 	if (isset($request['hyvaksy'])) {
 		if ($toim == 'EXTTARJOUS') {

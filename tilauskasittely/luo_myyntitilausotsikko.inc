@@ -6,7 +6,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		// clearing on special case, kun dummy tarjoukselta halutaan luoda asiakkaille oikeat tarjoukset, niin cleargin pitää setata näihin tarjouksiin
 		global $kukarow, $yhtiorow, $session;
 
-		if ($asiakasid > 0) {
+		if ($toim != 'EXTTARJOUS' and $toim != 'EXTENNAKKO' and $asiakasid > 0) {
 			$query	= "	SELECT *
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -344,7 +344,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				return $tilausnumero;
 			}
 		}
-		else {
+		else if (($toim == 'EXTTARJOUS' or $toim == 'EXTENNAKKO' or $toim == 'TARJOUS' or $toim == 'ENNAKKO') and $asiakasid < 0) {
 			//Jos asiakasid < 0 niin kyseessä on special case. Tässä tapauksessa luodaan Extranet Dummytarjousta.
 			$query = "  SELECT *
 						FROM kuka

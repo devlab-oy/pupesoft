@@ -88,11 +88,13 @@
 						}
 						else {
 
-							$chk_res = tuotteen_toimittajat_tuotenumerot_haku($tuote2, $tavarantoimittajanumero);
+							if (trim($tuote2) != "") {
+								$chk_res = tuotteen_toimittajat_tuotenumerot_haku($tuote2, $tavarantoimittajanumero);
 
-							if (mysql_num_rows($chk_res) != 0) {
-								$chk_row = mysql_fetch_assoc($chk_res);
-								$tuote = $chk_row['toim_tuoteno'];
+								if (mysql_num_rows($chk_res) != 0) {
+									$chk_row = mysql_fetch_assoc($chk_res);
+									$tuote = $chk_row['toim_tuoteno'];
+								}
 							}
 						}
 					}

@@ -60,7 +60,12 @@ else {
 
 // lisää tai poista asiakkaita dummytarjoukselta
 if ($request['action'] == 'liita_asiakkaat') {
-	luo_myyntitilausotsikko($dummy_tyyppi, $asiakasid, $request['tilausnumero'], '', '', '', '', $valitut_asiakastunnukset, '');
+	$parametrit = array("toim" => $dummy_tyyppi,
+						"asiakasid" => $asiakasid,
+						"tilausnumero" => $tilausnumero,
+						"valitut_asiakastunnukset" => $valitut_asiakastunnukset,
+					);
+	luo_tarjouspohja($parametrit);
 }
 elseif ($request['action'] == 'poista_asiakkaat') {
 	poista_asiakkaita_dummytarjoukselta($request['tilausnumero'], $request['valitut_asiakastunnukset']);
@@ -74,7 +79,10 @@ if (isset($request['tarjous_tee'])) {
 		$request['dummytarjous'] = $dummy_tarjous_row;
 	}
 	else {
-		$request['tilausnumero'] = luo_myyntitilausotsikko($dummy_tyyppi, $asiakasid);
+		$parametrit = array("toim" => $dummy_tyyppi,
+							"asiakasid" => $asiakasid,
+							);
+		$request['tilausnumero'] = luo_tarjouspohja($parametrit);
 	}
 }
 

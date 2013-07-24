@@ -69,11 +69,13 @@
 
 				if ($kpl > 0.0 and $tuote != "") {
 
+					$toim_tuoteno_wherelisa = trim($tuote2) != "" ? "AND tt.toim_tuoteno IN ('{$tuote}','{$tuote2}')" : "AND tt.toim_tuoteno = '{$tuote}'";
+
 					$query = "	SELECT tt.*
 								FROM tuotteen_toimittajat AS tt
 								JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$tavarantoimittajanumero}' AND toimi.tyyppi != 'P')
 								WHERE tt.yhtio = 'artr'
-								AND tt.toim_tuoteno IN ('{$tuote}','{$tuote2}')";
+								{$toim_tuoteno_wherelisa}";
 					$chk_res = pupe_query($query);
 
 					if (mysql_num_rows($chk_res) == 0) {

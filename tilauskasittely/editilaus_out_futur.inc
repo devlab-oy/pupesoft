@@ -213,10 +213,10 @@
 			$filename = $edipolku."/{$laskurow['tunnus']}.dat";
 			file_put_contents($filename,$edi_order);
 
-			$ftphost = $ftphost_unikko;
-			$ftpuser = $ftpuser_unikko;
-			$ftppass = $ftppass_unikko;
-			$ftppath = $ftppath_unikko;
+			$ftphost = $ftphost_futur;
+			$ftpuser = $ftpuser_futur;
+			$ftppass = $ftppass_futur;
+			$ftppath = $ftppath_futur;
 
 			$ftpfile = $unlink_filename = $filename;
 

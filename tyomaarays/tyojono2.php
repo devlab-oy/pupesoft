@@ -122,8 +122,8 @@ $request = array(
 );
 
 $validations = array(
-	'tee'				 => 'sanoja',
-	'toim'				 => 'sanoja',
+	'tee'				 => 'kirjain_numero',
+	'toim'				 => 'kirjain_numero',
 	'toimitusaika_haku'	 => 'numero',
 );
 $validator = new FormValidator($validations);

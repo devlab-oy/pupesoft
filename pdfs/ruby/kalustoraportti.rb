@@ -94,8 +94,7 @@ class KalustoraporttiPDF
   end
 
   def logo
-    #@pdf.image "/Users/joonas/Dropbox/Devlab yleiset/Projektit/Turvata/safetyeasy dokumentaatiot/Raporttimallit/turvanasi_logo.png", :scale => 0.7, :at => [@pdf_x, @pdf_y]
-    @pdf.image File.dirname(__FILE__) + '/../../pics/turvanasi_logo.png', :scale => 0.7, :at => [@pdf_x, @pdf_y]
+    @pdf.image File.dirname(__FILE__) + '/../../pics/logo_pdf.png', :scale => 0.7, :at => [@pdf_x, @pdf_y]
   end
 
   def company_info

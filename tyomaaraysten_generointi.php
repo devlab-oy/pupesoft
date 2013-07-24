@@ -193,6 +193,8 @@ function generoi_tyomaaraykset_huoltosykleista($laitteiden_huoltosyklirivit) {
 
 			$laskurow = hae_tyomaarays($tyomaarays_tunnus);
 
+			$kukarow['kesken'] = $laskurow['tunnus'];
+			
 			//lisätään sammuttimen toimenpiteen palvelurivi
 			$trow = hae_tuote($huoltosyklirivi['toimenpide']);
 			$parametrit = array(
@@ -203,7 +205,7 @@ function generoi_tyomaaraykset_huoltosykleista($laitteiden_huoltosyklirivit) {
 				'hinta'		 => $trow['hinta'],
 				'netto'		 => '',
 			);
-			$rivit = pupesoft_lisaa_rivi($parametrit);
+			$rivit = lisaa_rivi($parametrit);
 
 			paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($huoltosyklirivi, $rivit);
 			paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $huoltosyklirivi);

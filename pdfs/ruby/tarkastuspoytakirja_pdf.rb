@@ -369,8 +369,7 @@ class TarkastuspoytakirjaPDF
   end
 
   def logo
-    #@pdf.image "/Users/joonas/Dropbox/Devlab yleiset/Projektit/Turvata/safetyeasy dokumentaatiot/Raporttimallit/turvanasi_logo.png", :scale => 0.7, :at => [0, 540]
-    @pdf.image File.dirname(__FILE__) + '/../../pics/turvanasi_logo.png', :scale => 0.7, :at => [0, 540]
+    @pdf.image File.dirname(__FILE__) + '/../../pics/logo_pdf.png', :scale => 0.7, :at => [0, 540]
   end
 
   def tarkastuspoytakirja_header

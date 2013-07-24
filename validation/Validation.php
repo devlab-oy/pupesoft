@@ -82,7 +82,8 @@ class FormValidator {
 				}
 			}
 			else {
-				$havefailures = $this->validate($val);
+				//request contains an array. We probably want to make a recursive function call here but for now it is unsupported because of validate() structure ($havefailures).
+				//What needs to be done is we need a wrapper for validate function so that we can return $havefailures to it and NOT !$havefailures. Because of this recursive function call is unsupported.
 			}
 		}
 
@@ -206,6 +207,7 @@ class FormValidator {
 
 	public static function validateContent($var, $type) {
 
+		$is_ok = true;
 		switch ($type) {
 			case 'paiva':
 				if (strpos($var, '.')) {

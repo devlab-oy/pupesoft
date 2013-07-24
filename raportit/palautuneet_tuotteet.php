@@ -131,7 +131,7 @@ if ($request['tee'] == 'aja_raportti') {
 			$excel_tiedosto = generoi_excel_tiedosto($palautuneet_tuotteet, $header_values, $force_to_string);
 			echo "</div>";
 			if ($excel_tiedosto != '') {
-				echo_tallennus_formi($excel_tiedosto, t('Palautuneet_tuotteet'));
+				echo_tallennus_formi($excel_tiedosto, t('Palautuneet_tuotteet'), 'xlsx');
 			}
 		}
 

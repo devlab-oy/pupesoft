@@ -98,7 +98,7 @@
 			$toim_maa	  = '';
 		}
 		// jos toimitusosoite eroaa asiakkaan toimitusosoitteesta (tai jos toimitusosoite on tyhj‰ niin asiakkaan osoitteesta), niin silloin se lis‰t‰‰n aineistoon
-		elseif ($myynti_vai_osto == 'M' and trim($asiakasrow['toim_osoite']) != '') {
+		elseif ($myynti_vai_osto == 'M' and isset($asiakasrow) and trim($asiakasrow['toim_osoite']) != '') {
 			// Kauttalaskutusasiakkaille ei tyhjennet‰
 			if ($asiakasrow["osasto"] != "6" and $toim_yritys == substr(trim($asiakasrow['toim_nimi'].' '.$asiakasrow['toim_nimitark']), 0, 30) and $toim_osoite == substr(trim($asiakasrow['toim_osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['toim_postitp']), 0, 25) and $toim_postino == trim($asiakasrow['toim_postino'])) {
 				$toim_yritys 	= '';
@@ -109,7 +109,7 @@
 			}
 		}
 		else {
-			if ($myynti_vai_osto == 'M' and $toim_yritys == substr(trim($asiakasrow['nimi'].' '.$asiakasrow['nimitark']), 0, 30) and $toim_osoite == substr(trim($asiakasrow['osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['postitp']), 0, 25) and $toim_postino == trim($asiakasrow['postino'])) {
+			if ($myynti_vai_osto == 'M' and isset($asiakasrow) and $toim_yritys == substr(trim($asiakasrow['nimi'].' '.$asiakasrow['nimitark']), 0, 30) and $toim_osoite == substr(trim($asiakasrow['osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['postitp']), 0, 25) and $toim_postino == trim($asiakasrow['postino'])) {
 				$toim_yritys 	= '';
 				$toim_osoite 	= '';
 				$toim_postitp	= '';

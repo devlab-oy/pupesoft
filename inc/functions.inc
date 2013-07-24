@@ -22708,7 +22708,7 @@ if (!function_exists("saako_myyda_private_label")) {
 	}
 }
 
-if (!function_exists('murmur')) {
+if (!function_exists('hae_kaikki_oletuspaikat_try_tai_status')) {
 	function hae_kaikki_oletuspaikat_try_tai_status($try, $status) {
 		global $kukarow, $yhtiorow;
 

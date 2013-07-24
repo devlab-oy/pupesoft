@@ -2,12 +2,11 @@
 
 require('tilauskasittely/luo_myyntitilausotsikko.inc');
 if ($toim == 'EXTTARJOUS') {
-	echo "<font class='head'>" . t("Ext-Tarjoukset") . "</font><hr>";
+	echo "<font class='head'>".t("Ext-Tarjoukset")."</font><hr>";
 }
 else {
-	echo "<font class='head'>" . t("Ext-Ennakot") . "</font><hr>";
+	echo "<font class='head'>".t("Ext-Ennakot")."</font><hr>";
 }
-
 ?>
 
 <style>
@@ -19,7 +18,7 @@ else {
 	});
 	function bind_kaikki_asiakkaat_checkbox_click() {
 		$('#valitse_kaikki').on('click', function() {
-		
+
 			if ($(this).is(':checked')) {
 				$(this).parent().parent().parent().parent().find('.valitut_asiakastunnukset').each(function(index, value) {
 					$(value).attr('checked', 'checked');
@@ -36,17 +35,17 @@ else {
 <?php
 
 $request = array(
-	"toim" => $toim,
-	"hakuehto" => $hakuehto,
-	"mul_asiakasosasto" => $mul_asiakasosasto,
-	"mul_asiakasryhma" => $mul_asiakasryhma,
-	"mul_asiakasmyyja" => $mul_asiakasmyyja,
-	"ext_asiakas_haku_tehty" => $ext_asiakas_haku_tehty,
-	"tarjous_tee" => $tarjous_tee,
-	"tilausnumero" => $tilausnumero,
-	"action" => $action,
-	"valitut_asiakastunnukset" => $valitut_asiakastunnukset,
-	"saate_teksti" => $saate_teksti
+	"toim"						 => $toim,
+	"hakuehto"					 => $hakuehto,
+	"mul_asiakasosasto"			 => $mul_asiakasosasto,
+	"mul_asiakasryhma"			 => $mul_asiakasryhma,
+	"mul_asiakasmyyja"			 => $mul_asiakasmyyja,
+	"ext_asiakas_haku_tehty"	 => $ext_asiakas_haku_tehty,
+	"tarjous_tee"				 => $tarjous_tee,
+	"tilausnumero"				 => $tilausnumero,
+	"action"					 => $action,
+	"valitut_asiakastunnukset"	 => $valitut_asiakastunnukset,
+	"saate_teksti"				 => $saate_teksti
 );
 
 $asiakasid = $kukarow['tunnus'] * -1;
@@ -60,11 +59,12 @@ else {
 
 // lis‰‰ tai poista asiakkaita dummytarjoukselta
 if ($request['action'] == 'liita_asiakkaat') {
-	$parametrit = array("toim" => $dummy_tyyppi,
-						"asiakasid" => $asiakasid,
-						"tilausnumero" => $tilausnumero,
-						"valitut_asiakastunnukset" => $valitut_asiakastunnukset,
-					);
+	$parametrit = array(
+		"toim"						 => $dummy_tyyppi,
+		"asiakasid"					 => $asiakasid,
+		"tilausnumero"				 => $tilausnumero,
+		"valitut_asiakastunnukset"	 => $valitut_asiakastunnukset,
+	);
 	luo_tarjouspohja($parametrit);
 }
 elseif ($request['action'] == 'poista_asiakkaat') {
@@ -79,9 +79,10 @@ if (isset($request['tarjous_tee'])) {
 		$request['dummytarjous'] = $dummy_tarjous_row;
 	}
 	else {
-		$parametrit = array("toim" => $dummy_tyyppi,
-							"asiakasid" => $asiakasid,
-							);
+		$parametrit = array(
+			"toim"		 => $dummy_tyyppi,
+			"asiakasid"	 => $asiakasid,
+		);
 		$request['tilausnumero'] = luo_tarjouspohja($parametrit);
 	}
 }
@@ -90,13 +91,13 @@ if (isset($request['tarjous_tee'])) {
 if ($request['tarjous_tee'] == 'nayta_poimitut_asiakkaat') {
 	if (!empty($request['dummytarjous']['sopimus_lisatietoja'])) {
 		$request['asiakkaat'] = hae_poimitut_asiakkaat($request['dummytarjous']['sopimus_lisatietoja']);
-		echo "<font class='message'>" . t("Poimitut asiakkaat") . "</font>";
+		echo "<font class='message'>".t("Poimitut asiakkaat")."</font>";
 		echo "<br>";
 		echo "<br>";
 		echo_asiakas_table($request);
 	}
 	else {
-		echo "<font class='message'>" . t("Tarjoukselle ei ole valittu yht‰‰n asiakasta") . "</font>";
+		echo "<font class='message'>".t("Tarjoukselle ei ole valittu yht‰‰n asiakasta")."</font>";
 		echo "<br>";
 		echo_asiakas_table($request);
 	}
@@ -162,7 +163,7 @@ function echo_asiakas_rajaus($request) {
 	else {
 		$liitettyjen_asiakkaiden_lkm = 0;
 	}
-	echo t("Sinulla on") . ' ' . $liitettyjen_asiakkaiden_lkm . ' ' . t("poimittua asiakasta");
+	echo t("Sinulla on").' '.$liitettyjen_asiakkaiden_lkm.' '.t("poimittua asiakasta");
 	echo "</div>";
 
 	echo "<div id='hakuehdot_wrapper'>";
@@ -173,7 +174,7 @@ function echo_asiakas_rajaus($request) {
 
 	echo t("Anna y-tunnus, nimi tai asiakasnumero");
 	echo "<input type='text' name='hakuehto' value='{$request['hakuehto']}'>";
-	echo "<input type='submit' value='" . t("Hae") . "'>";
+	echo "<input type='submit' value='".t("Hae")."'>";
 	echo "<br>";
 	echo t("N‰ytet‰‰n 100 ensimm‰ist‰ hakutulosta");
 	echo "</div>";
@@ -278,7 +279,7 @@ function echo_asiakas_table($request) {
 		echo "</form>";
 		echo "<br>";
 		echo "<br>";
-			echo "<br>";
+		echo "<br>";
 	}
 
 	if (!empty($request['dummytarjous']['sopimus_lisatietoja'])) {
@@ -312,14 +313,14 @@ function echo_asiakas_table($request) {
 		echo "<form method='post' action='tilaus_myynti.php'>";
 		echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
 		echo "<input type='hidden' name='tarjous_tee' value='nayta_asiakas_valinta' />";
-		echo "<input type='submit' id='takaisin_asiakasvalintaan' value ='" . t("Takaisin asiakasvalintaan") . "'/>";
+		echo "<input type='submit' id='takaisin_asiakasvalintaan' value ='".t("Takaisin asiakasvalintaan")."'/>";
 		echo "</form>";
 	}
 	else {
 		echo "<form method='post' action='tilaus_myynti.php'>";
 		echo "<input type='hidden' name='toim' value='{$request['toim']}' />";
 		echo "<input type='hidden' name='tarjous_tee' value='nayta_poimitut_asiakkaat' />";
-		echo "<input type='submit' id='nayta_poimitut' value ='" . t("N‰yt‰ poimitut") . "'/>";
+		echo "<input type='submit' id='nayta_poimitut' value ='".t("N‰yt‰ poimitut")."'/>";
 		echo "</form>";
 	}
 }
@@ -329,7 +330,7 @@ function poista_asiakkaita_dummytarjoukselta($tilausnumero, $valitut_asiakastunn
 	global $kukarow, $yhtiorow;
 
 	if (!empty($valitut_asiakastunnukset)) {
-		
+
 		//haetaan dummytarjoukselle jo lis‰tyt asiakkaat jotta niist‰ voidaan poistaa valitut asiakkaat
 		$query = "  select sopimus_lisatietoja from laskun_lisatiedot
 					where yhtio='{$kukarow['yhtio']}'
@@ -341,7 +342,7 @@ function poista_asiakkaita_dummytarjoukselta($tilausnumero, $valitut_asiakastunn
 		$poiston_jalkeiset_asiakkaat = array_diff($dummytarjoukselta_loytyvat_asiakastunnukset, $valitut_asiakastunnukset);
 
 		$query = "  update laskun_lisatiedot
-					set sopimus_lisatietoja = '" . implode(",", $poiston_jalkeiset_asiakkaat) . "'
+					set sopimus_lisatietoja = '".implode(",", $poiston_jalkeiset_asiakkaat)."'
 					where yhtio='{$kukarow['yhtio']}'
 					and otunnus='{$tilausnumero}'";
 		pupe_query($query);
@@ -354,13 +355,13 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 	$where = "AND asiakas.laji NOT IN ( 'P' )";
 
 	if (!empty($request['mul_asiakasosasto'])) {
-		$where .= " AND asiakas.osasto IN ('" . implode("','", $request['mul_asiakasosasto']) . "')";
+		$where .= " AND asiakas.osasto IN ('".implode("','", $request['mul_asiakasosasto'])."')";
 	}
 	if (!empty($request['mul_asiakasryhma'])) {
-		$where .= " AND asiakas.ryhma IN ('" . implode("','", $request['mul_asiakasryhma']) . "')";
+		$where .= " AND asiakas.ryhma IN ('".implode("','", $request['mul_asiakasryhma'])."')";
 	}
 	if (!empty($request['mul_asiakasmyyja'])) {
-		$where .= " AND asiakas.myyjanro IN ('" . implode("','", $request['mul_asiakasmyyja']) . "')";
+		$where .= " AND asiakas.myyjanro IN ('".implode("','", $request['mul_asiakasmyyja'])."')";
 	}
 	if (empty($request['hakuehto'])) {
 		$query = "SELECT asiakas.*,myyjahaku.nimi as myyjanimi, myyjahaku.tunnus as myyjatunnus
@@ -382,7 +383,7 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
 						LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro AND myyjahaku.myyja != 0)
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-						and REPLACE(REPLACE(asiakas.ytunnus, '-', ''), '+', '') = '" . str_replace(array('-', '+'), '', $request['hakuehto']) . "'
+						and REPLACE(REPLACE(asiakas.ytunnus, '-', ''), '+', '') = '".str_replace(array('-', '+'), '', $request['hakuehto'])."'
 						and asiakas.ytunnus!=''
 						{$where}
 						GROUP BY asiakas.tunnus)
@@ -404,7 +405,7 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
 						LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro AND myyjahaku.myyja != 0)
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-						and REPLACE(REPLACE(asiakas.ovttunnus, '-', ''), '+', '') = '" . str_replace(array('-', '+'), '', $request['hakuehto']) . "'
+						and REPLACE(REPLACE(asiakas.ovttunnus, '-', ''), '+', '') = '".str_replace(array('-', '+'), '', $request['hakuehto'])."'
 						and asiakas.ovttunnus!=''
 						{$where}
 						GROUP BY asiakas.tunnus)

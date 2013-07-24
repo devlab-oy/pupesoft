@@ -345,7 +345,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
 if (!function_exists("luo_tarjouspohja")) {
 	function luo_tarjouspohja($params) {
-		global $kukarow, $yhtiorow;
+		global $kukarow, $yhtiorow, $session;
 
 		// valitut_asiakastunnukset on special case tapaus. valitut_asiakastunnukset on setattu ainoastaan silloin kun dummytarjoukselle halutaan liitt‰‰ asiakkaita.
 		// clearing on special case, kun dummy tarjoukselta halutaan luoda asiakkaille oikeat tarjoukset, niin cleargin pit‰‰ setata n‰ihin tarjouksiin

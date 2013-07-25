@@ -74,34 +74,19 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 
 	foreach ($tilausrivit as $tilausrivi) {
 		if ($tilausrivi['tunnus'] == $tilausrivi['perheid'] or $tilausrivi['perheid'] == 0) {
+
 			$trow = hae_tuote($tilausrivi['tuoteno']);
-			if ($toim == "EXTTARJOUS") {
-				$netto = "N";
-			}
-			else {
-				$netto = '';
-				$query = "  SELECT selite AS ennakko_pros_a
-						FROM tuotteen_avainsanat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tuoteno = '{$tuoteno}'
-						AND laji = 'parametri_ennakkoale_a'
-						AND selite != ''";
-				$result = pupe_query($query);
-				$tuotteen_hinta = mysql_fetch_assoc($result);
-				if ($tuotteen_hinta === false) {
-					$hinta = 0;
-				}
-				else {
-					$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
-				}
-			}
+
 			$parametrit = array(
 				'trow'				 => $trow,
 				'tuoteno'			 => $trow['tuoteno'],
 				'laskurow'			 => $laskurow,
-				'kpl'				 => ($tilausrivi['varattu'] + $tilausrivi['jt']),
-				'netto'				 => $netto,
-				'hinta'				 => $hinta,
+				'kpl'				 => $tilausrivi['varattu'],
+				'ale1'				 => $tilausrivi['ale1'],
+				'ale2'				 => $tilausrivi['ale2'],
+				'ale3'				 => $tilausrivi['ale3'],
+				'netto'				 => $tilausrivi['netto'],
+				'hinta'				 => $tilausrivi['hinta'],
 				'varataan_saldoa'	 => 'EI',
 			);
 			lisaa_rivi($parametrit);

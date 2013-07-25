@@ -58,6 +58,36 @@ if(!function_exists("avainsanatarkista")) {
 				$seliteerrori = 1;
 			}
 
+			if ($tem_laji == 'HINNAT_CRON') {
+
+				list($date, $time) = explode(" ", $t[$i]);
+
+				if (count(explode(" ", $t[$i])) != 2 or trim($time) == '') {
+					$virhe[$i] = t("Selite on pakollinen ja se pit‰‰ olla muodossa vvvv-kk-pp tt:mm:ss");
+				}
+				else {
+
+					list($vv, $kk, $pp) = explode("-", $date);
+					list($tt, $mm, $ss) = explode(":", $time);
+
+					if ($tt == '' or $mm == '' or $ss == '' or strlen($tt) != 2 or strlen($mm) != 2 or strlen($ss) != 2) {
+						$virhe[$i] = t("Kellonaika on virheellinen. Kellonaika pit‰‰ olla muodossa tt:mm:ss");
+					}
+
+					if (!is_int($vv) or strlen($vv) != 4 or !is_int($kk) or strlen($kk) != 2 or !is_int($pp) or strlen($pp) != 2) {
+						$virhe[$i] = t("P‰iv‰m‰‰r‰ on virheellinen. P‰iv‰m‰‰r‰ pit‰‰ olla muodossa vvvv-kk-pp");
+					}
+
+					if (!checkdate($kk, $pp, $vv)) {
+						$virhe[$i] = t("P‰iv‰m‰‰r‰ on virheellinen. P‰iv‰m‰‰r‰ pit‰‰ olla muodossa vvvv-kk-pp");
+					}
+					elseif ($tt < 00 or $tt > 23 or $mm < 00 or $mm > 59 or $ss < 00 or $ss > 59) {
+						$virhe[$i] = t("Kellonaika on virheellinen. Kellonaika pit‰‰ olla muodossa tt:mm:ss");
+					}
+				}
+
+			}
+
 			if ($tem_laji == 'LABEL') {
 				if (trim($tem_selite) == '') {
 					$virhe[$i] = t("Selite on pakollinen ja se pit‰‰ olla muodossa #123 tai #112233");
@@ -91,7 +121,7 @@ if(!function_exists("avainsanatarkista")) {
 					$t[$i] = (int) $t[$i];
 				}
 			}
-			
+
 			if (($tem_laji == 'VAKIOVIESTI' or $tem_laji == 'VAKIOVIESTI_TIL') and trim($tem_selite) == '') {
 				$virhe[$i] = t("Selite on pakollinen");
 			}
@@ -138,7 +168,7 @@ if(!function_exists("avainsanatarkista")) {
 				}
 			}
 
-			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL') {
+			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON') {
 				$virhe[$i] = t("Selite ja selitetark ei voi olla tyhji‰")."!";
 			}
 

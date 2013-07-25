@@ -33,6 +33,15 @@
 				list($toimirow['edi_palvelin'], $toimirow['edi_portti']) = explode(":", $toimirow['edi_palvelin']);
 			}
 
+			if ($toimirow['edi_kuvaus'] == 'editilaus_out_futur.inc') {
+				$myynti_vai_osto = 'O';
+
+				$ftphost_futur = $toimirow['edi_palvelin'];
+				$ftpuser_futur = $toimirow['edi_kayttaja'];
+				$ftppass_futur = $toimirow['edi_salasana'];
+				$ftppath_futur = $toimirow['edi_polku'];
+			}
+
 			require($toimirow['edi_kuvaus']);
 			$tee = '';
 		}

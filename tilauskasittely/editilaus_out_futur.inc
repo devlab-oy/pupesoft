@@ -18,8 +18,8 @@
 	   	$edi_order .= "*RS OSTOTIL\n";
 
 	   	$edi_order .= "OSTOTIL.OT_NRO:{$laskurow['tunnus']}\n";
-		// 4 = Örum
-	   	$edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:4\n";
+		// 0 = Örum
+	   	$edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:0\n";
 		$edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:{$laskurow['tilaustyyppi']}\n";
 		$edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
 		$edi_order .= "OSTOTIL.OT_KASITTELIJA:\n";

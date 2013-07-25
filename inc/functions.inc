@@ -12705,6 +12705,9 @@ if (!function_exists("pupe_DataTables")) {
 					}
 
 					datatablesit[t] = $(this).dataTable( {
+						\"bProcessing\": true,
+				        \"bServerSide\": true,
+				        \"sAjaxSource\": \"?dtss=TRUE\",
 						\"bSortCellsTop\": true,
 						\"bDestroy\" : true,
 						\"bPaginate\" : parametrit[tableid][2],
@@ -22571,7 +22574,7 @@ if (!function_exists("lisaa_rivi")) {
 			echo "Lisaarivi not found";
 			exit;
 		}
-		
+
 		return array(
 			'lisatyt_rivit1' => $lisatyt_rivit1,
 			'lisatyt_rivit2' => $lisatyt_rivit2,
@@ -22591,7 +22594,7 @@ if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
 
         $query = "  SELECT count(*) as luku
                     FROM lasku
-                    JOIN asiakas 
+                    JOIN asiakas
 					ON ( asiakas.yhtio = lasku.yhtio
 						AND asiakas.tunnus = lasku.liitostunnus
 						AND asiakas.tunnus = '{$oletus_asiakas}' )

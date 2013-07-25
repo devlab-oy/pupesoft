@@ -4,7 +4,7 @@ if(!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko;
 
-		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind, $tem_tuotetyyppi, $tem_status, $tem_try;
+		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind, $tem_tuotetyyppi, $tem_status, $tem_status_vanha, $tem_try, $tem_try_vanha;
 
 		if (mysql_field_name($result, $i) == "tuoteno") {
 			if (trim($t[$i]) == '') {
@@ -88,11 +88,45 @@ if(!function_exists("tuotetarkista")) {
 
 		if ((mysql_field_name($result, $i) == "osasto" or mysql_field_name($result, $i) == "try" or mysql_field_name($result, $i) == "tuotemerkki" or mysql_field_name($result, $i) == "malli" or mysql_field_name($result, $i) == "mallitarkenne") and trim($t[$i]) != '') {
 
+			//mysql_field_name pitää ottaa talteen koska muuvarastopaikka.php muuttaa resulttia.
+			$field_name = mysql_field_name($result, $i);
 			$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '".mysql_field_name($result, $i)."'";
 			$tpres = pupe_query($tpque);
 
 			if (mysql_num_rows($tpres) > 0) {
-				$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '".mysql_field_name($result, $i)."' and SELITE = '$t[$i]'";
+
+				if (mysql_field_name($result, $i) == "try") {
+					$tem_try = $t[$i];
+					$tem_try_vanha = $trow[$i];
+				}
+
+				if (mysql_field_name($result, $i) == "try" and !empty($trow) and $tem_try_vanha != $tem_try) {
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tem_tuoteno);
+
+					if ($saldo == 0) {
+
+						$query = "	SELECT tuotepaikat.*,
+									concat_ws('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) as hylly
+									FROM tuotepaikat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tuoteno = '{$tem_tuoteno}'
+									ORDER BY oletus ASC";
+						$tuotepaikat_result = pupe_query($query);
+						$poista = array();
+						while($tuotepaikka = mysql_fetch_assoc($tuotepaikat_result)) {
+							$poista[] = $tuotepaikka;
+						}
+
+						$tee = "MUUTA";
+						$tuoteno = $tem_tuoteno;
+						$halyraja2 = array();
+						$tilausmaara2 = array();
+						$kutsuja = "tuotetarkista.inc";
+						require("muuvarastopaikka.php");
+					}
+				}
+
+				$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '".$field_name."' and SELITE = '$t[$i]'";
 				$tpres = pupe_query($tpque);
 
 				if (mysql_num_rows($tpres) == 0) {
@@ -286,13 +320,13 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == 'status') {
-			$tem_status = $trow['status'];
-			$tem_try = $trow['try'];
+			$tem_status = $t[$i];
+			$tem_status_vanha = $trow[$i];
 
-			if (!empty($trow) and $trow[$i] != $t[$i]) {
+			if (!empty($trow) and $tem_status_vanha != $tem_status) {
 				//jos tuotteella status muutetaan ja tuotteella on vain oletuspaikka ja saldo on nolla,
 				//niin tuotteen muokkauksen yhteydessä mitätöidään nykyinen tuotepaikka + tapahtumiin jälki ja perustetaan määritellyin ehdoin uudet tuotepaikat.
-				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($t['tuoteno']);
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tem_tuoteno);
 
 				if ($saldo == 0) {
 
@@ -300,7 +334,7 @@ if(!function_exists("tuotetarkista")) {
 								concat_ws('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) as hylly
 								FROM tuotepaikat
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tuoteno = '{$t['tuoteno']}'
+								AND tuoteno = '{$tem_tuoteno}'
 								ORDER BY oletus ASC";
 					$tuotepaikat_result = pupe_query($query);
 					$poista = array();
@@ -309,7 +343,7 @@ if(!function_exists("tuotetarkista")) {
 					}
 
 					$tee = "MUUTA";
-					$tuoteno = $t['tuoteno'];
+					$tuoteno = $tem_tuoteno;
 					$halyraja2 = array();
 					$tilausmaara2 = array();
 					$kutsuja = "tuotetarkista.inc";
@@ -365,7 +399,7 @@ if(!function_exists("tuotetarkista")) {
 				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) == 0) {
-					$kaikki_oletuspaikat = hae_kaikki_oletuspaikat_try_tai_status($t['try'], $t['status']);
+					$kaikki_oletuspaikat = hae_kaikki_oletuspaikat_try_tai_status($tem_try, $tem_status);
 					$_counter = 0;
 
 					foreach ($kaikki_oletuspaikat as $_tuotepaikka) {

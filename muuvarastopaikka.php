@@ -118,7 +118,7 @@
 		//Kun tuotteen statusta muutetaa, poistetaan tuotteelta myös automaattisesti perustetut tuotepaikat, jos tuotteelle ei ole perustettu manuaalisesti yhtään paikkaa.
 		//Haetaan edellisen tuote statuksen oletuspaikat
 		if ($kutsuja == 'tuotetarkista.inc') {
-			$kaikki_oletuspaikat = hae_kaikki_oletuspaikat_try_tai_status($tem_try, $tem_status);
+			$kaikki_oletuspaikat = hae_kaikki_oletuspaikat_try_tai_status($tem_try_vanha, $tem_status_vanha);
 
 			foreach ($poista as $poistettava) {
 				//Jos poistettavaa paikkaa ei löydy kaikista_oletuspaikoista,
@@ -127,7 +127,6 @@
 				$oletuspaikka = in_array($poistettava['hylly'], $kaikki_oletuspaikat);
 
 				if (!$oletuspaikka) {
-					echo "<font class='error'>".t('Tuotteella oli manuaalisesti lisättyjä paikkoja').". ".t('Mitään paikkoja ei poistettu')."</font><br/><br/>";
 					$poista = array();
 					break;
 				}

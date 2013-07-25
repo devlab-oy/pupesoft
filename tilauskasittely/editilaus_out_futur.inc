@@ -193,18 +193,10 @@
 
 			$edi_order .= "*RE  OSTOTILRIV $i\n";
 			$i++;
-
-			// var J voi olla vain jos tilaustyyppi ei ole 7
-			// var J rivi laitetaan unikkoon ja päivitetään rivin var H:ksi ettei se jää roikkumaan JT-selaukseen
-			/*
-			if ($tilausrivi_row['var'] == 'J') {
-				$query = "UPDATE tilausrivi SET var = 'H' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausrivi_row['tunnus']}'";
-				$update_res = pupe_query($query);
-			}
-			*/
 		}
 
 		if ($i > 1) {
+
 		   	$edi_order .= "*ME\n";
 		   	$edi_order .= "*IE\n";
 

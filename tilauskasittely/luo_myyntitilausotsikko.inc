@@ -353,7 +353,6 @@ if (!function_exists("luo_tarjouspohja")) {
 		$asiakasid = $params['asiakasid'];
 		$tilausnumero = $params['tilausnumero'];
 		$valitut_asiakastunnukset = $params['valitut_asiakastunnukset'];
-		$vienti = $params['vienti'];
 		$alv = $params['alv'];
 
 		//Jos asiakasid < 0 niin kyseessä on special case. Tässä tapauksessa luodaan Extranet Dummytarjousta.

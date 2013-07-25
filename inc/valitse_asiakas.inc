@@ -83,7 +83,6 @@ if (isset($request['tarjous_tee'])) {
 		$parametrit = array(
 			"toim"		 => $dummy_tyyppi,
 			"asiakasid"	 => $asiakasid,
-			'vienti'	 => '',
 			'alv'		 => alv_oletus(),
 		);
 		$request['tilausnumero'] = luo_tarjouspohja($parametrit);
@@ -293,8 +292,6 @@ function echo_asiakas_table($request) {
 		echo "<input type='hidden' name='viimeinen_voimassaolo_pvm' value='{$viimeinen_voimassaolo_pvm}' />";
 		echo "<input type='hidden' name='tee' value='OTSIK' />";
 		echo "<input type='hidden' name='tarjous_tee' value='luo_dummy_tarjous' />";
-		echo "<input type='hidden' name='vienti' value='' />";
-		echo "<input type='hidden' name='alv' value='24' />";
 		echo "<input type='hidden' name='tilausnumero' value='{$request['tilausnumero']}' />";
 		if ($request['tarjous_tee'] == 'nayta_poimitut_asiakkaat') {
 			if ($request['toim'] == 'EXTTARJOUS') {

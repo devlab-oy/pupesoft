@@ -1,7 +1,7 @@
 <?php
 
-require ("inc/parametrit.inc");
-require ("validation/Validation.php");
+require ("parametrit.inc");
+require ("Validation.php");
 enable_ajax();
 
 ?>
@@ -72,6 +72,7 @@ $request = array(
 	"hylkaa"						 => $hylkaa,
 );
 
+
 $request['kayttajaan_liitetty_asiakas'] = hae_extranet_kayttajaan_liitetty_asiakas();
 
 if ($tee == "LISAARIVI") {
@@ -84,10 +85,10 @@ if ($tee == "LISAARIVI") {
 	if (mysql_num_rows($result) > 0) {
 		//Tuote löytyi
 		$trow = mysql_fetch_assoc($result);
-
 		$kukarow["kesken"] = $otunnus;
-
+		$hinta = 0.000001;
 		$laskurow = hae_lasku($otunnus);
+
 		// Nollataan hinta kun kyseessä on asiakkaan ext-ennakkotilaukseen lisäämä rivi
 		if ($toim == 'EXTENNAKKO') {
 			$query = "  SELECT selite AS ennakko_pros_a
@@ -97,21 +98,26 @@ if ($tee == "LISAARIVI") {
 						AND laji = 'parametri_ennakkoale_a'
 						AND selite != ''";
 			$result = pupe_query($query);
-			$tuotteen_hinta = mysql_fetch_assoc($result);
-			$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
+
+			if (mysql_num_rows($result) == 1) {
+				$tuotteen_hinta = mysql_fetch_assoc($result);
+				$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
+			}
 			$laskurow["tila"] = 'N';
 		}
 		else {
 			$laskurow["tila"] = 'T';
 		}
+
 		$perhekielto = '';
 		$perheid = 0;
 		$trow = hae_tuote($tuoteno);
+
 		$parametrit = array(
 			'trow'			 => $trow,
 			'laskurow'		 => $laskurow,
-			'kpl'			 => ($kpl),
-			'netto'			 => $netto,
+			'kpl'			 => $kpl,
+			'ale1'           => 100,
 			'hinta'			 => $hinta,
 			'perhekielto'	 => $perhekielto,
 			'perheid'		 => $perheid,
@@ -170,7 +176,7 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 	exit;
 }
 else {
-	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset(58962, $request['toim']);
+	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset($request['kayttajaan_liitetty_asiakas']['tunnus'], $request['toim']);
 
 	if (count($request['asiakkaan_tarjoukset']) == 0) {
 		if ($request['toim'] == "EXTENNAKKO") {
@@ -314,7 +320,7 @@ function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
 		pupe_query($query);
 
 		// Kopsataan valitut rivit uudelle myyntitilaukselle
-		require("tilauskasittely/tilauksesta_myyntitilaus.inc");
+		require("tilauksesta_myyntitilaus.inc");
 
 		$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($valittu_tarjous_tunnus, '', '', '');
 		if ($tilauksesta_myyntitilaus != '') {
@@ -443,7 +449,7 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 						<input type='hidden' name='otunnus'  value='$valittu_tarjous_tunnus'>";
 		echo "<font class='message'>".t("Tuotteiden lisäys")."</font>";
 
-		require('tilauskasittely/syotarivi.inc');
+		require('syotarivi.inc');
 		echo "<br>";
 	}
 
@@ -471,6 +477,8 @@ function hae_tarjous($valittu_tarjous_tunnus) {
 function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 	global $kukarow, $yhtiorow;
 
+	$query_ale_lisa = generoi_alekentta('M');
+
 	$query = "  SELECT '' as nro,
 				'' as kuva,
 				tilausrivi.tunnus,
@@ -479,15 +487,14 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 				tilausrivi.nimitys,
 				tilausrivi.tilkpl as kpl,
 				tilausrivi.hinta,
-				round(sum((tilausrivi.hinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl))*(1+tilausrivi.alv/100),2) verollinenrivihinta,
+				round((tilausrivi.hinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa} * (tilausrivi.alv/100), 2) verollinenrivihinta,
 				tilausrivi.alv,
 				tuote.tunnus as tuote_tunnus
 				FROM tilausrivi
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-				JOIN lasku ON ( lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus )
+				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-				AND tilausrivi.otunnus = '{$valittu_tarjous_tunnus}'
-				GROUP BY tilausrivi.tunnus";
+				AND tilausrivi.otunnus = '{$valittu_tarjous_tunnus}'";
 	$result = pupe_query($query);
 
 	$tilausrivit = array();
@@ -641,4 +648,4 @@ function piirra_tarjouksen_tilausrivit($params) {
 	echo "</form>";
 }
 
-require ("inc/footer.inc");
+require ("footer.inc");

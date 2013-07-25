@@ -485,9 +485,9 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 				tilausrivi.perheid as perheid_tunnus,
 				tilausrivi.tuoteno,
 				tilausrivi.nimitys,
-				tilausrivi.tilkpl as kpl,
+				tilausrivi.varattu as kpl,
 				tilausrivi.hinta,
-				round((tilausrivi.hinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa} * (tilausrivi.alv/100), 2) verollinenrivihinta,
+				round(tilausrivi.hinta * tilausrivi.varattu * (1 - ale1 / 100) * (1 - ale2 / 100) * (1 - ale3 / 100), 2) rivihinta,
 				tilausrivi.alv,
 				tuote.tunnus as tuote_tunnus
 				FROM tilausrivi
@@ -628,7 +628,7 @@ function piirra_tarjouksen_tilausrivit($params) {
 		echo "</td>";
 
 		echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["hinta"], $yhtiorow['hintapyoristys'])."</td>";
-		echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["verollinenrivihinta"], $yhtiorow['hintapyoristys'])."</td>";
+		echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["rivihinta"], $yhtiorow['hintapyoristys'])."</td>";
 		echo "<td class='{$class}' style='text-align: right;'>{$rivi["alv"]}</td>";
 		echo "</tr>";
 	}

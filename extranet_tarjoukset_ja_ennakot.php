@@ -1,7 +1,7 @@
 <?php
 
-require ("parametrit.inc");
-require ("Validation.php");
+require ("inc/parametrit.inc");
+require ("validation/Validation.php");
 enable_ajax();
 
 ?>
@@ -170,7 +170,7 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 	exit;
 }
 else {
-	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset($request['kayttajaan_liitetty_asiakas']['tunnus'], $request['toim']);
+	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset(58962, $request['toim']);
 
 	if (count($request['asiakkaan_tarjoukset']) == 0) {
 		if ($request['toim'] == "EXTENNAKKO") {
@@ -314,7 +314,7 @@ function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
 		pupe_query($query);
 
 		// Kopsataan valitut rivit uudelle myyntitilaukselle
-		require("tilauksesta_myyntitilaus.inc");
+		require("tilauskasittely/tilauksesta_myyntitilaus.inc");
 
 		$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($valittu_tarjous_tunnus, '', '', '');
 		if ($tilauksesta_myyntitilaus != '') {
@@ -443,7 +443,7 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 						<input type='hidden' name='otunnus'  value='$valittu_tarjous_tunnus'>";
 		echo "<font class='message'>".t("Tuotteiden lisäys")."</font>";
 
-		require('syotarivi.inc');
+		require('tilauskasittely/syotarivi.inc');
 		echo "<br>";
 	}
 
@@ -478,13 +478,16 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 				tilausrivi.tuoteno,
 				tilausrivi.nimitys,
 				tilausrivi.tilkpl as kpl,
-				IF(tilausrivi.alv != 0, ( (1 + ( tilausrivi.alv / 100)	 ) * (tilausrivi.tilkpl * tilausrivi.hinta ) ), tilausrivi.tilkpl * tilausrivi.hinta) AS rivihinta,
+				tilausrivi.hinta,
+				round(sum((tilausrivi.hinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl))*(1+tilausrivi.alv/100),2) verollinenrivihinta,
 				tilausrivi.alv,
 				tuote.tunnus as tuote_tunnus
 				FROM tilausrivi
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+				JOIN lasku ON ( lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus )
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-				AND tilausrivi.otunnus = '{$valittu_tarjous_tunnus}'";
+				AND tilausrivi.otunnus = '{$valittu_tarjous_tunnus}'
+				GROUP BY tilausrivi.tunnus";
 	$result = pupe_query($query);
 
 	$tilausrivit = array();
@@ -582,6 +585,7 @@ function piirra_tarjouksen_tilausrivit($params) {
 	echo "<th>".t("Tuoteno")."</th>";
 	echo "<th>".t("Nimitys")."</th>";
 	echo "<th>".t("Kpl")."</th>";
+	echo "<th>".t("Yksikköhinta")."</th>";
 	echo "<th>".t("Rivihinta")."</th>";
 	echo "<th>".t("Alv")."</th>";
 	echo "</tr>";
@@ -616,7 +620,8 @@ function piirra_tarjouksen_tilausrivit($params) {
 		}
 		echo "</td>";
 
-		echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["rivihinta"], $yhtiorow['hintapyoristys'])."</td>";
+		echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["hinta"], $yhtiorow['hintapyoristys'])."</td>";
+		echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["verollinenrivihinta"], $yhtiorow['hintapyoristys'])."</td>";
 		echo "<td class='{$class}' style='text-align: right;'>{$rivi["alv"]}</td>";
 		echo "</tr>";
 	}
@@ -636,4 +641,4 @@ function piirra_tarjouksen_tilausrivit($params) {
 	echo "</form>";
 }
 
-require ("footer.inc");
+require ("inc/footer.inc");

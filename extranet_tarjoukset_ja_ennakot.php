@@ -428,6 +428,9 @@ function hae_extranet_tarjous($tunnus, $toim) {
 	else if ($toim == 'EXTENNAKKO') {
 		$where = "	AND tila = 'N' AND alatila = ''";
 	}
+	else {
+		return false;
+	}
 	$query = "  SELECT *
 				FROM lasku
 				WHERE yhtio = '{$kukarow['yhtio']}'

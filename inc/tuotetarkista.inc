@@ -4,7 +4,7 @@ if(!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko;
 
-		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind, $tem_tuotetyyppi, $tem_status;
+		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind, $tem_tuotetyyppi, $tem_status, $tem_try;
 
 		if (mysql_field_name($result, $i) == "tuoteno") {
 			if (trim($t[$i]) == '') {
@@ -303,9 +303,9 @@ if(!function_exists("tuotetarkista")) {
 								AND tuoteno = '{$t['tuoteno']}'
 								ORDER BY oletus ASC";
 					$tuotepaikat_result = pupe_query($query);
-					$poistettavat = array();
+					$poista = array();
 					while($tuotepaikka = mysql_fetch_assoc($tuotepaikat_result)) {
-						$poistettavat[] = $tuotepaikka;
+						$poista[] = $tuotepaikka;
 					}
 
 					$tee = "MUUTA";

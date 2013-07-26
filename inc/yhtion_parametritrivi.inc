@@ -799,6 +799,20 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tee_automaattinen_osto_myyntitilaukselta") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array_fill_keys(array('X'), '');
+		$sel[$trow[$i]] = " SELECTED";
+
+		$ulos .= "<option value=''>".t("Myyntitilauksella ei voi luoda automaattisesti ostorivejä")."</option>";
+		$ulos .= "<option value='X' {$sel['X']}>".t("Myyntitilauksella luodaan automaattisesti ostorivejä jos tee_osto_myyntitilaukselta-parametri sallii sen")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "tee_valmistus_myyntitilaukselta") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

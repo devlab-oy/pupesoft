@@ -310,10 +310,6 @@ if ($tee != '') {
 			'header' => t('Ostoehdotus'),
 			'order'	 => 17
 		),
-		'onko_paikalta_keratty'		 => array(
-			'header' => t('Onko paikalta kerätty'),
-			'order'	 => 18
-		),
 	);
 	$force_to_string = array(
 		'tuoteno'
@@ -404,7 +400,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 	$keraysvyohyke_select = "";
 	$keraysvyohyke_join = "";
 	$varaston_hyllypaikat_join = "";
-	$group = "GROUP BY tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,";
+	$group = "tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,";
 	if (!empty($yhtiorow['kerayserat'])) {
 		$keraysvyohyke_select = "keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,";
 		$keraysvyohyke_join = " JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)";
@@ -437,12 +433,13 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 			foreach ($lisa_kentat as $lisa_kentta) {
 				if (!empty($lisa_kentta['checked'])) {
 					$tuote_select .= $lisa_kentta['kolumni'].', ';
+					$group .= $lisa_kentta['kolumni'].', ';
 				}
 			}
 		}
 
 		$tuotepaikat_select = "tuotepaikat.saldo, tuotepaikat.tunnus paikkatun, ";
-		$group .= "tilausrivi.tuoteno,";
+		$group .= "tuotepaikat.saldo, tuotepaikat.tunnus,";
 	}
 	else {
 		$tuote_select = "";
@@ -452,20 +449,20 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 	$group = substr($group, 0, -1);
 	if (!empty($kerayksettomat_tuotepaikat)) {
 		$kerayksettomat_tuotepaikat_varaston_hyllypaikat_join = str_replace('tilausrivi', 'tuotepaikat', $varaston_hyllypaikat_join);
+		$kerayksettomat_tuotepaikat_group = str_replace('tilausrivi', 'tuotepaikat', $group);
 
 		$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
+					CONCAT_WS(' ', tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) as hylly,
+					'".t("Ei tiedossa")."' poistettu,
 					{$keraysvyohyke_select}
 					{$tuote_select}
 					{$tuotepaikat_select}
-					CONCAT_WS(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as hylly,
 					sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
 					sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl, 0)) tuokpl_valittu_aika,
 					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), 1, 0)) kpl_6,
 					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), tilausrivi.kpl, 0)) tuo_kpl_6,
 					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), 1, 0)) kpl_12,
-					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), tilausrivi.kpl, 0)) tuo_kpl_12,
-					'".t("Ei tiedossa")."' poistettu,
-					0 as onko_paikalta_keratty
+					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), tilausrivi.kpl, 0)) tuo_kpl_12
 					FROM tuotepaikat
 					JOIN tuote
 					ON (tuotepaikat.yhtio = tuote.yhtio
@@ -488,23 +485,22 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 					WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
 					{$tuotepaikka_where}
 					{$varasto_lisa}
-					{$group}
+					GROUP BY 1,2,3, {$kerayksettomat_tuotepaikat_group}
 					ORDER BY kpl_valittu_aika DESC";
 	}
 	else {
 		$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
+					CONCAT_WS(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as hylly,
+					if (tuotepaikat.tunnus IS NULL , 1, 0) poistettu,
 					{$keraysvyohyke_select}
 					{$tuote_select}
 					{$tuotepaikat_select}
-					CONCAT_WS(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as hylly,
 					sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
 					sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl, 0)) tuokpl_valittu_aika,
 					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), 1, 0)) kpl_6,
 					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), tilausrivi.kpl, 0)) tuo_kpl_6,
 					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), 1, 0)) kpl_12,
-					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), tilausrivi.kpl, 0)) tuo_kpl_12,
-					sum(if (tuotepaikat.tunnus IS NULL , 1, 0)) poistettu,
-					1 as onko_paikalta_keratty
+					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), tilausrivi.kpl, 0)) tuo_kpl_12
 					FROM tilausrivi
 					JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 					LEFT JOIN tuotepaikat
@@ -528,7 +524,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 					{$tuotepaikka_where}
 					{$varasto_lisa}
 					{$_date}
-					{$group}
+					GROUP BY 1,2,3, {$group}
 					ORDER BY kpl_valittu_aika DESC";
 	}
 
@@ -765,28 +761,17 @@ function nayta_ruudulla(&$rivit, $header_values, $force_to_string, $ppa, $kka, $
 //callback function table td:lle
 function right_align_numbers($header, $solu, $force_to_string) {
 	if (!stristr($header, 'tunnus')) {
-		if (stristr($header, 'onko_paikalta_keratty')) {
-			//queryssä asetetaan arvot 1 ja 0 riippuen onko kerätty vai ei
-			if ($solu) {
-				echo "<td>".t("Paikalta on kerätty")."</td>";
-			}
-			else {
-				echo "<td>".t("Paikalta ei ole kerätty")."</td>";
-			}
+		if (is_numeric($solu) and !in_array($header, $force_to_string)) {
+			$align = "align='right'";
 		}
 		else {
-			if (is_numeric($solu) and !in_array($header, $force_to_string)) {
-				$align = "align='right'";
-			}
-			else {
-				$align = "";
-			}
-			if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
-				$solu = number_format($solu, 0);
-			}
-
-			echo "<td $align>{$solu}</td>";
+			$align = "";
 		}
+		if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
+			$solu = number_format($solu, 0);
+		}
+
+		echo "<td $align>{$solu}</td>";
 	}
 }
 require ("inc/footer.inc");

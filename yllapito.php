@@ -71,14 +71,14 @@
 	if (!isset($lukitse_laji))		$lukitse_laji = "";
 
 	// Tutkitaan vähän alias_settejä ja rajattua näkymää
-	$al_lisa = " and selitetark_2 = '' ";
+	$al_lisa = " and selitetark_2 = '' and nakyvyys != '' ";
 
 	if ($alias_set != '') {
 		if ($rajattu_nakyma != '') {
-			$al_lisa = " and selitetark_2 = '$alias_set' ";
+			$al_lisa = " and selitetark_2 = '$alias_set' and nakyvyys != '' ";
 		}
 		else {
-			$al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = '') ";
+			$al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = '') and nakyvyys != '' ";
 		}
 	}
 
@@ -349,6 +349,7 @@
 				$query = "INSERT into $toim SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
+					// Tuleeko tämä columni käyttöliittymästä
 					if (isset($t[$i])) {
 
 						if (is_array($_FILES["liite_$i"]) and $_FILES["liite_$i"]["size"] > 0) {
@@ -361,14 +362,32 @@
 
 						if (mysql_field_type($result,$i) == 'real') {
 							$t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
-
 							$query .= ", ". mysql_field_name($result,$i)." = {$t[$i]} ";
 						}
 						else {
 							$query .= ", ". mysql_field_name($result,$i)." = '".trim($t[$i])."' ";
 						}
 					}
+					else {
+						// columni ei tullut käyttöliittymästä, katsotaan onko meillä sille silti joku oletusarvo aliaksissa
+						$al_nimi = mysql_field_name($result, $i);
+
+						$oletus_tarkistus_query = "	SELECT *
+									FROM avainsana
+									WHERE yhtio = '$kukarow[yhtio]'
+									and laji = 'MYSQLALIAS'
+									and selite = '$toim.$al_nimi'
+									and selitetark_4 != ''";
+						$oletus_tarkistus_result = pupe_query($oletus_tarkistus_query);
+						
+						if (mysql_num_rows($oletus_tarkistus_result) == 1) {
+							$oletuksen_tarkistus_rivi = mysql_fetch_assoc($oletus_tarkistus_result);
+							$oletusarvo = trim($oletuksen_tarkistus_rivi['selitetark_4']);
+							$query .= ", $al_nimi = '$oletusarvo' ";
+						}
+					}
 				}
+				
 			}
 			// Päivitetään
 			else {

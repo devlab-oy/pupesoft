@@ -3419,10 +3419,12 @@
 	if (mysql_field_name($result, $i) == 'korvaavuusketjun_puutekasittely') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = $trow[$i] == 'K' ? ' selected' : '';
+		$sel1 = $trow[$i] == 'K' ? ' selected' : '';
+		$sel2 = $trow[$i] == 'V' ? ' selected' : '';
 
-		$ulos .= "<option value = ''>".t("Jos korvaavuusketjun kaikki tuotteet on loppu, lis‰t‰‰n syˆtetty tuote puutteeksi/j‰lkitoimitukseen")."</option>";
-		$ulos .= "<option value = 'K' $sel>".t("Jos korvaavuusketjun kaikki tuotteet on loppu, lis‰t‰‰n korvaavuusketjun ensimm‰inen tuote puutteeksi/j‰lkitoimitukseen")."</option>";
+		$ulos .= "<option value = ''>".t("Jos kaikki tuotteet on loppu, lis‰t‰‰n syˆtetty tuote puutteeksi/j‰lkitoimitukseen")."</option>";
+		$ulos .= "<option value = 'K' $sel1>".t("Jos kaikki tuotteet on loppu, lis‰t‰‰n korvaavuusketjun ensimm‰inen tuote puutteeksi/j‰lkitoimitukseen")."</option>";
+		$ulos .= "<option value = 'V' $sel2>".t("Jos kaikki tuotteet on loppu, lis‰t‰‰n vastaavuusketjus ensimm‰inen tuote puutteeksi/j‰lkitoimitukseen")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -535,6 +535,10 @@
 			elseif ($kk_laji == 'X') {
 				$korvaavat_kiellot = "VASTAAVAT";
 			}
+			// Korvaavia ja Vastaavuusketjun päätuotetta myydään
+			elseif ($kk_laji == 'Y') {
+				$korvaavat_kiellot = "PAA_VASTAAVA";
+			}
 
 			// Otetaan alkuperäisen tuotteen hinta talteen
 			list($korva_isa_hinta, , $korva_isa_ale_kaikki, , ) = alehinta($laskurow, $trow, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
@@ -548,8 +552,8 @@
 			$options = array('korvaavuusketjun_jarjestys' => $yhtiorow['korvaavuusketjun_jarjestys']);
 			$korvaavat_tuotteet = $korvaavat->tuotteet($options);
 
-			// Vastaavien automaattinen myynti, eli haetaanko vastaavat
-			if ($korvaavat_kiellot == "VASTAAVAT") {
+			// Vastaavien automaattinen myynti, eli haetaanko vastaavat tai Vastaavuusketjun päätuotteen automaattinen myynti
+			if ($korvaavat_kiellot == "VASTAAVAT" or $korvaavat_kiellot == "PAA_VASTAAVA") {
 
 				// Haetaan vastaavuusketjut korvaavat ketjun päätuotteella
 				require_once 'vastaavat.class.php';
@@ -580,6 +584,11 @@
 
 							if (!isset($korvaavat_tuotteet[$_tuote['tuoteno']])) {
 								$korvaavat_tuotteet[$_tuote['tuoteno']] = $_tuote;
+							}
+
+							if ($korvaavat_kiellot == "PAA_VASTAAVA") {
+								// Jos eka natsaa niin ok.
+								break 2;
 							}
 						}
 					}
@@ -1953,6 +1962,39 @@
 					$tuoteno = $paatuote;
 				}
 			}
+			// Vastaavuusketjun puutekäsittely, lisätään ketjun päätuote puutteeksi
+			elseif ($yhtiorow["korvaavuusketjun_puutekasittely"] == "V") {
+				require_once 'vastaavat.class.php';
+
+				$options = array('skippaa_vaihtoehtoiset' => TRUE);
+				$vastaavat = new Vastaavat($tuoteno, $options);
+
+				if ($vastaavat->onkovastaavia()) {
+
+					$options = array('vastaavuusketjun_jarjestys' => $yhtiorow['vastaavuusketjun_jarjestys'], 'skippaa_vaihtoehtoiset' => TRUE);
+
+					// Loopataan kaikki tuotteen vastaavuusketjut
+					foreach (explode(",", $vastaavat->getIDt()) as $ketju) {
+
+						// Haetaan tuotteet ketjukohtaisesti
+						$_tuotteet = $vastaavat->tuotteet($ketju, $options);
+
+						// Lisätään löydetyt vastaavat mahdollisten myytävien joukkoon
+						foreach ($_tuotteet as $_tuote) {
+							if (strtoupper($_tuote['tuoteno']) != strtoupper($tuoteno)) {
+								if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $tuoteno") === FALSE) {
+									$kommentti .= " ".t("HUOM: Korvaa tuotteen")." $tuoteno";
+								}
+
+								$tuoteno = $_tuote['tuoteno'];
+							}
+
+							// Breakataan aina ekan jälkeen
+							break 2;
+						}
+					}
+				}
+			}
 
 			$query = "	SELECT *
 						FROM tuote
@@ -1997,7 +2039,7 @@
 
 					#$where_yksi_suoratoimittaja TÄTÄ EI VIELÄ KOODATTU TÄNNE, TARTTIS KUITENKIN KOODATA!
 
-					if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('Y', 'V')) or ($krow['tehdas_saldo'] >= $kpl)) {
+					if (!in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('Y', 'V')) or ($krow['tehdas_saldo'] >= $kpl)) {
 						// tarkistetaan voiko tuotteen tilata suoraan asiakkaalle tai varastoon. oletuksena voi...
 						$tmp_varastoon   = 1;
 						$tmp_asiakkaalle = 1;
@@ -2026,13 +2068,13 @@
 							)
 						) {
 
-							if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1 and in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('X', 'Y'))) {
+							if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1 and in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('X', 'Y'))) {
 								$var 		 		= "T";
 								$toimittajan_tunnus	= $krow['liitostunnus'];
 								$paikka		 		= "";
 							}
 
-							if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1 and in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'V'))) {
+							if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1 and in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('U', 'V'))) {
 								$var 		 		= "U";
 								$toimittajan_tunnus	= $krow['liitostunnus'];
 								$paikka		 		= "";

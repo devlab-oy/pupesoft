@@ -26,12 +26,19 @@ if (!isset($karhu_kertaa_myyntikielto)) {
 // jos jollain laskulla on kolmas tai useampi karhukierros menossa, asetetaan asiakas myyntikieltoon
 $ehdota_maksukielto = 0;
 
+if (!isset($tee)) $tee = "";
+
 $query = "SELECT tunnus from avainsana where laji = 'KARHUVIESTI' and yhtio ='$yhtiorow[yhtio]'";
 $res = pupe_query($query);
 
 if (mysql_num_rows($res) == 0) {
     echo "<font class='error'>".t("Yhtiöllä ei ole yhtään karhuviestiä tallennettuna. Ei voida karhuta").".</font><br>";
     $tee = '';
+}
+
+if ($tee != '' and isset($karhuttavatfile)) {
+	$karhuttavat = unserialize(file_get_contents("/tmp/".$karhuttavatfile));
+	unlink("/tmp/".$karhuttavatfile);
 }
 
 if ($tee == 'LAHETA') {
@@ -227,13 +234,16 @@ if ($tee == "KARHUAKAIKKI") {
 	unset($karhuttavat);
 }
 
+if ($tee == 'KARHUA' and isset($karhuttavat_cookiesta) and $karhuttavat_cookiesta == "JOO") {
+	$karhuttavat = unserialize($_COOKIE["karhuttavat"]);
+}
+
 if ($tee == 'KARHUA' and $karhuttavat[0] == "") {
 	echo "<font class='message'>".t("Kaikki asiakkaat karhuttu")."!</font><br><br>";
 	$tee = "";
 }
 
 if ($tee == 'KARHUA')  {
-
 	$query = "	SELECT lasku.liitostunnus,
 				lasku.summa-lasku.saldo_maksettu as summa,
 				lasku.erpcm, lasku.laskunro, lasku.tapvm, lasku.tunnus,
@@ -271,7 +281,7 @@ if ($tee == 'KARHUA')  {
 	$asiakasresult = pupe_query($query);
 	$asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
-	//ja kelataan akuun
+	//ja kelataan alkuun
 	mysql_data_seek($result,0);
 
 	echo "<table><td valign='top' class='back'>";
@@ -421,22 +431,32 @@ if ($tee == 'KARHUA')  {
 	echo "<th>".t("Lasku karhutaan")."</th>";
 	echo "<th>".t("Myyntikielto")."</th>";
 	echo "<th>".t("Viesti")."</th></tr>";
-	$summmmma = 0;
 
+	$summmmma = 0;
 	$valuutat = array();
+
+	// Pidetään karhuttavat filessä
+	$karhuttavatfile = tempnam("/tmp", "karhu");
+	file_put_contents($karhuttavatfile, serialize($karhuttavat));
+	$karhuttavatfile = basename($karhuttavatfile);
+
+	$klopetus = "&lopetus={$palvelin2}myyntires/karhu.php////tee=$tee//ktunnus=$ktunnus//yhteyshenkilo=$yhteyshenkilo//kirjoitin=$kirjoitin//karhuttavatfile=$karhuttavatfile";
+
 	while ($lasku = mysql_fetch_assoc($result)) {
 		echo "<tr class='aktiivi'><td>";
+
+
 
 		if ($kukarow['taso'] < 2) {
 			echo tv1dateconv($lasku["tapvm"]);
 		}
 		else {
-			echo "<a href = '../muutosite.php?tee=E&tunnus=$lasku[tunnus]'>".tv1dateconv($lasku["tapvm"])."</a>";
+			echo "<a href = '{$palvelin2}muutosite.php?tee=E&tunnus=$lasku[tunnus]{$klopetus}'>".tv1dateconv($lasku["tapvm"])."</a>";
 		}
 
 		echo "</td>";
 
-		echo "<td><a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$lasku[laskunro]'>$lasku[laskunro]</a></td>
+		echo "<td><a href = '{$palvelin2}tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$lasku[laskunro]{$klopetus}'>$lasku[laskunro]</a></td>
 				<td align='right'>$lasku[summa]</td>
 				<td>".tv1dateconv($lasku["erpcm"])."</td>
 				<td>$lasku[ika]</td>
@@ -503,10 +523,7 @@ if ($tee == 'KARHUA')  {
 	echo "<input name='kirjoitin' type='hidden' value='$kirjoitin'>";
 	echo "<input name='ktunnus' type='hidden' value='$ktunnus'>";
 	echo "<input name='karhu_email' type='hidden' value='{$asiakastiedot["karhu_email"]}'>";
-
-	foreach ($karhuttavat as $tunnukset) {
-		echo "\n<input type='hidden' name='karhuttavat[]' value='$tunnukset'>";
-	}
+	echo "<input type='hidden' name='karhuttavatfile' value='$karhuttavatfile'>";
 
 	echo "<td class='back'><input name='$kentta' type='submit' value='".t('Tulosta paperille')."'>";
 
@@ -530,11 +547,7 @@ if ($tee == 'KARHUA')  {
 	echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
 	echo "<input name='kirjoitin' type='hidden' value='$kirjoitin'>";
 	echo "<input name='ktunnus' type='hidden' value='$ktunnus'>";
-
-	foreach($karhuttavat as $tunnukset) {
-		echo "\n<input type='hidden' name='karhuttavat[]' value='$tunnukset'>";
-	}
-
+	echo "<input type='hidden' name='karhuttavatfile' value='$karhuttavatfile'>";
 	echo "<td class='back'><input type='hidden' name='tee' value='OHITA'>
 		<input type='submit' value='".t("Ohita")."'></td>";
 	echo "</form></tr>";

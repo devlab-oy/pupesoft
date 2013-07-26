@@ -20964,19 +20964,24 @@ if (!function_exists('valid_date')) {
 		'tuoteno'
 	);
  */
-if(!function_exists('echo_rows_in_table')) {
+if (!function_exists('echo_rows_in_table')) {
 	function echo_rows_in_table(&$rivit, $header_values = array(), $force_to_string = array(), $callback = '') {
 		echo "<table>";
-		$_temp = search_array_key_recursive($header_values, 'order');
-		if(!empty($_temp)) {
-			_two_dimensional_array_sort_by_key($header_values, 'order');
+		if (count($rivit) > 0) {
+			$_temp = search_array_key_recursive($header_values, 'order');
+			if (!empty($_temp)) {
+				_two_dimensional_array_sort_by_key($header_values, 'order');
 
-			_echo_ordered_table_headers($rivit[0], $header_values);
-			_echo_ordered_table_rows($rivit, $header_values, $force_to_string, $callback);
+				_echo_ordered_table_headers($rivit[0], $header_values);
+				_echo_ordered_table_rows($rivit, $header_values, $force_to_string, $callback);
+			}
+			else {
+				_echo_table_headers($rivit[0], $header_values);
+				_echo_table_rows($rivit, $force_to_string, $callback);
+			}
 		}
 		else {
-			_echo_table_headers($rivit[0], $header_values);
-			_echo_table_rows($rivit, $force_to_string, $callback);
+			echo "<tr><td>".t("Ei tulostettavia rivejä")."</td></tr>";
 		}
 		echo "</table>";
 	}
@@ -22599,14 +22604,21 @@ if (!function_exists("lisaa_rivi")) {
 		$olpaikalta         = (!empty($parametrit['olpaikalta']))         ? $parametrit['olpaikalta'] : '';          // pakotetaan myymään oletuspaikalta
 		$tuotenimitys       = (!empty($parametrit['tuotenimitys']))       ? $parametrit['tuotenimitys'] : '';        // tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
 		$tuotenimitys_force = (!empty($parametrit['tuotenimitys_force'])) ? $parametrit['tuotenimitys_force'] : '';  // tuotteen nimitys muutetaan systemitasolla
+		$kommentti          = (!empty($parametrit['kommentti']))          ? $parametrit['kommentti'] : '';           // rivikommentti
+		$alv				= (!empty($parametrit['alv']))		          ? $parametrit['alv'] : '';				// rivi alv
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			$ale_temp = str_replace(',', '.', $parametrit{'ale'.$alepostfix});
 			${'ale'.$alepostfix} = (!empty($ale_temp)) ? $ale_temp : "";
 		}
 
-		require('tilauskasittely/lisaarivi.inc');
-
+		if (@include("tilauskasittely/lisaarivi.inc"));
+		elseif (@include("lisaarivi.inc"));
+		else {
+			echo "Lisaarivi not found";
+			exit;
+		}
+		
 		return array(
 			'lisatyt_rivit1' => $lisatyt_rivit1,
 			'lisatyt_rivit2' => $lisatyt_rivit2,
@@ -22615,6 +22627,30 @@ if (!function_exists("lisaa_rivi")) {
 		// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi myyntihaarassa
 		// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
 	}
+}
+if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
+    function hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset($oletus_asiakas) {
+        global $kukarow, $yhtiorow;
+
+		if (empty($oletus_asiakas)) {
+			return 0;
+		}
+
+        $query = "  SELECT count(*) as luku
+                    FROM lasku
+                    JOIN asiakas 
+					ON ( asiakas.yhtio = lasku.yhtio
+						AND asiakas.tunnus = lasku.liitostunnus
+						AND asiakas.tunnus = '{$oletus_asiakas}' )
+                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                    AND lasku.tila = 'T'
+                    AND lasku.alatila = ''
+					AND lasku.clearing = 'EXTTARJOUS'";
+        $result = pupe_query($query);
+
+        $tarjousten_lukumaara = mysql_fetch_assoc($result);
+        return $tarjousten_lukumaara['luku'];
+    }
 }
 
 if (!function_exists("saako_myyda_private_label")) {
@@ -22669,6 +22705,34 @@ if (!function_exists("saako_myyda_private_label")) {
 			//tänne tullaan, jos tuote ei ees oo private label => saa myydä!
 			return TRUE;
 		}
+	}
+}
+
+if (!function_exists("tuotteen_toimittajat_tuotenumerot_haku")) {
+	function tuotteen_toimittajat_tuotenumerot_haku($tuoteno, $laskuttajan_toimittajanumero, $kpl = 0) {
+		global $kukarow, $yhtiorow;
+
+		if ($kpl > 0) {
+			$wildcard = "";
+			for ($i = 0; $i<$kpl; $i++) {
+				$wildcard .= "*";
+			}
+			$tuoteno = substr($tuoteno, 0, $kpl * -1).$wildcard;
+		}
+
+		$query = "	SELECT tt.*
+					FROM tuotteen_toimittajat_tuotenumerot AS ttt
+					JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
+					JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}' AND toimi.tyyppi != 'P')
+					WHERE ttt.yhtio = '{$kukarow['yhtio']}'
+					AND ttt.tuoteno = '$tuoteno'";
+		$chk_res = pupe_query($query);
+
+		if (mysql_num_rows($chk_res) == 0 and $kpl < strlen($tuoteno)) {
+			$chk_res = tuotteen_toimittajat_tuotenumerot_haku($tuoteno, $laskuttajan_toimittajanumero, ($kpl+1));
+		}
+
+		return $chk_res;
 	}
 }
 

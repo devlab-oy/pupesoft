@@ -745,7 +745,7 @@
 							$selpaikkamyytavissa = 0;
 						}
 
-						if (($sel1 != "" or $sel2 != "") and $krow['tehdas_saldo_tarkistus'] != '' and $krow['tehdas_saldo'] != 0 and $row['varattu'] > $krow['tehdas_saldo']) {
+						if (($sel1 != "" or $sel2 != "") and $krow['tehdas_saldo_tarkistus'] != '' and $row['varattu'] > $krow['tehdas_saldo']) {
 							$varaosavirhe .= t("HUOM: Toimittajan tehtaan saldo on %d", "", $krow['tehdas_saldo']).".<br>";
 						}
 					}

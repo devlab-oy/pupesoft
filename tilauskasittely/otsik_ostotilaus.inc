@@ -337,15 +337,13 @@
 						ORDER BY tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
 
-			$sel = '';
-
 			while ($varow = mysql_fetch_array($vares)) {
 				if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"]) or ($varow['tunnus']==$srow["varasto"]) or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'])) {
 
-					if ($sel == '') {
-						// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
-						if ($varow['tunnus']==$srow["varasto"] or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'] and $srow['varasto'] == '') or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '')) $sel = 'selected';
-					}
+					$sel = '';
+
+					// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
+					if ($varow['tunnus']==$srow["varasto"] or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'] and $srow['varasto'] == '') or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '')) $sel = 'selected';
 
 					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 				}

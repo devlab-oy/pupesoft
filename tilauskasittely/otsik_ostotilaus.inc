@@ -271,7 +271,9 @@
 
 				while($row = mysql_fetch_array($yresult)) {
 					$sel = "";
-					if ($srow["vanhatunnus"] == $row["tunnus"]) $sel = "selected";
+
+					if ($srow["vanhatunnus"] == $row["tunnus"] or ($sel == "" and $kukarow['oletus_ostovarasto'] == $row['tunnus'])) $sel = "selected";
+
 					echo "<option value='$row[tunnus]' $sel>$row[nimi] ($row[ovtlisa])</option>";
 				}
 

@@ -48,7 +48,7 @@
 			if (mysql_num_rows($result) > 0) {
 
 				$perheid = 0;
-				$tunnus = 0;
+				$tunnukset = array();
 
 				while ($rivi = mysql_fetch_assoc($result)) {
 
@@ -256,6 +256,8 @@
 							$tunnus = $jtsro["tunnus"];
 						}
 
+						$tunnukset[$tunnus] = $tunnus;
+
 						//Haetaan myˆs ns. lis‰varusteperheet.
 						$query = "	SELECT tuoteperhe.ohita_kerays, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl
 									FROM tilausrivi
@@ -436,17 +438,19 @@
 				$upd_res = pupe_query($query);
 
 				// "L‰hetet‰‰n heti"-ominaisuus
-				if (in_array($myytilrow['ostotilauksen_kasittely'], array('1','3','5')) and $tunnus != 0) {
+				if (in_array($myytilrow['ostotilauksen_kasittely'], array('1','3','5')) and count($tunnukset) > 0) {
 
-					$otunnus = $tunnus;
-					$komento['Ostotilaus'] = 'edi';
+					foreach ($tunnukset as $otunnus) {
 
-					require('tilauskasittely/tulosta_ostotilaus.inc');
+						$komento['Ostotilaus'] = 'edi';
 
-					if (isset($tulosta_ostotilaus_ulos) and $tulosta_ostotilaus_ulos == "") {
-						// p‰ivitet‰‰n t‰ss‰ tilaus tulostetuksi
-						$query = "UPDATE lasku SET lahetepvm = now() WHERE tunnus='{$otunnus}'";
-						$result = pupe_query($query);
+						require('tilauskasittely/tulosta_ostotilaus.inc');
+
+						if (isset($tulosta_ostotilaus_ulos) and $tulosta_ostotilaus_ulos == "") {
+							// p‰ivitet‰‰n t‰ss‰ tilaus tulostetuksi
+							$query = "UPDATE lasku SET lahetepvm = now() WHERE tunnus='{$otunnus}'";
+							$result = pupe_query($query);
+						}
 					}
 				}
 

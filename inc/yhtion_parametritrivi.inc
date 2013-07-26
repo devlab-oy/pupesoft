@@ -803,11 +803,14 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array_fill_keys(array('X'), '');
+		$sel = array_fill_keys(array('X','U','V','Y'), '');
 		$sel[$trow[$i]] = " SELECTED";
 
 		$ulos .= "<option value=''>".t("Myyntitilauksella ei voi luoda automaattisesti ostorivej‰")."</option>";
-		$ulos .= "<option value='X' {$sel['X']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ jos tee_osto_myyntitilaukselta-parametri sallii sen")."</option>";
+		$ulos .= "<option value='X' {$sel['X']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ varastoon jos tee_osto_myyntitilaukselta-parametri sallii sen")."</option>";
+		$ulos .= "<option value='U' {$sel['U']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ asiakkaalle jos tee_osto_myyntitilaukselta-parametri sallii sen")."</option>";
+		$ulos .= "<option value='Y' {$sel['Y']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ varastoon jos tee_osto_myyntitilaukselta-parametri sallii sen ja tehtaansaldo riitt‰‰")."</option>";
+		$ulos .= "<option value='V' {$sel['V']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ asiakkaalle jos tee_osto_myyntitilaukselta-parametri sallii sen ja tehtaansaldo riitt‰‰")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

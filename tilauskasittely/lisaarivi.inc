@@ -1968,6 +1968,80 @@
 				$trow = mysql_fetch_assoc($tuoteresult);
 			}
 
+			// Tehdäänkö puute- tai jt-rivistä automaattisesti osto/suoratoimitus?
+			if ((int) $rivitunnus == 0 and $yhtiorow["tee_automaattinen_osto_myyntitilaukselta"] != "" and ($kukarow["extranet"] == "" or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E') and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS'))) and $var != 'V') {
+
+				if ((
+						$kukarow["extranet"] == ""
+						or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E'
+					)
+					and in_array($var, array('','H','S','T','U','J','P'))
+					and (
+						$toim == "TARJOUS"
+						or (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('','Z','Q')))
+					)
+					and $kpl > 0
+					and $toim != "SIIRTOTYOMAARAYS"
+				) {
+
+					// Otetaan tuotteen oletustoimittaja
+					$query = "	SELECT toimi.tyyppi_tieto, tuotteen_toimittajat.liitostunnus, toimi.nimi, toimi.suoratoimitus, tuotteen_toimittajat.tehdas_saldo
+								FROM tuotteen_toimittajat use index (yhtio_tuoteno)
+								JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+								WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+								and tuotteen_toimittajat.tuoteno = '$trow[tuoteno]'
+								ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
+								LIMIT 1";
+					$toimpaikres = pupe_query($query);
+					$krow = mysql_fetch_assoc($toimpaikres);
+
+					#$where_yksi_suoratoimittaja TÄTÄ EI VIELÄ KOODATTU TÄNNE, TARTTIS KUITENKIN KOODATA!
+
+					if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('Y', 'V')) or ($krow['tehdas_saldo'] >= $kpl)) {
+						// tarkistetaan voiko tuotteen tilata suoraan asiakkaalle tai varastoon. oletuksena voi...
+						$tmp_varastoon   = 1;
+						$tmp_asiakkaalle = 1;
+
+						// ...kielletään tilaamasta varastoon jos yhtiöparametri ohjaa katsomaan tuotteelta ja siellä ei ole sallittu...
+						if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J'))
+							and !in_array($trow['suoratoimitus'], array('S', 'X'))) { 				// vain S ja X sallivat tilauksen varastoon
+							$tmp_varastoon = 0;
+						}
+
+						// ...kielletään tilaamasta asiakkaalle jos yhtiöparametri ohjaa katsomaan tuotteelta ja siellä ei ole sallittu...
+						if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('W', 'J'))
+						 	and !in_array($trow['suoratoimitus'], array('S', 'U'))) {				// vain S ja U sallivat tilauksen asiakkaalle
+							$tmp_asiakkaalle = 0;
+						}
+
+						// katsotaan onko tuote suoratoimituskelpoinen (vain ei tuoteperheet, tai tuoteperheiden saldolliset isät tai jos yhtiöllä suoratoimitetaan perheet per tuote)
+						if ((   // jos on tuoteperheen lapsi, pitää lapsien suoratoimitus olla sallittu
+								$yhtiorow['tuoteperhe_suoratoimitus'] == ''
+								or $perheid == 0
+								or $perheid == $rivitunnus
+							)
+							and ( // onko suoratoimitus yleensäkään sallittu
+								in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'X', 'Y', 'A', 'B', 'C'))
+								or (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J')) and ($tmp_varastoon == 1 or $tmp_asiakkaalle == 1))
+							)
+						) {
+
+							if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1 and in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('X', 'Y'))) {
+								$var 		 		= "T";
+								$toimittajan_tunnus	= $krow['liitostunnus'];
+								$paikka		 		= "";
+							}
+
+							if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1 and in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'V'))) {
+								$var 		 		= "U";
+								$toimittajan_tunnus	= $krow['liitostunnus'];
+								$paikka		 		= "";
+							}
+						}
+					}
+				}
+			}
+
 			if ($yhtiorow['rivinumero_syotto'] != '') {
 				if (!isset($tilrivinumero) or (int) $tilrivinumero == 0) {
 					$query = "SELECT max(tilaajanrivinro) as trivinro from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";

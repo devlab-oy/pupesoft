@@ -3424,7 +3424,7 @@
 
 		$ulos .= "<option value = ''>".t("Jos kaikki tuotteet on loppu, lis‰t‰‰n syˆtetty tuote puutteeksi/j‰lkitoimitukseen")."</option>";
 		$ulos .= "<option value = 'K' $sel1>".t("Jos kaikki tuotteet on loppu, lis‰t‰‰n korvaavuusketjun ensimm‰inen tuote puutteeksi/j‰lkitoimitukseen")."</option>";
-		$ulos .= "<option value = 'V' $sel2>".t("Jos kaikki tuotteet on loppu, lis‰t‰‰n vastaavuusketjus ensimm‰inen tuote puutteeksi/j‰lkitoimitukseen")."</option>";
+		$ulos .= "<option value = 'V' $sel2>".t("Jos kaikki tuotteet on loppu, lis‰t‰‰n vastaavuusketjun ensimm‰inen tuote puutteeksi/j‰lkitoimitukseen")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

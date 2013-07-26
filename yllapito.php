@@ -416,7 +416,7 @@
 				$tunnus = mysql_insert_id();
 			}
 
-			if ($onko_tama_insert and $tunnus > 0 and isset($tee_myos_tuotteen_toimittaja_liitos) and isset($liitostunnus) and $toim == "tuote") {
+			if ($onko_tama_insert and $tunnus > 0 and isset($tee_myos_tuotteen_toimittaja_liitos) and isset($liitostunnus) and $toim == "tuote" and $tee_myos_tuotteen_toimittaja_liitos == 'JOO' and $liitostunnus != '') {
 
 				$query = "	SELECT *
 							FROM tuote
@@ -1500,8 +1500,6 @@
 		}
 
 		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa$ankkuri' name='mainform' id='mainform' method = 'post' autocomplete='off' $javalisasubmit enctype='multipart/form-data'>";
-		if (isset($liitostunnus)) echo "<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />";
-		if (isset($tee_myos_tuotteen_toimittaja_liitos)) echo "<input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='{$tee_myos_tuotteen_toimittaja_liitos}' />";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>";
 		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
@@ -1522,6 +1520,30 @@
 		echo "<table><tr><td class='back' valign='top' style='padding: 0px;'>";
 
 		echo "<table>";
+
+		if ($uusi == '1' and $toim == 'tuote') {
+
+			$query = "	SELECT tunnus, nimi
+						FROM toimi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND oletus_vienti IN ('C', 'F', 'J', 'K', 'I', 'L')
+						ORDER BY nimi";
+			$toimiresult = pupe_query($query);
+
+			echo "<input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='JOO'>";
+			echo "<th align='left'>".t("Toimittaja")."</th>";
+			echo "<td>";
+			echo "<select name='liitostunnus' />";
+			echo "<option value=''>".t("Ei toimittajaa")."</option>";
+
+			while ($toimirow = mysql_fetch_assoc($toimiresult)) {
+				$selected = (isset($liitostunnus) and $toimirow['tunnus'] == $liitostunnus) ? 'SELECTED': '';
+				echo "<option value='{$toimirow['tunnus']}' {$selected}> {$toimirow['nimi']}</option>";
+			}
+
+			echo "</select>";
+			echo "</td>";
+		}
 
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
 

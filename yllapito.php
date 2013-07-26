@@ -37,6 +37,9 @@
 	if (isset($toimi_array[1])) $alias_set = $toimi_array[1];
 	if (isset($toimi_array[2])) $rajattu_nakyma = $toimi_array[2];
 
+	// Tuotteita voidaan rajata status -kentällä
+	$tuote_status_rajaus_lisa = (isset($status) and $toim == 'tuote') ? " and tuote.status = '".pupesoft_cleanstring($status)."' " : "";
+
 	// Setataan muuttujat
 	if (!isset($rajauslisa)) 		$rajauslisa = "";
 	if (!isset($del)) 				$del = "";
@@ -1146,7 +1149,7 @@
 		// Ei näytetä seuraavia avainsanoja avainsana-ylläpitolistauksessa
 		$avainsana_query_lisa = $toim == "avainsana" ? " AND laji NOT IN ('MYSQLALIAS', 'HALYRAP', 'SQLDBQUERY', 'KKOSTOT') " : "";
 
-		$query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa";
+		$query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa $tuote_status_rajaus_lisa";
         $query .= "$ryhma ORDER BY $jarjestys $limiitti";
 		$result = pupe_query($query);
 

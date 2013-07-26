@@ -57,7 +57,15 @@
 	$mista_yhtion_toimittajan_tunnus = 27371;
 	$mihin_yhtion_asiakkaan_tunnus = 101850;
 
-	$datetime_checkpoint = date('2013-07-25 11:00:00');
+	$datetime_checkpoint_res = t_avainsana("HINNAT_CRON");
+
+	if (mysql_num_rows($datetime_checkpoint_res) != 0) {
+		$datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
+		$datetime_checkpoint = $datetime_checkpoint_row['selite'];
+	}
+	else {
+		$datetime_checkpoint = '0000-00-00 00:00:00';
+	}
 
 	$query = "	SELECT *
 				FROM asiakas
@@ -266,5 +274,15 @@
 					AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}";
 		pupe_query($query);
 	}
+
+	$selitelisa = "";
+
+	if ($datetime_checkpoint == '0000-00-00 00:00:00') $datetime_checkpoint = date('Y-m-d H:i:s');
+
+	$query = "	UPDATE avainsana SET
+				selite = DATE_ADD('{$datetime_checkpoint}', INTERVAL 1 MINUTE)
+				WHERE yhtio = '{$mista_yhtio}'
+				AND laji = 'HINNAT_CRON'";
+	pupe_query($query);
 
 	unlink($lockfile);

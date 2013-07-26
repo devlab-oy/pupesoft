@@ -2244,7 +2244,7 @@ if ($tee == '') {
 
 		echo "</form>";
 
-		if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO"))   {
+		if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
 			echo "	<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
 						<input type='hidden' name='toim' 			value = '$toim'>
 						<input type='hidden' name='lopetus' 		value = '$lopetus'>
@@ -6584,7 +6584,11 @@ if ($tee == '') {
 					echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>";
 
 					if ($row['kommentti'] != '') {
-						echo t("Kommentti").":<br><font class='message'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
+						$font_color = "";
+						if ($row['vanha_otunnus'] != $tilausnumero) {
+							$font_color = "color='green'";
+						}
+						echo t("Kommentti").":<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
 					}
 
 					// tähän se taulu

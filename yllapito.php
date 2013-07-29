@@ -38,7 +38,13 @@
 	if (isset($toimi_array[2])) $rajattu_nakyma = $toimi_array[2];
 
 	// Tuotteita voidaan rajata status -kentällä
-	$tuote_status_rajaus_lisa = (isset($status) and $toim == 'tuote') ? " and tuote.status = '".pupesoft_cleanstring($status)."' " : "";
+	$tuote_status_rajaus_lisa = "";
+	$tuote_status_lisa = "";
+
+	if (isset($status) and $toim == 'tuote') {
+		$tuote_status_rajaus_lisa = " and tuote.status = '".pupesoft_cleanstring($status)."' ";
+		$tuote_status_lisa = "&status=$status";
+	}
 
 	// Setataan muuttujat
 	if (!isset($rajauslisa)) 		$rajauslisa = "";
@@ -379,7 +385,7 @@
 									and selite = '$toim.$al_nimi'
 									and selitetark_4 != ''";
 						$oletus_tarkistus_result = pupe_query($oletus_tarkistus_query);
-						
+
 						if (mysql_num_rows($oletus_tarkistus_result) == 1) {
 							$oletuksen_tarkistus_rivi = mysql_fetch_assoc($oletus_tarkistus_result);
 							$oletusarvo = trim($oletuksen_tarkistus_rivi['selitetark_4']);
@@ -387,7 +393,7 @@
 						}
 					}
 				}
-				
+
 			}
 			// Päivitetään
 			else {
@@ -1296,7 +1302,7 @@
 			for ($i = 1; $i < mysql_num_fields($result); $i++) {
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 
-					echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
+				echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji'{$tuote_status_lisa}>" . t(mysql_field_name($result,$i)) . "</a>";
 
 					if 	(mysql_field_len($result,$i)>10) $size='15';
 					elseif	(mysql_field_len($result,$i)<5)  $size='5';
@@ -1394,7 +1400,7 @@
 					if ($i == 1) {
 						if (trim($trow[1]) == '' or (is_numeric($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhjä*");
 
-						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji";
+						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji{$tuote_status_lisa}";
 
 						if ($from == "" and $lopetus == "") {
 							echo "&lopetus=".$palvelin2."yllapito.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."//toim=$aputoim//limit=$limit//nayta_poistetut=$nayta_poistetut//nayta_eraantyneet=$nayta_eraantyneet//laji=$laji///$trow[0]";
@@ -1531,6 +1537,10 @@
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 		echo "<input type = 'hidden' name = 'upd' value = '1'>";
+
+		if (isset($status) and $toim == 'tuote') {
+			echo "<input type = 'hidden' name = 'status' value = '$status'>";
+		}
 
 		// Kokeillaan geneeristä
 		$query = "	SELECT *
@@ -2040,7 +2050,9 @@
 		echo "<br>
 				<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
 				if (isset($liitostunnus)) echo "&liitostunnus={$liitostunnus}";
+				if (isset($status) and $toim == 'tuote') echo "&status={$status}";
 				echo "' method = 'post'>
+				
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
 				<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>

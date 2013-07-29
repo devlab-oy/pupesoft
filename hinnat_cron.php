@@ -200,8 +200,6 @@
 		$tuoteres = pupe_query($query);
 		$tuoterow = mysql_fetch_assoc($tuoteres);
 
-		echo "tuote: {$tuoterow['tuoteno']}\n";
-
 		$query = "	SELECT tunnus
 					FROM tuotteen_toimittajat
 					WHERE yhtio = '{$mihin_yhtio}'
@@ -214,13 +212,9 @@
 			// Lasketaan ja päivitetään ostohinta
 			list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, 1, '', '', array());
 
-			echo "Laskettu hinta: $hinta\n";
-
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 				$hinta *= (1 - $ale["ale{$alepostfix}"] / 100);
 			}
-
-			echo "Alennettu hinta: $hinta\n";
 
 			// Päivitetään ostohinta
 			$query = "	UPDATE tuotteen_toimittajat SET
@@ -264,8 +258,6 @@
 
 	while ($row = mysql_fetch_assoc($result)) {
 		list($saldo, $hyllyssa, $myytavissa, $devnull) = saldo_myytavissa($row['tuoteno']);
-
-		echo "tuotteen $row[tuoteno] tehdas_saldo $myytavissa\n";
 
 		$query = "	UPDATE tuotteen_toimittajat SET
 					tehdas_saldo = '{$myytavissa}'

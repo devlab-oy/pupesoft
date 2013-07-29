@@ -574,9 +574,10 @@
 		$jatko = 0;
 
 	}
+
 	if (mysql_field_name($result, $i) == "pikaperustus") {
 
-		$sel[$trow[$i]] = " selected";
+		$sel = $trow[$i] == 'X' ? " selected" : "";
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Toimittaja on valittavissa kun perustetaan uutta tuotetta")."</option>";
@@ -585,4 +586,3 @@
 
 		$jatko = 0;
 	}
-

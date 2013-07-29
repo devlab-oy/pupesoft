@@ -1559,6 +1559,7 @@
 						FROM toimi
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND oletus_vienti IN ('C', 'F', 'J', 'K', 'I', 'L')
+						AND pikaperustus = ''
 						ORDER BY nimi";
 			$toimiresult = pupe_query($query);
 

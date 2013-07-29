@@ -460,7 +460,7 @@
 								yhtio = '{$kukarow['yhtio']}',
 								tuoteno = '{$tuote_chk_row['tuoteno']}',
 								liitostunnus = '{$liitostunnus}',
-								toimittaja = '{$toimi_chk_row['toimittajanro']}',
+								toimittaja = '{$toimi_chk_row['ytunnus']}',
 								alkuperamaa = '{$toimi_chk_row['maa']}',
 								laatija = '{$kukarow['kuka']}',
 								luontiaika = now(),

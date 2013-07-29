@@ -96,11 +96,13 @@
 	}
 
 	$korvattiin_korvaavalla = "";
+	$pikaperustus_naytetaan = 0;
 
 	if (mysql_num_rows($tres) == 0) {
 		$varaosavirhe .= t("VIRHE: Tuotetta ei löydy!")."<br>";
 		$riviok++;
 		$tilausok++;
+		$pikaperustus_naytetaan = 1;
 	}
 
 	if ($row["var2"] == "PK" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") AND $yhtiorow['reklamaation_hinnoittelu'] == 'K') {

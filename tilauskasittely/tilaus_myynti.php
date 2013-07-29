@@ -6405,6 +6405,19 @@ if ($tee == '') {
 								<input type='Submit' value='".t("Hyväksy")."'>
 								</form> ";
 					}
+					
+					if (isset($pikaperustus_naytetaan) and $pikaperustus_naytetaan > 0 and tarkista_oikeus("yllapito.php", "tuote!!!PIKAPERUSTA!!!true", "JOO")) {
+						echo " <form method='post' action='{$palvelin2}yllapito.php' name='pikaperusta'>
+								<input type='hidden' name='toim' value='tuote!!!PIKAPERUSTA!!!true'>
+								<input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=LASKUTATILAUS''>
+								<input type='hidden' name='uusi' value='1'>
+								<input type='hidden' name='from' value='myyntitilaus'>
+								<input type='hidden' name='ohje' value='off'>
+								<input type='hidden' name='t[1]' value='{$row["tuoteno"]}'>
+								<input type='hidden' name='t[16]' value='".hintapyoristys($row["hinta"])."'>
+								<input type='submit' value='".t("Pikaperusta")."'>
+								</form>";
+					}
 
 					if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm'])) {
 						echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>

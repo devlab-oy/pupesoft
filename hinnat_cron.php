@@ -177,7 +177,7 @@
 		}
 	}
 
-	$query = "	SELECT tuoteno
+	$query = "	SELECT *
 				FROM tuote
 				WHERE yhtio = '{$mista_yhtio}'
 				AND status != 'P'
@@ -199,6 +199,13 @@
 					AND tuoteno = '{$tuoteno}'";
 		$tuoteres = pupe_query($query);
 		$tuoterow = mysql_fetch_assoc($tuoteres);
+
+		// Päivitetään myyntihinta
+		$query = "	UPDATE tuote SET
+					myyntihinta = '{$tuoterow['myyntihinta']}'
+					WHERE yhtio = '{$mihin_yhtio}'
+					AND tuoteno = '{$tuoteno}'";
+		pupe_query($query);
 
 		$query = "	SELECT tunnus
 					FROM tuotteen_toimittajat

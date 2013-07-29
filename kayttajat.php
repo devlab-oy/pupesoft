@@ -343,6 +343,7 @@
 						tuuraaja						= '{$tuuraaja}',
 						varasto 						= '{$varasto}',
 						oletus_varasto					= '{$oletus_varasto}',
+						oletus_ostovarasto				= '{$oletus_ostovarasto}',
 						oletus_pakkaamo					= '{$oletus_pakkaamo}',
 						kirjoitin 						= '{$kirjoitin}',
 						kassalipas_otto					= '{$kassalipas_otto}',
@@ -560,6 +561,7 @@
 						osasto							= '{$osasto}',
 						varasto 						= '{$varasto}',
 						oletus_varasto 					= '{$oletus_varasto}',
+						oletus_ostovarasto				= '{$oletus_ostovarasto}',
 						oletus_pakkaamo					= '{$oletus_pakkaamo}',
 						kirjoitin 						= '{$kirjoitin}',
 						oletus_asiakas 					= '{$oletus_asiakas}',
@@ -964,14 +966,31 @@
 
 				echo "<select name='oletus_varasto'>";
 				echo "<option value='0'>",t("Oletusvarasto"),"</option>";
+
 				while ($varow = mysql_fetch_assoc($vares)) {
-					$sel = '';
-					if ($varow['tunnus'] == $krow['oletus_varasto']) {
-						$sel = 'selected';
-					}
+
+					$sel = $varow['tunnus'] == $krow['oletus_varasto'] ? ' selected' : '';
+
 					echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
 				}
-				echo "</select>";
+
+				echo "</select></td></tr>";
+
+				echo "<tr><th align='left'>",t("Valitse käyttäjän oletusostovarasto"),":</td>";
+				echo "<td>";
+
+				mysql_data_seek($vares, 0);
+
+				echo "<select name='oletus_ostovarasto'>";
+				echo "<option value='0'>",t("Oletusvarasto"),"</option>";
+
+				while ($varow = mysql_fetch_assoc($vares)) {
+
+					$sel = $varow['tunnus'] == $krow['oletus_ostovarasto'] ? ' selected' : '';
+
+					echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
+				}
+				echo "</select></td></tr>";
 
 				echo "<tr><th align='left'>",t("Valitse varastot, joista käyttäjä saa myydä"),":</td>";
 				echo "<td>";

@@ -23,10 +23,10 @@
 		$locktime_calc = mktime() - filemtime($lockfile);
 
 		if ($locktime_calc < $locktime) {
-			exit("Hintojen päivitys käynnissä, odota hetki!");
+			exit("Hintojen päivitys käynnissä, odota hetki!")."\n";
 		}
 		else {
-			exit("VIRHE: Hintojen päivitys jumissa! Ota yhteys tekniseen tukeen!!!");
+			exit("VIRHE: Hintojen päivitys jumissa! Ota yhteys tekniseen tukeen!!!")."\n";
 		}
 	}
 
@@ -222,8 +222,6 @@
 						WHERE yhtio = '{$mihin_yhtio}'
 						AND tunnus = '{$mihin_tuoterow['tunnus']}'";
 			pupe_query($query);
-
-			echo "\n";
 		}
 	}
 

@@ -16,6 +16,36 @@
 
 	require ("../inc/parametrit.inc");
 
+	if ($ajax_request) {
+		if ($hae_toimittajien_saldot) {
+			$query = "	SELECT tilausrivi.tuoteno,
+						tuotteen_toimittajat.tehdas_saldo
+						FROM tilausrivi
+						JOIN tuotteen_toimittajat
+						ON ( tuotteen_toimittajat.yhtio = tilausrivi.yhtio
+							AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno)
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus = '{$tilausnumero}'
+						AND tilausrivi.varattu > tuotteen_toimittajat.tehdas_saldo";
+			$result = pupe_query($query);
+
+			$tuote_saldot = array();
+			while($tuote_saldo = mysql_fetch_assoc($result)) {
+				$tuote_saldot[] = $tuote_saldo;
+			}
+
+			array_walk_recursive($tuote_saldot, 'array_utf8_encode');
+
+			echo json_encode($tuote_saldot);
+
+			exit;
+		}
+	}
+
+	if ($kukarow["extranet"] == "") {
+		echo "<script src='../js/tilaus_osto/tilaus_osto.js'></script>";
+	}
+	
 	if (!isset($tee)) $tee = "";
 	if (!isset($from)) $from = "";
 	if (!isset($toim_nimitykset)) $toim_nimitykset = "";
@@ -447,28 +477,59 @@
 				$sarjares = pupe_query($query);
 			}
 
+			if ($tapa == 'VAIHDARIVI') {
+				if ($toimi_tunnus == $laskurow['liitostunnus']) {
+					$tee = 'TI';
+					$tuoteno = $vastaavatuoteno;
+					$kpl = $vastaavakpl;
+				}
+				else {
+					//Vaihdettava tuote ei ole tämän ostotilauksen toimittajalta.
+					//Katsotaan, löytyykö toiselta toimittajalta auki olevia ostotilauksia,
+					//ja liitetään tilausrivi siihen tilaukseen jos löytyy,
+					//muuten perustetaan uusi otsikko.
+					$query = "	SELECT *
+								FROM lasku
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND liitostunnus = '{$toimi_tunnus}'
+								AND tila = 'O'
+								AND alatila = ''";
+					$result = pupe_query($query);
 
-			$hinta 			= $tilausrivirow["hinta"];
-			$tuoteno 		= $tilausrivirow["tuoteno"];
-			$tuotenimitys	= $tilausrivirow["nimitys"];
-			$kpl 			= $tilausrivirow["tilkpl"];
+					$toisen_toimittajan_ostotilaus = mysql_fetch_assoc($result);
 
-			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-				${'ale'.$alepostfix} = $tilausrivirow["ale{$alepostfix}"];
+					if (!empty($toisen_toimittajan_ostotilaus)) {
+						$tilausnumero = $toisen_toimittajan_ostotilaus['tunnus'];
+					}
+					else {
+						$toisen_toimittajan_ostotilaus = luo_ostotilausotsikko();
+					}
+				}
+			}
+			else {
+				$hinta 			= $tilausrivirow["hinta"];
+				$tuoteno 		= $tilausrivirow["tuoteno"];
+				$tuotenimitys	= $tilausrivirow["nimitys"];
+				$kpl 			= $tilausrivirow["tilkpl"];
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
+					${'ale'.$alepostfix} = $tilausrivirow["ale{$alepostfix}"];
+				}
+
+				$toimaika 		= $tilausrivirow["toimaika"];
+				$kerayspvm 		= $tilausrivirow["kerayspvm"];
+				$alv 			= $tilausrivirow["alv"];
+				$kommentti 		= $tilausrivirow["kommentti"];
+				$perheid2 		= $tilausrivirow["perheid2"];
+				$rivitunnus 	= $tilausrivirow["tunnus"];
+				$automatiikka 	= "ON";
+				$tee 			= "Y";
+
+				if ($tilausrivirow["myyntihinta_maara"] != 0 and $hinta != 0) {
+					$hinta = hintapyoristys($hinta * $tilausrivirow["myyntihinta_maara"]);
+				}
 			}
 
-			$toimaika 		= $tilausrivirow["toimaika"];
-			$kerayspvm 		= $tilausrivirow["kerayspvm"];
-			$alv 			= $tilausrivirow["alv"];
-			$kommentti 		= $tilausrivirow["kommentti"];
-			$perheid2 		= $tilausrivirow["perheid2"];
-			$rivitunnus 	= $tilausrivirow["tunnus"];
-			$automatiikka 	= "ON";
-			$tee 			= "Y";
-
-			if ($tilausrivirow["myyntihinta_maara"] != 0 and $hinta != 0) {
-				$hinta = hintapyoristys($hinta * $tilausrivirow["myyntihinta_maara"]);
-			}
 		}
 
 		if ($tee == 'POISTA_RIVI') {
@@ -1371,6 +1432,16 @@
 						echo "<td colspan='$alespan' $kommclass1>";
 						if (trim($prow["kommentti"]) != "") echo t("Kommentti").": $prow[kommentti]";
 						echo "</td></tr>";
+
+						echo "<tr>";
+						echo "<td></td>";
+						echo "<td colspan='".($alespan + 1)."' $kommclass1>";
+						echo $vastaavat_html;
+						echo "</td>";
+						echo "</tr>";
+
+						unset($vastaavat_html);
+						unset($vastaavattuotteet);
 					}
 				}
 
@@ -1460,7 +1531,7 @@
 							<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 							<input type='hidden' name='toimittajaid' 		value = '$laskurow[liitostunnus]'>
 							<input type='hidden' name='tee' 				value = 'valmis'>
-							<input type='Submit' value='".t("Tilaus valmis")."'>
+							<input type='Submit' value='".t("Tilaus valmis")."' onclick='return tarkasta_ostotilauksen_tilausrivien_toimittajien_saldot({$tilausnumero}, \"".t('Tuotteen')." *tuote* ".t('Varastosaldo on: *kpl*')."\")'>
 							</form>
 							</td>";
 

@@ -67,7 +67,28 @@
 		$lask_postitp = $lisatiedot['laskutus_postitp'];
 		$lask_postino = $lisatiedot['laskutus_postino'];
 
-		$edi_order .= "OSTOTIL.OT_ASIAKASNRO:\n";
+		$asiakasnumero = $yhtiorow['ovttunnus'];
+
+		// Generoidaan asiakasnumero
+		// Ostotilauksella vanhatunnus-kentässä on toimipaikan tunnus
+		if ($myynti_vai_osto == 'O') {
+
+			if ($laskurow['vanhatunnus'] != 0) {
+
+				$query = "	SELECT ovtlisa
+							FROM yhtion_toimipaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$laskurow['vanhatunnus']}'";
+				$toimipaikka_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($toimipaikka_chk_res) != 0) {
+					$toimipaikka_chk_row = mysql_fetch_assoc($toimipaikka_chk_res);
+					$asiakasnumero = "{$asiakasnumero}{$toimipaikka_chk_row['ovtlisa']}";
+				}
+			}
+		}
+
+		$edi_order .= "OSTOTIL.OT_ASIAKASNRO:{$asiakasnumero}\n";
 		$edi_order .= "OSTOTIL.OT_YRITYS:{$lask_yritys}\n";
 		$edi_order .= "OSTOTIL.OT_KATUOSOITE:{$lask_osoite}\n";
 		$edi_order .= "OSTOTIL.OT_POSTITOIMIPAIKKA:{$lask_postitp}\n";

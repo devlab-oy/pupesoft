@@ -16,7 +16,14 @@
 
 	require ("../inc/parametrit.inc");
 
-	if (isset($tee) and $tee == "lataa_tiedosto") {
+	if (!isset($tee)) $tee = "";
+	if (!isset($from)) $from = "";
+	if (!isset($toim_nimitykset)) $toim_nimitykset = "";
+	if (!isset($toim_tuoteno)) $toim_tuoteno = "";
+	if (!isset($naytetaankolukitut)) $naytetaankolukitut = "";
+	if (!isset($lopetus)) $lopetus = "";
+
+	if ($tee == "lataa_tiedosto") {
 		readfile("$pupe_root_polku/dataout/".basename($filenimi));
 		exit;
 	}
@@ -26,7 +33,7 @@
 		js_popup();
 	}
 
-	if (!isset($nayta_pdf) and $livesearch_tee == "TUOTEHAKU") {
+	if (!isset($nayta_pdf) and isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
 	}

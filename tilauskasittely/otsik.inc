@@ -2257,39 +2257,58 @@
 				// asiakkaalle tai varastoon
 				if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U','X','Y','A','B','C','V','W','I','J'))) {
 
-					$query = "	SELECT tunnus
-								FROM tilausrivi
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND otunnus = '{$laskurow['tunnus']}'
-								AND var IN ('U','T')";
-					$suoratoimitus_chk_row_count_res = pupe_query($query);
+					$myynnista_osto_avainsanat = t_avainsana("MYYNNISTA_OSTO");
 
-					if (mysql_num_rows($suoratoimitus_chk_row_count_res) > 0) {
+					if (mysql_num_rows($myynnista_osto_avainsanat) > 0) {
 
-						$myynnista_osto_avainsanat = t_avainsana("MYYNNISTA_OSTO");
+						if (!isset($laskurow)) {
 
-						if (mysql_num_rows($myynnista_osto_avainsanat) > 0) {
+							// Yhtiön toimipaikka yliajaa tämän parametrin
+							$query_x = "	SELECT ostotilauksen_kasittely
+											FROM yhtion_parametrit
+											WHERE yhtio = '{$kukarow['yhtio']}'";
+							$param_fetch_res = pupe_query($query_x);
+							$param_fetch_row = mysql_fetch_assoc($param_fetch_res);
 
-							$vasen_sarake[$vasen] = "<td>".t("Ostotilauksen käsittely").":</td>";
-							$vasen_sarake[$vasen] .= "<td><select name='ostotilauksen_kasittely' id='ostotilauksen_kasittely' style='max-width: 300px'>";
-							$vasen_sarake[$vasen] .= "<option value=''>".t("Ei valintaa")."</option>";
+							$ostotilauksen_kasittely = $param_fetch_row['ostotilauksen_kasittely'];
 
-							while ($myynnista_osto_avainsanat_row = mysql_fetch_assoc($myynnista_osto_avainsanat)) {
+							if ($kukarow['toimipaikka'] != 0) {
 
-								if ($laskurow['ostotilauksen_kasittely'] == $myynnista_osto_avainsanat_row['selite']) {
-									$sel = " selected";
+								$query_x = "	SELECT ostotilauksen_kasittely
+												FROM yhtion_toimipaikat
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus = '{$kukarow['toimipaikka']}'
+												AND ostotilauksen_kasittely != ''";
+								$toimpaikka_chk_res = pupe_query($query_x);
+
+								if (mysql_num_rows($toimpaikka_chk_res) > 0) {
+									$toimpaikka_chk_row = mysql_fetch_assoc($toimpaikka_chk_res);
+									$ostotilauksen_kasittely = $toimpaikka_chk_row['ostotilauksen_kasittely'];
 								}
-								else {
-									$sel = "";
-								}
-
-								$vasen_sarake[$vasen] .= "<option value='{$myynnista_osto_avainsanat_row['selite']}'{$sel}>{$myynnista_osto_avainsanat_row['selitetark']}</option>";
 							}
-
-							$vasen_sarake[$vasen] .= "</select></td>";
-							$vasen++;
+						}
+						else {
+							$ostotilauksen_kasittely = $laskurow['ostotilauksen_kasittely'];
 						}
 
+						$vasen_sarake[$vasen] = "<td>".t("Ostotilauksen käsittely").":</td>";
+						$vasen_sarake[$vasen] .= "<td><select name='ostotilauksen_kasittely' id='ostotilauksen_kasittely' style='max-width: 300px'>";
+						$vasen_sarake[$vasen] .= "<option value=''>".t("Ei valintaa")."</option>";
+
+						while ($myynnista_osto_avainsanat_row = mysql_fetch_assoc($myynnista_osto_avainsanat)) {
+
+							if ($ostotilauksen_kasittely == $myynnista_osto_avainsanat_row['selite']) {
+								$sel = " selected";
+							}
+							else {
+								$sel = "";
+							}
+
+							$vasen_sarake[$vasen] .= "<option value='{$myynnista_osto_avainsanat_row['selite']}'{$sel}>{$myynnista_osto_avainsanat_row['selitetark']}</option>";
+						}
+
+						$vasen_sarake[$vasen] .= "</select></td>";
+						$vasen++;
 					}
 				}
 			}
@@ -3400,33 +3419,6 @@
 		if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
 
 		$label = !isset($label) ? "" : $label;
-
-		if (!isset($ostotilauksen_kasittely)) {
-
-			// Yhtiön toimipaikka yliajaa tämän parametrin
-			$query_x = "	SELECT ostotilauksen_kasittely
-							FROM yhtion_parametrit
-							WHERE yhtio = '{$kukarow['yhtio']}'";
-			$param_fetch_res = pupe_query($query_x);
-			$param_fetch_row = mysql_fetch_assoc($param_fetch_res);
-
-			$ostotilauksen_kasittely = $param_fetch_row['ostotilauksen_kasittely'];
-
-			if ($kukarow['toimipaikka'] != 0) {
-
-				$query_x = "	SELECT ostotilauksen_kasittely
-								FROM yhtion_toimipaikat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$kukarow['toimipaikka']}'
-								AND ostotilauksen_kasittely != ''";
-				$toimpaikka_chk_res = pupe_query($query_x);
-
-				if (mysql_num_rows($toimpaikka_chk_res) > 0) {
-					$toimpaikka_chk_row = mysql_fetch_assoc($toimpaikka_chk_res);
-					$ostotilauksen_kasittely = $toimpaikka_chk_row['ostotilauksen_kasittely'];
-				}
-			}
-		}
 
 		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
 

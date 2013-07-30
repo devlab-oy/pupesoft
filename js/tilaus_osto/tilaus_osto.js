@@ -3,7 +3,7 @@ function tarkasta_ostotilauksen_tilausrivien_toimittajien_saldot(tilausnumero, a
 
 	var viesti = '';
 	saldot_request_obj.done(function(saldot) {
-		$.each(saldot, function(index, saldo){
+		$.each(saldot, function(index, saldo) {
 			alert_viesti_temp = alert_viesti.replace('*tuote*', saldo.tuoteno);
 			alert_viesti_temp = alert_viesti_temp.replace('*kpl*', saldo.tehdas_saldo);
 			viesti += alert_viesti_temp + '\n';
@@ -30,7 +30,7 @@ function hae_ostotilauksen_tilausrivien_toimittajien_saldot(tilausnumero) {
 			console.log('Saldojen haku onnistui');
 			//console.log(data);
 		}
-	}).fail(function(data){
+	}).fail(function(data) {
 		if (console && console.log) {
 			console.log('Saldojen haku EPÄONNISTUI');
 		}

@@ -276,7 +276,7 @@
 									."<td>{$tuotteen_toimittaja_row['toim_tuoteno']}</td>"
 									."<td>{$tvrow["nimitys"]}</td>"
 									."<td>{$tuotteen_toimittaja_row['toimittajan_nimi']}</td>"
-									."<td>{$tuotteen_toimittaja_row['ostohinta']}</td>"
+									."<td>".sprintf("%.2f", $tuotteen_toimittaja_row['ostohinta'])."</td>"
 									."<td>hinta</td>"
 						 			."<td align='right'>".$tuotteen_toimittaja_row['tehdas_saldo']."</td>"
 						 			."<td align='left'>"
@@ -286,11 +286,10 @@
 						 			   	<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 						 			   	<input type='hidden' name='rivitunnus' 		value = '$prow[tunnus]'>
 						 			   	<input type='hidden' name='vastaavatuoteno' value = '$_tuote[tuoteno]'>
-										<input type='hidden' name='vastaavakpl'		value = '{$prow['varattukpl']}'>
 										<input type='hidden' name='toimi_tunnus'	value = '{$tuotteen_toimittaja_row['toimi_tunnus']}'>
 						 			   	<input type='hidden' name='tee' 			value = 'PV'>
 						 			   	<input type='hidden' name='tapa' 			value = 'VAIHDARIVI'>
-						 			   	<input type='Submit' value='".t("Vaihda tähän tuotteeseen")."'>
+						 			   	<input type='Submit' value='".t("Vaihda tähän tuotteeseen")."' onclick='return confirm(\"".t('Oletko varma että haluat vaihtaa tuotteen')."\")'>
 						 			   	</form> "
 						 			."</td></tr>";
 					}
@@ -341,6 +340,85 @@
 			if ($vastaavat_html != "") {
 				$vastaavat_html .= "</table>";
 			}
+		}
+
+		require_once 'korvaavat.class.php';
+		$korvaavat = new Korvaavat($prow['tuoteno']);
+
+		if (count($korvaavat->tuotteet()) > 0) {
+			$korvaavat_tuotteet = $korvaavat->tuotteet();
+
+			$korvaavat_table = "";
+
+			foreach ($korvaavat_tuotteet as $korvaava_tuote) {
+				$tuotteen_toimittaja_query = "	SELECT tuotteen_toimittajat.tehdas_saldo,
+												tuotteen_toimittajat.toim_tuoteno,
+												tuotteen_toimittajat.ostohinta,
+												toimi.nimi as toimittajan_nimi,
+												toimi.tunnus as toimi_tunnus
+												FROM tuotteen_toimittajat
+												JOIN toimi
+												ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+													AND toimi.ytunnus = tuotteen_toimittajat.toimittaja )
+												WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+												AND tuotteen_toimittajat.tuoteno = '{$korvaava_tuote['tuoteno']}'";
+				$tuotteen_toimittaja_result = pupe_query($tuotteen_toimittaja_query);
+				$tuotteen_toimittaja_row = mysql_fetch_assoc($tuotteen_toimittaja_result);
+
+				if ($tuotteen_toimittaja_row['tehdas_saldo'] < $prow['varattukpl']) {
+					$tuotteen_toimittaja_row['tehdas_saldo'] = "<font class='error'>".sprintf("%.2f", $tuotteen_toimittaja_row['tehdas_saldo'])."</font>";
+				}
+				else {
+					$tuotteen_toimittaja_row['tehdas_saldo'] = sprintf("%.2f", $tuotteen_toimittaja_row['tehdas_saldo']);
+				}
+
+				 $korvaavat_table .= "<tr class='aktiivi'>"
+							."<td>{$_tuote["tuoteno"]}</td>"
+							."<td>{$tuotteen_toimittaja_row['toim_tuoteno']}</td>"
+							."<td>{$tvrow["nimitys"]}</td>"
+							."<td>{$tuotteen_toimittaja_row['toimittajan_nimi']}</td>"
+							."<td>".sprintf("%.2f", $tuotteen_toimittaja_row['ostohinta'])."</td>"
+							."<td>hinta</td>"
+							."<td align='right'>".$tuotteen_toimittaja_row['tehdas_saldo']."</td>"
+							."<td align='left'>"
+							." <form method='post' name='jalkitoimita'>
+								<input type='hidden' name='toim' 			value = '$toim'>
+								<input type='hidden' name='lopetus' 		value = '$lopetus'>
+								<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+								<input type='hidden' name='rivitunnus' 		value = '$prow[tunnus]'>
+								<input type='hidden' name='vastaavatuoteno' value = '$korvaava_tuote[tuoteno]'>
+								<input type='hidden' name='toimi_tunnus'	value = '{$tuotteen_toimittaja_row['toimi_tunnus']}'>
+								<input type='hidden' name='tee' 			value = 'PV'>
+								<input type='hidden' name='tapa' 			value = 'VAIHDARIVI'>
+								<input type='Submit' value='".t("Vaihda tähän tuotteeseen")."' onclick='return confirm(\"".t('Oletko varma että haluat vaihtaa tuotteen')."\")'>
+								</form> "
+							."</td></tr>";
+			}
+
+			$vastaavat_html .= "<br/><br/>";
+			$vastaavat_html .= "<table width='100%'>";
+
+			$vastaavat_html .= "<tr><th>".t("Korvaava")." ".t("Tuoteno")."</th><th>".t("Toimittajan tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Toimittaja")."</th><th>".t("Ostohinta")."</th><th>".t("Hinta")."</th><th>".t("Tehtaan saldo")."</th>";
+			$vastaavat_html .= "<th>";
+
+			$vastaavat_html .= "<form method='post' name='hyvaksy'>
+								<input type='hidden' name='toim' 			value = '$toim'>
+								<input type='hidden' name='lopetus' 		value = '$lopetus'>
+								<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+								<input type='hidden' name='projektilla' 	value = '$projektilla'>
+								<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+								<input type='hidden' name='mista' 			value = '$mista'>
+								<input type='hidden' name='rivitunnus' 		value = '$prow[tunnus]'>
+								<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
+								<input type='hidden' name='menutila' 		value = '$menutila'>
+								<input type='hidden' name='tila' 			value = 'OOKOOAA'>
+								<input type='hidden' name='vastaavienkasittely' value = 'kylla'>
+								<input type='Submit' value='".t("Piilota vastaavat tuotteet")."'>
+								</form>";
+
+			$vastaavat_html .= "</th></tr>$korvaavat_table";
+
+			$vastaavat_html .= "</table>";
 		}
 	}
 ?>

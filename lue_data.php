@@ -1660,6 +1660,37 @@ if ($kasitellaan_tiedosto) {
 							elseif ($table_mysql=='tuotepaikat' and $otsikko == 'OLETUS' and $taulunrivit[$taulu][$eriviindex][$r] == 'XVAIHDA') {
 								//vaihdetaan tämä oletukseksi
 								$taulunrivit[$taulu][$eriviindex][$r] = "X"; // pakotetaan oletus
+								//  Selvitetään vanha oletuspaikka 
+								$vanha_oletus_query = "	SELECT *
+														FROM tuotepaikat
+														WHERE tuoteno = '$tuoteno' 
+														and yhtio = '$kukarow[yhtio]' 
+														and oletus != ''";
+								$oletusresult = pupe_query($vanha_oletus_query);
+								$oletusrow = mysql_fetch_assoc($oletusresult);
+
+								if (mysql_num_rows($oletusresult) == 1) {
+									$uusi_oletus_query = "	UPDATE tilausrivi
+															SET hyllyalue = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])]}',
+															hyllynro = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYNRO", $taulunotsikot["tuotepaikat"])]}',
+															hyllytaso = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYTASO", $taulunotsikot["tuotepaikat"])]}',
+															hyllyvali = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYVALI", $taulunotsikot["tuotepaikat"])]}'
+															WHERE yhtio = '$kukarow[yhtio]'
+															AND tuoteno = '$tuoteno'
+															AND hyllyalue = '$oletusrow[hyllyalue]'
+															AND hyllynro = '$oletusrow[hyllynro]'
+															AND hyllytaso = '$oletusrow[hyllytaso]'
+															AND hyllyvali = '$oletusrow[hyllyvali]'
+															AND tyyppi = 'O'
+															AND uusiotunnus = '0'
+															AND kpl = '0'
+															AND varattu != '0'";
+									$paivitysresult = pupe_query($uusi_oletus_query);
+
+									if (mysql_affected_rows() > 0) {
+										echo "<br><br><font class='message'>".t("Päivitettiin %s ostotilausrivin varastopaikkaa.", '', mysql_affected_rows())."</font><br><br>";
+									}
+								}
 
 								$tpupque = "UPDATE tuotepaikat SET oletus = '' where yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
 
@@ -1681,6 +1712,38 @@ if ($kasitellaan_tiedosto) {
 							if ($table_mysql == 'tuotepaikat' and $otsikko == 'OLETUS' and $taulunrivit[$taulu][$eriviindex][$r] == 'XVAIHDA') {
 								//vaihdetaan tämä oletukseksi
 								$taulunrivit[$taulu][$eriviindex][$r] = "X"; // pakotetaan oletus
+								
+								//  Selvitetään vanha oletuspaikka 
+								$vanha_oletus_query = "	SELECT *
+														FROM tuotepaikat
+														WHERE tuoteno = '$tuoteno' 
+														and yhtio = '$kukarow[yhtio]' 
+														and oletus != ''";
+								$oletusresult = pupe_query($vanha_oletus_query);
+								$oletusrow = mysql_fetch_assoc($oletusresult);
+
+								if (mysql_num_rows($oletusresult) == 1) {
+									$uusi_oletus_query = "	UPDATE tilausrivi
+															SET hyllyalue = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])]}',
+															hyllynro = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYNRO", $taulunotsikot["tuotepaikat"])]}',
+															hyllytaso = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYTASO", $taulunotsikot["tuotepaikat"])]}',
+															hyllyvali = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYVALI", $taulunotsikot["tuotepaikat"])]}'
+															WHERE yhtio = '$kukarow[yhtio]'
+															AND tuoteno = '$tuoteno'
+															AND hyllyalue = '$oletusrow[hyllyalue]'
+															AND hyllynro = '$oletusrow[hyllynro]'
+															AND hyllytaso = '$oletusrow[hyllytaso]'
+															AND hyllyvali = '$oletusrow[hyllyvali]'
+															AND tyyppi = 'O'
+															AND uusiotunnus = '0'
+															AND kpl = '0'
+															AND varattu != '0'";
+									$paivitysresult = pupe_query($uusi_oletus_query);
+
+									if (mysql_affected_rows() > 0) {
+										echo "<br><br><font class='message'>".t("Päivitettiin %s ostotilausrivin varastopaikkaa.", '', mysql_affected_rows())."</font><br><br>";
+									}
+								}
 
 								$tpupque = "UPDATE tuotepaikat SET oletus = '' where yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
 

@@ -67,44 +67,24 @@ ini_set("memory_limit", "5G");
 <?php
 
 // ehdotetaan 7 päivää taaksepäin
-if (!isset($kka))
-	$kka = date("m", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
-if (!isset($vva))
-	$vva = date("Y", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
-if (!isset($ppa))
-	$ppa = date("d", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
-
-if (!isset($kkl))
-	$kkl = date("m");
-if (!isset($vvl))
-	$vvl = date("Y");
-if (!isset($ppl))
-	$ppl = date("d");
-
-if (!isset($tee))
-	$tee = "";
-if (!isset($toppi))
-	$toppi = "";
-if (!isset($ahyllyalue))
-	$ahyllyalue = "";
-if (!isset($ahyllynro))
-	$ahyllynro = "";
-if (!isset($ahyllyvali))
-	$ahyllyvali = "";
-if (!isset($ahyllytaso))
-	$ahyllytaso = "";
-if (!isset($lhyllyalue))
-	$lhyllyalue = "";
-if (!isset($lhyllynro))
-	$lhyllynro = "";
-if (!isset($lhyllyvali))
-	$lhyllyvali = "";
-if (!isset($lhyllytaso))
-	$lhyllytaso = "";
-if (!isset($summaa_varastopaikalle))
-	$summaa_varastopaikalle = "";
-if (!isset($tee_excel))
-	$tee_excel = "";
+if (!isset($kka))                     $kka = date("m", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
+if (!isset($vva))                     $vva = date("Y", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
+if (!isset($ppa))                     $ppa = date("d", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
+if (!isset($kkl))                     $kkl = date("m");
+if (!isset($vvl))                     $vvl = date("Y");
+if (!isset($ppl))                     $ppl = date("d");
+if (!isset($tee))                     $tee = "";
+if (!isset($toppi))                   $toppi = "";
+if (!isset($ahyllyalue))              $ahyllyalue = "";
+if (!isset($ahyllynro))               $ahyllynro = "";
+if (!isset($ahyllyvali))              $ahyllyvali = "";
+if (!isset($ahyllytaso))              $ahyllytaso = "";
+if (!isset($lhyllyalue))              $lhyllyalue = "";
+if (!isset($lhyllynro))               $lhyllynro = "";
+if (!isset($lhyllyvali))              $lhyllyvali = "";
+if (!isset($lhyllytaso))              $lhyllytaso = "";
+if (!isset($summaa_varastopaikalle))  $summaa_varastopaikalle = "";
+if (!isset($tee_excel))               $tee_excel = "";
 
 echo "<div id='valitse_varasto' style='display:none;'>".t("Valitse varasto tai rajaa varastopaikalla")."</div>";
 
@@ -316,7 +296,7 @@ if ($tee != '') {
 	);
 
 	if (!empty($summaa_varastopaikalle)) {
-		list($rivit, $saldolliset) = hae_rivit("PAIKKA", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $kaikki_lisa_kentat, $kerayksettomat_tuotepaikat);
+		list($rivit, $saldolliset) = hae_rivit("PAIKKA", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $kaikki_lisa_kentat, $kerayksettomat_tuotepaikat, $lisa);
 
 		if (count($rivit) > 0) {
 
@@ -332,7 +312,7 @@ if ($tee != '') {
 		}
 	}
 	else {
-		list($rivit, $saldolliset) = hae_rivit("TUOTE", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $kaikki_lisa_kentat, $kerayksettomat_tuotepaikat);
+		list($rivit, $saldolliset) = hae_rivit("TUOTE", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $kaikki_lisa_kentat, $kerayksettomat_tuotepaikat, $lisa);
 
 		if (count($rivit) > 0) {
 
@@ -355,7 +335,7 @@ if ($tee != '') {
 
 echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso, $toppi, $summaa_varastopaikalle, $tee_excel, $kaikki_varastot, $kaikki_keraysvyohykkeet, $kaikki_lisa_kentat, $kerayksettomat_tuotepaikat);
 
-function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $lisa_kentat, $kerayksettomat_tuotepaikat) {
+function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $lisa_kentat, $kerayksettomat_tuotepaikat, $lisa) {
 	global $yhtiorow;
 
 	$ostoehdotukset = array(
@@ -364,11 +344,11 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 	);
 
 	if (strtotime("$vva-$kka-$ppa") < strtotime('now - 12 months')) {
-		$_date = "AND tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
-				  AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'";
+		$_date = "AND tilausrivi.kerattyaika >= '$vva-$kka-$ppa'
+				  AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl'";
 	}
 	else {
-		$_date = "AND tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month)";
+		$_date = "AND tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month)";
 	}
 
 	$tuotepaikka_where = "";
@@ -401,6 +381,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 	$keraysvyohyke_join = "";
 	$varaston_hyllypaikat_join = "";
 	$group = "tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,";
+
 	if (!empty($yhtiorow['kerayserat'])) {
 		$keraysvyohyke_select = "keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,";
 		$keraysvyohyke_join = " JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)";
@@ -438,8 +419,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 			}
 		}
 
-		$tuotepaikat_select = "tuotepaikat.saldo, tuotepaikat.tunnus paikkatun, ";
-		$group .= "tuotepaikat.saldo, tuotepaikat.tunnus,";
+		$tuotepaikat_select = "sum(tuotepaikat.saldo) saldo, group_concat(distinct tuotepaikat.tunnus) paikkatun, ";
 	}
 	else {
 		$tuote_select = "";
@@ -447,28 +427,33 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 	}
 
 	$group = substr($group, 0, -1);
+
 	if (!empty($kerayksettomat_tuotepaikat)) {
 		$kerayksettomat_tuotepaikat_varaston_hyllypaikat_join = str_replace('tilausrivi', 'tuotepaikat', $varaston_hyllypaikat_join);
 		$kerayksettomat_tuotepaikat_group = str_replace('tilausrivi', 'tuotepaikat', $group);
+		$kerayksettomat_tuotepaikka_where = str_replace('tilausrivi', 'tuotepaikat', $tuotepaikka_where);
 
 		$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
 					CONCAT_WS(' ', tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) as hylly,
-					'".t("Ei tiedossa")."' poistettu,
+					'N/A' poistettu,
 					{$keraysvyohyke_select}
 					{$tuote_select}
 					{$tuotepaikat_select}
-					sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
-					sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl, 0)) tuokpl_valittu_aika,
-					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), 1, 0)) kpl_6,
-					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), tilausrivi.kpl, 0)) tuo_kpl_6,
-					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), 1, 0)) kpl_12,
-					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), tilausrivi.kpl, 0)) tuo_kpl_12
+					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
+					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl, 0)) tuokpl_valittu_aika,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), 1, 0)) kpl_6,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), tilausrivi.kpl, 0)) tuo_kpl_6,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), 1, 0)) kpl_12,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), tilausrivi.kpl, 0)) tuo_kpl_12
 					FROM tuotepaikat
-					JOIN tuote
-					ON (tuotepaikat.yhtio = tuote.yhtio
-						AND tuotepaikat.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
-					LEFT JOIN tilausrivi
-					ON ( tilausrivi.tyyppi = 'L'
+					JOIN tuote USE INDEX (tuoteno_index) ON (tuotepaikat.yhtio = tuote.yhtio
+						AND tuotepaikat.tuoteno = tuote.tuoteno
+						AND tuote.ei_saldoa = '')
+					JOIN varastopaikat ON ( varastopaikat.yhtio = tuotepaikat.yhtio
+						AND concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+						AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+						{$varasto_lisa} )
+					LEFT JOIN tilausrivi ON ( tilausrivi.tyyppi = 'L'
 						AND tilausrivi.yhtio = tuotepaikat.yhtio
 						AND tilausrivi.hyllyalue = tuotepaikat.hyllyalue
 						AND tilausrivi.hyllynro = tuotepaikat.hyllynro
@@ -476,17 +461,13 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 						AND tilausrivi.hyllytaso = tuotepaikat.hyllytaso
 						AND tilausrivi.tuoteno = tuotepaikat.tuoteno
 						{$_date})
-					LEFT JOIN varastopaikat
-					ON ( varastopaikat.yhtio = tuotepaikat.yhtio
-						AND concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-						AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) )
 					{$kerayksettomat_tuotepaikat_varaston_hyllypaikat_join}
 					{$keraysvyohyke_join}
 					WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-					{$tuotepaikka_where}
-					{$varasto_lisa}
+					{$kerayksettomat_tuotepaikka_where}
 					GROUP BY 1,2,3, {$kerayksettomat_tuotepaikat_group}
-					ORDER BY kpl_valittu_aika DESC";
+					ORDER BY kpl_valittu_aika DESC
+					$lisa";
 	}
 	else {
 		$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
@@ -495,37 +476,35 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 					{$keraysvyohyke_select}
 					{$tuote_select}
 					{$tuotepaikat_select}
-					sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
-					sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl, 0)) tuokpl_valittu_aika,
-					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), 1, 0)) kpl_6,
-					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), tilausrivi.kpl, 0)) tuo_kpl_6,
-					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), 1, 0)) kpl_12,
-					sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), tilausrivi.kpl, 0)) tuo_kpl_12
+					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
+					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl, 0)) tuokpl_valittu_aika,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), 1, 0)) kpl_6,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), tilausrivi.kpl, 0)) tuo_kpl_6,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), 1, 0)) kpl_12,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), tilausrivi.kpl, 0)) tuo_kpl_12
 					FROM tilausrivi
-					JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
-					LEFT JOIN tuotepaikat
-					ON (
-						tilausrivi.yhtio = tuotepaikat.yhtio
-						and tilausrivi.hyllyalue = tuotepaikat.hyllyalue
-						and tilausrivi.hyllynro  = tuotepaikat.hyllynro
-						and tilausrivi.hyllyvali = tuotepaikat.hyllyvali
-						and tilausrivi.hyllytaso = tuotepaikat.hyllytaso
-						and tilausrivi.tuoteno   = tuotepaikat.tuoteno)
-					LEFT JOIN varastopaikat
-					ON (
-						varastopaikat.yhtio = tilausrivi.yhtio
+					JOIN tuote USE INDEX (tuoteno_index) ON (tilausrivi.yhtio = tuote.yhtio 
+						AND tilausrivi.tuoteno = tuote.tuoteno 
+						AND tuote.ei_saldoa = '')
+					JOIN varastopaikat ON ( varastopaikat.yhtio = tilausrivi.yhtio
 						AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-						AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-					)
+						AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')
+						{$varasto_lisa} ) )
+					LEFT JOIN tuotepaikat USE INDEX (yhtio_tuoteno_paikka) ON ( tilausrivi.yhtio = tuotepaikat.yhtio
+						AND tilausrivi.hyllyalue = tuotepaikat.hyllyalue
+						AND tilausrivi.hyllynro  = tuotepaikat.hyllynro
+						AND tilausrivi.hyllyvali = tuotepaikat.hyllyvali
+						AND tilausrivi.hyllytaso = tuotepaikat.hyllytaso
+						AND tilausrivi.tuoteno   = tuotepaikat.tuoteno )
 					{$varaston_hyllypaikat_join}
 					{$keraysvyohyke_join}
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.tyyppi = 'L'
 					{$tuotepaikka_where}
-					{$varasto_lisa}
 					{$_date}
 					GROUP BY 1,2,3, {$group}
-					ORDER BY kpl_valittu_aika DESC";
+					ORDER BY kpl_valittu_aika DESC
+					$lisa";
 	}
 
 	$result = pupe_query($query);

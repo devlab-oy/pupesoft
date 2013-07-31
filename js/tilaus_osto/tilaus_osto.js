@@ -1,3 +1,24 @@
+$(document).ready(function() {
+	bind_toggle_korvaavat_vastaavat_click();
+});
+
+function bind_toggle_korvaavat_vastaavat_click() {
+	$('.toggle_korvaavat_vastaavat').on('click', function() {
+		var rivitunnus = $(this).attr('rivitunnus');
+
+		var $korvaavat_vastaavat_table = $(this).parent().parent().parent().find('tr.' + rivitunnus);
+
+		if ($korvaavat_vastaavat_table.hasClass('vastaavat_korvaavat_not_hidden')) {
+			$korvaavat_vastaavat_table.addClass('vastaavat_korvaavat_hidden');
+			$korvaavat_vastaavat_table.removeClass('vastaavat_korvaavat_not_hidden');
+		}
+		else {
+			$korvaavat_vastaavat_table.addClass('vastaavat_korvaavat_not_hidden');
+			$korvaavat_vastaavat_table.removeClass('vastaavat_korvaavat_hidden');
+		}
+	});
+}
+
 function tarkasta_ostotilauksen_tilausrivien_toimittajien_saldot(tilausnumero, alert_viesti) {
 	saldot_request_obj = hae_ostotilauksen_tilausrivien_toimittajien_saldot(tilausnumero);
 

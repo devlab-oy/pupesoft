@@ -44,7 +44,17 @@
 	}
 
 	if ($kukarow["extranet"] == "") {
-		echo "<script src='../js/tilaus_osto/tilaus_osto.js'></script>";
+		echo "<script src='../js/tilaus_osto/tilaus_osto.js?not_cache=".time()."'></script>";
+		?>
+<style>
+	.vastaavat_korvaavat_hidden {
+		display:none;
+	}
+	.vastaavat_korvaavat_not_hidden {
+		
+	}
+</style>
+		<?php
 	}
 	
 	if (!isset($tee)) $tee = "";
@@ -486,7 +496,7 @@
 			if ($tapa == 'VAIHDARIVI') {
 				$trow = hae_tuote($vastaavatuoteno);
 				$kpl = ($tilausrivirow['varattu'] + $tilausrivirow['jt']);
-				$hinta = $tilausrivirow['varattu'];
+				$hinta = $tilausrivirow['hinta'];
 				$ale = $tilausrivirow['ale1'];
 
 				list($hinta, $netto, $ale, , ) = alehinta($laskurow, $trow, $kpl, '', $hinta, $ale);
@@ -1333,6 +1343,27 @@
 									<input type='Submit' value='".t("Poista")."'>
 									</td></form>";
 
+							if (!empty($prow['tilausrivilinkki'])) {
+								$query = "	SELECT otunnus
+											FROM tilausrivi
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$prow['tilausrivitunnus']}'";
+								$linkattu_myyntitilaus_result = pupe_query($query);
+								$linkattu_myyntitilaus_row = mysql_fetch_assoc($linkattu_myyntitilaus_result);
+
+								$myyntitilaus_lopetus = "{$palvelin2}tilauskasittely/tilaus_osto.php////tee=AKTIVOI//orig_tila={$laskurow['tila']}//orig_alatila={$laskurow['alatila']}//tilausnumero={$tilausnumero}//from=tilaus_myynti";
+								echo "	<td valign='top' class='back' nowrap>
+											<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=RIVISYOTTO&tilausnumero={$linkattu_myyntitilaus_row['otunnus']}&lopetus={$myyntitilaus_lopetus}'><button type='button'>".t('Näytä myyntitilaus')."</button></a>
+										</td>";
+							}
+							else {
+								echo "	<td valign='top' class='back' nowrap></td>";
+							}
+
+							echo "<td valign='top' class='back' nowrap>";
+							echo "<button type='button' class='toggle_korvaavat_vastaavat' rivitunnus='{$prow['tunnus']}'>".t("Näytä tuotteelle korvaavat & vastaavat")."</button>";
+							echo "</td>";
+
 							if ($saako_hyvaksya > 0) {
 								echo "<td valign='top' class='back'>
 										<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
@@ -1478,7 +1509,7 @@
 						}
 						echo "</td></tr>";
 
-						echo "<tr>";
+						echo "<tr class='vastaavat_korvaavat_hidden {$prow['tunnus']}'>";
 						echo "<td></td>";
 						echo "<td colspan='".($alespan + 1)."' $kommclass1>";
 						echo $vastaavat_html;

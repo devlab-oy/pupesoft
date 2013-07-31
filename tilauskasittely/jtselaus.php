@@ -929,7 +929,7 @@
 							and tilausrivi.keratty 			= ''
 							and tilausrivi.uusiotunnus 		= 0
 							and tilausrivi.kpl 				= 0
-							and tilausrivi.jt $lisavarattu	> 0
+							and tilausrivi.jt + tilausrivi.varattu	> 0
 							and ((tilausrivi.tunnus=tilausrivi.perheid and tilausrivi.perheid2=0) or (tilausrivi.tunnus=tilausrivi.perheid2) or (tilausrivi.perheid=0 and tilausrivi.perheid2=0))
 							$tilausrivilisa
 							$order
@@ -965,7 +965,7 @@
 							and tilausrivi.keratty 			= ''
 							and tilausrivi.uusiotunnus 		= 0
 							and tilausrivi.kpl 				= 0
-							and tilausrivi.jt $lisavarattu	> 0
+							and tilausrivi.jt  + tilausrivi.varattu	> 0
 							and ((tilausrivi.tunnus=tilausrivi.perheid and tilausrivi.perheid2=0) or (tilausrivi.tunnus=tilausrivi.perheid2) or (tilausrivi.perheid=0 and tilausrivi.perheid2=0))
 							$tilausrivilisa
 							$order

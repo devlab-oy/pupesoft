@@ -272,14 +272,33 @@ if ($tee == "ETSILASKU") {
 	if (!isset($ppl))
 		$ppl = date("d");
 
-	if ($toim != 'SOPIMUS') {
+	// Jos meillä on tunnus tiedossa, haetaan toimittajan/asiakkaan tiedot
+	if ($toimittajaid != '') {
+		require ("inc/kevyt_toimittajahaku.inc");
+	}
+	elseif ($asiakasid != '') {
+		require ("inc/asiakashaku.inc");
+	}
+
+	// Ei näytetä päivämäärärajauksia, jos etsitään tilausnumerolla/laskunumerolla
+	if ($laskunro == 0 and $otunnus == 0) {
 		echo "<form method='post' autocomplete='off'>
 				<input type='hidden' name='toim' value='{$toim}'>
 				<input type='hidden' name='asiakasid' value='{$asiakasid}'>
+				<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>
 				<input type='hidden' name='tunnukset' value='{$tunnukset}'>
 				<input type='hidden' name='tee' value='ETSILASKU'>";
 
 		echo "<table>";
+
+		echo "<tr><th colspan='4'>";
+		if ($toimittajaid != '') {
+			echo $toimittajarow["nimi"], " ", $toimittajarow["nimitark"];
+		}
+		elseif ($asiakasid != '') {
+			echo $asiakasrow["nimi"], " ", $asiakasrow["nimitark"];
+		}
+		echo "</th></tr>";
 
 		echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
 				<td><input type='text' name='ppa' value='{$ppa}' size='3'></td>
@@ -291,9 +310,9 @@ if ($tee == "ETSILASKU") {
 				<td><input type='text' name='vvl' value='{$vvl}' size='5'></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr></form></table><br>";
 	}
-	
+
 	$limit = "LIMIT 100";
-	
+
 	if ($tunnukset != '') {
 		$where 	= " tila = 'U' and lasku.tunnus in ({$tunnukset}) ";
 		$use 	= " ";
@@ -351,32 +370,44 @@ if ($tee == "ETSILASKU") {
 	else {
 		if ($toim == 'SOPIMUS') {
 			$where = "	tila = '0'
-						and lasku.liitostunnus = '{$asiakasid}' ";
+						and lasku.liitostunnus = '{$asiakasid}'
+						and lasku.luontiaika >='{$vva}-{$kka}-{$ppa} 00:00:00'
+						and lasku.luontiaika <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
 			$use 	= " ";
 		}
 		elseif ($toim == 'TARJOUS') {
 			$where = "	tila in ('T','L','N')
-						and lasku.liitostunnus = '{$asiakasid}' ";
+						and lasku.liitostunnus = '{$asiakasid}'
+						and lasku.luontiaika >='{$vva}-{$kka}-{$ppa} 00:00:00'
+						and lasku.luontiaika <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
 			$use 	= " ";
 		}
 		elseif ($toim == 'TYOMAARAYS') {
 			$where 	= " tila in ('N','L','A')
-						and lasku.liitostunnus = '{$asiakasid}' ";
+						and lasku.liitostunnus = '{$asiakasid}'
+						and lasku.luontiaika >='{$vva}-{$kka}-{$ppa} 00:00:00'
+						and lasku.luontiaika <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
 			$use 	= " ";
 		}
 		elseif ($toim == 'TILAUS') {
 			$where 	= " tila in ('N','L')
-						and lasku.liitostunnus = '{$asiakasid}' ";
+						and lasku.liitostunnus = '{$asiakasid}'
+						and lasku.luontiaika >='{$vva}-{$kka}-{$ppa} 00:00:00'
+						and lasku.luontiaika <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
 			$use 	= " ";
 		}
 		elseif ($toim == 'ENNAKKOTILAUS') {
 			$where 	= " tila = 'E'
-						and lasku.liitostunnus = '{$asiakasid}' ";
+						and lasku.liitostunnus = '{$asiakasid}'
+						and lasku.luontiaika >='{$vva}-{$kka}-{$ppa} 00:00:00'
+						and lasku.luontiaika <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
 			$use 	= " ";
 		}
 		elseif ($toim == 'OSTOTILAUS') {
 			$where 	= " tila = 'O'
-						and lasku.liitostunnus = '{$toimittajaid}' ";
+						and lasku.liitostunnus = '{$toimittajaid}'
+						and lasku.luontiaika >='{$vva}-{$kka}-{$ppa} 00:00:00'
+						and lasku.luontiaika <='{$vvl}-{$kkl}-{$ppl} 23:59:59' ";
 			$use 	= " ";
 		}
 		else {
@@ -389,7 +420,7 @@ if ($tee == "ETSILASKU") {
 	}
 
 	// Etsitään muutettavaa tilausta
-	$query = "	SELECT yhtio, tunnus 'tilaus', laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, summa, tapvm, laatija, tila, alatila
+	$query = "	SELECT yhtio, tunnus 'tilaus', laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, summa, tapvm, luontiaika, laatija, tila, alatila
 				FROM lasku {$use}
 				WHERE {$where}
 				AND yhtio in ('".implode("','", $yhtiot)."')
@@ -410,6 +441,7 @@ if ($tee == "ETSILASKU") {
 		echo "<th>".t("Ytunnus")."</th>";
 		echo "<th>".t("Summa")."</th>";
 		echo "<th>".t("Tapvm")."</th>";
+		echo "<th>".t("Luontiaika")."</th>";
 		echo "<th>".t("Laatija")."</th>";
 		echo "<th>".t("Tyyppi")."</th>";
 		echo "<th>".t("Toiminto")."</th>";
@@ -441,6 +473,7 @@ if ($tee == "ETSILASKU") {
 			echo "<{$ero}>{$row['ytunnus']}</{$ero}>";
 			echo "<{$ero}>{$row['summa']}</{$ero}>";
 			echo "<{$ero}>".tv1dateconv($row["tapvm"])."</{$ero}>";
+			echo "<{$ero}>".tv1dateconv($row["luontiaika"])."</{$ero}>";
 			echo "<{$ero}>{$row['laatija']}</{$ero}>";
 
 			$laskutyyppi = $row["tila"];
@@ -526,7 +559,12 @@ if ($tee == "ETSILASKU") {
 		echo "<input type='submit' value='".t("Monista")."'></form>";
 	}
 	else {
-		echo t("Ei tilauksia")."...<br><br>";
+		echo "<font class='error'>", t("Haulla ei löytynyt yhtään tilausta").".<br>";
+
+		// Näytetään haku uudestaan, jos yritettiin etsiä numerolla ja ei löydetty
+		if ($laskunro != 0 or $otunnus != 0) {
+			$tee = "";
+		}
 	}
 }
 
@@ -1679,7 +1717,6 @@ if ($tee == '' and $vain_monista == "") {
 
 	echo "<td><input type='text' size='10' name='ytunnus'></td></tr>";
 
-
 	echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
 
 	if ($toim == '') {
@@ -1692,6 +1729,7 @@ if ($tee == '' and $vain_monista == "") {
 	echo "</form>";
 
 	if ($toim == '') {
+		echo "<br>";
 		echo "<form method = 'post'>";
 		echo "<input type='hidden' name='toim' value='{$toim}'>";
 		echo "<input type='hidden' name='tee' value='mikrotila'>";

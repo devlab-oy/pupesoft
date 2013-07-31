@@ -2199,6 +2199,7 @@ if (!$cli and !isset($api_kentat)) {
 		'vak_imdg'                        => 'VAK/IMDG-tietoja',
 		'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
 		'yhteyshenkilo'                   => 'Yhteyshenkilöt',
+		'yhtion_toimipaikat'              => 'Toimipaikka',
 	);
 
 	// Yhtiökohtaisia

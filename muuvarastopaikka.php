@@ -205,44 +205,17 @@
 				
 				// Tehd‰‰n p‰ivitykset
 				echo "<font class='message'>".t("Siirret‰‰n oletuspaikka")."</font><br><br>";
-
-				$query = "	UPDATE tuotepaikat
-							SET oletus = '',
-							muuttaja = '$kukarow[kuka]',
-							muutospvm = now()
-							WHERE tuoteno = '$tuoteno' 
-							AND yhtio = '$kukarow[yhtio]'";
-				$result = pupe_query($query);
-
-				$query = "	UPDATE tuotepaikat
-							SET oletus = 'X',
-							muuttaja = '$kukarow[kuka]',
-							muutospvm = now()
-							WHERE tuoteno = '$tuoteno' 
-							AND yhtio = '$kukarow[yhtio]' 
-							AND tunnus = '$oletus'";
-				$result = pupe_query($query);
-
-				// P‰ivitet‰‰n uusi oletuspaikka myˆs avoimille keskener‰isille ostotilauksille´
-				$query = "	UPDATE tilausrivi
-							SET hyllyalue = '$uusi_oletusrow[hyllyalue]',
-							hyllynro = '$uusi_oletusrow[hyllynro]',
-							hyllytaso = '$uusi_oletusrow[hyllytaso]',
-							hyllyvali = '$uusi_oletusrow[hyllyvali]'
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND tuoteno = '$tuoteno'
-							AND hyllyalue = '$oletusrow[hyllyalue]'
-							AND hyllynro = '$oletusrow[hyllynro]'
-							AND hyllytaso = '$oletusrow[hyllytaso]'
-							AND hyllyvali = '$oletusrow[hyllyvali]'
-							AND tyyppi = 'O'
-							AND uusiotunnus = '0'
-							AND kpl = '0'
-							AND varattu != '0'";
-				$result = pupe_query($query);
-
-				if (mysql_affected_rows() > 0) {
-					echo "<font class='message'>".t("P‰ivitettiin %s ostotilausrivin varastopaikkaa.", '', mysql_affected_rows())."</font><br><br>";
+				
+				$hylly = array(
+						"hyllyalue" => $uusi_oletusrow['hyllyalue'],
+						"hyllynro" => $uusi_oletusrow['hyllynro'],
+						"hyllytaso" => $uusi_oletusrow['hyllytaso'],
+						"hyllyvali" => $uusi_oletusrow['hyllyvali']
+						);
+				$upd_result = paivita_oletuspaikka($tuoteno, $hylly);
+				
+				if ($upd_result["paivitetyt_ostorivit"] > 0) {
+					echo "<font class='message'>".t("P‰ivitettiin %s ostotilausrivin varastopaikkaa.", '', $upd_result["paivitetyt_ostorivit"])."</font><br><br>";
 				}
 			}
 			else {

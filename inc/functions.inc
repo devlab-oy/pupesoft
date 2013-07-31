@@ -20031,6 +20031,17 @@ if (!function_exists('paivita_oletuspaikka')) {
 	function paivita_oletuspaikka($tuoteno, Array $hylly) {
 		global $kukarow;
 
+		// Palautusmuuttuja
+		$return = array();
+		
+		// Haetaan vanha oletuspaikka talteen ostotilausmuutoksia varten
+		$oletusquery = "	SELECT *
+							FROM tuotepaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$tuoteno'
+							and oletus != ''";
+		$oletusresult = pupe_query($oletusquery);
+		
 		# Poistetaan kaikilta tuotteen tuotepaikoilta oletus
 		# ostorivienvarastopaikat.inc, rivi 281
 		$query = "	UPDATE tuotepaikat
@@ -20076,9 +20087,34 @@ if (!function_exists('paivita_oletuspaikka')) {
 						and tuoteno = '$tuoteno'
 						ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";
 			$upresult = pupe_query($query);
-		}
 
-		return 1;
+			$return["error"] = "Oletuspaikkaa ei löytynyt, tehtiin ensimmäisestä paikasta oletuspaikka";			
+		}
+		else {
+			$oletusrow = mysql_fetch_assoc($oletusresult);
+			
+			// Päivitetään uusi oletuspaikka myös avoimille keskeneräisille ostotilauksille«
+			$query = "	UPDATE tilausrivi
+						SET hyllyalue	= '$hylly[hyllyalue]',
+						hyllynro	= '$hylly[hyllynro]',
+						hyllyvali	= '$hylly[hyllyvali]',
+						hyllytaso	= '$hylly[hyllytaso]'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tuoteno = '$tuoteno'
+						AND hyllyalue = '$oletusrow[hyllyalue]'
+						AND hyllynro = '$oletusrow[hyllynro]'
+						AND hyllytaso = '$oletusrow[hyllytaso]'
+						AND hyllyvali = '$oletusrow[hyllyvali]'
+						AND tyyppi = 'O'
+						AND uusiotunnus = '0'
+						AND kpl = '0'
+						AND varattu != '0'";
+			$result = pupe_query($query);
+
+			$return["paivitetyt_ostorivit"] = mysql_affected_rows();			
+		}
+		
+		return $return;
 	}
 }
 

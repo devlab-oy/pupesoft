@@ -382,12 +382,11 @@ if ($tee == '') {
 	echo "</td>";
 	echo "</tr>";
 
-	if (!empty($yhtiorow['kerayserat']) and !empty($keraysvyohykkeet)) {
+	if (!empty($yhtiorow['kerayserat']) and !empty($kaikki_keraysvyohykkeet)) {
 		echo "<tr>";
 		echo "<th>".t("Keräysvyöhykkeet")."</th>";
 
 		echo "<td>";
-		echo "kissa";
 		foreach ($kaikki_keraysvyohykkeet as $keraysvyohykkeet_index => $keraysvyohykkeet) {
 			echo "<input class='keraysvyohykkeet' type='checkbox' name='keraysvyohykkeet[]' value='{$keraysvyohykkeet_index}' {$keraysvyohykkeet['checked']} />";
 			echo " {$keraysvyohykkeet['nimitys']}";

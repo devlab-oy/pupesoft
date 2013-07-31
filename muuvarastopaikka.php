@@ -12,7 +12,7 @@
 					tuote READ,
 					varastopaikat READ,
 					varaston_hyllypaikat READ,
-					tilausrivi READ,
+					tilausrivi WRITE,
 					tilausrivi as tilausrivi_osto READ,
 					sarjanumeroseuranta WRITE,
 					sarjanumeroseuranta_arvomuutos READ,
@@ -78,7 +78,7 @@
 
 	// Itse varastopaikkoja muutellaan
 	if ($tee == 'MUUTA') {
-		$query = "	SELECT tunnus
+		$query = "	SELECT *
 					FROM tuotepaikat
 					WHERE tuoteno = '$tuoteno'
 					and yhtio 	= '$kukarow[yhtio]'
@@ -194,26 +194,56 @@
 		if (isset($oletus) and $oletus != $oletusrow["tunnus"]) {
 			$query = "	SELECT *
 						FROM tuotepaikat
-						WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$oletus'";
+						WHERE tuoteno = '$tuoteno' 
+						and yhtio = '$kukarow[yhtio]' 
+						and tunnus = '$oletus'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
+
+				$uusi_oletusrow = mysql_fetch_assoc($result);
+				
 				// Tehd‰‰n p‰ivitykset
 				echo "<font class='message'>".t("Siirret‰‰n oletuspaikka")."</font><br><br>";
 
 				$query = "	UPDATE tuotepaikat
 							SET oletus = '',
-							muuttaja	= '$kukarow[kuka]',
-							muutospvm	= now()
-							WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
+							muuttaja = '$kukarow[kuka]',
+							muutospvm = now()
+							WHERE tuoteno = '$tuoteno' 
+							AND yhtio = '$kukarow[yhtio]'";
 				$result = pupe_query($query);
 
 				$query = "	UPDATE tuotepaikat
 							SET oletus = 'X',
-							muuttaja	= '$kukarow[kuka]',
-							muutospvm	= now()
-							WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$oletus'";
+							muuttaja = '$kukarow[kuka]',
+							muutospvm = now()
+							WHERE tuoteno = '$tuoteno' 
+							AND yhtio = '$kukarow[yhtio]' 
+							AND tunnus = '$oletus'";
 				$result = pupe_query($query);
+
+				// P‰ivitet‰‰n uusi oletuspaikka myˆs avoimille keskener‰isille ostotilauksille´
+				$query = "	UPDATE tilausrivi
+							SET hyllyalue = '$uusi_oletusrow[hyllyalue]',
+							hyllynro = '$uusi_oletusrow[hyllynro]',
+							hyllytaso = '$uusi_oletusrow[hyllytaso]',
+							hyllyvali = '$uusi_oletusrow[hyllyvali]'
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tuoteno = '$tuoteno'
+							AND hyllyalue = '$oletusrow[hyllyalue]'
+							AND hyllynro = '$oletusrow[hyllynro]'
+							AND hyllytaso = '$oletusrow[hyllytaso]'
+							AND hyllyvali = '$oletusrow[hyllyvali]'
+							AND tyyppi = 'O'
+							AND uusiotunnus = '0'
+							AND kpl = '0'
+							AND varattu != '0'";
+				$result = pupe_query($query);
+
+				if (mysql_affected_rows() > 0) {
+					echo "<font class='message'>".t("P‰ivitettiin %s ostotilausrivin varastopaikkaa.", '', mysql_affected_rows())."</font><br><br>";
+				}
 			}
 			else {
 				echo "<font class='error'>".t("Uusi oletuspaikka on kadonnut")."</font><br><br>";

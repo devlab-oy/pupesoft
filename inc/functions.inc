@@ -20029,11 +20029,11 @@ if (!function_exists('paivita_tilausrivin_hylly')) {
 
 if (!function_exists('paivita_oletuspaikka')) {
 	function paivita_oletuspaikka($tuoteno, Array $hylly) {
-		global $kukarow;
+		global $kukarow, $yhtiorow;
 
 		// Palautusmuuttuja
 		$return = array();
-		
+
 		// Haetaan vanha oletuspaikka talteen ostotilausmuutoksia varten
 		$oletusquery = "	SELECT *
 							FROM tuotepaikat
@@ -20041,6 +20041,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 							and tuoteno = '$tuoteno'
 							and oletus != ''";
 		$oletusresult = pupe_query($oletusquery);
+		$oletusrow = mysql_fetch_assoc($oletusresult);
 		
 		# Poistetaan kaikilta tuotteen tuotepaikoilta oletus
 		# ostorivienvarastopaikat.inc, rivi 281
@@ -20090,10 +20091,8 @@ if (!function_exists('paivita_oletuspaikka')) {
 
 			$return["error"] = "Oletuspaikkaa ei löytynyt, tehtiin ensimmäisestä paikasta oletuspaikka";			
 		}
-		else {
-			$oletusrow = mysql_fetch_assoc($oletusresult);
-			
-			// Päivitetään uusi oletuspaikka myös avoimille keskeneräisille ostotilauksille«
+		elseif (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
+			// Päivitetään uusi oletuspaikka myös avoimille keskeneräisille ostotilauksille (jos uusi paikka on samassa varastossa kun vanha)
 			$query = "	UPDATE tilausrivi
 						SET hyllyalue	= '$hylly[hyllyalue]',
 						hyllynro	= '$hylly[hyllynro]',

@@ -1669,13 +1669,19 @@ if ($kasitellaan_tiedosto) {
 								$oletusresult = pupe_query($vanha_oletus_query);
 								$oletusrow = mysql_fetch_assoc($oletusresult);
 
-								// Päivitetään uusi oletuspaikka myös avoimille ostotilausriveille
-								if (mysql_num_rows($oletusresult) == 1) {
+								// Päivitetään uusi oletuspaikka myös avoimille ostotilausriveille (jos uusi paikka on samassa varastossa kun vanha)
+								$hylly = array(
+									"hyllyalue" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])],
+									"hyllynro" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYNRO", $taulunotsikot["tuotepaikat"])],
+									"hyllytaso" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYTASO", $taulunotsikot["tuotepaikat"])],
+									"hyllyvali" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYVALI", $taulunotsikot["tuotepaikat"])],
+								);
+								if (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
 									$uusi_oletus_query = "	UPDATE tilausrivi
-															SET hyllyalue = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])]}',
-															hyllynro = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYNRO", $taulunotsikot["tuotepaikat"])]}',
-															hyllytaso = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYTASO", $taulunotsikot["tuotepaikat"])]}',
-															hyllyvali = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYVALI", $taulunotsikot["tuotepaikat"])]}'
+															SET hyllyalue = '$hylly[hyllyalue]',
+															hyllynro = '$hylly[hyllynro]',
+															hyllytaso = '$hylly[hyllytaso]',
+															hyllyvali = '$hylly[hyllyvali]'
 															WHERE yhtio = '$kukarow[yhtio]'
 															AND tuoteno = '$tuoteno'
 															AND hyllyalue = '$oletusrow[hyllyalue]'
@@ -1723,13 +1729,19 @@ if ($kasitellaan_tiedosto) {
 								$oletusresult = pupe_query($vanha_oletus_query);
 								$oletusrow = mysql_fetch_assoc($oletusresult);
 
-								// Päivitetään uusi oletuspaikka myös avoimille ostotilausriveille
-								if (mysql_num_rows($oletusresult) == 1) {
+								// Päivitetään uusi oletuspaikka myös avoimille ostotilausriveille (jos uusi paikka on samassa varastossa kun vanha)
+								$hylly = array(
+									"hyllyalue" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])],
+									"hyllynro" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYNRO", $taulunotsikot["tuotepaikat"])],
+									"hyllytaso" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYTASO", $taulunotsikot["tuotepaikat"])],
+									"hyllyvali" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYVALI", $taulunotsikot["tuotepaikat"])],
+								);
+								if (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
 									$uusi_oletus_query = "	UPDATE tilausrivi
-															SET hyllyalue = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])]}',
-															hyllynro = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYNRO", $taulunotsikot["tuotepaikat"])]}',
-															hyllytaso = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYTASO", $taulunotsikot["tuotepaikat"])]}',
-															hyllyvali = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYVALI", $taulunotsikot["tuotepaikat"])]}'
+															SET hyllyalue = '$hylly[hyllyalue]',
+															hyllynro = '$hylly[hyllynro]',
+															hyllytaso = '$hylly[hyllytaso]',
+															hyllyvali = '$hylly[hyllyvali]'
 															WHERE yhtio = '$kukarow[yhtio]'
 															AND tuoteno = '$tuoteno'
 															AND hyllyalue = '$oletusrow[hyllyalue]'

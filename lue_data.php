@@ -1669,6 +1669,7 @@ if ($kasitellaan_tiedosto) {
 								$oletusresult = pupe_query($vanha_oletus_query);
 								$oletusrow = mysql_fetch_assoc($oletusresult);
 
+								// Päivitetään uusi oletuspaikka myös avoimille ostotilausriveille
 								if (mysql_num_rows($oletusresult) == 1) {
 									$uusi_oletus_query = "	UPDATE tilausrivi
 															SET hyllyalue = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])]}',
@@ -1722,6 +1723,7 @@ if ($kasitellaan_tiedosto) {
 								$oletusresult = pupe_query($vanha_oletus_query);
 								$oletusrow = mysql_fetch_assoc($oletusresult);
 
+								// Päivitetään uusi oletuspaikka myös avoimille ostotilausriveille
 								if (mysql_num_rows($oletusresult) == 1) {
 									$uusi_oletus_query = "	UPDATE tilausrivi
 															SET hyllyalue = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])]}',

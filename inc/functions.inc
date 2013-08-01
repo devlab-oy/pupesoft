@@ -22224,8 +22224,10 @@ if (!function_exists('poista_lasku')) {
 }
 
 if (!function_exists('hae_kayttajaan_linkitetty_extranet_kayttaja')) {
-	function hae_kayttajaan_linkitetty_extranet_kayttaja($kuka) {
+	function hae_kayttajaan_linkitetty_extranet_kayttaja($kuka, $yhtio = "") {
 		global $kukarow, $yhtiorow;
+
+		if ($yhtio == "") $yhtio = $kukarow['yhtio'];
 
 		$query = "	SELECT kuka.*
 					FROM kuka
@@ -22234,7 +22236,7 @@ if (!function_exists('hae_kayttajaan_linkitetty_extranet_kayttaja')) {
 					AND extranet_kayttajan_lisatiedot.liitostunnus = kuka.tunnus
 					AND extranet_kayttajan_lisatiedot.selite = '{$kuka}'
 					AND extranet_kayttajan_lisatiedot.laji = 'LINKITYS' )
-					WHERE kuka.yhtio = '{$kukarow['yhtio']}'";
+					WHERE kuka.yhtio = '{$yhtio}'";
 		$result = pupe_query($query);
 
 		return mysql_fetch_assoc($result);
@@ -22572,7 +22574,7 @@ if (!function_exists("lisaa_rivi")) {
 			echo "Lisaarivi not found";
 			exit;
 		}
-		
+
 		return array(
 			'lisatyt_rivit1' => $lisatyt_rivit1,
 			'lisatyt_rivit2' => $lisatyt_rivit2,
@@ -22592,7 +22594,7 @@ if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
 
         $query = "  SELECT count(*) as luku
                     FROM lasku
-                    JOIN asiakas 
+                    JOIN asiakas
 					ON ( asiakas.yhtio = lasku.yhtio
 						AND asiakas.tunnus = lasku.liitostunnus
 						AND asiakas.tunnus = '{$oletus_asiakas}' )

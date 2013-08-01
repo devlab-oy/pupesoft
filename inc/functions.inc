@@ -10120,7 +10120,16 @@ if (!function_exists("t")) {
 		}
 
 		if ($indeksi != 'fi') {
-			$sanakirjaquery  = "SELECT fi, $indeksi, tunnus FROM sanakirja WHERE fi = BINARY '$stringi'";
+
+			// Jos meill‰ on HTML:‰‰ strigiss‰, unohdetaan koko juttu ja palautetaan string vaa takas
+			if ($stringi != strip_tags($stringi)) {
+				return $stringi;
+			}
+
+			// Eskeipataan stringi
+			$stringi_sql = mysql_real_escape_string($stringi);
+
+			$sanakirjaquery  = "SELECT fi, $indeksi, tunnus FROM sanakirja WHERE fi = BINARY '$stringi_sql'";
 			$sanakirjaresult = pupe_query($sanakirjaquery, $link);
 
 			if (isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) $kaannetyt_sanat[] = $stringi;
@@ -10147,7 +10156,7 @@ if (!function_exists("t")) {
 				}
 			}
 			elseif ($verkkokauppa == "") {
-				$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
+				$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi_sql', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
 				$sanakirjaresult = pupe_query($sanakirjaquery, $link);
 			}
 		}

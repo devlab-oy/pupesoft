@@ -9,7 +9,7 @@
 	$laskurow = mysql_fetch_array($sresult);
 
 	if ($laskurow['tila'] != 'O' and $laskurow['tila'] != 'D' and $laskurow['tilaustyyppi'] != 'O') {
-		$tulosta_ostotilaus_ulos .= t("Kesken oleva tilaus ei ole ostotilaus");
+		$tulosta_ostotilaus_ulos .= t("Kesken oleva tilaus ei ole ostotilaus")."<br />";
 		exit;
 	}
 
@@ -25,7 +25,7 @@
 		$toimirow = mysql_fetch_array($toimires);
 
 		if (!preg_match("/(excel|wabco|xml)/", $toimirow['edi_kuvaus']) and ($toimirow['edi_palvelin'] == '' or $toimirow['edi_kayttaja'] == '' or $toimirow['edi_salasana'] == '' or $toimirow['edi_kuvaus'] == '' or $toimirow['edi_polku'] == '')) {
-			$tulosta_ostotilaus_ulos .= "<font class='error'>".t("Edi-tilauksen lähettämiseen tarvittavia tietoja ei ole syötetty")."! ".t("Tarkista toimittajan tiedot")."!</font>";
+			$tulosta_ostotilaus_ulos .= "<font class='error'>".t("Edi-tilauksen lähettämiseen tarvittavia tietoja ei ole syötetty")."! ".t("Tarkista toimittajan %s tiedot", "", trim("{$toimirow['nimi']} {$toimirow['nimitark']}"))."!</font><br />";
 		}
 		else {
 			// Otetaan ftp-palvelimen portti jos sellanen on setattu.

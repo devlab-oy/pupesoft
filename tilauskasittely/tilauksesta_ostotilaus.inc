@@ -5,7 +5,7 @@
 
 	if (!function_exists("tilauksesta_ostotilaus")) {
 		function tilauksesta_ostotilaus($otunnus, $tyyppi) {
-			global $yhtiorow, $kukarow, $toim;
+			global $yhtiorow, $kukarow, $toim, $pupe_root_polku;
 
 			$tilauksesta_ostotilaus = "";
 			$lisa_varattusiirto = "";
@@ -48,6 +48,7 @@
 			if (mysql_num_rows($result) > 0) {
 
 				$perheid = 0;
+				$tunnukset = array();
 
 				while ($rivi = mysql_fetch_assoc($result)) {
 
@@ -144,20 +145,52 @@
 
 						$commentsit = trim(t("Myyntitilaus").": $myytilrow[tunnus] \n".t("Myyntitilauksen toimitustapa").": $myytilrow[toimitustapa] \n".$tiltoi["comments"]);
 
+						// K‰sitell‰‰n myyntitilauksen otsikolla setattu "ostotilauksen k‰sittely"
+						switch($myytilrow['ostotilauksen_kasittely']) {
+							case '4':
+							case '5':
+								$ostotilauksen_kasittely_wherelisa = "
+								and toim_nimi		= '{$toim_nimi}'
+								and toim_nimitark	= '{$toim_nimitark}'
+								and toim_osoite		= '{$toim_osoite}'
+								and toim_postino	= '{$toim_postino}'
+								and toim_postitp	= '{$toim_postitp}'
+								and toim_maa		= '{$toim_maa}'
+								and varasto 		= '{$kukarow['oletus_ostovarasto']}'
+								and ohjausmerkki 	= '{$myytilrow['ohjausmerkki']}'";
+								break;
+							case '2':
+							case '3':
+								$ostotilauksen_kasittely_wherelisa = "
+								and toim_nimi		= '{$toim_nimi}'
+								and toim_nimitark	= '{$toim_nimitark}'
+								and toim_osoite		= '{$toim_osoite}'
+								and toim_postino	= '{$toim_postino}'
+								and toim_postitp	= '{$toim_postitp}'
+								and toim_maa		= '{$toim_maa}'";
+								break;
+							case '1':
+							case '0':
+							default:
+								$ostotilauksen_kasittely_wherelisa = "
+								and toim_nimi		= '{$toim_nimi}'
+								and toim_nimitark	= '{$toim_nimitark}'
+								and toim_osoite		= '{$toim_osoite}'
+								and toim_postino	= '{$toim_postino}'
+								and toim_postitp	= '{$toim_postitp}'
+								and toim_maa		= '{$toim_maa}'
+								and left(luontiaika,10) = left(now(),10)
+								and laatija 		= '{$kukarow['kuka']}'";
+								break;
+						}
+
 						$query = "	SELECT *
 									from lasku
 									where yhtio 		= '$kukarow[yhtio]'
 									and liitostunnus 	= '$tiltoi[tunnus]'
 									and tila 			= 'O'
 									and alatila 		= ''
-									and toim_nimi		= '$toim_nimi'
-									and toim_nimitark	= '$toim_nimitark'
-									and toim_osoite		= '$toim_osoite'
-									and toim_postino	= '$toim_postino'
-									and toim_postitp	= '$toim_postitp'
-									and toim_maa		= '$toim_maa'
-									and left(luontiaika,10) = left(now(),10)
-									and laatija 		= '$kukarow[kuka]'";
+									{$ostotilauksen_kasittely_wherelisa}";
 						$jtsre = pupe_query($query);
 
 						// ei lˆydy, tehd‰‰n uus otsikko
@@ -180,6 +213,7 @@
 										myyja 				= '$myytilrow[myyja]',
 										nimi 				= '$tiltoi[nimi]',
 										nimitark 			= '$tiltoi[nimitark]',
+										ohjausmerkki 		= '{$myytilrow['ohjausmerkki']}',
 										osoite 				= '$tiltoi[osoite]',
 										ovttunnus 			= '$tiltoi[ovttunnus]',
 										postino 			= '$tiltoi[postino]',
@@ -200,7 +234,7 @@
 										toim_postitp 		= '$toim_postitp',
 										valkoodi 			= '$valkoodi',
 										vanhatunnus			= '{$myytilrow['yhtio_toimipaikka']}',
-										varasto 			= '',
+										varasto 			= '{$kukarow['oletus_ostovarasto']}',
 										verkkotunnus		= '$myytilrow[liitostunnus]',
 									 	vienti_kurssi 		= '$vrow[kurssi]',
 										viesti 				= '$myytilrow[viesti]',
@@ -223,6 +257,8 @@
 							$jtsro = mysql_fetch_assoc($jtsre);
 							$tunnus = $jtsro["tunnus"];
 						}
+
+						$tunnukset[$tunnus] = $tunnus;
 
 						//Haetaan myˆs ns. lis‰varusteperheet.
 						$query = "	SELECT tuoteperhe.ohita_kerays, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl
@@ -402,6 +438,24 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$otunnus}'";
 				$upd_res = pupe_query($query);
+
+				// "L‰hetet‰‰n heti"-ominaisuus
+				if (in_array($myytilrow['ostotilauksen_kasittely'], array('1','3','5')) and count($tunnukset) > 0) {
+
+					foreach ($tunnukset as $otunnus) {
+
+						$komento['Ostotilaus'] = 'edi';
+
+						require('tilauskasittely/tulosta_ostotilaus.inc');
+
+						if (isset($tulosta_ostotilaus_ulos) and $tulosta_ostotilaus_ulos == "") {
+							// p‰ivitet‰‰n t‰ss‰ tilaus tulostetuksi
+							$query = "UPDATE lasku SET lahetepvm = now(), alatila = 'A' WHERE tunnus='{$otunnus}'";
+							$result = pupe_query($query);
+						}
+					}
+				}
+
 			}
 
 			return $tilauksesta_ostotilaus;

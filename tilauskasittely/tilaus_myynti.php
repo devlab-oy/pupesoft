@@ -2686,6 +2686,8 @@ if ($tee == '') {
 	// kirjoitellaan otsikko
 	echo "<table>";
 
+	$myyntikielto = '';
+		
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
@@ -3352,6 +3354,11 @@ if ($tee == '') {
 			echo "<br/>";
 			echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt"),"!</font>";
 			echo "<br/>";
+			
+			if ($yhtiorow['luottorajan_ylitys'] == "L") {
+				$muokkauslukko = 'LUKOSSA';
+				$myyntikielto = 'MYYNTIKIELTO';
+			}
 		}
 
 		if ($jvvirhe != '') {
@@ -3364,6 +3371,11 @@ if ($tee == '') {
 			echo "<br/>";
 			echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!</font>";
 			echo "<br/>";
+			
+			if ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L") {
+				$muokkauslukko = 'LUKOSSA';
+				$myyntikielto = 'MYYNTIKIELTO';
+			}
 		}
 
 		if ($trattavirhe != '') {
@@ -3386,8 +3398,6 @@ if ($tee == '') {
 	}
 
 	echo "<br>";
-
-	$myyntikielto = '';
 
 	// Tarkastetaan onko asiakas myyntikiellossa
 	if ($laskurow['liitostunnus'] > 0) {

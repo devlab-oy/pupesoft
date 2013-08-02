@@ -1,12 +1,12 @@
 #!/bin/bash
 
 hosti=`hostname`
-underline=`tput smul`
-nounderline=`tput rmul`
-green=`tput setaf 2`
-red=`tput setaf 1`
-white=`tput setaf 7`
-normal=`tput sgr0`
+underline=`tput -Txterm-color smul`
+nounderline=`tput -Txterm-color rmul`
+green=`tput -Txterm-color setaf 2`
+red=`tput -Txterm-color setaf 1`
+white=`tput -Txterm-color setaf 7`
+normal=`tput -Txterm-color sgr0`
 
 echo
 echo "${green}${underline}Tervetuloa ${hosti} Pupesoft-narupalveluun!${nounderline}${normal}"

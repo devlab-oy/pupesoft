@@ -132,6 +132,11 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$saakopoistaa = TRUE;
 				break;
+			case "yhtion_toimipaikat" :
+				$pakolliset  = array("OVTLISA", "NIMI");
+				$wherelliset = array("OVTLISA", "NIMI");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
 			case "rahtimaksut" :
 				$pakolliset = array("TOIMITUSTAPA", "KILOTALKU", "KILOTLOPPU", "KMALKU", "KMLOPPU");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
@@ -248,7 +253,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "rahtisopimukset" :
 				$pakolliset = array("YTUNNUS", "RAHTISOPIMUS", "TOIMITUSTAPA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-					break;
+				break;
 			case "toimitustapa" :
 				$pakolliset = array("SELITE", "TULOSTUSTAPA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");

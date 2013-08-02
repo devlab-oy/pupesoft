@@ -562,4 +562,27 @@
 		$jatko = 0;
 	}
 
-?>
+	if (mysql_field_name($result, $i) == "tehdas_saldo_tarkistus") {
+
+		$sel = $trow[$i] == 'K' ? " selected" : "";
+
+		$ulos  = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Ei tarkisteta tehdassaldoja suoratoimitusta tehdessä myyntitilaukselta")."</option>";
+		$ulos .= "<option value='K' {$sel}>".t("Tarkistetaan tehdassaldot suoratoimitusta tehdessä myyntitilaukselta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+
+	}
+
+	if (mysql_field_name($result, $i) == "pikaperustus") {
+
+		$sel = $trow[$i] == 'X' ? " selected" : "";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Toimittaja on valittavissa kun perustetaan uutta tuotetta")."</option>";
+		$ulos .= "<option value='X'{$sel["X"]}>".t("Toimittaja ei ole valittavissa kun perustetaan uutta tuotetta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

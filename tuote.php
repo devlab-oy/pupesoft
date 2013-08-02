@@ -737,7 +737,7 @@
 				foreach ($ttrow as $tt_rivi) {
 					$query = "	SELECT ttt.*, TRIM(CONCAT(toimi.nimi, ' ', toimi.nimitark)) AS nimi
 								FROM tuotteen_toimittajat_tuotenumerot AS ttt
-								JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus AND tt.toim_tuoteno = '{$tt_rivi['toim_tuoteno']}')
+								JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus AND tt.toim_tuoteno = '{$tt_rivi['toim_tuoteno']}' AND tt.toim_tuoteno != '')
 								JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
 								WHERE ttt.yhtio = '{$kukarow['yhtio']}'";
 					$chk_res = pupe_query($query);

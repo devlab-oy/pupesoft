@@ -2307,7 +2307,8 @@ if (!function_exists("tulosta_lasku")) {
 									WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 									AND lasku.tila = 'L'
 									AND lasku.alatila = 'X'
-									AND lasku.laskunro = '{$laskurow['laskunro']}'";
+									AND lasku.laskunro = '{$laskurow['laskunro']}'
+									AND lasku.tapvm = '{$laskurow["tapvm"]}'";
 		}
 
 		$asiakas_apu_res = pupe_query($asiakas_apu_query);

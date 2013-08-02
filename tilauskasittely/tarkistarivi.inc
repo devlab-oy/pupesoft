@@ -96,11 +96,13 @@
 	}
 
 	$korvattiin_korvaavalla = "";
+	$pikaperustus_naytetaan = 0;
 
 	if (mysql_num_rows($tres) == 0) {
 		$varaosavirhe .= t("VIRHE: Tuotetta ei löydy!")."<br>";
 		$riviok++;
 		$tilausok++;
+		$pikaperustus_naytetaan = 1;
 	}
 
 	if ($row["var2"] == "PK" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") AND $yhtiorow['reklamaation_hinnoittelu'] == 'K') {
@@ -419,7 +421,7 @@
 		}
 
 		if (($kukarow["extranet"] == "" or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E') and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS'))) and $row["var"] != 'V') {
-			$query = "	SELECT tyyppi_tieto, liitostunnus, toimi.nimi, toimi.suoratoimitus
+			$query = "	SELECT tyyppi_tieto, liitostunnus, toimi.nimi, toimi.suoratoimitus, tuotteen_toimittajat.tehdas_saldo, toimi.tehdas_saldo_tarkistus
 						FROM tuotteen_toimittajat use index (yhtio_tuoteno)
 						JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
 						WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
@@ -743,6 +745,10 @@
 							$selpaikka 			 = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
 							$selpaikkamaa 		 = "";
 							$selpaikkamyytavissa = 0;
+						}
+
+						if (($sel1 != "" or $sel2 != "") and $krow['tehdas_saldo_tarkistus'] != '' and $row['varattu'] > $krow['tehdas_saldo']) {
+							$varaosavirhe .= t("HUOM: Toimittajan tehtaan saldo on %d", "", $krow['tehdas_saldo']).".<br>";
 						}
 					}
 

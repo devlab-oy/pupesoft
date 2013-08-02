@@ -370,7 +370,9 @@
 				$asirow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
 			}
 
-			if (@include("tilauskasittely/$asirow[toimitusvahvistus]")) {
+			@include("tilauskasittely/$asirow[toimitusvahvistus]");
+
+			if ($toimitusvahvistus_desadv_lahetys === true) {
 				$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksesta %s lähetettiin toimitusvahvistus."), $laskurow["tunnus"])."</font><br><br>\n";
 			}
 		}

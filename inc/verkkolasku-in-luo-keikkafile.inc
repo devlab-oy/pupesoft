@@ -2075,6 +2075,16 @@ $debug = 0;
 
 		foreach ($tilausrivit as $tilriv_suuntalava => $tilrivit) {
 
+			// Laitetaan suuntalava valmiiksi
+			$query = "	UPDATE suuntalavat SET
+						tila = 'S'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tilriv_suuntalava}'";
+			pupe_query($query);
+
+			// Duplikaatit pois
+			$tilausrivit[$tilriv_suuntalava] = array_unique($tilausrivit[$tilriv_suuntalava]);
+
 			$query = "	SELECT count(tunnus) rivit
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -2094,7 +2104,6 @@ $debug = 0;
 				pupe_query($query);
 			}
 		}
-
 	}
 
 	// tämän keikan voi viedä saldoille ja laskuttaa

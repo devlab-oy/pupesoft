@@ -509,12 +509,12 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 		}
 
 		$tuote_select .= "tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,";
-		$tuote_select .= "CONCAT_WS(' ', tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) as hylly, ";
+		$tuote_select .= "CONCAT_WS(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as hylly, ";
 		$tuote_select .= "group_concat(distinct tuotepaikat.tunnus) paikkatun, ";
 
 		$group .= "tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, hylly,";
 
-		if (!empty($kerayksettomat_tuotepaikat)) {
+		if (empty($kerayksettomat_tuotepaikat)) {
 			$tuote_select .= "if (tuotepaikat.tunnus IS NULL , 1, 0) poistettu, ";
 			$group .= "poistettu,";
 		}
@@ -527,10 +527,11 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 		$kerayksettomat_tuotepaikat_varaston_hyllypaikat_join = str_replace('tilausrivi', 'tuotepaikat', $varaston_hyllypaikat_join);
 		$kerayksettomat_tuotepaikat_group = str_replace('tilausrivi', 'tuotepaikat', $group);
 		$kerayksettomat_tuotepaikka_where = str_replace('tilausrivi', 'tuotepaikat', $tuotepaikka_where);
+		$kerayksettomat_tuote_select = str_replace('tilausrivi', 'tuotepaikat', $tuote_select);
 
 		$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
 					{$keraysvyohyke_select}
-					{$tuote_select}
+					{$kerayksettomat_tuote_select}
 					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
 					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl+tilausrivi.varattu, 0)) tuokpl_valittu_aika,
 					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), 1, 0)) kpl_6,

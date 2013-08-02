@@ -729,7 +729,16 @@
 
 				// Laitetaan tämä päivä laskun kirjauspäiväksi jos yhtiön parametri on tässä asennossa.
 				if ($yhtiorow['ostolaskujen_paivays'] == "1") {
-					$laskun_tapvm = date("Ymd");
+
+					$edkuunvika = date("Ymd", mktime(0, 0, 0, date("m"), 0, date("Y")));
+
+					// Poikkeus jos kuun ekana päivänä tulee viime kuun vikalle päivälle päivättyjä laskuja
+					if (date("j") == 1 and $edkuunvika == $laskun_tapvm) {
+						$laskun_tapvm = $edkuunvika;
+					}
+					else {
+						$laskun_tapvm = date("Ymd");
+					}
 				}
 
 				$tpp = (int) substr($laskun_tapvm, 6, 2);
@@ -1489,7 +1498,7 @@
 												tilausrivinpositio 	= '{$rtuoteno[$i]['tilaajanrivinro']}',
 												toimittajanumero 	= '{$trow['toimittajanro']}',
 												toim_tuoteno 		= '{$rtuoteno[$i]['tuoteno']}',
-												toim_tuoteno2 		= '{$rtuoteno[$i]['tuoteno2']}',
+												toim_tuoteno2 		= '',
 												tuoteno				= '',
 												vastaanottaja 		= '{$ostaja_asiakkaantiedot['nimi']}',
 												yhtio 				= '{$yhtio}'";

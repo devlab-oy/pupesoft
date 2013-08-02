@@ -889,6 +889,9 @@
 				$where2 .= " and lasku.tunnus = 0 ";
 			}
 		}
+		else {
+			$kerayseran_tilaukset = $otunnus;
+		}
 
 		if (!isset($ascdesc)) $ascdesc = "desc";
 
@@ -2051,7 +2054,7 @@
 				}
 
 				// keräyslistan rivit
-				if ($yhtiorow['kerayserat'] == 'K' and $kerayseran_tilaukset != "") {
+				if (($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_tilaukset) and trim($kerayseran_tilaukset) != '') or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
 					$query = "	SELECT tilausrivi.*,
 								tuote.sarjanumeroseuranta,
 								kerayserat.kpl as tilkpl,
@@ -2063,12 +2066,6 @@
 								FROM kerayserat
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno {$lisa1})
-								JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio
-									AND vh.hyllyalue = tilausrivi.hyllyalue
-									AND vh.hyllynro = tilausrivi.hyllynro
-									AND vh.hyllyvali = tilausrivi.hyllyvali
-									AND vh.hyllytaso = tilausrivi.hyllytaso
-									AND vh.keraysvyohyke = kerayserat.keraysvyohyke)
 								WHERE kerayserat.otunnus IN ({$kerayseran_tilaukset})
 								AND kerayserat.yhtio   = '{$kukarow['yhtio']}'
 								ORDER BY sorttauskentta";

@@ -1131,7 +1131,11 @@ if (!function_exists('rivi_kerayslista')) {
 				// Trimmataan uudestaan
 				$row["kommentti"] = trim($row["kommentti"]);
 
-				if (($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
+				if ((
+					($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0)
+					or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))
+					)
+					and !empty($row['pakkausnro'])) {
 					$pakkaus_kirjain = chr((64+$row['pakkausnro']));
 
 					$pdf->draw_text(42, $kala+5, $pakkaus_kirjain, $thispage, $iso_boldi);

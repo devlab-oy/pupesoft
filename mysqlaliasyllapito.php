@@ -28,12 +28,17 @@
 						and selitetark_2 = '$xalias_set'";
 			$al_res = mysql_query($query) or pupe_error($query);
 
-			if ($mysqlaliasbox[$al_nimi] != "" or trim($mysqlalias[$al_nimi]) != "") {
+			if ($mysqlaliasbox[$al_nimi] != "" or trim($mysqlalias[$al_nimi]) != "" or trim($oletusarvo[$al_nimi]) != "") {
 
 				$pakollisuus = "";
+				$nakyvyys = "";
 
 				if ($mysqlaliaspakollisuus[$al_nimi] != "") {
 					$pakollisuus = "PAKOLLINEN";
+				}
+				
+				if ($mysqlaliasbox[$al_nimi] != "") {
+					$nakyvyys = "X";
 				}
 
 				$xotsikko = str_replace("(BR)", "<br>", trim($mysqlalias[$al_nimi]));
@@ -41,6 +46,7 @@
 				$query = "	INSERT INTO avainsana
 							SET yhtio 		= '$kukarow[yhtio]',
 							laji			= 'MYSQLALIAS',
+							nakyvyys		= '$nakyvyys',
 							selite			= '$xtaulu.$al_nimi',
 							selitetark 		= '$xotsikko',
 							selitetark_2 	= '$xalias_set',
@@ -218,7 +224,8 @@
 			//Haetaan tietokantasarakkeen nimialias
 			$al_nimi = mysql_field_name($result, $i);
 			$otsikko = "";
-			$box 	 = "CHK";
+			$box 	 = "";
+			$pakollisuusbox = "";
 			$oletusarvo = "";
 
 			$query = "	SELECT *
@@ -229,19 +236,12 @@
 						and selitetark_2 = '$alias_set'";
 			$al_res = mysql_query($query) or pupe_error($query);
 
-			if(mysql_num_rows($al_res) > 0) {
+			if (mysql_num_rows($al_res) > 0) {
 				$al_row = mysql_fetch_array($al_res);
 
 				$otsikko = str_replace("<br>", "(BR)", $al_row["selitetark"]);
-				$box = "CHECKED";
-
-				if ($al_row['selitetark_3'] == 'PAKOLLINEN') {
-					$pakollisuusbox = "CHECKED";
-				}
-				else {
-					$pakollisuusbox = "";
-				}
-
+				$box = $al_row['nakyvyys'] != '' ? "CHECKED" : "";
+				$pakollisuusbox = $al_row['selitetark_3'] == 'PAKOLLINEN' ? "CHECKED" : "";
 				$oletusarvo = $al_row['selitetark_4'];
 			}
 
@@ -308,5 +308,3 @@
 	}
 
 	require ("inc/footer.inc");
-
-?>

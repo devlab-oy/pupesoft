@@ -242,8 +242,12 @@
 
 				$rtuoteno[$i]["kauttalaskutus"] = "";
 				$rtuoteno[$i]['status'] = "";
+
 				$rtuoteno[$i]["ostotilausnro"] = (string) pupesoft_cleanstring($tuotetieto->OrderRef->BuyerOrderNumber);
+				if ($rtuoteno[$i]["ostotilausnro"] == "") (string) $xml->InvoiceHeader->OrderRef->BuyerOrderNumber;
+
 				$rtuoteno[$i]["tilaajanrivinro"] = (string) pupesoft_cleanstring($tuotetieto->OrderItemRef->BuyerOrderItemRef);
+
 				$rtuoteno[$i]["kpl"] = (int) str_replace(",", ".", $tuotetieto->Quantity);
 
 				if (isset($tuotetieto->TotalValue->Amount)) {

@@ -5989,13 +5989,13 @@ if ($tee == '') {
 				}
 
 				if ($row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm'])) {
-					$var = $row['var'] . " - ".t("Muiden mukana");
+					$var_temp = $row['var'] . " - ".t("Muiden mukana");
 				}
 				else {
-					$var = $row['var'];
+					$var_temp = $row['var'];
 				}
 				
-				echo "<td $classvar align='center' valign='top'>$var&nbsp;</td>";
+				echo "<td $classvar align='center' valign='top'>$var_temp&nbsp;</td>";
 
 				if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 
@@ -6309,7 +6309,7 @@ if ($tee == '') {
 								</form> ";
 					}
 
-					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $row['var'] != 'J' and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] != "o" and $row["status"] != 'P' and $row["status"] != 'X') {
+					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and in_array($row["var"], array('','P','H','S','T','U','V','A','B','R')) and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] != "o" and $row["status"] != 'P' and $row["status"] != 'X') {
 
 						echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
 									<input type='hidden' name='toim' 			value = '$toim'>

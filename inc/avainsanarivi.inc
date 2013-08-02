@@ -162,6 +162,8 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_VAKIOTE") 	$ulos .= "<option value='TARJOUS_VAKIOTE' {$avain_sel['TARJOUS_VAKIOTE']}>	".t("Tarjouksen vakioteksti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KATEISOTTO")		$ulos .= "<option value='KATEISOTTO' {$avain_sel['KATEISOTTO']}>			".t("K‰teisoton luonne")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KOHDE_TYYPPI")  	$ulos .= "<option value='KOHDE_TYYPPI' {$avain_sel['KOHDE_TYYPPI']}>        ".t("Kohteen tyyppi")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "MYYNNISTA_OSTO")  	$ulos .= "<option value='MYYNNISTA_OSTO' {$avain_sel['MYYNNISTA_OSTO']}>    ".t("Ostotilauksen k‰sittely myyntitilauksella")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "PAIKALLISVARAST")	$ulos .= "<option value='PAIKALLISVARAST' {$avain_sel['PAIKALLISVARAST']}>	".t("Paikallisvarasto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "HINNAT_CRON") 	 	$ulos .= "<option value='HINNAT_CRON' {$avain_sel['HINNAT_CRON']}>        	".t("Hinnat-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
@@ -347,6 +349,21 @@
 		$jatko = 0;
 	}
 
+	if ($avain_sel['MYYNNISTA_OSTO'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
+
+		$sel = array($trow[$i] => " selected") + array_fill_keys(array('1','2','3','4','5'), '');
+
+		$ulos  = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value='0'>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja per k‰ytt‰j‰ per p‰iv‰")."</option>";
+		$ulos .= "<option value='1' {$sel[1]}>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja per k‰ytt‰j‰ per p‰iv‰, l‰hetet‰‰n heti")."</option>";
+		$ulos .= "<option value='2' {$sel[2]}>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja")."</option>";
+		$ulos .= "<option value='3' {$sel[3]}>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja, l‰hetet‰‰n heti")."</option>";
+		$ulos .= "<option value='4' {$sel[4]}>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja per varasto per ohjausmerkki")."</option>";
+		$ulos .= "<option value='5' {$sel[5]}>".t("Tilauksen rivit lis‰t‰‰n olemassa olevalle ostotilaukselle per toimittaja per varasto per ohjausmerkki, l‰hetet‰‰n heti")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 	if ($avain_sel["ALV"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {
 
 		$sel = trim($trow[$i]) != "" ? " SELECTED" : "";
@@ -408,7 +425,6 @@
 		$ulos .= "<option value='LAHETTAJAN_SOPIMUS' $sel1>".t("K‰ytet‰‰n l‰hett‰j‰n rahtisopimusta")."</option>";
 		$ulos .= "<option value='VASTAANOTTAJAN_SOPIMUS' $sel2>".t("K‰ytet‰‰n vastaanottajan rahtisopimusta")."</option>";
 		$ulos .= "</select></td>";
-		$jatko = 0;
 		$jatko = 0;
 	}
 

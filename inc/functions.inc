@@ -21066,7 +21066,7 @@ if (!function_exists('_echo_ordered_table_headers')) {
 if(!function_exists('_echo_table_rows')) {
 	function _echo_table_rows(&$rivit, $force_to_string = array(), $callback = '') {
 		foreach ($rivit as $rivi) {
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 			foreach ($rivi as $header => &$solu) {
                 if($callback == '') {
                     _echo_table_row_td($header, $solu, $force_to_string);
@@ -21101,7 +21101,7 @@ if(!function_exists('_echo_table_row_td')) {
 if (!function_exists('_echo_ordered_table_rows')) {
 	function _echo_ordered_table_rows(&$rivit, $header_values, $force_to_string = array(), $callback = '') {
 		foreach ($rivit as $rivi) {
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 			foreach ($header_values as $column_name => $value) {
 				if (array_key_exists($column_name, $rivi)) {
 					if ($callback == '') {

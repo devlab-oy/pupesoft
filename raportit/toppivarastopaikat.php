@@ -17,7 +17,7 @@ if (isset($_POST["tee"])) {
 	}
 }
 
-require "../inc/parametrit.inc";
+require("../inc/parametrit.inc");
 
 if ($tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
@@ -25,112 +25,99 @@ if ($tee == 'lataa_tiedosto') {
 		readfile($filepath);
 		unlink($filepath);
 	}
-    else {
-        echo "<font class='error'>".t("Tiedostoa ei ole olemassa")."</font>";
-    }
+	else {
+		echo "<font class='error'>".t("Tiedostoa ei ole olemassa")."</font>";
+	}
 	exit;
 }
 
-require ('inc/pupeExcel.inc');
-require ('inc/ProgressBar.class.php');
+require('inc/pupeExcel.inc');
+require('inc/ProgressBar.class.php');
 
-ini_set("memory_limit", "2G");
-
+ini_set("memory_limit", "5G");
 ?>
 <script type="text/javascript">
-    function tarkista() {
-        var saako_submit = true;
+	function tarkista() {
+		var saako_submit = true;
 
-        var all_values = $(".ahylly").map(function(){return $(this).val();}).get();
-        var ahylly_not_empty_values = all_values.filter(function(v){return v!==''});
+		var all_values = $(".ahylly").map(function() {
+			return $(this).val();
+		}).get();
+		var ahylly_not_empty_values = all_values.filter(function(v) {
+			return v !== ''
+		});
 
-        all_values = $(".lhylly").map(function(){return $(this).val();}).get();
-        var lhylly_not_empty_values = all_values.filter(function(v){return v!==''});
+		all_values = $(".lhylly").map(function() {
+			return $(this).val();
+		}).get();
+		var lhylly_not_empty_values = all_values.filter(function(v) {
+			return v !== ''
+		});
 
-        //jos ei olla rajattu ahylly, lhylly tai varastolla
-        if ((ahylly_not_empty_values.length === 0 && lhylly_not_empty_values.length === 0 ) && $('.varastot:checked').length === 0) {
-            alert($('#valitse_varasto').html());
-            saako_submit = false;
-        }
+		//jos ei olla rajattu ahylly, lhylly tai varastolla
+		if ((ahylly_not_empty_values.length === 0 && lhylly_not_empty_values.length === 0) && $('.varastot:checked').length === 0) {
+			alert($('#valitse_varasto').html());
+			saako_submit = false;
+		}
 
-        return saako_submit;
-    }
+		return saako_submit;
+	}
 </script>
 
 <?php
-// ehdotetaan 7 päivää taaksepäin
-if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
-if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
-if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
-
-if (!isset($kkl)) $kkl = date("m");
-if (!isset($vvl)) $vvl = date("Y");
-if (!isset($ppl)) $ppl = date("d");
-
-if (!isset($tee))      	$tee = "";
-if (!isset($toppi))      $toppi = "";
-if (!isset($ahyllyalue)) $ahyllyalue = "";
-if (!isset($ahyllynro))  $ahyllynro  = "";
-if (!isset($ahyllyvali)) $ahyllyvali = "";
-if (!isset($ahyllytaso)) $ahyllytaso = "";
-if (!isset($lhyllyalue)) $lhyllyalue = "";
-if (!isset($lhyllynro))  $lhyllynro  = "";
-if (!isset($lhyllyvali)) $lhyllyvali = "";
-if (!isset($lhyllytaso)) $lhyllytaso = "";
-if (!isset($summaa_varastopaikalle)) $summaa_varastopaikalle = "";
-if (!isset($tee_excel)) $tee_excel = "";
 
 echo "<div id='valitse_varasto' style='display:none;'>".t("Valitse varasto tai rajaa varastopaikalla")."</div>";
 
 echo "<font class='head'>".t("Varastopaikkojen keräysseuranta")."</font><hr>";
 
 $kaikki_lisa_kentat = array(
-	0 => array(
-		'kolumni' => 'tuote.tuotekorkeus',
-        'header' => t('Tuotekorkeus'),
-		'checked' => '',
+	0	 => array(
+		'kolumni'	 => 'tuote.tuotekorkeus',
+		'header'	 => t('Tuotekorkeus'),
+		'checked'	 => '',
 	),
-	1 => array(
-		'kolumni' => 'tuote.tuoteleveys',
-        'header' => t('Tuoteleveys'),
-		'checked' => '',
+	1	 => array(
+		'kolumni'	 => 'tuote.tuoteleveys',
+		'header'	 => t('Tuoteleveys'),
+		'checked'	 => '',
 	),
-	2 => array(
-		'kolumni' => 'tuote.tuotesyvyys',
-        'header' => t('Tuotesyvyys'),
-		'checked' => '',
+	2	 => array(
+		'kolumni'	 => 'tuote.tuotesyvyys',
+		'header'	 => t('Tuotesyvyys'),
+		'checked'	 => '',
 	),
-	3 => array(
-		'kolumni' => 'tuote.tuotemassa',
-        'header' => t('Tuotemassa'),
-		'checked' => '',
+	3	 => array(
+		'kolumni'	 => 'tuote.tuotemassa',
+		'header'	 => t('Tuotemassa'),
+		'checked'	 => '',
 	),
-	4 => array(
-		'kolumni' => 'tuote.status',
-        'header' => t('Status'),
-		'checked' => '',
+	4	 => array(
+		'kolumni'	 => 'tuote.status',
+		'header'	 => t('Status'),
+		'checked'	 => '',
 	),
-	5 => array(
-		'kolumni' => 'tuote.luontiaika',
-        'header' => t('Luontiaika'),
-		'checked' => '',
+	5	 => array(
+		'kolumni'	 => 'tuote.luontiaika',
+		'header'	 => t('Luontiaika'),
+		'checked'	 => '',
 	),
-	6 => array(
-		'kolumni' => 'tuote.tuoteno',
-        'header' => t('Tuotenumero'),
-		'checked' => ($tee == '' ? "checked='checked'" : ''),
+	6	 => array(
+		'kolumni'	 => 'tuote.tuoteno',
+		'header'	 => t('Tuotenumero'),
+		'checked'	 => ($tee == '' ? "checked='checked'" : ''),
 	),
-	7 => array(
-		'kolumni' => 'tuote.nimitys',
-        'header' => t('Nimitys'),
-		'checked' => ($tee == '' ? "checked='checked'" : ''),
+	7	 => array(
+		'kolumni'	 => 'tuote.nimitys',
+		'header'	 => t('Nimitys'),
+		'checked'	 => ($tee == '' ? "checked='checked'" : ''),
 	),
-	8 => array(
-		'kolumni' => 'tuote.ostoehdotus',
-        'header' => t('Ostoehdotus'),
-		'checked' => '',
+	8	 => array(
+		'kolumni'	 => 'tuote.ostoehdotus',
+		'header'	 => t('Ostoehdotus'),
+		'checked'	 => '',
 	),
 );
+
 //for looppi vain sen takia, että saadaan synkattua formista valitut kentät, mahdollisien kenttien kanssa
 foreach ($kaikki_lisa_kentat as $kentat_index => &$kentat_value) {
 	if ((isset($lisa_kentat) and in_array($kentat_index, $lisa_kentat)) or (!empty($kentat_value['checked']))) {
@@ -141,149 +128,100 @@ foreach ($kaikki_lisa_kentat as $kentat_index => &$kentat_value) {
 	}
 }
 
-$query = "	SELECT tunnus,
-			nimitys
-			FROM varastopaikat
-			WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tyyppi != 'P'
-			ORDER BY nimitys ASC";
-$result = pupe_query($query);
-$kaikki_varastot = array();
-
-while ($varasto = mysql_fetch_assoc($result)) {
-	if (isset($varastot) and in_array($varasto['tunnus'], $varastot)) {
-		$checked = "checked = 'checked'";
-	}
-	else {
-		$checked = "";
-	}
-	$kaikki_varastot[$varasto['tunnus']] = array(
-		'nimitys' => $varasto['nimitys'],
-		'checked' => $checked,
-	);
-}
-
-if (!empty($yhtiorow['kerayserat'])) {
-    $query = "	SELECT tunnus, nimitys
-                FROM keraysvyohyke
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND nimitys != ''";
-    $result = pupe_query($query);
-    $kaikki_keraysvyohykkeet = array();
-
-	while ($keraysvyohyke = mysql_fetch_assoc($result)) {
-        if (isset($keraysvyohykkeet) and in_array($keraysvyohyke['tunnus'], $keraysvyohykkeet)) {
-            $checked = "checked = 'checked'";
-        }
-        else {
-            $checked = "";
-        }
-        $kaikki_keraysvyohykkeet[$keraysvyohyke['tunnus']] = array(
-            'nimitys' => $keraysvyohyke['nimitys'],
-            'checked' => $checked,
-        );
-    }
-}
-
+// Ajetaan raportti
 if ($tee != '') {
+
 	$apaikka = strtoupper(sprintf("%-05s", $ahyllyalue)).strtoupper(sprintf("%05s", $ahyllynro)).strtoupper(sprintf("%05s", $ahyllyvali)).strtoupper(sprintf("%05s", $ahyllytaso));
 	$lpaikka = strtoupper(sprintf("%-05s", $lhyllyalue)).strtoupper(sprintf("%05s", $lhyllynro)).strtoupper(sprintf("%05s", $lhyllyvali)).strtoupper(sprintf("%05s", $lhyllytaso));
 
 	$apaikka = array(
 		'ahyllyalue' => $ahyllyalue,
-		'ahyllynro' => $ahyllynro,
+		'ahyllynro'	 => $ahyllynro,
 		'ahyllyvali' => $ahyllyvali,
 		'ahyllytaso' => $ahyllytaso,
-
 	);
+
 	$lpaikka = array(
 		'lhyllyalue' => $lhyllyalue,
-		'lhyllynro' => $lhyllynro,
+		'lhyllynro'	 => $lhyllynro,
 		'lhyllyvali' => $lhyllyvali,
 		'lhyllytaso' => $lhyllytaso,
 	);
-	$lisa = "";
 
-	if ($toppi != '') {
-		$lisa = " LIMIT $toppi ";
-	}
+	$lisa = ($toppi != '' and is_numeric($toppi)) ? " LIMIT $toppi " : "";
 
 	$header_values = array(
-		'tuoteno' => array(
+		'tuoteno'					 => array(
 			'header' => t('Tuoteno'),
-			'order' => 0
+			'order'	 => 0
 		),
-		'nimitys' => array(
+		'nimitys'					 => array(
 			'header' => t('Tuotteen nimi'),
-			'order' => 10
+			'order'	 => 10
 		),
-		'varaston_nimitys' => array(
+		'varaston_nimitys'			 => array(
 			'header' => t('Varasto'),
-			'order' => 20
+			'order'	 => 20
 		),
-		'keraysvyohykkeen_nimitys' => array(
+		'keraysvyohykkeen_nimitys'	 => array(
 			'header' => t('Keräysvyöhyke'),
-			'order' => 30
+			'order'	 => 30
 		),
-		'hylly' => array(
+		'hylly'						 => array(
 			'header' => t('Varastopaikka'),
-			'order' => 40
+			'order'	 => 40
 		),
-		'saldo' => array(
-			'header' => t('Saldo'),
-			'order' => 50
-		),
-		'kpl_valittu_aika' => array(
+		'kpl_valittu_aika'			 => array(
 			'header' => t('Keräystä'),
-			'order' => 60
+			'order'	 => 60
 		),
-		'kpl_valittu_aika_pvm' => array(
+		'kpl_valittu_aika_pvm'		 => array(
 			'header' => t('Keräystä/Päivä'),
-			'order' => 70
+			'order'	 => 70
 		),
-		'kpl_kerays' => array(
+		'kpl_kerays'				 => array(
 			'header' => t('Kpl/Keräys'),
-			'order' => 80
+			'order'	 => 80
 		),
-		'kpl_6' => array(
+		'kpl_6'						 => array(
 			'header' => t('Keräystä tästä päivästä 6kk'),
-			'order' => 90
+			'order'	 => 90
 		),
-		'kpl_12' => array(
+		'kpl_12'					 => array(
 			'header' => t('Keräystä tästä päivästä 12kk'),
-			'order' => 100
+			'order'	 => 100
 		),
-		'poistettu' => array(
+		'poistettu'					 => array(
 			'header' => t('Poistettu varastopaikka'),
-			'order' => 110
+			'order'	 => 110
 		),
-		'tuotekorkeus' => array(
+		'tuotekorkeus'				 => array(
 			'header' => t('Tuotteen korkeus'),
-			'order' => 11
+			'order'	 => 11
 		),
-		'tuoteleveys' => array(
+		'tuoteleveys'				 => array(
 			'header' => t('Tuotteen leveys'),
-			'order' => 12
+			'order'	 => 12
 		),
-		'tuotesyvyys' => array(
+		'tuotesyvyys'				 => array(
 			'header' => t('Tuotteen syvyys'),
-			'order' => 13
+			'order'	 => 13
 		),
-		'tuotemassa' => array(
+		'tuotemassa'				 => array(
 			'header' => t('Tuotteen massa'),
-			'order' => 14
+			'order'	 => 14
 		),
-		'status' => array(
+		'status'					 => array(
 			'header' => t('Status'),
-			'order' => 15
+			'order'	 => 15
 		),
-		'luontiaika' => array(
+		'luontiaika'				 => array(
 			'header' => t('Tuotteen Luontiaika'),
-			'order' => 16
+			'order'	 => 16
 		),
-		'ostoehdotus' => array(
+		'ostoehdotus'				 => array(
 			'header' => t('Ostoehdotus'),
-			'order' => 17
+			'order'	 => 17
 		),
 	);
 	$force_to_string = array(
@@ -291,59 +229,214 @@ if ($tee != '') {
 	);
 
 	if (!empty($summaa_varastopaikalle)) {
-		list($rivit, $saldolliset) = hae_rivit("PAIKKA", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $kaikki_lisa_kentat);
-
-		if (count($rivit) > 0) {
-
-			if (!empty($tee_excel)) {
-				$xls_filename = generoi_excel_tiedosto($rivit, $header_values, $force_to_string);
-				echo_tallennus_formi($xls_filename);
-			}
-
-			nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl, 'right_align_numbers');
-		}
-        else {
-            echo "<br><font class='error'>".t("Yhtään keräystä ei löytynyt")."</font><br><br>";
-        }
+		list($rivit, $saldolliset) = hae_rivit("PAIKKA", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $kaikki_lisa_kentat, $kerayksettomat_tuotepaikat, $lisa);
 	}
 	else {
-		list($rivit, $saldolliset) = hae_rivit("TUOTE", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $kaikki_lisa_kentat);
-
-		if (count($rivit) > 0) {
-
-			if (!empty($tee_excel)) {
-				$xls_filename = generoi_excel_tiedosto($rivit, $header_values, $force_to_string);
-				echo_tallennus_formi($xls_filename);
-			}
-
-			nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl, 'right_align_numbers');
-		}
-        else {
-            echo "<br><font class='error'>".t("Yhtään keräystä ei löytynyt")."</font><br><br>";
-        }
+		list($rivit, $saldolliset) = hae_rivit("TUOTE", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $kaikki_lisa_kentat, $kerayksettomat_tuotepaikat, $lisa);
 	}
 
-    if (count($saldolliset) > 0) {
-        echo_tulosta_inventointilista($saldolliset);
-    }
+	if (count($rivit) > 0) {
+
+		if (!empty($tee_excel)) {
+			$xls_filename = generoi_excel_tiedosto($rivit, $header_values, $force_to_string);
+			echo_tallennus_formi($xls_filename);
+		}
+
+		nayta_ruudulla($rivit, $header_values, $force_to_string, $ppa, $kka, $vva, $ppl, $kkl, $vvl, 'right_align_numbers');
+	}
+	else {
+		echo "<br><font class='error'>".t("Yhtään keräystä ei löytynyt")."</font><br><br>";
+	}
+
+	if (count($saldolliset) > 0) {
+		echo_tulosta_inventointilista($saldolliset);
+	}
+
+	$tee = "";
 }
 
-echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso, $toppi, $summaa_varastopaikalle, $tee_excel, $kaikki_varastot, $kaikki_keraysvyohykkeet, $kaikki_lisa_kentat);
+// Käyttöliittymä
+if ($tee == '') {
 
-function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $lisa_kentat) {
+	// ehdotetaan 7 päivää taaksepäin
+	if (!isset($kka))                     $kka = date("m", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
+	if (!isset($vva))                     $vva = date("Y", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
+	if (!isset($ppa))                     $ppa = date("d", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
+	if (!isset($kkl))                     $kkl = date("m");
+	if (!isset($vvl))                     $vvl = date("Y");
+	if (!isset($ppl))                     $ppl = date("d");
+	if (!isset($tee))                     $tee = "";
+	if (!isset($toppi))                   $toppi = "";
+	if (!isset($ahyllyalue))              $ahyllyalue = "";
+	if (!isset($ahyllynro))               $ahyllynro = "";
+	if (!isset($ahyllyvali))              $ahyllyvali = "";
+	if (!isset($ahyllytaso))              $ahyllytaso = "";
+	if (!isset($lhyllyalue))              $lhyllyalue = "";
+	if (!isset($lhyllynro))               $lhyllynro = "";
+	if (!isset($lhyllyvali))              $lhyllyvali = "";
+	if (!isset($lhyllytaso))              $lhyllytaso = "";
+	if (!isset($summaa_varastopaikalle))  $summaa_varastopaikalle = "";
+	if (!isset($tee_excel))               $tee_excel = "";
+
+	$query = "	SELECT tunnus, nimitys
+				FROM varastopaikat
+				WHERE yhtio = '{$kukarow['yhtio']}'
+	            AND tyyppi != 'P'
+				ORDER BY nimitys ASC";
+	$result = pupe_query($query);
+	$kaikki_varastot = array();
+
+	while ($varasto = mysql_fetch_assoc($result)) {
+		if (isset($varastot) and in_array($varasto['tunnus'], $varastot)) {
+			$checked = "checked = 'checked'";
+		}
+		else {
+			$checked = "";
+		}
+		$kaikki_varastot[$varasto['tunnus']] = array(
+			'nimitys'	 => $varasto['nimitys'],
+			'checked'	 => $checked,
+		);
+	}
+
+	if (!empty($yhtiorow['kerayserat'])) {
+		$query = "	SELECT tunnus, nimitys
+	                FROM keraysvyohyke
+	                WHERE yhtio = '{$kukarow['yhtio']}'
+	                AND nimitys != ''";
+		$result = pupe_query($query);
+
+		$kaikki_keraysvyohykkeet = array();
+
+		while ($keraysvyohyke = mysql_fetch_assoc($result)) {
+			if (isset($keraysvyohykkeet) and in_array($keraysvyohyke['tunnus'], $keraysvyohykkeet)) {
+				$checked = "checked = 'checked'";
+			}
+			else {
+				$checked = "";
+			}
+			$kaikki_keraysvyohykkeet[$keraysvyohyke['tunnus']] = array(
+				'nimitys'	 => $keraysvyohyke['nimitys'],
+				'checked'	 => $checked,
+			);
+		}
+	}
+
+
+
+	echo "<br>";
+	echo "<form method='POST'>";
+
+	echo "<table>";
+	echo "<input type='hidden' name='tee' value='kaikki' />";
+
+	$checked = empty($summaa_varastopaikalle) ? '' : 'checked = "checked"';
+
+	echo "<tr>";
+	echo "<th>".t('Summaa per varasto')."/".t('keräysvyöhyke')."</th>";
+	echo "<td><input type='checkbox' name='summaa_varastopaikalle' $checked /></td>";
+	echo "</tr>";
+
+	$checked = empty($kerayksettomat_tuotepaikat) ? '' : 'checked = "checked"';
+
+	echo "<tr>";
+	echo "<th>".t("Näytä myös ne tuotepaikat joilta ei ole keräyksiä")."</th>";
+	echo "<td><input type='checkbox' name='kerayksettomat_tuotepaikat' {$checked}/> (".t("Lasketaan keräykset vain aktiivisilta tuotepaikoilta").")</td>";
+	echo "</tr>";
+
+	echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='ppa' value='$ppa' size='3'>
+			<input type='text' name='kka' value='$kka' size='3' />
+			<input type='text' name='vva' value='$vva' size='5' /></td>
+			</tr><tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='ppl' value='$ppl' size='3' />
+			<input type='text' name='kkl' value='$kkl' size='3' />
+			<input type='text' name='vvl' value='$vvl' size='5' /></td>";
+
+	echo "<tr><th>".t("Anna alkuvarastopaikka").":</th>
+			<td>", hyllyalue("ahyllyalue", $ahyllyalue), "
+			<input class='ahylly' type='text' size='6' name='ahyllynro' value='$ahyllynro' />
+			<input class='ahylly' type='text' size='6' name='ahyllyvali' value='$ahyllyvali' />
+			<input class='ahylly' type='text' size='6' name='ahyllytaso' value='$ahyllytaso' />
+			</td></tr>";
+
+	echo "<tr><th>".t("ja loppuvarastopaikka").":</th>
+			<td>", hyllyalue("lhyllyalue", $lhyllyalue), "
+			<input class='lhylly' type='text' size='6' name='lhyllynro' value='$lhyllynro' />
+			<input class='lhylly' type='text' size='6' name='lhyllyvali' value='$lhyllyvali' />
+			<input class='lhylly' type='text' size='6' name='lhyllytaso' value='$lhyllytaso' />
+			</td></tr>";
+
+	echo "<tr><th>".t("Listaa vain näin monta kerätyintä tuotetta").":</th>
+			<td><input type='text' size='6' name='toppi' value='$toppi' /></td>";
+
+	echo "<tr>";
+	echo "<th>".t("Varastot")."</th>";
+	echo "<td>";
+
+	foreach ($kaikki_varastot as $varasto_index => $varasto) {
+		echo "<input class='varastot' type='checkbox' name='varastot[]' value='{$varasto_index}' {$varasto['checked']} />";
+		echo " {$varasto['nimitys']}";
+		echo "<br/>";
+	}
+	echo "</td>";
+	echo "</tr>";
+
+	if (!empty($yhtiorow['kerayserat']) and !empty($kaikki_keraysvyohykkeet)) {
+		echo "<tr>";
+		echo "<th>".t("Keräysvyöhykkeet")."</th>";
+
+		echo "<td>";
+		foreach ($kaikki_keraysvyohykkeet as $keraysvyohykkeet_index => $keraysvyohykkeet) {
+			echo "<input class='keraysvyohykkeet' type='checkbox' name='keraysvyohykkeet[]' value='{$keraysvyohykkeet_index}' {$keraysvyohykkeet['checked']} />";
+			echo " {$keraysvyohykkeet['nimitys']}";
+			echo "<br/>";
+		}
+		echo "</td>";
+
+		echo "</tr>";
+	}
+
+	echo "<tr>";
+	echo "<th>".t("Lisäkentät")."</th>";
+
+	echo "<td>";
+
+	foreach ($kaikki_lisa_kentat as $lisa_kentat_index => $lisa_kentat) {
+		echo "<input class='keraysvyohykkeet' type='checkbox' name='lisa_kentat[]' value='{$lisa_kentat_index}' {$lisa_kentat['checked']} />";
+		echo " {$lisa_kentat['header']}";
+		echo "<br/>";
+	}
+	echo "</td>";
+	echo "<td class='back'>".t("Ei käytössä jos summataan per varasto/keräysvyöhyke")."</td>";
+	echo "</tr>";
+
+	$checked = empty($tee_excel) ? '' : 'checked = "checked"';
+
+	echo "<tr>";
+	echo "<th>".t('Tee Excel')."</th>";
+	echo "<td><input type='checkbox' name='tee_excel' $checked /></td></tr>";
+
+	echo "</table>";
+	echo '<br/>';
+	echo "<input type='submit' value='".t("Aja raportti")."' onclick='return tarkista();'/>";
+	echo '</form>';
+}
+
+function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka, $varastot, $keraysvyohykkeet, $lisa_kentat, $kerayksettomat_tuotepaikat, $lisa) {
 	global $yhtiorow;
 
 	$ostoehdotukset = array(
-		'' => t("Ehdotetaan ostoehdotusohjelmissa tilattavaksi"),
-		'E' => ("Ei ehdoteta ostoehdotusohjelmissa tilattavaksi"),
+		''	 => t("Ehdotetaan ostoehdotusohjelmissa tilattavaksi"),
+		'E'	 => ("Ei ehdoteta ostoehdotusohjelmissa tilattavaksi"),
 	);
 
 	if (strtotime("$vva-$kka-$ppa") < strtotime('now - 12 months')) {
-		$_date = "AND tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
-				  AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'";
+		$_date = "AND tilausrivi.kerattyaika >= '$vva-$kka-$ppa'
+				  AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl'";
 	}
 	else {
-		$_date = "AND tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month)";
+		$_date = "AND tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month)";
 	}
 
 	$tuotepaikka_where = "";
@@ -352,11 +445,11 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 
 	if (!empty($a) or !empty($l)) {
 		$ahyllyalue = $apaikka['ahyllyalue'];
-		$ahyllynro  = $apaikka['ahyllynro'];
+		$ahyllynro = $apaikka['ahyllynro'];
 		$ahyllyvali = $apaikka['ahyllyvali'];
 		$ahyllytaso = $apaikka['ahyllytaso'];
 		$lhyllyalue = $lpaikka['lhyllyalue'];
-		$lhyllynro  = $lpaikka['lhyllynro'];
+		$lhyllynro = $lpaikka['lhyllynro'];
 		$lhyllyvali = $lpaikka['lhyllyvali'];
 		$lhyllytaso = $lpaikka['lhyllytaso'];
 
@@ -372,9 +465,11 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 		$varasto_lisa = " AND varastopaikat.tunnus IN (".implode(",", $varastot).") ";
 	}
 
-    $keraysvyohyke_select = "";
-    $keraysvyohyke_join = "";
-    $varaston_hyllypaikat_join = "";
+	$tuote_select = "";
+	$keraysvyohyke_select = "";
+	$keraysvyohyke_join = "";
+	$varaston_hyllypaikat_join = "";
+	$group = "";
 
 	if (!empty($yhtiorow['kerayserat'])) {
 		$keraysvyohyke_select = "keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,";
@@ -386,11 +481,14 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 											AND vh.hyllynro = tilausrivi.hyllynro
 											AND vh.hyllytaso = tilausrivi.hyllytaso
 											AND vh.hyllyvali = tilausrivi.hyllyvali";
+
 		if (!empty($keraysvyohykkeet)) {
 			$varaston_hyllypaikat_join .= "  AND vh.keraysvyohyke IN (".implode(",", $keraysvyohykkeet).")";
 		}
 
 		$varaston_hyllypaikat_join .= ")";
+
+		$group .= "keraysvyohykkeen_nimitys,";
 	}
 
 	if ($tyyppi == "TUOTE") {
@@ -402,65 +500,108 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 		}
 
 		if (!empty($lisa_kentat)) {
-			$tuote_select = "";
 			foreach ($lisa_kentat as $lisa_kentta) {
 				if (!empty($lisa_kentta['checked'])) {
-					$tuote_select .= $lisa_kentta['kolumni'] . ', ';
+					$tuote_select .= $lisa_kentta['kolumni'].', ';
+					$group .= $lisa_kentta['kolumni'].', ';
 				}
 			}
 		}
 
-		$tuotepaikat_select = "tuotepaikat.saldo, tuotepaikat.tunnus paikkatun, ";
-		$group = "GROUP BY tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno";
+		$tuote_select .= "tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,";
+		$tuote_select .= "CONCAT_WS(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as hylly, ";
+		$tuote_select .= "group_concat(distinct tuotepaikat.tunnus) paikkatun, ";
+
+		$group .= "tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, hylly,";
+
+		if (empty($kerayksettomat_tuotepaikat)) {
+			$tuote_select .= "if (tuotepaikat.tunnus IS NULL , 1, 0) poistettu, ";
+			$group .= "poistettu,";
+		}
+	}
+
+	$group = substr($group, 0, -1);
+
+	if (!empty($kerayksettomat_tuotepaikat)) {
+
+		$kerayksettomat_tuotepaikat_varaston_hyllypaikat_join = str_replace('tilausrivi', 'tuotepaikat', $varaston_hyllypaikat_join);
+		$kerayksettomat_tuotepaikat_group = str_replace('tilausrivi', 'tuotepaikat', $group);
+		$kerayksettomat_tuotepaikka_where = str_replace('tilausrivi', 'tuotepaikat', $tuotepaikka_where);
+		$kerayksettomat_tuote_select = str_replace('tilausrivi', 'tuotepaikat', $tuote_select);
+
+		$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
+					{$keraysvyohyke_select}
+					{$kerayksettomat_tuote_select}
+					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
+					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl+tilausrivi.varattu, 0)) tuokpl_valittu_aika,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), 1, 0)) kpl_6,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), tilausrivi.kpl+tilausrivi.varattu, 0)) tuo_kpl_6,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), 1, 0)) kpl_12,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), tilausrivi.kpl+tilausrivi.varattu, 0)) tuo_kpl_12
+					FROM tuotepaikat
+					JOIN tuote USE INDEX (tuoteno_index) ON (tuotepaikat.yhtio = tuote.yhtio
+						AND tuotepaikat.tuoteno = tuote.tuoteno
+						AND tuote.ei_saldoa = '')
+					JOIN varastopaikat ON ( varastopaikat.yhtio = tuotepaikat.yhtio
+						AND concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+						AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+						{$varasto_lisa} )
+					{$kerayksettomat_tuotepaikat_varaston_hyllypaikat_join}
+					{$keraysvyohyke_join}
+					LEFT JOIN tilausrivi ON ( tilausrivi.tyyppi = 'L'
+						AND tilausrivi.yhtio = tuotepaikat.yhtio
+						AND tilausrivi.hyllyalue = tuotepaikat.hyllyalue
+						AND tilausrivi.hyllynro = tuotepaikat.hyllynro
+						AND tilausrivi.hyllyvali = tuotepaikat.hyllyvali
+						AND tilausrivi.hyllytaso = tuotepaikat.hyllytaso
+						AND tilausrivi.tuoteno = tuotepaikat.tuoteno
+						{$_date})
+					WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+					{$kerayksettomat_tuotepaikka_where}
+					GROUP BY 1, {$kerayksettomat_tuotepaikat_group}
+					ORDER BY kpl_valittu_aika DESC
+					$lisa";
 	}
 	else {
-		$tuote_select = "";
-		$tuotepaikat_select = "";
-		$group = "GROUP BY tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso";
+		$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
+					{$keraysvyohyke_select}
+					{$tuote_select}
+					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
+					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl+tilausrivi.varattu, 0)) tuokpl_valittu_aika,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), 1, 0)) kpl_6,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), tilausrivi.kpl+tilausrivi.varattu, 0)) tuo_kpl_6,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), 1, 0)) kpl_12,
+					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), tilausrivi.kpl+tilausrivi.varattu, 0)) tuo_kpl_12
+					FROM tilausrivi
+					JOIN tuote USE INDEX (tuoteno_index) ON (tilausrivi.yhtio = tuote.yhtio
+						AND tilausrivi.tuoteno = tuote.tuoteno
+						AND tuote.ei_saldoa = '')
+					JOIN varastopaikat ON ( varastopaikat.yhtio = tilausrivi.yhtio
+						AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+						AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')
+						{$varasto_lisa} ) )
+					{$varaston_hyllypaikat_join}
+					{$keraysvyohyke_join}
+					LEFT JOIN tuotepaikat USE INDEX (yhtio_tuoteno_paikka) ON ( tilausrivi.yhtio = tuotepaikat.yhtio
+						AND tilausrivi.hyllyalue = tuotepaikat.hyllyalue
+						AND tilausrivi.hyllynro  = tuotepaikat.hyllynro
+						AND tilausrivi.hyllyvali = tuotepaikat.hyllyvali
+						AND tilausrivi.hyllytaso = tuotepaikat.hyllytaso
+						AND tilausrivi.tuoteno   = tuotepaikat.tuoteno )
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.tyyppi = 'L'
+					{$tuotepaikka_where}
+					{$_date}
+					GROUP BY 1, {$group}
+					ORDER BY kpl_valittu_aika DESC
+					$lisa";
 	}
 
-	$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
-				{$keraysvyohyke_select}
-				CONCAT_WS(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as hylly,
-				sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
-				sum(if (tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl, 0)) tuokpl_valittu_aika,
-				sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), 1, 0)) kpl_6,
-				sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), tilausrivi.kpl, 0)) tuo_kpl_6,
-				sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), 1, 0)) kpl_12,
-				sum(if (tilausrivi.laskutettuaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), tilausrivi.kpl, 0)) tuo_kpl_12,
-				{$tuote_select}
-				{$tuotepaikat_select}
-				sum(if (tuotepaikat.tunnus IS NULL , 1, 0)) poistettu
-				FROM tilausrivi
-				JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
-				LEFT JOIN tuotepaikat
-				ON (
-					tilausrivi.yhtio = tuotepaikat.yhtio
-					and tilausrivi.hyllyalue = tuotepaikat.hyllyalue
-					and tilausrivi.hyllynro  = tuotepaikat.hyllynro
-					and tilausrivi.hyllyvali = tuotepaikat.hyllyvali
-					and tilausrivi.hyllytaso = tuotepaikat.hyllytaso
-					and tilausrivi.tuoteno   = tuotepaikat.tuoteno)
-				LEFT JOIN varastopaikat
-				ON (
-					varastopaikat.yhtio = tilausrivi.yhtio
-					AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-					AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-				)
-                {$varaston_hyllypaikat_join}
-				{$keraysvyohyke_join}
-				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-				AND tilausrivi.tyyppi = 'L'
-				{$tuotepaikka_where}
-				{$varasto_lisa}
-				{$_date}
-				{$group}
-				ORDER BY kpl_valittu_aika DESC";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	//päiviä aikajaksossa
-	$epa1 = (int) date('U', mktime(0, 0, 0, $kka, $ppa, $vva));
-	$epa2 = (int) date('U', mktime(0, 0, 0, $kkl, $ppl, $vvl));
+	$epa1 = (int)date('U', mktime(0, 0, 0, $kka, $ppa, $vva));
+	$epa2 = (int)date('U', mktime(0, 0, 0, $kkl, $ppl, $vvl));
 
 	//Diff in workdays (5 day week)
 	$pva = abs($epa2 - $epa1) / 60 / 60 / 24 / 7 * 5;
@@ -469,20 +610,22 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 
 	$rows = array();
 	$saldolliset = array();
-    if (mysql_num_rows($result) > 0) {
-        $progress_bar = new ProgressBar(t("Haetaan tiedot"));
-        $progress_bar->initialize(mysql_num_rows($result));
-    }
+
+	if (mysql_num_rows($result) > 0) {
+		$progress_bar = new ProgressBar(t("Haetaan tiedot"));
+		$progress_bar->initialize(mysql_num_rows($result));
+	}
 
 	while ($row = mysql_fetch_assoc($result)) {
-        if (isset($progress_bar)) {
-            $progress_bar->increase();
-        }
+
+		if (isset($progress_bar)) {
+			$progress_bar->increase();
+		}
 
 		if ($tyyppi == 'TUOTE') {
-            if (!empty($lisa_kentat['nimitys']['checked'])) {
-                $row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys');
-            }
+			if (!empty($lisa_kentat['nimitys']['checked'])) {
+				$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys');
+			}
 			if (isset($row['status']) and array_key_exists($row['status'], $tuote_statukset)) {
 				$row['status'] = $tuote_statukset[$row['status']];
 			}
@@ -498,12 +641,14 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 		$row['kpl_kerays'] = number_format($row["kpl_valittu_aika"] > 0 ? round($row["tuokpl_valittu_aika"] / $row["kpl_valittu_aika"]) : 0, 0);
 		$row['kpl_valittu_aika_pvm'] = number_format($row["kpl_valittu_aika"] / $pva, 0);
 
-		if ($row['poistettu'] != 0) {
-			$row['poistettu'] = $poistettu;
-		}
-		else {
-			$saldolliset[] = $row["paikkatun"];
-			$row['poistettu'] = '';
+		if (is_numeric($row['poistettu'])) {
+			if ($row['poistettu'] == 1) {
+				$row['poistettu'] = $poistettu;
+			}
+			else if ($row['poistettu'] == 0) {
+				$saldolliset[] = $row["paikkatun"];
+				$row['poistettu'] = '';
+			}
 		}
 
 		unset($row['tuokpl_valittu_aika']);
@@ -534,111 +679,6 @@ function echo_tulosta_inventointilista($saldolliset) {
 	echo "<input type='hidden' name='tila' value='SIIVOUS'>";
 	echo "<input type='hidden' name='ei_inventointi' value='EI'>";
 	echo "<input type='submit' value='".t("Tulosta inventointilista")."'></form><br><br>";
-}
-
-function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso, $toppi, $summaa_varastopaikalle, $tee_excel, $varastot, $keraysvyohykkeet, $lisa_kentat) {
-    global $yhtiorow;
-
-	//Käyttöliittymä
-	echo "<br>";
-	echo "<form method='POST'>";
-	echo "<table>";
-	echo "<input type='hidden' name='tee' value='kaikki' />";
-
-	if (!empty($summaa_varastopaikalle)) {
-		$checked = 'checked = "checked"';
-	}
-	else {
-		$checked = '';
-	}
-
-	echo "<tr><th>".t('Summaa per varastopaikka')."</th>
-			<td><input type='checkbox' name='summaa_varastopaikalle' $checked /></td></tr>";
-
-	echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
-			<td><input type='text' name='ppa' value='$ppa' size='3'>
-			<input type='text' name='kka' value='$kka' size='3' />
-			<input type='text' name='vva' value='$vva' size='5' /></td>
-			</tr><tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
-			<td><input type='text' name='ppl' value='$ppl' size='3' />
-			<input type='text' name='kkl' value='$kkl' size='3' />
-			<input type='text' name='vvl' value='$vvl' size='5' /></td>";
-
-	echo "<tr><th>".t("Anna alkuvarastopaikka").":</th>
-			<td>",hyllyalue("ahyllyalue", $ahyllyalue),"
-			<input class='ahylly' type='text' size='6' name='ahyllynro' value='$ahyllynro' />
-			<input class='ahylly' type='text' size='6' name='ahyllyvali' value='$ahyllyvali' />
-			<input class='ahylly' type='text' size='6' name='ahyllytaso' value='$ahyllytaso' />
-			</td></tr>";
-
-	echo "<tr><th>".t("ja loppuvarastopaikka").":</th>
-			<td>",hyllyalue("lhyllyalue", $lhyllyalue),"
-			<input class='lhylly' type='text' size='6' name='lhyllynro' value='$lhyllynro' />
-			<input class='lhylly' type='text' size='6' name='lhyllyvali' value='$lhyllyvali' />
-			<input class='lhylly' type='text' size='6' name='lhyllytaso' value='$lhyllytaso' />
-			</td></tr>";
-
-	echo "<tr><th>".t("Listaa vain näin monta kerätyintä tuotetta").":</th>
-			<td><input type='text' size='6' name='toppi' value='$toppi' /></td>";
-
-	echo "<tr>";
-	echo "<th>";
-	echo t("Varastot");
-	echo ":</th>";
-	echo "<td>";
-	foreach ($varastot as $varasto_index => $varasto) {
-		echo "<input class='varastot' type='checkbox' name='varastot[]' value='{$varasto_index}' {$varasto['checked']} />";
-		echo " {$varasto['nimitys']}";
-		echo "<br/>";
-	}
-	echo "</td>";
-	echo "</tr>";
-
-    if (!empty($yhtiorow['kerayserat']) and !empty($keraysvyohykkeet)) {
-        echo "<tr>";
-
-        echo "<th>";
-        echo t("Keräysvyöhykkeet");
-        echo ":</th>";
-
-        echo "<td>";
-        foreach ($keraysvyohykkeet as $keraysvyohykkeet_index => $keraysvyohykkeet) {
-            echo "<input class='keraysvyohykkeet' type='checkbox' name='keraysvyohykkeet[]' value='{$keraysvyohykkeet_index}' {$keraysvyohykkeet['checked']} />";
-            echo " {$keraysvyohykkeet['nimitys']}";
-            echo "<br/>";
-        }
-        echo "</td>";
-
-        echo "</tr>";
-    }
-
-	echo "<tr>";
-	echo "<th>";
-	echo t("Lisäkentät");
-	echo ":</th>";
-	echo "<td>";
-	foreach ($lisa_kentat as $lisa_kentat_index => $lisa_kentat) {
-		echo "<input class='keraysvyohykkeet' type='checkbox' name='lisa_kentat[]' value='{$lisa_kentat_index}' {$lisa_kentat['checked']} />";
-		echo " {$lisa_kentat['header']}";
-		echo "<br/>";
-	}
-	echo "</td>";
-	echo "</tr>";
-
-	if (!empty($tee_excel)) {
-		$checked = 'checked = "checked"';
-	}
-	else {
-		$checked = '';
-	}
-
-	echo "<tr><th>".t('Tee Excel')."</th>
-			<td><input type='checkbox' name='tee_excel' $checked /></td></tr>";
-
-	echo "</table>";
-	echo '<br/>';
-	echo "<input type='submit' value='".t("Aja raportti")."' onclick='return tarkista();'/>";
-	echo '</form>';
 }
 
 function echo_tallennus_formi($xls_filename) {
@@ -672,21 +712,20 @@ function nayta_ruudulla(&$rivit, $header_values, $force_to_string, $ppa, $kka, $
 	echo_rows_in_table($rivit, $header_values, $force_to_string, $callback_function);
 }
 
-//callback function table td:lle
 function right_align_numbers($header, $solu, $force_to_string) {
-    if (!stristr($header, 'tunnus')) {
-        if (is_numeric($solu) and !in_array($header, $force_to_string)) {
-            $align = "align='right'";
-        }
-        else {
-            $align = "";
-        }
-        if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
-            $solu = number_format($solu, 0);
-        }
+	if (!stristr($header, 'tunnus')) {
+		if (is_numeric($solu) and !in_array($header, $force_to_string)) {
+			$align = "align='right'";
+		}
+		else {
+			$align = "";
+		}
+		if (is_numeric($solu) and !ctype_digit($solu) and !in_array($header, $force_to_string)) {
+			$solu = number_format($solu, 0);
+		}
 
-        echo "<td $align>{$solu}</td>";
-    }
+		echo "<td $align>{$solu}</td>";
+	}
 }
 
-require ("inc/footer.inc");
+require("inc/footer.inc");

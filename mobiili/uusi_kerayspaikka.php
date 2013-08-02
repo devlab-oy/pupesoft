@@ -156,7 +156,7 @@ if (isset($submit) and trim($submit) != '') {
 				// Päivitetään oletuspaikat jos tehdään tästä oletuspaikka
 				if ($oletus == 'X') {
 					// Asetetaan oletuspaikka uusiksi
-					$paivitetty_paikka = paivita_oletuspaikka($row['tuoteno'], $hylly);
+					paivita_oletuspaikka($row['tuoteno'], $hylly);
 
 					// Siirretään saldot jos on siirrettävää
 					if ($siirra_saldot == 'on' and $saldo['myytavissa'] > 0 and $tuote['sarjanumeroseuranta'] == '') {

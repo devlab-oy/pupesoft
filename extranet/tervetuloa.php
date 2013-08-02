@@ -128,6 +128,17 @@ if ($tee == '') {
 		}
 	}
 
+	$exttarjousten_lukumaara = hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset($kukarow['oletus_asiakas']);
+
+	if ($exttarjousten_lukumaara > 0) {
+		echo "<table border='1'>";
+		echo "<tr>";
+		echo "<td style='padding:10px;'><font class='message'>".t("Sinulla on %s kappaletta hyväksymättömiä tarjouksia.", '', $exttarjousten_lukumaara)."</font></td>";
+		echo "</tr>";
+		echo "</table>";
+		echo "<br>";
+	}
+
 	echo "<table width='100%'>";
 	echo "<tr>";
 
@@ -425,7 +436,4 @@ if ($tee == "PRINTTAA") {
 		";
 }
 
-
 require("footer.inc");
-
-?>

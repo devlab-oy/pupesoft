@@ -42,6 +42,15 @@
 	if (isset($toimi_array[1])) $alias_set = $toimi_array[1];
 	if (isset($toimi_array[2])) $rajattu_nakyma = $toimi_array[2];
 
+	// Tuotteita voidaan rajata status -kent‰ll‰
+	$tuote_status_rajaus_lisa = "";
+	$tuote_status_lisa = "";
+
+	if (isset($status) and $toim == 'tuote') {
+		$tuote_status_rajaus_lisa = " and tuote.status = '".pupesoft_cleanstring($status)."' ";
+		$tuote_status_lisa = "&status=$status";
+	}
+
 	// Setataan muuttujat
 	if (!isset($rajauslisa)) 		$rajauslisa = "";
 	if (!isset($del)) 				$del = "";
@@ -73,14 +82,14 @@
 	if (!isset($lukitse_laji))		$lukitse_laji = "";
 
 	// Tutkitaan v‰h‰n alias_settej‰ ja rajattua n‰kym‰‰
-	$al_lisa = " and selitetark_2 = '' ";
+	$al_lisa = " and selitetark_2 = '' and nakyvyys != '' ";
 
 	if ($alias_set != '') {
 		if ($rajattu_nakyma != '') {
-			$al_lisa = " and selitetark_2 = '$alias_set' ";
+			$al_lisa = " and selitetark_2 = '$alias_set' and nakyvyys != '' ";
 		}
 		else {
-			$al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = '') ";
+			$al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = '') and nakyvyys != '' ";
 		}
 	}
 
@@ -351,6 +360,7 @@
 				$query = "INSERT into $toim SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
+					// Tuleeko t‰m‰ columni k‰yttˆliittym‰st‰
 					if (isset($t[$i])) {
 
 						if (is_array($_FILES["liite_$i"]) and $_FILES["liite_$i"]["size"] > 0) {
@@ -363,14 +373,32 @@
 
 						if (mysql_field_type($result,$i) == 'real') {
 							$t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
-
 							$query .= ", ". mysql_field_name($result,$i)." = {$t[$i]} ";
 						}
 						else {
 							$query .= ", ". mysql_field_name($result,$i)." = '".trim($t[$i])."' ";
 						}
 					}
+					else {
+						// columni ei tullut k‰yttˆliittym‰st‰, katsotaan onko meill‰ sille silti joku oletusarvo aliaksissa
+						$al_nimi = mysql_field_name($result, $i);
+
+						$oletus_tarkistus_query = "	SELECT *
+									FROM avainsana
+									WHERE yhtio = '$kukarow[yhtio]'
+									and laji = 'MYSQLALIAS'
+									and selite = '$toim.$al_nimi'
+									and selitetark_4 != ''";
+						$oletus_tarkistus_result = pupe_query($oletus_tarkistus_query);
+
+						if (mysql_num_rows($oletus_tarkistus_result) == 1) {
+							$oletuksen_tarkistus_rivi = mysql_fetch_assoc($oletus_tarkistus_result);
+							$oletusarvo = trim($oletuksen_tarkistus_rivi['selitetark_4']);
+							$query .= ", $al_nimi = '$oletusarvo' ";
+						}
+					}
 				}
+
 			}
 			// P‰ivitet‰‰n
 			else {
@@ -421,7 +449,7 @@
 				$tunnus = mysql_insert_id();
 			}
 
-			if ($onko_tama_insert and $tunnus > 0 and isset($tee_myos_tuotteen_toimittaja_liitos) and isset($liitostunnus) and $toim == "tuote") {
+			if ($onko_tama_insert and $tunnus > 0 and isset($tee_myos_tuotteen_toimittaja_liitos) and isset($liitostunnus) and $toim == "tuote" and $tee_myos_tuotteen_toimittaja_liitos == 'JOO' and $liitostunnus != '') {
 
 				$query = "	SELECT *
 							FROM tuote
@@ -443,7 +471,7 @@
 								yhtio = '{$kukarow['yhtio']}',
 								tuoteno = '{$tuote_chk_row['tuoteno']}',
 								liitostunnus = '{$liitostunnus}',
-								toimittaja = '{$toimi_chk_row['toimittajanro']}',
+								toimittaja = '{$toimi_chk_row['ytunnus']}',
 								alkuperamaa = '{$toimi_chk_row['maa']}',
 								laatija = '{$kukarow['kuka']}',
 								luontiaika = now(),
@@ -1151,7 +1179,7 @@
 		// Ei n‰ytet‰ seuraavia avainsanoja avainsana-yll‰pitolistauksessa
 		$avainsana_query_lisa = $toim == "avainsana" ? " AND laji NOT IN ('MYSQLALIAS', 'HALYRAP', 'SQLDBQUERY', 'KKOSTOT') " : "";
 
-		$query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa";
+		$query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa $avainsana_query_lisa $tuote_status_rajaus_lisa";
         $query .= "$ryhma ORDER BY $jarjestys $limiitti";
 		$result = pupe_query($query);
 
@@ -1279,7 +1307,7 @@
 			for ($i = 1; $i < mysql_num_fields($result); $i++) {
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 
-					echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
+				echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji'{$tuote_status_lisa}>" . t(mysql_field_name($result,$i)) . "</a>";
 
 					if 	(mysql_field_len($result,$i)>10) $size='15';
 					elseif	(mysql_field_len($result,$i)<5)  $size='5';
@@ -1377,7 +1405,7 @@
 					if ($i == 1) {
 						if (trim($trow[1]) == '' or (is_numeric($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhj‰*");
 
-						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji";
+						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji{$tuote_status_lisa}";
 
 						if ($from == "" and $lopetus == "") {
 							echo "&lopetus=".$palvelin2."yllapito.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."//toim=$aputoim//limit=$limit//nayta_poistetut=$nayta_poistetut//nayta_eraantyneet=$nayta_eraantyneet//laji=$laji///$trow[0]";
@@ -1505,8 +1533,6 @@
 		}
 
 		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa$ankkuri' name='mainform' id='mainform' method = 'post' autocomplete='off' $javalisasubmit enctype='multipart/form-data'>";
-		if (isset($liitostunnus)) echo "<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />";
-		if (isset($tee_myos_tuotteen_toimittaja_liitos)) echo "<input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='{$tee_myos_tuotteen_toimittaja_liitos}' />";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>";
 		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
@@ -1516,6 +1542,10 @@
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 		echo "<input type = 'hidden' name = 'upd' value = '1'>";
+
+		if (isset($status) and $toim == 'tuote') {
+			echo "<input type = 'hidden' name = 'status' value = '$status'>";
+		}
 
 		// Kokeillaan geneerist‰
 		$query = "	SELECT *
@@ -1527,6 +1557,32 @@
 		echo "<table><tr><td class='back' valign='top' style='padding: 0px;'>";
 
 		echo "<table>";
+
+		if ($uusi == '1' and $toim == 'tuote') {
+
+			$query = "	SELECT tunnus, nimi
+						FROM toimi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND oletus_vienti IN ('C', 'F', 'J', 'K', 'I', 'L')
+						AND pikaperustus = ''
+						AND tyyppi != 'P'
+						ORDER BY nimi";
+			$toimiresult = pupe_query($query);
+
+			echo "<input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='JOO'>";
+			echo "<th align='left'>".t("Toimittaja")."</th>";
+			echo "<td>";
+			echo "<select name='liitostunnus' />";
+			echo "<option value=''>".t("Ei toimittajaa")."</option>";
+
+			while ($toimirow = mysql_fetch_assoc($toimiresult)) {
+				$selected = (isset($liitostunnus) and $toimirow['tunnus'] == $liitostunnus) ? 'SELECTED': '';
+				echo "<option value='{$toimirow['tunnus']}' {$selected}> {$toimirow['nimi']}</option>";
+			}
+
+			echo "</select>";
+			echo "</td>";
+		}
 
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
 
@@ -2001,7 +2057,9 @@
 		echo "<br>
 				<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
 				if (isset($liitostunnus)) echo "&liitostunnus={$liitostunnus}";
+				if (isset($status) and $toim == 'tuote') echo "&status={$status}";
 				echo "' method = 'post'>
+				
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
 				<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>

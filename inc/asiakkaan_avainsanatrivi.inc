@@ -119,6 +119,25 @@
 			$ulos .= "</select></td>";
 			$jatko = 0;
 		}
+		elseif (stripos($asavainsanatyyppi, "PAIKALLISVARAST") !== FALSE){
+			$query = "	SELECT *
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND laji = 'PAIKALLISVARAST'
+						ORDER BY jarjestys, selite";
+			$varresult = mysql_query($query) or pupe_error($query);
+			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+			while ($paikallisrow = mysql_fetch_assoc($varresult)) {
+
+				$sel = $trow[$i] == $paikallisrow['tunnus'] ? " selected" : "";
+
+				$ulos .= "<option value='{$paikallisrow['tunnus']}'{$sel}>{$paikallisrow['selitetark']}</option>";
+			}
+			
+			$ulos .= "</select></td>";
+			$jatko = 0;
+		}
 	}
 
 	if (mysql_field_name($result, $i) == "kieli") {

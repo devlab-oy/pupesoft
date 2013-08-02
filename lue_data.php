@@ -1660,6 +1660,44 @@ if ($kasitellaan_tiedosto) {
 							elseif ($table_mysql=='tuotepaikat' and $otsikko == 'OLETUS' and $taulunrivit[$taulu][$eriviindex][$r] == 'XVAIHDA') {
 								//vaihdetaan tämä oletukseksi
 								$taulunrivit[$taulu][$eriviindex][$r] = "X"; // pakotetaan oletus
+								//  Selvitetään vanha oletuspaikka 
+								$vanha_oletus_query = "	SELECT *
+														FROM tuotepaikat
+														WHERE tuoteno = '$tuoteno' 
+														and yhtio = '$kukarow[yhtio]' 
+														and oletus != ''";
+								$oletusresult = pupe_query($vanha_oletus_query);
+								$oletusrow = mysql_fetch_assoc($oletusresult);
+
+								// Päivitetään uusi oletuspaikka myös avoimille ostotilausriveille (jos uusi paikka on samassa varastossa kun vanha)
+								$hylly = array(
+									"hyllyalue" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])],
+									"hyllynro" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYNRO", $taulunotsikot["tuotepaikat"])],
+									"hyllytaso" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYTASO", $taulunotsikot["tuotepaikat"])],
+									"hyllyvali" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYVALI", $taulunotsikot["tuotepaikat"])],
+								);
+								if (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
+									$uusi_oletus_query = "	UPDATE tilausrivi
+															SET hyllyalue = '$hylly[hyllyalue]',
+															hyllynro = '$hylly[hyllynro]',
+															hyllytaso = '$hylly[hyllytaso]',
+															hyllyvali = '$hylly[hyllyvali]'
+															WHERE yhtio = '$kukarow[yhtio]'
+															AND tuoteno = '$tuoteno'
+															AND hyllyalue = '$oletusrow[hyllyalue]'
+															AND hyllynro = '$oletusrow[hyllynro]'
+															AND hyllytaso = '$oletusrow[hyllytaso]'
+															AND hyllyvali = '$oletusrow[hyllyvali]'
+															AND tyyppi = 'O'
+															AND uusiotunnus = '0'
+															AND kpl = '0'
+															AND varattu != '0'";
+									$paivitysresult = pupe_query($uusi_oletus_query);
+
+									if (mysql_affected_rows() > 0) {
+										lue_data_echo(t("Päivitettiin %s ostotilausrivin varastopaikkaa.", '', mysql_affected_rows())."<br>");
+									}
+								}
 
 								$tpupque = "UPDATE tuotepaikat SET oletus = '' where yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
 
@@ -1681,6 +1719,45 @@ if ($kasitellaan_tiedosto) {
 							if ($table_mysql == 'tuotepaikat' and $otsikko == 'OLETUS' and $taulunrivit[$taulu][$eriviindex][$r] == 'XVAIHDA') {
 								//vaihdetaan tämä oletukseksi
 								$taulunrivit[$taulu][$eriviindex][$r] = "X"; // pakotetaan oletus
+								
+								//  Selvitetään vanha oletuspaikka 
+								$vanha_oletus_query = "	SELECT *
+														FROM tuotepaikat
+														WHERE tuoteno = '$tuoteno' 
+														and yhtio = '$kukarow[yhtio]' 
+														and oletus != ''";
+								$oletusresult = pupe_query($vanha_oletus_query);
+								$oletusrow = mysql_fetch_assoc($oletusresult);
+
+								// Päivitetään uusi oletuspaikka myös avoimille ostotilausriveille (jos uusi paikka on samassa varastossa kun vanha)
+								$hylly = array(
+									"hyllyalue" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])],
+									"hyllynro" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYNRO", $taulunotsikot["tuotepaikat"])],
+									"hyllytaso" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYTASO", $taulunotsikot["tuotepaikat"])],
+									"hyllyvali" => $taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYVALI", $taulunotsikot["tuotepaikat"])],
+								);
+								if (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
+									$uusi_oletus_query = "	UPDATE tilausrivi
+															SET hyllyalue = '$hylly[hyllyalue]',
+															hyllynro = '$hylly[hyllynro]',
+															hyllytaso = '$hylly[hyllytaso]',
+															hyllyvali = '$hylly[hyllyvali]'
+															WHERE yhtio = '$kukarow[yhtio]'
+															AND tuoteno = '$tuoteno'
+															AND hyllyalue = '$oletusrow[hyllyalue]'
+															AND hyllynro = '$oletusrow[hyllynro]'
+															AND hyllytaso = '$oletusrow[hyllytaso]'
+															AND hyllyvali = '$oletusrow[hyllyvali]'
+															AND tyyppi = 'O'
+															AND uusiotunnus = '0'
+															AND kpl = '0'
+															AND varattu != '0'";
+									$paivitysresult = pupe_query($uusi_oletus_query);
+
+									if (mysql_affected_rows() > 0) {
+										lue_data_echo(t("Päivitettiin %s ostotilausrivin varastopaikkaa.", '', mysql_affected_rows())."<br>");
+									}
+								}
 
 								$tpupque = "UPDATE tuotepaikat SET oletus = '' where yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
 

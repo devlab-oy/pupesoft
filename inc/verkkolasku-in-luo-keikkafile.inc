@@ -2100,9 +2100,39 @@ $debug = 0;
 							varastoon = 0
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND suuntalava = '{$tilriv_suuntalava}'
+							AND kpl = 0
+							AND varattu != 0
 							AND tunnus NOT IN (".implode($tilausrivit[$tilriv_suuntalava]).")";
 				pupe_query($query);
 			}
+		}
+
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$otunnus}'";
+		$laskures = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($laskures);
+
+		$toimittajaid = $laskurow['liitostunnus'];
+		$toiminto = "kalkyyli";
+		$tee = "varastoon";
+
+		foreach ($tilausrivit as $suuntalavan_tunnus => $tilriv_array) {
+
+			$query = "	SELECT sum(if(kpl != 0, 1, 0)) kplrivit
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND suuntalava = '{$suuntalavan_tunnus}'";
+			$cnt_chk_res = pupe_query($query);
+			$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
+
+			// Jos kaikki rivit on tuloutettu, ei haluta käsitellä sitä suuntalavaa
+			if ($cnt_chk_row['kplrivit'] == count($tilausrivit[$suuntalavan_tunnus])) {
+				continue;
+			}
+
+			require("tilauskasittely/varastoon.inc");
 		}
 	}
 

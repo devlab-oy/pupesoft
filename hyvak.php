@@ -5,6 +5,7 @@
 	}
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php")  !== FALSE) {
+		$pupe_DataTables = '';
 		require ("inc/parametrit.inc");
 	}
 
@@ -1529,7 +1530,15 @@
 			exit;
 		}
 
-		echo "<table>";
+		//tablen sarakkeiden m‰‰r‰ riippuu $kukarow['taso']
+		$sarakkeet_base = 12;
+		if ($kukarow['taso'] == 1 or $kukarow['taso'] == 2 or $kukarow['taso'] == 3) {
+			$sarakkeet_base = 14;
+		}
+		pupe_DataTables(array(array('mur', 11, $sarakkeet_base)));
+
+		echo "<table class='display dataTable' id='mur'>";
+		echo "<thead>";
 		echo "<tr>";
 		echo "<th>".t("Tapvm")."</th>";
 		echo "<th>".t("Er‰pvm/Kapvm")."</th>";
@@ -1544,7 +1553,9 @@
 		if ($liitetaanko_editilaus_laskulle_hakemisto != '') echo "<th>",t("Vertailu"),"</th>";
 		echo "<th>".t("Kustannuspaikka")."</th>";
 		echo "</tr>";
+		echo "</thead>";
 
+		echo "<tbody>";
 		while ($trow = mysql_fetch_assoc($result)) {
 
 			$query = "	SELECT laskunro
@@ -1574,13 +1585,13 @@
 				echo "<td valign='top'><a href='$PHP_SELF?tee=M&tunnus=$trow[tunnus]'>".tv1dateconv($trow["tapvm"])."</a></td>";
 			}
 			else {
-				echo "<td valign='top'>".tv1dateconv($trow["tapvm"])."</td>";
+				echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['tapvm']).tv1dateconv($trow["tapvm"])."</td>";
 			}
 
 			echo "<td valign='top'>";
 
 			echo tv1dateconv($trow["erpcm"]);
-			if ($trow["kapvm"] != "0000-00-00") echo "<br>".tv1dateconv($trow["kapvm"]);
+			if ($trow["kapvm"] != "0000-00-00") echo "<br>".pupe_DataTablesEchoSort($trow['kapvm']).tv1dateconv($trow["kapvm"]);
 
 			echo "</td>";
 
@@ -1699,10 +1710,14 @@
 							</form>
 						</td>";
 				}
+				else {
+					echo "<td class='back' valign='top'></td>";
+				}
 			}
 
 			echo "</tr>";
 		}
+		echo "</tbody>";
 		echo "</table>";
 
 		echo "	<SCRIPT LANGUAGE=JAVASCRIPT>

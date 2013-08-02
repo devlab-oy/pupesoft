@@ -1695,7 +1695,7 @@ if ($kasitellaan_tiedosto) {
 									$paivitysresult = pupe_query($uusi_oletus_query);
 
 									if (mysql_affected_rows() > 0) {
-										echo "<br><br><font class='message'>".t("Päivitettiin %s ostotilausrivin varastopaikkaa.", '', mysql_affected_rows())."</font><br><br>";
+										lue_data_echo(t("Päivitettiin %s ostotilausrivin varastopaikkaa.", '', mysql_affected_rows())."<br>");
 									}
 								}
 
@@ -1755,7 +1755,7 @@ if ($kasitellaan_tiedosto) {
 									$paivitysresult = pupe_query($uusi_oletus_query);
 
 									if (mysql_affected_rows() > 0) {
-										echo "<br><br><font class='message'>".t("Päivitettiin %s ostotilausrivin varastopaikkaa.", '', mysql_affected_rows())."</font><br><br>";
+										lue_data_echo(t("Päivitettiin %s ostotilausrivin varastopaikkaa.", '', mysql_affected_rows())."<br>");
 									}
 								}
 

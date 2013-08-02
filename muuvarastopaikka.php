@@ -12,7 +12,7 @@
 					tuote READ,
 					varastopaikat READ,
 					varaston_hyllypaikat READ,
-					tilausrivi READ,
+					tilausrivi WRITE,
 					tilausrivi as tilausrivi_osto READ,
 					sarjanumeroseuranta WRITE,
 					sarjanumeroseuranta_arvomuutos READ,
@@ -78,7 +78,7 @@
 
 	// Itse varastopaikkoja muutellaan
 	if ($tee == 'MUUTA') {
-		$query = "	SELECT tunnus
+		$query = "	SELECT *
 					FROM tuotepaikat
 					WHERE tuoteno = '$tuoteno'
 					and yhtio 	= '$kukarow[yhtio]'
@@ -194,26 +194,29 @@
 		if (isset($oletus) and $oletus != $oletusrow["tunnus"]) {
 			$query = "	SELECT *
 						FROM tuotepaikat
-						WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$oletus'";
+						WHERE tuoteno = '$tuoteno' 
+						and yhtio = '$kukarow[yhtio]' 
+						and tunnus = '$oletus'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
+
+				$uusi_oletusrow = mysql_fetch_assoc($result);
+				
 				// Tehd‰‰n p‰ivitykset
 				echo "<font class='message'>".t("Siirret‰‰n oletuspaikka")."</font><br><br>";
-
-				$query = "	UPDATE tuotepaikat
-							SET oletus = '',
-							muuttaja	= '$kukarow[kuka]',
-							muutospvm	= now()
-							WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
-				$result = pupe_query($query);
-
-				$query = "	UPDATE tuotepaikat
-							SET oletus = 'X',
-							muuttaja	= '$kukarow[kuka]',
-							muutospvm	= now()
-							WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$oletus'";
-				$result = pupe_query($query);
+				
+				$hylly = array(
+						"hyllyalue" => $uusi_oletusrow['hyllyalue'],
+						"hyllynro" => $uusi_oletusrow['hyllynro'],
+						"hyllytaso" => $uusi_oletusrow['hyllytaso'],
+						"hyllyvali" => $uusi_oletusrow['hyllyvali']
+						);
+				$upd_result = paivita_oletuspaikka($tuoteno, $hylly);
+				
+				if ($upd_result["paivitetyt_ostorivit"] > 0) {
+					echo "<font class='message'>".t("P‰ivitettiin %s ostotilausrivin varastopaikkaa.", '', $upd_result["paivitetyt_ostorivit"])."</font><br><br>";
+				}
 			}
 			else {
 				echo "<font class='error'>".t("Uusi oletuspaikka on kadonnut")."</font><br><br>";

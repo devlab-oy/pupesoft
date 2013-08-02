@@ -321,7 +321,7 @@
 							// RFF - buyer's order number
 							// CO = buyer's order number
 							if ($desadv_version == "fi0089") {
-								# In line level RFF+CO the order line number has to be like we send in our orders 10, 20, 30 etc. instead of 1, 2, 3…
+								# In line level RFF+CO the order line number has to be like we send in our orders 10, 20, 30 etc. instead of 1, 2, 3
 								# RFF+CO: 116100531:10'
 								if ($desadv_laskurow['asiakkaan_tilausnumero'] != '') {
 									$desadv_message .= "RFF+CO:".substr($desadv_laskurow["asiakkaan_tilausnumero"], 0, 35).":{$tuotteet_row['tilaajanrivinro']}'";
@@ -432,7 +432,7 @@
 						// RFF - buyer's order number
 						// CO = buyer's order number
 						if ($desadv_version == "fi0089") {
-							# In line level RFF+CO the order line number has to be like we send in our orders 10, 20, 30 etc. instead of 1, 2, 3…
+							# In line level RFF+CO the order line number has to be like we send in our orders 10, 20, 30 etc. instead of 1, 2, 3
 							# RFF+CO: 116100531:10'
 							if ($desadv_laskurow['asiakkaan_tilausnumero'] != '') {
 								$desadv_message .= "RFF+CO:".substr($desadv_laskurow["asiakkaan_tilausnumero"], 0, 35).":{$tuotteet_row['tilaajanrivinro']}'";
@@ -608,7 +608,7 @@
 				}
 			}
 			else {
-				echo "<br/><font class='error'><br><hr>",t("AINEISTOA EI VOIDA LÄHETTÄÄ"),"!<br>",t("Aineistossa virheitä"),":<br>{$error}</font><hr><br>";
+				echo "<br/><font class='error'><br><hr>",t("Aineistoa ei voida lähettää"),"!<br>",t("Aineistossa virheitä"),":<br>{$error}</font><hr><br>";
 			}
 
 			$rajaus++;

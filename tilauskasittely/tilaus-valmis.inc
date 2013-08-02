@@ -160,7 +160,7 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
 	}
 	else {
 		// laitetaan tilaan Odottaa asiakkaan suoritusta tai kesken
-		if ($yhtiorow["luottorajan_ylitys"] == "J" or $yhtiorow["	"] == "J" or $yhtiorow["luottorajan_ylitys"] == "L" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "L") {
+		if ($yhtiorow["luottorajan_ylitys"] == "J" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "J" or $yhtiorow["luottorajan_ylitys"] == "L" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "L") {
 			$alatila = "";
 		}
 		else {

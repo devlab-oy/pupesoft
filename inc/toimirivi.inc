@@ -556,9 +556,33 @@
 		$ulos .= "<option value=''>".t("Toimittajalta ei tule ASN-sanomia eik‰ laskuja")."</option>";
 		$ulos .= "<option value='K' $sel[K]>".t("Toimittaja l‰hett‰‰ ASN-sanoman ja TecCom-laskun")."</option>";
 		$ulos .= "<option value='L' $sel[L]>".t("Toimittaja l‰hett‰‰ vain TecCom-laskun")."</option>";
+		$ulos .= "<option value='M' $sel[M]>".t("Toimittaja l‰hett‰‰ vain Maventa-laskun")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}
 
-?>
+	if (mysql_field_name($result, $i) == "tehdas_saldo_tarkistus") {
+
+		$sel = $trow[$i] == 'K' ? " selected" : "";
+
+		$ulos  = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Ei tarkisteta tehdassaldoja suoratoimitusta tehdess‰ myyntitilaukselta")."</option>";
+		$ulos .= "<option value='K' {$sel}>".t("Tarkistetaan tehdassaldot suoratoimitusta tehdess‰ myyntitilaukselta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+
+	}
+
+	if (mysql_field_name($result, $i) == "pikaperustus") {
+
+		$sel = $trow[$i] == 'X' ? " selected" : "";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Toimittaja on valittavissa kun perustetaan uutta tuotetta")."</option>";
+		$ulos .= "<option value='X'{$sel["X"]}>".t("Toimittaja ei ole valittavissa kun perustetaan uutta tuotetta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

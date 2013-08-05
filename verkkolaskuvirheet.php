@@ -164,10 +164,6 @@
 						require("inc/verkkolasku-in-teccom.inc");
 						$kumpivoice = "TECCOM";
 					}
-					elseif (strpos($file, "ORAO") !== false){
-						require("inc/verkkolasku-in-unikko.inc");
-						$kumpivoice = "ORAO";
-					}
 					else {
 						require("inc/verkkolasku-in-pupevoice.inc");
 						$kumpivoice = "PUPEVOICE";

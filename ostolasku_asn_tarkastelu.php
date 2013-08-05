@@ -126,7 +126,16 @@
 
 		if (trim($sanomatunniste) != '') {
 
-			$valitse_lisa = $valitse == 'asn' ? 'asn' : 'tec';
+			//$valitse_lisa = $valitse == 'asn' ? 'asn' : 'tec';
+			if ($valitse == 'maventa') {
+				$valitse_lisa = 'mav';
+			}
+			else if ($valitse == 'asn') {
+				$valitse_lisa = 'asn';
+			}
+			else {
+				$valitse_lisa = 'tec';
+			}
 
 			$query = "	DELETE FROM asn_sanomat
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -500,9 +509,13 @@
 				}
 				else {
 
-					$rtuoteno[$i]['tuoteno'] 			= trim($kollirow['tuoteno']) != "" ? $kollirow['tuoteno'] : $kollirow['toim_tuoteno2'];
-					$rtuoteno[$i]['tuoteno2'] 			= $kollirow['toim_tuoteno'];
-					$rtuoteno[$i]['tuoteno3'] 			= trim($kollirow['tuoteno']) != "" ? $kollirow['toim_tuoteno2'] : "";
+					if (!$tullaan_virhetarkistuksesta) {
+						$rtuoteno[$i]['tuoteno']		= $kollirow['toim_tuoteno'];
+					}
+					else {
+						$rtuoteno[$i]['tuoteno']		= trim($kollirow['tuoteno']) != "" ? $kollirow['tuoteno'] : $kollirow['toim_tuoteno'];
+					}
+
 					$rtuoteno[$i]['ostotilausnro'] 		= $kollirow['tilausnumero'];
 					$rtuoteno[$i]['tilaajanrivinro'] 	= $kollirow['tilausrivinpositio'];
 					$rtuoteno[$i]['kpl'] 				= $kollirow['kappalemaara'];
@@ -1140,7 +1153,7 @@
 								break;
 							case 'kate_korjattu':
 								$values .= ", NULL";
-								break;							
+								break;
 							default:
 								$values .= ", '".$ostotilausrivirow[$fieldname]."'";
 						}
@@ -1406,7 +1419,8 @@
 			$tilausnro = (int) $tilausnro;
 
 			$tilaajanrivinrolisa = trim($tilaajanrivinro) != '' ? " and tilausrivi.tilaajanrivinro = ".(int) $tilaajanrivinro : '';
-			$tilausnrolisa = (trim($tilausnro) != '' and trim($tilausnro) != 0) ? " and lasku.tunnus LIKE '%{$tilausnro}'" : '';
+			$tilausnrolisa = (trim($tilausnro) != '' and trim($tilausnro) != 0) ? " and lasku.tunnus LIKE '%{$tilausnro}'" : '';		
+			$tilausnrolisa2 = (trim($tilausnro) != '' and trim($tilausnro) != 0) ? " and tilausrivi.otunnus LIKE '%{$tilausnro}'" : '';				
 			$tuoteno_valeilla = str_replace(' ','_',$tuoteno);
 			$tuoteno_ilman_valeilla =str_replace(' ','',$tuoteno);
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tuote.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tuote.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tuote.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
@@ -1481,14 +1495,13 @@
 						tilausrivi.uusiotunnus,
 						lasku.tunnus laskutunnus
 						FROM lasku
-						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.uusiotunnus != 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.uusiotunnus != 0 {$tilausnrolisa2} {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
 						AND lasku.tila 			= 'K'
 						AND lasku.tapvm 		= '0000-00-00'
 						AND lasku.mapvm 		= '0000-00-00'
-						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
-						{$tilausnrolisa}";
+						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'";
 
 			if ($valitse == 'asn') {
 				$query = "{$query1} ORDER BY tunnus, uusiotunnus, laskutunnus";
@@ -1964,7 +1977,7 @@
 
 			echo "<tr><th colspan='9'><input type='button' class='vahvistavakisinbutton' value='",t("Aja automaattikohdistus uudestaan kaikille riveille"),"' /></th></tr>";
 
-			echo ebid($laskurow['tunnus']);
+			if ($laskurow['tunnus'] != '') echo "<tr><th colspan='9'>",ebid($laskurow['tunnus']),"</th></tr>";
 
 			echo "</table>";
 			echo "</form>";

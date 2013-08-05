@@ -261,6 +261,7 @@
 			$lang 							= $monta['kieli'];
 			$ip								= $monta['ip'];
 			$taso 							= $monta['taso'];
+			$tilaus_valmis					= $monta['tilaus_valmis'];
 			$hinta 							= $monta['hinnat'];
 			$saatavat 						= $monta['saatavat'];
 			$salasana 						= $monta['salasana'];
@@ -332,6 +333,7 @@
 						kieli 							= '{$lang}',
 						ip								= '{$ip}',
 						taso 							= '{$taso}',
+						tilaus_valmis					= '{$tilaus_valmis}',
 						hinnat							= '{$hinta}',
 						saatavat						= '{$saatavat}',
 						osasto							= '{$osasto}',
@@ -341,6 +343,7 @@
 						tuuraaja						= '{$tuuraaja}',
 						varasto 						= '{$varasto}',
 						oletus_varasto					= '{$oletus_varasto}',
+						oletus_ostovarasto				= '{$oletus_ostovarasto}',
 						oletus_pakkaamo					= '{$oletus_pakkaamo}',
 						kirjoitin 						= '{$kirjoitin}',
 						kassalipas_otto					= '{$kassalipas_otto}',
@@ -549,6 +552,7 @@
 						kieli 							= '{$lang}',
 						ip								= '{$ip}',
 						taso 							= '{$taso}',
+						tilaus_valmis					= '{$tilaus_valmis}',
 						hinnat							= '{$hinnat}',
 						saatavat						= '{$saatavat}',
 						keraajanro 						= '{$keraajanro}',
@@ -557,6 +561,7 @@
 						osasto							= '{$osasto}',
 						varasto 						= '{$varasto}',
 						oletus_varasto 					= '{$oletus_varasto}',
+						oletus_ostovarasto				= '{$oletus_ostovarasto}',
 						oletus_pakkaamo					= '{$oletus_pakkaamo}',
 						kirjoitin 						= '{$kirjoitin}',
 						oletus_asiakas 					= '{$oletus_asiakas}',
@@ -863,23 +868,21 @@
 					}
 
 				}
-				else {
 
-					$sel = array_fill_keys(array($krow['taso']), " selected") + array_fill_keys(array('1','2','3','4','9'), '');
+				$sel = array_fill_keys(array($krow['tilaus_valmis']), " selected") + array_fill_keys(array('1','2','3','4','9'), '');
 
-					echo "<tr><th align='left'>",t("Taso"),":</th>";
+				echo "<tr><th align='left'>",t("Tilauksen k‰sittely"),":</th>";
 
-					echo "<td><select name='taso'>";
-					echo "<option value='1' {$sel[1]}>",t("Tehotilaaja, tilaukset menee suoraan tomitukseen"),"</option>";
-					echo "<option value='2' {$sel[2]}>",t("Aloittelijatilaaja, tilaukset hyv‰ksytet‰‰n ennen toimitusta"),"</option>";
-					echo "<option value='3' {$sel[3]}>",t("Tehotilaaja, tilaukset menee suoraan toimitukseen MAISTA RIIPPUMATTA"),"</option>";
-					echo "<option value='4' {$sel[4]}>",t("Aloittelijatilaaja, tilauksia ei saa laittaa valmiiksi"),"</option>";
+				echo "<td><select name='tilaus_valmis' ".js_alasvetoMaxWidth("tilaus_valmis", 400).">";
+				echo "<option value='1' {$sel[1]}>",t("Tilaukset menev‰t suoraan ker‰ykseen"),"</option>";
+				echo "<option value='2' {$sel[2]}>",t("Tilaukset pit‰‰ hyv‰ksy‰ ennen ker‰yst‰"),"</option>";
+				echo "<option value='3' {$sel[3]}>",t("Tilaukset pit‰‰ hyv‰ksy‰ ennen ker‰yst‰ jos tilauksella on tuotteita ulkomaan varastoista (muuten menev‰t suoraan ker‰ykseen)"),"</option>";
+				echo "<option value='4' {$sel[4]}>",t("K‰ytt‰j‰ ei saa laittaa tilauksia valmiiksi"),"</option>";
 
-					if ($kukarow['yhtio'] == 'artr') {
-						echo "<option value='9' {$sel[9]}>",t("Tehotilaaja, hyv‰ksytyt tyˆm‰‰r‰ykset tilataan automaattisesti"),"</option>";
-					}
-					echo "</select></td></tr>";
+				if ($kukarow['yhtio'] == 'artr') {
+					echo "<option value='9' {$sel[9]}>",t("Tehotilaaja, hyv‰ksytyt tyˆm‰‰r‰ykset tilataan automaattisesti"),"</option>";
 				}
+				echo "</select></td></tr>";
 
 				$sel0 = $sel1 = $sel2 = "";
 
@@ -963,14 +966,31 @@
 
 				echo "<select name='oletus_varasto'>";
 				echo "<option value='0'>",t("Oletusvarasto"),"</option>";
+
 				while ($varow = mysql_fetch_assoc($vares)) {
-					$sel = '';
-					if ($varow['tunnus'] == $krow['oletus_varasto']) {
-						$sel = 'selected';
-					}
+
+					$sel = $varow['tunnus'] == $krow['oletus_varasto'] ? ' selected' : '';
+
 					echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
 				}
-				echo "</select>";
+
+				echo "</select></td></tr>";
+
+				echo "<tr><th align='left'>",t("Valitse k‰ytt‰j‰n oletusostovarasto"),":</td>";
+				echo "<td>";
+
+				mysql_data_seek($vares, 0);
+
+				echo "<select name='oletus_ostovarasto'>";
+				echo "<option value='0'>",t("Oletusvarasto"),"</option>";
+
+				while ($varow = mysql_fetch_assoc($vares)) {
+
+					$sel = $varow['tunnus'] == $krow['oletus_ostovarasto'] ? ' selected' : '';
+
+					echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
+				}
+				echo "</select></td></tr>";
 
 				echo "<tr><th align='left'>",t("Valitse varastot, joista k‰ytt‰j‰ saa myyd‰"),":</td>";
 				echo "<td>";

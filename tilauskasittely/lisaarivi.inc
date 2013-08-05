@@ -1577,8 +1577,7 @@
 												toimittajan_tunnus		= '$toimittajan_tunnus',
 												muutospvm				= now(),
 												muuttaja				= '$kukarow[kuka]',
-												erikoistoimitus_myynti	= '$myy_erikoistoimitus[$indeksi]',
-												ohita_kerays 			= '{$myy_ohita_kerays[$indeksi]}'
+												erikoistoimitus_myynti	= '$myy_erikoistoimitus[$indeksi]'
 												{$tlisatied_lisa}
 												{$tlisatied_lisa2}
 												WHERE yhtio			 = '$kukarow[yhtio]'
@@ -1983,6 +1982,9 @@
 						// (Jt_automatiikka = "kohdistetaan.." ja Automaattinen_jt_toimitus = "Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä keräyspäivän mukaisesti")
 						if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
 							$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
+						}
+						else if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'EI') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
+							$kerayspvm = date('Y-m-d', strtotime('now'));
 						}
 					case 'R' : // Valmistetaan asiakkaalle
 					case 'U' : // Tilataan toimittajalta asiakkaalle
@@ -2454,8 +2456,7 @@
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							muutospvm			= now(),
 							muuttaja			= '$kukarow[kuka]',
-							ei_nayteta			= '{$puu_ein[$i]}',
-							ohita_kerays 		= '{$puu_ohiker[$i]}'
+							ei_nayteta			= '{$puu_ein[$i]}'
 							{$tlisatied_lisa}
 							{$tlisatied_lisa2}
 							WHERE yhtio			 = '$kukarow[yhtio]'

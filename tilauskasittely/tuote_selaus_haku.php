@@ -1542,11 +1542,9 @@
 					$myyntihinta = hintapyoristys($row["myyntihinta"]). " $yhtiorow[valkoodi]";
 
 					if ($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
-						$hinnat["erikoisale"] = 0;
-
-						$myyntihinta_echotus = $hinnat["hinta"] * generoi_alekentta_php($hinnat, 'M', 'kerto');
-
-						$myyntihinta = hintapyoristys($myyntihinta_echotus)." $laskurow[valkoodi]";
+						list($hinta, $netto, $ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($oleasrow, $row, 1, '', '', '');
+						$myyntihinta_echotus = $hinta * generoi_alekentta_php($ale_kaikki, 'M', 'kerto');
+						$myyntihinta = hintapyoristys($myyntihinta_echotus)." $alehinta_val";
 					}
 					elseif ($kukarow["extranet"] != "") {
 						// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa

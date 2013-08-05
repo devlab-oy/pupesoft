@@ -1,5 +1,11 @@
 <?php
 
+	// Nämä pitää setata kuntoon
+	$locktime = 5400;
+	$lockfile = "/tmp/##hinnat_cron.lock";
+	$mista_yhtion_toimittajan_tunnus = 27371;
+	$mihin_yhtion_asiakkaan_tunnus = 101850;
+
 	// Kutsutaanko CLI:stä
 	if (php_sapi_name() != 'cli') {
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!\n");
@@ -14,9 +20,6 @@
 	}
 
 	date_default_timezone_set("Europe/Helsinki");
-
-	$locktime = 5400;
-	$lockfile = "/tmp/##hinnat_cron.lock";
 
 	// jos meillä on lock-file ja se on alle 90 minuuttia vanha (90 minsaa ku backuppia odotellessa saattaa tunti vierähtää aika nopeasti)
 	if (file_exists($lockfile)) {
@@ -52,26 +55,37 @@
 				WHERE yhtio = '{$mista_yhtio}'
 				AND kuka = 'admin'";
 	$kukares = pupe_query($query);
+
+	if (mysql_num_rows($kukares) != 1) {
+		unlink($lockfile);
+		exit("VIRHE: Admin käyttäjä ei löydy!\n");
+	}
+
 	$kukarow = mysql_fetch_assoc($kukares);
 
-	$mista_yhtion_toimittajan_tunnus = 27371;
-	$mihin_yhtion_asiakkaan_tunnus = 101850;
-
+	// Haetaan timestamp
 	$datetime_checkpoint_res = t_avainsana("HINNAT_CRON");
 
-	if (mysql_num_rows($datetime_checkpoint_res) != 0) {
-		$datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
-		$datetime_checkpoint = $datetime_checkpoint_row['selite'];
+	if (mysql_num_rows($datetime_checkpoint_res) != 1) {
+		unlink($lockfile);
+		exit("VIRHE: Timestamp ei löydy avainsanoista!\n");
 	}
-	else {
-		$datetime_checkpoint = '0000-00-00 00:00:00';
-	}
+
+	$datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
+	$datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mikä tilanne on jo käsitelty
+	$datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
 	$query = "	SELECT *
 				FROM asiakas
 				WHERE yhtio = '{$mista_yhtio}'
 				AND tunnus = $mihin_yhtion_asiakkaan_tunnus";
 	$asiakasres = pupe_query($query);
+
+	if (mysql_num_rows($asiakasres) != 1) {
+		unlink($lockfile);
+		exit("VIRHE: Asiakas ei löydy!\n");
+	}
+
 	$asiakasrow = mysql_fetch_assoc($asiakasres);
 
 	// Haetaan vain tuotteet mitkä vastaanottava yhtiö ostaa lähettävältä yhtiöltä
@@ -81,6 +95,11 @@
 				AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}";
 	$mihin_tuoteres = pupe_query($query);
 	$mihin_tuoterow = mysql_fetch_assoc($mihin_tuoteres);
+
+	if ($mihin_tuoterow['tuotteet'] === NULL) {
+		unlink($lockfile);
+		exit("VIRHE: Toimittajan tuotteita ei löydy!\n");
+	}
 
 	$laskurow = array(
 		'liitostunnus' => $mihin_yhtion_asiakkaan_tunnus,
@@ -103,6 +122,7 @@
 
 	$asiakkaan_puiden_tunnukset = $puun_tunnukset !== NULL ? " OR asiakas_segmentti IN ({$puun_tunnukset['tunnukset']})" : "";
 
+	// Haetaan muuttuneet asiakashinnat
 	$query = "	SELECT hinta, ryhma, tuoteno, laji
 				FROM asiakashinta
 				WHERE yhtio = '{$mista_yhtio}'
@@ -124,6 +144,7 @@
 		}
 	}
 
+	// Haetaan muuttuneet asiakasalennukset
 	$query = "	SELECT ryhma, tuoteno
 				FROM asiakasalennus
 				WHERE yhtio = '{$mista_yhtio}'
@@ -145,6 +166,7 @@
 		}
 	}
 
+	// Haetaan muuttuneet hinnastohinnat
 	$query = "	SELECT tuoteno
 				FROM hinnasto
 				WHERE yhtio = '{$mista_yhtio}'
@@ -161,6 +183,7 @@
 		$tuotteet[$hinnasto_row['tuoteno']] = 0;
 	}
 
+	// Käydään läpi kaikki muuttuneet alennusryhmät, lisätään niiden tuotteet tuote arrayseen
 	foreach ($ryhmat as $ryhma => $devnull) {
 
 		$query = "	SELECT tuoteno
@@ -177,6 +200,10 @@
 		}
 	}
 
+	// Vapautetaan muistia
+	unset($ryhmat);
+
+	// Haetaan kaikki muuttuneet tuotteet ja lisätään ne arrayseen
 	$query = "	SELECT *
 				FROM tuote
 				WHERE yhtio = '{$mista_yhtio}'
@@ -191,8 +218,10 @@
 		$tuotteet[$tuoterow['tuoteno']] = 0;
 	}
 
+	// Loopataan läpi kaikki muuttuneet tuotteet
 	foreach ($tuotteet as $tuoteno => $devnull) {
 
+		// Haetaan tuotteen tiedot $mista_yhtio
 		$query = "	SELECT *
 					FROM tuote
 					WHERE yhtio = '{$mista_yhtio}'
@@ -200,13 +229,14 @@
 		$tuoteres = pupe_query($query);
 		$tuoterow = mysql_fetch_assoc($tuoteres);
 
-		// Päivitetään myyntihinta
+		// Päivitetään myyntihinta $mihin_yhtio
 		$query = "	UPDATE tuote SET
 					myyntihinta = '{$tuoterow['myyntihinta']}'
 					WHERE yhtio = '{$mihin_yhtio}'
 					AND tuoteno = '{$tuoteno}'";
 		pupe_query($query);
 
+		// Haetaan tuotteen toimittajan liitos $mihin_yhtio
 		$query = "	SELECT tunnus
 					FROM tuotteen_toimittajat
 					WHERE yhtio = '{$mihin_yhtio}'
@@ -272,14 +302,15 @@
 		pupe_query($query);
 	}
 
-	$selitelisa = "";
-
-	if ($datetime_checkpoint == '0000-00-00 00:00:00') $datetime_checkpoint = date('Y-m-d H:i:s');
-
+	// Kun kaikki onnistui, päivitetään lopuksi timestamppi talteen
 	$query = "	UPDATE avainsana SET
-				selite = DATE_ADD('{$datetime_checkpoint}', INTERVAL 1 MINUTE)
+				selite = '{$datetime_checkpoint_uusi}'
 				WHERE yhtio = '{$mista_yhtio}'
 				AND laji = 'HINNAT_CRON'";
 	pupe_query($query);
+	
+	if (mysql_affected_rows() != 1) {
+		echo "Timestamp päivitys epäonnistui!\n";
+	}
 
 	unlink($lockfile);

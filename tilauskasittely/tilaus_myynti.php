@@ -1312,7 +1312,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 				$tuote_row = mysql_fetch_assoc($tuote_result);
 
 				$params = array('trow' => $tuote_row, 'laskurow' => $laskurow, 'tuoteno' => $row['tuoteno'], 'kpl' => $row['tilkpl'], 'hinta' => $row['hinta']);
-				$lisatyt_rivi = pupesoft_lisaa_rivi($params);
+				$lisatyt_rivi = lisaa_rivi($params);
 			}
 
 			// Jos on asetettu lisäkuluprosentti niin lisätään se myyntitilaukselle
@@ -1338,7 +1338,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 					'hinta' => $lisakulu['hinta'],
 					'var' => '',
 					'varataan_saldoa' => 'EI');
-				$lisatyt_rivi = pupesoft_lisaa_rivi($params);
+				$lisatyt_rivi = lisaa_rivi($params);
 			}
 		}
 		else {

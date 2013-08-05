@@ -2120,7 +2120,8 @@ $debug = 0;
 
 		foreach ($tilausrivit as $suuntalavan_tunnus => $tilriv_array) {
 
-			$query = "	SELECT sum(if(kpl != 0, 1, 0)) kplrivit
+			$query = "	SELECT SUM(IF(kpl != 0, 1, 0)) kplrivit,
+						SUM(IF(hyllyalue != '' and hyllynro != '' and hyllyvali != '' and hyllytaso != ''), 1, 0) hyllypaikat
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND suuntalava = '{$suuntalavan_tunnus}'";
@@ -2128,7 +2129,7 @@ $debug = 0;
 			$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
 
 			// Jos kaikki rivit on tuloutettu, ei haluta käsitellä sitä suuntalavaa
-			if ($cnt_chk_row['kplrivit'] == count($tilausrivit[$suuntalavan_tunnus])) {
+			if ($cnt_chk_row['kplrivit'] == count($tilausrivit[$suuntalavan_tunnus]) or $cnt_chk_row['hyllypaikat'] != count($tilausrivit[$suuntalavan_tunnus])) {
 				continue;
 			}
 
@@ -2137,7 +2138,6 @@ $debug = 0;
 	}
 
 	// tämän keikan voi viedä saldoille ja laskuttaa
-	// if ($kohdistettujariveja > 0 and ($kauttalaskutus == "kylla" or ($osrow["ebid"] == "TECCOM-INVOICE" and $virheet == 0))) {
 	if ($kohdistettujariveja > 0 and $kauttalaskutus == "kylla") {
 
 		$otunnus = $keikantunnus;

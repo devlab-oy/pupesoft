@@ -1859,7 +1859,7 @@ if ($kukarow["extranet"] == "" and $tee == 'jyvita') {
 if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == "")
 	or ((
 			(($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and $toim == 'EXTRANET')
-			or ($yhtiorow['jt_automatiikka'] == 'M' or $yhtiorow['jt_automatiikka'] == 'K')
+			or (($yhtiorow['jt_automatiikka'] == 'M' or $yhtiorow['jt_automatiikka'] == 'K') and ($toim == 'PIKATILAUS' or $toim == 'RIVISYOTTO'))
 		)
 		and (int) $kukarow['kesken'] > 0
 		and $kaytiin_otsikolla == "NOJOO!"
@@ -6405,7 +6405,7 @@ if ($tee == '') {
 								<input type='Submit' value='".t("Hyväksy")."'>
 								</form> ";
 					}
-					
+
 					if (isset($pikaperustus_naytetaan) and $pikaperustus_naytetaan > 0 and tarkista_oikeus("yllapito.php", "tuote!!!PIKAPERUSTA!!!true", "JOO")) {
 						echo " <form method='post' action='{$palvelin2}yllapito.php' name='pikaperusta'>
 								<input type='hidden' name='toim' value='tuote!!!PIKAPERUSTA!!!true'>

@@ -126,7 +126,12 @@
 	$query = "	SELECT hinta, ryhma, tuoteno, laji
 				FROM asiakashinta
 				WHERE yhtio = '{$mista_yhtio}'
-				AND (asiakas = {$asiakasrow['tunnus']} OR ytunnus = '{$asiakasrow['ytunnus']}' OR asiakas_ryhma = '{$asiakasrow['ryhma']}' OR piiri = '{$asiakasrow['piiri']}' {$asiakkaan_puiden_tunnukset})
+				AND ((asiakas = {$asiakasrow['tunnus']} and asiakas != 0)
+					OR (ytunnus = '{$asiakasrow['ytunnus']}' and ytunnus != '')
+					OR (asiakas_ryhma = '{$asiakasrow['ryhma']}' and asiakas_ryhma != '')
+					OR (piiri = '{$asiakasrow['piiri']}' and piiri != '')
+					{$asiakkaan_puiden_tunnukset})
+			    AND tuoteno IN ('', {$mihin_tuoterow['tuotteet']})
 				AND minkpl < 2
 				AND (
 					(alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
@@ -148,7 +153,12 @@
 	$query = "	SELECT ryhma, tuoteno
 				FROM asiakasalennus
 				WHERE yhtio = '{$mista_yhtio}'
-				AND (asiakas = {$asiakasrow['tunnus']} OR ytunnus = '{$asiakasrow['ytunnus']}' OR asiakas_ryhma = '{$asiakasrow['ryhma']}' OR piiri = '{$asiakasrow['piiri']}' {$asiakkaan_puiden_tunnukset})
+				AND ((asiakas = {$asiakasrow['tunnus']} and asiakas != 0)
+					OR (ytunnus = '{$asiakasrow['ytunnus']}' and ytunnus != '')
+					OR (asiakas_ryhma = '{$asiakasrow['ryhma']}' and asiakas_ryhma != '')
+					OR (piiri = '{$asiakasrow['piiri']}' and piiri != '')
+					{$asiakkaan_puiden_tunnukset})
+			    AND tuoteno IN ('', {$mihin_tuoterow['tuotteet']})
 				AND minkpl < 2
 				AND (
 					(alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
@@ -244,7 +254,7 @@
 					AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}";
 		$mihin_tuoteres = pupe_query($query);
 
-		while ($mihin_tuoterow = mysql_fetch_assoc($mihin_tuoteres)) {
+		while ($mihin_tuoterow2 = mysql_fetch_assoc($mihin_tuoteres)) {
 
 			// Lasketaan ja päivitetään ostohinta
 			list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, 1, '', '', array());
@@ -257,7 +267,7 @@
 			$query = "	UPDATE tuotteen_toimittajat SET
 						ostohinta = '{$hinta}'
 						WHERE yhtio = '{$mihin_yhtio}'
-						AND tunnus = '{$mihin_tuoterow['tunnus']}'";
+						AND tunnus = '{$mihin_tuoterow2['tunnus']}'";
 			pupe_query($query);
 		}
 	}

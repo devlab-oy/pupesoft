@@ -58,6 +58,17 @@ if(!function_exists("avainsanatarkista")) {
 				$seliteerrori = 1;
 			}
 
+			if ($tem_laji == 'HINNAT_CRON') {
+
+				$date = $t[$i];
+
+				// Huom. preg_match tarkoituksella "== false", koska se palauttaa virheess‰ 0 tai false
+				if (preg_match("/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/", $date) == false or strtotime($date) === false) {
+					$virhe[$i] = t("Selite on pakollinen ja se pit‰‰ olla muodossa vvvv-kk-pp tt:mm:ss");
+				}
+
+			}
+
 			if ($tem_laji == 'LABEL') {
 				if (trim($tem_selite) == '') {
 					$virhe[$i] = t("Selite on pakollinen ja se pit‰‰ olla muodossa #123 tai #112233");
@@ -91,7 +102,7 @@ if(!function_exists("avainsanatarkista")) {
 					$t[$i] = (int) $t[$i];
 				}
 			}
-			
+
 			if (($tem_laji == 'VAKIOVIESTI' or $tem_laji == 'VAKIOVIESTI_TIL') and trim($tem_selite) == '') {
 				$virhe[$i] = t("Selite on pakollinen");
 			}
@@ -138,7 +149,7 @@ if(!function_exists("avainsanatarkista")) {
 				}
 			}
 
-			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL') {
+			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON') {
 				$virhe[$i] = t("Selite ja selitetark ei voi olla tyhji‰")."!";
 			}
 

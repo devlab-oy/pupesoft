@@ -803,7 +803,7 @@ else {
 			unset($valittu_tulostin);
 		}
 		// jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D
-		elseif (($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') and $kateisohitus == "") {
+		elseif ((($laskurow['eilahetetta'] != '' and $yhtiorow['lahetteen_tulostustapa'] != 'I') or $laskurow['sisainen'] != '') and $kateisohitus == "") {
 
 			// vaikka laitetaan sisäiseen laskutukseen tai ei haluttu lähetettä, mutta annetaan mahdollisuus lähettää tilausvahvistus omaan sähköpostiin
 			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {

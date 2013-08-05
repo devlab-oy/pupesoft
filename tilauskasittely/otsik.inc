@@ -1984,7 +1984,7 @@
 			$jtki = "";
 			$rahtivapaa_chk = '';
 
-			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE")) $eilah = 'CHECKED';
+			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I')) $eilah = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';

@@ -6048,7 +6048,7 @@ if ($tee == '') {
 				else {
 					$var_temp = $row['var'];
 				}
-				
+
 				echo "<td $classvar align='center' valign='top'>$var_temp&nbsp;</td>";
 
 				if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
@@ -6363,7 +6363,12 @@ if ($tee == '') {
 								</form> ";
 					}
 
-					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and in_array($row["var"], array('','P','H')) and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] != "o" and $row["status"] != 'P' and $row["status"] != 'X') {
+					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0)
+							and ($row["var"] == 'P' or (in_array($row["var"], array('','H')) and ($toim == 'PIKATILAUS' or $toim == 'RIVISYOTTO')))
+							and $saako_jalkitoimittaa == 0
+							and $laskurow["jtkielto"] != "o"
+							and $row["status"] != 'P'
+							and $row["status"] != 'X') {
 
 						echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
 									<input type='hidden' name='toim' 			value = '$toim'>
@@ -6443,7 +6448,7 @@ if ($tee == '') {
 								<input type='Submit' value='".t("Hyväksy")."'>
 								</form> ";
 					}
-					
+
 					if (isset($pikaperustus_naytetaan) and $pikaperustus_naytetaan > 0 and tarkista_oikeus("yllapito.php", "tuote!!!PIKAPERUSTA!!!true", "JOO")) {
 						echo " <form method='post' action='{$palvelin2}yllapito.php' name='pikaperusta'>
 								<input type='hidden' name='toim' value='tuote!!!PIKAPERUSTA!!!true'>

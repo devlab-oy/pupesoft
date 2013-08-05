@@ -60,30 +60,11 @@ if(!function_exists("avainsanatarkista")) {
 
 			if ($tem_laji == 'HINNAT_CRON') {
 
-				list($date, $time) = explode(" ", $t[$i]);
+				$date = $t[$i];
 
-				if (count(explode(" ", $t[$i])) != 2 or trim($time) == '') {
+				// Huom. preg_match tarkoituksella "== false", koska se palauttaa virheess‰ 0 tai false
+				if (preg_match("/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/", $date) == false or strtotime($date) === false) {
 					$virhe[$i] = t("Selite on pakollinen ja se pit‰‰ olla muodossa vvvv-kk-pp tt:mm:ss");
-				}
-				else {
-
-					list($vv, $kk, $pp) = explode("-", $date);
-					list($tt, $mm, $ss) = explode(":", $time);
-
-					if ($tt == '' or $mm == '' or $ss == '' or strlen($tt) != 2 or strlen($mm) != 2 or strlen($ss) != 2) {
-						$virhe[$i] = t("Kellonaika on virheellinen. Kellonaika pit‰‰ olla muodossa tt:mm:ss");
-					}
-
-					if (!is_int($vv) or strlen($vv) != 4 or !is_int($kk) or strlen($kk) != 2 or !is_int($pp) or strlen($pp) != 2) {
-						$virhe[$i] = t("P‰iv‰m‰‰r‰ on virheellinen. P‰iv‰m‰‰r‰ pit‰‰ olla muodossa vvvv-kk-pp");
-					}
-
-					if (!checkdate($kk, $pp, $vv)) {
-						$virhe[$i] = t("P‰iv‰m‰‰r‰ on virheellinen. P‰iv‰m‰‰r‰ pit‰‰ olla muodossa vvvv-kk-pp");
-					}
-					elseif ($tt < 00 or $tt > 23 or $mm < 00 or $mm > 59 or $ss < 00 or $ss > 59) {
-						$virhe[$i] = t("Kellonaika on virheellinen. Kellonaika pit‰‰ olla muodossa tt:mm:ss");
-					}
 				}
 
 			}

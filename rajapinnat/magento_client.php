@@ -238,11 +238,14 @@ class MagentoClient {
 									'status'                => self::ENABLED,
 									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
 									'price'                 => $tuote['myymalahinta'],
-									'special_price'			=> $tuote['kuluprosentti'],
+									'special_price'         => $tuote['kuluprosentti'],
 									'tax_class_id'          => $this->getTaxClassID(),
 									'meta_title'            => '',
 									'meta_keyword'          => '',
-									'meta_description'      => ''
+									'meta_description'      => '',
+									'campaign_code'         => $tuote['campaign_code'],
+									'featured'              => $tuote['featured'],
+									'target'                => $tuote['target'],
 								)
 							)
 						);
@@ -262,11 +265,14 @@ class MagentoClient {
 									'status'                => self::ENABLED,
 									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
 									'price'                 => $tuote['myymalahinta'],
-									'special_price'			=> $tuote['kuluprosentti'],
+									'special_price'         => $tuote['kuluprosentti'],
 									'tax_class_id'          => $this->getTaxClassID(),
 									'meta_title'            => '',
 									'meta_keyword'          => '',
-									'meta_description'      => ''
+									'meta_description'      => '',
+									'campaign_code'         => $tuote['campaign_code'],
+									'featured'              => $tuote['featured'],
+									'target'                => $tuote['target'],
 								)
 							)
 						);

@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 use FileHandle;
+use POSIX;
 
 $dirri1		= "/joku/polku/tiliotteet/";    		# mist‰ haetaan
 $dirri2		= "/joku/polku/tiliotteet/done/";		# minne siirret‰‰n
@@ -36,11 +37,13 @@ if (!-f $tmpfile) {
 
 	while ($file = readdir($hakemisto)) {
 
+		$timestamp = strftime("%Y%d%m-%H%M%S", localtime);
 		$nimi = $dirri1.$file;
+		$nimi_to = $dirri2.$timestamp."_".$file;
 
 		if (-f $nimi) {
 			system("$komento $pupeote perl $nimi");
-			system("mv -f $nimi $dirri2");
+			system("mv -f $nimi $nimi_to");
 		}
 	}
 

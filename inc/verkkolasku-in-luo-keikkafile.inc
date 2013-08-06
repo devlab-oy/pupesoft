@@ -1999,8 +1999,6 @@ $debug = 0;
 
 	if (($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == 'MAVENTAXML') and $virheet == 0 and count($loop_array) > 0) {
 
-		$laskuvirhe .= t("Viedään varastoon").". ($laskurow[laskunro])\n";
-
 		$tullaan_automaattikohdistuksesta = true;
 		$uusi_suuntalavan_tunnus = 0;
 		$tilausrivit = array();
@@ -2032,7 +2030,7 @@ $debug = 0;
 									ORDER BY 3 DESC
 									LIMIT 1";
 						$checkres = pupe_query($query);
-						$vyohyke_row = mysql_fetch_array($checkres);
+						$vyohyke_row = mysql_fetch_assoc($checkres);
 
 						// Tehdään uusi suuntalava
 						$tee 			= "lisaa";
@@ -2073,40 +2071,6 @@ $debug = 0;
 			}
 		}
 
-		foreach ($tilausrivit as $tilriv_suuntalava => $tilrivit) {
-
-			// Laitetaan suuntalava valmiiksi
-			$query = "	UPDATE suuntalavat SET
-						tila = 'S'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$tilriv_suuntalava}'";
-			pupe_query($query);
-
-			// Duplikaatit pois
-			$tilausrivit[$tilriv_suuntalava] = array_unique($tilausrivit[$tilriv_suuntalava]);
-
-			$query = "	SELECT count(tunnus) rivit
-						FROM tilausrivi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND suuntalava = '{$tilriv_suuntalava}'";
-			$cnt_chk_res = pupe_query($query);
-			$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
-
-			if ($cnt_chk_row['rivit'] > count($tilausrivit[$tilriv_suuntalava])) {
-
-				// Ei haluta viedä varastoon niitä rivejä, mitkä ei ollu tässä laskussa mukana
-				// Joten laitetaan varastoon = 0
-				$query = "	UPDATE tilausrivi SET
-							varastoon = 0
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND suuntalava = '{$tilriv_suuntalava}'
-							AND kpl = 0
-							AND varattu != 0
-							AND tunnus NOT IN (".implode($tilausrivit[$tilriv_suuntalava]).")";
-				pupe_query($query);
-			}
-		}
-
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
@@ -2114,11 +2078,37 @@ $debug = 0;
 		$laskures = pupe_query($query);
 		$laskurow = mysql_fetch_assoc($laskures);
 
+		$laskuvirhe .= t("Viedään varastoon").". ($laskurow[laskunro])\n";
+
 		$toimittajaid = $laskurow['liitostunnus'];
 		$toiminto = "kalkyyli";
 		$tee = "varastoon";
 
-		foreach ($tilausrivit as $suuntalavan_tunnus => $tilriv_array) {
+		foreach ($tilausrivit as $suuntalavan_tunnus => $tilrivit) {
+
+			// Duplikaatit pois
+			$tilausrivit[$suuntalavan_tunnus] = array_unique($tilausrivit[$suuntalavan_tunnus]);
+
+			$query = "	SELECT count(tunnus) rivit
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND suuntalava = '{$suuntalavan_tunnus}'";
+			$cnt_chk_res = pupe_query($query);
+			$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
+
+			if ($cnt_chk_row['rivit'] > count($tilausrivit[$suuntalavan_tunnus])) {
+
+				// Ei haluta viedä varastoon niitä rivejä, mitkä ei ollu tässä laskussa mukana
+				// Joten laitetaan varastoon = 0
+				$query = "	UPDATE tilausrivi SET
+							varastoon = 0
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND suuntalava = '{$suuntalavan_tunnus}'
+							AND kpl = 0
+							AND varattu != 0
+							AND tunnus NOT IN (".implode($tilausrivit[$suuntalavan_tunnus]).")";
+				pupe_query($query);
+			}
 
 			$query = "	SELECT SUM(IF(kpl != 0, 1, 0)) kplrivit,
 						SUM(IF(hyllyalue != '' and hyllynro != '' and hyllyvali != '' and hyllytaso != ''), 1, 0) hyllypaikat
@@ -2133,7 +2123,15 @@ $debug = 0;
 				continue;
 			}
 
+			// Laitetaan suuntalava valmiiksi
+			$query = "	UPDATE suuntalavat SET
+						tila = 'S'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$suuntalavan_tunnus}'";
+			pupe_query($query);
+
 			require("tilauskasittely/varastoon.inc");
+
 		}
 	}
 

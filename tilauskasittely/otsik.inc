@@ -716,7 +716,9 @@
 				$srow_from = "LASKU";
 			}
 			else {
-				$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
+				//tyomaarays.viite as tyomaarays_viite, selectoidaan erikseen koska resultista löytyy 2 viite kenttää: tyomaarays.viite ja lasku.viite. mysql driveri yliajaa tyomaarays.viiteen lasku.viitteellä
+				//kts. n rivi. 2717 Dynaaminen osio
+				$squery = "	SELECT tyomaarays.viite as tyomaarays_viite, tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
 							FROM lasku
 							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
@@ -2713,6 +2715,9 @@
 					}
 					// Muut
 					else {
+						if ($kentta == 'viite') {
+							$srow[$kentta] = $srow['tyomaarays_viite'];
+						}
 						echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='$srow[$kentta]'></td>";
 					}
 

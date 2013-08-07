@@ -269,7 +269,6 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				 			tuoteno     	= '{$chk_row['tuoteno']}',
 				 			oletus      	= '{$oletuspaikka_lapsi}',
 		   		 			saldo       	= '{$chk_row['varattu']}',
-							saldo_varattu 	= '{$chk_row['varattu']}',
 		   		 			saldoaika   	= now(),
 							hyllyalue   	= '{$chk_row['hyllyalue']}',
 							hyllynro    	= '{$chk_row['hyllynro']}',

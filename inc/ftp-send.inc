@@ -39,11 +39,14 @@ $palautus_pyynto = isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
 $filenimi		 = basename($ftpfile);
 $ftptmpr		 = !isset($ftptmpr) ? TRUE : $ftptmpr;
 
-if ($ftphost == 'localhost' and $ftppath != '' and is_writable($ftppath) and $ftpfile != '' and is_readable($ftpfile)) {
+if ($ftphost == 'localhost' and $ftppath != '' and is_dir($ftppath) and is_writable($ftppath) and $ftpfile != '' and is_file($ftpfile) and is_readable($ftpfile)) {
 
 	$ftppath = rtrim($ftppath, "/")."/";
 
-	if (rename($ftpfile, $ftppath.$filenimi)) $tulos_ulos_ftp .= t("Tiedoston siirto onnistui")."<br>\n";
+	$file_from = realpath($ftpfile);
+	$file_to = realpath($ftppath.$filenimi);
+
+	if (rename($file_from, $file_to)) $tulos_ulos_ftp .= t("Tiedoston siirto onnistui")."<br>\n";
 	else $tulos_ulos_ftp .= t("Tiedoston siirto epäonnistui")."<br>\n";
 
 }

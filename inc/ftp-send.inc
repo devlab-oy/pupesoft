@@ -269,5 +269,3 @@ if (!isset($tulos_ulos) or $tulos_ulos == "") {
 elseif ($tulos_ulos == "edi") {
 	$edi_ulos .= strip_tags($tulos_ulos_ftp);
 }
-
-?>

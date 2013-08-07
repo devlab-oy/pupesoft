@@ -586,3 +586,15 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "sahkoinen_automaattituloutus") {
+
+		$sel = $trow[$i] == 'K' ? " selected" : "";
+
+		$ulos  = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
+		$ulos .= "<option value='K'{$sel["K"]}>".t("Tuloutetaan automaattisesti sähköisen laskun sisäänluvun yhteydessä")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

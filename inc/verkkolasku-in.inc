@@ -318,7 +318,7 @@
 			$_yhtion_toimipaikka = 0;
 
 			// Katsotaan löytyykö yhtiön toimipaikkaa
-			if (isset($yhtiorow) and $yhtio != "") {
+			if (isset($yhtiorow) and $yhtio != "" and $toim_asiakkaantiedot["toim_ovttunnus"] != "") {
 
 				$query = "	SELECT ovtlisa, tunnus
 							FROM yhtion_toimipaikat
@@ -328,7 +328,7 @@
 
 				while ($chk_toimipaikka_row = mysql_fetch_assoc($chk_toimipaikka_res)) {
 
-					if ($chk_toimipaikka_row['ovtlisa'] == substr($yhtiorow['ovttunnus'], strlen(trim($chk_toimipaikka_row['ovtlisa'])) * -1)) {
+					if ($chk_toimipaikka_row['ovtlisa'] == substr($toim_asiakkaantiedot["toim_ovttunnus"], strlen(trim($chk_toimipaikka_row['ovtlisa'])) * -1)) {
 						$_yhtion_toimipaikka = $chk_toimipaikka_row['tunnus'];
 					}
 				}

@@ -1997,7 +1997,27 @@ $debug = 0;
 		}
 	}
 
+	$automaattituloutus = false;
+
 	if (($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == 'MAVENTAXML') and $virheet == 0 and count($loop_array) > 0) {
+
+		if ($trow['sahkoinen_automaattituloutus'] == 'K') $automaattituloutus = true;
+
+		if ($osrow['yhtio_toimipaikka'] != 0) {
+
+			$query = "	SELECT sahkoinen_automaattituloutus
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$osrow['yhtio_toimipaikka']}'";
+			$chk_toimipaikka_res = pupe_query($query);
+			$chk_toimipaikka_row = mysql_fetch_assoc($chk_toimipaikka_res);
+
+			if ($chk_toimipaikka_row['sahkoinen_automaattituloutus'] == 'K') $automaattituloutus = true;
+			else $automaattituloutus = false;
+		}
+	}
+
+	if (($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == 'MAVENTAXML') and $virheet == 0 and count($loop_array) > 0 and $automaattituloutus) {
 
 		$tullaan_automaattikohdistuksesta = true;
 		$uusi_suuntalavan_tunnus = 0;
@@ -2016,7 +2036,7 @@ $debug = 0;
 				$tilausrivi_chk_res = pupe_query($query);
 				$tilausrivi_chk_row = mysql_fetch_assoc($tilausrivi_chk_res);
 
-				if ($tilausrivi_chk_row['suuntalava'] == 0 and $tilausrivi_chk_row['varattu'] != 0) {
+				if ($tilausrivi_chk_row['suuntalava'] == 0 and $tilausrivi_chk_row['varattu'] != 0 and $yhtiorow['suuntalavat'] == 'S') {
 
 					if ($uusi_suuntalavan_tunnus == 0) {
 
@@ -2089,46 +2109,63 @@ $debug = 0;
 			// Duplikaatit pois
 			$tilausrivit[$suuntalavan_tunnus] = array_unique($tilausrivit[$suuntalavan_tunnus]);
 
-			$query = "	SELECT count(tunnus) rivit
-						FROM tilausrivi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND suuntalava = '{$suuntalavan_tunnus}'";
-			$cnt_chk_res = pupe_query($query);
-			$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
+			if ($yhtiorow['suuntalavat'] == 'S') {
 
-			if ($cnt_chk_row['rivit'] > count($tilausrivit[$suuntalavan_tunnus])) {
-
-				// Ei haluta viedä varastoon niitä rivejä, mitkä ei ollu tässä laskussa mukana
-				// Joten laitetaan varastoon = 0
-				$query = "	UPDATE tilausrivi SET
-							varastoon = 0
+				$query = "	SELECT count(tunnus) rivit
+							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND suuntalava = '{$suuntalavan_tunnus}'
-							AND kpl = 0
-							AND varattu != 0
-							AND tunnus NOT IN (".implode($tilausrivit[$suuntalavan_tunnus]).")";
+							AND suuntalava = '{$suuntalavan_tunnus}'";
+				$cnt_chk_res = pupe_query($query);
+				$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
+
+				if ($cnt_chk_row['rivit'] > count($tilausrivit[$suuntalavan_tunnus])) {
+
+					// Ei haluta viedä varastoon niitä rivejä, mitkä ei ollu tässä laskussa mukana
+					// Joten laitetaan varastoon = 0
+					$query = "	UPDATE tilausrivi SET
+								varastoon = 0
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND suuntalava = '{$suuntalavan_tunnus}'
+								AND kpl = 0
+								AND varattu != 0
+								AND tunnus NOT IN (".implode($tilausrivit[$suuntalavan_tunnus]).")";
+					pupe_query($query);
+				}
+
+				$query = "	SELECT SUM(IF(kpl != 0, 1, 0)) kplrivit,
+							SUM(IF(hyllyalue != '' and hyllynro != '' and hyllyvali != '' and hyllytaso != ''), 1, 0) hyllypaikat
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND suuntalava = '{$suuntalavan_tunnus}'";
+				$cnt_chk_res = pupe_query($query);
+				$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
+
+				// Jos kaikki rivit on tuloutettu, ei haluta käsitellä sitä suuntalavaa
+				if ($cnt_chk_row['kplrivit'] == count($tilausrivit[$suuntalavan_tunnus]) or $cnt_chk_row['hyllypaikat'] != count($tilausrivit[$suuntalavan_tunnus])) {
+					continue;
+				}
+
+				// Laitetaan suuntalava valmiiksi
+				$query = "	UPDATE suuntalavat SET
+							tila = 'S'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$suuntalavan_tunnus}'";
 				pupe_query($query);
 			}
+			else {
 
-			$query = "	SELECT SUM(IF(kpl != 0, 1, 0)) kplrivit,
-						SUM(IF(hyllyalue != '' and hyllynro != '' and hyllyvali != '' and hyllytaso != ''), 1, 0) hyllypaikat
-						FROM tilausrivi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND suuntalava = '{$suuntalavan_tunnus}'";
-			$cnt_chk_res = pupe_query($query);
-			$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
+				$query = "	SELECT SUM(IF(kpl != 0, 1, 0)) kplrivit,
+							SUM(IF(hyllyalue != '' and hyllynro != '' and hyllyvali != '' and hyllytaso != ''), 1, 0) hyllypaikat
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND uusiotunnus = '{$otunnus}'";
+				$cnt_chk_res = pupe_query($query);
+				$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
 
-			// Jos kaikki rivit on tuloutettu, ei haluta käsitellä sitä suuntalavaa
-			if ($cnt_chk_row['kplrivit'] == count($tilausrivit[$suuntalavan_tunnus]) or $cnt_chk_row['hyllypaikat'] != count($tilausrivit[$suuntalavan_tunnus])) {
-				continue;
+				if ($cnt_chk_row['kplrivit'] == count($tilausrivit[$suuntalavan_tunnus]) or $cnt_chk_row['hyllypaikat'] != count($tilausrivit[$suuntalavan_tunnus])) {
+					continue;
+				}
 			}
-
-			// Laitetaan suuntalava valmiiksi
-			$query = "	UPDATE suuntalavat SET
-						tila = 'S'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$suuntalavan_tunnus}'";
-			pupe_query($query);
 
 			require("tilauskasittely/varastoon.inc");
 

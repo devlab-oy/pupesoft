@@ -39,7 +39,15 @@ $palautus_pyynto = isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
 $filenimi		 = basename($ftpfile);
 $ftptmpr		 = !isset($ftptmpr) ? TRUE : $ftptmpr;
 
-if ($ftphost == '' or $ftpuser == '' or $ftppass == '' or $ftppath == '' or $ftpfile == '') {
+if ($ftphost == 'localhost' and $ftppath != '' and is_writable($ftppath) and $ftpfile != '' and is_readable($ftpfile)) {
+
+	$ftppath = rtrim($ftppath, "/")."/";
+
+	if (rename($ftpfile, $ftppath.$filenimi)) $tulos_ulos_ftp .= t("Tiedoston siirto onnistui")."<br>\n";
+	else $tulos_ulos_ftp .= t("Tiedoston siirto epäonnistui")."<br>\n";
+
+}
+elseif ($ftphost == '' or $ftpuser == '' or $ftppass == '' or $ftppath == '' or $ftpfile == '') {
 	$tulos_ulos_ftp .= "<font class='error'>".t("Lähetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path, file)</font><br>\n";
 	$palautus = 9;
 	$syy = t("Lähetykseen tarvittavia tietoja puuttuu");

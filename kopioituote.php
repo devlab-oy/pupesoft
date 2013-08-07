@@ -59,43 +59,7 @@
 			else {
 				$otsikkorivi = mysql_fetch_array($stresult);
 
-				$tuotepaikat_query = "	SELECT *
-										FROM tuotepaikat
-										WHERE tuoteno = '$tuoteno'
-										and yhtio = '$kukarow[yhtio]'";
-				$tuotepaikat_result = pupe_query($tuotepaikat_query);
-
-				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($tuotepaikat_result) == 0 and $otsikkorivi["ei_saldoa"] == "") {
-					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
-
-					if ($hyllyalue == "") {
-						$hyllyalue = 0;
-					}
-					if ($hyllynro == "") {
-						$hyllynro = 0;
-					}
-					if ($hyllyvali == "") {
-						$hyllyvali = 0;
-					}
-					if ($hyllytaso == "") {
-						$hyllytaso = 0;
-					}
-
-					$tuotepaikka_query = "	INSERT INTO tuotepaikat set
-					 						yhtio			= '$kukarow[yhtio]',
-								 			tuoteno     	= '$tuoteno',
-								 			oletus      	= 'X',
-						   		 			saldoaika   	= now(),
-											hyllyalue   	= '$hyllyalue',
-											hyllynro    	= '$hyllynro',
-											hyllyvali   	= '$hyllyvali',
-											hyllytaso   	= '$hyllytaso',
-											luontiaika		= now(),
-											laatija			= '$kukarow[kuka]',
-											muutospvm		= now(),
-											muuttaja		= '$kukarow[kuka]'";
-					$tuotepaikka_result = pupe_query($tuotepaikka_query);
-				}
+				// tuotepaikat perustetan tuotetarkista.inciss‰, ei tehd‰ niit‰ t‰ss‰
 
 				// tehd‰‰n vanhasta tuotteesta 1:1 kopio...
 				$query = "INSERT into tuote set ";

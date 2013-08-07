@@ -328,11 +328,10 @@
 
 				while ($chk_toimipaikka_row = mysql_fetch_assoc($chk_toimipaikka_res)) {
 
-					if ($chk_toimipaikka_row['ovtlisa'] == substr($yhtiorow['ovttunnus'], strlen($chk_toimipaikka_row['ovtlisa']) * -1)) {
+					if ($chk_toimipaikka_row['ovtlisa'] == substr($yhtiorow['ovttunnus'], strlen(trim($chk_toimipaikka_row['ovtlisa'])) * -1)) {
 						$_yhtion_toimipaikka = $chk_toimipaikka_row['tunnus'];
 					}
 				}
-
 			}
 
 			// $laskuttajan_ovt --> voi olla ovttunnus, ytunnus, tai vatnumero

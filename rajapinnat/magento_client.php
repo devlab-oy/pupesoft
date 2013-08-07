@@ -184,8 +184,8 @@ class MagentoClient {
 	 * @param  array  $dnstuote 	Pupesoftin tuote_exportin palauttama tuote array
 	 * @return int  	         	Lisättyjen tuotteiden määrä
 	 */
-	public function lisaa_simple_tuotteet(array $dnstuote)
-	{
+	public function lisaa_simple_tuotteet(array $dnstuote) {
+
 		$this->log("Lisätään tuotteita (simple)");
 
 		// Tuote countteri
@@ -200,10 +200,12 @@ class MagentoClient {
 
 			// Haetaan storessa olevat tuotenumerot
 			$skus_in_store = $this->getProductList(true);
-		} catch (Exception $e) {
+		}
+		catch (Exception $e) {
 			$this->log("Virhe tuotteiden lisäyksessä", $e);
 			exit();
 		}
+
 		// Lisätään tuotteet erissä
 		foreach($dnstuote as $tuote) {
 
@@ -238,14 +240,18 @@ class MagentoClient {
 									'status'                => self::ENABLED,
 									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
 									'price'                 => $tuote['myymalahinta'],
-									'special_price'			=> $tuote['kuluprosentti'],
+									'special_price'         => $tuote['kuluprosentti'],
 									'tax_class_id'          => $this->getTaxClassID(),
 									'meta_title'            => '',
 									'meta_keyword'          => '',
-									'meta_description'      => ''
+									'meta_description'      => '',
+									'campaign_code'         => utf8_encode($tuote['campaign_code']),
+									'featured'              => utf8_encode($tuote['featured']),
+									'target'                => utf8_encode($tuote['target']),
 								)
 							)
 						);
+					$this->log("Tuote {$tuote['tuoteno']} lisätty." . print_r($tuote));
 				}
 				// Tuote on jo olemassa, päivitetään
 				else {
@@ -262,14 +268,18 @@ class MagentoClient {
 									'status'                => self::ENABLED,
 									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
 									'price'                 => $tuote['myymalahinta'],
-									'special_price'			=> $tuote['kuluprosentti'],
+									'special_price'         => $tuote['kuluprosentti'],
 									'tax_class_id'          => $this->getTaxClassID(),
 									'meta_title'            => '',
 									'meta_keyword'          => '',
-									'meta_description'      => ''
+									'meta_description'      => '',
+									'campaign_code'         => utf8_encode($tuote['campaign_code']),
+									'featured'              => utf8_encode($tuote['featured']),
+									'target'                => utf8_encode($tuote['target']),
 								)
 							)
 						);
+					$this->log("Tuote {$tuote['tuoteno']} päivitetty." . print_r($tuote));
 				}
 
 				// Lisätään tuotekuvat
@@ -281,8 +291,9 @@ class MagentoClient {
 				// Lisätään tuote countteria
 				$count++;
 
-			} catch (Exception $e) {
-				$this->log("Tuotteen (" . $tuote['tuoteno'] . ") lisäys/päivitys epäonnistui.", $e);
+			}
+			catch (Exception $e) {
+				$this->log("Tuotteen {$tuote['tuoteno']} lisäys/päivitys epäonnistui." . print_r($tuote), $e);
 			}
 		}
 

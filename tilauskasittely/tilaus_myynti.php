@@ -1859,7 +1859,7 @@ if ($kukarow["extranet"] == "" and $tee == 'jyvita') {
 if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == "")
 	or ((
 			(($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and $toim == 'EXTRANET')
-			or ($yhtiorow['jt_automatiikka'] == 'M' or $yhtiorow['jt_automatiikka'] == 'K')
+			or (($yhtiorow['jt_automatiikka'] == 'M' or $yhtiorow['jt_automatiikka'] == 'K') and ($toim == 'PIKATILAUS' or $toim == 'RIVISYOTTO'))
 		)
 		and (int) $kukarow['kesken'] > 0
 		and $kaytiin_otsikolla == "NOJOO!"
@@ -2286,6 +2286,22 @@ if ($tee == '') {
 		}
 
 		echo "</form>";
+
+		if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+			echo "	<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
+						<input type='hidden' name='toim' 			value = '$toim'>
+						<input type='hidden' name='lopetus' 		value = '$lopetus'>
+						<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+						<input type='hidden' name='projektilla' 	value = '$projektilla'>
+						<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+						<input type='hidden' name='mista' 			value = '$mista'>
+						<input type='hidden' name='menutila' 		value = '$menutila'>
+						<input type='hidden' name='orig_tila' 		value = '$orig_tila'>
+						<input type='hidden' name='orig_alatila' 	value = '$orig_alatila'>
+						<input type='hidden' name='tila' 			value = 'MUUTAKAIKKI'>
+						<input type='Submit' value='" . t("Muuta kaikki tilauksen rivit JT-muiden mukana") . "' onclick='return nappi_onclick_confirm(\"".t('Haluatko muuttaa kaikki tilausrivit jt-muiden mukana')."?\");' >
+					</form> ";
+		}
 
 		if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and file_exists($pupe_root_polku . '/tilauskasittely/varaosaselain_napit.inc')) {
 			require_once('tilauskasittely/varaosaselain_napit.inc');
@@ -3837,6 +3853,17 @@ if ($tee == '') {
 				$tilausrivilinkki	= '';
 				$toimittajan_tunnus	= '';
 			}
+		}
+	}
+
+	if ($kukarow["extranet"] == "" and $tila == 'MUUTAKAIKKI') {
+		if (!empty($tilausnumero)) {
+			$query = "	UPDATE tilausrivi
+						SET var = 'J',
+						kerayspvm = '".date('Y-m-d', strtotime('now + 3 month'))."'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND otunnus = '{$tilausnumero}'";
+			pupe_query($query);
 		}
 	}
 
@@ -6015,7 +6042,14 @@ if ($tee == '') {
 					}
 				}
 
-				echo "<td $classvar align='center' valign='top'>$row[var]&nbsp;</td>";
+				if ($row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm'])) {
+					$var_temp = $row['var'] . " - ".t("Muiden mukana");
+				}
+				else {
+					$var_temp = $row['var'];
+				}
+
+				echo "<td $classvar align='center' valign='top'>$var_temp&nbsp;</td>";
 
 				if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 
@@ -6219,6 +6253,10 @@ if ($tee == '') {
 								<input type='Submit' value='".t("Muokkaa")."'>
 								</form> ";
 
+						if ($row['vanha_otunnus'] != $tilausnumero) {
+							//kyseessä JT-rivi tai JT-muiden mukana, joka tulee asiakkaan edellisiltä tilauksilta. Näille riveille halutaan poista nappiin alertti
+							$poista_onclick = "onclick='return nappi_onclick_confirm(\"".t('Olet poistamassa automaattisesti lisätyn jälkitoimitusrivin oletko varma')."?\");'";
+						}
 						echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='poista'>
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='lopetus' 		value = '$lopetus'>
@@ -6233,7 +6271,7 @@ if ($tee == '') {
 								<input type='hidden' name='orig_alatila'	value = '$orig_alatila'>
 								<input type='hidden' name='tila' 			value = 'MUUTA'>
 								<input type='hidden' name='tapa' 			value = 'POISTA'>
-								<input type='Submit' value='".t("Poista")."'>
+								<input type='Submit' value='".t("Poista")."' $poista_onclick>
 								</form> ";
 					}
 
@@ -6325,7 +6363,12 @@ if ($tee == '') {
 								</form> ";
 					}
 
-					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $row["var"] == "P" and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] != "o" and $row["status"] != 'P' and $row["status"] != 'X') {
+					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0)
+							and ($row["var"] == 'P' or (in_array($row["var"], array('','H')) and ($toim == 'PIKATILAUS' or $toim == 'RIVISYOTTO')))
+							and $saako_jalkitoimittaa == 0
+							and $laskurow["jtkielto"] != "o"
+							and $row["status"] != 'P'
+							and $row["status"] != 'X') {
 
 						echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
 									<input type='hidden' name='toim' 			value = '$toim'>
@@ -6405,7 +6448,7 @@ if ($tee == '') {
 								<input type='Submit' value='".t("Hyväksy")."'>
 								</form> ";
 					}
-					
+
 					if (isset($pikaperustus_naytetaan) and $pikaperustus_naytetaan > 0 and tarkista_oikeus("yllapito.php", "tuote!!!PIKAPERUSTA!!!true", "JOO")) {
 						echo " <form method='post' action='{$palvelin2}yllapito.php' name='pikaperusta'>
 								<input type='hidden' name='toim' value='tuote!!!PIKAPERUSTA!!!true'>
@@ -6613,7 +6656,11 @@ if ($tee == '') {
 					echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>";
 
 					if ($row['kommentti'] != '') {
-						echo t("Kommentti").":<br><font class='message'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
+						$font_color = "";
+						if ($row['vanha_otunnus'] != $tilausnumero) {
+							$font_color = "color='green'";
+						}
+						echo t("Kommentti").":<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
 					}
 
 					// tähän se taulu

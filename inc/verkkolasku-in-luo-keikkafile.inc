@@ -2016,7 +2016,7 @@ $debug = 0;
 				$tilausrivi_chk_res = pupe_query($query);
 				$tilausrivi_chk_row = mysql_fetch_assoc($tilausrivi_chk_res);
 
-				if ($tilausrivi_chk_row['suuntalava'] == 0) {
+				if ($tilausrivi_chk_row['suuntalava'] == 0 and $tilausrivi_chk_row['varattu'] != 0) {
 
 					if ($uusi_suuntalavan_tunnus == 0) {
 

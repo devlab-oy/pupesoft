@@ -477,7 +477,9 @@
 						WHERE tunnus = '$rivitunnus'";
 			$result = pupe_query($query);
 
-			tarkista_myynti_osto_liitos_ja_poista($rivitunnus, false);
+			if ($tapa != 'VAIHDARIVI') {
+				tarkista_myynti_osto_liitos_ja_poista($rivitunnus, false);
+			}
 
 			// Tehdään pari juttua jos tuote on sarjanumeroseurannassa
 			if ($tilausrivirow["sarjanumeroseuranta"] != '') {
@@ -496,14 +498,13 @@
 			if ($tapa == 'VAIHDARIVI') {
 				$trow = hae_tuote($vastaavatuoteno);
 				$kpl = ($tilausrivirow['varattu'] + $tilausrivirow['jt']);
-				$hinta = $tilausrivirow['hinta'];
-				$ale = $tilausrivirow['ale1'];
 
-				list($hinta, $netto, $ale, , ) = alehinta($laskurow, $trow, $kpl, '', $hinta, $ale);
+				list($hinta, $netto, $ale, , ) = alehinta($laskurow, $trow, $kpl, '', '', '');
 				if (!empty($tilausrivirow['tilausrivilinkki'])) {
 					//Jos vaihdettava rivi on linkattu myyntitilaukseen, käydään vaihtamassa myös myyntitilauksen tuote vastaavaan tuotteeseen.
 					$query = "	UPDATE tilausrivi
 								SET tuoteno = '{$vastaavatuoteno}',
+								nimitys = '{$trow['nimitys']}',
 								hinta = '{$hinta}',
 								ale1 = '{$ale}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
@@ -531,6 +532,8 @@
 					unset($tilausrivirow['laatija']);
 					unset($tilausrivirow['sarjanumeroseuranta']);
 					unset($tilausrivirow['myyntihinta_maara']);
+					unset($tilausrivirow['tilausrivilinkki']);
+					unset($tilausrivirow['tilausrivitunnus']);
 
 					$tilausrivirow['otunnus'] = $toisen_toimittajan_ostotilaus['tunnus'];
 					$tilausrivirow['tuoteno'] = $vastaavatuoteno;

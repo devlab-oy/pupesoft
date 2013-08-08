@@ -314,7 +314,10 @@ if (!function_exists("toimitarkista")) {
 		if (mysql_field_name($result, $i) == "edi_polku") {
 			$tmp_edi_polku = trim($t[$i]);
 
-			if ($tmp_edi_kuvaus != "" and $tmp_edi_palvelin == "localhost" and ($tmp_edi_polku == "" or !is_writable($tmp_edi_polku))) {
+			if ($tmp_edi_kuvaus == 'editilaus_out_wabco.inc' or $tmp_edi_kuvaus == 'editilaus_out_excel.inc' or $tmp_edi_kuvaus == 'editilaus_out_xml.inc') {
+				// Näissä tyypeissä ei tartte olle mitään kenttiä syötetty
+			}
+			elseif ($tmp_edi_kuvaus != "" and $tmp_edi_palvelin == "localhost" and ($tmp_edi_polku == "" or !is_writable($tmp_edi_polku))) {
 				$tmp_virhe = t("Paikallinen siirto ei onnistu, koska hakemistoon ei ole kirjoitusoikeutta")."!";
 				$virhe[$i] = $tmp_virhe;
 				$virhe[$tmp_edi_palvelin_i] = $tmp_virhe;

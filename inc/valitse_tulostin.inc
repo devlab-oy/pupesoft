@@ -338,8 +338,11 @@
 				echo "<option value='asiakasemail$asrow[lasku_email]'>".t("Asiakkaan laskutussähköpostiin").": $asrow[lasku_email]</option>";
 			}
 		}
-
-		if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and (preg_match("/(excel|wabco|xml)/", $editoimrow['edi_kuvaus']) or ($editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != ''))) {
+		
+		if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and 
+				(preg_match("/(excel|wabco|xml)/", $editoimrow['edi_kuvaus']) or 
+				($editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != '') or 
+				$editoimrow['edi_palvelin'] == "localhost" and $editoimrow["edi_polku"] != '')) {
 			$rajaus = "";
 			$valittu = "edi";
 		}

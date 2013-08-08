@@ -1860,8 +1860,28 @@
 				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 				$vasen_sarake[$vasen] .= "<td><select name='tilaustyyppi'>";
 
-				$sel = array();
-				$sel[$srow["tilaustyyppi"]] = "selected";
+				if (isset($srow) and $srow['tilaustyyppi'] != '') {
+					$sel = array($srow['tilaustyyppi'] => "selected");
+				}
+				elseif (isset($tilaustyyppi) and $tilaustyyppi != "") {
+					$sel = array($tilaustyyppi => "selected");
+				}
+				else {
+					$sel = array();
+				}
+
+				$sel = $sel +
+				array(
+					'A' => '',
+					'E' => '',
+					'N' => '',
+					'S' => '',
+					'T' => '',
+					2 => '',
+					7 => '',
+					8 => '',
+					9 => '',
+				);
 
 				$vasen_sarake[$vasen] .= "<option value='N' $sel[N]>".t("Normaalitilaus")."</option>";
 				$vasen_sarake[$vasen] .= "<option value='E' $sel[E]>".t("Ennakkotilaus")."</option>";

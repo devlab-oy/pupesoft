@@ -803,7 +803,7 @@ else {
 			unset($valittu_tulostin);
 		}
 		// jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D
-		elseif ((($laskurow['eilahetetta'] != '' and $yhtiorow['lahetteen_tulostustapa'] != 'I') or $laskurow['sisainen'] != '') and $kateisohitus == "") {
+		elseif (($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') and $kateisohitus == "") {
 
 			// vaikka laitetaan sisäiseen laskutukseen tai ei haluttu lähetettä, mutta annetaan mahdollisuus lähettää tilausvahvistus omaan sähköpostiin
 			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
@@ -823,6 +823,12 @@ else {
 			// Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina
 			if ($yhtiorow['lahetteen_tulostustapa'] == "I") {
 
+				$query = "	UPDATE lasku
+							SET tila = 'N',
+							alatila = 'A'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$laskurow['tunnus']}'";
+				pupe_query($query);
 				// Tulostetaan keräyslista
 				$tilausnumeroita = $laskurow["tunnus"];
 				require("tilaus-valmis-tulostus.inc");

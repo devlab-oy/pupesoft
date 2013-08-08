@@ -133,7 +133,7 @@
 		$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s mitätöitiin koska tilauksella ei ollut yhtään kerättävää/laskutettavaa riviä."), $laskurow["tunnus"])."</font><br><br>\n";
 		$toimitusvahvitus_laheta = TRUE;
 	}
-	elseif ($rivirow["jteet"] > 0 and $laskurow["osatoimitus"] != '' and $yhtiorow['lahetteen_tulostustapa'] != 'I') {
+	elseif ($rivirow["jteet"] > 0 and $laskurow["osatoimitus"] != '') {
 		// Jos tilauksella oli yksikin jt-rivi ja osatoimitus on kielletty
 		$query  = "	UPDATE lasku
 					SET tila='N', alatila='U'
@@ -314,12 +314,12 @@
 		$result = pupe_query($query);
 
 		///* Tähän mennään jos lähete tosiaan tulostetaan *///
-		if ($yhtiorow["lahetteen_tulostustapa"] == "A" or in_array($yhtiorow["lahetteen_tulostustapa"], array('B','I'))) {
+		if ($yhtiorow["lahetteen_tulostustapa"] == "A" or $yhtiorow["lahetteen_tulostustapa"] == "B") {
 			$tilausnumeroita = $laskurow["tunnus"];
 			require("tilaus-valmis-tulostus.inc");
 
 			// jos halutaan MYÖS lähete samantien
-			if (in_array($yhtiorow["lahetteen_tulostustapa"], array('B','I'))) {
+			if ($yhtiorow["lahetteen_tulostustapa"] == "B") {
 				$params = array(
 					'laskurow'					=> $laskurow,
 					'sellahetetyyppi' 			=> "",
@@ -380,22 +380,6 @@
 
 	if (!isset($silent) or $silent == "") {
 		echo $tilaus_valmis_message;
-	}
-
-	if ($yhtiorow['lahetteen_tulostustapa'] == 'I' and $rivirow["jteet"] == 0 and $rivirow["puutteet"] == 0) {
-		$query = "	UPDATE lasku
-					JOIN tilausrivi
-					ON ( tilausrivi.yhtio = lasku.yhtio
-						AND tilausrivi.otunnus = lasku.tunnus )
-					SET lasku.tila = 'L',
-					lasku.alatila = 'D',
-					tilausrivi.keratty = '{$kukarow['kuka']}',
-					tilausrivi.kerattyaika = NOW(),
-					tilausrivi.toimitettu = '{$kukarow['kuka']}',
-					tilausrivi.toimitettuaika = NOW()
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-					AND lasku.tunnus = '{$laskurow['tunnus']}'";
-		pupe_query($query);
 	}
 
 ?>

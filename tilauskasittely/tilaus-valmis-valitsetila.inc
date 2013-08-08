@@ -384,10 +384,17 @@
 
 	if ($yhtiorow['lahetteen_tulostustapa'] == 'I' and $rivirow["jteet"] == 0 and $rivirow["puutteet"] == 0) {
 		$query = "	UPDATE lasku
-					SET tila = 'L',
-					alatila = 'D'
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$laskurow['tunnus']}'";
+					JOIN tilausrivi
+					ON ( tilausrivi.yhtio = lasku.yhtio
+						AND tilausrivi.otunnus = lasku.tunnus )
+					SET lasku.tila = 'L',
+					lasku.alatila = 'D',
+					tilausrivi.keratty = '{$kukarow['kuka']}',
+					tilausrivi.kerattyaika = NOW(),
+					tilausrivi.toimitettu = '{$kukarow['kuka']}',
+					tilausrivi.toimitettuaika = NOW()
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					AND lasku.tunnus = '{$laskurow['tunnus']}'";
 		pupe_query($query);
 	}
 

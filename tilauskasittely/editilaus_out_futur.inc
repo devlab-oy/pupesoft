@@ -226,10 +226,43 @@
 			$filename = $edipolku."/{$laskurow['tunnus']}.dat";
 			file_put_contents($filename,$edi_order);
 
-			$ftphost = $ftphost_futur;
-			$ftpuser = $ftpuser_futur;
-			$ftppass = $ftppass_futur;
-			$ftppath = $ftppath_futur;
+			$ftphost = $ftpuser = $ftppass = $ftppath = "";
+
+			if ($myynti_vai_osto == 'M') {
+
+				$query = "	SELECT *
+							FROM asiakkaan_avainsanat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND liitostunnus = '{$laskurow['liitostunnus']}'
+							AND laji IN ('futur_host','futur_path','futur_user','futur_password')
+							AND avainsana != ''";
+				$chk_res = pupe_query($query);
+
+				while ($chk_row = mysql_fetch_assoc($chk_res)) {
+
+					switch($chk_row['laji']) {
+						case 'futur_host':
+							$ftphost = $chk_row['avainsana'];
+							break;
+						case 'futur_path':
+							$ftppath = $chk_row['avainsana'];
+							break;
+						case 'futur_user':
+							$ftpuser = $chk_row['avainsana'];
+							break;
+						case 'futur_password':
+							$ftppass = $chk_row['avainsana'];
+							break;
+					}
+
+				}
+			}
+			else {
+				$ftphost = $ftphost_futur;
+				$ftpuser = $ftpuser_futur;
+				$ftppass = $ftppass_futur;
+				$ftppath = $ftppath_futur;
+			}
 
 			$ftpfile = $unlink_filename = $filename;
 

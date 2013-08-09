@@ -204,6 +204,16 @@
 	}
 
 	if ($avain_sel['OLETUSPAIKKA'] == 'SELECTED') {
+
+		if (mysql_field_name($result, $i) == "selite") {
+			$ulos .= "<td>";
+			$ulos .= "<input type='text' name='{$nimi}' size='35' maxlength='65535'/>";
+			$ulos .= t("Oletuspaikka pit‰‰ antaa muodossa hyllyalue-hyllynro-hyllyvali-hyllytaso");
+			$ulos .= "</td>";
+			
+			$jatko = 0;
+		}
+		
 		if (mysql_field_name($result, $i) == "selitetark") {
 			$sel = array();
 			$sel[$trow[$i]] = "SELECTED";

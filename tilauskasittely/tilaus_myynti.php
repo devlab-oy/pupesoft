@@ -1546,67 +1546,53 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 				AND alatila = 'A'";
 	$result = pupe_query($query);
 
-	// katsotaan onko tilausrivit Unikko-järjestelmään
-	$query = "	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro
-				FROM tilausrivi
-				JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno and tuote.ei_saldoa='')
-				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-				AND tilausrivi.otunnus = '{$tilausnumero}'
-				AND tilausrivi.tyyppi != 'D'";
-	$varasto_chk_res = pupe_query($query);
+	// Jos tehdaspalautus
+	if ($laskurow['tilaustyyppi'] == 9) {
 
-	while ($varasto_chk_row = mysql_fetch_assoc($varasto_chk_res)) {
-		$varasto_chk = kuuluukovarastoon($varasto_chk_row['hyllyalue'], $varasto_chk_row['hyllynro']);
+		$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
+		$laskurow_edi_res = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($laskurow_edi_res);
 
-		$query = "	SELECT ulkoinen_jarjestelma
-					FROM varastopaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$varasto_chk}'";
-		$ulkoinen_jarjestelma_res = pupe_query($query);
-		$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
+		$query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
+		$asiakas_chk_res = pupe_query($query);
+		$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
 
-		if ($ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'] == 'U') {
-			// Rahtivapaat aina lähettäjän rahtisopparilla
-			$query = "UPDATE lasku SET rahtivapaa = 'X', kohdistettu = 'K' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
-			$rahtivapaa_upd_res = pupe_query($query);
-
-			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
-			$laskurow_edi_res = pupe_query($query);
-			$laskurow_edi = mysql_fetch_assoc($laskurow_edi_res);
-
-			$query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow_edi['liitostunnus']}'";
-			$asiakas_chk_res = pupe_query($query);
-			$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
+		if (strtolower(trim($asiakas_chk_row['toimitusvahvistus'])) == 'editilaus_out_futur.inc') {
 
 			$query = "	SELECT *
-						FROM laskun_lisatiedot
+						FROM asiakkaan_avainsanat
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND otunnus = '{$laskurow_edi['tunnus']}'";
-			$lisatiedot_result = pupe_query($query);
-			$laskun_lisatiedot = mysql_fetch_assoc($lisatiedot_result);
+						AND liitostunnus = '{$laskurow['liitostunnus']}'
+						AND laji IN ('futur_host','futur_path','futur_user','futur_password')
+						AND avainsana != ''";
+			$chk_res = pupe_query($query);
 
-			$params = array(
-				'laskurow' 		=> $laskurow_edi,
-				'lisatiedot' 	=> $laskun_lisatiedot,
-				'asiakasrow' 	=> $asiakas_chk_row,
-				'tilaustyyppi' 	=> 3,
-				'toim' 			=> $toim,
-			);
+			$ftphost_futur = $ftppath_futur = $ftpuser_futur = $ftppass_futur = "";
 
-			require("{$tilauskaslisa}editilaus_out_futur.inc");
+			while ($chk_row = mysql_fetch_assoc($chk_res)) {
 
-			if (editilaus_out_futur($params) === 0) {
-
-				$query = "	UPDATE lasku SET
-							tila = 'C',
-							alatila = 'C',
-							lahetepvm = now()
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$tilausnumero}'";
-				$upd_res = pupe_query($query);
+				switch($chk_row['laji']) {
+					case 'futur_host':
+						$ftphost_futur = $chk_row['avainsana'];
+						break;
+					case 'futur_path':
+						$ftppath_futur = $chk_row['avainsana'];
+						break;
+					case 'futur_user':
+						$ftpuser_futur = $chk_row['avainsana'];
+						break;
+					case 'futur_password':
+						$ftppass_futur = $chk_row['avainsana'];
+						break;
+				}
 			}
 
-			break;
+			if (($ftphost_futur == 'localhost' and $ftppath_futur != '') or ($ftphost_futur != 'localhost' and $ftphost_futur != '' and $ftppath_futur != '' and $ftppass_futur != '' and $ftpuser_futur != '')) {
+				$laskurow['tilaustyyppi'] = 3;
+				$myynti_vai_osto = 'M';
+
+				require("{$tilauskaslisa}editilaus_out_futur.inc");
+			}
 		}
 	}
 

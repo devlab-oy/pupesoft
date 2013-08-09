@@ -502,11 +502,16 @@
 				list($hinta, $netto, $ale, , ) = alehinta($laskurow, $trow, $kpl, '', '', '');
 				if (!empty($tilausrivirow['tilausrivilinkki'])) {
 					//Jos vaihdettava rivi on linkattu myyntitilaukseen, käydään vaihtamassa myös myyntitilauksen tuote vastaavaan tuotteeseen.
+					$ale_query = "";
+					foreach($ale as $a_index => $a) {
+						$ale_query .= $a_index .' = ' . $a . ',';
+					}
+					$ale_query = substr($ale_query, 0, -1);
 					$query = "	UPDATE tilausrivi
 								SET tuoteno = '{$vastaavatuoteno}',
 								nimitys = '{$trow['nimitys']}',
 								hinta = '{$hinta}',
-								ale1 = '{$ale}'
+								{$ale_query}
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$tilausrivirow['tilausrivitunnus']}'";
 					pupe_query($query);
@@ -755,7 +760,7 @@
 						$tilausrivin_lisatiedot_row = mysql_fetch_assoc($result);
 
 						//jos ostorivi on naitettu myyntiriviin
-						if (!empty($tilausrivin_lisatiedot_row)) {
+						if (!empty($tilausrivin_lisatiedot_row) and $tapa != 'VAIHDARIVI') {
 							// päivitetään myyntitilausrivi, jos se on liitetty ostotilausriviin (nollarivejä ei elvytetä...)
 							$query = "	UPDATE tilausrivi
 										SET tilausrivi.tyyppi  = 'L'
@@ -1495,6 +1500,11 @@
 
 						echo "<td colspan='$alespan' $kommclass1>";
 						if (trim($prow["kommentti"]) != "") echo t("Kommentti").": $prow[kommentti]";
+						echo "</td></tr>";
+
+						echo "<tr class='vastaavat_korvaavat_hidden {$prow['tunnus']}'>";
+						echo "<td></td>";
+						echo "<td colspan='".($alespan + 1)."' $kommclass1>";
 						if (!empty($prow['tilausrivilinkki'])) {
 							$query = "	SELECT tilausrivi.otunnus as otunnus,
 										lasku.nimi as nimi
@@ -1503,18 +1513,14 @@
 										ON ( lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus )
 										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-										AND tilausrivi.tunnus = '{$prow['tilausrivilinkki']}'";
+										AND tilausrivi.tunnus = '{$prow['tilausrivitunnus']}'";
 							$myyntitilaus_result = pupe_query($query);
 							$myyntitilausrow = mysql_fetch_assoc($myyntitilaus_result);
 
-							echo "<br/>";
 							echo '<font class="message">'.t("Huom: vaihtamalla tuotteen vaihdetaan myös myyntitilauksen %s %s tilausrivi", '', $myyntitilausrow['otunnus'], $myyntitilausrow['nimi']).'</font>';
+							echo "<br/>";
+							echo "<br/>";
 						}
-						echo "</td></tr>";
-
-						echo "<tr class='vastaavat_korvaavat_hidden {$prow['tunnus']}'>";
-						echo "<td></td>";
-						echo "<td colspan='".($alespan + 1)."' $kommclass1>";
 						echo $vastaavat_html;
 						echo "</td>";
 						echo "</tr>";

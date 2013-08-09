@@ -22865,6 +22865,7 @@ if (!function_exists('hae_kaikki_oletuspaikat_try_tai_status')) {
 			$oletuspaikat[] = $oletuspaikka['selite'];
 		}
 
+		$yhtiorow["tuotteen_oletuspaikka"] = str_replace(" ", "", $yhtiorow["tuotteen_oletuspaikka"]);
 		$yhtion_tuotteen_oletuspaikat = explode(",", $yhtiorow["tuotteen_oletuspaikka"]);
 		$kaikki_oletuspaikat = array_merge($oletuspaikat, $yhtion_tuotteen_oletuspaikat);
 

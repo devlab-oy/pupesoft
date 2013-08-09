@@ -98,6 +98,7 @@ if(!function_exists("tuotetarkista")) {
 				if (mysql_field_name($result, $i) == "try") {
 					$tem_try = $t[$i];
 					$tem_try_vanha = $trow[$i];
+					$tem_status_vanha = $trow['status'];
 				}
 
 				if (mysql_field_name($result, $i) == "try" and !empty($trow) and $tem_try_vanha != $tem_try) {

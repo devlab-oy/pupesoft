@@ -47,9 +47,6 @@
 		$muutoslisa = "AND (tuote.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR) 
 							OR ta_nimitys_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR) 
 							OR ta_nimitys_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-							OR campaign_code.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-							OR target.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-							OR featured.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
 							)";
 	}
 	else {

@@ -72,28 +72,15 @@
 				tuote.nakyvyys,
 				tuote.tuotemassa,
 				tuote.tunnus,
+				tuote.mallitarkenne campaign_code,
+				tuote.malli target,
 				ta_nimitys_se.selite nimi_swe,
 				ta_nimitys_en.selite nimi_eng,
-				try_fi.selitetark try_nimi,
-				campaign_code.selite campaign_code,
-				target.selite target,
-				featured.selite featured
+				try_fi.selitetark try_nimi
 				FROM tuote
 				LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio and try_fi.selite = tuote.try and try_fi.laji = 'try' and try_fi.kieli = 'fi')
 				LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys' and ta_nimitys_se.kieli = 'se'
 				LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en'
-				LEFT JOIN tuotteen_avainsanat as campaign_code on (tuote.yhtio = campaign_code.yhtio
-					AND tuote.tuoteno = campaign_code.tuoteno
-					AND campaign_code.laji = 'campaign_code'
-					AND campaign_code.kieli = 'fi')
-				LEFT JOIN tuotteen_avainsanat as target on (tuote.yhtio = target.yhtio
-					AND tuote.tuoteno = target.tuoteno
-					AND target.laji = 'target'
-					AND target.kieli = 'fi')
-				LEFT JOIN tuotteen_avainsanat as featured on (tuote.yhtio = featured.yhtio
-					AND tuote.tuoteno = featured.tuoteno
-					AND featured.laji = 'featured'
-					AND featured.kieli = 'fi')
 				WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 				AND tuote.status != 'P'
 				AND tuote.tuotetyyppi NOT in ('A','B')
@@ -142,7 +129,6 @@
 							'nimi_swe'				=> $row["nimi_swe"],
 							'nimi_eng'				=> $row["nimi_eng"],
 							'campaign_code'			=> $row["campaign_code"],
-							'featured'				=> $row["featured"],
 							'target'				=> $row["target"],
 							'tunnus'				=> $row['tunnus'],
 							);

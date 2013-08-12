@@ -17057,6 +17057,8 @@ if (!function_exists("tee_keraysera")) {
 					if (!$loytyko_pakkaus) {
 						if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E970): Ei löytynyt sopivaa pakkausta. Laitetaan tuote yksin keräysalustalle.<br><br>\n";
 
+						$fail = $fail != "" ? "{$fail}|||{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}" : "{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}";
+
 						$tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']] = $tuoterow['otunnus'];
 						$yksin_kerailyalustalle_normi_tuote_trigger = true;
 					}
@@ -20051,7 +20053,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 							and oletus != ''";
 		$oletusresult = pupe_query($oletusquery);
 		$oletusrow = mysql_fetch_assoc($oletusresult);
-		
+
 		# Poistetaan kaikilta tuotteen tuotepaikoilta oletus
 		# ostorivienvarastopaikat.inc, rivi 281
 		$query = "	UPDATE tuotepaikat
@@ -20098,7 +20100,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 						ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";
 			$upresult = pupe_query($query);
 
-			$return["error"] = "Oletuspaikkaa ei löytynyt, tehtiin ensimmäisestä paikasta oletuspaikka";			
+			$return["error"] = "Oletuspaikkaa ei löytynyt, tehtiin ensimmäisestä paikasta oletuspaikka";
 		}
 		elseif (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
 			// Päivitetään uusi oletuspaikka myös avoimille keskeneräisille ostotilauksille (jos uusi paikka on samassa varastossa kun vanha)
@@ -20119,9 +20121,9 @@ if (!function_exists('paivita_oletuspaikka')) {
 						AND varattu != '0'";
 			$result = pupe_query($query);
 
-			$return["paivitetyt_ostorivit"] = mysql_affected_rows();			
+			$return["paivitetyt_ostorivit"] = mysql_affected_rows();
 		}
-		
+
 		return $return;
 	}
 }

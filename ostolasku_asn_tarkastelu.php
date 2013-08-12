@@ -493,6 +493,9 @@
 
 									$kysely  = "INSERT INTO asn_sanomat ({$fields}) VALUES ({$values})";
 									$uusires = pupe_query($kysely);
+									$asn_lapsi_uusi_id = mysql_insert_id();
+
+									$paketin_tunnukset[] = $asn_lapsi_uusi_id;
 								}
 
 								$paketin_rivit[] = $isa_chk_row["tunnus"];
@@ -1419,8 +1422,8 @@
 			$tilausnro = (int) $tilausnro;
 
 			$tilaajanrivinrolisa = trim($tilaajanrivinro) != '' ? " and tilausrivi.tilaajanrivinro = ".(int) $tilaajanrivinro : '';
-			$tilausnrolisa = (trim($tilausnro) != '' and trim($tilausnro) != 0) ? " and lasku.tunnus LIKE '%{$tilausnro}'" : '';		
-			$tilausnrolisa2 = (trim($tilausnro) != '' and trim($tilausnro) != 0) ? " and tilausrivi.otunnus LIKE '%{$tilausnro}'" : '';				
+			$tilausnrolisa = (trim($tilausnro) != '' and trim($tilausnro) != 0) ? " and lasku.tunnus LIKE '%{$tilausnro}'" : '';
+			$tilausnrolisa2 = (trim($tilausnro) != '' and trim($tilausnro) != 0) ? " and tilausrivi.otunnus LIKE '%{$tilausnro}'" : '';
 			$tuoteno_valeilla = str_replace(' ','_',$tuoteno);
 			$tuoteno_ilman_valeilla =str_replace(' ','',$tuoteno);
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tuote.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tuote.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tuote.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';

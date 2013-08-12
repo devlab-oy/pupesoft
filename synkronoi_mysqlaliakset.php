@@ -40,7 +40,7 @@ if ($tee == "TEE") {
 	array_shift($aliakset);
 
 	foreach ($aliakset as $rivi) {
-		list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $jarjestys) = explode("\t", trim($rivi));
+		list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $jarjestys, $nakyvyys) = explode("\t", trim($rivi));
 
 		list($taulu, $sarake) = explode(".", $selite);
 
@@ -68,7 +68,7 @@ if ($tee == "TEE") {
 	echo "<br><table>";
 
 	foreach ($rivit as $rivi) {
-		list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $selitetark_4, $jarjestys) = explode("\t", trim($rivi));
+		list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $selitetark_4, $jarjestys, $nakyvyys) = explode("\t", trim($rivi));
 
 		$sanakirjaquery = "	SELECT *
 							FROM avainsana
@@ -87,6 +87,7 @@ if ($tee == "TEE") {
 								laji 			= 'MYSQLALIAS',
 								perhe			= '$perhe',
 								kieli			= '$kieli',
+								nakyvyys		= '$nakyvyys',
 								selite			= '$selite',
 								selitetark		= '$selitetark',
 								selitetark_2	= '$selitetark_2',
@@ -104,7 +105,6 @@ if ($tee == "TEE") {
 	echo "</table><br>";
 
 	echo t("Mysqlaliakset synkronoitu onnistuneesti")."!<br>";
-
 }
 
 echo "	<br><br>
@@ -113,7 +113,4 @@ echo "	<br><br>
 		<input type='submit' value='".t("Hae uusimmat mysqlaliakset")."'>
 		</form>";
 
-
 require ("inc/footer.inc");
-
-?>

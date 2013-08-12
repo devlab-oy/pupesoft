@@ -91,89 +91,48 @@ class MagentoClient {
 	 * @param  array  $dnsryhma Pupesoftin tuote_exportin palauttama array
 	 * @return int           	Lisättyjen kategorioiden määrä
 	 */
-	public function lisaa_kategoriat(array $dnsryhma)
-	{
+	public function lisaa_kategoriat(array $dnsryhma) {
+
 		$this->log("Lisätään kategoriat");
+
+		$parent_id = 3; // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
 
 		try {
 			$count = 0;
 
 			// Loopataan osastot ja tuoteryhmat
-			foreach($dnsryhma as $osasto => $tuoteryhmat) {
+			foreach($dnsryhma as $kategoria) {
 
-				foreach ($tuoteryhmat as $kategoria) {
+				// Haetaan kategoriat joka kerta koska lisättäessä puu muuttuu
+				$category_tree = $this->getCategories();
 
-					// Haetaan kategoriat joka kerta koska lisättäessä puu muuttuu
-					$category_tree = $this->getCategories();
+				// Kasotaan löytyykö tuoteryhmä
+				if (!$this->findCategory($kategoria['try_fi'], $category_tree['children'])) {
 
-					// Jos osastoa ei löydy magenton category_treestä, niin lisätään se
-					$parent_id = $this->findCategory($kategoria['osasto_fi'], $category_tree['children']);
+					// Lisätään kategoria, jos ei löytynyt
+					$category_data = array(
+						'name'              => $kategoria['try_fi'],
+						'is_active'         => 1,
+						'position'          => 1,
+						'default_sort_by'   => 'position',
+						'available_sort_by' => 'position',
+						'include_in_menu'   => 1
+					);
 
-					// Jos kategoria löytyi, lisätään tuoteryhmä sen alle
-					if ($parent_id) {
-
-						// Tarkastetaan ettei tuoteryhmää ole jo lisätty
-						if (!$this->findCategory($kategoria['try_fi'], $category_tree['children'])) {
-							$category_data = array(
-								'name'              => $kategoria['try_fi'],
-								'is_active'         => 1,
-								'position'          => 1,
-								'default_sort_by'   => 'position',
-								'available_sort_by' => 'position',
-								'include_in_menu'   => 1
-							);
-
-							// Kutsutaan soap rajapintaa
-							$category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
-								array($parent_id, $category_data)
-							);
-							$count++;
-						}
-					}
-					// Muuten lisätään ensin osasto ja sen alle tuoteryhmä.
-					else {
-						$category_data = array(
-							'name'              => $kategoria['osasto_fi'],
-							'is_active'         => 1,
-							'position'          => 1,
-							'default_sort_by'   => 'position',
-							'available_sort_by' => 'position',
-							'include_in_menu'   => 0
-						);
-
-						// Kutsutaan soap rajapintaa
-						$category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
-							array(2, $category_data)
-						);
-						$count++;
-
-						// Lisätään tuoteryhmä lisätyn osaston alle
-						$category_data = array(
-							'name'              => $kategoria['try_fi'],
-							'is_active'         => 1,
-							'position'          => 1,
-							'default_sort_by'   => 'position',
-							'available_sort_by' => 'position',
-							'include_in_menu'   => 1
-						);
-
-						// Kutsutaan soap rajapintaa
-						$category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
-							array($category_id, $category_data)
-						);
-						$count++;
-					}
+					// Kutsutaan soap rajapintaa
+					$category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
+						array($parent_id, $category_data)
+					);
+					$count++;
 				}
 			}
 
 			$this->_category_tree = $this->getCategories();
-
 			$this->log("$count kategoriaa lisätty");
 
-			// Palautetaan monta kategoriaa lisättiin.
 			return $count;
-
-		} catch (Exception $e) {
+		}
+		catch (Exception $e) {
 			echo $e->getMessage();
 		}
 	}

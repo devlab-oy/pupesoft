@@ -29,7 +29,8 @@
 	if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
 		// Varmistetaan, että kaikki muuttujat on kunnossa
-		if (empty($magento_api_ana_url) or empty($magento_api_ana_usr) or empty($magento_api_ana_pas)) {
+		if (empty($magento_api_ana_url) or empty($magento_api_ana_usr) or empty($magento_api_ana_pas) or empty($magento_tax_class_id)) {
+			echo "Magento parametrit puuttuu, päivitystä ei voida ajaa.";
 			exit;
 		}
 
@@ -40,7 +41,7 @@
 	$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
 
 	// alustetaan arrayt
-	$dnstuote = $dnsryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = array();
+	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = array();
 
 	if ($ajetaanko_kaikki == "NO") {
 		$muutoslisa = "AND (tuote.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR) 
@@ -229,10 +230,11 @@
 				AND tuote.nakyvyys != ''
 				$muutoslisa
 				ORDER BY 1, 2";
-	$result = pupe_query($query);
+	$try_result = pupe_query($query);
 
-	while ($row = mysql_fetch_assoc($result)) {
+	while ($row = mysql_fetch_assoc($try_result)) {
 
+		// Osasto/tuoteryhmä array
 		$dnsryhma[$row["osasto"]][$row["try"]] = array(	'osasto'	=> $row["osasto"],
 														'try'		=> $row["try"],
 														'osasto_fi'	=> $row["osasto_fi_nimi"],
@@ -242,6 +244,13 @@
 														'osasto_en' => $row["osasto_en_nimi"],
 														'try_en'	=> $row["try_en_nimi"],
 														);
+
+		// Kerätään myös pelkät tuotenumerot Magentoa varten
+		$dnstuoteryhma[$row["try"]] = array(	'try'		=> $row["try"],
+												'try_fi'	=> $row["try_fi_nimi"],
+												'try_se'	=> $row["try_se_nimi"],
+												'try_en'	=> $row["try_en_nimi"],
+												);
 	}
 
 	if ($ajetaanko_kaikki == "NO") {
@@ -445,13 +454,12 @@
 		$magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 
 		// tax_class_id, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
-		if (! isset($magento_tax_class_id)) $magento_tax_class_id = 0;
 		$magento_client->setTaxClassID($magento_tax_class_id);
 
 		// lisaa_kategoriat
-		if (count($dnsryhma) > 0) {
+		if (count($dnstuoteryhma) > 0) {
 			echo "Päivitetään tuotekategoriat\n";
-			$count = $magento_client->lisaa_kategoriat($dnsryhma);
+			$count = $magento_client->lisaa_kategoriat($dnstuoteryhma);
 			echo "Päivitettiin $count kategoriaa\n";
 		}
 

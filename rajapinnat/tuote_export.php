@@ -40,12 +40,29 @@
 
 	$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
 
+	$locktime = 5400;
+	$lockfile = "/tmp/tuote_export_cron.lock";
+
+	// jos meillä on lock-file ja se on alle 90 minuuttia vanha
+	if (file_exists($lockfile)) {
+		$locktime_calc = mktime() - filemtime($lockfile);
+
+		if ($locktime_calc < $locktime) {
+			exit("Magento-päivitys käynnissä, odota hetki!")."\n";
+		}
+		else {
+			exit("VIRHE: Magento-päivitys jumissa! Ota yhteys tekniseen tukeen!!!")."\n";
+		}
+	}
+
+	touch($lockfile);
+
 	// alustetaan arrayt
 	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = array();
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND (tuote.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR) 
-							OR ta_nimitys_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR) 
+		$muutoslisa = "AND (tuote.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
+							OR ta_nimitys_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
 							OR ta_nimitys_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
 							)";
 	}
@@ -514,3 +531,5 @@
 			require ("{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc");
 		}
 	}
+
+	unlink($lockfile);

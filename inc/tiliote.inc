@@ -410,6 +410,12 @@
 
 		if ($kuittikoodi == ' ') {
 			if ($eiselitetta == 1) $selite = '';
+
+			$selite = str_replace("\n", "", $selite);
+			$selite = urlencode($selite);
+			$koodiselite = urlencode($koodiselite);
+			$maksaa = urlencode($maksaa);
+
 			echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&tiliote=Z&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm&ohje=off');\">".t("Tee tiliotesääntö")."</a>";
 		}
 

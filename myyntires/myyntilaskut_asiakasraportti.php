@@ -221,7 +221,8 @@
 			$query = "	SELECT tunnus, ytunnus, nimi, osoite, postino, postitp, maa, IF(lasku_email != '', lasku_email, email) AS email
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
-						and $haku_sql";
+						and $haku_sql
+						ORDER BY email DESC";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {

@@ -44,7 +44,7 @@
 	}
 
 	if ($kukarow["extranet"] == "") {
-		echo "<script src='../js/tilaus_osto/tilaus_osto.js?not_cache=".time()."'></script>";
+		echo "<script src='../js/tilaus_osto/tilaus_osto.js'></script>";
 		?>
 <style>
 	.vastaavat_korvaavat_hidden {
@@ -499,8 +499,19 @@
 				$trow = hae_tuote($vastaavatuoteno);
 				$kpl = ($tilausrivirow['varattu'] + $tilausrivirow['jt']);
 
-				list($hinta, $netto, $ale, , ) = alehinta($laskurow, $trow, $kpl, '', '', '');
 				if (!empty($tilausrivirow['tilausrivilinkki'])) {
+					$query = "	SELECT lasku.*
+								FROM lasku
+								JOIN tilausrivi
+								ON ( tilausrivi.yhtio = lasku.yhtio
+									AND tilausrivi.otunnus = lasku.tunnus
+									AND tilausrivi.tunnus = '{$tilausrivirow['tilausrivitunnus']}')
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								GROUP BY lasku.tunnus";
+					$result = pupe_query($query);
+					$myyntitilausrow = mysql_fetch_assoc($result);
+					list($hinta, $netto, $ale, , ) = alehinta($myyntitilausrow, $trow, $kpl, '', '', '');
+
 					//Jos vaihdettava rivi on linkattu myyntitilaukseen, käydään vaihtamassa myös myyntitilauksen tuote vastaavaan tuotteeseen.
 					$ale_query = "";
 					foreach($ale as $a_index => $a) {
@@ -531,6 +542,16 @@
 					$params = array(
 						'liitostunnus' => $toimi_tunnus,
 					);
+					if (!empty($tilausrivirow['tilausrivilinkki'])) {
+						$params['nimi'] = $laskurow['nimi'];
+						$params['nimitark'] = $laskurow['nimitark'];
+						$params['osoite'] = $laskurow['osoite'];
+						$params['postino'] = $laskurow['postino'];
+						$params['postitp'] = $laskurow['postitp'];
+						$params['maa'] = $laskurow['maa'];
+						$params['ohjausmerkki'] = $myyntitilausrow['ohjausmerkki'];
+						$params['ostotilauksen_kasittely'] = $myyntitilausrow['ostotilauksen_kasittely'];
+					}
 					$toisen_toimittajan_ostotilaus = luo_ostotilausotsikko($params);
 
 					unset($tilausrivirow['laadittu']);

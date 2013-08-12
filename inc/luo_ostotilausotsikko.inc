@@ -25,8 +25,6 @@ if (!function_exists('luo_ostotilausotsikko')) {
 		 * 	$params['myytil_toimaika']
 		 * 	$params['myytil_toimitustapa']
 		 * 	$params['myytil_liitostunnus']
-		 *
-		 * HUOM!!!! $params['ostotilauksen_kasittely'] forcetetaan 0:ksi
 		 */
 
 		$params['ostotilauksen_kasittely'] = (!empty($params['ostotilauksen_kasittely'])) ? $params['ostotilauksen_kasittely'] : '';
@@ -45,8 +43,6 @@ if (!function_exists('luo_ostotilausotsikko')) {
 		$params['myytil_toimaika'] = (!empty($params['myytil_toimaika'])) ? $params['myytil_toimaika'] : '';
 		$params['myytil_toimitustapa'] = (!empty($params['myytil_toimitustapa'])) ? $params['myytil_toimitustapa'] : '';
 		$params['myytil_liitostunnus'] = (!empty($params['myytil_liitostunnus'])) ? $params['myytil_liitostunnus'] : '';
-
-		$params['ostotilauksen_kasittely'] = 0;
 
 		if (empty($params['toim_nimi']) or empty($params['toim_nimitark']) or empty($params['toim_osoite']) or empty($params['toim_postino']) or empty($params['toim_postitp']) or empty($params['toim_maa'])) {
 
@@ -80,8 +76,6 @@ if (!function_exists('luo_ostotilausotsikko')) {
 		$vresult = pupe_query($vquery);
 		$vrow = mysql_fetch_array($vresult);
 
-		$commentsit = "";
-		//$commentsit = trim(t("Myyntitilaus").": $myytilrow[tunnus] \n".t("Myyntitilauksen toimitustapa").": $myytilrow[toimitustapa] \n".$tiltoi["comments"]);
 		// K‰sitell‰‰n myyntitilauksen otsikolla setattu "ostotilauksen k‰sittely"
 		switch ($params['ostotilauksen_kasittely']) {
 			case '4':
@@ -135,7 +129,6 @@ if (!function_exists('luo_ostotilausotsikko')) {
 
 			$query = "	INSERT INTO lasku SET
 						alatila 			= '',
-						comments 			= '{$commentsit}',
 						huolitsija 			= '{$tiltoi['huolitsija']}',
 						jakelu 				= '{$params['jakelu']}',
 						kerayspvm 			= '{$params['myyntitil_kerayspvm']}',

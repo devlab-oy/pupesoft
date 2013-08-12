@@ -385,6 +385,7 @@
 							AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
 							AND tuotteen_avainsanat.laji like 'parametri_%'
 							AND tuotteen_avainsanat.tuoteno = '{$alirow['tuoteno']}'
+							AND tuotteen_avainsanat.kieli = 'fi'
 							ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
 			$alinres = pupe_query($alinselect);
 			$properties = array();

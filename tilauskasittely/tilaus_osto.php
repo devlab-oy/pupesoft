@@ -543,12 +543,12 @@
 						'liitostunnus' => $toimi_tunnus,
 					);
 					if (!empty($tilausrivirow['tilausrivilinkki'])) {
-						$params['nimi'] = $laskurow['nimi'];
-						$params['nimitark'] = $laskurow['nimitark'];
-						$params['osoite'] = $laskurow['osoite'];
-						$params['postino'] = $laskurow['postino'];
-						$params['postitp'] = $laskurow['postitp'];
-						$params['maa'] = $laskurow['maa'];
+						$params['nimi'] = $laskurow['toim_nimi'];
+						$params['nimitark'] = $laskurow['toim_nimitark'];
+						$params['osoite'] = $laskurow['toim_osoite'];
+						$params['postino'] = $laskurow['toim_postino'];
+						$params['postitp'] = $laskurow['toim_postitp'];
+						$params['maa'] = $laskurow['toim_maa'];
 						$params['ohjausmerkki'] = $myyntitilausrow['ohjausmerkki'];
 						$params['ostotilauksen_kasittely'] = $myyntitilausrow['ostotilauksen_kasittely'];
 					}

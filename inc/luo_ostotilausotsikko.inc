@@ -44,14 +44,17 @@ if (!function_exists('luo_ostotilausotsikko')) {
 		$params['myytil_toimitustapa'] = (!empty($params['myytil_toimitustapa'])) ? $params['myytil_toimitustapa'] : '';
 		$params['myytil_liitostunnus'] = (!empty($params['myytil_liitostunnus'])) ? $params['myytil_liitostunnus'] : '';
 
-		if (empty($params['toim_nimi']) or empty($params['toim_nimitark']) or empty($params['toim_osoite']) or empty($params['toim_postino']) or empty($params['toim_postitp']) or empty($params['toim_maa'])) {
+		$tiltoi = hae_toimittaja($params['liitostunnus']);
 
-			$toim_nimi = $yhtiorow["nimi"];
-			$toim_nimitark = $yhtiorow["nimitark"];
-			$toim_osoite = $yhtiorow["osoite"];
-			$toim_postino = $yhtiorow["postino"];
-			$toim_postitp = $yhtiorow["postitp"];
-			$toim_maa = $yhtiorow["maa"];
+		// Jos ostotilausta ei ole luotu myyntitilaukselta (tilaus_osto.php ~545), k‰ytet‰‰n toimittajan oletuksia
+		if (empty($params['nimi'])) {
+
+			$toim_nimi = $tiltoi["nimi"];
+			$toim_nimitark = $tiltoi["nimitark"];
+			$toim_osoite = $tiltoi["osoite"];
+			$toim_postino = $tiltoi["postino"];
+			$toim_postitp = $tiltoi["postitp"];
+			$toim_maa = $tiltoi["maa"];
 		}
 		else {
 			$toim_nimi = $params["nimi"];
@@ -62,7 +65,6 @@ if (!function_exists('luo_ostotilausotsikko')) {
 			$toim_maa = $params["maa"];
 		}
 
-		$tiltoi = hae_toimittaja($params['liitostunnus']);
 		$valkoodi = $tiltoi["oletus_valkoodi"];
 
 		if ($valkoodi == '') {

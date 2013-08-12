@@ -86,7 +86,11 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
-		if ((mysql_field_name($result, $i) == "osasto" or mysql_field_name($result, $i) == "try" or mysql_field_name($result, $i) == "tuotemerkki" or mysql_field_name($result, $i) == "malli" or mysql_field_name($result, $i) == "mallitarkenne") and trim($t[$i]) != '') {
+		if ((mysql_field_name($result, $i) == "osasto"
+				or mysql_field_name($result, $i) == "try"
+				or mysql_field_name($result, $i) == "tuotemerkki"
+				or mysql_field_name($result, $i) == "malli"
+				or mysql_field_name($result, $i) == "mallitarkenne")) {
 
 			//mysql_field_name pitää ottaa talteen koska muuvarastopaikka.php muuttaa resulttia.
 			$field_name = mysql_field_name($result, $i);
@@ -127,11 +131,13 @@ if(!function_exists("tuotetarkista")) {
 					}
 				}
 
-				$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '".$field_name."' and SELITE = '$t[$i]'";
-				$tpres = pupe_query($tpque);
+				if (trim($t[$i]) != '') {
+					$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '".$field_name."' and SELITE = '$t[$i]'";
+					$tpres = pupe_query($tpque);
 
-				if (mysql_num_rows($tpres) == 0) {
-					$virhe[$i] .= t("Avainsanaa ei löydy")."!";
+					if (mysql_num_rows($tpres) == 0) {
+						$virhe[$i] .= t("Avainsanaa ei löydy")."!";
+					}
 				}
 			}
 		}

@@ -161,11 +161,11 @@
 						$poisto_texti = t("Poistettiin myyntitili-varastopaikka")." ".$asiakasrow["asiakkaan_nimi"];
 					}
 					else {
-						$poisto_texti = t("Poistettiin varastopaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]";
+						$poisto_texti = t("Poistettiin varastopaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]<br/>";
 					}
 
 					if ($kutsuja != "vastaanota.php") {
-						echo "<font class='message'>$poisto_texti</font><br><br>";
+						echo "<font class='message'>$poisto_texti</font>";
 					}
 
 					$query = "	INSERT into tapahtuma set
@@ -193,6 +193,7 @@
 					unset($saldot[$poistetaan]);
 				}
 			}
+			echo "<br/>";
 		}
 
 		if (count($flagaa_poistettavaksi_undo) > 0) {

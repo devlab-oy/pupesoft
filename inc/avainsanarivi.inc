@@ -209,7 +209,7 @@
 
 		if (mysql_field_name($result, $i) == "selite") {
 			$ulos .= "<td>";
-			$ulos .= "<input type='text' name='{$nimi}' size='35' maxlength='65535'/>";
+			$ulos .= "<input type='text' name='{$nimi}' size='35' maxlength='65535' value='{$trow[$i]}' />";
 			$ulos .= t("Oletuspaikka pit‰‰ antaa muodossa hyllyalue-hyllynro-hyllyvali-hyllytaso");
 			$ulos .= "</td>";
 			

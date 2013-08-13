@@ -727,7 +727,7 @@
 		while ($laskurow = mysql_fetch_assoc($result)) {
 
             // Jos laskunumero on syötetty, lisätään se viestiin mukaan
-            if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti']) {
+            if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti'] and $laskurow['maa'] != 'EE') {
                 $laskurow['viesti'] = (trim($laskurow['viesti']) == "") ? $laskurow['laskunro'] : $laskurow['viesti']." ".$laskurow['laskunro'];
             }
 

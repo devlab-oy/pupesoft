@@ -1606,8 +1606,6 @@
 						ORDER BY asn_sanomat.tilausrivinpositio + 0 ASC";
 			$result = pupe_query($query);
 
-			query_dump($query);
-
 			echo "<form method='post' action='?valitse={$valitse}&lopetus={$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta//kolli={$kolli}//asn_numero={$asn_numero}//toimittajanumero={$toimittajanumero}//valitse={$valitse}' id='kolliformi'>";
 			echo "<input type='hidden' id='tee' name='tee' value='etsi' />";
 			echo "<input type='hidden' id='kolli' name='kolli' value='{$kolli}' />";

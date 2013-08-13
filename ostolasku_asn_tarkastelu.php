@@ -318,8 +318,6 @@
 						ORDER BY asn_sanomat.tuoteno ASC";
 			$kollires = pupe_query($query);
 
-			query_dump($query);
-
 			$i = $x = 0;
 			$keikoilla	= array();
 			$ostoilla	= array();
@@ -332,8 +330,6 @@
 					$toimittaja = $kollirow['toimittajanumero'];
 					$asn_numero = $kollirow['asn_numero'];
 					$paketin_tunnukset[] = $kollirow['tunnus'];
-
-					echo "Tilausrivit: $kollirow[tilausrivi]<br>";
 
 					// Otetaan ASN-sanomalta tilausrivi(e)n tunnus ja laitetaan $paketin_rivit muuttujaan
 					if (strpos($kollirow['tilausrivi'], ",") !== false) {
@@ -356,8 +352,6 @@
 					$result = pupe_query($query);
 					$lapset = mysql_fetch_assoc($result);
 
-					query_dump($query);
-
 					// Lapsia löytyi, tämä on isätuote
 					if ($lapset["lapset"] != NULL) {
 
@@ -368,8 +362,6 @@
 									AND tilausrivi.tunnus IN ({$kollirow['tilausrivi']})";
 						$result = pupe_query($query);
 						$tilaukset = mysql_fetch_assoc($result);
-
-						query_dump($query);
 
 						foreach (explode(",", $lapset['lapset']) as $lapsi_tuoteno) {
 
@@ -382,8 +374,6 @@
 											AND tilausrivi.tuoteno = '{$lapsi_tuoteno}'
 											AND (tilausrivi.perheid IN ('{$kollirow['tilausrivi']}') OR tilausrivi.perheid = 0)";
 								$result = pupe_query($query);
-
-								query_dump($query);
 							}
 
 							if ($tilaukset['tilaukset'] == '' or mysql_num_rows($result) == 0) {
@@ -690,8 +680,6 @@
 			}
 
 			if ($valitse == 'asn' and count($paketin_rivit) > 0) {
-
-				echo "Löydetyt paketin rivit: <pre>".var_dump($paketin_rivit)."</pre>";
 
 				$query = "SELECT GROUP_CONCAT(tuoteno) AS tuotenumerot FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN (".implode(",", $paketin_rivit).")";
 				$tuotenores = pupe_query($query);
@@ -1268,8 +1256,6 @@
 		}
 	}
 
-	echo "Debug: $muut_siirrettavat = $asn_rivi.'!¡!'.$toimittaja.'!¡!'.$tilausnro.'!¡!'.$tuoteno.'!¡!'.$tilaajanrivinro.'!¡!'.$kpl.'!¡!'.$valitse.'!!!'.$kolli.'!!!'.$toimittajanumero.'!!!'.$asn_numero<br><br>";
-
 	if ($tee == 'etsi') {
 
 		if ($valitse == 'asn') {
@@ -1282,62 +1268,39 @@
 				$result = pupe_query($query);
 				$asn_row = mysql_fetch_assoc($result);
 
-				if ($asn_row["toimittajanumero"] == "123067") {
-					$orgtuote = $asn_row["toim_tuoteno"];
-					$lyhennetty_tuoteno = substr($asn_row["toim_tuoteno"], 0, -3);
-					$jatkettu_tuoteno = $lyhennetty_tuoteno."090";
+				$poikkeus_tuoteno = trim($asn_row["toim_tuoteno2"]) != "" ? "AND tt.toim_tuoteno IN ('{$asn_row[toim_tuoteno]}','{$asn_row["toim_tuoteno2"]}')" : "AND tt.toim_tuoteno = '{$asn_row[toim_tuoteno]}'";
 
-					if ($asn_row["toim_tuoteno2"] != "") {
-						$toinen_tuoteno = ",'{$asn_row["toim_tuoteno2"]}'";
+				$query = "	SELECT tt.*
+							FROM tuotteen_toimittajat AS tt
+							JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$tavarantoimittajanumero}' AND toimi.tyyppi != 'P')
+							WHERE tt.yhtio = 'artr'
+							{$poikkeus_tuoteno}";
+				$chk_res = pupe_query($query);
+
+				if (mysql_num_rows($chk_res) == 0) {
+					// haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan myös hakea vaihtoehtoinen tuotenumero ilman että
+					$chk_res = tuotteen_toimittajat_tuotenumerot_haku($asn_row['toim_tuoteno'], $tavarantoimittajanumero);
+
+					if (mysql_num_rows($chk_res) != 0) {
+						$chk_row = mysql_fetch_assoc($chk_res);
+						$asn_row['toim_tuoteno'] = $chk_row['toim_tuoteno'];
 					}
+					else {
 
-					$poikkeus_tuoteno =" in ('$orgtuote','$lyhennetty_tuoteno','$jatkettu_tuoteno' $toinen_tuoteno)";
-				}
-				elseif ($asn_row["toimittajanumero"] == "123453") {
-					$suba = substr($asn_row["toim_tuoteno"],0,3);
-					$subb = substr($asn_row["toim_tuoteno"],3);
-					$tuote = $suba."-".$subb;
-					$yhteen = $asn_row["toim_tuoteno"];
+						if (trim($asn_row["toim_tuoteno2"]) != "") {
+							$chk_res = tuotteen_toimittajat_tuotenumerot_haku($asn_row["toim_tuoteno2"], $tavarantoimittajanumero);
 
-					if ($asn_row["toim_tuoteno2"] != "") {
-						$toinen_tuoteno = ",'{$asn_row["toim_tuoteno2"]}'";
+							if (mysql_num_rows($chk_res) != 0) {
+								$chk_row = mysql_fetch_assoc($chk_res);
+								$asn_row['toim_tuoteno'] = $chk_row['toim_tuoteno'];
+							}
+						}
 					}
-
-					$poikkeus_tuoteno = " in ('$tuote','$yhteen' $toinen_tuoteno) ";
-				}
-				elseif ($asn_row["toimittajanumero"] == "123178") {
-					$orgtuote = $asn_row["toim_tuoteno"];
-					$lyhennetty = substr($asn_row["toim_tuoteno"],3);
-
-					if ($row["toim_tuoteno2"] != "") {
-						$lyhennetty_toinen = substr($asn_row["toim_tuoteno2"],3);
-						$toinen_tuoteno = ",'{$asn_row["toim_tuoteno2"]}','$lyhennetty_toinen'";
-					}
-
-					$poikkeus_tuoteno = " in ('$orgtuote','$lyhennetty' $toinen_tuoteno) ";
-				}
-				elseif ($asn_row["toimittajanumero"] == "123084") {
-					$orgtuote = $asn_row["toim_tuoteno"];
-					$lyhennetty = ltrim($asn_row["toim_tuoteno"],'0');
-
-					if ($asn_row["toim_tuoteno2"] != "") {
-						$lyhennetty_toinen = ltrim($asn_row["toim_tuoteno2"],'0');
-						$toinen_tuoteno = ",'{$asn_row["toim_tuoteno2"]}','$lyhennetty_toinen'";
-					}
-					$poikkeus_tuoteno = " in ('$orgtuote','$lyhennetty' $toinen_tuoteno) ";
-				}
-				else {
-
-					if ($asn_row["toim_tuoteno2"] != "") {
-						$toinen_tuoteno = ",'{$asn_row["toim_tuoteno2"]}'";
-					}
-
-					$poikkeus_tuoteno = " in ('{$asn_row["toim_tuoteno"]}' $toinen_tuoteno) ";
 				}
 
 				$query = "	SELECT tt.tuoteno ttuoteno, tt.toim_tuoteno, tuote.tuoteno tuoteno
 							FROM tuotteen_toimittajat AS tt
-							JOIN toimi ON (toimi.tunnus = tt.liitostunnus AND toimi.yhtio = tt.yhtio AND toimi.toimittajanro = '{$asn_row['toimittajanumero']}' AND tt.toim_tuoteno {$poikkeus_tuoteno} AND toimi.tyyppi != 'P')
+							JOIN toimi ON (toimi.tunnus = tt.liitostunnus AND toimi.yhtio = tt.yhtio AND toimi.toimittajanro = '{$asn_row['toimittajanumero']}' AND tt.toim_tuoteno = '{$asn_row['toim_tuoteno']}' AND toimi.tyyppi != 'P')
 							JOIN tuote ON (tuote.yhtio = toimi.yhtio AND tuote.tuoteno = tt.tuoteno AND tuote.status != 'P')
 							WHERE tt.yhtio = '{$kukarow['yhtio']}'";
 				$result = pupe_query($query);

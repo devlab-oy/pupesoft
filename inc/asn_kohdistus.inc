@@ -1056,15 +1056,11 @@
 							AND tunnus IN (".implode(",", $paketin_rivit).")";
 				$updateres = pupe_query($query);
 
-				query_dump($query);
-
 				$query = "	UPDATE asn_sanomat SET
 							status = 'X'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus IN (".implode(",", $paketin_tunnukset).")";
 				$updateres = pupe_query($query);
-
-				query_dump($query);
 
 				// Laitetaan suuntalava siirtovalmiiksi.
 				$suuntalavan_tunnus = $uusi_suuntalavan_tunnus;

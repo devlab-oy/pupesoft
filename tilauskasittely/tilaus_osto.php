@@ -561,15 +561,29 @@
 					unset($tilausrivirow['tilausrivilinkki']);
 					unset($tilausrivirow['tilausrivitunnus']);
 
+					$query = "	SELECT *
+								FROM tuotepaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tuoteno = '{$vastaavatuoteno}'
+								AND oletus != ''";
+					$oletus_tuotepaikka_result = pupe_query($query);
+					$oletus_tuotepaikka_row = mysql_fetch_assoc($oletus_tuotepaikka_result);
+
+					$tilausrivirow['hyllyalue'] = $oletus_tuotepaikka_row['hyllyalue'];
+					$tilausrivirow['hyllynro'] = $oletus_tuotepaikka_row['hyllynro'];
+					$tilausrivirow['hyllyvali'] = $oletus_tuotepaikka_row['hyllyvali'];
+					$tilausrivirow['hyllytaso'] = $oletus_tuotepaikka_row['hyllytaso'];
 					$tilausrivirow['otunnus'] = $toisen_toimittajan_ostotilaus['tunnus'];
 					$tilausrivirow['tuoteno'] = $vastaavatuoteno;
+					$tilausrivirow['nimitys'] = $trow['nimitys'];
+
 					$copy_query = "	INSERT INTO
 									tilausrivi (".implode(", ", array_keys($tilausrivirow)).", laadittu, laatija)
 									VALUES('".implode("', '", array_values($tilausrivirow)). "', now(), '{$kukarow['kuka']}')";
 					pupe_query($copy_query);
 
 					$tee = 'TI';
-					$tyhjanna = '';
+					$tyhjenna = '';
 				}
 			}
 			else {

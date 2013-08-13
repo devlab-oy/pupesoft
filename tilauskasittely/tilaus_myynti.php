@@ -474,7 +474,9 @@ if (
 
 	require("{$tilauskaslisa}luo_myyntitilausotsikko.inc");
 
-	$tilausnumero = luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero, $myyjanumero, '', $kantaasiakastunnus);
+	if (!isset($tilaustyyppi)) $tilaustyyppi = "";
+
+	$tilausnumero = luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero, $myyjanumero, '', $kantaasiakastunnus, '', $tilaustyyppi);
 	$kukarow["kesken"] = $tilausnumero;
 	$kaytiin_otsikolla = "NOJOO!";
 
@@ -2665,6 +2667,7 @@ if ($tee == '') {
 			<input type='hidden' name='toim' value='$toim'>
 			<input type='hidden' name='lopetus' value='$lopetus'>
 			<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+			<input type='hidden' name='tilaustyyppi' value='{$tilaustyyppi}'>
 			<input type='hidden' name='projektilla' value='$projektilla'>
 			<input type='hidden' name='orig_tila' value='$orig_tila'>
 			<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
@@ -2673,7 +2676,7 @@ if ($tee == '') {
 	echo "<table>";
 
 	$myyntikielto = '';
-		
+
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
@@ -3340,7 +3343,7 @@ if ($tee == '') {
 			echo "<br/>";
 			echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt"),"!</font>";
 			echo "<br/>";
-			
+
 			if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
 				$muokkauslukko = 'LUKOSSA';
 				$myyntikielto = 'MYYNTIKIELTO';
@@ -3357,7 +3360,7 @@ if ($tee == '') {
 			echo "<br/>";
 			echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!</font>";
 			echo "<br/>";
-			
+
 			if ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M") {
 				$muokkauslukko = 'LUKOSSA';
 				$myyntikielto = 'MYYNTIKIELTO';

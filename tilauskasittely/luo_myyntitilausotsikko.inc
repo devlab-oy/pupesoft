@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("luo_myyntitilausotsikko")) {
-	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '') {
+	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '') {
 		global $kukarow, $yhtiorow, $session;
 
 		$query	= "	SELECT *
@@ -312,7 +312,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			$osatoimitus = "o";
 		}
 
-		$tilaustyyppi = "N";
+		$tilaustyyppi = $tilaustyyppi != '' ? $tilaustyyppi : "N";
 
 		if ($toim == "TARJOUS") {
 			$tilaustyyppi = 'T';
@@ -440,7 +440,7 @@ if (!function_exists("luo_tarjouspohja")) {
 						AND otunnus = '{$tilausnumero}'";
 			pupe_query($query);
 		}
-		
+
 		return $tilausnumero;
 	}
 }

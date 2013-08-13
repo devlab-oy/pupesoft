@@ -1272,14 +1272,14 @@
 
 				$query = "	SELECT tt.*
 							FROM tuotteen_toimittajat AS tt
-							JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$tavarantoimittajanumero}' AND toimi.tyyppi != 'P')
+							JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$asn_row['toimittajanumero']}' AND toimi.tyyppi != 'P')
 							WHERE tt.yhtio = 'artr'
 							{$poikkeus_tuoteno}";
 				$chk_res = pupe_query($query);
 
 				if (mysql_num_rows($chk_res) == 0) {
 					// haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan myös hakea vaihtoehtoinen tuotenumero ilman että
-					$chk_res = tuotteen_toimittajat_tuotenumerot_haku($asn_row['toim_tuoteno'], $tavarantoimittajanumero);
+					$chk_res = tuotteen_toimittajat_tuotenumerot_haku($asn_row['toim_tuoteno'], $asn_row['toimittajanumero']);
 
 					if (mysql_num_rows($chk_res) != 0) {
 						$chk_row = mysql_fetch_assoc($chk_res);
@@ -1288,7 +1288,7 @@
 					else {
 
 						if (trim($asn_row["toim_tuoteno2"]) != "") {
-							$chk_res = tuotteen_toimittajat_tuotenumerot_haku($asn_row["toim_tuoteno2"], $tavarantoimittajanumero);
+							$chk_res = tuotteen_toimittajat_tuotenumerot_haku($asn_row["toim_tuoteno2"], $asn_row['toimittajanumero']);
 
 							if (mysql_num_rows($chk_res) != 0) {
 								$chk_row = mysql_fetch_assoc($chk_res);

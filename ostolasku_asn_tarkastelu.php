@@ -1284,6 +1284,8 @@
 					if (mysql_num_rows($chk_res) != 0) {
 						$chk_row = mysql_fetch_assoc($chk_res);
 						$asn_row['toim_tuoteno'] = $chk_row['toim_tuoteno'];
+
+						$poikkeus_tuoteno = trim($asn_row["toim_tuoteno2"]) != "" ? "AND tt.toim_tuoteno IN ('{$asn_row[toim_tuoteno]}','{$asn_row["toim_tuoteno2"]}')" : "AND tt.toim_tuoteno = '{$asn_row[toim_tuoteno]}'";
 					}
 					else {
 
@@ -1293,16 +1295,20 @@
 							if (mysql_num_rows($chk_res) != 0) {
 								$chk_row = mysql_fetch_assoc($chk_res);
 								$asn_row['toim_tuoteno'] = $chk_row['toim_tuoteno'];
+
+								$poikkeus_tuoteno = trim($asn_row["toim_tuoteno2"]) != "" ? "AND tt.toim_tuoteno IN ('{$asn_row[toim_tuoteno]}','{$asn_row["toim_tuoteno2"]}')" : "AND tt.toim_tuoteno = '{$asn_row[toim_tuoteno]}'";
 							}
 						}
 					}
 				}
 
+
 				$query = "	SELECT tt.tuoteno ttuoteno, tt.toim_tuoteno, tuote.tuoteno tuoteno
 							FROM tuotteen_toimittajat AS tt
-							JOIN toimi ON (toimi.tunnus = tt.liitostunnus AND toimi.yhtio = tt.yhtio AND toimi.toimittajanro = '{$asn_row['toimittajanumero']}' AND tt.toim_tuoteno = '{$asn_row['toim_tuoteno']}' AND toimi.tyyppi != 'P')
+							JOIN toimi ON (toimi.tunnus = tt.liitostunnus AND toimi.yhtio = tt.yhtio AND toimi.toimittajanro = '{$asn_row['toimittajanumero']}' AND toimi.tyyppi != 'P')
 							JOIN tuote ON (tuote.yhtio = toimi.yhtio AND tuote.tuoteno = tt.tuoteno AND tuote.status != 'P')
-							WHERE tt.yhtio = '{$kukarow['yhtio']}'";
+							WHERE tt.yhtio = '{$kukarow['yhtio']}'
+							{$poikkeus_tuoteno}";
 				$result = pupe_query($query);
 				$apurivi = mysql_fetch_assoc($result);
 
@@ -1312,7 +1318,6 @@
 				else {
 					$tuoteno = $asn_row['toim_tuoteno'];
 				}
-
 			}
 
 			// pakotetaan tuoteno asn_sanomasta. Välilyönnit tekee kiusaa
@@ -1701,6 +1706,8 @@
 					if (mysql_num_rows($chk_res) != 0) {
 						$chk_row = mysql_fetch_assoc($chk_res);
 						$row['toim_tuoteno'] = $chk_row['toim_tuoteno'];
+
+						$poikkeus_tuoteno = trim($row["toim_tuoteno2"]) != "" ? "AND tt.toim_tuoteno IN ('{$row[toim_tuoteno]}','{$row["toim_tuoteno2"]}')" : "AND tt.toim_tuoteno = '{$row[toim_tuoteno]}'";
 					}
 					else {
 
@@ -1710,6 +1717,8 @@
 							if (mysql_num_rows($chk_res) != 0) {
 								$chk_row = mysql_fetch_assoc($chk_res);
 								$row['toim_tuoteno'] = $chk_row['toim_tuoteno'];
+
+								$poikkeus_tuoteno = trim($row["toim_tuoteno2"]) != "" ? "AND tt.toim_tuoteno IN ('{$row[toim_tuoteno]}','{$row["toim_tuoteno2"]}')" : "AND tt.toim_tuoteno = '{$row[toim_tuoteno]}'";
 							}
 						}
 					}
@@ -1719,7 +1728,7 @@
 							FROM tuotteen_toimittajat as tt
 							JOIN tuote on (tuote.yhtio=tt.yhtio and tt.tuoteno = tuote.tuoteno and tuote.status !='P')
 							WHERE tt.yhtio = '{$kukarow['yhtio']}'
-							AND tt.toim_tuoteno = '{$row['toim_tuoteno']}'
+							{$poikkeus_tuoteno}
 							AND tt.liitostunnus = '{$row['toimi_tunnus']}'";
 				$res = pupe_query($query);
 

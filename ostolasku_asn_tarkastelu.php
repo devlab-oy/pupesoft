@@ -1268,6 +1268,8 @@
 		}
 	}
 
+	echo "Debug: $muut_siirrettavat = $asn_rivi.'!¡!'.$toimittaja.'!¡!'.$tilausnro.'!¡!'.$tuoteno.'!¡!'.$tilaajanrivinro.'!¡!'.$kpl.'!¡!'.$valitse<br><br>";
+
 	if ($tee == 'etsi') {
 
 		if ($valitse == 'asn') {

@@ -1724,65 +1724,41 @@
 
 				echo "<tr>";
 
-				if ($row["toimittajanumero"] == "123067") {
-					$orgtuote = $row["toim_tuoteno"];
-					$lyhennetty_tuoteno = substr($row["toim_tuoteno"], 0, -3);
-					$jatkettu_tuoteno = $lyhennetty_tuoteno."090";
+				$poikkeus_tuoteno = trim($row["toim_tuoteno2"]) != "" ? "AND tt.toim_tuoteno IN ('{$row[toim_tuoteno]}','{$row["toim_tuoteno2"]}')" : "AND tt.toim_tuoteno = '{$row[toim_tuoteno]}'";
 
-					if ($row["toim_tuoteno2"] != "") {
-						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}'";
+				$query = "	SELECT tt.*
+							FROM tuotteen_toimittajat AS tt
+							JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$tavarantoimittajanumero}' AND toimi.tyyppi != 'P')
+							WHERE tt.yhtio = 'artr'
+							{$poikkeus_tuoteno}";
+				$chk_res = pupe_query($query);
+
+				if (mysql_num_rows($chk_res) == 0) {
+					// haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan myös hakea vaihtoehtoinen tuotenumero ilman että
+					$chk_res = tuotteen_toimittajat_tuotenumerot_haku($row['toim_tuoteno'], $tavarantoimittajanumero);
+
+					if (mysql_num_rows($chk_res) != 0) {
+						$chk_row = mysql_fetch_assoc($chk_res);
+						$row['toim_tuoteno'] = $chk_row['toim_tuoteno'];
 					}
+					else {
 
-					$poikkeus_tuoteno =" in ('$orgtuote','$lyhennetty_tuoteno','$jatkettu_tuoteno' $toinen_tuoteno)";
-				}
-				elseif ($row["toimittajanumero"] == "123453") {
-					$suba = substr($row["toim_tuoteno"],0,3);
-					$subb = substr($row["toim_tuoteno"],3);
-					$tuote = $suba."-".$subb;
-					$yhteen = $row["toim_tuoteno"];
+						if (trim($row["toim_tuoteno2"]) != "") {
+							$chk_res = tuotteen_toimittajat_tuotenumerot_haku($row["toim_tuoteno2"], $tavarantoimittajanumero);
 
-					if ($row["toim_tuoteno2"] != "") {
-						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}'";
+							if (mysql_num_rows($chk_res) != 0) {
+								$chk_row = mysql_fetch_assoc($chk_res);
+								$row['toim_tuoteno'] = $chk_row['toim_tuoteno'];
+							}
+						}
 					}
-
-					$poikkeus_tuoteno = " in ('$tuote','$yhteen' $toinen_tuoteno) ";
 				}
-				elseif ($row["toimittajanumero"] == "123178") {
-					$orgtuote = $row["toim_tuoteno"];
-					$lyhennetty = substr($row["toim_tuoteno"],3);
-
-					if ($row["toim_tuoteno2"] != "") {
-						$lyhennetty_toinen = substr($row["toim_tuoteno2"],3);
-						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}','$lyhennetty_toinen'";
-					}
-
-					$poikkeus_tuoteno = " in ('$orgtuote','$lyhennetty' $toinen_tuoteno) ";
-				}
-				elseif ($row["toimittajanumero"] == "123084") {
-					$orgtuote = $row["toim_tuoteno"];
-					$lyhennetty = ltrim($row["toim_tuoteno"],'0');
-
-					if ($row["toim_tuoteno2"] != "") {
-						$lyhennetty_toinen = ltrim($row["toim_tuoteno2"],'0');
-						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}','$lyhennetty_toinen'";
-					}
-					$poikkeus_tuoteno = " in ('$orgtuote','$lyhennetty' $toinen_tuoteno) ";
-				}
-				else {
-
-					if ($row["toim_tuoteno2"] != "") {
-						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}'";
-					}
-
-					$poikkeus_tuoteno = " in ('$row[toim_tuoteno]' $toinen_tuoteno) ";
-				}
-
 
 				$query = "	SELECT tt.tuoteno
 							FROM tuotteen_toimittajat as tt
 							JOIN tuote on (tuote.yhtio=tt.yhtio and tt.tuoteno = tuote.tuoteno and tuote.status !='P')
 							WHERE tt.yhtio = '{$kukarow['yhtio']}'
-							AND tt.toim_tuoteno {$poikkeus_tuoteno}
+							AND tt.toim_tuoteno = '{$row['toim_tuoteno']}'
 							AND tt.liitostunnus = '{$row['toimi_tunnus']}'";
 				$res = pupe_query($query);
 

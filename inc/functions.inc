@@ -5751,8 +5751,8 @@ if (!function_exists("alehinta_osto")) {
 						}
 					}
 
-					$hinta         	= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste     	.= "Toimittajan tuotteen nettohinta laskun valuutassa. ";
+					$hinta 			= $hrow['hinta'];
+					$aperuste     	.= "Toimittajan tuotteen nettohinta laskun valuutassa.";
 					$valuutta		= $laskurow["valkoodi"];
 					$hintaperuste	= 2;
 				}
@@ -5853,8 +5853,8 @@ if (!function_exists("alehinta_osto")) {
 						}
 					}
 
-					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste    .= "Toimittajan tuotealeryhmän nettohinta laskun valuutassa. ";
+					$hinta		= $hrow["hinta"];
+					$aperuste	.= "Toimittajan tuotealeryhmän nettohinta laskun valuutassa. ";
 					$valuutta	= $laskurow["valkoodi"];
 					$hintaperuste = 3;
 				}

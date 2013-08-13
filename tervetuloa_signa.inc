@@ -214,11 +214,11 @@ function paata_kvartaali() {
 		),
 		1	 => array(
 			"start_date" => "$tama_vuosi-04-01",
-			"end_date"	 => "$tama_vuosi-06-31"
+			"end_date"	 => "$tama_vuosi-06-30"
 		),
 		2	 => array(
 			"start_date" => "$tama_vuosi-07-01",
-			"end_date"	 => "$tama_vuosi-09-31"
+			"end_date"	 => "$tama_vuosi-09-30"
 		),
 		3	 => array(
 			"start_date" => "$tama_vuosi-10-01",

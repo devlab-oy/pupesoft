@@ -113,7 +113,7 @@
 	if (!isset($tee)) $tee = '';
 	if (!isset($valitse)) $valitse = '';
 	if (!isset($asn_rivi)) $asn_rivi = '';
-	if (isset($muut_siirrettavat) and trim($muut_siirrettavat) != "") list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl, $valitse) = explode("!¡!", $muut_siirrettavat);
+	if (isset($muut_siirrettavat) and trim($muut_siirrettavat) != "") list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl, $valitse, $kolli, $toimittajanumero, $asn_numero) = explode("!¡!", $muut_siirrettavat);
 
 	if ($tee == 'poista_sanoma') {
 
@@ -798,7 +798,7 @@
 				list($hinta,,,) = alehinta_osto($laskurow, $trow, $kpl);
 
 				//pidetään kaikki muuttujat tallessa
-				$muut_siirrettavat = $asn_rivi."!¡!".$toimittaja."!¡!".$tilausnro."!¡!".$tuoteno."!¡!".$tilaajanrivinro."!¡!".$kpl."!¡!".$valitse;
+				$muut_siirrettavat = $asn_rivi."!¡!".$toimittaja."!¡!".$tilausnro."!¡!".$tuoteno."!¡!".$tilaajanrivinro."!¡!".$kpl."!¡!".$valitse."!¡!".$kolli."!¡!".$toimittajanumero."!¡!".$asn_numero;
 
 				$rivinotunnus = $tilausnro;
 				$toimaika = date('Y')."-".date('m')."-".date('d');
@@ -881,7 +881,7 @@
 			$automatiikka = 'ON';
 
 			//pidetään kaikki muuttujat tallessa
-			$muut_siirrettavat = $asn_rivi."!¡!".$toimittaja."!¡!".$tilausnro."!¡!".$tuoteno."!¡!".$tilaajanrivinro."!¡!".$kpl."!¡!".$valitse;
+			$muut_siirrettavat = $asn_rivi."!¡!".$toimittaja."!¡!".$tilausnro."!¡!".$tuoteno."!¡!".$tilaajanrivinro."!¡!".$kpl."!¡!".$valitse."!¡!".$kolli."!¡!".$toimittajanumero."!¡!".$asn_numero;
 
 			$rivinotunnus = $tilausnro;
 
@@ -1037,7 +1037,7 @@
 
 	//korjataan siirrettävät muuttujat taas talteen
 	if (isset($muut_siirrettavat) and trim($muut_siirrettavat) != "") {
-		list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl, $valitse) = explode("!¡!", $muut_siirrettavat);
+		list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl, $valitse, $kolli, $toimittajanumero, $asn_numero) = explode("!¡!", $muut_siirrettavat);
 	}
 
 	if ($tee == 'kohdista_tilausrivi') {
@@ -1268,7 +1268,7 @@
 		}
 	}
 
-	echo "Debug: $muut_siirrettavat = $asn_rivi.'!¡!'.$toimittaja.'!¡!'.$tilausnro.'!¡!'.$tuoteno.'!¡!'.$tilaajanrivinro.'!¡!'.$kpl.'!¡!'.$valitse<br><br>";
+	echo "Debug: $muut_siirrettavat = $asn_rivi.'!¡!'.$toimittaja.'!¡!'.$tilausnro.'!¡!'.$tuoteno.'!¡!'.$tilaajanrivinro.'!¡!'.$kpl.'!¡!'.$valitse.'!!!'.$kolli.'!!!'.$toimittajanumero.'!!!'.$asn_numero<br><br>";
 
 	if ($tee == 'etsi') {
 
@@ -1408,6 +1408,7 @@
 			echo "<td colspan='6' class='back'><input type='checkbox' name='rivit_ei_asnlla'{$chk} /> ",t("Näytä myös rivit joita ei ole ASN:llä tullut"),"</td>";
 			echo "</tr>";
 		}
+
 		echo "</table>";
 		echo "</form>";
 
@@ -1641,6 +1642,8 @@
 						AND asn_sanomat.laji = 'asn'
 						ORDER BY asn_sanomat.tilausrivinpositio + 0 ASC";
 			$result = pupe_query($query);
+
+			query_dump($query);
 
 			echo "<form method='post' action='?valitse={$valitse}&lopetus={$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta//kolli={$kolli}//asn_numero={$asn_numero}//toimittajanumero={$toimittajanumero}//valitse={$valitse}' id='kolliformi'>";
 			echo "<input type='hidden' id='tee' name='tee' value='etsi' />";

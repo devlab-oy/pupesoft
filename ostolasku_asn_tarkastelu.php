@@ -379,7 +379,8 @@
 											FROM tilausrivi
 											WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 											AND tilausrivi.otunnus IN ({$tilaukset['tilaukset']})
-											AND tilausrivi.tuoteno = '{$lapsi_tuoteno}'";
+											AND tilausrivi.tuoteno = '{$lapsi_tuoteno}'
+											AND (tilausrivi.perheid IN ('{$kollirow['tilausrivi']}') OR tilausrivi.perheid = 0)";
 								$result = pupe_query($query);
 
 								query_dump($query);

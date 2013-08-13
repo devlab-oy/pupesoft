@@ -369,6 +369,8 @@
 						$result = pupe_query($query);
 						$tilaukset = mysql_fetch_assoc($result);
 
+						query_dump($query);
+
 						foreach (explode(",", $lapset['lapset']) as $lapsi_tuoteno) {
 
 							if ($tilaukset['tilaukset'] != '') {
@@ -379,6 +381,8 @@
 											AND tilausrivi.otunnus IN ({$tilaukset['tilaukset']})
 											AND tilausrivi.tuoteno = '{$lapsi_tuoteno}'";
 								$result = pupe_query($query);
+
+								query_dump($query);
 							}
 
 							if ($tilaukset['tilaukset'] == '' or mysql_num_rows($result) == 0) {
@@ -410,6 +414,8 @@
 											AND tuote.status != 'P'
 											AND tuote.tuoteno = '{$lapsi_tuoteno}'";
 								$lapsiresult = pupe_query($query);
+
+								query_dump($query);
 
 								while ($lapsitieto = mysql_fetch_assoc($lapsiresult)) {
 									// hae tuotteen ostohinta
@@ -450,6 +456,8 @@
 													uusiotunnus		= '{$isa_chk_row['uusiotunnus']}',
 													perheid			= '{$isa_chk_row['tunnus']}'";
 									$inskres = pupe_query($lisainsert);
+
+									query_dump($query);
 
 									$id = mysql_insert_id();
 									$paketin_rivit[] = $id;

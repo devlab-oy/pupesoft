@@ -342,9 +342,8 @@
 			$RmtInf = $CdtTrfTxInf->addChild('RmtInf', '');														// RemittanceInformation
 
 			if ($laskurow['maa'] == 'EE' and strlen(trim($laskurow["laskunro"])) > 0 and $laskurow['viesti'] != "") {
-				//Ustrd kentän kokonaispituudesta (140 merkkiä) vähennetään "/RFB/" (5 merkkiä) + "/TXT/" (5 merkkiä) eli viitteestä ja viestistä molemmista 5 merkkiä pois
-				$reference_number_and_message = "/RFB/".sprintf("%-1.30s", $laskurow['laskunro'])."/TXT/".sprintf("%-1.135s", $laskurow['viesti']);
-				$Ustrd = $RmtInf->addChild('Ustrd', $reference_number_and_message);					// Unstructured (max 140 char)
+				$reference_number_and_message = "/RFB/".$laskurow['laskunro']."/TXT/".$laskurow['viesti'];
+				$Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s",$reference_number_and_message));					// Unstructured (max 140 char)
 			}
 			else {
 				if (strlen(trim($laskurow["viite"])) > 0) {

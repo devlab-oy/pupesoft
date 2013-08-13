@@ -318,6 +318,8 @@
 						ORDER BY asn_sanomat.tuoteno ASC";
 			$kollires = pupe_query($query);
 
+			query_dump($query);
+
 			$i = $x = 0;
 			$keikoilla	= array();
 			$ostoilla	= array();
@@ -330,6 +332,8 @@
 					$toimittaja = $kollirow['toimittajanumero'];
 					$asn_numero = $kollirow['asn_numero'];
 					$paketin_tunnukset[] = $kollirow['tunnus'];
+
+					echo "Tilausrivit: $kollirow[tilausrivi]<br>";
 
 					// Otetaan ASN-sanomalta tilausrivi(e)n tunnus ja laitetaan $paketin_rivit muuttujaan
 					if (strpos($kollirow['tilausrivi'], ",") !== false) {
@@ -351,6 +355,8 @@
 								AND ohita_kerays != ''";
 					$result = pupe_query($query);
 					$lapset = mysql_fetch_assoc($result);
+
+					query_dump($query);
 
 					// Lapsia löytyi, tämä on isätuote
 					if ($lapset["lapset"] != NULL) {
@@ -675,6 +681,8 @@
 			}
 
 			if ($valitse == 'asn' and count($paketin_rivit) > 0) {
+
+				echo "Löydetyt paketin rivit: <pre>".var_dump($paketin_rivit)."</pre>";
 
 				$query = "SELECT GROUP_CONCAT(tuoteno) AS tuotenumerot FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN (".implode(",", $paketin_rivit).")";
 				$tuotenores = pupe_query($query);

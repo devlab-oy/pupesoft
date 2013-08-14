@@ -124,25 +124,6 @@ function echo_myyntiseuranta_table() {
 	echo "</table>";
 }
 
-function hae_liikevaihto($nykyinen_kvartaali) {
-	global $kukarow;
-
-	$query = "	SELECT IFNULL(Sum(tiliointi.summa), 0) AS liikevaihto
-				FROM   tiliointi
-				JOIN tili
-				ON ( tili.yhtio = tiliointi.yhtio
-				AND tili.tilino = tiliointi.tilino
-				AND tili.sisainen_taso LIKE '31%' )
-				WHERE  tiliointi.yhtio = '{$kukarow['yhtio']}'
-				AND tiliointi.korjattu = ''
-				AND tiliointi.tapvm >= '{$nykyinen_kvartaali['start_date']}'
-				AND tiliointi.tapvm <= '{$nykyinen_kvartaali['end_date']}'";
-	$result = pupe_query($query);
-
-	$row = mysql_fetch_assoc($result);
-	return $row['liikevaihto'];
-}
-
 function hae_tulos_ja_liikevaihto($nykyinen_kvartaali) {
 	global $kukarow;
 

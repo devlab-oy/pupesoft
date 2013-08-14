@@ -201,7 +201,7 @@ class MagentoClient {
 
 			// Lisätään tai päivitetään tuote
 			try {
-								
+
 				// Jos tuotetta ei ole olemassa niin lisätään se
 				if ( ! in_array($tuote['tuoteno'], $skus_in_store)) {
 					// Jos tuotteen lisäys ei onnistu ei tuotekuviakaan lisätä.
@@ -267,6 +267,36 @@ class MagentoClient {
 
 		// Lisätään tuotteet
 		foreach($dnslajitelma as $nimitys => $tuotteet) {
+
+			// Jos lyhytkuvaus on tyhjä, käytetään kuvausta?
+			if ($tuotteet[0]['lyhytkuvaus'] == '') {
+				$tuotteet[0]['lyhytkuvaus'] = '&nbsp';
+			}
+
+			// Erikoishinta
+			$tuotteet[0]['kuluprosentti'] = ($tuotteet[0]['kuluprosentti'] == 0) ? '' : $tuotteet[0]['kuluprosentti'];
+
+			// Etsitään kategoria mihin tuote lisätään
+			$category_id = $this->findCategory($tuotteet[0]['try_nimi'], $this->_category_tree['children']);
+
+			// Configurable tuotteen tiedot
+			$configurable = array(
+				'categories'			=> array($category_id),
+				'websites'				=> array(explode(" ", $tuote['nakyvyys'])),
+				'name'					=> utf8_encode($tuotteet[0]['nimitys']),
+				'description'           => utf8_encode($tuotteet[0]['kuvaus']),
+				'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
+				'weight'                => $tuotteet[0]['tuotemassa'],
+				'status'                => self::ENABLED,
+				'visibility'            => self::CATALOG_SEARCH, # Configurablet nakyy kaikkialla
+				'price'                 => $tuotteet[0]['myymalahinta'],
+				'special_price'			=> $tuotteet[0]['kuluprosentti'],
+				'tax_class_id'          => $this->getTaxClassID(), # 24%
+				'meta_title'            => '',
+				'meta_keyword'          => '',
+				'meta_description'      => '',
+			);
+
 			try {
 
 				/**
@@ -304,37 +334,8 @@ class MagentoClient {
 					);
 				}
 
-				// Jos lyhytkuvaus on tyhjä, käytetään kuvausta?
-				if ($tuotteet[0]['lyhytkuvaus'] == '') {
-					$tuotteet[0]['lyhytkuvaus'] = '&nbsp';
-				}
-
-				// Erikoishinta
-				$tuotteet[0]['kuluprosentti'] = ($tuotteet[0]['kuluprosentti'] == 0) ? '' : $tuotteet[0]['kuluprosentti'];
-
-				// Etsitään kategoria mihin tuote lisätään
-				$category_id = $this->findCategory($tuotteet[0]['try_nimi'], $this->_category_tree['children']);
-
-				// Configurable tuotteen tiedot
-				$configurable = array(
-					'categories'			=> array($category_id),
-					'websites'				=> array(explode(" ", $tuote['nakyvyys'])),
-					'name'					=> utf8_encode($tuotteet[0]['nimitys']),
-					'description'           => utf8_encode($tuotteet[0]['kuvaus']),
-					'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
-					'weight'                => $tuotteet[0]['tuotemassa'],
-					'status'                => self::ENABLED,
-					'visibility'            => self::CATALOG_SEARCH, # Configurablet nakyy kaikkialla
-					'price'                 => $tuotteet[0]['myymalahinta'],
-					'special_price'			=> $tuotteet[0]['kuluprosentti'],
-					'tax_class_id'          => $this->getTaxClassID(), # 24%
-					'meta_title'            => '',
-					'meta_keyword'          => '',
-					'meta_description'      => '',
-				);
-
 				// Jos configurable tuotetta ei löydy, niin lisätään uusi tuote.
-				if ( ! in_array($nimitys, $skus_in_store)) {
+				if (!in_array($nimitys, $skus_in_store)) {
 					$product_id = $this->_proxy->call($this->_session, 'catalog_product.create',
 						array(
 							'configurable',
@@ -343,6 +344,7 @@ class MagentoClient {
 							$configurable
 							)
 						);
+					$this->log("Tuote {$nimitys} lisätty." . print_r($configurable, true));
 				}
 				// Päivitetään olemassa olevaa configurablea
 				else {
@@ -352,6 +354,7 @@ class MagentoClient {
 							$configurable
 							)
 						);
+					$this->log("Tuote {$nimitys} päivitetty." . print_r($configurable, true));
 				}
 
 				// Tarkistetaan onko lisätyllä tuotteella tuotekuvia ja lisätään ne
@@ -363,8 +366,9 @@ class MagentoClient {
 				// Lisätään countteria
 				$count++;
 
-			} catch (Exception $e) {
-				$this->log("Configurable tuotteen " . $tuotteet[0]['tuoteno'] ." lisäys epäonnistui. ", $e);
+			}
+			catch (Exception $e) {
+				$this->log("Configurable tuotteen {$nimitys} lisäys/päivitys epäonnistui." . print_r($configurable, true), $e);
 			}
 		}
 

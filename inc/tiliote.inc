@@ -563,6 +563,15 @@
 			if ($silent == "") {
 				echo "<tr><td colspan='3'>";
 			}
+			
+			if (mysql_num_rows($result) != 1) {
+				// Kokeillaan 14 vikalla merkillä (Virossa esim on 18 merkkisiä tilinumeroita)
+				$query = "	SELECT *
+							FROM yriti
+							WHERE right(tilino,14) = '$pankkitilino'
+							and kaytossa = ''";
+				$result = pupe_query($query);
+			}
 
 			if (mysql_num_rows($result) != 1) {
 				echo "<font class='error'> ".t("Tiliä")." '$pankkitilino' ".t("ei löytynyt")."!</font><br>\n";

@@ -406,8 +406,6 @@
 											AND tuote.tuoteno = '{$lapsi_tuoteno}'";
 								$lapsiresult = pupe_query($query);
 
-								query_dump($query);
-
 								while ($lapsitieto = mysql_fetch_assoc($lapsiresult)) {
 									// hae tuotteen ostohinta
 									$laskuselect = "SELECT *
@@ -447,8 +445,6 @@
 													uusiotunnus		= '{$isa_chk_row['uusiotunnus']}',
 													perheid			= '{$isa_chk_row['tunnus']}'";
 									$inskres = pupe_query($lisainsert);
-
-									query_dump($query);
 
 									$id = mysql_insert_id();
 									$paketin_rivit[] = $id;

@@ -1261,6 +1261,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "salli_jyvitys_tarjouksella") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tarjouksella ei sallita katteen jyvityst‰");
+		$ulos .= "<option value = 'K' $sel[K]>".t("Kaikki saa jyvitt‰‰ katteen perusteella tarjouksella");
+		$ulos .= "<option value = 'S' $sel[S]>".t("Kaikki saa jyvitt‰‰ sek‰ osajyvitt‰‰ katteen perusteella tarjouksella");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "rivinumero_syotto") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

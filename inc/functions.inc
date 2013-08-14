@@ -3410,7 +3410,7 @@ if (!function_exists("hae_alehinta_minkpl")) {
 }
 
 if (!function_exists("alehinta")) {
-	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="", $onlapsi="") {
+	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="", $onlapsi="", $asiakasryhma = '') {
 		global $yhtiorow, $kukarow;
 
 		// Tämä rutiini määrittelee riville hinnan ja alennuksen
@@ -3538,7 +3538,9 @@ if (!function_exists("alehinta")) {
 			$alehi_asrow = mysql_fetch_assoc($alhire);
 		}
 		else {
-			$alehi_asrow = array();
+			$alehi_asrow = array(
+				'ryhma' => $asiakasryhma,
+			);
 			$aperuste .= t("Asiakasta ei löytynyt").". ";
 		}
 
@@ -4073,7 +4075,6 @@ if (!function_exists("alehinta")) {
 
 			// 5B. asiakas.ryhmä tuote.tuoteno nettohinta (asiakasaleryhmän tuotteen hinta) yhtiön valuutassa
 			if ($hinta == 0) {
-
 				$query = "	SELECT hinta, laji
 							FROM asiakashinta
 							WHERE yhtio = '$kukarow[yhtio]'

@@ -1052,6 +1052,9 @@
 			$kutsuttu = 0;
 
 			$alku = "<table width='100%'><tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
+
+			if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') $alku .= "<th>".t("Tehtaan saldo")."</th>";
+
 			$alku .= "<th><form method='post' name='hyvaksy'>
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='lopetus' 		value = '$lopetus'>
@@ -1083,7 +1086,7 @@
 
 				list(, , $vmyytavissa) = saldo_myytavissa($vrow["tuoteno"]);
 
-				if ($vmyytavissa > 0) {
+				if ($vmyytavissa > 0 or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') {
 
 					if ($kutsuttu == 0) {
 						$vastaavat_html = $alku;
@@ -1100,8 +1103,23 @@
 					 			."<td>{$vrow["tuoteno"]}</td>"
 								."<td>{$tvrow["nimitys"]}</td>"
 					 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
-					 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>"
-					 			."<td align='left'>"
+					 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>";
+
+					 if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') {
+
+					 	$query = "	SELECT tehdas_saldo, IF(jarjestys = 0, 9999, jarjestys) jarjestys
+					 				FROM tuotteen_toimittajat
+					 				WHERE yhtio = '{$kukarow['yhtio']}'
+					 				AND tuoteno = '{$vrow['tuoteno']}'
+					 				ORDER BY jarjestys
+					 				LIMIT 1";
+					 	$tehdas_saldo_res = pupe_query($query);
+					 	$tehdas_saldo_row = mysql_fetch_assoc($tehdas_saldo_res);
+
+					 	$vastaavat_html .= "<td align='right'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</td>";
+					 }
+
+					 $vastaavat_html .= "<td align='left'>"
 					 			." <form method='post' name='jalkitoimita'>
 					 			   	<input type='hidden' name='toim' 			value = '$toim'>
 					 			   	<input type='hidden' name='lopetus' 		value = '$lopetus'>

@@ -69,22 +69,18 @@
 
 		$asiakasnumero = $yhtiorow['ovttunnus'];
 
-		// Generoidaan asiakasnumero
-		// Ostotilauksella vanhatunnus-kentässä on toimipaikan tunnus
-		if ($myynti_vai_osto == 'O') {
-
-			if ($laskurow['vanhatunnus'] != 0) {
-
-				$query = "	SELECT ovtlisa
-							FROM yhtion_toimipaikat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$laskurow['vanhatunnus']}'";
-				$toimipaikka_chk_res = pupe_query($query);
-
-				if (mysql_num_rows($toimipaikka_chk_res) != 0) {
-					$toimipaikka_chk_row = mysql_fetch_assoc($toimipaikka_chk_res);
-					$asiakasnumero = "{$asiakasnumero}{$toimipaikka_chk_row['ovtlisa']}";
-				}
+		// Generoidaan asiakasnumeroon ovtlisä, jos käytössä on toimipaikka
+		if ($laskurow['vanhatunnus'] != 0) {
+        
+			$query = "	SELECT ovtlisa
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$laskurow['vanhatunnus']}'";
+			$toimipaikka_chk_res = pupe_query($query);
+        
+			if (mysql_num_rows($toimipaikka_chk_res) != 0) {
+				$toimipaikka_chk_row = mysql_fetch_assoc($toimipaikka_chk_res);
+				$asiakasnumero = "{$asiakasnumero}{$toimipaikka_chk_row['ovtlisa']}";
 			}
 		}
 

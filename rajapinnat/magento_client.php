@@ -179,29 +179,29 @@ class MagentoClient {
 			// Etsitään kategoria_id tuoteryhmällä
 			$category_id = $this->findCategory($tuote['try_nimi'], $category_tree['children']);
 
+			$tuote_data = array(
+					'categories'            => array($category_id),
+					'websites'              => array(explode(" ", $tuote['nakyvyys'])),
+					'name'                  => utf8_encode($tuote['nimi']),
+					'description'           => utf8_encode($tuote['kuvaus']),
+					'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
+					'weight'                => $tuote['tuotemassa'],
+					'status'                => self::ENABLED,
+					'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
+					'price'                 => $tuote['myymalahinta'],
+					'special_price'         => $tuote['kuluprosentti'],
+					'tax_class_id'          => $this->getTaxClassID(),
+					'meta_title'            => '',
+					'meta_keyword'          => '',
+					'meta_description'      => '',
+					'campaign_code'         => utf8_encode($tuote['campaign_code']),
+					'featured'              => utf8_encode($tuote['featured']),
+					'target'                => utf8_encode($tuote['target']),
+				);
+
 			// Lisätään tai päivitetään tuote
 			try {
-				
-				$tuote_data = array(
-						'categories'            => array($category_id),
-						'websites'              => array($tuote['nakyvyys']),
-						'name'                  => utf8_encode($tuote['nimi']),
-						'description'           => utf8_encode($tuote['kuvaus']),
-						'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
-						'weight'                => $tuote['tuotemassa'],
-						'status'                => self::ENABLED,
-						'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
-						'price'                 => $tuote['myymalahinta'],
-						'special_price'         => $tuote['kuluprosentti'],
-						'tax_class_id'          => $this->getTaxClassID(),
-						'meta_title'            => '',
-						'meta_keyword'          => '',
-						'meta_description'      => '',
-						'campaign_code'         => utf8_encode($tuote['campaign_code']),
-						'featured'              => utf8_encode($tuote['featured']),
-						'target'                => utf8_encode($tuote['target']),
-					);
-				
+								
 				// Jos tuotetta ei ole olemassa niin lisätään se
 				if ( ! in_array($tuote['tuoteno'], $skus_in_store)) {
 					// Jos tuotteen lisäys ei onnistu ei tuotekuviakaan lisätä.
@@ -237,7 +237,7 @@ class MagentoClient {
 
 			}
 			catch (Exception $e) {
-				$this->log("Tuotteen {$tuote['tuoteno']} lisäys/päivitys epäonnistui." . print_r($tuote), $e);
+				$this->log("Tuotteen {$tuote['tuoteno']} lisäys/päivitys epäonnistui." . print_r($tuote_data, true), $e);
 			}
 		}
 
@@ -318,9 +318,9 @@ class MagentoClient {
 				// Configurable tuotteen tiedot
 				$configurable = array(
 					'categories'			=> array($category_id),
-					'websites'				=> array($tuote['nakyvyys']),
-					'name'					=> $tuotteet[0]['nimitys'],
-					'description'           => $tuotteet[0]['kuvaus'],
+					'websites'				=> array(explode(" ", $tuote['nakyvyys'])),
+					'name'					=> utf8_encode($tuotteet[0]['nimitys']),
+					'description'           => utf8_encode($tuotteet[0]['kuvaus']),
 					'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
 					'weight'                => $tuotteet[0]['tuotemassa'],
 					'status'                => self::ENABLED,

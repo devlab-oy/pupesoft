@@ -820,6 +820,35 @@ else {
 				laheta_tilausvahvistus($params_tilausvahvistus);
 			}
 
+			// Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina
+			if ($yhtiorow['lahetteen_tulostustapa'] == "I") {
+
+				$query = "	UPDATE lasku
+							SET tila = 'N',
+							alatila = 'A'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$laskurow['tunnus']}'";
+				pupe_query($query);
+				// Tulostetaan keräyslista
+				$tilausnumeroita = $laskurow["tunnus"];
+				require("tilaus-valmis-tulostus.inc");
+
+				// Tulostetaan lähete
+				$params = array(
+					'laskurow'					=> $laskurow,
+					'sellahetetyyppi' 			=> "",
+					'extranet_tilausvahvistus' 	=> "",
+					'naytetaanko_rivihinta'		=> "",
+					'tee'						=> "",
+					'toim'						=> $toim,
+					'komento' 					=> $komento,
+					'lahetekpl'					=> "",
+					'kieli' 					=> ""
+					);
+
+				pupesoft_tulosta_lahete($params);
+			}
+
 			// Laitetaan tässäkin haarassa Intrastat-tiedot kuntoon, muuten laskujen ketjutus ei onnaa. (varasto = 0 ,eli mennään yhtiön oletusmaalla)
 			$laskurow = palauta_intrastat_tiedot($laskurow, 0, TRUE);
 
@@ -886,6 +915,11 @@ else {
 								WHERE tunnus = '$laskurow[tunnus]'
 								and yhtio = '$kukarow[yhtio]'";
 					$result = pupe_query($query);
+				}
+
+				// Jos meillä on osatoimituskielto, ni mennään katsomaan pitääkö tilaus jättää odottamaan tuotteita
+				if ($laskurow['osatoimitus'] != '') {
+					require ("tilauskasittely/tilaus-valmis-valitsetila.inc");
 				}
 			}
 
@@ -1329,7 +1363,7 @@ else {
 								break;
 							case 'kate_korjattu':
 								$values .= ", NULL";
-								break;								
+								break;
 							default:
 								$values .= ", '".$laskurow[$fieldname]."'";
 						}

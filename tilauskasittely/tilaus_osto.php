@@ -554,6 +554,8 @@
 					}
 					$toisen_toimittajan_ostotilaus = luo_ostotilausotsikko($params);
 
+					$myyntitilausrivi_tunnus_temp = $tilausrivirow['tilausrivitunnus'];
+
 					unset($tilausrivirow['laadittu']);
 					unset($tilausrivirow['laatija']);
 					unset($tilausrivirow['sarjanumeroseuranta']);
@@ -581,6 +583,12 @@
 									tilausrivi (".implode(", ", array_keys($tilausrivirow)).", laadittu, laatija)
 									VALUES('".implode("', '", array_values($tilausrivirow)). "', now(), '{$kukarow['kuka']}')";
 					pupe_query($copy_query);
+
+					$update_query = "	UPDATE tilausrivin_lisatiedot
+										SET toimittajan_tunnus = '{$toimi_tunnus}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tilausrivitunnus = '{$myyntitilausrivi_tunnus_temp}'";
+					pupe_query($update_query);
 
 					$tee = 'TI';
 					$tyhjenna = '';

@@ -71,7 +71,7 @@ class MagentoClient {
 		try {
 			$this->_proxy = new SoapClient($url);
 			$this->_session = $this->_proxy->login($user, $pass);
-			$this->log("Magento p‰ivitysskripti aloitettu " . date('d-m-y H:i:s') . "\n");
+			$this->log("Magento p‰ivitysskripti aloitettu " . date('d-m-y H:i:s'));
 		} catch (Exception $e) {
 			echo $e->getMessage();
 			exit;
@@ -82,7 +82,7 @@ class MagentoClient {
 	 * Destructor
 	 */
 	function __destruct() {
-		$this->log("\nP‰ivitysskripti p‰‰ttyi " . date('d-m-y H:i:s') . "\n");
+		$this->log("P‰ivitysskripti p‰‰ttyi " . date('d-m-y H:i:s') . "\n");
 	}
 
 	/**
@@ -181,6 +181,27 @@ class MagentoClient {
 
 			// Lis‰t‰‰n tai p‰ivitet‰‰n tuote
 			try {
+				
+				$tuote_data = array(
+						'categories'            => array($category_id),
+						'websites'              => array($tuote['nakyvyys']),
+						'name'                  => utf8_encode($tuote['nimi']),
+						'description'           => utf8_encode($tuote['kuvaus']),
+						'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
+						'weight'                => $tuote['tuotemassa'],
+						'status'                => self::ENABLED,
+						'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
+						'price'                 => $tuote['myymalahinta'],
+						'special_price'         => $tuote['kuluprosentti'],
+						'tax_class_id'          => $this->getTaxClassID(),
+						'meta_title'            => '',
+						'meta_keyword'          => '',
+						'meta_description'      => '',
+						'campaign_code'         => utf8_encode($tuote['campaign_code']),
+						'featured'              => utf8_encode($tuote['featured']),
+						'target'                => utf8_encode($tuote['target']),
+					);
+				
 				// Jos tuotetta ei ole olemassa niin lis‰t‰‰n se
 				if ( ! in_array($tuote['tuoteno'], $skus_in_store)) {
 					// Jos tuotteen lis‰ys ei onnistu ei tuotekuviakaan lis‰t‰.
@@ -189,56 +210,20 @@ class MagentoClient {
 							'simple',
 							$this->_attributeSet['set_id'],
 							$tuote['tuoteno'], # sku
-							array(
-									'categories'            => array($category_id),
-									'websites'              => array($tuote['nakyvyys']),
-									'name'                  => $tuote['nimi'],
-									'description'           => $tuote['kuvaus'],
-									'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
-									'weight'                => $tuote['tuotemassa'],
-									'status'                => self::ENABLED,
-									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
-									'price'                 => $tuote['myymalahinta'],
-									'special_price'         => $tuote['kuluprosentti'],
-									'tax_class_id'          => $this->getTaxClassID(),
-									'meta_title'            => '',
-									'meta_keyword'          => '',
-									'meta_description'      => '',
-									'campaign_code'         => utf8_encode($tuote['campaign_code']),
-									'featured'              => utf8_encode($tuote['featured']),
-									'target'                => utf8_encode($tuote['target']),
-								)
+							$tuote_data,
 							)
 						);
-					$this->log("Tuote {$tuote['tuoteno']} lis‰tty." . print_r($tuote));
+					$this->log("Tuote {$tuote['tuoteno']} lis‰tty." . print_r($tuote_data, true));
 				}
 				// Tuote on jo olemassa, p‰ivitet‰‰n
 				else {
 					$product_id = $this->_proxy->call($this->_session, 'catalog_product.update',
 						array(
 							$tuote['tuoteno'], # sku
-							array(
-									'categories'            => array($category_id),
-									'websites'              => array($tuote['nakyvyys']),
-									'name'                  => $tuote['nimi'],
-									'description'           => $tuote['kuvaus'],
-									'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
-									'weight'                => $tuote['tuotemassa'],
-									'status'                => self::ENABLED,
-									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
-									'price'                 => $tuote['myymalahinta'],
-									'special_price'         => $tuote['kuluprosentti'],
-									'tax_class_id'          => $this->getTaxClassID(),
-									'meta_title'            => '',
-									'meta_keyword'          => '',
-									'meta_description'      => '',
-									'campaign_code'         => utf8_encode($tuote['campaign_code']),
-									'featured'              => utf8_encode($tuote['featured']),
-									'target'                => utf8_encode($tuote['target']),
-								)
+							$tuote_data,
 							)
 						);
-					$this->log("Tuote {$tuote['tuoteno']} p‰ivitetty." . print_r($tuote));
+					$this->log("Tuote {$tuote['tuoteno']} p‰ivitetty." . print_r($tuote_data, true));
 				}
 
 				// Lis‰t‰‰n tuotekuvat

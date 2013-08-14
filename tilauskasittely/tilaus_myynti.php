@@ -1548,56 +1548,6 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 				AND alatila = 'A'";
 	$result = pupe_query($query);
 
-	// Jos tehdaspalautus
-	if ($laskurow['tilaustyyppi'] == 9) {
-
-		$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
-		$laskurow_edi_res = pupe_query($query);
-		$laskurow = mysql_fetch_assoc($laskurow_edi_res);
-
-		$query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
-		$asiakas_chk_res = pupe_query($query);
-		$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
-
-		if (strtolower(trim($asiakas_chk_row['toimitusvahvistus'])) == 'editilaus_out_futur.inc') {
-
-			$query = "	SELECT *
-						FROM asiakkaan_avainsanat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND liitostunnus = '{$laskurow['liitostunnus']}'
-						AND laji IN ('futur_host','futur_path','futur_user','futur_password')
-						AND avainsana != ''";
-			$chk_res = pupe_query($query);
-
-			$ftphost_futur = $ftppath_futur = $ftpuser_futur = $ftppass_futur = "";
-
-			while ($chk_row = mysql_fetch_assoc($chk_res)) {
-
-				switch($chk_row['laji']) {
-					case 'futur_host':
-						$ftphost_futur = $chk_row['avainsana'];
-						break;
-					case 'futur_path':
-						$ftppath_futur = $chk_row['avainsana'];
-						break;
-					case 'futur_user':
-						$ftpuser_futur = $chk_row['avainsana'];
-						break;
-					case 'futur_password':
-						$ftppass_futur = $chk_row['avainsana'];
-						break;
-				}
-			}
-
-			if (($ftphost_futur == 'localhost' and $ftppath_futur != '') or ($ftphost_futur != 'localhost' and $ftphost_futur != '' and $ftppath_futur != '' and $ftppass_futur != '' and $ftpuser_futur != '')) {
-				$laskurow['tilaustyyppi'] = 3;
-				$myynti_vai_osto = 'M';
-
-				require("{$tilauskaslisa}editilaus_out_futur.inc");
-			}
-		}
-	}
-
 	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
 	$result = pupe_query($query);
 

@@ -181,7 +181,7 @@ class MagentoClient {
 
 			$tuote_data = array(
 					'categories'            => array($category_id),
-					'websites'              => array(explode(" ", $tuote['nakyvyys'])),
+					'websites'              => explode(" ", $tuote['nakyvyys']),
 					'name'                  => utf8_encode($tuote['nimi']),
 					'description'           => utf8_encode($tuote['kuvaus']),
 					'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
@@ -282,7 +282,7 @@ class MagentoClient {
 			// Configurable tuotteen tiedot
 			$configurable = array(
 				'categories'			=> array($category_id),
-				'websites'				=> array(explode(" ", $tuote['nakyvyys'])),
+				'websites'				=> explode(" ", $tuote['nakyvyys']),
 				'name'					=> utf8_encode($tuotteet[0]['nimitys']),
 				'description'           => utf8_encode($tuotteet[0]['kuvaus']),
 				'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),

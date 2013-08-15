@@ -1606,141 +1606,207 @@ while ($tietue = fgets($fd)) {
 		 		// jos tuote on lˆytynyt ok
 				if ($tuoteerror == 0) {
 
-					// halutaan $tuoteno
-					// $kpl kappaletta
-					// $trow jossa on tuotten tiedot
-					$ytunnus    			= $laskurow["ytunnus"];
-					$hinta 					= "";
-					$netto 					= "";
+					$tuoteno_array = array($tuoteno);
 
-					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						${'ale'.$alepostfix} = "";
-					}
+					$hyvityssaanto_indeksi 				= 0;
+					$hyvityssaanto_hinta_array 			= "";
+					$hyvityssaanto_ale_array 			= "";
+					$hyvityssaanto_kpl_array 			= "";
+					$hyvityssaanto_kommentti_array 		= "";
+					$hyvityssaanto_palautuskielto_array	= "";
 
-					$var					= "";
-					$alv					= "";
-					$toimaika 				= $laskurow["toimaika"];
-					$kerayspvm				= $laskurow["kerayspvm"];
-					$paikka					= "";
-					$kukarow["kesken"] 		= $laskurow["tunnus"];
-					$jtkielto 				= $laskurow['jtkielto'];
-					$varasto 				= array();
-					$kommentti				= $rivikommentti;
-					$laskurow["varasto"]	= "";
+					// Jos k‰ytet‰‰n reklamaatioiden hinnoittelus‰‰ntˆ‰ ja k‰ytt‰j‰ ei ole v‰kisinhyv‰ksynyt rivi‰
+					if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and $edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
+						$hyvityssaanto_hinta_array = array();
+						$hyvityssaanto_ale_array = array();
+						$hyvityssaanto_kpl_array = array();
+						$hyvityssaanto_kommentti_array = array();
+						$hyvityssaanto_palautuskielto_array = array();
 
-					if ($edi_tyyppi == "magento") {
-						// N‰m‰ ovat ainoat varastot joista verkkokauppa saa myyd‰
-						if ($verkkokauppavarasto == "") {
-							$query	= "	SELECT GROUP_CONCAT(tunnus) tunnukset
-										FROM varastopaikat
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND prioriteetti > 0 AND tyyppi != 'P'";
-							$pres = pupe_query($query);
-							$prow = mysql_fetch_assoc($pres);
+						$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
 
-							if ($prow["tunnukset"] != "") {
-								$verkkokauppavarasto 	= explode(",", $prow["tunnukset"]);
-								$verkkokauppavarasto_li = " and varastopaikat.tunnus in ($prow[tunnukset]) ";
-								$laskurow["varasto"] 	= $verkkokauppavarasto[0];
-							}
-						}
-
-						$varasto = $verkkokauppavarasto;
-					}
-					elseif ($olinvarasto != "") {
-						$varasto = $olinvarasto;
-					}
-
-					// jos terminaalitoimitus niin ohitetaan kaikki saldozekit, sek‰ laitetaan kommenttiriville asiakkaan tuotenumero ja nimitys
-					if ($editilaus_tila == "Z") {
-						$var = "Y";
-						$kommentti = "$olinsapi#$edi_nimitys";
-					}
-
-					// jos tullaan magentosta ja hinta on tiedossa ja kyseess‰ on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
-					if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
-						$hinta = $editilaus_hinta;
-					}
-
-					// jos tullaan magentosta ja alennus on tiedossa
-					if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus > 0) {
-						$ale1 = $editilaus_alennus;
-					}
-
-					// Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
-					// Jos tilattu kpl-m‰‰r‰ on suurempi kuin myyt‰viss‰ oleva kpl-m‰‰r‰, niin pakotetaan rivi hyv‰ksytyksi
-					if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
-
-						list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, "", $verkkokauppavarasto);
-
-						// jos saldo ei riit‰ normivarastoista, pit‰‰ katsoa miss‰ varastossa riitt‰‰ ja myyd‰‰n sielt‰ (koska jossain riitt‰‰, muuten tilaus ei olisi edes tullu t‰nne asti)
-						if ($chk_myytavissa < $kpl) {
-
-							$query = "	SELECT distinct varastopaikat.tunnus varasto, varastopaikat.prioriteetti
-										FROM tuotepaikat
-										JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-											AND varastopaikat.tyyppi != ''
-											AND varastopaikat.prioriteetti > 0
-											AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-											AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-											$verkkokauppavarasto_li)
-										WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-										AND tuotepaikat.tuoteno = '$tuoteno'
-										ORDER BY prioriteetti";
-							$sres = pupe_query($query);
-
-							$erikoisvarastojen_saldot = array();
-							$erikois_i = 0;
-
-							while ($erikoisasaldo_row = mysql_fetch_assoc($sres)) {
-								list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, '', $erikoisasaldo_row["varasto"]);
-
-								if ($chk_myytavissa >= $kpl) {
-									$erikoisvarastojen_saldot[$erikois_i]["varasto"] = (int) $erikoisasaldo_row["varasto"];
-									$erikoisvarastojen_saldot[$erikois_i]["myytavissa"] = (float) $chk_myytavissa;
-									$erikoisvarastojen_saldot[$erikois_i]["prioriteetti"] = (int) $erikoisasaldo_row["prioriteetti"];
-									$erikois_i++;
-								}
-							}
-
-							if (count($erikoisvarastojen_saldot) > 0) {
-								// Sortataan 2 dimensoinen array. pit‰‰ ensiksi tehd‰ sortattavista keyst‰ omat arrayt
-								$apusort_jarj0 = $apusort_jarj1 = array();
-								foreach ($erikoisvarastojen_saldot as $apusort_key => $apusort_row) {
-								    $apusort_jarj0[$apusort_key] = $apusort_row['prioriteetti'];
-									$apusort_jarj1[$apusort_key] = $apusort_row['myytavissa'];
-								}
-
-								// sortataan by myytavissa, sorttauskentt‰
-								array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_DESC, $erikoisvarastojen_saldot);
-
-								$varasto = $erikoisvarastojen_saldot[0]["varasto"]; // ekassa varastossa on pienin prioriteetti
-								$laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
-
-								// Tilausrivin systeemikommentti
-								$kommentti .= t("HUOM: Tuote toimitetaan erikoisvarastosta!");
-							}
-							else {
-								$var = "H";
-							}
+						foreach ($palautus as $index => $arvot) {
+							$tuoteno_array[] = $palautus[$index]["tuoteno"];
+							$hyvityssaanto_hinta_array[$index][$tuoteno] = $palautus[$index]["hinta"];
+							$hyvityssaanto_ale_array[$index][$tuoteno] = $palautus[$index]["ale"];
+							$hyvityssaanto_kpl_array[$index][$tuoteno] = $palautus[$index]["kpl"] * -1;
+							$hyvityssaanto_kommentti_array[$index][$tuoteno] = $palautus[$index]["kommentti"];
+							$hyvityssaanto_palautuskielto_array[$index][$tuoteno] = $palautus[$index]["palautuskielto"];
 						}
 					}
 
-					$kutsuja = "EDITILAUS";
+					foreach ($tuoteno_array as $tuoteno) {
 
-					// Jos meill‰ on t‰pp‰ p‰‰ll‰, ett‰ asiakas haluaa kamat j‰lkitoimitukseen
-					if ($sallitaanjt == '1') {
-						$var 		= "J";
-						$kommentti 	= ""; // HUOM: nollataan kommentti
+						// halutaan $tuoteno
+						// $kpl kappaletta
+						// $trow jossa on tuotten tiedot
+						$ytunnus    			= $laskurow["ytunnus"];
+						$hinta 					= "";
+						$netto 					= "";
+
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							${'ale'.$alepostfix} = "";
+						}
+
+						$var					= "";
+						$alv					= "";
+						$toimaika 				= $laskurow["toimaika"];
+						$kerayspvm				= $laskurow["kerayspvm"];
+						$paikka					= "";
+						$kukarow["kesken"] 		= $laskurow["tunnus"];
+						$jtkielto 				= $laskurow['jtkielto'];
+						$varasto 				= array();
+						$kommentti				= $rivikommentti;
+						$laskurow["varasto"]	= "";
+
+						if ($edi_tyyppi == "magento") {
+							// N‰m‰ ovat ainoat varastot joista verkkokauppa saa myyd‰
+							if ($verkkokauppavarasto == "") {
+								$query	= "	SELECT GROUP_CONCAT(tunnus) tunnukset
+											FROM varastopaikat
+											WHERE yhtio = '$kukarow[yhtio]'
+											AND prioriteetti > 0 AND tyyppi != 'P'";
+								$pres = pupe_query($query);
+								$prow = mysql_fetch_assoc($pres);
+
+								if ($prow["tunnukset"] != "") {
+									$verkkokauppavarasto 	= explode(",", $prow["tunnukset"]);
+									$verkkokauppavarasto_li = " and varastopaikat.tunnus in ($prow[tunnukset]) ";
+									$laskurow["varasto"] 	= $verkkokauppavarasto[0];
+								}
+							}
+
+							$varasto = $verkkokauppavarasto;
+						}
+						elseif ($olinvarasto != "") {
+							$varasto = $olinvarasto;
+						}
+
+						// jos terminaalitoimitus niin ohitetaan kaikki saldozekit, sek‰ laitetaan kommenttiriville asiakkaan tuotenumero ja nimitys
+						if ($editilaus_tila == "Z") {
+							$var = "Y";
+							$kommentti = "$olinsapi#$edi_nimitys";
+						}
+
+						// jos tullaan magentosta ja hinta on tiedossa ja kyseess‰ on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
+						if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
+							$hinta = $editilaus_hinta;
+						}
+						elseif (is_array($hyvityssaanto_hinta_array)) {
+							$hinta = $hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno];
+						}
+
+						// jos tullaan magentosta ja alennus on tiedossa
+						if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus > 0) {
+							$ale1 = $editilaus_alennus;
+						}
+						elseif (is_array($hyvityssaanto_ale_array)) {
+
+							// hyvityss‰‰nnˆn alennus yliajaa k‰ytt‰j‰n syˆtt‰m‰n alennuksen
+							$ale1 = $hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno];
+
+							for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								${'ale'.$alepostfix} = 0;
+							}
+						}
+
+
+						// Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
+						// Jos tilattu kpl-m‰‰r‰ on suurempi kuin myyt‰viss‰ oleva kpl-m‰‰r‰, niin pakotetaan rivi hyv‰ksytyksi
+						if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
+
+							list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, "", $verkkokauppavarasto);
+
+							// jos saldo ei riit‰ normivarastoista, pit‰‰ katsoa miss‰ varastossa riitt‰‰ ja myyd‰‰n sielt‰ (koska jossain riitt‰‰, muuten tilaus ei olisi edes tullu t‰nne asti)
+							if ($chk_myytavissa < $kpl) {
+
+								$query = "	SELECT distinct varastopaikat.tunnus varasto, varastopaikat.prioriteetti
+											FROM tuotepaikat
+											JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+												AND varastopaikat.tyyppi != ''
+												AND varastopaikat.prioriteetti > 0
+												AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+												AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+												$verkkokauppavarasto_li)
+											WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+											AND tuotepaikat.tuoteno = '$tuoteno'
+											ORDER BY prioriteetti";
+								$sres = pupe_query($query);
+
+								$erikoisvarastojen_saldot = array();
+								$erikois_i = 0;
+
+								while ($erikoisasaldo_row = mysql_fetch_assoc($sres)) {
+									list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, '', $erikoisasaldo_row["varasto"]);
+
+									if ($chk_myytavissa >= $kpl) {
+										$erikoisvarastojen_saldot[$erikois_i]["varasto"] = (int) $erikoisasaldo_row["varasto"];
+										$erikoisvarastojen_saldot[$erikois_i]["myytavissa"] = (float) $chk_myytavissa;
+										$erikoisvarastojen_saldot[$erikois_i]["prioriteetti"] = (int) $erikoisasaldo_row["prioriteetti"];
+										$erikois_i++;
+									}
+								}
+
+								if (count($erikoisvarastojen_saldot) > 0) {
+									// Sortataan 2 dimensoinen array. pit‰‰ ensiksi tehd‰ sortattavista keyst‰ omat arrayt
+									$apusort_jarj0 = $apusort_jarj1 = array();
+									foreach ($erikoisvarastojen_saldot as $apusort_key => $apusort_row) {
+									    $apusort_jarj0[$apusort_key] = $apusort_row['prioriteetti'];
+										$apusort_jarj1[$apusort_key] = $apusort_row['myytavissa'];
+									}
+
+									// sortataan by myytavissa, sorttauskentt‰
+									array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_DESC, $erikoisvarastojen_saldot);
+
+									$varasto = $erikoisvarastojen_saldot[0]["varasto"]; // ekassa varastossa on pienin prioriteetti
+									$laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
+
+									// Tilausrivin systeemikommentti
+									$kommentti .= t("HUOM: Tuote toimitetaan erikoisvarastosta!");
+								}
+								else {
+									$var = "H";
+								}
+							}
+						}
+
+						$kutsuja = "EDITILAUS";
+
+						// Jos meill‰ on t‰pp‰ p‰‰ll‰, ett‰ asiakas haluaa kamat j‰lkitoimitukseen
+						if ($sallitaanjt == '1') {
+							$var 		= "J";
+							$kommentti 	= ""; // HUOM: nollataan kommentti
+						}
+
+						if (is_array($hyvityssaanto_kpl_array)) {
+							$kpl = $hyvityssaanto_kpl_array[$hyvityssaanto_indeksi][$tuoteno];
+						}
+
+						if ($edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
+							$kpl = abs($kpl) * -1;
+						}
+
+						if (is_array($hyvityssaanto_kommentti_array)) {
+
+							// jos myyj‰ on reklamaatiossa syˆtt‰nyt riville kommentin niin se laitetaan ensimm‰iselle sille tarkoitetulle riville
+							if ($kommentti != "") {
+								$kommentti .= " ";
+							}
+
+							$kommentti .= $hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi][$tuoteno];
+						}
+
+						if (is_array($hyvityssaanto_palautuskielto_array)) {
+							$hyvityssaannon_palautuskielto =  $hyvityssaanto_palautuskielto_array[$hyvityssaanto_indeksi][$tuoteno];
+						}
+						else {
+							$hyvityssaannon_palautuskielto = "";
+						}
+
+						require ("lisaarivi.inc");
+
+						$edi_ulos .= "\n";
 					}
-
-					if ($edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
-						$kpl = abs($kpl) * -1;
-					}
-
-					require ("lisaarivi.inc");
-
-					$edi_ulos .= "\n";
 
 				} // end jos tuote on lˆydetty oikein
 				else {

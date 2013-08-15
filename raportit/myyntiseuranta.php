@@ -2271,7 +2271,6 @@
 											$vsum = sprintf("%.2f", $vsum);
 										}
 
-
 										if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
 										if (isset($worksheet)) {

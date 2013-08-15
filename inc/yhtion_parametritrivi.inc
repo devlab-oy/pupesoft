@@ -102,6 +102,7 @@
 		$sel2 = "";
 		$sel3 = "";
 		$sel4 = "";
+		$sel5 = "";
 
 		if ($trow[$i] == 'A') {
 			$sel1 = "selected";
@@ -115,11 +116,15 @@
 		if ($trow[$i] == 'L') {
 			$sel4 = "selected";
 		}
+		if ($trow[$i] == 'I') {
+			$sel5 = "selected";
+		}
 
 		$ulos .= "<option value = 'K' $sel2>".t("Myyntitilausten ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa");
 		$ulos .= "<option value = 'L' $sel4>".t("Myyntitilausten ker‰yslistojen ja l‰hetteen tulostukseen k‰ytet‰‰n tulostusjonoa");
 		$ulos .= "<option value = 'A' $sel1>".t("Myyntitilausten ker‰yslistat tulostetaan automaattisesti");
 		$ulos .= "<option value = 'B' $sel3>".t("Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti");
+		$ulos .= "<option value = 'I' $sel5>".t("Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti ja tilaus laitetaan toimitetuksi");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

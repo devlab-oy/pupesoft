@@ -2136,7 +2136,8 @@ $debug = 0;
 							SUM(IF((hyllyalue != '' and hyllynro != '' and hyllyvali != '' and hyllytaso != ''), 1, 0)) hyllypaikat
 							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND suuntalava = '{$suuntalavan_tunnus}'";
+							AND suuntalava = '{$suuntalavan_tunnus}'
+							AND tunnus IN (".implode($tilausrivit[$suuntalavan_tunnus]).")";
 				$cnt_chk_res = pupe_query($query);
 				$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
 
@@ -2166,6 +2167,8 @@ $debug = 0;
 					continue;
 				}
 			}
+
+			$tilausrivi = 0;
 
 			require("tilauskasittely/varastoon.inc");
 

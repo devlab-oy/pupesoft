@@ -28,7 +28,7 @@ if (empty($magento_api_ana_edi)
 $magento = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 
 // Haetaan maksetut tilaukset magentosta
-$tilaukset = $magento->hae_tilaukset('pending');
+$tilaukset = $magento->hae_tilaukset('Processing');
 
 // Tehdään EDI-tilaukset
 foreach($tilaukset as $tilaus) {

@@ -385,8 +385,8 @@ class MagentoClient {
 	 * @param string $status 	Haettavien tilausten status, esim 'prorcessing'
 	 * @return array 			Löydetyt tilaukset
 	 */
-	public function hae_tilaukset($status = 'processing')
-	{
+	public function hae_tilaukset($status = 'processing') {
+
 		$this->log("Haetaan tilauksia");
 
 		$orders = array();
@@ -407,6 +407,9 @@ class MagentoClient {
 		// Haetaan laskut (invoices.state = 'paid')
 
 		foreach ($fetched_orders as $order) {
+
+			$this->log("Haetaan tilaus $order");
+
 			// Haetaan tilauksen tiedot (orders)
 			$orders[] = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);
 

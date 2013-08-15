@@ -257,7 +257,9 @@
 												ON ( tuote.yhtio = tuotteen_toimittajat.yhtio
 													AND tuote.tuoteno = tuotteen_toimittajat.tuoteno )
 												WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-												AND tuotteen_toimittajat.tuoteno = '{$_tuote['tuoteno']}'";
+												AND tuotteen_toimittajat.tuoteno = '{$_tuote['tuoteno']}'
+												ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
+												LIMIT 1";
 				$tuotteen_toimittaja_result = pupe_query($tuotteen_toimittaja_query);
 				$tuotteen_toimittaja_row = mysql_fetch_assoc($tuotteen_toimittaja_result);
 

@@ -11,7 +11,6 @@
 	if (!isset($tee)) $tee = '';
 	if (!isset($summa1)) $summa1 = '';
 	if (!isset($summa2)) $summa2 = '';
-	if (!isset($alku)) $alku = 0;
 	if (!isset($pvm)) $pvm = '';
 
 	if (!function_exists("kuka_kayttaja")) {
@@ -183,8 +182,6 @@
 	}
 
 	if ($tee != '') {
-		$alku += 0;
-
 		$query = "	SELECT tapvm, erpcm, laskunro, concat_ws(' ', nimi, nimitark) nimi,
 					summa, valkoodi, ebid, tila, alatila, tunnus,
 					mapvm, saldo_maksettu, ytunnus, liitostunnus, laatija
@@ -281,5 +278,3 @@
 	}
 
 	require ("inc/footer.inc");
-
-?>

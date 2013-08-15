@@ -2133,7 +2133,7 @@ $debug = 0;
 				}
 
 				$query = "	SELECT SUM(IF(kpl != 0, 1, 0)) kplrivit,
-							SUM(IF(hyllyalue != '' and hyllynro != '' and hyllyvali != '' and hyllytaso != ''), 1, 0) hyllypaikat
+							SUM(IF((hyllyalue != '' and hyllynro != '' and hyllyvali != '' and hyllytaso != ''), 1, 0)) hyllypaikat
 							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND suuntalava = '{$suuntalavan_tunnus}'";
@@ -2155,7 +2155,7 @@ $debug = 0;
 			else {
 
 				$query = "	SELECT SUM(IF(kpl != 0, 1, 0)) kplrivit,
-							SUM(IF(hyllyalue != '' and hyllynro != '' and hyllyvali != '' and hyllytaso != ''), 1, 0) hyllypaikat
+							SUM(IF((hyllyalue != '' and hyllynro != '' and hyllyvali != '' and hyllytaso != ''), 1, 0)) hyllypaikat
 							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND uusiotunnus = '{$otunnus}'";

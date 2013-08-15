@@ -22,9 +22,13 @@
 			$query = "	SELECT tilausrivi.tuoteno,
 						tuotteen_toimittajat.tehdas_saldo
 						FROM tilausrivi
+						JOIN lasku
+						ON (tilausrivi.yhtio = lasku.yhtio
+							AND tilausrivi.otunnus = lasku.tunnus)
 						JOIN tuotteen_toimittajat
 						ON ( tuotteen_toimittajat.yhtio = tilausrivi.yhtio
-							AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno)
+							AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+							AND tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus = '{$tilausnumero}'
 						AND tilausrivi.varattu > tuotteen_toimittajat.tehdas_saldo";

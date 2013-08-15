@@ -408,7 +408,7 @@ class MagentoClient {
 
 		foreach ($fetched_orders as $order) {
 
-			$this->log("Haetaan tilaus $order");
+			$this->log("Haetaan tilaus {$order['increment_id']}");
 
 			// Haetaan tilauksen tiedot (orders)
 			$orders[] = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);

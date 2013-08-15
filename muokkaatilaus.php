@@ -375,9 +375,11 @@
 				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "EXTENNAKKO") {
-				$query = "	SELECT *
+				$query = "	SELECT lasku.*
 							FROM lasku
-							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and lasku.tila in ('E', 'N') and lasku.alatila in ('','A','J') AND clearing = 'EXTENNAKKO'";
+							JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]')  and lasku.tila in ('E', 'N') and lasku.alatila in ('','A','J') AND
+							lasku.clearing = 'EXTENNAKKO' AND laskun_lisatiedot.sopimus_lisatietoja != ''";
 				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "OSTO") {
@@ -863,6 +865,7 @@
 						and lasku.tila in ('E','N')
 						and lasku.tilaustyyppi = 'E'
 						and clearing = 'EXTENNAKKO'
+						and lasku.ytunnus != ''
 						$haku
 						GROUP BY lasku.tunnus
 						$mt_order_by
@@ -1493,6 +1496,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'N'
 						and lasku.alatila in ('A','','T','U','G')
+						and lasku.clearing != 'EXTENNAKKO'
 						$haku
 						HAVING extra = '' or extra is null
 						$mt_order_by
@@ -1588,6 +1592,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('L','N')
 						and lasku.alatila in ('A','','T','U','G')
+						and lasku.clearing != 'EXTENNAKKO'
 						$haku
 						HAVING extra = '' or extra is null
 						$mt_order_by

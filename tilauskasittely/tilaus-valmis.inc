@@ -82,8 +82,8 @@ $tilausvalmis_asiakas_row = mysql_fetch_assoc($tilausvalmis_asiakas_res);
 
 // Myynti esteteään jos luottoraja on ylitetty (K - kaikki estetään, E -  kaikki muu ku myyjien tekemä estetään)
 // samma på erapaivan_ylityksen_raja
-$luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K","J"))             or (in_array($yhtiorow["luottorajan_ylitys"], array("E","F"))             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) ? 1 : 0;
-$erapaiva_chk   =  (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("K","J")) or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E","F")) and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) ? 1 : 0;
+$luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K","J","L","M"))             or (in_array($yhtiorow["luottorajan_ylitys"], array("E","F"))             and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) ? 1 : 0;
+$erapaiva_chk   =  (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("K","J","L","M")) or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E","F")) and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) ? 1 : 0;
 
 if ($luottoraja_chk or $erapaiva_chk) {
 
@@ -160,7 +160,7 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
 	}
 	else {
 		// laitetaan tilaan Odottaa asiakkaan suoritusta tai kesken
-		if ($yhtiorow["luottorajan_ylitys"] == "J" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "J") {
+		if ($yhtiorow["luottorajan_ylitys"] == "J" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "J" or $yhtiorow["luottorajan_ylitys"] == "L" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "L") {
 			$alatila = "";
 		}
 		else {
@@ -820,6 +820,35 @@ else {
 				laheta_tilausvahvistus($params_tilausvahvistus);
 			}
 
+			// Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina
+			if ($yhtiorow['lahetteen_tulostustapa'] == "I") {
+
+				$query = "	UPDATE lasku
+							SET tila = 'N',
+							alatila = 'A'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$laskurow['tunnus']}'";
+				pupe_query($query);
+				// Tulostetaan keräyslista
+				$tilausnumeroita = $laskurow["tunnus"];
+				require("tilaus-valmis-tulostus.inc");
+
+				// Tulostetaan lähete
+				$params = array(
+					'laskurow'					=> $laskurow,
+					'sellahetetyyppi' 			=> "",
+					'extranet_tilausvahvistus' 	=> "",
+					'naytetaanko_rivihinta'		=> "",
+					'tee'						=> "",
+					'toim'						=> $toim,
+					'komento' 					=> $komento,
+					'lahetekpl'					=> "",
+					'kieli' 					=> ""
+					);
+
+				pupesoft_tulosta_lahete($params);
+			}
+
 			// Laitetaan tässäkin haarassa Intrastat-tiedot kuntoon, muuten laskujen ketjutus ei onnaa. (varasto = 0 ,eli mennään yhtiön oletusmaalla)
 			$laskurow = palauta_intrastat_tiedot($laskurow, 0, TRUE);
 
@@ -886,6 +915,11 @@ else {
 								WHERE tunnus = '$laskurow[tunnus]'
 								and yhtio = '$kukarow[yhtio]'";
 					$result = pupe_query($query);
+				}
+
+				// Jos meillä on osatoimituskielto, ni mennään katsomaan pitääkö tilaus jättää odottamaan tuotteita
+				if ($laskurow['osatoimitus'] != '') {
+					require ("tilauskasittely/tilaus-valmis-valitsetila.inc");
 				}
 			}
 
@@ -1329,7 +1363,7 @@ else {
 								break;
 							case 'kate_korjattu':
 								$values .= ", NULL";
-								break;								
+								break;
 							default:
 								$values .= ", '".$laskurow[$fieldname]."'";
 						}

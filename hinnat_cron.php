@@ -1,10 +1,8 @@
 <?php
 
-	// Nämä pitää setata kuntoon
+	// Nämä on nyt kovakoodattu tähän toistaiseksi
 	$locktime = 5400;
 	$lockfile = "/tmp/##hinnat_cron.lock";
-	$mista_yhtion_toimittajan_tunnus = 27371;
-	$mihin_yhtion_asiakkaan_tunnus = 101850;
 
 	// Kutsutaanko CLI:stä
 	if (php_sapi_name() != 'cli') {
@@ -17,6 +15,14 @@
 
 	if (trim($argv[2]) == '') {
 		die ("Et antanut vastaanottavaa yhtiötä!\n");
+	}
+
+	if (trim($argv[3]) == '') {
+		die ("Et antanut lähettävän yhtiön toimittajatunnusta!\n");
+	}
+
+	if (trim($argv[4]) == '') {
+		die ("Et antanut vastaanottavan yhtiön asiakastunnusta!\n");
 	}
 
 	date_default_timezone_set("Europe/Helsinki");
@@ -47,6 +53,8 @@
 
 	$mista_yhtio = mysql_escape_string(trim($argv[1]));
 	$mihin_yhtio = mysql_escape_string(trim($argv[2]));
+	$mista_yhtion_toimittajan_tunnus = mysql_escape_string(trim($argv[3]));
+	$mihin_yhtion_asiakkaan_tunnus = mysql_escape_string(trim($argv[4]));
 
 	$yhtiorow = hae_yhtion_parametrit($mista_yhtio);
 
@@ -88,6 +96,9 @@
 	}
 
 	$asiakasrow = mysql_fetch_assoc($asiakasres);
+
+	$query = "SET SESSION group_concat_max_len = 3000000";
+	$foo = pupe_query($query);
 
 	// Haetaan vain tuotteet mitkä vastaanottava yhtiö ostaa lähettävältä yhtiöltä
 	$query = "	SELECT GROUP_CONCAT(DISTINCT CONCAT('\'', tuoteno, '\'')) AS tuotteet
@@ -319,7 +330,7 @@
 				WHERE yhtio = '{$mista_yhtio}'
 				AND laji = 'HINNAT_CRON'";
 	pupe_query($query);
-	
+
 	if (mysql_affected_rows() != 1) {
 		echo "Timestamp päivitys epäonnistui!\n";
 	}

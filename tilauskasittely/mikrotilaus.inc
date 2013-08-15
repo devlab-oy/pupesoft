@@ -302,7 +302,7 @@
 									$tilatapa = "PAIVITA";
 									require("laskuta_myyntitilirivi.inc");
 								}
-								elseif ($laskurow["tila"] == "V") {									
+								elseif ($laskurow["tila"] == "V") {
 									// Valmistuksilla pitää huomioida rekursiiviset reseptit
 									// funktio populoi globaalit muuttujat $tuoteno_array $kpl_array $kommentti_array $lapsenlap_array
 									$tuoteno_array = array($tuoteno);
@@ -312,8 +312,15 @@
 
 									foreach ($tuoteno_array as $tuoteno_temp) {
 
+										$query = "	SELECT *
+													FROM tuote
+													WHERE yhtio = '{$kukarow["yhtio"]}'
+													AND tuoteno = '{$tuoteno_temp}'";
+										$tuotearray_result = pupe_query($query);
+										$tuotearray_row = mysql_fetch_array($tuotearray_result);
+
 										$params = array(
-											"trow"              => $trow,
+											"trow"              => $tuotearray_row,
 											"laskurow"          => $laskurow,
 											"kpl"               => $kpl_array[$tuoteno_temp],
 											"tuoteno"           => $tuoteno_temp,
@@ -324,7 +331,7 @@
 										);
 										lisaa_rivi($params);
 									}
-									
+
 									// Nämä pitää unsetata, muuten tilaus_myynti lisää rivit uudestaan
 									unset($tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array);
 								}

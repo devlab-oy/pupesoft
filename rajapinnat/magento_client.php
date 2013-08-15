@@ -71,7 +71,7 @@ class MagentoClient {
 		try {
 			$this->_proxy = new SoapClient($url);
 			$this->_session = $this->_proxy->login($user, $pass);
-			$this->log("Magento päivitysskripti aloitettu " . date('d-m-y H:i:s') . "\n");
+			$this->log("Magento päivitysskripti aloitettu " . date('d-m-y H:i:s'));
 		} catch (Exception $e) {
 			echo $e->getMessage();
 			exit;
@@ -82,7 +82,7 @@ class MagentoClient {
 	 * Destructor
 	 */
 	function __destruct() {
-		$this->log("\nPäivitysskripti päättyi " . date('d-m-y H:i:s') . "\n");
+		$this->log("Päivitysskripti päättyi " . date('d-m-y H:i:s') . "\n");
 	}
 
 	/**
@@ -91,89 +91,48 @@ class MagentoClient {
 	 * @param  array  $dnsryhma Pupesoftin tuote_exportin palauttama array
 	 * @return int           	Lisättyjen kategorioiden määrä
 	 */
-	public function lisaa_kategoriat(array $dnsryhma)
-	{
+	public function lisaa_kategoriat(array $dnsryhma) {
+
 		$this->log("Lisätään kategoriat");
+
+		$parent_id = 3; // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
 
 		try {
 			$count = 0;
 
 			// Loopataan osastot ja tuoteryhmat
-			foreach($dnsryhma as $osasto => $tuoteryhmat) {
+			foreach($dnsryhma as $kategoria) {
 
-				foreach ($tuoteryhmat as $kategoria) {
+				// Haetaan kategoriat joka kerta koska lisättäessä puu muuttuu
+				$category_tree = $this->getCategories();
 
-					// Haetaan kategoriat joka kerta koska lisättäessä puu muuttuu
-					$category_tree = $this->getCategories();
+				// Kasotaan löytyykö tuoteryhmä
+				if (!$this->findCategory($kategoria['try_fi'], $category_tree['children'])) {
 
-					// Jos osastoa ei löydy magenton category_treestä, niin lisätään se
-					$parent_id = $this->findCategory($kategoria['osasto_fi'], $category_tree['children']);
+					// Lisätään kategoria, jos ei löytynyt
+					$category_data = array(
+						'name'              => $kategoria['try_fi'],
+						'is_active'         => 1,
+						'position'          => 1,
+						'default_sort_by'   => 'position',
+						'available_sort_by' => 'position',
+						'include_in_menu'   => 1
+					);
 
-					// Jos kategoria löytyi, lisätään tuoteryhmä sen alle
-					if ($parent_id) {
-
-						// Tarkastetaan ettei tuoteryhmää ole jo lisätty
-						if (!$this->findCategory($kategoria['try_fi'], $category_tree['children'])) {
-							$category_data = array(
-								'name'              => $kategoria['try_fi'],
-								'is_active'         => 1,
-								'position'          => 1,
-								'default_sort_by'   => 'position',
-								'available_sort_by' => 'position',
-								'include_in_menu'   => 1
-							);
-
-							// Kutsutaan soap rajapintaa
-							$category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
-								array($parent_id, $category_data)
-							);
-							$count++;
-						}
-					}
-					// Muuten lisätään ensin osasto ja sen alle tuoteryhmä.
-					else {
-						$category_data = array(
-							'name'              => $kategoria['osasto_fi'],
-							'is_active'         => 1,
-							'position'          => 1,
-							'default_sort_by'   => 'position',
-							'available_sort_by' => 'position',
-							'include_in_menu'   => 0
-						);
-
-						// Kutsutaan soap rajapintaa
-						$category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
-							array(2, $category_data)
-						);
-						$count++;
-
-						// Lisätään tuoteryhmä lisätyn osaston alle
-						$category_data = array(
-							'name'              => $kategoria['try_fi'],
-							'is_active'         => 1,
-							'position'          => 1,
-							'default_sort_by'   => 'position',
-							'available_sort_by' => 'position',
-							'include_in_menu'   => 1
-						);
-
-						// Kutsutaan soap rajapintaa
-						$category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
-							array($category_id, $category_data)
-						);
-						$count++;
-					}
+					// Kutsutaan soap rajapintaa
+					$category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
+						array($parent_id, $category_data)
+					);
+					$count++;
 				}
 			}
 
 			$this->_category_tree = $this->getCategories();
-
 			$this->log("$count kategoriaa lisätty");
 
-			// Palautetaan monta kategoriaa lisättiin.
 			return $count;
-
-		} catch (Exception $e) {
+		}
+		catch (Exception $e) {
 			echo $e->getMessage();
 		}
 	}
@@ -220,8 +179,29 @@ class MagentoClient {
 			// Etsitään kategoria_id tuoteryhmällä
 			$category_id = $this->findCategory($tuote['try_nimi'], $category_tree['children']);
 
+			$tuote_data = array(
+					'categories'            => array($category_id),
+					'websites'              => explode(" ", $tuote['nakyvyys']),
+					'name'                  => utf8_encode($tuote['nimi']),
+					'description'           => utf8_encode($tuote['kuvaus']),
+					'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
+					'weight'                => $tuote['tuotemassa'],
+					'status'                => self::ENABLED,
+					'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
+					'price'                 => $tuote['myymalahinta'],
+					'special_price'         => $tuote['kuluprosentti'],
+					'tax_class_id'          => $this->getTaxClassID(),
+					'meta_title'            => '',
+					'meta_keyword'          => '',
+					'meta_description'      => '',
+					'campaign_code'         => utf8_encode($tuote['campaign_code']),
+					'featured'              => utf8_encode($tuote['featured']),
+					'target'                => utf8_encode($tuote['target']),
+				);
+
 			// Lisätään tai päivitetään tuote
 			try {
+
 				// Jos tuotetta ei ole olemassa niin lisätään se
 				if ( ! in_array($tuote['tuoteno'], $skus_in_store)) {
 					// Jos tuotteen lisäys ei onnistu ei tuotekuviakaan lisätä.
@@ -230,56 +210,20 @@ class MagentoClient {
 							'simple',
 							$this->_attributeSet['set_id'],
 							$tuote['tuoteno'], # sku
-							array(
-									'categories'            => array($category_id),
-									'websites'              => array($tuote['nakyvyys']),
-									'name'                  => $tuote['nimi'],
-									'description'           => $tuote['kuvaus'],
-									'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
-									'weight'                => $tuote['tuotemassa'],
-									'status'                => self::ENABLED,
-									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
-									'price'                 => $tuote['myymalahinta'],
-									'special_price'         => $tuote['kuluprosentti'],
-									'tax_class_id'          => $this->getTaxClassID(),
-									'meta_title'            => '',
-									'meta_keyword'          => '',
-									'meta_description'      => '',
-									'campaign_code'         => utf8_encode($tuote['campaign_code']),
-									'featured'              => utf8_encode($tuote['featured']),
-									'target'                => utf8_encode($tuote['target']),
-								)
+							$tuote_data,
 							)
 						);
-					$this->log("Tuote {$tuote['tuoteno']} lisätty." . print_r($tuote));
+					$this->log("Tuote {$tuote['tuoteno']} lisätty." . print_r($tuote_data, true));
 				}
 				// Tuote on jo olemassa, päivitetään
 				else {
 					$product_id = $this->_proxy->call($this->_session, 'catalog_product.update',
 						array(
 							$tuote['tuoteno'], # sku
-							array(
-									'categories'            => array($category_id),
-									'websites'              => array($tuote['nakyvyys']),
-									'name'                  => $tuote['nimi'],
-									'description'           => $tuote['kuvaus'],
-									'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
-									'weight'                => $tuote['tuotemassa'],
-									'status'                => self::ENABLED,
-									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
-									'price'                 => $tuote['myymalahinta'],
-									'special_price'         => $tuote['kuluprosentti'],
-									'tax_class_id'          => $this->getTaxClassID(),
-									'meta_title'            => '',
-									'meta_keyword'          => '',
-									'meta_description'      => '',
-									'campaign_code'         => utf8_encode($tuote['campaign_code']),
-									'featured'              => utf8_encode($tuote['featured']),
-									'target'                => utf8_encode($tuote['target']),
-								)
+							$tuote_data,
 							)
 						);
-					$this->log("Tuote {$tuote['tuoteno']} päivitetty." . print_r($tuote));
+					$this->log("Tuote {$tuote['tuoteno']} päivitetty." . print_r($tuote_data, true));
 				}
 
 				// Lisätään tuotekuvat
@@ -293,7 +237,7 @@ class MagentoClient {
 
 			}
 			catch (Exception $e) {
-				$this->log("Tuotteen {$tuote['tuoteno']} lisäys/päivitys epäonnistui." . print_r($tuote), $e);
+				$this->log("Tuotteen {$tuote['tuoteno']} lisäys/päivitys epäonnistui." . print_r($tuote_data, true), $e);
 			}
 		}
 
@@ -323,6 +267,36 @@ class MagentoClient {
 
 		// Lisätään tuotteet
 		foreach($dnslajitelma as $nimitys => $tuotteet) {
+
+			// Jos lyhytkuvaus on tyhjä, käytetään kuvausta?
+			if ($tuotteet[0]['lyhytkuvaus'] == '') {
+				$tuotteet[0]['lyhytkuvaus'] = '&nbsp';
+			}
+
+			// Erikoishinta
+			$tuotteet[0]['kuluprosentti'] = ($tuotteet[0]['kuluprosentti'] == 0) ? '' : $tuotteet[0]['kuluprosentti'];
+
+			// Etsitään kategoria mihin tuote lisätään
+			$category_id = $this->findCategory($tuotteet[0]['try_nimi'], $this->_category_tree['children']);
+
+			// Configurable tuotteen tiedot
+			$configurable = array(
+				'categories'			=> array($category_id),
+				'websites'				=> explode(" ", $tuote['nakyvyys']),
+				'name'					=> utf8_encode($tuotteet[0]['nimitys']),
+				'description'           => utf8_encode($tuotteet[0]['kuvaus']),
+				'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
+				'weight'                => $tuotteet[0]['tuotemassa'],
+				'status'                => self::ENABLED,
+				'visibility'            => self::CATALOG_SEARCH, # Configurablet nakyy kaikkialla
+				'price'                 => $tuotteet[0]['myymalahinta'],
+				'special_price'			=> $tuotteet[0]['kuluprosentti'],
+				'tax_class_id'          => $this->getTaxClassID(), # 24%
+				'meta_title'            => '',
+				'meta_keyword'          => '',
+				'meta_description'      => '',
+			);
+
 			try {
 
 				/**
@@ -360,37 +334,8 @@ class MagentoClient {
 					);
 				}
 
-				// Jos lyhytkuvaus on tyhjä, käytetään kuvausta?
-				if ($tuotteet[0]['lyhytkuvaus'] == '') {
-					$tuotteet[0]['lyhytkuvaus'] = '&nbsp';
-				}
-
-				// Erikoishinta
-				$tuotteet[0]['kuluprosentti'] = ($tuotteet[0]['kuluprosentti'] == 0) ? '' : $tuotteet[0]['kuluprosentti'];
-
-				// Etsitään kategoria mihin tuote lisätään
-				$category_id = $this->findCategory($tuotteet[0]['try_nimi'], $this->_category_tree['children']);
-
-				// Configurable tuotteen tiedot
-				$configurable = array(
-					'categories'			=> array($category_id),
-					'websites'				=> array($tuote['nakyvyys']),
-					'name'					=> $tuotteet[0]['nimitys'],
-					'description'           => $tuotteet[0]['kuvaus'],
-					'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
-					'weight'                => $tuotteet[0]['tuotemassa'],
-					'status'                => self::ENABLED,
-					'visibility'            => self::CATALOG_SEARCH, # Configurablet nakyy kaikkialla
-					'price'                 => $tuotteet[0]['myymalahinta'],
-					'special_price'			=> $tuotteet[0]['kuluprosentti'],
-					'tax_class_id'          => $this->getTaxClassID(), # 24%
-					'meta_title'            => '',
-					'meta_keyword'          => '',
-					'meta_description'      => '',
-				);
-
 				// Jos configurable tuotetta ei löydy, niin lisätään uusi tuote.
-				if ( ! in_array($nimitys, $skus_in_store)) {
+				if (!in_array($nimitys, $skus_in_store)) {
 					$product_id = $this->_proxy->call($this->_session, 'catalog_product.create',
 						array(
 							'configurable',
@@ -399,6 +344,7 @@ class MagentoClient {
 							$configurable
 							)
 						);
+					$this->log("Tuote {$nimitys} lisätty." . print_r($configurable, true));
 				}
 				// Päivitetään olemassa olevaa configurablea
 				else {
@@ -408,6 +354,7 @@ class MagentoClient {
 							$configurable
 							)
 						);
+					$this->log("Tuote {$nimitys} päivitetty." . print_r($configurable, true));
 				}
 
 				// Tarkistetaan onko lisätyllä tuotteella tuotekuvia ja lisätään ne
@@ -419,8 +366,9 @@ class MagentoClient {
 				// Lisätään countteria
 				$count++;
 
-			} catch (Exception $e) {
-				$this->log("Configurable tuotteen " . $tuotteet[0]['tuoteno'] ." lisäys epäonnistui. ", $e);
+			}
+			catch (Exception $e) {
+				$this->log("Configurable tuotteen {$nimitys} lisäys/päivitys epäonnistui." . print_r($configurable, true), $e);
 			}
 		}
 

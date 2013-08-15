@@ -1107,11 +1107,11 @@
 
 					 if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') {
 
-					 	$query = "	SELECT tehdas_saldo, IF(jarjestys = 0, 9999, jarjestys) jarjestys
+					 	$query = "	SELECT tehdas_saldo, IF(jarjestys = 0, 9999, jarjestys) sorttauskentta
 					 				FROM tuotteen_toimittajat
 					 				WHERE yhtio = '{$kukarow['yhtio']}'
 					 				AND tuoteno = '{$vrow['tuoteno']}'
-					 				ORDER BY jarjestys
+					 				ORDER BY sorttauskentta
 					 				LIMIT 1";
 					 	$tehdas_saldo_res = pupe_query($query);
 					 	$tehdas_saldo_row = mysql_fetch_assoc($tehdas_saldo_res);

@@ -2271,6 +2271,7 @@
 											$vsum = sprintf("%.2f", $vsum);
 										}
 
+
 										if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
 										if (isset($worksheet)) {
@@ -2494,8 +2495,8 @@
 											$row[$ken_nimi] = round($row["katenyt"] / abs($row["myyntinyt"]) * 100, 2);
 										}
 										else {
-											if ($ajotapa == "tilausauki" and $row["myyntilaskuttamattanyt"] != 0) {
-												$row[$ken_nimi] = round($row["katenyt"] / abs($row["myyntilaskuttamattanyt"]) * 100, 2);
+											if ($ajotapa == "tilausauki" AND $row["myyntilaskuttamattanyt"] != 0) {
+												$row[$ken_nimi] = round($row["katelaskuttamattanyt"] / abs($row["myyntilaskuttamattanyt"]) * 100, 2);
 											}
 											else {
 												$row[$ken_nimi] = 0;
@@ -2519,8 +2520,13 @@
 											$row[$ken_nimi] = round($row["nettokatenyt"] / abs($row["myyntinyt"]) * 100, 2);
 										}
 										else {
+											if ($ajotapa == "tilausauki" AND $row["myyntilaskuttamattanyt"] != 0){
+												$row[$ken_nimi] = round($row["nettokatelaskuttamattanyt"] / abs($row["myyntilaskuttamattanyt"]) * 100, 2);
+											} 
+											else {
 											$row[$ken_nimi] = 0;
-										}
+											}
+										}	
 									}
 
 									// nettokateprossa

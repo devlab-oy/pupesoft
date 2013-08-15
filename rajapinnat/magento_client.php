@@ -71,7 +71,7 @@ class MagentoClient {
 		try {
 			$this->_proxy = new SoapClient($url);
 			$this->_session = $this->_proxy->login($user, $pass);
-			$this->log("Magento päivitysskripti aloitettu " . date('d-m-y H:i:s'));
+			$this->log("Magento päivitysskripti aloitettu");
 		} catch (Exception $e) {
 			echo $e->getMessage();
 			exit;
@@ -82,7 +82,7 @@ class MagentoClient {
 	 * Destructor
 	 */
 	function __destruct() {
-		$this->log("Päivitysskripti päättyi " . date('d-m-y H:i:s') . "\n");
+		$this->log("Päivitysskripti päättyi\n");
 	}
 
 	/**
@@ -817,17 +817,18 @@ class MagentoClient {
 	 * @param string $message 		Virheviesti
 	 * @param exception $exception 	Exception
 	 */
-	private function log($message, $exception = '')
-	{
+	private function log($message, $exception = '') {
+
 		if (self::LOGGING == true) {
 			$timestamp = date('d.m.y H:i:s');
+			$message = utf8_encode($message);
 
 			if ($exception != '') {
 				$message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
 			}
 
 			$message .= "\n";
-			error_log($timestamp . " " . $message, 3, '/tmp/magento_log.txt');
+			error_log("{$timestamp}: {$message}", 3, '/tmp/magento_log.txt');
 		}
 	}
 }

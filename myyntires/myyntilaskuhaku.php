@@ -190,8 +190,7 @@
 					mapvm, saldo_maksettu, ytunnus, liitostunnus, laatija
 					FROM lasku {$index}
 					WHERE {$ehto} and yhtio = '{$kukarow['yhtio']}'
-					ORDER BY {$jarj}
-					LIMIT {$alku}, 50";
+					ORDER BY {$jarj}";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -276,18 +275,6 @@
 
 			echo "</tbody>";
 			echo "</table><br /><br />";
-
-			if ($alku > 0) {
-				$siirry = $alku - 50;
-				echo "<a href = '?tee={$tee}&pvm={$pvm}&summa1={$summa1}&summa2={$summa2}&alku={$siirry}'>",t("Edelliset"),"</a> ";
-			}
-			else {
-				echo t("Edelliset")," ";
-			}
-
-			$siirry = $alku + 50;
-			echo "<a href = '?tee={$tee}&pvm={$pvm}&summa1={$summa1}&summa2={$summa2}&alku={$siirry}'>",t("Seuraavat"),"</a> ";
-			echo "<br /><br />";
 
 			$toim = "";
 		}

@@ -1616,7 +1616,7 @@ while ($tietue = fgets($fd)) {
 					$hyvityssaanto_palautuskielto_array	= "";
 
 					// Jos k‰ytet‰‰n reklamaatioiden hinnoittelus‰‰ntˆ‰ ja k‰ytt‰j‰ ei ole v‰kisinhyv‰ksynyt rivi‰
-					if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and $edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
+					if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and $editilaus_tilaustyyppi == 3) {
 						$hyvityssaanto_hinta_array = array();
 						$hyvityssaanto_ale_array = array();
 						$hyvityssaanto_kpl_array = array();

@@ -847,6 +847,54 @@ else {
 					);
 
 				pupesoft_tulosta_lahete($params);
+
+				// Jos tehdaspalautus
+				if (file_exists("tilauskasittely/$tilausvalmis_asiakas_row[toimitusvahvistus]") and $tilausvalmis_asiakas_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+
+					// jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan tämän jälkeen
+					$tmp_laskurow = $laskurow;
+
+					$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$rivi['otunnus']}'";
+					$laskurow_edi_res = pupe_query($query);
+					$laskurow = mysql_fetch_assoc($laskurow_edi_res);
+
+					$query = "	SELECT *
+								FROM asiakkaan_avainsanat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND liitostunnus = '{$laskurow['liitostunnus']}'
+								AND laji IN ('futur_host','futur_path','futur_user','futur_password')
+								AND avainsana != ''";
+					$chk_res = pupe_query($query);
+
+					$ftphost_futur = $ftppath_futur = $ftpuser_futur = $ftppass_futur = "";
+
+					while ($chk_row = mysql_fetch_assoc($chk_res)) {
+
+						switch($chk_row['laji']) {
+							case 'futur_host':
+								$ftphost_futur = $chk_row['avainsana'];
+								break;
+							case 'futur_path':
+								$ftppath_futur = $chk_row['avainsana'];
+								break;
+							case 'futur_user':
+								$ftpuser_futur = $chk_row['avainsana'];
+								break;
+							case 'futur_password':
+								$ftppass_futur = $chk_row['avainsana'];
+								break;
+						}
+					}
+
+					if (($ftphost_futur == 'localhost' and $ftppath_futur != '') or ($ftphost_futur != 'localhost' and $ftphost_futur != '' and $ftppath_futur != '' and $ftppass_futur != '' and $ftpuser_futur != '')) {
+						$laskurow['tilaustyyppi'] = 3;
+						$myynti_vai_osto = 'M';
+
+						require("tilauskasittely/editilaus_out_futur.inc");
+					}
+
+					$laskurow = $tmp_laskurow;
+				}
 			}
 
 			// Laitetaan tässäkin haarassa Intrastat-tiedot kuntoon, muuten laskujen ketjutus ei onnaa. (varasto = 0 ,eli mennään yhtiön oletusmaalla)

@@ -2687,7 +2687,7 @@ if ($tee == '') {
 	echo "<table>";
 
 	$myyntikielto = '';
-		
+
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
@@ -3354,7 +3354,7 @@ if ($tee == '') {
 			echo "<br/>";
 			echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt"),"!</font>";
 			echo "<br/>";
-			
+
 			if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
 				$muokkauslukko = 'LUKOSSA';
 				$myyntikielto = 'MYYNTIKIELTO';
@@ -3371,7 +3371,7 @@ if ($tee == '') {
 			echo "<br/>";
 			echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!</font>";
 			echo "<br/>";
-			
+
 			if ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M") {
 				$muokkauslukko = 'LUKOSSA';
 				$myyntikielto = 'MYYNTIKIELTO';
@@ -3510,8 +3510,10 @@ if ($tee == '') {
 			$wherelisa = "AND tunnus = '{$rivitunnus}'";
 		}
 
+		$update_var2 = (isset($naytetaan_vastaavat) and trim($naytetaan_vastaavat) != "") ? "" : "OK";
+
 		$query = "	UPDATE tilausrivi
-					SET var2 = 'OK'
+					SET var2 = '{$update_var2}'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					{$wherelisa}";
 		$result = pupe_query($query);

@@ -17,11 +17,11 @@ if ($tee == "teeyhdistys") {
 
 			if (mysql_num_rows($result) == 1) {
 				$keikkarow = mysql_fetch_array($result);
-				
+
 				//p‰ivitet‰‰n otunnus jo kohdistetuille riveille jotta ne ev‰t j‰isi ilman otsikkoa
 				$query = "update tilausrivi set otunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and uusiotunnus='$keikkatunnus' and otunnus=uusiotunnus order by yhtio";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				//p‰ivitet‰‰n otunnus niille riveille joiden otunnus pointtaa dellattavaan otsikkoon jotta ne ev‰t j‰isi ilman otsikkoa
 				$query = "update tilausrivi set otunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and otunnus='$keikkatunnus' order by yhtio";
 				$result = mysql_query($query) or pupe_error($query);
@@ -29,16 +29,16 @@ if ($tee == "teeyhdistys") {
 				//liitet‰‰n jo liitetyt rivit uuteen otsikkoon
 				$query = "update tilausrivi set uusiotunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and uusiotunnus='$keikkatunnus' order by yhtio";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				//poistetaan keikat, mutta ei en‰‰ sanota delete from
 				$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit‰tˆitiin ohjelmassa ostotilausten_rivien_yhdistys.inc (1)")."<br>";
 				$query = "update lasku set alatila='K', tila='D',  comments = '$komm' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkarow[laskunro]' and vanhatunnus = 0";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				//liitet‰‰n liitosotsikot uudestaan
 				$query = "update lasku set laskunro = '$laskurow[laskunro]' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkarow[laskunro]' and vanhatunnus != 0";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				//Varmistetaan ett‰ keikka ei ole merkitty kohdistetuks
 				$query = "update lasku set kohdistettu = '' where yhtio='$kukarow[yhtio]' and tila='K' and tunnus = '$otunnus'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -105,8 +105,9 @@ if ($tee == "") {
 		echo "</tr>";
 
 		$keikkakesken = 0;
+
 		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
-			$keikkakesken = file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock");
+			list($keikkakesken, $_kuka, $_timestamp) = explode(";", file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock"));
 		}
 
 		while ($row = mysql_fetch_array($result)) {
@@ -173,7 +174,7 @@ if ($tee == "") {
 
 				// keikkaa ollaan viem‰ss‰ varastoon
 				if ($keikkakesken == $row["tunnus"]) {
-					echo "<td>".t("Varastoonvienti kesken")."</td>";
+					echo "<td>".t("Varastoonvienti kesken")." ".t("k‰ytt‰j‰ll‰")." {$_kuka} @ {$_timestamp}</td>";
 				}
 				else {
 					echo "<td><input type='checkbox' name='yhdistakeikka[]' value='$row[tunnus]'></td>";

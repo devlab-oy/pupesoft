@@ -191,7 +191,7 @@ function hae_asiakashinta_ja_alennus_tuotteet($request) {
 
 	$asiakashinnasto_where = "";
 	if (!empty($request['valittu_asiakas'])) {
-		$asiakashinnasto_where .= " AND asiakas = {$request['valittu_asiakas']}";
+		$asiakashinnasto_where .= " AND asiakas = '{$request['valittu_asiakas']}'";
 	}
 	if (!empty($request['valittu_asiakasryhma'])) {
 		$asiakashinnasto_where .= " AND asiakas_ryhma = '{$request['valittu_asiakasryhma']}'";

@@ -416,7 +416,7 @@
 
 				$colspanni = 4;
 			}
-# KISSA		
+
 			echo "<tr><th>".t("Valitse")." ABC- ".t("luokkarajausperuste")."</th><td>";
 			echo "<select name='abcvalintamenu'>";
 

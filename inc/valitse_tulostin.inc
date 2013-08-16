@@ -416,6 +416,19 @@
 
 				$colspanni = 4;
 			}
+# KISSA		
+			echo "<tr><th>".t("Valitse")." ABC- ".t("luokkarajausperuste")."</th><td>";
+			echo "<select name='abcvalintamenu'>";
+
+			echo "<option value = ''>".t("Ei rajausta")."</option>";
+			echo "<option value = 'TM'>".t("Myynti")."</option>";
+			echo "<option value = 'TK'>".t("Myyntikate")."</option>";
+			echo "<option value = 'TR'>".t("Myyntirivi")."</option>";
+			echo "<option value = 'TP'>".t("Myyntikappaleet")."</option>";
+			
+
+			echo "</select>";
+			echo "</td></tr>";
 
 			echo "<tr><th rowspan='$colspanni'>".t("Järjestele purkulista")."</th>";
 

@@ -25,7 +25,7 @@ if (empty($magento_api_ana_edi)
 }
 
 $locktime = 5400;
-$lockfile = "/tmp/magento_tilaukset_cron.lock";
+$lockfile = "/tmp/tuote_export_cron.lock";
 
 // jos meillä on lock-file ja se on alle 90 minuuttia vanha
 if (file_exists($lockfile)) {

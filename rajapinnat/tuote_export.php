@@ -33,9 +33,6 @@
 			echo "Magento parametrit puuttuu, päivitystä ei voida ajaa.";
 			exit;
 		}
-
-		// Testataan vielä, että yhteys toimii ennenkun ajellaan queryjä
-		$magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 	}
 
 	$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";

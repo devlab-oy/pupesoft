@@ -876,9 +876,9 @@ $debug = 0;
 
 	$laskun_numero = $osrow["laskunro"]; // älä mene muuttaamaan tai poistamaan tätä muuttujaa.!!! Tai no joo... Ongelma..
 
-	$lajilisa = $osrow['ebid'] == 'MAVENTAXML' ? 'mav' : 'tec';
+	$lajilisa = strtolower(substr($ebid, 0, 3));
 
-	if ($osrow["ebid"] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML") {
+	if ($osrow["ebid"] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML" and $trow['asn_sanomat'] != 'F') {
 		$query  = "LOCK TABLE lasku WRITE, sanakirja WRITE, tiliointi READ";
 		$result = pupe_query($query);
 
@@ -955,7 +955,7 @@ $debug = 0;
 	for ($i = 0; $i < count($rtuoteno); $i++) {
 
 		// tehdään tää vaan jos meillä on rivinumero
-		if ((!isset($rtuoteno[$i]["kauttalaskutus"]) or $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS") and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0 and $osrow['ebid'] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML") {
+		if ((!isset($rtuoteno[$i]["kauttalaskutus"]) or $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS") and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0 and $osrow['ebid'] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML" and $trow['asn_sanomat'] != 'F') {
 
 			$toim_tuoteno 	= $rtuoteno[$i]["tuoteno"];
 			$kpl			= (float) $rtuoteno[$i]["kpl"];
@@ -1008,7 +1008,7 @@ $debug = 0;
 				$laskuvirhe .= t("Tuotenumero").": {$toim_tuoteno} ".t("Kpl").": {$kpl} ".t("Ei voitu kohdistaa saapumiseen")."! ({$keikantunnus}/{$rtuoteno[$i]['tilaajanrivinro']})\n";
 			}
 		}
-		elseif (($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == "MAVENTAXML") and (!isset($rtuoteno[$i]["kauttalaskutus"]) or $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS") and !$tullaan_virhetarkistuksesta) {
+		elseif (($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == "MAVENTAXML" or ($osrow['ebid'] == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) and (!isset($rtuoteno[$i]["kauttalaskutus"]) or $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS") and !$tullaan_virhetarkistuksesta) {
 			// Onko ostolaskua ja onko kohdistamatta
 
 			// Mikäli toimittajalla on kenttä "asn_sanomat" arvoja, ja ne on
@@ -1016,6 +1016,7 @@ $debug = 0;
 			// S = tulee vain sanoma   <--- ei tehdä mitään
 			// L = tulee vain lasku
 			// M = tulee vain maventa-lasku
+			// F = tulee vain finvoice-lasku
 
 			// ei käsitellä erolistalle siirrettyjä rivejä.
 			if ($rtuoteno[$i]['status'] == 'E') continue;
@@ -1221,7 +1222,7 @@ $debug = 0;
 						}
 
 						$virheet++;
-						
+
 						// tehää lapselle sama jippo ku ylempänä
 						if ($tilausrivirow['tunnus'] == $tilausrivirow['perheid'] and !empty($rtuoteno[$i+1]["isa_olemassa"])) {
 
@@ -1574,7 +1575,7 @@ $debug = 0;
 				continue;
 			}
 		}
-		elseif ($rtuoteno[$i]["kauttalaskutus"] == "KAUTTALASKUTUS" and $osrow['ebid'] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML") {
+		elseif ($rtuoteno[$i]["kauttalaskutus"] == "KAUTTALASKUTUS" and $osrow['ebid'] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML" and $trow['asn_sanomat'] != 'F') {
 
 			$query = "	SELECT *
 						FROM tuote
@@ -1630,13 +1631,14 @@ $debug = 0;
 	}
 
 	// Jos kyseessä on TecCom ostolasku tai Maventa-lasku
-	if ($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == 'MAVENTAXML') {
+	if ($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == 'MAVENTAXML' or ($osrow['ebid'] == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) {
 
 		// Mikäli toimittajalla on kenttä "asn_sanomat" arvoja, ja ne on
 		// K = tulee asn-sanoma ja lasku
 		// S = tulee vain sanoma   <--- ei tehdä mitään
 		// L = tulee vain lasku
 		// M = tulee vain maventa-lasku
+		// F = tulee vain finvoice-lasku
 
 		// ensin ostoilta, sitten keikalta, sitten virheet.
 		// saadaan luoda keikka vain, jos tulee pelkkä lasku (eli toimittajan takana on asn_sanomat = 'L')

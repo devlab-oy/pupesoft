@@ -558,6 +558,7 @@
 		$ulos .= "<option value='K' $sel[K]>".t("Toimittaja l‰hett‰‰ ASN-sanoman ja TecCom-laskun")."</option>";
 		$ulos .= "<option value='L' $sel[L]>".t("Toimittaja l‰hett‰‰ vain TecCom-laskun")."</option>";
 		$ulos .= "<option value='M' $sel[M]>".t("Toimittaja l‰hett‰‰ vain Maventa-laskun")."</option>";
+		$ulos .= "<option value='F' {$sel['F']}>".t("Toimittaja l‰hett‰‰ vain Finvoice-laskun")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

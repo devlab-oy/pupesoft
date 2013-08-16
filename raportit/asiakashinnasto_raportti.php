@@ -147,6 +147,11 @@ function hae_asiakasryhmat() {
 		$asiakasryhmat[] = $asiakasryhma;
 	}
 
+	$ei_valintaa_array = array(
+		'selite'	 => '',
+		'selitetark' => t('Ei valintaa'),
+	);
+	array_unshift($asiakasryhmat, $ei_valintaa_array);
 	return $asiakasryhmat;
 }
 
@@ -303,6 +308,10 @@ function hae_asiakasalennukset($request) {
 function generoi_custom_excel($tuotteet) {
 	global $kukarow, $yhtiorow;
 
+	if (count($tuotteet) == 0) {
+		return false;
+	}
+
 	$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
 	$xls_progress_bar->initialize(count($tuotteet));
 
@@ -340,7 +349,7 @@ function generoi_custom_excel($tuotteet) {
 			$xls->write($rivi, $sarake, $tuote['aleryhma']['ryhma'], array('bold' => true));
 			$sarake++;
 			$xls->write($rivi, $sarake, $tuote['aleryhma']['selite'], array('bold' => true));
-			
+
 			$rivi++;
 			$sarake = 0;
 		}

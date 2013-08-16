@@ -19951,9 +19951,14 @@ if (!function_exists('saako_vieda_varastoon')) {
 		$varastoerror = 0;
 
 		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
+
 			if ($palautus != '') {
-				echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".t("Varastoonvienti on kesken!")."</font><br>";
+
+				list($keikkakesken, $_kuka, $_timestamp) = explode(";", file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock"));
+
+				echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".t("Varastoonvienti on kesken!")." ".t("Käyttäjä")." {$_kuka} @ {$_timestamp}</font><br>";
 			}
+
 			$varastoerror = 1;
 		}
 		elseif (mysql_num_rows($result) != 0){
@@ -20051,7 +20056,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 							and oletus != ''";
 		$oletusresult = pupe_query($oletusquery);
 		$oletusrow = mysql_fetch_assoc($oletusresult);
-		
+
 		# Poistetaan kaikilta tuotteen tuotepaikoilta oletus
 		# ostorivienvarastopaikat.inc, rivi 281
 		$query = "	UPDATE tuotepaikat
@@ -20098,7 +20103,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 						ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";
 			$upresult = pupe_query($query);
 
-			$return["error"] = "Oletuspaikkaa ei löytynyt, tehtiin ensimmäisestä paikasta oletuspaikka";			
+			$return["error"] = "Oletuspaikkaa ei löytynyt, tehtiin ensimmäisestä paikasta oletuspaikka";
 		}
 		elseif (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
 			// Päivitetään uusi oletuspaikka myös avoimille keskeneräisille ostotilauksille (jos uusi paikka on samassa varastossa kun vanha)
@@ -20119,9 +20124,9 @@ if (!function_exists('paivita_oletuspaikka')) {
 						AND varattu != '0'";
 			$result = pupe_query($query);
 
-			$return["paivitetyt_ostorivit"] = mysql_affected_rows();			
+			$return["paivitetyt_ostorivit"] = mysql_affected_rows();
 		}
-		
+
 		return $return;
 	}
 }

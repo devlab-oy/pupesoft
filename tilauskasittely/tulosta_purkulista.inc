@@ -376,6 +376,8 @@
 
 	if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
 
+		list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcvalintamenu);
+
 		$pdf = new pdffile;
 		$pdf->set_default('margin-top', 	0);
 		$pdf->set_default('margin-bottom', 	0);
@@ -587,6 +589,21 @@
 				else {
 					$pdf->draw_text(30,  $kala, $row["toim_tuoteno"],	$firstpage, $b);
 					$pdf->draw_text(30, $kala-10, $row["tuoteno"], 		$firstpage, $b);
+				}
+
+				$abc_valittu = "";
+				if ($abcvalintamenu != '') {
+
+					$query = "	SELECT luokka
+								FROM abc_aputaulu
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tuoteno = '$row[tuoteno]'
+								AND tyyppi = '$abcvalintamenu'";
+					$abcresult = pupe_query($query);
+					$abctama = mysql_fetch_assoc($abcresult);
+					$abc_valittu = $ryhmanimet[$abctama['luokka']];
+
+					$pdf->draw_text(280, $kala-17, $abc_valittu, $firstpage, $b);
 				}
 
 				if ($mista == "vastaanota") {

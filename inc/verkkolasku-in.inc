@@ -902,7 +902,7 @@
 					}
 
 					// katsotaan onko Teccom-lasku jo asn_sanomat-taulussa
-					if ($ebid == 'TECCOM-INVOICE' or $ebid == 'MAVENTAXML' or ($ebid == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) {
+					if ($ebid == 'TECCOM-INVOICE' or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) {
 
 						$lajilisa = strtolower(substr($ebid, 0, 3));
 
@@ -1437,7 +1437,7 @@
 				}
 
 				// Tehd‰‰n ASN Insertit
-				if (($ebid == "TECCOM-INVOICE" or $ebid == "MAVENTAXML" or ($ebid == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
+				if (($ebid == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
 
 					$saapumispvm_chk = trim($laskun_tapvm) != '' ? substr($laskun_tapvm, 0, 4).'-'.substr($laskun_tapvm, 4, 2).'-'.substr($laskun_tapvm, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
 					$count_rtuoteno  = count($rtuoteno);

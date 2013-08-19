@@ -2205,6 +2205,9 @@ $debug = 0;
 				$alvit = "tuotteen_alv.alv";
 			}
 		}
+		else {
+			$alvit = 0;
+		}
 
 		$query_ale_lisa = generoi_alekentta('O');
 

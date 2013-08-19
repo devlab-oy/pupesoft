@@ -1692,7 +1692,7 @@ while ($tietue = fgets($fd)) {
 						if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
 							$hinta = $editilaus_hinta;
 						}
-						elseif (is_array($hyvityssaanto_hinta_array)) {
+						elseif (is_array($hyvityssaanto_hinta_array) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno])) {
 							$hinta = $hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno];
 						}
 
@@ -1700,7 +1700,7 @@ while ($tietue = fgets($fd)) {
 						if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus > 0) {
 							$ale1 = $editilaus_alennus;
 						}
-						elseif (is_array($hyvityssaanto_ale_array)) {
+						elseif (is_array($hyvityssaanto_ale_array) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno])) {
 
 							// hyvityssäännön alennus yliajaa käyttäjän syöttämän alennuksen
 							$ale1 = $hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno];
@@ -1778,7 +1778,7 @@ while ($tietue = fgets($fd)) {
 							$kommentti 	= ""; // HUOM: nollataan kommentti
 						}
 
-						if (is_array($hyvityssaanto_kpl_array)) {
+						if (is_array($hyvityssaanto_kpl_array) and isset($hyvityssaanto_kpl_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_kpl_array[$hyvityssaanto_indeksi][$tuoteno])) {
 							$kpl = $hyvityssaanto_kpl_array[$hyvityssaanto_indeksi][$tuoteno];
 						}
 
@@ -1786,7 +1786,7 @@ while ($tietue = fgets($fd)) {
 							$kpl = abs($kpl) * -1;
 						}
 
-						if (is_array($hyvityssaanto_kommentti_array)) {
+						if (is_array($hyvityssaanto_kommentti_array) and isset($hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi][$tuoteno])) {
 
 							// jos myyjä on reklamaatiossa syöttänyt riville kommentin niin se laitetaan ensimmäiselle sille tarkoitetulle riville
 							if ($kommentti != "") {
@@ -1796,7 +1796,7 @@ while ($tietue = fgets($fd)) {
 							$kommentti .= $hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi][$tuoteno];
 						}
 
-						if (is_array($hyvityssaanto_palautuskielto_array)) {
+						if (is_array($hyvityssaanto_palautuskielto_array) and isset($hyvityssaanto_palautuskielto_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_palautuskielto_array[$hyvityssaanto_indeksi][$tuoteno])) {
 							$hyvityssaannon_palautuskielto =  $hyvityssaanto_palautuskielto_array[$hyvityssaanto_indeksi][$tuoteno];
 						}
 						else {
@@ -1806,6 +1806,8 @@ while ($tietue = fgets($fd)) {
 						require ("lisaarivi.inc");
 
 						$edi_ulos .= "\n";
+
+						$hyvityssaanto_indeksi++;
 					}
 
 				} // end jos tuote on löydetty oikein

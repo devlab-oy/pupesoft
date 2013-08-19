@@ -1076,7 +1076,7 @@
 
 				$alku = "<table width='100%'><tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
 
-				if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') $alku .= "<th>".t("Tehtaan saldo")."</th>";
+				if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') $alku .= "<th>".t("Tehtaan saldo")."</th>";
 
 				$alku .= "<th><form method='post' name='hyvaksy'>
 									<input type='hidden' name='toim' 			value = '$toim'>
@@ -1109,7 +1109,7 @@
 
 					list(, , $vmyytavissa) = saldo_myytavissa($vrow["tuoteno"]);
 
-					if ($vmyytavissa > 0 or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') {
+					if (($vmyytavissa > 0 or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
 
 						if ($kutsuttu == 0) {
 							$vastaavat_html = $alku;
@@ -1128,7 +1128,7 @@
 						 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
 						 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>";
 
-						 if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') {
+						 if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
 
 						 	$query = "	SELECT tehdas_saldo, IF(jarjestys = 0, 9999, jarjestys) sorttauskentta
 						 				FROM tuotteen_toimittajat

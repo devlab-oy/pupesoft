@@ -11,18 +11,21 @@
 	require ("{$pupe_root_polku}/rajapinnat/magento_client.php");
 
 	if (trim($argv[1]) != '') {
-		$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
-		$kukarow["extranet"] = "";
-		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+		$yhtio = mysql_real_escape_string($argv[1]);
+		$yhtiorow = hae_yhtion_parametrit($yhtio);
+		$kukarow = hae_kukarow('admin', $yhtio);
+
+		if ($kukarow === null) {
+			die ("\n");
+		}
 	}
 	else {
 		die ("Et antanut yhtiötä.\n");
 	}
 
-	if (trim($argv[2]) != '') {
-		$verkkokauppatyyppi = trim($argv[2]);
-	}
-	else {
+	$verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
+
+	if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia") {
 		die ("Et antanut verkkokaupan tyyppiä.\n");
 	}
 
@@ -45,22 +48,34 @@
 		$locktime_calc = mktime() - filemtime($lockfile);
 
 		if ($locktime_calc < $locktime) {
-			exit("Magento-päivitys käynnissä, odota hetki!")."\n";
+			exit("Tuote Export-päivitys käynnissä, odota hetki!")."\n";
 		}
 		else {
-			exit("VIRHE: Magento-päivitys jumissa! Ota yhteys tekniseen tukeen!!!")."\n";
+			exit("VIRHE: Tuote Export-päivitys jumissa! Ota yhteys tekniseen tukeen!!!")."\n";
 		}
 	}
 
 	touch($lockfile);
 
+	// Haetaan timestamp
+	$datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
+
+	if (mysql_num_rows($datetime_checkpoint_res) != 1) {
+		unlink($lockfile);
+		exit("VIRHE: Timestamp ei löydy avainsanoista!\n");
+	}
+
+	$datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
+	$datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mikä tilanne on jo käsitelty
+	$datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
+
 	// alustetaan arrayt
 	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = array();
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND (tuote.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-							OR ta_nimitys_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-							OR ta_nimitys_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
+		$muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
+							OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
+							OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
 							)";
 	}
 	else {
@@ -146,8 +161,8 @@
 	}
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa1 = "AND tapahtuma.laadittu > DATE_SUB(now(), INTERVAL 1 HOUR)";
-		$muutoslisa2 = "AND tilausrivi.laadittu > DATE_SUB(now(), INTERVAL 1 HOUR)";
+		$muutoslisa1 = "AND tapahtuma.laadittu >= '{$datetime_checkpoint}'";
+		$muutoslisa2 = "AND tilausrivi.laadittu >= '{$datetime_checkpoint}'";
 	}
 	else {
 		$muutoslisa1 = "";
@@ -193,12 +208,12 @@
 	}
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND (try_fi.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-			OR try_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-			OR try_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-			OR osasto_fi.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-			OR osasto_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-			OR osasto_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR))";
+		$muutoslisa = "AND (try_fi.muutospvm >= '{$datetime_checkpoint}'
+			OR try_se.muutospvm >= '{$datetime_checkpoint}'
+			OR try_en.muutospvm >= '{$datetime_checkpoint}'
+			OR osasto_fi.muutospvm >= '{$datetime_checkpoint}'
+			OR osasto_se.muutospvm >= '{$datetime_checkpoint}'
+			OR osasto_en.muutospvm >= '{$datetime_checkpoint}')";
 	}
 	else {
 		$muutoslisa = "";
@@ -251,7 +266,7 @@
 	}
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND asiakas.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)";
+		$muutoslisa = "AND asiakas.muutospvm >= '{$datetime_checkpoint}'";
 	}
 	else {
 		$muutoslisa = "";
@@ -280,7 +295,7 @@
 	}
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND hinnasto.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)";
+		$muutoslisa = "AND hinnasto.muutospvm >= '{$datetime_checkpoint}'";
 	}
 	else {
 		$muutoslisa = "";
@@ -339,7 +354,7 @@
 	$resselite = pupe_query($query);
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND tuotteen_avainsanat.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)";
+		$muutoslisa = "AND tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}'";
 	}
 	else {
 		$muutoslisa = "";
@@ -527,6 +542,17 @@
 		if (count($dnslajitelma) > 0) {
 			require ("{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc");
 		}
+	}
+
+	// Kun kaikki onnistui, päivitetään lopuksi timestamppi talteen
+	$query = "	UPDATE avainsana SET
+				selite = '{$datetime_checkpoint_uusi}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND laji = 'TUOTE_EXP_CRON'";
+	pupe_query($query);
+
+	if (mysql_affected_rows() != 1) {
+		echo "Timestamp päivitys epäonnistui!\n";
 	}
 
 	unlink($lockfile);

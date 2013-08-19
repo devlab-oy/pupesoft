@@ -58,7 +58,7 @@ if(!function_exists("avainsanatarkista")) {
 				$seliteerrori = 1;
 			}
 
-			if ($tem_laji == 'HINNAT_CRON') {
+			if ($tem_laji == 'HINNAT_CRON' or $tem_laji == 'TUOTE_EXP_CRON') {
 
 				$date = $t[$i];
 
@@ -158,7 +158,7 @@ if(!function_exists("avainsanatarkista")) {
 				}
 			}
 
-			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON') {
+			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON' and $tem_laji != 'TUOTE_EXP_CRON') {
 				$virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiä")."!";
 			}
 

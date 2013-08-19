@@ -73,7 +73,7 @@ function alku ($laji = '') {
 	}
 
 	$oikpos = $pdf->strlen("Kpl Nyt", $pieni);
-	$pdf->draw_text(330-$oikpos, 600, "Kpl nyt",			$firstpage, $pieni);
+	$pdf->draw_text(330-$oikpos, 600, "Kpl Nyt",			$firstpage, $pieni);
 
 	$oikpos = $pdf->strlen("Kpl Ed", $pieni);
 	$pdf->draw_text(380-$oikpos, 600, "Kpl Ed",			$firstpage, $pieni);

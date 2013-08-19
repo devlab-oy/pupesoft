@@ -59,7 +59,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			$kohde  = "";
 			$eilahe = "";
 
-			if ($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") {
+			if (($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") or $yhtiorow['lahetteen_tulostustapa'] == 'I') {
 				$eilahe = "o";
 			}
 
@@ -353,6 +353,7 @@ if (!function_exists("luo_tarjouspohja")) {
 		$asiakasid = $params['asiakasid'];
 		$tilausnumero = $params['tilausnumero'];
 		$valitut_asiakastunnukset = $params['valitut_asiakastunnukset'];
+		$alv = $params['alv'];
 
 		//Jos asiakasid < 0 niin kyseessä on special case. Tässä tapauksessa luodaan Extranet Dummytarjousta.
 		$query = "  SELECT *

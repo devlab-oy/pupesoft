@@ -533,16 +533,17 @@
 	if (mysql_field_name($result, $i) == "edi_kuvaus") {
 
 		$path_parts = pathinfo($trow[$i]);
-		$apu = $path_parts['filename'];
-		$sel[$apu] = "selected";
 
-		$ulos  = "<td><select name='$nimi'>";
+		$sel = array($path_parts['filename'] => 'selected') + array('editilaus_out_teccom.inc' => '', 'editilaus_out_wabco.inc' => '', 'editilaus_out_excel.inc' => '', 'editilaus_out_elma.inc' => '', 'editilaus_out_xml.inc' => '', 'editilaus_out_futur.inc' => '');
+
+		$ulos  = "<td><select name='{$nimi}'>";
 		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
-		$ulos .= "<option value='editilaus_out_teccom.inc' $sel[editilaus_out_teccom]>".t("TecCom sähköinen tilaus")."</option>";
-		$ulos .= "<option value='editilaus_out_wabco.inc' $sel[editilaus_out_wabco]>".t("Wabco sähköinen tilaus")."</option>";
-		$ulos .= "<option value='editilaus_out_excel.inc' $sel[editilaus_out_excel]>".t("Excel-ostotilaus")."</option>";
-		$ulos .= "<option value='editilaus_out_elma.inc' $sel[editilaus_out_elma]>".t("Elma-editilaus")."</option>";
-		$ulos .= "<option value='editilaus_out_xml.inc' $sel[editilaus_out_xml]>".t("Xml-ostotilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_teccom.inc' {$sel['editilaus_out_teccom']}>".t("TecCom sähköinen tilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_wabco.inc' {$sel['editilaus_out_wabco']}>".t("Wabco sähköinen tilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_excel.inc' {$sel['editilaus_out_excel']}>".t("Excel-ostotilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_elma.inc' {$sel['editilaus_out_elma']}>".t("Elma-editilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_xml.inc' {$sel['editilaus_out_xml']}>".t("Xml-ostotilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_futur.inc' {$sel['editilaus_out_futur']}>".t("Futur-ostotilaus")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -562,4 +563,27 @@
 		$jatko = 0;
 	}
 
-?>
+	if (mysql_field_name($result, $i) == "tehdas_saldo_tarkistus") {
+
+		$sel = $trow[$i] == 'K' ? " selected" : "";
+
+		$ulos  = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Ei tarkisteta tehdassaldoja suoratoimitusta tehdessä myyntitilaukselta")."</option>";
+		$ulos .= "<option value='K' {$sel}>".t("Tarkistetaan tehdassaldot suoratoimitusta tehdessä myyntitilaukselta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+
+	}
+
+	if (mysql_field_name($result, $i) == "pikaperustus") {
+
+		$sel = $trow[$i] == 'X' ? " selected" : "";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Toimittaja on valittavissa kun perustetaan uutta tuotetta")."</option>";
+		$ulos .= "<option value='X'{$sel["X"]}>".t("Toimittaja ei ole valittavissa kun perustetaan uutta tuotetta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

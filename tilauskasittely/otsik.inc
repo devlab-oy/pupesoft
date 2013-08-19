@@ -1984,7 +1984,7 @@
 			$jtki = "";
 			$rahtivapaa_chk = '';
 
-			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE")) $eilah = 'CHECKED';
+			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I')) $eilah = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
@@ -2257,6 +2257,65 @@
 
 					$vasen_sarake[$vasen] .= "</select></td>";
 					$vasen++;
+				}
+
+				// Katsotaan onko suoratoimitusrivejä
+				// asiakkaalle tai varastoon
+				if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U','X','Y','A','B','C','V','W','I','J'))) {
+
+					$myynnista_osto_avainsanat = t_avainsana("MYYNNISTA_OSTO");
+
+					if (mysql_num_rows($myynnista_osto_avainsanat) > 0) {
+
+						if (!isset($laskurow)) {
+
+							// Yhtiön toimipaikka yliajaa tämän parametrin
+							$query_x = "	SELECT ostotilauksen_kasittely
+											FROM yhtion_parametrit
+											WHERE yhtio = '{$kukarow['yhtio']}'";
+							$param_fetch_res = pupe_query($query_x);
+							$param_fetch_row = mysql_fetch_assoc($param_fetch_res);
+
+							$ostotilauksen_kasittely = $param_fetch_row['ostotilauksen_kasittely'];
+
+							if ($kukarow['toimipaikka'] != 0) {
+
+								$query_x = "	SELECT ostotilauksen_kasittely
+												FROM yhtion_toimipaikat
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus = '{$kukarow['toimipaikka']}'
+												AND ostotilauksen_kasittely != ''";
+								$toimpaikka_chk_res = pupe_query($query_x);
+
+								if (mysql_num_rows($toimpaikka_chk_res) > 0) {
+									$toimpaikka_chk_row = mysql_fetch_assoc($toimpaikka_chk_res);
+									$ostotilauksen_kasittely = $toimpaikka_chk_row['ostotilauksen_kasittely'];
+								}
+							}
+						}
+						else {
+							$ostotilauksen_kasittely = $laskurow['ostotilauksen_kasittely'];
+						}
+
+						$vasen_sarake[$vasen] = "<td>".t("Ostotilauksen käsittely").":</td>";
+						$vasen_sarake[$vasen] .= "<td><select name='ostotilauksen_kasittely' id='ostotilauksen_kasittely' style='max-width: 300px'>";
+						$vasen_sarake[$vasen] .= "<option value=''>".t("Ei valintaa")."</option>";
+
+						while ($myynnista_osto_avainsanat_row = mysql_fetch_assoc($myynnista_osto_avainsanat)) {
+
+							if ($ostotilauksen_kasittely == $myynnista_osto_avainsanat_row['selite']) {
+								$sel = " selected";
+							}
+							else {
+								$sel = "";
+							}
+
+							$vasen_sarake[$vasen] .= "<option value='{$myynnista_osto_avainsanat_row['selite']}'{$sel}>{$myynnista_osto_avainsanat_row['selitetark']}</option>";
+						}
+
+						$vasen_sarake[$vasen] .= "</select></td>";
+						$vasen++;
+					}
 				}
 			}
 
@@ -2810,7 +2869,7 @@
 
 			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";
 
-			echo "<tr><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
+			echo "<tr><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")."</td></tr>";
 
 			if (isset($srow["myynti_kommentti1"]) and $srow["myynti_kommentti1"] != "") {
 				echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[myynti_kommentti1] $srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
@@ -3372,6 +3431,7 @@
 		if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
 
 		$label = !isset($label) ? "" : $label;
+
 		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
 
 		if ($naytetaanko_tarjouksella != 'on' and ($toim == 'TARJOUS' or $toim == 'EXTTARJOUS')) {
@@ -3433,6 +3493,7 @@
 					olmapvm								= '$voimaika_vv-$voimaika_kk-$voimaika_pp',
 					osatoimitus							= '$osatoimitus',
 					osoite 								= '$osoite',
+					ostotilauksen_kasittely 			= '{$ostotilauksen_kasittely}',
 					ovttunnus 							= '$ovttunnus',
 					piiri 								= '$piiri',
 					postino 							= '$postino',
@@ -3803,6 +3864,11 @@
 				else {
 					$sopimus_pp = "";
 				}
+				
+				$sopimus_info = '';
+				if($toim != 'EXTENNAKKO' and $toim != 'EXTTARJOUS') {
+					$sopimus_info = "sopimus_lisatietoja			= '$sopimus_lisatietoja',";
+				}
 
 				$query3 .= "laskun_lisatiedot SET
 							yhtio						= '$kukarow[yhtio]',
@@ -3810,7 +3876,7 @@
 							sopimus_pp					= '$sopimus_pp',
 							sopimus_alkupvm				= '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
 							sopimus_loppupvm			= '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
-							sopimus_lisatietoja			= '$sopimus_lisatietoja',
+							{$sopimus_info}
 							kolm_ovttunnus				= '$kolm_ovttunnus',
 							kolm_nimi					= '$kolm_nimi',
 							kolm_nimitark				= '$kolm_nimitark',

@@ -5751,8 +5751,8 @@ if (!function_exists("alehinta_osto")) {
 						}
 					}
 
-					$hinta         	= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste     	.= "Toimittajan tuotteen nettohinta laskun valuutassa. ";
+					$hinta 			= $hrow['hinta'];
+					$aperuste     	.= "Toimittajan tuotteen nettohinta laskun valuutassa.";
 					$valuutta		= $laskurow["valkoodi"];
 					$hintaperuste	= 2;
 				}
@@ -5853,8 +5853,8 @@ if (!function_exists("alehinta_osto")) {
 						}
 					}
 
-					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste    .= "Toimittajan tuotealeryhmän nettohinta laskun valuutassa. ";
+					$hinta		= $hrow["hinta"];
+					$aperuste	.= "Toimittajan tuotealeryhmän nettohinta laskun valuutassa. ";
 					$valuutta	= $laskurow["valkoodi"];
 					$hintaperuste = 3;
 				}
@@ -10120,7 +10120,16 @@ if (!function_exists("t")) {
 		}
 
 		if ($indeksi != 'fi') {
-			$sanakirjaquery  = "SELECT fi, $indeksi, tunnus FROM sanakirja WHERE fi = BINARY '$stringi'";
+
+			// Jos meillä on HTML:ää strigissä, unohdetaan koko juttu ja palautetaan string vaa takas
+			if ($stringi != strip_tags($stringi)) {
+				return $stringi;
+			}
+
+			// Eskeipataan stringi
+			$stringi_sql = mysql_real_escape_string($stringi);
+
+			$sanakirjaquery  = "SELECT fi, $indeksi, tunnus FROM sanakirja WHERE fi = BINARY '$stringi_sql'";
 			$sanakirjaresult = pupe_query($sanakirjaquery, $link);
 
 			if (isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) $kaannetyt_sanat[] = $stringi;
@@ -10147,7 +10156,7 @@ if (!function_exists("t")) {
 				}
 			}
 			elseif ($verkkokauppa == "") {
-				$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
+				$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi_sql', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
 				$sanakirjaresult = pupe_query($sanakirjaquery, $link);
 			}
 		}
@@ -19945,9 +19954,14 @@ if (!function_exists('saako_vieda_varastoon')) {
 		$varastoerror = 0;
 
 		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
+
 			if ($palautus != '') {
-				echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".t("Varastoonvienti on kesken!")."</font><br>";
+
+				list($keikkakesken, $_kuka, $_timestamp) = explode(";", file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock"));
+
+				echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".t("Varastoonvienti on kesken!")." ".t("Käyttäjä")." {$_kuka} @ {$_timestamp}</font><br>";
 			}
+
 			$varastoerror = 1;
 		}
 		elseif (mysql_num_rows($result) != 0){
@@ -20032,7 +20046,19 @@ if (!function_exists('paivita_tilausrivin_hylly')) {
 
 if (!function_exists('paivita_oletuspaikka')) {
 	function paivita_oletuspaikka($tuoteno, Array $hylly) {
-		global $kukarow;
+		global $kukarow, $yhtiorow;
+
+		// Palautusmuuttuja
+		$return = array();
+
+		// Haetaan vanha oletuspaikka talteen ostotilausmuutoksia varten
+		$oletusquery = "	SELECT *
+							FROM tuotepaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$tuoteno'
+							and oletus != ''";
+		$oletusresult = pupe_query($oletusquery);
+		$oletusrow = mysql_fetch_assoc($oletusresult);
 
 		# Poistetaan kaikilta tuotteen tuotepaikoilta oletus
 		# ostorivienvarastopaikat.inc, rivi 281
@@ -20079,9 +20105,32 @@ if (!function_exists('paivita_oletuspaikka')) {
 						and tuoteno = '$tuoteno'
 						ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";
 			$upresult = pupe_query($query);
+
+			$return["error"] = "Oletuspaikkaa ei löytynyt, tehtiin ensimmäisestä paikasta oletuspaikka";
+		}
+		elseif (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
+			// Päivitetään uusi oletuspaikka myös avoimille keskeneräisille ostotilauksille (jos uusi paikka on samassa varastossa kun vanha)
+			$query = "	UPDATE tilausrivi
+						SET hyllyalue	= '$hylly[hyllyalue]',
+						hyllynro	= '$hylly[hyllynro]',
+						hyllyvali	= '$hylly[hyllyvali]',
+						hyllytaso	= '$hylly[hyllytaso]'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tuoteno = '$tuoteno'
+						AND hyllyalue = '$oletusrow[hyllyalue]'
+						AND hyllynro = '$oletusrow[hyllynro]'
+						AND hyllytaso = '$oletusrow[hyllytaso]'
+						AND hyllyvali = '$oletusrow[hyllyvali]'
+						AND tyyppi = 'O'
+						AND uusiotunnus = '0'
+						AND kpl = '0'
+						AND varattu != '0'";
+			$result = pupe_query($query);
+
+			$return["paivitetyt_ostorivit"] = mysql_affected_rows();
 		}
 
-		return 1;
+		return $return;
 	}
 }
 
@@ -21025,7 +21074,7 @@ if (!function_exists('_echo_ordered_table_headers')) {
 if(!function_exists('_echo_table_rows')) {
 	function _echo_table_rows(&$rivit, $force_to_string = array(), $callback = '') {
 		foreach ($rivit as $rivi) {
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 			foreach ($rivi as $header => &$solu) {
                 if($callback == '') {
                     _echo_table_row_td($header, $solu, $force_to_string);
@@ -21060,7 +21109,7 @@ if(!function_exists('_echo_table_row_td')) {
 if (!function_exists('_echo_ordered_table_rows')) {
 	function _echo_ordered_table_rows(&$rivit, $header_values, $force_to_string = array(), $callback = '') {
 		foreach ($rivit as $rivi) {
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 			foreach ($header_values as $column_name => $value) {
 				if (array_key_exists($column_name, $rivi)) {
 					if ($callback == '') {
@@ -22227,8 +22276,10 @@ if (!function_exists('poista_lasku')) {
 }
 
 if (!function_exists('hae_kayttajaan_linkitetty_extranet_kayttaja')) {
-	function hae_kayttajaan_linkitetty_extranet_kayttaja($kuka) {
+	function hae_kayttajaan_linkitetty_extranet_kayttaja($kuka, $yhtio = "") {
 		global $kukarow, $yhtiorow;
+
+		if ($yhtio == "") $yhtio = $kukarow['yhtio'];
 
 		$query = "	SELECT kuka.*
 					FROM kuka
@@ -22237,7 +22288,7 @@ if (!function_exists('hae_kayttajaan_linkitetty_extranet_kayttaja')) {
 					AND extranet_kayttajan_lisatiedot.liitostunnus = kuka.tunnus
 					AND extranet_kayttajan_lisatiedot.selite = '{$kuka}'
 					AND extranet_kayttajan_lisatiedot.laji = 'LINKITYS' )
-					WHERE kuka.yhtio = '{$kukarow['yhtio']}'";
+					WHERE kuka.yhtio = '{$yhtio}'";
 		$result = pupe_query($query);
 
 		return mysql_fetch_assoc($result);
@@ -22562,6 +22613,7 @@ if (!function_exists("lisaa_rivi")) {
 		$tuotenimitys       = (!empty($parametrit['tuotenimitys']))       ? $parametrit['tuotenimitys'] : '';        // tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
 		$tuotenimitys_force = (!empty($parametrit['tuotenimitys_force'])) ? $parametrit['tuotenimitys_force'] : '';  // tuotteen nimitys muutetaan systemitasolla
 		$kommentti          = (!empty($parametrit['kommentti']))          ? $parametrit['kommentti'] : '';           // rivikommentti
+		$alv				= (!empty($parametrit['alv']))		          ? $parametrit['alv'] : '';				// rivi alv
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			$ale_temp = str_replace(',', '.', $parametrit{'ale'.$alepostfix});

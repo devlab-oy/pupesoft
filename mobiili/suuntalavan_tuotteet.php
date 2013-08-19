@@ -101,7 +101,13 @@ if (isset($alusta_tunnus)) {
 }
 
 echo "<div class='header'>";
-echo "<button onclick='window.location.href=\"alusta.php\"' class='button left'><img src='back2.png'></button>";
+if (isset($viivakoodi)) {
+	//Jos viivakoodilla ollaan etsitty jotain, back-nappi palaa kokolistaus-n‰kym‰‰n
+	echo "<button onclick='window.location.href=\"suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}\"' class='button left'><img src='back2.png'></button>";
+}
+else {
+	echo "<button onclick='window.location.href=\"alusta.php\"' class='button left'><img src='back2.png'></button>";
+}
 echo "<h1>",t("SUUNTALAVAN TUOTTEET"),"</h1></div>";
 
 echo "<form name='viivakoodiformi' method='post' action='' id='viivakoodiformi'>

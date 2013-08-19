@@ -12,6 +12,8 @@
 	// Tarvitaan $toitarow jossa on laskun toimitustavan tiedot
 	// Passataan $tulostauna, mikäli se on tyhjä, niin ei tulosteta uusia headereitä
 
+	$toimitusvahvistus_desadv_lahetys = FALSE;
+
 	//jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 	if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv_path != '') {
 		//	Haetaan otsikkotiedot pohjalle
@@ -372,6 +374,10 @@
 				$ftpfile = realpath($filenimi);
 
 				require ("inc/ftp-send.inc");
+
+				if ($palautus == 0) {
+					$toimitusvahvistus_desadv_lahetys = TRUE;
+				}
 			}
 			else {
 				echo "<br/><font class='error'><br><hr>",t("AINEISTOA EI VOIDA LÄHETTÄÄ"),"!<br>",t("Aineistossa virheitä"),":<br>$error</font><hr><br>";
@@ -380,4 +386,6 @@
 			$rajaus++;
 		}
 	}
-?>
+	else {
+		echo "<br/><font class='error'><br><hr>",t("Toimitusvahvistusta ei voida lähettää"),"!<br>",t("Lähetystiedot puuttuu"),".<br></font><hr><br>";
+	}

@@ -176,5 +176,15 @@ if(!function_exists("yhtion_parametrittarkista")) {
 				$virhe[$i] = t("Arvon oltava kokonaisluku ja v‰hint‰‰n 1") . "!";
 			}
         }
+
+		if (mysql_field_name($result, $i) == "lahetteen_tulostustapa") {
+            if (in_array($t[$i], array('B', 'I')) and !empty($t['kerayserat'])) {
+				//jos lahetteen_tulostustapa on asennossa:
+				//"Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti"
+				//tai "Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti ja tilaus laitetaan toimitetuksi"
+				//ja kerayser‰t on p‰‰ll‰
+				$virhe[$i] = t("Ker‰yser‰t ei voi olla p‰‰ll‰ jos l‰hete halutaan tulostaa automaattisesti") . "!";
+			}
+        }
 	}
 }

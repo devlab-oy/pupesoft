@@ -29,21 +29,39 @@
 	if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
 		// Varmistetaan, että kaikki muuttujat on kunnossa
-		if (empty($magento_api_ana_url) or empty($magento_api_ana_usr) or empty($magento_api_ana_pas)) {
+		if (empty($magento_api_ana_url) or empty($magento_api_ana_usr) or empty($magento_api_ana_pas) or empty($magento_tax_class_id)) {
+			echo "Magento parametrit puuttuu, päivitystä ei voida ajaa.";
 			exit;
 		}
-
-		// Testataan vielä, että yhteys toimii ennenkun ajellaan queryjä
-		$magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 	}
 
 	$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
 
+	$locktime = 5400;
+	$lockfile = "/tmp/tuote_export_cron.lock";
+
+	// jos meillä on lock-file ja se on alle 90 minuuttia vanha
+	if (file_exists($lockfile)) {
+		$locktime_calc = mktime() - filemtime($lockfile);
+
+		if ($locktime_calc < $locktime) {
+			exit("Magento-päivitys käynnissä, odota hetki!")."\n";
+		}
+		else {
+			exit("VIRHE: Magento-päivitys jumissa! Ota yhteys tekniseen tukeen!!!")."\n";
+		}
+	}
+
+	touch($lockfile);
+
 	// alustetaan arrayt
-	$dnstuote = $dnsryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = array();
+	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = array();
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND (tuote.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR) OR ta_nimitys_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR) OR ta_nimitys_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR))";
+		$muutoslisa = "AND (tuote.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
+							OR ta_nimitys_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
+							OR ta_nimitys_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
+							)";
 	}
 	else {
 		$muutoslisa = "";
@@ -65,6 +83,8 @@
 				tuote.nakyvyys,
 				tuote.tuotemassa,
 				tuote.tunnus,
+				tuote.mallitarkenne campaign_code,
+				tuote.malli target,
 				ta_nimitys_se.selite nimi_swe,
 				ta_nimitys_en.selite nimi_eng,
 				try_fi.selitetark try_nimi
@@ -119,7 +139,9 @@
 							'nakyvyys'				=> $row["nakyvyys"],
 							'nimi_swe'				=> $row["nimi_swe"],
 							'nimi_eng'				=> $row["nimi_eng"],
-							'tunnus'				=> $row['tunnus']
+							'campaign_code'			=> $row["campaign_code"],
+							'target'				=> $row["target"],
+							'tunnus'				=> $row['tunnus'],
 							);
 	}
 
@@ -205,10 +227,11 @@
 				AND tuote.nakyvyys != ''
 				$muutoslisa
 				ORDER BY 1, 2";
-	$result = pupe_query($query);
+	$try_result = pupe_query($query);
 
-	while ($row = mysql_fetch_assoc($result)) {
+	while ($row = mysql_fetch_assoc($try_result)) {
 
+		// Osasto/tuoteryhmä array
 		$dnsryhma[$row["osasto"]][$row["try"]] = array(	'osasto'	=> $row["osasto"],
 														'try'		=> $row["try"],
 														'osasto_fi'	=> $row["osasto_fi_nimi"],
@@ -218,6 +241,13 @@
 														'osasto_en' => $row["osasto_en_nimi"],
 														'try_en'	=> $row["try_en_nimi"],
 														);
+
+		// Kerätään myös pelkät tuotenumerot Magentoa varten
+		$dnstuoteryhma[$row["try"]] = array(	'try'		=> $row["try"],
+												'try_fi'	=> $row["try_fi_nimi"],
+												'try_se'	=> $row["try_se_nimi"],
+												'try_en'	=> $row["try_en_nimi"],
+												);
 	}
 
 	if ($ajetaanko_kaikki == "NO") {
@@ -366,6 +396,7 @@
 							AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
 							AND tuotteen_avainsanat.laji like 'parametri_%'
 							AND tuotteen_avainsanat.tuoteno = '{$alirow['tuoteno']}'
+							AND tuotteen_avainsanat.kieli = 'fi'
 							ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
 			$alinres = pupe_query($alinselect);
 			$properties = array();
@@ -421,13 +452,12 @@
 		$magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 
 		// tax_class_id, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
-		if (! isset($magento_tax_class_id)) $magento_tax_class_id = 0;
 		$magento_client->setTaxClassID($magento_tax_class_id);
 
 		// lisaa_kategoriat
-		if (count($dnsryhma) > 0) {
+		if (count($dnstuoteryhma) > 0) {
 			echo "Päivitetään tuotekategoriat\n";
-			$count = $magento_client->lisaa_kategoriat($dnsryhma);
+			$count = $magento_client->lisaa_kategoriat($dnstuoteryhma);
 			echo "Päivitettiin $count kategoriaa\n";
 		}
 
@@ -498,3 +528,5 @@
 			require ("{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc");
 		}
 	}
+
+	unlink($lockfile);

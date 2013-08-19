@@ -64,6 +64,7 @@ if ($request['action'] == 'liita_asiakkaat') {
 		"asiakasid"					 => $asiakasid,
 		"tilausnumero"				 => $tilausnumero,
 		"valitut_asiakastunnukset"	 => $valitut_asiakastunnukset,
+		'alv'						 => alv_oletus(),
 	);
 	luo_tarjouspohja($parametrit);
 }
@@ -82,6 +83,7 @@ if (isset($request['tarjous_tee'])) {
 		$parametrit = array(
 			"toim"		 => $dummy_tyyppi,
 			"asiakasid"	 => $asiakasid,
+			'alv'		 => alv_oletus(),
 		);
 		$request['tilausnumero'] = luo_tarjouspohja($parametrit);
 	}
@@ -394,7 +396,7 @@ function hae_asiakkaat_joilla_extranet_kayttajatunnus($request) {
 						JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' )
 						LEFT JOIN kuka AS myyjahaku ON (myyjahaku.yhtio = asiakas.yhtio AND myyjahaku.myyja = asiakas.myyjanro AND myyjahaku.myyja != 0)
 						WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-						and asiakas.asiakasnro = '{$request['hakuehto']}'
+						and asiakas.asiakasnro LIKE '{$request['hakuehto']}%'
 						and asiakas.asiakasnro not in ('0','')
 						{$where}
 						GROUP BY asiakas.tunnus)

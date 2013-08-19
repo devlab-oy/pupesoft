@@ -96,11 +96,13 @@
 	}
 
 	$korvattiin_korvaavalla = "";
+	$pikaperustus_naytetaan = 0;
 
 	if (mysql_num_rows($tres) == 0) {
 		$varaosavirhe .= t("VIRHE: Tuotetta ei löydy!")."<br>";
 		$riviok++;
 		$tilausok++;
+		$pikaperustus_naytetaan = 1;
 	}
 
 	if ($row["var2"] == "PK" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") AND $yhtiorow['reklamaation_hinnoittelu'] == 'K') {
@@ -419,7 +421,7 @@
 		}
 
 		if (($kukarow["extranet"] == "" or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E') and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS'))) and $row["var"] != 'V') {
-			$query = "	SELECT tyyppi_tieto, liitostunnus, toimi.nimi, toimi.suoratoimitus
+			$query = "	SELECT tyyppi_tieto, liitostunnus, toimi.nimi, toimi.suoratoimitus, tuotteen_toimittajat.tehdas_saldo, toimi.tehdas_saldo_tarkistus
 						FROM tuotteen_toimittajat use index (yhtio_tuoteno)
 						JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
 						WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
@@ -744,6 +746,10 @@
 							$selpaikkamaa 		 = "";
 							$selpaikkamyytavissa = 0;
 						}
+
+						if (($sel1 != "" or $sel2 != "") and $krow['tehdas_saldo_tarkistus'] != '' and $row['varattu'] > $krow['tehdas_saldo']) {
+							$varaosavirhe .= t("HUOM: Toimittajan tehtaan saldo on %d", "", $krow['tehdas_saldo']).".<br>";
+						}
 					}
 
 					if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1) {
@@ -1007,7 +1013,7 @@
 
 			if ($suoratoimostorow["tila"] == "O") {
 				$tilaustyypilla = t("Ostotilauksella");
-				
+
 				if ($suoratoimostorow["luontiaika"] == date("Y-m-d") and
 					$suoratoimostorow["tila"]    	== 'O' and
 					$suoratoimostorow["alatila"]    == '' and
@@ -1046,6 +1052,9 @@
 			$kutsuttu = 0;
 
 			$alku = "<table width='100%'><tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
+
+			if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') $alku .= "<th>".t("Tehtaan saldo")."</th>";
+
 			$alku .= "<th><form method='post' name='hyvaksy'>
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='lopetus' 		value = '$lopetus'>
@@ -1077,7 +1086,7 @@
 
 				list(, , $vmyytavissa) = saldo_myytavissa($vrow["tuoteno"]);
 
-				if ($vmyytavissa > 0) {
+				if ($vmyytavissa > 0 or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') {
 
 					if ($kutsuttu == 0) {
 						$vastaavat_html = $alku;
@@ -1094,8 +1103,23 @@
 					 			."<td>{$vrow["tuoteno"]}</td>"
 								."<td>{$tvrow["nimitys"]}</td>"
 					 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
-					 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>"
-					 			."<td align='left'>"
+					 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>";
+
+					 if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') {
+
+					 	$query = "	SELECT tehdas_saldo, IF(jarjestys = 0, 9999, jarjestys) sorttauskentta
+					 				FROM tuotteen_toimittajat
+					 				WHERE yhtio = '{$kukarow['yhtio']}'
+					 				AND tuoteno = '{$vrow['tuoteno']}'
+					 				ORDER BY sorttauskentta
+					 				LIMIT 1";
+					 	$tehdas_saldo_res = pupe_query($query);
+					 	$tehdas_saldo_row = mysql_fetch_assoc($tehdas_saldo_res);
+
+					 	$vastaavat_html .= "<td align='right'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</td>";
+					 }
+
+					 $vastaavat_html .= "<td align='left'>"
 					 			." <form method='post' name='jalkitoimita'>
 					 			   	<input type='hidden' name='toim' 			value = '$toim'>
 					 			   	<input type='hidden' name='lopetus' 		value = '$lopetus'>

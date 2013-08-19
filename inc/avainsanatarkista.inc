@@ -58,6 +58,17 @@ if(!function_exists("avainsanatarkista")) {
 				$seliteerrori = 1;
 			}
 
+			if ($tem_laji == 'HINNAT_CRON') {
+
+				$date = $t[$i];
+
+				// Huom. preg_match tarkoituksella "== false", koska se palauttaa virheessä 0 tai false
+				if (preg_match("/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/", $date) == false or strtotime($date) === false) {
+					$virhe[$i] = t("Selite on pakollinen ja se pitää olla muodossa vvvv-kk-pp tt:mm:ss");
+				}
+
+			}
+
 			if ($tem_laji == 'LABEL') {
 				if (trim($tem_selite) == '') {
 					$virhe[$i] = t("Selite on pakollinen ja se pitää olla muodossa #123 tai #112233");
@@ -67,6 +78,16 @@ if(!function_exists("avainsanatarkista")) {
 				}
 				elseif (strlen($tem_selite) != 4 and strlen($tem_selite) != 7) {
 					$virhe[$i] = t("Selite täytyy olla 4 tai 7 merkkiä pitkä");
+				}
+			}
+
+			if (strtoupper($tem_laji) == "OSTOTIL_TILTYYP") {
+
+				if (trim($tem_selite) == '') {
+					$virhe[$i] = t("Selite on pakollinen");
+				}
+				elseif (strlen($tem_selite) > 1) {
+					$virhe[$i] = t("Selite on liian pitkä, maksimipituus on yksi merkki");
 				}
 			}
 
@@ -91,7 +112,7 @@ if(!function_exists("avainsanatarkista")) {
 					$t[$i] = (int) $t[$i];
 				}
 			}
-			
+
 			if (($tem_laji == 'VAKIOVIESTI' or $tem_laji == 'VAKIOVIESTI_TIL') and trim($tem_selite) == '') {
 				$virhe[$i] = t("Selite on pakollinen");
 			}
@@ -138,7 +159,7 @@ if(!function_exists("avainsanatarkista")) {
 				}
 			}
 
-			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL') {
+			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON') {
 				$virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiä")."!";
 			}
 

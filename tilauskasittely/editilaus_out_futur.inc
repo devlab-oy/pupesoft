@@ -70,12 +70,14 @@
 		$asiakasnumero = $yhtiorow['ovttunnus'];
 
 		// Generoidaan asiakasnumeroon ovtlisä, jos käytössä on toimipaikka
-		if ($laskurow['vanhatunnus'] != 0) {
+		if (($myynti_vai_osto == 'O' and $laskurow['vanhatunnus'] != 0) or ($myynti_vai_osto == 'M' and $laskurow['yhtio_toimipaikka'] != 0)) {
         
+			$wherelisa = $myynti_vai_osto == 'O' ? $laskurow['vanhatunnus'] : $laskurow['yhtio_toimipaikka'];
+
 			$query = "	SELECT ovtlisa
 						FROM yhtion_toimipaikat
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$laskurow['vanhatunnus']}'";
+						AND tunnus = '{$wherelisa}'";
 			$toimipaikka_chk_res = pupe_query($query);
         
 			if (mysql_num_rows($toimipaikka_chk_res) != 0) {

@@ -341,7 +341,7 @@
 //					$Inf = $RgltryDtls->addChild('Inf', '');
 			$RmtInf = $CdtTrfTxInf->addChild('RmtInf', '');														// RemittanceInformation
 
-			if ($laskurow['maa'] == 'EE' and strlen(trim($laskurow["laskunro"])) > 0 and $laskurow['viesti'] != "") {
+			if ($yhtiorow['maa'] == 'EE' and strlen(trim($laskurow["laskunro"])) > 0 and $laskurow['viesti'] != "") {
 				$reference_number_and_message = "/RFB/".$laskurow['laskunro']."/TXT/".$laskurow['viesti'];
 				$Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s",$reference_number_and_message));					// Unstructured (max 140 char)
 			}
@@ -727,7 +727,7 @@
 		while ($laskurow = mysql_fetch_assoc($result)) {
 
             // Jos laskunumero on syötetty, lisätään se viestiin mukaan
-            if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti'] and $laskurow['maa'] != 'EE') {
+            if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti'] and $yhtiorow['maa'] != 'EE') {
                 $laskurow['viesti'] = (trim($laskurow['viesti']) == "") ? $laskurow['laskunro'] : $laskurow['viesti']." ".$laskurow['laskunro'];
             }
 

@@ -733,8 +733,8 @@ if ($asiakasid > 0) {
 						/* 6. asiakas.tunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus) */
 						(	SELECT 3 prio,
 								asiakasalennus.alennus,
-								asiakasalennus.alennuslaji,
 								'' tuoteno,
+								asiakasalennus.alennuslaji,
 								'' tuoteno_nimi,
 								'' asiakasryhmä,
 								'' asiakasryhmä_nimi,
@@ -763,8 +763,8 @@ if ($asiakasid > 0) {
 						/* 6. asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus) */
 						(	SELECT 4 prio,
 								asiakasalennus.alennus,
-								asiakasalennus.alennuslaji,
 								'' tuoteno,
+								asiakasalennus.alennuslaji,
 								'' tuoteno_nimi,
 								'' asiakasryhmä,
 								'' asiakasryhmä_nimi,
@@ -887,8 +887,8 @@ if ($asiakasid > 0) {
 						/* 10. asiakas.segmentti tuote.aleryhmä aleprosentti (asiakassegmentin tuotealeryhmän alennus) */
 						(	SELECT 8 prio,
 								asiakasalennus.alennus,
-								asiakasalennus.alennuslaji,
 								'' tuoteno,
+								asiakasalennus.alennuslaji,
 								'' tuoteno_nimi,
 								asiakas_ryhma asiakasryhmä,
 								avainsana.selitetark asiakasryhmä_nimi,
@@ -919,8 +919,8 @@ if ($asiakasid > 0) {
 						/* 11. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasaleryhmän tuotealeryhmän alennus) */
 						(	SELECT 9 prio,
 								asiakasalennus.alennus,
-								asiakasalennus.alennuslaji,
 								'' tuoteno,
+								asiakasalennus.alennuslaji,
 								'' tuoteno_nimi,
 								asiakas_ryhma asiakasryhmä,
 								avainsana.selitetark asiakasryhmä_nimi,
@@ -951,8 +951,8 @@ if ($asiakasid > 0) {
 						/* 12. asiakas.piiri tuote.aleryhmä aleprosentti (asiakaspiirin tuotealeryhmän alennus) */
 						(	SELECT 10 prio,
 								asiakasalennus.alennus,
-								asiakasalennus.alennuslaji,
 								'' tuoteno,
+								asiakasalennus.alennuslaji,
 								'' tuoteno_nimi,
 								asiakas_ryhma asiakasryhmä,
 								avainsana.selitetark asiakasryhmä_nimi,
@@ -983,8 +983,8 @@ if ($asiakasid > 0) {
 						/* 13. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus) */
 						(	SELECT 11 prio,
 								alennus,
-								'' alennuslaji,
 								'' tuoteno,
+								'1' alennuslaji,
 								'' tuoteno_nimi,
 								'' asiakasryhmä,
 								'' asiakasryhmä_nimi,

@@ -1999,7 +1999,7 @@ $debug = 0;
 
 	$automaattituloutus = false;
 
-	if (($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == 'MAVENTAXML') and $virheet == 0 and count($loop_array) > 0) {
+	if (($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == 'MAVENTAXML') and $virheet == 0 and count($loop_array) > 0 and $trow['sahkoinen_automaattituloutus'] != 'E') {
 
 		if ($trow['sahkoinen_automaattituloutus'] == 'K') $automaattituloutus = true;
 

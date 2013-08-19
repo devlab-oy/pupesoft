@@ -82,6 +82,9 @@
 		$muutoslisa = "";
 	}
 
+	echo date("d.m.Y @ G:i:s")." - Aloitetaan tuote-export.\n";
+	echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
+
 	// Haetaan pupesta tuotteen tiedot
 	$query = "	SELECT tuote.tuoteno,
 				tuote.nimitys,
@@ -169,6 +172,8 @@
 		$muutoslisa2 = "";
 	}
 
+	echo date("d.m.Y @ G:i:s")." - Haetaan saldot.\n";
+
 	// Haetaan saldot tuotteille, joille on tehty tunnin sisällä tilausrivi tai tapahtuma
 	$query =  "(SELECT tapahtuma.tuoteno,
 				tuote.eankoodi
@@ -218,6 +223,8 @@
 	else {
 		$muutoslisa = "";
 	}
+
+	echo date("d.m.Y @ G:i:s")." - Haetaan osastot/tuoteryhmät.\n";
 
 	// Haetaan kaikki TRY ja OSASTO:t, niiden muutokset.
 	$query = "	SELECT DISTINCT	tuote.osasto,
@@ -272,6 +279,8 @@
 		$muutoslisa = "";
 	}
 
+	echo date("d.m.Y @ G:i:s")." - Haetaan asiakkaat.\n";
+
 	// Haetaan kaikki asiakkaat
 	$query = "	SELECT asiakas.nimi,
 				asiakas.osoite,
@@ -300,6 +309,8 @@
 	else {
 		$muutoslisa = "";
 	}
+
+	echo date("d.m.Y @ G:i:s")." - Haetaan hinnastot.\n";
 
 	// Haetaan kaikki hinnastot ja alv
 	$query = "	SELECT hinnasto.tuoteno,
@@ -345,12 +356,14 @@
 								);
 	}
 
+	echo date("d.m.Y @ G:i:s")." - Haetaan tuotteiden variaatiot.\n";
+
 	// haetaan tuotteen variaatiot
-	$query = "	SELECT distinct selite
+	$query = "	SELECT DISTINCT selite
 				FROM tuotteen_avainsanat
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND laji = 'parametri_variaatio'
-				AND trim(selite) != ''";
+				WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
+				AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+				AND trim(tuotteen_avainsanat.selite) != ''";
 	$resselite = pupe_query($query);
 
 	if ($ajetaanko_kaikki == "NO") {
@@ -392,7 +405,8 @@
 						LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio and try_fi.selite = tuote.try and try_fi.laji = 'try' and try_fi.kieli = 'fi')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys' and ta_nimitys_se.kieli = 'se')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en')
-						WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
+						WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
+						AND tuotteen_avainsanat.laji = 'parametri_variaatio'
 						AND tuotteen_avainsanat.selite = '{$rowselite['selite']}'
 						{$muutoslisa}
 						ORDER BY tuote.tuoteno";
@@ -402,8 +416,8 @@
 
 			$alinselect = " SELECT tuotteen_avainsanat.selite,
 							avainsana.selitetark
-							FROM tuotteen_avainsanat
-							JOIN avainsana ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
+							FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
+							JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
 								AND avainsana.laji = 'PARAMETRI'
 								AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
 							WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
@@ -458,49 +472,62 @@
 
 	}
 
+	$tuote_export_error_count = 0;
+
+	echo date("d.m.Y @ G:i:s")." - Aloitetaan päivitys verkkokauppaan.\n";
+
 	if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
 		$time_start = microtime(true);
 
-		echo "Päivitetään Magento verkkokauppaa!\n";
-
 		$magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
+
+		if ($magento_client === null) {
+			unlink($lockfile);
+			exit;
+		}
 
 		// tax_class_id, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
 		$magento_client->setTaxClassID($magento_tax_class_id);
 
 		// lisaa_kategoriat
 		if (count($dnstuoteryhma) > 0) {
-			echo "Päivitetään tuotekategoriat\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitetään tuotekategoriat\n";
 			$count = $magento_client->lisaa_kategoriat($dnstuoteryhma);
-			echo "Päivitettiin $count kategoriaa\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitettiin $count kategoriaa\n";
 		}
 
 		// Tuotteet (Simple)
 		if (count($dnstuote) > 0) {
-			echo "Päivitetään simple tuotteet\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitetään simple tuotteet\n";
 			$count = $magento_client->lisaa_simple_tuotteet($dnstuote);
-			echo "Päivitettiin $count tuotetta (simple)\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotetta (simple)\n";
 		}
 
 		// Tuotteet (Configurable)
 		if (count($dnslajitelma) > 0) {
-			echo "Päivitetään configurable tuotteet\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitetään configurable tuotteet\n";
 			$count = $magento_client->lisaa_configurable_tuotteet($dnslajitelma);
-			echo "Päivitettiin $count tuotetta (configurable)\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotetta (configurable)\n";
 		}
 
 		// Saldot
 		if (count($dnstock) > 0) {
-			echo "Päivitetään tuotteiden saldot\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitetään tuotteiden saldot\n";
 			$count = $magento_client->paivita_saldot($dnstock);
-			echo "Päivitettiin $count tuotteen saldot\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotteen saldot\n";
+		}
+
+		$tuote_export_error_count = $magento_client->getErrorCount();
+
+		if ($tuote_export_error_count != 0) {
+			echo date("d.m.Y @ G:i:s")." - Päivityksessä tapahtui {$tuote_export_error_count} virhettä!\n";
 		}
 
 		$time_end = microtime(true);
-		$time = $time_end - $time_start;
+		$time = round($time_end - $time_start);
 
-		echo 'Magenton päivitys kesti '.$time.' sekuntia';
+		echo date("d.m.Y @ G:i:s")." - Päivitys valmis! (Magento API {$time} sekuntia)\n";
 	}
 	elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
 

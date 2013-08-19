@@ -123,10 +123,10 @@ class vuosisopimus_asiakkaat_excel {
 		}
 
 		$this->add_tyhja_kolumni(2);
-		$this->write_solu(t('Kpl', $this->kieli) . ' 2012');
-		$this->write_solu(t('Kpl', $this->kieli) . ' 2011');
-		$this->write_solu(t('Osasto', $this->kieli) . ' 2012');
-		$this->write_solu(t('Osasto', $this->kieli) . ' 2011');
+		$this->write_solu(t('Kpl Nyt', $this->kieli));
+		$this->write_solu(t('Kpl Ed', $this->kieli));
+		$this->write_solu(t('Ostot Nyt', $this->kieli));
+		$this->write_solu(t('Ostot Ed', $this->kieli));
 		$this->write_solu(t('Indeksi', $this->kieli));
 	}
 

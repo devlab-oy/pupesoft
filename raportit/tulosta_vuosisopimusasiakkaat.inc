@@ -72,17 +72,17 @@ function alku ($laji = '') {
 		$pdf->draw_text(30,  600, "Tuoteryhmä",			$firstpage, $pieni);
 	}
 
-	$oikpos = $pdf->strlen("Kpl $vvt", $pieni);
-	$pdf->draw_text(330-$oikpos, 600, "Kpl $vvt",			$firstpage, $pieni);
+	$oikpos = $pdf->strlen("Kpl Nyt", $pieni);
+	$pdf->draw_text(330-$oikpos, 600, "Kpl nyt",			$firstpage, $pieni);
 
-	$oikpos = $pdf->strlen("Kpl $vvv", $pieni);
-	$pdf->draw_text(380-$oikpos, 600, "Kpl $vvv",			$firstpage, $pieni);
+	$oikpos = $pdf->strlen("Kpl Ed", $pieni);
+	$pdf->draw_text(380-$oikpos, 600, "Kpl Ed",			$firstpage, $pieni);
 
-	$oikpos = $pdf->strlen("Ostot $vvt", $pieni);
-	$pdf->draw_text(460-$oikpos, 600, "Ostot $vvt",			$firstpage, $pieni);
+	$oikpos = $pdf->strlen("Ostot Nyt", $pieni);
+	$pdf->draw_text(460-$oikpos, 600, "Ostot Nyt",			$firstpage, $pieni);
 
-	$oikpos = $pdf->strlen("Ostot $vvv", $pieni);
-	$pdf->draw_text(530-$oikpos, 600, "Ostot $vvv",			$firstpage, $pieni);
+	$oikpos = $pdf->strlen("Ostot Ed", $pieni);
+	$pdf->draw_text(530-$oikpos, 600, "Ostot Ed",			$firstpage, $pieni);
 
 	$oikpos = $pdf->strlen("Indeksi", $pieni);
 	$pdf->draw_text(575-$oikpos, 600, "Indeksi",			$firstpage, $pieni);

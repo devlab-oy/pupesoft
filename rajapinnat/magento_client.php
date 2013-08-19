@@ -278,6 +278,9 @@ class MagentoClient {
 		// Haetaan storessa olevat tuotenumerot
 		$skus_in_store = $this->getProductList(true);
 
+		// Tarvitaan kategoriat
+		$category_tree = $this->getCategories();
+
 		// Lisätään tuotteet
 		foreach ($dnslajitelma as $nimitys => $tuotteet) {
 
@@ -290,7 +293,7 @@ class MagentoClient {
 			$tuotteet[0]['kuluprosentti'] = ($tuotteet[0]['kuluprosentti'] == 0) ? '' : $tuotteet[0]['kuluprosentti'];
 
 			// Etsitään kategoria mihin tuote lisätään
-			$category_id = $this->findCategory($tuotteet[0]['try_nimi'], $this->_category_tree['children']);
+			$category_id = $this->findCategory($tuotteet[0]['try_nimi'], $category_tree['children']);
 
 			// Configurable tuotteen tiedot
 			$configurable = array(

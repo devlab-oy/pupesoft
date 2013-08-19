@@ -66,7 +66,6 @@ if(!function_exists("avainsanatarkista")) {
 				if (preg_match("/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/", $date) == false or strtotime($date) === false) {
 					$virhe[$i] = t("Selite on pakollinen ja se pit‰‰ olla muodossa vvvv-kk-pp tt:mm:ss");
 				}
-
 			}
 
 			if ($tem_laji == 'LABEL') {

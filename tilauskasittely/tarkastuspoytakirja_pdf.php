@@ -2,7 +2,13 @@
 
 namespace PDF\Tarkastuspoytakirja;
 
-require("../inc/parametrit.inc");
+$filepath = dirname(__FILE__);
+if (file_exists($filepath . '/../inc/parametrit.inc')) {
+	require_once($filepath . '/../inc/parametrit.inc');
+}
+else {
+	require_once($filepath . '/parametrit.inc');
+}
 
 function hae_tarkastuspoytakirjat($lasku_tunnukset) {
 	$pdf_tiedostot = array();
@@ -10,9 +16,10 @@ function hae_tarkastuspoytakirjat($lasku_tunnukset) {
 		$tyomaaraykset = \PDF\Tarkastuspoytakirja\pdf_hae_tyomaaraykset($lasku_tunnukset);
 
 		foreach ($tyomaaraykset as $tyomaarays) {
-			$filepath = \PDF\Tarkastuspoytakirja\kirjoita_json_tiedosto($tyomaarays);
+			$filepath = kirjoita_json_tiedosto($tyomaarays, "tyomaarays_{$tyomaarays['tunnus']}");
 
-			$pdf_tiedostot[] = \PDF\Tarkastuspoytakirja\aja_ruby($filepath);
+			//ajettavan tiedoston nimi on tarkastuspoytakirja_pdf.rb
+			$pdf_tiedostot[] = aja_ruby($filepath, 'tarkastuspoytakirja_pdf');
 		}
 	}
 
@@ -21,6 +28,13 @@ function hae_tarkastuspoytakirjat($lasku_tunnukset) {
 
 function pdf_hae_tyomaaraykset($lasku_tunnukset) {
 	global $kukarow, $yhtiorow;
+
+	if (!empty($lasku_tunnukset)) {
+		$lasku_tunnukset = explode(',', $lasku_tunnukset);
+	}
+	else {
+		return array();
+	}
 
 	//queryyn joinataan tauluja kohteeseen saakka, koska tarkastuspöytäkirjat halutaan tulostaa per kohde mutta työmääräykset on laite per työmääräin
 	$query = "	SELECT lasku.*,
@@ -65,6 +79,7 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
 			$tyomaarays['kohde'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_kohde($tyomaarays['laite_tunnus']);
 			$tyomaarays['asiakas'] = \PDF\Tarkastuspoytakirja\hae_tyomaarayksen_asiakas($tyomaarays['liitostunnus']);
 			$tyomaarays['yhtio'] = $yhtiorow;
+			$tyomaarays['logo'] = base64_encode(hae_yhtion_lasku_logo());
 			$tyomaaraykset[$tyomaarays['kohde_tunnus']] = $tyomaarays;
 		}
 	}
@@ -75,12 +90,17 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
 function hae_tyomaarayksen_rivit($lasku_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$query = "	SELECT *
+	$query = "	SELECT tilausrivi.*,
+				tilausrivin_lisatiedot.*,
+				poikkeamarivi.tunnus as poikkeamarivi_tunnus
 				FROM tilausrivi
 				JOIN tilausrivin_lisatiedot
 				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
 					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
 					AND tilausrivin_lisatiedot.asiakkaan_positio != 0 )
+				LEFT JOIN tilausrivi as poikkeamarivi
+				ON ( poikkeamarivi.yhtio = tilausrivin_lisatiedot.yhtio
+					AND poikkeamarivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki )
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				AND tilausrivi.otunnus = '{$lasku_tunnus}'
 				AND tilausrivi.var != 'P'";
@@ -119,17 +139,6 @@ function hae_tyomaarayksen_asiakas($asiakas_tunnus) {
 	return mysql_fetch_assoc($result);
 }
 
-function kirjoita_json_tiedosto($tyomaarays) {
-	$filename = "tyomaarays_{$tyomaarays['tunnus']}.json";
-	$filepath = "/tmp/{$filename}";
-
-	array_walk_recursive($tyomaarays, '\PDF\Tarkastuspoytakirja\array_utf8_encode');
-
-	file_put_contents($filepath, json_encode($tyomaarays));
-
-	return $filepath;
-}
-
 function hae_tyomaarayksen_kohde($laite_tunnus) {
 	global $kukarow, $yhtiorow;
 
@@ -147,21 +156,3 @@ function hae_tyomaarayksen_kohde($laite_tunnus) {
 
 	return mysql_fetch_assoc($result);
 }
-
-function array_utf8_encode(&$item, $key) {
-	$item = utf8_encode($item);
-}
-
-function aja_ruby($filepath) {
-	global $pupe_root_polku;
-
-	$cmd = "ruby {$pupe_root_polku}/pdfs/ruby/tarkastuspoytakirja_pdf.rb {$filepath}";
-	$return = exec($cmd, $output, $return_code);
-
-	//poistetaan json tiedosto
-	unlink($filepath);
-
-	// Palautetaan ensimmäinen rivi outputista, siinä on filenimet
-	return $output[0];
-}
-?>

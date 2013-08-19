@@ -6,10 +6,11 @@ require 'prawn'
 require 'json'
 require 'logger'
 require 'date'
+require 'base64'
 
 class KalustoraporttiPDF
 
-  attr_accessor :customer, :company
+  attr_accessor :customer, :company, :logo
 
   def initialize
     margin = 20
@@ -94,7 +95,10 @@ class KalustoraporttiPDF
   end
 
   def logo
-    @pdf.image File.dirname(__FILE__) + '/../../pics/logo_pdf.png', :scale => 0.7, :at => [@pdf_x, @pdf_y]
+    file = File.new('/tmp/logo.jpeg', 'a+')
+    file.write Base64.decode64 @logo
+    file.close
+    @pdf.image file.path, :scale => 0.7, :at => [@pdf_x, @pdf_y]
   end
 
   def company_info
@@ -316,6 +320,7 @@ if !ARGV[0].empty?
     pdf = KalustoraporttiPDF.new
     pdf.customer = spots.data['asiakas']
     pdf.company = spots.data['yhtio']
+    pdf.logo = spots.data['logo']
     pdf.data(spot)
 
     files += pdf.generate + ' '

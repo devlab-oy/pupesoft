@@ -165,6 +165,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "MYYNNISTA_OSTO")  	$ulos .= "<option value='MYYNNISTA_OSTO' {$avain_sel['MYYNNISTA_OSTO']}>    ".t("Ostotilauksen käsittely myyntitilauksella")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PAIKALLISVARAST")	$ulos .= "<option value='PAIKALLISVARAST' {$avain_sel['PAIKALLISVARAST']}>	".t("Paikallisvarasto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "OLOSUHDE")		  	$ulos .= "<option value='OLOSUHDE' {$avain_sel['OLOSUHDE']}>				".t("Olosuhde")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "LAITE_TILA")		$ulos .= "<option value='LAITE_TILA' {$avain_sel['LAITE_TILA']}>			".t("Laitteen tila")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -622,6 +623,20 @@
 			$ulos .= "<select name='{$nimi}'>";
 			$ulos .= "<option value='X'>".t("Olosuhde").": ".t("Ulkona")." / ".t("Tärinässä")."</option>";
 			$ulos .= "<option value='A'>".t("Olosuhde").": ".t("Sisällä")."</option>";
+			$ulos .= "</select>";
+			$ulos .= "</td>";
+
+			$jatko = 0;
+		}
+	}
+
+	if ($avain_sel['LAITE_TILA'] == 'SELECTED') {
+		if (mysql_field_name($result, $i) == "selite") {
+			$ulos = "<td>";
+			$ulos .= "<select name='{$nimi}'>";
+			$ulos .= "<option value='N'>".t("Normaali")."</option>";
+			$ulos .= "<option value='P'>".t("Poistettu")."</option>";
+			$ulos .= "<option value='V'>".t("Varalaite")."</option>";
 			$ulos .= "</select>";
 			$ulos .= "</td>";
 

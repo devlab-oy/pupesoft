@@ -41,18 +41,16 @@ if (mysql_num_rows($result) == 0) {
 // Adminin oletus, mutta kuka konversio
 $kukarow = mysql_fetch_assoc($result);
 
-//generoidaan debug moodissa vain testi tuotteen työmääräyksiä
-//if ($debug) {
-//	$laitteet = array(
-//		'TESTI',
-//		'TESTI2',
-//		'TESTI3',
-//	);
-//}
-
 $request = array(
 	'laitteiden_huoltosyklirivit' => $laitteiden_huoltosyklirivit,
 );
+
+//generoidaan debug moodissa vain testi tuotteen työmääräyksiä
+if ($debug) {
+	$request['laitteet'] = array(
+		'TESTI',
+	);
+}
 
 $laitteiden_huoltosyklirivit = hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($request);
 
@@ -61,7 +59,6 @@ $laitteiden_huoltosyklirivit = hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto
 
 generoi_tyomaaraykset_huoltosykleista($laitteiden_huoltosyklirivit);
 
-//TODO: tee tämä funkkari niin että hakee vain yhden / useamman laitteen. tämä mahdollistaa sen, että näitä samoja funkkareita ja logiikkaa voidaan käyttää uuden laitteen työmääräysten generoimisessa
 function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($request = array()) {
 	global $kukarow;
 

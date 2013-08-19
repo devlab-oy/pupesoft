@@ -80,5 +80,27 @@ if (!function_exists("laitetarkista")) {
 				}
 			}
 		}
+
+		if (mysql_field_name($result, $i) == "tila") {
+			$tila = trim($t[$i]);
+
+
+			if (empty($tila)) {
+				$virhe[$i] = t("Tila on pakollinen").'!';
+			}
+			else {
+				$query = "	SELECT selite
+							FROM avainsana
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji = 'LAITE_TILA'
+							AND selite = '{$tila}'";
+				$tilat_result = pupe_query($query);
+
+				if (mysql_num_rows($tilat_result) != 1) {
+					$virhe[$i] = t("Laitteen tilaa ei löydy avainsanoista").'!';
+				}
+			}
+		}
 	}
+
 }

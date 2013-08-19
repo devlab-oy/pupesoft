@@ -22622,6 +22622,7 @@ if (!function_exists("lisaa_rivi")) {
 		// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
 	}
 }
+
 if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
     function hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset($oletus_asiakas) {
         global $kukarow, $yhtiorow;
@@ -22736,9 +22737,231 @@ if (!function_exists('array_utf8_encode')) {
 	}
 }
 
-require_once('huoltosykli_functions.inc');
-require_once('laite_functions.inc');
-require_once('paikka_functions.inc');
+if (!function_exists('hae_huoltosykli')) {
+
+	function hae_huoltosykli($huoltosykli_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT *
+					FROM huoltosykli
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$huoltosykli_tunnus}'";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+if (!function_exists('hae_laitteen_oletus_huoltosyklit')) {
+
+	function hae_laitteen_oletus_huoltosyklit($laite_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT huoltosykli.*
+					FROM   laite
+					JOIN tuotteen_avainsanat ta
+					ON ( ta.yhtio = laite.yhtio
+						AND ta.tuoteno = laite.tuoteno
+						AND ta.laji = 'sammutin_tyyppi' )
+					JOIN tuotteen_avainsanat ta2
+					ON ( ta2.yhtio = laite.yhtio
+						AND ta2.tuoteno = laite.tuoteno
+						AND ta2.laji = 'sammutin_koko' )
+					JOIN paikka
+					ON ( paikka.yhtio = laite.yhtio
+						AND paikka.tunnus = laite.paikka )
+					JOIN huoltosykli
+					ON ( huoltosykli.yhtio = laite.yhtio
+						AND huoltosykli.tyyppi = ta.selite
+						AND huoltosykli.koko = ta2.selite
+						AND huoltosykli.olosuhde = paikka.olosuhde )
+					WHERE laite.yhtio = '{$kukarow['yhtio']}'
+					AND laite.tunnus = '{$laite_tunnus}'";
+		$result = pupe_query($query);
+
+		$huoltosyklit = array();
+		while ($huoltosykli = mysql_fetch_assoc($result)) {
+			$huoltosyklit[] = $huoltosykli;
+		}
+
+		return $huoltosyklit;
+	}
+}
+
+/**
+ * Iframe näkymään huoltosykli dropdownin change bind ja huoltosyklin huoltovälin muutto
+ */
+if (!function_exists('js_huoltosykli_dropdown_huoltovali_change')) {
+	function js_huoltosykli_dropdown_huoltovali_change() {
+		?>
+		<script>
+			$(document).ready(function() {
+				bind_huoltosykli_change();
+
+				//jos ollaan muokkaustilassa niin ensimmäisellä sivulatauksella ei päivitetä huoltosykliä, koska kentässä saattaa olla poikkeava huoltoväli ja sitä ei haluta kadottaa
+				//ja jos iframen domista löytyy classilla error mitä tahansa.
+				if ($('input[name=tunnus]').val().length === 0 && $('.error').length === 0) {
+					$('.huoltosykli_tunnus').change();
+				}
+			});
+
+			function bind_huoltosykli_change() {
+				$('.huoltosykli_tunnus').on('change', function() {
+					var ajax_request_obj = hae_huoltosyklin_huoltovali($(this).val());
+
+					var huoltovali_input = $(this).parent().parent().parent().find('.huoltovali');
+					ajax_request_obj.done(function(huoltosykli) {
+						$(huoltovali_input).val(huoltosykli.huoltovali);
+					});
+				});
+			}
+
+			function hae_huoltosyklin_huoltovali(huoltosykli_tunnus) {
+				return $.ajax({
+					async: true,
+					dataType: 'json',
+					type: 'GET',
+					url: 'yllapito.php?no_head=yes&ajax_request=1&toim=huoltosykli&action=hae_huoltosykli&huoltosykli_tunnus=' + huoltosykli_tunnus
+				}).done(function(data) {
+					if (console && console.log) {
+						console.log('Huoltoväli haku onnistui');
+						//console.log(data);
+					}
+
+				});
+			}
+		</script>
+		<?php
+	}
+}
+
+if (!function_exists('hae_laite')) {
+
+	function hae_laite($laite_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT laite.*,
+					ta.selite as laite_tyyppi,
+					ta2.selite as laite_koko
+					FROM laite
+					JOIN tuotteen_avainsanat ta
+					ON ( ta.yhtio = laite.yhtio
+						AND ta.tuoteno = laite.tuoteno
+						AND ta.laji = 'sammutin_tyyppi' )
+					JOIN tuotteen_avainsanat ta2
+					ON ( ta2.yhtio = laite.yhtio
+						AND ta2.tuoteno = laite.tuoteno
+						AND ta2.laji = 'sammutin_koko' )
+					WHERE laite.yhtio = '{$kukarow['yhtio']}'
+					AND laite.tunnus = '{$laite_tunnus}'";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+
+if (!function_exists('hae_paikka')) {
+	function hae_paikka($paikka_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT *
+					FROM paikka
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$paikka_tunnus}'";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+
+if (!function_exists('hae_extranet_kayttajaan_liitetty_asiakas')) {
+	function hae_extranet_kayttajaan_liitetty_asiakas() {
+		global $kukarow, $yhtiorow;
+
+		$query = "  SELECT asiakas.*
+					FROM asiakas
+					JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' AND kuka.kuka = '{$kukarow['kuka']}' )
+					WHERE asiakas.yhtio = '{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+
+if (!function_exists('kirjoita_json_tiedosto')) {
+	/**
+	 * Kirjoittaa json-tiedoston /tmp/ -kansioon. Annettavalla array:lle ($data) ajetaan array_utf8_encode rekursiivisesti.
+	 *
+	 * @param array $data
+	 * @param string $json_tiedosto_nimi
+	 * @return string
+	 */
+	function kirjoita_json_tiedosto($data, $json_tiedosto_nimi) {
+		$filename = "{$json_tiedosto_nimi}.json";
+		$filepath = "/tmp/{$filename}";
+
+		array_walk_recursive($data, 'array_utf8_encode');
+
+		file_put_contents($filepath, json_encode($data));
+
+		return $filepath;
+	}
+}
+
+if (!function_exists('aja_ruby')) {
+	/**
+	 * Tätä funktiota käytetään ruby-koodin ajamiseen, joka generoi pdf-tiedostoja. Funktio palauttaa generoidun tiedoston nimen.
+	 *
+	 * @global string $pupe_root_polku
+	 * @param string $json_data_filepath
+	 * @param string $ruby_tiedosto_nimi
+	 * @return string
+	 */
+	function aja_ruby($json_data_filepath, $ruby_tiedosto_nimi) {
+		global $pupe_root_polku;
+
+		$filepath = realpath("pdfs/ruby/{$ruby_tiedosto_nimi}.rb");
+		
+		$cmd = "ruby {$filepath} {$json_data_filepath}";
+		$return = exec($cmd, $output, $return_code);
+
+		//poistetaan json tiedosto
+		unlink($json_data_filepath);
+
+		// Palautetaan ensimmäinen rivi outputista, siinä on filenimet
+		return $output[0];
+	}
+}
+
+if (!function_exists('pupesoft_require')) {
+	function pupesoft_require($filename) {
+		global $kukarow, $yhtiorow;
+
+		if (file_exists($filename)) {
+			require_once($filename);
+		}
+		else if (file_exists(basename($filename))) {
+			require_once(basename($filename));
+		}
+		else {
+			die(t('Ajettavaa tiedostoa ei löytynyt'));
+		}
+	}
+}
+
+if (!function_exists('hae_yhtion_lasku_logo')) {
+	function hae_yhtion_lasku_logo() {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT data
+					FROM liitetiedostot
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND kayttotarkoitus = 'yhtion_parametrit.lasku_logo'";
+		$result = pupe_query($query);
+
+		$logo = mysql_fetch_assoc($result);
+		return $logo['data'];
+	}
+}
 
 if (!function_exists("hae_viivakoodilla")) {
 	function hae_viivakoodilla($viivakoodi) {

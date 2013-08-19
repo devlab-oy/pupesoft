@@ -67,24 +67,24 @@ if (mysql_field_name($result, $i) == "omistaja") {
 }
 
 if (mysql_field_name($result, $i) == "tila") {
-	$tilat = array(
-		array(
-			'value' => '',
-			'text' => t("Normaali"),
-		),
-		array(
-			'value' => 'P',
-			'text' => t("Poistettu"),
-		),
-	);
+	$query = "	SELECT *
+				FROM avainsana
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND laji = 'LAITE_TILA'";
+	$tuote_tila_result = pupe_query($query);
+	$tuote_tilat = array();
+	while($tuote_tila = mysql_fetch_assoc($tuote_tila_result)) {
+		$tuote_tilat[] = $tuote_tila;
+	}
+
 	$ulos = "<td>";
 	$ulos .= "<select name='{$nimi}'>";
-	foreach ($tilat as $tila) {
+	foreach ($tuote_tilat as $tila) {
 		$sel = "";
-		if ($tila['value'] == $trow['tila']) {
+		if ($tila['selite'] == $trow['tila']) {
 			$sel = "SELECTED";
 		}
-		$ulos .= "<option {$sel} value='{$tila['value']}'>{$tila['text']}</option>";
+		$ulos .= "<option {$sel} value='{$tila['selite']}'>{$tila['selitetark']}</option>";
 	}
 	$ulos .= "</select>";
 	$ulos .= "</td>";

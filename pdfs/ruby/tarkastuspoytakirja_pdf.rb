@@ -6,6 +6,7 @@ require 'prawn'
 require 'json'
 require 'logger'
 require 'date'
+require 'base64'
 
 class TarkastuspoytakirjaPDF
 
@@ -79,7 +80,7 @@ class TarkastuspoytakirjaPDF
     spot_data = [
       {
         :header => 'Kust.paikka/merkki',
-        :value => '??'
+        :value => ''
       },
       {
         :header => 'Kohde',
@@ -99,7 +100,7 @@ class TarkastuspoytakirjaPDF
       },
       {
         :header => 'Asiakasvastaava',
-        :value => '??'
+        :value => ''
       },
     ]
     self.spot_info(spot_data)
@@ -117,11 +118,11 @@ class TarkastuspoytakirjaPDF
       },
       {
         :header => 'Puh. nro',
-        :value => '??'
+        :value => ''
       },
       {
         :header => 'Puh. nro',
-        :value => '??'
+        :value => ''
       },
     ]
     self.other_info(other_data)
@@ -307,8 +308,13 @@ class TarkastuspoytakirjaPDF
       @pdf.draw_text "", :at => [@x, @y]
 
       #TODO poikkeama raportti??
+      if !row['poikkeamarivi_tunnus'].empty?
+        exception = 'X'
+      else
+        exception = ''
+      end
       @x += 50
-      @pdf.draw_text "", :at => [@x, @y]
+      @pdf.draw_text exception, :at => [@x, @y]
 
       #TODO viimeinen painekoe
       @x += 20
@@ -369,7 +375,10 @@ class TarkastuspoytakirjaPDF
   end
 
   def logo
-    @pdf.image File.dirname(__FILE__) + '/../../pics/logo_pdf.png', :scale => 0.7, :at => [0, 540]
+    file = File.new('/tmp/logo.jpeg', 'a+')
+    file.write Base64.decode64 @data['logo']
+    file.close
+    @pdf.image file.path, :scale => 0.7, :at => [0, 540]
   end
 
   def tarkastuspoytakirja_header

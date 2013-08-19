@@ -6,6 +6,7 @@ require 'prawn'
 require 'json'
 require 'logger'
 require 'date'
+require 'base64'
 
 #@TODO If poikkeamaraportti prints many rows the page break doesnt work as wanted. All the other data except rows need to go inside header so that all the other data gets printed when page break occurs.
 
@@ -151,7 +152,10 @@ class PoikkeamaraporttiPDF
   end
 
   def logo
-    @pdf.image File.dirname(__FILE__) + '/../../pics/logo_pdf.png', :scale => 0.7, :at => [@pdf_x, @pdf_y]
+    file = File.new('/tmp/logo.jpeg', 'a+')
+    file.write Base64.decode64 @data['logo']
+    file.close
+    @pdf.image file.path, :scale => 0.7, :at => [@pdf_x, @pdf_y]
   end
 
   def company_info

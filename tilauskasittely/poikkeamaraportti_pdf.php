@@ -2,7 +2,13 @@
 
 namespace PDF\Poikkeamaraportti;
 
-require("../inc/parametrit.inc");
+$filepath = dirname(__FILE__);
+if (file_exists($filepath . '/../inc/parametrit.inc')) {
+	require_once($filepath . '/../inc/parametrit.inc');
+}
+else {
+	require_once($filepath . '/parametrit.inc');
+}
 
 function hae_poikkeamaraportit($lasku_tunnukset) {
 	$pdf_tiedostot = array();
@@ -10,9 +16,9 @@ function hae_poikkeamaraportit($lasku_tunnukset) {
 		$tyomaaraykset = \PDF\Poikkeamaraportti\pdf_hae_tyomaarays($lasku_tunnukset);
 
 		foreach ($tyomaaraykset as $tyomaarays) {
-			$filepath = \PDF\Poikkeamaraportti\kirjoita_json_tiedosto($tyomaarays);
+			$filepath = kirjoita_json_tiedosto($tyomaarays, "poikkeamaraportti_{$tyomaarays['tunnus']}");
 
-			$pdf_tiedostot[] = aja_ruby($filepath);
+			$pdf_tiedostot[] = aja_ruby($filepath, 'poikkeamaraportti_pdf');
 		}
 	}
 
@@ -22,6 +28,13 @@ function hae_poikkeamaraportit($lasku_tunnukset) {
 function pdf_hae_tyomaarays($lasku_tunnukset) {
 	global $kukarow, $yhtiorow;
 
+	if (!empty($lasku_tunnukset)) {
+		$lasku_tunnukset = explode(',', $lasku_tunnukset);
+	}
+	else {
+		return array();
+	}
+	
 	//queryyn joinataan tauluja kohteeseen saakka, koska tarkastuspöytäkirjat halutaan tulostaa per kohde mutta työmääräykset on laite per työmääräin
 	$query = "	SELECT lasku.*,
 				kohde.tunnus as kohde_tunnus,
@@ -72,6 +85,7 @@ function pdf_hae_tyomaarays($lasku_tunnukset) {
 			$tyomaarays['kohde'] = \PDF\Poikkeamaraportti\hae_tyomaarayksen_kohde($tyomaarays['laite_tunnus']);
 			$tyomaarays['asiakas'] = \PDF\Poikkeamaraportti\hae_tyomaarayksen_asiakas($tyomaarays['liitostunnus']);
 			$tyomaarays['yhtio'] = $yhtiorow;
+			$tyomaarays['logo'] = base64_encode(hae_yhtion_lasku_logo());
 			//tyomääräys otsikolle voidaan asettaa toimitettuaika ekalta riviltä, koska työmääräys pitää sisällään toistaiseksi aina vain yhden rivin
 			$tyomaarays['toimitettuaika'] = $tyomaarays['rivit'][0]['toimitettuaika'];
 			$tyomaaraykset[$tyomaarays['kohde_tunnus']] = $tyomaarays;
@@ -166,17 +180,6 @@ function hae_tyomaarayksen_asiakas($asiakas_tunnus) {
 	return mysql_fetch_assoc($result);
 }
 
-function kirjoita_json_tiedosto($tyomaarays) {
-	$filename = "poikkeamaraportti_{$tyomaarays['tunnus']}.json";
-	$filepath = "/tmp/{$filename}";
-
-	array_walk_recursive($tyomaarays, '\PDF\Poikkeamaraportti\array_utf8_encode');
-
-	file_put_contents($filepath, json_encode($tyomaarays));
-
-	return $filepath;
-}
-
 function hae_tyomaarayksen_kohde($laite_tunnus) {
 	global $kukarow, $yhtiorow;
 
@@ -194,21 +197,3 @@ function hae_tyomaarayksen_kohde($laite_tunnus) {
 
 	return mysql_fetch_assoc($result);
 }
-
-function array_utf8_encode(&$item, $key) {
-	$item = utf8_encode($item);
-}
-
-function aja_ruby($filepath) {
-	global $pupe_root_polku;
-
-	$cmd = "ruby {$pupe_root_polku}/pdfs/ruby/poikkeamaraportti_pdf.rb {$filepath}";
-	$return = exec($cmd, $output, $return_code);
-
-	//poistetaan json tiedosto
-	unlink($filepath);
-
-	// Palautetaan ensimmäinen rivi outputista, siinä on filenimet
-	return $output[0];
-}
-?>

@@ -10,6 +10,9 @@
 	require ("{$pupe_root_polku}/inc/functions.inc");
 	require ("{$pupe_root_polku}/rajapinnat/magento_client.php");
 
+	// Laitetaan unlimited execution time
+	ini_set("max_execution_time", 0);
+
 	if (trim($argv[1]) != '') {
 		$yhtio = mysql_real_escape_string($argv[1]);
 		$yhtiorow = hae_yhtion_parametrit($yhtio);

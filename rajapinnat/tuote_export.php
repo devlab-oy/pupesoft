@@ -361,16 +361,26 @@
 
 	echo date("d.m.Y @ G:i:s")." - Haetaan tuotteiden variaatiot.\n";
 
-	// haetaan tuotteen variaatiot
-	$query = "	SELECT DISTINCT selite
+	// haetaan kaikki tuotteen variaatiot, jotka on menossa verkkokauppaan
+	$query = "	SELECT DISTINCT tuotteen_avainsanat.selite selite
 				FROM tuotteen_avainsanat
+				JOIN tuote ON (tuote.yhtio = tuotteen_avainsanat.yhtio
+				AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
+				AND tuote.status != 'P'
+				AND tuote.tuotetyyppi NOT IN ('A','B')
+				AND tuote.tuoteno != ''
+				$nakyvyys_lisa)
 				WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
 				AND tuotteen_avainsanat.laji = 'parametri_variaatio'
 				AND trim(tuotteen_avainsanat.selite) != ''";
 	$resselite = pupe_query($query);
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}'";
+		$muutoslisa = " AND (tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}'
+							OR try_fi.muutospvm  >= '{$datetime_checkpoint}'
+							OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
+							OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
+							OR tuote.muutospvm  >= '{$datetime_checkpoint}')";
 	}
 	else {
 		$muutoslisa = "";
@@ -382,6 +392,7 @@
 	// loopataan variaatio-nimitykset
 	while ($rowselite = mysql_fetch_assoc($resselite)) {
 
+		// Haetaan kaikki tuotteet, jotka kuuluu tähän variaatioon ja on muuttunut
 		$aliselect = "	SELECT
 						tuotteen_avainsanat.tuoteno,
 						tuote.tunnus,
@@ -417,6 +428,7 @@
 
 		while ($alirow = mysql_fetch_assoc($alires)) {
 
+			// Haetaan kaikki tuotteen atribuutit
 			$alinselect = " SELECT tuotteen_avainsanat.selite,
 							avainsana.selitetark
 							FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
@@ -530,7 +542,7 @@
 		$time_end = microtime(true);
 		$time = round($time_end - $time_start);
 
-		echo date("d.m.Y @ G:i:s")." - Päivitys valmis! (Magento API {$time} sekuntia)\n";
+		echo date("d.m.Y @ G:i:s")." - Tuote-export valmis! (Magento API {$time} sekuntia)\n";
 	}
 	elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
 

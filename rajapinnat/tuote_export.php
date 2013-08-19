@@ -571,6 +571,9 @@
 		}
 	}
 
+	// Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
+	require ("{$pupe_root_polku}/inc/connect.inc");
+
 	// Kun kaikki onnistui, p‰ivitet‰‰n lopuksi timestamppi talteen
 	$query = "	UPDATE avainsana SET
 				selite = '{$datetime_checkpoint_uusi}'

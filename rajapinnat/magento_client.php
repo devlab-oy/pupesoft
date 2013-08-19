@@ -173,7 +173,7 @@ class MagentoClient {
 		}
 		catch (Exception $e) {
 			$this->_error_count++;
-			$this->log("Virhe! Tuotteiden lis‰yksess‰", $e);
+			$this->log("Virhe! Tuotteiden lis‰yksess‰ (simple)", $e);
 			return;
 		}
 
@@ -225,7 +225,7 @@ class MagentoClient {
 							$tuote_data,
 							)
 						);
-					$this->log("Tuote {$tuote['tuoteno']} lis‰tty." . print_r($tuote_data, true));
+					$this->log("Tuote {$tuote['tuoteno']} lis‰tty (simple)" . print_r($tuote_data, true));
 				}
 				// Tuote on jo olemassa, p‰ivitet‰‰n
 				else {
@@ -235,7 +235,7 @@ class MagentoClient {
 							$tuote_data,
 							)
 						);
-					$this->log("Tuote {$tuote['tuoteno']} p‰ivitetty." . print_r($tuote_data, true));
+					$this->log("Tuote {$tuote['tuoteno']} p‰ivitetty (simple)" . print_r($tuote_data, true));
 				}
 
 				// Lis‰t‰‰n tuotekuvat
@@ -250,11 +250,11 @@ class MagentoClient {
 			}
 			catch (Exception $e) {
 				$this->_error_count++;
-				$this->log("Virhe! Tuotteen {$tuote['tuoteno']} lis‰ys/p‰ivitys ep‰onnistui." . print_r($tuote_data, true), $e);
+				$this->log("Virhe! Tuotteen {$tuote['tuoteno']} lis‰ys/p‰ivitys ep‰onnistui (simple)" . print_r($tuote_data, true), $e);
 			}
 		}
 
-		$this->log("$count tuotetta p‰ivitetty");
+		$this->log("$count tuotetta p‰ivitetty (simple)");
 
 		// Palautetaan p‰vitettyjen tuotteiden m‰‰r‰
 		return $count;
@@ -357,7 +357,7 @@ class MagentoClient {
 							$configurable
 							)
 						);
-					$this->log("Tuote {$nimitys} lis‰tty." . print_r($configurable, true));
+					$this->log("Tuote {$nimitys} lis‰tty (configurable)" . print_r($configurable, true));
 				}
 				// P‰ivitet‰‰n olemassa olevaa configurablea
 				else {
@@ -367,7 +367,7 @@ class MagentoClient {
 							$configurable
 							)
 						);
-					$this->log("Tuote {$nimitys} p‰ivitetty." . print_r($configurable, true));
+					$this->log("Tuote {$nimitys} p‰ivitetty (configurable)" . print_r($configurable, true));
 				}
 
 				// Tarkistetaan onko lis‰tyll‰ tuotteella tuotekuvia ja lis‰t‰‰n ne
@@ -382,11 +382,11 @@ class MagentoClient {
 			}
 			catch (Exception $e) {
 				$this->_error_count++;
-				$this->log("Virhe! Configurable tuotteen {$nimitys} lis‰ys/p‰ivitys ep‰onnistui." . print_r($configurable, true), $e);
+				$this->log("Virhe! Configurable tuotteen {$nimitys} lis‰ys/p‰ivitys ep‰onnistui (configurable)" . print_r($configurable, true), $e);
 			}
 		}
 
-		$this->log("$count tuotetta p‰ivitetty");
+		$this->log("$count tuotetta p‰ivitetty (configurable)");
 
 		// Palautetaan lis‰ttyjen configurable tuotteiden m‰‰r‰
 		return $count;

@@ -225,7 +225,7 @@ class MagentoClient {
 							$tuote_data,
 							)
 						);
-					$this->log("Tuote {$tuote['tuoteno']} lisätty (simple)" . print_r($tuote_data, true));
+					$this->log("Tuote {$tuote['tuoteno']} lisätty (simple) " . print_r($tuote_data, true));
 				}
 				// Tuote on jo olemassa, päivitetään
 				else {
@@ -235,7 +235,7 @@ class MagentoClient {
 							$tuote_data,
 							)
 						);
-					$this->log("Tuote {$tuote['tuoteno']} päivitetty (simple)" . print_r($tuote_data, true));
+					$this->log("Tuote {$tuote['tuoteno']} päivitetty (simple) " . print_r($tuote_data, true));
 				}
 
 				// Lisätään tuotekuvat
@@ -250,7 +250,7 @@ class MagentoClient {
 			}
 			catch (Exception $e) {
 				$this->_error_count++;
-				$this->log("Virhe! Tuotteen {$tuote['tuoteno']} lisäys/päivitys epäonnistui (simple)" . print_r($tuote_data, true), $e);
+				$this->log("Virhe! Tuotteen {$tuote['tuoteno']} lisäys/päivitys epäonnistui (simple) " . print_r($tuote_data, true), $e);
 			}
 		}
 
@@ -298,7 +298,7 @@ class MagentoClient {
 			// Configurable tuotteen tiedot
 			$configurable = array(
 				'categories'			=> array($category_id),
-				'websites'				=> explode(" ", $tuote['nakyvyys']),
+				'websites'				=> explode(" ", $tuotteet[0]['nakyvyys']),
 				'name'					=> utf8_encode($tuotteet[0]['nimitys']),
 				'description'           => utf8_encode($tuotteet[0]['kuvaus']),
 				'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
@@ -360,7 +360,7 @@ class MagentoClient {
 							$configurable
 							)
 						);
-					$this->log("Tuote {$nimitys} lisätty (configurable)" . print_r($configurable, true));
+					$this->log("Tuote {$nimitys} lisätty (configurable) " . print_r($configurable, true));
 				}
 				// Päivitetään olemassa olevaa configurablea
 				else {
@@ -370,7 +370,7 @@ class MagentoClient {
 							$configurable
 							)
 						);
-					$this->log("Tuote {$nimitys} päivitetty (configurable)" . print_r($configurable, true));
+					$this->log("Tuote {$nimitys} päivitetty (configurable) " . print_r($configurable, true));
 				}
 
 				// Tarkistetaan onko lisätyllä tuotteella tuotekuvia ja lisätään ne
@@ -385,7 +385,7 @@ class MagentoClient {
 			}
 			catch (Exception $e) {
 				$this->_error_count++;
-				$this->log("Virhe! Configurable tuotteen {$nimitys} lisäys/päivitys epäonnistui (configurable)" . print_r($configurable, true), $e);
+				$this->log("Virhe! Configurable tuotteen {$nimitys} lisäys/päivitys epäonnistui (configurable) " . print_r($configurable, true), $e);
 			}
 		}
 

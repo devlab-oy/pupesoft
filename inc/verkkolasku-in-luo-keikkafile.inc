@@ -2180,6 +2180,10 @@ $debug = 0;
 
 		$otunnus = $keikantunnus;
 
+		$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
+		$result = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($result);
+
 		$laskuvirhe .= t("Vied‰‰n kauttalaskutus varastoon").". ($laskurow[laskunro])\n";
 
 		$tullaan_automaattikohdistuksesta = false;

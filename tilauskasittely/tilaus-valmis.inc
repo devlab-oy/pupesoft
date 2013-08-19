@@ -849,7 +849,7 @@ else {
 				pupesoft_tulosta_lahete($params);
 
 				// Jos tehdaspalautus
-				if (file_exists("tilauskasittely/$tilausvalmis_asiakas_row[toimitusvahvistus]") and $tilausvalmis_asiakas_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+				if (file_exists("$tilausvalmis_asiakas_row[toimitusvahvistus]") and $tilausvalmis_asiakas_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
 
 					// jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan tämän jälkeen
 					$tmp_laskurow = $laskurow;

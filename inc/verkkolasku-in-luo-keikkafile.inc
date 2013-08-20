@@ -1008,7 +1008,7 @@ $debug = 0;
 				$laskuvirhe .= t("Tuotenumero").": {$toim_tuoteno} ".t("Kpl").": {$kpl} ".t("Ei voitu kohdistaa saapumiseen")."! ({$keikantunnus}/{$rtuoteno[$i]['tilaajanrivinro']})\n";
 			}
 		}
-		elseif (($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == "MAVENTAXML" or ($osrow['ebid'] == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) and (!isset($rtuoteno[$i]["kauttalaskutus"]) or $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS") and !$tullaan_virhetarkistuksesta) {
+		elseif (($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $trow['asn_sanomat'] == 'M') or ($osrow['ebid'] == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) and (!isset($rtuoteno[$i]["kauttalaskutus"]) or $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS") and !$tullaan_virhetarkistuksesta) {
 			// Onko ostolaskua ja onko kohdistamatta
 
 			// Mikäli toimittajalla on kenttä "asn_sanomat" arvoja, ja ne on
@@ -1631,7 +1631,7 @@ $debug = 0;
 	}
 
 	// Jos kyseessä on TecCom ostolasku tai Maventa-lasku
-	if ($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == 'MAVENTAXML' or ($osrow['ebid'] == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) {
+	if ($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $trow['asn_sanomat'] == 'M') or ($osrow['ebid'] == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) {
 
 		$loop_array = array();
 
@@ -2001,7 +2001,7 @@ $debug = 0;
 
 	$automaattituloutus = false;
 
-	if (($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == 'MAVENTAXML') and $virheet == 0 and count($loop_array) > 0 and $trow['sahkoinen_automaattituloutus'] != 'E') {
+	if (($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $trow['asn_sanomat'] == 'M') or ($osrow['ebid'] == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) and $virheet == 0 and count($loop_array) > 0 and $trow['sahkoinen_automaattituloutus'] != 'E') {
 
 		if ($trow['sahkoinen_automaattituloutus'] == 'K') $automaattituloutus = true;
 
@@ -2019,7 +2019,7 @@ $debug = 0;
 		}
 	}
 
-	if (($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == 'MAVENTAXML') and $virheet == 0 and count($loop_array) > 0 and $automaattituloutus) {
+	if (($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $trow['asn_sanomat'] == 'M') or ($osrow['ebid'] == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) and $virheet == 0 and count($loop_array) > 0 and $automaattituloutus) {
 
 		$tullaan_automaattikohdistuksesta = true;
 		$uusi_suuntalavan_tunnus = 0;

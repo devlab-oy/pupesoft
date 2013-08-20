@@ -8,6 +8,44 @@
 
 	if (!in_array($myynti_vai_osto, array('M','O')) or !isset($laskurow)) $luodaan_aineisto = false;
 
+	if ($luodaan_aineisto and $myynti_vai_osto == 'M') {
+
+		$query = "	SELECT *
+					FROM asiakkaan_avainsanat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND liitostunnus = '{$laskurow['liitostunnus']}'
+					AND laji IN ('futur_host','futur_path','futur_user','futur_password')
+					AND avainsana != ''";
+		$chk_res = pupe_query($query);
+
+		$ftphost_futur = $ftppath_futur = $ftpuser_futur = $ftppass_futur = "";
+
+		while ($chk_row = mysql_fetch_assoc($chk_res)) {
+
+			switch($chk_row['laji']) {
+				case 'futur_host':
+					$ftphost_futur = $chk_row['avainsana'];
+					break;
+				case 'futur_path':
+					$ftppath_futur = $chk_row['avainsana'];
+					break;
+				case 'futur_user':
+					$ftpuser_futur = $chk_row['avainsana'];
+					break;
+				case 'futur_password':
+					$ftppass_futur = $chk_row['avainsana'];
+					break;
+			}
+		}
+
+		if (($ftphost_futur == 'localhost' and $ftppath_futur != '') or ($ftphost_futur != 'localhost' and $ftphost_futur != '' and $ftppath_futur != '' and $ftppass_futur != '' and $ftpuser_futur != '')) {
+			$laskurow['tilaustyyppi'] = 3;
+		}
+		else {
+			$luodaan_aineisto = false;
+		}
+	}
+
 	if ($luodaan_aineisto) {
 
 		$summa = $toim == 'REKLAMAATIO' ? $laskurow['summa'] : '';
@@ -71,7 +109,7 @@
 
 		// Generoidaan asiakasnumeroon ovtlisä, jos käytössä on toimipaikka
 		if (($myynti_vai_osto == 'O' and $laskurow['vanhatunnus'] != 0) or ($myynti_vai_osto == 'M' and $laskurow['yhtio_toimipaikka'] != 0)) {
-        
+
 			$wherelisa = $myynti_vai_osto == 'O' ? $laskurow['vanhatunnus'] : $laskurow['yhtio_toimipaikka'];
 
 			$query = "	SELECT ovtlisa
@@ -79,7 +117,7 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$wherelisa}'";
 			$toimipaikka_chk_res = pupe_query($query);
-        
+
 			if (mysql_num_rows($toimipaikka_chk_res) != 0) {
 				$toimipaikka_chk_row = mysql_fetch_assoc($toimipaikka_chk_res);
 				$asiakasnumero = "{$asiakasnumero}{$toimipaikka_chk_row['ovtlisa']}";

@@ -44,6 +44,11 @@ touch($lockfile);
 // Magenton soap client
 $magento = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 
+if ($magento === null) {
+	unlink($lockfile);
+	exit;
+}
+
 // Haetaan maksetut tilaukset magentosta
 $tilaukset = $magento->hae_tilaukset('Processing');
 

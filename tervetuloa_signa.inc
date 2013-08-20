@@ -41,14 +41,14 @@ function echo_myyntiseuranta_table() {
 	echo "<tr>";
 	echo "<th>".t("Liikevaihto")."</th>";
 	echo "<td align='right'>";
-	echo sprintf('%.2f', $tulos_ja_liikevaihto['liikevaihto']);
+	echo sprintf('%.2f', $tulos_ja_liikevaihto['liikevaihto']) . " {$yhtiorow['valkoodi']}";
 	echo "</td>";
 	echo "</tr>";
 
 	echo "<tr>";
 	echo "<th>".t("Tulos")."</th>";
 	echo "<td align='right'>";
-	echo sprintf('%.2f', $tulos_ja_liikevaihto['tulos']);
+	echo sprintf('%.2f', $tulos_ja_liikevaihto['tulos']) . " {$yhtiorow['valkoodi']}";
 	echo "</td>";
 	echo "</tr>";
 
@@ -63,7 +63,8 @@ function echo_myyntiseuranta_table() {
 
 	echo "<tr>";
 	echo "<td align='right'>";
-	echo sprintf('%.2f', $avoimet_tilaukset['arvo']);
+
+	echo sprintf('%.2f', $avoimet_tilaukset['arvo']) . " {$yhtiorow['valkoodi']}";
 	echo "</td>";
 	echo "</tr>";
 	echo "</table>";
@@ -85,7 +86,7 @@ function echo_myyntiseuranta_table() {
 		echo t("Liikevaihto").' '.piirra_aikavali($nykyinen_kvartaali);
 		echo "</td>";
 		echo "<td align='right'>";
-		echo $myynti_ja_kate_nykyinen_kvartaali['myynti'];
+		echo sprintf('%.2f', $myynti_ja_kate_nykyinen_kvartaali['myynti']) . " {$yhtiorow['valkoodi']}";
 		echo "</td>";
 		echo "</tr>";
 
@@ -94,7 +95,7 @@ function echo_myyntiseuranta_table() {
 		echo t("Liikevaihto").' '.piirra_aikavali($nykyinen_kuukausi);
 		echo "</td>";
 		echo "<td align='right'>";
-		echo $myynti_ja_kate_nykyinen_kuukausi['myynti'];
+		echo sprintf('%.2f', $myynti_ja_kate_nykyinen_kuukausi['myynti']) . " {$yhtiorow['valkoodi']}";
 		echo "</td>";
 		echo "</tr>";
 
@@ -103,7 +104,7 @@ function echo_myyntiseuranta_table() {
 		echo t("Kate").' '.piirra_aikavali($nykyinen_kuukausi);
 		echo "</td>";
 		echo "<td align='right'>";
-		echo $myynti_ja_kate_nykyinen_kuukausi['kate'];
+		echo sprintf('%.2f', $myynti_ja_kate_nykyinen_kuukausi['kate']) . " {$yhtiorow['valkoodi']}";
 		echo "</td>";
 		echo "</tr>";
 
@@ -112,7 +113,7 @@ function echo_myyntiseuranta_table() {
 		echo t("Avoimet tilaukset");
 		echo "</td>";
 		echo "<td align='right'>";
-		echo $avoimet_tilaukset['myyjan_arvo'];
+		echo sprintf('%.2f', $avoimet_tilaukset['myyjan_arvo']) . " {$yhtiorow['valkoodi']}";
 		echo "</td>";
 		echo "</tr>";
 		echo "</table>";
@@ -182,8 +183,7 @@ function hae_myyjan_myynti_ja_kate($aika, $kuka_tunnus) {
 }
 
 function piirra_aikavali($aika_vali) {
-	$mur = date('d.m', strtotime($aika_vali['start_date'])).' - '.date('d.m', strtotime($aika_vali['end_date']));
-	return $mur;
+	return date('d.m', strtotime($aika_vali['start_date'])).' - '.date('d.m', strtotime($aika_vali['end_date']));
 }
 
 function paata_kvartaali() {

@@ -3864,6 +3864,11 @@
 				else {
 					$sopimus_pp = "";
 				}
+				
+				$sopimus_info = '';
+				if($toim != 'EXTENNAKKO' and $toim != 'EXTTARJOUS') {
+					$sopimus_info = "sopimus_lisatietoja			= '$sopimus_lisatietoja',";
+				}
 
 				$query3 .= "laskun_lisatiedot SET
 							yhtio						= '$kukarow[yhtio]',
@@ -3871,7 +3876,7 @@
 							sopimus_pp					= '$sopimus_pp',
 							sopimus_alkupvm				= '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
 							sopimus_loppupvm			= '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
-							sopimus_lisatietoja			= '$sopimus_lisatietoja',
+							{$sopimus_info}
 							kolm_ovttunnus				= '$kolm_ovttunnus',
 							kolm_nimi					= '$kolm_nimi',
 							kolm_nimitark				= '$kolm_nimitark',

@@ -514,7 +514,7 @@ if ($tila == 'tee_siirto') {
 		$keikkakesken = 0;
 
 		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
-			$keikkakesken = file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock");
+			list($keikkakesken, $_kuka, $_timestamp) = explode(";", file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock"));
 		}
 
 		foreach ($rivi_siirrettavat_tunnukset as $valittu) {

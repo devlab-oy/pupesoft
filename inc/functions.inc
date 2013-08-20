@@ -22633,6 +22633,7 @@ if (!function_exists("lisaa_rivi")) {
 		// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
 	}
 }
+
 if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
     function hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset($oletus_asiakas) {
         global $kukarow, $yhtiorow;
@@ -22643,14 +22644,11 @@ if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
 
         $query = "  SELECT count(*) as luku
                     FROM lasku
-                    JOIN asiakas
-					ON ( asiakas.yhtio = lasku.yhtio
-						AND asiakas.tunnus = lasku.liitostunnus
-						AND asiakas.tunnus = '{$oletus_asiakas}' )
-                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                    AND lasku.tila = 'T'
-                    AND lasku.alatila = ''
-					AND lasku.clearing = 'EXTTARJOUS'";
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tila = 'T'
+                    AND alatila = ''
+					AND liitostunnus = '{$oletus_asiakas}'
+					AND clearing = 'EXTTARJOUS'";
         $result = pupe_query($query);
 
         $tarjousten_lukumaara = mysql_fetch_assoc($result);
@@ -22668,14 +22666,11 @@ if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot")) {
 
         $query = "  SELECT count(*) as luku
                     FROM lasku
-                    JOIN asiakas
-					ON ( asiakas.yhtio = lasku.yhtio
-						AND asiakas.tunnus = lasku.liitostunnus
-						AND asiakas.tunnus = '{$oletus_asiakas}' )
-                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                    AND lasku.tila = 'N'
-                    AND lasku.alatila = ''
-					AND lasku.clearing = 'EXTENNAKKO'";
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tila = 'N'
+                    AND alatila = ''
+					AND liitostunnus = '{$oletus_asiakas}'
+					AND clearing = 'EXTENNAKKO'";
         $result = pupe_query($query);
 
         $ennakoiden_lukumaara = mysql_fetch_assoc($result);

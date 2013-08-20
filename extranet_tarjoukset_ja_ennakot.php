@@ -88,6 +88,7 @@ if ($tee == "LISAARIVI") {
 		$hinta = 0.000001;
 		$alennus = 100;
 		$laskurow = hae_lasku($otunnus);
+		$netto = '';
 
 		// Nollataan hinta kun kyseessä on asiakkaan ext-ennakkotilaukseen lisäämä rivi
 		if ($toim == 'EXTENNAKKO') {
@@ -103,6 +104,7 @@ if ($tee == "LISAARIVI") {
 				$tuotteen_hinta = mysql_fetch_assoc($result);
 				$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
 				$alennus = 0;
+				$netto = 'N';
 			}
 			$laskurow["tila"] = 'N';
 		}
@@ -122,6 +124,7 @@ if ($tee == "LISAARIVI") {
 			'hinta'			 => $hinta,
 			'perhekielto'	 => $perhekielto,
 			'perheid'		 => $perheid,
+			'netto'			 => $netto,
 		);
 		lisaa_rivi($parametrit);
 

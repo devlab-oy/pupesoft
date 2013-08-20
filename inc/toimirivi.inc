@@ -594,8 +594,8 @@
 
 		$ulos  = "<td><select name='{$nimi}'>";
 		$ulos .= "<option value=''>".t("Käytetään yhtiön toimipaikan oletusta")."</option>";
-		$ulos .= "<option value='E'{$sel['E']}>".t("Ei käytössä")."</option>";
-		$ulos .= "<option value='K'{$sel["K"]}>".t("Tuloutetaan automaattisesti sähköisen laskun sisäänluvun yhteydessä")."</option>";
+		$ulos .= "<option value='E'{$sel['E']}>".t("Sähköisen laskun sisäänluvun yhteydessä ei tulouteta tuotteita varastoon")."</option>";
+		$ulos .= "<option value='K'{$sel["K"]}>".t("Tuotteet tuloutetaan varastoon automaattisesti sähköisen laskun sisäänluvun yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

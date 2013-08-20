@@ -81,9 +81,13 @@ class vuosisopimus_asiakkaat_excel {
 	}
 
 	private function rivit_osastoittain() {
-		$this->write_solu(t('Rajaus:', $this->kieli));
+		$this->write_solu(t('Kausi Nyt:', $this->kieli));
 		$this->write_solu($this->rajaus_paivat['alkupaiva'] . ' - ' . $this->rajaus_paivat['loppupaiva']);
 		$this->move_seuraavalle_riville();
+		$this->write_solu(t('Kausi Ed:', $this->kieli));
+		$this->write_solu($this->rajaus_paivat['edalkupaiva'] . ' - ' . $this->rajaus_paivat['edloppupaiva']);
+		$this->move_seuraavalle_riville();
+		
 		$this->print_headers('osasto');
 		$this->move_seuraavalle_riville();
 
@@ -94,8 +98,11 @@ class vuosisopimus_asiakkaat_excel {
 	}
 
 	private function rivit_tuoteryhmittain() {
-		$this->write_solu('Rajaus:');
+		$this->write_solu('Kausi Nyt:');
 		$this->write_solu($this->rajaus_paivat['alkupaiva'] . ' - ' . $this->rajaus_paivat['loppupaiva']);
+		$this->move_seuraavalle_riville();
+		$this->write_solu(t('Kausi Ed:', $this->kieli));
+		$this->write_solu($this->rajaus_paivat['edalkupaiva'] . ' - ' . $this->rajaus_paivat['edloppupaiva']);
 		$this->move_seuraavalle_riville();
 		$this->print_headers('tuoteryhma');
 		$this->move_seuraavalle_riville();

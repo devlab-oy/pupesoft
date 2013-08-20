@@ -60,8 +60,12 @@ function alku ($laji = '') {
 	$pdf->draw_text(300, 677, $yhtiorow["nimi"],				$firstpage, $norm);
 
 	//aika
-	$pdf->draw_text(300,  610, "Rajaus: ",			$firstpage, $pieni);
-	$pdf->draw_text(350,  610, tv1dateconv("$alkuvv-$alkukk-$alkupp")." - ".tv1dateconv("$loppuvv-$loppukk-$loppupp"),			$firstpage, $pieni);
+	$pdf->draw_text(300,  625, "Kausi Nyt: ",			$firstpage, $pieni);
+	$pdf->draw_text(350,  625, tv1dateconv("$alkuvv-$alkukk-$alkupp")." - ".tv1dateconv("$loppuvv-$loppukk-$loppupp"),			$firstpage, $pieni);
+	$pdf->draw_text(300,  615, "Kausi Ed: ",			$firstpage, $pieni);
+	$ed_alku_vv = $alkuvv-1;
+	$ed_loppu_vv = $loppuvv-1;
+	$pdf->draw_text(350,  615, tv1dateconv("$ed_alku_vv-$alkukk-$alkupp")." - ".tv1dateconv("$ed_loppu_vv-$loppukk-$loppupp"),			$firstpage, $pieni);
 
 	//otsikkotiedot
 	if ($laji == "osasto") {

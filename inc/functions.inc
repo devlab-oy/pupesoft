@@ -22658,6 +22658,31 @@ if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
     }
 }
 
+if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot")) {
+    function hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot($oletus_asiakas) {
+        global $kukarow, $yhtiorow;
+
+		if (empty($oletus_asiakas)) {
+			return 0;
+		}
+
+        $query = "  SELECT count(*) as luku
+                    FROM lasku
+                    JOIN asiakas
+					ON ( asiakas.yhtio = lasku.yhtio
+						AND asiakas.tunnus = lasku.liitostunnus
+						AND asiakas.tunnus = '{$oletus_asiakas}' )
+                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                    AND lasku.tila = 'N'
+                    AND lasku.alatila = ''
+					AND lasku.clearing = 'EXTENNAKKO'";
+        $result = pupe_query($query);
+
+        $ennakoiden_lukumaara = mysql_fetch_assoc($result);
+        return $ennakoiden_lukumaara['luku'];
+    }
+}
+
 if (!function_exists("saako_myyda_private_label")) {
 	function saako_myyda_private_label($asiakastunnus, $tuotenro, $alemaara = 1, $tarkistakaikkituotteet = FALSE) {
 		//$tarkistakaikkituotteet muuttujalla voidaan funktio pakottaa tutkimaan onko asiakashintoja/alennuksia olemassa, vaikka tuote olisikin normaali hinnasto-tuote (eli tarkistetaan kaikki tuotteet)

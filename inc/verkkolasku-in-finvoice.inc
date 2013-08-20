@@ -3,6 +3,8 @@
 $laskuformaatti = "FINVOICE";
 $laskun_ebid    = "FINVOICEXML";
 
+if (strpos($file, "maventa") !== false) $laskun_ebid = $ebid = "MAVENTAXML";
+
 // parseroidaan xml
 $yhtio 					= $xml->BuyerOrganisationUnitNumber;
 $verkkotunnus_vas		= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;

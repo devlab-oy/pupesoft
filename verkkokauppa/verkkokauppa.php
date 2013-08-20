@@ -1291,7 +1291,7 @@ if ($tee == "") {
 	}
 	else {
 		$login_screen = "<input type='button' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=haku&hakutapa=tila&tilaustila=kesken', false, false);\" value='".t("Avoimet tilaukset")."'>|<input type='button' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria', false, false);\" value='".t("Tilaushistoria")."'>|<input type='button' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot', false, false);\" value='".t("Asiakastiedot")."'>
-			&nbsp;Tervetuloa, ".$kukarow["nimi"]."&nbsp;<input type='button' onclick=\"javascript:document.location='".$palvelin2."logout.php?location=".$palvelin2."';\" value='".t("Kirjaudu ulos")."'>";
+			&nbsp;<font class='login'>Tervetuloa, ".$kukarow["nimi"]."</font>&nbsp;<input type='button' onclick=\"javascript:document.location='".$palvelin2."logout.php?location=".$palvelin2."';\" value='".t("Kirjaudu ulos")."'>";
 	}
 
 	$verkkokauppa_ulos =  "<div class='login' id='login'>$login_screen</div>

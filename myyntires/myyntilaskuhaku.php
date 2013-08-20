@@ -11,7 +11,6 @@
 	if (!isset($tee)) $tee = '';
 	if (!isset($summa1)) $summa1 = '';
 	if (!isset($summa2)) $summa2 = '';
-	if (!isset($alku)) $alku = 0;
 	if (!isset($pvm)) $pvm = '';
 
 	if (!function_exists("kuka_kayttaja")) {
@@ -183,15 +182,12 @@
 	}
 
 	if ($tee != '') {
-		$alku += 0;
-
 		$query = "	SELECT tapvm, erpcm, laskunro, concat_ws(' ', nimi, nimitark) nimi,
 					summa, valkoodi, ebid, tila, alatila, tunnus,
 					mapvm, saldo_maksettu, ytunnus, liitostunnus, laatija
 					FROM lasku {$index}
 					WHERE {$ehto} and yhtio = '{$kukarow['yhtio']}'
-					ORDER BY {$jarj}
-					LIMIT {$alku}, 50";
+					ORDER BY {$jarj}";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -277,22 +273,8 @@
 			echo "</tbody>";
 			echo "</table><br /><br />";
 
-			if ($alku > 0) {
-				$siirry = $alku - 50;
-				echo "<a href = '?tee={$tee}&pvm={$pvm}&summa1={$summa1}&summa2={$summa2}&alku={$siirry}'>",t("Edelliset"),"</a> ";
-			}
-			else {
-				echo t("Edelliset")," ";
-			}
-
-			$siirry = $alku + 50;
-			echo "<a href = '?tee={$tee}&pvm={$pvm}&summa1={$summa1}&summa2={$summa2}&alku={$siirry}'>",t("Seuraavat"),"</a> ";
-			echo "<br /><br />";
-
 			$toim = "";
 		}
 	}
 
 	require ("inc/footer.inc");
-
-?>

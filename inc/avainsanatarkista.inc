@@ -58,7 +58,7 @@ if(!function_exists("avainsanatarkista")) {
 				$seliteerrori = 1;
 			}
 
-			if ($tem_laji == 'HINNAT_CRON') {
+			if ($tem_laji == 'HINNAT_CRON' or $tem_laji == 'TUOTE_EXP_CRON') {
 
 				$date = $t[$i];
 
@@ -66,7 +66,6 @@ if(!function_exists("avainsanatarkista")) {
 				if (preg_match("/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/", $date) == false or strtotime($date) === false) {
 					$virhe[$i] = t("Selite on pakollinen ja se pit‰‰ olla muodossa vvvv-kk-pp tt:mm:ss");
 				}
-
 			}
 
 			if ($tem_laji == 'LABEL') {
@@ -159,7 +158,7 @@ if(!function_exists("avainsanatarkista")) {
 				}
 			}
 
-			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON') {
+			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON' and $tem_laji != 'TUOTE_EXP_CRON') {
 				$virhe[$i] = t("Selite ja selitetark ei voi olla tyhji‰")."!";
 			}
 

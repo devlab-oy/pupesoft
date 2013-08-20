@@ -214,6 +214,13 @@
 
 			$edi_order .= "*RE  OSTOTILRIV $i\n";
 			$i++;
+			
+			$sqlquery = "	UPDATE tilausrivi SET
+							tilaajanrivinro = tunnus
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus  = '$tilausrivi_row[tunnus]'";
+			$tresult = pupe_query($sqlquery);
+			
 		}
 
 		if ($i > 1) {

@@ -126,11 +126,13 @@
 
 		if (trim($sanomatunniste) != '') {
 
-			//$valitse_lisa = $valitse == 'asn' ? 'asn' : 'tec';
 			if ($valitse == 'maventa') {
 				$valitse_lisa = 'mav';
 			}
-			else if ($valitse == 'asn') {
+			elseif ($valitse == 'finvoice') {
+				$valitse_lisa = 'fin';
+			}
+			elseif ($valitse == 'asn') {
 				$valitse_lisa = 'asn';
 			}
 			else {
@@ -606,7 +608,15 @@
 
 				if ($tee == 'vahvistavakisinkolli' and !$tullaan_virhetarkistuksesta) {
 
-					$lajilisa = $valitse == 'maventa' ? 'mav' : 'tec';
+					if ($valitse == 'maventa') {
+						$lajilisa = 'mav';
+					}
+					elseif ($valitse == 'finvoice') {
+						$lajilisa = 'fin';
+					}
+					else {
+						$lajilisa = 'tec';
+					}
 
 					$query = "	UPDATE asn_sanomat SET
 								status = '',
@@ -1050,6 +1060,9 @@
 			}
 			elseif ($valitse == 'maventa') {
 				$lajilisa = 'mav';
+			}
+			elseif ($valitse == 'finvoice') {
+				$lajilisa = 'fin';
 			}
 			else {
 				$lajilisa = 'tec';
@@ -1504,6 +1517,9 @@
 				if ($valitse == 'maventa') {
 					$lajilisa = 'mav';
 				}
+				elseif ($valitse == 'finvoice') {
+					$lajilisa = 'fin';
+				}
 				elseif ($valitse == 'asn') {
 					$lajilisa = 'asn';
 				}
@@ -1835,7 +1851,15 @@
 
 			$laskurow = mysql_fetch_assoc($laskures);
 
-			$lajilisa = $valitse == 'maventa' ? "mav" : "tec";
+			if ($valitse == 'maventa') {
+				$lajilisa = 'mav';
+			}
+			elseif ($valitse == 'finvoice') {
+				$lajilisa = 'fin';
+			}
+			else {
+				$lajilisa = 'tec';
+			}
 
 			$query = "	SELECT asn_sanomat.toimittajanumero,
 						asn_sanomat.toim_tuoteno,
@@ -1962,11 +1986,15 @@
 		elseif (isset($nayta_maventa)) {
 			$valitse = "maventa";
 		}
+		elseif (isset($nayta_finvoice)) {
+			$valitse = "finvoice";
+		}
 
 		if ($valitse == '') {
 			echo "<form method='post' action='?tee='>";
 			echo "<table><tr>";
 			echo "<th>",t("Valitse"),"</th>";
+			echo "<td><input type='submit' name='nayta_finvoice' value='",t("Finvoice"),"' /></td>";
 			echo "<td><input type='submit' name='nayta_maventa' value='",t("Maventa"),"' /></td>";
 			echo "<td><input type='submit' name='nayta_ostolasku' value='",t("Ostolaskut"),"' /></td>";
 			echo "<td><input type='submit' name='nayta_asn' value='",t("ASN-sanomat"),"' /></td>";
@@ -2096,9 +2124,17 @@
 			echo "</table>";
 			echo "</form>";
 		}
-		elseif ($valitse == 'ostolasku' or $valitse == 'maventa') {
+		elseif (in_array($valitse, array('ostolasku','maventa','finvoice'))) {
 
-			$lajilisa = $valitse == 'maventa' ? "mav" : "tec";
+			if ($valitse == 'maventa') {
+				$lajilisa = 'mav';
+			}
+			elseif ($valitse == 'finvoice') {
+				$lajilisa = 'fin';
+			}
+			else {
+				$lajilisa = 'tec';
+			}
 
 			$query = "	SELECT toimi.ytunnus,
 						toimi.nimi,

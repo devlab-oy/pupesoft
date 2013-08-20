@@ -207,7 +207,7 @@ class MagentoClient {
 					'meta_keyword'          => '',
 					'meta_description'      => '',
 					'campaign_code'         => utf8_encode($tuote['campaign_code']),
-					'featured'              => utf8_encode($tuote['featured']),
+					'onsale'                => utf8_encode($tuote['onsale']),
 					'target'                => utf8_encode($tuote['target']),
 				);
 
@@ -302,6 +302,9 @@ class MagentoClient {
 				'name'					=> utf8_encode($tuotteet[0]['nimitys']),
 				'description'           => utf8_encode($tuotteet[0]['kuvaus']),
 				'short_description'     => utf8_encode($tuotteet[0]['lyhytkuvaus']),
+				'campaign_code'         => utf8_encode($tuotteet[0]['campaign_code']),
+				'onsale'                => utf8_encode($tuotteet[0]['onsale']),
+				'target'                => utf8_encode($tuotteet[0]['target']),
 				'weight'                => $tuotteet[0]['tuotemassa'],
 				'status'                => self::ENABLED,
 				'visibility'            => self::CATALOG_SEARCH, # Configurablet nakyy kaikkialla

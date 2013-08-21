@@ -255,6 +255,28 @@ echo "
 			}
 			else return true;
 		}
+
+		function doFocus() {
+	        var focusElementId = 'koodi'
+	        var textBox = document.getElementById(focusElementId);
+	        textBox.focus();
+	    }
+
+		function clickButton() {
+		   document.getElementById('myHiddenButton').click();
+		}
+
+	   setTimeout('clickButton()', 1000);
+
+		$(document).ready(function() {
+			$('#koodi').on('keyup', function() {
+				// Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
+				if ($('#koodi').val().length > 1) {
+					document.getElementById('vahvista').click();
+				}
+			});
+		});
+
 	</script>
 ";
 
@@ -278,6 +300,7 @@ if (isset($errors)) {
 	echo "</span>";
 }
 
+echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
 echo "<div class='main'>
 <form name='vahvistaformi' method='post' action=''>
 <table>
@@ -300,7 +323,7 @@ echo "<div class='main'>
 	</tr>
 	<tr>
 		<th>",t("Koodi"),"</th>
-		<td colspan='2'><input type='text' name='koodi' value='' size='7' />
+		<td colspan='2'><input type='text' name='koodi' id='koodi' value='' size='7' />
 	</tr>
 	<tr>
 		<td><input type='hidden' name='saapuminen' value='{$saapuminen}' /></td>
@@ -309,7 +332,7 @@ echo "<div class='main'>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' class='button' value='submit' onclick='return vahvista();'>",t("Vahvista"),"</button>";
+	<button name='submit' class='button' value='submit' id='vahvista' onclick='return vahvista();'>",t("Vahvista"),"</button>";
 
 # Jos hyllytyksestä niin tämä piiloon
 if (!isset($hyllytys)) echo "<button class='button right' name='submit' value='new'>",t("Uusi keräyspaikka"),"</button>";

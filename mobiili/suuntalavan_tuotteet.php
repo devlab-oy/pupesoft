@@ -240,10 +240,10 @@ echo "<script type='text/javascript'>
 	});
 
 	function doFocus() {
-	        var focusElementId = 'viivakoodi'
-	        var textBox = document.getElementById(focusElementId);
-	        textBox.focus();
-	    }
+	    var focusElementId = 'viivakoodi'
+	    var textBox = document.getElementById(focusElementId);
+	    textBox.focus();
+	}
 
 	function clickButton() {
 	   document.getElementById('myHiddenButton').click();

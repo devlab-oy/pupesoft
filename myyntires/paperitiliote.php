@@ -82,9 +82,7 @@
 		$oikpos = $pdf->strlen(t("Avoinsumma", $kieli), $pieni);
 		$pdf->draw_text(480-$oikpos, $kala, t("Avoinsumma", $kieli),$firstpage, $pieni);
 
-		if ($tito_pvm != date('Y-m-d')) {
-			$pdf->draw_text(510, $kala, t("Maksettu", $kieli),		$firstpage, $pieni);
-		}
+		$pdf->draw_text(510, $kala, t("Maksettu", $kieli),		$firstpage, $pieni);
 
 
 		$kala -= 15;
@@ -112,23 +110,21 @@
 			$pdf->draw_text(300, $kala, $row["valkoodi"], 				$firstpage, $norm);
 
 			if (strtoupper($row['valkoodi']) == strtoupper($yhtiorow['valkoodi'])) {
-				$oikpos = $pdf->strlen($row["tiliointisumma"], $norm);
-				$pdf->draw_text(400-$oikpos, $kala, $row["tiliointisumma"],		$firstpage, $norm);
+				$oikpos = $pdf->strlen($row["laskusumma"], $norm);
+				$pdf->draw_text(400-$oikpos, $kala, $row["laskusumma"],		$firstpage, $norm);
 
-				$oikpos = $pdf->strlen($row["tiliointiavoinsaldo"], $norm);
-				$pdf->draw_text(480-$oikpos, $kala, $row["tiliointiavoinsaldo"], $firstpage, $norm);
+				$oikpos = $pdf->strlen($row["laskuavoinsaldo"], $norm);
+				$pdf->draw_text(480-$oikpos, $kala, $row["laskuavoinsaldo"], $firstpage, $norm);
 			}
 			else {
-				$oikpos = $pdf->strlen($row["tiliointisumma_valuutassa"], $norm);
-				$pdf->draw_text(400-$oikpos, $kala, $row["tiliointisumma_valuutassa"],		$firstpage, $norm);
+				$oikpos = $pdf->strlen($row["laskusumma_valuutassa"], $norm);
+				$pdf->draw_text(400-$oikpos, $kala, $row["laskusumma_valuutassa"],		$firstpage, $norm);
 
-				$oikpos = $pdf->strlen($row["tiliointiavoinsaldo_valuutassa"], $norm);
-				$pdf->draw_text(480-$oikpos, $kala, $row["tiliointiavoinsaldo_valuutassa"],	$firstpage, $norm);
+				$oikpos = $pdf->strlen($row["laskuavoinsaldo_valuutassa"], $norm);
+				$pdf->draw_text(480-$oikpos, $kala, $row["laskuavoinsaldo_valuutassa"],	$firstpage, $norm);
 			}
 
-			if ($tito_pvm != date('Y-m-d')) {
-				$pdf->draw_text(510, $kala, tv1dateconv($row["mapvm"]), 	$firstpage, $norm);
-			}
+			$pdf->draw_text(510, $kala, tv1dateconv($row["mapvm"]), 	$firstpage, $norm);
 		}
 		else {
 			$pdf->draw_text(30,  $kala, t("Kohdistamaton suoritus"),	$firstpage, $norm);
@@ -273,6 +269,16 @@
 		$mapvmlisa = " and (lasku.mapvm  > '{$tito_pvm}' or lasku.mapvm = '0000-00-00') ";
 	}
 
+	$tapvmlisa = "";
+	$tiliointilisa = "";
+	if (!empty($alkupvm) and !empty($loppupvm)) {
+		$tapvmlisa = " AND lasku.tapvm >= '{$alkupvm}' AND lasku.tapvm <= '{$loppupvm}'";
+	}
+	else {
+		$tiliointilisa = "and tiliointi.tapvm <= '{$tito_pvm}'";
+		$tapvmlisa = " and lasku.tapvm <= '{$tito_pvm}'";
+	}
+
 	$query = "	SELECT
 				lasku.ytunnus,
 				lasku.maa,
@@ -293,15 +299,15 @@
 				sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0))-lasku.pyoristys tiliointisumma,
 				sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
 				FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-				JOIN tiliointi use index (tositerivit_index) ON (
+				LEFT JOIN tiliointi use index (tositerivit_index) ON (
 					lasku.yhtio 		    = tiliointi.yhtio
 					and lasku.tunnus 	    = tiliointi.ltunnus
 					and tiliointi.tilino   in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
 					and tiliointi.korjattu  = ''
-					and tiliointi.tapvm    <= '$tito_pvm' )
+					{$tiliointilisa} )
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				{$mapvmlisa}
-				and lasku.tapvm	  <= '{$tito_pvm}'
+				{$tapvmlisa}
 				and lasku.tapvm	  > '0000-00-00'
 				and lasku.tila	  = 'U'
 				and lasku.alatila = 'X'

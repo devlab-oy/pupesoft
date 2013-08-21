@@ -312,7 +312,7 @@
 
 				echo "<table>
 					<tr>
-					<th rowspan='$riveja'><a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$ytunnus&asiakasid=$asiakasid&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi'>$asiakasrow[nimi]</a></th>
+					<th rowspan='$riveja'><a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$ytunnus&asiakasid=$asiakasid&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl'>$asiakasrow[nimi]</a></th>
 					<td rowspan='$riveja'>".t("Kaatotilill‰")."</td>";
 
 				if (mysql_num_rows($kaatoresult) > 1) { // Valuuttasummia
@@ -406,7 +406,7 @@
 					<td colspan='2'></td></tr>";
 
 				echo "<tr>
-					<th>$asiakasrow[maa]</th><td colspan='2'><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid=$asiakasid&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi'>".t("Asiakkaan myyntitiedot")."</a></td>
+					<th>$asiakasrow[maa]</th><td colspan='2'><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid=$asiakasid&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl'>".t("Asiakkaan myyntitiedot")."</a></td>
 					</tr>";
 
 				if ($asiakasrow['email'] != '') {
@@ -551,6 +551,13 @@
 					$salisa = " and lasku.valkoodi='$savalkoodi' ";
 				}
 
+				$laskupvm_where = "";
+				if (!empty($ppa) and !empty($kka) and !empty($vva) and !empty($ppl) and !empty($kkl) and !empty($vvl)) {
+					$alkupvm = "{$vva}-{$kka}-{$ppa}";
+					$loppupvm = "{$vvl}-{$kkl}-{$ppl}";
+					$laskupvm_where = "	AND tapvm >= '{$alkupvm}' AND tapvm <= '{$loppupvm}'";
+				}
+
 				$query = "	SELECT laskunro, tapvm, erpcm,
 							summa loppusumma,
 							summa_valuutassa loppusumma_valuutassa,
@@ -570,6 +577,7 @@
 							and alatila = 'X'
 							and liitostunnus in ($tunnukset)
 							AND tapvm > '0000-00-00'
+							{$laskupvm_where}
 							$mapvmlisa
 							$salisa
 							ORDER BY erpcm";
@@ -619,7 +627,41 @@
 				}
 
 				echo "</tr>";
-				echo "</table></form><br>";
+				echo "</table>";
+
+				echo "<br/>";
+				echo "<br/>";
+
+				echo "<table>";
+
+				echo "<tr>";
+				echo "<th>".t('Alkup‰iv‰m‰‰r‰')."</th>";
+				echo "<td>";
+				echo "<input type='text' id='ppa' name='ppa' value='{$ppa}' size='3'/>";
+				echo " ";
+				echo "<input type='text' id='kka' name='kka' value='{$kka}' size='3' />";
+				echo " ";
+				echo "<input type='text' id='vva' name='vva' value='{$vva}' size='6' />";
+				echo " ";
+				echo "</td>";
+				echo "<tr>";
+
+				echo "<tr>";
+				echo "<th>".t('Loppup‰iv‰m‰‰r‰')."</th>";
+				echo "<td>";
+				echo "<input type='text' id='ppl' name='ppl' value='{$ppl}' size='3' />";
+				echo " ";
+				echo "<input type='text' id='kkl' name='kkl' value='{$kkl}' size='3' />";
+				echo " ";
+				echo "<input type='text' id='vvl' name='vvl' value='{$vvl}' size='6' />";
+				echo " ";
+				echo "</td>";
+				echo "<tr>";
+
+				echo "</table>";
+
+				echo "<input type='submit' value='".t('Hae')."' />";
+				echo "</form><br>";
 
 				if (mysql_num_rows($result) > 0) {
 					echo "<form method = 'post'>
@@ -690,7 +732,7 @@
 							echo "<input class='laskunro' type='checkbox' value='{$maksurow['laskunro']}' /> ";
 						}
 
-						echo "<a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi'>$maksurow[laskunro]</a>";
+						echo "<a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl'>$maksurow[laskunro]</a>";
 						echo "</td>";
 
 						echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['tapvm']).tv1dateconv($maksurow["tapvm"])."</td>";
@@ -847,6 +889,8 @@
 								<input type='hidden' name = 'asiakasid' value = '{$asiakasid}'>
 								<input type='hidden' name = 'alatila' value = '{$alatila}'>
 								<input type='hidden' name = 'valintra' value='{$valintra}' />
+								<input type='hidden' name = 'alkupvm' value='{$alkupvm}' />
+								<input type='hidden' name = 'loppupvm' value='{$loppupvm}' />
 								<input type='submit' value='",t("Tulosta"),"' onClick=\"js_openFormInNewWindow('tulosta_myra', ''); return false;\">
 							</form>
 							</td>";

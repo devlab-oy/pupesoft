@@ -192,7 +192,7 @@ class Edi {
 
 	   	$edi_order = iconv("UTF-8", "ISO-8859-1", $edi_order);
 
-		$filename = $magento_api_ana_edi."/magento-order".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+		$filename = $magento_api_ana_edi."/magento-order-{$order['increment_id']}-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 		file_put_contents($filename, $edi_order);
 
 		return true;

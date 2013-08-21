@@ -231,6 +231,9 @@ $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen
 mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (parametrit.inc)");
 mysql_set_charset("latin1");
 
+// Palvelin-muuttujassa pitää olla lopussa kauttaviiva
+$palvelin = rtrim($palvelin, "/")."/";
+
 // Pupeasennuksen root polku
 $pupe_root_polku = dirname(dirname(__FILE__));
 $pupesoft_url = parse_url($palvelin);

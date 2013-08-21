@@ -759,7 +759,8 @@ if (!function_exists('rivi_kerayslista')) {
 
 			if ($row["var"] == "" or  $row["var"] == "H"
 				or ($row["var"] == "P" and ($yhtiorow["puute_jt_kerataanko"] == "P" or $yhtiorow["puute_jt_kerataanko"] == "Q"))
-				or ($row["var"] == "J" and ($yhtiorow["puute_jt_kerataanko"] == "J" or $yhtiorow["puute_jt_kerataanko"] == "Q"))) {
+				or ($row["var"] == "J" and ($yhtiorow["puute_jt_kerataanko"] == "J" or $yhtiorow["puute_jt_kerataanko"] == "Q"))
+				or ($row["var"] == "J" and $yhtiorow["lahetteen_tulostustapa"] == "I")) {
 
 				$varastopaikka = hyllyalue('', $row['hyllyalue'], 'riisuttu') . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
 

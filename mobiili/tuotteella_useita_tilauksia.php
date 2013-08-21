@@ -11,6 +11,11 @@ elseif (@include_once("inc/parametrit.inc"));
 
 if(!isset($errors)) $errors = array();
 
+$sort_by_direction_tuoteno 		= (!isset($sort_by_direction_tuoteno) or $sort_by_direction_tuoteno == 'asc') ? 'desc' : 'asc';
+$sort_by_direction_otunnus 		= (!isset($sort_by_direction_otunnus) or $sort_by_direction_otunnus == 'asc') ? 'desc' : 'asc';
+$sort_by_direction_sorttaus_kpl	= (!isset($sort_by_direction_sorttaus_kpl) or $sort_by_direction_sorttaus_kpl == 'asc') ? 'desc' : 'asc';
+$sort_by_direction_hylly		= (!isset($sort_by_direction_hylly) or $sort_by_direction_hylly == 'asc') ? 'desc' : 'asc';
+
 # Joku parametri tarvii olla setattu.
 if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 
@@ -46,6 +51,24 @@ if ($keskeneraiset['kesken'] != 0) {
 	$saapuminen = $keskeneraiset['kesken'];
 }
 
+$orderby = "tuoteno";
+$ascdesc = "desc";
+
+if (isset($sort_by)) {
+
+	switch($sort_by) {
+		case 'tuoteno':
+		case 'otunnus':
+		case 'sorttaus_kpl':
+		case 'hylly':
+			$orderby = $sort_by;
+			$ascdesc = ${"sort_by_direction_{$sort_by}"};
+			break;
+		default:
+			break;
+	}
+}
+
 # Haetaan ostotilaukset
 $query = "	SELECT
 			lasku.tunnus as ostotilaus,
@@ -55,6 +78,7 @@ $query = "	SELECT
 			tilausrivi.tuoteno,
 			tilausrivi.varattu,
 			tilausrivi.kpl,
+			(tilausrivi.varattu + tilausrivi.kpl) as sorttaus_kpl,
 			tilausrivi.tilkpl,
 			tilausrivi.uusiotunnus,
 			concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
@@ -68,9 +92,10 @@ $query = "	SELECT
 				AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
 				AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 			WHERE
-			$query_lisa
+			{$query_lisa}
 			AND lasku.alatila = 'A'
 			AND lasku.yhtio='{$kukarow['yhtio']}'
+			ORDER BY {$orderby} {$ascdesc}
 		";
 $result = pupe_query($query);
 $tilausten_lukumaara = mysql_num_rows($result);
@@ -147,16 +172,24 @@ echo "<div class='main'>
 <tr>";
 
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
-	echo "<th>",t("Ostotilaus"),"</th>";
+	echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_tuoteno}'>",t("Ostotilaus"), "</a>&nbsp;";
+	echo $sort_by_direction_otunnus == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
+	echo "</th>";
 }
 if ($tuotenumero == '' and $viivakoodi == '' and $ostotilaus != '') {
-	echo "<th>",t("Tuoteno"), "</th>";
+	echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuoteno"), "</a>&nbsp;";
+	echo $sort_by_direction_tuoteno == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
+	echo "</th>";
 }
 
-echo "
-	<th>",t("Kpl (ulk.)"),"</th>
-	<th>",t("Tuotepaikka"),"</th>
-</tr>";
+echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=sorttaus_kpl&sort_by_direction_sorttaus_kpl={$sort_by_direction_sorttaus_kpl}'>",t("Kpl (ulk.)"),"</a>";
+echo $sort_by_direction_sorttaus_kpl == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
+echo "</th>";
+
+echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=hylly&sort_by_direction_hylly={$sort_by_direction_hylly}'>",t("Tuotepaikka"),"</a>";
+echo $sort_by_direction_hylly == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
+echo "</th>";
+echo "</tr>";
 
 # Loopataan ostotilaukset
 while($row = mysql_fetch_assoc($result)) {

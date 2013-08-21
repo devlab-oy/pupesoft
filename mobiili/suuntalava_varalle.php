@@ -71,6 +71,10 @@ if (isset($submit) and trim($submit) != '') {
 				$error['varalle'] .= t("Virheellinen tuotepaikka, yritä syöttää tuotepaikka käsin") . " ($tuotepaikka)<br>";
 			}
 
+			if (isset($tulosta_tavaraetiketit) and trim($tulosta_tavaraetiketit) != "" and $kukarow['kirjoitin'] == 0) {
+				$error['varalle'] .= t("Käyttäjätietojen taakse ei ole määritelty kirjoitinta. Tavaraetikettejä ei voida tulostaa.")."<br>";
+			}
+
 			# Tarkistetaan hyllypaikka ja varmistuskoodi
 			# hyllypaikan on oltava reservipaikka ja siellä ei saa olla tuotteita
 			$options = array('varmistuskoodi' => $koodi, 'reservipaikka' => 'K');
@@ -102,6 +106,20 @@ if (isset($submit) and trim($submit) != '') {
 							continue;
 						} else {
 							vie_varastoon($saapuminen, $alusta_tunnus, $hylly);
+
+							if (isset($tulosta_tavaraetiketit) and trim($tulosta_tavaraetiketit) != '') {
+
+								if ($kukarow['kirjoitin'] != 0) {
+
+									$komento['Tavaraetiketti'] = $kukarow['kirjoitin'];
+
+									$suuntalavat = array($alusta_tunnus);
+									$otunnus = $saapuminen;
+
+									require('tilauskasittely/tulosta_tavaraetiketti.inc');
+								}
+
+							}
 						}
 					}
 					# Jos kaikki meni ok
@@ -139,6 +157,8 @@ echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"suuntalavan_tuotteet.php?$url\"' class='button left'><img src='back2.png'></button>";
 echo "<h1>",t("SUUNTALAVAVARALLE"),"</h1></div>";
 
+$chk = isset($tulosta_tavaraetiketit) ? "checked" : "";
+
 echo "<div class='main'>
 
 	<form name='varalleformi' method='post' action=''>
@@ -154,6 +174,10 @@ echo "<div class='main'>
 		<tr>
 			<th>",t("Koodi", $browkieli),"</th>
 			<td colspan='2'><input type='text' name='koodi' value='{$koodi}' size='7' />
+		</tr>
+		<tr>
+			<th>",t("Tulosta tavaraetiketit"),"</th>
+			<td colspan='2'><input type='checkbox' name='tulosta_tavaraetiketit' {$chk} /></td>
 		</tr>
 	</table>
 	</div>

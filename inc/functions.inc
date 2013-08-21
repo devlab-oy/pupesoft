@@ -20106,6 +20106,9 @@ if (!function_exists('paivita_oletuspaikka')) {
 			$return["error"] = "Oletuspaikkaa ei löytynyt, tehtiin ensimmäisestä paikasta oletuspaikka";
 		}
 		elseif (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
+
+			$wherelisa = $yhtiorow['paivita_oletuspaikka'] == 'S' ? "" : "AND uusiotunnus = '0'";
+
 			// Päivitetään uusi oletuspaikka myös avoimille keskeneräisille ostotilauksille (jos uusi paikka on samassa varastossa kun vanha)
 			$query = "	UPDATE tilausrivi
 						SET hyllyalue	= '$hylly[hyllyalue]',
@@ -20119,7 +20122,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 						AND hyllytaso = '$oletusrow[hyllytaso]'
 						AND hyllyvali = '$oletusrow[hyllyvali]'
 						AND tyyppi = 'O'
-						AND uusiotunnus = '0'
+						{$wherelisa}
 						AND kpl = '0'
 						AND varattu != '0'";
 			$result = pupe_query($query);

@@ -3547,3 +3547,15 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == 'paivita_oletuspaikka') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'S' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Päivitetään uusi oletuspaikka myös avoimille keskeneräisille ostotilauksille")."</option>";
+		$ulos .= "<option value = 'S' {$sel}>".t("Päivitetään uusi oletuspaikka myös avoimille ja saapumisella oleville keskeneräisille ostotilauksille.")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

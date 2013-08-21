@@ -118,13 +118,10 @@ if (isset($submit)) {
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>"; exit();
 
 			break;
+		case 'cancel':
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}'>";
+			exit;
 		default:
-
-			if ($submit == 'cancel') {
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}'>";
-				exit;
-			}
-
 			echo "Virhe";
 			break;
 	}

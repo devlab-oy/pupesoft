@@ -3449,8 +3449,10 @@ if ($tee == '') {
 			$wherelisa = "AND tunnus = '{$rivitunnus}'";
 		}
 
+		$update_var2 = (isset($naytetaan_vastaavat) and trim($naytetaan_vastaavat) != "") ? "" : "OK";
+
 		$query = "	UPDATE tilausrivi
-					SET var2 = 'OK'
+					SET var2 = '{$update_var2}'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					{$wherelisa}";
 		$result = pupe_query($query);

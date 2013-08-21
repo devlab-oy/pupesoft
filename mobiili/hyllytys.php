@@ -160,7 +160,7 @@ echo "<div class='main'>
 # Napit
 echo "
 <div class='controls'>
-<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}'\">",t("OK"),"</button>
+<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}&ostotilaus={$ostotilaus}'\">",t("OK"),"</button>
 <button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("KERÄYSPAIKKA"),"</button>
 <button type='submit' class='button right' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'\">",t("SUUNTALAVALLE"),"</button>
 </div>

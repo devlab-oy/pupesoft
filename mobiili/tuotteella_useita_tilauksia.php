@@ -125,6 +125,17 @@ echo "<div class='header'>
 	<h1>",t("USEITA TILAUKSIA"), "</h1></div>";
 
 echo "<div class='main'>
+
+<form name='viivakoodiformi' method='post' action='?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}' id='viivakoodiformi'>
+	<table class='search'>
+		<tr>
+			<th>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' /></th>
+			<td><button id='valitse_nappi' value='viivakoodi' class='button' onclick='submit();'>",t("Etsi"),"</button></td>
+		</tr>
+	</table>
+	</form>
+
+
 <form name='form1' method='post' action=''>
 <table>
 <tr>";

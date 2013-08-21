@@ -3575,10 +3575,11 @@
 	if (mysql_field_name($result, $i) == 'vastaavat_tuotteet_esitysmuoto') {
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = $trow[$i] == 'S' ? 'selected' : '';
+		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('S' => '', 'A' => '');
 
 		$ulos .= "<option value = ''>".t("Vastaavat tuotteet näytetään normaalisti")."</option>";
-		$ulos .= "<option value = 'S' {$sel}>".t("Vastaavat tuotteet näytetään vaikka saldo on nolla. Näytetään myös toimittajan tehtaan saldo.")."</option>";
+		$ulos .= "<option value = 'S' {$sel['S']}>".t("Vastaavat tuotteet näytetään vaikka saldo on nolla. Näytetään myös toimittajan tehtaan saldo.")."</option>";
+		$ulos .= "<option value = 'A' {$sel['A']}>".t("Vastaavat tuotteet näytetään aina. Näytetään myös toimittajan tehtaan saldo.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

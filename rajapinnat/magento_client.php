@@ -170,20 +170,12 @@ class MagentoClient {
 
 			// Haetaan storessa olevat tuotenumerot
 			$skus_in_store = $this->getProductList(true);
-<<<<<<< HEAD
-		}
-		catch (Exception $e) {
-			$this->log("Virhe tuotteiden lis‰yksess‰", $e);
-			exit();
-		}
-=======
 		}
 		catch (Exception $e) {
 			$this->_error_count++;
 			$this->log("Virhe! Tuotteiden lis‰yksess‰ (simple)", $e);
 			return;
 		}
->>>>>>> master
 
 		// Lis‰t‰‰n tuotteet eriss‰
 		foreach ($dnstuote as $tuote) {
@@ -230,70 +222,20 @@ class MagentoClient {
 							'simple',
 							$this->_attributeSet['set_id'],
 							$tuote['tuoteno'], # sku
-<<<<<<< HEAD
-							array(
-									'categories'            => array($category_id),
-									'websites'              => array($tuote['nakyvyys']),
-									'name'                  => $tuote['nimi'],
-									'description'           => $tuote['kuvaus'],
-									'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
-									'weight'                => $tuote['tuotemassa'],
-									'status'                => self::ENABLED,
-									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
-									'price'                 => $tuote['myymalahinta'],
-									'special_price'         => $tuote['kuluprosentti'],
-									'tax_class_id'          => $this->getTaxClassID(),
-									'meta_title'            => '',
-									'meta_keyword'          => '',
-									'meta_description'      => '',
-									'campaign_code'         => utf8_encode($tuote['campaign_code']),
-									'featured'              => utf8_encode($tuote['featured']),
-									'target'                => utf8_encode($tuote['target']),
-								)
-							)
-						);
-					$this->log("Tuote {$tuote['tuoteno']} lis‰tty." . print_r($tuote));
-=======
 							$tuote_data,
 							)
 						);
 					$this->log("Tuote {$tuote['tuoteno']} lis‰tty (simple) " . print_r($tuote_data, true));
->>>>>>> master
 				}
 				// Tuote on jo olemassa, p‰ivitet‰‰n
 				else {
 					$product_id = $this->_proxy->call($this->_session, 'catalog_product.update',
 						array(
 							$tuote['tuoteno'], # sku
-<<<<<<< HEAD
-							array(
-									'categories'            => array($category_id),
-									'websites'              => array($tuote['nakyvyys']),
-									'name'                  => $tuote['nimi'],
-									'description'           => $tuote['kuvaus'],
-									'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
-									'weight'                => $tuote['tuotemassa'],
-									'status'                => self::ENABLED,
-									'visibility'            => self::NOT_VISIBLE_INDIVIDUALLY,
-									'price'                 => $tuote['myymalahinta'],
-									'special_price'         => $tuote['kuluprosentti'],
-									'tax_class_id'          => $this->getTaxClassID(),
-									'meta_title'            => '',
-									'meta_keyword'          => '',
-									'meta_description'      => '',
-									'campaign_code'         => utf8_encode($tuote['campaign_code']),
-									'featured'              => utf8_encode($tuote['featured']),
-									'target'                => utf8_encode($tuote['target']),
-								)
-							)
-						);
-					$this->log("Tuote {$tuote['tuoteno']} p‰ivitetty." . print_r($tuote));
-=======
 							$tuote_data,
 							)
 						);
 					$this->log("Tuote {$tuote['tuoteno']} p‰ivitetty (simple) " . print_r($tuote_data, true));
->>>>>>> master
 				}
 
 				// Lis‰t‰‰n tuotekuvat
@@ -307,12 +249,8 @@ class MagentoClient {
 
 			}
 			catch (Exception $e) {
-<<<<<<< HEAD
-				$this->log("Tuotteen {$tuote['tuoteno']} lis‰ys/p‰ivitys ep‰onnistui." . print_r($tuote), $e);
-=======
 				$this->_error_count++;
 				$this->log("Virhe! Tuotteen {$tuote['tuoteno']} lis‰ys/p‰ivitys ep‰onnistui (simple) " . print_r($tuote_data, true), $e);
->>>>>>> master
 			}
 		}
 

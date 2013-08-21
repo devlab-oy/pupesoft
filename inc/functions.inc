@@ -8803,7 +8803,7 @@ if (!function_exists('livesearch_tuoteryhmahaku')) {
 			</script>";
 
 			if (empty($kukarow['kieli'])) {
-				$kieli = 'fi';
+				$kieli = $yhtiorow['kieli'];
 			}
 			else {
 				$kieli = $kukarow['kieli'];

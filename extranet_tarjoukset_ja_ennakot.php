@@ -3,6 +3,7 @@
 require ("parametrit.inc");
 require ("Validation.php");
 enable_ajax();
+
 ?>
 
 <style>
@@ -72,83 +73,30 @@ $request = array(
 	"paivita"						 => $paivita,
 );
 
-
 $request['kayttajaan_liitetty_asiakas'] = hae_extranet_kayttajaan_liitetty_asiakas();
 
 if ($tee == "LISAARIVI") {
+	$parametrit = array("lasku_tunnus" => $otunnus,
+						"tuoteno" => $tuoteno,
+						"kpl" => $kpl);
+	lisaa_ennakkorivi($parametrit);
+}
 
-	$query = "	SELECT *
-				FROM tuote
-				WHERE tuoteno='$tuoteno' AND yhtio='$kukarow[yhtio]'";
-	$result = pupe_query($query);
+$action = $request['action'];
 
-	if (mysql_num_rows($result) > 0) {
-		//Tuote löytyi
-		$trow = mysql_fetch_assoc($result);
-		$kukarow["kesken"] = $otunnus;
-		$hinta = 0.000001;
-		$alennus = 100;
-		$laskurow = hae_lasku($otunnus);
-		$netto = '';
+// Halutaan listata kaikki ennakot/tarjoukset
+if ($action == "") {
 
-		// Nollataan hinta kun kyseessä on asiakkaan ext-ennakkotilaukseen lisäämä rivi
-		if ($toim == 'EXTENNAKKO') {
-			$query = "  SELECT selite AS ennakko_pros_a
-						FROM tuotteen_avainsanat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tuoteno = '{$tuoteno}'
-						AND laji = 'parametri_ennakkoale_a'
-						AND selite != ''";
-			$result = pupe_query($query);
+}
 
-			if (mysql_num_rows($result) == 1) {
-				$tuotteen_hinta = mysql_fetch_assoc($result);
-				$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
-				$alennus = 0;
-				$netto = 'N';
-			}
-			$laskurow["tila"] = 'N';
-		}
-		else {
-			$laskurow["tila"] = 'T';
-		}
+// Näytetään yksittäinen ennakko/tarjout
+if ($action == 'nayta_tarjous') {
 
-		$perhekielto = '';
-		$perheid = 0;
-		$trow = hae_tuote($tuoteno);
+}
 
-		$parametrit = array(
-			'trow'			 => $trow,
-			'laskurow'		 => $laskurow,
-			'kpl'			 => $kpl,
-			'ale1'           => $alennus,
-			'hinta'			 => $hinta,
-			'perhekielto'	 => $perhekielto,
-			'perheid'		 => $perheid,
-			'netto'			 => $netto,
-		);
-		lisaa_rivi($parametrit);
+// Hyväksytään/hylyttään yksi ennakko/tarjous
+if ($action == 'hyvaksy_tai_hylkaa') {
 
-		$lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
-
-		if ($lisatyt_rivit[0] > 0) {
-			$valmistettavat .= ",".$lisatyt_rivit[0];
-
-			$query = "	UPDATE tilausrivi
-						SET toimitettu	= '$kukarow[kuka]',
-						toimitettuaika	= now(),
-						keratty			= '$kukarow[kuka]',
-						kerattyaika		= now()
-						WHERE yhtio	= '$kukarow[yhtio]'
-						and tunnus	= '$lisatyt_rivit[0]'";
-			$result = pupe_query($query);
-		}
-	}
-	else {
-		echo t("Tuotetta ei löydy")."!<br>";
-	}
-
-	$tee = "VALMISTA";
 }
 
 if (!empty($request['action'])) {
@@ -165,19 +113,21 @@ if (!empty($request['action'])) {
 	}
 }
 
-if ($request['action'] == 'nayta_tarjous') {	
+if ($request['action'] == 'nayta_tarjous') {
 	nayta_tarjous($request['valittu_tarjous_tunnus'], $request['toim']);
 }
+
 elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 
-	if(isset($request['paivita']) && $toim =='EXTENNAKKO') {
+	if (isset($request['paivita']) and $toim == 'EXTENNAKKO') {
 		unset($request['paivita']);
 		
 		$onnistuiko_toiminto = paivita_ennakko($request['valittu_tarjous_tunnus'], $syotetyt_lisatiedot, $kappalemaarat);
-		if($onnistuiko_toiminto) {
+
+		if ($onnistuiko_toiminto) {
 			nayta_tarjous($request['valittu_tarjous_tunnus'], $request['toim']);
 		}
-		exit;	
+		exit;
 	}
 	elseif (isset($request['hyvaksy'])) {
 		if ($toim == 'EXTTARJOUS') {
@@ -225,17 +175,17 @@ function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappale
 	global $kukarow, $yhtiorow;
 
 	$onnistuiko_toiminto = paivita_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappalemaarat);
-	
+
 	// Vaihdetaan tila/alatila Ennakko/Lepäämässä
-	if($onnistuiko_toiminto) {
-	$query = "	UPDATE lasku
-				SET tila='E',
-				alatila='A'
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$valittu_tarjous_tunnus}'";
-			pupe_query($query);
-			return true;
-		}
+	if ($onnistuiko_toiminto) {
+		$query = "	UPDATE lasku
+					SET tila='E',
+					alatila='A'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$valittu_tarjous_tunnus}'";
+		pupe_query($query);
+		return true;
+	}
 	else {
 		return false;
 	}
@@ -281,110 +231,81 @@ function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
 	return false;
 }
 
-function paivita_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappalemaarat) {
+function paivita_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, Array $kappalemaarat) {
 	global $kukarow, $yhtiorow;
-	
-	foreach ($kappalemaarat as &$kappalemaara_temp) {
-		$kappalemaara_temp = round(str_replace(",", ".", pupesoft_cleanstring($kappalemaara_temp)), 2);
-	}
 
-	$validations = array(
-		'syotetyt_lisatiedot' => 'kirjain_numero',
-	);
+	// Siistiään parametrit tietokantaqueryjä varten
+	$syotetyt_lisatiedot = pupesoft_cleanstring($syotetyt_lisatiedot);
+	$valittu_tarjous_tunnus = pupesoft_cleanstring($valittu_tarjous_tunnus);
 
-	$validator = new FormValidator($validations);
+	// Haetaan kannasta tilausrivit
+	$muokkaamaton_ennakko = hae_tarjous($valittu_tarjous_tunnus);
 
-	if ($validator->validate(array('syotetyt_lisatiedot' => $syotetyt_lisatiedot))) {
+	foreach ($kappalemaarat as $key => $value) {
 
-		foreach ($kappalemaarat as $kappalemaara) {
-			if (!FormValidator::validateItem($kappalemaara, "2digitopt")) {
-				return false;
-			}
+		// Kappalemäärä käyttöliittymästä, pilkut pisteiksi ja round 2
+		$value = round(str_replace(",", ".", pupesoft_cleanstring($value)), 2);
+		
+		// Etsitään tilausrivitunnuksen perusteella tuotteen kannassa oleva kappalemäärä
+		$loytynyt_tilausrivi = search_array_key_for_value_recursive($muokkaamaton_ennakko['tilausrivit'], 'tunnus', $key);
+
+		// Tarkistetaan löytyikö tilausrivi, jos ei löydy, ei tehdä mitään
+		if (empty($loytynyt_tilausrivi[0])) {
+			continue;
 		}
-		// Haetaan kannasta tilausrivit
-		$muokkaamaton_ennakko = hae_tarjous($valittu_tarjous_tunnus);
 
-		foreach ($kappalemaarat as $key => $value) {
-			// Etsitään tilausrivitunnuksen perusteella tuotteen kannassa oleva kappalemäärä
-			$loytynyt_tilausrivi = search_array_key_for_value_recursive($muokkaamaton_ennakko['tilausrivit'], 'tunnus', $key);
-			// Tarkistetaan löytyikö tilausrivi
-			if (!empty($loytynyt_tilausrivi[0])) {
-				// Muutetaan kappalemäärä oikeaan muotoon
-				$kplmaara = round(str_replace(",", ".", pupesoft_cleanstring($loytynyt_tilausrivi[0]['kpl'])), 2);
-				// Tarkistetaan onko kappalemäärä säilynyt muuttamattomana, jos ei muutoksia niin toimenpiteitä riville ei vaadita
-				if ($kplmaara != $value) {
-					// Onko tuote tuoteperheen isätuote tai normaali tilausrivi JA uusi syötetty kappalemäärä 0
-					if (($loytynyt_tilausrivi[0]['tunnus'] == $loytynyt_tilausrivi[0]['perheid_tunnus'] or $loytynyt_tilausrivi[0]['perheid_tunnus'] == 0) and $value == 0.00) {
-						// Tuoteperheen kappalemäärän nollaus tilauksesta
-						if ($loytynyt_tilausrivi[0]['tunnus'] == $loytynyt_tilausrivi[0]['perheid_tunnus']) {
-							$andy = "   AND perheid = '{$loytynyt_tilausrivi[0]['tunnus']}'";
-						}
-						// Normaalituotteen kappalemäärän nollaus tilauksesta
-						else {
-							$andy = "   AND tunnus = '{$loytynyt_tilausrivi[0]['tunnus']}'";
-						}
+		// Kappalemäärä kannasta
+		$kplmaara = $loytynyt_tilausrivi[0]['kpl'];
 
-						$query = "  UPDATE tilausrivi
-										SET tilkpl = 0,
-										kpl = 0,
-										jt = 0,
-										varattu = 0
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND otunnus = '{$valittu_tarjous_tunnus}'
-										{$andy}
-										";
-						pupe_query($query);
-					}
-					// Kun kappalemäärää muutetaan muuksi kuin nollaksi, poistetaan tilausrivi tilauksesta ja lisätään uudestaan uudella määrällä
-					else {
-						$kukarow['kesken'] = $valittu_tarjous_tunnus;
-						// Tuoteperheen tapauksessa rivin poistoa varten
-						if ($loytynyt_tilausrivi[0]['tunnus'] == $loytynyt_tilausrivi[0]['perheid_tunnus']) {
-							$andy = "   AND perheid = '{$loytynyt_tilausrivi[0]['tunnus']}'";
-						}
-						// Normaalituotteen tapauksessa rivin poistoa varten
-						else {
-							$andy = "   AND tunnus = '{$loytynyt_tilausrivi[0]['tunnus']}'";
-						}
-						// Rivin poisto
-						$query = "  DELETE
-									FROM tilausrivi
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND otunnus = '{$valittu_tarjous_tunnus}'
-									{$andy}
-									";
-
-						pupe_query($query);
-
-
-						// Rivin uudelleenlisäys
-						$trow = hae_tuote($loytynyt_tilausrivi[0]['tuoteno']);
-						$laskurow = $muokkaamaton_ennakko;
-						$parametrit = array(
-							'trow'		 => $trow,
-							'laskurow'	 => $laskurow,
-							'kpl'		 => $value,
-							'netto'		 => "N",
-							'rivitunnus' => $loytynyt_tilausrivi[0]['tunnus'],
-							'tuoteno'	 => $loytynyt_tilausrivi[0]['tuoteno'],
-							'hinta'		 => 0,
-						);
-						lisaa_rivi($parametrit);
-					}
-				}
-			}
+		// Tarkistetaan onko kappalemäärä säilynyt muuttamattomana, jos ei muutoksia niin toimenpiteitä riville ei vaadita
+		if ($kplmaara == $value) {
+			continue;
 		}
-		// Päivitetään käyttäjän lisäämät kommentit
-		$query = "	UPDATE lasku
-					SET sisviesti1='{$syotetyt_lisatiedot}'
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$valittu_tarjous_tunnus}'";
-		pupe_query($query);
-		return true;
+
+		// Tuoteperheen tapauksessa päivitetään/poisteaan kaikki tuoteperheen rivit, muuten vain ko. rivi
+		if ($loytynyt_tilausrivi[0]['tunnus'] == $loytynyt_tilausrivi[0]['perheid_tunnus']) {
+			$andy = "AND perheid = '{$loytynyt_tilausrivi[0]['tunnus']}'";
+		}		
+		else {
+			$andy = "AND tunnus = '{$loytynyt_tilausrivi[0]['tunnus']}'";
+		}
+
+		// Jos ollaan nollatut kappaleet, päivitetään rivi
+		if ($value == 0) {
+			$query = "  UPDATE tilausrivi
+						SET tilkpl = 0,
+						kpl = 0,
+						jt = 0,
+						varattu = 0
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND otunnus = '{$valittu_tarjous_tunnus}'
+						{$andy}";
+			pupe_query($query);
+		}
+		else {
+			// Rivin poisto
+			$query = "  UPDATE tilausrivi
+						SET tyyppi = 'D'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND otunnus = '{$valittu_tarjous_tunnus}'
+						{$andy}";
+			pupe_query($query);
+
+			$parametrit = array("lasku_tunnus" => $valittu_tarjous_tunnus,
+								"tuoteno" => $loytynyt_tilausrivi[0]['tuoteno'],
+								"kpl" => $value);
+			lisaa_ennakkorivi($parametrit);
+		}
 	}
-	else {
-		return false;
-	}
+
+	// Päivitetään käyttäjän lisäämät kommentit
+	$query = "	UPDATE lasku
+				SET sisviesti1 = '{$syotetyt_lisatiedot}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$valittu_tarjous_tunnus}'";
+	pupe_query($query);
+
+	return true;
 }
 
 function hylkaa($valittu_tarjous_tunnus) {
@@ -549,7 +470,9 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-				AND tilausrivi.otunnus = '{$valittu_tarjous_tunnus}'";
+				AND tilausrivi.otunnus = '{$valittu_tarjous_tunnus}'
+				AND tilausrivi.tyyppi in ('L','E')
+				ORDER BY tilausrivi.perheid, tilausrivi.tunnus";
 	$result = pupe_query($query);
 
 	$tilausrivit = array();
@@ -709,4 +632,87 @@ function piirra_tarjouksen_tilausrivit($params) {
 	}
 	echo "</form>";
 }
+
+function lisaa_ennakkorivi($params) {
+
+	global $kukarow, $yhtiorow;
+	
+	$tuoteno = $params['tuoteno'];
+	$kpl = $params['kpl'];
+	$otunnus = $params['lasku_tunnus'];
+	
+	$query = "	SELECT *
+				FROM tuote
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tuoteno = '{$tuoteno}'";
+	$result = pupe_query($query);
+
+	if (mysql_num_rows($result) > 0) {
+
+		//Tuote löytyi
+		$trow = mysql_fetch_assoc($result);
+
+		$kukarow["kesken"] = $otunnus;
+		$hinta = 0.000001;
+		$alennus = 100;
+		$laskurow = hae_lasku($otunnus);
+		$netto = '';
+
+		// Nollataan hinta kun kyseessä on asiakkaan ext-ennakkotilaukseen lisäämä rivi
+		if ($toim == 'EXTENNAKKO') {
+			$query = "  SELECT selite AS ennakko_pros_a
+						FROM tuotteen_avainsanat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '{$tuoteno}'
+						AND laji = 'parametri_ennakkoale_a'
+						AND selite != ''";
+			$result = pupe_query($query);
+
+			if (mysql_num_rows($result) == 1) {
+				$tuotteen_hinta = mysql_fetch_assoc($result);
+				$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
+				$alennus = 0;
+				$netto = 'N';
+			}
+			$laskurow["tila"] = 'N';
+		}
+		else {
+			$laskurow["tila"] = 'T';
+		}
+
+		$perhekielto = '';
+		$perheid = 0;
+
+		$parametrit = array(
+			'trow'			 => $trow,
+			'laskurow'		 => $laskurow,
+			'kpl'			 => $kpl,
+			'ale1'           => $alennus,
+			'hinta'			 => $hinta,
+			'perhekielto'	 => $perhekielto,
+			'perheid'		 => $perheid,
+			'netto'			 => $netto,
+		);
+		lisaa_rivi($parametrit);
+
+		$lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
+
+		if ($lisatyt_rivit[0] > 0) {
+			$valmistettavat .= ",".$lisatyt_rivit[0];
+
+			$query = "	UPDATE tilausrivi
+						SET toimitettu	= '$kukarow[kuka]',
+						toimitettuaika	= now(),
+						keratty			= '$kukarow[kuka]',
+						kerattyaika		= now()
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tunnus	= '$lisatyt_rivit[0]'";
+			$result = pupe_query($query);
+		}
+	}
+	else {
+		echo t("Tuotetta ei löydy")."!<br>";
+	}
+}
+
 require ("footer.inc");

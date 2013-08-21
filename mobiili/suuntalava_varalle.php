@@ -31,7 +31,7 @@ if (isset($submit) and trim($submit) != '') {
 
 			// Parsitaan uusi tuotepaikka
 			// Jos tuotepaikka on luettu viivakoodina, muotoa (C21 045) tai (21C 03V)
-			if (preg_match('/^([a-zåäö#0-9]{2,4} [a-zåäö#0-9]{2,4})/i', $tuotepaikka)) {
+			if (preg_match('/^([a-zåäö#0-9]{2,4} [a-zåäö#0-9]{2,4})/i', $tuotepaikka) and substr_count($tuotepaikka, " ") == 1) {
 
 				// Pilkotaan viivakoodilla luettu tuotepaikka välilyönnistä
 				list($alku, $loppu) = explode(' ', $tuotepaikka);

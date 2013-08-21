@@ -69,6 +69,7 @@ $request = array(
 	"valittu_tarjous_tunnus"		 => $valittu_tarjous_tunnus,
 	"hyvaksy"						 => $hyvaksy,
 	"hylkaa"						 => $hylkaa,
+	"paivita"						 => $paivita,
 );
 
 
@@ -164,13 +165,21 @@ if (!empty($request['action'])) {
 	}
 }
 
-if ($request['action'] == 'nayta_tarjous') {
-	
+if ($request['action'] == 'nayta_tarjous') {	
 	nayta_tarjous($request['valittu_tarjous_tunnus'], $request['toim']);
 }
 elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 
-	if (isset($request['hyvaksy'])) {
+	if(isset($request['paivita']) && $toim =='EXTENNAKKO') {
+		unset($request['paivita']);
+		
+		$onnistuiko_toiminto = paivita_ennakko($request['valittu_tarjous_tunnus'], $syotetyt_lisatiedot, $kappalemaarat);
+		if($onnistuiko_toiminto) {
+			nayta_tarjous($request['valittu_tarjous_tunnus'], $request['toim']);
+		}
+		exit;	
+	}
+	elseif (isset($request['hyvaksy'])) {
 		if ($toim == 'EXTTARJOUS') {
 			$onnistuiko_toiminto = hyvaksy_tarjous($request['valittu_tarjous_tunnus'], $syotetyt_lisatiedot);
 		}
@@ -215,10 +224,69 @@ else {
 function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappalemaarat) {
 	global $kukarow, $yhtiorow;
 
+	$onnistuiko_toiminto = paivita_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappalemaarat);
+	
+	// Vaihdetaan tila/alatila Ennakko/Lepäämässä
+	if($onnistuiko_toiminto) {
+	$query = "	UPDATE lasku
+				SET tila='E',
+				alatila='A'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$valittu_tarjous_tunnus}'";
+			pupe_query($query);
+			return true;
+		}
+	else {
+		return false;
+	}
+}
+
+function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
+	global $kukarow, $yhtiorow;
+	$validations = array(
+		'syotetyt_lisatiedot' => 'kirjain_numero',
+	);
+
+	$validator = new FormValidator($validations);
+
+	if ($validator->validate(array('syotetyt_lisatiedot' => $syotetyt_lisatiedot))) {
+
+		//asetetaan myyntitilaus Myyntitilaus kesken Tulostusjonossa
+		$query = "	UPDATE lasku
+					SET sisviesti1='{$syotetyt_lisatiedot}'
+					WHERE yhtio='$kukarow[yhtio]'
+					AND tunnus='$valittu_tarjous_tunnus'";
+		pupe_query($query);
+
+		// Kopsataan valitut rivit uudelle myyntitilaukselle
+		require("tilauksesta_myyntitilaus.inc");
+
+		$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($valittu_tarjous_tunnus, '', '', '');
+		if ($tilauksesta_myyntitilaus != '') {
+			echo "$tilauksesta_myyntitilaus<br><br>";
+
+			$query = "UPDATE lasku SET alatila='B' where yhtio='$kukarow[yhtio]' and tunnus='$valittu_tarjous_tunnus'";
+			pupe_query($query);
+		}
+
+		$aika = date("d.m.y @ G:i:s", time());
+		echo "<font class='message'>$otsikko $kukarow[kesken] ".t("valmis")."!</font><br><br>";
+
+		$tee = '';
+		$tilausnumero = '';
+		$laskurow = '';
+		$kukarow['kesken'] = '';
+		return true;
+	}
+	return false;
+}
+
+function paivita_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappalemaarat) {
+	global $kukarow, $yhtiorow;
+	
 	foreach ($kappalemaarat as &$kappalemaara_temp) {
 		$kappalemaara_temp = round(str_replace(",", ".", pupesoft_cleanstring($kappalemaara_temp)), 2);
 	}
-
 
 	$validations = array(
 		'syotetyt_lisatiedot' => 'kirjain_numero',
@@ -306,11 +374,9 @@ function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappale
 				}
 			}
 		}
-		// Päivitetään käyttäjän lisäämät kommentit ja vaihdetaan tila/alatila Ennakko/Lepäämässä
+		// Päivitetään käyttäjän lisäämät kommentit
 		$query = "	UPDATE lasku
-					SET sisviesti1='{$syotetyt_lisatiedot}',
-					tila='E',
-					alatila='A'
+					SET sisviesti1='{$syotetyt_lisatiedot}'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$valittu_tarjous_tunnus}'";
 		pupe_query($query);
@@ -319,46 +385,6 @@ function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappale
 	else {
 		return false;
 	}
-}
-
-function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
-	global $kukarow, $yhtiorow;
-	$validations = array(
-		'syotetyt_lisatiedot' => 'kirjain_numero',
-	);
-
-	$validator = new FormValidator($validations);
-
-	if ($validator->validate(array('syotetyt_lisatiedot' => $syotetyt_lisatiedot))) {
-
-		//asetetaan myyntitilaus Myyntitilaus kesken Tulostusjonossa
-		$query = "	UPDATE lasku
-					SET sisviesti1='{$syotetyt_lisatiedot}'
-					WHERE yhtio='$kukarow[yhtio]'
-					AND tunnus='$valittu_tarjous_tunnus'";
-		pupe_query($query);
-
-		// Kopsataan valitut rivit uudelle myyntitilaukselle
-		require("tilauksesta_myyntitilaus.inc");
-
-		$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($valittu_tarjous_tunnus, '', '', '');
-		if ($tilauksesta_myyntitilaus != '') {
-			echo "$tilauksesta_myyntitilaus<br><br>";
-
-			$query = "UPDATE lasku SET alatila='B' where yhtio='$kukarow[yhtio]' and tunnus='$valittu_tarjous_tunnus'";
-			pupe_query($query);
-		}
-
-		$aika = date("d.m.y @ G:i:s", time());
-		echo "<font class='message'>$otsikko $kukarow[kesken] ".t("valmis")."!</font><br><br>";
-
-		$tee = '';
-		$tilausnumero = '';
-		$laskurow = '';
-		$kukarow['kesken'] = '';
-		return true;
-	}
-	return false;
 }
 
 function hylkaa($valittu_tarjous_tunnus) {
@@ -663,7 +689,14 @@ function piirra_tarjouksen_tilausrivit($params) {
 	}
 
 	echo "</table>";
-
+	echo "<br>";
+	
+	if ($toim == "EXTENNAKKO") {
+		echo "<input type='submit' name='paivita' value='".t("Päivitä rivit")."'";
+		echo "<br>";
+		echo "<br>";
+	}
+	
 	echo "<br>";
 	echo "<textarea rows='5' cols='90' maxlength='1000' name='syotetyt_lisatiedot' placeholder='".t("Lisätietoja")."'>";
 	echo "</textarea>";

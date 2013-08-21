@@ -847,6 +847,19 @@ else {
 					);
 
 				pupesoft_tulosta_lahete($params);
+
+				// Jos tehdaspalautus
+				if (file_exists("$tilausvalmis_asiakas_row[toimitusvahvistus]") and $tilausvalmis_asiakas_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+
+					// jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan tämän jälkeen
+					$tmp_laskurow = $laskurow;
+
+					$myynti_vai_osto = 'M';
+
+					require("editilaus_out_futur.inc");
+
+					$laskurow = $tmp_laskurow;
+				}
 			}
 
 			// Laitetaan tässäkin haarassa Intrastat-tiedot kuntoon, muuten laskujen ketjutus ei onnaa. (varasto = 0 ,eli mennään yhtiön oletusmaalla)

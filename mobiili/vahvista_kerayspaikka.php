@@ -209,7 +209,7 @@ if (isset($submit) and trim($submit) != '') {
 
 				# Redirectit ostotilaukseen tai suuntalavan_tuotteet?
 				if (isset($hyllytys)) {
-					echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=ostotilaus.php?ostotilaus={$row['otunnus']}'>";
+					echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=tuotteella_useita_tilauksia.php?ostotilaus={$row['otunnus']}'>";
 				}
 				else {
 					echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=suuntalavan_tuotteet.php?{$url}'>";

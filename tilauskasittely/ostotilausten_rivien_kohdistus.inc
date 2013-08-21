@@ -514,7 +514,7 @@ if ($tila == 'tee_siirto') {
 		$keikkakesken = 0;
 
 		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
-			$keikkakesken = file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock");
+			list($keikkakesken, $_kuka, $_timestamp) = explode(";", file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock"));
 		}
 
 		foreach ($rivi_siirrettavat_tunnukset as $valittu) {
@@ -1047,7 +1047,7 @@ if ($tila == '') {
 	}
 
 	$kentat_array[] = "$alvti alv";
-	$kentat_array[] = "round((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * {$query_ale_lisa} * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),'$yhtiorow[hintapyoristys]') rivihinta";
+	$kentat_array[] = "round((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * {$query_ale_lisa} * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),'$yhtiorow[hintapyoristys]') rivihinta_2";
 	$kentat_array[] = "round((tilausrivi.varattu+tilausrivi.kpl) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa} *
 							(1+(if ((SELECT max(kaytetty) kaytetty
 									FROM sarjanumeroseuranta

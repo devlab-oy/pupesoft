@@ -1064,7 +1064,7 @@
 					$vaihtoehtoinen = ($_tuote['vaihtoehtoinen'] == 'K') ? "<font color=#F00>".t("Vaihtoehtoinen, tarkista sopivuus")."!</font>" : "";
 					list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"]);
 
-					if ($vmyytavissa > 0 and strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"])) {
+					if (($vmyytavissa > 0 or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') and strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"])) {
 
 						$tvrow = hae_tuote($_tuote['tuoteno']);
 
@@ -1074,9 +1074,25 @@
 						 			."<td>{$_tuote["tuoteno"]} $vaihtoehtoinen</td>"
 									."<td>{$tvrow["nimitys"]}</td>"
 						 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
-						 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>"
-						 			."<td align='left'>"
-						 			." <form method='post' name='jalkitoimita'>
+						 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>";
+						
+						
+							if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') {
+
+								$query = "  SELECT tehdas_saldo, IF(jarjestys = 0, 9999, jarjestys) jarjestys
+											FROM tuotteen_toimittajat
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tuoteno = '{$vrow['tuoteno']}'
+											ORDER BY jarjestys
+											LIMIT 1";
+								$tehdas_saldo_res = pupe_query($query);
+								$tehdas_saldo_row = mysql_fetch_assoc($tehdas_saldo_res);
+
+								$vastaavat_table .= "<td align='right'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</td>";
+							}
+						
+						 	$vastaavat_table .= "<td align='left'>
+										<form method='post' name='jalkitoimita'>
 						 			   	<input type='hidden' name='toim' 			value = '$toim'>
 						 			   	<input type='hidden' name='lopetus' 		value = '$lopetus'>
 						 			   	<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
@@ -1089,8 +1105,7 @@
 						 			   	<input type='hidden' name='tila' 			value = 'MUUTA'>
 						 			   	<input type='hidden' name='tapa' 			value = 'MYYVASTAAVA'>
 						 			   	<input type='Submit' value='".t("Tilaa tuote")."'>
-						 			   	</form> "
-						 			."</td></tr>";
+						 			   	</form></td></tr>";
 					}
 				}
 
@@ -1100,6 +1115,7 @@
 					}
 
 					$vastaavat_html .= "<tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
+					if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') $vastaavat_html .= "<th>".t("Tehtaan saldo")."</th>";
 					$vastaavat_html .= "<th>";
 
 					if ($vastaavattuotteet == 0) {

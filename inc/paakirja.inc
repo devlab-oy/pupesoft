@@ -214,8 +214,8 @@
 	echo livesearch_kentta("valinta", "TILIHAKU", "tili2", 120, $tili2, "EISUBMIT");
 	echo "</td></tr>";
 
-	echo "<tr><th>".t("Vain asiakas")."</th><td colspan='3'><input type='text' name='asia_ytunnus' value='$asiakasrow[ytunnus]'> $asiakasrow[nimi] <input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
-	echo "<tr><th>".t("Vain toimittaja")."</th><td colspan='3'><input type='text' name='toim_ytunnus' value='$toimittajarow[ytunnus]'> $toimittajarow[nimi] <input type='hidden' name='toimittajaid' value='$toimittajaid'></td></tr>";
+	echo "<tr><th>".t("Vain asiakas")."</th><td colspan='3'><input type='text' name='asia_ytunnus' value='".tarkistahetu($asiakasrow['ytunnus'])."'> $asiakasrow[nimi] <input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
+	echo "<tr><th>".t("Vain toimittaja")."</th><td colspan='3'><input type='text' name='toim_ytunnus' value='".tarkistahetu($toimittajarow['ytunnus'])."'> $toimittajarow[nimi] <input type='hidden' name='toimittajaid' value='$toimittajaid'></td></tr>";
 
 	echo "<tr><th>".t("Vain alv%")."</th>";
 

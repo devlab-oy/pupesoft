@@ -287,6 +287,22 @@ if(!function_exists("tuotetarkista")) {
 
 		if (mysql_field_name($result, $i) == 'status') {
 			$tem_status = $t[$i];
+			
+			// Jos kyseessä tuotteen poisto, tarkistetaan löytyykö tuotetta avoimilta ostotilauksilta, jos löytyy niin poistoa ei sallita.
+			if ($tem_status == 'P') {
+				$query = "	SELECT tuoteno
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tyyppi = 'O'
+							AND tuoteno = '$tem_tuoteno'
+							AND kpl = 0
+							AND varattu != 0";
+				$result = pupe_query($query);
+				
+				if(mysql_num_rows($result) > 0) {
+					$virhe[$i] = t("Tuotetta löytyy avoimelta ostotilaukselta, ei voida merkata poistetuksi");
+				}
+			}
 		}
 
 		// ei piirretä ellei yhtiöparametri ohjeista katsomaan täältä

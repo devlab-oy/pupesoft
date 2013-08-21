@@ -24,13 +24,24 @@
 		$toimires = pupe_query($query);
 		$toimirow = mysql_fetch_array($toimires);
 
-		if (!preg_match("/(excel|wabco|xml)/", $toimirow['edi_kuvaus']) and ($toimirow['edi_palvelin'] == '' or $toimirow['edi_kayttaja'] == '' or $toimirow['edi_salasana'] == '' or $toimirow['edi_kuvaus'] == '' or $toimirow['edi_polku'] == '')) {
+		if (!preg_match("/(excel|wabco|xml)/", $toimirow['edi_kuvaus']) and
+				($toimirow['edi_palvelin'] == '' or $toimirow['edi_kayttaja'] == '' or $toimirow['edi_salasana'] == '' or $toimirow['edi_kuvaus'] == '' or $toimirow['edi_polku'] == '') and
+				($toimirow['edi_palvelin'] != "localhost" or $toimirow["edi_polku"] == '')) {
 			$tulosta_ostotilaus_ulos .= "<font class='error'>".t("Edi-tilauksen lähettämiseen tarvittavia tietoja ei ole syötetty")."! ".t("Tarkista toimittajan %s tiedot", "", trim("{$toimirow['nimi']} {$toimirow['nimitark']}"))."!</font><br />";
 		}
 		else {
 			// Otetaan ftp-palvelimen portti jos sellanen on setattu.
 			if (strpos($toimirow['edi_palvelin'], ":") !== FALSE) {
 				list($toimirow['edi_palvelin'], $toimirow['edi_portti']) = explode(":", $toimirow['edi_palvelin']);
+			}
+
+			if ($toimirow['edi_kuvaus'] == 'editilaus_out_futur.inc') {
+				$myynti_vai_osto = 'O';
+
+				$ftphost_futur = $toimirow['edi_palvelin'];
+				$ftpuser_futur = $toimirow['edi_kayttaja'];
+				$ftppass_futur = $toimirow['edi_salasana'];
+				$ftppath_futur = $toimirow['edi_polku'];
 			}
 
 			require($toimirow['edi_kuvaus']);

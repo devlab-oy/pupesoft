@@ -4,6 +4,8 @@ if (!function_exists("toimitarkista")) {
 	function toimitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $toimtyyppi;
 		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_nimi, $tmp_ultilno_maa, $ytunnus_ind, $hetuok;
+		static $tmp_edi_kuvaus, $tmp_edi_salasana, $tmp_edi_kayttaja, $tmp_edi_palvelin;
+		static $tmp_edi_kuvaus_i, $tmp_edi_salasana_i, $tmp_edi_kayttaja_i, $tmp_edi_palvelin_i;
 
 		if ((mysql_field_name($result, $i) == "nimi") or
 			(mysql_field_name($result, $i) == "maa") or
@@ -289,13 +291,50 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "edi_palvelin") {
+			$tmp_edi_palvelin = trim($t[$i]);
+			$tmp_edi_palvelin_i = $i;
+		}
+
+		if (mysql_field_name($result, $i) == "edi_kayttaja") {
+			$tmp_edi_kayttaja = trim($t[$i]);
+			$tmp_edi_kayttaja_i = $i;
+		}
+
+		if (mysql_field_name($result, $i) == "edi_salasana") {
+			$tmp_edi_salasana = trim($t[$i]);
+			$tmp_edi_salasana_i = $i;
+		}
+
 		if (mysql_field_name($result, $i) == "edi_kuvaus") {
-			$tmp_asn = $t[$i];
+			$tmp_edi_kuvaus = trim($t[$i]);
+			$tmp_edi_kuvaus_i = $i;
+		}
+
+		if (mysql_field_name($result, $i) == "edi_polku") {
+			$tmp_edi_polku = trim($t[$i]);
+
+			if ($tmp_edi_kuvaus == 'editilaus_out_wabco.inc' or $tmp_edi_kuvaus == 'editilaus_out_excel.inc' or $tmp_edi_kuvaus == 'editilaus_out_xml.inc') {
+				// Näissä tyypeissä ei tartte olle mitään kenttiä syötetty
+			}
+			elseif ($tmp_edi_kuvaus != "" and $tmp_edi_palvelin == "localhost" and ($tmp_edi_polku == "" or !is_writable($tmp_edi_polku))) {
+				$tmp_virhe = t("Paikallinen siirto ei onnistu, koska hakemistoon ei ole kirjoitusoikeutta")."!";
+				$virhe[$i] = $tmp_virhe;
+				$virhe[$tmp_edi_palvelin_i] = $tmp_virhe;
+			}
+			elseif ($tmp_edi_kuvaus != "" and $tmp_edi_palvelin != "localhost" and ($tmp_edi_palvelin == "" or $tmp_edi_kayttaja == "" or $tmp_edi_salasana == "" or $tmp_edi_polku == "")) {
+				$tmp_virhe = t("Edi-kuvaus valittu, mutta lähettämiseen tarvittavia kenttiä ei syötetty")."!";
+				$virhe[$i] = $tmp_virhe;
+				$virhe[$tmp_edi_palvelin_i] = $tmp_virhe;
+				$virhe[$tmp_edi_kayttaja_i] = $tmp_virhe;
+				$virhe[$tmp_edi_salasana_i] = $tmp_virhe;
+				$virhe[$tmp_edi_kuvaus_i] = $tmp_virhe;
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "asn_sanomat") {
 			$asn_tyyppi = trim($t[$i]);
-			if ($tmp_asn == "editilaus_out_teccom.inc" and $asn_tyyppi == "") {
+			if ($tmp_edi_kuvaus == "editilaus_out_teccom.inc" and $asn_tyyppi == "") {
 				$virhe[$i] = t("Toimittajalle on laitettu TecCom-editilaus. Mitä sanomia toimittaja lähettää")." ?";
 			}
 		}

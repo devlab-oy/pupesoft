@@ -235,7 +235,7 @@ function tee_kateisotto($kassalipas, $request_params) {
 				'summa' => $kateisotto_rivi['summa'],
 				'alv' => 0,
 			);
-				
+
 			//tehdään kulutiliöinti
 			tee_tiliointi($params, true);
 

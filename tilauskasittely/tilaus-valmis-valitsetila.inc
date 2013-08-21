@@ -304,9 +304,15 @@
 	elseif ($kerattavia > 0 and $kutsuja != 'keraa.php') {
 		// T‰ss‰ meill‰ ON jotain ker‰tt‰v‰‰
 		// laitetaan l‰hete tulostusjonoon
+		$tila = 'N';
+		$alatila = 'A';
+		if ($yhtiorow['lahetteen_tulostustapa'] == 'I') {
+			$tila = 'L';
+			$alatila = 'D';
+		}
 		$query  = "	UPDATE lasku SET
-					tila    = 'N',
-					alatila = 'A'
+					tila    = '{$tila}',
+					alatila = '{$alatila}'
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$laskurow[tunnus]'
 					and tila in ('N','L')

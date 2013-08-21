@@ -1860,8 +1860,28 @@
 				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 				$vasen_sarake[$vasen] .= "<td><select name='tilaustyyppi'>";
 
-				$sel = array();
-				$sel[$srow["tilaustyyppi"]] = "selected";
+				if (isset($srow) and $srow['tilaustyyppi'] != '') {
+					$sel = array($srow['tilaustyyppi'] => "selected");
+				}
+				elseif (isset($tilaustyyppi) and $tilaustyyppi != "") {
+					$sel = array($tilaustyyppi => "selected");
+				}
+				else {
+					$sel = array();
+				}
+
+				$sel = $sel +
+				array(
+					'A' => '',
+					'E' => '',
+					'N' => '',
+					'S' => '',
+					'T' => '',
+					2 => '',
+					7 => '',
+					8 => '',
+					9 => '',
+				);
 
 				$vasen_sarake[$vasen] .= "<option value='N' $sel[N]>".t("Normaalitilaus")."</option>";
 				$vasen_sarake[$vasen] .= "<option value='E' $sel[E]>".t("Ennakkotilaus")."</option>";
@@ -1984,7 +2004,7 @@
 			$jtki = "";
 			$rahtivapaa_chk = '';
 
-			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE")) $eilah = 'CHECKED';
+			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I')) $eilah = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
@@ -2869,7 +2889,7 @@
 
 			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";
 
-			echo "<tr><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
+			echo "<tr><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")."</td></tr>";
 
 			if (isset($srow["myynti_kommentti1"]) and $srow["myynti_kommentti1"] != "") {
 				echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[myynti_kommentti1] $srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
@@ -3864,6 +3884,11 @@
 				else {
 					$sopimus_pp = "";
 				}
+				
+				$sopimus_info = '';
+				if($toim != 'EXTENNAKKO' and $toim != 'EXTTARJOUS') {
+					$sopimus_info = "sopimus_lisatietoja			= '$sopimus_lisatietoja',";
+				}
 
 				$query3 .= "laskun_lisatiedot SET
 							yhtio						= '$kukarow[yhtio]',
@@ -3871,7 +3896,7 @@
 							sopimus_pp					= '$sopimus_pp',
 							sopimus_alkupvm				= '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
 							sopimus_loppupvm			= '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
-							sopimus_lisatietoja			= '$sopimus_lisatietoja',
+							{$sopimus_info}
 							kolm_ovttunnus				= '$kolm_ovttunnus',
 							kolm_nimi					= '$kolm_nimi',
 							kolm_nimitark				= '$kolm_nimitark',

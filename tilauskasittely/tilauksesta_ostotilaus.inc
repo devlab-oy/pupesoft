@@ -234,7 +234,7 @@
 										toim_postitp 		= '$toim_postitp',
 										valkoodi 			= '$valkoodi',
 										vanhatunnus			= '{$myytilrow['yhtio_toimipaikka']}',
-										varasto 			= '',
+										varasto 			= '{$kukarow['oletus_ostovarasto']}',
 										verkkotunnus		= '$myytilrow[liitostunnus]',
 									 	vienti_kurssi 		= '$vrow[kurssi]',
 										viesti 				= '$myytilrow[viesti]',

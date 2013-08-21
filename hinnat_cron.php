@@ -97,6 +97,9 @@
 
 	$asiakasrow = mysql_fetch_assoc($asiakasres);
 
+	$query = "SET SESSION group_concat_max_len = 3000000";
+	$foo = pupe_query($query);
+
 	// Haetaan vain tuotteet mitkä vastaanottava yhtiö ostaa lähettävältä yhtiöltä
 	$query = "	SELECT GROUP_CONCAT(DISTINCT CONCAT('\'', tuoteno, '\'')) AS tuotteet
 				FROM tuotteen_toimittajat

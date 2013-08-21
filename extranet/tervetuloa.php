@@ -138,6 +138,17 @@ if ($tee == '') {
 		echo "</table>";
 		echo "<br>";
 	}
+	
+	$extennakoiden_lukumaara = hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot($kukarow['oletus_asiakas']);
+
+	if ($extennakoiden_lukumaara > 0) {
+		echo "<table border='1'>";
+		echo "<tr>";
+		echo "<td style='padding:10px;'><font class='message'>".t("Sinulla on %s kappaletta hyväksymättömiä ennakkotilauksia.", '', $extennakoiden_lukumaara)."</font></td>";
+		echo "</tr>";
+		echo "</table>";
+		echo "<br>";
+	}
 
 	echo "<table width='100%'>";
 	echo "<tr>";

@@ -1,7 +1,7 @@
 <?php
 
 // tehdään lock file, ettei voi kerralla ajaa kuin yks per firma
-file_put_contents("/tmp/$kukarow[yhtio]-keikka.lock", "$otunnus");
+file_put_contents("/tmp/$kukarow[yhtio]-keikka.lock", "$otunnus;{$kukarow['kuka']};".date("Y-m-d H:i:s"));
 
 $query  = "	SELECT *
 			FROM lasku

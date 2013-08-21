@@ -120,7 +120,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 		$varastoon_tilausrivirajaus = "AND tilausrivi.tunnus = $tilausrivi";
 	}
 
-	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
+	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus) and $suuntalavan_tunnus > 0) {
 
 		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
 					FROM suuntalavat_saapuminen

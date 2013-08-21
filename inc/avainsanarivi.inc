@@ -167,6 +167,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "MYYNNISTA_OSTO")  	$ulos .= "<option value='MYYNNISTA_OSTO' {$avain_sel['MYYNNISTA_OSTO']}>    ".t("Ostotilauksen k‰sittely myyntitilauksella")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PAIKALLISVARAST")	$ulos .= "<option value='PAIKALLISVARAST' {$avain_sel['PAIKALLISVARAST']}>	".t("Paikallisvarasto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "HINNAT_CRON") 	 	$ulos .= "<option value='HINNAT_CRON' {$avain_sel['HINNAT_CRON']}>        	".t("Hinnat-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TUOTE_EXP_CRON")  	$ulos .= "<option value='TUOTE_EXP_CRON' {$avain_sel['TUOTE_EXP_CRON']}>	".t("Tuote Export-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -212,10 +213,10 @@
 			$ulos .= "<input type='text' name='{$nimi}' size='35' maxlength='65535' value='{$trow[$i]}' />";
 			$ulos .= t("Oletuspaikka pit‰‰ antaa muodossa hyllyalue-hyllynro-hyllyvali-hyllytaso");
 			$ulos .= "</td>";
-			
+
 			$jatko = 0;
 		}
-		
+
 		if (mysql_field_name($result, $i) == "selitetark") {
 			$sel = array();
 			$sel[$trow[$i]] = "SELECTED";

@@ -102,6 +102,7 @@
 		$sel2 = "";
 		$sel3 = "";
 		$sel4 = "";
+		$sel5 = "";
 
 		if ($trow[$i] == 'A') {
 			$sel1 = "selected";
@@ -115,11 +116,15 @@
 		if ($trow[$i] == 'L') {
 			$sel4 = "selected";
 		}
+		if ($trow[$i] == 'I') {
+			$sel5 = "selected";
+		}
 
 		$ulos .= "<option value = 'K' $sel2>".t("Myyntitilausten ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa");
 		$ulos .= "<option value = 'L' $sel4>".t("Myyntitilausten ker‰yslistojen ja l‰hetteen tulostukseen k‰ytet‰‰n tulostusjonoa");
 		$ulos .= "<option value = 'A' $sel1>".t("Myyntitilausten ker‰yslistat tulostetaan automaattisesti");
 		$ulos .= "<option value = 'B' $sel3>".t("Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti");
+		$ulos .= "<option value = 'I' $sel5>".t("Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti ja tilaus laitetaan toimitetuksi");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3527,6 +3532,18 @@
 
 			$ulos .= "</select></td>";
 		}
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'vastaavat_tuotteet_esitysmuoto') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'S' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Vastaavat tuotteet n‰ytet‰‰n normaalisti")."</option>";
+		$ulos .= "<option value = 'S' {$sel}>".t("Vastaavat tuotteet n‰ytet‰‰n vaikka saldo on nolla. N‰ytet‰‰n myˆs toimittajan tehtaan saldo.")."</option>";
+		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}

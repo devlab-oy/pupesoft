@@ -1986,6 +1986,7 @@
 			$toim == "asiakaskommentti" or
 			$toim == "yhteyshenkilo" or
 			$toim == "autodata_tuote" or
+			$toim == "korvaavat_kiellot" or
 			$toim == "tuotteen_toimittajat" or
 			$toim == "tuotteen_toimittajat_tuotenumerot" or
 			$toim == "extranet_kayttajan_lisatiedot" or

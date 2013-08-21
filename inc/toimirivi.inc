@@ -554,10 +554,11 @@
 		$sel[$trow[$i]] = "selected";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>".t("Toimittajalta ei tule ASN-sanomia eikä laskuja")."</option>";
-		$ulos .= "<option value='K' $sel[K]>".t("Toimittaja lähettää ASN-sanoman ja TecCom-laskun")."</option>";
-		$ulos .= "<option value='L' $sel[L]>".t("Toimittaja lähettää vain TecCom-laskun")."</option>";
-		$ulos .= "<option value='M' $sel[M]>".t("Toimittaja lähettää vain Maventa-laskun")."</option>";
+		$ulos .= "<option value=''>".t("ASN-sanomista ja laskuista ei luoda saapumisia")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("ASN-sanomista ja TecCom-laskuista luodaan saapumisia")."</option>";
+		$ulos .= "<option value='L' $sel[L]>".t("TecCom-laskuista luodaan saapumisia")."</option>";
+		$ulos .= "<option value='M' $sel[M]>".t("Maventa-laskuista luodaan saapumisia")."</option>";
+		$ulos .= "<option value='F' $sel[F]>".t("Finvoice-laskuista luodaan saapumisia")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -583,6 +584,19 @@
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Toimittaja on valittavissa kun perustetaan uutta tuotetta")."</option>";
 		$ulos .= "<option value='X'{$sel["X"]}>".t("Toimittaja ei ole valittavissa kun perustetaan uutta tuotetta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "sahkoinen_automaattituloutus") {
+
+		$sel = array($trow[$i] => 'selected') + array('E' => '', 'K' => '');
+
+		$ulos  = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Käytetään yhtiön toimipaikan oletusta")."</option>";
+		$ulos .= "<option value='E'{$sel['E']}>".t("Sähköisen laskun sisäänluvun yhteydessä ei tulouteta tuotteita varastoon")."</option>";
+		$ulos .= "<option value='K'{$sel["K"]}>".t("Tuotteet tuloutetaan varastoon automaattisesti sähköisen laskun sisäänluvun yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

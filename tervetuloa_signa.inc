@@ -41,14 +41,14 @@ function echo_myyntiseuranta_table() {
 	echo "<tr>";
 	echo "<th>".t("Liikevaihto")."</th>";
 	echo "<td align='right'>";
-	echo $tulos_ja_liikevaihto['liikevaihto'];
+	echo sprintf('%.2f', $tulos_ja_liikevaihto['liikevaihto']) . " {$yhtiorow['valkoodi']}";
 	echo "</td>";
 	echo "</tr>";
 
 	echo "<tr>";
 	echo "<th>".t("Tulos")."</th>";
 	echo "<td align='right'>";
-	echo $tulos_ja_liikevaihto['tulos'];
+	echo sprintf('%.2f', $tulos_ja_liikevaihto['tulos']) . " {$yhtiorow['valkoodi']}";
 	echo "</td>";
 	echo "</tr>";
 
@@ -63,7 +63,8 @@ function echo_myyntiseuranta_table() {
 
 	echo "<tr>";
 	echo "<td align='right'>";
-	echo $avoimet_tilaukset['arvo'];
+
+	echo sprintf('%.2f', $avoimet_tilaukset['arvo']) . " {$yhtiorow['valkoodi']}";
 	echo "</td>";
 	echo "</tr>";
 	echo "</table>";
@@ -85,7 +86,7 @@ function echo_myyntiseuranta_table() {
 		echo t("Liikevaihto").' '.piirra_aikavali($nykyinen_kvartaali);
 		echo "</td>";
 		echo "<td align='right'>";
-		echo $myynti_ja_kate_nykyinen_kvartaali['myynti'];
+		echo sprintf('%.2f', $myynti_ja_kate_nykyinen_kvartaali['myynti']) . " {$yhtiorow['valkoodi']}";
 		echo "</td>";
 		echo "</tr>";
 
@@ -94,7 +95,7 @@ function echo_myyntiseuranta_table() {
 		echo t("Liikevaihto").' '.piirra_aikavali($nykyinen_kuukausi);
 		echo "</td>";
 		echo "<td align='right'>";
-		echo $myynti_ja_kate_nykyinen_kuukausi['myynti'];
+		echo sprintf('%.2f', $myynti_ja_kate_nykyinen_kuukausi['myynti']) . " {$yhtiorow['valkoodi']}";
 		echo "</td>";
 		echo "</tr>";
 
@@ -103,7 +104,7 @@ function echo_myyntiseuranta_table() {
 		echo t("Kate").' '.piirra_aikavali($nykyinen_kuukausi);
 		echo "</td>";
 		echo "<td align='right'>";
-		echo $myynti_ja_kate_nykyinen_kuukausi['kate'];
+		echo sprintf('%.2f', $myynti_ja_kate_nykyinen_kuukausi['kate']) . " {$yhtiorow['valkoodi']}";
 		echo "</td>";
 		echo "</tr>";
 
@@ -112,7 +113,7 @@ function echo_myyntiseuranta_table() {
 		echo t("Avoimet tilaukset");
 		echo "</td>";
 		echo "<td align='right'>";
-		echo $avoimet_tilaukset['myyjan_arvo'];
+		echo sprintf('%.2f', $avoimet_tilaukset['myyjan_arvo']) . " {$yhtiorow['valkoodi']}";
 		echo "</td>";
 		echo "</tr>";
 		echo "</table>";
@@ -124,31 +125,12 @@ function echo_myyntiseuranta_table() {
 	echo "</table>";
 }
 
-function hae_liikevaihto($nykyinen_kvartaali) {
-	global $kukarow;
-
-	$query = "	SELECT IFNULL(Sum(tiliointi.summa), 0) AS liikevaihto
-				FROM   tiliointi
-				JOIN tili
-				ON ( tili.yhtio = tiliointi.yhtio
-				AND tili.tilino = tiliointi.tilino
-				AND tili.sisainen_taso LIKE '31%' )
-				WHERE  tiliointi.yhtio = '{$kukarow['yhtio']}'
-				AND tiliointi.korjattu = ''
-				AND tiliointi.tapvm >= '{$nykyinen_kvartaali['start_date']}'
-				AND tiliointi.tapvm <= '{$nykyinen_kvartaali['end_date']}'";
-	$result = pupe_query($query);
-
-	$row = mysql_fetch_assoc($result);
-	return $row['liikevaihto'];
-}
-
 function hae_tulos_ja_liikevaihto($nykyinen_kvartaali) {
 	global $kukarow;
 
 	$query = "	SELECT
-				IFNULL(round(Sum(if (tili.sisainen_taso != '3A', summa, 0)) * -1), 0) AS tulos,
-				IFNULL(round(Sum(if (tili.sisainen_taso LIKE '31%', summa, 0)) * -1), 0) AS liikevaihto
+				IFNULL(round(Sum(if (tili.sisainen_taso != '3A', summa, 0)) * -1, 2), 0) AS tulos,
+				IFNULL(round(Sum(if (tili.sisainen_taso LIKE '31%', summa, 0)) * -1, 2), 0) AS liikevaihto
 				FROM tiliointi
 				JOIN tili ON (tili.yhtio = tiliointi.yhtio
 					AND tili.tilino = tiliointi.tilino
@@ -169,8 +151,8 @@ function hae_avoimet_tilaukset($kuka_tunnus) {
 	$query_myyntihinta = "if(lasku.alatila='X', 0, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa})";
 
 	$sumquery = "	SELECT
-					IFNULL(round(sum($query_myyntihinta)), 0) arvo,
-					IFNULL(round(sum(if(lasku.myyja = '$kuka_tunnus', $query_myyntihinta, 0))), 0) myyjan_arvo
+					IFNULL(round(sum($query_myyntihinta), 2), 0) arvo,
+					IFNULL(round(sum(if(lasku.myyja = '$kuka_tunnus', $query_myyntihinta, 0)), 2), 0) myyjan_arvo
 					FROM lasku use index (tila_index)
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio
 						and tilausrivi.otunnus = lasku.tunnus
@@ -201,8 +183,7 @@ function hae_myyjan_myynti_ja_kate($aika, $kuka_tunnus) {
 }
 
 function piirra_aikavali($aika_vali) {
-	$mur = date('d.m', strtotime($aika_vali['start_date'])).' - '.date('d.m', strtotime($aika_vali['end_date']));
-	return $mur;
+	return date('d.m', strtotime($aika_vali['start_date'])).' - '.date('d.m', strtotime($aika_vali['end_date']));
 }
 
 function paata_kvartaali() {
@@ -214,11 +195,11 @@ function paata_kvartaali() {
 		),
 		1	 => array(
 			"start_date" => "$tama_vuosi-04-01",
-			"end_date"	 => "$tama_vuosi-06-31"
+			"end_date"	 => "$tama_vuosi-06-30"
 		),
 		2	 => array(
 			"start_date" => "$tama_vuosi-07-01",
-			"end_date"	 => "$tama_vuosi-09-31"
+			"end_date"	 => "$tama_vuosi-09-30"
 		),
 		3	 => array(
 			"start_date" => "$tama_vuosi-10-01",

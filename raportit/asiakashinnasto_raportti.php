@@ -72,7 +72,7 @@ if ($request['action'] == 'aja_raportti') {
 }
 echo_kayttoliittyma($request);
 
-require ("../inc/footer.inc");
+require ("inc/footer.inc");
 
 function echo_kayttoliittyma($request = array()) {
 	global $kukarow, $yhtiorow;
@@ -93,7 +93,7 @@ function echo_kayttoliittyma($request = array()) {
 	echo "<tr>";
 	echo "<th>".t('Asiakasryhmä').":</th>";
 	echo "<td>";
-	echo "<select id='valittu_asiakas' name='valittu_asiakasryhma'>";
+	echo "<select id='valittu_asiakasryhma' name='valittu_asiakasryhma'>";
 	foreach ($request['asiakasryhmat'] as $asiakasryhma) {
 		$sel = "";
 		if ($request['valittu_asiakasryhma'] == $asiakasryhma['selite']) {
@@ -112,7 +112,7 @@ function echo_kayttoliittyma($request = array()) {
 		'tuotteet_joilla_asiakashinta'	 => $request['mitka_tuotteet'] == 'tuotteet_joilla_asiakashinta' ? 'CHECKED' : '',
 	);
 	if (empty($request['mitka_tuotteet'])) {
-		$sel['kaikki'] = "CHECKED";
+		$sel['tuotteet_joilla_asiakashinta'] = "CHECKED";
 	}
 	echo "<th>".t('Tuotteet').":</th>";
 
@@ -196,7 +196,7 @@ function hae_asiakashinta_ja_alennus_tuotteet($request) {
 	if (!empty($request['valittu_asiakasryhma'])) {
 		$asiakashinnasto_where .= " AND asiakas_ryhma = '{$request['valittu_asiakasryhma']}'";
 	}
-	// Haetaan muuttuneet asiakashinnat
+
 	$query = "	SELECT ryhma, tuoteno
 				FROM asiakashinta
 				WHERE yhtio = '{$kukarow['yhtio']}'
@@ -214,7 +214,6 @@ function hae_asiakashinta_ja_alennus_tuotteet($request) {
 	}
 
 	if ($request['mitka_tuotteet'] == 'kaikki') {
-		// Haetaan muuttuneet asiakasalennukset
 		$query = "	SELECT ryhma, tuoteno
 					FROM asiakasalennus
 					WHERE yhtio = '{$kukarow['yhtio']}'
@@ -228,6 +227,16 @@ function hae_asiakashinta_ja_alennus_tuotteet($request) {
 			elseif ($asiakasalennus_row['tuoteno'] != "") {
 				$tuotteet[$asiakasalennus_row['tuoteno']] = 0;
 			}
+		}
+
+		$query = "	SELECT aleryhma, tuoteno
+					FROM tuote
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND status != 'P'";
+		$result = pupe_query($query);
+
+		while ($tuote = mysql_fetch_assoc($result)) {
+			$tuotteet[$tuote['tuoteno']] = 0;
 		}
 	}
 
@@ -288,11 +297,11 @@ function hae_asiakasalennukset($request) {
 			'kappalemaara'		 => 1,
 			'yksikko'			 => $tuote['yksikko'],
 			'paivitys_pvm'		 => $tuote['muutospvm'],
-			'ostohinta'			 => $tuotteen_toimittaja_row['ostohinta'],
-			'kehahin'			 => $tuote['kehahin'],
-			'ovh_hinta'			 => $tuote['myyntihinta'],
-			'ryhman_ale'		 => $alennettu_hinta,
-			'hinnasto_hinta'	 => $hinta,
+			'ostohinta'			 => number_format($tuotteen_toimittaja_row['ostohinta'], 2),
+			'kehahin'			 => number_format($tuote['kehahin'], 2),
+			'ovh_hinta'			 => number_format($tuote['myyntihinta'], 2),
+			'ryhman_ale'		 => number_format($alennettu_hinta, 2),
+			'hinnasto_hinta'	 => number_format($hinta, 2),
 			'ale_prosentti'		 => '',
 			'tarjous_hinta'		 => '',
 			'alennus_prosentti'	 => '',
@@ -326,6 +335,7 @@ function generoi_custom_excel($tuotteet) {
 		'yksikko'			 => t('Yksikkö'),
 		'paivitys_pvm'		 => t('Päivitys päivämäärä'),
 		'ostohinta'			 => t('Ostohinta'),
+		'kehahin'			 => t('Keskihankintahinta'),
 		'ovh_hinta'			 => t('Ovh').'-'.t('Hinta'),
 		'ryhman_ale'		 => t('Ryhmän ale'),
 		'hinnasto_hinta'	 => t('Hinnasto hinta'),
@@ -365,6 +375,8 @@ function generoi_custom_excel($tuotteet) {
 		$xls->write($rivi, $sarake, date('d.m.Y', strtotime($tuote['paivitys_pvm'])));
 		$sarake++;
 		$xls->write($rivi, $sarake, $tuote['ostohinta']);
+		$sarake++;
+		$xls->write($rivi, $sarake, $tuote['kehahin']);
 		$sarake++;
 		$xls->write($rivi, $sarake, $tuote['ovh_hinta']);
 		$sarake++;

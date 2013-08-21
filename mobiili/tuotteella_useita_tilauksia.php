@@ -94,6 +94,12 @@ if (isset($submit)) {
 
 			break;
 		default:
+
+			if ($submit == 'cancel') {
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}'>";
+				exit;
+			}
+
 			echo "Virhe";
 			break;
 	}
@@ -121,7 +127,7 @@ mysql_data_seek($result, 0);
 
 ### UI ###
 echo "<div class='header'>
-	<button onclick='window.location.href=\"ostotilaus.php\"' class='button left'><img src='back2.png'></button>
+	<button onclick='window.location.href=\"ostotilaus.php?ostotilaus={$ostotilaus}\"' class='button left'><img src='back2.png'></button>
 	<h1>",t("USEITA TILAUKSIA"), "</h1></div>";
 
 echo "<div class='main'>

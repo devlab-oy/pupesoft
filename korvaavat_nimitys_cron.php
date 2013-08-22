@@ -4,7 +4,7 @@
 - Loopataan kaikki ketjut läpi
 - Jos ketjun tuotteella saldo 0, tuote ei ole ketjun ykköstuote = laitetaan järjestykseltä pienempi nimitykseen, esim "KORVAAVA A2".
 - Jos järjestys on kuitenkin 0, niin laitetaan "Korvaava "ykköstuote"". Eli päätuote ketjusta menee silloin nimitykseen.
-- Tarvitaan tsekki updeittiin, että jos siellä on nimityksenä "Korvaava%" niin ei tehä mitään.
+- Tehdään tsekki, että jos tuotteella on nimitys jo muutettu, niin ei tehä mitään.
 */
 
 // Kutsutaanko CLI:stä

@@ -174,6 +174,7 @@ echo "<div class='main'>
 			$query = "	SELECT *
 						FROM kirjoittimet
 						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND komento NOT IN ('edi','email')
 						ORDER BY kirjoitin";
 			$kires = pupe_query($query);
 

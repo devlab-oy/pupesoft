@@ -201,7 +201,7 @@ while($row = mysql_fetch_assoc($result)) {
 
 	# Jos rivi on jo kohdistettu eri saapumiselle
 	if ($row['uusiotunnus'] != 0) $saapuminen = $row['uusiotunnus'];
-	$url = http_build_query(array('saapuminen' => $saapuminen, 'ostotilaus' => $row['ostotilaus'], 'tilausrivi' => $row['tunnus']));
+	$url = http_build_query(array('saapuminen' => $saapuminen, 'ostotilaus' => $row['ostotilaus'], 'tilausrivi' => $row['tunnus'], 'manuaalisesti_syotetty_ostotilausnro'  => $manuaalisesti_syotetty_ostotilausnro, 'tilausten_lukumaara' => $tilausten_lukumaara));
 
 	echo "<tr>";
 

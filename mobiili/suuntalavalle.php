@@ -125,7 +125,9 @@ if (isset($submit)) {
 $url = array (
             'ostotilaus' => $tilausrivi['otunnus'],
             'tilausrivi' => $tilausrivi['tunnus'],
-            'saapuminen' => $alkuperainen_saapuminen
+            'saapuminen' => $alkuperainen_saapuminen,
+            'tilausten_lukumaara' => $tilausten_lukumaara,
+            'manuaalisesti_syotetty_ostotilausnro' => $manuaalisesti_syotetty_ostotilausnro,
         );
 
 if (!is_numeric($hyllytetty)) {

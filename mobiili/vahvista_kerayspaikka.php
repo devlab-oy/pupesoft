@@ -209,7 +209,9 @@ if (isset($submit) and trim($submit) != '') {
 
 				# Redirectit ostotilaukseen tai suuntalavan_tuotteet?
 				if (isset($hyllytys)) {
-					echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=tuotteella_useita_tilauksia.php?ostotilaus={$row['otunnus']}'>";
+					$ostotilaus_urliin = $manuaalisesti_syotetty_ostotilausnro ? "" : $row['otunnus'];
+					$tilausten_lukumaara--;
+					echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus_urliin}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}'>";
 				}
 				else {
 					echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=suuntalavan_tuotteet.php?{$url}'>";
@@ -284,7 +286,7 @@ echo "
 $paluu_url = "suuntalavan_tuotteet.php?$url";
 # Ostotilaus -> hyllytykseen
 if (isset($hyllytys)) {
-	$paluu_url = "hyllytys.php?ostotilaus={$row['otunnus']}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}";
+	$paluu_url = "hyllytys.php?ostotilaus={$row['otunnus']}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}";
 }
 
 echo "<div class='header'>";

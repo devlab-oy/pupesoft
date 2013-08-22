@@ -17,7 +17,9 @@ $data = array(
 	'liitostunnus' => $liitostunnus,
 	'tilausrivi' => $tilausrivi,
 	'ostotilaus' => $ostotilaus,
-	'saapuminen' => $saapuminen
+	'saapuminen' => $saapuminen,
+	'tilausten_lukumaara' => $tilausten_lukumaara,
+	'manuaalisesti_syotetty_ostotilausnro' => $manuaalisesti_syotetty_ostotilausnro,
 );
 $url = http_build_query($data);
 

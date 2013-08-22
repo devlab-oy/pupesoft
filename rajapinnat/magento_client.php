@@ -60,6 +60,11 @@ class MagentoClient {
 	 */
 	private $_tax_class_id = 0;
 
+	/** 
+	 * Verkkokaupan "root" kategorian tunnus, tämän alle lisätään kaikki tuoteryhmät
+	 */
+	private $_parent_id = 3;
+
 	/**
 	 * Tämän yhteyden aikana sattuneiden virheiden määrä
 	 */
@@ -102,8 +107,7 @@ class MagentoClient {
 
 		$this->log("Lisätään kategoriat");
 
-		$parent_id = 3; // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
-
+		$parent_id = $this->_parent_id; // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
 		$count = 0;
 
 		// Loopataan osastot ja tuoteryhmat
@@ -534,7 +538,7 @@ class MagentoClient {
 	/**
 	 * Poistaa magentosta tuotteita
 	 *
-	 * @param array $poistetut_tuotteet Poistettavat tuotteet
+	 * @param array $kaikki_tuotteet Kaikki tuotteet, jotka pitää LÖYTYÄ Magentosta
 	 * @return   Poistettujen tuotteiden määrä
 	 */
 	public function poista_poistetut(array $kaikki_tuotteet) {
@@ -807,6 +811,16 @@ class MagentoClient {
 	 */
 	public function setTaxClassID($tax_class_id) {
 		$this->_tax_class_id = $tax_class_id;
+	}
+
+	/**
+	 * Asettaa parent_id:n
+	 * Oletus 3
+	 *
+	 * @param int $parent_id Root kategorian tunnus
+	 */
+	public function setParentID($parent_id) {
+		$this->_parent_id = $parent_id;
 	}
 
 	/**

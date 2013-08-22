@@ -12654,16 +12654,18 @@ if (!function_exists("pupe_DataTables")) {
 		// Luetaan taulujen parametrit ja vied‰‰n ne javascriptille...
 		foreach ($parametrit as $param) {
 
-			$taulu			= $param[0];
-			$sarakkeetVis	= $param[1];
-			$sarakkeetTot	= $param[2];
-			$paginate 		= isset($param[3]) ? $param[3] : "false";
-			$info 			= isset($param[4]) ? $param[4] : "false";
-			$sorting 		= isset($param[5]) ? $param[5] : "true";
-			$aoColumns 		= "";
-			$paginationtype = $paginate !== false ? "full_numbers" : "two_button";
+			$taulu				= $param[0];
+			$sarakkeetVis		= $param[1];
+			$sarakkeetTot		= $param[2];
+			$paginate 			= isset($param[3]) ? $param[3] : "false";
+			$info 				= isset($param[4]) ? $param[4] : "false";
+			$sorting 			= isset($param[5]) ? $param[5] : "true";
+			$serverside			= isset($param[6]) ? $param[6] : "false";
+			$serversideparams	= isset($param[7]) ? $param[7] : "";
+			$aoColumns 			= "";
+			$paginationtype 	= $paginate !== false ? "full_numbers" : "two_button";
 
-			$json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting);
+			$json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting, $serverside, $serversideparams);
 		}
 
 		preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
@@ -12713,10 +12715,18 @@ if (!function_exists("pupe_DataTables")) {
 						aoColumns[i-1] = {\"bSortable\": false, \"bSearchable\": false};
 					}
 
+					if (parametrit[tableid][6] == true) {
+						
+						console.log(parametrit[tableid][7]);
+						
+						datatablesit[t] = $(this).dataTable( {
+							\"bProcessing\": true,
+							\"bServerSide\": true,
+							\"sAjaxSource\": \"?dtss=TRUE&serversideparams=\"+parametrit[tableid][7]
+						} );
+					}
+
 					datatablesit[t] = $(this).dataTable( {
-						\"bProcessing\": true,
-				        \"bServerSide\": true,
-				        \"sAjaxSource\": \"?dtss=TRUE\",
 						\"bSortCellsTop\": true,
 						\"bDestroy\" : true,
 						\"bPaginate\" : parametrit[tableid][2],

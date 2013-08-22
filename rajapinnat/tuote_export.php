@@ -631,8 +631,9 @@
 	}
 
 	// Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
-	unset($useslave, $tempdbhost, $masterlink, $temporarylink);
-	require ("{$pupe_root_polku}/inc/connect.inc");
+	$link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost (tuote_export)");
+	mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (tuote_export)");
+	mysql_set_charset("latin1", $link);
 
 	// Kun kaikki onnistui, päivitetään lopuksi timestamppi talteen
 	$query = "	UPDATE avainsana SET

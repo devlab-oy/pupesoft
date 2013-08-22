@@ -22920,7 +22920,8 @@ if (!function_exists('aja_ruby')) {
 		global $pupe_root_polku;
 
 		$filepath = realpath("pdfs/ruby/{$ruby_tiedosto_nimi}.rb");
-		
+
+		$filepath = $pupe_root_polku . "/pdfs/ruby/{$ruby_tiedosto_nimi}.rb";
 		$cmd = "ruby {$filepath} {$json_data_filepath}";
 		$return = exec($cmd, $output, $return_code);
 

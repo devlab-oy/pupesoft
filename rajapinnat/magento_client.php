@@ -60,7 +60,7 @@ class MagentoClient {
 	 */
 	private $_tax_class_id = 0;
 
-	/** 
+	/**
 	 * Verkkokaupan "root" kategorian tunnus, tämän alle lisätään kaikki tuoteryhmät
 	 */
 	private $_parent_id = 3;
@@ -556,17 +556,17 @@ class MagentoClient {
 
 			try {
 				// Tässä kutsu, jos tuote oikeasti halutaan poistaa
-				# $this->_proxy->call($this->_session, 'catalog_product.delete', $tuote, 'SKU');
+				$this->_proxy->call($this->_session, 'catalog_product.delete', $tuote, 'SKU');
 
-				// "Poistetaan" tuote, eli merkataan disabled ja not visible
-				$this->_proxy->call($this->_session, 'catalog_product.update',
-									array(
-										$tuote,
-										array('status'     => self::DISABLED,
-											  'visibility' => self::NOT_VISIBLE_INDIVIDUALLY,
-											 )
-										)
-									);
+				// "Poistetaan" tuote, merkataan disabled ja not visible
+				// $this->_proxy->call($this->_session, 'catalog_product.update',
+				// 					array(
+				// 						$tuote,
+				// 						array('status'     => self::DISABLED,
+				// 							  'visibility' => self::NOT_VISIBLE_INDIVIDUALLY,
+				// 							 )
+				// 						)
+				// 					);
 				$count++;
 			}
 			catch (Exception $e) {
@@ -576,6 +576,36 @@ class MagentoClient {
 		}
 
 		$this->log("$count tuotetta poistettu");
+
+		return $count;
+	}
+
+	/**
+	 * Poistaa magentosta kategorioita
+	 *
+	 * @param array $kaikki_kategoriat Kaikki kategoriat jotka pitää löytyä Magentosta
+	 * @return   Poistettujen tuotteiden määrä
+	 */
+	public function poista_kategorioita(array $kaikki_kategoriat) {
+
+		# Work in progress, don't use :)
+		return;
+
+		$count = 0;
+		$parent_id = $this->_parent_id; // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
+
+		// Haetaan kaikki kategoriat, joiden parent_id on parent id
+		$magento_kategoriat = $this->_proxy->call($this->_session, 'catalog_category.level',
+								array(
+									null, # website
+									null, # storeview
+									$parent_id,
+									)
+								);
+
+		var_dump($magento_kategoriat);
+
+		$this->log("$count kategoriaa poistettu");
 
 		return $count;
 	}

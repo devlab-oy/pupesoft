@@ -62,6 +62,9 @@ if (isset($submit)) {
 				$errors[] = t("Vähintään yksi kenttä on syötettävä");
 				break;
 			}
+
+			$data['manuaalisesti_syotetty_ostotilausnro'] = $data['ostotilaus'] != '' ? 1 : 0;
+
 			# Rakennetaan parametrit kentistä
 			$url = http_build_query($data);
 

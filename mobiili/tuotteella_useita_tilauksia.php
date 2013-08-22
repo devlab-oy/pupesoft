@@ -129,7 +129,7 @@ if (isset($submit)) {
 
 # Ei osumia, palataan ostotilaus sivulle
 if ($tilausten_lukumaara == 0) {
-	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?virhe'>";
+	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tilauksia.php?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&virhe'>";
 	exit();
 }
 
@@ -137,24 +137,32 @@ if ($tilausten_lukumaara == 0) {
 if ($tilausten_lukumaara == 1) {
 
 	$url_array['tilausrivi'] = $tilaukset['tunnus'];
-	$url_array['ostotilaus'] = (empty($ostotilaus)) ? $tilaukset['otunnus'] : $ostotilaus;
+	$url_array['ostotilaus'] = empty($ostotilaus) ? $tilaukset['otunnus'] : $ostotilaus;
 	$url_array['saapuminen'] = $saapuminen;
+	$url_array['manuaalisesti_syotetty_ostotilausnro'] = empty($manuaalisesti_syotetty_ostotilausnro) ? 0 : 1;
+	$url_array['tilausten_lukumaara'] = $tilausten_lukumaara;
 
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>";
 	exit();
 }
 
+if (isset($virhe)) {
+	$errors[] = t("Tuotetta ei löytynyt").".<br>";
+}
+
 # Result alkuun
 mysql_data_seek($result, 0);
 
+$url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "?ostotilaus={$ostotilaus}" : "";
+
 ### UI ###
 echo "<div class='header'>
-	<button onclick='window.location.href=\"ostotilaus.php?ostotilaus={$ostotilaus}\"' class='button left'><img src='back2.png'></button>
+	<button onclick='window.location.href=\"ostotilaus.php{$url_lisa}\"' class='button left'><img src='back2.png'></button>
 	<h1>",t("USEITA TILAUKSIA"), "</h1></div>";
 
 echo "<div class='main'>
 
-<form name='viivakoodiformi' method='post' action='?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}' id='viivakoodiformi'>
+<form name='viivakoodiformi' method='post' action='?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}' id='viivakoodiformi'>
 	<table class='search'>
 		<tr>
 			<th>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' /></th>
@@ -169,21 +177,21 @@ echo "<div class='main'>
 <tr>";
 
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
-	echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_tuoteno}'>",t("Ostotilaus"), "</a>&nbsp;";
+	echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_tuoteno}'>",t("Ostotilaus"), "</a>&nbsp;";
 	echo $sort_by_direction_otunnus == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 	echo "</th>";
 }
 if ($tuotenumero == '' and $viivakoodi == '' and $ostotilaus != '') {
-	echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuoteno"), "</a>&nbsp;";
+	echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuoteno"), "</a>&nbsp;";
 	echo $sort_by_direction_tuoteno == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 	echo "</th>";
 }
 
-echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=sorttaus_kpl&sort_by_direction_sorttaus_kpl={$sort_by_direction_sorttaus_kpl}'>",t("Kpl (ulk.)"),"</a>";
+echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=sorttaus_kpl&sort_by_direction_sorttaus_kpl={$sort_by_direction_sorttaus_kpl}'>",t("Kpl (ulk.)"),"</a>";
 echo $sort_by_direction_sorttaus_kpl == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 echo "</th>";
 
-echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=hylly&sort_by_direction_hylly={$sort_by_direction_hylly}'>",t("Tuotepaikka"),"</a>";
+echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=hylly&sort_by_direction_hylly={$sort_by_direction_hylly}'>",t("Tuotepaikka"),"</a>";
 echo $sort_by_direction_hylly == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 echo "</th>";
 echo "</tr>";

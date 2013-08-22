@@ -6,7 +6,34 @@
 	// DataTables p‰‰lle
 	$pupe_DataTables = "myyntilaskuhaku";
 
+	if (isset($_GET["dtss"]) and $_GET["dtss"] == "TRUE") {
+		$no_head = "yes";
+	}
+
 	require ("../inc/parametrit.inc");
+
+	if (isset($_GET["dtss"]) and $_GET["dtss"] == "TRUE") {
+
+		/* Array of database columns which should be read and sent back to DataTables. Use a space where
+		 * you want to insert a non-database field (for example a counter or static image)
+		 */
+		$aColumns = array('tapvm', 'erpcm', 'laskunro', 'nimi', 'summa', 'valkoodi', 'ebid', 'tila', 'laatija');
+
+		/*
+		 * Indexed column (used for fast and accurate table cardinality)
+		 */
+		$sIndexColumn = "tunnus";
+
+		/*
+		 * DB table to use
+		 */
+		$sTable = "lasku";
+
+		list($sUseIndex, $sInitialWhere, $sInitialOrder) = unserialize($_GET["serversideparams"]);
+
+		require("server_processing_getdata.php");
+		exit;
+	}
 
 	if (!isset($tee)) $tee = '';
 	if (!isset($summa1)) $summa1 = '';
@@ -52,7 +79,7 @@
 	echo "<option value = 'V'  {$seldr["V"]}>",t("viitteell‰"),"</option>";
 	echo "<option value = 'L'  {$seldr["L"]}>",t("laskunnumerolla"),"</option>";
 	echo "<option value = 'A'  {$seldr["A"]}>",t("asiakasnumerolla"),"</option>";
-	echo "<option value = 'LN'  {$seldr["LN"]}>",t("Laatijan/myyj‰n nimell‰"),"</option>";
+	echo "<option value = 'LN' {$seldr["LN"]}>",t("Laatijan/myyj‰n nimell‰"),"</option>";
 	echo "</select></td>";
 	echo "<td><input type = 'text' name = 'summa1' size='13'> - <input type = 'text' name = 'summa2' size='13'></td>";
 	echo "<td class='back'><input type = 'submit' value = '",t("Hae"),"'></td>";
@@ -181,100 +208,44 @@
 		$jarj = "nimi, summa";
 	}
 
-	if ($tee != '') {
-		$query = "	SELECT tapvm, erpcm, laskunro, concat_ws(' ', nimi, nimitark) nimi,
-					summa, valkoodi, ebid, tila, alatila, tunnus,
-					mapvm, saldo_maksettu, ytunnus, liitostunnus, laatija
-					FROM lasku {$index}
-					WHERE {$ehto} and yhtio = '{$kukarow['yhtio']}'
-					ORDER BY {$jarj}";
-		$result = pupe_query($query);
+	if ($tee != '' and $ehto != "") {
 
-		if (mysql_num_rows($result) == 0) {
-			echo "<b>",t("Haulla ei lˆytynyt yht‰‰n laskua"),"</b>";
-			$tee = '';
-		}
-		else {
+		pupe_DataTables(array(array($pupe_DataTables, 9, 9, false, false, true, true, urlencode(serialize(array($index, $ehto, $jarj))))));
 
-			pupe_DataTables(array(array($pupe_DataTables, 9, 9)));
+		echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 
-			echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
+		echo "<thead>
+				<tr>
+				<th>",t("Pvm"),"</th>
+				<th>",t("Er‰p‰iv‰"),"</th>
+				<th>",t("Laskunro"),"</th>
+				<th>",t("Nimi"),"</th>
+				<th>",t("Summa"),"</th>
+				<th>",t("Valuutta"),"</th>
+				<th>",t("Ebid"),"</th>
+				<th>",t("Tila"),"</th>
+				<th>",t("Laatija"),"</th>
+				</tr>
+				<tr>
+				<td><input type='text' class='search_field' name='search_pvm'></td>
+				<td><input type='text' class='search_field' name='search_erpvm'></td>
+				<td><input type='text' class='search_field' name='search_laskunro'></td>
+				<td><input type='text' class='search_field' name='search_nimi'></td>
+				<td><input type='text' class='search_field' name='search_summa'></td>
+				<td><input type='text' class='search_field' name='search_valuutta'></td>
+				<td><input type='text' class='search_field' name='search_ebid'></td>
+				<td><input type='text' class='search_field' name='search_tila'></td>
+				<td><input type='text' class='search_field' name='search_laatija'></td>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td colspan='9' class='dataTables_empty'>".t("Ladataan")."...</td>
+				</tr>
+			</tbody>
+			</table><br /><br />";
 
-			echo "<thead>
-					<tr>
-					<th>",t("Pvm"),"</th>
-					<th>",t("Er‰p‰iv‰"),"</th>
-					<th>",t("Laskunro"),"</th>
-					<th>",t("Nimi"),"</th>
-					<th>",t("Summa"),"</th>
-					<th>",t("Valuutta"),"</th>
-					<th>",t("Ebid"),"</th>
-					<th>",t("Tila"),"</th>
-					<th>",t("Laatija"),"</th>
-					</tr>
-					<tr>
-					<td><input type='text' class='search_field' name='search_pvm'></td>
-					<td><input type='text' class='search_field' name='search_erpvm'></td>
-					<td><input type='text' class='search_field' name='search_laskunro'></td>
-					<td><input type='text' class='search_field' name='search_nimi'></td>
-					<td><input type='text' class='search_field' name='search_summa'></td>
-					<td><input type='text' class='search_field' name='search_valuutta'></td>
-					<td><input type='text' class='search_field' name='search_ebid'></td>
-					<td><input type='text' class='search_field' name='search_tila'></td>
-					<td><input type='text' class='search_field' name='search_laatija'></td>
-					</tr>
-				</thead>";
-
-			echo "<tbody>";
-
-			while ($trow = mysql_fetch_assoc($result)) {
-				echo "<tr class='aktiivi'>";
-
-				if ($kukarow['taso'] < 2) {
-					echo "<td valign='top'>{$trow["tapvm"]}</td>";
-				}
-				else {
-					echo "<td valign='top'><a href = '../muutosite.php?tee=E&tunnus={$trow['tunnus']}&lopetus={$lopetus}'>{$trow["tapvm"]}</td>";
-				}
-
-				echo "<td valign='top'>{$trow["erpcm"]}</td>";
-				echo "<td valign='top'><a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro={$trow['laskunro']}&lopetus={$lopetus}'>{$trow['laskunro']}</td>";
-				echo "<td valign='top'><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[liitostunnus]&alatila=Y&tila=tee_raportti&lopetus={$lopetus}'>{$trow['nimi']}</a></td>";
-				echo "<td valign='top' align='right'>{$trow['summa']}</td>";
-				echo "<td valign='top'>{$trow['valkoodi']}</td>";
-
-				// tehd‰‰n lasku linkki
-				echo "<td>",ebid($trow['tunnus']),"</td>";
-
-				$maksuviesti = "";
-
-				if ($trow['mapvm'] != "0000-00-00") {
-					$maksuviesti = t("Maksettu");
-				}
-				elseif ($trow['mapvm'] == "0000-00-00" and $trow['saldo_maksettu'] != 0) {
-					$maksuviesti = t("Osasuoritettu");
-
-					if ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
-						$maksuviesti .= " / ".t("Er‰‰ntynyt");
-					}
-				}
-				elseif ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
-					$maksuviesti = " ".t("Er‰‰ntynyt");
-				}
-				else {
-					$maksuviesti = t("Avoin");
-				}
-
-				echo "<td>$maksuviesti</td>";
-				echo "<td>".kuka_kayttaja($trow["laatija"])."</td>";
-				echo "</tr>";
-			}
-
-			echo "</tbody>";
-			echo "</table><br /><br />";
-
-			$toim = "";
-		}
+		$toim = "";
 	}
 
 	require ("inc/footer.inc");

@@ -12715,18 +12715,7 @@ if (!function_exists("pupe_DataTables")) {
 						aoColumns[i-1] = {\"bSortable\": false, \"bSearchable\": false};
 					}
 
-					if (parametrit[tableid][6] == true) {
-						
-						console.log(parametrit[tableid][7]);
-						
-						datatablesit[t] = $(this).dataTable( {
-							\"bProcessing\": true,
-							\"bServerSide\": true,
-							\"sAjaxSource\": \"?dtss=TRUE&serversideparams=\"+parametrit[tableid][7]
-						} );
-					}
-
-					datatablesit[t] = $(this).dataTable( {
+					var settings = {
 						\"bSortCellsTop\": true,
 						\"bDestroy\" : true,
 						\"bPaginate\" : parametrit[tableid][2],
@@ -12736,6 +12725,7 @@ if (!function_exists("pupe_DataTables")) {
 						\"bStateSave\" : true,
 						\"iDisplayLength\" : 25,
 						\"oLanguage\": {
+							\"sProcessing\" : \"".t("Ladataan")."...\",
 							\"sSearch\" : \"".t("Etsi taulukosta").":\",
 							\"sZeroRecords\": \"".t("Ei hakuosumia")."\",
 							\"sLengthMenu\": \"",t("Näytä")," _MENU_ ",t("riviä"),"\",
@@ -13002,8 +12992,17 @@ if (!function_exists("pupe_DataTables")) {
 								}
 							}
 						}
-					} );
-				} );
+					};
+
+					if (parametrit[tableid][6] == true) {
+						settings.bProcessing = true;
+						settings.bServerSide = true,
+						settings.sAjaxSource = \"?dtss=TRUE&serversideparams=\"+parametrit[tableid][7];
+					}
+
+					datatablesit[t] = $(this).dataTable(settings);
+				}
+				);
 
 				// KEIKKA.PHPN OMAT JQUERY-TOIMINNALLISUUDET
 				if (datatablesit[0].attr(\"id\") == 'keikka') {

@@ -94,18 +94,24 @@ if(!function_exists("tuotetarkista")) {
 
 			//mysql_field_name pitää ottaa talteen koska muuvarastopaikka.php muuttaa resulttia.
 			$field_name = mysql_field_name($result, $i);
-			$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '".mysql_field_name($result, $i)."'";
+			$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$field_name'";
 			$tpres = pupe_query($tpque);
 
 			if (mysql_num_rows($tpres) > 0) {
 
-				if (mysql_field_name($result, $i) == "try") {
+				if ($field_name == "try") {
 					$tem_try = $t[$i];
-					$tem_try_vanha = $trow[$i];
-					$tem_status_vanha = $trow['status'];
+					if (!empty($trow)) {
+						$tem_try_vanha = $trow[$i];
+						$tem_status_vanha = $trow['status'];
+					}
+					else {
+						$tem_try_vanha = '';
+						$tem_status_vanha = '';
+					}
 				}
 
-				if (mysql_field_name($result, $i) == "try" and !empty($trow) and $tem_try_vanha != $tem_try) {
+				if ($field_name == "try" and !empty($trow) and $tem_try_vanha != $tem_try) {
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tem_tuoteno);
 
 					if ($saldo == 0) {

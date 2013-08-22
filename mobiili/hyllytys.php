@@ -114,13 +114,14 @@ elseif($row['tilausrivi_tyyppi'] == '') {
     $row['tilausrivi_tyyppi'] = 'JT';
 }
 
-$url_prelisa = $tilausten_lukumaara == 1 ? "ostotilaus.php" : "tuotteella_useita_tilauksia.php";
-$url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "?ostotilaus={$ostotilaus}" : "";
+$url_prelisa = $tilausten_lukumaara < 2 ? "ostotilaus.php" : "tuotteella_useita_tilauksia.php";
+$url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "ostotilaus={$ostotilaus}" : "";
+$url_lisa .= ($viivakoodi != "" and $tilausten_lukumaara > 1) ? "viivakoodi={$viivakoodi}" : "";
 
 ######## UI ##########
 # Otsikko
 echo "<div class='header'>";
-echo "<button onclick='window.location.href=\"{$url_prelisa}{$url_lisa}\"' class='button left'><img src='back2.png'></button>";
+echo "<button onclick='window.location.href=\"{$url_prelisa}?{$url_lisa}\"' class='button left'><img src='back2.png'></button>";
 echo "<h1>",t("HYLLYTYS")."</h1>";
 echo "</div>";
 

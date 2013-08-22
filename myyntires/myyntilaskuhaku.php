@@ -170,7 +170,7 @@
 	// N = Etsit‰‰n nime‰ laskulta
 	if ($tee == 'N') {
 		$index = " use index (asiakasnimi) ";
-		$ehto = "tila = 'U' and nimi like '%".$summa1."%'";
+		$ehto = "tila = 'U' and match (nimi) against ('$summa1*' IN BOOLEAN MODE)";
 		$jarj = "nimi, tapvm desc";
 	}
 
@@ -210,7 +210,7 @@
 
 	if ($tee != '' and $ehto != "") {
 
-		pupe_DataTables(array(array($pupe_DataTables, 9, 9, false, false, true, true, urlencode(serialize(array($index, $ehto, $jarj))))));
+		pupe_DataTables(array(array($pupe_DataTables, 9, 9, true, false, true, true, urlencode(serialize(array($index, $ehto, $jarj))))));
 
 		echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 

@@ -2623,6 +2623,20 @@
 				echo "<tr><th>".t("Ker‰‰j‰")."</th><td><input type='text' size='5' name='keraajanro'> ".t("tai")." ";
 				echo "<select name='keraajalist'>";
 
+				if ($yhtiorow['kerayserat'] == 'K' and $keraajalist == "") {
+
+					$query = "	SELECT kerayserat.laatija
+								FROM kerayserat
+								JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
+								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+								AND kerayserat.otunnus IN ({$tilausnumeroita})
+								LIMIT 1";
+					$keraaja_res = pupe_query($query);
+					$keraaja_row = mysql_fetch_assoc($keraaja_res);
+
+					$keraajalist = $keraaja_row['laatija'];
+				}
+
 				$query = "	SELECT *
 							from kuka
 							where yhtio = '$kukarow[yhtio]'

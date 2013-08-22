@@ -71,10 +71,6 @@ if (isset($submit) and trim($submit) != '') {
 				$error['varalle'] .= t("Virheellinen tuotepaikka, yritä syöttää tuotepaikka käsin") . " ($tuotepaikka)<br>";
 			}
 
-			if (isset($tulosta_tavaraetiketit) and trim($tulosta_tavaraetiketit) != "" and $kukarow['kirjoitin'] == 0) {
-				$error['varalle'] .= t("Käyttäjätietojen taakse ei ole määritelty kirjoitinta. Tavaraetikettejä ei voida tulostaa.")."<br>";
-			}
-
 			# Tarkistetaan hyllypaikka ja varmistuskoodi
 			# hyllypaikan on oltava reservipaikka ja siellä ei saa olla tuotteita
 			$options = array('varmistuskoodi' => $koodi, 'reservipaikka' => 'K');
@@ -111,18 +107,12 @@ if (isset($submit) and trim($submit) != '') {
 						} else {
 							vie_varastoon($saapuminen, $alusta_tunnus, $hylly);
 
-							if (isset($tulosta_tavaraetiketit) and trim($tulosta_tavaraetiketit) != '') {
+							if (isset($komento) and $komento['Tavaraetiketti'] != "") {
 
-								if ($kukarow['kirjoitin'] != 0) {
+								$suuntalavat = array($alusta_tunnus);
+								$otunnus = $saapuminen;
 
-									$komento['Tavaraetiketti'] = $kukarow['kirjoitin'];
-
-									$suuntalavat = array($alusta_tunnus);
-									$otunnus = $saapuminen;
-
-									require('tilauskasittely/tulosta_tavaraetiketti.inc');
-								}
-
+								require('tilauskasittely/tulosta_tavaraetiketti.inc');
 							}
 						}
 					}
@@ -161,8 +151,6 @@ echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"suuntalavan_tuotteet.php?$url\"' class='button left'><img src='back2.png'></button>";
 echo "<h1>",t("SUUNTALAVAVARALLE"),"</h1></div>";
 
-$chk = isset($tulosta_tavaraetiketit) ? "checked" : "";
-
 echo "<div class='main'>
 
 	<form name='varalleformi' method='post' action=''>
@@ -181,7 +169,22 @@ echo "<div class='main'>
 		</tr>
 		<tr>
 			<th>",t("Tulosta tavaraetiketit"),"</th>
-			<td colspan='2'><input type='checkbox' name='tulosta_tavaraetiketit' {$chk} /></td>
+			<td colspan='2'><select name='komento[Tavaraetiketti]'>";
+
+			$query = "	SELECT *
+						FROM kirjoittimet
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						ORDER BY kirjoitin";
+			$kires = pupe_query($query);
+
+			echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
+
+			while ($kirow = mysql_fetch_assoc($kires)) {
+				$sel = $kirow['tunnus'] == $kukarow['kirjoitin'] ? " selected" : "";
+				echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
+			}
+
+			echo "</select></td>
 		</tr>
 	</table>
 	</div>

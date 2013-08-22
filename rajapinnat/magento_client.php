@@ -537,16 +537,42 @@ class MagentoClient {
 	 * @param array $poistetut_tuotteet Poistettavat tuotteet
 	 * @return   Poistettujen tuotteiden määrä
 	 */
-	public function poista_poistetut(array $poistetut_tuotteet) {
+	public function poista_poistetut(array $kaikki_tuotteet) {
 
 		$count = 0;
+		$skus = $this->getProductList(true);
 
-		foreach($poistetut_tuotteet as $tuote) {
-			#$result = $client->call($session, 'catalog_product.delete', $tuote['tuoteno']);
-			$count++;
+		// Poistetaan tuottee jotka löytyvät arraysta $kaikki_tuotteet arraystä $skus
+		$poistettavat_tuotteet = array_diff($skus, $kaikki_tuotteet);
+
+		// Nämä kaikki tuotteet pitää poistaa Magentosta
+		foreach ($poistettavat_tuotteet as $tuote) {
+
+			$this->log("Poistetaan tuote $tuote");
+
+			try {
+				// Tässä kutsu, jos tuote oikeasti halutaan poistaa
+				# $this->_proxy->call($this->_session, 'catalog_product.delete', $tuote, 'SKU');
+
+				// "Poistetaan" tuote, eli merkataan disabled ja not visible
+				$this->_proxy->call($this->_session, 'catalog_product.update',
+									array(
+										$tuote,
+										array('status'     => self::DISABLED,
+											  'visibility' => self::NOT_VISIBLE_INDIVIDUALLY,
+											 )
+										)
+									);
+				$count++;
+			}
+			catch (Exception $e) {
+				$this->_error_count++;
+				$this->log("Virhe! Tuotteen poisto epäonnistui!", $e);
+			}
 		}
 
-		echo date("H:i:s").": Poistettiin Magentosta $count tuotetta.\n\n";
+		$this->log("$count tuotetta poistettu");
+
 		return $count;
 	}
 

@@ -632,7 +632,7 @@
 
 	// Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
 	unset($link);
-	$link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost (tuote_export)");
+	$link = mysql_connect($dbhost, $dbuser, $dbpass, true) or die ("Ongelma tietokantapalvelimessa $dbhost (tuote_export)");
 	mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (tuote_export)");
 	mysql_set_charset("latin1", $link);
 

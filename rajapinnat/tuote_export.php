@@ -106,6 +106,7 @@
 				tuote.tunnus,
 				tuote.mallitarkenne campaign_code,
 				tuote.malli target,
+				tuote.leimahduspiste onsale,
 				ta_nimitys_se.selite nimi_swe,
 				ta_nimitys_en.selite nimi_eng,
 				try_fi.selitetark try_nimi
@@ -162,6 +163,7 @@
 							'nimi_eng'				=> $row["nimi_eng"],
 							'campaign_code'			=> $row["campaign_code"],
 							'target'				=> $row["target"],
+							'onsale'				=> $row["onsale"],
 							'tunnus'				=> $row['tunnus'],
 							);
 	}
@@ -408,6 +410,9 @@
 						tuote.eankoodi,
 						tuote.alv,
 						tuote.nakyvyys,
+						tuote.mallitarkenne campaign_code,
+						tuote.malli target,
+						tuote.leimahduspiste onsale,
 						try_fi.selitetark try_nimi
 						FROM tuotteen_avainsanat
 						JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio
@@ -476,6 +481,9 @@
 															'try_nimi'				=> $alirow["try_nimi"],
 															'nimi_swe'				=> $alirow["nimi_swe"],
 															'nimi_eng'				=> $alirow["nimi_eng"],
+															'campaign_code'			=> $alirow["campaign_code"],
+															'target'				=> $alirow["target"],
+															'onsale'				=> $alirow["onsale"],
 															'myyntihinta'			=> $myyntihinta,
 															'myyntihinta_veroton'	=> $myyntihinta_veroton,
 															'myymalahinta'			=> $myymalahinta,
@@ -587,6 +595,7 @@
 	}
 
 	// Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
+	unset($useslave, $tempdbhost, $masterlink, $temporarylink);
 	require ("{$pupe_root_polku}/inc/connect.inc");
 
 	// Kun kaikki onnistui, p‰ivitet‰‰n lopuksi timestamppi talteen

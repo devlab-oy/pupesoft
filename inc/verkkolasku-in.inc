@@ -315,6 +315,25 @@
 
 			unset($trow);
 
+			$_yhtion_toimipaikka = 0;
+
+			// Katsotaan löytyykö yhtiön toimipaikkaa
+			if (isset($yhtiorow) and $yhtio != "" and $toim_asiakkaantiedot["toim_ovttunnus"] != "") {
+
+				$query = "	SELECT ovtlisa, tunnus
+							FROM yhtion_toimipaikat
+							WHERE yhtio = '{$yhtio}'
+							AND ovtlisa != ''";
+				$chk_toimipaikka_res = pupe_query($query);
+
+				while ($chk_toimipaikka_row = mysql_fetch_assoc($chk_toimipaikka_res)) {
+
+					if ($chk_toimipaikka_row['ovtlisa'] == substr($toim_asiakkaantiedot["toim_ovttunnus"], strlen(trim($chk_toimipaikka_row['ovtlisa'])) * -1)) {
+						$_yhtion_toimipaikka = $chk_toimipaikka_row['tunnus'];
+					}
+				}
+			}
+
 			// $laskuttajan_ovt --> voi olla ovttunnus, ytunnus, tai vatnumero
 			// $laskuttajan_vat --> voisi olla vatnumero
 			// $laskuttajan_nimi --> voisi olla laskuttajan nimi
@@ -1009,6 +1028,7 @@
 				// Kirjoitetaan lasku
 				$query = "	INSERT into lasku set
 							yhtio 				= '$yhtio',
+							yhtio_toimipaikka 	= '{$_yhtion_toimipaikka}',
 							summa 				= '$summa',
 							kasumma 			= '$kassaale',
 							erpcm 				= '$erv-$erk-$erp',

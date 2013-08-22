@@ -12994,6 +12994,7 @@ if (!function_exists("pupe_DataTables")) {
 						}
 					};
 
+					// ServerSide
 					if (parametrit[tableid][6] == true) {
 						settings.bProcessing = true;
 						settings.bServerSide = true,
@@ -13001,6 +13002,11 @@ if (!function_exists("pupe_DataTables")) {
 					}
 
 					datatablesit[t] = $(this).dataTable(settings);
+
+					// ServerSide-keississä enabloidaan filtteröntidelay niin kuormitetaan kantaa vähemmän jos/kun kirjoitetaan pitkiä hakusanoja
+					if (parametrit[tableid][6] == true) {
+						datatablesit[t].fnSetFilteringDelay(500);
+					}
 				}
 				);
 
@@ -13574,38 +13580,50 @@ if (!function_exists("pupe_DataTables")) {
 					});
 				}
 
+				// Sarakefiltteröinnille myös delay
+				var delay = (function() {
+					var timer = 0;
+
+					return function(callback, ms) {
+						clearTimeout (timer);
+						timer = setTimeout(callback, ms);
+					};
+				})();
+
 				// Sarakefiltteröinti, toistaiseksi vain ekalle taululle!
-				$(\"thead input\").keyup( function () {
-					var arvo = this.value;
-					var sarake = $(\"thead input\").index(this);
+				$(\"thead input\").keyup(function() {
+					var that = this;
 
-					// fnFilter toistaiseksi vain ekalle tablelle
+					delay(function() {
+						var arvo = that.value;
+						var sarake = $(\"thead input\").index(that);
 
-					// Onko regular expressioni?
-					if (arvo.indexOf(\"|\") > -1) {
-						datatablesit[0].fnFilter( arvo, sarake, true, false );
-					}
-					else {
-						datatablesit[0].fnFilter( arvo, sarake, false, true );
-					}
-
-					// filtteröidään työjono.php:ssa myös alempaa taulua, jos ja vain jos alempi taulu on olemassa
-					if (datatablesit[0].attr(\"id\") == \"tyojono0\" && datatablesit[1] != undefined) {
-						var tyojono = [];
-
-						$(\"span[class=tyom_id]\").each(function(i) {
-							tyojono[i] = this.innerHTML;
-						});
-
-						var jonosearch = tyojono.join(\"|\");
-
-						if (arvo != \"\" && jonosearch == \"\") {
-							// ei näytetä mitään
-							jonosearch = \"xyzzypupe\";
+						// Onko regular expressioni?
+						if (arvo.indexOf(\"|\") > -1) {
+							datatablesit[0].fnFilter( arvo, sarake, true, false );
+						}
+						else {
+							datatablesit[0].fnFilter( arvo, sarake, false, true );
 						}
 
-						datatablesit[1].fnFilter( jonosearch, 0, true, false, true );
-					}
+						// filtteröidään työjono.php:ssa myös alempaa taulua, jos ja vain jos alempi taulu on olemassa
+						if (datatablesit[0].attr(\"id\") == \"tyojono0\" && datatablesit[1] != undefined) {
+							var tyojono = [];
+
+							$(\"span[class=tyom_id]\").each(function(i) {
+								tyojono[i] = that.innerHTML;
+							});
+
+							var jonosearch = tyojono.join(\"|\");
+
+							if (arvo != \"\" && jonosearch == \"\") {
+								// ei näytetä mitään
+								jonosearch = \"xyzzypupe\";
+							}
+
+							datatablesit[1].fnFilter( jonosearch, 0, true, false, true );
+						}
+					}, 500);
 				} );
 
 				// Presorttaus, eli luetaan cookiesta tarvittavat tiedot, toistaiseksi vain ekalle taululle!

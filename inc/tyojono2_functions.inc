@@ -1,6 +1,8 @@
 <?php
 
 function hae_tyojono2_js() {
+	global $palvelin2;
+	
 	ob_start();
 	?>
 	<script src='<?php echo $palvelin2 ?>js/tyomaarays/tyojono2.js'></script>

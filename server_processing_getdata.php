@@ -1,20 +1,5 @@
 <?php
 
-	/* Array of database columns which should be read and sent back to DataTables. Use a space where
-	 * you want to insert a non-database field (for example a counter or static image)
-	 */
-	$aColumns = array('ytunnus', 'nimi', 'nimitark', 'toimitustapa', 'toim_nimi');
-
-	/*
-	 * Indexed column (used for fast and accurate table cardinality)
-	 */
-	$sIndexColumn = "tunnus";
-
-	/*
-	 * DB table to use
-	 */
-	$sTable = "asiakas";
-
 	/*
 	 * Paging
 	 */
@@ -54,7 +39,7 @@
 	$sWhere = "";
 
 	if (isset($_GET['sSearch']) and $_GET['sSearch'] != "") {
-		$sWhere = "WHERE (";
+		$sWhere = " AND (";
 
 		for ($i=0; $i<count($aColumns); $i++) {
 			$sWhere .= "{$aColumns[$i]} LIKE '%".mysql_real_escape_string($_GET['sSearch'])."%' OR ";
@@ -69,27 +54,58 @@
 	 */
 	for ($i=0; $i<count($aColumns); $i++) {
 		if (isset($_GET['bSearchable_'.$i]) and $_GET['bSearchable_'.$i] == "true" and $_GET['sSearch_'.$i] != '') {
-			if ($sWhere == "") {
-				$sWhere = "WHERE ";
-			}
-			else {
-				$sWhere .= " AND ";
-			}
-
-			$sWhere .= "{$aColumns[$i]} LIKE '%".mysql_real_escape_string($_GET['sSearch_'.$i])."%' ";
+			$sWhere .= " AND {$aColumns[$i]} LIKE '%".mysql_real_escape_string($_GET['sSearch_'.$i])."%' ";
 		}
 	}
+
+	/*
+	 * Use specific index
+	 */
+	$sIndex = "";
+	
+	if (isset($sUseIndex) and $sUseIndex != "") {
+		$sIndex = ($sUseIndex);
+	}
+	
+	/*
+	* Static where
+	*/
+	if (isset($sInitialWhere) and $sInitialWhere != "") {
+		$sWhere .= " AND ".($sInitialWhere);
+	}
+	
+	/*
+	* Initial sorting
+	*/
+	if ($sOrder == "" and isset($sInitialOrder) and $sInitialOrder != "") {
+		$sOrder = "ORDER BY ".($sInitialOrder);
+	}
+
+	if (isset($_GET['sSearch']) and $_GET['sSearch'] != "") {
+		$sWhere = " AND (";
+
+		for ($i=0; $i<count($aColumns); $i++) {
+			$sWhere .= "{$aColumns[$i]} LIKE '%".mysql_real_escape_string($_GET['sSearch'])."%' OR ";
+		}
+
+		$sWhere = substr_replace($sWhere, "", -3);
+		$sWhere .= ')';
+	}
+	
 
 	/*
 	 * SQL queries
 	 * Get data to display
 	 */
 	$sQuery = "	SELECT SQL_CALC_FOUND_ROWS ".str_replace(" , ", " ", implode(", ", $aColumns))."
-				FROM $sTable
+				FROM $sTable {$sIndex}
+				WHERE yhtio = '{$kukarow['yhtio']}'
 				$sWhere
 				$sOrder
 				$sLimit";
 	$rResult = pupe_query($sQuery);
+
+	error_log($sQuery);
 
 	/* Data set length after filtering */
 	$sQuery = " SELECT FOUND_ROWS() ";

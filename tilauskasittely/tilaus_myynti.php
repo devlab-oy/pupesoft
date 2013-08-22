@@ -474,7 +474,9 @@ if (
 
 	require("{$tilauskaslisa}luo_myyntitilausotsikko.inc");
 
-	$tilausnumero = luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero, $myyjanumero, '', $kantaasiakastunnus);
+	if (!isset($tilaustyyppi)) $tilaustyyppi = "";
+
+	$tilausnumero = luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero, $myyjanumero, '', $kantaasiakastunnus, '', $tilaustyyppi);
 	$kukarow["kesken"] = $tilausnumero;
 	$kaytiin_otsikolla = "NOJOO!";
 
@@ -1546,70 +1548,6 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 				AND alatila = 'A'";
 	$result = pupe_query($query);
 
-	// katsotaan onko tilausrivit Unikko-j‰rjestelm‰‰n
-	$query = "	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro
-				FROM tilausrivi
-				JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno and tuote.ei_saldoa='')
-				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-				AND tilausrivi.otunnus = '{$tilausnumero}'
-				AND tilausrivi.tyyppi != 'D'";
-	$varasto_chk_res = pupe_query($query);
-
-	while ($varasto_chk_row = mysql_fetch_assoc($varasto_chk_res)) {
-		$varasto_chk = kuuluukovarastoon($varasto_chk_row['hyllyalue'], $varasto_chk_row['hyllynro']);
-
-		$query = "	SELECT ulkoinen_jarjestelma
-					FROM varastopaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$varasto_chk}'";
-		$ulkoinen_jarjestelma_res = pupe_query($query);
-		$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
-
-		if ($ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'] == 'U') {
-			// Rahtivapaat aina l‰hett‰j‰n rahtisopparilla
-			$query = "UPDATE lasku SET rahtivapaa = 'X', kohdistettu = 'K' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
-			$rahtivapaa_upd_res = pupe_query($query);
-
-			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
-			$laskurow_edi_res = pupe_query($query);
-			$laskurow_edi = mysql_fetch_assoc($laskurow_edi_res);
-
-			$query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow_edi['liitostunnus']}'";
-			$asiakas_chk_res = pupe_query($query);
-			$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
-
-			$query = "	SELECT *
-						FROM laskun_lisatiedot
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND otunnus = '{$laskurow_edi['tunnus']}'";
-			$lisatiedot_result = pupe_query($query);
-			$laskun_lisatiedot = mysql_fetch_assoc($lisatiedot_result);
-
-			$params = array(
-				'laskurow' 		=> $laskurow_edi,
-				'lisatiedot' 	=> $laskun_lisatiedot,
-				'asiakasrow' 	=> $asiakas_chk_row,
-				'tilaustyyppi' 	=> 3,
-				'toim' 			=> $toim,
-			);
-
-			require("{$tilauskaslisa}editilaus_out_futur.inc");
-
-			if (editilaus_out_futur($params) === 0) {
-
-				$query = "	UPDATE lasku SET
-							tila = 'C',
-							alatila = 'C',
-							lahetepvm = now()
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$tilausnumero}'";
-				$upd_res = pupe_query($query);
-			}
-
-			break;
-		}
-	}
-
 	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
 	$result = pupe_query($query);
 
@@ -2679,6 +2617,7 @@ if ($tee == '') {
 			<input type='hidden' name='toim' value='$toim'>
 			<input type='hidden' name='lopetus' value='$lopetus'>
 			<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+			<input type='hidden' name='tilaustyyppi' value='{$tilaustyyppi}'>
 			<input type='hidden' name='projektilla' value='$projektilla'>
 			<input type='hidden' name='orig_tila' value='$orig_tila'>
 			<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
@@ -2687,7 +2626,7 @@ if ($tee == '') {
 	echo "<table>";
 
 	$myyntikielto = '';
-		
+
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
@@ -3354,7 +3293,7 @@ if ($tee == '') {
 			echo "<br/>";
 			echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt"),"!</font>";
 			echo "<br/>";
-			
+
 			if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
 				$muokkauslukko = 'LUKOSSA';
 				$myyntikielto = 'MYYNTIKIELTO';
@@ -3371,7 +3310,7 @@ if ($tee == '') {
 			echo "<br/>";
 			echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!</font>";
 			echo "<br/>";
-			
+
 			if ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M") {
 				$muokkauslukko = 'LUKOSSA';
 				$myyntikielto = 'MYYNTIKIELTO';
@@ -3510,8 +3449,10 @@ if ($tee == '') {
 			$wherelisa = "AND tunnus = '{$rivitunnus}'";
 		}
 
+		$update_var2 = (isset($naytetaan_vastaavat) and trim($naytetaan_vastaavat) != "") ? "" : "OK";
+
 		$query = "	UPDATE tilausrivi
-					SET var2 = 'OK'
+					SET var2 = '{$update_var2}'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					{$wherelisa}";
 		$result = pupe_query($query);

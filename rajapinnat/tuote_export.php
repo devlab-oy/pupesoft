@@ -73,7 +73,7 @@
 	$datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
 	// alustetaan arrayt
-	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = array();
+	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = $kaikki_tuotteet = array();
 
 	if ($ajetaanko_kaikki == "NO") {
 		$muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
@@ -175,6 +175,34 @@
 	else {
 		$muutoslisa1 = "";
 		$muutoslisa2 = "";
+	}
+
+	// Magentoa varten pitää hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa
+	if ($verkkokauppatyyppi == 'magento') {
+
+		echo date("d.m.Y @ G:i:s")." - Haetaan poistettavat tuotteet.\n";
+
+		// Haetaan pupesta kaikki tuotteet (ja configurable-tuotteet), jotka pitää olla Magentossa
+		$query = "	SELECT DISTINCT tuotteen_avainsanat.selite configurable_tuoteno, tuote.tuoteno
+					FROM tuotteen_avainsanat
+					JOIN tuote ON (tuote.yhtio = tuotteen_avainsanat.yhtio
+					AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
+					AND tuote.status != 'P'
+					AND tuote.tuotetyyppi NOT IN ('A','B')
+					AND tuote.tuoteno != ''
+					AND tuote.nakyvyys != '')
+					WHERE tuotteen_avainsanat.yhtio = '{$kukarow["yhtio"]}'
+					AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+					AND trim(tuotteen_avainsanat.selite) != ''";
+		$res = pupe_query($query);
+
+		// Kaikki tuotenumerot arrayseen
+		while ($row = mysql_fetch_array($res)) {
+			$kaikki_tuotteet[] = $row['tuoteno'];
+			$kaikki_tuotteet[] = $row['configurable_tuoteno'];
+		}
+
+		$kaikki_tuotteet = array_unique($kaikki_tuotteet);
 	}
 
 	echo date("d.m.Y @ G:i:s")." - Haetaan saldot.\n";
@@ -539,6 +567,14 @@
 			echo date("d.m.Y @ G:i:s")." - Päivitetään tuotteiden saldot\n";
 			$count = $magento_client->paivita_saldot($dnstock);
 			echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotteen saldot\n";
+		}
+
+		// Poistetaan tuotteet jota ei ole kaupassa
+		if (count($kaikki_tuotteet) > 0) {
+			echo date("d.m.Y @ G:i:s")." - Poistetaan ylimääräiset tuotteet\n";
+			// HUOM, tähän passataan **KAIKKI** verkkokauppatuotteet, methodi katsoo että kaikki nämä on kaupassa, muut dellataan!
+			$count = $magento_client->poista_poistetut($kaikki_tuotteet);
+			echo date("d.m.Y @ G:i:s")." - Poistettiin $count tuotetta\n";
 		}
 
 		$tuote_export_error_count = $magento_client->getErrorCount();

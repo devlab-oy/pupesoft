@@ -125,7 +125,7 @@
 				$pdf->draw_text(50, 624, $laskurow["toim_osoite"],	 	$thispage, $norm);
 				$pdf->draw_text(50, 614, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $thispage, $norm);
 
-				if ($yhtiorow['maa'] != $laskurow['toim_maa']) {
+				if ($yhtiorow['maa'] != $laskurow['maa']) {
 					$maan_tiedot = hae_maa(array('maakoodi' => $laskurow['toim_maa']));
 					$pdf->draw_text(50, 604, $maan_tiedot["nimi"], 		$thispage, $norm);
 				}

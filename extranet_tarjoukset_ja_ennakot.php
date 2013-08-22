@@ -78,7 +78,8 @@ $request['kayttajaan_liitetty_asiakas'] = hae_extranet_kayttajaan_liitetty_asiak
 if ($tee == "LISAARIVI") {
 	$parametrit = array("lasku_tunnus" => $otunnus,
 						"tuoteno" => $tuoteno,
-						"kpl" => $kpl);
+						"kpl" => $kpl,
+						"toim" => $request['toim']);
 	lisaa_ennakkorivi($parametrit);
 }
 
@@ -86,43 +87,36 @@ $action = $request['action'];
 
 // Halutaan listata kaikki ennakot/tarjoukset
 if ($action == "") {
+	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset($request['kayttajaan_liitetty_asiakas']['tunnus'], $request['toim']);
 
-}
-
-// N‰ytet‰‰n yksitt‰inen ennakko/tarjout
-if ($action == 'nayta_tarjous') {
-
-}
-
-// Hyv‰ksyt‰‰n/hylytt‰‰n yksi ennakko/tarjous
-if ($action == 'hyvaksy_tai_hylkaa') {
-
-}
-
-if (!empty($request['action'])) {
-	$laskurow = hae_extranet_tarjous($request['valittu_tarjous_tunnus'], $toim);
-
-	if (empty($laskurow)) {
-		if ($toim == 'EXTTARJOUS') {
-			echo "<font class='error'>".t("Tarjous kadonnut")."</font><hr>";
+	if (count($request['asiakkaan_tarjoukset']) == 0) {
+		if ($request['toim'] == "EXTENNAKKO") {
+			echo t("Sinulle ei ole voimassaolevia ennakkotilauksia.");
 		}
-		elseif ($toim == 'EXTENNAKKO') {
-			echo "<font class='error'>".t("Ennakko kadonnut")."</font><hr>";
+		else {
+			echo t("Sinulle ei ole voimassaolevia tarjouksia.");
 		}
-		exit;
+	}
+	else {
+		$params = array("data"	 => $request['asiakkaan_tarjoukset'],
+			"toim"	 => $request['toim']);
+		piirra_tarjoukset($params);
 	}
 }
-
-if ($request['action'] == 'nayta_tarjous') {
+// N‰ytet‰‰n yksitt‰inen ennakko/tarjous
+if ($action == 'nayta_tarjous') {
 	nayta_tarjous($request['valittu_tarjous_tunnus'], $request['toim']);
 }
 
-elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
-
+// Hyv‰ksyt‰‰n/hyl‰t‰‰n/p‰ivitet‰‰n yksi ennakko/tarjous
+if ($action == 'hyvaksy_hylkaa_paivita') {
 	if (isset($request['paivita']) and $toim == 'EXTENNAKKO') {
 		unset($request['paivita']);
-		
-		$onnistuiko_toiminto = paivita_ennakko($request['valittu_tarjous_tunnus'], $syotetyt_lisatiedot, $kappalemaarat);
+		$params = array("valittu_tarjous_tunnus" => $valittu_tarjous_tunnus,
+		 				"syotetyt_lisatiedot" => $syotetyt_lisatiedot,
+						"kappalemaarat" => $kappalemaarat,
+						"toim" => $request['toim']);
+		$onnistuiko_toiminto = paivita_ennakko($params);
 
 		if ($onnistuiko_toiminto) {
 			nayta_tarjous($request['valittu_tarjous_tunnus'], $request['toim']);
@@ -134,7 +128,11 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 			$onnistuiko_toiminto = hyvaksy_tarjous($request['valittu_tarjous_tunnus'], $syotetyt_lisatiedot);
 		}
 		else {
-			$onnistuiko_toiminto = hyvaksy_ennakko($request['valittu_tarjous_tunnus'], $syotetyt_lisatiedot, $kappalemaarat);
+			$parametrit = array("valittu_tarjous_tunnus" => $valittu_tarjous_tunnus,
+								"syotetyt_lisatiedot" => $syotetyt_lisatiedot,
+								"kappalemaarat" => $kappalemaarat,
+								"toim" => $toim);
+			$onnistuiko_toiminto = hyvaksy_ennakko($parametrit);
 		}
 	}
 	else {
@@ -153,28 +151,28 @@ elseif ($request['action'] == 'hyvaksy_tai_hylkaa') {
 			</script>";
 	exit;
 }
-else {
-	$request['asiakkaan_tarjoukset'] = hae_extranet_tarjoukset($request['kayttajaan_liitetty_asiakas']['tunnus'], $request['toim']);
 
-	if (count($request['asiakkaan_tarjoukset']) == 0) {
-		if ($request['toim'] == "EXTENNAKKO") {
-			echo t("Sinulle ei ole voimassaolevia ennakkotilauksia.");
+if (!empty($request['action'])) {
+	$laskurow = hae_extranet_tarjous($request['valittu_tarjous_tunnus'], $toim);
+
+	if (empty($laskurow)) {
+		if ($toim == 'EXTTARJOUS') {
+			echo "<font class='error'>".t("Tarjous kadonnut")."</font><hr>";
 		}
-		else {
-			echo t("Sinulle ei ole voimassaolevia tarjouksia.");
+		elseif ($toim == 'EXTENNAKKO') {
+			echo "<font class='error'>".t("Ennakko kadonnut")."</font><hr>";
 		}
-	}
-	else {
-		$params = array("data"	 => $request['asiakkaan_tarjoukset'],
-			"toim"	 => $request['toim']);
-		piirra_tarjoukset($params);
+		exit;
 	}
 }
 
-function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappalemaarat) {
+//function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappalemaarat, $toim) {
+function hyvaksy_ennakko($parametrit) {
 	global $kukarow, $yhtiorow;
-
-	$onnistuiko_toiminto = paivita_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappalemaarat);
+	
+	$valittu_tarjous_tunnus = $parametrit['valittu_tarjous_tunnus'];
+	
+	$onnistuiko_toiminto = paivita_ennakko($parametrit);
 
 	// Vaihdetaan tila/alatila Ennakko/Lep‰‰m‰ss‰
 	if ($onnistuiko_toiminto) {
@@ -231,8 +229,13 @@ function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
 	return false;
 }
 
-function paivita_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, Array $kappalemaarat) {
+function paivita_ennakko($params) {
 	global $kukarow, $yhtiorow;
+
+	$syotetyt_lisatiedot = $params['syotetyt_lisatiedot'];
+	$valittu_tarjous_tunnus = $params['valittu_tarjous_tunnus'];
+	$kappalemaarat = $params['kappalemaarat'];
+	$toim = $params['toim'];
 
 	// Siisti‰‰n parametrit tietokantaqueryj‰ varten
 	$syotetyt_lisatiedot = pupesoft_cleanstring($syotetyt_lisatiedot);
@@ -257,12 +260,12 @@ function paivita_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, Array $k
 		// Kappalem‰‰r‰ kannasta
 		$kplmaara = $loytynyt_tilausrivi[0]['kpl'];
 
-		// Tarkistetaan onko kappalem‰‰r‰ s‰ilynyt muuttamattomana, jos ei muutoksia niin toimenpiteit‰ riville ei vaadita
+		// Tarkistetaan onko kappalem‰‰r‰‰ muutettu, jos ei muutoksia niin toimenpiteit‰ riville ei vaadita
 		if ($kplmaara == $value) {
 			continue;
 		}
 
-		// Tuoteperheen tapauksessa p‰ivitet‰‰n/poisteaan kaikki tuoteperheen rivit, muuten vain ko. rivi
+		// Tuoteperheen tapauksessa p‰ivitet‰‰n/poistetaan kaikki tuoteperheen rivit, muuten vain ko. rivi
 		if ($loytynyt_tilausrivi[0]['tunnus'] == $loytynyt_tilausrivi[0]['perheid_tunnus']) {
 			$andy = "AND perheid = '{$loytynyt_tilausrivi[0]['tunnus']}'";
 		}		
@@ -270,7 +273,7 @@ function paivita_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, Array $k
 			$andy = "AND tunnus = '{$loytynyt_tilausrivi[0]['tunnus']}'";
 		}
 
-		// Jos ollaan nollatut kappaleet, p‰ivitet‰‰n rivi
+		// Jos ollaan nollattu kappaleet, p‰ivitet‰‰n rivi
 		if ($value == 0) {
 			$query = "  UPDATE tilausrivi
 						SET tilkpl = 0,
@@ -293,7 +296,8 @@ function paivita_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, Array $k
 
 			$parametrit = array("lasku_tunnus" => $valittu_tarjous_tunnus,
 								"tuoteno" => $loytynyt_tilausrivi[0]['tuoteno'],
-								"kpl" => $value);
+								"kpl" => $value,
+								"toim" => $toim);
 			lisaa_ennakkorivi($parametrit);
 		}
 	}
@@ -558,7 +562,7 @@ function piirra_tarjouksen_tilausrivit($params) {
 	echo "<font class='message'>".t("Tilausrivit")."</font>";
 
 	echo "<form method='post' action=''>";
-	echo "<input type='hidden' name='action' value='hyvaksy_tai_hylkaa' />";
+	echo "<input type='hidden' name='action' value='hyvaksy_hylkaa_paivita' />";
 	echo "<input type='hidden' name='toim' value='{$toim}' />";
 	echo "<input type='hidden' name='valittu_tarjous_tunnus' value='{$tunnus}'/ >";
 
@@ -640,7 +644,8 @@ function lisaa_ennakkorivi($params) {
 	$tuoteno = $params['tuoteno'];
 	$kpl = $params['kpl'];
 	$otunnus = $params['lasku_tunnus'];
-	
+	$toim = $params['toim'];
+
 	$query = "	SELECT *
 				FROM tuote
 				WHERE yhtio = '{$kukarow['yhtio']}'
@@ -658,14 +663,15 @@ function lisaa_ennakkorivi($params) {
 		$laskurow = hae_lasku($otunnus);
 		$netto = '';
 
-		// Nollataan hinta kun kyseess‰ on asiakkaan ext-ennakkotilaukseen lis‰‰m‰ rivi
+		// Haetaan tuotteen ennakkohinta kun kyseess‰ on extennakkotilaus
 		if ($toim == 'EXTENNAKKO') {
 			$query = "  SELECT selite AS ennakko_pros_a
 						FROM tuotteen_avainsanat
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tuoteno = '{$tuoteno}'
 						AND laji = 'parametri_ennakkoale_a'
-						AND selite != ''";
+						AND selite != ''
+						LIMIT 1";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {

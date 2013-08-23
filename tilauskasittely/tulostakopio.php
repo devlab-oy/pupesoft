@@ -410,7 +410,7 @@
 	    echo "</form><br>";
 	}
 
-	if ($tee == "ETSILASKU") {
+	if ($tee == "ETSILASKU" OR $tee == "NAYTATILAUS") {
 
 		// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 		js_openFormInNewWindow();
@@ -887,10 +887,11 @@
 			}
 			else {
 				$where2 .= " and lasku.tunnus = 0 ";
+				$kerayseran_tilaukset = "";
 			}
 		}
 		else {
-			$kerayseran_tilaukset = $otunnus;
+			$kerayseran_tilaukset = "";
 		}
 
 		if (!isset($ascdesc)) $ascdesc = "desc";

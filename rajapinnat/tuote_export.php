@@ -43,6 +43,11 @@
 
 	$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
 
+	if (isset($verkkokauppa_saldo_varasto) and !is_array($verkkokauppa_saldo_varasto)) {
+		echo "verkkokauppa_saldo_varasto pitää olla array!";
+		exit;
+	}
+
 	$locktime = 5400;
 	$lockfile = "/tmp/tuote_export_cron.lock";
 
@@ -238,7 +243,7 @@
 	$result = pupe_query($query);
 
 	while ($row = mysql_fetch_assoc($result)) {
-		list(,,$myytavissa) = saldo_myytavissa($row["tuoteno"]);
+		list(,,$myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
 		$dnstock[] = array(	'tuoteno'		=> $row["tuoteno"],
 							'ean'			=> $row["eankoodi"],
 							'myytavissa'	=> $myytavissa,

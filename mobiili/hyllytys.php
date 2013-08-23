@@ -78,7 +78,7 @@ else {
 # Kontrolleri
 if (isset($submit)) {
 
-    $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}";
+    $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=".urlencode($tuotenumero);
 
     switch($submit) {
         case 'ok':
@@ -119,6 +119,7 @@ elseif($row['tilausrivi_tyyppi'] == '') {
 $url_prelisa = $tilausten_lukumaara < 2 ? "ostotilaus.php" : "tuotteella_useita_tilauksia.php";
 $url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "ostotilaus={$ostotilaus}" : "";
 $url_lisa .= ($viivakoodi != "" and $tilausten_lukumaara > 1) ? "viivakoodi={$viivakoodi}" : "";
+$url_lisa .= "&tuotenumero=".urlencode($tuotenumero);
 
 ######## UI ##########
 # Otsikko
@@ -132,6 +133,7 @@ echo "<div class='main'>
 <form name='f1' method='post' action=''>
 <input type='hidden' name='tilausten_lukumaara' value='{$tilausten_lukumaara}' />
 <input type='hidden' name='manuaalisesti_syotetty_ostotilausnro' value='{$manuaalisesti_syotetty_ostotilausnro}' />
+<input type='hidden' name='tuotenumero' value='{$tuotenumero}' />
 <table>
     <tr>
         <th>",t("Tilattu m‰‰r‰"),"</th>
@@ -165,7 +167,7 @@ echo "<div class='main'>
 </table>
 </div>";
 
-$url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}";
+$url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=".urlencode($tuotenumero);
 
 # Napit
 echo "

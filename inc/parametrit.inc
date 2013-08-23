@@ -37,7 +37,7 @@ if (!function_exists("pupe_register_globals")) {
 				}
 			}
 
-			$param_clean[$key] = $GLOBALS[$key] = str_replace(array("\"","'","<",">","\\", ";"), "", $param_clean[$key]);
+			$param_clean[$key] = $GLOBALS[$key] = $param_clean[$key];
 		}
 
 		return $param_clean;
@@ -608,6 +608,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 			if (isset($pupe_DataTables)) {
 				echo "<script language='javascript' src='{$palvelin2}DataTables/media/js/jquery.dataTables.min.js'></script>";
+				// fnSetFilteringDelay plugini
+				echo "<script language='javascript' src='{$palvelin2}DataTables/media/js/fnSetFilteringDelay.js'></script>";
 			}
 
 			// Salitaan VAIN YKSI submitti per sivu! Bye bye tuplaklikkaajat...

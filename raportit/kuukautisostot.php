@@ -560,7 +560,7 @@
 			}
 			if ($valitut["EIVIENTEJA"] != '') {
 				$ei_vienteja_lisa = " JOIN lasku ON ( lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.vienti = '')";
-				$ei_vienteja_lisa2 = "	AND lasku.vienti = ''";
+				$ei_vienteja_lisa2 = "	AND l.vienti = ''";
 			}
 			// Listaa vain äskettäin perustetut tuotteet:
 			if ($valitut["VAINUUDETTUOTTEET"] != '') {
@@ -1895,9 +1895,9 @@
 								if ($valitut["SARAKE{$_x}"] != '') {
 									//myytävissä
 
-									$myytavissa = $saldo['saldo'] - $ennp['ennpois'];
+									$myytavissa = $vastaava_saldo['saldo'] - $vastaava_ennp['ennpois'];
 
-									if ($yhtiorow['varaako_jt_saldoa'] == 'K') $myytavissa -= $ennp['jt'];
+									if ($yhtiorow['varaako_jt_saldoa'] == 'K') $myytavissa -= $vastaava_ennp['jt'];
 
 									$rivi .= "\"{$myytavissa}\"\t";
 
@@ -2762,19 +2762,19 @@
 		$selectlisa = "";
 		$q1 = array(
 			'alku' => date('Y')."-01-01",
-			'loppu' => date('Y')."03-31",
+			'loppu' => date('Y')."-03-31",
 		);
 		$q2 = array(
 			'alku' => date('Y')."-04-01",
-			'loppu' => date('Y')."06-30",
+			'loppu' => date('Y')."-06-30",
 		);
 		$q3 = array(
 			'alku' => date('Y')."-07-01",
-			'loppu' => date('Y')."09-30",
+			'loppu' => date('Y')."-09-30",
 		);
 		$q4 = array(
 			'alku' => date('Y')."-10-01",
-			'loppu' => date('Y')."12-31",
+			'loppu' => date('Y')."-12-31",
 		);
 		$selectlisa .= "sum(if (laskutettuaika >= '{$q1['alku']}' and laskutettuaika <= '{$q1['loppu']}', kpl, 0)) as kpl_q1, ";
 		$selectlisa .= "sum(if (laskutettuaika >= '{$q2['alku']}' and laskutettuaika <= '{$q2['loppu']}', kpl, 0)) as kpl_q2, ";

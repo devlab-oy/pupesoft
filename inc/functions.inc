@@ -5751,8 +5751,8 @@ if (!function_exists("alehinta_osto")) {
 						}
 					}
 
-					$hinta         	= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste     	.= "Toimittajan tuotteen nettohinta laskun valuutassa. ";
+					$hinta 			= $hrow['hinta'];
+					$aperuste     	.= "Toimittajan tuotteen nettohinta laskun valuutassa.";
 					$valuutta		= $laskurow["valkoodi"];
 					$hintaperuste	= 2;
 				}
@@ -5853,8 +5853,8 @@ if (!function_exists("alehinta_osto")) {
 						}
 					}
 
-					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste    .= "Toimittajan tuotealeryhmän nettohinta laskun valuutassa. ";
+					$hinta		= $hrow["hinta"];
+					$aperuste	.= "Toimittajan tuotealeryhmän nettohinta laskun valuutassa. ";
 					$valuutta	= $laskurow["valkoodi"];
 					$hintaperuste = 3;
 				}
@@ -17410,6 +17410,9 @@ if (!function_exists("tee_keraysera")) {
 								break;
 							}
 							else {
+
+								$fail = $fail != "" ? "{$fail}|||{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}" : "{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}";
+
 								// Yhtään erää ei mahtunut....
 								unset($kaytettavat_pakkaukset[$kaytettava_pakkaus][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']]);
 								$ii--;
@@ -19951,9 +19954,14 @@ if (!function_exists('saako_vieda_varastoon')) {
 		$varastoerror = 0;
 
 		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
+
 			if ($palautus != '') {
-				echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".t("Varastoonvienti on kesken!")."</font><br>";
+
+				list($keikkakesken, $_kuka, $_timestamp) = explode(";", file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock"));
+
+				echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".t("Varastoonvienti on kesken!")." ".t("Käyttäjä")." {$_kuka} @ {$_timestamp}</font><br>";
 			}
+
 			$varastoerror = 1;
 		}
 		elseif (mysql_num_rows($result) != 0){
@@ -20051,7 +20059,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 							and oletus != ''";
 		$oletusresult = pupe_query($oletusquery);
 		$oletusrow = mysql_fetch_assoc($oletusresult);
-		
+
 		# Poistetaan kaikilta tuotteen tuotepaikoilta oletus
 		# ostorivienvarastopaikat.inc, rivi 281
 		$query = "	UPDATE tuotepaikat
@@ -20098,7 +20106,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 						ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";
 			$upresult = pupe_query($query);
 
-			$return["error"] = "Oletuspaikkaa ei löytynyt, tehtiin ensimmäisestä paikasta oletuspaikka";			
+			$return["error"] = "Oletuspaikkaa ei löytynyt, tehtiin ensimmäisestä paikasta oletuspaikka";
 		}
 		elseif (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
 			// Päivitetään uusi oletuspaikka myös avoimille keskeneräisille ostotilauksille (jos uusi paikka on samassa varastossa kun vanha)
@@ -20119,9 +20127,9 @@ if (!function_exists('paivita_oletuspaikka')) {
 						AND varattu != '0'";
 			$result = pupe_query($query);
 
-			$return["paivitetyt_ostorivit"] = mysql_affected_rows();			
+			$return["paivitetyt_ostorivit"] = mysql_affected_rows();
 		}
-		
+
 		return $return;
 	}
 }
@@ -22674,6 +22682,7 @@ if (!function_exists("lisaa_rivi")) {
 		// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
 	}
 }
+
 if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
     function hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset($oletus_asiakas) {
         global $kukarow, $yhtiorow;
@@ -22684,18 +22693,37 @@ if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
 
         $query = "  SELECT count(*) as luku
                     FROM lasku
-                    JOIN asiakas
-					ON ( asiakas.yhtio = lasku.yhtio
-						AND asiakas.tunnus = lasku.liitostunnus
-						AND asiakas.tunnus = '{$oletus_asiakas}' )
-                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                    AND lasku.tila = 'T'
-                    AND lasku.alatila = ''
-					AND lasku.clearing = 'EXTTARJOUS'";
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tila = 'T'
+                    AND alatila = ''
+					AND liitostunnus = '{$oletus_asiakas}'
+					AND clearing = 'EXTTARJOUS'";
         $result = pupe_query($query);
 
         $tarjousten_lukumaara = mysql_fetch_assoc($result);
         return $tarjousten_lukumaara['luku'];
+    }
+}
+
+if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot")) {
+    function hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot($oletus_asiakas) {
+        global $kukarow, $yhtiorow;
+
+		if (empty($oletus_asiakas)) {
+			return 0;
+		}
+
+        $query = "  SELECT count(*) as luku
+                    FROM lasku
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tila = 'N'
+                    AND alatila = ''
+					AND liitostunnus = '{$oletus_asiakas}'
+					AND clearing = 'EXTENNAKKO'";
+        $result = pupe_query($query);
+
+        $ennakoiden_lukumaara = mysql_fetch_assoc($result);
+        return $ennakoiden_lukumaara['luku'];
     }
 }
 

@@ -107,7 +107,7 @@ if (isset($uusi)) {
 				require ("../tilauskasittely/suuntalavat.inc");
 
 				$uusi_suuntalava = lisaa_suuntalava($otunnus, $params);
-				echo "<br>Lisättiin lava! ".$uusi_suuntalava;
+				echo "<br>Lisättiin lava! ".$uusi_sscc;
 
 				# Takaisin suuntalavat listaan
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavat.php'>";

@@ -2165,6 +2165,9 @@
 						if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
 							$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
 						}
+						else if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'EI') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
+							$kerayspvm = date('Y-m-d', strtotime('now'));
+						}
 					case 'R' : // Valmistetaan asiakkaalle
 					case 'U' : // Tilataan toimittajalta asiakkaalle
 					case 'T' : // Tilataan toimittajalta

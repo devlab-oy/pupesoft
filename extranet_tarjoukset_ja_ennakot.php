@@ -297,7 +297,8 @@ function paivita_ennakko($params) {
 			$parametrit = array("lasku_tunnus" => $valittu_tarjous_tunnus,
 								"tuoteno" => $loytynyt_tilausrivi[0]['tuoteno'],
 								"kpl" => $value,
-								"toim" => $toim);
+								"toim" => $toim,
+								"syotettyhinta" => $loytynyt_tilausrivi[0]['hinta']);
 			lisaa_ennakkorivi($parametrit);
 		}
 	}
@@ -457,8 +458,6 @@ function hae_tarjous($valittu_tarjous_tunnus) {
 function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 	global $kukarow, $yhtiorow;
 
-	$query_ale_lisa = generoi_alekentta('M');
-
 	$query = "  SELECT '' as nro,
 				'' as kuva,
 				tilausrivi.tunnus,
@@ -467,7 +466,7 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 				tilausrivi.nimitys,
 				tilausrivi.varattu as kpl,
 				tilausrivi.hinta,
-				round(tilausrivi.hinta * tilausrivi.varattu * (1 - ale1 / 100) * (1 - ale2 / 100) * (1 - ale3 / 100), 2) rivihinta,
+				round(tilausrivi.hinta * tilausrivi.varattu, 2) rivihinta,
 				tilausrivi.alv,
 				tuote.tunnus as tuote_tunnus
 				FROM tilausrivi
@@ -646,6 +645,8 @@ function lisaa_ennakkorivi($params) {
 	$otunnus = $params['lasku_tunnus'];
 	$toim = $params['toim'];
 
+	$hinta = $params['syotettyhinta'];
+
 	$query = "	SELECT *
 				FROM tuote
 				WHERE yhtio = '{$kukarow['yhtio']}'
@@ -658,13 +659,16 @@ function lisaa_ennakkorivi($params) {
 		$trow = mysql_fetch_assoc($result);
 
 		$kukarow["kesken"] = $otunnus;
-		$hinta = 0.000001;
-		$alennus = 100;
+		if (empty($hinta)) {
+			$hinta = 0.000001;
+		}
+		$alennus = 100;	
 		$laskurow = hae_lasku($otunnus);
 		$netto = '';
 
 		// Haetaan tuotteen ennakkohinta kun kyseessä on extennakkotilaus
 		if ($toim == 'EXTENNAKKO') {
+
 			$query = "  SELECT selite AS ennakko_pros_a
 						FROM tuotteen_avainsanat
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -674,12 +678,12 @@ function lisaa_ennakkorivi($params) {
 						LIMIT 1";
 			$result = pupe_query($query);
 
-			if (mysql_num_rows($result) == 1) {
+			if (mysql_num_rows($result) == 1 and $hinta == 0.000001) {
 				$tuotteen_hinta = mysql_fetch_assoc($result);
 				$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
 				$alennus = 0;
-				$netto = 'N';
 			}
+			$netto = 'N';
 			$laskurow["tila"] = 'N';
 		}
 		else {

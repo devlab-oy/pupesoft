@@ -12644,7 +12644,7 @@ if (!function_exists("pupe_DataTablesEchoSort")) {
 
 if (!function_exists("pupe_DataTables")) {
 	function pupe_DataTables($parametrit) {
-		global $yhtiorow;
+		global $yhtiorow, $lopetus;
 
 		preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
 		preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
@@ -12998,7 +12998,7 @@ if (!function_exists("pupe_DataTables")) {
 					if (parametrit[tableid][6] == true) {
 						settings.bProcessing = true;
 						settings.bServerSide = true,
-						settings.sAjaxSource = \"?dtss=TRUE&serversideparams=\"+parametrit[tableid][7];
+						settings.sAjaxSource = \"?dtss=TRUE&serversideparams=\"+parametrit[tableid][7]+\"&lopetus={$lopetus}\";
 					}
 
 					datatablesit[t] = $(this).dataTable(settings);

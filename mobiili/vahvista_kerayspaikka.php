@@ -209,9 +209,10 @@ if (isset($submit) and trim($submit) != '') {
 
 				# Redirectit ostotilaukseen tai suuntalavan_tuotteet?
 				if (isset($hyllytys)) {
-					$ostotilaus_urliin = $manuaalisesti_syotetty_ostotilausnro ? "" : $row['otunnus'];
+					$ostotilaus_urliin = $manuaalisesti_syotetty_ostotilausnro ? $row['otunnus'] : "";
 					$tilausten_lukumaara--;
-					echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus_urliin}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}'>";
+					$url = "&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&viivakoodi={$viivakoodi}";
+					echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus_urliin}{$url}'>";
 				}
 				else {
 					echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=suuntalavan_tuotteet.php?{$url}'>";
@@ -286,7 +287,8 @@ echo "
 $paluu_url = "suuntalavan_tuotteet.php?$url";
 # Ostotilaus -> hyllytykseen
 if (isset($hyllytys)) {
-	$paluu_url = "hyllytys.php?ostotilaus={$row['otunnus']}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}";
+	$urlilisa = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}";
+	$paluu_url = "hyllytys.php?ostotilaus={$row['otunnus']}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}{$urlilisa}";
 }
 
 echo "<div class='header'>";
@@ -343,6 +345,9 @@ echo "
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 	<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />
+	<input type='hidden' name='tilausten_lukumaara' value='{$tilausten_lukumaara}' />
+	<input type='hidden' name='manuaalisesti_syotetty_ostotilausnro' value='{$manuaalisesti_syotetty_ostotilausnro}' />
+	<input type='hidden' name='viivakoodi' value='{$viivakoodi}' />
 </form>
 ";
 

@@ -128,6 +128,7 @@ $url = array (
             'saapuminen' => $alkuperainen_saapuminen,
             'tilausten_lukumaara' => $tilausten_lukumaara,
             'manuaalisesti_syotetty_ostotilausnro' => $manuaalisesti_syotetty_ostotilausnro,
+            'tuotenumero' => $tuotenumero,
         );
 
 if (!is_numeric($hyllytetty)) {

@@ -32,6 +32,10 @@ if (isset($submit) and trim($submit) != '') {
 			# Jos hyllypaikka ok, laitetaan koko suuntalava varastoon
 			if ($kaikki_ok) {
 
+				# Poistetaan käyttäjän kesken, että osataan viedä varastoon
+				$query = "UPDATE kuka SET kesken = 0 where yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
+				$res = pupe_query($query);
+
 				# Haetaan saapumiset?
 				$saapumiset = hae_saapumiset($alusta_tunnus);
 

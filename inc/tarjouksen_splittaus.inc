@@ -38,17 +38,14 @@ $tarjouksen_asiakkaat = explode(',', $tarjouksen_asiakkaat);
 $dummy_tarjouksen_tilausnumero = $tilausnumero;
 
 foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
+
 	$kukarow['kesken'] = 0;
-	
-	$netto = $tilausrivi['netto'];
 
 	if ($toim == "EXTTARJOUS") {
 		$tilausnumero = luo_myyntitilausotsikko('TARJOUS', $tarjous_asiakas, '', '', '', '', '', '', $clearing);
 	}
 	else {
 		$tilausnumero = luo_myyntitilausotsikko('ENNAKKO', $tarjous_asiakas, '', '', '', '', '', '', $clearing);
-		//Ext-ennakolle tulee hinnat aina nettona
-		$netto = 'N';
 	}
 
 	//Halutaan pitää asiakkaille kopioitavissa tarjouksissa myyjän valitsema varasto
@@ -77,7 +74,17 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 	$kukarow['kesken'] = $tilausnumero;
 
 	foreach ($tilausrivit as $tilausrivi) {
+
 		if ($tilausrivi['tunnus'] == $tilausrivi['perheid'] or $tilausrivi['perheid'] == 0) {
+
+			// Ext-ennakolle tulee hinnat aina nettona, lasketaan alennukset pois
+			if ($toim == "EXTENNAKKO") {
+				$tilausrivi['hinta'] = $tilausrivi['hinta'] * (1 - $tilausrivi['ale1'] / 100) * (1 - $tilausrivi['ale2'] / 100) * (1 - $tilausrivi['ale3'] / 100);
+				$tilausrivi['ale1'] = 0;
+				$tilausrivi['ale2'] = 0;
+				$tilausrivi['ale3'] = 0;
+				$tilausrivi['netto'] = 'N';
+			}
 
 			$trow = hae_tuote($tilausrivi['tuoteno']);
 
@@ -89,10 +96,11 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 				'ale1'				 => $tilausrivi['ale1'],
 				'ale2'				 => $tilausrivi['ale2'],
 				'ale3'				 => $tilausrivi['ale3'],
-				'netto'				 => $netto,
+				'netto'				 => $tilausrivi['netto'],
 				'hinta'				 => $tilausrivi['hinta'],
 				'varataan_saldoa'	 => 'EI',
 			);
+			
 			lisaa_rivi($parametrit);
 		}
 	}

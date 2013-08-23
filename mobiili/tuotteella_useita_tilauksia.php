@@ -176,22 +176,24 @@ echo "<div class='main'>
 <table>
 <tr>";
 
+$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}";
+
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
-	echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_otunnus}'>",t("Ostotilaus"), "</a>&nbsp;";
+	echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_otunnus}'>",t("Ostotilaus"), "</a>&nbsp;";
 	echo $sort_by_direction_otunnus == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 	echo "</th>";
 }
 if ($tuotenumero == '' and $viivakoodi == '' and $ostotilaus != '') {
-	echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuoteno"), "</a>&nbsp;";
+	echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuoteno"), "</a>&nbsp;";
 	echo $sort_by_direction_tuoteno == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 	echo "</th>";
 }
 
-echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=sorttaus_kpl&sort_by_direction_sorttaus_kpl={$sort_by_direction_sorttaus_kpl}'>",t("Kpl (ulk.)"),"</a>";
+echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=sorttaus_kpl&sort_by_direction_sorttaus_kpl={$sort_by_direction_sorttaus_kpl}'>",t("Kpl (ulk.)"),"</a>";
 echo $sort_by_direction_sorttaus_kpl == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 echo "</th>";
 
-echo "<th><a href='tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}&sort_by=hylly&sort_by_direction_hylly={$sort_by_direction_hylly}'>",t("Tuotepaikka"),"</a>";
+echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=hylly&sort_by_direction_hylly={$sort_by_direction_hylly}'>",t("Tuotepaikka"),"</a>";
 echo $sort_by_direction_hylly == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 echo "</th>";
 echo "</tr>";
@@ -208,16 +210,17 @@ while($row = mysql_fetch_assoc($result)) {
 			'tilausrivi' => $row['tunnus'],
 			'manuaalisesti_syotetty_ostotilausnro'  => $manuaalisesti_syotetty_ostotilausnro,
 			'tilausten_lukumaara' => $tilausten_lukumaara,
-			'viivakoodi' => $viivakoodi)
+			'viivakoodi' => $viivakoodi,
+			'tuotenumero' => $tuotenumero,)
 		);
 
 	echo "<tr>";
 
 	if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
-		echo "<td><a href='hyllytys.php?$url'>{$row['otunnus']}</a></td>";
+		echo "<td><a href='hyllytys.php?{$url}'>{$row['otunnus']}</a></td>";
 	}
 	if ($tuotenumero == '' and $viivakoodi == '' and $ostotilaus != '') {
-		echo "<td><a href='hyllytys.php?$url'>{$row['tuoteno']}</a></td>";
+		echo "<td><a href='hyllytys.php?{$url}'>{$row['tuoteno']}</a></td>";
 	}
 	echo "
 		<td>".($row['varattu']+$row['kpl']).

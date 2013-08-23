@@ -166,7 +166,6 @@ if (!empty($request['action'])) {
 	}
 }
 
-//function hyvaksy_ennakko($valittu_tarjous_tunnus, $syotetyt_lisatiedot, $kappalemaarat, $toim) {
 function hyvaksy_ennakko($parametrit) {
 	global $kukarow, $yhtiorow;
 	

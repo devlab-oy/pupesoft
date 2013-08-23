@@ -22919,9 +22919,14 @@ if (!function_exists('aja_ruby')) {
 	function aja_ruby($json_data_filepath, $ruby_tiedosto_nimi) {
 		global $pupe_root_polku;
 
-		$filepath = realpath("pdfs/ruby/{$ruby_tiedosto_nimi}.rb");
-
-		$filepath = $pupe_root_polku . "/pdfs/ruby/{$ruby_tiedosto_nimi}.rb";
+		// @TODO purkka fix. realpath("/pdfs/ruby/{$ruby_tiedosto_nimi}.rb") palauttaa false. fiksaa jotenkin.
+		if (stristr($pupe_root_polku, 'pupesoft')) {
+			$filepath = $pupe_root_polku . "/pdfs/ruby/{$ruby_tiedosto_nimi}.rb";
+		}
+		else {
+			$filepath = $pupe_root_polku . "/extranet/pdfs/ruby/{$ruby_tiedosto_nimi}.rb";
+		}
+		
 		$cmd = "ruby {$filepath} {$json_data_filepath}";
 		$return = exec($cmd, $output, $return_code);
 

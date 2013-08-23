@@ -46,11 +46,11 @@ $request = array(
 );
 
 //generoidaan debug moodissa vain testi tuotteen työmääräyksiä
-if ($debug) {
-	$request['laitteet'] = array(
-		'TESTI',
-	);
-}
+//if ($debug) {
+//	$request['laitteet'] = array(
+//		'TESTI',
+//	);
+//}
 
 $laitteiden_huoltosyklirivit = hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($request);
 

@@ -7,7 +7,7 @@ if (!function_exists("laitetarkista")) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto, $asiakasid;
 
 		//laitetta ei saa perustaa jos sen sammutin tuotteelle (tuote-taulu) ei ole linkattu koko ja tyyppiä, koska tällöin työmääräysten generointi ei toimi
-		if (mysql_field_name($result, $i) == "tunnus") {
+		if (mysql_field_name($result, $i) == "tunnus" and !empty($t['tuoteno'])) {
 			$query = "	SELECT DISTINCT laji
 						FROM tuotteen_avainsanat
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -50,6 +50,9 @@ if (!function_exists("laitetarkista")) {
 				if (mysql_num_rows($tuote_result) != 1) {
 					$virhe[$i] = t("Tuote puuttuu tai sitä ei löydy").'!';
 				}
+			}
+			else {
+				$virhe[$i] = t("Tuote annettava").'!';
 			}
 		}
 

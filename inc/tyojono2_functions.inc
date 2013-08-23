@@ -396,6 +396,12 @@ function echo_tyomaaraykset_table($request = array()) {
 		echo_tyomaarays_rivi($request, $tyomaarays['tyomaaraykset']);
 	}
 
+	if (empty($request['tyomaaraykset'])) {
+		echo "<tr>";
+		echo "<td colspan = '6' align='center'>".t('Ei työmääräyksiä')."</td>";
+		echo "</tr>";
+	}
+
 	echo "</tbody>";
 	echo "</table>";
 }

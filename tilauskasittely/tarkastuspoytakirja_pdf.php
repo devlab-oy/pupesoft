@@ -43,11 +43,12 @@ function pdf_hae_tyomaaraykset($lasku_tunnukset) {
 				FROM lasku
 				JOIN tilausrivi
 				ON ( tilausrivi.yhtio = lasku.yhtio
-					AND tilausrivi.otunnus = lasku.tunnus )
+					AND tilausrivi.otunnus = lasku.tunnus
+					AND tilausrivi.var != 'P')
 				JOIN tilausrivin_lisatiedot
 				ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
 					AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-					AND tilausrivin_lisatiedot.tilausrivilinkki != 0 )
+					)
 				JOIN laite
 				ON ( laite.yhtio = tilausrivin_lisatiedot.yhtio
 					AND laite.tunnus = tilausrivin_lisatiedot.asiakkaan_positio )

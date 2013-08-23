@@ -43,6 +43,11 @@
 
 	$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
 
+	if (isset($verkkokauppa_saldo_varasto) and !is_array($verkkokauppa_saldo_varasto)) {
+		echo "verkkokauppa_saldo_varasto pitää olla array!";
+		exit;
+	}
+
 	$locktime = 5400;
 	$lockfile = "/tmp/tuote_export_cron.lock";
 
@@ -73,7 +78,7 @@
 	$datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
 	// alustetaan arrayt
-	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = array();
+	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = $kaikki_tuotteet = array();
 
 	if ($ajetaanko_kaikki == "NO") {
 		$muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
@@ -177,6 +182,34 @@
 		$muutoslisa2 = "";
 	}
 
+	// Magentoa varten pitää hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa
+	if ($verkkokauppatyyppi == 'magento') {
+
+		echo date("d.m.Y @ G:i:s")." - Haetaan poistettavat tuotteet.\n";
+
+		// Haetaan pupesta kaikki tuotteet (ja configurable-tuotteet), jotka pitää olla Magentossa
+		$query = "	SELECT DISTINCT tuotteen_avainsanat.selite configurable_tuoteno, tuote.tuoteno
+					FROM tuotteen_avainsanat
+					JOIN tuote ON (tuote.yhtio = tuotteen_avainsanat.yhtio
+					AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
+					AND tuote.status != 'P'
+					AND tuote.tuotetyyppi NOT IN ('A','B')
+					AND tuote.tuoteno != ''
+					AND tuote.nakyvyys != '')
+					WHERE tuotteen_avainsanat.yhtio = '{$kukarow["yhtio"]}'
+					AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+					AND trim(tuotteen_avainsanat.selite) != ''";
+		$res = pupe_query($query);
+
+		// Kaikki tuotenumerot arrayseen
+		while ($row = mysql_fetch_array($res)) {
+			$kaikki_tuotteet[] = $row['tuoteno'];
+			$kaikki_tuotteet[] = $row['configurable_tuoteno'];
+		}
+
+		$kaikki_tuotteet = array_unique($kaikki_tuotteet);
+	}
+
 	echo date("d.m.Y @ G:i:s")." - Haetaan saldot.\n";
 
 	// Haetaan saldot tuotteille, joille on tehty tunnin sisällä tilausrivi tai tapahtuma
@@ -210,7 +243,7 @@
 	$result = pupe_query($query);
 
 	while ($row = mysql_fetch_assoc($result)) {
-		list(,,$myytavissa) = saldo_myytavissa($row["tuoteno"]);
+		list(,,$myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
 		$dnstock[] = array(	'tuoteno'		=> $row["tuoteno"],
 							'ean'			=> $row["eankoodi"],
 							'myytavissa'	=> $myytavissa,
@@ -505,7 +538,7 @@
 
 		$magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 
-		if ($magento_client === null) {
+		if ($magento_client->getErrorCount() > 0) {
 			unlink($lockfile);
 			exit;
 		}
@@ -539,6 +572,14 @@
 			echo date("d.m.Y @ G:i:s")." - Päivitetään tuotteiden saldot\n";
 			$count = $magento_client->paivita_saldot($dnstock);
 			echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotteen saldot\n";
+		}
+
+		// Poistetaan tuotteet jota ei ole kaupassa
+		if (count($kaikki_tuotteet) > 0) {
+			echo date("d.m.Y @ G:i:s")." - Poistetaan ylimääräiset tuotteet\n";
+			// HUOM, tähän passataan **KAIKKI** verkkokauppatuotteet, methodi katsoo että kaikki nämä on kaupassa, muut dellataan!
+			$count = $magento_client->poista_poistetut($kaikki_tuotteet);
+			echo date("d.m.Y @ G:i:s")." - Poistettiin $count tuotetta\n";
 		}
 
 		$tuote_export_error_count = $magento_client->getErrorCount();
@@ -595,8 +636,10 @@
 	}
 
 	// Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
-	unset($useslave, $tempdbhost, $masterlink, $temporarylink);
-	require ("{$pupe_root_polku}/inc/connect.inc");
+	unset($link);
+	$link = mysql_connect($dbhost, $dbuser, $dbpass, true) or die ("Ongelma tietokantapalvelimessa $dbhost (tuote_export)");
+	mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (tuote_export)");
+	mysql_set_charset("latin1", $link);
 
 	// Kun kaikki onnistui, päivitetään lopuksi timestamppi talteen
 	$query = "	UPDATE avainsana SET

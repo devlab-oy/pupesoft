@@ -61,6 +61,11 @@ class MagentoClient {
 	private $_tax_class_id = 0;
 
 	/**
+	 * Verkkokaupan "root" kategorian tunnus, tämän alle lisätään kaikki tuoteryhmät
+	 */
+	private $_parent_id = 3;
+
+	/**
 	 * Tämän yhteyden aikana sattuneiden virheiden määrä
 	 */
 	private $_error_count = 0;
@@ -102,8 +107,7 @@ class MagentoClient {
 
 		$this->log("Lisätään kategoriat");
 
-		$parent_id = 3; // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
-
+		$parent_id = $this->_parent_id; // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
 		$count = 0;
 
 		// Loopataan osastot ja tuoteryhmat
@@ -534,19 +538,75 @@ class MagentoClient {
 	/**
 	 * Poistaa magentosta tuotteita
 	 *
-	 * @param array $poistetut_tuotteet Poistettavat tuotteet
+	 * @param array $kaikki_tuotteet Kaikki tuotteet, jotka pitää LÖYTYÄ Magentosta
 	 * @return   Poistettujen tuotteiden määrä
 	 */
-	public function poista_poistetut(array $poistetut_tuotteet) {
+	public function poista_poistetut(array $kaikki_tuotteet) {
 
 		$count = 0;
+		$skus = $this->getProductList(true);
 
-		foreach($poistetut_tuotteet as $tuote) {
-			#$result = $client->call($session, 'catalog_product.delete', $tuote['tuoteno']);
-			$count++;
+		// Poistetaan tuottee jotka löytyvät arraysta $kaikki_tuotteet arraystä $skus
+		$poistettavat_tuotteet = array_diff($skus, $kaikki_tuotteet);
+
+		// Nämä kaikki tuotteet pitää poistaa Magentosta
+		foreach ($poistettavat_tuotteet as $tuote) {
+
+			$this->log("Poistetaan tuote $tuote");
+
+			try {
+				// Tässä kutsu, jos tuote oikeasti halutaan poistaa
+				$this->_proxy->call($this->_session, 'catalog_product.delete', $tuote, 'SKU');
+
+				// "Poistetaan" tuote, merkataan disabled ja not visible
+				// $this->_proxy->call($this->_session, 'catalog_product.update',
+				// 					array(
+				// 						$tuote,
+				// 						array('status'     => self::DISABLED,
+				// 							  'visibility' => self::NOT_VISIBLE_INDIVIDUALLY,
+				// 							 )
+				// 						)
+				// 					);
+				$count++;
+			}
+			catch (Exception $e) {
+				$this->_error_count++;
+				$this->log("Virhe! Tuotteen poisto epäonnistui!", $e);
+			}
 		}
 
-		echo date("H:i:s").": Poistettiin Magentosta $count tuotetta.\n\n";
+		$this->log("$count tuotetta poistettu");
+
+		return $count;
+	}
+
+	/**
+	 * Poistaa magentosta kategorioita
+	 *
+	 * @param array $kaikki_kategoriat Kaikki kategoriat jotka pitää löytyä Magentosta
+	 * @return   Poistettujen tuotteiden määrä
+	 */
+	public function poista_kategorioita(array $kaikki_kategoriat) {
+
+		# Work in progress, don't use :)
+		return;
+
+		$count = 0;
+		$parent_id = $this->_parent_id; // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
+
+		// Haetaan kaikki kategoriat, joiden parent_id on parent id
+		$magento_kategoriat = $this->_proxy->call($this->_session, 'catalog_category.level',
+								array(
+									null, # website
+									null, # storeview
+									$parent_id,
+									)
+								);
+
+		var_dump($magento_kategoriat);
+
+		$this->log("$count kategoriaa poistettu");
+
 		return $count;
 	}
 
@@ -781,6 +841,16 @@ class MagentoClient {
 	 */
 	public function setTaxClassID($tax_class_id) {
 		$this->_tax_class_id = $tax_class_id;
+	}
+
+	/**
+	 * Asettaa parent_id:n
+	 * Oletus 3
+	 *
+	 * @param int $parent_id Root kategorian tunnus
+	 */
+	public function setParentID($parent_id) {
+		$this->_parent_id = $parent_id;
 	}
 
 	/**

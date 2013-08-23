@@ -105,7 +105,7 @@
 
 		list($sUseIndex, $sInitialWhere, $sInitialOrder) = unserialize($_GET["serversideparams"]);
 
-		require("server_processing_getdata.php");
+		require("server_processing_getdata.inc");
 		exit;
 	}
 

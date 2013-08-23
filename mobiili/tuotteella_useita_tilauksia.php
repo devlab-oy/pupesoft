@@ -19,6 +19,8 @@ $sort_by_direction_hylly		= (!isset($sort_by_direction_hylly) or $sort_by_direct
 # Joku parametri tarvii olla setattu.
 if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 
+	if (strpos($tuotenumero, "%") !== FALSE) $tuotenumero = urldecode($tuotenumero);
+
 	if ($tuotenumero != '') $params['tuoteno'] = "tilausrivi.tuoteno = '{$tuotenumero}'";
 	if ($ostotilaus != '') 	$params['otunnus'] = "tilausrivi.otunnus = '{$ostotilaus}'";
 
@@ -129,7 +131,7 @@ if (isset($submit)) {
 
 # Ei osumia, palataan ostotilaus sivulle
 if ($tilausten_lukumaara == 0) {
-	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tilauksia.php?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&virhe'>";
+	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&virhe'>";
 	exit();
 }
 

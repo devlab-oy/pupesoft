@@ -211,7 +211,7 @@ if (isset($submit) and trim($submit) != '') {
 				if (isset($hyllytys)) {
 					$ostotilaus_urliin = $manuaalisesti_syotetty_ostotilausnro ? $row['otunnus'] : "";
 					$tilausten_lukumaara--;
-					$url = "&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&viivakoodi={$viivakoodi}";
+					$url = "&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&viivakoodi={$viivakoodi}&tuotenumero=".urlencode($tuotenumero);
 					echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus_urliin}{$url}'>";
 				}
 				else {
@@ -287,7 +287,7 @@ echo "
 $paluu_url = "suuntalavan_tuotteet.php?$url";
 # Ostotilaus -> hyllytykseen
 if (isset($hyllytys)) {
-	$urlilisa = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}";
+	$urlilisa = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=".urlencode($tuotenumero);
 	$paluu_url = "hyllytys.php?ostotilaus={$row['otunnus']}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}{$urlilisa}";
 }
 
@@ -348,6 +348,7 @@ echo "
 	<input type='hidden' name='tilausten_lukumaara' value='{$tilausten_lukumaara}' />
 	<input type='hidden' name='manuaalisesti_syotetty_ostotilausnro' value='{$manuaalisesti_syotetty_ostotilausnro}' />
 	<input type='hidden' name='viivakoodi' value='{$viivakoodi}' />
+	<input type='hidden' name='tuotenumero' value='{$tuotenumero}' />
 </form>
 ";
 

@@ -538,7 +538,7 @@
 
 		$magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 
-		if ($magento_client === null) {
+		if ($magento_client->getErrorCount() > 0) {
 			unlink($lockfile);
 			exit;
 		}

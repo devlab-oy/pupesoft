@@ -81,11 +81,17 @@
 		$sOrder = "ORDER BY ".($sInitialOrder);
 	}
 
+	$selectColumns = $aColumns;
+
+	if (isset($aExtraColumns) and count($aExtraColumns) > 0) {
+		$selectColumns = array_merge($aColumns, $aExtraColumns);
+	}
+
 	/*
 	 * SQL queries
 	 * Get data to display
 	 */
-	$sQuery = "	SELECT SQL_CALC_FOUND_ROWS ".str_replace(" , ", " ", implode(", ", $aColumns))."
+	$sQuery = "	SELECT SQL_CALC_FOUND_ROWS ".str_replace(" , ", " ", implode(", ", $selectColumns))."
 				FROM $sTable {$sIndex}
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				$sWhere
@@ -93,14 +99,8 @@
 				$sLimit";
 	$rResult = pupe_query($sQuery);
 
-	error_log($sQuery);
-
 	/* Data set length after filtering */
-	$sQuery = " SELECT FOUND_ROWS() ";
-	$rResultFilterTotal = pupe_query($sQuery);
-	$aResultFilterTotal = mysql_fetch_array($rResultFilterTotal);
-
-	$iFilteredTotal = $aResultFilterTotal[0];
+	$iFilteredTotal = mysql_num_rows($rResult);
 
 	/* Total data set length */
 	$sQuery = " SELECT COUNT('".$sIndexColumn."')
@@ -123,7 +123,33 @@
 	while ($aRow = mysql_fetch_array($rResult)) {
 		$row = array();
 
-		for ($i=0 ; $i<count($aColumns); $i++) {
+		for ($i=0; $i<count($aColumns); $i++) {
+			if (isset($aExceptionColumns[$i]) and $aExceptionColumns[$i] != "") {
+
+				$aMatchException = $aExceptionColumns[$i];
+
+				$aMatches = array();
+				preg_match_all("/#ROW_([a-zA-Z_]*?)#/", $aMatchException, $aMatches);
+
+				for ($aii=0; $aii<count($aMatches[0]); $aii++) {
+
+					if ($aMatches[1][$aii] == "ebidFUNCTION") {
+						$aMatchException = str_replace($aMatches[0][$aii], ebid($aRow['tunnus']), $aMatchException);
+					}
+					elseif ($aMatches[1][$aii] == "mlh_maksutekstiFUNCTION") {
+						$aMatchException = str_replace($aMatches[0][$aii], mlh_maksuteksti($aRow), $aMatchException);
+					}
+					elseif ($aMatches[1][$aii] == "mlh_nimiFUNCTION") {
+						$aMatchException = str_replace($aMatches[0][$aii], mlh_nimi($aRow['laatija']), $aMatchException);
+					}
+					else {
+						$aMatchException = str_replace($aMatches[0][$aii], $aRow[$aMatches[1][$aii]], $aMatchException);
+					}
+				}
+
+				$aRow[$aColumns[$i]] = $aMatchException;
+			}
+
 			$row[] = utf8_encode($aRow[$aColumns[$i]]);
 		}
 

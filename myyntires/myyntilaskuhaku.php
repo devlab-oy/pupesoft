@@ -12,37 +12,15 @@
 
 	require ("../inc/parametrit.inc");
 
-	if (isset($_GET["dtss"]) and $_GET["dtss"] == "TRUE") {
-
-		/* Array of database columns which should be read and sent back to DataTables. Use a space where
-		 * you want to insert a non-database field (for example a counter or static image)
-		 */
-		$aColumns = array('tapvm', 'erpcm', 'laskunro', 'nimi', 'summa', 'valkoodi', 'ebid', 'tila', 'laatija');
-
-		/*
-		 * Indexed column (used for fast and accurate table cardinality)
-		 */
-		$sIndexColumn = "tunnus";
-
-		/*
-		 * DB table to use
-		 */
-		$sTable = "lasku";
-
-		list($sUseIndex, $sInitialWhere, $sInitialOrder) = unserialize($_GET["serversideparams"]);
-
-		require("server_processing_getdata.php");
-		exit;
-	}
-
-	if (!isset($tee)) $tee = '';
+	if (!isset($tee)) 	 $tee 	 = '';
 	if (!isset($summa1)) $summa1 = '';
 	if (!isset($summa2)) $summa2 = '';
-	if (!isset($pvm)) $pvm = '';
+	if (!isset($pvm)) 	 $pvm 	 = '';
+	if (!isset($index))	 $index  = '';
 
-	if (!function_exists("kuka_kayttaja")) {
-		function kuka_kayttaja($keta_haetaan) {
-			global $kukarow, $yhtiorow;
+	if (!function_exists("mlh_nimi")) {
+		function mlh_nimi($keta_haetaan) {
+			global $kukarow;
 
 			$query = "	SELECT kuka.nimi
 						FROM kuka
@@ -60,14 +38,83 @@
 		}
 	}
 
-	echo "<font class='head'>",t("Myyntilaskuhaku"),"</font><hr>";
+	if (!function_exists("mlh_maksuteksti")) {
+		function mlh_maksuteksti($trow) {
+			global $kukarow;
 
-	$index = "";
+			$maksuviesti = "";
+
+			if ($trow['mapvm'] != "0000-00-00") {
+				$maksuviesti = t("Maksettu");
+			}
+			elseif ($trow['mapvm'] == "0000-00-00" and $trow['saldo_maksettu'] != 0) {
+				$maksuviesti = t("Osasuoritettu");
+
+				if ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
+					$maksuviesti .= " / ".t("Erääntynyt");
+				}
+			}
+			elseif ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
+				$maksuviesti = " ".t("Erääntynyt");
+			}
+			else {
+				$maksuviesti = t("Avoin");
+			}
+
+			return $maksuviesti;
+		}
+	}
+
+	if (isset($_GET["dtss"]) and $_GET["dtss"] == "TRUE") {
+
+		/*
+		 * Nämä sarakkeet haetaan kannasta ja tulostetaan tableen
+		 */
+		$aColumns = array('tapvm', 'erpcm', 'laskunro', 'nimi', 'summa', 'valkoodi', 'ebid', 'tila', 'laatija');
+
+
+		/*
+		 * Nämä sarakkeet haetaan kannasta, mutta ei näytetä tablessa
+		 */
+		$aExtraColumns = array('tunnus', 'liitostunnus', 'ytunnus', 'mapvm', 'saldo_maksettu');
+
+		/*
+		 * Käyttöliittymäpoikkeukset
+		 */
+		$aExceptionColumns = array();
+
+		if (tarkista_oikeus("muutosite.php")) {
+			$aExceptionColumns[0] = "<a href = '../muutosite.php?tee=E&tunnus=#ROW_tunnus#&lopetus={$lopetus}'>#ROW_tapvm#</a>";
+		}
+
+		$aExceptionColumns[2] = "<a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=#ROW_laskunro#&lopetus={$lopetus}'>#ROW_laskunro#</a>";
+		$aExceptionColumns[3] = "<a name='#ROW_tunnus#' href='{$palvelin2}myyntires/myyntilaskut_asiakasraportti.php?ytunnus=#ROW_ytunnus#&asiakasid=#ROW_liitostunnus#&alatila=Y&tila=tee_raportti&lopetus={$lopetus}'>#ROW_nimi#</a>";
+		$aExceptionColumns[6] = "#ROW_ebidFUNCTION#";
+		$aExceptionColumns[7] = "#ROW_mlh_maksutekstiFUNCTION#";
+		$aExceptionColumns[8] = "#ROW_mlh_nimiFUNCTION#";
+
+		/*
+		 * Indeksisarake
+		 */
+		$sIndexColumn = "tunnus";
+
+		/*
+		 * DB table to use
+		 */
+		$sTable = "lasku";
+
+		list($sUseIndex, $sInitialWhere, $sInitialOrder) = unserialize($_GET["serversideparams"]);
+
+		require("server_processing_getdata.php");
+		exit;
+	}
+
 	$lopetus = "${palvelin2}myyntires/myyntilaskuhaku.php////tee={$tee}//summa1={$summa1}//summa2={$summa2}";
 
+	echo "<font class='head'>",t("Myyntilaskuhaku"),"</font><hr>";
 	echo "<br><form name = 'valinta' method='post'>";
 
-	$seldr = array_fill_keys(array($tee), " selected") + array('S','VS','N','V','L','LN');
+	$seldr = array_fill_keys(array($tee), " selected") + array('A' => '','S' => '','VS' => '','N' => '','V' => '','L' => '','LN' => '');
 
 	echo "<table>";
 	echo "<tr>";

@@ -178,7 +178,7 @@ echo "<div class='main'>
 <table>
 <tr>";
 
-$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero={$tuotenumero}&saapuminen={$saapuminen}";
+$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&saapuminen={$saapuminen}&tuotenumero=".urlencode($tuotenumero);
 
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
 	echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_otunnus}'>",t("Ostotilaus"), "</a>&nbsp;";

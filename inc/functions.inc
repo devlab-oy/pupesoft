@@ -407,28 +407,30 @@ if (!function_exists("lopetus")) {
 
 				if (!isset($alanimi[1])) $alanimi[1] = "";
 
-				for ($i=0; $i<count($nimet); $i++) {
+				if ($meta == "") {
+					for ($i=0; $i<count($nimet); $i++) {
 
-					$nimi = "";
+						$nimi = "";
 
-					for ($j = $i; $j < count($nimet); $j++) {
-						$nimi .= $nimet[$j]."/";
-					}
+						for ($j = $i; $j < count($nimet); $j++) {
+							$nimi .= $nimet[$j]."/";
+						}
 
-					$nimi = substr($nimi,0,-1);
+						$nimi = substr($nimi,0,-1);
 
-					$query = "	SELECT nimitys
-								FROM oikeu
-								WHERE yhtio 	= '$kukarow[yhtio]'
-								and kuka 		= ''
-								and nimi		= '$nimi'
-								and alanimi		= '$alanimi[1]'
-								LIMIT 1";
-					$res = pupe_query($query);
+						$query = "	SELECT nimitys
+									FROM oikeu
+									WHERE yhtio 	= '$kukarow[yhtio]'
+									and kuka 		= ''
+									and nimi		= '$nimi'
+									and alanimi		= '$alanimi[1]'
+									LIMIT 1";
+						$res = pupe_query($query);
 
-					if (mysql_num_rows($res) > 0) {
-						$row = mysql_fetch_assoc($res);
-						break;
+						if (mysql_num_rows($res) > 0) {
+							$row = mysql_fetch_assoc($res);
+							break;
+						}
 					}
 				}
 

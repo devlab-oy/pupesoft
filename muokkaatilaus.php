@@ -1906,7 +1906,12 @@
 						}
 
 						if ($fieldname == 'luontiaika' or $fieldname == 'toimaika') {
-							echo "<td class='$class' valign='top' align='right'>".tv1dateconv($row[$fieldname], "PITKA", "LYHYT")."</td>";
+							echo "<td class='{$class}' valign='top' align='right'>";
+
+							if (($whiletoim == '' or $whiletoim == 'SUPER' or $whiletoim == 'KESKEN' or $whiletoim == 'HYPER' or $whiletoim == 'TOSI_KESKEN' or $whiletoim == 'ODOTTAA_SUORITUSTA') and $fieldname == 'toimaika' and $row['toimaika'] == '0000-00-00') echo t("Avoin");
+							else echo tv1dateconv($row[$fieldname], "PITKA", "LYHYT");
+
+							echo "</td>";
 						}
 						elseif ($fieldname == 'sopimuspvm') {
 

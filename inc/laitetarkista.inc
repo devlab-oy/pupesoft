@@ -22,7 +22,7 @@ if (!function_exists("laitetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "paikka") {
-			$tunnus = trim($t[$i]);
+			$tunnus = trim($t['paikka']);
 
 			if (!empty($tunnus)) {
 				$query = "	SELECT *
@@ -38,7 +38,7 @@ if (!function_exists("laitetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "tuoteno") {
-			$tuoteno = trim($t[$i]);
+			$tuoteno = trim($t['tuoteno']);
 
 			if (!empty($tuoteno)) {
 				$query = "	SELECT *
@@ -57,7 +57,7 @@ if (!function_exists("laitetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "valm_pvm") {
-			$valm_pvm = trim($t[$i]);
+			$valm_pvm = trim($t['valm_pvm']);
 
 			if (empty($valm_pvm)) {
 				$virhe[$i] = t("Valmistuspäivä on pakollinen").'!';
@@ -71,7 +71,7 @@ if (!function_exists("laitetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "sarjanro") {
-			$sarjanro = trim($t[$i]);
+			$sarjanro = trim($t['sarjanro']);
 
 			if (empty($sarjanro)) {
 				$virhe[$i] = t("Sarjanumero on pakollinen").'!';
@@ -85,8 +85,7 @@ if (!function_exists("laitetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "tila") {
-			$tila = trim($t[$i]);
-
+			$tila = trim($t['tila']);
 
 			if (empty($tila)) {
 				$virhe[$i] = t("Tila on pakollinen").'!';

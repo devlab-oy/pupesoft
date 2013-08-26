@@ -2,6 +2,8 @@
 
 require('../inc/parametrit.inc');
 
+require('inc/laitetarkista.inc');
+
 //AJAX requestit tänne
 if ($ajax_request) {
 	exit;
@@ -28,6 +30,25 @@ $request = array(
 	'vanha_laite_tunnus' => $vanha_laite_tunnus,
 );
 
+$request['laite'] = hae_laite_ja_asiakastiedot($request['tilausrivi_tunnus']);
+$request['paikat'] = hae_paikat();
+
+if (!empty($request['uusi_laite'])) {
+	if (!empty($request['uusi_laite']['varalaite'])) {
+		$request['uusi_laite']['tila'] = 'V';
+	}
+	else {
+		$request['uusi_laite']['tila'] = 'N';
+	}
+	unset($request['uusi_laite']['varalaite']);
+
+	$request['virheet'] = validoi_uusi_laite($request['uusi_laite']);
+
+	if (!empty($request['virheet'])) {
+		$request['tee'] = '';
+	}
+}
+
 if ($request['tee'] == 'vaihda_laite') {
 	//luo_uusi_laite funktio liittää myös laitteen oikealle paikalle asiakkaan laite puuhun
 	$request['uusi_laite'] = luo_uusi_laite($request['uusi_laite']);
@@ -49,7 +70,6 @@ if ($request['tee'] == 'vaihda_laite') {
 	//tekemättömästä työmääräys rivistä ei nollata hävinneen laitteen tunnusta.
 	//Tekemätön työmääräysrivi ja hävinnyt laite asetetaan poistettu tilaan, joten unlinkkaus ei ole tarpeellinen
 	//nollaa_vanhan_toimenpiderivin_asiakas_positio($request['tilausrivi_tunnus']);
-
 	//työmääräykselle pitää liittää uusi laite.
 	//HUOM uudesta laitteesta ei ehkä aina haluta luoda uutta työmääräys riviä,
 	//jos esim laitetta ei myydä asiakkaalle vaan se menee vain lainaan
@@ -75,20 +95,36 @@ if ($request['tee'] == 'vaihda_laite') {
 	if (!empty($poistetut_tilaukset)) {
 		$poistetut_tilaukset = implode(', ', $poistetut_tilaukset);
 		$poistetut_tilaukset = substr($poistetut_tilaukset, 0, -2);
-		echo t('Seuraavat työmääräykset poistettiin, koska niihin liitetty laite on kadonnut/hajonnut') . ': ' . $poistetut_tilaukset;
+		echo t('Seuraavat työmääräykset poistettiin, koska niihin liitetty laite on kadonnut/hajonnut').': '.$poistetut_tilaukset;
 	}
 	else {
 		echo t('Laitteella ei ollut muita poistettavia työmääräyksiä');
 	}
 }
 else {
-	$request['laite'] = hae_laite_ja_asiakastiedot($request['tilausrivi_tunnus']);
-	$request['paikat'] = hae_paikat();
-
 	echo_laitteen_vaihto_form($request);
 }
 
 require('inc/footer.inc');
+
+function validoi_uusi_laite($uusi_laite) {
+	global $kukarow, $yhtiorow;
+
+	$virhe = array();
+
+	$query = "	SELECT *
+				FROM laite
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = ''";
+	$result = pupe_query($query);
+	$trow = mysql_fetch_assoc($result);
+
+	for ($i = 1; $i < mysql_num_fields($result); $i++) {
+		laitetarkista($uusi_laite, $i, $result, '', $virhe, $trow);
+	}
+
+	return $virhe;
+}
 
 function luo_uusi_laite($uusi_laite) {
 	global $kukarow, $yhtiorow;
@@ -96,14 +132,7 @@ function luo_uusi_laite($uusi_laite) {
 	//tämän funktion jälkeen ajetaan aseta_uuden_tyomaarays_rivin_kommentti.
 	//alla oleva unset ei vaikuta siihen
 	unset($uusi_laite['kommentti']);
-	if (!empty($uusi_laite['varalaite'])) {
-		$uusi_laite['tila'] = 'V';
-	}
-	else {
-		$uusi_laite['tila'] = 'N';
-	}
-	unset($uusi_laite['varalaite']);
-	
+
 	$uusi_laite['yhtio'] = $kukarow['yhtio'];
 	$query = "INSERT INTO
 				laite (".implode(", ", array_keys($uusi_laite)).")
@@ -375,6 +404,13 @@ function aseta_vanhan_laitteen_tyomaarays_rivit_poistettu_tilaan($vanha_laite_tu
 function echo_laitteen_vaihto_form($request = array()) {
 	global $kukarow, $yhtiorow, $oikeurow;
 
+	if (!empty($request['virheet'])) {
+		$virhe_message = implode('<br/>', $request['virheet']);
+
+		echo '<font class="error">'.$virhe_message.'</font>';
+		echo '<br/>';
+	}
+
 	echo "<form class='multisubmit' method='POST' action=''>";
 	echo "<input type='hidden' name='tee' value='vaihda_laite' />";
 	echo "<input type='hidden' name='tilausrivi_tunnus' value='{$request['laite']['tilausrivi_tunnus']}' />";
@@ -404,10 +440,6 @@ function echo_laitteen_vaihto_form($request = array()) {
 
 	echo "<tr>";
 	echo "<th>".t("Uusi laite")."</th>";
-//	$toim = 'laite';
-//	$uusi = 1;
-//	$valittu_paikka = $request['laite']['paikka_tunnus'];
-//	require('yllapito.php');
 	echo "<td>";
 	echo '
 	<table>
@@ -416,35 +448,35 @@ function echo_laitteen_vaihto_form($request = array()) {
 	<tr>
 	<th align="left">'.t("Tuotenumero").'</th>
 	<td>
-	<input type="text" name="uusi_laite[tuoteno]" value="" size="35" maxlength="60" />
+	<input type="text" name="uusi_laite[tuoteno]" value="'.$request['uusi_laite']['tuoteno'].'" size="35" maxlength="60" />
 	</td>
 	</tr>
 
 	<tr>
 	<th align="left">'.t("Sarjanumero").'</th>
 	<td>
-	<input type="text" name="uusi_laite[sarjanro]" value="" size="35" maxlength="60" />
+	<input type="text" name="uusi_laite[sarjanro]" value="'.$request['uusi_laite']['sarjanro'].'" size="35" maxlength="60" />
 	</td>
 	</tr>
 
 	<tr>
 	<th align="left">'.t("Valmistus päivä").'</th>
 	<td>
-	<input type="text" name="uusi_laite[valm_pvm]" value="" size="10" maxlength="10" />
+	<input type="text" name="uusi_laite[valm_pvm]" value="'.$request['uusi_laite']['valm_pvm'].'" size="10" maxlength="10" />
 	</td>
 	</tr>
 
 	<tr>
 	<th align="left">'.t("Oma numero").'</th>
 	<td>
-	<input type="text" name="uusi_laite[oma_numero]" value="" size="35" maxlength="20" />
+	<input type="text" name="uusi_laite[oma_numero]" value="'.$request['uusi_laite']['oma_numero'].'" size="35" maxlength="20" />
 	</td>
 	</tr>
 
 	<tr>
 	<th align="left">'.t("Omistaja").'</th>
 	<td>
-	<input type="text" name="uusi_laite[omistaja]" value="" size="35" maxlength="60" />
+	<input type="text" name="uusi_laite[omistaja]" value="'.$request['uusi_laite']['omistaja'].'" size="35" maxlength="60" />
 	</td>
 	</tr>
 
@@ -463,21 +495,25 @@ function echo_laitteen_vaihto_form($request = array()) {
 	<tr>
 	<th align="left">'.t("Sijainti").'</th>
 	<td>
-	<input type="text" name="uusi_laite[sijainti]" value="" size="35" maxlength="60" />
+	<input type="text" name="uusi_laite[sijainti]" value="'.$request['uusi_laite']['sijainti'].'" size="35" maxlength="60" />
 	</td>
 	</tr>
 
 	<tr>
 	<th align="left">'.t("Kommentti").'</th>
 	<td>
-	<input type="text" name="uusi_laite[kommentti]" value="" size="35" maxlength="60" />
+	<input type="text" name="uusi_laite[kommentti]" value="'.$request['uusi_laite']['kommentti'].'" size="35" maxlength="60" />
 	</td>
 	</tr>
 
 	<tr>
 	<th align="left">'.t("Varalaite").'</th>
-	<td>
-	<input type="checkbox" name="uusi_laite[varalaite]" />
+	<td>';
+	$varalaite_chk = '';
+	if (!empty($request['uusi_laite']['varalaite'])) {
+		$varalaite_chk = 'CHECKED';
+	}
+	echo '<input type="checkbox" name="uusi_laite[varalaite]" '.$varalaite_chk.'/>
 	</td>
 	</tr>
 

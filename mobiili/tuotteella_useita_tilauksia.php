@@ -232,9 +232,9 @@ while($row = mysql_fetch_assoc($result)) {
 		echo "<td><a href='hyllytys.php?{$url}'>{$row['tuoteno']}</a></td>";
 	}
 	echo "
-		<td>".($row['varattu']+$row['kpl']).
+		<td><a href='hyllytys.php?{$url}'>".($row['varattu']+$row['kpl']).
 			"(".($row['varattu']+$row['kpl'])*$row['tuotekerroin'].")
-		</td>
+		</a></td>
 		<td>{$row['hylly']}</td>";
 	echo "<tr>";
 }

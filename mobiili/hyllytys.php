@@ -120,6 +120,7 @@ $url_prelisa = $tilausten_lukumaara < 2 ? "ostotilaus.php" : "tuotteella_useita_
 $url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "ostotilaus={$ostotilaus}" : "";
 $url_lisa .= ($viivakoodi != "" and $tilausten_lukumaara > 1) ? "viivakoodi={$viivakoodi}" : "";
 $url_lisa .= "&tuotenumero=".urlencode($tuotenumero);
+$url_lisa .= "&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}";
 
 ######## UI ##########
 # Otsikko

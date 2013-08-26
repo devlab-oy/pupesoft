@@ -27,7 +27,14 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 	// Viivakoodi case
 	if ($viivakoodi != '') {
 		$tuotenumerot = hae_viivakoodilla($viivakoodi);
-		$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+
+		if (count($tuotenumerot) > 0) {
+			$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+		}
+		else {
+			$errors[] = t("Viivakoodilla %s ei löytynyt tuotetta", '', $viivakoodi)."<br />";
+			$viivakoodi = "";
+		}
 	}
 
 	$query_lisa = implode($params, " AND ");

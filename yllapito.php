@@ -449,7 +449,7 @@
 				$query = "	SELECT tt.tuoteno, ttt.tuoteno as ttt_tuoteno, toimi.toimittajanro
 							FROM tuotteen_toimittajat_tuotenumerot AS ttt
 							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
-							JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
+							JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.asn_sanomat IN ('K','L','M','F'))
 							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
 							AND ttt.tunnus = '{$tunnus}'";
 				$toim_tuoteno_chk_res = pupe_query($query);

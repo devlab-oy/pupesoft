@@ -43,19 +43,23 @@ function laske_tilausriveille_uudet_hinnat($uusi_kate, $tilausnumero = 0, $tilau
 		if ((float)$uusi_kate > 99.99) {
 			$uusi_kate = 99.99;
 		}
-		$uusi_hinta = $tilausrivi['kehahin'] / ( 1 - ( $uusi_kate / 100 ));
+
+		$rivin_alennus = generoi_alekentta_php($tilausrivi, 'M', 'kerto');
+		//Jos rivill‰ on alennuksia, niin kahahinnan p‰‰lle pit‰‰ laskea rivin alennukset, jotta uuden katteen laskenta menee oikein.
+		$kehahin_plus_alennus = $tilausrivi['kehahin'] / $rivin_alennus;
+		$uusi_hinta = $kehahin_plus_alennus / ( 1 - ( $uusi_kate / 100 ));
 		$summa += $uusi_hinta;
 
 		$query = "	UPDATE tilausrivi
-						SET hinta = '{$uusi_hinta}'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$tilausrivi['tunnus']}'";
+					SET hinta = '{$uusi_hinta}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tilausrivi['tunnus']}'";
 		pupe_query($query);
 	}
 
 	$query = "	UPDATE lasku
-					SET hinta = '{$summa}'
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$otunnus}'";
+				SET hinta = '{$summa}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$otunnus}'";
 	pupe_query($query);
 }

@@ -1982,8 +1982,11 @@
 						// Lisätään löydetyt vastaavat mahdollisten myytävien joukkoon
 						foreach ($_tuotteet as $_tuote) {
 							if (strtoupper($_tuote['tuoteno']) != strtoupper($tuoteno)) {
-								if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $tuoteno") === FALSE) {
+								if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $tuoteno") === FALSE and empty($korlisakommi[$_tuote['tuoteno']])) {
 									$kommentti .= " ".t("HUOM: Korvaa tuotteen")." $tuoteno";
+								}
+								else {
+									$kommentti .= $korlisakommi[$_tuote['tuoteno']];
 								}
 
 								$tuoteno = $_tuote['tuoteno'];
@@ -2026,20 +2029,45 @@
 					and $toim != "SIIRTOTYOMAARAYS"
 				) {
 
+					// Katsotaan onko tälle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
+					$query = "	SELECT tilausrivin_lisatiedot.toimittajan_tunnus
+								FROM tilausrivi
+								JOIN tilausrivin_lisatiedot
+								ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+									AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+									AND tilausrivin_lisatiedot.toimittajan_tunnus != 0 )
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+								ORDER BY tilausrivi.tunnus ASC
+								LIMIT 1";
+					$toimittaja_result = pupe_query($query);
+					$toimittaja = mysql_fetch_assoc($toimittaja_result);
+					if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J')) and !empty($toimittaja['toimittajan_tunnus'])) {
+						$yksi_suoratoimittaja_join = " AND toimi.tunnus = {$toimittaja['toimittajan_tunnus']} ";
+					}
+					else {
+						$yksi_suoratoimittaja_join = "";
+					}
+
 					// Otetaan tuotteen oletustoimittaja
-					$query = "	SELECT toimi.tyyppi_tieto, tuotteen_toimittajat.liitostunnus, toimi.nimi, toimi.suoratoimitus, tuotteen_toimittajat.tehdas_saldo
+					$query = "	SELECT toimi.tyyppi_tieto,
+								tuotteen_toimittajat.liitostunnus,
+								toimi.nimi,
+								toimi.suoratoimitus,
+								tuotteen_toimittajat.tehdas_saldo
 								FROM tuotteen_toimittajat use index (yhtio_tuoteno)
-								JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+								JOIN toimi
+								ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+									AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+									{$yksi_suoratoimittaja_join})
 								WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-								and tuotteen_toimittajat.tuoteno = '$trow[tuoteno]'
+								AND tuotteen_toimittajat.tuoteno = '$trow[tuoteno]'
 								ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
 								LIMIT 1";
 					$toimpaikres = pupe_query($query);
 					$krow = mysql_fetch_assoc($toimpaikres);
 
-					#$where_yksi_suoratoimittaja TÄTÄ EI VIELÄ KOODATTU TÄNNE, TARTTIS KUITENKIN KOODATA!
-
-					if (!in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('Y', 'V')) or ($krow['tehdas_saldo'] >= $kpl)) {
+					if (!empty($krow) and !in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('Y', 'V')) or ($krow['tehdas_saldo'] >= $kpl)) {
 						// tarkistetaan voiko tuotteen tilata suoraan asiakkaalle tai varastoon. oletuksena voi...
 						$tmp_varastoon   = 1;
 						$tmp_asiakkaalle = 1;
@@ -2080,6 +2108,22 @@
 								$paikka		 		= "";
 							}
 						}
+					}
+					else {
+						if (in_array($yhtiorow['puute_jt_oletus'], array('','A'))) {
+							$var = "P";
+						}
+						else if (in_array($yhtiorow['puute_jt_oletus'], array('J','B'))) {
+							$var = "J";
+						}
+						else if (in_array($yhtiorow['puute_jt_oletus'], array('H'))) {
+							$var = "";
+						}
+						else {
+							$var = "";
+						}
+						$toimittajan_tunnus	= '';
+						$paikka		 		= '';
 					}
 				}
 			}

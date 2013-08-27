@@ -164,7 +164,7 @@ function generoi_email_body($ostotilaukset) {
 
 			$email_bodys[$ostaja] .= t("Tuoteno").', '.t("Kpl").', '.t("Toimitusaika").', '.t("Vahvistettu")."\n";
 			foreach ($ostotilaus['rivit'] as $ostotilaus_rivi) {
-				$email_bodys[$ostaja] .= $ostotilaus_rivi['tuoteno'].', '.$ostotilaus_rivi['tilkpl'].', '.$ostotilaus_rivi['toimitusaika'].', '.($ostotilaus_rivi['vahvistettu'] == 1 ? t("Vahvistettu") : t("Vahvistamatta"))."\n";
+				$email_bodys[$ostaja] .= $ostotilaus_rivi['tuoteno'].', '.$ostotilaus_rivi['tilkpl'].', '.date('d.m.Y', strtotime($ostotilaus_rivi['toimitusaika'])).', '.($ostotilaus_rivi['vahvistettu'] == 1 ? t("Vahvistettu") : t("Vahvistamatta"))."\n";
 			}
 			$email_bodys[$ostaja] .= "\n";
 		}

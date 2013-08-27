@@ -96,7 +96,7 @@ function hae_myohassa_olevat_ostotilaukset($paivamaararaja) {
 					AND tilausrivi.otunnus = lasku.tunnus
 					AND tilausrivi.tyyppi = 'O'
 					AND tilausrivi.toimaika <= DATE_SUB(CURRENT_DATE, INTERVAL {$paivamaararaja} DAY)
-					AND tilausrivi.keratty = '' )
+					AND tilausrivi.varattu > 0 )
 				JOIN tuote
 				ON ( tuote.yhtio = tilausrivi.yhtio
 					AND tuote.tuoteno = tilausrivi.tuoteno )

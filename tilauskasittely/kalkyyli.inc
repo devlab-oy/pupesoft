@@ -8,8 +8,6 @@ $lock_params = array(
 
 pupesoft_flock($lock_params);
 
-sleep(20);
-
 $query  = "	SELECT *
 			FROM lasku
 			WHERE tunnus = '$otunnus'
@@ -189,6 +187,3 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 else {
 	echo "<br><br><font class='error'>".t("Saapumisen tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
 }
-
-// vapautetaan lukko
-pupesoft_flock_unlock();

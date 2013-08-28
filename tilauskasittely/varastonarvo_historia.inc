@@ -27,6 +27,7 @@ else {
 list(,,,$kohok,,,,$lisok,,$sarjanrook,,,,,,$varok) = tsekit($laskurow, 0, 0);
 
 if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
+
 	if ($tee == "varma") {
 		require ("varastoon.inc");
 
@@ -143,6 +144,3 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 else {
 	echo "<br><br><font class='error'>".t("Saapumisen tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
 }
-
-// vapautetaan lukko
-pupesoft_flock_unlock();

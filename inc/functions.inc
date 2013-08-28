@@ -332,15 +332,6 @@ if (!function_exists("pupesoft_flock")) {
 	}
 }
 
-if (!function_exists("pupesoft_flock_unlock")) {
-	// otetaan parametriksi query
-	function pupesoft_flock_unlock() {
-		GLOBAL $flock;
-
-		flock($flock, LOCK_UN);
-	}
-}
-
 // Tehd‰‰n REST-kutsuja. Data aina JSON:ia.
 if (!function_exists("pupesoft_rest")) {
 

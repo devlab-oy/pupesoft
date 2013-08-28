@@ -280,6 +280,7 @@ if (!function_exists("query_dump")) {
 if (!function_exists("pupesoft_flock")) {
 	// otetaan parametriksi query
 	function pupesoft_flock(array $params = array()) {
+		GLOBAL $argv, $flock;
 
 		if (php_sapi_name() == 'cli') {
 			$scriptname = $argv[0];
@@ -291,7 +292,7 @@ if (!function_exists("pupesoft_flock")) {
 		$scriptname    = basename($scriptname);
 		$lockfile      = "/tmp/##{$scriptname}-flock.lock";
 		$error_message = "VIRHE: {$scriptname} flocklock-jumissa!";
-		$locktime      = isset($params["locktime"]) ? $params["lockfile"] : 300;
+		$locktime      = isset($params["locktime"]) ? $params["locktime"] : 300;
 		$filecontent   = isset($params["filecontent"]) ? $params["filecontent"] : '';
 
 		$flock = fopen($lockfile, "w+");
@@ -19992,22 +19993,6 @@ if (!function_exists('saako_vieda_varastoon')) {
 		$result = pupe_query($query);
 
 		$varastoerror = 0;
-
-		$flock = fopen("/tmp/$kukarow[yhtio]-keikka.lock", "w+");
-
-		if (! @flock($flock, LOCK_EX | LOCK_NB)) {
-			if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock") and mktime()-filemtime("/tmp/$kukarow[yhtio]-keikka.lock") >= 900) {
-				echo "VIRHE: Saapumisten varastoonvienti jumissa! Ota yhteys tekniseen tukeen!!!";
-
-				// Onko nagios monitor asennettu?
-				if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-					file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Saapumisten varastoonvienti jumissa!", FILE_APPEND);
-				}
-			}
-		}
-
-
-
 
 		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
 

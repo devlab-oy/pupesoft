@@ -85,7 +85,19 @@ if ($request['tee'] == 'vaihda_laite') {
 	//jotta raportit osaavat n‰ytt‰‰ mik‰ toimenpide vaihdettiin mihin.
 	paivita_uuden_toimenpide_rivin_tilausrivi_linkki($request['vaihto_toimenpide_tyomaarays_tilausrivi_tunnus'], $request['tilausrivi_tunnus']);
 
-	aseta_vanha_laite_poistettu_tilaan($request['vanha_laite_tunnus']);
+    if ($request['uusi_laite']['tila'] == 'N') {
+        //Jos uusi laite on normaali laite asetetaan vanha laite poistettu tilaan
+        aseta_laitteen_tila($request['vanha_laite_tunnus'], 'P');
+    }
+    else if ($request['uusi_laite']['tila'] == 'V'){
+        //Jos laite on varalaite asetetaan vanha laite huollossa tilaan
+        aseta_laitteen_tila($request['vanha_laite_tunnus'], 'H');
+    }
+    else {
+        //defaulttina asetetaan vanha laite poistettu tilaan
+        aseta_laitteen_tila($request['vanha_laite_tunnus'], 'P');
+    }
+	
 
 	echo '<font class="message">'.t("Laite vaihdettu").'</font>';
 	echo "<br/>";
@@ -354,13 +366,13 @@ function hae_paikat() {
 	return $paikat;
 }
 
-function aseta_vanha_laite_poistettu_tilaan($vanha_laite_tunnus) {
+function aseta_laitteen_tila($laite_tunnus, $tila) {
 	global $kukarow, $yhtiorow;
 
 	$query = "	UPDATE laite
-				SET tila = 'P'
+				SET tila = '{$tila}'
 				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$vanha_laite_tunnus}'";
+				AND tunnus = '{$laite_tunnus}'";
 	pupe_query($query);
 }
 

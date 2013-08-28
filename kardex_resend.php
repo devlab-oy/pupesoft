@@ -9,27 +9,25 @@
 
 	date_default_timezone_set('Europe/Helsinki');
 
-	// jos meillä on lock-file ja se on alle 15 minuuttia vanha
-	if (file_exists("/tmp/##kardex-resend.lock") and mktime()-filemtime("/tmp/##kardex-resend.lock") < 300) {
-		echo "Kardex-resend lähetys käynnissä, odota hetki!";
-	}
-	elseif (file_exists("/tmp/##kardex-resend.lock") and mktime()-filemtime("/tmp/##kardex-resend.lock") >= 300) {
-		echo "VIRHE: Kardex-resend lähetys jumissa! Ota yhteys tekniseen tukeen!!!";
+	$flock = fopen("/tmp/##kardex-resend.lock", "w+");
 
-		// Onko nagios monitor asennettu?
-		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-			file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Kardex-resend lähetys jumissa!", FILE_APPEND);
+	if (! @flock($flock, LOCK_EX | LOCK_NB)) {
+		if (file_exists("tmp/##kardex-resend.lock") and mktime()-filemtime("tmp/##kardex-resend.lock") >= 300) {
+			echo "VIRHE: Kardex-resend lähetys jumissa! Ota yhteys tekniseen tukeen!!!";
+
+			// Onko nagios monitor asennettu?
+			if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+				file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Kardex-resend lähetys jumissa!", FILE_APPEND);
+			}
 		}
+		exit;
 	}
 	else {
-
-		touch("/tmp/##kardex-resend.lock");
 
 		if ($php_cli) {
 
 			if (trim($argv[1]) == '') {
 				echo "Et antanut yhtiötä!\n";
-				unlink("/tmp/##kardex-resend.lock");
 				exit;
 			}
 
@@ -51,7 +49,6 @@
 
 		if (!is_dir($kardex_sscc)) {
 			echo "Kardex_sscc-kansio virheellinen!\n";
-			unlink("/tmp/##kardex-resend.lock");
 			exit;
 		}
 
@@ -100,6 +97,4 @@
 
 			closedir($handle);
 		}
-
-		unlink("/tmp/##kardex-resend.lock");
 	}

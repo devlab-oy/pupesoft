@@ -9,28 +9,25 @@
 
 	date_default_timezone_set('Europe/Helsinki');
 
-	// jos meillä on lock-file ja se on alle 5 minuuttia vanha
-	if (file_exists("/tmp/##unifaun-fetch.lock") and mktime()-filemtime("/tmp/##unifaun-fetch.lock") < 300) {
-		#echo "Unifaun-fetch sisäänluku käynnissä, odota hetki!";
-	}
-	elseif (file_exists("/tmp/##unifaun-fetch.lock") and mktime()-filemtime("/tmp/##unifaun-fetch.lock") >= 300) {
-		echo "VIRHE: Unifaun-fetch sisäänluku jumissa! Ota yhteys tekniseen tukeen!!!";
+	$flock = fopen("/tmp/##unifaun-fetch.lock", "w+");
 
-		// Onko nagios monitor asennettu?
-		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-			file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Unifaun-fetch sisäänluku jumissa!", FILE_APPEND);
+	if (! @flock($flock, LOCK_EX | LOCK_NB)) {
+		if (file_exists("/tmp/##unifaun-fetch.lock") and mktime()-filemtime("/tmp/##unifaun-fetch.lock") >= 300) {
+			echo "VIRHE: Unifaun-fetch sisäänluku jumissa! Ota yhteys tekniseen tukeen!!!";
+
+			// Onko nagios monitor asennettu?
+			if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+				file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Unifaun-fetch sisäänluku jumissa!", FILE_APPEND);
+			}
 		}
+		exit;
 	}
 	else {
-
-		touch("/tmp/##unifaun-fetch.lock");
-
 		// haetaan yhtiön tiedot vain jos tätä tiedostoa kutsutaan komentoriviltä suoraan
 		if ($php_cli and count(debug_backtrace()) <= 1) {
 
 			if (trim($argv[1]) == '') {
 				echo "Et antanut yhtiötä!\n";
-				unlink("/tmp/##unifaun-fetch.lock");
 				exit;
 			}
 
@@ -53,19 +50,16 @@
 
 		if (trim($operaattori) == '') {
 			echo "Operaattori puuttuu: unifaun_ps/unifaun_uo!\n";
-			unlink("/tmp/##unifaun-fetch.lock");
 			exit;
 		}
 
 		if (trim($ftpget_dest[$operaattori]) == '') {
 			echo "Unifaun return-kansio puuttuu!\n";
-			unlink("/tmp/##unifaun-fetch.lock");
 			exit;
 		}
 
 		if (!is_dir($ftpget_dest[$operaattori])) {
 			echo "Unifaun return-kansio virheellinen!\n";
-			unlink("/tmp/##unifaun-fetch.lock");
 			exit;
 		}
 
@@ -181,6 +175,4 @@
 				}
 			}
 		}
-
-		unlink("/tmp/##unifaun-fetch.lock");
 	}

@@ -1,27 +1,29 @@
 <?php
 
+	// Kutsutaanko CLI:st‰
+	$php_cli = FALSE;
+
+	if (php_sapi_name() == 'cli') {
+		$php_cli = TRUE;
+	}
+
 	date_default_timezone_set("Europe/Helsinki");
 
-	// jos meill‰ on lock-file ja se on alle 90 minuuttia vanha (90 minsaa ku backuppia odotellessa saattaa tunti vier‰ht‰‰ aika nopeasti)
-	if (file_exists("/tmp/##verkkolasku-in.lock") and mktime()-filemtime("/tmp/##verkkolasku-in.lock") < 5400) {
-		echo "Verkkolaskujen sis‰‰nluku k‰ynniss‰, odota hetki!";
-	}
-	elseif (file_exists("/tmp/##verkkolasku-in.lock") and mktime()-filemtime("/tmp/##verkkolasku-in.lock") >= 5400) {
-		echo "VIRHE: Verkkolaskujen sis‰‰nluku jumissa! Ota yhteys tekniseen tukeen!!!";
+	$flock = fopen("/tmp/##verkkolasku-in.lock", "w+");
 
-		// Onko nagios monitor asennettu?
-		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-			file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Verkkolaskujen sis‰‰nluku jumissa!", FILE_APPEND);
+	if (! @flock($flock, LOCK_EX | LOCK_NB)) {
+		if (file_exists("/tmp/##verkkolasku-in.lock") and mktime()-filemtime("/tmp/##verkkolasku-in.lock") >= 5400) {
+			echo "VIRHE: Verkkolaskujen sis‰‰nluku jumissa! Ota yhteys tekniseen tukeen!!!";
+
+			// Onko nagios monitor asennettu?
+			if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+				file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Verkkolaskujen sis‰‰nluku jumissa!", FILE_APPEND);
+			}
 		}
+		exit;
 	}
 	else {
-
-		// Kutsutaanko CLI:st‰
-		$php_cli = FALSE;
-
-		if (php_sapi_name() == 'cli') {
-			$php_cli = TRUE;
-
+		if ($php_cli) {
 			// otetaan includepath aina rootista
 			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 			error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
@@ -50,8 +52,6 @@
 		$origlaskut = $verkkolaskut_orig;
 		$errlaskut  = $verkkolaskut_error;
 
-		touch("/tmp/##verkkolasku-in.lock");
-
 		if ($php_cli) {
 			// Ei tehd‰ mit‰‰n. T‰ll‰set iffit on sit‰ parasta koodia.
 		}
@@ -64,13 +64,11 @@
 
 			if ($copy_boob === FALSE) {
 			    echo "Kopiointi ep‰onnistui $filenimi $laskut/$userfile<br>\n";
-				unlink("/tmp/##verkkolasku-in.lock");
 				exit;
 			}
 		}
 		else {
 			echo "N‰ill‰ ehdoilla emme voi ajaa verkkolaskujen sis‰‰nlukua!";
-			unlink("/tmp/##verkkolasku-in.lock");
 			exit;
 		}
 
@@ -130,8 +128,6 @@
 				}
 			}
 		}
-
-		unlink("/tmp/##verkkolasku-in.lock");
 
 		if ($php_cli) {
 			# laitetaan k‰yttˆoikeudet kuntoon

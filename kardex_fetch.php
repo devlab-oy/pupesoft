@@ -9,27 +9,25 @@
 
 	date_default_timezone_set('Europe/Helsinki');
 
-	// jos meillä on lock-file ja se on alle 5 minuuttia vanha
-	if (file_exists("/tmp/##kardex-fetch.lock") and mktime()-filemtime("/tmp/##kardex-fetch.lock") < 300) {
-		#echo "Kardex-fetch sisäänluku käynnissä, odota hetki!";
-	}
-	elseif (file_exists("/tmp/##kardex-fetch.lock") and mktime()-filemtime("/tmp/##kardex-fetch.lock") >= 300) {
-		echo "VIRHE: Kardex-fetch sisäänluku jumissa! Ota yhteys tekniseen tukeen!!!";
+	$flock = fopen("/tmp/##kardex-fetch.lock", "w+");
 
-		// Onko nagios monitor asennettu?
-		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-			file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Kardex-fetch sisäänluku jumissa!", FILE_APPEND);
+	if (! @flock($flock, LOCK_EX | LOCK_NB)) {
+		if (file_exists("/tmp/##kardex-fetch.lock") and mktime()-filemtime("/tmp/##kardex-fetch.lock") >= 300) {
+			echo "VIRHE: Kardex-fetch sisäänluku jumissa! Ota yhteys tekniseen tukeen!!!";
+
+			// Onko nagios monitor asennettu?
+			if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+				file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Kardex-fetch sisäänluku jumissa!", FILE_APPEND);
+			}
 		}
+		exit;
 	}
 	else {
-
-		touch("/tmp/##kardex-fetch.lock");
 
 		if ($php_cli) {
 
 			if (trim($argv[1]) == '') {
 				echo "Et antanut yhtiötä!\n";
-				unlink("/tmp/##kardex-fetch.lock");
 				exit;
 			}
 
@@ -52,19 +50,16 @@
 
 		if (trim($operaattori) == '') {
 			echo "Operaattori puuttuu: kardex!\n";
-			unlink("/tmp/##kardex-fetch.lock");
 			exit;
 		}
 
 		if (trim($ftpget_dest[$operaattori]) == '') {
 			echo "Kardex return-kansio puuttuu!\n";
-			unlink("/tmp/##kardex-fetch.lock");
 			exit;
 		}
 
 		if (!is_dir($ftpget_dest[$operaattori])) {
 			echo "Kardex return-kansio virheellinen!\n";
-			unlink("/tmp/##kardex-fetch.lock");
 			exit;
 		}
 
@@ -218,6 +213,4 @@
 		}
 
 		closedir($kardex_handle);
-
-		unlink("/tmp/##kardex-fetch.lock");
 	}

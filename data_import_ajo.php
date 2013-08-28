@@ -1,23 +1,39 @@
 <?php
 
-	/* DATA IMPORT CRON LOOP */
-	/* Ajetaan cronista ja t‰m‰ sis‰‰nlukee luedata-tiedostot datain hakemistosta */
-
 	// Kutsutaanko CLI:st‰
-	if (php_sapi_name() != 'cli') {
-		die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+	$php_cli = FALSE;
+
+	if (php_sapi_name() == 'cli') {
+		$php_cli = TRUE;
 	}
 
-	// Laitetaan unlimited max time
-	ini_set("max_execution_time", 0);
+	date_default_timezone_set('Europe/Helsinki');
 
-	$data_import_lock_file = "/tmp/data_import.lock";
+	$flock = fopen("/tmp/##data_import.lock", "w+");
 
-	// Jos meill‰ ei ole lukkofile‰, voidaan loopata
-	if (!file_exists($data_import_lock_file)) {
+	if (! @flock($flock, LOCK_EX | LOCK_NB)) {
+		if (file_exists("/tmp/##data_import.lock") and mktime()-filemtime("/tmp/##data_import.lock") >= 900) {
+			echo "VIRHE: Data-import jumissa! Ota yhteys tekniseen tukeen!!!";
 
-		// Tehd‰‰n lukkofile
-		touch($data_import_lock_file);
+			// Onko nagios monitor asennettu?
+			if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+				file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Data-import jumissa!", FILE_APPEND);
+			}
+		}
+		exit;
+	}
+	else {
+
+		/* DATA IMPORT CRON LOOP */
+		/* Ajetaan cronista ja t‰m‰ sis‰‰nlukee luedata-tiedostot datain hakemistosta */
+
+		// Kutsutaanko CLI:st‰
+		if (!$php_cli) {
+			die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+		}
+
+		// Laitetaan unlimited max time
+		ini_set("max_execution_time", 0);
 
 		$pupe_root_polku = dirname(__FILE__);
 		require ("{$pupe_root_polku}/inc/connect.inc");
@@ -75,8 +91,4 @@
 
 		// Aloitetaan sis‰‰nluku
 		data_import();
-
-		// Poistetaan lukkofile
-		unlink($data_import_lock_file);
-
 	}

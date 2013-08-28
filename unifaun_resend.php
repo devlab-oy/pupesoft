@@ -9,27 +9,24 @@
 
 	date_default_timezone_set('Europe/Helsinki');
 
-	// jos meillä on lock-file ja se on alle 15 minuuttia vanha
-	if (file_exists("/tmp/##unifaun-resend.lock") and mktime()-filemtime("/tmp/##unifaun-resend.lock") < 300) {
-		echo "Unifaun-resend lähetys käynnissä, odota hetki!";
-	}
-	elseif (file_exists("/tmp/##unifaun-resend.lock") and mktime()-filemtime("/tmp/##unifaun-resend.lock") >= 300) {
-		echo "VIRHE: Unifaun-resend lähetys jumissa! Ota yhteys tekniseen tukeen!!!";
+	$flock = fopen("/tmp/##unifaun-resend.lock", "w+");
 
-		// Onko nagios monitor asennettu?
-		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-			file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Unifaun-resend lähetys jumissa!", FILE_APPEND);
+	if (! @flock($flock, LOCK_EX | LOCK_NB)) {
+		if (file_exists("/tmp/##unifaun-resend.lock") and mktime()-filemtime("/tmp/##unifaun-resend.lock") >= 300) {
+			echo "VIRHE: Unifaun-resend lähetys jumissa! Ota yhteys tekniseen tukeen!!!";
+
+			// Onko nagios monitor asennettu?
+			if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+				file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Unifaun-resend lähetys jumissa!", FILE_APPEND);
+			}
 		}
+		exit;
 	}
 	else {
-
-		touch("/tmp/##unifaun-resend.lock");
-
 		if ($php_cli) {
 
 			if (trim($argv[1]) == '') {
 				echo "Et antanut yhtiötä!\n";
-				unlink("/tmp/##unifaun-resend.lock");
 				exit;
 			}
 
@@ -110,6 +107,4 @@
 
 			closedir($handle);
 		}
-
-		unlink("/tmp/##unifaun-resend.lock");
 	}

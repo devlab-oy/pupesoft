@@ -7,84 +7,83 @@
 		$php_cli = TRUE;
 	}
 
-	if ($php_cli) {
+	date_default_timezone_set('Europe/Helsinki');
 
-		date_default_timezone_set('Europe/Helsinki');
+	$flock = fopen("/tmp/##e3ehdotukset.lock", "w+");
 
-		if (!isset($argv[1]) or $argv[1] == '') {
-			echo "Anna yhtiˆ!!!\n";
-			die;
+	if (! @flock($flock, LOCK_EX | LOCK_NB)) {
+		if (file_exists("/tmp/##e3ehdotukset.lock") and mktime()-filemtime("/tmp/##e3ehdotukset.lock") >= 900) {
+			echo "VIRHE: E3-ostoehdotuksen sis‰‰nluku jumissa! Ota yhteys tekniseen tukeen!!!";
+
+			// Onko nagios monitor asennettu?
+			if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+				file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: E3-ostoehdotuksen sis‰‰nluku jumissa!", FILE_APPEND);
+			}
 		}
+		exit;
+	}
+	else {
 
-		// otetaan includepath aina rootista
-		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
-		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
-		ini_set("display_errors", 0);
+		if ($php_cli) {
 
-		// otetaan tietokanta connect
-		require("inc/connect.inc");
-		require("inc/functions.inc");
+			if (!isset($argv[1]) or $argv[1] == '') {
+				echo "Anna yhtiˆ!!!\n";
+				die;
+			}
 
-		// hmm.. j‰nn‰‰
-		$kukarow['yhtio'] = $argv[1];
+			// otetaan includepath aina rootista
+			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+			error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+			ini_set("display_errors", 0);
 
-		//Pupeasennuksen root
-		$pupe_root_polku = dirname(dirname(__FILE__));
+			// otetaan tietokanta connect
+			require("inc/connect.inc");
+			require("inc/functions.inc");
 
-		$yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
+			// hmm.. j‰nn‰‰
+			$kukarow['yhtio'] = $argv[1];
 
-		if ($yhtiorow["yhtio"] == "") {
-			die ("Yhtiˆ $kukarow[yhtio] ei lˆydy!");
-		}
+			//Pupeasennuksen root
+			$pupe_root_polku = dirname(dirname(__FILE__));
 
-		if (!isset($e3_params[$yhtiorow["yhtio"]]["ekansio"]) or !is_dir($e3_params[$yhtiorow["yhtio"]]["ekansio"])) {
-			echo "VIRHE: 'e3_ehdotuskansio' puuttuu!";
-			exit;
+			$yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
+
+			if ($yhtiorow["yhtio"] == "") {
+				die ("Yhtiˆ $kukarow[yhtio] ei lˆydy!");
+			}
+
+			if (!isset($e3_params[$yhtiorow["yhtio"]]["ekansio"]) or !is_dir($e3_params[$yhtiorow["yhtio"]]["ekansio"])) {
+				echo "VIRHE: 'e3_ehdotuskansio' puuttuu!";
+				exit;
+			}
+			else {
+				$e3_ehdotuskansio = $e3_params[$yhtiorow["yhtio"]]["ekansio"];
+			}
+
+			$filet = array();
+
+			// Avataan kansio
+			if ($handle = opendir($e3_ehdotuskansio)) {
+			    while (false !== ($file = readdir($handle))) {
+					// Napataan headerfilet arrayseen
+					if (substr($file, 0, 1) == "h") {
+						$filet[] = $file;
+					}
+			    }
+
+			    closedir($handle);
+			}
+
+			if (count($filet) > 0) {
+				$tee = "aja";
+			}
+
 		}
 		else {
-			$e3_ehdotuskansio = $e3_params[$yhtiorow["yhtio"]]["ekansio"];
+			require('../inc/parametrit.inc');
+
+			echo "<font class='head'>".t("E3-ostoehdotuksen sis‰‰nluku")."</font><hr>";
 		}
-
-		$filet = array();
-
-		// Avataan kansio
-		if ($handle = opendir($e3_ehdotuskansio)) {
-		    while (false !== ($file = readdir($handle))) {
-				// Napataan headerfilet arrayseen
-				if (substr($file, 0, 1) == "h") {
-					$filet[] = $file;
-				}
-		    }
-
-		    closedir($handle);
-		}
-
-		if (count($filet) > 0) {
-			$tee = "aja";
-		}
-
-	}
-	else {
-		require('../inc/parametrit.inc');
-
-		echo "<font class='head'>".t("E3-ostoehdotuksen sis‰‰nluku")."</font><hr>";
-	}
-
-	// jos meill‰ on lock-file ja se on alle 5 minuuttia vanha
-	if (file_exists("/tmp/##e3ehdotukset.lock") and mktime()-filemtime("/tmp/##e3ehdotukset.lock") < 900) {
-		#echo "E3-ostoehdotuksen sis‰‰nluku k‰ynniss‰, odota hetki!";
-	}
-	elseif (file_exists("/tmp/##e3ehdotukset.lock") and mktime()-filemtime("/tmp/##e3ehdotukset.lock") >= 900) {
-		echo "VIRHE: E3-ostoehdotuksen sis‰‰nluku jumissa! Ota yhteys tekniseen tukeen!!!";
-
-		// Onko nagios monitor asennettu?
-		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-			file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: E3-ostoehdotuksen sis‰‰nluku jumissa!", FILE_APPEND);
-		}
-	}
-	else {
-
-		touch("/tmp/##e3ehdotukset.lock");
 
 		function datansisalto_e3($e3_ehdotuskansio, $dfile, $otunnus, $toimituspaiva) {
 
@@ -291,8 +290,6 @@
 		 		}
 			}
 		}
-
-		unlink("/tmp/##e3ehdotukset.lock");
 	}
 
 	if (!$php_cli) {
@@ -307,5 +304,3 @@
 		echo "</table>";
 		echo "</form>";
 	}
-
-?>

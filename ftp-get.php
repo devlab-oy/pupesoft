@@ -9,21 +9,20 @@
 
 	date_default_timezone_set('Europe/Helsinki');
 
-	// jos meill‰ on lock-file ja se on alle 5 minuuttia vanha
-	if (file_exists("/tmp/##ftp-get-in.lock") and mktime()-filemtime("/tmp/##ftp-get-in.lock") < 300) {
-		#echo "FTP-get sis‰‰nluku ($argv[1]) k‰ynniss‰, odota hetki!";
-	}
-	elseif (file_exists("/tmp/##ftp-get-in.lock") and mktime()-filemtime("/tmp/##ftp-get-in.lock") >= 300) {
-		echo "VIRHE: FTP-get sis‰‰nluku ($argv[1]) jumissa! Ota yhteys tekniseen tukeen!!!";
+	$flock = fopen("/tmp/##ftp-get-in.lock", "w+");
 
-		// Onko nagios monitor asennettu?
-		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-			file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: FTP-get sis‰‰nluku ($argv[1]) jumissa!", FILE_APPEND);
+	if (! @flock($flock, LOCK_EX | LOCK_NB)) {
+		if (file_exists("/tmp/##ftp-get-in.lock") and mktime()-filemtime("/tmp/##ftp-get-in.lock") >= 300) {
+			echo "VIRHE: FTP-get sis‰‰nluku ($argv[1]) jumissa! Ota yhteys tekniseen tukeen!!!";
+
+			// Onko nagios monitor asennettu?
+			if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+				file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: FTP-get sis‰‰nluku ($argv[1]) jumissa!", FILE_APPEND);
+			}
 		}
+		exit;
 	}
 	else {
-
-		touch("/tmp/##ftp-get-in.lock");
 
 		if ($php_cli) {
 
@@ -45,7 +44,6 @@
 
 		if ($operaattori == "") {
 			mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q"), "FTP-get sis‰‰nluvussa ongelma, ei operaattoria valittuna. Tutki asia!", "From: ".mb_encode_mimeheader("Pupesoft", "ISO-8859-1", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
-			unlink("/tmp/##ftp-get-in.lock");
 			exit;
 		}
 
@@ -143,7 +141,4 @@
 		else {
 			mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q"), "FTP-get sis‰‰nluvussa saattaa olla ongelma. Jokin tarvittavista tiedoista on v‰‰rin (operaattori: $operaattori)", "From: ".mb_encode_mimeheader("Pupesoft", "ISO-8859-1", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
 		}
-
-		unlink("/tmp/##ftp-get-in.lock");
 	}
-?>

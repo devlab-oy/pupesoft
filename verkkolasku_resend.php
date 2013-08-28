@@ -9,21 +9,20 @@
 
 	date_default_timezone_set('Europe/Helsinki');
 
-	// jos meillä on lock-file ja se on alle 15 minuuttia vanha
-	if (file_exists("/tmp/##verkkolasku-resend.lock") and mktime()-filemtime("/tmp/##verkkolasku-resend.lock") < 300) {
-		echo "VIRHE: Verkkolaskujen uudelleenlähetys käynnissä, odota hetki!";
-	}
-	elseif (file_exists("/tmp/##verkkolasku-resend.lock") and mktime()-filemtime("/tmp/##verkkolasku-resend.lock") >= 300) {
-		echo "VIRHE: Verkkolaskujen uudelleenlähetys jumissa! Ota yhteys tekniseen tukeen!!!";
+	$flock = fopen("/tmp/##verkkolasku-resend.lock", "w+");
 
-		// Onko nagios monitor asennettu?
-		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-			file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Verkkolaskujen uudelleenlähetys jumissa!", FILE_APPEND);
+	if (! @flock($flock, LOCK_EX | LOCK_NB)) {
+		if (file_exists("/tmp/##verkkolasku-resend.lock") and mktime()-filemtime("/tmp/##verkkolasku-resend.lock") >= 300) {
+			echo "VIRHE: Verkkolaskujen uudelleenlähetys jumissa! Ota yhteys tekniseen tukeen!!!";
+
+			// Onko nagios monitor asennettu?
+			if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+				file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Verkkolaskujen uudelleenlähetys jumissa!", FILE_APPEND);
+			}
 		}
+		exit;
 	}
 	else {
-
-		touch("/tmp/##verkkolasku-resend.lock");
 
 		if ($php_cli) {
 			// otetaan includepath aina rootista
@@ -227,8 +226,4 @@
 
 			closedir($handle);
 		}
-
-		unlink("/tmp/##verkkolasku-resend.lock");
 	}
-
-?>

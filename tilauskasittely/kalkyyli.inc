@@ -1,7 +1,14 @@
 <?php
 
-// tehd‰‰n lock file, ettei voi kerralla ajaa kuin yks per firma
-file_put_contents("/tmp/$kukarow[yhtio]-keikka.lock", "$otunnus;{$kukarow['kuka']};".date("Y-m-d H:i:s"));
+$lock_params = array(
+    "locktime"    => 600,
+	"lockfile"    => "$kukarow[yhtio]-keikka.lock",
+	"filecontent" => "$otunnus;{$kukarow['kuka']};".date("Y-m-d H:i:s")
+);
+
+pupesoft_flock($lock_params);
+
+sleep(20);
 
 $query  = "	SELECT *
 			FROM lasku
@@ -183,5 +190,5 @@ else {
 	echo "<br><br><font class='error'>".t("Saapumisen tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
 }
 
-// poistetaan lock file
-unlink("/tmp/$kukarow[yhtio]-keikka.lock");
+// vapautetaan lukko
+pupesoft_flock_unlock();

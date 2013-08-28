@@ -1,9 +1,19 @@
 <?php
 
-// tehd‰‰n lock file, ettei voi kerralla ajaa kuin yks per firma
-file_put_contents("/tmp/$kukarow[yhtio]-keikka.lock", "$otunnus;{$kukarow['kuka']};".date("Y-m-d H:i:s"));
+$lock_params = array(
+    "locktime"    => 600,
+	"lockfile"    => "$kukarow[yhtio]-keikka.lock",
+	"filecontent" => "$otunnus;{$kukarow['kuka']};".date("Y-m-d H:i:s")
+);
 
-$query  = "SELECT * from lasku where tunnus='$otunnus' and yhtio='$kukarow[yhtio]' and tila='K' and alatila=''";
+pupesoft_flock($lock_params);
+
+$query  = "	SELECT *
+			FROM lasku
+			WHERE tunnus = '$otunnus'
+			AND yhtio    = '$kukarow[yhtio]'
+			AND tila     = 'K'
+			AND alatila  = ''";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
@@ -134,5 +144,5 @@ else {
 	echo "<br><br><font class='error'>".t("Saapumisen tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
 }
 
-// poistetaan lock file
-unlink("/tmp/$kukarow[yhtio]-keikka.lock");
+// vapautetaan lukko
+pupesoft_flock_unlock();

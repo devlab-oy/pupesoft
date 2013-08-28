@@ -1128,7 +1128,13 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 		$keikkakesken = 0;
 
-		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
+		$lock_params = array(
+		    "locktime" => 0,
+			"lockfile" => "$kukarow[yhtio]-keikka.lock",
+			"return"   => TRUE
+		);
+
+		if (!pupesoft_flock($lock_params)) {
 			list($keikkakesken, $_kuka, $_timestamp) = explode(";", file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock"));
 		}
 

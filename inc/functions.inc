@@ -290,12 +290,13 @@ if (!function_exists("pupesoft_flock")) {
 		}
 
 		$scriptname    = basename($scriptname);
-		$lockfile      = "/tmp/##{$scriptname}-flock.lock";
+		$lockfile      = isset($params["lockfile"]) ? "/tmp/".basename($params["lockfile"]) : "/tmp/##{$scriptname}-flock.lock";
 		$error_message = "VIRHE: {$scriptname} flocklock-jumissa!";
 		$locktime      = isset($params["locktime"]) ? $params["locktime"] : 300;
 		$filecontent   = isset($params["filecontent"]) ? $params["filecontent"] : '';
+		$flockreturn   = isset($params["return"]) ? $params["return"] : FALSE;
 
-		$flock = fopen($lockfile, "w+");
+		$flock = fopen($lockfile, "c");
 
 		if (! @flock($flock, LOCK_EX | LOCK_NB)) {
 
@@ -309,9 +310,34 @@ if (!function_exists("pupesoft_flock")) {
 				echo $error_message;
 			}
 
-			// Ei saatu lukkoa --> exit
-			exit;
+			// Ei saatu lukkoa --> false/exit
+			if ($flockreturn) {
+				return FALSE;
+			}
+			else {
+				exit;
+			}
 		}
+		else {
+
+			if ($filecontent != "") {
+				ftruncate($flock, 0);
+				fwrite($flock, $filecontent);
+			}
+
+			if ($flockreturn) {
+				return TRUE;
+			}
+		}
+	}
+}
+
+if (!function_exists("pupesoft_flock_unlock")) {
+	// otetaan parametriksi query
+	function pupesoft_flock_unlock() {
+		GLOBAL $flock;
+
+		flock($flock, LOCK_UN);
 	}
 }
 
@@ -19994,10 +20020,15 @@ if (!function_exists('saako_vieda_varastoon')) {
 
 		$varastoerror = 0;
 
-		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
+		$lock_params = array(
+		    "locktime" => 0,
+			"lockfile" => "$kukarow[yhtio]-keikka.lock",
+			"return"   => TRUE
+		);
+
+		if (!pupesoft_flock($lock_params)) {
 
 			if ($palautus != '') {
-
 				list($keikkakesken, $_kuka, $_timestamp) = explode(";", file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock"));
 
 				echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".t("Varastoonvienti on kesken!")." ".t("Käyttäjä")." {$_kuka} @ {$_timestamp}</font><br>";
@@ -20006,7 +20037,7 @@ if (!function_exists('saako_vieda_varastoon')) {
 			$varastoerror = 1;
 		}
 		elseif (mysql_num_rows($result) != 0){
-			while ($rivi = mysql_fetch_array($result)) {
+			while ($rivi = mysql_fetch_assoc($result)) {
 				if ($palautus != '') {
 					echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".sprintf(t("Käyttäjällä %s on kohdistus kesken!"), $rivi["nimi"])."</font><br>";
 				}
@@ -20030,7 +20061,6 @@ if (!function_exists('saako_vieda_varastoon')) {
 				$varastoerror = 1;
 			}
 		}
-
 
 		return $varastoerror;
 	}

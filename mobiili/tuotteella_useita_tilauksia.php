@@ -69,6 +69,7 @@ $query = "	SELECT
 				AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 			WHERE
 			$query_lisa
+			AND lasku.tila = 'O'
 			AND lasku.alatila = 'A'
 			AND lasku.yhtio='{$kukarow['yhtio']}'
 		";

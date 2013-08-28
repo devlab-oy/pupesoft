@@ -276,6 +276,44 @@ if (!function_exists("query_dump")) {
 	}
 }
 
+// flock lockfilekäsittely
+if (!function_exists("pupesoft_flock")) {
+	// otetaan parametriksi query
+	function pupesoft_flock(array $params = array()) {
+
+		if (php_sapi_name() == 'cli') {
+			$scriptname = $argv[0];
+		}
+		else {
+			$scriptname = $_SERVER["PHP_SELF"];
+		}
+
+		$scriptname    = basename($scriptname);
+		$lockfile      = "/tmp/##{$scriptname}-flock.lock";
+		$error_message = "VIRHE: {$scriptname} flocklock-jumissa!";
+		$locktime      = isset($params["locktime"]) ? $params["lockfile"] : 300;
+		$filecontent   = isset($params["filecontent"]) ? $params["filecontent"] : '';
+
+		$flock = fopen($lockfile, "w+");
+
+		if (! @flock($flock, LOCK_EX | LOCK_NB)) {
+
+			if ($locktime > 0 and mktime() - filemtime($lockfile) >= $locktime) {
+
+				// Onko nagios monitor asennettu?
+				if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+					file_put_contents("/home/nagios/nagios-pupesoft.log", $error_message, FILE_APPEND);
+				}
+
+				echo $error_message;
+			}
+
+			// Ei saatu lukkoa --> exit
+			exit;
+		}
+	}
+}
+
 // Tehdään REST-kutsuja. Data aina JSON:ia.
 if (!function_exists("pupesoft_rest")) {
 
@@ -19954,6 +19992,22 @@ if (!function_exists('saako_vieda_varastoon')) {
 		$result = pupe_query($query);
 
 		$varastoerror = 0;
+
+		$flock = fopen("/tmp/$kukarow[yhtio]-keikka.lock", "w+");
+
+		if (! @flock($flock, LOCK_EX | LOCK_NB)) {
+			if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock") and mktime()-filemtime("/tmp/$kukarow[yhtio]-keikka.lock") >= 900) {
+				echo "VIRHE: Saapumisten varastoonvienti jumissa! Ota yhteys tekniseen tukeen!!!";
+
+				// Onko nagios monitor asennettu?
+				if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+					file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Saapumisten varastoonvienti jumissa!", FILE_APPEND);
+				}
+			}
+		}
+
+
+
 
 		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
 

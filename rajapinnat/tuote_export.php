@@ -1,13 +1,31 @@
 <?php
 
 	// Kutsutaanko CLI:stä
-	if (php_sapi_name() != 'cli') {
+	$php_cli = FALSE;
+
+	if (php_sapi_name() == 'cli') {
+		$php_cli = TRUE;
+	}
+
+	date_default_timezone_set('Europe/Helsinki');
+
+	// Kutsutaanko CLI:stä
+	if (!$php_cli) {
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
 
 	$pupe_root_polku = dirname(dirname(__FILE__));
+	
 	require ("{$pupe_root_polku}/inc/connect.inc");
 	require ("{$pupe_root_polku}/inc/functions.inc");
+	
+	$lock_params = array(
+	    "locktime" => 5400,
+	);
+	
+	// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
+	pupesoft_flock($lock_params);
+	
 	require ("{$pupe_root_polku}/rajapinnat/magento_client.php");
 
 	// Laitetaan unlimited execution time
@@ -48,28 +66,10 @@
 		exit;
 	}
 
-	$locktime = 5400;
-	$lockfile = "/tmp/tuote_export_cron.lock";
-
-	// jos meillä on lock-file ja se on alle 90 minuuttia vanha
-	if (file_exists($lockfile)) {
-		$locktime_calc = mktime() - filemtime($lockfile);
-
-		if ($locktime_calc < $locktime) {
-			exit("Tuote Export-päivitys käynnissä, odota hetki!")."\n";
-		}
-		else {
-			exit("VIRHE: Tuote Export-päivitys jumissa! Ota yhteys tekniseen tukeen!!!")."\n";
-		}
-	}
-
-	touch($lockfile);
-
 	// Haetaan timestamp
 	$datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
 
 	if (mysql_num_rows($datetime_checkpoint_res) != 1) {
-		unlink($lockfile);
 		exit("VIRHE: Timestamp ei löydy avainsanoista!\n");
 	}
 
@@ -539,7 +539,6 @@
 		$magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 
 		if ($magento_client->getErrorCount() > 0) {
-			unlink($lockfile);
 			exit;
 		}
 
@@ -651,5 +650,3 @@
 	if (mysql_affected_rows() != 1) {
 		echo "Timestamp päivitys epäonnistui!\n";
 	}
-
-	unlink($lockfile);

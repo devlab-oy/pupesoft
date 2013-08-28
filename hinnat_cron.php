@@ -1,11 +1,16 @@
 <?php
 
-	// Nämä on nyt kovakoodattu tähän toistaiseksi
-	$locktime = 5400;
-	$lockfile = "/tmp/##hinnat_cron.lock";
+	// Kutsutaanko CLI:stä
+	$php_cli = FALSE;
+
+	if (php_sapi_name() == 'cli') {
+		$php_cli = TRUE;
+	}
+
+	date_default_timezone_set('Europe/Helsinki');
 
 	// Kutsutaanko CLI:stä
-	if (php_sapi_name() != 'cli') {
+	if (!$php_cli) {
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!\n");
 	}
 
@@ -25,22 +30,6 @@
 		die ("Et antanut vastaanottavan yhtiön asiakastunnusta!\n");
 	}
 
-	date_default_timezone_set("Europe/Helsinki");
-
-	// jos meillä on lock-file ja se on alle 90 minuuttia vanha (90 minsaa ku backuppia odotellessa saattaa tunti vierähtää aika nopeasti)
-	if (file_exists($lockfile)) {
-		$locktime_calc = mktime() - filemtime($lockfile);
-
-		if ($locktime_calc < $locktime) {
-			exit("Hintojen päivitys käynnissä, odota hetki!")."\n";
-		}
-		else {
-			exit("VIRHE: Hintojen päivitys jumissa! Ota yhteys tekniseen tukeen!!!")."\n";
-		}
-	}
-
-	touch($lockfile);
-
 	// lisätään includepathiin pupe-root
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 	error_reporting(E_ALL);
@@ -50,6 +39,13 @@
 	// otetaan tietokanta connect ja funktiot
 	require("inc/connect.inc");
 	require("inc/functions.inc");
+
+	$lock_params = array(
+	    "locktime" => 5400,
+	);
+	
+	// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
+	pupesoft_flock($lock_params);
 
 	$mista_yhtio = mysql_escape_string(trim($argv[1]));
 	$mihin_yhtio = mysql_escape_string(trim($argv[2]));
@@ -66,7 +62,6 @@
 	$kukares = pupe_query($query);
 
 	if (mysql_num_rows($kukares) != 1) {
-		unlink($lockfile);
 		exit("VIRHE: Admin käyttäjä ei löydy!\n");
 	}
 
@@ -76,7 +71,6 @@
 	$datetime_checkpoint_res = t_avainsana("HINNAT_CRON");
 
 	if (mysql_num_rows($datetime_checkpoint_res) != 1) {
-		unlink($lockfile);
 		exit("VIRHE: Timestamp ei löydy avainsanoista!\n");
 	}
 
@@ -91,7 +85,6 @@
 	$asiakasres = pupe_query($query);
 
 	if (mysql_num_rows($asiakasres) != 1) {
-		unlink($lockfile);
 		exit("VIRHE: Asiakas ei löydy!\n");
 	}
 
@@ -109,7 +102,6 @@
 	$mihin_tuoterow = mysql_fetch_assoc($mihin_tuoteres);
 
 	if ($mihin_tuoterow['tuotteet'] === NULL) {
-		unlink($lockfile);
 		exit("VIRHE: Toimittajan tuotteita ei löydy!\n");
 	}
 
@@ -334,5 +326,3 @@
 	if (mysql_affected_rows() != 1) {
 		echo "Timestamp päivitys epäonnistui!\n";
 	}
-
-	unlink($lockfile);

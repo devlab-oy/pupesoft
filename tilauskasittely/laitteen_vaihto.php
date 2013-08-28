@@ -73,15 +73,17 @@ if ($request['tee'] == 'vaihda_laite') {
 	//työmääräykselle pitää liittää uusi laite.
 	//HUOM uudesta laitteesta ei ehkä aina haluta luoda uutta työmääräys riviä,
 	//jos esim laitetta ei myydä asiakkaalle vaan se menee vain lainaan
-	$request['uusi_laite_tyomaarays_tilausrivi_tunnus'] = luo_uusi_tyomaarays_rivi($request['uusi_laite'], $request['lasku_tunnus']);
+	if ($request['uusi_laite']['tila'] == 'N') {
+		$request['uusi_laite_tyomaarays_tilausrivi_tunnus'] = luo_uusi_tyomaarays_rivi($request['uusi_laite'], $request['lasku_tunnus']);
+
+		//työmääräykselle lisätään myös uusi laite. tähän rivin pitää linkata vanha toimenpide tilausrivi
+		paivita_uuden_toimenpide_rivin_tilausrivi_linkki($request['uusi_laite_tyomaarays_tilausrivi_tunnus'], $request['tilausrivi_tunnus']);
+	}
 
 	//kun toimenpide vaihtuu työmääräyksellä niin vanha toimenpide laitetaan P tilaan (ylempänä)
 	//ja vanha toimenpide linkataan uuteen toimenpide riviin tilausrivin_lisatiedot.tilausrivilinkki kentän avulla,
 	//jotta raportit osaavat näyttää mikä toimenpide vaihdettiin mihin.
 	paivita_uuden_toimenpide_rivin_tilausrivi_linkki($request['vaihto_toimenpide_tyomaarays_tilausrivi_tunnus'], $request['tilausrivi_tunnus']);
-
-	//työmääräykselle lisätään myös uusi laite. tähän rivin pitää linkata vanha toimenpide tilausrivi
-	paivita_uuden_toimenpide_rivin_tilausrivi_linkki($request['uusi_laite_tyomaarays_tilausrivi_tunnus'], $request['tilausrivi_tunnus']);
 
 	aseta_vanha_laite_poistettu_tilaan($request['vanha_laite_tunnus']);
 

@@ -94,10 +94,10 @@
 						if (strlen(trim($tilino)) > 0) {
 							echo "<font class='message'> ".t("Maksukandidaatti tilino & m‰‰r‰")."</font><br>\n";
 
-							$iban = luoiban($tilino);
+							$tmpiban = luoiban($tilino);
 
-							if ($iban['iban'] != "" and $iban['swift'] != "") {
-								$tilihaku = " ultilno = '{$iban['iban']}' ";
+							if ($tmpiban['iban'] != "" and $tmpiban['swift'] != "") {
+								$tilihaku = " ultilno = '{$tmpiban['iban']}' ";
 							}
 							else {
 								$tilihaku = " tilinumero = '{$tilino}' ";
@@ -114,6 +114,7 @@
 										ORDER BY popvm
 										LIMIT 1";
 							$result = pupe_query($query);
+
 							if (mysql_num_rows($result) == 0) {
 								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
 											FROM lasku
@@ -122,6 +123,36 @@
 											and yhtio 	= '$yritirow[yhtio]'
 											and tila 	= 'Q'
 											and alatila = ''
+											$kohdm_valkoodilisa
+											ORDER BY popvm
+											LIMIT 1";
+								$result = pupe_query($query);
+							}
+						}
+
+						if (strlen(trim($iban)) > 0) {
+							echo "<font class='message'> ".t("Maksukandidaatti IBAN & m‰‰r‰")."</font><br>\n";
+
+							$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+										FROM lasku
+										WHERE ultilno = '$iban'
+										and ((summa   = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
+										and yhtio 	  = '$yritirow[yhtio]'
+										and tila 	  = 'Q'
+										and alatila   = 'K'
+										$kohdm_valkoodilisa
+										ORDER BY popvm
+										LIMIT 1";
+							$result = pupe_query($query);
+
+							if (mysql_num_rows($result) == 0) {
+								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
+											FROM lasku
+											WHERE ultilno = '$iban'
+											and ((summa   = $kohdm * -1) or (abs(summa + $kohdm) < 0.01))
+											and yhtio 	  = '$yritirow[yhtio]'
+											and tila 	  = 'Q'
+											and alatila   = ''
 											$kohdm_valkoodilisa
 											ORDER BY popvm
 											LIMIT 1";
@@ -145,7 +176,7 @@
 
 							// tarkka 35 merkki‰ <-> 35 merkki‰ nimihaku ilman k‰teisalennusta
 							if (mysql_num_rows($result) != 1) {
-								"	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma')
+								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
 											FROM lasku
 											WHERE left(nimi, 35) = left('$maksaa', 35)
 											and ((summa = $kohdm * -1) or (abs(summa + $kohdm) < 0.01))
@@ -245,7 +276,7 @@
 											and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
 											and yhtio 	= '$yritirow[yhtio]'
 											and tila 	= 'Q'
-												and alatila = 'K'
+											and alatila = 'K'
 											$kohdm_valkoodilisa";
 								$result = pupe_query($query);
 
@@ -563,7 +594,7 @@
 			if ($silent == "") {
 				echo "<tr><td colspan='3'>";
 			}
-			
+
 			if (mysql_num_rows($result) != 1) {
 				// Kokeillaan 14 vikalla merkill‰ (Virossa esim on 18 merkkisi‰ tilinumeroita)
 				$query = "	SELECT *
@@ -766,6 +797,7 @@
 			$erialla 	 = "";
 			$maksaa 	 = trim(substr($tietue, 108, 35));
 			$tilino 	 = substr($tietue, 144, 14);
+			$iban		 = "";
 			$omataso 	 = substr($tietue, 187, 1);
 			$koodiselite = trim(substr($tietue, 52, 35));
 
@@ -1107,7 +1139,14 @@
 					$selite = "";
 
 					if (trim(substr($arvo, 0,   35)) != "") $selite .= t("Maksajan viite").": ".		trim(substr($arvo, 0,   35))."<br>\n";
-					if (trim(substr($arvo, 35,  35)) != "") $selite .= t("IBAN tilinumero").": ".		trim(substr($arvo, 35,  35))."<br>\n";
+
+					if (trim(substr($arvo, 35,  35)) != "") {
+						$selite .= t("IBAN tilinumero").": ".		trim(substr($arvo, 35,  35))."<br>\n";
+
+						// Otetaan IBAN talteen
+						$iban = trim(substr($arvo, 35,  35));
+					}
+
 					if (trim(substr($arvo, 70,  35)) != "") $selite .= t("BIC-koodi").": ".				trim(substr($arvo, 70,  35))."<br>\n";
 					if (trim(substr($arvo, 105, 70)) != "") $selite .= t("Saajan nimitarkenne").": ".	trim(substr($arvo, 105, 70))."<br>\n";
 					if (trim(substr($arvo, 175, 70)) != "") $selite .= t("Maksajan nimitarkenne").": ".	trim(substr($arvo, 175, 70))."<br>\n";

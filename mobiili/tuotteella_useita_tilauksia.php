@@ -11,8 +11,15 @@ elseif (@include_once("inc/parametrit.inc"));
 
 if(!isset($errors)) $errors = array();
 
+$sort_by_direction_tuoteno 		= (!isset($sort_by_direction_tuoteno) or $sort_by_direction_tuoteno == 'asc') ? 'desc' : 'asc';
+$sort_by_direction_otunnus 		= (!isset($sort_by_direction_otunnus) or $sort_by_direction_otunnus == 'asc') ? 'desc' : 'asc';
+$sort_by_direction_sorttaus_kpl	= (!isset($sort_by_direction_sorttaus_kpl) or $sort_by_direction_sorttaus_kpl == 'asc') ? 'desc' : 'asc';
+$sort_by_direction_hylly		= (!isset($sort_by_direction_hylly) or $sort_by_direction_hylly == 'asc') ? 'desc' : 'asc';
+
 # Joku parametri tarvii olla setattu.
 if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
+
+	if (strpos($tuotenumero, "%") !== FALSE) $tuotenumero = urldecode($tuotenumero);
 
 	if ($tuotenumero != '') $params['tuoteno'] = "tilausrivi.tuoteno = '{$tuotenumero}'";
 	if ($ostotilaus != '') 	$params['otunnus'] = "tilausrivi.otunnus = '{$ostotilaus}'";
@@ -20,7 +27,14 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 	// Viivakoodi case
 	if ($viivakoodi != '') {
 		$tuotenumerot = hae_viivakoodilla($viivakoodi);
+
+		if (count($tuotenumerot) > 0) {
 		$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+	}
+		else {
+			$errors[] = t("Viivakoodilla %s ei löytynyt tuotetta", '', $viivakoodi)."<br />";
+			$viivakoodi = "";
+		}
 	}
 
 	$query_lisa = implode($params, " AND ");
@@ -46,6 +60,24 @@ if ($keskeneraiset['kesken'] != 0) {
 	$saapuminen = $keskeneraiset['kesken'];
 }
 
+$orderby = "tuoteno";
+$ascdesc = "desc";
+
+if (isset($sort_by)) {
+
+	switch($sort_by) {
+		case 'tuoteno':
+		case 'otunnus':
+		case 'sorttaus_kpl':
+		case 'hylly':
+			$orderby = $sort_by;
+			$ascdesc = ${"sort_by_direction_{$sort_by}"};
+			break;
+		default:
+			break;
+	}
+}
+
 # Haetaan ostotilaukset
 $query = "	SELECT
 			lasku.tunnus as ostotilaus,
@@ -55,6 +87,7 @@ $query = "	SELECT
 			tilausrivi.tuoteno,
 			tilausrivi.varattu,
 			tilausrivi.kpl,
+			(tilausrivi.varattu + tilausrivi.kpl) as sorttaus_kpl,
 			tilausrivi.tilkpl,
 			tilausrivi.uusiotunnus,
 			concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
@@ -69,8 +102,10 @@ $query = "	SELECT
 				AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 			WHERE
 			$query_lisa
+			AND lasku.tila = 'O'
 			AND lasku.alatila = 'A'
 			AND lasku.yhtio='{$kukarow['yhtio']}'
+			ORDER BY {$orderby} {$ascdesc}
 		";
 $result = pupe_query($query);
 $tilausten_lukumaara = mysql_num_rows($result);
@@ -93,6 +128,9 @@ if (isset($submit)) {
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>"; exit();
 
 			break;
+		case 'cancel':
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}'>";
+			exit;
 		default:
 			echo "Virhe";
 			break;
@@ -101,7 +139,7 @@ if (isset($submit)) {
 
 # Ei osumia, palataan ostotilaus sivulle
 if ($tilausten_lukumaara == 0) {
-	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?virhe'>";
+	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&virhe'>";
 	exit();
 }
 
@@ -109,57 +147,95 @@ if ($tilausten_lukumaara == 0) {
 if ($tilausten_lukumaara == 1) {
 
 	$url_array['tilausrivi'] = $tilaukset['tunnus'];
-	$url_array['ostotilaus'] = (empty($ostotilaus)) ? $tilaukset['otunnus'] : $ostotilaus;
+	$url_array['ostotilaus'] = empty($ostotilaus) ? $tilaukset['otunnus'] : $ostotilaus;
 	$url_array['saapuminen'] = $saapuminen;
+	$url_array['manuaalisesti_syotetty_ostotilausnro'] = empty($manuaalisesti_syotetty_ostotilausnro) ? 0 : 1;
+	$url_array['tilausten_lukumaara'] = $tilausten_lukumaara;
 
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>";
 	exit();
 }
 
+if (isset($virhe)) {
+	$errors[] = t("Tuotetta ei löytynyt").".<br>";
+}
+
 # Result alkuun
 mysql_data_seek($result, 0);
 
+$url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "?ostotilaus={$ostotilaus}" : "";
+
 ### UI ###
 echo "<div class='header'>
-	<button onclick='window.location.href=\"ostotilaus.php\"' class='button left'><img src='back2.png'></button>
+	<button onclick='window.location.href=\"ostotilaus.php{$url_lisa}\"' class='button left'><img src='back2.png'></button>
 	<h1>",t("USEITA TILAUKSIA"), "</h1></div>";
 
 echo "<div class='main'>
+
+<form name='viivakoodiformi' method='post' action='?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}' id='viivakoodiformi'>
+	<table class='search'>
+		<tr>
+			<th>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' /></th>
+			<td><button id='valitse_nappi' value='viivakoodi' class='button' onclick='submit();'>",t("Etsi"),"</button></td>
+		</tr>
+	</table>
+	</form>
+
+
 <form name='form1' method='post' action=''>
 <table>
 <tr>";
 
+$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&saapuminen={$saapuminen}&tuotenumero=".urlencode($tuotenumero);
+
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
-	echo "<th>",t("Ostotilaus"),"</th>";
+	echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_otunnus}'>",t("Ostotilaus"), "</a>&nbsp;";
+	echo $sort_by_direction_otunnus == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
+	echo "</th>";
 }
 if ($tuotenumero == '' and $viivakoodi == '' and $ostotilaus != '') {
-	echo "<th>",t("Tuoteno"), "</th>";
+	echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuoteno"), "</a>&nbsp;";
+	echo $sort_by_direction_tuoteno == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
+	echo "</th>";
 }
 
-echo "
-	<th>",t("Kpl (ulk.)"),"</th>
-	<th>",t("Tuotepaikka"),"</th>
-</tr>";
+echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=sorttaus_kpl&sort_by_direction_sorttaus_kpl={$sort_by_direction_sorttaus_kpl}'>",t("Kpl (ulk.)"),"</a>";
+echo $sort_by_direction_sorttaus_kpl == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
+echo "</th>";
+
+echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=hylly&sort_by_direction_hylly={$sort_by_direction_hylly}'>",t("Tuotepaikka"),"</a>";
+echo $sort_by_direction_hylly == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
+echo "</th>";
+echo "</tr>";
 
 # Loopataan ostotilaukset
 while($row = mysql_fetch_assoc($result)) {
 
 	# Jos rivi on jo kohdistettu eri saapumiselle
 	if ($row['uusiotunnus'] != 0) $saapuminen = $row['uusiotunnus'];
-	$url = http_build_query(array('saapuminen' => $saapuminen, 'ostotilaus' => $row['ostotilaus'], 'tilausrivi' => $row['tunnus']));
+	$url = http_build_query(
+		array(
+			'saapuminen' => $saapuminen,
+			'ostotilaus' => $row['ostotilaus'],
+			'tilausrivi' => $row['tunnus'],
+			'manuaalisesti_syotetty_ostotilausnro'  => $manuaalisesti_syotetty_ostotilausnro,
+			'tilausten_lukumaara' => $tilausten_lukumaara,
+			'viivakoodi' => $viivakoodi,
+			'tuotenumero' => $tuotenumero,)
+		);
 
 	echo "<tr>";
 
 	if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
-		echo "<td><a href='hyllytys.php?$url'>{$row['otunnus']}</a></td>";
+		echo "<td><a href='hyllytys.php?{$url}'>{$row['otunnus']}</a></td>";
 	}
 	if ($tuotenumero == '' and $viivakoodi == '' and $ostotilaus != '') {
-		echo "<td><a href='hyllytys.php?$url'>{$row['tuoteno']}</a></td>";
+		echo "<td><a href='hyllytys.php?{$url}'>{$row['tuoteno']}</a></td>";
 	}
 	echo "
-		<td>".($row['varattu']+$row['kpl']).
+		<td><a href='hyllytys.php?{$url}'>".($row['varattu']+$row['kpl']).
 			"(".($row['varattu']+$row['kpl'])*$row['tuotekerroin'].")
-		</td>
+		</a></td>
 		<td>{$row['hylly']}</td>";
 	echo "<tr>";
 }
@@ -178,3 +254,21 @@ echo "<div class='error'>";
 		echo $virhe;
 	}
 echo "</div>";
+
+echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
+echo "<script type='text/javascript'>
+
+	function doFocus() {
+        var focusElementId = 'viivakoodi'
+        var textBox = document.getElementById(focusElementId);
+        textBox.focus();
+    }
+
+	function clickButton() {
+	   document.getElementById('myHiddenButton').click();
+	}
+
+   setTimeout('clickButton()', 1000);
+
+</script>
+";

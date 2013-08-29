@@ -332,11 +332,5 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "asn_sanomat") {
-			$asn_tyyppi = trim($t[$i]);
-			if ($tmp_edi_kuvaus == "editilaus_out_teccom.inc" and $asn_tyyppi == "") {
-				$virhe[$i] = t("Toimittajalle on laitettu TecCom-editilaus. Mit‰ sanomia toimittaja l‰hett‰‰")." ?";
-			}
-		}
 	}
 }

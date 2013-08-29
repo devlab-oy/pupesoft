@@ -2627,7 +2627,6 @@
 
 					$query = "	SELECT kerayserat.laatija
 								FROM kerayserat
-								JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
 								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 								AND kerayserat.otunnus IN ({$tilausnumeroita})
 								LIMIT 1";

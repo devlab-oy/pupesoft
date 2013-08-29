@@ -316,46 +316,48 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = $tapahtuma[rivitunnus]";
 			$tres = pupe_query($query);
-			$trow = mysql_fetch_assoc($tres);
+			
+			if (mysql_num_rows($tres) > 0) {
+				$trow = mysql_fetch_assoc($tres);
 
-			$query  = "	SELECT round(sum(tilausrivi.rivihinta-tilausrivi.kate), 2) varmuutos
-						FROM tilausrivi
-						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.uusiotunnus = '$trow[uusiotunnus]'
-						and tilausrivi.tyyppi = 'L'";
-			$sres = pupe_query($query);
-			$srow = mysql_fetch_assoc($sres);
+				$query  = "	SELECT round(sum(tilausrivi.rivihinta-tilausrivi.kate), 2) varmuutos
+							FROM tilausrivi
+							JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tilausrivi.uusiotunnus = '$trow[uusiotunnus]'
+							and tilausrivi.tyyppi = 'L'";
+				$sres = pupe_query($query);
+				$srow = mysql_fetch_assoc($sres);
 
-			$query  = "	SELECT sum(summa) varmuutos
-						FROM tiliointi
-						WHERE yhtio = '$kukarow[yhtio]'
-						and ltunnus = $trow[uusiotunnus]
-						and korjattu = ''
-						and tilino = '$yhtiorow[varastonmuutos]'";
-			$mres = pupe_query($query);
-			$mrow = mysql_fetch_assoc($mres);
+				$query  = "	SELECT sum(summa) varmuutos
+							FROM tiliointi
+							WHERE yhtio = '$kukarow[yhtio]'
+							and ltunnus = $trow[uusiotunnus]
+							and korjattu = ''
+							and tilino = '$yhtiorow[varastonmuutos]'";
+				$mres = pupe_query($query);
+				$mrow = mysql_fetch_assoc($mres);
 
-			// Laskulla luulatavimmin +- samaa tuotetta jolloin varmuutos ja kate yhteensä nolla
-			if ($srow["varmuutos"] == 0 and $mrow["varmuutos"] == 0) {
-				$trow["varmuutos"] 	= 0;
-				$kpvarmuu 			= 0;
-				$tavarmuu 			= 0;
+				// Laskulla luulatavimmin +- samaa tuotetta jolloin varmuutos ja kate yhteensä nolla
+				if ($srow["varmuutos"] == 0 and $mrow["varmuutos"] == 0) {
+					$trow["varmuutos"] 	= 0;
+					$kpvarmuu 			= 0;
+					$tavarmuu 			= 0;
+				}
+				else {
+					$kpvarmuu =  round(($trow["varmuutos"] / $srow["varmuutos"]) * $mrow["varmuutos"], 2);
+					$tavarmuu = sprintf("%.2f", round($tapahtuma["kpl"]*$tapahtuma["hinta"]*-1, 2));
+				}
+
+				// Kirjanpito - Tilausrivi
+				$ero1 = sprintf("%.2f", round($kpvarmuu-$trow["varmuutos"], 2));
+
+				// Tapahtuma - Kirjanpito
+				$ero2 = sprintf("%.2f", round($kpvarmuu-$tavarmuu, 2));
+
+				// Tapahtuma - Tilausrivi
+				$ero3 = sprintf("%.2f", round($tavarmuu-$trow["varmuutos"], 2));
 			}
-			else {
-				$kpvarmuu =  round(($trow["varmuutos"] / $srow["varmuutos"]) * $mrow["varmuutos"], 2);
-				$tavarmuu = sprintf("%.2f", round($tapahtuma["kpl"]*$tapahtuma["hinta"]*-1, 2));
-			}
-
-			// Kirjanpito - Tilausrivi
-			$ero1 = sprintf("%.2f", round($kpvarmuu-$trow["varmuutos"], 2));
-
-			// Tapahtuma - Kirjanpito
-			$ero2 = sprintf("%.2f", round($kpvarmuu-$tavarmuu, 2));
-
-			// Tapahtuma - Tilausrivi
-			$ero3 = sprintf("%.2f", round($tavarmuu-$trow["varmuutos"], 2));
-
 			if (abs($ero1) > 0.01 or abs($ero2) > 0.01 or abs($ero3) > 0.01) {
 				echo "<tr>";
 				echo "<td>$tapahtuma[tuoteno]</td>";

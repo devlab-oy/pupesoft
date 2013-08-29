@@ -29,8 +29,8 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 		$tuotenumerot = hae_viivakoodilla($viivakoodi);
 
 		if (count($tuotenumerot) > 0) {
-			$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
-		}
+		$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+	}
 		else {
 			$errors[] = t("Viivakoodilla %s ei löytynyt tuotetta", '', $viivakoodi)."<br />";
 			$viivakoodi = "";
@@ -101,7 +101,8 @@ $query = "	SELECT
 				AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
 				AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 			WHERE
-			{$query_lisa}
+			$query_lisa
+			AND lasku.tila = 'O'
 			AND lasku.alatila = 'A'
 			AND lasku.yhtio='{$kukarow['yhtio']}'
 			ORDER BY {$orderby} {$ascdesc}

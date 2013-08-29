@@ -71,7 +71,7 @@ if (isset($submit) and trim($submit) != '') {
 				$hyllytaso = $loppu[0][1];
 
 				// Kaikkia tuotepaikkoja ei pystytä parsimaan
-				if (empty($hyllyalue) or empty($hyllynro) or empty($hyllyvali) or empty($hyllytaso)) {
+				if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
 					$errors[] = t("Tuotepaikan haussa virhe, yritä syöttää tuotepaikka käsin") . " ($tuotepaikka)";
 				}
 			}

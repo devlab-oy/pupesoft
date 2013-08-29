@@ -559,6 +559,19 @@
 			echo "<td class='back'>".t('(Toimii vain jos listaat tilauksittain)')."</td>";
 			echo "</tr>";
 
+
+			echo "<tr>";
+			echo "<th>";
+			echo t('N‰yt‰ kumulatiivinen myynti p‰iv‰st‰');
+			echo "</th>";
+
+
+			echo "<td colspan='3'><input type='checkbox' name='kumulatiivinen_valittu' $kumulatiivinen_chk />&nbsp;";
+			echo "<input type='text' name='kumulatiivinen_pp' value='{$kumulatiivinen_pp}' size='3' />";
+			echo "<input type='text' name='kumulatiivinen_kk' value='{$kumulatiivinen_kk}' size='3' />";
+			echo "<input type='text' name='kumulatiivinen_vv' value='{$kumulatiivinen_vv}' size='5' /></td>";
+			echo "</tr>";
+
 			echo "</table><br>";
 
 			// p‰iv‰m‰‰r‰rajaus
@@ -575,22 +588,6 @@
 				<td><input type='text' name='vvl' value='{$vvl}' size='5'></td>
 				</tr>\n";
 			echo "</table><br>";
-
-			echo "<table>";
-
-			echo "<tr>";
-			echo "<th>";
-			echo "<input type='checkbox' name='kumulatiivinen_valittu' $kumulatiivinen_chk />&nbsp;";
-			echo t('Kumulatiivinen myynti alkup‰iv‰m‰‰r‰');
-			echo "</th>";
-			echo "<td><input type='text' name='kumulatiivinen_pp' value='{$kumulatiivinen_pp}' size='3' /></td>";
-			echo "<td><input type='text' name='kumulatiivinen_kk' value='{$kumulatiivinen_kk}' size='3' /></td>";
-			echo "<td><input type='text' name='kumulatiivinen_vv' value='{$kumulatiivinen_vv}' size='5' /></td>";
-			echo "</tr>";
-
-			echo "</table>";
-
-			echo "<br/>";
 
 			echo nayta_kyselyt("myyntiseuranta");
 
@@ -720,8 +717,9 @@
 			$toimittaja	= trim($toimittaja);
 
 			if (!empty($kumulatiivinen_valittu)) {
-				$kumulatiivinen_alkupaiva = "$kumulatiivinen_vv-$kumulatiivinen_kk-$kumulatiivinen_pp";
+				$kumulatiivinen_alkupaiva  = "$kumulatiivinen_vv-$kumulatiivinen_kk-$kumulatiivinen_pp";
 				$kumulatiivinen_loppupaiva = date('Y-m-d');
+
 				$valid = FormValidator::validateContent($kumulatiivinen_alkupaiva, 'paiva');
 
 				if (strtotime($kumulatiivinen_loppupaiva) < strtotime($kumulatiivinen_alkupaiva)) {
@@ -1658,7 +1656,7 @@
 
 							$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));
 						}
-						
+
 						if (!empty($kumulatiivinen_valittu)) {
 							$startmonth	= date("Ymd",mktime(0, 0, 0, $kumulatiivinen_kk, 1,  $kumulatiivinen_vv));
 							$endmonth 	= date("Ymd",mktime(0, 0, 0, date('m'), 1,  date('Y')));
@@ -2017,10 +2015,10 @@
 							$vva = $kumulatiivinen_vv;
 							$kka = $kumulatiivinen_kk;
 							$ppa = $kumulatiivinen_pp;
-							
+
 							$lalku = $kumulatiivinen_alkupaiva;
 						}
-						
+
 						$vvl = date('Y');
 						$kkl = date('m');
 						$ppl = date('d');

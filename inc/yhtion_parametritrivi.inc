@@ -3553,8 +3553,8 @@
 
 		$sel = $trow[$i] == 'S' ? 'selected' : '';
 
-		$ulos .= "<option value = ''>".t("Päivitetään uusi oletuspaikka myös avoimille keskeneräisille ostotilauksille")."</option>";
-		$ulos .= "<option value = 'S' {$sel}>".t("Päivitetään uusi oletuspaikka myös avoimille ja saapumisella oleville keskeneräisille ostotilauksille.")."</option>";
+		$ulos .= "<option value = ''>".t("Päivitetään uusi oletuspaikka avoimille ostoriveille")."</option>";
+		$ulos .= "<option value = 'S' {$sel}>".t("Päivitetään uusi oletuspaikka avoimille ja saapumisiin liitetyille ostoriveille.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

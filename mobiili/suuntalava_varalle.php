@@ -14,6 +14,11 @@ $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
 $tilausrivi = 0;
 
+if (!isset($hyllyalue)) $hyllyalue = "";
+if (!isset($hyllynro)) $hyllynro = "";
+if (!isset($hyllyvali)) $hyllyvali = "";
+if (!isset($hyllytaso)) $hyllytaso = "";
+
 $error = array(
 	'varalle' => ''
 );
@@ -24,13 +29,55 @@ if (isset($submit) and trim($submit) != '') {
 		# Koodi ei saa olla tyhjä!
 		if ($koodi != '') {
 
+			// Parsitaan uusi tuotepaikka
+			// Jos tuotepaikka on luettu viivakoodina, muotoa (C21 045) tai (21C 03V)
+			if (preg_match('/^([a-zåäö#0-9]{2,4} [a-zåäö#0-9]{2,4})/i', $tuotepaikka) and substr_count($tuotepaikka, " ") == 1) {
+
+				// Pilkotaan viivakoodilla luettu tuotepaikka välilyönnistä
+				list($alku, $loppu) = explode(' ', $tuotepaikka);
+
+				// Mätsätään numerot ja kirjaimet erilleen
+				preg_match_all('/([0-9]+)|([a-z]+)/i', $alku, $alku);
+				preg_match_all('/([0-9]+)|([a-z]+)/i', $loppu, $loppu);
+
+				// Hyllyn tiedot oikeisiin muuttujiin
+				$hyllyalue = $alku[0][0];
+				$hyllynro  = $alku[0][1];
+				$hyllyvali = $loppu[0][0];
+				$hyllytaso = $loppu[0][1];
+
+				// Kaikkia tuotepaikkoja ei pystytä parsimaan
+				if (empty($hyllyalue) or empty($hyllynro) or empty($hyllyvali) or empty($hyllytaso)) {
+					$error['varalle'] .= t("Tuotepaikan haussa virhe, yritä syöttää tuotepaikka käsin") . " ($tuotepaikka)<br>";
+				}
+			}
+			// Tuotepaikka syötetty manuaalisesti (C-21-04-5) tai (C 21 04 5)
+			elseif (strstr($tuotepaikka, '-') or strstr($tuotepaikka, ' ')) {
+				// Parsitaan tuotepaikka omiin muuttujiin (erotelto välilyönnillä)
+				if (preg_match('/\w+\s\w+\s\w+\s\w+/i', $tuotepaikka)) {
+					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode(' ', $tuotepaikka);
+				}
+				// (erotelto väliviivalla)
+				elseif (preg_match('/\w+-\w+-\w+-\w+/i', $tuotepaikka)) {
+					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode('-', $tuotepaikka);
+				}
+
+				// Ei saa olla tyhjiä kenttiä
+				if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
+					$error['varalle'] .= t("Virheellinen tuotepaikka") . ". ($tuotepaikka)<br>";
+				}
+			}
+			else {
+				$error['varalle'] .= t("Virheellinen tuotepaikka, yritä syöttää tuotepaikka käsin") . " ($tuotepaikka)<br>";
+			}
+
 			# Tarkistetaan hyllypaikka ja varmistuskoodi
 			# hyllypaikan on oltava reservipaikka ja siellä ei saa olla tuotteita
 			$options = array('varmistuskoodi' => $koodi, 'reservipaikka' => 'K');
 			$kaikki_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $options);
 
 			# Jos hyllypaikka ok, laitetaan koko suuntalava varastoon
-			if ($kaikki_ok) {
+			if ($kaikki_ok and $error['varalle'] == '') {
 
 				# Poistetaan käyttäjän kesken, että osataan viedä varastoon
 				$query = "UPDATE kuka SET kesken = 0 where yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
@@ -59,26 +106,34 @@ if (isset($submit) and trim($submit) != '') {
 							continue;
 						} else {
 							vie_varastoon($saapuminen, $alusta_tunnus, $hylly);
+
+							if (isset($komento) and $komento['Tavaraetiketti'] != "") {
+
+								$suuntalavat = array($alusta_tunnus);
+								$otunnus = $saapuminen;
+
+								require('tilauskasittely/tulosta_tavaraetiketti.inc');
+							}
 						}
 					}
 					# Jos kaikki meni ok
 					if (isset($varastovirhe)) {
-						$error['varalle'] .= t("Virhe varastoonviennissä");
+						$error['varalle'] .= t("Virhe varastoonviennissä")."<br>";
 					} else {
 						echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
 						exit;
 					}
 				}
 				else {
-					$error['varalle'] = t("Yhtään tuotetta ei löytynyt suuntalavalta");
+					$error['varalle'] .= t("Yhtään tuotetta ei löytynyt suuntalavalta")."<br>";
 				}
 			}
 			else {
-				$error['varalle']  = t("Virheellinen varmistukoodi tai hyllypaikka ei ole reservipaikka");
+				$error['varalle'] .= t("Virheellinen varmistukoodi tai hyllypaikka ei ole reservipaikka")."<br>";
 			}
 		}
 		else {
-			$error['varalle'] = t("Varmistukoodi ei voi olla tyhjä");
+			$error['varalle'] .= t("Varmistukoodi ei voi olla tyhjä")."<br>";
 		}
 	}
 }
@@ -105,22 +160,32 @@ echo "<div class='main'>
 			<td colspan='3'>{$sscc['sscc']}</td>
 		</tr>
 		<tr>
-			<th>",t("Alue", $browkieli),"</th>
-			<td><input type='text' name='hyllyalue' value='{$hyllyalue}' /></td>
-		</tr>
-		<tr>
-			<th>",t("Nro", $browkieli),"</th>
-			<td><input type='text' name='hyllynro' value='{$hyllynro}' /></td>
-		<tr>
-			<th>",t("Väli", $browkieli),"</th>
-			<td><input type='text' name='hyllyvali' value='{$hyllyvali}' /></td>
-		<tr>
-			<th>",t("Taso", $browkieli),"</th>
-			<td><input type='text' name='hyllytaso' value='{$hyllytaso}' /></td>
+			<th>",t("Keräyspaikka", $browkieli),"</th>
+			<td><input type='text' name='tuotepaikka' value='{$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}' /></td>
 		</tr>
 		<tr>
 			<th>",t("Koodi", $browkieli),"</th>
 			<td colspan='2'><input type='text' name='koodi' value='{$koodi}' size='7' />
+		</tr>
+		<tr>
+			<th>",t("Tulosta tavaraetiketit"),"</th>
+			<td colspan='2'><select name='komento[Tavaraetiketti]'>";
+
+			$query = "	SELECT *
+						FROM kirjoittimet
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND komento NOT IN ('edi','email')
+						ORDER BY kirjoitin";
+			$kires = pupe_query($query);
+
+			echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
+
+			while ($kirow = mysql_fetch_assoc($kires)) {
+				$sel = $kirow['tunnus'] == $kukarow['kirjoitin'] ? " selected" : "";
+				echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
+			}
+
+			echo "</select></td>
 		</tr>
 	</table>
 	</div>

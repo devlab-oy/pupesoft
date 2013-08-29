@@ -310,13 +310,16 @@
 		$eroyht = 0;
 
 		while ($tapahtuma = mysql_fetch_assoc($result)) {
+			$ero1 = 0;
+			$ero2 = 0;
+			$ero3 = 0;
 
 			$query  = "	SELECT uusiotunnus, rivihinta, round(rivihinta-kate, 2) varmuutos
 						FROM tilausrivi
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = $tapahtuma[rivitunnus]";
 			$tres = pupe_query($query);
-			
+
 			if (mysql_num_rows($tres) > 0) {
 				$trow = mysql_fetch_assoc($tres);
 
@@ -358,6 +361,7 @@
 				// Tapahtuma - Tilausrivi
 				$ero3 = sprintf("%.2f", round($tavarmuu-$trow["varmuutos"], 2));
 			}
+
 			if (abs($ero1) > 0.01 or abs($ero2) > 0.01 or abs($ero3) > 0.01) {
 				echo "<tr>";
 				echo "<td>$tapahtuma[tuoteno]</td>";

@@ -3450,7 +3450,7 @@
 		// Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
 		if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
 
-		$label = !isset($label) ? "" : $label;
+		$label = !isset($label) ? $otsikon_laskurow['label'] : $label;
 
 		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
 

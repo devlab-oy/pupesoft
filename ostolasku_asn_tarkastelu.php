@@ -1796,7 +1796,7 @@
 				echo "<td><font class='error'>",t("Virhe"),"</font></td>";
 
 				echo "<td class='back'>";
-				if ($row['uusiotunnus'] == 0) echo "<input type='button' class='etsibutton' id={$row['asn_tunnus']}##{$row['tuoteno']}##{$row['tilausrivinpositio']}' value='",t("Etsi"),"' />";
+				if ($row['uusiotunnus'] == 0) echo "<input type='button' class='etsibutton' id='{$row['asn_tunnus']}##{$row['tuoteno']}##{$row['tilausrivinpositio']}' value='",t("Etsi"),"' />";
 				echo "</td>";
 
 				echo "</tr>";

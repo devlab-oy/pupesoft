@@ -7434,7 +7434,7 @@ if ($tee == '') {
 					}
 
 					if ($toim != "PROJEKTI") {
-						if ($toim == 'TARJOUS') {
+						if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
 							echo "	<th colspan='5'>".t("Pyöristä katetta").":</th>
 									<td class='spec'>
 									<form name='pyorista' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
@@ -7476,7 +7476,7 @@ if ($tee == '') {
 						}
 
 						
-						if ($toim == 'TARJOUS') {
+						if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
 							echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",100*$kate_eieri/($kotiarvo_eieri-$ostot_eieri))."' Style='text-align:right' $state></td>";
 
 							if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {

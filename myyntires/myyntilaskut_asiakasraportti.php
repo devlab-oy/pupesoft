@@ -600,7 +600,7 @@
 						<option value='maksetut' $chk2>".t("Maksetut laskut")."</option>
 						<option value='kaikki' $chk3>".t("Kaikki laskut")."</option>
 						</select>
-						</td>";
+						</td></tr>";
 
 				$query = "	SELECT
 							distinct upper(if(valkoodi='', '$yhtiorow[valkoodi]' , valkoodi)) valuutat
@@ -612,9 +612,9 @@
 							$mapvmlisa";
 				$aasres = pupe_query($query);
 
-				if (mysql_num_rows($aasres) > 0) {
+				if (mysql_num_rows($aasres) > 1) {
 
-					echo "<th>".t("Valuutta").":</th><td><select name='savalkoodi' onchange='submit();'>";
+					echo "<tr><th>".t("Valuutta").":</th><td><select name='savalkoodi' onchange='submit();'>";
 					echo "<option value = ''>".t("Kaikki")."</option>";
 
 					while ($aasrow = mysql_fetch_array($aasres)) {
@@ -627,40 +627,25 @@
 				}
 
 				echo "</tr>";
-				echo "</table>";
-
-				echo "<br/>";
-				echo "<br/>";
-
-				echo "<table>";
 
 				echo "<tr>";
 				echo "<th>".t('Alkup‰iv‰m‰‰r‰')."</th>";
 				echo "<td>";
 				echo "<input type='text' id='ppa' name='ppa' value='{$ppa}' size='3'/>";
-				echo " ";
 				echo "<input type='text' id='kka' name='kka' value='{$kka}' size='3' />";
-				echo " ";
 				echo "<input type='text' id='vva' name='vva' value='{$vva}' size='6' />";
-				echo " ";
 				echo "</td>";
 				echo "<tr>";
-
 				echo "<tr>";
 				echo "<th>".t('Loppup‰iv‰m‰‰r‰')."</th>";
 				echo "<td>";
 				echo "<input type='text' id='ppl' name='ppl' value='{$ppl}' size='3' />";
-				echo " ";
 				echo "<input type='text' id='kkl' name='kkl' value='{$kkl}' size='3' />";
-				echo " ";
 				echo "<input type='text' id='vvl' name='vvl' value='{$vvl}' size='6' />";
-				echo " ";
-				echo "</td>";
-				echo "<tr>";
-
+				echo "</td>";			
+				echo "<td class='back'><input type='submit' value='".t('Hae')."' /></td>";				
+				echo "</tr>";
 				echo "</table>";
-
-				echo "<input type='submit' value='".t('Hae')."' />";
 				echo "</form><br>";
 
 				if (mysql_num_rows($result) > 0) {

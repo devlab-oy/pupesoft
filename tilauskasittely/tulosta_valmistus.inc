@@ -465,6 +465,12 @@ if (!function_exists('rivi_valm')) {
 			elseif ($uusisivu == "KOHTA") {
 				$uusisivu 		= "JOO";
 			}
+			else {
+				$pdf->draw_line($x, $y, $thispage, $rectparam);
+			}
+		}
+		elseif ($tuoteperhe_omallesivulle == "KYLLA") {
+			$pdf->draw_line($x, $y, $thispage, $rectparam);
 		}
 
 		//Haetan sarjanumeron tiedot
@@ -536,13 +542,6 @@ if (!function_exists('rivi_valm')) {
 		$rivinkorkeus	= 15;
 
 		rivi_valmistus($thispage, $tyyppi);
-
-		// viivat rivien väliin...
-		$x[0] = 20;
-		$x[1] = 580;
-		$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
-
-		$pdf->draw_line($x, $y, $thispage, $rectparam);
 	}
 }
 
@@ -720,6 +719,13 @@ if (!function_exists('loppu_valm')) {
 				$oikpos = $pdf->strlen($paino." kg", $boldi);
 				$pdf->draw_text(575-$oikpos, 25, $paino." kg",				$thispage, $boldi);
 			}
+
+			// viivat rivien väliin...
+			$x[0] = 20;
+			$x[1] = 580;
+			$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
+
+			$pdf->draw_line($x, $y, $thispage, $rectparam);
 
 			for ($pp=1; $pp<=$sivu; $pp++) {
 				$pdf->draw_text(330, 803, "$pp / $sivu", $page[$pp], $norm);

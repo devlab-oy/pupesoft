@@ -87,8 +87,8 @@
 					WHERE tuoteno = '$tuoteno'
 					and yhtio 	= '$kukarow[yhtio]'
 					and oletus != ''";
-		$result = pupe_query($query);
-		$oletusrow = mysql_fetch_array($result);
+		$oletus_result = pupe_query($query);
+		$oletusrow = mysql_fetch_array($oletus_result);
 
 		// Saldot per varastopaikka
 		$query = "	SELECT tuotepaikat.*,
@@ -182,13 +182,13 @@
 								selite 		= '$poisto_texti',
 								laatija 	= '$kukarow[kuka]',
 								laadittu 	= now()";
-					$result = pupe_query($query);
+					pupe_query($query);
 
 					$query = "	DELETE FROM tuotepaikat
 								WHERE tuoteno 	= '$tuoteno'
 								and yhtio 		= '$kukarow[yhtio]'
 								and tunnus 		= '$poistetaan'";
-					$result = pupe_query($query);
+					pupe_query($query);
 
 					unset($saldot[$poistetaan]);
 				}
@@ -205,7 +205,7 @@
 								WHERE tuoteno 	= '$tuoteno'
 								and yhtio 		= '$kukarow[yhtio]'
 								and tunnus 		= '$poistetaan'";
-					$result = pupe_query($query);
+					pupe_query($query);
 				}
 			}
 		}
@@ -217,7 +217,7 @@
 							WHERE tuoteno 	= '$tuoteno'
 							and yhtio 		= '$kukarow[yhtio]'
 							and tunnus 		= '$poistetaan'";
-				$result = pupe_query($query);
+				pupe_query($query);
 			}
 		}
 
@@ -228,11 +228,11 @@
 						WHERE tuoteno = '$tuoteno' 
 						and yhtio = '$kukarow[yhtio]' 
 						and tunnus = '$oletus'";
-			$result = pupe_query($query);
+			$oletus_result = pupe_query($query);
 
-			if (mysql_num_rows($result) == 1) {
+			if (mysql_num_rows($oletus_result) == 1) {
 
-				$uusi_oletusrow = mysql_fetch_assoc($result);
+				$uusi_oletusrow = mysql_fetch_assoc($oletus_result);
 				
 				// Tehd‰‰n p‰ivitykset
 				echo "<font class='message'>".t("Siirret‰‰n oletuspaikka")."</font><br><br>";
@@ -261,7 +261,7 @@
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-				$result = pupe_query($query);
+				pupe_query($query);
 			}
 		}
 
@@ -272,7 +272,7 @@
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-				$result = pupe_query($query);
+				pupe_query($query);
 			}
 		}
 
@@ -283,7 +283,7 @@
 							muuttaja	= '{$kukarow['kuka']}',
 							muutospvm	= now()
 							WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
-				$result = pupe_query($query);
+				pupe_query($query);
 			}
 		}
 

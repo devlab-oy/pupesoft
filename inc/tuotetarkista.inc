@@ -94,6 +94,17 @@ if(!function_exists("tuotetarkista")) {
 
 			//mysql_field_name pitää ottaa talteen koska muuvarastopaikka.php muuttaa resulttia.
 			$field_name = mysql_field_name($result, $i);
+
+			if (trim($t[$i]) != '') {
+				$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '".$field_name."' and SELITE = '$t[$i]'";
+				$tpres = pupe_query($tpque);
+
+				if (mysql_num_rows($tpres) == 0) {
+					$virhe[$i] .= t("Avainsanaa ei löydy")."!";
+					return;
+				}
+			}
+
 			$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$field_name'";
 			$tpres = pupe_query($tpque);
 
@@ -134,15 +145,6 @@ if(!function_exists("tuotetarkista")) {
 						$tilausmaara2 = array();
 						$kutsuja = "tuotetarkista.inc";
 						require("muuvarastopaikka.php");
-					}
-				}
-
-				if (trim($t[$i]) != '') {
-					$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '".$field_name."' and SELITE = '$t[$i]'";
-					$tpres = pupe_query($tpque);
-
-					if (mysql_num_rows($tpres) == 0) {
-						$virhe[$i] .= t("Avainsanaa ei löydy")."!";
 					}
 				}
 			}

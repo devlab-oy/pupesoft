@@ -1032,6 +1032,9 @@
 			elseif ($from == "yllapito" and $toim == "tuotteen_toimittajat_tuotenumerot" and trim($array[$i]) == "tuoteno") {
 				$lisa .= " and toim_tuoteno_tunnus {$hakuehto} ";
 			}
+			elseif ($from == "yllapito" and $toim == "yhtion_toimipaikat_avainsanat" and trim($array[$i]) == "laji") {
+				$lisa .= " and yhtion_toimipaikan_tunnus {$hakuehto} ";
+			}
 			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'kohde' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
 
 				list($a, $b) = explode("/", $haku[$i]);

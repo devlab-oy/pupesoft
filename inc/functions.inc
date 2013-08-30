@@ -399,7 +399,7 @@ if (!function_exists("pupesoft_rest")) {
 		}
 
 		$response_json = curl_exec($handle);
-		$response = json_decode($response_json, true);
+		$response = $parameters["posttype"] == "xml" ? $response_json : json_decode($response_json, true);
 
 		$code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
 

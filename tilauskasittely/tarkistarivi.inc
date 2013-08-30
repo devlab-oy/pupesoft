@@ -1113,7 +1113,7 @@
 												FROM tuotteen_toimittajat AS tt
 												JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
 												WHERE tt.yhtio = '{$kukarow['yhtio']}'
-												AND tt.tuoteno = '{$vrow['tuoteno']}'
+												AND tt.tuoteno = '{$_tuote['tuoteno']}'
 												ORDER BY sorttauskentta
 												LIMIT 1";
 									$tehdas_saldo_res = pupe_query($query);
@@ -1138,11 +1138,11 @@
 
 								 			$yta_chk_row = mysql_fetch_assoc($yta_chk_res);
 
-								 			$vastaavat_table .= "<div class='availability' id='{$vrow['tunnus']}_availability' /><span id='{$vrow['tunnus']}_loading'></span></div>&nbsp;";
-									 		$vastaavat_table .= "<input type='hidden' id='{$vrow['tunnus']}_custid' value='{$yta_chk_row['tarkenne']}' />";
-										 	$vastaavat_table .= "<input type='hidden' id='{$vrow['tunnus']}_username' value='{$yta_chk_row['tarkenne_2']}' />";
-											$vastaavat_table .= "<input type='hidden' id='{$vrow['tunnus']}_password' value='{$yta_chk_row['tarkenne_3']}' />";
-											$vastaavat_table .= "<input type='hidden' id='{$vrow['tunnus']}_tt_tunnus' value='{$tehdas_saldo_row['tt_tunnus']}' />";
+								 			$vastaavat_table .= "<div class='availability' id='{$_tuote['vastaavat_tunnus']}_availability' /><span id='{$_tuote['vastaavat_tunnus']}_loading'></span></div>&nbsp;";
+									 		$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_custid' value='{$yta_chk_row['tarkenne']}' />";
+										 	$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_username' value='{$yta_chk_row['tarkenne_2']}' />";
+											$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_password' value='{$yta_chk_row['tarkenne_3']}' />";
+											$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tehdas_saldo_row['tt_tunnus']}' />";
 								 		}
 								 		else {
 								 			$tehdas_saldo_row['sahkoinen_tilausliitanta'] = '';
@@ -1150,7 +1150,7 @@
 								 	}
 
 								 	$vastaavat_table .= "<font class='{$tehtaan_saldon_font}'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</font></td>";
-									$vastaavat_table .= "<td id='{$vrow['tunnus']}_tehdas_saldo_paivitetty' align='right'>".tv1dateconv($tehdas_saldo_row['tehdas_saldo_paivitetty'], "PITKA")."</td>";
+									$vastaavat_table .= "<td id='{$_tuote['vastaavat_tunnus']}_tehdas_saldo_paivitetty' align='right'>".tv1dateconv($tehdas_saldo_row['tehdas_saldo_paivitetty'], "PITKA")."</td>";
 								}
 
 								if ($sahkoinen_tilausliitanta) {
@@ -1170,8 +1170,11 @@
 
 											$hae = 'nappi';
 											$rivitunnus = $row['tunnus'];
+											$_vastaavat_tunnus = $_tuote['vastaavat_tunnus'];
+											$_vastaavat_tuoteno = $_tuote['tuoteno'];
 
 											require("inc/sahkoinen_tilausliitanta.inc");
+
 										}
 									}
 
@@ -1184,7 +1187,7 @@
 							 			   	<input type='hidden' name='lopetus' 		value = '$lopetus'>
 							 			   	<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
 							 			   	<input type='hidden' name='projektilla' 	value = '$projektilla'>
-							 			   	<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+							 			   	<input type='hidden' id='tilausnumero' name='tilausnumero' 	value = '$tilausnumero'>
 							 			   	<input type='hidden' name='mista' 			value = '$mista'>
 							 			   	<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
 							 			   	<input type='hidden' name='vastaavatuoteno' value = '$_tuote[tuoteno]'>

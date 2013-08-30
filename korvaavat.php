@@ -43,6 +43,13 @@
 		$row    = mysql_fetch_array($result);
 		$id		= $row['id'];
 
+		if ($prio != 0) {
+			# Siirret‰‰n ketjun muita eteenp‰in, jarjestys + 1
+			$query = "UPDATE $taulu SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
+						WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND tunnus!=$tunnus AND jarjestys >= $prio";
+			$result = pupe_query($query);
+		}
+
 		//muutetaan prio..
 		$query  = "		UPDATE $taulu SET
 						jarjestys = '$prio',
@@ -50,6 +57,34 @@
 						muuttaja = '$kukarow[kuka]'
 						WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
+
+		// Haetaan koko ketju
+		$query = "SELECT * FROM korvaavat WHERE yhtio='{$kukarow['yhtio']}' AND id='$id' AND jarjestys!=0 ORDER BY jarjestys";
+		$result = pupe_query($query);
+
+		while($tuote = mysql_fetch_assoc($result)) {
+		    // Aloitetaan pienimm‰st‰ ei nollasta (useimmiten 1)
+		    // Pienimp‰‰n ei kosketa ja muut j‰rk‰t‰‰n siit‰ eteenp‰in
+		    if (!isset($edellinen)) {
+		        $edellinen = $tuote['jarjestys'];
+		        continue;
+		    }
+
+		    // P‰ivitet‰‰n j‰rjestykseksi edellinen+1
+		    $uusi_jarjestys = ($edellinen + 1);
+
+		    // Ei p‰ivitet‰ turhaan
+		    if ($tuote['jarjestys'] <> $uusi_jarjestys) {
+		        $query = "UPDATE korvaavat
+		                    SET jarjestys = $uusi_jarjestys, muutospvm = now()
+		                    WHERE yhtio='{$kukarow['yhtio']}' AND tunnus={$tuote['tunnus']}";
+		        if( ! pupe_query($query) ) {
+		            exit("Virhe ketjujen uudelleenj‰rjestelyss‰");
+		        }
+		    }
+
+		    $edellinen = $uusi_jarjestys;
+		}
 
 		//n‰ytet‰‰n silti loput.. kiltti‰.
 		$query  = "SELECT * FROM $taulu WHERE id = '$id' AND yhtio = '$kukarow[yhtio]'";
@@ -116,9 +151,15 @@
 
 			//is‰ on lˆytynyt, lapsi ei
 			if (($fid != "") and ($cid == "")) {
-				//lis‰t‰‰n korvaava...
-				$query  = " INSERT INTO $taulu (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
-							VALUES ('$fid', '$korvaava', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
+				# Siirret‰‰n ketjun muita eteenp‰in jarjestys + 1
+				$query = "UPDATE korvaavat SET jarjestys=jarjestys+1
+							WHERE jarjestys!=0 AND id='$fid' AND yhtio='{$kukarow['yhtio']}'";
+				$result = pupe_query($query);
+
+				# Lis‰t‰‰n uusi aina p‰‰tuotteeksi jarjestys=1
+				//lis‰t‰‰n korvaava p‰‰tuotteeksi
+				$query  = " INSERT INTO $taulu (id, tuoteno, yhtio, jarjestys, laatija, luontiaika, muutospvm, muuttaja)
+							VALUES ('$fid', '$korvaava', '$kukarow[yhtio]', '1', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
 				$result = pupe_query($query);
 			}
 
@@ -140,6 +181,22 @@
 				}
 			}
 		}
+	}
+
+	if ($tee == 'korvaa_vastaava') {
+
+		$query  = "SELECT * FROM $taulu WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
+		$result = pupe_query($query);
+		$row    = mysql_fetch_array($result);
+		$id		= $row['id'];
+
+		$query = "UPDATE vastaavat SET tuoteno='$korvaava' WHERE yhtio='{$kukarow['yhtio']}' and tuoteno='$korvattava'";
+		$result = pupe_query($query);
+
+		$query  = "SELECT * FROM $taulu WHERE id = '$id' AND yhtio = '$kukarow[yhtio]'";
+		$result = pupe_query($query);
+		$row    = mysql_fetch_array($result);
+		$tuoteno = $row['tuoteno'];
 	}
 
 	if ($tuoteno != '') {
@@ -170,7 +227,7 @@
 			$row    = mysql_fetch_array($result);
 			$id		= $row['id'];
 
-			$query = "SELECT * FROM $taulu WHERE id = '$id' AND yhtio = '$kukarow[yhtio]' ORDER BY if(jarjestys=0, 999, jarjestys), tuoteno";
+			$query = "SELECT * FROM $taulu WHERE id = '$id' AND yhtio = '$kukarow[yhtio]' ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno";
 			$result = pupe_query($query);
 
 			echo "<br><table>";
@@ -185,13 +242,28 @@
 			echo "<th>".t("J‰rjestys")."</th>";
 			echo "<td class='back'></td></tr>";
 
+			// Korvausketjussa pit‰‰ olla ensiksi j‰rjestysnumerot (ei j‰rjestys 0),
+			// ennen kuin voidaan sallia vastaavien korvaaminen vastaavat ketjussa.
+			$_query = "SELECT * FROM $taulu WHERE id = '$id' AND yhtio='{$kukarow['yhtio']}' AND jarjestys=0";
+			$_result = pupe_query($_query);
+			if (mysql_num_rows($_result) > 0) {
+				$disable_korvaa_nappi = "disabled";
+			}
+
+			// Loopataan ketjun tuotteet ja piirret‰‰n valikot
 			while ($row = mysql_fetch_array($result)) {
 				$error = "";
 				$query = "SELECT * FROM tuote WHERE tuoteno = '$row[tuoteno]' AND yhtio = '$kukarow[yhtio]'";
 				$res   = pupe_query($query);
 
+				// Tuotetta ei lˆydy
 				if (mysql_num_rows($res) == 0) {
 					$error = "<font class='error'>(".t("Tuote ei en‰‰ rekisteriss‰")."!)</font>";
+				}
+
+				// Tuote on p‰‰tuote
+				if ($row['jarjestys'] == 1) {
+					$paatuote = $row;
 				}
 
 				echo "<tr>
@@ -211,9 +283,31 @@
 					<input type='hidden' value='$toim' name='toim'>
 					<input type='submit' value='".t("Poista")."'>
 					</td>
-
-					</tr>
 					</form>";
+
+				// P‰‰tuotteen synkronointi vastaavat ketjuun
+				if ($taulu == 'korvaavat') {
+					// Tarkistetaan voidaanko p‰‰tuote synkronoida vastaava tauluun
+					$query = "SELECT * FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$row['tuoteno']}'";
+					$rresult = pupe_query($query);
+					$vastaava = mysql_num_rows($rresult);
+
+					// Jos tuotteella on vastaavat taulussa merkint‰ ja se ei ole korvaavuusketjun p‰‰tuote
+					if ($vastaava > 0 and $row['jarjestys'] != 1) {
+						echo "<td class='back'>
+							<form action='korvaavat.php' method='post'>
+							<input type='hidden' name='tee' value='korvaa_vastaava'>
+							<input type='hidden' name='tunnus' value='$row[tunnus]'>
+							<input type='hidden' name='korvattava' value='$row[tuoteno]'>
+							<input type='hidden' name='korvaava' value='$paatuote[tuoteno]'>
+							<input type='submit' value='Korvaa' $disable_korvaa_nappi/>
+							</form>
+							</td>";
+						echo "<td class='back'>".t("Korvaa vastaava t‰m‰n ketjun p‰‰tuotteella")."</td>";
+					}
+				}
+
+				echo "</tr>";
 			}
 
 			echo "</table>";

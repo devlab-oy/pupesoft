@@ -31,7 +31,7 @@ if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot')
 		require("inc/sahkoinen_tilausliitanta.inc");
 	}
 
-	if (!isset($data)) $data = array('error' => true, 'error_msg' => t("Haku epäonnistui! Ole yhteydessä IT-tukeen"));
+	if (!isset($data)) $data = array('id' => 0, 'error' => true, 'error_msg' => t("Haku ei onnistunut! Ole yhteydessä IT-tukeen"));
 
 	echo json_encode($data);
 	exit;

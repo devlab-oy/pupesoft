@@ -6,9 +6,36 @@ if (isset($_REQUEST['tulosta_maksusopimus']) and is_numeric(trim($_REQUEST['tulo
 	$ohje = 'off';
 }
 
+if (isset($_REQUEST['ajax_toiminto']) and trim($_REQUEST['ajax_toiminto']) == 'tarkista_tehtaan_saldot') {
+	$nayta_pdf = 1;
+	$ohje = 'off';
+}
+
 if (@include("../inc/parametrit.inc"));
 elseif (@include("parametrit.inc"));
 else exit;
+
+if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot') {
+
+	if (@file_exists("../inc/sahkoinen_tilausliitanta.inc")) {
+
+		$hae = 'tarkista_tehtaan_saldot';
+		$tunnus = (int) $id;
+		$otunnus = (int) $otunnus;
+		$tuoteno = (int) $tuoteno;
+		$cust_id = $cust_id;
+		$username = $username;
+		$password = $password;
+		$tt_tunnus = (int) $tt_tunnus;
+
+		require("inc/sahkoinen_tilausliitanta.inc");
+	}
+
+	if (!isset($data)) $data = array('error' => true, 'error_msg' => t("Haku epäonnistui! Ole yhteydessä IT-tukeen"));
+
+	echo json_encode($data);
+	exit;
+}
 
 if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
 	livesearch_sarjanumerohaku();

@@ -303,8 +303,10 @@
 
 	$tapvmlisa = "";
 	$tiliointilisa = "";
-	if (!empty($alkupvm) and !empty($loppupvm)) {
-		$tapvmlisa = " AND lasku.tapvm >= '{$alkupvm}' AND lasku.tapvm <= '{$loppupvm}'";
+	if (isset($laskuraportti)) {
+		if (!empty($alkupvm) and !empty($loppupvm)) {
+			$tapvmlisa = " AND lasku.tapvm >= '{$alkupvm}' AND lasku.tapvm <= '{$loppupvm}'";
+		}
 		$on_tiliote = false;
 	}
 	else {

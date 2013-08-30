@@ -876,6 +876,7 @@
 								<input type='hidden' name = 'valintra' value='{$valintra}' />
 								<input type='hidden' name = 'alkupvm' value='{$alkupvm}' />
 								<input type='hidden' name = 'loppupvm' value='{$loppupvm}' />
+								<input type='hidden' name = 'laskuraportti' value='1' />
 								<input type='submit' value='",t("Tulosta"),"' onClick=\"js_openFormInNewWindow('tulosta_myra', ''); return false;\">
 							</form>
 							</td>";

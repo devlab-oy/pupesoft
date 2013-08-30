@@ -38,6 +38,7 @@ $tarjouksen_asiakkaat = explode(',', $tarjouksen_asiakkaat);
 $dummy_tarjouksen_tilausnumero = $tilausnumero;
 
 foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
+
 	$kukarow['kesken'] = 0;
 
 	if ($toim == "EXTTARJOUS") {
@@ -73,7 +74,17 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 	$kukarow['kesken'] = $tilausnumero;
 
 	foreach ($tilausrivit as $tilausrivi) {
+
 		if ($tilausrivi['tunnus'] == $tilausrivi['perheid'] or $tilausrivi['perheid'] == 0) {
+
+			// Ext-ennakolle tulee hinnat aina nettona, lasketaan alennukset pois
+			if ($toim == "EXTENNAKKO") {
+				$tilausrivi['hinta'] = $tilausrivi['hinta'] * (1 - $tilausrivi['ale1'] / 100) * (1 - $tilausrivi['ale2'] / 100) * (1 - $tilausrivi['ale3'] / 100);
+				$tilausrivi['ale1'] = 0;
+				$tilausrivi['ale2'] = 0;
+				$tilausrivi['ale3'] = 0;
+				$tilausrivi['netto'] = 'N';
+			}
 
 			$trow = hae_tuote($tilausrivi['tuoteno']);
 
@@ -89,6 +100,7 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 				'hinta'				 => $tilausrivi['hinta'],
 				'varataan_saldoa'	 => 'EI',
 			);
+			
 			lisaa_rivi($parametrit);
 		}
 	}

@@ -194,18 +194,18 @@
 		if (isset($oletus) and $oletus != $oletusrow["tunnus"]) {
 			$query = "	SELECT *
 						FROM tuotepaikat
-						WHERE tuoteno = '$tuoteno' 
-						and yhtio = '$kukarow[yhtio]' 
+						WHERE tuoteno = '$tuoteno'
+						and yhtio = '$kukarow[yhtio]'
 						and tunnus = '$oletus'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 
 				$uusi_oletusrow = mysql_fetch_assoc($result);
-				
+
 				// Tehd‰‰n p‰ivitykset
 				echo "<font class='message'>".t("Siirret‰‰n oletuspaikka")."</font><br><br>";
-				
+
 				$hylly = array(
 						"hyllyalue" => $uusi_oletusrow['hyllyalue'],
 						"hyllynro" => $uusi_oletusrow['hyllynro'],
@@ -213,7 +213,7 @@
 						"hyllyvali" => $uusi_oletusrow['hyllyvali']
 						);
 				$upd_result = paivita_oletuspaikka($tuoteno, $hylly);
-				
+
 				if ($upd_result["paivitetyt_ostorivit"] > 0) {
 					echo "<font class='message'>".t("P‰ivitettiin %s ostotilausrivin varastopaikkaa.", '', $upd_result["paivitetyt_ostorivit"])."</font><br><br>";
 				}
@@ -1204,7 +1204,16 @@
 
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-				echo "<tr><td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td><td align='right'>$saldorow[saldo]</td><td align='right'>$hyllyssa</td><td align='right'>$myytavissa</td>";
+				echo "<tr><td>";
+
+				if (tarkista_oikeus('inventoi.php', '', 1)) {
+					echo "<a href='{$palvelin2}inventoi.php?tee=INVENTOI&tuoteno=".urlencode($saldorow["tuoteno"])."&lopetus=$lopetus/SPLIT/muuvarastopaikka.php////tee=M//tuoteno=".urlencode($saldorow["tuoteno"])."'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</a>";
+				}
+				else {
+					echo "$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]";
+				}
+
+				echo "</td><td align='right'>$saldorow[saldo]</td><td align='right'>$hyllyssa</td><td align='right'>$myytavissa</td>";
 
 				if (kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"])) {
 
@@ -1215,9 +1224,9 @@
 					}
 
 					echo "</td>";
-					echo "<td><input type='text' size='6' name='halyraja2[$saldorow[tunnus]]'    value='$saldorow[halytysraja]'></td>
+					echo "<td><input type='text' size='6' name='halyraja2[$saldorow[tunnus]]'  value='$saldorow[halytysraja]'></td>
 						<td><input type='text' size='6' name='tilausmaara2[$saldorow[tunnus]]' value='$saldorow[tilausmaara]'></td>
-						<td><input type='text' size='6' name='prio2[{$saldorow['tunnus']}]' value='{$saldorow['prio']}'></td>";
+						<td><input type='text' size='6' name='prio2[{$saldorow['tunnus']}]'    value='{$saldorow['prio']}'></td>";
 				}
 				else {
 					echo "<td></td><td></td><td></td><td></td>";

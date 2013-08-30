@@ -2675,8 +2675,7 @@ if ($tee == '') {
 				echo "<input type='submit' name='liitaasiakasnappi' value='".t("Liitä asiakas")."'>";
 			}
 			else {
-
-				echo $laskurow['ytunnus'];
+				echo "<a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&lopetus={$tilmyy_lopetus}'>{$laskurow['ytunnus']}</a>";
 
 				if ($faktarow["asiakasnro"] != "") {
 					echo " / $faktarow[asiakasnro]";
@@ -4136,6 +4135,23 @@ if ($tee == '') {
 			else {
 				//Tuotetta ei löydy, aravataan muutamia muuttujia
 				$trow["alv"] = $laskurow["alv"];
+			}
+
+			// Jos ollaan tekemässä Extranet-ennakkoa ja käyttäjä ei ole syöttänyt hintaa, katsotaan löytyykö tuotteelle ennakkotilaus-alennus
+			if ($toim == 'EXTENNAKKO' and $hinta == '') {
+				$query = "  SELECT selite AS ennakko_pros_a
+							FROM tuotteen_avainsanat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$tuoteno}'
+							AND laji = 'parametri_ennakkoale_a'
+							AND selite != ''";
+				$result = pupe_query($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$tuotteen_hinta = mysql_fetch_assoc($result);
+					$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
+					$netto = 'N';
+				}
 			}
 
 			if ($tuoteno != '' and $kpl != 0) {

@@ -64,7 +64,7 @@
 		}
 	}
 
-	if (isset($tuoteno)) $tkysy_lopetus = "{$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z";
+	if (isset($tuoteno)) $tkysy_lopetus = "{$palvelin2}tuote.php////tuoteno=".urlencode($tuoteno)."//tee=Z";
 	else $tkysy_lopetus = "";
 
 	if ($lopetus != "") {
@@ -846,7 +846,13 @@
 				}
 
 				// Varastosaldot ja paikat
-				echo "<font class='message'>".t("Varastopaikat")."</font><hr>";
+				echo "<font class='message'>".t("Varastopaikat")."</font>";
+
+				if (tarkista_oikeus('muuvarastopaikka.php', '', 1)) {
+					echo "&nbsp;&nbsp;<a href='{$palvelin2}muuvarastopaikka.php?tee=M&tuoteno=".urlencode($tuoterow["tuoteno"])."&lopetus=$tkysy_lopetus'><img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t("Muokkaa"),"' title='",t("Muuta tuotepaikkoja"),"' /></a>";
+				}
+
+				echo "<hr>";
 
 				// Saldot
 				echo "<table>";

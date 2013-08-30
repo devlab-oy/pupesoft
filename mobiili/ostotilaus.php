@@ -62,6 +62,9 @@ if (isset($submit)) {
 				$errors[] = t("Vähintään yksi kenttä on syötettävä");
 				break;
 			}
+
+			$data['manuaalisesti_syotetty_ostotilausnro'] = $data['ostotilaus'] != '' ? 1 : 0;
+
 			# Rakennetaan parametrit kentistä
 			$url = http_build_query($data);
 
@@ -98,7 +101,7 @@ echo "<div class='main'>
 	</tr>
 	<tr>
 		<th><label for='ostotilaus'>",t("Ostotilaus"),"</label></th>
-		<td><input type='text' id='ostotilaus' name='data[ostotilaus]' value=''/><td>
+		<td><input type='text' id='ostotilaus' name='data[ostotilaus]' value='{$ostotilaus}'/><td>
 	</tr>
 </table>
 </div>";
@@ -127,10 +130,10 @@ echo "<script type='text/javascript'>
 	});
 
 	function doFocus() {
-	        var focusElementId = 'viivakoodi';
-	        var textBox = document.getElementById(focusElementId);
-	        textBox.focus();
-	    }
+	    var focusElementId = 'viivakoodi';
+	    var textBox = document.getElementById(focusElementId);
+	    textBox.focus();
+    }
 
 	function clickButton() {
 	   document.getElementById('myHiddenButton').click();

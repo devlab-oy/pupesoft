@@ -19,6 +19,8 @@ $sort_by_direction_hylly		= (!isset($sort_by_direction_hylly) or $sort_by_direct
 # Joku parametri tarvii olla setattu.
 if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 
+	$params = array();
+
 	if (strpos($tuotenumero, "%") !== FALSE) $tuotenumero = urldecode($tuotenumero);
 
 	if ($tuotenumero != '') $params['tuoteno'] = "tilausrivi.tuoteno = '{$tuotenumero}'";
@@ -29,15 +31,15 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 		$tuotenumerot = hae_viivakoodilla($viivakoodi);
 
 		if (count($tuotenumerot) > 0) {
-		$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
-	}
+			$params['viivakoodi'] = "tuote.tuoteno in ('" . implode($tuotenumerot, "','") . "')";
+		}
 		else {
 			$errors[] = t("Viivakoodilla %s ei löytynyt tuotetta", '', $viivakoodi)."<br />";
 			$viivakoodi = "";
 		}
 	}
 
-	$query_lisa = implode($params, " AND ");
+	$query_lisa = count($params) > 0 ? " AND ".implode($params, " AND ") : "";
 
 }
 else {
@@ -100,11 +102,10 @@ $query = "	SELECT
 			JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
 				AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
 				AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
-			WHERE
-			$query_lisa
-			AND lasku.tila = 'O'
+			WHERE lasku.tila = 'O'
 			AND lasku.alatila = 'A'
 			AND lasku.yhtio='{$kukarow['yhtio']}'
+			{$query_lisa}
 			ORDER BY {$orderby} {$ascdesc}
 		";
 $result = pupe_query($query);

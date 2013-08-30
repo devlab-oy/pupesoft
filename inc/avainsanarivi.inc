@@ -102,6 +102,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "HENKILO_OSASTO") 	$ulos .= "<option value='HENKILO_OSASTO' $avain_sel[HENKILO_OSASTO]>		".t("Henkilöosasto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KVERITTELY") 		$ulos .= "<option value='KVERITTELY' $avain_sel[KVERITTELY]>				".t("Kulunvalvonnan erittely")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KONEENOSA") 		$ulos .= "<option value='KONEENOSA' $avain_sel[KONEENOSA]>					".t("Koneenosa")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "YTAVAINSANA") 		$ulos .= "<option value='YTAVAINSANA' {$avain_sel['YTAVAINSANA']}>			".t("Yhtiön toimipaikan avainsanalaji")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Varaston avainsanat")."'>";

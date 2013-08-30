@@ -1,7 +1,7 @@
 <?php
 
 	function alku () {
-		global $pdf, $asiakastiedot, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $kieli, $tito_pvm, $alatila;
+		global $pdf, $asiakastiedot, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $kieli, $tito_pvm, $alatila, $on_tiliote;
 
 		$firstpage = $pdf->new_page("a4");
 
@@ -82,8 +82,9 @@
 		$oikpos = $pdf->strlen(t("Avoinsumma", $kieli), $pieni);
 		$pdf->draw_text(480-$oikpos, $kala, t("Avoinsumma", $kieli),$firstpage, $pieni);
 
-		$pdf->draw_text(510, $kala, t("Maksettu", $kieli),		$firstpage, $pieni);
-
+		if (($on_tiliote and $tito_pvm != date('Y-m-d')) or !$on_tiliote) {
+			$pdf->draw_text(510, $kala, t("Maksettu", $kieli),		$firstpage, $pieni);
+		}
 
 		$kala -= 15;
 
@@ -91,7 +92,7 @@
 	}
 
 	function rivi ($tyyppi, $firstpage, $row) {
-		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni,$kieli, $yhtiorow, $tito_pvm, $alatila, $asiakastiedot;
+		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni,$kieli, $yhtiorow, $tito_pvm, $alatila, $asiakastiedot, $on_tiliote;
 
 		if ($lask == 35) {
 			$sivu++;
@@ -110,18 +111,49 @@
 			$pdf->draw_text(300, $kala, $row["valkoodi"], 				$firstpage, $norm);
 
 			if (strtoupper($row['valkoodi']) == strtoupper($yhtiorow['valkoodi'])) {
-				$oikpos = $pdf->strlen($row["laskusumma"], $norm);
-				$pdf->draw_text(400-$oikpos, $kala, $row["laskusumma"],		$firstpage, $norm);
+				if ($on_tiliote) {
+					$oikpos = $pdf->strlen($row["tiliointisumma"], $norm);
+					$pdf->draw_text(400-$oikpos, $kala, $row["tiliointisumma"],		$firstpage, $norm);
 
-				$oikpos = $pdf->strlen($row["laskuavoinsaldo"], $norm);
-				$pdf->draw_text(480-$oikpos, $kala, $row["laskuavoinsaldo"], $firstpage, $norm);
+					$oikpos = $pdf->strlen($row["tiliointiavoinsaldo"], $norm);
+					$pdf->draw_text(480-$oikpos, $kala, $row["tiliointiavoinsaldo"], $firstpage, $norm);
+				}
+				else {
+					$oikpos = $pdf->strlen($row["laskusumma"], $norm);
+					$pdf->draw_text(400-$oikpos, $kala, $row["laskusumma"],		$firstpage, $norm);
+
+					if ($row['mapvm'] == '0000-00-00') {
+						$oikpos = $pdf->strlen($row["laskuavoinsaldo"], $norm);
+						$pdf->draw_text(480-$oikpos, $kala, $row["laskuavoinsaldo"], $firstpage, $norm);
+					}
+					else {
+						$oikpos = $pdf->strlen('0.00', $norm);
+						$pdf->draw_text(480-$oikpos, $kala, '0.00', $firstpage, $norm);
+					}
+				}
+				
 			}
 			else {
-				$oikpos = $pdf->strlen($row["laskusumma_valuutassa"], $norm);
-				$pdf->draw_text(400-$oikpos, $kala, $row["laskusumma_valuutassa"],		$firstpage, $norm);
+				if ($on_tiliote) {
+					$oikpos = $pdf->strlen($row["tiliointisumma_valuutassa"], $norm);
+					$pdf->draw_text(400-$oikpos, $kala, $row["tiliointisumma_valuutassa"],		$firstpage, $norm);
 
-				$oikpos = $pdf->strlen($row["laskuavoinsaldo_valuutassa"], $norm);
-				$pdf->draw_text(480-$oikpos, $kala, $row["laskuavoinsaldo_valuutassa"],	$firstpage, $norm);
+					$oikpos = $pdf->strlen($row["tiliointiavoinsaldo_valuutassa"], $norm);
+					$pdf->draw_text(480-$oikpos, $kala, $row["tiliointiavoinsaldo_valuutassa"],	$firstpage, $norm);
+				}
+				else {
+					$oikpos = $pdf->strlen($row["laskusumma_valuutassa"], $norm);
+					$pdf->draw_text(400-$oikpos, $kala, $row["laskusumma_valuutassa"],		$firstpage, $norm);
+
+					if ($row['mapvm'] == '0000-00-00') {
+						$oikpos = $pdf->strlen($row["laskuavoinsaldo_valuutassa"], $norm);
+						$pdf->draw_text(480-$oikpos, $kala, $row["laskuavoinsaldo_valuutassa"],	$firstpage, $norm);
+					}
+					else {
+						$oikpos = $pdf->strlen('0.00', $norm);
+						$pdf->draw_text(480-$oikpos, $kala, '0.00',	$firstpage, $norm);
+					}
+				}
 			}
 
 			$pdf->draw_text(510, $kala, tv1dateconv($row["mapvm"]), 	$firstpage, $norm);
@@ -273,10 +305,12 @@
 	$tiliointilisa = "";
 	if (!empty($alkupvm) and !empty($loppupvm)) {
 		$tapvmlisa = " AND lasku.tapvm >= '{$alkupvm}' AND lasku.tapvm <= '{$loppupvm}'";
+		$on_tiliote = false;
 	}
 	else {
 		$tiliointilisa = "and tiliointi.tapvm <= '{$tito_pvm}'";
 		$tapvmlisa = " and lasku.tapvm <= '{$tito_pvm}'";
+		$on_tiliote = true;
 	}
 
 	$query = "	SELECT

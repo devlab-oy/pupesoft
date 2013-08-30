@@ -1804,15 +1804,18 @@
 					}
 
 					$vastaavat = new Vastaavat($row['tuoteno']);
-					$vastaavat_ketjut = $vastaavat->ketjut();
 
-					if (!empty($vastaavat_ketjut)) {
-						$vastaavat_tuotteet = $vastaavat->find_by_ketju($vastaavat_ketjut[0]);
+					if ($vastaavat->onkovastaavia()) {
 
 						$i = 1;
 
-						foreach ($vastaavat_tuotteet as $_tuoteno_arr) {
+						// Loopataan kaikki tuotteen vastaavuusketjut
+						foreach (explode(",", $vastaavat->getIDt()) as $ketju) {
 
+							// Haetaan tuotteet ketjukohtaisesti
+							$_tuotteet = $vastaavat->tuotteet($ketju);
+
+							foreach ($_tuotteet as $_tuoteno_arr) {
 							if ($_tuoteno_arr['tuoteno'] != $row['tuoteno']) {
 
 								if ($i == 6) break;
@@ -1972,6 +1975,7 @@
 								$i++;
 							}
 						}
+					}
 					}
 
 					$rivi .= "\r\n";

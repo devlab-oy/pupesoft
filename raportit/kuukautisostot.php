@@ -920,7 +920,7 @@
 								group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '/') osto_era,
 								group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
 								group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
-								group_concat(tuotteen_toimittajat.ostohinta * (1 - (tuotteen_toimittajat.alennus / 100)) order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
+								group_concat(format(tuotteen_toimittajat.ostohinta * (1 - (tuotteen_toimittajat.alennus / 100)), 2) order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
 								group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin
 								FROM tuotteen_toimittajat
 								WHERE yhtio = '$row[yhtio]'

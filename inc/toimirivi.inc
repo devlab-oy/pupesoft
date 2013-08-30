@@ -601,3 +601,22 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "sahkoinen_tilausliitanta") {
+
+		$sel = $trow[$i];
+
+		$ulos  = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
+
+		if (@file_exists("inc/sahkoinen_tilausliitanta.inc")) {
+
+			$hae = "option";
+
+			require("inc/sahkoinen_tilausliitanta.inc");
+		}
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

@@ -280,7 +280,7 @@ if (!function_exists("query_dump")) {
 if (!function_exists("pupesoft_flock")) {
 	// otetaan parametriksi query
 	function pupesoft_flock(array $params = array()) {
-		GLOBAL $argv, $flock;
+		GLOBAL $argv, $flock, $backupflock;
 
 		if (php_sapi_name() == 'cli') {
 			$scriptname = $argv[0];
@@ -296,12 +296,29 @@ if (!function_exists("pupesoft_flock")) {
 		$filecontent   = isset($params["filecontent"]) ? $params["filecontent"] : '';
 		$flockreturn   = isset($params["return"]) ? $params["return"] : FALSE;
 
+		// katotaan, ettei backuppi oo menossa....
+		$backupflock = fopen("/tmp/##pupesoft.sh-flock.lock", "c");
+
+		if (! @flock($backupflock, LOCK_SH | LOCK_NB)) {
+			if (mktime() - filemtime("/tmp/##pupesoft.sh-flock.lock") >= 14400) {
+				// Onko nagios monitor asennettu?
+				if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+					file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: pupesoft.sh flocklock-jumissa! (".date("Y-m-d H:i:s").")\n", FILE_APPEND);
+				}
+			}
+
+			// Ei saatu lukkoa --> false/exit
+			if ($flockreturn) return FALSE;
+			else exit;
+		}
+		else {
+			flock($backupflock, LOCK_UN);
+		}
+
 		$flock = fopen($lockfile, "c");
 
 		if (! @flock($flock, LOCK_EX | LOCK_NB)) {
-
 			if ($locktime > 0 and mktime() - filemtime($lockfile) >= $locktime) {
-
 				// Onko nagios monitor asennettu?
 				if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
 					file_put_contents("/home/nagios/nagios-pupesoft.log", $error_message, FILE_APPEND);
@@ -311,14 +328,12 @@ if (!function_exists("pupesoft_flock")) {
 			}
 
 			// Ei saatu lukkoa --> false/exit
-			if ($flockreturn) {
-				return FALSE;
-			}
-			else {
-				exit;
-			}
+			if ($flockreturn) return FALSE;
+			else exit;
 		}
 		else {
+			touch($lockfile);
+			chmod($lockfile, 0666);
 
 			if ($filecontent != "") {
 				ftruncate($flock, 0);

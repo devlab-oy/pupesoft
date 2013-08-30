@@ -1712,7 +1712,8 @@
 			if (mysql_field_name($result, $i) == "laatija" or
 				mysql_field_name($result, $i) == "muutospvm" or
 				mysql_field_name($result, $i) == "muuttaja" or
-				mysql_field_name($result, $i) == "luontiaika") {
+				mysql_field_name($result, $i) == "luontiaika" or
+				mysql_field_name($result, $i) == "tehdas_saldo_paivitetty") {
 				$tyyppi = 2;
 			}
 

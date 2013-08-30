@@ -2073,6 +2073,17 @@
 			}
 		}
 
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'yhtion_toimipaikat') {
+			if (($toikrow = tarkista_oikeus("yllapito.php", "yhtion_toimipaikat_avainsanat%", "", "OK")) !== FALSE) {
+				$lukitse_avaimeen = urlencode($yhtion_toimipaikat_tunnus);
+
+				echo "<tr><td class='back'></td></tr>";
+				echo "<tr><td class='back'>";
+				echo "<iframe id='yhtion_toimipaikat_avainsanat_iframe' name='yhtion_toimipaikat_avainsanat_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$lukitse_avaimeen}&lukitse_avaimeen={$lukitse_avaimeen}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "</td></tr>";
+			}
+		}
+
 		echo "</table>";
 	}
 	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit"  and $uusilukko == "" and $from == "") {

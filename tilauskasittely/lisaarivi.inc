@@ -1964,10 +1964,20 @@
 			}
 			// Vastaavuusketjun puutekäsittely, lisätään ketjun päätuote puutteeksi
 			elseif ($yhtiorow["korvaavuusketjun_puutekasittely"] == "V") {
-				require_once 'vastaavat.class.php';
 
+				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun päätuote
+				require_once 'korvaavat.class.php';
+				$korvaavat = new Korvaavat($tuoteno);
+
+				require_once 'vastaavat.class.php';
 				$options = array('skippaa_vaihtoehtoiset' => TRUE);
-				$vastaavat = new Vastaavat($tuoteno, $options);
+
+				if (count($korvaavat->tuotteet()) > 0) {
+					$vastaavat = new Vastaavat($korvaavat->paatuote(), $options);
+				}
+				else {
+					$vastaavat = new Vastaavat($tuoteno, $options);
+				}
 
 				if ($vastaavat->onkovastaavia()) {
 

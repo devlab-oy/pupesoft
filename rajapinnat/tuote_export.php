@@ -20,7 +20,8 @@
 	require ("{$pupe_root_polku}/inc/functions.inc");
 
 	$lock_params = array(
-	    "locktime" => 5400,
+		"locktime" => 5400,
+		"lockfile" => '##tuote-export-flock.lock',
 	);
 
 	// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan

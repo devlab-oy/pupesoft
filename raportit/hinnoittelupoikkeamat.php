@@ -302,7 +302,7 @@
 							echo "<tr>";
 							echo "<th>{$user} ",t("Yhteensä"),"</th>";
 							echo "<th colspan='11' style='text-align: right;'>{$total_user}</th>";
-							echo "<th colspan='1' style='text-align: right;'></th>";
+							echo "<th></th>";
 							echo "</tr>";
 
 							echo "<tr><td class='back' colspan='12'>&nbsp;</tr>";
@@ -338,13 +338,13 @@
 				echo "<tr>";
 				echo "<th>{$user} ",t("Yhteensä"),"</th>";
 				echo "<th colspan='11' style='text-align: right;'>{$total_user}</th>";
-				echo "<th colspan='1' style='text-align: right;'></th>";
+				echo "<th></th>";
 				echo "</tr>";
 
 				echo "<tr>";
 				echo "<th>",t("Kaikki yhteensä"),"</th>";
 				echo "<th colspan='11' style='text-align: right;'>{$total}</th>";
-				echo "<th colspan='1' style='text-align: right;'></th>";
+				echo "<th></th>";
 				echo "</tr>";
 
 				echo "</table>";

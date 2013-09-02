@@ -449,7 +449,19 @@ if (!function_exists("lopetus")) {
 				// Jotta urlin parametrissa voisi päässätä toisen urlin parametreineen
 				$lopetus_clean = $lopetus;
 
-				$lopetus = str_replace('////','?',               $lopetus);
+				$lopetus = str_replace('////','?', $lopetus);
+
+				// Otetaan parametrit ja urlenkoodataan ne
+				if (preg_match('/\?(.*)/', $lopetus, $paramit)) {
+					foreach (explode("//", $paramit[1]) as $para) {
+						list($mnimi, $arvo) = explode("=", $para);
+
+						if ($arvo != "") {
+							$lopetus = str_replace("$mnimi=$arvo", "$mnimi=".urlencode($arvo), $lopetus);
+						}
+					}
+				}
+
 				$lopetus = preg_replace('/([^:])\/\/\//','\\1#', $lopetus);
 				$lopetus = preg_replace('/([^:])\/\//','\\1&',   $lopetus);
 
@@ -503,7 +515,6 @@ if (!function_exists("lopetus")) {
 
 				if ($lask > 0) {
 					if (strrpos($lopetus, "#") !== FALSE) {
-
 						preg_match("/(#.*?)[&\?\/$]/", $lopetus, $ankkurimatchi);
 
 						$lopetus = str_replace($ankkurimatchi[1], "", $lopetus).$ankkurimatchi[1];

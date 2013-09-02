@@ -182,6 +182,7 @@ function onko_paatuote($tuoteno) {
 echo "<font class='head'>".t("Vastaavien yll‰pito")."</font><hr>";
 
 echo "<form method='get' name='etsituote' autocomplete='off'>
+	  <input type='hidden' value='$lopetus' name='lopetus'>
       ".t("Etsi tuotetta")." <input type='text' name='tuoteno'>
       <input type='submit' value='".t("Hae")."'>
       </form><br><br>";
@@ -277,6 +278,7 @@ if ($tuoteno != '') {
             echo "<br><font class='message'>".t("Tuotteella ei ole vastaavia tuotteita")."!</font>";
 
             echo "<form method='post' autocomplete='off'>
+					<input type='hidden' value='$lopetus' name='lopetus'>
                     <input type='hidden' name='tuoteno' value='$tuoteno'>
                     <input type='hidden' name='tee' value='add'>
                     <hr>";
@@ -309,41 +311,48 @@ if ($tuoteno != '') {
                     }
 
                     echo "<tr><td>$tuote[tuoteno] $error</td>";
-                    echo "<form method='post' autocomplete='off'>
-                        <td><input size='5' type='text' name='prio' value='$tuote[jarjestys]'>
-                        <input type='hidden' name='tunnus' value='$tuote[tunnus]'>
-                        <input type='hidden' name='tee' value='muutaprio'></td>
-                        </form>";
+                    echo "<td><form method='post' autocomplete='off'>
+							<input type='hidden' value='$lopetus' name='lopetus'>
+                        	<input size='5' type='text' name='prio' value='$tuote[jarjestys]'>
+                        	<input type='hidden' name='tunnus' value='$tuote[tunnus]'>
+                        	<input type='hidden' name='tee' value='muutaprio'>
+                        	</form>
+							</td>";
 
                     $checked = ($tuote['vaihtoehtoinen'] == 'K') ? 'checked' : '';
+
                     echo "<td><form method='post'>
+						<input type='hidden' value='$lopetus' name='lopetus'>
                         <input type='hidden' name='tunnus' value='$tuote[tunnus]'>
                         <input type='hidden' name='_tuoteno' value='$tuote[tuoteno]'>
                         <input type='hidden' name='tee' value='vaihtoehtoinen'>
                         <input type='checkbox' name='vaihtoehtoinen' value='true' onclick='submit()' $checked>
                         </form></td>";
 
-                    echo"<form method='post'>
-                        <td class='back'>
-                        <input type='hidden' name='tunnus' value='$tuote[tunnus]'>
-                        <input type='hidden' name='tee' value='del'>
-                        <input type='submit' value='".t("Poista")."'>
-                        </td>
-                        </form>
-                        </tr>";
+                    echo "<td class='back'>
+							<form method='post'>
+							<input type='hidden' value='$lopetus' name='lopetus'>
+							<input type='hidden' name='tunnus' value='$tuote[tunnus]'>
+							<input type='hidden' name='tee' value='del'>
+							<input type='submit' value='".t("Poista")."'>
+							</form>
+							</td>
+							</tr>";
                 }
-            echo "</table>";
 
-            echo "<form method='post' autocomplete='off'>
-                    <input type='hidden' name='tuoteno' value='$tuoteno'>
-                    <input type='hidden' name='ketju_id' value='$id'>
-                    <input type='hidden' name='tee' value='add'>
-                    <hr>";
-            echo t("Lis‰‰ vastaava tuote").": ";
+            	echo "</table>";
 
-            echo "<input type='text' name='vastaava'>
-                    <input type='submit' value='".t("Lis‰‰")."'>
-                    </form><br>";
+	            echo "<form method='post' autocomplete='off'>
+						<input type='hidden' value='$lopetus' name='lopetus'>
+	                    <input type='hidden' name='tuoteno' value='$tuoteno'>
+	                    <input type='hidden' name='ketju_id' value='$id'>
+	                    <input type='hidden' name='tee' value='add'>
+	                    <hr>";
+	            echo t("Lis‰‰ vastaava tuote").": ";
+
+	            echo "<input type='text' name='vastaava'>
+	                    <input type='submit' value='".t("Lis‰‰")."'>
+	                    </form><br>";
             }
         }
     }

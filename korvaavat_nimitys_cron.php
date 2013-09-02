@@ -1,11 +1,11 @@
 <?php
-/**
- * Päivitetään korvaavuusketjujen tuotteiden nimitys seuraavin ehdoin:
- * - Kaikille ketjun tuotteille, poislukien ketjun päätuote, joilla on järjestys 0 ja tuotteella
- *	 on saldoa, muutetaan nimitys muotoon "KORVAAVA A2". Jossa A2 on ketjussa järjestykseltään
- *	 suurempi kuin nimetty tuote.
- * - Samalla kun tuotteen nimitys muutetaan, poistetaan kyseinen tuote kaikista vastaavuusketjuista.
- */
+
+/*
+- Loopataan kaikki ketjut läpi
+- Jos ketjun tuotteella saldo 0, tuote ei ole ketjun ykköstuote = laitetaan järjestykseltä pienempi nimitykseen, esim "KORVAAVA A2".
+- Jos järjestys on kuitenkin 0, niin laitetaan "Korvaava "ykköstuote"". Eli päätuote ketjusta menee silloin nimitykseen.
+- Tehdään tsekki, että jos tuotteella on nimitys jo muutettu, niin ei tehä mitään.
+*/
 
 // Kutsutaanko CLI:stä
 if (php_sapi_name() != 'cli') {
@@ -33,22 +33,22 @@ $poistettu = 0;
 
 echo "Päivitetään korvaavuusketjun nimitykset ...\n\n";
 
-// Haetaan tuoteketjut joilla on järjestys=0 tuotteita
-$select = "SELECT distinct(id)
+// Haetaan tuoteketjut
+$select = "	SELECT distinct id
 			FROM korvaavat
-			WHERE yhtio='{$kukarow['yhtio']}'
-			AND jarjestys=0";
+			WHERE yhtio='{$kukarow['yhtio']}'";
 $result = pupe_query($select);
 
 // Loopataan ketjut läpi
 while($ketju = mysql_fetch_assoc($result)) {
 
 	// Haetaan ketjun tuotteet
-	$tuotteet_query = "SELECT korvaavat.id, korvaavat.tuoteno, korvaavat.jarjestys
+	$tuotteet_query = "	SELECT korvaavat.id, korvaavat.tuoteno, korvaavat.jarjestys, tuote.nimitys
 						FROM korvaavat
+						JOIN tuote ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno)
 						WHERE korvaavat.yhtio='{$kukarow['yhtio']}'
-						AND id='{$ketju['id']}'
-						ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno";
+						AND korvaavat.id='{$ketju['id']}'
+						ORDER BY if(korvaavat.jarjestys=0, 9999, korvaavat.jarjestys), korvaavat.tuoteno";
 	$tuotteet_result = pupe_query($tuotteet_query);
 
 	// Poislukien päätuote
@@ -58,25 +58,31 @@ while($ketju = mysql_fetch_assoc($result)) {
 	// Loopataan ketjun muut tuotteet läpi
 	while ($tuote = mysql_fetch_assoc($tuotteet_result)) {
 
-		// Jos tuotteen järjestys on 0, tarkistetaan sen saldo
-		if ($tuote['jarjestys'] == 0) {
+		// Muutetaan tuotteen nimitys
+		// Jos tuotteen järjestys on 0, laitetaan päätuote, muuten edellinen
+		if ($tuote['jarjestys'] == 0) $tuoteno = $paa_tuote['tuoteno'];
+		else $tuoteno = $edellinen_tuote['tuoteno'];
+
+		$uusi_nimitys = "KORVAAVA " . $tuoteno;
+
+		if ($uusi_nimitys != $tuote['nimitys']) {
+
 			// Tuotteen saldo
 			$myytavissa = saldo_myytavissa($tuote['tuoteno']);
 
-			// Huomioidaan vain tuotteet joilla on saldoa
-			if ($myytavissa[0] > 0) {
+			// Huomioidaan vain tuotteet joilla saldo on nolla
+			if ($myytavissa[0] == 0) {
 
-				// Muutetaan tuotteen nimitys (tuotteet joiden järjestys on 0 ja niillä on saldoa)
-				echo "Muutetaan tuotteen {$tuote['tuoteno']} nimitys 'KORVAAVA $edellinen_tuote[tuoteno]'\n";
-
-				$uusi_nimitys = "KORVAAVA " . $edellinen_tuote['tuoteno'];
-				$muutos_query = "UPDATE tuote SET nimitys='$uusi_nimitys' WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuote['tuoteno']}'";
+				$muutos_query = "	UPDATE tuote SET 
+									nimitys='$uusi_nimitys' 
+									WHERE yhtio='{$kukarow['yhtio']}' 
+									AND tuoteno='{$tuote['tuoteno']}'";
 
 				// Ajetaan päivitysquery ja poistetaan tuote vastaavuusketjuista
 				if (pupe_query($muutos_query)) {
 					$muutettu++;
 
-					$poista_vastaavat_query = "DELETE FROM vastaavat
+					$poista_vastaavat_query = "	DELETE FROM vastaavat
 												WHERE yhtio='{$kukarow['yhtio']}'
 												AND tuoteno='{$tuote['tuoteno']}'";
 

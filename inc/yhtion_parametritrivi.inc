@@ -3575,10 +3575,23 @@
 	if (mysql_field_name($result, $i) == 'vastaavat_tuotteet_esitysmuoto') {
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = $trow[$i] == 'S' ? 'selected' : '';
+		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('S' => '', 'A' => '');
 
 		$ulos .= "<option value = ''>".t("Vastaavat tuotteet n‰ytet‰‰n normaalisti")."</option>";
-		$ulos .= "<option value = 'S' {$sel}>".t("Vastaavat tuotteet n‰ytet‰‰n vaikka saldo on nolla. N‰ytet‰‰n myˆs toimittajan tehtaan saldo.")."</option>";
+		$ulos .= "<option value = 'S' {$sel['S']}>".t("Vastaavat tuotteet n‰ytet‰‰n vaikka saldo on nolla. N‰ytet‰‰n myˆs toimittajan tehtaan saldo.")."</option>";
+		$ulos .= "<option value = 'A' {$sel['A']}>".t("Vastaavat tuotteet n‰ytet‰‰n aina. N‰ytet‰‰n myˆs toimittajan tehtaan saldo.")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'paivita_oletuspaikka') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'S' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ostoriveille")."</option>";
+		$ulos .= "<option value = 'S' {$sel}>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ja saapumisiin liitetyille ostoriveille.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

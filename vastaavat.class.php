@@ -58,6 +58,11 @@ class Vastaavat {
 		$conditions = '';
 
 		if (!empty($options)) {
+
+			if ($options['skippaa_vaihtoehtoiset']) {
+				$conditions .= " AND vaihtoehtoinen = '' ";
+			}
+
 			// Tsekataan tarvittavat parametrit
 			if ($options['vastaavuusketjun_jarjestys'] == 'K') {
 
@@ -71,10 +76,6 @@ class Vastaavat {
 				$jarjestys = mysql_fetch_assoc($result);
 
 				$conditions .= "HAVING jarjestys >= {$jarjestys['jarjestys']}";
-			}
-
-			if ($options['skippaa_vaihtoehtoiset']) {
-				$conditions .= " AND vaihtoehtoinen = '' ";
 			}
 		}
 

@@ -1416,7 +1416,7 @@
 							}
 
 							echo "<td valign='top' class='back' nowrap>";
-							echo "<button type='button' class='toggle_korvaavat_vastaavat' rivitunnus='{$prow['tunnus']}'>".t("Näytä tuotteelle korvaavat & vastaavat")."</button>";
+							echo "<button type='button' class='toggle_korvaavat_vastaavat' rivitunnus='{$prow['tunnus']}'>".t("Näytä korvaavat & vastaavat")."</button>";
 							echo "</td>";
 
 							if ($saako_hyvaksya > 0) {

@@ -17,7 +17,10 @@ $data = array(
 	'liitostunnus' => $liitostunnus,
 	'tilausrivi' => $tilausrivi,
 	'ostotilaus' => $ostotilaus,
-	'saapuminen' => $saapuminen
+	'saapuminen' => $saapuminen,
+	'tilausten_lukumaara' => $tilausten_lukumaara,
+	'manuaalisesti_syotetty_ostotilausnro' => $manuaalisesti_syotetty_ostotilausnro,
+	'tuotenumero' => $tuotenumero,
 );
 $url = http_build_query($data);
 
@@ -68,7 +71,7 @@ if (isset($submit) and trim($submit) != '') {
 				$hyllytaso = $loppu[0][1];
 
 				// Kaikkia tuotepaikkoja ei pystytä parsimaan
-				if (empty($hyllyalue) or empty($hyllynro) or empty($hyllyvali) or empty($hyllytaso)) {
+				if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
 					$errors[] = t("Tuotepaikan haussa virhe, yritä syöttää tuotepaikka käsin") . " ($tuotepaikka)";
 				}
 			}
@@ -105,6 +108,15 @@ if (isset($submit) and trim($submit) != '') {
 			$result = pupe_query($query);
 			$tuote = mysql_fetch_assoc($result);
 
+			if (count($siirra_saldot) > 0) {
+				if (count($siirra_saldot) == 1 and $siirra_saldot[0] == 'default') {
+					$siirra_saldot = '';
+				}
+				else {
+					$siirra_saldot = $siirra_saldot[1];
+				}
+			}
+
 			if ($tuote['sarjanumeroseuranta'] != '' and $siirra_saldot == 'on') {
 				$errors[] = t("Saldojen siirto ei tue sarjanumerollisia tuotteita");
 			}
@@ -112,7 +124,7 @@ if (isset($submit) and trim($submit) != '') {
 			if (count($errors) == 0) {
 
 				// Oletuspaikka checkboxi
-				if ($oletuspaikka == 'on') {
+				if (count($oletuspaikka) == 2) {
 					$oletus = 'X';
 				}
 				else {
@@ -328,16 +340,16 @@ if (isset($submit) and trim($submit) != '') {
 
 }
 
-$oletuspaikka_chk = "checked";
+$oletuspaikka_chk = "";
+$siirra_saldot_chk = "";
+
+if (!isset($oletuspaikka) or count($oletuspaikka) == 2) $oletuspaikka_chk = "checked";
+if (!isset($siirra_saldot) or $siirra_saldot == 'on') $siirra_saldot_chk = "checked";
 
 $onko_suoratoimitus_res = onko_suoratoimitus($tilausrivi);
 
 if ($row_suoratoimitus = mysql_fetch_assoc($onko_suoratoimitus_res)) {
 	if ($row_suoratoimitus["suoraan_laskutukseen"] == "") $oletuspaikka_chk = '';
-}
-
-if ($siirra_saldot == 'on') {
-	$siirra_saldot_chk = "checked";
 }
 
 $paluu_url = "vahvista_kerayspaikka.php?{$url}";
@@ -387,10 +399,15 @@ echo "<div class='main'>
 			<td><input type='text' name='tilausmaara' value='' /></th>
 		</tr>
 		<tr>
-			<td colspan='2'>",t("Tee tästä oletuspaikka")," <input type='checkbox' id='oletuspaikka' name='oletuspaikka' $oletuspaikka_chk /></td>
+			<td colspan='2'>",t("Tee tästä oletuspaikka"),"
+			<input type='hidden' name='oletuspaikka[]' value='default' />
+			<input type='checkbox' id='oletuspaikka' name='oletuspaikka[]' {$oletuspaikka_chk} /></td>
 		</tr>
 		<tr>
-			<td colspan='2'>",t("Siirrä saldo")," ({$saldo['myytavissa']}) <input type='checkbox' id='siirra_saldot' name='siirra_saldot' $siirra_saldot_chk/> </td>
+			<td colspan='2'>",t("Siirrä saldo")," ({$saldo['myytavissa']})
+			<input type='hidden' name='siirra_saldot[]' value='default' />
+			<input type='checkbox' id='siirra_saldot' name='siirra_saldot[]' {$siirra_saldot_chk}/>
+			</td>
 		</tr>
 	</table>
 

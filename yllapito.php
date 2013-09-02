@@ -28,6 +28,11 @@
 		exit;
 	}
 
+	if (isset($livesearch_tee) and $livesearch_tee == "TUOTERYHMAHAKU") {
+		livesearch_tuoteryhmahaku();
+		exit;
+	}
+
 	//Jotta määritelty rajattu näkymä olisi myös käyttöoikeudellisesti tiukka
 	$aputoim = $toim;
 	$toimi_array = explode('!!!', $toim);
@@ -442,6 +447,31 @@
 
 			if ($onko_tama_insert) {
 				$tunnus = mysql_insert_id();
+			}
+
+			if ($tunnus > 0 and $toim == "tuotteen_toimittajat_tuotenumerot") {
+
+				$query = "	SELECT tt.tuoteno, ttt.tuoteno as ttt_tuoteno, toimi.toimittajanro
+							FROM tuotteen_toimittajat_tuotenumerot AS ttt
+							JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = ttt.yhtio AND tt.tunnus = ttt.toim_tuoteno_tunnus)
+							JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.asn_sanomat IN ('K','L','M','F'))
+							WHERE ttt.yhtio = '{$kukarow['yhtio']}'
+							AND ttt.tunnus = '{$tunnus}'";
+				$toim_tuoteno_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($toim_tuoteno_chk_res) == 1) {
+
+					$toim_tuoteno_chk_row = mysql_fetch_assoc($toim_tuoteno_chk_res);
+
+					$query = "	UPDATE asn_sanomat SET
+								tuoteno = '{$toim_tuoteno_chk_row['tuoteno']}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND status != 'X'
+								AND tuoteno = ''
+								AND toim_tuoteno = '{$toim_tuoteno_chk_row['ttt_tuoteno']}'
+								AND toimittajanumero = '{$toim_tuoteno_chk_row['toimittajanro']}'";
+					$upd_res = pupe_query($query);
+				}
 			}
 
 			if ($onko_tama_insert and $tunnus > 0 and isset($tee_myos_tuotteen_toimittaja_liitos) and isset($liitostunnus) and $toim == "tuote" and $tee_myos_tuotteen_toimittaja_liitos == 'JOO' and $liitostunnus != '') {
@@ -1981,6 +2011,7 @@
 			$toim == "asiakaskommentti" or
 			$toim == "yhteyshenkilo" or
 			$toim == "autodata_tuote" or
+			$toim == "korvaavat_kiellot" or
 			$toim == "tuotteen_toimittajat" or
 			$toim == "tuotteen_toimittajat_tuotenumerot" or
 			$toim == "extranet_kayttajan_lisatiedot" or
@@ -2054,7 +2085,7 @@
 				if (isset($liitostunnus)) echo "&liitostunnus={$liitostunnus}";
 				if (isset($status) and $toim == 'tuote') echo "&status={$status}";
 				echo "' method = 'post'>
-				
+
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
 				<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>

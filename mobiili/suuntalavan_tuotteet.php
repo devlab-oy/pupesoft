@@ -101,17 +101,22 @@ if (isset($alusta_tunnus)) {
 }
 
 echo "<div class='header'>";
-echo "<button onclick='window.location.href=\"alusta.php\"' class='button left'><img src='back2.png'></button>";
+if (isset($viivakoodi)) {
+	//Jos viivakoodilla ollaan etsitty jotain, back-nappi palaa kokolistaus-n‰kym‰‰n
+	echo "<button onclick='window.location.href=\"suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}\"' class='button left'><img src='back2.png'></button>";
+}
+else {
+	echo "<button onclick='window.location.href=\"alusta.php\"' class='button left'><img src='back2.png'></button>";
+}
 echo "<h1>",t("SUUNTALAVAN TUOTTEET"),"</h1></div>";
 
 echo "<form name='viivakoodiformi' method='post' action='' id='viivakoodiformi'>
 	<table class='search'>
 		<tr>
-			<th>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
-			</th>
-			<td>
+			<th>
+				",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
 				<button name='submit' id='valitse_nappi' value='viivakoodi' class='button' onclick='submit();'>",t("Etsi"),"</button>
-			</td>
+			</th>
 		</tr>
 	</table>
 	</form>";
@@ -234,10 +239,10 @@ echo "<script type='text/javascript'>
 	});
 
 	function doFocus() {
-	        var focusElementId = 'viivakoodi'
-	        var textBox = document.getElementById(focusElementId);
-	        textBox.focus();
-	    }
+	    var focusElementId = 'viivakoodi'
+	    var textBox = document.getElementById(focusElementId);
+	    textBox.focus();
+	}
 
 	function clickButton() {
 	   document.getElementById('myHiddenButton').click();

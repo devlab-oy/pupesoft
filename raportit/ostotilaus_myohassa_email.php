@@ -67,7 +67,9 @@ if ($tee == 'hae_ostotilaukset') {
 	}
 }
 
-require("inc/footer.inc");
+if (php_sapi_name() != 'cli') {
+	require("inc/footer.inc");
+}
 
 /**
  * Haetaan tavarantoimittajalla lähetetyt ostotilaskut, jotka eivät ole vielä saapuneet
@@ -79,9 +81,10 @@ require("inc/footer.inc");
 function hae_myohassa_olevat_ostotilaukset($paivamaararaja) {
 	global $kukarow;
 
+	//AND tilausrivi.keratty = '', ei haeta ostotilausrivejä, jotka on jo saapuneet varastoon.
 	$query = "	SELECT lasku.tunnus as lasku_tunnus,
-				lasku.toimaika as toimitusaika,
 				lasku.nimi as toimittaja,
+				tilausrivi.toimaika as toimitusaika,
 				tilausrivi.tuoteno,
 				tilausrivi.tilkpl,
 				tilausrivi.jaksotettu as vahvistettu,
@@ -91,14 +94,15 @@ function hae_myohassa_olevat_ostotilaukset($paivamaararaja) {
 				JOIN tilausrivi
 				ON ( tilausrivi.yhtio = lasku.yhtio
 					AND tilausrivi.otunnus = lasku.tunnus
-					AND tilausrivi.tyyppi = 'O' )
+					AND tilausrivi.tyyppi = 'O'
+					AND tilausrivi.toimaika <= DATE_SUB(CURRENT_DATE, INTERVAL {$paivamaararaja} DAY)
+					AND tilausrivi.varattu > 0 )
 				JOIN tuote
 				ON ( tuote.yhtio = tilausrivi.yhtio
 					AND tuote.tuoteno = tilausrivi.tuoteno )
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.tila = 'O'
 				AND lasku.alatila = 'A'
-				AND lasku.toimaika <= DATE_SUB(CURRENT_DATE, INTERVAL {$paivamaararaja} DAY)
 				ORDER BY lasku.nimi ASC";
 	$result = pupe_query($query);
 
@@ -160,7 +164,7 @@ function generoi_email_body($ostotilaukset) {
 
 			$email_bodys[$ostaja] .= t("Tuoteno").', '.t("Kpl").', '.t("Toimitusaika").', '.t("Vahvistettu")."\n";
 			foreach ($ostotilaus['rivit'] as $ostotilaus_rivi) {
-				$email_bodys[$ostaja] .= $ostotilaus_rivi['tuoteno'].', '.$ostotilaus_rivi['tilkpl'].', '.$ostotilaus_rivi['toimitusaika'].', '.($ostotilaus_rivi['vahvistettu'] == 1 ? t("Vahvistettu") : t("Vahvistamatta"))."\n";
+				$email_bodys[$ostaja] .= $ostotilaus_rivi['tuoteno'].', '.$ostotilaus_rivi['tilkpl'].', '.date('d.m.Y', strtotime($ostotilaus_rivi['toimitusaika'])).', '.($ostotilaus_rivi['vahvistettu'] == 1 ? t("Vahvistettu") : t("Vahvistamatta"))."\n";
 			}
 			$email_bodys[$ostaja] .= "\n";
 		}

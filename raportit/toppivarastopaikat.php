@@ -171,6 +171,10 @@ if ($tee != '') {
 			'header' => t('Varastopaikka'),
 			'order'	 => 40
 		),
+		'saldo'						=> array(
+			'header' => t('Saldo'),
+			'order' => 50
+		),
 		'kpl_valittu_aika'			 => array(
 			'header' => t('Keräystä'),
 			'order'	 => 60
@@ -499,16 +503,25 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 			$tuote_statukset[$status['selite']] = $status['selitetark'];
 		}
 
+		$checked_count = 0;
+
 		if (!empty($lisa_kentat)) {
 			foreach ($lisa_kentat as $lisa_kentta) {
 				if (!empty($lisa_kentta['checked'])) {
 					$tuote_select .= $lisa_kentta['kolumni'].', ';
 					$group .= $lisa_kentta['kolumni'].', ';
+					$checked_count++;
 				}
+			}
+
+			// Ruksattiin jotain lisävalintoita (tuotekohtaisia), voidaan näyttää saldo
+			if ($checked_count > 0) {
+				$tuote_select .= "tuotepaikat.saldo,";
+				$group .= "tuotepaikat.saldo,";
 			}
 		}
 
-		$tuote_select .= "tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,";
+		$tuote_select .= "tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, ";
 		$tuote_select .= "CONCAT_WS(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as hylly, ";
 		$tuote_select .= "group_concat(distinct tuotepaikat.tunnus) paikkatun, ";
 
@@ -520,7 +533,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 		}
 	}
 
-	$group = substr($group, 0, -1);
+	$group = rtrim($group, " ,");
 
 	if (!empty($kerayksettomat_tuotepaikat)) {
 

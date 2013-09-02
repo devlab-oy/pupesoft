@@ -131,7 +131,7 @@
 						$pdf->draw_text(480-$oikpos, $kala, '0.00', $firstpage, $norm);
 					}
 				}
-				
+
 			}
 			else {
 				if ($on_tiliote) {
@@ -301,13 +301,16 @@
 		$mapvmlisa = " and (lasku.mapvm  > '{$tito_pvm}' or lasku.mapvm = '0000-00-00') ";
 	}
 
-	$tapvmlisa = "";
+	$tapvmlisa     = "";
 	$tiliointilisa = "";
+	$leftlisa      = "";
+
 	if (isset($laskuraportti)) {
 		if (!empty($alkupvm) and !empty($loppupvm)) {
 			$tapvmlisa = " AND lasku.tapvm >= '{$alkupvm}' AND lasku.tapvm <= '{$loppupvm}'";
 		}
 		$on_tiliote = false;
+		$leftlisa = "LEFT";
 	}
 	else {
 		$tiliointilisa = "and tiliointi.tapvm <= '{$tito_pvm}'";
@@ -335,7 +338,7 @@
 				sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0))-lasku.pyoristys tiliointisumma,
 				sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
 				FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-				LEFT JOIN tiliointi use index (tositerivit_index) ON (
+				{$leftlisa} JOIN tiliointi use index (tositerivit_index) ON (
 					lasku.yhtio 		    = tiliointi.yhtio
 					and lasku.tunnus 	    = tiliointi.ltunnus
 					and tiliointi.tilino   in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]')

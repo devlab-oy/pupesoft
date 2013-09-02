@@ -64,7 +64,7 @@
 		}
 	}
 
-	if (isset($tuoteno)) $tkysy_lopetus = "{$palvelin2}tuote.php////tuoteno=".urlencode($tuoteno)."//tee=Z";
+	if (isset($tuoteno)) $tkysy_lopetus = "{$palvelin2}tuote.php////tuoteno=".urlencode($tuoteno)."//tee=Z///KALA";
 	else $tkysy_lopetus = "";
 
 	if ($lopetus != "") {
@@ -271,7 +271,7 @@
 				$kehahin = 0;
 
 				if (mysql_num_rows($sarjares) > 0) {
-					while($sarjarow = mysql_fetch_assoc($sarjares)) {
+					while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 						$kehahin += sarjanumeron_ostohinta("tunnus", $sarjarow["tunnus"]);
 						$sarjanumero_kpl++;
 					}
@@ -979,13 +979,20 @@
 
 			echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
 
-			//korvaavat tuotteet
-			$query  = "SELECT * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
-			$korvaresult = pupe_query($query);
+			// Korvaavat tuotteet
+			require "korvaavat.class.php";
+			$korvaavat = new Korvaavat($tuoteno);
 
-			if (mysql_num_rows($korvaresult) > 0) {
+			if (count($korvaavat->tuotteet()) > 0) {
+
 				// Varastosaldot ja paikat
-				echo "<font class='message'>".t("Korvaavat tuotteet")."</font><hr>";
+				echo "<font class='message'>".t("Korvaavat tuotteet")."</font>";
+
+				if (tarkista_oikeus('korvaavat.php', '', 1)) {
+					echo "&nbsp;&nbsp;<a href='{$palvelin2}korvaavat.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&lopetus=$tkysy_lopetus'><img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t("Muokkaa"),"' title='",t("Muuta korvaavuusketjuja"),"' /></a>";
+				}
+
+				echo "<hr>";
 
 				echo "<table>";
 				echo "<tr>";
@@ -993,18 +1000,12 @@
 				echo "<th>".t("Myytävissä")."</th>";
 				echo "</tr>";
 
-				// tuote löytyi, joten haetaan sen id...
-				$row    = mysql_fetch_assoc($korvaresult);
-				$id		= $row['id'];
-
-				$query = "SELECT * FROM korvaavat WHERE id='$id' AND tuoteno<>'$tuoteno' AND yhtio='$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
-				$korva2result = pupe_query($query);
-
-				while ($row = mysql_fetch_assoc($korva2result)) {
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+				// Listataan korvaavat ketju
+				foreach (array_reverse($korvaavat->tuotteet()) as $tuote) {
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
 					echo "<tr>";
-					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
+					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($tuote["tuoteno"])."&lopetus=$lopetus'>$tuote[tuoteno]</a></td>";
 					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
 					echo "</tr>";
 				}
@@ -1014,36 +1015,52 @@
 
 			echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
 
-			//vastaavat tuotteet
-			$query  = "SELECT * FROM vastaavat WHERE tuoteno='$tuoteno' AND yhtio='$kukarow[yhtio]'";
-			$vastaresult = pupe_query($query);
+			// Vastaavat tuotteet
+			require "vastaavat.class.php";
+			$vastaavat = new Vastaavat($tuoteno);
 
-			if (mysql_num_rows($vastaresult) > 0) {
-				// Varastosaldot ja paikat
-				echo "<font class='message'>".t("Vastaavat tuotteet")."</font><hr>";
+			// Jos tuote kuulu useampaan kuin yhteen vastaavuusketjuun
+			if ($vastaavat->onkovastaavia()) {
+				echo "<font class='message'>".t("Vastaavat tuotteet")."</font>";
 
-				echo "<table>";
-				echo "<tr>";
-				echo "<th>".t("Tuotenumero")."</th>";
-				echo "<th>".t("Myytävissä")."</th>";
-				echo "</tr>";
-
-				// tuote löytyi, joten haetaan sen id...
-				$row    = mysql_fetch_assoc($vastaresult);
-				$id		= $row['id'];
-
-				$query = "SELECT * FROM vastaavat WHERE id='$id' AND tuoteno<>'$tuoteno' AND yhtio='$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
-				$vasta2result = pupe_query($query);
-
-				while ($row = mysql_fetch_assoc($vasta2result)) {
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
-					echo "<tr>";
-					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
-					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
-					echo "</tr>";
+				if (tarkista_oikeus('vastaavat.php', '', 1)) {
+					echo "&nbsp;&nbsp;<a href='{$palvelin2}vastaavat.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&lopetus=$tkysy_lopetus'><img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t("Muokkaa"),"' title='",t("Muuta vastaavuusvuusketjuja"),"' /></a>";
 				}
 
-				echo "</table>";
+				echo "<hr>";
+
+				// Ketjujen id:t
+				foreach (explode(",", $vastaavat->getIDt()) as $ketju) {
+					echo "<table>";
+					echo "<tr><th colspan='3'>".t("Ketju").": $ketju.</th></tr>";
+					echo "<tr>";
+					echo "<th>".t("Tuotenumero")."</th>";
+					echo "<th>".t("Myytävissä")."</th>";
+					echo "<th>".t("Vaihtoehtoinen")."</th>";
+					echo "</tr>";
+
+					// Haetaan tuotteet ketjukohtaisesti
+					$_tuotteet = $vastaavat->tuotteet($ketju, $options);
+
+					// Lisätään löydetyt vastaavat mahdollisten myytävien joukkoon
+					foreach ($_tuotteet as $_tuote) {
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($_tuote["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+
+						echo "<tr>";
+						echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($_tuote["tuoteno"])."&lopetus=$lopetus'>$_tuote[tuoteno]</a></td>";
+						echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
+						echo "<td>";
+
+						// Vaihtoehtoinen
+						if ($_tuote['vaihtoehtoinen'] == 'K') {
+							echo t("Kyllä");
+						}
+
+						echo "</td>";
+						echo "</tr>";
+					}
+					echo "</table>";
+				}
 			}
 
 			echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
@@ -1052,7 +1069,7 @@
 			$lista = hae_tuotemuutokset($tuoteno);
 
 			if (count($lista) > 0) {
-				// tuotemuutoksia.
+				// Tuotemuutoksia.
 				echo "<font class='message'>".t("Tuotenumeromuutoksia")."</font><hr>";
 
 				echo "<table>";
@@ -1631,7 +1648,7 @@
 					echo "<th>".t("Ostohinta")."</th>";
 					echo "<th>".t("Varattu asiakaalle")."</th></tr>";
 
-					while($sarjarow = mysql_fetch_assoc($sarjares)) {
+					while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 
 						$fnlina1 = "";
 
@@ -1719,7 +1736,7 @@
 					}
 					echo "<th>".t("Lisätieto")."</th></tr>";
 
-					while($sarjarow = mysql_fetch_assoc($sarjares)) {
+					while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 						echo "<tr>
 								<td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($tuoterow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td>";
 
@@ -2094,7 +2111,7 @@
 										order by sarjanumero";
 							$sarjares = pupe_query($query);
 
-							while($sarjarow = mysql_fetch_assoc($sarjares)) {
+							while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 								if ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F" or $tuoterow["sarjanumeroseuranta"] == "G") {
 									echo "<br>".t("E:nro").": $sarjarow[sarjanumero]";
 								}
@@ -2132,4 +2149,3 @@
 	}
 
 	require ("inc/footer.inc");
-

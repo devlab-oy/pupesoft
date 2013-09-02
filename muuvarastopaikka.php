@@ -17,7 +17,11 @@
 					sarjanumeroseuranta WRITE,
 					sarjanumeroseuranta_arvomuutos READ,
 					lasku READ,
-					asiakas READ";
+					asiakas READ,
+					avainsana as a1 READ,
+					avainsana as a2 READ,
+					avainsana as a3 READ,
+					avainsana as a4 READ";
 		$result = pupe_query($query);
 	}
 	else {
@@ -83,8 +87,8 @@
 					WHERE tuoteno = '$tuoteno'
 					and yhtio 	= '$kukarow[yhtio]'
 					and oletus != ''";
-		$result = pupe_query($query);
-		$oletusrow = mysql_fetch_array($result);
+		$oletus_result = pupe_query($query);
+		$oletusrow = mysql_fetch_array($oletus_result);
 
 		// Saldot per varastopaikka
 		$query = "	SELECT tuotepaikat.*,
@@ -111,9 +115,34 @@
 			}
 		}
 
+		//Kun tuotteen statusta muutetaa, poistetaan tuotteelta myˆs automaattisesti perustetut tuotepaikat, jos tuotteelle ei ole perustettu manuaalisesti yht‰‰n paikkaa.
+		//Haetaan edellisen tuote statuksen oletuspaikat
+		if ($kutsuja == 'tuotetarkista.inc') {
+			$kaikki_oletuspaikat = hae_kaikki_oletuspaikat_try_tai_status($tem_try_vanha, $tem_status_vanha);
+
+			foreach ($poista as $poistettava) {
+				//Jos poistettavaa paikkaa ei lˆydy kaikista_oletuspaikoista,
+				//tarkoittaa se, ett‰ kyseess‰ on manuaalisesti lis‰tty tuotepaikka.
+				//T‰llˆin mit‰‰n paikkaa ei voida poistaa.
+				$oletuspaikka = in_array($poistettava['hylly'], $kaikki_oletuspaikat);
+
+				if (!$oletuspaikka) {
+					$poista = array();
+					break;
+				}
+			}
+		}
+
 		// K‰yd‰‰n l‰pi poistettavat paikat
 		if (count($poista) > 0) {
-			foreach ($poista as $poistetaan) {
+			foreach ($poista as $poistettava) {
+				if (is_array($poistettava)) {
+					$poistetaan = $poistettava['tunnus'];
+				}
+				else {
+					$poistetaan = $poistettava;
+				}
+
 				if ($poistetaan == $oletusrow["tunnus"] and ($saldot[$poistetaan] != 0 or count($saldot) > 1)) {
 					echo "<font class='error'>".t("Et voi poistaa oletuspaikkaa, koska sill‰ on saldoa tai tuotteella on muitakin paikkoja")."</font><br><br>";
 				}
@@ -121,7 +150,6 @@
 					echo "<font class='error'>".t("Et voi poistaa paikkaa jolla on saldoa")."</font><br><br>";
 				}
 				else {
-
 					if ($hyllyalue[$poistetaan] == "!!M") {
 						$asiakkaan_tunnus = (int) $hyllynro[$poistetaan].$hyllyvali[$poistetaan].$hyllytaso[$poistetaan];
 						$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
@@ -133,11 +161,11 @@
 						$poisto_texti = t("Poistettiin myyntitili-varastopaikka")." ".$asiakasrow["asiakkaan_nimi"];
 					}
 					else {
-						$poisto_texti = t("Poistettiin varastopaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]";
+						$poisto_texti = t("Poistettiin varastopaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]<br/>";
 					}
 
 					if ($kutsuja != "vastaanota.php") {
-						echo "<font class='message'>$poisto_texti</font><br><br>";
+						echo "<font class='message'>$poisto_texti</font>";
 					}
 
 					$query = "	INSERT into tapahtuma set
@@ -154,15 +182,18 @@
 								selite 		= '$poisto_texti',
 								laatija 	= '$kukarow[kuka]',
 								laadittu 	= now()";
-					$result = pupe_query($query);
+					pupe_query($query);
 
 					$query = "	DELETE FROM tuotepaikat
 								WHERE tuoteno 	= '$tuoteno'
 								and yhtio 		= '$kukarow[yhtio]'
 								and tunnus 		= '$poistetaan'";
-					$result = pupe_query($query);
+					pupe_query($query);
+
+					unset($saldot[$poistetaan]);
 				}
 			}
+			echo "<br/>";
 		}
 
 		if (count($flagaa_poistettavaksi_undo) > 0) {
@@ -174,7 +205,7 @@
 								WHERE tuoteno 	= '$tuoteno'
 								and yhtio 		= '$kukarow[yhtio]'
 								and tunnus 		= '$poistetaan'";
-					$result = pupe_query($query);
+					pupe_query($query);
 				}
 			}
 		}
@@ -186,7 +217,7 @@
 							WHERE tuoteno 	= '$tuoteno'
 							and yhtio 		= '$kukarow[yhtio]'
 							and tunnus 		= '$poistetaan'";
-				$result = pupe_query($query);
+				pupe_query($query);
 			}
 		}
 
@@ -197,11 +228,11 @@
 						WHERE tuoteno = '$tuoteno'
 						and yhtio = '$kukarow[yhtio]'
 						and tunnus = '$oletus'";
-			$result = pupe_query($query);
+			$oletus_result = pupe_query($query);
 
-			if (mysql_num_rows($result) == 1) {
+			if (mysql_num_rows($oletus_result) == 1) {
 
-				$uusi_oletusrow = mysql_fetch_assoc($result);
+				$uusi_oletusrow = mysql_fetch_assoc($oletus_result);
 
 				// Tehd‰‰n p‰ivitykset
 				echo "<font class='message'>".t("Siirret‰‰n oletuspaikka")."</font><br><br>";
@@ -230,7 +261,7 @@
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-				$result = pupe_query($query);
+				pupe_query($query);
 			}
 		}
 
@@ -241,7 +272,7 @@
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-				$result = pupe_query($query);
+				pupe_query($query);
 			}
 		}
 
@@ -252,7 +283,7 @@
 							muuttaja	= '{$kukarow['kuka']}',
 							muutospvm	= now()
 							WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
-				$result = pupe_query($query);
+				pupe_query($query);
 			}
 		}
 
@@ -261,7 +292,7 @@
 		$ahyllyvali	= '';
 		$ahyllytaso	= '';
 
-		if ($kutsuja == "vastaanota.php") {
+		if ($kutsuja == "vastaanota.php" or $kutsuja == "tuotetarkista.inc" ) {
 			$tee = "OK";
 		}
 		else {

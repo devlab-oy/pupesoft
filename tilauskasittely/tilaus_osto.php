@@ -15,7 +15,6 @@
 	}
 
 	require ("../inc/parametrit.inc");
-	require('inc/luo_ostotilausotsikko.inc');
 
 	if ($ajax_request) {
 		if ($hae_toimittajien_saldot) {
@@ -47,6 +46,8 @@
 		}
 	}
 
+	require ('inc/luo_ostotilausotsikko.inc');
+
 	if ($kukarow["extranet"] == "") {
 		echo "<script src='../js/tilaus_osto/tilaus_osto.js'></script>";
 		?>
@@ -55,12 +56,12 @@
 		display:none;
 	}
 	.vastaavat_korvaavat_not_hidden {
-		
+
 	}
 </style>
 		<?php
 	}
-	
+
 	if (!isset($tee)) $tee = "";
 	if (!isset($from)) $from = "";
 	if (!isset($toim_nimitykset)) $toim_nimitykset = "";
@@ -501,7 +502,7 @@
 
 			if ($tapa == 'VAIHDARIVI') {
 				$trow = hae_tuote($vastaavatuoteno);
-				$kpl = ($tilausrivirow['varattu'] + $tilausrivirow['jt']);
+				$kpl  = ($tilausrivirow['varattu'] + $tilausrivirow['jt']);
 
 				if (!empty($tilausrivirow['tilausrivilinkki'])) {
 					$query = "	SELECT lasku.*
@@ -514,6 +515,7 @@
 								GROUP BY lasku.tunnus";
 					$result = pupe_query($query);
 					$myyntitilausrow = mysql_fetch_assoc($result);
+
 					list($hinta, $netto, $ale, , ) = alehinta($myyntitilausrow, $trow, $kpl, '', '', '');
 
 					//Jos vaihdettava rivi on linkattu myyntitilaukseen, käydään vaihtamassa myös myyntitilauksen tuote vastaavaan tuotteeseen.
@@ -522,6 +524,7 @@
 						$ale_query .= $a_index .' = ' . $a . ',';
 					}
 					$ale_query = substr($ale_query, 0, -1);
+
 					$query = "	UPDATE tilausrivi
 								SET tuoteno = '{$vastaavatuoteno}',
 								nimitys = '{$trow['nimitys']}',
@@ -531,7 +534,7 @@
 								AND tunnus = '{$tilausrivirow['tilausrivitunnus']}'";
 					pupe_query($query);
 				}
-				
+
 				if ($toimi_tunnus == $laskurow['liitostunnus']) {
 					$tee = 'TI';
 					$tuoteno = $vastaavatuoteno;

@@ -271,7 +271,8 @@ if (!function_exists('alku_lahete')) {
 				$pdf->draw_text(430, 782, $taika, 								$thispage, $norm);
 			}
 			else {
-				$pdf->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]), 	$thispage, $norm);
+				if ($tyyppi != "YLLAPITOSOPIMUS" and $tyyppi != 'SIIRTOLISTA' and $laskurow['toimaika'] == '0000-00-00') $pdf->draw_text(430, 782, t("Avoin", $kieli), 	$thispage, $norm);
+				else $pdf->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]), 	$thispage, $norm);
 			}
 
 			$asrow["ytunnus"] = tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]);
@@ -681,7 +682,7 @@ if (!function_exists('uusi_sivu_lahete')) {
 
 		// Luodaan muuttujat
 		extract($params);
-		
+
 		$base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
 		$lahetetyyppi_avainsana = t_avainsana("LAHETETYYPPI", "", " and selite='$lahetetyyppi'", "", "", "selitetark_2");

@@ -587,13 +587,17 @@
 			}
 
 			//Jos kyseess‰ on laskutettava myyntitili
-			if ($monistarow["tila"] == "G" and $monistarow["alatila"] == "V" and $monistarow["tilaustyyppi"] == "M") {
-				// P‰ivitet‰‰n kopsatun laskun eilahetett‰ kentt‰‰
-				$query = "	UPDATE lasku
-							SET eilahetetta = 'o'
-							where yhtio = '$kukarow[yhtio]'
-							and tunnus = '$kukarow[kesken]'";
-				$result = pupe_query($query);
+			if (($monistarow["tila"] == "G" and $monistarow["alatila"] == "V" and $monistarow["tilaustyyppi"] == "M") or ($monistarow['clearing'] == 'EXTTARJOUS')) {
+				if ($monistarow['clearing'] != 'EXTTARJOUS') {
+					// P‰ivitet‰‰n kopsatun laskun eilahetett‰ kentt‰‰
+					$query = "	UPDATE lasku
+								SET eilahetetta = 'o'
+								where yhtio = '$kukarow[yhtio]'
+								and tunnus = '$kukarow[kesken]'";
+					$result = pupe_query($query);
+					
+					$tilausvalmiskutsuja = "MYYNTITILI";
+				}
 
 				$query 	= "	SELECT *
 							from lasku
@@ -601,8 +605,6 @@
 							and yhtio = '$kukarow[yhtio]'";
 				$result  	= pupe_query($query);
 				$laskurow   = mysql_fetch_array($result);
-				
-				$tilausvalmiskutsuja = "MYYNTITILI";
 				
 				require("tilaus-valmis.inc");
 			}

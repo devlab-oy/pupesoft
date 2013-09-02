@@ -13,6 +13,8 @@
 	// Tarvitaan $toitarow jossa on laskun toimitustavan tiedot
 	// Passataan $desadv_version, mik‰li se on "una", niin tulostetaan uudet headerit
 
+	$toimitusvahvistus_desadv_lahetys = FALSE;
+
 	//jos on laitettu kollikentt‰‰n 0 niin ei yritet‰ luoda siirtotiedostoa
 	if (($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv_path != '') or $desadv_path != '') {
 
@@ -134,7 +136,24 @@
 
 				// NAD - identification of consignee
 				if ($toitarow['toim_nimi'] != '' and $toitarow['toim_ovttunnus'] != '') {
-					$desadv_message .= "NAD+CN+{$toitarow['toim_ovttunnus']}::92++".substr($toitarow["toim_nimi"], 0, 35).":".substr($toitarow["toim_nimitark"], 0, 35)."+".substr($toitarow["toim_osoite"], 0, 35)."+".substr($toitarow["toim_postitp"], 0, 35)."++".substr($toitarow["toim_postino"], 0, 17)."+".substr($toitarow["toim_maa"], 0, 3)."'";
+					$desadv_message .= "NAD+CN+{$toitarow['toim_ovttunnus']}::100++"
+										.substr($toitarow["toim_nimi"], 0, 35).":"
+										.substr($toitarow["toim_nimitark"], 0, 35)."+"
+										.substr($toitarow["toim_osoite"], 0, 35)."+"
+										.substr($toitarow["toim_postitp"], 0, 35)."++"
+										.substr($toitarow["toim_postino"], 0, 17)."+"
+										.substr($toitarow["toim_maa"], 0, 3)."'";
+					$x++;
+				}
+				elseif ($desadv_laskurow["toim_nimi"] != '' and $desadv_laskurow['asiakasovttunnus'] != '') {
+					//asiakkaan toimitusosoite
+					$desadv_message .= "NAD+CN+{$desadv_laskurow['asiakasovttunnus']}:100++"
+										.substr($desadv_laskurow["toim_nimi"], 0, 35).":"
+										.substr($desadv_laskurow["toim_nimitark"], 0, 35)."+"
+										.substr($desadv_laskurow["toim_osoite"], 0, 35)."+"
+										.substr($desadv_laskurow["toim_postitp"], 0, 35)."++"
+										.substr($desadv_laskurow["toim_postino"], 0, 17)."+"
+										.substr($desadv_laskurow["toim_maa"], 0, 3)."'";
 					$x++;
 				}
 				else {
@@ -143,7 +162,13 @@
 
 				// NAD - identification of the delivery party
 				if ($desadv_laskurow['asiakastoim_nimi'] != '' and $desadv_laskurow['asiakastoim_ovttunnus'] != '') {
-					$desadv_message .= "NAD+DP+{$desadv_laskurow['asiakastoim_ovttunnus']}::92++".substr($desadv_laskurow["asiakastoim_nimi"], 0, 35).":".substr($desadv_laskurow["asiakastoim_nimitark"], 0, 35)."+".substr($desadv_laskurow["asiakastoim_osoite"], 0, 35)."+".substr($desadv_laskurow["asiakastoim_postitp"], 0, 35)."++".substr($desadv_laskurow["asiakastoim_postino"], 0, 17)."+".substr($desadv_laskurow["asiakastoim_maa"], 0, 3)."'";
+					$desadv_message .= "NAD+DP+{$desadv_laskurow['asiakastoim_ovttunnus']}::92++"
+										.substr($desadv_laskurow["asiakastoim_nimi"], 0, 35).":"
+										.substr($desadv_laskurow["asiakastoim_nimitark"], 0, 35)."+"
+										.substr($desadv_laskurow["asiakastoim_osoite"], 0, 35)."+"
+										.substr($desadv_laskurow["asiakastoim_postitp"], 0, 35)."++"
+										.substr($desadv_laskurow["asiakastoim_postino"], 0, 17)."+"
+										.substr($desadv_laskurow["asiakastoim_maa"], 0, 3)."'";
 					$x++;
 
 					if ($desadv_version != "fi0089") {
@@ -605,6 +630,10 @@
 					$ftpfile = realpath($filenimi);
 
 					require ("inc/ftp-send.inc");
+
+					if ($palautus == 0) {
+						$toimitusvahvistus_desadv_lahetys = TRUE;
+					}
 				}
 			}
 			else {
@@ -613,4 +642,7 @@
 
 			$rajaus++;
 		}
+	}
+	else {
+		echo "<br/><font class='error'><br><hr>",t("Toimitusvahvistusta ei voida l‰hett‰‰"),"!<br>",t("L‰hetystiedot puuttuu"),".<br></font><hr><br>";
 	}

@@ -109,5 +109,38 @@
 		$ulos .= "<option value = 'kk' $sel[kk]>".t("Kuukausittain")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
+	}
 
+	if (mysql_field_name($result, $i) == "ostotilauksen_kasittely") {
+
+		$myynnista_osto_avainsanat = t_avainsana("MYYNNISTA_OSTO");
+
+		if (mysql_num_rows($myynnista_osto_avainsanat) > 0) {
+
+			$ulos  = "<td><select name='{$nimi}'>";
+			$ulos .= "<option value=''>".t("Ei valintaa")."</option>";
+
+			while ($myynnista_osto_avainsanat_row = mysql_fetch_assoc($myynnista_osto_avainsanat)) {
+
+				$sel = $myynnista_osto_avainsanat_row['selite'] == $trow[$i] ? " selected" : "";
+
+				$ulos .= "<option value='{$myynnista_osto_avainsanat_row['selite']}'{$sel}>{$myynnista_osto_avainsanat_row['selitetark']}</option>";
+			}
+
+			$ulos .= "</select></td>";
+		}
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "sahkoinen_automaattituloutus") {
+
+		$sel = $trow[$i] == 'K' ? " selected" : "";
+
+		$ulos  = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Sähköisen laskun sisäänluvun yhteydessä ei oletuksena tulouteta tuotteita varastoon")."</option>";
+		$ulos .= "<option value='K'{$sel["K"]}>".t("Tuotteet tuloutetaan varastoon automaattisesti sähköisen laskun sisäänluvun yhteydessä")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
 	}

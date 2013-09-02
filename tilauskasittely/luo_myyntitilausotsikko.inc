@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("luo_myyntitilausotsikko")) {
-	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '') {
+if (!function_exists("luo_myyntitilausotsikko")) {
+	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '') {
 		global $kukarow, $yhtiorow, $session;
 
 		$query	= "	SELECT *
@@ -59,7 +59,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$kohde  = "";
 			$eilahe = "";
 
-			if ($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") {
+			if (($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") or $yhtiorow['lahetteen_tulostustapa'] == 'I') {
 				$eilahe = "o";
 			}
 
@@ -141,7 +141,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				$query  = "	SELECT distinct selite
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]'
-							and laji    = 'asiakasluokka'
+							and laji	= 'asiakasluokka'
 							and selite != ''
 							ORDER BY 1
 							LIMIT 1";
@@ -231,6 +231,38 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 
 			$yhteyshenkilo_kaupallinen	= "";
 			$yhteyshenkilo_tekninen		= "";
+
+			if ($toim == "PIKATILAUS" and in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U','X','Y','A','B','C','V','W','I','J'))) {
+
+				$myynnista_osto_avainsanat = t_avainsana("MYYNNISTA_OSTO");
+
+				if (mysql_num_rows($myynnista_osto_avainsanat) > 0) {
+
+					// Yhtiön toimipaikka yliajaa tämän parametrin
+					$query_x = "	SELECT ostotilauksen_kasittely
+									FROM yhtion_parametrit
+									WHERE yhtio = '{$kukarow['yhtio']}'";
+					$param_fetch_res = pupe_query($query_x);
+					$param_fetch_row = mysql_fetch_assoc($param_fetch_res);
+
+					$ostotilauksen_kasittely = $param_fetch_row['ostotilauksen_kasittely'];
+
+					if ($kukarow['toimipaikka'] != 0) {
+
+						$query_x = "	SELECT ostotilauksen_kasittely
+										FROM yhtion_toimipaikat
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$kukarow['toimipaikka']}'
+										AND ostotilauksen_kasittely != ''";
+						$toimpaikka_chk_res = pupe_query($query_x);
+
+						if (mysql_num_rows($toimpaikka_chk_res) > 0) {
+							$toimpaikka_chk_row = mysql_fetch_assoc($toimpaikka_chk_res);
+							$ostotilauksen_kasittely = $toimpaikka_chk_row['ostotilauksen_kasittely'];
+						}
+					}
+				}
+			}
 		}
 		else {
 			//yhtiön oletusalvi!
@@ -312,7 +344,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$osatoimitus = "o";
 		}
 
-		$tilaustyyppi = "N";
+		$tilaustyyppi = $tilaustyyppi != '' ? $tilaustyyppi : "N";
 
 		if ($toim == "TARJOUS") {
 			$tilaustyyppi = 'T';
@@ -340,5 +372,107 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		else {
 			return $tilausnumero;
 		}
+	}
+}
+
+if (!function_exists("luo_tarjouspohja")) {
+	function luo_tarjouspohja($params) {
+		global $kukarow, $yhtiorow, $session;
+
+		// valitut_asiakastunnukset on special case tapaus. valitut_asiakastunnukset on setattu ainoastaan silloin kun dummytarjoukselle halutaan liittää asiakkaita.
+		// clearing on special case, kun dummy tarjoukselta halutaan luoda asiakkaille oikeat tarjoukset, niin cleargin pitää setata näihin tarjouksiin
+		$toim = $params['toim'];
+		$asiakasid = $params['asiakasid'];
+		$tilausnumero = $params['tilausnumero'];
+		$valitut_asiakastunnukset = $params['valitut_asiakastunnukset'];
+		$alv = $params['alv'];
+
+		//Jos asiakasid < 0 niin kyseessä on special case. Tässä tapauksessa luodaan Extranet Dummytarjousta.
+		$query = "  SELECT *
+					FROM kuka
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus  = '$asiakasid'";
+		$result = pupe_query($query);
+		$asiakasrow  = mysql_fetch_assoc($result);
+
+		$query = "	SELECT *
+					FROM maksuehto
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND kaytossa = ''
+					AND jv = ''
+					AND kateinen = ''
+					AND jaksotettu = ''
+					AND erapvmkasin = ''
+					AND (sallitut_maat = '' OR sallitut_maat LIKE '%$yhtiorow[maa]%')
+					ORDER BY jarjestys ASC
+					LIMIT 1";
+		$result = pupe_query($query);
+		$maksuehto_row = mysql_fetch_assoc($result);
+
+		$query = "  SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND nouto = ''
+					AND vak_kielto = ''
+					AND (sallitut_maat = '' OR sallitut_maat LIKE '%$yhtiorow[maa]%')
+					ORDER BY jarjestys ASC
+					LIMIT 1";
+		$result = pupe_query($query);
+		$default_toimitustapa_row  = mysql_fetch_assoc($result);
+
+		$jatka	= "JATKA";
+		$tee	= "OTSIK";
+		$override_ytunnus_check = "YES";
+		$ei_kayttoliittymaa = "kylla";
+
+		$nimi = t("Tarjouspohja");
+		$osoite = t("Tarjouspohjan osoite");
+		$postitp = t("Tarjouspohjan postitoimipaikka");
+		$postino = t("Tarjouspohjan postinumero");
+		$maa = $yhtiorow['maa'];
+
+		$maksuehto = $maksuehto_row['tunnus'];
+		$toimitustapa = $default_toimitustapa_row['selite'];
+
+		if ($toim == "TARJOUS") {
+			$clearing = "EXTTARJOUS";
+			$tilaustyyppi = 'T';
+		}
+		else {
+			$clearing = "EXTENNAKKO";
+			$tilaustyyppi = 'E';
+		}
+
+		if (!empty($tilausnumero)) {
+			$query = "  SELECT lasku.*, laskun_lisatiedot.sopimus_lisatietoja
+						FROM lasku
+						JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+						WHERE lasku.yhtio='{$kukarow['yhtio']}'
+						AND lasku.tunnus = $tilausnumero";
+			$result = pupe_query($query);
+
+			$dummy_tarjous_row = mysql_fetch_assoc($result);
+			$sopimus_lisatietoja = $dummy_tarjous_row['sopimus_lisatietoja'];
+		}
+
+		require ("otsik.inc");
+
+		if (is_array($valitut_asiakastunnukset) and count($valitut_asiakastunnukset) > 0) {
+			if (!empty($dummy_tarjous_row['sopimus_lisatietoja'])) {
+				$olemassaolevat = explode(",", $dummy_tarjous_row['sopimus_lisatietoja']);
+				$lisattavat = array_diff($valitut_asiakastunnukset, $olemassaolevat);
+				$asiakas_tunnukset = $dummy_tarjous_row['sopimus_lisatietoja'] . ',' . implode(',', $lisattavat);
+			}
+			else {
+				$asiakas_tunnukset = implode(',', $valitut_asiakastunnukset);
+			}
+			$query = "  UPDATE laskun_lisatiedot
+						SET sopimus_lisatietoja = '{$asiakas_tunnukset}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND otunnus = '{$tilausnumero}'";
+			pupe_query($query);
+		}
+
+		return $tilausnumero;
 	}
 }

@@ -1127,8 +1127,15 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		echo "<tbody>";
 
 		$keikkakesken = 0;
-		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
-			$keikkakesken = file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock");
+
+		$lock_params = array(
+		    "locktime" => 0,
+			"lockfile" => "$kukarow[yhtio]-keikka.lock",
+			"return"   => TRUE
+		);
+
+		if (!pupesoft_flock($lock_params)) {
+			list($keikkakesken, $_kuka, $_timestamp) = explode(";", file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock"));
 		}
 
 		$kaikkivarastossayhteensa 		= 0;
@@ -1247,7 +1254,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 			// jos tätä keikkaa ollaan just viemässä varastoon ei tehdä dropdownia
 			if ($keikkakesken == $row["tunnus"]) {
-				echo "<td>".t("Varastoonvienti kesken")."</td>";
+				echo "<td>".t("Varastoonvienti kesken")." ".t("käyttäjällä")." {$_kuka} @ {$_timestamp}</td>";
 			}
 			else {
 

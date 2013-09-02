@@ -69,67 +69,45 @@
 
 				if ($kpl > 0.0 and $tuote != "") {
 
-					$toinen_tuoteno = "";
+					$toim_tuoteno_wherelisa = trim($tuote2) != "" ? "AND tt.toim_tuoteno IN ('{$tuote}','{$tuote2}')" : "AND tt.toim_tuoteno = '{$tuote}'";
 
-					if ($tavarantoimittajanumero == "123067") {
-						$orgtuote = $tuote;
-						$lyhennetty_tuoteno = substr($tuote, 0, -3);
-						$jatkettu_tuoteno = $lyhennetty_tuoteno."090";
+					$query = "	SELECT tt.*
+								FROM tuotteen_toimittajat AS tt
+								JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$tavarantoimittajanumero}' AND toimi.tyyppi != 'P')
+								WHERE tt.yhtio = 'artr'
+								{$toim_tuoteno_wherelisa}";
+					$chk_res = pupe_query($query);
 
-						if ($tuote2 != "") {
-							$toinen_tuoteno = ",'{$tuote2}'";
-						}
-
-						$poikkeus_tuoteno =" in ('{$orgtuote}','{$lyhennetty_tuoteno}','{$jatkettu_tuoteno}' {$toinen_tuoteno})";
+					if (mysql_num_rows($chk_res) != 0) {
+						$chk_row = mysql_fetch_assoc($chk_res);
+						$tuote = $chk_row['toim_tuoteno'];
 					}
-					elseif ($tavarantoimittajanumero == "123453") {
-						$suba = substr($tuote,0,3);
-						$subb = substr($tuote,3);
-						$tuote_x = $suba."-".$subb;
-						$yhteen = $tuote_x;
+					else if (mysql_num_rows($chk_res) == 0) {
+						// haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan myös hakea vaihtoehtoinen tuotenumero ilman että
+						$chk_res = tuotteen_toimittajat_tuotenumerot_haku($tuote, $tavarantoimittajanumero);
 
-						if ($tuote2 != "") {
-							$toinen_tuoteno = ",'{$tuote2}'";
+						if (mysql_num_rows($chk_res) != 0) {
+							$chk_row = mysql_fetch_assoc($chk_res);
+							$tuote = $chk_row['toim_tuoteno'];
 						}
+						else {
 
-						$poikkeus_tuoteno = " in ('{$tuote_x}','{$yhteen}' {$toinen_tuoteno}) ";
-					}
-					elseif ($tavarantoimittajanumero == "123178") {
-						$orgtuote = $tuote;
-						$lyhennetty = substr($tuote,3);
+							if (trim($tuote2) != "") {
+								$chk_res = tuotteen_toimittajat_tuotenumerot_haku($tuote2, $tavarantoimittajanumero);
 
-						if ($tuote2 != "") {
-							$lyhennetty_toinen = substr($tuote2,3);
-							$toinen_tuoteno = ",'{$tuote2}','{$lyhennetty_toinen}'";
+								if (mysql_num_rows($chk_res) != 0) {
+									$chk_row = mysql_fetch_assoc($chk_res);
+									$tuote = $chk_row['toim_tuoteno'];
+								}
+							}
 						}
-
-						$poikkeus_tuoteno = " in ('{$orgtuote}','{$lyhennetty}' {$toinen_tuoteno}) ";
-					}
-					elseif ($tavarantoimittajanumero == "123084") {
-						$orgtuote = $tuote;
-						$lyhennetty = ltrim($tuote,'0');
-
-						if ($tuote2 != "") {
-							$lyhennetty_toinen = ltrim($tuote2,'0');
-							$toinen_tuoteno = ",'{$tuote2}','{$lyhennetty_toinen}'";
-						}
-
-						$poikkeus_tuoteno = " in ('{$orgtuote}','{$lyhennetty}' {$toinen_tuoteno}) ";
-					}
-					else {
-						if ($tuote2 != "") {
-							$toinen_tuoteno = ",'{$tuote2}'";
-						}
-
-						$poikkeus_tuoteno = " in ('{$tuote}' {$toinen_tuoteno}) ";
 					}
 
 					$query = "	SELECT tuotteen_toimittajat.tuotekerroin
 								FROM toimi
 								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-															#AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno {$poikkeus_tuoteno}
+															AND tuotteen_toimittajat.toim_tuoteno = '{$tuote}'
 															AND tuotteen_toimittajat.toim_tuoteno != '')
 								JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
 												AND tuote.tuoteno = tuotteen_toimittajat.tuoteno
@@ -276,10 +254,10 @@
 					}
 					elseif (strtoupper($tavarantoimittajanumero) == "LES-7") {
 						$tavarantoimittajanumero = "123080";
-					}	
+					}
 					elseif (strtoupper($tavarantoimittajanumero) == "123035") {
 							$tavarantoimittajanumero = "123036";
-					}				
+					}
 
 					$asn_numero  = (string) $xml->DesAdvHeader->DesAdvId;
 					$asn_numero = utf8_decode($asn_numero);

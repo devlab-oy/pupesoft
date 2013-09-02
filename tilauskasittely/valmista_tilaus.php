@@ -525,8 +525,11 @@
 											$tee = "VALMISTA";
 										}
 
+										$apuapuapua1 =  (int) $saldot_valm[$perherow["tuoteno"]] * 100;
+										$apuapuapua2 =  (int) $varataankpl * 100;
+										
 										// katotaan kanssa, että perheenjäsenet löytyy kannasta ja niitä on riittävästi (jos reseptissä on useampi valmiste, niin summataan $varataankpl $saldot_valm-muuttujaan kun loopataan toista tat kolmatta valmistetta)
-										if ((!isset($vakisinhyvaksy) or $vakisinhyvaksy == '') and (($tilrivirow['perheid2'] != -100 and $saldot_valm[$perherow["tuoteno"]] < $varataankpl) or ($tilrivirow['perheid2'] == -100 and ($saldot_valm[$perherow["tuoteno"]]+$varataankpl) < $varataankpl))) {
+										if ((!isset($vakisinhyvaksy) or $vakisinhyvaksy == '') and (($tilrivirow['perheid2'] != -100 and $apuapuapua1 < $apuapuapua2) or ($tilrivirow['perheid2'] == -100 and ($apuapuapua1 + $apuapuapua2) < $apuapuapua2))) {
 											echo "<font class='error'>".t("Saldo")." ".$saldot[$perherow["tuoteno"]]." ".t("ei riitä")."! ".t("Tuotetta")." $perherow[tuoteno] ".t("kulutetaan")." $varataankpl ".t_avainsana("Y", $kieli, "and avainsana.selite='$perherow[yksikko]'", "", "", "selite").".</font><br>";
 											$virheitaoli = "JOO";
 											$tee = "VALMISTA";

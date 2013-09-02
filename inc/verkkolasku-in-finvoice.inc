@@ -3,6 +3,8 @@
 $laskuformaatti = "FINVOICE";
 $laskun_ebid    = "FINVOICEXML";
 
+if (strpos($file, "maventa") !== false) $laskun_ebid = $ebid = "MAVENTAXML";
+
 // parseroidaan xml
 $yhtio 					= $xml->BuyerOrganisationUnitNumber;
 $verkkotunnus_vas		= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
@@ -109,7 +111,6 @@ if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		// tuotekoodi
 		$rtuoteno[$i]["tuoteno"]  = empty($tuotetieto->ArticleIdentifier) ? pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleName)) : pupesoft_cleanstring(utf8_decode($tuotetieto->ArticleIdentifier));
-		$rtuoteno[$i]["tuoteno2"] = "";
 
 		if ($rtuoteno[$i]["tuoteno"] != "") {
 

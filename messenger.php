@@ -41,8 +41,8 @@
 	echo "<tr><th>".t("Lähetä viesti")." --> ".t("Vastaanottaja").": <select name='vastaanottaja'>";
 
 	$query = "	SELECT DISTINCT kuka.nimi, kuka.kuka
-				FROM kuka
-				JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+				FROM kuka USE INDEX (kuka_index)
+				JOIN oikeu USE INDEX (sovellus_index) ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 				WHERE kuka.yhtio $konsyhtiot
 				AND kuka.extranet = ''
 				AND kuka.nimi    != ''

@@ -586,9 +586,13 @@
 			$excel->set_kieli($kieli);
 			$excel->set_asiakas($data['asiakasrow']);
 			$excel->set_yhtiorow($yhtiorow);
+			$alkumiinusyks = $params['alkuvv']-1;
+			$loppumiinusyks = $params['loppuvv']-1;
 			$excel->set_rajaus_paivat(array(
 				'alkupaiva' => $params['alkupp'] . '.' . $params['alkukk'] . '.' . $params['alkuvv'],
 				'loppupaiva' => $params['loppupp'] . '.' . $params['loppukk'] . '.' .$params['loppuvv'],
+				'edalkupaiva' => $params['alkupp'] . '.' . $params['alkukk'] . '.' . $alkumiinusyks,
+				'edloppupaiva' => $params['loppupp'] . '.' . $params['loppukk'] . '.' .$loppumiinusyks,
 			));
 			$excel->set_tilausrivit($temp_data);
 			$excel->set_summat_osastoittain($data['summat_ilman_try']);

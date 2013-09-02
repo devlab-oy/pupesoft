@@ -173,9 +173,21 @@ while ($orow = mysql_fetch_array($result)) {
 			  and hidden		= ''
 			  ORDER BY jarjestys, jarjestys2";
 	$xresult = mysql_query($query) or pupe_error($query);
-
-
 	$mrow = mysql_fetch_array($xresult);
+
+	if ($mrow['nimi'] == 'extranet_tarjoukset_ja_ennakot.php' and stristr($mrow['alanimi'], "EXTENNAKKO")) {
+		$ennakoiden_lukumaara = hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot($kukarow['oletus_asiakas']);
+		if ($ennakoiden_lukumaara > 0) {
+			$mrow['nimitys'] .= " <span style='font-weight: bold;'>({$ennakoiden_lukumaara})</span>";
+		}
+	}
+
+	if ($mrow['nimi'] == 'extranet_tarjoukset_ja_ennakot.php' and stristr($mrow['alanimi'], "EXTTARJOUS")) {
+		$tarjousten_lukumaara = hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset($kukarow['oletus_asiakas']);
+		if ($tarjousten_lukumaara > 0) {
+			$mrow['nimitys'] .= " <span style='font-weight: bold;'>({$tarjousten_lukumaara})</span>";
+		}
+	}
 
 	// alamenuja löytyy, eli tämä on menu
 	if (mysql_num_rows($xresult) > 1) {

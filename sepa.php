@@ -341,23 +341,29 @@
 //					$Inf = $RgltryDtls->addChild('Inf', '');
 			$RmtInf = $CdtTrfTxInf->addChild('RmtInf', '');														// RemittanceInformation
 
-			if (strlen(trim($laskurow["viite"])) > 0) {
-				$Strd = $RmtInf->addChild('Strd', '');															// Structured (Max 9 occurrences)
-//					$RfrdDocInf = $Strd->addChild('RfrdDocInf', '');											// ReferredDocumentInformation
-//						$RfrdDocTp = $RfrdDocInf->addChild('RfrdDocTp', '');
-//							$Cd = $RfrdDocTp->addChild('Cd', '');
-//						$RfrdDocNb = $RfrdDocInf->addChild('RfrdDocNb', '');
-//					$RfrdDocRltdDt = $Strd->addChild('RfrdDocRltdDt', '');
-//					$RfrdDocAmt = $Strd->addChild('RfrdDocAmt', '');
-//						$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', '');
-					$CdtrRefInf = $Strd->addChild('CdtrRefInf', '');											// CreditorReferenceInformation
-						$CdtrRefTp = $CdtrRefInf->addChild('CdtrRefTp', '');									// CreditorReferenceType
-							$Cd = $CdtrRefTp->addChild('Cd', 'SCOR');											// Code (SCOR = Structured Communication Reference)
-						$CdtrRef = $CdtrRefInf->addChild('CdtrRef', sprintf("%-1.35s", $laskurow['viite']));	// CreditorReference
-//					$AddtlRmtInf = $Strd->addChild('AddtlRmtInf', '');
+			if ($yhtiorow['maa'] == 'EE' and strlen(trim($laskurow["laskunro"])) > 0 and $laskurow['viesti'] != "") {
+				$reference_number_and_message = "/RFB/".$laskurow['laskunro']."/TXT/".$laskurow['viesti'];
+				$Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s",$reference_number_and_message));					// Unstructured (max 140 char)
 			}
-			elseif ($laskurow['viesti'] != "") {
-				$Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $laskurow['viesti']));					// Unstructured (max 140 char)
+			else {
+				if (strlen(trim($laskurow["viite"])) > 0) {
+					$Strd = $RmtInf->addChild('Strd', '');															// Structured (Max 9 occurrences)
+	//					$RfrdDocInf = $Strd->addChild('RfrdDocInf', '');											// ReferredDocumentInformation
+	//						$RfrdDocTp = $RfrdDocInf->addChild('RfrdDocTp', '');
+	//							$Cd = $RfrdDocTp->addChild('Cd', '');
+	//						$RfrdDocNb = $RfrdDocInf->addChild('RfrdDocNb', '');
+	//					$RfrdDocRltdDt = $Strd->addChild('RfrdDocRltdDt', '');
+	//					$RfrdDocAmt = $Strd->addChild('RfrdDocAmt', '');
+	//						$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', '');
+						$CdtrRefInf = $Strd->addChild('CdtrRefInf', '');											// CreditorReferenceInformation
+							$CdtrRefTp = $CdtrRefInf->addChild('CdtrRefTp', '');									// CreditorReferenceType
+								$Cd = $CdtrRefTp->addChild('Cd', 'SCOR');											// Code (SCOR = Structured Communication Reference)
+							$CdtrRef = $CdtrRefInf->addChild('CdtrRef', sprintf("%-1.35s", $laskurow['viite']));	// CreditorReference
+	//					$AddtlRmtInf = $Strd->addChild('AddtlRmtInf', '');
+				}
+				elseif ($laskurow['viesti'] != "") {
+					$Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $laskurow['viesti']));					// Unstructured (max 140 char)
+				}
 			}
 
 			// jos tämä muuttuja on setattu, on tämä ko. lasku/tapahtuma netotettu näistä tunnuksista!
@@ -721,7 +727,7 @@
 		while ($laskurow = mysql_fetch_assoc($result)) {
 
             // Jos laskunumero on syötetty, lisätään se viestiin mukaan
-            if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti']) {
+            if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti'] and $yhtiorow['maa'] != 'EE') {
                 $laskurow['viesti'] = (trim($laskurow['viesti']) == "") ? $laskurow['laskunro'] : $laskurow['viesti']." ".$laskurow['laskunro'];
             }
 

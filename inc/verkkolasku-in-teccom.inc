@@ -3,6 +3,7 @@
 	// Bosch Teccom -case
 	$xml = isset($xml->ArchivedDocument->Invoice) ? $xml->ArchivedDocument->Invoice : $xml;
 
+	$kukarow['yhtio']		= "artr";
 	$laskuformaatti 		= "TECCOM-INVOICE";
 	$yhtio 					= "20428100"; 		//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber;
 	$verkkotunnus_vas		= "003720428100";	//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber; 	// joissakin materiaaleissa viallista materiaalia.
@@ -204,19 +205,6 @@
 		$laskuttajan_valkoodi = $xml->InvoiceHeader->Currency;
 	}
 
-	// Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, että se on ovtmuodossa
-	if (strlen($yhtio) != 18 or strtoupper(substr($yhtio,0,2)) != "FI") {
-		// Varmistetaan, että tunnus on ovtunnus muodossa
-		$yhtio = preg_replace("/[^0-9]/", "", $yhtio);
-
-		if (strpos($yhtio, "0037") === FALSE) {
-			$yhtio = "0037".$yhtio;
-		}
-	}
-
-	// Varmistetaan, että tunnus on ytunnus muodossa (Finvoicessa täällä tulee siis vastanottajan ytunnus FI etuliitteellä)
-	$verkkotunnus_vas = preg_replace("/[^0-9]/", "", $verkkotunnus_vas);
-
 	// Käsitellään tuoterivit
 	$tuotetiedot			= $xml->InvoiceDetail;
 	$i						= 0;
@@ -227,55 +215,39 @@
 	$x 						= 0;
 
 	if (count($tuotetiedot) > 0) {
+
 		foreach ($tuotetiedot as $tuotetieto) {
+
 			// tuotekoodi
-			// Tehdään poikkeustapaksien käsittely
-			if ($laskuttajan_toimittajanumero == "123085") {
-				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductDescription->ProductName1));
-			}
-			elseif ($laskuttajan_toimittajanumero == "123067") {
-				$rtuoteno[$i]["tuoteno"] = substr(pupesoft_cleanstring(utf8_decode($tuotetieto->ProductId->ProductNumber)),0,-3);
-				$rtuoteno[$i]["tuoteno2"] = "{$rtuoteno[$i]["tuoteno"]}090";
-			}
-			elseif ($laskuttajan_toimittajanumero == "123007") {
-				$aputuoteno = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductId->ProductNumber));
-				$pituus 	= strlen(trim($aputuoteno));
+			$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
 
-				if ($pituus == 8 and strpos(' ',$aputuoteno) == 6) {
-					$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = substr($aputuoteno,0,5);
-				}
-				else {
-					$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = $aputuoteno;
-				}
-			}
-			elseif ($laskuttajan_toimittajanumero == "123453") {
-				if (strpos($tuotetieto->ProductId->ProductNumber, "-") !== FALSE) {
-					$rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring(str_replace("-", "", $tuotetieto->ProductId->ProductNumber));
-				}
-				else {
-					$rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring(substr($tuotetieto->ProductId->ProductNumber,0,3)."-".substr($tuotetieto->ProductId->ProductNumber,3));
-				}
+			$query = "	SELECT tt.*
+						FROM tuotteen_toimittajat AS tt
+						JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}' AND toimi.tyyppi != 'P')
+						WHERE tt.yhtio = 'artr'
+						AND tt.toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'";
+			$chk_res = pupe_query($query);
 
-				$rtuoteno[$i]["tuoteno2"] = pupesoft_cleanstring($tuotetieto->ProductId->ProductNumber);
-			}
-			elseif ($laskuttajan_toimittajanumero == "123178") {
-				$rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring(substr($tuotetieto->ProductId->ProductNumber,3));
-				$rtuoteno[$i]["tuoteno2"] = pupesoft_cleanstring($tuotetieto->ProductId->ProductNumber);
-			}
-			elseif ($laskuttajan_toimittajanumero == "123084") {
-				$rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring($tuotetieto->ProductId->ProductNumber);
-				$rtuoteno[$i]["tuoteno2"] = pupesoft_cleanstring(ltrim($tuotetieto->ProductId->ProductNumber, '0'));
-			}
-			else {
-				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductId->ProductNumber));
+			if (mysql_num_rows($chk_res) == 0) {
+				// haetaan vaihtoehtoisten tuotenumeroiden (tuotteen_toimittajat_tuotenumerot) kautta tuotteen_toimittajat.toim_tuoteno. Osataan myös hakea vaihtoehtoinen tuotenumero ilman että
+				$chk_res = tuotteen_toimittajat_tuotenumerot_haku($rtuoteno[$i]['tuoteno'], $laskuttajan_toimittajanumero);
+				
+				if (mysql_num_rows($chk_res) != 0) {
+					$chk_row = mysql_fetch_assoc($chk_res);
+					$rtuoteno[$i]['tuoteno'] = $chk_row['toim_tuoteno'];
+				}											
 			}
 
 			if ($rtuoteno[$i]["tuoteno"] != "") {
 
 				$rtuoteno[$i]["kauttalaskutus"] = "";
 				$rtuoteno[$i]['status'] = "";
+
 				$rtuoteno[$i]["ostotilausnro"] = (string) pupesoft_cleanstring($tuotetieto->OrderRef->BuyerOrderNumber);
+				if ($rtuoteno[$i]["ostotilausnro"] == "") (string) $xml->InvoiceHeader->OrderRef->BuyerOrderNumber;
+
 				$rtuoteno[$i]["tilaajanrivinro"] = (string) pupesoft_cleanstring($tuotetieto->OrderItemRef->BuyerOrderItemRef);
+
 				$rtuoteno[$i]["kpl"] = (int) str_replace(",", ".", $tuotetieto->Quantity);
 
 				if (isset($tuotetieto->TotalValue->Amount)) {
@@ -319,16 +291,15 @@
 					}
 				}
 
-				$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"];
+				$rtuoteno[$i]["hinta"] = round($rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"], 2);
 
 				$query = "	SELECT tuotteen_toimittajat.tuotekerroin
 							FROM toimi
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
 														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-														#AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-														AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}')
+														AND tuotteen_toimittajat.toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'
 														AND tuotteen_toimittajat.toim_tuoteno != '')
-							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+							WHERE toimi.yhtio = 'artr'
 							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
 							AND toimi.tyyppi != 'P'
 							AND toimi.asn_sanomat IN ('K', 'L')";
@@ -338,7 +309,7 @@
 					$tuotekerroin_chk_row = mysql_fetch_assoc($tuotekerroin_chk_res);
 
 					if ($tuotekerroin_chk_row['tuotekerroin'] != 0) {
-						$rtuoteno[$i]['kpl'] /= $tuotekerroin_chk_row['tuotekerroin'];
+						$rtuoteno[$i]['kpl'] = round($rtuoteno[$i]['kpl'] / $tuotekerroin_chk_row['tuotekerroin'], 2);
 					}
 				}
 
@@ -360,8 +331,8 @@
 						$attribute = $node->AllowOrChargeIdentifier->attributes()->Value;
 
 						// ei oteta alennuksia huomioon Klokkerholm-keississä
-						// eikä ZF-keississä (123007)
-						if (strtolower($attribute) == "allow" and $laskuttajan_toimittajanumero != "123418" and $laskuttajan_toimittajanumero != "123007") {
+						// eikä ZF-keississä (123007), eikä Valeolla ( 123342)
+						if (strtolower($attribute) == "allow" and $laskuttajan_toimittajanumero != "123418" and $laskuttajan_toimittajanumero != "123007" and $laskuttajan_toimittajanumero != "123342") {
 
 							if (!isset($rtuoteno[$i]['ale1'])) {
 
@@ -429,14 +400,14 @@
 											FROM toimi
 											JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
 												AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-												AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}')
+												AND tuotteen_toimittajat.toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}'
 												AND tuotteen_toimittajat.toim_tuoteno != '')
 											JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio
 												AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno
 												AND tuoteperhe.tyyppi IN ('P','')
 												AND tuoteperhe.ohita_kerays != '')
 											JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
-											WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+											WHERE toimi.yhtio = 'artr'
 											AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
 											AND toimi.tyyppi != 'P'
 											AND toimi.asn_sanomat IN ('K', 'L')";
@@ -449,7 +420,6 @@
 									$x = $i + 1;
 
 									$rtuoteno[$x]['tuoteno'] 			= $child_chk_row['tuoteno'];
-									$rtuoteno[$x]['tuoteno2'] 			= $child_chk_row['tuoteno'];
 									$rtuoteno[$x]['ostotilausnro'] 		= $rtuoteno[$i]['ostotilausnro'];
 									$rtuoteno[$x]['tilaajanrivinro'] 	= $rtuoteno[$i]['tilaajanrivinro'];
 									$rtuoteno[$x]['kpl'] 				= $rtuoteno[$i]['kpl'];

@@ -263,6 +263,21 @@ if(!function_exists("asiakastarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "toimitusvahvistus" and trim($t[$i]) == 'editilaus_out_futur.inc') {
+
+			$query = "	SELECT *
+						FROM asiakkaan_avainsanat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND liitostunnus = '{$tunnus}'
+						AND laji IN ('futur_host','futur_path')
+						AND avainsana != ''";
+			$chk_res = pupe_query($query);
+
+			if (mysql_num_rows($chk_res) != 2) {
+				$virhe[$i] = t("Tarvittavia tietoja puuttuu").". ".t("Lis‰‰ asiakkaan avainsanoihin Futur FTP -tiedot").".";
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "toim_maa") {
 			$apu_toim_maa = $t[$i];
 		}

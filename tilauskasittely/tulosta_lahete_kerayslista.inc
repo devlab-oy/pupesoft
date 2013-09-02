@@ -759,7 +759,8 @@ if (!function_exists('rivi_kerayslista')) {
 
 			if ($row["var"] == "" or  $row["var"] == "H"
 				or ($row["var"] == "P" and ($yhtiorow["puute_jt_kerataanko"] == "P" or $yhtiorow["puute_jt_kerataanko"] == "Q"))
-				or ($row["var"] == "J" and ($yhtiorow["puute_jt_kerataanko"] == "J" or $yhtiorow["puute_jt_kerataanko"] == "Q"))) {
+				or ($row["var"] == "J" and ($yhtiorow["puute_jt_kerataanko"] == "J" or $yhtiorow["puute_jt_kerataanko"] == "Q"))
+				or ($row["var"] == "J" and $yhtiorow["lahetteen_tulostustapa"] == "I")) {
 
 				$varastopaikka = hyllyalue('', $row['hyllyalue'], 'riisuttu') . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
 
@@ -1131,7 +1132,11 @@ if (!function_exists('rivi_kerayslista')) {
 				// Trimmataan uudestaan
 				$row["kommentti"] = trim($row["kommentti"]);
 
-				if (($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
+				if ((
+					($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0)
+					or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))
+					)
+					and !empty($row['pakkausnro'])) {
 					$pakkaus_kirjain = chr((64+$row['pakkausnro']));
 
 					$pdf->draw_text(42, $kala+5, $pakkaus_kirjain, $thispage, $iso_boldi);

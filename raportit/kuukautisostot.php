@@ -920,7 +920,7 @@
 								group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '/') osto_era,
 								group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
 								group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
-								group_concat(distinct tuotteen_toimittajat.ostohinta order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
+								group_concat(format(tuotteen_toimittajat.ostohinta * (1 - (tuotteen_toimittajat.alennus / 100)), 2) order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
 								group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin
 								FROM tuotteen_toimittajat
 								WHERE yhtio = '$row[yhtio]'
@@ -1373,7 +1373,7 @@
 					if ($valitut["SARAKE19"] != '') {
 						$rivi .= str_replace(".",",",$row['ostohinta'])."\t";
 
-						$worksheet->writeNumber($excelrivi, $excelsarake, $row["ostohinta"]);
+						$worksheet->writeString($excelrivi, $excelsarake, $row["ostohinta"]);
 						$excelsarake++;
 					}
 
@@ -1838,7 +1838,10 @@
 										'ytunnus' => $tuotteen_toimittaja['ytunnus'],
 									);
 
-									list($ostohinta_temp, , ,) = alehinta_osto($laskurow_temp, $trow, 1, '', '', '');
+									list($ostohinta_temp, $netto, $alennus,) = alehinta_osto($laskurow_temp, $trow, 1, '', '', '');
+									if (empty($netto)) {
+										$ostohinta_temp = $ostohinta_temp * generoi_alekentta_php($alennus, 'O', 'kerto', 'EI');
+									}
 									$ostohinta .= sprintf('%.2f', $ostohinta_temp) . ' / ';
 									$tuotteen_toimittajat_string .= $tuotteen_toimittaja['toimittajan_nimi'] . ' / ';
 								}

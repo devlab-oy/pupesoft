@@ -718,7 +718,7 @@
 
 			if (!empty($kumulatiivinen_valittu)) {
 				$kumulatiivinen_alkupaiva  = "$kumulatiivinen_vv-$kumulatiivinen_kk-$kumulatiivinen_pp";
-				$kumulatiivinen_loppupaiva = date('Y-m-d');
+				$kumulatiivinen_loppupaiva = "{$vvl}-{$kkl}-{$ppl}";
 
 				$valid = FormValidator::validateContent($kumulatiivinen_alkupaiva, 'paiva');
 
@@ -1692,6 +1692,8 @@
 									$query .= " sum(if(lasku.luontiaika >= '{$alku} 00:00:00' and lasku.luontiaika <= '{$loppu} 23:59:59' and tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) +
 												sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.rivihinta, 0)) '".substr($i,0,4).substr($i,4,2)."_myyntiyhtkumul', ";
 								}
+								
+								$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));
 							}
 						}
 
@@ -2009,21 +2011,13 @@
 					$lalku_ed	= date("Y-m-d", mktime(0, 0, 0, $kka-1, $ppa,  $vva-1));
 					$lloppu_ed	= date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl-1));
 
-					if (!empty($kumulatiivinen_valittu)) {
+					if (!empty($kumulatiivinen_valittu) and strtotime($kumulatiivinen_alkupaiva) < strtotime("$vva-$kka-$ppa")) {
 						//Verrataan kumpi käyttöliittymästä tulevista ajoista on aikasempi ja käytetään sitä.
-						if (strtotime($kumulatiivinen_alkupaiva) < strtotime("$vva-$kka-$ppa")) {
-							$vva = $kumulatiivinen_vv;
-							$kka = $kumulatiivinen_kk;
-							$ppa = $kumulatiivinen_pp;
+						$vva = $kumulatiivinen_vv;
+						$kka = $kumulatiivinen_kk;
+						$ppa = $kumulatiivinen_pp;
 
-							$lalku = $kumulatiivinen_alkupaiva;
-						}
-
-						$vvl = date('Y');
-						$kkl = date('m');
-						$ppl = date('d');
-
-						$lloppu = $kumulatiivinen_loppupaiva;
+						$lalku = $kumulatiivinen_alkupaiva;
 					}
 
 					if ($ajotapa == 'tilausjaauki') {

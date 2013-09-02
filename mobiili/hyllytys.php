@@ -78,10 +78,12 @@ else {
 # Kontrolleri
 if (isset($submit)) {
 
+    $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=".urlencode($tuotenumero);
+
     switch($submit) {
         case 'ok':
             # Vahvista keräyspaikka
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?hyllytys&".http_build_query($url_array)."&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?hyllytys&".http_build_query($url_array)."{$url}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
             break;
         case 'suuntalavalle':
             if (!is_numeric($hyllytetty) or $hyllytetty < 0) {
@@ -90,12 +92,12 @@ if (isset($submit)) {
             }
 
             # Lisätään rivi suuntalavalle
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'>"; exit();
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}{$url}'>"; exit();
 
             break;
         case 'kerayspaikka':
             # Parametrit $alusta_tunnus, $liitostunnus, $tilausrivi
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?hyllytys&ostotilaus={$ostotilaus}&saapuminen={$saapuminen}&tilausrivi={$tilausrivi}'>"; exit();
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?hyllytys&ostotilaus={$ostotilaus}{$url}&saapuminen={$saapuminen}&tilausrivi={$tilausrivi}'>"; exit();
             break;
         default:
             $errors[] = "Error";
@@ -114,16 +116,25 @@ elseif($row['tilausrivi_tyyppi'] == '') {
     $row['tilausrivi_tyyppi'] = 'JT';
 }
 
+$url_prelisa = $tilausten_lukumaara < 2 ? "ostotilaus.php" : "tuotteella_useita_tilauksia.php";
+$url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "ostotilaus={$ostotilaus}" : "";
+$url_lisa .= ($viivakoodi != "" and $tilausten_lukumaara > 1) ? "viivakoodi={$viivakoodi}" : "";
+$url_lisa .= "&tuotenumero=".urlencode($tuotenumero);
+$url_lisa .= "&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}";
+
 ######## UI ##########
 # Otsikko
 echo "<div class='header'>";
-echo "<button onclick='window.location.href=\"ostotilaus.php?ostotilaus={$ostotilaus}\"' class='button left'><img src='back2.png'></button>";
+echo "<button onclick='window.location.href=\"{$url_prelisa}?{$url_lisa}\"' class='button left'><img src='back2.png'></button>";
 echo "<h1>",t("HYLLYTYS")."</h1>";
 echo "</div>";
 
 # Main
 echo "<div class='main'>
 <form name='f1' method='post' action=''>
+<input type='hidden' name='tilausten_lukumaara' value='{$tilausten_lukumaara}' />
+<input type='hidden' name='manuaalisesti_syotetty_ostotilausnro' value='{$manuaalisesti_syotetty_ostotilausnro}' />
+<input type='hidden' name='tuotenumero' value='{$tuotenumero}' />
 <table>
     <tr>
         <th>",t("Tilattu määrä"),"</th>
@@ -157,12 +168,14 @@ echo "<div class='main'>
 </table>
 </div>";
 
+$url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=".urlencode($tuotenumero);
+
 # Napit
 echo "
 <div class='controls'>
-<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}'\">",t("OK"),"</button>
-<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("KERÄYSPAIKKA"),"</button>
-<button type='submit' class='button right' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'\">",t("SUUNTALAVALLE"),"</button>
+<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys{$url}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}&ostotilaus={$ostotilaus}'\">",t("OK"),"</button>
+<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI KERÄYSPAIKKA"),"</button>
+<button type='submit' class='button right' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}{$url}&saapuminen={$saapuminen}'\">",t("SUUNTALAVALLE"),"</button>
 </div>
 </form>";
 

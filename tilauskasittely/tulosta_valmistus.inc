@@ -171,7 +171,7 @@ if (!function_exists('alku_valm')) {
 			}
 
 			if (trim($laskurow['asiakkaan_tilausnumero']) != '') {
-				$komm .= "\n".t("Tilauksenne", $kieli).":###".$laskurow['asiakkaan_tilausnumero'];
+				$komm .= "\n".t("Asiakkaan tilausnumero", $kieli).":###".$laskurow['asiakkaan_tilausnumero'];
 			}
 
 			if (trim($laskurow['kohde']) != '') {
@@ -262,6 +262,13 @@ if (!function_exists('uusi_sivu_valm')) {
 
 		tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
+		//Vasen sarake
+		$pdf->draw_text(50, 717+74, $laskurow["nimi"], 		$thispage, $norm);
+		$pdf->draw_text(50, 707+74, $laskurow["nimitark"],	$thispage, $norm);
+		$pdf->draw_text(50, 697+74, $laskurow["osoite"], 	$thispage, $norm);
+		$pdf->draw_text(50, 687+74, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
+		$pdf->draw_text(50, 677+74, $laskurow["maa"], 		$thispage, $norm);
+
 		// haetaan maksuehdon tiedot
 		$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 		$masresult = mysql_query($query) or pupe_error($query);
@@ -337,7 +344,7 @@ if (!function_exists('uusi_sivu_valm')) {
 			$pohja  = 770;
 			$maxoik = 0;
 
-			foreach($kommentit as $kommentti) {
+			foreach ($kommentit as $kommentti) {
 				if(strpos($kommentti, "###") !== FALSE) {
 					list($o, $v) = explode("###", $kommentti);
 
@@ -349,7 +356,7 @@ if (!function_exists('uusi_sivu_valm')) {
 				}
 			}
 
-			foreach($kommentit as $kommentti) {
+			foreach ($kommentit as $kommentti) {
 
 				if (strpos($kommentti, "###") !== false) {
 					list($o, $v) = explode("###", $kommentti);
@@ -510,6 +517,10 @@ if (!function_exists('rivi_valm')) {
 			}
 		}
 
+		if ($row["tunnus"] == $row["perheid"] and $laskurow['asiakkaan_tilausnumero'] != "") {
+			$row["kommentti"] .= "\n".t("Asiakkaan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero'];
+		}
+
 		// Mahtuuko rivi tälle sivulle
 		$kala_nyt = $kala;
 
@@ -576,7 +587,7 @@ if (!function_exists('rivi_valmistus')) {
 		$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $pb);
 		$pdf->draw_text(515-$oikpos, $kala, $row["tilkpl"]." ".$omyks, 		$thispage, $pb);
 
-		if ($row["keratty"] != '') {
+		if ($row["toimitettu"] != '') {
 			$oikpos = $pdf->strlen($row['varattu'], $pb);
 			$pdf->draw_text(575-$oikpos, $kala, $row['varattu'], 			$thispage, $pb);
 		}
@@ -588,7 +599,7 @@ if (!function_exists('rivi_valmistus')) {
 
 		if (trim($row["kommentti"]) != '') {
 
-			$komm = t("Kommentti", $kieli).":\n".$row["kommentti"];
+			$komm = t("Kommentti", $kieli).":\n".trim($row["kommentti"]);
 
 			foreach (explode("\n", wordwrap(trim($komm), 90, "\n")) as $kommentti) {
 				$kala = $kala - $rivinkorkeus;
@@ -765,5 +776,3 @@ if (!function_exists('print_pdf_valm')) {
 		system("rm -f $pdffilenimi");
 	}
 }
-
-?>

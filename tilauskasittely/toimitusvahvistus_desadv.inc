@@ -161,18 +161,18 @@
 				}
 
 				// NAD - identification of the delivery party
-				if ($desadv_laskurow['asiakastoim_nimi'] != '' and $desadv_laskurow['asiakastoim_ovttunnus'] != '') {
+				if ($desadv_laskurow['toim_nimi'] != '' and $desadv_laskurow['asiakastoim_ovttunnus'] != '') {
 					$desadv_message .= "NAD+DP+{$desadv_laskurow['asiakastoim_ovttunnus']}::92++"
-										.substr($desadv_laskurow["asiakastoim_nimi"], 0, 35).":"
-										.substr($desadv_laskurow["asiakastoim_nimitark"], 0, 35)."+"
-										.substr($desadv_laskurow["asiakastoim_osoite"], 0, 35)."+"
-										.substr($desadv_laskurow["asiakastoim_postitp"], 0, 35)."++"
-										.substr($desadv_laskurow["asiakastoim_postino"], 0, 17)."+"
-										.substr($desadv_laskurow["asiakastoim_maa"], 0, 3)."'";
+										.substr($desadv_laskurow["toim_nimi"], 0, 35).":"
+										.substr($desadv_laskurow["toim_nimitark"], 0, 35)."+"
+										.substr($desadv_laskurow["toim_osoite"], 0, 35)."+"
+										.substr($desadv_laskurow["toim_postitp"], 0, 35)."++"
+										.substr($desadv_laskurow["toim_postino"], 0, 17)."+"
+										.substr($desadv_laskurow["toim_maa"], 0, 3)."'";
 					$x++;
 
 					if ($desadv_version != "fi0089") {
-						$desadv_message .= "LOC+11+:::".substr($desadv_laskurow["asiakastoim_postitp"], 0, 70)."'";
+						$desadv_message .= "LOC+11+:::".substr($desadv_laskurow["toim_postitp"], 0, 70)."'";
 						$x++;
 					}
 				}

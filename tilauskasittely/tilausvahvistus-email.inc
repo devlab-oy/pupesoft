@@ -207,7 +207,8 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 			}
 		}
 		else {
-			$taika = tv1dateconv($laskurow["toimaika"]);
+			if ($laskurow["toimaika"] == '0000-00-00') $taika = t("Avoin", $kieli);
+			else $taika = tv1dateconv($laskurow["toimaika"]);
 		}
 
 		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli))		.t("Toimitusaika", $kieli).": ".$taika."\n";

@@ -717,7 +717,7 @@
 
 				echo "<input type='hidden' name='tee' value='UUSI'>";
 				echo "<tr><th align='left'>",t("Käyttäjätunnus"),":</th>
-				<td><input type='text' size='50' maxlength='10' name='ktunnus'></td></tr>";
+				<td><input type='text' size='50' maxlength='50' name='ktunnus'></td></tr>";
 			}
 
 			if ($selkuka != "KOPSAAUUSI") {

@@ -557,6 +557,7 @@ if ($monta > 1 and $monta <= $limit) {
 			echo "<input type='hidden' name='from' 	  		  value='$from'>";
 			echo "<input type='hidden' name='tila' 			  value='$tila'>";
 			echo "<input type='hidden' name='muutparametrit'  value='$muutparametrit'>";
+			echo "<input type='hidden' name='tilaustyyppi'	  value='{$tilaustyyppi}'>";
 			echo "<input type='hidden' name='ytunnus'  		  value='$numero'>";
 			echo "<input type='hidden' name='asiakasnro'      value='$asiakasnro'>";
 			echo "<input type='hidden' name='toimittajaid'	  value='$toimittajaid'>";

@@ -37,6 +37,11 @@ function alku ($laji = '') {
 		$vvv = date("Y") - 1;
 		$now = date("Y-m-d");
 	}
+	
+	$alkukk  = sprintf("%02d", $alkukk);
+	$alkupp  = sprintf("%02d", $alkupp);
+	$loppukk = sprintf("%02d", $loppukk); 
+	$loppupp = sprintf("%02d", $loppupp);
 
 	$firstpage = $pdf->new_page("a4");
 
@@ -60,8 +65,12 @@ function alku ($laji = '') {
 	$pdf->draw_text(300, 677, $yhtiorow["nimi"],				$firstpage, $norm);
 
 	//aika
-	$pdf->draw_text(300,  610, "Rajaus: ",			$firstpage, $pieni);
-	$pdf->draw_text(350,  610, tv1dateconv("$alkuvv-$alkukk-$alkupp")." - ".tv1dateconv("$loppuvv-$loppukk-$loppupp"),			$firstpage, $pieni);
+	$pdf->draw_text(300,  625, "Kausi Nyt: ",			$firstpage, $pieni);
+	$pdf->draw_text(350,  625, tv1dateconv("$alkuvv-$alkukk-$alkupp")." - ".tv1dateconv("$loppuvv-$loppukk-$loppupp"),			$firstpage, $pieni);
+	$pdf->draw_text(300,  615, "Kausi Ed: ",			$firstpage, $pieni);
+	$ed_alku_vv = $alkuvv-1;
+	$ed_loppu_vv = $loppuvv-1;
+	$pdf->draw_text(350,  615, tv1dateconv("$ed_alku_vv-$alkukk-$alkupp")." - ".tv1dateconv("$ed_loppu_vv-$loppukk-$loppupp"),			$firstpage, $pieni);
 
 	//otsikkotiedot
 	if ($laji == "osasto") {
@@ -72,17 +81,17 @@ function alku ($laji = '') {
 		$pdf->draw_text(30,  600, "Tuoteryhmä",			$firstpage, $pieni);
 	}
 
-	$oikpos = $pdf->strlen("Kpl $vvt", $pieni);
-	$pdf->draw_text(330-$oikpos, 600, "Kpl $vvt",			$firstpage, $pieni);
+	$oikpos = $pdf->strlen("Kpl Nyt", $pieni);
+	$pdf->draw_text(330-$oikpos, 600, "Kpl Nyt",			$firstpage, $pieni);
 
-	$oikpos = $pdf->strlen("Kpl $vvv", $pieni);
-	$pdf->draw_text(380-$oikpos, 600, "Kpl $vvv",			$firstpage, $pieni);
+	$oikpos = $pdf->strlen("Kpl Ed", $pieni);
+	$pdf->draw_text(380-$oikpos, 600, "Kpl Ed",			$firstpage, $pieni);
 
-	$oikpos = $pdf->strlen("Ostot $vvt", $pieni);
-	$pdf->draw_text(460-$oikpos, 600, "Ostot $vvt",			$firstpage, $pieni);
+	$oikpos = $pdf->strlen("Ostot Nyt", $pieni);
+	$pdf->draw_text(460-$oikpos, 600, "Ostot Nyt",			$firstpage, $pieni);
 
-	$oikpos = $pdf->strlen("Ostot $vvv", $pieni);
-	$pdf->draw_text(530-$oikpos, 600, "Ostot $vvv",			$firstpage, $pieni);
+	$oikpos = $pdf->strlen("Ostot Ed", $pieni);
+	$pdf->draw_text(530-$oikpos, 600, "Ostot Ed",			$firstpage, $pieni);
 
 	$oikpos = $pdf->strlen("Indeksi", $pieni);
 	$pdf->draw_text(575-$oikpos, 600, "Indeksi",			$firstpage, $pieni);

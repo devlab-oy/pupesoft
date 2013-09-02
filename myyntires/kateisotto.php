@@ -201,6 +201,7 @@ function tee_kateisotto($kassalipas, $request_params) {
 	$lasku_tunnus = tee_laskuotsikko($kassalipas, $summa, $request_params['yleinen_kommentti']);
 
     foreach($request_params['kateisotto_rivi'] as $kateisotto_rivi) {
+		$kateisotto_rivi['summa'] = str_replace(',', '.', $kateisotto_rivi['summa']);
         if ($kateisotto_rivi['alv'] > 0) {
             //jos käteisotto rivin alv on muuta kuin nolla niin pitää laskea tiliöinnin alvittomat hinnat tehdä myös alv tiliöinti
             $alviton_summa = $kateisotto_rivi['summa'] / (1 + ($kateisotto_rivi['alv'] / 100));

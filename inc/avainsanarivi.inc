@@ -74,6 +74,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "TARRATYYPPI") 		$ulos .= "<option value='TARRATYYPPI' $avain_sel[TARRATYYPPI]>				".t("Tuotteen tarratyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "VALMISTUSLINJA") 	$ulos .= "<option value='VALMISTUSLINJA' $avain_sel[VALMISTUSLINJA]>		".t("Tuotteen valmistuslinja")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "HAMMASTUS") 		$ulos .= "<option value='HAMMASTUS' $avain_sel[HAMMASTUS]>					".t("Tuotteen hammastus")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "OLETUSPAIKKA") 		$ulos .= "<option value='OLETUSPAIKKA' $avain_sel[OLETUSPAIKKA]>			".t("Tuoteryhm‰n tai tuotestatuksen oletuspaikka")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";
@@ -159,6 +160,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_TEEMA") 	$ulos .= "<option value='EXTRANET_TEEMA' $avain_sel[EXTRANET_TEEMA]>		".t("Extranet ulkoasuteema")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA") 	$ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>		".t("Yll‰pitosopimuksen rivien kent‰t")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LABEL") 			$ulos .= "<option value='LABEL' {$avain_sel['LABEL']}>						".t("Myyntitilauksen luokitus")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "OSTOTIL_TILTYYP") 	$ulos .= "<option value='OSTOTIL_TILTYYP' {$avain_sel['OSTOTIL_TILTYYP']}>	".t("Ostotilauksen tilaustyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_VAKIOTE") 	$ulos .= "<option value='TARJOUS_VAKIOTE' {$avain_sel['TARJOUS_VAKIOTE']}>	".t("Tarjouksen vakioteksti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KATEISOTTO")		$ulos .= "<option value='KATEISOTTO' {$avain_sel['KATEISOTTO']}>			".t("K‰teisoton luonne")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KOHDE_TYYPPI")  	$ulos .= "<option value='KOHDE_TYYPPI' {$avain_sel['KOHDE_TYYPPI']}>        ".t("Kohteen tyyppi")."</option>";
@@ -166,6 +168,8 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "PAIKALLISVARAST")	$ulos .= "<option value='PAIKALLISVARAST' {$avain_sel['PAIKALLISVARAST']}>	".t("Paikallisvarasto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "OLOSUHDE")		  	$ulos .= "<option value='OLOSUHDE' {$avain_sel['OLOSUHDE']}>				".t("Olosuhde")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LAITE_TILA")		$ulos .= "<option value='LAITE_TILA' {$avain_sel['LAITE_TILA']}>			".t("Laitteen tila")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "HINNAT_CRON") 	 	$ulos .= "<option value='HINNAT_CRON' {$avain_sel['HINNAT_CRON']}>        	".t("Hinnat-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TUOTE_EXP_CRON")  	$ulos .= "<option value='TUOTE_EXP_CRON' {$avain_sel['TUOTE_EXP_CRON']}>	".t("Tuote Export-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -202,6 +206,47 @@
 		}
 
 		$jatko = 0;
+	}
+
+	if ($avain_sel['OLETUSPAIKKA'] == 'SELECTED') {
+
+		if (mysql_field_name($result, $i) == "selite") {
+			$ulos .= "<td>";
+			$ulos .= "<input type='text' name='{$nimi}' size='35' maxlength='65535' value='{$trow[$i]}' />";
+			$ulos .= t("Oletuspaikka pit‰‰ antaa muodossa hyllyalue-hyllynro-hyllyvali-hyllytaso");
+			$ulos .= "</td>";
+
+			$jatko = 0;
+		}
+
+		if (mysql_field_name($result, $i) == "selitetark") {
+			$sel = array();
+			$sel[$trow[$i]] = "SELECTED";
+
+			$query = "	SELECT selite,
+						selitetark
+						FROM avainsana
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji = 'S'";
+			$tuote_status_result = pupe_query($query);
+
+			$ulos = "<td><select name = '$nimi'>";
+			$ulos .= "<option value = 'X'>".t("Mik‰ vain")."</option>";
+			while($tuote_status = mysql_fetch_assoc($tuote_status_result)) {
+				$ulos .= "<option value = '{$tuote_status['selite']}' {$sel[$tuote_status['selite']]}>".t($tuote_status['selitetark'])."</option>";
+			}
+			$ulos .= "</select></td>";
+
+			$jatko = 0;
+		}
+
+		if (mysql_field_name($result, $i) == "selitetark_2") {
+			$ulos = '<td>';
+			$ulos .= livesearch_kentta('a', 'TUOTERYHMAHAKU', $nimi, 251, $trow[$i], '', '', '', 'ei');
+			$ulos .= '</td>';
+
+			$jatko = 0;
+		}
 	}
 
 	if (mysql_field_name($result, $i) == "kieli") {

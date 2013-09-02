@@ -196,6 +196,8 @@
 						// ei löydy, tehdään uus otsikko
 						if (mysql_num_rows($jtsre) == 0) {
 
+							// Vanhatunnus-kenttään laitetaan ostotilauksella toimipaikan tunnus
+
 							$query = "	INSERT INTO lasku SET
 										alatila 			= '',
 										comments 			= '$commentsit',
@@ -231,7 +233,7 @@
 										toim_postino 		= '$toim_postino',
 										toim_postitp 		= '$toim_postitp',
 										valkoodi 			= '$valkoodi',
-										vanhatunnus			= '',
+										vanhatunnus			= '{$myytilrow['yhtio_toimipaikka']}',
 										varasto 			= '{$kukarow['oletus_ostovarasto']}',
 										verkkotunnus		= '$myytilrow[liitostunnus]',
 									 	vienti_kurssi 		= '$vrow[kurssi]',

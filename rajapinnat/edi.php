@@ -92,11 +92,18 @@ class Edi {
 				$nimitys = $item['name'];
 
 				// Määrä
-				$kpl = $item['qty_ordered']*1;
+				$kpl = $item['qty_ordered'] * 1;
 
 				// Hinta pitää hakea isältä
-				if ($_item = $item['parent_item_id']); # Tää ei palauta parent itemiä?
-				else $_item = $item;
+				$result = search_array_key_for_value_recursive($order['items'], "item_id", $item['parent_item_id']);
+
+				// Löyty yks tai enemmän, otetaan eka?
+				if (count($result) != 0) {
+					$_item = $result[0];
+				}
+				else {
+					$_item = $item;
+				}
 
 				// Veroton yksikköhinta
 				$hinta = $_item['price'];
@@ -150,7 +157,7 @@ class Edi {
 	    		#	$edi_order .= "OSTOTILRIV.OTR_SALLITAANJT:1\n";
 	    		#}
 	    		#else {
-	    			$edi_order .= "OSTOTILRIV.OTR_SALLITAANJT:0\n";
+    			$edi_order .= "OSTOTILRIV.OTR_SALLITAANJT:0\n";
 	    		#}
 
 	    		$edi_order .= "*RE  OSTOTILRIV $i\n";
@@ -190,7 +197,7 @@ class Edi {
 	   	$edi_order .= "*ME\n";
 	   	$edi_order .= "*IE";
 
-	   	$edi_order = iconv("UTF-8", "ISO-8859-1", $edi_order);
+	   	$edi_order = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $edi_order);
 
 		$filename = $magento_api_ana_edi."/magento-order-{$order['increment_id']}-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 		file_put_contents($filename, $edi_order);

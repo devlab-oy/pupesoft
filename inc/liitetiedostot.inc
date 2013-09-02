@@ -55,7 +55,7 @@
 			}
 		}
 		//	Nämä ovat varmaankin sitten itse tilauksia?
-		elseif(in_array($lasrow['tila'], array("L","N","R","E","T","U","0","A","O"))) {
+		elseif(in_array($lasrow['tila'], array("L","N","R","E","T","U","0","A","O","V"))) {
 			$uusilukko = "";
 		}
 

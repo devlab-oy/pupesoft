@@ -852,7 +852,24 @@
 					}
 
 					if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {
+
+						if ($rakir_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+
+							// jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan tämän jälkeen
+							$tmp_laskurow = $laskurow;
+
+							$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$rivi['otunnus']}'";
+							$laskurow_edi_res = pupe_query($query);
+							$laskurow = mysql_fetch_assoc($laskurow_edi_res);
+
+							$myynti_vai_osto = 'M';
+						}
+
 						require("tilauskasittely/$rakir_row[toimitusvahvistus]");
+
+						if ($rakir_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+							$laskurow = $tmp_laskurow;
+						}
 					}
 				}
 

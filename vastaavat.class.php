@@ -6,119 +6,85 @@
 class Vastaavat {
 
 	// Ketjun id
-	private $id;
+	private $idt;
 
 	// Tuote jolla ketju on alunperin haettu
 	private $tuote;
 
-	// Tuotteen tyyppi vastaava/vaihtoehtoinen
-	private $tyyppi;
-
-	// Ketjun päätuote
-	private $paatuote;
-
-	// Ketjut, joita voi olla useampia
-	private $ketjut = array();
-
 	/** Ketju tarvitsee aina tuotenumeron minkä perusteella ketju luodaan.
 	 */
-	function __construct($tuoteno) {
+	function __construct($tuoteno, $options = array()) {
 		global $kukarow;
 
+		$conditions = '';
+
+		if (!empty($options)) {
+			// Tsekataan tarvittavat parametrit
+			if ($options['skippaa_vaihtoehtoiset']) {
+				$conditions .= " AND vaihtoehtoinen = '' ";
+			}
+		}
+
 		if (!empty($tuoteno)) {
-			// Haetaan haetun tuotteen tiedot korvaavuusketjusta
-			$query = "SELECT * FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuoteno}' LIMIT 1";
+			// Haetaan haetun tuotteen tiedot vastaavuusketjusta
+			$query = "	SELECT group_concat(DISTINCT id order by id) idt
+						FROM vastaavat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '{$tuoteno}'
+						$conditions";
 			$tuote_result = pupe_query($query);
 			$tuote = mysql_fetch_assoc($tuote_result);
 
 			// Ketju ja tuote talteen
-			$this->id = $tuote['id'];
-			$this->tyyppi = $tuote['vaihtoehtoinen'];
-			$this->tuote = $tuote;
+			$this->idt    = $tuote['idt'];
+			$this->tuote  = $tuoteno;
 		}
 	}
 
-	/* Hakee kaikkien ketjujen id:t joihin haettu tuote kuuluu.
-	 */
-	function ketjut() {
-		global $kukarow;
-		$this->ketjut = array();
-
-		$query = "SELECT id FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$this->tuote['tuoteno']}'";
-		$ketjut_result = pupe_query($query);
-
-		while ($ketju = mysql_fetch_assoc($ketjut_result)) {
-			$this->ketjut[] = $ketju['id'];
-		}
-
-		return $this->ketjut;
+	function onkovastaavia() {
+		return $this->idt != "";
 	}
 
-	function getTyyppi() {
-		return $this->tyyppi;
-	}
-
-	/** Palauttaa ketjun tuotteet ketjun id:n mukaan
-	 */
-	function find_by_ketju($id, $options = array()) {
-		global $kukarow;
-
-		$tuotteet = array();
-
-		$conditions = '';
-		if (!empty($options)) {
-			// Heitetään nolla järjestykset ketjun viimeiseksti
-			if ($this->tuote['jarjestys'] == 0) $this->tuote['jarjestys'] = 9999;
-
-			// Tsekataan tarvittavat parametrit
-			if($options['vastaavuusketjun_jarjestys'] == 'K') {
-				$conditions = "HAVING jarjestys >= {$this->tuote['jarjestys']}";
-			}
-		}
-
-		$query = "SELECT 'vastaava' as tyyppi, if(jarjestys=0, 9999, jarjestys) jarjestys, vaihtoehtoinen, tuote.*
-					FROM vastaavat
-					JOIN tuote ON vastaavat.yhtio=tuote.yhtio AND vastaavat.tuoteno=tuote.tuoteno
-					WHERE vastaavat.yhtio='{$kukarow['yhtio']}'
-					AND id='{$id}'
-					#AND vaihtoehtoinen = '{$this->tyyppi}'
-					$conditions
-					ORDER BY jarjestys, tuoteno";
-		$result = pupe_query($query);
-
-		while ($tuote = mysql_fetch_assoc($result)) {
-			$tuotteet[] = $tuote;
-		}
-
-		return $tuotteet;
-
+	function getIDt() {
+		return $this->idt;
 	}
 
 	/** Palauttaa ketjun kaikki tuotteet
 	 */
-	function tuotteet($options = array()) {
+	function tuotteet($ketju, $options = array()) {
 		global $kukarow;
 
 		$tuotteet = array();
-
 		$conditions = '';
+
 		if (!empty($options)) {
-			// Heitetään nolla järjestykset ketjun viimeiseksti
-			if ($this->tuote['jarjestys'] == 0) $this->tuote['jarjestys'] = 9999;
+
+			if ($options['skippaa_vaihtoehtoiset']) {
+				$conditions .= " AND vaihtoehtoinen = '' ";
+			}
 
 			// Tsekataan tarvittavat parametrit
-			if($options['vastaavuusketjun_jarjestys'] == 'K') {
-				$conditions = "HAVING jarjestys >= {$this->tuote['jarjestys']}";
+			if ($options['vastaavuusketjun_jarjestys'] == 'K') {
+
+				// Haetaan tuotteen järjestys jolla ketju on alunperin haettu
+				$query = "	SELECT if (jarjestys=0, 9999, jarjestys) jarjestys
+							FROM vastaavat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND id 		= '{$ketju}'
+							AND tuoteno = '{$this->tuote}'";
+				$result = pupe_query($query);
+				$jarjestys = mysql_fetch_assoc($result);
+
+				$conditions .= "HAVING jarjestys >= {$jarjestys['jarjestys']}";
 			}
 		}
 
 		// Haetaan korvaavat ketju ja tuotteiden tiedot
-		$query = "SELECT 'vastaava' as tyyppi, if(jarjestys=0, 9999, jarjestys) jarjestys, vaihtoehtoinen, tuote.*
+		$query = "	SELECT 'vastaava' as tyyppi, if (vastaavat.jarjestys=0, 9999, vastaavat.jarjestys) jarjestys, vastaavat.vaihtoehtoinen, tuote.*
 					FROM vastaavat
 					JOIN tuote ON vastaavat.yhtio=tuote.yhtio AND vastaavat.tuoteno=tuote.tuoteno
-					WHERE vastaavat.yhtio='{$kukarow['yhtio']}'
-					AND id='{$this->id}'
-					#AND vaihtoehtoinen = '{$this->tyyppi}'
+					WHERE vastaavat.yhtio = '{$kukarow['yhtio']}'
+					AND vastaavat.id = '{$ketju}'
 					$conditions
 					ORDER BY jarjestys, tuoteno";
 		$result = pupe_query($query);
@@ -128,27 +94,5 @@ class Vastaavat {
 		}
 
 		return $tuotteet;
-	}
-
-	/** Palauttaa ketjun päätuotteen
-	 */
-	function paatuote() {
-		global $kukarow;
-
-		$query = "SELECT * FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND id={$this->id}
-					ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno LIMIT 1";
-		$result = pupe_query($query);
-
-		$ketju = mysql_fetch_assoc($result);
-		$this->paatuote = $ketju;
-
-		return $this->paatuote['tuoteno'];
-	}
-
-	function lisaa_tuote($tuote, $jarjestys=0) {
-		global $kukarow;
-		$query  = "INSERT INTO vastaavat (yhtio, tuoteno, jarjestys, id, laatija, luontiaika, muutospvm, muuttaja)
-		            VALUES ('$kukarow[yhtio]', '{$tuote}', '{$jarjestys}', '$this->id', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
-		echo $query;
 	}
 }

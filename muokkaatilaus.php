@@ -369,15 +369,18 @@
 				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "EXTTARJOUS") {
-				$query = "	SELECT *
+				$query = "	SELECT lasku.*
 							FROM lasku
-							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='T' and alatila in ('','A') and tilaustyyppi='T' AND clearing = 'EXTTARJOUS'";
+							JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]')  and lasku.tila='T' and lasku.alatila in ('','A') and lasku.tilaustyyppi='T' AND lasku.clearing = 'EXTTARJOUS' and laskun_lisatiedot.sopimus_lisatietoja != ''";
 				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "EXTENNAKKO") {
-				$query = "	SELECT *
+				$query = "	SELECT lasku.*
 							FROM lasku
-							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and lasku.tila in ('E', 'N') and lasku.alatila in ('','A','J') AND clearing = 'EXTENNAKKO'";
+							JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]')  and lasku.tila in ('E', 'N') and lasku.alatila in ('','A','J') AND
+							lasku.clearing = 'EXTENNAKKO' AND laskun_lisatiedot.sopimus_lisatietoja != ''";
 				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "OSTO") {
@@ -420,7 +423,7 @@
 			elseif ($toim == "" or $toim == "SUPER" or $toim == "PROJEKTI" or $toim == "KESKEN") {
 				$query = "	SELECT *
 							FROM lasku use index (tila_index)
-							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]') and alatila='' and tila in ('N','E')";
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]') and alatila='' and tila in ('N','E') and clearing not in ('EXTENNAKKO','EXTTARJOUS')";
 				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "LASKUTUSKIELTO") {
@@ -635,6 +638,12 @@
 				$haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%$etsi%' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%$etsi%' or lasku.asiakkaan_tilausnumero like '%$etsi%') ";
 			}
 
+			// Myyntitilauksia voidaan etsiä myös asiakkaan tilausnumerolla
+			if ($etsi != "" and $haku != "" and ($toim == '' or $toim == 'SUPER' or $toim == 'KESKEN' or $toim == 'HYPER' or $toim == 'TOSI_KESKEN' or $toim == 'ODOTTAA_SUORITUSTA')) {
+				$haku = substr($haku, 0, -2); // Poistetaan vika sulku $hausta
+				$haku .= " or (lasku.asiakkaan_tilausnumero like '%$etsi%' and lasku.asiakkaan_tilausnumero != '')) ";
+			}
+
 			if (!empty($mt_order)) {
 				$hakusarake = mysql_real_escape_string(key($mt_order));
 				$hakusuunta = mysql_real_escape_string($mt_order[$hakusarake]);
@@ -799,7 +808,7 @@
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						LEFT JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X' and lasku.clearing != 'EXTENNAKKO'
 						$haku
 						GROUP BY lasku.tunnus
 						$mt_order_by
@@ -815,7 +824,7 @@
 								count(distinct lasku.tunnus) kpl
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'";
+								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X' and lasku.clearing != 'EXTENNAKKO'";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -831,7 +840,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('E','N')
 						and lasku.tilaustyyppi = 'E'
-						and clearing != 'EXTENNAKKO'
+						and lasku.clearing != 'EXTENNAKKO'
 						$haku
 						GROUP BY lasku.tunnus
 						$mt_order_by
@@ -846,7 +855,7 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi = 'E')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'E'
-								and clearing != 'EXTENNAKKO'";
+								and lasku.clearing != 'EXTENNAKKO'";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -862,7 +871,8 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('E','N')
 						and lasku.tilaustyyppi = 'E'
-						and clearing = 'EXTENNAKKO'
+						and lasku.clearing = 'EXTENNAKKO'
+						and lasku.ytunnus != ''
 						$haku
 						GROUP BY lasku.tunnus
 						$mt_order_by
@@ -877,7 +887,7 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi = 'E')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila IN ('E', 'N')
-								and clearing = 'EXTENNAKKO'";
+								and lasku.clearing = 'EXTENNAKKO'";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -982,6 +992,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'N'
 						and lasku.alatila in ('U','T')
+						and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')
 						$haku
 						$mt_order_by
 						$rajaus";
@@ -994,7 +1005,7 @@
 								count(distinct lasku.tunnus) kpl
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='N' and lasku.alatila='U'";
+								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='N' and lasku.alatila='U' and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -1305,6 +1316,7 @@
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A')
 						AND lasku.clearing = 'EXTTARJOUS'
+						AND lasku.ytunnus != ''
 						$haku
 						$mt_order_by
 						$rajaus";
@@ -1493,6 +1505,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'N'
 						and lasku.alatila in ('A','','T','U','G')
+						and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')
 						$haku
 						HAVING extra = '' or extra is null
 						$mt_order_by
@@ -1508,7 +1521,8 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.tila = 'N'
-								and lasku.alatila in ('A','','T','U','G')";
+								and lasku.alatila in ('A','','T','U','G')
+								and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -1525,6 +1539,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'N'
 						and lasku.alatila in ('','G')
+						and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')
 						$haku
 						HAVING extra = '' or extra is null
 						$mt_order_by
@@ -1540,7 +1555,8 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.tila = 'N'
-								and lasku.alatila in ('','G')";
+								and lasku.alatila in ('','G')
+								and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -1557,6 +1573,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'N'
 						and lasku.alatila = 'G'
+						and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')
 						$haku
 						$mt_order_by
 						$rajaus";
@@ -1569,7 +1586,7 @@
 								count(distinct lasku.tunnus) kpl
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'N' and lasku.alatila = 'G'";
+								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'N' and lasku.alatila = 'G' and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -1588,6 +1605,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('L','N')
 						and lasku.alatila in ('A','','T','U','G')
+						and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')
 						$haku
 						HAVING extra = '' or extra is null
 						$mt_order_by
@@ -1603,7 +1621,8 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.tila in ('L','N')
-								and lasku.alatila in ('A','','T','U','G')";
+								and lasku.alatila in ('A','','T','U','G')
+								and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -1887,7 +1906,12 @@
 						}
 
 						if ($fieldname == 'luontiaika' or $fieldname == 'toimaika') {
-							echo "<td class='$class' valign='top' align='right'>".tv1dateconv($row[$fieldname], "PITKA", "LYHYT")."</td>";
+							echo "<td class='{$class}' valign='top' align='right'>";
+
+							if (($whiletoim == '' or $whiletoim == 'SUPER' or $whiletoim == 'KESKEN' or $whiletoim == 'HYPER' or $whiletoim == 'TOSI_KESKEN' or $whiletoim == 'ODOTTAA_SUORITUSTA') and $fieldname == 'toimaika' and $row['toimaika'] == '0000-00-00') echo t("Avoin");
+							else echo tv1dateconv($row[$fieldname], "PITKA", "LYHYT");
+
+							echo "</td>";
 						}
 						elseif ($fieldname == 'sopimuspvm') {
 

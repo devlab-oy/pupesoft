@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("luo_myyntitilausotsikko")) {
-	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '') {
+	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '') {
 		global $kukarow, $yhtiorow, $session;
 
 		$query	= "	SELECT *
@@ -59,7 +59,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			$kohde  = "";
 			$eilahe = "";
 
-			if ($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") {
+			if (($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") or $yhtiorow['lahetteen_tulostustapa'] == 'I') {
 				$eilahe = "o";
 			}
 
@@ -231,6 +231,38 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
 			$yhteyshenkilo_kaupallinen	= "";
 			$yhteyshenkilo_tekninen		= "";
+
+			if ($toim == "PIKATILAUS" and in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U','X','Y','A','B','C','V','W','I','J'))) {
+
+				$myynnista_osto_avainsanat = t_avainsana("MYYNNISTA_OSTO");
+
+				if (mysql_num_rows($myynnista_osto_avainsanat) > 0) {
+
+					// Yhtiön toimipaikka yliajaa tämän parametrin
+					$query_x = "	SELECT ostotilauksen_kasittely
+									FROM yhtion_parametrit
+									WHERE yhtio = '{$kukarow['yhtio']}'";
+					$param_fetch_res = pupe_query($query_x);
+					$param_fetch_row = mysql_fetch_assoc($param_fetch_res);
+
+					$ostotilauksen_kasittely = $param_fetch_row['ostotilauksen_kasittely'];
+
+					if ($kukarow['toimipaikka'] != 0) {
+
+						$query_x = "	SELECT ostotilauksen_kasittely
+										FROM yhtion_toimipaikat
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$kukarow['toimipaikka']}'
+										AND ostotilauksen_kasittely != ''";
+						$toimpaikka_chk_res = pupe_query($query_x);
+
+						if (mysql_num_rows($toimpaikka_chk_res) > 0) {
+							$toimpaikka_chk_row = mysql_fetch_assoc($toimpaikka_chk_res);
+							$ostotilauksen_kasittely = $toimpaikka_chk_row['ostotilauksen_kasittely'];
+						}
+					}
+				}
+			}
 		}
 		else {
 			//yhtiön oletusalvi!
@@ -312,7 +344,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			$osatoimitus = "o";
 		}
 
-		$tilaustyyppi = "N";
+		$tilaustyyppi = $tilaustyyppi != '' ? $tilaustyyppi : "N";
 
 		if ($toim == "TARJOUS") {
 			$tilaustyyppi = 'T';
@@ -440,7 +472,7 @@ if (!function_exists("luo_tarjouspohja")) {
 						AND otunnus = '{$tilausnumero}'";
 			pupe_query($query);
 		}
-		
+
 		return $tilausnumero;
 	}
 }

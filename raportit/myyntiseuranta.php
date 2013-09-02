@@ -2495,7 +2495,7 @@
 										}
 										else {
 											if ($ajotapa == "tilausauki" and $row["myyntilaskuttamattanyt"] != 0) {
-												$row[$ken_nimi] = round($row["katenyt"] / abs($row["myyntilaskuttamattanyt"]) * 100, 2);
+												$row[$ken_nimi] = round($row["katelaskuttamattanyt"] / abs($row["myyntilaskuttamattanyt"]) * 100, 2);
 											}
 											else {
 												$row[$ken_nimi] = 0;
@@ -2519,7 +2519,12 @@
 											$row[$ken_nimi] = round($row["nettokatenyt"] / abs($row["myyntinyt"]) * 100, 2);
 										}
 										else {
-											$row[$ken_nimi] = 0;
+											if ($ajotapa == "tilausauki" and $row["myyntilaskuttamattanyt"] != 0){
+												$row[$ken_nimi] = round($row["nettokatelaskuttamattanyt"] / abs($row["myyntilaskuttamattanyt"]) * 100, 2);
+											}
+											else {
+												$row[$ken_nimi] = 0;
+											}
 										}
 									}
 

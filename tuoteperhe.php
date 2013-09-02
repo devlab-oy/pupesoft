@@ -292,12 +292,14 @@
 				//tarkistetaan tuotteiden olemassaolo
 				$error = '';
 
-				$query = "SELECT * from tuote where tuoteno='$isatuoteno' and yhtio='$kukarow[yhtio]'";
-				$res   = pupe_query($query);
+				$query   = "SELECT * from tuote where tuoteno='$isatuoteno' and yhtio='$kukarow[yhtio]'";
+				$res     = pupe_query($query);
+				$isatrow = mysql_fetch_assoc($res);
 				if (mysql_num_rows($res)==0) $error .= "<font class='error'>".t("Tuotenumero")." $isatuoteno ".t("ei ole tuoterekisterissä, riviä ei voida lisätä")."!</font><br>";
 
-				$query = "SELECT * from tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
-				$res   = pupe_query($query);
+				$query   = "SELECT * from tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+				$res     = pupe_query($query);
+				$laptrow = mysql_fetch_assoc($res);
 				if (mysql_num_rows($res)==0) $error .= "<font class='error'>".t("Tuotenumero")." $tuoteno ".t("ei ole tuoterekisterissä, riviä ei voida lisätä")."!</font><br>";
 
 				if ($error == '') {
@@ -335,8 +337,8 @@
 					}
 
 					$query  .= "	tuoteperhe set
-									isatuoteno		= '$isatuoteno',
-									tuoteno 		= '$tuoteno',
+									isatuoteno		= '{$isatrow['tuoteno']}',
+									tuoteno 		= '{$laptrow['tuoteno']}',
 									kerroin 		= '$kerroin',
 									omasivu			= '$kpl2',
 									hintakerroin	= '$hintakerroin',

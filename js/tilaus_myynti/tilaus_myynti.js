@@ -29,3 +29,9 @@ function bind_valitut_rivit_checkbox_click() {
 		}
 	});
 }
+
+function nappi_onclick_confirm(message) {
+	ok = confirm(message);
+
+	return ok;
+}

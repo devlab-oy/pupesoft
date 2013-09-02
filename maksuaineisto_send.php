@@ -46,8 +46,12 @@
 		$PHP_SELF = "maksuehto_send.php";
 	}
 
+	// Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
+	pupesoft_flock();
+
 	// Katsotaan, ett‰ tarvittavat muuttujat on setattu
 	$y = $kukarow["yhtio"];
+
 	if (!isset(	$maksuaineiston_siirto[$y]["host"],
 				$maksuaineiston_siirto[$y]["user"],
 				$maksuaineiston_siirto[$y]["pass"],
@@ -73,44 +77,26 @@
 	$ftpsucc = $maksuaineiston_siirto[$y]["local_dir_ok"];
     $ftpfail = $localdir_error;
 
-	// Jos meill‰ on lock-file ja se on alle 15 minuuttia vanha
-	if (file_exists("/tmp/##maksuaineisto-send.lock") and mktime()-filemtime("/tmp/##maksuaineisto-send.lock") < 300) {
-		echo "maksuaineisto-send l‰hetys k‰ynniss‰, odota hetki!\n";
-	}
-	// Jos meill‰ on lock-file ja se on yli 15 minuuttia vanha
-	elseif (file_exists("/tmp/##maksuaineisto-send.lock") and mktime()-filemtime("/tmp/##maksuaineisto-send.lock") >= 300) {
-		echo "VIRHE: maksuaineisto-send l‰hetys jumissa! Ota yhteys tekniseen tukeen!!!\n";
-		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-			file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: maksuaineisto-send l‰hetys jumissa!", FILE_APPEND);
-		}
-	}
-	else {
-
-		touch("/tmp/##maksuaineisto-send.lock");
-
-		// Loopataan l‰pi pankkipolku
-		if ($handle = opendir($localdir)) {
-			while (($file = readdir($handle)) !== FALSE) {
-				$ftpfile = realpath($localdir."/".$file);
-				if (is_file($ftpfile)) {
-					require ("inc/ftp-send.inc");
-				}
+	// Loopataan l‰pi pankkipolku
+	if ($handle = opendir($localdir)) {
+		while (($file = readdir($handle)) !== FALSE) {
+			$ftpfile = realpath($localdir."/".$file);
+			if (is_file($ftpfile)) {
+				require ("inc/ftp-send.inc");
 			}
-			closedir($handle);
 		}
+		closedir($handle);
+	}
 
-		// Loopataan l‰pi ep‰onnistuneet dirikka
-		if ($handle = opendir($localdir_error)) {
-			// Ei siirret‰ feilattuja en‰‰ uudestaan jos feilaa taas
-			unset($ftpfail);
-			while (($file = readdir($handle)) !== FALSE) {
-				$ftpfile = realpath($localdir_error."/".$file);
-				if (is_file($ftpfile)) {
-					require ("inc/ftp-send.inc");
-				}
+	// Loopataan l‰pi ep‰onnistuneet dirikka
+	if ($handle = opendir($localdir_error)) {
+		// Ei siirret‰ feilattuja en‰‰ uudestaan jos feilaa taas
+		unset($ftpfail);
+		while (($file = readdir($handle)) !== FALSE) {
+			$ftpfile = realpath($localdir_error."/".$file);
+			if (is_file($ftpfile)) {
+				require ("inc/ftp-send.inc");
 			}
-			closedir($handle);
 		}
-
-		unlink("/tmp/##maksuaineisto-send.lock");
+		closedir($handle);
 	}

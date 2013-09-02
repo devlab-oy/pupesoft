@@ -6,7 +6,9 @@ if(!function_exists("tuotetarkista")) {
 
 		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind, $tem_tuotetyyppi, $tem_status, $tem_status_vanha, $tem_try, $tem_try_vanha;
 
-		if (mysql_field_name($result, $i) == "tuoteno") {
+		$fieldname = mysql_field_name($result, $i);
+
+		if ($fieldname == "tuoteno") {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
@@ -67,11 +69,11 @@ if(!function_exists("tuotetarkista")) {
 			$tem_tuoteno = $t[$i];
 		}
 
-		if ((mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i) == "kohde" or mysql_field_name($result, $i) == "kustp") and (int) trim($t[$i]) != 0) {
+		if (($fieldname == "projekti" or $fieldname == "kohde" or $fieldname == "kustp") and (int) trim($t[$i]) != 0) {
 
-			if (mysql_field_name($result, $i) == "projekti") $kptyyppi = "P";
-			if (mysql_field_name($result, $i) == "kohde") 	 $kptyyppi = "O";
-			if (mysql_field_name($result, $i) == "kustp") 	 $kptyyppi = "K";
+			if ($fieldname == "projekti") $kptyyppi = "P";
+			if ($fieldname == "kohde") 	 $kptyyppi = "O";
+			if ($fieldname == "kustp") 	 $kptyyppi = "K";
 
 			$tpque = "	SELECT tunnus
 						from kustannuspaikka
@@ -86,31 +88,28 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
-		if ((mysql_field_name($result, $i) == "osasto"
-				or mysql_field_name($result, $i) == "try"
-				or mysql_field_name($result, $i) == "tuotemerkki"
-				or mysql_field_name($result, $i) == "malli"
-				or mysql_field_name($result, $i) == "mallitarkenne")) {
+		if (($fieldname == "osasto"
+				or $fieldname == "try"
+				or $fieldname == "tuotemerkki"
+				or $fieldname == "malli"
+				or $fieldname == "mallitarkenne")) {
 
-			//mysql_field_name pitää ottaa talteen koska muuvarastopaikka.php muuttaa resulttia.
-			$field_name = mysql_field_name($result, $i);
-
-			if (trim($t[$i]) != '') {
-				$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '".$field_name."' and SELITE = '$t[$i]'";
-				$tpres = pupe_query($tpque);
-
-				if (mysql_num_rows($tpres) == 0) {
-					$virhe[$i] .= t("Avainsanaa ei löydy")."!";
-					return;
-				}
-			}
-
-			$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$field_name'";
+			$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$fieldname'";
 			$tpres = pupe_query($tpque);
 
 			if (mysql_num_rows($tpres) > 0) {
 
-				if ($field_name == "try") {
+				if (trim($t[$i]) != '') {
+					$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$fieldname' and SELITE = '$t[$i]'";
+					$tpres = pupe_query($tpque);
+
+					if (mysql_num_rows($tpres) == 0) {
+						$virhe[$i] .= t("Avainsanaa ei löydy")."!";
+						return;
+					}
+				}
+
+				if ($fieldname == "try") {
 					$tem_try = $t[$i];
 					if (!empty($trow)) {
 						$tem_try_vanha = $trow[$i];
@@ -122,7 +121,7 @@ if(!function_exists("tuotetarkista")) {
 					}
 				}
 
-				if ($field_name == "try" and !empty($trow) and $tem_try_vanha != $tem_try) {
+				if ($fieldname == "try" and !empty($trow) and $tem_try_vanha != $tem_try) {
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tem_tuoteno);
 
 					if ($saldo == 0) {
@@ -135,7 +134,8 @@ if(!function_exists("tuotetarkista")) {
 									ORDER BY oletus ASC";
 						$tuotepaikat_result = pupe_query($query);
 						$poista = array();
-						while($tuotepaikka = mysql_fetch_assoc($tuotepaikat_result)) {
+
+						while ($tuotepaikka = mysql_fetch_assoc($tuotepaikat_result)) {
 							$poista[] = $tuotepaikka;
 						}
 
@@ -150,22 +150,22 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "kehahin" and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
+		if ($fieldname == "kehahin" and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
 			$tem_kehahin = $t[$i];
 			$tem_kehahin_ind = $i;
 		}
 
-		if (mysql_field_name($result, $i) == "nimitys") {
+		if ($fieldname == "nimitys") {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] .= t("Nimitys puuttuu")."!";
 			}
 		}
 
-		if ((mysql_field_name($result, $i) == "tilino" or
-			mysql_field_name($result, $i) == "tilino_eu" or
-			mysql_field_name($result, $i) == "tilino_ei_eu" or
-			mysql_field_name($result, $i) == "tilino_marginaali" or
-			mysql_field_name($result, $i) == "tilino_osto_marginaali") and $t[$i] != "") {
+		if (($fieldname == "tilino" or
+			$fieldname == "tilino_eu" or
+			$fieldname == "tilino_ei_eu" or
+			$fieldname == "tilino_marginaali" or
+			$fieldname == "tilino_osto_marginaali") and $t[$i] != "") {
 
 			$query = "	SELECT yhtio
 						FROM tili
@@ -178,11 +178,11 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "tilino" and trim($t[$i]) == "" and $laji == "V") {
+		if ($fieldname == "tilino" and trim($t[$i]) == "" and $laji == "V") {
 			$virhe[$i] = t("Viranomaistuotteella on oltava tili")."!";
 		}
 
-		if ((mysql_field_name($result, $i) == "tullinimike1") and ($t[$i] != 0)) {
+		if (($fieldname == "tullinimike1") and ($t[$i] != 0)) {
 			$query = "	SELECT cn
 						FROM tullinimike
 						WHERE cn = '$t[$i]' and kieli = '$yhtiorow[kieli]'";
@@ -195,12 +195,12 @@ if(!function_exists("tuotetarkista")) {
 			$tem_tullinimike1 = $t[$i];
 		}
 
-		if (mysql_field_name($result, $i) == "tullinimike2" and $tem_tullinimike1 != "") {
+		if ($fieldname == "tullinimike2" and $tem_tullinimike1 != "") {
 			// jos tyhjää laitetaan nollaksi
 			if ($t[$i] == "") $t[$i] = "00";
 		}
 
-		if (mysql_field_name($result, $i) == "tuotetyyppi") {
+		if ($fieldname == "tuotetyyppi") {
 			if (isset($t[$i])) {
 				// Tyyppiä ei saa vaihtaa, jos tuotteella on yksikin tapahtuma
 				if (trim(strtoupper($trow["tuotetyyppi"])) != trim(strtoupper($t[$i]))) {
@@ -218,7 +218,7 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
+		if ($fieldname == "sarjanumeroseuranta") {
 
 			$query = "	SELECT count(*) saldo
 						FROM tuotepaikat
@@ -243,7 +243,7 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "ei_saldoa") {
+		if ($fieldname == "ei_saldoa") {
 			if (isset($t[$i])) {
 				$query = "	SELECT *
 							FROM tuotepaikat
@@ -265,7 +265,7 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		// Viranomaistuotteita ei tsekata...
-		if (mysql_field_name($result, $i) == "vienti" and $laji != "V") {
+		if ($fieldname == "vienti" and $laji != "V") {
 
 			// Katsotaan, ettei ole sekaisin plussia ja miinuksia
 			if ($t[$i] != '' and strpos($t[$i], "+") !== FALSE and strpos($t[$i], "-") !== FALSE) {
@@ -314,7 +314,7 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "eankoodi") {
+		if ($fieldname == "eankoodi") {
 			if (trim($t[$i]) != 0 and trim($t[$i] != '')) {
 				$query  = "	SELECT eankoodi
 							FROM tuote
@@ -334,7 +334,7 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == 'status') {
+		if ($fieldname == 'status') {
 			$tem_status = $t[$i];
 			$tem_status_vanha = $trow[$i];
 
@@ -375,7 +375,7 @@ if(!function_exists("tuotetarkista")) {
 							AND kpl = 0
 							AND varattu != 0";
 				$result = pupe_query($query);
-				
+
 				if(mysql_num_rows($result) > 0) {
 					$virhe[$i] = t("Tuotetta löytyy avoimelta ostotilaukselta, ei voida merkata poistetuksi");
 				}
@@ -383,7 +383,7 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		// ei piirretä ellei yhtiöparametri ohjeista katsomaan täältä
-		if (mysql_field_name($result, $i) == "suoratoimitus") {
+		if ($fieldname == "suoratoimitus") {
 			if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J'))) {
 				if (!in_array($t[$i], array('S','U','X',''))) {
 					$virhe[$i] = t("Suoratoimitustieto virheellinen");
@@ -392,7 +392,7 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		//tehdään nää jutut tässä koska tämä on aina viimeinen sarake
-		if (mysql_field_name($result, $i) == "tunnus") {
+		if ($fieldname == "tunnus") {
 
 			if ($tem_kehahin != "" and $tem_kehahin != $trow["kehahin"] and $tem_eisaldoa == "") {
 				// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi

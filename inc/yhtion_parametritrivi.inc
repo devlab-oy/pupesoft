@@ -3279,6 +3279,30 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'valmistuksien_kasittely') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Valmistuksella voi olla useita valmisteita")."</option>";
+		$ulos .= "<option value = 'Y' $sel>".t("Valmistuksella voi olla vain yksi valmiste")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'tulosta_valmistus_tulosteet') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'V' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Tulostetaan Keräyslista ja Valmistuslista")."</option>";
+		$ulos .= "<option value = 'V' $sel>".t("Tulostetaan vain Valmistuslista")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'tarkista_eankoodi') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

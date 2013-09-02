@@ -5,13 +5,13 @@
 //$tilausnumero TAI $valitut_tilausrivi_tunnukset
 
 if ((!isset($valitut_rivit_jyvitys) and empty($valitut_tilausrivi_tunnukset))) {
-	laske_tilausriveille_uudet_hinnat($jysum, $tilausrivi_alvillisuus, $tilausnumero);
+	laske_tilausriveille_uudet_hinnat($jysum, $tilausnumero);
 }
 else {
-	laske_tilausriveille_uudet_hinnat($jysum, $tilausrivi_alvillisuus, 0, $valitut_tilausrivi_tunnukset);
+	laske_tilausriveille_uudet_hinnat($jysum, 0, $valitut_tilausrivi_tunnukset);
 }
 
-function laske_tilausriveille_uudet_hinnat($uusi_kate, $tilausrivi_alvillisuus, $tilausnumero = 0, $tilausrivi_tunnukset = array()) {
+function laske_tilausriveille_uudet_hinnat($uusi_kate, $tilausnumero = 0, $tilausrivi_tunnukset = array()) {
 	global $kukarow, $yhtiorow;
 
 	if (!empty($tilausnumero)) {
@@ -45,6 +45,7 @@ function laske_tilausriveille_uudet_hinnat($uusi_kate, $tilausrivi_alvillisuus, 
 		}
 
 		$rivin_alennus = generoi_alekentta_php($tilausrivi, 'M', 'kerto');
+
 		//Jos rivill‰ on alennuksia, niin kahahinnan p‰‰lle pit‰‰ laskea rivin alennukset, jotta uuden katteen laskenta menee oikein.
 		$kehahin_plus_alennus = $tilausrivi['kehahin'] / $rivin_alennus;
 		$uusi_hinta = $kehahin_plus_alennus / ( 1 - ( $uusi_kate / 100 ));
@@ -53,9 +54,11 @@ function laske_tilausriveille_uudet_hinnat($uusi_kate, $tilausrivi_alvillisuus, 
 		//ett‰ myyntihinnoissa on alv laskettuna myyntihinnan sis‰lle.
 		//Verrattuna verottomaan myyntihintaan,
 		//hinnan pit‰‰ siis olla tilausrivi.alv verran suurempi, jotta katteen lasku on oikein.
-		if ($tilausrivi_alvillisuus != 'E' and $yhtiorow['alv_kasittely'] == '') {
+		if ($yhtiorow['alv_kasittely'] == '') {
 			$uusi_hinta = $uusi_hinta * (1 + ($tilausrivi['alv'] / 100));
 		}
+
+		$uusi_hinta = hintapyoristys($uusi_hinta);
 
 		$summa += $uusi_hinta;
 

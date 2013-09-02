@@ -1,14 +1,28 @@
 <?php
 
 	// Kutsutaanko CLI:stä
-	if (php_sapi_name() != 'cli') {
-		die("vain cli");
+	$php_cli = FALSE;
+
+	if (php_sapi_name() == 'cli') {
+		$php_cli = TRUE;
 	}
 
 	date_default_timezone_set('Europe/Helsinki');
 
-	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
+	if (!$php_cli) {
+		echo "Vain komentoriviltä!";
+		exit;
+	}
+
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
+	error_reporting(E_ALL);
+	ini_set("display_errors", 0);
+
 	require("inc/salasanat.php");
+	require("inc/functions.inc");
+
+	// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
+	pupesoft_flock();
 
 	if (!isset(	$pankkiaineiston_haku["host"],
 				$pankkiaineiston_haku["user"],
@@ -25,29 +39,11 @@
 		exit;
 	}
 
-	// Jos meillä on lock-file ja se on alle 15 minuuttia vanha
-	if (file_exists("/tmp/##pankkiaineisto-haku.lock") and mktime()-filemtime("/tmp/##pankkiaineisto-haku.lock") < 300) {
-		echo "pankkiaineisto-haku lähetys käynnissä, odota hetki!\n";
-		exit;
-	}
-
-	// Jos meillä on lock-file ja se on yli 15 minuuttia vanha
-	if (file_exists("/tmp/##pankkiaineisto-haku.lock") and mktime()-filemtime("/tmp/##pankkiaineisto-haku.lock") >= 300) {
-		echo "VIRHE: pankkiaineisto-haku lähetys jumissa! Ota yhteys tekniseen tukeen!!!\n";
-		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-			file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: pankkiaineisto-haku lähetys jumissa!", FILE_APPEND);
-		}
-		exit;
-	}
-
-	touch("/tmp/##pankkiaineisto-haku.lock");
-
 	// Avataan yhteys
 	$conn_id = @ftp_connect($pankkiaineiston_haku["host"]);
 
 	if ($conn_id === FALSE) {
 		echo "Yhteys epaonnistui {$pankkiaineiston_haku["host"]}!";
-		unlink("/tmp/##pankkiaineisto-haku.lock");
 		exit;
 	}
 
@@ -55,7 +51,6 @@
 
 	if ($login_result === FALSE) {
 		echo "Login epaonnistui {$pankkiaineiston_haku["host"]}!";
-		unlink("/tmp/##pankkiaineisto-haku.lock");
 		exit;
 	}
 
@@ -78,5 +73,3 @@
 	}
 
 	ftp_close($conn_id);
-
-	unlink("/tmp/##pankkiaineisto-haku.lock");

@@ -454,19 +454,19 @@
 					$asiakasrow['toim_postitp']  = $asiakasrow['postitp'];
 				}
 
+				$asylloik = tarkista_oikeus("yllapito.php", "asiakas", "X");
 
 				echo "<tr>";
-				echo "<td>$asiakasrow[nimi]</td><td>$asiakasrow[toim_nimi]</td><td>$yhenkilo</td>";
+				echo "<td>$asiakasrow[nimi]";
 
-				$query = "	SELECT yhtio
-							FROM oikeu
-							WHERE yhtio	= '$kukarow[yhtio]'
-							and kuka	= '$kukarow[kuka]'
-							and nimi	= 'yllapito.php'
-							and alanimi = 'asiakas'";
-				$result = pupe_query($query);
+				if ($asylloik) {
+					echo "&nbsp;&nbsp;<a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t("Muokkaa"),"' title='",t("Muuta asiakkaan tietoja"),"' /></a>";
+				}
 
-				if (mysql_num_rows($result) > 0) {
+				echo "</td>";
+				echo "<td>$asiakasrow[toim_nimi]</td><td>$yhenkilo</td>";
+
+				if ($asylloik and tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
 					echo "<td><a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Luo uusi yhteyshenkilö")."</a></td>";
 				}
 				else {
@@ -497,36 +497,18 @@
 				$vvl = date("Y");
 				$ppl = date("d");
 
-				$query = "	SELECT yhtio
-							FROM oikeu
-							WHERE yhtio	= '$kukarow[yhtio]'
-							and kuka	= '$kukarow[kuka]'
-							and nimi	= 'crm/kalenteri.php'
-							and alanimi = ''";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) > 0) {
+				if (tarkista_oikeus("crm/kalenteri.php", "", "X")) {
 					echo "<td><a href='{$palvelin2}crm/kalenteri.php?lopetus=$asmemo_lopetus'>".t("Kalenteri")."</a></td>";
 				}
 				else {
 					echo "<td>".t("Kalenteri")."</td>";
 				}
 
-
 				echo "</tr>";
 				echo "<tr>";
 				echo "<td>$asiakasrow[postino] $asiakasrow[postitp]</td><td>$asiakasrow[toim_postino] $asiakasrow[toim_postitp]</td><td>".t("Gsm").": $ygsm</td>";
 
-
-				$query = "	SELECT yhtio
-							FROM oikeu
-							WHERE yhtio	= '$kukarow[yhtio]'
-							and kuka	= '$kukarow[kuka]'
-							and nimi	= 'raportit/myyntiseuranta.php'
-							and alanimi = ''";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) > 0) {
+				if (tarkista_oikeus("raportit/myyntiseuranta.php")) {
 					echo "<td><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=MYYNTI&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=$asmemo_lopetus'>".t("Myynninseuranta")."</a></td>";
 				}
 				else {
@@ -543,15 +525,7 @@
 
 				echo "</td>";
 
-				$query = "	SELECT yhtio
-							FROM oikeu
-							WHERE yhtio	= '$kukarow[yhtio]'
-							and kuka	= '$kukarow[kuka]'
-							and nimi	= 'raportit/asiakasinfo.php'
-							and alanimi = ''";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) > 0) {
+				if (tarkista_oikeus("raportit/asiakasinfo.php")) {
 					echo "<td><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=ALENNUKSET&lopetus=$asmemo_lopetus'>".t("Alennustaulukko")."</a></td>";
 				}
 				else {

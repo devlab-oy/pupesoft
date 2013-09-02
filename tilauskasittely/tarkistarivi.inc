@@ -1044,126 +1044,127 @@
 
 	if ($row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A'  or (($row["var"] == 'J' or $row["var"] == 'P') and !in_array($row["var2"], array("OK", "PK"))))) {
 
-		//vastaavat tuotteet
-		$query  = "SELECT * FROM vastaavat WHERE tuoteno = '$row[tuoteno]' AND yhtio = '$kukarow[yhtio]'";
-		$vastaresult = pupe_query($query);
+		// Haetaan vastaavuusketjut korvaavat ketjun päätuotteella
+		require_once 'vastaavat.class.php';
 
-		if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A' and in_array($row["var2"], array("OK", "PK")) and mysql_num_rows($vastaresult) > 0) {
+		$vastaavat = new Vastaavat($row["tuoteno"]);
 
-			$vastaavat_html = "<table width='100%'><tr>";
-			$vastaavat_html .= "<th style='width:100%;'><form method='post' name='hyvaksy'>
-								<input type='hidden' name='toim' 			value = '$toim'>
-								<input type='hidden' name='lopetus' 		value = '$lopetus'>
-								<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
-								<input type='hidden' name='projektilla' 	value = '$projektilla'>
-								<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
-								<input type='hidden' name='mista' 			value = '$mista'>
-								<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
-								<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
-								<input type='hidden' name='menutila' 		value = '$menutila'>
-								<input type='hidden' name='tila' 			value = 'OOKOOAA'>
-								<input type='hidden' name='vastaavienkasittely' value = 'kylla'>
-								<input type='hidden' name='naytetaan_vastaavat' value='true' />
-								<input style='float: right;' type='Submit' value='".t("Näytä vastaavat tuotteet")."'>
-								</form></th>";
-			$vastaavat_html .= "</tr></table>";
-			$vastaavattuotteet = 1;
-		}
-		else {
+		if ($vastaavat->onkovastaavia()) {
 
-			if (mysql_num_rows($vastaresult) > 0) {
-				$kutsuttu = 0;
+			if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A' and in_array($row["var2"], array("OK", "PK"))) {
 
-				$alku = "<table width='100%'><tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
-
-				if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') $alku .= "<th>".t("Tehtaan saldo")."</th>";
-
-				$alku .= "<th><form method='post' name='hyvaksy'>
-									<input type='hidden' name='toim' 			value = '$toim'>
-									<input type='hidden' name='lopetus' 		value = '$lopetus'>
-									<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
-									<input type='hidden' name='projektilla' 	value = '$projektilla'>
-									<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
-									<input type='hidden' name='mista' 			value = '$mista'>
-									<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
-									<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
-									<input type='hidden' name='menutila' 		value = '$menutila'>
-									<input type='hidden' name='tila' 			value = 'OOKOOAA'>
+				$vastaavat_html = "<table width='100%'><tr>";
+				$vastaavat_html .= "<th style='width:100%;'><form method='post' name='hyvaksy'>
+									<input type='hidden' name='toim'       	 value = '$toim'>
+									<input type='hidden' name='lopetus'      value = '$lopetus'>
+									<input type='hidden' name='ruutulimit'   value = '$ruutulimit'>
+									<input type='hidden' name='projektilla'  value = '$projektilla'>
+									<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
+									<input type='hidden' name='mista'        value = '$mista'>
+									<input type='hidden' name='rivitunnus'   value = '$row[tunnus]'>
+									<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
+									<input type='hidden' name='menutila'     value = '$menutila'>
+									<input type='hidden' name='tila'         value = 'OOKOOAA'>
 									<input type='hidden' name='vastaavienkasittely' value = 'kylla'>
-									<input type='Submit' value='".t("Piilota vastaavat tuotteet")."'>
+									<input type='hidden' name='naytetaan_vastaavat' value = 'true' />
+									<input style='float: right;' type='Submit' value='".t("Näytä vastaavat tuotteet")."'>
 									</form></th>";
-				$alku .= "</tr>";
+				$vastaavat_html .= "</tr></table>";
+				$vastaavattuotteet = 1;
+			}
+			else {
 
-				if ($row['kommentti'] != "") {
-					$alku = "<br>".$alku;
-				}
+				// Loopataan kaikki tuotteen vastaavuusketjut
+				foreach (explode(",", $vastaavat->getIDt()) as $ketju) {
 
-				// tuote löytyi, joten haetaan sen id...
-				$vrow    = mysql_fetch_array($vastaresult);
-				$id		= $vrow['id'];
+					$vastaavat_table = "";
 
-				$query = "SELECT * FROM vastaavat WHERE id='$id' AND tuoteno<>'$row[tuoteno]' AND yhtio='$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
-				$vasta2result = pupe_query($query);
+					// Haetaan tuotteet ketjukohtaisesti
+					$_tuotteet = $vastaavat->tuotteet($ketju);
 
-				while ($vrow = mysql_fetch_array($vasta2result)) {
+					foreach ($_tuotteet as $_tuote) {
 
-					list(, , $vmyytavissa) = saldo_myytavissa($vrow["tuoteno"]);
+						$vaihtoehtoinen = ($_tuote['vaihtoehtoinen'] == 'K') ? "<font color=#F00>".t("Vaihtoehtoinen, tarkista sopivuus")."!</font>" : "";
+						list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"]);
 
-					if (($vmyytavissa > 0 or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
+						if (($vmyytavissa > 0 or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') and strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"])) {
 
-						if ($kutsuttu == 0) {
-							$vastaavat_html = $alku;
-							$kutsuttu++;
+							$tvrow = hae_tuote($_tuote['tuoteno']);
+
+							list($V_hinta, $V_netto, $V_ale, $V_alehinta_alv, $V_alehinta_val) = alehinta($laskurow, $tvrow, $row['tilkpl'], '', '', '');
+
+							 $vastaavat_table .= "<tr class='aktiivi'>"
+							 			."<td>{$_tuote["tuoteno"]} $vaihtoehtoinen</td>"
+										."<td>{$tvrow["nimitys"]}</td>"
+							 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
+							 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>";
+
+
+								if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
+
+									$query = "  SELECT tehdas_saldo, IF(jarjestys = 0, 9999, jarjestys) jarjestys
+												FROM tuotteen_toimittajat
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tuoteno = '{$vrow['tuoteno']}'
+												ORDER BY jarjestys
+												LIMIT 1";
+									$tehdas_saldo_res = pupe_query($query);
+									$tehdas_saldo_row = mysql_fetch_assoc($tehdas_saldo_res);
+
+									$vastaavat_table .= "<td align='right'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</td>";
+								}
+
+							 	$vastaavat_table .= "<td align='left'>
+											<form method='post' name='jalkitoimita'>
+							 			   	<input type='hidden' name='toim' 			value = '$toim'>
+							 			   	<input type='hidden' name='lopetus' 		value = '$lopetus'>
+							 			   	<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+							 			   	<input type='hidden' name='projektilla' 	value = '$projektilla'>
+							 			   	<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+							 			   	<input type='hidden' name='mista' 			value = '$mista'>
+							 			   	<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+							 			   	<input type='hidden' name='vastaavatuoteno' value = '$_tuote[tuoteno]'>
+							 			   	<input type='hidden' name='menutila' 		value = '$menutila'>
+							 			   	<input type='hidden' name='tila' 			value = 'MUUTA'>
+							 			   	<input type='hidden' name='tapa' 			value = 'MYYVASTAAVA'>
+							 			   	<input type='Submit' value='".t("Tilaa tuote")."'>
+							 			   	</form></td></tr>";
+						}
+					}
+
+					if ($vastaavat_table != "") {
+						if ($vastaavattuotteet == 0) {
+							$vastaavat_html .= "<table width='100%'>";
 						}
 
-						$tvsql = "SELECT * FROM tuote where yhtio='$kukarow[yhtio]' and tuoteno = '$vrow[tuoteno]'";
-						$tvresult = pupe_query($tvsql);
-						$tvrow = mysql_fetch_assoc($tvresult);
+						$vastaavat_html .= "<tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
+						if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') $vastaavat_html .= "<th>".t("Tehtaan saldo")."</th>";
+						$vastaavat_html .= "<th>";
 
-						list($V_hinta, $V_netto, $V_ale, $V_alehinta_alv, $V_alehinta_val) = alehinta($laskurow, $tvrow, $row['tilkpl'], '', '', '');
+						if ($vastaavattuotteet == 0) {
+							$vastaavat_html .= "<form method='post' name='hyvaksy'>
+												<input type='hidden' name='toim' 			value = '$toim'>
+												<input type='hidden' name='lopetus' 		value = '$lopetus'>
+												<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+												<input type='hidden' name='projektilla' 	value = '$projektilla'>
+												<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+												<input type='hidden' name='mista' 			value = '$mista'>
+												<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+												<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
+												<input type='hidden' name='menutila' 		value = '$menutila'>
+												<input type='hidden' name='tila' 			value = 'OOKOOAA'>
+												<input type='hidden' name='vastaavienkasittely' value = 'kylla'>
+												<input type='Submit' value='".t("Piilota vastaavat tuotteet")."'>
+												</form>";
+						}
 
-						 $vastaavat_html .= 	"<tr class='aktiivi'>"
-						 			."<td>{$vrow["tuoteno"]}</td>"
-									."<td>{$tvrow["nimitys"]}</td>"
-						 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
-						 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>";
-
-						 if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
-
-						 	$query = "	SELECT tehdas_saldo, IF(jarjestys = 0, 9999, jarjestys) sorttauskentta
-						 				FROM tuotteen_toimittajat
-						 				WHERE yhtio = '{$kukarow['yhtio']}'
-						 				AND tuoteno = '{$vrow['tuoteno']}'
-						 				ORDER BY sorttauskentta
-						 				LIMIT 1";
-						 	$tehdas_saldo_res = pupe_query($query);
-						 	$tehdas_saldo_row = mysql_fetch_assoc($tehdas_saldo_res);
-
-						 	$vastaavat_html .= "<td align='right'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</td>";
-						 }
-
-						 $vastaavat_html .= "<td align='left'>"
-						 			." <form method='post' name='jalkitoimita'>
-						 			   	<input type='hidden' name='toim' 			value = '$toim'>
-						 			   	<input type='hidden' name='lopetus' 		value = '$lopetus'>
-						 			   	<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
-						 			   	<input type='hidden' name='projektilla' 	value = '$projektilla'>
-						 			   	<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
-						 			   	<input type='hidden' name='mista' 			value = '$mista'>
-						 			   	<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
-						 			   	<input type='hidden' name='vastaavatuoteno' value = '$vrow[tuoteno]'>
-						 			   	<input type='hidden' name='menutila' 		value = '$menutila'>
-						 			   	<input type='hidden' name='tila' 			value = 'MUUTA'>
-						 			   	<input type='hidden' name='tapa' 			value = 'MYYVASTAAVA'>
-						 			   	<input type='Submit' value='".t("Tilaa tuote")."'>
-						 			   	</form> "
-						 			."</td></tr>";
+						$vastaavat_html .= "</th></tr>$vastaavat_table";
+						$vastaavattuotteet = 1;
 					}
 				}
 
-				if ($kutsuttu > 0) {
+				if ($vastaavat_html != "") {
 					$vastaavat_html .= "</table>";
-					$vastaavattuotteet = 1;
 				}
 			}
 		}

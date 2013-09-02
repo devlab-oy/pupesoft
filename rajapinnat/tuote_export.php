@@ -15,17 +15,17 @@
 	}
 
 	$pupe_root_polku = dirname(dirname(__FILE__));
-	
+
 	require ("{$pupe_root_polku}/inc/connect.inc");
 	require ("{$pupe_root_polku}/inc/functions.inc");
-	
+
 	$lock_params = array(
 	    "locktime" => 5400,
 	);
-	
+
 	// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 	pupesoft_flock($lock_params);
-	
+
 	require ("{$pupe_root_polku}/rajapinnat/magento_client.php");
 
 	// Laitetaan unlimited execution time
@@ -173,15 +173,6 @@
 							);
 	}
 
-	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa1 = "AND tapahtuma.laadittu >= '{$datetime_checkpoint}'";
-		$muutoslisa2 = "AND tilausrivi.laadittu >= '{$datetime_checkpoint}'";
-	}
-	else {
-		$muutoslisa1 = "";
-		$muutoslisa2 = "";
-	}
-
 	// Magentoa varten pitää hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa
 	if ($verkkokauppatyyppi == 'magento') {
 
@@ -212,6 +203,17 @@
 
 	echo date("d.m.Y @ G:i:s")." - Haetaan saldot.\n";
 
+	if ($ajetaanko_kaikki == "NO") {
+		$muutoslisa1 = "AND tapahtuma.laadittu >= '{$datetime_checkpoint}'";
+		$muutoslisa2 = "AND tilausrivi.laadittu >= '{$datetime_checkpoint}'";
+		$muutoslisa3 = "AND tuote.muutospvm >= '{$datetime_checkpoint}'";
+	}
+	else {
+		$muutoslisa1 = "";
+		$muutoslisa2 = "";
+		$muutoslisa3 = "";
+	}
+
 	// Haetaan saldot tuotteille, joille on tehty tunnin sisällä tilausrivi tai tapahtuma
 	$query =  "(SELECT tapahtuma.tuoteno,
 				tuote.eankoodi
@@ -238,6 +240,18 @@
 					AND tuote.nakyvyys != '')
 				WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 				$muutoslisa2)
+
+				UNION
+
+				(SELECT tuote.tuoteno,
+				tuote.eankoodi
+				FROM tuote
+				WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+				AND tuote.status != 'P'
+				AND tuote.tuotetyyppi NOT in ('A','B')
+				AND tuote.tuoteno != ''
+				AND tuote.nakyvyys != ''
+				$muutoslisa3)
 
 				ORDER BY 1";
 	$result = pupe_query($query);

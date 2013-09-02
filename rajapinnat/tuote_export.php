@@ -444,6 +444,7 @@
 		// Haetaan kaikki tuotteet, jotka kuuluu tähän variaatioon ja on muuttunut
 		$aliselect = "	SELECT
 						tuotteen_avainsanat.tuoteno,
+						tuotteen_avainsanat.jarjestys,
 						tuote.tunnus,
 						tuote.nimitys,
 						tuote.kuvaus,
@@ -531,6 +532,7 @@
 															'campaign_code'			=> $alirow["campaign_code"],
 															'target'				=> $alirow["target"],
 															'onsale'				=> $alirow["onsale"],
+															'jarjestys'				=> $alirow["jarjestys"],
 															'myyntihinta'			=> $myyntihinta,
 															'myyntihinta_veroton'	=> $myyntihinta_veroton,
 															'myymalahinta'			=> $myymalahinta,

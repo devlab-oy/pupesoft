@@ -364,6 +364,7 @@ class MagentoClient {
 						array(
 								'price'				=> $tuote['myymalahinta'],
 								'short_description' => utf8_encode($tuote['lyhytkuvaus']),
+								'featured_priority' => utf8_encode($tuote['jarjestys']),
 								'visibility'		=> self::NOT_VISIBLE_INDIVIDUALLY,
 								'additional_attributes' => array(
 									'multi_data' => array(

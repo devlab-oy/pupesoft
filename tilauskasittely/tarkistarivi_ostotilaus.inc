@@ -6,7 +6,7 @@
 
 	$query = "	SELECT *
 				FROM tuote
-				LEFT JOIN tuotteen_toimittajat ON tuote.yhtio	= tuotteen_toimittajat.yhtio and tuote.tuoteno	= tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+				LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 				LEFT JOIN toimi ON tuote.yhtio = toimi.yhtio and toimi.tunnus = '$laskurow[liitostunnus]'
 				WHERE tuote.tuoteno	= '$prow[tuoteno]'
 				and tuote.yhtio		= '$kukarow[yhtio]'";
@@ -42,6 +42,10 @@
 	if ($trow['ei_saldoa'] != '' and $riviok == 0) {
 		$varaosavirhe .= t("HUOM: Tuote ei ole varastoitava, sit‰ ei voida saavuttaa varastoon")."!<br>";
 		$riviok++;
+	}
+
+	if (!empty($trow['tehdas_saldo_tarkistus']) and $trow['tehdas_saldo'] < $prow['varattukpl']) {
+		$varaosavirhe .= "<font class='error'>".t("HUOM: Toimittajan tehtaan saldo on %d", "", $trow['tehdas_saldo']).".<br></font>";
 	}
 
 	if ($yhtiorow['ostoera_pyoristys'] == 'K' and isset($ostoerahuom) and is_array($ostoerahuom) and in_array($prow['tunnus'], $ostoerahuom) and $kpl_st != $org_kpl) {
@@ -164,8 +168,6 @@
 										and tunnus	= '$paiv_rivitunnus'
 										and otunnus = '$kukarow[kesken]'";
 				$paivita_res = pupe_query($paivita_toimaika);
-
-
 			}
 
 			$varaosavirhe .= "<font class='message'>".t("P‰ivitettiin tuotteen")." $trow[tuoteno] ".t("toimitusaika").": ".tv1dateconv($prow["toimaika"])." -> ".tv1dateconv($ehdotus_pvm)."</font>";
@@ -204,22 +206,6 @@
 								</form>";
 		}
 
-	}
-
-	$query = "	SELECT tuotteen_toimittajat.tehdas_saldo,
-				toimi.tehdas_saldo_tarkistus
-				FROM tuotteen_toimittajat use index (yhtio_tuoteno)
-				JOIN toimi
-				ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
-					AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
-				WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-				AND tuotteen_toimittajat.tuoteno = '{$prow['tuoteno']}'
-				ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)";
-	$tehtaan_saldo_result = pupe_query($query);
-
-	$tehtaan_saldo_row = mysql_fetch_assoc($tehtaan_saldo_result);
-	if (!empty($tehtaan_saldo_row['tehdas_saldo_tarkistus']) and $tehtaan_saldo_row['tehdas_saldo'] < $prow['varattukpl']) {
-		$varaosavirhe .= "<font class='error'>".t("HUOM: Toimittajan tehtaan saldo on %d", "", $tehtaan_saldo_row['tehdas_saldo']).".<br></font>";
 	}
 
 	// Haetaan vastaavuusketjut korvaavat ketjun p‰‰tuotteella
@@ -380,7 +366,7 @@
 					."</td></tr>";
 		}
 	}
-	
+
 	if (!empty($korvaavat_table)) {
 		if (empty($vastaavat_html)) {
 			$vastaavat_html = "<table width='100%'>";
@@ -402,5 +388,3 @@
 	if ($vastaavat_html != "") {
 		$vastaavat_html .= "</table>";
 	}
-	
-?>

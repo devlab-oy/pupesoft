@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#Otetaan flock-locki
 exec 9>/tmp/##pupesoft.sh-flock.lock
 
 if ! flock -n 9  ; then
@@ -378,3 +379,6 @@ fi
 echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
 echo ": Backup done."
 echo
+
+# Vapautetaan lukko
+flock -u 9

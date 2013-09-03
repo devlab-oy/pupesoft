@@ -7,6 +7,7 @@ if ! flock -n 9  ; then
 	echo "Backup on jo menossa!";
 	exit 1
 else
+	touch /tmp/##pupesoft.sh-flock.lock
 	chmod 666 /tmp/##pupesoft.sh-flock.lock
 fi
 

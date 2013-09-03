@@ -1,5 +1,14 @@
 #!/bin/bash
 
+exec 9>/tmp/##pupesoft.sh-flock.lock
+
+if ! flock -n 9  ; then
+	echo "Backup on jo menossa!";
+	exit 1
+else
+	chmod 666 /tmp/##pupesoft.sh-flock.lock
+fi
+
 BACKUPDIR=$1
 DBKANTA=$2
 DBKAYTTAJA=$3

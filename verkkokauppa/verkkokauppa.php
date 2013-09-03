@@ -192,8 +192,18 @@ if (!function_exists("menu")) {
 			$result = t_avainsana("VERKKOKAULINKKI");
 
 			while ($orow = mysql_fetch_array($result)) {
-				if ($orow["selite"] == "ETUSIVU") $val .= "<tr><td class='menucell'><a class='menu' href = '{$palvelin2}'>".t("Etusivu")."</a></td></tr>";
-				else $val .= "<tr><td class='menucell'><a class='menu' href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=uutiset&sivu={$orow['selite']}', false, false);\">{$orow['selitetark']}</a></td></tr>";
+				if ($orow["selite"] == "ETUSIVU") {
+					$val .= "<tr><td class='menucell'><a class='menu' href = '{$palvelin2}'>".t("Etusivu")."</a></td></tr>";
+				}
+				else {
+					if (file_exists("{$orow['selitetark']}.png")) {
+						$val .= "<tr><td class='menucell'><a class='menu' href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=uutiset&sivu={$orow['selite']}', false, false);\"><img width='170' src='{$orow['selitetark']}.png'/></a></td></tr>";
+					}
+					else {
+						$val .= "<tr><td class='menucell'><a class='menu' href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=uutiset&sivu={$orow['selite']}', false, false);\">{$orow['selitetark']}</a></td></tr>";
+					}
+
+				}
 			}
 
 			$verkkokauppa_tuotehaku = "<tr><td class='back'><br><font class='info'>".t("Tuotehaku").":</font><br><hr></td></tr>

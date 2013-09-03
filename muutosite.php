@@ -45,8 +45,18 @@ if ($tee == 'tulosta_korkoerittely') {
 
 enable_ajax();
 
-if ($livesearch_tee == "TILIHAKU") {
+if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
 	livesearch_tilihaku();
+	exit;
+}
+
+if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
+	livesearch_asiakashaku();
+	exit;
+}
+
+if (isset($livesearch_tee) and $livesearch_tee == "TOIMITTAJAHAKU") {
+	livesearch_toimittajahaku();
 	exit;
 }
 

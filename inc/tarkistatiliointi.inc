@@ -4,6 +4,7 @@
 	$summa 	= (float) $summa;
 	$tili 	= trim($tili);
 	$ulos 	= "";
+	$asiakastoimittajavirhe = FALSE;
 
 	if (!isset($mistatullaan)) $mistatullaan = "";
 
@@ -56,6 +57,16 @@
 				$ok = 1;
 			}
 		}
+		
+		if (isset($tiliasiakasid) and $tiliasiakasid > 0) {
+			$liitos = 'A';
+			$liitostunnus = $tiliasiakasid;
+		}
+		
+		if (isset($tilitoimittajaid) and $tilitoimittajaid > 0) {
+			$liitos = 'T';
+			$liitostunnus = $tilitoimittajaid;
+		}
 
 		if ($ok == 0 and strlen($tili) > 0) {
 
@@ -65,6 +76,7 @@
 			if ($tositetila == "X" and $xrow["toimijaliitos"] != "" and (int) $liitostunnus == 0 and (!isset($avaavatase) or $avaavatase != 'joo')) {
 				$virhe .= t("Tositteeseen on liitettävä asiakas tai toimittaja")."!<br />";
 				$ok = 1;
+				$asiakastoimittajavirhe = TRUE;
 			}
 
 			/*

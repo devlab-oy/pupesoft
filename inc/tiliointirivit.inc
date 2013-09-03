@@ -152,8 +152,6 @@
 				<input type='hidden' name = 'kk' value = '$kk'>
 				<input type='hidden' name = 'iframe' value = '$iframe'>
 				<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
-				<input type='hidden' name = 'liitos' value='{$liitos}' />
-				<input type='hidden' name = 'liitostunnus' value='{$liitostunnus}' />
 				<input type='hidden' name = 'jarj' value = '$jarj'>
 				<input type='hidden' name = 'vanha_tili' value='{$vanha_tili}' />";
 
@@ -168,6 +166,23 @@
 		}
 		else {
 			echo "$tiliulos";
+		}
+
+		if ($liitostunnus > 0 or $asiakastoimittajavirhe) {
+			#<input type='hidden' name = 'liitos' value='{$liitos}' />
+			#<input type='hidden' name = 'liitostunnus' value='{$liitostunnus}' />
+
+			$tiliasiakasid = $tilitoimittajaid = "";
+
+			if ($liitos == "A" and $liitostunnus > 0) {
+				$tiliasiakasid = $liitostunnus;
+			}
+			elseif ($liitos == "A" and $liitostunnus > 0) {
+				$tilitoimittajaid = $liitostunnus;
+			}
+
+			echo t("Asiakas").": ".livesearch_kentta("uusi", "ASIAKASHAKU", "tiliasiakasid", 170, $tiliasiakasid, "EISUBMIT");
+			echo t("Toimittaja").": ".livesearch_kentta("uusi", "TOIMITTAJAHAKU", "tilitoimittajaid", 170, $tilitoimittajaid, "EISUBMIT");
 		}
 
 		echo "</td>
@@ -427,15 +442,15 @@
 			echo "<td>
 					<form action = '$PHP_SELF#$tunnus' method='post'>
 					<input type='hidden' name = 'tilirivformi' value = 'submitattu'>
-					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-					<input type='hidden' name='tee' value = 'P'>
-					<input type='hidden' name='tunnus' value = '$tunnus'>
-					<input type='hidden' name='viivatut' value = '$viivatut'>
+					<input type='hidden' name = 'lopetus' value = '$lopetus'>
+					<input type='hidden' name = 'tee' value = 'P'>
+					<input type='hidden' name = 'tunnus' value = '$tunnus'>
+					<input type='hidden' name = 'viivatut' value = '$viivatut'>
 					<input type='hidden' name = 'grouppaa' value = '$grouppaa'>
-					<input type='hidden' name='laji' value = '$laji'>
-					<input type='hidden' name='vv' value = '$vv'>
-					<input type='hidden' name='kk' value = '$kk'>
-					<input type='hidden' name='ptunnus' value = '$trow[tunnus]'>
+					<input type='hidden' name = 'laji' value = '$laji'>
+					<input type='hidden' name = 'vv' value = '$vv'>
+					<input type='hidden' name = 'kk' value = '$kk'>
+					<input type='hidden' name = 'ptunnus' value = '$trow[tunnus]'>
 					<input type='hidden' name = 'iframe' value = '$iframe'>
 					<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
 					<input type='hidden' name = 'jarj' value = '$jarj'>

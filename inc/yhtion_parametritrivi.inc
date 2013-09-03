@@ -804,6 +804,23 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tee_automaattinen_osto_myyntitilaukselta") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array_fill_keys(array('X','U','V','Y'), '');
+		$sel[$trow[$i]] = " SELECTED";
+
+		$ulos .= "<option value=''>".t("Myyntitilauksella ei voi luoda automaattisesti ostorivej‰")."</option>";
+		$ulos .= "<option value='X' {$sel['X']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ varastoon jos tee_osto_myyntitilaukselta-parametri sallii sen")."</option>";
+		$ulos .= "<option value='U' {$sel['U']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ asiakkaalle jos tee_osto_myyntitilaukselta-parametri sallii sen")."</option>";
+		$ulos .= "<option value='Y' {$sel['Y']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ varastoon jos tee_osto_myyntitilaukselta-parametri sallii sen ja tehtaansaldo riitt‰‰")."</option>";
+		$ulos .= "<option value='V' {$sel['V']}>".t("Myyntitilauksella luodaan automaattisesti ostorivej‰ asiakkaalle jos tee_osto_myyntitilaukselta-parametri sallii sen ja tehtaansaldo riitt‰‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "tee_valmistus_myyntitilaukselta") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -1261,6 +1278,21 @@
 		$ulos .= "<option value = 'K' $sel[K]>".t("Kaikki saa jyvitt‰‰ myyntitilauksella");
 		$ulos .= "<option value = 'S' $sel[S]>".t("Kaikki saa jyvitt‰‰ sek‰ osajyvitt‰‰ myyntitilauksella");
 		$ulos .= "<option value = 'V' $sel[V]>".t("Vain valitut k‰ytt‰j‰t saa jyvitt‰‰ myyntitilauksella");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "salli_jyvitys_tarjouksella") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tarjouksella ei sallita katteen jyvityst‰");
+		$ulos .= "<option value = 'K' $sel[K]>".t("Kaikki saa jyvitt‰‰ katteen perusteella tarjouksella");
+		$ulos .= "<option value = 'S' $sel[S]>".t("Kaikki saa jyvitt‰‰ sek‰ osajyvitt‰‰ katteen perusteella tarjouksella");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3411,10 +3443,12 @@
 	if (mysql_field_name($result, $i) == 'korvaavuusketjun_puutekasittely') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = $trow[$i] == 'K' ? ' selected' : '';
+		$sel1 = $trow[$i] == 'K' ? ' selected' : '';
+		$sel2 = $trow[$i] == 'V' ? ' selected' : '';
 
-		$ulos .= "<option value = ''>".t("Jos korvaavuusketjun kaikki tuotteet on loppu, lis‰t‰‰n syˆtetty tuote puutteeksi/j‰lkitoimitukseen")."</option>";
-		$ulos .= "<option value = 'K' $sel>".t("Jos korvaavuusketjun kaikki tuotteet on loppu, lis‰t‰‰n korvaavuusketjun ensimm‰inen tuote puutteeksi/j‰lkitoimitukseen")."</option>";
+		$ulos .= "<option value = ''>".t("Jos kaikki tuotteet on loppu, lis‰t‰‰n syˆtetty tuote puutteeksi/j‰lkitoimitukseen")."</option>";
+		$ulos .= "<option value = 'K' $sel1>".t("Jos kaikki tuotteet on loppu, lis‰t‰‰n korvaavuusketjun ensimm‰inen tuote puutteeksi/j‰lkitoimitukseen")."</option>";
+		$ulos .= "<option value = 'V' $sel2>".t("Jos kaikki tuotteet on loppu, lis‰t‰‰n vastaavuusketjun ensimm‰inen tuote puutteeksi/j‰lkitoimitukseen")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -219,8 +219,7 @@ class MagentoClient {
 			try {
 
 				// Jos tuotetta ei ole olemassa niin lis‰t‰‰n se
-				if ( ! in_array($tuote['tuoteno'], $skus_in_store)) {
-					// Jos tuotteen lis‰ys ei onnistu ei tuotekuviakaan lis‰t‰.
+				if (!in_array($tuote['tuoteno'], $skus_in_store)) {
 					$product_id = $this->_proxy->call($this->_session, 'catalog_product.create',
 						array(
 							'simple',
@@ -230,23 +229,43 @@ class MagentoClient {
 							)
 						);
 					$this->log("Tuote {$tuote['tuoteno']} lis‰tty (simple) " . print_r($tuote_data, true));
+
+					// Pit‰‰ k‰yd‰ tekem‰ss‰ viel‰ stock.update kutsu, ett‰ saadaan Manage Stock: YES
+					$stock_data = array(
+						'qty'          => 0,
+						'is_in_stock'  => 0,
+						'manage_stock' => 1
+					);
+
+					$result = $this->_proxy->call(
+					    $this->_session,
+					    'product_stock.update',
+					    array(
+					        $tuote['tuoteno'], # sku
+					        $stock_data
+					    ));
 				}
 				// Tuote on jo olemassa, p‰ivitet‰‰n
 				else {
-					$product_id = $this->_proxy->call($this->_session, 'catalog_product.update',
+					$this->_proxy->call($this->_session, 'catalog_product.update',
 						array(
 							$tuote['tuoteno'], # sku
 							$tuote_data,
 							)
 						);
+
+					// Haetaan tuotteen Magenton ID
+					$result = $this->_proxy->call($this->_session, 'catalog_product.info', $tuote['tuoteno']);
+					$product_id = $result['product_id'];
+
 					$this->log("Tuote {$tuote['tuoteno']} p‰ivitetty (simple) " . print_r($tuote_data, true));
 				}
 
-				// Lis‰t‰‰n tuotekuvat
-				if ($tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus'])) {
-					// Multicallilla kaikki kuvat yhdell‰ kertaa.
-					$this->lisaa_tuotekuvat($product_id, $tuotekuvat);
-				}
+				// Haetaan tuotekuvat Pupesoftista
+				$tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
+
+				// Lis‰t‰‰n kuvat Magentoon
+				$this->lisaa_tuotekuvat($product_id, $tuotekuvat);
 
 				// Lis‰t‰‰n tuote countteria
 				$count++;
@@ -345,6 +364,7 @@ class MagentoClient {
 						array(
 								'price'				=> $tuote['myymalahinta'],
 								'short_description' => utf8_encode($tuote['lyhytkuvaus']),
+								'featured_priority' => utf8_encode($tuote['jarjestys']),
 								'visibility'		=> self::NOT_VISIBLE_INDIVIDUALLY,
 								'additional_attributes' => array(
 									'multi_data' => array(
@@ -368,6 +388,21 @@ class MagentoClient {
 							)
 						);
 					$this->log("Tuote {$nimitys} lis‰tty (configurable) " . print_r($configurable, true));
+
+					// Pit‰‰ k‰yd‰ tekem‰ss‰ viel‰ stock.update kutsu, ett‰ saadaan Manage Stock: YES
+					$stock_data = array(
+						'qty'          => 0,
+						'is_in_stock'  => 0,
+						'manage_stock' => 1
+					);
+
+					$result = $this->_proxy->call(
+					    $this->_session,
+					    'product_stock.update',
+					    array(
+					        $nimitys, # sku
+					        $stock_data
+					    ));
 				}
 				// P‰ivitet‰‰n olemassa olevaa configurablea
 				else {
@@ -378,13 +413,17 @@ class MagentoClient {
 							)
 						);
 					$this->log("Tuote {$nimitys} p‰ivitetty (configurable) " . print_r($configurable, true));
+
+					// Haetaan tuotteen Magenton ID
+					$result = $this->_proxy->call($this->_session, 'catalog_product.info', $nimitys);
+					$product_id = $result['product_id'];
 				}
 
-				// Tarkistetaan onko lis‰tyll‰ tuotteella tuotekuvia ja lis‰t‰‰n ne
-				// Multicallilla kaikki kuvat yhdell‰ kertaa.
-				if ($tuotekuvat = $this->hae_tuotekuvat($tuotteet[0]['tunnus'])) {
-					$this->lisaa_tuotekuvat($product_id, $tuotekuvat);
-				}
+				// Haetaan tuotekuvat Pupesoftista
+				$tuotekuvat = $this->hae_tuotekuvat($tuotteet[0]['tunnus']);
+
+				// Lis‰t‰‰n kuvat Magentoon
+				$this->lisaa_tuotekuvat($product_id, $tuotekuvat);
 
 				// Lis‰t‰‰n countteria
 				$count++;
@@ -493,6 +532,8 @@ class MagentoClient {
 
 			$count++;
 		}
+
+		$this->log("$count saldoa p‰ivitetty");
 
 		return $count;
 	}
@@ -747,90 +788,157 @@ class MagentoClient {
 	 * @param  array 	$tuotekuvat Tuotteen kuvatiedostot
 	 * @return array    			Tiedostonimet
 	 */
-	private function lisaa_tuotekuvat($product_id, $tuotekuvat) {
+	public function lisaa_tuotekuvat($product_id, $tuotekuvat) {
 
-		// Multicall array
-		$calls = array();
-		$filenames = '';
+		$types = array('image', 'small_image', 'thumbnail');
 
-		foreach($tuotekuvat as $kuva) {
-			$types = array('image', 'small', 'thumbnail');
+		// Pit‰‰ ensin poistaa kaikki tuotteen kuvat Magentosta
+		$magento_pictures = $this->listaa_tuotekuvat($product_id);
 
-			$calls[] = array(
-				'catalog_product_attribute_media.create',
-				array($product_id,
-					array(	'file' 		=> $kuva,
-							'label'		=> '',
-							'position' 	=> 0,
-							'types' 	=> $types,
-							'exclude' 	=> 0
-						)
-					)
-			);
+		// Poistetaan kuvat
+		foreach ($magento_pictures as $file) {
+			$this->poista_tuotekuva($product_id, $file);
 		}
 
-		// Lis‰t‰‰n tuotekuvat
-		try {
-			$filenames = $this->_proxy->multicall($this->_session, $calls);
-		}
-		catch (Exception $e) {
-			$this->_error_count++;
-			$this->log("Virhe! Kuvan lis‰ys ep‰onnistui", $e);
-		}
+		// Loopataan tuotteen kaikki kuvat
+		foreach ($tuotekuvat as $kuva) {
 
-		return $filenames;
+			// Lis‰t‰‰n tuotekuva kerrallaan
+			try {
+				$data = array(	$product_id,
+								array(	'file' 		=> $kuva,
+										'label'		=> '',
+										'position' 	=> 0,
+										'types' 	=> $types,
+										'exclude' 	=> 0
+								),
+						);
+
+				$return = $this->_proxy->call(
+					$this->_session,
+					'catalog_product_attribute_media.create',
+					$data
+				);
+
+				$this->log("Lis‰tty kuva " . print_r($return, true));
+			}
+			catch (Exception $e) {
+				// Nollataan base-encoodattu kuva, ett‰ logi ei tuu isoks
+				$data[1]["file"]["content"] = '...content poistettu logista...';
+
+				$this->log("Virhe! Kuvan lis‰ys ep‰onnistui ". print_r($data, true), $e);
+				$this->_error_count++;
+			}
+		}
 	}
 
 	/**
-	 * Hakee tuotteen tuotekuvat
+	 * Hakee tuotteen tuotekuvat Magentosta
+	 *
+	 * @param  int 		$product_id 	Tuoteen tunnus (Magento ID)
+	 * @return array 	$return 		Palauttaa arrayn, jossa tuotekuvien filenamet
+	 */
+	public function listaa_tuotekuvat($product_id) {
+
+		$pictures = array();
+		$return = array();
+
+		// Haetaan tuotteen kuvat
+		try {
+			$pictures = $this->_proxy->call(
+				$this->_session,
+				'catalog_product_attribute_media.list',
+				$product_id);
+		}
+		catch (Exception $e) {
+			$this->log("Virhe! Kuvalistauksen haku '{$product_id}' ep‰onnistui", $e);
+			$this->_error_count++;
+		}
+
+		foreach ($pictures as $picture) {
+			$return[] = $picture['file'];
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Poistaa tuotteen tuotekuvan Magentosta
+	 *
+	 * @param  int 		$product_id 	Tuoteen tunnus (Magento ID)
+	 * @return bool 	$return 		Palauttaa boolean
+	 */
+	public function poista_tuotekuva($product_id, $filename) {
+
+		$return = false;
+
+		// Poistetaan tuotteen kuva
+		try {
+			$return = $this->_proxy->call(
+				$this->_session,
+				'catalog_product_attribute_media.remove',
+				array(	'product' => $product_id,
+						'file' => $filename));
+				$this->log("Poistetaan tuotteen '{$product_id}' kuva '{$filename}'");
+		}
+		catch (Exception $e) {
+			$this->log("Virhe! Kuvan poisto ep‰onnistui '{$product_id}' kuva '{$filename}'", $e);
+			$this->_error_count++;
+			return false;
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Hakee tuotteen tuotekuvat Pupesoftista
 	 *
 	 * @param  int 		$tunnus 		Tuoteen tunnus (tuote.tunnus)
 	 * @return array 	$tuotekuvat 	Palauttaa arrayn joka kelpaa magenton soap clientille suoraan
 	 */
-	private function hae_tuotekuvat($tunnus) {
+	public function hae_tuotekuvat($tunnus) {
 		global $kukarow, $dbhost, $dbuser, $dbpass, $dbkanta;
 
-			try {
-				// Tietokantayhteys
-				$db = new PDO("mysql:host=$dbhost;dbname=$dbkanta", $dbuser, $dbpass);
+		// Populoidaan tuotekuvat array
+		$tuotekuvat = array();
 
-				// Tuotekuva query
-				$stmt = $db->prepare("
-					SELECT liitetiedostot.kayttotarkoitus, liitetiedostot.filename, liitetiedostot.data, liitetiedostot.filetype, liitetiedostot.jarjestys, t1.selite
-					FROM liitetiedostot
-					JOIN tuote ON (tuote.tunnus=liitetiedostot.liitostunnus)
-					LEFT JOIN tuotteen_avainsanat t1 ON (tuote.yhtio=t1.yhtio AND tuote.tuoteno=t1.tuoteno AND t1.laji='parametri_vari' AND t1.kieli='fi')
-					WHERE liitetiedostot.yhtio=?
-					AND liitetiedostot.liitostunnus=?
-					AND liitetiedostot.liitos='tuote'
-					AND liitetiedostot.kayttotarkoitus='TK'
-					ORDER BY liitetiedostot.jarjestys DESC, liitetiedostot.tunnus DESC;
-				");
-				$stmt->execute(array($kukarow['yhtio'], $tunnus));
+		try {
+			// Tietokantayhteys
+			$db = new PDO("mysql:host=$dbhost;dbname=$dbkanta", $dbuser, $dbpass);
 
-				// Populoidaan tuotekuvat array
-				$tuotekuvat = array();
-				while($liite = $stmt->fetch(PDO::FETCH_ASSOC)) {
-					$file = array(
-						'content' 	=> base64_encode($liite['data']),
-						'mime'		=> $liite['filetype'],
-						'name'		=> $liite['filename']
-					);
+			// Tuotekuva query
+			$stmt = $db->prepare("
+				SELECT
+				liitetiedostot.data,
+				liitetiedostot.filetype,
+				liitetiedostot.filename
+				FROM liitetiedostot
+				WHERE liitetiedostot.yhtio = ?
+				AND liitetiedostot.liitostunnus = ?
+				AND liitetiedostot.liitos = 'tuote'
+				AND liitetiedostot.kayttotarkoitus = 'TK'
+				ORDER BY liitetiedostot.jarjestys DESC, liitetiedostot.tunnus DESC;
+			");
+			$stmt->execute(array($kukarow['yhtio'], $tunnus));
 
-					$tuotekuvat[] = $file;
-				}
-
-				$db = null;
-
-				// Palautetaan tuotekuvat
-				return $tuotekuvat;
+			while($liite = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				$file = array(
+					'content' 	=> base64_encode($liite['data']),
+					'mime'		=> $liite['filetype'],
+					'name'		=> $liite['filename']
+				);
+				$tuotekuvat[] = $file;
 			}
-			catch (Exception $e) {
-				$this->_error_count++;
-				$this->log("Virhe! PDO yhteys on poikki. Yritet‰‰n uudelleen.", $e);
-				$db = null;
-				return false;
-			}
+		}
+		catch (Exception $e) {
+			$this->_error_count++;
+			$this->log("Virhe! PDO yhteys on poikki. Yritet‰‰n uudelleen.", $e);
+		}
+
+		$db = null;
+
+		// Palautetaan tuotekuvat
+		return $tuotekuvat;
 	}
 
 	/**

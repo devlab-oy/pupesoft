@@ -1793,6 +1793,29 @@ if ($kukarow["extranet"] == "" and $tee == 'jyvita') {
 	}
 }
 
+if ($kukarow['extranet'] == '' and $tee == 'kate_jyvita') {
+	if ((isset($valitut_rivit_jyvitys) and !empty($valitut_tilausrivi_tunnukset)) or (!isset($valitut_rivit_jyvitys) and empty($valitut_tilausrivi_tunnukset))) {
+		if ($jysum > 0) {
+			$jysum = str_replace(',', '.', $jysum);
+			require("inc/kate_jyvita_riveille.inc");
+		}
+		else {
+			echo "<font class='error'>".t("Rivejä ei voitu jyvittää koska kate pitää olla suurempi kuin %s ja pienempi kuin %s",'', 0, 99.99)."</font><br/><br/>";
+		}
+	}
+	else {
+		echo "<font class='error'>".t("Rivejä ei voitu jyvittää koska yhtään riviä ei oltu valittu")."</font><br/><br/>";
+
+	}
+	$jysum	 = '';
+	$tila	 = '';
+	$tee	 = '';
+	$kiekat  = "";
+	$summa 	 = "";
+	$anna_ea = "";
+	$hinta	 = "";
+}
+
 // Lisätään tän asiakkaan valitut JT-rivit tälle tilaukselle
 if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == "")
 	or ((
@@ -5398,7 +5421,7 @@ if ($tee == '') {
 						if ($row["kommentti"] != "" or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
 							echo "<td valign='top' rowspan = '2' $class>$echorivino";
 
-							if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+							if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S" or ($toim == 'TARJOUS' and $yhtiorow['salli_jyvitys_tarjouksella'] == 'S')) {
 								echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$row['tunnus']}' />";
 							}
 
@@ -5407,7 +5430,7 @@ if ($tee == '') {
 						else {
 							echo "<td valign='top' $class>$echorivino";
 
-							if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+							if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S" or ($toim == 'TARJOUS' and $yhtiorow['salli_jyvitys_tarjouksella'] == 'S')) {
 								echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$row['tunnus']}' />";
 							}
 
@@ -5459,7 +5482,7 @@ if ($tee == '') {
 
 						echo "<td $class rowspan = '2' valign='top'>$echorivino";
 
-						if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+						if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S" or ($toim == 'TARJOUS' and $yhtiorow['salli_jyvitys_tarjouksella'] == 'S')) {
 							echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$row['tunnus']}' />";
 						}
 					}
@@ -5473,7 +5496,7 @@ if ($tee == '') {
 
 						echo "<td $class valign='top'>$echorivino";
 
-						if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+						if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S" or ($toim == 'TARJOUS' and $yhtiorow['salli_jyvitys_tarjouksella'] == 'S')) {
 							echo "<br/>";
 							echo "<input type='checkbox' class='valitut_rivit' name='valitut_rivit[]' value='{$row['tunnus']}'/>";
 						}
@@ -6008,8 +6031,8 @@ if ($tee == '') {
 						$classvar = $class;
 					}
 				}
-
-				if ($row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm'])) {
+				
+				if ($row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and !empty($yhtiorow['jt_automatiikka'])) {
 					$var_temp = $row['var'] . " - ".t("Muiden mukana");
 				}
 				else {
@@ -7262,6 +7285,10 @@ if ($tee == '') {
 					if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
 						$sallijyvitys = TRUE;
 					}
+
+					if ($toim == 'TARJOUS' and $yhtiorow['salli_jyvitys_tarjouksella'] != '') {
+						$sallijyvitys = TRUE;
+					}
 				}
 
 				//annetaan mahdollisuus antaa loppusumma joka jyvitetään riveille arvoosuuden mukaan
@@ -7364,19 +7391,36 @@ if ($tee == '') {
 					}
 
 					if ($toim != "PROJEKTI") {
-						echo "	<th colspan='5'>".t("Pyöristä loppusummaa").":</th>
-								<td class='spec'>
-								<form name='pyorista' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
-										<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-										<input type='hidden' name='mista' 		value = '$mista'>
-										<input type='hidden' name='tee' 		value = 'jyvita'>
-										<input type='hidden' name='toim' 		value = '$toim'>
-										<input type='hidden' name='lopetus' 	value = '$lopetus'>
-										<input type='hidden' name='ruutulimit' 	value = '$ruutulimit'>
-										<input type='hidden' name='tilausrivi_alvillisuus' value='$tilausrivi_alvillisuus'>
-										<input type='hidden' name='projektilla' value='$projektilla'>
-										<input type='hidden' name='orig_tila' 	value='$orig_tila'>
-										<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+						if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
+							echo "	<th colspan='5'>".t("Pyöristä katetta").":</th>
+									<td class='spec'>
+									<form name='pyorista' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
+											<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+											<input type='hidden' name='mista' 		value = '$mista'>
+											<input type='hidden' name='tee' 		value = 'kate_jyvita'>
+											<input type='hidden' name='toim' 		value = '$toim'>
+											<input type='hidden' name='lopetus' 	value = '$lopetus'>
+											<input type='hidden' name='ruutulimit' 	value = '$ruutulimit'>
+											<input type='hidden' name='tilausrivi_alvillisuus' value='$tilausrivi_alvillisuus'>
+											<input type='hidden' name='projektilla' value='$projektilla'>
+											<input type='hidden' name='orig_tila' 	value='$orig_tila'>
+											<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+						}
+						else {
+							echo "	<th colspan='5'>".t("Pyöristä loppusummaa").":</th>
+									<td class='spec'>
+									<form name='pyorista' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
+											<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+											<input type='hidden' name='mista' 		value = '$mista'>
+											<input type='hidden' name='tee' 		value = 'jyvita'>
+											<input type='hidden' name='toim' 		value = '$toim'>
+											<input type='hidden' name='lopetus' 	value = '$lopetus'>
+											<input type='hidden' name='ruutulimit' 	value = '$ruutulimit'>
+											<input type='hidden' name='tilausrivi_alvillisuus' value='$tilausrivi_alvillisuus'>
+											<input type='hidden' name='projektilla' value='$projektilla'>
+											<input type='hidden' name='orig_tila' 	value='$orig_tila'>
+											<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+						}
 
 						if ($laskurow["hinta"] != 0 and (($yhtiorow["alv_kasittely"] == "" and abs($jysum - $summa) <= .50) or ($yhtiorow["alv_kasittely"] != "" and abs($jysum - $arvo) <= .50))) {
 							$jysum = $laskurow["hinta"];
@@ -7388,13 +7432,24 @@ if ($tee == '') {
 							$jysum = $arvo;
 						}
 
-						echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",$jysum)."' Style='text-align:right' $state></td>";
+						
+						if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
+							echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",100*$kate_eieri/($kotiarvo_eieri-$ostot_eieri))."' Style='text-align:right' $state></td>";
 
-						if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
-							echo "<td class='spec' align='right'>&nbsp;</td>";
+							if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
+								echo "<td class='spec' align='right'>&nbsp;</td>";
+							}
+
+							echo "<td class='spec'>%</td>";
 						}
+						else {
+							echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",$jysum)."' Style='text-align:right' $state></td>";
 
-						echo "<td class='spec'>$laskurow[valkoodi]</td>";
+							if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
+								echo "<td class='spec' align='right'>&nbsp;</td>";
+							}
+							echo "<td class='spec'>$laskurow[valkoodi]</td>";
+						}
 
 						echo "<td class='back' colspan='2'><input type='submit' value='".t("Jyvitä")."' $state></form></td>";
 
@@ -7403,11 +7458,11 @@ if ($tee == '') {
 					echo "</tr>";
 
 					//jos vain tietyt henkilöt saavat jyvittää ja henkilöllä on jyvitys sekä osajyvitys päällä TAI kaikki saavat jyvittää
-					if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+					if ($toim != 'TARJOUS' and (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S")) {
 						echo "<tr>";
 						echo "<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>";
 						echo "<th colspan='5'>".t("Pyöristä valitut rivit").":</th>";
-						echo "<td>";
+						echo "<td class='spec'>";
 						echo "<form id='jyvita_valitut_form' name='pyorista' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
 											<input type='hidden' name='tilausnumero' 			value='$tilausnumero'>
 											<input type='hidden' name='mista' 					value = '$mista'>
@@ -7422,8 +7477,33 @@ if ($tee == '') {
 											<input type='hidden' name='orig_alatila' 			value = '$orig_alatila'>";
 						echo "<input type='text' size='$koko' name='jysum' value='' Style='text-align:right' $state></td>";
 						echo "</td>";
-						echo "<td></td>";
+						echo "<td class='spec'></td>";
 						echo "<td class='spec'>$laskurow[valkoodi]</td>";
+						echo "<td class='back' colspan='2'><input type='submit' value='".t("Jyvitä")."' $state></form></td>";
+						echo "</tr>";
+					}
+
+					if ($toim == 'TARJOUS' and $yhtiorow['salli_jyvitys_tarjouksella'] == 'S') {
+						echo "<tr>";
+						echo "<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>";
+						echo "<th colspan='5'>".t("Pyöristä valittujen rivien katetta").":</th>";
+						echo "<td class='spec'>";
+						echo "<form id='jyvita_valitut_form' name='pyorista' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
+											<input type='hidden' name='tilausnumero' 			value='$tilausnumero'>
+											<input type='hidden' name='mista' 					value = '$mista'>
+											<input type='hidden' name='tee' 					value = 'kate_jyvita'>
+											<input type='hidden' name='valitut_rivit_jyvitys' 	value = '1'>
+											<input type='hidden' name='toim' 					value = '$toim'>
+											<input type='hidden' name='lopetus' 				value = '$lopetus'>
+											<input type='hidden' name='ruutulimit' 				value = '$ruutulimit'>
+											<input type='hidden' name='tilausrivi_alvillisuus' 	value = '$tilausrivi_alvillisuus'>
+											<input type='hidden' name='projektilla' 			value = '$projektilla'>
+											<input type='hidden' name='orig_tila' 				value = '$orig_tila'>
+											<input type='hidden' name='orig_alatila' 			value = '$orig_alatila'>";
+						echo "<input type='text' size='$koko' name='jysum' value='' Style='text-align:right' $state></td>";
+						echo "</td>";
+						echo "<td class='spec'></td>";
+						echo "<td class='spec'>%</td>";
 						echo "<td class='back' colspan='2'><input type='submit' value='".t("Jyvitä")."' $state></form></td>";
 						echo "</tr>";
 					}

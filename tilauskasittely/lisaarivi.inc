@@ -545,9 +545,13 @@
 
 			// Tehdään homma siten, että etsitään kaikki korvaavat jo tässä vaiheessa arrayseen
 			// Haetaan korvaavuusketju tuotteelle
-			require_once 'korvaavat.class.php';
-			$korvaavat = new Korvaavat($tuoteno);
-
+			if (!empty($tuoteno)) {
+				require_once 'korvaavat.class.php';
+				$korvaavat = new Korvaavat($tuoteno);
+			}
+			else {
+				$korvaavat = '';
+			}	
 			// Korvaavuusketjun järjestyksessä pienempään päin, eli päätuotetta kohden
 			$options = array('korvaavuusketjun_jarjestys' => $yhtiorow['korvaavuusketjun_jarjestys']);
 			$korvaavat_tuotteet = $korvaavat->tuotteet($options);
@@ -1948,10 +1952,16 @@
 
 			// Korvaavuusketjun puutekäsittely, lisätään ketjun päätuote puutteeksi
 			if ($yhtiorow["korvaavuusketjun_puutekasittely"] == "K") {
-				require_once 'korvaavat.class.php';
-				$korvaavat = new Korvaavat($tuoteno);
-				$paatuote = $korvaavat->paatuote();
-
+				
+				if (!empty($tuoteno)) {
+					require_once 'korvaavat.class.php';
+					$korvaavat = new Korvaavat($tuoteno);
+					$paatuote = $korvaavat->paatuote();
+				}
+				else {
+					$korvaavat = '';
+					$paatuote = '';
+				}
 				if ($paatuote != "") {
 					if (strtoupper($paatuote) != strtoupper($tuoteno)) {
 						if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $tuoteno") === FALSE) {
@@ -1964,11 +1974,15 @@
 			}
 			// Vastaavuusketjun puutekäsittely, lisätään ketjun päätuote puutteeksi
 			elseif ($yhtiorow["korvaavuusketjun_puutekasittely"] == "V") {
-
-				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun päätuote
-				require_once 'korvaavat.class.php';
-				$korvaavat = new Korvaavat($tuoteno);
-
+				
+				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun päätuote		
+				if (!empty($tuoteno)) {
+					require_once 'korvaavat.class.php';
+					$korvaavat = new Korvaavat($tuoteno);
+				}
+				else {
+					$korvaavat = '';
+				}
 				require_once 'vastaavat.class.php';
 				$options = array('skippaa_vaihtoehtoiset' => TRUE);
 

@@ -86,7 +86,6 @@ class MagentoClient {
 		catch (Exception $e) {
 			$this->_error_count++;
 			$this->log("Virhe! Magento-class init failed", $e);
-			return null;
 		}
 	}
 
@@ -417,7 +416,8 @@ class MagentoClient {
 
 				// Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
 				$stock_data = array(
-					'manage_stock' => 1
+					'is_in_stock'  => 1,
+					'manage_stock' => 1,
 				);
 
 				$result = $this->_proxy->call(

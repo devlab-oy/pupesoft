@@ -484,7 +484,8 @@
 
 			// Haetaan kaikki tuotteen atribuutit
 			$alinselect = " SELECT tuotteen_avainsanat.selite,
-							avainsana.selitetark
+							avainsana.selitetark,
+							avainsana.selite option_name
 							FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
 							JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
 								AND avainsana.laji = 'PARAMETRI'
@@ -501,6 +502,7 @@
 
 			while ($syvinrow = mysql_fetch_assoc($alinres)) {
 				$properties[] = array(	"nimi" => $syvinrow["selitetark"],
+										"option_name" => $syvinrow["option_name"],
 				 						"arvo" => $syvinrow["selite"]);
 			}
 

@@ -354,30 +354,21 @@ class MagentoClient {
 				 * ja päivitetään niiden attribuutit kuten koko ja väri.
 				 */
 				foreach ($tuotteet as $tuote) {
-					$koko = '';
-					$vari = '';
+
+					$multi_data = array();
 
 					// Simple tuotteiden parametrit kuten koko ja väri
 					foreach($tuote['parametrit'] as $parametri) {
-						if ($parametri['nimi'] == "Koko") {
-							$koko = $this->get_option_id('koko', $parametri['arvo']);
-						}
-						if ($parametri['nimi'] == "Väri") {
-							$vari = $this->get_option_id('vari', $parametri['arvo']);
-						}
+						$key = $parametri['option_name'];						
+						$multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
 					}
 
-					$simple_tuote_data = array(	'price'				=> $tuote['myymalahinta'],
-												'short_description' => utf8_encode($tuote['lyhytkuvaus']),
-												'featured_priority' => utf8_encode($tuote['jarjestys']),
-												'visibility'		=> self::NOT_VISIBLE_INDIVIDUALLY,
-												'additional_attributes' => array(
-													'multi_data' => array(
-														'koko' => $koko,
-														'vari' => $vari
-													)
-												)
-											);
+					$simple_tuote_data = array(	'price'					=> $tuote['myymalahinta'],
+												'short_description'		=> utf8_encode($tuote['lyhytkuvaus']),
+												'featured_priority'		=> utf8_encode($tuote['jarjestys']),
+												'visibility'			=> self::NOT_VISIBLE_INDIVIDUALLY,
+												'additional_attributes' => array('multi_data' => $multi_data),
+												);
 
 					// Päivitetään Simple tuote
 					$result = $this->_proxy->call(	$this->_session,

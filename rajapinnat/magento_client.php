@@ -219,8 +219,7 @@ class MagentoClient {
 			try {
 
 				// Jos tuotetta ei ole olemassa niin lisätään se
-				if ( ! in_array($tuote['tuoteno'], $skus_in_store)) {
-					// Jos tuotteen lisäys ei onnistu ei tuotekuviakaan lisätä.
+				if (!in_array($tuote['tuoteno'], $skus_in_store)) {
 					$product_id = $this->_proxy->call($this->_session, 'catalog_product.create',
 						array(
 							'simple',
@@ -230,6 +229,21 @@ class MagentoClient {
 							)
 						);
 					$this->log("Tuote {$tuote['tuoteno']} lisätty (simple) " . print_r($tuote_data, true));
+
+					// Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
+					$stock_data = array(
+						'qty'          => 0,
+						'is_in_stock'  => 0,
+						'manage_stock' => 1
+					);
+
+					$result = $this->_proxy->call(
+					    $this->_session,
+					    'product_stock.update',
+					    array(
+					        $tuote['tuoteno'], # sku
+					        $stock_data
+					    ));
 				}
 				// Tuote on jo olemassa, päivitetään
 				else {
@@ -350,6 +364,7 @@ class MagentoClient {
 						array(
 								'price'				=> $tuote['myymalahinta'],
 								'short_description' => utf8_encode($tuote['lyhytkuvaus']),
+								'featured_priority' => utf8_encode($tuote['jarjestys']),
 								'visibility'		=> self::NOT_VISIBLE_INDIVIDUALLY,
 								'additional_attributes' => array(
 									'multi_data' => array(
@@ -373,6 +388,21 @@ class MagentoClient {
 							)
 						);
 					$this->log("Tuote {$nimitys} lisätty (configurable) " . print_r($configurable, true));
+
+					// Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
+					$stock_data = array(
+						'qty'          => 0,
+						'is_in_stock'  => 0,
+						'manage_stock' => 1
+					);
+
+					$result = $this->_proxy->call(
+					    $this->_session,
+					    'product_stock.update',
+					    array(
+					        $nimitys, # sku
+					        $stock_data
+					    ));
 				}
 				// Päivitetään olemassa olevaa configurablea
 				else {
@@ -758,7 +788,7 @@ class MagentoClient {
 	 */
 	public function lisaa_tuotekuvat($product_id, $tuotekuvat) {
 
-		$types = array('image', 'small', 'thumbnail');
+		$types = array('image', 'small_image', 'thumbnail');
 
 		// Pitää ensin poistaa kaikki tuotteen kuvat Magentosta
 		$magento_pictures = $this->listaa_tuotekuvat($product_id);
@@ -793,7 +823,7 @@ class MagentoClient {
 			catch (Exception $e) {
 				// Nollataan base-encoodattu kuva, että logi ei tuu isoks
 				$data[1]["file"]["content"] = '...content poistettu logista...';
-				
+
 				$this->log("Virhe! Kuvan lisäys epäonnistui ". print_r($data, true), $e);
 				$this->_error_count++;
 			}

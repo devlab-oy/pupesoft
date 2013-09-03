@@ -1946,17 +1946,11 @@
 			$var = $puu_var[$i];
 
 			// Korvaavuusketjun puutekäsittely, lisätään ketjun päätuote puutteeksi
-			if ($yhtiorow["korvaavuusketjun_puutekasittely"] == "K") {
+			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K") {
+				require_once 'korvaavat.class.php';
+				$korvaavat = new Korvaavat($tuoteno);
+				$paatuote  = $korvaavat->paatuote();
 
-				if (!empty($tuoteno)) {
-					require_once 'korvaavat.class.php';
-					$korvaavat = new Korvaavat($tuoteno);
-					$paatuote = $korvaavat->paatuote();
-				}
-				else {
-					$korvaavat = '';
-					$paatuote = '';
-				}
 				if ($paatuote != "") {
 					if (strtoupper($paatuote) != strtoupper($tuoteno)) {
 						if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $tuoteno") === FALSE) {
@@ -1968,16 +1962,11 @@
 				}
 			}
 			// Vastaavuusketjun puutekäsittely, lisätään ketjun päätuote puutteeksi
-			elseif ($yhtiorow["korvaavuusketjun_puutekasittely"] == "V") {
-
+			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V") {
 				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun päätuote
-				if (!empty($tuoteno)) {
-					require_once 'korvaavat.class.php';
-					$korvaavat = new Korvaavat($tuoteno);
-				}
-				else {
-					$korvaavat = '';
-				}
+				require_once 'korvaavat.class.php';
+				$korvaavat = new Korvaavat($tuoteno);
+
 				require_once 'vastaavat.class.php';
 				$options = array('skippaa_vaihtoehtoiset' => TRUE);
 

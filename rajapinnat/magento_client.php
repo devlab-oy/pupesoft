@@ -533,6 +533,8 @@ class MagentoClient {
 			$count++;
 		}
 
+		$this->log("$count saldoa päivitetty");
+
 		return $count;
 	}
 

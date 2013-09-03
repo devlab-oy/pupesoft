@@ -808,7 +808,7 @@
 			}
 		}
 
-		if ($paikat != "" and $row["hyllyalue"] != "!!M") {
+		if ($paikat != "" and $paikatlask > 1 and $row["hyllyalue"] != "!!M") {
 			$paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
 		}
 		elseif ($row["hyllyalue"] == "!!M") {

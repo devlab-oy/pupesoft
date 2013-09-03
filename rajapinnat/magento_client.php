@@ -397,21 +397,6 @@ class MagentoClient {
 							)
 						);
 					$this->log("Tuote {$nimitys} lisätty (configurable) " . print_r($configurable, true));
-
-					// Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
-					$stock_data = array(
-						'qty'          => 0,
-						'is_in_stock'  => 0,
-						'manage_stock' => 1
-					);
-
-					$result = $this->_proxy->call(
-					    $this->_session,
-					    'product_stock.update',
-					    array(
-					        $nimitys, # sku
-					        $stock_data
-					    ));
 				}
 				// Päivitetään olemassa olevaa configurablea
 				else {
@@ -427,6 +412,17 @@ class MagentoClient {
 					$result = $this->_proxy->call($this->_session, 'catalog_product.info', $nimitys);
 					$product_id = $result['product_id'];
 				}
+
+				// Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
+				$stock_data = array(
+					'manage_stock' => 1
+				);
+
+				$result = $this->_proxy->call(
+					$this->_session,
+					'product_stock.update',
+					array(	$nimitys, # sku
+							$stock_data));
 
 				// Haetaan tuotekuvat Pupesoftista
 				$tuotekuvat = $this->hae_tuotekuvat($tuotteet[0]['tunnus']);

@@ -516,7 +516,7 @@
 		if ($lisaarivi_debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
 
 		// Etsit‰‰n korvaavia tuotteita
-		if ($trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L') {
+		if ($tuoteno != "" and $trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L') {
 			$korvaavat_kiellot 	= ""; // Korvaavia tuotteita myyd‰‰n, vastaavia ei
 			$krkaikkimyytavissa	= 0;
 
@@ -545,13 +545,9 @@
 
 			// Tehd‰‰n homma siten, ett‰ etsit‰‰n kaikki korvaavat jo t‰ss‰ vaiheessa arrayseen
 			// Haetaan korvaavuusketju tuotteelle
-			if (!empty($tuoteno)) {
-				require_once 'korvaavat.class.php';
-				$korvaavat = new Korvaavat($tuoteno);
-			}
-			else {
-				$korvaavat = '';
-			}	
+			require_once 'korvaavat.class.php';
+			$korvaavat = new Korvaavat($tuoteno);
+
 			// Korvaavuusketjun j‰rjestyksess‰ pienemp‰‰n p‰in, eli p‰‰tuotetta kohden
 			$options = array('korvaavuusketjun_jarjestys' => $yhtiorow['korvaavuusketjun_jarjestys']);
 			$korvaavat_tuotteet = $korvaavat->tuotteet($options);
@@ -697,8 +693,7 @@
 			elseif (count($korkieltokommi) > 1) {
 				$korkieltokommi = t("Voit tilata korvaavia tuotteita").": ".implode(", ",$korkieltokommi);
 			}
-
-		} // end etsit‰‰nkˆ korvaavia
+		}
 
 		// Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhj‰ niin vaihdetaan vain jonkun tuotteen paikkaa eik‰ p‰ivitet‰ tuoteperheit‰
 		// Tai jos muokataan tuoteperheen lasta ei menn‰ uudestaan t‰h‰n haaraan
@@ -1952,7 +1947,7 @@
 
 			// Korvaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
 			if ($yhtiorow["korvaavuusketjun_puutekasittely"] == "K") {
-				
+
 				if (!empty($tuoteno)) {
 					require_once 'korvaavat.class.php';
 					$korvaavat = new Korvaavat($tuoteno);
@@ -1974,8 +1969,8 @@
 			}
 			// Vastaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
 			elseif ($yhtiorow["korvaavuusketjun_puutekasittely"] == "V") {
-				
-				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun p‰‰tuote		
+
+				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun p‰‰tuote
 				if (!empty($tuoteno)) {
 					require_once 'korvaavat.class.php';
 					$korvaavat = new Korvaavat($tuoteno);

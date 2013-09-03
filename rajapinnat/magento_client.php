@@ -228,7 +228,7 @@ class MagentoClient {
 							$tuote_data,
 							)
 						);
-					$this->log("Tuote {$tuote['tuoteno']} lisätty (simple) " . print_r($tuote_data, true));
+					$this->log("Tuote '{$tuote['tuoteno']}' lisätty (simple) " . print_r($tuote_data, true));
 
 					// Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
 					$stock_data = array(
@@ -258,7 +258,7 @@ class MagentoClient {
 					$result = $this->_proxy->call($this->_session, 'catalog_product.info', $tuote['tuoteno']);
 					$product_id = $result['product_id'];
 
-					$this->log("Tuote {$tuote['tuoteno']} päivitetty (simple) " . print_r($tuote_data, true));
+					$this->log("Tuote '{$tuote['tuoteno']}' päivitetty (simple) " . print_r($tuote_data, true));
 				}
 
 				// Haetaan tuotekuvat Pupesoftista
@@ -273,7 +273,7 @@ class MagentoClient {
 			}
 			catch (Exception $e) {
 				$this->_error_count++;
-				$this->log("Virhe! Tuotteen {$tuote['tuoteno']} lisäys/päivitys epäonnistui (simple) " . print_r($tuote_data, true), $e);
+				$this->log("Virhe! Tuotteen '{$tuote['tuoteno']}' lisäys/päivitys epäonnistui (simple) " . print_r($tuote_data, true), $e);
 			}
 		}
 
@@ -368,22 +368,24 @@ class MagentoClient {
 						}
 					}
 
+					$simple_tuote_data = array(	'price'				=> $tuote['myymalahinta'],
+												'short_description' => utf8_encode($tuote['lyhytkuvaus']),
+												'featured_priority' => utf8_encode($tuote['jarjestys']),
+												'visibility'		=> self::NOT_VISIBLE_INDIVIDUALLY,
+												'additional_attributes' => array(
+													'multi_data' => array(
+														'koko' => $koko,
+														'vari' => $vari
+													)
+												)
+											);
+
 					// Päivitetään Simple tuote
-					$result = $this->_proxy->call($this->_session, 'catalog_product.update', array($tuote['tuoteno'],
-						array(
-								'price'				=> $tuote['myymalahinta'],
-								'short_description' => utf8_encode($tuote['lyhytkuvaus']),
-								'featured_priority' => utf8_encode($tuote['jarjestys']),
-								'visibility'		=> self::NOT_VISIBLE_INDIVIDUALLY,
-								'additional_attributes' => array(
-									'multi_data' => array(
-										'koko' => $koko,
-										'vari' => $vari
-									)
-								)
-							)
-						)
-					);
+					$result = $this->_proxy->call(	$this->_session,
+													'catalog_product.update',
+													array($tuote['tuoteno'], $simple_tuote_data));
+
+					$this->log("Päivitetään '{$nimitys}' tuotteen lapsituote '{$tuote['tuoteno']}' " . print_r($simple_tuote_data, true));
 				}
 
 				// Jos configurable tuotetta ei löydy, niin lisätään uusi tuote.
@@ -396,7 +398,7 @@ class MagentoClient {
 							$configurable
 							)
 						);
-					$this->log("Tuote {$nimitys} lisätty (configurable) " . print_r($configurable, true));
+					$this->log("Tuote '{$nimitys}' lisätty (configurable) " . print_r($configurable, true));
 				}
 				// Päivitetään olemassa olevaa configurablea
 				else {
@@ -406,7 +408,7 @@ class MagentoClient {
 							$configurable
 							)
 						);
-					$this->log("Tuote {$nimitys} päivitetty (configurable) " . print_r($configurable, true));
+					$this->log("Tuote '{$nimitys}' päivitetty (configurable) " . print_r($configurable, true));
 
 					// Haetaan tuotteen Magenton ID
 					$result = $this->_proxy->call($this->_session, 'catalog_product.info', $nimitys);
@@ -436,7 +438,7 @@ class MagentoClient {
 			}
 			catch (Exception $e) {
 				$this->_error_count++;
-				$this->log("Virhe! Configurable tuotteen {$nimitys} lisäys/päivitys epäonnistui (configurable) " . print_r($configurable, true), $e);
+				$this->log("Virhe! Configurable tuotteen '{$nimitys}' lisäys/päivitys epäonnistui (configurable) " . print_r($configurable, true), $e);
 			}
 		}
 

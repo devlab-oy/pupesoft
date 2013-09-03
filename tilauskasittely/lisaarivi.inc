@@ -2048,10 +2048,13 @@
 									AND tilausrivin_lisatiedot.toimittajan_tunnus != 0 )
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+								AND tilausrivi.tyyppi != 'D'
+								AND tilausrivi.var in ('J','T','U')
 								ORDER BY tilausrivi.tunnus ASC
 								LIMIT 1";
 					$toimittaja_result = pupe_query($query);
 					$toimittaja = mysql_fetch_assoc($toimittaja_result);
+
 					if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J')) and !empty($toimittaja['toimittajan_tunnus'])) {
 						$yksi_suoratoimittaja_join = " AND toimi.tunnus = {$toimittaja['toimittajan_tunnus']} ";
 					}

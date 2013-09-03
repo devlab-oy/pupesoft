@@ -318,6 +318,14 @@ class MagentoClient {
 			// Etsitään kategoria mihin tuote lisätään
 			$category_id = $this->findCategory($tuotteet[0]['try_nimi'], $category_tree['children']);
 
+			// Tehdään 'associated_skus' -kenttä
+			// Vaatii, että Magentoon asennetaan 'magento-improve-api' -moduli: https://github.com/jreinke/magento-improve-api
+			$lapsituotteet_array = array();
+
+			foreach ($tuotteet as $tuote) {
+				$lapsituotteet_array[] = $tuote['tuoteno'];
+			}
+
 			// Configurable tuotteen tiedot
 			$configurable = array(
 				'categories'			=> array($category_id),
@@ -337,6 +345,7 @@ class MagentoClient {
 				'meta_title'            => '',
 				'meta_keyword'          => '',
 				'meta_description'      => '',
+				'associated_skus'       => $lapsituotteet_array,
 			);
 
 			try {
@@ -907,18 +916,17 @@ class MagentoClient {
 			$db = new PDO("mysql:host=$dbhost;dbname=$dbkanta", $dbuser, $dbpass);
 
 			// Tuotekuva query
-			$stmt = $db->prepare("
-				SELECT
-				liitetiedostot.data,
-				liitetiedostot.filetype,
-				liitetiedostot.filename
-				FROM liitetiedostot
-				WHERE liitetiedostot.yhtio = ?
-				AND liitetiedostot.liitostunnus = ?
-				AND liitetiedostot.liitos = 'tuote'
-				AND liitetiedostot.kayttotarkoitus = 'TK'
-				ORDER BY liitetiedostot.jarjestys DESC, liitetiedostot.tunnus DESC;
-			");
+			$stmt = $db->prepare("	SELECT
+									liitetiedostot.data,
+									liitetiedostot.filetype,
+									liitetiedostot.filename
+									FROM liitetiedostot
+									WHERE liitetiedostot.yhtio = ?
+									AND liitetiedostot.liitostunnus = ?
+									AND liitetiedostot.liitos = 'tuote'
+									AND liitetiedostot.kayttotarkoitus = 'TK'
+									ORDER BY liitetiedostot.jarjestys DESC,
+									liitetiedostot.tunnus DESC");
 			$stmt->execute(array($kukarow['yhtio'], $tunnus));
 
 			while($liite = $stmt->fetch(PDO::FETCH_ASSOC)) {

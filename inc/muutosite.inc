@@ -1605,13 +1605,6 @@
 	}
 
 	if ($tila == '') {
-
-		$lisaa_grouppaus_hiddenit = "";
-
-		if (isset($grouppaa)) $lisaa_grouppaus_hiddenit .= "<input type='hidden' name='grouppaa' value='{$grouppaa}' />";
-		if (isset($viivatut_grouppaa_formi)) $lisaa_grouppaus_hiddenit .= "<input type='hidden' name='viivatut_grouppaa_formi' value='{$viivatut_grouppaa_formi}' />";
-
-
 		// katotaan onko lasku liitetty keikkaan
 		$query = "	SELECT lasku.laskunro, keikka.alatila
 					FROM lasku
@@ -1635,7 +1628,6 @@
 						<input type = 'hidden' name='tila' value='P'>
 						<input type = 'hidden' name='tee'  value='M'>
 						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t("Tapahtumapvm")."</th>
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1656,7 +1648,6 @@
 							<input type = 'hidden' name='lopetus' value='{$lopetus}'>
 							<input type = 'hidden' name='tila' value='vaihda_lapvm'>
 							<input type = 'hidden' name='tee' value='M'>
-							{$lisaa_grouppaus_hiddenit}
 							<input type = 'hidden' name='tunnus' value='{$tunnus}'>";
 					echo "<tr><th>".t("Lapvm")."</th>";
 					echo "<td><input type = 'text' name = 'vpp' maxlength='2' size='2' value = '$lapvm[pp]'>
@@ -1672,7 +1663,6 @@
 						<input type = 'hidden' name='tila' value='P'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t("Tapahtumapvm")."</th>
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1695,7 +1685,6 @@
 							<input type = 'hidden' name='tila' value='Q'>
 							<input type = 'hidden' name='tee' value='M'>
 							<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-							{$lisaa_grouppaus_hiddenit}
 							<tr>
 							<th>".t("summa")."</th>
 							<td><input type = 'text' name = 'summa' value='$trow[summa]'></td>
@@ -1714,7 +1703,6 @@
 							<input type = 'hidden' name='tila' value='C'>
 							<input type = 'hidden' name='tee' value='M'>
 							<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-							{$lisaa_grouppaus_hiddenit}
 							<tr>
 							<th>".t("kassa-ale ja/tai kapvm")."</th>
 							<td><input type = 'text' name = 'summa' value='$trow[kasumma]'>
@@ -1736,7 +1724,6 @@
 						<input type = 'hidden' name='tila' value='R'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t("eräpvm")."</th>
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1754,7 +1741,6 @@
 							<input type = 'hidden' name='tila' value='B'>
 							<input type = 'hidden' name='tee' value='M'>
 							<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-							{$lisaa_grouppaus_hiddenit}
 							<tr>
 							<th>".t("kassa-alepvm")."</th>
 							<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1773,7 +1759,6 @@
 							<input type = 'hidden' name='tila' value='maksuehto'>
 							<input type = 'hidden' name='tee' value='M'>
 							<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-							{$lisaa_grouppaus_hiddenit}
 							<tr>
 							<th>".t("Vaihda maksuehto")."</th>";
 							echo "<td><select name='maksuehto'>";
@@ -1810,7 +1795,6 @@
 					<input type = 'hidden' name='tila' value='S'>
 					<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-						{$lisaa_grouppaus_hiddenit}
 					<tr>
 					<th>".t("suorituspvm")."</th>
 					<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
@@ -1855,7 +1839,6 @@
 					<input type = 'hidden' name='tila' value='W'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-					{$lisaa_grouppaus_hiddenit}
 					<tr>
 					<th>".t("laskun tyyppi")."</th>";
 
@@ -1896,7 +1879,6 @@
 			echo "<input type='hidden' name='tila' value='ostolasku_kulut' />";
 			echo "<input type='hidden' name='tee' value='M' />";
 			echo "<input type='hidden' name='tunnus' value='{$tunnus}' />";
-			echo $lisaa_grouppaus_hiddenit;
 
 			for ($i = 1; $i <= $yhtiorow['ostolaskun_kulutilit']; $i++) {
 				echo "<tr>";
@@ -1955,7 +1937,6 @@
 			echo "<input type = 'hidden' name='tila' value='vaihdalaskunumero'>";
 			echo "<input type = 'hidden' name='tee' value='M'>";
 			echo "<input type = 'hidden' name='tunnus' value='{$tunnus}'>";
-			echo $lisaa_grouppaus_hiddenit;
 
 			echo "<tr>";
 			echo "<th>".t("laskunumero")."</th>";
@@ -1971,7 +1952,6 @@
 					<input type = 'hidden' name='tila' value='jako'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-					{$lisaa_grouppaus_hiddenit}
 					<tr>
 					<th>".t("Jaa ostolasku kahteen osaan").".<br>".t("Syötä uuden laskun summa")."</th>
 					<td><input type='text' name='syotetty_jakosumma' value=''> $trow[valkoodi]</td>
@@ -1987,7 +1967,6 @@
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tila' value='A'>
 					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-					{$lisaa_grouppaus_hiddenit}
 					<tr>
 					<th>".t("Poista suoraveloitus")."</th>
 					<td>Lasku siirtyy takaisin hyväksyntään</td>
@@ -2017,7 +1996,6 @@
 			echo "<input type = 'hidden' name='tunnus' value='$tunnus'>";
 			echo "<input type = 'hidden' name='tee' value='M'>";
 			echo "<input type = 'hidden' name='tila' value='KK'>";
-			echo $lisaa_grouppaus_hiddenit;
 			echo "<tr>";
 			echo "<th>".t("Alv tili")."</th>";
 			echo "<td><select name='alv_tili'>";
@@ -2043,7 +2021,6 @@
 				<input type = 'hidden' name='tila' value='K'>
 				<input type = 'hidden' name='lopetus' value='{$lopetus}'>
 				<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-				{$lisaa_grouppaus_hiddenit}
 				<tr>
 				<th>".t("Lisää kommentti")."</th>
 				<td><input type = 'text' name = 'komm' size='40' value = '{$komm}'></td>
@@ -2059,7 +2036,6 @@
 						<input type = 'hidden' name='tila' value='T'>
 						<input type = 'hidden' name='lopetus' value='{$lopetus}'>
 						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t("Toimittajan tilinumero (kotimainen)")."</th>
 						<td><input type = 'text' name = 'tili' size='40' value = '".tilinumero_print($trow['tilinumero'])."'></td>
@@ -2082,7 +2058,6 @@
 						<input type = 'hidden' name='tila' value='TU'>
 						<input type = 'hidden' name='lopetus' value='{$lopetus}'>
 						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t('Pankkihaltija')."</th>
 						<td><input type = 'text' name = 'pankki_haltija' size='40' value = '$trow[pankki_haltija]'></td>
@@ -2127,7 +2102,6 @@
 					<input type = 'hidden' name='tila' value='MVIESTI'>
 					<input type = 'hidden' name='lopetus' value='{$lopetus}'>
 					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-					{$lisaa_grouppaus_hiddenit}
 					<tr>
 					<th>".t('laskun viesti')."</th>
 					<td><input type = 'text' name = 'viesti' size='40' value = '$trow[viesti]'></td>
@@ -2147,7 +2121,6 @@
 					<input type = 'hidden' name='tila' value='MAKSATUKSEEN'>
 					<input type = 'hidden' name='lopetus' value='{$lopetus}'>
 					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-					{$lisaa_grouppaus_hiddenit}
 					<tr>
 					<th>".t("Palauta lasku maksatukseen")."</th>
 					<td></td>
@@ -2181,7 +2154,6 @@
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='lopetus' value='{$lopetus}'>
 					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-					{$lisaa_grouppaus_hiddenit}
 					<tr>
 					<th>".t("Palauta lasku hyväksyntäkierrokselle")."</th>
 					<td></td>
@@ -2213,7 +2185,6 @@
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='lopetus' value='{$lopetus}'>
 						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t("Viivästyskorkoprosentti")."</th>
 						<td>
@@ -2240,7 +2211,6 @@
 						<input type = 'hidden' name='tila' value='konversio_avaa'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
-						{$lisaa_grouppaus_hiddenit}
 						<tr>
 						<th>".t("Muuta konversion lasku avoimeksi summalla")."</th>
 						<td><input type='text' name='syotetty_avoinsumma' value=''> $trow[valkoodi]</td>

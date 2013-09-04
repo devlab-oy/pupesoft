@@ -1370,10 +1370,6 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<input type = 'hidden' name = 'tee' value='M'>";
 		echo "<input type = 'hidden' name = 'tila' value=''>";
 		echo "<input type = 'hidden' name = 'tunnus' value='{$tunnus}'>";
-
-		if (isset($grouppaa)) echo "<input type='hidden' name='grouppaa' value='{$grouppaa}' />";
-		if (isset($viivatut_grouppaa_formi)) echo "<input type='hidden' name='viivatut_grouppaa_formi' value='{$viivatut_grouppaa_formi}' />";
-
 		echo "<input type = 'submit' value = '",t("Muuta tietoja"),"'>";
 		echo "</form>";
 	}

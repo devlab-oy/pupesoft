@@ -447,6 +447,8 @@
 				$kustp_tark		= $ikustp[$i];
 				$kohde_tark		= $ikohde[$i];
 				$projekti_tark	= $iprojekti[$i];
+				$liitos			= mysql_real_escape_string($iliitos[$i]);
+				$liitostunnus	= mysql_real_escape_string($iliitostunnus[$i]);
 
 				if (isset($toimittajaid) and $toimittajaid > 0) {
 					$tositeliit = $toimrow["tunnus"];

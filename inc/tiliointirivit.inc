@@ -168,23 +168,6 @@
 			echo "$tiliulos";
 		}
 
-		if ($liitostunnus > 0 or $asiakastoimittajavirhe) {
-			#<input type='hidden' name = 'liitos' value='{$liitos}' />
-			#<input type='hidden' name = 'liitostunnus' value='{$liitostunnus}' />
-
-			$tiliasiakasid = $tilitoimittajaid = "";
-
-			if ($liitos == "A" and $liitostunnus > 0) {
-				$tiliasiakasid = $liitostunnus;
-			}
-			elseif ($liitos == "A" and $liitostunnus > 0) {
-				$tilitoimittajaid = $liitostunnus;
-			}
-
-			echo t("Asiakas").": ".livesearch_kentta("uusi", "ASIAKASHAKU", "tiliasiakasid", 170, $tiliasiakasid, "EISUBMIT");
-			echo t("Toimittaja").": ".livesearch_kentta("uusi", "TOIMITTAJAHAKU", "tilitoimittajaid", 170, $tilitoimittajaid, "EISUBMIT");
-		}
-
 		echo "</td>
 			<td valign='top'>$ulos</td>
 			<td valign='top'>
@@ -262,7 +245,22 @@
 			$liitos_nimi_res = pupe_query($query);
 			$liitos_nimi_row = mysql_fetch_assoc($liitos_nimi_res);
 
-			echo "<br />",t(ucwords($taulu)),": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}";
+			echo "<br />".t("Valittu")." ".t(ucwords($taulu)),": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}";
+		}
+
+		if ($trow['tila'] == 'X' and ($liitostunnus > 0 or $asiakastoimittajavirhe)) {
+			$tiliasiakasid = $tilitoimittajaid = "";
+
+			if ($liitos == "A" and $liitostunnus > 0) {
+				$tiliasiakasid = $liitostunnus;
+			}
+			elseif ($liitos == "A" and $liitostunnus > 0) {
+				$tilitoimittajaid = $liitostunnus;
+			}
+			
+			echo "<br><br>";
+			echo t("Asiakas").":     ".livesearch_kentta("uusi", "ASIAKASHAKU", "tiliasiakasid", 170, $tiliasiakasid, "EISUBMIT");
+			echo t("Toimittaja").": ".livesearch_kentta("uusi", "TOIMITTAJAHAKU", "tilitoimittajaid", 170, $tilitoimittajaid, "EISUBMIT");
 		}
 
 		echo "</td>";

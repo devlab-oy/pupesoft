@@ -57,12 +57,12 @@
 				$ok = 1;
 			}
 		}
-		
+
 		if (isset($tiliasiakasid) and $tiliasiakasid > 0) {
 			$liitos = 'A';
 			$liitostunnus = $tiliasiakasid;
 		}
-		
+
 		if (isset($tilitoimittajaid) and $tilitoimittajaid > 0) {
 			$liitos = 'T';
 			$liitostunnus = $tilitoimittajaid;

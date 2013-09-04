@@ -7,6 +7,8 @@
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 		require("inc/parametrit.inc");
+		require('valmistuslinjat.inc');
+		require('validation/Validation.php');
 	}
 
 	if (!isset($toim)) $toim = '';
@@ -584,6 +586,7 @@
 		}
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
+			$valmistuslinjat = hae_valmistuslinjat();
 			// Näytetään muuten vaan sopivia tilauksia
 			echo "<br><br>";
 			echo "<form method='post' name='hakuformi'>";
@@ -597,10 +600,60 @@
 			else if ($toim == "MYYNTITILITOIMITA") {
 				echo t("Syötä tuotenumeron, tilausnumeron, nimen tai laatijan osa");
 			}
+			else if ($toim == "VALMISTUS") {
+				echo "<table>";
+
+				echo "<tr>";
+				echo "<th>".t('Syötä tilausnumeron,').'<br/>'.t('nimen tai laatijan osa')."</th>";
+				echo "<td>";
+				echo "<input type='text' name='etsi'>";
+				echo "</td>";
+				echo "</tr>";
+
+				echo "<tr>";
+				echo "<th>".t('Tuotenumero')."</th>";
+				echo "<td>";
+				echo "<input type='text' name='tuoteno' value='{$tuoteno}' />";
+				echo "</td>";
+				echo "</tr>";
+
+				echo "<tr>";
+				echo "<th>".t('Valmistuslinja')."</th>";
+				echo "<td>";
+				echo "<select name='valmistuslinja'>";
+				echo "<option value='' >".t('Ei valintaa')."</option>";
+				foreach ($valmistuslinjat as $_valmistuslinja) {
+					$sel = "";
+					if ($_valmistuslinja['selite'] == $valmistuslinja) {
+						$sel = "SELECTED";
+					}
+					echo "<option value='{$_valmistuslinja['selite']}' {$sel}>{$_valmistuslinja['selitetark']}</option>";
+				}
+				echo "</select>";
+				echo "</td>";
+				echo "</tr>";
+
+				echo "<tr>";
+				echo "<th>".t('Keräyspäivämäärä')." (pp-kk-vvvv)</th>";
+				echo "<td>";
+				echo "	<input type='text' name='pp' value='{$pp}' size='3'>
+						<input type='text' name='kk' value='{$kk}' size='3'>
+						<input type='text' name='vv' value='{$vv}' size='5'>";
+				echo "</td>";
+				echo "</tr>";
+				echo "</table>";
+			}
 			else {
 				echo t("Syötä tilausnumeron, nimen tai laatijan osa");
 			}
-			echo "<input type='text' name='etsi'>";
+			if ($toim != 'VALMISTUS') {
+				echo "<input type='text' name='etsi'>";
+			}
+
+			if ($toim == 'VALMISTUS') {
+				echo "<br/>";
+
+			}
 			echo "<input type='Submit' value = '".t("Etsi")."'>";
 			echo "</form>";
 			echo "<br>";
@@ -1013,13 +1066,41 @@
 			$miinus = 3;
 		}
 		elseif ($toim == 'VALMISTUS') {
+			$tilausrivi_join = "";
+			$tilausrivi_join_ehto = "";
+			if ($tuoteno != '') {
+				$tilausrivi_join = "	JOIN tilausrivi
+										ON ( tilausrivi.yhtio = lasku.yhtio
+											AND tilausrivi.otunnus = lasku.tunnus
+											AND tilausrivi.tuoteno = '{$tuoteno}')";
+				$tilausrivi_join_ehto = "	AND tilausrivi.tuoteno = '{$tuoteno}'";
+			}
+
+			$valmistuslinja_where = "";
+			if ($valmistuslinja != '') {
+				$valmistuslinja_where = "	AND lasku.kohde = '{$valmistuslinja}'";
+			}
+
+			$kerayspaiva_where = "";
+			if (!empty($pp) and !empty($kk) and !empty($vv)) {
+				$paiva = "{$vv}-{$kk}-{$pp}";
+				$valid = FormValidator::validateContent($paiva, 'paiva');
+
+				if ($valid) {
+					$kerayspaiva_where = "	AND lasku.kerayspvm = '{$paiva}'";
+				}
+			}
+
 			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi varastoon, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
+						{$tilausrivi_join}
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'V'
 						and lasku.alatila in ('','A','B','J')
+						{$valmistuslinja_where}
+						{$kerayspaiva_where}
 						$haku
 						$mt_order_by
 						$rajaus";
@@ -1031,8 +1112,10 @@
 								round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa,
 								count(distinct lasku.tunnus) kpl
 								FROM lasku use index (tila_index)
-								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus) and tilausrivi.tyyppi IN ('L','W')
+								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W') {$tilausrivi_join_ehto})
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
+								{$valmistuslinja_where}
+								{$kerayspaiva_where}
 								and lasku.tila = 'V'
 								and lasku.alatila in ('','A','B','J')
 								and lasku.tilaustyyppi != 'W'";

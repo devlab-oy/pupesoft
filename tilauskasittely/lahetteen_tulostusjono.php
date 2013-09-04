@@ -1,6 +1,8 @@
 <?php
 
 	require ("../inc/parametrit.inc");
+	require('validation/Validation.php');
+	require('valmistuslinjat.inc');
 
 	if (isset($tee) and $tee == "TILAA_AJAX") {
 		require_once("inc/tilaa_ajax.inc");
@@ -14,6 +16,18 @@
 	if (!isset($tuvarasto)) $tuvarasto = '';
 
 	if (!isset($tutyyppi)) $tutyyppi = '';
+
+	$now_minus_1_month = date('Y-m-d', strtotime('now - 1 month'));
+	$now_minus_1_month = explode('-', $now_minus_1_month);
+	if (!isset($ppa)) $ppa = $now_minus_1_month[2];
+	if (!isset($kka)) $kka = $now_minus_1_month[1];
+	if (!isset($vva)) $vva = $now_minus_1_month[0];
+
+	if (!isset($ppl)) $ppl = date('d');
+	if (!isset($kkl)) $kkl = date('m');
+	if (!isset($vvl)) $vvl = date('Y');
+
+	$valmistuslinjat = hae_valmistuslinjat();
 
 	$logistiikka_yhtio 		= '';
 	$logistiikka_yhtiolisa 	= '';
@@ -625,8 +639,28 @@
 
 		$haku = '';
 
-		if (is_numeric($karajaus)) {
+		if (is_numeric($karajaus) and $karajaus != 0) {
 			$haku .= " and lasku.kerayspvm<=date_add(now(), INTERVAL $karajaus day)";
+		}
+		else {
+			$valid = true;
+			$alku_paiva = "{$vva}-{$kka}-{$ppa}";
+			$loppu_paiva = "{$vvl}-{$kkl}-{$ppl}";
+			$valid = FormValidator::validateContent($alku_paiva, 'paiva');
+			if ($valid) {
+				$valid = FormValidator::validateContent($loppu_paiva, 'paiva');
+				if ($valid and strtotime($alku_paiva) > strtotime($loppu_paiva)) {
+					echo "<font class='error'>".t('Alkup‰iv‰ on myˆhemmin kuin loppup‰iv‰')."</font>";
+					$valid = false;
+				}
+			}
+
+			if ($valid) {
+				$haku .= " AND lasku.kerayspvm >= '{$alku_paiva}' AND lasku.kerayspvm <= '{$loppu_paiva}'";
+			}
+			else {
+				echo "<font class='error'>".t('P‰iv‰m‰‰r‰t ei ole valideja')."</font>";
+			}
 		}
 
 		if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {
@@ -774,7 +808,10 @@
 
 		echo "</select></td></tr>";
 
-		echo "<tr><th>".t("Valitse toimitustapa:")."</th><td><select name='tutoimtapa' onchange='submit()'>";
+		echo "<tr>";
+		echo "<th>".t("Valitse toimitustapa:")."</th>";
+		echo "<td>";
+		echo "<select name='tutoimtapa' onchange='submit()'>";
 
 		$query = "	SELECT toimitustapa.selite, count(*) kpl, MIN(toimitustapa.tunnus) tunnus
 					FROM toimitustapa
@@ -792,23 +829,67 @@
 			echo "<option value='$row[selite]' ".$sel[$row["selite"]].">".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")." ($row[kpl])</option>";
 		}
 
-		echo "</select></td><th></th><td></td>";
+		echo "</select>";
+		echo "</td>";
+		echo "<th>".t('Tuotenonumero')."</th>";
+		echo "<td>";
+		echo "<input type='text' name='tuoteno' value='{$tuoteno}' />";
+		echo "</td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<th>".t('Valmistuslinja')."</th>";
+		echo "<td>";
+
+		echo "<select name='valmistuslinja'>";
+		echo "<option value='' >".t('Ei valintaa')."</option>";
+		foreach ($valmistuslinjat as $_valmistuslinja) {
+			$sel = "";
+			if ($_valmistuslinja['selite'] == $valmistuslinja) {
+				$sel = "SELECTED";
+			}
+			echo "<option value='{$_valmistuslinja['selite']}' {$sel}>{$_valmistuslinja['selitetark']}</option>";
+		}
+		echo "</select>";
+
+		echo "</td>";
+
+		echo "<th></th>";
+		echo "<td>";
+		echo "</td>";
+		echo "</tr>";
 
 		$sel=array();
 		$sel[$karajaus] = "selected";
 
-		echo "<tr><th>".t("Ker‰ysaikarajaus:")."</th>
-				<td>
-					<select name='karajaus' onchange='submit()'>
-						<option value='1'  $sel[1]>".t("Huominen")."</option>
-						<option value='3'  $sel[3]>".t("Seuraavat 3 p‰iv‰‰")."</option>
-						<option value='5'  $sel[5]>".t("Seuraavat 5 p‰iv‰‰")."</option>
-						<option value='7'  $sel[7]>".t("Seuraava viikko")."</option>
-						<option value='14' $sel[14]>".t("Seuraavat 2 viikkoa")."</option>
-						<option value='KK' $sel[KK]>".t("N‰yt‰ kaikki")."</option>
-					</select>
-
-				</td>";
+		echo "<tr><th>".t("Ker‰ysaikarajaus:")."</th>";
+		echo "<td>";
+		echo "<select name='karajaus' onchange='submit()'>
+					<option value='0'   $sel[0]>".t("Ei valintaa")."</option>
+					<option value='1'  $sel[1]>".t("Huominen")."</option>
+					<option value='3'  $sel[3]>".t("Seuraavat 3 p‰iv‰‰")."</option>
+					<option value='5'  $sel[5]>".t("Seuraavat 5 p‰iv‰‰")."</option>
+					<option value='7'  $sel[7]>".t("Seuraava viikko")."</option>
+					<option value='14' $sel[14]>".t("Seuraavat 2 viikkoa")."</option>
+					<option value='KK' $sel[KK]>".t("N‰yt‰ kaikki")."</option>
+				</select>";
+		echo "<br/>";
+		echo "<br/>";
+		echo t('TAI');
+		echo "<br/>";
+		echo "<br/>";
+		echo t("Syˆt‰ alkup‰iv‰m‰‰r‰")." (pp-kk-vvvv)";
+		echo "<br/>";
+		echo "	<input type='text' name='ppa' value='{$ppa}' size='3'>
+				<input type='text' name='kka' value='{$kka}' size='3'>
+				<input type='text' name='vva' value='{$vva}' size='5'>";
+		echo "<br/>";
+		echo t("Syˆt‰ loppup‰iv‰m‰‰r‰")." (pp-kk-vvvv)";
+		echo "<br/>";
+		echo "	<input type='text' name='ppl' value='{$ppl}' size='3'>
+				<input type='text' name='kkl' value='{$kkl}' size='3'>
+				<input type='text' name='vvl' value='{$vvl}' size='5'>";
+		echo "</td>";
 		echo "<th>".t("Etsi tilausta").":</th><td><input type='text' name='etsi'>";
 		echo "<input type='Submit' value='".t("Etsi")."'></td></tr>";
 
@@ -844,6 +925,14 @@
 			$grouppi .= ", lasku.varasto, lasku.tulostusalue";
 		}
 
+		if ($tuoteno != '') {
+			$tilausrivi_tuoteno_join = "	AND tilausrivi.tuoteno = '{$tuoteno}'";
+		}
+
+		if ($valmistuslinja != '') {
+			$valmistuslinja_where = "	AND lasku.kohde = '{$valmistuslinja}'";
+		}
+
 		$query = "	SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto,
 					if (tila = 'V', lasku.viesti, lasku.toimitustapa) toimitustapa,
 					if (maksuehto.jv!='', lasku.tunnus, '') jvgrouppi,
@@ -869,19 +958,27 @@
 					GROUP_CONCAT(DISTINCT if(tilausrivi.kommentti!='',tilausrivi.kommentti, NULL) SEPARATOR '\n') kommentti,
 					lasku.mapvm
 					FROM lasku
-					JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')
+					JOIN tilausrivi
+					ON ( tilausrivi.yhtio = lasku.yhtio
+						AND tilausrivi.otunnus = lasku.tunnus
+						AND tilausrivi.tyyppi != 'D'
+						{$tilausrivi_tuoteno_join})
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
 					LEFT JOIN maksuehto ON maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus
 					WHERE
 					lasku.$logistiikka_yhtiolisa
 					and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa)
+					$valmistuslinja_where
 					$haku
 					$tilaustyyppi
 					$grouppi
 					$jarjx";
-		$tilre = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($tilre)==0) {
+		if ($valid) {
+			$tilre = mysql_query($query) or pupe_error($query);
+		}
+
+		if (mysql_num_rows($tilre)==0 or !$valid) {
 			echo "<br><br><font class='message'>".t("Tulostusjonossa ei ole yht‰‰n tilausta")."...</font>";
 		}
 		else {

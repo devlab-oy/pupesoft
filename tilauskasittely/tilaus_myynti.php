@@ -3833,6 +3833,7 @@ if ($tee == '') {
 		if (!empty($tilausnumero)) {
 			$query = "	UPDATE tilausrivi
 						SET var = 'J',
+						varattu = if(varattu=0,tilkpl,varattu),
 						kerayspvm = '".date('Y-m-d', strtotime('now + 3 month'))."'
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND otunnus = '{$tilausnumero}'";

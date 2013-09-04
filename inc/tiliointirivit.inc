@@ -135,8 +135,6 @@
 			$ulos .= "</select>";
 		}
 
-		$vanha_tili = (!isset($vanha_tili) or $vanha_tili == '') ? $tili : $vanha_tili;
-
 		echo "<tr>
 				<td valign='top'>
 				<form name = 'uusi' action = '$PHP_SELF#$tunnus' method='post'>
@@ -152,17 +150,10 @@
 				<input type='hidden' name = 'kk' value = '$kk'>
 				<input type='hidden' name = 'iframe' value = '$iframe'>
 				<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
-				<input type='hidden' name = 'jarj' value = '$jarj'>
-				<input type='hidden' name = 'vanha_tili' value='{$vanha_tili}' />";
+				<input type='hidden' name = 'jarj' value = '$jarj'>";
 
 		if ($tiliulos == '') {
-			if ($tili == '') $vanha_tili = '';
-
 			echo livesearch_kentta("uusi", "TILIHAKU", "tili", 170, $tili, "EISUBMIT", "vero");
-
-			if ($vanha_tili != '' and $virhe != '' and $vanha_tili != $tili) {
-				echo "<br /><font class='error'>",t("Aiemmin syötetty tili")," {$vanha_tili}</font>";
-			}
 		}
 		else {
 			echo "$tiliulos";
@@ -257,7 +248,7 @@
 			elseif ($liitos == "A" and $liitostunnus > 0) {
 				$tilitoimittajaid = $liitostunnus;
 			}
-			
+
 			echo "<br><br>";
 			echo t("Asiakas").":     ".livesearch_kentta("uusi", "ASIAKASHAKU", "tiliasiakasid", 170, $tiliasiakasid, "EISUBMIT");
 			echo t("Toimittaja").": ".livesearch_kentta("uusi", "TOIMITTAJAHAKU", "tilitoimittajaid", 170, $tilitoimittajaid, "EISUBMIT");

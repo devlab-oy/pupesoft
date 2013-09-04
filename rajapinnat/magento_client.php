@@ -86,7 +86,6 @@ class MagentoClient {
 		catch (Exception $e) {
 			$this->_error_count++;
 			$this->log("Virhe! Magento-class init failed", $e);
-			return null;
 		}
 	}
 
@@ -219,8 +218,7 @@ class MagentoClient {
 			try {
 
 				// Jos tuotetta ei ole olemassa niin lisätään se
-				if ( ! in_array($tuote['tuoteno'], $skus_in_store)) {
-					// Jos tuotteen lisäys ei onnistu ei tuotekuviakaan lisätä.
+				if (!in_array($tuote['tuoteno'], $skus_in_store)) {
 					$product_id = $this->_proxy->call($this->_session, 'catalog_product.create',
 						array(
 							'simple',
@@ -229,7 +227,22 @@ class MagentoClient {
 							$tuote_data,
 							)
 						);
-					$this->log("Tuote {$tuote['tuoteno']} lisätty (simple) " . print_r($tuote_data, true));
+					$this->log("Tuote '{$tuote['tuoteno']}' lisätty (simple) " . print_r($tuote_data, true));
+
+					// Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
+					$stock_data = array(
+						'qty'          => 0,
+						'is_in_stock'  => 0,
+						'manage_stock' => 1
+					);
+
+					$result = $this->_proxy->call(
+					    $this->_session,
+					    'product_stock.update',
+					    array(
+					        $tuote['tuoteno'], # sku
+					        $stock_data
+					    ));
 				}
 				// Tuote on jo olemassa, päivitetään
 				else {
@@ -244,7 +257,7 @@ class MagentoClient {
 					$result = $this->_proxy->call($this->_session, 'catalog_product.info', $tuote['tuoteno']);
 					$product_id = $result['product_id'];
 
-					$this->log("Tuote {$tuote['tuoteno']} päivitetty (simple) " . print_r($tuote_data, true));
+					$this->log("Tuote '{$tuote['tuoteno']}' päivitetty (simple) " . print_r($tuote_data, true));
 				}
 
 				// Haetaan tuotekuvat Pupesoftista
@@ -259,7 +272,7 @@ class MagentoClient {
 			}
 			catch (Exception $e) {
 				$this->_error_count++;
-				$this->log("Virhe! Tuotteen {$tuote['tuoteno']} lisäys/päivitys epäonnistui (simple) " . print_r($tuote_data, true), $e);
+				$this->log("Virhe! Tuotteen '{$tuote['tuoteno']}' lisäys/päivitys epäonnistui (simple) " . print_r($tuote_data, true), $e);
 			}
 		}
 
@@ -304,6 +317,14 @@ class MagentoClient {
 			// Etsitään kategoria mihin tuote lisätään
 			$category_id = $this->findCategory($tuotteet[0]['try_nimi'], $category_tree['children']);
 
+			// Tehdään 'associated_skus' -kenttä
+			// Vaatii, että Magentoon asennetaan 'magento-improve-api' -moduli: https://github.com/jreinke/magento-improve-api
+			$lapsituotteet_array = array();
+
+			foreach ($tuotteet as $tuote) {
+				$lapsituotteet_array[] = $tuote['tuoteno'];
+			}
+
 			// Configurable tuotteen tiedot
 			$configurable = array(
 				'categories'			=> array($category_id),
@@ -323,6 +344,7 @@ class MagentoClient {
 				'meta_title'            => '',
 				'meta_keyword'          => '',
 				'meta_description'      => '',
+				'associated_skus'       => $lapsituotteet_array,
 			);
 
 			try {
@@ -332,34 +354,28 @@ class MagentoClient {
 				 * ja päivitetään niiden attribuutit kuten koko ja väri.
 				 */
 				foreach ($tuotteet as $tuote) {
-					$koko = '';
-					$vari = '';
+
+					$multi_data = array();
 
 					// Simple tuotteiden parametrit kuten koko ja väri
 					foreach($tuote['parametrit'] as $parametri) {
-						if ($parametri['nimi'] == "Koko") {
-							$koko = $this->get_option_id('koko', $parametri['arvo']);
-						}
-						if ($parametri['nimi'] == "Väri") {
-							$vari = $this->get_option_id('vari', $parametri['arvo']);
-						}
+						$key = $parametri['option_name'];						
+						$multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
 					}
 
+					$simple_tuote_data = array(	'price'					=> $tuote['myymalahinta'],
+												'short_description'		=> utf8_encode($tuote['lyhytkuvaus']),
+												'featured_priority'		=> utf8_encode($tuote['jarjestys']),
+												'visibility'			=> self::NOT_VISIBLE_INDIVIDUALLY,
+												'additional_attributes' => array('multi_data' => $multi_data),
+												);
+
 					// Päivitetään Simple tuote
-					$result = $this->_proxy->call($this->_session, 'catalog_product.update', array($tuote['tuoteno'],
-						array(
-								'price'				=> $tuote['myymalahinta'],
-								'short_description' => utf8_encode($tuote['lyhytkuvaus']),
-								'visibility'		=> self::NOT_VISIBLE_INDIVIDUALLY,
-								'additional_attributes' => array(
-									'multi_data' => array(
-										'koko' => $koko,
-										'vari' => $vari
-									)
-								)
-							)
-						)
-					);
+					$result = $this->_proxy->call(	$this->_session,
+													'catalog_product.update',
+													array($tuote['tuoteno'], $simple_tuote_data));
+
+					$this->log("Päivitetään '{$nimitys}' tuotteen lapsituote '{$tuote['tuoteno']}' " . print_r($simple_tuote_data, true));
 				}
 
 				// Jos configurable tuotetta ei löydy, niin lisätään uusi tuote.
@@ -372,7 +388,7 @@ class MagentoClient {
 							$configurable
 							)
 						);
-					$this->log("Tuote {$nimitys} lisätty (configurable) " . print_r($configurable, true));
+					$this->log("Tuote '{$nimitys}' lisätty (configurable) " . print_r($configurable, true));
 				}
 				// Päivitetään olemassa olevaa configurablea
 				else {
@@ -382,12 +398,24 @@ class MagentoClient {
 							$configurable
 							)
 						);
-					$this->log("Tuote {$nimitys} päivitetty (configurable) " . print_r($configurable, true));
+					$this->log("Tuote '{$nimitys}' päivitetty (configurable) " . print_r($configurable, true));
 
 					// Haetaan tuotteen Magenton ID
 					$result = $this->_proxy->call($this->_session, 'catalog_product.info', $nimitys);
 					$product_id = $result['product_id'];
 				}
+
+				// Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
+				$stock_data = array(
+					'is_in_stock'  => 1,
+					'manage_stock' => 1,
+				);
+
+				$result = $this->_proxy->call(
+					$this->_session,
+					'product_stock.update',
+					array(	$nimitys, # sku
+							$stock_data));
 
 				// Haetaan tuotekuvat Pupesoftista
 				$tuotekuvat = $this->hae_tuotekuvat($tuotteet[0]['tunnus']);
@@ -401,7 +429,7 @@ class MagentoClient {
 			}
 			catch (Exception $e) {
 				$this->_error_count++;
-				$this->log("Virhe! Configurable tuotteen {$nimitys} lisäys/päivitys epäonnistui (configurable) " . print_r($configurable, true), $e);
+				$this->log("Virhe! Configurable tuotteen '{$nimitys}' lisäys/päivitys epäonnistui (configurable) " . print_r($configurable, true), $e);
 			}
 		}
 
@@ -502,6 +530,8 @@ class MagentoClient {
 
 			$count++;
 		}
+
+		$this->log("$count saldoa päivitetty");
 
 		return $count;
 	}
@@ -758,7 +788,7 @@ class MagentoClient {
 	 */
 	public function lisaa_tuotekuvat($product_id, $tuotekuvat) {
 
-		$types = array('image', 'small', 'thumbnail');
+		$types = array('image', 'small_image', 'thumbnail');
 
 		// Pitää ensin poistaa kaikki tuotteen kuvat Magentosta
 		$magento_pictures = $this->listaa_tuotekuvat($product_id);
@@ -793,7 +823,7 @@ class MagentoClient {
 			catch (Exception $e) {
 				// Nollataan base-encoodattu kuva, että logi ei tuu isoks
 				$data[1]["file"]["content"] = '...content poistettu logista...';
-				
+
 				$this->log("Virhe! Kuvan lisäys epäonnistui ". print_r($data, true), $e);
 				$this->_error_count++;
 			}
@@ -875,18 +905,17 @@ class MagentoClient {
 			$db = new PDO("mysql:host=$dbhost;dbname=$dbkanta", $dbuser, $dbpass);
 
 			// Tuotekuva query
-			$stmt = $db->prepare("
-				SELECT
-				liitetiedostot.data,
-				liitetiedostot.filetype,
-				liitetiedostot.filename
-				FROM liitetiedostot
-				WHERE liitetiedostot.yhtio = ?
-				AND liitetiedostot.liitostunnus = ?
-				AND liitetiedostot.liitos = 'tuote'
-				AND liitetiedostot.kayttotarkoitus = 'TK'
-				ORDER BY liitetiedostot.jarjestys DESC, liitetiedostot.tunnus DESC;
-			");
+			$stmt = $db->prepare("	SELECT
+									liitetiedostot.data,
+									liitetiedostot.filetype,
+									liitetiedostot.filename
+									FROM liitetiedostot
+									WHERE liitetiedostot.yhtio = ?
+									AND liitetiedostot.liitostunnus = ?
+									AND liitetiedostot.liitos = 'tuote'
+									AND liitetiedostot.kayttotarkoitus = 'TK'
+									ORDER BY liitetiedostot.jarjestys DESC,
+									liitetiedostot.tunnus DESC");
 			$stmt->execute(array($kukarow['yhtio'], $tunnus));
 
 			while($liite = $stmt->fetch(PDO::FETCH_ASSOC)) {

@@ -61,13 +61,14 @@
 	if (mysql_field_name($result, $i) == "laji") {
 
 		// Vaihtoehdot
-		$selected = array('K' => '', 'O' => '', 'Q' => '', 'X' => '');
+		$selected = array_fill_keys(array('K','O','X','Y'), '');
 		$selected[$trow[$i]] = "SELECTED";
 
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value='K' $selected[K]>".t("Korvaavia ja vastaavia tuotteita ei myyd‰")."</option>";
 		$ulos .= "<option value='O' $selected[O]>".t("Korvaavia tuotteita myyd‰‰n, mik‰li korvaavuusketjusta lˆytyy tilattu m‰‰r‰")."</option>";
 		$ulos .= "<option value='X' $selected[X]>".t("Korvaavia ja Vastaavia tuotteita myyd‰‰n")."</option>";
+		$ulos .= "<option value='Y' $selected[Y]>".t("Korvaavia ja Vastaavuusketjun p‰‰tuotetta myyd‰‰n")."</option>";
 
 		$ulos .= "</select></td>";
 		$jatko = 0;

@@ -516,7 +516,7 @@
 		if ($lisaarivi_debug==1) echo "Mennään myyntihaaraan: $tuoteno<br>";
 
 		// Etsitään korvaavia tuotteita
-		if ($trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L') {
+		if ($tuoteno != "" and $trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L') {
 			$korvaavat_kiellot 	= ""; // Korvaavia tuotteita myydään, vastaavia ei
 			$krkaikkimyytavissa	= 0;
 
@@ -535,6 +535,10 @@
 			elseif ($kk_laji == 'X') {
 				$korvaavat_kiellot = "VASTAAVAT";
 			}
+			// Korvaavia ja Vastaavuusketjun päätuotetta myydään
+			elseif ($kk_laji == 'Y') {
+				$korvaavat_kiellot = "PAA_VASTAAVA";
+			}
 
 			// Otetaan alkuperäisen tuotteen hinta talteen
 			list($korva_isa_hinta, , $korva_isa_ale_kaikki, , ) = alehinta($laskurow, $trow, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
@@ -548,8 +552,8 @@
 			$options = array('korvaavuusketjun_jarjestys' => $yhtiorow['korvaavuusketjun_jarjestys']);
 			$korvaavat_tuotteet = $korvaavat->tuotteet($options);
 
-			// Vastaavien automaattinen myynti, eli haetaanko vastaavat
-			if ($korvaavat_kiellot == "VASTAAVAT") {
+			// Vastaavien automaattinen myynti, eli haetaanko vastaavat tai Vastaavuusketjun päätuotteen automaattinen myynti
+			if ($korvaavat_kiellot == "VASTAAVAT" or $korvaavat_kiellot == "PAA_VASTAAVA") {
 
 				// Haetaan vastaavuusketjut korvaavat ketjun päätuotteella
 				require_once 'vastaavat.class.php';
@@ -580,6 +584,11 @@
 
 							if (!isset($korvaavat_tuotteet[$_tuote['tuoteno']])) {
 								$korvaavat_tuotteet[$_tuote['tuoteno']] = $_tuote;
+							}
+
+							if ($korvaavat_kiellot == "PAA_VASTAAVA") {
+								// Jos eka natsaa niin ok.
+								break 2;
 							}
 						}
 					}
@@ -684,8 +693,7 @@
 			elseif (count($korkieltokommi) > 1) {
 				$korkieltokommi = t("Voit tilata korvaavia tuotteita").": ".implode(", ",$korkieltokommi);
 			}
-
-		} // end etsitäänkö korvaavia
+		}
 
 		// Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhjä niin vaihdetaan vain jonkun tuotteen paikkaa eikä päivitetä tuoteperheitä
 		// Tai jos muokataan tuoteperheen lasta ei mennä uudestaan tähän haaraan
@@ -1938,10 +1946,10 @@
 			$var = $puu_var[$i];
 
 			// Korvaavuusketjun puutekäsittely, lisätään ketjun päätuote puutteeksi
-			if ($yhtiorow["korvaavuusketjun_puutekasittely"] == "K") {
+			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K") {
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
-				$paatuote = $korvaavat->paatuote();
+				$paatuote  = $korvaavat->paatuote();
 
 				if ($paatuote != "") {
 					if (strtoupper($paatuote) != strtoupper($tuoteno)) {
@@ -1951,6 +1959,51 @@
 					}
 
 					$tuoteno = $paatuote;
+				}
+			}
+			// Vastaavuusketjun puutekäsittely, lisätään ketjun päätuote puutteeksi
+			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V") {
+				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun päätuote
+				require_once 'korvaavat.class.php';
+				$korvaavat = new Korvaavat($tuoteno);
+
+				require_once 'vastaavat.class.php';
+				$options = array('skippaa_vaihtoehtoiset' => TRUE);
+
+				if (count($korvaavat->tuotteet()) > 0) {
+					$vastaavat = new Vastaavat($korvaavat->paatuote(), $options);
+				}
+				else {
+					$vastaavat = new Vastaavat($tuoteno, $options);
+				}
+
+				if ($vastaavat->onkovastaavia()) {
+
+					$options = array('vastaavuusketjun_jarjestys' => $yhtiorow['vastaavuusketjun_jarjestys'], 'skippaa_vaihtoehtoiset' => TRUE);
+
+					// Loopataan kaikki tuotteen vastaavuusketjut
+					foreach (explode(",", $vastaavat->getIDt()) as $ketju) {
+
+						// Haetaan tuotteet ketjukohtaisesti
+						$_tuotteet = $vastaavat->tuotteet($ketju, $options);
+
+						// Lisätään löydetyt vastaavat mahdollisten myytävien joukkoon
+						foreach ($_tuotteet as $_tuote) {
+							if (strtoupper($_tuote['tuoteno']) != strtoupper($tuoteno)) {
+								if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $tuoteno") === FALSE and empty($korlisakommi[$_tuote['tuoteno']])) {
+									$kommentti .= " ".t("HUOM: Korvaa tuotteen")." $tuoteno";
+								}
+								else {
+									$kommentti .= $korlisakommi[$_tuote['tuoteno']];
+								}
+
+								$tuoteno = $_tuote['tuoteno'];
+							}
+
+							// Breakataan aina ekan jälkeen
+							break 2;
+						}
+					}
 				}
 			}
 
@@ -1966,6 +2019,124 @@
 			}
 			else {
 				$trow = mysql_fetch_assoc($tuoteresult);
+			}
+
+			// Tehdäänkö puute- tai jt-rivistä automaattisesti osto/suoratoimitus?
+			if ((int) $rivitunnus == 0 and $yhtiorow["tee_automaattinen_osto_myyntitilaukselta"] != "" and ($kukarow["extranet"] == "" or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E') and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS'))) and $var != 'V') {
+
+				if ((
+						$kukarow["extranet"] == ""
+						or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E'
+					)
+					and in_array($var, array('','H','S','T','U','J','P'))
+					and (
+						$toim == "TARJOUS"
+						or (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('','Z','Q')))
+					)
+					and $kpl > 0
+					and $toim != "SIIRTOTYOMAARAYS"
+				) {
+
+					// Katsotaan onko tälle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
+					$query = "	SELECT tilausrivin_lisatiedot.toimittajan_tunnus
+								FROM tilausrivi
+								JOIN tilausrivin_lisatiedot
+								ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+									AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+									AND tilausrivin_lisatiedot.toimittajan_tunnus != 0 )
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+								AND tilausrivi.tyyppi != 'D'
+								AND tilausrivi.var in ('J','T','U')
+								ORDER BY tilausrivi.tunnus ASC
+								LIMIT 1";
+					$toimittaja_result = pupe_query($query);
+					$toimittaja = mysql_fetch_assoc($toimittaja_result);
+
+					if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('A', 'B', 'C', 'I', 'J')) and !empty($toimittaja['toimittajan_tunnus'])) {
+						$yksi_suoratoimittaja_join = " AND toimi.tunnus = {$toimittaja['toimittajan_tunnus']} ";
+					}
+					else {
+						$yksi_suoratoimittaja_join = "";
+					}
+
+					// Otetaan tuotteen oletustoimittaja
+					$query = "	SELECT toimi.tyyppi_tieto,
+								tuotteen_toimittajat.liitostunnus,
+								toimi.nimi,
+								toimi.suoratoimitus,
+								tuotteen_toimittajat.tehdas_saldo
+								FROM tuotteen_toimittajat use index (yhtio_tuoteno)
+								JOIN toimi
+								ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+									AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+									{$yksi_suoratoimittaja_join})
+								WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+								AND tuotteen_toimittajat.tuoteno = '$trow[tuoteno]'
+								ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
+								LIMIT 1";
+					$toimpaikres = pupe_query($query);
+					$krow = mysql_fetch_assoc($toimpaikres);
+
+					if (!empty($krow) and !in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('Y', 'V')) or ($krow['tehdas_saldo'] >= $kpl)) {
+						// tarkistetaan voiko tuotteen tilata suoraan asiakkaalle tai varastoon. oletuksena voi...
+						$tmp_varastoon   = 1;
+						$tmp_asiakkaalle = 1;
+
+						// ...kielletään tilaamasta varastoon jos yhtiöparametri ohjaa katsomaan tuotteelta ja siellä ei ole sallittu...
+						if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J'))
+							and !in_array($trow['suoratoimitus'], array('S', 'X'))) { 				// vain S ja X sallivat tilauksen varastoon
+							$tmp_varastoon = 0;
+						}
+
+						// ...kielletään tilaamasta asiakkaalle jos yhtiöparametri ohjaa katsomaan tuotteelta ja siellä ei ole sallittu...
+						if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('W', 'J'))
+						 	and !in_array($trow['suoratoimitus'], array('S', 'U'))) {				// vain S ja U sallivat tilauksen asiakkaalle
+							$tmp_asiakkaalle = 0;
+						}
+
+						// katsotaan onko tuote suoratoimituskelpoinen (vain ei tuoteperheet, tai tuoteperheiden saldolliset isät tai jos yhtiöllä suoratoimitetaan perheet per tuote)
+						if ((   // jos on tuoteperheen lapsi, pitää lapsien suoratoimitus olla sallittu
+								$yhtiorow['tuoteperhe_suoratoimitus'] == ''
+								or $perheid == 0
+								or $perheid == $rivitunnus
+							)
+							and ( // onko suoratoimitus yleensäkään sallittu
+								in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'X', 'Y', 'A', 'B', 'C'))
+								or (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J')) and ($tmp_varastoon == 1 or $tmp_asiakkaalle == 1))
+							)
+						) {
+
+							if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1 and in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('X', 'Y'))) {
+								$var 		 		= "T";
+								$toimittajan_tunnus	= $krow['liitostunnus'];
+								$paikka		 		= "";
+							}
+
+							if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1 and in_array($yhtiorow["tee_automaattinen_osto_myyntitilaukselta"], array('U', 'V'))) {
+								$var 		 		= "U";
+								$toimittajan_tunnus	= $krow['liitostunnus'];
+								$paikka		 		= "";
+							}
+						}
+					}
+					else {
+						if (in_array($yhtiorow['puute_jt_oletus'], array('','A'))) {
+							$var = "P";
+						}
+						else if (in_array($yhtiorow['puute_jt_oletus'], array('J','B'))) {
+							$var = "J";
+						}
+						else if (in_array($yhtiorow['puute_jt_oletus'], array('H'))) {
+							$var = "";
+						}
+						else {
+							$var = "";
+						}
+						$toimittajan_tunnus	= '';
+						$paikka		 		= '';
+					}
+				}
 			}
 
 			if ($yhtiorow['rivinumero_syotto'] != '') {

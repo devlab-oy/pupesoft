@@ -334,6 +334,13 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "valmistusaika_sekunneissa") {
+		$valmistusaika_sekunneissa = trim($t[$i]);
+			if (!is_numeric($valmistusaika_sekunneissa)) {
+				$virhe[$i] = t("Valmistusaika pitää olla kokonaisluku");
+			}
+		}
+
 		if ($fieldname == 'status') {
 			$tem_status = $t[$i];
 			$tem_status_vanha = $trow[$i];

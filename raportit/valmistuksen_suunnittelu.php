@@ -1,9 +1,51 @@
 <?php
 
-	require("../inc/parametrit.inc");
+	if (isset($_POST["tee"])) {
+		if ($_POST["tee"] == 'lataa_tiedosto') {
+			$lataa_tiedosto = 1;
+		}
+		if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
+			$_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+		}
+	}
 
-	// Salitaan vain numeroita ja piste/pilkku input kentiss‰
-	echo '<script language="javascript">
+	require("../inc/parametrit.inc");
+	require('valmistuslinjat.inc');
+
+	//N‰m‰ ovat $lopetus varten. lopetus-muuttujaan serialisoidaan ja base64-enkoodataan arrayt
+	//ja ne pit‰‰ reverttaa t‰ss‰ kohtaa kun tuotekyselyst‰ tullaan takaisin.
+	if (is_string($mul_try)) {
+		$mul_try = unserialize(base64_decode($mul_try));
+	}
+	if (is_string($mul_osasto)) {
+		$mul_osasto = unserialize(base64_decode($mul_osasto));
+	}
+	if (is_string($mul_tme)) {
+		$mul_tme = unserialize(base64_decode($mul_tme));
+	}
+
+	if ($tee == 'lataa_tiedosto') {
+		$filepath = "/tmp/".$tmpfilenimi;
+		if (file_exists($filepath)) {
+			readfile($filepath);
+			unlink($filepath);
+		}
+		else {
+			echo "<font class='error'>".t("Tiedostoa ei ole olemassa")."</font>";
+		}
+		exit;
+	}
+
+	?>
+	<style>
+		.raaka_aineet_not_hidden {
+
+		}
+		.raaka_aineet_hidden {
+			display: none;
+		}
+	</style>
+	<script language="javascript">
 	$(document).ready(function() {
 	    $("#vain_numeroita").keydown(function(event) {
 	        // sallitaan backspace (8) ja delete (46)
@@ -21,9 +63,44 @@
 			event.preventDefault();
 			$("tr.togglettava_rivi_"+$(this).attr("id")).toggle();
 		});
-	});
-	</script>';
 
+		bind_ei_exceliin_checkbox();
+		bind_raaka_aine_saldo_tr_toggle();
+	});
+
+	function bind_ei_exceliin_checkbox() {
+		$('.ei_exceliin').on('click', function() {
+			//jos rivi‰ ei haluta tulostettavan exceliin, poistetaan exceliin inputista nimi, jolloin se ei l‰hde requestin mukana.
+			if ($(this).is(':checked')) {
+				$(this).parent().find('.exceliin').removeAttr('name');
+			}
+			else {
+				var tuoteno = $(this).parent().parent().find('td:first').html();
+				$(this).parent().find('.exceliin').attr('name', 'exceliin['+tuoteno+']');
+			}
+		});
+	}
+
+	function bind_raaka_aine_saldo_tr_toggle() {
+		$('.raaka_aine_toggle').on('click', function(event) {
+			event.preventDefault();
+
+			var togglettava_rivi_id = $(this).attr('data');
+
+			var $raaka_aine_tr = $(this).parent().parent().parent().find('.raaka_aineet_'+togglettava_rivi_id);
+
+			if ($raaka_aine_tr.hasClass('raaka_aineet_not_hidden')) {
+				$raaka_aine_tr.addClass('raaka_aineet_hidden');
+				$raaka_aine_tr.removeClass('raaka_aineet_not_hidden');
+			}
+			else {
+				$raaka_aine_tr.addClass('raaka_aineet_not_hidden');
+				$raaka_aine_tr.removeClass('raaka_aineet_hidden');
+			}
+		});
+	}
+	</script>
+	<?php
 	echo "<font class='head'>".t("Valmistuksien suunnittelu")."</font><hr>";
 
 	// org_rajausta tarvitaan yhdess‰ selectiss‰ joka triggerˆi taas toisen asian.
@@ -35,34 +112,43 @@
 	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
 	// Ehdotetaan oletuksena ehdotusta ensikuun valmistuksille sek‰ siit‰ plus 3 kk
+	if (!isset($ppa1)) $ppa1 = date("d", mktime(0, 0, 0, date("d"), 1, date("Y")));
 	if (!isset($kka1)) $kka1 = date("m", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
 	if (!isset($vva1)) $vva1 = date("Y", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
+	if (!isset($ppl1)) $ppl1 = date("d", mktime(0, 0, 0, date("d"), 1, date("Y")));
 	if (!isset($kkl1)) $kkl1 = date("m", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 	if (!isset($vvl1)) $vvl1 = date("Y", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 
 	// P‰iv‰m‰‰r‰tarkistus
-	if (!checkdate($kka1, 1, $vva1)) {
+	if (!checkdate($kka1, $ppa1, $vva1)) {
 		echo "<font class='error'>".t("Virheellinen alkup‰iv‰!")."</font><br>";
 		$tee = "";
 	}
 	else {
-		$nykyinen_alku  = date("Y-m-d", mktime(0, 0, 0, $kka1, 1, $vva1));
-		$edellinen_alku = date("Y-m-d", mktime(0, 0, 0, $kka1, 1, $vva1-1));
+		$nykyinen_alku  = date("Y-m-d", mktime(0, 0, 0, $kka1, $ppa1, $vva1));
+		$edellinen_alku = date("Y-m-d", mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
 	}
 
-	if (!checkdate($kkl1, 1, $vvl1)) {
+	if (!checkdate($kkl1, $ppl1, $vvl1)) {
 		echo "<font class='error'>".t("Virheellinen loppup‰iv‰!")."</font><br>";
 		$tee = "";
 	}
 	else {
-		$nykyinen_loppu  = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, 0, $vvl1));
-		$edellinen_loppu = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, 0, $vvl1-1));
+		$nykyinen_loppu  = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, $ppl1, $vvl1));
+		$edellinen_loppu = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, $ppl1, $vvl1-1));
 	}
 
 	if ($nykyinen_alku > $nykyinen_loppu) {
 		echo "<font class='error'>".t("Virheelliset kaudet!")." $nykyinen_alku > $nykyinen_loppu</font><br>";
 		$tee = "";
 	}
+
+	$lopetus = "{$palvelin2}raportit/valmistuksen_suunnittelu.php////toim={$toim}
+		//abcrajaus={$abcrajaus}//ehdotetut_valmistukset={$ehdotetut_valmistukset}
+		//ppa1={$ppa1}//kka1={$kka1}//vva1={$vva1}//ppl1={$ppl1}//kkl1={$kkl1}//vvl1={$vvl1}
+		//kohde_varasto={$kohde_varasto}//lahde_varasto={$lahde_varasto}//status={$status}
+		//ehdotusnappi={$ehdotusnappi}//tee={$tee}//mul_try=".base64_encode(serialize($mul_try))."
+		//mul_osasto=".base64_encode(serialize($mul_osasto))."//mul_tme=".base64_encode(serialize($mul_tme));
 
 	// Muuttujia
 	$ytunnus = isset($ytunnus) ? trim($ytunnus) : "";
@@ -374,9 +460,94 @@
 		$tee = "";
 	}
 
+	if (isset($tee) and $tee == "GENEROI_EXCEL") {
+		$excel_rivit = array();
+		foreach ($_REQUEST['exceliin'] as $excel_rivi) {
+			$excel_rivi = unserialize(base64_decode($excel_rivi));
+
+			$excel_rivit[] = $excel_rivi;
+		}
+
+		$header_values = array(
+			'tuoteno'					 => array(
+				'header' => t('Tuotenumero'),
+				'order'	 => 10
+			),
+			'nimitys'					 => array(
+				'header' => t('Nimitys'),
+				'order'	 => 20
+			),
+			'sisartuote'				 => array(
+				'header' => t('Sisartuotteet'),
+				'order'	 => 30
+			),
+			'abcluokka'					 => array(
+				'header' => t('ABC-luokka'),
+				'order'	 => 40
+			),
+			'reaalisaldo'				 => array(
+				'header' => t('Reaalisaldo'),
+				'order'	 => 50
+			),
+			'valmistuksessa'			 => array(
+				'header' => t('Valmistuksessa'),
+				'order'	 => 60
+			),
+			'riittopv'					 => array(
+				'header' => t('Riitto pv'),
+				'order'	 => 70
+			),
+			'raakaaine_riitto'		 => array(
+				'header' => t('Raaka-aine riitto'),
+				'order'	 => 80
+			),
+			'vuosikulutus'				 => array(
+				'header' => t('Vuosikulutus'),
+				'order'	 => 90
+			),
+			'valmistuslinja'			 => array(
+				'header' => t('Valmistuslinja'),
+				'order'	 => 100
+			),
+			'pakkauskoko'				 => array(
+				'header' => t('Pakkauskoko'),
+				'order'	 => 110
+			),
+			'valmistusmaara'			 => array(
+				'header' => t('Valmistusmaara'),
+				'order'	 => 120
+			),
+			'valmistusaika_sekunneissa'	 => array(
+				'header' => t('Valmistusaika (sek)'),
+				'order'	 => 130
+			),
+			'valmistusaika'				 => array(
+				'header' => t('Valmistusaika yht.'),
+				'order'	 => 140
+			),
+			'varaus_sekunneissa'		 => array(
+				'header' => t('Kumulatiivinen aika'),
+				'order'	 => 150
+			),
+			'varaus_paivissa'			 => array(
+				'header' => t('P‰iv‰'),
+				'order'	 => 160
+			),
+		);
+		$force_to_string = array(
+			'tuoteno'
+		);
+
+		$excel_filename = generoi_excel_tiedosto($excel_rivit, $header_values, $force_to_string);
+
+		echo_tallennus_formi($excel_filename, 'Valmistusraportti');
+	}
+
 	// Tehd‰‰n raportti
 	if (isset($ehdotusnappi) and $ehdotusnappi != "") {
 
+		$valmistuslinjat = hae_valmistuslinjat();
+		
 		$tuote_where       = ""; // tuote-rajauksia
 		$toimittaja_join   = ""; // toimittaja-rajauksia
 		$toimittaja_select = ""; // toimittaja-rajauksia
@@ -405,11 +576,11 @@
 		if ($toimittajaid != '') {
 			// Jos ollaan rajattu toimittaja, niin otetaan vain sen toimittajan tuotteet ja laitetaan mukaan selectiin
 			$toimittaja_join = "JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid')";
-			$toimittaja_select = "tuotteen_toimittajat.liitostunnus toimittaja";
+			$toimittaja_select = "tuotteen_toimittajat.liitostunnus toimittaja, tuotteen_toimittaja.pakkauskoko";
 		}
 		else {
 			// Jos toimittajaa ei olla rajattu, haetaan tuotteen oletustoimittaja subqueryll‰
-			$toimittaja_select = "(SELECT liitostunnus FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = ifnull(samankaltaiset.isatuoteno, tuote.tuoteno) ORDER BY if(jarjestys = 0, 9999, jarjestys), toimittaja LIMIT 1) toimittaja";
+			$toimittaja_select = "(SELECT liitostunnus FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = ifnull(samankaltaiset.isatuoteno, tuote.tuoteno) ORDER BY if(jarjestys = 0, 9999, jarjestys), toimittaja LIMIT 1) toimittaja, (SELECT pakkauskoko FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = ifnull(samankaltaiset.isatuoteno, tuote.tuoteno) ORDER BY if(jarjestys = 0, 9999, jarjestys), toimittaja LIMIT 1) pakkauskoko";
 		}
 
 		if ($abcrajaus != "") {
@@ -553,6 +724,7 @@
 					ifnull(samankaltaiset.isatuoteno, tuote.tuoteno) tuoteno,
 					ifnull(samankaltainen_tuote.nimitys, tuote.nimitys) nimitys,
 					ifnull(samankaltainen_tuote.valmistuslinja, tuote.valmistuslinja) valmistuslinja,
+					tuote.valmistusaika_sekunneissa,
 					{$toimittaja_select}
 					FROM tuote
 					JOIN tuoteperhe ON (tuoteperhe.yhtio = tuote.yhtio
@@ -588,6 +760,9 @@
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["nimitys"] = $row["nimitys"];
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistuslinja"] = $row["valmistuslinja"];
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuote"] = $row["tuoteno"];
+			$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistusaika_sekunneissa"] = $row["valmistusaika_sekunneissa"];
+			$kasiteltavat_tuotteet[$kasiteltavat_key]["pakkauskoko"] = $row["pakkauskoko"];
+			$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistusaika"] = $row["valmistusaika_sekunneissa"] * $kasiteltavat_tuotteet[$kasiteltavat_key]["valmistussuositus"];
 
 			// Otetaan is‰tuotteen pakkauskoko talteen, sill‰ sen perusteella tulee laskea "samankaltaisten" valmistusm‰‰r‰
 			$isatuotteen_pakkauskoko = $kasiteltavat_tuotteet[$kasiteltavat_key]["pakkauskoko"];
@@ -596,6 +771,7 @@
 			// Katsotaan onko kyseess‰ "samankaltainen" is‰tuote ja haetaan lapsituotteiden infot
 			$query = "	SELECT tuote.tuoteno,
 						tuote.nimitys,
+						tuote.valmistusaika_sekunneissa,
 						tuote.valmistuslinja
 						FROM tuoteperhe
 						JOIN tuote USING (yhtio, tuoteno)
@@ -618,6 +794,9 @@
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["nimitys"] = $samankaltainen_row["nimitys"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistuslinja"] = $samankaltainen_row["valmistuslinja"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuote"] = $row["tuoteno"];
+				$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistusaika_sekunneissa"] = $samankaltainen_row["valmistusaika_sekunneissa"];
+				$kasiteltavat_tuotteet[$kasiteltavat_key]["pakkauskoko"] = $samankaltainen_row["pakkauskoko"];
+				$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistusaika"] = $samankaltainen_row["valmistusaika_sekunneissa"] * $kasiteltavat_tuotteet[$kasiteltavat_key]["valmistussuositus"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuotteen_pakkauskoko"] = $isatuotteen_pakkauskoko;
 				$samankaltaiset_tuotteet .= "{$samankaltainen_row["tuoteno"]} ";
 			}
@@ -639,7 +818,10 @@
 				if ($isatuotteen_pakkauskoko != 1) {
 
 					// Pyˆristet‰‰n koko samankaltaisten nippu ylˆsp‰in seuraavaan pakkauskokoon
-					$samankaltaisten_valmistusmaara = round($valmistettava_yhteensa / $isatuotteen_pakkauskoko) * $isatuotteen_pakkauskoko;
+					//@TODO mit‰ jos $isatuotteen_pakkauskoko = 0
+					if ($isatuotteen_pakkauskoko != 0) {
+						$samankaltaisten_valmistusmaara = round($valmistettava_yhteensa / $isatuotteen_pakkauskoko) * $isatuotteen_pakkauskoko;
+					}
 
 					foreach ($kasiteltavat_tuotteet as $key => $kasittelyssa) {
 						// Lasketaan paljonko t‰m‰n tuotteen valmistusmaara on koko valmistuksesta
@@ -683,8 +865,45 @@
 			$valmistaja_header_piirretty = false;
 			$formin_pointteri = 0;
 
+			$valmistuslinjojen_kumulatiiviset_ajat = array();
+			foreach ($valmistuslinjat as $valmistuslinja) {
+				$valmistuslinjojen_kumulatiiviset_ajat[$valmistuslinja['selite']] = array(
+					'varaus_sekunneissa' => 0,
+					'varaus_paivissa' => 1,
+				);
+			}
+
 			// loopataan tuotteet l‰pi
+			$linja_kohtainen_paivan_toteutunut_kapasiteetti_varaus = 0;
 			foreach ($valmistettavat_tuotteet as $tuoterivi) {
+				if ($tuoterivi['valmistuslinja'] != '') {
+					if ($tuoterivi['valmistuslinja'] != $EDlinja or $EDlinja === false) {
+						$linja_kohtainen_paivan_toteutunut_kapasiteetti_varaus = 0;
+					}
+
+					$tuoterivin_valmistuslinja = search_array_key_for_value_recursive($valmistuslinjat, 'selite', $tuoterivi['valmistuslinja']);
+					$valmistuslinjojen_kumulatiiviset_ajat[$tuoterivin_valmistuslinja[0]['selite']]['varaus_sekunneissa'] += $tuoterivi['valmistusaika_sekunneissa'];
+					//@TODO jos valmistuslinjaston p‰iv‰kapasiteetti on 0?
+					if ((int)$tuoterivin_valmistuslinja[0]['selitetark_2'] != 0) {
+						$mahtuuko_valmistus_linjaston_taman_paivan_valmistuksiin =  ((int)$linja_kohtainen_paivan_toteutunut_kapasiteetti_varaus + (int)$tuoterivi['valmistusaika_sekunneissa']) / (int)$tuoterivin_valmistuslinja[0]['selitetark_2'];
+					}
+					else {
+						$mahtuuko_valmistus_linjaston_taman_paivan_valmistuksiin = 0;
+					}
+					if ($mahtuuko_valmistus_linjaston_taman_paivan_valmistuksiin > 1) {
+						//jos k‰sittelyss‰ oleva valmistus ei en‰‰ mahdu linjaston p‰iv‰n valmistuksiin,
+						//siirret‰‰n se seuraavalle p‰iv‰lle.
+						$valmistuslinjojen_kumulatiiviset_ajat[$tuoterivin_valmistuslinja[0]['selite']]['varaus_paivissa']++;
+						$linja_kohtainen_paivan_toteutunut_kapasiteetti_varaus = (int)$tuoterivi['valmistusaika_sekunneissa'];
+					}
+					else {
+						$linja_kohtainen_paivan_toteutunut_kapasiteetti_varaus += $tuoterivi['valmistusaika_sekunneissa'];
+					}
+					//asetetaan varausajat myˆs tuoterivi muuttujaan, jotta ne saadaan exceliin
+					$tuoterivi['varaus_sekunneissa'] = $valmistuslinjojen_kumulatiiviset_ajat[$tuoterivin_valmistuslinja[0]['selite']]['varaus_sekunneissa'];
+					$tuoterivi['varaus_paivissa'] = $valmistuslinjojen_kumulatiiviset_ajat[$tuoterivin_valmistuslinja[0]['selite']]['varaus_paivissa'];
+				}
+				$tuoterivi['raakaaine_riitto'] = '';
 
 				// Valmistuslinja vaihtuu
 				if ($tuoterivi['valmistuslinja'] != $EDlinja or $EDlinja === false) {
@@ -699,6 +918,11 @@
 					$valmistaja_header .= "<th>".t("Sisar")."-<br>".t("tuotteet")."</th>";
 					$valmistaja_header .= "<th>".t("ABC")."-<br>".t("luokka")."</th>";
 					$valmistaja_header .= "<th>".t("Reaali")."-<br>".t("saldo")."</th>";
+					$valmistaja_header .= "<th>".t("Valmistusaika sekunneissa")."</th>";
+					$valmistaja_header .= "<th>".t("Kumulatiivinenaika sekunneissa")."</th>";
+					$valmistaja_header .= "<th>".t("Pakkauskoko")."</th>";
+					$valmistaja_header .= "<th>".t("Valmistusaika yhteens‰ sekunneissa")."</th>";
+					$valmistaja_header .= "<th>".t("Valmistusp‰ivi‰ yhteens‰")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistuksessa")."</th>";
 					$valmistaja_header .= "<th>".t("Riitto Pv")."</th>";
 					$valmistaja_header .= "<th>".t("Raaka")."-<br>".t("aine")." ".t("riitto")."</th>";
@@ -725,39 +949,52 @@
 				echo "<td>{$tuoterivi["sisartuote"]}</td>";
 				echo "<td>{$tuoterivi["abcluokka"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["reaalisaldo"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["valmistusaika_sekunneissa"]}</td>";
+				echo "<td style='text-align: right;'>".(!empty($tuoterivin_valmistuslinja) ? $valmistuslinjojen_kumulatiiviset_ajat[$tuoterivin_valmistuslinja[0]['selite']]['varaus_sekunneissa'] : 0)."</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["pakkauskoko"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["valmistusaika"]}</td>";
+				echo "<td style='text-align: right;'>".(!empty($tuoterivin_valmistuslinja) ? $valmistuslinjojen_kumulatiiviset_ajat[$tuoterivin_valmistuslinja[0]['selite']]['varaus_paivissa'] : 0)."</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["valmistuksessa"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["riittopv"]}</td>";
 
 				// Tarkistetaanko moneenko valmisteeseen meill‰ on raaka-aineita
 				$raaka_aineiden_riitto = raaka_aineiden_riitto($tuoterivi["tuoteno"], (int) $lahde_varasto);
+				//raaka-aine riitto tuoterivi-muuttujaan talteen, jotta se tulee myˆs excelille
+				$tuoterivi['raakaaine_riitto'] = $raaka_aineiden_riitto;
 				echo "<td style='text-align: right;'>$raaka_aineiden_riitto</td>";
 
 				echo "<td style='text-align: right;'>{$tuoterivi["vuosikulutus"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["valmistussuositus"]}</td>";
 
 				echo "<td>";
-
 				$result = t_avainsana("VALMISTUSLINJA");
-
-				// jos avainsanoja on perustettu tehd‰‰n dropdown
-				if (mysql_num_rows($result) > 0) {
-
-					echo "<select name='valmistettavat_tuotteet[$formin_pointteri][valmistuslinja]' tabindex='-1'>";
-					echo "<option value = ''>".t("Ei valmistuslinjaa")."</option>";
-
+				if ($toim == 'EXCEL') {
 					while ($srow = mysql_fetch_array($result)) {
-						$sel = ($tuoterivi["valmistuslinja"] == $srow["selite"]) ? "selected" : "";
-						echo "<option value='{$srow["selite"]}' $sel>{$srow["selitetark"]}</option>";
+						if ($tuoterivi["valmistuslinja"] == $srow["selite"]) {
+							echo $srow["selitetark"];
+						}
 					}
-
-					echo "</select>";
 				}
 				else {
-					echo "$valmistuslinja";
-					echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][valmistuslinja]' value='{$tuoterivi["valmistuslinja"]}'>";
+					// jos avainsanoja on perustettu tehd‰‰n dropdown
+					if (mysql_num_rows($result) > 0) {
 
+						echo "<select name='valmistettavat_tuotteet[$formin_pointteri][valmistuslinja]' tabindex='-1'>";
+						echo "<option value = ''>".t("Ei valmistuslinjaa")."</option>";
+
+						while ($srow = mysql_fetch_array($result)) {
+							$sel = ($tuoterivi["valmistuslinja"] == $srow["selite"]) ? "selected" : "";
+							echo "<option value='{$srow["selite"]}' $sel>{$srow["selitetark"]}</option>";
+						}
+
+						echo "</select>";
+					}
+					else {
+						echo "$valmistuslinja";
+						echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][valmistuslinja]' value='{$tuoterivi["valmistuslinja"]}'>";
+
+					}
 				}
-
 				echo "</td>";
 
 				// Tehd‰‰n Toggle-nappi, jolla voidaan n‰ytt‰‰ matikkainfo alla
@@ -767,16 +1004,31 @@
 				echo "</td>";
 
 				echo "<td style='text-align: right;'>";
-				echo "<input size='8' style='text-align: right;' type='text' name='valmistettavat_tuotteet[$formin_pointteri][valmistusmaara]' value='{$tuoterivi["valmistusmaara"]}' id='vain_numeroita' tabindex='".($formin_pointteri+1)."'>";
-				echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][tuoteno]' value='{$tuoterivi["tuoteno"]}'>";
-				echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][riittopv]' value='{$tuoterivi["riittopv"]}'>";
+				if ($toim == 'EXCEL') {
+					echo $tuoterivi['valmistusmaara'];
+				}
+				else {
+					echo "<input size='8' style='text-align: right;' type='text' name='valmistettavat_tuotteet[$formin_pointteri][valmistusmaara]' value='{$tuoterivi["valmistusmaara"]}' id='vain_numeroita' tabindex='".($formin_pointteri+1)."'>";
+					echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][tuoteno]' value='{$tuoterivi["tuoteno"]}'>";
+					echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][riittopv]' value='{$tuoterivi["riittopv"]}'>";
+				}
 				echo "</td>";
 				echo "<td class='back'>";
 
 				if ($raaka_aineiden_riitto < $tuoterivi["valmistusmaara"]) {
-					echo "<font class='error'>".t("Raaka-aineiden saldo ei riit‰")."!</font><br>";
-					echo "<input type='checkbox' name='valmistettavat_tuotteet[$formin_pointteri][hyvaksy]'>";
-					echo "<font class='errir'> ".t("Hyv‰ksy v‰kisin")."</font><br>";
+					echo "<font class='error'>".t("Raaka-aineiden saldo ei riit‰")."!</font>";
+					echo " <a data='{$toggle_counter}' href='#' class='raaka_aine_toggle'><img src='{$palvelin}pics/lullacons/info.png'></a>";
+					echo "<br>";
+					if ($toim != 'EXCEL') {
+						echo "<input type='checkbox' name='valmistettavat_tuotteet[$formin_pointteri][hyvaksy]'>";
+						echo "<font class='errir'> ".t("Hyv‰ksy v‰kisin")."</font><br>";
+					}
+				}
+
+				if ($toim == 'EXCEL') {
+					echo "<input type='hidden' class='exceliin' name='exceliin[{$tuoterivi['tuoteno']}]' value='".base64_encode(serialize($tuoterivi))."'>";
+					echo "<input type='checkbox' class='ei_exceliin'>";
+					echo "<font class='errir'> ".t("Ei valmisteta")."</font><br>";
 				}
 
 				echo "</td>";
@@ -805,7 +1057,7 @@
 				echo "<tr><td>".t("Valmistusm‰‰r‰")."	</td><td>{$tuoterivi['valmistusmaara']}		</td></tr>";
 				echo "</table>";
 
-				echo "</td><td colspan='8'>";
+				echo "</td><td colspan='14'>";
 
 				echo t("Reaalisaldo")." = ".t("Varastosaldo")." + ".t("Tilattu")." + ".t("Valmistuksessa")." - ".t("Varattu")." - ".t("Ennakkotilaukset")."<br>";
 				echo "{$tuoterivi["reaalisaldo"]} = {$tuoterivi["varastosaldo"]} + {$tuoterivi["tilattu"]} + {$tuoterivi["valmistuksessa"]} - {$tuoterivi["varattu"]} - {$tuoterivi["ennakko"]}<br><br>";
@@ -823,13 +1075,52 @@
 				echo "</td></tr>";
 
 				$formin_pointteri++;
+
+				$raaka_aineet = hae_raaka_aineet($tuoterivi['tuoteno'], (int) $lahde_varasto);
+
+				echo "<tr class='raaka_aineet_{$toggle_counter} raaka_aineet_hidden'>";
+				echo "<td colspan='18'>";
+
+				echo "<table>";
+				echo "<thead>";
+				echo "<th>".t('Tuotenumero')."</th>";
+				echo "<th>".t('Nimitys')."</th>";
+				echo "<th>".t('Saldo')."</th>";
+				echo "</thead>";
+				echo "<tbody>";
+				foreach ($raaka_aineet as $raaka_aine) {
+					echo "<tr class='aktiivi'>";
+					echo "<td>";
+					echo "<a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($raaka_aine["tuoteno"])."&lopetus=$lopetus'>".$raaka_aine['tuoteno'] . "</a>";
+					echo "</td>";
+
+					echo "<td>";
+					echo  $raaka_aine['nimitys'];
+					echo "</td>";
+
+					echo "<td>";
+					echo $raaka_aine['saldo'];
+					echo "</td>";
+					echo "</tr>";
+				}
+				echo "</tbody>";
+				echo "</table>";
+				
+				echo "</td>";
+				echo "</tr>";
 			}
 
 			echo "</table>";
 
 			echo "<br>";
-			echo "<input type='hidden' name='tee' value='TEE_VALMISTUKSET' />";
-			echo "<input type='submit' name='muodosta_valmistukset' value='".t('Muodosta valmistukset')."' />";
+			if ($toim == 'EXCEL') {
+				echo "<input type='hidden' name='tee' value='GENEROI_EXCEL' />";
+				echo "<input type='submit' name='generoi_excel' value='".t('Tulosta excel')."' />";
+			}
+			else {
+				echo "<input type='hidden' name='tee' value='TEE_VALMISTUKSET' />";
+				echo "<input type='submit' name='muodosta_valmistukset' value='".t('Muodosta valmistukset')."' />";
+			}
 			echo "<br><br>";
 
 			echo "</form>";
@@ -971,16 +1262,28 @@
 		echo "</td></tr>";
 
 		echo "<tr>";
-		echo "<th>".t("Alkup‰iv‰m‰‰r‰ (kk-vvvv)")."</th>";
+		echo "<th>".t('Ehdotetut valmistukset')."</th>";
 		echo "<td>";
+		echo "<select name='ehdotetut_valmistukset'>";
+		echo "<option value='tuotteittain'>".t('N‰yt‰ tuotteittain')."</option>";
+		echo "<option value='valmistuslinjoittain'>".t('N‰yt‰ valmistuslinjoittain')."</option>";
+		echo "</select>";
+		echo "</td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
+		echo "<td>";
+		echo "<input type='text' name='ppa1' value='$ppa1' size='5'>";
 		echo "<input type='text' name='kka1' value='$kka1' size='5'>";
 		echo "<input type='text' name='vva1' value='$vva1' size='5'>";
 		echo "</td>";
 		echo "</tr>";
 
 		echo "<tr>";
-		echo "<th>".t("Loppup‰iv‰m‰‰r‰ (kk-vvvv)")."</th>";
+		echo "<th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
 		echo "<td>";
+		echo "<input type='text' name='ppl1' value='$ppl1' size='5'>";
 		echo "<input type='text' name='kkl1' value='$kkl1' size='5'>";
 		echo "<input type='text' name='vvl1' value='$vvl1' size='5'>";
 		echo "</td>";

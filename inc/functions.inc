@@ -18911,6 +18911,46 @@ if (!function_exists('raaka_aineiden_riitto')) {
 	}
 }
 
+if (!function_exists('hae_raaka_aineet')) {
+	function hae_raaka_aineet($tuoteno, $varasto = 0) {
+		global $kukarow, $yhtiorow;
+
+		if ($varasto != 0) {
+			$varasto_join_lisa = "
+							JOIN tuotepaikat
+							ON ( tuotepaikat.yhtio = tuote.yhtio
+								AND tuotepaikat.tuoteno = tuote.tuoteno )
+							JOIN varastopaikat
+							ON ( varastopaikat.yhtio = tuotepaikat.yhtio
+								AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+								AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+								AND varastopaikat.tunnus in ($varasto)";
+		}
+
+		$query = "	SELECT tuote.*
+					FROM tuoteperhe
+					JOIN tuote
+					ON ( tuote.yhtio = tuoteperhe.yhtio
+						AND tuote.tuoteno = tuoteperhe.tuoteno
+						AND tuote.ei_saldoa = '' )
+					$varasto_join_lisa
+					WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
+					AND tuoteperhe.isatuoteno = '{$tuoteno}'
+					AND tuoteperhe.tyyppi = 'R'";
+		$result = pupe_query($query);
+
+		$raaka_aineet = array();
+		while($raaka_aine = mysql_fetch_assoc($result)) {
+			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($raaka_aine["tuoteno"], '', $varasto);
+			$raaka_aine['saldo'] = $myytavissa;
+			
+			$raaka_aineet[] = $raaka_aine;
+		}
+
+		return $raaka_aineet;
+	}
+}
+
 if (!function_exists("mod10_tarkiste")) {
 	function mod10_tarkiste ($numero) {
 
@@ -21107,6 +21147,11 @@ if (!function_exists('_xls_jarjestetty_rivit')) {
 			foreach($header_values as $column_name => $value) {
 				if (!stristr($column_name, 'tunnus') and isset($rivi[$column_name]) and !in_array($column_name, $sulje_pois)) {
 					_kirjoita_solu($xls, $column_name, $rivi[$column_name], $rivi_numero, $sarake_numero, $force_to_string);
+				}
+				else if (!isset($rivi[$column_name])) {
+					//jos aineisto on viallinen,
+					//lis‰t‰‰n tyhj‰ solu jotta solujen j‰rjestys pysyy oikeana
+					_kirjoita_solu($xls, $column_name, '', $rivi_numero, $sarake_numero, $force_to_string);
 				}
 			}
 			$rivi_numero++;

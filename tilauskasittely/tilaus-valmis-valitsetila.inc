@@ -100,6 +100,10 @@
 		}
 	}
 
+	// Jos menn‰‰n miinukselle ni j‰‰d‰‰n nollaan?
+	$ei_kerattavia = $ei_kerattavia < 0 ? 0 : $ei_kerattavia;
+	$kerattavia = $kerattavia < 0 ? 0 : $kerattavia;
+
 	/*
 	echo "puute_jt_kerataanko: $yhtiorow[puute_jt_kerataanko]<br>";
 	echo "kerataanko_jos_vain_puute_jt: $yhtiorow[kerataanko_jos_vain_puute_jt]<br>";

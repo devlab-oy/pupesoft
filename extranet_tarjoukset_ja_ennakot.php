@@ -661,37 +661,10 @@ function lisaa_ennakkorivi($params) {
 	$laskurow = hae_lasku($otunnus);
 	$laskurow["tila"] = 'N';
 
-	$hinta = 0.000001;
-	$alennus = 100;	
-	$netto = '';
-
 	if ($toim == 'EXTENNAKKO' and !empty($params['syotettyhinta'])) {
 		$hinta = $params['syotettyhinta'];
 		$alennus = 0;
 		$netto = 'N';
-	}
-	elseif ($toim == 'EXTENNAKKO') {
-		// Haetaan tuotteen ennakkohinta kun kyseessä on extennakkotilaus
-		$query = "  SELECT selite AS ennakko_pros_a
-					FROM tuotteen_avainsanat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tuoteno = '{$tuoteno}'
-					AND laji = 'parametri_ennakkoale_a'
-					AND selite != ''
-					ORDER BY ennakko_pros_a DESC
-					LIMIT 1";
-		$result = pupe_query($query);
-
-		if (mysql_num_rows($result) == 1) {
-			$tuotteen_hinta = mysql_fetch_assoc($result);
-			$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
-			$alennus = 0;
-			$netto = 'N';
-		}
-	}
-	else {
-		// Tarjoukselle tila T
-		$laskurow["tila"] = 'T';
 	}
 
 	$perhekielto = '';

@@ -4160,15 +4160,6 @@ if ($tee == '') {
 				$trow["alv"] = $laskurow["alv"];
 			}
 
-			// Jos ollaan tekemässä Extranet-ennakkoa ja käyttäjä ei ole syöttänyt hintaa, katsotaan löytyykö tuotteelle ennakkotilaus-alennus
-			if ($toim == 'EXTENNAKKO' and $hinta == '') {
-				$hinta = laske_ext_ennakko_hinta($trow);
-
-				if ($hinta != '') {
-					$netto = 'N';
-				}
-			}
-
 			if ($tuoteno != '' and $kpl != 0) {
 				require ('lisaarivi.inc');
 			}

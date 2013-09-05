@@ -259,14 +259,6 @@
 						$varataan_saldoa = "EI";
 					}
 
-					if ($toim_kutsu == 'EXTENNAKKO') {
-						$hinta = laske_ext_ennakko_hinta($trow);
-
-						if ($hinta != '') {
-							$netto = 'N';
-						}
-					}
-
 					// jos meillä on ostoskori muuttujassa numero, niin halutaan lisätä tuotteita siihen ostoskoriin
 					if (is_numeric($ostoskori)) {
 						lisaa_ostoskoriin ($ostoskori, $laskurow["liitostunnus"], $tuoteno, $kpl);

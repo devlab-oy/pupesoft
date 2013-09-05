@@ -23080,7 +23080,9 @@ if (!function_exists('laske_ext_ennakko_hinta')) {
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tuoteno = '{$trow['tuoteno']}'
 					AND laji = 'parametri_ennakkoale_a'
-					AND selite != ''";
+					AND selite != ''
+					ORDER BY ennakko_pros_a DESC
+					LIMIT 1";
 		$result = pupe_query($query);
 
 		$hinta = "";

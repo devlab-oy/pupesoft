@@ -28,6 +28,11 @@
 		exit;
 	}
 
+	if (isset($livesearch_tee) and $livesearch_tee == "TUOTERYHMAHAKU") {
+		livesearch_tuoteryhmahaku();
+		exit;
+	}
+
 	//Jotta määritelty rajattu näkymä olisi myös käyttöoikeudellisesti tiukka
 	$aputoim = $toim;
 	$toimi_array = explode('!!!', $toim);

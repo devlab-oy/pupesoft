@@ -233,7 +233,7 @@
 						$kommentti	= trim($rivi[$ind_Kommentti]);
 
 						if ($toim == "MYYNTITILI") {
-							echo "KISSA";
+							// var- ja netto-kentän sisältöä ei tarkisteta myyntitilin rivien syötössä
 						}
 						else if (($var!='') and ($var!='P') and ($var!='H') and ($var!='J')) {
 							echo t("Väärä arvo kentässä var! Sallitut arvot ovat: P, J ja H").". ".t("Rivillä").": $rivilask1. '$var'<br>";

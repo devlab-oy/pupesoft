@@ -61,12 +61,12 @@
 	if ($tee == "W") {
 
 		if ($thyllyalue == "" or $thyllynro == "" or $thyllyvali == "" or $thyllytaso == "") {
-			echo "<font class='error'>VIRHE: Syötetty varastopaikka ei ollut täydellinen</font><br>";
+			echo "<font class='error'>".t("VIRHE: Syötetty varastopaikka ei ollut täydellinen")."</font><br>";
 			$tee = "V";
 		}
 
 		if (kuuluukovarastoon($thyllyalue, $thyllynro) == 0) {
-			echo "<font class='error'>VIRHE: Syötetty varastopaikka ei kuulu mihinkään varastoon ($ahyllyalue-$ahyllynro)</font><br>";
+			echo "<font class='error'>".t("VIRHE: Syötetty varastopaikka ei kuulu mihinkään varastoon")." ($ahyllyalue-$ahyllynro)</font><br>";
 			$tee = "V";
 		}
 

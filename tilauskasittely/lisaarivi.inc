@@ -70,18 +70,14 @@
 		// Tarkistetaan onko hinta annettu käsin, jos on niin käytetään sitä, muussa tapauksessa haetaan ennakkohinta
 		$hinta = (!isset($hinta)) ? laske_ext_ennakko_hinta($trow) : $hinta;
 
-		if ($hinta != '') {
-			$netto = 'N';
-			$alennus = 0;
-		}
-		elseif ($kutsuja == "extranet_tarjoukset_ja_ennakot.php") {
+		if ($kutsuja == "extranet_tarjoukset_ja_ennakot.php" and $hinta == '') {
 			$hinta = 0.000001;
-			$alennus = 100;	
+			$ale1 = 100;	
 			$netto = '';
 		}
 		else {
-			$alennus = '';	
 			$netto = '';
+			$ale1 = (isset($ale1)) ? $ale1 : 0;
 		}
 	}
 	

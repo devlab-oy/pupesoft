@@ -10,11 +10,16 @@ if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
 if(!isset($errors)) $errors = array();
+if (!isset($viivakoodi)) $viivakoodi = "";
+if (!isset($_viivakoodi)) $_viivakoodi = "";
+if (!isset($orig_tilausten_lukumaara)) $orig_tilausten_lukumaara = 0;
 
 $sort_by_direction_tuoteno 		= (!isset($sort_by_direction_tuoteno) or $sort_by_direction_tuoteno == 'asc') ? 'desc' : 'asc';
 $sort_by_direction_otunnus 		= (!isset($sort_by_direction_otunnus) or $sort_by_direction_otunnus == 'asc') ? 'desc' : 'asc';
 $sort_by_direction_sorttaus_kpl	= (!isset($sort_by_direction_sorttaus_kpl) or $sort_by_direction_sorttaus_kpl == 'asc') ? 'desc' : 'asc';
 $sort_by_direction_hylly		= (!isset($sort_by_direction_hylly) or $sort_by_direction_hylly == 'asc') ? 'desc' : 'asc';
+
+$viivakoodi = (isset($_viivakoodi) and $_viivakoodi != "") ? $_viivakoodi : $viivakoodi;
 
 # Joku parametri tarvii olla setattu.
 if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
@@ -48,6 +53,8 @@ else {
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=ostotilaus.php'>";
 	exit();
 }
+
+if ($_viivakoodi == $viivakoodi) $viivakoodi = "";
 
 # Tarkistetaan onko k‰ytt‰j‰ll‰ kesken saapumista
 $keskeneraiset_query = "SELECT kuka.kesken FROM lasku
@@ -112,6 +119,8 @@ $result = pupe_query($query);
 $tilausten_lukumaara = mysql_num_rows($result);
 $tilaukset = mysql_fetch_assoc($result);
 
+if ($orig_tilausten_lukumaara == 0) $orig_tilausten_lukumaara = $tilausten_lukumaara;
+
 # Submit
 if (isset($submit)) {
 	switch($submit) {
@@ -145,7 +154,7 @@ if ($tilausten_lukumaara == 0) {
 }
 
 # Jos vain yksi osuma, menn‰‰n suoraan hyllytykseen;
-if ($tilausten_lukumaara == 1) {
+if ($tilausten_lukumaara == 1 and $_viivakoodi == "") {
 
 	$url_array['tilausrivi'] = $tilaukset['tunnus'];
 	$url_array['ostotilaus'] = empty($ostotilaus) ? $tilaukset['otunnus'] : $ostotilaus;
@@ -173,10 +182,10 @@ echo "<div class='header'>
 
 echo "<div class='main'>
 
-<form name='viivakoodiformi' method='post' action='?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}' id='viivakoodiformi'>
+<form name='viivakoodiformi' method='post' action='?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}' id='viivakoodiformi'>
 	<table class='search'>
 		<tr>
-			<th>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' /></th>
+			<th>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='_viivakoodi' value='' /></th>
 			<td><button id='valitse_nappi' value='viivakoodi' class='button' onclick='submit();'>",t("Etsi"),"</button></td>
 		</tr>
 	</table>
@@ -187,7 +196,7 @@ echo "<div class='main'>
 <table>
 <tr>";
 
-$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&saapuminen={$saapuminen}&tuotenumero=".urlencode($tuotenumero);
+$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&_viivakoodi={$_viivakoodi}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&saapuminen={$saapuminen}&tuotenumero=".urlencode($tuotenumero);
 
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
 	echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_otunnus}'>",t("Ostotilaus"), "</a>&nbsp;";
@@ -214,6 +223,9 @@ while($row = mysql_fetch_assoc($result)) {
 
 	# Jos rivi on jo kohdistettu eri saapumiselle
 	if ($row['uusiotunnus'] != 0) $saapuminen = $row['uusiotunnus'];
+
+	if ($orig_tilausten_lukumaara != $tilausten_lukumaara) $tilausten_lukumaara = $orig_tilausten_lukumaara;
+
 	$url = http_build_query(
 		array(
 			'saapuminen' => $saapuminen,
@@ -258,6 +270,15 @@ echo "</div>";
 
 echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
 echo "<script type='text/javascript'>
+
+	$(document).ready(function() {
+		$('#viivakoodi').on('keyup', function() {
+			// Autosubmit vain jos on syˆtetty tarpeeksi pitk‰ viivakoodi
+			if ($('#viivakoodi').val().length > 8) {
+				document.getElementById('valitse_nappi').click();
+			}
+		});
+	});
 
 	function doFocus() {
         var focusElementId = 'viivakoodi'

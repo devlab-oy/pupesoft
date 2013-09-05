@@ -1095,10 +1095,12 @@
 
 							list($V_hinta, $V_netto, $V_ale, $V_alehinta_alv, $V_alehinta_val) = alehinta($laskurow, $tvrow, $row['tilkpl'], '', '', '');
 
-							 $vastaavat_table .= "<tr class='aktiivi'>"
+							$myytavissa_font = $vmyytavissa < 1 ? "error" : "ok";
+
+							$vastaavat_table .= "<tr class='aktiivi'>"
 							 			."<td>{$_tuote["tuoteno"]} $vaihtoehtoinen</td>"
 										."<td>{$tvrow["nimitys"]}</td>"
-							 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
+							 			."<td align='right'><font class='{$myytavissa_font}'>".sprintf("%.2f", $vmyytavissa)."</font></td>"
 							 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>";
 
 

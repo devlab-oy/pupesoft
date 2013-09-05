@@ -123,6 +123,8 @@ if ($orig_tilausten_lukumaara == 0) $orig_tilausten_lukumaara = $tilausten_lukum
 // Jos etsitään viivakoodilla ja kyseistä tuotetta ei löydy esim. ostotilaukselta, tehdään uusi haku ilman viivakoodia
 if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") and count($params) > 1) {
 
+	$errors[] = t("Viivakoodilla %s ei löytynyt tuotetta", '', $_viivakoodi)."<br />";
+
 	unset($params['viivakoodi']);
 
 	$query_lisa = " AND ".implode($params, " AND ");

@@ -180,9 +180,11 @@ echo "<div class='header'>
 	<button onclick='window.location.href=\"ostotilaus.php{$url_lisa}\"' class='button left'><img src='back2.png'></button>
 	<h1>",t("USEITA TILAUKSIA"), "</h1></div>";
 
+$viivakoodi_formi_urli = "?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}";
+
 echo "<div class='main'>
 
-<form name='viivakoodiformi' method='post' action='?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}' id='viivakoodiformi'>
+<form name='viivakoodiformi' method='post' action='{$viivakoodi_formi_urli}' id='viivakoodiformi'>
 	<table class='search'>
 		<tr>
 			<th>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='_viivakoodi' value='' /></th>

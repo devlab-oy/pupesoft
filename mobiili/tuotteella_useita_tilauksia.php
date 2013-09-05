@@ -21,10 +21,10 @@ $sort_by_direction_hylly		= (!isset($sort_by_direction_hylly) or $sort_by_direct
 
 $viivakoodi = (isset($_viivakoodi) and $_viivakoodi != "") ? $_viivakoodi : $viivakoodi;
 
+$params = array();
+
 # Joku parametri tarvii olla setattu.
 if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
-
-	$params = array();
 
 	if (strpos($tuotenumero, "%") !== FALSE) $tuotenumero = urldecode($tuotenumero);
 
@@ -117,9 +117,48 @@ $query = "	SELECT
 		";
 $result = pupe_query($query);
 $tilausten_lukumaara = mysql_num_rows($result);
-$tilaukset = mysql_fetch_assoc($result);
 
 if ($orig_tilausten_lukumaara == 0) $orig_tilausten_lukumaara = $tilausten_lukumaara;
+
+// Jos etsitään viivakoodilla ja kyseistä tuotetta ei löydy esim. ostotilaukselta, tehdään uusi haku ilman viivakoodia
+if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") and count($params) > 1) {
+
+	unset($params['viivakoodi']);
+
+	$query_lisa = " AND ".implode($params, " AND ");
+
+	$query = "	SELECT
+				lasku.tunnus as ostotilaus,
+				lasku.liitostunnus,
+				tilausrivi.tunnus,
+				tilausrivi.otunnus,
+				tilausrivi.tuoteno,
+				tilausrivi.varattu,
+				tilausrivi.kpl,
+				(tilausrivi.varattu + tilausrivi.kpl) as sorttaus_kpl,
+				tilausrivi.tilkpl,
+				tilausrivi.uusiotunnus,
+				concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
+				tuotteen_toimittajat.tuotekerroin,
+				tuotteen_toimittajat.liitostunnus
+				FROM lasku
+				JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
+					AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
+				JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
+				JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
+					AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+					AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
+				WHERE lasku.tila = 'O'
+				AND lasku.alatila = 'A'
+				AND lasku.yhtio='{$kukarow['yhtio']}'
+				{$query_lisa}
+				ORDER BY {$orderby} {$ascdesc}
+			";
+	$result = pupe_query($query);
+	$tilausten_lukumaara = mysql_num_rows($result);
+}
+
+$tilaukset = mysql_fetch_assoc($result);
 
 # Submit
 if (isset($submit)) {

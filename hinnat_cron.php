@@ -244,6 +244,17 @@
 		$tuoteres = pupe_query($query);
 		$tuoterow = mysql_fetch_assoc($tuoteres);
 
+		// alvillinen -> alviton
+		// alv pois
+		if ($yhtiorow['alv_kasittely'] == '' and $mihin_yhtiorow['alv_kasittely'] == 'o') {
+			$tuoterow['myyntihinta'] = round($tuoterow['myyntihinta'] / (1+$tuoterow['alv']/100), $mihin_yhtiorow['hintapyoristys']);
+		}
+		// alviton -> alvillinen
+		// lisätään alv
+		elseif ($yhtiorow['alv_kasittely'] == 'o' and $mihin_yhtiorow['alv_kasittely'] == '') {
+			$tuoterow['myyntihinta'] = round($tuoterow['myyntihinta'] * (1+$tuoterow['alv']/100), $mihin_yhtiorow['hintapyoristys']);
+		}
+
 		// Päivitetään myyntihinta $mihin_yhtio
 		$query = "	UPDATE tuote SET
 					myyntihinta = '{$tuoterow['myyntihinta']}'

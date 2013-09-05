@@ -43,7 +43,7 @@
 	$lock_params = array(
 	    "locktime" => 5400,
 	);
-	
+
 	// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 	pupesoft_flock($lock_params);
 
@@ -53,6 +53,7 @@
 	$mihin_yhtion_asiakkaan_tunnus = mysql_escape_string(trim($argv[4]));
 
 	$yhtiorow = hae_yhtion_parametrit($mista_yhtio);
+	$mihin_yhtiorow = hae_yhtion_parametrit($mihin_yhtio);
 
 	// Haetaan kukarow
 	$query = "	SELECT *

@@ -68,9 +68,9 @@
 
 	if ($toim == 'EXTENNAKKO' or $toim_kutsu == 'EXTENNAKKO') {
 		// Tarkistetaan onko hinta annettu k‰sin, jos on niin k‰ytet‰‰n sit‰, muussa tapauksessa haetaan ennakkohinta
-		$hinta = (!isset($hinta)) ? laske_ext_ennakko_hinta($trow) : $hinta;
+		$hinta = (empty($hinta)) ? laske_ext_ennakko_hinta($trow) : $hinta;
 
-		if ($kutsuja == "extranet_tarjoukset_ja_ennakot.php" and $hinta == '') {
+		if (!empty($kukarow['extranet']) and $hinta == '') {
 			$hinta = 0.000001;
 			$ale1 = 100;	
 			$netto = '';

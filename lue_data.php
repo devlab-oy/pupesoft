@@ -1660,11 +1660,11 @@ if ($kasitellaan_tiedosto) {
 							elseif ($table_mysql=='tuotepaikat' and $otsikko == 'OLETUS' and $taulunrivit[$taulu][$eriviindex][$r] == 'XVAIHDA') {
 								//vaihdetaan t‰m‰ oletukseksi
 								$taulunrivit[$taulu][$eriviindex][$r] = "X"; // pakotetaan oletus
-								//  Selvitet‰‰n vanha oletuspaikka 
+								//  Selvitet‰‰n vanha oletuspaikka
 								$vanha_oletus_query = "	SELECT *
 														FROM tuotepaikat
-														WHERE tuoteno = '$tuoteno' 
-														and yhtio = '$kukarow[yhtio]' 
+														WHERE tuoteno = '$tuoteno'
+														and yhtio = '$kukarow[yhtio]'
 														and oletus != ''";
 								$oletusresult = pupe_query($vanha_oletus_query);
 								$oletusrow = mysql_fetch_assoc($oletusresult);
@@ -1719,12 +1719,12 @@ if ($kasitellaan_tiedosto) {
 							if ($table_mysql == 'tuotepaikat' and $otsikko == 'OLETUS' and $taulunrivit[$taulu][$eriviindex][$r] == 'XVAIHDA') {
 								//vaihdetaan t‰m‰ oletukseksi
 								$taulunrivit[$taulu][$eriviindex][$r] = "X"; // pakotetaan oletus
-								
-								//  Selvitet‰‰n vanha oletuspaikka 
+
+								//  Selvitet‰‰n vanha oletuspaikka
 								$vanha_oletus_query = "	SELECT *
 														FROM tuotepaikat
-														WHERE tuoteno = '$tuoteno' 
-														and yhtio = '$kukarow[yhtio]' 
+														WHERE tuoteno = '$tuoteno'
+														and yhtio = '$kukarow[yhtio]'
 														and oletus != ''";
 								$oletusresult = pupe_query($vanha_oletus_query);
 								$oletusrow = mysql_fetch_assoc($oletusresult);
@@ -1855,6 +1855,10 @@ if ($kasitellaan_tiedosto) {
 
 				if (substr($taulu, 0, 11) == 'puun_alkio_' and $taulunrivit[$taulu][$eriviindex][$postoiminto] != 'POISTA') {
 					$query .= " , laji = '{$table_tarkenne}' ";
+				}
+
+				if ($table_mysql == 'tuotteen_toimittajat' and $taulunrivit[$taulu][$eriviindex][$postoiminto] != 'POISTA') {
+					$query .= " , tehdas_saldo_paivitetty = now() ";
 				}
 
 				// Ollaan lis‰‰m‰ss‰ tietuetta, katsotaan ett‰ on kaikki oletukset MySQL aliaksista

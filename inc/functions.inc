@@ -10695,7 +10695,6 @@ if (!function_exists("hae_kukarow")) {
 	}
 }
 
-
 if (!function_exists("hae_yhtion_parametrit")) {
 	function hae_yhtion_parametrit($yhtio) {
 		global $kukarow, $konserni_yhtiot, $konsernivarasto_yhtiot;

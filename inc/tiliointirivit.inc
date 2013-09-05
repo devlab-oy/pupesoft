@@ -217,6 +217,17 @@
 
 		echo "<input type='text' name='selite' value = '$selite'>";
 
+		if ($trow['tila'] == 'X') {
+			echo "<div style='float:right;'><a href=\"javascript:toggleGroup('eee')\"><img src='{$palvelin2}pics/lullacons/user-option-add.png'></a></div>";
+
+			if ($liitostunnus > 0 or $asiakastoimittajavirhe) {
+				echo "<div id='eee' style='display:block'>";
+			}
+			else {
+				echo "<div id='eee' style='display:none'>";
+			}
+		}
+
 		if ($trow['tila'] == 'X' and trim($liitos) != '' and $liitostunnus > 0) {
 
 			if ($liitos == "A") {
@@ -236,10 +247,10 @@
 			$liitos_nimi_res = pupe_query($query);
 			$liitos_nimi_row = mysql_fetch_assoc($liitos_nimi_res);
 
-			echo "<br />".t("Valittu")." ".t(ucwords($taulu)),": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}";
+			echo "<br />".t("Valittu")." ".t(ucwords($taulu)),": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}<br>";
 		}
 
-		if ($trow['tila'] == 'X' and ($liitostunnus > 0 or $asiakastoimittajavirhe)) {
+		if ($trow['tila'] == 'X') {
 			$tiliasiakasid = $tilitoimittajaid = "";
 
 			if ($liitos == "A" and $liitostunnus > 0) {
@@ -249,9 +260,10 @@
 				$tilitoimittajaid = $liitostunnus;
 			}
 
-			echo "<br><br>";
-			echo t("Asiakas").":     ".livesearch_kentta("uusi", "ASIAKASHAKU", "tiliasiakasid", 170, $tiliasiakasid, "EISUBMIT");
+			echo "<br>";
+			echo t("Asiakas").":    ".livesearch_kentta("uusi", "ASIAKASHAKU", "tiliasiakasid", 170, $tiliasiakasid, "EISUBMIT");
 			echo t("Toimittaja").": ".livesearch_kentta("uusi", "TOIMITTAJAHAKU", "tilitoimittajaid", 170, $tilitoimittajaid, "EISUBMIT");
+			echo "</div>";
 		}
 
 		echo "</td>";

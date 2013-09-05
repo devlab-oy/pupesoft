@@ -23071,6 +23071,30 @@ if (!function_exists("hae_viivakoodilla")) {
 	}
 }
 
+if (!function_exists('laske_ext_ennakko_hinta')) {
+	function laske_ext_ennakko_hinta($trow) {
+		global $kukarow, $yhtiorow;
+
+		$query = "  SELECT selite AS ennakko_pros_a
+					FROM tuotteen_avainsanat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$trow['tuoteno']}'
+					AND laji = 'parametri_ennakkoale_a'
+					AND selite != ''
+					ORDER BY ennakko_pros_a DESC
+					LIMIT 1";
+		$result = pupe_query($query);
+
+		$hinta = "";
+		if (mysql_num_rows($result) == 1) {
+			$tuotteen_hinta = mysql_fetch_assoc($result);
+			$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
+		}
+
+		return $hinta;
+	}
+}
+
 if (!function_exists("korvaavat_kiellot")) {
 	function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
 		global $kukarow;

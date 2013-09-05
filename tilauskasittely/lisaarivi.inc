@@ -66,6 +66,21 @@
 	unset($korvaavan_hinta_ylaraja_halvin_ale);
 	unset($korvaavan_hinta_ylaraja_halvin_netto);
 
+	if ($toim == 'EXTENNAKKO' or $toim_kutsu == 'EXTENNAKKO') {
+		// Tarkistetaan onko hinta annettu k‰sin, jos on niin k‰ytet‰‰n sit‰, muussa tapauksessa haetaan ennakkohinta
+		$hinta = (empty($hinta)) ? laske_ext_ennakko_hinta($trow) : $hinta;
+
+		if (!empty($kukarow['extranet']) and $hinta == '') {
+			$hinta = 0.000001;
+			$ale1 = 100;	
+			$netto = '';
+		}
+		else {
+			$netto = '';
+			$ale1 = (isset($ale1)) ? $ale1 : 0;
+		}
+	}
+	
 	if (!function_exists("tuoteperhe_reku")) {
 		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet, $perhelisa, $kieltolisa, $lisaarivi_debug) {
 			global $yhtiorow, $kukarow;

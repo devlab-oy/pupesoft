@@ -256,7 +256,7 @@
 			if ($liitos == "A" and $liitostunnus > 0) {
 				$tiliasiakasid = $liitostunnus;
 			}
-			elseif ($liitos == "A" and $liitostunnus > 0) {
+			elseif ($liitos == "T" and $liitostunnus > 0) {
 				$tilitoimittajaid = $liitostunnus;
 			}
 

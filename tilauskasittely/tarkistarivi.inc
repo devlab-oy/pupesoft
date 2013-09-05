@@ -1097,7 +1097,7 @@
 
 							$myytavissa_font = $vmyytavissa < 1 ? "error" : "ok";
 
-							$vastaavat_table .= "<tr class='aktiivi'>"
+							$vastaavat_table .= "<tr class='spec aktiivi'>"
 							 			."<td>{$_tuote["tuoteno"]} $vaihtoehtoinen</td>"
 										."<td>{$tvrow["nimitys"]}</td>"
 							 			."<td align='right'><font class='{$myytavissa_font}'>".sprintf("%.2f", $vmyytavissa)."</font></td>"
@@ -1184,9 +1184,10 @@
 								$vastaavat_table .= "</td>";
 							}
 
+							$vastaavat_table .= "<td align='left'>";
+
 							if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] != 'A' or (strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"]))) {
-								 	$vastaavat_table .= "<td align='left'>
-												<form method='post' name='jalkitoimita'>
+								$vastaavat_table .= "<form method='post' name='jalkitoimita'>
 								 			   	<input type='hidden' name='toim' 			value = '$toim'>
 								 			   	<input type='hidden' name='lopetus' 		value = '$lopetus'>
 								 			   	<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
@@ -1199,8 +1200,10 @@
 								 			   	<input type='hidden' name='tila' 			value = 'MUUTA'>
 								 			   	<input type='hidden' name='tapa' 			value = 'MYYVASTAAVA'>
 								 			   	<input type='Submit' value='".t("Tilaa tuote")."'>
-								 			   	</form></td></tr>";
+								 			   	</form>";
 							}
+
+							$vastaavat_table .= "</td></tr>";
 						}
 					}
 

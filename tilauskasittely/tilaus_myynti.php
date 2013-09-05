@@ -3831,8 +3831,18 @@ if ($tee == '') {
 
 	if ($kukarow["extranet"] == "" and $tila == 'MUUTAKAIKKI') {
 		if (!empty($tilausnumero)) {
+
+			// Riippuen yhtiön parametristä, käsitellään jt eri tavalla
+			if ($yhtiorow["varaako_jt_saldoa"] == "") {
+				$updatelisa = "jt = if(var='P',tilkpl,if(var='J',jt,varattu)), varattu = 0,";
+			}
+			else {
+				$updatelisa = "varattu = if(var='P',tilkpl,varattu),";
+			}
+
 			$query = "	UPDATE tilausrivi
-						SET var = 'J',
+						SET $updatelisa
+						var = 'J',
 						kerayspvm = '".date('Y-m-d', strtotime('now + 3 month'))."'
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND otunnus = '{$tilausnumero}'";

@@ -57,6 +57,7 @@ function bind_tarkista_tehtaan_saldot_click() {
 		$id = $(this).attr('id');
 		$otunnus = $('#tilausnumero').val();
 		$tuoteno = $('#'+$id+'_tuoteno').val();
+		$myytavissa = $('#'+$id+'_myytavissa').val();
 
 		$cust_id = $('#'+$id+'_custid').val();
 		$username = $('#'+$id+'_username').val();
@@ -71,6 +72,7 @@ function bind_tarkista_tehtaan_saldot_click() {
 			id: $id,
 			otunnus: $otunnus,
 			tuoteno: $tuoteno,
+			myytavissa: $myytavissa,
 			cust_id: $cust_id,
 			username: $username,
 			password: $password,

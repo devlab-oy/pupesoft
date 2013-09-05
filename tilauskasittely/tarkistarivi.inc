@@ -1143,6 +1143,7 @@
 										 	$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_username' value='{$yta_chk_row['tarkenne_2']}' />";
 											$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_password' value='{$yta_chk_row['tarkenne_3']}' />";
 											$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tehdas_saldo_row['tt_tunnus']}' />";
+											$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_myytavissa' value='{$vmyytavissa}' />";
 								 		}
 								 		else {
 								 			$tehdas_saldo_row['sahkoinen_tilausliitanta'] = '';

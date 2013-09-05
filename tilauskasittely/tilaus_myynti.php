@@ -23,6 +23,7 @@ if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot')
 		$tunnus = (int) $id;
 		$otunnus = (int) $otunnus;
 		$tuoteno = (int) $tuoteno;
+		$myytavissa = $myytavissa;
 		$cust_id = $cust_id;
 		$username = $username;
 		$password = $password;
@@ -6058,7 +6059,7 @@ if ($tee == '') {
 						$classvar = $class;
 					}
 				}
-				
+
 				if ($row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and !empty($yhtiorow['jt_automatiikka'])) {
 					$var_temp = $row['var'] . " - ".t("Muiden mukana");
 				}
@@ -7459,7 +7460,7 @@ if ($tee == '') {
 							$jysum = $arvo;
 						}
 
-						
+
 						if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
 							echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",100*$kate_eieri/($kotiarvo_eieri-$ostot_eieri))."' Style='text-align:right' $state></td>";
 

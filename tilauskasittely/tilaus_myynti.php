@@ -22,8 +22,8 @@ if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot')
 		$hae = 'tarkista_tehtaan_saldot';
 		$tunnus = (int) $id;
 		$otunnus = (int) $otunnus;
-		$tuoteno = (int) $tuoteno;
-		$myytavissa = $myytavissa;
+		$tuoteno = $tuoteno;
+		$myytavissa = (int) $myytavissa;
 		$cust_id = $cust_id;
 		$username = $username;
 		$password = $password;

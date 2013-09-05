@@ -118,10 +118,10 @@ class Edi {
 				$alvprosentti = $_item['tax_percent'];
 
 				// Verollinen rivihinta
-				$rivihinta_verollinen = ($verollinen_hinta * $kpl) * (1 - $alennusprosentti / 100);
+				$rivihinta_verollinen = round(($verollinen_hinta * $kpl) * (1 - $alennusprosentti / 100), 2);
 
 				// Veroton rivihinta
-				$rivihinta_veroton = ($veroton_hinta * $kpl) * (1 - $alennusprosentti / 100);
+				$rivihinta_veroton = round(($veroton_hinta * $kpl) * (1 - $alennusprosentti / 100), 2);
 
 	   			$edi_order .= "*RS OSTOTILRIV $i\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_NRO:".$order['increment_id']."\n";

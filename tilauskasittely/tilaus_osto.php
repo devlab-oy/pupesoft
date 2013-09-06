@@ -1656,19 +1656,24 @@
 			echo "<br><br><table width='100%'><tr>";
 
 			if ($rivienmaara > 0 and $laskurow["liitostunnus"] != '' and $tilausok == 0) {
-					echo "	<td class='back'>
-							<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
-							<input type='hidden' name='toim' 				value = '$toim'>
-							<input type='hidden' name='lopetus' 			value = '$lopetus'>
-							<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
-							<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
-							<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
-							<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
-							<input type='hidden' name='toimittajaid' 		value = '$laskurow[liitostunnus]'>
-							<input type='hidden' name='tee' 				value = 'valmis'>
-							<input type='Submit' value='".t("Tilaus valmis")."' onclick='return tarkasta_ostotilauksen_tilausrivien_toimittajien_saldot({$tilausnumero}, \"".t('Tuotteen')." *tuote* ".t('Varastosaldo on: *kpl*')."\")'>
-							</form>
-							</td>";
+				
+				$saldo_tarkistus_onclick = "";
+				if ($yhtiorow['ostotilauksen_toimittajien_saldo_tarkistus'] == 'K') {
+					$saldo_tarkistus_onclick = "onclick='return tarkasta_ostotilauksen_tilausrivien_toimittajien_saldot({$tilausnumero}, \"".t('Tuotteen')." *tuote* ".t('Varastosaldo on: *kpl*')."\")'";
+				}
+				echo "	<td class='back'>
+						<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
+						<input type='hidden' name='toim' 				value = '$toim'>
+						<input type='hidden' name='lopetus' 			value = '$lopetus'>
+						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+						<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+						<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
+						<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+						<input type='hidden' name='toimittajaid' 		value = '$laskurow[liitostunnus]'>
+						<input type='hidden' name='tee' 				value = 'valmis'>
+						<input type='Submit' value='".t("Tilaus valmis")."' {$saldo_tarkistus_onclick}>
+						</form>
+						</td>";
 
 				if ($toim != "HAAMU") {
 					echo "	<td class='back''>

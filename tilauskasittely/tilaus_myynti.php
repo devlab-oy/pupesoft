@@ -3630,10 +3630,27 @@ if ($tee == '') {
 				$result = pupe_query($query);
 			}
 
-			// Poistetaan muokattava tilausrivi
-			$query = "	DELETE FROM tilausrivi
-						WHERE tunnus = '$rivitunnus'";
-			$result = pupe_query($query);
+			if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and !empty($tilausrivi['vanha_otunnus']) and $tilausrivi['vanha_otunnus'] != $tilausrivi['otunnus'] and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $yhtiorow['jt_automatiikka_mitatoi_tilaus'] == 'E') {
+
+				$jt_saldo_lisa = $yhtiorow["varaako_jt_saldoa"] == "" ? ", jt = varattu, varattu = 0 " : '';
+
+				// riviä poistettaessa laitetaan jt-rivi takaisin omalle tilaukselle
+				$query = "	UPDATE tilausrivi SET
+							otunnus = '{$tilausrivi['vanha_otunnus']}',
+							var = 'J'
+							{$jt_saldo_lisa}
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$tilausrivi['tunnus']}'";
+				$jt_rivi_res = pupe_query($query);
+
+				echo "<font class='message'>",t("Jälkitoimitus palautettiin tilaukselle")," {$tilausrivi['vanha_otunnus']}</font><br /><br />";
+			}
+			else {
+				// Poistetaan muokattava tilausrivi
+				$query = "	DELETE FROM tilausrivi
+							WHERE tunnus = '$rivitunnus'";
+				$result = pupe_query($query);
+			}
 
 			// Jos muokkaamme tilausrivin paikkaa ja se on speciaalikeissi, T,U niin laitetaan $paikka-muuttuja kuntoon
 			if (substr($tapa, 0, 6) != "VAIHDA" and $tilausrivi["var"] == "T" and substr($paikka,0,3) != "¡¡¡") {
@@ -6024,7 +6041,7 @@ if ($tee == '') {
 						$classvar = $class;
 					}
 				}
-				
+
 				if ($row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and !empty($yhtiorow['jt_automatiikka'])) {
 					$var_temp = $row['var'] . " - ".t("Muiden mukana");
 				}
@@ -7425,7 +7442,7 @@ if ($tee == '') {
 							$jysum = $arvo;
 						}
 
-						
+
 						if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
 							echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",100*$kate_eieri/($kotiarvo_eieri-$ostot_eieri))."' Style='text-align:right' $state></td>";
 

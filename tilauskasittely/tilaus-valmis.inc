@@ -324,7 +324,7 @@ else {
 											AND avainsana.selite = tuote.try)
 										WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 										AND tilausrivi.otunnus = '{$laskurow["tunnus"]}'
-										AND tilausrivi.var NOT IN ('P','J')
+										AND tilausrivi.var not in ('P','J','O')
 										ORDER by avainsana.selitetark_4 ASC
 										LIMIT 1";
 		$keraysprioriteetti_res = pupe_query($keraysprioriteetti_query);
@@ -362,7 +362,7 @@ else {
 					where yhtio = '$kukarow[yhtio]'
 					and otunnus = '$laskurow[tunnus]'
 					and keratty = ''
-					and var not in ('P','J','S')
+					and var not in ('P','J','O','S')
 					and tyyppi != 'D'
 					and varattu > 0";
 		$keres = pupe_query($query);
@@ -435,7 +435,7 @@ else {
 					WHERE yhtio = '$kukarow[yhtio]'
 					and otunnus = '$laskurow[tunnus]'
 					and keratty = ''
-					and var not in ('P','J','S')
+					and var not in ('P','J','O','S')
 					and tyyppi != 'D'";
 		$result = pupe_query($query);
 
@@ -447,7 +447,7 @@ else {
 						and otunnus = '$laskurow[tunnus]'
 						and keratty != ''
 						and toimitettu = ''
-						and var not in ('P','J','S')
+						and var not in ('P','J','O','S')
 						and tyyppi != 'D'";
 			$result = pupe_query($query);
 		}
@@ -476,7 +476,7 @@ else {
 							SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio		= '$kukarow[yhtio]'
-							and var not in ('P','J','S')
+							and var not in ('P','J','O','S')
 							and keratty    != ''
 							and toimitettu	= ''
 							and tyyppi 	   != 'D'";
@@ -763,7 +763,7 @@ else {
 						SET kerattyaika = now(), keratty = '$kukarow[kuka]'
 						WHERE otunnus 	= '$laskurow[tunnus]'
 						and yhtio		= '$kukarow[yhtio]'
-						and var not in ('P','J','S')
+						and var not in ('P','J','O','S')
 						and keratty		= ''
 						and toimitettu	= ''
 						and tyyppi 	   != 'D'";
@@ -772,7 +772,7 @@ else {
 			$query = "	UPDATE tilausrivi
 						SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 						WHERE otunnus 	= '$laskurow[tunnus]'
-						and var not in ('P','J')
+						and var not in ('P','J','O')
 						and yhtio 		= '$kukarow[yhtio]'
 						and keratty    != ''
 						and toimitettu  = ''
@@ -871,7 +871,7 @@ else {
 							SET kerattyaika = now(), keratty = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio 		= '$kukarow[yhtio]'
-							and var not in ('P','J','S')
+							and var not in ('P','J','O','S')
 							and keratty 	= ''
 							and toimitettu 	= ''
 							and tyyppi     != 'D'";
@@ -895,7 +895,7 @@ else {
 							SET kerattyaika = now(), keratty = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio		= '$kukarow[yhtio]'
-							and var not in ('P','J','S')
+							and var not in ('P','J','O','S')
 							and keratty		= ''
 							and toimitettu	= ''
 							and tyyppi 	   != 'D'";
@@ -905,7 +905,7 @@ else {
 							SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio		= '$kukarow[yhtio]'
-							and var not in ('P','J','S')
+							and var not in ('P','J','O','S')
 							and keratty    != ''
 							and toimitettu	= ''
 							and tyyppi 	   != 'D'";
@@ -986,7 +986,7 @@ else {
 							AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
 							AND tilausrivi.tyyppi != 'D'
 							AND tilausrivi.varattu >= 1
-							AND tilausrivi.var NOT IN ('J','P')
+							AND tilausrivi.var not in ('J','P','O')
 							AND (tilausrivi.perheid = 0 OR tilausrivi.perheid=tilausrivi.tunnus)
 							ORDER BY tilausrivi.tunnus";
 				$result = pupe_query($query);
@@ -1217,7 +1217,7 @@ else {
 						AND tilausrivi.tyyppi != 'D'
 						and (tilausrivi.hyllyalue != '' OR tilausrivin_lisatiedot.omalle_tilaukselle != '')
 						and tilausrivi.varattu+tilausrivi.kpl > 0
-						and tilausrivi.var not in ('J','P')
+						and tilausrivi.var not in ('J','P','O')
 						ORDER BY omalle_tilaukselle_sort $sorttaus";
 			$result = pupe_query($query);
 

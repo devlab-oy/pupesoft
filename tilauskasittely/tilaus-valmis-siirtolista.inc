@@ -68,7 +68,7 @@
 					where yhtio = '$kukarow[yhtio]'
 					and otunnus = '$laskurow[tunnus]'
 					and keratty = ''
-					and var not in ('P','J','S')";
+					and var not in ('P','J','O','S')";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {

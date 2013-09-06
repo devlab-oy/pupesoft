@@ -957,7 +957,7 @@
 					and tilausrivi.otunnus = '$id'
 					and tilausrivi.tyyppi  = 'G'
 					and tilausrivi.varattu != 0
-					and var not in ('P','J','S')
+					and var not in ('P','J','O','S')
 					ORDER BY sorttauskentta, tuoteno";
 		$result = pupe_query($query);
 

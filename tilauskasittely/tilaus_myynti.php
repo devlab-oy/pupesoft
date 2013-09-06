@@ -7190,7 +7190,7 @@ if ($tee == '') {
 									AND tilausrivi.tyyppi != 'D'
 									and tilausrivi.hyllyalue != ''
 									and tilausrivi.varattu > 0
-									and tilausrivi.var NOT IN ('J','P')";
+									and tilausrivi.var not in ('J','P','O')";
 						$chk_res = pupe_query($query);
 
 						$chk_arr = array();

@@ -6695,6 +6695,7 @@ if ($tee == '') {
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.tyyppi in ($tilrivity)
 								and tilausrivi.tyyppi not in ('D','V','M')
+								and tilausrivi.var not in ('O')
 								$tunnuslisa
 								GROUP BY 1
 								ORDER BY 1";

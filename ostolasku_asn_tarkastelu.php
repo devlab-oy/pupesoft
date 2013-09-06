@@ -1461,7 +1461,7 @@
 						tilausrivi.uusiotunnus,
 						lasku.tunnus laskutunnus
 						FROM lasku
-						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.uusiotunnus = 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.uusiotunnus = 0 AND tilausrivi.kpl+tilausrivi.varattu != 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
 						AND lasku.tila = 'O'
@@ -1478,7 +1478,7 @@
 						tilausrivi.uusiotunnus,
 						lasku.tunnus laskutunnus
 						FROM lasku
-						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.uusiotunnus = 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.uusiotunnus = 0 AND tilausrivi.kpl+tilausrivi.varattu != 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
 						AND lasku.tila = 'K'
@@ -1495,7 +1495,7 @@
 						tilausrivi.uusiotunnus,
 						lasku.tunnus laskutunnus
 						FROM lasku
-						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.uusiotunnus != 0 {$tilausnrolisa2} {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.uusiotunnus != 0 AND tilausrivi.kpl+tilausrivi.varattu != 0 {$tilausnrolisa2} {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
 						AND lasku.tila 			= 'K'

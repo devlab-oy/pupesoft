@@ -1735,7 +1735,18 @@
 				($tyyppi == 3 and $tunnus!="")  or
 				$tyyppi == 5) {
 				echo "<tr>";
-				echo "<th align='left'>$otsikko</th>";
+				//KISSA
+				$infolinkki = "";
+
+				//echo "<a class='tooltip' id='$id2'>$saldorow[nimitys]</a> $saldorow[tyyppi]";
+				//echo "<div id='div_$id2' class='popup' style='width: 300px'>($saldorow[hyllyalue]-$saldorow[hyllynro]-$saldorow[hyllyvali]-$saldorow[hyllytaso])</div>";
+				// Jos helppiselite (selitetark_5) löytyy niin piirretään linkki onclick='myFunction(\"kekkonen\")
+				if ($al_row['selite'] != '') {
+					$infolinkki = "<a class='tooltip' id='div_$al_row[tunnus]'>?</a>";
+					echo "<div id='div_$al_row[tunnus]' class='popup' style='width: 300px'>($al_row[selite])</div>";
+				}
+				echo "<th align='left'>$otsikko $infolinkki</th>";
+				js_popup();
 			}
 
 			if ($jatko == 0) {

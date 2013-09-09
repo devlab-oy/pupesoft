@@ -27,6 +27,10 @@ if (tarkista_oikeus("mobiili/inventointi.php")) {
 	echo "<p><a href='inventointi.php' class='button'>",t("Inventointi", $browkieli),"</a></p>";
 }
 
+if (tarkista_oikeus("mobiili/hyllysiirrot.php")) {
+	echo "<p><a href='hyllysiirrot.php' class='button'>",t("Hyllysiirrot", $browkieli),"</a></p>";
+}
+
 if (tarkista_oikeus("mobiili/tuki.php")) {
 	echo "<button class='button' value=''>",t("Tuki", $browkieli),"</button>";
 }

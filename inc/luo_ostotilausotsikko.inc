@@ -29,7 +29,6 @@ if (!function_exists('luo_ostotilausotsikko')) {
 
 		$params['ostotilauksen_kasittely'] = (!empty($params['ostotilauksen_kasittely'])) ? $params['ostotilauksen_kasittely'] : '';
 		$params["nimi"] = (!empty($params["nimi"])) ? $params["nimi"] : '';
-		$params["nimi"] = (!empty($params["nimi"])) ? $params["nimi"] : '';
 		$params["nimitark"] = (!empty($params["nimitark"])) ? $params["nimitark"] : '';
 		$params["osoite"] = (!empty($params["osoite"])) ? $params["osoite"] : '';
 		$params["postino"] = (!empty($params["postino"])) ? $params["postino"] : '';
@@ -48,21 +47,20 @@ if (!function_exists('luo_ostotilausotsikko')) {
 
 		// Jos ostotilausta ei ole luotu myyntitilaukselta (tilaus_osto.php ~545), k‰ytet‰‰n toimittajan oletuksia
 		if (empty($params['nimi'])) {
-
-			$toim_nimi = $tiltoi["nimi"];
-			$toim_nimitark = $tiltoi["nimitark"];
-			$toim_osoite = $tiltoi["osoite"];
-			$toim_postino = $tiltoi["postino"];
-			$toim_postitp = $tiltoi["postitp"];
-			$toim_maa = $tiltoi["maa"];
+			$toim_nimi 		= $tiltoi["nimi"];
+			$toim_nimitark 	= $tiltoi["nimitark"];
+			$toim_osoite 	= $tiltoi["osoite"];
+			$toim_postino 	= $tiltoi["postino"];
+			$toim_postitp 	= $tiltoi["postitp"];
+			$toim_maa 		= $tiltoi["maa"];
 		}
 		else {
-			$toim_nimi = $params["nimi"];
-			$toim_nimitark = $params["nimitark"];
-			$toim_osoite = $params["osoite"];
-			$toim_postino = $params["postino"];
-			$toim_postitp = $params["postitp"];
-			$toim_maa = $params["maa"];
+			$toim_nimi 		= $params["nimi"];
+			$toim_nimitark 	= $params["nimitark"];
+			$toim_osoite 	= $params["osoite"];
+			$toim_postino 	= $params["postino"];
+			$toim_postitp 	= $params["postitp"];
+			$toim_maa 		= $params["maa"];
 		}
 
 		$valkoodi = $tiltoi["oletus_valkoodi"];

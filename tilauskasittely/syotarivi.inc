@@ -567,9 +567,15 @@
 			echo "<th align='left'>".t("Reseptiin")."</th>";
 		}
 
-		echo "	<th align='left'>".t("Tuoteno")."</th>
-				<th align='left'>".t("M‰‰r‰")."</th>
-				</tr>";
+		echo "<th align='left'>".t("Tuoteno")."</th>";
+		echo "<th align='left'>".t("M‰‰r‰")."</th>";
+
+		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			echo "<th align='left'>".t("Valmistuslinja")."</th>";
+			echo "<th align='left'>".t("Toivottu ker‰ysajankohta")."</th>";
+			echo "<th align='left'>".t("Toivottu valmistusajankohta")."</th>";
+		}
+		echo "</tr>";
 
 
 		echo "<tr>$jarjlisa";
@@ -598,6 +604,24 @@
 		}
 
 		echo "<td valign='top'><input type='text' size='5' name='kpl' maxlength='13' value='$kpl'></td>";
+
+		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			echo "<td>";
+			echo "<input type='text' size='5' name='valmistuslinja' value='{$valmistuslinja}'";
+			echo "</td>";
+
+			echo "<td>";
+			echo "<input type='text' size='3' name='toivottu_kerayspvm_pp' value='{$toivottu_kerayspvm[2]}' />";
+			echo "<input type='text' size='3' name='toivottu_kerayspvm_kk' value='{$toivottu_kerayspvm[1]}' />";
+			echo "<input type='text' size='5' name='toivottu_kerayspvm_vv' value='{$toivottu_kerayspvm[0]}' />";
+			echo "</td>";
+
+			echo "<td>";
+			echo "<input type='text' size='3' name='toivottu_valmistuspvm_pp' value='{$toivottu_valmistuspvm[2]}' />";
+			echo "<input type='text' size='3' name='toivottu_valmistuspvm_kk' value='{$toivottu_valmistuspvm[1]}' />";
+			echo "<input type='text' size='5' name='toivottu_valmistuspvm_vv' value='{$toivottu_valmistuspvm[0]}' />";
+			echo "</td>";
+		}
 
 		echo "<td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
@@ -672,7 +696,13 @@
 			echo "<th></th>";
 		}
 
-		echo "<th colspan='2' align='left'>".t("Kommentti")."</th>
+		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			$colspan = 5;
+		}
+		else {
+			$colspan = 2;
+		}
+		echo "<th colspan='{$colspan}' align='left'>".t("Kommentti")."</th>
 				</tr>";
 
 		echo "<tr>$jarjlisa";
@@ -681,7 +711,7 @@
 			echo "<td valign='top'></td>";
 		}
 
-		echo "<td valign='top' colspan='2'><textarea name='kommentti' cols='40' rows='2' wrap='soft'>$kommentti</textarea></td>
+		echo "<td valign='top' colspan='{$colspan}'><textarea name='kommentti' cols='40' rows='2' wrap='soft'>$kommentti</textarea></td>
 				<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'>";
 
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..

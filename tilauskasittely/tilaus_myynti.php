@@ -10,6 +10,8 @@ if (@include("../inc/parametrit.inc"));
 elseif (@include("parametrit.inc"));
 else exit;
 
+require('validation/Validation.php');
+
 if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
 	livesearch_sarjanumerohaku();
 	exit;
@@ -960,6 +962,13 @@ if (isset($tyhjenna)) {
 	$sopimuksen_lisatieto1 = "";
 	$sopimuksen_lisatieto2 = "";
 	$omalle_tilaukselle = "";
+	$valmistuslinja = "";
+	$toivottu_kerayspvm_pp = "";
+	$toivottu_kerayspvm_kk = "";
+	$toivottu_kerayspvm_vv = "";
+	$toivottu_valmistuspvm_pp = "";
+	$toivottu_valmistuspvm_kk = "";
+	$toivottu_valmistuspvm_vv = "";
 }
 
 if ($tee == "VALMIS"
@@ -3713,6 +3722,9 @@ if ($tee == '') {
 			$sopimuksen_lisatieto1 = $tilausrivi["sopimuksen_lisatieto1"];
 			$sopimuksen_lisatieto2 = $tilausrivi["sopimuksen_lisatieto2"];
 			$omalle_tilaukselle = $tilausrivi['omalle_tilaukselle'];
+			$valmistuslinja = $tilausrivi['positio'];
+			$toivottu_kerayspvm = explode('-', $tilausrivi['kerayspvm']);
+			$toivottu_valmistuspvm = explode('-', $tilausrivi['toimaika']);
 
 			// useamman valmisteen reseptit...
 			if (($tilausrivi['tyyppi'] == "W" and $tilausrivi["tunnus"] != $tilausrivi["perheid"]) or ($tilausrivi['tyyppi'] == "W" and $tapa == "VAIHDA")) {
@@ -4283,6 +4295,13 @@ if ($tee == '') {
 		$sopimuksen_lisatieto2 = "";
 		if (!isset($lisaa_jatka)) $variaatio_tuoteno = "";
 		$omalle_tilaukselle = "";
+		$valmistuslinja = "";
+		$toivottu_kerayspvm_pp = "";
+		$toivottu_kerayspvm_kk = "";
+		$toivottu_kerayspvm_vv = "";
+		$toivottu_valmistuspvm_pp = "";
+		$toivottu_valmistuspvm_kk = "";
+		$toivottu_valmistuspvm_vv = "";
 	}
 
 	//Syöttörivi

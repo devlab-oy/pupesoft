@@ -61,6 +61,18 @@
 		$perhekielto = "Y";
 	}
 
+	if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y' and isset($toivottu_kerayspvm_pp) and isset($toivottu_kerayspvm_kk) and isset($toivottu_kerayspvm_vv)) {
+		if (FormValidator::validateContent("{$toivottu_kerayspvm_vv}-{$toivottu_kerayspvm_kk}-{$toivottu_kerayspvm_pp}", 'paiva')) {
+			$kerayspvm = "{$toivottu_kerayspvm_vv}-{$toivottu_kerayspvm_kk}-{$toivottu_kerayspvm_pp}";
+		}
+	}
+
+	if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y' and isset($toivottu_valmistuspvm_pp) and isset($toivottu_valmistuspvm_kk) and isset($toivottu_valmistuspvm_vv)) {
+		if (FormValidator::validateContent("{$toivottu_valmistuspvm_vv}-{$toivottu_valmistuspvm_kk}-{$toivottu_valmistuspvm_pp}", 'paiva')) {
+			$toimaika = "{$toivottu_valmistuspvm_vv}-{$toivottu_valmistuspvm_kk}-{$toivottu_valmistuspvm_pp}";
+		}
+	}
+
 	unset($korvaavan_hinta_ylaraja_halvin_alehinta);
 	unset($korvaavan_hinta_ylaraja_halvin_hinta);
 	unset($korvaavan_hinta_ylaraja_halvin_ale);

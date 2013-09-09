@@ -70,6 +70,11 @@
 				$desadv_message .= "DTM+11:{$year}{$month}{$day}:102'";
 				$x++;
 
+				if ($desadv_version == 'fi0089') {
+					$desadv_message .= "DTM+35:{$year}{$month}{$day}:102'";
+					$x++;
+				}
+
 				if ($desadv_version != "fi0089") {
 					// DTM - despatch and/or delivery date/time
 					// 171 = tilauspäivä
@@ -122,7 +127,7 @@
 					$x++;
 				}
 
-				$desadv_message .= "NAD+CZ+{$yhtiorow['ovttunnus']}::92++".substr($yhtiorow["nimi"], 0, 35)."+".substr($yhtiorow["osoite"], 0, 35)."+".substr($yhtiorow["postitp"], 0, 35)."++".substr($yhtiorow["postino"], 0, 17)."+".substr($yhtiorow["maa"], 0, 3)."'";
+				$desadv_message .= "NAD+CZ+{$yhtiorow['ovttunnus']}::100++".substr($yhtiorow["nimi"], 0, 35)."+".substr($yhtiorow["osoite"], 0, 35)."+".substr($yhtiorow["postitp"], 0, 35)."++".substr($yhtiorow["postino"], 0, 17)."+".substr($yhtiorow["maa"], 0, 3)."'";
 				$x++;
 
 				// NAD - identification of buyer

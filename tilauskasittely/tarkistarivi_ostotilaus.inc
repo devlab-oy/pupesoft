@@ -7,7 +7,6 @@
 	$query = "	SELECT *
 				FROM tuote
 				LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-				LEFT JOIN toimi ON tuote.yhtio = toimi.yhtio and toimi.tunnus = '$laskurow[liitostunnus]'
 				WHERE tuote.tuoteno	= '$prow[tuoteno]'
 				and tuote.yhtio		= '$kukarow[yhtio]'";
 	$rarresult = pupe_query($query);
@@ -19,7 +18,7 @@
 		$tilausok++;
 	}
 
-	if ($trow["toimittaja"] == "" and $toim_tarkistus!= "EI" and $riviok == 0) {
+	if ($trow["toimittaja"] == "" and $toim_tarkistus != "EI" and $riviok == 0) {
 		$varaosavirhe .= t("VIRHE: Tuotetta ei voi tilata tältä toimittajalta")."!<br>";
 		$riviok++;
 		$tilausok++;
@@ -44,8 +43,8 @@
 		$riviok++;
 	}
 
-	if (!empty($trow['tehdas_saldo_tarkistus']) and $trow['tehdas_saldo'] < $prow['varattukpl']) {
-		$varaosavirhe .= "<font class='error'>".t("HUOM: Toimittajan tehtaan saldo on %d", "", $trow['tehdas_saldo']).".<br></font>";
+	if (!empty($toimittajarow['tehdas_saldo_tarkistus']) and $trow['tehdas_saldo'] < $prow['varattukpl']) {
+		$prow["kommentti"] .= "<br>".t("HUOM: Toimittajan tehtaan saldo on")." {$trow['tehdas_saldo']}.<br>";
 	}
 
 	if ($yhtiorow['ostoera_pyoristys'] == 'K' and isset($ostoerahuom) and is_array($ostoerahuom) and in_array($prow['tunnus'], $ostoerahuom) and $kpl_st != $org_kpl) {
@@ -150,13 +149,13 @@
 	}
 
 	//toimitusajan päivitys toimittajan toimitusaikaan
-	if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($trow["oletus_toimaika"] != 0 and $trow["oletus_toimaika"] != '')) and $riviok == 0 and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== FALSE and ($yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '1' or $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '2')) {
+	if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($toimittajarow["oletus_toimaika"] != 0 and $toimittajarow["oletus_toimaika"] != '')) and $riviok == 0 and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== FALSE and ($yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '1' or $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '2')) {
 
 		if ($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') {
 			$ehdotus_pvm = date('Y-m-d',time() + $trow["toimitusaika"] * 24 * 60 * 60);
 		}
-		elseif ($trow["oletus_toimaika"] != 0 and $trow["oletus_toimaika"] != '') {
-			$ehdotus_pvm = date('Y-m-d',time() + $trow["oletus_toimaika"] * 24 * 60 * 60);
+		elseif ($toimittajarow["oletus_toimaika"] != 0 and $toimittajarow["oletus_toimaika"] != '') {
+			$ehdotus_pvm = date('Y-m-d',time() + $toimittajarow["oletus_toimaika"] * 24 * 60 * 60);
 		}
 
 		if ($paivitatoimaika == "ON" and $prow["tunnus"] == $paiv_rivitunnus and $JOPATO != '') {
@@ -385,6 +384,6 @@
 		$vastaavat_html .= "</th></tr>$korvaavat_table";
 	}
 
-	if ($vastaavat_html != "") {
+	if (isset($vastaavat_html) and $vastaavat_html != "") {
 		$vastaavat_html .= "</table>";
 	}

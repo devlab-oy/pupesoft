@@ -20449,7 +20449,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-						AND tilausrivi.var not in ('J','P','O')
+						AND tilausrivi.var not in ('P','J','O')
 						AND tilausrivi.otunnus IN ($tilausnumeroita)";
 			$paino_chk_res = pupe_query($query);
 			$paino_chk_row = mysql_fetch_assoc($paino_chk_res);
@@ -20481,7 +20481,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivi.var not in ('J','P','O')
+					AND tilausrivi.var not in ('P','J','O')
 					AND tilausrivi.otunnus IN ($tilausnumeroita)
 					ORDER BY sorttauskentta {$order_sorttaus}";
 		$keraysera_res = pupe_query($query);

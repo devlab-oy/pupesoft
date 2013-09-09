@@ -986,7 +986,7 @@ else {
 							AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
 							AND tilausrivi.tyyppi != 'D'
 							AND tilausrivi.varattu >= 1
-							AND tilausrivi.var not in ('J','P','O')
+							AND tilausrivi.var not in ('P','J','O')
 							AND (tilausrivi.perheid = 0 OR tilausrivi.perheid=tilausrivi.tunnus)
 							ORDER BY tilausrivi.tunnus";
 				$result = pupe_query($query);
@@ -1217,7 +1217,7 @@ else {
 						AND tilausrivi.tyyppi != 'D'
 						and (tilausrivi.hyllyalue != '' OR tilausrivin_lisatiedot.omalle_tilaukselle != '')
 						and tilausrivi.varattu+tilausrivi.kpl > 0
-						and tilausrivi.var not in ('J','P','O')
+						and tilausrivi.var not in ('P','J','O')
 						ORDER BY omalle_tilaukselle_sort $sorttaus";
 			$result = pupe_query($query);
 

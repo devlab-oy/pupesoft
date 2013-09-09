@@ -821,6 +821,7 @@
 								$toimittajalisa
 								WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
 								and tilausrivi.tyyppi 			= 'E'
+								and tilausrivi.var 		   	   != 'O'
 								and tilausrivi.laskutettuaika 	= '0000-00-00'
 								and tilausrivi.varattu 			> 0
 								and ((tilausrivi.tunnus = tilausrivi.perheid and tilausrivi.perheid2 = 0) or (tilausrivi.tunnus = tilausrivi.perheid2) or (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0))

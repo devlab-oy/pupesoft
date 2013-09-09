@@ -101,6 +101,77 @@ if (isset($submit)) {
 
 			if (count($errors) == 0) {
 
+				$siirrettavat_rivit = array();
+
+				// Lets lock up
+				$query = "	LOCK TABLES
+							lasku READ,
+							lasku AS l1 READ,
+							tilausrivi READ,
+							tilausrivi AS t1 READ,
+							tilausrivi AS t2 READ,
+							tuote READ,
+							tuotepaikat READ,
+							varastopaikat READ";
+				$res = pupe_query($query);
+
+				list($saldo, $hyllyssa, $siirrettava_yht, $devnull) = saldo_myytavissa($row['tuoteno'], '', 0, '', $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso']);
+
+				// echo "Kohde paikka: $hyllyalue $hyllynro $hyllyvali $hyllytaso<br>";
+				// echo "Myytävissä: $siirrettava_yht<br>";
+
+				$query = "	(SELECT t1.tunnus, t1.otunnus, t1.varattu
+							FROM lasku AS l1
+							JOIN tilausrivi AS t1 ON (
+								t1.yhtio = l1.yhtio AND
+								t1.otunnus = l1.tunnus AND
+								t1.tuoteno = '{$row['tuoteno']}' AND
+								t1.hyllyalue = '{$row['hyllyalue']}' AND
+								t1.hyllynro = '{$row['hyllynro']}' AND
+								t1.hyllyvali = '{$row['hyllyvali']}' AND
+								t1.hyllytaso = '{$row['hyllytaso']}' AND
+								t1.tyyppi IN ('L','G') AND
+								t1.var IN ('','H') AND
+								t1.keratty = '' AND
+								t1.uusiotunnus = 0 AND
+								t1.kpl = 0 AND
+								t1.varattu > 0
+							)
+							WHERE l1.yhtio = '{$kukarow['yhtio']}'
+							AND l1.tila = 'N'
+							AND l1.alatila IN ('','A'))
+							UNION
+							(SELECT t2.tunnus, t2.otunnus, t2.jt + t2.varattu AS varattu
+							FROM tilausrivi AS t2
+							WHERE t2.yhtio = '{$kukarow['yhtio']}'
+							AND	t2.tuoteno = '{$row['tuoteno']}'
+							AND	t2.hyllyalue = '{$row['hyllyalue']}'
+							AND	t2.hyllynro = '{$row['hyllynro']}'
+							AND	t2.hyllyvali = '{$row['hyllyvali']}'
+							AND	t2.hyllytaso = '{$row['hyllytaso']}'
+							AND	t2.tyyppi IN ('L','G')
+							AND	t2.var = 'J'
+							AND	t2.keratty = ''
+							AND	t2.uusiotunnus = 0
+							AND	t2.kpl = 0
+							AND	t2.jt + t2.varattu > 0)";
+				$result = pupe_query($query);
+
+				while ($saldorow = mysql_fetch_assoc($result)) {
+
+					// echo "otunnus: $saldorow[otunnus] ($saldorow[tunnus]) varattu: $saldorow[varattu]<br>";
+
+					$siirrettava_yht += $saldorow['varattu'];
+					$siirrettavat_rivit[] = $saldorow['tunnus'];
+				}
+
+				// echo "Siirrettävät yhteensä: $siirrettava_yht<br><br>";
+				// echo "Siirretävät rivit:<br>";
+				// echo var_dump($siirrettavat_rivit)."<br>";
+
+				// poistetaan lukko
+				$query = "UNLOCK TABLES";
+				$res   = pupe_query($query);
 			}
 
 			break;

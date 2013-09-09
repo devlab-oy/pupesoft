@@ -25,26 +25,38 @@
 		$lisasalker = " ";
 	}
 
-	if ($yhtiorow['valmistuksien_kasittely'] == 'Y' and($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON")) {
+	if ($yhtiorow['valmistuksien_kasittely'] == 'Y' and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON")) {
 		// Jos valmistuksien_kasittely == Valmistuksella voi olla vain yksi valmiste,
 		// niin loopataan valmistusrivit läpi ja luodaan jokaiselle riville oma otsikko
 
-		$query = "	SELECT *
+		$query = "	SELECT tilausrivi.*,
+					tilausrivin_lisatiedot.positio
 					FROM tilausrivi
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND otunnus = '{$laskurow['tunnus']}'
-					AND tyyppi = 'W'";
+					JOIN tilausrivin_lisatiedot
+					ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+						AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+					AND tilausrivi.tyyppi = 'W'";
 		$tilausrivi_split_result = pupe_query($query);
 
 		$i = 0;
 		while($tilausrivi_split_row = mysql_fetch_assoc($tilausrivi_split_result)) {
 			if ($i == 0) {
+				$query = "	UPDATE lasku
+							SET kohde = '{$tilausrivi_split_row['positio']}',
+							toimaika = '{$tilausrivi_split_row['toimaika']}',
+							kerayspvm = '{$tilausrivi_split_row['kerayspvm']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$tilausrivi_split_row['otunnus']}'";
+				pupe_query($query);
+				
 				$i++;
 				continue;
 			}
 
-			$toimaika_array = explode('-', $laskurow['toimaika']);
-			$keraika_array = explode('-', $laskurow['kerayspvm']);
+			$toimaika_array = explode('-', $tilausrivi_split_row['toimaika']);
+			$keraika_array = explode('-', $tilausrivi_split_row['kerayspvm']);
 			$kukarow['kesken'] = 0;
 			$params = array(
 				'toim' => $toim,
@@ -56,6 +68,7 @@
 				'kervv' => $keraika_array[0],
 				'kerkk' => $keraika_array[1],
 				'kerpp' => $keraika_array[2],
+				'valmistuslinja' => $tilausrivi_split_row['positio'],
 			);
 			$valmistus_tunnus = luo_valmistusotsikko($params);
 

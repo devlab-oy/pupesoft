@@ -419,25 +419,26 @@
 
 				$as_tunnus = explode(",", $tunnukset);
 
+				$resk_viesti = "";
 				foreach ($as_tunnus as $astun) {
 					$query  = "	SELECT kentta01
 						        FROM kalenteri
 						        WHERE yhtio = '$kukarow[yhtio]'
 						        AND tyyppi  = 'Myyntireskontraviesti'
 						        AND liitostunnus = '$astun'
-						        AND yhtio   = '$kukarow[yhtio]'
-								ORDER BY tunnus desc
-								LIMIT 1";
+								ORDER BY tunnus desc";
 					$amres = pupe_query($query);
-
-					if (mysql_num_rows($amres) > 0) {
-						$amrow = mysql_fetch_assoc($amres);
-
+					
+					while ($amrow = mysql_fetch_assoc($amres)) {
+						$resk_viesti .= "$amrow[kentta01]<br>";
+					}	
+					if ($resk_viesti != '') {
 						echo "<tr>
-							<th>".t("Reskontraviesti")."</th><td colspan='2'>$amrow[kentta01]</td>
+							<th>".t("Reskontraviesti")."</th><td colspan='2'>$resk_viesti</td>
 							</tr>";
 					}
 				}
+				
 
 				echo "</table><br>";
 

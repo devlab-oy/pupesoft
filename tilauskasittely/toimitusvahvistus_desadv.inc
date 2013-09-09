@@ -141,7 +141,7 @@
 
 				// NAD - identification of consignee
 				if ($toitarow['toim_nimi'] != '' and $toitarow['toim_ovttunnus'] != '') {
-					$desadv_message .= "NAD+CN+{$toitarow['toim_ovttunnus']}::100++"
+					$desadv_message .= "NAD+CN+{$toitarow['toim_ovttunnus']}::92++"
 										.substr($toitarow["toim_nimi"], 0, 35).":"
 										.substr($toitarow["toim_nimitark"], 0, 35)."+"
 										.substr($toitarow["toim_osoite"], 0, 35)."+"

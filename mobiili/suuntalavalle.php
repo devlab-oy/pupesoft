@@ -116,8 +116,15 @@ if (isset($submit)) {
             require ("../tilauskasittely/suuntalavat.inc");
         }
 
+        if ($tilausten_lukumaara > 0) {
+            $url = "tuotteella_useita_tilauksia.php";
+        }
+        else {
+            $url = "ostotilaus.php";
+        }
+
         # Kaikki ok
-        echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$tilausrivi['otunnus']}'>";
+        echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$url}?ostotilaus={$tilausrivi['otunnus']}'>";
         exit();
     }
 }
@@ -144,6 +151,8 @@ echo "<div class='main'>
 
 <input type='hidden' name='hyllytetty' value='{$hyllytetty}' />
 <input type='hidden' name='saapuminen' value='{$alkuperainen_saapuminen}' />
+<input type='hidden' name='tilausten_lukumaara' value='{$tilausten_lukumaara}' />
+<input type='hidden' name='tilausrivi' value='{$tilausrivi['tunnus']}' />
 
 <table>
     <tr>

@@ -28,7 +28,7 @@
 	if (!isset($maa)) 		 			$maa = "";
 	if (!isset($pkrow))              	$pkrow = array();
 	if (!isset($suoratoimit))        	$suoratoimit = "";
-	if (!isset($jt_huomioi_pvm))        	$jt_huomioi_pvm = "";
+	if (!isset($jt_huomioi_pvm))        $jt_huomioi_pvm = "";
 	if (!isset($tee))                	$tee = "";
 	if (!isset($tilaus)) 	 			$tilaus = "";
 	if (!isset($tilausnumero))       	$tilausnumero = "";
@@ -40,7 +40,7 @@
 	if (!isset($tuotemerkki)) 			$tuotemerkki = "";
 	if (!isset($tuotenumero)) 			$tuotenumero = "";
 	if (!isset($tuoteosasto)) 			$tuoteosasto = "";
-	if (!isset($saldolaskenta)) 			$saldolaskenta = "";
+	if (!isset($saldolaskenta)) 		$saldolaskenta = "";
 	if (!isset($tuoteryhma))  			$tuoteryhma = "";
 	if (!isset($vainvarastosta))     	$vainvarastosta = "";
 	if (!isset($suoratoimitus_rivit))	$suoratoimitus_rivit  = array();
@@ -48,7 +48,7 @@
 	if (!isset($varastosta))  			$varastosta = "";
 	if (!isset($ytunnus)) 	 			$ytunnus = "";
 	if (!isset($myyja))					$myyja = "";
-	if (!isset($automaattinen_poiminta))	$automaattinen_poiminta = "";
+	if (!isset($automaattinen_poiminta))$automaattinen_poiminta = "";
 	if (!isset($mista_tullaan))			$mista_tullaan = "";
 
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
@@ -893,6 +893,7 @@
 							$toimittajalisa
 							WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
 							and tilausrivi.tyyppi 			= 'E'
+							and tilausrivi.var 		   	   != 'O'
 							and tilausrivi.laskutettuaika 	= '0000-00-00'
 							and tilausrivi.varattu 			> 0
 							and ((tilausrivi.tunnus = tilausrivi.perheid and tilausrivi.perheid2 = 0) or (tilausrivi.tunnus = tilausrivi.perheid2) or (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0))
@@ -1053,6 +1054,7 @@
 										JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 										JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+										and tilausrivi.var    != 'O'
 										$otunlisa
 										$pklisa
 										and tilausrivi.varattu > 0
@@ -1543,6 +1545,7 @@
 												FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 												WHERE yhtio 	= '$kukarow[yhtio]'
 												and tyyppi 		= 'E'
+												and var		   != 'O'
 												and tuoteno 	= '$jtrow[tuoteno]'
 												and varattu 	> 0";
 								}

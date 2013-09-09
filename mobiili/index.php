@@ -8,6 +8,8 @@ $mobile = true;
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
+if (empty($browkieli)) $browkieli = 'fi';
+
 # Index.php ei sisällytä parametrit incistä headereita
 echo "<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>\n";
 echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";

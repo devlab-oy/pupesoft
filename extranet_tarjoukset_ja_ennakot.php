@@ -258,9 +258,13 @@ function paivita_ennakko($params) {
 
 		// Kappalem‰‰r‰ kannasta
 		$kplmaara = $loytynyt_tilausrivi[0]['kpl'];
-
-		// Tarkistetaan onko kappalem‰‰r‰‰ muutettu, jos ei muutoksia niin toimenpiteit‰ riville ei vaadita
-		if ($kplmaara == $value) {
+		
+		// jos Optio-rivi niin katsotaan onko syˆtetty arvo muutettu tyhj‰st‰ joksikin muuksi, jos ei niin toimenpiteit‰ riville ei vaadita
+		if ($loytynyt_tilausrivi[0]['var'] == "O" and $value == '') {
+			continue;
+		}
+		// Tarkistetaan onko kappalem‰‰r‰‰ muutettu tai onko kplm‰‰r‰ tyhj‰, jos ei muutoksia niin toimenpiteit‰ riville ei vaadita
+		elseif ($kplmaara == $value and $loytynyt_tilausrivi[0]['var'] != "O") {
 			continue;
 		}
 
@@ -272,13 +276,10 @@ function paivita_ennakko($params) {
 			$andy = "AND tunnus = '{$loytynyt_tilausrivi[0]['tunnus']}'";
 		}
 
-		// Jos ollaan nollattu kappaleet, p‰ivitet‰‰n rivi
+		// Jos ollaan nollattu kappaleet, p‰ivitet‰‰n rivi tilaan Optio
 		if ($value == 0) {
 			$query = "  UPDATE tilausrivi
-						SET tilkpl = 0,
-						kpl = 0,
-						jt = 0,
-						varattu = 0
+						SET var = 'O'
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND otunnus = '{$valittu_tarjous_tunnus}'
 						{$andy}";
@@ -463,6 +464,7 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 				tilausrivi.perheid as perheid_tunnus,
 				tilausrivi.tuoteno,
 				tilausrivi.nimitys,
+				tilausrivi.var,
 				tilausrivi.varattu as kpl,
 				round(tilausrivi.hinta * (1 - ale1 / 100) * (1 - ale2 / 100) * (1 - ale3 / 100), 2) hinta,
 				round(tilausrivi.hinta * tilausrivi.varattu * (1 - ale1 / 100) * (1 - ale2 / 100) * (1 - ale3 / 100), 2) rivihinta,
@@ -600,7 +602,13 @@ function piirra_tarjouksen_tilausrivit($params) {
 		echo "<td class='{$class}'>";
 
 		if ($toim == "EXTENNAKKO" and $rivinumero != "") {
-			echo "<input type='text' size='4' name='kappalemaarat[{$rivi['tunnus']}]' value='{$rivi["kpl"]}' />";
+			if ($rivi['var'] == "O") {
+				$kpl = '';
+			}
+			else {
+				$kpl = $rivi['kpl'];
+			}
+			echo "<input type='text' size='4' name='kappalemaarat[{$rivi['tunnus']}]' value='{$kpl}' />";
 		}
 		else {
 			echo "{$rivi["kpl"]}";
@@ -643,6 +651,7 @@ function lisaa_ennakkorivi($params) {
 	$kpl     = $params['kpl'];
 	$otunnus = $params['lasku_tunnus'];
 	$toim    = $params['toim'];
+	$var     = $params['var'];
 
 	$query = "	SELECT *
 				FROM tuote
@@ -679,6 +688,7 @@ function lisaa_ennakkorivi($params) {
 		'perhekielto'	 => $perhekielto,
 		'perheid'		 => $perheid,
 		'netto'			 => $netto,
+		'var'			 => $var,
 	);
 	lisaa_rivi($parametrit);
 

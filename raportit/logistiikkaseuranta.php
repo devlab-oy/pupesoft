@@ -314,7 +314,7 @@
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						and tilausrivi.otunnus in ($tilaukset)
 						and tilausrivi.tyyppi != 'D'
-						and tilausrivi.var not in ('P','J')
+						and tilausrivi.var not in ('P','J','O')
 						{$kpllisa}
 						ORDER BY tilausrivi.otunnus, tilausrivi.tunnus";
 			$tilausrivi_res = pupe_query($query);

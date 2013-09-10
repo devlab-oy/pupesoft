@@ -232,16 +232,13 @@
 						$var  		= strtoupper(trim($rivi[$ind_Var]));
 						$kommentti	= trim($rivi[$ind_Kommentti]);
 
-						if ($toim == "MYYNTITILI") {
-							// var- ja netto-kentän sisältöä ei tarkisteta myyntitilin rivien syötössä
-						}
-						else if (($var!='') and ($var!='P') and ($var!='H') and ($var!='J')) {
-							echo t("Väärä arvo kentässä var! Sallitut arvot ovat: P, J ja H").". ".t("Rivillä").": $rivilask1. '$var'<br>";
+						if (($var!='') and ($var!='P') and ($var!='H') and ($var!='J')) {
+							echo t("Väärä arvo kentässä var! Sallitut arvot ovat: P, J ja H").". ".t("Rivillä").": $rivilask1. $var<br>";
 							$var = '';
 						}
 
 						if ($netto != '' and $netto != 'N') {
-							echo t("Väärä arvo kentässä netto! Sallitut arvot ovat: tyhjä tai N").". ".t("Rivillä").": $rivilask1. '$netto'<br>";
+							echo t("Väärä arvo kentässä netto! Sallitut arvot ovat: tyhjä tai N").". ".t("Rivillä").": $rivilask1. $netto<br>";
 							$netto = '';
 						}
 					}

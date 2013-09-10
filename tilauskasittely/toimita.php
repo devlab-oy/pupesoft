@@ -94,7 +94,7 @@
 			$query = "	UPDATE tilausrivi
 						SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 						WHERE otunnus 	= '$otunnus'
-						and var not in ('P','J')
+						and var not in ('P','J','O')
 						and yhtio 		= '$kukarow[yhtio]'
 						and keratty    != ''
 						and toimitettu  = ''
@@ -397,7 +397,7 @@
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
 					WHERE tilausrivi.yhtio ='$kukarow[yhtio]'
-					and tilausrivi.var not in ('P','J')
+					and tilausrivi.var not in ('P','J','O')
 					and tilausrivi.tyyppi = 'L'
 					and tilausrivi.otunnus = '$id'
 					ORDER BY varastopaikka";
@@ -437,7 +437,7 @@
 			$alvquery = "	SELECT DISTINCT alv
 							FROM tilausrivi
 							WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'
-							and tilausrivi.var not in ('P','J')
+							and tilausrivi.var not in ('P','J','O')
 							and tilausrivi.tyyppi 	= 'L'
 							and tilausrivi.otunnus	= '$id'
 							and tilausrivi.alv 		< 500";
@@ -450,7 +450,7 @@
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 							WHERE tilausrivi.yhtio 	= '$kukarow[yhtio]'
-							and tilausrivi.var not in ('P','J')
+							and tilausrivi.var not in ('P','J','O')
 							and tilausrivi.tyyppi 	= 'L'
 							and tilausrivi.otunnus 	= '$id'
 							and tilausrivi.alv 		= '$alvrow[alv]'";

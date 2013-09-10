@@ -180,7 +180,7 @@
 		$tilausok++;
 	}
 
-	if (!in_array($row["var"], array('','P','J','H','S','T','U','V','A','B','R'))) {
+	if (!in_array($row["var"], array('','P','J','H','S','T','U','V','A','B','R','O'))) {
 		// Tässä varrien selitykset
 		// P - Puute
 		// J - Jt
@@ -192,9 +192,10 @@
 		// B - Myyntitilirivi joka palautetaan myyntitilistä omaan varastoon
 		// R - Rakennettava rivi
 		// S - who knows?
+		// O - Optio
 
 
-		$varaosavirhe .= t("VIRHE: Var voi olla tyhjä, P, J, H, S, T, U, V, A, B tai R!")."<br>";
+		$varaosavirhe .= t("VIRHE: Var voi olla tyhjä, P, J, H, S, T, U, V, A, B, O tai R!")."<br>";
 		$riviok++;
 		$tilausok++;
 	}

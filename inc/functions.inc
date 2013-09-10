@@ -10698,7 +10698,6 @@ if (!function_exists("hae_kukarow")) {
 	}
 }
 
-
 if (!function_exists("hae_yhtion_parametrit")) {
 	function hae_yhtion_parametrit($yhtio) {
 		global $kukarow, $konserni_yhtiot, $konsernivarasto_yhtiot;
@@ -15708,7 +15707,7 @@ if (!function_exists("splittaa_tilaus")) {
 						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus = '{$otun}'
-						AND tilausrivi.var NOT IN ('P','J')
+						AND tilausrivi.var not in ('P','J','O')
 						AND tilausrivi.tyyppi != 'D'
 						AND tilausrivi.varattu > 0";
 			$tilausrivires = pupe_query($query);
@@ -16417,7 +16416,7 @@ if (!function_exists("tee_keraysera")) {
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus IN ({$row['tunnus']})
 						AND tilausrivi.varattu > 0
-						AND tilausrivi.var NOT IN ('P','J')
+						AND tilausrivi.var not in ('P','J','O')
 						AND tilausrivi.tyyppi != 'D'
 						ORDER BY vh.indeksi";
 			$indeksi_res = pupe_query($query);
@@ -18585,7 +18584,8 @@ if (!function_exists("pupeFileReader")) {
         }
         else {
         	/** PHPExcel kirjasto **/
-        	require_once "PHPExcel/PHPExcel/IOFactory.php";
+        	if (@include("PHPExcel/Classes/PHPExcel/IOFactory.php"));
+			elseif (@include("PHPExcel/PHPExcel/IOFactory.php"));
 
         	/** Tunnistetaan tiedostomuoto **/
         	$inputFileType = PHPExcel_IOFactory::identify($file);
@@ -20453,7 +20453,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-						AND tilausrivi.var NOT IN ('J','P')
+						AND tilausrivi.var not in ('P','J','O')
 						AND tilausrivi.otunnus IN ($tilausnumeroita)";
 			$paino_chk_res = pupe_query($query);
 			$paino_chk_row = mysql_fetch_assoc($paino_chk_res);
@@ -20485,7 +20485,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivi.var NOT IN ('J','P')
+					AND tilausrivi.var not in ('P','J','O')
 					AND tilausrivi.otunnus IN ($tilausnumeroita)
 					ORDER BY sorttauskentta {$order_sorttaus}";
 		$keraysera_res = pupe_query($query);
@@ -20823,7 +20823,7 @@ if (!function_exists('koontilahete_check')) {
 			// Onko kaikki rivit kerätty?
 			$query = "	SELECT lasku.tunnus
 						FROM lasku
-						JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.keratty = '' AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
+						JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.keratty = '' AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O'))
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
 						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 						WHERE lasku.yhtio	  = '{$kukarow['yhtio']}'
@@ -23071,6 +23071,30 @@ if (!function_exists("hae_viivakoodilla")) {
 		}
 
 		return $viivakoodit;
+	}
+}
+
+if (!function_exists('laske_ext_ennakko_hinta')) {
+	function laske_ext_ennakko_hinta($trow) {
+		global $kukarow, $yhtiorow;
+
+		$query = "  SELECT selite AS ennakko_pros_a
+					FROM tuotteen_avainsanat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$trow['tuoteno']}'
+					AND laji = 'parametri_ennakkoale_a'
+					AND selite != ''
+					ORDER BY ennakko_pros_a DESC
+					LIMIT 1";
+		$result = pupe_query($query);
+
+		$hinta = "";
+		if (mysql_num_rows($result) == 1) {
+			$tuotteen_hinta = mysql_fetch_assoc($result);
+			$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
+		}
+
+		return $hinta;
 	}
 }
 

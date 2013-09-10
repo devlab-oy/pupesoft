@@ -49,8 +49,8 @@ class Edi {
 		$edi_order .= "OSTOTIL.OT_VAHVISTUS_FAKSILLA:\n";
 		$edi_order .= "OSTOTIL.OT_FAKSI:\n";
 
-		$billingadress = $order['billing_address']['street'];
-		$shippingadress = $order['shipping_address']['street'];
+		$billingadress = str_replace("\n", ", ", $order['billing_address']['street']);
+		$shippingadress = str_replace("\n", ", ", $order['shipping_address']['street']);
 
 		//Asiakkaan ovt_tunnus MUISTA MUUTTAA
 		$edi_order .= "OSTOTIL.OT_ASIAKASNRO:".$verkkokauppa_asiakasnro."\n";
@@ -105,30 +105,23 @@ class Edi {
 					$_item = $item;
 				}
 
+				// Verollinen yksikköhinta
+				$verollinen_hinta = $_item['original_price'];
+
 				// Veroton yksikköhinta
-				$hinta = $_item['price'];
+				$veroton_hinta = $_item['price'];
 
-				// Rivin alennusmäärä
-				$ale = $_item['discount_amount'];
+				// Rivin alennusprosentti
+				$alennusprosentti = $_item['discount_percent'];
 
-				// Rivin veronmäärä
-				$alveur = $_item['tax_amount'];
-
-				// Rivin veronmäärä ennen alennusta
-				$alveur_ea = $_item['base_tax_amount'];
+				// Verokanta
+				$alvprosentti = $_item['tax_percent'];
 
 				// Verollinen rivihinta
-				$rivihinta_veroll = ($hinta * $kpl) - $ale + $alveur;
-
-				// Veroprossa
-				$alvpros = $_item['tax_percent'];
+				$rivihinta_verollinen = round(($verollinen_hinta * $kpl) * (1 - $alennusprosentti / 100), 2);
 
 				// Veroton rivihinta
-				$rivihinta = round($rivihinta_veroll / (1+($alvpros/100)),2);
-
-				// Aleprossa
-				if ($hinta != 0) $alepros = round((1 - $rivihinta / ($hinta*$kpl)) * 100, 2);
-				else $alepros = 0;
+				$rivihinta_veroton = round(($veroton_hinta * $kpl) * (1 - $alennusprosentti / 100), 2);
 
 	   			$edi_order .= "*RS OSTOTILRIV $i\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_NRO:".$order['increment_id']."\n";
@@ -140,10 +133,10 @@ class Edi {
 				$edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:$kpl\n";
 
 				// Verottomat hinnat
-	    		$edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:$rivihinta\n";
-	    		$edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:$hinta\n";
-	    		$edi_order .= "OSTOTILRIV.OTR_ALENNUS:$alepros\n";
-				$edi_order .= "OSTOTILRIV.OTR_VEROKANTA:$alvpros\n";
+	    		$edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:$rivihinta_veroton\n";
+	    		$edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:$veroton_hinta\n";
+	    		$edi_order .= "OSTOTILRIV.OTR_ALENNUS:$alennusprosentti\n";
+				$edi_order .= "OSTOTILRIV.OTR_VEROKANTA:$alvprosentti\n";
 
 				$edi_order .= "OSTOTILRIV.OTR_VIITE:\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";

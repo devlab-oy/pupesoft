@@ -3606,6 +3606,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'ostotilauksen_toimittajien_saldo_tarkistus') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel['K'] = $trow[$i] == 'K' ? 'selected' : '';
+		
+		$ulos .= "<option value = ''>".t("Ostotilauksella ei tarkisteta toimittajien saldoja")."</option>";
+		$ulos .= "<option value = 'K' {$sel['K']}>".t("Ostotilauksella tarkistetaan toimittajien saldoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'vastaavat_tuotteet_esitysmuoto') {
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

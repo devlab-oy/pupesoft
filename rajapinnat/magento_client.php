@@ -335,6 +335,7 @@ class MagentoClient {
 				'campaign_code'         => utf8_encode($tuotteet[0]['campaign_code']),
 				'onsale'                => utf8_encode($tuotteet[0]['onsale']),
 				'target'                => utf8_encode($tuotteet[0]['target']),
+				'featured_priority'		=> utf8_encode($tuotteet[0]['jarjestys']),
 				'weight'                => $tuotteet[0]['tuotemassa'],
 				'status'                => self::ENABLED,
 				'visibility'            => self::CATALOG_SEARCH, # Configurablet nakyy kaikkialla
@@ -359,7 +360,7 @@ class MagentoClient {
 
 					// Simple tuotteiden parametrit kuten koko ja väri
 					foreach($tuote['parametrit'] as $parametri) {
-						$key = $parametri['option_name'];						
+						$key = $parametri['option_name'];
 						$multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
 					}
 

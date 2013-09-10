@@ -3801,10 +3801,10 @@ if (!function_exists('alvierittely_lahete')) {
 				$tyyppilisa = " and tilausrivi.tyyppi in ('L','T') and tilausrivi.var != 'P' ";
 			}
 			elseif ($tyyppi == "TILAUSVAHVISTUS") {
-				$tyyppilisa = " and tilausrivi.tyyppi in ('L','T') and tilausrivi.var not in ('P','J') ";
+				$tyyppilisa = " and tilausrivi.tyyppi in ('L','T') and tilausrivi.var not in ('P','J','O') ";
 			}
 			else {
-				$tyyppilisa = " and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J') ";
+				$tyyppilisa = " and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J','O') ";
 			}
 		}
 

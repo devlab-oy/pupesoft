@@ -417,29 +417,21 @@
 					echo "</tr>";
 				}
 
-				$as_tunnus = explode(",", $tunnukset);
-
-				$resk_viesti = "";
-				foreach ($as_tunnus as $astun) {
-					$query  = "	SELECT kentta01
-						        FROM kalenteri
-						        WHERE yhtio = '$kukarow[yhtio]'
-						        AND tyyppi  = 'Myyntireskontraviesti'
-					        	AND liitostunnus = '$astun'
-								ORDER BY tunnus desc";
+					$query  = "	SELECT group_concat(distinct kentta01 SEPARATOR '<br>') viestit
+				  			FROM kalenteri
+				   			WHERE yhtio = '$kukarow[yhtio]'
+				   			AND tyyppi  = 'Myyntireskontraviesti'
+				       		AND liitostunnus in ($tunnukset)
+							ORDER BY tunnus desc";
 					$amres = pupe_query($query);
-					
-					while ($amrow = mysql_fetch_assoc($amres)) {
-						$resk_viesti .= "$amrow[kentta01]<br>";
-					}
-				}
-				
-				if ($resk_viesti != '') {
+					$amrow = mysql_fetch_assoc($amres);
+
+				if ($amrow['viestit'] != "") {
 					echo "<tr>
-						<th>".t("Reskontraviesti")."</th><td colspan='2'>$resk_viesti</td>
+						<th>".t("Reskontraviesti")."</th><td colspan='2'>'{$amrow['viestit']}'</td>
 						</tr>";
 				}
-
+				
 				echo "</table><br>";
 
 				if (!isset($vv)) $vv = date("Y");

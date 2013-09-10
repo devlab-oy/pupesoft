@@ -10,18 +10,15 @@ if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
 if (!isset($errors)) $errors = array();
-#if (!isset($viivakoodi)) $viivakoodi = "";
 if (!isset($hyllypaikka)) $hyllypaikka = "";
 
 if (!isset($tuotenumero)) $tuotenumero = "";
-else $tuotenumero = urldecode($tuotenumero);
 
 if (isset($submit)) {
 	switch($submit) {
 		case 'ok':
 
 			$tuotenumero = $data['tuotenumero'];
-#			$viivakoodi = $data['viivakoodi'];
 			$hyllypaikka = $data['hyllypaikka'];
 
 			# Haettu v‰hint‰‰n yhdell‰ kent‰ll‰

@@ -69,13 +69,14 @@ if ($hae_hyllypaikalla and !$hae_tuotenumerolla and !$hae_viivakoodilla) {
 	$query = "	SELECT tuotepaikat.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.tunnus
 				FROM tuotepaikat
 				WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+				AND tuotepaikat.saldo > 0
 				{$query_lisa}
 				ORDER BY {$orderby} {$ascdesc}";
 }
 else {
 	$query = "	SELECT tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.tunnus
 				FROM tuote
-				JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno)
+				JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0)
 				WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 				{$query_lisa}
 				ORDER BY {$orderby} {$ascdesc}";
@@ -86,15 +87,9 @@ $tilausten_lukumaara = mysql_num_rows($result);
 
 $url_lisa_arr = array();
 
-if ($hae_hyllypaikalla) $url_lisa_arr['hyllypaikka'] = urlencode(trim("{$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}"));
-#if ($hae_viivakoodilla) $url_lisa_arr[] = trim($viivakoodi);
-if ($hae_tuotenumerolla) $url_lisa_arr['tuotenumero'] = urlencode(trim($tuotenumero));
-
-$url_lisa = "?".http_build_query($url_lisa_arr);
-
 ### UI ###
 echo "<div class='header'>
-	<button onclick='window.location.href=\"hyllysiirrot.php{$url_lisa}\"' class='button left'><img src='back2.png'></button>
+	<button onclick='window.location.href=\"hyllysiirrot.php\"' class='button left'><img src='back2.png'></button>
 	<h1>",t("USEITA HYLLYPAIKKOJA"), "</h1></div>";
 
 echo "<form name='form1' method='post' action=''>";

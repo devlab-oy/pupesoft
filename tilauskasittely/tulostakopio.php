@@ -410,7 +410,7 @@
 	    echo "</form><br>";
 	}
 
-	if ($tee == "ETSILASKU") {
+	if ($tee == "ETSILASKU" OR $tee == "NAYTATILAUS") {
 
 		// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 		js_openFormInNewWindow();
@@ -845,14 +845,17 @@
 
 		if ($otunnus > 0) {
 			//katotaan löytyykö lasku ja sen kaikki tilaukset
-			$query = "  SELECT laskunro
-						FROM lasku
-						WHERE tunnus = '$otunnus' and lasku.$logistiikka_yhtiolisa";
+			$query = "  SELECT l2.laskunro, l2.tapvm
+						FROM lasku l1
+						JOIN lasku l2 ON l1.yhtio=l2.yhtio and l1.tila=l2.tila and l1.tapvm=l2.tapvm and l1.laskunro=l2.laskunro and l2.tunnus!='$otunnus'
+						WHERE l1.tunnus = '$otunnus'
+						and l1.$logistiikka_yhtiolisa
+						LIMIT 1";
 			$laresult = pupe_query($query);
 			$larow = mysql_fetch_assoc($laresult);
 
 			if ($larow["laskunro"] > 0 and $toim != 'DGD') {
-				$where2 .= " and lasku.laskunro = '$larow[laskunro]' ";
+				$where2 .= " and lasku.laskunro = '$larow[laskunro]' and lasku.tapvm='$larow[tapvm]' ";
 
 				$where3 = "";
 
@@ -873,24 +876,21 @@
 			//katotaan löytyykö lasku ja sen kaikki tilaukset
 			$query = "  SELECT group_concat(otunnus) tilaukset
 						FROM kerayserat
-						WHERE nro = '$kerayseran_numero' and kerayserat.$logistiikka_yhtiolisa";
+						WHERE nro = '$kerayseran_numero'
+						and kerayserat.$logistiikka_yhtiolisa";
 			$laresult = pupe_query($query);
 			$larow = mysql_fetch_assoc($laresult);
 
 			if ($larow["tilaukset"] != "") {
-
 				$kerayseran_tilaukset = $larow["tilaukset"];
 
 				$where2 .= " and lasku.tunnus in ({$larow["tilaukset"]}) ";
-
 				$joinlisa = " JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio and kerayserat.otunnus = lasku.tunnus) ";
 			}
 			else {
 				$where2 .= " and lasku.tunnus = 0 ";
+				$kerayseran_tilaukset = "";
 			}
-		}
-		else {
-			$kerayseran_tilaukset = $otunnus;
 		}
 
 		if (!isset($ascdesc)) $ascdesc = "desc";

@@ -36,6 +36,11 @@ if (isset($submit)) {
 		case 'kerayspaikka':
 
 			$url = "tuotepaikan_tunnus={$tuotepaikan_tunnus}&tullaan=tuotteen_hyllypaikan_muutos";
+
+			if (trim($minne_hyllypaikka) != '') {
+				$url .= "&tuotepaikka={$minne_hyllypaikka}&mista_koodi={$mista_koodi}&minne_koodi={$minne_koodi}";
+			}
+
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?{$url}'>"; exit();
 			break;
 		case 'ok':

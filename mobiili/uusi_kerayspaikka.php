@@ -17,6 +17,8 @@ if (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
 
 	$data = array(
 		'tuotepaikan_tunnus' => $tuotepaikan_tunnus,
+		'mista_koodi' => $mista_koodi,
+		'minne_koodi' => $minne_koodi,
 	);
 
 	$url = http_build_query($data);
@@ -42,6 +44,7 @@ else {
 
 // Virheet
 $errors = array();
+if (!isset($tuotepaikka)) $tuotepaikka = '';
 
 // Suuntalavan kanssa
 if (!empty($alusta_tunnus)) {
@@ -447,7 +450,7 @@ echo "	<tr>
 		</tr>
 		<tr>
 			<th>",t("Uusi tuotepaikka"),"</td>
-			<td><input type='text' name='tuotepaikka' /></td>
+			<td><input type='text' name='tuotepaikka' value='{$tuotepaikka}' /></td>
 		</tr>
 		<tr>
 			<th>",t("Hälytysraja"),"</td>
@@ -482,6 +485,8 @@ if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
 elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
 	echo "<input type='hidden' name='tuotepaikan_tunnus' value='{$tuotepaikan_tunnus}' />";
 	echo "<input type='hidden' name='tullaan' value='{$tullaan}' />";
+	echo "<input type='hidden' name='mista_koodi' value='{$mista_koodi}' />";
+	echo "<input type='hidden' name='minne_koodi' value='{$minne_koodi}' />";
 }
 
 echo "</div>";

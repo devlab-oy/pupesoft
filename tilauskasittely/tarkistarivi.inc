@@ -1098,7 +1098,7 @@
 
 							$myytavissa_font = $vmyytavissa < 1 ? "error" : "ok";
 
-							$vastaavat_table .= "<tr class='spec aktiivi'>"
+							$vastaavat_table .= "<tr class='back aktiivi'>"
 							 			."<td>{$_tuote["tuoteno"]} $vaihtoehtoinen</td>"
 										."<td>{$tvrow["nimitys"]}</td>"
 							 			."<td align='right'><font class='{$myytavissa_font}'>".sprintf("%.2f", $vmyytavissa)."</font></td>"

@@ -154,7 +154,7 @@ echo "<script type='text/javascript'>
 		});
 
 		function doFocus() {
-		    var focusElementId = 'viivakoodi';
+		    var focusElementId = 'hyllypaikka';
 		    var textBox = document.getElementById(focusElementId);
 		    textBox.focus();
 	    }

@@ -425,20 +425,20 @@
 						        FROM kalenteri
 						        WHERE yhtio = '$kukarow[yhtio]'
 						        AND tyyppi  = 'Myyntireskontraviesti'
-						        AND liitostunnus = '$astun'
+					        	AND liitostunnus = '$astun'
 								ORDER BY tunnus desc";
 					$amres = pupe_query($query);
 					
 					while ($amrow = mysql_fetch_assoc($amres)) {
 						$resk_viesti .= "$amrow[kentta01]<br>";
-					}	
-					if ($resk_viesti != '') {
-						echo "<tr>
-							<th>".t("Reskontraviesti")."</th><td colspan='2'>$resk_viesti</td>
-							</tr>";
 					}
 				}
 				
+				if ($resk_viesti != '') {
+					echo "<tr>
+						<th>".t("Reskontraviesti")."</th><td colspan='2'>$resk_viesti</td>
+						</tr>";
+				}
 
 				echo "</table><br>";
 

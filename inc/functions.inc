@@ -18581,7 +18581,8 @@ if (!function_exists("pupeFileReader")) {
         }
         else {
         	/** PHPExcel kirjasto **/
-        	require_once "PHPExcel/PHPExcel/IOFactory.php";
+        	if (@include("PHPExcel/Classes/PHPExcel/IOFactory.php"));
+			elseif (@include("PHPExcel/PHPExcel/IOFactory.php"));
 
         	/** Tunnistetaan tiedostomuoto **/
         	$inputFileType = PHPExcel_IOFactory::identify($file);

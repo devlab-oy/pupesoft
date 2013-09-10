@@ -818,9 +818,11 @@
 				if ($isatuotteen_pakkauskoko != 1) {
 
 					// Pyöristetään koko samankaltaisten nippu ylöspäin seuraavaan pakkauskokoon
-					//@TODO mitä jos $isatuotteen_pakkauskoko = 0
 					if ($isatuotteen_pakkauskoko != 0) {
 						$samankaltaisten_valmistusmaara = round($valmistettava_yhteensa / $isatuotteen_pakkauskoko) * $isatuotteen_pakkauskoko;
+					}
+					else {
+						$samankaltaisten_valmistusmaara = $valmistettava_yhteensa;
 					}
 
 					foreach ($kasiteltavat_tuotteet as $key => $kasittelyssa) {
@@ -876,29 +878,33 @@
 			// loopataan tuotteet läpi
 			$linja_kohtainen_paivan_toteutunut_kapasiteetti_varaus = 0;
 			foreach ($valmistettavat_tuotteet as $tuoterivi) {
+
 				if ($tuoterivi['valmistuslinja'] != '') {
+
 					if ($tuoterivi['valmistuslinja'] != $EDlinja or $EDlinja === false) {
 						$linja_kohtainen_paivan_toteutunut_kapasiteetti_varaus = 0;
 					}
 
 					$tuoterivin_valmistuslinja = search_array_key_for_value_recursive($valmistuslinjat, 'selite', $tuoterivi['valmistuslinja']);
-					$valmistuslinjojen_kumulatiiviset_ajat[$tuoterivin_valmistuslinja[0]['selite']]['varaus_sekunneissa'] += $tuoterivi['valmistusaika_sekunneissa'];
-					//@TODO jos valmistuslinjaston päiväkapasiteetti on 0?
+					$valmistuslinjojen_kumulatiiviset_ajat[$tuoterivin_valmistuslinja[0]['selite']]['varaus_sekunneissa'] += $tuoterivi['valmistusaika'];
+
 					if ((int)$tuoterivin_valmistuslinja[0]['selitetark_2'] != 0) {
-						$mahtuuko_valmistus_linjaston_taman_paivan_valmistuksiin =  ((int)$linja_kohtainen_paivan_toteutunut_kapasiteetti_varaus + (int)$tuoterivi['valmistusaika_sekunneissa']) / (int)$tuoterivin_valmistuslinja[0]['selitetark_2'];
+						$mahtuuko_valmistus_linjaston_taman_paivan_valmistuksiin =  ((int) $linja_kohtainen_paivan_toteutunut_kapasiteetti_varaus + (int) $tuoterivi['valmistusaika']) / (int) $tuoterivin_valmistuslinja[0]['selitetark_2'];
 					}
 					else {
 						$mahtuuko_valmistus_linjaston_taman_paivan_valmistuksiin = 0;
 					}
+
 					if ($mahtuuko_valmistus_linjaston_taman_paivan_valmistuksiin > 1) {
 						//jos käsittelyssä oleva valmistus ei enää mahdu linjaston päivän valmistuksiin,
 						//siirretään se seuraavalle päivälle.
 						$valmistuslinjojen_kumulatiiviset_ajat[$tuoterivin_valmistuslinja[0]['selite']]['varaus_paivissa']++;
-						$linja_kohtainen_paivan_toteutunut_kapasiteetti_varaus = (int)$tuoterivi['valmistusaika_sekunneissa'];
+						$linja_kohtainen_paivan_toteutunut_kapasiteetti_varaus = (int)$tuoterivi['valmistusaika'];
 					}
 					else {
-						$linja_kohtainen_paivan_toteutunut_kapasiteetti_varaus += $tuoterivi['valmistusaika_sekunneissa'];
+						$linja_kohtainen_paivan_toteutunut_kapasiteetti_varaus += $tuoterivi['valmistusaika'];
 					}
+
 					//asetetaan varausajat myös tuoterivi muuttujaan, jotta ne saadaan exceliin
 					$tuoterivi['varaus_sekunneissa'] = $valmistuslinjojen_kumulatiiviset_ajat[$tuoterivin_valmistuslinja[0]['selite']]['varaus_sekunneissa'];
 					$tuoterivi['varaus_paivissa'] = $valmistuslinjojen_kumulatiiviset_ajat[$tuoterivin_valmistuslinja[0]['selite']]['varaus_paivissa'];
@@ -922,7 +928,7 @@
 					$valmistaja_header .= "<th>".t("Kumulatiivinenaika sekunneissa")."</th>";
 					$valmistaja_header .= "<th>".t("Pakkauskoko")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistusaika yhteensä sekunneissa")."</th>";
-					$valmistaja_header .= "<th>".t("Valmistuspäiviä yhteensä")."</th>";
+					$valmistaja_header .= "<th>".t("Päivä")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistuksessa")."</th>";
 					$valmistaja_header .= "<th>".t("Riitto Pv")."</th>";
 					$valmistaja_header .= "<th>".t("Raaka")."-<br>".t("aine")." ".t("riitto")."</th>";
@@ -1076,7 +1082,8 @@
 
 				$formin_pointteri++;
 
-				$raaka_aineet = hae_raaka_aineet($tuoterivi['tuoteno'], (int) $lahde_varasto);
+				//$raaka_aineet = hae_raaka_aineet($tuoterivi['tuoteno'], (int) $lahde_varasto);
+				$raaka_aineet = raaka_aineiden_riitto($tuoterivi['tuoteno'], (int) $lahde_varasto, 'X');
 
 				echo "<tr class='raaka_aineet_{$toggle_counter} raaka_aineet_hidden'>";
 				echo "<td colspan='18'>";
@@ -1086,22 +1093,31 @@
 				echo "<th>".t('Tuotenumero')."</th>";
 				echo "<th>".t('Nimitys')."</th>";
 				echo "<th>".t('Saldo')."</th>";
+				echo "<th>".t('Riitto')."</th>";
 				echo "</thead>";
 				echo "<tbody>";
 				foreach ($raaka_aineet as $raaka_aine) {
-					echo "<tr class='aktiivi'>";
-					echo "<td>";
-					echo "<a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($raaka_aine["tuoteno"])."&lopetus=$lopetus'>".$raaka_aine['tuoteno'] . "</a>";
-					echo "</td>";
+					if ($raaka_aine['riitto'] < $tuoterivi['valmistusmaara']) {
+						echo "<tr class='aktiivi'>";
 
-					echo "<td>";
-					echo  $raaka_aine['nimitys'];
-					echo "</td>";
+						echo "<td>";
+						echo "<a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($raaka_aine["tuoteno"])."&lopetus=$lopetus'>".$raaka_aine['tuoteno']."</a>";
+						echo "</td>";
 
-					echo "<td>";
-					echo $raaka_aine['saldo'];
-					echo "</td>";
-					echo "</tr>";
+						echo "<td>";
+						echo $raaka_aine['nimitys'];
+						echo "</td>";
+
+						echo "<td>";
+						echo $raaka_aine['saldo'];
+						echo "</td>";
+
+						echo "<td>";
+						echo $raaka_aine['riitto'];
+						echo "</td>";
+
+						echo "</tr>";
+					}
 				}
 				echo "</tbody>";
 				echo "</table>";

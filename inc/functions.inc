@@ -18855,7 +18855,7 @@ if (!function_exists('gauge')) {
 
 // Lasketaan moneenko valmisteeseen raaka-aineet riittää
 if (!function_exists('raaka_aineiden_riitto')) {
-	function raaka_aineiden_riitto($tuoteno, $varasto = 0) {
+	function raaka_aineiden_riitto($tuoteno, $varasto = 0, $return_type = '') {
 
 		global $kukarow;
 
@@ -18863,6 +18863,7 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		$join_lisa = "";
 		$varasto = (int) $varasto;
 		$tuoteno = mysql_real_escape_string($tuoteno);
+		$return = array();
 
 		// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
 		if ($varasto != 0) {
@@ -18875,7 +18876,8 @@ if (!function_exists('raaka_aineiden_riitto')) {
 
 		// Loopataan lapsituotteet läpi
 		$query = "	SELECT tuoteperhe.tuoteno,
-					tuoteperhe.kerroin
+					tuoteperhe.kerroin,
+					tuote.nimitys
 					FROM tuoteperhe
 					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
 						AND tuote.tuoteno = tuoteperhe.tuoteno
@@ -18896,7 +18898,14 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		while ($row = mysql_fetch_assoc($result)) {
 			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($row["tuoteno"], '', $varasto);
 
-			$riitto = $myytavissa / $row["kerroin"];
+			$riitto = round($myytavissa / $row["kerroin"], 2);
+
+			$return[] = array(
+				'tuoteno'	 => $row['tuoteno'],
+				'nimitys'	 => $row['nimitys'],
+				'saldo'		 => $myytavissa,
+				'riitto'	 => $riitto,
+			);
 
 			// Otetaan telteen pienin riitto
 			if ($riitto < $voidaan_valmistaa) {
@@ -18907,7 +18916,12 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		// Näytetään alle nollat nollana ja pyöristetään desimaalit alas
 		$voidaan_valmistaa = $voidaan_valmistaa < 0 ? 0 : floor($voidaan_valmistaa);
 
-		return $voidaan_valmistaa;
+		if ($return_type != "") {
+			return $return;
+		}
+		else {
+			return $voidaan_valmistaa;
+		}
 	}
 }
 
@@ -18942,6 +18956,12 @@ if (!function_exists('hae_raaka_aineet')) {
 		$raaka_aineet = array();
 		while($raaka_aine = mysql_fetch_assoc($result)) {
 			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($raaka_aine["tuoteno"], '', $varasto);
+
+			$riitto = $myytavissa / $raaka_aine["kerroin"];
+
+			if ($riitto >= 1) {
+
+			}
 			$raaka_aine['saldo'] = $myytavissa;
 			
 			$raaka_aineet[] = $raaka_aine;

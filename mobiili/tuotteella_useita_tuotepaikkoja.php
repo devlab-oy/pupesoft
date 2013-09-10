@@ -99,8 +99,16 @@ echo "<th>",t("Tuoteno"),"</th>";
 echo "<th>",t("Hyllypaikka"),"</th>";
 echo "</tr>";
 
+$_cnt = 0;
+
 # Loopataan ostotilaukset
 while($row = mysql_fetch_assoc($result)) {
+
+	list($siirrettava_yht, $siirrettavat_rivit) = laske_siirrettava_maara($row);
+
+	if ($siirrettava_yht == 0) continue;
+
+	$_cnt++;
 
 	echo "<tr>";
 	echo "<td><a href='tuotteen_hyllypaikan_muutos.php?tuotepaikan_tunnus={$row['tunnus']}'>{$row['tuoteno']}</td>";
@@ -109,7 +117,10 @@ while($row = mysql_fetch_assoc($result)) {
 }
 
 echo "</table></div>";
-echo t("Rivej‰"),": ".mysql_num_rows($result);
+
+if ($_cnt == 0) {
+	echo "<span class='error'>",t("Yht‰‰n siirre‰tt‰v‰‰ tuotetta / tuotepaikkaa ei ole"),"</span>";
+}
 
 echo "<div class='controls'></div>";
 echo "</form>";

@@ -873,25 +873,21 @@
 			//katotaan löytyykö lasku ja sen kaikki tilaukset
 			$query = "  SELECT group_concat(otunnus) tilaukset
 						FROM kerayserat
-						WHERE nro = '$kerayseran_numero' and kerayserat.$logistiikka_yhtiolisa";
+						WHERE nro = '$kerayseran_numero'
+						and kerayserat.$logistiikka_yhtiolisa";
 			$laresult = pupe_query($query);
 			$larow = mysql_fetch_assoc($laresult);
 
 			if ($larow["tilaukset"] != "") {
-
 				$kerayseran_tilaukset = $larow["tilaukset"];
-
+				
 				$where2 .= " and lasku.tunnus in ({$larow["tilaukset"]}) ";
-
 				$joinlisa = " JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio and kerayserat.otunnus = lasku.tunnus) ";
 			}
 			else {
 				$where2 .= " and lasku.tunnus = 0 ";
 				$kerayseran_tilaukset = "";
 			}
-		}
-		else {
-			$kerayseran_tilaukset = "";
 		}
 
 		if (!isset($ascdesc)) $ascdesc = "desc";

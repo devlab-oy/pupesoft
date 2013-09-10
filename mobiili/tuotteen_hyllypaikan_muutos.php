@@ -23,77 +23,6 @@ if ($tuotepaikan_tunnus == 0 or $siirretty) {
 	exit();
 }
 
-if (!function_exists('laske_siirrettava_maara')) {
-	function laske_siirrettava_maara($row) {
-		global $kukarow, $yhtiorow;
-
-		$siirrettavat_rivit = array();
-
-		// Lets lock up
-		$query = "	LOCK TABLES
-					lasku READ,
-					lasku AS l1 READ,
-					tilausrivi READ,
-					tilausrivi AS t1 READ,
-					tilausrivi AS t2 READ,
-					tuote READ,
-					tuotepaikat READ,
-					varastopaikat READ";
-		$res = pupe_query($query);
-
-		list($saldo, $hyllyssa, $siirrettava_yht, $devnull) = saldo_myytavissa($row['tuoteno'], '', 0, '', $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso']);
-
-		$query = "	(SELECT t1.tunnus, t1.otunnus, t1.varattu
-					FROM lasku AS l1
-					JOIN tilausrivi AS t1 ON (
-						t1.yhtio = l1.yhtio AND
-						t1.otunnus = l1.tunnus AND
-						t1.tuoteno = '{$row['tuoteno']}' AND
-						t1.hyllyalue = '{$row['hyllyalue']}' AND
-						t1.hyllynro = '{$row['hyllynro']}' AND
-						t1.hyllyvali = '{$row['hyllyvali']}' AND
-						t1.hyllytaso = '{$row['hyllytaso']}' AND
-						t1.tyyppi IN ('L','G') AND
-						t1.var IN ('','H') AND
-						t1.keratty = '' AND
-						t1.uusiotunnus = 0 AND
-						t1.kpl = 0 AND
-						t1.varattu > 0
-					)
-					WHERE l1.yhtio = '{$kukarow['yhtio']}'
-					AND l1.tila = 'N'
-					AND l1.alatila IN ('','A'))
-					UNION
-					(SELECT t2.tunnus, t2.otunnus, t2.jt + t2.varattu AS varattu
-					FROM tilausrivi AS t2
-					WHERE t2.yhtio = '{$kukarow['yhtio']}'
-					AND	t2.tuoteno = '{$row['tuoteno']}'
-					AND	t2.hyllyalue = '{$row['hyllyalue']}'
-					AND	t2.hyllynro = '{$row['hyllynro']}'
-					AND	t2.hyllyvali = '{$row['hyllyvali']}'
-					AND	t2.hyllytaso = '{$row['hyllytaso']}'
-					AND	t2.tyyppi IN ('L','G')
-					AND	t2.var = 'J'
-					AND	t2.keratty = ''
-					AND	t2.uusiotunnus = 0
-					AND	t2.kpl = 0
-					AND	t2.jt + t2.varattu > 0)";
-		$result = pupe_query($query);
-
-		while ($saldorow = mysql_fetch_assoc($result)) {
-
-			$siirrettava_yht += $saldorow['varattu'];
-			$siirrettavat_rivit[] = $saldorow['tunnus'];
-		}
-
-		// poistetaan lukko
-		$query = "UNLOCK TABLES";
-		$res   = pupe_query($query);
-
-		return array($siirrettava_yht, $siirrettavat_rivit);
-	}
-}
-
 $query = "	SELECT tuotepaikat.*, tuote.yksikko
 			FROM tuotepaikat
 			JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
@@ -104,6 +33,11 @@ $row = mysql_fetch_assoc($res);
 
 if (isset($submit)) {
 	switch($submit) {
+		case 'kerayspaikka':
+
+			$url = "tuotepaikan_tunnus={$tuotepaikan_tunnus}&tullaan=tuotteen_hyllypaikan_muutos";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?{$url}'>"; exit();
+			break;
 		case 'ok':
 
 			# Tarkistetaan koodi
@@ -257,6 +191,10 @@ if ($nakyma == 'siirrä') {
 
 	echo "<input type='hidden' name='siirretty' value='1' />";
 
+	if (isset($aiempi_siirrettava_yht) and $aiempi_siirrettava_yht != $siirrettava_yht) {
+		echo "<span class='error'>",t("Huomioithan, että siirrettävä määrä on muuttunut (%d)", "", $aiempi_siirrettava_yht),"</span><br />";
+	}
+
 	echo "<span class='message'>",t("Siirrä %d tuotetta", "", $siirrettava_yht),"</span>";
 
 	echo "<div class='controls'>";
@@ -282,9 +220,13 @@ else {
 	echo "<td>{$row['tuoteno']}</td>";
 	echo "</tr>";
 
+	list($siirrettava_yht, $siirrettavat_rivit) = laske_siirrettava_maara($row);
+
+	echo "<input type='hidden' name='aiempi_siirrettava_yht' value='{$siirrettava_yht}' />";
+
 	echo "<tr>";
 	echo "<th>",t("Määrä"),"</th>";
-	echo "<td>{$row['saldo']} {$row['yksikko']}</td>";
+	echo "<td>{$siirrettava_yht} {$row['yksikko']}</td>";
 	echo "</tr>";
 
 	echo "<tr>";
@@ -308,7 +250,7 @@ else {
 	echo "</table>";
 	echo "<div class='controls'>";
 	echo "<button name='submit' class='button left' id='haku_nappi' value='ok' onclick='submit();' class='button'>",t("OK"),"</button>";
-	echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI HYLLYPAIKKA"),"</button>";
+	echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI KERÄYSPAIKKA"),"</button>";
 	echo "</div>";
 	echo "</form>";
 

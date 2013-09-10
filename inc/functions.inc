@@ -1317,12 +1317,12 @@ if (!function_exists("saldo_myytavissa")) {
 			if ($tyyppi == "E") {
 				$valinta1 = " varastopaikat.tyyppi = 'E' and ";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 			elseif ($tyyppi == "V") {
 				$valinta1 = " varastopaikat.tyyppi = 'V' and ";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 			elseif ($tyyppi == "KAIKKI") {
 				$valinta1 = "";
@@ -1332,19 +1332,19 @@ if (!function_exists("saldo_myytavissa")) {
 			elseif ($tyyppi == "ORVOT") {
 				$valinta1 = "";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is null ";
+				$valinta3 = " varastopaikat.tyyppi is null ";
 			}
 			else {
 				$valinta1 = " (varastopaikat.tyyppi = '' or (varastopaikat.tyyppi = 'E' and varastopaikat.erikoistoimitus_alarajasumma > 0 and '$tuote[myyntihinta]' >= varastopaikat.erikoistoimitus_alarajasumma)) and ";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 
 			// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
 			if ((is_numeric($varasto) and $varasto > 0) or (!is_numeric($varasto) and $varasto != "")) {
 				$valinta1 = " varastopaikat.tunnus in ($varasto) and ";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 
 			// Katotaan halutaanko saldo vaan joltain tietyltä varasopaikalta, silloinkin unohdetaan edellä annettu tyyppi kokonaan
@@ -1354,7 +1354,7 @@ if (!function_exists("saldo_myytavissa")) {
 								and tuotepaikat.hyllynro  = '$hyllynro'
 								and tuotepaikat.hyllyvali = '$hyllyvali'
 								and tuotepaikat.hyllytaso = '$hyllytaso' ";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 
 			if ($maa != "") {
@@ -1389,7 +1389,7 @@ if (!function_exists("saldo_myytavissa")) {
 							and tuotepaikat.tuoteno = '$tuoteno'
 							$valinta2
 							GROUP BY tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi
-							$valinta3";
+							HAVING $valinta3";
 			}
 			else {
 				$query = "	SELECT tuotepaikat.saldo, tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi
@@ -1401,7 +1401,7 @@ if (!function_exists("saldo_myytavissa")) {
 							WHERE tuotepaikat.yhtio = '$yhtiolisa'
 							and tuotepaikat.tuoteno = '$tuoteno'
 							$valinta2
-							$valinta3";
+							AND $valinta3";
 			}
 			$result = pupe_query($query);
 

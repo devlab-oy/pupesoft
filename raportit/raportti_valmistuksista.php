@@ -43,34 +43,7 @@
 	if (!isset($kk2)) $kk2 = date("m", mktime(0, 0, 0, date("m"), 0, date("Y")));
 	if (!isset($vv2)) $vv2 = date("Y", mktime(0, 0, 0, date("m"), 0, date("Y")));
 
-	$valmistuksien_tilat = array(
-		0 => array(
-			'value' => '',
-			'dropdown_text' => t('Näytä kaikki valmistukset'),
-			'query_where' => '',
-		),
-		1 => array(
-			'value' => 'K',
-			'dropdown_text' => t('Näytä valmistukset, jotka ovat kesken'),
-			'query_where' => ' AND lasku.tila IN ("V") AND lasku.alatila IN ("")',
-		),
-		2 => array(
-			'value' => 'T',
-			'dropdown_text' => t('Näytä valmistukset, jotka ovat tulostettu'),
-			'query_where' => ' AND lasku.tila IN ("V") AND lasku.alatila IN ("A")',
-		),
-		3 => array(
-			'value' => 'R',
-			'dropdown_text' => t('Näytä valmistukset, jotka ovat kerätty'),
-			'query_where' => ' AND lasku.tila IN ("V") AND lasku.alatila IN ("C")',
-		),
-		4 => array(
-			'value' => 'V',
-			'dropdown_text' => t('Näytä valmistukset, jotka ovat valmistettu'),
-			'query_where' => ' AND lasku.tila IN ("V") AND lasku.alatila IN ("V")',
-		),
-	);
-
+	$valmistuksien_tilat = hae_valmistuksien_tilat('myos_valmistukset_jotka_valmistettu');
 	$valmistuslinjat = hae_valmistuslinjat();
 
 	if (checkdate($kk1, $pp1, $vv1) and checkdate($kk2, $pp2, $vv2)) {
@@ -205,9 +178,11 @@
 					ifnull(sum(tilausrivi.kpl), 0) valmistettu,
 					ifnull(sum(tilausrivi.varattu), 0) valmistetaan
 					FROM tuote
-					JOIN tilausrivi on (tilausrivi.yhtio = tuote.yhtio
-						AND tilausrivi.tuoteno = tuote.tuoteno and tilausrivi.tyyppi in ('W','M')
-						AND tilausrivi.toimaika between '{$pvmalku}' and '{$pvmloppu}'
+					JOIN tilausrivi
+					ON ( tilausrivi.yhtio = tuote.yhtio
+						AND tilausrivi.tuoteno = tuote.tuoteno
+						AND tilausrivi.tyyppi in ('W','M')
+						AND tilausrivi.toimaika between '{$pvmalku}' AND '{$pvmloppu}'
 						AND tilausrivi.toimitettuaika = '0000-00-00 00:00:00')
 					JOIN lasku
 					ON ( lasku.yhtio = tuote.yhtio
@@ -240,7 +215,7 @@
 					JOIN tilausrivi on (tilausrivi.yhtio = tuote.yhtio
 						AND tilausrivi.tuoteno = tuote.tuoteno
 						AND tilausrivi.tyyppi in ('W','M')
-						AND tilausrivi.toimitettuaika between '{$pvmalku} 00:00:00' and '{$pvmloppu} 23:59:59')
+						AND tilausrivi.toimitettuaika between '{$pvmalku} 00:00:00' AND '{$pvmloppu} 23:59:59')
 					JOIN lasku
 					ON ( lasku.yhtio = tuote.yhtio
 						AND lasku.tunnus = tilausrivi.otunnus

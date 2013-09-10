@@ -614,7 +614,7 @@ function jaa_valmistus($tunnus, $params) {
 
 		// Alkuperäiselle jätettävä määrä ja kopiolle tuleva määrä
 		$original_kpl = $params[$valmiste['tunnus']]; // esim. valmistettiin 3
-		$copy_kpl = $valmiste['varattu'] - $original_kpl;				 // 9 = 12 - 3, uudelle valmisteelle siirretään 9 kpl
+		$copy_kpl = $valmiste['varattu'] - $original_kpl;  // 9 = 12 - 3, uudelle valmisteelle siirretään 9 kpl
 		$raaka_aineen_suhde = $original_kpl / $valmiste['varattu'];
 
 		// Jos syötetty nolla ei tehdä kopioita
@@ -693,7 +693,7 @@ function jaa_valmistus($tunnus, $params) {
 
 				// Raaka-aineen kappaleet
 				$r_original_kpl = $raaka_aine['varattu'] * $raaka_aineen_suhde; # 3 = 12 * 0.25
-				$r_copy_kpl = $raaka_aine['varattu'] - $r_original_kpl;	 # 9 = 12 - 3
+				$r_copy_kpl = $raaka_aine['varattu'] - $r_original_kpl;  # 9 = 12 - 3
 				// Kopioidaan Raaka-aine
 				$poikkeukset = array(
 					'tilausrivi.varattu' => $r_copy_kpl,
@@ -722,4 +722,50 @@ function jaa_valmistus($tunnus, $params) {
 	} // End of valmisteet
 	// palautetaan kopioidun laskun tunnus
 	$return = (isset($copy['tunnus'])) ? $copy['tunnus'] : null;
+}
+
+/**
+ * Hakee käyttöliittymässä dropdowniin piirrettävät valmistuksien tila rajaukset
+ * (raportti_valmistuksista.php ja puuttuvat_raaka_aineet.php)
+ *
+ * @param string $tyyppi puuttuvat_raaka_aineet.php ei haluta valmistuksia, jotka on jo valmistettu
+ * @global type $kukarow
+ * @global type $yhtiorow
+ * @return array
+ */
+function hae_valmistuksien_tilat($tyyppi = '') {
+	global $kukarow, $yhtiorow;
+
+	$valmistuksien_tilat = array(
+		0	 => array(
+			'value'			 => '',
+			'dropdown_text'	 => t('Näytä kaikki valmistukset'),
+			'query_where'	 => '',
+		),
+		1	 => array(
+			'value'			 => 'K',
+			'dropdown_text'	 => t('Näytä valmistukset, jotka ovat kesken'),
+			'query_where'	 => ' AND lasku.tila IN ("V") AND lasku.alatila IN ("")',
+		),
+		2	 => array(
+			'value'			 => 'T',
+			'dropdown_text'	 => t('Näytä valmistukset, jotka ovat tulostettu'),
+			'query_where'	 => ' AND lasku.tila IN ("V") AND lasku.alatila IN ("A")',
+		),
+		3	 => array(
+			'value'			 => 'R',
+			'dropdown_text'	 => t('Näytä valmistukset, jotka ovat kerätty'),
+			'query_where'	 => ' AND lasku.tila IN ("V") AND lasku.alatila IN ("C")',
+		),
+	);
+	
+	if (!empty($tyyppi)) {
+		$a = array(
+			'value'			 => 'V',
+			'dropdown_text'	 => t('Näytä valmistukset, jotka ovat valmistettu'),
+			'query_where'	 => ' AND lasku.tila IN ("V") AND lasku.alatila IN ("V")',
+		);
+		array_push($valmistuksien_tilat, $a);
+	}
+	return $valmistuksien_tilat;
 }

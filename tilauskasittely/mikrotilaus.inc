@@ -232,16 +232,13 @@
 						$var  		= strtoupper(trim($rivi[$ind_Var]));
 						$kommentti	= trim($rivi[$ind_Kommentti]);
 
-						if ($toim == "MYYNTITILI") {
-							echo "KISSA";
-						}
-						else if (($var!='') and ($var!='P') and ($var!='H') and ($var!='J')) {
-							echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: P, J ja H").". ".t("Rivill‰").": $rivilask1. '$var'<br>";
+						if (($var!='') and ($var!='P') and ($var!='H') and ($var!='J')) {
+							echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: P, J ja H").". ".t("Rivill‰").": $rivilask1. $var<br>";
 							$var = '';
 						}
 
 						if ($netto != '' and $netto != 'N') {
-							echo t("V‰‰r‰ arvo kent‰ss‰ netto! Sallitut arvot ovat: tyhj‰ tai N").". ".t("Rivill‰").": $rivilask1. '$netto'<br>";
+							echo t("V‰‰r‰ arvo kent‰ss‰ netto! Sallitut arvot ovat: tyhj‰ tai N").". ".t("Rivill‰").": $rivilask1. $netto<br>";
 							$netto = '';
 						}
 					}

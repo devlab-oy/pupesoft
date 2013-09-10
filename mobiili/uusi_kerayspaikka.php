@@ -140,7 +140,7 @@ if (isset($submit) and trim($submit) != '') {
 			$result = pupe_query($query);
 			$tuote = mysql_fetch_assoc($result);
 
-			if (count($siirra_saldot) > 0) {
+			if (isset($siirra_saldot) and count($siirra_saldot) > 0) {
 				if (count($siirra_saldot) == 1 and $siirra_saldot[0] == 'default') {
 					$siirra_saldot = '';
 				}
@@ -150,6 +150,18 @@ if (isset($submit) and trim($submit) != '') {
 			}
 			else {
 				$siirra_saldot = '';
+			}
+
+			if (isset($poista_vanha_tuotepaikka) and count($poista_vanha_tuotepaikka) > 0) {
+				if (count($poista_vanha_tuotepaikka) == 1 and $poista_vanha_tuotepaikka[0] == 'default') {
+					$poista_vanha_tuotepaikka = '';
+				}
+				else {
+					$poista_vanha_tuotepaikka = $poista_vanha_tuotepaikka[1];
+				}
+			}
+			else {
+				$poista_vanha_tuotepaikka = '';
 			}
 
 			if ($tuote['sarjanumeroseuranta'] != '' and $siirra_saldot == 'on') {
@@ -213,6 +225,31 @@ if (isset($submit) and trim($submit) != '') {
 				if ($oletus == 'X') {
 					// Asetetaan oletuspaikka uusiksi
 					paivita_oletuspaikka($row['tuoteno'], $hylly);
+
+					if ($poista_vanha_tuotepaikka == 'on') {
+
+						// Lukitaan taulut saldojen siirtoa varten
+						$query = "LOCK TABLE
+									tuotepaikat WRITE";
+						$result = pupe_query($query);
+
+						$query = "	UPDATE tuotepaikat SET
+									muuttaja      = '{$kukarow['kuka']}',
+									muutospvm     = now(),
+									poistettava   = 'D'
+									WHERE tuoteno = '{$row['tuoteno']}'
+									AND yhtio     = '{$kukarow['yhtio']}'
+									AND hyllyalue = '{$row['hyllyalue']}'
+									AND hyllynro  = '{$row['hyllynro']}'
+									AND hyllyvali = '{$row['hyllyvali']}'
+									AND hyllytaso = '{$row['hyllytaso']}'";
+						$result = pupe_query($query);
+
+						// Unlock tables
+						$query = "UNLOCK TABLES";
+						$result = pupe_query($query);
+
+					}
 
 					// Siirret‰‰n saldot jos on siirrett‰v‰‰
 					if ($siirra_saldot == 'on' and isset($saldo) and $saldo['myytavissa'] > 0 and $tuote['sarjanumeroseuranta'] == '') {
@@ -406,6 +443,10 @@ if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
 		if ($row_suoratoimitus["suoraan_laskutukseen"] == "") $oletuspaikka_chk = '';
 	}
 }
+elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
+	$poista_vanha_tuotepaikka_chk = "";
+	if (!isset($poista_vanha_tuotepaikka) or is_array($poista_vanha_tuotepaikka) or $poista_vanha_tuotepaikka == 'on') $poista_vanha_tuotepaikka_chk = "checked";
+}
 
 $paluu_url = "vahvista_kerayspaikka.php?{$url}";
 if (isset($hyllytys)) {
@@ -474,6 +515,14 @@ if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
 				</td>
 			</tr>";
 }
+elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
+	echo "	<tr>
+				<td colspan='2'>",t("Poista vanha tuotepaikka"),"
+				<input type='hidden' name='poista_vanha_tuotepaikka[]' value='default' />
+				<input type='checkbox' id='poista_vanha_tuotepaikka' name='poista_vanha_tuotepaikka[]' {$poista_vanha_tuotepaikka_chk}/>
+				</td>
+			</tr>";
+}
 
 echo "</table>";
 
@@ -502,13 +551,26 @@ echo "
 $(document).ready(function() {
 	$('#oletuspaikka').on('change', function() {
 		if ($('#oletuspaikka').is(':checked')) {
-			// enabloidaan siirra saldot checkbox
-			$('#siirra_saldot').removeAttr('disabled');
+			if ($('#poista_vanha_tuotepaikka')) {
+				// enabloidaan poista vanha tuotepaikka checkbox
+				$('#poista_vanha_tuotepaikka').removeAttr('disabled');
+			}
+			else {
+				// enabloidaan siirra saldot checkbox
+				$('#siirra_saldot').removeAttr('disabled');
+			}
 		}
 		else {
-			// Tyhjennet‰‰n ja disabloidaan siirra saldot checkbox
-			$('#siirra_saldot').attr('disabled', 'disabled');
-			$('#siirra_saldot').removeAttr('checked');
+			if ($('#poista_vanha_tuotepaikka')) {
+				// Tyhjennet‰‰n ja disabloidaan poista vanha tuotepaikka checkbox
+				$('#poista_vanha_tuotepaikka').attr('disabled', 'disabled');
+				$('#poista_vanha_tuotepaikka').removeAttr('checked');
+			}
+			else {
+				// Tyhjennet‰‰n ja disabloidaan siirra saldot checkbox
+				$('#siirra_saldot').attr('disabled', 'disabled');
+				$('#siirra_saldot').removeAttr('checked');
+			}
 		}
 	});
 });

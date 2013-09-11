@@ -1658,42 +1658,25 @@
 						}
 
 						if (!empty($kumulatiivinen_valittu)) {
-							$startmonth	= date("Ymd",mktime(0, 0, 0, $kumulatiivinen_kk, 1,  $kumulatiivinen_vv));
-							$endmonth 	= date("Ymd",mktime(0, 0, 0, date('m'), 1,  date('Y')));
+							if ($ajotapa == 'tilausjaauki' or $ajotapa == 'tilausauki') {
+								$query .= "sum(if(lasku.luontiaika >= '{$kumulatiivinen_alkupaiva} 00:00:00' and lasku.luontiaika <= '{$kumulatiivinen_loppupaiva} 23:59:59' and tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) myyntilaskuttamattakumul, ";
+							}
 
-							for ($i = $startmonth;  $i <= $endmonth;) {
-								$alku  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
-								$loppu = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)));
+							if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
+								$query .= "	sum(if(lasku.luontiaika >= '{$kumulatiivinen_alkupaiva} 00:00:00' and lasku.luontiaika <= '{$kumulatiivinen_loppupaiva} 23:59:59', if(tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta), 0)) myyntikumul, ";
+							}
+							elseif ($ajotapa != 'tilausauki') {
+								$query .= "	sum(if(tilausrivi.laskutettuaika >= '{$kumulatiivinen_alkupaiva}' and tilausrivi.laskutettuaika <= '{$kumulatiivinen_loppupaiva}', tilausrivi.rivihinta, 0)) myyntikumul, ";
+							}
 
-								$alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)-1));
-								$loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)-1));
+							if ($vertailubu != "") {
+								$query .= " sum(0) 'tavoitekumul', ";
+								$query .= " sum(0) 'tavoitekumul', ";
+							}
 
-								if ($ajotapa == 'tilausjaauki' or $ajotapa == 'tilausauki') {
-									$query .= " sum(if(lasku.luontiaika >= '{$alku} 00:00:00' and lasku.luontiaika <= '{$loppu} 23:59:59' and tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) '".substr($i,0,4).substr($i,4,2)."_laskuttamattakumul', ";
-								}
-
-								if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
-									$query .= " sum(if(lasku.luontiaika >= '{$alku} 00:00:00' and lasku.luontiaika <= '{$loppu} 23:59:59', if(tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta), 0)) '".substr($i,0,4).substr($i,4,2)."_myyntikumul', ";
-								}
-								elseif($ajotapa != 'tilausauki') {
-									$query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.rivihinta, 0)) '".substr($i,0,4).substr($i,4,2)."_myyntikumul', ";
-								}
-
-								if ($vertailubu != "") {
-									$query .= " sum(0) '".substr($i,0,4).substr($i,4,2)."_tavoitekumul', ";
-									$query .= " sum(0) '".substr($i,0,4).substr($i,4,2)."_tavoiteindkumul', ";
-								}
-
-								if ($piilota_kappaleet == "") {
-									$query .= " sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.kpl,0)) '".substr($i,0,4).substr($i,4,2)."_kplkumul', ";
-								}
-
-								if ($ajotapa == 'tilausjaauki') {
-									$query .= " sum(if(lasku.luontiaika >= '{$alku} 00:00:00' and lasku.luontiaika <= '{$loppu} 23:59:59' and tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) +
-												sum(if(tilausrivi.laskutettuaika >= '{$alku}' and tilausrivi.laskutettuaika <= '{$loppu}', tilausrivi.rivihinta, 0)) '".substr($i,0,4).substr($i,4,2)."_myyntiyhtkumul', ";
-								}
-								
-								$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));
+							if ($ajotapa == 'tilausjaauki') {
+								$query .= " sum(if(lasku.luontiaika >= '{$kumulatiivinen_alkupaiva} 00:00:00' and lasku.luontiaika <= '{$kumulatiivinen_loppupaiva} 23:59:59' and tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) +
+											sum(if(tilausrivi.laskutettuaika >= '$kumulatiivinen_alkupaiva' and tilausrivi.laskutettuaika <= '$kumulatiivinen_loppupaiva', tilausrivi.rivihinta, 0)) myyntikumulyht, ";
 							}
 						}
 

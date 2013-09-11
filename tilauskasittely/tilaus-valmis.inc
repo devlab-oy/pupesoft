@@ -1266,7 +1266,7 @@ else {
 				if (	((($varasto != $edvarasto and $edvarasto != 'x' and $edomalle_tilaukselle == 0) or
 						  ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '' and $edomalle_tilaukselle == 0) or
 						  ($keraysvyohyke != $edkeraysvyohyke and $edkeraysvyohyke != 'x' and $edkeraysvyohyke != '' and $edomalle_tilaukselle == 0)
-						 ) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E"
+						 ) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $laskurow["osatoimitus"] == ''
 						) or
 						($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $edomalle_tilaukselle == 0 and $yhtiorow["splittauskielto"] == "K") or
 						($omalle_tilaukselle != $edomalle_tilaukselle and $edomalle_tilaukselle != 'x')

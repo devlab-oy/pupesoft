@@ -18916,58 +18916,14 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		// Näytetään alle nollat nollana ja pyöristetään desimaalit alas
 		$voidaan_valmistaa = $voidaan_valmistaa < 0 ? 0 : floor($voidaan_valmistaa);
 
+		//Jos return_type != '',
+		//palautetaan kaikki raaka-aineet ja niiden saldot sekä riitot array:ssä
 		if ($return_type != "") {
 			return $return;
 		}
 		else {
 			return $voidaan_valmistaa;
 		}
-	}
-}
-
-if (!function_exists('hae_raaka_aineet')) {
-	function hae_raaka_aineet($tuoteno, $varasto = 0) {
-		global $kukarow, $yhtiorow;
-
-		if ($varasto != 0) {
-			$varasto_join_lisa = "
-							JOIN tuotepaikat
-							ON ( tuotepaikat.yhtio = tuote.yhtio
-								AND tuotepaikat.tuoteno = tuote.tuoteno )
-							JOIN varastopaikat
-							ON ( varastopaikat.yhtio = tuotepaikat.yhtio
-								AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-								AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-								AND varastopaikat.tunnus in ($varasto)";
-		}
-
-		$query = "	SELECT tuote.*
-					FROM tuoteperhe
-					JOIN tuote
-					ON ( tuote.yhtio = tuoteperhe.yhtio
-						AND tuote.tuoteno = tuoteperhe.tuoteno
-						AND tuote.ei_saldoa = '' )
-					$varasto_join_lisa
-					WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
-					AND tuoteperhe.isatuoteno = '{$tuoteno}'
-					AND tuoteperhe.tyyppi = 'R'";
-		$result = pupe_query($query);
-
-		$raaka_aineet = array();
-		while($raaka_aine = mysql_fetch_assoc($result)) {
-			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($raaka_aine["tuoteno"], '', $varasto);
-
-			$riitto = $myytavissa / $raaka_aine["kerroin"];
-
-			if ($riitto >= 1) {
-
-			}
-			$raaka_aine['saldo'] = $myytavissa;
-			
-			$raaka_aineet[] = $raaka_aine;
-		}
-
-		return $raaka_aineet;
 	}
 }
 

@@ -917,19 +917,20 @@
 					  		ORDER BY asiakas.ytunnus";
 				$result = pupe_query($query);
 
-				while ($trow = mysql_fetch_assoc ($result)) {
+				while ($trow = mysql_fetch_assoc($result)) {
 						echo "<tr class='aktiivi'>";
 
 						$suoritussummatotal += $trow["suoritussumma"];
 
 						if ($trow["tunnus"] != NULL) {
-							echo "<td><a name='a_$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=".tarkistahetu($trow["ytunnus"])."&asiakasid=$trow[tunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///a_$trow[tunnus]'>".tarkistahetu($trow["ytunnus"])."</a></td>";
+							echo "<td><a name='a_$trow[tunnus]' href='{$palvelin2}myyntires/myyntilaskut_asiakasraportti.php?ytunnus=".tarkistahetu($trow["ytunnus"])."&asiakasid=$trow[tunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///a_$trow[tunnus]'>".tarkistahetu($trow["ytunnus"])."</a></td>";
 							echo "<td>$trow[asiakasnro]</td>";
 						}
 						else {
 							echo "<td>*".t("ei asiakasta")."*</td>";
 							echo "<td></td>";
 						}
+
 						echo "<td>$trow[nimi_maksaja]</td>";
 						echo "<td>$trow[maa]</td>";
 						echo "<td>$trow[viite]</td>";

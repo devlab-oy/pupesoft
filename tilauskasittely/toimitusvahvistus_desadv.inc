@@ -249,6 +249,7 @@
 							$sscc_sovellustunnus = "00";
 							if ($sscc_gs1_laajennustunnus == "") $sscc_gs1_laajennustunnus = "0";
 
+							$sscc_gs1_yritystunnus = str_pad($sscc_gs1_yritystunnus, 7, 0, STR_PAD_LEFT);
 							$keraysera_row['sscc'] = str_pad($keraysera_row['sscc'], 7, 0, STR_PAD_LEFT);
 
 							$sscc = $sscc_sovellustunnus.$sscc_gs1_laajennustunnus.$sscc_gs1_yritystunnus.$keraysera_row['sscc'];

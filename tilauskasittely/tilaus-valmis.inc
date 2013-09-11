@@ -372,6 +372,7 @@ else {
 			$query = "UPDATE lasku SET alatila = '' where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
 			$result = pupe_query($query);
 			$laskurow["alatila"] = "";
+			$laskurow["osatoimitus"] = "";
 		}
 	}
 
@@ -1260,7 +1261,7 @@ else {
 
 				// Intrastat-tiedot
 				$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
-
+echo "1263: $laskurow[osatoimitus], $laskurow[alatila], $laskurow[tunnus] <br><br>";
 				// varasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
 				// omalle_tilaukselle - tilauksia ei splitata muuten ku omiksi tilauksiksi (eli ei esim splitata varastoittain tai vyöhykkeittäin)
 				if (	((($varasto != $edvarasto and $edvarasto != 'x' and $edomalle_tilaukselle == 0) or

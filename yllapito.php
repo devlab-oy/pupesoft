@@ -359,6 +359,8 @@
 				// Taulun ensimmäinen kenttä on aina yhtiö
 				$query = "INSERT into $toim SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
+				if ($toim == 'tuotteen_toimittajat') $query .= ", tehdas_saldo_paivitetty = now() ";
+
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
 					// Tuleeko tämä columni käyttöliittymästä
 					if (isset($t[$i])) {
@@ -418,6 +420,8 @@
 
 				// Taulun ensimmäinen kenttä on aina yhtiö
 				$query = "UPDATE $toim SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
+
+				if ($toim == 'tuotteen_toimittajat') $query .= ", tehdas_saldo_paivitetty = now() ";
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
 					if (isset($t[$i]) or (isset($_FILES["liite_$i"]) and is_array($_FILES["liite_$i"]))) {

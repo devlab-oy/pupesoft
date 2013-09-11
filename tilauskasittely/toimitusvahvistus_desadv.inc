@@ -25,13 +25,16 @@
 				// Luodaan muuttujat
 				extract($params);
 
-				if ($desadv_version == "una") {
-					$kuljetustunnus = "PS".sprintf("%012.12s",$desadv_laskurow["laskutunnus"]); // tämä voi olla yhteensä max 14 merkkiäpitkä stringjono
+				if ($desadv_version == "una" or $desadv_version == 'fi0089') {
 
-					// ED2 ja UNA kehykset.
-					// NRQ:0 = Ei CON kuittauspyyntöä, NRQ:1 = CON kuittauspyyntö
-					$desadv_message  = "'''ED2''':{$desadv_laskurow["asiakasovttunnus"]}:OVT':{$desadv_laskurow["yhtio_ovttunnus"]}:OVT'{$kuljetustunnus}'1'STX:EDIFACT'TYP:EDI'NRQ:0'''";
-					$desadv_message .= "\nUNA:+.? '";
+					if ($desadv_version != "fi0089") {
+						$kuljetustunnus = "PS".sprintf("%012.12s",$desadv_laskurow["laskutunnus"]); // tämä voi olla yhteensä max 14 merkkiäpitkä stringjono
+
+						// ED2 ja UNA kehykset.
+						// NRQ:0 = Ei CON kuittauspyyntöä, NRQ:1 = CON kuittauspyyntö
+						$desadv_message  = "'''ED2''':{$desadv_laskurow["asiakasovttunnus"]}:OVT':{$desadv_laskurow["yhtio_ovttunnus"]}:OVT'{$kuljetustunnus}'1'STX:EDIFACT'TYP:EDI'NRQ:0'''";
+						$desadv_message .= "\nUNA:+.? '";
+					}
 
 					// Valmistelupäiväys ja valmisteluaika on now(), jollei parempaa tietoa tule.
 					$valpvm = date("ymd");
@@ -218,7 +221,7 @@
 					$x++;
 				}
 
-				return array($desadv_message, $error, $x);
+				return array($desadv_message, $error, $x, $lahtunniste);
 			}
 		}
 
@@ -277,13 +280,13 @@
 						$pakkaus_res = pupe_query($query);
 						$pakkaus_row = mysql_fetch_assoc($pakkaus_res);
 
-						if ($pakkaus_row['korkeus'] == 0 or $pakkaus_row['leveys'] == 0 or $pakkaus_row['syvyys'] == 0) {
+						if ($desadv_version != "fi0089" and ($pakkaus_row['korkeus'] == 0 or $pakkaus_row['leveys'] == 0 or $pakkaus_row['syvyys'] == 0)) {
 							$error .= t("Pakkauksella %s %s on puutteelliset mittatiedot", '', $pakkaus_row['pakkaus'], $pakkaus_row['pakkauskuvaus'])."<br>";
 						}
 
 						if ($desadv_version == "fi0089") {
 							// Haetaan pakkauksen tiedot
-							$query = "	SELECT SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot
+							$query = "	SELECT SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot, SUM(tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys * kerayserat.kpl_keratty) tilavuus
 										FROM tilausrivi
 										JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
 										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -301,7 +304,7 @@
 
 							// Pakkauksen tilavuus
 							// m3 => litrat
-							$pakkauksen_tilavuus_litroina = round($pakkaus_row['korkeus'] * $pakkaus_row['leveys'] * $pakkaus_row['syvyys'] * 1000);
+							$pakkauksen_tilavuus_litroina = round($paino_row['tilavuus'] * 1000);
 							$desadv_message .= "MEA+AAE+ABJ+LTR:{$pakkauksen_tilavuus_litroina}'";
 							$x++;
 						}
@@ -592,9 +595,10 @@
 				'yhteyshenkilo' 	=> $yhteyshenkilo,
 				'yhteyshenkilo_puh' => $yhteyshenkilo_puh,
 				'toitarow'			=> $toitarow,
+				'lahtunniste'		=> $lahtunniste,
 			);
 
-			list($desadv_message, $error, $x) = desadv_header($params);
+			list($desadv_message, $error, $x, $lahtunniste) = desadv_header($params);
 
 			$params = array(
 				'desadv_laskurow' 	=> $desadv_laskurow,
@@ -612,10 +616,13 @@
 			$x++;
 			$desadv_message .= "UNT+{$x}+{$desadv_laskurow['laskutunnus']}'";
 
-			if ($desadv_version == "una") {
+			if ($desadv_version == "una" or $desadv_version == 'fi0089') {
 				// loppuun pakollinen UNZ ja EOF. HUOM: UNZ ja EOF pitää olla erillisillä riveillä !!!
 				$desadv_message .= "\nUNZ+1+{$lahtunniste}'";
-				$desadv_message .= "\n'''EOF'''0'";
+
+				if ($desadv_version == "una") {
+					$desadv_message .= "\n'''EOF'''0'";
+				}
 			}
 
 			$filenimi = $pupe_root_polku."/dataout/desadv_import-{$kukarow['yhtio']}-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";

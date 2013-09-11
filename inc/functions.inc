@@ -1369,6 +1369,10 @@ if (!function_exists("saldo_myytavissa")) {
 
 			// Saldo varastoista
 			if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {
+				if ($valinta3 != '') {
+					$valinta3 = "HAVING {$valinta3}";
+				}
+
 				$query = "	SELECT sum(sarjanumeroseuranta.era_kpl) saldo, tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi
 							FROM tuotepaikat
 							LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
@@ -1389,9 +1393,13 @@ if (!function_exists("saldo_myytavissa")) {
 							and tuotepaikat.tuoteno = '$tuoteno'
 							$valinta2
 							GROUP BY tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi
-							HAVING $valinta3";
+							$valinta3";
 			}
 			else {
+				if ($valinta3 != '') {
+					$valinta3 = "AND {$valinta3}";
+				}
+
 				$query = "	SELECT tuotepaikat.saldo, tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi
 							FROM tuotepaikat
 							LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
@@ -1401,7 +1409,7 @@ if (!function_exists("saldo_myytavissa")) {
 							WHERE tuotepaikat.yhtio = '$yhtiolisa'
 							and tuotepaikat.tuoteno = '$tuoteno'
 							$valinta2
-							AND $valinta3";
+							$valinta3";
 			}
 			$result = pupe_query($query);
 

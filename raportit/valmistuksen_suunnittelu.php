@@ -143,8 +143,7 @@
 		$tee = "";
 	}
 
-	$lopetus = "{$palvelin2}raportit/valmistuksen_suunnittelu.php////toim={$toim}
-		//abcrajaus={$abcrajaus}//ehdotetut_valmistukset={$ehdotetut_valmistukset}
+	$lopetus = "{$palvelin2}raportit/valmistuksen_suunnittelu.php////toim={$toim}//abcrajaus={$abcrajaus}//ehdotetut_valmistukset={$ehdotetut_valmistukset}
 		//ppa1={$ppa1}//kka1={$kka1}//vva1={$vva1}//ppl1={$ppl1}//kkl1={$kkl1}//vvl1={$vvl1}
 		//kohde_varasto={$kohde_varasto}//lahde_varasto={$lahde_varasto}//status={$status}
 		//ehdotusnappi={$ehdotusnappi}//tee={$tee}//mul_try=".base64_encode(serialize($mul_try))."
@@ -902,6 +901,10 @@
 					$kapasiteetti_varaus = $valmistuksen_kokonaiskesto;
 				}
 
+				//Kumulatiivinen aika sek ja päivissä tuoteriville, jotta ne menevät myös exceliin
+				$tuoterivi['varaus_sekunneissa'] = $kumulatiivinen_valmistusaika;
+				$tuoterivi['varaus_paivissa'] = $valmistuspaiva;
+
 				$tuoterivi['raakaaine_riitto'] = '';
 
 				// Valmistuslinja vaihtuu
@@ -917,9 +920,9 @@
 					$valmistaja_header .= "<th>".t("Sisar")."-<br>".t("tuotteet")."</th>";
 					$valmistaja_header .= "<th>".t("ABC")."-<br>".t("luokka")."</th>";
 					$valmistaja_header .= "<th>".t("Reaali")."-<br>".t("saldo")."</th>";
+					$valmistaja_header .= "<th>".t("Pakkauskoko")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistusaika sekunneissa")."</th>";
 					$valmistaja_header .= "<th>".t("Kumulatiivinenaika sekunneissa")."</th>";
-					$valmistaja_header .= "<th>".t("Pakkauskoko")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistusaika yhteensä sekunneissa")."</th>";
 					$valmistaja_header .= "<th>".t("Päivä")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistuksessa")."</th>";
@@ -948,11 +951,11 @@
 				echo "<td>{$tuoterivi["sisartuote"]}</td>";
 				echo "<td>{$tuoterivi["abcluokka"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["reaalisaldo"]}</td>";
-				echo "<td style='text-align: right;'>{$tuoterivi["valmistusaika_sekunneissa"]}</td>";
-				echo "<td style='text-align: right;'>$kumulatiivinen_valmistusaika</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["pakkauskoko"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["valmistusaika_sekunneissa"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi['varaus_sekunneissa']}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["valmistusaika"]}</td>";
-				echo "<td style='text-align: right;'>$valmistuspaiva</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi['varaus_paivissa']}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["valmistuksessa"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["riittopv"]}</td>";
 
@@ -1123,6 +1126,7 @@
 			echo "<br>";
 			if ($toim == 'EXCEL') {
 				echo "<input type='hidden' name='tee' value='GENEROI_EXCEL' />";
+				echo "<input type='hidden' name='lopetus' value='{$lopetus}' />";
 				echo "<input type='submit' name='generoi_excel' value='".t('Tulosta excel')."' />";
 			}
 			else {

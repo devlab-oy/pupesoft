@@ -700,6 +700,7 @@ if ($tila == 'tee_kohdistus') {
 			'laatija' 		=> $kukarow['kuka'],
 			'laadittu' 		=> date('Y-m-d H:i:s'),
 			'aputunnus'		=> 0,
+			'perheid'		=> $tiliointi1['tunnus'],
 			'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]",
 		);
 
@@ -711,6 +712,7 @@ if ($tila == 'tee_kohdistus') {
 			'laatija' 		=> $kukarow['kuka'],
 			'laadittu' 		=> date('Y-m-d H:i:s'),
 			'aputunnus'		=> 0,
+			'perheid'		=> $tiliointi2['tunnus'],
 			'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]",
 		);
 
@@ -1247,6 +1249,7 @@ if ($tila == 'tee_kohdistus') {
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
 					'aputunnus'		=> 0,
+					'perheid'		=> $tiliointi1['tunnus'],
 					'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
 				);
 
@@ -1264,7 +1267,8 @@ if ($tila == 'tee_kohdistus') {
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
 					'aputunnus'		=> 0,
-					'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
+					'perheid'		=> $tiliointi2['tunnus'],
+					'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
 				);
 
 				kopioitiliointi($tiliointi2['tunnus'], "", $params);
@@ -1277,6 +1281,7 @@ if ($tila == 'tee_kohdistus') {
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
 					'aputunnus'		=> 0,
+					'perheid'		=> $tiliointi1['tunnus'],
 					'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
 				);
 
@@ -1288,6 +1293,7 @@ if ($tila == 'tee_kohdistus') {
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
 					'aputunnus'		=> 0,
+					'perheid'		=> $tiliointi2['tunnus'],
 					'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
 				);
 
@@ -1308,6 +1314,7 @@ if ($tila == 'tee_kohdistus') {
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
 					'aputunnus'		=> 0,
+					'perheid'		=> $tiliointi1['tunnus'],
 					'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti]",
 				);
 
@@ -1319,6 +1326,7 @@ if ($tila == 'tee_kohdistus') {
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
 					'aputunnus'		=> 0,
+					'perheid'		=> $tiliointi2['tunnus'],
 					'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti]",
 				);
 

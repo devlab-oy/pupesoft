@@ -184,7 +184,7 @@ function echo_kalustoraportti_form($haettu_asiakas) {
 	echo "<form method='POST' action='' name='tulosta_kalustoraportti'>";
 	echo "<input type='hidden' id='tee' name='tee' value='hae_asiakas' />";
 	echo "<input type='hidden' id='ala_tee' name='ala_tee' value='tulosta_kalustoraportti' />";
-	echo "<input type='hidden' id='ytunnus' name='ytunnus' value='{$haettu_asiakas['tunnus']}' />";
+	echo "<input type='hidden' id='asiakasid' name='asiakasid' value='{$haettu_asiakas['tunnus']}' />";
 	echo "<input type='submit' value='".t("Tulosta kalustoraportti")."' />";
 	echo "</form>";
 }
@@ -403,7 +403,7 @@ function hae_laitteen_tilat() {
 function hae_asiakas($request) {
 	global $kukarow, $yhtiorow;
 
-	if ($request['ytunnus'] != '') {
+	if ($request['ytunnus'] != '' or $request['asiakasid'] != '') {
 		$ytunnus = $request['ytunnus'];
 		$asiakasid = $request['asiakasid'];
 		require("inc/asiakashaku.inc");

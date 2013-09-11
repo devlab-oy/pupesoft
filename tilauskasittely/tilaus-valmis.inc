@@ -375,6 +375,23 @@ else {
 			$laskurow["osatoimitus"] = "";
 		}
 	}
+	else if ($laskurow["osatoimitus"] != "" and $laskurow["tila"] == 'N' and $laskurow["alatila"] == 'U') {
+		// Onko jotain tulostettavaa?
+		$query = "	SELECT *
+					from tilausrivi
+					where yhtio = '$kukarow[yhtio]'
+					and otunnus = '$laskurow[tunnus]'
+					and keratty = ''
+					and var not in ('P','J','O','S')
+					and tyyppi != 'D'
+					and varattu > 0";
+		$keres = pupe_query($query);
+
+		if (mysql_num_rows($keres) > 0) {
+			// Osatoimituskielto, mutta kaikki löytyy
+			$laskurow["osatoimitus"] = "";
+		}
+	}
 
 	//päivitetään tilaus valmisaika, kun painetaan ekan kerran tilaus valmiiksi
 	if ($laskurow['h1time'] == "0000-00-00 00:00:00") {
@@ -1261,7 +1278,6 @@ else {
 
 				// Intrastat-tiedot
 				$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
-echo "1263: $laskurow[osatoimitus], $laskurow[alatila], $laskurow[tunnus] <br><br>";
 				// varasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
 				// omalle_tilaukselle - tilauksia ei splitata muuten ku omiksi tilauksiksi (eli ei esim splitata varastoittain tai vyöhykkeittäin)
 				if (	((($varasto != $edvarasto and $edvarasto != 'x' and $edomalle_tilaukselle == 0) or

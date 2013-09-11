@@ -166,6 +166,7 @@ if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 }
 
 if ($kukarow["extranet"] == "") {
+	echo "<script src='../js/tilaus.js'></script>";
 	echo "<script src='../js/tilaus_myynti/tilaus_myynti.js'></script>";
 }
 

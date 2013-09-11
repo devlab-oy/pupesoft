@@ -16,6 +16,30 @@
 
 	require ("../inc/parametrit.inc");
 
+	if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot') {
+
+		if (@file_exists("../inc/sahkoinen_tilausliitanta.inc")) {
+
+			$hae = 'tarkista_tehtaan_saldot';
+			$tunnus = (int) $id;
+			$otunnus = (int) $otunnus;
+			$tuoteno = $tuoteno;
+			$myytavissa = (int) $myytavissa;
+			$cust_id = $cust_id;
+			$username = $username;
+			$password = $password;
+			$suppliernumber = $suppliernumber;
+			$tt_tunnus = (int) $tt_tunnus;
+
+			require("inc/sahkoinen_tilausliitanta.inc");
+		}
+
+		if (!isset($data)) $data = array('id' => 0, 'error' => true, 'error_msg' => t("Haku ei onnistunut! Ole yhteydessä IT-tukeen"));
+
+		echo json_encode($data);
+		exit;
+	}
+
 	if ($ajax_request) {
 		if ($hae_toimittajien_saldot) {
 			$query = "	SELECT tilausrivi.tuoteno,
@@ -49,6 +73,7 @@
 	require ('inc/luo_ostotilausotsikko.inc');
 
 	if ($kukarow["extranet"] == "") {
+		echo "<script src='../js/tilaus.js'></script>";
 		echo "<script src='../js/tilaus_osto/tilaus_osto.js'></script>";
 		?>
 <style>
@@ -1226,7 +1251,7 @@
 						elseif ($prow["perheid"] == 0 and $prow["perheid2"] == 0) {
 							echo "<td rowspan = '2' valign='top'>$lask</td>";
 
-							
+
 							$pkrow[0]		= 1;
 							$pkrow[1]		= 1;
 							$borderlask		= 0;

@@ -291,7 +291,7 @@
 										COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
 										ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
 										FROM kerayserat
-										JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
+										JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O'))
 										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 										LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 										WHERE kerayserat.yhtio 		 = '{$kukarow['yhtio']}'
@@ -341,7 +341,7 @@
 												ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
 												FROM kerayserat
 												{$joinlisa}
-												JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
+												JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O'))
 												JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 												WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 												AND kerayserat.sscc = '{$row['sscc']}'
@@ -1979,7 +1979,7 @@ function hae_yhdistettavat_tilaukset() {
 		$query = "	SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.tunnus
 					FROM lasku
 					JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.perheid != 0 AND tilausrivi.perheid != tilausrivi.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.perheid != 0 AND tilausrivi.perheid != tilausrivi.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O'))
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
 						and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
@@ -1996,7 +1996,7 @@ function hae_yhdistettavat_tilaukset() {
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$row['perheid']}'
 						AND tyyppi != 'D'
-						AND var not in ('P','J')";
+						AND var not in ('P','J','O')";
 			$isatuote_chk_res = pupe_query($query);
 			$isatuote_chk_row = mysql_fetch_assoc($isatuote_chk_res);
 
@@ -2076,7 +2076,7 @@ function hae_yhdistettavat_tilaukset() {
 						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
 						JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
 						JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
-						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J') {$ei_lapsia_lisa})
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O') {$ei_lapsia_lisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
 							and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
@@ -2330,7 +2330,7 @@ function hae_yhdistettavat_tilaukset() {
 				$query = "	SELECT COUNT(DISTINCT tilausrivi.tunnus) AS 'suunnittelussa',
 							SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
 							FROM lasku
-							JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.varattu > 0 AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J') {$ei_lapsia_lisa})
+							JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.varattu > 0 AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O') {$ei_lapsia_lisa})
 							WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 							AND lasku.tunnus IN ({$row['tilaukset']})";
 				$rivit_res = pupe_query($query);
@@ -2347,7 +2347,7 @@ function hae_yhdistettavat_tilaukset() {
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus IN ({$row['tilaukset']})
 							AND tilausrivi.tyyppi != 'D'
-							AND tilausrivi.var not in ('P','J')
+							AND tilausrivi.var not in ('P','J','O')
 							{$ei_lapsia_lisa}";
 				$kg_res = pupe_query($query);
 				$kg_row = mysql_fetch_assoc($kg_res);
@@ -2703,7 +2703,7 @@ function hae_yhdistettavat_tilaukset() {
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
 							AND tilausrivi.tyyppi != 'D'
-							AND tilausrivi.var not in ('P','J')
+							AND tilausrivi.var not in ('P','J','O')
 							{$ei_lapsia_lisa}
 							GROUP BY 1,2
 							HAVING ohitakerays IS NULL";
@@ -2734,7 +2734,7 @@ function hae_yhdistettavat_tilaukset() {
 								ROUND((kerayserat.kpl * tuote.tuotemassa), 0) AS 'kg'
 								FROM kerayserat
 								JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
-								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J') {$ei_lapsia_lisa})
+								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O') {$ei_lapsia_lisa})
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 								AND kerayserat.sscc = '{$lahto_row['sscc']}'
@@ -2780,7 +2780,7 @@ function hae_yhdistettavat_tilaukset() {
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
 							AND tilausrivi.tyyppi != 'D'
-							AND tilausrivi.var not in ('P','J')
+							AND tilausrivi.var not in ('P','J','O')
 							{$ei_lapsia_lisa}
 							ORDER BY kerayserat.sscc, tilausrivi.tuoteno";
 				$rivi_res = pupe_query($query);
@@ -2844,7 +2844,7 @@ function hae_yhdistettavat_tilaukset() {
 								tilausrivi.kerattyaika,
 								ROUND(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', IFNULL(kerayserat.kpl_keratty, tilausrivi.varattu), 0), 0) AS 'keratyt'
 								FROM kerayserat
-								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J') {$ei_lapsia_lisa})
+								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O') {$ei_lapsia_lisa})
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 								AND kerayserat.sscc = '{$lahto_row['sscc']}'
@@ -2963,7 +2963,7 @@ function hae_yhdistettavat_tilaukset() {
                         count(*) AS keraamatta
                         FROM lahdot
                         JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND (lasku.tila = 'L' OR (lasku.tila = 'N' AND lasku.alatila = 'A')))
-                        JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND tilausrivi.var NOT IN ('P','J'))
+                        JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND tilausrivi.var not in ('P','J','O'))
                         JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '' )
                         JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
                         WHERE  lahdot.yhtio = '{$kukarow['yhtio']}'

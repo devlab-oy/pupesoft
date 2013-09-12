@@ -3630,10 +3630,27 @@ if ($tee == '') {
 				$result = pupe_query($query);
 			}
 
-			// Poistetaan muokattava tilausrivi
-			$query = "	DELETE FROM tilausrivi
-						WHERE tunnus = '$rivitunnus'";
-			$result = pupe_query($query);
+			if ($tapa == "POISTA" and $kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and !empty($tilausrivi['vanha_otunnus']) and $tilausrivi['vanha_otunnus'] != $tilausrivi['otunnus'] and $tilausrivi['positio'] == 'JT' and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $yhtiorow['jt_automatiikka_mitatoi_tilaus'] == 'E') {
+
+				$jt_saldo_lisa = $yhtiorow["varaako_jt_saldoa"] == "" ? ", jt = varattu, varattu = 0 " : '';
+
+				// riviä poistettaessa laitetaan jt-rivi takaisin omalle tilaukselle
+				$query = "	UPDATE tilausrivi SET
+							otunnus = '{$tilausrivi['vanha_otunnus']}',
+							var = 'J'
+							{$jt_saldo_lisa}
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$tilausrivi['tunnus']}'";
+				$jt_rivi_res = pupe_query($query);
+
+				echo "<font class='message'>",t("Jälkitoimitus palautettiin tilaukselle")," {$tilausrivi['vanha_otunnus']}</font><br /><br />";
+			}
+			else {
+				// Poistetaan muokattava tilausrivi
+				$query = "	DELETE FROM tilausrivi
+							WHERE tunnus = '$rivitunnus'";
+				$result = pupe_query($query);
+			}
 
 			// Jos muokkaamme tilausrivin paikkaa ja se on speciaalikeissi, T,U niin laitetaan $paikka-muuttuja kuntoon
 			if (substr($tapa, 0, 6) != "VAIHDA" and $tilausrivi["var"] == "T" and substr($paikka,0,3) != "¡¡¡") {
@@ -3831,8 +3848,18 @@ if ($tee == '') {
 
 	if ($kukarow["extranet"] == "" and $tila == 'MUUTAKAIKKI') {
 		if (!empty($tilausnumero)) {
+
+			// Riippuen yhtiön parametristä, käsitellään jt eri tavalla
+			if ($yhtiorow["varaako_jt_saldoa"] == "") {
+				$updatelisa = "jt = if(var='P',tilkpl,if(var='J',jt,varattu)), varattu = 0,";
+			}
+			else {
+				$updatelisa = "varattu = if(var='P',tilkpl,varattu),";
+			}
+
 			$query = "	UPDATE tilausrivi
-						SET var = 'J',
+						SET $updatelisa
+						var = 'J',
 						kerayspvm = '".date('Y-m-d', strtotime('now + 3 month'))."'
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND otunnus = '{$tilausnumero}'";
@@ -4158,23 +4185,6 @@ if ($tee == '') {
 			else {
 				//Tuotetta ei löydy, aravataan muutamia muuttujia
 				$trow["alv"] = $laskurow["alv"];
-			}
-
-			// Jos ollaan tekemässä Extranet-ennakkoa ja käyttäjä ei ole syöttänyt hintaa, katsotaan löytyykö tuotteelle ennakkotilaus-alennus
-			if ($toim == 'EXTENNAKKO' and $hinta == '') {
-				$query = "  SELECT selite AS ennakko_pros_a
-							FROM tuotteen_avainsanat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tuoteno = '{$tuoteno}'
-							AND laji = 'parametri_ennakkoale_a'
-							AND selite != ''";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$tuotteen_hinta = mysql_fetch_assoc($result);
-					$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
-					$netto = 'N';
-				}
 			}
 
 			if ($tuoteno != '' and $kpl != 0) {
@@ -6032,7 +6042,7 @@ if ($tee == '') {
 					}
 				}
 
-				if ($row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm'])) {
+				if ($row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and !empty($yhtiorow['jt_automatiikka'])) {
 					$var_temp = $row['var'] . " - ".t("Muiden mukana");
 				}
 				else {
@@ -6702,6 +6712,7 @@ if ($tee == '') {
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.tyyppi in ($tilrivity)
 								and tilausrivi.tyyppi not in ('D','V','M')
+								and tilausrivi.var not in ('O')
 								$tunnuslisa
 								GROUP BY 1
 								ORDER BY 1";
@@ -7197,7 +7208,7 @@ if ($tee == '') {
 									AND tilausrivi.tyyppi != 'D'
 									and tilausrivi.hyllyalue != ''
 									and tilausrivi.varattu > 0
-									and tilausrivi.var NOT IN ('J','P')";
+									and tilausrivi.var not in ('P','J','O')";
 						$chk_res = pupe_query($query);
 
 						$chk_arr = array();
@@ -7432,7 +7443,7 @@ if ($tee == '') {
 							$jysum = $arvo;
 						}
 
-						
+
 						if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
 							echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",100*$kate_eieri/($kotiarvo_eieri-$ostot_eieri))."' Style='text-align:right' $state></td>";
 

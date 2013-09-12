@@ -151,6 +151,8 @@ echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"suuntalavan_tuotteet.php?$url\"' class='button left'><img src='back2.png'></button>";
 echo "<h1>",t("SUUNTALAVAVARALLE"),"</h1></div>";
 
+$_tuotepaikka = trim("{$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}");
+
 echo "<div class='main'>
 
 	<form name='varalleformi' method='post' action=''>
@@ -161,7 +163,7 @@ echo "<div class='main'>
 		</tr>
 		<tr>
 			<th>",t("Keräyspaikka", $browkieli),"</th>
-			<td><input type='text' name='tuotepaikka' value='{$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}' /></td>
+			<td><input type='text' name='tuotepaikka' value='{$_tuotepaikka}' /></td>
 		</tr>
 		<tr>
 			<th>",t("Koodi", $browkieli),"</th>

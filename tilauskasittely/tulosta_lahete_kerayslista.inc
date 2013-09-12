@@ -172,7 +172,7 @@ if (!function_exists('alku_kerayslista')) {
 				$pdf->draw_text(310,815, t("Siirtolista", $kieli), 		$thispage, $iso);
 			}
 			elseif ($tyyppi == "REKLAMAATIO") {
-				$pdf->draw_text(310,815, t("Reklamaatio/Purkulista", $kieli), 		$thispage, $iso);
+				$pdf->draw_text(240,815, t("Reklamaatio/Purkulista", $kieli), 		$thispage, $iso);
 			}
 			elseif ($tyyppi == "MYYNTITILI") {
 				$pdf->draw_text(310,815, t("Myyntitili", $kieli), 		$thispage, $iso);

@@ -461,7 +461,7 @@
 				SET uusiotunnus = '$laskurow[tunnus]'
 				WHERE otunnus in ($tunnukset)
 				and yhtio = '$kukarow[yhtio]'
-				and var not in ('P','J')";
+				and var not in ('P','J','O')";
 	$ulasr = pupe_query($query);
 
 	// katotaan montako tilausta ollaan käsittelemässä

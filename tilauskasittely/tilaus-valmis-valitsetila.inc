@@ -29,9 +29,9 @@
 	$query = "	SELECT count(*) riveja,
 				sum(if (tilausrivi.var = 'P' and tilausrivi.tilkpl $lis_plus_kpl > 0, 1, 0)) puutteet,
 				sum(if (tilausrivi.var in ('J','S') and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet,
-				sum(if (tilausrivi.var not in ('P','J','S') and tilausrivi.varattu $lis_plus_kpl < 0, 1, 0)) hyvitykset,
-				sum(if (tilausrivi.var not in ('P','J','S') and (('$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) normaalit_kerataan,
-				sum(if (tilausrivi.var not in ('P','J','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) saldottomat,
+				sum(if (tilausrivi.var not in ('P','J','O','S') and tilausrivi.varattu $lis_plus_kpl < 0, 1, 0)) hyvitykset,
+				sum(if (tilausrivi.var not in ('P','J','O','S') and (('$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) normaalit_kerataan,
+				sum(if (tilausrivi.var not in ('P','J','O','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) saldottomat,
 				sum(if (tilausrivi.toimitettu != '', 1, 0)) toimitetut
 				FROM tilausrivi
 				LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
@@ -201,7 +201,7 @@
 							SET kerattyaika = now(), keratty = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio 		= '$kukarow[yhtio]'
-							and var not in ('P','J','S')
+							and var not in ('P','J','O','S')
 							and keratty 	= ''
 							and toimitettu 	= ''
 							and tyyppi 	   != 'D'";
@@ -224,7 +224,7 @@
 								SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
 								WHERE otunnus 	= '$laskurow[tunnus]'
 								and yhtio 		= '$kukarow[yhtio]'
-								and var not in ('P','J','S')
+								and var not in ('P','J','O','S')
 								and keratty    != ''
 								and toimitettu 	= ''
 								and tyyppi 	   != 'D'";
@@ -238,7 +238,7 @@
 								SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
 								WHERE otunnus 	= '$laskurow[tunnus]'
 								and yhtio 		= '$kukarow[yhtio]'
-								and var not in ('P','J','S')
+								and var not in ('P','J','O','S')
 								and keratty    != ''
 								and toimitettu 	= ''
 								and tyyppi 	   != 'D'";
@@ -263,7 +263,7 @@
 							SET kerattyaika = now(), keratty = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio		= '$kukarow[yhtio]'
-							and var not in ('P','J','S')
+							and var not in ('P','J','O','S')
 							and keratty		= ''
 							and toimitettu	= ''";
 				$result = pupe_query($query);
@@ -272,7 +272,7 @@
 							SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio		= '$kukarow[yhtio]'
-							and var not in ('P','J','S')
+							and var not in ('P','J','O','S')
 							and keratty    != ''
 							and toimitettu	= ''
 							and tyyppi 	   != 'D'";

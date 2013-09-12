@@ -99,6 +99,7 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 				'netto'				 => $tilausrivi['netto'],
 				'hinta'				 => $tilausrivi['hinta'],
 				'varataan_saldoa'	 => 'EI',
+				'var'				 => $tilausrivi['var'],
 			);
 			
 			lisaa_rivi($parametrit);

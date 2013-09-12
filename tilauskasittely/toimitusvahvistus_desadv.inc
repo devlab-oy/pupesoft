@@ -297,16 +297,9 @@
 						$desadv_message .= "MEA+AAE+AAA+KGM:{$paino_row['kilot']}'";
 						$x++;
 
-						if ($desadv_version == 'fi0089') {
-							$pakkauksen_tilavuus_litroina = $paino_row['tilavuus'];
-						}
-						else {
-							$pakkauksen_tilavuus_litroina = $desadv_kollitrow["kuutiot"];
-						}
-
 						// Pakkauksen tilavuus
 						// m3 => litrat
-						$pakkauksen_tilavuus_litroina = round($pakkauksen_tilavuus_litroina * 1000);
+						$pakkauksen_tilavuus_litroina = round($paino_row['tilavuus'] * 1000);
 						$desadv_message .= "MEA+AAE+ABJ+LTR:{$pakkauksen_tilavuus_litroina}'";
 						$x++;
 					}

@@ -1616,24 +1616,24 @@ while ($tietue = fgets($fd)) {
 					$hyvityssaanto_palautuskielto_array	= "";
 
 					// Jos käytetään reklamaatioiden hinnoittelusääntöä ja käyttäjä ei ole väkisinhyväksynyt riviä
-					// if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and $editilaus_tilaustyyppi == 3) {
-					// 	$hyvityssaanto_hinta_array = array();
-					// 	$hyvityssaanto_ale_array = array();
-					// 	$hyvityssaanto_kpl_array = array();
-					// 	$hyvityssaanto_kommentti_array = array();
-					// 	$hyvityssaanto_palautuskielto_array = array();
+					if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and $editilaus_tilaustyyppi == 3) {
+						$hyvityssaanto_hinta_array = array();
+						$hyvityssaanto_ale_array = array();
+						$hyvityssaanto_kpl_array = array();
+						$hyvityssaanto_kommentti_array = array();
+						$hyvityssaanto_palautuskielto_array = array();
 
-					// 	$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
+						$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
 
-					// 	foreach ($palautus as $index => $arvot) {
-					// 		$tuoteno_array[] = $palautus[$index]["tuoteno"];
-					// 		$hyvityssaanto_hinta_array[$index][$tuoteno] = $palautus[$index]["hinta"];
-					// 		$hyvityssaanto_ale_array[$index][$tuoteno] = $palautus[$index]["ale"];
-					// 		$hyvityssaanto_kpl_array[$index][$tuoteno] = $palautus[$index]["kpl"] * -1;
-					// 		$hyvityssaanto_kommentti_array[$index][$tuoteno] = $palautus[$index]["kommentti"];
-					// 		$hyvityssaanto_palautuskielto_array[$index][$tuoteno] = $palautus[$index]["palautuskielto"];
-					// 	}
-					// }
+						foreach ($palautus as $index => $arvot) {
+							$tuoteno_array[] = $palautus[$index]["tuoteno"];
+							$hyvityssaanto_hinta_array[$index][$tuoteno] = $palautus[$index]["hinta"];
+							$hyvityssaanto_ale_array[$index][$tuoteno] = $palautus[$index]["ale"];
+							$hyvityssaanto_kpl_array[$index][$tuoteno] = $palautus[$index]["kpl"] * -1;
+							$hyvityssaanto_kommentti_array[$index][$tuoteno] = $palautus[$index]["kommentti"];
+							$hyvityssaanto_palautuskielto_array[$index][$tuoteno] = $palautus[$index]["palautuskielto"];
+						}
+					}
 
 					foreach ($tuoteno_array as $tuoteno) {
 

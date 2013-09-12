@@ -382,6 +382,10 @@
 		if ($kukarow['resoluutio'] == 'I') {
 			$summaselli .= " lasku.viesti tilausviite, ";
 		}
+		
+		if ($kukarow['resoluutio'] == 'I') {
+			$summaselli .= " lasku.asiakkaan_tilausnumero astilno, ";
+		}
 
 		if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {
 			if ($laskunro > 0) {
@@ -506,10 +510,10 @@
 
 			if ($kukarow['resoluutio'] == 'I') {
 				if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-					pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
+					pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
 				}
 				else {
-					pupe_DataTables(array(array($pupe_DataTables, 9, 10)));
+					pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
 				}
 			}
 			else {
@@ -634,7 +638,7 @@
 						echo "<a href = '{$palvelin2}muutosite.php?tee=E&tunnus=$row[tilaus]&lopetus=$PHP_SELF////asiakasid=$asiakasid//ytunnus=$ytunnus//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toim=$toim'>$row[$i]</a>";
 						echo "</td>";
 					}
-					elseif (is_numeric(trim($row[$i])) and mysql_field_name($result,$i) != 'tilausviite') {
+					elseif (is_numeric(trim($row[$i])) and mysql_field_name($result,$i) != 'tilausviite' and mysql_field_name($result,$i) != 'astilno') {
 						echo "<td valign='top' nowrap align='right' $class>$row[$i]</td>";
 					}
 					else {

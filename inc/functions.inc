@@ -156,7 +156,6 @@ if (!function_exists("pupesoft_login")) {
 			error_log ("user {$user}: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
 		}
 
-
 		if ($usea == 1) {
 			$query = "	SELECT yhtio.nimi, yhtio.yhtio, IF(yhtio.jarjestys = 0, 9999, yhtio.jarjestys) jarj
 						FROM kuka
@@ -14511,14 +14510,7 @@ if (!function_exists('tulosta_sscc')) {
 			$sscc = $sscc_kopio;
 		}
 		else {
-			$query = "	SELECT selite
-						FROM avainsana
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND laji	= 'SSCC'";
-			$result = pupe_query($query);
-			$row = mysql_fetch_assoc($result);
-
-			$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
+			$sscc = uusi_sscc_nro();
 		}
 
 		$nimi = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['nimi']);
@@ -14562,34 +14554,6 @@ if (!function_exists('tulosta_sscc')) {
 		}
 		else {
 			$line = exec("echo \"$sivu\" | $komento");
-		}
-
-		if (!$sscc_kopio) {
-			if (trim($row['selite']) == '') {
-				$query = "	INSERT INTO avainsana SET
-							yhtio 			= '{$kukarow['yhtio']}',
-							perhe 			= '',
-							kieli 			= '{$kukarow['kieli']}',
-							laji 			= 'SSCC',
-							nakyvyys 		= '',
-							selite 			= '{$sscc}',
-							selitetark 		= '',
-							selitetark_2 	= '',
-							selitetark_3 	= '',
-							jarjestys 		= 0,
-							laatija 		= '{$kukarow['kuka']}',
-							luontiaika 		= now(),
-							muutospvm 		= now(),
-							muuttaja 		= '{$kukarow['kuka']}'";
-				$insert_res = pupe_query($query);
-			}
-			else {
-				$query = "	UPDATE avainsana
-							SET selite = '{$sscc}'
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND laji	= 'SSCC'";
-				$update_res = pupe_query($query);
-			}
 		}
 
 		return $sscc;
@@ -20435,6 +20399,50 @@ if (!function_exists('tarkiste')) {
 	}
 }
 
+if (!function_exists('uusi_sscc_nro')) {
+	function uusi_sscc_nro() {
+		global $kukarow;
+
+		$query = "	SELECT selite
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laji 	= 'SSCC'";
+		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
+
+		$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
+
+		if (trim($row['selite']) == '') {
+
+			$query = "	INSERT INTO avainsana SET
+						yhtio 			= '{$kukarow['yhtio']}',
+						perhe 			= '666',
+						kieli 			= '{$kukarow['kieli']}',
+						laji 			= 'SSCC',
+						nakyvyys 		= '',
+						selite 			= '{$sscc}',
+						selitetark	 	= '',
+						selitetark_2 	= '',
+						selitetark_3 	= '',
+						jarjestys 		= 0,
+						laatija 		= '{$kukarow['kuka']}',
+						luontiaika 		= now(),
+						muutospvm 		= now(),
+						muuttaja 		= '{$kukarow['kuka']}'";
+			$insert_res = pupe_query($query);
+		}
+		else {
+			$query = "	UPDATE avainsana
+						SET selite  = '{$sscc}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji	= 'SSCC'";
+			$update_res = pupe_query($query);
+		}
+
+		return $sscc;
+	}
+}
+
 if (!function_exists('tee_keraysera_painon_perusteella')) {
 	function tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita, $_pakkaus = 0) {
 
@@ -20573,12 +20581,14 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				$rivi['data']['tunnus'] = $tun;
 				$kappalemaara = $uusikpl;
 
+				$sscc = uusi_sscc_nro();
+
 				$query = "	INSERT INTO kerayserat SET
 							yhtio 			= '{$kukarow['yhtio']}',
 							nro 			= {$keraysera_nro},
 							keraysvyohyke 	= 0,
 							tila 			= '',
-							sscc 			= 0,
+							sscc 			= {$sscc},
 							sscc_ulkoinen 	= '',
 							otunnus 		= '{$rivi['data']['otunnus']}',
 							tilausrivi 		= '{$rivi['data']['tunnus']}',
@@ -20605,12 +20615,14 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 				$kappalemaara = $rivi['data']['upd_varattu'];
 
+				$sscc = uusi_sscc_nro();
+
 				$query = "	INSERT INTO kerayserat SET
 							yhtio 			= '{$kukarow['yhtio']}',
 							nro 			= {$keraysera_nro},
 							keraysvyohyke 	= 0,
 							tila 			= '',
-							sscc 			= 0,
+							sscc 			= {$sscc},
 							sscc_ulkoinen 	= '',
 							otunnus 		= '{$rivi['data']['otunnus']}',
 							tilausrivi 		= '{$rivi['data']['tunnus']}',
@@ -20639,12 +20651,15 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 					$upd_res = pupe_query($query);
 				}
 				else {
+
+					$sscc = uusi_sscc_nro();
+
 					$query = "	INSERT INTO kerayserat SET
 								yhtio 			= '{$kukarow['yhtio']}',
 								nro 			= {$keraysera_nro},
 								keraysvyohyke 	= 0,
 								tila 			= '',
-								sscc 			= 0,
+								sscc 			= {$sscc},
 								sscc_ulkoinen 	= '',
 								otunnus 		= '{$rivi['data']['otunnus']}',
 								tilausrivi 		= '{$rivi['data']['tunnus']}',

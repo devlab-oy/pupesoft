@@ -192,8 +192,8 @@ if(!function_exists("avainsanatarkista")) {
 			}
 
 
-			if (strtoupper($tem_laji) == 'VALMISTUSLINJA' and $tem_selitetark_2 == 0) {
-				$virhe[$i] = t("Valmistuslinjan päiväkapasiteetin (selitetark_2) on oltava suurempi kuin 0")."!";
+			if (strtoupper($tem_laji) == 'VALMISTUSLINJA' and $tem_selitetark_2 >= 0) {
+				$virhe[$i] = t("Valmistuslinjan päiväkapasiteetin (selitetark_2) on oltava suurempi tai yhtäsuuri kuin 0")."!";
 			}
 			elseif (strtoupper($tem_laji) == 'VALMISTUSLINJA' and !is_numeric($tem_selitetark_2)) {
 				$virhe[$i] = t("Valmistuslinjan päiväkapasiteetin (selitetark_2) on oltava numero")."!";

@@ -878,7 +878,7 @@
 				$tuoterivin_valmistuslinja = search_array_key_for_value_recursive($valmistuslinjat, 'selite', $tuoterivi['valmistuslinja']);
 
 				// Jos päiväkapasiteettiä ei ole syötetty, laitetaan 24h
-				$paivakapasiteetti = $tuoterivin_valmistuslinja[0]['selitetark_2'] == '' ? 86400 : $tuoterivin_valmistuslinja[0]['selitetark_2'];
+				$paivakapasiteetti = $tuoterivin_valmistuslinja[0]['selitetark_2'] == 0 ? 86400 : $tuoterivin_valmistuslinja[0]['selitetark_2'];
 				$valmistuksen_kokonaiskesto = $tuoterivi['valmistusaika'];
 
 				// Lasketaan valmistuksien kumulatiivistä valmistusaikaa per linja

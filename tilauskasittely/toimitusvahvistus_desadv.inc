@@ -22,7 +22,7 @@
 
 			if ($desadv_version == "una" or $desadv_version == 'fi0089') {
 
-				if ($desadv_version != "fi0089") {
+				if ($desadv_version == "una") {
 					$kuljetustunnus = "PS".sprintf("%012.12s",$desadv_laskurow["laskutunnus"]); // tämä voi olla yhteensä max 14 merkkiäpitkä stringjono
 
 					// ED2 ja UNA kehykset.
@@ -73,7 +73,7 @@
 				$x++;
 			}
 
-			if ($desadv_version != "fi0089") {
+			if ($desadv_version == "una" or $desadv_version == "") {
 				// DTM - despatch and/or delivery date/time
 				// 171 = tilauspäivä
 				list($date, $time) = explode(" ", $desadv_laskurow['luontiaika']);
@@ -633,20 +633,18 @@
 			}
 
 			if ($error == '') {
-				if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv_path != '') {
-					// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
-					// palautetaan $palautus ja $syy
-					$ftphost = $desadv_host;
-					$ftpuser = $desadv_user;
-					$ftppass = $desadv_pass;
-					$ftppath = $desadv_path;
-					$ftpfile = realpath($filenimi);
+				// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
+				// palautetaan $palautus ja $syy
+				$ftphost = $desadv_host;
+				$ftpuser = $desadv_user;
+				$ftppass = $desadv_pass;
+				$ftppath = $desadv_path;
+				$ftpfile = realpath($filenimi);
 
-					require ("inc/ftp-send.inc");
+				require ("inc/ftp-send.inc");
 
-					if ($palautus == 0) {
-						$toimitusvahvistus_desadv_lahetys = TRUE;
-					}
+				if ($palautus == 0) {
+					$toimitusvahvistus_desadv_lahetys = TRUE;
 				}
 			}
 			else {

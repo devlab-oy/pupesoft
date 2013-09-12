@@ -894,15 +894,14 @@
 				$query = "	SELECT asiakas.tunnus,
 							asiakas.ytunnus,
 							if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
-							suoritus.nimi_maksaja,
+							if(asiakas.nimi is not null, asiakas.nimi, suoritus.nimi_maksaja) nimi_maksaja,
 							asiakas.maa,
 							suoritus.viite,
 							suoritus.kirjpvm,
-							tiliointi.summa tiliointisumma,
-							tiliointi.summa_valuutassa tiliointisumma_valuutassa,
-							round(suoritus.summa * if(suoritus.kurssi = 0, 1, suoritus.kurssi), 2) * -1 suoritussumma,
 							tiliointi.ltunnus,
+							tiliointi.tunnus tiliointitunnus,
 							suoritus.summa * -1 summa,
+							round(suoritus.summa * if(suoritus.kurssi = 0, 1, suoritus.kurssi), 2) * -1 kotisumma,
 							suoritus.valkoodi
 					  		FROM suoritus
 							JOIN tiliointi ON (suoritus.yhtio = tiliointi.yhtio and tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino in ($tili) {$tiliointilisa})
@@ -918,9 +917,22 @@
 				$result = pupe_query($query);
 
 				while ($trow = mysql_fetch_assoc($result)) {
-						echo "<tr class='aktiivi'>";
 
-						$suoritussummatotal += $trow["suoritussumma"];
+						$query = "	SELECT
+									sum(summa) summa,
+									sum(summa_valuutassa) summa_valuutassa
+							  		FROM tiliointi
+									WHERE yhtio  = '{$kukarow['yhtio']}'
+									AND ltunnus  = {$trow['ltunnus']}
+									AND (tunnus  = {$trow['tiliointitunnus']} or perheid={$trow['tiliointitunnus']})
+ 									AND tapvm   <= '$pvm'
+									AND korjattu = ''";
+						$tiliointires = pupe_query($query);
+						$tiliointirow = mysql_fetch_assoc($tiliointires);
+
+						echo "$query<tr class='aktiivi'>";
+
+						$suoritussummatotal += $tiliointirow["summa"];
 
 						if ($trow["tunnus"] != NULL) {
 							echo "<td><a name='a_$trow[tunnus]' href='{$palvelin2}myyntires/myyntilaskut_asiakasraportti.php?ytunnus=".tarkistahetu($trow["ytunnus"])."&asiakasid=$trow[tunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///a_$trow[tunnus]'>".tarkistahetu($trow["ytunnus"])."</a></td>";
@@ -938,32 +950,32 @@
 						echo "<td></td>";
 						echo "<td></td>";
 
-						$trow["summa"] = sprintf("%01.2f", $trow["summa"]);
-						$trow["suoritussumma"] = sprintf("%01.2f", $trow["suoritussumma"]);
+						$tiliointirow["summa"] = sprintf("%01.2f", $tiliointirow["summa"]);
+						$tiliointirow["summa_valuutassa"] = sprintf("%01.2f", $tiliointirow["summa_valuutassa"]);
 
 						if ($valuutassako == 'V') {
 							echo "<td></td>";
-							echo "<td align='right'>$trow[summa]</td>";
+							echo "<td align='right'>$tiliointirow[summa_valuutassa]</td>";
 							echo "<td align='right'>$trow[valkoodi]</td>";
 
-							$suoritussumma[$trow["valkoodi"]] += $trow["summa"];
+							$suoritussumma[$trow["valkoodi"]] += $tiliointirow["summa_valuutassa"];
 						}
 						else {
 							echo "<td></td>";
-							echo "<td align='right'>$trow[suoritussumma]</td>";
+							echo "<td align='right'>$tiliointirow[summa]</td>";
 							echo "<td align='right'>$yhtiorow[valkoodi]</td>";
 
-							$suoritussumma[$yhtiorow["valkoodi"]] += $trow["suoritussumma"];
+							$suoritussumma[$yhtiorow["valkoodi"]] += $tiliointirow["summa"];
 						}
 
 						echo "<td class='back' nowrap>";
 
-						if ($trow["suoritussumma"] != $trow["tiliointisumma"] and $trow["summa"] != $trow["tiliointisumma_valuutassa"] and $trow["tiliointisumma"] != NULL and $trow["tiliointisumma_valuutassa"] != NULL) {
-							echo "<font class='error'>VIRHE: Kirjanpito / Suoritus summat heittävät!</font> (<a href='muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tiliointisumma] / $trow[suoritussumma]</a>)";
-						}
+						#if ($trow["suoritussumma"] != $trow["tiliointisumma"] and $trow["summa"] != $trow["tiliointisumma_valuutassa"] and $trow["tiliointisumma"] != NULL and $trow["tiliointisumma_valuutassa"] != NULL) {
+						#	echo "<font class='error'>".t("VIRHE: Kirjanpito / Suoritus summat heittävät")."!</font> (<a href='muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tiliointisumma] / $trow[suoritussumma]</a>)";
+						#}
 
-						if ($trow["tiliointisumma"] == NULL) {
-							echo "<br><font class='error'>VIRHE: Suoritukselle ei löydy tiliöintejä!</font>";
+						if ($tiliointirow["summa"] == NULL) {
+							echo "<br><font class='error'>".t("VIRHE: Suoritukselle ei löydy tiliöintejä")."!</font>";
 						}
 
 						echo "</td>";

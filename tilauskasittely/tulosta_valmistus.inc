@@ -263,11 +263,11 @@ if (!function_exists('uusi_sivu_valm')) {
 		tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
 		//Vasen sarake
-		$pdf->draw_text(50, 717+74, $laskurow["nimi"], 		$thispage, $norm);
-		$pdf->draw_text(50, 707+74, $laskurow["nimitark"],	$thispage, $norm);
-		$pdf->draw_text(50, 697+74, $laskurow["osoite"], 	$thispage, $norm);
-		$pdf->draw_text(50, 687+74, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
-		$pdf->draw_text(50, 677+74, $laskurow["maa"], 		$thispage, $norm);
+		$pdf->draw_text(50, 707+74, $laskurow["nimi"], 		$thispage, $norm);
+		$pdf->draw_text(50, 697+74, $laskurow["nimitark"],	$thispage, $norm);
+		$pdf->draw_text(50, 687+74, $laskurow["osoite"], 	$thispage, $norm);
+		$pdf->draw_text(50, 677+74, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
+		$pdf->draw_text(50, 667+74, $laskurow["maa"], 		$thispage, $norm);
 
 		// haetaan maksuehdon tiedot
 		$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
@@ -361,11 +361,11 @@ if (!function_exists('uusi_sivu_valm')) {
 				if (strpos($kommentti, "###") !== false) {
 					list($o, $v) = explode("###", $kommentti);
 
-					$pdf->draw_text(35, $pohja, trim($o), $thispage, $boldi);
-					$pdf->draw_text(35+$maxoik+5, $pohja, trim($v), $thispage, $norm);
+					$pdf->draw_text(125, $pohja, trim($o), $thispage, $boldi);
+					$pdf->draw_text(125+$maxoik+5, $pohja, trim($v), $thispage, $norm);
 				}
 				else {
-					$pdf->draw_text(35, $pohja, trim($kommentti), $thispage, $norm);
+					$pdf->draw_text(125, $pohja, trim($kommentti), $thispage, $norm);
 				}
 
 				$pohja = $pohja - 10;

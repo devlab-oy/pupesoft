@@ -410,7 +410,7 @@
 	    echo "</form><br>";
 	}
 
-	if ($tee == "ETSILASKU" OR $tee == "NAYTATILAUS") {
+	if ($tee == "ETSILASKU") {
 
 		// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 		js_openFormInNewWindow();

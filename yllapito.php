@@ -18,6 +18,10 @@
 	if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 		require ("inc/parametrit.inc");
 	}
+	
+	if (function_exists("js_popup")) {
+		echo js_popup(-100);
+	}
 
 	if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana") {
 		enable_ajax();
@@ -1735,18 +1739,20 @@
 				($tyyppi == 3 and $tunnus!="")  or
 				$tyyppi == 5) {
 				echo "<tr>";
-				//KISSA
+
 				$infolinkki = "";
 
-				//echo "<a class='tooltip' id='$id2'>$saldorow[nimitys]</a> $saldorow[tyyppi]";
-				//echo "<div id='div_$id2' class='popup' style='width: 300px'>($saldorow[hyllyalue]-$saldorow[hyllynro]-$saldorow[hyllyvali]-$saldorow[hyllytaso])</div>";
-				// Jos helppiselite (selitetark_5) löytyy niin piirretään linkki onclick='myFunction(\"kekkonen\")
-				if ($al_row['selite'] != '') {
-					$infolinkki = "<a class='tooltip' id='div_$al_row[tunnus]'>?</a>";
-					echo "<div id='div_$al_row[tunnus]' class='popup' style='width: 300px'>($al_row[selite])</div>";
+				// Jos riviltä löytyy selitetark_5 niin piirretään otsikon perään tooltip-kysymysmerkki
+				if ($al_row['selitetark_5'] != '') {
+					$siistiselite = str_replace('.','_', $al_row['selite']);
+					$infolinkki = "<a class='tooltip' id='{$al_row['tunnus']}_{$siistiselite}'>?</a>";
+					
+					// Tehdään helppi-popup
+					echo "<div id='div_{$al_row['tunnus']}_{$siistiselite}' class='popup'>{$al_row['selitetark']} <br> <br>
+					{$al_row['selitetark_5']}
+					</div>";
 				}
 				echo "<th align='left'>$otsikko $infolinkki</th>";
-				js_popup();
 			}
 
 			if ($jatko == 0) {

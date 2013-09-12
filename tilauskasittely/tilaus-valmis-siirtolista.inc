@@ -43,6 +43,7 @@
 		$i = 0;
 		while($tilausrivi_split_row = mysql_fetch_assoc($tilausrivi_split_result)) {
 			if ($i == 0) {
+
 				$query = "	UPDATE lasku
 							SET kohde = '{$tilausrivi_split_row['positio']}',
 							toimaika = '{$tilausrivi_split_row['toimaika']}',
@@ -55,22 +56,36 @@
 				continue;
 			}
 
-			$toimaika_array = explode('-', $tilausrivi_split_row['toimaika']);
-			$keraika_array = explode('-', $tilausrivi_split_row['kerayspvm']);
-			$kukarow['kesken'] = 0;
-			$params = array(
-				'toim' => $toim,
-				'jatka' => '',
-				'clearing' => $laskurow['clearing'],
-				'toimvv' => $toimaika_array[0],
-				'toimkk' => $toimaika_array[1],
-				'toimpp' => $toimaika_array[2],
-				'kervv' => $keraika_array[0],
-				'kerkk' => $keraika_array[1],
-				'kerpp' => $keraika_array[2],
-				'valmistuslinja' => $tilausrivi_split_row['positio'],
-			);
-			$valmistus_tunnus = luo_valmistusotsikko($params);
+			$laskurow_temp = $laskurow;
+			unset($laskurow_temp['tunnus']);
+			unset($laskurow_temp['muutospvm']);
+			unset($laskurow_temp['muuttaja']);
+			unset($laskurow_temp['luontiaika']);
+			unset($laskurow_temp['laatija']);
+			unset($laskurow_temp['toimaika']);
+			unset($laskurow_temp['kerayspvm']);
+			unset($laskurow_temp['kohde']);
+
+			$_toimaika = ($tilausrivi_split_row['toimaika'] == '0000-00-00') ? $laskurow['toimaika'] : $tilausrivi_split_row['toimaika'];
+			$_kerayspvm = ($tilausrivi_split_row['kerayspvm'] == '0000-00-00') ? $laskurow['kerayspvm'] : $tilausrivi_split_row['kerayspvm'];
+			$_kohde = ($tilausrivi_split_row['kohde'] == '') ? $laskurow['kohde'] : $tilausrivi_split_row['kohde'];
+
+			$copy_query = "	INSERT INTO
+							lasku (".implode(", ", array_keys($laskurow_temp)).", 
+								luontiaika,
+								laatija,
+								toimaika,
+								kerayspvm,
+								kohde)
+
+								VALUES('".implode("', '", array_values($laskurow_temp))."',
+								now(),
+								'{$kukarow['kuka']}',
+								'{$_toimaika}',
+								'{$_kerayspvm}',
+								'{$_kohde}')";
+			pupe_query($copy_query);
+			$valmistus_tunnus = mysql_insert_id();
 
 			if (!empty($valmistus_tunnus)) {
 				$query = "	UPDATE tilausrivi

@@ -417,21 +417,21 @@
 					echo "</tr>";
 				}
 
-					$query  = "	SELECT group_concat(distinct kentta01 SEPARATOR '<br>') viestit
+				$query  = "	SELECT group_concat(distinct kentta01 SEPARATOR '<br>') viestit
 				  			FROM kalenteri
 				   			WHERE yhtio = '$kukarow[yhtio]'
 				   			AND tyyppi  = 'Myyntireskontraviesti'
 				       		AND liitostunnus in ($tunnukset)
 							ORDER BY tunnus desc";
-					$amres = pupe_query($query);
-					$amrow = mysql_fetch_assoc($amres);
+				$amres = pupe_query($query);
+				$amrow = mysql_fetch_assoc($amres);
 
 				if ($amrow['viestit'] != "") {
 					echo "<tr>
-						<th>".t("Reskontraviesti")."</th><td colspan='2'>'{$amrow['viestit']}'</td>
+						<th>".t("Reskontraviesti")."</th><td colspan='2'>{$amrow['viestit']}</td>
 						</tr>";
 				}
-				
+
 				echo "</table><br>";
 
 				if (!isset($vv)) $vv = date("Y");
@@ -636,8 +636,8 @@
 				echo "<input type='text' id='ppl' name='ppl' value='{$ppl}' size='3' />";
 				echo "<input type='text' id='kkl' name='kkl' value='{$kkl}' size='3' />";
 				echo "<input type='text' id='vvl' name='vvl' value='{$vvl}' size='6' />";
-				echo "</td>";			
-				echo "<td class='back'><input type='submit' value='".t('Hae')."' /></td>";				
+				echo "</td>";
+				echo "<td class='back'><input type='submit' value='".t('Hae')."' /></td>";
 				echo "</tr>";
 				echo "</table>";
 				echo "</form><br>";

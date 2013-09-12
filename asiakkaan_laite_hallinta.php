@@ -387,11 +387,7 @@ function echo_laitteet_table($laitteet = array()) {
 function hae_laitteen_tilat() {
 	global $kukarow, $yhtiorow;
 
-	$query = "	SELECT *
-				FROM avainsana
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND laji = 'LAITE_TILA'";
-	$result = pupe_query($query);
+	$result = t_avainsana('LAITE_TILA');
 	$tilat = array();
 	while ($tila = mysql_fetch_assoc($result)) {
 		$tilat[] = $tila;

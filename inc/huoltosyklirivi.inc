@@ -50,11 +50,7 @@ if (mysql_field_name($result, $i) == "koko") {
 
 //olosuhde pitää löytyä avainsanat taulusta OLOSUHDE
 if (mysql_field_name($result, $i) == "olosuhde") {
-	$query = "	SELECT *
-				FROM avainsana
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND laji = 'OLOSUHDE'";
-	$olosuhde_result = pupe_query($query);
+	$olosuhde_result = t_avainsana('OLOSUHDE');
 	$olosuhteet = array();
 	while ($olosuhde = mysql_fetch_assoc($olosuhde_result)) {
 		if ($trow[$i] == $olosuhde['tunnus']) {

@@ -242,7 +242,7 @@ if (!function_exists('rivi_dgd')) {
 			$pdf->pages[$sivu]->drawText($vaktuoterivi, mm_pt(45), mm_pt($kala), 'LATIN1');
 
 			if ($vaktuotepaino != "") {
-				$pdf->pages[$sivu]->drawText($vaktuotepaino, mm_pt(145), mm_pt($kala), 'LATIN1');
+				$pdf->pages[$sivu]->drawText($vaktuotepaino, mm_pt(167), mm_pt($kala), 'LATIN1');
 			}
 
 			$kala-=4;

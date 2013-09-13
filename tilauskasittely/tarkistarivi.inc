@@ -1012,6 +1012,8 @@
 		if (mysql_num_rows($suoratoimostores) > 0) {
 			$suoratoimostorow = mysql_fetch_assoc($suoratoimostores);
 
+			$ostotilaus_linkkilisa = "";
+
 			if ($suoratoimostorow["tila"] == "O") {
 				$tilaustyypilla = t("Ostotilauksella");
 
@@ -1026,12 +1028,22 @@
 					$nayta_sostolisateksti = "HUOM";
 				}
 
+				$backlinkki = "tilaus_myynti.php////toim={$toim}//tee={$tee}//tilausnumero={$tilausnumero}//mista={$mista}//tila={$tila}//orig_tila={$laskurow['tila']}//orig_alatila={$laskurow['alatila']}";
+				$ostotilaus_linkkilisa = "<a href='{$palvelin2}tilauskasittely/tilaus_osto.php?tee=AKTIVOI&tilausnumero={$suoratoimostorow['otunnus']}&from=MYYNTITILAUS&lopetus={$backlinkki}'>";
 			}
 			elseif($suoratoimostorow["tila"] == "V" or $suoratoimostorow["tila"] == "W") {
 				$tilaustyypilla = t("Valmistuksella");
 			}
 
-			$varaosakommentti .= "$tilaustyypilla: $suoratoimostorow[nimi] $suoratoimostorow[otunnus]<br>";
+			$varaosakommentti .= "$tilaustyypilla: $suoratoimostorow[nimi] ";
+
+			if ($ostotilaus_linkkilisa != "") $varaosakommentti .= $ostotilaus_linkkilisa;
+
+			$varaosakommentti .= "$suoratoimostorow[otunnus]";
+
+			if ($ostotilaus_linkkilisa != "") $varaosakommentti .= "</a>";
+
+			$varaosakommentti .= "<br>";
 		}
 	}
 

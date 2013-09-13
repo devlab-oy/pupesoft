@@ -32,7 +32,7 @@
 				sum(if (tilausrivi.var not in ('P','J','O','S') and tilausrivi.varattu $lis_plus_kpl < 0, 1, 0)) hyvitykset,
 				sum(if (tilausrivi.var not in ('P','J','O','S') and (('$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) normaalit_kerataan,
 				sum(if (tilausrivi.var not in ('P','J','O','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) saldottomat,
-				sum(if (tilausrivi.toimitettu != '', 1, 0)) toimitetut
+				sum(if (tilausrivi.toimitettu != '' and tuote.ei_saldoa = '', 1, 0)) toimitetut
 				FROM tilausrivi
 				LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'

@@ -1110,6 +1110,7 @@
 								$query = "	SELECT tt.tehdas_saldo,
 											tt.tehdas_saldo_paivitetty,
 											tt.liitostunnus,
+											tt.toim_tuoteno,
 											tt.tunnus AS tt_tunnus,
 											toimi.sahkoinen_tilausliitanta,
 											IF(tt.jarjestys = 0, 9999, tt.jarjestys) sorttauskentta
@@ -1141,10 +1142,13 @@
 
 							 			$yta_chk_row = mysql_fetch_assoc($yta_chk_res);
 
+							 			$_tuote['toim_tuoteno'] = $tehdas_saldo_row['toim_tuoteno'];
+
 							 			$vastaavat_table .= "<div class='availability' id='{$_tuote['vastaavat_tunnus']}_availability' /><span id='{$_tuote['vastaavat_tunnus']}_loading'></span></div>&nbsp;";
 								 		$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_custid' value='{$yta_chk_row['tarkenne']}' />";
 									 	$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_username' value='{$yta_chk_row['tarkenne_2']}' />";
 										$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_password' value='{$yta_chk_row['tarkenne_3']}' />";
+										$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_suppliernumber' value='{$yta_chk_row['tarkenne_4']}' />";
 										$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tehdas_saldo_row['tt_tunnus']}' />";
 										$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_myytavissa' value='{$row['tilkpl']}' />";
 							 		}
@@ -1175,7 +1179,7 @@
 										$hae = 'nappi';
 										$rivitunnus = $row['tunnus'];
 										$_vastaavat_tunnus = $_tuote['vastaavat_tunnus'];
-										$_vastaavat_tuoteno = $_tuote['tuoteno'];
+										$_vastaavat_tuoteno = $_tuote['toim_tuoteno'];
 
 										require("inc/sahkoinen_tilausliitanta.inc");
 

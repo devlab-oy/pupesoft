@@ -72,7 +72,7 @@
 
 		if (!empty($kukarow['extranet']) and $hinta == '') {
 			$hinta = 0.000001;
-			$ale1 = 100;	
+			$ale1 = 100;
 			$netto = '';
 		}
 		else {
@@ -80,7 +80,7 @@
 			$ale1 = (isset($ale1)) ? $ale1 : 0;
 		}
 	}
-	
+
 	if (!function_exists("tuoteperhe_reku")) {
 		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet, $perhelisa, $kieltolisa, $lisaarivi_debug) {
 			global $yhtiorow, $kukarow;
@@ -2592,12 +2592,14 @@
 				$varattu = 0;
 			}
 
-			$query_insert_ale_lisa = '';
+			$query_insert_ale_lisa = $query_insert_hinta_alkuperainen_lisa = '';
 
 			if ($rivityyppi == 'O') {
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 					$query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
 				}
+
+				if ($rivitunnus == 0) $query_insert_hinta_alkuperainen_lisa = " hinta_alkuperainen = '{$lis_hinta}',";
 			}
 			else {
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -2629,6 +2631,7 @@
 						alv 			= '$lis_alv',
 						netto			= '$lis_netto',
 						hinta 			= '$lis_hinta',
+						{$query_insert_hinta_alkuperainen_lisa}
 						kerayspvm 		= '$kerayspvm',
 						otunnus 		= '$kukarow[kesken]',
 						tyyppi 			= '$rivityyppi',

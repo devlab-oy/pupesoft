@@ -1379,7 +1379,7 @@
 			// Näytetään alv-erittely, jos on useita kantoja.
 			if ($naytalisa != '') {
 
-				// Etsitään myynti-tiliöinnit
+				// Etsitään kulutiliöinnit
 				$query = "	SELECT tiliointi.vero, sum(tiliointi.summa) veroton, round(sum(tiliointi.summa*tiliointi.vero/100),2) 'veron määrä', round(sum(tiliointi.summa*(1+tiliointi.vero/100)),2) verollinen
 							FROM tiliointi
 							JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)

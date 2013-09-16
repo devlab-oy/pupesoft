@@ -527,6 +527,7 @@
 
 						$totvesumma = 0;
 
+						// Etsitään kulutiliöinnit
 						$query = "	SELECT tiliointi.*
 									FROM tiliointi
 									JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)

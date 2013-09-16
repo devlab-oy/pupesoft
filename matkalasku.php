@@ -2733,6 +2733,7 @@ function korjaa_ostovelka($tilausnumero) {
 	$summarow = mysql_fetch_assoc($summares);
 
 	if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
+		// Etsitään kulutiliöinnit
 		$query = "	SELECT tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
 					FROM tiliointi
 					JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)

@@ -314,7 +314,7 @@
 								WHERE tiliointi.yhtio	= '$kukarow[yhtio]'
 								and tiliointi.ltunnus 	= '$row[laskutunnus]'
 								and tiliointi.tapvm   	= '$row[tapvm]'
-								and abs(tiliointi.summa)  <> 0
+								and abs(tiliointi.summa) <> 0
 								and tiliointi.tilino not in ('$row[myyntisaamiset]','$row[konsernimyyntisaamiset]','$row[alvtili]','$row[varasto]','$row[varastomuu]','$row[pyoristys]','$row[alennustili]','$row[factoringsaamiset]')
 								and tiliointi.korjattu	= ''";
 					$tilres = pupe_query($query);

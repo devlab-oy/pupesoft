@@ -2,6 +2,7 @@
 
 require ("parametrit.inc");
 require ("Validation.php");
+require_once('luo_myyntitilausotsikko.inc');
 enable_ajax();
 
 ?>
@@ -15,31 +16,95 @@ enable_ajax();
 	}
 </style>
 <script>
-	function tarkista(type, toim) {
-		if (type == "hyvaksy" && toim == "EXTTARJOUS") {
-			ok = confirm($('#hyvaksy_tarjous').val());
-		}
-		else if (type == "hylkaa" && toim == "EXTTARJOUS") {
-			ok = confirm($('#hylkaa_tarjous_message').val());
-		}
-		else if (type == "hyvaksy" && toim == "EXTENNAKKO") {
-			ok = confirm($('#hyvaksy_ennakko').val());
-		}
-		else {
-			ok = true;
-		}
+$(document).ready(
+	function(){  $( "#tarkistusviesti" ).dialog({
+	autoOpen: false,
+	resizable: false,
+	height:140,
+	modal: true,
+	buttons: [{
+		text: "Lähetä",
+		click: function() {
+			$( this ).dialog( "close" );
+			return true;
+		}},
+		{
+		text :"Peruuta",
+		click: function() {
+			$( this ).dialog( "close" );
+			return false;
+		}}]
+	}
+});
+});
+/*$(document).ready(function(){ 
+  $("#dialog").dialog({
+    autoOpen: false, 
+    buttons : {
+        "Confirm" : function() {
+          $('#form1').submit();
+        },
+        "Cancel" : function() {
+          $(this).dialog("close");
+        }
+      }
+    });
+  $('#submitButton').click(function(){
+	console.log('asdsakdo');
+      $("#tarkistusviesti").dialog();
+  });*/
+});
 
+function tarkista(type, toim) {
+	if (type == "hyvaksy" && toim == "EXTTARJOUS") {
+		ok = confirm($('#hyvaksy_tarjous_message').val());
+	}
+	else if (type == "hylkaa" && toim == "EXTTARJOUS") {
+		ok = confirm($('#hylkaa_tarjous_message').val());
+	}
+	else if (type == "hyvaksy" && toim == "EXTENNAKKO") {
+		ok = $("#tarkistusviesti").dialog();
+	}
+	else {
+		ok = true;
+	}
+
+	if (ok) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+/*	function tarkista(type, toim) {
+		$( "#tarkistusviesti" ).dialog({
+			resizable: false,
+			height:140,
+			modal: true,
+			buttons: {
+				"Lähetä": function() {
+					ok = true;
+					$( this ).dialog( "close" );
+				},
+				"Peruuta": function() {
+					ok = false;
+					$( this ).dialog( "close" );
+				}
+			}
+		});
 		if (ok) {
 			return true;
 		}
 		else {
 			return false;
 		}
-	}
+	}*/
+	
 </script>
 
 <?php
-
+echo "<div id='tarkistusviesti' style='display:none;'>Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum</div>";
+//echo "<button type='button' id='submitButton'>jorma</button>";
 if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
 	liite_popup("AK", $tuotetunnus, $width, $height);
 }
@@ -102,6 +167,16 @@ if ($action == "") {
 			"toim"	 => $request['toim']);
 		piirra_tarjoukset($params);
 	}
+
+	if ($toim == "EXTENNAKKO") {
+		// Uuden ennakon luonti asiakkaan näkymästä
+		echo "<br>";
+		echo "<br>";
+		echo "<form method='post' action=''>";
+		echo "<input type='hidden' name='action' value='luo_uusi_ennakko'>";
+		echo "<input type='submit' id='luo_uusi_ennakko' value='".t("Luo uusi ennakkotilaus")."'>";
+		echo "</form>";
+	}
 }
 // Näytetään yksittäinen ennakko/tarjous
 if ($action == 'nayta_tarjous') {
@@ -150,6 +225,35 @@ if ($action == 'hyvaksy_hylkaa_paivita') {
 			setTimeout(\"parent.location.href='$palvelin2'\", 2000);
 			</script>";
 	exit;
+}
+
+if ($action == 'luo_uusi_ennakko') {
+	$ennakko_asiakas = hae_extranet_kayttajaan_liitetty_asiakas();
+
+	$uusi_tilausnumero = luo_myyntitilausotsikko('ENNAKKO', $ennakko_asiakas['tunnus'], '', '', '', '', '', '');
+
+	$uusi_saate_teksti = "Tämä on Extranet-asiakkaan luoma ennakkotilaus";
+
+	$tilaustyyppi = 'E';
+
+	$viimeinen_voimassaolo_pvm = date('Y-m-d', strtotime('now + 30 day'));
+
+	$query = "	UPDATE lasku
+				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+				SET lasku.olmapvm = '{$viimeinen_voimassaolo_pvm}',
+				laskun_lisatiedot.saate = '{$uusi_saate_teksti}',
+				lasku.clearing = 'EXTENNAKKO',
+				lasku.tilaustyyppi = '{$tilaustyyppi}'
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND lasku.tunnus = '{$uusi_tilausnumero}'";
+	pupe_query($query);
+
+	$request['valittu_tarjous_tunnus'] = $uusi_tilausnumero;
+	//$laskurow = hae_extranet_tarjous($uusi_tilausnumero, $toim);
+
+	require_once('tilaus-valmis.inc');
+
+	nayta_tarjous($uusi_tilausnumero, $toim);
 }
 
 if (!empty($request['action'])) {
@@ -420,6 +524,36 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 	global $kukarow, $yhtiorow;
 
 	$tarjous = hae_tarjous($valittu_tarjous_tunnus);
+	$kukarow['kesken'] = $valittu_tarjous_tunnus;
+
+	echo "<br>
+			<form action='yhteensopivuus.php' method='post'>
+			<input type='hidden' name='toim' value='MP'>
+			<input type='hidden' name='toim_kutsu' value='$toim'>
+			<input type='hidden' name='tilausnumero' value='$valittu_tarjous_tunnus'>
+			<input type='hidden' name='toiminto' value='LISAARIVI'>
+			<input type='submit' value='".t("MP-Selain")."'>
+			</form>
+			<form action='yhteensopivuus.php' method='post'>
+			<input type='hidden' name='toim' value='MO'>
+			<input type='hidden' name='toim_kutsu' value='$toim'>
+			<input type='submit' value='".t("Moposelain")."'>
+			</form>
+			<form action='yhteensopivuus.php' method='post'>
+			<input type='hidden' name='toim' value='MK'>
+			<input type='hidden' name='toim_kutsu' value='$toim'>
+			<input type='submit' value='".t("Kelkkaselain")."'>
+			</form>
+			<form action='yhteensopivuus.php' method='post'>
+			<input type='hidden' name='toim' value='MX'>
+			<input type='hidden' name='toim_kutsu' value='$toim'>
+			<input type='submit' value='".t("Crossiselain")."'>
+			</form>
+			<form action='yhteensopivuus.php' method='post'>
+			<input type='hidden' name='toim' value='AT'>
+			<input type='hidden' name='toim_kutsu' value='$toim'>
+			<input type='submit' value='".t("ATV-Selain")."'>
+			</form><br><br>";
 
 	echo_tarjouksen_otsikko($tarjous, $toim);
 
@@ -465,6 +599,7 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 				tilausrivi.tuoteno,
 				tilausrivi.nimitys,
 				tilausrivi.var,
+				tuote.myyntihinta,
 				tilausrivi.varattu as kpl,
 				round(tilausrivi.hinta * (1 - ale1 / 100) * (1 - ale2 / 100) * (1 - ale3 / 100), 2) hinta,
 				round(tilausrivi.hinta * tilausrivi.varattu * (1 - ale1 / 100) * (1 - ale2 / 100) * (1 - ale3 / 100), 2) rivihinta,
@@ -492,7 +627,7 @@ function echo_tarjouksen_otsikko($tarjous, $toim) {
 	global $kukarow, $yhtiorow;
 
 	echo "<input type='hidden' id='hylkaa_tarjous_message' value='".t("Oletko varma, että haluat hylätä tarjouksen?")."'/>";
-	echo "<input type='hidden' id='hyvaksy_ennakko' value='".t("Oletko varma, että haluat hyväksyä ennakon?")."'/>";
+	//echo "<input type='hidden' id='hyvaksy_ennakko' value='".t("Kiitos ennakkotilauksestasi")."'/>";
 	echo "<input type='hidden' id='hyvaksy_tarjous' value='".t("Oletko varma, että haluat hyväksyä tarjouksen?")."'/>";
 
 	echo "<a href=$_SERVER[PHP_SELF]?toim={$toim}>".t("Palaa takaisin")."</a>";
@@ -574,6 +709,7 @@ function piirra_tarjouksen_tilausrivit($params) {
 	echo "<th>".t("Tuoteno")."</th>";
 	echo "<th>".t("Nimitys")."</th>";
 	echo "<th>".t("Kpl")."</th>";
+	echo "<th>".t("Osh")."</th>";	
 	echo "<th>".t("Yksikköhinta")."</th>";
 	echo "<th>".t("Rivihinta")."</th>";
 	echo "<th>".t("Alv")."</th>";
@@ -614,7 +750,7 @@ function piirra_tarjouksen_tilausrivit($params) {
 			echo "{$rivi["kpl"]}";
 		}
 		echo "</td>";
-
+		echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["myyntihinta"], $yhtiorow['hintapyoristys'])."</td>";
 		echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["hinta"], $yhtiorow['hintapyoristys'])."</td>";
 		echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["rivihinta"], $yhtiorow['hintapyoristys'])."</td>";
 		echo "<td class='{$class}' style='text-align: right;'>{$rivi["alv"]}</td>";

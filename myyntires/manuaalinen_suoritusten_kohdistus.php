@@ -1258,20 +1258,21 @@ if ($tila == 'tee_kohdistus') {
 				}
 
 				$query = "	UPDATE suoritus
-							SET kohdpvm = now(), summa = (summa-$kaatosumma)
+							SET kohdpvm = '$laskun_maksupvm',
+							summa = (summa-$kaatosumma)
 							WHERE tunnus = $suoritus[tunnus]
 							AND yhtio = '$kukarow[yhtio]'";
 				$result = pupe_query($query);
 
 				// Splitataan myyntisaamiset
 				$query = "	UPDATE tiliointi
-							SET summa = $erotus
+							SET summa = ($kassaan*-1)
 							WHERE tunnus = $tiliointi1[tunnus]
 							AND yhtio = '$kukarow[yhtio]'";
 				$result = pupe_query($query);
 
 				$params = array(
-					'summa' 		=> ($kassaan*-1),
+					'summa' 		=> $erotus,
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
 					'aputunnus'		=> 0,
@@ -1298,13 +1299,13 @@ if ($tila == 'tee_kohdistus') {
 
 				// Splitataan rahatiliöinti
 				$query = "	UPDATE tiliointi
-							SET summa = ($erotus * -1)
+							SET summa = $kassaan
 							WHERE tunnus = $tiliointi2[tunnus]
 							AND yhtio = '$kukarow[yhtio]'";
 				$result = pupe_query($query);
 
 				$params = array(
-					'summa' 		=> $kassaan,
+					'summa' 		=> ($erotus * -1),
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
 					'aputunnus'		=> $ttunnus,

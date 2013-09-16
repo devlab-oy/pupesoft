@@ -20,7 +20,7 @@
 	}
 
 	// Pupe datatables koodi
-	pupe_DataTables(array(array($pupe_DataTables[0], 9, 9)));
+	pupe_DataTables(array(array($pupe_DataTables[0], 11, 11)));
 
 	// Piirret‰‰n taulu aluksi display:none, ettei selain piirr‰ sit‰ ruudulle. Toglataan display p‰‰lle kun dokumentti on ready ja datatables tehny rivityksen.
 	echo '<script language="javascript">
@@ -164,7 +164,7 @@
 			$lasku_join_ehto .= " AND lasku.kohde = '{$valmistuslinja}'";
 		}
 
-		$query = "	(SELECT
+		$query = "	SELECT
 					tuote.tuoteno,
 					lasku.kohde valmistuslinja,
 					tilausrivi.toimaika,
@@ -175,6 +175,8 @@
 					lasku.alatila,
 					tuote.try,
 					tuote.osasto,
+					left(lasku.kerayspvm, 10) kerayspvm,
+					lasku.toimaika,
 					ifnull(sum(tilausrivi.kpl), 0) valmistettu,
 					ifnull(sum(tilausrivi.varattu), 0) valmistetaan
 					FROM tuote
@@ -193,12 +195,12 @@
 					AND tuote.status != 'P'
 					AND tuote.tuotetyyppi not in ('A', 'B')
 					{$lisa}
-					GROUP BY 1,2,3,4,5,6,7,8
-					HAVING valmistettu != 0 OR valmistetaan != 0)
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
+					HAVING valmistettu != 0 OR valmistetaan != 0
 
 					UNION
 
-					(SELECT
+					SELECT
 					tuote.tuoteno,
 					lasku.kohde valmistuslinja,
 					tilausrivi.toimaika,
@@ -209,6 +211,8 @@
 					lasku.alatila,
 					tuote.try,
 					tuote.osasto,
+					left(lasku.kerayspvm, 10) kerayspvm,
+					lasku.toimaika,
 					ifnull(sum(tilausrivi.kpl), 0) valmistettu,
 					ifnull(sum(tilausrivi.varattu), 0) valmistetaan
 					FROM tuote
@@ -225,8 +229,8 @@
 					AND tuote.status != 'P'
 					AND tuote.tuotetyyppi not in ('A', 'B')
 					{$lisa}
-					GROUP BY 1,2,3,4,5,6,7,8
-					HAVING valmistettu != 0 OR valmistetaan != 0)
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
+					HAVING valmistettu != 0 OR valmistetaan != 0
 
 					ORDER BY valmistuslinja, tuoteno, alatila";
 
@@ -255,6 +259,10 @@
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Valmistuksen tila"), $format_bold);
 				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("Ker‰ysajankohta"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("Valmistusajankohta"), $format_bold);
+				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Toteutunut valmistusp‰iv‰"), $format_bold);
 				$excelsarake++;
 			}
@@ -271,6 +279,8 @@
 				echo "<th>".t("Valmistettu kpl")."</th>";
 				echo "<th>".t("Valmistetaan kpl")."</th>";
 				echo "<th>".t("Valmistuksen tila")."</th>";
+				echo "<th>".t("Ker‰ysajankohta")."</th>";
+				echo "<th>".t("Valmistusajankohta")."</th>";
 				echo "<th>".t("Toteutunut Valmistusp‰iv‰")."</th>";
 				echo "</tr>";
 
@@ -283,6 +293,8 @@
 				echo "<td><input type='text' size='8' class='search_field' name='search_valmistettu_haku'></td>";
 				echo "<td><input type='text' size='8' class='search_field' name='search_valmistetaan_haku'></td>";
 				echo "<td><input type='text' size='8' class='search_field' name='search_tila_haku'></td>";
+				echo "<td><input type='text' size='8' class='search_field' name='search_keraysajankohta_haku'></td>";
+				echo "<td><input type='text' size='8' class='search_field' name='search_valmistusajankohta_haku'></td>";
 				echo "<td><input type='text' size='8' class='search_field' name='search_valmistettu_haku'></td>";
 				echo "</tr>";
 				echo "</thead>";
@@ -314,6 +326,8 @@
 					echo "<td align='right'>{$rivit["valmistettu"]}</td>";
 					echo "<td align='right'>{$rivit["valmistetaan"]}</td>";
 					echo "<td>{$alatila}</td>";
+					echo "<td align='right'>".tv1dateconv($rivit["kerayspvm"])."</td>";
+					echo "<td align='right'>".tv1dateconv($rivit["toimaika"])."</td>";
 					echo "<td align='right'>".tv1dateconv($rivit["toimitettuaika"])."</td>";
 					echo "</tr>";
 				}
@@ -335,6 +349,10 @@
 					$worksheet->write($excelrivi, $excelsarake, $rivit["valmistetaan"]);
 					$excelsarake++;
 					$worksheet->write($excelrivi, $excelsarake, $alatila);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, $rivit["kerayspvm"]);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, $rivit["toimaika"]);
 					$excelsarake++;
 					$worksheet->write($excelrivi, $excelsarake, $rivit["toimitettuaika"]);
 					$excelsarake++;
@@ -358,7 +376,7 @@
 				echo "<th colspan='4'>".t("N‰kym‰ yhteens‰").":</th>";
 				echo "<th valign='top' name='yhteensa' id='yhteensa_4' style='text-align: right'></th>";
 				echo "<th valign='top' name='yhteensa' id='yhteensa_5' style='text-align: right'></th>";
-				echo "<th colspan='3'></th>";
+				echo "<th colspan='5'></th>";
 				echo "</tr>";
 				echo "</tfoot>";
 				echo "</table>";

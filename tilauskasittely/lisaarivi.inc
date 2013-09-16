@@ -61,16 +61,15 @@
 		$perhekielto = "Y";
 	}
 
-	if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y' and isset($toivottu_kerayspvm_pp) and isset($toivottu_kerayspvm_kk) and isset($toivottu_kerayspvm_vv)) {
-		if (FormValidator::validateContent("{$toivottu_kerayspvm_vv}-{$toivottu_kerayspvm_kk}-{$toivottu_kerayspvm_pp}", 'paiva')) {
-			$kerayspvm = "{$toivottu_kerayspvm_vv}-{$toivottu_kerayspvm_kk}-{$toivottu_kerayspvm_pp}";
-		}
+	// Jos valmistuksien_kasittely on Y, voidaan käyttöliittymästä antaa keräyspvm/toimiaika
+	if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y' and isset($toivottu_kerayspvm_pp) and isset($toivottu_kerayspvm_kk) and isset($toivottu_kerayspvm_vv)) {		
+		$kerayspvm_check = "{$toivottu_kerayspvm_vv}-{$toivottu_kerayspvm_kk}-{$toivottu_kerayspvm_pp}";
+		$kerayspvm = strtotime($kerayspvm_check) !== false ? date('Y-m-d', strtotime($kerayspvm_check)) : '';
 	}
 
 	if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y' and isset($toivottu_valmistuspvm_pp) and isset($toivottu_valmistuspvm_kk) and isset($toivottu_valmistuspvm_vv)) {
-		if (FormValidator::validateContent("{$toivottu_valmistuspvm_vv}-{$toivottu_valmistuspvm_kk}-{$toivottu_valmistuspvm_pp}", 'paiva')) {
-			$toimaika = "{$toivottu_valmistuspvm_vv}-{$toivottu_valmistuspvm_kk}-{$toivottu_valmistuspvm_pp}";
-		}
+		$toimaika_check = "{$toivottu_valmistuspvm_vv}-{$toivottu_valmistuspvm_kk}-{$toivottu_valmistuspvm_pp}";
+		$toimaika = strtotime($toimaika_check) !== false ? date('Y-m-d', strtotime($toimaika_check)) : '';
 	}
 
 	unset($korvaavan_hinta_ylaraja_halvin_alehinta);

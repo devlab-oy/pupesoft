@@ -566,7 +566,7 @@ if ($tila == 'tee_kohdistus') {
 					$alvtili = $yhtiorow["alv"];
 				}
 
-				# Etsitään myynti-tiliöinnit
+				// Etsitään myynti-tiliöinnit
 				$query = "	SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
 							FROM tiliointi use index (tositerivit_index)
 							JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)

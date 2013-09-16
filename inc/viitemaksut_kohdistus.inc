@@ -174,15 +174,17 @@
 				$totkasumma = 0;
 				$totkasumma_valuutassa = 0;
 
-				# Etsitään myynti-tiliöinnit
-				$query = "	SELECT summa, vero, kustp, kohde, projekti, summa_valuutassa, valkoodi
+				// Etsitään myynti-tiliöinnit
+				$query = "	SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
 							FROM tiliointi use index (tositerivit_index)
-							WHERE yhtio		= '$kukarow[yhtio]'
-							and ltunnus		= '$row[laskutunnus]'
-							and tapvm		= '$row[tapvm]'
-							and abs(summa) <> 0
-							and tilino not in ('$row[myyntisaamiset]','$row[konsernimyyntisaamiset]','$row[alvtili]','$row[varasto]','$row[varastomuu]','$row[pyoristys]','$row[alennustili]','$row[factoringsaamiset]')
-							and korjattu	= ''";
+							JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
+							JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.kayttotarkoitus in ('','M'))
+							WHERE tiliointi.yhtio	= '$kukarow[yhtio]'
+							and tiliointi.ltunnus	= '$row[laskutunnus]'
+							and tiliointi.tapvm		= '$row[tapvm]'
+							and abs(tiliointi.summa) <> 0
+							and tiliointi.tilino not in ('$row[myyntisaamiset]','$row[konsernimyyntisaamiset]','$row[alvtili]','$row[varasto]','$row[varastomuu]','$row[pyoristys]','$row[alennustili]','$row[factoringsaamiset]')
+							and tiliointi.korjattu	= ''";
 				$tilres = pupe_query($query);
 
 				if (mysql_num_rows($tilres) == 0) {
@@ -304,15 +306,17 @@
 
 					$totvesumma = 0;
 
-					# Etsitään myynti-tiliöinnit
-					$query = "	SELECT summa, vero, kustp, kohde, projekti, summa_valuutassa, valkoodi
+					// Etsitään myynti-tiliöinnit
+					$query = "	SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
 								FROM tiliointi use index (tositerivit_index)
-								WHERE yhtio		= '$kukarow[yhtio]'
-								and ltunnus 	= '$row[laskutunnus]'
-								and tapvm   	= '$row[tapvm]'
-								and abs(summa)  <> 0
-								and tilino not in ('$row[myyntisaamiset]','$row[konsernimyyntisaamiset]','$row[alvtili]','$row[varasto]','$row[varastomuu]','$row[pyoristys]','$row[alennustili]','$row[factoringsaamiset]')
-								and korjattu	= ''";
+								JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
+								JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.kayttotarkoitus in ('','M'))
+								WHERE tiliointi.yhtio	= '$kukarow[yhtio]'
+								and tiliointi.ltunnus 	= '$row[laskutunnus]'
+								and tiliointi.tapvm   	= '$row[tapvm]'
+								and abs(tiliointi.summa)  <> 0
+								and tiliointi.tilino not in ('$row[myyntisaamiset]','$row[konsernimyyntisaamiset]','$row[alvtili]','$row[varasto]','$row[varastomuu]','$row[pyoristys]','$row[alennustili]','$row[factoringsaamiset]')
+								and tiliointi.korjattu	= ''";
 					$tilres = pupe_query($query);
 
 					if (mysql_num_rows($tilres) == 0) {

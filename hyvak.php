@@ -988,7 +988,7 @@
 			if ($laskurow["kapvm"] != "0000-00-00") {
 				echo "<br>".tv1dateconv($laskurow["kapvm"]);
 				echo " ({$laskurow["kasumma"]} {$laskurow["valkoodi"]})";
-			} 
+			}
 
 			echo "</td>";
 		}
@@ -1378,11 +1378,16 @@
 
 			// N‰ytet‰‰n alv-erittely, jos on useita kantoja.
 			if ($naytalisa != '') {
-				$query = "	SELECT vero, sum(summa) veroton, round(sum(summa*vero/100),2) 'veron m‰‰r‰', round(sum(summa*(1+vero/100)),2) verollinen from tiliointi
-							WHERE ltunnus = '$tunnus'
-							and yhtio = '$kukarow[yhtio]'
-							and korjattu = ''
-							and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+
+				// Etsit‰‰n myynti-tiliˆinnit
+				$query = "	SELECT tiliointi.vero, sum(tiliointi.summa) veroton, round(sum(tiliointi.summa*tiliointi.vero/100),2) 'veron m‰‰r‰', round(sum(tiliointi.summa*(1+tiliointi.vero/100)),2) verollinen
+							FROM tiliointi
+							JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
+							JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.kayttotarkoitus in ('','O'))
+							WHERE tiliointi.ltunnus = '$tunnus'
+							and tiliointi.yhtio     = '$kukarow[yhtio]'
+							and tiliointi.korjattu  = ''
+							and tiliointi.tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
 							GROUP BY 1";
 				$result = pupe_query($query);
 

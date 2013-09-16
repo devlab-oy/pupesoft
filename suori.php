@@ -166,13 +166,16 @@
 			$totkasumma = 0;
 			$totkasumma_valuutassa = 0;
 
-			$query = "	SELECT *
+			// Etsitään kulutiliöinnit
+			$query = "	SELECT tiliointi.*
 						FROM tiliointi
-						WHERE ltunnus	= '$tunnus'
-						and yhtio 		= '$kukarow[yhtio]'
-						and tapvm 		= '$laskurow[tapvm]'
-						and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
-						and korjattu 	= ''";
+						JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
+						JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.kayttotarkoitus in ('','O'))
+						WHERE tiliointi.ltunnus	= '$tunnus'
+						and tiliointi.yhtio 	= '$kukarow[yhtio]'
+						and tiliointi.tapvm 	= '$laskurow[tapvm]'
+						and tiliointi.tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+						and tiliointi.korjattu 	= ''";
 			$yresult = pupe_query($query);
 
 			if (mysql_num_rows($yresult) == 0) {
@@ -273,13 +276,16 @@
 
 				$totvesumma = 0;
 
-				$query = "	SELECT *
+				// Etsitään kulutiliöinnit
+				$query = "	SELECT tiliointi.*
 							FROM tiliointi
-							WHERE ltunnus	= '$tunnus'
-							and yhtio 		= '$kukarow[yhtio]'
-							and tapvm 		= '$laskurow[tapvm]'
-							and tilino not in ('$yhtiorow[kassaale]', '$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
-							and korjattu 	= ''";
+							JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
+							JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.kayttotarkoitus in ('','O'))
+							WHERE tiliointi.ltunnus	= '$tunnus'
+							and tiliointi.yhtio 	= '$kukarow[yhtio]'
+							and tiliointi.tapvm 	= '$laskurow[tapvm]'
+							and tiliointi.tilino not in ('$yhtiorow[kassaale]', '$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+							and tiliointi.korjattu 	= ''";
 				$yresult = pupe_query($query);
 
 				if (mysql_num_rows($yresult) == 0) {

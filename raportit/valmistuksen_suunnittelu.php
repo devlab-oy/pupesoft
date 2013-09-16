@@ -546,7 +546,7 @@
 	if (isset($ehdotusnappi) and $ehdotusnappi != "") {
 
 		$valmistuslinjat = hae_valmistuslinjat();
-		
+
 		$tuote_where       = ""; // tuote-rajauksia
 		$toimittaja_join   = ""; // toimittaja-rajauksia
 		$toimittaja_select = ""; // toimittaja-rajauksia
@@ -921,16 +921,16 @@
 					$valmistaja_header .= "<th>".t("ABC")."-<br>".t("luokka")."</th>";
 					$valmistaja_header .= "<th>".t("Reaali")."-<br>".t("saldo")."</th>";
 					$valmistaja_header .= "<th>".t("Pakkauskoko")."</th>";
-					$valmistaja_header .= "<th>".t("Valmistusaika sekunneissa")."</th>";
-					$valmistaja_header .= "<th>".t("Kumulatiivinenaika sekunneissa")."</th>";
-					$valmistaja_header .= "<th>".t("Valmistusaika yhteensä sekunneissa")."</th>";
+					$valmistaja_header .= "<th>".t("Valmistusaika")."</th>";
+					$valmistaja_header .= "<th>".t("Kumulatiivinen")."<br>".t("valmistusaika")."</th>";
+					$valmistaja_header .= "<th>".t("Valmistusaika")."<br>".t("yhteensä")."</th>";
 					$valmistaja_header .= "<th>".t("Päivä")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistuksessa")."</th>";
 					$valmistaja_header .= "<th>".t("Riitto Pv")."</th>";
 					$valmistaja_header .= "<th>".t("Raaka")."-<br>".t("aine")." ".t("riitto")."</th>";
 					$valmistaja_header .= "<th>".t("Vuosi")."-<br>".t("kulutus")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistus")."-<br>".t("suositus")."</th>";
-					$valmistaja_header .= "<th>".t("Valmistus")."-".t("linja")."</th>";
+					$valmistaja_header .= "<th>".t("Valmistus")."-<br>".t("linja")."</th>";
 					$valmistaja_header .= "<th></th>";
 					$valmistaja_header .= "<th>".t("Valmistus")."-<br>".t("määrä")."</th>";
 					$valmistaja_header .= "</tr>";
@@ -1015,7 +1015,7 @@
 					echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][riittopv]' value='{$tuoterivi["riittopv"]}'>";
 				}
 				echo "</td>";
-				echo "<td class='back'>";
+				echo "<td class='back' nowrap>";
 
 				if ($raaka_aineiden_riitto < $tuoterivi["valmistusmaara"]) {
 					echo "<font class='error'>".t("Raaka-aineiden saldo ei riitä")."!</font>";
@@ -1116,7 +1116,7 @@
 				}
 				echo "</tbody>";
 				echo "</table>";
-				
+
 				echo "</td>";
 				echo "</tr>";
 			}

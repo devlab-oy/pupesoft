@@ -14495,6 +14495,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 			if ($rakirkilot > 0) {
 				$vaktuotetiedot[] = "TOTAL GROSS MASS: {$rakirkilot} kg";
+				$vaktuotetiedot[] = "TOTAL NET MASS: {$tuotepainot_yht} kg";
 			}
 		}
 

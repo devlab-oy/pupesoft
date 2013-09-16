@@ -62,7 +62,7 @@ if (!function_exists('alku_dgd')) {
 
 		// 9 Additional handling information
 		$pdf->pages[$sivu]->drawText(t("Hätäpuhelinnumero", $kieli)." {$yhtiorow["puhelin"]}", mm_pt(105), mm_pt(202), 'LATIN1');
-
+		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(105), mm_pt(196), 'LATIN1');
 
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(61), 'LATIN1');
 

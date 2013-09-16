@@ -25,91 +25,6 @@
 		$lisasalker = " ";
 	}
 
-	if ($yhtiorow['valmistuksien_kasittely'] == 'Y' and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON")) {
-		// Jos valmistuksien_kasittely == Valmistuksella voi olla vain yksi valmiste,
-		// niin loopataan valmistusrivit l‰pi ja luodaan jokaiselle riville oma otsikko
-
-		// Otetaan laskurow talteen, ja nollataan sielt‰ muutama kentt‰
-		$laskurow_temp = $laskurow;
-		unset($laskurow_temp['tunnus']);
-		unset($laskurow_temp['muutospvm']);
-		unset($laskurow_temp['muuttaja']);
-		unset($laskurow_temp['luontiaika']);
-		unset($laskurow_temp['laatija']);
-		unset($laskurow_temp['toimaika']);
-		unset($laskurow_temp['kerayspvm']);
-		unset($laskurow_temp['kohde']);
-		unset($laskurow_temp['alatila']);
-
-		$query = "	SELECT tilausrivi.*,
-					tilausrivin_lisatiedot.positio
-					FROM tilausrivi
-					JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-						AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-					AND tilausrivi.tyyppi = 'W'
-					ORDER BY tilausrivi.tunnus";
-		$tilausrivi_split_result = pupe_query($query);
-
-		$valmistuksen_splittaus_rivi = 0;
-
-		while ($tilausrivi_split_row = mysql_fetch_assoc($tilausrivi_split_result)) {
-
-			$_toimaika = ($tilausrivi_split_row['toimaika'] == '0000-00-00') ? $laskurow['toimaika'] : $tilausrivi_split_row['toimaika'];
-			$_kerayspvm = ($tilausrivi_split_row['kerayspvm'] == '0000-00-00') ? $laskurow['kerayspvm'] : $tilausrivi_split_row['kerayspvm'];
-			$_kohde = ($tilausrivi_split_row['positio'] == '') ? $laskurow['kohde'] : $tilausrivi_split_row['positio'];
-
-			// J‰tet‰‰n ensimm‰inen rivi alkuper‰iselle otsikolle
-			if ($valmistuksen_splittaus_rivi == 0) {
-				$query = "	UPDATE lasku
-							SET kohde = '{$_kohde}',
-							toimaika = '{$_toimaika}',
-							kerayspvm = '{$_kerayspvm}',
-							muutospvm = now(),
-							muuttaja = '{$kukarow['kuka']}'
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$tilausrivi_split_row['otunnus']}'";
-				pupe_query($query);
-
-				$valmistuksen_splittaus_rivi++;
-				continue;
-			}
-
-			$copy_query = "	INSERT INTO lasku (
-								".implode(", ", array_keys($laskurow_temp)).",
-								luontiaika,
-								laatija,
-								muutospvm,
-								muuttaja,
-								toimaika,
-								kerayspvm,
-								kohde,
-								alatila)
-								VALUES (
-								'".implode("', '", array_values($laskurow_temp))."',
-								now(),
-								'{$kukarow['kuka']}',
-								now(),
-								'{$kukarow['kuka']}',
-								'{$_toimaika}',
-								'{$_kerayspvm}',
-								'{$_kohde}',
-								'J')";
-			pupe_query($copy_query);
-			$valmistus_tunnus = mysql_insert_id();
-
-			// Siirret‰‰n koko perhe uudelle otsikolle
-			if (!empty($valmistus_tunnus)) {
-				$query = "	UPDATE tilausrivi SET otunnus = '{$valmistus_tunnus}'
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND perheid = '{$tilausrivi_split_row['tunnus']}'
-							AND perheid != 0";
-				pupe_query($query);
-			}
-		}
-	}
-
 	// p‰ivitet‰‰n vanhatunnus laskulle
 	$query  = "	UPDATE lasku SET
 	 			vanhatunnus = tunnus
@@ -129,6 +44,12 @@
 
 		$laskurow['h1time'] = date('Y-m-d H:i:s');
 		$laskurow['hyvak1'] = $kukarow["kuka"];
+	}
+
+	// Jos valmistuksien_kasittely == Valmistuksella voi olla vain yksi valmiste,
+	// niin loopataan valmistusrivit l‰pi ja luodaan jokaiselle riville oma otsikko
+	if (($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+		splittaa_valmistukset($laskurow);
 	}
 
 	//otetaan varmuuden vuoksi alkuper‰isen otsikon tunnus
@@ -874,4 +795,3 @@
 			}
 		}
 	}
-

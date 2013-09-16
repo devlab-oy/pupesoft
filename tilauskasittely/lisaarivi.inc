@@ -62,7 +62,7 @@
 	}
 
 	// Jos valmistuksien_kasittely on Y, voidaan käyttöliittymästä antaa keräyspvm/toimiaika
-	if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y' and isset($toivottu_kerayspvm_pp) and isset($toivottu_kerayspvm_kk) and isset($toivottu_kerayspvm_vv)) {		
+	if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y' and isset($toivottu_kerayspvm_pp) and isset($toivottu_kerayspvm_kk) and isset($toivottu_kerayspvm_vv)) {
 		$kerayspvm_check = "{$toivottu_kerayspvm_vv}-{$toivottu_kerayspvm_kk}-{$toivottu_kerayspvm_pp}";
 		$kerayspvm = strtotime($kerayspvm_check) !== false ? date('Y-m-d', strtotime($kerayspvm_check)) : '';
 	}

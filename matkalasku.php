@@ -2737,7 +2737,7 @@ function korjaa_ostovelka($tilausnumero) {
 		$query = "	SELECT tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
 					FROM tiliointi
 					JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
-					JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.kayttotarkoitus in ('','O'))
+					JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi='U' and taso.kayttotarkoitus in ('','O'))
 					WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
 					AND tiliointi.ltunnus  = '$tilausnumero'
 					AND tiliointi.korjattu = ''

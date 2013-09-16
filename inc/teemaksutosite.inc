@@ -32,7 +32,7 @@
 	$query = "	SELECT tiliointi.*
 				FROM tiliointi
 				JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
-				JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.kayttotarkoitus in ('','O'))
+				JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi='U' and taso.kayttotarkoitus in ('','O'))
 				WHERE tiliointi.ltunnus = '$trow[tunnus]'
 				and tiliointi.yhtio 	= '$yritirow[yhtio]'
 				and tiliointi.tapvm 	= '$trow[tapvm]'

@@ -894,7 +894,7 @@
 			$query = "	SELECT tiliointi.*
 						FROM tiliointi
 						JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
-						JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.kayttotarkoitus in ('','O'))
+						JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi='U' and taso.kayttotarkoitus in ('','O'))
 						WHERE tiliointi.yhtio	= '$kukarow[yhtio]'
 						AND tiliointi.ltunnus	= '$tunnus'
 						AND tiliointi.tapvm		= '$trow[tapvm]'
@@ -957,7 +957,7 @@
 			$query = "	SELECT tiliointi.tunnus, tiliointi.summa, tiliointi.vero, tiliointi.tilino
 						FROM tiliointi
 						JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
-						JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.kayttotarkoitus in ('','O'))
+						JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi='U' and taso.kayttotarkoitus in ('','O'))
 						WHERE tiliointi.yhtio	= '$kukarow[yhtio]'
 						AND tiliointi.ltunnus	= '$tunnus'
 						AND tiliointi.tapvm		= '$trow[tapvm]'
@@ -1378,7 +1378,7 @@
 			$query = "	SELECT tiliointi.*
 						FROM tiliointi
 						JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
-						JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.kayttotarkoitus in ('','O'))
+						JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi='U' and taso.kayttotarkoitus in ('','O'))
 						WHERE tiliointi.yhtio	= '$kukarow[yhtio]'
 						AND tiliointi.ltunnus	= '$tunnus'
 						{$tapvmlisa}

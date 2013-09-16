@@ -178,7 +178,7 @@
 				$query = "	SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
 							FROM tiliointi use index (tositerivit_index)
 							JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
-							JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.kayttotarkoitus in ('','M'))
+							JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi='U' and taso.kayttotarkoitus in ('','M'))
 							WHERE tiliointi.yhtio	= '$kukarow[yhtio]'
 							and tiliointi.ltunnus	= '$row[laskutunnus]'
 							and tiliointi.tapvm		= '$row[tapvm]'
@@ -310,7 +310,7 @@
 					$query = "	SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
 								FROM tiliointi use index (tositerivit_index)
 								JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
-								JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.kayttotarkoitus in ('','M'))
+								JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi='U' and taso.kayttotarkoitus in ('','M'))
 								WHERE tiliointi.yhtio	= '$kukarow[yhtio]'
 								and tiliointi.ltunnus 	= '$row[laskutunnus]'
 								and tiliointi.tapvm   	= '$row[tapvm]'

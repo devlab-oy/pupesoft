@@ -354,8 +354,28 @@ else {
 		$laskurow['kassalipas'] = $kertakassa;
 	}
 
+	if ($laskurow["tila"] == 'N' and $laskurow["alatila"] == 'U' and $laskurow["osatoimitus"] != '') {
+		// Osatoimitus kielletty, mutta kaikki rivit toimitettavissa
+		$query = "	SELECT *
+					from tilausrivi
+					where yhtio = '$kukarow[yhtio]'
+					and otunnus = '$laskurow[tunnus]'
+					and keratty = ''
+					and var     = 'J'
+					and tyyppi != 'D'
+					and varattu > 0";
+		$keres = pupe_query($query);
+
+		if (mysql_num_rows($keres) == 0) {
+			//Muutetaan tulostettavaksi
+			$query = "UPDATE lasku SET alatila = '' where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
+			$result = pupe_query($query);
+			$laskurow["alatila"] = "";
+			$laskurow["osatoimitus"] = "";
+		}
+	}
 	// Aktivoituiko "Odottaa jt-rivejä" tilaus?
-	if (($laskurow["tila"] == 'N' or $laskurow["tila"] == 'G') and ($laskurow["alatila"] == 'T' or $laskurow["alatila"] == 'U')) {
+	else if (($laskurow["tila"] == 'N' or $laskurow["tila"] == 'G') and ($laskurow["alatila"] == 'T' or $laskurow["alatila"] == 'U')) {
 		// Onko jotain tulostettavaa?
 		$query = "	SELECT *
 					from tilausrivi
@@ -372,23 +392,6 @@ else {
 			$query = "UPDATE lasku SET alatila = '' where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
 			$result = pupe_query($query);
 			$laskurow["alatila"] = "";
-			$laskurow["osatoimitus"] = "";
-		}
-	}
-	else if ($laskurow["osatoimitus"] != "" and $laskurow["tila"] == 'N' and $laskurow["alatila"] == 'U') {
-		// Onko jotain tulostettavaa?
-		$query = "	SELECT *
-					from tilausrivi
-					where yhtio = '$kukarow[yhtio]'
-					and otunnus = '$laskurow[tunnus]'
-					and keratty = ''
-					and var not in ('P','J','O','S')
-					and tyyppi != 'D'
-					and varattu > 0";
-		$keres = pupe_query($query);
-
-		if (mysql_num_rows($keres) > 0) {
-			// Osatoimituskielto, mutta kaikki löytyy
 			$laskurow["osatoimitus"] = "";
 		}
 	}
@@ -1280,14 +1283,15 @@ else {
 				$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 				// varasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
 				// omalle_tilaukselle - tilauksia ei splitata muuten ku omiksi tilauksiksi (eli ei esim splitata varastoittain tai vyöhykkeittäin)
-				if (	((($varasto != $edvarasto and $edvarasto != 'x' and $edomalle_tilaukselle == 0) or
+				if ((	((($varasto != $edvarasto and $edvarasto != 'x' and $edomalle_tilaukselle == 0) or
 						  ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '' and $edomalle_tilaukselle == 0) or
 						  ($keraysvyohyke != $edkeraysvyohyke and $edkeraysvyohyke != 'x' and $edkeraysvyohyke != '' and $edomalle_tilaukselle == 0)
-						 ) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $laskurow["osatoimitus"] == ''
+						 ) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" 
 						) or
 						($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $edomalle_tilaukselle == 0 and $yhtiorow["splittauskielto"] == "K") or
 						($omalle_tilaukselle != $edomalle_tilaukselle and $edomalle_tilaukselle != 'x')
-					) {
+					) 
+					and $laskurow["osatoimitus"] == '' ) {
 
 					$tilaus_splitattu = TRUE;
 

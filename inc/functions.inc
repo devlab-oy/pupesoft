@@ -23129,7 +23129,7 @@ if (!function_exists("splittaa_valmistukset")) {
 					AND tilausrivi.tyyppi = 'W'
 					ORDER BY tilausrivi.tunnus";
 		$tilausrivi_split_result = pupe_query($query);
-query_dump($query);
+
 		$valmistuksen_splittaus_rivi = 0;
 
 
@@ -23150,7 +23150,7 @@ query_dump($query);
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$tilausrivi_split_row['otunnus']}'";
 				pupe_query($query);
-query_dump($query);
+
 				$valmistuksen_splittaus_rivi++;
 				continue;
 			}
@@ -23177,7 +23177,7 @@ query_dump($query);
 								'J')";
 			pupe_query($query);
 			$valmistus_tunnus = mysql_insert_id();
-query_dump($copy_query);
+
 			// Siirret‰‰n koko perhe uudelle otsikolle
 			if (!empty($valmistus_tunnus)) {
 				$query = "	UPDATE tilausrivi SET otunnus = '{$valmistus_tunnus}'
@@ -23186,7 +23186,6 @@ query_dump($copy_query);
 							AND perheid = '{$tilausrivi_split_row['tunnus']}'
 							AND perheid != 0";
 				pupe_query($query);
-query_dump($query);
 			}
 		}
 	}

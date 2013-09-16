@@ -236,7 +236,7 @@
 							echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat").": 'O'. ".t("Rivill‰").": $rivilask1. $var<br>";
 							$var = '';
 						}
-						elseif ($var != '' and $var != 'P' and $var != 'H' and $var != 'J') {
+						elseif ($toim != "EXTENNAKKO" and $var != '' and $var != 'P' and $var != 'H' and $var != 'J') {
 							echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat").": 'P','H','J'. ".t("Rivill‰").": $rivilask1. $var<br>";
 							$var = '';
 						}

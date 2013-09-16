@@ -488,24 +488,18 @@
 
 		if ($kukarow["extranet"] == "") {
 
-			if ( ($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
-				echo "<td>".t("Toivottu valmistusajankohta vvvv-kk-pp")."</td>";
+			if (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+				echo "<td>".t("Valmistusajankohta")." ".t("(vvvv-kk-pp)")."</td>";
 				echo "<td>".t("Hinta")."</td>";
 				echo "<td>".t("Ale")."</td>";
 				echo "<td>".t("Netto")."</td>";
 				echo "<td>".t("Var")."</td>";
 				echo "<td>".t("Kommentti")."</td>";
-
-				echo "<td>";
-				echo t('Valmistuslinja');
-				echo "</td>";
-
-				echo "<td>";
-				echo t('Toivottu keräysajankohta');
-				echo "</td>";
+				echo "<td>".t('Valmistuslinja')."</td>";
+				echo "<td>".t('Keräysajankohta')." ".t("(vvvv-kk-pp)")."</td>";
 			}
 			else {
-				echo "<td>".t("Arvioitu toimituspäivä vvvv-kk-pp")."</td>";
+				echo "<td>".t("Arvioitu toimituspäivä")." ".t("(vvvv-kk-pp)")."</td>";
 				echo "<td>".t("Hinta")."</td>";
 				echo "<td>".t("Ale")."</td>";
 				echo "<td>".t("Netto")."</td>";
@@ -513,7 +507,6 @@
 				echo "<td>".t("Kommentti")."</td>";
 			}
 		}
-
 
 		echo "	</tr>
 				</table>

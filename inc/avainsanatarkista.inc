@@ -191,12 +191,10 @@ if(!function_exists("avainsanatarkista")) {
 				if (mysql_num_rows($tili_chk_res) == 0) $virhe[$i] = t("Tilinumero ei ole sallittu")."!";
 			}
 
-
-			if (strtoupper($tem_laji) == 'VALMISTUSLINJA' and $tem_selitetark_2 >= 0) {
-				$virhe[$i] = t("Valmistuslinjan päiväkapasiteetin (selitetark_2) on oltava suurempi tai yhtäsuuri kuin 0")."!";
-			}
-			elseif (strtoupper($tem_laji) == 'VALMISTUSLINJA' and !is_numeric($tem_selitetark_2)) {
-				$virhe[$i] = t("Valmistuslinjan päiväkapasiteetin (selitetark_2) on oltava numero")."!";
+			if (strtoupper($tem_laji) == 'VALMISTUSLINJA') {
+				if (!is_numeric($tem_selitetark_2) or $tem_selitetark_2 < 0) {
+					$virhe[$i] = t("Valmistuslinjan päiväkapasiteetin (selitetark_2) on oltava suurempi tai yhtäsuuri kuin 0")."!";
+				}
 			}
 		}
 

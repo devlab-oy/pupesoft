@@ -709,14 +709,13 @@ if ($tila == 'tee_kohdistus') {
 
 		$tiliointi2 = mysql_fetch_assoc($result);
 
-		// Tehdään suorituksen tosittelle vastakirjaukset
+		// Tehdään suorituksen tositteelle vastakirjaukset
 		$params = array(
 			'summa' 		=> ($tiliointi1['summa'] * -1),
 			'tapvm'			=> $laskun_maksupvm,
 			'laatija' 		=> $kukarow['kuka'],
 			'laadittu' 		=> date('Y-m-d H:i:s'),
 			'aputunnus'		=> 0,
-			'perheid'		=> $tiliointi1['tunnus'],
 			'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]",
 		);
 
@@ -728,7 +727,6 @@ if ($tila == 'tee_kohdistus') {
 			'laatija' 		=> $kukarow['kuka'],
 			'laadittu' 		=> date('Y-m-d H:i:s'),
 			'aputunnus'		=> 0,
-			'perheid'		=> $tiliointi2['tunnus'],
 			'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]",
 		);
 
@@ -1260,7 +1258,7 @@ if ($tila == 'tee_kohdistus') {
 				}
 
 				$query = "	UPDATE suoritus
-							SET summa = $ervains
+							SET kohdpvm = now(), summa = (summa-$kaatosumma)
 							WHERE tunnus = $suoritus[tunnus]
 							AND yhtio = '$kukarow[yhtio]'";
 				$result = pupe_query($query);
@@ -1277,11 +1275,26 @@ if ($tila == 'tee_kohdistus') {
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
 					'aputunnus'		=> 0,
-					'perheid'		=> $tiliointi1['tunnus'],
 					'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
 				);
 
-				kopioitiliointi($tiliointi1['tunnus'], "", $params);
+				$ttunnus = kopioitiliointi($tiliointi1['tunnus'], "", $params);
+
+				// Luodaan suoritus johon ylijäänyt saldo laitetaan
+				$query = "	INSERT INTO suoritus SET
+							yhtio			= '$suoritus[yhtio]',
+							tilino			= '$suoritus[tilino]',
+							nimi_maksaja	= '$suoritus[nimi_maksaja]',
+							summa			= $ervains,
+							kirjpvm			= '$suoritus[kirjpvm]',
+							maksupvm		= '$suoritus[maksupvm_clean]',
+							asiakas_tunnus	= '$suoritus[asiakas_tunnus]',
+							ltunnus			= '$ttunnus',
+							viesti			= '$suoritus[clean_viesti]',
+							viite			= '$suoritus[viite]',
+							valkoodi		= '$suoritus[valkoodi]',
+							kurssi			= '$suoritus[kurssi]'";
+				$result = pupe_query($query);
 
 				// Splitataan rahatiliöinti
 				$query = "	UPDATE tiliointi
@@ -1294,22 +1307,20 @@ if ($tila == 'tee_kohdistus') {
 					'summa' 		=> $kassaan,
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
-					'aputunnus'		=> 0,
-					'perheid'		=> $tiliointi2['tunnus'],
+					'aputunnus'		=> $ttunnus,
 					'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
 				);
 
 				kopioitiliointi($tiliointi2['tunnus'], "", $params);
 
 
-				// Tehdään suorituksen tosittelle vastakirjaukset
+				// Tehdään suorituksen tositteelle vastakirjaukset
 				$params = array(
 					'summa' 		=> $kassaan,
 					'tapvm'			=> $laskun_maksupvm,
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
 					'aputunnus'		=> 0,
-					'perheid'		=> $tiliointi1['tunnus'],
 					'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
 				);
 
@@ -1321,7 +1332,6 @@ if ($tila == 'tee_kohdistus') {
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
 					'aputunnus'		=> 0,
-					'perheid'		=> $tiliointi2['tunnus'],
 					'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta käytetiin osa.",
 				);
 
@@ -1336,14 +1346,13 @@ if ($tila == 'tee_kohdistus') {
 							AND yhtio = '$kukarow[yhtio]'";
 				$result = pupe_query($query);
 
-				// Tehdään suorituksen tosittelle vastakirjaukset
+				// Tehdään suorituksen tositteelle vastakirjaukset
 				$params = array(
 					'summa' 		=> ($tiliointi1['summa'] * -1),
 					'tapvm'			=> $laskun_maksupvm,
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
 					'aputunnus'		=> 0,
-					'perheid'		=> $tiliointi1['tunnus'],
 					'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti]",
 				);
 
@@ -1355,7 +1364,6 @@ if ($tila == 'tee_kohdistus') {
 					'laatija' 		=> $kukarow['kuka'],
 					'laadittu' 		=> date('Y-m-d H:i:s'),
 					'aputunnus'		=> 0,
-					'perheid'		=> $tiliointi2['tunnus'],
 					'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti]",
 				);
 
@@ -1574,7 +1582,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	echo "</form>";
 
 	//Näytetään laskut!
-	$kentat = 'summa, kasumma, laskunro, erpcm, kapvm, viite, ytunnus';
+	$kentat = 'summa, kasumma, laskunro, erpvm, kapvm, viite, ytunnus';
 	$kentankoko = array(10,10,15,10,10,15);
 	$array 	= explode(",", $kentat);
 	$count 	= count($array);
@@ -1593,7 +1601,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 		$jarjestys = $array[$ojarj];
 	}
 	else {
-		$jarjestys = 'erpcm';
+		$jarjestys = 'erpvm';
 	}
 
 	// Etsitään ytunnuksella
@@ -1619,7 +1627,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 		$query = "SELECT summa-saldo_maksettu summa, kasumma, ";
 	}
 
-	$query .= " laskunro, erpcm, kapvm, viite, ytunnus, lasku.tunnus
+	$query .= " laskunro, erpcm erpvm, kapvm, viite, ytunnus, lasku.tunnus
 				FROM lasku USE INDEX (yhtio_tila_mapvm)
 	           	WHERE yhtio  = '$kukarow[yhtio]'
 				and tila     = 'U'
@@ -1694,7 +1702,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 		}
 
 		echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/{$palvelin2}myyntires/manuaalinen_suoritusten_kohdistus.php////tunnus=$tunnus//tila=$tila//asiakas_tunnus=$asiakas_tunnus//asiakas_nimi=$asiakas_nimi//suoritus_tunnus=$suoritus_tunnus//vastatili=$vastatili'>$maksurow[laskunro]</a></td>";
-		echo "<td>".tv1dateconv($maksurow["erpcm"])."</td>";
+		echo "<td>".tv1dateconv($maksurow["erpvm"])."</td>";
 		echo "<td>".tv1dateconv($maksurow["kapvm"])."</td>";
 		echo "<td>$maksurow[viite]</td>";
 		echo "<td>$maksurow[ytunnus]</td>";

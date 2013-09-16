@@ -34,3 +34,16 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "kayttotarkoitus") {
+
+		$sel = array_fill_keys(array($trow[$i]), " selected") + array('M' => '', 'O' => '');
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Ei valintaa")."</option>";
+		$ulos .= "<option value = 'M' $sel[M]>".t("Liikevaihto")."</option>";
+		$ulos .= "<option value = 'O' $sel[O]>".t("Ostot, Aineet, tarvikkeet ja tavarat")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+

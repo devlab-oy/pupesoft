@@ -396,6 +396,7 @@
 											'valmistuslinja'	=> $valmistuslinja,
 											'toimaika'			=> $toimaika,
 											'kerayspvm'			=> $kerayspvm,
+											'toim'				=> "VALMISTAVARASTOON",
 										);
 
 										lisaa_rivi($params);

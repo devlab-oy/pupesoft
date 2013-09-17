@@ -570,13 +570,14 @@ if ($tila == 'tee_kohdistus') {
 				$query = "	SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
 							FROM tiliointi use index (tositerivit_index)
 							JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
-							JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi='U' and taso.kayttotarkoitus in ('','M'))
+							LEFT JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi = 'U')
 							WHERE tiliointi.ltunnus	= '$lasku[tunnus]'
-							and tiliointi.yhtio 	= '$kukarow[yhtio]'
-							and tiliointi.tapvm 	= '$lasku[tapvm]'
-							and abs(tiliointi.summa) <> 0
-							and tiliointi.tilino not in ('$yhtiorow[myyntisaamiset]','$yhtiorow[konsernimyyntisaamiset]','$alvtili','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[pyoristys]','$yhtiorow[myynninkassaale]','$yhtiorow[factoringsaamiset]')
-							and tiliointi.korjattu 	= ''";
+							AND tiliointi.yhtio 	= '$kukarow[yhtio]'
+							AND tiliointi.tapvm 	= '$lasku[tapvm]'
+							AND abs(tiliointi.summa) <> 0
+							AND tiliointi.tilino not in ('$yhtiorow[myyntisaamiset]','$yhtiorow[konsernimyyntisaamiset]','$alvtili','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[pyoristys]','$yhtiorow[myynninkassaale]','$yhtiorow[factoringsaamiset]')
+							AND tiliointi.korjattu 	= ''
+							AND (taso.kayttotarkoitus is null or taso.kayttotarkoitus  in ('','M'))";
 				$tilres = pupe_query($query);
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["myynninvaluuttaero_tilino"]);
@@ -879,13 +880,14 @@ if ($tila == 'tee_kohdistus') {
 					$query = "	SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
 								FROM tiliointi use index (tositerivit_index)
 								JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
-								JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi='U' and taso.kayttotarkoitus in ('','M'))
+								LEFT JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi = 'U')
 								WHERE tiliointi.ltunnus	= '$lasku[tunnus]'
-								and tiliointi.yhtio 	= '$kukarow[yhtio]'
-								and tiliointi.tapvm 	= '$lasku[tapvm]'
-								and abs(tiliointi.summa) <> 0
-								and tiliointi.tilino not in ('$yhtiorow[myyntisaamiset]','$yhtiorow[konsernimyyntisaamiset]','$alvtili','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[pyoristys]','$yhtiorow[myynninkassaale]','$yhtiorow[factoringsaamiset]')
-								and tiliointi.korjattu 	= ''";
+								AND tiliointi.yhtio 	= '$kukarow[yhtio]'
+								AND tiliointi.tapvm 	= '$lasku[tapvm]'
+								AND abs(tiliointi.summa) <> 0
+								AND tiliointi.tilino not in ('$yhtiorow[myyntisaamiset]','$yhtiorow[konsernimyyntisaamiset]','$alvtili','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[pyoristys]','$yhtiorow[myynninkassaale]','$yhtiorow[factoringsaamiset]')
+								AND tiliointi.korjattu 	= ''
+								AND (taso.kayttotarkoitus is null or taso.kayttotarkoitus  in ('','M'))";
 					$yresult = pupe_query($query);
 
 					if (mysql_num_rows($yresult) == 0) {
@@ -1093,13 +1095,14 @@ if ($tila == 'tee_kohdistus') {
 						$query = "	SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
 									FROM tiliointi use index (tositerivit_index)
 									JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
-									JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi='U' and taso.kayttotarkoitus in ('','M'))
+									LEFT JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi = 'U')
 									WHERE tiliointi.ltunnus	= '$lasku[tunnus]'
-									and tiliointi.yhtio 	= '$kukarow[yhtio]'
-									and tiliointi.tapvm 	= '$lasku[tapvm]'
-									and abs(tiliointi.summa) <> 0
-									and tiliointi.tilino not in ('$yhtiorow[myyntisaamiset]','$yhtiorow[konsernimyyntisaamiset]','$alvtili','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[pyoristys]','$yhtiorow[myynninkassaale]','$yhtiorow[factoringsaamiset]')
-									and tiliointi.korjattu 	= ''";
+									AND tiliointi.yhtio 	= '$kukarow[yhtio]'
+									AND tiliointi.tapvm 	= '$lasku[tapvm]'
+									AND abs(tiliointi.summa) <> 0
+									AND tiliointi.tilino not in ('$yhtiorow[myyntisaamiset]','$yhtiorow[konsernimyyntisaamiset]','$alvtili','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[pyoristys]','$yhtiorow[myynninkassaale]','$yhtiorow[factoringsaamiset]')
+									AND tiliointi.korjattu 	= ''
+									AND (taso.kayttotarkoitus is null or taso.kayttotarkoitus  in ('','M'))";
 						$tilres = pupe_query($query);
 
 						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["myynninvaluuttaero_tilino"]);

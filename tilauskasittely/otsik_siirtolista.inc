@@ -593,5 +593,6 @@
 				}
 			}
 		}
+
+		$valmistuslinja = "";
 	}
-?>

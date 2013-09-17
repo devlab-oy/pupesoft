@@ -56,9 +56,16 @@
 	if (!isset($jtspec)) 			$jtspec = "";
 	if (!isset($paikka)) 			$paikka = "";
 	if (!isset($perhekielto)) 		$perhekielto = "";
+	if (!isset($valmistuslinja))	$valmistuslinja = "";
 
 	if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely_tuoteperhe'] == 'U') {
 		$perhekielto = "Y";
+	}
+
+	// Jos valmistuksien_kasittely on Y, voidaan käyttöliittymästä antaa valmistuslinja
+	if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y' and $valmistuslinja == '') {
+		// Jos ei olla pakotettu valmistuslinjaa, otetaan default tuotteelta tai sitten otsikolta
+		$valmistuslinja = $laskurow['kohde'] == "" ? $trow['valmistuslinja'] : $laskurow['kohde'];
 	}
 
 	unset($korvaavan_hinta_ylaraja_halvin_alehinta);
@@ -1601,7 +1608,7 @@
 								//special case: Kun yhtiöparametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
 								//excelistä sisäänluettavissa valmistusriveissä voi antaa valmistuslinjan ja toivotut päivämäärät (mikrotilaus.inc)
 								//Nämä tiedot tallennetaan väliaikaisesti tilausriveille, joista ne sitten kopioidaan omille otsikoilleen.
-								if (isset($valmistuslinja) and $valmistuslinja != '') {
+								if ($valmistuslinja != '') {
 									$positio = $valmistuslinja;
 								}
 								else {
@@ -1639,7 +1646,7 @@
 
 									$query = "	UPDATE tilausrivin_lisatiedot
 												SET
-												positio = if (positio = '', '$trivtyrow[selite]', positio),
+												positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
 												toimittajan_tunnus		= '$toimittajan_tunnus',
 												muutospvm				= now(),
 												muuttaja				= '$kukarow[kuka]',
@@ -2686,7 +2693,7 @@
 			//special case: Kun yhtiöparametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
 			//excelistä sisäänluettavissa valmistusriveissä voi antaa valmistuslinjan ja toivotut päivämäärät (mikrotilaus.inc)
 			//Nämä tiedot tallennetaan väliaikaisesti tilausriveille, joista ne sitten kopioidaan omille otsikoilleen.
-			if (isset($valmistuslinja) and $valmistuslinja != '') {
+			if ($valmistuslinja != '') {
 				$positio = $valmistuslinja;
 			}
 			else {
@@ -2716,7 +2723,7 @@
 
 				$query = "	UPDATE tilausrivin_lisatiedot
 							SET
-							positio = if (positio = '', '$trivtyrow[selite]', positio),
+							positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							muutospvm			= now(),
 							muuttaja			= '$kukarow[kuka]',

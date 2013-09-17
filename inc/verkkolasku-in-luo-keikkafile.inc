@@ -130,6 +130,7 @@ $debug = 0;
 						AND tilausrivi.otunnus LIKE '%{$data['ostotilausnro']}'
 						AND tilausrivi.tilaajanrivinro = '{$data['tilaajanrivinro']}'
 						AND tilausrivi.uusiotunnus != 0
+						AND tilausrivi.kpl+tilausrivi.varattu != 0
 						{$isalisa})
 						UNION
 						(SELECT tilausrivi.*, toimi.asn_sanomat, '2' AS orderi
@@ -152,6 +153,7 @@ $debug = 0;
 						AND tilausrivi.otunnus LIKE '%{$data['ostotilausnro']}'
 						AND tilausrivi.tilaajanrivinro = '{$data['tilaajanrivinro']}'
 						AND tilausrivi.uusiotunnus = 0
+						AND tilausrivi.kpl+tilausrivi.varattu != 0
 						{$isalisa})
 						ORDER BY orderi ASC, laadittu ASC";
 			$kokeillaan = pupe_query($query);
@@ -192,6 +194,7 @@ $debug = 0;
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus != 0
 							AND tilausrivi.tilaajanrivinro = '{$data['tilaajanrivinro']}'
+							AND tilausrivi.kpl+tilausrivi.varattu != 0
 							{$isalisa})
 							UNION
 							(SELECT tilausrivi.*, toimi.asn_sanomat, '2' AS orderi
@@ -217,6 +220,7 @@ $debug = 0;
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.tilaajanrivinro = '{$data['tilaajanrivinro']}'
 							AND tilausrivi.uusiotunnus = 0
+							AND tilausrivi.kpl+tilausrivi.varattu != 0
 							{$isalisa})
 							ORDER BY orderi ASC, laadittu ASC";
 				$kokeillaan = pupe_query($query);
@@ -257,6 +261,7 @@ $debug = 0;
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.otunnus LIKE '%{$data['ostotilausnro']}'
 							AND tilausrivi.uusiotunnus != 0
+							AND tilausrivi.kpl+tilausrivi.varattu != 0
 							{$isalisa})
 							UNION
 							(SELECT tilausrivi.*, toimi.asn_sanomat, '2' AS orderi
@@ -278,6 +283,7 @@ $debug = 0;
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.otunnus LIKE '%{$data['ostotilausnro']}'
 							AND tilausrivi.uusiotunnus = 0
+							AND tilausrivi.kpl+tilausrivi.varattu != 0
 							{$isalisa})
 							ORDER BY orderi ASC, laadittu ASC";
 				$kokeillaan = pupe_query($query);
@@ -318,6 +324,7 @@ $debug = 0;
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus != 0
+							AND tilausrivi.kpl+tilausrivi.varattu != 0
 							{$isalisa})
 							UNION
 							(SELECT tilausrivi.*, toimi.asn_sanomat, '2' AS orderi
@@ -342,6 +349,7 @@ $debug = 0;
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
+							AND tilausrivi.kpl+tilausrivi.varattu != 0
 							{$isalisa})
 							ORDER BY orderi ASC, laadittu ASC";
 				$kokeillaan = pupe_query($query);
@@ -381,6 +389,7 @@ $debug = 0;
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus != 0
+							AND tilausrivi.kpl+tilausrivi.varattu != 0
 							{$isalisa})
 							UNION
 							(SELECT tilausrivi.*, toimi.asn_sanomat, '2' AS orderi
@@ -401,6 +410,7 @@ $debug = 0;
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
+							AND tilausrivi.kpl+tilausrivi.varattu != 0
 							{$isalisa})
 							ORDER BY orderi ASC, laadittu ASC";
 				$kokeillaan = pupe_query($query);
@@ -975,7 +985,8 @@ $debug = 0;
 						JOIN lasku on lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus = '$trow[tunnus]'
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						AND tilausrivi.tunnus  = '{$rtuoteno[$i]["tilaajanrivinro"]}'
-						AND tilausrivi.tyyppi  = 'O'";
+						AND tilausrivi.tyyppi  = 'O'
+						AND tilausrivi.kpl+tilausrivi.varattu != 0";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
@@ -1265,6 +1276,7 @@ $debug = 0;
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.tyyppi = 'O'
 									AND tilausrivi.uusiotunnus = '{$tilausrivirow['uusiotunnus']}'
+									AND tilausrivi.kpl+tilausrivi.varattu != 0
 									{$isalisa})
 									UNION
 									(SELECT DISTINCT tilausrivi.tunnus, toimi.asn_sanomat,
@@ -1287,6 +1299,7 @@ $debug = 0;
 									AND tilausrivi.tyyppi = 'O'
 									AND tilausrivi.uusiotunnus != '{$tilausrivirow['uusiotunnus']}'
 									AND tilausrivi.uusiotunnus != 0
+									AND tilausrivi.kpl+tilausrivi.varattu != 0
 									{$isalisa})
 									UNION
 									(SELECT DISTINCT tilausrivi.tunnus, toimi.asn_sanomat,
@@ -1308,6 +1321,7 @@ $debug = 0;
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.tyyppi = 'O'
 									AND tilausrivi.uusiotunnus = 0
+									AND tilausrivi.kpl+tilausrivi.varattu != 0
 									{$isalisa})
 									ORDER BY jarjestys, uusiotunnus ASC, laskutettuaika ASC, laadittu ASC";
 						if ($debug == 1) {

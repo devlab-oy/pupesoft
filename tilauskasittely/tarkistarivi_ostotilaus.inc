@@ -262,7 +262,7 @@
 
 				list(, , $tuotteen_toimittaja_row['saldo_myytavissa']) = saldo_myytavissa($_tuote['tuoteno'], '', '', '', '', '', '', '', '', '');
 
-				$vastaavat_table .= "<tr class='aktiivi'>"
+				$vastaavat_table .= "<tr class='aktiivi back'>"
 						."<td>{$_tuote["tuoteno"]} $vaihtoehtoinen</td>"
 						."<td>{$tuotteen_toimittaja_row['toim_tuoteno']}</td>"
 						."<td>{$tvrow["nimitys"]}</td>"
@@ -272,6 +272,8 @@
 						."<td align='right'>".$tuotteen_toimittaja_row['saldo_myytavissa']."</td>";
 
 			 	$vastaavat_table .= "<td align='right' nowrap>";
+
+			 	$_tilattu = (int) $prow['tilattu'];
 
 			 	// Ostopuolella toimipaikan tunnus tallennetaan vanhatunnus-kenttään
 			 	if ($sahkoinen_tilausliitanta and $tuotteen_toimittaja_row['sahkoinen_tilausliitanta'] == 'F' and $laskurow['vanhatunnus'] != 0) {
@@ -290,13 +292,12 @@
 
 			 			$yta_chk_row = mysql_fetch_assoc($yta_chk_res);
 
-			 			$vastaavat_table .= "<div class='availability' id='{$_tuote['vastaavat_tunnus']}_availability' /><span id='{$_tuote['vastaavat_tunnus']}_loading'></span></div>&nbsp;";
-				 		$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_custid' value='{$yta_chk_row['tarkenne']}' />";
-					 	$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_username' value='{$yta_chk_row['tarkenne_2']}' />";
-						$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_password' value='{$yta_chk_row['tarkenne_3']}' />";
-						$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_suppliernumber' value='{$yta_chk_row['tarkenne_4']}' />";
-						$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tuotteen_toimittaja_row['tt_tunnus']}' />";
-						$vastaavat_table .= "<input type='hidden' id='{$_tuote['vastaavat_tunnus']}_myytavissa' value='{$prow['tilattu']}' />";
+			 			$vastaavat_table .= "<div class='availability {$_tuote['vastaavat_tunnus']}_{$_tilattu}_availability' /> <span class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_loading'></span></div>&nbsp;";
+				 		$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_custid' value='{$yta_chk_row['tarkenne']}' />";
+					 	$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_username' value='{$yta_chk_row['tarkenne_2']}' />";
+						$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_password' value='{$yta_chk_row['tarkenne_3']}' />";
+						$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_suppliernumber' value='{$yta_chk_row['tarkenne_4']}' />";
+						$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tuotteen_toimittaja_row['tt_tunnus']}' />";
 			 		}
 			 		else {
 			 			$tuotteen_toimittaja_row['sahkoinen_tilausliitanta'] = '';
@@ -304,7 +305,7 @@
 			 	}
 
 			 	$vastaavat_table .= "<font class='{$tehtaan_saldon_font}'>".sprintf("%.2f", $tuotteen_toimittaja_row['tehdas_saldo'])."</font></td>";
-				$vastaavat_table .= "<td id='{$_tuote['vastaavat_tunnus']}_tehdas_saldo_paivitetty' align='right'>".tv1dateconv($tuotteen_toimittaja_row['tehdas_saldo_paivitetty'], "PITKA")."</td>";
+				$vastaavat_table .= "<td class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_tehdas_saldo_paivitetty' align='right'>".tv1dateconv($tuotteen_toimittaja_row['tehdas_saldo_paivitetty'], "PITKA")."</td>";
 
 				if ($sahkoinen_tilausliitanta) {
 
@@ -315,7 +316,7 @@
 						$hae = 'nappi';
 						$rivitunnus = $prow['tunnus'];
 						$_vastaavat_tunnus = $_tuote['vastaavat_tunnus'];
-						$_vastaavat_tuoteno = $_tuote['tuoteno'];
+						$_vastaavat_tuoteno = $tuotteen_toimittaja_row['toim_tuoteno'];
 
 						require("inc/sahkoinen_tilausliitanta.inc");
 					}

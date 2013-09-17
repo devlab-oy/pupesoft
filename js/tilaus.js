@@ -22,7 +22,7 @@ function bind_tarkista_tehtaan_saldot_click() {
 		$id = $(this).attr('id');
 		$otunnus = $('#tilausnumero').val();
 		$tuoteno = $('.'+$id+'_tuoteno').val();
-		$myytavissa = $('.'+$id+'_myytavissa').val();
+		$myytavissa = $(this).siblings('.'+$id+'_myytavissa').val();
 
 		$cust_id = $('.'+$id+'_custid').val();
 		$username = $('.'+$id+'_username').val();
@@ -31,7 +31,7 @@ function bind_tarkista_tehtaan_saldot_click() {
 
 		$tt_tunnus = $('.'+$id+'_tt_tunnus').val();
 
-		$('.'+$id+'_loading').html("<img class='"+$id+"_image' src='../pics/loading_blue_small.gif' />");
+		$('.'+$id+'_'+$myytavissa+'_loading').html("<img class='"+$id+"_"+$myytavissa+"_image' src='../pics/loading_blue_small.gif' />");
 
 		$.post('',
 			{
@@ -51,10 +51,10 @@ function bind_tarkista_tehtaan_saldot_click() {
 			function(return_value) {
 				var data = jQuery.parseJSON(return_value);
 
-				$('.'+data.id+'_image').remove();
+				$('.'+data.id+'_'+$myytavissa+'_image').remove();
 
 				if (data.error) {
-					$('.'+data.id+'_availability')
+					$('.'+data.id+'_'+$myytavissa+'_availability')
 					.css({'background-image': 'url(../pics/lullacons/alert.png)'});
 
 					alert(data.error_msg);
@@ -62,18 +62,18 @@ function bind_tarkista_tehtaan_saldot_click() {
 				}
 
 				if (data.saldo < 0) {
-					$('.'+data.id+'_availability')
+					$('.'+data.id+'_'+$myytavissa+'_availability')
 					.css({'background-image': 'url(../pics/lullacons/alert.png)'});
 				}
 				else {
-					$('.'+data.id+'_availability')
+					$('.'+data.id+'_'+$myytavissa+'_availability')
 					.css({
 						'background-image': 'none',
 						'background-color': bgcolors[data.saldo]})
 					.show();
 				}
 
-				$('.'+data.id+'_tehdas_saldo_paivitetty').html(data.tehdas_saldo_paivitetty);
+				$('.'+data.id+'_'+$myytavissa+'_tehdas_saldo_paivitetty').html(data.tehdas_saldo_paivitetty);
 			}
 		);
 	});

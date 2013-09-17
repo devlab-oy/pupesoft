@@ -1130,6 +1130,8 @@
 
 							 	if ($sahkoinen_tilausliitanta and $tehdas_saldo_row['sahkoinen_tilausliitanta'] == 'F' and $laskurow['yhtio_toimipaikka'] != 0) {
 
+							 		$_tilattu = (int) $row['tilkpl'];
+
 							 		$query = "	SELECT *
 							 					FROM yhtion_toimipaikat_avainsanat
 							 					WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1144,13 +1146,12 @@
 
 							 			$_tuote['toim_tuoteno'] = $tehdas_saldo_row['toim_tuoteno'];
 
-							 			$vastaavat_table .= "<div class='availability {$_tuote['vastaavat_tunnus']}_availability' /><span class='{$_tuote['vastaavat_tunnus']}_loading'></span></div>&nbsp;";
+							 			$vastaavat_table .= "<div class='availability {$_tuote['vastaavat_tunnus']}_{$_tilattu}_availability' /><span class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_loading'></span></div>&nbsp;";
 								 		$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_custid' value='{$yta_chk_row['tarkenne']}' />";
 									 	$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_username' value='{$yta_chk_row['tarkenne_2']}' />";
 										$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_password' value='{$yta_chk_row['tarkenne_3']}' />";
 										$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_suppliernumber' value='{$yta_chk_row['tarkenne_4']}' />";
 										$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tehdas_saldo_row['tt_tunnus']}' />";
-										$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_myytavissa' value='{$row['tilkpl']}' />";
 							 		}
 							 		else {
 							 			$tehdas_saldo_row['sahkoinen_tilausliitanta'] = '';
@@ -1158,7 +1159,7 @@
 							 	}
 
 							 	$vastaavat_table .= "<font class='{$tehtaan_saldon_font}'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</font></td>";
-								$vastaavat_table .= "<td class='{$_tuote['vastaavat_tunnus']}_tehdas_saldo_paivitetty' align='right'>".tv1dateconv($tehdas_saldo_row['tehdas_saldo_paivitetty'], "PITKA")."</td>";
+								$vastaavat_table .= "<td class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_tehdas_saldo_paivitetty' align='right'>".tv1dateconv($tehdas_saldo_row['tehdas_saldo_paivitetty'], "PITKA")."</td>";
 							}
 
 							if ($sahkoinen_tilausliitanta) {

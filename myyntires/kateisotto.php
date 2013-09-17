@@ -145,9 +145,9 @@ if ($tee == 'kateisotto') {
 
 	$date = "{$vv}-{$kk}-{$pp}";
 
-	$voiko_kateisoton_tehda = validoi_tapahtumapaiva($pp, $kk, $vv);
+	$validoi_date = validoi_tapahtumapaiva($pp, $kk, $vv);
 
-	$voiko_kateisoton_tehda = $voiko_kateisoton_tehda ? tarkista_saako_laskua_muuttaa($date) : false;
+	$voiko_kateisoton_tehda = $validoi_date ? tarkista_saako_laskua_muuttaa($date) : false;
 
 	if ($voiko_kateisoton_tehda) {
 
@@ -180,7 +180,7 @@ if ($tee == 'kateisotto') {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $yhtiorow['tilikausi_alku'], "{$vv}-{$kk}-{$pp}")."!</font>";
+		echo $validoi_date ? "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $yhtiorow['tilikausi_alku'], "{$vv}-{$kk}-{$pp}")."!</font>" : "";
 	}
 
 	echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet, $alvit, $request_params);

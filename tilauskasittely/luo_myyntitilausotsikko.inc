@@ -476,37 +476,3 @@ if (!function_exists("luo_tarjouspohja")) {
 		return $tilausnumero;
 	}
 }
-
-if (!function_exists('luo_valmistusotsikko')) {
-	function luo_valmistusotsikko($params) {
-		global $kukarow, $yhtiorow;
-
-		$toim = (isset($params['toim']) ? $params['toim'] : '');
-		$tila = (isset($params['tila']) ? $params['tila'] : '');
-		$tilausnumero = (isset($params['tilausnumero']) ? $params['tilausnumero'] : '');
-		if (isset($params['jatka'])) {
-			$jatka = $params['jatka'];
-		}
-		$clearing = (isset($params['clearing']) ? $params['clearing'] : '');
-		$varasto = (isset($params['varasto']) ? $params['varasto'] : '');
-		$kopioitava_otsikko = (isset($params['kopioitava_otsikko']) ? $params['kopioitava_otsikko'] : '');
-		$session = (isset($params['session']) ? $params['session'] : '');
-		$projektilla = (isset($params['projektilla']) ? $params['projektilla'] : '');
-		$eilahe = (isset($params['eilahe']) ? $params['eilahe'] : '');
-		$viesti = (isset($params['viesti']) ? $params['viesti'] : '');
-		$luokka = (isset($params['luokka']) ? $params['luokka'] : '');
-		$tunnusnippu = (isset($params['tunnusnippu']) ? $params['tunnusnippu'] : '');
-		$valmistuslinja = (isset($params['valmistuslinja']) ? $params['valmistuslinja'] : '');
-		$toimitustapa = (isset($params['toimitustapa']) ? $params['toimitustapa'] : '');
-		$toimvv = (isset($params['toimvv']) ? $params['toimvv'] : '');
-		$toimkk = (isset($params['toimkk']) ? $params['toimkk'] : '');
-		$toimpp = (isset($params['toimpp']) ? $params['toimpp'] : '');
-		$kervv = (isset($params['kervv']) ? $params['kervv'] : '');
-		$kerkk = (isset($params['kerkk']) ? $params['kerkk'] : '');
-		$kerpp = (isset($params['kerpp']) ? $params['kerpp'] : '');
-
-		require('otsik_siirtolista.inc');
-
-		return $id;
-	}
-}

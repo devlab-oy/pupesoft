@@ -164,7 +164,7 @@
 						$poisto_texti = t("Poistettiin varastopaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]<br/>";
 					}
 
-					if ($kutsuja != "vastaanota.php") {
+					if ($kutsuja != "vastaanota.php" and $kutsuja != 'tuotetarkista.inc') {
 						echo "<font class='message'>$poisto_texti</font>";
 					}
 

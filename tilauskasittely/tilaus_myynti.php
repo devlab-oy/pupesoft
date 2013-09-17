@@ -962,15 +962,7 @@ if (isset($tyhjenna)) {
 	$sopimuksen_lisatieto1 = "";
 	$sopimuksen_lisatieto2 = "";
 	$omalle_tilaukselle = "";
-	$valmistuslinja = "";
-	$toivottu_kerayspvm_pp = "";
-	$toivottu_kerayspvm_kk = "";
-	$toivottu_kerayspvm_vv = "";
-	$toivottu_valmistuspvm_pp = "";
-	$toivottu_valmistuspvm_kk = "";
-	$toivottu_valmistuspvm_vv = "";
-	$toivottu_kerayspvm = "";
-	$toivottu_valmistuspvm = "";
+	$valmistuslinja     = "";
 }
 
 if ($tee == "VALMIS"
@@ -3709,24 +3701,22 @@ if ($tee == '') {
 				${'ale'.$alepostfix} = $tilausrivi["ale{$alepostfix}"];
 			}
 
-			$netto		= $tilausrivi['netto'];
-			$alv 		= $tilausrivi['alv'];
-			$kommentti	= $tilausrivi['kommentti'];
-			$kerayspvm	= $tilausrivi['kerayspvm'];
-			$toimaika	= $tilausrivi['toimaika'];
-			$hyllyalue	= $tilausrivi['hyllyalue'];
-			$hyllynro	= $tilausrivi['hyllynro'];
-			$hyllytaso	= $tilausrivi['hyllytaso'];
-			$hyllyvali	= $tilausrivi['hyllyvali'];
-			$rivinumero	= $tilausrivi['tilaajanrivinro'];
-			$jaksotettu = $tilausrivi['jaksotettu'];
-			$perheid2 	= $tilausrivi["perheid2"];
-			$sopimuksen_lisatieto1 = $tilausrivi["sopimuksen_lisatieto1"];
-			$sopimuksen_lisatieto2 = $tilausrivi["sopimuksen_lisatieto2"];
-			$omalle_tilaukselle = $tilausrivi['omalle_tilaukselle'];
-			$valmistuslinja = $tilausrivi['positio'];
-			$toivottu_kerayspvm = explode('-', $tilausrivi['kerayspvm']);
-			$toivottu_valmistuspvm = explode('-', $tilausrivi['toimaika']);
+			$netto					= $tilausrivi['netto'];
+			$alv 					= $tilausrivi['alv'];
+			$kommentti				= $tilausrivi['kommentti'];
+			$kerayspvm				= $tilausrivi['kerayspvm'];
+			$toimaika				= $tilausrivi['toimaika'];
+			$hyllyalue				= $tilausrivi['hyllyalue'];
+			$hyllynro				= $tilausrivi['hyllynro'];
+			$hyllytaso				= $tilausrivi['hyllytaso'];
+			$hyllyvali				= $tilausrivi['hyllyvali'];
+			$rivinumero				= $tilausrivi['tilaajanrivinro'];
+			$jaksotettu 			= $tilausrivi['jaksotettu'];
+			$perheid2 				= $tilausrivi["perheid2"];
+			$sopimuksen_lisatieto1	= $tilausrivi["sopimuksen_lisatieto1"];
+			$sopimuksen_lisatieto2	= $tilausrivi["sopimuksen_lisatieto2"];
+			$omalle_tilaukselle		= $tilausrivi['omalle_tilaukselle'];
+			$valmistuslinja			= $tilausrivi['positio'];
 
 			// useamman valmisteen reseptit...
 			if (($tilausrivi['tyyppi'] == "W" and $tilausrivi["tunnus"] != $tilausrivi["perheid"]) or ($tilausrivi['tyyppi'] == "W" and $tapa == "VAIHDA")) {
@@ -3840,8 +3830,6 @@ if ($tee == '') {
 				$tilausrivilinkki	   = '';
 				$toimittajan_tunnus	   = '';
 				$valmistuslinja        = '';
-				$toivottu_kerayspvm    = '';
-				$toivottu_valmistuspvm = '';
 			}
 		}
 	}
@@ -4300,15 +4288,7 @@ if ($tee == '') {
 		$sopimuksen_lisatieto2 = "";
 		if (!isset($lisaa_jatka)) $variaatio_tuoteno = "";
 		$omalle_tilaukselle = "";
-		$valmistuslinja = "";
-		$toivottu_kerayspvm_pp = "";
-		$toivottu_kerayspvm_kk = "";
-		$toivottu_kerayspvm_vv = "";
-		$toivottu_valmistuspvm_pp = "";
-		$toivottu_valmistuspvm_kk = "";
-		$toivottu_valmistuspvm_vv = "";
-		$toivottu_kerayspvm = "";
-		$toivottu_valmistuspvm = "";
+		$valmistuslinja     = "";
 	}
 
 	//Syöttörivi

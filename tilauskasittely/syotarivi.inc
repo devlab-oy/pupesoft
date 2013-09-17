@@ -572,11 +572,8 @@
 
 		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
 			echo "<th align='left'>".t("Valmistuslinja")."</th>";
-			echo "<th align='left'>".t("Toivottu keräysajankohta")."</th>";
-			echo "<th align='left'>".t("Toivottu valmistusajankohta")."</th>";
 		}
 		echo "</tr>";
-
 
 		echo "<tr>$jarjlisa";
 
@@ -609,22 +606,9 @@
 			echo "<td>";
 			echo "<input type='text' size='5' name='valmistuslinja' value='{$valmistuslinja}'";
 			echo "</td>";
-
-			echo "<td>";
-			echo "<input type='text' size='3' name='toivottu_kerayspvm_pp' value='{$toivottu_kerayspvm[2]}' />";
-			echo "<input type='text' size='3' name='toivottu_kerayspvm_kk' value='{$toivottu_kerayspvm[1]}' />";
-			echo "<input type='text' size='5' name='toivottu_kerayspvm_vv' value='{$toivottu_kerayspvm[0]}' />";
-			echo "</td>";
-
-			echo "<td>";
-			echo "<input type='text' size='3' name='toivottu_valmistuspvm_pp' value='{$toivottu_valmistuspvm[2]}' />";
-			echo "<input type='text' size='3' name='toivottu_valmistuspvm_kk' value='{$toivottu_valmistuspvm[1]}' />";
-			echo "<input type='text' size='5' name='toivottu_valmistuspvm_vv' value='{$toivottu_valmistuspvm[0]}' />";
-			echo "</td>";
 		}
 
 		echo "<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
-
 
 		echo "<tr>$jarjlisa";
 
@@ -632,8 +616,12 @@
 			echo "<th></th>";
 		}
 
+		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			echo "<th align='left'>".t("Toivottu keräysajankohta")."</th>";
+			echo "<th align='left' colspan='2'>".t("Toivottu valmistusajankohta")."</th>";
+		}
 		// Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
-		if ($yhtiorow["splittauskielto"] == "K") {
+		elseif ($yhtiorow["splittauskielto"] == "K") {
 			echo "	<th align='left'>".t("Keräysaika")."</th>
 					<th align='left'>".t("Toimitusaika")."</th>";
 		}
@@ -676,9 +664,10 @@
 		}
 
 		// Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
-		if ($yhtiorow["splittauskielto"] == "K") {
+		if ($yhtiorow["splittauskielto"] == "K" or ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+			$colspan = $yhtiorow["splittauskielto"] == "K" ? 1 : 2;
 			echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
-			echo "<td valign='top'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
+			echo "<td valign='top' colspan='{$colspan}'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
 		}
 		else {
 			echo "<input type='hidden' name='keraysppa' value='$keraysppa'>";
@@ -697,11 +686,12 @@
 		}
 
 		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
-			$colspan = 5;
+			$colspan = 3;
 		}
 		else {
 			$colspan = 2;
 		}
+
 		echo "<th colspan='{$colspan}' align='left'>".t("Kommentti")."</th>
 				</tr>";
 

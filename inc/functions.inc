@@ -22863,7 +22863,6 @@ if (!function_exists("lisaa_rivi")) {
 		$kommentti          = (!empty($parametrit['kommentti']))          ? $parametrit['kommentti'] : '';           // rivikommentti
 		$alv				= (!empty($parametrit['alv']))		          ? $parametrit['alv'] : '';				// rivi alv
 		$valmistuslinja		= (!empty($parametrit['valmistuslinja']))	  ? $parametrit['valmistuslinja'] : '';
-		$toivottu_keraysajankohta    = (!empty($parametrit['toivottu_keraysajankohta']))	  ? $parametrit['toivottu_keraysajankohta'] : '';
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			$ale_temp = str_replace(',', '.', $parametrit{'ale'.$alepostfix});
@@ -23131,7 +23130,6 @@ if (!function_exists("splittaa_valmistukset")) {
 		$tilausrivi_split_result = pupe_query($query);
 
 		$valmistuksen_splittaus_rivi = 0;
-
 
 		while ($tilausrivi_split_row = mysql_fetch_assoc($tilausrivi_split_result)) {
 

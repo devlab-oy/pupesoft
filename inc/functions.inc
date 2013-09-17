@@ -11612,6 +11612,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 				}
 
 				$placement = $pdf->image_place($image, $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]), $lasku_logo_positio_x, $thispage, $logoparam);
+				return $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]);
 			}
 		}
 		else {
@@ -11631,6 +11632,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 			}
 
 			$pdf->draw_text($lasku_logo_positio_x, $lasku_logo_positio_y, $ff_string, $thispage, $ff_font);
+			return $lasku_logo_positio_y;
 		}
 	}
 }

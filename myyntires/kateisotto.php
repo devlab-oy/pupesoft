@@ -183,7 +183,7 @@ if ($tee == 'kateisotto') {
 		echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $yhtiorow['tilikausi_alku'], "{$vv}-{$kk}-{$pp}")."!</font>";
 	}
 
-	echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet, $alvit);
+	echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet, $alvit, $request_params);
 }
 else {
 	echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet, $alvit, $request_params);

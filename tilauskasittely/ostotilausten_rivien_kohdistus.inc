@@ -1009,7 +1009,8 @@ if ($tila == '') {
 				LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				AND tilausrivi.uusiotunnus = '$otunnus'
-				AND tilausrivi.tyyppi != 'D'";
+				AND tilausrivi.tyyppi != 'D'
+				AND tilausrivi.kpl+tilausrivi.varattu != 0";
 	$result   = pupe_query($query);
 	$hintarow = mysql_fetch_assoc($result);
 
@@ -1234,7 +1235,7 @@ if ($tila == '') {
 				tilausrivin_lisatiedot.suoratoimitettuaika,
 				lasku.comments
 				FROM lasku
-				JOIN tilausrivi use index ($tilriindex) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$uusilisa}otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
+				JOIN tilausrivi use index ($tilriindex) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$uusilisa}otunnus=lasku.tunnus and tilausrivi.tyyppi='O' AND tilausrivi.kpl+tilausrivi.varattu != 0 $tilaajanrivinro $lisa2
 				LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno  and tuote.ei_saldoa = '')
 				LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus

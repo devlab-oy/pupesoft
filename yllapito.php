@@ -18,6 +18,10 @@
 	if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 		require ("inc/parametrit.inc");
 	}
+	
+	if (function_exists("js_popup")) {
+		echo js_popup(-100);
+	}
 
 	if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana") {
 		enable_ajax();
@@ -1735,7 +1739,20 @@
 				($tyyppi == 3 and $tunnus!="")  or
 				$tyyppi == 5) {
 				echo "<tr>";
-				echo "<th align='left'>$otsikko</th>";
+
+				$infolinkki = "";
+
+				// Jos rivilt‰ lˆytyy selitetark_5 niin piirret‰‰n otsikon per‰‰n tooltip-kysymysmerkki
+				if ($al_row['selitetark_5'] != '') {
+					$siistiselite = str_replace('.','_', $al_row['selite']);
+					$infolinkki = "<div style='float: right;'><a class='tooltip' id='{$al_row['tunnus']}_{$siistiselite}'><img src='{$palvelin2}pics/lullacons/info.png'></a></div>";
+					
+					// Tehd‰‰n helppi-popup
+					echo "<div id='div_{$al_row['tunnus']}_{$siistiselite}' class='popup'>{$al_row['selitetark']} <br> <br>
+					{$al_row['selitetark_5']}
+					</div>";
+				}
+				echo "<th align='left'>$otsikko $infolinkki</th>";
 			}
 
 			if ($jatko == 0) {

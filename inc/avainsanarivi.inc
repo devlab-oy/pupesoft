@@ -8,6 +8,87 @@
 		$tyyppi = 0;
 	}
 
+	// Näitä kenttiä ei oletuksena näytetä
+	if (mysql_field_name($result, $i) == "selitetark_5" or
+		mysql_field_name($result, $i) == "selitetark_4" or
+		mysql_field_name($result, $i) == "selitetark_3" or
+		mysql_field_name($result, $i) == "selitetark_2") {
+		$tyyppi = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "selitetark_5" and
+		$avain_sel['MYSQLALIAS'] == "SELECTED") {
+		$tyyppi = 1;
+	}
+
+	if (mysql_field_name($result, $i) == "selitetark_4" and
+		($avain_sel['ASIAKASRYHMA'] == "SELECTED" or
+		$avain_sel['HENKILO_OSASTO'] == "SELECTED" or
+		$avain_sel['MYSQLALIAS'] == "SELECTED" or
+		$avain_sel['TRY'] == "SELECTED" or
+		$avain_sel['TYOM_TYOKENTAT'] == "SELECTED")) {
+		$tyyppi = 1;
+	}
+
+	if (mysql_field_name($result, $i) == "selitetark_3" and
+		($avain_sel['ASAVAINSANA'] == "SELECTED" or
+		$avain_sel['ASIAKASLUOKKA'] == "SELECTED" or
+		$avain_sel['HENKILO_OSASTO'] == "SELECTED" or
+		$avain_sel['INVEN_LAJI'] == "SELECTED" or
+		$avain_sel['MYSQLALIAS'] == "SELECTED" or
+		$avain_sel['OSASTO'] == "SELECTED" or
+		$avain_sel['PAIKALLISVARAST'] == "SELECTED" or
+		$avain_sel['RAHTIKIRJA'] == "SELECTED" or
+		$avain_sel['SARJANUMERON_LI'] == "SELECTED" or
+		$avain_sel['SQLDBQUERY'] == "SELECTED" or
+		$avain_sel['TOIMEHTO'] == "SELECTED" or
+		$avain_sel['TRY'] == "SELECTED" or
+		$avain_sel['TYOM_PRIORIT'] == "SELECTED" or
+		$avain_sel['TYOM_TYOJONO'] == "SELECTED" or
+		$avain_sel['TYOM_TYOKENTAT'] == "SELECTED" or
+		$avain_sel['TYOM_TYOSTATUS'] == "SELECTED" or
+		$avain_sel['Y'] == "SELECTED")) {
+		$tyyppi = 1;
+	}
+
+	if (mysql_field_name($result, $i) == "selitetark_2" and
+		($avain_sel['ALV'] == "SELECTED" or
+		$avain_sel['ALVULK'] == "SELECTED" or
+		$avain_sel['ASAVAINSANA'] == "SELECTED" or
+		$avain_sel['ASIAKASLUOKKA'] == "SELECTED" or
+		$avain_sel['ASIAKASOSASTO'] == "SELECTED" or
+		$avain_sel['ASIAKASRYHMA'] == "SELECTED" or
+		$avain_sel['HENKILO_OSASTO'] == "SELECTED" or
+		$avain_sel['INVEN_LAJI'] == "SELECTED" or
+		$avain_sel['KAANTALVVIESTI'] == "SELECTED" or
+		$avain_sel['KALETAPA'] == "SELECTED" or
+		$avain_sel['KASSA'] == "SELECTED" or
+		$avain_sel['KUKAASEMA'] == "SELECTED" or
+		$avain_sel['LAHETETYYPPI'] == "SELECTED" or
+		$avain_sel['LASKUTUS_SAATE'] == "SELECTED" or
+		$avain_sel['LITETY'] == "SELECTED" or
+		$avain_sel['MERCASVHKER'] == "SELECTED" or
+		$avain_sel['MYSQLALIAS'] == "SELECTED" or
+		$avain_sel['OLETUSPAIKKA'] == "SELECTED" or
+		$avain_sel['OSASTO'] == "SELECTED" or
+		$avain_sel['OSTOTILAUS_SAAT'] == "SELECTED" or
+		$avain_sel['PAIKALLISVARAST'] == "SELECTED" or
+		$avain_sel['PIIRI'] == "SELECTED" or
+		$avain_sel['RAHTIKIRJA'] == "SELECTED" or
+		$avain_sel['SARJANUMERON_LI'] == "SELECTED" or
+		$avain_sel['SQLDBQUERY'] == "SELECTED" or
+		$avain_sel['TOIMEHTO'] == "SELECTED" or
+		$avain_sel['TOIMTAPAKV'] == "SELECTED" or
+		$avain_sel['TRY'] == "SELECTED" or
+		$avain_sel['TYOM_PRIORIT'] == "SELECTED" or
+		$avain_sel['TYOM_TYOJONO'] == "SELECTED" or
+		$avain_sel['TYOM_TYOKENTAT'] == "SELECTED" or
+		$avain_sel['TYOM_TYOLINJA'] == "SELECTED" or
+		$avain_sel['TYOM_TYOSTATUS'] == "SELECTED" or
+		$avain_sel['Y'] == "SELECTED")) {
+		$tyyppi = 1;
+	}
+
 	if (mysql_field_name($result, $i) == "perhe") {
 
 		// Perhetunnus

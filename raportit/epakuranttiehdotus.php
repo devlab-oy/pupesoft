@@ -364,7 +364,7 @@ else {
 			$tapres = mysql_query($query) or pupe_error($query);
 			$taprow = mysql_fetch_assoc($tapres);
 
-			// verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa vittumaista PHP:ss‰!
+			// verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa ik‰v‰‰ PHP:ss‰!
 			list($vv1,$kk1,$pp1) = explode("-", $taprow["max"]);	// $saapunut (viimeisen tulon pvm)
 			$saapunut = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
 

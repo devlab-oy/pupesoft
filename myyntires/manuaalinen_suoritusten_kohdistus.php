@@ -229,6 +229,29 @@ if ($tila == 'tee_kohdistus') {
 	else {
 		$suoritus = mysql_fetch_assoc($result);
 
+		// Otetaan yhtiˆn tiedoista myyntireskontran sallittu tilikauden ajankohta
+		$tilalk = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
+		$tillop = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
+		$makpvm = explode("-", $suoritus['maksupvm']);
+
+		// Verrataan v‰h‰n p‰iv‰m‰‰ri‰.
+		$myyresktilalk = (int) date('Ymd', mktime(0,0,0, $tilalk[1], $tilalk[2], $tilalk[0]));
+		$myyresktillop = (int) date('Ymd', mktime(0,0,0, $tillop[1], $tillop[2], $tillop[0]));
+		$maksupvmint   = (int) date('Ymd', mktime(0,0,0, $makpvm[1], $makpvm[2], $makpvm[0]));
+
+		if ($maksupvmint < $myyresktilalk) {
+			$maksupvm    = $yhtiorow["myyntireskontrakausi_alku"];
+			$maksupvmint = $myyresktilalk;
+		}
+		elseif ($maksupvmint > $myyresktillop) {
+			$maksupvm    = $yhtiorow["myyntireskontrakausi_loppu"];
+			$maksupvmint = $myyresktillop;
+		}
+		else {
+			$maksupvm    = $suoritus['maksupvm'];
+			$maksupvmint = $maksupvmint;
+		}
+
 		$laskutunnukset = "";
 		$laskutunnuksetkale = "";
 
@@ -279,8 +302,7 @@ if ($tila == 'tee_kohdistus') {
 				$result = pupe_query($query);
 			}
 
-
-			//Haetaan osasuoritettava lasku
+			// Haetaan osasuoritettava lasku
 			if (strtoupper($suoritus['valkoodi']) != strtoupper($yhtiorow['valkoodi'])) {
 				$query = "SELECT summa_valuutassa-saldo_maksettu_valuutassa summa ";
 			}
@@ -465,14 +487,25 @@ if ($tila == 'tee_kohdistus') {
 
 		$lasku = mysql_fetch_assoc($result);
 
+		// Verrataan v‰h‰n p‰iv‰m‰‰ri‰.
+		$lapvm = explode("-", $lasku["tapvm"]);
+		$lapvmint = (int) date('Ymd', mktime(0,0,0, $lapvm[1], $lapvm[2], $lapvm[0]));
+
+		// Jos suoritus on vanhempi kuin lasku, niin merkataan lasku maksetuksi laskun p‰iv‰m‰‰r‰ll‰
+		if ($maksupvmint < $lapvmint) {
+			$laskun_maksupvm = $lasku["tapvm"];
+		}
+		else {
+			$laskun_maksupvm = $maksupvm;
+		}
+
 		$ltunnus			= $lasku["tunnus"];
-		$maksupvm			= $suoritus["maksupvm"];
 		$suoritussumma		= $suoritus["summa"];
 		$suoritussummaval	= $suoritus["summa"];
 
 		if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) $suoritussumma = round($suoritussummaval * $suoritus["kurssi"],2);
 
-		$query_korko = "SELECT viikorkopros * $suoritussumma * (if (to_days('$maksupvm')-to_days(erpcm) > 0, to_days('$maksupvm')-to_days(erpcm), 0))/36500 korkosumma
+		$query_korko = "SELECT viikorkopros * $suoritussumma * (if (to_days('$suoritus[maksupvm]')-to_days(erpcm) > 0, to_days('$suoritus[maksupvm]')-to_days(erpcm), 0))/36500 korkosumma
 						FROM lasku
 						WHERE tunnus='$ltunnus'";
 		$result_korko = pupe_query($query_korko);
@@ -493,7 +526,7 @@ if ($tila == 'tee_kohdistus') {
 					yhtio				= '$kukarow[yhtio]',
 					laatija				= '$kukarow[kuka]',
 					laadittu			= now(),
-					tapvm				= '$suoritus[maksupvm]',
+					tapvm				= '$laskun_maksupvm',
 					tilino				= '$suoritus[kassatilino]',
 					kustp    			= '{$kustp_ins}',
 					kohde	 			= '{$kohde_ins}',
@@ -525,7 +558,7 @@ if ($tila == 'tee_kohdistus') {
 					yhtio				= '$kukarow[yhtio]',
 					laatija				= '$kukarow[kuka]',
 					laadittu			= now(),
-					tapvm				= '$suoritus[maksupvm]',
+					tapvm				= '$laskun_maksupvm',
 					ltunnus				= '$ltunnus',
 					tilino				= '$suoritus[myyntisaamiset_tilino]',
 					kustp    			= '{$kustp_ins}',
@@ -588,7 +621,7 @@ if ($tila == 'tee_kohdistus') {
 								yhtio		= '$kukarow[yhtio]',
 								laatija		= '$kukarow[kuka]',
 								laadittu	= now(),
-								tapvm		= '$suoritus[maksupvm]',
+								tapvm		= '$laskun_maksupvm',
 								ltunnus		= '$ltunnus',
 								tilino		= '$suoritus[myynninvaluuttaero_tilino]',
 								kustp    	= '{$kustp_ins}',
@@ -609,7 +642,7 @@ if ($tila == 'tee_kohdistus') {
 									yhtio		= '$kukarow[yhtio]',
 									laatija		= '$kukarow[kuka]',
 									laadittu	= now(),
-									tapvm		= '$suoritus[maksupvm]',
+									tapvm		= '$laskun_maksupvm',
 									ltunnus		= '$ltunnus',
 									tilino		= '$suoritus[myynninvaluuttaero_tilino]',
 									kustp    	= '{$kustp_ins}',
@@ -659,35 +692,60 @@ if ($tila == 'tee_kohdistus') {
 
 		//Merkataan suoritus k‰ytetyksi ja yliviivataan sen tiliˆinnit
 		$query = "	UPDATE suoritus
-					SET kohdpvm = now()
+					SET kohdpvm = '$laskun_maksupvm'
 					WHERE tunnus = $suoritus[tunnus]
 					AND yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 
-		// Luetaan ketjussa olevat tapahtumat ja poistetaan ne (=merkataan korjatuksi)
-		$query = "SELECT aputunnus, ltunnus FROM tiliointi WHERE tunnus=$suoritus[ltunnus] AND yhtio='$kukarow[yhtio]'";
+		// Luetaan ketjussa olevat tapahtumat ja kumotaan ne
+		$query = "	SELECT *
+					FROM tiliointi
+					WHERE tunnus = $suoritus[ltunnus]
+					AND yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			die ("Tiliˆinti1 kateissa " . $suoritus["tunnus"]);
 		}
-		$tiliointi = mysql_fetch_assoc ($result);
+		$tiliointi1 = mysql_fetch_assoc($result);
 
-		$query = "SELECT tunnus FROM tiliointi WHERE aputunnus=$suoritus[ltunnus] AND yhtio='$kukarow[yhtio]'";
+		$query = "	SELECT *
+					FROM tiliointi
+					WHERE aputunnus = $suoritus[ltunnus]
+					AND yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			die ("Tiliˆinti2 kateissa " . $suoritus["tunnus"]);
 		}
 
-        $query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE tunnus=$suoritus[ltunnus] AND yhtio='$kukarow[yhtio]'";
-        $result = pupe_query($query);
+		$tiliointi2 = mysql_fetch_assoc($result);
 
-        $query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE aputunnus=$suoritus[ltunnus] AND yhtio='$kukarow[yhtio]'";
-        $result = pupe_query($query);
+		// Tehd‰‰n suorituksen tositteelle vastakirjaukset
+		$params = array(
+			'summa' 		=> ($tiliointi1['summa'] * -1),
+			'tapvm'			=> $laskun_maksupvm,
+			'laatija' 		=> $kukarow['kuka'],
+			'laadittu' 		=> date('Y-m-d H:i:s'),
+			'aputunnus'		=> 0,
+			'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]",
+		);
+
+		kopioitiliointi($tiliointi1['tunnus'], "", $params);
+
+		$params = array(
+			'summa' 		=> ($tiliointi2['summa'] * -1),
+			'tapvm'			=> $laskun_maksupvm,
+			'laatija' 		=> $kukarow['kuka'],
+			'laadittu' 		=> date('Y-m-d H:i:s'),
+			'aputunnus'		=> 0,
+			'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]",
+		);
+
+		kopioitiliointi($tiliointi2['tunnus'], "", $params);
 	}
 	else {
-		//*** T‰ss‰ k‰sitell‰‰n tavallinen suoritus ***
+		//*** T‰ss‰ k‰sitell‰‰n tavallinen suoritus ***/
 		$laskujen_summa = 0;
 
 		if ($laskutunnukset != 0) {
@@ -723,7 +781,7 @@ if ($tila == 'tee_kohdistus') {
 				exit;
 			}
 
-			while($lasku = mysql_fetch_assoc($result)){
+			while ($lasku = mysql_fetch_assoc($result)){
 				$laskut[] = $lasku;
 				$laskujen_summa				+=$lasku["summa"];
 				$laskujen_summa_valuutassa	+=$lasku["summa_valuutassa"];
@@ -808,15 +866,26 @@ if ($tila == 'tee_kohdistus') {
 
 			foreach ($laskut as $lasku) {
 
+				// Verrataan v‰h‰n p‰iv‰m‰‰ri‰.
+				$lapvm = explode("-", $lasku["tapvm"]);
+				$lapvmint = (int) date('Ymd', mktime(0,0,0, $lapvm[1], $lapvm[2], $lapvm[0]));
+
+				// Jos suoritus on vanhempi kuin lasku, niin merkataan lsaku maksetuksi laskun p‰iv‰m‰‰r‰ll‰
+				if ($lapvmint > $maksupvmint) {
+					$laskun_maksupvm = $lasku["tapvm"];
+				}
+				else {
+					$laskun_maksupvm = $maksupvm;
+				}
+
 				// lasketaan korko
 				$ltunnus			= $lasku["tunnus"];
-				$maksupvm			= $suoritus["maksupvm"];
 				$suoritussumma		= $suoritus["summa"];
 				$suoritussummaval	= $suoritus["summa"];
 
 				if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) $suoritussumma = round($suoritussummaval * $suoritus["kurssi"],2);
 
-				$query_korko = "SELECT viikorkopros * $suoritussumma * (if (to_days('$maksupvm')-to_days(erpcm) > 0, to_days('$maksupvm')-to_days(erpcm), 0))/36500 korkosumma from lasku WHERE tunnus='$ltunnus'";
+				$query_korko = "SELECT viikorkopros * $suoritussumma * (if (to_days('$suoritus[maksupvm]')-to_days(erpcm) > 0, to_days('$suoritus[maksupvm]')-to_days(erpcm), 0))/36500 korkosumma from lasku WHERE tunnus='$ltunnus'";
 				$result_korko = pupe_query($query_korko);
 				$korko_row = mysql_fetch_assoc($result_korko);
 
@@ -900,7 +969,7 @@ if ($tila == 'tee_kohdistus') {
 									yhtio				= '$kukarow[yhtio]',
 									laatija				= '$kukarow[kuka]',
 									laadittu			= now(),
-									tapvm				= '$suoritus[maksupvm]',
+									tapvm				= '$laskun_maksupvm',
 									ltunnus				= '$lasku[tunnus]',
 									tilino				= '$suoritus[kassa_ale_tilino]',
 									kustp    			= '{$kustp_ins}',
@@ -944,7 +1013,7 @@ if ($tila == 'tee_kohdistus') {
 										yhtio				= '$kukarow[yhtio]',
 										laatija				= '$kukarow[kuka]',
 										laadittu			= now(),
-										tapvm				= '$suoritus[maksupvm]',
+										tapvm				= '$laskun_maksupvm',
 										ltunnus				= '$lasku[tunnus]',
 										tilino				= '$suoritus[kassa_ale_tilino]',
 										kustp    			= '{$kustp_ins}',
@@ -967,7 +1036,7 @@ if ($tila == 'tee_kohdistus') {
 											kustp 				= 0,
 											kohde 				= 0,
 											projekti 			= 0,
-											tapvm 				= '$suoritus[maksupvm]',
+											tapvm 				= '$laskun_maksupvm',
 											summa 				= $alv,
 											summa_valuutassa	= $alv_valuutassa,
 											valkoodi			= '$tiliointirow[valkoodi]',
@@ -1016,7 +1085,7 @@ if ($tila == 'tee_kohdistus') {
 							yhtio				= '$kukarow[yhtio]',
 							laatija				= '$kukarow[kuka]',
 							laadittu			= now(),
-							tapvm				= '$suoritus[maksupvm]',
+							tapvm				= '$laskun_maksupvm',
 							tilino				= '$suoritus[kassatilino]',
 							kustp    			= '{$kustp_ins}',
 							kohde	 			= '{$kohde_ins}',
@@ -1050,7 +1119,7 @@ if ($tila == 'tee_kohdistus') {
 							yhtio				= '$kukarow[yhtio]',
 							laatija				= '$kukarow[kuka]',
 							laadittu			= now(),
-							tapvm				= '$suoritus[maksupvm]',
+							tapvm				= '$laskun_maksupvm',
 							ltunnus				= '$lasku[tunnus]',
 							tilino				= '$suoritus[myyntisaamiset_tilino]',
 							kustp    			= '{$kustp_ins}',
@@ -1113,7 +1182,7 @@ if ($tila == 'tee_kohdistus') {
 										yhtio		= '$kukarow[yhtio]',
 										laatija		= '$kukarow[kuka]',
 										laadittu	= now(),
-										tapvm		= '$suoritus[maksupvm]',
+										tapvm		= '$laskun_maksupvm',
 										ltunnus		= '$lasku[tunnus]',
 										tilino		= '$suoritus[myynninvaluuttaero_tilino]',
 										kustp		= '$kustp_ins',
@@ -1134,7 +1203,7 @@ if ($tila == 'tee_kohdistus') {
 											yhtio		= '$kukarow[yhtio]',
 											laatija		= '$kukarow[kuka]',
 											laadittu	= now(),
-											tapvm		= '$suoritus[maksupvm]',
+											tapvm		= '$laskun_maksupvm',
 											ltunnus		= '$ltunnus',
 											tilino		= '$suoritus[myynninvaluuttaero_tilino]',
 											kustp		= '$kustp_ins',
@@ -1160,7 +1229,7 @@ if ($tila == 'tee_kohdistus') {
 				}
 
 				$query = "	UPDATE lasku
-							SET mapvm 		= '$suoritus[maksupvm]',
+							SET mapvm 		= '$laskun_maksupvm',
 							viikorkoeur 	= '$korkosumma',
 							saldo_maksettu 	= 0,
 							saldo_maksettu_valuutassa = 0
@@ -1169,14 +1238,8 @@ if ($tila == 'tee_kohdistus') {
 				$result = pupe_query($query);
 			}
 
-			$query = "	UPDATE suoritus
-						SET kohdpvm = now(), summa = (summa-$kaatosumma)
-						WHERE tunnus = $suoritus[tunnus]
-						AND yhtio = '$kukarow[yhtio]'";
-			$result = pupe_query($query);
-
-			// Luetaan ketjussa olevat tapahtumat ja poistetaan ne ( = merkataan korjatuksi)
-			$query = "	SELECT aputunnus, ltunnus, summa, summa_valuutassa, valkoodi
+			// Myyntisaamiset (suorituksen summa * -1)
+			$query = "	SELECT *
 						FROM tiliointi
 						WHERE tunnus = $suoritus[ltunnus]
 						AND yhtio = '$kukarow[yhtio]'";
@@ -1185,9 +1248,10 @@ if ($tila == 'tee_kohdistus') {
 			if (mysql_num_rows($result) != 1) {
 				die ("Tiliˆinti1 kateissa " . $suoritus["tunnus"]);
 			}
-			$tiliointi = mysql_fetch_assoc ($result);
+			$tiliointi1 = mysql_fetch_assoc($result);
 
-			$query = "	SELECT tunnus
+			// Rahatili (suorituksen summa)
+			$query = "	SELECT *
 						FROM tiliointi
 						WHERE aputunnus = $suoritus[ltunnus]
 						AND yhtio = '$kukarow[yhtio]'";
@@ -1196,82 +1260,51 @@ if ($tila == 'tee_kohdistus') {
 			if (mysql_num_rows($result) != 1) {
 				die ("Tiliˆinti2 kateissa " . $suoritus["tunnus"]);
 			}
-
-            $query = "	UPDATE tiliointi
-						SET korjausaika = now(),
-						korjattu = '$kukarow[kuka]'
-						WHERE tunnus = $suoritus[ltunnus]
-						AND yhtio = '$kukarow[yhtio]'";
-            $result = pupe_query($query);
-
-            $query = "	UPDATE tiliointi
-						SET korjausaika = now(),
-						korjattu = '$kukarow[kuka]'
-						WHERE aputunnus = $suoritus[ltunnus]
-						AND yhtio = '$kukarow[yhtio]'";
-            $result = pupe_query($query);
+			$tiliointi2 = mysql_fetch_assoc($result);
 
 			// J‰‰kˆ suoritukselle viel‰ saldoa
-			$erotus = round($tiliointi["summa"] + $kassaan, 2);
-			$erotus_valuutassa = round($tiliointi["summa_valuutassa"] + $kassaan_valuutassa, 2);
+			$erotus = round($tiliointi1["summa"] + $kassaan, 2);
+			$erotus_valuutassa = round($tiliointi1["summa_valuutassa"] + $kassaan_valuutassa, 2);
 
 			if ($erotus != 0) {
-
-				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["myyntisaamiset_tilino"]);
-
-				// Myyntisaamiset
-				$query = "	INSERT INTO tiliointi SET
-							yhtio				= '$kukarow[yhtio]',
-							laatija				= '$kukarow[kuka]',
-							laadittu			= now(),
-							tapvm				= '$suoritus[maksupvm]',
-							ltunnus				= '$tiliointi[ltunnus]',
-							tilino				= '$suoritus[myyntisaamiset_tilino]',
-							kustp				= '$kustp_ins',
-							kohde				= '$kohde_ins',
-							projekti			= '$projekti_ins',
-							summa				= $erotus,
-							summa_valuutassa	= $erotus_valuutassa,
-							valkoodi			= '$tiliointi[valkoodi]',
-							selite				= 'K‰sin syˆtetty suoritus'";
-				$result = pupe_query($query);
-				$ttunnus = mysql_insert_id($link);
-
-				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["kassatilino"], $apukustp);
-
-				// Rahatili
-				$query = "	INSERT INTO tiliointi SET
-							yhtio				= '$kukarow[yhtio]',
-							laatija				= '$kukarow[kuka]',
-							laadittu			= now(),
-							tapvm				= '$suoritus[maksupvm]',
-							ltunnus				= '$tiliointi[ltunnus]',
-							tilino				= '$suoritus[kassatilino]',
-							kustp    			= '{$kustp_ins}',
-							kohde	 			= '{$kohde_ins}',
-							projekti 			= '{$projekti_ins}',
-							summa				= $erotus * -1,
-							summa_valuutassa	= $erotus_valuutassa * -1,
-							valkoodi			= '$tiliointi[valkoodi]',
-							selite				= 'K‰sin syˆtetty suoritus',
-							aputunnus			= $ttunnus,
-							lukko				= '1'";
-				$result = pupe_query($query);
-
-
+				// Suoritukselle j‰‰ viel‰ rahaa
 				if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
-					$ervains = $erotus_valuutassa;
+					$ervains = round($erotus_valuutassa * -1, 2);
 				}
 				else {
-					$ervains = $erotus;
+					$ervains = round($erotus * -1, 2);
 				}
+
+				$query = "	UPDATE suoritus
+							SET kohdpvm = '$laskun_maksupvm',
+							summa = (summa-$kaatosumma)
+							WHERE tunnus = $suoritus[tunnus]
+							AND yhtio = '$kukarow[yhtio]'";
+				$result = pupe_query($query);
+
+				// Splitataan myyntisaamiset
+				$query = "	UPDATE tiliointi
+							SET summa = ($kassaan*-1)
+							WHERE tunnus = $tiliointi1[tunnus]
+							AND yhtio = '$kukarow[yhtio]'";
+				$result = pupe_query($query);
+
+				$params = array(
+					'summa' 		=> $erotus,
+					'laatija' 		=> $kukarow['kuka'],
+					'laadittu' 		=> date('Y-m-d H:i:s'),
+					'aputunnus'		=> 0,
+					'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta k‰ytetiin osa.",
+				);
+
+				$ttunnus = kopioitiliointi($tiliointi1['tunnus'], "", $params);
 
 				// Luodaan suoritus johon ylij‰‰nyt saldo laitetaan
 				$query = "	INSERT INTO suoritus SET
 							yhtio			= '$suoritus[yhtio]',
 							tilino			= '$suoritus[tilino]',
 							nimi_maksaja	= '$suoritus[nimi_maksaja]',
-							summa			= $ervains * -1,
+							summa			= $ervains,
 							kirjpvm			= '$suoritus[kirjpvm]',
 							maksupvm		= '$suoritus[maksupvm_clean]',
 							asiakas_tunnus	= '$suoritus[asiakas_tunnus]',
@@ -1281,6 +1314,79 @@ if ($tila == 'tee_kohdistus') {
 							valkoodi		= '$suoritus[valkoodi]',
 							kurssi			= '$suoritus[kurssi]'";
 				$result = pupe_query($query);
+
+				// Splitataan rahatiliˆinti
+				$query = "	UPDATE tiliointi
+							SET summa = $kassaan
+							WHERE tunnus = $tiliointi2[tunnus]
+							AND yhtio = '$kukarow[yhtio]'";
+				$result = pupe_query($query);
+
+				$params = array(
+					'summa' 		=> ($erotus * -1),
+					'laatija' 		=> $kukarow['kuka'],
+					'laadittu' 		=> date('Y-m-d H:i:s'),
+					'aputunnus'		=> $ttunnus,
+					'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta k‰ytetiin osa.",
+				);
+
+				kopioitiliointi($tiliointi2['tunnus'], "", $params);
+
+
+				// Tehd‰‰n suorituksen tositteelle vastakirjaukset
+				$params = array(
+					'summa' 		=> $kassaan,
+					'tapvm'			=> $laskun_maksupvm,
+					'laatija' 		=> $kukarow['kuka'],
+					'laadittu' 		=> date('Y-m-d H:i:s'),
+					'aputunnus'		=> 0,
+					'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta k‰ytetiin osa.",
+				);
+
+				kopioitiliointi($tiliointi1['tunnus'], "", $params);
+
+				$params = array(
+					'summa' 		=> ($kassaan * -1),
+					'tapvm'			=> $laskun_maksupvm,
+					'laatija' 		=> $kukarow['kuka'],
+					'laadittu' 		=> date('Y-m-d H:i:s'),
+					'aputunnus'		=> 0,
+					'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti], Suorituksesta k‰ytetiin osa.",
+				);
+
+				kopioitiliointi($tiliointi2['tunnus'], "", $params);
+			}
+			else {
+				// Suoritus on kokonaan k‰ytetty
+				$query = "	UPDATE suoritus
+							SET kohdpvm = '$laskun_maksupvm',
+							summa = (summa-$kaatosumma)
+							WHERE tunnus = $suoritus[tunnus]
+							AND yhtio = '$kukarow[yhtio]'";
+				$result = pupe_query($query);
+
+				// Tehd‰‰n suorituksen tositteelle vastakirjaukset
+				$params = array(
+					'summa' 		=> ($tiliointi1['summa'] * -1),
+					'tapvm'			=> $laskun_maksupvm,
+					'laatija' 		=> $kukarow['kuka'],
+					'laadittu' 		=> date('Y-m-d H:i:s'),
+					'aputunnus'		=> 0,
+					'selite' 		=> $tiliointi1['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti]",
+				);
+
+				kopioitiliointi($tiliointi1['tunnus'], "", $params);
+
+				$params = array(
+					'summa' 		=> ($tiliointi2['summa'] * -1),
+					'tapvm'			=> $laskun_maksupvm,
+					'laatija' 		=> $kukarow['kuka'],
+					'laadittu' 		=> date('Y-m-d H:i:s'),
+					'aputunnus'		=> 0,
+					'selite' 		=> $tiliointi2['selite']." Manuaalisesti kohdistettu suoritus $suoritus[viesti]",
+				);
+
+				kopioitiliointi($tiliointi2['tunnus'], "", $params);
 			}
 		}
 	}
@@ -1320,27 +1426,21 @@ if ($tila == 'suorituksenvalinta') {
 
 		$r=1;
 
-		while($suoritus = mysql_fetch_assoc($result)) {
+		while ($suoritus = mysql_fetch_assoc($result)) {
 
-			if ($yhtiorow['myyntireskontrakausi_alku'] <= $suoritus['kirjpvm']) {
-				echo "<tr class='aktiivi'><td>";
-				echo "<input type='radio' name='suoritus_tunnus' value='$suoritus[tunnus]' ";
+			echo "<tr class='aktiivi'><td>";
+			echo "<input type='radio' name='suoritus_tunnus' value='$suoritus[tunnus]' ";
 
-				if (mysql_num_rows($result)==$r) echo "checked";
-				$r++;
+			if (mysql_num_rows($result)==$r) echo "checked";
+			$r++;
 
-				echo "></td>";
-			}
-			else {
-				echo "<tr class='aktiivi'><td><font class='error'>".t("Tilikausi lukittu")."</font></td>";
-			}
+			echo "></td>";
 
 			for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
 				echo "<td>".$suoritus[mysql_field_name($result, $i)]."</td>";
 			}
 
 			echo "</tr>";
-
 		}
 
 		echo "</table>";
@@ -1487,12 +1587,6 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 
 	echo "</table>";
 
-	if ($yhtiorow['myyntireskontrakausi_alku'] > $suoritus['kirjpvm']) {
-		echo "<br><font class='error'>".t("Tilikausi lukittu")."</font>";
-		require ("inc/footer.inc");
-		exit;
-	}
-
 	$pyocheck='';
 	$osacheck='';
 	if ($osasuoritus == '1') $osacheck = 'checked';
@@ -1507,7 +1601,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	echo "</form>";
 
 	//N‰ytet‰‰n laskut!
-	$kentat = 'summa, kasumma, laskunro, erpcm, kapvm, viite, ytunnus';
+	$kentat = 'summa, kasumma, laskunro, erpvm, kapvm, viite, ytunnus';
 	$kentankoko = array(10,10,15,10,10,15);
 	$array 	= explode(",", $kentat);
 	$count 	= count($array);
@@ -1526,7 +1620,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 		$jarjestys = $array[$ojarj];
 	}
 	else {
-		$jarjestys = 'erpcm';
+		$jarjestys = 'erpvm';
 	}
 
 	// Etsit‰‰n ytunnuksella
@@ -1552,7 +1646,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 		$query = "SELECT summa-saldo_maksettu summa, kasumma, ";
 	}
 
-	$query .= " laskunro, erpcm, kapvm, viite, ytunnus, lasku.tunnus
+	$query .= " laskunro, erpcm erpvm, kapvm, viite, ytunnus, lasku.tunnus
 				FROM lasku USE INDEX (yhtio_tila_mapvm)
 	           	WHERE yhtio  = '$kukarow[yhtio]'
 				and tila     = 'U'
@@ -1627,7 +1721,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 		}
 
 		echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/{$palvelin2}myyntires/manuaalinen_suoritusten_kohdistus.php////tunnus=$tunnus//tila=$tila//asiakas_tunnus=$asiakas_tunnus//asiakas_nimi=$asiakas_nimi//suoritus_tunnus=$suoritus_tunnus//vastatili=$vastatili'>$maksurow[laskunro]</a></td>";
-		echo "<td>".tv1dateconv($maksurow["erpcm"])."</td>";
+		echo "<td>".tv1dateconv($maksurow["erpvm"])."</td>";
 		echo "<td>".tv1dateconv($maksurow["kapvm"])."</td>";
 		echo "<td>$maksurow[viite]</td>";
 		echo "<td>$maksurow[ytunnus]</td>";
@@ -1644,14 +1738,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	echo "<tr><th>".t("Kirjaa erotus kassa-aleen")."</th><td><input type='checkbox' name='pyoristys_virhe_ok' value='1' $pyocheck></td>";
 	echo "<th>".t("Osasuorita lasku")."</th><td><input type='checkbox' name='osasuoritus' value='1' $osacheck onclick='javascript:osasuo(this)'></td></tr>";
 	echo "</table>";
-
-	if ($yhtiorow['myyntireskontrakausi_alku'] <= $suoritus['kirjpvm']) {
-		echo "<br><input type='submit' value='".t("Kohdista")."'>";
-	}
-	else {
-		echo "<br><font class='error'>".t("Tilikausi lukittu")."</font>";
-	}
-
+	echo "<br><input type='submit' value='".t("Kohdista")."'>";
 	echo "</form>\n";
 
 	echo "<script language='JavaScript'><!--

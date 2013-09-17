@@ -11,14 +11,14 @@
 
 	if (mysql_field_name($result, $i) == "tyyppi") {
 
-		$sel = array();
-		$sel[$trow[$i]] = "SELECTED";
+		$seltyyppi = array();
+		$seltyyppi[$trow[$i]] = "SELECTED";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value = 'S' $sel[S]>".t("Sisäinen")."</option>";
-		$ulos .= "<option value = 'U' $sel[U]>".t("Ulkoinen")."</option>";
-		$ulos .= "<option value = 'A' $sel[A]>".t("ALV")."</option>";
-		$ulos .= "<option value = 'B' $sel[B]>".t("Tulosseuranta")."</option>";
+		$ulos .= "<option value = 'S' $seltyyppi[S]>".t("Sisäinen")."</option>";
+		$ulos .= "<option value = 'U' $seltyyppi[U]>".t("Ulkoinen")."</option>";
+		$ulos .= "<option value = 'A' $seltyyppi[A]>".t("ALV")."</option>";
+		$ulos .= "<option value = 'B' $seltyyppi[B]>".t("Tulosseuranta")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -37,13 +37,17 @@
 
 	if (mysql_field_name($result, $i) == "kayttotarkoitus") {
 
-		$sel = array_fill_keys(array($trow[$i]), " selected") + array('M' => '', 'O' => '');
+		if ($seltyyppi["U"] == "SELECTED") {
+			$sel = array_fill_keys(array($trow[$i]), " selected") + array('M' => '', 'O' => '');
 
-		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value = ''>".t("Ei valintaa")."</option>";
-		$ulos .= "<option value = 'M' $sel[M]>".t("Liikevaihto")."</option>";
-		$ulos .= "<option value = 'O' $sel[O]>".t("Ostot, Aineet, tarvikkeet ja tavarat")."</option>";
-		$ulos .= "</select></td>";
-		$jatko = 0;
+			$ulos  = "<td><select name='$nimi'>";
+			$ulos .= "<option value = ''>".t("Ei valintaa")."</option>";
+			$ulos .= "<option value = 'M' $sel[M]>".t("Liikevaihto")."</option>";
+			$ulos .= "<option value = 'O' $sel[O]>".t("Ostot, Aineet, tarvikkeet ja tavarat")."</option>";
+			$ulos .= "</select></td>";
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 0;
+		}
 	}
-

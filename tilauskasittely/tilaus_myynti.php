@@ -969,6 +969,8 @@ if (isset($tyhjenna)) {
 	$toivottu_valmistuspvm_pp = "";
 	$toivottu_valmistuspvm_kk = "";
 	$toivottu_valmistuspvm_vv = "";
+	$toivottu_kerayspvm = "";
+	$toivottu_valmistuspvm = "";
 }
 
 if ($tee == "VALMIS"
@@ -3822,21 +3824,24 @@ if ($tee == '') {
 					${'ale'.$alepostfix} = '';
 				}
 
-				$tuoteno			= '';
-				$kpl				= '';
-				$var				= '';
-				$hinta				= '';
-				$netto				= '';
-				$rivitunnus			= 0;
-				$kommentti			= '';
-				$kerayspvm			= '';
-				$toimaika			= '';
-				$paikka				= '';
-				$alv				= '';
-				$perheid			= 0;
-				$perheid2			= 0;
-				$tilausrivilinkki	= '';
-				$toimittajan_tunnus	= '';
+				$tuoteno			   = '';
+				$kpl				   = '';
+				$var				   = '';
+				$hinta				   = '';
+				$netto				   = '';
+				$rivitunnus			   = 0;
+				$kommentti			   = '';
+				$kerayspvm			   = '';
+				$toimaika			   = '';
+				$paikka				   = '';
+				$alv				   = '';
+				$perheid			   = 0;
+				$perheid2			   = 0;
+				$tilausrivilinkki	   = '';
+				$toimittajan_tunnus	   = '';
+				$valmistuslinja        = '';
+				$toivottu_kerayspvm    = '';
+				$toivottu_valmistuspvm = '';
 			}
 		}
 	}
@@ -4302,6 +4307,8 @@ if ($tee == '') {
 		$toivottu_valmistuspvm_pp = "";
 		$toivottu_valmistuspvm_kk = "";
 		$toivottu_valmistuspvm_vv = "";
+		$toivottu_kerayspvm = "";
+		$toivottu_valmistuspvm = "";
 	}
 
 	//Syöttörivi
@@ -6050,7 +6057,7 @@ if ($tee == '') {
 						$classvar = $class;
 					}
 				}
-				
+
 				if ($row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and !empty($yhtiorow['jt_automatiikka'])) {
 					$var_temp = $row['var'] . " - ".t("Muiden mukana");
 				}
@@ -7451,7 +7458,7 @@ if ($tee == '') {
 							$jysum = $arvo;
 						}
 
-						
+
 						if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
 							echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",100*$kate_eieri/($kotiarvo_eieri-$ostot_eieri))."' Style='text-align:right' $state></td>";
 

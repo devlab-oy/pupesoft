@@ -54,31 +54,46 @@
 			// document identifier? onko tämä laskun tunnus myös?
 			$desadv_message .= "BGM+351+{$desadv_laskurow['laskutunnus']}+9'";
 			$x++;
-
-			// DTM - date of despatch advice
-			// 0000-00-00 00:00:00
-			// 202   YYMMDDHHMMSS
-			list($date, $time) = explode(" ", $desadv_rakir_row['tulostettu']);
-			list($year, $month, $day) = explode("-", $date);
-			$desadv_message .= "DTM+137:{$year}{$month}{$day}:102'";
-			$x++;
-
-			// DTM - despatch and/or delivery date/time
-			// 11 = despatch date/time
-			$desadv_message .= "DTM+11:{$year}{$month}{$day}:102'";
-			$x++;
-
+			
 			if ($desadv_version == 'fi0089') {
+				// DTM - date of despatch advice
+				// 0000-00-00 00:00:00
+				// 102   YYYYMMDD
+				list($date, $time) = explode(" ", $desadv_rakir_row['tulostettu']);
+				list($year, $month, $day) = explode("-", $date);
+				$desadv_message .= "DTM+137:{$year}{$month}{$day}:102'";
+				$x++;
+
+				// DTM - despatch and/or delivery date/time
+				// 11 = despatch date/time
+				$desadv_message .= "DTM+11:{$year}{$month}{$day}:102'";
+				$x++;
+
+			
 				$desadv_message .= "DTM+35:{$year}{$month}{$day}:102'";
 				$x++;
 			}
 
 			if ($desadv_version == "una" or $desadv_version == "") {
+				// DTM - date of despatch advice
+				// 0000-00-00 00:00:00
+				// 202   YYMMDDHHMMSS
+				list($date, $time) = explode(" ", $desadv_rakir_row['tulostettu']);
+				list($year, $month, $day) = explode("-", $date);
+				list($hour, $minute, $second) = explode(":", $time);
+				$desadv_message .= "DTM+137:".substr($year, 2, 2).$month.$day.$hour.$minute.$second.":202'";
+				$x++;
+
+				// DTM - despatch and/or delivery date/time
+				// 11 = despatch date/time
+				$desadv_message .= "DTM+11:".substr($year, 2, 2).$month.$day.$hour.$minute.$second.":202'";
+				$x++;
 				// DTM - despatch and/or delivery date/time
 				// 171 = tilauspäivä
 				list($date, $time) = explode(" ", $desadv_laskurow['luontiaika']);
 				list($year, $month, $day) = explode("-", $date);
-				$desadv_message .= "DTM+171:{$year}{$month}{$day}:102'";
+				list($hour, $minute, $second) = explode(":", $time);
+				$desadv_message .= "DTM+171:".substr($year, 2, 2).$month.$day.$hour.$minute.$second.":202'";
 				$x++;
 
 				// DTM - despatch and/or delivery date/time

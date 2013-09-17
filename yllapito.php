@@ -1745,7 +1745,7 @@
 				// Jos rivilt‰ lˆytyy selitetark_5 niin piirret‰‰n otsikon per‰‰n tooltip-kysymysmerkki
 				if ($al_row['selitetark_5'] != '') {
 					$siistiselite = str_replace('.','_', $al_row['selite']);
-					$infolinkki = "<a class='tooltip' id='{$al_row['tunnus']}_{$siistiselite}'>?</a>";
+					$infolinkki = "<div style='float: right;'><a class='tooltip' id='{$al_row['tunnus']}_{$siistiselite}'><img src='{$palvelin2}pics/lullacons/info.png'></a></div>";
 					
 					// Tehd‰‰n helppi-popup
 					echo "<div id='div_{$al_row['tunnus']}_{$siistiselite}' class='popup'>{$al_row['selitetark']} <br> <br>

@@ -572,23 +572,24 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
     echo "</td>";
     echo "</tr>";
 
-    $pp = isset($request_params['pp']) ? $request_params['pp'] : date('d');
-    $kk = isset($request_params['kk']) ? $request_params['kk'] : date('m');
-    $vv = isset($request_params['vv']) ? $request_params['vv'] : date('Y');
-
-    echo "<tr>";
-    echo "<th>",t("Tapahtumapäivä"),"</th>";
-    echo "<td>";
-    echo "<input type='text' id='pp' name='pp' value='{$pp}' size='3' maxlength='2' />&nbsp;";
-    echo "<input type='text' id='kk' name='kk' value='{$kk}' size='3' maxlength='2' />&nbsp;";
-    echo "<input type='text' id='vv' name='vv' value='{$vv}' size='5' maxlength='4' />";
-    echo "</td>";
-    echo "</tr>";
-
 	echo "<tr id='kommentti_tr'>";
 	echo "<th>".t("Yleinen kommentti")."</th>";
 	echo "<td><input type='text' name='yleinen_kommentti' id='yleinen_kommentti' value='{$request_params['yleinen_kommentti']}'></td>";
 	echo "</tr>";
+
+	$pp = isset($request_params['pp']) ? $request_params['pp'] : date('d');
+	$kk = isset($request_params['kk']) ? $request_params['kk'] : date('m');
+	$vv = isset($request_params['vv']) ? $request_params['vv'] : date('Y');
+
+	echo "<tr>";
+	echo "<th>",t("Tapahtumapäivä"),"</th>";
+	echo "<td>";
+	echo "<input type='text' id='pp' name='pp' value='{$pp}' size='3' maxlength='2' />&nbsp;";
+	echo "<input type='text' id='kk' name='kk' value='{$kk}' size='3' maxlength='2' />&nbsp;";
+	echo "<input type='text' id='vv' name='vv' value='{$vv}' size='5' maxlength='4' />";
+	echo "</td>";
+	echo "</tr>";
+
 	echo "	<tr>
 				<th>".t("Valitse tiedosto")."</th>
 				<td><input id='userfile' name='userfile' type='file'></td>

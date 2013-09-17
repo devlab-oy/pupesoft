@@ -168,7 +168,18 @@ if ($tila == "vaihdasuorituksentili") {
 
 if ($tila == 'tee_kohdistus') {
 	// Tehdään error tsekit
-	$query = "LOCK TABLES yriti READ, yhtio READ, tili READ, lasku WRITE, suoritus WRITE, tiliointi WRITE, tiliointi as tiliointi2 WRITE, sanakirja WRITE, yhtion_toimipaikat READ, avainsana as avainsana_kieli READ";
+	$query = "	LOCK TABLES
+				yriti READ,
+				yhtio READ,
+				tili READ,
+				taso READ,
+				lasku WRITE,
+				suoritus WRITE,
+				tiliointi WRITE,
+				tiliointi as tiliointi2 WRITE,
+				sanakirja WRITE,
+				yhtion_toimipaikat READ,
+				avainsana as avainsana_kieli READ";
 	$result = pupe_query($query);
 
 	// haetaan suorituksen tiedot
@@ -555,15 +566,18 @@ if ($tila == 'tee_kohdistus') {
 					$alvtili = $yhtiorow["alv"];
 				}
 
-				# Etsitään myynti-tiliöinnit
-				$query = "	SELECT summa, vero, kustp, kohde, projekti, summa_valuutassa, valkoodi
-							FROM tiliointi
-							WHERE ltunnus 	 = '$lasku[tunnus]'
-							and yhtio   	 = '$kukarow[yhtio]'
-							and tapvm   	 = '$lasku[tapvm]'
-							and abs(summa)  <> 0
-							and tilino not in ('$yhtiorow[myyntisaamiset]','$yhtiorow[konsernimyyntisaamiset]','$alvtili','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[pyoristys]','$yhtiorow[myynninkassaale]','$yhtiorow[factoringsaamiset]')
-							and korjattu	 = ''";
+				// Etsitään myynti-tiliöinnit
+				$query = "	SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
+							FROM tiliointi use index (tositerivit_index)
+							JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
+							LEFT JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi = 'U')
+							WHERE tiliointi.ltunnus	= '$lasku[tunnus]'
+							AND tiliointi.yhtio 	= '$kukarow[yhtio]'
+							AND tiliointi.tapvm 	= '$lasku[tapvm]'
+							AND abs(tiliointi.summa) <> 0
+							AND tiliointi.tilino not in ('$yhtiorow[myyntisaamiset]','$yhtiorow[konsernimyyntisaamiset]','$alvtili','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[pyoristys]','$yhtiorow[myynninkassaale]','$yhtiorow[factoringsaamiset]')
+							AND tiliointi.korjattu 	= ''
+							AND (taso.kayttotarkoitus is null or taso.kayttotarkoitus  in ('','M'))";
 				$tilres = pupe_query($query);
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["myynninvaluuttaero_tilino"]);
@@ -863,14 +877,17 @@ if ($tila == 'tee_kohdistus') {
 					}
 
 					// Etsitään myynti-tiliöinnit
-					$query = "	SELECT summa, vero, kustp, kohde, projekti, summa_valuutassa, valkoodi
+					$query = "	SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
 								FROM tiliointi use index (tositerivit_index)
-								WHERE ltunnus	= '$lasku[tunnus]'
-								and yhtio 		= '$kukarow[yhtio]'
-								and tapvm 		= '$lasku[tapvm]'
-								and abs(summa) <> 0
-								and tilino not in ('$yhtiorow[myyntisaamiset]','$yhtiorow[konsernimyyntisaamiset]','$alvtili','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[pyoristys]','$yhtiorow[myynninkassaale]','$yhtiorow[factoringsaamiset]')
-								and korjattu 	= ''";
+								JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
+								LEFT JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi = 'U')
+								WHERE tiliointi.ltunnus	= '$lasku[tunnus]'
+								AND tiliointi.yhtio 	= '$kukarow[yhtio]'
+								AND tiliointi.tapvm 	= '$lasku[tapvm]'
+								AND abs(tiliointi.summa) <> 0
+								AND tiliointi.tilino not in ('$yhtiorow[myyntisaamiset]','$yhtiorow[konsernimyyntisaamiset]','$alvtili','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[pyoristys]','$yhtiorow[myynninkassaale]','$yhtiorow[factoringsaamiset]')
+								AND tiliointi.korjattu 	= ''
+								AND (taso.kayttotarkoitus is null or taso.kayttotarkoitus  in ('','M'))";
 					$yresult = pupe_query($query);
 
 					if (mysql_num_rows($yresult) == 0) {
@@ -1075,14 +1092,17 @@ if ($tila == 'tee_kohdistus') {
 						}
 
 						// Etsitään myynti-tiliöinnit
-						$query = "	SELECT summa, vero, kustp, kohde, projekti, summa_valuutassa, valkoodi
+						$query = "	SELECT tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, tiliointi.summa_valuutassa, tiliointi.valkoodi
 									FROM tiliointi use index (tositerivit_index)
-									WHERE ltunnus	= '$lasku[tunnus]'
-									and yhtio 		= '$kukarow[yhtio]'
-									and tapvm 		= '$lasku[tapvm]'
-									and abs(summa) <> 0
-									and tilino not in ('$yhtiorow[myyntisaamiset]','$yhtiorow[konsernimyyntisaamiset]','$alvtili','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[pyoristys]','$yhtiorow[myynninkassaale]','$yhtiorow[factoringsaamiset]')
-									and korjattu 	= ''";
+									JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
+									LEFT JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi = 'U')
+									WHERE tiliointi.ltunnus	= '$lasku[tunnus]'
+									AND tiliointi.yhtio 	= '$kukarow[yhtio]'
+									AND tiliointi.tapvm 	= '$lasku[tapvm]'
+									AND abs(tiliointi.summa) <> 0
+									AND tiliointi.tilino not in ('$yhtiorow[myyntisaamiset]','$yhtiorow[konsernimyyntisaamiset]','$alvtili','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[pyoristys]','$yhtiorow[myynninkassaale]','$yhtiorow[factoringsaamiset]')
+									AND tiliointi.korjattu 	= ''
+									AND (taso.kayttotarkoitus is null or taso.kayttotarkoitus  in ('','M'))";
 						$tilres = pupe_query($query);
 
 						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["myynninvaluuttaero_tilino"]);

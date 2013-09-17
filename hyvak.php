@@ -19,7 +19,6 @@
 	if (!isset($nayta)) 		   $nayta = "";
 	if (!isset($iframe)) 		   $iframe = "";
 	if (!isset($iframe_id)) 	   $iframe_id = "";
-	if (!isset($naytalisa)) 	   $naytalisa = "";
 	if (!isset($ok)) 			   $ok = "";
 	if (!isset($toimittajaid)) 	   $toimittajaid = "";
 	if (!isset($livesearch_tee))   $livesearch_tee = "";
@@ -1374,45 +1373,6 @@
 						<input type='hidden' name='tunnus' value='$tunnus'>
 						<input type='Submit' value='".t("Palauta lasku edelliselle hyväksyjälle")."'>
 						</form><br>";
-			}
-
-			// Näytetään alv-erittely, jos on useita kantoja.
-			if ($naytalisa != '') {
-
-				// Etsitään kulutiliöinnit
-				$query = "	SELECT tiliointi.vero, sum(tiliointi.summa) veroton, round(sum(tiliointi.summa*tiliointi.vero/100),2) 'veron määrä', round(sum(tiliointi.summa*(1+tiliointi.vero/100)),2) verollinen
-							FROM tiliointi
-							JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
-							JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi='U' and taso.kayttotarkoitus in ('','O'))
-							WHERE tiliointi.ltunnus = '$tunnus'
-							and tiliointi.yhtio     = '$kukarow[yhtio]'
-							and tiliointi.korjattu  = ''
-							and tiliointi.tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
-							GROUP BY 1";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) > 1) {
-
-					echo "<br><table><tr>";
-
-					for ($i = 0; $i < mysql_num_fields($result); $i++) {
-						echo "<th>" . t(mysql_field_name($result,$i))."</th>";
-					}
-
-					echo "</tr>";
-
-					while ($tiliointirow = mysql_fetch_assoc($result)) {
-
-						echo "<tr>";
-
-						for ($i=0; $i<mysql_num_fields($result); $i++) {
-							echo "<td>".$tiliointirow[mysql_field_name($result,$i)]."</td>";
-						}
-
-						echo "</tr>";
-					}
-					echo "</table>";
-				}
 			}
 		}
 

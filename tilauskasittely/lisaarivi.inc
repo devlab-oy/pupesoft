@@ -2599,7 +2599,12 @@
 					$query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
 				}
 
-				if ($rivitunnus == 0) $query_insert_hinta_alkuperainen_lisa = " hinta_alkuperainen = '{$lis_hinta}',";
+				if (isset($hinta_alkuperainen) and trim($hinta_alkuperainen) != '' and $laskurow['tila'] == 'O' and ($laskurow['alatila'] != '' or ($laskurow['alatila'] == '' and $laskurow['laskunro'] != 0))) {
+					$query_insert_hinta_alkuperainen_lisa = " hinta_alkuperainen = '{$hinta_alkuperainen}',";
+				}
+				elseif ($rivitunnus == 0 or ($laskurow['tila'] == 'O' and $laskurow['alatila'] == '' and $laskurow['laskunro'] == 0)) {
+					$query_insert_hinta_alkuperainen_lisa = " hinta_alkuperainen = '{$lis_hinta}',";
+				}
 			}
 			else {
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {

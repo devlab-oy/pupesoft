@@ -1857,7 +1857,7 @@ if ($kasitellaan_tiedosto) {
 					$query .= " , laji = '{$table_tarkenne}' ";
 				}
 
-				if ($table_mysql == 'tuotteen_toimittajat' and $taulunrivit[$taulu][$eriviindex][$postoiminto] != 'POISTA') {
+				if ($table_mysql == 'tuotteen_toimittajat' and in_array("TEHDAS_SALDO", $taulunotsikot[$taulu]) and $taulunrivit[$taulu][$eriviindex][$postoiminto] != 'POISTA') {
 					$query .= " , tehdas_saldo_paivitetty = now() ";
 				}
 

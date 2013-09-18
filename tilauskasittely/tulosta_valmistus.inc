@@ -375,6 +375,9 @@ if (!function_exists('uusi_sivu_valm')) {
 			}
 			$kala = $pohja-30;
 		}
+		else {
+			$pohja  = $logoloppuy;
+		}
 
 
 		if (class_exists("Image_Barcode")) {

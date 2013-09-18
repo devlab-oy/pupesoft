@@ -23148,6 +23148,9 @@ if (!function_exists('hyllysiirto')) {
 		if (!isset($params['selite'])) $error = true;
 		else $selite = $params['selite'];
 
+		if (!isset($params['tun'])) $error = true;
+		else $tun = (int) $params['tun'];
+
 		if ($error) return false;
 
 		if ($lisavaruste == "LISAVARUSTE") {
@@ -23260,7 +23263,7 @@ if (!function_exists('hyllysiirto')) {
 					hyllynro 	= '{$mistarow['hyllynro']}',
 					hyllyvali	= '{$mistarow['hyllyvali']}',
 					hyllytaso	= '{$mistarow['hyllytaso']}',
-					rivitunnus	= 0,
+					rivitunnus	= {$tun},
 					selite 		= '".t("Paikasta")." {$mista_texti} ".t("vähennettiin")." {$kappaleet}{$selite}',
 					laatija 	= '{$kukarow['kuka']}',
 					laadittu 	= now()";
@@ -23276,7 +23279,7 @@ if (!function_exists('hyllysiirto')) {
 					hyllynro 	= '{$minnerow['hyllynro']}',
 					hyllyvali	= '{$minnerow['hyllyvali']}',
 					hyllytaso	= '{$minnerow['hyllytaso']}',
-					rivitunnus	= 0,
+					rivitunnus	= {$tun},
 					selite 		= '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." {$kappaleet}{$selite}',
 					laatija 	= '{$kukarow['kuka']}',
 					laadittu 	= now()";

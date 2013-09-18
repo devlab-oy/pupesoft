@@ -20504,6 +20504,8 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 			$kerayseran_rivit[]['data'] = $keraysera_row;
 		}
 
+		$sscc = 0;
+
 		for ($i = 0; $i < count($kerayseran_rivit); $i++) {
 
 			$kerayseran_paino = $kerayseran_rivit[$i]['data']['paino'];
@@ -20515,9 +20517,10 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 					$pakkauksen_kaytetty_paino = 0;
 
-					if ($_pakkaus != 0) {
+					if ($_pakkaus != 0 or count($kerayseran_rivit) > 1) {
 						$pakkausnro++;
 						$pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era']);
+						$sscc = uusi_sscc_nro();
 					}
 
 					break;
@@ -20531,7 +20534,10 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				if ($jaljella <= 0) break;
 			}
 
-			if ($pakkausnro == 0) $pakkausnro++;
+			if ($pakkausnro == 0) {
+				$pakkausnro++;
+				$sscc = uusi_sscc_nro();
+			}
 
 			$keraysera_kpl = $kerayseran_rivit[$i]['data']['varattu'] - $jaljella;
 
@@ -20539,6 +20545,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 			$kerayseran_rivit[$i]['data']['paino'] = $kerayseran_rivit[$i]['data']['tuotemassa'] * $keraysera_kpl;
 
 			$kerayseran_rivit[$i]['data']['pakkausnro'] = $pakkausnro;
+			$kerayseran_rivit[$i]['data']['sscc'] = $sscc;
 
 			if ($keraysera_kpl > 0 and $jaljella > 0) {
 
@@ -20549,6 +20556,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				$uusi_row['data']['varattu'] = $jaljella;
 				$uusi_row['data']['paino'] = $uusi_row['data']['tuotemassa'] * $jaljella;
 				$uusi_row['data']['uusirivi'] = true;
+				$uusi_row['data']['sscc'] = $sscc = uusi_sscc_nro();
 
 				// splitataan array
 				// halutaan lis‰t‰ uusi_row arrayn keskelle, joten joudutaan k‰ytt‰m‰‰n array_slicea.
@@ -20584,14 +20592,12 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				$rivi['data']['tunnus'] = $tun;
 				$kappalemaara = $uusikpl;
 
-				$sscc = uusi_sscc_nro();
-
 				$query = "	INSERT INTO kerayserat SET
 							yhtio 			= '{$kukarow['yhtio']}',
 							nro 			= {$keraysera_nro},
 							keraysvyohyke 	= 0,
 							tila 			= '',
-							sscc 			= {$sscc},
+							sscc 			= '{$rivi['data']['sscc']}',
 							sscc_ulkoinen 	= '',
 							otunnus 		= '{$rivi['data']['otunnus']}',
 							tilausrivi 		= '{$rivi['data']['tunnus']}',
@@ -20618,14 +20624,12 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 				$kappalemaara = $rivi['data']['upd_varattu'];
 
-				$sscc = uusi_sscc_nro();
-
 				$query = "	INSERT INTO kerayserat SET
 							yhtio 			= '{$kukarow['yhtio']}',
 							nro 			= {$keraysera_nro},
 							keraysvyohyke 	= 0,
 							tila 			= '',
-							sscc 			= {$sscc},
+							sscc 			= '{$rivi['data']['sscc']}',
 							sscc_ulkoinen 	= '',
 							otunnus 		= '{$rivi['data']['otunnus']}',
 							tilausrivi 		= '{$rivi['data']['tunnus']}',
@@ -20655,14 +20659,12 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				}
 				else {
 
-					$sscc = uusi_sscc_nro();
-
 					$query = "	INSERT INTO kerayserat SET
 								yhtio 			= '{$kukarow['yhtio']}',
 								nro 			= {$keraysera_nro},
 								keraysvyohyke 	= 0,
 								tila 			= '',
-								sscc 			= {$sscc},
+								sscc 			= '{$rivi['data']['sscc']}',
 								sscc_ulkoinen 	= '',
 								otunnus 		= '{$rivi['data']['otunnus']}',
 								tilausrivi 		= '{$rivi['data']['tunnus']}',

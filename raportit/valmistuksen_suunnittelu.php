@@ -1347,9 +1347,13 @@
 		echo "<tr>";
 		echo "<th>".t('Ehdotetut valmistukset')."</th>";
 		echo "<td>";
+		$sel = array();
+		if (isset($ehdotetut_valmistukset) and $ehdotetut_valmistukset != '') {
+			$sel[$ehdotetut_valmistukset] = "SELECTED";
+		}
 		echo "<select name='ehdotetut_valmistukset'>";
-		echo "<option value='tuotteittain'>".t('Näytä tuotteittain')."</option>";
-		echo "<option value='valmistuslinjoittain'>".t('Näytä valmistuslinjoittain')."</option>";
+		echo "<option value='tuotteittain' {$sel['tuotteittain']}>".t('Näytä tuotteittain')."</option>";
+		echo "<option value='valmistuslinjoittain' {$sel['valmistuslinjoittain']}>".t('Näytä valmistuslinjoittain')."</option>";
 		echo "</select>";
 		echo "</td>";
 		echo "</tr>";

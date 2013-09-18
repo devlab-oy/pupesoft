@@ -1116,8 +1116,7 @@
 						LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
 						LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and ((tilausrivi.tyyppi in ('L','E','G','V','W','M') and tilausrivi.varattu + tilausrivi.jt != 0) OR
-							(tilausrivi.tyyppi = 'O'))
+						and ((tilausrivi.tyyppi in ('L','E','G','V','W','M') and tilausrivi.varattu + tilausrivi.jt != 0) OR (tilausrivi.tyyppi = 'O' and lasku.alatila != 'X'))
 						and tilausrivi.tuoteno = '$tuoteno'
 						and tilausrivi.laskutettuaika = '0000-00-00'
 						and tilausrivi.var != 'P'

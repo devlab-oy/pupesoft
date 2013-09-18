@@ -219,7 +219,7 @@
 					}
 
 					$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
-					
+
 					$query  = "	UPDATE tilausrivi
 								SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
 								WHERE otunnus 	= '$laskurow[tunnus]'

@@ -747,6 +747,18 @@
 		// Kerätään valmistettavien tuotteiden tiedot arrayseen
 		$valmistettavat_tuotteet = array();
 
+		if ($ehdotetut_valmistukset == 'valmistuslinjoittain') {
+			$valmistukset_yhteensa_valmistuslinjoittain = array();
+			foreach ($valmistuslinjat as $valmistuslinja) {
+				$valmistukset_yhteensa_valmistuslinjoittain[$valmistuslinja['selite']] = array(
+					'valmistuksessa' => 0,
+					'valmistusmaara' => 0,
+					'yhteensa_kpl' => 0,
+					'valmistusaika_sekunneissa' => 0,
+				);
+			}
+		}
+
 		while ($row = mysql_fetch_assoc($res)) {
 
 			// Kerätään mahdolliset samankaltaiset yhteen arrayseen
@@ -761,6 +773,13 @@
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuote"] = $row["tuoteno"];
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistusaika_sekunneissa"] = $row["valmistusaika_sekunneissa"];
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["pakkauskoko"] = $row["pakkauskoko"];
+
+			if ($ehdotetut_valmistukset == 'valmistuslinjoittain') {
+				$valmistukset_yhteensa_valmistuslinjoittain[$row['valmistuslinja']]['valmistuksessa'] += $kasiteltavat_tuotteet[$kasiteltavat_key]['valmistuksessa'];
+				$valmistukset_yhteensa_valmistuslinjoittain[$row['valmistuslinja']]['valmistusmaara'] += $kasiteltavat_tuotteet[$kasiteltavat_key]['valmistusmaara'];
+				$valmistukset_yhteensa_valmistuslinjoittain[$row['valmistuslinja']]['yhteensa_kpl'] += ($kasiteltavat_tuotteet[$kasiteltavat_key]['valmistuksessa'] + $kasiteltavat_tuotteet[$kasiteltavat_key]['valmistusmaara']);
+				$valmistukset_yhteensa_valmistuslinjoittain[$row['valmistuslinja']]['valmistusaika_sekunneissa'] += $kasiteltavat_tuotteet[$kasiteltavat_key]['valmistusaika_sekunneissa'];
+			}
 
 			// Otetaan isätuotteen pakkauskoko talteen, sillä sen perusteella tulee laskea "samankaltaisten" valmistusmäärä
 			$isatuotteen_pakkauskoko = $kasiteltavat_tuotteet[$kasiteltavat_key]["pakkauskoko"];
@@ -796,6 +815,13 @@
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["pakkauskoko"] = $samankaltainen_row["pakkauskoko"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuotteen_pakkauskoko"] = $isatuotteen_pakkauskoko;
 				$samankaltaiset_tuotteet .= "{$samankaltainen_row["tuoteno"]} ";
+
+				if ($ehdotetut_valmistukset == 'valmistuslinjoittain') {
+					$valmistukset_yhteensa_valmistuslinjoittain[$row['valmistuslinja']]['valmistuksessa'] += $kasiteltavat_tuotteet[$kasiteltavat_key]['valmistuksessa'];
+					$valmistukset_yhteensa_valmistuslinjoittain[$row['valmistuslinja']]['valmistusmaara'] += $kasiteltavat_tuotteet[$kasiteltavat_key]['valmistusmaara'];
+					$valmistukset_yhteensa_valmistuslinjoittain[$row['valmistuslinja']]['yhteensa_kpl'] += ($kasiteltavat_tuotteet[$kasiteltavat_key]['valmistuksessa'] + $kasiteltavat_tuotteet[$kasiteltavat_key]['valmistusmaara']);
+					$valmistukset_yhteensa_valmistuslinjoittain[$row['valmistuslinja']]['valmistusaika_sekunneissa'] += $kasiteltavat_tuotteet[$kasiteltavat_key]['valmistusaika_sekunneissa'];
+				}
 			}
 
 			// Loopataan käsitellyt tuotteet ja lasketaan yhteensä valmistettava määrä. Lisäksi poistetaan arraystä kaikki tuotteet, jota ei tule valmistaa
@@ -839,7 +865,7 @@
 
 		// Loopataan läpi tehty array
 
-		if (count($valmistettavat_tuotteet) > 0) {
+		if (count($valmistettavat_tuotteet) > 0 and $ehdotetut_valmistukset == 'tuotteittain') {
 
 			// Sortataan 2 dimensoinen array. Pitää ensiksi tehdä sortattavista keystä omat arrayt
 			$apusort_jarj0 = $apusort_jarj1 = $apusort_jarj2 = array();
@@ -1137,6 +1163,51 @@
 
 			echo "</form>";
 			$tee = "";
+		}
+		elseif (count($valmistettavat_tuotteet) > 0 and $ehdotetut_valmistukset == 'valmistuslinjoittain') {
+			echo "<table>";
+			echo "<thead>";
+			echo "<tr>";
+			echo "<th>".t('Valmistuslinja')."</th>";
+			echo "<th>".t('Valmistuksessa kpl')."</th>";
+			echo "<th>".t('Valmistusmaara kpl')."</th>";
+			echo "<th>".t('Yhteensä kpl')."</th>";
+			echo "<th>".t('Valmistusaika (sek)')."</th>";
+			echo "</tr>";
+			echo "</thead>";
+
+			echo "<tbody>";
+			$kaikki_valmistuslinjat_yhteensa = array(
+				'valmistuksessa' => 0,
+				'valmistusmaara' => 0,
+				'yhteensa_kpl' => 0,
+				'valmistusaika' => 0,
+			);
+			foreach($valmistukset_yhteensa_valmistuslinjoittain as $valmistuslinjan_tunnus => $valmistukset_yhteensa_valmistuslinja) {
+				$kaikki_valmistuslinjat_yhteensa['valmistuksessa'] += $valmistukset_yhteensa_valmistuslinja['valmistuksessa'];
+				$kaikki_valmistuslinjat_yhteensa['valmistusmaara'] += $valmistukset_yhteensa_valmistuslinja['valmistusmaara'];
+				$kaikki_valmistuslinjat_yhteensa['yhteensa_kpl'] += $valmistukset_yhteensa_valmistuslinja['yhteensa_kpl'];
+				$kaikki_valmistuslinjat_yhteensa['valmistusaika_sekunneissa'] += $valmistukset_yhteensa_valmistuslinja['valmistusaika_sekunneissa'];
+				echo "<tr>";
+				echo "<td>{$valmistuslinjan_tunnus}</td>";
+				echo "<td>{$valmistukset_yhteensa_valmistuslinja['valmistuksessa']}</td>";
+				echo "<td>{$valmistukset_yhteensa_valmistuslinja['valmistusmaara']}</td>";
+				echo "<td>{$valmistukset_yhteensa_valmistuslinja['yhteensa_kpl']}</td>";
+				echo "<td>{$valmistukset_yhteensa_valmistuslinja['valmistusaika_sekunneissa']}</td>";
+				echo "</tr>";
+			}
+
+			echo "<tr>";
+			echo "<td>".t('Yhteensä')."</td>";
+			echo "<td>{$kaikki_valmistuslinjat_yhteensa['valmistuksessa']}</td>";
+			echo "<td>{$kaikki_valmistuslinjat_yhteensa['valmistusmaara']}</td>";
+			echo "<td>{$kaikki_valmistuslinjat_yhteensa['yhteensa_kpl']}</td>";
+			echo "<td>{$kaikki_valmistuslinjat_yhteensa['valmistusaika_sekunneissa']}</td>";
+			echo "</tr>";
+			echo "</tbody>";
+			echo "</table>";
+
+			echo "<br><br>";
 		}
 		else {
 			echo "<br><br>";

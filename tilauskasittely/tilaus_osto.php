@@ -72,21 +72,6 @@
 
 	require ('inc/luo_ostotilausotsikko.inc');
 
-	if ($kukarow["extranet"] == "") {
-		echo "<script src='../js/tilaus.js'></script>";
-		echo "<script src='../js/tilaus_osto/tilaus_osto.js'></script>";
-		?>
-<style>
-	.vastaavat_korvaavat_hidden {
-		display:none;
-	}
-	.vastaavat_korvaavat_not_hidden {
-
-	}
-</style>
-		<?php
-	}
-
 	if (!isset($tee)) $tee = "";
 	if (!isset($from)) $from = "";
 	if (!isset($toim_nimitykset)) $toim_nimitykset = "";
@@ -102,6 +87,21 @@
 	if (!isset($nayta_pdf)) {
 		// scripti balloonien tekemiseen
 		js_popup();
+
+		if ($kukarow["extranet"] == "") {
+			echo "<script src='../js/tilaus.js'></script>";
+			echo "<script src='../js/tilaus_osto/tilaus_osto.js'></script>";
+				?>
+				<style>
+				.vastaavat_korvaavat_hidden {
+					display:none;
+				}
+				.vastaavat_korvaavat_not_hidden {
+
+				}
+				</style>
+				<?php
+		}
 	}
 
 	if (!isset($nayta_pdf) and isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {

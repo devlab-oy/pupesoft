@@ -783,7 +783,7 @@
 				$tilalk = explode("-", $yhtiorow["ostoreskontrakausi_alku"]);
 				$tillop = explode("-", $yhtiorow["ostoreskontrakausi_loppu"]);
 
-				// Verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa vittumaista PHP:ss‰!
+				// Verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa ik‰v‰‰ PHP:ss‰!
 				$ostoresktilalk = (int) date('Ymd', mktime(0,0,0, $tilalk[1], $tilalk[2], $tilalk[0]));
 				$ostoresktillop = (int) date('Ymd', mktime(0,0,0, $tillop[1], $tillop[2], $tillop[0]));
 				$syotettypvm 	= (int) date('Ymd', mktime(0,0,0, $tpk, $tpp, $tpv));

@@ -52,7 +52,7 @@
 		}
 
 		// Excelissä date voi tulla integerinä
-		if (is_integer($date)) {
+		if (is_numeric($date)) {
 			/*  the date fields have integers that are the amount of days from 1900-00-00 */
 			return date('Y-m-d', mktime(0, 0, 0, 1, $date - 1, 1900));
 		}

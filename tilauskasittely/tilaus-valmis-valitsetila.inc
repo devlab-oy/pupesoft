@@ -295,6 +295,7 @@
 				$result = pupe_query($query);
 
 				$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
+				$toimitusvahvitus_laheta = TRUE;
 			}
 		}
 		else {

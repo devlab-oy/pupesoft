@@ -847,8 +847,8 @@
 			//katotaan löytyykö lasku ja sen kaikki tilaukset
 			$query = "  SELECT l2.laskunro, l2.tapvm
 						FROM lasku l1
-						JOIN lasku l2 ON l1.yhtio=l2.yhtio and l1.tila=l2.tila and l1.tapvm=l2.tapvm and l1.laskunro=l2.laskunro and l2.tunnus!='$otunnus'
-						WHERE l1.vanhatunnus = '$otunnus'
+						JOIN lasku l2 ON l1.yhtio=l2.yhtio and l2.tila='U' and l1.tapvm=l2.tapvm and l1.laskunro=l2.laskunro and l2.tunnus!='$otunnus'
+						WHERE l1.tunnus = '$otunnus'
 						and l1.$logistiikka_yhtiolisa
 						LIMIT 1";
 			$laresult = pupe_query($query);
@@ -1040,12 +1040,18 @@
 
 				echo "<tr>";
 				if ($logistiikka_yhtio != '') echo "<$ero valign='top'>$row[yhtio_nimi]</$ero>";
-				echo "<$ero valign='top'>$row[tunnus]<br>";
+
+				echo "<$ero valign='top'>";
+
+				if ($row['tila'] != "U") {
+					echo $row['tunnus'];
+				}
+
 				if ($row['tila'] == "U" and tarkista_oikeus("muutosite.php")) {
-					echo "<a href = '{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$PHP_SELF////asiakasid=$asiakasid//ytunnus=$ytunnus//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toim=$toim//tee=$tee//otunnus=$otunnus//laskunro=$laskunro//laskunroloppu=$laskunroloppu'>$row[laskunro]</a>";
+					echo "<br><a href = '{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$PHP_SELF////asiakasid=$asiakasid//ytunnus=$ytunnus//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toim=$toim//tee=$tee//otunnus=$otunnus//laskunro=$laskunro//laskunroloppu=$laskunroloppu'>$row[laskunro]</a>";
 				}
 				else {
-					echo "$row[laskunro]";
+					echo "<br>$row[laskunro]";
 				}
 				echo "</$ero>";
 				echo "<$ero valign='top'>$row[ytunnus]<br>$row[nimi]<br>$row[nimitark]</$ero>";
@@ -1381,11 +1387,8 @@
 					FROM lasku
 					WHERE";
 
-		if (isset($tilausnumero) and $tilausnumero != '' and $toim != 'LASKU') {
+		if (isset($tilausnumero) and $tilausnumero != '') {
 			$query .= " tunnus in ($tilausnumero) ";
-		}
-		else if (isset($tilausnumero) and $tilausnumero != '') {
-			$query .= " vanhatunnus in ($tilausnumero) and tila = 'U'";
 		}
 		else {
 			if ($otunnus > 0) {

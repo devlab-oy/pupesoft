@@ -596,7 +596,7 @@
 				'mistarow' => $mistarow,
 				'minnerow' => $minnerow,
 				'sarjano_array' => !isset($sarjano_array) ? array() : $sarjano_array,
-				'selite' => $selite,
+				'selite' => !isset($selite) ? '' : $selite,
 			);
 
 			hyllysiirto($params);

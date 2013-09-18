@@ -153,6 +153,7 @@ if (isset($submit)) {
 					'minnerow' => $minnerow,
 					'sarjano_array' => array(),
 					'selite' => '',
+					'tun' => 0,
 				);
 
 				hyllysiirto($params);

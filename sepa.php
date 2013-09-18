@@ -264,7 +264,7 @@
 				$Nm = $Cdtr->addChild('Nm', sprintf("%-1.70s", str_replace("&", "&amp;", $laskurow['pankki_haltija'])));										// Name, Pakollinen kenttä 1-70
 			}
 			else {
-				$Nm = $Cdtr->addChild('Nm', sprintf("%-1.70s", str_replace("&", "&amp;", $laskurow['nimi'])));												// Name, Pakollinen kenttä 1-70
+				$Nm = $Cdtr->addChild('Nm', sprintf("%-1.70s", str_replace("&", "&amp;", trim($laskurow['nimi']." ".$laskurow['nimitark']))));												// Name, Pakollinen kenttä 1-70
 			}
 			 	$PstlAdr = $Cdtr->addChild('PstlAdr', '');																								// PostalAddress
 //					$AdrTp = $PstlAdr->addChild('AdrTp', '');

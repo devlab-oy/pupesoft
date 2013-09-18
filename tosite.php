@@ -55,11 +55,9 @@
 		$ed_iliitos 		= unserialize(urldecode($ed_iliitos));
 		$tiliointirivit 	= unserialize(urldecode($tiliointirivit));
 	}
-
+		
 	if ($toimittajaid > 0) {
-
 		for ($i = 1; $i <= count($iliitos); $i++) {
-
 			if ($iliitos[$i] == 'T' and $iliitostunnus[$i] == $toimittajaid) {
 				$ed_iliitostunnus[$i] = $toimittajaid;
 				$ed_iliitos[$i] = 'T';
@@ -71,9 +69,7 @@
 		}
 	}
 	elseif ($asiakasid > 0) {
-
 		for ($i = 1; $i <= count($iliitos); $i++) {
-
 			if ($iliitos[$i] == 'A' and $iliitostunnus[$i] == $asiakasid) {
 				$ed_iliitostunnus[$i] = $asiakasid;
 				$ed_iliitos[$i] = 'A';
@@ -383,6 +379,11 @@
 
 		$kuittiok = 0; // Onko joku vienneistä kassa-tili, jotta kuitti voidaan tulostaa
 		$isumma_valuutassa = array();
+		
+		foreach ($ed_iliitostunnus as $liit_indx => $liit) {
+			$iliitostunnus[$liit_indx] = $liit;
+			$iliitos[$liit_indx] = $ed_iliitos[$liit_indx];
+		}
 
 		for ($i=1; $i<$maara; $i++) {
 
@@ -447,6 +448,8 @@
 				$kustp_tark		= $ikustp[$i];
 				$kohde_tark		= $ikohde[$i];
 				$projekti_tark	= $iprojekti[$i];
+				$liitos			= mysql_real_escape_string($iliitos[$i]);
+				$liitostunnus	= mysql_real_escape_string($iliitostunnus[$i]);
 
 				if (isset($toimittajaid) and $toimittajaid > 0) {
 					$tositeliit = $toimrow["tunnus"];
@@ -1238,12 +1241,14 @@
 					$taulu = "SQLERROR";
 				}
 
-				$query = "SELECT nimi, nimitark FROM {$taulu} WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tunnus_chk}'";
+				$query = "	SELECT nimi, nimitark
+							FROM {$taulu}
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus  = '{$tunnus_chk}'";
 				$asiakasres = pupe_query($query);
 				$asiakasrow = mysql_fetch_assoc($asiakasres);
 
 				echo "{$asiakasrow['nimi']} {$asiakasrow['nimitark']}";
-
 			}
 
 			echo "</td>";
@@ -1252,8 +1257,6 @@
 				$cspan++;
 
 				echo "<td>";
-				echo "<input type='hidden' name='iliitostunnus[0]' value='default' />";
-
 				$chk = (isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) == $toimittajaid) ? ' checked' : ((isset($ed_iliitostunnus[$i]) and trim($ed_iliitostunnus[$i]) == $toimittajaid) ? ' checked' : '');
 
 				echo "<input type='hidden' name='ed_iliitostunnus[{$i}]' value='{$ed_iliitostunnus[$i]}' />";
@@ -1267,8 +1270,6 @@
 				$cspan++;
 
 				echo "<td>";
-				echo "<input type='hidden' name='iliitostunnus[0]' value='default' />";
-
 				$chk = (isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) == $asiakasid) ? ' checked' : ((isset($ed_iliitostunnus[$i]) and trim($ed_iliitostunnus[$i]) == $asiakasid) ? ' checked' : '');
 
 				echo "<input type='hidden' name='ed_iliitostunnus[{$i}]' value='{$ed_iliitostunnus[$i]}' />";

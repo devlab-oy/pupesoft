@@ -291,22 +291,17 @@
 
 					if ($kukarow["extranet"] == "") {
 
-						$toimaika		= choose_correct_date($rivi[$ind_Arvioitu]);
-						$kerayspvm		= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
-						$hinta			= str_replace(",", ".", $rivi[$ind_Hinta]);
-						$ale1	  		= str_replace(",", ".", $rivi[$ind_Ale]);
-						$netto 	  		= strtoupper(trim($rivi[$ind_Netto]));
-						$var  			= strtoupper(trim($rivi[$ind_Var]));
-						$kommentti		= trim($rivi[$ind_Kommentti]);
-						$valmistuslinja	= trim($rivi[$ind_Valmistuslinja]);
-
-						if (($var!='') and ($var!='P') and ($var!='H') and ($var!='J')) {
-							echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: P, J ja H").". ".t("Rivill‰").": $rivilask1. '$var'<br>";
+						if ($toim == "EXTENNAKKO" and $var != '' and $var != 'O') {
+							echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat").": 'O'. ".t("Rivill‰").": $rivilask1. $var<br>";
+							$var = '';
+						}
+						elseif ($toim != "EXTENNAKKO" and $var != '' and $var != 'P' and $var != 'H' and $var != 'J') {
+							echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat").": 'P','H','J'. ".t("Rivill‰").": $rivilask1. $var<br>";
 							$var = '';
 						}
 
 						if ($netto != '' and $netto != 'N') {
-							echo t("V‰‰r‰ arvo kent‰ss‰ netto! Sallitut arvot ovat: tyhj‰ tai N").". ".t("Rivill‰").": $rivilask1. '$netto'<br>";
+							echo t("V‰‰r‰ arvo kent‰ss‰ netto! Sallitut arvot ovat: tyhj‰ tai N").". ".t("Rivill‰").": $rivilask1. $netto<br>";
 							$netto = '';
 						}
 					}

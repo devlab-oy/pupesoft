@@ -32,7 +32,7 @@
 					and tilausrivi.tyyppi  = 'L'
 					and tilausrivi.{$aikalisa} >= '{$vva}-{$kka}-{$ppa}'
 					and tilausrivi.{$aikalisa} <= '{$vvl}-{$kkl}-{$ppl}'
-					and tilausrivi.var not in ('P','J')
+					and tilausrivi.var not in ('P','J','O')
 					and tilausrivi.tilkpl <> tilausrivi.kpl
 					ORDER BY sorttauskentta, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);

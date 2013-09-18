@@ -199,6 +199,7 @@
 					dynaaminen_puu AS node READ,
 					dynaaminen_puu AS parent READ,
 					etaisyydet READ,
+					kerayserat READ,
 					kirjoittimet READ,
 					kuka READ,
 					lahdot READ,
@@ -296,7 +297,7 @@
 							SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 							WHERE otunnus  = '$row[tunnus]'
 							AND yhtio 	   = '$kukarow[yhtio]'
-							AND var not in ('P','J')
+							AND var not in ('P','J','O')
 							AND keratty    != ''
 							AND toimitettu  = ''
 							AND tyyppi 	 	= 'L'";
@@ -635,7 +636,7 @@
 								SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 								WHERE otunnus in ($otunnukset)
 								AND yhtio 	   = '$kukarow[yhtio]'
-								AND var not in ('P','J')
+								AND var not in ('P','J','O')
 								AND keratty    != ''
 								AND toimitettu  = ''
 								AND tyyppi 	 	= 'L'";
@@ -844,11 +845,16 @@
 
 				if ($rakir_row['toimitusvahvistus'] != '') {
 
-					$tulostauna = "";
-
 					if ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
-						$tulostauna = "KYLLA";
+						$desadv_version = "una";
 						$rakir_row["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+					}
+					elseif ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
+						$desadv_version = "fi0089";
+						$rakir_row["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+					}
+					else {
+						$desadv_version = "";
 					}
 
 					if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {

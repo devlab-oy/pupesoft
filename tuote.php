@@ -1116,10 +1116,9 @@
 						LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
 						LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.tyyppi in ('L','E','O','G','V','W','M')
+						and ((tilausrivi.tyyppi in ('L','E','G','V','W','M') and tilausrivi.varattu + tilausrivi.jt != 0) OR (tilausrivi.tyyppi = 'O' and lasku.alatila != 'X'))
 						and tilausrivi.tuoteno = '$tuoteno'
 						and tilausrivi.laskutettuaika = '0000-00-00'
-						and tilausrivi.varattu + tilausrivi.jt != 0
 						and tilausrivi.var != 'P'
 						ORDER BY pvm, tunnus";
 			$jtresult = pupe_query($query);
@@ -1167,7 +1166,7 @@
 								$keikka = " / ".$jtrow["keikkanro"];
 							}
 						}
-						if ($jtrow["kpl"] > 0) {
+						if ($jtrow["kpl"] >= 0) {
 							$merkki = "+";
 						}
 						else {
@@ -1243,7 +1242,9 @@
 
 					list(, , $myyta) = saldo_myytavissa($tuoteno, "KAIKKI", '', '', '', '', '', '', '', $jtrow["pvm"]);
 
-					echo "<tr>
+					$classlisa = ($jtrow['tyyppi'] == 'O' and $jtrow["kpl"] == 0) ? " class='error'" : "";
+
+					echo "<tr{$classlisa}>
 							<td>$jtrow[nimi]</td>";
 
 					if ($jtrow["tyyppi"] == "O" and $jtrow["laskutila"] != "K" and $jtrow["keikkanro"] > 0 and $jtrow['comments'] != '') {

@@ -2503,7 +2503,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 						$_alkuaika  = date('Y-m-d H:i:s');
 						$_loppuaika = date('Y-m-d H:i:s');
 						$ins_kpl    = $kpl_array[$indeksi];
-						$i 		    = $kpl_array[$indeksi];											
+						$i 		    = $kpl_array[$indeksi];
 					}
 					else {
 						$ins_kpl = 1;
@@ -2733,13 +2733,17 @@ function korjaa_ostovelka($tilausnumero) {
 	$summarow = mysql_fetch_assoc($summares);
 
 	if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
-		$query = "	SELECT kustp, kohde, projekti
+		// Etsitään kulutiliöinnit
+		$query = "	SELECT tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
 					FROM tiliointi
-					WHERE yhtio  = '$kukarow[yhtio]'
-					AND ltunnus  = '$tilausnumero'
-					AND korjattu = ''
-					AND tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
-					ORDER BY abs(summa) DESC
+					JOIN tili ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino)
+					LEFT JOIN taso ON (tili.yhtio = taso.yhtio and tili.ulkoinen_taso = taso.taso and taso.tyyppi = 'U')
+					WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+					AND tiliointi.ltunnus  = '$tilausnumero'
+					AND tiliointi.korjattu = ''
+					AND tiliointi.tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+					AND (taso.kayttotarkoitus is null or taso.kayttotarkoitus  in ('','O'))
+					ORDER BY abs(tiliointi.summa) DESC
 					LIMIT 1";
 		$kpres = pupe_query($query);
 		$kprow = mysql_fetch_assoc($kpres);

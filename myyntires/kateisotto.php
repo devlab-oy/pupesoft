@@ -166,10 +166,12 @@ if ($tee == 'kateisotto') {
 
 			//tarkistetaan, onko kassalipas jo täsmäytetty
 			$kassalippaan_tasmaytys = tarkista_kassalippaan_tasmaytys($kassalipas['tunnus'], $date);
+
 			if ($kassalippaan_tasmaytys['ltunnukset'] != '' and $kassalippaan_tasmaytys['selite'] != '') {
-				echo "<font class='error'>".t("Tämän päivän valittu kassalipas on jo täsmäytetty")."</font>";
+				$voiko_kateisoton_tehda = vapauta_kateistasmaytys($kassalipas, $date);
 			}
-			else {
+
+			if ($voiko_kateisoton_tehda) {
 				$lasku_tunnus = tee_kateisotto($kassalipas, $request_params);
 				echo "<br><font class='message'>".t("Käteisotto tehtiin onnistuneesti")."!</font><br><br>";
 

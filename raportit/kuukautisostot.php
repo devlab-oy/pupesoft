@@ -2839,7 +2839,7 @@
 					sum(if(tyyppi in ('W','M'), varattu, 0)) valmistuksessa,
 					sum(if(tyyppi = 'O', varattu, 0)) tilattu,
 					sum(if((tyyppi = 'O' and kpl = 0 and varattu != 0 and uusiotunnus != 0), varattu, 0)) saapuneet,
-					sum(if(tyyppi = 'E', varattu, 0)) ennakot, # toimittamattomat ennakot
+					sum(if(tyyppi = 'E' and var != 'O', varattu, 0)) ennakot, # toimittamattomat ennakot
 					sum(if(tyyppi in ('L','V') and var not in ('P','J','O','S'), varattu, 0)) ennpois,
 					sum(if(tyyppi in ('L','G') and var in ('J','S'), jt $lisavarattu, 0)) jt
 					$varastolisa

@@ -2603,7 +2603,27 @@
 					$query_insert_hinta_alkuperainen_lisa = " hinta_alkuperainen = '{$hinta_alkuperainen}',";
 				}
 				elseif ($rivitunnus == 0 or ($laskurow['tila'] == 'O' and $laskurow['alatila'] == '' and $laskurow['laskunro'] == 0)) {
-					$query_insert_hinta_alkuperainen_lisa = " hinta_alkuperainen = '{$lis_hinta}',";
+
+					$query = "	SELECT tuotekerroin
+								FROM tuotteen_toimittajat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tuoteno = '{$trow['tuoteno']}'
+								AND liitostunnus = '{$laskurow['liitostunnus']}'";
+					$tt_res = pupe_query($query);
+					$tt_row = mysql_fetch_assoc($tt_res);
+
+					$_arr = array(
+						'netto' => $lis_netto,
+						'erikoisale' => (trim($lis_netto) != 'N' ? $laskurow['erikoisale'] : 0),
+						'erkoisale_saapuminen' => 0,
+					);
+
+					$_arr = array_merge($_arr, $lis_ale_kaikki);
+
+					$ale_lisa_apu_kala = generoi_alekentta_php($_arr, 'O', 'kerto');
+					$ohinta = round($lis_hinta * $ale_lisa_apu_kala * $tt_row['tuotekerroin'] * $laskurow['vienti_kurssi'] * $varattu, 6); // tuotteen rivihinta OLETUSVALUUTASSA
+
+					$query_insert_hinta_alkuperainen_lisa = " hinta_alkuperainen = '{$ohinta}',";
 				}
 			}
 			else {

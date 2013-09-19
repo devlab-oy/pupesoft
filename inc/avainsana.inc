@@ -24,3 +24,7 @@
 	$mysqlaliasarray['SAHKTILTUN']['selitetark_3'] = "Käyttäjätunnus";
 	$mysqlaliasarray['SAHKTILTUN']['selitetark_4'] = "Salasana";
 	$mysqlaliasarray['SAHKTILTUN']['selitetark_5'] = "Toimittajanumero";
+
+	$mysqlaliasarray['VALMISTUSLINJA']['selite']       = "Linjanumero";
+	$mysqlaliasarray['VALMISTUSLINJA']['selitetark']   = "Linjan nimi";
+	$mysqlaliasarray['VALMISTUSLINJA']['selitetark_2'] = "Päiväkapasiteetti sekunneissa";

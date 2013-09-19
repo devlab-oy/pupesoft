@@ -1060,9 +1060,6 @@
 			elseif ($from == "yllapito" and $toim == "tuotteen_toimittajat_tuotenumerot" and trim($array[$i]) == "tuoteno") {
 				$lisa .= " and toim_tuoteno_tunnus {$hakuehto} ";
 			}
-			elseif ($from == "yllapito" and $toim == "yhtion_toimipaikat_avainsanat" and trim($array[$i]) == "laji") {
-				$lisa .= " and yhtion_toimipaikan_tunnus {$hakuehto} ";
-			}
 			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'kohde' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
 
 				list($a, $b) = explode("/", $haku[$i]);
@@ -1728,7 +1725,12 @@
 						$otsikko = t("Reklamaatioiden ja siirtolistojen vastaanoton purkulista");
 						break;
 					default:
-						$otsikko = t(mysql_field_name($result, $i));
+						if (isset($mysqlaliasarraysetti) and isset($mysqlaliasarray[$mysqlaliasarraysetti][mysql_field_name($result, $i)])) {
+							$otsikko = t($mysqlaliasarray[$mysqlaliasarraysetti][mysql_field_name($result, $i)]);
+						}
+						else {
+							$otsikko = t(mysql_field_name($result, $i));
+						}
 				}
 			}
 
@@ -1770,9 +1772,7 @@
 					$infolinkki = "<div style='float: right;'><a class='tooltip' id='{$al_row['tunnus']}_{$siistiselite}'><img src='{$palvelin2}pics/lullacons/info.png'></a></div>";
 
 					// Tehd‰‰n helppi-popup
-					echo "<div id='div_{$al_row['tunnus']}_{$siistiselite}' class='popup'>{$al_row['selitetark']} <br> <br>
-					{$al_row['selitetark_5']}
-					</div>";
+					echo "<div id='div_{$al_row['tunnus']}_{$siistiselite}' class='popup'>{$al_row['selitetark']}<br><br>{$al_row['selitetark_5']}</div>";
 				}
 				echo "<th align='left'>$otsikko $infolinkki</th>";
 			}
@@ -2112,17 +2112,6 @@
 				echo "<tr><td class='back'></td></tr>";
 				echo "<tr><td class='back'>";
 				echo "<iframe id='tuotteen_toimittajat_tuotenumerot_iframe' name='tuotteen_toimittajat_tuotenumerot_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$lukitse_avaimeen}&lukitse_avaimeen={$lukitse_avaimeen}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
-				echo "</td></tr>";
-			}
-		}
-
-		if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'yhtion_toimipaikat') {
-			if (($toikrow = tarkista_oikeus("yllapito.php", "yhtion_toimipaikat_avainsanat%", "", "OK")) !== FALSE) {
-				$lukitse_avaimeen = urlencode($yhtion_toimipaikat_tunnus);
-
-				echo "<tr><td class='back'></td></tr>";
-				echo "<tr><td class='back'>";
-				echo "<iframe id='yhtion_toimipaikat_avainsanat_iframe' name='yhtion_toimipaikat_avainsanat_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$lukitse_avaimeen}&lukitse_avaimeen={$lukitse_avaimeen}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 				echo "</td></tr>";
 			}
 		}

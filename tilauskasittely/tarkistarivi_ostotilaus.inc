@@ -278,13 +278,12 @@
 			 	// Ostopuolella toimipaikan tunnus tallennetaan vanhatunnus-kentt‰‰n
 			 	if ($sahkoinen_tilausliitanta and $tuotteen_toimittaja_row['sahkoinen_tilausliitanta'] == 'F' and $laskurow['vanhatunnus'] != 0) {
 
-			 		$query = "	SELECT yta.*
-			 					FROM yhtion_toimipaikat_avainsanat AS yta
-			 					JOIN yhtion_toimipaikat AS yt ON (yt.yhtio = yta.yhtio AND yt.tunnus = yta.yhtion_toimipaikan_tunnus)
-			 					WHERE yta.yhtio = '{$kukarow['yhtio']}'
-			 					AND yta.laji = 'toimittaja'
-			 					AND yta.avainsana = '{$tuotteen_toimittaja_row['toimi_tunnus']}'
-			 					AND yta.yhtion_toimipaikan_tunnus = {$laskurow['vanhatunnus']}
+			 		$query = "	SELECT *
+			 					FROM avainsana
+								WHERE yhtio 	= '{$kukarow['yhtio']}'
+			 					AND laji 		= 'SAHKTILTUN'
+			 					AND selite 		= '{$laskurow['vanhatunnus']}'
+								AND selitetark	= '{$tuotteen_toimittaja_row['toimi_tunnus']}'
 			 					LIMIT 1";
 			 		$yta_chk_res = pupe_query($query);
 
@@ -293,10 +292,10 @@
 			 			$yta_chk_row = mysql_fetch_assoc($yta_chk_res);
 
 			 			$vastaavat_table .= "<div class='availability {$_tuote['vastaavat_tunnus']}_{$_tilattu}_availability' /> <span class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_loading'></span></div>&nbsp;";
-				 		$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_custid' value='{$yta_chk_row['tarkenne']}' />";
-					 	$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_username' value='{$yta_chk_row['tarkenne_2']}' />";
-						$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_password' value='{$yta_chk_row['tarkenne_3']}' />";
-						$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_suppliernumber' value='{$yta_chk_row['tarkenne_4']}' />";
+				 		$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_custid' value='{$yta_chk_row['selitetark_2']}' />";
+					 	$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_username' value='{$yta_chk_row['selitetark_3']}' />";
+						$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_password' value='{$yta_chk_row['selitetark_4']}' />";
+						$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_suppliernumber' value='{$yta_chk_row['selitetark_5']}' />";
 						$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tuotteen_toimittaja_row['tt_tunnus']}' />";
 			 		}
 			 		else {

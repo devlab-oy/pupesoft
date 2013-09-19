@@ -339,12 +339,22 @@ echo "<div class='controls'>
 	<button name='submit' class='button' value='submit' id='vahvista' onclick='return vahvista();'>",t("Vahvista"),"</button>";
 
 # Jos hyllytyksestä niin tämä piiloon
-if (!isset($hyllytys)) echo "<button class='button right' name='submit' value='new'>",t("Uusi keräyspaikka"),"</button>";
+if (!isset($hyllytys)) {
+	echo "<button class='button right' name='submit' value='new'>",t("Uusi keräyspaikka"),"</button>";
+
+	$saapuminen = !isset($saapuminen) ? $row['uusiotunnus'] : $saapuminen;
+
+	echo "<button type='submit' class='button right' onclick=\"vahvistaformi.action='suuntalavalle.php'\">",t("SUUNTALAVALLE"),"</button>";
+	echo "<input type='hidden' name='tullaan' value='pre_vahvista_kerayspaikka' />";
+	echo "<input type='hidden' name='hyllytetty' value='{$maara}' />";
+}
+
 
 echo "
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 	<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />
+	<input type='hidden' name='saapuminen' value='{$saapuminen}' />
 	<input type='hidden' name='tilausten_lukumaara' value='{$tilausten_lukumaara}' />
 	<input type='hidden' name='manuaalisesti_syotetty_ostotilausnro' value='{$manuaalisesti_syotetty_ostotilausnro}' />
 	<input type='hidden' name='viivakoodi' value='{$viivakoodi}' />

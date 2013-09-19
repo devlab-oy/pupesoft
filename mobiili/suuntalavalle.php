@@ -34,6 +34,8 @@ if (!empty($tilausrivi['uusiotunnus'])) {
     $saapuminen = $tilausrivi['uusiotunnus'];
 }
 
+if (empty($tullaan)) $tullaan = '';
+
 # Etsitään sopivat suuntalavat
 $query = "  (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
             FROM suuntalavat
@@ -65,7 +67,7 @@ $query = "  (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.t
 
 $suuntalavat_res = pupe_query($query);
 
-if (isset($submit)) {
+if (isset($submit) and $tullaan != 'pre_vahvista_kerayspaikka') {
     if(empty($suuntalava)) $errors[] = t("Valitse suuntalava");
 
     # Rivi suuntalavalle
@@ -119,6 +121,9 @@ if (isset($submit)) {
         if ($tilausten_lukumaara > 0) {
             $url = "tuotteella_useita_tilauksia.php";
         }
+        elseif ($tullaan == 'vahvista_kerayspaikka') {
+            $url = "suuntalavan_tuotteet.php?alusta_tunnus={$tilausrivi['suuntalava']}&liitostunnus={$laskurow['liitostunnus']}&oletuspaikat=true";
+        }
         else {
             $url = "ostotilaus.php";
         }
@@ -146,6 +151,8 @@ echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"hyllytys.php?".http_build_query($url)."\"' class='button left'><img src='back2.png'></button>";
 echo "<h1>",t("SUUNTALAVALLE"), "</h1></div>";
 
+$tullaan = $tullaan == 'pre_vahvista_kerayspaikka' ? 'vahvista_kerayspaikka' : $tullaan;
+
 echo "<div class='main'>
 <form method='post' action=''>
 
@@ -153,6 +160,7 @@ echo "<div class='main'>
 <input type='hidden' name='saapuminen' value='{$alkuperainen_saapuminen}' />
 <input type='hidden' name='tilausten_lukumaara' value='{$tilausten_lukumaara}' />
 <input type='hidden' name='tilausrivi' value='{$tilausrivi['tunnus']}' />
+<input type='hidden' name='tullaan' value='{$tullaan}' />
 
 <table>
     <tr>

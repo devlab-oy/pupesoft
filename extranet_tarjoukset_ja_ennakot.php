@@ -16,44 +16,6 @@ enable_ajax();
 	}
 </style>
 <script>
-$(document).ready(
-	function(){  $( "#tarkistusviesti" ).dialog({
-	autoOpen: false,
-	resizable: false,
-	height:140,
-	modal: true,
-	buttons: [{
-		text: "Lähetä",
-		click: function() {
-			$( this ).dialog( "close" );
-			return true;
-		}},
-		{
-		text :"Peruuta",
-		click: function() {
-			$( this ).dialog( "close" );
-			return false;
-		}}]
-	}
-});
-});
-/*$(document).ready(function(){ 
-  $("#dialog").dialog({
-    autoOpen: false, 
-    buttons : {
-        "Confirm" : function() {
-          $('#form1').submit();
-        },
-        "Cancel" : function() {
-          $(this).dialog("close");
-        }
-      }
-    });
-  $('#submitButton').click(function(){
-	console.log('asdsakdo');
-      $("#tarkistusviesti").dialog();
-  });*/
-});
 
 function tarkista(type, toim) {
 	if (type == "hyvaksy" && toim == "EXTTARJOUS") {
@@ -61,12 +23,6 @@ function tarkista(type, toim) {
 	}
 	else if (type == "hylkaa" && toim == "EXTTARJOUS") {
 		ok = confirm($('#hylkaa_tarjous_message').val());
-	}
-	else if (type == "hyvaksy" && toim == "EXTENNAKKO") {
-		ok = $("#tarkistusviesti").dialog();
-	}
-	else {
-		ok = true;
 	}
 
 	if (ok) {
@@ -76,35 +32,55 @@ function tarkista(type, toim) {
 		return false;
 	}
 }
-/*	function tarkista(type, toim) {
-		$( "#tarkistusviesti" ).dialog({
-			resizable: false,
-			height:140,
-			modal: true,
-			buttons: {
-				"Lähetä": function() {
-					ok = true;
-					$( this ).dialog( "close" );
-				},
-				"Peruuta": function() {
-					ok = false;
-					$( this ).dialog( "close" );
-				}
-			}
-		});
-		if (ok) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}*/
+
+$(function() {
+
+	function confirmation(question) {
+	    var defer = $.Deferred();
+	    $('<div></div>')
+	        .html(question)
+	        .dialog({
+	            autoOpen: true,
+	            modal: true,
+	            title: 'Vahvistus',
+	            buttons: {
+	                "Lähetä": function () {
+	                    defer.resolve("true");
+						$(this).dialog("close");
+	                },
+	                "Peruuta": function () {
+	                    defer.resolve("false");
+	                    $(this).dialog("close");
+	                }
+	            }
+	        });
+	    return defer.promise();
+	};
+
+	$('#hyvaksyennakko').on('click', function() {
+	    var question = "Kiitos ennakkotilauksestasi";
+	    confirmation(question).then(function (answer) {
+	        // var ansbool = Boolean.parse(answer.toString());
+	        if(answer){
+				$('#hyvaksy_hylkaa_formi').submit();
+	        } else {
+	        }
+	    });
+	});
+});
 	
 </script>
 
 <?php
-echo "<div id='tarkistusviesti' style='display:none;'>Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum</div>";
-//echo "<button type='button' id='submitButton'>jorma</button>";
+
+/*
+/*else if (type == "hyvaksy" && toim == "EXTENNAKKO") {
+	ok = $("#tarkistusviesti").dialog();
+}*/
+
+//echo "<div id='confirm-dialog' style='display:none;'>Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum</div>";
+//	echo "<button type='button' id='nappi' >OLEN NAPPI, PIENI MUTTA NIIN SUURI</button>";
+
 if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
 	liite_popup("AK", $tuotetunnus, $width, $height);
 }
@@ -230,7 +206,7 @@ if ($action == 'hyvaksy_hylkaa_paivita') {
 if ($action == 'luo_uusi_ennakko') {
 	$ennakko_asiakas = hae_extranet_kayttajaan_liitetty_asiakas();
 
-	$uusi_tilausnumero = luo_myyntitilausotsikko('ENNAKKO', $ennakko_asiakas['tunnus'], '', '', '', '', '', '');
+	$uusi_tilausnumero = luo_myyntitilausotsikko($toim, $ennakko_asiakas['tunnus'], '', '', '', '', '', '');
 
 	$uusi_saate_teksti = "Tämä on Extranet-asiakkaan luoma ennakkotilaus";
 
@@ -242,16 +218,30 @@ if ($action == 'luo_uusi_ennakko') {
 				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
 				SET lasku.olmapvm = '{$viimeinen_voimassaolo_pvm}',
 				laskun_lisatiedot.saate = '{$uusi_saate_teksti}',
-				lasku.clearing = 'EXTENNAKKO',
+				lasku.clearing = '{$toim}',
 				lasku.tilaustyyppi = '{$tilaustyyppi}'
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.tunnus = '{$uusi_tilausnumero}'";
 	pupe_query($query);
 
 	$request['valittu_tarjous_tunnus'] = $uusi_tilausnumero;
-	//$laskurow = hae_extranet_tarjous($uusi_tilausnumero, $toim);
+	
+	$query = "  SELECT *
+				FROM lasku
+				JOIN laskun_lisatiedot
+				ON ( laskun_lisatiedot.yhtio = lasku.yhtio
+					AND laskun_lisatiedot.otunnus = lasku.tunnus )
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND lasku.tunnus = '{$uusi_tilausnumero}'";
+	$result = pupe_query($query);
 
-	require_once('tilaus-valmis.inc');
+	$laskurow = mysql_fetch_assoc($result);
+
+	$kukarow['kesken'] = $uusi_tilausnumero;
+	//$request['toim'] = "EXTENNAKKO";
+	//$laskurow = hae_extranet_tarjous($uusi_tilausnumero, $toim);
+	
+	$valittu_tarjous_tunnus = $uusi_tilausnumero;
 
 	nayta_tarjous($uusi_tilausnumero, $toim);
 }
@@ -524,14 +514,14 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 	global $kukarow, $yhtiorow;
 
 	$tarjous = hae_tarjous($valittu_tarjous_tunnus);
-	$kukarow['kesken'] = $valittu_tarjous_tunnus;
+	$kukarow['kesken'] = '';
+	echo "toim $toim action $action valittu_tarjous_tunnus $valittu_tarjous_tunnus kesken {$kukarow['kesken']}";
 
-	echo "<br>
+	echo "	<br>
 			<form action='yhteensopivuus.php' method='post'>
 			<input type='hidden' name='toim' value='MP'>
 			<input type='hidden' name='toim_kutsu' value='$toim'>
-			<input type='hidden' name='tilausnumero' value='$valittu_tarjous_tunnus'>
-			<input type='hidden' name='toiminto' value='LISAARIVI'>
+			<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
 			<input type='submit' value='".t("MP-Selain")."'>
 			</form>
 			<form action='yhteensopivuus.php' method='post'>
@@ -558,11 +548,13 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 	echo_tarjouksen_otsikko($tarjous, $toim);
 
 	if ($toim == 'EXTENNAKKO') {
+		echo "<font class='message'>".t("Tuotteiden lisäys")."</font>";
+
 		echo "	<form method='post' autocomplete='off'>";
 		echo "	<input type='hidden' name='tee' value='LISAARIVI'>
-						<input type='hidden' name='toim'  value='$toim'>
-						<input type='hidden' name='otunnus'  value='$valittu_tarjous_tunnus'>";
-		echo "<font class='message'>".t("Tuotteiden lisäys")."</font>";
+				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='otunnus' value='$valittu_tarjous_tunnus'>
+				";
 
 		require('syotarivi.inc');
 		echo "<br>";
@@ -617,6 +609,17 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 	$tilausrivit = array();
 
 	while ($tilausrivi = mysql_fetch_assoc($result)) {
+		$query2 = " SELECT selite AS ennakko_pros_a
+					FROM tuotteen_avainsanat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$tilausrivi['tuoteno']}'
+					AND laji = 'parametri_ennakkoale_a'
+					AND selite != ''
+					ORDER BY ennakko_pros_a DESC
+					LIMIT 1";
+		$result2 = pupe_query($query2);
+		$selite = mysql_fetch_assoc($result2);
+		$tilausrivi['ennakkoale'] = $selite['ennakko_pros_a'];
 		$tilausrivit[] = $tilausrivi;
 	}
 
@@ -627,8 +630,7 @@ function echo_tarjouksen_otsikko($tarjous, $toim) {
 	global $kukarow, $yhtiorow;
 
 	echo "<input type='hidden' id='hylkaa_tarjous_message' value='".t("Oletko varma, että haluat hylätä tarjouksen?")."'/>";
-	//echo "<input type='hidden' id='hyvaksy_ennakko' value='".t("Kiitos ennakkotilauksestasi")."'/>";
-	echo "<input type='hidden' id='hyvaksy_tarjous' value='".t("Oletko varma, että haluat hyväksyä tarjouksen?")."'/>";
+	echo "<input type='hidden' id='hyvaksy_tarjous_message' value='".t("Oletko varma, että haluat hyväksyä tarjouksen?")."'/>";
 
 	echo "<a href=$_SERVER[PHP_SELF]?toim={$toim}>".t("Palaa takaisin")."</a>";
 	echo "<br>";
@@ -696,7 +698,7 @@ function piirra_tarjouksen_tilausrivit($params) {
 
 	echo "<font class='message'>".t("Tilausrivit")."</font>";
 
-	echo "<form method='post' action=''>";
+	echo "<form id='hyvaksy_hylkaa_formi' method='post' action=''>";
 	echo "<input type='hidden' name='action' value='hyvaksy_hylkaa_paivita' />";
 	echo "<input type='hidden' name='toim' value='{$toim}' />";
 	echo "<input type='hidden' name='valittu_tarjous_tunnus' value='{$tunnus}'/ >";
@@ -708,9 +710,12 @@ function piirra_tarjouksen_tilausrivit($params) {
 	echo "<th>".t("Kuva")."</th>";
 	echo "<th>".t("Tuoteno")."</th>";
 	echo "<th>".t("Nimitys")."</th>";
-	echo "<th>".t("Kpl")."</th>";
-	echo "<th>".t("Osh")."</th>";	
+	echo "<th>".t("Kpl")."</th>";	
 	echo "<th>".t("Yksikköhinta")."</th>";
+	if ($toim == "EXTENNAKKO") {
+		echo "<th>".t("Osh")."</th>";	
+		echo "<th>".t("Ale %")."</th>";
+	}
 	echo "<th>".t("Rivihinta")."</th>";
 	echo "<th>".t("Alv")."</th>";
 	echo "</tr>";
@@ -750,8 +755,12 @@ function piirra_tarjouksen_tilausrivit($params) {
 			echo "{$rivi["kpl"]}";
 		}
 		echo "</td>";
-		echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["myyntihinta"], $yhtiorow['hintapyoristys'])."</td>";
+
 		echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["hinta"], $yhtiorow['hintapyoristys'])."</td>";
+		if ($toim == "EXTENNAKKO") {
+			echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["myyntihinta"], $yhtiorow['hintapyoristys'])."</td>";
+			echo "<td class='{$class}' style='text-align: right;'>{$rivi["ennakkoale"]}</td>";
+		}
 		echo "<td class='{$class}' style='text-align: right;'>".hintapyoristys($rivi["rivihinta"], $yhtiorow['hintapyoristys'])."</td>";
 		echo "<td class='{$class}' style='text-align: right;'>{$rivi["alv"]}</td>";
 		echo "</tr>";
@@ -771,9 +780,11 @@ function piirra_tarjouksen_tilausrivit($params) {
 	echo "</textarea>";
 	echo "<br>";
 	echo "<br>";
-
-	echo "<input type='submit' name='hyvaksy' value='".t("Hyväksy")."' onclick='return tarkista(\"hyvaksy\", \"$toim\");'/>";
-	if ($toim == "EXTTARJOUS") {
+	if ($toim == "EXTENNAKKO") {
+		echo "<button type='button' id='hyvaksyennakko' name='hyvaksy'>".t("Hyväksy")."</button>";
+	}
+	else {
+		echo "<input type='submit' name='hyvaksy' value='".t("Hyväksy")."' onclick='return tarkista(\"hyvaksy\", \"$toim\");'/>";
 		echo "<input type='submit' name='hylkaa' value='".t("Hylkää")."' onclick='return tarkista(\"hylkaa\", \"$toim\");'/>";
 	}
 	echo "</form>";

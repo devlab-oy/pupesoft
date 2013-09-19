@@ -9,6 +9,10 @@ else {
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
 }
 
+// echo "<pre>";
+// var_dump($_REQUEST);
+// exit;
+
 error_reporting(E_ERROR);
 ini_set("display_errors", 0);
 ini_set("log_errors", 1);
@@ -346,6 +350,10 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 	}
 
 	exit;
+}
+// Selaimet ext-ennakolla s‰ilytt‰‰ kukarow kesken
+if (isset($kukarow['kesken']) and $toim == "EXTENNAKKO") {
+	$kukarow['kesken'] = $tilausnumero;
 }
 
 //	Verkkokauppamoodissa ei koskaan ohjetta!

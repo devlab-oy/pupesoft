@@ -344,7 +344,8 @@ if ($kukarow["extranet"] != '') {
 						AND liitostunnus = '$asiakasid'
 						AND tila 		 = '$ex_tila'
 						AND alatila 	 = ''
-						AND laatija 	 = '{$kukarow['kuka']}'";
+						AND laatija 	 = '{$kukarow['kuka']}'
+						AND clearing != 'EXTENNAKKO'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {

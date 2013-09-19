@@ -24,6 +24,9 @@ function tarkista(type, toim) {
 	else if (type == "hylkaa" && toim == "EXTTARJOUS") {
 		ok = confirm($('#hylkaa_tarjous_message').val());
 	}
+	else {
+		ok = true;
+	}
 
 	if (ok) {
 		return true;
@@ -72,15 +75,7 @@ $(function() {
 </script>
 
 <?php
-
-/*
-/*else if (type == "hyvaksy" && toim == "EXTENNAKKO") {
-	ok = $("#tarkistusviesti").dialog();
-}*/
-
-//echo "<div id='confirm-dialog' style='display:none;'>Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum</div>";
-//	echo "<button type='button' id='nappi' >OLEN NAPPI, PIENI MUTTA NIIN SUURI</button>";
-
+	
 if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
 	liite_popup("AK", $tuotetunnus, $width, $height);
 }
@@ -175,7 +170,9 @@ if ($action == 'hyvaksy_hylkaa_paivita') {
 		exit;
 	}
 	elseif (isset($request['hyvaksy'])) {
+		echo "toim {$toim} valittu {$valittu_tarjous_tunnus} syotto {$syotetyt_lisatiedot}";
 		if ($toim == 'EXTTARJOUS') {
+			echo "KISSAKIRAISRSasasdsfasg ad {$request['valittu_tarjous_tunnus']} ja {$syotetyt_lisatiedot}";
 			$onnistuiko_toiminto = hyvaksy_tarjous($request['valittu_tarjous_tunnus'], $syotetyt_lisatiedot);
 		}
 		else {
@@ -187,7 +184,8 @@ if ($action == 'hyvaksy_hylkaa_paivita') {
 		}
 	}
 	else {
-		$onnistuiko_toiminto = hylkaa($request['valittu_tarjous_tunnus']);
+		echo "UIKKENDAALI";
+		//$onnistuiko_toiminto = hylkaa($request['valittu_tarjous_tunnus']);
 	}
 
 	if (!$onnistuiko_toiminto) {
@@ -225,6 +223,7 @@ if ($action == 'luo_uusi_ennakko') {
 	pupe_query($query);
 
 	$request['valittu_tarjous_tunnus'] = $uusi_tilausnumero;
+	$request['action'] = 'nayta_tilaus';
 	
 	$query = "  SELECT *
 				FROM lasku
@@ -238,8 +237,6 @@ if ($action == 'luo_uusi_ennakko') {
 	$laskurow = mysql_fetch_assoc($result);
 
 	$kukarow['kesken'] = $uusi_tilausnumero;
-	//$request['toim'] = "EXTENNAKKO";
-	//$laskurow = hae_extranet_tarjous($uusi_tilausnumero, $toim);
 	
 	$valittu_tarjous_tunnus = $uusi_tilausnumero;
 
@@ -284,6 +281,8 @@ function hyvaksy_ennakko($parametrit) {
 
 function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
 	global $kukarow, $yhtiorow;
+
+	$kukarow['kesken'] = $valittu_tarjous_tunnus;
 	$validations = array(
 		'syotetyt_lisatiedot' => 'kirjain_numero',
 	);
@@ -301,8 +300,8 @@ function hyvaksy_tarjous($valittu_tarjous_tunnus, $syotetyt_lisatiedot) {
 
 		// Kopsataan valitut rivit uudelle myyntitilaukselle
 		require("tilauksesta_myyntitilaus.inc");
-
 		$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($valittu_tarjous_tunnus, '', '', '');
+
 		if ($tilauksesta_myyntitilaus != '') {
 			echo "$tilauksesta_myyntitilaus<br><br>";
 
@@ -514,10 +513,11 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 	global $kukarow, $yhtiorow;
 
 	$tarjous = hae_tarjous($valittu_tarjous_tunnus);
-	$kukarow['kesken'] = '';
-	echo "toim $toim action $action valittu_tarjous_tunnus $valittu_tarjous_tunnus kesken {$kukarow['kesken']}";
+	$kukarow['kesken'] = $valittu_tarjous_tunnus;
 
-	echo "	<br>
+	echo "toim $toim action $action valittu_tarjous_tunnus $valittu_tarjous_tunnus kesken {$kukarow['kesken']}";
+	if ($toim == "EXTENNAKKO") {
+		echo "<br>
 			<form action='yhteensopivuus.php' method='post'>
 			<input type='hidden' name='toim' value='MP'>
 			<input type='hidden' name='toim_kutsu' value='$toim'>
@@ -527,24 +527,29 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 			<form action='yhteensopivuus.php' method='post'>
 			<input type='hidden' name='toim' value='MO'>
 			<input type='hidden' name='toim_kutsu' value='$toim'>
+			<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
 			<input type='submit' value='".t("Moposelain")."'>
 			</form>
 			<form action='yhteensopivuus.php' method='post'>
 			<input type='hidden' name='toim' value='MK'>
 			<input type='hidden' name='toim_kutsu' value='$toim'>
+			<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
 			<input type='submit' value='".t("Kelkkaselain")."'>
 			</form>
 			<form action='yhteensopivuus.php' method='post'>
 			<input type='hidden' name='toim' value='MX'>
 			<input type='hidden' name='toim_kutsu' value='$toim'>
+			<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
 			<input type='submit' value='".t("Crossiselain")."'>
 			</form>
 			<form action='yhteensopivuus.php' method='post'>
 			<input type='hidden' name='toim' value='AT'>
 			<input type='hidden' name='toim_kutsu' value='$toim'>
+			<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
 			<input type='submit' value='".t("ATV-Selain")."'>
 			</form><br><br>";
-
+	}
+	
 	echo_tarjouksen_otsikko($tarjous, $toim);
 
 	if ($toim == 'EXTENNAKKO') {
@@ -702,6 +707,7 @@ function piirra_tarjouksen_tilausrivit($params) {
 	echo "<input type='hidden' name='action' value='hyvaksy_hylkaa_paivita' />";
 	echo "<input type='hidden' name='toim' value='{$toim}' />";
 	echo "<input type='hidden' name='valittu_tarjous_tunnus' value='{$tunnus}'/ >";
+	//echo "<input type='hidden' name='action' value='{$action}'/>";
 
 	echo "<table>";
 

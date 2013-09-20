@@ -232,8 +232,12 @@
 						$var  		= strtoupper(trim($rivi[$ind_Var]));
 						$kommentti	= trim($rivi[$ind_Kommentti]);
 
-						if (($var!='') and ($var!='P') and ($var!='H') and ($var!='J')) {
-							echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: P, J ja H").". ".t("Rivill‰").": $rivilask1. $var<br>";
+						if ($toim == "EXTENNAKKO" and $var != '' and $var != 'O') {
+							echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat").": 'O'. ".t("Rivill‰").": $rivilask1. $var<br>";
+							$var = '';
+						}
+						elseif ($toim != "EXTENNAKKO" and $var != '' and $var != 'P' and $var != 'H' and $var != 'J') {
+							echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat").": 'P','H','J'. ".t("Rivill‰").": $rivilask1. $var<br>";
 							$var = '';
 						}
 

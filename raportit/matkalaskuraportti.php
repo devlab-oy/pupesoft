@@ -233,7 +233,7 @@ function generoi_where_ehdot($request_params) {
 		$where .= ajotapa_where($request_params);
 	}
 
-	if (!empty($request_params['matkalaskunro'])) {
+	if (!empty($request_params['matkalaskunro']) and is_numeric($request_params['matkalaskunro'])) {
 		$where .= "AND lasku.laskunro IN ({$request_params['matkalaskunro']})";
 	}
 

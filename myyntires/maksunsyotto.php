@@ -14,7 +14,7 @@ if ($tee != "CHECK" or $tiliote != 'Z') {
 	echo "<font class='head'>".t("Suorituksen käsinsyöttö")."</font><hr>";
 }
 
-//Tultiinko tiliotteelta ja olisiko tämä jo viety?
+// Tultiinko tiliotteelta ja olisiko tämä jo viety?
 if ($tiliote == 'Z' and $ytunnus != '' and $asiakasid != '') {
 	$query = "	SELECT tunnus
 				FROM suoritus

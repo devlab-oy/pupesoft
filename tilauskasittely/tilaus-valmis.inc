@@ -354,7 +354,7 @@ else {
 		$laskurow['kassalipas'] = $kertakassa;
 	}
 
-	if ($laskurow["tila"] == 'N' and $laskurow["alatila"] == 'U' and $laskurow["osatoimitus"] != '') {
+	if ($laskurow["tila"] == 'N' and ($laskurow["alatila"] == 'U' or $laskurow["alatila"] == '') and $laskurow["osatoimitus"] != '') {
 		// Osatoimitus kielletty, mutta kaikki rivit toimitettavissa
 		$query = "	SELECT *
 					from tilausrivi

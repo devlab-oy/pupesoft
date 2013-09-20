@@ -358,6 +358,11 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 		elseif ($toim == "TYOMAARAYS") {
 			$tilaustyyppi = "A";
 		}
+		elseif ($toim == "EXTENNAKKO") {
+			// Kun asiakas tekee ext-ennakkotilausta extranetissä
+			$tilaustyyppi = "E";
+			$clearing  = "EXTENNAKKO";
+		}
 
 		$jatka	= "JATKA";
 		$tee	= "OTSIK";

@@ -20446,9 +20446,29 @@ if (!function_exists('uusi_sscc_nro')) {
 	}
 }
 
+if (!function_exists('uusi_gs1_sscc_nro')) {
+	function uusi_gs1_sscc_nro($sscc_sisainen) {
+		global $kukarow, $yhtiorow;
+
+		// Rakennetaan GS1 SSCC -numero
+		$sscc_sovellustunnus = "00";
+		$sscc_gs1_laajennustunnus = "0";
+
+		$sscc_gs1_yritystunnus = str_pad($yhtiorow['ean'], 7, 0, STR_PAD_LEFT);
+		$sscc_sisainen = str_pad($sscc_sisainen, 7, 0, STR_PAD_LEFT);
+
+		$sscc = $sscc_sovellustunnus.$sscc_gs1_laajennustunnus.$sscc_gs1_yritystunnus.$sscc_sisainen;
+
+		$sscc_tarkiste = tarkiste($sscc);
+
+		$sscc = $sscc.$sscc_tarkiste;
+
+		return $sscc;
+	}
+}
+
 if (!function_exists('tee_keraysera_painon_perusteella')) {
 	function tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita, $_pakkaus = 0) {
-
 		global $kukarow, $yhtiorow;
 
 		$_pakkaus = (int) $_pakkaus;
@@ -20480,7 +20500,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 		$pakkausres = pupe_query($query);
 		$pakkausrow = mysql_fetch_assoc($pakkausres);
 
-		$valittu_pakkaus = $pakkausrow['tunnus'];
+		$valittu_pakkaus  = $pakkausrow['tunnus'];
 		$pakkaukset_paino = $pakkausrow['paino'];
 		$pakkauksen_kaytetty_paino = 0;
 		$pakkausnro = 0;
@@ -20505,6 +20525,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 		}
 
 		$sscc = 0;
+		$sscc_ulkoinen = 0;
 
 		for ($i = 0; $i < count($kerayseran_rivit); $i++) {
 
@@ -20520,7 +20541,9 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 					if ($_pakkaus != 0 or count($kerayseran_rivit) > 1) {
 						$pakkausnro++;
 						$pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era']);
-						$sscc = uusi_sscc_nro();
+
+						$sscc          = uusi_sscc_nro();
+						$sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
 					}
 
 					break;
@@ -20536,7 +20559,9 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 			if ($pakkausnro == 0) {
 				$pakkausnro++;
-				$sscc = uusi_sscc_nro();
+
+				$sscc          = uusi_sscc_nro();
+				$sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
 			}
 
 			$keraysera_kpl = $kerayseran_rivit[$i]['data']['varattu'] - $jaljella;
@@ -20546,6 +20571,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 			$kerayseran_rivit[$i]['data']['pakkausnro'] = $pakkausnro;
 			$kerayseran_rivit[$i]['data']['sscc'] = $sscc;
+			$kerayseran_rivit[$i]['data']['sscc_ulkoinen'] = $sscc_ulkoinen;
 
 			if ($keraysera_kpl > 0 and $jaljella > 0) {
 
@@ -20557,6 +20583,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				$uusi_row['data']['paino'] = $uusi_row['data']['tuotemassa'] * $jaljella;
 				$uusi_row['data']['uusirivi'] = true;
 				$uusi_row['data']['sscc'] = $sscc = uusi_sscc_nro();
+				$uusi_row['data']['sscc_ulkoinen'] = $sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
 
 				// splitataan array
 				// halutaan lis‰t‰ uusi_row arrayn keskelle, joten joudutaan k‰ytt‰m‰‰n array_slicea.
@@ -20598,7 +20625,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 							keraysvyohyke 	= 0,
 							tila 			= '',
 							sscc 			= '{$rivi['data']['sscc']}',
-							sscc_ulkoinen 	= '',
+							sscc_ulkoinen 	= '{$rivi['data']['sscc_ulkoinen']}',
 							otunnus 		= '{$rivi['data']['otunnus']}',
 							tilausrivi 		= '{$rivi['data']['tunnus']}',
 							pakkaus 		= '{$valittu_pakkaus}',
@@ -20612,7 +20639,6 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 							muutospvm 		= now(),
 							muuttaja 		= ''";
 				$keraysera_ins = pupe_query($query);
-
 			}
 			elseif ($rivi['data']['upd_varattu'] != 0 and $rivi['data']['varattu'] != $rivi['data']['upd_varattu']) {
 
@@ -20630,7 +20656,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 							keraysvyohyke 	= 0,
 							tila 			= '',
 							sscc 			= '{$rivi['data']['sscc']}',
-							sscc_ulkoinen 	= '',
+							sscc_ulkoinen 	= '{$rivi['data']['sscc_ulkoinen']}',
 							otunnus 		= '{$rivi['data']['otunnus']}',
 							tilausrivi 		= '{$rivi['data']['tunnus']}',
 							pakkaus 		= '{$valittu_pakkaus}',
@@ -20644,7 +20670,6 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 							muutospvm 		= now(),
 							muuttaja 		= ''";
 				$keraysera_ins = pupe_query($query);
-
 			}
 			else {
 				$kappalemaara = $rivi['data']['varattu'];
@@ -20665,7 +20690,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 								keraysvyohyke 	= 0,
 								tila 			= '',
 								sscc 			= '{$rivi['data']['sscc']}',
-								sscc_ulkoinen 	= '',
+								sscc_ulkoinen 	= '{$rivi['data']['sscc_ulkoinen']}',
 								otunnus 		= '{$rivi['data']['otunnus']}',
 								tilausrivi 		= '{$rivi['data']['tunnus']}',
 								pakkaus 		= '{$valittu_pakkaus}',

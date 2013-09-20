@@ -600,7 +600,7 @@ $request = array(
 	'valitut_varastot'			 => $varastot,
 	'valitut_inventointilajit'	 => $inventointilajit,
 	'valittu_status'			 => $valittu_status,
-	'ei_huomioida_tuotepaikkoja_avainsanoista' => isset($ei_huomioida_tuotepaikkoja_avainsanoista) ? true : false,
+	'ei_huomioida_tuotepaikkoja_avainsanoista' => (!isset($ei_huomioida_tuotepaikkoja_avainsanoista) or (is_array($ei_huomioida_tuotepaikkoja_avainsanoista) and count($ei_huomioida_tuotepaikkoja_avainsanoista) == 2)) ? true : false,
 );
 
 echo "<div id='wrapper'>";
@@ -1049,10 +1049,13 @@ function echo_kayttoliittyma($request) {
 
 	if (mysql_num_rows($invaste_tuotepaikat_result) > 0) {
 
+		$chk = $request['ei_huomioida_tuotepaikkoja_avainsanoista'] ? 'checked' : '';
+
 		echo "<tr>";
 		echo "<th>",t("Ei huomioida avainsanoihin m‰‰riteltyj‰ tuotepaikkoja"),"</th>";
 		echo "<td>";
-		echo "<input type='checkbox' name='ei_huomioida_tuotepaikkoja_avainsanoista' checked /><br />";
+		echo "<input type='hidden' name='ei_huomioida_tuotepaikkoja_avainsanoista[]' value='default' /><br />";
+		echo "<input type='checkbox' name='ei_huomioida_tuotepaikkoja_avainsanoista[]' {$chk} /><br />";
 
 		while ($invaste_tuotepaikat_row = mysql_fetch_assoc($invaste_tuotepaikat_result)) {
 			echo "{$invaste_tuotepaikat_row['selite']}<br />";

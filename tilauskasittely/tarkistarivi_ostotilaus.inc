@@ -141,10 +141,13 @@
 				$varaosavirhe .= "<input type='hidden' name='kommentti' value = '$kommentti'>";
 			}
 
-			$varaosavirhe .= "	<font class='message'>".t("Päivitä tuotteen ostohinta").":<br> ".hintapyoristys($trow["ostohinta"])." $trow[valuutta] -> ".hintapyoristys($prow["hinta"])." $trow[valuutta]</font><br>
-								<input type='submit' name='JOPA' value='".t("Päivitä")."'>
-								<input type='submit' name='ALPA' value='".t("Älä päivitä")."'>
-								</form>";
+			if (tarkista_oikeus("yllapito.php", "tuotteen_toimittajat", "check") !== FALSE) {
+
+				$varaosavirhe .= "	<font class='message'>".t("Päivitä tuotteen ostohinta").":<br> ".hintapyoristys($trow["ostohinta"])." $trow[valuutta] -> ".hintapyoristys($prow["hinta"])." $trow[valuutta]</font><br>
+									<input type='submit' name='JOPA' value='".t("Päivitä")."'>
+									<input type='submit' name='ALPA' value='".t("Älä päivitä")."'>
+									</form>";
+			}
 		}
 	}
 

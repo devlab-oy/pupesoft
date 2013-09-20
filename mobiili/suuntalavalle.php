@@ -141,17 +141,21 @@ $url = array (
             'tilausten_lukumaara' => $tilausten_lukumaara,
             'manuaalisesti_syotetty_ostotilausnro' => $manuaalisesti_syotetty_ostotilausnro,
             'tuotenumero' => $tuotenumero,
+            'alusta_tunnus' => $alusta_tunnus,
+            'liitostunnus' => $liitostunnus,
         );
 
 if (!is_numeric($hyllytetty)) {
     echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url)."&virhe'>";
 }
 
-echo "<div class='header'>";
-echo "<button onclick='window.location.href=\"hyllytys.php?".http_build_query($url)."\"' class='button left'><img src='back2.png'></button>";
-echo "<h1>",t("SUUNTALAVALLE"), "</h1></div>";
-
 $tullaan = $tullaan == 'pre_vahvista_kerayspaikka' ? 'vahvista_kerayspaikka' : $tullaan;
+
+echo "<div class='header'>";
+
+if ($tullaan == 'vahvista_kerayspaikka') echo "<button onclick='window.location.href=\"vahvista_kerayspaikka.php?".http_build_query($url)."\"' class='button left'><img src='back2.png'></button>";
+else echo "<button onclick='window.location.href=\"hyllytys.php?".http_build_query($url)."\"' class='button left'><img src='back2.png'></button>";
+echo "<h1>",t("SUUNTALAVALLE"), "</h1></div>";
 
 echo "<div class='main'>
 <form method='post' action=''>
@@ -161,6 +165,8 @@ echo "<div class='main'>
 <input type='hidden' name='tilausten_lukumaara' value='{$tilausten_lukumaara}' />
 <input type='hidden' name='tilausrivi' value='{$tilausrivi['tunnus']}' />
 <input type='hidden' name='tullaan' value='{$tullaan}' />
+<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
+<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 
 <table>
     <tr>

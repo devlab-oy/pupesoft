@@ -3779,6 +3779,7 @@ if ($tee == '') {
 				$perheid	= $tilausrivi['perheid'];
 				$tila		= "";
 				$var		= $tilausrivi["var"];
+				$var2 		= $tilausrivi['var2'];
 			}
 			elseif ($tapa == "VAIHDAJAPOISTA") {
 				$perheid	= "";

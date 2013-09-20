@@ -72,7 +72,7 @@
 
 		if (!empty($kukarow['extranet']) and $hinta == '') {
 			$hinta = 0.000001;
-			$ale1 = 100;	
+			$ale1 = 100;
 			$netto = '';
 		}
 		else {
@@ -80,7 +80,7 @@
 			$ale1 = (isset($ale1)) ? $ale1 : 0;
 		}
 	}
-	
+
 	if (!function_exists("tuoteperhe_reku")) {
 		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet, $perhelisa, $kieltolisa, $lisaarivi_debug) {
 			global $yhtiorow, $kukarow;
@@ -2607,6 +2607,8 @@
 
 			$query_erikoisale_lisa = trim($lis_netto) != 'N' ? " erikoisale = '{$laskurow['erikoisale']}', " : '';
 
+			$var2 = !isset($var2) ? '' : $var2;
+
 			// lis‰t‰‰n puuterivi
 			$query = "	INSERT into tilausrivi set
 						hyllyalue 		= '$p_hyllyalue',
@@ -2635,6 +2637,7 @@
 						toimaika 		= '$toimaika',
 						kommentti 		= '$kommentti',
 						var 			= '$var',
+						var2 			= '{$var2}',
 						try				= '$trow[try]',
 						osasto			= '$trow[osasto]',
 						perheid			= '$perheid',

@@ -3836,35 +3836,66 @@
 				if ($merkki2 != 'eimenu' and $merkki2 != '') {
 					$merkki = $merkki2;
 				}
+				
+				//Jos on PIKATILAUS, siellä ei ole kaikkia kenttiä, joten jos työmääräystä muutetaan sitä kautta ei kaikkia voi päivittää
+				if ($toim == "PIKATILAUS"){
+					$query2 .= "tyomaarays SET
+								yhtio			= '$kukarow[yhtio]',
+								kotipuh 		= '$kotipuh',
+								tyopuh 			= '$tyopuh',
+								myyjaliike 		= '$myyjaliike',
+								ostopvm 		= '$ostopvmvv-$ostopvmkk-$ostopvmpp',
+								rekno 			= '$rekno',
+								mittarilukema 	= '$mittarilukema',
+								merkki 			= '$merkki',
+								mallivari 		= '$mallivari',
+								valmnro 		= '$valmnro',
+								tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
+								luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',
+								komm1 			= '$komm1',
+								komm2 			= '$komm2',
+								suorittaja 		= '$suorittaja',
+								viite	 		= '$viite',
+								prioriteetti	= '$prioriteetti',
+								jalleenmyyja 	= '$jalleenmyyja',
+								tehdas			= '$tehdas',
+								tyoaika			= '$tyoaika',
+								vikakoodi		= '$vikakoodi',
+								takuunumero		= '$takuunumero',
+								tyokoodi		= '$tyokoodi',
+								hyvaksy			= '$hyvaksy',
+								otunnus 		= '$kukarow[kesken]'";
 
-				$query2 .= "tyomaarays SET
-							yhtio			= '$kukarow[yhtio]',
-							kotipuh 		= '$kotipuh',
-							tyopuh 			= '$tyopuh',
-							myyjaliike 		= '$myyjaliike',
-							ostopvm 		= '$ostopvmvv-$ostopvmkk-$ostopvmpp',
-							rekno 			= '$rekno',
-							mittarilukema 	= '$mittarilukema',
-							merkki 			= '$merkki',
-							mallivari 		= '$mallivari',
-							valmnro 		= '$valmnro',
-							tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
-							luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',
-							komm1 			= '$komm1',
-							komm2 			= '$komm2',
-							suorittaja 		= '$suorittaja',
-							viite	 		= '$viite',
-							tyojono			= '$tyojono',
-							tyostatus		= '$tyostatus',
-							prioriteetti	= '$prioriteetti',
-							jalleenmyyja 	= '$jalleenmyyja',
-							tehdas			= '$tehdas',
-							tyoaika			= '$tyoaika',
-							vikakoodi		= '$vikakoodi',
-							takuunumero		= '$takuunumero',
-							tyokoodi		= '$tyokoodi',
-							hyvaksy			= '$hyvaksy',
-							otunnus 		= '$kukarow[kesken]'";
+				} else {
+					$query2 .= "tyomaarays SET
+								yhtio			= '$kukarow[yhtio]',
+								kotipuh 		= '$kotipuh',
+								tyopuh 			= '$tyopuh',
+								myyjaliike 		= '$myyjaliike',
+								ostopvm 		= '$ostopvmvv-$ostopvmkk-$ostopvmpp',
+								rekno 			= '$rekno',
+								mittarilukema 	= '$mittarilukema',
+								merkki 			= '$merkki',
+								mallivari 		= '$mallivari',
+								valmnro 		= '$valmnro',
+								tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
+								luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',
+								komm1 			= '$komm1',
+								komm2 			= '$komm2',
+								suorittaja 		= '$suorittaja',
+								viite	 		= '$viite',
+								tyojono			= '$tyojono',
+								tyostatus		= '$tyostatus',
+								prioriteetti	= '$prioriteetti',
+								jalleenmyyja 	= '$jalleenmyyja',
+								tehdas			= '$tehdas',
+								tyoaika			= '$tyoaika',
+								vikakoodi		= '$vikakoodi',
+								takuunumero		= '$takuunumero',
+								tyokoodi		= '$tyokoodi',
+								hyvaksy			= '$hyvaksy',
+								otunnus 		= '$kukarow[kesken]'";
+				}	
 				$query2 .= $postquery2;
 				$result = pupe_query($query2);
 			}

@@ -1105,6 +1105,7 @@ if ($tila == '') {
 	$kenhak_array[] = 'rivihinta';
 	$kenhak_array[] = 'alerivihinta';
 	#$kenhak_array[] = 'kuluhinta';
+	$kenhak_array[] = 'alvale';
 	$kenhak_array[] = 'toimaika';
 	$kenhak_array[] = 'kommentti';
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kenhak_array[] = 'laskunro';
@@ -1157,7 +1158,7 @@ if ($tila == '') {
 
 	$jarjestys = "";
 
-	if (strlen($ojarj) > 0 AND strlen(trim($kenhak_array[$ojarj])) > 0) {
+	if (strlen($ojarj) > 0) {
 		$jarjestys = $kenhak_array[$ojarj].", ";
 	}
 

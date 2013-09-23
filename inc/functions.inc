@@ -388,6 +388,9 @@ if (!function_exists("pupesoft_rest")) {
 		if (isset($parameters["posttype"]) and $parameters["posttype"] == "array") {
 			$post_data = $parameters["data"];
 		}
+		elseif (isset($parameters["posttype"]) and $parameters["posttype"] == "xml") {
+			$post_data = $parameters["data"][0];
+		}
 		else {
 			$post_data = json_encode($parameters["data"]);
 		}
@@ -410,7 +413,7 @@ if (!function_exists("pupesoft_rest")) {
 		}
 
 		$response_json = curl_exec($handle);
-		$response = json_decode($response_json, true);
+		$response = $parameters["posttype"] == "xml" ? $response_json : json_decode($response_json, true);
 
 		$code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
 

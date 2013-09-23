@@ -1,8 +1,10 @@
 <?php
 
-	$riviok = 0;
-	$saako_hyvaksya = 0;
-	$varaosavirhe = "";
+	$riviok 			= 0;
+	$saako_hyvaksya 	= 0;
+	$varaosavirhe 		= "";
+	$vastaavattuotteet	= 0;
+	$vastaavat_html		= "";
 
 	$sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc") ? true : false;
 
@@ -284,6 +286,8 @@
 					$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_suppliernumber' value='{$tuotteen_toimittaja_row['selitetark_5']}' />";
 					$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tuotteen_toimittaja_row['tt_tunnus']}' />";
 			 	}
+
+				$tehtaan_saldon_font = $tuotteen_toimittaja_row['tehdas_saldo'] < 1 ? "error" : "ok";
 
 			 	$vastaavat_table .= "<font class='{$tehtaan_saldon_font}'>".sprintf("%.2f", $tuotteen_toimittaja_row['tehdas_saldo'])."</font></td>";
 				$vastaavat_table .= "<td class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_tehdas_saldo_paivitetty' align='right'>".tv1dateconv($tuotteen_toimittaja_row['tehdas_saldo_paivitetty'], "PITKA")."</td>";

@@ -101,7 +101,7 @@
 		$asiakasvalintachk  = "CHECKED";
 	}
 
-	if (!isset($kustapvalinta) or $kustapvalinta == 'tuote') {
+	if ($kustapvalinta == 'tuote') {
 		$kustapvalinta_tuote  	= "CHECKED";
 	}
 	else {

@@ -1096,34 +1096,25 @@
 
 							list($V_hinta, $V_netto, $V_ale, $V_alehinta_alv, $V_alehinta_val) = alehinta($laskurow, $tvrow, $row['tilkpl'], '', '', '');
 
-<<<<<<< HEAD
-							$vastaavat_table .= "<tr class='aktiivi'>";
+							$myytavissa_font = $vmyytavissa < 1 ? "error" : "ok";
 
-							$vastaavat_table .= "<td>";
+							$vastaavat_table .= "<tr class='back aktiivi'>"
+							 			."<td>";
 
-							if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {
-								$vastaavat_table .= "<a href='{$palvelin2}$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($_tuote["tuoteno"])."&toim_kutsu=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>";
-							}
+				 			if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {
+				 				$vastaavat_table .= "<a href='{$palvelin2}$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($_tuote["tuoteno"])."&toim_kutsu=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>";
+				 			}
 
-							$vastaavat_table .= "{$_tuote["tuoteno"]} $vaihtoehtoinen";
+							$vastaavat_table .= $_tuote["tuoteno"];
 
 							if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {
 								$vastaavat_table .= "</a>";
 							}
 
-							$vastaavat_table .= "</td>";
-							$vastaavat_table .= "<td>{$tvrow["nimitys"]}</td>"
-							 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
-=======
-							$myytavissa_font = $vmyytavissa < 1 ? "error" : "ok";
-
-							$vastaavat_table .= "<tr class='back aktiivi'>"
-							 			."<td>{$_tuote["tuoteno"]} $vaihtoehtoinen</td>"
+							$vastaavat_table .= " $vaihtoehtoinen</td>"
 										."<td>{$tvrow["nimitys"]}</td>"
 							 			."<td align='right'><font class='{$myytavissa_font}'>".sprintf("%.2f", $vmyytavissa)."</font></td>"
->>>>>>> master
 							 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>";
-
 
 							if ($sahkoinen_tilausliitanta AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
 

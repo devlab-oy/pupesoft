@@ -278,10 +278,10 @@
 			 	// Ostopuolella toimipaikan tunnus tallennetaan vanhatunnus-kenttään
 			 	if ($tuotteen_toimittaja_row['selitetark_2'] != "") {
 		 			$vastaavat_table .= "<div class='availability {$_tuote['vastaavat_tunnus']}_{$_tilattu}_availability' /> <span class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_loading'></span></div>&nbsp;";
-			 		$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_custid' value='{$tehdas_saldo_row['selitetark_2']}' />";
-				 	$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_username' value='{$tehdas_saldo_row['selitetark_3']}' />";
-					$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_password' value='{$tehdas_saldo_row['selitetark_4']}' />";
-					$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_suppliernumber' value='{$tehdas_saldo_row['selitetark_5']}' />";
+			 		$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_custid' value='{$tuotteen_toimittaja_row['selitetark_2']}' />";
+				 	$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_username' value='{$tuotteen_toimittaja_row['selitetark_3']}' />";
+					$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_password' value='{$tuotteen_toimittaja_row['selitetark_4']}' />";
+					$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_suppliernumber' value='{$tuotteen_toimittaja_row['selitetark_5']}' />";
 					$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tuotteen_toimittaja_row['tt_tunnus']}' />";
 			 	}
 

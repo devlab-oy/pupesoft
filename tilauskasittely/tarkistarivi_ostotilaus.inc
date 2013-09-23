@@ -309,7 +309,7 @@
 
 			$vastaavat_table .= "<td align='left'>";
 
-			if ($prow['tuoteno'] != $_tuote['tuoteno']) {
+			if (strtoupper($prow['tuoteno']) != strtoupper($_tuote['tuoteno'])) {
 				$vastaavat_table .= "<form method='post' name='jalkitoimita'>
 							<input type='hidden' name='toim' 			value = '$toim'>
 							<input type='hidden' name='lopetus' 		value = '$lopetus'>

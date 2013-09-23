@@ -1133,7 +1133,7 @@
 						 		$_tilattu = (int) $row['tilkpl'];
 					 			$_tuote['toim_tuoteno'] = $tehdas_saldo_row['toim_tuoteno'];
 
-								$vastaavat_table .= "<td align='right'>$query ";
+								$vastaavat_table .= "<td align='right'>";
 
 								if ($tehdas_saldo_row['selitetark_2'] != "") {
 					 				$vastaavat_table .= "<div class='availability {$_tuote['vastaavat_tunnus']}_{$_tilattu}_availability' /><span class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_loading'></span></div>&nbsp;";

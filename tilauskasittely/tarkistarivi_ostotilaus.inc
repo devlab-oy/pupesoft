@@ -265,6 +265,8 @@
 
 			list(, , $tuotteen_toimittaja_row['saldo_myytavissa']) = saldo_myytavissa($_tuote['tuoteno'], '', '', '', '', '', '', '', '', '');
 
+			$saldo_myytavissa_font = $tuotteen_toimittaja_row['saldo_myytavissa'] < 1 ? "error" : "ok";
+
 			$vastaavat_table .= "<tr class='aktiivi back'>"
 					."<td><a href='../tuote.php?tee=Z&tuoteno=".urlencode($_tuote['tuoteno'])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>{$_tuote["tuoteno"]} $vaihtoehtoinen</a></td>"
 					."<td>{$tuotteen_toimittaja_row['toim_tuoteno']}</td>"
@@ -272,7 +274,7 @@
 					."<td>{$tuotteen_toimittaja_row['toimittajan_nimi']}</td>"
 					."<td>".sprintf("%.2f", $tuotteen_toimittaja_row['ostohinta'])."</td>"
 					."<td>".sprintf("%.2f", $tuotteen_toimittaja_row['myyntihinta'])."</td>"
-					."<td align='right'>".$tuotteen_toimittaja_row['saldo_myytavissa']."</td>";
+					."<td align='right'><font class='{$saldo_myytavissa_font}'>".$tuotteen_toimittaja_row['saldo_myytavissa']."</font></td>";
 
 		 	$vastaavat_table .= "<td align='right' nowrap>";
 

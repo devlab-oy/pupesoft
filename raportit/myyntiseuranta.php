@@ -1452,6 +1452,10 @@
 				if ($kateprossat != "") {
 					$katelisanyt = " 0 kateprosnyt, ";
 					$katelisaed  = " 0 kateprosed, ";
+
+					if (!empty($kumulatiivinen_valittu)) {
+						$katelisanyt .= " 0 kateproskumul, ";
+					}
 				}
 				else {
 					$katelisanyt = "";
@@ -1461,6 +1465,10 @@
 				if ($nettokateprossat != "") {
 					$nettokatelisanyt = " 0 nettokateprosnyt, ";
 					$nettokatelisaed  = " 0 nettokateprosed, ";
+
+					if (!empty($kumulatiivinen_valittu)) {
+						$nettokatelisanyt .= " 0 nettokateproskumul, ";
+					}
 				}
 				else {
 					$nettokatelisanyt = "";
@@ -1677,6 +1685,10 @@
 							if ($ajotapa == 'tilausjaauki') {
 								$query .= " sum(if(lasku.luontiaika >= '{$kumulatiivinen_alkupaiva} 00:00:00' and lasku.luontiaika <= '{$kumulatiivinen_loppupaiva} 23:59:59' and tilausrivi.uusiotunnus=0, tilausrivi.hinta / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)) +
 											sum(if(tilausrivi.laskutettuaika >= '$kumulatiivinen_alkupaiva' and tilausrivi.laskutettuaika <= '$kumulatiivinen_loppupaiva', tilausrivi.rivihinta, 0)) myyntikumulyht, ";
+							}
+
+							if ($piilota_kappaleet == "") {
+								$query .= " sum(if(tilausrivi.laskutettuaika >= '{$kumulatiivinen_alkupaiva}' and tilausrivi.laskutettuaika <= '{$kumulatiivinen_loppupaiva}', tilausrivi.kpl,0)) 'kplkumul', ";
 							}
 						}
 
@@ -2674,6 +2686,21 @@
 										}
 									}
 
+									//kateprossa
+									if ($ken_nimi == 'kateproskumul') {
+										if ($row["myyntikumul"] != 0) {
+											$row[$ken_nimi] = round($row["katekumul"] / abs($row["myyntikumul"]) * 100, 2);
+										}
+										else {
+											if ($ajotapa == "tilausauki" and $row["myyntilaskuttamattakumul"] != 0) {
+												$row[$ken_nimi] = round($row["katelaskuttamattakumul"] / abs($row["myyntikumul"]) * 100, 2);
+											}
+											else {
+												$row[$ken_nimi] = 0;
+											}
+										}
+									}
+
 									// nettokateprossa
 									if ($ken_nimi == "nettokateprosnyt") {
 										if ($row["myyntinyt"] != 0) {
@@ -2696,6 +2723,21 @@
 										}
 										else {
 											$row[$ken_nimi] = 0;
+										}
+									}
+
+									//nettokateprossa
+									if ($ken_nimi == "nettokateproskumul") {
+										if ($row["myyntikumul"] != 0) {
+											$row[$ken_nimi] = round($row["nettokatekumul"] / abs($row["myyntikumul"]) * 100, 2);
+										}
+										else {
+											if ($ajotapa == "tilausauki" and $row["myyntilaskuttamattakumul"] != 0) {
+												$row[$ken_nimi] = round($row["nettokatelaskuttamattakumul"] / abs($row["myyntilaskuttamattakumul"]) * 100, 2);
+											}
+											else {
+												$row[$ken_nimi] = 0;
+											}
 										}
 									}
 

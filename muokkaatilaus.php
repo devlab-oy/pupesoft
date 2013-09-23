@@ -591,6 +591,11 @@
 			echo "<input type='hidden' name='asiakastiedot' value='$asiakastiedot'>";
 			echo "<input type='hidden' name='limit' value='$limit'>";
 			echo "<font class='head'>".t("Etsi")." $otsikko<hr></font>";
+
+			echo "<table>";
+			echo "<tr>";
+			echo "<th>";
+
 			if ($toim == "YLLAPITO") {
 				echo t("Syötä tilausnumeron, asiakkaan tilausnumeron, nimen, laatijan tai sopimuksen lisätiedon osa");
 			}
@@ -600,8 +605,39 @@
 			else {
 				echo t("Syötä tilausnumeron, nimen tai laatijan osa");
 			}
-			echo "<input type='text' name='etsi'>";
-			echo "<input type='Submit' value = '".t("Etsi")."'>";
+			echo "</th>";
+			echo "<td><input type='text' name='etsi'></td>";
+			echo "<td class='back'><input type='Submit' value = '".t("Etsi")."'></td>";
+			echo "</tr>";
+
+			if ($toim == 'KESKEN' or $toim == 'SUPER' or $toim == 'OSTO' or $toim == 'OSTOSUPER') {
+
+				$query = "	SELECT *
+							FROM yhtion_toimipaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'";
+				$toimipaikkares = pupe_query($query);
+
+				if (mysql_num_rows($toimipaikkares) > 0)  {
+
+					echo "<tr>";
+
+					echo "<th>",t("Toimipaikka"),"</th>";
+
+					echo "<td><select name='toimipaikka' onchange='submit();'>";
+					echo "<option value=''>",t("Valitse"),"</option>";
+
+					while ($toimipaikkarow = mysql_fetch_assoc($toimipaikkares)) {
+						$sel = (isset($toimipaikka) and $toimipaikka == $toimipaikkarow['tunnus']) ? ' selected' : '';
+						echo "<option value='{$toimipaikkarow['tunnus']}'{$sel}>{$toimipaikkarow['nimi']}</option>";
+					}
+
+					echo "</select></td><td class='back'>&nbsp;</td></tr>";
+				}
+
+			}
+
+			echo "</table>";
+
 			echo "</form>";
 			echo "<br>";
 
@@ -642,6 +678,18 @@
 			if ($etsi != "" and $haku != "" and ($toim == '' or $toim == 'SUPER' or $toim == 'KESKEN' or $toim == 'HYPER' or $toim == 'TOSI_KESKEN' or $toim == 'ODOTTAA_SUORITUSTA')) {
 				$haku = substr($haku, 0, -2); // Poistetaan vika sulku $hausta
 				$haku .= " or (lasku.asiakkaan_tilausnumero like '%$etsi%' and lasku.asiakkaan_tilausnumero != '')) ";
+			}
+
+			if (isset($toimipaikka) and $toimipaikka != "") {
+
+				$toimipaikka = (int) $toimipaikka;
+
+				if ($toim == 'KESKEN' or $toim == 'SUPER') {
+					$haku .= " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
+				}
+				elseif ($toim == 'OSTO' or $toim == 'OSTOSUPER') {
+					$haku .= " and lasku.vanhatunnus = '{$toimipaikka}' ";
+				}
 			}
 
 			if (!empty($mt_order)) {

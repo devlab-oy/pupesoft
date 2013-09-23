@@ -32,7 +32,7 @@ if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot')
 		require("inc/sahkoinen_tilausliitanta.inc");
 	}
 
-	if (!isset($data)) $data = array('id' => 0, 'error' => true, 'error_msg' => t("Haku ei onnistunut! Ole yhteydessä IT-tukeen"));
+	if (!isset($data)) $data = array('id' => 0, 'error' => true, 'error_msg' => utf8_encode(t("Haku ei onnistunut! Ole yhteydessä IT-tukeen")));
 
 	echo json_encode($data);
 	exit;
@@ -6282,10 +6282,13 @@ if ($tee == '') {
 								<input type='Submit' value='".t("Muokkaa")."'>
 								</form> ";
 
+						$poista_onclick = "";
+
 						if ($row['vanha_otunnus'] != $tilausnumero) {
 							//kyseessä JT-rivi tai JT-muiden mukana, joka tulee asiakkaan edellisiltä tilauksilta. Näille riveille halutaan poista nappiin alertti
 							$poista_onclick = "onclick='return nappi_onclick_confirm(\"".t('Olet poistamassa automaattisesti lisätyn jälkitoimitusrivin oletko varma')."?\");'";
 						}
+
 						echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='poista'>
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='lopetus' 		value = '$lopetus'>

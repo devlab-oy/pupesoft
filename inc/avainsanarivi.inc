@@ -535,7 +535,8 @@
 		$query = "  SELECT nimi, tunnus
 					FROM toimi
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND sahkoinen_tilausliitanta = 'F'";
+					AND tyyppi != 'P'
+					AND oletus_vienti IN ('C', 'F', 'J', 'K', 'I', 'L')";
 		$toimi_chk_res = pupe_query($query);
 
 		if (mysql_num_rows($toimi_chk_res) > 0) {

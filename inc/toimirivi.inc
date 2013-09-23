@@ -601,18 +601,3 @@
 
 		$jatko = 0;
 	}
-
-	if (mysql_field_name($result, $i) == "sahkoinen_tilausliitanta") {
-
-		if (@file_exists("inc/sahkoinen_tilausliitanta.inc")) {
-
-			$hae = "option";
-
-			require("inc/sahkoinen_tilausliitanta.inc");
-		}
-		else {
-			$tyyppi = 0;
-		}
-
-		$jatko = 0;
-	}

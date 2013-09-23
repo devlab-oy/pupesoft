@@ -1094,11 +1094,6 @@
 
 							list($V_hinta, $V_netto, $V_ale, $V_alehinta_alv, $V_alehinta_val) = alehinta($laskurow, $tvrow, $row['tilkpl'], '', '', '');
 
-							if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {
-								echo "<td $class valign='top'><a href='{$palvelin2}$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($row["tuoteno"])."&toim_kutsu=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>$row[tuoteno]</a>";
-							}
-
-
 							$vastaavat_table .= "<tr class='aktiivi'>";
 
 							$vastaavat_table .= "<td>";

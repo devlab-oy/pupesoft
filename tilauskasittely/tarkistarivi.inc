@@ -1123,6 +1123,7 @@
 											tt.liitostunnus,
 											tt.toim_tuoteno,
 											tt.tunnus AS tt_tunnus,
+											toimi.nimi AS toimittajan_nimi,
 											avainsana.selitetark_2,
 											avainsana.selitetark_3,
 											avainsana.selitetark_4,
@@ -1143,6 +1144,8 @@
 
 						 		$_tilattu = (int) $row['tilkpl'];
 					 			$_tuote['toim_tuoteno'] = $tehdas_saldo_row['toim_tuoteno'];
+
+					 			$vastaavat_table .= "<td>{$tehdas_saldo_row['toimittajan_nimi']}</td>";
 
 								$vastaavat_table .= "<td align='right'>";
 
@@ -1203,7 +1206,7 @@
 						$vastaavat_html .= "<tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
 
 						if ($sahkoinen_tilausliitanta and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
-							$vastaavat_html .= "<th>".t("Toimittajan saldo")."</th><th>".t("Toimittajan saldo päivitetty")."</th>";
+							$vastaavat_html .= "<th>".t("Toimittaja")."</th><th>".t("Toimittajan saldo")."</th><th>".t("Toimittajan saldo päivitetty")."</th>";
 							$vastaavat_html .= "<th>".t("Tarkista toimittajan saldo")."</th>";
 						}
 

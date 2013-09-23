@@ -340,10 +340,10 @@
 				<th>".t("Ostohinta")."</th>
 				<th>".t("Hinta")."</th>
 				<th>".t("Saldo myytävissä")."</th>
-				<th>".t("Tehtaan saldo")."</th>
-				<th>".t("Tehtaan saldo päivitetty")."</th>";
+				<th>".t("Toimittajan saldo")."</th>
+				<th>".t("Toimittajan saldo päivitetty")."</th>";
 
-			if ($sahkoinen_tilausliitanta) $vastaavat_html .= "<th>".t("Tarkista tehtaan saldo")."</th>";
+			if ($sahkoinen_tilausliitanta) $vastaavat_html .= "<th>".t("Tarkista toimittajan saldo")."</th>";
 
 			$vastaavat_html .= "<th></th></tr>$vastaavat_table";
 			$vastaavattuotteet = 1;

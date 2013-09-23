@@ -1203,8 +1203,8 @@
 						$vastaavat_html .= "<tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
 
 						if ($sahkoinen_tilausliitanta and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
-							$vastaavat_html .= "<th>".t("Tehtaan saldo")."</th><th>".t("Tehtaan saldo päivitetty")."</th>";
-							$vastaavat_html .= "<th>".t("Tarkista tehtaan saldo")."</th>";
+							$vastaavat_html .= "<th>".t("Toimittajan saldo")."</th><th>".t("Toimittajan saldo päivitetty")."</th>";
+							$vastaavat_html .= "<th>".t("Tarkista toimittajan saldo")."</th>";
 						}
 
 						$vastaavat_html .= "<th>";

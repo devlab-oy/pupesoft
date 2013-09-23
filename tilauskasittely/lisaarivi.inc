@@ -1571,6 +1571,13 @@
 									$kommentti .= t("Rekisterinumero")." $rekisterinumero";
 								}
 
+								if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
+									$var2 = $var == 'P' ? '' : 'OK';
+								}
+								else {
+									$var2 = '';
+								}
+
 								$query = "	INSERT into tilausrivi set
 											hyllyalue 		= '$myy_hyllyalue[$indeksi]',
 											hyllynro 		= '$myy_hyllynro[$indeksi]',
@@ -1597,6 +1604,7 @@
 											toimaika 		= '$toimaika',
 											kommentti 		= '$kommentti',
 											var 			= '',
+											var2			= '{$var2}',
 											try				= '$trow[try]',
 											osasto			= '$trow[osasto]',
 											perheid			= '$perheid',
@@ -2623,6 +2631,10 @@
 
 			$var2 = !isset($var2) ? '' : $var2;
 
+			if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
+				$var2 = $var == 'P' ? '' : 'OK';
+			}
+
 			// lis‰t‰‰n puuterivi
 			$query = "	INSERT into tilausrivi set
 						hyllyalue 		= '$p_hyllyalue',
@@ -2664,7 +2676,7 @@
 				$query .= ", kerattyaika = now()";
 			}
 
-			if ($yhtiorow['reklamaation_hinnoittelu'] == 'K' and ($toim == "REKLAMAATIO"  or $toim == "EXTRANET_REKLAMAATIO") and $hyvityssaannon_palautuskielto == "X") {
+			if ($var2 == '' and $yhtiorow['reklamaation_hinnoittelu'] == 'K' and ($toim == "REKLAMAATIO"  or $toim == "EXTRANET_REKLAMAATIO") and $hyvityssaannon_palautuskielto == "X") {
 				$query .= ", var2 = 'PK'";
 			}
 

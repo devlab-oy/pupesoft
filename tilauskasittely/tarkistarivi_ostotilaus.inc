@@ -261,7 +261,7 @@
 				list(, , $tuotteen_toimittaja_row['saldo_myytavissa']) = saldo_myytavissa($_tuote['tuoteno'], '', '', '', '', '', '', '', '', '');
 
 				$vastaavat_table .= "<tr class='aktiivi'>"
-						."<td>{$_tuote["tuoteno"]} $vaihtoehtoinen</td>"
+						."<td><a href='../tuote.php?tee=Z&tuoteno=".urlencode($_tuote['tuoteno'])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>{$_tuote["tuoteno"]} $vaihtoehtoinen</a></td>"
 						."<td>{$tuotteen_toimittaja_row['toim_tuoteno']}</td>"
 						."<td>{$tvrow["nimitys"]}</td>"
 						."<td>{$tuotteen_toimittaja_row['toimittajan_nimi']}</td>"

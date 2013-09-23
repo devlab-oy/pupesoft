@@ -58,17 +58,19 @@
 
 				$lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
 
-				if ($lisatyt_rivit[0] > 0) {
-					$valmistettavat .= ",".$lisatyt_rivit[0];
+				if (count($lisatyt_rivit) > 0) $valmistettavat .= ",".implode(",", $lisatyt_rivit);
 
-					$query = "	UPDATE tilausrivi
-								SET toimitettu	= '$kukarow[kuka]',
-								toimitettuaika	= now(),
-								keratty			= '$kukarow[kuka]',
-								kerattyaika		= now()
-								WHERE yhtio	= '$kukarow[yhtio]'
-								and tunnus	= '$lisatyt_rivit[0]'";
-					$result = pupe_query($query);
+				if ($toim == "KORJAA") {
+					if ($lisatyt_rivit[0] > 0) {
+						$query = "	UPDATE tilausrivi
+									SET toimitettu	= '$kukarow[kuka]',
+									toimitettuaika	= now(),
+									keratty			= '$kukarow[kuka]',
+									kerattyaika		= now()
+									WHERE yhtio	= '$kukarow[yhtio]'
+									and tunnus	= '$lisatyt_rivit[0]'";
+						$result = pupe_query($query);
+					}
 				}
 			}
 			else {
@@ -529,7 +531,7 @@
 
 										$apuapuapua1 =  (int) $saldot_valm[$perherow["tuoteno"]] * 100;
 										$apuapuapua2 =  (int) $varataankpl * 100;
-										
+
 										// katotaan kanssa, että perheenjäsenet löytyy kannasta ja niitä on riittävästi (jos reseptissä on useampi valmiste, niin summataan $varataankpl $saldot_valm-muuttujaan kun loopataan toista tat kolmatta valmistetta)
 										if ((!isset($vakisinhyvaksy) or $vakisinhyvaksy == '') and (($tilrivirow['perheid2'] != -100 and $apuapuapua1 < $apuapuapua2) or ($tilrivirow['perheid2'] == -100 and ($apuapuapua1 + $apuapuapua2) < $apuapuapua2))) {
 											echo "<font class='error'>".t("Saldo")." ".$saldot[$perherow["tuoteno"]]." ".t("ei riitä")."! ".t("Tuotetta")." $perherow[tuoteno] ".t("kulutetaan")." $varataankpl ".t_avainsana("Y", $kieli, "and avainsana.selite='$perherow[yksikko]'", "", "", "selite").".</font><br>";
@@ -1317,7 +1319,9 @@
 				}
 
 				if ($prow["tunnus"] == $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
-					echo "<td valign='top' class='$class' align='center'><input type='text' name='valmkpllat[$prow[tunnus]]' value='".$valmkpllat2[$prow["tunnus"]]."' size='5'></td><td class='back'>".$virhe[$prow["tunnus"]]."</td>";
+					echo "<td valign='top' class='$class' align='center'><input type='text' name='valmkpllat[$prow[tunnus]]' value='".$valmkpllat2[$prow["tunnus"]]."' size='5'></td><td class='back'>".$virhe[$prow["tunnus"]];
+					echo "<br><a href='$PHP_SELF?toim=$toim&tee=SYOTARIVI&valmistettavat=$valmistettavat&perheid=$prow[perheid]&otunnus=$prow[otunnus]'>".t("Lisää raaka-aine")."</a>";
+					echo  "</td>";
 				}
 				elseif ($prow["tunnus"] != $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
 					echo "<td valign='top' align='center'>".t("Usea valmiste")."</td>";
@@ -1404,7 +1408,6 @@
 				echo "</tr>";
 
 				$vanhaid = $prow["perheid"];
-
 			}
 
 			echo "<tr><td colspan='9' class='back'><br></td></tr>";

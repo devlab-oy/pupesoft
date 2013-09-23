@@ -199,7 +199,6 @@ if (isset($submit) and trim($submit) != '') {
 				if (mysql_num_rows($oma_paikka) == 0) {
 
 					if (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
-						$tilausmaara = 0;
 						$_viesti = 'Hyllysiirroissa';
 					}
 					else {

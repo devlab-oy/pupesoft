@@ -196,6 +196,19 @@ if(!function_exists("avainsanatarkista")) {
 			$tem_selitetark_3 = trim($t[$i]);
 		}
 
+		if ($tem_laji == "SAHKTILTUN" and
+		   (mysql_field_name($result, $i) == "selite" or
+			mysql_field_name($result, $i) == "selitetark" or
+			mysql_field_name($result, $i) == "selitetark_2" or
+			mysql_field_name($result, $i) == "selitetark_3" or
+			mysql_field_name($result, $i) == "selitetark_4" or
+			mysql_field_name($result, $i) == "selitetark_5")) {
+
+			if (trim($t[$i]) == "") {
+				$virhe[$i] = t("Tieto pakollinen")."!";
+			}
+		}
+
 		if (mysql_field_name($result, $i) == 'tunnus') {
 
 			$query = "	SELECT kieli, selite, laji

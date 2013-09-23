@@ -6,9 +6,37 @@ if (isset($_REQUEST['tulosta_maksusopimus']) and is_numeric(trim($_REQUEST['tulo
 	$ohje = 'off';
 }
 
+if (isset($_REQUEST['ajax_toiminto']) and trim($_REQUEST['ajax_toiminto']) == 'tarkista_tehtaan_saldot') {
+	$nayta_pdf = 1;
+	$ohje = 'off';
+}
+
 if (@include("../inc/parametrit.inc"));
 elseif (@include("parametrit.inc"));
 else exit;
+
+if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot') {
+
+	if (@file_exists("../inc/sahkoinen_tilausliitanta.inc")) {
+
+		$hae = 'tarkista_tehtaan_saldot';
+		$tunnus = (int) $id;
+		$otunnus = (int) $otunnus;
+		$tuoteno = $tuoteno;
+		$myytavissa = (int) $myytavissa;
+		$cust_id = $cust_id;
+		$username = $username;
+		$password = $password;
+		$tt_tunnus = (int) $tt_tunnus;
+
+		require("inc/sahkoinen_tilausliitanta.inc");
+	}
+
+	if (!isset($data)) $data = array('id' => 0, 'error' => true, 'error_msg' => utf8_encode(t("Haku ei onnistunut! Ole yhteydessä IT-tukeen")));
+
+	echo json_encode($data);
+	exit;
+}
 
 if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
 	livesearch_sarjanumerohaku();
@@ -138,6 +166,7 @@ if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 }
 
 if ($kukarow["extranet"] == "") {
+	echo "<script src='../js/tilaus.js'></script>";
 	echo "<script src='../js/tilaus_myynti/tilaus_myynti.js'></script>";
 }
 
@@ -6254,10 +6283,13 @@ if ($tee == '') {
 								<input type='Submit' value='".t("Muokkaa")."'>
 								</form> ";
 
+						$poista_onclick = "";
+
 						if ($row['vanha_otunnus'] != $tilausnumero) {
 							//kyseessä JT-rivi tai JT-muiden mukana, joka tulee asiakkaan edellisiltä tilauksilta. Näille riveille halutaan poista nappiin alertti
 							$poista_onclick = "onclick='return nappi_onclick_confirm(\"".t('Olet poistamassa automaattisesti lisätyn jälkitoimitusrivin oletko varma')."?\");'";
 						}
+
 						echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='poista'>
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='lopetus' 		value = '$lopetus'>

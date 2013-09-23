@@ -198,7 +198,8 @@
 
 				if ($toiminto == 'paivita_ja_poista') {
 					$query = "	UPDATE tuotteen_toimittajat SET
-								tehdas_saldo = '0'
+								tehdas_saldo = '0',
+								tehdas_saldo_paivitetty = now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND toimittaja = '$tuotteen_toimittaja'";
 					$update_saldo_result = mysql_query($query) or pupe_error($query);
@@ -207,7 +208,8 @@
 				foreach ($tuote as $index => $tuoteno) {
 
 					$query = "	UPDATE tuotteen_toimittajat SET
-								tehdas_saldo = '$saldo[$index]'
+								tehdas_saldo = '{$saldo[$index]}',
+								tehdas_saldo_paivitetty = now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND toimittaja = '$tuotteen_toimittaja'
 								AND $tuotenumeron_sijainti_pupessa = '$tuoteno'";

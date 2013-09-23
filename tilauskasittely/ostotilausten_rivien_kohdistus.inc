@@ -1157,7 +1157,7 @@ if ($tila == '') {
 
 	$jarjestys = "";
 
-	if (strlen($ojarj) > 0) {
+	if (strlen($ojarj) > 0 AND strlen(trim($kenhak_array[$ojarj])) > 0) {
 		$jarjestys = $kenhak_array[$ojarj].", ";
 	}
 

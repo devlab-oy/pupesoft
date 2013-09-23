@@ -8,6 +8,8 @@
 	$varaosavirhe 			= "";
 	$vastaavat_html			= "";
 
+	$sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc");
+
 	$tquery	= "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 	$tres	= pupe_query($tquery);
 	$trow 	= mysql_fetch_assoc($tres); // haetaan tuotteen tiedot..
@@ -1088,48 +1090,97 @@
 						$vaihtoehtoinen = ($_tuote['vaihtoehtoinen'] == 'K') ? "<font color=#F00>".t("Vaihtoehtoinen, tarkista sopivuus")."!</font>" : "";
 						list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"]);
 
-						if (($vmyytavissa > 0 or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') and strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"])) {
+						if ((($vmyytavissa > 0 or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') and strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"])) or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
 
 							$tvrow = hae_tuote($_tuote['tuoteno']);
 
 							list($V_hinta, $V_netto, $V_ale, $V_alehinta_alv, $V_alehinta_val) = alehinta($laskurow, $tvrow, $row['tilkpl'], '', '', '');
 
-							 $vastaavat_table .= "<tr class='aktiivi'>"
+							$myytavissa_font = $vmyytavissa < 1 ? "error" : "ok";
+
+							$vastaavat_table .= "<tr class='back aktiivi'>"
 							 			."<td>{$_tuote["tuoteno"]} $vaihtoehtoinen</td>"
 										."<td>{$tvrow["nimitys"]}</td>"
-							 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
+							 			."<td align='right'><font class='{$myytavissa_font}'>".sprintf("%.2f", $vmyytavissa)."</font></td>"
 							 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>";
 
 
-								if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
+							if ($sahkoinen_tilausliitanta AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
 
-									$query = "  SELECT tehdas_saldo, IF(jarjestys = 0, 9999, jarjestys) jarjestys
-												FROM tuotteen_toimittajat
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tuoteno = '{$vrow['tuoteno']}'
-												ORDER BY jarjestys
-												LIMIT 1";
-									$tehdas_saldo_res = pupe_query($query);
-									$tehdas_saldo_row = mysql_fetch_assoc($tehdas_saldo_res);
+								$query = "	SELECT tt.tehdas_saldo,
+											tt.tehdas_saldo_paivitetty,
+											tt.liitostunnus,
+											tt.toim_tuoteno,
+											tt.tunnus AS tt_tunnus,
+											avainsana.selitetark_2,
+											avainsana.selitetark_3,
+											avainsana.selitetark_4,
+											avainsana.selitetark_5,
+											if(tt.jarjestys = 0, 9999, tt.jarjestys) sorttauskentta
+											FROM tuotteen_toimittajat AS tt
+											JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
+											LEFT JOIN avainsana ON (toimi.yhtio = avainsana.yhtio AND avainsana.laji = 'SAHKTILTUN' AND avainsana.selite = '{$laskurow['yhtio_toimipaikka']}' AND toimi.tunnus = avainsana.selitetark)
+											WHERE tt.yhtio = '{$kukarow['yhtio']}'
+											AND tt.tuoteno = '{$_tuote['tuoteno']}'
+											ORDER BY sorttauskentta
+											LIMIT 1";
+								$tehdas_saldo_res = pupe_query($query);
+								$tehdas_saldo_row = mysql_fetch_assoc($tehdas_saldo_res);
 
-									$vastaavat_table .= "<td align='right'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</td>";
+							 	$tuotteen_toimittajan_tunnus = $tehdas_saldo_row['liitostunnus'];
+							 	$tehtaan_saldon_font = $tehdas_saldo_row['tehdas_saldo'] < 1 ? "error" : "ok";
+
+						 		$_tilattu = (int) $row['tilkpl'];
+					 			$_tuote['toim_tuoteno'] = $tehdas_saldo_row['toim_tuoteno'];
+
+								$vastaavat_table .= "<td align='right'>";
+
+								if ($tehdas_saldo_row['selitetark_2'] != "") {
+					 				$vastaavat_table .= "<div class='availability {$_tuote['vastaavat_tunnus']}_{$_tilattu}_availability' /><span class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_loading'></span></div>&nbsp;";
+						 			$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_custid' value='{$tehdas_saldo_row['selitetark_2']}' />";
+							 		$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_username' value='{$tehdas_saldo_row['selitetark_3']}' />";
+									$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_password' value='{$tehdas_saldo_row['selitetark_4']}' />";
+									$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_suppliernumber' value='{$tehdas_saldo_row['selitetark_5']}' />";
+									$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tehdas_saldo_row['tt_tunnus']}' />";
+							 	}
+
+							 	$vastaavat_table .= "<font class='{$tehtaan_saldon_font}'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</font></td>";
+								$vastaavat_table .= "<td class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_tehdas_saldo_paivitetty' align='right'>".tv1dateconv($tehdas_saldo_row['tehdas_saldo_paivitetty'], "PITKA")."</td>";
+
+								$vastaavat_table .= "<td>";
+
+								if ($tehdas_saldo_row['selitetark_2'] != "") {
+									$hae = 'nappi';
+									$rivitunnus = $row['tunnus'];
+									$_vastaavat_tunnus = $_tuote['vastaavat_tunnus'];
+									$_vastaavat_tuoteno = $_tuote['toim_tuoteno'];
+
+									require("inc/sahkoinen_tilausliitanta.inc");
 								}
 
-							 	$vastaavat_table .= "<td align='left'>
-											<form method='post' name='jalkitoimita'>
-							 			   	<input type='hidden' name='toim' 			value = '$toim'>
-							 			   	<input type='hidden' name='lopetus' 		value = '$lopetus'>
-							 			   	<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
-							 			   	<input type='hidden' name='projektilla' 	value = '$projektilla'>
-							 			   	<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
-							 			   	<input type='hidden' name='mista' 			value = '$mista'>
-							 			   	<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
-							 			   	<input type='hidden' name='vastaavatuoteno' value = '$_tuote[tuoteno]'>
-							 			   	<input type='hidden' name='menutila' 		value = '$menutila'>
-							 			   	<input type='hidden' name='tila' 			value = 'MUUTA'>
-							 			   	<input type='hidden' name='tapa' 			value = 'MYYVASTAAVA'>
-							 			   	<input type='Submit' value='".t("Tilaa tuote")."'>
-							 			   	</form></td></tr>";
+								$vastaavat_table .= "</td>";
+							}
+
+							$vastaavat_table .= "<td align='left'>";
+
+							if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] != 'A' or (strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"]))) {
+								$vastaavat_table .= "<form method='post' name='jalkitoimita'>
+								 			   	<input type='hidden' name='toim' 			value = '$toim'>
+								 			   	<input type='hidden' name='lopetus' 		value = '$lopetus'>
+								 			   	<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+								 			   	<input type='hidden' name='projektilla' 	value = '$projektilla'>
+								 			   	<input type='hidden' id='tilausnumero' name='tilausnumero' 	value = '$tilausnumero'>
+								 			   	<input type='hidden' name='mista' 			value = '$mista'>
+								 			   	<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+								 			   	<input type='hidden' name='vastaavatuoteno' value = '$_tuote[tuoteno]'>
+								 			   	<input type='hidden' name='menutila' 		value = '$menutila'>
+								 			   	<input type='hidden' name='tila' 			value = 'MUUTA'>
+								 			   	<input type='hidden' name='tapa' 			value = 'MYYVASTAAVA'>
+								 			   	<input type='Submit' value='".t("Tilaa tuote")."'>
+								 			   	</form>";
+							}
+
+							$vastaavat_table .= "</td></tr>";
 						}
 					}
 
@@ -1139,7 +1190,12 @@
 						}
 
 						$vastaavat_html .= "<tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
-						if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') $vastaavat_html .= "<th>".t("Tehtaan saldo")."</th>";
+
+						if ($sahkoinen_tilausliitanta and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+							$vastaavat_html .= "<th>".t("Tehtaan saldo")."</th><th>".t("Tehtaan saldo päivitetty")."</th>";
+							$vastaavat_html .= "<th>".t("Tarkista tehtaan saldo")."</th>";
+						}
+
 						$vastaavat_html .= "<th>";
 
 						if ($vastaavattuotteet == 0) {
@@ -1159,7 +1215,9 @@
 												</form>";
 						}
 
-						$vastaavat_html .= "</th></tr>$vastaavat_table";
+						$vastaavat_html .= "</th>";
+
+						$vastaavat_html .= "</tr>$vastaavat_table";
 						$vastaavattuotteet = 1;
 					}
 				}

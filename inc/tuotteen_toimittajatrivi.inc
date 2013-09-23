@@ -122,4 +122,20 @@
 		$jatko = 0;
 	}
 
-?>
+	if (mysql_field_name($result, $i) == "tehdas_saldo_paivitetty") {
+
+		$ulos = "<td>";
+
+		if (isset($trow[$i])) {
+			$ulos .= tv1dateconv($trow[$i], "PITKA");
+		}
+
+		$ulos .= "&nbsp;";
+		$ulos .= "<input type='hidden' name='{$nimi}' value='{$trow[$i]}' />";
+		$ulos .= "<input type='hidden' name='paivita_tehdas_saldo_paivitetty[]' value='default' />";
+		$ulos .= "<span style='float: right;'>".t("Päivitä")." <input type='checkbox' name='paivita_tehdas_saldo_paivitetty[]' /></span>";
+
+		$ulos .= "</td>";
+
+		$jatko = 0;
+	}

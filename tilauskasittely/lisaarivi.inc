@@ -1564,6 +1564,13 @@
 
 								$query_erikoisale_lisa = trim($lis_netto) != 'N' ? " erikoisale = '{$laskurow['erikoisale']}', " : '';
 
+								if (isset($rekisterinumero) and trim($rekisterinumero) != "") {
+
+									if ($kommentti != "") $kommentti .= "\n";
+
+									$kommentti .= t("Rekisterinumero")." $rekisterinumero";
+								}
+
 								$query = "	INSERT into tilausrivi set
 											hyllyalue 		= '$myy_hyllyalue[$indeksi]',
 											hyllynro 		= '$myy_hyllynro[$indeksi]',
@@ -2571,6 +2578,13 @@
 				}
 			}
 
+			if (isset($rekisterinumero) and trim($rekisterinumero) != "") {
+
+				if ($kommentti != "") $kommentti .= "\n";
+
+				$kommentti .= t("Rekisterinumero")." $rekisterinumero";
+			}
+
 			// jos meill‰ on vanha laadittuaikaa, niin k‰ytet‰‰ sit‰
 			if ($rivilaadittu != "" and $rivitunnus != 0) {
 				$vanharivilaadittu = "'$rivilaadittu'";
@@ -2732,6 +2746,7 @@
 				else {
 					$jarjestys = 0;
 				}
+
 				$query = "	INSERT INTO tilausrivin_lisatiedot
 							SET yhtio			= '$kukarow[yhtio]',
 							positio 			= '$trivtyrow[selite]',

@@ -3837,68 +3837,45 @@
 					$merkki = $merkki2;
 				}
 				
-				//Jos on PIKATILAUS, siell‰ ei ole kaikkia kentti‰, joten jos tyˆm‰‰r‰yst‰ muutetaan sit‰ kautta ei kaikkia voi p‰ivitt‰‰
-				if ($toim == "PIKATILAUS"){
-					$query2 .= "tyomaarays SET
-								yhtio			= '$kukarow[yhtio]',
-								kotipuh 		= '$kotipuh',
-								tyopuh 			= '$tyopuh',
-								myyjaliike 		= '$myyjaliike',
-								ostopvm 		= '$ostopvmvv-$ostopvmkk-$ostopvmpp',
-								rekno 			= '$rekno',
-								mittarilukema 	= '$mittarilukema',
-								merkki 			= '$merkki',
-								mallivari 		= '$mallivari',
-								valmnro 		= '$valmnro',
-								tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
-								luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',
-								komm1 			= '$komm1',
-								komm2 			= '$komm2',
-								suorittaja 		= '$suorittaja',
-								viite	 		= '$viite',
-								prioriteetti	= '$prioriteetti',
-								jalleenmyyja 	= '$jalleenmyyja',
-								tehdas			= '$tehdas',
-								tyoaika			= '$tyoaika',
-								vikakoodi		= '$vikakoodi',
-								takuunumero		= '$takuunumero',
-								tyokoodi		= '$tyokoodi',
-								hyvaksy			= '$hyvaksy',
-								otunnus 		= '$kukarow[kesken]'";
-
-				} else {
-					$query2 .= "tyomaarays SET
-								yhtio			= '$kukarow[yhtio]',
-								kotipuh 		= '$kotipuh',
-								tyopuh 			= '$tyopuh',
-								myyjaliike 		= '$myyjaliike',
-								ostopvm 		= '$ostopvmvv-$ostopvmkk-$ostopvmpp',
-								rekno 			= '$rekno',
-								mittarilukema 	= '$mittarilukema',
-								merkki 			= '$merkki',
-								mallivari 		= '$mallivari',
-								valmnro 		= '$valmnro',
-								tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
-								luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',
-								komm1 			= '$komm1',
-								komm2 			= '$komm2',
-								suorittaja 		= '$suorittaja',
-								viite	 		= '$viite',
-								tyojono			= '$tyojono',
-								tyostatus		= '$tyostatus',
-								prioriteetti	= '$prioriteetti',
-								jalleenmyyja 	= '$jalleenmyyja',
-								tehdas			= '$tehdas',
-								tyoaika			= '$tyoaika',
-								vikakoodi		= '$vikakoodi',
-								takuunumero		= '$takuunumero',
-								tyokoodi		= '$tyokoodi',
-								hyvaksy			= '$hyvaksy',
-								otunnus 		= '$kukarow[kesken]'";
-				}	
+				$query2 .= "tyomaarays SET
+							yhtio			= '$kukarow[yhtio]',
+							kotipuh 		= '$kotipuh',
+							tyopuh 			= '$tyopuh',
+							myyjaliike 		= '$myyjaliike',
+							ostopvm 		= '$ostopvmvv-$ostopvmkk-$ostopvmpp',
+							rekno 			= '$rekno',
+							mittarilukema 	= '$mittarilukema',
+							merkki 			= '$merkki',
+							mallivari 		= '$mallivari',
+							valmnro 		= '$valmnro',
+							tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
+							luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',
+							komm1 			= '$komm1',
+							komm2 			= '$komm2',
+							suorittaja 		= '$suorittaja',
+							viite	 		= '$viite',
+							prioriteetti	= '$prioriteetti',
+							jalleenmyyja 	= '$jalleenmyyja',
+							tehdas			= '$tehdas',
+							tyoaika			= '$tyoaika',
+							vikakoodi		= '$vikakoodi',
+							takuunumero		= '$takuunumero',
+							tyokoodi		= '$tyokoodi',
+							hyvaksy			= '$hyvaksy',
+							otunnus 		= '$kukarow[kesken]'";
+				
 				$query2 .= $postquery2;
 				$result = pupe_query($query2);
-			}
+				
+				//N‰m‰ kent‰t p‰ivitet‰‰n vain, jos p‰ivitet‰‰n sit‰ tyˆm‰‰r‰ykselt‰ tai muualta miss‰ nuo kaksi kentt‰‰ n‰kyy..
+				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
+					$query2 = "UPDATE	tyomaarays SET
+										tyojono			= '$tyojono',
+										tyostatus		= '$tyostatus'";
+					$query2 .= $postquery2;
+					$result = pupe_query($query2);
+				}	
+			}	
 
 			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "EXTTARJOUS", "ENNAKKO","EXTENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE", "WEBTILAUSTARJOUS","EXTRANET_REKLAMAATIO"))) {
 

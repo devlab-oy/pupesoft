@@ -23388,6 +23388,44 @@ if (!function_exists('laske_siirrettava_maara')) {
 	}
 }
 
+if (!function_exists('paivita_ohjausmerkki')) {
+	function paivita_ohjausmerkki($laskurow) {
+		global $kukarow;
+
+		$query = "	SELECT tarkenne
+					FROM asiakkaan_avainsanat
+					WHERE yhtio 	 = '{$kukarow['yhtio']}'
+					AND laji 		 = 'OHJAUSMERKKI'
+					AND liitostunnus = '{$laskurow['liitostunnus']}'
+					AND avainsana 	 = '{$laskurow['toimitustapa']}'";
+		$ohjausmerkki_check_res = pupe_query($query);
+		$ohjausmerkki_check_row = mysql_fetch_assoc($ohjausmerkki_check_res);
+
+		if ($ohjausmerkki_check_row['tarkenne'] != "") {
+
+			// Tarkistetaan löytyykö kyseinen ohjausmerkkiteksti otsikolta
+			// Ei haluta lisätä tekstiä kahteen kertaan
+			if (stripos($laskurow['ohjausmerkki'], $ohjausmerkki_check_row['tarkenne']) === FALSE) {
+
+				if ($laskurow['ohjausmerkki'] != "") {
+					$updlisa = " ohjausmerkki = CONCAT('{$ohjausmerkki_check_row['tarkenne']}', ' / ', ohjausmerkki)";
+					$laskurow['ohjausmerkki'] = "{$ohjausmerkki_check_row['tarkenne']} / {$laskurow['ohjausmerkki']}";
+				}
+				else {
+					$updlisa = " ohjausmerkki = '{$ohjausmerkki_check_row['tarkenne']}'";
+					$laskurow['ohjausmerkki'] = $ohjausmerkki_check_row['tarkenne'];
+				}
+
+				$query = "	UPDATE lasku SET
+							{$updlisa}
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus  = '{$laskurow['tunnus']}'";
+				$updres = pupe_query($query);
+			}
+		}
+	}
+}
+
 if (!function_exists("korvaavat_kiellot")) {
 	function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
 		global $kukarow;

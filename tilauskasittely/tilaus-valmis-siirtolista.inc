@@ -46,12 +46,6 @@
 		$laskurow['hyvak1'] = $kukarow["kuka"];
 	}
 
-	// Jos valmistuksien_kasittely == Valmistuksella voi olla vain yksi valmiste,
-	// niin loopataan valmistusrivit läpi ja luodaan jokaiselle riville oma otsikko
-	if (($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
-		splittaa_valmistukset($laskurow);
-	}
-
 	//otetaan varmuuden vuoksi alkuperäisen otsikon tunnus
 	$alkuplaskutunnus = $laskurow["tunnus"];
 
@@ -794,4 +788,12 @@
 				exit;
 			}
 		}
+	}
+
+	// Jos valmistuksien_kasittely == Valmistuksella voi olla vain yksi valmiste,
+	// niin loopataan valmistusrivit läpi ja luodaan jokaiselle riville oma otsikko
+	if (($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+		//haeetaan päivittyneet laskun tiedot
+		$laskurow = hae_lasku($laskurow['tunnus']);
+		splittaa_valmistukset($laskurow);
 	}

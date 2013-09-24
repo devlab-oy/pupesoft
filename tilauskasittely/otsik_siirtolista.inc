@@ -170,12 +170,11 @@
 
 			echo "</select></td></tr>";
 
-			if ($toim == "VALMISTAVARASTOON") {
+			$valmistuslinja_result = t_avainsana("VALMISTUSLINJA");
+			if ($toim == "VALMISTAVARASTOON" and mysql_num_rows($valmistuslinja_result) > 0) {
 				echo "<tr>";
 				echo "<th>".t("Valmistuslinja").":</th>";
 				echo "<td colspan='3'>";
-
-				$valmistuslinja_result = t_avainsana("VALMISTUSLINJA");
 
 				echo "<select name='valmistuslinja'>";
 				echo "<option value = ''>".t("Ei valmistuslinjaa")."</option>";

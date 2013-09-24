@@ -1480,21 +1480,23 @@
 				echo "</td>";
 				echo "</tr>";
 
-				echo "<tr>";
-				echo "<th>".t('Valmistuslinja')."</th>";
-				echo "<td>";
-				echo "<select name='valmistuslinja'>";
-				echo "<option value='' >".t('Ei valintaa')."</option>";
-				foreach ($valmistuslinjat as $_valmistuslinja) {
-					$sel = "";
-					if ($_valmistuslinja['selite'] == $valmistuslinja) {
-						$sel = "SELECTED";
+				if (!empty($valmistuslinjat)) {
+					echo "<tr>";
+					echo "<th>".t('Valmistuslinja')."</th>";
+					echo "<td>";
+					echo "<select name='valmistuslinja'>";
+					echo "<option value='' >".t('Ei valintaa')."</option>";
+					foreach ($valmistuslinjat as $_valmistuslinja) {
+						$sel = "";
+						if ($_valmistuslinja['selite'] == $valmistuslinja) {
+							$sel = "SELECTED";
+						}
+						echo "<option value='{$_valmistuslinja['selite']}' {$sel}>{$_valmistuslinja['selitetark']}</option>";
 					}
-					echo "<option value='{$_valmistuslinja['selite']}' {$sel}>{$_valmistuslinja['selitetark']}</option>";
+					echo "</select>";
+					echo "</td>";
+					echo "</tr>";
 				}
-				echo "</select>";
-				echo "</td>";
-				echo "</tr>";
 
 				echo "<tr>";
 				echo "<th>".t('Valmistenumero')."</th>";

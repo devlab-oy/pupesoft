@@ -173,9 +173,7 @@ function valmistuksen_kesto($valmistus) {
 function hae_valmistuslinjat() {
 	global $kukarow;
 
-	// Haetaan valmistuslinjat avainsanoista
-	$query = "SELECT * FROM avainsana WHERE yhtio='{$kukarow['yhtio']}' AND laji='valmistuslinja' ORDER BY selite";
-	$result = pupe_query($query);
+	$result = t_avainsana("VALMISTUSLINJA");
 
 	$valmistuslinjat = array();
 

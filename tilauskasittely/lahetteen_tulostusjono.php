@@ -640,6 +640,7 @@
 		$haku = '';
 
 		if (is_numeric($karajaus) and $karajaus != 0) {
+			$valid = true;
 			$haku .= " and lasku.kerayspvm<=date_add(now(), INTERVAL $karajaus day)";
 		}
 		else {
@@ -831,64 +832,75 @@
 
 		echo "</select>";
 		echo "</td>";
-		echo "<th>".t('Tuotenonumero')."</th>";
+		echo "<th>".t('Tuotenumero')."</th>";
 		echo "<td>";
 		echo "<input type='text' name='tuoteno' value='{$tuoteno}' />";
 		echo "</td>";
 		echo "</tr>";
 
-		echo "<tr>";
-		echo "<th>".t('Valmistuslinja')."</th>";
-		echo "<td>";
+		$valmistuslinjat = array();
+		
+		if (!empty($valmistuslinjat)) {
+			echo "<tr>";
+			echo "<th>".t('Valmistuslinja')."</th>";
+			echo "<td>";
 
-		echo "<select name='valmistuslinja'>";
-		echo "<option value='' >".t('Ei valintaa')."</option>";
-		foreach ($valmistuslinjat as $_valmistuslinja) {
-			$sel = "";
-			if ($_valmistuslinja['selite'] == $valmistuslinja) {
-				$sel = "SELECTED";
+			echo "<select name='valmistuslinja'>";
+			echo "<option value='' >".t('Ei valintaa')."</option>";
+			foreach ($valmistuslinjat as $_valmistuslinja) {
+				$sel = "";
+				if ($_valmistuslinja['selite'] == $valmistuslinja) {
+					$sel = "SELECTED";
+				}
+				echo "<option value='{$_valmistuslinja['selite']}' {$sel}>{$_valmistuslinja['selitetark']}</option>";
 			}
-			echo "<option value='{$_valmistuslinja['selite']}' {$sel}>{$_valmistuslinja['selitetark']}</option>";
+			echo "</select>";
+
+			echo "</td>";
+
+			echo "<th></th>";
+			echo "<td>";
+			echo "</td>";
+			echo "</tr>";
 		}
-		echo "</select>";
-
-		echo "</td>";
-
-		echo "<th></th>";
-		echo "<td>";
-		echo "</td>";
-		echo "</tr>";
+		
 
 		$sel=array();
 		$sel[$karajaus] = "selected";
 
 		echo "<tr><th>".t("Keräysaikarajaus:")."</th>";
 		echo "<td>";
-		echo "<select name='karajaus' onchange='submit()'>
-					<option value='0'   $sel[0]>".t("Ei valintaa")."</option>
-					<option value='1'  $sel[1]>".t("Huominen")."</option>
+		echo "<select name='karajaus' onchange='submit()'>";
+		if (!empty($valmistuslinjat)) {
+			echo "<option value='0'   $sel[0]>".t("Ei valintaa")."</option>";
+		}
+		echo "		<option value='1'  $sel[1]>".t("Huominen")."</option>
 					<option value='3'  $sel[3]>".t("Seuraavat 3 päivää")."</option>
 					<option value='5'  $sel[5]>".t("Seuraavat 5 päivää")."</option>
 					<option value='7'  $sel[7]>".t("Seuraava viikko")."</option>
 					<option value='14' $sel[14]>".t("Seuraavat 2 viikkoa")."</option>
 					<option value='KK' $sel[KK]>".t("Näytä kaikki")."</option>
 				</select>";
-		echo "<br/>";
-		echo "<br/>";
-		echo t('TAI');
-		echo "<br/>";
-		echo "<br/>";
-		echo t("Syötä alkupäivämäärä")." (pp-kk-vvvv)";
-		echo "<br/>";
-		echo "	<input type='text' name='ppa' value='{$ppa}' size='3'>
-				<input type='text' name='kka' value='{$kka}' size='3'>
-				<input type='text' name='vva' value='{$vva}' size='5'>";
-		echo "<br/>";
-		echo t("Syötä loppupäivämäärä")." (pp-kk-vvvv)";
-		echo "<br/>";
-		echo "	<input type='text' name='ppl' value='{$ppl}' size='3'>
-				<input type='text' name='kkl' value='{$kkl}' size='3'>
-				<input type='text' name='vvl' value='{$vvl}' size='5'>";
+
+		if (!empty($valmistuslinjat)) {
+			echo "<br/>";
+			echo "<br/>";
+			echo t('TAI');
+			echo "<br/>";
+			echo "<br/>";
+			echo t("Syötä alkupäivämäärä")." (pp-kk-vvvv)";
+			echo "<br/>";
+			echo "	<input type='text' name='ppa' value='{$ppa}' size='3'>
+					<input type='text' name='kka' value='{$kka}' size='3'>
+					<input type='text' name='vva' value='{$vva}' size='5'>";
+			echo "<br/>";
+			echo t("Syötä loppupäivämäärä")." (pp-kk-vvvv)";
+			echo "<br/>";
+			echo "	<input type='text' name='ppl' value='{$ppl}' size='3'>
+					<input type='text' name='kkl' value='{$kkl}' size='3'>
+					<input type='text' name='vvl' value='{$vvl}' size='5'>";
+		}
+		
 		echo "</td>";
 		echo "<th>".t("Etsi tilausta").":</th><td><input type='text' name='etsi'>";
 		echo "<input type='Submit' value='".t("Etsi")."'></td></tr>";

@@ -544,6 +544,14 @@
 		$ulos .= "<option value='editilaus_out_elma.inc' {$sel['editilaus_out_elma']}>".t("Elma-editilaus")."</option>";
 		$ulos .= "<option value='editilaus_out_xml.inc' {$sel['editilaus_out_xml']}>".t("Xml-ostotilaus")."</option>";
 		$ulos .= "<option value='editilaus_out_futur.inc' {$sel['editilaus_out_futur']}>".t("Futur-ostotilaus")."</option>";
+
+		if (@file_exists("sahkoinen_tilausliitanta.inc")) {
+
+			$hae = "option_edi_kuvaus";
+
+			require("inc/sahkoinen_tilausliitanta.inc");
+		}
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

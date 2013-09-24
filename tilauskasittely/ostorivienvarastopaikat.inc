@@ -199,14 +199,17 @@ if ($tee == "valmis") {
 								$kaytosq = pupe_query($query);
 								$kaytossa = (mysql_num_rows($kaytosq) == 0 ? 0 : 1);								
 								
-								$query = "	SELECT tunnus 
-											FROM varaston_hyllypaikat
-											WHERE yhtio		= '$kukarow[yhtio]'
-											AND hyllyalue	= '".$t1[$tilausrivirow["tunnus"]]."'
-											AND hyllynro	= '".$t2[$tilausrivirow["tunnus"]]."'
-											AND hyllyvali	= '".$t3[$tilausrivirow["tunnus"]]."'
-											AND hyllytaso 	= '".$t4[$tilausrivirow["tunnus"]]."'";
-								$hyllyp = pupe_query($query);
+								//katotaan onko varaston hyllypaikoissa toi paikka vaan, jos ne on käytössä
+								if ($kaytossa == 1) {
+									$query = "	SELECT tunnus 
+												FROM varaston_hyllypaikat
+												WHERE yhtio		= '$kukarow[yhtio]'
+												AND hyllyalue	= '".$t1[$tilausrivirow["tunnus"]]."'
+												AND hyllynro	= '".$t2[$tilausrivirow["tunnus"]]."'
+												AND hyllyvali	= '".$t3[$tilausrivirow["tunnus"]]."'
+												AND hyllytaso 	= '".$t4[$tilausrivirow["tunnus"]]."'";
+									$hyllyp = pupe_query($query);
+								}
 								
 								if (mysql_num_rows($hyllyp) != 0 OR $kaytossa == 0){
 

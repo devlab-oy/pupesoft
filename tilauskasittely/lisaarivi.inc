@@ -531,7 +531,7 @@
 		if ($lisaarivi_debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
 
 		// Etsit‰‰n korvaavia tuotteita
-		if ($tuoteno != "" and $trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L') {
+		if ($tuoteno != "" and $trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L' and $tapa != "MYYVASTAAVA") {
 			$korvaavat_kiellot 	= ""; // Korvaavia tuotteita myyd‰‰n, vastaavia ei
 			$krkaikkimyytavissa	= 0;
 
@@ -1976,7 +1976,7 @@
 			$var = $puu_var[$i];
 
 			// Korvaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K") {
+			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and $tapa != "MYYVASTAAVA") {
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
 				$paatuote  = $korvaavat->paatuote();
@@ -1992,7 +1992,7 @@
 				}
 			}
 			// Vastaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V") {
+			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and $tapa != "MYYVASTAAVA") {
 				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun p‰‰tuote
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
@@ -2024,7 +2024,7 @@
 									$kommentti .= " ".t("HUOM: Korvaa tuotteen")." $tuoteno";
 								}
 								else {
-									$kommentti .= $korlisakommi[$_tuote['tuoteno']];
+									$kommentti .= " ".$korlisakommi[$_tuote['tuoteno']];
 								}
 
 								$tuoteno = $_tuote['tuoteno'];

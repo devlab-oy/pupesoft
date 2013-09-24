@@ -3611,7 +3611,7 @@
 
 		$sel = array();
 		$sel['K'] = $trow[$i] == 'K' ? 'selected' : '';
-		
+
 		$ulos .= "<option value = ''>".t("Ostotilauksella ei tarkisteta toimittajien saldoja")."</option>";
 		$ulos .= "<option value = 'K' {$sel['K']}>".t("Ostotilauksella tarkistetaan toimittajien saldoja")."</option>";
 		$ulos .= "</select></td>";
@@ -3626,7 +3626,7 @@
 
 		$ulos .= "<option value = ''>".t("Vastaavat tuotteet näytetään normaalisti")."</option>";
 		$ulos .= "<option value = 'S' {$sel['S']}>".t("Vastaavat tuotteet näytetään vaikka saldo on nolla. Näytetään myös toimittajan tehtaan saldo.")."</option>";
-		$ulos .= "<option value = 'A' {$sel['A']}>".t("Vastaavat tuotteet näytetään aina. Näytetään myös toimittajan tehtaan saldo.")."</option>";
+		$ulos .= "<option value = 'A' {$sel['A']}>".t("Vastaavat tuotteet näytetään aina, jos rivi on puute. Näytetään myös toimittajan tehtaan saldo.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

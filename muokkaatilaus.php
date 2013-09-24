@@ -690,12 +690,15 @@
 				$haku .= " or (lasku.asiakkaan_tilausnumero like '%$etsi%' and lasku.asiakkaan_tilausnumero != '')) ";
 			}
 
+			$sumhaku = '';
+
 			if (isset($toimipaikka) and $toimipaikka != "") {
 
 				$toimipaikka = (int) $toimipaikka;
 
 				if ($toim == 'KESKEN' or $toim == 'SUPER') {
 					$haku .= " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
+					$sumhaku = " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
 				}
 				elseif ($toim == 'OSTO' or $toim == 'OSTOSUPER') {
 					$haku .= " and lasku.vanhatunnus = '{$toimipaikka}' ";
@@ -882,7 +885,11 @@
 								count(distinct lasku.tunnus) kpl
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X' and lasku.clearing != 'EXTENNAKKO'";
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.tila IN ('L', 'N')
+								AND lasku.alatila != 'X'
+								AND lasku.clearing != 'EXTENNAKKO'
+								{$sumhaku}";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -1579,10 +1586,11 @@
 								count(distinct lasku.tunnus) kpl
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-								WHERE lasku.yhtio = '$kukarow[yhtio]'
-								and lasku.tila = 'N'
-								and lasku.alatila in ('A','','T','U','G')
-								and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')";
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.tila = 'N'
+								AND lasku.alatila IN ('A','','T','U','G')
+								AND lasku.clearing NOT IN ('EXTENNAKKO','EXTTARJOUS')
+								{$sumhaku}";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}

@@ -46,9 +46,13 @@
 
 			if ($toimirow['edi_kuvaus'] == 'sendorder_out_futur') {
 				$luo = 'sendorder';
+
+				require("inc/sahkoinen_tilausliitanta.inc");
+			}
+			else {
+				require($toimirow['edi_kuvaus']);
 			}
 
-			require($toimirow['edi_kuvaus']);
 			$tee = '';
 		}
 	}

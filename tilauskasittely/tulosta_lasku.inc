@@ -356,7 +356,7 @@ if (!function_exists('alku')) {
 			$komm .= t("AVL 8c §", $kieli).":###".wordwrap(str_replace("\n","\n###", t_avainsana("KAANTALVVIESTI", $kieli, "", "", "", "selitetark")), 90, "\n###")."\n";
 		}
 
-		if (trim($laskurow['tilausyhteyshenkilo']) != '' and $laskutyyppi != 18) {
+		if (trim($laskurow['tilausyhteyshenkilo']) != '') {
 			$komm .= "\n".t("Tilaaja", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
 		}
 

@@ -260,32 +260,20 @@ function hyvaksy_ennakko($parametrit) {
 	global $kukarow, $yhtiorow;
 	
 	$valittu_tarjous_tunnus = $parametrit['valittu_tarjous_tunnus'];
+	$toim = $parametrit['toim'];
 	$kukarow['kesken'] = $valittu_tarjous_tunnus;
 	$onnistuiko_toiminto = paivita_ennakko($parametrit);
 
 	// Vaihdetaan tila/alatila Ennakko/Lep‰‰m‰ss‰
 	if ($onnistuiko_toiminto) {
-		$query = "	UPDATE lasku
-					SET tila='E',
-					alatila='A'
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$valittu_tarjous_tunnus}'";
-		pupe_query($query);
-		
+
 		$laskurow = hae_extranet_tarjous($valittu_tarjous_tunnus, $toim);
 
 		require_once('tilaus-valmis.inc');
 
 		$kukarow['kesken'] = '';
 		$valittu_tarjous_tunnus = '';
-		// Tyhj‰t‰‰n kesken kannasta ettei pupen puolella huudella turhaan aktiivisesta k‰ytt‰j‰st‰ vaikka asiakas ei en‰‰ p‰‰se extranetiss‰ k‰siksi hyv‰ksyttyyn ennakkoon
-		$query = "	UPDATE kuka
-					SET kesken = 0
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND kuka = '{$kukarow['kuka']}'
-					AND extranet != ''";
-		pupe_query($query);
-		
+
 		return true;
 	}
 	else {

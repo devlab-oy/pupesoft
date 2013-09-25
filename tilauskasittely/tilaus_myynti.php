@@ -1,6 +1,5 @@
 <?php
 
-
 if (isset($_REQUEST['tulosta_maksusopimus']) and is_numeric(trim($_REQUEST['tulosta_maksusopimus']))) {
 	$nayta_pdf = 1;
 	$ohje = 'off';
@@ -1444,8 +1443,12 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 			//	P‰ivite‰‰n aina myˆs projektin aktiiviseksi jos se on ollut kesken
 			$query = "	UPDATE lasku SET
-							alatila = 'A'
-						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnusnippu]' and tunnusnippu > 0 and tila = 'R' and alatila= ''";
+						alatila = 'A'
+						WHERE yhtio     = '$kukarow[yhtio]'
+						and tunnusnippu = '$laskurow[tunnusnippu]'
+						and tunnusnippu > 0
+						and tila        = 'R'
+						and alatila     = ''";
 			$updres = pupe_query($query);
 
 			//	Hyp‰t‰‰n takaisin otsikolle

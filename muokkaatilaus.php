@@ -654,6 +654,7 @@
 			if ($toim != 'VALMISTUS') {
 				echo "<td>";
 				echo "<input type='text' name='etsi'>";
+				echo "</td>";
 			}
 
 			if ($toim == 'KESKEN' or $toim == 'SUPER' or $toim == 'OSTO' or $toim == 'OSTOSUPER') {

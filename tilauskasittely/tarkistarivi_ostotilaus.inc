@@ -47,7 +47,7 @@
 		$riviok++;
 	}
 
-	if (!empty($toimittajarow['tehdas_saldo_tarkistus']) and $trow['tehdas_saldo'] < $prow['varattukpl']) {
+	if (!empty($toimittajarow['tehdas_saldo_tarkistus']) and isset($trow['tehdas_saldo']) and $trow['tehdas_saldo'] < $prow['varattukpl']) {
 		$prow["kommentti"] .= "<br>".t("HUOM: Toimittajan tehtaan saldo on")." {$trow['tehdas_saldo']}.<br>";
 	}
 

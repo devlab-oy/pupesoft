@@ -262,7 +262,6 @@ function hyvaksy_ennakko($parametrit) {
 	$valittu_tarjous_tunnus = $parametrit['valittu_tarjous_tunnus'];
 	$kukarow['kesken'] = $valittu_tarjous_tunnus;
 	$onnistuiko_toiminto = paivita_ennakko($parametrit);
-	$laskurow = hae_extranet_tarjous($valittu_tarjous_tunnus);
 
 	// Vaihdetaan tila/alatila Ennakko/Lep‰‰m‰ss‰
 	if ($onnistuiko_toiminto) {
@@ -272,6 +271,8 @@ function hyvaksy_ennakko($parametrit) {
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$valittu_tarjous_tunnus}'";
 		pupe_query($query);
+		
+		$laskurow = hae_extranet_tarjous($valittu_tarjous_tunnus, $toim);
 
 		require_once('tilaus-valmis.inc');
 
@@ -424,7 +425,7 @@ function hylkaa($valittu_tarjous_tunnus) {
 	global $kukarow, $yhtiorow;
 
 	$kukarow['kesken'] = $valittu_tarjous_tunnus;
-	$laskurow = hae_extranet_tarjous($valittu_tarjous_tunnus);
+	$laskurow = hae_extranet_tarjous($valittu_tarjous_tunnus, $toim);
 
 	$query = "	UPDATE lasku
 				SET alatila = 'X'
@@ -528,6 +529,7 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 
 	$tarjous = hae_tarjous($valittu_tarjous_tunnus);
 	$kukarow['kesken'] = $valittu_tarjous_tunnus;
+	$laskurow = hae_extranet_tarjous($valittu_tarjous_tunnus, $toim);
 
 	if ($toim == "EXTENNAKKO") {
 		echo "<br>

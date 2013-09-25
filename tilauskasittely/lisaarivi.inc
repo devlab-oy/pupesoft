@@ -1571,13 +1571,12 @@
 									$kommentti .= t("Rekisterinumero")." $rekisterinumero";
 								}
 
+								$var2 = '';
+
 								if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
 									$var2 = $var == 'P' ? '' : 'OK';
 								}
-								else {
-									$var2 = '';
-								}
-								
+
 								if ($yhtiorow['reklamaation_hinnoittelu'] == 'K' and ($toim == "REKLAMAATIO"  or $toim == "EXTRANET_REKLAMAATIO") and $hyvityssaannon_palautuskielto == "X") {
 									$var2 = 'PK';
 								}

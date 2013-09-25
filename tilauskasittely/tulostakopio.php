@@ -916,6 +916,7 @@
 		// Etsitään muutettavaa tilausta
 		$query = "  SELECT distinct
 					lasku.tunnus,
+					lasku.vanhatunnus,
 					if (lasku.laskunro=0, '', lasku.laskunro) laskunro,
 					lasku.ytunnus,
 					lasku.nimi,
@@ -1045,6 +1046,14 @@
 
 				if ($row['tila'] != "U") {
 					echo $row['tunnus'];
+				}
+				//laitetaan se tilausnumero, jolla haettiin, jos haettiin tilausnumerolla (tämä tärkeä jos laskulla useampi tilaus -> näytetään se sama jolla käyttäjä haki)
+				elseif ($otunnus != 0 AND isset($otunnus)) {
+					echo $otunnus;
+				}
+				//jos ei haettu tilausnumerolla laitetaan sen laskun vanhatunnus, kun se on sen tilauksen numero josta se luotiin (tai ainakin ekan niistä)
+				elseif ($row['vanhatunnus'] != 0 AND isset($row['vanhatunnus'])) {
+					echo $row['vanhatunnus'];
 				}
 
 				if ($row['tila'] == "U" and tarkista_oikeus("muutosite.php")) {

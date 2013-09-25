@@ -260,8 +260,9 @@ function hyvaksy_ennakko($parametrit) {
 	global $kukarow, $yhtiorow;
 	
 	$valittu_tarjous_tunnus = $parametrit['valittu_tarjous_tunnus'];
-	
+	$kukarow['kesken'] = $valittu_tarjous_tunnus;
 	$onnistuiko_toiminto = paivita_ennakko($parametrit);
+	$laskurow = hae_extranet_tarjous($valittu_tarjous_tunnus);
 
 	// Vaihdetaan tila/alatila Ennakko/Lepäämässä
 	if ($onnistuiko_toiminto) {
@@ -271,6 +272,9 @@ function hyvaksy_ennakko($parametrit) {
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$valittu_tarjous_tunnus}'";
 		pupe_query($query);
+
+		require_once('tilaus-valmis.inc');
+
 		$kukarow['kesken'] = '';
 		$valittu_tarjous_tunnus = '';
 		// Tyhjätään kesken kannasta ettei pupen puolella huudella turhaan aktiivisesta käyttäjästä vaikka asiakas ei enää pääse extranetissä käsiksi hyväksyttyyn ennakkoon
@@ -280,6 +284,7 @@ function hyvaksy_ennakko($parametrit) {
 					AND kuka = '{$kukarow['kuka']}'
 					AND extranet != ''";
 		pupe_query($query);
+		
 		return true;
 	}
 	else {
@@ -400,8 +405,7 @@ function paivita_ennakko($params) {
 								"kpl" => $value,
 								"toim" => $toim,
 								"syotettyhinta" => $loytynyt_tilausrivi[0]['hinta']);
-			echo "kisse ";
-			var_dump($parametrit);
+
 			lisaa_ennakkorivi($parametrit);
 		}
 	}
@@ -527,6 +531,12 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 
 	if ($toim == "EXTENNAKKO") {
 		echo "<br>
+			<form action='tuote_selaus_haku.php' method='post'>
+			<input type='hidden' name='toim_kutsu' value='$toim'>
+			<input type='hidden' name='tilausnumero' value='$valittu_tarjous_tunnus'>
+			<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
+			<input type='submit' value='".t("Selaa tuotteita")."'>
+			</form><br>
 			<form action='yhteensopivuus.php' method='post'>
 			<input type='hidden' name='toim' value='MP'>
 			<input type='hidden' name='toim_kutsu' value='$toim'>
@@ -816,8 +826,7 @@ function lisaa_ennakkorivi($params) {
 	$otunnus = $params['lasku_tunnus'];
 	$toim    = $params['toim'];
 	$var     = $params['var'];
-	echo "katinroikale: ";
-	var_dump($params);
+
 	$query = "	SELECT *
 				FROM tuote
 				WHERE yhtio = '{$kukarow['yhtio']}'

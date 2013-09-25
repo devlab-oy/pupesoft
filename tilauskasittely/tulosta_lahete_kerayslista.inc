@@ -410,6 +410,7 @@ if (!function_exists('alku_kerayslista')) {
 							JOIN tilausrivin_lisatiedot as tlt2 USE INDEX (tilausrivitunnus) ON (tlt2.yhtio = tilausrivi.yhtio AND tlt2.tilausrivitunnus = tilausrivi.tunnus)
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus IN ($tilausnumeroita)
+							AND tilausrivi.var NOT IN ('O')
 							AND tilausrivi.tyyppi != 'D'";
 				$query_result = pupe_query($query);
 				$isa_tilaus = mysql_fetch_assoc($query_result);
@@ -420,6 +421,7 @@ if (!function_exists('alku_kerayslista')) {
 								FROM tilausrivin_lisatiedot as tlt2
 								LEFT JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
 								WHERE tlt2.yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi.var NOT IN ('O')
 								AND tlt2.vanha_otunnus IN ({$isa_tilaus['alkuperaiset_tilaukset']})
 								GROUP BY tlt2.vanha_otunnus
 								ORDER BY toimituksia";
@@ -804,6 +806,7 @@ if (!function_exists('rivi_kerayslista')) {
 									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.otunnus in ($perherow[tunnukset])
 									AND tilausrivi.tyyppi != 'D'
+									AND tilausrivi.var NOT IN ('O')
 									and tilausrivi.perheid = '$row[perheid]'
 									ORDER BY tilausrivi.tunnus";
 						$perheresult = mysql_query($query) or pupe_error($query);

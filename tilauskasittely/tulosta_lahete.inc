@@ -96,7 +96,8 @@ if (!function_exists('alku_lahete')) {
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
 						and otunnus = '$laskurow[tunnus]'
-						AND tyyppi != 'D'";
+						AND tyyppi != 'D'
+						AND var NOT IN ('O')";
 			$keraresult = pupe_query($query);
 			$kerarow = mysql_fetch_assoc($keraresult);
 
@@ -248,6 +249,7 @@ if (!function_exists('alku_lahete')) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and otunnus IN ($laskurow[nippu])
 							AND tyyppi != 'D'
+							AND var NOT IN ('O')
 							and toimaika != '0000-00-00'";
 				$toimaikares = pupe_query($query);
 
@@ -728,6 +730,7 @@ if (!function_exists('uusi_sivu_lahete')) {
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
 						and otunnus = '$laskurow[tunnus]'
+						AND var NOT IN ('O')
 						AND tyyppi != 'D'";
 			$keraresult = pupe_query($query);
 			$kerarow = mysql_fetch_assoc($keraresult);
@@ -1364,6 +1367,7 @@ if (!function_exists('rivi_lahete')) {
 							and tuote.tuotetyyppi != 'R'
 							and tilausrivi.tyyppi != 'V'
 							AND tilausrivi.tyyppi != 'D'
+							and tilausrivi.var NOT IN ('O')
 							ORDER BY tilausrivi.tunnus";
 				$perheresult = pupe_query($query);
 
@@ -1469,6 +1473,7 @@ if (!function_exists('rivi_lahete')) {
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.otunnus in ($perherow[tunnukset])
 								AND tilausrivi.tyyppi != 'D'
+								and tilausrivi.var NOT IN ('O')
 								and tilausrivi.perheid = '$row[perheid]'";
 					$riresult = pupe_query($query);
 					$perherow = mysql_fetch_assoc($riresult);
@@ -3798,7 +3803,7 @@ if (!function_exists('alvierittely_lahete')) {
 		}
 		else {
 			if ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE) {
-				$tyyppilisa = " and tilausrivi.tyyppi in ('L','T') and tilausrivi.var != 'P' ";
+				$tyyppilisa = " and tilausrivi.tyyppi in ('L','T') and tilausrivi.var not in ('P','O') ";
 			}
 			elseif ($tyyppi == "TILAUSVAHVISTUS") {
 				$tyyppilisa = " and tilausrivi.tyyppi in ('L','T') and tilausrivi.var not in ('P','J','O') ";

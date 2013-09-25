@@ -139,6 +139,7 @@
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.var NOT IN ('O')
 					and $wherelisa
 					$tyyppilisa
 					and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
@@ -160,6 +161,7 @@
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.var NOT IN ('O')
 					and $wherelisa
 					$tyyppilisa
 					and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'

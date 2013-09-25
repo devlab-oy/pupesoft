@@ -38,11 +38,13 @@
 										FROM tilausrivi use index (uusiotunnus_index)
 										WHERE tilausrivi.yhtio = lasku.yhtio
 										AND tilausrivi.uusiotunnus = lasku.tunnus
+										AND tilausrivi.var NOT IN ('O')
 										AND tilausrivi.tyyppi != 'D'),
 									  ( SELECT group_concat(distinct alv SEPARATOR ' ')
 										FROM tilausrivi use index (yhtio_otunnus)
 										WHERE tilausrivi.yhtio = lasku.yhtio
 										AND tilausrivi.otunnus = lasku.tunnus
+										AND tilausrivi.var NOT IN ('O')
 										AND tilausrivi.tyyppi != 'D')) alv
 
 				FROM lasku
@@ -334,6 +336,7 @@
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					AND tilausrivi.otunnus = '$laskurow[tunnus]'
+					AND tilausrivi.var NOT IN ('O')
 					AND tilausrivi.tyyppi != 'D'";
 		$aikares = pupe_query($query);
 		$aikarow = mysql_fetch_assoc($aikares);
@@ -634,6 +637,7 @@
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 					WHERE $where
 					and tilausrivi.yhtio='$kukarow[yhtio]'
+					AND tilausrivi.var NOT IN ('O')
 					and tilausrivi.tyyppi in ('O' $deletedlisa)
 					ORDER BY $jarjestys";
 		$presult = pupe_query($query);
@@ -838,6 +842,7 @@
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE $where
 					and tilausrivi.yhtio='$kukarow[yhtio]'
+					AND tilausrivi.var NOT IN ('O')
 					$tyyppilisa
 					ORDER BY tilausrivi.otunnus, $sorttauslisa sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
 		$result = pupe_query($query);
@@ -1101,6 +1106,7 @@
 							FROM tilausrivi
 							JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							AND tilausrivi.var NOT IN ('O')
 							and $where
 							$pklisa
 							$tyyppilisa";
@@ -1443,6 +1449,7 @@
 										and sarjanumeroseuranta.kaytetty 	= '$sarjarow[kaytetty]'
 										and sarjanumeroseuranta.myyntirivitunnus > 0
 										and sarjanumeroseuranta.ostorivitunnus   > 0
+										AND tilausrivi.var NOT IN ('O')
 										ORDER BY sarjanumeroseuranta.tunnus
 										LIMIT 1";
 							$sarjares1 = pupe_query($query);
@@ -1521,6 +1528,7 @@
 									WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 									AND tilausrivi.tuoteno = '{$row["tuoteno"]}'
 									AND tilausrivi.tyyppi = 'O'
+									AND tilausrivi.var NOT IN ('O')
 									AND tilausrivi.varattu > 0";
 					$tilres = pupe_query($tilauksessa);
 					$tilrivi = mysql_fetch_assoc($tilres);
@@ -1641,6 +1649,7 @@
 							FROM tilausrivi
 							WHERE $where
 							and yhtio	= '$kukarow[yhtio]'
+							AND var NOT IN ('O')
 							$tyyppilisa
 							and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'
 							ORDER BY alv";
@@ -1660,6 +1669,7 @@
 								WHERE $where
 								and tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.alv = '$alvrow[alv]'
+								AND tilausrivi.var NOT IN ('O')
 								$tyyppilisa
 								and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'";
 				}
@@ -1672,6 +1682,7 @@
 								WHERE $where
 								and tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.alv = '$alvrow[alv]'
+								AND tilausrivi.var NOT IN ('O')
 								$tyyppilisa
 								and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'";
 				}
@@ -1715,6 +1726,7 @@
 								FROM tilausrivi
 								WHERE $where
 								and yhtio	= '$kukarow[yhtio]'
+								AND var NOT IN ('O')
 								$tyyppilisa
 								and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'
 								ORDER BY alv";
@@ -1732,6 +1744,7 @@
 									WHERE $where
 									and tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.alv = '$alvrow[alv]'
+									AND tilausrivi.var NOT IN ('O')
 									$tyyppilisa
 									and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
 					}
@@ -1744,6 +1757,7 @@
 									WHERE $where
 									and tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.alv = '$alvrow[alv]'
+									AND tilausrivi.var NOT IN ('O')
 									$tyyppilisa
 									and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
 					}

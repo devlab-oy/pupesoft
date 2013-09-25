@@ -85,7 +85,7 @@
 					and yhtio	 = '$kukarow[yhtio]'";
 	$result   = pupe_query($query);
 	$laskurow = mysql_fetch_assoc($result);
-
+	
 	if ($verkkokauppa == "") {
 		if (!isset($ostoskori)) {
 			$ostoskori = '';
@@ -117,12 +117,12 @@
 					<input type='submit' value='".t("Takaisin tilaukselle")."'>
 					</form><br><br>";
 		}
-		elseif ($kukarow["kuka"] != "" and $laskurow["tila"] != "" and $laskurow["tila"] != "K" and $toim_kutsu != "") {
+		elseif ($kukarow["kuka"] != "" and $laskurow["tila"] != "" and $laskurow["tila"] != "K" and $toim_kutsu != "" and $toim_kutsu != "EXTENNAKKO") {
 
 			if ($kukarow["extranet"] != "") {
 				if ($yhtiorow['reklamaation_kasittely'] == 'U' and $toim == 'EXTRANET_REKLAMAATIO') {
 					$toim_kutsu = "EXTRANET_REKLAMAATIO";
-				}
+				}					
 				else {
 					$toim_kutsu = "EXTRANET";
 				}
@@ -137,6 +137,16 @@
 					<input type='hidden' name='toim' value='$toim_kutsu'>
 					<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
 					<input type='hidden' name='tyojono' value='$tyojono'>
+					<input type='submit' value='".t("Takaisin tilaukselle")."'>
+					</form><br><br>";
+		}
+		elseif ($toim_kutsu == "EXTENNAKKO" and $kukarow["extranet"] != "") {
+			$kukarow['kesken'] = (isset($tilausnumero)) ? $kukarow['kesken'] = $tilausnumero : $kukarow['kesken'] = '';
+			echo "	<form method='post' action='extranet_tarjoukset_ja_ennakot.php'>
+					<input type='hidden' name='toim' value='$toim_kutsu'>
+					<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
+					<input type='hidden' name='valittu_tarjous_tunnus' value='$kukarow[kesken]'>
+					<input type='hidden' name='action' value='nayta_tarjous'>
 					<input type='submit' value='".t("Takaisin tilaukselle")."'>
 					</form><br><br>";
 		}

@@ -1099,11 +1099,22 @@
 							$myytavissa_font = $vmyytavissa < 1 ? "error" : "ok";
 
 							$vastaavat_table .= "<tr class='back aktiivi'>"
-							 			."<td>{$_tuote["tuoteno"]} $vaihtoehtoinen</td>"
+							 			."<td>";
+
+				 			if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {
+				 				$vastaavat_table .= "<a href='{$palvelin2}$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($_tuote["tuoteno"])."&toim_kutsu=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>";
+				 			}
+
+							$vastaavat_table .= $_tuote["tuoteno"];
+
+							if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {
+								$vastaavat_table .= "</a>";
+							}
+
+							$vastaavat_table .= " $vaihtoehtoinen</td>"
 										."<td>{$tvrow["nimitys"]}</td>"
 							 			."<td align='right'><font class='{$myytavissa_font}'>".sprintf("%.2f", $vmyytavissa)."</font></td>"
 							 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>";
-
 
 							if ($sahkoinen_tilausliitanta AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
 
@@ -1112,6 +1123,7 @@
 											tt.liitostunnus,
 											tt.toim_tuoteno,
 											tt.tunnus AS tt_tunnus,
+											toimi.nimi AS toimittajan_nimi,
 											avainsana.selitetark_2,
 											avainsana.selitetark_3,
 											avainsana.selitetark_4,
@@ -1132,6 +1144,8 @@
 
 						 		$_tilattu = (int) $row['tilkpl'];
 					 			$_tuote['toim_tuoteno'] = $tehdas_saldo_row['toim_tuoteno'];
+
+					 			$vastaavat_table .= "<td>{$tehdas_saldo_row['toimittajan_nimi']}</td>";
 
 								$vastaavat_table .= "<td align='right'>";
 
@@ -1192,8 +1206,8 @@
 						$vastaavat_html .= "<tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
 
 						if ($sahkoinen_tilausliitanta and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
-							$vastaavat_html .= "<th>".t("Tehtaan saldo")."</th><th>".t("Tehtaan saldo päivitetty")."</th>";
-							$vastaavat_html .= "<th>".t("Tarkista tehtaan saldo")."</th>";
+							$vastaavat_html .= "<th>".t("Toimittaja")."</th><th>".t("Toimittajan saldo")."</th><th>".t("Toimittajan saldo päivitetty")."</th>";
+							$vastaavat_html .= "<th>".t("Tarkista toimittajan saldo")."</th>";
 						}
 
 						$vastaavat_html .= "<th>";

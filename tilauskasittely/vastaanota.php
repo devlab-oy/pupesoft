@@ -166,6 +166,33 @@
 		}
 	}
 
+	if ($tee == 'paikat') {
+
+		foreach ($tunnus as $tun) {
+
+			$t1[$tun] = trim($t1[$tun]);
+			$t2[$tun] = trim($t2[$tun]);
+			$t3[$tun] = trim($t3[$tun]);
+			$t4[$tun] = trim($t4[$tun]);
+
+			$t1[$tun] = strtoupper($t1[$tun]);
+
+			// PÄivitetään syötetyt paikat tilausrivin_lisätietoihin
+			$query = "	UPDATE tilausrivi
+						JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+						SET
+						tilausrivin_lisatiedot.kohde_hyllyalue = '{$t1[$tun]}',
+						tilausrivin_lisatiedot.kohde_hyllynro  = '{$t2[$tun]}',
+						tilausrivin_lisatiedot.kohde_hyllyvali = '{$t3[$tun]}',
+						tilausrivin_lisatiedot.kohde_hyllytaso = '{$t4[$tun]}'
+						WHERE tilausrivi.tunnus		= '$tun'
+						and tilausrivi.yhtio		= '$kukarow[yhtio]'
+						and tilausrivi.tyyppi		= 'G'
+						and tilausrivi.toimitettu	= ''";
+			$result = pupe_query($query);
+		}
+	}
+
 	if ($tee == 'paikat' and $vainlistaus == '') {
 
 		$virheita = 0;
@@ -949,10 +976,15 @@
 					tilausrivi.hyllyvali,
 					tilausrivi.hyllytaso,
 					tuote.ei_saldoa,
+					tilausrivin_lisatiedot.kohde_hyllyalue,
+					tilausrivin_lisatiedot.kohde_hyllynro,
+					tilausrivin_lisatiedot.kohde_hyllyvali,
+					tilausrivin_lisatiedot.kohde_hyllytaso,
 					concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'), lpad(upper(tilausrivi.hyllyvali), 5, '0'), lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 					FROM tilausrivi
 					JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
+					JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.otunnus = '$id'
 					and tilausrivi.tyyppi  = 'G'
@@ -986,7 +1018,17 @@
 
 		while ($rivirow = mysql_fetch_assoc($result)) {
 
-			if ($rivirow["ei_saldoa"] == "") {
+			// Näytetäänkö rivin vai tuotteen varastopaikka
+			$lahde = "Tuote";
+
+			if ($rivirow["kohde_hyllyalue"] != "" and $rivirow["kohde_hyllynro"] != "" and $rivirow["kohde_hyllyvali"] != "" and $rivirow["kohde_hyllytaso"] != "" ) {
+				$privirow['t1'] = $rivirow["kohde_hyllyalue"];
+				$privirow['t2'] = $rivirow["kohde_hyllynro"];
+				$privirow['t3'] = $rivirow["kohde_hyllyvali"];
+				$privirow['t4'] = $rivirow["kohde_hyllytaso"];
+				$lahde = "Rivi";
+			}
+			elseif ($rivirow["ei_saldoa"] == "") {
 				$query = "	SELECT tuotepaikat.hyllyalue t1, tuotepaikat.hyllynro t2, tuotepaikat.hyllyvali t3, tuotepaikat.hyllytaso t4,
 							concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 							FROM tuotepaikat
@@ -1000,9 +1042,6 @@
 			else {
 				$privirow = array();
 			}
-
-			// Näytetäänkö rivin vai tuotteen varastopaikka
-			$lahde = "Tuote";
 
 			if ($rivirow["ei_saldoa"] != "") {
 				$privirow['t1'] = "SALDOTON-TUOTE";

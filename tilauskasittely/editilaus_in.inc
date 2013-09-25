@@ -120,7 +120,6 @@ $ketjutus             	= "";
 $editilaus_maksuehto	= "";
 $editilaus_maksuteksti	= "";
 $editilaus_toimitustapa = "";
-$tilaus_hyvaksyntaan	= "";
 $editilaus_rahtivapaa	= "";
 $editilaus_tilaustyyppi = "";
 $editilaus_eilahetetta	= "";
@@ -1894,12 +1893,6 @@ while ($tietue = fgets($fd)) {
 					}
 				}
 
-				if ($editilaus_tilaustyyppi != 'K') {
-					// Tilaus merkataan valmiiksi
-					$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
-					$result = mysql_query($query) or die($query);
-				}
-
 				// haetaan tilauksen tiedot
 				$query    = "SELECT * FROM lasku WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
 				$result   = mysql_query($query) or die($query);
@@ -1997,15 +1990,6 @@ while ($tietue = fgets($fd)) {
 						require ("tilaus-valmis.inc");
 					}
 
-					// Halutaanko tilaus hyväksynnän kautta!
-					if ($tilaus_hyvaksyntaan != "") {
-						$query = "	UPDATE lasku SET
-									alatila = 'F'
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND tunnus = '$editilaus_lasku_tunnus'";
-						$magento_maksettu_res = pupe_query($query);
-					}
-
 					$edi_ulos .= "$tilaus_valmis_ulos\n";
 					$edi_ulos .= "$tilaus_valmis_message\n";
 					$edi_ulos .= "\n".t("Merkittiin tilaus valmiiksi").": $editilaus_lasku_tunnus.\n\n";
@@ -2064,7 +2048,6 @@ while ($tietue = fgets($fd)) {
 			$editilaus_maksuehto	= "";
 			$editilaus_maksuteksti	= "";
 			$editilaus_toimitustapa = "";
-			$tilaus_hyvaksyntaan	= "";
 			$editilaus_rahtivapaa	= "";
 			$editilaus_tilaustyyppi = "";
 			$editilaus_eilahetetta	= "";

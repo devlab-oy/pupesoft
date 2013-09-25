@@ -307,10 +307,12 @@
 		// laitetaan lähete tulostusjonoon
 		$tila = 'N';
 		$alatila = 'A';
+
 		if ($yhtiorow['lahetteen_tulostustapa'] == 'I') {
 			$tila = 'L';
 			$alatila = 'D';
 		}
+
 		$query  = "	UPDATE lasku SET
 					tila    = '{$tila}',
 					alatila = '{$alatila}'
@@ -342,7 +344,6 @@
 				pupesoft_tulosta_lahete($params);
 			}
 		}
-
 		///* Tähän mennään jos lähete vain siirretään tulostusjonoon *///
 		elseif (mysql_affected_rows() > 0) {
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s siirretty tulostusjonoon"), $laskurow["tunnus"])."!</font><br><br>\n";

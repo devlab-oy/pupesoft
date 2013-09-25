@@ -22833,6 +22833,7 @@ if (!function_exists("lisaa_rivi")) {
 		$tuotenimitys_force = (!empty($parametrit['tuotenimitys_force'])) ? $parametrit['tuotenimitys_force'] : '';  // tuotteen nimitys muutetaan systemitasolla
 		$kommentti          = (!empty($parametrit['kommentti']))          ? $parametrit['kommentti'] : '';           // rivikommentti
 		$alv				= (!empty($parametrit['alv']))		          ? $parametrit['alv'] : '';				// rivi alv
+		$toim				= (!empty($parametrit['toim']))		          ? $parametrit['toim'] : '';				// toim
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			$ale_temp = str_replace(',', '.', $parametrit{'ale'.$alepostfix});

@@ -400,6 +400,8 @@ function paivita_ennakko($params) {
 								"kpl" => $value,
 								"toim" => $toim,
 								"syotettyhinta" => $loytynyt_tilausrivi[0]['hinta']);
+			echo "kisse ";
+			var_dump($parametrit);
 			lisaa_ennakkorivi($parametrit);
 		}
 	}
@@ -814,7 +816,8 @@ function lisaa_ennakkorivi($params) {
 	$otunnus = $params['lasku_tunnus'];
 	$toim    = $params['toim'];
 	$var     = $params['var'];
-
+	echo "katinroikale: ";
+	var_dump($params);
 	$query = "	SELECT *
 				FROM tuote
 				WHERE yhtio = '{$kukarow['yhtio']}'
@@ -851,6 +854,7 @@ function lisaa_ennakkorivi($params) {
 		'perheid'		 => $perheid,
 		'netto'			 => $netto,
 		'var'			 => $var,
+		'toim'			 => $toim
 	);
 	lisaa_rivi($parametrit);
 

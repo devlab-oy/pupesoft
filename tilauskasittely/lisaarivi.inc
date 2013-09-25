@@ -72,12 +72,12 @@
 
 		if (!empty($kukarow['extranet']) and $hinta == '') {
 			$hinta = 0.000001;
-			$ale1 = 100;	
+			$ale1 = 100;
 			$netto = '';
 		}
 		else {
 			$netto = '';
-			$ale1 = (isset($ale1)) ? $ale1 : 0;
+			$ale1 = 0;
 		}
 	}
 	

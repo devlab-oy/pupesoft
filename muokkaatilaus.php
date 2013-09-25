@@ -600,16 +600,13 @@
 			echo "<th>";
 
 			if ($toim == "YLLAPITO") {
-				echo t("Syötä tilausnumeron, asiakkaan tilausnumeron, nimen, laatijan tai sopimuksen lisätiedon osa");
+				echo t("Syötä tilausnumeron, asiakkaan tilausnumeron, nimen, laatijan tai sopimuksen lisätiedon osa")."</th>";
 			}
 			else if ($toim == "MYYNTITILITOIMITA") {
-				echo t("Syötä tuotenumeron, tilausnumeron, nimen tai laatijan osa");
+				echo t('Syötä tuotenumeron, tilausnumeron,').'<br/>'.t('nimen tai laatijan osa')."</th>";
 			}
 			else if ($toim == "VALMISTUS") {
-				echo "<table>";
-
-				echo "<tr>";
-				echo "<th>".t('Syötä tilausnumeron,').'<br/>'.t('nimen tai laatijan osa')."</th>";
+				echo t('Syötä tilausnumeron,').'<br/>'.t('nimen tai laatijan osa')."</th>";
 				echo "<td>";
 				echo "<input type='text' name='etsi'>";
 				echo "</td>";
@@ -651,10 +648,11 @@
 				echo "</table>";
 			}
 			else {
-				echo t("Syötä tilausnumeron, nimen tai laatijan osa");
+				echo t("Syötä tilausnumeron, nimen tai laatijan osa")."</th>";
 			}
 
 			if ($toim != 'VALMISTUS') {
+				echo "<td>";
 				echo "<input type='text' name='etsi'>";
 			}
 
@@ -697,6 +695,8 @@
 				echo "<br/>";
 			}
 
+			echo "</table>";
+			
 			echo "<input type='Submit' value = '".t("Etsi")."'>";
 			echo "</form>";
 			echo "<br>";

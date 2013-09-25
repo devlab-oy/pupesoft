@@ -1961,7 +1961,7 @@
 			$var = $puu_var[$i];
 
 			// Korvaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and $rivityyppi == 'L') {
+			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and $rivityyppi == 'L' and $var != 'H') {
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
 				$paatuote  = $korvaavat->paatuote();
@@ -1977,7 +1977,7 @@
 				}
 			}
 			// Vastaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and $rivityyppi == 'L') {
+			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and $rivityyppi == 'L' and $var != 'H') {
 				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun p‰‰tuote
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);

@@ -1577,6 +1577,10 @@
 								else {
 									$var2 = '';
 								}
+								
+								if ($yhtiorow['reklamaation_hinnoittelu'] == 'K' and ($toim == "REKLAMAATIO"  or $toim == "EXTRANET_REKLAMAATIO") and $hyvityssaannon_palautuskielto == "X") {
+									$var2 = 'PK';
+								}
 
 								$query = "	INSERT into tilausrivi set
 											hyllyalue 		= '$myy_hyllyalue[$indeksi]',
@@ -1615,10 +1619,6 @@
 
 								if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
 									$query .= ", keratty = 'saldoton', kerattyaika = now()";
-								}
-
-								if ($yhtiorow['reklamaation_hinnoittelu'] == 'K' and ($toim == "REKLAMAATIO"  or $toim == "EXTRANET_REKLAMAATIO") and $hyvityssaannon_palautuskielto == "X") {
-									$query .= ", var2 = 'PK'";
 								}
 
 								$result = pupe_query($query);
@@ -2635,6 +2635,10 @@
 				$var2 = $var == 'P' ? '' : 'OK';
 			}
 
+			if ($var2 == '' and $yhtiorow['reklamaation_hinnoittelu'] == 'K' and ($toim == "REKLAMAATIO"  or $toim == "EXTRANET_REKLAMAATIO") and $hyvityssaannon_palautuskielto == "X") {
+				$var2 = 'PK';
+			}
+
 			// lis‰t‰‰n puuterivi
 			$query = "	INSERT into tilausrivi set
 						hyllyalue 		= '$p_hyllyalue',
@@ -2674,10 +2678,6 @@
 
 			if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
 				$query .= ", kerattyaika = now()";
-			}
-
-			if ($var2 == '' and $yhtiorow['reklamaation_hinnoittelu'] == 'K' and ($toim == "REKLAMAATIO"  or $toim == "EXTRANET_REKLAMAATIO") and $hyvityssaannon_palautuskielto == "X") {
-				$query .= ", var2 = 'PK'";
 			}
 
 			$result = pupe_query($query);

@@ -225,7 +225,7 @@
 		while ($laskurow = mysql_fetch_assoc($jtrest)) {
 
 			$query  = "	UPDATE lasku
-						SET alatila = 'A'
+						SET alatila = ''
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = '$laskurow[tunnus]'";
 			$apure  = pupe_query($query);

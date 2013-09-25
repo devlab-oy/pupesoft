@@ -1105,6 +1105,7 @@ if ($tila == '') {
 	$kenhak_array[] = 'rivihinta';
 	$kenhak_array[] = 'alerivihinta';
 	#$kenhak_array[] = 'kuluhinta';
+	$kenhak_array[] = 'rivihinta_2';
 	$kenhak_array[] = 'toimaika';
 	$kenhak_array[] = 'kommentti';
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kenhak_array[] = 'laskunro';

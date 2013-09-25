@@ -594,6 +594,11 @@
 			echo "<input type='hidden' name='asiakastiedot' value='$asiakastiedot'>";
 			echo "<input type='hidden' name='limit' value='$limit'>";
 			echo "<font class='head'>".t("Etsi")." $otsikko<hr></font>";
+
+			echo "<table>";
+			echo "<tr>";
+			echo "<th>";
+
 			if ($toim == "YLLAPITO") {
 				echo t("Syötä tilausnumeron, asiakkaan tilausnumeron, nimen, laatijan tai sopimuksen lisätiedon osa");
 			}
@@ -646,14 +651,50 @@
 			else {
 				echo t("Syötä tilausnumeron, nimen tai laatijan osa");
 			}
+
 			if ($toim != 'VALMISTUS') {
 				echo "<input type='text' name='etsi'>";
 			}
 
+			if ($toim == 'KESKEN' or $toim == 'SUPER' or $toim == 'OSTO' or $toim == 'OSTOSUPER') {
+
+				$query = "	SELECT *
+							FROM yhtion_toimipaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'";
+				$toimipaikkares = pupe_query($query);
+
+				if (mysql_num_rows($toimipaikkares) > 0)  {
+
+					echo "<tr>";
+
+					echo "<th>",t("Toimipaikka"),"</th>";
+
+					echo "<td><select name='toimipaikka' onchange='submit();'>";
+					echo "<option value=''>",t("Valitse"),"</option>";
+
+					while ($toimipaikkarow = mysql_fetch_assoc($toimipaikkares)) {
+						if (!isset($toimipaikka) and $kukarow['toimipaikka'] == $toimipaikkarow['tunnus']) {
+							$sel = ' selected';
+							$toimipaikka = $kukarow['toimipaikka'];
+						}
+						elseif (isset($toimipaikka) and $toimipaikka == $toimipaikkarow['tunnus']) {
+							$sel = ' selected';
+						}
+						else {
+							$sel = '';
+						}
+
+						echo "<option value='{$toimipaikkarow['tunnus']}'{$sel}>{$toimipaikkarow['nimi']}</option>";
+					}
+
+					echo "</select></td><td class='back'>&nbsp;</td></tr>";
+				}
+			}
+
 			if ($toim == 'VALMISTUS') {
 				echo "<br/>";
-
 			}
+
 			echo "<input type='Submit' value = '".t("Etsi")."'>";
 			echo "</form>";
 			echo "<br>";
@@ -695,6 +736,21 @@
 			if ($etsi != "" and $haku != "" and ($toim == '' or $toim == 'SUPER' or $toim == 'KESKEN' or $toim == 'HYPER' or $toim == 'TOSI_KESKEN' or $toim == 'ODOTTAA_SUORITUSTA')) {
 				$haku = substr($haku, 0, -2); // Poistetaan vika sulku $hausta
 				$haku .= " or (lasku.asiakkaan_tilausnumero like '%$etsi%' and lasku.asiakkaan_tilausnumero != '')) ";
+			}
+
+			$sumhaku = '';
+
+			if (isset($toimipaikka) and $toimipaikka != "") {
+
+				$toimipaikka = (int) $toimipaikka;
+
+				if ($toim == 'KESKEN' or $toim == 'SUPER') {
+					$haku .= " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
+					$sumhaku = " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
+				}
+				elseif ($toim == 'OSTO' or $toim == 'OSTOSUPER') {
+					$haku .= " and lasku.vanhatunnus = '{$toimipaikka}' ";
+				}
 			}
 
 			if (!empty($mt_order)) {
@@ -775,18 +831,18 @@
 
 		// Näytetään asiakastiedot linkki
 		if ($asiakastiedot == 'toimitus') {
-			echo " <a href='muokkaatilaus.php?toim=$toim&asiakastiedot=laskutus&limit=$limit&etsi=$etsi'>" .t("Näytä vain laskutustiedot") . "</a>";
+			echo " <a href='muokkaatilaus.php?toim=$toim&asiakastiedot=laskutus&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka'>" .t("Näytä vain laskutustiedot") . "</a>";
 		}
 		else {
-			echo " <a href='muokkaatilaus.php?toim=$toim&asiakastiedot=toimitus&limit=$limit&etsi=$etsi'>" . t("Näytä myös toimitusasiakkaan tiedot") . "</a>";
+			echo " <a href='muokkaatilaus.php?toim=$toim&asiakastiedot=toimitus&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka'>" . t("Näytä myös toimitusasiakkaan tiedot") . "</a>";
 		}
 
 		// Näytetäänkö saldot linkki
 		if ($toim == '' and $naytetaanko_saldot == 'kylla') {
-			echo " <a href='muokkaatilaus.php?toim=$toim&limit=$limit&etsi=$etsi&naytetaanko_saldot=ei'>" . t("Piilota saldot keräypäivänä") . "</a>";
+			echo " <a href='muokkaatilaus.php?toim=$toim&limit=$limit&etsi=$etsi&naytetaanko_saldot=ei&toimipaikka=$toimipaikka'>" . t("Piilota saldot keräypäivänä") . "</a>";
 		}
 		elseif ($yhtiorow['saldo_kasittely'] == 'T' and $toim == '') {
-			echo " <a href='muokkaatilaus.php?toim=$toim&limit=$limit&etsi=$etsi&naytetaanko_saldot=kylla'>" .t("Näytä saldot keräyspäivänä") . "</a>";
+			echo " <a href='muokkaatilaus.php?toim=$toim&limit=$limit&etsi=$etsi&naytetaanko_saldot=kylla&toimipaikka=$toimipaikka'>" .t("Näytä saldot keräyspäivänä") . "</a>";
 		}
 
 		echo "<br><br>";
@@ -877,7 +933,11 @@
 								count(distinct lasku.tunnus) kpl
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X' and lasku.clearing != 'EXTENNAKKO'";
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.tila IN ('L', 'N')
+								AND lasku.alatila != 'X'
+								AND lasku.clearing != 'EXTENNAKKO'
+								{$sumhaku}";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -1472,7 +1532,8 @@
 		elseif ($toim == 'OSTO') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext,
 						sum(if(tilausrivi.kpl is not null and tilausrivi.kpl != 0, 1, 0)) varastokpl,
-						sum(if(tilausrivi.jaksotettu is not null and tilausrivi.jaksotettu != 0, 1, 0)) vahvistettukpl
+						sum(if(tilausrivi.jaksotettu is not null and tilausrivi.jaksotettu != 0, 1, 0)) vahvistettukpl,
+						count(*) rivit
 						FROM lasku use index (tila_index)
 						LEFT JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi = 'O'
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
@@ -1490,7 +1551,8 @@
 		elseif ($toim == 'OSTOSUPER') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext,
 						sum(if(tilausrivi.kpl is not null and tilausrivi.kpl != 0, 1, 0)) varastokpl,
-						sum(if(tilausrivi.jaksotettu is not null and tilausrivi.jaksotettu != 0, 1, 0)) vahvistettukpl
+						sum(if(tilausrivi.jaksotettu is not null and tilausrivi.jaksotettu != 0, 1, 0)) vahvistettukpl,
+						count(*) rivit
 						FROM lasku use index (tila_index)
 						LEFT JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi = 'O'
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
@@ -1602,10 +1664,11 @@
 								count(distinct lasku.tunnus) kpl
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-								WHERE lasku.yhtio = '$kukarow[yhtio]'
-								and lasku.tila = 'N'
-								and lasku.alatila in ('A','','T','U','G')
-								and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')";
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.tila = 'N'
+								AND lasku.alatila IN ('A','','T','U','G')
+								AND lasku.clearing NOT IN ('EXTENNAKKO','EXTTARJOUS')
+								{$sumhaku}";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -1749,13 +1812,13 @@
 			for ($i = 0; $i < mysql_num_fields($result)-$miinus; $i++) {
 
 				if (isset($mt_order[mysql_field_name($result,$i)]) and $mt_order[mysql_field_name($result,$i)] == 'ASC') {
-					echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&mt_order[".mysql_field_name($result,$i)."]=DESC'>".t(mysql_field_name($result,$i))."<img src='{$palvelin2}pics/lullacons/arrow-small-up-green.png' /></a></th>";
+					echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&mt_order[".mysql_field_name($result,$i)."]=DESC'>".t(mysql_field_name($result,$i))."<img src='{$palvelin2}pics/lullacons/arrow-small-up-green.png' /></a></th>";
 				}
 				elseif (isset($mt_order[mysql_field_name($result,$i)]) and $mt_order[mysql_field_name($result,$i)] == 'DESC') {
-					echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&mt_order[".mysql_field_name($result,$i)."]=ASC'>".t(mysql_field_name($result,$i))."<img src='{$palvelin2}pics/lullacons/arrow-small-down-green.png' /></a></th>";
+					echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&mt_order[".mysql_field_name($result,$i)."]=ASC'>".t(mysql_field_name($result,$i))."<img src='{$palvelin2}pics/lullacons/arrow-small-down-green.png' /></a></th>";
 				}
 				else {
-					echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&mt_order[".mysql_field_name($result,$i)."]=ASC'>".t(mysql_field_name($result,$i))."</a></th>";
+					echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&mt_order[".mysql_field_name($result,$i)."]=ASC'>".t(mysql_field_name($result,$i))."</a></th>";
 				}
 
 				if (isset($worksheet)) {
@@ -2217,7 +2280,7 @@
 						}
 
 						if (isset($row["vahvistettukpl"]) and $row["vahvistettukpl"] > 0) {
-							$varastotila .= "<font class='info'><br>".t("Toimitusajat vahvistettu")."</font>";
+							$varastotila .= "<font class='info'><br>".t("Toimitusajat vahvistettu")." ({$row['vahvistettukpl']} / {$row['rivit']})</font>";
 						}
 
 						echo "<td class='$class' valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila</td>";

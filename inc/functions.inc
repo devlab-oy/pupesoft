@@ -21857,21 +21857,23 @@ if (!function_exists('hae_laskun_tilausrivit')) {
 		global $kukarow, $yhtiorow;
 
 		if (!empty($tyypit)) {
-			$tilausrivi_where = " AND tyyppi IN ('".implode("','", $tyypit)."') ";
+			$tilausrivi_where = " AND tilausrivi.tyyppi IN ('".implode("','", $tyypit)."') ";
 		}
 		else {
-			$tilausrivi_where = " AND tyyppi != 'D' ";
+			$tilausrivi_where = " AND tilausrivi.tyyppi != 'D' ";
 		}
 
 		if ($sorttauskentta == "") $sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
 		$query = "	SELECT tilausrivi.*,
+					tilausrivin_lisatiedot.rekisterinumero,
 					$sorttauskentta
 					FROM tilausrivi
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND otunnus = '{$otunnus}'
+					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.otunnus = '{$otunnus}'
 					{$tilausrivi_where}
-					ORDER BY sorttauskentta {$sorttaussuunta}, tunnus";
+					ORDER BY sorttauskentta {$sorttaussuunta}, tilausrivi.tunnus";
 		$result = pupe_query($query);
 		$tilausrivit = array();
 
@@ -22912,6 +22914,7 @@ if (!function_exists("lisaa_rivi")) {
 		$alv                = (!empty($parametrit['alv']))                ? $parametrit['alv'] : '';                 // rivi alv
 		$valmistuslinja     = (!empty($parametrit['valmistuslinja']))     ? $parametrit['valmistuslinja'] : '';      // valmistuslinja
 		$toim               = (!empty($parametrit['toim']))               ? $parametrit['toim'] : '';                // toim
+		$rekisterinumero	= (!empty($parametrit['rekisterinumero']))	  ? $parametrit['rekisterinumero'] : '';	 // rekisterinumero
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			$ale_temp = str_replace(',', '.', $parametrit{'ale'.$alepostfix});

@@ -1316,8 +1316,20 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		require("tyomaarays/tyomaarays.inc");
 	}
 	elseif ($kukarow["extranet"] == "" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") and $msiirto == "") {
-		// Siirtolista, myyntitili, valmistus valmis
-		require ("tilaus-valmis-siirtolista.inc");
+		if (($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			$valmistus_tunnukset = splittaa_valmistukset($laskurow);
+
+			// Jos valmistuksien_kasittely == Valmistuksella voi olla vain yksi valmiste,
+			// niin loopataan valmistusrivit l‰pi ja luodaan jokaiselle riville oma otsikko
+			foreach ($valmistus_tunnukset as $valmistus_tunnus) {
+				$laskurow = hae_lasku($valmistus_tunnus);
+				require ("tilaus-valmis-siirtolista.inc");
+			}
+		}
+		else {
+			// Siirtolista, myyntitili, valmistus valmis
+			require ("tilaus-valmis-siirtolista.inc");
+		}
 	}
 	elseif ($toim == "PROJEKTI") {
 		// Projekti, t‰ll‰ ei ole mit‰‰n rivej‰ joten nollataan vaan muuttujat

@@ -23180,6 +23180,7 @@ if (!function_exists("splittaa_valmistukset")) {
 
 		$valmistuksen_splittaus_rivi = 0;
 
+		$valmistus_tunnukset = array();
 		while ($tilausrivi_split_row = mysql_fetch_assoc($tilausrivi_split_result)) {
 
 			$_toimaika = ($tilausrivi_split_row['toimaika'] == '0000-00-00') ? $laskurow['toimaika'] : $tilausrivi_split_row['toimaika'];
@@ -23188,6 +23189,7 @@ if (!function_exists("splittaa_valmistukset")) {
 
 			// J‰tet‰‰n ensimm‰inen rivi alkuper‰iselle otsikolle
 			if ($valmistuksen_splittaus_rivi == 0) {
+				$valmistus_tunnukset[] = $tilausrivi_split_row['otunnus'];
 				$query = "	UPDATE lasku
 							SET kohde = '{$_kohde}',
 							toimaika = '{$_toimaika}',
@@ -23224,6 +23226,7 @@ if (!function_exists("splittaa_valmistukset")) {
 								'J')";
 			pupe_query($query);
 			$valmistus_tunnus = mysql_insert_id();
+			$valmistus_tunnukset[] = $valmistus_tunnus;
 
 			// Siirret‰‰n koko perhe uudelle otsikolle
 			if (!empty($valmistus_tunnus)) {
@@ -23235,6 +23238,8 @@ if (!function_exists("splittaa_valmistukset")) {
 				pupe_query($query);
 			}
 		}
+
+		return $valmistus_tunnukset;
 	}
 }
 

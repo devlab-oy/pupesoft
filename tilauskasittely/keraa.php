@@ -2057,27 +2057,29 @@
 			echo "</td>";
 			echo "</tr>";
 
-			echo "<tr>";
-			echo "<th>".t('Valmistuslinja')."</th>";
-			echo "<td>";
+			if (!empty($valmistuslinjat)) {
+				echo "<tr>";
+				echo "<th>".t('Valmistuslinja')."</th>";
+				echo "<td>";
 
-			echo "<select name='valmistuslinja'>";
-			echo "<option value='' >".t('Ei valintaa')."</option>";
-			foreach ($valmistuslinjat as $_valmistuslinja) {
-				$sel = "";
-				if ($_valmistuslinja['selite'] == $valmistuslinja) {
-					$sel = "SELECTED";
+				echo "<select name='valmistuslinja'>";
+				echo "<option value='' >".t('Ei valintaa')."</option>";
+				foreach ($valmistuslinjat as $_valmistuslinja) {
+					$sel = "";
+					if ($_valmistuslinja['selite'] == $valmistuslinja) {
+						$sel = "SELECTED";
+					}
+					echo "<option value='{$_valmistuslinja['selite']}' {$sel}>{$_valmistuslinja['selitetark']}</option>";
 				}
-				echo "<option value='{$_valmistuslinja['selite']}' {$sel}>{$_valmistuslinja['selitetark']}</option>";
+				echo "</select>";
+
+				echo "</td>";
+
+				echo "<th></th>";
+				echo "<td>";
+				echo "</td>";
+				echo "</tr>";
 			}
-			echo "</select>";
-
-			echo "</td>";
-
-			echo "<th></th>";
-			echo "<td>";
-			echo "</td>";
-			echo "</tr>";
 
 			echo "<tr><th>",t("Valitse toimitustapa"),":</th><td><select name='tutoimtapa' onchange='submit()'>";
 

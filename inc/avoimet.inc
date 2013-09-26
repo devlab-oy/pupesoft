@@ -894,7 +894,7 @@
 				$query = "	SELECT asiakas.tunnus,
 							asiakas.ytunnus,
 							if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
-							suoritus.nimi_maksaja,
+							if(asiakas.nimi is not null, asiakas.nimi, suoritus.nimi_maksaja) nimi_maksaja,
 							asiakas.maa,
 							suoritus.viite,
 							suoritus.kirjpvm,

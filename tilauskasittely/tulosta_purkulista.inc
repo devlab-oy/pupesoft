@@ -224,7 +224,7 @@
 					tilausrivi.hyllynro trhyllynro,
 					tilausrivi.hyllyvali trhyllyvali,
 					tilausrivi.hyllytaso trhyllytaso,
-					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta,
+					concat(lpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'),lpad(upper(tapahtuma.hyllyvali), 5, '0'),lpad(upper(tapahtuma.hyllytaso), 5, '0')) sorttauskentta,
 					tuote.purkukommentti,
 					tilausrivi.laadittu
 					FROM tilausrivi
@@ -249,11 +249,12 @@
 					tilausrivi.hyllynro trhyllynro,
 					tilausrivi.hyllyvali trhyllyvali,
 					tilausrivi.hyllytaso trhyllytaso,
-					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta,
+					concat(lpad(upper(tilausrivin_lisatiedot.kohde_hyllyalue), 5, '0'),lpad(upper(tilausrivin_lisatiedot.kohde_hyllynro), 5, '0'),lpad(upper(tilausrivin_lisatiedot.kohde_hyllyvali), 5, '0'),lpad(upper(tilausrivin_lisatiedot.kohde_hyllytaso), 5, '0')) sorttauskentta,
 					tuote.purkukommentti,
 					tilausrivi.laadittu
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
+					JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE tilausrivi.otunnus = '$otunnus'
 					and tilausrivi.yhtio='$kukarow[yhtio]'
 					ORDER BY sorttauskentta, tuote.tuoteno";

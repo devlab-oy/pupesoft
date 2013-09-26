@@ -62,7 +62,7 @@ if (!function_exists('alku_dgd')) {
 
 		// 9 Additional handling information
 		$pdf->pages[$sivu]->drawText(t("Hätäpuhelinnumero", $kieli)." {$yhtiorow["puhelin"]}", mm_pt(105), mm_pt(202), 'LATIN1');
-
+		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(105), mm_pt(196), 'LATIN1');
 
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(61), 'LATIN1');
 
@@ -242,7 +242,7 @@ if (!function_exists('rivi_dgd')) {
 			$pdf->pages[$sivu]->drawText($vaktuoterivi, mm_pt(45), mm_pt($kala), 'LATIN1');
 
 			if ($vaktuotepaino != "") {
-				$pdf->pages[$sivu]->drawText($vaktuotepaino, mm_pt(145), mm_pt($kala), 'LATIN1');
+				$pdf->pages[$sivu]->drawText($vaktuotepaino, mm_pt(167), mm_pt($kala), 'LATIN1');
 			}
 
 			$kala-=4;

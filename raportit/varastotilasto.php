@@ -112,7 +112,6 @@
 					ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
 		$eresult = pupe_query($query);
 		$total_rows = mysql_num_rows($eresult);
-		$current_row = 0;
 
 		if ($total_rows > 0) {
 
@@ -122,22 +121,24 @@
 			$format_bold = array("bold" => TRUE);
 			$excelrivi 	 = 0;
 
-			$varastotilasto_table = "<table>";
-			$varastotilasto_table .= "<th>".t("Osasto")."</th>";
-			$varastotilasto_table .= "<th>".t("Tuoteryhm‰")."</th>";
-			$varastotilasto_table .= "<th>".t("Tuoteno")."</th>";
-			$varastotilasto_table .= "<th>".t("Nimitys")."</th>";
-			$varastotilasto_table .= "<th>".t("Varastosaldo")."</th>";
-			$varastotilasto_table .= "<th>".t("Varastonarvo")."</th>";
-			$varastotilasto_table .= "<th>".t("Myyntihinta")."</th>";
-			$varastotilasto_table .= "<th>".t("Varmuusvarasto")."</th>";
-			$varastotilasto_table .= "<th>".t("Tilattu m‰‰r‰")."</th>";
-			$varastotilasto_table .= "<th>".t("Toimitus aika")."</th>";
-			$varastotilasto_table .= "<th>".t("Varattu saldo")."</th>";
-			$varastotilasto_table .= "<th>".t("Myynti")."<br>$vvl</th>";
-			$varastotilasto_table .= "<th>".t("Myynti")."<br>12kk</th>";
-			$varastotilasto_table .= "<th>".t("Myynti")."<br>6kk</th>";
-			$varastotilasto_table .= "<th>".t("Myynti")."<br>3kk</th>";
+			if ($total_rows <= 1000) {
+				$varastotilasto_table = "<table>";
+				$varastotilasto_table .= "<th>".t("Osasto")."</th>";
+				$varastotilasto_table .= "<th>".t("Tuoteryhm‰")."</th>";
+				$varastotilasto_table .= "<th>".t("Tuoteno")."</th>";
+				$varastotilasto_table .= "<th>".t("Nimitys")."</th>";
+				$varastotilasto_table .= "<th>".t("Varastosaldo")."</th>";
+				$varastotilasto_table .= "<th>".t("Varastonarvo")."</th>";
+				$varastotilasto_table .= "<th>".t("Myyntihinta")."</th>";
+				$varastotilasto_table .= "<th>".t("Varmuusvarasto")."</th>";
+				$varastotilasto_table .= "<th>".t("Tilattu m‰‰r‰")."</th>";
+				$varastotilasto_table .= "<th>".t("Toimitus aika")."</th>";
+				$varastotilasto_table .= "<th>".t("Varattu saldo")."</th>";
+				$varastotilasto_table .= "<th>".t("Myynti")."<br>$vvl</th>";
+				$varastotilasto_table .= "<th>".t("Myynti")."<br>12kk</th>";
+				$varastotilasto_table .= "<th>".t("Myynti")."<br>6kk</th>";
+				$varastotilasto_table .= "<th>".t("Myynti")."<br>3kk</th>";
+			}
 
 			$excelsarake = 0;
 			$worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
@@ -219,8 +220,6 @@
 					continue;
 				}
 
-				$current_row++;
-
 				$osastores = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
 				$osastorow = mysql_fetch_assoc($osastores);
 
@@ -241,23 +240,25 @@
 				$varattu = ((int) $varattu == 0) ? "" : $varattu;
 				$saldo = ((int) $saldo == 0) ? "" : $saldo;
 
-				$varastotilasto_table .= "<tr class='aktiivi'>";
-				$varastotilasto_table .= "<td>$row[osasto]</td>";
-				$varastotilasto_table .= "<td>$row[try]</td>";
-				$varastotilasto_table .= "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
-				$varastotilasto_table .= "<td>$row[nimitys]</td>";
-				$varastotilasto_table .= "<td align='right'>$saldo</td>";
-				$varastotilasto_table .= "<td align='right'>$varastonarvo</td>";
-				$varastotilasto_table .= "<td align='right'>".hintapyoristys($row['myyntihinta'])."</td>";
-				$varastotilasto_table .= "<td align='right'>$row[varmuus_varasto]</td>";
-				$varastotilasto_table .= "<td align='right'>$ostorivi[tulossa]</td>";
-				$varastotilasto_table .= "<td align='right'>".tv1dateconv($ostorivi['toimaika'])."</td>";
-				$varastotilasto_table .= "<td align='right'>$varattu</td>";
-				$varastotilasto_table .= "<td align='right'>$myyntirivi[myyntiVA]</td>";
-				$varastotilasto_table .= "<td align='right'>$myyntirivi[myynti12kk]</td>";
-				$varastotilasto_table .= "<td align='right'>$myyntirivi[myynti6kk]</td>";
-				$varastotilasto_table .= "<td align='right'>$myyntirivi[myynti3kk]</td>";
-				$varastotilasto_table .= "</tr>";
+				if ($total_rows <= 1000) {
+					$varastotilasto_table .= "<tr class='aktiivi'>";
+					$varastotilasto_table .= "<td>$row[osasto]</td>";
+					$varastotilasto_table .= "<td>$row[try]</td>";
+					$varastotilasto_table .= "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
+					$varastotilasto_table .= "<td>$row[nimitys]</td>";
+					$varastotilasto_table .= "<td align='right'>$saldo</td>";
+					$varastotilasto_table .= "<td align='right'>$varastonarvo</td>";
+					$varastotilasto_table .= "<td align='right'>".hintapyoristys($row['myyntihinta'])."</td>";
+					$varastotilasto_table .= "<td align='right'>$row[varmuus_varasto]</td>";
+					$varastotilasto_table .= "<td align='right'>$ostorivi[tulossa]</td>";
+					$varastotilasto_table .= "<td align='right'>".tv1dateconv($ostorivi['toimaika'])."</td>";
+					$varastotilasto_table .= "<td align='right'>$varattu</td>";
+					$varastotilasto_table .= "<td align='right'>$myyntirivi[myyntiVA]</td>";
+					$varastotilasto_table .= "<td align='right'>$myyntirivi[myynti12kk]</td>";
+					$varastotilasto_table .= "<td align='right'>$myyntirivi[myynti6kk]</td>";
+					$varastotilasto_table .= "<td align='right'>$myyntirivi[myynti3kk]</td>";
+					$varastotilasto_table .= "</tr>";
+				}
 
 				$excelsarake = 0;
 				$worksheet->writeString($excelrivi, $excelsarake++, $row["osasto"]);
@@ -278,7 +279,9 @@
 				$excelrivi++;
 			}
 
-			$varastotilasto_table .= "</table>";
+			if ($total_rows <= 1000) {
+				$varastotilasto_table .= "</table>";
+			}
 
 			echo "<br>";
 
@@ -293,15 +296,15 @@
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";
 
-			if ($current_row > 10000000) {
+			if ($total_rows > 1000) {
 				echo "<font class='error'>", t("Hakutulos oli liian suuri"), ". " ,t("Tulos vain exceliss‰"), ".</font><br><br>";
 			}
-			elseif ($current_row > 0) {
+			else {
 				echo "<br>", $varastotilasto_table;
 			}
 		}
 
-		if ($total_rows == 0 or $current_row == 0) {
+		if ($total_rows == 0) {
 			echo "<font class='message'>", t("Yht‰‰n soveltuvaa tuotetta ei lˆytynyt"), ".</font>";
 		}
 	}

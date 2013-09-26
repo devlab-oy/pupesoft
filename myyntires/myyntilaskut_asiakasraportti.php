@@ -417,28 +417,20 @@
 					echo "</tr>";
 				}
 
-				$as_tunnus = explode(",", $tunnukset);
+				$query  = "	SELECT group_concat(distinct kentta01 SEPARATOR '<br>') viestit
+				  			FROM kalenteri
+				   			WHERE yhtio = '$kukarow[yhtio]'
+				   			AND tyyppi  = 'Myyntireskontraviesti'
+				       		AND liitostunnus in ($tunnukset)
+							ORDER BY tunnus desc";
+				$amres = pupe_query($query);
+				$amrow = mysql_fetch_assoc($amres);
 
-				$resk_viesti = "";
-				foreach ($as_tunnus as $astun) {
-					$query  = "	SELECT kentta01
-						        FROM kalenteri
-						        WHERE yhtio = '$kukarow[yhtio]'
-						        AND tyyppi  = 'Myyntireskontraviesti'
-						        AND liitostunnus = '$astun'
-								ORDER BY tunnus desc";
-					$amres = pupe_query($query);
-					
-					while ($amrow = mysql_fetch_assoc($amres)) {
-						$resk_viesti .= "$amrow[kentta01]<br>";
-					}	
-					if ($resk_viesti != '') {
-						echo "<tr>
-							<th>".t("Reskontraviesti")."</th><td colspan='2'>$resk_viesti</td>
-							</tr>";
-					}
+				if ($amrow['viestit'] != "") {
+					echo "<tr>
+						<th>".t("Reskontraviesti")."</th><td colspan='2'>{$amrow['viestit']}</td>
+						</tr>";
 				}
-				
 
 				echo "</table><br>";
 
@@ -644,8 +636,8 @@
 				echo "<input type='text' id='ppl' name='ppl' value='{$ppl}' size='3' />";
 				echo "<input type='text' id='kkl' name='kkl' value='{$kkl}' size='3' />";
 				echo "<input type='text' id='vvl' name='vvl' value='{$vvl}' size='6' />";
-				echo "</td>";			
-				echo "<td class='back'><input type='submit' value='".t('Hae')."' /></td>";				
+				echo "</td>";
+				echo "<td class='back'><input type='submit' value='".t('Hae')."' /></td>";
 				echo "</tr>";
 				echo "</table>";
 				echo "</form><br>";

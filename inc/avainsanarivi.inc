@@ -8,6 +8,91 @@
 		$tyyppi = 0;
 	}
 
+	// Näitä kenttiä ei oletuksena näytetä
+	if (mysql_field_name($result, $i) == "selitetark_5" or
+		mysql_field_name($result, $i) == "selitetark_4" or
+		mysql_field_name($result, $i) == "selitetark_3" or
+		mysql_field_name($result, $i) == "selitetark_2") {
+		$tyyppi = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "selitetark_5" and
+		$avain_sel['MYSQLALIAS'] == "SELECTED" or
+		$avain_sel["SAHKTILTUN"] == "SELECTED") {
+		$tyyppi = 1;
+	}
+
+	if (mysql_field_name($result, $i) == "selitetark_4" and
+		($avain_sel['ASIAKASRYHMA'] == "SELECTED" or
+		$avain_sel['HENKILO_OSASTO'] == "SELECTED" or
+		$avain_sel['MYSQLALIAS'] == "SELECTED" or
+		$avain_sel['TRY'] == "SELECTED" or
+		$avain_sel["SAHKTILTUN"] == "SELECTED" or
+		$avain_sel['TYOM_TYOKENTAT'] == "SELECTED")) {
+		$tyyppi = 1;
+	}
+
+	if (mysql_field_name($result, $i) == "selitetark_3" and
+		($avain_sel['ASAVAINSANA'] == "SELECTED" or
+		$avain_sel['ASIAKASLUOKKA'] == "SELECTED" or
+		$avain_sel['HENKILO_OSASTO'] == "SELECTED" or
+		$avain_sel['INVEN_LAJI'] == "SELECTED" or
+		$avain_sel['MYSQLALIAS'] == "SELECTED" or
+		$avain_sel['OSASTO'] == "SELECTED" or
+		$avain_sel['PAIKALLISVARAST'] == "SELECTED" or
+		$avain_sel['RAHTIKIRJA'] == "SELECTED" or
+		$avain_sel['SARJANUMERON_LI'] == "SELECTED" or
+		$avain_sel['SQLDBQUERY'] == "SELECTED" or
+		$avain_sel['TOIMEHTO'] == "SELECTED" or
+		$avain_sel['TRY'] == "SELECTED" or
+		$avain_sel['TYOM_PRIORIT'] == "SELECTED" or
+		$avain_sel['TYOM_TYOJONO'] == "SELECTED" or
+		$avain_sel['TYOM_TYOKENTAT'] == "SELECTED" or
+		$avain_sel['TYOM_TYOSTATUS'] == "SELECTED" or
+		$avain_sel["SAHKTILTUN"] == "SELECTED" or
+		$avain_sel['Y'] == "SELECTED")) {
+		$tyyppi = 1;
+	}
+
+	if (mysql_field_name($result, $i) == "selitetark_2" and
+		($avain_sel['ALV'] == "SELECTED" or
+		$avain_sel['ALVULK'] == "SELECTED" or
+		$avain_sel['ASAVAINSANA'] == "SELECTED" or
+		$avain_sel['ASIAKASLUOKKA'] == "SELECTED" or
+		$avain_sel['ASIAKASOSASTO'] == "SELECTED" or
+		$avain_sel['ASIAKASRYHMA'] == "SELECTED" or
+		$avain_sel['HENKILO_OSASTO'] == "SELECTED" or
+		$avain_sel['INVEN_LAJI'] == "SELECTED" or
+		$avain_sel['KAANTALVVIESTI'] == "SELECTED" or
+		$avain_sel['KALETAPA'] == "SELECTED" or
+		$avain_sel['KASSA'] == "SELECTED" or
+		$avain_sel['KUKAASEMA'] == "SELECTED" or
+		$avain_sel['LAHETETYYPPI'] == "SELECTED" or
+		$avain_sel['LASKUTUS_SAATE'] == "SELECTED" or
+		$avain_sel['LITETY'] == "SELECTED" or
+		$avain_sel['MERCASVHKER'] == "SELECTED" or
+		$avain_sel['MYSQLALIAS'] == "SELECTED" or
+		$avain_sel['OLETUSPAIKKA'] == "SELECTED" or
+		$avain_sel['OSASTO'] == "SELECTED" or
+		$avain_sel['OSTOTILAUS_SAAT'] == "SELECTED" or
+		$avain_sel['PAIKALLISVARAST'] == "SELECTED" or
+		$avain_sel['PIIRI'] == "SELECTED" or
+		$avain_sel['RAHTIKIRJA'] == "SELECTED" or
+		$avain_sel['SARJANUMERON_LI'] == "SELECTED" or
+		$avain_sel['SQLDBQUERY'] == "SELECTED" or
+		$avain_sel['TOIMEHTO'] == "SELECTED" or
+		$avain_sel['TOIMTAPAKV'] == "SELECTED" or
+		$avain_sel['TRY'] == "SELECTED" or
+		$avain_sel['TYOM_PRIORIT'] == "SELECTED" or
+		$avain_sel['TYOM_TYOJONO'] == "SELECTED" or
+		$avain_sel['TYOM_TYOKENTAT'] == "SELECTED" or
+		$avain_sel['TYOM_TYOLINJA'] == "SELECTED" or
+		$avain_sel['TYOM_TYOSTATUS'] == "SELECTED" or
+		$avain_sel["SAHKTILTUN"] == "SELECTED" or
+		$avain_sel['Y'] == "SELECTED")) {
+		$tyyppi = 1;
+	}
+
 	if (mysql_field_name($result, $i) == "perhe") {
 
 		// Perhetunnus
@@ -18,7 +103,7 @@
 			$query = "	SELECT max(perhe) perhe
 			 			FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'";
-			$pres = mysql_query($query) or pupe_error($query);
+			$pres = pupe_query($query);
 			$perse = mysql_fetch_array($pres);
 
 			$trow[$i] = $perhe = ($perse["perhe"]+1);
@@ -29,7 +114,7 @@
 							SET perhe = '$perhe'
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$tunnus'";
-				$pres = mysql_query($query) or pupe_error($query);
+				$pres = pupe_query($query);
 			}
 		}
 		else {
@@ -51,9 +136,10 @@
 
 	if (mysql_field_name($result, $i) == "laji") {
 
-		$al_laji 				= trim(strtoupper($trow[$i]));
-		$lukitse_laji 			= trim(strtoupper($lukitse_laji));
-		$avain_sel[$trow[$i]] 	= "SELECTED";
+		$al_laji 			  = trim(strtoupper($trow[$i]));
+		$lukitse_laji 		  = trim(strtoupper($lukitse_laji));
+		$avain_sel[$trow[$i]] = "SELECTED";
+		$mysqlaliasarraysetti = $trow[$i];
 
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
@@ -103,6 +189,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "HENKILO_OSASTO") 	$ulos .= "<option value='HENKILO_OSASTO' $avain_sel[HENKILO_OSASTO]>		".t("Henkilöosasto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KVERITTELY") 		$ulos .= "<option value='KVERITTELY' $avain_sel[KVERITTELY]>				".t("Kulunvalvonnan erittely")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KONEENOSA") 		$ulos .= "<option value='KONEENOSA' $avain_sel[KONEENOSA]>					".t("Koneenosa")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "SAHKTILTUN") 		$ulos .= "<option value='SAHKTILTUN' {$avain_sel['SAHKTILTUN']}>			".t("Sähköisen tilausliitännän tunnukset")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Varaston avainsanat")."'>";
@@ -114,6 +201,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "TERMINAALIALUE") 	$ulos .= "<option value='TERMINAALIALUE' $avain_sel[TERMINAALIALUE]>		".t("Varaston terminaalialue")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SSCC")			 	$ulos .= "<option value='SSCC' $avain_sel[SSCC]>							".t("SSCC-koodi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PAKKAUSKV") 		$ulos .= "<option value='PAKKAUSKV' $avain_sel[PAKKAUSKV]>					".t("Pakkaustiedon kieliversio")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "INVASTEPAIKKA")		$ulos .= "<option value='INVASTEPAIKKA' {$avain_sel['INVASTEPAIKKA']}>		".t("Inventointiaste-raportin hylkäämät tuotepaikat")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Työmääräysten avainsanat")."'>";
@@ -266,7 +354,7 @@
 			$query = "	SELECT group_concat(kieli) kielet
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]' and perhe='$perhe' and laji = '$laji'";
-			$res = mysql_query($query) or pupe_error($query);
+			$res = pupe_query($query);
 			$kilerow = mysql_fetch_array($res);
 			$kielet = $kilerow["kielet"];
 		}
@@ -314,6 +402,30 @@
 			}
 		}
 		closedir($handle);
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if ($avain_sel["SAHKTILTUN"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
+
+		$query = "	SELECT *
+					FROM yhtion_toimipaikat
+					WHERE yhtio = '$kukarow[yhtio]'";
+		$vresult = pupe_query($query);
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value='0'>".t("Valitse toimipaikka")."</option>";
+
+		while ($vrow = mysql_fetch_assoc($vresult)) {
+			$sel = "";
+
+			if ($vrow["tunnus"] == $trow[$i]) {
+				$sel = "SELECTED";
+			}
+
+			$ulos .= "<option value='{$vrow["tunnus"]}' $sel>".trim($vrow["nimi"]." ".$vrow["postitp"]." ".$vrow["ovtlisa"])."</option>";
+		}
 
 		$ulos .= "</select></td>";
 		$jatko = 0;
@@ -419,13 +531,46 @@
 		$jatko = 0;
 	}
 
+	if ($avain_sel["SAHKTILTUN"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {
+
+		$query = "  SELECT nimi, tunnus
+					FROM toimi
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tyyppi != 'P'
+					AND oletus_vienti IN ('C', 'F', 'J', 'K', 'I', 'L')";
+		$toimi_chk_res = pupe_query($query);
+
+		if (mysql_num_rows($toimi_chk_res) > 0) {
+
+			$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300)." onchange='submit();'>";
+			$ulos .= "<option value=''>".t("Valitse toimittaja")."</option>";
+
+			while ($row = mysql_fetch_assoc($toimi_chk_res)) {
+				$sel = "";
+
+				if ($row["tunnus"] == $trow[$i]) {
+					$sel = 'selected';
+				}
+
+				$ulos .= "<option value='{$row['tunnus']}' {$sel}>{$row['nimi']}</option>";
+			}
+
+			$ulos .= "</select></td>";
+		}
+		else {
+			$ulos = "<td><input type='text' name='{$nimi}' value='{$trow[$i]}'></td>";
+		}
+
+		$jatko = 0;
+	}
+
 	if ($avain_sel["ALVULK"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
 
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
 					WHERE nimi != ''
 					ORDER BY koodi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 		$ulos = "<td><select name='$nimi'>";
 
 		$ulos .= "<option value = '' ></option>";
@@ -538,7 +683,7 @@
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOJONO'
 					ORDER BY jarjestys, selitetark_2";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = ''>".t("Kaikki työjonot")."</option>";
@@ -564,7 +709,7 @@
 					and nimi != ''
 					and extranet=''
 					ORDER BY nimi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$ulos = "<td><select name='$nimi'>";
 
@@ -599,7 +744,7 @@
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
 					WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'";
-		$varasto_res = mysql_query($query) or pupe_error($query);
+		$varasto_res = pupe_query($query);
 
 		$ulos .= "<td>";
 

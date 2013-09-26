@@ -564,7 +564,7 @@
 
 		echo "</td></tr></table></form>";
 	}
-	elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON" or $toim == "KORJAA" or $toim == "SIIRTOTYOMAARAYS")) {
+	elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON" or strpos($_SERVER['SCRIPT_NAME'], "valmista_tilaus.php") !== FALSE or $toim == "SIIRTOTYOMAARAYS")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
 				<tr>$jarjlisa";

@@ -80,7 +80,7 @@ class Vastaavat {
 		}
 
 		// Haetaan korvaavat ketju ja tuotteiden tiedot
-		$query = "	SELECT 'vastaava' as tyyppi, if (vastaavat.jarjestys=0, 9999, vastaavat.jarjestys) jarjestys, vastaavat.vaihtoehtoinen, tuote.*
+		$query = "	SELECT 'vastaava' as tyyppi, if (vastaavat.jarjestys=0, 9999, vastaavat.jarjestys) jarjestys, vastaavat.vaihtoehtoinen, vastaavat.tunnus as vastaavat_tunnus, tuote.*
 					FROM vastaavat
 					JOIN tuote ON vastaavat.yhtio=tuote.yhtio AND vastaavat.tuoteno=tuote.tuoteno
 					WHERE vastaavat.yhtio = '{$kukarow['yhtio']}'

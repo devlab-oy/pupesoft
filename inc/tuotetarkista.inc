@@ -487,5 +487,13 @@ if(!function_exists("tuotetarkista")) {
 				}
 			}
 		}
+		//tarkistetaan ettei yritet‰ laittaa ostoehdotus sarakkeeseen v‰‰ri‰ kirjaimia! sallitut "E" = ei ja "" = kyll‰
+		if ($fieldname == "ostoehdotus"){
+			if ($t[$i] != "E" AND $t[$i] != "") {
+				$virhe[$i] = t("Ostoehdotus arvo tulee olla joko E tai tyhj‰! (E = ei n‰ytet‰ ja tyhj‰ = n‰ytet‰‰n)");
+			}
+		}
 	}
+	
+		
 }

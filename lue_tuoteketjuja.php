@@ -219,7 +219,7 @@ if ($kasitellaan_tiedosto) {
 
 			for ($j = 0; $j < count($rivi); $j++) {
 				//otetaan rivin kaikki tuotenumerot talteen
-				if ($headers[$j] == "TUOTENO" and $rivi[$j] != "") {
+				if ($headers[$j] == "TUOTENO" and $rivi[$j] != "" and $j != 0) {
 					$haku .= "'$rivi[$j]',";
 				}
 
@@ -372,7 +372,7 @@ if ($kasitellaan_tiedosto) {
 									echo t("Lisättiin ketjuun")," $id {$rivi[$j]}! ";
 								}
 							}
-							elseif ($toiminto == 'POISTA') {
+ 							elseif ($toiminto == 'POISTA' and (($table == 'vastaavat' and $j > 0) or table != 'vastaavat')) {
 
 								if (mysql_num_rows($kresult) == 0) {
 									echo t("Tuotetta")," {$rivi[$j]} ",t("ei voida poistaa, koska se ei löydy tästä ketjusta"),"! ";

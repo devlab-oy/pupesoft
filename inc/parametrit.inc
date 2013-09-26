@@ -347,10 +347,6 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 
 	exit;
 }
-// Selaimet ext-ennakolla s‰ilytt‰‰ kukarow kesken
-if (isset($kukarow['kesken']) and $toim == "EXTENNAKKO") {
-	$kukarow['kesken'] = $tilausnumero;
-}
 
 //	Verkkokauppamoodissa ei koskaan ohjetta!
 if (isset($verkkokauppa) and $verkkokauppa != "") $_GET["ohje"] = "off";

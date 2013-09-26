@@ -2243,6 +2243,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "jt_manual") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Ei k‰ytet‰ manuaalisia JT-rivej‰")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("K‰ytet‰‰n manuaalisia JT-rivej‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "tilausvahvistus_tallenna") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

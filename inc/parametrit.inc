@@ -601,9 +601,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 			if (substr(dirname(__FILE__), -3) == "inc") {
 				echo "<script language='javascript' src='{$palvelin2}inc/jquery.min.js'></script>";
+				echo "<link rel='stylesheet' href='{$palvelin2}inc/jquery-ui.css' />";
+				echo "<script src='{$palvelin2}inc/jquery-ui.js'></script>";
 			}
 			else {
 				echo "<script language='javascript' src='{$palvelin2}jquery.min.js'></script>";
+				echo "<link rel='stylesheet' href='{$palvelin2}jquery-ui-extranet.css' />";
+				echo "<script src='{$palvelin2}jquery-ui.js'></script>";
 			}
 
 			if (isset($pupe_DataTables)) {

@@ -77,7 +77,7 @@
 		}
 		else {
 			$netto = '';
-			$ale1 = (isset($ale1)) ? $ale1 : 0;
+			$ale1 = 0;
 		}
 	}
 

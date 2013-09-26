@@ -284,7 +284,7 @@ function hae_asiakasalennukset($request) {
 						AND tuoteno = '{$tuote['tuoteno']}'
 						AND (
 							asiakas = '{$request['valittu_asiakas']}'
-							OR ryhma = '{$request['asiakas']['ryhma']}'
+							OR asiakas_ryhma = '{$request['asiakas']['ryhma']}'
 						)
 						ORDER BY asiakas DESC";
 			$asiakashinta_result = pupe_query($query);

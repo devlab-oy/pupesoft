@@ -23165,11 +23165,12 @@ if (!function_exists('aja_ruby')) {
 		global $pupe_root_polku;
 
 		// @TODO purkka fix. realpath("/pdfs/ruby/{$ruby_tiedosto_nimi}.rb") palauttaa false. fiksaa jotenkin.
-		if (stristr($pupe_root_polku, 'pupesoft')) {
+		// @TODO 26.9.2013 PURKKA. demo palvelinta varten lisätty or (!stristr($pupe_root_polku, 'extranet') and stristr($pupe_root_polku, 'turvanasi')) ota pois
+		if (stristr($pupe_root_polku, 'pupesoft') or (!stristr($pupe_root_polku, 'extranet') and stristr($pupe_root_polku, 'turvanasi'))) {
 			$filepath = $pupe_root_polku . "/pdfs/ruby/{$ruby_tiedosto_nimi}.rb";
 		}
 		else {
-			$filepath = $pupe_root_polku . "/extranet/pdfs/ruby/{$ruby_tiedosto_nimi}.rb";
+			$filepath = $pupe_root_polku . "/turvanasi_extranet/pdfs/ruby/{$ruby_tiedosto_nimi}.rb";
 		}
 
 		$cmd = "ruby {$filepath} {$json_data_filepath}";

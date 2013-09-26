@@ -1367,7 +1367,7 @@ if (!function_exists('rivi_lahete')) {
 							and tuote.tuotetyyppi != 'R'
 							and tilausrivi.tyyppi != 'V'
 							AND tilausrivi.tyyppi != 'D'
-							and tilausrivi.var NOT IN ('O')
+							and tilausrivi.var != 'O'
 							ORDER BY tilausrivi.tunnus";
 				$perheresult = pupe_query($query);
 
@@ -1473,7 +1473,7 @@ if (!function_exists('rivi_lahete')) {
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.otunnus in ($perherow[tunnukset])
 								AND tilausrivi.tyyppi != 'D'
-								and tilausrivi.var NOT IN ('O')
+								and tilausrivi.var != 'O'
 								and tilausrivi.perheid = '$row[perheid]'";
 					$riresult = pupe_query($query);
 					$perherow = mysql_fetch_assoc($riresult);

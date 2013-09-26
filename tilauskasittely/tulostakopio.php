@@ -1073,7 +1073,7 @@
 									$kerroinlisa2
 									WHERE tilausrivi.yhtio = '$row[yhtio]'
 									and tilausrivi.otunnus = '$row[tunnus]'
-									and tilausrivi.var NOT IN ('O')
+									and tilausrivi.var != 'O'
 									and tilausrivi.tyyppi not in ('D','V')";
 						$sumres = pupe_query($query);
 						$sumrow = mysql_fetch_assoc($sumres);
@@ -1728,7 +1728,7 @@
 								and tilausrivi.tyyppi  != 'D'
 								and tilausrivi.yhtio 	= tuote.yhtio
 								and tilausrivi.tuoteno  = tuote.tuoteno
-								and tilausrivi.var NOT IN ('O')
+								and tilausrivi.var != 'O'
 								ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 					$result = pupe_query($query);
 
@@ -2066,7 +2066,7 @@
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno {$lisa1})
 								WHERE kerayserat.otunnus IN ({$kerayseran_tilaukset})
-								and tilausrivi.var NOT IN ('O')
+								and tilausrivi.var != 'O'
 								AND kerayserat.yhtio   = '{$kukarow['yhtio']}'
 								ORDER BY sorttauskentta";
 				}
@@ -2083,7 +2083,7 @@
 								WHERE tilausrivi.otunnus in ($tilausnumeroita)
 								and tilausrivi.yhtio   = '$kukarow[yhtio]'
 								and tilausrivi.tyyppi  != 'D'
-								and tilausrivi.var NOT IN ('O')
+								and tilausrivi.var != 'O'
 								$lisa1
 								$where_lisa
 								ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";

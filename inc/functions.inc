@@ -18288,7 +18288,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					AND tilausrivi.yhtio = '$kukarow[yhtio]'
 					$tyyppilisa
 					{$koontilisa}
-					and tilausrivi.var NOT IN ('O')
+					and tilausrivi.var != 'O'
 					AND (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 					ORDER BY jtsort, $koontisort $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$riresult = pupe_query($query);
@@ -18409,7 +18409,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							$tyyppilisa
 							$toimitettulisa
-							and tilausrivi.var NOT IN ('O')
+							and tilausrivi.var != 'O'
 							and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 							ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 				$riresult = pupe_query($query);

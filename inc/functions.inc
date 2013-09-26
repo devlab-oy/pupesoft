@@ -20680,7 +20680,9 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				if ($_pakkaus != 0) {
 					$query = "	UPDATE kerayserat SET
 								pakkaus = '{$valittu_pakkaus}',
-								pakkausnro = '{$rivi['data']['pakkausnro']}'
+								pakkausnro = '{$rivi['data']['pakkausnro']}',
+								sscc = '{$rivi['data']['sscc']}',
+								sscc_ulkoinen = '{$rivi['data']['sscc_ulkoinen']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi = '{$rivi['data']['tunnus']}'";
 					$upd_res = pupe_query($query);

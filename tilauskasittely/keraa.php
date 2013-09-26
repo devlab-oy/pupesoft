@@ -273,7 +273,7 @@
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]' and
 					tilausrivi.otunnus in ($tilausnumeroita) and
 					tilausrivi.tyyppi in ('L','G')
-					and tilausrivi.var not in ('P','T','U','J')";
+					and tilausrivi.var not in ('P','T','U','J','O')";
 		$toimresult = pupe_query($query);
 
 		if (mysql_num_rows($toimresult) > 0) {

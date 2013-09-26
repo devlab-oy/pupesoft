@@ -18258,6 +18258,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					AND tilausrivi.yhtio = '$kukarow[yhtio]'
 					$tyyppilisa
 					{$koontilisa}
+					and tilausrivi.var != 'O'
 					AND (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 					ORDER BY jtsort, $koontisort $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$riresult = pupe_query($query);
@@ -18378,6 +18379,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							$tyyppilisa
 							$toimitettulisa
+							and tilausrivi.var != 'O'
 							and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 							ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 				$riresult = pupe_query($query);
@@ -22861,7 +22863,7 @@ if (!function_exists("lisaa_rivi")) {
 		$tuoteno            = (!empty($parametrit['tuoteno']))            ? $parametrit['tuoteno'] : '';             // --> tilattava tuotenumero
 		$toimaika           = (!empty($parametrit['toimaika']))           ? $parametrit['toimaika'] : '';            // --> arvioitu toimitusaika
 		$kerayspvm          = (!empty($parametrit['kerayspvm']))          ? $parametrit['kerayspvm'] : '';           // --> toivottu keräysaika
-		$hinta              = (!empty($parametrit['hinta']))              ? $parametrit['hinta'] : '';                // --> käyttäjän syöttämä hinta
+		$hinta              = (!empty($parametrit['hinta']))              ? $parametrit['hinta'] : '';               // --> käyttäjän syöttämä hinta
 		$netto              = (!empty($parametrit['netto']))              ? $parametrit['netto'] : '';               // --> käyttäjän syöttämä netto
 		$var                = (!empty($parametrit['var']))                ? $parametrit['var'] : '';                 // H,J,P varrit
 		$varasto            = (!empty($parametrit['varasto']))            ? $parametrit['varasto'] : '';             // myydään vain tästä/näistä varastosta
@@ -22885,6 +22887,7 @@ if (!function_exists("lisaa_rivi")) {
 		$tuotenimitys_force = (!empty($parametrit['tuotenimitys_force'])) ? $parametrit['tuotenimitys_force'] : '';  // tuotteen nimitys muutetaan systemitasolla
 		$kommentti          = (!empty($parametrit['kommentti']))          ? $parametrit['kommentti'] : '';           // rivikommentti
 		$alv				= (!empty($parametrit['alv']))		          ? $parametrit['alv'] : '';				 // rivi alv
+		$toim				= (!empty($parametrit['toim']))		          ? $parametrit['toim'] : '';				 // toim
 		$rekisterinumero	= (!empty($parametrit['rekisterinumero']))	  ? $parametrit['rekisterinumero'] : '';	 // rekisterinumero
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {

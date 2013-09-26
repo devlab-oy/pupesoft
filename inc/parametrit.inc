@@ -614,8 +614,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				echo "<script src='{$palvelin2}jquery-ui.js'></script>";
 			}
 
-				if (isset($pupe_DataTables)) {
-					echo "<script language='javascript' src='{$palvelin2}DataTables/media/js/jquery.dataTables.min.js'></script>";
+			if (isset($pupe_DataTables)) {
+				echo "<script language='javascript' src='{$palvelin2}DataTables/media/js/jquery.dataTables.min.js'></script>";
 			}
 
 			// Salitaan VAIN YKSI submitti per sivu! Bye bye tuplaklikkaajat...

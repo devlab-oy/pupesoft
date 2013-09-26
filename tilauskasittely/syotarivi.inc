@@ -291,35 +291,20 @@
 
 		echo "<td valign='top'><input type='text' size='5' name='kpl' maxlength='13' value='$kpl'></td>";
 
-		$selh = $selj = $selp = $selo = "";
-
-		if ($var == "H") {
-			$selh = "SELECTED";
-		}
-		elseif ($var == "J") {
-			$selj = "SELECTED";
-		}
-		elseif ($var == "P") {
-			$selp = "SELECTED";
-		}
-		elseif ($var == "W") {
-			$selw = "SELECTED";
-		}
-		elseif ($var == "O") {
-			$selo = "SELECTED";
-		}	
+		$sel = array($var => 'selected') + array('H' => '', 'J' => '', 'P' => '', 'W' => '', 'O' => '');
 
 		echo "<td valign='top'><select name='var'>";
 		if ($toim == "EXTENNAKKO") {
-			echo "<option value='O' $selo>".t("Optio")."</option>";
+			echo "<option value='O' {$sel['O']}>".t("Optio")."</option>";
 		}
 		echo "<option value=''>".t("Oletus")."</option>";
-		echo "<option value='J' $selj>".t("JT")."</option>";
-		echo "<option value='H' $selh>".t("Hyväksy")."</option>";
-		echo "<option value='P' $selp>".t("Puute")."</option>";
+		echo "<option value='J' {$sel['J']}>".t("JT")."</option>";
+
+		echo "<option value='H' {$sel['H']}>".t("Hyväksy")."</option>";
+		echo "<option value='P' {$sel['P']}>".t("Puute")."</option>";
 
 		if($laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
-			echo "<option value='W' $selw>".t("Varastosta")."</option>";
+			echo "<option value='W' {$sel['W']}>".t("Varastosta")."</option>";
 		}
 
 		echo "</select></td>";

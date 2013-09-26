@@ -2246,7 +2246,10 @@
 					case 'J' : // Jälkitoimitukseen
 						// Ollaan painettu JT-muiden mukana nappia, tai meillä on parametrit siten, että se halutaan defaulttina päälle
 						// (Jt_automatiikka = "kohdistetaan.." ja Automaattinen_jt_toimitus = "Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä keräyspäivän mukaisesti")
-						if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
+						if (isset($jt_manual) and $jt_manual != '' and !empty($yhtiorow['jt_manual'])) {
+							$kerayspvm = date('Y-m-d', strtotime('now'));
+						}
+						else if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
 							$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
 						}
 						else if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'EI') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
@@ -2734,6 +2737,8 @@
 				$tlisatied_lisa2 .= ", kohde_hyllyalue='$kohde_alue' , kohde_hyllynro='$kohde_nro' , kohde_hyllyvali='$kohde_vali' , kohde_hyllytaso='$kohde_taso'";
 			}
 
+			$jt_manual_lisa = (isset($jt_manual) and trim($jt_manual) != '') ? ", jt_manual = 'K'" : ", jt_manual = ''";
+
 			if (mysql_num_rows($lisatied_res) > 0) {
 				$lisatied_row = mysql_fetch_assoc($lisatied_res);
 
@@ -2746,6 +2751,7 @@
 							ei_nayteta			= '{$puu_ein[$i]}'
 							{$tlisatied_lisa}
 							{$tlisatied_lisa2}
+							{$jt_manual_lisa}
 							WHERE yhtio			 = '$kukarow[yhtio]'
 							and tilausrivitunnus = '$lisatty_tun'";
 				$result = pupe_query($query);
@@ -2770,7 +2776,8 @@
 							luontiaika			= now(),
 							laatija 			= '$kukarow[kuka]'
 							{$tlisatied_lisa}
-							{$tlisatied_lisa2}";
+							{$tlisatied_lisa2}
+							{$jt_manual_lisa}";
 
 				if ($trow["sarjanumeroseuranta"] == "S" and $kpl < 0) {
 					$query .= " , osto_vai_hyvitys='O' ";

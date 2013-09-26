@@ -75,7 +75,7 @@ if ($request['action'] == 'aja_raportti') {
 }
 echo_kayttoliittyma($request);
 
-require ("inc/footer.inc");
+//require ("inc/footer.inc");
 
 function echo_kayttoliittyma($request = array()) {
 	global $kukarow, $yhtiorow;
@@ -297,10 +297,7 @@ function hae_asiakasalennukset($request) {
 						FROM asiakashinta
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tuoteno = '{$tuote['tuoteno']}'
-						AND (
-							asiakas = '{$request['valittu_asiakas']}'
-							OR ryhma = '{$request['asiakas']['ryhma']}'
-						)";
+						AND asiakas_ryhma = '{$request['valittu_asiakasryhma']}'";
 			$asiakashinta_result = pupe_query($query);
 			$asiakashinta = mysql_fetch_assoc($asiakashinta_result);
 			list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta(array(), $tuote, 1, '', '', array(), '', '', '', $request['valittu_asiakasryhma']);

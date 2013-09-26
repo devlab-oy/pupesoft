@@ -1649,7 +1649,7 @@
 							FROM tilausrivi
 							WHERE $where
 							and yhtio	= '$kukarow[yhtio]'
-							AND var NOT IN ('O')
+							and var != 'O'
 							$tyyppilisa
 							and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'
 							ORDER BY alv";
@@ -1726,7 +1726,7 @@
 								FROM tilausrivi
 								WHERE $where
 								and yhtio	= '$kukarow[yhtio]'
-								AND var NOT IN ('O')
+								and var != 'O'
 								$tyyppilisa
 								and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'
 								ORDER BY alv";

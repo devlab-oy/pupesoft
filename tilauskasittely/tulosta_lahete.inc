@@ -97,7 +97,7 @@ if (!function_exists('alku_lahete')) {
 						where yhtio = '$kukarow[yhtio]'
 						and otunnus = '$laskurow[tunnus]'
 						AND tyyppi != 'D'
-						AND var NOT IN ('O')";
+						and var != 'O'";
 			$keraresult = pupe_query($query);
 			$kerarow = mysql_fetch_assoc($keraresult);
 
@@ -249,7 +249,7 @@ if (!function_exists('alku_lahete')) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and otunnus IN ($laskurow[nippu])
 							AND tyyppi != 'D'
-							AND var NOT IN ('O')
+							and var != 'O'
 							and toimaika != '0000-00-00'";
 				$toimaikares = pupe_query($query);
 
@@ -730,7 +730,7 @@ if (!function_exists('uusi_sivu_lahete')) {
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
 						and otunnus = '$laskurow[tunnus]'
-						AND var NOT IN ('O')
+						and var != 'O'
 						AND tyyppi != 'D'";
 			$keraresult = pupe_query($query);
 			$kerarow = mysql_fetch_assoc($keraresult);

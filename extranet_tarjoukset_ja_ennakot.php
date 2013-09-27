@@ -145,6 +145,7 @@ if ($action == "") {
 		echo "<br>";
 		echo "<form method='post' action=''>";
 		echo "<input type='hidden' name='action' value='luo_uusi_ennakko'>";
+		echo "<input type='hidden' name='toim' value='EXTENNAKKO'>";
 		echo "<input type='submit' id='luo_uusi_ennakko' value='".t("Luo uusi ennakkotilaus")."'>";
 		echo "</form>";
 	}

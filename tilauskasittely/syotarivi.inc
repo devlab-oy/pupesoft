@@ -307,7 +307,7 @@
 		}
 		elseif ($var == "O") {
 			$selo = "SELECTED";
-		}	
+		}
 
 		echo "<td valign='top'><select name='var'>";
 		if ($toim == "EXTENNAKKO") {
@@ -610,7 +610,18 @@
 
 		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
 			echo "<td>";
-			echo "<input type='text' size='5' name='valmistuslinja' value='{$valmistuslinja}'";
+
+			$valmistuslinja_result = t_avainsana("VALMISTUSLINJA");
+
+			echo "<select name='valmistuslinja'>";
+			echo "<option value = ''>".t("Oletus")."</option>";
+
+			while ($valmistuslinja_row = mysql_fetch_array($valmistuslinja_result)) {
+				$sel = ($valmistuslinja_row["selite"] == $valmistuslinja) ? "selected" : "";
+				echo "<option value='{$valmistuslinja_row["selite"]}' $sel>{$valmistuslinja_row["selitetark"]}</option>";
+			}
+
+			echo "</select>";
 			echo "</td>";
 		}
 

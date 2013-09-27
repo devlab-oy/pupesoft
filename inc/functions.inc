@@ -23173,17 +23173,16 @@ if (!function_exists("splittaa_valmistukset")) {
 		$query = "	SELECT tilausrivi.*,
 					tilausrivin_lisatiedot.positio
 					FROM tilausrivi
-					JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-						AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-					AND tilausrivi.tyyppi = 'W'
+					AND tilausrivi.tyyppi in ('W','M')
 					ORDER BY tilausrivi.tunnus";
 		$tilausrivi_split_result = pupe_query($query);
 
 		$valmistuksen_splittaus_rivi = 0;
-
 		$valmistus_tunnukset = array();
+
 		while ($tilausrivi_split_row = mysql_fetch_assoc($tilausrivi_split_result)) {
 
 			$_toimaika = ($tilausrivi_split_row['toimaika'] == '0000-00-00') ? $laskurow['toimaika'] : $tilausrivi_split_row['toimaika'];

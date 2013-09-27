@@ -918,12 +918,20 @@
 
 			echo "</select></td></tr>";
 
-			if(isset($srow['ryhma'])) {
+			if (isset($srow['ryhma']) and $srow['ryhma'] != "") {
 				echo "<tr>";
-				echo "<td valign='top'>".t("Asiakasryhmä")."</td>";
+				echo "<td valign='top'>".t("Asiakasryhmä").":</td>";
 				echo "<td>{$srow['ryhma']}</td>";
 				echo "</tr>";
 			}
+			
+			if (isset($srow['fakta']) and $srow['fakta'] != "") {
+				echo "<tr>";
+				echo "<td valign='top'>".t("Asiakasfakta").":</td>";
+				echo "<td>".str_replace("\n", "<br>", $srow['fakta'])."</td>";
+				echo "</tr>";
+			}	
+			
 
 			$query  = "	SELECT laji
 						FROM asiakas

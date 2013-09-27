@@ -170,11 +170,12 @@
 
 			echo "</select></td></tr>";
 
-			if ($toim == "VALMISTAVARASTOON") {
-				echo "<tr><th>".t("Valmistuslinja").":</th>";
+			$valmistuslinja_result = t_avainsana("VALMISTUSLINJA");
+			
+			if ($toim == "VALMISTAVARASTOON" and mysql_num_rows($valmistuslinja_result) > 0) {
+				echo "<tr>";
+				echo "<th>".t("Valmistuslinja").":</th>";
 				echo "<td colspan='3'>";
-
-				$valmistuslinja_result = t_avainsana("VALMISTUSLINJA");
 
 				echo "<select name='valmistuslinja'>";
 				echo "<option value = ''>".t("Ei valmistuslinjaa")."</option>";
@@ -184,7 +185,9 @@
 					echo "<option value='{$valmistuslinja_row["selite"]}' $sel>{$valmistuslinja_row["selitetark"]}</option>";
 				}
 				echo "</select>";
-				echo "</td></tr>";
+				echo "<input type='hidden' name='vvalmistuslinja' value='{$srow["kohde"]}' />";
+				echo "</td>";
+				echo "</tr>";
 			}
 
 			echo "<tr><th>".t("Nimi").":</th><td colspan='3'><input type='text' size='35' name='toim_nimi' value='$srow[toim_nimi]'></td>";
@@ -267,7 +270,7 @@
 		//	Olisiko erikseen varastoluokkia?
 		$tresult = t_avainsana("VARASTOLUOKKA");
 
-		if(mysql_num_rows($tresult) == 0) {
+		if (mysql_num_rows($tresult) == 0) {
 			$tresult = t_avainsana("ASIAKASLUOKKA");
 		}
 
@@ -280,13 +283,10 @@
 			echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark]</option>";
 		}
 		echo "</select>";
-
-
 		echo "</td></tr>";
 
-		echo "<tr>";
-
 		if ($toim == "SIIRTOLISTA") {
+			echo "<tr>";
 			echo "<th>".t("Toimitustapa")."</th><td>";
 
 			$query = "	SELECT tunnus, selite
@@ -419,6 +419,18 @@
 						SET toimaika = '$toimvv-$toimkk-$toimpp'
 						WHERE otunnus = '$kukarow[kesken]' and toimaika='$vtoimaika' and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
+
+			if ($yhtiorow['valmistuksien_kasittely'] == 'Y' and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON")) {
+				$query = "	UPDATE tilausrivi
+							JOIN tilausrivin_lisatiedot
+							ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+								AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+							SET tilausrivin_lisatiedot.positio = '{$valmistuslinja}'
+							WHERE tilausrivi.otunnus = '{$kukarow['kesken']}'
+							AND tilausrivin_lisatiedot.positio = '{$vvalmistuslinja}'
+							AND tilausrivi.yhtio = '{$kukarow['yhtio']}'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
 
 			$query = "UPDATE ";
 			$postquery = " WHERE tunnus = '$kukarow[kesken]'";
@@ -578,5 +590,6 @@
 				}
 			}
 		}
+
+		$valmistuslinja = "";
 	}
-?>

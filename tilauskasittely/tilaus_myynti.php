@@ -14,6 +14,8 @@ if (@include("../inc/parametrit.inc"));
 elseif (@include("parametrit.inc"));
 else exit;
 
+require('validation/Validation.php');
+
 if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot') {
 
 	if (@file_exists("../inc/sahkoinen_tilausliitanta.inc")) {
@@ -989,6 +991,7 @@ if (isset($tyhjenna)) {
 	$sopimuksen_lisatieto1 = "";
 	$sopimuksen_lisatieto2 = "";
 	$omalle_tilaukselle = "";
+	$valmistuslinja     = "";
 }
 
 if ($tee == "VALMIS"
@@ -1313,8 +1316,20 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		require("tyomaarays/tyomaarays.inc");
 	}
 	elseif ($kukarow["extranet"] == "" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") and $msiirto == "") {
-		// Siirtolista, myyntitili, valmistus valmis
-		require ("tilaus-valmis-siirtolista.inc");
+		if (($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			$valmistus_tunnukset = splittaa_valmistukset($laskurow);
+
+			// Jos valmistuksien_kasittely == Valmistuksella voi olla vain yksi valmiste,
+			// niin loopataan valmistusrivit läpi ja luodaan jokaiselle riville oma otsikko
+			foreach ($valmistus_tunnukset as $valmistus_tunnus) {
+				$laskurow = hae_lasku($valmistus_tunnus);
+				require ("tilaus-valmis-siirtolista.inc");
+			}
+		}
+		else {
+			// Siirtolista, myyntitili, valmistus valmis
+			require ("tilaus-valmis-siirtolista.inc");
+		}
 	}
 	elseif ($toim == "PROJEKTI") {
 		// Projekti, tällä ei ole mitään rivejä joten nollataan vaan muuttujat
@@ -3084,7 +3099,7 @@ if ($tee == '') {
 
 			if (trim($faktarow["fakta"]) != "" and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 				echo "<tr>$jarjlisa<th>".t("Asiakasfakta").":</th><td colspan='3'>";
-				echo "<strong>".wordwrap($faktarow["fakta"], 110, "<br>")."</strong>&nbsp;</td></tr>\n";
+				echo "<strong>".str_replace("\n", "<br>", $faktarow['fakta'])."</strong>&nbsp;</td></tr>\n";
 			}
 
 			// Katsotaan onko liitetiedostoja
@@ -3748,21 +3763,22 @@ if ($tee == '') {
 				${'ale'.$alepostfix} = $tilausrivi["ale{$alepostfix}"];
 			}
 
-			$netto		= $tilausrivi['netto'];
-			$alv 		= $tilausrivi['alv'];
-			$kommentti	= $tilausrivi['kommentti'];
-			$kerayspvm	= $tilausrivi['kerayspvm'];
-			$toimaika	= $tilausrivi['toimaika'];
-			$hyllyalue	= $tilausrivi['hyllyalue'];
-			$hyllynro	= $tilausrivi['hyllynro'];
-			$hyllytaso	= $tilausrivi['hyllytaso'];
-			$hyllyvali	= $tilausrivi['hyllyvali'];
-			$rivinumero	= $tilausrivi['tilaajanrivinro'];
-			$jaksotettu = $tilausrivi['jaksotettu'];
-			$perheid2 	= $tilausrivi["perheid2"];
-			$sopimuksen_lisatieto1 = $tilausrivi["sopimuksen_lisatieto1"];
-			$sopimuksen_lisatieto2 = $tilausrivi["sopimuksen_lisatieto2"];
-			$omalle_tilaukselle = $tilausrivi['omalle_tilaukselle'];
+			$netto					= $tilausrivi['netto'];
+			$alv 					= $tilausrivi['alv'];
+			$kommentti				= $tilausrivi['kommentti'];
+			$kerayspvm				= $tilausrivi['kerayspvm'];
+			$toimaika				= $tilausrivi['toimaika'];
+			$hyllyalue				= $tilausrivi['hyllyalue'];
+			$hyllynro				= $tilausrivi['hyllynro'];
+			$hyllytaso				= $tilausrivi['hyllytaso'];
+			$hyllyvali				= $tilausrivi['hyllyvali'];
+			$rivinumero				= $tilausrivi['tilaajanrivinro'];
+			$jaksotettu 			= $tilausrivi['jaksotettu'];
+			$perheid2 				= $tilausrivi["perheid2"];
+			$sopimuksen_lisatieto1	= $tilausrivi["sopimuksen_lisatieto1"];
+			$sopimuksen_lisatieto2	= $tilausrivi["sopimuksen_lisatieto2"];
+			$omalle_tilaukselle		= $tilausrivi['omalle_tilaukselle'];
+			$valmistuslinja			= $tilausrivi['positio'];
 
 			// useamman valmisteen reseptit...
 			if (($tilausrivi['tyyppi'] == "W" and $tilausrivi["tunnus"] != $tilausrivi["perheid"]) or ($tilausrivi['tyyppi'] == "W" and $tapa == "VAIHDA")) {
@@ -3861,21 +3877,22 @@ if ($tee == '') {
 					${'ale'.$alepostfix} = '';
 				}
 
-				$tuoteno			= '';
-				$kpl				= '';
-				$var				= '';
-				$hinta				= '';
-				$netto				= '';
-				$rivitunnus			= 0;
-				$kommentti			= '';
-				$kerayspvm			= '';
-				$toimaika			= '';
-				$paikka				= '';
-				$alv				= '';
-				$perheid			= 0;
-				$perheid2			= 0;
-				$tilausrivilinkki	= '';
-				$toimittajan_tunnus	= '';
+				$tuoteno			   = '';
+				$kpl				   = '';
+				$var				   = '';
+				$hinta				   = '';
+				$netto				   = '';
+				$rivitunnus			   = 0;
+				$kommentti			   = '';
+				$kerayspvm			   = '';
+				$toimaika			   = '';
+				$paikka				   = '';
+				$alv				   = '';
+				$perheid			   = 0;
+				$perheid2			   = 0;
+				$tilausrivilinkki	   = '';
+				$toimittajan_tunnus	   = '';
+				$valmistuslinja        = '';
 			}
 		}
 	}
@@ -4327,6 +4344,7 @@ if ($tee == '') {
 		$sopimuksen_lisatieto2 = "";
 		if (!isset($lisaa_jatka)) $variaatio_tuoteno = "";
 		$omalle_tilaukselle = "";
+		$valmistuslinja     = "";
 	}
 
 	//Syöttörivi

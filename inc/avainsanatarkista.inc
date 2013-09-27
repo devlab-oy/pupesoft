@@ -58,6 +58,13 @@ if(!function_exists("avainsanatarkista")) {
 				$seliteerrori = 1;
 			}
 
+			if ($tem_laji == 'INVASTEPAIKKA') {
+
+				if (preg_match("/\A[\w#הצוִײֵ!]{1,5}-[\w#הצוִײֵ!]{1,5}-[\w#הצוִײֵ!]{1,5}-[\w#הצוִײֵ!]{1,5}\z/", $t[$i]) == false) {
+					$virhe[$i] = t("Tuotepaikka on virheellinen");
+				}
+			}
+
 			if ($tem_laji == 'HINNAT_CRON' or $tem_laji == 'TUOTE_EXP_CRON') {
 
 				$date = $t[$i];

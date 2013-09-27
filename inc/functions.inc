@@ -369,12 +369,19 @@ if (!function_exists("pupesoft_rest")) {
 											);
 		}
 
+		if (!isset($parameters['timeout'])) $timeout = 10;
+		else $timeout = (int) $parameters['timeout'];
+
 		$handle = curl_init();
 		curl_setopt($handle, CURLOPT_URL, $parameters["url"]);
 		curl_setopt($handle, CURLOPT_HTTPHEADER, $parameters["headers"]);
 		curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
+
+		if ($parameters['posttype'] == 'xml') {
+			curl_setopt($handle, CURLOPT_CONNECTTIMEOUT, $timeout);
+		}
 
 		if (isset($parameters["auth_user"]) and isset($parameters["auth_pass"])) {
 			curl_setopt($handle, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);

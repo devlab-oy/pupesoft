@@ -57,6 +57,9 @@ $request['aleryhmat'] = hae_aleryhmat();
 if ($request['action'] == 'aja_raportti') {
 	echo "<font class='message'>".t("Raporttia ajetaan")."</font>";
 	echo "<br/>";
+
+	$html = ob_get_clean();
+	echo $html;
 	
 	$request['tuotteet'] = hae_asiakashinta_ja_alennus_tuotteet($request);
 
@@ -99,7 +102,8 @@ function echo_kayttoliittyma($request = array()) {
 	echo "<select id='valittu_asiakasryhma' name='valittu_asiakasryhma'>";
 	foreach ($request['asiakasryhmat'] as $asiakasryhma) {
 		$sel = "";
-		if ($request['valittu_asiakasryhma'] == $asiakasryhma['selite']) {
+		//absoluuttinen vertaus tarvitaan, koska asiakasryhmän tunnuksessa voi olla leading zero 005023 == 5023
+		if ($request['valittu_asiakasryhma'] === $asiakasryhma['selite']) {
 			$sel = "SELECTED";
 		}
 		echo "<option value='{$asiakasryhma['selite']}' {$sel}>{$asiakasryhma['selite']} - {$asiakasryhma['selitetark']}</option>";
@@ -317,10 +321,21 @@ function hae_asiakasalennukset($request) {
 		$alennusryhma = search_array_key_for_value_recursive($request['aleryhmat'], 'ryhma', $tuote['aleryhma']);
 
 		if (empty($asiakashinta['hinta'])) {
-			$kateprosentti = number_format((1 - ($tuotteen_toimittaja_row['ostohinta'] / $alennettu_hinta)) * 100, 2);
+			if ($alennettu_hinta == 0) {
+				$kateprosentti = number_format(0, 2);
+			}
+			else {
+				$kateprosentti = number_format((1 - ($tuotteen_toimittaja_row['ostohinta'] / $alennettu_hinta)) * 100, 2);
+			}
+			
 		}
 		else {
-			$kateprosentti = number_format((1 - ($tuotteen_toimittaja_row['ostohinta'] / $asiakashinta['hinta'])) * 100, 2);
+			if ($asiakashinta['hinta'] == 0) {
+				$kateprosentti = number_format(0, 2);
+			}
+			else {
+				$kateprosentti = number_format((1 - ($tuotteen_toimittaja_row['ostohinta'] / $asiakashinta['hinta'])) * 100, 2);
+			}
 		}
 		$tuote_temp = array(
 			'aleryhma'			 => $alennusryhma[0],

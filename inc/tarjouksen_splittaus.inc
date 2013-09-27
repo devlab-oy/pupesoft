@@ -40,12 +40,12 @@ $dummy_tarjouksen_tilausnumero = $tilausnumero;
 foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 
 	$kukarow['kesken'] = 0;
-
+	
 	if ($toim == "EXTTARJOUS") {
-		$tilausnumero = luo_myyntitilausotsikko('TARJOUS', $tarjous_asiakas, '', '', '', '', '', '', $clearing);
+		$tilausnumero = luo_myyntitilausotsikko('TARJOUS', $tarjous_asiakas, '', '', '', '', '', '');
 	}
 	else {
-		$tilausnumero = luo_myyntitilausotsikko('ENNAKKO', $tarjous_asiakas, '', '', '', '', '', '', $clearing);
+		$tilausnumero = luo_myyntitilausotsikko('ENNAKKO', $tarjous_asiakas, '', '', '', '', '', '');
 	}
 
 	//Halutaan pit‰‰ asiakkaille kopioitavissa tarjouksissa myyj‰n valitsema varasto
@@ -113,4 +113,10 @@ $query = "  UPDATE lasku
 			SET tila = 'D'
 			WHERE yhtio = '{$kukarow['yhtio']}'
 			AND tunnus = '{$dummy_tarjouksen_tilausnumero}'";
+pupe_query($query);
+
+$query = "	UPDATE kuka
+			SET kesken = 0
+			WHERE yhtio = '{$kukarow['yhtio']}'
+			AND kuka = '{$kukarow['kuka']}'";
 pupe_query($query);

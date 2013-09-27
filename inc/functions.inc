@@ -18258,6 +18258,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					AND tilausrivi.yhtio = '$kukarow[yhtio]'
 					$tyyppilisa
 					{$koontilisa}
+					and tilausrivi.var != 'O'
 					AND (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 					ORDER BY jtsort, $koontisort $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$riresult = pupe_query($query);
@@ -18378,6 +18379,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							$tyyppilisa
 							$toimitettulisa
+							and tilausrivi.var != 'O'
 							and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 							ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 				$riresult = pupe_query($query);
@@ -20680,7 +20682,9 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				if ($_pakkaus != 0) {
 					$query = "	UPDATE kerayserat SET
 								pakkaus = '{$valittu_pakkaus}',
-								pakkausnro = '{$rivi['data']['pakkausnro']}'
+								pakkausnro = '{$rivi['data']['pakkausnro']}',
+								sscc = '{$rivi['data']['sscc']}',
+								sscc_ulkoinen = '{$rivi['data']['sscc_ulkoinen']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi = '{$rivi['data']['tunnus']}'";
 					$upd_res = pupe_query($query);
@@ -21828,21 +21832,23 @@ if (!function_exists('hae_laskun_tilausrivit')) {
 		global $kukarow, $yhtiorow;
 
 		if (!empty($tyypit)) {
-			$tilausrivi_where = " AND tyyppi IN ('".implode("','", $tyypit)."') ";
+			$tilausrivi_where = " AND tilausrivi.tyyppi IN ('".implode("','", $tyypit)."') ";
 		}
 		else {
-			$tilausrivi_where = " AND tyyppi != 'D' ";
+			$tilausrivi_where = " AND tilausrivi.tyyppi != 'D' ";
 		}
 
 		if ($sorttauskentta == "") $sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
 		$query = "	SELECT tilausrivi.*,
+					tilausrivin_lisatiedot.rekisterinumero,
 					$sorttauskentta
 					FROM tilausrivi
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND otunnus = '{$otunnus}'
+					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.otunnus = '{$otunnus}'
 					{$tilausrivi_where}
-					ORDER BY sorttauskentta {$sorttaussuunta}, tunnus";
+					ORDER BY sorttauskentta {$sorttaussuunta}, tilausrivi.tunnus";
 		$result = pupe_query($query);
 		$tilausrivit = array();
 
@@ -22857,7 +22863,7 @@ if (!function_exists("lisaa_rivi")) {
 		$tuoteno            = (!empty($parametrit['tuoteno']))            ? $parametrit['tuoteno'] : '';             // --> tilattava tuotenumero
 		$toimaika           = (!empty($parametrit['toimaika']))           ? $parametrit['toimaika'] : '';            // --> arvioitu toimitusaika
 		$kerayspvm          = (!empty($parametrit['kerayspvm']))          ? $parametrit['kerayspvm'] : '';           // --> toivottu keräysaika
-		$hinta              = (!empty($parametrit['hinta']))              ? $parametrit['hinta'] : '';                // --> käyttäjän syöttämä hinta
+		$hinta              = (!empty($parametrit['hinta']))              ? $parametrit['hinta'] : '';               // --> käyttäjän syöttämä hinta
 		$netto              = (!empty($parametrit['netto']))              ? $parametrit['netto'] : '';               // --> käyttäjän syöttämä netto
 		$var                = (!empty($parametrit['var']))                ? $parametrit['var'] : '';                 // H,J,P varrit
 		$varasto            = (!empty($parametrit['varasto']))            ? $parametrit['varasto'] : '';             // myydään vain tästä/näistä varastosta
@@ -22880,7 +22886,9 @@ if (!function_exists("lisaa_rivi")) {
 		$tuotenimitys       = (!empty($parametrit['tuotenimitys']))       ? $parametrit['tuotenimitys'] : '';        // tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
 		$tuotenimitys_force = (!empty($parametrit['tuotenimitys_force'])) ? $parametrit['tuotenimitys_force'] : '';  // tuotteen nimitys muutetaan systemitasolla
 		$kommentti          = (!empty($parametrit['kommentti']))          ? $parametrit['kommentti'] : '';           // rivikommentti
-		$alv				= (!empty($parametrit['alv']))		          ? $parametrit['alv'] : '';				// rivi alv
+		$alv				= (!empty($parametrit['alv']))		          ? $parametrit['alv'] : '';				 // rivi alv
+		$toim				= (!empty($parametrit['toim']))		          ? $parametrit['toim'] : '';				 // toim
+		$rekisterinumero	= (!empty($parametrit['rekisterinumero']))	  ? $parametrit['rekisterinumero'] : '';	 // rekisterinumero
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			$ale_temp = str_replace(',', '.', $parametrit{'ale'.$alepostfix});

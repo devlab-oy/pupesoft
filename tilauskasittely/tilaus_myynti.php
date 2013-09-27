@@ -1,6 +1,5 @@
 <?php
 
-
 if (isset($_REQUEST['tulosta_maksusopimus']) and is_numeric(trim($_REQUEST['tulosta_maksusopimus']))) {
 	$nayta_pdf = 1;
 	$ohje = 'off';
@@ -373,7 +372,8 @@ if ($kukarow["extranet"] != '') {
 						AND liitostunnus = '$asiakasid'
 						AND tila 		 = '$ex_tila'
 						AND alatila 	 = ''
-						AND laatija 	 = '{$kukarow['kuka']}'";
+						AND laatija 	 = '{$kukarow['kuka']}'
+						AND clearing != 'EXTENNAKKO'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
@@ -1446,8 +1446,12 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 			//	Päiviteään aina myös projektin aktiiviseksi jos se on ollut kesken
 			$query = "	UPDATE lasku SET
-							alatila = 'A'
-						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnusnippu]' and tunnusnippu > 0 and tila = 'R' and alatila= ''";
+						alatila = 'A'
+						WHERE yhtio     = '$kukarow[yhtio]'
+						and tunnusnippu = '$laskurow[tunnusnippu]'
+						and tunnusnippu > 0
+						and tila        = 'R'
+						and alatila     = ''";
 			$updres = pupe_query($query);
 
 			//	Hypätään takaisin otsikolle
@@ -3810,6 +3814,7 @@ if ($tee == '') {
 				$perheid	= $tilausrivi['perheid'];
 				$tila		= "";
 				$var		= $tilausrivi["var"];
+				$var2 		= $tilausrivi['var2'];
 			}
 			elseif ($tapa == "VAIHDAJAPOISTA") {
 				$perheid	= "";
@@ -5026,6 +5031,21 @@ if ($tee == '') {
 						 	".t("Verolliset hinnat").": <input type='radio' onclick='submit();' name='tilausrivi_alvillisuus' value='K' $sele[K]>
 						 	".t("Verottomat hinnat").": <input type='radio' onclick='submit();' name='tilausrivi_alvillisuus' value='E' $sele[E]>
 							</form>";
+
+					if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+
+						$style = "width: 15px; height: 15px; display: inline-table; border-radius: 50%; -webkit-border-radius: 50%; -moz-border-radius: 50%;";
+
+						echo "&nbsp;&nbsp;&nbsp;<span class='tooltip' id='color_tooltip'><span style='{$style} background-color: #5D2; margin-right: 5px;'></span><span style='{$style} background-color: #FCF300; margin-right: 5px;'></span><span style='{$style} background-color: #E66; margin-right: 5px;'></span></span></a>";
+						echo "<div id='div_color_tooltip' class='popup' style='width: 300px; line-height: 15px; height: 60px;'>";
+						echo "<table>";
+						echo "<tr><td class='back'><span style='{$style} background-color: #5D2;'></span></td><td class='back'><span style='float: right'>",t("kysytty määrä löytyy"),"</span></td></tr>";
+						echo "<tr><td class='back'><span style='{$style} background-color: #FCF300;'></span></td><td class='back'><span style='float: right;'>",t("osa kysytystä määrästä löytyy"),"</span></td></tr>";
+						echo "<tr><td class='back'><span style='{$style} background-color: #E66'></span></td><td class='back'><span style='float: right;'>",t("kysyttyä määrää ei löydy"),"</span></td></tr>";
+						echo "<tr><td class='back'><img src='{$palvelin2}pics/lullacons/alert.png' /></td><td class='back'><span style='float: right;'>",t("kysyttyä tuotetta ei löydy"),"</span></td></tr>";
+						echo "</table>";
+						echo "</div>";
+					}
 				}
 				else {
 					echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
@@ -6746,7 +6766,7 @@ if ($tee == '') {
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.tyyppi in ($tilrivity)
 								and tilausrivi.tyyppi not in ('D','V','M')
-								and tilausrivi.var not in ('O')
+								and tilausrivi.var != 'O'
 								$tunnuslisa
 								GROUP BY 1
 								ORDER BY 1";

@@ -262,8 +262,8 @@ elseif ($laskurow["tila"] == 'T') {
 
 	//tila on T kun kyseessä on tarjous
 	$query  = "	UPDATE lasku
-				SET tila='T',
-				alatila='A'
+				SET tila = 'T',
+				alatila  = 'A'
 				WHERE tunnus='$laskurow[tunnus]'
 				and tila ='T'
 				and yhtio='$kukarow[yhtio]'";
@@ -795,10 +795,11 @@ else {
 
 				$query = "	UPDATE lasku
 							SET tila = 'N',
-							alatila = 'A'
+							alatila  = 'A'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$laskurow['tunnus']}'";
 				pupe_query($query);
+
 				// Tulostetaan keräyslista
 				$tilausnumeroita = $laskurow["tunnus"];
 				require("tilaus-valmis-tulostus.inc");

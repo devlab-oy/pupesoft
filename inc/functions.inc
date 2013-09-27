@@ -380,7 +380,7 @@ if (!function_exists("pupesoft_rest")) {
 		curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
 
 		if ($parameters['posttype'] == 'xml') {
-			curl_setopt($handle, CURLOPT_CONNECTTIMEOUT, $timeout);
+			curl_setopt($handle, CURLOPT_TIMEOUT, $timeout);
 		}
 
 		if (isset($parameters["auth_user"]) and isset($parameters["auth_pass"])) {

@@ -1319,12 +1319,12 @@ if (!function_exists("saldo_myytavissa")) {
 			if ($tyyppi == "E") {
 				$valinta1 = " varastopaikat.tyyppi = 'E' and ";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 			elseif ($tyyppi == "V") {
 				$valinta1 = " varastopaikat.tyyppi = 'V' and ";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 			elseif ($tyyppi == "KAIKKI") {
 				$valinta1 = "";
@@ -1334,19 +1334,19 @@ if (!function_exists("saldo_myytavissa")) {
 			elseif ($tyyppi == "ORVOT") {
 				$valinta1 = "";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is null ";
+				$valinta3 = " varastopaikat.tyyppi is null ";
 			}
 			else {
 				$valinta1 = " (varastopaikat.tyyppi = '' or (varastopaikat.tyyppi = 'E' and varastopaikat.erikoistoimitus_alarajasumma > 0 and '$tuote[myyntihinta]' >= varastopaikat.erikoistoimitus_alarajasumma)) and ";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 
 			// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
 			if ((is_numeric($varasto) and $varasto > 0) or (!is_numeric($varasto) and $varasto != "")) {
 				$valinta1 = " varastopaikat.tunnus in ($varasto) and ";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 
 			// Katotaan halutaanko saldo vaan joltain tietyltä varasopaikalta, silloinkin unohdetaan edellä annettu tyyppi kokonaan
@@ -1356,7 +1356,7 @@ if (!function_exists("saldo_myytavissa")) {
 								and tuotepaikat.hyllynro  = '$hyllynro'
 								and tuotepaikat.hyllyvali = '$hyllyvali'
 								and tuotepaikat.hyllytaso = '$hyllytaso' ";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 
 			if ($maa != "") {
@@ -1371,6 +1371,10 @@ if (!function_exists("saldo_myytavissa")) {
 
 			// Saldo varastoista
 			if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {
+				if ($valinta3 != '') {
+					$valinta3 = "HAVING {$valinta3}";
+				}
+
 				$query = "	SELECT sum(sarjanumeroseuranta.era_kpl) saldo, tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi
 							FROM tuotepaikat
 							LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
@@ -1394,6 +1398,10 @@ if (!function_exists("saldo_myytavissa")) {
 							$valinta3";
 			}
 			else {
+				if ($valinta3 != '') {
+					$valinta3 = "AND {$valinta3}";
+				}
+
 				$query = "	SELECT tuotepaikat.saldo, tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi
 							FROM tuotepaikat
 							LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
@@ -18827,7 +18835,7 @@ if (!function_exists('gauge')) {
 
 // Lasketaan moneenko valmisteeseen raaka-aineet riittää
 if (!function_exists('raaka_aineiden_riitto')) {
-	function raaka_aineiden_riitto($tuoteno, $varasto = 0) {
+	function raaka_aineiden_riitto($tuoteno, $varasto = 0, $return_type = '') {
 
 		global $kukarow;
 
@@ -18835,6 +18843,7 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		$join_lisa = "";
 		$varasto = (int) $varasto;
 		$tuoteno = mysql_real_escape_string($tuoteno);
+		$return = array();
 
 		// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
 		if ($varasto != 0) {
@@ -18847,7 +18856,8 @@ if (!function_exists('raaka_aineiden_riitto')) {
 
 		// Loopataan lapsituotteet läpi
 		$query = "	SELECT tuoteperhe.tuoteno,
-					tuoteperhe.kerroin
+					tuoteperhe.kerroin,
+					tuote.nimitys
 					FROM tuoteperhe
 					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
 						AND tuote.tuoteno = tuoteperhe.tuoteno
@@ -18868,7 +18878,14 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		while ($row = mysql_fetch_assoc($result)) {
 			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($row["tuoteno"], '', $varasto);
 
-			$riitto = $myytavissa / $row["kerroin"];
+			$riitto = round($myytavissa / $row["kerroin"], 2);
+
+			$return[] = array(
+				'tuoteno'	 => $row['tuoteno'],
+				'nimitys'	 => $row['nimitys'],
+				'saldo'		 => $myytavissa,
+				'riitto'	 => $riitto,
+			);
 
 			// Otetaan telteen pienin riitto
 			if ($riitto < $voidaan_valmistaa) {
@@ -18879,7 +18896,14 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		// Näytetään alle nollat nollana ja pyöristetään desimaalit alas
 		$voidaan_valmistaa = $voidaan_valmistaa < 0 ? 0 : floor($voidaan_valmistaa);
 
-		return $voidaan_valmistaa;
+		//Jos return_type != '',
+		//palautetaan kaikki raaka-aineet ja niiden saldot sekä riitot array:ssä
+		if ($return_type != "") {
+			return $return;
+		}
+		else {
+			return $voidaan_valmistaa;
+		}
 	}
 }
 
@@ -21160,6 +21184,11 @@ if (!function_exists('_xls_jarjestetty_rivit')) {
 				if (!stristr($column_name, 'tunnus') and isset($rivi[$column_name]) and !in_array($column_name, $sulje_pois)) {
 					_kirjoita_solu($xls, $column_name, $rivi[$column_name], $rivi_numero, $sarake_numero, $force_to_string);
 				}
+				else if (!isset($rivi[$column_name])) {
+					//jos aineisto on viallinen,
+					//lisätään tyhjä solu jotta solujen järjestys pysyy oikeana
+					_kirjoita_solu($xls, $column_name, '', $rivi_numero, $sarake_numero, $force_to_string);
+				}
 			}
 			$rivi_numero++;
 			$sarake_numero = 0;
@@ -22886,6 +22915,7 @@ if (!function_exists("lisaa_rivi")) {
 		$tuotenimitys       = (!empty($parametrit['tuotenimitys']))       ? $parametrit['tuotenimitys'] : '';        // tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
 		$tuotenimitys_force = (!empty($parametrit['tuotenimitys_force'])) ? $parametrit['tuotenimitys_force'] : '';  // tuotteen nimitys muutetaan systemitasolla
 		$kommentti          = (!empty($parametrit['kommentti']))          ? $parametrit['kommentti'] : '';           // rivikommentti
+		$valmistuslinja     = (!empty($parametrit['valmistuslinja']))     ? $parametrit['valmistuslinja'] : '';      // valmistuslinja
 		$alv				= (!empty($parametrit['alv']))		          ? $parametrit['alv'] : '';				 // rivi alv
 		$toim				= (!empty($parametrit['toim']))		          ? $parametrit['toim'] : '';				 // toim
 		$rekisterinumero	= (!empty($parametrit['rekisterinumero']))	  ? $parametrit['rekisterinumero'] : '';	 // rekisterinumero
@@ -23124,6 +23154,98 @@ if (!function_exists("hae_viivakoodilla")) {
 		}
 
 		return $viivakoodit;
+	}
+}
+
+if (!function_exists("splittaa_valmistukset")) {
+	function splittaa_valmistukset($laskurow) {
+		global $yhtiorow, $kukarow;
+
+		// Otetaan laskurow talteen, ja nollataan sieltä kentät jota ei monisteta
+		$laskurow_temp = $laskurow;
+		unset($laskurow_temp['tunnus']);
+		unset($laskurow_temp['muutospvm']);
+		unset($laskurow_temp['muuttaja']);
+		unset($laskurow_temp['luontiaika']);
+		unset($laskurow_temp['laatija']);
+		unset($laskurow_temp['toimaika']);
+		unset($laskurow_temp['kerayspvm']);
+		unset($laskurow_temp['kohde']);
+		unset($laskurow_temp['alatila']);
+
+		// Haetaan kaikki valmisteet
+		$query = "	SELECT tilausrivi.*,
+					tilausrivin_lisatiedot.positio
+					FROM tilausrivi
+					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+					AND tilausrivi.tyyppi in ('W','M')
+					ORDER BY tilausrivi.tunnus";
+		$tilausrivi_split_result = pupe_query($query);
+
+		$valmistuksen_splittaus_rivi = 0;
+		$valmistus_tunnukset = array();
+
+		while ($tilausrivi_split_row = mysql_fetch_assoc($tilausrivi_split_result)) {
+
+			$_toimaika = ($tilausrivi_split_row['toimaika'] == '0000-00-00') ? $laskurow['toimaika'] : $tilausrivi_split_row['toimaika'];
+			$_kerayspvm = ($tilausrivi_split_row['kerayspvm'] == '0000-00-00') ? $laskurow['kerayspvm'] : $tilausrivi_split_row['kerayspvm'];
+			$_kohde = ($tilausrivi_split_row['positio'] == '') ? $laskurow['kohde'] : $tilausrivi_split_row['positio'];
+
+			// Jätetään ensimmäinen rivi alkuperäiselle otsikolle
+			if ($valmistuksen_splittaus_rivi == 0) {
+				$valmistus_tunnukset[] = $tilausrivi_split_row['otunnus'];
+				$query = "	UPDATE lasku
+							SET kohde = '{$_kohde}',
+							toimaika = '{$_toimaika}',
+							kerayspvm = '{$_kerayspvm}',
+							muutospvm = now(),
+							muuttaja = '{$kukarow['kuka']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$tilausrivi_split_row['otunnus']}'";
+				pupe_query($query);
+
+				$valmistuksen_splittaus_rivi++;
+				continue;
+			}
+
+			$query = "	INSERT INTO lasku (
+								".implode(", ", array_keys($laskurow_temp)).",
+								luontiaika,
+								laatija,
+								muutospvm,
+								muuttaja,
+								toimaika,
+								kerayspvm,
+								kohde,
+								alatila)
+								VALUES (
+								'".implode("', '", array_values($laskurow_temp))."',
+								now(),
+								'{$kukarow['kuka']}',
+								now(),
+								'{$kukarow['kuka']}',
+								'{$_toimaika}',
+								'{$_kerayspvm}',
+								'{$_kohde}',
+								'J')";
+			pupe_query($query);
+			$valmistus_tunnus = mysql_insert_id();
+			$valmistus_tunnukset[] = $valmistus_tunnus;
+
+			// Siirretään koko perhe uudelle otsikolle
+			if (!empty($valmistus_tunnus)) {
+				$query = "	UPDATE tilausrivi SET otunnus = '{$valmistus_tunnus}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND otunnus = '{$laskurow['tunnus']}'
+							AND perheid = '{$tilausrivi_split_row['tunnus']}'
+							AND perheid != 0";
+				pupe_query($query);
+			}
+		}
+
+		return $valmistus_tunnukset;
 	}
 }
 

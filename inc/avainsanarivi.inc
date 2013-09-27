@@ -88,6 +88,7 @@
 		$avain_sel['TYOM_TYOKENTAT'] == "SELECTED" or
 		$avain_sel['TYOM_TYOLINJA'] == "SELECTED" or
 		$avain_sel['TYOM_TYOSTATUS'] == "SELECTED" or
+		$avain_sel['VALMISTUSLINJA'] == "SELECTED" or
 		$avain_sel["SAHKTILTUN"] == "SELECTED" or
 		$avain_sel['Y'] == "SELECTED")) {
 		$tyyppi = 1;

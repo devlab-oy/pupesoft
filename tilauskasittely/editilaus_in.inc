@@ -1995,6 +1995,11 @@ while ($tietue = fgets($fd)) {
 					$edi_ulos .= "\n".t("Merkittiin tilaus valmiiksi").": $editilaus_lasku_tunnus.\n\n";
 				}
 				elseif ($editilaus_tila == "Z") {
+					$query = "	UPDATE lasku SET
+								alatila 		= 'A'
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus  = '$editilaus_lasku_tunnus'";
+					$terminaali_tilaus_res = pupe_query($query);
 					$edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
 				}
 				elseif ($editilaus_tilaustyyppi == 3) {

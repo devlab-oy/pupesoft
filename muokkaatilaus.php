@@ -586,7 +586,7 @@
 		}
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
-			$valmistuslinjat = hae_valmistuslinjat();
+
 			// Näytetään muuten vaan sopivia tilauksia
 			echo "<br><br>";
 			echo "<form method='post' name='hakuformi'>";
@@ -602,25 +602,26 @@
 			if ($toim == "YLLAPITO") {
 				echo t("Syötä tilausnumeron, asiakkaan tilausnumeron, nimen, laatijan tai sopimuksen lisätiedon osa")."</th>";
 			}
-			else if ($toim == "MYYNTITILITOIMITA") {
-				echo t('Syötä tuotenumeron, tilausnumeron,').'<br/>'.t('nimen tai laatijan osa')."</th>";
+			elseif ($toim == "MYYNTITILITOIMITA") {
+				echo t('Syötä tuotenumeron, tilausnumeron, nimen tai laatijan osa')."</th>";
 			}
-			else if ($toim == "VALMISTUS") {
-				echo t('Syötä tilausnumeron,').'<br/>'.t('nimen tai laatijan osa')."</th>";
+			elseif ($toim == "VALMISTUS") {
+				$valmistuslinjat = hae_valmistuslinjat();
+
+				echo t('Syötä tilausnumeron, nimen tai laatijan osa')."</th>";
 				echo "<td>";
-				echo "<input type='text' name='etsi'>";
+				echo "<input type='text' size='25' name='etsi'>";
 				echo "</td>";
 				echo "</tr>";
 
 				echo "<tr>";
 				echo "<th>".t('Tuotenumero')."</th>";
 				echo "<td>";
-				echo "<input type='text' name='tuoteno' value='{$tuoteno}' />";
+				echo "<input type='text' size='25' name='tuoteno' value='{$tuoteno}' />";
 				echo "</td>";
-				echo "</tr>";
 
 				if (!empty($valmistuslinjat)) {
-					echo "<tr>";
+					echo "</tr><tr>";
 					echo "<th>".t('Valmistuslinja')."</th>";
 					echo "<td>";
 					echo "<select name='valmistuslinja'>";
@@ -635,17 +636,15 @@
 					echo "</select>";
 					echo "</td>";
 					echo "</tr>";
-				}
 
-				echo "<tr>";
-				echo "<th>".t('Keräyspäivämäärä')." (pp-kk-vvvv)</th>";
-				echo "<td>";
-				echo "	<input type='text' name='pp' value='{$pp}' size='3'>
-						<input type='text' name='kk' value='{$kk}' size='3'>
-						<input type='text' name='vv' value='{$vv}' size='5'>";
-				echo "</td>";
-				echo "</tr>";
-				echo "</table>";
+					echo "<tr>";
+					echo "<th>".t('Keräyspäivämäärä')." (pp-kk-vvvv)</th>";
+					echo "<td>";
+					echo "	<input type='text' name='pp' value='{$pp}' size='3'>
+							<input type='text' name='kk' value='{$kk}' size='3'>
+							<input type='text' name='vv' value='{$vv}' size='5'>";
+					echo "</td>";
+				}
 			}
 			else {
 				echo t("Syötä tilausnumeron, nimen tai laatijan osa")."</th>";
@@ -653,7 +652,7 @@
 
 			if ($toim != 'VALMISTUS') {
 				echo "<td>";
-				echo "<input type='text' name='etsi'>";
+				echo "<input type='text' size='25' name='etsi'>";
 				echo "</td>";
 			}
 
@@ -666,7 +665,7 @@
 
 				if (mysql_num_rows($toimipaikkares) > 0)  {
 
-					echo "<tr>";
+					echo "</tr><tr>";
 
 					echo "<th>",t("Toimipaikka"),"</th>";
 
@@ -688,17 +687,12 @@
 						echo "<option value='{$toimipaikkarow['tunnus']}'{$sel}>{$toimipaikkarow['nimi']}</option>";
 					}
 
-					echo "</select></td><td class='back'>&nbsp;</td></tr>";
+					echo "</select></td><td class='back'>&nbsp;</td>";
 				}
 			}
 
-			if ($toim == 'VALMISTUS') {
-				echo "<br/>";
-			}
-
+			echo "<td class='back'><input type='Submit' value = '".t("Etsi")."'></td></tr>";
 			echo "</table>";
-			
-			echo "<input type='Submit' value = '".t("Etsi")."'>";
 			echo "</form>";
 			echo "<br>";
 

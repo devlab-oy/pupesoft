@@ -1,6 +1,6 @@
 <?php
 
-	require ("../inc/parametrit.inc");
+	require("../inc/parametrit.inc");
 	require('validation/Validation.php');
 	require('valmistuslinjat.inc');
 
@@ -838,8 +838,6 @@
 		echo "</td>";
 		echo "</tr>";
 
-		$valmistuslinjat = array();
-		
 		if (!empty($valmistuslinjat)) {
 			echo "<tr>";
 			echo "<th>".t('Valmistuslinja')."</th>";
@@ -863,7 +861,7 @@
 			echo "</td>";
 			echo "</tr>";
 		}
-		
+
 
 		$sel=array();
 		$sel[$karajaus] = "selected";
@@ -871,15 +869,17 @@
 		echo "<tr><th>".t("Ker‰ysaikarajaus:")."</th>";
 		echo "<td>";
 		echo "<select name='karajaus' onchange='submit()'>";
+
 		if (!empty($valmistuslinjat)) {
 			echo "<option value='0'   $sel[0]>".t("Ei valintaa")."</option>";
 		}
-		echo "		<option value='1'  $sel[1]>".t("Huominen")."</option>
-					<option value='3'  $sel[3]>".t("Seuraavat 3 p‰iv‰‰")."</option>
-					<option value='5'  $sel[5]>".t("Seuraavat 5 p‰iv‰‰")."</option>
-					<option value='7'  $sel[7]>".t("Seuraava viikko")."</option>
-					<option value='14' $sel[14]>".t("Seuraavat 2 viikkoa")."</option>
-					<option value='KK' $sel[KK]>".t("N‰yt‰ kaikki")."</option>
+
+		echo "<option value='1'    $sel[1]>".t("Huominen")."</option>
+				<option value='3'  $sel[3]>".t("Seuraavat 3 p‰iv‰‰")."</option>
+				<option value='5'  $sel[5]>".t("Seuraavat 5 p‰iv‰‰")."</option>
+				<option value='7'  $sel[7]>".t("Seuraava viikko")."</option>
+				<option value='14' $sel[14]>".t("Seuraavat 2 viikkoa")."</option>
+				<option value='KK' $sel[KK]>".t("N‰yt‰ kaikki")."</option>
 				</select>";
 
 		if (!empty($valmistuslinjat)) {
@@ -900,7 +900,7 @@
 					<input type='text' name='kkl' value='{$kkl}' size='3'>
 					<input type='text' name='vvl' value='{$vvl}' size='5'>";
 		}
-		
+
 		echo "</td>";
 		echo "<th>".t("Etsi tilausta").":</th><td><input type='text' name='etsi'>";
 		echo "<input type='Submit' value='".t("Etsi")."'></td></tr>";

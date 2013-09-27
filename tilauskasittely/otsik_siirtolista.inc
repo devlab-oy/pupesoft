@@ -171,6 +171,7 @@
 			echo "</select></td></tr>";
 
 			$valmistuslinja_result = t_avainsana("VALMISTUSLINJA");
+			
 			if ($toim == "VALMISTAVARASTOON" and mysql_num_rows($valmistuslinja_result) > 0) {
 				echo "<tr>";
 				echo "<th>".t("Valmistuslinja").":</th>";
@@ -269,7 +270,7 @@
 		//	Olisiko erikseen varastoluokkia?
 		$tresult = t_avainsana("VARASTOLUOKKA");
 
-		if(mysql_num_rows($tresult) == 0) {
+		if (mysql_num_rows($tresult) == 0) {
 			$tresult = t_avainsana("ASIAKASLUOKKA");
 		}
 
@@ -282,13 +283,10 @@
 			echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark]</option>";
 		}
 		echo "</select>";
-
-
 		echo "</td></tr>";
 
-		echo "<tr>";
-
 		if ($toim == "SIIRTOLISTA") {
+			echo "<tr>";
 			echo "<th>".t("Toimitustapa")."</th><td>";
 
 			$query = "	SELECT tunnus, selite

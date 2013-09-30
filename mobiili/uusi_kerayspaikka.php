@@ -223,7 +223,7 @@ if (isset($submit) and trim($submit) != '') {
 				// Päivitetään oletuspaikat jos tehdään tästä oletuspaikka
 				if ($oletus == 'X') {
 					// Asetetaan oletuspaikka uusiksi
-					paivita_oletuspaikka($row['tuoteno'], $hylly);
+					paivita_oletuspaikka($row['tuoteno'], $hylly, true);
 
 					if ($poista_vanha_tuotepaikka == 'on') {
 

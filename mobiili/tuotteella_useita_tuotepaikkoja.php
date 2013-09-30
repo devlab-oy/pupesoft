@@ -69,14 +69,13 @@ if ($hae_hyllypaikalla and !$hae_tuotenumerolla and !$hae_viivakoodilla) {
 	$query = "	SELECT tuotepaikat.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.tunnus
 				FROM tuotepaikat
 				WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-				AND tuotepaikat.saldo > 0
 				{$query_lisa}
 				ORDER BY {$orderby} {$ascdesc}";
 }
 else {
 	$query = "	SELECT tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.tunnus
 				FROM tuote
-				JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.saldo > 0)
+				JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno)
 				WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 				{$query_lisa}
 				ORDER BY {$orderby} {$ascdesc}";
@@ -105,8 +104,6 @@ $_cnt = 0;
 while($row = mysql_fetch_assoc($result)) {
 
 	list($siirrettava_yht, $siirrettavat_rivit) = laske_siirrettava_maara($row);
-
-	if ($siirrettava_yht == 0) continue;
 
 	$_cnt++;
 

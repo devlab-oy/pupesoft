@@ -1002,12 +1002,14 @@
 
 				// Listataan korvaavat ketju
 				foreach (array_reverse($korvaavat->tuotteet()) as $tuote) {
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+					if ($tuote['tuoteno'] != $tuoteno) {
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
-					echo "<tr>";
-					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($tuote["tuoteno"])."&lopetus=$lopetus'>$tuote[tuoteno]</a></td>";
-					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
-					echo "</tr>";
+						echo "<tr>";
+						echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($tuote["tuoteno"])."&lopetus=$lopetus'>$tuote[tuoteno]</a></td>";
+						echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
+						echo "</tr>";
+					}
 				}
 
 				echo "</table>";

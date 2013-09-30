@@ -619,7 +619,7 @@
 						$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
 						$kirres= mysql_query($query) or pupe_error($query);
 						$kirrow= mysql_fetch_array($kirres);
-						$komento=$kirrow['komento'];					
+						$komento=$kirrow['komento'];
 					}
 
 					//tulostetaan sivu

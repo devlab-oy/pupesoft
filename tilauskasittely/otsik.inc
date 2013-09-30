@@ -3864,17 +3864,13 @@
 							hyvaksy			= '$hyvaksy',
 							otunnus 		= '$kukarow[kesken]'";
 				
-				$query2 .= $postquery2;
-				$result = pupe_query($query2);
-				
 				//N‰m‰ kent‰t p‰ivitet‰‰n vain, jos p‰ivitet‰‰n sit‰ tyˆm‰‰r‰ykselt‰ tai muualta miss‰ nuo kaksi kentt‰‰ n‰kyy..
 				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
-					$query2 = "UPDATE	tyomaarays SET
-										tyojono			= '$tyojono',
-										tyostatus		= '$tyostatus'";
-					$query2 .= $postquery2;
-					$result = pupe_query($query2);
-				}	
+					$query2 .= ",	tyojono			= '$tyojono',
+									tyostatus		= '$tyostatus'";
+				}
+				$query2 .= $postquery2;
+				$result = pupe_query($query2);
 			}	
 
 			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "EXTTARJOUS", "ENNAKKO","EXTENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE", "WEBTILAUSTARJOUS","EXTRANET_REKLAMAATIO"))) {

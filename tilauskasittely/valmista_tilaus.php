@@ -2,6 +2,8 @@
 
 	if (!isset($from_kaikkikorj)) {
 		require ("../inc/parametrit.inc");
+		require('valmistuslinjat.inc');
+		require('validation/Validation.php');
 
 		if (!isset($toim)) $toim = "";
 		 if (!isset($tee)) $tee = "";
@@ -1453,27 +1455,87 @@
 			$formi="find";
 			$kentta="etsi";
 
+			$valmistuslinjat = hae_valmistuslinjat();
+
 			// tehd‰‰n etsi valinta
 			echo "<br><form name='find' method='post'>";
 			echo "<input type='hidden' name='toim'  value='$toim'>";
 
 			if ($toim == "TUOTE") {
-				echo t("Etsi valmistetta/raaka-ainetta").": ";
+				echo "<table>";
+
+				echo "<tr>";
+				echo "<th>".t('Valmiste')."/".t('raaka-aine')."</th>";
+				echo "<td>";
+				echo "<input type='text' name='etsi' value='{$etsi}' />";
+				echo "</td>";
+				echo "</tr>";
+
+				echo "<tr>";
+				echo "<th>".t('Ker‰ysp‰iv‰')."</th>";
+				echo "<td>";
+				echo "	<input type='text' name='pp' value='{$pp}' size='3'>
+						<input type='text' name='kk' value='{$kk}' size='3'>
+						<input type='text' name='vv' value='{$vv}' size='5'>";
+				echo "</td>";
+				echo "</tr>";
+
+				if (!empty($valmistuslinjat)) {
+					echo "<tr>";
+					echo "<th>".t('Valmistuslinja')."</th>";
+					echo "<td>";
+					echo "<select name='valmistuslinja'>";
+					echo "<option value='' >".t('Ei valintaa')."</option>";
+					foreach ($valmistuslinjat as $_valmistuslinja) {
+						$sel = "";
+						if ($_valmistuslinja['selite'] == $valmistuslinja) {
+							$sel = "SELECTED";
+						}
+						echo "<option value='{$_valmistuslinja['selite']}' {$sel}>{$_valmistuslinja['selitetark']}</option>";
+					}
+					echo "</select>";
+					echo "</td>";
+					echo "</tr>";
+				}
+
+				echo "<tr>";
+				echo "<th>".t('Valmistenumero')."</th>";
+				echo "<td>";
+				echo "<input type='text' name='tilausnumero' value='{$tilausnumero}' />";
+				echo "</td>";
+				echo "</tr>";
+
+				echo "</table>";
 			}
 			else {
 				echo t("Etsi asiakasta/valmistusta").": ";
+				echo "<input type='text' name='etsi'>";
 			}
 
-			echo "<input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form>";
+			echo "<input type='Submit' value='".t("Etsi")."'></form>";
 
 			$haku = "";
 			$laskuindex = "";
+
+			$kerayspvm = "{$vv}-{$kk}-{$pp}";
+			$where = "";
+			if (FormValidator::validateContent($kerayspvm, 'paiva')) {
+				$where .= "	AND lasku.kerayspvm = '{$kerayspvm}'";
+			}
+
+			if ($valmistuslinja != '') {
+				$where .= " AND lasku.kohde = '{$valmistuslinja}'";
+			}
+
+			if (!empty($tilausnumero)) {
+				$where .= "	AND lasku.tunnus = '{$tilausnumero}'";
+			}
 
 			if ($toim == "TUOTE" and isset($etsi) and $etsi != "") {
 				$haku = " and tilausrivi.tuoteno = '$etsi' ";
 			}
 			else {
-				if (isset($etsi) and is_string($etsi))  {
+				if (isset($etsi) and is_string($etsi) and $etsi != '')  {
 					$haku = " and match (lasku.nimi) against ('$etsi*' IN BOOLEAN MODE) ";
 					$laskuindex = "asiakasnimi";
 				}
@@ -1570,6 +1632,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila 	in ($ylatilat)
 						and lasku.alatila  in ($alatilat)
+						$where
 						$lisa
 						$haku
 						$valmistuksen_tila

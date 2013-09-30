@@ -3279,6 +3279,30 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'valmistuksien_kasittely') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Valmistuksella voi olla useita valmisteita")."</option>";
+		$ulos .= "<option value = 'Y' $sel>".t("Valmistuksella voi olla vain yksi valmiste")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'tulosta_valmistus_tulosteet') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'V' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Tulostetaan Ker‰yslista ja Valmistuslista")."</option>";
+		$ulos .= "<option value = 'V' $sel>".t("Tulostetaan vain Valmistuslista")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'tarkista_eankoodi') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3611,7 +3635,7 @@
 
 		$sel = array();
 		$sel['K'] = $trow[$i] == 'K' ? 'selected' : '';
-		
+
 		$ulos .= "<option value = ''>".t("Ostotilauksella ei tarkisteta toimittajien saldoja")."</option>";
 		$ulos .= "<option value = 'K' {$sel['K']}>".t("Ostotilauksella tarkistetaan toimittajien saldoja")."</option>";
 		$ulos .= "</select></td>";
@@ -3626,7 +3650,7 @@
 
 		$ulos .= "<option value = ''>".t("Vastaavat tuotteet n‰ytet‰‰n normaalisti")."</option>";
 		$ulos .= "<option value = 'S' {$sel['S']}>".t("Vastaavat tuotteet n‰ytet‰‰n vaikka saldo on nolla. N‰ytet‰‰n myˆs toimittajan tehtaan saldo.")."</option>";
-		$ulos .= "<option value = 'A' {$sel['A']}>".t("Vastaavat tuotteet n‰ytet‰‰n aina. N‰ytet‰‰n myˆs toimittajan tehtaan saldo.")."</option>";
+		$ulos .= "<option value = 'A' {$sel['A']}>".t("Vastaavat tuotteet n‰ytet‰‰n aina, jos rivi on puute. N‰ytet‰‰n myˆs toimittajan tehtaan saldo.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

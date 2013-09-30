@@ -93,59 +93,51 @@
 
 	if ($aja == "AJA" and isset($ajoon)) {
 
-		if (@include('Spreadsheet/Excel/Writer.php')) {
+		include('inc/pupeExcel.inc');
 
-			//keksitään failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+		$worksheet 	 = new pupeExcel();
+		$format_bold = array("bold" => TRUE);
+		$excelrivi 	 = 0;
+		$excelsarake = 0;
 
-			$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-			$workbook->setVersion(8);
-			$worksheet =& $workbook->addWorksheet('Sheet 1');
-
-			$excelrivi = 0;
-			$excelsarake = 0;
-
-			$worksheet->writeString($excelrivi, $excelsarake++, t("ABC"));
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Osaston luokka"));
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Ryhmän luokka"));
-			$worksheet->writeString($excelrivi, $excelsarake++, $astusana);
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Toim_tuoteno"));
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Ryhmä"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Merkki"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Malli"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Mallitarkenne"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Myyjä"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostaja"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Viim. saapumispvm"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Saldo"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Tulopvm"));
-			$worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("tot"));
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Kate").t("tot"));
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Kate%"));
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Kateosuus"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Vararvo"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Kierto"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Kate")."% x ".t("Kierto"));
-			$worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("määrä"));
-			$worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("erä").t("määrä"));
-			$worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("erä").$yhtiorow["valkoodi"]);
-			$worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("rivit"));
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Puuterivit"));
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Palvelutaso"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostoerä").t("määrä"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostoerä").$yhtiorow["valkoodi"]);
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostorivit"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("KustannusMyynti"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("KustannusOsto"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("KustannusYht"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Kate-Kustannus"));
-			if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Tuotepaikka"));
-			$excelrivi++;
-		}
+		$worksheet->writeString($excelrivi, $excelsarake++, t("ABC"));
+		$worksheet->writeString($excelrivi, $excelsarake++, t("Osaston luokka"));
+		$worksheet->writeString($excelrivi, $excelsarake++, t("Ryhmän luokka"));
+		$worksheet->writeString($excelrivi, $excelsarake++, $astusana);
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Toim_tuoteno"));
+		$worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+		$worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
+		$worksheet->writeString($excelrivi, $excelsarake++, t("Ryhmä"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Merkki"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Malli"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Mallitarkenne"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Myyjä"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostaja"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Viim. saapumispvm"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Saldo"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Tulopvm"));
+		$worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("tot"));
+		$worksheet->writeString($excelrivi, $excelsarake++, t("Kate").t("tot"));
+		$worksheet->writeString($excelrivi, $excelsarake++, t("Kate%"));
+		$worksheet->writeString($excelrivi, $excelsarake++, t("Kateosuus"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Vararvo"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Kierto"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Kate")."% x ".t("Kierto"));
+		$worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("määrä"));
+		$worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("erä").t("määrä"));
+		$worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("erä").$yhtiorow["valkoodi"]);
+		$worksheet->writeString($excelrivi, $excelsarake++, $myykusana.t("rivit"));
+		$worksheet->writeString($excelrivi, $excelsarake++, t("Puuterivit"));
+		$worksheet->writeString($excelrivi, $excelsarake++, t("Palvelutaso"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostoerä").t("määrä"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostoerä").$yhtiorow["valkoodi"]);
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Ostorivit"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("KustannusMyynti"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("KustannusOsto"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("KustannusYht"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Kate-Kustannus"));
+		if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, t("Tuotepaikka"));
+		$excelrivi++;
 
 		if (count($haku) > 0) {
 			foreach ($haku as $kentta => $arvo) {
@@ -294,65 +286,59 @@
 					}
 
 					// Lisätään rivi exceltiedostoon
-					if (isset($workbook)) {
-						$excelsarake = 0;
+					$excelsarake = 0;
 
-						$worksheet->writeString($excelrivi, $excelsarake++,  $ryhmanimet[$row["luokka"]]);
-						$worksheet->writeString($excelrivi, $excelsarake++,  $ryhmanimet[$row["luokka_osasto"]]);
-						$worksheet->writeString($excelrivi, $excelsarake++,  $ryhmanimet[$row["luokka_try"]]);
-						$worksheet->writeString($excelrivi, $excelsarake++,  $row["tuoteno"]);
-						if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++,  $tuorow["toim_tuoteno"]);
-						$worksheet->writeString($excelrivi, $excelsarake++,  $row["nimitys"]);
-						$worksheet->writeString($excelrivi, $excelsarake++,  $row["osasto"]);
-						$worksheet->writeString($excelrivi, $excelsarake++,  $row["try"]);
-						if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++,  $row["tuotemerkki"]);
-						if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, $row["malli"]);
-						if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, $row["mallitarkenne"]);
-						if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, $myyjarow["nimi"]);
-						if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, $ostajarow["nimi"]);
-						if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++,  tv1dateconv($row["saapumispvm"]));
-						if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++,  $row["saldo"]);
-						if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++,  tv1dateconv($row["tulopvm"]));
-						$worksheet->write($excelrivi, $excelsarake++,  sprintf('%.1f',$row["summa"]));
-						$worksheet->write($excelrivi, $excelsarake++,  sprintf('%.1f',$row["kate"]));
-						$worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["katepros"]));
-						$worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["kateosuus"]));
-						if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["vararvo"]));
-						if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["varaston_kiertonop"]));
-						if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["kate_kertaa_kierto"]));
-						$worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["kpl"]));
-						$worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["myyntierankpl"]));
-						$worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["myyntieranarvo"]));
-						$worksheet->write($excelrivi, $excelsarake++, sprintf('%.0f',$row["rivia"]));
-						$worksheet->write($excelrivi, $excelsarake++, sprintf('%.0f',$row["puuterivia"]));
-						$worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["palvelutaso"]));
-						if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["ostoerankpl"]));
-						if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["ostoeranarvo"]));
-						if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.0f',$row["osto_rivia"]));
-						if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["kustannus"]));
-						if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["kustannus_osto"]));
-						if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["kustannus_yht"]));
-						if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["total"]));
-						if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, $paikrow["paikka"]);
-						$excelrivi++;
-					}
+					$worksheet->writeString($excelrivi, $excelsarake++,  $ryhmanimet[$row["luokka"]]);
+					$worksheet->writeString($excelrivi, $excelsarake++,  $ryhmanimet[$row["luokka_osasto"]]);
+					$worksheet->writeString($excelrivi, $excelsarake++,  $ryhmanimet[$row["luokka_try"]]);
+					$worksheet->writeString($excelrivi, $excelsarake++,  $row["tuoteno"]);
+					if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++,  $tuorow["toim_tuoteno"]);
+					$worksheet->writeString($excelrivi, $excelsarake++,  $row["nimitys"]);
+					$worksheet->writeString($excelrivi, $excelsarake++,  $row["osasto"]);
+					$worksheet->writeString($excelrivi, $excelsarake++,  $row["try"]);
+					if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++,  $row["tuotemerkki"]);
+					if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, $row["malli"]);
+					if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, $row["mallitarkenne"]);
+					if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, $myyjarow["nimi"]);
+					if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, $ostajarow["nimi"]);
+					if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++,  tv1dateconv($row["saapumispvm"]));
+					if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++,  $row["saldo"]);
+					if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++,  tv1dateconv($row["tulopvm"]));
+					$worksheet->write($excelrivi, $excelsarake++,  sprintf('%.1f',$row["summa"]));
+					$worksheet->write($excelrivi, $excelsarake++,  sprintf('%.1f',$row["kate"]));
+					$worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["katepros"]));
+					$worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["kateosuus"]));
+					if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["vararvo"]));
+					if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["varaston_kiertonop"]));
+					if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["kate_kertaa_kierto"]));
+					$worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["kpl"]));
+					$worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["myyntierankpl"]));
+					$worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["myyntieranarvo"]));
+					$worksheet->write($excelrivi, $excelsarake++, sprintf('%.0f',$row["rivia"]));
+					$worksheet->write($excelrivi, $excelsarake++, sprintf('%.0f',$row["puuterivia"]));
+					$worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["palvelutaso"]));
+					if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["ostoerankpl"]));
+					if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["ostoeranarvo"]));
+					if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.0f',$row["osto_rivia"]));
+					if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["kustannus"]));
+					if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["kustannus_osto"]));
+					if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["kustannus_yht"]));
+					if (!$asiakasanalyysi) $worksheet->write($excelrivi, $excelsarake++, sprintf('%.1f',$row["total"]));
+					if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, $paikrow["paikka"]);
+					$excelrivi++;
 				}
 			}
 		}
 
-		if(isset($workbook)) {
-			// We need to explicitly close the workbook
-			$workbook->close();
+		$excelnimi = $worksheet->close();
 
-			echo "<br><br><table>";
-			echo "<tr><th>".t("Tallenna Excel").":</th>";
-			echo "<form method='post' class='multisubmit'>";
-			echo "<input type='hidden' name='exceltee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='ABC_listaus.xls'>";
-			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-			echo "<input type='hidden' name='toim' value='$toim'>";
-			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-			echo "</table><br>";
-		}
+		echo "<br><br><table>";
+		echo "<tr><th>".t("Tallenna Excel").":</th>";
+		echo "<form method='post' class='multisubmit'>";
+		echo "<input type='hidden' name='exceltee' value='lataa_tiedosto'>";
+		echo "<input type='hidden' name='kaunisnimi' value='ABC_listaus.xlsx'>";
+		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+		echo "</table><br>";
 	}
-?>

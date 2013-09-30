@@ -334,6 +334,14 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "valmistusaika_sekunneissa") {
+			$valmistusaika_sekunneissa = $t[$i];
+
+			if (!is_numeric($valmistusaika_sekunneissa) or $valmistusaika_sekunneissa < 0) {
+				$virhe[$i] = t("Valmistusaika pitää olla suurempi tai yhtäsuuri kuin 0");
+			}
+		}
+
 		if ($fieldname == 'status') {
 			$tem_status = $t[$i];
 			$tem_status_vanha = $trow[$i];
@@ -487,5 +495,13 @@ if(!function_exists("tuotetarkista")) {
 				}
 			}
 		}
+		//tarkistetaan ettei yritetä laittaa ostoehdotus sarakkeeseen vääriä kirjaimia! sallitut "E" = ei ja "" = kyllä
+		if ($fieldname == "ostoehdotus"){
+			if ($t[$i] != "E" AND $t[$i] != "") {
+				$virhe[$i] = t("Ostoehdotus arvo tulee olla joko E tai tyhjä! (E = ei näytetä ja tyhjä = näytetään)");
+			}
+		}
 	}
+	
+		
 }

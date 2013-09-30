@@ -55,30 +55,45 @@
 			$desadv_message .= "BGM+351+{$desadv_laskurow['laskutunnus']}+9'";
 			$x++;
 
-			// DTM - date of despatch advice
-			// 0000-00-00 00:00:00
-			// 202   YYMMDDHHMMSS
-			list($date, $time) = explode(" ", $desadv_rakir_row['tulostettu']);
-			list($year, $month, $day) = explode("-", $date);
-			$desadv_message .= "DTM+137:{$year}{$month}{$day}:102'";
-			$x++;
-
-			// DTM - despatch and/or delivery date/time
-			// 11 = despatch date/time
-			$desadv_message .= "DTM+11:{$year}{$month}{$day}:102'";
-			$x++;
-
 			if ($desadv_version == 'fi0089') {
+				// DTM - date of despatch advice
+				// 0000-00-00 00:00:00
+				// 102   YYYYMMDD
+				list($date, $time) = explode(" ", $desadv_rakir_row['tulostettu']);
+				list($year, $month, $day) = explode("-", $date);
+				$desadv_message .= "DTM+137:{$year}{$month}{$day}:102'";
+				$x++;
+
+				// DTM - despatch and/or delivery date/time
+				// 11 = despatch date/time
+				$desadv_message .= "DTM+11:{$year}{$month}{$day}:102'";
+				$x++;
+
+
 				$desadv_message .= "DTM+35:{$year}{$month}{$day}:102'";
 				$x++;
 			}
 
 			if ($desadv_version == "una" or $desadv_version == "") {
+				// DTM - date of despatch advice
+				// 0000-00-00 00:00:00
+				// 202   YYMMDDHHMMSS
+				list($date, $time) = explode(" ", $desadv_rakir_row['tulostettu']);
+				list($year, $month, $day) = explode("-", $date);
+				list($hour, $minute, $second) = explode(":", $time);
+				$desadv_message .= "DTM+137:".substr($year, 2, 2).$month.$day.$hour.$minute.$second.":202'";
+				$x++;
+
+				// DTM - despatch and/or delivery date/time
+				// 11 = despatch date/time
+				$desadv_message .= "DTM+11:".substr($year, 2, 2).$month.$day.$hour.$minute.$second.":202'";
+				$x++;
 				// DTM - despatch and/or delivery date/time
 				// 171 = tilauspäivä
 				list($date, $time) = explode(" ", $desadv_laskurow['luontiaika']);
 				list($year, $month, $day) = explode("-", $date);
-				$desadv_message .= "DTM+171:{$year}{$month}{$day}:102'";
+				list($hour, $minute, $second) = explode(":", $time);
+				$desadv_message .= "DTM+171:".substr($year, 2, 2).$month.$day.$hour.$minute.$second.":202'";
 				$x++;
 
 				// DTM - despatch and/or delivery date/time
@@ -125,8 +140,10 @@
 				$x++;
 			}
 
-			$desadv_message .= "NAD+CZ+{$yhtiorow['ovttunnus']}::100++".substr($yhtiorow["nimi"], 0, 35)."+".substr($yhtiorow["osoite"], 0, 35)."+".substr($yhtiorow["postitp"], 0, 35)."++".substr($yhtiorow["postino"], 0, 17)."+".substr($yhtiorow["maa"], 0, 3)."'";
-			$x++;
+			if ($desadv_version == 'fi0089') {
+				$desadv_message .= "NAD+CZ+{$yhtiorow['ovttunnus']}::100++".substr($yhtiorow["nimi"], 0, 35)."+".substr($yhtiorow["osoite"], 0, 35)."+".substr($yhtiorow["postitp"], 0, 35)."++".substr($yhtiorow["postino"], 0, 17)."+".substr($yhtiorow["maa"], 0, 3)."'";
+				$x++;
+			}
 
 			// NAD - identification of buyer
 			if ($desadv_laskurow['asiakasovttunnus'] != '' and $desadv_laskurow['asiakasnimi'] != '') {
@@ -222,18 +239,18 @@
 
 	if (!function_exists('desadv_row')) {
 		function desadv_row($params) {
-			global $kukarow, $yhtiorow, $sscc_gs1_laajennustunnus, $sscc_gs1_yritystunnus;
+			global $kukarow, $yhtiorow;
 
 			// Luodaan muuttujat
 			extract($params);
 
 			// Katsotaan löytyykö tilaukselle keräyserä
-			$query = "	SELECT sscc, pakkaus, GROUP_CONCAT(tilausrivi) AS tilausrivit
+			$query = "	SELECT sscc, sscc_ulkoinen, pakkaus, GROUP_CONCAT(tilausrivi) AS tilausrivit
 						FROM kerayserat
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND otunnus = '{$desadv_laskurow['laskutunnus']}'
-						GROUP BY 1,2
-						ORDER BY 1,2";
+						GROUP BY 1,2,3
+						ORDER BY 1,2,3";
 			$keraysera_res = pupe_query($query);
 
 			$kokonais_pakettimaara = 0;
@@ -242,19 +259,8 @@
 
 				while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
 
-					if ($sscc_gs1_yritystunnus != "") {
-						// Rakennetaan GS1 SSCC -numero
-						$sscc_sovellustunnus = "00";
-						if ($sscc_gs1_laajennustunnus == "") $sscc_gs1_laajennustunnus = "0";
-
-						$sscc_gs1_yritystunnus = str_pad($sscc_gs1_yritystunnus, 7, 0, STR_PAD_LEFT);
-						$keraysera_row['sscc'] = str_pad($keraysera_row['sscc'], 7, 0, STR_PAD_LEFT);
-
-						$sscc = $sscc_sovellustunnus.$sscc_gs1_laajennustunnus.$sscc_gs1_yritystunnus.$keraysera_row['sscc'];
-
-						$sscc_tarkiste = tarkiste($sscc);
-
-						$sscc = $sscc.$sscc_tarkiste;
+					if ($keraysera_row['sscc_ulkoinen'] != "") {
+						$sscc = $keraysera_row['sscc_ulkoinen'];
 					}
 					else {
 						$sscc = $keraysera_row['sscc'];

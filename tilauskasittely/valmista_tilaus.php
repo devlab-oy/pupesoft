@@ -2,6 +2,8 @@
 
 	if (!isset($from_kaikkikorj)) {
 		require ("../inc/parametrit.inc");
+		require('valmistuslinjat.inc');
+		require('validation/Validation.php');
 
 		if (!isset($toim)) $toim = "";
 		 if (!isset($tee)) $tee = "";
@@ -56,17 +58,19 @@
 
 				$lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
 
-				if ($lisatyt_rivit[0] > 0) {
-					$valmistettavat .= ",".$lisatyt_rivit[0];
+				if (count($lisatyt_rivit) > 0) $valmistettavat .= ",".implode(",", $lisatyt_rivit);
 
-					$query = "	UPDATE tilausrivi
-								SET toimitettu	= '$kukarow[kuka]',
-								toimitettuaika	= now(),
-								keratty			= '$kukarow[kuka]',
-								kerattyaika		= now()
-								WHERE yhtio	= '$kukarow[yhtio]'
-								and tunnus	= '$lisatyt_rivit[0]'";
-					$result = pupe_query($query);
+				if ($toim == "KORJAA") {
+					if ($lisatyt_rivit[0] > 0) {
+						$query = "	UPDATE tilausrivi
+									SET toimitettu	= '$kukarow[kuka]',
+									toimitettuaika	= now(),
+									keratty			= '$kukarow[kuka]',
+									kerattyaika		= now()
+									WHERE yhtio	= '$kukarow[yhtio]'
+									and tunnus	= '$lisatyt_rivit[0]'";
+						$result = pupe_query($query);
+					}
 				}
 			}
 			else {
@@ -527,7 +531,7 @@
 
 										$apuapuapua1 =  (int) $saldot_valm[$perherow["tuoteno"]] * 100;
 										$apuapuapua2 =  (int) $varataankpl * 100;
-										
+
 										// katotaan kanssa, että perheenjäsenet löytyy kannasta ja niitä on riittävästi (jos reseptissä on useampi valmiste, niin summataan $varataankpl $saldot_valm-muuttujaan kun loopataan toista tat kolmatta valmistetta)
 										if ((!isset($vakisinhyvaksy) or $vakisinhyvaksy == '') and (($tilrivirow['perheid2'] != -100 and $apuapuapua1 < $apuapuapua2) or ($tilrivirow['perheid2'] == -100 and ($apuapuapua1 + $apuapuapua2) < $apuapuapua2))) {
 											echo "<font class='error'>".t("Saldo")." ".$saldot[$perherow["tuoteno"]]." ".t("ei riitä")."! ".t("Tuotetta")." $perherow[tuoteno] ".t("kulutetaan")." $varataankpl ".t_avainsana("Y", $kieli, "and avainsana.selite='$perherow[yksikko]'", "", "", "selite").".</font><br>";
@@ -1315,7 +1319,9 @@
 				}
 
 				if ($prow["tunnus"] == $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
-					echo "<td valign='top' class='$class' align='center'><input type='text' name='valmkpllat[$prow[tunnus]]' value='".$valmkpllat2[$prow["tunnus"]]."' size='5'></td><td class='back'>".$virhe[$prow["tunnus"]]."</td>";
+					echo "<td valign='top' class='$class' align='center'><input type='text' name='valmkpllat[$prow[tunnus]]' value='".$valmkpllat2[$prow["tunnus"]]."' size='5'></td><td class='back'>".$virhe[$prow["tunnus"]];
+					echo "<br><a href='$PHP_SELF?toim=$toim&tee=SYOTARIVI&valmistettavat=$valmistettavat&perheid=$prow[perheid]&otunnus=$prow[otunnus]'>".t("Lisää raaka-aine")."</a>";
+					echo  "</td>";
 				}
 				elseif ($prow["tunnus"] != $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
 					echo "<td valign='top' align='center'>".t("Usea valmiste")."</td>";
@@ -1402,7 +1408,6 @@
 				echo "</tr>";
 
 				$vanhaid = $prow["perheid"];
-
 			}
 
 			echo "<tr><td colspan='9' class='back'><br></td></tr>";
@@ -1450,27 +1455,87 @@
 			$formi="find";
 			$kentta="etsi";
 
+			$valmistuslinjat = hae_valmistuslinjat();
+
 			// tehdään etsi valinta
 			echo "<br><form name='find' method='post'>";
 			echo "<input type='hidden' name='toim'  value='$toim'>";
 
 			if ($toim == "TUOTE") {
-				echo t("Etsi valmistetta/raaka-ainetta").": ";
+				echo "<table>";
+
+				echo "<tr>";
+				echo "<th>".t('Valmiste')."/".t('raaka-aine')."</th>";
+				echo "<td>";
+				echo "<input type='text' name='etsi' value='{$etsi}' />";
+				echo "</td>";
+				echo "</tr>";
+
+				echo "<tr>";
+				echo "<th>".t('Keräyspäivä')."</th>";
+				echo "<td>";
+				echo "	<input type='text' name='pp' value='{$pp}' size='3'>
+						<input type='text' name='kk' value='{$kk}' size='3'>
+						<input type='text' name='vv' value='{$vv}' size='5'>";
+				echo "</td>";
+				echo "</tr>";
+
+				if (!empty($valmistuslinjat)) {
+					echo "<tr>";
+					echo "<th>".t('Valmistuslinja')."</th>";
+					echo "<td>";
+					echo "<select name='valmistuslinja'>";
+					echo "<option value='' >".t('Ei valintaa')."</option>";
+					foreach ($valmistuslinjat as $_valmistuslinja) {
+						$sel = "";
+						if ($_valmistuslinja['selite'] == $valmistuslinja) {
+							$sel = "SELECTED";
+						}
+						echo "<option value='{$_valmistuslinja['selite']}' {$sel}>{$_valmistuslinja['selitetark']}</option>";
+					}
+					echo "</select>";
+					echo "</td>";
+					echo "</tr>";
+				}
+
+				echo "<tr>";
+				echo "<th>".t('Valmistenumero')."</th>";
+				echo "<td>";
+				echo "<input type='text' name='tilausnumero' value='{$tilausnumero}' />";
+				echo "</td>";
+				echo "</tr>";
+
+				echo "</table>";
 			}
 			else {
 				echo t("Etsi asiakasta/valmistusta").": ";
+				echo "<input type='text' name='etsi'>";
 			}
 
-			echo "<input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form>";
+			echo "<input type='Submit' value='".t("Etsi")."'></form>";
 
 			$haku = "";
 			$laskuindex = "";
+
+			$kerayspvm = "{$vv}-{$kk}-{$pp}";
+			$where = "";
+			if (FormValidator::validateContent($kerayspvm, 'paiva')) {
+				$where .= "	AND lasku.kerayspvm = '{$kerayspvm}'";
+			}
+
+			if ($valmistuslinja != '') {
+				$where .= " AND lasku.kohde = '{$valmistuslinja}'";
+			}
+
+			if (!empty($tilausnumero)) {
+				$where .= "	AND lasku.tunnus = '{$tilausnumero}'";
+			}
 
 			if ($toim == "TUOTE" and isset($etsi) and $etsi != "") {
 				$haku = " and tilausrivi.tuoteno = '$etsi' ";
 			}
 			else {
-				if (isset($etsi) and is_string($etsi))  {
+				if (isset($etsi) and is_string($etsi) and $etsi != '')  {
 					$haku = " and match (lasku.nimi) against ('$etsi*' IN BOOLEAN MODE) ";
 					$laskuindex = "asiakasnimi";
 				}
@@ -1567,6 +1632,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila 	in ($ylatilat)
 						and lasku.alatila  in ($alatilat)
+						$where
 						$lisa
 						$haku
 						$valmistuksen_tila

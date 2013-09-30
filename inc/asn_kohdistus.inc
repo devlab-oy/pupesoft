@@ -97,6 +97,7 @@
 							AND tilausrivi.uusiotunnus = 0
 							AND tilausrivi.otunnus LIKE '%{$row['tilausnumero']}'
 							AND tilausrivi.tilaajanrivinro = '{$row['tilausrivinpositio']}'
+							AND tilausrivi.kpl+tilausrivi.varattu != 0
 							{$tilausrivi_muuttuja}
 							ORDER BY laadittu asc";
 				$kokeillaan = pupe_query($query);
@@ -123,6 +124,7 @@
 								AND tilausrivi.uusiotunnus = 0
 								AND lasku.comments LIKE '%{$row['tilausnumero']}%'
 								AND tilausrivi.tilaajanrivinro = '{$row['tilausrivinpositio']}'
+								AND tilausrivi.kpl+tilausrivi.varattu != 0
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu ASC";
 					$kokeillaan = pupe_query($query);
@@ -149,6 +151,7 @@
 								AND tilausrivi.tyyppi = 'O'
 								AND tilausrivi.uusiotunnus = 0
 								AND tilausrivi.otunnus LIKE '%{$row['tilausnumero']}'
+								AND tilausrivi.kpl+tilausrivi.varattu != 0
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu ASC";
 					$kokeillaan = pupe_query($query);
@@ -175,6 +178,7 @@
 								AND tilausrivi.tyyppi = 'O'
 								AND tilausrivi.uusiotunnus = 0
 								AND lasku.comments LIKE '%{$row['tilausnumero']}%'
+								AND tilausrivi.kpl+tilausrivi.varattu != 0
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu ASC";
 					$kokeillaan = pupe_query($query);
@@ -200,6 +204,7 @@
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tyyppi = 'O'
 								AND tilausrivi.uusiotunnus = 0
+								AND tilausrivi.kpl+tilausrivi.varattu != 0
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu ASC";
 				}
@@ -290,6 +295,7 @@
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.tyyppi = 'O'
 									AND tilausrivi.uusiotunnus = 0
+									AND tilausrivi.kpl+tilausrivi.varattu != 0
 									{$loysan_tilausrivi_muuttuja}
 									ORDER BY laadittu ASC";
 						$loysa_result = pupe_query($query);

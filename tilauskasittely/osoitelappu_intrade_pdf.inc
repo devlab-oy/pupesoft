@@ -109,13 +109,13 @@ $huge["height"] = 20;
 $huge["font"] = "Helvetica-Bold";
 
 $uniq_pakkaukset = array();
+$uniq_pakkaukset_sscc = array();
 
 if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
 
 	$kaikki_ok = true;
 
 	if ($yhtiorow['kerayserat'] == 'A') {
-
 		$query = "	SELECT kerayserat
 					FROM asiakas
 					WHERE yhtio = '{$kukarow['yhtio']}'
@@ -129,20 +129,19 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
 	}
 
 	if ($kaikki_ok) {
-
-		$query = "	SELECT pakkausnro
+		$query = "	SELECT DISTINCT pakkausnro, sscc, sscc_ulkoinen, pakkaus
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND otunnus = '{$laskurow['tunnus']}'
-					GROUP BY pakkausnro
-					ORDER BY pakkausnro ASC";
+					ORDER BY pakkausnro";
 		$pakkaus_chk_res = pupe_query($query);
 
-		$i = 1;
+		$pi = 1;
 
 		while ($pakkaus_chk_row = mysql_fetch_assoc($pakkaus_chk_res)) {
-			$uniq_pakkaukset[$i] = $pakkaus_chk_row['pakkausnro'];
-			$i++;
+			$uniq_pakkaukset[$pi] = $pakkaus_chk_row['pakkausnro'];
+			$uniq_pakkaukset_sscc[$pi] = $pakkaus_chk_row['sscc_ulkoinen'];
+			$pi++;
 		}
 
 		$oslappkpl = count($uniq_pakkaukset) > 0 ? count($uniq_pakkaukset) : $oslappkpl;
@@ -161,19 +160,24 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 		$kirjainlisa = " ".chr(64+$uniq_merkki);
 	}
 
-	// tehdään SSCC :
-	// (00)
-	// 1
-	// ean (8)
-	// lähetenro (6) viimeistä
-	// tulostuskpl (2)
-	// tarkiste (1)
-	$sscc = 1;
-	$sscc .= sprintf("%-08.8s",$yhtiorow["ean"]);
-	$sscc .= sprintf('%06.6s', substr($laskurow["tunnus"], -6));
-	$sscc .= sprintf('%02.2s', $uniq_merkki);
-	$loppu = tarkiste($sscc);
-	$sscc = $sscc.$loppu;
+	if (isset($uniq_pakkaukset_sscc[$tulostuskpl]) and $uniq_pakkaukset_sscc[$tulostuskpl] != "") {
+		$sscc = $uniq_pakkaukset_sscc[$tulostuskpl];
+	}
+	else {
+		// tehdään SSCC :
+		// (00)
+		// 1
+		// ean (8)
+		// lähetenro (6) viimeistä
+		// tulostuskpl (2)
+		// tarkiste (1)
+		$sscc  = "1";
+		$sscc .= sprintf("%-08.8s",$yhtiorow["ean"]);
+		$sscc .= sprintf('%06.6s', substr($laskurow["tunnus"], -6));
+		$sscc .= sprintf('%02.2s', $uniq_merkki);
+		$loppu = tarkiste($sscc);
+		$sscc  = "00".$sscc.$loppu;
+	}
 
 	// tehdään pdf:n uusi sivu
 	$firstpage = $pdf->new_page("a5");
@@ -196,7 +200,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 
 		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-		imagejpeg(Image_Barcode::draw('00'.$sscc, 'code128', 'jpg', false, 3, 170), $nimi);
+		imagejpeg(Image_Barcode::draw($sscc, 'code128', 'jpg', false, 3, 170), $nimi);
 
 		$fh = fopen($nimi, "r");
 		$data = fread($fh, filesize($nimi));
@@ -217,7 +221,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 
 	// piirretään viivakoodi paprulle
 	$pdf->draw_text(mm_pt(22), mm_pt(33), "Kolli - Item ID.: ", $firstpage, $otsik);
-	$pdf->draw_text(mm_pt(45), mm_pt(33), "(00) $sscc", $firstpage, $iso);
+	$pdf->draw_text(mm_pt(45), mm_pt(33), "(".substr($sscc, 0, 2).") ".substr($sscc, 2), $firstpage, $iso);
 
 	// sitten aletaan piirtämään itse PDF sisältöä
 	// ensin isot viivat kohilleen

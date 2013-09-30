@@ -32,7 +32,7 @@
 				sum(if (tilausrivi.var not in ('P','J','O','S') and tilausrivi.varattu $lis_plus_kpl < 0, 1, 0)) hyvitykset,
 				sum(if (tilausrivi.var not in ('P','J','O','S') and (('$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) normaalit_kerataan,
 				sum(if (tilausrivi.var not in ('P','J','O','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) saldottomat,
-				sum(if (tilausrivi.toimitettu != '' and tuote.ei_saldoa = '', 1, 0)) toimitetut
+				sum(if (tilausrivi.toimitettu != '' and tuote.ei_saldoa = '' and (tilausrivi.varattu $lis_plus_kpl > 0 and tilausrivi.var not in ('P','J','O','S')), 1, 0)) toimitetut
 				FROM tilausrivi
 				LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'
@@ -295,6 +295,7 @@
 				$result = pupe_query($query);
 
 				$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
+				$toimitusvahvitus_laheta = TRUE;
 			}
 		}
 		else {
@@ -306,10 +307,12 @@
 		// laitetaan l‰hete tulostusjonoon
 		$tila = 'N';
 		$alatila = 'A';
+
 		if ($yhtiorow['lahetteen_tulostustapa'] == 'I') {
 			$tila = 'L';
 			$alatila = 'D';
 		}
+
 		$query  = "	UPDATE lasku SET
 					tila    = '{$tila}',
 					alatila = '{$alatila}'
@@ -341,7 +344,6 @@
 				pupesoft_tulosta_lahete($params);
 			}
 		}
-
 		///* T‰h‰n menn‰‰n jos l‰hete vain siirret‰‰n tulostusjonoon *///
 		elseif (mysql_affected_rows() > 0) {
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s siirretty tulostusjonoon"), $laskurow["tunnus"])."!</font><br><br>\n";

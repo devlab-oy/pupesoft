@@ -1,11 +1,18 @@
 <?php
 
+//katotaan onko varaston hyllypaikat käytössä ja jos on käytössä ei anneta perustaa sellasta tuotepaikkaa, joka ei ole olemassa varaston hyllypaikoissa
+$query = "	SELECT tunnus
+			FROM varaston_hyllypaikat
+			WHERE yhtio 	= '$kukarow[yhtio]'
+			LIMIT 1";
+$kaytosq = pupe_query($query);
+$varaston_hyllypaikat_kaytossa = mysql_num_rows($kaytosq) == 0 ? FALSE : TRUE;
+
 $query  = "	SELECT *
 			from lasku
 			where tunnus = '$otunnus'
 			and yhtio 	 = '$kukarow[yhtio]'
 			and tila 	 = 'K'";
-
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
@@ -48,10 +55,10 @@ if ($tee == "valmis") {
 					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
 								from tuotepaikat
 								WHERE yhtio		= '$kukarow[yhtio]'
-								and hyllyalue	= '".$faijanmesta[$tilausrivirow["perheid2"]]["t1"]."'
-								and hyllynro	= '".$faijanmesta[$tilausrivirow["perheid2"]]["t2"]."'
-								and hyllyvali	= '".$faijanmesta[$tilausrivirow["perheid2"]]["t3"]."'
-								and hyllytaso	= '".$faijanmesta[$tilausrivirow["perheid2"]]["t4"]."'
+								and hyllyalue	= '{$faijanmesta[$tilausrivirow["perheid2"]]["t1"]}'
+								and hyllynro	= '{$faijanmesta[$tilausrivirow["perheid2"]]["t2"]}'
+								and hyllyvali	= '{$faijanmesta[$tilausrivirow["perheid2"]]["t3"]}'
+								and hyllytaso	= '{$faijanmesta[$tilausrivirow["perheid2"]]["t4"]}'
 								and tuoteno		= '$tilausrivirow[tuoteno]'";
 					$result = pupe_query($query);
 					//echo "FAIJALTA: $tilausrivirow[tuoteno] $query<br><br>";
@@ -179,39 +186,34 @@ if ($tee == "valmis") {
 						$query = "	SELECT tuoteno
 									FROM tuotepaikat
 									WHERE yhtio		= '$kukarow[yhtio]'
-									and hyllyalue	= '".$t1[$tilausrivirow["tunnus"]]."'
-									and hyllynro	= '".$t2[$tilausrivirow["tunnus"]]."'
-									and hyllyvali	= '".$t3[$tilausrivirow["tunnus"]]."'
-									and hyllytaso	= '".$t4[$tilausrivirow["tunnus"]]."'
+									and hyllyalue	= '{$t1[$tilausrivirow["tunnus"]]}'
+									and hyllynro	= '{$t2[$tilausrivirow["tunnus"]]}'
+									and hyllyvali	= '{$t3[$tilausrivirow["tunnus"]]}'
+									and hyllytaso	= '{$t4[$tilausrivirow["tunnus"]]}'
 									and tuoteno		= '$tilausrivirow[tuoteno]'";
 						$checkres = pupe_query($query);
 
 						//jos duplikaattia ei löydy
 						if (mysql_num_rows($checkres) == 0) {
 							$virheita = 0;
-							
+
 							if (kuuluukovarastoon($t1[$tilausrivirow["tunnus"]],$t2[$tilausrivirow["tunnus"]],'') != 0) {
-								//katotaan onko varaston hyllypaikat käytössä ja jos on käytössä ei anneta perustaa sellasta tuotepaikkaa, joka ei ole olemassa varaston hyllypaikoissa
-								$query = "	SELECT tunnus
-											FROM varaston_hyllypaikat
-											WHERE yhtio 	= '$kukarow[yhtio]'
-											LIMIT 1";
-								$kaytosq = pupe_query($query);
-								$kaytossa = (mysql_num_rows($kaytosq) == 0 ? 0 : 1);								
-								
+
+								unset($hyllyp);
+
 								//katotaan onko varaston hyllypaikoissa toi paikka vaan, jos ne on käytössä
-								if ($kaytossa == 1) {
-									$query = "	SELECT tunnus 
+								if ($varaston_hyllypaikat_kaytossa) {
+									$query = "	SELECT tunnus
 												FROM varaston_hyllypaikat
 												WHERE yhtio		= '$kukarow[yhtio]'
-												AND hyllyalue	= '".$t1[$tilausrivirow["tunnus"]]."'
-												AND hyllynro	= '".$t2[$tilausrivirow["tunnus"]]."'
-												AND hyllyvali	= '".$t3[$tilausrivirow["tunnus"]]."'
-												AND hyllytaso 	= '".$t4[$tilausrivirow["tunnus"]]."'";
+												AND hyllyalue	= '{$t1[$tilausrivirow["tunnus"]]}'
+												AND hyllynro	= '{$t2[$tilausrivirow["tunnus"]]}'
+												AND hyllyvali	= '{$t3[$tilausrivirow["tunnus"]]}'
+												AND hyllytaso 	= '{$t4[$tilausrivirow["tunnus"]]}'";
 									$hyllyp = pupe_query($query);
 								}
-								
-								if (mysql_num_rows($hyllyp) != 0 OR $kaytossa == 0){
+
+								if (!$varaston_hyllypaikat_kaytossa or (isset($hyllyp) and mysql_num_rows($hyllyp) != 0)) {
 
 									$query = "	insert into tuotepaikat (hyllyalue,hyllynro,hyllyvali,hyllytaso,oletus,saldo,saldoaika,tuoteno,yhtio,laatija,luontiaika)
 												values ('".$t1[$tilausrivirow["tunnus"]]."','".$t2[$tilausrivirow["tunnus"]]."','".$t3[$tilausrivirow["tunnus"]]."','".$t4[$tilausrivirow["tunnus"]]."','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
@@ -235,10 +237,10 @@ if ($tee == "valmis") {
 												hinta		= '0',
 												kplhinta	= '0',
 												laji 		= 'uusipaikka',
-												hyllyalue	= '".$t1[$tilausrivirow["tunnus"]]."',
-												hyllynro	= '".$t2[$tilausrivirow["tunnus"]]."',
-												hyllyvali	= '".$t3[$tilausrivirow["tunnus"]]."',
-												hyllytaso	= '".$t4[$tilausrivirow["tunnus"]]."',
+												hyllyalue	= '{$t1[$tilausrivirow["tunnus"]]}',
+												hyllynro	= '{$t2[$tilausrivirow["tunnus"]]}',
+												hyllyvali	= '{$t3[$tilausrivirow["tunnus"]]}',
+												hyllytaso	= '{$t4[$tilausrivirow["tunnus"]]}',
 												selite		= '".t("Saavutettaessa lisättiin tuotepaikka")." ".$t1[$tilausrivirow["tunnus"]]." ".$t2[$tilausrivirow["tunnus"]]." ".$t3[$tilausrivirow["tunnus"]]." ".$t4[$tilausrivirow["tunnus"]]."',
 												laatija 	= '$kukarow[kuka]',
 												laadittu	= now()";

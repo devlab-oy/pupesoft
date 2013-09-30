@@ -20211,7 +20211,7 @@ if (!function_exists('paivita_tilausrivin_hylly')) {
 }
 
 if (!function_exists('paivita_oletuspaikka')) {
-	function paivita_oletuspaikka($tuoteno, Array $hylly) {
+	function paivita_oletuspaikka($tuoteno, Array $hylly, $tultiin_mobiilista = false) {
 		global $kukarow, $yhtiorow;
 
 		// Palautusmuuttuja
@@ -20276,24 +20276,30 @@ if (!function_exists('paivita_oletuspaikka')) {
 		}
 		elseif (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
 
-			$wherelisa = $yhtiorow['paivita_oletuspaikka'] == 'S' ? "" : "AND uusiotunnus = '0'";
+			$wherelisa = $yhtiorow['paivita_oletuspaikka'] == 'S' ? "" : "AND t.uusiotunnus = '0'";
+			$joinlisa = "";
+
+			if ($tultiin_mobiilista) $joinlisa = "JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila IN ('N','O') and lasku.alatila != 'X')";
+
+			$tyyppilisa = $tultiin_mobiilista ? "AND t.tyyppi IN ('O','L','G')" : "AND t.tyyppi = 'O'";
 
 			// Päivitetään uusi oletuspaikka myös avoimille keskeneräisille ostotilauksille (jos uusi paikka on samassa varastossa kun vanha)
-			$query = "	UPDATE tilausrivi
-						SET hyllyalue	= '$hylly[hyllyalue]',
-						hyllynro	= '$hylly[hyllynro]',
-						hyllyvali	= '$hylly[hyllyvali]',
-						hyllytaso	= '$hylly[hyllytaso]'
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND tuoteno = '$tuoteno'
-						AND hyllyalue = '$oletusrow[hyllyalue]'
-						AND hyllynro = '$oletusrow[hyllynro]'
-						AND hyllytaso = '$oletusrow[hyllytaso]'
-						AND hyllyvali = '$oletusrow[hyllyvali]'
-						AND tyyppi = 'O'
+			$query = "	UPDATE tilausrivi AS t
+						{$joinlisa}
+						SET t.hyllyalue	= '{$hylly['hyllyalue']}',
+						t.hyllynro	= '{$hylly['hyllynro']}',
+						t.hyllyvali	= '{$hylly['hyllyvali']}',
+						t.hyllytaso	= '{$hylly['hyllytaso']}'
+						WHERE t.yhtio = '{$kukarow['yhtio']}'
+						AND t.tuoteno = '{$tuoteno}'
+						AND t.hyllyalue = '{$oletusrow['hyllyalue']}'
+						AND t.hyllynro = '{$oletusrow['hyllynro']}'
+						AND t.hyllytaso = '{$oletusrow['hyllytaso']}'
+						AND t.hyllyvali = '{$oletusrow['hyllyvali']}'
+						{$tyyppilisa}
 						{$wherelisa}
-						AND kpl = '0'
-						AND varattu != '0'";
+						AND t.kpl = '0'
+						AND t.varattu != '0'";
 			$result = pupe_query($query);
 
 			$return["paivitetyt_ostorivit"] = mysql_affected_rows();

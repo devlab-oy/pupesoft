@@ -194,7 +194,7 @@
 		echo "<font class='head'>".sprintf(t("Tulosta %s kopioita"), $fuse).":</font><hr><br>";
 	}
 
-	if ($laskunro > 0 and $laskunroloppu > 0 and $laskunro < $laskunroloppu) {
+	if ($laskunro <> 0 and $laskunroloppu <> 0 and $laskunro < $laskunroloppu) {
 		$tee = "TULOSTA";
 
 		$tulostukseen = array();
@@ -826,7 +826,7 @@
 		}
 
 
-		if (strlen($laskunro) > 0 and strpos($laskunro, ",") !== FALSE) {
+		if (strlen($laskunro) <> 0 and strpos($laskunro, ",") !== FALSE) {
 			$where2 .= " and lasku.laskunro IN ('".str_replace(",", "','", $laskunro)."') ";
 
 			$where3 = "";
@@ -834,7 +834,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (lasno_index) ";
 		}
-		elseif ($laskunro > 0) {
+		elseif ($laskunro <> 0) {
 			$where2 .= " and lasku.laskunro = '$laskunro' ";
 
 			$where3 = "";

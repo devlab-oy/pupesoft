@@ -586,7 +586,7 @@
 
 					$params_kerayslista["tots"] = 1;
 					$params_kerayslista = loppu_kerayslista($params_kerayslista);
-
+					
 					//tulostetaan failit ja valitaan sopivat printterit
 					if ($laskurow["varasto"] == '') {
 						$query = "	SELECT *
@@ -620,12 +620,50 @@
 						$kirres= mysql_query($query) or pupe_error($query);
 						$kirrow= mysql_fetch_array($kirres);
 						$komento=$kirrow['komento'];
+					
 					}
 
 					//tulostetaan sivu
 					$params_kerayslista["komento"] = $komento;
 					print_pdf_kerayslista($params_kerayslista);
 				}
+				elseif ($yhtiorow['tulosta_valmistus_tulosteet'] == "V"){
+					//tulostetaan failit ja valitaan sopivat printterit
+					if ($laskurow["varasto"] == '') {
+						$query = "	SELECT *
+									FROM varastopaikat
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tyyppi != 'P'
+									ORDER BY alkuhyllyalue,alkuhyllynro
+									LIMIT 1";
+					}
+					else {
+						$query = "	SELECT *
+									FROM varastopaikat
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus  = '$laskurow[varasto]'
+									ORDER BY alkuhyllyalue,alkuhyllynro";
+					}
+					$prires = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($prires) > 0) {
+						$prirow = mysql_fetch_array($prires);
+
+						if (!isset($valittu_tulostin) or $valittu_tulostin == "oletukselle") {
+							$apuprintteri = $prirow['printteri0']; // keräyslistaprintteri
+						}
+						else {
+							$apuprintteri = $valittu_tulostin;
+						}
+
+						//haetaan lähetteen tulostuskomento
+						$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+						$kirres= mysql_query($query) or pupe_error($query);
+						$kirrow= mysql_fetch_array($kirres);
+						$komento=$kirrow['komento'];
+					}	
+				}
+				
 				// jos halutaan MYÖS lähete
 				if ($yhtiorow["lahetteen_tulostustapa"] == "L") {
 					$params = array(

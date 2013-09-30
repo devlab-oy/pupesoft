@@ -6,14 +6,18 @@ function echo_myyntiseuranta_table() {
 	global $kukarow, $yhtiorow;
 
 	$nykyinen_kvartaali = paata_kvartaali();
-	$nykyinen_kuukausi = paata_kuukausi();
 
 	$tulos_ja_liikevaihto = hae_tulos_ja_liikevaihto($nykyinen_kvartaali);
 	$avoimet_tilaukset = hae_avoimet_tilaukset($kukarow['tunnus']);
 
 	if (stristr($kukarow['asema'], 'myyjä')) {
+		$tilikausi = array(
+			'start_date' => $yhtiorow['tilikausi_alku'],
+			'end_date' => $yhtiorow['tilikausi_loppu'],
+		);
+		$myynti_ja_kate_nykyinen_tilikausi = hae_myyjan_myynti_ja_kate($tilikausi, $kukarow['tunnus']);
 		$myynti_ja_kate_nykyinen_kvartaali = hae_myyjan_myynti_ja_kate($nykyinen_kvartaali, $kukarow['tunnus']);
-		$myynti_ja_kate_nykyinen_kuukausi = hae_myyjan_myynti_ja_kate($nykyinen_kuukausi, $kukarow['tunnus']);
+		
 	}
 
 	echo "<table>";
@@ -71,6 +75,15 @@ function echo_myyntiseuranta_table() {
 
 		echo "<tr>";
 		echo "<td>";
+		echo t("Liikevaihto").' '.piirra_aikavali($tilikausi);
+		echo "</td>";
+		echo "<td align='right'>";
+		echo sprintf('%.2f', $myynti_ja_kate_nykyinen_tilikausi['myynti']) . " {$yhtiorow['valkoodi']}";
+		echo "</td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<td>";
 		echo t("Liikevaihto").' '.piirra_aikavali($nykyinen_kvartaali);
 		echo "</td>";
 		echo "<td align='right'>";
@@ -80,19 +93,10 @@ function echo_myyntiseuranta_table() {
 
 		echo "<tr>";
 		echo "<td>";
-		echo t("Liikevaihto").' '.piirra_aikavali($nykyinen_kuukausi);
+		echo t("Kate").' '.piirra_aikavali($nykyinen_kvartaali);
 		echo "</td>";
 		echo "<td align='right'>";
-		echo sprintf('%.2f', $myynti_ja_kate_nykyinen_kuukausi['myynti']) . " {$yhtiorow['valkoodi']}";
-		echo "</td>";
-		echo "</tr>";
-
-		echo "<tr>";
-		echo "<td>";
-		echo t("Kate").' '.piirra_aikavali($nykyinen_kuukausi);
-		echo "</td>";
-		echo "<td align='right'>";
-		echo sprintf('%.2f', $myynti_ja_kate_nykyinen_kuukausi['kate']) . " {$yhtiorow['valkoodi']}";
+		echo sprintf('%.2f', $myynti_ja_kate_nykyinen_kvartaali['kate']) . " {$yhtiorow['valkoodi']}";
 		echo "</td>";
 		echo "</tr>";
 
@@ -205,13 +209,4 @@ function paata_kvartaali() {
 	}
 
 	return $nykyinen_kvartaali;
-}
-
-function paata_kuukausi() {
-	$nykyinen_kuukausi = array(
-		'start_date' => date('Y-m-01'),
-		'end_date'	 => date('Y-m-t')
-	);
-
-	return $nykyinen_kuukausi;
 }

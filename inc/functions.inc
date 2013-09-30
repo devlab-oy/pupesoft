@@ -11448,7 +11448,8 @@ if (!function_exists("hae_kaikki_alvit")) {
 					selitetark,
 					selitetark_2
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv'";
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv'
+					ORDER BY jarjestys, selite";
 		$vresult = pupe_query($query);
 
 		$alvit = array();
@@ -23276,6 +23277,50 @@ if (!function_exists('laske_ext_ennakko_hinta')) {
 		}
 
 		return $hinta;
+	}
+}
+
+if (!function_exists('vapauta_kateistasmaytys')) {
+	function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
+		global $kukarow, $yhtiorow;
+
+		// Katsotaan onko kassalippaan tämän päivän kassa jo täsmäytetty
+		$tasmays_query = "	SELECT group_concat(distinct lasku.tunnus) ltunnukset,
+							group_concat(distinct tiliointi.selite) selite
+							FROM lasku
+							JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.selite LIKE '$kassalipasrow[nimi] %' AND tiliointi.korjattu = '')
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							AND lasku.tila 	  = 'X'
+							AND lasku.alatila = 'K'
+							AND lasku.tapvm   = '$paiva'";
+		$tasmays_result = pupe_query($tasmays_query);
+		$tasmaysrow = mysql_fetch_assoc($tasmays_result);
+
+		// Jos on, niin poistetaan täsmäytys
+		if ($tasmaysrow["ltunnukset"] != "") {
+			$query = "	UPDATE tiliointi
+						SET korjattu = '{$kukarow['kuka']}',
+						korjausaika  = NOW()
+						WHERE yhtio  = '{$kukarow['yhtio']}'
+						AND ltunnus IN ({$tasmaysrow['ltunnukset']})
+						AND korjattu = ''";
+			$result = pupe_query($query);
+
+			$query = "	UPDATE lasku
+						SET tila = 'D',
+						alatila  = 'X',
+						comments = CONCAT(comments, ' {$kukarow['kuka']} mitätöi tositteen eikateinen.php ohjelmassa')
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus IN ({$tasmaysrow['ltunnukset']})";
+			$result = pupe_query($query);
+
+			echo "<font class='error'>".t("Vapautettiin kassojen %s päivän %s tosite.", '', $kassalipasrow['nimi'], $paiva)."<br/><br/>";
+			echo t("Sinun on täsmäytettävä päivän käteismyynnit uudelleen käteismyynnit ohjelmasta") . "</font>";
+
+			return true;
+		}
+
+		return false;
 	}
 }
 

@@ -444,7 +444,6 @@
 
 			// jos keräyserät on A, eli asiakkaan takan pitää olla keräyserät päällä, tarkistetaan se ensiksi
 			if ($yhtiorow['kerayserat'] == 'A') {
-
 				$query = "	SELECT asiakas.kerayserat
 							FROM lasku
 							JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.kerayserat = 'A')
@@ -456,20 +455,18 @@
 			}
 
 			if ($ok_chk) {
-				for ($y=0; $y < count($kerivi); $y++) {
-					$que0 = "	SELECT ei_saldoa FROM tilausrivi
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+				for ($y=0; $y<count($kerivi); $y++) {
+					$que0 = "	SELECT tunnus
+								FROM tilausrivi
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.tunnus = '{$kerivi[$y]}'";
+								AND tilausrivi.tunnus  = '{$kerivi[$y]}'";
 					$tark = pupe_query($que0);
-					$rivi = mysql_fetch_assoc($tark);
-					if ($rivi["ei_saldoa"] != "o"){
-						if (trim($keraysera_pakkaus[$kerivi[$y]]) == '') $virherivi++;
-					}
+
+					if (mysql_num_rows($tark) == 1 and trim($keraysera_pakkaus[$kerivi[$y]]) == '') $virherivi++;
 				}
 
 				if ($virherivi != 0) {
-
 					echo "<font class='error'>",t("HUOM: Tuotteita ei viety hyllyyn. Syötä pakkauskirjain"),"!</font><br /><br />";
 					$keraysvirhe++;
 
@@ -522,7 +519,9 @@
 		}
 
 		$result = pupe_query($query);
+
 		$pakkausnro = array();
+
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("VIRHE: Kerääjää %s ei löydy", "", $keraajanro)."!</font><br><br>";
 			$keraysvirhe++;

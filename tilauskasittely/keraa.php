@@ -457,7 +457,15 @@
 
 			if ($ok_chk) {
 				for ($y=0; $y < count($kerivi); $y++) {
-					if (trim($keraysera_pakkaus[$kerivi[$y]]) == '') $virherivi++;
+					$que0 = "	SELECT ei_saldoa FROM tilausrivi
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi.tunnus = '{$kerivi[$y]}'";
+					$tark = pupe_query($que0);
+					$rivi = mysql_fetch_assoc($tark);
+					if ($rivi["ei_saldoa"] != "o"){
+						if (trim($keraysera_pakkaus[$kerivi[$y]]) == '') $virherivi++;
+					}
 				}
 
 				if ($virherivi != 0) {
@@ -514,7 +522,7 @@
 		}
 
 		$result = pupe_query($query);
-
+		$pakkausnro = array();
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("VIRHE: Kerääjää %s ei löydy", "", $keraajanro)."!</font><br><br>";
 			$keraysvirhe++;
@@ -524,12 +532,26 @@
 			$who 		= $keraaja['kuka'];
 			$keraamaton = 0;
 
+
+					$query0 = "	SELECT kerayserat.pakkaus, kerayserat.pakkausnro, kerayserat.sscc, kerayserat.sscc_ulkoinen, kerayserat.tilausrivi, kerayserat.kpl, kerayserat.tunnus
+								FROM kerayserat
+								WHERE kerayserat.yhtio = '$kukarow[yhtio]'
+								AND kerayserat.nro = '{$id}'
+								GROUP BY 1,2
+								ORDER BY kerayserat.pakkausnro";
+					$pnresult = pupe_query($query0);
+
+					while ($prow = mysql_fetch_assoc($pnresult)) {
+						$pakkaus = array('pakkausnro' => $prow['pakkausnro'], 'sscc' => $prow['sscc'], 'sscc_ulkoinen' => $prow['sscc_ulkoinen'], 'pakkaus' => $prow['pakkaus'], 'tilausrivi' => $prow['tilausrivi'], 'kpl' => $prow['kpl'], 'tunnus' => $prow['tunnus']);
+						$pakkaukset[] = $pakkaus;
+					}
+
 			for ($i=0; $i < count($kerivi); $i++) {
 
 				$query1 = "	SELECT if (kerattyaika='0000-00-00 00:00:00', 'keraamaton', 'keratty') status
 							FROM tilausrivi
 							WHERE tunnus = '$kerivi[$i]'
-							and yhtio	 = '$kukarow[yhtio]'";
+							AND yhtio	 = '$kukarow[yhtio]'";
 				$ktresult = pupe_query($query1);
 				$statusrow = mysql_fetch_assoc($ktresult);
 
@@ -1134,9 +1156,22 @@
 							$kerattylisa = (trim($maara[$apui]) == '' or $maara[$apui] < 0) ? ", kpl_keratty = kpl" : ", kpl_keratty = '{$maara[$apui]}'";
 
 							$pakkauskirjain = (int) abs(ord($keraysera_pakkaus[$kerivi[$i]]) - 64);
+							$satu = $pakkausnro['sscc'];
+
+							$monesko = -1;
+
+							for ($x = 0; $x < count($pakkaukset); $x++){
+								if ($pakkaukset[$x]['pakkausnro'] == $pakkauskirjain){
+									$monesko = $x;
+									break;
+								}
+							}
 
 							$query_ins = "	UPDATE kerayserat SET
-											pakkausnro = '{$pakkauskirjain}'
+											pakkausnro = '{$pakkauskirjain}',
+											sscc = '{$pakkaukset[$monesko]['sscc']}',
+											sscc_ulkoinen = '{$pakkaukset[$monesko]['sscc_ulkoinen']}',
+											pakkaus = '{$pakkaukset[$monesko]['pakkaus']}'
 											{$kerattylisa}
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tilausrivi = '{$kerivi[$i]}'";
@@ -1960,7 +1995,7 @@
 		if ($id == 0) {
 
 			$valmistuslinjat = hae_valmistuslinjat();
-			
+
 			$formi	= "find";
 			$kentta	= "etsi";
 
@@ -2496,7 +2531,7 @@
 				}
 			}
 
- 			echo "<table>";
+			echo "<table>";
 
 			if ($toim == 'SIIRTOLISTA')	 {
 				echo "<tr><th align='left'>",t("Siirtolista"),"</th><td>{$id}</td></tr>";
@@ -2512,11 +2547,11 @@
 					$alatilareklamaatio = 'A';
 				}
 
- 				$query = "	SELECT
- 							lasku.*,
- 							toimitustapa.tulostustapa,
- 							toimitustapa.nouto
- 							FROM lasku
+				$query = "	SELECT
+							lasku.*,
+							toimitustapa.tulostustapa,
+							toimitustapa.nouto
+							FROM lasku
 							LEFT JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite)
 							WHERE lasku.tunnus in ({$tilausnumeroita})
 							and lasku.yhtio = '{$kukarow['yhtio']}'

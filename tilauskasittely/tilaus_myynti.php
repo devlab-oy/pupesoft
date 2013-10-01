@@ -6118,7 +6118,7 @@ if ($tee == '') {
 				else {
 					$var_temp = $row['var'];
 
-					if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+					if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $row['var'] == 'J') {
 						$var_temp = $var_temp." - ".t("heti");
 					}
 				}
@@ -6608,7 +6608,7 @@ if ($tee == '') {
 									<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
 									<input type='hidden' name='var' 			value = 'J'>
 									<input type='hidden' name='jt_muidenmukana' value = 'KYLLA'>
-									<input type='Submit' value='" . t("JT, muiden mukana"). "'>
+									<input type='Submit' value='" . t("Jälkitoim, muiden mukana"). "'>
 									</form> ";
 					}
 
@@ -6628,7 +6628,7 @@ if ($tee == '') {
 								<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
 								<input type='hidden' name='var' 			value = 'J'>
 								<input type='hidden' name='jt_manual' value = 'KYLLA'>
-								<input type='Submit' value='" . t("JT, manuaalinen") . "'>
+								<input type='Submit' value='" . t("Jälkitoim, manuaalinen") . "'>
 								</form> ";
 					}
 				}

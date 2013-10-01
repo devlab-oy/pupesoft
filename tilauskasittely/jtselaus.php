@@ -1706,7 +1706,7 @@
 											else {
 												echo t("JT");
 
-												if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+												if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
 													echo " ".t("heti");
 												}
 											}
@@ -1795,6 +1795,10 @@
 										}
 										else {
 											echo t("JT");
+
+											if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+												echo " ".t("heti");
+											}
 										}
 
 										echo "</td>";
@@ -1844,6 +1848,10 @@
 										}
 										else {
 											echo t("JT");
+
+											if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+												echo " ".t("heti");
+											}
 										}
 
 										echo "</td>";
@@ -1896,6 +1904,10 @@
 											}
 											else {
 												echo t("JT");
+
+												if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+													echo " ".t("heti");
+												}
 											}
 
 											echo "</td>";
@@ -2436,7 +2448,7 @@
 		echo "<option value=''>",t("Näytä kaikki"),"</option>";
 
 		if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
-			echo "<option value='j' {$sel['j']}>",t("JT - heti"),"</option>";
+			echo "<option value='j' {$sel['j']}>",t("JT heti"),"</option>";
 		}
 		else {
 			echo "<option value='j' {$sel['j']}>",t("JT"),"</option>";

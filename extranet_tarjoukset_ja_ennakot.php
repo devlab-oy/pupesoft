@@ -70,7 +70,7 @@ $(function() {
 	    });
 	});
 });
-	
+
 </script>
 
 <?php
@@ -224,7 +224,7 @@ if ($action == 'luo_uusi_ennakko') {
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.tunnus = '{$uusi_tilausnumero}'";
 	pupe_query($query);
-	
+
 	$query = "  SELECT *
 				FROM lasku
 				JOIN laskun_lisatiedot
@@ -235,7 +235,7 @@ if ($action == 'luo_uusi_ennakko') {
 	$result = pupe_query($query);
 
 	$laskurow = mysql_fetch_assoc($result);
-	
+
 	$request['valittu_tarjous_tunnus'] = $uusi_tilausnumero;
 
 	$kukarow['kesken'] = $uusi_tilausnumero;
@@ -259,7 +259,7 @@ if (!empty($request['action'])) {
 
 function hyvaksy_ennakko($parametrit) {
 	global $kukarow, $yhtiorow;
-	
+
 	$valittu_tarjous_tunnus = $parametrit['valittu_tarjous_tunnus'];
 	$toim = $parametrit['toim'];
 	$kukarow['kesken'] = $valittu_tarjous_tunnus;
@@ -343,7 +343,7 @@ function paivita_ennakko($params) {
 
 		// Kappalemäärä käyttöliittymästä, pilkut pisteiksi ja round 2
 		$value = round(str_replace(",", ".", pupesoft_cleanstring($value)), 2);
-		
+
 		// Etsitään tilausrivitunnuksen perusteella tuotteen kannassa oleva kappalemäärä
 		$loytynyt_tilausrivi = search_array_key_for_value_recursive($muokkaamaton_ennakko['tilausrivit'], 'tunnus', $key);
 
@@ -367,7 +367,7 @@ function paivita_ennakko($params) {
 		// Tuoteperheen tapauksessa päivitetään/poistetaan kaikki tuoteperheen rivit, muuten vain ko. rivi
 		if ($loytynyt_tilausrivi[0]['tunnus'] == $loytynyt_tilausrivi[0]['perheid_tunnus']) {
 			$andy = "AND perheid = '{$loytynyt_tilausrivi[0]['tunnus']}'";
-		}		
+		}
 		else {
 			$andy = "AND tunnus = '{$loytynyt_tilausrivi[0]['tunnus']}'";
 		}
@@ -521,13 +521,12 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 	$laskurow = hae_extranet_tarjous($valittu_tarjous_tunnus, $toim);
 
 	if ($toim == "EXTENNAKKO") {
-		echo "<br>
-			<form action='tuote_selaus_haku.php' method='post'>
+		echo " <form action='tuote_selaus_haku.php' method='post'>
 			<input type='hidden' name='toim_kutsu' value='$toim'>
 			<input type='hidden' name='tilausnumero' value='$valittu_tarjous_tunnus'>
 			<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
 			<input type='submit' value='".t("Selaa tuotteita")."'>
-			</form><br>
+			</form>
 			<form action='yhteensopivuus.php' method='post'>
 			<input type='hidden' name='toim' value='MP'>
 			<input type='hidden' name='toim_kutsu' value='$toim'>
@@ -559,7 +558,7 @@ function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
 			<input type='submit' value='".t("ATV-Selain")."'>
 			</form><br><br>";
 	}
-	
+
 	echo_tarjouksen_otsikko($tarjous, $toim);
 
 	if ($toim == 'EXTENNAKKO') {
@@ -727,10 +726,10 @@ function piirra_tarjouksen_tilausrivit($params) {
 	echo "<th>".t("Kuva")."</th>";
 	echo "<th>".t("Tuoteno")."</th>";
 	echo "<th>".t("Nimitys")."</th>";
-	echo "<th>".t("Kpl")."</th>";	
+	echo "<th>".t("Kpl")."</th>";
 	echo "<th>".t("Yksikköhinta")."</th>";
 	if ($toim == "EXTENNAKKO") {
-		echo "<th>".t("Osh")."</th>";	
+		echo "<th>".t("Osh")."</th>";
 		echo "<th>".t("Ale %")."</th>";
 	}
 	echo "<th>".t("Rivihinta")."</th>";
@@ -785,13 +784,13 @@ function piirra_tarjouksen_tilausrivit($params) {
 
 	echo "</table>";
 	echo "<br>";
-	
+
 	if ($toim == "EXTENNAKKO") {
 		echo "<input type='submit' name='paivita' value='".t("Päivitä rivit")."' />";
 		echo "<br>";
 		echo "<br>";
 	}
-	
+
 	echo "<br>";
 	echo "<textarea rows='5' cols='90' maxlength='1000' name='syotetyt_lisatiedot' placeholder='".t("Lisätietoja")."'>";
 	echo "</textarea>";
@@ -811,7 +810,7 @@ function piirra_tarjouksen_tilausrivit($params) {
 function lisaa_ennakkorivi($params) {
 
 	global $kukarow, $yhtiorow;
-	
+
 	$tuoteno = $params['tuoteno'];
 	$kpl     = $params['kpl'];
 	$otunnus = $params['lasku_tunnus'];
@@ -856,7 +855,8 @@ function lisaa_ennakkorivi($params) {
 		'var'			 => $var,
 		'toim'			 => $toim
 	);
-	lisaa_rivi($parametrit);
+	
+	list($lisatyt_rivit1, $lisatyt_rivit2) = lisaa_rivi($parametrit);
 
 	$lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
 
@@ -870,7 +870,7 @@ function lisaa_ennakkorivi($params) {
 					kerattyaika		= now()
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and tunnus	= '$lisatyt_rivit[0]'";
-		$result = pupe_query($query);
+		$result = pupe_query($query);		
 	}
 }
 

@@ -1002,7 +1002,7 @@
 
 				// Listataan korvaavat ketju
 				foreach (array_reverse($korvaavat->tuotteet()) as $tuote) {
-					if ($tuote['tuoteno'] != $tuoteno) {
+					if ($tuoterow["tuoteno"] != $tuote["tuoteno"]) {
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
 						echo "<tr>";

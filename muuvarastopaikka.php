@@ -13,6 +13,7 @@
 					varastopaikat READ,
 					varaston_hyllypaikat READ,
 					tilausrivi WRITE,
+					tilausrivi as t WRITE,
 					tilausrivi as tilausrivi_osto READ,
 					sarjanumeroseuranta WRITE,
 					sarjanumeroseuranta_arvomuutos READ,

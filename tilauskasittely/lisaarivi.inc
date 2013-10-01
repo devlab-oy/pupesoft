@@ -56,9 +56,16 @@
 	if (!isset($jtspec)) 			$jtspec = "";
 	if (!isset($paikka)) 			$paikka = "";
 	if (!isset($perhekielto)) 		$perhekielto = "";
+	if (!isset($valmistuslinja))	$valmistuslinja = "";
 
 	if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely_tuoteperhe'] == 'U') {
 		$perhekielto = "Y";
+	}
+
+	// Jos valmistuksien_kasittely on Y, voidaan käyttöliittymästä antaa valmistuslinja
+	if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y' and $valmistuslinja == '') {
+		// Jos ei olla pakotettu valmistuslinjaa, otetaan default tuotteelta tai sitten otsikolta
+		$valmistuslinja = $laskurow['kohde'] == "" ? $trow['valmistuslinja'] : $laskurow['kohde'];
 	}
 
 	unset($korvaavan_hinta_ylaraja_halvin_alehinta);
@@ -77,7 +84,7 @@
 		}
 		else {
 			$netto = '';
-			$ale1 = (isset($ale1)) ? $ale1 : 0;
+			$ale1 = 0;
 		}
 	}
 
@@ -1627,6 +1634,16 @@
 
 								@include("trivityyppivalinta.inc");
 
+								//special case: Kun yhtiöparametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
+								//excelistä sisäänluettavissa valmistusriveissä voi antaa valmistuslinjan ja toivotut päivämäärät (mikrotilaus.inc)
+								//Nämä tiedot tallennetaan väliaikaisesti tilausriveille, joista ne sitten kopioidaan omille otsikoilleen.
+								if ($valmistuslinja != '') {
+									$positio = $valmistuslinja;
+								}
+								else {
+									$positio = $trivtyrow['selite'];
+								}
+
 								$query = "	SELECT *
 											FROM tilausrivin_lisatiedot
 											WHERE yhtio			 = '$kukarow[yhtio]'
@@ -1658,7 +1675,7 @@
 
 									$query = "	UPDATE tilausrivin_lisatiedot
 												SET
-												positio = if (positio = '', '$trivtyrow[selite]', positio),
+												positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
 												toimittajan_tunnus		= '$toimittajan_tunnus',
 												muutospvm				= now(),
 												muuttaja				= '$kukarow[kuka]',
@@ -1679,7 +1696,7 @@
 
 									$query = "	INSERT INTO tilausrivin_lisatiedot
 												SET yhtio				= '$kukarow[yhtio]',
-												positio 				= '$trivtyrow[selite]',
+												positio 				= '{$positio}',
 												toimittajan_tunnus		= '$toimittajan_tunnus',
 												ei_nayteta 				= '$myy_lapsi_ein[$indeksi]',
 												tilausrivitunnus		= '$lisatty_tun',
@@ -2719,6 +2736,16 @@
 			$trivtyrow = array("selite" => "");
 			@include("trivityyppivalinta.inc");
 
+			//special case: Kun yhtiöparametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
+			//excelistä sisäänluettavissa valmistusriveissä voi antaa valmistuslinjan ja toivotut päivämäärät (mikrotilaus.inc)
+			//Nämä tiedot tallennetaan väliaikaisesti tilausriveille, joista ne sitten kopioidaan omille otsikoilleen.
+			if ($valmistuslinja != '') {
+				$positio = $valmistuslinja;
+			}
+			else {
+				$positio = $trivtyrow['selite'];
+			}
+
 			$query = "	SELECT *
 						FROM tilausrivin_lisatiedot
 						WHERE yhtio			 = '$kukarow[yhtio]'
@@ -2744,7 +2771,7 @@
 
 				$query = "	UPDATE tilausrivin_lisatiedot
 							SET
-							positio = if (positio = '', '$trivtyrow[selite]', positio),
+							positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							muutospvm			= now(),
 							muuttaja			= '$kukarow[kuka]',
@@ -2766,7 +2793,7 @@
 
 				$query = "	INSERT INTO tilausrivin_lisatiedot
 							SET yhtio			= '$kukarow[yhtio]',
-							positio 			= '$trivtyrow[selite]',
+							positio 			= '{$positio}',
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							tilausrivitunnus	= '$lisatty_tun',
 							jarjestys			= '$jarjestys',

@@ -194,7 +194,7 @@
 		echo "<font class='head'>".sprintf(t("Tulosta %s kopioita"), $fuse).":</font><hr><br>";
 	}
 
-	if ($laskunro > 0 and $laskunroloppu > 0 and $laskunro < $laskunroloppu) {
+	if ($laskunro <> 0 and $laskunroloppu <> 0 and $laskunro < $laskunroloppu) {
 		$tee = "TULOSTA";
 
 		$tulostukseen = array();
@@ -817,7 +817,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'O')
 						 JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
 						 JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))";
 
@@ -826,7 +826,7 @@
 		}
 
 
-		if (strlen($laskunro) > 0 and strpos($laskunro, ",") !== FALSE) {
+		if (strlen($laskunro) <> 0 and strpos($laskunro, ",") !== FALSE) {
 			$where2 .= " and lasku.laskunro IN ('".str_replace(",", "','", $laskunro)."') ";
 
 			$where3 = "";
@@ -834,7 +834,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (lasno_index) ";
 		}
-		elseif ($laskunro > 0) {
+		elseif ($laskunro <> 0) {
 			$where2 .= " and lasku.laskunro = '$laskunro' ";
 
 			$where3 = "";
@@ -909,7 +909,7 @@
 		}
 
 		if ($toim == "VASTAANOTTORAPORTTI") {
-			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')";
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'O')";
 			$where5 = " AND tilausrivi.kpl != 0 ";
 		}
 
@@ -1079,6 +1079,7 @@
 									$kerroinlisa2
 									WHERE tilausrivi.yhtio = '$row[yhtio]'
 									and tilausrivi.otunnus = '$row[tunnus]'
+									and tilausrivi.var != 'O'
 									and tilausrivi.tyyppi not in ('D','V')";
 						$sumres = pupe_query($query);
 						$sumrow = mysql_fetch_assoc($sumres);
@@ -1733,6 +1734,7 @@
 								and tilausrivi.tyyppi  != 'D'
 								and tilausrivi.yhtio 	= tuote.yhtio
 								and tilausrivi.tuoteno  = tuote.tuoteno
+								and tilausrivi.var != 'O'
 								ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 					$result = pupe_query($query);
 
@@ -2070,6 +2072,7 @@
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno {$lisa1})
 								WHERE kerayserat.otunnus IN ({$kerayseran_tilaukset})
+								and tilausrivi.var != 'O'
 								AND kerayserat.yhtio   = '{$kukarow['yhtio']}'
 								ORDER BY sorttauskentta";
 				}
@@ -2086,6 +2089,7 @@
 								WHERE tilausrivi.otunnus in ($tilausnumeroita)
 								and tilausrivi.yhtio   = '$kukarow[yhtio]'
 								and tilausrivi.tyyppi  != 'D'
+								and tilausrivi.var != 'O'
 								$lisa1
 								$where_lisa
 								ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";

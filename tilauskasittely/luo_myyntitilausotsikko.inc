@@ -13,17 +13,17 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 		if (mysql_num_rows($result) == 1) {
 			$asiakasrow  = mysql_fetch_assoc($result);
 
-			if(empty($asiakasrow['maksuehto'])) {
-					$query = "	SELECT *
-								FROM maksuehto
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND kaytossa = ''
-								ORDER BY jarjestys ASC
-								LIMIT 1";
-					$result = pupe_query($query);
+			if (empty($asiakasrow['maksuehto'])) {
+				$query = "	SELECT *
+							FROM maksuehto
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND kaytossa = ''
+							ORDER BY jarjestys ASC
+							LIMIT 1";
+				$result = pupe_query($query);
 
-					$maksuehto_row = mysql_fetch_assoc($result);
-					$asiakasrow['maksuehto'] = $maksuehto_row['tunnus'];
+				$maksuehto_row = mysql_fetch_assoc($result);
+				$asiakasrow['maksuehto'] = $maksuehto_row['tunnus'];
 			}
 
 			$ytunnus 		   = $asiakasrow["ytunnus"];
@@ -357,6 +357,11 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 		}
 		elseif ($toim == "TYOMAARAYS") {
 			$tilaustyyppi = "A";
+		}
+		elseif ($toim == "EXTENNAKKO") {
+			// Kun asiakas tekee ext-ennakkotilausta extranetissä
+			$tilaustyyppi = "E";
+			$clearing  = "EXTENNAKKO";
 		}
 
 		$jatka	= "JATKA";

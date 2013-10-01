@@ -456,7 +456,7 @@
 
 			if ($ok_chk) {
 				for ($y=0; $y<count($kerivi); $y++) {
-					$que0 = "	SELECT tunnus
+					$que0 = "	SELECT tilausrivi.tunnus
 								FROM tilausrivi
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -520,8 +520,6 @@
 
 		$result = pupe_query($query);
 
-		$pakkausnro = array();
-
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("VIRHE: Kerääjää %s ei löydy", "", $keraajanro)."!</font><br><br>";
 			$keraysvirhe++;
@@ -530,7 +528,6 @@
 			$keraaja 	= mysql_fetch_assoc($result);
 			$who 		= $keraaja['kuka'];
 			$keraamaton = 0;
-
 
 					$query0 = "	SELECT kerayserat.pakkaus, kerayserat.pakkausnro, kerayserat.sscc, kerayserat.sscc_ulkoinen, kerayserat.tilausrivi, kerayserat.kpl, kerayserat.tunnus
 								FROM kerayserat
@@ -1155,8 +1152,6 @@
 							$kerattylisa = (trim($maara[$apui]) == '' or $maara[$apui] < 0) ? ", kpl_keratty = kpl" : ", kpl_keratty = '{$maara[$apui]}'";
 
 							$pakkauskirjain = (int) abs(ord($keraysera_pakkaus[$kerivi[$i]]) - 64);
-							$satu = $pakkausnro['sscc'];
-
 							$monesko = -1;
 
 							for ($x = 0; $x < count($pakkaukset); $x++){

@@ -57,10 +57,8 @@ $request['aleryhmat'] = hae_aleryhmat();
 if ($request['action'] == 'aja_raportti') {
 	echo "<font class='message'>".t("Raporttia ajetaan")."</font>";
 	echo "<br/>";
+	flush();
 
-	$html = ob_get_clean();
-	echo $html;
-	
 	$request['tuotteet'] = hae_asiakashinta_ja_alennus_tuotteet($request);
 
 	$tuotteet = hae_asiakasalennukset($request);
@@ -76,9 +74,10 @@ if ($request['action'] == 'aja_raportti') {
 		echo "<br/>";
 	}
 }
+
 echo_kayttoliittyma($request);
 
-//require ("inc/footer.inc");
+require ("inc/footer.inc");
 
 function echo_kayttoliittyma($request = array()) {
 	global $kukarow, $yhtiorow;
@@ -327,7 +326,7 @@ function hae_asiakasalennukset($request) {
 			else {
 				$kateprosentti = number_format((1 - ($tuotteen_toimittaja_row['ostohinta'] / $alennettu_hinta)) * 100, 2);
 			}
-			
+
 		}
 		else {
 			if ($asiakashinta['hinta'] == 0) {

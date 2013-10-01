@@ -529,7 +529,7 @@
 			$who 		= $keraaja['kuka'];
 			$keraamaton = 0;
 
-					$query0 = "	SELECT kerayserat.pakkaus, kerayserat.pakkausnro, kerayserat.sscc, kerayserat.sscc_ulkoinen, kerayserat.tilausrivi, kerayserat.kpl, kerayserat.tunnus
+					$query0 = "	SELECT kerayserat.pakkaus, kerayserat.pakkausnro, kerayserat.sscc, kerayserat.sscc_ulkoinen, kerayserat.tunnus
 								FROM kerayserat
 								WHERE kerayserat.yhtio = '$kukarow[yhtio]'
 								AND kerayserat.nro = '{$id}'
@@ -538,7 +538,7 @@
 					$pnresult = pupe_query($query0);
 
 					while ($prow = mysql_fetch_assoc($pnresult)) {
-						$pakkaus = array('pakkausnro' => $prow['pakkausnro'], 'sscc' => $prow['sscc'], 'sscc_ulkoinen' => $prow['sscc_ulkoinen'], 'pakkaus' => $prow['pakkaus'], 'tilausrivi' => $prow['tilausrivi'], 'kpl' => $prow['kpl'], 'tunnus' => $prow['tunnus']);
+						$pakkaus = array('pakkausnro' => $prow['pakkausnro'], 'sscc' => $prow['sscc'], 'sscc_ulkoinen' => $prow['sscc_ulkoinen'], 'pakkaus' => $prow['pakkaus'], 'tunnus' => $prow['tunnus']);
 						$pakkaukset[] = $pakkaus;
 					}
 

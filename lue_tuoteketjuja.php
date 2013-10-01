@@ -372,7 +372,7 @@ if ($kasitellaan_tiedosto) {
 									echo t("Lisättiin ketjuun")," $id {$rivi[$j]}! ";
 								}
 							}
- 							elseif ($toiminto == 'POISTA' and (($table == 'vastaavat' and $j > 0) or table != 'vastaavat')) {
+ 							elseif ($toiminto == 'POISTA' and (($table == 'vastaavat' and $j > 0) or $table != 'vastaavat')) {
 
 								if (mysql_num_rows($kresult) == 0) {
 									echo t("Tuotetta")," {$rivi[$j]} ",t("ei voida poistaa, koska se ei löydy tästä ketjusta"),"! ";

@@ -23431,6 +23431,8 @@ if (!function_exists('paivita_ohjausmerkki')) {
 				$updres = pupe_query($query);
 			}
 		}
+
+		return $laskurow;
 	}
 }
 

@@ -2082,6 +2082,10 @@
 											}
 											else {
 												echo t("JT");
+
+												if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+													echo " ".t("heti");
+												}
 											}
 
 											echo "</td>";

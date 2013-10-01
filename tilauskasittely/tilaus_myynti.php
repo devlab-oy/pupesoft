@@ -6117,6 +6117,10 @@ if ($tee == '') {
 				}
 				else {
 					$var_temp = $row['var'];
+
+					if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+						$var_temp = $var_temp." - ".t("heti");
+					}
 				}
 
 				echo "<td $classvar align='center' valign='top'>$var_temp&nbsp;</td>";
@@ -6436,6 +6440,13 @@ if ($tee == '') {
 								</form> ";
 					}
 
+					if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+						$napinnimi = t("Jälkitoim, heti");
+					}
+					else {
+						$napinnimi = t("Jälkitoim");
+					}
+
 					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0)
 							and ($row["var"] == 'P' or (in_array($row["var"], array('','H')) and ($toim == 'PIKATILAUS' or $toim == 'RIVISYOTTO')))
 							and $saako_jalkitoimittaa == 0
@@ -6461,7 +6472,7 @@ if ($tee == '') {
 									<input type='hidden' name='jt_muidenmukana' value = 'EI'>
 									<input type='hidden' name='orig_tila' 		value = '$orig_tila'>
 									<input type='hidden' name='orig_alatila' 	value = '$orig_alatila'>
-									<input type='Submit' value='" . t("Jälkitoim") . "'>
+									<input type='Submit' value='{$napinnimi}'>
 									</form> ";
 
 						if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
@@ -6576,7 +6587,7 @@ if ($tee == '') {
 									<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
 									<input type='hidden' name='var' 			value = 'J'>
 									<input type='hidden' name='jt_muidenmukana' value = 'EI'>
-									<input type='Submit' value='" . t("Jälkitoim"). "'>
+									<input type='Submit' value='{$napinnimi}'>
 									</form> ";
 					}
 

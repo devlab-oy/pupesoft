@@ -1705,6 +1705,10 @@
 											}
 											else {
 												echo t("JT");
+
+												if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+													echo " ".t("heti");
+												}
 											}
 
 											echo "</td>";
@@ -2430,7 +2434,13 @@
 		echo "<td>";
 		echo "<select name='jt_tyyppi'>";
 		echo "<option value=''>",t("Näytä kaikki"),"</option>";
-		echo "<option value='j' {$sel['j']}>",t("JT"),"</option>";
+
+		if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+			echo "<option value='j' {$sel['j']}>",t("JT - heti"),"</option>";
+		}
+		else {
+			echo "<option value='j' {$sel['j']}>",t("JT"),"</option>";
+		}
 
 		if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
 			echo "<option value='j_muiden_mukana' {$sel['j_muiden_mukana']}>",t("JT muiden mukana"),"</option>";

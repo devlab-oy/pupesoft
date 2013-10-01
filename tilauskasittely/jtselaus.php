@@ -876,6 +876,26 @@
 
 			$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
+			if ($jt_tyyppi == 'j_manual') {
+				$j_manual_lisa = " and tilausrivin_lisatiedot.jt_manual != '' ";
+			}
+			elseif ($jt_tyyppi == 'j') {
+				$j_manual_lisa = " and tilausrivin_lisatiedot.jt_manual = '' ";
+			}
+			else {
+				$j_manual_lisa = '';
+			}
+
+			if ($jt_tyyppi == 'j_muiden_mukana') {
+				$j_muiden_mukana_lisa = " and tilausrivi.kerayspvm > CURRENT_DATE ";
+			}
+			elseif ($jt_tyyppi == 'j') {
+				$j_muiden_mukana_lisa = ' and tilausrivi.kerayspvm <= CURRENT_DATE ';
+			}
+			else {
+				$j_muiden_mukana_lisa = '';
+			}
+
 			// haetaan vain tuoteperheiden is‰t tai sellaset tuotteet jotka eiv‰t kuulu tuoteperheisiin
 			if ($toim == "ENNAKKO") {
 				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.varattu jt,
@@ -886,7 +906,8 @@
 							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
 							tilausrivi.jaksotettu,
 							tuote.status,
-							lasku.jtkielto
+							lasku.jtkielto,
+							'' as jt_manual
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa $summarajauslisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
@@ -913,9 +934,10 @@
 							tilausrivi.kerayspvm,
 							tilausrivi.jaksotettu,
 							tuote.status,
-							lasku.jtkielto
+							lasku.jtkielto,
+							tilausrivin_lisatiedot.jt_manual
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus {$j_manual_lisa})
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio
 								and lasku.tunnus = tilausrivi.otunnus
 								and (lasku.tila != 'N' or lasku.alatila != '') $laskulisa $summarajauslisa
@@ -933,6 +955,7 @@
 							and tilausrivi.kpl 				= 0
 							and tilausrivi.jt + tilausrivi.varattu	> 0
 							and ((tilausrivi.tunnus=tilausrivi.perheid and tilausrivi.perheid2=0) or (tilausrivi.tunnus=tilausrivi.perheid2) or (tilausrivi.perheid=0 and tilausrivi.perheid2=0))
+							{$j_muiden_mukana_lisa}
 							$tilausrivilisa
 							$order
 							$limit";
@@ -955,9 +978,10 @@
 							lasku.toim_maa,
 							tilausrivi.jaksotettu,
 							tuote.status,
-							lasku.jtkielto
+							lasku.jtkielto,
+							tilausrivin_lisatiedot.jt_manual
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus {$j_manual_lisa})
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (lasku.tila != 'N' or lasku.alatila != '') $laskulisa $summarajauslisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
 							$toimittajalisa
@@ -969,6 +993,7 @@
 							and tilausrivi.kpl 				= 0
 							and tilausrivi.jt  + tilausrivi.varattu	> 0
 							and ((tilausrivi.tunnus=tilausrivi.perheid and tilausrivi.perheid2=0) or (tilausrivi.tunnus=tilausrivi.perheid2) or (tilausrivi.perheid=0 and tilausrivi.perheid2=0))
+							{$j_muiden_mukana_lisa}
 							$tilausrivilisa
 							$order
 							$limit";
@@ -1241,6 +1266,8 @@
 								echo "</th>";
 
 								echo "<th valign='top'>".t("Status")."<br>".t("Toimaika")."<br/>".t("Saapumisp‰iv‰")."</th>";
+
+								if ($kukarow['extranet'] == '') echo "<th valign='top'>",t("Tyyppi"),"</th>";
 
 								if ($jtselaus_paivitys_oikeus) {
 									if ($kukarow["extranet"] == "") {
@@ -1652,6 +1679,7 @@
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 
 										if ($kukarow["extranet"] == "") {
+
 											echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:green;'>".t("Riitt‰‰ kaikille")."!</font><br>";
 
 											if (isset($toimvko) and $toimvko > 0 and !isset($toimpva)) {
@@ -1663,6 +1691,20 @@
 											else {
 												echo tv1dateconv($toimaika);
 												echo $saapumisajat[$jtrow['tuoteno']];
+											}
+
+											echo "</td>";
+
+											echo "<td valign='top' {$class}>";
+
+											if ($jtrow['jt_manual'] != '') {
+												echo t("JT manual");
+											}
+											elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+												echo t("JT muiden mukana");
+											}
+											else {
+												echo t("JT");
 											}
 
 											echo "</td>";
@@ -1739,6 +1781,20 @@
 										}
 										echo "</td>";
 
+										echo "<td valign='top' {$class}>";
+
+										if ($jtrow['jt_manual'] != '') {
+											echo t("JT manual");
+										}
+										elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+											echo t("JT muiden mukana");
+										}
+										else {
+											echo t("JT");
+										}
+
+										echo "</td>";
+
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 										echo "<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI' $kaikki_check></td>";
 
@@ -1772,6 +1828,20 @@
 											echo tv1dateconv($toimaika);
 											echo $saapumisajat[$jtrow['tuoteno']];
 										}
+										echo "</td>";
+
+										echo "<td valign='top' {$class}>";
+
+										if ($jtrow['jt_manual'] != '') {
+											echo t("JT manual");
+										}
+										elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+											echo t("JT muiden mukana");
+										}
+										else {
+											echo t("JT");
+										}
+
 										echo "</td>";
 
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
@@ -1811,6 +1881,21 @@
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 
 										if ($kukarow["extranet"] == "") {
+
+											echo "<td valign='top' {$class}>";
+
+											if ($jtrow['jt_manual'] != '') {
+												echo t("JT manual");
+											}
+											elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+												echo t("JT muiden mukana");
+											}
+											else {
+												echo t("JT");
+											}
+
+											echo "</td>";
+
 											echo "	<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $class>&nbsp;</td>
@@ -1970,6 +2055,21 @@
 										echo "</td>";
 
 										if ($kukarow["extranet"] == "") {
+
+											echo "<td valign='top' {$class}>";
+
+											if ($jtrow['jt_manual'] != '') {
+												echo t("JT manual");
+											}
+											elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+												echo t("JT muiden mukana");
+											}
+											else {
+												echo t("JT");
+											}
+
+											echo "</td>";
+
 											echo "	<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $class>&nbsp;</td>
@@ -2064,17 +2164,17 @@
 
 							echo "<tr class='aktiivi'>";
 
-							$colspan = 3;
+							$colspan = 4;
 
 							if ($tilaus_on_jo == "") {
 								$colspan++;
 							}
 
-							if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
+							if ($kukarow["resoluutio"] == 'I') {
 								$colspan++;
 							}
 
-							if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "") {
+							if ($jtselaus_paivitys_oikeus) {
 								$colspan++;
 							}
 
@@ -2320,6 +2420,29 @@
 		}
 
 		echo "</select></td></tr>\n";
+
+		$jt_tyyppi = !isset($jt_tyyppi) ? '' : $jt_tyyppi;
+
+		$sel = array($jt_tyyppi => 'selected') + array('j' => '', 'j_muiden_mukana' => '', 'j_manual' => '');
+
+		echo "<tr>";
+		echo "<th>",t("JT tyyppi"),"</th>";
+		echo "<td>";
+		echo "<select name='jt_tyyppi'>";
+		echo "<option value=''>",t("N‰yt‰ kaikki"),"</option>";
+		echo "<option value='j' {$sel['j']}>",t("JT"),"</option>";
+
+		if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+			echo "<option value='j_muiden_mukana' {$sel['j_muiden_mukana']}>",t("JT muiden mukana"),"</option>";
+		}
+
+		if ($yhtiorow['jt_manual'] == 'K') {
+			echo "<option value='j_manual' {$sel['j_manual']}>",t("JT manual"),"</option>";
+		}
+
+		echo "</select>";
+		echo "</td>";
+		echo "</tr>";
 
 		echo "<tr>
 				<th>".t("Tilaus")."</th>

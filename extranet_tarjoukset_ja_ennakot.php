@@ -1,7 +1,7 @@
 <?php
 
 require ("parametrit.inc");
-require ("Validation.php");
+require ("validation/Validation.php");
 require_once('luo_myyntitilausotsikko.inc');
 enable_ajax();
 

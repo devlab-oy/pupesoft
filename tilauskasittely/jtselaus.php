@@ -1651,7 +1651,7 @@
 								if (($jtrow['jt_manual'] == '' or $mista_tullaan != 'MYYNTITILAUKSELTA') and (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0 and $voiko_toimittaa !== false) or $automaaginen == 'vakisin') {
 
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
-									if ($jtrow['jt_manual'] == '' and ($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen' or $automaaginen == 'vakisin')) {
+									if (($jtrow['jt_manual'] == '' or ($jtrow['jt_manual'] != '' and $mista_tullaan != 'MYYNTITILAUKSELTA' and $automaaginen == 'tosi_automaaginen')) and ($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen' or $automaaginen == 'vakisin')) {
 
 										if ($from_varastoon_inc == "editilaus_in.inc") {
 											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
@@ -1747,7 +1747,7 @@
 								elseif (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $kokonaismyytavissa >= $jtrow["jt"] and $perheok == 0 and $voiko_toimittaa !== false and ($jtrow['jt_manual'] == '' or $mista_tullaan != 'MYYNTITILAUKSELTA')) {
 
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
-									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $automaaginen == 'tosi_automaaginen' and $jtrow['jt_manual'] == '') {
+									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $automaaginen == 'tosi_automaaginen' and ($jtrow['jt_manual'] == '' or ($jtrow['jt_manual'] != '' and $mista_tullaan != 'MYYNTITILAUKSELTA'))) {
 
 										if ($from_varastoon_inc == "editilaus_in.inc") {
 											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";

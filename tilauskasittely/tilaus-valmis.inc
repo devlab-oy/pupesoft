@@ -37,7 +37,7 @@ $query  = "	UPDATE lasku SET vanhatunnus=tunnus $ohjausmerkkilisa $jtkielto
 			AND vanhatunnus = 0";
 $oldtur = pupe_query($query);
 
-$laskurow = paivita_ohjausmerkki($laskurow);
+$laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
 
 // päivitetään myös muuttuja
 $laskurow["vanhatunnus"] = $laskurow["tunnus"];

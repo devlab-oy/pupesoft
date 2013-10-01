@@ -23432,7 +23432,7 @@ if (!function_exists('paivita_ohjausmerkki')) {
 			}
 		}
 
-		return $laskurow;
+		return $laskurow['ohjausmerkki'];
 	}
 }
 

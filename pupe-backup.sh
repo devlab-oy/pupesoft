@@ -245,6 +245,8 @@ if $MYSQLBACKUP; then
 
 	# Dellataan pois tempit
 	rm -rf /tmp/${DBKANTA}
+else
+	echo ": Databasea ei backupata!"
 fi
 
 # Backupataan Pupeasenukseen liittyvät asetuskset
@@ -260,55 +262,55 @@ if ls -A etc/cron.* &> /dev/null; then
 	BACKUPFILET="${BACKUPFILET} etc/cron.*"
 fi
 
-if [ -f "${PUPEPOLKU}/inc/salasanat.php" && -r "${PUPEPOLKU}/inc/salasanat.php" ]; then
+if test -f "${PUPEPOLKU}/inc/salasanat.php" -a -r "${PUPEPOLKU}/inc/salasanat.php"; then
 	BACKUPFILET="${BACKUPFILET} ${PUPEPOLKU}/inc/salasanat.php"
 fi
 
-if [ -f "etc/ssh/sshd_config" && -r "etc/ssh/sshd_config" ]; then
+if test -f "etc/ssh/sshd_config" -a -r "etc/ssh/sshd_config"; then
 	BACKUPFILET="${BACKUPFILET} etc/ssh/sshd_config"
 fi
 
-if [ -f "etc/rc.local" && -r "etc/rc.local" ]; then
+if test -f "etc/rc.local" -a -r "etc/rc.local"; then
 	BACKUPFILET="${BACKUPFILET} etc/rc.local"
 fi
 
-if [ -f "etc/dhcp/dhcpd.conf" && -r "etc/dhcp/dhcpd.conf" ]; then
+if test -f "etc/dhcp/dhcpd.conf" -a -r "etc/dhcp/dhcpd.conf"; then
 	BACKUPFILET="${BACKUPFILET} etc/dhcp/dhcpd.conf"
 fi
 
-if [ -f "etc/vtund.conf" && -r "etc/vtund.conf" ]; then
+if test -f "etc/vtund.conf" -a -r "etc/vtund.conf"; then
 	BACKUPFILET="${BACKUPFILET} etc/vtund.conf"
 fi
 
-if [ -f "etc/samba/smb.conf" && -r "etc/samba/smb.conf" ]; then
+if test -f "etc/samba/smb.conf" -a -r "etc/samba/smb.conf"; then
 	BACKUPFILET="${BACKUPFILET} etc/samba/smb.conf"
 fi
 
-if [ -f "etc/cups/" && -r "etc/cups/" ]; then
+if test -f "etc/cups/" -a -r "etc/cups/"; then
 	BACKUPFILET="${BACKUPFILET} etc/cups/*"
 fi
 
-if [ -f "etc/cups/lpoptions" && -r "etc/cups/lpoptions" ]; then
+if test -f "etc/cups/lpoptions" -a -r "etc/cups/lpoptions"; then
 	BACKUPFILET="${BACKUPFILET} etc/cups/lpoptions"
 fi
 
-if [ -f "etc/my.cnf" && -r "etc/my.cnf" ]; then
+if test -f "etc/my.cnf" -a -r "etc/my.cnf"; then
 	BACKUPFILET="${BACKUPFILET} etc/my.cnf"
 fi
 
-if [ -f "root/.forward" && -r "root/.forward" ]; then
+if test -f "root/.forward" -a -r "root/.forward"; then
 	BACKUPFILET="${BACKUPFILET} root/.forward"
 fi
 
-if [ -f "etc/hosts" && -r "etc/hosts" ]; then
+if test -f "etc/hosts" -a -r "etc/hosts"; then
 	BACKUPFILET="${BACKUPFILET} etc/hosts"
 fi
 
-if [ -f "etc/sysconfig/network" && -r "etc/sysconfig/network" ]; then
+if test -f "etc/sysconfig/network" -a -r "etc/sysconfig/network"; then
 	BACKUPFILET="${BACKUPFILET} etc/sysconfig/network"
 fi
 
-if [ -f "etc/crontab" && -r "etc/crontab" ]; then
+if test -f "etc/crontab" -a -r "etc/crontab"; then
 	BACKUPFILET="${BACKUPFILET} etc/crontab"
 fi
 

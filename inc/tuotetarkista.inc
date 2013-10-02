@@ -335,9 +335,9 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "valmistusaika_sekunneissa") {
-			$valmistusaika_sekunneissa = $t[$i];
+			$valmistusaika_sekunneissa = trim($t[$i]);
 
-			if (!is_numeric($valmistusaika_sekunneissa) or $valmistusaika_sekunneissa < 0) {
+			if ($valmistusaika_sekunneissa != "" and (!is_numeric($valmistusaika_sekunneissa) or $valmistusaika_sekunneissa < 0)) {
 				$virhe[$i] = t("Valmistusaika pitää olla suurempi tai yhtäsuuri kuin 0");
 			}
 		}

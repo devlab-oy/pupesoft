@@ -1698,7 +1698,7 @@
 											echo "<td valign='top' {$class}>";
 
 											if ($jtrow['jt_manual'] != '') {
-												echo t("JT manual");
+												echo t("JT manuaalinen");
 											}
 											elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
 												echo t("JT muiden mukana");
@@ -1788,7 +1788,7 @@
 										echo "<td valign='top' {$class}>";
 
 										if ($jtrow['jt_manual'] != '') {
-											echo t("JT manual");
+											echo t("JT manuaalinen");
 										}
 										elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
 											echo t("JT muiden mukana");
@@ -1841,7 +1841,7 @@
 										echo "<td valign='top' {$class}>";
 
 										if ($jtrow['jt_manual'] != '') {
-											echo t("JT manual");
+											echo t("JT manuaalinen");
 										}
 										elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
 											echo t("JT muiden mukana");
@@ -1897,7 +1897,7 @@
 											echo "<td valign='top' {$class}>";
 
 											if ($jtrow['jt_manual'] != '') {
-												echo t("JT manual");
+												echo t("JT manuaalinen");
 											}
 											elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
 												echo t("JT muiden mukana");
@@ -2075,7 +2075,7 @@
 											echo "<td valign='top' {$class}>";
 
 											if ($jtrow['jt_manual'] != '') {
-												echo t("JT manual");
+												echo t("JT manuaalinen");
 											}
 											elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
 												echo t("JT muiden mukana");
@@ -2463,7 +2463,7 @@
 		}
 
 		if ($yhtiorow['jt_manual'] == 'K') {
-			echo "<option value='j_manual' {$sel['j_manual']}>",t("JT manual"),"</option>";
+			echo "<option value='j_manual' {$sel['j_manual']}>",t("JT manuaalinen"),"</option>";
 		}
 
 		echo "</select>";

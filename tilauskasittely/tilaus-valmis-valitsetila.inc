@@ -131,7 +131,7 @@
 		$result = pupe_query($query);
 
 		$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s mitätöitiin koska tilauksella ei ollut yhtään kerättävää/laskutettavaa riviä."), $laskurow["tunnus"])."</font><br><br>\n";
-		$toimitusvahvitus_laheta = FALSE;
+		$toimitusvahvitus_laheta = TRUE;
 	}
 	elseif ($rivirow["jteet"] > 0 and $laskurow["osatoimitus"] != '') {
 		// Jos tilauksella oli yksikin jt-rivi ja osatoimitus on kielletty
@@ -161,7 +161,7 @@
 			$result = pupe_query($query);
 
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s  oli pelkästään Puuterivejä. Otsikko mitätöitiin."), $laskurow["tunnus"])."</font><br><br>\n";
-			$toimitusvahvitus_laheta = FALSE;
+			$toimitusvahvitus_laheta = TRUE;
 		}
 		elseif ($rivirow["riveja"] == $rivirow["jteet"]) {
 			// Jos tilauksella oli vain jt-rivejä niin poistetaan rahtikulurivi jos sellanen on

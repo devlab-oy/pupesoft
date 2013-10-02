@@ -378,8 +378,17 @@
 			else {
 
 				// CPS - consignment packing sequence
-				$desadv_message .= "CPS+1'";
-				$x++;
+				if ($desadv_version == "fi0089") {
+					$sscc          = uusi_sscc_nro();
+					$sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
+
+					$desadv_message .= "CPS+{$sscc}++1'";
+					$x++;
+				}
+				else {
+					$desadv_message .= "CPS+1'";
+					$x++;
+				}
 
 				if (trim($desadv_rakir_row['viesti']) != '') {
 					$desadv_message .= "FTX+GEN+++{$desadv_rakir_row['viesti']}'";

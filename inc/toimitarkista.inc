@@ -18,7 +18,7 @@ if (!function_exists("toimitarkista")) {
 				$t[$i] = $tmp_nimi;
 			}
 
-			if (trim($t[$i]) == '') {
+			if ((trim($t[$i]) == '' and mysql_field_name($result, $i) != "oletus_hyvak1") or ($alias_set == "KAYTTAJA" and mysql_field_name($result, $i) == "oletus_hyvak1" and trim($t[$i]) == '')) {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
 
@@ -88,12 +88,14 @@ if (!function_exists("toimitarkista")) {
 			if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
 			else $ibanmaa = $tmp_maakoodi;
 
-			// Jos SEPA-maa, tarkistetaan IBAN
-			if (tarkista_sepa($ibanmaa) and tarkista_iban($t[$i]) != $t[$i]) {
-				$virhe[$i] = t("Virheellinen IBAN!")." $t[$i]";
-			}
-			elseif (tarkista_bban($t[$i]) === FALSE) {
-				$virhe[$i] = t("Virheellinen BBAN!")." $t[$i] ".t("Tilinumerossa saa olla vain kirjaimia A-Z ja/tai numeroita 0-9");
+			if ($t[$i] != '') {
+				// Jos SEPA-maa, tarkistetaan IBAN
+				if (tarkista_sepa($ibanmaa) and tarkista_iban($t[$i]) != $t[$i]) {
+					$virhe[$i] = t("Virheellinen IBAN!")." $t[$i]";
+				}
+				elseif (tarkista_bban($t[$i]) === FALSE) {
+					$virhe[$i] = t("Virheellinen BBAN!")." $t[$i] ".t("Tilinumerossa saa olla vain kirjaimia A-Z ja/tai numeroita 0-9");
+				}
 			}
 		}
 
@@ -108,7 +110,7 @@ if (!function_exists("toimitarkista")) {
 			else $ibanmaa = $tmp_maakoodi;
 
 			// Jos SEPA-maa, tarkistetaan BIC
-			if (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE) {
+			if (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE and $t[$i] != '') {
 				$virhe[$i] = t("Virheellinen BIC!")." $t[$i]";
 			}
 		}

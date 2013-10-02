@@ -205,7 +205,7 @@ if (isset($submit) and trim($submit) != '') {
 						$_viesti = 'Saapumisessa';
 					}
 
-					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti, $oletus, $halytysraja, $tilausmaara);
+					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti, '', $halytysraja, $tilausmaara);
 				}
 				else {
 					// Nollataan poistettava kenttä varmuuden vuoksi

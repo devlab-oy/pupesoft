@@ -2249,8 +2249,8 @@
 
 		$sel = $trow[$i] == 'K' ? "selected" : "";
 
-		$ulos .= "<option value = ''>".t("Ei käytetä manuaalisia JT-rivejä")."</option>";
-		$ulos .= "<option value = 'K' {$sel}>".t("Käytetään manuaalisia JT-rivejä")."</option>";
+		$ulos .= "<option value = ''>".t("Ei käytössä")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Myyntitilaukselle voidaan lisätä jälkitoimitusrivi johon ei JT automatiikat koske")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

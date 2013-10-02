@@ -23565,6 +23565,21 @@ if (!function_exists('laske_siirrettava_maara')) {
 	}
 }
 
+if (!function_exists('hae_asiakas')) {
+	function hae_asiakas($liitostunnus) {
+		global $yhtiorow;
+
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$yhtiorow['yhtio']}'
+					AND tunnus = {$liitostunnus}";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+
+
 if (!function_exists("korvaavat_kiellot")) {
 	function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
 		global $kukarow;

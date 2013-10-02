@@ -3841,7 +3841,6 @@ if ($tee == '') {
 				$var				= '';
 				$hinta				= '';
 				$netto				= '';
-				$rivitunnus			= 0;
 				$paikka				= '';
 				$alv				= '';
 				$perheid			= 0;

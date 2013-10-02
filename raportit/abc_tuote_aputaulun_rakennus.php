@@ -10,9 +10,11 @@ if (php_sapi_name() == 'cli') {
 if ($php_cli) {
 
 	if (!isset($argv[1]) or $argv[1] == '') {
-		echo "Anna hytiö!!!\n";
+		echo "Anna yhtiö!!!\n";
 		die;
 	}
+	
+	date_default_timezone_set('Europe/Helsinki');
 
 	// otetaan tietokanta connect
 	require ("../inc/connect.inc");

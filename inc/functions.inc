@@ -22876,7 +22876,6 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 
 if (!function_exists("lisaa_rivi")) {
 	function lisaa_rivi($parametrit) {
-
 		global $kukarow, $yhtiorow;
 
 		if (empty($kukarow['kesken'])) {
@@ -22939,10 +22938,7 @@ if (!function_exists("lisaa_rivi")) {
 			exit;
 		}
 
-		return array(
-			'lisatyt_rivit1' => $lisatyt_rivit1,
-			'lisatyt_rivit2' => $lisatyt_rivit2,
-		);
+		return array($lisatyt_rivit1, $lisatyt_rivit2);
 
 		// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si myyntihaarassa
 		// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa

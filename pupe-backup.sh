@@ -122,19 +122,20 @@ if [ ! -d ${MYSQLPOLKU}${DBKANTA} ]; then
 	exit
 fi
 
-mkdir /tmp/${DBKANTA}
-
-if [ ! -d /tmp/${DBKANTA} ]; then
-	echo
-	echo "ERROR! Hakemistoa /tmp/${DBKANTA} ei löydy!"
-	echo
-	exit
-fi
-
 echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
 echo ": Backup started."
 
 if $MYSQLBACKUP; then
+
+	mkdir /tmp/${DBKANTA}
+
+	if [ ! -d /tmp/${DBKANTA} ]; then
+		echo
+		echo "ERROR! Hakemistoa /tmp/${DBKANTA} ei löydy!"
+		echo
+		exit
+	fi
+
 	# Siirrytään temppidirriin
 	cd /tmp/${DBKANTA}
 

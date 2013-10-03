@@ -1448,7 +1448,6 @@
 										and sarjanumeroseuranta.kaytetty 	= '$sarjarow[kaytetty]'
 										and sarjanumeroseuranta.myyntirivitunnus > 0
 										and sarjanumeroseuranta.ostorivitunnus   > 0
-										and tilausrivi.var != 'O'
 										ORDER BY sarjanumeroseuranta.tunnus
 										LIMIT 1";
 							$sarjares1 = pupe_query($query);

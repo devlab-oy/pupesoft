@@ -924,14 +924,14 @@
 				echo "<td>{$srow['ryhma']}</td>";
 				echo "</tr>";
 			}
-			
+
 			if (isset($srow['fakta']) and $srow['fakta'] != "") {
 				echo "<tr>";
 				echo "<td valign='top'>".t("Asiakasfakta").":</td>";
 				echo "<td>".str_replace("\n", "<br>", $srow['fakta'])."</td>";
 				echo "</tr>";
-			}	
-			
+			}
+
 
 			$query  = "	SELECT laji
 						FROM asiakas
@@ -1315,7 +1315,7 @@
 				}
 
 				// Alku m‰ts‰‰
-				if ($srow["toimitusehto"] != "" and strtoupper(substr($srow["toimitusehto"], 0, 3)) == strtoupper($row["selite"])) {
+				if ($srow["toimitusehto"] != "" and strtoupper(substr($srow["toimitusehto"], 0, 3)) == strtoupper(substr($row["selite"], 0, 3))) {
 					$toimehtosel2 = $row["tunnus"];
 					$toimehtoseltark2 = substr($srow["toimitusehto"], 4);
 					$toimehtoseltark_32 = $row["selitetark_3"];
@@ -3844,7 +3844,7 @@
 				if ($merkki2 != 'eimenu' and $merkki2 != '') {
 					$merkki = $merkki2;
 				}
-				
+
 				$query2 .= "tyomaarays SET
 							yhtio			= '$kukarow[yhtio]',
 							kotipuh 		= '$kotipuh',
@@ -3871,7 +3871,7 @@
 							tyokoodi		= '$tyokoodi',
 							hyvaksy			= '$hyvaksy',
 							otunnus 		= '$kukarow[kesken]'";
-				
+
 				//N‰m‰ kent‰t p‰ivitet‰‰n vain, jos p‰ivitet‰‰n sit‰ tyˆm‰‰r‰ykselt‰ tai muualta miss‰ nuo kaksi kentt‰‰ n‰kyy..
 				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
 					$query2 .= ",	tyojono			= '$tyojono',
@@ -3879,7 +3879,7 @@
 				}
 				$query2 .= $postquery2;
 				$result = pupe_query($query2);
-			}	
+			}
 
 			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "EXTTARJOUS", "ENNAKKO","EXTENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE", "WEBTILAUSTARJOUS","EXTRANET_REKLAMAATIO"))) {
 
@@ -3896,7 +3896,7 @@
 				else {
 					$sopimus_pp = "";
 				}
-				
+
 				$sopimus_info = '';
 				if($toim != 'EXTENNAKKO' and $toim != 'EXTTARJOUS') {
 					$sopimus_info = "sopimus_lisatietoja			= '$sopimus_lisatietoja',";

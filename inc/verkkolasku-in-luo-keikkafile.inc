@@ -2013,11 +2013,92 @@ $debug = 0;
 		}
 	}
 
+	if (!function_exists('saapumisen_pyoristyserot')) {
+		function saapumisen_pyoristyserot($osrow, $laskurow, $otunnus) {
+			global $kukarow, $yhtiorow;
+
+			// $osrow = sähköisen laskun tiedot
+			// $laskurow = saapumisen otsikon tiedot
+			// $otunnus = saapumisen tunnus
+
+			$alvit = "tuote.alv";
+
+			if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
+				// tutkitaan ollaanko siellä alv-rekisteröity
+				$alhqur = "SELECT * FROM yhtion_toimipaikat WHERE yhtio = '{$kukarow['yhtio']}' AND maa = '{$laskurow['maa']}' AND vat_numero != ''";
+				$alhire = pupe_query($alhqur);
+
+				if (mysql_num_rows($alhire) == 1) {
+					$alvit = "tuotteen_alv.alv";
+				}
+			}
+			else {
+				$alvit = 0;
+			}
+
+			$query_ale_lisa = generoi_alekentta('O');
+
+			$query = "  SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa} *
+						(1+(if ((SELECT max(kaytetty) kaytetty
+							FROM sarjanumeroseuranta
+							WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio
+							and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno
+							and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, {$alvit})/100))) hinta
+						FROM tilausrivi use index (uusiotunnus_index)
+						JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+						LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}')
+						LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '{$laskurow['maa']}')
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.uusiotunnus = '{$otunnus}'
+						AND tilausrivi.tyyppi != 'D'";
+			$result   = pupe_query($query);
+			$hintarow = mysql_fetch_array($result);
+
+			$valittusumma       = round($hintarow["hinta"], 2);
+			$laskunsumma        = round($osrow["summa"] - $valittusumma, 2);
+			$checksumma         = $osrow["summa"] - $hintarow["hinta"];
+			$kohdistettava_summa   = round($osrow["summa"], 2);
+
+			if ($laskunsumma != 0.00 and $checksumma < 0.01 and $checksumma > -0.01 and $kohdistettava_summa == $valittusumma) {
+				$laskunsumma = 0.00;
+			}
+
+			if ($laskunsumma != 0) {
+				$pyoristys_erot = $laskunsumma;
+			}
+			else {
+				$pyoristys_erot = 0;
+			}
+
+			$query   = "UPDATE lasku SET
+						summa = '{$hintarow['hinta']}',
+						pyoristys_erot = '{$pyoristys_erot}',
+						kohdistettu = 'K'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$otunnus}'";
+			$hinresu = pupe_query($query);
+
+			$laskurow['summa'] = $hintarow['hinta'];
+			$laskurow['pyoristys_erot'] = $pyoristys_erot;
+			$laskurow['kohdistettu'] = 'K';
+
+			return $laskurow;
+		}
+	}
+
 	$automaattituloutus = false;
+	$automaattijalkilaskenta = false;
 
 	if (($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $trow['asn_sanomat'] == 'M') or ($osrow['ebid'] == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) and $virheet == 0 and count($loop_array) > 0 and $trow['sahkoinen_automaattituloutus'] != 'E') {
 
-		if ($trow['sahkoinen_automaattituloutus'] == 'K') $automaattituloutus = true;
+		if ($trow['sahkoinen_automaattituloutus'] == 'K') {
+			$automaattituloutus = true;
+		}
+
+		if ($trow['sahkoinen_automaattituloutus'] == 'J') {
+			$automaattituloutus = true;
+			$automaattijalkilaskenta = true;
+		}
 
 		if ($osrow['yhtio_toimipaikka'] != 0) {
 
@@ -2028,8 +2109,18 @@ $debug = 0;
 			$chk_toimipaikka_res = pupe_query($query);
 			$chk_toimipaikka_row = mysql_fetch_assoc($chk_toimipaikka_res);
 
-			if ($chk_toimipaikka_row['sahkoinen_automaattituloutus'] == 'K') $automaattituloutus = true;
-			else $automaattituloutus = false;
+			if ($chk_toimipaikka_row['sahkoinen_automaattituloutus'] == 'K') {
+				$automaattituloutus = true;
+				$automaattijalkilaskenta = false;
+			}
+			elseif ($chk_toimipaikka_row['sahkoinen_automaattituloutus'] == 'J') {
+				$automaattituloutus = true;
+				$automaattijalkilaskenta = true;
+			}
+			else {
+				$automaattituloutus = false;
+				$automaattijalkilaskenta = false;
+			}
 		}
 	}
 
@@ -2187,7 +2278,39 @@ $debug = 0;
 			$tilausrivi = 0;
 
 			require("tilauskasittely/varastoon.inc");
+		}
 
+		if ($automaattijalkilaskenta) {
+
+			list($_kaikkivarastossayhteensa,$_kaikkiliitettyyhteensa,$_kohdistus,$_kohok,$_kplvarasto,$_kplyhteensa,$_lisatiedot,$_lisok,$_llrow,$_sarjanrook,$_sarjanrot,$_uusiot,$_varastopaikat,$_varastossaarvo,$_liitettyarvo,$_varok) = tsekit($laskurow, 0, 0);
+
+			if ($_lisok == 1 and $_kohok == 1 and $_varok == 1 and $_kplyhteensa == $_kplvarasto and $_sarjanrook == 1 and $_llrow["volasku"] == $_llrow["volasku_ok"] and $_llrow["kulasku"] == $_llrow["kulasku_ok"]) {
+
+				// tunnus turvaan
+				$tmp_tunnus = $tunnus;
+
+				$toiminto = "kaikkiok";
+				$tee = "varma";
+
+				// viedään varastoon TEHDÄÄN LOPPUKALKYYLI
+				require ("tilauskasittely/varastoon.inc");
+
+				$tunnus = $tmp_tunnus;
+
+				// laitetaan lasku suoraan maksuvalmiiksi
+				$query = "	UPDATE lasku set
+							tila 		  = 'M',
+							hyvak1 		  = 'verkkolas',
+							h1time 		  = now(),
+							hyvak2 		  = '',
+							hyvak3 		  = '',
+							hyvak4 		  = '',
+							hyvak5 		  = '',
+							hyvaksyja_nyt = '',
+							comments 	  = TRIM(CONCAT(comments, '\n Lasku siirrettiin suoraan maksuvalmiiksi, koska se täsmäsi ostotilaukseen.'))
+							WHERE tunnus = '{$tunnus}'";
+				$xresult = pupe_query($query);
+			}
 		}
 	}
 
@@ -2214,58 +2337,7 @@ $debug = 0;
 		$toiminto = "kaikkiok";
 		$tee = "varma";
 
-		$alvit = "tuote.alv";
-
-		if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
-			// tutkitaan ollaanko siellä alv-rekisteröity
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
-			$alhire = pupe_query($alhqur);
-
-			if (mysql_num_rows($alhire) == 1) {
-				$alvit = "tuotteen_alv.alv";
-			}
-		}
-		else {
-			$alvit = 0;
-		}
-
-		$query_ale_lisa = generoi_alekentta('O');
-
-		$query = "  SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa} *
-					(1+(if ((SELECT max(kaytetty) kaytetty
-						FROM sarjanumeroseuranta
-						WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio
-						and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno
-						and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alvit)/100))) hinta
-					FROM tilausrivi use index (uusiotunnus_index)
-					JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-					LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]')
-					LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
-					WHERE tilausrivi.yhtio ='$kukarow[yhtio]'
-					AND tilausrivi.uusiotunnus = '$otunnus'
-					AND tilausrivi.tyyppi != 'D'";
-		$result   = pupe_query($query);
-		$hintarow = mysql_fetch_array($result);
-
-		$valittusumma       = round($hintarow["hinta"], 2);
-		$laskunsumma        = round($osrow["summa"]-$valittusumma, 2);
-		$checksumma         = $osrow["summa"]-$hintarow["hinta"];
-		$kohdistettava_summa   = round($osrow["summa"], 2);
-		$valitutrivit       = mysql_num_rows($result);
-
-		if ($laskunsumma != 0.00 and $checksumma < 0.01 and $checksumma > -0.01 and $kohdistettava_summa == $valittusumma) {
-			$laskunsumma = 0.00;
-		}
-
-		if ($laskunsumma != 0) {
-			$pyoristys_erot = $laskunsumma;
-		}
-		else {
-			$pyoristys_erot = 0;
-		}
-
-		$query   = "UPDATE lasku set summa='$hintarow[hinta]', pyoristys_erot='$pyoristys_erot', kohdistettu='K' where yhtio ='$kukarow[yhtio]' and tunnus='$otunnus'";
-		$hinresu = pupe_query($query);
+		$laskurow = saapumisen_pyoristyserot($osrow, $laskurow, $otunnus);
 
 		// viedään varastoon TEHDÄÄN LOPPUKALKYYLI
 		require ("tilauskasittely/varastoon.inc");

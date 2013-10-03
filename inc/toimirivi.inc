@@ -591,12 +591,13 @@
 
 	if (mysql_field_name($result, $i) == "sahkoinen_automaattituloutus") {
 
-		$sel = array($trow[$i] => 'selected') + array('E' => '', 'K' => '');
+		$sel = array($trow[$i] => 'selected') + array('E' => '', 'K' => '', 'J' => '');
 
 		$ulos  = "<td><select name='{$nimi}'>";
 		$ulos .= "<option value=''>".t("Käytetään yhtiön toimipaikan oletusta")."</option>";
 		$ulos .= "<option value='E'{$sel['E']}>".t("Sähköisen laskun sisäänluvun yhteydessä ei tulouteta tuotteita varastoon")."</option>";
 		$ulos .= "<option value='K'{$sel["K"]}>".t("Tuotteet tuloutetaan varastoon automaattisesti sähköisen laskun sisäänluvun yhteydessä")."</option>";
+		$ulos .= "<option value='J'{$sel["J"]}>".t("Tuotteet tuloutetaan varastoon ja jälkilasketaan automaattisesti sähköisen laskun sisäänluvun yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

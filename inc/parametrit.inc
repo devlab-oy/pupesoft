@@ -335,6 +335,9 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 		if ($browkieli == 'sv') {
 			$browkieli = 'se';
 		}
+		if ($browkieli == 'en') {
+			$browkieli = 'en';
+		}
 		else {
 			$browkieli = 'fi';
 		}

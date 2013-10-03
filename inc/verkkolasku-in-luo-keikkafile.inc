@@ -2282,6 +2282,8 @@ $debug = 0;
 
 		if ($automaattijalkilaskenta) {
 
+			$laskurow = saapumisen_pyoristyserot($osrow, $laskurow, $otunnus);
+
 			list($_kaikkivarastossayhteensa,$_kaikkiliitettyyhteensa,$_kohdistus,$_kohok,$_kplvarasto,$_kplyhteensa,$_lisatiedot,$_lisok,$_llrow,$_sarjanrook,$_sarjanrot,$_uusiot,$_varastopaikat,$_varastossaarvo,$_liitettyarvo,$_varok) = tsekit($laskurow, 0, 0);
 
 			if ($_lisok == 1 and $_kohok == 1 and $_varok == 1 and $_kplyhteensa == $_kplvarasto and $_sarjanrook == 1 and $_llrow["volasku"] == $_llrow["volasku_ok"] and $_llrow["kulasku"] == $_llrow["kulasku_ok"]) {

@@ -105,7 +105,9 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 			lisaa_rivi($parametrit);
 		}
 	}
-
+    
+	// Tällä parametrilla ohitetaan tilausvahvistuksen lähettäminen Tarjouspohjaa kopioidessa
+	$ohita_tilausvahvistuksen_lahetys = "JOO";
 	require_once('tilaus-valmis.inc');
 }
 

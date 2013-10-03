@@ -248,8 +248,8 @@ elseif ($laskurow["tilaustyyppi"] == 'E') {
 				and otunnus	= '$laskurow[tunnus]'
 				and tyyppi in ('L','E')";
 	$result = pupe_query($query);
-
-	if (trim($laskurow['tilausvahvistus']) != "") {
+	// Ohitusparametri $ohita_tilausvahvistuksen_lahetys:llä voidaan estää tilausvahvistuksen lähetys Ennakkotilauksella (ext-ennakko)
+	if (trim($laskurow['tilausvahvistus']) != "" and !isset($ohita_tilausvahvistuksen_lahetys)) {
 		//
 		// LÄHETETÄÄN TILAUSVAHVISTUS
 		//

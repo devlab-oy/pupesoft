@@ -1315,7 +1315,7 @@
 				}
 
 				// Alku m‰ts‰‰
-				if ($srow["toimitusehto"] != "" and strtoupper(substr($srow["toimitusehto"], 0, 3)) == strtoupper($row["selite"])) {
+				if ($srow["toimitusehto"] != "" and strtoupper(substr($srow["toimitusehto"], 0, 3)) == strtoupper(substr($row["selite"], 0, 3))) {
 					$toimehtosel2 = $row["tunnus"];
 					$toimehtoseltark2 = substr($srow["toimitusehto"], 4);
 					$toimehtoseltark_32 = $row["selitetark_3"];

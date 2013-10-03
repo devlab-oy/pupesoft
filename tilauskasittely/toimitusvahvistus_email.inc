@@ -14,7 +14,13 @@
 
 		$body = t("Hei").",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa").":\n\n".t("Tuotenumero")." ".t("Määrä")." ".t("Nimitys")." ".t("Hinta")."\n";
 
-		$query = "	SELECT tilausrivi.tuoteno, tilausrivi.varattu+tilausrivi.kpl as maara, tilausrivi.nimitys, tilausrivi.rivihinta, lasku.valkoodi
+		$query_ale_lisa = generoi_alekentta('M');
+
+		$query = "	SELECT tilausrivi.tuoteno,
+					tilausrivi.varattu+tilausrivi.kpl as maara,
+					tilausrivi.nimitys,
+					round(tilausrivi.hinta * tilausrivi.varattu * {$query_ale_lisa}, 2) hinta,
+					lasku.valkoodi
 					FROM lasku
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -43,10 +49,12 @@
 
 		$body .= t("Toimituksen toimitusosoite").":\n\n";
 
+		$maan_tiedot = hae_maa(array('maakoodi' => $rakir_row['toim_maa']));
+
 		$body .= "{$rakir_row['toim_nimi']} {$rakir_row['toim_nimitark']}\n";
 		$body .= "{$rakir_row['toim_osoite']}\n";
 		$body .= "{$rakir_row['toim_postino']} {$rakir_row['toim_postitp']}\n";
-		$body .= "{$rakir_row['toim_maa']}\n";
+		$body .= "{$maan_tiedot['nimi']}\n";
 
 		// Sähköpostin lähetykseen parametrit
 		$parametri = array( "to" 			=> $rakir_row['asiakas_email'],

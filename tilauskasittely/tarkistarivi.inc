@@ -256,7 +256,7 @@
 		}
 	}
 
-	if ($kukarow["extranet"] == "" and in_array($trow["status"], array("P","X")) and !in_array($row["var2"], array("OK", "PK"))) {
+	if ($kukarow["extranet"] == "" and in_array($trow["status"], array("P","X")) and $yhtiorow['huomautetaanko_poistuvasta'] == 'K' and !in_array($row["var2"], array("OK", "PK"))) {
 		$varaosavirhe .= t("HUOM: Tämä on poistuva tuote!")."<br>";
 		$riviok++;
 	}

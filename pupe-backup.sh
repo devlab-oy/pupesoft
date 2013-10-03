@@ -246,6 +246,7 @@ if $MYSQLBACKUP; then
 	# Dellataan pois tempit
 	rm -rf /tmp/${DBKANTA}
 else
+	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
 	echo ": Databasea ei backupata!"
 fi
 

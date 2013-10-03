@@ -47,7 +47,7 @@
 
 		$body .= "\n";
 
-		$body .= t("Toimituksen toimitusosoite").":\n\n";
+		$body .= t("Tilauksen toimitusosoite").":\n\n";
 
 		$maan_tiedot = hae_maa(array('maakoodi' => $rakir_row['toim_maa']));
 

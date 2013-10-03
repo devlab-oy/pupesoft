@@ -161,7 +161,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
 						toim_postino 		= '{$toim_postino}',
 						toim_postitp 		= '{$toim_postitp}',
 						valkoodi 			= '{$valkoodi}',
-						vanhatunnus			= '',
+						vanhatunnus			= {$params['toimipaikka']},
 						varasto 			= '{$kukarow['oletus_ostovarasto']}',
 						verkkotunnus		= '{$params['myytil_liitostunnus']}',
 						vienti_kurssi 		= '{$vrow['kurssi']}',

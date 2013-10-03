@@ -28,3 +28,6 @@
 	$mysqlaliasarray['VALMISTUSLINJA']['selite']       = "Linjanumero";
 	$mysqlaliasarray['VALMISTUSLINJA']['selitetark']   = "Linjan nimi";
 	$mysqlaliasarray['VALMISTUSLINJA']['selitetark_2'] = "Päiväkapasiteetti sekunneissa";
+
+	$mysqlaliasarray['TOIMVAHVISTUS']['selite']       = "Toimitusvahvistuksen tiedoston nimi";
+	$mysqlaliasarray['TOIMVAHVISTUS']['selitetark']   = "Toimitusvahvistuksen nimi";

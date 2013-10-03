@@ -1992,7 +1992,7 @@
 			$var = $puu_var[$i];
 
 			// Korvaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and $tapa != "MYYVASTAAVA") {
+			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and $tapa != "MYYVASTAAVA" and $rivityyppi == 'L' and $var != 'H') {
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
 				$paatuote  = $korvaavat->paatuote();
@@ -2008,7 +2008,7 @@
 				}
 			}
 			// Vastaavuusketjun puutek‰sittely, lis‰t‰‰n ketjun p‰‰tuote puutteeksi
-			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and $tapa != "MYYVASTAAVA") {
+			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and $tapa != "MYYVASTAAVA" and $rivityyppi == 'L' and $var != 'H') {
 				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun p‰‰tuote
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
@@ -2068,7 +2068,7 @@
 			}
 
 			// Tehd‰‰nkˆ puute- tai jt-rivist‰ automaattisesti osto/suoratoimitus?
-			if ((int) $rivitunnus == 0 and $yhtiorow["tee_automaattinen_osto_myyntitilaukselta"] != "" and ($kukarow["extranet"] == "" or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E') and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS'))) and $var != 'V') {
+			if ((int) $rivitunnus == 0 and $yhtiorow["tee_automaattinen_osto_myyntitilaukselta"] != "" and ($kukarow["extranet"] == "" or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E') and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS'))) and $var != 'V' and $var != 'H') {
 
 				if ((
 						$kukarow["extranet"] == ""

@@ -992,6 +992,7 @@ if (isset($tyhjenna)) {
 	$sopimuksen_lisatieto2 = "";
 	$omalle_tilaukselle = "";
 	$valmistuslinja     = "";
+	$rekisterinumero    = "";
 }
 
 if ($tee == "VALMIS"
@@ -3709,6 +3710,7 @@ if ($tee == '') {
 				$paikka = "!!!".$tilausrivi["toimittajan_tunnus"];
 			}
 
+			$rekisterinumero = $tilausrivi['rekisterinumero'];
 			$tuoteno = $tilausrivi['tuoteno'];
 
 			if (in_array($tilausrivi["var"], array('S','U','T','R', 'J'))) {
@@ -3876,6 +3878,7 @@ if ($tee == '') {
 					${'ale'.$alepostfix} = '';
 				}
 
+				$rekisterinumero       = '';
 				$tuoteno			   = '';
 				$kpl				   = '';
 				$var				   = '';
@@ -4247,6 +4250,7 @@ if ($tee == '') {
 			$kpl 	= '';
 			$alv 	= '';
 			$paikka	= '';
+			$rekisterinumero = '';
 			$hyvityssaanto_indeksi++;
 			$lisatty++;
 
@@ -4946,6 +4950,11 @@ if ($tee == '') {
 					$headerit .= "<th>".t("Tyyppi")."</th>";
 					$sarakkeet++;
 				}
+			}
+
+			if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+				$headerit .= "<th>".t("Rekisterinumero")."</th>";
+				$sarakkeet++;
 			}
 
 			if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
@@ -5699,6 +5708,12 @@ if ($tee == '') {
 
 				if ($trivityyulos != "") {
 					echo "<td $class valign='top'>$trivityyulos</td>";
+				}
+
+				if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+					echo "<td $class align='left' valign='top'>";
+					echo $row['rekisterinumero'];
+					echo "</td>";
 				}
 
 				// Tuotteen nimitys n‰ytet‰‰n vain jos k‰ytt‰j‰n resoluution on iso

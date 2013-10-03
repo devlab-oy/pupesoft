@@ -3595,6 +3595,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'myyntitilausrivi_rekisterinumero') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel['K'] = $trow[$i] == 'K' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Myyntitilauksen tilausriveill‰ ei n‰ytet‰ rekisterinumerovalintaa")."</option>";
+		$ulos .= "<option value = 'K' {$sel['K']}>".t("Myyntitilauksen tilausriveill‰ n‰ytet‰‰n rekisterinumerovalinta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'matkalaskun_tarkastus') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

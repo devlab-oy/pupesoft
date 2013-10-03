@@ -209,7 +209,7 @@ if ($action == 'luo_uusi_ennakko') {
 
 	$uusi_tilausnumero = luo_myyntitilausotsikko($toim, $ennakko_asiakas['tunnus'], '', '', '', '', '', '');
 
-	$uusi_saate_teksti = "Tämä on Extranet-asiakkaan luoma ennakkotilaus";
+	$uusi_saate_teksti = t("Tämä on Extranet-asiakkaan luoma ennakkotilaus");
 
 	$tilaustyyppi = 'E';
 
@@ -599,6 +599,7 @@ function hae_tarjous($valittu_tarjous_tunnus) {
 
 function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 	global $kukarow, $yhtiorow;
+	$laskurow = hae_lasku($valittu_tarjous_tunnus);
 
 	$query = "  SELECT '' as nro,
 				'' as kuva,
@@ -636,6 +637,12 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 		$result2 = pupe_query($query2);
 		$selite = mysql_fetch_assoc($result2);
 		$tilausrivi['parametri_ennakkoale_a'] = $selite['ennakko_pros_a'];
+
+		if($laskurow['valkoodi'] == "SEK" and $laskurow['maa'] == "SE") {
+			$tilausrivi['myyntihinta'] = tuotteen_myyntihinta($laskurow, $tilausrivi, $tilausrivi['kpl']);
+			$tilausrivi['hinta'] = $tilausrivi['myyntihinta'] * (1 - ($tilausrivi['parametri_ennakkoale_a'] / 100));
+			$tilausrivi['rivihinta'] = $tilausrivi['kpl'] * $tilausrivi['hinta'];
+		}
 		$tilausrivit[] = $tilausrivi;
 	}
 

@@ -77,6 +77,29 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 
 		if ($tilausrivi['tunnus'] == $tilausrivi['perheid'] or $tilausrivi['perheid'] == 0) {
 
+			$trow = hae_tuote($tilausrivi['tuoteno']);
+
+			// Mikä maa mikä valuutta - Tarkistetaan asiakkaan valuutta ja maa
+			$query = "	SELECT *
+						FROM asiakas
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tarjous_asiakas}'";
+			$result = pupe_query($query);
+			$maatiedot = mysql_fetch_assoc($result);
+
+			// Haetaanko ruotsihinnat
+			if ($maatiedot['valkoodi'] == "SEK" and $maatiedot['maa'] = "SE") {
+				$query = "	SELECT alv
+							FROM tuotteen_alv
+							WHERE tuoteno = '{$tilausrivi['tuoteno']}'
+							AND maa = '{$maatiedot['maa']}'";
+				$result = pupe_query($query);
+				$tuotteen_alv_rivi = mysql_fetch_assoc($result);
+				$tuotteen_alv = $tuotteen_alv_rivi['alv'];
+
+				$tilausrivi['hinta'] = tuotteen_myyntihinta($laskurow, $trow, $tilausrivi['varattu']);
+
+			}
 			// Ext-ennakolle tulee hinnat aina nettona, lasketaan alennukset pois
 			if ($toim == "EXTENNAKKO") {
 				$tilausrivi['hinta'] = $tilausrivi['hinta'] * (1 - $tilausrivi['ale1'] / 100) * (1 - $tilausrivi['ale2'] / 100) * (1 - $tilausrivi['ale3'] / 100);
@@ -85,8 +108,6 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 				$tilausrivi['ale3'] = 0;
 				$tilausrivi['netto'] = 'N';
 			}
-
-			$trow = hae_tuote($tilausrivi['tuoteno']);
 
 			$parametrit = array(
 				'trow'				 => $trow,

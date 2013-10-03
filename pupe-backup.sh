@@ -354,7 +354,10 @@ if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SAMBA" ]; then
 		echo
 	else
 		#Poistetaan vanha backuppi
-		rm -f ${REMOTELOCALDIR}/${DBKANTA}-backup-*
+		if $MYSQLBACKUP; then
+			rm -f ${REMOTELOCALDIR}/${DBKANTA}-backup-*
+		fi
+
 		rm -f ${REMOTELOCALDIR}/linux-backup-*
 
 		# Siirret‰‰n t‰m‰
@@ -368,7 +371,10 @@ fi
 #Pidet‰‰nkˆ kaikki backupit eri serverill‰
 if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SSH" ]; then
 	# Siirret‰‰n failit remoteserverille
-	scp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+	if $MYSQLBACKUP; then
+		scp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+	fi
+
 	scp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
 
 	# Siivotaan vanhat backupit pois remoteserverilt‰

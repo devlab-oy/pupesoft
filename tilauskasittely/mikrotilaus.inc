@@ -23,6 +23,49 @@
 	Kommentti
 	*/
 
+	/* VAIHTOEHTOINEN FILEFORMAATTI (VALMISTUS) $yhtiorow['Valmistuksien_kasittely'] == Y: (sarakeotsikoilla)
+	Tuoteno (pakollinen)
+	M‰‰r‰ (pakollinen)
+	Arvioitu toimitusp‰iv‰ vvvv-kk-pp
+	Nimitys
+	Hinta
+	Ale
+	Netto
+	Var
+	Kommentti
+	Valmistuslinja
+	Toivottu ker‰ysajankohta
+	Toivottu valmistusajankohta
+	*/
+
+	function choose_correct_date($date) {
+		global $kukarow, $yhtiorow;
+
+		if (trim($date) == "") {
+			return '';
+		}
+
+		// P‰iv‰m‰‰r‰ oli ymm‰rrett‰v‰ss‰ muodossa
+		if (strtotime($date) !== false) {
+			// Palautetaan Y-m-d
+			return date('Y-m-d', strtotime($date));
+		}
+
+		// Exceliss‰ date voi tulla integerin‰
+		if (is_numeric($date)) {
+			/*  the date fields have integers that are the amount of days from 1900-00-00 */
+			return date('Y-m-d', mktime(0, 0, 0, 1, $date - 1, 1900));
+		}
+
+		// Ei osattu valita sopivaa p‰iv‰‰
+		echo "<font class='error'>";
+		echo t("Virheellinen p‰iv‰m‰‰r‰");
+		echo " \"{$date}\"";
+		echo "</font><br>";
+
+		return '';
+	}
+
 	if ($tee == "file") {
 		if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$timeparts = explode(" ",microtime());
@@ -148,8 +191,30 @@
 					$tila 	 = '';
 					$valinta = '';
 
-					//Detektoidaan tiedostomuoto
-					if ($filetyyppi == ""
+					// Detektoidaan tiedostomuoto
+					if ($filetyyppi == "" and $laskurow["tila"] == "V") {
+						// Valmistukset aina tyyppi‰ kolme
+						$filetyyppi = "KOLMONE";
+
+						$ind_Tuoteno 	= 0;
+						$ind_Maara 		= 1;
+						$ind_Arvioitu 	= 2;
+						$ind_Hinta 		= 3;
+						$ind_Ale 		= 4;
+						$ind_Netto 		= 5;
+						$ind_Var 		= 6;
+						$ind_Kommentti	= 7;
+
+						$ind_Valmistuslinja	= 8;
+						$ind_ToivottuKeraysajankohta = 9;
+
+						// Jos ensimm‰isest‰ solusta lˆytyy sana "tuote", niin k‰ytt‰j‰ on antanu sarakeotsikot
+						if (stripos($rivi[0], "tuote") !== FALSE) {
+							// Skipataan otsikot
+							continue;
+						}
+					}
+					elseif ($filetyyppi == ""
 						and stripos($rivi[0], "tuote") !== FALSE
 						and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m‰‰r‰") !== FALSE)
 						and stripos($rivi[2], "p‰iv‰") !== FALSE
@@ -225,12 +290,15 @@
 					}
 
 					if ($kukarow["extranet"] == "") {
-						$toimaika 	= $rivi[$ind_Arvioitu];
-						$hinta		= str_replace(",", ".", $rivi[$ind_Hinta]);
-						$ale1	  	= str_replace(",", ".", $rivi[$ind_Ale]);
-						$netto 	  	= strtoupper(trim($rivi[$ind_Netto]));
-						$var  		= strtoupper(trim($rivi[$ind_Var]));
-						$kommentti	= trim($rivi[$ind_Kommentti]);
+
+						$toimaika		= choose_correct_date($rivi[$ind_Arvioitu]);
+						$kerayspvm		= choose_correct_date($rivi[$ind_ToivottuKeraysajankohta]);
+						$hinta			= str_replace(",", ".", $rivi[$ind_Hinta]);
+						$ale1	  		= str_replace(",", ".", $rivi[$ind_Ale]);
+						$netto 	  		= strtoupper(trim($rivi[$ind_Netto]));
+						$var  			= strtoupper(trim($rivi[$ind_Var]));
+						$kommentti		= trim($rivi[$ind_Kommentti]);
+						$valmistuslinja	= trim($rivi[$ind_Valmistuslinja]);
 
 						if ($toim == "EXTENNAKKO" and $var != '' and $var != 'O') {
 							echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat").": 'O'. ".t("Rivill‰").": $rivilask1. $var<br>";
@@ -329,7 +397,12 @@
 											"varasto"           => $varasto,
 											"varataan_saldoa"   => "EI",
 											"kommentti"         => $kommentti_array[$tuoteno_temp],
+											'valmistuslinja'	=> $valmistuslinja,
+											'toimaika'			=> $toimaika,
+											'kerayspvm'			=> $kerayspvm,
+											'toim'				=> "{$toim}",
 										);
+
 										lisaa_rivi($params);
 									}
 
@@ -396,6 +469,12 @@
 	}
 
 	if ($tee == 'mikrotila') {
+		if ( ($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			$colspan = 11;
+		}
+		else {
+			$colspan = 8;
+		}
 		echo "<font class='head'>$otsikko</font><hr>";
 
 		echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
@@ -407,13 +486,31 @@
 				<font class='message'>".t("Tiedostomuoto").":</font><br><br>
 
 				<table>
-				<tr><th colspan='8'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
+				<tr><th colspan='{$colspan}'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
 				<tr>";
 
 		echo "	<td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."</td>";
 
 		if ($kukarow["extranet"] == "") {
-			echo "<td>".t("Arvioitu toimitusp‰iv‰ vvvv-kk-pp")."</td><td>".t("Hinta")."</td><td>".t("Ale")."</td><td>".t("Netto")."</td><td>".t("Var")."</td><td>".t("Kommentti")."</td>";
+
+			if (($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+				echo "<td>".t("Valmistusajankohta")." ".t("(vvvv-kk-pp)")."</td>";
+				echo "<td>".t("Hinta")."</td>";
+				echo "<td>".t("Ale")."</td>";
+				echo "<td>".t("Netto")."</td>";
+				echo "<td>".t("Var")."</td>";
+				echo "<td>".t("Kommentti")."</td>";
+				echo "<td>".t('Valmistuslinja')."</td>";
+				echo "<td>".t('Ker‰ysajankohta')." ".t("(vvvv-kk-pp)")."</td>";
+			}
+			else {
+				echo "<td>".t("Arvioitu toimitusp‰iv‰")." ".t("(vvvv-kk-pp)")."</td>";
+				echo "<td>".t("Hinta")."</td>";
+				echo "<td>".t("Ale")."</td>";
+				echo "<td>".t("Netto")."</td>";
+				echo "<td>".t("Var")."</td>";
+				echo "<td>".t("Kommentti")."</td>";
+			}
 		}
 
 		echo "	</tr>

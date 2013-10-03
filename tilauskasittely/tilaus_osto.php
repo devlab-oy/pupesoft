@@ -1182,7 +1182,8 @@
 						tilausrivi.ale2,
 						tilausrivi.ale3,
 						tilausrivin_lisatiedot.tilausrivitunnus,
-						tilausrivin_lisatiedot.tilausrivilinkki
+						tilausrivin_lisatiedot.tilausrivilinkki,
+						tilausrivi.hinta_alkuperainen
 						FROM tilausrivi
 						LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
@@ -1451,8 +1452,13 @@
 									<input type='hidden' name='toim_tuoteno'		value = '$toim_tuoteno'>
 									<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
 									<input type='hidden' name='rivitunnus' 			value = '$prow[tunnus]'>
-									<input type='hidden' name='tee' 				value = 'PV'>
-									<input type='Submit' value='".t("Muuta")."'>
+									<input type='hidden' name='tee' 				value = 'PV'>";
+
+							if ($laskurow['tila'] == 'O' and $laskurow['alatila'] != '') {
+								echo "<input type='hidden' name='hinta_alkuperainen' value = '{$prow['hinta_alkuperainen']}'>";
+							}
+
+							echo "	<input type='Submit' value='".t("Muuta")."'>
 									</form>
 									</td>";
 

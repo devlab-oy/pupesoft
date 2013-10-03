@@ -918,12 +918,20 @@
 
 			echo "</select></td></tr>";
 
-			if(isset($srow['ryhma'])) {
+			if (isset($srow['ryhma']) and $srow['ryhma'] != "") {
 				echo "<tr>";
-				echo "<td valign='top'>".t("Asiakasryhm‰")."</td>";
+				echo "<td valign='top'>".t("Asiakasryhm‰").":</td>";
 				echo "<td>{$srow['ryhma']}</td>";
 				echo "</tr>";
 			}
+			
+			if (isset($srow['fakta']) and $srow['fakta'] != "") {
+				echo "<tr>";
+				echo "<td valign='top'>".t("Asiakasfakta").":</td>";
+				echo "<td>".str_replace("\n", "<br>", $srow['fakta'])."</td>";
+				echo "</tr>";
+			}	
+			
 
 			$query  = "	SELECT laji
 						FROM asiakas
@@ -3836,7 +3844,7 @@
 				if ($merkki2 != 'eimenu' and $merkki2 != '') {
 					$merkki = $merkki2;
 				}
-
+				
 				$query2 .= "tyomaarays SET
 							yhtio			= '$kukarow[yhtio]',
 							kotipuh 		= '$kotipuh',
@@ -3854,8 +3862,6 @@
 							komm2 			= '$komm2',
 							suorittaja 		= '$suorittaja',
 							viite	 		= '$viite',
-							tyojono			= '$tyojono',
-							tyostatus		= '$tyostatus',
 							prioriteetti	= '$prioriteetti',
 							jalleenmyyja 	= '$jalleenmyyja',
 							tehdas			= '$tehdas',
@@ -3865,9 +3871,15 @@
 							tyokoodi		= '$tyokoodi',
 							hyvaksy			= '$hyvaksy',
 							otunnus 		= '$kukarow[kesken]'";
+				
+				//N‰m‰ kent‰t p‰ivitet‰‰n vain, jos p‰ivitet‰‰n sit‰ tyˆm‰‰r‰ykselt‰ tai muualta miss‰ nuo kaksi kentt‰‰ n‰kyy..
+				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
+					$query2 .= ",	tyojono			= '$tyojono',
+									tyostatus		= '$tyostatus'";
+				}
 				$query2 .= $postquery2;
 				$result = pupe_query($query2);
-			}
+			}	
 
 			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "EXTTARJOUS", "ENNAKKO","EXTENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE", "WEBTILAUSTARJOUS","EXTRANET_REKLAMAATIO"))) {
 

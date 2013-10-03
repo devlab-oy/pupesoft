@@ -307,7 +307,7 @@
 		}
 		elseif ($var == "O") {
 			$selo = "SELECTED";
-		}	
+		}
 
 		echo "<td valign='top'><select name='var'>";
 		if ($toim == "EXTENNAKKO") {
@@ -573,10 +573,13 @@
 			echo "<th align='left'>".t("Reseptiin")."</th>";
 		}
 
-		echo "	<th align='left'>".t("Tuoteno")."</th>
-				<th align='left'>".t("Määrä")."</th>
-				</tr>";
+		echo "<th align='left'>".t("Tuoteno")."</th>";
+		echo "<th align='left'>".t("Määrä")."</th>";
 
+		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			echo "<th align='left'>".t("Valmistuslinja")."</th>";
+		}
+		echo "</tr>";
 
 		echo "<tr>$jarjlisa";
 
@@ -605,8 +608,24 @@
 
 		echo "<td valign='top'><input type='text' size='5' name='kpl' maxlength='13' value='$kpl'></td>";
 
-		echo "<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
+		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			echo "<td>";
 
+			$valmistuslinja_result = t_avainsana("VALMISTUSLINJA");
+
+			echo "<select name='valmistuslinja'>";
+			echo "<option value = ''>".t("Oletus")."</option>";
+
+			while ($valmistuslinja_row = mysql_fetch_array($valmistuslinja_result)) {
+				$sel = ($valmistuslinja_row["selite"] == $valmistuslinja) ? "selected" : "";
+				echo "<option value='{$valmistuslinja_row["selite"]}' $sel>{$valmistuslinja_row["selitetark"]}</option>";
+			}
+
+			echo "</select>";
+			echo "</td>";
+		}
+
+		echo "<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
 		echo "<tr>$jarjlisa";
 
@@ -614,8 +633,12 @@
 			echo "<th></th>";
 		}
 
+		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			echo "<th align='left'>".t("Toivottu keräysajankohta")."</th>";
+			echo "<th align='left' colspan='2'>".t("Toivottu valmistusajankohta")."</th>";
+		}
 		// Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
-		if ($yhtiorow["splittauskielto"] == "K") {
+		elseif ($yhtiorow["splittauskielto"] == "K") {
 			echo "	<th align='left'>".t("Keräysaika")."</th>
 					<th align='left'>".t("Toimitusaika")."</th>";
 		}
@@ -658,9 +681,10 @@
 		}
 
 		// Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
-		if ($yhtiorow["splittauskielto"] == "K") {
+		if ($yhtiorow["splittauskielto"] == "K" or ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+			$colspan = $yhtiorow["splittauskielto"] == "K" ? 1 : 2;
 			echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
-			echo "<td valign='top'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
+			echo "<td valign='top' colspan='{$colspan}'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
 		}
 		else {
 			echo "<input type='hidden' name='keraysppa' value='$keraysppa'>";
@@ -678,7 +702,14 @@
 			echo "<th></th>";
 		}
 
-		echo "<th colspan='2' align='left'>".t("Kommentti")."</th>
+		if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+			$colspan = 3;
+		}
+		else {
+			$colspan = 2;
+		}
+
+		echo "<th colspan='{$colspan}' align='left'>".t("Kommentti")."</th>
 				</tr>";
 
 		echo "<tr>$jarjlisa";
@@ -687,7 +718,7 @@
 			echo "<td valign='top'></td>";
 		}
 
-		echo "<td valign='top' colspan='2'><textarea name='kommentti' cols='40' rows='2' wrap='soft'>$kommentti</textarea></td>
+		echo "<td valign='top' colspan='{$colspan}'><textarea name='kommentti' cols='40' rows='2' wrap='soft'>$kommentti</textarea></td>
 				<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'>";
 
 		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..

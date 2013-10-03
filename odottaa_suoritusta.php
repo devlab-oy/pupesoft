@@ -93,18 +93,6 @@ function aseta_tilaus_kesken_tilaan_ja_aseta_uusi_lahto($laskurow) {
 	aseta_tilaus_kesken_tilaan($laskurow);
 }
 
-function hae_asiakas($liitostunnus) {
-	global $yhtiorow;
-
-	$query = "	SELECT *
-				FROM asiakas
-				WHERE yhtio = '{$yhtiorow['yhtio']}'
-				AND tunnus = {$liitostunnus}";
-	$result = pupe_query($query);
-
-	return mysql_fetch_assoc($result);
-}
-
 function tarkista_suoratoimitus($myyntitilaus) {
 	global $kukarow, $yhtiorow;
 

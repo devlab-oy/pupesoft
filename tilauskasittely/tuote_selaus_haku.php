@@ -35,6 +35,10 @@
 				}
 			//-->
 			</SCRIPT>";
+	// Jos tullaan sivuvalikosta extranetiss‰ tyhj‰t‰‰n kesken ettei lis‰t‰ tuotteita v‰‰r‰lle tilaukselle
+	if((!isset($valittu_tarjous_tunnus)) and $kukarow['extranet'] != '') {
+		$kukarow['kesken'] = '';
+	}
 
 	if (isset($toiminto) and $toiminto == "sarjanumeronlisatiedot_popup") {
 		@include('sarjanumeron_lisatiedot_popup.inc');
@@ -141,11 +145,11 @@
 					</form><br><br>";
 		}
 		elseif ($toim_kutsu == "EXTENNAKKO" and $kukarow["extranet"] != "") {
-			$kukarow['kesken'] = (isset($tilausnumero)) ? $kukarow['kesken'] = $tilausnumero : $kukarow['kesken'] = '';
+			$kukarow['kesken'] = (isset($valittu_tarjous_tunnus)) ? $kukarow['kesken'] = $valittu_tarjous_tunnus : $kukarow['kesken'] = '';
 			echo "	<form method='post' action='extranet_tarjoukset_ja_ennakot.php'>
 					<input type='hidden' name='toim' value='$toim_kutsu'>
-					<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
-					<input type='hidden' name='valittu_tarjous_tunnus' value='$kukarow[kesken]'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
 					<input type='hidden' name='action' value='nayta_tarjous'>
 					<input type='submit' value='".t("Takaisin tilaukselle")."'>
 					</form><br><br>";
@@ -649,6 +653,7 @@
 		echo "<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>";
 		echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
+		echo "<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>";
 
 		if (!isset($tultiin)) {
 			$tultiin = '';
@@ -755,6 +760,7 @@
 		echo "<input type='Submit' name='submit_button' id='submit_button' value = '".t("Etsi")."'></form>";
 		echo "&nbsp;<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>
 				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
+				<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
 				<input type='submit' name='submit_button2' id='submit_button2' value = '".t("Tyhjenn‰")."'>
 				</form>";
 
@@ -1103,6 +1109,7 @@
 			echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 			echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
 			echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
+			echo "<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>";
 
 			if ($tultiin == "futur") {
 				echo " <input type='hidden' name='tultiin' value='$tultiin'>";
@@ -1201,8 +1208,10 @@
 				if ($lisatiedot != "" and $kukarow["extranet"] == "") {
 					echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=aleryhma$ulisa'>".t("Aleryhm‰")."<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=status$ulisa'>".t("Status")."</th>";
 				}
-
-				echo "<th>".t("Myyt‰viss‰")."</th>";
+				// Ext-ennakolla kun asiakas lis‰‰ rivej‰ ei ole tarpeellista n‰ytt‰‰ myyt‰viss‰-saraketta
+				if ($toim_kutsu != "EXTENNAKKO") {
+					echo "<th>".t("Myyt‰viss‰")."</th>";
+				}
 
 				if ($lisatiedot != "" and $kukarow["extranet"] == "") {
 					echo "<th>".t("Hyllyss‰")."</th>";
@@ -1636,8 +1645,8 @@
 				if ($lisatiedot != "" and $kukarow["extranet"] == "") {
 					echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]<br>$row[status]</td>";
 				}
-
-				if ($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www" and $verkkokauppa_saldotsk)) {
+ 
+				if ($toim_kutsu != "EXTENNAKKO" and ($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www" and $verkkokauppa_saldotsk))) {
 					// Tuoteperheen is‰t, mutta ei sarjanumerollisisa isi‰ (Normi, Extranet ja Verkkokauppa)
 					if ($row["tuoteperhe"] == $row["tuoteno"] and $row["sarjanumeroseuranta"] != "S") {
 						// Extranet ja verkkokauppa

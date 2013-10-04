@@ -50,6 +50,7 @@
 	if (!isset($myyja))					$myyja = "";
 	if (!isset($automaattinen_poiminta))$automaattinen_poiminta = "";
 	if (!isset($mista_tullaan))			$mista_tullaan = "";
+	if (!isset($jt_tyyppi)) 			$jt_tyyppi = "";
 
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
@@ -1267,7 +1268,7 @@
 
 								echo "<th valign='top'>".t("Status")."<br>".t("Toimaika")."<br/>".t("Saapumispäivä")."</th>";
 
-								if ($kukarow['extranet'] == '') echo "<th valign='top'>",t("Tyyppi"),"</th>";
+								if ($kukarow['extranet'] == '' and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') echo "<th valign='top'>",t("Tyyppi"),"</th>";
 
 								if ($jtselaus_paivitys_oikeus) {
 									if ($kukarow["extranet"] == "") {
@@ -1695,23 +1696,25 @@
 
 											echo "</td>";
 
-											echo "<td valign='top' {$class}>";
+											if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+												echo "<td valign='top' {$class}>";
 
-											if ($jtrow['jt_manual'] != '') {
-												echo t("JT manuaalinen");
-											}
-											elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
-												echo t("JT muiden mukana");
-											}
-											else {
-												echo t("JT");
-
-												if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
-													echo " ".t("heti");
+												if ($jtrow['jt_manual'] != '') {
+													echo t("JT manuaalinen");
 												}
-											}
+												elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+													echo t("JT muiden mukana");
+												}
+												else {
+													echo t("JT");
 
-											echo "</td>";
+													if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+														echo " ".t("heti");
+													}
+												}
+
+												echo "</td>";
+											}
 
 											echo "<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI' $kaikki_check></td>";
 
@@ -1785,23 +1788,26 @@
 										}
 										echo "</td>";
 
-										echo "<td valign='top' {$class}>";
+										if ($kukarow['extranet'] == '' and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
 
-										if ($jtrow['jt_manual'] != '') {
-											echo t("JT manuaalinen");
-										}
-										elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
-											echo t("JT muiden mukana");
-										}
-										else {
-											echo t("JT");
+											echo "<td valign='top' {$class}>";
 
-											if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
-												echo " ".t("heti");
+											if ($jtrow['jt_manual'] != '') {
+												echo t("JT manuaalinen");
 											}
-										}
+											elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+												echo t("JT muiden mukana");
+											}
+											else {
+												echo t("JT");
 
-										echo "</td>";
+												if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+													echo " ".t("heti");
+												}
+											}
+
+											echo "</td>";
+										}
 
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 										echo "<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI' $kaikki_check></td>";
@@ -1838,23 +1844,26 @@
 										}
 										echo "</td>";
 
-										echo "<td valign='top' {$class}>";
+										if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
 
-										if ($jtrow['jt_manual'] != '') {
-											echo t("JT manuaalinen");
-										}
-										elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
-											echo t("JT muiden mukana");
-										}
-										else {
-											echo t("JT");
+											echo "<td valign='top' {$class}>";
 
-											if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
-												echo " ".t("heti");
+											if ($jtrow['jt_manual'] != '') {
+												echo t("JT manuaalinen");
 											}
-										}
+											elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+												echo t("JT muiden mukana");
+											}
+											else {
+												echo t("JT");
 
-										echo "</td>";
+												if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+													echo " ".t("heti");
+												}
+											}
+
+											echo "</td>";
+										}
 
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 										echo "<td valign='top' align='center' $class>&nbsp;</td>";
@@ -1894,23 +1903,26 @@
 
 										if ($kukarow["extranet"] == "") {
 
-											echo "<td valign='top' {$class}>";
+											if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
 
-											if ($jtrow['jt_manual'] != '') {
-												echo t("JT manuaalinen");
-											}
-											elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
-												echo t("JT muiden mukana");
-											}
-											else {
-												echo t("JT");
+												echo "<td valign='top' {$class}>";
 
-												if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
-													echo " ".t("heti");
+												if ($jtrow['jt_manual'] != '') {
+													echo t("JT manuaalinen");
 												}
-											}
+												elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+													echo t("JT muiden mukana");
+												}
+												else {
+													echo t("JT");
 
-											echo "</td>";
+													if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+														echo " ".t("heti");
+													}
+												}
+
+												echo "</td>";
+											}
 
 											echo "	<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $class>&nbsp;</td>
@@ -2072,23 +2084,25 @@
 
 										if ($kukarow["extranet"] == "") {
 
-											echo "<td valign='top' {$class}>";
+											if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+												echo "<td valign='top' {$class}>";
 
-											if ($jtrow['jt_manual'] != '') {
-												echo t("JT manuaalinen");
-											}
-											elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
-												echo t("JT muiden mukana");
-											}
-											else {
-												echo t("JT");
-
-												if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
-													echo " ".t("heti");
+												if ($jtrow['jt_manual'] != '') {
+													echo t("JT manuaalinen");
 												}
-											}
+												elseif (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $jtrow['kerayspvm'] > date('Y-m-d')) {
+													echo t("JT muiden mukana");
+												}
+												else {
+													echo t("JT");
 
-											echo "</td>";
+													if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+														echo " ".t("heti");
+													}
+												}
+
+												echo "</td>";
+											}
 
 											echo "	<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $class>&nbsp;</td>
@@ -2184,7 +2198,12 @@
 
 							echo "<tr class='aktiivi'>";
 
-							$colspan = 4;
+							if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+								$colspan = 4;
+							}
+							else {
+								$colspan = 3;
+							}
 
 							if ($tilaus_on_jo == "") {
 								$colspan++;
@@ -2441,34 +2460,26 @@
 
 		echo "</select></td></tr>\n";
 
-		$jt_tyyppi = !isset($jt_tyyppi) ? '' : $jt_tyyppi;
-
-		$sel = array($jt_tyyppi => 'selected') + array('j' => '', 'j_muiden_mukana' => '', 'j_manual' => '');
-
-		echo "<tr>";
-		echo "<th>",t("JT tyyppi"),"</th>";
-		echo "<td>";
-		echo "<select name='jt_tyyppi'>";
-		echo "<option value=''>",t("Näytä kaikki"),"</option>";
-
 		if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+
+			$sel = array($jt_tyyppi => 'selected') + array('j' => '', 'j_muiden_mukana' => '', 'j_manual' => '');
+
+			echo "<tr>";
+			echo "<th>",t("JT tyyppi"),"</th>";
+			echo "<td>";
+			echo "<select name='jt_tyyppi'>";
+			echo "<option value=''>",t("Näytä kaikki"),"</option>";
 			echo "<option value='j' {$sel['j']}>",t("JT heti"),"</option>";
-		}
-		else {
-			echo "<option value='j' {$sel['j']}>",t("JT"),"</option>";
-		}
-
-		if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
 			echo "<option value='j_muiden_mukana' {$sel['j_muiden_mukana']}>",t("JT muiden mukana"),"</option>";
-		}
 
-		if ($yhtiorow['jt_manual'] == 'K') {
-			echo "<option value='j_manual' {$sel['j_manual']}>",t("JT manuaalinen"),"</option>";
-		}
+			if ($yhtiorow['jt_manual'] == 'K') {
+				echo "<option value='j_manual' {$sel['j_manual']}>",t("JT manuaalinen"),"</option>";
+			}
 
-		echo "</select>";
-		echo "</td>";
-		echo "</tr>";
+			echo "</select>";
+			echo "</td>";
+			echo "</tr>";
+		}
 
 		echo "<tr>
 				<th>".t("Tilaus")."</th>

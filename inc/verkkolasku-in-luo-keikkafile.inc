@@ -2284,34 +2284,29 @@ $debug = 0;
 
 			$laskurow = saapumisen_pyoristyserot($osrow, $laskurow, $otunnus);
 
+			// laitetaan lasku suoraan maksuvalmiiksi
+			$query = "	UPDATE lasku set
+						tila 		  = 'M',
+						hyvak1 		  = 'verkkolas',
+						h1time 		  = now(),
+						hyvak2 		  = '',
+						hyvak3 		  = '',
+						hyvak4 		  = '',
+						hyvak5 		  = '',
+						hyvaksyja_nyt = '',
+						comments 	  = TRIM(CONCAT(comments, '\n Lasku siirrettiin suoraan maksuvalmiiksi, koska se täsmäsi ostotilaukseen.'))
+						WHERE tunnus = '{$tunnus}'";
+			$xresult = pupe_query($query);
+
 			list($_kaikkivarastossayhteensa,$_kaikkiliitettyyhteensa,$_kohdistus,$_kohok,$_kplvarasto,$_kplyhteensa,$_lisatiedot,$_lisok,$_llrow,$_sarjanrook,$_sarjanrot,$_uusiot,$_varastopaikat,$_varastossaarvo,$_liitettyarvo,$_varok) = tsekit($laskurow, 0, 0);
 
 			if ($_lisok == 1 and $_kohok == 1 and $_varok == 1 and $_kplyhteensa == $_kplvarasto and $_sarjanrook == 1 and $_llrow["volasku"] == $_llrow["volasku_ok"] and $_llrow["kulasku"] == $_llrow["kulasku_ok"]) {
-
-				// tunnus turvaan
-				$tmp_tunnus = $tunnus;
 
 				$toiminto = "kaikkiok";
 				$tee = "varma";
 
 				// viedään varastoon TEHDÄÄN LOPPUKALKYYLI
 				require ("tilauskasittely/varastoon.inc");
-
-				$tunnus = $tmp_tunnus;
-
-				// laitetaan lasku suoraan maksuvalmiiksi
-				$query = "	UPDATE lasku set
-							tila 		  = 'M',
-							hyvak1 		  = 'verkkolas',
-							h1time 		  = now(),
-							hyvak2 		  = '',
-							hyvak3 		  = '',
-							hyvak4 		  = '',
-							hyvak5 		  = '',
-							hyvaksyja_nyt = '',
-							comments 	  = TRIM(CONCAT(comments, '\n Lasku siirrettiin suoraan maksuvalmiiksi, koska se täsmäsi ostotilaukseen.'))
-							WHERE tunnus = '{$tunnus}'";
-				$xresult = pupe_query($query);
 			}
 		}
 	}

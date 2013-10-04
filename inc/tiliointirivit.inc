@@ -215,6 +215,9 @@
 		// Ei rikota rivinvaihtoja
 		$selite = str_ireplace("<br>", "(br)", $selite);
 
+		if ($selite == '') {
+			$selite = $lisaselite;
+		}
 		echo "<input type='text' name='selite' value = '$selite'>";
 
 		if ($trow['tila'] == 'X') {
@@ -273,8 +276,8 @@
 		}
 
 		if ($virhe != "") $virhe .= "<br>";
-
-		echo "<td valign='top'><input type='Submit' value = '".t("Lisää")."'></td>";
+		echo "<input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />";
+		echo "<td valign='top'><input type='Submit' class='hae_lisaselite' value = '".t("Lisää")."'></td>";
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") === FALSE and strpos($_SERVER['SCRIPT_NAME'], "selaajamuuta.php") === FALSE) {
 			echo "<td valign='top' class='back' nowrap><font class='error'>$virhe</font><input type='checkbox' name = 'jaksota'> ".t("Jaksota")."</td>";
@@ -455,7 +458,8 @@
 					<input type='hidden' name = 'iframe' value = '$iframe'>
 					<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
 					<input type='hidden' name = 'jarj' value = '$jarj'>
-					<input type='Submit' value = '".t("Muuta")."'>
+					<input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />
+					<input type='Submit' class='hae_lisaselite' value = '".t("Muuta")."'>
 					</td></tr></form>";
 		}
 		else {

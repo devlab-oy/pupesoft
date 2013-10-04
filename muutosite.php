@@ -18,6 +18,7 @@ if (!isset($tee_pdf)) $tee_pdf = "";
 if (!isset($kpexport)) $kpexport = "";
 if (!isset($liitetiedosto)) $liitetiedosto = 0;
 if (!isset($livesearch_tee)) $livesearch_tee = "";
+if (!isset($lisaselite)) $lisaselite = "";
 
 $listaus = FALSE;
 
@@ -62,6 +63,18 @@ if (isset($livesearch_tee) and $livesearch_tee == "TOIMITTAJAHAKU") {
 
 // ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 js_openFormInNewWindow();
+
+echo "	<script language='javascript'> 
+
+			$(function() {
+
+				$('.hae_lisaselite').on('click', function() {
+					$('.lisaselite').val($('#lisaselite').val());
+				});
+
+			});
+
+		</script>";
 
 echo "<font class='head'>".t("Tiliöintien muutos/selailu")."</font><hr>";
 
@@ -969,7 +982,7 @@ if ($tee == 'E' or $tee == 'F') {
 
 	// Myyntilaskut
 	if ($trow['tila'] == 'U' or $trow['tila'] == 'L') {
-
+		echo "<form name='ylaotsikko'>";
 		// Tämä on koko yläotsikon table
 		echo "<table>";
 		// Aloitetaan vasen sarake
@@ -990,7 +1003,7 @@ if ($tee == 'E' or $tee == 'F') {
 			echo "<tr><th>".t("Toim_osoite")."</th><td>$trow[toim_osoite]</td></tr>";
 			echo "<tr><th>".t("Toim_postino")."</th><td>$trow[toim_postino], $trow[toim_postitp], $trow[toim_maa]</td></tr>";
 		}
-
+		echo "<tr><th>".t("Apuselite")."</th><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
 		echo "</table>";
 
 		// Lopetettaan vasen sarake, aloitetaan keskisarake
@@ -1009,12 +1022,12 @@ if ($tee == 'E' or $tee == 'F') {
 			if ($trow["kasumma"] != 0) echo "<tr><th nowrap>".t("Kassa-ale")." $yhtiorow[valkoodi]</th><td align='right'>".sprintf("%.02f", $trow["kasumma"] * $kurssi)."</td></tr>";
 		}
 		echo "</table>";
-
+		echo "</form>";
 		// Lopetataan keskisarake, aloitetaan oikea sarake
 		echo "</td><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 		echo "<table>";
-
+		
 		echo "<tr><th>".t("Laatija")."</th><td nowrap>".tv1dateconv($trow["luontiaika"], "PITKÄ")." &raquo; $trow[laatija_nimi]</td></tr>";
 
 		// Onko laskua karhuttu?
@@ -1165,6 +1178,7 @@ if ($tee == 'E' or $tee == 'F') {
 	elseif ($trow["tila"] == 'X') {
 
 		if ($trow["liitostunnus"] > 0) {
+			echo "<form name='ylaotsikko>";
 			// Tämä on koko yläotsikon table
 			echo "<table>";
 			// Aloitetaan vasen sarake
@@ -1187,14 +1201,17 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<tr><th>".t("Tapvm")."</th><td>".tv1dateconv($trow["tapvm"])."</td></tr>";
 		echo "<tr><th>".t("Kommentti")."</th><td>$trow[comments]</td></tr>";
 		echo "<tr><th>".t("Liitetiedostot")."</th><td>".ebid($tunnus) ."</td></tr>";
+		echo "<tr><th>".t("Apuselite")."</th><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
 		echo "</table>";
 
 		if ($trow["liitostunnus"] > 0) {
 			echo "</td></tr></table>";
 		}
+		echo "</form>";
 	}
 	// Jotain muuta kuin Myytilasku tai Tosite
 	else {
+		echo "<form name='ylaotsikko'>";
 		// Tämä on koko yläotsikon table
 		echo "<table>";
 		// Aloitetaan vasen sarake
@@ -1226,9 +1243,9 @@ if ($tee == 'E' or $tee == 'F') {
 		}
 
 		echo "<tr><th>".t("Maksutieto")."</th><td>".wordwrap($trow["viite"]." ".$trow["viesti"]." ".$trow["sisviesti1"], 40, "<br>")."</td></tr>";
-
+		echo "<tr><th>".t("Apuselite")."</th><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";
 		echo "</table>";
-
+		echo "</form>";
 		// Lopetaan vasen sarake, aloitetaan keskisarake
 		echo "</td><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
@@ -1370,7 +1387,8 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<input type = 'hidden' name = 'tee' value='M'>";
 		echo "<input type = 'hidden' name = 'tila' value=''>";
 		echo "<input type = 'hidden' name = 'tunnus' value='{$tunnus}'>";
-		echo "<input type = 'submit' value = '",t("Muuta tietoja"),"'>";
+		echo "<input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />";
+		echo "<input type = 'submit' class='hae_lisaselite' value = '",t("Muuta tietoja"),"'>";
 		echo "</form>";
 	}
 
@@ -1451,13 +1469,15 @@ if ($tee == 'E' or $tee == 'F') {
 			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 			<input type = 'hidden' name = 'tee' value='$ftee'>
 			<input type = 'hidden' name = 'tunnus' value='$tunnus'>
-			<input type = 'submit' value = '$fnappula'>
+			<input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />
+			<input type = 'submit' class='hae_lisaselite' value = '$fnappula'>
 			</form>
 			<form method='post'>
 			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 			<input type = 'hidden' name = 'tee' value='G'>
 			<input type = 'hidden' name = 'tunnus' value='$tunnus'>
-			<input type = 'submit' value = '".t("Seuraava")."'>
+			<input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />
+		    <input type = 'submit' class='hae_lisaselite' value = '".t("Seuraava")."'>
 			</form>";
 	}
 
@@ -1480,7 +1500,8 @@ if ($tee == 'E' or $tee == 'F') {
 			echo "<input type = 'hidden' name = 'liitetiedosto' value = '$ktarkoitus[tunnus]'>";
 			echo "<input type = 'hidden' name = 'kayttotyyppi' value = '$ktarkoitus[kayttotarkoitus]'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus/SPLIT/${palvelin2}muutosite.php////tee=E//tunnus=$trow[tunnus]'>";
-			echo "<input type = 'submit' value='" . t('Tee tiliöintisääntö laskusta')."'>";
+			echo "<input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />";
+			echo "<input type = 'submit' class='hae_lisaselite' value='" . t('Tee tiliöintisääntö laskusta')."'>";
 			echo "</form>";
 		}
 	}
@@ -1551,7 +1572,8 @@ if ($tee == "") {
 	echo "<tr>
 		  	<td>".t("Näytä yliviivatut rivit")."</td>
 		  	<td><input type = 'checkbox' name = 'viivatut'></td>
-		  	<td><input type = 'submit' value = '".t("Etsi")."'></td></tr>";
+			<input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />
+		  	<td><input type = 'submit' class='hae_lisaselite' value = '".t("Etsi")."'></td></tr>";
 
 	echo "</table>";
 	echo "</form>";

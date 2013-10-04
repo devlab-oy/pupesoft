@@ -857,7 +857,7 @@ if (!function_exists('rivi_otsikot_lahete')) {
 
 		$base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
-		if ($base_lahetetyyppi == "tulosta_lahete.inc" or $base_lahetetyyppi == "tulosta_lahete_ean.inc") {
+		if ($base_lahetetyyppi == "tulosta_lahete.inc" or $base_lahetetyyppi == "tulosta_lahete_ean.inc" or $base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc') {
 			// tulosta_lahete.inc
 
 			$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,  	$thispage, $rectparam);
@@ -1000,7 +1000,7 @@ if (!function_exists('rivi_otsikot_lahete')) {
 			}
 
 		}
-		elseif ($base_lahetetyyppi == "tulosta_lahete_viivakoodi.inc") {
+		elseif ($base_lahetetyyppi == "tulosta_lahete_viivakoodi.inc" or $base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc') {
 			// tulosta_lahete_viivakoodi.inc
 
 			$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,  	$thispage, $rectparam);
@@ -1012,7 +1012,13 @@ if (!function_exists('rivi_otsikot_lahete')) {
 			$pdf->draw_text(45,  $kala+15, t("Tuotenumero", $kieli),	$thispage, $norm);
 			$pdf->draw_text(190, $kala+15, t("Tuotenimi", $kieli),		$thispage, $norm);
 			$pdf->draw_text(490, $kala+15, t("Tilattu", $kieli),		$thispage, $norm);
-			$pdf->draw_text(540, $kala+15, t("Toimitus", $kieli),		$thispage, $norm);
+
+			if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc') {
+				$pdf->draw_text(540, $kala+15, t("Yks.hinta", $kieli),		$thispage, $norm);
+			}
+			else {
+				$pdf->draw_text(540, $kala+15, t("Toimitus", $kieli),		$thispage, $norm);
+			}
 		}
 		elseif ($base_lahetetyyppi == "tulosta_lahete_viivakoodi_osh.inc") {
 			// tulosta_lahete_viivakoodi.inc
@@ -1546,7 +1552,7 @@ if (!function_exists('rivi_lahete')) {
 				$row['varattu_viivakoodi'] = $kpl_rivilla*1;
 			}
 			else {
-				if ($row["var"] == 'J') { // jälkitoimitus
+				if ($row["var"] == 'J' and $base_lahetetyyppi != 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' and $base_lahetetyyppi != 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc') { // jälkitoimitus
 					$row['varattu'] = t("**JT**", $kieli);
 					$row['varattu_viivakoodi'] = 0;
 				}
@@ -1642,7 +1648,7 @@ if (!function_exists('rivi_lahete')) {
 			//Fuulataan tämä, jotta voidaan kokeilla mahtuuko rivi sivulle
 			$returntest["thispage"] = "TESTISIVU";
 
-			if ($base_lahetetyyppi == "tulosta_lahete.inc") {
+			if ($base_lahetetyyppi == "tulosta_lahete.inc" or $base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc') {
 				$returntest = rivi_hinta_ale_lahete($returntest);
 			}
 			elseif ($base_lahetetyyppi == "tulosta_lahete_ean.inc") {
@@ -1657,7 +1663,7 @@ if (!function_exists('rivi_lahete')) {
 			elseif ($base_lahetetyyppi == "tulosta_lahete_eialeja.inc") {
 				$returntest = rivi_eialeja_lahete($returntest);
 			}
-			elseif ($base_lahetetyyppi == "tulosta_lahete_viivakoodi.inc") {
+			elseif ($base_lahetetyyppi == "tulosta_lahete_viivakoodi.inc" or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc") {
 				$returntest = rivi_viivakoodi_lahete($returntest);
 			}
 			elseif ($base_lahetetyyppi == "tulosta_lahete_viivakoodi_osh.inc") {
@@ -1706,9 +1712,9 @@ if (!function_exists('rivi_lahete')) {
 		$return = compact(array_keys($params));
 
 		if (substr($lahetetyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
-			if ($base_lahetetyyppi == "tulosta_lahete.inc") {
+			if ($base_lahetetyyppi == "tulosta_lahete.inc" or $base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc') {
 				// tulosta_lahete.inc
-				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
+				if ((($row["var"] != 'J' or ($row['var'] == 'J' and $base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc')) or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
 
 					// Myyntihinnat sisältävät arvonlisäveron
 					if ($yhtiorow['alv_kasittely'] == '') {
@@ -1835,7 +1841,7 @@ if (!function_exists('rivi_lahete')) {
 
 				$return = rivi_eialeja_lahete($return);
 			}
-			elseif ($base_lahetetyyppi == "tulosta_lahete_viivakoodi.inc") {
+			elseif ($base_lahetetyyppi == "tulosta_lahete_viivakoodi.inc" or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc") {
 				// tulosta_lahete_viivakoodi.inc
 				$return = rivi_viivakoodi_lahete($return);
 			}
@@ -1965,6 +1971,8 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
 		// Luodaan muuttujat
 		extract($params);
 
+		$base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
+
 		// Rivin eka rivi
 		$rivi_kala = $kala;
 
@@ -2049,6 +2057,30 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
 
 		$kala = $kala - $rivinkorkeus;
 
+		if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc') {
+
+			// tutkitaan onko tuotteelle eankoodi
+			$eanquery = "	SELECT trim(eankoodi) eankoodi
+							from tuote
+							where yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$row[tuoteno]'";
+			$eanres = pupe_query($eanquery);
+			$eanrow = mysql_fetch_assoc($eanres);
+
+			$alakala = $kala;
+
+			// tarkista_ean13 on uusi, jos syötettävä EAN-koodi on viallinen, niin ei tehdä viivakoodi tulostusta PDF:lle
+			if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"]) and tarkista_ean13($eanrow["eankoodi"]) !== FALSE) {
+				#viivakoodi
+				$data = viivakoodi($eanrow["eankoodi"], "ean", 100, 10, "");
+				$image = $pdf->jfif_embed($data);
+				$pdf->image_place($image, $kala-15, 410, $thispage, array("scale" => 0.5));
+				$pdf->draw_text(425, $kala-17, $eanrow["eankoodi"], $thispage, $pieni);
+
+				$alakala = $kala-17-$rivinkorkeus;
+			}
+		}
+
 		if ($row["kommentti"] != '') {
 
 			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
@@ -2090,6 +2122,8 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
 			$pdf->draw_text(465-$oikpos, ($rivi_kala-$rivinkorkeus+5), hintapyoristys($row["hinta"]*$row["myyntihinta_maara"]), $thispage, $pieni);
 			$pdf->draw_text(465, ($rivi_kala-$rivinkorkeus+5), " / $row[myyntihinta_maara] $omyks", $thispage, $pieni);
 		}
+
+		if ($kala > $alakala) $kala = $alakala;
 
 		// Luodaan palautettavat
 		$return = compact(array_keys($params));
@@ -3105,8 +3139,14 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 			$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
 			$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".$omyks, 	$thispage, $norm);
 
-			$oikpos = $pdf->strlen($row["varattu"], $norm);
-			$pdf->draw_text(575-$oikpos, $kala, $row["varattu"],$thispage, $norm);
+			if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc') {
+				$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
+				$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
+			}
+			else {
+				$oikpos = $pdf->strlen($row["varattu"], $norm);
+				$pdf->draw_text(575-$oikpos, $kala, $row["varattu"],$thispage, $norm);
+			}
 		}
 
 		$kala = $pohja - $rivinkorkeus;

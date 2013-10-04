@@ -18152,6 +18152,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		#$lahetetyyppi = "tulosta_lahete_brutto.inc"; 			# Näytetään tuotteen myymälähinta/(asiakkaan hinta)
 		#$lahetetyyppi = "tulosta_lahete_eialeja.inc"; 			# Näytetään tuotteen myyntihinta ja alennusryhmä
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc"; 		# Ei näytetä hintoja eikä alennuksia, EAN-koodi tulostetaan viivakoodina
+		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # Näytetään asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
+		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # Näytetään asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
 		#$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
@@ -18248,13 +18250,19 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			$kvaktuotteet = ",'{$toimitustapa_row['kuljetusvakuutus_tuotenumerot']}'";
 		}
 
+		$jtsort_lisa = "if (tilausrivi.tuoteno in ('$yhtiorow[rahti_tuotenumero]' $kvaktuotteet), 2, if(tilausrivi.var='J', 1, 0)) jtsort,";
+
+		if (substr($lahetetyyppi, 0, 6) != "perhe_" and (hae_base_lahetetyyppi($lahetetyyppi) == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' or hae_base_lahetetyyppi($lahetetyyppi) == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc')) {
+			$jtsort_lisa = "0 as jtsort,";
+		}
+
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot
 		$query = "  SELECT tilausrivi.*, {$koontiselect}
 					round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 					{$koontirivihinta}
 					$sorttauskentta,
-					if (tilausrivi.tuoteno in ('$yhtiorow[rahti_tuotenumero]' $kvaktuotteet), 2, if(tilausrivi.var='J', 1, 0)) jtsort,
+					{$jtsort_lisa}
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 					tuote.sarjanumeroseuranta

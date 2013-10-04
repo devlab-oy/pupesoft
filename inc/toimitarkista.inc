@@ -18,7 +18,9 @@ if (!function_exists("toimitarkista")) {
 				$t[$i] = $tmp_nimi;
 			}
 
-			if ((trim($t[$i]) == '' and mysql_field_name($result, $i) != "oletus_hyvak1") or ($alias_set == "KAYTTAJA" and mysql_field_name($result, $i) == "oletus_hyvak1" and trim($t[$i]) == '')) {
+			if ((trim($t[$i]) == '' and mysql_field_name($result, $i) != "oletus_hyvak1" and $yhtiorow['jalkilaskenta_kuluperuste'] == 'VS')
+					or ($alias_set == "KAYTTAJA" and mysql_field_name($result, $i) == "oletus_hyvak1" and trim($t[$i]) == '')
+					or (trim($t[$i]) == '' and mysql_field_name($result, $i) == "oletus_hyvak1" and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS')) {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
 
@@ -88,7 +90,7 @@ if (!function_exists("toimitarkista")) {
 			if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
 			else $ibanmaa = $tmp_maakoodi;
 
-			if ($t[$i] != '') {
+			if (($t[$i] != '' and $yhtiorow['jalkilaskenta_kuluperuste'] == 'VS') or ($t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS')) {
 				// Jos SEPA-maa, tarkistetaan IBAN
 				if (tarkista_sepa($ibanmaa) and tarkista_iban($t[$i]) != $t[$i]) {
 					$virhe[$i] = t("Virheellinen IBAN!")." $t[$i]";
@@ -110,7 +112,7 @@ if (!function_exists("toimitarkista")) {
 			else $ibanmaa = $tmp_maakoodi;
 
 			// Jos SEPA-maa, tarkistetaan BIC
-			if (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE and $t[$i] != '') {
+			if ((tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE and $t[$i] != '' and $yhtiorow['jalkilaskenta_kuluperuste'] == 'VS') or ($t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS')) {
 				$virhe[$i] = t("Virheellinen BIC!")." $t[$i]";
 			}
 		}

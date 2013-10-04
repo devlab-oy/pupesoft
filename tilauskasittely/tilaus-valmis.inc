@@ -129,7 +129,7 @@ while($rekisterinumero_row = mysql_fetch_assoc($rekisterinumero_result)) {
 		$kommentti = "\n";
 	}
 
-	$kommentti .= $rekisterinumero_row['rekisterinumero'];
+	$kommentti = $rekisterinumero_row['rekisterinumero'];
 	$query = "	UPDATE tilausrivi
 				SET kommentti = '{$kommentti}'
 				WHERE yhtio = '{$kukarow['yhtio']}'

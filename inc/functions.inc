@@ -23569,6 +23569,10 @@ if (!function_exists('hae_tilauksen_rekisterinumerot')) {
 	function hae_tilauksen_rekisterinumerot($tilausnumero) {
 		global $kukarow, $yhtiorow;
 
+		if ($tilausnumero == '') {
+			return array();
+		}
+		
 		//Tilausrivi pit‰‰ joinaa, jottei tule poistettuja rekisterinumeroita
 		$query = "	SELECT DISTINCT tilausrivin_lisatiedot.rekisterinumero
 					FROM tilausrivin_lisatiedot

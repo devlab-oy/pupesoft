@@ -23574,7 +23574,7 @@ if (!function_exists('hae_tilauksen_rekisterinumerot')) {
 		}
 		
 		//Tilausrivi pit‰‰ joinaa, jottei tule poistettuja rekisterinumeroita
-		$query = "	SELECT DISTINCT tilausrivin_lisatiedot.rekisterinumero
+		$query = "	SELECT tilausrivin_lisatiedot.rekisterinumero
 					FROM tilausrivin_lisatiedot
 					JOIN tilausrivi
 					ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
@@ -23586,7 +23586,7 @@ if (!function_exists('hae_tilauksen_rekisterinumerot')) {
 
 		$rekisterinumerot = array();
 		while($rekisterinumero = mysql_fetch_assoc($result)) {
-			$rekisterinumerot[] = $rekisterinumero;
+			$rekisterinumerot[$rekisterinumero['rekisterinumero']] = $rekisterinumero;
 		}
 
 		return $rekisterinumerot;

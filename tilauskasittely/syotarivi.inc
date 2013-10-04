@@ -311,14 +311,14 @@
 			echo "<br/>";
 			echo "<select name='jo_syotetty_rekisterinumero'>";
 			echo "<option value=''>".t('Ei valintaa')."</option>";
-			$i = 0;
+			$sel = "SELECTED";
 			foreach($tilauksen_rekisterinumerot as $syotetty_rekisterinumero) {
-				$sel = "";
-				if ($i == 0) {
-					$sel = "SELECTED";
+				if ($syotetty_rekisterinumero['rekisterinumero'] == '') {
+					$sel = '';
+					continue;
 				}
 				echo "<option value='{$syotetty_rekisterinumero['rekisterinumero']}' {$sel}>{$syotetty_rekisterinumero['rekisterinumero']}</option>";
-				$i++;
+				$sel = '';
 			}
 			echo "</select>";
 			echo "</td>";

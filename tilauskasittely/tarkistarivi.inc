@@ -1103,6 +1103,15 @@
 
 						list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"], '', explode(",", $kukarow['varasto']));
 
+						$query = "	SELECT status
+									FROM tuote
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tuoteno = '{$_tuote['tuoteno']}'";
+						$chk_status_res = pupe_query($query);
+						$chk_status_row = mysql_fetch_assoc($chk_status_res);
+
+						if ($chk_status_row['status'] == 'P' and $vmyytavissa == 0) continue;
+
 						if ((($vmyytavissa > 0 or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') and strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"])) or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
 
 							$tvrow = hae_tuote($_tuote['tuoteno']);

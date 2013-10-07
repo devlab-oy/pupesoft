@@ -2133,7 +2133,7 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
 			$pdf->draw_text(465, ($rivi_kala-$rivinkorkeus+5), " / $row[myyntihinta_maara] $omyks", $thispage, $pieni);
 		}
 
-		if ($kala > $alakala) $kala = $alakala;
+		if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' and $kala > $alakala) $kala = $alakala;
 
 		// Luodaan palautettavat
 		$return = compact(array_keys($params));

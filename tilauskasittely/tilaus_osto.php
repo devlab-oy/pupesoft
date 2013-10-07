@@ -1190,7 +1190,7 @@
 						LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 						LEFT JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
-						WHERE otunnus = '$kukarow[kesken]'
+						WHERE tilausrivi.otunnus = '$kukarow[kesken]'
 						and tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi = 'O'
 						ORDER BY sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";

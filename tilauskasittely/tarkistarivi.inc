@@ -1101,7 +1101,9 @@
 
 						$vaihtoehtoinen = ($_tuote['vaihtoehtoinen'] == 'K') ? "<font color=#F00>".t("Vaihtoehtoinen, tarkista sopivuus")."!</font>" : "";
 
-						list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"], '', explode(",", $kukarow['varasto']));
+						$chk_varasto = $laskurow['varasto'] == 0 ? explode(",", $kukarow['varasto']) : $laskurow['varasto'];
+
+						list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"], '', $chk_varasto);
 
 						$query = "	SELECT status
 									FROM tuote

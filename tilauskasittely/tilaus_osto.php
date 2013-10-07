@@ -1183,6 +1183,8 @@
 						tilausrivi.ale3,
 						tilausrivin_lisatiedot.tilausrivitunnus,
 						tilausrivin_lisatiedot.tilausrivilinkki,
+						tilausrivi.vahvistettu_maara,
+						tilausrivi.vahvistettu_kommentti,
 						tilausrivi.hinta_alkuperainen
 						FROM tilausrivi
 						LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno

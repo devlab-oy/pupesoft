@@ -1066,8 +1066,8 @@
 			echo "<tr><th>".t("Tilausnumero")."</th><th>".t("Laadittu")."</th><th>".t("Toimaika")."</th><th>".t("Valuutta")."</th><td class='back'></td></tr>";
 			echo "<tr><td>$laskurow[tunnus]</td><td>".tv1dateconv($laskurow["luontiaika"])."</td><td>".tv1dateconv($laskurow["toimaika"])."</td><td>{$laskurow["valkoodi"]}</td></tr>";
 
-			if ($toimittajaresult["fakta"] != "") {
-				echo "<tr><th>".t("Fakta")."</th><td colspan='3'>$toimittajaresult[fakta]&nbsp;</td></tr>";
+			if ($toimittajarow["fakta"] != "") {
+				echo "<tr><th>".t("Fakta")."</th><td colspan='3'>$toimittajarow[fakta]&nbsp;</td></tr>";
 			}
 
 			echo "</table><br>";

@@ -219,7 +219,7 @@ if ($kasitellaan_tiedosto) {
 
 			for ($j = 0; $j < count($rivi); $j++) {
 				//otetaan rivin kaikki tuotenumerot talteen
-				if ($headers[$j] == "TUOTENO" and $rivi[$j] != "" and $j != 0) {
+				if ($headers[$j] == "TUOTENO" and $rivi[$j] != "") {
 					$haku .= "'$rivi[$j]',";
 				}
 
@@ -293,8 +293,18 @@ if ($kasitellaan_tiedosto) {
 					$toiminto 	= "MUUTA";
 				}
 				elseif (strtoupper(trim($rivi[$postoiminto])) == 'POISTA') {
+					if ($table == "vastaavat") {
+						if ($vastaava_paatuote == '') {
+							$loppu 		= " and id='$id' and tuoteno=$haku";
+						}
+						else  {
+							$loppu 		= " and id='$id'";
+						}	
+					}
+					else  {
+						$loppu 		= " and id='$id'";
+					}
 					$alku 		= "DELETE from $table where yhtio = '{$kukarow['yhtio']}' ";
-					$loppu 		= " and id='$id' ";
 					$toiminto 	= "POISTA";
 				}
 				else {

@@ -1100,7 +1100,8 @@
 					foreach ($_tuotteet as $_tuote) {
 
 						$vaihtoehtoinen = ($_tuote['vaihtoehtoinen'] == 'K') ? "<font color=#F00>".t("Vaihtoehtoinen, tarkista sopivuus")."!</font>" : "";
-						list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"]);
+
+						list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"], '', explode(",", $kukarow['varasto']));
 
 						if ((($vmyytavissa > 0 or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') and strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"])) or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
 

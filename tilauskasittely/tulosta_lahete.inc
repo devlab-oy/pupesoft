@@ -1006,7 +1006,11 @@ if (!function_exists('rivi_otsikot_lahete')) {
 			$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,  	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 40,  $kala+10, 180,  $thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 180, $kala+10, 480, 	$thispage, $rectparam);
-			$pdf->draw_rectangle($kala+30, 430, $kala+10, 480, 	$thispage, $rectparam);
+
+			if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc') {
+				$pdf->draw_rectangle($kala+30, 430, $kala+10, 480, 	$thispage, $rectparam);
+			}
+
 			$pdf->draw_rectangle($kala+30, 480, $kala+10, 530, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 530, $kala+10, 580, 	$thispage, $rectparam);
 			$pdf->draw_text(25,  $kala+15, "#",							$thispage, $norm);

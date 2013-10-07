@@ -1006,19 +1006,19 @@ if (!function_exists('rivi_otsikot_lahete')) {
 			$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,  	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 40,  $kala+10, 180,  $thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 180, $kala+10, 480, 	$thispage, $rectparam);
+			$pdf->draw_rectangle($kala+30, 430, $kala+10, 480, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 480, $kala+10, 530, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 530, $kala+10, 580, 	$thispage, $rectparam);
 			$pdf->draw_text(25,  $kala+15, "#",							$thispage, $norm);
 			$pdf->draw_text(45,  $kala+15, t("Tuotenumero", $kieli),	$thispage, $norm);
 			$pdf->draw_text(190, $kala+15, t("Tuotenimi", $kieli),		$thispage, $norm);
-			$pdf->draw_text(490, $kala+15, t("Tilattu", $kieli),		$thispage, $norm);
 
 			if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc') {
-				$pdf->draw_text(540, $kala+15, t("Yks.hinta", $kieli),		$thispage, $norm);
+				$pdf->draw_text(435, $kala+15, t("Yks.hinta", $kieli),		$thispage, $norm);
 			}
-			else {
-				$pdf->draw_text(540, $kala+15, t("Toimitus", $kieli),		$thispage, $norm);
-			}
+
+			$pdf->draw_text(490, $kala+15, t("Tilattu", $kieli),		$thispage, $norm);
+			$pdf->draw_text(540, $kala+15, t("Toimitus", $kieli),		$thispage, $norm);
 		}
 		elseif ($base_lahetetyyppi == "tulosta_lahete_viivakoodi_osh.inc") {
 			// tulosta_lahete_viivakoodi.inc
@@ -2007,8 +2007,14 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 		$pdf->draw_text(355, $kala, $omyks, $thispage, $pieni);
 
-		$oikpos = $pdf->strlen($row["varattu"], $norm);
-		$pdf->draw_text(415-$oikpos, $kala, $row["varattu"], $thispage, $norm);
+		if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' and $yhtiorow['lahetteen_tulostustapa'] == 'I') {
+			$oikpos = $pdf->strlen($row["tilkpl"], $norm);
+			$pdf->draw_text(415-$oikpos, $kala, $row["tilkpl"], $thispage, $norm);
+		}
+		else {
+			$oikpos = $pdf->strlen($row["varattu"], $norm);
+			$pdf->draw_text(415-$oikpos, $kala, $row["varattu"], $thispage, $norm);
+		}
 
 		$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
 		$pdf->draw_text(465-$oikpos, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
@@ -2083,7 +2089,7 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
 
 		if ($row["kommentti"] != '') {
 
-			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+			$row["kommentti"] = wordwrap($row["kommentti"], 85, "\n");
 
 			foreach (explode("\n", $row["kommentti"]) as $komm) {
 				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);
@@ -3136,12 +3142,17 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 		else {
 			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+1, 185, 70, 460, $row["nimitys"], $thispage, $norm);
 
+			if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc') {
+				$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
+				$pdf->draw_text(475-$oikpos, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
+			}
+
 			$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
 			$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".$omyks, 	$thispage, $norm);
 
-			if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc') {
-				$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
-				$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
+			if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc' and $yhtiorow['lahetteen_tulostustapa'] == 'I') {
+				$oikpos = $pdf->strlen($row["tilkpl"], $norm);
+				$pdf->draw_text(575-$oikpos, $kala, $row["tilkpl"],$thispage, $norm);
 			}
 			else {
 				$oikpos = $pdf->strlen($row["varattu"], $norm);
@@ -3172,7 +3183,7 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 
 		if ($row["kommentti"] != '') {
 
-			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+			$row["kommentti"] = wordwrap($row["kommentti"], 85, "\n");
 
 			foreach (explode("\n", $row["kommentti"]) as $komm) {
 				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);

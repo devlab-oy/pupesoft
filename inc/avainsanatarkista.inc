@@ -110,6 +110,10 @@ if(!function_exists("avainsanatarkista")) {
 				$virhe[$i] = t("Selite on liian pitkä, maksimipituus on yksi merkki")."!";
 			}
 
+			if ($tem_laji == "TOIMEHTO" AND strlen($tem_selite) != 3){
+				$virhe[$i] = t("Selitteen tulee olla kolme merkkiä pitkä")."!";
+			}
+
 			if (in_array($tem_laji, array("TRY", "OSASTO", "PIIRI", "VALMISTUSLINJA"))) {
 				if (!is_numeric($tem_selite)) {
 					$virhe[$i] = t("Selitteen on oltava numeerinen")."!";

@@ -124,7 +124,8 @@ $query = "	SELECT tilausrivi.tunnus as tilausrivitunnus,
 			WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 			AND tilausrivi.otunnus = '{$laskurow['tunnus']}'";
 $rekisterinumero_result = pupe_query($query);
-while($rekisterinumero_row = mysql_fetch_assoc($rekisterinumero_result)) {
+
+while ($rekisterinumero_row = mysql_fetch_assoc($rekisterinumero_result)) {
 	if ($rekisterinumero_row['kommentti'] != ""){
 		$kommentti = "\n";
 	}

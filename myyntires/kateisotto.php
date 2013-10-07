@@ -134,14 +134,30 @@ $request_params = array(
 	'kateisotto_rivi'=> $kateisotto_rivi,
 	'yleinen_kommentti' => $yleinen_kommentti,
 	'userfile' => $userfile,
-	'kuvaselite' => $kuvaselite
+	'kuvaselite' => $kuvaselite,
+	'pp' => $pp,
+	'kk' => $kk,
+	'vv' => $vv,
+	'date' => "{$vv}-{$kk}-{$pp}",
 );
 
 if ($tee == 'kateisotto') {
-	$voiko_kateisoton_tehda = tarkista_saako_laskua_muuttaa(date('Y-m-d'));
+
+	$date = "{$vv}-{$kk}-{$pp}";
+
+	$validoi_date = validoi_tapahtumapaiva($pp, $kk, $vv);
+
+	$voiko_kateisoton_tehda = $validoi_date ? tarkista_saako_laskua_muuttaa($date) : false;
+
 	if ($voiko_kateisoton_tehda) {
 
 		$voiko_kateisoton_tehda = validoi_liitetiedosto($_FILES);
+
+		if ($voiko_kateisoton_tehda and count($request_params['kateisotto_rivi']) == 0) {
+			echo "<br><font class='error'>".t("K‰teisotolla ei ollut yht‰‰n rivi‰")."!</font><br><br>";
+			$voiko_kateisoton_tehda = false;
+		}
+
 		if ($voiko_kateisoton_tehda) {
 			//tehd‰‰n k‰teisotto
 			//
@@ -149,11 +165,13 @@ if ($tee == 'kateisotto') {
 			$kassalipas = hae_kassalipas($kassalipas_tunnus);
 
 			//tarkistetaan, onko kassalipas jo t‰sm‰ytetty
-			$kassalippaan_tasmaytys = tarkista_kassalippaan_tasmaytys($kassalipas['tunnus']);
+			$kassalippaan_tasmaytys = tarkista_kassalippaan_tasmaytys($kassalipas['tunnus'], $date);
+
 			if ($kassalippaan_tasmaytys['ltunnukset'] != '' and $kassalippaan_tasmaytys['selite'] != '') {
-				echo "<font class='error'>".t("T‰m‰n p‰iv‰n valittu kassalipas on jo t‰sm‰ytetty")."</font>";
+				$voiko_kateisoton_tehda = vapauta_kateistasmaytys($kassalipas, $date);
 			}
-			else {
+
+			if ($voiko_kateisoton_tehda) {
 				$lasku_tunnus = tee_kateisotto($kassalipas, $request_params);
 				echo "<br><font class='message'>".t("K‰teisotto tehtiin onnistuneesti")."!</font><br><br>";
 
@@ -164,16 +182,16 @@ if ($tee == 'kateisotto') {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $yhtiorow['tilikausi_alku'], date('Y-m-d'))."!</font>";
+		echo $validoi_date ? "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $yhtiorow['tilikausi_alku'], "{$vv}-{$kk}-{$pp}")."!</font>" : "";
 	}
 
-	echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet, $alvit);
+	echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet, $alvit, $request_params);
 }
 else {
 	echo_kateisotto_form($kassalippaat, $kateisoton_luonteeet, $alvit, $request_params);
 }
 
-function tarkista_kassalippaan_tasmaytys($kassalipas_tunnus) {
+function tarkista_kassalippaan_tasmaytys($kassalipas_tunnus, $date) {
 	global $kukarow;
 
 	$query = "	SELECT group_concat(distinct lasku.tunnus) ltunnukset,
@@ -184,7 +202,7 @@ function tarkista_kassalippaan_tasmaytys($kassalipas_tunnus) {
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.tila 	  = 'X'
 				AND lasku.alatila = 'K'
-				AND lasku.tapvm   = CURDATE()";
+				AND lasku.tapvm   = '{$date}'";
 	$result = pupe_query($query);
 
 	return mysql_fetch_assoc($result);
@@ -198,7 +216,7 @@ function tee_kateisotto($kassalipas, $request_params) {
         $summa += $kateisotto_rivi['summa'];
     }
 
-	$lasku_tunnus = tee_laskuotsikko($kassalipas, $summa, $request_params['yleinen_kommentti']);
+	$lasku_tunnus = tee_laskuotsikko($kassalipas, $summa, $request_params['yleinen_kommentti'], $request_params['date']);
 
     foreach($request_params['kateisotto_rivi'] as $kateisotto_rivi) {
 		$kateisotto_rivi['summa'] = str_replace(',', '.', $kateisotto_rivi['summa']);
@@ -213,6 +231,7 @@ function tee_kateisotto($kassalipas, $request_params) {
 				'kateisoton_luonne' => $kateisotto_rivi['kateisoton_luonne'],
 				'alv' => $kateisotto_rivi['alv'],
 				'summa' => -1*$kateisotto_rivi['summa'],
+				'date' => $request_params['date'],
 			);
 
 			//tehd‰‰n k‰teisotto tiliˆinti
@@ -234,6 +253,7 @@ function tee_kateisotto($kassalipas, $request_params) {
 				'kateisoton_luonne' => $kateisotto_rivi['kateisoton_luonne'],
 				'summa' => $kateisotto_rivi['summa'],
 				'alv' => 0,
+				'date' => $request_params['date'],
 			);
 
 			//tehd‰‰n kulutiliˆinti
@@ -249,7 +269,7 @@ function tee_kateisotto($kassalipas, $request_params) {
 	return $lasku_tunnus;
 }
 
-function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti) {
+function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti, $date) {
 	global $kukarow;
 
 	$query = "	INSERT INTO lasku
@@ -260,7 +280,7 @@ function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti) {
 				alatila 	 = 'O',
 				laatija 	 = '{$kukarow['kuka']}',
 				luontiaika 	 = NOW(),
-				tapvm 		 = NOW(),
+				tapvm 		 = '{$date}',
 				kassalipas   = '{$kassalipas['tunnus']}',
 				nimi 		 = '".t("K‰teisotto kassalippaasta").": {$kassalipas['nimi']}'";
 	pupe_query($query);
@@ -295,7 +315,9 @@ function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false)
 		$kulu_tiliointi_linkki = "";
 		$lukko = "lukko = '',";
 	}
-	
+
+	$date = $params['date'];
+
 	$query = "	INSERT INTO tiliointi
                 SET yhtio 	= '{$kukarow['yhtio']}',
                 laatija 	= '{$kukarow['kuka']}',
@@ -303,7 +325,7 @@ function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false)
                 ltunnus 	= '{$params['lasku_tunnus']}',
                 tilino 		= '{$kateisoton_luonne_row['tilino']}',
                 kustp 		= '{$kateisoton_luonne_row['kustp']}',
-                tapvm 		= NOW(),
+                tapvm 		= '{$date}',
                 summa 		= {$params['summa']},
                 summa_valuutassa = {$params['summa']},
                 valkoodi 	= '{$yhtiorow['valkoodi']}',
@@ -327,6 +349,29 @@ function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {
 		return false;
 	}
 
+}
+
+function validoi_tapahtumapaiva($pp, $kk, $vv) {
+
+	$errormsg = false;
+	$return = true;
+
+	$date = "$vv-$kk-$pp";
+
+	// Huom. preg_match tarkoituksella "== false", koska se palauttaa virheess‰ 0 tai false
+	if (preg_match("/\d{4}-\d{2}-\d{2}/", $date) == false or strtotime($date) === false) {
+		$errormsg = t("P‰iv‰m‰‰r‰ on virheellinen");
+		$return = false;
+	}
+
+	if (strtotime($date) > strtotime(date('Y-m-d'))) {
+		$errormsg = t("P‰iv‰m‰‰r‰ ei saa olla tulevaisuudessa");
+		$return = false;
+	}
+
+	echo $errormsg ? "<font class='error'>{$errormsg}</font><br />" : '';
+
+	return $return;
 }
 
 function validoi_liitetiedosto($_FILES) {
@@ -533,6 +578,20 @@ function echo_kateisotto_form($kassalippaat, $kateisoton_luonteet, $alvit, $requ
 	echo "<th>".t("Yleinen kommentti")."</th>";
 	echo "<td><input type='text' name='yleinen_kommentti' id='yleinen_kommentti' value='{$request_params['yleinen_kommentti']}'></td>";
 	echo "</tr>";
+
+	$pp = isset($request_params['pp']) ? $request_params['pp'] : date('d');
+	$kk = isset($request_params['kk']) ? $request_params['kk'] : date('m');
+	$vv = isset($request_params['vv']) ? $request_params['vv'] : date('Y');
+
+	echo "<tr>";
+	echo "<th>",t("Tapahtumap‰iv‰"),"</th>";
+	echo "<td>";
+	echo "<input type='text' id='pp' name='pp' value='{$pp}' size='3' maxlength='2' />&nbsp;";
+	echo "<input type='text' id='kk' name='kk' value='{$kk}' size='3' maxlength='2' />&nbsp;";
+	echo "<input type='text' id='vv' name='vv' value='{$vv}' size='5' maxlength='4' />";
+	echo "</td>";
+	echo "</tr>";
+
 	echo "	<tr>
 				<th>".t("Valitse tiedosto")."</th>
 				<td><input id='userfile' name='userfile' type='file'></td>

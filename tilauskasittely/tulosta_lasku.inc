@@ -41,9 +41,15 @@ if (!function_exists('alku')) {
 				if ($toim == 'PROFORMA') {
 					$pdf_lasku->draw_text(310, 815, t("Proformalasku", $kieli), $page_lasku[$sivu], $iso);
 				}
+				elseif ($laskurow["kateistyyppi"] != '') {
+					$pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli),  $page_lasku[$sivu], $iso);
+				}
 				else {
 					$pdf_lasku->draw_text(310, 815, t("Lasku", $kieli), $page_lasku[$sivu], $iso);
 				}
+			}
+			elseif ($laskurow["kateistyyppi"] != '') {
+				$pdf_lasku->draw_text(310, 815, t("Käteishyvitys", $kieli),  $page_lasku[$sivu], $iso);
 			}
 			else {
 				$pdf_lasku->draw_text(310, 815, t("Hyvityslasku", $kieli), $page_lasku[$sivu], $iso);
@@ -542,9 +548,15 @@ if (!function_exists('uusi_sivu')) {
 				if ($toim == 'PROFORMA') {
 					$pdf_lasku->draw_text(310, 815, t("Proformalasku", $kieli), $thispage);
 				}
+				elseif ($laskurow["kateistyyppi"] != '') {
+					$pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli),  $thispage, $iso);
+				}
 				else {
 					$pdf_lasku->draw_text(310, 815, t("Lasku", $kieli), $thispage);
 				}
+			}
+			elseif ($laskurow["kateistyyppi"] != '') {
+				$pdf_lasku->draw_text(310, 815, t("Käteishyvitys", $kieli),  $thispage, $iso);
 			}
 			else {
 				$pdf_lasku->draw_text(310, 815, t("Hyvityslasku", $kieli), $thispage);
@@ -1977,10 +1989,7 @@ if (!function_exists('loppu')) {
 			if ($data) {
 				$image = $pdf_lasku->jfif_embed($data);
 
-				if (!$image) {
-					echo t("Logokuvavirhe");
-				}
-				else {
+				if ($image) {
 					$logoparam = array();
 					$logoparam['scale'] = 0.9;
 					$placement = $pdf_lasku->image_place($image, 3, 160, $thispage, $logoparam);

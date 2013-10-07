@@ -55,9 +55,15 @@ $request['asiakasryhmat'] = hae_asiakasryhmat();
 $request['aleryhmat'] = hae_aleryhmat();
 
 if ($request['action'] == 'aja_raportti') {
-	$request['tuotteet'] = hae_asiakashinta_ja_alennus_tuotteet($request);
+	echo "<font class='message'>".t("Raporttia ajetaan")."</font>";
+	echo "<br/>";
 
-	$tuotteet = hae_asiakasalennukset($request);
+	$html = ob_get_clean();
+	echo $html;
+
+	$request['tuotteet'] = hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet($request);
+
+	$tuotteet = hae_asiakasalet($request);
 
 	$xls_tiedosto = generoi_custom_excel($tuotteet);
 
@@ -70,6 +76,7 @@ if ($request['action'] == 'aja_raportti') {
 		echo "<br/>";
 	}
 }
+
 echo_kayttoliittyma($request);
 
 require ("inc/footer.inc");
@@ -96,7 +103,8 @@ function echo_kayttoliittyma($request = array()) {
 	echo "<select id='valittu_asiakasryhma' name='valittu_asiakasryhma'>";
 	foreach ($request['asiakasryhmat'] as $asiakasryhma) {
 		$sel = "";
-		if ($request['valittu_asiakasryhma'] == $asiakasryhma['selite']) {
+		//absoluuttinen vertaus tarvitaan, koska asiakasryhmän tunnuksessa voi olla leading zero 005023 == 5023
+		if ($request['valittu_asiakasryhma'] === $asiakasryhma['selite']) {
 			$sel = "SELECTED";
 		}
 		echo "<option value='{$asiakasryhma['selite']}' {$sel}>{$asiakasryhma['selite']} - {$asiakasryhma['selitetark']}</option>";
@@ -171,93 +179,51 @@ function hae_aleryhmat() {
 	return $aleryhmat;
 }
 
-function hae_asiakashinta_ja_alennus_tuotteet($request) {
+function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) {
 	global $kukarow, $yhtiorow;
 
 	$tuotteet = array();
-	$ryhmat = array();
-
-	$query = "	SELECT group_concat(parent.tunnus) tunnukset
-				FROM puun_alkio
-				JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
-				JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
-				WHERE puun_alkio.yhtio = '{$kukarow['yhtio']}'
-				AND puun_alkio.laji    = 'ASIAKAS'
-				AND puun_alkio.liitos  = '{$request['valittu_asiakas']}'";
-	$result = pupe_query($query);
-	$puun_tunnukset = mysql_fetch_assoc($result);
-
-	$asiakkaan_puiden_tunnukset = $puun_tunnukset['tunnukset'] !== NULL ? " OR asiakas_segmentti IN ({$puun_tunnukset['tunnukset']})" : "";
-
-	$asiakashinnasto_where = "";
-	if (!empty($request['valittu_asiakas'])) {
-		$asiakashinnasto_where .= " AND asiakas = '{$request['valittu_asiakas']}'";
-	}
-	if (!empty($request['valittu_asiakasryhma'])) {
-		$asiakashinnasto_where .= " AND asiakas_ryhma = '{$request['valittu_asiakasryhma']}'";
-	}
-
-	$query = "	SELECT ryhma, tuoteno
-				FROM asiakashinta
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				{$asiakashinnasto_where}
-				{$asiakkaan_puiden_tunnukset}";
-	$result = pupe_query($query);
-
-	while ($asiakashinta_row = mysql_fetch_assoc($result)) {
-		if ($asiakashinta_row['ryhma'] != "") {
-			$ryhmat[$asiakashinta_row['ryhma']] = 0;
-		}
-		elseif ($asiakashinta_row['tuoteno'] != "") {
-			$tuotteet[$asiakashinta_row['tuoteno']] = 0;
-		}
-	}
-
+	
 	if ($request['mitka_tuotteet'] == 'kaikki') {
-		$query = "	SELECT ryhma, tuoteno
-					FROM asiakasalennus
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					{$asiakashinnasto_where}";
-		$result = pupe_query($query);
-
-		while ($asiakasalennus_row = mysql_fetch_assoc($result)) {
-			if ($asiakasalennus_row['ryhma'] != "") {
-				$ryhmat[$asiakasalennus_row['ryhma']] = 0;
-			}
-			elseif ($asiakasalennus_row['tuoteno'] != "") {
-				$tuotteet[$asiakasalennus_row['tuoteno']] = 0;
-			}
-		}
-
 		$query = "	SELECT aleryhma, tuoteno
 					FROM tuote
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND status != 'P'";
+					AND status not in ('P','X')";
 		$result = pupe_query($query);
 
 		while ($tuote = mysql_fetch_assoc($result)) {
 			$tuotteet[$tuote['tuoteno']] = 0;
 		}
 	}
+	else {
+		if ($request['valittu_asiakas']) {
+			$request['asiakas'] = hae_asiakas($request['valittu_asiakas']);
+		}
+		else {
+			$request['asiakas']['ryhma'] = $request['valittu_asiakasryhma'];
+		}
+		
+		$query = "	SELECT group_concat(parent.tunnus) tunnukset
+					FROM puun_alkio
+					JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
+					JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
+					WHERE puun_alkio.yhtio = '{$kukarow['yhtio']}'
+					AND puun_alkio.laji    = 'ASIAKAS'
+					AND puun_alkio.liitos  = '{$request['valittu_asiakas']}'";
+		$result = pupe_query($query);
+		$puun_tunnukset = mysql_fetch_assoc($result);
 
-	foreach ($ryhmat as $ryhma => $devnull) {
+		$tuotteet_joilla_asiakashinta = hae_asiakashinnat($request['asiakas'], $puun_tunnukset, $kukarow['yhtio'], FALSE);
 
-		$query = "	SELECT tuoteno
-					FROM tuote
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND status != 'P'
-					AND aleryhma = '{$ryhma}'";
-		$ryhmares = pupe_query($query);
-
-		while ($ryhmarow = mysql_fetch_assoc($ryhmares)) {
-			$tuotteet[$ryhmarow['tuoteno']] = 0;
+		foreach ($tuotteet_joilla_asiakashinta as $tuote) {
+			$tuotteet[$tuote['tuoteno']] = 0;
 		}
 	}
 
 	return $tuotteet;
 }
 
-function hae_asiakasalennukset($request) {
+function hae_asiakasalet($request) {
 	global $kukarow, $yhtiorow;
 
 	$tuotenumerot = array_keys($request['tuotteet']);
@@ -266,16 +232,30 @@ function hae_asiakasalennukset($request) {
 				FROM tuote
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tuoteno IN ('".implode("','", $tuotenumerot)."')
+				AND status not in ('P','X')
 				ORDER BY tuote.aleryhma ASC";
 	$result = pupe_query($query);
 
 	$tuotteet = array();
+	$palautettavat_kentat = "hinta,netto,ale,hintaperuste";
+	
 	while ($tuote = mysql_fetch_assoc($result)) {
 		if (!empty($request['valittu_asiakas'])) {
-			list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta(array('liitostunnus' => $request['valittu_asiakas']), $tuote, 1, '', '', array(), '', '', '', '');
+			$laskurow = array();
+			//haetaan asiakkaan oma hinta
+			$laskurow["ytunnus"] 		= $request['asiakas']["ytunnus"];
+			$laskurow["liitostunnus"] 	= $request['asiakas']["tunnus"];
+			$laskurow["vienti"] 		= $request['asiakas']["vienti"];
+			$laskurow["alv"] 			= $request['asiakas']["alv"];
+			$laskurow["valkoodi"]		= $request['asiakas']["valkoodi"];
+			$laskurow["maa"]			= $request['asiakas']["maa"];
+			$laskurow['toim_ovttunnus'] = $request['asiakas']["toim_ovttunnus"];
+			$laskurow['liitostunnus']	= $request['valittu_asiakas'];
+			
+			$alehinnat = alehinta($laskurow, $tuote, 1, '', '', '', $palautettavat_kentat, '', '');
 		}
 		else {
-			list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta(array(), $tuote, 1, '', '', array(), '', '', '', $request['valittu_asiakasryhma']);
+			$alehinnat = alehinta(array(), $tuote, 1, '', '', '', $palautettavat_kentat, '', '', $request['valittu_asiakasryhma']);
 		}
 
 		$query = "	SELECT *
@@ -287,9 +267,17 @@ function hae_asiakasalennukset($request) {
 		$tuotteen_toimittaja_result = pupe_query($query);
 		$tuotteen_toimittaja_row = mysql_fetch_assoc($tuotteen_toimittaja_result);
 
-		$alennettu_hinta = ( 1 - ( $ale['ale1'] / 100 ) ) * $hinta;
+		$alennettu_hinta = ( 1 - ( $alehinnat['ale']['ale1'] / 100 ) ) * $tuote['myyntihinta'];
 
 		$alennusryhma = search_array_key_for_value_recursive($request['aleryhmat'], 'ryhma', $tuote['aleryhma']);
+
+		if ($alennettu_hinta == 0) {
+			$kateprosentti = number_format(0, 2);
+		}
+		else {
+			$kateprosentti = number_format((1 - ($tuotteen_toimittaja_row['ostohinta'] / $alehinnat['hinta'])) * 100, 2);
+		}
+
 		$tuote_temp = array(
 			'aleryhma'			 => $alennusryhma[0],
 			'tuoteno'			 => $tuote['tuoteno'],
@@ -301,11 +289,11 @@ function hae_asiakasalennukset($request) {
 			'kehahin'			 => number_format($tuote['kehahin'], 2),
 			'ovh_hinta'			 => number_format($tuote['myyntihinta'], 2),
 			'ryhman_ale'		 => number_format($alennettu_hinta, 2),
-			'hinnasto_hinta'	 => number_format($hinta, 2),
+			'hinnasto_hinta'	 => (($alehinnat['hintaperuste'] == 2 or $alehinnat['hintaperuste'] == 5) ? number_format($alehinnat['hinta'], 2) : ''),
 			'ale_prosentti'		 => '',
 			'tarjous_hinta'		 => '',
 			'alennus_prosentti'	 => '',
-			'kate_prosentti'	 => '',
+			'kate_prosentti'	 => $kateprosentti,
 		);
 
 		$tuotteet[] = $tuote_temp;

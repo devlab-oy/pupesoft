@@ -63,7 +63,7 @@ if ($request['action'] == 'aja_raportti') {
 
 	$request['tuotteet'] = hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet($request);
 
-	$tuotteet = hae_asiakasalennukset($request);
+	$tuotteet = hae_asiakasalet($request);
 
 	$xls_tiedosto = generoi_custom_excel($tuotteet);
 
@@ -188,7 +188,7 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
 		$query = "	SELECT aleryhma, tuoteno
 					FROM tuote
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND status != 'P'";
+					AND status not in ('P','X')";
 		$result = pupe_query($query);
 
 		while ($tuote = mysql_fetch_assoc($result)) {
@@ -202,6 +202,7 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
 		else {
 			$request['asiakas']['ryhma'] = $request['valittu_asiakasryhma'];
 		}
+		
 		$query = "	SELECT group_concat(parent.tunnus) tunnukset
 					FROM puun_alkio
 					JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
@@ -212,9 +213,9 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
 		$result = pupe_query($query);
 		$puun_tunnukset = mysql_fetch_assoc($result);
 
-		$tuotteet_joilla_asiakashinta = hae_asiakashinnat($request['asiakas'], $puun_tunnukset, $kukarow['yhtio']);
+		$tuotteet_joilla_asiakashinta = hae_asiakashinnat($request['asiakas'], $puun_tunnukset, $kukarow['yhtio'], FALSE);
 
-		foreach($tuotteet_joilla_asiakashinta as $tuote) {
+		foreach ($tuotteet_joilla_asiakashinta as $tuote) {
 			$tuotteet[$tuote['tuoteno']] = 0;
 		}
 	}
@@ -222,7 +223,7 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
 	return $tuotteet;
 }
 
-function hae_asiakasalennukset($request) {
+function hae_asiakasalet($request) {
 	global $kukarow, $yhtiorow;
 
 	$tuotenumerot = array_keys($request['tuotteet']);
@@ -231,11 +232,13 @@ function hae_asiakasalennukset($request) {
 				FROM tuote
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tuoteno IN ('".implode("','", $tuotenumerot)."')
+				AND status not in ('P','X')
 				ORDER BY tuote.aleryhma ASC";
 	$result = pupe_query($query);
 
 	$tuotteet = array();
 	$palautettavat_kentat = "hinta,netto,ale,hintaperuste";
+	
 	while ($tuote = mysql_fetch_assoc($result)) {
 		if (!empty($request['valittu_asiakas'])) {
 			$laskurow = array();
@@ -248,6 +251,7 @@ function hae_asiakasalennukset($request) {
 			$laskurow["maa"]			= $request['asiakas']["maa"];
 			$laskurow['toim_ovttunnus'] = $request['asiakas']["toim_ovttunnus"];
 			$laskurow['liitostunnus']	= $request['valittu_asiakas'];
+			
 			$alehinnat = alehinta($laskurow, $tuote, 1, '', '', '', $palautettavat_kentat, '', '');
 		}
 		else {

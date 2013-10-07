@@ -23621,8 +23621,15 @@ if (!function_exists('hae_asiakas')) {
 }
 
 if (!function_exists('hae_asiakasalennukset')) {
-	function hae_asiakasalennukset($asiakasrow, $alehi_assegmenttirow, $asiakas_yhtio, $tuotecols, $tuotejoin, $tuotewhere, $tuotegroup, $order) {
+	function hae_asiakasalennukset($asiakasrow, $alehi_assegmenttirow, $asiakas_yhtio, $tuotecols, $tuotejoin, $tuotewhere, $tuotegroup, $order, $poistuvat = TRUE) {
 		global $kukarow, $yhtiorow;
+
+		if ($poistuvat) {
+			$poislisa = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
+		}
+		else {
+			$poislisa = " and tuote.status not in ('P','X') ";
+		}
 
 		$query = "	/*	5. asiakas.tunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus) */
 						(	SELECT 1 prio,
@@ -23650,7 +23657,7 @@ if (!function_exists('hae_asiakasalennukset')) {
 							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
 							and asiakasalennus.alennus >= 0
 							and asiakasalennus.alennus <= 100
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						UNION
 						/*	5. asiakas.ytunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus) */
@@ -23679,7 +23686,7 @@ if (!function_exists('hae_asiakasalennukset')) {
 							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
 							and asiakasalennus.alennus >= 0
 							and asiakasalennus.alennus <= 100
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						UNION
 						/* 6. asiakas.tunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus) */
@@ -23771,7 +23778,7 @@ if (!function_exists('hae_asiakasalennukset')) {
 								and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
 								and asiakasalennus.alennus >= 0
 								and asiakasalennus.alennus <= 100
-								and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+								{$poislisa}
 						)
 						UNION
 						/* 8. asiakas.ryhmä tuote.tuoteno aleprosentti (asiakasaleryhmän tuotteen alennus) */
@@ -23802,7 +23809,7 @@ if (!function_exists('hae_asiakasalennukset')) {
 							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
 							and asiakasalennus.alennus >= 0
 							and asiakasalennus.alennus <= 100
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						UNION
 						/* 9. asiakas.piiri tuote.tuoteno aleprosentti (asiakaspiirin tuotteen alennus) */
@@ -23833,7 +23840,7 @@ if (!function_exists('hae_asiakasalennukset')) {
 							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
 							and asiakasalennus.alennus >= 0
 							and asiakasalennus.alennus <= 100
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						UNION
 						/* 10. asiakas.segmentti tuote.aleryhmä aleprosentti (asiakassegmentin tuotealeryhmän alennus) */
@@ -23969,14 +23976,22 @@ if (!function_exists('hae_asiakasalennukset')) {
 }
 
 if (!function_exists('hae_asiakashinnat')) {
-	function hae_asiakashinnat($asiakasrow, $alehi_assegmenttirow, $asiakas_yhtio) {
+	function hae_asiakashinnat($asiakasrow, $alehi_assegmenttirow, $asiakas_yhtio, $poistuvat = TRUE) {
 		global $kukarow, $yhtiorow;
 
 		$segmentti_where = "";
+
 		if (!empty($alehi_assegmenttirow['tunnukset'])) {
 			$segmentti_where = " and asiakashinta.asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])";
 		}
-		
+
+		if ($poistuvat) {
+			$poislisa = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
+		}
+		else {
+			$poislisa = " and tuote.status not in ('P','X') ";
+		}
+
 		$query = "	/* 2B. asiakas.tunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) yhtiön valuutassa */
 						(	SELECT 1 prio,
 								hinta,
@@ -24000,7 +24015,7 @@ if (!function_exists('hae_asiakashinnat')) {
 							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
 							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
 							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						UNION
 						/* 2B. asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) yhtiön valuutassa */
@@ -24026,7 +24041,7 @@ if (!function_exists('hae_asiakashinnat')) {
 							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
 							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
 							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						UNION
 						/* 3B. asiakas.tunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) yhtiön valuutassa */
@@ -24052,7 +24067,7 @@ if (!function_exists('hae_asiakashinnat')) {
 							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
 							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
 							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						UNION
 						/* 3B. asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) yhtiön valuutassa */
@@ -24078,7 +24093,7 @@ if (!function_exists('hae_asiakashinnat')) {
 							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
 							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
 							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						UNION
 						/* 4B. asiakas.segmentti tuote.tuoteno nettohinta (asiakassegmentin tuotteen hinta) yhtiön valuutassa */
@@ -24106,7 +24121,7 @@ if (!function_exists('hae_asiakashinnat')) {
 							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
 							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
 							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						UNION
 						/* 5B. asiakas.ryhmä tuote.tuoteno nettohinta (asiakasaleryhmän tuotteen hinta) yhtiön valuutassa */
@@ -24134,7 +24149,7 @@ if (!function_exists('hae_asiakashinnat')) {
 							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
 							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
 							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						UNION
 						/* 6B. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) yhtiön valuutassa */
@@ -24162,7 +24177,7 @@ if (!function_exists('hae_asiakashinnat')) {
 							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
 							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
 							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						UNION
 						/* 7B. asiakas.segmentti tuote.aleryhma nettohinta (asiakassegmentin tuotealeryhmän hinta) yhtiön valuutassa */
@@ -24190,7 +24205,7 @@ if (!function_exists('hae_asiakashinnat')) {
 							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
 							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
 							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						UNION
 						/* 8B. asiakas.ryhmä tuote.aleryhmä nettohinta (asiakasaleryhmän tuotealeryhmän hinta) yhtiön valuutassa */
@@ -24218,7 +24233,7 @@ if (!function_exists('hae_asiakashinnat')) {
 							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
 							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
 							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						UNION
 						/* 9B. asiakas.piiri tuote.aleryhma nettohinta (asiakaspiirin tuotealeryhmän hinta) yhtiön valuutassa */
@@ -24246,13 +24261,14 @@ if (!function_exists('hae_asiakashinnat')) {
 							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
 							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
 							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
-							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							{$poislisa}
 						)
 						ORDER BY alennusryhmä+0, tuoteno, prio, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)";
 		$result = pupe_query($query);
 
 		$tuote_hinnat = array();
-		while($tuote_hinta = mysql_fetch_assoc($result)) {
+
+		while ($tuote_hinta = mysql_fetch_assoc($result)) {
 			$tuote_hinnat[] = $tuote_hinta;
 		}
 

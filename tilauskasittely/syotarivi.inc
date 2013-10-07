@@ -187,6 +187,8 @@
 				echo "<input type='hidden' name='toimvva' value='$toimvva'>";
 			}
 
+			echo "<input type='hidden' name='vanha_tapa' value = '{$tapa}' />";
+
 			if ($yhtiorow['rivinumero_syotto'] != '') {
 				$nrospanni--;
 			}
@@ -557,6 +559,7 @@
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 			echo "<input type='hidden' name='kpl2' value='$kpl2'>";
+			echo "<input type='hidden' name='vanha_tapa' value = '{$tapa}' />";
 		}
 
 		echo "<input type='hidden' name='perheid' value = '$perheid'>";

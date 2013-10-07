@@ -2093,7 +2093,9 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
 
 		if ($row["kommentti"] != '') {
 
-			$row["kommentti"] = wordwrap($row["kommentti"], 85, "\n");
+			$kommentin_pituus = $base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' ? 85 : 90;
+
+			$row["kommentti"] = wordwrap($row["kommentti"], $kommentin_pituus, "\n");
 
 			foreach (explode("\n", $row["kommentti"]) as $komm) {
 				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);
@@ -3187,7 +3189,9 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 
 		if ($row["kommentti"] != '') {
 
-			$row["kommentti"] = wordwrap($row["kommentti"], 85, "\n");
+			$kommentin_pituus = $base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc' ? 85 : 90;
+
+			$row["kommentti"] = wordwrap($row["kommentti"], $kommentin_pituus, "\n");
 
 			foreach (explode("\n", $row["kommentti"]) as $komm) {
 				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);

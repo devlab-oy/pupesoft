@@ -25,7 +25,7 @@
 		$query = "	SELECT nimi
 					from yhtio
 					where yhtio = '$yhtio'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 			$uusiyhtiorow = mysql_fetch_array($result);
@@ -41,14 +41,14 @@
 						nimi		= '$nimi',
 						laatija 	= '$kukarow[kuka]',
 						luontiaika 	= now()";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			// Tehdään parametrit
 			$query = "	INSERT into yhtion_parametrit
 						SET yhtio	= '$yhtio',
 						laatija 	= '$kukarow[kuka]',
 						luontiaika 	= now()";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			// Tehdään haluttu valuutta
 			$query = "	INSERT into valuu
@@ -58,7 +58,7 @@
 						jarjestys	= 1,
 						laatija 	= '$kukarow[kuka]',
 						luontiaika 	= now()";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 		else {
 			unset($tila);
@@ -68,7 +68,7 @@
 	if ($tila == 'ulkonako') {
 		if ($fromyhtio != '') {
 			$query = "SELECT * from yhtio where yhtio='$fromyhtio'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 				echo "<font class='error'>".t("Kopioitava yritys ei löydy")."</font><br>";
@@ -78,7 +78,7 @@
 			$query = "	SELECT tunnus
 						FROM yhtio
 						WHERE yhtio = '$yhtio'";
-			$yht_res = mysql_query($query) or pupe_error($query);
+			$yht_res = pupe_query($query);
 			$yht_row = mysql_fetch_assoc($yht_res);
 
 			if ($error == 0) {
@@ -106,11 +106,11 @@
 
 				$query .= "	WHERE tunnus = '$yht_row[tunnus]'
 							AND yhtio = '$yhtio'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 
 			$query = "SELECT * from yhtion_parametrit where yhtio='$fromyhtio'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 				echo "<font class='error'>".t("Kopioitava yritys ei löydy")."</font><br>";
@@ -120,7 +120,7 @@
 			$query = "	SELECT tunnus
 						FROM yhtion_parametrit
 						WHERE yhtio = '$yhtio'";
-			$yht_res = mysql_query($query) or pupe_error($query);
+			$yht_res = pupe_query($query);
 			$yht_row = mysql_fetch_assoc($yht_res);
 
 			if ($error == 0) {
@@ -159,7 +159,7 @@
 
 				$query .= "	WHERE tunnus = '$yht_row[tunnus]'
 							AND yhtio = '$yhtio'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 	}
@@ -169,7 +169,7 @@
 			$query = "	SELECT css, css_extranet, css_verkkokauppa, css_pieni
 						from yhtion_parametrit
 						where yhtio = '$fromyhtio'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 				echo "<font class='error'>".t("Kopioitava yritys ei löydy")."</font><br>";
@@ -182,7 +182,7 @@
 				$query = "	SELECT tunnus
 							FROM yhtion_parametrit
 							WHERE yhtio = '$yhtio'";
-				$yht_res = mysql_query($query) or pupe_error($query);
+				$yht_res = pupe_query($query);
 				$yht_row = mysql_fetch_assoc($yht_res);
 
 				$query = "	UPDATE yhtion_parametrit SET
@@ -192,7 +192,7 @@
 							css_pieni 			= '$uusiyhtiorow[css_pieni]'
 							WHERE tunnus = '$yht_row[tunnus]'
 							AND yhtio	 = '$yhtio'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 	}
@@ -201,7 +201,7 @@
 		if ($fromyhtio != '') {
 			$query = "	INSERT into oikeu (sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,yhtio)
 						SELECT sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,'$yhtio' FROM oikeu WHERE yhtio='$fromyhtio' and profiili='' and kuka=''";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 	}
 
@@ -211,7 +211,7 @@
 				$query = "	SELECT *
 							FROM oikeu
 							WHERE yhtio='$fromyhtio' and kuka='$prof' and profiili='$prof'";
-				$pres = mysql_query($query) or pupe_error($query);
+				$pres = pupe_query($query);
 
 				while ($trow = mysql_fetch_array($pres)) {
 					$query = "	INSERT into oikeu
@@ -227,7 +227,7 @@
 								profiili	= '$trow[profiili]',
 								yhtio		= '$yhtio',
 								hidden		= '$trow[hidden]'";
-					$rresult = mysql_query($query) or pupe_error($query);
+					$rresult = pupe_query($query);
 				}
 			}
 		}
@@ -247,7 +247,7 @@
 		}
 
 		$query = "SELECT salasana, nimi FROM kuka WHERE kuka='$kuka' limit 1";
-		$pres = mysql_query($query) or pupe_error($query);
+		$pres = pupe_query($query);
 
 		if (mysql_num_rows($pres) > 0) {
 			$krow = mysql_fetch_array($pres);
@@ -263,7 +263,7 @@
 					salasana 	= '$salasana',
 					kuka  		= '$kuka',
 					profiilit 	= '$profile'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		//Insertoidaan ainakin oikeudet käyttäjähallintaan
 		$query = "	INSERT into oikeu
@@ -279,7 +279,7 @@
 					lukittu		= '1',
 					yhtio		= '$yhtio',
 					hidden		= ''";
-		$rresult = mysql_query($query) or pupe_error($query);
+		$rresult = pupe_query($query);
 
 		// Oikeudet
 		if (is_array($profiilit)) {
@@ -288,7 +288,7 @@
 				$query = "	SELECT *
 							FROM oikeu
 							WHERE yhtio='$yhtio' and kuka='$prof' and profiili='$prof'";
-				$pres = mysql_query($query) or pupe_error($query);
+				$pres = pupe_query($query);
 
 				while ($trow = mysql_fetch_array($pres)) {
 					//joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
@@ -304,7 +304,7 @@
 								and jarjestys 	= '$trow[jarjestys]'
 								and jarjestys2	= '$trow[jarjestys2]'
 								and yhtio		= '$yhtio'";
-					$tarkesult = mysql_query($query) or pupe_error($query);
+					$tarkesult = pupe_query($query);
 
 					if (mysql_num_rows($tarkesult) == 0) {
 						$query = "	INSERT into oikeu
@@ -319,7 +319,7 @@
 									jarjestys2	= '$trow[jarjestys2]',
 									yhtio		= '$yhtio',
 									hidden		= '$trow[hidden]'";
-						$rresult = mysql_query($query) or pupe_error($query);
+						$rresult = pupe_query($query);
 					}
 				}
 			}
@@ -329,21 +329,21 @@
 	if ($tila == 'tili') {
 		if ($fromyhtio != '') {
 			$query = "SELECT * FROM tili where yhtio='$fromyhtio'";
-			$kukar = mysql_query($query) or pupe_error($query);
+			$kukar = pupe_query($query);
 
 			while ($row = mysql_fetch_array($kukar)) {
 				$query = "	INSERT into tili (nimi, sisainen_taso, tilino, ulkoinen_taso, alv_taso, kustp, kohde, projekti, toimijaliitos, yhtio)
 							values ('$row[nimi]','$row[sisainen_taso]','$row[tilino]','$row[ulkoinen_taso]', '$row[alv_taso]', '$row[kustp]','$row[kohde]','$row[projekti]','$row[toimijaliitos]','$yhtio')";
-				$upres = mysql_query($query) or pupe_error($query);
+				$upres = pupe_query($query);
 			}
 
 			$query = "SELECT * FROM taso where yhtio='$fromyhtio'";
-			$kukar = mysql_query($query) or pupe_error($query);
+			$kukar = pupe_query($query);
 
 			while ($row = mysql_fetch_array($kukar)) {
 				$query = "	INSERT into taso (tyyppi, summattava_taso, taso, nimi, yhtio)
 							values ('$row[tyyppi]','$row[summattava_taso]','$row[taso]','$row[nimi]','$yhtio')";
-				$upres = mysql_query($query) or pupe_error($query);
+				$upres = pupe_query($query);
 			}
 		}
 	}
@@ -354,7 +354,7 @@
 				$query = "	SELECT *
 							FROM avainsana
 							WHERE yhtio = '$fromyhtio' and laji = '$avain'";
-				$pres = mysql_query($query) or pupe_error($query);
+				$pres = pupe_query($query);
 				while ($trow = mysql_fetch_array($pres)) {
 					$query = "	INSERT into avainsana
 								SET
@@ -368,7 +368,7 @@
 								selitetark_3	= '$trow[selitetark_3]',
 								kieli			= '$trow[kieli]',
 								yhtio			= '$yhtio'";
-					$rresult = mysql_query($query) or pupe_error($query);
+					$rresult = pupe_query($query);
 				}
 			}
 		}
@@ -377,7 +377,7 @@
 	if ($tila == 'kirjoitin') {
 		if ($fromyhtio != '') {
 			$query = "SELECT * FROM kirjoittimet where yhtio='$fromyhtio'";
-			$kukar = mysql_query($query) or pupe_error($query);
+			$kukar = pupe_query($query);
 
 			while ($row = mysql_fetch_array($kukar)) {
 				$query = "	INSERT INTO kirjoittimet SET
@@ -395,7 +395,7 @@
 							ip 			= '$row[ip]',
 							laatija 	= '$kukarow[kuka]',
 							luontiaika	= now()";
-				$upres = mysql_query($query) or pupe_error($query);
+				$upres = pupe_query($query);
 			}
 		}
 	}
@@ -403,7 +403,7 @@
 	if ($tila == 'maksuehto') {
 		if ($fromyhtio != '') {
 			$query = "SELECT * FROM maksuehto where yhtio='$fromyhtio'";
-			$kukar = mysql_query($query) or pupe_error($query);
+			$kukar = pupe_query($query);
 
 			while ($row = mysql_fetch_array($kukar)) {
 				$query = "	INSERT INTO maksuehto SET
@@ -430,7 +430,7 @@
 							jarjestys 			= '$row[jarjestys]',
 							laatija 			= '$kukarow[kuka]',
 							luontiaika 			= now()";
-				$upres = mysql_query($query) or pupe_error($query);
+				$upres = pupe_query($query);
 			}
 		}
 	}
@@ -438,7 +438,7 @@
 	if ($tila == 'toimitustapa') {
 		if ($fromyhtio != '') {
 			$query = "SELECT * FROM toimitustapa where yhtio='$fromyhtio'";
-			$kukar = mysql_query($query) or pupe_error($query);
+			$kukar = pupe_query($query);
 
 			while ($row = mysql_fetch_array($kukar)) {
 				$query = "	INSERT INTO toimitustapa SET
@@ -482,7 +482,7 @@
 							jarjestys 				= '$row[jarjestys]',
 							laatija 				= '$kukarow[kuka]',
 							luontiaika				= now()";
-				$upres = mysql_query($query) or pupe_error($query);
+				$upres = pupe_query($query);
 			}
 		}
 	}
@@ -492,7 +492,7 @@
 			$varasto = mysql_real_escape_string($varasto);
 
 			$query = "SELECT * FROM kirjoittimet where yhtio = '$yhtio' LIMIT 1";
-			$kirjoitin_res = mysql_query($query) or pupe_error($query);
+			$kirjoitin_res = pupe_query($query);
 			$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 
 			$query = "	INSERT INTO varastopaikat SET
@@ -530,7 +530,7 @@
 						sallitut_maat 	= '',
 						laatija 		= '$kukarow[kuka]',
 						luontiaika		= now()";
-			$upres = mysql_query($query) or pupe_error($query);
+			$upres = pupe_query($query);
 		}
 		unset($tila);
 		unset($yhtio);
@@ -543,7 +543,7 @@
 		$query = "	SELECT nimi
 					from yhtio
 					where yhtio = '$yhtio'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Perustettava yritys on kadonnut")."!</font><br>";
@@ -563,7 +563,7 @@
 		$query = "	SELECT yhtio, nimi
 					FROM yhtio
 					WHERE yhtio != '$yhtio'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='ulkonako'>
@@ -587,7 +587,7 @@
 	if ($tila == 'ulkonako') {
 		// yritysvalinta
 		$query = "SELECT yhtio, nimi FROM yhtio WHERE yhtio != '$yhtio'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='perusta'>
@@ -611,7 +611,7 @@
 	if ($tila == 'perusta') {
 		// yritysvalinta
 		$query = "SELECT yhtio, nimi FROM yhtio WHERE yhtio != '$yhtio'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='menut'>
@@ -635,7 +635,7 @@
 	if ($tila == 'menut') {
 		// profiilit
 		$query = "SELECT distinct profiili FROM oikeu WHERE yhtio = '$fromyhtio' and profiili != ''";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 			echo "<form method='post'>
@@ -659,7 +659,7 @@
 	if ($tila == 'profiilit') {
 		// käyttäjät
 		$query = "SELECT distinct profiili FROM oikeu WHERE yhtio = '$yhtio' and profiili != ''";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (!isset($kuka)) {
 				$kuka = $kukarow['kuka'];
@@ -688,7 +688,7 @@
 	if ($tila == 'kayttaja') {
 		// tilit ja tasot
 		$query = "SELECT distinct tili.yhtio, yhtio.nimi FROM tili, yhtio WHERE tili.yhtio=yhtio.yhtio";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='tili'>
@@ -712,7 +712,7 @@
 	if ($tila == 'tili') {
 		// avainsanat
 		$query = "SELECT yhtio, nimi FROM yhtio WHERE yhtio != '$yhtio'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='avainsana'>
@@ -792,7 +792,7 @@
 	if ($tila == 'avainsana') {
 		//tulostimet
 		$query = "SELECT distinct kirjoittimet.yhtio, yhtio.nimi FROM kirjoittimet, yhtio WHERE kirjoittimet.yhtio=yhtio.yhtio";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='kirjoitin'>
@@ -816,7 +816,7 @@
 	if ($tila == 'kirjoitin') {
 		//maksuehdot
 		$query = "SELECT distinct maksuehto.yhtio, yhtio.nimi FROM maksuehto, yhtio WHERE maksuehto.yhtio=yhtio.yhtio";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='maksuehto'>
@@ -840,7 +840,7 @@
 	if ($tila == 'maksuehto') {
 		//toimitustavat
 		$query = "SELECT distinct toimitustapa.yhtio, yhtio.nimi FROM toimitustapa, yhtio WHERE toimitustapa.yhtio=yhtio.yhtio";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='toimitustapa'>

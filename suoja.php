@@ -16,14 +16,14 @@
 		$query = "	SELECT nimi, kuka, tunnus
 					FROM kuka
 					WHERE tunnus='$selkuka'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$selkukarow = mysql_fetch_array($result);
 	}
 	elseif ($toim != "extranet") {
 		$query = "	SELECT nimi, kuka, tunnus
 					FROM kuka
 					WHERE tunnus='$kukarow[tunnus]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$selkukarow = mysql_fetch_array($result);
 	}
 
@@ -36,7 +36,7 @@
 		if ($sovellus != '' and $sovellus != 'kaikki_sovellukset') {
 			$query .= " and sovellus='$sovellus'";
 		}
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		// sitten tutkaillaan onko jotain ruksattu...
 		if (count($valittu) != 0) {
@@ -47,7 +47,7 @@
 				$query = "	SELECT nimi, nimitys, jarjestys, alanimi, sovellus, jarjestys2, hidden
 							FROM oikeu
 							WHERE kuka='' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov' and yhtio='$kukarow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$trow = mysql_fetch_array($result);
 
 				$query = "	INSERT into oikeu
@@ -64,7 +64,7 @@
 							hidden		= '$trow[hidden]',
 							yhtio		= '$kukarow[yhtio]'";
 
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 			echo "<font class='message'>".t("Käyttöoikeudet päivitetty")."!</font><br>";
 		}
@@ -76,11 +76,11 @@
 				$query = "	SELECT nimi
 							FROM oikeu
 							WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
 					$query = "UPDATE oikeu SET paivitys = '1' where yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 				}
 			}
 		}
@@ -92,11 +92,11 @@
 				$query = "	SELECT nimi
 							FROM oikeu
 							WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
 					$query = "UPDATE oikeu SET lukittu = '1' where yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 				}
 			}
 		}
@@ -140,7 +140,7 @@
 				  WHERE tunnus!='$selkukarow[tunnus]' and extranet = '' and yhtio='$kukarow[yhtio]'
 				  ORDER BY nimi";
 	}
-	$kukares = mysql_query($query) or pupe_error($query);
+	$kukares = pupe_query($query);
 
 	while ($kurow=mysql_fetch_array($kukares)) {
 		echo "<option value='$kurow[tunnus]'>$kurow[nimi] ($kurow[kuka])</option>";
@@ -160,7 +160,7 @@
 				where yhtio = '$kukarow[yhtio]'
 				$sovellus_rajaus
 				order by sovellus";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0) {
 
@@ -210,7 +210,7 @@
 	}
 
 	$query .= "	ORDER BY sovellus, jarjestys, jarjestys2";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 		<!--
@@ -259,7 +259,7 @@
 			$oq = "	SELECT *
 					FROM oikeu
 					WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$orow[nimi]' and alanimi='$orow[alanimi]' and sovellus='$orow[sovellus]'";
-			$or = mysql_query($oq) or pupe_error($oq);
+			$or = pupe_query($oq);
 
 			if (mysql_num_rows($or) != 0) {
 				$checked = "CHECKED";

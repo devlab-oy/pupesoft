@@ -32,7 +32,7 @@
 					$lisa
 					GROUP BY sovellus, nimi, alanimi
 					ORDER BY sovellus, jarjestys, jarjestys2";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		//poistetaan molemilta yhtiöiltä tämä menu
 		$query = "	DELETE
@@ -40,7 +40,7 @@
 					WHERE yhtio in ($yht)
 					and kuka = ''
 					$lisa";
-		$deleteresult = mysql_query($query) or pupe_error($query);
+		$deleteresult = pupe_query($query);
 
 		$jarj  = 0;
 		$jarj2 = 0;
@@ -78,7 +78,7 @@
 							jarjestys2	= '$jarj2',
 							hidden		= '$row[hidden]',
 							yhtio		= '$uusiyhtio'";
-				$insresult = mysql_query($query) or pupe_error($query);
+				$insresult = pupe_query($query);
 
 				//päivitettän käyttäjien oikeudet
 				$query = "	UPDATE oikeu
@@ -89,7 +89,7 @@
 							and sovellus	= '$row[sovellus]'
 							and nimi 		= '$row[nimi]'
 							and alanimi		= '$row[alanimi]'";
-				$updresult = mysql_query($query) or pupe_error($query);
+				$updresult = pupe_query($query);
 			}
 
 			$edsovellus 	= $row["sovellus"];
@@ -157,7 +157,7 @@
 					$lisa
 					GROUP BY sovellus, nimi, alanimi
 					ORDER BY sovellus, jarjestys, jarjestys2";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		while ($row = mysql_fetch_array($result)) {
 			if (!array_key_exists($row["sovellus"].$row["nimi"].$row["alanimi"], $rows)) {
@@ -206,7 +206,7 @@
 							and sovellus	= '$row[sovellus]'
 							and nimi		= '$row[nimi]'
 							and alanimi		= '$row[alanimi]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 0 and $row["sovellus"] != "") {
 
@@ -222,7 +222,7 @@
 								jarjestys2	= '$jarj2',
 								hidden		= '$row[hidden]',
 								yhtio		= '$yhtio'";
-					$insresult = mysql_query($query) or pupe_error($query);
+					$insresult = pupe_query($query);
 				}
 
 				//päivitettän käyttäjien oikeudet
@@ -240,7 +240,7 @@
 							and sovellus	= '$row[sovellus]'
 							and nimi 		= '$row[nimi]'
 							and alanimi		= '$row[alanimi]'";
-				$updresult = mysql_query($query) or pupe_error($query);
+				$updresult = pupe_query($query);
 			}
 
 			$edsovellus 	= $row["sovellus"];
@@ -256,7 +256,7 @@
 			$query  = "	SELECT *
 						FROM oikeu
 						WHERE tunnus='$tun'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 
@@ -273,7 +273,7 @@
 							and jarjestys	= '$row[jarjestys]'
 							and jarjestys2	= '$row[jarjestys2]'
 							and hidden		= '$row[hidden]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$num1 = mysql_affected_rows();
 			}
 		}
@@ -301,7 +301,7 @@
 			$query  = "	SELECT *
 						FROM oikeu
 						WHERE tunnus='$tunnus'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 
@@ -322,7 +322,7 @@
 							and jarjestys2	= '$row[jarjestys2]'
 							and hidden		= '$row[hidden]'
 							and yhtio in ($yht)";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$num1 = mysql_affected_rows();
 
 				echo "<font class='message'>$num1 ".t("riviä päivitetty")."!<br></font>";
@@ -347,7 +347,7 @@
 				if ($yhtio != "REFERENSSI") {
 					$query = "INSERT into oikeu (kuka, sovellus, nimi, alanimi, nimitys, jarjestys, jarjestys2, yhtio, hidden)
 								values ('', '$sove', '$nimi', '$alanimi', '$nimitys', '$jarjestys', '$jarjestys2', '$yhtio', '$hidden')";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 					$num = mysql_affected_rows();
 
 					echo "<font class='message'>$num ".t("riviä lisätty")."!<br></font>";
@@ -369,7 +369,7 @@
 			$query  = "	SELECT *
 						from oikeu
 						where tunnus='$tunnus'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$row = mysql_fetch_array($result);
 
 			$sove		= $row['sovellus'];
@@ -429,7 +429,7 @@
 		$query  = "	SELECT *
 					from oikeu
 					where tunnus='$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
 
@@ -447,7 +447,7 @@
 						and jarjestys	= '$row[jarjestys]'
 						and jarjestys2	= '$row[jarjestys2]'
 						and yhtio in ($yht)";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$num1 = mysql_affected_rows();
 
 			echo "<font class='message'>$num1 ".t("riviä poistettu")."!<br></font>";
@@ -470,7 +470,7 @@
 		$query	= "	SELECT distinct yhtio, nimi
 					from yhtio
 					where yhtio='$kukarow[yhtio]' or (konserni = '$yhtiorow[konserni]' and konserni != '')";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$sovyhtiot = "";
 
@@ -503,7 +503,7 @@
 					where yhtio in ($sovyhtiot)
 					and kuka=''
 					order by sovellus";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<tr><th>".t("Valitse sovellus").":</th><td><select name='sovellus' onchange='submit();'>";
 
@@ -608,7 +608,7 @@
 					}
 
 					$query .= " order by sovellus, jarjestys, jarjestys2";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					$lask = 0;
 

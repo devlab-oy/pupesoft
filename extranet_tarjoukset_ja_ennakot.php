@@ -598,6 +598,12 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 	global $kukarow, $yhtiorow;
 
 	$laskurow = hae_lasku($valittu_tarjous_tunnus);
+	
+	$kielilisa = "FI";
+
+	if (strtoupper($laskurow["maa"]) == "SE") {
+		$kielilisa = "SE";
+	}
 
 	$query = "  SELECT '' as nro,
 				'' as kuva,
@@ -626,10 +632,11 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 	while ($tilausrivi = mysql_fetch_assoc($result)) {
 		$query2 = " SELECT selite AS ennakko_pros_a
 					FROM tuotteen_avainsanat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tuoteno = '{$tilausrivi['tuoteno']}'
-					AND laji = 'parametri_ennakkoale_a'
-					AND selite != ''
+					WHERE yhtio	 = '{$kukarow['yhtio']}'
+					AND tuoteno	 = '{$tilausrivi['tuoteno']}'
+					AND laji	 = 'parametri_ennakkoale_a'
+					AND kieli	 = '{$kielilisa}'
+					AND selite	!= ''
 					ORDER BY ennakko_pros_a DESC
 					LIMIT 1";
 		$result2 = pupe_query($query2);

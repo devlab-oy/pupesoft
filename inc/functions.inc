@@ -23257,11 +23257,18 @@ if (!function_exists('laske_ext_ennakko_hinta')) {
 	function laske_ext_ennakko_hinta($trow, $laskurow) {
 		global $kukarow, $yhtiorow;
 
+		$kielilisa = "FI";
+
+		if (strtoupper($laskurow["maa"]) == "SE") {
+			$kielilisa = "SE";
+		}
+
 		$query = "  SELECT selite AS ennakko_pros_a
 					FROM tuotteen_avainsanat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tuoteno = '{$trow['tuoteno']}'
-					AND laji = 'parametri_ennakkoale_a'
+					AND laji 	= 'parametri_ennakkoale_a'
+					AND kieli 	= '{$kielilisa}'
 					AND selite != ''
 					ORDER BY ennakko_pros_a DESC
 					LIMIT 1";

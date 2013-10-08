@@ -23266,8 +23266,9 @@ if (!function_exists('laske_ext_ennakko_hinta')) {
 					ORDER BY ennakko_pros_a DESC
 					LIMIT 1";
 		$result = pupe_query($query);
+
 		// Haetaanko ruotsihinnat
-		if ($laskurow['valkoodi'] == "SEK" and $laskurow['maa'] = "SE") {
+		if (strtoupper($laskurow["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
 			$query = "	SELECT alv
 						FROM tuotteen_alv
 						WHERE tuoteno = '{$trow['tuoteno']}'
@@ -23279,7 +23280,9 @@ if (!function_exists('laske_ext_ennakko_hinta')) {
 
 			$trow['myyntihinta'] = tuotteen_myyntihinta($laskurow, $trow, $trow['varattu']);
 		}
+
 		$hinta = "";
+
 		if (mysql_num_rows($result) == 1) {
 			$tuotteen_hinta = mysql_fetch_assoc($result);
 			$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));

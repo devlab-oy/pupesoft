@@ -3,6 +3,7 @@
 require ("parametrit.inc");
 require ("validation/Validation.php");
 require_once('luo_myyntitilausotsikko.inc');
+
 enable_ajax();
 
 ?>
@@ -37,7 +38,6 @@ function tarkista(type, toim) {
 }
 
 $(function() {
-
 	function confirmation(question) {
 	    var defer = $.Deferred();
 	    $('<div></div>')
@@ -45,13 +45,13 @@ $(function() {
 	        .dialog({
 	            autoOpen: true,
 	            modal: true,
-	            title: 'Vahvistus',
+	            title: '<?php t("Vahvistus"); ?>',
 	            buttons: {
-	                "Lähetä": function () {
+	                "<?php t("Lähetä"); ?>": function () {
 	                    defer.resolve(true);
 						$(this).dialog("close");
 	                },
-	                "Peruuta": function () {
+	                "<?php t("Peruuta"); ?>": function () {
 	                    defer.resolve(false);
 	                    $(this).dialog("close");
 	                }
@@ -61,11 +61,10 @@ $(function() {
 	};
 
 	$('#hyvaksyennakko').on('click', function() {
-	    var question = "Kiitos ennakkotilauksestasi";
+	    var question = "<?php t("Kiitos ennakkotilauksestasi"); ?>";
 	    confirmation(question).then(function (answer) {
 	        if(answer){
 				$('#hyvaksy_hylkaa_formi').submit();
-	        } else {
 	        }
 	    });
 	});
@@ -227,9 +226,7 @@ if ($action == 'luo_uusi_ennakko') {
 
 	$query = "  SELECT *
 				FROM lasku
-				JOIN laskun_lisatiedot
-				ON ( laskun_lisatiedot.yhtio = lasku.yhtio
-					AND laskun_lisatiedot.otunnus = lasku.tunnus )
+				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.tunnus = '{$uusi_tilausnumero}'";
 	$result = pupe_query($query);
@@ -599,6 +596,7 @@ function hae_tarjous($valittu_tarjous_tunnus) {
 
 function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 	global $kukarow, $yhtiorow;
+
 	$laskurow = hae_lasku($valittu_tarjous_tunnus);
 
 	$query = "  SELECT '' as nro,
@@ -636,13 +634,15 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 					LIMIT 1";
 		$result2 = pupe_query($query2);
 		$selite = mysql_fetch_assoc($result2);
+
 		$tilausrivi['parametri_ennakkoale_a'] = $selite['ennakko_pros_a'];
 
-		if($laskurow['valkoodi'] == "SEK" and $laskurow['maa'] == "SE") {
+		if (strtoupper($laskurow["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
 			$tilausrivi['myyntihinta'] = tuotteen_myyntihinta($laskurow, $tilausrivi, $tilausrivi['kpl']);
 			$tilausrivi['hinta'] = $tilausrivi['myyntihinta'] * (1 - ($tilausrivi['parametri_ennakkoale_a'] / 100));
 			$tilausrivi['rivihinta'] = $tilausrivi['kpl'] * $tilausrivi['hinta'];
 		}
+
 		$tilausrivit[] = $tilausrivi;
 	}
 
@@ -862,7 +862,7 @@ function lisaa_ennakkorivi($params) {
 		'var'			 => $var,
 		'toim'			 => $toim
 	);
-	
+
 	list($lisatyt_rivit1, $lisatyt_rivit2) = lisaa_rivi($parametrit);
 
 	$lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
@@ -877,7 +877,7 @@ function lisaa_ennakkorivi($params) {
 					kerattyaika		= now()
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and tunnus	= '$lisatyt_rivit[0]'";
-		$result = pupe_query($query);		
+		$result = pupe_query($query);
 	}
 }
 

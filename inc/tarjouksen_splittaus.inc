@@ -10,12 +10,8 @@ $query = "  SELECT laskun_lisatiedot.sopimus_lisatietoja,
 			lasku.varasto,
 			lasku.tilaustyyppi
 			FROM laskun_lisatiedot
-			JOIN tilausrivi
-			ON ( tilausrivi.yhtio = laskun_lisatiedot.yhtio
-				AND tilausrivi.otunnus = laskun_lisatiedot.otunnus )
-			JOIN lasku
-			ON ( lasku.yhtio = laskun_lisatiedot.yhtio
-				AND lasku.tunnus = laskun_lisatiedot.otunnus)
+			JOIN tilausrivi ON (tilausrivi.yhtio = laskun_lisatiedot.yhtio AND tilausrivi.otunnus = laskun_lisatiedot.otunnus)
+			JOIN lasku ON (lasku.yhtio = laskun_lisatiedot.yhtio AND lasku.tunnus = laskun_lisatiedot.otunnus)
 			WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
 			AND laskun_lisatiedot.otunnus = '{$tilausnumero}'";
 $result = pupe_query($query);
@@ -40,7 +36,7 @@ $dummy_tarjouksen_tilausnumero = $tilausnumero;
 foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 
 	$kukarow['kesken'] = 0;
-	
+
 	if ($toim == "EXTTARJOUS") {
 		$tilausnumero = luo_myyntitilausotsikko('TARJOUS', $tarjous_asiakas, '', '', '', '', '', '');
 	}
@@ -62,13 +58,10 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 
 	$query = "  SELECT *
 				FROM lasku
-				JOIN laskun_lisatiedot
-				ON ( laskun_lisatiedot.yhtio = lasku.yhtio
-					AND laskun_lisatiedot.otunnus = lasku.tunnus )
+				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.tunnus = '{$tilausnumero}'";
 	$result = pupe_query($query);
-
 	$laskurow = mysql_fetch_assoc($result);
 
 	$kukarow['kesken'] = $tilausnumero;
@@ -88,7 +81,7 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 			$maatiedot = mysql_fetch_assoc($result);
 
 			// Haetaanko ruotsihinnat
-			if ($maatiedot['valkoodi'] == "SEK" and $maatiedot['maa'] = "SE") {
+			if (strtoupper($maatiedot["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
 				$query = "	SELECT alv
 							FROM tuotteen_alv
 							WHERE tuoteno = '{$tilausrivi['tuoteno']}'
@@ -98,8 +91,8 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 				$tuotteen_alv = $tuotteen_alv_rivi['alv'];
 
 				$tilausrivi['hinta'] = tuotteen_myyntihinta($laskurow, $trow, $tilausrivi['varattu']);
-
 			}
+
 			// Ext-ennakolle tulee hinnat aina nettona, lasketaan alennukset pois
 			if ($toim == "EXTENNAKKO") {
 				$tilausrivi['hinta'] = $tilausrivi['hinta'] * (1 - $tilausrivi['ale1'] / 100) * (1 - $tilausrivi['ale2'] / 100) * (1 - $tilausrivi['ale3'] / 100);
@@ -122,13 +115,14 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 				'varataan_saldoa'	 => 'EI',
 				'var'				 => $tilausrivi['var'],
 			);
-			
+
 			lisaa_rivi($parametrit);
 		}
 	}
-    
+
 	// Tällä parametrilla ohitetaan tilausvahvistuksen lähettäminen Tarjouspohjaa kopioidessa
-	$ohita_tilausvahvistuksen_lahetys = "JOO";
+	$laskurow['tilausvahvistus'] = "";
+
 	require_once('tilaus-valmis.inc');
 }
 

@@ -31,7 +31,7 @@
 			echo "<th align='left'>".t("Reseptiin")."</th>";
 		}
 
-		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and $toim == 'PIKATILAUS') {
+		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K') {
 			$tilauksen_rekisterinumerot = hae_tilauksen_rekisterinumerot($laskurow['tunnus']);
 			echo "	<th align='left'>".t("Rekisterinumero")."</th>";
 		}
@@ -67,22 +67,24 @@
 			echo "<td valign='top' style='color: #00FF00;'>".t("Tuote")."</td>";
 		}
 
-		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K') {
 			echo "<td valign='top'>";
 			echo "<input type='text' name='rekisterinumero' size='8' value='{$rekisterinumero}'/>";
 			echo "<br/>";
-			echo "<select name='jo_syotetty_rekisterinumero'>";
-			echo "<option value=''>".t('Ei valintaa')."</option>";
-			$i = 0;
-			foreach($tilauksen_rekisterinumerot as $syotetty_rekisterinumero) {
-				$sel = "";
-				if ($i == 0) {
-					$sel = "SELECTED";
+			if (count($tilauksen_rekisterinumerot) > 0) {
+				echo "<select name='jo_syotetty_rekisterinumero'>";
+				echo "<option value=''>".t('Ei valintaa')."</option>";
+				$i = 0;
+				foreach($tilauksen_rekisterinumerot as $syotetty_rekisterinumero) {
+					$sel = "";
+					if ($i == 0) {
+						$sel = "SELECTED";
+					}
+					echo "<option value='{$syotetty_rekisterinumero['rekisterinumero']}' {$sel}>{$syotetty_rekisterinumero['rekisterinumero']}</option>";
+					$i++;
 				}
-				echo "<option value='{$syotetty_rekisterinumero['rekisterinumero']}' {$sel}>{$syotetty_rekisterinumero['rekisterinumero']}</option>";
-				$i++;
+				echo "</select>";
 			}
-			echo "</select>";
 			echo "</td>";
 		}
 		

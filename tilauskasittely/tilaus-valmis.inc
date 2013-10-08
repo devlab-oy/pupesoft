@@ -126,11 +126,15 @@ $query = "	SELECT tilausrivi.tunnus as tilausrivitunnus,
 $rekisterinumero_result = pupe_query($query);
 
 while ($rekisterinumero_row = mysql_fetch_assoc($rekisterinumero_result)) {
+	$kommentti = "";
 	if ($rekisterinumero_row['kommentti'] != ""){
-		$kommentti = "\n";
+		$kommentti .= "{$rekisterinumero_row['kommentti']}\n";
 	}
 
-	$kommentti = $rekisterinumero_row['rekisterinumero'];
+	if (!stristr($kommentti, $rekisterinumero_row['rekisterinumero'])) {
+		$kommentti .= $rekisterinumero_row['rekisterinumero'];
+	}
+	
 	$query = "	UPDATE tilausrivi
 				SET kommentti = '{$kommentti}'
 				WHERE yhtio = '{$kukarow['yhtio']}'

@@ -36,7 +36,7 @@
 			//-->
 			</SCRIPT>";
 	// Jos tullaan sivuvalikosta extranetissä tyhjätään kesken ettei lisätä tuotteita väärälle tilaukselle
-	if((!isset($valittu_tarjous_tunnus)) and $kukarow['extranet'] != '') {
+	if((!isset($valittu_tarjous_tunnus)) and $kukarow['extranet'] != '' and $verkkokauppa == "") {
 		$kukarow['kesken'] = '';
 	}
 

@@ -69,6 +69,7 @@ function hae_valmistukset_joissa_raaka_aine_ei_riita($request) {
 		$tuote_join .= "	AND tuote.tuotemerkki IN ('".implode("','", $request['mul_tme'])."')";
 	}
 
+	//Haetaan valmisteet
 	$query = "	SELECT lasku.tunnus AS lasku_tunnus,
 				tilausrivi.tunnus AS tilausrivi_tunnus,
 				tilausrivi.tuoteno,
@@ -94,7 +95,7 @@ function hae_valmistukset_joissa_raaka_aine_ei_riita($request) {
 				JOIN tilausrivi
 				ON ( tilausrivi.yhtio = lasku.yhtio
 					AND tilausrivi.otunnus = lasku.tunnus
-					AND tilausrivi.tyyppi IN ('W', 'V')
+					AND tilausrivi.tyyppi IN ('W')
 					AND tilausrivi.varattu > 0)
 				JOIN tuote
 				ON ( tuote.yhtio = tilausrivi.yhtio
@@ -110,12 +111,47 @@ function hae_valmistukset_joissa_raaka_aine_ei_riita($request) {
 	$result = pupe_query($query);
 
 	$valmistukset_joissa_raaka_aine_ei_riita = array();
-	$valmiste = null;
-	while ($valmistus_rivi = mysql_fetch_assoc($result)) {
-		if ($valmistus_rivi['tyyppi'] == 'W') {
-			$valmiste = $valmistus_rivi;
-		}
-		else {
+	while($valmiste_rivi = mysql_fetch_assoc($result)) {
+		//Haetaan valmisteen raaka-aineet
+		$query = "	SELECT lasku.tunnus AS lasku_tunnus,
+					tilausrivi.tunnus AS tilausrivi_tunnus,
+					tilausrivi.tuoteno,
+					tilausrivi.nimitys,
+					tilausrivi.tyyppi,
+					lasku.kohde,
+					lasku.tila,
+					lasku.alatila,
+					lasku.kerayspvm,
+					lasku.toimaika,
+					(	SELECT toimi.nimi
+						FROM tuotteen_toimittajat
+						JOIN toimi
+						ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
+							AND toimi.tunnus = tuotteen_toimittajat.liitostunnus )
+						WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+						AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+						ORDER BY tuotteen_toimittajat.jarjestys ASC
+						LIMIT 1
+					) AS toimittaja,
+					sum(tilausrivi.varattu) AS valmistettava_kpl
+					FROM lasku
+					JOIN tilausrivi
+					ON ( tilausrivi.yhtio = lasku.yhtio
+						AND tilausrivi.otunnus = lasku.tunnus
+						AND tilausrivi.tyyppi IN ('V')
+						AND tilausrivi.varattu > 0
+						AND tilausrivi.otunnus = '{$valmiste_rivi['lasku_tunnus']}'
+						AND tilausrivi.perheid = '{$valmiste_rivi['tilausrivi_tunnus']}' )
+					JOIN tuote
+					ON ( tuote.yhtio = tilausrivi.yhtio
+						AND tuote.tuoteno = tilausrivi.tuoteno
+						AND tuote.tuotetyyppi not in ('A', 'B')
+						AND tuote.ei_saldoa = '' )
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11";
+		$valmistus_result = pupe_query($query);
+
+		while($valmistus_rivi = mysql_fetch_assoc($valmistus_result)) {
 			list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($valmistus_rivi['tuoteno']);
 
 			if ($saldo < $valmistus_rivi['valmistettava_kpl']) {
@@ -126,11 +162,11 @@ function hae_valmistukset_joissa_raaka_aine_ei_riita($request) {
 				$valmistus_rivi['hyllyssa'] = $hyllyssa;
 				$valmistus_rivi['myytavissa'] = $myytavissa;
 
-				if (empty($valmistukset_joissa_raaka_aine_ei_riita[$valmistus_rivi['lasku_tunnus']]['tilausrivit'][$valmiste['tilausrivi_tunnus']])) {
-					$valmistukset_joissa_raaka_aine_ei_riita[$valmistus_rivi['lasku_tunnus']]['tilausrivit'][$valmiste['tilausrivi_tunnus']] = $valmiste;
+				if (empty($valmistukset_joissa_raaka_aine_ei_riita[$valmiste_rivi['lasku_tunnus']]['tilausrivit'][$valmiste_rivi['tilausrivi_tunnus']])) {
+					$valmistukset_joissa_raaka_aine_ei_riita[$valmiste_rivi['lasku_tunnus']]['tilausrivit'][$valmiste_rivi['tilausrivi_tunnus']] = $valmiste_rivi;
 				}
 
-				$valmistukset_joissa_raaka_aine_ei_riita[$valmistus_rivi['lasku_tunnus']]['tilausrivit'][$valmiste['tilausrivi_tunnus']]['raaka_aineet'][] = $valmistus_rivi;
+				$valmistukset_joissa_raaka_aine_ei_riita[$valmiste_rivi['lasku_tunnus']]['tilausrivit'][$valmiste_rivi['tilausrivi_tunnus']]['raaka_aineet'][] = $valmistus_rivi;
 			}
 		}
 	}
@@ -412,6 +448,9 @@ function echo_kayttoliittyma($request) {
 	echo "<th>".t("Rajaa tuotekategorialla")."</th>";
 	echo "<td>";
 	$monivalintalaatikot = array('OSASTO', 'TRY', 'TUOTEMERKKI');
+	$mul_osasto = $request['mul_osasto'];
+	$mul_try = $request['mul_try'];
+	$mul_tme = $request['mul_tme'];
 	require ("tilauskasittely/monivalintalaatikot.inc");
 	echo "</td>";
 	echo "</tr>";

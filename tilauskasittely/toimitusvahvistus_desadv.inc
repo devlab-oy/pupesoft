@@ -382,7 +382,7 @@
 					$sscc          = uusi_sscc_nro();
 					$sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
 
-					$desadv_message .= "CPS+{$sscc}++1'";
+					$desadv_message .= "CPS+{$sscc_ulkoinen}++1'";
 					$x++;
 				}
 				else {

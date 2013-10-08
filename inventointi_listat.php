@@ -21,16 +21,16 @@
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND laji = 'HAE_JA_SELAA'
 				AND selite != ''";
-	$hae_ja_selaa_result = pupe_query($query);
-	$hae_ja_selaa_row = mysql_fetch_assoc($hae_ja_selaa_result);
+	$avainsana_result = pupe_query($query);
+	$avainsana_row = mysql_fetch_assoc($avainsana_result);
 
 	// Monivalintalaatikot (osasto, try tuotemerkki...)
 	// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
-	if (trim($hae_ja_selaa_row['selitetark']) != '') {
-		$monivalintalaatikot = explode(",", $hae_ja_selaa_row['selitetark']);
+	if (trim($avainsana_row['selitetark']) != '') {
+		$monivalintalaatikot = explode(",", $avainsana_row['selitetark']);
 
-		if (trim($hae_ja_selaa_row['selitetark_2'] != '')) {
-			$monivalintalaatikot_normaali = explode(",", $hae_ja_selaa_row['selitetark_2']);
+		if (trim($avainsana_row['selitetark_2'] != '')) {
+			$monivalintalaatikot_normaali = explode(",", $avainsana_row['selitetark_2']);
 		}
 		else {
 			$monivalintalaatikot_normaali = array();

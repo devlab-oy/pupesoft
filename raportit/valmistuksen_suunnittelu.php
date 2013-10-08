@@ -768,7 +768,7 @@
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.ei_saldoa = ''
 					{$tuote_where}
-					GROUP BY 1, 2, 3, 4";
+					GROUP BY 1, 2, 3";
 		$res = pupe_query($query);
 
 		// Jos yhteens‰n‰kym‰, ei ehcota mit‰‰n

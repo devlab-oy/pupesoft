@@ -3403,11 +3403,6 @@ if ($tee == '') {
 		}
 	}
 
-	// Allr specific!
-	if (file_exists("${pupe_root_polku}/allr_kamppikset.php")) {
-		require("${pupe_root_polku}/allr_kamppikset.php");
-	}
-
 	echo "<br>";
 
 	// Tarkastetaan onko asiakas myyntikiellossa
@@ -3479,6 +3474,7 @@ if ($tee == '') {
 			echo "<font class='message'>Tekstiviestimuistutus lähetetään!</font><br><br>";
 		}
 	}
+
 	if ($tila == "SYOTASMS") {
 
 		$query  = "	SELECT gsm
@@ -4346,6 +4342,11 @@ if ($tee == '') {
 		if (!isset($lisaa_jatka)) $variaatio_tuoteno = "";
 		$omalle_tilaukselle = "";
 		$valmistuslinja     = "";
+	}
+
+	// Allr specific!
+	if (file_exists("${pupe_root_polku}/allr_kamppikset.php")) {
+		require("${pupe_root_polku}/allr_kamppikset.php");
 	}
 
 	//Syöttörivi

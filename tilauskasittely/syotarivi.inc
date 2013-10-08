@@ -307,22 +307,24 @@
 			echo "<td valign='top' style='color: #00FF00;'>".t("Tuote")."</td>";
 		}
 
-		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+		if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and $toim == 'RIVISYOTTO') {
 			echo "<td valign='top'>";
 			echo "<input type='text' name='rekisterinumero' size='8' value='{$rekisterinumero}'/>";
-			echo "<br/>";
-			echo "<select name='jo_syotetty_rekisterinumero'>";
-			echo "<option value=''>".t('Ei valintaa')."</option>";
-			$sel = "SELECTED";
-			foreach($tilauksen_rekisterinumerot as $syotetty_rekisterinumero) {
-				if ($syotetty_rekisterinumero['rekisterinumero'] == '') {
+			if (count($tilauksen_rekisterinumerot) > 0) {
+				echo "<br/>";
+				echo "<select name='jo_syotetty_rekisterinumero'>";
+				echo "<option value=''>".t('Ei valintaa')."</option>";
+				$sel = "SELECTED";
+				foreach($tilauksen_rekisterinumerot as $syotetty_rekisterinumero) {
+					if ($syotetty_rekisterinumero['rekisterinumero'] == '') {
+						$sel = '';
+						continue;
+					}
+					echo "<option value='{$syotetty_rekisterinumero['rekisterinumero']}' {$sel}>{$syotetty_rekisterinumero['rekisterinumero']}</option>";
 					$sel = '';
-					continue;
 				}
-				echo "<option value='{$syotetty_rekisterinumero['rekisterinumero']}' {$sel}>{$syotetty_rekisterinumero['rekisterinumero']}</option>";
-				$sel = '';
+				echo "</select>";
 			}
-			echo "</select>";
 			echo "</td>";
 		}
 

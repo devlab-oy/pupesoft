@@ -3,6 +3,7 @@
 require ("parametrit.inc");
 require ("validation/Validation.php");
 require_once('luo_myyntitilausotsikko.inc');
+
 enable_ajax();
 
 ?>
@@ -37,7 +38,6 @@ function tarkista(type, toim) {
 }
 
 $(function() {
-
 	function confirmation(question) {
 	    var defer = $.Deferred();
 	    $('<div></div>')
@@ -45,13 +45,13 @@ $(function() {
 	        .dialog({
 	            autoOpen: true,
 	            modal: true,
-	            title: 'Vahvistus',
+	            title: '<?php echo t("Vahvistus"); ?>',
 	            buttons: {
-	                "Lähetä": function () {
+	                "<?php echo t("Lähetä"); ?>": function () {
 	                    defer.resolve(true);
 						$(this).dialog("close");
 	                },
-	                "Peruuta": function () {
+	                "<?php echo t("Peruuta"); ?>": function () {
 	                    defer.resolve(false);
 	                    $(this).dialog("close");
 	                }
@@ -61,11 +61,10 @@ $(function() {
 	};
 
 	$('#hyvaksyennakko').on('click', function() {
-	    var question = "Kiitos ennakkotilauksestasi";
+	    var question = "<?php echo t("Kiitos ennakkotilauksestasi"); ?>";
 	    confirmation(question).then(function (answer) {
 	        if(answer){
 				$('#hyvaksy_hylkaa_formi').submit();
-	        } else {
 	        }
 	    });
 	});
@@ -209,7 +208,7 @@ if ($action == 'luo_uusi_ennakko') {
 
 	$uusi_tilausnumero = luo_myyntitilausotsikko($toim, $ennakko_asiakas['tunnus'], '', '', '', '', '', '');
 
-	$uusi_saate_teksti = "Tämä on Extranet-asiakkaan luoma ennakkotilaus";
+	$uusi_saate_teksti = t("Tämä on Extranet-asiakkaan luoma ennakkotilaus");
 
 	$tilaustyyppi = 'E';
 
@@ -227,9 +226,7 @@ if ($action == 'luo_uusi_ennakko') {
 
 	$query = "  SELECT *
 				FROM lasku
-				JOIN laskun_lisatiedot
-				ON ( laskun_lisatiedot.yhtio = lasku.yhtio
-					AND laskun_lisatiedot.otunnus = lasku.tunnus )
+				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.tunnus = '{$uusi_tilausnumero}'";
 	$result = pupe_query($query);
@@ -600,6 +597,14 @@ function hae_tarjous($valittu_tarjous_tunnus) {
 function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 	global $kukarow, $yhtiorow;
 
+	$laskurow = hae_lasku($valittu_tarjous_tunnus);
+
+	$kielilisa = "FI";
+
+	if (strtoupper($laskurow["maa"]) == "SE") {
+		$kielilisa = "SE";
+	}
+
 	$query = "  SELECT '' as nro,
 				'' as kuva,
 				tilausrivi.tunnus,
@@ -627,15 +632,24 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 	while ($tilausrivi = mysql_fetch_assoc($result)) {
 		$query2 = " SELECT selite AS ennakko_pros_a
 					FROM tuotteen_avainsanat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tuoteno = '{$tilausrivi['tuoteno']}'
-					AND laji = 'parametri_ennakkoale_a'
-					AND selite != ''
+					WHERE yhtio	 = '{$kukarow['yhtio']}'
+					AND tuoteno	 = '{$tilausrivi['tuoteno']}'
+					AND laji	 = 'parametri_ennakkoale_a'
+					AND kieli	 = '{$kielilisa}'
+					AND selite	!= ''
 					ORDER BY ennakko_pros_a DESC
 					LIMIT 1";
 		$result2 = pupe_query($query2);
 		$selite = mysql_fetch_assoc($result2);
+
 		$tilausrivi['parametri_ennakkoale_a'] = $selite['ennakko_pros_a'];
+
+		if (strtoupper($laskurow["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
+			$tilausrivi['myyntihinta'] = tuotteen_myyntihinta($laskurow, $tilausrivi, $tilausrivi['kpl']);
+			$tilausrivi['hinta'] = $tilausrivi['myyntihinta'] * (1 - ($tilausrivi['parametri_ennakkoale_a'] / 100));
+			$tilausrivi['rivihinta'] = $tilausrivi['kpl'] * $tilausrivi['hinta'];
+		}
+
 		$tilausrivit[] = $tilausrivi;
 	}
 
@@ -855,7 +869,7 @@ function lisaa_ennakkorivi($params) {
 		'var'			 => $var,
 		'toim'			 => $toim
 	);
-	
+
 	list($lisatyt_rivit1, $lisatyt_rivit2) = lisaa_rivi($parametrit);
 
 	$lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
@@ -870,7 +884,7 @@ function lisaa_ennakkorivi($params) {
 					kerattyaika		= now()
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and tunnus	= '$lisatyt_rivit[0]'";
-		$result = pupe_query($query);		
+		$result = pupe_query($query);
 	}
 }
 

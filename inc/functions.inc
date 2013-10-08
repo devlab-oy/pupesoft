@@ -23280,8 +23280,8 @@ if (!function_exists('laske_ext_ennakko_hinta')) {
 						FROM tuotteen_alv
 						WHERE tuoteno = '{$trow['tuoteno']}'
 						AND maa = '{$laskurow['maa']}'";
-			$result = pupe_query($query);
-			$tuotteen_alv_rivi = mysql_fetch_assoc($result);
+			$tuotteen_alv_resu = pupe_query($query);
+			$tuotteen_alv_rivi = mysql_fetch_assoc($tuotteen_alv_resu);
 
 			$alv = $tuotteen_alv_rivi['alv'];
 

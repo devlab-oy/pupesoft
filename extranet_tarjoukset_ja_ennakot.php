@@ -45,13 +45,13 @@ $(function() {
 	        .dialog({
 	            autoOpen: true,
 	            modal: true,
-	            title: '<?php t("Vahvistus"); ?>',
+	            title: '<?php echo t("Vahvistus"); ?>',
 	            buttons: {
-	                "<?php t("Lähetä"); ?>": function () {
+	                "<?php echo t("Lähetä"); ?>": function () {
 	                    defer.resolve(true);
 						$(this).dialog("close");
 	                },
-	                "<?php t("Peruuta"); ?>": function () {
+	                "<?php echo t("Peruuta"); ?>": function () {
 	                    defer.resolve(false);
 	                    $(this).dialog("close");
 	                }
@@ -61,7 +61,7 @@ $(function() {
 	};
 
 	$('#hyvaksyennakko').on('click', function() {
-	    var question = "<?php t("Kiitos ennakkotilauksestasi"); ?>";
+	    var question = "<?php echo t("Kiitos ennakkotilauksestasi"); ?>";
 	    confirmation(question).then(function (answer) {
 	        if(answer){
 				$('#hyvaksy_hylkaa_formi').submit();
@@ -598,7 +598,7 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 	global $kukarow, $yhtiorow;
 
 	$laskurow = hae_lasku($valittu_tarjous_tunnus);
-	
+
 	$kielilisa = "FI";
 
 	if (strtoupper($laskurow["maa"]) == "SE") {

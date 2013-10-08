@@ -12,7 +12,35 @@
 	$monivalintalaatikot = array("OSASTO", "TRY");
 
 	echo "<br><table>";
-	echo "<tr><th>",t("Anna osasto")," ",t("ja/tai")," ",t("tuoteryhm‰"),":</th><td nowrap>";
+	echo "<tr><th>",t("Rajaa tuotteita"),"</th><td nowrap>";
+
+	// selitetark 	= n‰ytett‰v‰t monivalintalaatikot, jos tyhj‰‰, otetaan oletus alhaalla
+	// selitetark_2 = mitk‰ n‰ytett‰vist‰ monivalintalaatikoista on normaaleja alasvetovalikoita
+	$query = "	SELECT selitetark, REPLACE(selitetark_2, ', ', ',') selitetark_2
+				FROM avainsana
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND laji = 'HAE_JA_SELAA'
+				AND selite != ''";
+	$hae_ja_selaa_result = pupe_query($query);
+	$hae_ja_selaa_row = mysql_fetch_assoc($hae_ja_selaa_result);
+
+	// Monivalintalaatikot (osasto, try tuotemerkki...)
+	// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
+	if (trim($hae_ja_selaa_row['selitetark']) != '') {
+		$monivalintalaatikot = explode(",", $hae_ja_selaa_row['selitetark']);
+
+		if (trim($hae_ja_selaa_row['selitetark_2'] != '')) {
+			$monivalintalaatikot_normaali = explode(",", $hae_ja_selaa_row['selitetark_2']);
+		}
+		else {
+			$monivalintalaatikot_normaali = array();
+		}
+	}
+	else {
+		// Oletus
+		$monivalintalaatikot = array("OSASTO", "TRY");
+		$monivalintalaatikot_normaali = array();
+	}
 
 	require ("tilauskasittely/monivalintalaatikot.inc");
 

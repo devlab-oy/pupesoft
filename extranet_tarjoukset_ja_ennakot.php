@@ -45,13 +45,13 @@ $(function() {
 	        .dialog({
 	            autoOpen: true,
 	            modal: true,
-	            title: '<?php t("Vahvistus"); ?>',
+	            title: '<?php echo t("Vahvistus"); ?>',
 	            buttons: {
-	                "<?php t("Lähetä"); ?>": function () {
+	                "<?php echo t("Lähetä"); ?>": function () {
 	                    defer.resolve(true);
 						$(this).dialog("close");
 	                },
-	                "<?php t("Peruuta"); ?>": function () {
+	                "<?php echo t("Peruuta"); ?>": function () {
 	                    defer.resolve(false);
 	                    $(this).dialog("close");
 	                }
@@ -61,7 +61,7 @@ $(function() {
 	};
 
 	$('#hyvaksyennakko').on('click', function() {
-	    var question = "<?php t("Kiitos ennakkotilauksestasi"); ?>";
+	    var question = "<?php echo t("Kiitos ennakkotilauksestasi"); ?>";
 	    confirmation(question).then(function (answer) {
 	        if(answer){
 				$('#hyvaksy_hylkaa_formi').submit();
@@ -599,6 +599,12 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 
 	$laskurow = hae_lasku($valittu_tarjous_tunnus);
 
+	$kielilisa = "FI";
+
+	if (strtoupper($laskurow["maa"]) == "SE") {
+		$kielilisa = "SE";
+	}
+
 	$query = "  SELECT '' as nro,
 				'' as kuva,
 				tilausrivi.tunnus,
@@ -626,10 +632,11 @@ function hae_tarjouksen_tilausrivit($valittu_tarjous_tunnus) {
 	while ($tilausrivi = mysql_fetch_assoc($result)) {
 		$query2 = " SELECT selite AS ennakko_pros_a
 					FROM tuotteen_avainsanat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tuoteno = '{$tilausrivi['tuoteno']}'
-					AND laji = 'parametri_ennakkoale_a'
-					AND selite != ''
+					WHERE yhtio	 = '{$kukarow['yhtio']}'
+					AND tuoteno	 = '{$tilausrivi['tuoteno']}'
+					AND laji	 = 'parametri_ennakkoale_a'
+					AND kieli	 = '{$kielilisa}'
+					AND selite	!= ''
 					ORDER BY ennakko_pros_a DESC
 					LIMIT 1";
 		$result2 = pupe_query($query2);

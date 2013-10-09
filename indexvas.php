@@ -262,7 +262,7 @@ while ($orow = mysql_fetch_array($result)) {
 			echo "indexvas=1";
 		}
 
-		echo "' target='main'>".t("$mrow[nimitys]")." {$nimitys_lukumaara}</a></td></tr>";
+		echo "' target='main'>".t("$mrow[nimitys]")."{$nimitys_lukumaara}</a></td></tr>";
 	}
 
 }

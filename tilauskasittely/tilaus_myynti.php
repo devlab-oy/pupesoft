@@ -3782,6 +3782,10 @@ if ($tee == '') {
 			$omalle_tilaukselle		= $tilausrivi['omalle_tilaukselle'];
 			$valmistuslinja			= $tilausrivi['positio'];
 
+			if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and stristr($kommentti, $tilausrivi['rekisterinumero'])) {
+				$kommentti = str_replace($tilausrivi['rekisterinumero'], '', $kommentti);
+			}
+
 			// useamman valmisteen reseptit...
 			if (($tilausrivi['tyyppi'] == "W" and $tilausrivi["tunnus"] != $tilausrivi["perheid"]) or ($tilausrivi['tyyppi'] == "W" and $tapa == "VAIHDA")) {
 				$perheid2 = -100;

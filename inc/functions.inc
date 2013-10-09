@@ -23585,11 +23585,19 @@ if (!function_exists('hae_tilauksen_rekisterinumerot')) {
 		$result = pupe_query($query);
 
 		$rekisterinumerot = array();
+		$onko_syotetty_muita_kuin_tyhjia = false;
 		while($rekisterinumero = mysql_fetch_assoc($result)) {
+			if ($rekisterinumero['rekisterinumero'] != '') {
+				$onko_syotetty_muita_kuin_tyhjia = true;
+			}
 			$rekisterinumerot[$rekisterinumero['rekisterinumero']] = $rekisterinumero;
 		}
 
-		return $rekisterinumerot;
+		if ($onko_syotetty_muita_kuin_tyhjia) {
+			return $rekisterinumerot;
+		}
+
+		return array();
 	}
 }
 

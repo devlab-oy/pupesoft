@@ -3783,7 +3783,7 @@ if ($tee == '') {
 			$valmistuslinja			= $tilausrivi['positio'];
 
 			if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and stristr($kommentti, $tilausrivi['rekisterinumero'])) {
-				$kommentti = str_replace($tilausrivi['rekisterinumero'], '', $kommentti);
+				$kommentti = str_replace("\n" . $tilausrivi['rekisterinumero'], '', $kommentti);
 			}
 
 			// useamman valmisteen reseptit...

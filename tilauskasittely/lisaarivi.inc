@@ -216,12 +216,10 @@
 	$aikatsk_p = (int) $aikatsk_p;
 	$aikatsk_v = (int) $aikatsk_v;
 
-	if ((int) $aikatsk_k != 0 AND (int) $aikatsk_p != 0 AND (int) $aikatsk_v != 0){
-		if (!checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
-			$toimaika = date("Y-m-d");
-			if ($toim == "YLLAPITO") {
-				$toimaika = "0000-00-00"; // Yll‰pitosoppareissa toimaika tarkoittaa sopimuksen poikkeavaa alkup‰iv‰‰ ja nolla on default
-			}
+	if (((int) $aikatsk_k != 0 AND (int) $aikatsk_p != 0 AND (int) $aikatsk_v != 0) AND !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
+		$toimaika = date("Y-m-d");
+		if ($toim == "YLLAPITO") {
+			$toimaika = "0000-00-00"; // Yll‰pitosoppareissa toimaika tarkoittaa sopimuksen poikkeavaa alkup‰iv‰‰ ja nolla on default
 		}
 	}
 
@@ -231,12 +229,10 @@
 	$aikatsk_p = (int) $aikatsk_p;
 	$aikatsk_v = (int) $aikatsk_v;
 
-	if ((int) $aikatsk_k != 0 AND (int) $aikatsk_p != 0 AND (int) $aikatsk_v != 0){
-		if (!checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
-			$kerayspvm = date("Y-m-d");
-			if ($toim == "YLLAPITO") {
-				$kerayspvm = "0000-00-00"; // Yll‰pitosoppareissa kerayspvm tarkoittaa sopimuksen poikkeavaa loppup‰iv‰‰ ja nolla on default
-			}
+	if (((int) $aikatsk_k != 0 AND (int) $aikatsk_p != 0 AND (int) $aikatsk_v != 0) AND !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
+		$kerayspvm = date("Y-m-d");
+		if ($toim == "YLLAPITO") {
+			$kerayspvm = "0000-00-00"; // Yll‰pitosoppareissa kerayspvm tarkoittaa sopimuksen poikkeavaa loppup‰iv‰‰ ja nolla on default
 		}
 	}
 

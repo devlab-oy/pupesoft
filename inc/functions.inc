@@ -311,6 +311,7 @@ if (!function_exists("pupesoft_flock")) {
 			else exit;
 		}
 		else {
+			@chmod("/tmp/##pupesoft.sh-flock.lock", 0666);
 			flock($backupflock, LOCK_UN);
 		}
 

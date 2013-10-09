@@ -195,7 +195,8 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
 		$query = "	SELECT aleryhma, tuoteno
 					FROM tuote
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND status not in ('P','X')";
+					AND status not in ('P','X')"
+					AND aleryhma != '';
 		$result = pupe_query($query);
 
 		while ($tuote = mysql_fetch_assoc($result)) {
@@ -233,6 +234,7 @@ function hae_asiakasalet($request) {
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tuoteno IN ('".implode("','", $tuotenumerot)."')
 				AND status not in ('P','X')
+				AND aleryhma != ''
 				ORDER BY tuote.aleryhma ASC, tuote.nimitys ASC";
 	$result = pupe_query($query);
 
@@ -344,8 +346,8 @@ function generoi_custom_excel($tuotteet) {
 		if ($tuote['aleryhma']['ryhma'] != $edellinen_ryhma) {
 			$xls->write($rivi, $sarake, t('Ryhmä'), array('bold' => true));
 			$sarake++;
-			$xls->write($rivi, $sarake, $tuote['aleryhma']['ryhma'], array('bold' => true));
-			$sarake++;
+//			$xls->write($rivi, $sarake, $tuote['aleryhma']['ryhma'], array('bold' => true));
+//			$sarake++;
 			$xls->write($rivi, $sarake, $tuote['aleryhma']['selite'], array('bold' => true));
 
 			$rivi++;

@@ -346,8 +346,6 @@ function generoi_custom_excel($tuotteet) {
 		if ($tuote['aleryhma']['ryhma'] != $edellinen_ryhma) {
 			$xls->write($rivi, $sarake, t('Ryhmä'), array('bold' => true));
 			$sarake++;
-//			$xls->write($rivi, $sarake, $tuote['aleryhma']['ryhma'], array('bold' => true));
-//			$sarake++;
 			$xls->write($rivi, $sarake, $tuote['aleryhma']['selite'], array('bold' => true));
 
 			$rivi++;

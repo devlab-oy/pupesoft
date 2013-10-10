@@ -73,15 +73,6 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 				$asiakasrow["tunnus"] 	= $asiakasrow["spec_tunnus"];
 			}
 
-			$toimvv = date("Y");
-			$toimkk = date("m");
-			$toimpp = date("d");
-
-			$kervv = date("Y");
-			$kerkk = date("m");
-			$kerpp = date("d");
-
-
 			if ($toim == "TARJOUS" or $asiakasrow["vienti"] =='K') {
 				$kolm_nimi 		= $asiakasrow["kolm_nimi"];
 				$kolm_nimitark 	= $asiakasrow["kolm_nimitark"];
@@ -307,6 +298,14 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 				$valkoodi = $yhtiorow["valkoodi"]."##";
 			}
 		}
+
+		$toimvv = date("Y");
+		$toimkk = date("m");
+		$toimpp = date("d");
+
+		$kervv = date("Y");
+		$kerkk = date("m");
+		$kerpp = date("d");
 
 		$alv_velvollisuus = "";
 

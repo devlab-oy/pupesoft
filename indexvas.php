@@ -161,8 +161,6 @@ $query = "	SELECT nimi, jarjestys
 			ORDER BY jarjestys";
 $result = mysql_query($query) or pupe_error($query);
 
-$nimitys_lukumaara = "";
-
 while ($orow = mysql_fetch_array($result)) {
 
 	// tutkitaan onko meillä alamenuja
@@ -177,6 +175,8 @@ while ($orow = mysql_fetch_array($result)) {
 	$xresult = mysql_query($query) or pupe_error($query);
 	$mrow = mysql_fetch_array($xresult);
 
+	$nimitys_lukumaara = "";
+	
 	if ($mrow['nimi'] == 'extranet_tarjoukset_ja_ennakot.php' and stristr($mrow['alanimi'], "EXTENNAKKO")) {
 		$ennakoiden_lukumaara = hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot($kukarow['oletus_asiakas']);
 		if ($ennakoiden_lukumaara > 0) {

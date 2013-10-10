@@ -14,20 +14,23 @@
 	}
 
 	if (!isset($tuvarasto)) $tuvarasto = '';
-
 	if (!isset($tutyyppi)) $tutyyppi = '';
 
-	$now_minus_1_month = date('Y-m-d', strtotime('now - 1 month'));
-	$now_minus_1_month = explode('-', $now_minus_1_month);
-	if (!isset($ppa)) $ppa = $now_minus_1_month[2];
-	if (!isset($kka)) $kka = $now_minus_1_month[1];
-	if (!isset($vva)) $vva = $now_minus_1_month[0];
-
-	if (!isset($ppl)) $ppl = date('d');
-	if (!isset($kkl)) $kkl = date('m');
-	if (!isset($vvl)) $vvl = date('Y');
-
 	$valmistuslinjat = hae_valmistuslinjat();
+
+	if (!empty($valmistuslinjat)) {
+		//Tänne vain jos valmistuslinjat on käytössä, eli käyttöliittymässä on dropdown sekä aikavalinta inputit
+		$now_minus_1_month = date('Y-m-d', strtotime('now - 1 month'));
+		$now_minus_1_month = explode('-', $now_minus_1_month);
+
+		if (!isset($ppa)) $ppa = $now_minus_1_month[2];
+		if (!isset($kka)) $kka = $now_minus_1_month[1];
+		if (!isset($vva)) $vva = $now_minus_1_month[0];
+
+		if (!isset($ppl)) $ppl = date('d');
+		if (!isset($kkl)) $kkl = date('m');
+		if (!isset($vvl)) $vvl = date('Y');
+	}
 
 	$logistiikka_yhtio 		= '';
 	$logistiikka_yhtiolisa 	= '';
@@ -643,13 +646,15 @@
 			$valid = true;
 			$haku .= " and lasku.kerayspvm<=date_add(now(), INTERVAL $karajaus day)";
 		}
-		else {
+		elseif (isset($vva) and isset($kka) and isset($ppa) and isset($vvl) and isset($kkl) and isset($ppl)) {
 			$valid = true;
 			$alku_paiva = "{$vva}-{$kka}-{$ppa}";
 			$loppu_paiva = "{$vvl}-{$kkl}-{$ppl}";
 			$valid = FormValidator::validateContent($alku_paiva, 'paiva');
+
 			if ($valid) {
 				$valid = FormValidator::validateContent($loppu_paiva, 'paiva');
+
 				if ($valid and strtotime($alku_paiva) > strtotime($loppu_paiva)) {
 					echo "<font class='error'>".t('Alkupäivä on myöhemmin kuin loppupäivä')."</font>";
 					$valid = false;
@@ -662,6 +667,10 @@
 			else {
 				echo "<font class='error'>".t('Päivämäärät ei ole valideja')."</font>";
 			}
+		}
+		else {
+			//karajus == 'KK' eli kaikki
+			$valid = true;
 		}
 
 		if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {

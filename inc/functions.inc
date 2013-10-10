@@ -311,6 +311,7 @@ if (!function_exists("pupesoft_flock")) {
 			else exit;
 		}
 		else {
+			@chmod("/tmp/##pupesoft.sh-flock.lock", 0666);
 			flock($backupflock, LOCK_UN);
 		}
 
@@ -23262,20 +23263,42 @@ if (!function_exists("splittaa_valmistukset")) {
 }
 
 if (!function_exists('laske_ext_ennakko_hinta')) {
-	function laske_ext_ennakko_hinta($trow) {
+	function laske_ext_ennakko_hinta($trow, $laskurow) {
 		global $kukarow, $yhtiorow;
+
+		$kielilisa = "FI";
+
+		if (strtoupper($laskurow["maa"]) == "SE") {
+			$kielilisa = "SE";
+		}
 
 		$query = "  SELECT selite AS ennakko_pros_a
 					FROM tuotteen_avainsanat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tuoteno = '{$trow['tuoteno']}'
-					AND laji = 'parametri_ennakkoale_a'
+					AND laji 	= 'parametri_ennakkoale_a'
+					AND kieli 	= '{$kielilisa}'
 					AND selite != ''
 					ORDER BY ennakko_pros_a DESC
 					LIMIT 1";
 		$result = pupe_query($query);
 
+		// Haetaanko ruotsihinnat
+		if (strtoupper($laskurow["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
+			$query = "	SELECT alv
+						FROM tuotteen_alv
+						WHERE tuoteno = '{$trow['tuoteno']}'
+						AND maa = '{$laskurow['maa']}'";
+			$tuotteen_alv_resu = pupe_query($query);
+			$tuotteen_alv_rivi = mysql_fetch_assoc($tuotteen_alv_resu);
+
+			$alv = $tuotteen_alv_rivi['alv'];
+
+			$trow['myyntihinta'] = tuotteen_myyntihinta($laskurow, $trow, $trow['varattu']);
+		}
+
 		$hinta = "";
+
 		if (mysql_num_rows($result) == 1) {
 			$tuotteen_hinta = mysql_fetch_assoc($result);
 			$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));

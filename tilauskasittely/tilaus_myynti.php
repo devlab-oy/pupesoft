@@ -4957,7 +4957,7 @@ if ($tee == '') {
 			}
 
 			if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
-				$headerit .= "<th>".t("Rekisterinumero")."</th>";
+				$headerit .= "<th>".t("Rekno")."</th>";
 				$sarakkeet++;
 			}
 

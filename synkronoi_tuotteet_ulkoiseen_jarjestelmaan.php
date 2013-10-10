@@ -50,12 +50,12 @@
 			$line->addAttribute('No', $i);
 
 			$line->addChild('Type', 'U');
-			$line->addChild('ItemNumber', $row['eankoodi']);
-			$line->addChild('ItemName', $row['nimitys']);
-			$line->addChild('ProdGroup1', $row['try']);
+			$line->addChild('ItemNumber', substr($row['eankoodi'], 0, 20));
+			$line->addChild('ItemName', substr($row['nimitys'], 0, 50));
+			$line->addChild('ProdGroup1', substr($row['try'], 0, 6));
 			$line->addChild('ProdGroup2', 0);
 			$line->addChild('SalesPrice', 0);
-			$line->addChild('Unit1', $row['yksikko']);
+			$line->addChild('Unit1', substr($row['yksikko'], 0, 10));
 			$line->addChild('Unit2', 0);
 			$line->addChild('Relation', 0);
 			$line->addChild('Weight', 0);
@@ -68,7 +68,7 @@
 			$line->addChild('PalletSize', 0);
 			$line->addChild('Status', 0);
 			$line->addChild('WholesalePackageSize', 0);
-			$line->addChild('EANCode', $row['eankoodi']);
+			$line->addChild('EANCode', substr($row['eankoodi'], 0, 20));
 			$line->addChild('EANCode2', 0);
 			$line->addChild('CustomsTariffNum', 0);
 			$line->addChild('AlarmLimit', 0);
@@ -87,7 +87,7 @@
 			$line->addChild('PurchasePrice', 0);
 			$line->addChild('ConsumerPrice', 0);
 			$line->addChild('OperRecommendation', 0);
-			$line->addChild('FreeText', $row['tuoteno']);
+			$line->addChild('FreeText', substr($row['tuoteno'], 0, 100));
 			$line->addChild('PurchaseUnit', 0);
 			$line->addChild('ManufactItemNum', 0);
 			$line->addChild('InternationalItemNum', 0);
@@ -131,7 +131,7 @@
 		$path = '/Users/sami/temp/makia/materialmaster_testit/';
 		$path = strrpos($path, '/', -1) === false ? $path.'/' : $path;
 
-		$filename = md5(uniqid()).".xml";
+		$filename = 'materialmaster_testi_'.md5(uniqid()).".xml";
 		file_put_contents($path.$filename, utf8_encode($xml->asXML()));
 
 		// echo "</table>";

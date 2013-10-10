@@ -47,6 +47,8 @@
 	#$lahetetyyppi = "tulosta_lahete_brutto.inc";
 	#$lahetetyyppi = "tulosta_lahete_eialeja.inc";
 	#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
+	#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
+	#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
 	#$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
 	#$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
 	#$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";

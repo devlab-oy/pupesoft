@@ -1014,6 +1014,8 @@
 		if (mysql_num_rows($suoratoimostores) > 0) {
 			$suoratoimostorow = mysql_fetch_assoc($suoratoimostores);
 
+			$ostotilaus_linkkilisa = "";
+
 			if ($suoratoimostorow["tila"] == "O") {
 				$tilaustyypilla = t("Ostotilauksella");
 
@@ -1028,12 +1030,22 @@
 					$nayta_sostolisateksti = "HUOM";
 				}
 
+				$backlinkki = "tilaus_myynti.php////toim={$toim}//tee={$tee}//tilausnumero={$tilausnumero}//mista={$mista}//tila={$tila}//orig_tila={$laskurow['tila']}//orig_alatila={$laskurow['alatila']}";
+				$ostotilaus_linkkilisa = "<a href='{$palvelin2}tilauskasittely/tilaus_osto.php?tee=AKTIVOI&tilausnumero={$suoratoimostorow['otunnus']}&from=MYYNTITILAUS&lopetus={$backlinkki}'>";
 			}
 			elseif($suoratoimostorow["tila"] == "V" or $suoratoimostorow["tila"] == "W") {
 				$tilaustyypilla = t("Valmistuksella");
 			}
 
-			$varaosakommentti .= "$tilaustyypilla: $suoratoimostorow[nimi] $suoratoimostorow[otunnus]<br>";
+			$varaosakommentti .= "$tilaustyypilla: $suoratoimostorow[nimi] ";
+
+			if ($ostotilaus_linkkilisa != "") $varaosakommentti .= $ostotilaus_linkkilisa;
+
+			$varaosakommentti .= "$suoratoimostorow[otunnus]";
+
+			if ($ostotilaus_linkkilisa != "") $varaosakommentti .= "</a>";
+
+			$varaosakommentti .= "<br>";
 		}
 	}
 
@@ -1088,7 +1100,19 @@
 					foreach ($_tuotteet as $_tuote) {
 
 						$vaihtoehtoinen = ($_tuote['vaihtoehtoinen'] == 'K') ? "<font color=#F00>".t("Vaihtoehtoinen, tarkista sopivuus")."!</font>" : "";
-						list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"]);
+
+						$chk_varasto = $laskurow['varasto'] == 0 ? explode(",", $kukarow['varasto']) : $laskurow['varasto'];
+
+						list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"], '', $chk_varasto);
+
+						$query = "	SELECT status
+									FROM tuote
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tuoteno = '{$_tuote['tuoteno']}'";
+						$chk_status_res = pupe_query($query);
+						$chk_status_row = mysql_fetch_assoc($chk_status_res);
+
+						if ($chk_status_row['status'] == 'P' and $vmyytavissa == 0) continue;
 
 						if ((($vmyytavissa > 0 or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S') and strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"])) or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
 

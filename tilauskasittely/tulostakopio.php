@@ -2268,7 +2268,8 @@
 			}
 		}
 	}
-
-	if (@include("inc/footer.inc"));
-	elseif (@include("footer.inc"));
-	else exit;
+	
+	if ($tee != 'NAYTATILAUS') {
+		if (@include("inc/footer.inc"));
+		elseif (@include("footer.inc"));
+	}

@@ -752,7 +752,7 @@
 					ifnull(samankaltaiset.isatuoteno, tuote.tuoteno) tuoteno,
 					ifnull(samankaltainen_tuote.nimitys, tuote.nimitys) nimitys,
 					ifnull(samankaltainen_tuote.valmistuslinja, tuote.valmistuslinja) valmistuslinja,
-					tuote.valmistusaika_sekunneissa,
+					avg(tuote.valmistusaika_sekunneissa) valmistusaika_sekunneissa,
 					{$toimittaja_select}
 					FROM tuote
 					JOIN tuoteperhe ON (tuoteperhe.yhtio = tuote.yhtio
@@ -768,7 +768,7 @@
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.ei_saldoa = ''
 					{$tuote_where}
-					GROUP BY 1, 2, 3, 4";
+					GROUP BY 1, 2, 3";
 		$res = pupe_query($query);
 
 		// Jos yhteens‰n‰kym‰, ei ehcota mit‰‰n

@@ -23597,6 +23597,42 @@ if (!function_exists('laske_siirrettava_maara')) {
 	}
 }
 
+if (!function_exists('hae_tilauksen_rekisterinumerot')) {
+	function hae_tilauksen_rekisterinumerot($tilausnumero) {
+		global $kukarow, $yhtiorow;
+
+		if ($tilausnumero == '') {
+			return array();
+		}
+
+		//Tilausrivi pit‰‰ joinaa, jottei tule poistettuja rekisterinumeroita
+		$query = "	SELECT tilausrivin_lisatiedot.rekisterinumero
+					FROM tilausrivin_lisatiedot
+					JOIN tilausrivi
+					ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+						AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus )
+					WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivin_lisatiedot.vanha_otunnus = '{$tilausnumero}'
+					ORDER BY tilausrivi.tunnus DESC";
+		$result = pupe_query($query);
+
+		$rekisterinumerot = array();
+		$onko_syotetty_muita_kuin_tyhjia = false;
+		while($rekisterinumero = mysql_fetch_assoc($result)) {
+			if ($rekisterinumero['rekisterinumero'] != '') {
+				$onko_syotetty_muita_kuin_tyhjia = true;
+			}
+			$rekisterinumerot[$rekisterinumero['rekisterinumero']] = $rekisterinumero;
+		}
+
+		if ($onko_syotetty_muita_kuin_tyhjia) {
+			return $rekisterinumerot;
+		}
+
+		return array();
+	}
+}
+
 if (!function_exists('paivita_ohjausmerkki')) {
 	function paivita_ohjausmerkki($laskurow) {
 		global $kukarow;

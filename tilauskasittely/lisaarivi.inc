@@ -57,6 +57,16 @@
 	if (!isset($paikka)) 			$paikka = "";
 	if (!isset($perhekielto)) 		$perhekielto = "";
 	if (!isset($valmistuslinja))	$valmistuslinja = "";
+	if (!isset($rekisterinumero))	$rekisterinumero = "";
+	if (!isset($jo_syotetty_rekisterinumero)) $jo_syotetty_rekisterinumero = "";
+
+	if ($rekisterinumero == '') {
+		//Kun yhtion_parametri myyntitilausrivi_rekisterinumero == K, käyttöliittymästä on mahdollisuus syöttää tilausriville rekisterinumero.
+		//Käyttöliittymässä on 2 valintaa. input rekisterinumero ja dropdown jo_syotetty_rekisterinumero. Jos rekisterinumero on syötetty, yliajaa se dropdownin
+		$rekisterinumero = $jo_syotetty_rekisterinumero;
+	}
+
+	$rekisterinumero = strtoupper($rekisterinumero);
 
 	if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely_tuoteperhe'] == 'U') {
 		$perhekielto = "Y";
@@ -1571,13 +1581,6 @@
 
 								$query_erikoisale_lisa = trim($lis_netto) != 'N' ? " erikoisale = '{$laskurow['erikoisale']}', " : '';
 
-								if (isset($rekisterinumero) and trim($rekisterinumero) != "") {
-
-									if ($kommentti != "") $kommentti .= "\n";
-
-									$kommentti .= t("Rekisterinumero")." $rekisterinumero";
-								}
-
 								$var2 = '';
 
 								if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
@@ -1677,6 +1680,7 @@
 												SET
 												positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
 												toimittajan_tunnus		= '$toimittajan_tunnus',
+												rekisterinumero			= '{$rekisterinumero}',
 												muutospvm				= now(),
 												muuttaja				= '$kukarow[kuka]',
 												erikoistoimitus_myynti	= '$myy_erikoistoimitus[$indeksi]'
@@ -1703,6 +1707,7 @@
 												erikoistoimitus_myynti 	= '$myy_erikoistoimitus[$indeksi]',
 												ohita_kerays			= '{$myy_ohita_kerays[$indeksi]}',
 												vanha_otunnus			= '$kukarow[kesken]',
+												rekisterinumero			= '{$rekisterinumero}',
 												jarjestys				= '$jarjestys',
 												luontiaika				= now(),
 												laatija 				= '$kukarow[kuka]'
@@ -2605,13 +2610,6 @@
 				}
 			}
 
-			if (isset($rekisterinumero) and trim($rekisterinumero) != "") {
-
-				if ($kommentti != "") $kommentti .= "\n";
-
-				$kommentti .= t("Rekisterinumero")." $rekisterinumero";
-			}
-
 			// jos meillä on vanha laadittuaikaa, niin käytetää sitä
 			if ($rivilaadittu != "" and $rivitunnus != 0) {
 				$vanharivilaadittu = "'$rivilaadittu'";
@@ -2801,6 +2799,7 @@
 							SET
 							positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
 							toimittajan_tunnus	= '$toimittajan_tunnus',
+							rekisterinumero		= '{$rekisterinumero}',
 							muutospvm			= now(),
 							muuttaja			= '$kukarow[kuka]',
 							ei_nayteta			= '{$puu_ein[$i]}'
@@ -2828,6 +2827,7 @@
 							vanha_otunnus		= '$kukarow[kesken]',
 							ei_nayteta			= '{$puu_ein[$i]}',
 							ohita_kerays 		= '{$puu_ohiker[$i]}',
+							rekisterinumero		= '{$rekisterinumero}',
 							luontiaika			= now(),
 							laatija 			= '$kukarow[kuka]'
 							{$tlisatied_lisa}

@@ -1616,6 +1616,9 @@ else {
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 								AND lasku.tunnus = '{$_otunnus}'";
 					$loopres = pupe_query($query);
+
+					if (mysql_num_rows($loopres) == 0) continue;
+
 					$looprow = mysql_fetch_assoc($loopres);
 
 					$xml = simplexml_load_string("<?xml version='1.0' encoding='utf-8'?><Message></Message>");
@@ -1626,10 +1629,10 @@ else {
 					$messageheader->addChild('Receiver', 'Posten');
 
 					$custpickinglist = $xml->addChild('CustPickingList');
-					$custpickinglist->addChild('SalesId', $_otunnus);
-					$custpickinglist->addChild('PickingListId', $_otunnus);
-					$custpickinglist->addChild('CustOrderNumber', 0); // Magentosta?
-					$custpickinglist->addChild('CustReference', $looprow['viesti']);
+					$custpickinglist->addChild('SalesId', substr($_otunnus, 0, 20));
+					$custpickinglist->addChild('PickingListId', substr($_otunnus, 0, 20));
+					$custpickinglist->addChild('CustOrderNumber', substr($looprow['asiakkaan_tilausnumero'], 0, 20)); // Magentosta?
+					$custpickinglist->addChild('CustReference', substr($looprow['viesti'], 0, 50));
 					$custpickinglist->addChild('OrderCode', 'U');
 					$custpickinglist->addChild('OrderType', 'SO');
 
@@ -1641,8 +1644,8 @@ else {
 
 					$custpickinglist->addChild('UnloadingDate', 0);
 					$custpickinglist->addChild('OrderDate', 0);
-					$custpickinglist->addChild('DlvTerm', $looprow['toimitusehto']);
-					$custpickinglist->addChild('PickingInstruction', $looprow['sisviesti2']);
+					$custpickinglist->addChild('DlvTerm', substr($looprow['toimitusehto'], 0, 10));
+					$custpickinglist->addChild('PickingInstruction', substr($looprow['sisviesti2'], 0, 128));
 					$custpickinglist->addChild('SalesOffice', 0);
 					$custpickinglist->addChild('SalesContact', 0);
 					$custpickinglist->addChild('Warehouse', 0);
@@ -1650,22 +1653,22 @@ else {
 
 					$orderedby = $custpickinglist->addChild('OrderedBy');
 					$orderedby->addChild('CustAccount', 0);
-					$orderedby->addChild('CustName', trim($looprow['nimi'].' '.$looprow['nimitark']));
-					$orderedby->addChild('CustStreet', $looprow['osoite']);
-					$orderedby->addChild('CustStreet2', $looprow['osoite']);
-					$orderedby->addChild('CustPostCode', $looprow['postino']);
-					$orderedby->addChild('CustCity', $looprow['postitp']);
-					$orderedby->addChild('CustCountry', $looprow['maa']);
+					$orderedby->addChild('CustName', substr(trim($looprow['nimi'].' '.$looprow['nimitark'], 0, 50)));
+					$orderedby->addChild('CustStreet', substr($looprow['osoite'], 0, 50));
+					$orderedby->addChild('CustStreet2', substr($looprow['osoite'], 0, 50));
+					$orderedby->addChild('CustPostCode', substr($looprow['postino'], 0, 10));
+					$orderedby->addChild('CustCity', substr($looprow['postitp'], 0, 30));
+					$orderedby->addChild('CustCountry', substr($looprow['maa'], 0, 10));
 					$orderedby->addChild('Email', $looprow['email']);
 
 					$receiver = $custpickinglist->addChild('Receiver');
 					$receiver->addChild('RecCustAccount', 0);
-					$receiver->addChild('RecCustName', trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark']));
-					$receiver->addChild('RecCustStreet', $looprow['toim_osoite']);
-					$receiver->addChild('RecCustStreet2', $looprow['toim_osoite']);
-					$receiver->addChild('RecCustPostCode', $looprow['toim_postino']);
-					$receiver->addChild('RecCustCity', $looprow['toim_postitp']);
-					$receiver->addChild('RecCustCountry', $looprow['toim_maa']);
+					$receiver->addChild('RecCustName', substr(trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark'], 0, 50)));
+					$receiver->addChild('RecCustStreet', substr($looprow['toim_osoite'], 0, 50));
+					$receiver->addChild('RecCustStreet2', substr($looprow['toim_osoite'], 0, 50));
+					$receiver->addChild('RecCustPostCode', substr($looprow['toim_postino'], 0, 10));
+					$receiver->addChild('RecCustCity', substr($looprow['toim_postitp'], 0, 30));
+					$receiver->addChild('RecCustCountry', substr($looprow['toim_maa'], 0, 10));
 					$receiver->addChild('RecCustPhone', 0); // wat toim_puhelinnumero
 
 					$query = "	SELECT tunnus
@@ -1676,8 +1679,8 @@ else {
 					$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
 
 					$transport = $custpickinglist->addChild('Transport');
-					$transport->addChild('TransportAccount', $toimitustapa_chk_row['tunnus']);
-					$transport->addChild('TransportInstruction', '');
+					$transport->addChild('TransportAccount', substr($toimitustapa_chk_row['tunnus'], 0, 10));
+					$transport->addChild('TransportInstruction', substr('', 0, 250));
 					$transport->addChild('FreightPayer', 'sender');
 
 					$lines = $custpickinglist->addChild('Lines');
@@ -1691,8 +1694,8 @@ else {
 						$line = $lines->addChild('Line');
 						$line->addAttribute('No', $_line_i);
 
-						$line->addChild('TransId', $looprow['tilausrivin_tunnus']);
-						$line->addChild('ItemNumber', $looprow['eankoodi']);
+						$line->addChild('TransId', substr($looprow['tilausrivin_tunnus'], 0, 20));
+						$line->addChild('ItemNumber', substr($looprow['eankoodi'], 0, 20));
 						$line->addChild('CustItemNumber', 0);
 						$line->addChild('ItemName', 0);
 						$line->addChild('ItemText', 0);
@@ -1707,10 +1710,17 @@ else {
 						$line->addChild('DiscountPercent', 0);
 						$line->addChild('CurrencyCode', 0);
 						$line->addChild('TaxCode', 0);
-						$line->addChild('LineInfo', $looprow['kommentti']);
+						$line->addChild('LineInfo', substr($looprow['kommentti'], 0, 92));
 
 						$_line_i++;
 					}
+
+					$path = '/Users/sami/temp/makia/outbounddelivery_testit/';
+					$path = strrpos($path, '/', -1) === false ? $path.'/' : $path;
+
+					$filename = 'outbounddelivery_testi_'.md5(uniqid()).".xml";
+					file_put_contents($path.$filename, utf8_encode($xml->asXML()));
+
 				}
 			}
 

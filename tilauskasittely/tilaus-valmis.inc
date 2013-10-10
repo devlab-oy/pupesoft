@@ -1603,7 +1603,12 @@ else {
 
 				if ($_ulkoinen_jarjestelma == 'P') {
 
-					$query = "	SELECT lasku.*, tilausrivi.*, tilausrivi.tunnus AS tilausrivin_tunnus, lasku.toimaika AS lasku_toimaika, asiakas.email, tuote.eankoodi
+					$query = "	SELECT lasku.*,
+								tilausrivi.*,
+								tilausrivi.tunnus AS tilausrivin_tunnus,
+								lasku.toimaika AS lasku_toimaika,
+								asiakas.email,
+								tuote.eankoodi
 								FROM lasku
 								JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
@@ -1702,7 +1707,7 @@ else {
 						$line->addChild('DiscountPercent', 0);
 						$line->addChild('CurrencyCode', 0);
 						$line->addChild('TaxCode', 0);
-						$line->addChild('LineInfo', 0); // ????
+						$line->addChild('LineInfo', $looprow['kommentti']);
 
 						$_line_i++;
 					}

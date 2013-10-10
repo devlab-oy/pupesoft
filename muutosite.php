@@ -73,6 +73,12 @@ echo "	<script language='javascript'>
 				});
 
 			});
+			
+			$(document).ready(function() {
+				$('#lisaselite').on('keyup change blur', function() {
+					$('.selite').val($('#lisaselite').val());
+				});
+			});
 
 		</script>";
 

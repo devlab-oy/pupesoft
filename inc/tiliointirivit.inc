@@ -215,10 +215,10 @@
 		// Ei rikota rivinvaihtoja
 		$selite = str_ireplace("<br>", "(br)", $selite);
 
-		if ($selite == '') {
+		if ($selite == '' and $lisaselite != '') {
 			$selite = $lisaselite;
 		}
-		echo "<input type='text' name='selite' value = '$selite'>";
+		echo "<input type='text' class='selite' name='selite' value = '$selite'>";
 
 		if ($trow['tila'] == 'X') {
 			echo "<div style='float:right;'><a href=\"javascript:toggleGroup('eee')\"><img src='{$palvelin2}pics/lullacons/user-option-add.png'></a></div>";

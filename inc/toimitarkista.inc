@@ -10,23 +10,25 @@ if (!function_exists("toimitarkista")) {
 		if ((mysql_field_name($result, $i) == "nimi") or
 			(mysql_field_name($result, $i) == "maa") or
 			(mysql_field_name($result, $i) == "ytunnus") or
-			(mysql_field_name($result, $i) == "oletus_hyvak1") or
 			(mysql_field_name($result, $i) == "oletus_valkoodi")) {
 
-
-			if (mysql_field_name($result, $i) == "oletus_hyvak1" and $alias_set == "KAYTTAJA") {
-				$t[$i] = $tmp_nimi;
-			}
-
-			if ((trim($t[$i]) == '' and mysql_field_name($result, $i) != "oletus_hyvak1" and $yhtiorow['jalkilaskenta_kuluperuste'] == 'VS')
-					or ($alias_set == "KAYTTAJA" and mysql_field_name($result, $i) == "oletus_hyvak1" and trim($t[$i]) == '')
-					or (trim($t[$i]) == '' and mysql_field_name($result, $i) == "oletus_hyvak1" and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS')) {
+			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
 
 			if (mysql_field_name($result, $i) == "maa") {
 				$t[$i] = strtoupper($t[$i]);
 				$tmp_maakoodi = $t[$i];
+			}
+		}
+
+		if (mysql_field_name($result, $i) == "oletus_hyvak1") {
+			if ($alias_set == "KAYTTAJA") {
+				$t[$i] = $tmp_nimi;
+			}
+
+			if (($alias_set == "KAYTTAJA" and trim($t[$i]) == '') or (trim($t[$i]) == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS')) {
+				$virhe[$i] = t("Tieto puuttuu");
 			}
 		}
 
@@ -90,7 +92,7 @@ if (!function_exists("toimitarkista")) {
 			if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
 			else $ibanmaa = $tmp_maakoodi;
 
-			if (($t[$i] != '' and $yhtiorow['jalkilaskenta_kuluperuste'] == 'VS') or ($t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS')) {
+			if ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
 				// Jos SEPA-maa, tarkistetaan IBAN
 				if (tarkista_sepa($ibanmaa) and tarkista_iban($t[$i]) != $t[$i]) {
 					$virhe[$i] = t("Virheellinen IBAN!")." $t[$i]";
@@ -112,7 +114,7 @@ if (!function_exists("toimitarkista")) {
 			else $ibanmaa = $tmp_maakoodi;
 
 			// Jos SEPA-maa, tarkistetaan BIC
-			if ((tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE and $t[$i] != '' and $yhtiorow['jalkilaskenta_kuluperuste'] == 'VS') or ($t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS')) {
+			if (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
 				$virhe[$i] = t("Virheellinen BIC!")." $t[$i]";
 			}
 		}

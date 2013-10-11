@@ -6,22 +6,23 @@ require ("../inc/parametrit.inc");
 $filename = "$pupe_root_polku/datain/$tyyppi-order-".md5(uniqid(rand(),true)).".txt";
 
 echo "<script type='text/javascript'>
-        $(document).ready(function()
-        {
-            $('#valinta').attr('selectedIndex', -1);
+		$(document).ready(function() {
 
-            $('#valinta').change(function()
-            {
-                keijo = ($('#valinta option:selected').val());
+			$('#valinta').attr('selectedIndex', -1);
+
+			$('#valinta').change(function()
+			{
+				keijo = ($('#valinta option:selected').val());
+
 				if (keijo == 'multi') {
 					$('#keijo').show();
 				}
 				else {
 					$('#keijo').hide();
 				}
-            });
-        });
-    </script>";
+			});
+		});
+</script>";
 if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
 	$path_parts = pathinfo($filename);

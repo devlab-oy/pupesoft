@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists('elmaedi_otsik')) {
-	function elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi) {
+	function elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow, $asiakas_apu_row) {
 		global $yhtiorow;
 
 		$fstat = fstat($tootedi);
@@ -40,7 +40,7 @@ if (!function_exists('elmaedi_otsik')) {
 		fputs($tootedi, "INADSE_SA:$yhtiorow[osoite]\n");
 		fputs($tootedi, "INADSE_CI:$yhtiorow[postitp]\n");
 		fputs($tootedi, "INADSE_PO:$yhtiorow[postino]\n");
-		fputs($tootedi, "INADPL_RF:IT @$lasrow[toim_ovttunnus]\n");
+		fputs($tootedi, "INADPL_RF:IT @$asiakas_apu_row[verkkotunnus]\n");
 		fputs($tootedi, "INADPL_RF:ZZ @$lasrow[ytunnus]\n");
 		fputs($tootedi, "INADPL_NA:$lasrow[toim_nimi]\n");
 		fputs($tootedi, "INADPL_NX:$lasrow[toim_nimitark]\n");

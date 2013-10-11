@@ -438,7 +438,7 @@
 
 				//Kirjoitetaan failiin laskun otsikkotiedot
 				if ($lasrow["chn"] == "111") {
-					elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
+					elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow, $asiakas_apu_row);
 				}
 				elseif ($lasrow["chn"] == "112") {
 					finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", "", $nosoap);

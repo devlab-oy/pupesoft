@@ -128,6 +128,9 @@ while ($rivi = fgets($fd)) {
 
  		$edytunnus = $tarkytunnus;
 	}
+	if(isset($tilaus_valmiiksi)) {
+		require_once("tilaus-valmis.inc");
+	}
 }
 
 fclose ($fd);

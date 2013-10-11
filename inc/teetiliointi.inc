@@ -49,8 +49,20 @@
 		$valkoodi = $yhtiorow["valkoodi"];
 	}
 
+	$query = "	SELECT kurssi
+				FROM valuu
+				WHERE nimi = '$valkoodi'
+				AND yhtio  = '{$kukarow['yhtio']}'";
+	$result = pupe_query($query);
+
 	if (!isset($summa_valuutassa)) {
-		$summa_valuutassa = $summa;
+		if (mysql_num_rows($result) == 1) {
+			$vrow = mysql_fetch_assoc($result);
+			$summa_valuutassa = round($summa / $vrow['kurssi'], 2);
+		}
+		else {
+			$summa_valuutassa = $summa;
+		}
 	}
 
 	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tili, $kustp, $kohde, $projekti);

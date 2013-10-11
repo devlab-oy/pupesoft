@@ -408,6 +408,21 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				setcookie("naytetaanko_saldot", '', time()+60*60*24*30, "/");
 			}
 		}
+		
+		// Tuoteperhe
+		if ($phpnimi == "tuoteperhe.php") {
+			// Muistetaan ker‰yksen ohituksen valinta 
+			if (isset($tallenna_keksiin) and $ohita_kerays == "on") {
+				// tehd‰‰n cookie, voimassa 30 pv
+				setcookie("pupesoft_tuoteperhe", "ohitetaan", time()+60*60*24*30, "/");
+				$_COOKIE["pupesoft_tuoteperhe"] = "ohitetaan";
+			}
+			elseif (isset($tallenna_keksiin) and !isset($ohita_kerays)) {
+				// tehd‰‰n cookie, voimassa 30 pv
+				setcookie("pupesoft_tuoteperhe", "ei", time()+60*60*24*30, "/");
+				$_COOKIE["pupesoft_tuoteperhe"] = "ei";
+			}
+		}
 
 		// Unohdetaan tallennettu state jos tullaan suoraan indexsvassista
 		if (isset($pupe_DataTables) and isset($indexvas) and $indexvas == 1) {

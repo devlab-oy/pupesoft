@@ -7,40 +7,42 @@ if (!function_exists("toimitarkista")) {
 		static $tmp_edi_kuvaus, $tmp_edi_salasana, $tmp_edi_kayttaja, $tmp_edi_palvelin;
 		static $tmp_edi_kuvaus_i, $tmp_edi_salasana_i, $tmp_edi_kayttaja_i, $tmp_edi_palvelin_i;
 
-		if ((mysql_field_name($result, $i) == "nimi") or
-			(mysql_field_name($result, $i) == "maa") or
-			(mysql_field_name($result, $i) == "ytunnus") or
-			(mysql_field_name($result, $i) == "oletus_valkoodi")) {
+		$fieldname = mysql_field_name($result, $i);
+
+		if (($fieldname == "nimi") or
+			($fieldname == "maa") or
+			($fieldname == "ytunnus") or
+			($fieldname == "oletus_valkoodi")) {
 
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
 
-			if (mysql_field_name($result, $i) == "maa") {
+			if ($fieldname == "maa") {
 				$t[$i] = strtoupper($t[$i]);
 				$tmp_maakoodi = $t[$i];
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "oletus_hyvak1") {
+		if ($fieldname == "oletus_hyvak1") {
 			if ($alias_set == "KAYTTAJA") {
 				$t[$i] = $tmp_nimi;
 			}
 
-			if (($alias_set == "KAYTTAJA" and trim($t[$i]) == '') or (trim($t[$i]) == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS')) {
+			if (trim($t[$i]) == '' and ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS' or $alias_set == "KAYTTAJA")) {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "nimi") {
+		if ($fieldname == "nimi") {
 			$tmp_nimi = $t[$i];
 		}
 
-		if (mysql_field_name($result, $i) == "ultilno_maa") {
+		if ($fieldname == "ultilno_maa") {
 			$tmp_ultilno_maa = $t[$i];
 		}
 
-		if (mysql_field_name($result, $i) == "tilino" and $t[$i] != "") {
+		if ($fieldname == "tilino" and $t[$i] != "") {
 			$query = "	SELECT yhtio
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -52,7 +54,7 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "tilinumero") {
+		if ($fieldname == "tilinumero") {
 			$t[$i] = trim($t[$i]);
 
 			if ($tmp_maakoodi == strtoupper($yhtiorow['maa'])) {
@@ -78,7 +80,7 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "ultilno") {
+		if ($fieldname == "ultilno") {
 
 			if ($tmp_maakoodi != strtoupper($yhtiorow['maa']) and $t[$i] == '') {
 				$virhe[$i] = t("Tieto puuttuu");
@@ -103,7 +105,7 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "swift") {
+		if ($fieldname == "swift") {
 
 			if ($t[$i] == '') $t[$i] = $tmp_swift;
 
@@ -119,7 +121,7 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "ytunnus" and trim($t[$i]) != '') {
+		if ($fieldname == "ytunnus" and trim($t[$i]) != '') {
 			$ytunnus = trim($t[$i]);
 			$ytunnus_ind = $i;
 
@@ -164,7 +166,7 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "ohjeitapankille") {
+		if ($fieldname == "ohjeitapankille") {
 
 			if ($tmp_maakoodi=='FI' and strlen($t[$i]) != '') {
 				$virhe[$i] = t("Käytössä vain ulkomaisille toimittajille");
@@ -177,7 +179,7 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "ovttunnus") {
+		if ($fieldname == "ovttunnus") {
 			if ($tmp_maakoodi == 'FI') {
 
 				if (trim($t[$i]) == '' and !isset($hetuok)) {
@@ -200,7 +202,7 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "email" and trim($t[$i]) != '') {
+		if ($fieldname == "email" and trim($t[$i]) != '') {
 			// Tarkistetaan sähköpostiosoite
 			$email_virhe = tarkista_email($t[$i]);
 
@@ -209,11 +211,11 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "oletus_valkoodi") {
+		if ($fieldname == "oletus_valkoodi") {
 			$tmp_valkoodi = $t[$i];
 		}
 
-		if (mysql_field_name($result, $i) == "tyyppi") {
+		if ($fieldname == "tyyppi") {
 			$toimtyyppi = $t[$i]; // otetaan tää talteen
 
 			if ($toimtyyppi == "K") {
@@ -231,7 +233,7 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "tyyppi_tieto") {
+		if ($fieldname == "tyyppi_tieto") {
 
 			if ($toimtyyppi == "S") {
 				$query = "SELECT * from yhtio where konserni='$yhtiorow[konserni]' and yhtio='$t[$i]' and yhtio!='$kukarow[yhtio]'";
@@ -297,27 +299,27 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "edi_palvelin") {
+		if ($fieldname == "edi_palvelin") {
 			$tmp_edi_palvelin = trim($t[$i]);
 			$tmp_edi_palvelin_i = $i;
 		}
 
-		if (mysql_field_name($result, $i) == "edi_kayttaja") {
+		if ($fieldname == "edi_kayttaja") {
 			$tmp_edi_kayttaja = trim($t[$i]);
 			$tmp_edi_kayttaja_i = $i;
 		}
 
-		if (mysql_field_name($result, $i) == "edi_salasana") {
+		if ($fieldname == "edi_salasana") {
 			$tmp_edi_salasana = trim($t[$i]);
 			$tmp_edi_salasana_i = $i;
 		}
 
-		if (mysql_field_name($result, $i) == "edi_kuvaus") {
+		if ($fieldname == "edi_kuvaus") {
 			$tmp_edi_kuvaus = trim($t[$i]);
 			$tmp_edi_kuvaus_i = $i;
 		}
 
-		if (mysql_field_name($result, $i) == "edi_polku") {
+		if ($fieldname == "edi_polku") {
 			$tmp_edi_polku = trim($t[$i]);
 
 			if ($tmp_edi_kuvaus == 'editilaus_out_wabco.inc' or $tmp_edi_kuvaus == 'editilaus_out_excel.inc' or $tmp_edi_kuvaus == 'editilaus_out_xml.inc') {

@@ -162,7 +162,7 @@
 				echo "<br /><font class='message'>",t("Tiedoston luonti onnistui"),"</font><br />";
 			}
 			else {
-				echo "<br /><font class='message'>",t("Tiedoston luonti epäonnistui"),"</font><br />";
+				echo "<br /><font class='error'>",t("Tiedoston luonti epäonnistui"),"</font><br />";
 			}
 		}
 	}

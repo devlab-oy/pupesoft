@@ -2,6 +2,8 @@
 
 	require("inc/parametrit.inc");
 
+	if (!isset($tee)) $tee = '';
+
 	echo "<font class='head'>",t("Synkronoi tuotteet ulkoiseen j‰rjestelm‰‰n"),"</font><hr><br />";
 
 	$query = "	SELECT tuote.*, ta.selite AS synkronointi
@@ -17,125 +19,152 @@
 
 	if (mysql_num_rows($res) > 0) {
 
-		echo "<font class='message'>",t("Tuotteet joita ei ole synkronoitu"),"</font><br />";
-		echo "<font class='message'>",t("Yhteens‰ %d kappaletta", "", mysql_num_rows($res)),"</font><br /><br />";
+		if ($tee == '') {
 
-		// echo "<table>";
-		// echo "<tr>";
-		// echo "<th>",t("Tuotenumero"),"</th>";
-		// echo "<th>",t("Nimitys"),"</th>";
-		// echo "</tr>";
+			echo "<font class='message'>",t("Tuotteet joita ei ole synkronoitu"),"</font><br />";
+			echo "<font class='message'>",t("Yhteens‰ %d kappaletta", "", mysql_num_rows($res)),"</font><br /><br />";
 
-		$xml = simplexml_load_string("<?xml version='1.0' encoding='utf-8'?><Message></Message>");
+			echo "<form action='' method='post'>";
+			echo "<table>";
+			echo "<tr><td class='back' colspan='2'>";
+			echo "<input type='submit' name='tee' value='",t("L‰het‰"),"' />";
+			echo "</td></tr>";
+			echo "<tr>";
+			echo "<th>",t("Tuotenumero"),"</th>";
+			echo "<th>",t("Nimitys"),"</th>";
+			echo "</tr>";
+		}
+		else {
 
-		$messageheader = $xml->addChild('MessageHeader');
-		$messageheader->addChild('MessageType', 'MaterialMaster');
-		$messageheader->addChild('Sender', 'Makia');
-		$messageheader->addChild('Receiver', 'Posten');
+			$xml = simplexml_load_string("<?xml version='1.0' encoding='utf-8'?><Message></Message>");
 
-		$iteminformation = $xml->addChild('ItemInformation');
-		$iteminformation->addChild('TransDate', date('d-m-Y'));
-		$iteminformation->addChild('TransTime', date('H:i:s'));
+			$messageheader = $xml->addChild('MessageHeader');
+			$messageheader->addChild('MessageType', 'MaterialMaster');
+			$messageheader->addChild('Sender', 'Makia');
+			$messageheader->addChild('Receiver', 'Posten');
 
-		$items = $iteminformation->addChild('Items');
+			$iteminformation = $xml->addChild('ItemInformation');
+			$iteminformation->addChild('TransDate', date('d-m-Y'));
+			$iteminformation->addChild('TransTime', date('H:i:s'));
 
-		$i = 1;
+			$items = $iteminformation->addChild('Items');
 
-		while ($row = mysql_fetch_assoc($res)) {
-			// echo "<tr>";
-			// echo "<td>{$row['tuoteno']}</td>";
-			// echo "<td>{$row['nimitys']}</td>";
-			// echo "</tr>";
-
-			$line = $items->addChild('Line');
-			$line->addAttribute('No', $i);
-
-			$line->addChild('Type', 'U');
-			$line->addChild('ItemNumber', substr($row['eankoodi'], 0, 20));
-			$line->addChild('ItemName', substr($row['nimitys'], 0, 50));
-			$line->addChild('ProdGroup1', substr($row['try'], 0, 6));
-			$line->addChild('ProdGroup2', 0);
-			$line->addChild('SalesPrice', 0);
-			$line->addChild('Unit1', substr($row['yksikko'], 0, 10));
-			$line->addChild('Unit2', 0);
-			$line->addChild('Relation', 0);
-			$line->addChild('Weight', 0);
-			$line->addChild('NetWeight', 0);
-			$line->addChild('Volume', 0);
-			$line->addChild('Height', 0);
-			$line->addChild('Width', 0);
-			$line->addChild('Length', 0);
-			$line->addChild('PackageSize', 0);
-			$line->addChild('PalletSize', 0);
-			$line->addChild('Status', 0);
-			$line->addChild('WholesalePackageSize', 0);
-			$line->addChild('EANCode', substr($row['eankoodi'], 0, 20));
-			$line->addChild('EANCode2', 0);
-			$line->addChild('CustomsTariffNum', 0);
-			$line->addChild('AlarmLimit', 0);
-			$line->addChild('QualPeriod1', 0);
-			$line->addChild('QualPeriod2', 0);
-			$line->addChild('QualPeriod3', 0);
-			$line->addChild('FactoryNum', 0);
-			$line->addChild('UNCode', 0);
-			$line->addChild('BBDateCollect', 0);
-			$line->addChild('SerialNumbers', 0);
-			$line->addChild('SerialNumInArrival', 0);
-			$line->addChild('TaxCode', 0);
-			$line->addChild('CountryofOrigin', 0);
-			$line->addChild('PlatformQuantity', 0);
-			$line->addChild('PlatformType', 0);
-			$line->addChild('PurchasePrice', 0);
-			$line->addChild('ConsumerPrice', 0);
-			$line->addChild('OperRecommendation', 0);
-			$line->addChild('FreeText', substr($row['tuoteno'], 0, 100));
-			$line->addChild('PurchaseUnit', 0);
-			$line->addChild('ManufactItemNum', 0);
-			$line->addChild('InternationalItemNum', 0);
-			$line->addChild('Flashpoint', 0);
-			$line->addChild('SalesCurrency', 0);
-			$line->addChild('PurchaseCurrency', 0);
-			$line->addChild('Model', 0);
-			$line->addChild('ModelOrder', 0);
-			$line->addChild('TransportTemperature', 0);
-
-			// if (is_null($row['synkronointi'])) {
-
-			// 	$query = "	INSERT INTO tuotteen_avainsanat SET
-			// 				yhtio = '{$kukarow['yhtio']}',
-			// 				tuoteno = '{$row['tuoteno']}',
-			// 				kieli = '{$yhtiorow['kieli']}',
-			// 				laji = 'synkronointi',
-			// 				selite = 'x',
-			// 				laatija = '{$kukarow['kuka']}',
-			// 				luontiaika = now(),
-			// 				muutospvm = now(),
-			// 				muuttaja = '{$kukarow['kuka']}'";
-			// 	pupe_query($query);
-
-			// }
-			// else {
-
-			// 	$query = "	UPDATE tuotteen_avainsanat SET
-			// 				selite = 'x'
-			// 				WHERE yhtio = '{$kukarow['yhtio']}'
-			// 				AND tuoteno = '{$row['tuoteno']}'
-			// 				AND laji = 'synkronointi'";
-			// 	pupe_query($query_dump());
-			// }
-
-			$i++;
+			$i = 1;
 		}
 
-		echo "<pre>",var_dump($xml),"</pre>";
+		while ($row = mysql_fetch_assoc($res)) {
 
-		$path = '/Users/sami/temp/makia/materialmaster_testit/';
-		$path = strrpos($path, '/', -1) === false ? $path.'/' : $path;
+			if ($tee == '') {
 
-		$filename = 'materialmaster_testi_'.md5(uniqid()).".xml";
-		file_put_contents($path.$filename, utf8_encode($xml->asXML()));
+				echo "<tr>";
+				echo "<td>{$row['tuoteno']}</td>";
+				echo "<td>{$row['nimitys']}</td>";
+				echo "</tr>";
+			}
+			else {
 
-		// echo "</table>";
+				$line = $items->addChild('Line');
+				$line->addAttribute('No', $i);
+
+				$line->addChild('Type', 'U');
+				$line->addChild('ItemNumber', substr($row['eankoodi'], 0, 20));
+				$line->addChild('ItemName', substr($row['nimitys'], 0, 50));
+				$line->addChild('ProdGroup1', substr($row['try'], 0, 6));
+				$line->addChild('ProdGroup2', 0);
+				$line->addChild('SalesPrice', 0);
+				$line->addChild('Unit1', substr($row['yksikko'], 0, 10));
+				$line->addChild('Unit2', 0);
+				$line->addChild('Relation', 0);
+				$line->addChild('Weight', 0);
+				$line->addChild('NetWeight', 0);
+				$line->addChild('Volume', 0);
+				$line->addChild('Height', 0);
+				$line->addChild('Width', 0);
+				$line->addChild('Length', 0);
+				$line->addChild('PackageSize', 0);
+				$line->addChild('PalletSize', 0);
+				$line->addChild('Status', 0);
+				$line->addChild('WholesalePackageSize', 0);
+				$line->addChild('EANCode', substr($row['eankoodi'], 0, 20));
+				$line->addChild('EANCode2', 0);
+				$line->addChild('CustomsTariffNum', 0);
+				$line->addChild('AlarmLimit', 0);
+				$line->addChild('QualPeriod1', 0);
+				$line->addChild('QualPeriod2', 0);
+				$line->addChild('QualPeriod3', 0);
+				$line->addChild('FactoryNum', 0);
+				$line->addChild('UNCode', 0);
+				$line->addChild('BBDateCollect', 0);
+				$line->addChild('SerialNumbers', 0);
+				$line->addChild('SerialNumInArrival', 0);
+				$line->addChild('TaxCode', 0);
+				$line->addChild('CountryofOrigin', 0);
+				$line->addChild('PlatformQuantity', 0);
+				$line->addChild('PlatformType', 0);
+				$line->addChild('PurchasePrice', 0);
+				$line->addChild('ConsumerPrice', 0);
+				$line->addChild('OperRecommendation', 0);
+				$line->addChild('FreeText', substr($row['tuoteno'], 0, 100));
+				$line->addChild('PurchaseUnit', 0);
+				$line->addChild('ManufactItemNum', 0);
+				$line->addChild('InternationalItemNum', 0);
+				$line->addChild('Flashpoint', 0);
+				$line->addChild('SalesCurrency', 0);
+				$line->addChild('PurchaseCurrency', 0);
+				$line->addChild('Model', 0);
+				$line->addChild('ModelOrder', 0);
+				$line->addChild('TransportTemperature', 0);
+
+				// if (is_null($row['synkronointi'])) {
+
+				// 	$query = "	INSERT INTO tuotteen_avainsanat SET
+				// 				yhtio = '{$kukarow['yhtio']}',
+				// 				tuoteno = '{$row['tuoteno']}',
+				// 				kieli = '{$yhtiorow['kieli']}',
+				// 				laji = 'synkronointi',
+				// 				selite = 'x',
+				// 				laatija = '{$kukarow['kuka']}',
+				// 				luontiaika = now(),
+				// 				muutospvm = now(),
+				// 				muuttaja = '{$kukarow['kuka']}'";
+				// 	pupe_query($query);
+
+				// }
+				// else {
+
+				// 	$query = "	UPDATE tuotteen_avainsanat SET
+				// 				selite = 'x'
+				// 				WHERE yhtio = '{$kukarow['yhtio']}'
+				// 				AND tuoteno = '{$row['tuoteno']}'
+				// 				AND laji = 'synkronointi'";
+				// 	pupe_query($query_dump());
+				// }
+
+				$i++;
+			}
+		}
+
+		if ($tee == '') {
+
+			echo "<tr><td class='back' colspan='2'>";
+			echo "<input type='submit' name='tee' value='",t("L‰het‰"),"' />";
+			echo "</td></tr>";
+			echo "</table>";
+			echo "</form>";
+		}
+		else {
+
+			$path = '/Users/sami/temp/makia/materialmaster_testit/';
+			$path = strrpos($path, '/', -1) === false ? $path.'/' : $path;
+
+			$filename = 'materialmaster_testi_'.md5(uniqid()).".xml";
+			if (file_put_contents($path.$filename, utf8_encode($xml->asXML()))) {
+				echo "<br /><font class='message'>",t("Tiedoston luonti onnistui"),"</font><br />";
+			}
+			else {
+				echo "<br /><font class='message'>",t("Tiedoston luonti ep‰onnistui"),"</font><br />";
+			}
+		}
 	}
 	else {
 		echo "<font class='message'>",t("Kaikki tuotteet ovat synkronoitu"),"</font><br />";

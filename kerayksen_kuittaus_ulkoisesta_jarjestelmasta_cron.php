@@ -65,7 +65,7 @@
 
 				if (is_object($xml)) {
 
-					if ($xml->MessageHeader->MessageType == 'OutboundDeliveryConfirmation') {
+					if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType) and $xml->MessageHeader->MessageType == 'OutboundDeliveryConfirmation') {
 
 						$otunnus = (int) $xml->CustPackingSlip->SalesId;
 						$toimaika = $xml->CustPackingSlip->DeliveryDate;
@@ -80,12 +80,13 @@
 							$query = "	UPDATE tilausrivi
 										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.eankoodi = '{$eankoodi}' AND tuote.tuoteno = tilausrivi.tuoteno)
 										SET tilausrivi.keratty = '{$kukarow['kuka']}',
-										tilausrivi.kerattyaika = now(),
+										tilausrivi.kerattyaika = '{$toimaika} 00:00:00',
 										tilausrivi.toimitettu = '{$kukarow['kuka']}',
 										tilausrivi.toimitettuaika = '{$toimaika} 00:00:00',
 										tilausrivi.varattu = '{$keratty}'
 										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 										AND tilausrivi.tunnus = '{$tilausrivin_tunnus}'";
+							pupe_query($query);
 						}
 
 						unlink($path.$file);

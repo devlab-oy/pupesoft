@@ -3203,6 +3203,7 @@
 		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan käytetään saapumiseen liitettyjen huolinta-/rahtilaskujen summaa")."</option>";
 		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan käytetään saapumiselle syötettyä kulusummaa/kuluprosenttia")."</option>";
 		$ulos .= "<option value = 'PX' {$sel["PX"]}>".t("Virallisen varastonarvon laskentaan käytetään kululaskujen summaa, mikäli kululaskut on syötetty, muuten kulusummaa/kuluprosenttia")."</option>";
+		$ulos .= "<option value = 'VS' {$sel["VS"]}>".t("Vaihto-omaisuuslaskua ei tarvitse liittää saapumiselle, virallisen varastonarvon laskentaan käytetään kulusummaa / kuluprosenttia.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

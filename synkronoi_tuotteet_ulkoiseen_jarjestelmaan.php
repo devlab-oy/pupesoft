@@ -115,30 +115,30 @@
 				$line->addChild('ModelOrder', 0);
 				$line->addChild('TransportTemperature', 0);
 
-				// if (is_null($row['synkronointi'])) {
+				if (is_null($row['synkronointi'])) {
 
-				// 	$query = "	INSERT INTO tuotteen_avainsanat SET
-				// 				yhtio = '{$kukarow['yhtio']}',
-				// 				tuoteno = '{$row['tuoteno']}',
-				// 				kieli = '{$yhtiorow['kieli']}',
-				// 				laji = 'synkronointi',
-				// 				selite = 'x',
-				// 				laatija = '{$kukarow['kuka']}',
-				// 				luontiaika = now(),
-				// 				muutospvm = now(),
-				// 				muuttaja = '{$kukarow['kuka']}'";
-				// 	pupe_query($query);
+					$query = "	INSERT INTO tuotteen_avainsanat SET
+								yhtio = '{$kukarow['yhtio']}',
+								tuoteno = '{$row['tuoteno']}',
+								kieli = '{$yhtiorow['kieli']}',
+								laji = 'synkronointi',
+								selite = 'x',
+								laatija = '{$kukarow['kuka']}',
+								luontiaika = now(),
+								muutospvm = now(),
+								muuttaja = '{$kukarow['kuka']}'";
+					pupe_query($query);
 
-				// }
-				// else {
+				}
+				else {
 
-				// 	$query = "	UPDATE tuotteen_avainsanat SET
-				// 				selite = 'x'
-				// 				WHERE yhtio = '{$kukarow['yhtio']}'
-				// 				AND tuoteno = '{$row['tuoteno']}'
-				// 				AND laji = 'synkronointi'";
-				// 	pupe_query($query_dump());
-				// }
+					$query = "	UPDATE tuotteen_avainsanat SET
+								selite = 'x'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tuoteno = '{$row['tuoteno']}'
+								AND laji = 'synkronointi'";
+					pupe_query($query_dump());
+				}
 
 				$i++;
 			}

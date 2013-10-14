@@ -928,7 +928,7 @@
 			if (isset($srow['fakta']) and $srow['fakta'] != "") {
 				echo "<tr>";
 				echo "<td valign='top'>".t("Asiakasfakta").":</td>";
-				echo "<td>".str_replace("\n", "<br>", $srow['fakta'])."</td>";
+				echo "<td><font class='asiakasfakta'>".str_replace("\n", "<br>", $srow['fakta'])."</font></td>";
 				echo "</tr>";
 			}	
 			

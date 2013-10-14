@@ -260,7 +260,7 @@
 		$keres = pupe_query($query);
 
 		//Yhtään riviä ei ole
-		if(mysql_num_rows($keres) == 0) {
+		if (mysql_num_rows($keres) == 0) {
 			$query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 			$result = pupe_query($query);
 
@@ -275,6 +275,7 @@
 	}
 
 	if ($toim == "REKLAMAATIO" and $tee == 'VALMIS') {
+
 		$query  = "	UPDATE lasku
 					SET tila = 'L'
 					WHERE tunnus = '$laskurow[tunnus]'
@@ -282,12 +283,14 @@
 					and yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 
-		//Katotaan löytyykö tilausrivejä
-		$query = "	SELECT *
-					from tilausrivi
-					where yhtio = '$kukarow[yhtio]'
-					and otunnus = '$laskurow[tunnus]'
-					and tyyppi != 'D'";
+		// Katotaan löytyykö tilausrivejä
+		$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.asiakkaan_positio
+					FROM tilausrivi
+					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					AND tilausrivi.otunnus = '$laskurow[tunnus]'
+					AND tilausrivi.tyyppi != 'D'
+					ORDER BY tilausrivin_lisatiedot.asiakkaan_positio";
 		$keres = pupe_query($query);
 
 		//Yhtään riviä ei ole
@@ -300,8 +303,28 @@
 			$result = pupe_query($query);
 		}
 		else {
+
+			// Luodaan toimittajalle palautettavat jos niitä on
+			$palautettavat = array();
+
+			while ($kerow = mysql_fetch_assoc($keres)) {
+				if ($kerow['asiakkaan_positio'] > 0) $palautettavat[$kerow['asiakkaan_positio']] .= $kerow['tunnus'].",";
+			}
+
+			if (count($palautettavat) > 0) {
+				require("tilauskasittely/tilauksesta_myyntitilaus.inc");
+
+				foreach ($palautettavat as $asiakas => $rivit) {
+					$rivit = " AND tilausrivi.tunnus in (".substr($rivit, 0, -1).")";
+
+					$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], $rivit, '', '', '', 'KOPSAAPAIKAT', "REKLAMAATIO#$asiakas");
+					if ($tilauksesta_myyntitilaus != '') echo "$tilauksesta_myyntitilaus<br><br>";
+				}
+			}
+
 			require("tilauskasittely/tilaus-valmis.inc");
 		}
+
 		$tee = "";
 	}
 

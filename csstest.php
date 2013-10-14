@@ -44,6 +44,7 @@
 		,	'TR_COLOR'				=>	'Taulukon solun teksti'
 		,	'TUMMA_BACKGROUND'		=>	'Tumman elementin tausta'
 		,	'TUMMA_COLOR'			=>	'Tumman elementin teksti'
+		,	'ASIAKASFAKTA_COLOR'	=>	'Asiakasfakta otsikolla ja myyntitilauksella'
 		);
 
 	function getCSSDescription($css_name){

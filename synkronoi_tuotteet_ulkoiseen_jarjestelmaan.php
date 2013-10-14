@@ -11,7 +11,8 @@
 				AND tuote.status != 'P'
 				AND tuote.ei_saldoa = ''
 				AND tuote.eankoodi != ''
-				AND tuote.tuoteno like 'FW13%'";
+				AND tuote.tuoteno like 'FW13%'
+				AND ta.selite IS NULL";
 	$res = pupe_query($query);
 
 	if (mysql_num_rows($res) > 0) {

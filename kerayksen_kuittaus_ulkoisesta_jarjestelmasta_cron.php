@@ -48,6 +48,7 @@
 	$path = strrpos($path, '/', -1) === false ? $path.'/' : $path;
 
 	if ($handle = opendir($path)) {
+
 		while (false !== ($file = readdir($handle))) {
 
 			if ($file == '.' or $file == '..' or $file == '.DS_Store' or is_dir($path.$file)) continue;
@@ -87,9 +88,6 @@
 										AND tilausrivi.tunnus = '{$tilausrivin_tunnus}'";
 						}
 
-					}
-
-					if ($ok) {
 						unlink($path.$file);
 					}
 				}

@@ -4018,8 +4018,8 @@ if ($tee == '') {
 				$tuoteno_array[] = $palautus[$index]["tuoteno"];
 				$hyvityssaanto_hinta_array[$index][$tuoteno] = $palautus[$index]["hinta"];
 				$hyvityssaanto_ale_array[$index][$tuoteno] = $palautus[$index]["ale"];
-				$hyvityssaanto_kpl_array[$index][$tuoteno] = $palautus[$index]["kpl"] * -1;
-				$hyvityssaanto_kommentti_array[$index][$tuoteno] = $palautus[$index]["kommentti"];
+				$hyvityssaanto_kpl_array[$index][$tuoteno] = $palautus[$index]["kpl"] * -1;				
+				if (stripos($kommentti, $palautus[$index]["kommentti"]) === FALSE) $hyvityssaanto_kommentti_array[$index][$tuoteno] = $palautus[$index]["kommentti"];				
 				$hyvityssaanto_palautuskielto_array[$index][$tuoteno] = $palautus[$index]["palautuskielto"];
 			}
 		}
@@ -5758,7 +5758,7 @@ if ($tee == '') {
 
 							mysql_data_seek($trivityyppi_result, 0);
 
-							$paltoimiulos .= "<option value=''>".t("Valitse")."</option>";
+							$paltoimiulos .= "<option value=''>".t("Ei palauteta")."</option>";
 
 							while($trrow = mysql_fetch_assoc($tpares)) {
 								$sel = "";

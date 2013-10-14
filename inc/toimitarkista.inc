@@ -59,7 +59,6 @@ if (!function_exists("toimitarkista")) {
 
 			if ($tmp_maakoodi == strtoupper($yhtiorow['maa'])) {
 				if ((int) trim($t[$i]) != 0) {
-
 					$pankkitili = $t[$i];
 
 					if ($tmp_maakoodi == 'FI') {
@@ -70,9 +69,9 @@ if (!function_exists("toimitarkista")) {
 							$virhe[$i] = t("Pankkitili %s on virheellinen", "", $t[$i]);
 						}
 						else {
-							$t[$i]=$pankkitili;
-							$vastaus = luoiban($t[$i]);
-							$tmp_iban = $vastaus['iban'];
+							$t[$i]     = $pankkitili;
+							$vastaus   = luoiban($t[$i]);
+							$tmp_iban  = $vastaus['iban'];
 							$tmp_swift = $vastaus['swift'];
 						}
 					}
@@ -82,11 +81,11 @@ if (!function_exists("toimitarkista")) {
 
 		if ($fieldname == "ultilno") {
 
-			if ($tmp_maakoodi != strtoupper($yhtiorow['maa']) and $t[$i] == '') {
+			if ($t[$i] == '') $t[$i] = $tmp_iban;
+
+			if ($tmp_maakoodi != strtoupper($yhtiorow['maa']) and $t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
-
-			if ($t[$i] == '') $t[$i] = $tmp_iban;
 
 			// Vaaditaan isot kirjaimet
 			$t[$i] = strtoupper($t[$i]);
@@ -94,7 +93,7 @@ if (!function_exists("toimitarkista")) {
 			if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
 			else $ibanmaa = $tmp_maakoodi;
 
-			if ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
+			if ($t[$i] != '') {
 				// Jos SEPA-maa, tarkistetaan IBAN
 				if (tarkista_sepa($ibanmaa) and tarkista_iban($t[$i]) != $t[$i]) {
 					$virhe[$i] = t("Virheellinen IBAN!")." $t[$i]";
@@ -109,15 +108,21 @@ if (!function_exists("toimitarkista")) {
 
 			if ($t[$i] == '') $t[$i] = $tmp_swift;
 
+			if ($tmp_maakoodi != strtoupper($yhtiorow['maa']) and $t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
+				$virhe[$i] = t("Tieto puuttuu");
+			}
+
 			// Vaaditaan isot kirjaimet
 			$t[$i] = trim(strtoupper($t[$i]));
 
 			if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
 			else $ibanmaa = $tmp_maakoodi;
 
-			// Jos SEPA-maa, tarkistetaan BIC
-			if (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
-				$virhe[$i] = t("Virheellinen BIC!")." $t[$i]";
+			if ($t[$i] != '') {
+				// Jos SEPA-maa, tarkistetaan BIC
+				if (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE) {
+					$virhe[$i] = t("Virheellinen BIC!")." $t[$i]";
+				}
 			}
 		}
 

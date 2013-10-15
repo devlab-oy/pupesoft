@@ -9,8 +9,6 @@
 
 	// Monivalintalaatikot (osasto, try tuotemerkki...)
 	// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
-	$monivalintalaatikot = array("OSASTO", "TRY");
-
 	echo "<br><table>";
 	echo "<tr><th>",t("Rajaa tuotteita"),"</th><td nowrap>";
 
@@ -640,6 +638,10 @@
 
 			if ($joinlisa != "") {
 				$join .= $joinlisa;
+			}
+
+			if ($lisa_parametri != "") {
+				$join .= $lisa_parametri;
 			}
 
 			if ($top > 0) {

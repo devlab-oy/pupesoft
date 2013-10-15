@@ -475,7 +475,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 	$varaston_hyllypaikat_join = "";
 	$group = "";
 
-	if (!empty($yhtiorow['kerayserat'])) {
+	if ($yhtiorow['kerayserat'] == "K") {
 		$keraysvyohyke_select = "keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,";
 		$keraysvyohyke_join = " JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)";
 		$varaston_hyllypaikat_join = " JOIN varaston_hyllypaikat AS vh

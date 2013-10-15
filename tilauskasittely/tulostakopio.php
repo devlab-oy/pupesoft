@@ -1079,7 +1079,7 @@
 									$kerroinlisa2
 									WHERE tilausrivi.yhtio = '$row[yhtio]'
 									and tilausrivi.otunnus = '$row[tunnus]'
-									and tilausrivi.var != 'O'
+									and (tilausrivi.var != 'O' or tilausrivi.tyyppi='O')
 									and tilausrivi.tyyppi not in ('D','V')";
 						$sumres = pupe_query($query);
 						$sumrow = mysql_fetch_assoc($sumres);

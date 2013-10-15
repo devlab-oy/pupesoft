@@ -3203,6 +3203,7 @@
 		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n saapumiseen liitettyjen huolinta-/rahtilaskujen summaa")."</option>";
 		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n saapumiselle syˆtetty‰ kulusummaa/kuluprosenttia")."</option>";
 		$ulos .= "<option value = 'PX' {$sel["PX"]}>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n kululaskujen summaa, mik‰li kululaskut on syˆtetty, muuten kulusummaa/kuluprosenttia")."</option>";
+		$ulos .= "<option value = 'VS' {$sel["VS"]}>".t("Vaihto-omaisuuslaskua ei tarvitse liitt‰‰ saapumiselle, virallisen varastonarvon laskentaan k‰ytet‰‰n kulusummaa / kuluprosenttia.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3603,6 +3604,19 @@
 		$ulos .= "<option value = ''>".t("Ei ehdoteta seuraavaa vapaata tuotenumeroa tuotetta perustettaessa")."</option>";
 		$ulos .= "<option value = 'K' {$sel['K']}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa")."</option>";
 		$ulos .= "<option value = 'O' {$sel['O']}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa (vain ostotilauksella)")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'myyntitilausrivi_rekisterinumero') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel['K'] = $trow[$i] == 'K' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Myyntitilauksen tilausriveill‰ ei n‰ytet‰ rekisterinumerovalintaa")."</option>";
+		$ulos .= "<option value = 'K' {$sel['K']}>".t("Myyntitilauksen tilausriveill‰ n‰ytet‰‰n rekisterinumerovalinta")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

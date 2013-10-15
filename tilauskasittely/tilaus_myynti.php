@@ -4628,7 +4628,7 @@ if ($tee == '') {
 						echo "<tr><th>".t("Myytävissä")."</th><td><font class='error'>".t("Tuote loppu")."</font></td></tr>";
 					}
 				}
-				
+
 				if ($toim == "REKLAMAATIO") {
 					// Saako tuotteen palauttaa toimittajalle
 					$query = "	SELECT asiakas.tunnus, asiakas.nimi, if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
@@ -4641,15 +4641,11 @@ if ($tee == '') {
 								AND (tuotteen_avainsanat.selite is NULL or tuotteen_avainsanat.selite = '')
 								ORDER BY sorttaus";
 					$abures = pupe_query($query);
-					
+
 					if (mysql_num_rows($abures) > 0) {
-						#echo "<tr><td><table>";
-					
 						while ($trrow = mysql_fetch_assoc($abures)) {
 							echo "<tr><th>".t("Voidaan palauttaa toimittajalle")."</th><td>{$trrow['nimi']}</td></tr>";
 						}
-					
-						#echo "</table></td></tr>";
 					}
 				}
 
@@ -4711,7 +4707,7 @@ if ($tee == '') {
 						echo "</table>";
 					}
 				}
-				
+
 				echo "</td>";
 				echo "</tr>";
 				echo "</table>";

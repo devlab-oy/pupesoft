@@ -4629,7 +4629,7 @@ if ($tee == '') {
 					}
 				}
 
-				if ($toim == "REKLAMAATIO") {
+				if ($toim == "REKLAMAATIO" and $toimpalautusasiakkat != "") {
 					// Saako tuotteen palauttaa toimittajalle
 					$query = "	SELECT asiakas.tunnus, asiakas.nimi, if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
 								FROM tuotteen_toimittajat

@@ -40,6 +40,22 @@
 		exit;
 	}
 
+	if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot_kaikki') {
+
+		if (@file_exists("../inc/sahkoinen_tilausliitanta.inc")) {
+
+			$hae = 'tarkista_tehtaan_saldot_kaikki';
+			$otunnus = (int) $otunnus;
+
+			require("inc/sahkoinen_tilausliitanta.inc");
+		}
+
+		if (!isset($data)) $data = array('id' => 0, 'error' => true, 'error_msg' => utf8_encode(t("Haku ei onnistunut! Ole yhteydessä IT-tukeen")));
+
+		echo json_encode($data);
+		exit;
+	}
+
 	if ($ajax_request) {
 		if ($hae_toimittajien_saldot) {
 			$query = "	SELECT tilausrivi.tuoteno,
@@ -1433,7 +1449,13 @@
 							echo "</ul></div>";
 						}
 						echo "</td>";
-						echo "<td valign='top' $class align='right'>".($prow["tilattu"]*1)." ",strtolower($prow['yksikko']),"<br />".($prow["tilattu_ulk"]*1)." ",strtolower($prow['toim_yksikko']),"</td>";
+						echo "<td valign='top' $class align='right'>";
+
+						if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+							echo "<div class='availability {$prow['tunnus']}_availability' /> <span class='{$prow['tunnus']}_loading'></span></div>&nbsp;";
+						}
+
+						echo ($prow["tilattu"]*1)." ",strtolower($prow['yksikko']),"<br />".($prow["tilattu_ulk"]*1)." ",strtolower($prow['toim_yksikko']),"</td>";
 						echo "<td valign='top' $class align='right'>".hintapyoristys($prow["hinta"])."</td>";
 
 						$alespan = 8;
@@ -1755,6 +1777,11 @@
 						<input type='Submit' value='".t("Tilaus valmis")."' {$saldo_tarkistus_onclick}>
 						</form>
 						</td>";
+
+				if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+					$hae = 'nappi_kaikki';
+					require("inc/sahkoinen_tilausliitanta.inc");
+				}
 
 				if ($toim != "HAAMU") {
 					echo "	<td class='back''>

@@ -1182,9 +1182,9 @@
 									$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tehdas_saldo_row['tt_tunnus']}' />";
 							 	}
 
-							 	if ($tehdas_saldo_row['selitetark_2'] != "") {
-								 	$vastaavat_table .= "<font class='{$tehtaan_saldon_font}'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</font>";
-								 }
+							 	if ($tehdas_saldo_row['selitetark_2'] == '') {
+							 		$vastaavat_table .= "<font class='{$tehtaan_saldon_font}'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</font>";
+							 	}
 
 								$vastaavat_table .= "</td>";
 

@@ -4374,6 +4374,14 @@ if ($tee == '') {
 		echo "</form></table>";
 	}
 
+	// Sarakem‰‰r‰ ruudulla
+	$sarakkeet = 0;
+	$sarakkeet_alku = 0;
+
+	// Sarakkeiden otsikot
+	$headerit = "<tr>$jarjlisa<th>#</th>";
+	$sarakkeet++;
+
 	if ($toim == "REKLAMAATIO") {
 		$query = "	SELECT asiakas.*
 					FROM asiakkaan_avainsanat
@@ -4994,14 +5002,6 @@ if ($tee == '') {
 			}
 
 			echo "<br><table>";
-
-			// Sarakem‰‰r‰ ruudulla
-			$sarakkeet = 0;
-			$sarakkeet_alku = 0;
-
-			// Sarakkeiden otsikot
-			$headerit = "<tr>$jarjlisa<th>#</th>";
-			$sarakkeet++;
 
 			if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T" or $kukarow["yhtio"] == "savt") {
 				$trivityyppi_result = t_avainsana("TRIVITYYPPI", "", "ORDER BY avainsana.selitetark");

@@ -65,6 +65,6 @@
 						);
 
 		if (pupesoft_sahkoposti($parametri)) {
-			echo t("Sähköpostin lähetys onnitstui").": {$rakir_row['asiakas_email']}<br />";
+			echo t("Sähköpostin lähetys onnistui").": {$rakir_row['asiakas_email']}<br />";
 		}
 	}

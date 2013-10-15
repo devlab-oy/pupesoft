@@ -38,7 +38,7 @@
 
 			$tehdaan_uusi_otsikko = TRUE;
 
-			// Katsotaan löytyykö jo sopiva otsikkom jos ei nyyn tehdään uusi, eli tässä tapauksessa ei kopsata vanhaa ikinä
+			// Katsotaan löytyykö jo sopiva otsikko, jos ei niin tehdään uusi, eli tässä tapauksessa ei kopsata vanhaa
 			if ($perusta == "REKLAMAATIO") {
 				$query = "	SELECT lasku.*
 							FROM lasku

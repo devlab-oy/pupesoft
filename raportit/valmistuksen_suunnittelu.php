@@ -636,14 +636,14 @@
 							AND abc_aputaulu.tyyppi = '{$abcrajaustapa}')";
 		}
 
-		// Haetaan tehdyt valmistukset
+		// Haetaan valmistukset kannasta, katotaan paljon niissä on vielä valmistettavaa
 		$query = "	SELECT
 					lasku.kohde valmistuslinja,
 					tilausrivi.tuoteno,
 					tilausrivi.osasto,
 					tilausrivi.try,
-					tilausrivi.kpl + tilausrivi.varattu maara,
-					(tilausrivi.kpl + tilausrivi.varattu) * tuote.valmistusaika_sekunneissa valmistusaika,
+					tilausrivi.varattu maara,
+					tilausrivi.varattu * tuote.valmistusaika_sekunneissa valmistusaika,
 					DATE_FORMAT(lasku.luontiaika, GET_FORMAT(DATE, 'EUR')) pvm,
 					lasku.alatila tila
 					FROM lasku
@@ -652,11 +652,14 @@
 						AND tilausrivi.tyyppi = 'W'
 						AND tilausrivi.var != 'P')
 					JOIN tuote ON (tuote.yhtio = lasku.yhtio
-						AND tuote.tuoteno = tilausrivi.tuoteno)
+						AND tuote.tuoteno = tilausrivi.tuoteno {$tuote_where})
+					{$toimittaja_join}
+					{$abc_join}						
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila = 'V'
 					AND lasku.toimaika >= '{$nykyinen_alku}'
 					AND lasku.toimaika <= '{$nykyinen_loppu}'
+					{$lisa}
 					ORDER BY lasku.kohde, lasku.toimaika, tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno";
 		$res = pupe_query($query);
 
@@ -1213,7 +1216,7 @@
 				echo "<td style='text-align:right;'>{$luvut['valmistuksessa']}</td>";
 				echo "<td style='text-align:right;'>{$luvut['valmistusmaara']}</td>";
 				echo "<td style='text-align:right;'>{$luvut['yhteensa_kpl']}</td>";
-				echo "<td style='text-align:right;'>{$luvut['valmistusaika_sekunneissa']}</td>";
+				echo "<td style='text-align:right;'>".round($luvut['valmistusaika_sekunneissa'])."</td>";
 				echo "</tr>";
 
 				// Yhteensäluvut
@@ -1228,7 +1231,7 @@
 			echo "<td class='tumma' style='text-align:right;'>{$valmistuksessa}</td>";
 			echo "<td class='tumma' style='text-align:right;'>{$valmistusmaara}</td>";
 			echo "<td class='tumma' style='text-align:right;'>{$yhteensa_kpl}</td>";
-			echo "<td class='tumma' style='text-align:right;'>{$valmistusaika}</td>";
+			echo "<td class='tumma' style='text-align:right;'>".round($valmistusaika)."</td>";
 			echo "</tr>";
 
 			echo "</tbody>";

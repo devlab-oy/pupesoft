@@ -1148,6 +1148,21 @@
 				echo "</form>";
 			}
 
+			if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+
+				$style = "width: 15px; height: 15px; display: inline-table; border-radius: 50%; -webkit-border-radius: 50%; -moz-border-radius: 50%;";
+
+				echo "&nbsp;&nbsp;&nbsp;<span class='tooltip' id='color_tooltip'><span style='{$style} background-color: #5D2; margin-right: 5px;'></span><span style='{$style} background-color: #FCF300; margin-right: 5px;'></span><span style='{$style} background-color: #E66; margin-right: 5px;'></span></span></a>";
+				echo "<div id='div_color_tooltip' class='popup' style='width: 300px; line-height: 15px; height: 60px;'>";
+				echo "<table>";
+				echo "<tr><td class='back'><span style='{$style} background-color: #5D2;'></span></td><td class='back'><span style='float: right'>",t("kysytty määrä löytyy"),"</span></td></tr>";
+				echo "<tr><td class='back'><span style='{$style} background-color: #FCF300;'></span></td><td class='back'><span style='float: right;'>",t("osa kysytystä määrästä löytyy"),"</span></td></tr>";
+				echo "<tr><td class='back'><span style='{$style} background-color: #E66'></span></td><td class='back'><span style='float: right;'>",t("kysyttyä määrää ei löydy"),"</span></td></tr>";
+				echo "<tr><td class='back'><img src='{$palvelin2}pics/lullacons/alert.png' /></td><td class='back'><span style='float: right;'>",t("kysyttyä tuotetta ei löydy"),"</span></td></tr>";
+				echo "</table>";
+				echo "</div>";
+			}
+
 			// katotaan miten halutaan sortattavan
 			$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 

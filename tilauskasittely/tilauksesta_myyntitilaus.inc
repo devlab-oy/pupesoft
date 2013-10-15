@@ -437,23 +437,32 @@
 				if ($perusta == "REKLAMAATIO") {
 					$kpl = $kpl * -1;
 
-					// TÄSSÄ BUGI, PITÄISI HAKEA TIEDOT TOIMITTAJALTA
 					$query  = "	SELECT *
 								FROM asiakas
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus  = '$asiakasjollepalautetaan'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 					$asiakasrow = mysql_fetch_assoc($result);
 
+					$query = "	SELECT toimi.tunnus
+								FROM toimi
+								JOIN tuotteen_toimittajat ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus AND tuotteen_toimittajat.tuoteno = '{$tuoteno}')
+								WHERE toimi.yhtio = '$kukarow[yhtio]'
+								AND toimi.tyyppi != 'P'
+								AND toimi.ytunnus = '{$asiakasrow['ytunnus']}'
+								LIMIT 1";
+					$result = pupe_query($query);
+					$toimirow = mysql_fetch_assoc($result);
+
 					$ostorow = array();
-					$ostorow["liitostunnus"] = $asiakasrow['tunnus'];
-					$ostorow["valkoodi"] 	 = $asiakasrow['valkoodi'];
+					$ostorow["liitostunnus"] = $toimirow['tunnus'];
+					$ostorow["valkoodi"] 	 = $toimirow['valkoodi'];
 
 					$vquery = "	SELECT nimi, kurssi, tunnus
 								FROM valuu
 								WHERE yhtio = '$kukarow[yhtio]'
-								and nimi   = '{$asiakasrow['valkoodi']}'";
-					$vresult = mysql_query($vquery) or pupe_error($vquery);
+								and nimi   = '{$toimirow['valkoodi']}'";
+					$vresult = pupe_query($vquery);
 
 					if (mysql_num_rows($vresult) == 1) {
 						$vrow = mysql_fetch_assoc($vresult);
@@ -463,7 +472,7 @@
 						$ostorow["vienti_kurssi"] = 1;
 					}
 
-					$ostorow["ytunnus"] = $asiakasrow['ytunnus'];
+					$ostorow["ytunnus"] = $toimirow['ytunnus'];
 
 					list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_val) = alehinta_osto($ostorow, $tuoterow, $kpl, "", "", "");
 

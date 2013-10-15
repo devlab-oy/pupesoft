@@ -820,7 +820,7 @@ else {
 			}
 
 			// Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina
-			if ($yhtiorow['lahetteen_tulostustapa'] == "I") {
+			if ($yhtiorow['lahetteen_tulostustapa'] == "I" and $toim != "REKLAMAATIO") {
 
 				$query = "	UPDATE lasku
 							SET tila = 'N',

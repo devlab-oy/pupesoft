@@ -72,8 +72,10 @@
 					if (tuote.tuotetyyppi='K','2 Tyˆt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 					tuote.sarjanumeroseuranta,
-					tuote.eankoodi
+					tuote.eankoodi,
+					abs(tilausrivin_lisatiedot.asiakkaan_positio) asiakkaan_positio
 					FROM tilausrivi
+					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					WHERE tilausrivi.otunnus = '$otunnus'
@@ -293,7 +295,7 @@
 					ORDER BY tilausrivin_lisatiedot.asiakkaan_positio";
 		$keres = pupe_query($query);
 
-		//Yht‰‰n rivi‰ ei ole
+		// Yht‰‰n rivi‰ ei ole
 		if (mysql_num_rows($keres) == 0) {
 			$query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 			$result = pupe_query($query);
@@ -315,10 +317,17 @@
 				require("tilauskasittely/tilauksesta_myyntitilaus.inc");
 
 				foreach ($palautettavat as $asiakas => $rivit) {
-					$rivit = " AND tilausrivi.tunnus in (".substr($rivit, 0, -1).")";
+					$rivitlisa = " AND tilausrivi.tunnus in (".substr($rivit, 0, -1).")";
 
-					$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], $rivit, '', '', '', 'KOPSAAPAIKAT', "REKLAMAATIO#$asiakas");
+					$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], $rivitlisa, '', '', '', 'KOPSAAPAIKAT', "REKLAMAATIO#$asiakas");
 					if ($tilauksesta_myyntitilaus != '') echo "$tilauksesta_myyntitilaus<br><br>";
+					
+					// P‰ivitet‰‰n rivit tilatuiksi
+					$query  = "	UPDATE tilausrivin_lisatiedot
+								SET asiakkaan_positio = asiakkaan_positio*-1
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tilausrivitunnus in (".substr($rivit, 0, -1).")";
+					$result = pupe_query($query);
 				}
 			}
 

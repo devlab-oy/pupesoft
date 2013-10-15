@@ -4018,8 +4018,8 @@ if ($tee == '') {
 				$tuoteno_array[] = $palautus[$index]["tuoteno"];
 				$hyvityssaanto_hinta_array[$index][$tuoteno] = $palautus[$index]["hinta"];
 				$hyvityssaanto_ale_array[$index][$tuoteno] = $palautus[$index]["ale"];
-				$hyvityssaanto_kpl_array[$index][$tuoteno] = $palautus[$index]["kpl"] * -1;				
-				if (stripos($kommentti, $palautus[$index]["kommentti"]) === FALSE) $hyvityssaanto_kommentti_array[$index][$tuoteno] = $palautus[$index]["kommentti"];				
+				$hyvityssaanto_kpl_array[$index][$tuoteno] = $palautus[$index]["kpl"] * -1;
+				if (stripos($kommentti, $palautus[$index]["kommentti"]) === FALSE) $hyvityssaanto_kommentti_array[$index][$tuoteno] = $palautus[$index]["kommentti"];
 				$hyvityssaanto_palautuskielto_array[$index][$tuoteno] = $palautus[$index]["palautuskielto"];
 			}
 		}
@@ -4374,7 +4374,30 @@ if ($tee == '') {
 		echo "</form></table>";
 	}
 
-	 // erikoisceisi, jos halutaan PIENITUOTEKYSELY tilaustaulussa, mutta emme halua näyttää niitä kun lisätään lisävarusteita
+	if ($toim == "REKLAMAATIO") {
+		$query = "	SELECT asiakas.*
+					FROM asiakkaan_avainsanat
+					JOIN asiakas ON (asiakas.yhtio=asiakkaan_avainsanat.yhtio and asiakas.tunnus=asiakkaan_avainsanat.liitostunnus)
+					WHERE asiakkaan_avainsanat.yhtio = '$kukarow[yhtio]'
+					and asiakkaan_avainsanat.laji = 'TPALAUTUS'
+					and asiakkaan_avainsanat.avainsana != ''";
+		$tpares = pupe_query($query);
+
+		if (mysql_num_rows($tpares) > 0) {
+			$headerit .= "<th>".t("Palauta toimittajalle")."</th>";
+			$sarakkeet++;
+
+			$toimpalautusasiakkat = "";
+
+			while ($trrow = mysql_fetch_assoc($tpares)) {
+				$toimpalautusasiakkat .= $trrow['tunnus'].",";
+			}
+
+			$toimpalautusasiakkat = substr($toimpalautusasiakkat, 0, -1);
+		}
+	}
+
+	// erikoisceisi, jos halutaan PIENITUOTEKYSELY tilaustaulussa, mutta emme halua näyttää niitä kun lisätään lisävarusteita
 	if ((($tuoteno != '' or (is_array($tuoteno_array) and count($tuoteno_array) > 1)) and $kpl == '' and $kukarow['extranet'] == '') or ($toim == "REKLAMAATIO" and isset($trow['tuoteno']) and $trow['tuoteno'] != '' and $kukarow['extranet'] == '')) {
 
 		if ($toim == "REKLAMAATIO" and $tuoteno == '') {
@@ -4605,6 +4628,32 @@ if ($tee == '') {
 						echo "<tr><th>".t("Myytävissä")."</th><td><font class='error'>".t("Tuote loppu")."</font></td></tr>";
 					}
 				}
+				
+				if ($toim == "REKLAMAATIO") {
+					// Saako tuotteen palauttaa toimittajalle
+					$query = "	SELECT asiakas.tunnus, asiakas.nimi, if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
+								FROM tuotteen_toimittajat
+								JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+								JOIN asiakas ON (toimi.yhtio = asiakas.yhtio AND toimi.ytunnus = asiakas.ytunnus and asiakas.tunnus in ({$toimpalautusasiakkat}))
+								LEFT JOIN tuotteen_avainsanat ON (tuotteen_toimittajat.yhtio = tuotteen_avainsanat.yhtio AND tuotteen_toimittajat.tuoteno = tuotteen_avainsanat.tuoteno AND tuotteen_avainsanat.laji = 'toimpalautus')
+								WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+								AND tuotteen_toimittajat.tuoteno = '$trow[tuoteno]'
+								AND (tuotteen_avainsanat.selite is NULL or tuotteen_avainsanat.selite = '')
+								ORDER BY sorttaus";
+					$abures = pupe_query($query);
+					
+					if (mysql_num_rows($abures) > 0) {
+						#echo "<tr><td><table>";
+					
+						while ($trrow = mysql_fetch_assoc($abures)) {
+							echo "<tr><th>".t("Voidaan palauttaa toimittajalle")."</th><td>{$trrow['nimi']}</td></tr>";
+						}
+					
+						#echo "</table></td></tr>";
+					}
+				}
+
+
 				echo "</table>";
 				echo "</td>";
 
@@ -4662,14 +4711,14 @@ if ($tee == '') {
 						echo "</table>";
 					}
 				}
-
+				
 				echo "</td>";
 				echo "</tr>";
 				echo "</table>";
 
 			}
 		}
-	} #end if erkoisceisi
+	}
 
 	// jos ollaan jo saatu tilausnumero aikaan listataan kaikki tilauksen rivit..
 	if ((int) $kukarow["kesken"] != 0) {
@@ -4963,21 +5012,6 @@ if ($tee == '') {
 
 				if (mysql_num_rows($trivityyppi_result) > 0) {
 					$headerit .= "<th>".t("Tyyppi")."</th>";
-					$sarakkeet++;
-				}
-			}
-
-			if ($toim == "REKLAMAATIO") {
-				$query = "	SELECT asiakas.*
-							FROM asiakkaan_avainsanat
-							JOIN asiakas ON (asiakas.yhtio=asiakkaan_avainsanat.yhtio and asiakas.tunnus=asiakkaan_avainsanat.liitostunnus)
-							WHERE asiakkaan_avainsanat.yhtio = '$kukarow[yhtio]'
-							and asiakkaan_avainsanat.laji = 'TPALAUTUS'
-							and asiakkaan_avainsanat.avainsana != ''";
-				$tpares = pupe_query($query);
-
-				if (mysql_num_rows($tpares) > 0) {
-					$headerit .= "<th>".t("Palauta toimittajalle")."</th>";
 					$sarakkeet++;
 				}
 			}
@@ -5724,11 +5758,12 @@ if ($tee == '') {
 
 							$trivityyulos .= "<option value=''>".t("Valitse")."</option>";
 
-							while($trrow = mysql_fetch_assoc($trivityyppi_result)) {
+							while ($trrow = mysql_fetch_assoc($trivityyppi_result)) {
 								$sel = "";
 								if ($trrow["selite"]==$row["positio"]) $sel = 'selected';
 								$trivityyulos .= "<option value='$trrow[selite]' $sel>$trrow[selitetark]</option>";
 							}
+
 							$trivityyulos .= "</select></form>";
 						}
 					}
@@ -5740,32 +5775,56 @@ if ($tee == '') {
 				if ($toim == "REKLAMAATIO") {
 					if ($muokkauslukko_rivi == "" and $row["ei_nayteta"] == "") {
 						if (mysql_num_rows($tpares) > 0) {
-							//annetaan valita tilausrivin tyyppi
-							$paltoimiulos .= "	<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='lisatietoja'>
-												<input type='hidden' name='toim' value='$toim'>
-												<input type='hidden' name='lopetus' value='$lopetus'>
-												<input type='hidden' name='ruutulimit' value='$ruutulimit'>
-												<input type='hidden' name='projektilla' value='$projektilla'>
-												<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
-												<input type='hidden' name='mista' value = '$mista'>
-												<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
-												<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
-												<input type='hidden' name='menutila' value='$menutila'>
-												<input type='hidden' name='tila' value = 'ASPOSITIO_RIVILLE'>
-												<input type='hidden' name='orig_tila' value='$orig_tila'>
-												<input type='hidden' name='orig_alatila' value='$orig_alatila'>
-												<select name='asiakkaan_positio' onchange='submit();' $state>";
 
-							mysql_data_seek($trivityyppi_result, 0);
+							// Saako tuotteen palauttaa toimittajalle
+							$query = "	SELECT asiakas.tunnus, asiakas.nimi, if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
+										FROM tuotteen_toimittajat
+										JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+										JOIN asiakas ON (toimi.yhtio = asiakas.yhtio AND toimi.ytunnus = asiakas.ytunnus and asiakas.tunnus in ({$toimpalautusasiakkat}))
+										LEFT JOIN tuotteen_avainsanat ON (tuotteen_toimittajat.yhtio = tuotteen_avainsanat.yhtio AND tuotteen_toimittajat.tuoteno = tuotteen_avainsanat.tuoteno AND tuotteen_avainsanat.laji = 'toimpalautus')
+										WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+										AND tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
+										AND (tuotteen_avainsanat.selite is NULL or tuotteen_avainsanat.selite = '')
+										ORDER BY sorttaus";
+							$abures = pupe_query($query);
 
-							$paltoimiulos .= "<option value=''>".t("Ei palauteta")."</option>";
+							if (mysql_num_rows($abures) > 0) {
 
-							while($trrow = mysql_fetch_assoc($tpares)) {
-								$sel = "";
-								if ($trrow["tunnus"]==$row["asiakkaan_positio"]) $sel = 'selected';
-								$paltoimiulos .= "<option value='$trrow[tunnus]' $sel>$trrow[nimi]</option>";
+								$disalisa = "";
+
+								if ($row["asiakkaan_positio"] < 0) {
+									$disalisa = "DISABLED";
+								}
+
+								//annetaan valita tilausrivin tyyppi
+								$paltoimiulos .= "	<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='lisatietoja'>
+													<input type='hidden' name='toim' value='$toim'>
+													<input type='hidden' name='lopetus' value='$lopetus'>
+													<input type='hidden' name='ruutulimit' value='$ruutulimit'>
+													<input type='hidden' name='projektilla' value='$projektilla'>
+													<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
+													<input type='hidden' name='mista' value = '$mista'>
+													<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+													<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
+													<input type='hidden' name='menutila' value='$menutila'>
+													<input type='hidden' name='tila' value = 'ASPOSITIO_RIVILLE'>
+													<input type='hidden' name='orig_tila' value='$orig_tila'>
+													<input type='hidden' name='orig_alatila' value='$orig_alatila'>
+													<select name='asiakkaan_positio' onchange='submit();' $state $disalisa>";
+
+								$paltoimiulos .= "<option value=''>".t("Ei palauteta")."</option>";
+
+								while ($trrow = mysql_fetch_assoc($abures)) {
+									$sel = "";
+									if ($trrow["tunnus"]==abs($row["asiakkaan_positio"])) $sel = 'selected';
+									$paltoimiulos .= "<option value='$trrow[tunnus]' $sel>$trrow[nimi]</option>";
+								}
+
+								$paltoimiulos .= "</select></form>";
 							}
-							$paltoimiulos .= "</select></form>";
+							else {
+								$paltoimiulos = t("Ei voida palauttaa");
+							}
 						}
 					}
 					elseif (mysql_num_rows($tpares) > 0) {

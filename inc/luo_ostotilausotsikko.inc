@@ -43,6 +43,8 @@ if (!function_exists('luo_ostotilausotsikko')) {
 		$params['myytil_toimitustapa'] = (!empty($params['myytil_toimitustapa'])) ? $params['myytil_toimitustapa'] : '';
 		$params['myytil_liitostunnus'] = (!empty($params['myytil_liitostunnus'])) ? $params['myytil_liitostunnus'] : '';
 
+		$params['varasto'] = (!empty($params['varasto'])) ? $params['varasto'] : $kukarow['oletus_ostovarasto'];
+
 		$tiltoi = hae_toimittaja($params['liitostunnus']);
 
 		// Jos ostotilausta ei ole luotu myyntitilaukselta (tilaus_osto.php ~545), k‰ytet‰‰n toimittajan oletuksia
@@ -87,7 +89,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
 					and toim_postino	= '{$toim_postino}'
 					and toim_postitp	= '{$toim_postitp}'
 					and toim_maa		= '{$toim_maa}'
-					and varasto 		= '{$kukarow['oletus_ostovarasto']}'
+					and varasto 		= '{$params['varasto']}'
 					and ohjausmerkki 	= '{$params['ohjausmerkki']}'";
 				break;
 			case '2':
@@ -162,7 +164,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
 						toim_postitp 		= '{$toim_postitp}',
 						valkoodi 			= '{$valkoodi}',
 						vanhatunnus			= {$params['toimipaikka']},
-						varasto 			= '{$kukarow['oletus_ostovarasto']}',
+						varasto 			= '{$params['varasto']}',
 						verkkotunnus		= '{$params['myytil_liitostunnus']}',
 						vienti_kurssi 		= '{$vrow['kurssi']}',
 						viesti 				= '{$params['myytil_viesti']}',

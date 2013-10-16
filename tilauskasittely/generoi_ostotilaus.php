@@ -9,7 +9,7 @@
 
 		$ytunnus = mysql_real_escape_string($ytunnus);
 
-		$muutparametrit = $tee."/".serialize($kohdevarastot)."/".$mul_osasto."/".$mul_try."/".$mul_tme."/".$abcrajaus."/".$kesken."/".$generoi;
+		$muutparametrit = $tee."/".serialize($kohdevarastot)."/".$mul_osasto."/".$mul_try."/".$mul_tme."/".$abcrajaus."/".$generoi;
 
 		require ("inc/kevyt_toimittajahaku.inc");
 
@@ -18,7 +18,7 @@
 		}
 		else {
 			if ($muutparametrit != '') {
-				list($tee, $kohdevarastot, $mul_osasto, $mul_try, $mul_tme, $abcrajaus, $kesken, $generoi) = explode("/", $muutparametrit);
+				list($tee, $kohdevarastot, $mul_osasto, $mul_try, $mul_tme, $abcrajaus, $generoi) = explode("/", $muutparametrit);
 				$kohdevarastot = unserialize($kohdevarastot);
 			}
 		}
@@ -154,16 +154,6 @@
 	}
 
 	echo "</select>";
-
-	if ($kesken == "X") {
-		$c = "checked";
-	}
-	else {
-		$c = "";
-	}
-
-	echo "<tr><th>",t("Jätä ostotilaus kesken"),":</th><td><input type='checkbox' name = 'kesken' value='X' {$c}></td></tr>";
-
 	echo "</table><br><input type = 'submit' name = 'generoi' value = '",t("Generoi ostotilaus"),"'></form>";
 
 	if ($tee == 'M' and isset($generoi) and $toimittajaid > 0 and count($kohdevarastot) > 0) {
@@ -376,15 +366,6 @@
 		}
 		else {
 			echo "<font class='message'>",t("Luotiin %s ostotilausta", $kieli, count($otsikot)),"</font><br /><br /><br />";
-
-			if ($kesken != "X") {
-				foreach ($otsikot as $ots) {
-
-				}
-			}
-			else {
-				echo "<font class='message'>",t("Siirtolistat jätettiin kesken"),"</font><br /><br /><br />";
-			}
 		}
 
 		$query = "UPDATE kuka SET kesken = 0 WHERE yhtio = '{$kukarow['yhtio']}' and kuka = '{$kukarow['kuka']}'";

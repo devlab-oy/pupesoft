@@ -48,7 +48,7 @@
 	echo "<th>".t("Listaustyyppi")."</th>";
 	echo "<td>";
 	echo "<select name='listaustyyppi'>";
-	echo "<option value = 'kappaleet'>".t("Listauksessa n‰ytet‰‰n myynti kappaleina")."</option>";
+	echo "<option value = 'kappaleet'>".t("Listauksessa n‰ytet‰‰n myynti ja kulutus kappaleina")."</option>";
 	echo "<option value = 'hinnat'>".t("Listauksessa n‰ytet‰‰n myynti euroina")."</option>";
 	echo "</select>";
 	echo "</td>";
@@ -299,10 +299,10 @@
 
 				if ($total_rows <= 1000) {
 					$varastotilasto_table .= "<tr class='aktiivi'>";
-					$varastotilasto_table .= "<td>$row[osasto]</td>";
-					$varastotilasto_table .= "<td>$row[try]</td>";
+					$varastotilasto_table .= "<td nowrap>$row[osasto]</td>";
+					$varastotilasto_table .= "<td nowrap>$row[try]</td>";
 					$varastotilasto_table .= "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
-					$varastotilasto_table .= "<td>$row[nimitys]</td>";
+					$varastotilasto_table .= "<td nowrap>$row[nimitys]</td>";
 					$varastotilasto_table .= "<td align='right'>$saldo</td>";
 					$varastotilasto_table .= "<td align='right'>$varastonarvo</td>";
 					$varastotilasto_table .= "<td align='right'>".hintapyoristys($row['myyntihinta'])."</td>";

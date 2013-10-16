@@ -17,7 +17,7 @@
 					where yhtio = '$kukarow[yhtio]'
 					AND komento != 'EDI'
 					ORDER BY kirjoitin";
-		$kires = mysql_query($query) or pupe_error($query);
+		$kires = pupe_query($query);
 
 		$ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
 
@@ -72,7 +72,7 @@
 					FROM maat
 					WHERE nimi != ''
 					ORDER BY koodi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 		$ulos = "<td><select name='$nimi'>";
 
 		$ulos .= "<option value = '' ></option>";

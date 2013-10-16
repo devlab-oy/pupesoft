@@ -160,7 +160,7 @@
 		global $kukarow, $edellinen_alku, $edellinen_loppu, $nykyinen_alku, $nykyinen_loppu, $ryhmanimet;
 
 		// Tehd‰‰n kaudet p‰iv‰m‰‰rist‰
-		$alku_kausi = substr(str_replace("-", "", $nykyinen_alku), 0, 6);
+		$alku_kausi  = substr(str_replace("-", "", $nykyinen_alku), 0, 6);
 		$loppu_kausi = substr(str_replace("-", "", $nykyinen_loppu), 0, 6);
 
 		// Haetaan tuotteen ABC luokka
@@ -240,28 +240,57 @@
 		}
 
 		// Haetaan budjetoitu myynti
-		$query = "	SELECT ifnull(sum(budjetti_tuote.maara), 0) maara
+		$query = "	SELECT budjetti_tuote.kausi kausi,
+					ifnull(sum(budjetti_tuote.maara), 0) budjetti,
+					DAY(LAST_DAY(concat(budjetti_tuote.kausi, '01'))) paivia_kuussa,
+					ifnull(sum(budjetti_tuote.maara), 0) / DAY(LAST_DAY(concat(budjetti_tuote.kausi, '01'))) paivabudjetti
 					FROM budjetti_tuote
 					WHERE budjetti_tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND budjetti_tuote.kausi >= '{$alku_kausi}'
 					AND budjetti_tuote.kausi <= '{$loppu_kausi}'
-					AND budjetti_tuote.tuoteno = '{$tuoteno}'";
+					AND budjetti_tuote.tuoteno = '{$tuoteno}'
+					GROUP BY 1";
 		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);
-		$budjetoitu_myynti = $row['maara'];
 
 		// Jos ei ole budjettia, otetaan edellisen kauden myynti ja k‰ytet‰‰n sit‰
-		if ($budjetoitu_myynti == 0) {
-			$query = "	SELECT ifnull(sum(tilausrivi.kpl), 0) myynti_ed
+		if (mysql_num_rows($result) == 0) {
+			// Lis‰t‰‰n kauteen sata, ett‰ saadaan vuosiluvut t‰sm‰‰m‰‰n budjetin kanssa (helpottaa koodia alla)
+			$query = "	SELECT DATE_FORMAT(tilausrivi.laskutettuaika, '%Y%m') + 100 kausi,
+						ifnull(sum(tilausrivi.kpl), 0) budjetti,
+						DAY(LAST_DAY(tilausrivi.laskutettuaika)) paivia_kuussa,
+						ifnull(sum(tilausrivi.kpl), 0) / DAY(LAST_DAY(tilausrivi.laskutettuaika)) paivabudjetti
 						FROM tilausrivi
 						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 						AND tilausrivi.tyyppi = 'L'
 						AND tilausrivi.tuoteno = '{$tuoteno}'
 						AND tilausrivi.laskutettuaika >= '{$edellinen_alku}'
-						AND tilausrivi.laskutettuaika <= '{$edellinen_loppu}'";
+						AND tilausrivi.laskutettuaika <= '{$edellinen_loppu}'
+						GROUP BY 1";
 			$result = pupe_query($query);
-			$row = mysql_fetch_assoc($result);
-			$budjetoitu_myynti = $row["myynti_ed"];
+		}
+
+		// Lasketaan budjetoitu myynti
+		$budjetoitu_myynti = 0;
+
+		// Alku- ja loppukauden p‰iv‰
+		$alku_kausi_pp  = substr(str_replace("-", "", $nykyinen_alku), 6, 2);
+		$loppu_kausi_pp = substr(str_replace("-", "", $nykyinen_loppu), 6, 2);
+
+		// Loopataan kaudet l‰pi
+		while ($row = mysql_fetch_assoc($result)) {
+
+			// Montako p‰iv‰‰ t‰lt‰ kaudelta on otettu raporttiin
+			$paivien_maara = $row['paivia_kuussa'];
+
+			if ($row['kausi'] == $alku_kausi) {
+				$paivien_maara -= $alku_kausi_pp - 1;
+			}
+
+			if ($row['kausi'] == $loppu_kausi) {
+				$paivien_maara -= $row['paivia_kuussa'] - $loppu_kausi_pp;
+			}
+
+			$budjetoitu_myynti += $paivien_maara * $row['paivabudjetti'];
 		}
 
 		// Lasketaan reaalisaldo
@@ -658,7 +687,7 @@
 						AND tuote.ei_saldoa = ''
 						{$tuote_where})
 					{$toimittaja_join}
-					{$abc_join}						
+					{$abc_join}
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila = 'V'
 					AND lasku.toimaika >= '{$nykyinen_alku}'
@@ -781,7 +810,7 @@
 		$res = pupe_query($query);
 
 		// Jos yhteens‰n‰kym‰, ei ehcota mit‰‰n
-		if ($ehdotetut_valmistukset != 'valmistuslinjoittain') {	
+		if ($ehdotetut_valmistukset != 'valmistuslinjoittain') {
 			echo "<br/><br/><font class='head'>".t("Ehdotetut valmistukset")."</font><br/><hr>";
 		}
 

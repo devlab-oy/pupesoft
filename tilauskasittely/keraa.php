@@ -838,6 +838,16 @@
 										if ($maara[$apui] == 0) {
 											// Mitätöidään nollarivi koska poikkeamalle kuitenkin tehdään jotain fiksua
 											$query .= ", tyyppi = 'D', kommentti=trim(concat(kommentti, ' Mitätöitiin koska keräyspoikkeamasta tehtiin: ".$poikkeama_kasittely[$apui]."'))";
+
+											//vapautetaan tämän tilausrivi sarjanumero(t)
+											$queryv = " SELECT otunnus
+														FROM tilausrivi
+														WHERE yhtio = '{$kukarow['yhtio']}'
+														AND tunnus = '{$apui}'";
+											$vapaut = pupe_query($queryv);
+											$vapaurow = mysql_fetch_assoc($vapaut);
+
+											vapauta_sarjanumerot($toim, $vapaurow["otunnus"], "AND tilausrivi.tunnus = '{$apui}'");
 										}
 
 										$rotunnus	= $tilrivirow['otunnus'];
@@ -1197,14 +1207,6 @@
 						//päivitetään alkuperäinen rivi
 						$query .= " WHERE tunnus='$apui' and yhtio='$kukarow[yhtio]'";
 						$result = pupe_query($query);
-
-						//vapautetaan kanssa ne sarjanumerot, jotka oli linkitetty siihen alkuperäseen tilaukseen - haetaan toi otunnus tässä vaiheessa, että varmasti saadaan oikea tunnus thih
-						if (strrpos($query, "tyyppi = 'D'") !== FALSE) {
-							$queryv = " SELECT otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$apui}'";
-							$vapaut = pupe_query($queryv);
-							$vapaurow = mysql_fetch_assoc($vapaut);
-							vapauta_sarjanumerot($toim, $vapaurow["otunnus"], "AND tilausrivi.tunnus = '{$apui}'");
-						}
 
 						// jos keräyserät on käytössä, päivitetään kerätyt kappalemäärät keräyserään
 						if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {

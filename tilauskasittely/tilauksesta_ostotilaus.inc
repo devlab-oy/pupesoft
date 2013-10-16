@@ -448,7 +448,7 @@
 
 						require('tilauskasittely/tulosta_ostotilaus.inc');
 
-						if (isset($tulosta_ostotilaus_ulos) and $tulosta_ostotilaus_ulos == "") {
+						if (isset($luodaan_aineisto) and $luodaan_aineisto) {
 							// p‰ivitet‰‰n t‰ss‰ tilaus tulostetuksi
 							$query = "UPDATE lasku SET lahetepvm = now(), alatila = 'A' WHERE tunnus='{$otunnus}'";
 							$result = pupe_query($query);

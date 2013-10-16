@@ -537,6 +537,12 @@
 				}
 			}
 
+			$onko_hyvityslasku_kerroin = 1;
+
+			if ($laskun_tyyppi_teksti == 'HYVITYSLASKU' and $laskun_summa_eur < 0) {
+				$onko_hyvityslasku_kerroin = -1;
+			}
+
 			if (@file_exists("inc/maventa.inc") and (($trow['asn_sanomat'] == "M" and $ebid == 'MAVENTAXML') or ($trow['asn_sanomat'] == 'F' and $ebid == 'FINVOICEXML'))) {
 				require("inc/maventa.inc");
 			}

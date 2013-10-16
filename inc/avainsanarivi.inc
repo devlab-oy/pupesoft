@@ -90,6 +90,7 @@
 		$avain_sel['TYOM_TYOSTATUS'] == "SELECTED" or
 		$avain_sel['VALMISTUSLINJA'] == "SELECTED" or
 		$avain_sel["SAHKTILTUN"] == "SELECTED" or
+		$avain_sel["OSTOTIL_TILTYYP"] == "SELECTED" or
 		$avain_sel['Y'] == "SELECTED")) {
 		$tyyppi = 1;
 	}
@@ -428,6 +429,17 @@
 			$ulos .= "<option value='{$vrow["tunnus"]}' $sel>".trim($vrow["nimi"]." ".$vrow["postitp"]." ".$vrow["ovtlisa"])."</option>";
 		}
 
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if ($avain_sel['OSTOTIL_TILTYYP'] == 'SELECTED' and mysql_field_name($result, $i) == 'selitetark_2') {
+
+		$sel = $trow[$i] != '' ? " selected" : "";
+
+		$ulos = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Ei")."</option>";
+		$ulos .= "<option value='x'{$sel}>".t("Kyllä")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

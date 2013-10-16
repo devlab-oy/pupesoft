@@ -47,7 +47,7 @@
 		$riviok++;
 	}
 
-	if (!empty($toimittajarow['tehdas_saldo_tarkistus']) and $trow['tehdas_saldo'] < $prow['varattukpl']) {
+	if (!empty($toimittajarow['tehdas_saldo_tarkistus']) and isset($trow['tehdas_saldo']) and $trow['tehdas_saldo'] < $prow['varattukpl']) {
 		$prow["kommentti"] .= "<br>".t("HUOM: Toimittajan tehtaan saldo on")." {$trow['tehdas_saldo']}.<br>";
 	}
 
@@ -62,11 +62,7 @@
 		// $saako_hyvaksya++;
 	}
 
-	if ($trow["myyntihinta_maara"] != 0 and $prow["hinta"] != 0) {
-		$prow["hinta"] = round($prow["hinta"] * $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
-	}
-
-	if ((float) $prow["hinta"] != (float) $trow['ostohinta'] and ($prow["var"] == "" or $toiminto == 'kohdista') and $trow["toimittaja"] != "" and $riviok == 0) {
+	if ($oikeusostohintapaiv !== FALSE and (float) $prow["hinta"] != (float) $trow['ostohinta'] and ($prow["var"] == "" or $toiminto == 'kohdista') and $trow["toimittaja"] != "" and $riviok == 0) {
 
 		$paiv_hinta = (float) $paiv_hinta;
 
@@ -145,14 +141,15 @@
 				$varaosavirhe .= "<input type='hidden' name='kommentti' value = '$kommentti'>";
 			}
 
-			if (tarkista_oikeus("yllapito.php", "tuotteen_toimittajat", "check") !== FALSE) {
-
-				$varaosavirhe .= "	<font class='message'>".t("Päivitä tuotteen ostohinta").":<br> ".hintapyoristys($trow["ostohinta"])." $trow[valuutta] -> ".hintapyoristys($prow["hinta"])." $trow[valuutta]</font><br>
-									<input type='submit' name='JOPA' value='".t("Päivitä")."'>
-									<input type='submit' name='ALPA' value='".t("Älä päivitä")."'>
-									</form>";
-			}
+			$varaosavirhe .= "	<font class='message'>".t("Päivitä tuotteen ostohinta").":<br> ".hintapyoristys($trow["ostohinta"])." $trow[valuutta] -> ".hintapyoristys($prow["hinta"])." $trow[valuutta]</font><br>
+								<input type='submit' name='JOPA' value='".t("Päivitä")."'>
+								<input type='submit' name='ALPA' value='".t("Älä päivitä")."'>
+								</form>";
 		}
+	}
+
+	if ($trow["myyntihinta_maara"] != 0 and $prow["hinta"] != 0) {
+		$prow["hinta"] = round($prow["hinta"] * $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
 	}
 
 	//toimitusajan päivitys toimittajan toimitusaikaan

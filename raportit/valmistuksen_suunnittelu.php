@@ -112,10 +112,10 @@
 	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
 	// Ehdotetaan oletuksena ehdotusta ensikuun valmistuksille sek‰ siit‰ plus 3 kk
-	if (!isset($ppa1)) $ppa1 = date("d", mktime(0, 0, 0, date("d"), 1, date("Y")));
+	if (!isset($ppa1)) $ppa1 = date("d", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
 	if (!isset($kka1)) $kka1 = date("m", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
 	if (!isset($vva1)) $vva1 = date("Y", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
-	if (!isset($ppl1)) $ppl1 = date("d", mktime(0, 0, 0, date("d"), 1, date("Y")));
+	if (!isset($ppl1)) $ppl1 = date("d", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 	if (!isset($kkl1)) $kkl1 = date("m", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 	if (!isset($vvl1)) $vvl1 = date("Y", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 
@@ -134,8 +134,8 @@
 		$tee = "";
 	}
 	else {
-		$nykyinen_loppu  = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, $ppl1, $vvl1));
-		$edellinen_loppu = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, $ppl1, $vvl1-1));
+		$nykyinen_loppu  = date("Y-m-d", mktime(0, 0, 0, $kkl1, $ppl1, $vvl1));
+		$edellinen_loppu = date("Y-m-d", mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
 	}
 
 	if ($nykyinen_alku > $nykyinen_loppu) {
@@ -636,14 +636,14 @@
 							AND abc_aputaulu.tyyppi = '{$abcrajaustapa}')";
 		}
 
-		// Haetaan tehdyt valmistukset
+		// Haetaan valmistukset kannasta, katotaan paljon niiss‰ on viel‰ valmistettavaa
 		$query = "	SELECT
 					lasku.kohde valmistuslinja,
 					tilausrivi.tuoteno,
 					tilausrivi.osasto,
 					tilausrivi.try,
-					tilausrivi.kpl + tilausrivi.varattu maara,
-					(tilausrivi.kpl + tilausrivi.varattu) * tuote.valmistusaika_sekunneissa valmistusaika,
+					tilausrivi.varattu maara,
+					tilausrivi.varattu * tuote.valmistusaika_sekunneissa valmistusaika,
 					DATE_FORMAT(lasku.luontiaika, GET_FORMAT(DATE, 'EUR')) pvm,
 					lasku.alatila tila
 					FROM lasku
@@ -652,11 +652,14 @@
 						AND tilausrivi.tyyppi = 'W'
 						AND tilausrivi.var != 'P')
 					JOIN tuote ON (tuote.yhtio = lasku.yhtio
-						AND tuote.tuoteno = tilausrivi.tuoteno)
+						AND tuote.tuoteno = tilausrivi.tuoteno {$tuote_where})
+					{$toimittaja_join}
+					{$abc_join}						
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila = 'V'
 					AND lasku.toimaika >= '{$nykyinen_alku}'
 					AND lasku.toimaika <= '{$nykyinen_loppu}'
+					{$lisa}
 					ORDER BY lasku.kohde, lasku.toimaika, tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno";
 		$res = pupe_query($query);
 
@@ -669,6 +672,7 @@
 				$valmistettu_yhteensa = 0;
 
 				echo t("Valmistukset aikav‰lill‰").": $nykyinen_alku - $nykyinen_loppu <br>\n";
+				echo t("Edellinen vastaava aikav‰li").": $edellinen_alku - $edellinen_loppu <br>\n";
 				echo t("Valmistuksia")." ".mysql_num_rows($res)." ".t("kpl").".<br>\n";
 
 				echo "<table>";
@@ -752,7 +756,7 @@
 					ifnull(samankaltaiset.isatuoteno, tuote.tuoteno) tuoteno,
 					ifnull(samankaltainen_tuote.nimitys, tuote.nimitys) nimitys,
 					ifnull(samankaltainen_tuote.valmistuslinja, tuote.valmistuslinja) valmistuslinja,
-					tuote.valmistusaika_sekunneissa,
+					avg(tuote.valmistusaika_sekunneissa) valmistusaika_sekunneissa,
 					{$toimittaja_select}
 					FROM tuote
 					JOIN tuoteperhe ON (tuoteperhe.yhtio = tuote.yhtio
@@ -768,7 +772,7 @@
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.ei_saldoa = ''
 					{$tuote_where}
-					GROUP BY 1, 2, 3, 4";
+					GROUP BY 1, 2, 3";
 		$res = pupe_query($query);
 
 		// Jos yhteens‰n‰kym‰, ei ehcota mit‰‰n
@@ -1212,7 +1216,7 @@
 				echo "<td style='text-align:right;'>{$luvut['valmistuksessa']}</td>";
 				echo "<td style='text-align:right;'>{$luvut['valmistusmaara']}</td>";
 				echo "<td style='text-align:right;'>{$luvut['yhteensa_kpl']}</td>";
-				echo "<td style='text-align:right;'>{$luvut['valmistusaika_sekunneissa']}</td>";
+				echo "<td style='text-align:right;'>".round($luvut['valmistusaika_sekunneissa'])."</td>";
 				echo "</tr>";
 
 				// Yhteens‰luvut
@@ -1227,7 +1231,7 @@
 			echo "<td class='tumma' style='text-align:right;'>{$valmistuksessa}</td>";
 			echo "<td class='tumma' style='text-align:right;'>{$valmistusmaara}</td>";
 			echo "<td class='tumma' style='text-align:right;'>{$yhteensa_kpl}</td>";
-			echo "<td class='tumma' style='text-align:right;'>{$valmistusaika}</td>";
+			echo "<td class='tumma' style='text-align:right;'>".round($valmistusaika)."</td>";
 			echo "</tr>";
 
 			echo "</tbody>";

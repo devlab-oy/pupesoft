@@ -35,6 +35,13 @@ if [ ! -z ${13} ]; then
 	S3BUCKET=${13}
 fi
 
+# Tehd‰‰nkˆ mysql-backuppi vai ei.
+if [ ! -z ${14} ]; then
+	MYSQLBACKUP=false;
+else
+	MYSQLBACKUP=true;
+fi
+
 # Katsotaan, ett‰ parametrit on annettu
 if [ -z ${BACKUPDIR} ] || [ -z ${DBKANTA} ] || [ -z ${DBKAYTTAJA} ] || [ -z ${DBSALASANA} ]; then
 	echo
@@ -115,128 +122,134 @@ if [ ! -d ${MYSQLPOLKU}${DBKANTA} ]; then
 	exit
 fi
 
-mkdir /tmp/${DBKANTA}
-
-if [ ! -d /tmp/${DBKANTA} ]; then
-	echo
-	echo "ERROR! Hakemistoa /tmp/${DBKANTA} ei lˆydy!"
-	echo
-	exit
-fi
-
 echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
 echo ": Backup started."
 
-# Siirryt‰‰n temppidirriin
-cd /tmp/${DBKANTA}
+if $MYSQLBACKUP; then
 
-# Lukitaan taulut, Flushataan binlogit, Otetaan masterin positio ylˆs, Kopioidaan mysql kanta ja lopuksi vapautetaan taulut.
-mysql -u ${DBKAYTTAJA} ${DBKANTA} --password=${DBSALASANA} -e "FLUSH STATUS; FLUSH TABLES WITH READ LOCK; FLUSH LOGS; SHOW MASTER STATUS; system cp -R ${MYSQLPOLKU}${DBKANTA}/ /tmp/; UNLOCK TABLES;" > /tmp/${DBKANTA}/backup-binlog.info
+	mkdir /tmp/${DBKANTA}
 
-# Jos backup onnistui!
-if [[ $? -eq 0 ]]; then
+	if [ ! -d /tmp/${DBKANTA} ]; then
+		echo
+		echo "ERROR! Hakemistoa /tmp/${DBKANTA} ei lˆydy!"
+		echo
+		exit
+	fi
 
-	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-	echo ": Database copy done."
+	# Siirryt‰‰n temppidirriin
+	cd /tmp/${DBKANTA}
 
-	# Pakataan failit
-	tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *
+	# Lukitaan taulut, Flushataan binlogit, Otetaan masterin positio ylˆs, Kopioidaan mysql kanta ja lopuksi vapautetaan taulut.
+	mysql -u ${DBKAYTTAJA} ${DBKANTA} --password=${DBSALASANA} -e "FLUSH STATUS; FLUSH TABLES WITH READ LOCK; FLUSH LOGS; SHOW MASTER STATUS; system cp -R ${MYSQLPOLKU}${DBKANTA}/ /tmp/; UNLOCK TABLES;" > /tmp/${DBKANTA}/backup-binlog.info
 
-	# Jos pakkaus onnistui!
+	# Jos backup onnistui!
 	if [[ $? -eq 0 ]]; then
 
 		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-		echo ": Database bzip2 done."
+		echo ": Database copy done."
 
-		# Salataan tiedosto
-		if [ ! -z "${SALAUSAVAIN}" ]; then
-			encrypt_file "${SALAUSAVAIN}" "${BACKUPDIR}/${FILENAME}"
-		fi
+		# Pakataan failit
+		tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *
 
-		# T‰m‰n backupin binlog-info
-		binlog_new_log=$(< /tmp/${DBKANTA}/backup-binlog.info)
+		# Jos pakkaus onnistui!
+		if [[ $? -eq 0 ]]; then
 
-		# Tuorein binlog-info mik‰ meill‰ on tallella
-		tmp_filename=`ls ${BACKUPDIR}/backup-binlog* | sort -r | head -1`
-		binlog_last_log=$(< ${tmp_filename})
+			echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+			echo ": Database bzip2 done."
 
-		# Teht‰v‰n binlog backupin nimi
-		binlog_backup="${DBKANTA}-binlog-${FILEDATE}.sql.bz2"
+			# Salataan tiedosto
+			if [ ! -z "${SALAUSAVAIN}" ]; then
+				encrypt_file "${SALAUSAVAIN}" "${BACKUPDIR}/${FILENAME}"
+			fi
 
-		# Regex, jolla lˆydet‰‰n filenimi ja filepositio
-		binlog_regex="(mysql-bin\.[0-9]+).([0-9]+)"
+			# T‰m‰n backupin binlog-info
+			binlog_new_log=$(< /tmp/${DBKANTA}/backup-binlog.info)
 
-		# Kaivetaan t‰m‰n backupin binlog ja logipositio info-filest‰
-		if [[ ${binlog_new_log} =~ ${binlog_regex} ]]; then
-			binlog_new_file=${BASH_REMATCH[1]}
-			binlog_new_position=${BASH_REMATCH[2]}
-		fi
+			# Tuorein binlog-info mik‰ meill‰ on tallella
+			tmp_filename=`ls ${BACKUPDIR}/backup-binlog* | sort -r | head -1`
+			binlog_last_log=$(< ${tmp_filename})
 
-		# Kaivetaan edellisen backupin binlog ja logipositio info-filest‰
-		if [[ ${binlog_last_log} =~ ${binlog_regex} ]]; then
-			binlog_last_file=${BASH_REMATCH[1]}
-			binlog_last_position=${BASH_REMATCH[2]}
-		fi
+			# Teht‰v‰n binlog backupin nimi
+			binlog_backup="${DBKANTA}-binlog-${FILEDATE}.sql.bz2"
 
-		# Jos lˆydettiin kaikki muuttujat
-		if [[ ! -z ${binlog_new_file} && ! -z ${binlog_new_position} && ! -z ${binlog_last_file} && ! -z ${binlog_last_position} ]]; then
+			# Regex, jolla lˆydet‰‰n filenimi ja filepositio
+			binlog_regex="(mysql-bin\.[0-9]+).([0-9]+)"
 
-			# Siirryt‰‰n MySQL hakemistoon
-			cd ${MYSQLPOLKU}
+			# Kaivetaan t‰m‰n backupin binlog ja logipositio info-filest‰
+			if [[ ${binlog_new_log} =~ ${binlog_regex} ]]; then
+				binlog_new_file=${BASH_REMATCH[1]}
+				binlog_new_position=${BASH_REMATCH[2]}
+			fi
 
-			# Katsotaan kaikki binlog filet edellisen ja t‰m‰n backupin v‰list‰
-			binlog_perl="print if (/^${binlog_last_file}\b/ .. /^${binlog_new_file}\b/)"
-			binlog_all=`ls mysql-bin.* | sort | perl -ne "${binlog_perl}" | perl -ne 'chomp and print "$_ "'`
+			# Kaivetaan edellisen backupin binlog ja logipositio info-filest‰
+			if [[ ${binlog_last_log} =~ ${binlog_regex} ]]; then
+				binlog_last_file=${BASH_REMATCH[1]}
+				binlog_last_position=${BASH_REMATCH[2]}
+			fi
 
-			# Jos lˆydettiin binlogifilet
-			if [[ ! -z ${binlog_all} ]]; then
+			# Jos lˆydettiin kaikki muuttujat
+			if [[ ! -z ${binlog_new_file} && ! -z ${binlog_new_position} && ! -z ${binlog_last_file} && ! -z ${binlog_last_position} ]]; then
 
-				# Tehd‰‰n binlogeista SQL-lausekkeita ja pakataan ne zippiin
-				mysqlbinlog --start-position=${binlog_last_position} --stop-position=${binlog_new_position} ${binlog_all} | pbzip2 > ${BACKUPDIR}/${binlog_backup}
+				# Siirryt‰‰n MySQL hakemistoon
+				cd ${MYSQLPOLKU}
 
-				# Jos pakkaus onnistui!
-				if [[ $? -eq 0 ]]; then
-					# Kopsataan t‰m‰n backupin logipositio paikalleen, ett‰ tiedet‰‰n ottaa t‰st‰ eteenp‰in seuraavalla kerralla
-					cp -f /tmp/${DBKANTA}/backup-binlog.info ${BACKUPDIR}/backup-binlog-${FILEDATE}.info
+				# Katsotaan kaikki binlog filet edellisen ja t‰m‰n backupin v‰list‰
+				binlog_perl="print if (/^${binlog_last_file}\b/ .. /^${binlog_new_file}\b/)"
+				binlog_all=`ls mysql-bin.* | sort | perl -ne "${binlog_perl}" | perl -ne 'chomp and print "$_ "'`
 
-					echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-					echo ": Binlog bzip2 done."
+				# Jos lˆydettiin binlogifilet
+				if [[ ! -z ${binlog_all} ]]; then
 
-					# Salataan tiedosto
-					if [ ! -z "${SALAUSAVAIN}" ]; then
-						encrypt_file "${SALAUSAVAIN}" "${BACKUPDIR}/${binlog_backup}"
+					# Tehd‰‰n binlogeista SQL-lausekkeita ja pakataan ne zippiin
+					mysqlbinlog --start-position=${binlog_last_position} --stop-position=${binlog_new_position} ${binlog_all} | pbzip2 > ${BACKUPDIR}/${binlog_backup}
+
+					# Jos pakkaus onnistui!
+					if [[ $? -eq 0 ]]; then
+						# Kopsataan t‰m‰n backupin logipositio paikalleen, ett‰ tiedet‰‰n ottaa t‰st‰ eteenp‰in seuraavalla kerralla
+						cp -f /tmp/${DBKANTA}/backup-binlog.info ${BACKUPDIR}/backup-binlog-${FILEDATE}.info
+
+						echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+						echo ": Binlog bzip2 done."
+
+						# Salataan tiedosto
+						if [ ! -z "${SALAUSAVAIN}" ]; then
+							encrypt_file "${SALAUSAVAIN}" "${BACKUPDIR}/${binlog_backup}"
+						fi
+					else
+						# Jos pakkaus ep‰onnistui! Poistetaan rikkin‰inen tiedosto.
+						rm -f ${BACKUPDIR}/${binlog_backup}
+						echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+						echo ": Binlog bzip2 FAILED!"
 					fi
 				else
-					# Jos pakkaus ep‰onnistui! Poistetaan rikkin‰inen tiedosto.
-					rm -f ${BACKUPDIR}/${binlog_backup}
 					echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-					echo ": Binlog bzip2 FAILED!"
+					echo ": No binlogs found!"
 				fi
 			else
 				echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-				echo ": No binlogs found!"
+				echo ": Binlog info not found!"
 			fi
-		else
-			echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-			echo ": Binlog info not found!"
-		fi
 
-		# Kopsataan t‰m‰n backupin logipositio aina backup dirikkaan samalle nimell‰. Ylemp‰n‰ kopsataan "oikea versio" p‰iv‰m‰‰r‰n kanssa.
-		# T‰m‰ siksi, ett‰ helpottaa ekalla kerralla kun backup ajetaan ja debuggia ongelmatilanteissa.
-		cp -f /tmp/${DBKANTA}/backup-binlog.info ${BACKUPDIR}/backup-binlog-0000.info
+			# Kopsataan t‰m‰n backupin logipositio aina backup dirikkaan samalle nimell‰. Ylemp‰n‰ kopsataan "oikea versio" p‰iv‰m‰‰r‰n kanssa.
+			# T‰m‰ siksi, ett‰ helpottaa ekalla kerralla kun backup ajetaan ja debuggia ongelmatilanteissa.
+			cp -f /tmp/${DBKANTA}/backup-binlog.info ${BACKUPDIR}/backup-binlog-0000.info
+		else
+			# Jos pakkaus ep‰onnistui! Poistetaan rikkin‰inen tiedosto.
+			rm -f ${BACKUPDIR}/${FILENAME}
+			echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+			echo ": Database bzip2 FAILED!"
+	    fi
 	else
-		# Jos pakkaus ep‰onnistui! Poistetaan rikkin‰inen tiedosto.
-		rm -f ${BACKUPDIR}/${FILENAME}
 		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-		echo ": Database bzip2 FAILED!"
-    fi
+		echo ": Database copy FAILED!"
+	fi
+
+	# Dellataan pois tempit
+	rm -rf /tmp/${DBKANTA}
 else
 	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-	echo ": Database copy FAILED!"
+	echo ": Databasea ei backupata!"
 fi
-
-# Dellataan pois tempit
-rm -rf /tmp/${DBKANTA}
 
 # Backupataan Pupeasenukseen liittyv‰t asetuskset
 PUPEPOLKU=`dirname $0|cut -d "/" -f 2-`
@@ -251,55 +264,55 @@ if ls -A etc/cron.* &> /dev/null; then
 	BACKUPFILET="${BACKUPFILET} etc/cron.*"
 fi
 
-if [ -f "${PUPEPOLKU}/inc/salasanat.php" ]; then
+if test -f "${PUPEPOLKU}/inc/salasanat.php" -a -r "${PUPEPOLKU}/inc/salasanat.php"; then
 	BACKUPFILET="${BACKUPFILET} ${PUPEPOLKU}/inc/salasanat.php"
 fi
 
-if [ -f "etc/ssh/sshd_config" ]; then
+if test -f "etc/ssh/sshd_config" -a -r "etc/ssh/sshd_config"; then
 	BACKUPFILET="${BACKUPFILET} etc/ssh/sshd_config"
 fi
 
-if [ -f "etc/rc.local" ]; then
+if test -f "etc/rc.local" -a -r "etc/rc.local"; then
 	BACKUPFILET="${BACKUPFILET} etc/rc.local"
 fi
 
-if [ -f "etc/dhcp/dhcpd.conf" ]; then
+if test -f "etc/dhcp/dhcpd.conf" -a -r "etc/dhcp/dhcpd.conf"; then
 	BACKUPFILET="${BACKUPFILET} etc/dhcp/dhcpd.conf"
 fi
 
-if [ -f "etc/vtund.conf" ]; then
+if test -f "etc/vtund.conf" -a -r "etc/vtund.conf"; then
 	BACKUPFILET="${BACKUPFILET} etc/vtund.conf"
 fi
 
-if [ -f "etc/samba/smb.conf" ]; then
+if test -f "etc/samba/smb.conf" -a -r "etc/samba/smb.conf"; then
 	BACKUPFILET="${BACKUPFILET} etc/samba/smb.conf"
 fi
 
-if [ -f "etc/cups/" ]; then
+if test -f "etc/cups/" -a -r "etc/cups/"; then
 	BACKUPFILET="${BACKUPFILET} etc/cups/*"
 fi
 
-if [ -f "etc/cups/lpoptions" ]; then
+if test -f "etc/cups/lpoptions" -a -r "etc/cups/lpoptions"; then
 	BACKUPFILET="${BACKUPFILET} etc/cups/lpoptions"
 fi
 
-if [ -f "etc/my.cnf" ]; then
+if test -f "etc/my.cnf" -a -r "etc/my.cnf"; then
 	BACKUPFILET="${BACKUPFILET} etc/my.cnf"
 fi
 
-if [ -f "root/.forward" ]; then
+if test -f "root/.forward" -a -r "root/.forward"; then
 	BACKUPFILET="${BACKUPFILET} root/.forward"
 fi
 
-if [ -f "etc/hosts" ]; then
+if test -f "etc/hosts" -a -r "etc/hosts"; then
 	BACKUPFILET="${BACKUPFILET} etc/hosts"
 fi
 
-if [ -f "etc/sysconfig/network" ]; then
+if test -f "etc/sysconfig/network" -a -r "etc/sysconfig/network"; then
 	BACKUPFILET="${BACKUPFILET} etc/sysconfig/network"
 fi
 
-if [ -f "etc/crontab" ]; then
+if test -f "etc/crontab" -a -r "etc/crontab"; then
 	BACKUPFILET="${BACKUPFILET} etc/crontab"
 fi
 
@@ -343,7 +356,10 @@ if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SAMBA" ]; then
 		echo
 	else
 		#Poistetaan vanha backuppi
-		rm -f ${REMOTELOCALDIR}/${DBKANTA}-backup-*
+		if $MYSQLBACKUP; then
+			rm -f ${REMOTELOCALDIR}/${DBKANTA}-backup-*
+		fi
+
 		rm -f ${REMOTELOCALDIR}/linux-backup-*
 
 		# Siirret‰‰n t‰m‰
@@ -357,7 +373,10 @@ fi
 #Pidet‰‰nkˆ kaikki backupit eri serverill‰
 if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SSH" ]; then
 	# Siirret‰‰n failit remoteserverille
-	scp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+	if $MYSQLBACKUP; then
+		scp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+	fi
+
 	scp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
 
 	# Siivotaan vanhat backupit pois remoteserverilt‰

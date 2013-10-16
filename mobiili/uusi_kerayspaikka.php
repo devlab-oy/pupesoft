@@ -205,7 +205,7 @@ if (isset($submit) and trim($submit) != '') {
 						$_viesti = 'Saapumisessa';
 					}
 
-					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti, $oletus, $halytysraja, $tilausmaara);
+					lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti, '', $halytysraja, $tilausmaara);
 				}
 				else {
 					// Nollataan poistettava kentt‰ varmuuden vuoksi
@@ -223,7 +223,7 @@ if (isset($submit) and trim($submit) != '') {
 				// P‰ivitet‰‰n oletuspaikat jos tehd‰‰n t‰st‰ oletuspaikka
 				if ($oletus == 'X') {
 					// Asetetaan oletuspaikka uusiksi
-					paivita_oletuspaikka($row['tuoteno'], $hylly);
+					paivita_oletuspaikka($row['tuoteno'], $hylly, true);
 
 					if ($poista_vanha_tuotepaikka == 'on') {
 

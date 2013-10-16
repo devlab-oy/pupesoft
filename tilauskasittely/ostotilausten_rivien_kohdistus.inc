@@ -298,7 +298,9 @@ if ($tee == 'TI' or $tee == "Y") {
 
 	$multi = "";
 	require("../inc/tuotehaku.inc");
-	$prow["tuoteno"] = $tuoteno;
+
+	$prow["tuoteno"]      = $tuoteno;
+	$oikeusostohintapaiv  = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat", "check");
 
 	require('tarkistarivi_ostotilaus.inc');
 

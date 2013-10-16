@@ -55,6 +55,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			$verkkotunnus 	   = $asiakasrow["verkkotunnus"];
 			$piiri 			   = $asiakasrow["piiri"];
 			$laskutyyppi	   = $asiakasrow["laskutyyppi"];
+			$lahetetyyppi 	   = pupesoft_lahetetyyppi(0, $asiakasrow['tunnus']);
 
 			$kohde  = "";
 			$eilahe = "";
@@ -72,15 +73,6 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 				$asiakasid 				= $asiakasrow["spec_tunnus"];
 				$asiakasrow["tunnus"] 	= $asiakasrow["spec_tunnus"];
 			}
-
-			$toimvv = date("Y");
-			$toimkk = date("m");
-			$toimpp = date("d");
-
-			$kervv = date("Y");
-			$kerkk = date("m");
-			$kerpp = date("d");
-
 
 			if ($toim == "TARJOUS" or $asiakasrow["vienti"] =='K') {
 				$kolm_nimi 		= $asiakasrow["kolm_nimi"];
@@ -307,6 +299,14 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 				$valkoodi = $yhtiorow["valkoodi"]."##";
 			}
 		}
+
+		$toimvv = date("Y");
+		$toimkk = date("m");
+		$toimpp = date("d");
+
+		$kervv = date("Y");
+		$kerkk = date("m");
+		$kerpp = date("d");
 
 		$alv_velvollisuus = "";
 

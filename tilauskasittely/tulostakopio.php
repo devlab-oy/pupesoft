@@ -194,7 +194,7 @@
 		echo "<font class='head'>".sprintf(t("Tulosta %s kopioita"), $fuse).":</font><hr><br>";
 	}
 
-	if ($laskunro > 0 and $laskunroloppu > 0 and $laskunro < $laskunroloppu) {
+	if ($laskunro <> 0 and $laskunroloppu <> 0 and $laskunro < $laskunroloppu) {
 		$tee = "TULOSTA";
 
 		$tulostukseen = array();
@@ -826,7 +826,7 @@
 		}
 
 
-		if (strlen($laskunro) > 0 and strpos($laskunro, ",") !== FALSE) {
+		if (strlen($laskunro) <> 0 and strpos($laskunro, ",") !== FALSE) {
 			$where2 .= " and lasku.laskunro IN ('".str_replace(",", "','", $laskunro)."') ";
 
 			$where3 = "";
@@ -834,7 +834,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (lasno_index) ";
 		}
-		elseif ($laskunro > 0) {
+		elseif ($laskunro <> 0) {
 			$where2 .= " and lasku.laskunro = '$laskunro' ";
 
 			$where3 = "";
@@ -1079,7 +1079,7 @@
 									$kerroinlisa2
 									WHERE tilausrivi.yhtio = '$row[yhtio]'
 									and tilausrivi.otunnus = '$row[tunnus]'
-									and tilausrivi.var != 'O'
+									and (tilausrivi.var != 'O' or tilausrivi.tyyppi='O')
 									and tilausrivi.tyyppi not in ('D','V')";
 						$sumres = pupe_query($query);
 						$sumrow = mysql_fetch_assoc($sumres);
@@ -2083,8 +2083,10 @@
 								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 								if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 								tuote.sarjanumeroseuranta,
-								tuote.eankoodi
+								tuote.eankoodi,
+								abs(tilausrivin_lisatiedot.asiakkaan_positio) asiakkaan_positio
 								FROM tilausrivi
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 								JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 								WHERE tilausrivi.otunnus in ($tilausnumeroita)
 								and tilausrivi.yhtio   = '$kukarow[yhtio]'
@@ -2269,6 +2271,7 @@
 		}
 	}
 
-	if (@include("inc/footer.inc"));
-	elseif (@include("footer.inc"));
-	else exit;
+	if ($tee != 'NAYTATILAUS') {
+		if (@include("inc/footer.inc"));
+		elseif (@include("footer.inc"));
+	}

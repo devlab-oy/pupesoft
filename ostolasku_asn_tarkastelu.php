@@ -864,7 +864,9 @@
 
 		$multi = "";
 		require("inc/tuotehaku.inc");
-		$prow["tuoteno"] = $tuoteno;
+
+		$prow["tuoteno"]      = $tuoteno;
+		$oikeusostohintapaiv  = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat", "check");
 
 		require('tilauskasittely/tarkistarivi_ostotilaus.inc');
 

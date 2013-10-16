@@ -756,12 +756,12 @@ function hae_valmistuksien_tilat($tyyppi = '') {
 			'query_where'	 => ' AND lasku.tila IN ("V") AND lasku.alatila IN ("C")',
 		),
 	);
-	
+
 	if (!empty($tyyppi)) {
 		$a = array(
 			'value'			 => 'V',
 			'dropdown_text'	 => t('Näytä valmistukset, jotka ovat valmistettu'),
-			'query_where'	 => ' AND lasku.tila IN ("V") AND lasku.alatila IN ("V")',
+			'query_where'	 => ' AND lasku.tila IN ("V") AND tilausrivi.kpl != 0',
 		);
 		array_push($valmistuksien_tilat, $a);
 	}

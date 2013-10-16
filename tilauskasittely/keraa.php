@@ -1198,6 +1198,14 @@
 						$query .= " WHERE tunnus='$apui' and yhtio='$kukarow[yhtio]'";
 						$result = pupe_query($query);
 
+						//vapautetaan kanssa ne sarjanumerot, jotka oli linkitetty siihen alkuper‰seen tilaukseen - haetaan toi otunnus t‰ss‰ vaiheessa, ett‰ varmasti saadaan oikea tunnus thih
+						if (strrpos($query, "tyyppi = 'D'") !== FALSE) {
+							$queryv = " SELECT otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$apui}'";
+							$vapaut = pupe_query($queryv);
+							$vapaurow = mysql_fetch_assoc($vapaut);
+							vapauta_sarjanumerot($toim, $vapaurow["otunnus"], "AND tilausrivi.tunnus = '{$apui}'");
+						}
+
 						// jos ker‰yser‰t on k‰ytˆss‰, p‰ivitet‰‰n ker‰tyt kappalem‰‰r‰t ker‰yser‰‰n
 						if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 							$query_ker = "	SELECT tunnus

@@ -1,5 +1,7 @@
 <?php
 
+require_once('functions.inc');
+
 if ($_POST['ajax_toiminto'] == 'tilin_oletusalv') {
 	$tili = mysql_real_escape_string($_POST['tilino']);
 
@@ -24,6 +26,12 @@ if ($_POST['ajax_toiminto'] == 'tilin_oletusalv') {
 		array('empty' => ' ')
 	);
 
+}
+
+if ($_POST['ajax_toiminto'] == 'hae_ostolaskun_tyypin_oletustili') {
+	$oletustili = hae_ostolaskun_tyypin_oletustili($_POST['vienti'], $_POST['toimittaja_tunnus']);
+
+	echo json_encode($oletustili);
 }
 
 exit;

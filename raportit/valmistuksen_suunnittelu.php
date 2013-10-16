@@ -610,6 +610,7 @@
 						JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
 							AND tuote.tuoteno = tilausrivi.tuoteno
 							AND tuote.ei_saldoa = ''
+							AND tuote.ostoehdotus != 'E'
 							{$tuote_where})
 						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 						AND tilausrivi.tyyppi IN ('L','G')
@@ -652,7 +653,10 @@
 						AND tilausrivi.tyyppi = 'W'
 						AND tilausrivi.var != 'P')
 					JOIN tuote ON (tuote.yhtio = lasku.yhtio
-						AND tuote.tuoteno = tilausrivi.tuoteno {$tuote_where})
+						AND tuote.tuoteno = tilausrivi.tuoteno
+						AND tuote.ostoehdotus != 'E'
+						AND tuote.ei_saldoa = ''
+						{$tuote_where})
 					{$toimittaja_join}
 					{$abc_join}						
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
@@ -771,6 +775,7 @@
 					{$abc_join}
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.ei_saldoa = ''
+					AND tuote.ostoehdotus != 'E'
 					{$tuote_where}
 					GROUP BY 1, 2, 3";
 		$res = pupe_query($query);
@@ -808,7 +813,10 @@
 						tuote.valmistusaika_sekunneissa,
 						tuote.valmistuslinja
 						FROM tuoteperhe
-						JOIN tuote USING (yhtio, tuoteno)
+						JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
+							AND tuote.tuoteno = tuoteperhe.tuoteno
+							AND tuote.ei_saldoa = ''
+							AND tuote.ostoehdotus != 'E')
 						WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
 						AND tuoteperhe.isatuoteno = '{$row["tuoteno"]}'
 						AND tuoteperhe.tyyppi = 'S'";

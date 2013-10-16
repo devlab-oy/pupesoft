@@ -3,9 +3,32 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
+if (isset($_POST["tee"])) {
+	if ($_POST["tee"] == 'lataa_tiedosto') {
+		$lataa_tiedosto = 1;
+	}
+	if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
+		$_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+	}
+}
+
 require("../inc/parametrit.inc");
 require('valmistuslinjat.inc');
 require('validation/Validation.php');
+require('inc/pupeExcel.inc');
+require('inc/ProgressBar.class.php');
+
+if ($tee == 'lataa_tiedosto') {
+	$filepath = "/tmp/".$tmpfilenimi;
+	if (file_exists($filepath)) {
+		readfile($filepath);
+		unlink($filepath);
+	}
+	else {
+		echo "<font class='error'>".t("Tiedostoa ei ole olemassa")."</font>";
+	}
+	exit;
+}
 
 echo "<font class='head'>".t("Puuttuvat raaka-aineet")."</font><hr>";
 
@@ -24,6 +47,7 @@ $request = array(
 	'mul_osasto'		 => $mul_osasto,
 	'mul_try'			 => $mul_try,
 	'mul_tme'			 => $mul_tme,
+	'generoi_excel'		 => $generoi_excel,
 );
 
 $request['valmistuslinjat'] = hae_valmistuslinjat();
@@ -41,7 +65,14 @@ if ($request['tee'] == 'ajaraportti') {
 	if ($valid) {
 		$request['valmistukset'] = hae_valmistukset_joissa_raaka_aine_ei_riita($request);
 
-		echo_valmistukset_joissa_raaka_aine_ei_riita($request);
+		if ($request['generoi_excel']) {
+			$xls_filename = generoi_custom_excel($request['valmistukset'], $request['valmistuslinjat']);
+
+			echo_tallennus_formi($xls_filename, t('Puuttuvat_raaka_aineet'));
+		}
+		else {
+			echo_valmistukset_joissa_raaka_aine_ei_riita($request);
+		}
 	}
 }
 
@@ -111,7 +142,7 @@ function hae_valmistukset_joissa_raaka_aine_ei_riita($request) {
 	$result = pupe_query($query);
 
 	$valmistukset_joissa_raaka_aine_ei_riita = array();
-	while($valmiste_rivi = mysql_fetch_assoc($result)) {
+	while ($valmiste_rivi = mysql_fetch_assoc($result)) {
 		//Haetaan valmisteen raaka-aineet
 		$query = "	SELECT lasku.tunnus AS lasku_tunnus,
 					tilausrivi.tunnus AS tilausrivi_tunnus,
@@ -151,7 +182,7 @@ function hae_valmistukset_joissa_raaka_aine_ei_riita($request) {
 					GROUP BY 1,2,3,4,5,6,7,8,9,10,11";
 		$valmistus_result = pupe_query($query);
 
-		while($valmistus_rivi = mysql_fetch_assoc($valmistus_result)) {
+		while ($valmistus_rivi = mysql_fetch_assoc($valmistus_result)) {
 			list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($valmistus_rivi['tuoteno']);
 
 			if ($saldo < $valmistus_rivi['valmistettava_kpl']) {
@@ -188,6 +219,126 @@ function hae_tilattu_kpl($tuoteno) {
 	$tilattu_row = mysql_fetch_assoc($result);
 
 	return $tilattu_row['tilattu'];
+}
+
+function generoi_custom_excel($valmistukset, $valmistuslinjat) {
+	global $kukarow, $yhtiorow;
+
+	if (count($valmistukset) == 0) {
+		return false;
+	}
+
+	$xls_progress_bar = new ProgressBar(t("Tallennetaan exceliin"));
+	$xls_progress_bar->initialize(count($valmistukset));
+
+	$xls = new pupeExcel();
+	$rivi = 0;
+	$sarake = 0;
+	$valmistus_headerit = array(
+		'tuoteno'			 => t('Valmisteen tuoteno'),
+		'nimitys'			 => t('Valmisteen nimitys'),
+		'lasku_tunnus'		 => t('Valmistusnumero'),
+		'yksikko'			 => t('Valmistuslinja'),
+		'valmistettava_kpl'	 => t('Valmistetaan kpl'),
+		'ostohinta'			 => t('Valmistuksen tila'),
+		'kerayspvm'			 => t('Ker‰ysp‰iv‰'),
+		'toimaika'			 => t('Valmistusp‰iv‰'),
+	);
+	$raaka_aine_headerit = array(
+		'tuoteno'		 => t('Raaka-Aineen Tuoteno'),
+		'nimitys'		 => t('Raaka-Aineen Nimitys'),
+		'kappalemaara'	 => t('Valmistusnumero'),
+		'yksikko'		 => t('Saldo'),
+		'paivitys_pvm'	 => t('Hyllyss‰'),
+		'ostohinta'		 => t('Myyt‰viss‰'),
+		'kehahin'		 => t('Tilattu'),
+		'ryhman_ale'	 => t('Toimittaja'),
+	);
+
+	foreach ($valmistukset as $valmistus) {
+		foreach ($valmistus['tilausrivit'] as $tilausrivi) {
+			foreach ($valmistus_headerit as $valmistus_header) {
+				$xls->write($rivi, $sarake, $valmistus_header, array('bold' => true));
+				$sarake++;
+			}
+			$sarake = 0;
+			$rivi++;
+
+			$xls->write($rivi, $sarake, $tilausrivi['tuoteno']);
+			$sarake++;
+			$xls->write($rivi, $sarake, $tilausrivi['nimitys']);
+			$sarake++;
+			$xls->write($rivi, $sarake, $tilausrivi['lasku_tunnus']);
+			$sarake++;
+
+			$valmistuslinja = search_array_key_for_value_recursive($valmistuslinjat, 'selite', $tilausrivi['valmistuslinja']);
+			$valmistuslinja = $valmistuslinja[0];
+			if (empty($valmistuslinja)) {
+				$xls->write($rivi, $sarake, t('Ei valmistuslinjaa'));
+				$sarake++;
+			}
+			else {
+				$xls->write($rivi, $sarake, $valmistuslinja['selitetark']);
+				$sarake++;
+			}
+
+			$xls->writeNumber($rivi, $sarake, $tilausrivi['valmistettava_kpl']);
+			$sarake++;
+
+			$laskutyyppi = $tilausrivi['tila'];
+			$alatila = $tilausrivi['alatila'];
+			require('inc/laskutyyppi.inc');
+			$xls->write($rivi, $sarake, $laskutyyppi.' '.$alatila);
+			$sarake++;
+
+			$xls->write($rivi, $sarake, date('d.m.Y', strtotime($tilausrivi['kerayspvm'])));
+			$sarake++;
+			$xls->write($rivi, $sarake, date('d.m.Y', strtotime($tilausrivi['toimaika'])));
+			$sarake++;
+
+			$rivi = $rivi + 2;
+			$sarake = 0;
+
+			foreach ($raaka_aine_headerit as $raaka_aine_header) {
+				$xls->write($rivi, $sarake, $raaka_aine_header, array('bold' => true));
+				$sarake++;
+			}
+			$sarake = 0;
+			$rivi++;
+
+			foreach ($tilausrivi['raaka_aineet'] as $raaka_aine) {
+				$xls->write($rivi, $sarake, $raaka_aine['tuoteno']);
+				$sarake++;
+				$xls->write($rivi, $sarake, $raaka_aine['nimitys']);
+				$sarake++;
+				$xls->write($rivi, $sarake, $raaka_aine['lasku_tunnus']);
+				$sarake++;
+				$xls->writeNumber($rivi, $sarake, $raaka_aine['saldo']);
+				$sarake++;
+				$xls->writeNumber($rivi, $sarake, $raaka_aine['hyllyssa']);
+				$sarake++;
+				$xls->writeNumber($rivi, $sarake, $raaka_aine['myytavissa']);
+				$sarake++;
+				$xls->writeNumber($rivi, $sarake, $raaka_aine['tilattu']);
+				$sarake++;
+				$xls->write($rivi, $sarake, $raaka_aine['toimittaja']);
+				$sarake++;
+
+				$rivi++;
+				$sarake = 0;
+			}
+
+			$xls_progress_bar->increase();
+			$rivi = $rivi + 2;
+			$sarake = 0;
+		}
+	}
+
+	echo "<br/>";
+
+	$xls_tiedosto = $xls->close();
+
+	return $xls_tiedosto;
 }
 
 function echo_valmistukset_joissa_raaka_aine_ei_riita($request) {
@@ -441,6 +592,16 @@ function echo_kayttoliittyma($request) {
 		echo "<option value='{$_valmistuslinja['selite']}' {$sel}>{$_valmistuslinja['selitetark']}</option>";
 	}
 	echo "</select>";
+	echo "</td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t("Tulosta exceliin")."</th>";
+	echo "<td>";
+	if (!empty($request['generoi_excel'])) {
+		$chk = "CHECKED";
+	}
+	echo "<input type='checkbox' name='generoi_excel' {$chk}>";
 	echo "</td>";
 	echo "</tr>";
 

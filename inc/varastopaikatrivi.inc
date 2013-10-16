@@ -177,6 +177,27 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "toimipaikka") {
+
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Valitse toimipaikka")."</option>";
+
+		$query = "SELECT * FROM yhtion_toimipaikat WHERE yhtio = '{$kukarow['yhtio']}' AND vat_numero = '' ORDER BY nimi";
+		$vresult = pupe_query($query);
+
+		while ($vrow = mysql_fetch_assoc($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow['tunnus']) {
+				$sel = "selected";
+			}
+
+			$ulos .= "<option value='{$vrow['tunnus']}' {$sel}>{$vrow['ovtlisa']} {$vrow['nimi']}</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
 		$ulos = "<td>";
 

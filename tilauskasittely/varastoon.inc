@@ -585,6 +585,10 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	// lasketaan rivin hinta
 	$osuus_apu_hinta = round($tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*$ale_lisa_apu_kala*$tuorow['tuotekerroin'], $yhtiorow["hintapyoristys"]);
 
+	echo "rahtikulut: $rahtikulut<br>";
+
+	echo "if ($laskurow[summa] != 0 and $osuus_apu_hinta <= $laskurow[summa] + 0.01)<br>";
+
 	// jos keikan arvo on muuta kuin nolla ja rivin hinta on pienempi kuin keikan hinta, lasketaan rahtiosuus. muuten nollaa
 	if ($laskurow['summa'] != 0 and $osuus_apu_hinta <= $laskurow["summa"] + 0.01) {
 		// rivin hinta
@@ -595,6 +599,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		$rahtios = 0;
 		$osuus   = 0;
 	}
+
+	echo "osuus: $osuus rahtios: $rahtios<br>";
 
 	if ($tilrivirow['varattu'] < 0) {
 		$rahtios = $rahtios * -1;
@@ -611,6 +617,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 					AND tunnus = '{$tilrivirow['tunnus']}'";
 		$resultxxx = pupe_query($query);
 	}
+
+	echo "uusi ohinta: $ohinta + $rahtios<br>";
 
 	$ohinta = round($ohinta+$rahtios, 6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
 

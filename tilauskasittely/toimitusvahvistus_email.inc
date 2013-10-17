@@ -22,7 +22,7 @@
 					round(tilausrivi.hinta * tilausrivi.varattu * {$query_ale_lisa}, 2) hinta,
 					lasku.valkoodi
 					FROM lasku
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi = 'L' AND tilausrivi.toimitettu != '' AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus IN ({$otunnukset})";
 		$rivi_loop_res = pupe_query($query);

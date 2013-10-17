@@ -2073,8 +2073,11 @@ $debug = 0;
 			$pyoristys_erot_alv = 0;
 
 			// Jos käyttäjä on syöttänyt alvillisen pyöristyksen niin lisätään alvi
-			if ($pyoristys_erot != 0 and ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J')) {
-				$pyoristys_erot_alv = 24;
+			if ($pyoristys_erot != 0) {
+				if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
+					$pyoristys_erot_alv = $vero;
+					$pyoristys_erot = round($pyoristys_erot / (1+$pyoristys_erot_alv/100), $yhtiorow['hintapyoristys']);
+				}
 			}
 
 			$query   = "UPDATE lasku SET

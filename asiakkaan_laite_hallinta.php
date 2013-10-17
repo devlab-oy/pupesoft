@@ -201,7 +201,7 @@ function echo_kohteet_table($asiakkaan_kohteet = array(), $request = array()) {
 
 	$haettu_asiakas = $request['haettu_asiakas'];
 
-	$lopetus = "{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//ytunnus={$haettu_asiakas['tunnus']}";
+	$lopetus = "{$palvelin2}asiakkaan_laite_hallinta.php////tee=hae_asiakas//asiakasid={$haettu_asiakas['tunnus']}";
 
 	echo_kalustoraportti_form($haettu_asiakas);
 	echo "<br/>";

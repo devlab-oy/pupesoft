@@ -105,7 +105,8 @@ if ($tee == 'aja_raportti') {
 			'kommentti' 		=> t('Kommentti'),
 			'kpl' 				=> t('Määrä'),
 			'ilmaiset_lounaat' 	=> t('Ilmaiset ateriat'),
-			'hinta' 			=> t('Summa'),
+			'hinta' 			=> t('Yksikköhinta'),
+			'rivihinta' 		=> t('Rivihinta'),
 		);
 		$force_to_string = array(
 			'laskunro'
@@ -173,7 +174,8 @@ function generoi_matkalaskuraportti_rivit($request_params) {
 	}
 
 	$rivit = array();
-	while($rivi = mysql_fetch_assoc($result)) {
+	
+	while ($rivi = mysql_fetch_assoc($result)) {
 		if (isset($rivi['tuotetyyppi'])) {
 			korvaa_tuotetyyppi_selitteella($rivi);
 		}
@@ -359,10 +361,10 @@ function generoi_select($request_params) {
 				or $request_params['ruksit']['matkalaskuittain']
 				or $request_params['ruksit']['tuotetyypeittain']
 				or $request_params['ruksit']['kustp']) {
-			$select .= "sum(tilausrivi.kpl) as kpl, sum(tilausrivi.erikoisale) as ilmaiset_lounaat, sum(tilausrivi.hinta) as hinta, ";
+			$select .= "sum(tilausrivi.kpl) as kpl, sum(tilausrivi.erikoisale) as ilmaiset_lounaat, avg(tilausrivi.hinta) as hinta, sum(tilausrivi.rivihinta) as rivihinta, ";
 		}
 		else {
-			$select .= "tilausrivi.kpl, tilausrivi.erikoisale as ilmaiset_lounaat, tilausrivi.hinta as hinta, ";
+			$select .= "tilausrivi.kpl, tilausrivi.erikoisale as ilmaiset_lounaat, tilausrivi.hinta as hinta, tilausrivi.rivihinta as rivihinta, ";
 		}
 	}
 

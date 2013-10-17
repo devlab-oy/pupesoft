@@ -14,20 +14,23 @@
 	}
 
 	if (!isset($tuvarasto)) $tuvarasto = '';
-
 	if (!isset($tutyyppi)) $tutyyppi = '';
 
-	$now_minus_1_month = date('Y-m-d', strtotime('now - 1 month'));
-	$now_minus_1_month = explode('-', $now_minus_1_month);
-	if (!isset($ppa)) $ppa = $now_minus_1_month[2];
-	if (!isset($kka)) $kka = $now_minus_1_month[1];
-	if (!isset($vva)) $vva = $now_minus_1_month[0];
-
-	if (!isset($ppl)) $ppl = date('d');
-	if (!isset($kkl)) $kkl = date('m');
-	if (!isset($vvl)) $vvl = date('Y');
-
 	$valmistuslinjat = hae_valmistuslinjat();
+
+	if (!empty($valmistuslinjat)) {
+		//Tänne vain jos valmistuslinjat on käytössä, eli käyttöliittymässä on dropdown sekä aikavalinta inputit
+		$now_minus_1_month = date('Y-m-d', strtotime('now - 1 month'));
+		$now_minus_1_month = explode('-', $now_minus_1_month);
+
+		if (!isset($ppa)) $ppa = $now_minus_1_month[2];
+		if (!isset($kka)) $kka = $now_minus_1_month[1];
+		if (!isset($vva)) $vva = $now_minus_1_month[0];
+
+		if (!isset($ppl)) $ppl = date('d');
+		if (!isset($kkl)) $kkl = date('m');
+		if (!isset($vvl)) $vvl = date('Y');
+	}
 
 	$logistiikka_yhtio 		= '';
 	$logistiikka_yhtiolisa 	= '';
@@ -643,13 +646,15 @@
 			$valid = true;
 			$haku .= " and lasku.kerayspvm<=date_add(now(), INTERVAL $karajaus day)";
 		}
-		else {
+		elseif($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != '') {
 			$valid = true;
 			$alku_paiva = "{$vva}-{$kka}-{$ppa}";
 			$loppu_paiva = "{$vvl}-{$kkl}-{$ppl}";
 			$valid = FormValidator::validateContent($alku_paiva, 'paiva');
+
 			if ($valid) {
 				$valid = FormValidator::validateContent($loppu_paiva, 'paiva');
+
 				if ($valid and strtotime($alku_paiva) > strtotime($loppu_paiva)) {
 					echo "<font class='error'>".t('Alkupäivä on myöhemmin kuin loppupäivä')."</font>";
 					$valid = false;
@@ -662,6 +667,10 @@
 			else {
 				echo "<font class='error'>".t('Päivämäärät ei ole valideja')."</font>";
 			}
+		}
+		else {
+			//karajus == 'KK' eli kaikki
+			$valid = true;
 		}
 
 		if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {
@@ -1133,6 +1142,12 @@
 					echo "<input type='hidden' name='tutyyppi' 		value='$tutyyppi'>";
 					echo "<input type='hidden' name='tutoimtapa' 	value='$tutoimtapa'>";
 					echo "<input type='hidden' name='karajaus' 		value='$karajaus'>";
+					echo "<input type='hidden' name='vva'			value='$vva'>";
+					echo "<input type='hidden' name='kka'			value='$kka'>";
+					echo "<input type='hidden' name='ppa'			value='$ppa'>";
+					echo "<input type='hidden' name='vvl'			value='$vvl'>";
+					echo "<input type='hidden' name='kkl'			value='$kkl'>";
+					echo "<input type='hidden' name='ppl'			value='$ppl'>";
 					echo "<input type='hidden' name='lasku_yhtio' 	value='$tilrow[yhtio]'>";
 					echo "<input type='hidden' name='tee2' 			value='VALITSE'>";
 					echo "<input type='hidden' name='tilaukset'		value='$tilrow[otunnus]'>";
@@ -1214,6 +1229,12 @@
 					echo "<input type='hidden' name='tutyyppi'		value='$tutyyppi'>";
 					echo "<input type='hidden' name='tutoimtapa'	value='$tutoimtapa'>";
 					echo "<input type='hidden' name='karajaus'		value='$karajaus'>";
+					echo "<input type='hidden' name='vva'			value='$vva'>";
+					echo "<input type='hidden' name='kka'			value='$kka'>";
+					echo "<input type='hidden' name='ppa'			value='$ppa'>";
+					echo "<input type='hidden' name='vvl'			value='$vvl'>";
+					echo "<input type='hidden' name='kkl'			value='$kkl'>";
+					echo "<input type='hidden' name='ppl'			value='$ppl'>";
 					echo "<input type='hidden' name='tee2' 			value='TULOSTA'>";
 					echo "<input type='hidden' name='tulostukseen[]' value='$tilrow[otunnus]'>";
 					echo "<input type='hidden' name='lasku_yhtio' 	value='$tilrow[yhtio]'>";
@@ -1227,6 +1248,12 @@
 					echo "<input type='hidden' name='tutyyppi' 		value='$tutyyppi'>";
 					echo "<input type='hidden' name='tutoimtapa'	value='$tutoimtapa'>";
 					echo "<input type='hidden' name='karajaus' 		value='$karajaus'>";
+					echo "<input type='hidden' name='vva'			value='$vva'>";
+					echo "<input type='hidden' name='kka'			value='$kka'>";
+					echo "<input type='hidden' name='ppa'			value='$ppa'>";
+					echo "<input type='hidden' name='vvl'			value='$vvl'>";
+					echo "<input type='hidden' name='kkl'			value='$kkl'>";
+					echo "<input type='hidden' name='ppl'			value='$ppl'>";
 					echo "<input type='hidden' name='etsi' 			value='$etsi'>";
 					echo "<input type='hidden' name='tee2' 			value='NAYTATILAUS'>";
 					echo "<input type='hidden' name='vanha_tee2' 	value=''>";

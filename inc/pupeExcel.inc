@@ -94,6 +94,25 @@ class pupeExcel {
 		$result = pupe_query($query, $this->_exceldblink);
 	}
 
+	function writeFormula($excelrivi, $excelsarake, $number, $style = array()) {
+
+		if ((string) $number == "") {
+			return;
+		}
+
+		// Indeksit juoksee tässä maailmassa ykkösestä
+		$excelrivi++;
+		$excelsarake++;
+
+		$query = "	INSERT INTO temporary_excel_data SET
+					excelrivi 	= $excelrivi,
+					excelsarake = $excelsarake,
+					type 		= 'F',
+					value 		= '$number',
+					style 		= '".mysql_real_escape_string(serialize($style))."'";
+		$result = pupe_query($query, $this->_exceldblink);
+	}
+
 	function writeString($excelrivi, $excelsarake, $string, $style = array()) {
 
 		// Indeksit juoksee tässä maailmassa ykkösestä
@@ -211,6 +230,21 @@ class pupeExcel {
 			if ($data_row["type"] == "N") {
 				// Set cell value
 				$cell->addChild("v", (float) $data_row["value"]);
+
+				// Add style attribute
+				$this->setStyle($cell, $data_row["style"]);
+			}
+
+			// Formula
+			if ($data_row["type"] == "F") {
+
+				$cell->addAttribute('t', 'n');
+
+				// Set cell value
+				$formula = $cell->addChild("f", $data_row["value"]);
+
+				// Add formula attribute
+				$formula->addAttribute('aca', 'false');
 
 				// Add style attribute
 				$this->setStyle($cell, $data_row["style"]);

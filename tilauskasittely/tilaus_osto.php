@@ -575,6 +575,38 @@
 					$kpl = ($tilausrivirow['varattu'] + $tilausrivirow['jt']);
 				}
 				else {
+
+					// Haetaan defaultti ostotilauksen käsittely
+					$myynnista_osto_avainsanat = t_avainsana("MYYNNISTA_OSTO");
+
+					if (mysql_num_rows($myynnista_osto_avainsanat) > 0) {
+
+						// Yhtiön toimipaikka yliajaa tämän parametrin
+						$query_x = "	SELECT ostotilauksen_kasittely
+										FROM yhtion_parametrit
+										WHERE yhtio = '{$kukarow['yhtio']}'";
+						$param_fetch_res = pupe_query($query_x);
+						$param_fetch_row = mysql_fetch_assoc($param_fetch_res);
+
+						$ostotilauksen_kasittely = $param_fetch_row['ostotilauksen_kasittely'];
+
+						if ($kukarow['toimipaikka'] != 0) {
+
+							$query_x = "	SELECT ostotilauksen_kasittely
+											FROM yhtion_toimipaikat
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$kukarow['toimipaikka']}'
+											AND ostotilauksen_kasittely != ''";
+							$toimpaikka_chk_res = pupe_query($query_x);
+
+							if (mysql_num_rows($toimpaikka_chk_res) > 0) {
+								$toimpaikka_chk_row = mysql_fetch_assoc($toimpaikka_chk_res);
+								$ostotilauksen_kasittely = $toimpaikka_chk_row['ostotilauksen_kasittely'];
+							}
+						}
+					}
+
+
 					//Vaihdettava tuote ei ole tämän ostotilauksen toimittajalta.
 					//Katsotaan, löytyykö toiselta toimittajalta auki olevia ostotilauksia,
 					//ja liitetään tilausrivi siihen tilaukseen jos löytyy,
@@ -582,17 +614,22 @@
 					//luo_ostotilausotsikko()-funktio handaa uuden otsikon luonnin ja olemassa olevan hakemisen
 					$params = array(
 						'liitostunnus' => $toimi_tunnus,
+						'ohjausmerkki' => $laskurow['ohjausmerkki'],
+						'nimi' => $laskurow['toim_nimi'],
+						'nimitark' => $laskurow['toim_nimitark'],
+						'osoite' => $laskurow['toim_osoite'],
+						'postino' => $laskurow['toim_postino'],
+						'postitp' => $laskurow['toim_postitp'],
+						'maa' => $laskurow['toim_maa'],
+						'myytil_toimaika' => $laskurow['toimaika'],
+						'toimipaikka' => $laskurow['vanhatunnus'],
+						'ostotilauksen_kasittely' => $ostotilauksen_kasittely,
 					);
+
 					if (!empty($tilausrivirow['tilausrivilinkki'])) {
-						$params['nimi'] = $laskurow['toim_nimi'];
-						$params['nimitark'] = $laskurow['toim_nimitark'];
-						$params['osoite'] = $laskurow['toim_osoite'];
-						$params['postino'] = $laskurow['toim_postino'];
-						$params['postitp'] = $laskurow['toim_postitp'];
-						$params['maa'] = $laskurow['toim_maa'];
-						$params['ohjausmerkki'] = $myyntitilausrow['ohjausmerkki'];
 						$params['ostotilauksen_kasittely'] = $myyntitilausrow['ostotilauksen_kasittely'];
 					}
+
 					$toisen_toimittajan_ostotilaus = luo_ostotilausotsikko($params);
 
 					$myyntitilausrivi_tunnus_temp = $tilausrivirow['tilausrivitunnus'];
@@ -1029,8 +1066,8 @@
 			echo "<tr><th>".t("Tilausnumero")."</th><th>".t("Laadittu")."</th><th>".t("Toimaika")."</th><th>".t("Valuutta")."</th><td class='back'></td></tr>";
 			echo "<tr><td>$laskurow[tunnus]</td><td>".tv1dateconv($laskurow["luontiaika"])."</td><td>".tv1dateconv($laskurow["toimaika"])."</td><td>{$laskurow["valkoodi"]}</td></tr>";
 
-			if ($toimittajaresult["fakta"] != "") {
-				echo "<tr><th>".t("Fakta")."</th><td colspan='3'>$toimittajaresult[fakta]&nbsp;</td></tr>";
+			if ($toimittajarow["fakta"] != "") {
+				echo "<tr><th>".t("Fakta")."</th><td colspan='3'>$toimittajarow[fakta]&nbsp;</td></tr>";
 			}
 
 			echo "</table><br>";
@@ -1188,6 +1225,8 @@
 				$divnolla			  = 0;
 				$erikoisale_summa	  = 0;
 				$myyntitilaus_lopetus = "{$palvelin2}tilauskasittely/tilaus_osto.php////tee=AKTIVOI//orig_tila={$laskurow['tila']}//orig_alatila={$laskurow['alatila']}//tilausnumero={$tilausnumero}//from=tilaus_myynti";
+				$oikeusostohintapaiv  = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat", "check");
+
 
 				while ($prow = mysql_fetch_assoc($presult)) {
 					$divnolla++;

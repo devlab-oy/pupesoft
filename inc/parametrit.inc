@@ -451,7 +451,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				$dtpalvelin .= "tyomaarays/";
 			}
 
-			if (basename($phpnimi) == "selaasopimuksia.php" or basename($phpnimi) == "asiakkaantilaukset.php") {
+			if (basename($phpnimi) == "selaasopimuksia.php" or basename($phpnimi) == "asiakkaantilaukset.php" or basename($phpnimi) == "varastotilasto.php") {
 				$dtpalvelin .= "raportit/";
 			}
 

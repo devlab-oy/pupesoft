@@ -311,6 +311,7 @@ if (!function_exists("pupesoft_flock")) {
 			else exit;
 		}
 		else {
+			@chmod("/tmp/##pupesoft.sh-flock.lock", 0666);
 			flock($backupflock, LOCK_UN);
 		}
 
@@ -2838,11 +2839,11 @@ if (!function_exists("jalkilaske_valmistus")) {
 		}
 		else {
 			if (!$tullaan_automaattikohdistuksesta) {
-				echo "<tr>";
-				echo "<th>$valmistettava_tilaus</th>";
-				echo "<td colspan='5'><font class='error'>".t("Yhtään valmistusriviä ei löytynyt")."!</font></td>";
-				echo "</tr>";
-			}
+			echo "<tr>";
+			echo "<th>$valmistettava_tilaus</th>";
+			echo "<td colspan='5'><font class='error'>".t("Yhtään valmistusriviä ei löytynyt")."!</font></td>";
+			echo "</tr>";
+		}
 		}
 
 		if ($tee == "VALMISTA" and $valmistettavat != "") {
@@ -3021,18 +3022,18 @@ if (!function_exists("jalkilaske_valmistus")) {
 			ob_end_clean();
 
 			if (!$tullaan_automaattikohdistuksesta) {
-				if (count($virhe) > 0) {
-					echo "<tr>";
-					echo "<th>$valmistettava_tilaus</th>";
-					echo "<td colspan='5'><font class='error'>",var_dump($virhe),"</font></td>";
-					echo "</tr>";
-				}
-				else {
-					echo "<tr>";
-					echo "<th>$valmistettava_tilaus</th>";
-					echo "<td colspan='5'><font class='ok'>$retval</font></td>";
-					echo "</tr>";
-				}
+			if (count($virhe) > 0) {
+				echo "<tr>";
+				echo "<th>$valmistettava_tilaus</th>";
+				echo "<td colspan='5'><font class='error'>",var_dump($virhe),"</font></td>";
+				echo "</tr>";
+			}
+			else {
+				echo "<tr>";
+				echo "<th>$valmistettava_tilaus</th>";
+				echo "<td colspan='5'><font class='ok'>$retval</font></td>";
+				echo "</tr>";
+			}
 			}
 
 			$query = "	UPDATE lasku
@@ -18088,10 +18089,11 @@ if (!function_exists("pupesoft_lahetetyyppi")) {
 
 		if ((int) $asiakastunnus != 0) {
 			# Jos tilauksella ei ollut lähetetyyppiä, haetaan asiakkaan oletuslähettyyppi
-			$query = "	SELECT lahetetyyppi
+			$query = "	SELECT asiakas.lahetetyyppi
 						FROM asiakas
-						WHERE tunnus = '$asiakastunnus'
-						AND yhtio = '$kukarow[yhtio]'";
+						JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.selite = asiakas.lahetetyyppi AND avainsana.laji = 'LAHETETYYPPI')
+						WHERE asiakas.tunnus = '$asiakastunnus'
+						AND asiakas.yhtio    = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
@@ -18156,6 +18158,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		#$lahetetyyppi = "tulosta_lahete_brutto.inc"; 			# Näytetään tuotteen myymälähinta/(asiakkaan hinta)
 		#$lahetetyyppi = "tulosta_lahete_eialeja.inc"; 			# Näytetään tuotteen myyntihinta ja alennusryhmä
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc"; 		# Ei näytetä hintoja eikä alennuksia, EAN-koodi tulostetaan viivakoodina
+		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # Näytetään asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
+		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # Näytetään asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
 		#$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
@@ -18252,13 +18256,19 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			$kvaktuotteet = ",'{$toimitustapa_row['kuljetusvakuutus_tuotenumerot']}'";
 		}
 
+		$jtsort_lisa = "if (tilausrivi.tuoteno in ('$yhtiorow[rahti_tuotenumero]' $kvaktuotteet), 2, if(tilausrivi.var='J', 1, 0)) jtsort,";
+
+		if (substr($lahetetyyppi, 0, 6) != "perhe_" and (hae_base_lahetetyyppi($lahetetyyppi) == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' or hae_base_lahetetyyppi($lahetetyyppi) == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc')) {
+			$jtsort_lisa = "0 as jtsort,";
+		}
+
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot
 		$query = "  SELECT tilausrivi.*, {$koontiselect}
 					round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 					{$koontirivihinta}
 					$sorttauskentta,
-					if (tilausrivi.tuoteno in ('$yhtiorow[rahti_tuotenumero]' $kvaktuotteet), 2, if(tilausrivi.var='J', 1, 0)) jtsort,
+					{$jtsort_lisa}
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 					tuote.sarjanumeroseuranta
@@ -23258,20 +23268,42 @@ if (!function_exists("splittaa_valmistukset")) {
 }
 
 if (!function_exists('laske_ext_ennakko_hinta')) {
-	function laske_ext_ennakko_hinta($trow) {
+	function laske_ext_ennakko_hinta($trow, $laskurow) {
 		global $kukarow, $yhtiorow;
+
+		$kielilisa = "FI";
+
+		if (strtoupper($laskurow["maa"]) == "SE") {
+			$kielilisa = "SE";
+		}
 
 		$query = "  SELECT selite AS ennakko_pros_a
 					FROM tuotteen_avainsanat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tuoteno = '{$trow['tuoteno']}'
-					AND laji = 'parametri_ennakkoale_a'
+					AND laji 	= 'parametri_ennakkoale_a'
+					AND kieli 	= '{$kielilisa}'
 					AND selite != ''
 					ORDER BY ennakko_pros_a DESC
 					LIMIT 1";
 		$result = pupe_query($query);
 
+		// Haetaanko ruotsihinnat
+		if (strtoupper($laskurow["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
+			$query = "	SELECT alv
+						FROM tuotteen_alv
+						WHERE tuoteno = '{$trow['tuoteno']}'
+						AND maa = '{$laskurow['maa']}'";
+			$tuotteen_alv_resu = pupe_query($query);
+			$tuotteen_alv_rivi = mysql_fetch_assoc($tuotteen_alv_resu);
+
+			$alv = $tuotteen_alv_rivi['alv'];
+
+			$trow['myyntihinta'] = tuotteen_myyntihinta($laskurow, $trow, $trow['varattu']);
+		}
+
 		$hinta = "";
+
 		if (mysql_num_rows($result) == 1) {
 			$tuotteen_hinta = mysql_fetch_assoc($result);
 			$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
@@ -23570,6 +23602,42 @@ if (!function_exists('laske_siirrettava_maara')) {
 	}
 }
 
+if (!function_exists('hae_tilauksen_rekisterinumerot')) {
+	function hae_tilauksen_rekisterinumerot($tilausnumero) {
+		global $kukarow, $yhtiorow;
+
+		if ($tilausnumero == '') {
+			return array();
+		}
+
+		//Tilausrivi pitää joinaa, jottei tule poistettuja rekisterinumeroita
+		$query = "	SELECT tilausrivin_lisatiedot.rekisterinumero
+					FROM tilausrivin_lisatiedot
+					JOIN tilausrivi
+					ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+						AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus )
+					WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivin_lisatiedot.vanha_otunnus = '{$tilausnumero}'
+					ORDER BY tilausrivi.tunnus DESC";
+		$result = pupe_query($query);
+
+		$rekisterinumerot = array();
+		$onko_syotetty_muita_kuin_tyhjia = false;
+		while($rekisterinumero = mysql_fetch_assoc($result)) {
+			if ($rekisterinumero['rekisterinumero'] != '') {
+				$onko_syotetty_muita_kuin_tyhjia = true;
+			}
+			$rekisterinumerot[$rekisterinumero['rekisterinumero']] = $rekisterinumero;
+		}
+
+		if ($onko_syotetty_muita_kuin_tyhjia) {
+			return $rekisterinumerot;
+		}
+
+		return array();
+	}
+}
+
 if (!function_exists('paivita_ohjausmerkki')) {
 	function paivita_ohjausmerkki($laskurow) {
 		global $kukarow;
@@ -23607,20 +23675,6 @@ if (!function_exists('paivita_ohjausmerkki')) {
 		}
 
 		return $laskurow['ohjausmerkki'];
-	}
-}
-
-if (!function_exists('hae_asiakas')) {
-	function hae_asiakas($liitostunnus) {
-		global $yhtiorow;
-
-		$query = "	SELECT *
-					FROM asiakas
-					WHERE yhtio = '{$yhtiorow['yhtio']}'
-					AND tunnus = {$liitostunnus}";
-		$result = pupe_query($query);
-
-		return mysql_fetch_assoc($result);
 	}
 }
 
@@ -23732,7 +23786,7 @@ if (!function_exists("tsekit")) {
 		}
 
 		// katotaan onko kohdistus tehty pennilleen
-		if ($row["kohdistettu"] == 'K') {
+		if (($row["kohdistettu"] == 'K' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') or $yhtiorow['jalkilaskenta_kuluperuste'] == 'VS') {
 			$kohok = 1;
 			$kohdistus = "<font class='ok'>".t("ok")."</font>";
 		}
@@ -23824,6 +23878,676 @@ if (!function_exists("tsekit")) {
 		}
 
 		return array($kaikkivarastossayhteensa,$kaikkiliitettyyhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$liitettyarvo,$varok);
+	}
+}
+
+if (!function_exists('hae_asiakas')) {
+	function hae_asiakas($liitostunnus) {
+		global $yhtiorow;
+
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$yhtiorow['yhtio']}'
+					AND tunnus = {$liitostunnus}";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+
+if (!function_exists('hae_asiakasalennukset')) {
+	function hae_asiakasalennukset($asiakasrow, $alehi_assegmenttirow, $asiakas_yhtio, $tuotecols, $tuotejoin, $tuotewhere, $tuotegroup, $order, $poistuvat = TRUE) {
+		global $kukarow, $yhtiorow;
+
+		if ($poistuvat) {
+			$poislisa = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
+		}
+		else {
+			$poislisa = " and tuote.status not in ('P','X') ";
+		}
+
+		$query = "	/*	5. asiakas.tunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus) */
+						(	SELECT 1 prio,
+								asiakasalennus.alennus,
+								asiakasalennus.tuoteno,
+								asiakasalennus.alennuslaji,
+								tuote.nimitys tuoteno_nimi,
+								'' asiakasryhmä,
+								'' asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas / tuote' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.asiakas = '$asiakasrow[tunnus]'
+							and asiakasalennus.asiakas > 0
+							and asiakasalennus.tuoteno != ''
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							{$poislisa}
+						)
+						UNION
+						/*	5. asiakas.ytunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus) */
+						(	SELECT 2 prio,
+								asiakasalennus.alennus,
+								asiakasalennus.tuoteno,
+								asiakasalennus.alennuslaji,
+								tuote.nimitys tuoteno_nimi,
+								'' asiakasryhmä,
+								'' asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Ytunnus / tuote' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.ytunnus = '$asiakasrow[ytunnus]'
+							and asiakasalennus.ytunnus != ''
+							and asiakasalennus.tuoteno != ''
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							{$poislisa}
+						)
+						UNION
+						/* 6. asiakas.tunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus) */
+						(	SELECT 3 prio,
+								asiakasalennus.alennus,
+								'' tuoteno,
+								asiakasalennus.alennuslaji,
+								'' tuoteno_nimi,
+								'' asiakasryhmä,
+								'' asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas / aleryhmä' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							$tuotejoin
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.asiakas = '$asiakasrow[tunnus]'
+							and asiakasalennus.asiakas > 0
+							and asiakasalennus.ryhma != ''
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							$tuotewhere
+							$tuotegroup
+						)
+						UNION
+						/* 6. asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus) */
+						(	SELECT 4 prio,
+								asiakasalennus.alennus,
+								'' tuoteno,
+								asiakasalennus.alennuslaji,
+								'' tuoteno_nimi,
+								'' asiakasryhmä,
+								'' asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Ytunnus / aleryhmä' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							$tuotejoin
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.ytunnus = '$asiakasrow[ytunnus]'
+							and asiakasalennus.ytunnus != ''
+							and asiakasalennus.ryhma != ''
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							$tuotewhere
+							$tuotegroup
+						)
+						UNION
+						/* 7. asiakas.segmentti tuote.tuoteno aleprosentti (asiakassegmentin tuotteen alennus) */
+						(
+							SELECT 5 prio,
+									asiakasalennus.alennus,
+									asiakasalennus.tuoteno,
+									asiakasalennus.alennuslaji,
+									tuote.nimitys tuoteno_nimi,
+									'' asiakasryhmä,
+									'' asiakasryhmä_nimi,
+									asiakasalennus.ryhma alennusryhmä,
+									perusalennus.selite alennusryhmä_nimi,
+									if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+									if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+									'Asiakas-segmentti / tuote' tyyppi
+									$tuotecols
+								FROM asiakasalennus
+								LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+								LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+								JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
+								WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+								and asiakasalennus.asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
+								and asiakasalennus.asiakas_segmentti != ''
+								and asiakasalennus.tuoteno != ''
+								and asiakasalennus.ytunnus = ''
+								and asiakasalennus.asiakas = 0
+								and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+								and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+								and asiakasalennus.alennus >= 0
+								and asiakasalennus.alennus <= 100
+								{$poislisa}
+						)
+						UNION
+						/* 8. asiakas.ryhmä tuote.tuoteno aleprosentti (asiakasaleryhmän tuotteen alennus) */
+						(	SELECT 6 prio,
+								asiakasalennus.alennus,
+								asiakasalennus.tuoteno,
+								asiakasalennus.alennuslaji,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakasryhmä / tuote' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.asiakas_ryhma = '$asiakasrow[ryhma]'
+							and asiakasalennus.asiakas_ryhma != ''
+							and asiakasalennus.tuoteno != ''
+							and asiakasalennus.ytunnus = ''
+							and asiakasalennus.asiakas = 0
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							{$poislisa}
+						)
+						UNION
+						/* 9. asiakas.piiri tuote.tuoteno aleprosentti (asiakaspiirin tuotteen alennus) */
+						(	SELECT 7 prio,
+								asiakasalennus.alennus,
+								asiakasalennus.tuoteno,
+								asiakasalennus.alennuslaji,
+								tuote.nimitys tuoteno_nimi,
+								'' asiakasryhmä,
+								'' asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakaspiiri / tuote' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.piiri = '$asiakasrow[piiri]'
+							and asiakasalennus.piiri != ''
+							and asiakasalennus.tuoteno != ''
+							and asiakasalennus.ytunnus = ''
+							and asiakasalennus.asiakas = 0
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							{$poislisa}
+						)
+						UNION
+						/* 10. asiakas.segmentti tuote.aleryhmä aleprosentti (asiakassegmentin tuotealeryhmän alennus) */
+						(	SELECT 8 prio,
+								asiakasalennus.alennus,
+								'' tuoteno,
+								asiakasalennus.alennuslaji,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas-segmentti / aleryhmä' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							$tuotejoin
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
+							and asiakasalennus.asiakas_segmentti != ''
+							and asiakasalennus.ryhma != ''
+							and asiakasalennus.ytunnus = ''
+							and asiakasalennus.asiakas = 0
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							$tuotewhere
+							$tuotegroup
+						)
+						UNION
+						/* 11. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasaleryhmän tuotealeryhmän alennus) */
+						(	SELECT 9 prio,
+								asiakasalennus.alennus,
+								'' tuoteno,
+								asiakasalennus.alennuslaji,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakasryhmä / aleryhmä' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							$tuotejoin
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.asiakas_ryhma = '$asiakasrow[ryhma]'
+							and asiakasalennus.asiakas_ryhma != ''
+							and asiakasalennus.ryhma != ''
+							and asiakasalennus.ytunnus = ''
+							and asiakasalennus.asiakas = 0
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							$tuotewhere
+							$tuotegroup
+						)
+						UNION
+						/* 12. asiakas.piiri tuote.aleryhmä aleprosentti (asiakaspiirin tuotealeryhmän alennus) */
+						(	SELECT 10 prio,
+								asiakasalennus.alennus,
+								'' tuoteno,
+								asiakasalennus.alennuslaji,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakaspiiri / aleryhmä' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							$tuotejoin
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.piiri = '$asiakasrow[piiri]'
+							and asiakasalennus.piiri != ''
+							and asiakasalennus.ryhma != ''
+							and asiakasalennus.ytunnus = ''
+							and asiakasalennus.asiakas = 0
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							$tuotewhere
+							$tuotegroup
+						)
+						UNION
+						/* 13. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus) */
+						(	SELECT 11 prio,
+								alennus,
+								'' tuoteno,
+								'1' alennuslaji,
+								'' tuoteno_nimi,
+								'' asiakasryhmä,
+								'' asiakasryhmä_nimi,
+								ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								'' alkupvm,
+								'' loppupvm,
+								'Perusalennus' tyyppi
+								$tuotecols
+							FROM perusalennus
+							$tuotejoin
+							WHERE perusalennus.yhtio = '$asiakas_yhtio'
+							and perusalennus.ryhma != ''
+							# Huom. perualennus > 0
+							and perusalennus.alennus > 0
+							and perusalennus.alennus <= 100
+							$tuotewhere
+							$tuotegroup
+						)
+						ORDER BY $order";
+		$result = pupe_query($query);
+
+		$asiakas_alennukset = array();
+		while($asiakas_alennus = mysql_fetch_assoc($result)) {
+			$asiakas_alennukset[] = $asiakas_alennus;
+		}
+
+		return $asiakas_alennukset;
+	}
+}
+
+if (!function_exists('hae_asiakashinnat')) {
+	function hae_asiakashinnat($asiakasrow, $alehi_assegmenttirow, $asiakas_yhtio, $poistuvat = TRUE) {
+		global $kukarow, $yhtiorow;
+
+		$segmentti_where = "";
+
+		if (!empty($alehi_assegmenttirow['tunnukset'])) {
+			$segmentti_where = " and asiakashinta.asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])";
+		}
+
+		if ($poistuvat) {
+			$poislisa = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
+		}
+		else {
+			$poislisa = " and tuote.status not in ('P','X') ";
+		}
+
+		$query = "	/* 2B. asiakas.tunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) yhtiön valuutassa */
+						(	SELECT 1 prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas / tuote' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.asiakas = '$asiakasrow[tunnus]'
+							and asiakashinta.asiakas > 0
+							and asiakashinta.tuoteno != ''
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 2B. asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) yhtiön valuutassa */
+						(	SELECT 2 prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Ytunnus / tuote' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.ytunnus = '$asiakasrow[ytunnus]'
+							and asiakashinta.ytunnus > 0
+							and asiakashinta.tuoteno != ''
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 3B. asiakas.tunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) yhtiön valuutassa */
+						(	SELECT 3 prio,
+								hinta,
+								'' tuoteno,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas / aleryhmä' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.asiakas = '$asiakasrow[tunnus]'
+							and asiakashinta.asiakas > 0
+							and asiakashinta.ryhma != ''
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 3B. asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) yhtiön valuutassa */
+						(	SELECT 4 prio,
+								hinta,
+								'' tuoteno,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Ytunnus / aleryhmä' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.ytunnus = '$asiakasrow[ytunnus]'
+							and asiakashinta.ytunnus != ''
+							and asiakashinta.ryhma != ''
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 4B. asiakas.segmentti tuote.tuoteno nettohinta (asiakassegmentin tuotteen hinta) yhtiön valuutassa */
+						(	SELECT 5 prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas-segmentti / tuote' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							{$segmentti_where}
+							and asiakashinta.asiakas_segmentti !=''
+							and asiakashinta.tuoteno != ''
+							and asiakashinta.ytunnus = ''
+							and asiakashinta.asiakas = 0
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 5B. asiakas.ryhmä tuote.tuoteno nettohinta (asiakasaleryhmän tuotteen hinta) yhtiön valuutassa */
+						(	SELECT 6 prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakasryhmä / tuote' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.asiakas_ryhma = '$asiakasrow[ryhma]'
+							and asiakashinta.asiakas_ryhma != ''
+							and asiakashinta.tuoteno != ''
+							and asiakashinta.ytunnus = ''
+							and asiakashinta.asiakas = 0
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 6B. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) yhtiön valuutassa */
+						(	SELECT 7 prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakaspiiri / tuote' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.piiri = '$asiakasrow[piiri]'
+							and asiakashinta.piiri != ''
+							and asiakashinta.tuoteno != ''
+							and asiakashinta.ytunnus = ''
+							and asiakashinta.asiakas = 0
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 7B. asiakas.segmentti tuote.aleryhma nettohinta (asiakassegmentin tuotealeryhmän hinta) yhtiön valuutassa */
+						(	SELECT 8 prio,
+								hinta,
+								'' tuoteno,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas-segmentti / aleryhmä' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							{$segmentti_where}
+							and asiakashinta.asiakas_segmentti != ''
+							and asiakashinta.ryhma != ''
+							and asiakashinta.ytunnus = ''
+							and asiakashinta.asiakas = 0
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 8B. asiakas.ryhmä tuote.aleryhmä nettohinta (asiakasaleryhmän tuotealeryhmän hinta) yhtiön valuutassa */
+						(	SELECT 9 prio,
+								hinta,
+								'' tuoteno,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakasryhmä / aleryhmä' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.asiakas_ryhma = '$asiakasrow[ryhma]'
+							and asiakashinta.asiakas_ryhma != ''
+							and asiakashinta.ryhma != ''
+							and asiakashinta.ytunnus = ''
+							and asiakashinta.asiakas = 0
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 9B. asiakas.piiri tuote.aleryhma nettohinta (asiakaspiirin tuotealeryhmän hinta) yhtiön valuutassa */
+						(	SELECT 10 prio,
+								hinta,
+								'' tuoteno,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakaspiiri / aleryhmä' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.piiri = '$asiakasrow[piiri]'
+							and asiakashinta.piiri != ''
+							and asiakashinta.ryhma != ''
+							and asiakashinta.ytunnus = ''
+							and asiakashinta.asiakas = 0
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						ORDER BY alennusryhmä+0, tuoteno, prio, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)";
+		$result = pupe_query($query);
+
+		$tuote_hinnat = array();
+
+		while ($tuote_hinta = mysql_fetch_assoc($result)) {
+			$tuote_hinnat[] = $tuote_hinta;
+		}
+
+		return $tuote_hinnat;
 	}
 }
 

@@ -345,6 +345,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "extranet_kayttajan_lisatiedot" :
 				$pakolliset = array("LIITOSTUNNUS", "LAJI", "SELITE");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
 				break;
 			case "varaston_hyllypaikat":
 				$pakolliset = array("VARASTO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO");

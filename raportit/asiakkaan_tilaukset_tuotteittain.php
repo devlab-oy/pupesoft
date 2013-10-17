@@ -114,7 +114,6 @@
 		echo "<td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='20'></td></tr>";
 	}
 
-
 	echo "	<tr><th>".t("Syˆt‰ tuotenumero").":</th>
 			<td colspan='3'>";
 
@@ -136,43 +135,30 @@
 			<td><input type='text' name='kkl' value='$kkl' size='3'></td>
 			<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
 
-			if ($toim == 'OSTO') {
-				echo "</tr><tr><th>".t("Valitse p‰iv‰m‰‰r‰n tyyppi")."</th>
-					<td colspan='3'><select name='pvmtapa'>
-						<option value='laadittu' $pvm_select1>".t("Tilauksen laatimisp‰iv‰m‰‰r‰")."</option>
-						<option value='toimaika' $pvm_select2>".t("Tilauksen toivottu toimitusp‰iv‰m‰‰r‰")."</option>
-					</select></td>";
-			}
-			else {
-				echo "</tr><tr><th>".t("Valitse p‰iv‰m‰‰r‰n tyyppi")."</th>
-					<td colspan='3'><select name='pvmtapa'>
-						<option value='laadittu' $pvm_select1>".t("Tilauksen laatimisp‰iv‰m‰‰r‰")."</option>
-						<option value='laskutettu' $pvm_select2>".t("Tilauksen laskutusp‰iv‰m‰‰r‰")."</option>
-					</select></td>";
-			}
+	if ($toim == 'OSTO') {
+		echo "</tr><tr><th>".t("Valitse p‰iv‰m‰‰r‰n tyyppi")."</th>
+			<td colspan='3'><select name='pvmtapa'>
+				<option value='laadittu' $pvm_select1>".t("Tilauksen laatimisp‰iv‰m‰‰r‰")."</option>
+				<option value='toimaika' $pvm_select2>".t("Tilauksen toivottu toimitusp‰iv‰m‰‰r‰")."</option>
+			</select></td>";
+	}
+	else {
+		echo "</tr><tr><th>".t("Valitse p‰iv‰m‰‰r‰n tyyppi")."</th>
+			<td colspan='3'><select name='pvmtapa'>
+				<option value='laadittu' $pvm_select1>".t("Tilauksen laatimisp‰iv‰m‰‰r‰")."</option>
+				<option value='laskutettu' $pvm_select2>".t("Tilauksen laskutusp‰iv‰m‰‰r‰")."</option>
+			</select></td>";
+	}
 
 	echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td></tr></form></table>";
 
 	if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
 
-		if(@include('Spreadsheet/Excel/Writer.php')) {
-			//keksit‰‰n failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+		include('inc/pupeExcel.inc');
 
-			$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-			$workbook->setVersion(8);
-			$worksheet =& $workbook->addWorksheet('Sheet 1');
-
-			$format_bold =& $workbook->addFormat();
-			$format_bold->setBold();
-
-			$format_num =& $workbook->addFormat();
-			$format_num->setNumFormat('0.00');
-
-			$excelrivi = 0;
-		}
+		$worksheet 	 = new pupeExcel();
+		$format_bold = array("bold" => TRUE);
+		$excelrivi 	 = 0;
 
 		if ($jarj != '') {
 			$jarj = "ORDER BY $jarj";
@@ -277,7 +263,7 @@
 		}
 
 		$query .= "$jarj";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if ($toim == 'OSTO') {
 			$miinus = 2;
@@ -301,33 +287,24 @@
 
 				echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&tuoteno=".urlencode($tuoteno)."&ytunnus=$ytunnus&asiakasid=$asiakasid&jarj=".mysql_field_name($result,$i)."$pvmtapa_url'>".t(mysql_field_name($result,$i))."</a></th>";
 
-				if (isset($workbook)) {
-					$worksheet->write($excelrivi, $j, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
-				}
-
+				$worksheet->write($excelrivi, $j, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 				$j++;
 
 				if (mysql_field_name($result,$i) == 'kate') {
 					echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&tuoteno=".urlencode($tuoteno)."&ytunnus=$ytunnus&asiakasid=$asiakasid&jarj=".mysql_field_name($result,$i)."$pvmtapa_url'>".t("Katepros")."</a></th>";
 
-					if (isset($workbook)) {
-						$worksheet->write($excelrivi, $j, ucfirst(t("Katepros")), $format_bold);
-						$j++;
-					}
+					$worksheet->write($excelrivi, $j, ucfirst(t("Katepros")), $format_bold);
+					$j++;
 				}
 			}
 
 			if ($toim != "OSTO") {
 				echo "<th align='left'>".t("Tyyppi")."</th>";
 
-				if(isset($workbook)) {
-					$worksheet->write($excelrivi, $i, t("Tyyppi"), $format_bold);
-				}
+				$worksheet->write($excelrivi, $i, t("Tyyppi"), $format_bold);
 			}
 
-			if(isset($workbook)) {
-				$excelrivi++;
-			}
+			$excelrivi++;
 
 			echo "</tr>";
 
@@ -430,7 +407,7 @@
 												FROM sarjanumeroseuranta
 												WHERE yhtio 		= '$kukarow[yhtio]'
 												and ostorivitunnus 	= '$row[tunnus]'";
-									$sarjares = mysql_query($query) or pupe_error($query);
+									$sarjares = pupe_query($query);
 
 									$ostohinta = 0;
 
@@ -448,7 +425,7 @@
 													and sarjanumeroseuranta.ostorivitunnus   > 0
 													ORDER BY sarjanumeroseuranta.tunnus
 													LIMIT 1";
-										$sarjares1 = mysql_query($query) or pupe_error($query);
+										$sarjares1 = pupe_query($query);
 										$sarjarow1 = mysql_fetch_array($sarjares1);
 
 										$ostohinta += $sarjarow1["ostohinta"];
@@ -484,14 +461,14 @@
 
 							$row[$i] = $kate;
 
-							if (isset($workbook)) {
-								$worksheet->writeNumber($excelrivi, $excelsarake, $kate_eur, $format_num);
-								$excelsarake++;
-							}
+							$worksheet->writeNumber($excelrivi, $excelsarake, $kate_eur, $format_num);
+
 
 							echo "<$ero align='right' valign='top' nowrap $class>".sprintf("%.2f", $kate_eur)."</$ero>";
 							echo "<$ero align='right' valign='top' nowrap $class>$kate</$ero>";
 						}
+
+						$excelsarake++;
 					}
 					elseif (mysql_field_name($result,$i) == 'hinta' or mysql_field_name($result,$i) == 'rivihinta') {
 						echo "<$ero valign='top' align='right' nowrap $class>".sprintf("%.2f", $row[$i])."</$ero>";
@@ -500,15 +477,16 @@
 						echo "<$ero valign='top' $class>$row[$i]</td>";
 					}
 
-					if (isset($workbook)) {
-						if (is_numeric($row[$i]) and mysql_field_name($result,$i) != 'ytunnus') {
-							$worksheet->writeNumber($excelrivi, $excelsarake, $row[$i], $format_num);
-						}
-						else {
-							$worksheet->write($excelrivi, $excelsarake, $row[$i]);
-						}
-						$excelsarake++;
+
+
+					if (is_numeric($row[$i]) and mysql_field_name($result,$i) != 'ytunnus') {
+						$worksheet->writeNumber($excelrivi, $excelsarake, $row[$i]);
 					}
+					else {
+						$worksheet->write($excelrivi, $excelsarake, $row[$i]);
+					}
+
+					$excelsarake++;
 				}
 
 				if ($row["var"] != "P" and $row["var"] != "J") {
@@ -525,9 +503,7 @@
 
 					echo "<$ero valign='top' $class>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
 
-					if(isset($workbook)) {
-						$worksheet->write($excelrivi, $i, t("$laskutyyppi")." ".t("$alatila"));
-					}
+					$worksheet->write($excelrivi, $i, t("$laskutyyppi")." ".t("$alatila"));
 				}
 
 				echo "<form method='post'><td class='back' valign='top'>
@@ -547,9 +523,7 @@
 
 				echo "</tr>";
 
-				if (isset($workbook)) {
-					$excelrivi++;
-				}
+				$excelrivi++;
 			}
 
 			if ($toim == "OSTO") {
@@ -597,57 +571,54 @@
 			echo "</tr>";
 			echo "</table>";
 
-			if (isset($workbook)) {
-				if ($toim == "OSTO") {
-					$worksheet->writeFormula($excelrivi, 5, "=sum(F2:F$excelrivi)");
-					$worksheet->write($excelrivi, 6, "");
-					$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
-					$worksheet->writeFormula($excelrivi, 8, "=sum(I2:I$excelrivi)");
-				}
-				else {
+			$sarakeplus = $yhtiorow["myynnin_alekentat"]-1;
 
-					if ($asiakaslisa != "") {
-						$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
-						$worksheet->writeFormula($excelrivi, 10, "=sum(K2:K$excelrivi)");
-
-						if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-
-							$worksheet->write($excelrivi, 11, $kate_yht);
-							$worksheet->write($excelrivi, 12, $ykate);
-						}
-					}
-					else {
-						$worksheet->writeFormula($excelrivi, 4, "=sum(E2:E$excelrivi)");
-						$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
-
-						if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-
-							$worksheet->write($excelrivi, 8, $kate_yht);
-							$worksheet->write($excelrivi, 9, $ykate);
-						}
-					}
-				}
-
-				$workbook->close();
-
-				echo "<br><table>";
-				echo "<tr><th>".t("Tallenna tulos").":</th>";
-				echo "<form method='post' class='multisubmit'>";
-				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-
-				if($toim == "MYYNTI") {
-					echo "<input type='hidden' name='kaunisnimi' value='Asiakkaan_tuoteostot-$ytunnus.xls'>";
-				}
-				else {
-					echo "<input type='hidden' name='kaunisnimi' value='Toimittajalta_tilatut-$ytunnus.xls'>";
-				}
-
-				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-				echo "<input type='hidden' name='toim' value='$toim'>";
-				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table>";
-
+			if ($toim == "OSTO") {
+				$worksheet->writeFormula($excelrivi, 5, "SUM(F2:F$excelrivi)");
+				$worksheet->write($excelrivi, 6, "");
+				$worksheet->writeFormula($excelrivi, 7, "SUM(H2:H$excelrivi)");
+				$worksheet->writeFormula($excelrivi, 8, "SUM(I2:I$excelrivi)");
 			}
+			else {
+
+				if ($asiakaslisa != "") {
+					$worksheet->writeFormula($excelrivi, 7, "SUM(H2:H$excelrivi)");
+					$worksheet->writeFormula($excelrivi, 10+$sarakeplus, "SUM(K2:K$excelrivi)");
+
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						$worksheet->write($excelrivi, 11+$sarakeplus, $kate_yht);
+						$worksheet->write($excelrivi, 12+$sarakeplus, $ykate);
+					}
+				}
+				else {
+					$worksheet->writeFormula($excelrivi, 4, "SUM(E2:E$excelrivi)");
+					$worksheet->writeFormula($excelrivi, 7, "SUM(H2:H$excelrivi)");
+
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						$worksheet->write($excelrivi, 8+$sarakeplus, $kate_yht);
+						$worksheet->write($excelrivi, 9+$sarakeplus, $ykate);
+					}
+				}
+			}
+
+			$excelnimi = $worksheet->close();
+
+			echo "<br><table>";
+			echo "<tr><th>".t("Tallenna tulos").":</th>";
+			echo "<form method='post' class='multisubmit'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+
+			if ($toim == "MYYNTI") {
+				echo "<input type='hidden' name='kaunisnimi' value='Asiakkaan_tuoteostot-$ytunnus.xlsx'>";
+			}
+			else {
+				echo "<input type='hidden' name='kaunisnimi' value='Toimittajalta_tilatut-$ytunnus.xlsx'>";
+			}
+
+			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
+			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+			echo "</table>";
 		}
 
 		else {
@@ -655,5 +626,4 @@
 		}
 	}
 
-	require ("../inc/footer.inc");
-?>
+	require ("inc/footer.inc");

@@ -637,7 +637,6 @@
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 					WHERE $where
 					and tilausrivi.yhtio='$kukarow[yhtio]'
-					and tilausrivi.var != 'O'
 					and tilausrivi.tyyppi in ('O' $deletedlisa)
 					ORDER BY $jarjestys";
 		$presult = pupe_query($query);
@@ -1449,7 +1448,6 @@
 										and sarjanumeroseuranta.kaytetty 	= '$sarjarow[kaytetty]'
 										and sarjanumeroseuranta.myyntirivitunnus > 0
 										and sarjanumeroseuranta.ostorivitunnus   > 0
-										and tilausrivi.var != 'O'
 										ORDER BY sarjanumeroseuranta.tunnus
 										LIMIT 1";
 							$sarjares1 = pupe_query($query);

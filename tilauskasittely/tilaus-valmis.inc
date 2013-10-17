@@ -83,6 +83,35 @@ if ($luottoraja_chk or $erapaiva_chk) {
     if ($erapaiva_chk   == 0) { $ylivito         = 0; }
 }
 
+$query = "	SELECT tilausrivi.tunnus as tilausrivitunnus,
+			tilausrivi.kommentti,
+			tilausrivin_lisatiedot.rekisterinumero
+			FROM tilausrivi
+			JOIN tilausrivin_lisatiedot
+			ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+				AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+				AND tilausrivin_lisatiedot.rekisterinumero != '' )
+			WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+			AND tilausrivi.otunnus = '{$laskurow['tunnus']}'";
+$rekisterinumero_result = pupe_query($query);
+
+while ($rekisterinumero_row = mysql_fetch_assoc($rekisterinumero_result)) {
+	$kommentti = "";
+	if ($rekisterinumero_row['kommentti'] != ""){
+		$kommentti .= "{$rekisterinumero_row['kommentti']}\n";
+	}
+
+	if (!stristr($kommentti, $rekisterinumero_row['rekisterinumero'])) {
+		$kommentti .= $rekisterinumero_row['rekisterinumero'];
+	}
+	
+	$query = "	UPDATE tilausrivi
+				SET kommentti = '{$kommentti}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$rekisterinumero_row['tilausrivitunnus']}'";
+	pupe_query($query);
+}
+
 // otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
 $query = "	SELECT *
 			FROM maksuehto
@@ -791,7 +820,7 @@ else {
 			}
 
 			// Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina
-			if ($yhtiorow['lahetteen_tulostustapa'] == "I") {
+			if ($yhtiorow['lahetteen_tulostustapa'] == "I" and $toim != "REKLAMAATIO") {
 
 				$query = "	UPDATE lasku
 							SET tila = 'N',

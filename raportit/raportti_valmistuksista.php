@@ -179,61 +179,23 @@
 					lasku.toimaika,
 					ifnull(sum(tilausrivi.kpl), 0) valmistettu,
 					ifnull(sum(tilausrivi.varattu), 0) valmistetaan
-					FROM tuote
-					JOIN tilausrivi
-					ON ( tilausrivi.yhtio = tuote.yhtio
-						AND tilausrivi.tuoteno = tuote.tuoteno
-						AND tilausrivi.tyyppi in ('W','M')
-						AND tilausrivi.toimaika between '{$pvmalku}' AND '{$pvmloppu}'
-						AND tilausrivi.toimitettuaika = '0000-00-00 00:00:00')
-					JOIN lasku
-					ON ( lasku.yhtio = tuote.yhtio
-						AND lasku.tunnus = tilausrivi.otunnus
-						{$lasku_join_ehto})
+					FROM lasku
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+						AND tilausrivi.otunnus = lasku.tunnus
+						AND tilausrivi.tyyppi = 'W'
+						AND tilausrivi.var != 'P')
+					JOIN tuote ON (tuote.yhtio = lasku.yhtio
+						AND tuote.tuoteno = tilausrivi.tuoteno)
 					{$lisa_parametri}
-					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-					AND tuote.status != 'P'
-					AND tuote.tuotetyyppi not in ('A', 'B')
+					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+					AND lasku.tila = 'V'
+					AND lasku.toimaika >= '{$pvmalku}'
+					AND lasku.toimaika <= '{$pvmloppu}'
+					{$lasku_join_ehto}
 					{$lisa}
 					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
 					HAVING valmistettu != 0 OR valmistetaan != 0
-
-					UNION
-
-					SELECT
-					tuote.tuoteno,
-					lasku.kohde valmistuslinja,
-					tilausrivi.toimaika,
-					tilausrivi.toimitettuaika,
-					tilausrivi.kerattyaika,
-					tilausrivi.nimitys,
-					lasku.tila,
-					lasku.alatila,
-					tuote.try,
-					tuote.osasto,
-					left(lasku.kerayspvm, 10) kerayspvm,
-					lasku.toimaika,
-					ifnull(sum(tilausrivi.kpl), 0) valmistettu,
-					ifnull(sum(tilausrivi.varattu), 0) valmistetaan
-					FROM tuote
-					JOIN tilausrivi on (tilausrivi.yhtio = tuote.yhtio
-						AND tilausrivi.tuoteno = tuote.tuoteno
-						AND tilausrivi.tyyppi in ('W','M')
-						AND tilausrivi.toimitettuaika between '{$pvmalku} 00:00:00' AND '{$pvmloppu} 23:59:59')
-					JOIN lasku
-					ON ( lasku.yhtio = tuote.yhtio
-						AND lasku.tunnus = tilausrivi.otunnus
-						{$lasku_join_ehto})
-					{$lisa_parametri}
-					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-					AND tuote.status != 'P'
-					AND tuote.tuotetyyppi not in ('A', 'B')
-					{$lisa}
-					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
-					HAVING valmistettu != 0 OR valmistetaan != 0
-
 					ORDER BY valmistuslinja, tuoteno, alatila";
-
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {

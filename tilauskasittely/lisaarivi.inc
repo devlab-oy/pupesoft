@@ -57,6 +57,16 @@
 	if (!isset($paikka)) 			$paikka = "";
 	if (!isset($perhekielto)) 		$perhekielto = "";
 	if (!isset($valmistuslinja))	$valmistuslinja = "";
+	if (!isset($rekisterinumero))	$rekisterinumero = "";
+	if (!isset($jo_syotetty_rekisterinumero)) $jo_syotetty_rekisterinumero = "";
+
+	if ($rekisterinumero == '') {
+		//Kun yhtion_parametri myyntitilausrivi_rekisterinumero == K, käyttöliittymästä on mahdollisuus syöttää tilausriville rekisterinumero.
+		//Käyttöliittymässä on 2 valintaa. input rekisterinumero ja dropdown jo_syotetty_rekisterinumero. Jos rekisterinumero on syötetty, yliajaa se dropdownin
+		$rekisterinumero = $jo_syotetty_rekisterinumero;
+	}
+
+	$rekisterinumero = strtoupper($rekisterinumero);
 
 	if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely_tuoteperhe'] == 'U') {
 		$perhekielto = "Y";
@@ -75,7 +85,7 @@
 
 	if ($toim == 'EXTENNAKKO' or $toim_kutsu == 'EXTENNAKKO') {
 		// Tarkistetaan onko hinta annettu käsin, jos on niin käytetään sitä, muussa tapauksessa haetaan ennakkohinta
-		$hinta = (empty($hinta)) ? laske_ext_ennakko_hinta($trow) : $hinta;
+		$hinta = (empty($hinta)) ? laske_ext_ennakko_hinta($trow, $laskurow) : $hinta;
 
 		if (!empty($kukarow['extranet']) and $hinta == '') {
 			$hinta = 0.000001;
@@ -216,7 +226,7 @@
 	$aikatsk_p = (int) $aikatsk_p;
 	$aikatsk_v = (int) $aikatsk_v;
 
-	if ((int) $aikatsk_k == 0 or (int) $aikatsk_p == 0 or (int) $aikatsk_v == 0 or !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
+	if ($toimaika != "0000-00-00" and !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
 		$toimaika = date("Y-m-d");
 		if ($toim == "YLLAPITO") {
 			$toimaika = "0000-00-00"; // Ylläpitosoppareissa toimaika tarkoittaa sopimuksen poikkeavaa alkupäivää ja nolla on default
@@ -229,7 +239,7 @@
 	$aikatsk_p = (int) $aikatsk_p;
 	$aikatsk_v = (int) $aikatsk_v;
 
-	if ((int) $aikatsk_k == 0 or (int) $aikatsk_p == 0 or (int) $aikatsk_v == 0 or !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
+	if ($kerayspvm != "0000-00-00" and !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
 		$kerayspvm = date("Y-m-d");
 		if ($toim == "YLLAPITO") {
 			$kerayspvm = "0000-00-00"; // Ylläpitosoppareissa kerayspvm tarkoittaa sopimuksen poikkeavaa loppupäivää ja nolla on default
@@ -1571,13 +1581,6 @@
 
 								$query_erikoisale_lisa = trim($lis_netto) != 'N' ? " erikoisale = '{$laskurow['erikoisale']}', " : '';
 
-								if (isset($rekisterinumero) and trim($rekisterinumero) != "") {
-
-									if ($kommentti != "") $kommentti .= "\n";
-
-									$kommentti .= t("Rekisterinumero")." $rekisterinumero";
-								}
-
 								$var2 = '';
 
 								if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') {
@@ -1677,6 +1680,7 @@
 												SET
 												positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
 												toimittajan_tunnus		= '$toimittajan_tunnus',
+												rekisterinumero			= '{$rekisterinumero}',
 												muutospvm				= now(),
 												muuttaja				= '$kukarow[kuka]',
 												erikoistoimitus_myynti	= '$myy_erikoistoimitus[$indeksi]'
@@ -1703,6 +1707,7 @@
 												erikoistoimitus_myynti 	= '$myy_erikoistoimitus[$indeksi]',
 												ohita_kerays			= '{$myy_ohita_kerays[$indeksi]}',
 												vanha_otunnus			= '$kukarow[kesken]',
+												rekisterinumero			= '{$rekisterinumero}',
 												jarjestys				= '$jarjestys',
 												luontiaika				= now(),
 												laatija 				= '$kukarow[kuka]'
@@ -1992,7 +1997,7 @@
 			$var = $puu_var[$i];
 
 			// Korvaavuusketjun puutekäsittely, lisätään ketjun päätuote puutteeksi
-			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and $tapa != "MYYVASTAAVA" and $rivityyppi == 'L' and $var != 'H') {
+			if ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "K" and empty($rivitunnus)) {
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
 				$paatuote  = $korvaavat->paatuote();
@@ -2008,7 +2013,7 @@
 				}
 			}
 			// Vastaavuusketjun puutekäsittely, lisätään ketjun päätuote puutteeksi
-			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and $tapa != "MYYVASTAAVA" and $rivityyppi == 'L' and $var != 'H') {
+			elseif ($tuoteno != "" and $yhtiorow["korvaavuusketjun_puutekasittely"] == "V" and empty($rivitunnus)) {
 				// Haetaan korvaavuusketju tuotteelle, jotta saadaan ketjun päätuote
 				require_once 'korvaavat.class.php';
 				$korvaavat = new Korvaavat($tuoteno);
@@ -2263,7 +2268,10 @@
 					case 'J' : // Jälkitoimitukseen
 						// Ollaan painettu JT-muiden mukana nappia, tai meillä on parametrit siten, että se halutaan defaulttina päälle
 						// (Jt_automatiikka = "kohdistetaan.." ja Automaattinen_jt_toimitus = "Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä keräyspäivän mukaisesti")
-						if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
+						if (isset($jt_manual) and $jt_manual != '' and !empty($yhtiorow['jt_manual'])) {
+							$kerayspvm = date('Y-m-d', strtotime('now'));
+						}
+						else if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
 							$kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
 						}
 						else if ((isset($jt_muidenmukana) and $jt_muidenmukana == 'EI') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
@@ -2602,13 +2610,6 @@
 				}
 			}
 
-			if (isset($rekisterinumero) and trim($rekisterinumero) != "") {
-
-				if ($kommentti != "") $kommentti .= "\n";
-
-				$kommentti .= t("Rekisterinumero")." $rekisterinumero";
-			}
-
 			// jos meillä on vanha laadittuaikaa, niin käytetää sitä
 			if ($rivilaadittu != "" and $rivitunnus != 0) {
 				$vanharivilaadittu = "'$rivilaadittu'";
@@ -2789,6 +2790,8 @@
 				$tlisatied_lisa2 .= ", kohde_hyllyalue='$kohde_alue' , kohde_hyllynro='$kohde_nro' , kohde_hyllyvali='$kohde_vali' , kohde_hyllytaso='$kohde_taso'";
 			}
 
+			$jt_manual_lisa = (isset($jt_manual) and trim($jt_manual) != '') ? ", jt_manual = 'K'" : ", jt_manual = ''";
+
 			if (mysql_num_rows($lisatied_res) > 0) {
 				$lisatied_row = mysql_fetch_assoc($lisatied_res);
 
@@ -2796,11 +2799,13 @@
 							SET
 							positio = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
 							toimittajan_tunnus	= '$toimittajan_tunnus',
+							rekisterinumero		= '{$rekisterinumero}',
 							muutospvm			= now(),
 							muuttaja			= '$kukarow[kuka]',
 							ei_nayteta			= '{$puu_ein[$i]}'
 							{$tlisatied_lisa}
 							{$tlisatied_lisa2}
+							{$jt_manual_lisa}
 							WHERE yhtio			 = '$kukarow[yhtio]'
 							and tilausrivitunnus = '$lisatty_tun'";
 				$result = pupe_query($query);
@@ -2822,10 +2827,12 @@
 							vanha_otunnus		= '$kukarow[kesken]',
 							ei_nayteta			= '{$puu_ein[$i]}',
 							ohita_kerays 		= '{$puu_ohiker[$i]}',
+							rekisterinumero		= '{$rekisterinumero}',
 							luontiaika			= now(),
 							laatija 			= '$kukarow[kuka]'
 							{$tlisatied_lisa}
-							{$tlisatied_lisa2}";
+							{$tlisatied_lisa2}
+							{$jt_manual_lisa}";
 
 				if ($trow["sarjanumeroseuranta"] == "S" and $kpl < 0) {
 					$query .= " , osto_vai_hyvitys='O' ";

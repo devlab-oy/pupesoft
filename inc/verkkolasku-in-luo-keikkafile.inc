@@ -2094,6 +2094,8 @@ $debug = 0;
 						AND tunnus = '{$otunnus}'";
 			$hinresu = pupe_query($query);
 
+			query_dump($query);
+
 			$laskurow['summa'] = $hintarow['hinta'];
 			$laskurow['pyoristys_erot'] = $pyoristys_erot;
 			$laskurow['pyoristys_erot_alv'] = $pyoristys_erot_alv;

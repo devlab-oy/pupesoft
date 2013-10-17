@@ -7,7 +7,7 @@
 
 	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 	$useslave = 1;
-	
+
 	// DataTables p‰‰lle
 	$pupe_DataTables = 'vartiltaul';
 
@@ -44,12 +44,15 @@
 
 	echo "<table>";
 
+	$sel = array_fill_keys(array($listaustyyppi), " SELECTED") + array_fill_keys(array('kappaleet', 'hinnat', 'kappaleet2'), '');
+
 	echo "<tr>";
 	echo "<th>".t("Listaustyyppi")."</th>";
 	echo "<td>";
 	echo "<select name='listaustyyppi'>";
-	echo "<option value = 'kappaleet'>".t("Listauksessa n‰ytet‰‰n myynti ja kulutus kappaleina")."</option>";
-	echo "<option value = 'hinnat'>".t("Listauksessa n‰ytet‰‰n myynti euroina")."</option>";
+	echo "<option value = 'kappaleet'{$sel['kappaleet']}>".t("Listauksessa n‰ytet‰‰n myynti kappaleina")."</option>";
+	echo "<option value = 'hinnat'{$sel['hinnat']}>".t("Listauksessa n‰ytet‰‰n myynti euroina")."</option>";
+	echo "<option value = 'kappaleet2'{$sel['kappaleet2']}>".t("Listauksessa n‰ytet‰‰n myynti ja kulutus kappaleina")."</option>";
 	echo "</select>";
 	echo "</td>";
 	echo "</tr>";
@@ -143,10 +146,10 @@
 				$varastotilasto_table .= "<th>".t("Myynti")."<br>12kk</th>";
 				$varastotilasto_table .= "<th>".t("Myynti")."<br>6kk</th>";
 				$varastotilasto_table .= "<th>".t("Myynti")."<br>3kk</th>";
-				$varastotilasto_table .= "<th>".t("Kulutus")."<br>$vvl</th>";
-				$varastotilasto_table .= "<th>".t("Kulutus")."<br>12kk</th>";
-				$varastotilasto_table .= "<th>".t("Kulutus")."<br>6kk</th>";
-				$varastotilasto_table .= "<th>".t("Kulutus")."<br>3kk</th>";
+				if ($listaustyyppi == "kappaleet2")$varastotilasto_table .= "<th>".t("Kulutus")."<br>$vvl</th>";
+				if ($listaustyyppi == "kappaleet2")$varastotilasto_table .= "<th>".t("Kulutus")."<br>12kk</th>";
+				if ($listaustyyppi == "kappaleet2")$varastotilasto_table .= "<th>".t("Kulutus")."<br>6kk</th>";
+				if ($listaustyyppi == "kappaleet2")$varastotilasto_table .= "<th>".t("Kulutus")."<br>3kk</th>";
 				$varastotilasto_table .= "</tr>";
 
 				$varastotilasto_table .= "<tr>";				
@@ -165,10 +168,10 @@
 				$varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Myynti12'></td>";
 				$varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Myynti6'></td>";
 				$varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Myynti3'></td>";
-				$varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Kulutusvv'></td>";
-				$varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Kulutus12'></td>";
-				$varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Kulutus6'></td>";
-				$varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Kulutus3'></td>";
+				if ($listaustyyppi == "kappaleet2")$varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Kulutusvv'></td>";
+				if ($listaustyyppi == "kappaleet2")$varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Kulutus12'></td>";
+				if ($listaustyyppi == "kappaleet2")$varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Kulutus6'></td>";
+				if ($listaustyyppi == "kappaleet2")$varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Kulutus3'></td>";
 				$varastotilasto_table .= "</tr>";
 				$varastotilasto_table .= "</thead>";
 				$varastotilasto_table .= "<tbody>";
@@ -190,10 +193,10 @@
 			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 12kk"));
 			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 6kk"));
 			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 3kk"));
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Kulutus")." $vvl");
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Kulutus 12kk"));
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Kulutus 6kk"));
-			$worksheet->writeString($excelrivi, $excelsarake++, t("Kulutus 3kk"));
+			if ($listaustyyppi == "kappaleet2")$worksheet->writeString($excelrivi, $excelsarake++, t("Kulutus")." $vvl");
+			if ($listaustyyppi == "kappaleet2")$worksheet->writeString($excelrivi, $excelsarake++, t("Kulutus 12kk"));
+			if ($listaustyyppi == "kappaleet2")$worksheet->writeString($excelrivi, $excelsarake++, t("Kulutus 6kk"));
+			if ($listaustyyppi == "kappaleet2")$worksheet->writeString($excelrivi, $excelsarake++, t("Kulutus 3kk"));
 			$excelrivi++;
 
 			echo "<font class='message'>", t("K‰sitell‰‰n"), " $total_rows ", t("tuotetta"), ".</font>";
@@ -233,7 +236,7 @@
 					$jalkitoimituksessa = $jt_rivi["jt"];
 				}
 
-				$tyyppi_lisa = ($listaustyyppi == "kappaleet") ? "kpl" : "rivihinta";
+				$tyyppi_lisa = ($listaustyyppi == "kappaleet" or $listaustyyppi == "kappaleet2") ? "kpl" : "rivihinta";
 
 				// myyntipuoli
 				$query = "	SELECT
@@ -314,10 +317,10 @@
 					$varastotilasto_table .= "<td align='right'>$myyntirivi[myynti12kk]</td>";
 					$varastotilasto_table .= "<td align='right'>$myyntirivi[myynti6kk]</td>";
 					$varastotilasto_table .= "<td align='right'>$myyntirivi[myynti3kk]</td>";
-					$varastotilasto_table .= "<td align='right'>$kulutusrivi[kulutusVA]</td>";
-					$varastotilasto_table .= "<td align='right'>$kulutusrivi[kulutus12kk]</td>";
-					$varastotilasto_table .= "<td align='right'>$kulutusrivi[kulutus6kk]</td>";
-					$varastotilasto_table .= "<td align='right'>$kulutusrivi[kulutus3kk]</td>";
+					if ($listaustyyppi == "kappaleet2")$varastotilasto_table .= "<td align='right'>$kulutusrivi[kulutusVA]</td>";
+					if ($listaustyyppi == "kappaleet2")$varastotilasto_table .= "<td align='right'>$kulutusrivi[kulutus12kk]</td>";
+					if ($listaustyyppi == "kappaleet2")$varastotilasto_table .= "<td align='right'>$kulutusrivi[kulutus6kk]</td>";
+					if ($listaustyyppi == "kappaleet2")$varastotilasto_table .= "<td align='right'>$kulutusrivi[kulutus3kk]</td>";
 					$varastotilasto_table .= "</tr>";
 				}
 
@@ -337,10 +340,10 @@
 				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti12kk"]);
 				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti6kk"]);
 				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti3kk"]);
-				$worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi["kulutusVA"]);
-				$worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi["kulutus12kk"]);
-				$worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi["kulutus6kk"]);
-				$worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi["kulutus3kk"]);
+				if ($listaustyyppi == "kappaleet2")$worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi["kulutusVA"]);
+				if ($listaustyyppi == "kappaleet2")$worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi["kulutus12kk"]);
+				if ($listaustyyppi == "kappaleet2")$worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi["kulutus6kk"]);
+				if ($listaustyyppi == "kappaleet2")$worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi["kulutus3kk"]);
 				$excelrivi++;
 			}
 
@@ -366,7 +369,12 @@
 				echo "<font class='error'>", t("Hakutulos oli liian suuri"), ". " ,t("Tulos vain exceliss‰"), ".</font><br><br>";
 			}
 			else {
-				pupe_DataTables(array(array($pupe_DataTables, 19, 19, false, false)));
+				if ($listaustyyppi == "kappaleet2"){
+					pupe_DataTables(array(array($pupe_DataTables, 19, 19, false, false)));
+				}
+				else {
+					pupe_DataTables(array(array($pupe_DataTables, 15, 15, false, false)));
+				}
 				echo "<br>", $varastotilasto_table;
 			}
 		}

@@ -742,8 +742,16 @@ if ($kasitellaan_tiedosto) {
 			foreach ($indeksi as $j) {
 				if ($taulunotsikot[$taulu][$j] == "TUOTENO") {
 
-					$tuoteno = $taulunrivit[$taulu][$eriviindex][$j];
+					//tarkistetaan, että tuotenumero on olemassa, jos ei olla luomassa uutta tuotetta
+					if ($table_mysql != "tuote" ) {
+						$olemassa = hae_tuote($taulunrivit[$taulu][$eriviindex][$j]);
+						if ($table_mysql != "tuote" AND empty($olemassa)) {
+								lue_data_echo("<br><font class='message'>".t("Tuotetta")." '{$taulunrivit[$taulu][$eriviindex][$j]}' ".t("ei ole olemassa")."!<br></font>");
+								$tila = 'ohita';
+						}
+					}
 
+					$tuoteno = $taulunrivit[$taulu][$eriviindex][$j];
 					$valinta .= " and TUOTENO='$tuoteno'";
 				}
 				elseif ($table_mysql == 'autoid_lisatieto' and $lue_data_autoid and ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA" or $taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA") AND !in_array($eriviindex, $lisatyt_indeksit)) {
@@ -969,6 +977,15 @@ if ($kasitellaan_tiedosto) {
 					elseif (!$avkmuuttuja) {
 						$valinta .= " and {$taulunotsikot[$taulu][$j]} = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
 					}
+				}
+				elseif ($taulunotsikot[$taulu][$j] == "ISATUOTENO") {
+					//tarkistetaan myös, että isätuotenumero on olemassa
+					$olemassa = hae_tuote($taulunrivit[$taulu][$eriviindex][$j]);
+					if (empty($olemassa)) {
+							lue_data_echo("<br><font class='message'>".t("Tuotetta")." '{$taulunrivit[$taulu][$eriviindex][$j]}' ".t("ei ole olemassa")."!<br></font>");
+							$tila = 'ohita';
+					}
+					$valinta .= " and ISATUOTENO = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
 				}
 				else {
 					$valinta .= " and {$taulunotsikot[$taulu][$j]} = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";

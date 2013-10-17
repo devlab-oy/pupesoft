@@ -1186,6 +1186,7 @@
 					$projekti         		= $oletusprojekti;
 					$kukarow['yhtio'] 		= $yhtio;
 					$kukarow['kuka']  		= 'verkkolas';
+					$summa_valuutassa		= -1 * $vassumma_valuutassa;
 
 					require ("inc/teetiliointi.inc");
 

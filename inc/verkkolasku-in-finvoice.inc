@@ -178,7 +178,7 @@ if (count($tuotetiedot) > 0) {
 $vattiedot	= $xml->InvoiceDetails->VatSpecificationDetails;
 $i 			= 0;
 
-$alv_talteen = $xml->InvoiceDetails->VatSpecificationDetails->VatRatePercent;
+$alv_talteen = (float) str_replace(",", ".", $xml->InvoiceDetails->VatSpecificationDetails->VatRatePercent);
 
 if (count($vattiedot) > 0) {
 	foreach ($vattiedot as $vattieto) {

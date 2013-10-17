@@ -2014,7 +2014,7 @@ $debug = 0;
 	}
 
 	if (!function_exists('saapumisen_pyoristyserot')) {
-		function saapumisen_pyoristyserot($osrow, $laskurow, $otunnus) {
+		function saapumisen_pyoristyserot($osrow, $laskurow, $otunnus, $alv_talteen = '') {
 			global $kukarow, $yhtiorow;
 
 			// $osrow = sähköisen laskun tiedot
@@ -2071,11 +2071,6 @@ $debug = 0;
 			}
 
 			$pyoristys_erot_alv = 0;
-
-			echo "	if ($pyoristys_erot != 0)<br>
-					if ($laskurow[vienti] == 'C' or $laskurow[vienti] == 'J')<br>
-					$pyoristys_erot_alv = $alv_talteen;<br>
-					$pyoristys_erot = round($pyoristys_erot / (1+$pyoristys_erot_alv/100), $yhtiorow[hintapyoristys]);<br><br>";
 
 			// Jos käyttäjä on syöttänyt alvillisen pyöristyksen niin lisätään alvi
 			if ($pyoristys_erot != 0 and isset($alv_talteen) and $alv_talteen != "") {
@@ -2328,7 +2323,9 @@ $debug = 0;
 
 		if ($automaattijalkilaskenta) {
 
-			$laskurow = saapumisen_pyoristyserot($osrow, $laskurow, $otunnus);
+			if (!isset($alv_talteen)) $alv_talteen = "";
+
+			$laskurow = saapumisen_pyoristyserot($osrow, $laskurow, $otunnus, $alv_talteen);
 
 			// laitetaan lasku suoraan maksuvalmiiksi
 			$query = "	UPDATE lasku set

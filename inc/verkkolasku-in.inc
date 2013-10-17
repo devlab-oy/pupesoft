@@ -1572,7 +1572,10 @@
 
 				// jos kyseessä on tavaraa
 				if ((!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and in_array($trow['oletus_vienti'], array('C','F','I','J','K','L'))) {
-					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+
+					if (!isset($alv_talteen)) $alv_talteen = '';
+
+					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno, $alv_talteen);
 				}
 
 				// Lisätään vielä ostovelkatiliöinnin tarkenteet

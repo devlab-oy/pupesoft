@@ -7,8 +7,7 @@ if (php_sapi_name() != 'cli' and !$debug) {
 	die("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-require ("inc/connect.inc");
-require ("inc/functions.inc");
+require ("inc/parametrit.inc");
 require ("tilauskasittely/luo_myyntitilausotsikko.inc");
 
 if (trim(empty($argv[1])) and !$debug) {
@@ -45,29 +44,14 @@ $request = array(
 	'laitteiden_huoltosyklirivit' => $laitteiden_huoltosyklirivit,
 );
 
-//generoidaan debug moodissa vain testi tuotteen työmääräyksiä
-//if ($debug) {
-//	$request['laitteet'] = array(
-//		'TESTI',
-//	);
-//}
+$laitteiden_huoltosyklirivit = hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy();
 
-$laitteiden_huoltosyklirivit = hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($request);
+list($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta) = paata_mitka_huollot_tehdaan($laitteiden_huoltosyklirivit);
 
-//TODO kts. funktion TODO
-//$laitteet = keraa_laitteittain_asiakkaan_alle($laitteet);
+generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
 
-generoi_tyomaaraykset_huoltosykleista($laitteiden_huoltosyklirivit);
-
-function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($request = array()) {
+function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy() {
 	global $kukarow;
-
-	if (!empty($request['laitteet'])) {
-		$laitteet_where = "AND laite.tuoteno IN ('".implode("', '", $request['laitteet'])."')";
-	}
-	else {
-		$laitteet_where = "";
-	}
 
 	$query = "	SELECT laite.tuoteno,
 				huoltosyklit_laitteet.viimeinen_tapahtuma,
@@ -79,7 +63,8 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($request = a
 				asiakas.tunnus AS asiakas_tunnus,
 				kohde.nimi AS kohde_nimi,
 				paikka.nimi AS paikka_nimi,
-				tuotteen_avainsanat.selite AS toimenpide_tuotteen_tyyppi
+				tuotteen_avainsanat.selite AS toimenpide_tuotteen_tyyppi,
+				tuotteen_avainsanat.selitetark AS toimenpide_tuotteen_prioriteetti
 				FROM   laite
 				JOIN huoltosyklit_laitteet
 				ON ( huoltosyklit_laitteet.yhtio = laite.yhtio
@@ -105,75 +90,115 @@ function hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($request = a
 					AND tuotteen_avainsanat.laji = 'tyomaarayksen_ryhmittely' )
 				WHERE  laite.yhtio = '{$kukarow['yhtio']}'
 				AND laite.tila != 'P'
-				{$laitteet_where}
-				HAVING IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosyklit_laitteet.huoltovali-30) DAY)";
+				HAVING IFNULL(huoltosyklit_laitteet.viimeinen_tapahtuma, '0000-00-00') < Date_sub(CURRENT_DATE, INTERVAL (huoltosyklit_laitteet.huoltovali - 30) DAY)
+				ORDER BY laite_tunnus ASC,
+				tuotteen_avainsanat.selitetark ASC";
 	$result = pupe_query($query);
 
 	$laitteet = array();
 	while ($laite = mysql_fetch_assoc($result)) {
 		//@TODO suorittajan määrittämiseen pitää tehdä algoritmi jne jne.
 		$laite['tyojono'] = 'joonas';
-		$laitteet[] = $laite;
+		$laitteet[$laite['laite_tunnus']][] = $laite;
 	}
 
 	return $laitteet;
 }
 
-//TODO 04-03-2013: tällä hetkellä työmääräys otsikoita luodaan niin monta kuin huollettavia laitteita on. tulevaisuudessa halutaan ehkä laittaa yhden asiakkaan tai yhden asiakkaan kohteen laitteet samalle työmääräykselle. tämä funktio on sitä varten. koodaa loppuun
-function keraa_laitteittain_asiakkaan_alle($laitteet) {
-	$laitteet_temp = array();
+function paata_mitka_huollot_tehdaan($laitteiden_huoltosyklirivit) {
+	global $kukarow, $yhtiorow;
 
-	foreach ($laitteet as $laite) {
-		$laitteet_temp[$laite['asiakas_tunnus']][] = $laite;
+	$huollettavien_laitteiden_huoltosyklirivit = array();
+	$laitteiden_huoltosyklirivit_joita_ei_huolleta = array();
+	foreach ($laitteiden_huoltosyklirivit as $laite_tunnus => $laitteen_huoltosyklirivit) {
+		$huollettavien_laitteiden_huoltosyklirivit[] = $laitteen_huoltosyklirivit[0];
+		$i = 0;
+		foreach ($laitteen_huoltosyklirivit as $laitteen_huoltosyklirivi) {
+			//Laitteelle ehdotettavat huollot tulevat toimenpide_tuotteen prioriteetin mukaan järjestettynä.
+			//Tällöin korkein prioriteetti on siis ensimmäisenä $laitteen_huoltosyklirivit muuttujassa
+			if ($i == 0) {
+				$i++;
+				continue;
+			}
+			$laitteiden_huoltosyklirivit_joita_ei_huolleta[$laite_tunnus][] = $laitteen_huoltosyklirivi;
+			$i++;
+		}
 	}
 
-	return $laitteet_temp;
+	return array($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
 }
 
-function generoi_tyomaaraykset_huoltosykleista($laitteiden_huoltosyklirivit) {
+function generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta) {
 	global $kukarow, $yhtiorow, $debug;
 
 	if ($debug) {
-		echo "TYÖMÄÄRÄYKSIÄ PITÄISI TULLA ".count($laitteiden_huoltosyklirivit).' kappaletta';
+		echo "Työmääräyksiä pitäisi tulla ".count($huollettavien_laitteiden_huoltosyklirivit).' kappaletta';
+		echo "<br/>";
+		echo "<br/>";
+
+		foreach ($huollettavien_laitteiden_huoltosyklirivit as $huollettavien_laitteiden_huoltosyklirivi) {
+			if (!empty($huollettavien_laitteiden_huoltosyklirivi['toimenpide_tuotteen_tyyppi'])) {
+				echo "Laitteelle: {$huollettavien_laitteiden_huoltosyklirivi['laite_tunnus']} generoidaan: {$huollettavien_laitteiden_huoltosyklirivi['toimenpide_tuotteen_tyyppi']}";
+				echo "<br/>";
+			}
+			else {
+				echo "<font class='error'>HUOM!! Laitteen: {$huollettavien_laitteiden_huoltosyklirivi['laite_tunnus']} huoltosyklin toimenpide tuotteen: {$huollettavien_laitteiden_huoltosyklirivi['toimenpide']} tuotteen avainsana (ryhmittely) on päivittämättä </font>";
+				echo "<br/>";
+			}
+		}
+
+		foreach ($laitteiden_huoltosyklirivit_joita_ei_huolleta as $laite_tunnus => $laitteen_huoltosyklirivit_joita_ei_huolleta) {
+			foreach ($laitteen_huoltosyklirivit_joita_ei_huolleta as $laitteen_huoltosyklirivi_jota_ei_huolleta) {
+				echo "Laitteelle: {$laite_tunnus} EI generoida huoltoa: {$laitteen_huoltosyklirivi_jota_ei_huolleta['toimenpide_tuotteen_tyyppi']}";
+				echo "<br/>";
+			}
+		}
+		echo "<br/>";
 		echo "<br/>";
 	}
-	foreach ($laitteiden_huoltosyklirivit as $huoltosyklirivi) {
-		if ($huoltosyklirivi['toimenpide_tuotteen_tyyppi'] == 'koeponnistus' and !empty($huoltosyklirivi['viimeinen_tapahtuma'])) {
-			$sekunttia_edellisesta_koeponnistuksesta = strtotime(date('Y-m-d')) - strtotime($huoltosyklirivi['viimeinen_tapahtuma']);
+
+	foreach ($huollettavien_laitteiden_huoltosyklirivit as $huollettavan_laitteen_huoltosyklirivi) {
+		if ($huollettavan_laitteen_huoltosyklirivi['toimenpide_tuotteen_tyyppi'] == 'koeponnistus' and !empty($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma'])) {
+			$sekunttia_edellisesta_koeponnistuksesta = strtotime(date('Y-m-d')) - strtotime($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']);
 			$paivaa_edellisesta_koeponnistuksesta = $sekunttia_edellisesta_koeponnistuksesta / 86400;
-			$paivaa_seuraavaan_koeponnistukseen = $huoltosyklirivi['huoltovali'] - $paivaa_edellisesta_koeponnistuksesta;
+			$paivaa_seuraavaan_koeponnistukseen = $huollettavan_laitteen_huoltosyklirivi['huoltovali'] - $paivaa_edellisesta_koeponnistuksesta;
 			//jos seuraavaan koeponnistukseen on enemmän kuin 2kk aikaa, ei generoida työmääräystä.
 			if ($paivaa_seuraavaan_koeponnistukseen > 60) {
 				continue;
 			}
 		}
 
-		$onko_tyomaarays_jo_luotu_talle_laitteelle = tarkista_loytyyko_tyomaarays($huoltosyklirivi);
+		$onko_tyomaarays_jo_luotu_talle_laitteelle = tarkista_loytyyko_tyomaarays($huollettavan_laitteen_huoltosyklirivi);
 		if ($onko_tyomaarays_jo_luotu_talle_laitteelle) {
 			if ($debug) {
-				echo "Tälle laitteelle ".$huoltosyklirivi['laite_tunnus']." on jo luotu työmääräys";
+				echo "Tälle laitteelle ".$huollettavan_laitteen_huoltosyklirivi['laite_tunnus']." on jo luotu työmääräys";
 				echo "<br/>";
 			}
 			continue;
 		}
 
 		//laitteen toimenpidetuote pitää olla saldoton
-		$onko_toimenpide_tuote_saldoton = tarkista_toimenpide_saldo($huoltosyklirivi);
+		$onko_toimenpide_tuote_saldoton = tarkista_toimenpide_saldo($huollettavan_laitteen_huoltosyklirivi);
 		if (!$onko_toimenpide_tuote_saldoton) {
 			if ($debug) {
-				echo "Toimenpide tuote ".$huoltosyklirivi['laite_tunnus']." pitää olla saldoton! Työmääräystä tälle tuotteelle ei lisätty";
+				echo "Toimenpide tuote ".$huollettavan_laitteen_huoltosyklirivi['laite_tunnus']." pitää olla saldoton! Työmääräystä tälle tuotteelle ei lisätty";
 				echo "<br/>";
 			}
 			continue;
 		}
 
+		//laitteen toimenpide tuotteen tuotteen_avainsana: tyomaarayksen ryhmittely pitää olla asetettu, myös prioriteetti (selitetark) pitää olla asetettu
+		if (empty($huollettavan_laitteen_huoltosyklirivi['toimenpide_tuotteen_tyyppi']) or $huollettavan_laitteen_huoltosyklirivi['toimenpide_tuotteen_prioriteetti'] == null) {
+			continue;
+		}
+
 		$kukarow['kesken'] = 0;
 
-		$tyomaarays_tunnus = luo_myyntitilausotsikko("TYOMAARAYS", $huoltosyklirivi['asiakas_tunnus']);
+		$tyomaarays_tunnus = luo_myyntitilausotsikko("TYOMAARAYS", $huollettavan_laitteen_huoltosyklirivi['asiakas_tunnus']);
 
 		//jos uusi laite, niin laitetaan työmääräyksen toimitusajankohta NOW
 		//HUOM jos huoltosyklirivin toimenpide_tuotteen_tyyppi = koeponnistus niin viimeinen_tapahtuma ei ole ikinä tyhjä. Luonti vaiheessa sinne asetetaan laite.valm_pvm
-		if (empty($huoltosyklirivi['viimeinen_tapahtuma']) and $huoltosyklirivi['toimenpide_tuotteen_tyyppi'] != 'koeponnistus') {
+		if (empty($huollettavan_laitteen_huoltosyklirivi['viimeinen_tapahtuma']) and $huollettavan_laitteen_huoltosyklirivi['toimenpide_tuotteen_tyyppi'] != 'koeponnistus') {
 			aseta_tyomaarayksen_toimitusajankohta($tyomaarays_tunnus, date("Y-m-d", rand(strtotime('now + 1 month'), strtotime('now - 7 day'))));
 		}
 
@@ -191,9 +216,9 @@ function generoi_tyomaaraykset_huoltosykleista($laitteiden_huoltosyklirivit) {
 			$laskurow = hae_tyomaarays($tyomaarays_tunnus);
 
 			$kukarow['kesken'] = $laskurow['tunnus'];
-			
+
 			//lisätään sammuttimen toimenpiteen palvelurivi
-			$trow = hae_tuote($huoltosyklirivi['toimenpide']);
+			$trow = hae_tuote($huollettavan_laitteen_huoltosyklirivi['toimenpide']);
 			$parametrit = array(
 				'trow'		 => $trow,
 				'laskurow'	 => $laskurow,
@@ -204,9 +229,11 @@ function generoi_tyomaaraykset_huoltosykleista($laitteiden_huoltosyklirivit) {
 			);
 			$rivit = lisaa_rivi($parametrit);
 
-			paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($huoltosyklirivi, $rivit);
-			paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $huoltosyklirivi);
-			paivita_viimenen_tapahtuma_laitteen_huoltosyklille($huoltosyklirivi['laite_tunnus'], $huoltosyklirivi['huoltosykli_tunnus']);
+			paivita_laite_tunnus_ja_kohteen_tiedot_toimenpiteen_tilausriville($huollettavan_laitteen_huoltosyklirivi, $rivit);
+			paivita_tyojono_ja_tyostatus_tyomaaraykselle($tyomaarays_tunnus, $huollettavan_laitteen_huoltosyklirivi);
+			paivita_viimenen_tapahtuma_laitteen_huoltosyklille($huollettavan_laitteen_huoltosyklirivi['laite_tunnus'], $huollettavan_laitteen_huoltosyklirivi['huoltosykli_tunnus']);
+
+			paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtumapaiva($laitteiden_huoltosyklirivit_joita_ei_huolleta, $huollettavan_laitteen_huoltosyklirivi['laite_tunnus']);
 
 			if ($debug) {
 				echo "Lisätään palvelutuoterivi";
@@ -259,6 +286,19 @@ function paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huol
 				AND laite_tunnus = '{$laite_tunnus}'
 				AND huoltosykli_tunnus = '{$huoltosykli_tunnus}'";
 	pupe_query($query);
+}
+
+function paivita_laitteen_muiden_jonossa_olevien_huoltosyklien_viimeinen_tapahtumapaiva(&$laitteiden_huoltosyklirivit_joita_ei_huolleta, $laite_tunnus) {
+	global $kukarow, $yhtiorow;
+
+	//Haetaan $laitteiden_huoltosyklirivit_joita_ei_huolleta resultista laite_tunnuksella huoltosyklirivit, joille päivitetään viimeiseksi_tapahtumapäiväksi tämä päivä,
+	//koska esim. kun suoritetaan koeponnistus, niin se sisältää huollon ja tarkastuksen, jolloin näille huoltosykliriveille pitää päivittää tämä päivä.
+
+	$huoltosyklirivit = search_array_key_for_value_recursive($laitteiden_huoltosyklirivit_joita_ei_huolleta, 'laite_tunnus', $laite_tunnus);
+
+	foreach ($huoltosyklirivit as $huoltosyklirivi) {
+		paivita_viimenen_tapahtuma_laitteen_huoltosyklille($laite_tunnus, $huoltosyklirivi['huoltosykli_tunnus']);
+	}
 }
 
 function tarkista_loytyyko_tyomaarays($laite) {

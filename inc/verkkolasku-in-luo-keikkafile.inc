@@ -2072,6 +2072,11 @@ $debug = 0;
 
 			$pyoristys_erot_alv = 0;
 
+			echo "	if ($pyoristys_erot != 0)<br>
+					if ($laskurow[vienti] == 'C' or $laskurow[vienti] == 'J')<br>
+					$pyoristys_erot_alv = $vero;<br>
+					$pyoristys_erot = round($pyoristys_erot / (1+$pyoristys_erot_alv/100), $yhtiorow[hintapyoristys]);<br><br>";
+
 			// Jos käyttäjä on syöttänyt alvillisen pyöristyksen niin lisätään alvi
 			if ($pyoristys_erot != 0) {
 				if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {

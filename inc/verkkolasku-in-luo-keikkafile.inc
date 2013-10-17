@@ -2070,9 +2070,17 @@ $debug = 0;
 				$pyoristys_erot = 0;
 			}
 
+			$pyoristys_erot_alv = 0;
+
+			// Jos käyttäjä on syöttänyt alvillisen pyöristyksen niin lisätään alvi
+			if ($pyoristys_erot != 0 and ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J')) {
+				$pyoristys_erot_alv = 24;
+			}
+
 			$query   = "UPDATE lasku SET
 						summa = '{$hintarow['hinta']}',
 						pyoristys_erot = '{$pyoristys_erot}',
+						pyoristys_erot_alv = '{$pyoristys_erot_alv}',
 						kohdistettu = 'K'
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$otunnus}'";
@@ -2080,6 +2088,7 @@ $debug = 0;
 
 			$laskurow['summa'] = $hintarow['hinta'];
 			$laskurow['pyoristys_erot'] = $pyoristys_erot;
+			$laskurow['pyoristys_erot_alv'] = $pyoristys_erot_alv;
 			$laskurow['kohdistettu'] = 'K';
 
 			return $laskurow;
@@ -2112,11 +2121,11 @@ $debug = 0;
 			if ($chk_toimipaikka_row['sahkoinen_automaattituloutus'] == 'K') {
 				$automaattituloutus = true;
 				$automaattijalkilaskenta = false;
-		}
+			}
 			elseif ($chk_toimipaikka_row['sahkoinen_automaattituloutus'] == 'J') {
 				$automaattituloutus = true;
 				$automaattijalkilaskenta = true;
-	}
+			}
 			else {
 				$automaattituloutus = false;
 				$automaattijalkilaskenta = false;
@@ -2304,6 +2313,7 @@ $debug = 0;
 				$tilausrivi = 0;
 
 				require("tilauskasittely/varastoon.inc");
+			}
 		}
 
 		if ($automaattijalkilaskenta) {

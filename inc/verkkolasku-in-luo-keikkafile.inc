@@ -2023,13 +2023,32 @@ $debug = 0;
 
 			$alvit = "tuote.alv";
 
-			if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
-				// tutkitaan ollaanko siellä alv-rekisteröity
-				$alhqur = "SELECT * FROM yhtion_toimipaikat WHERE yhtio = '{$kukarow['yhtio']}' AND maa = '{$laskurow['maa']}' AND vat_numero != ''";
-				$alhire = pupe_query($alhqur);
+			if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
 
-				if (mysql_num_rows($alhire) == 1) {
-					$alvit = "tuotteen_alv.alv";
+				// Lasketaan verokanta
+				if ($laskurow["arvo"] != 0) $simualv = round(100 * (($laskurow["summa"]/$laskurow["arvo"])-1),2);
+				else $simualv = 0;
+
+				if ($laskurow["arvo"] > 0 and $simualv == 0) {
+					$alvit = 0;
+				}
+				// Onko miellä oletuksista poikkeava alvi. Verokantoja ennen viimeisintä alv-muutosta.
+				elseif (in_array($simualv, array(23, 13, 9))) {
+					$alvit = $simualv;
+				}
+				else {
+					$alvit = "if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv)";
+				}
+
+				if ($osrow["maa"] != "" and $osrow["maa"] != $yhtiorow["maa"]) {
+					// tutkitaan ollaanko siellä alv-rekisteröity
+					$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$osrow[maa]' and vat_numero != ''";
+					$alhire = pupe_query($alhqur);
+
+					// ollaan alv-rekisteröity
+					if (mysql_num_rows($alhire) == 1) {
+						$alvit = "tuotteen_alv.alv";
+					}
 				}
 			}
 			else {
@@ -2088,8 +2107,6 @@ $debug = 0;
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$otunnus}'";
 			$hinresu = pupe_query($query);
-
-			query_dump($query);
 
 			$laskurow['summa'] = $hintarow['hinta'];
 			$laskurow['pyoristys_erot'] = $pyoristys_erot;

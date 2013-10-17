@@ -2074,13 +2074,13 @@ $debug = 0;
 
 			echo "	if ($pyoristys_erot != 0)<br>
 					if ($laskurow[vienti] == 'C' or $laskurow[vienti] == 'J')<br>
-					$pyoristys_erot_alv = $ealvi[0];<br>
+					$pyoristys_erot_alv = $alv_talteen;<br>
 					$pyoristys_erot = round($pyoristys_erot / (1+$pyoristys_erot_alv/100), $yhtiorow[hintapyoristys]);<br><br>";
 
 			// Jos käyttäjä on syöttänyt alvillisen pyöristyksen niin lisätään alvi
-			if ($pyoristys_erot != 0 and $ealvi[0] != "") {
+			if ($pyoristys_erot != 0 and isset($alv_talteen) and $alv_talteen != "") {
 				if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
-					$pyoristys_erot_alv = $lisavat[0];
+					$pyoristys_erot_alv = $alv_talteen;
 					$pyoristys_erot = round($pyoristys_erot / (1+$pyoristys_erot_alv/100), $yhtiorow['hintapyoristys']);
 				}
 			}

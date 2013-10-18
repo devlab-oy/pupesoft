@@ -1183,12 +1183,14 @@
 						tilausrivi.ale3,
 						tilausrivin_lisatiedot.tilausrivitunnus,
 						tilausrivin_lisatiedot.tilausrivilinkki,
+						tilausrivi.vahvistettu_maara,
+						tilausrivi.vahvistettu_kommentti,
 						tilausrivi.hinta_alkuperainen
 						FROM tilausrivi
 						LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 						LEFT JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
-						WHERE otunnus = '$kukarow[kesken]'
+						WHERE tilausrivi.otunnus = '$kukarow[kesken]'
 						and tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi = 'O'
 						ORDER BY sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
@@ -1592,7 +1594,29 @@
 						}
 
 						if ($prow["jaksotettu"] == 1) {
-							echo "<td $kommclass2><font style = 'color: #00FF00;'>".t("Vahvistettu toimitusaika").": ".tv1dateconv($prow["toimaika"])."</font></td>";
+							echo "<td $kommclass2>";
+
+							if (!is_null($prow['vahvistettu_maara'])) {
+
+								$comp_a = $prow['varattukpl'] * 10000;
+								$comp_b = $prow['vahvistettu_maara'] * 10000;
+
+								$font_class = $comp_a != $comp_b ? 'error' : 'ok';
+
+								echo "<font class='{$font_class}'>",t("Vahvistettu toimitusaika"),": ",tv1dateconv($prow["toimaika"]),"<br />";
+								echo t("Vahvistettu m‰‰r‰"),": {$prow['vahvistettu_maara']}";
+
+								if ($prow['vahvistettu_kommentti'] != "") {
+									echo "<br />",t("Vahvistettu kommentti"),": {$prow['vahvistettu_kommentti']}";
+						}
+
+								echo "</font>";
+							}
+						else {
+								echo "<font class='ok'>".t("Vahvistettu toimitusaika").": ".tv1dateconv($prow["toimaika"])."</font>";
+							}
+
+							echo "</td>";
 						}
 						else {
 

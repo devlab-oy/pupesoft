@@ -71,6 +71,8 @@
 						$toimaika = $xml->CustPackingSlip->DeliveryDate;
 						$toimitustavan_tunnus = (int) $xml->CustPackingSlip->TransportAccount;
 
+						$tuotteiden_paino = 0;
+
 						foreach ($xml->CustPackingSlip->Lines as $line) {
 
 							$tilausrivin_tunnus = (int) $line->TransId;
@@ -87,6 +89,16 @@
 										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 										AND tilausrivi.tunnus = '{$tilausrivin_tunnus}'";
 							pupe_query($query);
+
+							$query = "	SELECT SUM(tuote.tuotemassa) paino
+										FROM tilausrivi
+										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+										AND tilausrivi.tunnus = '{$tilausrivin_tunnus}'";
+							$painores = pupe_query($query);
+							$painorow = mysql_fetch_assoc($painores);
+
+							$tuotteiden_paino += $painorow['paino'];
 						}
 
 						$query = "	SELECT *
@@ -97,7 +109,8 @@
 						$laskurow = mysql_fetch_assoc($laskures);
 
 						$query  = "	INSERT INTO rahtikirjat SET
-									kollit 			= '',
+									kollit 			= 1,
+									kilot			= {$tuotteiden_paino},
 									pakkaus 		= '',
 									pakkauskuvaus 	= '',
 									rahtikirjanro 	= '',

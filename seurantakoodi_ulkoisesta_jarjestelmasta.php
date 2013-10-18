@@ -75,6 +75,15 @@
 								AND otsikkonro = '{$tilausnumero}'";
 					pupe_query($query);
 
+					$query = "	SELECT SUM(kilot) kilotyht
+								FROM rahtikirjat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND otsikkonro = '{$tilausnumero}'";
+					$kilotres = pupe_query($query);
+					$kilotrow = mysql_fetch_assoc($kilotres);
+
+					paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $tilausnumero, 'kilotyht' => $kilotrow['kilotyht']));
+
 					// Katsotaan onko magento-API konffattu, eli verkkokauppa käytössä, silloin merkataan tilaus toimitetuksi Magentossa kun rahtikirja tulostetaan
 					if (isset($magento_api_url) and $magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "") {
 

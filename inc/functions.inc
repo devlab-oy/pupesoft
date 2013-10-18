@@ -23598,6 +23598,51 @@ if (!function_exists('laske_siirrettava_maara')) {
 	}
 }
 
+if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
+	function paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(Array $params) {
+		global $kukarow;
+
+		$otunnukset = isset($params['otunnukset']) ? $params['otunnukset'] : '';
+		$kilotyht = isset($params['kilotyht']) ? $params['kilotyht'] : '';
+
+		if ($otunnukset == '' or $kilotyht == '') return false;
+
+		// kotimaan myynti menee alatilaan D
+		$query = "UPDATE lasku SET alatila = 'D' WHERE tunnus IN ({$otunnukset}) AND vienti = '' AND yhtio = '{$kukarow['yhtio']}'";
+		$ures  = pupe_query($query);
+
+		// vientilaskut menee alatilaan B
+		$query = "UPDATE lasku SET alatila = 'B' WHERE tunnus IN ({$otunnukset}) AND vienti != '' AND yhtio = '{$kukarow['yhtio']}'";
+		$ures  = pupe_query($query);
+
+		// jos laskulla on maksupositioita, menee ne alatilaan J
+		$query = "UPDATE lasku SET alatila = 'J' WHERE tunnus IN ({$otunnukset}) AND jaksotettu != 0 AND yhtio = '{$kukarow['yhtio']}'";
+		$ures  = pupe_query($query);
+
+		// verkkolaskutettavat EU-viennit menee alatilaan D, jos niill‰ on tarpeeksi lis‰tietoja
+		$query = "	UPDATE lasku SET
+					alatila = 'D',
+					bruttopaino = '{$kilotyht}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus IN ({$otunnukset})
+					AND vienti = 'E'
+					AND chn IN ('020', '030')
+					AND maa_maara != ''
+					AND kauppatapahtuman_luonne > 0
+					AND kuljetusmuoto != ''";
+		$ures  = pupe_query($query);
+
+		// Etuk‰teen maksetut tilaukset pit‰‰ muuttaa takaisin "maksettu"-tilaan
+		$query = "	UPDATE lasku SET
+					alatila = 'X'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus IN ({$otunnukset})
+					AND mapvm != '0000-00-00'
+					AND chn = '999'";
+		$ures  = pupe_query($query);
+	}
+}
+
 if (!function_exists('hae_tilauksen_rekisterinumerot')) {
 	function hae_tilauksen_rekisterinumerot($tilausnumero) {
 		global $kukarow, $yhtiorow;

@@ -38,11 +38,16 @@
 	else {
 		$multi_valmistuslinja = isset($multi_valmistuslinja) ? $multi_valmistuslinja : array();
 	}
+	if (isset($multi_status) and is_string($multi_status)) {
+		$multi_status = unserialize(base64_decode($multi_status));
+	}
+	else {
+		$multi_status = isset($multi_status) ? $multi_status : array();
+	}
 
 	$ehdotetut_valmistukset = isset($ehdotetut_valmistukset) ? $ehdotetut_valmistukset : '';
 	$kohde_varasto = isset($kohde_varasto) ? $kohde_varasto : '';
 	$lahde_varasto = isset($lahde_varasto) ? $lahde_varasto : '';
-	$status = isset($status) ? $status : '';
 	$ehdotusnappi = isset($ehdotusnappi) ? $ehdotusnappi : '';
 	$tee = isset($tee) ? $tee : '';
 	$lisa = isset($lisa) ? $lisa : '';
@@ -177,7 +182,7 @@
 
 	$lopetus = "{$palvelin2}raportit/valmistuksen_suunnittelu.php////toim={$toim}//abcrajaus={$abcrajaus}//ehdotetut_valmistukset={$ehdotetut_valmistukset}
 		//ppa1={$ppa1}//kka1={$kka1}//vva1={$vva1}//ppl1={$ppl1}//kkl1={$kkl1}//vvl1={$vvl1}
-		//kohde_varasto={$kohde_varasto}//lahde_varasto={$lahde_varasto}//status={$status}
+		//kohde_varasto={$kohde_varasto}//lahde_varasto={$lahde_varasto}//multi_status=".base64_encode(serialize($multi_status))."
 		//ehdotusnappi={$ehdotusnappi}//tee={$tee}//mul_try=".base64_encode(serialize($mul_try))."
 		//mul_osasto=".base64_encode(serialize($mul_osasto))."//mul_tme=".base64_encode(serialize($mul_tme))."//multi_valmistuslinja=".base64_encode(serialize($multi_valmistuslinja));
 
@@ -641,8 +646,8 @@
 			$tuote_where .= "and tuote.valmistuslinja in ('".implode("','", $multi_valmistuslinja)."')";
 		}
 
-		if ($status != '') {
-			$tuote_where .= " and tuote.status = '$status'";
+		if (isset($multi_status) and count($multi_status) > 0) {
+			$tuote_where .= "and tuote.status in ('".implode("','", $multi_status)."')";
 		}
 		else {
 			$tuote_where .= " and tuote.status != 'P'";
@@ -1381,13 +1386,13 @@
 		echo "<tr>";
 		echo "<th>".t("Tuotteen status")."</th>";
 		echo "<td>";
-		echo "<select name='status'>";
+		echo "<select multiple='multiple' name='multi_status[]'>";
 		echo "<option value=''>".t("Näytä kaikki")."</option>";
 
 		$result = t_avainsana("S");
 
 		while ($srow = mysql_fetch_array($result)) {
-			$sel = (isset($status) and $status == $srow["selite"]) ? "selected" : "";
+			$sel = in_array($srow["selite"], $multi_status) ? " SELECTED" : "";
 			echo "<option value = '$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 		}
 		echo "</select>";

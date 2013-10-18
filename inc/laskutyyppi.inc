@@ -163,6 +163,9 @@
 		case "E":
 			$laskutyyppi = "Ennakkotilaus";
 			switch($alatila) {
+				case "H":
+					$alatila = "hylätty";
+					break;
 				case "J":
 					$alatila = "";
 					break;

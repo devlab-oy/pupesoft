@@ -515,6 +515,9 @@
 					$tuote_chk_row = mysql_fetch_assoc($tuote_chk_res);
 					$toimi_chk_row = mysql_fetch_assoc($toimi_chk_res);
 
+					$toimittaja_liitos_ostohinta = pupesoft_cleannumber($toimittaja_liitos_ostohinta);
+					$toimittaja_liitos_tuoteno = pupesoft_cleanstring($toimittaja_liitos_tuoteno);
+
 					$query = "	INSERT INTO tuotteen_toimittajat SET
 								yhtio = '{$kukarow['yhtio']}',
 								tuoteno = '{$tuote_chk_row['tuoteno']}',
@@ -522,6 +525,8 @@
 								toimittaja = '{$toimi_chk_row['ytunnus']}',
 								alkuperamaa = '{$toimi_chk_row['maa']}',
 								laatija = '{$kukarow['kuka']}',
+								ostohinta = '$toimittaja_liitos_ostohinta',
+								toim_tuoteno = '$toimittaja_liitos_tuoteno',
 								luontiaika = now(),
 								muutospvm = now(),
 								muuttaja = '{$kukarow['kuka']}'";
@@ -1618,6 +1623,7 @@
 			$toimiresult = pupe_query($query);
 
 			echo "<input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='JOO'>";
+			echo "<tr>";
 			echo "<th align='left'>".t("Toimittaja")."</th>";
 			echo "<td>";
 			echo "<select name='liitostunnus' />";
@@ -1630,6 +1636,21 @@
 
 			echo "</select>";
 			echo "</td>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<th align='left'>".t("Ostohinta")."</th>";
+			echo "<td>";
+			echo "<input type='text' size='35' name='toimittaja_liitos_ostohinta'>";
+			echo "</td>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<th align='left'>".t("Toimittajan tuotenumero")."</th>";
+			echo "<td>";
+			echo "<input type='text' size='35' name='toimittaja_liitos_tuoteno'>";
+			echo "</td>";
+			echo "</tr>";
 		}
 
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {

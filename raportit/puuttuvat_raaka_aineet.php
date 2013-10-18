@@ -608,6 +608,7 @@ function echo_kayttoliittyma($request) {
 	echo "<tr>";
 	echo "<th>".t("Rajaa tuotekategorialla")."</th>";
 	echo "<td>";
+	$noautosubmit = true;
 	$monivalintalaatikot = array('OSASTO', 'TRY', 'TUOTEMERKKI');
 	$mul_osasto = $request['mul_osasto'];
 	$mul_try = $request['mul_try'];

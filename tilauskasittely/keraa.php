@@ -838,6 +838,16 @@
 										if ($maara[$apui] == 0) {
 											// Mitätöidään nollarivi koska poikkeamalle kuitenkin tehdään jotain fiksua
 											$query .= ", tyyppi = 'D', kommentti=trim(concat(kommentti, ' Mitätöitiin koska keräyspoikkeamasta tehtiin: ".$poikkeama_kasittely[$apui]."'))";
+
+											//vapautetaan tämän tilausrivi sarjanumero(t)
+											$queryv = " SELECT otunnus
+														FROM tilausrivi
+														WHERE yhtio = '{$kukarow['yhtio']}'
+														AND tunnus = '{$apui}'";
+											$vapaut = pupe_query($queryv);
+											$vapaurow = mysql_fetch_assoc($vapaut);
+
+											vapauta_sarjanumerot($toim, $vapaurow["otunnus"], "AND tilausrivi.tunnus = '{$apui}'");
 										}
 
 										$rotunnus	= $tilrivirow['otunnus'];

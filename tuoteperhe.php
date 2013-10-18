@@ -45,6 +45,15 @@
 		$hakutyyppi = "R";
 	}
 
+	if ($toim == "PERHE") {
+		// Haetaan viimeisin valinta keksist‰
+		$keijo = isset($_COOKIE["pupesoft_tuoteperhe"]) ? $_COOKIE["pupesoft_tuoteperhe"] : "";
+		// Tsekboksi valituksi jos viimeisin valinta oli checked
+		if ($keijo == "ohitetaan") {
+			$chk_ohita_kerays = "CHECKED";
+		}
+	}
+
 	if ($tee == "KOPIOI") {
 
 		if ($kop_isatuo == "") {
@@ -487,6 +496,9 @@
 
 				echo "<table>";
 				echo "<th>".t("Tuoteno")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Hintakerroin")."</th><th>".t("Alennuskerroin")."</th>";
+				if ($toim == "PERHE") {
+					echo "<th>".t("Ohita Ker‰ys")."</th>";
+				}
 				#echo "<th>".t("Rivikommentti")."</th>";
 				echo "<td class='back'></td></tr>";
 
@@ -508,10 +520,14 @@
 					echo "	<td><input type='text' name='kerroin' size='20'></td>
 							<td><input type='text' name='hintakerroin' size='20'></td>
 							<td><input type='text' name='alekerroin' size='20'></td>";
+					if($toim == "PERHE") {
+						echo "<td><input type='checkbox' name='ohita_kerays' {$chk_ohita_kerays}></td>";
+						echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
+					}
 					#echo "	<td><input type='text' name='rivikommentti' size='20'></td>";
 				}
 
-				echo "	<td class='back'><input type='submit' value='".t("Lis‰‰ rivi")."'></td></form></tr>";
+				echo "<td class='back'><input type='submit' value='".t("Lis‰‰ rivi")."'></td></form></tr>";
 				echo "</table>";
 			}
 			elseif (mysql_num_rows($result) == 1) {
@@ -790,7 +806,8 @@
 					else echo "<td></td><td></td>";
 
 					if ($toim == "PERHE" or $toim == "RESEPTI") {
-						echo "<td></td>";
+						echo "<td><input type='checkbox' name='ohita_kerays' {$chk_ohita_kerays}></td>";
+						echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
 					}
 
 					echo "	<td class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
@@ -947,7 +964,8 @@
 
 						if ($toim == "PERHE") {
 							$chk_ohita_kerays = (isset($zrow['ohita_kerays']) and trim($zrow['ohita_kerays']) != '') ? " checked" : "";
-							echo "<td><input type='checkbox' name='ohita_kerays'{$chk_ohita_kerays}></td>";
+							echo "<td><input type='checkbox' name='ohita_kerays' {$chk_ohita_kerays}></td>";
+							echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
 						}
 
 						if ($toim == "RESEPTI") {

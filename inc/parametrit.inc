@@ -400,16 +400,28 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 		if ($phpnimi == "muokkaatilaus.php") {
 			// Muistetaan asiakastietojen valinta
 			if (!empty($asiakastiedot)) {
-				// tehd‰‰n cookie, voimassa 30 pv
-				setcookie("pupesoft_muokkaatilaus", $asiakastiedot, time()+60*60*24*30, "/");
+				setcookie("pupesoft_muokkaatilaus", $asiakastiedot, time()+60*60*24*90, "/");
 			}
 
 			// N‰ytet‰‰n riitt‰‰kˆ saldo ker‰ysp‰iv‰n‰
 			if ($naytetaanko_saldot == 'kylla') {
-				setcookie("naytetaanko_saldot", $naytetaanko_saldot, time()+60*60*24*30, "/");
+				setcookie("naytetaanko_saldot", $naytetaanko_saldot, time()+60*60*24*90, "/");
 			}
 			elseif ($naytetaanko_saldot == 'ei') {
-				setcookie("naytetaanko_saldot", '', time()+60*60*24*30, "/");
+				setcookie("naytetaanko_saldot", '', time()+60*60*24*90, "/");
+			}
+		}
+
+		// Tuoteperhe
+		if ($phpnimi == "tuoteperhe.php") {
+			// Muistetaan ker‰yksen ohituksen valinta
+			if (isset($tallenna_keksiin) and $ohita_kerays == "on") {
+				setcookie("pupesoft_tuoteperhe", "ohitetaan", time()+60*60*24*90, "/");
+				$_COOKIE["pupesoft_tuoteperhe"] = "ohitetaan";
+			}
+			elseif (isset($tallenna_keksiin) and !isset($ohita_kerays)) {
+				setcookie("pupesoft_tuoteperhe", "ei", time()+60*60*24*90, "/");
+				$_COOKIE["pupesoft_tuoteperhe"] = "ei";
 			}
 		}
 
@@ -439,7 +451,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				$dtpalvelin .= "tyomaarays/";
 			}
 
-			if (basename($phpnimi) == "selaasopimuksia.php" or basename($phpnimi) == "asiakkaantilaukset.php") {
+			if (basename($phpnimi) == "selaasopimuksia.php" or basename($phpnimi) == "asiakkaantilaukset.php" or basename($phpnimi) == "varastotilasto.php") {
 				$dtpalvelin .= "raportit/";
 			}
 

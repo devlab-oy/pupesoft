@@ -1543,7 +1543,7 @@
 						GROUP BY 1,2,3,4,5,6,7,8
 						$mt_order_by
 						$rajaus";
-			$miinus = 6;
+			$miinus = 7;
 		}
 		elseif ($toim == 'OSTOSUPER') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext,

@@ -1182,8 +1182,18 @@
 									$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tehdas_saldo_row['tt_tunnus']}' />";
 							 	}
 
-							 	$vastaavat_table .= "<font class='{$tehtaan_saldon_font}'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</font></td>";
-								$vastaavat_table .= "<td class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_tehdas_saldo_paivitetty' align='right'>".tv1dateconv($tehdas_saldo_row['tehdas_saldo_paivitetty'], "PITKA")."</td>";
+							 	if ($tehdas_saldo_row['selitetark_2'] == '') {
+							 		$vastaavat_table .= "<font class='{$tehtaan_saldon_font}'>".sprintf("%.2f", $tehdas_saldo_row['tehdas_saldo'])."</font>";
+							 	}
+
+								$vastaavat_table .= "</td>";
+
+								if ($tehdas_saldo_row['selitetark_2'] != "") {
+									$vastaavat_table .= "<td align='right'></td>";
+								}
+								else {
+									$vastaavat_table .= "<td class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_tehdas_saldo_paivitetty' align='right'>".tv1dateconv($tehdas_saldo_row['tehdas_saldo_paivitetty'], "PITKA")."</td>";
+								}
 
 								$vastaavat_table .= "<td>";
 

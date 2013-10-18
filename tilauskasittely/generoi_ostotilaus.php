@@ -9,7 +9,7 @@
 
 		$ytunnus = mysql_real_escape_string($ytunnus);
 
-		$muutparametrit = $tee."/".serialize($kohdevarastot)."/".$mul_osasto."/".$mul_try."/".$mul_tme."/".$abcrajaus."/".$generoi;
+		$muutparametrit = $tee."/".serialize($kohdevarastot)."/".$mul_osasto."/".$mul_try."/".$mul_tme."/".$abcrajaus."/".$generoi."/".$ohjausmerkki."/".$tilaustyyppi."/".$viesti;
 
 		require ("inc/kevyt_toimittajahaku.inc");
 
@@ -18,7 +18,7 @@
 		}
 		else {
 			if ($muutparametrit != '') {
-				list($tee, $kohdevarastot, $mul_osasto, $mul_try, $mul_tme, $abcrajaus, $generoi) = explode("/", $muutparametrit);
+				list($tee, $kohdevarastot, $mul_osasto, $mul_try, $mul_tme, $abcrajaus, $generoi, $ohjausmerkki, $tilaustyyppi, $viesti) = explode("/", $muutparametrit);
 				$kohdevarastot = unserialize($kohdevarastot);
 			}
 		}
@@ -41,7 +41,7 @@
 			<table>";
 
 	echo "<tr><th>",t("Varasto johon tilataan"),"</th>";
-	echo "<td colspan='4'>";
+	echo "<td><table>";
 
 	$query  = "	SELECT tunnus, nimitys, maa
 				FROM varastopaikat
@@ -49,6 +49,8 @@
 				AND tyyppi != 'P'
 				ORDER BY tyyppi, nimitys";
 	$vares = pupe_query($query);
+
+	$kala = 0;
 
 	while ($varow = mysql_fetch_assoc($vares)) {
 		$sel = '';
@@ -59,10 +61,23 @@
 			$varastomaa = '(' . maa(strtoupper($varow['maa'])) . ')';
 		}
 
-		echo "<input type='checkbox' name='kohdevarastot[]' value='{$varow['tunnus']}' {$sel} />{$varow['nimitys']} {$varastomaa}<br />";
+		if ($kala == 0) echo "<tr>";
+
+		echo "<td><input type='checkbox' name='kohdevarastot[]' value='{$varow['tunnus']}' {$sel} />{$varow['nimitys']} {$varastomaa}</td>";
+
+		if ($kala == 3) {
+			echo "</tr>";
+			$kala = -1;
+		}
+
+		$kala++;
 	}
 
-	echo "</td></tr>";
+	if ($kala != 0) {
+		echo "</tr>";
+	}
+
+	echo "</table></td></tr>";
 
 	echo "<tr><th>",t("Lisärajaukset"),"</th><td>";
 
@@ -154,6 +169,38 @@
 	}
 
 	echo "</select>";
+	echo "</td></tr>";
+
+	echo "<tr><td class='back'><br></td></tr>";
+
+	echo "<tr><th>".t("Viite")."</th><td><input type='text' size='61' name='viesti' value='$viesti'></td></tr>";
+	echo "<tr><th>".t("Ohjausmerkki")."</th><td><input type='text' size='61' name='ohjausmerkki' value='$ohjausmerkki'></td></tr>";
+	echo "<tr><th>".t("Tilaustyyppi")."</th>";
+
+	echo "<td><select name='tilaustyyppi'>";
+
+	$ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP");
+
+	if (mysql_num_rows($ostotil_tiltyyp_res) > 0) {
+
+		while ($ostotil_tiltyyp_row = mysql_fetch_assoc($ostotil_tiltyyp_res)) {
+			$sel = $tilaustyyppi == $ostotil_tiltyyp_row['selite'] ? " selected" : "";
+			echo "<option value='{$ostotil_tiltyyp_row['selite']}'{$sel}>{$ostotil_tiltyyp_row['selitetark']}</option>";
+		}
+	}
+	else {
+
+		$sel = array($tilaustyyppi => "selected") + array(1 => '', 2 => '');
+
+		echo "<option value='2' {$sel[2]}>",t("Normaalitilaus"),"</option>";
+		echo "<option value='1' {$sel[1]}>",t("Pikalähetys"),"</option>";
+	}
+
+	echo "</select></td>";
+
+
+	echo "</tr>";
+
 	echo "</table><br><input type = 'submit' name = 'generoi' value = '",t("Generoi ostotilaus"),"'></form>";
 
 	if ($tee == 'M' and isset($generoi) and $toimittajaid > 0 and count($kohdevarastot) > 0) {
@@ -286,7 +333,6 @@
 
 					$params = array(
 						'liitostunnus' 				=> $toimittajaid,
-						'ohjausmerkki' 				=> "",
 						'nimi' 						=> $varow['nimi'],
 						'nimitark' 					=> $varow['nimitark'],
 						'osoite' 					=> $varow['osoite'],
@@ -296,7 +342,10 @@
 						'myytil_toimaika'			=> date("Y-m-d"),
 						'toimipaikka' 				=> $varow['toimipaikka'],
 						'varasto'	 				=> $kohdevarasto,
-						'ostotilauksen_kasittely'	=> "",
+						'ohjausmerkki'	 			=> $ohjausmerkki,
+						'tilaustyyppi'	 			=> $tilaustyyppi,
+						'myytil_viesti'				=> $viesti,
+						'ostotilauksen_kasittely'	=> "GEN", # tällä erotellaan generoidut ja käsin tehdyt ostotilaukset
 					);
 
 					$laskurow = luo_ostotilausotsikko($params);

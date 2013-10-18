@@ -40,6 +40,22 @@
 		exit;
 	}
 
+	if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot_kaikki') {
+
+		if (@file_exists("../inc/sahkoinen_tilausliitanta.inc")) {
+
+			$hae = 'tarkista_tehtaan_saldot_kaikki';
+			$otunnus = (int) $otunnus;
+
+			require("inc/sahkoinen_tilausliitanta.inc");
+		}
+
+		if (!isset($data)) $data = array('id' => 0, 'error' => true, 'error_msg' => utf8_encode(t("Haku ei onnistunut! Ole yhteydessä IT-tukeen")));
+
+		echo json_encode($data);
+		exit;
+	}
+
 	if ($ajax_request) {
 		if ($hae_toimittajien_saldot) {
 			$query = "	SELECT tilausrivi.tuoteno,
@@ -1148,6 +1164,21 @@
 				echo "</form>";
 			}
 
+			if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+
+				$style = "width: 15px; height: 15px; display: inline-table; border-radius: 50%; -webkit-border-radius: 50%; -moz-border-radius: 50%;";
+
+				echo "&nbsp;&nbsp;&nbsp;<span class='tooltip' id='color_tooltip'><span style='{$style} background-color: #5D2; margin-right: 5px;'></span><span style='{$style} background-color: #FCF300; margin-right: 5px;'></span><span style='{$style} background-color: #E66; margin-right: 5px;'></span></span></a>";
+				echo "<div id='div_color_tooltip' class='popup' style='width: 300px; line-height: 15px; height: 60px;'>";
+				echo "<table>";
+				echo "<tr><td class='back'><span style='{$style} background-color: #5D2;'></span></td><td class='back'><span style='float: right'>",t("kysytty määrä löytyy"),"</span></td></tr>";
+				echo "<tr><td class='back'><span style='{$style} background-color: #FCF300;'></span></td><td class='back'><span style='float: right;'>",t("osa kysytystä määrästä löytyy"),"</span></td></tr>";
+				echo "<tr><td class='back'><span style='{$style} background-color: #E66'></span></td><td class='back'><span style='float: right;'>",t("kysyttyä määrää ei löydy"),"</span></td></tr>";
+				echo "<tr><td class='back'><img src='{$palvelin2}pics/lullacons/alert.png' /></td><td class='back'><span style='float: right;'>",t("kysyttyä tuotetta ei löydy"),"</span></td></tr>";
+				echo "</table>";
+				echo "</div>";
+			}
+
 			// katotaan miten halutaan sortattavan
 			$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
@@ -1183,12 +1214,14 @@
 						tilausrivi.ale3,
 						tilausrivin_lisatiedot.tilausrivitunnus,
 						tilausrivin_lisatiedot.tilausrivilinkki,
+						tilausrivi.vahvistettu_maara,
+						tilausrivi.vahvistettu_kommentti,
 						tilausrivi.hinta_alkuperainen
 						FROM tilausrivi
 						LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 						LEFT JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
-						WHERE otunnus = '$kukarow[kesken]'
+						WHERE tilausrivi.otunnus = '$kukarow[kesken]'
 						and tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi = 'O'
 						ORDER BY sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
@@ -1420,7 +1453,13 @@
 							echo "</ul></div>";
 						}
 						echo "</td>";
-						echo "<td valign='top' $class align='right'>".($prow["tilattu"]*1)." ",strtolower($prow['yksikko']),"<br />".($prow["tilattu_ulk"]*1)." ",strtolower($prow['toim_yksikko']),"</td>";
+						echo "<td valign='top' $class align='right'>";
+
+						if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+							echo "<div class='availability {$prow['tunnus']}_availability' /> <span class='{$prow['tunnus']}_loading'></span></div>&nbsp;";
+						}
+
+						echo ($prow["tilattu"]*1)." ",strtolower($prow['yksikko']),"<br />".($prow["tilattu_ulk"]*1)." ",strtolower($prow['toim_yksikko']),"</td>";
 						echo "<td valign='top' $class align='right'>".hintapyoristys($prow["hinta"])."</td>";
 
 						$alespan = 8;
@@ -1592,7 +1631,29 @@
 						}
 
 						if ($prow["jaksotettu"] == 1) {
-							echo "<td $kommclass2><font style = 'color: #00FF00;'>".t("Vahvistettu toimitusaika").": ".tv1dateconv($prow["toimaika"])."</font></td>";
+							echo "<td $kommclass2>";
+
+							if (!is_null($prow['vahvistettu_maara'])) {
+
+								$comp_a = $prow['varattukpl'] * 10000;
+								$comp_b = $prow['vahvistettu_maara'] * 10000;
+
+								$font_class = $comp_a != $comp_b ? 'error' : 'ok';
+
+								echo "<font class='{$font_class}'>",t("Vahvistettu toimitusaika"),": ",tv1dateconv($prow["toimaika"]),"<br />";
+								echo t("Vahvistettu määrä"),": {$prow['vahvistettu_maara']}";
+
+								if ($prow['vahvistettu_kommentti'] != "") {
+									echo "<br />",t("Vahvistettu kommentti"),": {$prow['vahvistettu_kommentti']}";
+						}
+
+								echo "</font>";
+							}
+						else {
+								echo "<font class='ok'>".t("Vahvistettu toimitusaika").": ".tv1dateconv($prow["toimaika"])."</font>";
+							}
+
+							echo "</td>";
 						}
 						else {
 
@@ -1617,7 +1678,7 @@
 							$linkattu_myyntitilaus_result = pupe_query($query);
 							$linkattu_myyntitilaus_row = mysql_fetch_assoc($linkattu_myyntitilaus_result);
 
-							echo " <a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=RIVISYOTTO&tilausnumero={$linkattu_myyntitilaus_row['otunnus']}&lopetus={$myyntitilaus_lopetus}'>".t('Näytä myyntitilaus')."</a>";
+							echo " <a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=RIVISYOTTO&tilausnumero={$linkattu_myyntitilaus_row['otunnus']}&lopetus={$myyntitilaus_lopetus}'>".t('Näytä myyntitilaus').": {$linkattu_myyntitilaus_row['nimi']}</a>";
 						}
 
 						if (isset($vastaavat_html) and $vastaavat_html != "") {
@@ -1742,6 +1803,11 @@
 						<input type='Submit' value='".t("Tilaus valmis")."' {$saldo_tarkistus_onclick}>
 						</form>
 						</td>";
+
+				if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+					$hae = 'nappi_kaikki';
+					require("inc/sahkoinen_tilausliitanta.inc");
+				}
 
 				if ($toim != "HAAMU") {
 					echo "	<td class='back''>

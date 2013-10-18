@@ -7550,7 +7550,7 @@ if ($tee == '') {
 				$sallijyvitys = FALSE;
 
 				if ($kukarow["extranet"] == "") {
-					if ($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '') {
+					if ($yhtiorow["salli_jyvitys_myynnissa"] == "" and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '')) {
 						$sallijyvitys = TRUE;
 					}
 

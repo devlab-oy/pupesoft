@@ -14,17 +14,40 @@
 
 	//Nämä ovat $lopetus varten. lopetus-muuttujaan serialisoidaan ja base64-enkoodataan arrayt
 	//ja ne pitää reverttaa tässä kohtaa kun tuotekyselystä tullaan takaisin.
-	if (is_string($mul_try)) {
+	if (isset($mul_try) and is_string($mul_try)) {
 		$mul_try = unserialize(base64_decode($mul_try));
 	}
-	if (is_string($mul_osasto)) {
+	else {
+		$mul_try = isset($mul_try) ? $mul_try : array();
+	}
+	if (isset($mul_osasto) and is_string($mul_osasto)) {
 		$mul_osasto = unserialize(base64_decode($mul_osasto));
 	}
-	if (is_string($mul_tme)) {
+	else {
+		$mul_osasto = isset($mul_osasto) ? $mul_osasto : array();
+	}
+	if (isset($mul_tme) and is_string($mul_tme)) {
 		$mul_tme = unserialize(base64_decode($mul_tme));
 	}
+	else {
+		$mul_tme = isset($mul_tme) ? $mul_tme : array();
+	}
+	if (isset($multi_valmistuslinja) and is_string($multi_valmistuslinja)) {
+		$multi_valmistuslinja = unserialize(base64_decode($multi_valmistuslinja));
+	}
+	else {
+		$multi_valmistuslinja = isset($multi_valmistuslinja) ? $multi_valmistuslinja : array();
+	}
 
-	if ($tee == 'lataa_tiedosto') {
+	$ehdotetut_valmistukset = isset($ehdotetut_valmistukset) ? $ehdotetut_valmistukset : '';
+	$kohde_varasto = isset($kohde_varasto) ? $kohde_varasto : '';
+	$lahde_varasto = isset($lahde_varasto) ? $lahde_varasto : '';
+	$status = isset($status) ? $status : '';
+	$ehdotusnappi = isset($ehdotusnappi) ? $ehdotusnappi : '';
+	$tee = isset($tee) ? $tee : '';
+	$lisa = isset($lisa) ? $lisa : '';
+
+	if (isset($tee) and $tee == 'lataa_tiedosto') {
 		$filepath = "/tmp/".$tmpfilenimi;
 		if (file_exists($filepath)) {
 			readfile($filepath);
@@ -104,12 +127,18 @@
 	echo "<font class='head'>".t("Valmistuksien suunnittelu")."</font><hr>";
 
 	// org_rajausta tarvitaan yhdessä selectissä joka triggeröi taas toisen asian.
-	$org_rajaus = $abcrajaus;
-	list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
+	$org_rajaus = isset($abcrajaus) ? $abcrajaus : '';
+	$abcrajaus = isset($abcrajaus) ? $abcrajaus : '';
+
+	if ($abcrajaus != '') {
+		list($abcrajaus, $abcrajaustapa) = explode("##", $abcrajaus);
+	}
 
 	if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 
 	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
+
+	$valmistuslinjat = hae_valmistuslinjat();
 
 	// Ehdotetaan oletuksena ehdotusta ensikuun valmistuksille sekä siitä plus 3 kk
 	if (!isset($ppa1)) $ppa1 = date("d", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
@@ -121,8 +150,9 @@
 
 	// Päivämäärätarkistus
 	if (!checkdate($kka1, $ppa1, $vva1)) {
-		echo "<font class='error'>".t("Virheellinen alkupäivä!")."</font><br>";
+		echo "<font class='error'>".t("Virheellinen alkupäivä!")."</font><br><br>";
 		$tee = "";
+		$ehdotusnappi = "";
 	}
 	else {
 		$nykyinen_alku  = date("Y-m-d", mktime(0, 0, 0, $kka1, $ppa1, $vva1));
@@ -130,24 +160,26 @@
 	}
 
 	if (!checkdate($kkl1, $ppl1, $vvl1)) {
-		echo "<font class='error'>".t("Virheellinen loppupäivä!")."</font><br>";
+		echo "<font class='error'>".t("Virheellinen loppupäivä!")."</font><br><br>";
 		$tee = "";
+		$ehdotusnappi = "";
 	}
 	else {
 		$nykyinen_loppu  = date("Y-m-d", mktime(0, 0, 0, $kkl1, $ppl1, $vvl1));
 		$edellinen_loppu = date("Y-m-d", mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
 	}
 
-	if ($nykyinen_alku > $nykyinen_loppu) {
+	if (isset($nykyinen_alku) and isset($nykyinen_loppu) and $nykyinen_alku > $nykyinen_loppu) {
 		echo "<font class='error'>".t("Virheelliset kaudet!")." $nykyinen_alku > $nykyinen_loppu</font><br>";
 		$tee = "";
+		$ehdotusnappi = "";
 	}
 
 	$lopetus = "{$palvelin2}raportit/valmistuksen_suunnittelu.php////toim={$toim}//abcrajaus={$abcrajaus}//ehdotetut_valmistukset={$ehdotetut_valmistukset}
 		//ppa1={$ppa1}//kka1={$kka1}//vva1={$vva1}//ppl1={$ppl1}//kkl1={$kkl1}//vvl1={$vvl1}
 		//kohde_varasto={$kohde_varasto}//lahde_varasto={$lahde_varasto}//status={$status}
 		//ehdotusnappi={$ehdotusnappi}//tee={$tee}//mul_try=".base64_encode(serialize($mul_try))."
-		//mul_osasto=".base64_encode(serialize($mul_osasto))."//mul_tme=".base64_encode(serialize($mul_tme));
+		//mul_osasto=".base64_encode(serialize($mul_osasto))."//mul_tme=".base64_encode(serialize($mul_tme))."//multi_valmistuslinja=".base64_encode(serialize($multi_valmistuslinja));
 
 	// Muuttujia
 	$ytunnus = isset($ytunnus) ? trim($ytunnus) : "";
@@ -574,8 +606,6 @@
 	// Tehdään raportti
 	if (isset($ehdotusnappi) and $ehdotusnappi != "") {
 
-		$valmistuslinjat = hae_valmistuslinjat();
-
 		$tuote_where       = ""; // tuote-rajauksia
 		$toimittaja_join   = ""; // toimittaja-rajauksia
 		$toimittaja_select = ""; // toimittaja-rajauksia
@@ -605,6 +635,10 @@
 
 		if (isset($mul_tme) and count($mul_tme) > 0) {
 			$tuote_where .= " and tuote.tuotemerkki in ('".implode("','", $mul_tme)."')";
+		}
+
+		if (isset($multi_valmistuslinja) and count($multi_valmistuslinja) > 0) {
+			$tuote_where .= "and tuote.valmistuslinja in ('".implode("','", $multi_valmistuslinja)."')";
 		}
 
 		if ($status != '') {
@@ -866,7 +900,7 @@
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistuslinja"] = $samankaltainen_row["valmistuslinja"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuote"] = $row["tuoteno"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistusaika_sekunneissa"] = $samankaltainen_row["valmistusaika_sekunneissa"];
-				$kasiteltavat_tuotteet[$kasiteltavat_key]["pakkauskoko"] = $samankaltainen_row["pakkauskoko"];
+				// $kasiteltavat_tuotteet[$kasiteltavat_key]["pakkauskoko"] = $samankaltainen_row["pakkauskoko"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuotteen_pakkauskoko"] = $isatuotteen_pakkauskoko;
 				$samankaltaiset_tuotteet .= "{$samankaltainen_row["tuoteno"]} ";
 			}
@@ -1227,7 +1261,7 @@
 		}
 
 		// Jos yhteensänäkymä, ja meillä on dataa
-		if (count($valmistukset_yhteensa) > 0 and $ehdotetut_valmistukset == 'valmistuslinjoittain') {
+		if (isset($valmistukset_yhteensa) and count($valmistukset_yhteensa) > 0 and $ehdotetut_valmistukset == 'valmistuslinjoittain') {
 			echo "<table>";
 			echo "<thead>";
 			echo "<tr>";
@@ -1328,6 +1362,19 @@
 		$monivalintalaatikot_normaali = array();
 		require ("tilauskasittely/monivalintalaatikot.inc");
 
+		echo "</td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<th>".t('Valmistuslinja')."</th>";
+		echo "<td>";
+		echo "<select multiple='multiple' name='multi_valmistuslinja[]'>";
+		echo "<option value=''>".t('Kaikki valmistuslinjat')."</option>";
+		foreach ($valmistuslinjat as $_valmistuslinja) {
+			$sel = in_array($_valmistuslinja['selite'], $multi_valmistuslinja) ? " SELECTED" : "";
+			echo "<option value='{$_valmistuslinja['selite']}'{$sel}>{$_valmistuslinja['selitetark']}</option>";
+		}
+		echo "</select>";
 		echo "</td>";
 		echo "</tr>";
 

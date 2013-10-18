@@ -51,6 +51,7 @@
 	$ehdotusnappi = isset($ehdotusnappi) ? $ehdotusnappi : '';
 	$tee = isset($tee) ? $tee : '';
 	$lisa = isset($lisa) ? $lisa : '';
+	$tilaustuotteiden_kasittely = isset($tilaustuotteiden_kasittely) ? $tilaustuotteiden_kasittely : '';
 
 	if (isset($tee) and $tee == 'lataa_tiedosto') {
 		$filepath = "/tmp/".$tmpfilenimi;
@@ -194,7 +195,7 @@
 	function teerivi($tuoteno, $valittu_toimittaja, $abc_rajaustapa) {
 
 		// Kukarow ja p‰iv‰m‰‰r‰t globaaleina
-		global $kukarow, $edellinen_alku, $edellinen_loppu, $nykyinen_alku, $nykyinen_loppu, $ryhmanimet;
+		global $kukarow, $edellinen_alku, $edellinen_loppu, $nykyinen_alku, $nykyinen_loppu, $ryhmanimet, $tilaustuotteiden_kasittely;
 
 		// Tehd‰‰n kaudet p‰iv‰m‰‰rist‰
 		$alku_kausi  = substr(str_replace("-", "", $nykyinen_alku), 0, 6);
@@ -218,6 +219,15 @@
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 		$varastosaldo = $row['saldo'];
+
+		// Haetaan tuotteen status
+		$query = "	SELECT tuote.status
+					FROM tuote
+					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+					AND tuote.tuoteno = '{$tuoteno}'";
+		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
+		$tuote_status = $row['status'];
 
 		// Haetaan tuotteen vuosikulutus (= myynti)
 		$query = "	SELECT ifnull(sum(tilausrivi.kpl), 0) vuosikulutus
@@ -276,58 +286,84 @@
 							);
 		}
 
-		// Haetaan budjetoitu myynti
-		$query = "	SELECT budjetti_tuote.kausi kausi,
-					ifnull(sum(budjetti_tuote.maara), 0) budjetti,
-					DAY(LAST_DAY(concat(budjetti_tuote.kausi, '01'))) paivia_kuussa,
-					ifnull(sum(budjetti_tuote.maara), 0) / DAY(LAST_DAY(concat(budjetti_tuote.kausi, '01'))) paivabudjetti
-					FROM budjetti_tuote
-					WHERE budjetti_tuote.yhtio = '{$kukarow["yhtio"]}'
-					AND budjetti_tuote.kausi >= '{$alku_kausi}'
-					AND budjetti_tuote.kausi <= '{$loppu_kausi}'
-					AND budjetti_tuote.tuoteno = '{$tuoteno}'
-					GROUP BY 1";
-		$result = pupe_query($query);
-
-		// Jos ei ole budjettia, otetaan edellisen kauden myynti ja k‰ytet‰‰n sit‰
-		if (mysql_num_rows($result) == 0) {
-			// Lis‰t‰‰n kauteen sata, ett‰ saadaan vuosiluvut t‰sm‰‰m‰‰n budjetin kanssa (helpottaa koodia alla)
-			$query = "	SELECT DATE_FORMAT(tilausrivi.laskutettuaika, '%Y%m') + 100 kausi,
-						ifnull(sum(tilausrivi.kpl), 0) budjetti,
-						DAY(LAST_DAY(tilausrivi.laskutettuaika)) paivia_kuussa,
-						ifnull(sum(tilausrivi.kpl), 0) / DAY(LAST_DAY(tilausrivi.laskutettuaika)) paivabudjetti
-						FROM tilausrivi
-						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-						AND tilausrivi.tyyppi = 'L'
-						AND tilausrivi.tuoteno = '{$tuoteno}'
-						AND tilausrivi.laskutettuaika >= '{$edellinen_alku}'
-						AND tilausrivi.laskutettuaika <= '{$edellinen_loppu}'
-						GROUP BY 1";
-			$result = pupe_query($query);
-		}
-
 		// Lasketaan budjetoitu myynti
 		$budjetoitu_myynti = 0;
 
-		// Alku- ja loppukauden p‰iv‰
-		$alku_kausi_pp  = substr(str_replace("-", "", $nykyinen_alku), 6, 2);
-		$loppu_kausi_pp = substr(str_replace("-", "", $nykyinen_loppu), 6, 2);
-
-		// Loopataan kaudet l‰pi
-		while ($row = mysql_fetch_assoc($result)) {
-
-			// Montako p‰iv‰‰ t‰lt‰ kaudelta on otettu raporttiin
-			$paivien_maara = $row['paivia_kuussa'];
-
-			if ($row['kausi'] == $alku_kausi) {
-				$paivien_maara -= $alku_kausi_pp - 1;
+		// Status P budjetoitu myynti aina nolla
+		if ($tuote_status != "P") {
+			// Status T, eli tilaustuote, niin budjetoitu myynti on tuotteen JT-rivit
+			if ($tuote_status == "T") {
+				// Haetaan JT-rivit
+				$query = "	SELECT DATE_FORMAT(tilausrivi.laskutettuaika, '%Y%m') kausi,
+							ifnull(sum(tilausrivi.varattu + tilausrivi.jt), 0) budjetti,
+							DAY(LAST_DAY(tilausrivi.laskutettuaika)) paivia_kuussa,
+							ifnull(sum(tilausrivi.varattu + tilausrivi.jt), 0) / DAY(LAST_DAY(tilausrivi.laskutettuaika)) paivabudjetti
+							FROM tilausrivi
+							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio 
+								AND lasku.tunnus = tilausrivi.otunnus
+								AND lasku.toimaika >= '{$nykyinen_alku}'
+								AND lasku.toimaika <= '{$nykyinen_loppu}')
+							WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+							AND tilausrivi.tyyppi = 'L'
+							AND tilausrivi.var = 'J'
+							AND tilausrivi.tuoteno = '{$tuoteno}'
+							GROUP BY 1";
+				$result = pupe_query($query);
 			}
 
-			if ($row['kausi'] == $loppu_kausi) {
-				$paivien_maara -= $row['paivia_kuussa'] - $loppu_kausi_pp;
+			// Kaikki muut, katsotaan joko budjetti tai myynti
+			if ($tuote_status != 'T') {
+				// Haetaan budjetoitu myynti
+				$query = "	SELECT budjetti_tuote.kausi kausi,
+							ifnull(sum(budjetti_tuote.maara), 0) budjetti,
+							DAY(LAST_DAY(concat(budjetti_tuote.kausi, '01'))) paivia_kuussa,
+							ifnull(sum(budjetti_tuote.maara), 0) / DAY(LAST_DAY(concat(budjetti_tuote.kausi, '01'))) paivabudjetti
+							FROM budjetti_tuote
+							WHERE budjetti_tuote.yhtio = '{$kukarow["yhtio"]}'
+							AND budjetti_tuote.kausi >= '{$alku_kausi}'
+							AND budjetti_tuote.kausi <= '{$loppu_kausi}'
+							AND budjetti_tuote.tuoteno = '{$tuoteno}'
+							GROUP BY 1";
+				$result = pupe_query($query);
+
+				// Jos ei ole budjettia, otetaan edellisen kauden myynti ja k‰ytet‰‰n sit‰
+				if (mysql_num_rows($result) == 0) {
+					// Lis‰t‰‰n kauteen sata, ett‰ saadaan vuosiluvut t‰sm‰‰m‰‰n budjetin kanssa (helpottaa koodia alla)
+					$query = "	SELECT DATE_FORMAT(tilausrivi.laskutettuaika, '%Y%m') + 100 kausi,
+								ifnull(sum(tilausrivi.kpl), 0) budjetti,
+								DAY(LAST_DAY(tilausrivi.laskutettuaika)) paivia_kuussa,
+								ifnull(sum(tilausrivi.kpl), 0) / DAY(LAST_DAY(tilausrivi.laskutettuaika)) paivabudjetti
+								FROM tilausrivi
+								WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+								AND tilausrivi.tyyppi = 'L'
+								AND tilausrivi.tuoteno = '{$tuoteno}'
+								AND tilausrivi.laskutettuaika >= '{$edellinen_alku}'
+								AND tilausrivi.laskutettuaika <= '{$edellinen_loppu}'
+								GROUP BY 1";
+					$result = pupe_query($query);
+				}
 			}
 
-			$budjetoitu_myynti += $paivien_maara * $row['paivabudjetti'];
+			// Alku- ja loppukauden p‰iv‰
+			$alku_kausi_pp  = substr(str_replace("-", "", $nykyinen_alku), 6, 2);
+			$loppu_kausi_pp = substr(str_replace("-", "", $nykyinen_loppu), 6, 2);
+
+			// Loopataan kaudet l‰pi
+			while ($row = mysql_fetch_assoc($result)) {
+
+				// Montako p‰iv‰‰ t‰lt‰ kaudelta on otettu raporttiin
+				$paivien_maara = $row['paivia_kuussa'];
+
+				if ($row['kausi'] == $alku_kausi) {
+					$paivien_maara -= $alku_kausi_pp - 1;
+				}
+
+				if ($row['kausi'] == $loppu_kausi) {
+					$paivien_maara -= $row['paivia_kuussa'] - $loppu_kausi_pp;
+				}
+
+				$budjetoitu_myynti += $paivien_maara * $row['paivabudjetti'];
+			}
 		}
 
 		// Lasketaan reaalisaldo
@@ -1373,7 +1409,7 @@
 		echo "<tr>";
 		echo "<th>".t('Valmistuslinja')."</th>";
 		echo "<td>";
-		echo "<select multiple='multiple' name='multi_valmistuslinja[]'>";
+		echo "<select multiple='multiple' name='multi_valmistuslinja[]' onchange='submit();'>";
 		echo "<option value=''>".t('Kaikki valmistuslinjat')."</option>";
 		foreach ($valmistuslinjat as $_valmistuslinja) {
 			$sel = in_array($_valmistuslinja['selite'], $multi_valmistuslinja) ? " SELECTED" : "";
@@ -1386,7 +1422,7 @@
 		echo "<tr>";
 		echo "<th>".t("Tuotteen status")."</th>";
 		echo "<td>";
-		echo "<select multiple='multiple' name='multi_status[]'>";
+		echo "<select multiple='multiple' name='multi_status[]' onchange='submit();'>";
 		echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
 
 		$result = t_avainsana("S");
@@ -1397,6 +1433,15 @@
 		}
 		echo "</select>";
 
+		echo "</td>";
+		echo "</tr>";
+
+		echo "<tr><th>".t("Tilaustuotteiden k‰sittely")."</th><td>";
+		echo "<select name='tilaustuotteiden_kasittely'>";
+        echo "<option value='A' {$sel[$tilaustuotteiden_kasittely]}>".t("Tilaustuotteiden m‰‰r‰ennuste on j‰lkitoimitusrivit")."</option>";
+        echo "<option value='B' {$sel[$tilaustuotteiden_kasittely]}>".t("Tilaustuotteiden m‰‰r‰ennuste on budjetti/myynti")."</option>";
+        echo "<option value='C' {$sel[$tilaustuotteiden_kasittely]}>".t("Tilaustuotteiden m‰‰r‰ennuste on j‰lkitoimitusrivit + budjetti/myynti")."</option>";
+		echo "</select>";
 		echo "</td>";
 		echo "</tr>";
 
@@ -1446,6 +1491,8 @@
 		}
 
 		echo "</select>";
+		echo "</td>";
+		echo "</tr>";
 
 		echo "<tr><th>".t("Toimittaja")."</th><td>";
 		if ($toimittajaid == "") {

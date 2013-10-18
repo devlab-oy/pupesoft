@@ -89,6 +89,25 @@
 							pupe_query($query);
 						}
 
+						$query = "	SELECT *
+									FROM lasku
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$otunnus}'";
+						$laskures = pupe_query($query);
+						$laskurow = mysql_fetch_assoc($laskures);
+
+						$query  = "	INSERT INTO rahtikirjat SET
+									kollit 			= '',
+									pakkaus 		= '',
+									pakkauskuvaus 	= '',
+									rahtikirjanro 	= '',
+									otsikkonro 		= '{$otunnus}',
+									tulostuspaikka 	= '{$laskurow['varasto']}',
+									yhtio 			= '{$kukarow['yhtio']}',
+									viesti			= ''";
+						$result_rk = pupe_query($query);
+
+
 						unlink($path.$file);
 					}
 				}

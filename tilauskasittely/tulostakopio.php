@@ -1079,7 +1079,7 @@
 									$kerroinlisa2
 									WHERE tilausrivi.yhtio = '$row[yhtio]'
 									and tilausrivi.otunnus = '$row[tunnus]'
-									and tilausrivi.var != 'O'
+									and (tilausrivi.var != 'O' or tilausrivi.tyyppi='O')
 									and tilausrivi.tyyppi not in ('D','V')";
 						$sumres = pupe_query($query);
 						$sumrow = mysql_fetch_assoc($sumres);
@@ -2083,8 +2083,10 @@
 								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 								if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 								tuote.sarjanumeroseuranta,
-								tuote.eankoodi
+								tuote.eankoodi,
+								abs(tilausrivin_lisatiedot.asiakkaan_positio) asiakkaan_positio
 								FROM tilausrivi
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 								JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 								WHERE tilausrivi.otunnus in ($tilausnumeroita)
 								and tilausrivi.yhtio   = '$kukarow[yhtio]'
@@ -2268,7 +2270,7 @@
 			}
 		}
 	}
-	
+
 	if ($tee != 'NAYTATILAUS') {
 		if (@include("inc/footer.inc"));
 		elseif (@include("footer.inc"));

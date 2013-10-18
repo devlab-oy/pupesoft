@@ -311,6 +311,7 @@ if (!function_exists("pupesoft_flock")) {
 			else exit;
 		}
 		else {
+			@chmod("/tmp/##pupesoft.sh-flock.lock", 0666);
 			flock($backupflock, LOCK_UN);
 		}
 
@@ -18084,10 +18085,11 @@ if (!function_exists("pupesoft_lahetetyyppi")) {
 
 		if ((int) $asiakastunnus != 0) {
 			# Jos tilauksella ei ollut lähetetyyppiä, haetaan asiakkaan oletuslähettyyppi
-			$query = "	SELECT lahetetyyppi
+			$query = "	SELECT asiakas.lahetetyyppi
 						FROM asiakas
-						WHERE tunnus = '$asiakastunnus'
-						AND yhtio = '$kukarow[yhtio]'";
+						JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.selite = asiakas.lahetetyyppi AND avainsana.laji = 'LAHETETYYPPI')
+						WHERE asiakas.tunnus = '$asiakastunnus'
+						AND asiakas.yhtio    = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
@@ -18152,6 +18154,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		#$lahetetyyppi = "tulosta_lahete_brutto.inc"; 			# Näytetään tuotteen myymälähinta/(asiakkaan hinta)
 		#$lahetetyyppi = "tulosta_lahete_eialeja.inc"; 			# Näytetään tuotteen myyntihinta ja alennusryhmä
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc"; 		# Ei näytetä hintoja eikä alennuksia, EAN-koodi tulostetaan viivakoodina
+		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # Näytetään asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
+		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # Näytetään asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
 		#$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
@@ -18248,13 +18252,19 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			$kvaktuotteet = ",'{$toimitustapa_row['kuljetusvakuutus_tuotenumerot']}'";
 		}
 
+		$jtsort_lisa = "if (tilausrivi.tuoteno in ('$yhtiorow[rahti_tuotenumero]' $kvaktuotteet), 2, if(tilausrivi.var='J', 1, 0)) jtsort,";
+
+		if (substr($lahetetyyppi, 0, 6) != "perhe_" and (hae_base_lahetetyyppi($lahetetyyppi) == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' or hae_base_lahetetyyppi($lahetetyyppi) == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc')) {
+			$jtsort_lisa = "0 as jtsort,";
+		}
+
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot
 		$query = "  SELECT tilausrivi.*, {$koontiselect}
 					round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 					{$koontirivihinta}
 					$sorttauskentta,
-					if (tilausrivi.tuoteno in ('$yhtiorow[rahti_tuotenumero]' $kvaktuotteet), 2, if(tilausrivi.var='J', 1, 0)) jtsort,
+					{$jtsort_lisa}
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 					tuote.sarjanumeroseuranta
@@ -23254,20 +23264,42 @@ if (!function_exists("splittaa_valmistukset")) {
 }
 
 if (!function_exists('laske_ext_ennakko_hinta')) {
-	function laske_ext_ennakko_hinta($trow) {
+	function laske_ext_ennakko_hinta($trow, $laskurow) {
 		global $kukarow, $yhtiorow;
+
+		$kielilisa = "FI";
+
+		if (strtoupper($laskurow["maa"]) == "SE") {
+			$kielilisa = "SE";
+		}
 
 		$query = "  SELECT selite AS ennakko_pros_a
 					FROM tuotteen_avainsanat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tuoteno = '{$trow['tuoteno']}'
-					AND laji = 'parametri_ennakkoale_a'
+					AND laji 	= 'parametri_ennakkoale_a'
+					AND kieli 	= '{$kielilisa}'
 					AND selite != ''
 					ORDER BY ennakko_pros_a DESC
 					LIMIT 1";
 		$result = pupe_query($query);
 
+		// Haetaanko ruotsihinnat
+		if (strtoupper($laskurow["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
+			$query = "	SELECT alv
+						FROM tuotteen_alv
+						WHERE tuoteno = '{$trow['tuoteno']}'
+						AND maa = '{$laskurow['maa']}'";
+			$tuotteen_alv_resu = pupe_query($query);
+			$tuotteen_alv_rivi = mysql_fetch_assoc($tuotteen_alv_resu);
+
+			$alv = $tuotteen_alv_rivi['alv'];
+
+			$trow['myyntihinta'] = tuotteen_myyntihinta($laskurow, $trow, $trow['varattu']);
+		}
+
 		$hinta = "";
+
 		if (mysql_num_rows($result) == 1) {
 			$tuotteen_hinta = mysql_fetch_assoc($result);
 			$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
@@ -23563,6 +23595,42 @@ if (!function_exists('laske_siirrettava_maara')) {
 		$res   = pupe_query($query);
 
 		return array($siirrettava_yht, $siirrettavat_rivit);
+	}
+}
+
+if (!function_exists('hae_tilauksen_rekisterinumerot')) {
+	function hae_tilauksen_rekisterinumerot($tilausnumero) {
+		global $kukarow, $yhtiorow;
+
+		if ($tilausnumero == '') {
+			return array();
+		}
+
+		//Tilausrivi pitää joinaa, jottei tule poistettuja rekisterinumeroita
+		$query = "	SELECT tilausrivin_lisatiedot.rekisterinumero
+					FROM tilausrivin_lisatiedot
+					JOIN tilausrivi
+					ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+						AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus )
+					WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivin_lisatiedot.vanha_otunnus = '{$tilausnumero}'
+					ORDER BY tilausrivi.tunnus DESC";
+		$result = pupe_query($query);
+
+		$rekisterinumerot = array();
+		$onko_syotetty_muita_kuin_tyhjia = false;
+		while($rekisterinumero = mysql_fetch_assoc($result)) {
+			if ($rekisterinumero['rekisterinumero'] != '') {
+				$onko_syotetty_muita_kuin_tyhjia = true;
+			}
+			$rekisterinumerot[$rekisterinumero['rekisterinumero']] = $rekisterinumero;
+		}
+
+		if ($onko_syotetty_muita_kuin_tyhjia) {
+			return $rekisterinumerot;
+		}
+
+		return array();
 	}
 }
 

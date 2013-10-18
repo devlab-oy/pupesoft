@@ -183,12 +183,20 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
 	global $kukarow, $yhtiorow;
 
 	$tuotteet = array();
-	
+
+	if ($request['valittu_asiakas']) {
+		$request['asiakas'] = hae_asiakas($request['valittu_asiakas']);
+	}
+	else {
+		$request['asiakas']['ryhma'] = $request['valittu_asiakasryhma'];
+	}
+
 	if ($request['mitka_tuotteet'] == 'kaikki') {
 		$query = "	SELECT aleryhma, tuoteno
 					FROM tuote
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND status not in ('P','X')";
+					AND status not in ('P','X')"
+					AND aleryhma != '';
 		$result = pupe_query($query);
 
 		while ($tuote = mysql_fetch_assoc($result)) {
@@ -196,13 +204,6 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
 		}
 	}
 	else {
-		if ($request['valittu_asiakas']) {
-			$request['asiakas'] = hae_asiakas($request['valittu_asiakas']);
-		}
-		else {
-			$request['asiakas']['ryhma'] = $request['valittu_asiakasryhma'];
-		}
-		
 		$query = "	SELECT group_concat(parent.tunnus) tunnukset
 					FROM puun_alkio
 					JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
@@ -233,7 +234,8 @@ function hae_asiakasalet($request) {
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tuoteno IN ('".implode("','", $tuotenumerot)."')
 				AND status not in ('P','X')
-				ORDER BY tuote.aleryhma ASC";
+				AND aleryhma != ''
+				ORDER BY tuote.aleryhma ASC, tuote.nimitys ASC";
 	$result = pupe_query($query);
 
 	$tuotteet = array();
@@ -343,8 +345,6 @@ function generoi_custom_excel($tuotteet) {
 	foreach ($tuotteet as $tuote) {
 		if ($tuote['aleryhma']['ryhma'] != $edellinen_ryhma) {
 			$xls->write($rivi, $sarake, t('Ryhmä'), array('bold' => true));
-			$sarake++;
-			$xls->write($rivi, $sarake, $tuote['aleryhma']['ryhma'], array('bold' => true));
 			$sarake++;
 			$xls->write($rivi, $sarake, $tuote['aleryhma']['selite'], array('bold' => true));
 

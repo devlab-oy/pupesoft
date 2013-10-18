@@ -12,8 +12,8 @@ $rectparam["width"] 	= 0.3;
 $norm["height"] 		= 10;
 $norm["font"] 			= "Times-Roman";
 
-$norm_italic["height"] 		= 10;
-$norm_italic["font"]		= "Times-Italic";
+$norm_italic["height"] 	= 10;
+$norm_italic["font"]	= "Times-Italic";
 
 $pieni["height"] 		= 8;
 $pieni["font"] 			= "Times-Roman";
@@ -2498,7 +2498,12 @@ if (!function_exists("tulosta_lasku")) {
 		$rivigrouppaus = FALSE;
 		$yhteensamaara = 0;
 
+		$lasrivilask  = 0;
+		$lasrivimaara = mysql_num_rows($result);
+
 		while ($row = mysql_fetch_assoc($result)) {
+
+			$lasrivilask++;
 
 			// Rivin toimitusaika
 			if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K' and $row["keratty"] == "saldoton") {
@@ -2531,7 +2536,7 @@ if (!function_exists("tulosta_lasku")) {
 			else {
 				// Jos laskutyyppi on 18 (Normaali laskupohja (nimitykset rivitettynä))
 				// ja tilaus vaihtuu
-				if ($laskutyyppi == 18 and (strpos($row['kommentti'], "yhteensä") !== FALSE or strpos($row['kommentti'], t("yhteensä", $kieli)) !== FALSE or strpos($row['kommentti'], t("yhteensä", $asiakasrow["kieli"])) !== FALSE or strpos($row['kommentti'], t("yhteensä")) !== FALSE)) {
+				if ($laskutyyppi == 18 and ($lasrivilask == $lasrivimaara or strpos($row['kommentti'], "yhteensä") !== FALSE or strpos($row['kommentti'], t("yhteensä", $kieli)) !== FALSE or strpos($row['kommentti'], t("yhteensä", $asiakasrow["kieli"])) !== FALSE or strpos($row['kommentti'], t("yhteensä")) !== FALSE)) {
 
 					$row["kommentti"] = trim(t("Tilaus", $kieli).": ".$row['otunnus'])."\n".$row["kommentti"];
 

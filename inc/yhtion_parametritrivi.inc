@@ -2243,6 +2243,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "jt_manual") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? "selected" : "";
+
+		$ulos .= "<option value = ''>".t("Ei käytössä")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Myyntitilaukselle voidaan lisätä jälkitoimitusrivi johon ei JT automatiikat koske")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "tilausvahvistus_tallenna") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3190,6 +3203,7 @@
 		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan käytetään saapumiseen liitettyjen huolinta-/rahtilaskujen summaa")."</option>";
 		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan käytetään saapumiselle syötettyä kulusummaa/kuluprosenttia")."</option>";
 		$ulos .= "<option value = 'PX' {$sel["PX"]}>".t("Virallisen varastonarvon laskentaan käytetään kululaskujen summaa, mikäli kululaskut on syötetty, muuten kulusummaa/kuluprosenttia")."</option>";
+		$ulos .= "<option value = 'VS' {$sel["VS"]}>".t("Vaihto-omaisuuslaskua ei tarvitse liittää saapumiselle, virallisen varastonarvon laskentaan käytetään kulusummaa / kuluprosenttia.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3590,6 +3604,19 @@
 		$ulos .= "<option value = ''>".t("Ei ehdoteta seuraavaa vapaata tuotenumeroa tuotetta perustettaessa")."</option>";
 		$ulos .= "<option value = 'K' {$sel['K']}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa")."</option>";
 		$ulos .= "<option value = 'O' {$sel['O']}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa (vain ostotilauksella)")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'myyntitilausrivi_rekisterinumero') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel['K'] = $trow[$i] == 'K' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Myyntitilauksen tilausriveillä ei näytetä rekisterinumerovalintaa")."</option>";
+		$ulos .= "<option value = 'K' {$sel['K']}>".t("Myyntitilauksen tilausriveillä näytetään rekisterinumerovalinta")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

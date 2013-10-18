@@ -28,3 +28,10 @@
 	$mysqlaliasarray['VALMISTUSLINJA']['selite']       = "Linjanumero";
 	$mysqlaliasarray['VALMISTUSLINJA']['selitetark']   = "Linjan nimi";
 	$mysqlaliasarray['VALMISTUSLINJA']['selitetark_2'] = "Päiväkapasiteetti sekunneissa";
+
+	$mysqlaliasarray['TOIMVAHVISTUS']['selite']       	= "Toimitusvahvistuksen tiedoston nimi";
+	$mysqlaliasarray['TOIMVAHVISTUS']['selitetark']  	= "Toimitusvahvistuksen nimi";
+
+	$mysqlaliasarray['OSTOTIL_TILTYYP']['selite']       = "Ostotilauksen tilaustyyppi";
+	$mysqlaliasarray['OSTOTIL_TILTYYP']['selitetark']   = "Ostotilauksen tilaustyypin nimi";
+	$mysqlaliasarray['OSTOTIL_TILTYYP']['selitetark_2'] = "Automaattituloutuksen esto";

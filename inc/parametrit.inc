@@ -225,8 +225,14 @@ $quer_debug_array = array();
 require("salasanat.php");
 
 // haetaan jotain tarpeellisia funktioita mukaan..
-if (@include_once("inc/functions.inc"));
-elseif (@include_once("functions.inc"));
+if (@include_once("inc/functions.inc")) {
+	// Pupeasennuksen root polku
+	$pupe_root_polku = dirname(dirname(__FILE__));
+}
+elseif (@include_once("functions.inc")) {
+	// Pupeasennuksen root polku
+	$pupe_root_polku = dirname(__FILE__);
+}
 else exit;
 
 $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteytt‰. Se on pois p‰‰lt‰ tai k‰ytt‰j‰tietosi ovat virheelliset.");
@@ -236,8 +242,6 @@ mysql_set_charset("latin1");
 // Palvelin-muuttujassa pit‰‰ olla lopussa kauttaviiva
 $palvelin = rtrim($palvelin, "/")."/";
 
-// Pupeasennuksen root polku
-$pupe_root_polku = dirname(dirname(__FILE__));
 $pupesoft_url = parse_url($palvelin);
 
 // Otetaan tietoa t‰st‰ requestist‰

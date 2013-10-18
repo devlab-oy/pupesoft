@@ -74,26 +74,14 @@
 
 		if ($matee != '' and isset($AJA)) {
 
-			if (include('Spreadsheet/Excel/Writer.php')) {
+			include('inc/pupeExcel.inc');
 
-				//keksitään failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+			$worksheet 	 = new pupeExcel();
+			$format_bold = array("bold" => TRUE);
+			$excelrivi 	 = 0;
 
-				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-				$workbook->setVersion(8);
-				$worksheet = $workbook->addWorksheet('Sheet 1');
-
-				$format_bold = $workbook->addFormat();
-				$format_bold->setBold();
-
-				$excelrivi = 0;
-
-				$worksheet->writeString($excelrivi, 0, t("Myynti asiakkaittain"));
-
-				$excelrivi ++;
-			}
+			$worksheet->writeString($excelrivi, 0, t("Myynti asiakkaittain"));
+			$excelrivi ++;
 
 			$select = "lasku.liitostunnus, asiakas.piiri, tuote.aleryhma, max(lasku.ytunnus) ytunnus, max(lasku.nimi) nimi, max(lasku.nimitark) nimitark, ";
 			$group  = "lasku.liitostunnus, asiakas.piiri, tuote.aleryhma";
@@ -151,27 +139,25 @@
 				echo "<font class='error'>".t("Tallenna/avaa tulos excelissä")."!</font><br><br>";
 			}
 
-			if (isset($workbook)) {
-				$sarake = 0;
-				$worksheet->write($excelrivi, $sarake++, t("Ytunnus"), $format_bold);
-				$worksheet->write($excelrivi, $sarake++, t("Nimi"), $format_bold);
-				$worksheet->write($excelrivi, $sarake++, t("Nimitark"), $format_bold);
-				if ($summaa == '') $worksheet->write($excelrivi, $sarake++, t("Aleryhmä"), $format_bold);
+			$sarake = 0;
+			$worksheet->write($excelrivi, $sarake++, t("Ytunnus"), $format_bold);
+			$worksheet->write($excelrivi, $sarake++, t("Nimi"), $format_bold);
+			$worksheet->write($excelrivi, $sarake++, t("Nimitark"), $format_bold);
+			if ($summaa == '') $worksheet->write($excelrivi, $sarake++, t("Aleryhmä"), $format_bold);
 
-				if ($summaa == '') {
-					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						$worksheet->write($excelrivi, $sarake++, t("Alennus").$alepostfix, $format_bold);
-					}
+			if ($summaa == '') {
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$worksheet->write($excelrivi, $sarake++, t("Alennus").$alepostfix, $format_bold);
 				}
-
-				if ($summaa == '') $worksheet->write($excelrivi, $sarake++, t("Piiri"), $format_bold);
-				$worksheet->write($excelrivi, $sarake++, t("Määrä"), $format_bold);
-				$worksheet->write($excelrivi, $sarake++, t("Summa"), $format_bold);
-				$worksheet->write($excelrivi, $sarake++, t("Kate"), $format_bold);
-				$worksheet->write($excelrivi, $sarake++, t("Katepros"), $format_bold);
-
-				$excelrivi++;
 			}
+
+			if ($summaa == '') $worksheet->write($excelrivi, $sarake++, t("Piiri"), $format_bold);
+			$worksheet->write($excelrivi, $sarake++, t("Määrä"), $format_bold);
+			$worksheet->write($excelrivi, $sarake++, t("Summa"), $format_bold);
+			$worksheet->write($excelrivi, $sarake++, t("Kate"), $format_bold);
+			$worksheet->write($excelrivi, $sarake++, t("Katepros"), $format_bold);
+
+			$excelrivi++;
 
 			while ($lrow = mysql_fetch_array($result)) {
 				if ($summaa == '') {
@@ -241,46 +227,40 @@
 					echo "</tr>";
 				}
 
-				if (isset($workbook)) {
-					$sarake = 0;
-					$worksheet->writeString($excelrivi, $sarake++, $lrow["ytunnus"]);
-					$worksheet->write($excelrivi, $sarake++, $lrow["nimi"]);
-					$worksheet->write($excelrivi, $sarake++, $lrow["nimitark"]);
-					if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $lrow["aleryhma"]);
+				$sarake = 0;
+				$worksheet->writeString($excelrivi, $sarake++, $lrow["ytunnus"]);
+				$worksheet->write($excelrivi, $sarake++, $lrow["nimi"]);
+				$worksheet->write($excelrivi, $sarake++, $lrow["nimitark"]);
+				if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $lrow["aleryhma"]);
 
-					if ($summaa == '') {
-						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-							$worksheet->write($excelrivi, $sarake++, ${'ale'.$alepostfix});
-						}
+				if ($summaa == '') {
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						$worksheet->write($excelrivi, $sarake++, ${'ale'.$alepostfix});
 					}
-
-					if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $lrow["piiri"]);
-					$worksheet->write($excelrivi, $sarake++, $lrow["kpl"]);
-					$worksheet->write($excelrivi, $sarake++, $lrow["summa"]);
-					$worksheet->write($excelrivi, $sarake++, $lrow["kate"]);
-					$worksheet->write($excelrivi, $sarake++, $katepros);
-
-					$excelrivi++;
 				}
+
+				if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $lrow["piiri"]);
+				$worksheet->write($excelrivi, $sarake++, $lrow["kpl"]);
+				$worksheet->write($excelrivi, $sarake++, $lrow["summa"]);
+				$worksheet->write($excelrivi, $sarake++, $lrow["kate"]);
+				$worksheet->write($excelrivi, $sarake++, $katepros);
+
+				$excelrivi++;
 			}
 
 			if (mysql_num_rows($result) < 2000) echo "</table>";
 
-			if (isset($workbook)) {
-				// We need to explicitly close the workbook
-				$workbook->close();
+			$excelnimi = $worksheet->close();
 
-				echo "<br><br><table>";
-				echo "<tr><th>".t("Tallenna tulos").":</th>";
-				echo "<form method='post' class='multisubmit'>";
-				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='Myyntiasiakkaittain.xls'>";
-				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table><br>";
-			}
+			echo "<br><br><table>";
+			echo "<tr><th>".t("Tallenna tulos").":</th>";
+			echo "<form method='post' class='multisubmit'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Myyntiasiakkaittain.xlsx'>";
+			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+			echo "</table><br>";
 		}
 
-		require ("../inc/footer.inc");
+		require ("inc/footer.inc");
 	}
-?>

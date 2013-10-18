@@ -55,6 +55,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			$verkkotunnus 	   = $asiakasrow["verkkotunnus"];
 			$piiri 			   = $asiakasrow["piiri"];
 			$laskutyyppi	   = $asiakasrow["laskutyyppi"];
+			$lahetetyyppi 	   = pupesoft_lahetetyyppi(0, $asiakasrow['tunnus']);
 
 			$kohde  = "";
 			$eilahe = "";

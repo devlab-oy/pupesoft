@@ -17,7 +17,7 @@
 					where yhtio = '$kukarow[yhtio]'
 					AND komento != 'EDI'
 					ORDER BY kirjoitin";
-		$kires = mysql_query($query) or pupe_error($query);
+		$kires = pupe_query($query);
 
 		$ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
 
@@ -72,7 +72,7 @@
 					FROM maat
 					WHERE nimi != ''
 					ORDER BY koodi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 		$ulos = "<td><select name='$nimi'>";
 
 		$ulos .= "<option value = '' ></option>";
@@ -171,6 +171,27 @@
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "toimipaikka") {
+
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Valitse toimipaikka")."</option>";
+
+		$query = "SELECT * FROM yhtion_toimipaikat WHERE yhtio = '{$kukarow['yhtio']}' AND vat_numero = '' ORDER BY nimi";
+		$vresult = pupe_query($query);
+
+		while ($vrow = mysql_fetch_assoc($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow['tunnus']) {
+				$sel = "selected";
+			}
+
+			$ulos .= "<option value='{$vrow['tunnus']}' {$sel}>{$vrow['ovtlisa']} {$vrow['nimi']}</option>";
 		}
 
 		$ulos .= "</select></td>";

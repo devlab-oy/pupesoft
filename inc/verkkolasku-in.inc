@@ -1158,7 +1158,7 @@
 
 					$kirjattava_summa 		  = $omasumma;
 					$summa_varasto 			  = round($omasumma / (1 + ($vero / 100)), 2);
-					$summa_varasto_valuutassa = $summa_varasto;
+					$summa_varasto_valuutassa = round($omasumma / (1 + ($vero / 100)) / $vrow['kurssi'], 2);
 
 					if ($yhtiorow['ostolaskun_kulutilit'] != ''
 						and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')
@@ -1179,6 +1179,7 @@
 					}
 
 					$summa			  		= $kirjattava_summa;
+					$summa_valuutassa		= round($summa / $vrow['kurssi'], 2);
 					$totsumma 				= $kirjattava_summa;
 					$totsumma_valuutassa 	= $summa;
 					$kustp            		= $oletuskust;
@@ -1371,11 +1372,12 @@
 								}
 							}
 
-							$summa						 	 = round($summa * (1+($vero/100)),2);
-							$totsumma						+= $summa;
-							$totsumma_valuutassa			+= $summa_valuutassa;
-							$kukarow['yhtio']				 = $yhtio;
-							$kukarow['kuka']				 = 'verkkolas';
+							$summa					= round($summa * (1+($vero/100)),2);
+							$summa_valuutassa		= round($summa * (1+($vero/100)) / $vrow['kurssi'], 2);
+							$totsumma				+= $summa;
+							$totsumma_valuutassa	+= $summa_valuutassa;
+							$kukarow['yhtio']		 = $yhtio;
+							$kukarow['kuka']		 = 'verkkolas';
 
 							require ("inc/teetiliointi.inc");
 
@@ -1539,9 +1541,10 @@
 						foreach ($_array as $key => $value) {
 							if ($value == 0) continue;
 
-							$tili      = $yhtiorow[$key];
-							$summa     = round($value, 2);
-							$totsumma += $summa;
+							$tili      			= $yhtiorow[$key];
+							$summa     			= round($value, 2);
+							$summa_valuutassa	= round($value / $vrow['kurssi'], 2);
+							$totsumma 		   += $summa;
 
 							// Laitetaan kustannuspaikaksi/kohteeksi/projektiksi aina ensimmäisen tiliöintirivin tiedot.
 							// Jos menevät nollana, funktio osaa ottaa oletuksen tilin takaa.

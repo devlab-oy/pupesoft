@@ -55,18 +55,11 @@
 		$varaosavirhe .= "<font class='message'>".t("HUOM: Rivin määrä on pyöristetty täyteen ostoerään!")."<br></font>";
 	}
 
-	if ((float) $prow["hinta"] == 0 and (float) $trow['ostohinta'] == 0 and $riviok == 0 and $prow["var2"] != "OK") {
-		// $varaosavirhe .= t("HUOM: Tuotteelta puuttuu ostohinta")."!<br>";
-		// $riviok++;
-		// $tilausok++;
-		// $saako_hyvaksya++;
-	}
-
 	if ($trow["myyntihinta_maara"] != 0 and $prow["hinta"] != 0) {
 		$prow["hinta"] = round($prow["hinta"] * $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
 	}
 
-	if ((float) $prow["hinta"] != (float) $trow['ostohinta'] and ($prow["var"] == "" or $toiminto == 'kohdista') and $trow["toimittaja"] != "" and $riviok == 0) {
+	if ($oikeusostohintapaiv !== FALSE and (float) $prow["hinta"] != (float) $trow['ostohinta'] and ($prow["var"] == "" or $toiminto == 'kohdista') and $trow["toimittaja"] != "" and $riviok == 0) {
 
 		$paiv_hinta = (float) $paiv_hinta;
 
@@ -145,13 +138,10 @@
 				$varaosavirhe .= "<input type='hidden' name='kommentti' value = '$kommentti'>";
 			}
 
-			if (tarkista_oikeus("yllapito.php", "tuotteen_toimittajat", "check") !== FALSE) {
-
-				$varaosavirhe .= "	<font class='message'>".t("Päivitä tuotteen ostohinta").":<br> ".hintapyoristys($trow["ostohinta"])." $trow[valuutta] -> ".hintapyoristys($prow["hinta"])." $trow[valuutta]</font><br>
-									<input type='submit' name='JOPA' value='".t("Päivitä")."'>
-									<input type='submit' name='ALPA' value='".t("Älä päivitä")."'>
-									</form>";
-			}
+			$varaosavirhe .= "	<font class='message'>".t("Päivitä tuotteen ostohinta").":<br> ".hintapyoristys($trow["ostohinta"])." $trow[valuutta] -> ".hintapyoristys($prow["hinta"])." $trow[valuutta]</font><br>
+								<input type='submit' name='JOPA' value='".t("Päivitä")."'>
+								<input type='submit' name='ALPA' value='".t("Älä päivitä")."'>
+								</form>";
 		}
 	}
 

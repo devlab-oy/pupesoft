@@ -281,6 +281,13 @@ if ($tee == 'TI' or $tee == "Y") {
 		$toimaika = $toimvva."-".$toimkka."-".$toimppa;
 	}
 
+	$query = "	SELECT myyntihinta_maara
+				FROM tuote
+				WHERE yhtio  = '$kukarow[yhtio]'
+				AND  tuoteno = '$prow[tuoteno]'";
+	$result = pupe_query($query);
+	$trow = mysql_fetch_assoc($result);
+
 	if ($hinta == "") {
 		$query = "	SELECT *
 					FROM tuotteen_toimittajat
@@ -296,9 +303,13 @@ if ($tee == 'TI' or $tee == "Y") {
 		$prow["hinta"] = $hinta;
 	}
 
+	$prow["hinta"] = round($prow["hinta"] / $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
+
 	$multi = "";
 	require("../inc/tuotehaku.inc");
-	$prow["tuoteno"] = $tuoteno;
+
+	$prow["tuoteno"]      = $tuoteno;
+	$oikeusostohintapaiv  = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat", "check");
 
 	require('tarkistarivi_ostotilaus.inc');
 

@@ -1225,6 +1225,8 @@
 				$divnolla			  = 0;
 				$erikoisale_summa	  = 0;
 				$myyntitilaus_lopetus = "{$palvelin2}tilauskasittely/tilaus_osto.php////tee=AKTIVOI//orig_tila={$laskurow['tila']}//orig_alatila={$laskurow['alatila']}//tilausnumero={$tilausnumero}//from=tilaus_myynti";
+				$oikeusostohintapaiv  = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat", "check");
+
 
 				while ($prow = mysql_fetch_assoc($presult)) {
 					$divnolla++;

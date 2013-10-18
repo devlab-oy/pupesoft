@@ -112,10 +112,10 @@
 	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
 	// Ehdotetaan oletuksena ehdotusta ensikuun valmistuksille sek‰ siit‰ plus 3 kk
-	if (!isset($ppa1)) $ppa1 = date("d", mktime(0, 0, 0, date("d"), 1, date("Y")));
+	if (!isset($ppa1)) $ppa1 = date("d", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
 	if (!isset($kka1)) $kka1 = date("m", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
 	if (!isset($vva1)) $vva1 = date("Y", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
-	if (!isset($ppl1)) $ppl1 = date("d", mktime(0, 0, 0, date("d"), 1, date("Y")));
+	if (!isset($ppl1)) $ppl1 = date("d", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 	if (!isset($kkl1)) $kkl1 = date("m", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 	if (!isset($vvl1)) $vvl1 = date("Y", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 
@@ -134,8 +134,8 @@
 		$tee = "";
 	}
 	else {
-		$nykyinen_loppu  = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, $ppl1, $vvl1));
-		$edellinen_loppu = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, $ppl1, $vvl1-1));
+		$nykyinen_loppu  = date("Y-m-d", mktime(0, 0, 0, $kkl1, $ppl1, $vvl1));
+		$edellinen_loppu = date("Y-m-d", mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
 	}
 
 	if ($nykyinen_alku > $nykyinen_loppu) {
@@ -160,7 +160,7 @@
 		global $kukarow, $edellinen_alku, $edellinen_loppu, $nykyinen_alku, $nykyinen_loppu, $ryhmanimet;
 
 		// Tehd‰‰n kaudet p‰iv‰m‰‰rist‰
-		$alku_kausi = substr(str_replace("-", "", $nykyinen_alku), 0, 6);
+		$alku_kausi  = substr(str_replace("-", "", $nykyinen_alku), 0, 6);
 		$loppu_kausi = substr(str_replace("-", "", $nykyinen_loppu), 0, 6);
 
 		// Haetaan tuotteen ABC luokka
@@ -240,28 +240,57 @@
 		}
 
 		// Haetaan budjetoitu myynti
-		$query = "	SELECT ifnull(sum(budjetti_tuote.maara), 0) maara
+		$query = "	SELECT budjetti_tuote.kausi kausi,
+					ifnull(sum(budjetti_tuote.maara), 0) budjetti,
+					DAY(LAST_DAY(concat(budjetti_tuote.kausi, '01'))) paivia_kuussa,
+					ifnull(sum(budjetti_tuote.maara), 0) / DAY(LAST_DAY(concat(budjetti_tuote.kausi, '01'))) paivabudjetti
 					FROM budjetti_tuote
 					WHERE budjetti_tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND budjetti_tuote.kausi >= '{$alku_kausi}'
 					AND budjetti_tuote.kausi <= '{$loppu_kausi}'
-					AND budjetti_tuote.tuoteno = '{$tuoteno}'";
+					AND budjetti_tuote.tuoteno = '{$tuoteno}'
+					GROUP BY 1";
 		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);
-		$budjetoitu_myynti = $row['maara'];
 
 		// Jos ei ole budjettia, otetaan edellisen kauden myynti ja k‰ytet‰‰n sit‰
-		if ($budjetoitu_myynti == 0) {
-			$query = "	SELECT ifnull(sum(tilausrivi.kpl), 0) myynti_ed
+		if (mysql_num_rows($result) == 0) {
+			// Lis‰t‰‰n kauteen sata, ett‰ saadaan vuosiluvut t‰sm‰‰m‰‰n budjetin kanssa (helpottaa koodia alla)
+			$query = "	SELECT DATE_FORMAT(tilausrivi.laskutettuaika, '%Y%m') + 100 kausi,
+						ifnull(sum(tilausrivi.kpl), 0) budjetti,
+						DAY(LAST_DAY(tilausrivi.laskutettuaika)) paivia_kuussa,
+						ifnull(sum(tilausrivi.kpl), 0) / DAY(LAST_DAY(tilausrivi.laskutettuaika)) paivabudjetti
 						FROM tilausrivi
 						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 						AND tilausrivi.tyyppi = 'L'
 						AND tilausrivi.tuoteno = '{$tuoteno}'
 						AND tilausrivi.laskutettuaika >= '{$edellinen_alku}'
-						AND tilausrivi.laskutettuaika <= '{$edellinen_loppu}'";
+						AND tilausrivi.laskutettuaika <= '{$edellinen_loppu}'
+						GROUP BY 1";
 			$result = pupe_query($query);
-			$row = mysql_fetch_assoc($result);
-			$budjetoitu_myynti = $row["myynti_ed"];
+		}
+
+		// Lasketaan budjetoitu myynti
+		$budjetoitu_myynti = 0;
+
+		// Alku- ja loppukauden p‰iv‰
+		$alku_kausi_pp  = substr(str_replace("-", "", $nykyinen_alku), 6, 2);
+		$loppu_kausi_pp = substr(str_replace("-", "", $nykyinen_loppu), 6, 2);
+
+		// Loopataan kaudet l‰pi
+		while ($row = mysql_fetch_assoc($result)) {
+
+			// Montako p‰iv‰‰ t‰lt‰ kaudelta on otettu raporttiin
+			$paivien_maara = $row['paivia_kuussa'];
+
+			if ($row['kausi'] == $alku_kausi) {
+				$paivien_maara -= $alku_kausi_pp - 1;
+			}
+
+			if ($row['kausi'] == $loppu_kausi) {
+				$paivien_maara -= $row['paivia_kuussa'] - $loppu_kausi_pp;
+			}
+
+			$budjetoitu_myynti += $paivien_maara * $row['paivabudjetti'];
 		}
 
 		// Lasketaan reaalisaldo
@@ -610,6 +639,7 @@
 						JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
 							AND tuote.tuoteno = tilausrivi.tuoteno
 							AND tuote.ei_saldoa = ''
+							AND tuote.ostoehdotus != 'E'
 							{$tuote_where})
 						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 						AND tilausrivi.tyyppi IN ('L','G')
@@ -636,14 +666,14 @@
 							AND abc_aputaulu.tyyppi = '{$abcrajaustapa}')";
 		}
 
-		// Haetaan tehdyt valmistukset
+		// Haetaan valmistukset kannasta, katotaan paljon niiss‰ on viel‰ valmistettavaa
 		$query = "	SELECT
 					lasku.kohde valmistuslinja,
 					tilausrivi.tuoteno,
 					tilausrivi.osasto,
 					tilausrivi.try,
-					tilausrivi.kpl + tilausrivi.varattu maara,
-					(tilausrivi.kpl + tilausrivi.varattu) * tuote.valmistusaika_sekunneissa valmistusaika,
+					tilausrivi.varattu maara,
+					tilausrivi.varattu * tuote.valmistusaika_sekunneissa valmistusaika,
 					DATE_FORMAT(lasku.luontiaika, GET_FORMAT(DATE, 'EUR')) pvm,
 					lasku.alatila tila
 					FROM lasku
@@ -652,11 +682,17 @@
 						AND tilausrivi.tyyppi = 'W'
 						AND tilausrivi.var != 'P')
 					JOIN tuote ON (tuote.yhtio = lasku.yhtio
-						AND tuote.tuoteno = tilausrivi.tuoteno)
+						AND tuote.tuoteno = tilausrivi.tuoteno
+						AND tuote.ostoehdotus != 'E'
+						AND tuote.ei_saldoa = ''
+						{$tuote_where})
+					{$toimittaja_join}
+					{$abc_join}
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila = 'V'
 					AND lasku.toimaika >= '{$nykyinen_alku}'
 					AND lasku.toimaika <= '{$nykyinen_loppu}'
+					{$lisa}
 					ORDER BY lasku.kohde, lasku.toimaika, tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno";
 		$res = pupe_query($query);
 
@@ -669,6 +705,7 @@
 				$valmistettu_yhteensa = 0;
 
 				echo t("Valmistukset aikav‰lill‰").": $nykyinen_alku - $nykyinen_loppu <br>\n";
+				echo t("Edellinen vastaava aikav‰li").": $edellinen_alku - $edellinen_loppu <br>\n";
 				echo t("Valmistuksia")." ".mysql_num_rows($res)." ".t("kpl").".<br>\n";
 
 				echo "<table>";
@@ -767,12 +804,13 @@
 					{$abc_join}
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.ei_saldoa = ''
+					AND tuote.ostoehdotus != 'E'
 					{$tuote_where}
 					GROUP BY 1, 2, 3";
 		$res = pupe_query($query);
 
 		// Jos yhteens‰n‰kym‰, ei ehcota mit‰‰n
-		if ($ehdotetut_valmistukset != 'valmistuslinjoittain') {	
+		if ($ehdotetut_valmistukset != 'valmistuslinjoittain') {
 			echo "<br/><br/><font class='head'>".t("Ehdotetut valmistukset")."</font><br/><hr>";
 		}
 
@@ -804,7 +842,10 @@
 						tuote.valmistusaika_sekunneissa,
 						tuote.valmistuslinja
 						FROM tuoteperhe
-						JOIN tuote USING (yhtio, tuoteno)
+						JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
+							AND tuote.tuoteno = tuoteperhe.tuoteno
+							AND tuote.ei_saldoa = ''
+							AND tuote.ostoehdotus != 'E')
 						WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
 						AND tuoteperhe.isatuoteno = '{$row["tuoteno"]}'
 						AND tuoteperhe.tyyppi = 'S'";
@@ -1212,7 +1253,7 @@
 				echo "<td style='text-align:right;'>{$luvut['valmistuksessa']}</td>";
 				echo "<td style='text-align:right;'>{$luvut['valmistusmaara']}</td>";
 				echo "<td style='text-align:right;'>{$luvut['yhteensa_kpl']}</td>";
-				echo "<td style='text-align:right;'>{$luvut['valmistusaika_sekunneissa']}</td>";
+				echo "<td style='text-align:right;'>".round($luvut['valmistusaika_sekunneissa'])."</td>";
 				echo "</tr>";
 
 				// Yhteens‰luvut
@@ -1227,7 +1268,7 @@
 			echo "<td class='tumma' style='text-align:right;'>{$valmistuksessa}</td>";
 			echo "<td class='tumma' style='text-align:right;'>{$valmistusmaara}</td>";
 			echo "<td class='tumma' style='text-align:right;'>{$yhteensa_kpl}</td>";
-			echo "<td class='tumma' style='text-align:right;'>{$valmistusaika}</td>";
+			echo "<td class='tumma' style='text-align:right;'>".round($valmistusaika)."</td>";
 			echo "</tr>";
 
 			echo "</tbody>";

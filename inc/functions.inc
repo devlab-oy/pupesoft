@@ -18085,10 +18085,11 @@ if (!function_exists("pupesoft_lahetetyyppi")) {
 
 		if ((int) $asiakastunnus != 0) {
 			# Jos tilauksella ei ollut lähetetyyppiä, haetaan asiakkaan oletuslähettyyppi
-			$query = "	SELECT lahetetyyppi
+			$query = "	SELECT asiakas.lahetetyyppi
 						FROM asiakas
-						WHERE tunnus = '$asiakastunnus'
-						AND yhtio = '$kukarow[yhtio]'";
+						JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.selite = asiakas.lahetetyyppi AND avainsana.laji = 'LAHETETYYPPI')
+						WHERE asiakas.tunnus = '$asiakastunnus'
+						AND asiakas.yhtio    = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {

@@ -24,7 +24,7 @@
 		$toimires = pupe_query($query);
 		$toimirow = mysql_fetch_array($toimires);
 
-		if (!preg_match("/(excel|wabco|xml)/", $toimirow['edi_kuvaus']) and
+		if (!preg_match("/(excel|wabco|xml|sendorder)/", $toimirow['edi_kuvaus']) and
 				($toimirow['edi_palvelin'] == '' or $toimirow['edi_kayttaja'] == '' or $toimirow['edi_salasana'] == '' or $toimirow['edi_kuvaus'] == '' or $toimirow['edi_polku'] == '') and
 				($toimirow['edi_palvelin'] != "localhost" or $toimirow["edi_polku"] == '')) {
 			$tulosta_ostotilaus_ulos .= "<font class='error'>".t("Edi-tilauksen lähettämiseen tarvittavia tietoja ei ole syötetty")."! ".t("Tarkista toimittajan %s tiedot", "", trim("{$toimirow['nimi']} {$toimirow['nimitark']}"))."!</font><br />";
@@ -44,7 +44,15 @@
 				$ftppath_futur = $toimirow['edi_polku'];
 			}
 
-			require($toimirow['edi_kuvaus']);
+			if ($toimirow['edi_kuvaus'] == 'sendorder_out_futur') {
+				$luo = 'sendorder';
+
+				require("inc/sahkoinen_tilausliitanta.inc");
+			}
+			else {
+				require($toimirow['edi_kuvaus']);
+			}
+
 			$tee = '';
 		}
 	}

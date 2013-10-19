@@ -104,7 +104,7 @@ while ($rekisterinumero_row = mysql_fetch_assoc($rekisterinumero_result)) {
 	if (!stristr($kommentti, $rekisterinumero_row['rekisterinumero'])) {
 		$kommentti .= $rekisterinumero_row['rekisterinumero'];
 	}
-	
+
 	$query = "	UPDATE tilausrivi
 				SET kommentti = '{$kommentti}'
 				WHERE yhtio = '{$kukarow['yhtio']}'
@@ -805,7 +805,7 @@ else {
 		elseif (($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') and $kateisohitus == "") {
 
 			// vaikka laitetaan sisäiseen laskutukseen tai ei haluttu lähetettä, mutta annetaan mahdollisuus lähettää tilausvahvistus omaan sähköpostiin
-			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
+			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE or (trim($laskurow['tilausvahvistus']) != "" or $yhtiorow['lahetteen_tulostustapa'] == "I")) {
 				$params_tilausvahvistus = array(
 				'tee'						=> $tee,
 				'toim'						=> $toim,

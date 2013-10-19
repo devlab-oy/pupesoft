@@ -139,7 +139,7 @@
 
 		$ulos  = "<td><select name='{$nimi}'>";
 		$ulos .= "<option value=''>".t("Sähköisen laskun sisäänluvun yhteydessä ei oletuksena tulouteta tuotteita varastoon")."</option>";
-		$ulos .= "<option value='K'{$sel["K"]}>".t("Tuotteet tuloutetaan varastoon automaattisesti sähköisen laskun sisäänluvun yhteydessä")."</option>";
+		$ulos .= "<option value='K'{$sel}>".t("Tuotteet tuloutetaan varastoon automaattisesti sähköisen laskun sisäänluvun yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

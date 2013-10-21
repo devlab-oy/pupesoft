@@ -820,7 +820,7 @@ else {
 			}
 
 			// Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina
-			if ($yhtiorow['lahetteen_tulostustapa'] == "I" and $toim != "REKLAMAATIO") {
+			if ($yhtiorow['lahetteen_tulostustapa'] == "I") {
 
 				$query = "	UPDATE lasku
 							SET tila = 'N',
@@ -829,9 +829,11 @@ else {
 							AND tunnus = '{$laskurow['tunnus']}'";
 				pupe_query($query);
 
-				// Tulostetaan keräyslista
-				$tilausnumeroita = $laskurow["tunnus"];
-				require("tilaus-valmis-tulostus.inc");
+				if ($toim != "REKLAMAATIO") {
+					// Tulostetaan keräyslista
+					$tilausnumeroita = $laskurow["tunnus"];
+					require("tilaus-valmis-tulostus.inc");
+				}
 
 				// Tulostetaan lähete
 				$params = array(

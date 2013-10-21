@@ -1847,6 +1847,11 @@ if (!function_exists('rivi_lahete')) {
 			}
 			elseif ($base_lahetetyyppi == "tulosta_lahete_viivakoodi.inc" or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc") {
 
+				// Verollinen lähetetyyppi, lisätään alvit hintaan
+				if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc' and strpos($lahetetyyppi, "_verollinen") !== FALSE) {
+					$return['row']['hinta']	= hintapyoristys($row['hinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+				}
+
 				// tulosta_lahete_viivakoodi.inc
 				$return = rivi_viivakoodi_lahete($return);
 			}
@@ -3150,12 +3155,6 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+1, 185, 70, 460, $row["nimitys"], $thispage, $norm);
 
 			if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc') {
-
-				// Verollinen lähetetyyppi, lisätään alvit rivihintoihin
-				if (strpos($lahetetyyppi, "_verollinen") !== FALSE) {
-					$row["hinta"] = hintapyoristys($row["hinta"] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
-				}
-
 				$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
 				$pdf->draw_text(475-$oikpos, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
 			}

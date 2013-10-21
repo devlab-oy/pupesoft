@@ -18,7 +18,7 @@
 		$tasoresu = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>\n";
-		$ulos .= "<option value = ''>Ei tasoa</option>\n";
+		$ulos .= "<option value = ''>".t("Ei tasoa")."</option>\n";
 
 		while ($tasorow = mysql_fetch_array($tasoresu)) {
 			$tasoapu = $tasorow["taso"];
@@ -38,7 +38,7 @@
 		$tasoresu = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>\n";
-		$ulos .= "<option value = ''>Ei tasoa</option>\n";
+		$ulos .= "<option value = ''>".t("Ei tasoa")."</option>\n";
 
 		while ($tasorow = mysql_fetch_array($tasoresu)) {
 			$tasoapu = $tasorow["taso"];
@@ -58,7 +58,7 @@
 		$tasoresu = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>\n";
-		$ulos .= "<option value = ''>Ei tasoa</option>\n";
+		$ulos .= "<option value = ''>".t("Ei tasoa")."</option>\n";
 
 		while ($tasorow = mysql_fetch_array($tasoresu)) {
 			$tasoapu = $tasorow["taso"];
@@ -78,7 +78,7 @@
 		$tasoresu = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>\n";
-		$ulos .= "<option value = ''>Ei tasoa</option>\n";
+		$ulos .= "<option value = ''>".t("Ei tasoa")."</option>\n";
 
 		while ($tasorow = mysql_fetch_array($tasoresu)) {
 			$tasoapu = $tasorow["taso"];

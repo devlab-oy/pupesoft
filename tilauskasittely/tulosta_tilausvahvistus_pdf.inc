@@ -47,6 +47,8 @@
 	#$lahetetyyppi = "tulosta_lahete_brutto.inc";
 	#$lahetetyyppi = "tulosta_lahete_eialeja.inc";
 	#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
+	#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
+	#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
 	#$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
 	#$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
 	#$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
@@ -139,6 +141,7 @@
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.var != 'O'
 					and $wherelisa
 					$tyyppilisa
 					and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
@@ -160,6 +163,7 @@
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.var != 'O'
 					and $wherelisa
 					$tyyppilisa
 					and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'

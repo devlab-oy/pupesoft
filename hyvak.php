@@ -19,7 +19,6 @@
 	if (!isset($nayta)) 		   $nayta = "";
 	if (!isset($iframe)) 		   $iframe = "";
 	if (!isset($iframe_id)) 	   $iframe_id = "";
-	if (!isset($naytalisa)) 	   $naytalisa = "";
 	if (!isset($ok)) 			   $ok = "";
 	if (!isset($toimittajaid)) 	   $toimittajaid = "";
 	if (!isset($livesearch_tee))   $livesearch_tee = "";
@@ -988,7 +987,7 @@
 			if ($laskurow["kapvm"] != "0000-00-00") {
 				echo "<br>".tv1dateconv($laskurow["kapvm"]);
 				echo " ({$laskurow["kasumma"]} {$laskurow["valkoodi"]})";
-			} 
+			}
 
 			echo "</td>";
 		}
@@ -1374,40 +1373,6 @@
 						<input type='hidden' name='tunnus' value='$tunnus'>
 						<input type='Submit' value='".t("Palauta lasku edelliselle hyväksyjälle")."'>
 						</form><br>";
-			}
-
-			// Näytetään alv-erittely, jos on useita kantoja.
-			if ($naytalisa != '') {
-				$query = "	SELECT vero, sum(summa) veroton, round(sum(summa*vero/100),2) 'veron määrä', round(sum(summa*(1+vero/100)),2) verollinen from tiliointi
-							WHERE ltunnus = '$tunnus'
-							and yhtio = '$kukarow[yhtio]'
-							and korjattu = ''
-							and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
-							GROUP BY 1";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) > 1) {
-
-					echo "<br><table><tr>";
-
-					for ($i = 0; $i < mysql_num_fields($result); $i++) {
-						echo "<th>" . t(mysql_field_name($result,$i))."</th>";
-					}
-
-					echo "</tr>";
-
-					while ($tiliointirow = mysql_fetch_assoc($result)) {
-
-						echo "<tr>";
-
-						for ($i=0; $i<mysql_num_fields($result); $i++) {
-							echo "<td>".$tiliointirow[mysql_field_name($result,$i)]."</td>";
-						}
-
-						echo "</tr>";
-					}
-					echo "</table>";
-				}
 			}
 		}
 

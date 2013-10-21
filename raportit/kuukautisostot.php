@@ -4,7 +4,8 @@
 		if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
-
+	
+	ini_set("memory_limit", "5G");
 	ini_set('zlib.output_compression', 0);
 
 	require("../inc/parametrit.inc");
@@ -916,12 +917,12 @@
 
 				//toimittajatiedot
 				if ($toimittajaid == '') {
-					$query = "	SELECT group_concat(tuotteen_toimittajat.toimittaja order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
-								group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '/') osto_era,
-								group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
-								group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
-								group_concat(distinct tuotteen_toimittajat.ostohinta order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
-								group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin
+					$query = "	SELECT group_concat(tuotteen_toimittajat.toimittaja order by if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus separator '/') toimittaja,
+								group_concat(distinct tuotteen_toimittajat.osto_era order by if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus separator '/') osto_era,
+								group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
+								group_concat(distinct tuotteen_toimittajat.toim_nimitys order by if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
+								group_concat(format(tuotteen_toimittajat.ostohinta * (1 - (tuotteen_toimittajat.alennus / 100)), 2) order by if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus separator '/') ostohinta,
+								group_concat(distinct tuotteen_toimittajat.tuotekerroin order by if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus separator '/') tuotekerroin
 								FROM tuotteen_toimittajat
 								WHERE yhtio = '$row[yhtio]'
 								and tuoteno = '$row[tuoteno]'";
@@ -1373,7 +1374,7 @@
 					if ($valitut["SARAKE19"] != '') {
 						$rivi .= str_replace(".",",",$row['ostohinta'])."\t";
 
-						$worksheet->writeNumber($excelrivi, $excelsarake, $row["ostohinta"]);
+						$worksheet->writeString($excelrivi, $excelsarake, $row["ostohinta"]);
 						$excelsarake++;
 					}
 
@@ -1838,7 +1839,10 @@
 										'ytunnus' => $tuotteen_toimittaja['ytunnus'],
 									);
 
-									list($ostohinta_temp, , ,) = alehinta_osto($laskurow_temp, $trow, 1, '', '', '');
+									list($ostohinta_temp, $netto, $alennus,) = alehinta_osto($laskurow_temp, $trow, 1, '', '', '');
+									if (empty($netto)) {
+										$ostohinta_temp = $ostohinta_temp * generoi_alekentta_php($alennus, 'O', 'kerto', 'EI');
+									}
 									$ostohinta .= sprintf('%.2f', $ostohinta_temp) . ' / ';
 									$tuotteen_toimittajat_string .= $tuotteen_toimittaja['toimittajan_nimi'] . ' / ';
 								}
@@ -2836,7 +2840,7 @@
 					sum(if(tyyppi = 'O', varattu, 0)) tilattu,
 					sum(if((tyyppi = 'O' and kpl = 0 and varattu != 0 and uusiotunnus != 0), varattu, 0)) saapuneet,
 					sum(if(tyyppi = 'E', varattu, 0)) ennakot, # toimittamattomat ennakot
-					sum(if(tyyppi in ('L','V') and var not in ('P','J','S'), varattu, 0)) ennpois,
+					sum(if(tyyppi in ('L','V') and var not in ('P','J','O','S'), varattu, 0)) ennpois,
 					sum(if(tyyppi in ('L','G') and var in ('J','S'), jt $lisavarattu, 0)) jt
 					$varastolisa
 					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)

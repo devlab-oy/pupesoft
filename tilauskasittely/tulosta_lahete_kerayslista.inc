@@ -122,7 +122,7 @@ if (!function_exists('alku_kerayslista')) {
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus IN ($tilausnumeroita)";
-				$chk_res = mysql_query($query) or pupe_error($query);
+				$chk_res = pupe_query($query);
 				$chk_row = mysql_fetch_assoc($chk_res);
 
 				if ($chk_row["asiakkaita"] > 1) {
@@ -159,7 +159,7 @@ if (!function_exists('alku_kerayslista')) {
 						FROM maksuehto
 						WHERE yhtio='$kukarow[yhtio]'
 						AND tunnus='$laskurow[maksuehto]'";
-			$masresult = mysql_query($query) or pupe_error($query);
+			$masresult = pupe_query($query);
 			$masrow = mysql_fetch_assoc($masresult);
 
 			//maksuehto tekstinä
@@ -172,7 +172,7 @@ if (!function_exists('alku_kerayslista')) {
 				$pdf->draw_text(310,815, t("Siirtolista", $kieli), 		$thispage, $iso);
 			}
 			elseif ($tyyppi == "REKLAMAATIO") {
-				$pdf->draw_text(310,815, t("Reklamaatio/Purkulista", $kieli), 		$thispage, $iso);
+				$pdf->draw_text(240,815, t("Reklamaatio/Purkulista", $kieli), 		$thispage, $iso);
 			}
 			elseif ($tyyppi == "MYYNTITILI") {
 				$pdf->draw_text(310,815, t("Myyntitili", $kieli), 		$thispage, $iso);
@@ -288,7 +288,7 @@ if (!function_exists('alku_kerayslista')) {
 							FROM kuka
 							WHERE tunnus = '$laskurow[myyja]'
 							AND yhtio    = '$kukarow[yhtio]'";
-				$myyresult = mysql_query($query) or pupe_error($query);
+				$myyresult = pupe_query($query);
 				$myyrow = mysql_fetch_assoc($myyresult);
 
 				$pdf->draw_text(310, 719, $myyrow["nimi"], 										$thispage, $norm);
@@ -333,7 +333,7 @@ if (!function_exists('alku_kerayslista')) {
 				$query  = "	SELECT nimi
 							from kuka
 							where kuka='$laskurow[laatija]' and yhtio='$kukarow[yhtio]'";
-				$laaresult = mysql_query($query) or pupe_error($query);
+				$laaresult = pupe_query($query);
 				$laarow = mysql_fetch_assoc($laaresult);
 
 				$pdf->draw_text(310, 645, t("Laatija", $kieli), $thispage, $pieni);
@@ -352,7 +352,7 @@ if (!function_exists('alku_kerayslista')) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus = '$laskurow[pakkaamo]'
 							LIMIT 1";
-				$pakkaamo_fetch_res = mysql_query($query) or pupe_error($query);
+				$pakkaamo_fetch_res = pupe_query($query);
 
 				if (mysql_num_rows($pakkaamo_fetch_res) == 1) {
 					$pakkaamo_fetch_row = mysql_fetch_assoc($pakkaamo_fetch_res);
@@ -410,6 +410,7 @@ if (!function_exists('alku_kerayslista')) {
 							JOIN tilausrivin_lisatiedot as tlt2 USE INDEX (tilausrivitunnus) ON (tlt2.yhtio = tilausrivi.yhtio AND tlt2.tilausrivitunnus = tilausrivi.tunnus)
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus IN ($tilausnumeroita)
+							and tilausrivi.var != 'O'
 							AND tilausrivi.tyyppi != 'D'";
 				$query_result = pupe_query($query);
 				$isa_tilaus = mysql_fetch_assoc($query_result);
@@ -420,6 +421,7 @@ if (!function_exists('alku_kerayslista')) {
 								FROM tilausrivin_lisatiedot as tlt2
 								LEFT JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
 								WHERE tlt2.yhtio = '{$kukarow['yhtio']}'
+								and tilausrivi.var != 'O'
 								AND tlt2.vanha_otunnus IN ({$isa_tilaus['alkuperaiset_tilaukset']})
 								GROUP BY tlt2.vanha_otunnus
 								ORDER BY toimituksia";
@@ -775,7 +777,7 @@ if (!function_exists('rivi_kerayslista')) {
 								FROM lasku
 								WHERE yhtio	= '$kukarow[yhtio]'
 								and tunnus	= '$row[otunnus]'";
-					$vtunres = mysql_query($query) or pupe_error($query);
+					$vtunres = pupe_query($query);
 					$vtunrow = mysql_fetch_assoc($vtunres);
 
 					if ($vtunrow["vanhatunnus"] != 0) {
@@ -783,7 +785,7 @@ if (!function_exists('rivi_kerayslista')) {
 									FROM lasku use index (yhtio_vanhatunnus)
 									WHERE yhtio		= '$kukarow[yhtio]'
 									and vanhatunnus = '$vtunrow[vanhatunnus]'";
-						$perheresult = mysql_query($query) or pupe_error($query);
+						$perheresult = pupe_query($query);
 						$numrows = mysql_num_rows($perheresult);
 					}
 
@@ -792,7 +794,7 @@ if (!function_exists('rivi_kerayslista')) {
 									FROM lasku use index (PRIMARY)
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tunnus  = '$row[otunnus]'";
-						$perheresult = mysql_query($query) or pupe_error($query);
+						$perheresult = pupe_query($query);
 					}
 
 					if (mysql_num_rows($perheresult) > 0) {
@@ -804,9 +806,10 @@ if (!function_exists('rivi_kerayslista')) {
 									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.otunnus in ($perherow[tunnukset])
 									AND tilausrivi.tyyppi != 'D'
+									and tilausrivi.var != 'O'
 									and tilausrivi.perheid = '$row[perheid]'
 									ORDER BY tilausrivi.tunnus";
-						$perheresult = mysql_query($query) or pupe_error($query);
+						$perheresult = pupe_query($query);
 
 						if (mysql_num_rows($perheresult) > 1) {
 							$perherow = mysql_fetch_assoc($perheresult);
@@ -876,7 +879,7 @@ if (!function_exists('rivi_kerayslista')) {
 							LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno
 							WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.tuoteno = '$row[tuoteno]'
 							GROUP BY tuote.tuoteno";
-				$tresult = mysql_query($query) or pupe_error($query);
+				$tresult = pupe_query($query);
 				$trow	 = mysql_fetch_assoc($tresult);
 
 				// lisätään tuotteen takaata kommenni kerääjälle, tämä tulostuu vain keräyslistaan ja purkulistaan.
@@ -884,12 +887,25 @@ if (!function_exists('rivi_kerayslista')) {
 					$row['kommentti'] .= "\n".$trow['kerayskommentti'];
 				}
 
+				// jos rekkulalla on suoraan toimittajalle palautettvia rivejä
+				if ($row['asiakkaan_positio'] > 0) {
+					
+					$query = "	SELECT nimi
+								FROM asiakas
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$row['asiakkaan_positio']}'";
+					$asiakas_check_res = pupe_query($query);
+					$asiakas_check_row	 = mysql_fetch_assoc($asiakas_check_res);
+					
+					$row['kommentti'] .= "\n".t("Palutetaan toimittajalle").": ".$asiakas_check_row['nimi'];
+				}
+
 				//varaston sisäisen siirron kohdetuotepaikka, tsekataan onko tietoja ja onko kyseessä varmasti varaston sisäinen siirto. Jos, laitetaan siirtolistalle kohdetuotepaikasta infoa.
 				$query = "	SELECT kohde_hyllyalue, kohde_hyllynro, kohde_hyllyvali, kohde_hyllytaso
 							FROM tilausrivin_lisatiedot as tlt2
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tilausrivitunnus = '$row[tunnus]'";
-				$kohderesult = mysql_query($query) or pupe_error($query);
+				$kohderesult = pupe_query($query);
 				$kohderow	 = mysql_fetch_assoc($kohderesult);
 				$varastopaikkakohde = '';
 
@@ -949,7 +965,7 @@ if (!function_exists('rivi_kerayslista')) {
 									and tuote.tuoteno = '$row[tuoteno]'
 									ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 					}
-					$sresult = mysql_query($query) or pupe_error($query);
+					$sresult = pupe_query($query);
 
 					if (mysql_num_rows($sresult) > 0) {
 						while ($saldorow = mysql_fetch_assoc ($sresult)) {
@@ -1077,7 +1093,7 @@ if (!function_exists('rivi_kerayslista')) {
 								and $sarjanutunnus='$row[tunnus]'
 								and sarjanumero != ''
 								ORDER BY sarjanumero";
-					$sarjares = mysql_query($query) or pupe_error($query);
+					$sarjares = pupe_query($query);
 
 					if (mysql_num_rows($sarjares) > 0) {
 						if ($row["kommentti"] != '') {
@@ -1209,7 +1225,7 @@ if (!function_exists('loppu_kerayslista')) {
 			if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
 				// haetaan toimipaikan tiedot
 				$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
-				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+				$alhire = pupe_query($alhqur);
 
 				if (mysql_num_rows($alhire) == 1) {
 					$alhiro = mysql_fetch_assoc($alhire);
@@ -1226,7 +1242,7 @@ if (!function_exists('loppu_kerayslista')) {
 			if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
 				// haetaan toimipaikan tiedot
 				$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
-				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+				$alhire = pupe_query($alhqur);
 
 				if (mysql_num_rows($alhire) == 1) {
 					$alhiro = mysql_fetch_assoc($alhire);
@@ -1243,7 +1259,7 @@ if (!function_exists('loppu_kerayslista')) {
 			if (!$y_tiedot_ok) {
 				// haetaan toimipaikan tiedot
 				$alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$laskurow[yhtio]'";
-				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+				$alhire = pupe_query($alhqur);
 
 				if (mysql_num_rows($alhire) == 1) {
 					$alhiro = mysql_fetch_assoc($alhire);

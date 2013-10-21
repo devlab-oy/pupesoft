@@ -1282,23 +1282,12 @@
 
 			// Excel-koodia
 			if (isset($teexls) and $teexls == "OK") {
-				if (include('Spreadsheet/Excel/Writer.php')) {
+				include('inc/pupeExcel.inc');
 
-					//keksitään failille joku varmasti uniikki nimi:
-					list($usec, $sec) = explode(' ', microtime());
-					mt_srand((float) $sec + ((float) $usec * 100000));
-					$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-					$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-					$workbook->setVersion(8);
-					$worksheet = $workbook->addWorksheet('Sheet 1');
-
-					$format_bold = $workbook->addFormat();
-					$format_bold->setBold();
-
-					$excelrivi = 0;
-					$excelhist = 0;
-				}
+				$worksheet 	 = new pupeExcel();
+				$format_bold = array("bold" => TRUE);
+				$excelrivi 	 = 0;
+				$excelhist   = 0;
 
 				$pi = 1;
 
@@ -1533,10 +1522,9 @@
 				echo "</table><br>";
 			}
 
-			if (isset($teexls) and $teexls == "OK" and isset($workbook)) {
+			if (isset($teexls) and $teexls == "OK") {
 
-				// We need to explicitly close the workbook
-				$workbook->close();
+				$excelnimi = $worksheet->close();
 
 				echo "<br><table>";
 				echo "<tr><th>".t("Tallenna excel-tulos").":</th>";
@@ -1545,7 +1533,7 @@
 				echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
 				// poistetaan välilyönti
 				$otsikko = str_replace(" ","_",$otsikko);
-				echo "<input type='hidden' name='kaunisnimi' value='$otsikko.xls'>";
+				echo "<input type='hidden' name='kaunisnimi' value='$otsikko.xlsx'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table><br>";
@@ -1554,4 +1542,3 @@
 
 		require("inc/footer.inc");
 	}
-?>

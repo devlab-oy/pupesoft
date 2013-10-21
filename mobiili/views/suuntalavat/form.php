@@ -15,7 +15,8 @@
 				<select name='tulostin'>
 					<?php
 						foreach($kirjoittimet as $kirjoitin) {
-							echo "<option value='{$kirjoitin['tunnus']}' size='5'>{$kirjoitin['kirjoitin']}</option>";
+							$sel = (isset($tulostin) and $tulostin == $kirjoitin['tunnus']) ? " selected" : "";
+							echo "<option value='{$kirjoitin['tunnus']}' size='5'{$sel}>{$kirjoitin['kirjoitin']}</option>";
 						}
 					?>
 				</select>
@@ -27,12 +28,19 @@
 			<td>
 				<select name='tyyppi'>
 					<?php
-						$sel = '';
 						foreach($pakkaukset as $pakkaus) {
+
 							if (isset($suuntalava)) {
 								$sel = ($pakkaus['tunnus'] == $suuntalava['ptunnus']) ? ' selected' : '';
 							}
-							echo "<option value='{$pakkaus['tunnus']}' $sel>";
+							elseif (isset($tyyppi) and !empty($tyyppi)) {
+								$sel = $tyyppi == $pakkaus['tunnus'] ? ' selected' : '';
+							}
+							else {
+								$sel = "";
+							}
+
+							echo "<option value='{$pakkaus['tunnus']}'{$sel}>";
 							echo t_tunnus_avainsanat($pakkaus, "pakkaus", "PAKKAUSKV")." ".t_tunnus_avainsanat($pakkaus, "pakkauskuvaus", "PAKKAUSKV");
 							echo "</option>";
 						}
@@ -45,12 +53,19 @@
 			<td>
 				<select name='keraysvyohyke'>
 					<?php
-						$sel = '';
 						foreach($keraysvyohykkeet as $vyohyke) {
+
 							if (isset($suuntalava)) {
 								$sel = ($vyohyke['tunnus'] == $suuntalava['keraysvyohyke']) ? ' selected' : '';
 							}
-							echo "<option class='keraysvyohyke' value='{$vyohyke['tunnus']}' $sel $disabled>";
+							elseif (isset($keraysvyohyke) and !empty($keraysvyohyke)) {
+								$sel = $keraysvyohyke == $vyohyke['tunnus'] ? ' selected' : '';
+							}
+							else {
+								$sel = '';
+							}
+
+							echo "<option class='keraysvyohyke' value='{$vyohyke['tunnus']}' {$sel} {$disabled}>";
 							echo $vyohyke['nimitys'];
 							echo "</option>";
 						}
@@ -61,53 +76,99 @@
 		<tr>
 			<th>Alkuhylly</th>
 
+			<?php
+
+				$variables = array(
+					'alkuhyllyalue',
+					'alkuhyllynro',
+					'alkuhyllyvali',
+					'alkuhyllytaso',
+					'loppuhyllyalue',
+					'loppuhyllynro',
+					'loppuhyllyvali',
+					'loppuhyllytaso',
+				);
+
+				foreach ($variables as $variable) {
+
+					if (isset($suuntalava)) {
+						${"_{$variable}"} = $suuntalava[$variable];
+					}
+					elseif (isset(${$variable})) {
+						${"_{$variable}"} = ${$variable};
+					}
+					else {
+						${"_{$variable}"} = '';
+					}
+
+				}
+
+			?>
+
 			<td>
-				<input type='text' class='hylly' name='alkuhyllyalue' size='3' maxlength='5' value='<?php echo $suuntalava['alkuhyllyalue'] ?>' <?php echo $disabled ?> >
-				<input type='text' class='hylly' name='alkuhyllynro' size='3' maxlength='5' value='<?php echo $suuntalava['alkuhyllynro'] ?>' <?php echo $disabled ?> >
-				<input type='text' class='hylly' name='alkuhyllyvali' size='3' maxlength='5' value='<?php echo $suuntalava['alkuhyllyvali'] ?>' <?php echo $disabled ?> >
-				<input type='text' class='hylly' name='alkuhyllytaso' size='3' maxlength='5' value='<?php echo $suuntalava['alkuhyllytaso'] ?>' <?php echo $disabled ?> >
+				<input type='text' class='hylly' name='alkuhyllyalue' size='3' maxlength='5' value='<?php echo $_alkuhyllyalue ?>' <?php echo $disabled ?> >
+				<input type='text' class='hylly' name='alkuhyllynro' size='3' maxlength='5' value='<?php echo $_alkuhyllynro ?>' <?php echo $disabled ?> >
+				<input type='text' class='hylly' name='alkuhyllyvali' size='3' maxlength='5' value='<?php echo $_alkuhyllyvali ?>' <?php echo $disabled ?> >
+				<input type='text' class='hylly' name='alkuhyllytaso' size='3' maxlength='5' value='<?php echo $_alkuhyllytaso ?>' <?php echo $disabled ?> >
 			</td>
 		</tr>
 		<tr>
 			<th>Loppuhylly</th>
 
 			<td>
-				<input type='text' class='hylly' name='loppuhyllyalue' size='3' maxlength='5' value='<?php echo $suuntalava['loppuhyllyalue'] ?>' <?php echo $disabled ?> >
-				<input type='text' class='hylly' name='loppuhyllynro' size='3' maxlength='5' value='<?php echo $suuntalava['loppuhyllynro'] ?>' <?php echo $disabled ?> >
-				<input type='text' class='hylly' name='loppuhyllyvali' size='3' maxlength='5' value='<?php echo $suuntalava['loppuhyllyvali'] ?>' <?php echo $disabled ?> >
-				<input type='text' class='hylly' name='loppuhyllytaso' size='3' maxlength='5' value='<?php echo $suuntalava['loppuhyllytaso'] ?>' <?php echo $disabled ?> ></td>
+				<input type='text' class='hylly' name='loppuhyllyalue' size='3' maxlength='5' value='<?php echo $_loppuhyllyalue ?>' <?php echo $disabled ?> >
+				<input type='text' class='hylly' name='loppuhyllynro' size='3' maxlength='5' value='<?php echo $_loppuhyllynro ?>' <?php echo $disabled ?> >
+				<input type='text' class='hylly' name='loppuhyllyvali' size='3' maxlength='5' value='<?php echo $_loppuhyllyvali ?>' <?php echo $disabled ?> >
+				<input type='text' class='hylly' name='loppuhyllytaso' size='3' maxlength='5' value='<?php echo $_loppuhyllytaso ?>' <?php echo $disabled ?> ></td>
 			</tr>
 		</tr>
 		<tr>
 			<th>Käytettävyys</th>
 			<?php
-				$checked = array('','');
-				if (isset($suuntalava)) {
-					$checked = array(($suuntalava['kaytettavyys'] == 'Y') ? 'checked' : '',
-									 ($suuntalava['kaytettavyys'] == 'L') ? 'checked' : '');
+
+				$checked = array('Y' => '', 'L' => '');
+
+				if (isset($suuntalava) and !empty($suuntalava['kaytettavyys'])) {
+					$checked[$suuntalava['kaytettavyys']] = 'checked';
 				}
-				echo "<td><input type='radio' name='kaytettavyys' id='yksityinen' value='Y' {$checked[0]} /><label for='yksityinen'>Yksityinen</label>";
-				echo "<input type='radio' name='kaytettavyys' id='yleinen' value='L' {$checked[1]} /><label for='yleinen'>Yleinen</label></td>";
+				elseif (isset($kaytettavyys) and !empty($kaytettavyys)) {
+					$checked[$kaytettavyys] = 'checked';
+				}
+
+				echo "<td><input type='radio' name='kaytettavyys' id='yksityinen' value='Y' {$checked['Y']} /><label for='yksityinen'>Yksityinen</label>";
+				echo "<input type='radio' name='kaytettavyys' id='yleinen' value='L' {$checked['L']} /><label for='yleinen'>Yleinen</label></td>";
 			?>
 		</tr>
 		<tr><th>Terminaalialue</th>
 			<?php
-				if (isset($suuntalava)) {
-					$checked = array(($suuntalava['terminaalialue'] == 'Lähettämö') ? 'checked' : '',
-									 ($suuntalava['terminaalialue'] == 'Pakkaamo') ? 'checked' : '');
+
+				$checked = array('Lähettämö' => '', 'Pakkaamo' => '');
+
+				if (isset($suuntalava) and !empty($suuntalava['terminaalialue'])) {
+					$checked[$suuntalava['terminaalialue']] = 'checked';
 				}
-				echo "<td><input type='radio' name='terminaalialue' id='lahettamo' value='Lähettämö' {$checked[0]} /><label for='lahettamo'>Lähettämö</label>";
-				echo "<input type='radio' name='terminaalialue' id='pakkaamo' value='Pakkaamo' {$checked[1]} /><label for='pakkaamo'>Pakkaamo</label></td>";
+				elseif (isset($terminaalialue) and !empty($terminaalialue)) {
+					$checked[$terminaalialue] = 'checked';
+				}
+
+				echo "<td><input type='radio' name='terminaalialue' id='lahettamo' value='Lähettämö' {$checked['Lähettämö']} /><label for='lahettamo'>Lähettämö</label>";
+				echo "<input type='radio' name='terminaalialue' id='pakkaamo' value='Pakkaamo' {$checked['Pakkaamo']} /><label for='pakkaamo'>Pakkaamo</label></td>";
 			?>
 		</tr>
 		<tr><th>Sallitaanko</th>
 			<?php
+
+				$checked = array('E' => '', 'K' => '');
+
 				if (isset($suuntalava)) {
-					$checked = array(($suuntalava['usea_keraysvyohyke'] == 'K') ? 'checked' : '',
-									 ($suuntalava['usea_keraysvyohyke'] == '') 	? 'checked' : '');
+					$suuntalava['usea_keraysvyohyke'] == 'K' ? $checked['K'] = 'checked' : $checked['E'] = 'checked';
 				}
-				echo "<td><input type='radio' name='sallitaanko' id='kylla' value='K' {$checked[0]} /><label for='kylla'>Kyllä</label>";
-				echo "<input type='radio' name='sallitaanko' id='ei' value='' {$checked[1]} /><label for='ei'>Ei</label></td>";
+				elseif (isset($sallitaanko)) {
+					$sallitaanko == 'K' ? $checked['K'] = 'checked' : $checked['E'] = 'checked';
+				}
+
+				echo "<td><input type='radio' name='sallitaanko' id='kylla' value='K' {$checked['K']} /><label for='kylla'>Kyllä</label>";
+				echo "<input type='radio' name='sallitaanko' id='ei' value='' {$checked['E']} /><label for='ei'>Ei</label></td>";
 			?>
 		</tr>
 	</table>

@@ -483,7 +483,7 @@
 
 				//Voi käydä niin, että rahtikirja on jo tulostunut. Poistetaan mahdolliset tulostusflagit
 				$query = "	UPDATE tilausrivi set toimitettu = '', toimitettuaika = ''
-							where otunnus IN ({$otsikkonro}) and yhtio = '$kukarow[yhtio]' and var not in ('P','J') and tyyppi='$tila'";
+							where otunnus IN ({$otsikkonro}) and yhtio = '$kukarow[yhtio]' and var not in ('P','J','O') and tyyppi='$tila'";
 				$result = pupe_query($query);
 
 				//	Poistetaan kaikki lavaeloitukset

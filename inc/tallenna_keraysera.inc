@@ -33,41 +33,7 @@
 					$tilavuus 	= 0;
 					$kappaleet 	= 0;
 
-					$query = "	SELECT selite
-								FROM avainsana
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND laji 	= 'SSCC'";
-					$result = pupe_query($query);
-					$row = mysql_fetch_assoc($result);
-
-					$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
-
-					if (trim($row['selite']) == '') {
-
-						$query = "	INSERT INTO avainsana SET
-									yhtio 			= '{$kukarow['yhtio']}',
-									perhe 			= '666',
-									kieli 			= '{$kukarow['kieli']}',
-									laji 			= 'SSCC',
-									nakyvyys 		= '',
-									selite 			= '{$sscc}',
-									selitetark	 	= '',
-									selitetark_2 	= '',
-									selitetark_3 	= '',
-									jarjestys 		= 0,
-									laatija 		= '{$kukarow['kuka']}',
-									luontiaika 		= now(),
-									muutospvm 		= now(),
-									muuttaja 		= '{$kukarow['kuka']}'";
-						$insert_res = pupe_query($query);
-					}
-					else {
-						$query = "	UPDATE avainsana
-									SET selite  = '{$sscc}'
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND laji	= 'SSCC'";
-						$update_res = pupe_query($query);
-					}
+					$sscc = uusi_sscc_nro();
 
 					foreach ($pakkaus as $tilriv => $kpl) {
 						// varmistetaan, että ei keräytetä nollakappaleita

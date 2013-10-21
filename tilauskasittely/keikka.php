@@ -132,7 +132,7 @@ if (!function_exists("tsekit")) {
 		}
 
 		// katotaan onko kohdistus tehty pennilleen
-		if ($row["kohdistettu"] == 'K') {
+		if (($row["kohdistettu"] == 'K' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') or $yhtiorow['jalkilaskenta_kuluperuste'] == 'VS') {
 			$kohok = 1;
 			$kohdistus = "<font class='ok'>".t("ok")."</font>";
 		}

@@ -58,6 +58,13 @@ if(!function_exists("avainsanatarkista")) {
 				$seliteerrori = 1;
 			}
 
+			if ($tem_laji == 'INVASTEPAIKKA') {
+
+				if (preg_match("/\A[\w#äöåÄÖÅ!]{1,5}-[\w#äöåÄÖÅ!]{1,5}-[\w#äöåÄÖÅ!]{1,5}-[\w#äöåÄÖÅ!]{1,5}\z/", $t[$i]) == false) {
+					$virhe[$i] = t("Tuotepaikka on virheellinen");
+				}
+			}
+
 			if ($tem_laji == 'HINNAT_CRON' or $tem_laji == 'TUOTE_EXP_CRON') {
 
 				$date = $t[$i];
@@ -101,6 +108,10 @@ if(!function_exists("avainsanatarkista")) {
 
 			if (strlen($tem_selite) > 1 and $tem_laji == 'ASIAKASLUOKKA') {
 				$virhe[$i] = t("Selite on liian pitkä, maksimipituus on yksi merkki")."!";
+			}
+
+			if ($tem_laji == "TOIMEHTO" AND strlen($tem_selite) != 3){
+				$virhe[$i] = t("Selitteen tulee olla kolme merkkiä pitkä")."!";
 			}
 
 			if (in_array($tem_laji, array("TRY", "OSASTO", "PIIRI", "VALMISTUSLINJA"))) {
@@ -190,10 +201,29 @@ if(!function_exists("avainsanatarkista")) {
 
 				if (mysql_num_rows($tili_chk_res) == 0) $virhe[$i] = t("Tilinumero ei ole sallittu")."!";
 			}
+
+			if (strtoupper($tem_laji) == 'VALMISTUSLINJA') {
+				if (!is_numeric($tem_selitetark_2) or $tem_selitetark_2 < 0) {
+					$virhe[$i] = t("Valmistuslinjan päiväkapasiteetin (selitetark_2) on oltava suurempi tai yhtäsuuri kuin 0")."!";
+				}
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "selitetark_3") {
 			$tem_selitetark_3 = trim($t[$i]);
+		}
+
+		if ($tem_laji == "SAHKTILTUN" and
+		   (mysql_field_name($result, $i) == "selite" or
+			mysql_field_name($result, $i) == "selitetark" or
+			mysql_field_name($result, $i) == "selitetark_2" or
+			mysql_field_name($result, $i) == "selitetark_3" or
+			mysql_field_name($result, $i) == "selitetark_4" or
+			mysql_field_name($result, $i) == "selitetark_5")) {
+
+			if (trim($t[$i]) == "") {
+				$virhe[$i] = t("Tieto pakollinen")."!";
+			}
 		}
 
 		if (mysql_field_name($result, $i) == 'tunnus') {

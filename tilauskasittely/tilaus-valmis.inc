@@ -37,37 +37,7 @@ $query  = "	UPDATE lasku SET vanhatunnus=tunnus $ohjausmerkkilisa $jtkielto
 			AND vanhatunnus = 0";
 $oldtur = pupe_query($query);
 
-$query = "	SELECT tarkenne
-			FROM asiakkaan_avainsanat
-			WHERE yhtio 	 = '{$kukarow['yhtio']}'
-			AND laji 		 = 'OHJAUSMERKKI'
-			AND liitostunnus = '{$laskurow['liitostunnus']}'
-			AND avainsana 	 = '{$laskurow['toimitustapa']}'";
-$ohjausmerkki_check_res = pupe_query($query);
-$ohjausmerkki_check_row = mysql_fetch_assoc($ohjausmerkki_check_res);
-
-if ($ohjausmerkki_check_row['tarkenne'] != "") {
-
-	// Tarkistetaan löytyykö kyseinen ohjausmerkkiteksti otsikolta
-	// Ei haluta lisätä tekstiä kahteen kertaan
-	if (stripos($laskurow['ohjausmerkki'], $ohjausmerkki_check_row['tarkenne']) === FALSE) {
-
-		if ($laskurow['ohjausmerkki'] != "") {
-			$updlisa = " ohjausmerkki = CONCAT('{$ohjausmerkki_check_row['tarkenne']}', ' / ', ohjausmerkki)";
-			$laskurow['ohjausmerkki'] = "{$ohjausmerkki_check_row['tarkenne']} / {$laskurow['ohjausmerkki']}";
-		}
-		else {
-			$updlisa = " ohjausmerkki = '{$ohjausmerkki_check_row['tarkenne']}'";
-			$laskurow['ohjausmerkki'] = $ohjausmerkki_check_row['tarkenne'];
-		}
-
-		$query = "	UPDATE lasku SET
-					{$updlisa}
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus  = '{$laskurow['tunnus']}'";
-		$updres = pupe_query($query);
-	}
-}
+$laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
 
 // päivitetään myös muuttuja
 $laskurow["vanhatunnus"] = $laskurow["tunnus"];
@@ -111,6 +81,35 @@ if ($luottoraja_chk or $erapaiva_chk) {
 
     if ($luottoraja_chk == 0) { $luottorajavirhe = ""; }
     if ($erapaiva_chk   == 0) { $ylivito         = 0; }
+}
+
+$query = "	SELECT tilausrivi.tunnus as tilausrivitunnus,
+			tilausrivi.kommentti,
+			tilausrivin_lisatiedot.rekisterinumero
+			FROM tilausrivi
+			JOIN tilausrivin_lisatiedot
+			ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+				AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+				AND tilausrivin_lisatiedot.rekisterinumero != '' )
+			WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+			AND tilausrivi.otunnus = '{$laskurow['tunnus']}'";
+$rekisterinumero_result = pupe_query($query);
+
+while ($rekisterinumero_row = mysql_fetch_assoc($rekisterinumero_result)) {
+	$kommentti = "";
+	if ($rekisterinumero_row['kommentti'] != ""){
+		$kommentti .= "{$rekisterinumero_row['kommentti']}\n";
+	}
+
+	if (!stristr($kommentti, $rekisterinumero_row['rekisterinumero'])) {
+		$kommentti .= $rekisterinumero_row['rekisterinumero'];
+	}
+
+	$query = "	UPDATE tilausrivi
+				SET kommentti = '{$kommentti}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$rekisterinumero_row['tilausrivitunnus']}'";
+	pupe_query($query);
 }
 
 // otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
@@ -292,8 +291,8 @@ elseif ($laskurow["tila"] == 'T') {
 
 	//tila on T kun kyseessä on tarjous
 	$query  = "	UPDATE lasku
-				SET tila='T',
-				alatila='A'
+				SET tila = 'T',
+				alatila  = 'A'
 				WHERE tunnus='$laskurow[tunnus]'
 				and tila ='T'
 				and yhtio='$kukarow[yhtio]'";
@@ -324,7 +323,7 @@ else {
 											AND avainsana.selite = tuote.try)
 										WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 										AND tilausrivi.otunnus = '{$laskurow["tunnus"]}'
-										AND tilausrivi.var NOT IN ('P','J')
+										AND tilausrivi.var not in ('P','J','O')
 										ORDER by avainsana.selitetark_4 ASC
 										LIMIT 1";
 		$keraysprioriteetti_res = pupe_query($keraysprioriteetti_query);
@@ -362,7 +361,7 @@ else {
 					where yhtio = '$kukarow[yhtio]'
 					and otunnus = '$laskurow[tunnus]'
 					and keratty = ''
-					and var not in ('P','J','S')
+					and var not in ('P','J','O','S')
 					and tyyppi != 'D'
 					and varattu > 0";
 		$keres = pupe_query($query);
@@ -435,7 +434,7 @@ else {
 					WHERE yhtio = '$kukarow[yhtio]'
 					and otunnus = '$laskurow[tunnus]'
 					and keratty = ''
-					and var not in ('P','J','S')
+					and var not in ('P','J','O','S')
 					and tyyppi != 'D'";
 		$result = pupe_query($query);
 
@@ -447,7 +446,7 @@ else {
 						and otunnus = '$laskurow[tunnus]'
 						and keratty != ''
 						and toimitettu = ''
-						and var not in ('P','J','S')
+						and var not in ('P','J','O','S')
 						and tyyppi != 'D'";
 			$result = pupe_query($query);
 		}
@@ -476,7 +475,7 @@ else {
 							SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio		= '$kukarow[yhtio]'
-							and var not in ('P','J','S')
+							and var not in ('P','J','O','S')
 							and keratty    != ''
 							and toimitettu	= ''
 							and tyyppi 	   != 'D'";
@@ -763,7 +762,7 @@ else {
 						SET kerattyaika = now(), keratty = '$kukarow[kuka]'
 						WHERE otunnus 	= '$laskurow[tunnus]'
 						and yhtio		= '$kukarow[yhtio]'
-						and var not in ('P','J','S')
+						and var not in ('P','J','O','S')
 						and keratty		= ''
 						and toimitettu	= ''
 						and tyyppi 	   != 'D'";
@@ -772,7 +771,7 @@ else {
 			$query = "	UPDATE tilausrivi
 						SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 						WHERE otunnus 	= '$laskurow[tunnus]'
-						and var not in ('P','J')
+						and var not in ('P','J','O')
 						and yhtio 		= '$kukarow[yhtio]'
 						and keratty    != ''
 						and toimitettu  = ''
@@ -806,7 +805,7 @@ else {
 		elseif (($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') and $kateisohitus == "") {
 
 			// vaikka laitetaan sisäiseen laskutukseen tai ei haluttu lähetettä, mutta annetaan mahdollisuus lähettää tilausvahvistus omaan sähköpostiin
-			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
+			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE or (trim($laskurow['tilausvahvistus']) != "" or $yhtiorow['lahetteen_tulostustapa'] == "I")) {
 				$params_tilausvahvistus = array(
 				'tee'						=> $tee,
 				'toim'						=> $toim,
@@ -821,14 +820,15 @@ else {
 			}
 
 			// Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina
-			if ($yhtiorow['lahetteen_tulostustapa'] == "I") {
+			if ($yhtiorow['lahetteen_tulostustapa'] == "I" and $toim != "REKLAMAATIO") {
 
 				$query = "	UPDATE lasku
 							SET tila = 'N',
-							alatila = 'A'
+							alatila  = 'A'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$laskurow['tunnus']}'";
 				pupe_query($query);
+
 				// Tulostetaan keräyslista
 				$tilausnumeroita = $laskurow["tunnus"];
 				require("tilaus-valmis-tulostus.inc");
@@ -871,7 +871,7 @@ else {
 							SET kerattyaika = now(), keratty = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio 		= '$kukarow[yhtio]'
-							and var not in ('P','J','S')
+							and var not in ('P','J','O','S')
 							and keratty 	= ''
 							and toimitettu 	= ''
 							and tyyppi     != 'D'";
@@ -895,7 +895,7 @@ else {
 							SET kerattyaika = now(), keratty = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio		= '$kukarow[yhtio]'
-							and var not in ('P','J','S')
+							and var not in ('P','J','O','S')
 							and keratty		= ''
 							and toimitettu	= ''
 							and tyyppi 	   != 'D'";
@@ -905,7 +905,7 @@ else {
 							SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio		= '$kukarow[yhtio]'
-							and var not in ('P','J','S')
+							and var not in ('P','J','O','S')
 							and keratty    != ''
 							and toimitettu	= ''
 							and tyyppi 	   != 'D'";
@@ -986,7 +986,7 @@ else {
 							AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
 							AND tilausrivi.tyyppi != 'D'
 							AND tilausrivi.varattu >= 1
-							AND tilausrivi.var NOT IN ('J','P')
+							AND tilausrivi.var not in ('P','J','O')
 							AND (tilausrivi.perheid = 0 OR tilausrivi.perheid=tilausrivi.tunnus)
 							ORDER BY tilausrivi.tunnus";
 				$result = pupe_query($query);
@@ -1217,7 +1217,7 @@ else {
 						AND tilausrivi.tyyppi != 'D'
 						and (tilausrivi.hyllyalue != '' OR tilausrivin_lisatiedot.omalle_tilaukselle != '')
 						and tilausrivi.varattu+tilausrivi.kpl > 0
-						and tilausrivi.var not in ('J','P')
+						and tilausrivi.var not in ('P','J','O')
 						ORDER BY omalle_tilaukselle_sort $sorttaus";
 			$result = pupe_query($query);
 

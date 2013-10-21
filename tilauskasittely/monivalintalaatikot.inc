@@ -49,9 +49,12 @@
 								and avainsana_kieli.perhe > 0
 				            	and avainsana_kieli.perhe = avainsana.perhe
 				            	and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) selitetark ";
+
+		$kieli_lisa = ".kieli = '$kukarow[kieli]'";
 	}
 	else {
 		$kieli_selitetark = " avainsana.selitetark ";
+		$kieli_lisa = ".kieli in ('$yhtiorow[kieli]', '')";
 	}
 
 	if (strtoupper($kukarow["kieli"]) != strtoupper($yhtiorow["kieli"])) {
@@ -101,7 +104,7 @@
 		$asiakasvalintachk  = "CHECKED";
 	}
 
-	if (!isset($kustapvalinta) or $kustapvalinta == 'tuote') {
+	if ($kustapvalinta == 'tuote') {
 		$kustapvalinta_tuote  	= "CHECKED";
 	}
 	else {
@@ -306,7 +309,7 @@
 					if (trim($paramit) != '') {
 						${"lisa_haku_".$param} = " and t_av_$param.selite in ($paramit) ";
 
-						$lisa_parametri .= " JOIN tuotteen_avainsanat t_av_$param ON (t_av_$param.yhtio = tuote.yhtio and t_av_$param.tuoteno = tuote.tuoteno and t_av_$param.kieli in ('$yhtiorow[kieli]', '') and t_av_$param.laji = 'parametri_$param' and t_av_$param.selite in ($paramit)) ";
+						$lisa_parametri .= " JOIN tuotteen_avainsanat t_av_$param ON (t_av_$param.yhtio = tuote.yhtio and t_av_$param.tuoteno = tuote.tuoteno and t_av_$param$kieli_lisa and t_av_$param.laji = 'parametri_$param' and t_av_$param.selite in ($paramit)) ";
 					}
 				}
 			}
@@ -1498,7 +1501,7 @@
 								FROM tuote
 								{$lisa_dynaaminen["tuote"]}
 								$lisa_parametri
-								JOIN tuotteen_avainsanat 1_t_av_$parametri ON (1_t_av_$parametri.yhtio = tuote.yhtio and 1_t_av_$parametri.laji = 'parametri_$parametri' and 1_t_av_$parametri.tuoteno = tuote.tuoteno)
+								JOIN tuotteen_avainsanat 1_t_av_$parametri ON (1_t_av_$parametri.yhtio = tuote.yhtio and 1_t_av_$parametri.laji = 'parametri_$parametri' and 1_t_av_$parametri.tuoteno = tuote.tuoteno and 1_t_av_$parametri$kieli_lisa and 1_t_av_$parametri.selite != '')
 								JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and avainsana.selite = '$parametri' and avainsana.laji = 'PARAMETRI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
 								WHERE tuote.yhtio = '$kukarow[yhtio]'
 								$lisa_haku_osasto
@@ -1513,23 +1516,13 @@
 								ORDER BY 1_t_av_$parametri.jarjestys, 1_t_av_$parametri.selite";
 					$sxresult = pupe_query($query);
 				}
-				elseif ($lisa_haku_osasto == "" and $lisa_haku_try == "" and $lisa_haku_tme == "" and $lisa_dynaaminen["tuote"] == "") {
-					$query = "	SELECT distinct tuotteen_avainsanat.selite as $parametri
-					            FROM tuotteen_avainsanat
-								JOIN avainsana ON (avainsana.yhtio = tuotteen_avainsanat.yhtio and avainsana.laji = 'PARAMETRI' and avainsana.selite = '$parametri' $avainlisa)
-					            WHERE tuotteen_avainsanat.yhtio 	= '$kukarow[yhtio]'
-					            and tuotteen_avainsanat.laji 		= 'parametri_$parametri'
-								and tuotteen_avainsanat.kieli		= '$kukarow[kieli]'
-					            ORDER BY tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.selite";
-					$sxresult = pupe_query($query);
-				}
-				elseif ($lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_haku_tme != "" or $lisa_haku_malli != "" or $lisa_dynaaminen["tuote"] != "") {
+				else {
 					$query = "	SELECT distinct 1_t_av_$parametri.selite as $parametri
 								FROM tuote
 								{$lisa_dynaaminen["tuote"]}
 								$lisa_parametri
-								JOIN tuotteen_avainsanat 1_t_av_$parametri ON (1_t_av_$parametri.yhtio = tuote.yhtio and 1_t_av_$parametri.laji = 'parametri_$parametri' and 1_t_av_$parametri.tuoteno = tuote.tuoteno and 1_t_av_$parametri.kieli = '$kukarow[kieli]' and 1_t_av_$parametri.selite != '')
-								JOIN avainsana ON (avainsana.yhtio = 1_t_av_$parametri.yhtio and avainsana.selite = '$parametri' and avainsana.laji = 'PARAMETRI' $avainlisa)
+								JOIN tuotteen_avainsanat 1_t_av_$parametri ON (1_t_av_$parametri.yhtio = tuote.yhtio and 1_t_av_$parametri.laji = 'parametri_$parametri' and 1_t_av_$parametri.tuoteno = tuote.tuoteno and 1_t_av_$parametri$kieli_lisa and 1_t_av_$parametri.selite != '')
+								JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and avainsana.selite = '$parametri' and avainsana.laji = 'PARAMETRI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
 								WHERE tuote.yhtio = '$kukarow[yhtio]'
 								$lisa_haku_osasto
 								$lisa_haku_try

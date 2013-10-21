@@ -20,11 +20,13 @@ function bind_tarkista_tehtaan_saldot_click() {
 	$('.tarkista_tehtaan_saldot_kaikki').on('click', function() {
 
 		$id = $(this).attr('id');
+		$toim = $('#toim').val();
 
 		$.post('',
 			{
 			otunnus: $id,
 			ajax_toiminto: 'tarkista_tehtaan_saldot_kaikki',
+			toim: $toim,
 			no_head: 'yes',
 			ohje: 'off'
 			},
@@ -71,6 +73,8 @@ function bind_tarkista_tehtaan_saldot_click() {
 
 		$tt_tunnus = $('.'+$id+'_tt_tunnus').val();
 
+		$toim = $('#toim').val();
+
 		$('.'+$id+'_'+$myytavissa+'_loading').html("<img class='"+$id+"_"+$myytavissa+"_image' src='../pics/loading_blue_small.gif' />");
 
 		$.post('',
@@ -84,6 +88,7 @@ function bind_tarkista_tehtaan_saldot_click() {
 			password: $password,
 			suppliernumber: $suppliernumber,
 			tt_tunnus: $tt_tunnus,
+			toim: $toim,
 			ajax_toiminto: 'tarkista_tehtaan_saldot',
 			no_head: 'yes',
 			ohje: 'off'

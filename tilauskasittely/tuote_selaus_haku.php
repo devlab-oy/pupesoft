@@ -35,6 +35,10 @@
 				}
 			//-->
 			</SCRIPT>";
+	// Jos tullaan sivuvalikosta extranetiss‰ tyhj‰t‰‰n kesken ettei lis‰t‰ tuotteita v‰‰r‰lle tilaukselle
+	if((!isset($valittu_tarjous_tunnus)) and $kukarow['extranet'] != '' and $verkkokauppa == "") {
+		$kukarow['kesken'] = '';
+	}
 
 	if (isset($toiminto) and $toiminto == "sarjanumeronlisatiedot_popup") {
 		@include('sarjanumeron_lisatiedot_popup.inc');
@@ -85,7 +89,7 @@
 					and yhtio	 = '$kukarow[yhtio]'";
 	$result   = pupe_query($query);
 	$laskurow = mysql_fetch_assoc($result);
-
+	
 	if ($verkkokauppa == "") {
 		if (!isset($ostoskori)) {
 			$ostoskori = '';
@@ -117,12 +121,12 @@
 					<input type='submit' value='".t("Takaisin tilaukselle")."'>
 					</form><br><br>";
 		}
-		elseif ($kukarow["kuka"] != "" and $laskurow["tila"] != "" and $laskurow["tila"] != "K" and $toim_kutsu != "") {
+		elseif ($kukarow["kuka"] != "" and $laskurow["tila"] != "" and $laskurow["tila"] != "K" and $toim_kutsu != "" and $toim_kutsu != "EXTENNAKKO") {
 
 			if ($kukarow["extranet"] != "") {
 				if ($yhtiorow['reklamaation_kasittely'] == 'U' and $toim == 'EXTRANET_REKLAMAATIO') {
 					$toim_kutsu = "EXTRANET_REKLAMAATIO";
-				}
+				}					
 				else {
 					$toim_kutsu = "EXTRANET";
 				}
@@ -137,6 +141,16 @@
 					<input type='hidden' name='toim' value='$toim_kutsu'>
 					<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
 					<input type='hidden' name='tyojono' value='$tyojono'>
+					<input type='submit' value='".t("Takaisin tilaukselle")."'>
+					</form><br><br>";
+		}
+		elseif ($toim_kutsu == "EXTENNAKKO" and $kukarow["extranet"] != "") {
+			$kukarow['kesken'] = (isset($valittu_tarjous_tunnus)) ? $kukarow['kesken'] = $valittu_tarjous_tunnus : $kukarow['kesken'] = '';
+			echo "	<form method='post' action='extranet_tarjoukset_ja_ennakot.php'>
+					<input type='hidden' name='toim' value='$toim_kutsu'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
+					<input type='hidden' name='action' value='nayta_tarjous'>
 					<input type='submit' value='".t("Takaisin tilaukselle")."'>
 					</form><br><br>";
 		}
@@ -639,6 +653,7 @@
 		echo "<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>";
 		echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
+		echo "<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>";
 
 		if (!isset($tultiin)) {
 			$tultiin = '';
@@ -745,6 +760,7 @@
 		echo "<input type='Submit' name='submit_button' id='submit_button' value = '".t("Etsi")."'></form>";
 		echo "&nbsp;<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>
 				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
+				<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
 				<input type='submit' name='submit_button2' id='submit_button2' value = '".t("Tyhjenn‰")."'>
 				</form>";
 
@@ -867,7 +883,7 @@
 							$kieltolisa
 							$poislisa
 							$extra_poislisa
-							ORDER BY {$tvk_taulu}.jarjestys, {$tvk_taulu}.tuoteno";
+							ORDER BY if({$tvk_taulu}.jarjestys=0, 9999, {$tvk_taulu}.jarjestys), {$tvk_taulu}.tuoteno";
 				$kores = pupe_query($query);
 
 				return $kores;
@@ -933,7 +949,7 @@
 					ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi = 'P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
 					ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi = 'V' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') osaluettelo,
 					ifnull((SELECT id FROM korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) korvaavat,
-					ifnull((SELECT id FROM vastaavat use index (yhtio_tuoteno) where vastaavat.yhtio=tuote.yhtio and vastaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) vastaavat,
+					ifnull((SELECT group_concat(id) FROM vastaavat use index (yhtio_tuoteno) where vastaavat.yhtio=tuote.yhtio and vastaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) vastaavat,
 					tuote.tuoteno,
 					tuote.nimitys,
 					tuote.osasto,
@@ -975,27 +991,33 @@
 
 				if ($mrow["vastaavat"] != $mrow["tuoteno"]) {
 
-					$kores = tuoteselaushaku_vastaavat_korvaavat("vastaavat", $mrow["vastaavat"], $mrow["tuoteno"]);
+					// Tuote voi olla useammassa vastaavuusketjussa
+					$vastaavat = explode(',', $mrow['vastaavat']);
 
-					if (mysql_num_rows($kores) > 0) {
+					foreach ($vastaavat as $mrow['vastaavat']) {
 
-						$vastaavamaara = mysql_num_rows($kores);
+						$kores = tuoteselaushaku_vastaavat_korvaavat("vastaavat", $mrow["vastaavat"], $mrow["tuoteno"]);
 
-						while ($krow = mysql_fetch_assoc($kores)) {
+						if (mysql_num_rows($kores) > 0) {
 
-							if (isset($vastaavamaara)) {
-								$krow["vastaavamaara"] = $vastaavamaara;
-								unset($vastaavamaara);
+							$vastaavamaara = mysql_num_rows($kores);
+
+							while ($krow = mysql_fetch_assoc($kores)) {
+
+								if (isset($vastaavamaara)) {
+									$krow["vastaavamaara"] = $vastaavamaara;
+									unset($vastaavamaara);
+								}
+								else {
+									$krow["mikavastaava"] = $mrow["tuoteno"];
+								}
+
+								if (!isset($rows[$mrow["vastaavat"].$krow["tuoteno"]])) $rows[$mrow["vastaavat"].$krow["tuoteno"]] = $krow;
 							}
-							else {
-								$krow["mikavastaava"] = $mrow["tuoteno"];
-							}
-
-							if (!isset($rows[$mrow["korvaavat"].$krow["tuoteno"]])) $rows[$mrow["korvaavat"].$krow["tuoteno"]] = $krow;
 						}
-					}
-					else {
-						$rows[$mrow["tuoteno"]] = $mrow;
+						else {
+							$rows[$mrow["tuoteno"]] = $mrow;
+						}
 					}
 				}
 
@@ -1087,6 +1109,7 @@
 			echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 			echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
 			echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
+			echo "<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>";
 
 			if ($tultiin == "futur") {
 				echo " <input type='hidden' name='tultiin' value='$tultiin'>";
@@ -1185,8 +1208,10 @@
 				if ($lisatiedot != "" and $kukarow["extranet"] == "") {
 					echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=aleryhma$ulisa'>".t("Aleryhm‰")."<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=status$ulisa'>".t("Status")."</th>";
 				}
-
-				echo "<th>".t("Myyt‰viss‰")."</th>";
+				// Ext-ennakolla kun asiakas lis‰‰ rivej‰ ei ole tarpeellista n‰ytt‰‰ myyt‰viss‰-saraketta
+				if ($toim_kutsu != "EXTENNAKKO") {
+					echo "<th>".t("Myyt‰viss‰")."</th>";
+				}
 
 				if ($lisatiedot != "" and $kukarow["extranet"] == "") {
 					echo "<th>".t("Hyllyss‰")."</th>";
@@ -1620,8 +1645,8 @@
 				if ($lisatiedot != "" and $kukarow["extranet"] == "") {
 					echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]<br>$row[status]</td>";
 				}
-
-				if ($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www" and $verkkokauppa_saldotsk)) {
+ 
+				if ($toim_kutsu != "EXTENNAKKO" and ($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www" and $verkkokauppa_saldotsk))) {
 					// Tuoteperheen is‰t, mutta ei sarjanumerollisisa isi‰ (Normi, Extranet ja Verkkokauppa)
 					if ($row["tuoteperhe"] == $row["tuoteno"] and $row["sarjanumeroseuranta"] != "S") {
 						// Extranet ja verkkokauppa

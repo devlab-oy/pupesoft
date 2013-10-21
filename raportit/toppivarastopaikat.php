@@ -171,6 +171,10 @@ if ($tee != '') {
 			'header' => t('Varastopaikka'),
 			'order'	 => 40
 		),
+		'saldo'						=> array(
+			'header' => t('Saldo'),
+			'order' => 50
+		),
 		'kpl_valittu_aika'			 => array(
 			'header' => t('Keräystä'),
 			'order'	 => 60
@@ -299,7 +303,7 @@ if ($tee == '') {
 		);
 	}
 
-	if (!empty($yhtiorow['kerayserat'])) {
+	if ($yhtiorow['kerayserat'] == "K") {
 		$query = "	SELECT tunnus, nimitys
 	                FROM keraysvyohyke
 	                WHERE yhtio = '{$kukarow['yhtio']}'
@@ -382,7 +386,7 @@ if ($tee == '') {
 	echo "</td>";
 	echo "</tr>";
 
-	if (!empty($yhtiorow['kerayserat']) and !empty($kaikki_keraysvyohykkeet)) {
+	if ($yhtiorow['kerayserat'] == "K" and !empty($kaikki_keraysvyohykkeet)) {
 		echo "<tr>";
 		echo "<th>".t("Keräysvyöhykkeet")."</th>";
 
@@ -471,7 +475,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 	$varaston_hyllypaikat_join = "";
 	$group = "";
 
-	if (!empty($yhtiorow['kerayserat'])) {
+	if ($yhtiorow['kerayserat'] == "K") {
 		$keraysvyohyke_select = "keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,";
 		$keraysvyohyke_join = " JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)";
 		$varaston_hyllypaikat_join = " JOIN varaston_hyllypaikat AS vh
@@ -499,16 +503,25 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 			$tuote_statukset[$status['selite']] = $status['selitetark'];
 		}
 
+		$checked_count = 0;
+
 		if (!empty($lisa_kentat)) {
 			foreach ($lisa_kentat as $lisa_kentta) {
 				if (!empty($lisa_kentta['checked'])) {
 					$tuote_select .= $lisa_kentta['kolumni'].', ';
 					$group .= $lisa_kentta['kolumni'].', ';
+					$checked_count++;
 				}
+			}
+
+			// Ruksattiin jotain lisävalintoita (tuotekohtaisia), voidaan näyttää saldo
+			if ($checked_count > 0) {
+				$tuote_select .= "tuotepaikat.saldo,";
+				$group .= "tuotepaikat.saldo,";
 			}
 		}
 
-		$tuote_select .= "tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,";
+		$tuote_select .= "tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, ";
 		$tuote_select .= "CONCAT_WS(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as hylly, ";
 		$tuote_select .= "group_concat(distinct tuotepaikat.tunnus) paikkatun, ";
 
@@ -520,7 +533,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 		}
 	}
 
-	$group = substr($group, 0, -1);
+	$group = rtrim($group, " ,");
 
 	if (!empty($kerayksettomat_tuotepaikat)) {
 

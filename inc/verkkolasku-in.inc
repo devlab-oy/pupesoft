@@ -315,6 +315,25 @@
 
 			unset($trow);
 
+			$_yhtion_toimipaikka = 0;
+
+			// Katsotaan löytyykö yhtiön toimipaikkaa
+			if (isset($yhtiorow) and $yhtio != "" and $toim_asiakkaantiedot["toim_ovttunnus"] != "") {
+
+				$query = "	SELECT ovtlisa, tunnus
+							FROM yhtion_toimipaikat
+							WHERE yhtio = '{$yhtio}'
+							AND ovtlisa != ''";
+				$chk_toimipaikka_res = pupe_query($query);
+
+				while ($chk_toimipaikka_row = mysql_fetch_assoc($chk_toimipaikka_res)) {
+
+					if ($chk_toimipaikka_row['ovtlisa'] == substr($toim_asiakkaantiedot["toim_ovttunnus"], strlen(trim($chk_toimipaikka_row['ovtlisa'])) * -1)) {
+						$_yhtion_toimipaikka = $chk_toimipaikka_row['tunnus'];
+					}
+				}
+			}
+
 			// $laskuttajan_ovt --> voi olla ovttunnus, ytunnus, tai vatnumero
 			// $laskuttajan_vat --> voisi olla vatnumero
 			// $laskuttajan_nimi --> voisi olla laskuttajan nimi
@@ -518,7 +537,13 @@
 				}
 			}
 
-			if ($trow['asn_sanomat'] == "M" and @file_exists("inc/maventa.inc")) {
+			$onko_hyvityslasku_kerroin = 1;
+
+			if ($laskun_tyyppi_teksti == 'HYVITYSLASKU' and $laskun_summa_eur < 0) {
+				$onko_hyvityslasku_kerroin = -1;
+			}
+
+			if (@file_exists("inc/maventa.inc") and (($trow['asn_sanomat'] == "M" and $ebid == 'MAVENTAXML') or ($trow['asn_sanomat'] == 'F' and $ebid == 'FINVOICEXML'))) {
 				require("inc/maventa.inc");
 			}
 
@@ -764,7 +789,7 @@
 				$tilalk = explode("-", $yhtiorow["ostoreskontrakausi_alku"]);
 				$tillop = explode("-", $yhtiorow["ostoreskontrakausi_loppu"]);
 
-				// Verrataan vähän päivämääriä. onpa vittumaista PHP:ssä!
+				// Verrataan vähän päivämääriä. onpa ikävää PHP:ssä!
 				$ostoresktilalk = (int) date('Ymd', mktime(0,0,0, $tilalk[1], $tilalk[2], $tilalk[0]));
 				$ostoresktillop = (int) date('Ymd', mktime(0,0,0, $tillop[1], $tillop[2], $tillop[0]));
 				$syotettypvm 	= (int) date('Ymd', mktime(0,0,0, $tpk, $tpp, $tpv));
@@ -902,9 +927,9 @@
 					}
 
 					// katsotaan onko Teccom-lasku jo asn_sanomat-taulussa
-					if ($ebid == 'TECCOM-INVOICE' or $ebid == 'MAVENTAXML') {
+					if ($ebid == 'TECCOM-INVOICE' or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) {
 
-						$lajilisa = $ebid == "MAVENTAXML" ? "mav" : "tec";
+						$lajilisa = strtolower(substr($ebid, 0, 3));
 
 						$query = "	SELECT *
 									FROM asn_sanomat
@@ -1009,6 +1034,7 @@
 				// Kirjoitetaan lasku
 				$query = "	INSERT into lasku set
 							yhtio 				= '$yhtio',
+							yhtio_toimipaikka 	= '{$_yhtion_toimipaikka}',
 							summa 				= '$summa',
 							kasumma 			= '$kassaale',
 							erpcm 				= '$erv-$erk-$erp',
@@ -1132,7 +1158,7 @@
 
 					$kirjattava_summa 		  = $omasumma;
 					$summa_varasto 			  = round($omasumma / (1 + ($vero / 100)), 2);
-					$summa_varasto_valuutassa = $summa_varasto;
+					$summa_varasto_valuutassa = round($omasumma / (1 + ($vero / 100)) / $vrow['kurssi'], 2);
 
 					if ($yhtiorow['ostolaskun_kulutilit'] != ''
 						and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')
@@ -1153,6 +1179,7 @@
 					}
 
 					$summa			  		= $kirjattava_summa;
+					$summa_valuutassa		= round($summa / $vrow['kurssi'], 2);
 					$totsumma 				= $kirjattava_summa;
 					$totsumma_valuutassa 	= $summa;
 					$kustp            		= $oletuskust;
@@ -1345,11 +1372,12 @@
 								}
 							}
 
-							$summa						 	 = round($summa * (1+($vero/100)),2);
-							$totsumma						+= $summa;
-							$totsumma_valuutassa			+= $summa_valuutassa;
-							$kukarow['yhtio']				 = $yhtio;
-							$kukarow['kuka']				 = 'verkkolas';
+							$summa					= round($summa * (1+($vero/100)),2);
+							$summa_valuutassa		= round($summa * (1+($vero/100)) / $vrow['kurssi'], 2);
+							$totsumma				+= $summa;
+							$totsumma_valuutassa	+= $summa_valuutassa;
+							$kukarow['yhtio']		 = $yhtio;
+							$kukarow['kuka']		 = 'verkkolas';
 
 							require ("inc/teetiliointi.inc");
 
@@ -1437,7 +1465,7 @@
 				}
 
 				// Tehdään ASN Insertit
-				if (($ebid == "TECCOM-INVOICE" or $ebid == "MAVENTAXML") and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
+				if (($ebid == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
 
 					$saapumispvm_chk = trim($laskun_tapvm) != '' ? substr($laskun_tapvm, 0, 4).'-'.substr($laskun_tapvm, 4, 2).'-'.substr($laskun_tapvm, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
 					$count_rtuoteno  = count($rtuoteno);
@@ -1470,7 +1498,7 @@
 							// osto_rahti 		= invoiceSummary rahti
 							// osto_rivi_kulu 	= ($laskun_rahtikulu, $rtuoteno[$i]['kulu'])
 
-							$lajilisa = $ebid == "MAVENTAXML" ? "mav" : "tec";
+							$lajilisa = strtolower(substr($ebid, 0, 3));
 
 							$insertquery = "	INSERT INTO asn_sanomat SET
 												asn_numero 			= '{$laskun_numero}',
@@ -1513,9 +1541,10 @@
 						foreach ($_array as $key => $value) {
 							if ($value == 0) continue;
 
-							$tili      = $yhtiorow[$key];
-							$summa     = round($value, 2);
-							$totsumma += $summa;
+							$tili      			= $yhtiorow[$key];
+							$summa     			= round($value, 2);
+							$summa_valuutassa	= round($value / $vrow['kurssi'], 2);
+							$totsumma 		   += $summa;
 
 							// Laitetaan kustannuspaikaksi/kohteeksi/projektiksi aina ensimmäisen tiliöintirivin tiedot.
 							// Jos menevät nollana, funktio osaa ottaa oletuksen tilin takaa.

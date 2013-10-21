@@ -533,16 +533,25 @@
 	if (mysql_field_name($result, $i) == "edi_kuvaus") {
 
 		$path_parts = pathinfo($trow[$i]);
-		$apu = $path_parts['filename'];
-		$sel[$apu] = "selected";
 
-		$ulos  = "<td><select name='$nimi'>";
+		$sel = array($path_parts['filename'] => 'selected') + array('editilaus_out_teccom.inc' => '', 'editilaus_out_wabco.inc' => '', 'editilaus_out_excel.inc' => '', 'editilaus_out_elma.inc' => '', 'editilaus_out_xml.inc' => '', 'editilaus_out_futur.inc' => '');
+
+		$ulos  = "<td><select name='{$nimi}'>";
 		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
-		$ulos .= "<option value='editilaus_out_teccom.inc' $sel[editilaus_out_teccom]>".t("TecCom sähköinen tilaus")."</option>";
-		$ulos .= "<option value='editilaus_out_wabco.inc' $sel[editilaus_out_wabco]>".t("Wabco sähköinen tilaus")."</option>";
-		$ulos .= "<option value='editilaus_out_excel.inc' $sel[editilaus_out_excel]>".t("Excel-ostotilaus")."</option>";
-		$ulos .= "<option value='editilaus_out_elma.inc' $sel[editilaus_out_elma]>".t("Elma-editilaus")."</option>";
-		$ulos .= "<option value='editilaus_out_xml.inc' $sel[editilaus_out_xml]>".t("Xml-ostotilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_teccom.inc' {$sel['editilaus_out_teccom']}>".t("TecCom sähköinen tilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_wabco.inc' {$sel['editilaus_out_wabco']}>".t("Wabco sähköinen tilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_excel.inc' {$sel['editilaus_out_excel']}>".t("Excel-ostotilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_elma.inc' {$sel['editilaus_out_elma']}>".t("Elma-editilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_xml.inc' {$sel['editilaus_out_xml']}>".t("Xml-ostotilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_futur.inc' {$sel['editilaus_out_futur']}>".t("Futur-ostotilaus")."</option>";
+
+		if (@file_exists("inc/sahkoinen_tilausliitanta.inc")) {
+
+			$hae = "option_edi_kuvaus";
+
+			require("inc/sahkoinen_tilausliitanta.inc");
+		}
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -553,10 +562,11 @@
 		$sel[$trow[$i]] = "selected";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>".t("Toimittajalta ei tule ASN-sanomia eikä laskuja")."</option>";
-		$ulos .= "<option value='K' $sel[K]>".t("Toimittaja lähettää ASN-sanoman ja TecCom-laskun")."</option>";
-		$ulos .= "<option value='L' $sel[L]>".t("Toimittaja lähettää vain TecCom-laskun")."</option>";
-		$ulos .= "<option value='M' $sel[M]>".t("Toimittaja lähettää vain Maventa-laskun")."</option>";
+		$ulos .= "<option value=''>".t("ASN-sanomista ja laskuista ei luoda saapumisia")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("ASN-sanomista ja TecCom-laskuista luodaan saapumisia")."</option>";
+		$ulos .= "<option value='L' $sel[L]>".t("TecCom-laskuista luodaan saapumisia")."</option>";
+		$ulos .= "<option value='M' $sel[M]>".t("Maventa-laskuista luodaan saapumisia")."</option>";
+		$ulos .= "<option value='F' $sel[F]>".t("Finvoice-laskuista luodaan saapumisia")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -582,6 +592,19 @@
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Toimittaja on valittavissa kun perustetaan uutta tuotetta")."</option>";
 		$ulos .= "<option value='X'{$sel["X"]}>".t("Toimittaja ei ole valittavissa kun perustetaan uutta tuotetta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "sahkoinen_automaattituloutus") {
+
+		$sel = array($trow[$i] => 'selected') + array('E' => '', 'K' => '');
+
+		$ulos  = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Käytetään yhtiön toimipaikan oletusta")."</option>";
+		$ulos .= "<option value='E'{$sel['E']}>".t("Sähköisen laskun sisäänluvun yhteydessä ei tulouteta tuotteita varastoon")."</option>";
+		$ulos .= "<option value='K'{$sel["K"]}>".t("Tuotteet tuloutetaan varastoon automaattisesti sähköisen laskun sisäänluvun yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

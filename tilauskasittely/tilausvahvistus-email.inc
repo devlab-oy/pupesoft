@@ -136,7 +136,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 	}
 
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,
-				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
+				if(tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0) varattu,
 				if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
 				tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv,
 				tilausrivi.nimitys,	tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.var
@@ -207,7 +207,8 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 			}
 		}
 		else {
-			$taika = tv1dateconv($laskurow["toimaika"]);
+			if ($laskurow["toimaika"] == '0000-00-00') $taika = t("Avoin", $kieli);
+			else $taika = tv1dateconv($laskurow["toimaika"]);
 		}
 
 		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli))		.t("Toimitusaika", $kieli).": ".$taika."\n";

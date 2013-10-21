@@ -19,8 +19,8 @@ function bind_valitut_rivit_checkbox_click() {
 		else {
 			if ($(this).val().indexOf(',') > -1) {
 				tunnukset_array = $(this).val().split(',');
-				for (var i in tunnukset_array) {
-					$("#jyvita_valitut_form input[value='" + tunnukset_array[i] + "']").remove();
+				for (var x in tunnukset_array) {
+					$("#jyvita_valitut_form input[value='" + tunnukset_array[x] + "']").remove();
 				}
 			}
 			else {
@@ -28,4 +28,10 @@ function bind_valitut_rivit_checkbox_click() {
 			}
 		}
 	});
+}
+
+function nappi_onclick_confirm(message) {
+	ok = confirm(message);
+
+	return ok;
 }

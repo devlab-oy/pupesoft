@@ -120,7 +120,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 		$varastoon_tilausrivirajaus = "AND tilausrivi.tunnus = $tilausrivi";
 	}
 
-	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
+	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus) and $suuntalavan_tunnus > 0) {
 
 		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
 					FROM suuntalavat_saapuminen
@@ -269,7 +269,6 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				 			tuoteno     	= '{$chk_row['tuoteno']}',
 				 			oletus      	= '{$oletuspaikka_lapsi}',
 		   		 			saldo       	= '{$chk_row['varattu']}',
-							saldo_varattu 	= '{$chk_row['varattu']}',
 		   		 			saldoaika   	= now(),
 							hyllyalue   	= '{$chk_row['hyllyalue']}',
 							hyllynro    	= '{$chk_row['hyllynro']}',
@@ -1346,7 +1345,9 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("HUOM: Saapumiseen ei ole liitetty yht‰‰n vaihto-omaisuuslaskua!")."<br><br></font>";
+		if ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
+			echo "<font class='error'>".t("HUOM: Saapumiseen ei ole liitetty yht‰‰n vaihto-omaisuuslaskua!")."<br><br></font>";
+		}
 	}
 }
 
@@ -1565,7 +1566,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 		}
 
 		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A','S','V')) and count($jtrivit) > 0) {
-			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "vakisin", "JATKA", '', '', $jt_huomioi_pvm);
+			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "vakisin", "JATKA", '', '', $jt_huomioi_pvm, 'TULOUTUS');
 		}
 
 		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A'))) {

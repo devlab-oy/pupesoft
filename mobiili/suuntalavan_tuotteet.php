@@ -22,16 +22,6 @@ if (isset($submit) and trim($submit) != '') {
 	if (!isset($_POST['tilausrivi']) and $viivakoodi == '') {
 		$error['tuotteet'] = t("Rivi‰ ei ole valittu").'.';
 	}
-	else {
-		if ($submit == 'edit') {
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=muokkaa_suuntalavan_rivia.php?{$url}'>";
-			exit;
-		}
-		elseif ($submit == 'submit') {
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?suuntalavan_tuotteet&{$url}'>";
-			exit();
-		}
-	}
 
 	if ($submit == 'varalle') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalava_varalle.php?{$url}'>";
@@ -101,17 +91,22 @@ if (isset($alusta_tunnus)) {
 }
 
 echo "<div class='header'>";
-echo "<button onclick='window.location.href=\"alusta.php\"' class='button left'><img src='back2.png'></button>";
+if (isset($viivakoodi)) {
+	//Jos viivakoodilla ollaan etsitty jotain, back-nappi palaa kokolistaus-n‰kym‰‰n
+	echo "<button onclick='window.location.href=\"suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}\"' class='button left'><img src='back2.png'></button>";
+}
+else {
+	echo "<button onclick='window.location.href=\"alusta.php\"' class='button left'><img src='back2.png'></button>";
+}
 echo "<h1>",t("SUUNTALAVAN TUOTTEET"),"</h1></div>";
 
 echo "<form name='viivakoodiformi' method='post' action='' id='viivakoodiformi'>
 	<table class='search'>
 		<tr>
-			<th>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
-			</th>
-			<td>
+			<th>
+				",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
 				<button name='submit' id='valitse_nappi' value='viivakoodi' class='button' onclick='submit();'>",t("Etsi"),"</button>
-			</td>
+			</th>
 		</tr>
 	</table>
 	</form>";
@@ -119,13 +114,7 @@ echo "<form name='viivakoodiformi' method='post' action='' id='viivakoodiformi'>
 echo "
 <form name='hakuformi' method='post' action=''>
 
-<div class='controls'>";
-
-if($lava['kasittelytapa'] == 'H') echo "<button class='button' name='submit' value='submit' onclick='submit();' disabled>",t("Valitse"),"</button>";
-else echo "<button class='button' name='submit' value='submit' onclick='submit();'>",t("Valitse"),"</button>";
-
-echo "
-	<button name='submit' value='edit' class='button' onclick='submit();'>",t("Muokkaa"),"</button>
+<div class='controls'>
 	<button name='submit' value='varalle' class='button' onclick='return varmista();'>",t("Varalle"),"</button>
 </div>";
 
@@ -234,10 +223,10 @@ echo "<script type='text/javascript'>
 	});
 
 	function doFocus() {
-	        var focusElementId = 'viivakoodi'
-	        var textBox = document.getElementById(focusElementId);
-	        textBox.focus();
-	    }
+	    var focusElementId = 'viivakoodi'
+	    var textBox = document.getElementById(focusElementId);
+	    textBox.focus();
+	}
 
 	function clickButton() {
 	   document.getElementById('myHiddenButton').click();

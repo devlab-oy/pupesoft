@@ -199,6 +199,7 @@
 					dynaaminen_puu AS node READ,
 					dynaaminen_puu AS parent READ,
 					etaisyydet READ,
+					kerayserat READ,
 					kirjoittimet READ,
 					kuka READ,
 					lahdot READ,
@@ -296,7 +297,7 @@
 							SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 							WHERE otunnus  = '$row[tunnus]'
 							AND yhtio 	   = '$kukarow[yhtio]'
-							AND var not in ('P','J')
+							AND var not in ('P','J','O')
 							AND keratty    != ''
 							AND toimitettu  = ''
 							AND tyyppi 	 	= 'L'";
@@ -382,7 +383,7 @@
 		$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
 					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja,
-					asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
+					asiakas.toimitusvahvistus, if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) as asiakas_email, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
 					FROM rahtikirjat
 					JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') ";
 
@@ -635,7 +636,7 @@
 								SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 								WHERE otunnus in ($otunnukset)
 								AND yhtio 	   = '$kukarow[yhtio]'
-								AND var not in ('P','J')
+								AND var not in ('P','J','O')
 								AND keratty    != ''
 								AND toimitettu  = ''
 								AND tyyppi 	 	= 'L'";
@@ -844,15 +845,37 @@
 
 				if ($rakir_row['toimitusvahvistus'] != '') {
 
-					$tulostauna = "";
-
 					if ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
-						$tulostauna = "KYLLA";
+						$desadv_version = "una";
 						$rakir_row["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+					}
+					elseif ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
+						$desadv_version = "fi0089";
+						$rakir_row["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+					}
+					else {
+						$desadv_version = "";
 					}
 
 					if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {
+
+						if ($rakir_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+
+							// jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan tämän jälkeen
+							$tmp_laskurow = $laskurow;
+
+							$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$rivi['otunnus']}'";
+							$laskurow_edi_res = pupe_query($query);
+							$laskurow = mysql_fetch_assoc($laskurow_edi_res);
+
+							$myynti_vai_osto = 'M';
+						}
+
 						require("tilauskasittely/$rakir_row[toimitusvahvistus]");
+
+						if ($rakir_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+							$laskurow = $tmp_laskurow;
+						}
 					}
 				}
 

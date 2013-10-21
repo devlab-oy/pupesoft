@@ -58,6 +58,23 @@ if(!function_exists("avainsanatarkista")) {
 				$seliteerrori = 1;
 			}
 
+			if ($tem_laji == 'INVASTEPAIKKA') {
+
+				if (preg_match("/\A[\w#äöåÄÖÅ!]{1,5}-[\w#äöåÄÖÅ!]{1,5}-[\w#äöåÄÖÅ!]{1,5}-[\w#äöåÄÖÅ!]{1,5}\z/", $t[$i]) == false) {
+					$virhe[$i] = t("Tuotepaikka on virheellinen");
+				}
+			}
+
+			if ($tem_laji == 'HINNAT_CRON' or $tem_laji == 'TUOTE_EXP_CRON') {
+
+				$date = $t[$i];
+
+				// Huom. preg_match tarkoituksella "== false", koska se palauttaa virheessä 0 tai false
+				if (preg_match("/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/", $date) == false or strtotime($date) === false) {
+					$virhe[$i] = t("Selite on pakollinen ja se pitää olla muodossa vvvv-kk-pp tt:mm:ss");
+				}
+			}
+
 			if ($tem_laji == 'LABEL') {
 				if (trim($tem_selite) == '') {
 					$virhe[$i] = t("Selite on pakollinen ja se pitää olla muodossa #123 tai #112233");
@@ -67,6 +84,16 @@ if(!function_exists("avainsanatarkista")) {
 				}
 				elseif (strlen($tem_selite) != 4 and strlen($tem_selite) != 7) {
 					$virhe[$i] = t("Selite täytyy olla 4 tai 7 merkkiä pitkä");
+				}
+			}
+
+			if (strtoupper($tem_laji) == "OSTOTIL_TILTYYP") {
+
+				if (trim($tem_selite) == '') {
+					$virhe[$i] = t("Selite on pakollinen");
+				}
+				elseif (strlen($tem_selite) > 1) {
+					$virhe[$i] = t("Selite on liian pitkä, maksimipituus on yksi merkki");
 				}
 			}
 
@@ -83,6 +110,10 @@ if(!function_exists("avainsanatarkista")) {
 				$virhe[$i] = t("Selite on liian pitkä, maksimipituus on yksi merkki")."!";
 			}
 
+			if ($tem_laji == "TOIMEHTO" AND strlen($tem_selite) != 3){
+				$virhe[$i] = t("Selitteen tulee olla kolme merkkiä pitkä")."!";
+			}
+
 			if (in_array($tem_laji, array("TRY", "OSASTO", "PIIRI", "VALMISTUSLINJA"))) {
 				if (!is_numeric($tem_selite)) {
 					$virhe[$i] = t("Selitteen on oltava numeerinen")."!";
@@ -91,7 +122,7 @@ if(!function_exists("avainsanatarkista")) {
 					$t[$i] = (int) $t[$i];
 				}
 			}
-			
+
 			if (($tem_laji == 'VAKIOVIESTI' or $tem_laji == 'VAKIOVIESTI_TIL') and trim($tem_selite) == '') {
 				$virhe[$i] = t("Selite on pakollinen");
 			}
@@ -138,7 +169,7 @@ if(!function_exists("avainsanatarkista")) {
 				}
 			}
 
-			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL') {
+			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON' and $tem_laji != 'TUOTE_EXP_CRON') {
 				$virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiä")."!";
 			}
 
@@ -170,10 +201,29 @@ if(!function_exists("avainsanatarkista")) {
 
 				if (mysql_num_rows($tili_chk_res) == 0) $virhe[$i] = t("Tilinumero ei ole sallittu")."!";
 			}
+
+			if (strtoupper($tem_laji) == 'VALMISTUSLINJA') {
+				if (!is_numeric($tem_selitetark_2) or $tem_selitetark_2 < 0) {
+					$virhe[$i] = t("Valmistuslinjan päiväkapasiteetin (selitetark_2) on oltava suurempi tai yhtäsuuri kuin 0")."!";
+				}
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "selitetark_3") {
 			$tem_selitetark_3 = trim($t[$i]);
+		}
+
+		if ($tem_laji == "SAHKTILTUN" and
+		   (mysql_field_name($result, $i) == "selite" or
+			mysql_field_name($result, $i) == "selitetark" or
+			mysql_field_name($result, $i) == "selitetark_2" or
+			mysql_field_name($result, $i) == "selitetark_3" or
+			mysql_field_name($result, $i) == "selitetark_4" or
+			mysql_field_name($result, $i) == "selitetark_5")) {
+
+			if (trim($t[$i]) == "") {
+				$virhe[$i] = t("Tieto pakollinen")."!";
+			}
 		}
 
 		if (mysql_field_name($result, $i) == 'tunnus') {

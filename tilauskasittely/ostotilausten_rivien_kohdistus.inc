@@ -281,6 +281,13 @@ if ($tee == 'TI' or $tee == "Y") {
 		$toimaika = $toimvva."-".$toimkka."-".$toimppa;
 	}
 
+	$query = "	SELECT myyntihinta_maara
+				FROM tuote
+				WHERE yhtio  = '$kukarow[yhtio]'
+				AND  tuoteno = '$prow[tuoteno]'";
+	$result = pupe_query($query);
+	$trow = mysql_fetch_assoc($result);
+
 	if ($hinta == "") {
 		$query = "	SELECT *
 					FROM tuotteen_toimittajat
@@ -296,9 +303,13 @@ if ($tee == 'TI' or $tee == "Y") {
 		$prow["hinta"] = $hinta;
 	}
 
+	$prow["hinta"] = round($prow["hinta"] / $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
+
 	$multi = "";
 	require("../inc/tuotehaku.inc");
-	$prow["tuoteno"] = $tuoteno;
+
+	$prow["tuoteno"]      = $tuoteno;
+	$oikeusostohintapaiv  = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat", "check");
 
 	require('tarkistarivi_ostotilaus.inc');
 
@@ -513,8 +524,14 @@ if ($tila == 'tee_siirto') {
 
 		$keikkakesken = 0;
 
-		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
-			$keikkakesken = file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock");
+		$lock_params = array(
+		    "locktime" => 0,
+			"lockfile" => "$kukarow[yhtio]-keikka.lock",
+			"return"   => TRUE
+		);
+
+		if (!pupesoft_flock($lock_params)) {
+			list($keikkakesken, $_kuka, $_timestamp) = explode(";", file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock"));
 		}
 
 		foreach ($rivi_siirrettavat_tunnukset as $valittu) {
@@ -1003,7 +1020,8 @@ if ($tila == '') {
 				LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				AND tilausrivi.uusiotunnus = '$otunnus'
-				AND tilausrivi.tyyppi != 'D'";
+				AND tilausrivi.tyyppi != 'D'
+				AND tilausrivi.kpl+tilausrivi.varattu != 0";
 	$result   = pupe_query($query);
 	$hintarow = mysql_fetch_assoc($result);
 
@@ -1047,7 +1065,7 @@ if ($tila == '') {
 	}
 
 	$kentat_array[] = "$alvti alv";
-	$kentat_array[] = "round((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * {$query_ale_lisa} * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),'$yhtiorow[hintapyoristys]') rivihinta";
+	$kentat_array[] = "round((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * {$query_ale_lisa} * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),'$yhtiorow[hintapyoristys]') rivihinta_2";
 	$kentat_array[] = "round((tilausrivi.varattu+tilausrivi.kpl) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa} *
 							(1+(if ((SELECT max(kaytetty) kaytetty
 									FROM sarjanumeroseuranta
@@ -1098,6 +1116,7 @@ if ($tila == '') {
 	$kenhak_array[] = 'rivihinta';
 	$kenhak_array[] = 'alerivihinta';
 	#$kenhak_array[] = 'kuluhinta';
+	$kenhak_array[] = 'rivihinta_2';
 	$kenhak_array[] = 'toimaika';
 	$kenhak_array[] = 'kommentti';
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kenhak_array[] = 'laskunro';
@@ -1228,7 +1247,7 @@ if ($tila == '') {
 				tilausrivin_lisatiedot.suoratoimitettuaika,
 				lasku.comments
 				FROM lasku
-				JOIN tilausrivi use index ($tilriindex) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$uusilisa}otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
+				JOIN tilausrivi use index ($tilriindex) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$uusilisa}otunnus=lasku.tunnus and tilausrivi.tyyppi='O' AND tilausrivi.kpl+tilausrivi.varattu != 0 $tilaajanrivinro $lisa2
 				LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno  and tuote.ei_saldoa = '')
 				LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus

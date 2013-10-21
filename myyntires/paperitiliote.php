@@ -1,7 +1,7 @@
 <?php
 
 	function alku () {
-		global $pdf, $asiakastiedot, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $kieli, $tito_pvm, $alatila;
+		global $pdf, $asiakastiedot, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $kieli, $tito_pvm, $alatila, $on_tiliote;
 
 		$firstpage = $pdf->new_page("a4");
 
@@ -82,10 +82,9 @@
 		$oikpos = $pdf->strlen(t("Avoinsumma", $kieli), $pieni);
 		$pdf->draw_text(480-$oikpos, $kala, t("Avoinsumma", $kieli),$firstpage, $pieni);
 
-		if ($tito_pvm != date('Y-m-d')) {
+		if (($on_tiliote and $tito_pvm != date('Y-m-d')) or !$on_tiliote) {
 			$pdf->draw_text(510, $kala, t("Maksettu", $kieli),		$firstpage, $pieni);
 		}
-
 
 		$kala -= 15;
 
@@ -93,7 +92,7 @@
 	}
 
 	function rivi ($tyyppi, $firstpage, $row) {
-		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni,$kieli, $yhtiorow, $tito_pvm, $alatila, $asiakastiedot;
+		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni,$kieli, $yhtiorow, $tito_pvm, $alatila, $asiakastiedot, $on_tiliote;
 
 		if ($lask == 35) {
 			$sivu++;
@@ -112,23 +111,52 @@
 			$pdf->draw_text(300, $kala, $row["valkoodi"], 				$firstpage, $norm);
 
 			if (strtoupper($row['valkoodi']) == strtoupper($yhtiorow['valkoodi'])) {
-				$oikpos = $pdf->strlen($row["tiliointisumma"], $norm);
-				$pdf->draw_text(400-$oikpos, $kala, $row["tiliointisumma"],		$firstpage, $norm);
+				if ($on_tiliote) {
+					$oikpos = $pdf->strlen($row["tiliointisumma"], $norm);
+					$pdf->draw_text(400-$oikpos, $kala, $row["tiliointisumma"],		$firstpage, $norm);
 
-				$oikpos = $pdf->strlen($row["tiliointiavoinsaldo"], $norm);
-				$pdf->draw_text(480-$oikpos, $kala, $row["tiliointiavoinsaldo"], $firstpage, $norm);
+					$oikpos = $pdf->strlen($row["tiliointiavoinsaldo"], $norm);
+					$pdf->draw_text(480-$oikpos, $kala, $row["tiliointiavoinsaldo"], $firstpage, $norm);
+				}
+				else {
+					$oikpos = $pdf->strlen($row["laskusumma"], $norm);
+					$pdf->draw_text(400-$oikpos, $kala, $row["laskusumma"],		$firstpage, $norm);
+
+					if ($row['mapvm'] == '0000-00-00') {
+						$oikpos = $pdf->strlen($row["laskuavoinsaldo"], $norm);
+						$pdf->draw_text(480-$oikpos, $kala, $row["laskuavoinsaldo"], $firstpage, $norm);
+					}
+					else {
+						$oikpos = $pdf->strlen('0.00', $norm);
+						$pdf->draw_text(480-$oikpos, $kala, '0.00', $firstpage, $norm);
+					}
+				}
+
 			}
 			else {
-				$oikpos = $pdf->strlen($row["tiliointisumma_valuutassa"], $norm);
-				$pdf->draw_text(400-$oikpos, $kala, $row["tiliointisumma_valuutassa"],		$firstpage, $norm);
+				if ($on_tiliote) {
+					$oikpos = $pdf->strlen($row["tiliointisumma_valuutassa"], $norm);
+					$pdf->draw_text(400-$oikpos, $kala, $row["tiliointisumma_valuutassa"],		$firstpage, $norm);
 
-				$oikpos = $pdf->strlen($row["tiliointiavoinsaldo_valuutassa"], $norm);
-				$pdf->draw_text(480-$oikpos, $kala, $row["tiliointiavoinsaldo_valuutassa"],	$firstpage, $norm);
+					$oikpos = $pdf->strlen($row["tiliointiavoinsaldo_valuutassa"], $norm);
+					$pdf->draw_text(480-$oikpos, $kala, $row["tiliointiavoinsaldo_valuutassa"],	$firstpage, $norm);
+				}
+				else {
+					$oikpos = $pdf->strlen($row["laskusumma_valuutassa"], $norm);
+					$pdf->draw_text(400-$oikpos, $kala, $row["laskusumma_valuutassa"],		$firstpage, $norm);
+
+					if ($row['mapvm'] == '0000-00-00') {
+						$oikpos = $pdf->strlen($row["laskuavoinsaldo_valuutassa"], $norm);
+						$pdf->draw_text(480-$oikpos, $kala, $row["laskuavoinsaldo_valuutassa"],	$firstpage, $norm);
+					}
+					else {
+						$oikpos = $pdf->strlen('0.00', $norm);
+						$pdf->draw_text(480-$oikpos, $kala, '0.00',	$firstpage, $norm);
+					}
+				}
 			}
 
-			if ($tito_pvm != date('Y-m-d')) {
-				$pdf->draw_text(510, $kala, tv1dateconv($row["mapvm"]), 	$firstpage, $norm);
-			}
+			$pdf->draw_text(510, $kala, tv1dateconv($row["mapvm"]), 	$firstpage, $norm);
 		}
 		else {
 			$pdf->draw_text(30,  $kala, t("Kohdistamaton suoritus"),	$firstpage, $norm);
@@ -273,6 +301,23 @@
 		$mapvmlisa = " and (lasku.mapvm  > '{$tito_pvm}' or lasku.mapvm = '0000-00-00') ";
 	}
 
+	$tapvmlisa     = "";
+	$tiliointilisa = "";
+	$leftlisa      = "";
+
+	if (isset($laskuraportti)) {
+		if (!empty($alkupvm) and !empty($loppupvm)) {
+			$tapvmlisa = " AND lasku.tapvm >= '{$alkupvm}' AND lasku.tapvm <= '{$loppupvm}'";
+		}
+		$on_tiliote = false;
+		$leftlisa = "LEFT";
+	}
+	else {
+		$tiliointilisa = "and tiliointi.tapvm <= '{$tito_pvm}'";
+		$tapvmlisa = " and lasku.tapvm <= '{$tito_pvm}'";
+		$on_tiliote = true;
+	}
+
 	$query = "	SELECT
 				lasku.ytunnus,
 				lasku.maa,
@@ -293,15 +338,15 @@
 				sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0))-lasku.pyoristys tiliointisumma,
 				sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
 				FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-				JOIN tiliointi use index (tositerivit_index) ON (
+				{$leftlisa} JOIN tiliointi use index (tositerivit_index) ON (
 					lasku.yhtio 		    = tiliointi.yhtio
 					and lasku.tunnus 	    = tiliointi.ltunnus
 					and tiliointi.tilino   in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
 					and tiliointi.korjattu  = ''
-					and tiliointi.tapvm    <= '$tito_pvm' )
+					{$tiliointilisa} )
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				{$mapvmlisa}
-				and lasku.tapvm	  <= '{$tito_pvm}'
+				{$tapvmlisa}
 				and lasku.tapvm	  > '0000-00-00'
 				and lasku.tila	  = 'U'
 				and lasku.alatila = 'X'
@@ -329,11 +374,11 @@
 
 	$query = "	SELECT maksupvm tapvm, summa * -1 summa, valkoodi, summa*-1 laskusumma
 				FROM suoritus
-				WHERE suoritus.yhtio = '$kukarow[yhtio]'
-				and (suoritus.kohdpvm = '0000-00-00' or (suoritus.kohdpvm > '$tito_pvm' and suoritus.maksupvm < '$tito_pvm'))
-				and suoritus.ltunnus  > 0
-				and suoritus.kirjpvm <= '$tito_pvm'
-				and suoritus.asiakas_tunnus in ($tunnukset)";
+				WHERE suoritus.yhtio = '{$kukarow["yhtio"]}'
+				AND (suoritus.kohdpvm = '0000-00-00' OR suoritus.maksupvm > '{$tito_pvm}')
+				AND suoritus.kirjpvm <= '{$tito_pvm}'
+				AND suoritus.ltunnus  > 0
+				AND suoritus.asiakas_tunnus in ($tunnukset)";
 	$suoritusresult = pupe_query($query);
 
 	$firstpage = alku();

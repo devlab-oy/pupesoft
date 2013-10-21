@@ -1,53 +1,98 @@
 <?php
 
 	// Kutsutaanko CLI:stä
-	if (php_sapi_name() != 'cli') {
+	$php_cli = FALSE;
+
+	if (php_sapi_name() == 'cli') {
+		$php_cli = TRUE;
+	}
+
+	date_default_timezone_set('Europe/Helsinki');
+
+	// Kutsutaanko CLI:stä
+	if (!$php_cli) {
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
 
 	$pupe_root_polku = dirname(dirname(__FILE__));
+
 	require ("{$pupe_root_polku}/inc/connect.inc");
 	require ("{$pupe_root_polku}/inc/functions.inc");
+
+	$lock_params = array(
+		"locktime" => 5400,
+		"lockfile" => '##tuote-export-flock.lock',
+	);
+
+	// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
+	pupesoft_flock($lock_params);
+
 	require ("{$pupe_root_polku}/rajapinnat/magento_client.php");
 
+	// Laitetaan unlimited execution time
+	ini_set("max_execution_time", 0);
+
 	if (trim($argv[1]) != '') {
-		$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
-		$kukarow["extranet"] = "";
-		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+		$yhtio = mysql_real_escape_string($argv[1]);
+		$yhtiorow = hae_yhtion_parametrit($yhtio);
+		$kukarow = hae_kukarow('admin', $yhtio);
+
+		if ($kukarow === null) {
+			die ("\n");
+		}
 	}
 	else {
 		die ("Et antanut yhtiötä.\n");
 	}
 
-	if (trim($argv[2]) != '') {
-		$verkkokauppatyyppi = trim($argv[2]);
-	}
-	else {
+	$verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
+
+	if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia") {
 		die ("Et antanut verkkokaupan tyyppiä.\n");
 	}
 
 	if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
 		// Varmistetaan, että kaikki muuttujat on kunnossa
-		if (empty($magento_api_ana_url) or empty($magento_api_ana_usr) or empty($magento_api_ana_pas)) {
+		if (empty($magento_api_ana_url) or empty($magento_api_ana_usr) or empty($magento_api_ana_pas) or empty($magento_tax_class_id)) {
+			echo "Magento parametrit puuttuu, päivitystä ei voida ajaa.";
 			exit;
 		}
-
-		// Testataan vielä, että yhteys toimii ennenkun ajellaan queryjä
-		$magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 	}
 
 	$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
 
+	if (isset($verkkokauppa_saldo_varasto) and !is_array($verkkokauppa_saldo_varasto)) {
+		echo "verkkokauppa_saldo_varasto pitää olla array!";
+		exit;
+	}
+
+	// Haetaan timestamp
+	$datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
+
+	if (mysql_num_rows($datetime_checkpoint_res) != 1) {
+		exit("VIRHE: Timestamp ei löydy avainsanoista!\n");
+	}
+
+	$datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
+	$datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mikä tilanne on jo käsitelty
+	$datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
+
 	// alustetaan arrayt
-	$dnstuote = $dnsryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = array();
+	$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = $kaikki_tuotteet = array();
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND (tuote.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR) OR ta_nimitys_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR) OR ta_nimitys_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR))";
+		$muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
+							OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
+							OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
+							)";
 	}
 	else {
 		$muutoslisa = "";
 	}
+
+	echo date("d.m.Y @ G:i:s")." - Aloitetaan tuote-export.\n";
+	echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
 
 	// Haetaan pupesta tuotteen tiedot
 	$query = "	SELECT tuote.tuoteno,
@@ -65,6 +110,9 @@
 				tuote.nakyvyys,
 				tuote.tuotemassa,
 				tuote.tunnus,
+				tuote.mallitarkenne campaign_code,
+				tuote.malli target,
+				tuote.leimahduspiste onsale,
 				ta_nimitys_se.selite nimi_swe,
 				ta_nimitys_en.selite nimi_eng,
 				try_fi.selitetark try_nimi
@@ -119,17 +167,52 @@
 							'nakyvyys'				=> $row["nakyvyys"],
 							'nimi_swe'				=> $row["nimi_swe"],
 							'nimi_eng'				=> $row["nimi_eng"],
-							'tunnus'				=> $row['tunnus']
+							'campaign_code'			=> $row["campaign_code"],
+							'target'				=> $row["target"],
+							'onsale'				=> $row["onsale"],
+							'tunnus'				=> $row['tunnus'],
 							);
 	}
 
+	// Magentoa varten pitää hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa
+	if ($verkkokauppatyyppi == 'magento') {
+
+		echo date("d.m.Y @ G:i:s")." - Haetaan poistettavat tuotteet.\n";
+
+		// Haetaan pupesta kaikki tuotteet (ja configurable-tuotteet), jotka pitää olla Magentossa
+		$query = "	SELECT DISTINCT tuotteen_avainsanat.selite configurable_tuoteno, tuote.tuoteno
+					FROM tuotteen_avainsanat
+					JOIN tuote ON (tuote.yhtio = tuotteen_avainsanat.yhtio
+					AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
+					AND tuote.status != 'P'
+					AND tuote.tuotetyyppi NOT IN ('A','B')
+					AND tuote.tuoteno != ''
+					AND tuote.nakyvyys != '')
+					WHERE tuotteen_avainsanat.yhtio = '{$kukarow["yhtio"]}'
+					AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+					AND trim(tuotteen_avainsanat.selite) != ''";
+		$res = pupe_query($query);
+
+		// Kaikki tuotenumerot arrayseen
+		while ($row = mysql_fetch_array($res)) {
+			$kaikki_tuotteet[] = $row['tuoteno'];
+			$kaikki_tuotteet[] = $row['configurable_tuoteno'];
+		}
+
+		$kaikki_tuotteet = array_unique($kaikki_tuotteet);
+	}
+
+	echo date("d.m.Y @ G:i:s")." - Haetaan saldot.\n";
+
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa1 = "AND tapahtuma.laadittu > DATE_SUB(now(), INTERVAL 1 HOUR)";
-		$muutoslisa2 = "AND tilausrivi.laadittu > DATE_SUB(now(), INTERVAL 1 HOUR)";
+		$muutoslisa1 = "AND tapahtuma.laadittu >= '{$datetime_checkpoint}'";
+		$muutoslisa2 = "AND tilausrivi.laadittu >= '{$datetime_checkpoint}'";
+		$muutoslisa3 = "AND tuote.muutospvm >= '{$datetime_checkpoint}'";
 	}
 	else {
 		$muutoslisa1 = "";
 		$muutoslisa2 = "";
+		$muutoslisa3 = "";
 	}
 
 	// Haetaan saldot tuotteille, joille on tehty tunnin sisällä tilausrivi tai tapahtuma
@@ -159,11 +242,23 @@
 				WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 				$muutoslisa2)
 
+				UNION
+
+				(SELECT tuote.tuoteno,
+				tuote.eankoodi
+				FROM tuote
+				WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+				AND tuote.status != 'P'
+				AND tuote.tuotetyyppi NOT in ('A','B')
+				AND tuote.tuoteno != ''
+				AND tuote.nakyvyys != ''
+				$muutoslisa3)
+
 				ORDER BY 1";
 	$result = pupe_query($query);
 
 	while ($row = mysql_fetch_assoc($result)) {
-		list(,,$myytavissa) = saldo_myytavissa($row["tuoteno"]);
+		list(,,$myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
 		$dnstock[] = array(	'tuoteno'		=> $row["tuoteno"],
 							'ean'			=> $row["eankoodi"],
 							'myytavissa'	=> $myytavissa,
@@ -171,16 +266,18 @@
 	}
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND (try_fi.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-			OR try_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-			OR try_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-			OR osasto_fi.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-			OR osasto_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-			OR osasto_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR))";
+		$muutoslisa = "AND (try_fi.muutospvm >= '{$datetime_checkpoint}'
+			OR try_se.muutospvm >= '{$datetime_checkpoint}'
+			OR try_en.muutospvm >= '{$datetime_checkpoint}'
+			OR osasto_fi.muutospvm >= '{$datetime_checkpoint}'
+			OR osasto_se.muutospvm >= '{$datetime_checkpoint}'
+			OR osasto_en.muutospvm >= '{$datetime_checkpoint}')";
 	}
 	else {
 		$muutoslisa = "";
 	}
+
+	echo date("d.m.Y @ G:i:s")." - Haetaan osastot/tuoteryhmät.\n";
 
 	// Haetaan kaikki TRY ja OSASTO:t, niiden muutokset.
 	$query = "	SELECT DISTINCT	tuote.osasto,
@@ -205,10 +302,11 @@
 				AND tuote.nakyvyys != ''
 				$muutoslisa
 				ORDER BY 1, 2";
-	$result = pupe_query($query);
+	$try_result = pupe_query($query);
 
-	while ($row = mysql_fetch_assoc($result)) {
+	while ($row = mysql_fetch_assoc($try_result)) {
 
+		// Osasto/tuoteryhmä array
 		$dnsryhma[$row["osasto"]][$row["try"]] = array(	'osasto'	=> $row["osasto"],
 														'try'		=> $row["try"],
 														'osasto_fi'	=> $row["osasto_fi_nimi"],
@@ -218,14 +316,23 @@
 														'osasto_en' => $row["osasto_en_nimi"],
 														'try_en'	=> $row["try_en_nimi"],
 														);
+
+		// Kerätään myös pelkät tuotenumerot Magentoa varten
+		$dnstuoteryhma[$row["try"]] = array(	'try'		=> $row["try"],
+												'try_fi'	=> $row["try_fi_nimi"],
+												'try_se'	=> $row["try_se_nimi"],
+												'try_en'	=> $row["try_en_nimi"],
+												);
 	}
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND asiakas.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)";
+		$muutoslisa = "AND asiakas.muutospvm >= '{$datetime_checkpoint}'";
 	}
 	else {
 		$muutoslisa = "";
 	}
+
+	echo date("d.m.Y @ G:i:s")." - Haetaan asiakkaat.\n";
 
 	// Haetaan kaikki asiakkaat
 	$query = "	SELECT asiakas.nimi,
@@ -250,11 +357,13 @@
 	}
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND hinnasto.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)";
+		$muutoslisa = "AND hinnasto.muutospvm >= '{$datetime_checkpoint}'";
 	}
 	else {
 		$muutoslisa = "";
 	}
+
+	echo date("d.m.Y @ G:i:s")." - Haetaan hinnastot.\n";
 
 	// Haetaan kaikki hinnastot ja alv
 	$query = "	SELECT hinnasto.tuoteno,
@@ -300,16 +409,28 @@
 								);
 	}
 
-	// haetaan tuotteen variaatiot
-	$query = "	SELECT distinct selite
+	echo date("d.m.Y @ G:i:s")." - Haetaan tuotteiden variaatiot.\n";
+
+	// haetaan kaikki tuotteen variaatiot, jotka on menossa verkkokauppaan
+	$query = "	SELECT DISTINCT tuotteen_avainsanat.selite selite
 				FROM tuotteen_avainsanat
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND laji = 'parametri_variaatio'
-				AND trim(selite) != ''";
+				JOIN tuote ON (tuote.yhtio = tuotteen_avainsanat.yhtio
+				AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
+				AND tuote.status != 'P'
+				AND tuote.tuotetyyppi NOT IN ('A','B')
+				AND tuote.tuoteno != ''
+				$nakyvyys_lisa)
+				WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
+				AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+				AND trim(tuotteen_avainsanat.selite) != ''";
 	$resselite = pupe_query($query);
 
 	if ($ajetaanko_kaikki == "NO") {
-		$muutoslisa = "AND tuotteen_avainsanat.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)";
+		$muutoslisa = " AND (tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}'
+							OR try_fi.muutospvm  >= '{$datetime_checkpoint}'
+							OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
+							OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
+							OR tuote.muutospvm  >= '{$datetime_checkpoint}')";
 	}
 	else {
 		$muutoslisa = "";
@@ -321,8 +442,10 @@
 	// loopataan variaatio-nimitykset
 	while ($rowselite = mysql_fetch_assoc($resselite)) {
 
+		// Haetaan kaikki tuotteet, jotka kuuluu tähän variaatioon ja on muuttunut
 		$aliselect = "	SELECT
 						tuotteen_avainsanat.tuoteno,
+						tuotteen_avainsanat.jarjestys,
 						tuote.tunnus,
 						tuote.nimitys,
 						tuote.kuvaus,
@@ -336,6 +459,9 @@
 						tuote.eankoodi,
 						tuote.alv,
 						tuote.nakyvyys,
+						tuote.mallitarkenne campaign_code,
+						tuote.malli target,
+						tuote.leimahduspiste onsale,
 						try_fi.selitetark try_nimi
 						FROM tuotteen_avainsanat
 						JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio
@@ -347,7 +473,8 @@
 						LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio and try_fi.selite = tuote.try and try_fi.laji = 'try' and try_fi.kieli = 'fi')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys' and ta_nimitys_se.kieli = 'se')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en')
-						WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
+						WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
+						AND tuotteen_avainsanat.laji = 'parametri_variaatio'
 						AND tuotteen_avainsanat.selite = '{$rowselite['selite']}'
 						{$muutoslisa}
 						ORDER BY tuote.tuoteno";
@@ -355,10 +482,12 @@
 
 		while ($alirow = mysql_fetch_assoc($alires)) {
 
+			// Haetaan kaikki tuotteen atribuutit
 			$alinselect = " SELECT tuotteen_avainsanat.selite,
-							avainsana.selitetark
-							FROM tuotteen_avainsanat
-							JOIN avainsana ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
+							avainsana.selitetark,
+							avainsana.selite option_name
+							FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
+							JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
 								AND avainsana.laji = 'PARAMETRI'
 								AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
 							WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
@@ -366,12 +495,14 @@
 							AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
 							AND tuotteen_avainsanat.laji like 'parametri_%'
 							AND tuotteen_avainsanat.tuoteno = '{$alirow['tuoteno']}'
+							AND tuotteen_avainsanat.kieli = 'fi'
 							ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
 			$alinres = pupe_query($alinselect);
 			$properties = array();
 
 			while ($syvinrow = mysql_fetch_assoc($alinres)) {
 				$properties[] = array(	"nimi" => $syvinrow["selitetark"],
+										"option_name" => $syvinrow["option_name"],
 				 						"arvo" => $syvinrow["selite"]);
 			}
 
@@ -401,6 +532,10 @@
 															'try_nimi'				=> $alirow["try_nimi"],
 															'nimi_swe'				=> $alirow["nimi_swe"],
 															'nimi_eng'				=> $alirow["nimi_eng"],
+															'campaign_code'			=> $alirow["campaign_code"],
+															'target'				=> $alirow["target"],
+															'onsale'				=> $alirow["onsale"],
+															'jarjestys'				=> $alirow["jarjestys"],
 															'myyntihinta'			=> $myyntihinta,
 															'myyntihinta_veroton'	=> $myyntihinta_veroton,
 															'myymalahinta'			=> $myymalahinta,
@@ -412,50 +547,69 @@
 
 	}
 
+	$tuote_export_error_count = 0;
+
+	echo date("d.m.Y @ G:i:s")." - Aloitetaan päivitys verkkokauppaan.\n";
+
 	if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
 		$time_start = microtime(true);
 
-		echo "Päivitetään Magento verkkokauppaa!\n";
-
 		$magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
 
+		if ($magento_client->getErrorCount() > 0) {
+			exit;
+		}
+
 		// tax_class_id, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
-		if (! isset($magento_tax_class_id)) $magento_tax_class_id = 0;
 		$magento_client->setTaxClassID($magento_tax_class_id);
 
 		// lisaa_kategoriat
-		if (count($dnsryhma) > 0) {
-			echo "Päivitetään tuotekategoriat\n";
-			$count = $magento_client->lisaa_kategoriat($dnsryhma);
-			echo "Päivitettiin $count kategoriaa\n";
+		if (count($dnstuoteryhma) > 0) {
+			echo date("d.m.Y @ G:i:s")." - Päivitetään tuotekategoriat\n";
+			$count = $magento_client->lisaa_kategoriat($dnstuoteryhma);
+			echo date("d.m.Y @ G:i:s")." - Päivitettiin $count kategoriaa\n";
 		}
 
 		// Tuotteet (Simple)
 		if (count($dnstuote) > 0) {
-			echo "Päivitetään simple tuotteet\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitetään simple tuotteet\n";
 			$count = $magento_client->lisaa_simple_tuotteet($dnstuote);
-			echo "Päivitettiin $count tuotetta (simple)\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotetta (simple)\n";
 		}
 
 		// Tuotteet (Configurable)
 		if (count($dnslajitelma) > 0) {
-			echo "Päivitetään configurable tuotteet\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitetään configurable tuotteet\n";
 			$count = $magento_client->lisaa_configurable_tuotteet($dnslajitelma);
-			echo "Päivitettiin $count tuotetta (configurable)\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotetta (configurable)\n";
 		}
 
 		// Saldot
 		if (count($dnstock) > 0) {
-			echo "Päivitetään tuotteiden saldot\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitetään tuotteiden saldot\n";
 			$count = $magento_client->paivita_saldot($dnstock);
-			echo "Päivitettiin $count tuotteen saldot\n";
+			echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotteen saldot\n";
+		}
+
+		// Poistetaan tuotteet jota ei ole kaupassa
+		if (count($kaikki_tuotteet) > 0) {
+			echo date("d.m.Y @ G:i:s")." - Poistetaan ylimääräiset tuotteet\n";
+			// HUOM, tähän passataan **KAIKKI** verkkokauppatuotteet, methodi katsoo että kaikki nämä on kaupassa, muut dellataan!
+			$count = $magento_client->poista_poistetut($kaikki_tuotteet);
+			echo date("d.m.Y @ G:i:s")." - Poistettiin $count tuotetta\n";
+		}
+
+		$tuote_export_error_count = $magento_client->getErrorCount();
+
+		if ($tuote_export_error_count != 0) {
+			echo date("d.m.Y @ G:i:s")." - Päivityksessä tapahtui {$tuote_export_error_count} virhettä!\n";
 		}
 
 		$time_end = microtime(true);
-		$time = $time_end - $time_start;
+		$time = round($time_end - $time_start);
 
-		echo 'Magenton päivitys kesti '.$time.' sekuntia';
+		echo date("d.m.Y @ G:i:s")." - Tuote-export valmis! (Magento API {$time} sekuntia)\n";
 	}
 	elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
 
@@ -497,4 +651,21 @@
 		if (count($dnslajitelma) > 0) {
 			require ("{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc");
 		}
+	}
+
+	// Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
+	unset($link);
+	$link = mysql_connect($dbhost, $dbuser, $dbpass, true) or die ("Ongelma tietokantapalvelimessa $dbhost (tuote_export)");
+	mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (tuote_export)");
+	mysql_set_charset("latin1", $link);
+
+	// Kun kaikki onnistui, päivitetään lopuksi timestamppi talteen
+	$query = "	UPDATE avainsana SET
+				selite = '{$datetime_checkpoint_uusi}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND laji = 'TUOTE_EXP_CRON'";
+	pupe_query($query);
+
+	if (mysql_affected_rows() != 1) {
+		echo "Timestamp päivitys epäonnistui!\n";
 	}

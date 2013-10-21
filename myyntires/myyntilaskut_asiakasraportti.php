@@ -221,7 +221,8 @@
 			$query = "	SELECT tunnus, ytunnus, nimi, osoite, postino, postitp, maa, IF(lasku_email != '', lasku_email, email) AS email
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
-						and $haku_sql";
+						and $haku_sql
+						ORDER BY email DESC";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
@@ -312,7 +313,7 @@
 
 				echo "<table>
 					<tr>
-					<th rowspan='$riveja'><a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$ytunnus&asiakasid=$asiakasid&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi'>$asiakasrow[nimi]</a></th>
+					<th rowspan='$riveja'><a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$ytunnus&asiakasid=$asiakasid&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl'>$asiakasrow[nimi]</a></th>
 					<td rowspan='$riveja'>".t("Kaatotilill‰")."</td>";
 
 				if (mysql_num_rows($kaatoresult) > 1) { // Valuuttasummia
@@ -406,7 +407,7 @@
 					<td colspan='2'></td></tr>";
 
 				echo "<tr>
-					<th>$asiakasrow[maa]</th><td colspan='2'><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid=$asiakasid&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi'>".t("Asiakkaan myyntitiedot")."</a></td>
+					<th>$asiakasrow[maa]</th><td colspan='2'><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid=$asiakasid&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl'>".t("Asiakkaan myyntitiedot")."</a></td>
 					</tr>";
 
 				if ($asiakasrow['email'] != '') {
@@ -416,26 +417,19 @@
 					echo "</tr>";
 				}
 
-				$as_tunnus = explode(",", $tunnukset);
+				$query  = "	SELECT group_concat(distinct kentta01 SEPARATOR '<br>') viestit
+				  			FROM kalenteri
+				   			WHERE yhtio = '$kukarow[yhtio]'
+				   			AND tyyppi  = 'Myyntireskontraviesti'
+				       		AND liitostunnus in ($tunnukset)
+							ORDER BY tunnus desc";
+				$amres = pupe_query($query);
+				$amrow = mysql_fetch_assoc($amres);
 
-				foreach ($as_tunnus as $astun) {
-					$query  = "	SELECT kentta01
-						        FROM kalenteri
-						        WHERE yhtio = '$kukarow[yhtio]'
-						        AND tyyppi  = 'Myyntireskontraviesti'
-						        AND liitostunnus = '$astun'
-						        AND yhtio   = '$kukarow[yhtio]'
-								ORDER BY tunnus desc
-								LIMIT 1";
-					$amres = pupe_query($query);
-
-					if (mysql_num_rows($amres) > 0) {
-						$amrow = mysql_fetch_assoc($amres);
-
-						echo "<tr>
-							<th>".t("Reskontraviesti")."</th><td colspan='2'>$amrow[kentta01]</td>
-							</tr>";
-					}
+				if ($amrow['viestit'] != "") {
+					echo "<tr>
+						<th>".t("Reskontraviesti")."</th><td colspan='2'>{$amrow['viestit']}</td>
+						</tr>";
 				}
 
 				echo "</table><br>";
@@ -551,6 +545,13 @@
 					$salisa = " and lasku.valkoodi='$savalkoodi' ";
 				}
 
+				$laskupvm_where = "";
+				if (!empty($ppa) and !empty($kka) and !empty($vva) and !empty($ppl) and !empty($kkl) and !empty($vvl)) {
+					$alkupvm = "{$vva}-{$kka}-{$ppa}";
+					$loppupvm = "{$vvl}-{$kkl}-{$ppl}";
+					$laskupvm_where = "	AND tapvm >= '{$alkupvm}' AND tapvm <= '{$loppupvm}'";
+				}
+
 				$query = "	SELECT laskunro, tapvm, erpcm,
 							summa loppusumma,
 							summa_valuutassa loppusumma_valuutassa,
@@ -570,6 +571,7 @@
 							and alatila = 'X'
 							and liitostunnus in ($tunnukset)
 							AND tapvm > '0000-00-00'
+							{$laskupvm_where}
 							$mapvmlisa
 							$salisa
 							ORDER BY erpcm";
@@ -592,7 +594,7 @@
 						<option value='maksetut' $chk2>".t("Maksetut laskut")."</option>
 						<option value='kaikki' $chk3>".t("Kaikki laskut")."</option>
 						</select>
-						</td>";
+						</td></tr>";
 
 				$query = "	SELECT
 							distinct upper(if(valkoodi='', '$yhtiorow[valkoodi]' , valkoodi)) valuutat
@@ -604,9 +606,9 @@
 							$mapvmlisa";
 				$aasres = pupe_query($query);
 
-				if (mysql_num_rows($aasres) > 0) {
+				if (mysql_num_rows($aasres) > 1) {
 
-					echo "<th>".t("Valuutta").":</th><td><select name='savalkoodi' onchange='submit();'>";
+					echo "<tr><th>".t("Valuutta").":</th><td><select name='savalkoodi' onchange='submit();'>";
 					echo "<option value = ''>".t("Kaikki")."</option>";
 
 					while ($aasrow = mysql_fetch_array($aasres)) {
@@ -619,7 +621,26 @@
 				}
 
 				echo "</tr>";
-				echo "</table></form><br>";
+
+				echo "<tr>";
+				echo "<th>".t('Alkup‰iv‰m‰‰r‰')."</th>";
+				echo "<td>";
+				echo "<input type='text' id='ppa' name='ppa' value='{$ppa}' size='3'/>";
+				echo "<input type='text' id='kka' name='kka' value='{$kka}' size='3' />";
+				echo "<input type='text' id='vva' name='vva' value='{$vva}' size='6' />";
+				echo "</td>";
+				echo "<tr>";
+				echo "<tr>";
+				echo "<th>".t('Loppup‰iv‰m‰‰r‰')."</th>";
+				echo "<td>";
+				echo "<input type='text' id='ppl' name='ppl' value='{$ppl}' size='3' />";
+				echo "<input type='text' id='kkl' name='kkl' value='{$kkl}' size='3' />";
+				echo "<input type='text' id='vvl' name='vvl' value='{$vvl}' size='6' />";
+				echo "</td>";
+				echo "<td class='back'><input type='submit' value='".t('Hae')."' /></td>";
+				echo "</tr>";
+				echo "</table>";
+				echo "</form><br>";
 
 				if (mysql_num_rows($result) > 0) {
 					echo "<form method = 'post'>
@@ -690,7 +711,7 @@
 							echo "<input class='laskunro' type='checkbox' value='{$maksurow['laskunro']}' /> ";
 						}
 
-						echo "<a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi'>$maksurow[laskunro]</a>";
+						echo "<a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl'>$maksurow[laskunro]</a>";
 						echo "</td>";
 
 						echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['tapvm']).tv1dateconv($maksurow["tapvm"])."</td>";
@@ -780,7 +801,7 @@
 							$avoimet[$maksurow['valkoodi']] += $maksurow['avoinsumma'];
 						}
 
-						$korkoja += $maksurow['korko'];
+						if ($maksurow["korko"] > 0) $korkoja += $maksurow['korko'];
 					}
 
 					echo "</tbody>";
@@ -847,6 +868,9 @@
 								<input type='hidden' name = 'asiakasid' value = '{$asiakasid}'>
 								<input type='hidden' name = 'alatila' value = '{$alatila}'>
 								<input type='hidden' name = 'valintra' value='{$valintra}' />
+								<input type='hidden' name = 'alkupvm' value='{$alkupvm}' />
+								<input type='hidden' name = 'loppupvm' value='{$loppupvm}' />
+								<input type='hidden' name = 'laskuraportti' value='1' />
 								<input type='submit' value='",t("Tulosta"),"' onClick=\"js_openFormInNewWindow('tulosta_myra', ''); return false;\">
 							</form>
 							</td>";

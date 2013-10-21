@@ -171,7 +171,7 @@ if (!function_exists('alku_valm')) {
 			}
 
 			if (trim($laskurow['asiakkaan_tilausnumero']) != '') {
-				$komm .= "\n".t("Tilauksenne", $kieli).":###".$laskurow['asiakkaan_tilausnumero'];
+				$komm .= "\n".t("Asiakkaan tilausnumero", $kieli).":###".$laskurow['asiakkaan_tilausnumero'];
 			}
 
 			if (trim($laskurow['kohde']) != '') {
@@ -260,7 +260,17 @@ if (!function_exists('uusi_sivu_valm')) {
 
 		$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
-		tulosta_logo_pdf($pdf, $thispage, $laskurow);
+		$logoloppuy = tulosta_logo_pdf($pdf, $thispage, $laskurow);
+		$logoloppuy -= 10;
+
+		//Vasen sarake
+		$pdf->draw_text(35, $logoloppuy, $laskurow["nimi"], 		$thispage, $norm);
+		$pdf->draw_text(35, $logoloppuy-10, $laskurow["nimitark"],	$thispage, $norm);
+		$pdf->draw_text(35, $logoloppuy-20, $laskurow["osoite"], 	$thispage, $norm);
+		$pdf->draw_text(35, $logoloppuy-30, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
+		$pdf->draw_text(35, $logoloppuy-40, $laskurow["maa"], 		$thispage, $norm);
+		
+		$logoloppuy -= 55;
 
 		// haetaan maksuehdon tiedot
 		$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
@@ -334,10 +344,10 @@ if (!function_exists('uusi_sivu_valm')) {
 		if (trim($komm) != '') {
 			$kommentit = explode("\n", trim($komm));
 
-			$pohja  = 770;
+			$pohja  = $logoloppuy;
 			$maxoik = 0;
 
-			foreach($kommentit as $kommentti) {
+			foreach ($kommentit as $kommentti) {
 				if(strpos($kommentti, "###") !== FALSE) {
 					list($o, $v) = explode("###", $kommentti);
 
@@ -349,7 +359,7 @@ if (!function_exists('uusi_sivu_valm')) {
 				}
 			}
 
-			foreach($kommentit as $kommentti) {
+			foreach ($kommentit as $kommentti) {
 
 				if (strpos($kommentti, "###") !== false) {
 					list($o, $v) = explode("###", $kommentti);
@@ -364,6 +374,9 @@ if (!function_exists('uusi_sivu_valm')) {
 				$pohja = $pohja - 10;
 			}
 			$kala = $pohja-30;
+		}
+		else {
+			$pohja  = $logoloppuy;
 		}
 
 
@@ -383,7 +396,7 @@ if (!function_exists('uusi_sivu_valm')) {
 			system("rm -f $nimi");
 		}
 
-		$kala = 705;
+		$kala = $pohja-30;
 
 		rivi_otsikot_valm($thispage);
 
@@ -510,6 +523,10 @@ if (!function_exists('rivi_valm')) {
 			}
 		}
 
+		if ($row["tunnus"] == $row["perheid"] and $laskurow['asiakkaan_tilausnumero'] != "") {
+			$row["kommentti"] .= "\n".t("Asiakkaan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero'];
+		}
+
 		// Mahtuuko rivi tälle sivulle
 		$kala_nyt = $kala;
 
@@ -576,7 +593,7 @@ if (!function_exists('rivi_valmistus')) {
 		$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $pb);
 		$pdf->draw_text(515-$oikpos, $kala, $row["tilkpl"]." ".$omyks, 		$thispage, $pb);
 
-		if ($row["keratty"] != '') {
+		if ($row["toimitettu"] != '') {
 			$oikpos = $pdf->strlen($row['varattu'], $pb);
 			$pdf->draw_text(575-$oikpos, $kala, $row['varattu'], 			$thispage, $pb);
 		}
@@ -588,7 +605,7 @@ if (!function_exists('rivi_valmistus')) {
 
 		if (trim($row["kommentti"]) != '') {
 
-			$komm = t("Kommentti", $kieli).":\n".$row["kommentti"];
+			$komm = t("Kommentti", $kieli).":\n".trim($row["kommentti"]);
 
 			foreach (explode("\n", wordwrap(trim($komm), 90, "\n")) as $kommentti) {
 				$kala = $kala - $rivinkorkeus;
@@ -765,5 +782,3 @@ if (!function_exists('print_pdf_valm')) {
 		system("rm -f $pdffilenimi");
 	}
 }
-
-?>

@@ -192,8 +192,18 @@ if (!function_exists("menu")) {
 			$result = t_avainsana("VERKKOKAULINKKI");
 
 			while ($orow = mysql_fetch_array($result)) {
-				if ($orow["selite"] == "ETUSIVU") $val .= "<tr><td class='menucell'><a class='menu' href = '{$palvelin2}'>".t("Etusivu")."</a></td></tr>";
-				else $val .= "<tr><td class='menucell'><a class='menu' href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=uutiset&sivu={$orow['selite']}', false, false);\">{$orow['selitetark']}</a></td></tr>";
+				if ($orow["selite"] == "ETUSIVU") {
+					$val .= "<tr><td class='menucell'><a class='menu' href = '{$palvelin2}'>".t("Etusivu")."</a></td></tr>";
+				}
+				else {
+					if (file_exists("{$orow['selitetark']}.png")) {
+						$val .= "<tr><td class='menucell'><a class='menu' href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=uutiset&sivu={$orow['selite']}', false, false);\"><img width='170' src='{$orow['selitetark']}.png'/></a></td></tr>";
+					}
+					else {
+						$val .= "<tr><td class='menucell'><a class='menu' href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=uutiset&sivu={$orow['selite']}', false, false);\">{$orow['selitetark']}</a></td></tr>";
+					}
+
+				}
 			}
 
 			$verkkokauppa_tuotehaku = "<tr><td class='back'><br><font class='info'>".t("Tuotehaku").":</font><br><hr></td></tr>
@@ -1291,7 +1301,7 @@ if ($tee == "") {
 	}
 	else {
 		$login_screen = "<input type='button' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=haku&hakutapa=tila&tilaustila=kesken', false, false);\" value='".t("Avoimet tilaukset")."'>|<input type='button' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria', false, false);\" value='".t("Tilaushistoria")."'>|<input type='button' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot', false, false);\" value='".t("Asiakastiedot")."'>
-			&nbsp;Tervetuloa, ".$kukarow["nimi"]."&nbsp;<input type='button' onclick=\"javascript:document.location='".$palvelin2."logout.php?location=".$palvelin2."';\" value='".t("Kirjaudu ulos")."'>";
+			&nbsp;<font class='login'>Tervetuloa, ".$kukarow["nimi"]."</font>&nbsp;<input type='button' onclick=\"javascript:document.location='".$palvelin2."logout.php?location=".$palvelin2."';\" value='".t("Kirjaudu ulos")."'>";
 	}
 
 	$verkkokauppa_ulos =  "<div class='login' id='login'>$login_screen</div>

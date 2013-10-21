@@ -2,7 +2,8 @@
 
 	if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE) {
 		require ("../inc/parametrit.inc");
-
+		require('valmistuslinjat.inc');
+		require('validation/Validation.php');
 		js_popup();
 	}
 
@@ -109,7 +110,7 @@
 	elseif ($toim == 'VALMISTUS') {
 		echo "<font class='head'>",t("Ker‰‰ valmistus"),":</font><hr>";
 		$tila = "'V'";
-		$tyyppi = "'V','L'";
+		$tyyppi = "'V','L','W'";
 		$tilaustyyppi = "";
 	}
 	elseif ($toim == 'VALMISTUSMYYNTI') {
@@ -273,7 +274,7 @@
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]' and
 					tilausrivi.otunnus in ($tilausnumeroita) and
 					tilausrivi.tyyppi in ('L','G')
-					and tilausrivi.var not in ('P','T','U','J')";
+					and tilausrivi.var not in ('P','T','U','J','O')";
 		$toimresult = pupe_query($query);
 
 		if (mysql_num_rows($toimresult) > 0) {
@@ -443,7 +444,6 @@
 
 			// jos ker‰yser‰t on A, eli asiakkaan takan pit‰‰ olla ker‰yser‰t p‰‰ll‰, tarkistetaan se ensiksi
 			if ($yhtiorow['kerayserat'] == 'A') {
-
 				$query = "	SELECT asiakas.kerayserat
 							FROM lasku
 							JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.kerayserat = 'A')
@@ -455,12 +455,18 @@
 			}
 
 			if ($ok_chk) {
-				for ($y=0; $y < count($kerivi); $y++) {
-					if (trim($keraysera_pakkaus[$kerivi[$y]]) == '') $virherivi++;
+				for ($y=0; $y<count($kerivi); $y++) {
+					$que0 = "	SELECT tilausrivi.tunnus
+								FROM tilausrivi
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi.tunnus  = '{$kerivi[$y]}'";
+					$tark = pupe_query($que0);
+
+					if (mysql_num_rows($tark) == 1 and trim($keraysera_pakkaus[$kerivi[$y]]) == '') $virherivi++;
 				}
 
 				if ($virherivi != 0) {
-
 					echo "<font class='error'>",t("HUOM: Tuotteita ei viety hyllyyn. Syˆt‰ pakkauskirjain"),"!</font><br /><br />";
 					$keraysvirhe++;
 
@@ -523,12 +529,25 @@
 			$who 		= $keraaja['kuka'];
 			$keraamaton = 0;
 
+					$query0 = "	SELECT kerayserat.pakkaus, kerayserat.pakkausnro, kerayserat.sscc, kerayserat.sscc_ulkoinen, kerayserat.tunnus
+								FROM kerayserat
+								WHERE kerayserat.yhtio = '$kukarow[yhtio]'
+								AND kerayserat.nro = '{$id}'
+								GROUP BY 1,2
+								ORDER BY kerayserat.pakkausnro";
+					$pnresult = pupe_query($query0);
+
+					while ($prow = mysql_fetch_assoc($pnresult)) {
+						$pakkaus = array('pakkausnro' => $prow['pakkausnro'], 'sscc' => $prow['sscc'], 'sscc_ulkoinen' => $prow['sscc_ulkoinen'], 'pakkaus' => $prow['pakkaus'], 'tunnus' => $prow['tunnus']);
+						$pakkaukset[] = $pakkaus;
+					}
+
 			for ($i=0; $i < count($kerivi); $i++) {
 
 				$query1 = "	SELECT if (kerattyaika='0000-00-00 00:00:00', 'keraamaton', 'keratty') status
 							FROM tilausrivi
 							WHERE tunnus = '$kerivi[$i]'
-							and yhtio	 = '$kukarow[yhtio]'";
+							AND yhtio	 = '$kukarow[yhtio]'";
 				$ktresult = pupe_query($query1);
 				$statusrow = mysql_fetch_assoc($ktresult);
 
@@ -819,6 +838,16 @@
 										if ($maara[$apui] == 0) {
 											// Mit‰tˆid‰‰n nollarivi koska poikkeamalle kuitenkin tehd‰‰n jotain fiksua
 											$query .= ", tyyppi = 'D', kommentti=trim(concat(kommentti, ' Mit‰tˆitiin koska ker‰yspoikkeamasta tehtiin: ".$poikkeama_kasittely[$apui]."'))";
+
+											//vapautetaan t‰m‰n tilausrivi sarjanumero(t)
+											$queryv = " SELECT otunnus
+														FROM tilausrivi
+														WHERE yhtio = '{$kukarow['yhtio']}'
+														AND tunnus = '{$apui}'";
+											$vapaut = pupe_query($queryv);
+											$vapaurow = mysql_fetch_assoc($vapaut);
+
+											vapauta_sarjanumerot($toim, $vapaurow["otunnus"], "AND tilausrivi.tunnus = '{$apui}'");
 										}
 
 										$rotunnus	= $tilrivirow['otunnus'];
@@ -1133,9 +1162,20 @@
 							$kerattylisa = (trim($maara[$apui]) == '' or $maara[$apui] < 0) ? ", kpl_keratty = kpl" : ", kpl_keratty = '{$maara[$apui]}'";
 
 							$pakkauskirjain = (int) abs(ord($keraysera_pakkaus[$kerivi[$i]]) - 64);
+							$monesko = -1;
+
+							for ($x = 0; $x < count($pakkaukset); $x++){
+								if ($pakkaukset[$x]['pakkausnro'] == $pakkauskirjain){
+									$monesko = $x;
+									break;
+								}
+							}
 
 							$query_ins = "	UPDATE kerayserat SET
-											pakkausnro = '{$pakkauskirjain}'
+											pakkausnro = '{$pakkauskirjain}',
+											sscc = '{$pakkaukset[$monesko]['sscc']}',
+											sscc_ulkoinen = '{$pakkaukset[$monesko]['sscc_ulkoinen']}',
+											pakkaus = '{$pakkaukset[$monesko]['pakkaus']}'
 											{$kerattylisa}
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tilausrivi = '{$kerivi[$i]}'";
@@ -1488,7 +1528,7 @@
 						$query = "	UPDATE tilausrivi
 									SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 									WHERE otunnus 	= '$laskurow[tunnus]'
-									and var not in ('P','J')
+									and var not in ('P','J','O')
 									and yhtio 		= '$kukarow[yhtio]'
 									and keratty    != ''
 									and toimitettu  = ''
@@ -1958,6 +1998,8 @@
 
 		if ($id == 0) {
 
+			$valmistuslinjat = hae_valmistuslinjat();
+
 			$formi	= "find";
 			$kentta	= "etsi";
 
@@ -1967,7 +2009,10 @@
 			echo "<input type='hidden' id='jarj' name='jarj' value='{$jarj}'>";
 
 			echo "<table>";
-			echo "<tr><th>",t("Valitse varasto"),":</th><td><select name='tuvarasto' onchange='submit()'>";
+			echo "<tr>";
+			echo "<th>",t("Valitse varasto"),":</th>";
+			echo "<td>";
+			echo "<select name='tuvarasto' onchange='submit()'>";
 
 			$query = "	SELECT yhtio, tunnus, nimitys
 						FROM varastopaikat
@@ -2021,7 +2066,9 @@
 			}
 
 			echo "</td>";
-			echo "<th>",t("Valitse tilaustyyppi"),":</th><td><select name='tutyyppi' onchange='submit()'>";
+			echo "<th>",t("Valitse tilaustyyppi"),":</th>";
+			echo "<td>";
+			echo "<select name='tutyyppi' onchange='submit()'>";
 
 			$sel = array($tutyyppi => 'selected') + array('NORMAA' => '', 'ENNAKK' => '', 'JTTILA' => '', 'VALMISTUS' => '');
 
@@ -2031,7 +2078,47 @@
 			echo "<option value='JTTILA' {$sel['JTTILA']}>",t("N‰yt‰ jt-tilaukset"),"</option>";
 			echo "<option value='VALMISTUS' {$sel['VALMISTUS']}>",t("N‰yt‰ jt-tilaukset valmistuksesta"),"</option>";
 
-			echo "</select></td></tr>";
+			echo "</select>";
+			echo "</td>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<th>".t('Tuotenumero')."</th>";
+			echo "<td>";
+			echo "<input type='text' name='tuoteno' value='{$tuoteno}' />";
+			echo "</td>";
+
+			echo "<th>".t('Ker‰ysp‰iv‰')." (pp-kk-vvvv)</th>";
+			echo "<td>";
+			echo "	<input type='text' name='pp' value='{$pp}' size='3'>
+					<input type='text' name='kk' value='{$kk}' size='3'>
+					<input type='text' name='vv' value='{$vv}' size='5'>";
+			echo "</td>";
+			echo "</tr>";
+
+			if (!empty($valmistuslinjat)) {
+				echo "<tr>";
+				echo "<th>".t('Valmistuslinja')."</th>";
+				echo "<td>";
+
+				echo "<select name='valmistuslinja'>";
+				echo "<option value='' >".t('Ei valintaa')."</option>";
+				foreach ($valmistuslinjat as $_valmistuslinja) {
+					$sel = "";
+					if ($_valmistuslinja['selite'] == $valmistuslinja) {
+						$sel = "SELECTED";
+					}
+					echo "<option value='{$_valmistuslinja['selite']}' {$sel}>{$_valmistuslinja['selitetark']}</option>";
+				}
+				echo "</select>";
+
+				echo "</td>";
+
+				echo "<th></th>";
+				echo "<td>";
+				echo "</td>";
+				echo "</tr>";
+			}
 
 			echo "<tr><th>",t("Valitse toimitustapa"),":</th><td><select name='tutoimtapa' onchange='submit()'>";
 
@@ -2134,6 +2221,25 @@
 				$alatilareklamaatio = 'A';
 			}
 
+			$tilausrivi_join_ehto = "";
+			if (isset($tuoteno) and $tuoteno != '') {
+				$tilausrivi_join_ehto = "	AND tilausrivi.tuoteno = '{$tuoteno}'";
+			}
+			$valmistuslinja_where = "";
+			if ($valmistuslinja != '') {
+				$valmistuslinja_where = "	AND lasku.kohde = '{$valmistuslinja}'";
+			}
+
+			$kerayspaiva_where = "";
+			if (!empty($pp) and !empty($kk) and !empty($vv)) {
+				$paiva = "{$vv}-{$kk}-{$pp}";
+				$valid = FormValidator::validateContent($paiva, 'paiva');
+
+				if ($valid) {
+					$kerayspaiva_where = "	AND lasku.kerayspvm = '{$paiva}'";
+				}
+			}
+
 			if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 				$query = "	SELECT lasku.yhtio AS 'yhtio',
 							lasku.yhtio_nimi AS 'yhtio_nimi',
@@ -2154,13 +2260,16 @@
 								tilausrivi.otunnus = lasku.tunnus AND
 								tilausrivi.tyyppi = 'L' AND
 								tilausrivi.var IN ('', 'H') AND
-								tilausrivi.keratty = '' AND
-								tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND
+								tilausrivi.keratty = ''
+								{$tilausrivi_join_ehto}
+								AND tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND
 								((tilausrivi.laskutettu = '' AND tilausrivi.laskutettuaika 	= '0000-00-00') OR lasku.mapvm != '0000-00-00'))
 							JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus AND kerayserat.tila = 'K' {$kerayserahaku})
 							JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 							LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.hyvak3)
 							WHERE lasku.{$logistiikka_yhtiolisa}
+							{$valmistuslinja_where}
+							{$kerayspaiva_where}
 							AND lasku.tila = 'L'
 							AND lasku.alatila = 'A'
 							{$haku}
@@ -2188,8 +2297,10 @@
 							lasku.yhtio yhtio,
 							lasku.yhtio_nimi yhtio_nimi
 							from lasku use index (tila_index)
-							JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
+							JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' {$tilausrivi_join_ehto})
 							WHERE lasku.{$logistiikka_yhtiolisa}
+							{$valmistuslinja_where}
+							{$kerayspaiva_where}
 							and lasku.tila					in ({$tila})
 							and lasku.alatila				= '{$alatilareklamaatio}'
 							and tilausrivi.tyyppi			in ({$tyyppi})
@@ -2424,7 +2535,7 @@
 				}
 			}
 
- 			echo "<table>";
+			echo "<table>";
 
 			if ($toim == 'SIIRTOLISTA')	 {
 				echo "<tr><th align='left'>",t("Siirtolista"),"</th><td>{$id}</td></tr>";
@@ -2440,11 +2551,11 @@
 					$alatilareklamaatio = 'A';
 				}
 
- 				$query = "	SELECT
- 							lasku.*,
- 							toimitustapa.tulostustapa,
- 							toimitustapa.nouto
- 							FROM lasku
+				$query = "	SELECT
+							lasku.*,
+							toimitustapa.tulostustapa,
+							toimitustapa.nouto
+							FROM lasku
 							LEFT JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite)
 							WHERE lasku.tunnus in ({$tilausnumeroita})
 							and lasku.yhtio = '{$kukarow['yhtio']}'
@@ -2622,6 +2733,19 @@
 				echo "<table>";
 				echo "<tr><th>".t("Ker‰‰j‰")."</th><td><input type='text' size='5' name='keraajanro'> ".t("tai")." ";
 				echo "<select name='keraajalist'>";
+
+				if ($yhtiorow['kerayserat'] == 'K' and $keraajalist == "") {
+
+					$query = "	SELECT kerayserat.laatija
+								FROM kerayserat
+								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+								AND kerayserat.otunnus IN ({$tilausnumeroita})
+								LIMIT 1";
+					$keraaja_res = pupe_query($query);
+					$keraaja_row = mysql_fetch_assoc($keraaja_res);
+
+					$keraajalist = $keraaja_row['laatija'];
+				}
 
 				$query = "	SELECT *
 							from kuka

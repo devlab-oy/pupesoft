@@ -224,7 +224,7 @@
 					tilausrivi.hyllynro trhyllynro,
 					tilausrivi.hyllyvali trhyllyvali,
 					tilausrivi.hyllytaso trhyllytaso,
-					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta,
+					concat(lpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'),lpad(upper(tapahtuma.hyllyvali), 5, '0'),lpad(upper(tapahtuma.hyllytaso), 5, '0')) sorttauskentta,
 					tuote.purkukommentti,
 					tilausrivi.laadittu
 					FROM tilausrivi
@@ -249,11 +249,12 @@
 					tilausrivi.hyllynro trhyllynro,
 					tilausrivi.hyllyvali trhyllyvali,
 					tilausrivi.hyllytaso trhyllytaso,
-					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta,
+					concat(lpad(upper(tilausrivin_lisatiedot.kohde_hyllyalue), 5, '0'),lpad(upper(tilausrivin_lisatiedot.kohde_hyllynro), 5, '0'),lpad(upper(tilausrivin_lisatiedot.kohde_hyllyvali), 5, '0'),lpad(upper(tilausrivin_lisatiedot.kohde_hyllytaso), 5, '0')) sorttauskentta,
 					tuote.purkukommentti,
 					tilausrivi.laadittu
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
+					JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE tilausrivi.otunnus = '$otunnus'
 					and tilausrivi.yhtio='$kukarow[yhtio]'
 					ORDER BY sorttauskentta, tuote.tuoteno";
@@ -375,6 +376,8 @@
 	}
 
 	if ($komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
+
+		list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcvalintamenu);
 
 		$pdf = new pdffile;
 		$pdf->set_default('margin-top', 	0);
@@ -587,6 +590,21 @@
 				else {
 					$pdf->draw_text(30,  $kala, $row["toim_tuoteno"],	$firstpage, $b);
 					$pdf->draw_text(30, $kala-10, $row["tuoteno"], 		$firstpage, $b);
+				}
+
+				$abc_valittu = "";
+				if ($abcvalintamenu != '') {
+
+					$query = "	SELECT luokka
+								FROM abc_aputaulu
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tuoteno = '$row[tuoteno]'
+								AND tyyppi = '$abcvalintamenu'";
+					$abcresult = pupe_query($query);
+					$abctama = mysql_fetch_assoc($abcresult);
+					$abc_valittu = $ryhmanimet[$abctama['luokka']];
+
+					$pdf->draw_text(280, $kala-17, $abc_valittu, $firstpage, $b);
 				}
 
 				if ($mista == "vastaanota") {

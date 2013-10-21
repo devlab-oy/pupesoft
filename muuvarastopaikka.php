@@ -13,11 +13,16 @@
 					varastopaikat READ,
 					varaston_hyllypaikat READ,
 					tilausrivi WRITE,
+					tilausrivi as t WRITE,
 					tilausrivi as tilausrivi_osto READ,
 					sarjanumeroseuranta WRITE,
 					sarjanumeroseuranta_arvomuutos READ,
 					lasku READ,
-					asiakas READ";
+					asiakas READ,
+					avainsana as a1 READ,
+					avainsana as a2 READ,
+					avainsana as a3 READ,
+					avainsana as a4 READ";
 		$result = pupe_query($query);
 	}
 	else {
@@ -83,8 +88,8 @@
 					WHERE tuoteno = '$tuoteno'
 					and yhtio 	= '$kukarow[yhtio]'
 					and oletus != ''";
-		$result = pupe_query($query);
-		$oletusrow = mysql_fetch_array($result);
+		$oletus_result = pupe_query($query);
+		$oletusrow = mysql_fetch_array($oletus_result);
 
 		// Saldot per varastopaikka
 		$query = "	SELECT tuotepaikat.*,
@@ -111,9 +116,34 @@
 			}
 		}
 
+		//Kun tuotteen statusta muutetaa, poistetaan tuotteelta myˆs automaattisesti perustetut tuotepaikat, jos tuotteelle ei ole perustettu manuaalisesti yht‰‰n paikkaa.
+		//Haetaan edellisen tuote statuksen oletuspaikat
+		if ($kutsuja == 'tuotetarkista.inc') {
+			$kaikki_oletuspaikat = hae_kaikki_oletuspaikat_try_tai_status($tem_try_vanha, $tem_status_vanha);
+
+			foreach ($poista as $poistettava) {
+				//Jos poistettavaa paikkaa ei lˆydy kaikista_oletuspaikoista,
+				//tarkoittaa se, ett‰ kyseess‰ on manuaalisesti lis‰tty tuotepaikka.
+				//T‰llˆin mit‰‰n paikkaa ei voida poistaa.
+				$oletuspaikka = in_array($poistettava['hylly'], $kaikki_oletuspaikat);
+
+				if (!$oletuspaikka) {
+					$poista = array();
+					break;
+				}
+			}
+		}
+
 		// K‰yd‰‰n l‰pi poistettavat paikat
 		if (count($poista) > 0) {
-			foreach ($poista as $poistetaan) {
+			foreach ($poista as $poistettava) {
+				if (is_array($poistettava)) {
+					$poistetaan = $poistettava['tunnus'];
+				}
+				else {
+					$poistetaan = $poistettava;
+				}
+
 				if ($poistetaan == $oletusrow["tunnus"] and ($saldot[$poistetaan] != 0 or count($saldot) > 1)) {
 					echo "<font class='error'>".t("Et voi poistaa oletuspaikkaa, koska sill‰ on saldoa tai tuotteella on muitakin paikkoja")."</font><br><br>";
 				}
@@ -121,7 +151,6 @@
 					echo "<font class='error'>".t("Et voi poistaa paikkaa jolla on saldoa")."</font><br><br>";
 				}
 				else {
-
 					if ($hyllyalue[$poistetaan] == "!!M") {
 						$asiakkaan_tunnus = (int) $hyllynro[$poistetaan].$hyllyvali[$poistetaan].$hyllytaso[$poistetaan];
 						$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
@@ -133,11 +162,11 @@
 						$poisto_texti = t("Poistettiin myyntitili-varastopaikka")." ".$asiakasrow["asiakkaan_nimi"];
 					}
 					else {
-						$poisto_texti = t("Poistettiin varastopaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]";
+						$poisto_texti = t("Poistettiin varastopaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]<br/>";
 					}
 
-					if ($kutsuja != "vastaanota.php") {
-						echo "<font class='message'>$poisto_texti</font><br><br>";
+					if ($kutsuja != "vastaanota.php" and $kutsuja != 'tuotetarkista.inc') {
+						echo "<font class='message'>$poisto_texti</font>";
 					}
 
 					$query = "	INSERT into tapahtuma set
@@ -154,15 +183,18 @@
 								selite 		= '$poisto_texti',
 								laatija 	= '$kukarow[kuka]',
 								laadittu 	= now()";
-					$result = pupe_query($query);
+					pupe_query($query);
 
 					$query = "	DELETE FROM tuotepaikat
 								WHERE tuoteno 	= '$tuoteno'
 								and yhtio 		= '$kukarow[yhtio]'
 								and tunnus 		= '$poistetaan'";
-					$result = pupe_query($query);
+					pupe_query($query);
+
+					unset($saldot[$poistetaan]);
 				}
 			}
+			echo "<br/>";
 		}
 
 		if (count($flagaa_poistettavaksi_undo) > 0) {
@@ -174,7 +206,7 @@
 								WHERE tuoteno 	= '$tuoteno'
 								and yhtio 		= '$kukarow[yhtio]'
 								and tunnus 		= '$poistetaan'";
-					$result = pupe_query($query);
+					pupe_query($query);
 				}
 			}
 		}
@@ -186,7 +218,7 @@
 							WHERE tuoteno 	= '$tuoteno'
 							and yhtio 		= '$kukarow[yhtio]'
 							and tunnus 		= '$poistetaan'";
-				$result = pupe_query($query);
+				pupe_query($query);
 			}
 		}
 
@@ -194,18 +226,18 @@
 		if (isset($oletus) and $oletus != $oletusrow["tunnus"]) {
 			$query = "	SELECT *
 						FROM tuotepaikat
-						WHERE tuoteno = '$tuoteno' 
-						and yhtio = '$kukarow[yhtio]' 
+						WHERE tuoteno = '$tuoteno'
+						and yhtio = '$kukarow[yhtio]'
 						and tunnus = '$oletus'";
-			$result = pupe_query($query);
+			$oletus_result = pupe_query($query);
 
-			if (mysql_num_rows($result) == 1) {
+			if (mysql_num_rows($oletus_result) == 1) {
 
-				$uusi_oletusrow = mysql_fetch_assoc($result);
-				
+				$uusi_oletusrow = mysql_fetch_assoc($oletus_result);
+
 				// Tehd‰‰n p‰ivitykset
 				echo "<font class='message'>".t("Siirret‰‰n oletuspaikka")."</font><br><br>";
-				
+
 				$hylly = array(
 						"hyllyalue" => $uusi_oletusrow['hyllyalue'],
 						"hyllynro" => $uusi_oletusrow['hyllynro'],
@@ -213,7 +245,7 @@
 						"hyllyvali" => $uusi_oletusrow['hyllyvali']
 						);
 				$upd_result = paivita_oletuspaikka($tuoteno, $hylly);
-				
+
 				if ($upd_result["paivitetyt_ostorivit"] > 0) {
 					echo "<font class='message'>".t("P‰ivitettiin %s ostotilausrivin varastopaikkaa.", '', $upd_result["paivitetyt_ostorivit"])."</font><br><br>";
 				}
@@ -230,7 +262,7 @@
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-				$result = pupe_query($query);
+				pupe_query($query);
 			}
 		}
 
@@ -241,7 +273,7 @@
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-				$result = pupe_query($query);
+				pupe_query($query);
 			}
 		}
 
@@ -252,7 +284,7 @@
 							muuttaja	= '{$kukarow['kuka']}',
 							muutospvm	= now()
 							WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
-				$result = pupe_query($query);
+				pupe_query($query);
 			}
 		}
 
@@ -261,7 +293,7 @@
 		$ahyllyvali	= '';
 		$ahyllytaso	= '';
 
-		if ($kutsuja == "vastaanota.php") {
+		if ($kutsuja == "vastaanota.php" or $kutsuja == "tuotetarkista.inc" ) {
 			$tee = "OK";
 		}
 		else {
@@ -556,135 +588,20 @@
 
 		for ($iii=0; $iii< count($tuotteet); $iii++) {
 
-			if ($lisavaruste[$iii] == "LISAVARUSTE") {
-				$lisavarlisa1 = " saldo_varattu = saldo_varattu - $kappaleet[$iii], ";
-				$lisavarlisa2 = " saldo_varattu = saldo_varattu + $kappaleet[$iii], ";
-			}
-			else {
-				$lisavarlisa1 = "";
-				$lisavarlisa2 = "";
-			}
+			$params = array(
+				'kappaleet' => $kappaleet[$iii],
+				'lisavaruste' => $lisavaruste[$iii],
+				'tuoteno' => $tuotteet[$iii],
+				'tuotepaikat_tunnus_otetaan' => $otetaan[$iii],
+				'tuotepaikat_tunnus_siirretaan' => $siirretaan[$iii],
+				'mistarow' => $mistarow,
+				'minnerow' => $minnerow,
+				'sarjano_array' => !isset($sarjano_array) ? array() : $sarjano_array,
+				'selite' => !isset($selite) ? '' : $selite,
+				'tun' => !isset($tun) ? 0 : $tun,
+			);
 
-			// Mist‰ varastosta otetaan?
-			$query = "	UPDATE tuotepaikat
-						set saldo 	= saldo - $kappaleet[$iii],
-						$lisavarlisa1
-						saldoaika	= now(),
-						muuttaja	= '$kukarow[kuka]',
-						muutospvm	= now()
-	                  	WHERE tuoteno 	= '$tuotteet[$iii]'
-						and yhtio 		= '$kukarow[yhtio]'
-						and tunnus		= '$otetaan[$iii]'";
-			$result = pupe_query($query);
-
-			// Minne varastoon vied‰‰n?
-			$query = "	UPDATE tuotepaikat
-						set saldo 	= saldo + $kappaleet[$iii],
-						$lisavarlisa2
-						saldoaika	= now(),
-						muuttaja	= '$kukarow[kuka]',
-						muutospvm	= now()
-						WHERE tuoteno 	= '$tuotteet[$iii]'
-						and yhtio 		= '$kukarow[yhtio]'
-						and tunnus		= '$siirretaan[$iii]'";
-			$result = pupe_query($query);
-
-			if ($minnerow["hyllyalue"] == "!!M") {
-				$asiakkaan_tunnus = (int) $minnerow["hyllynro"].$minnerow["hyllyvali"].$minnerow["hyllytaso"];
-				$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
-							FROM asiakas
-							WHERE yhtio = '{$kukarow["yhtio"]}'
-							AND tunnus = '$asiakkaan_tunnus'";
-				$asiakasresult = pupe_query($query);
-				$asiakasrow = mysql_fetch_assoc($asiakasresult);
-				$minne_texti = t("Myyntitili")." ".$asiakasrow["asiakkaan_nimi"];
-			}
-			else {
-				$minne_texti = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
-			}
-
-			if ($mistarow["hyllyalue"] == "!!M") {
-				$asiakkaan_tunnus = (int) $mistarow["hyllynro"].$mistarow["hyllyvali"].$mistarow["hyllytaso"];
-				$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
-							FROM asiakas
-							WHERE yhtio = '{$kukarow["yhtio"]}'
-							AND tunnus = '$asiakkaan_tunnus'";
-				$asiakasresult = pupe_query($query);
-				$asiakasrow = mysql_fetch_assoc($asiakasresult);
-				$mista_texti = t("Myyntitili")." ".$asiakasrow["asiakkaan_nimi"];
-			}
-			else {
-				$mista_texti = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
-			}
-
-			$kehahin_query = "	SELECT tuote.sarjanumeroseuranta,
-								round(if (tuote.epakurantti100pvm = '0000-00-00',
-										if (tuote.epakurantti75pvm = '0000-00-00',
-											if (tuote.epakurantti50pvm = '0000-00-00',
-												if (tuote.epakurantti25pvm = '0000-00-00',
-													tuote.kehahin,
-												tuote.kehahin * 0.75),
-											tuote.kehahin * 0.5),
-										tuote.kehahin * 0.25),
-									0),
-								6) kehahin
-								FROM tuote
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tuoteno = '$tuotteet[$iii]'";
-			$kehahin_result = pupe_query($kehahin_query);
-			$kehahin_row = mysql_fetch_array($kehahin_result);
-
-			$keskihankintahinta = $kehahin_row['kehahin'];
-
-			if ($kehahin_row['sarjanumeroseuranta'] == 'G') {
-				$keskihankintahinta = sarjanumeron_ostohinta("tunnus", $sarjano_array[0]);
-			}
-			elseif ($kehahin_row['sarjanumeroseuranta'] == 'S' or $kehahin_row['sarjanumeroseuranta'] == 'U') {
-				$keskihankintahinta = 0;
-				foreach ($sarjano_array as $sarjano) {
-					$keskihankintahinta +=	sarjanumeron_ostohinta("tunnus", $sarjano);
-				}
-				$keskihankintahinta = round($keskihankintahinta / count($sarjano_array), 6);
-			}
-
-			if ($selite != '') {
-				$selite = ": {$selite}";
-			}
-			else {
-				$selite = "";
-			}
-
-			$query = "	INSERT into tapahtuma set
-						yhtio 		= '$kukarow[yhtio]',
-						tuoteno 	= '$tuotteet[$iii]',
-						kpl 		= $kappaleet[$iii] * -1,
-						hinta 		= '$keskihankintahinta',
-						laji 		= 'siirto',
-						hyllyalue	= '$mistarow[hyllyalue]',
-						hyllynro 	= '$mistarow[hyllynro]',
-						hyllyvali	= '$mistarow[hyllyvali]',
-						hyllytaso	= '$mistarow[hyllytaso]',
-						rivitunnus	= '$tun',
-						selite 		= '".t("Paikasta")." $mista_texti ".t("v‰hennettiin")." $kappaleet[$iii]{$selite}',
-						laatija 	= '$kukarow[kuka]',
-						laadittu 	= now()";
-			$result = pupe_query($query);
-
-			$query = "	INSERT into tapahtuma set
-						yhtio 		= '$kukarow[yhtio]',
-						tuoteno 	= '$tuotteet[$iii]',
-						kpl 		= '$kappaleet[$iii]',
-						hinta 		= '$keskihankintahinta',
-						laji 		= 'siirto',
-						hyllyalue	= '$minnerow[hyllyalue]',
-						hyllynro 	= '$minnerow[hyllynro]',
-						hyllyvali	= '$minnerow[hyllyvali]',
-						hyllytaso	= '$minnerow[hyllytaso]',
-						rivitunnus	= '$tun',
-						selite 		= '".t("Paikalle")." $minne_texti ".t("lis‰ttiin")." $kappaleet[$iii]{$selite}',
-						laatija 	= '$kukarow[kuka]',
-						laadittu 	= now()";
-			$result = pupe_query($query);
+			hyllysiirto($params);
 		}
 
 		//P‰ivitet‰‰n sarjanumerot
@@ -1204,7 +1121,16 @@
 
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-				echo "<tr><td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td><td align='right'>$saldorow[saldo]</td><td align='right'>$hyllyssa</td><td align='right'>$myytavissa</td>";
+				echo "<tr><td>";
+
+				if (tarkista_oikeus('inventoi.php', '', 1)) {
+					echo "<a href='{$palvelin2}inventoi.php?tee=INVENTOI&tuoteno=".urlencode($saldorow["tuoteno"])."&lopetus=$lopetus/SPLIT/muuvarastopaikka.php////tee=M//tuoteno=".urlencode($saldorow["tuoteno"])."'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</a>";
+				}
+				else {
+					echo "$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]";
+				}
+
+				echo "</td><td align='right'>$saldorow[saldo]</td><td align='right'>$hyllyssa</td><td align='right'>$myytavissa</td>";
 
 				if (kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"])) {
 
@@ -1215,9 +1141,9 @@
 					}
 
 					echo "</td>";
-					echo "<td><input type='text' size='6' name='halyraja2[$saldorow[tunnus]]'    value='$saldorow[halytysraja]'></td>
+					echo "<td><input type='text' size='6' name='halyraja2[$saldorow[tunnus]]'  value='$saldorow[halytysraja]'></td>
 						<td><input type='text' size='6' name='tilausmaara2[$saldorow[tunnus]]' value='$saldorow[tilausmaara]'></td>
-						<td><input type='text' size='6' name='prio2[{$saldorow['tunnus']}]' value='{$saldorow['prio']}'></td>";
+						<td><input type='text' size='6' name='prio2[{$saldorow['tunnus']}]'    value='{$saldorow['prio']}'></td>";
 				}
 				else {
 					echo "<td></td><td></td><td></td><td></td>";
@@ -1229,13 +1155,14 @@
 				}
 				elseif ($saldorow["saldo"] != 0) {
 
-					$chk = "";
+					$chk = $poistoteksti = "";
 
 					if ($saldorow["poistettava"] != "") {
 						$chk = "CHECKED";
+						$poistoteksti = "(".t("Poistetaan kun saldo loppuu").")";
 					}
 
-					echo "<td><input type = 'checkbox' name='flagaa_poistettavaksi[$saldorow[tunnus]]' value='$saldorow[tunnus]' $chk> (".t("Poistetaan kun saldo loppuu").")
+					echo "<td><input type = 'checkbox' name='flagaa_poistettavaksi[$saldorow[tunnus]]' value='$saldorow[tunnus]' $chk> {$poistoteksti}
 							<input type = 'hidden' name='flagaa_poistettavaksi_undo[$saldorow[tunnus]]' value='$saldorow[poistettava]'></td>";
 				}
 				else {

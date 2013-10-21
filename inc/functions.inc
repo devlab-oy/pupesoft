@@ -156,7 +156,6 @@ if (!function_exists("pupesoft_login")) {
 			error_log ("user {$user}: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
 		}
 
-
 		if ($usea == 1) {
 			$query = "	SELECT yhtio.nimi, yhtio.yhtio, IF(yhtio.jarjestys = 0, 9999, yhtio.jarjestys) jarj
 						FROM kuka
@@ -276,6 +275,78 @@ if (!function_exists("query_dump")) {
 	}
 }
 
+// flock lockfilekäsittely
+if (!function_exists("pupesoft_flock")) {
+	// otetaan parametriksi query
+	function pupesoft_flock(array $params = array()) {
+		GLOBAL $argv, $flock, $backupflock;
+
+		if (php_sapi_name() == 'cli') {
+			$scriptname = $argv[0];
+		}
+		else {
+			$scriptname = $_SERVER["PHP_SELF"];
+		}
+
+		$scriptname    = basename($scriptname);
+		$lockfile      = isset($params["lockfile"]) ? "/tmp/".basename($params["lockfile"]) : "/tmp/##{$scriptname}-flock.lock";
+		$error_message = "VIRHE: {$scriptname} flocklock-jumissa! (".date("Y-m-d H:i:s").")\n";
+		$locktime      = isset($params["locktime"]) ? $params["locktime"] : 300;
+		$filecontent   = isset($params["filecontent"]) ? $params["filecontent"] : '';
+		$flockreturn   = isset($params["return"]) ? $params["return"] : FALSE;
+
+		// katotaan, ettei backuppi oo menossa....
+		$backupflock = fopen("/tmp/##pupesoft.sh-flock.lock", "c");
+
+		if (! @flock($backupflock, LOCK_SH | LOCK_NB)) {
+			if (mktime() - filemtime("/tmp/##pupesoft.sh-flock.lock") >= 14400) {
+				// Onko nagios monitor asennettu?
+				if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+					file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: pupesoft.sh flocklock-jumissa! (".date("Y-m-d H:i:s").")\n", FILE_APPEND);
+				}
+			}
+
+			// Ei saatu lukkoa --> false/exit
+			if ($flockreturn) return FALSE;
+			else exit;
+		}
+		else {
+			@chmod("/tmp/##pupesoft.sh-flock.lock", 0666);
+			flock($backupflock, LOCK_UN);
+		}
+
+		$flock = fopen($lockfile, "c");
+
+		if (! @flock($flock, LOCK_EX | LOCK_NB)) {
+			if ($locktime > 0 and mktime() - filemtime($lockfile) >= $locktime) {
+				// Onko nagios monitor asennettu?
+				if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+					file_put_contents("/home/nagios/nagios-pupesoft.log", $error_message, FILE_APPEND);
+				}
+
+				echo $error_message;
+			}
+
+			// Ei saatu lukkoa --> false/exit
+			if ($flockreturn) return FALSE;
+			else exit;
+		}
+		else {
+			touch($lockfile);
+			chmod($lockfile, 0666);
+
+			if ($filecontent != "") {
+				ftruncate($flock, 0);
+				fwrite($flock, $filecontent);
+			}
+
+			if ($flockreturn) {
+				return TRUE;
+			}
+		}
+	}
+}
+
 // Tehdään REST-kutsuja. Data aina JSON:ia.
 if (!function_exists("pupesoft_rest")) {
 
@@ -299,12 +370,19 @@ if (!function_exists("pupesoft_rest")) {
 											);
 		}
 
+		if (!isset($parameters['timeout'])) $timeout = 10;
+		else $timeout = (int) $parameters['timeout'];
+
 		$handle = curl_init();
 		curl_setopt($handle, CURLOPT_URL, $parameters["url"]);
 		curl_setopt($handle, CURLOPT_HTTPHEADER, $parameters["headers"]);
 		curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
+
+		if ($parameters['posttype'] == 'xml') {
+			curl_setopt($handle, CURLOPT_TIMEOUT, $timeout);
+		}
 
 		if (isset($parameters["auth_user"]) and isset($parameters["auth_pass"])) {
 			curl_setopt($handle, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
@@ -317,6 +395,9 @@ if (!function_exists("pupesoft_rest")) {
 
 		if (isset($parameters["posttype"]) and $parameters["posttype"] == "array") {
 			$post_data = $parameters["data"];
+		}
+		elseif (isset($parameters["posttype"]) and $parameters["posttype"] == "xml") {
+			$post_data = $parameters["data"][0];
 		}
 		else {
 			$post_data = json_encode($parameters["data"]);
@@ -340,7 +421,7 @@ if (!function_exists("pupesoft_rest")) {
 		}
 
 		$response_json = curl_exec($handle);
-		$response = json_decode($response_json, true);
+		$response = $parameters["posttype"] == "xml" ? $response_json : json_decode($response_json, true);
 
 		$code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
 
@@ -393,7 +474,19 @@ if (!function_exists("lopetus")) {
 				// Jotta urlin parametrissa voisi päässätä toisen urlin parametreineen
 				$lopetus_clean = $lopetus;
 
-				$lopetus = str_replace('////','?',               $lopetus);
+				$lopetus = str_replace('////','?', $lopetus);
+
+				// Otetaan parametrit ja urlenkoodataan ne
+				if (preg_match('/\?(.*)/', $lopetus, $paramit)) {
+					foreach (explode("//", $paramit[1]) as $para) {
+						list($mnimi, $arvo) = explode("=", $para);
+
+						if ($arvo != "") {
+							$lopetus = str_replace("$mnimi=$arvo", "$mnimi=".urlencode($arvo), $lopetus);
+						}
+					}
+				}
+
 				$lopetus = preg_replace('/([^:])\/\/\//','\\1#', $lopetus);
 				$lopetus = preg_replace('/([^:])\/\//','\\1&',   $lopetus);
 
@@ -407,28 +500,30 @@ if (!function_exists("lopetus")) {
 
 				if (!isset($alanimi[1])) $alanimi[1] = "";
 
-				for ($i=0; $i<count($nimet); $i++) {
+				if ($meta == "") {
+					for ($i=0; $i<count($nimet); $i++) {
 
-					$nimi = "";
+						$nimi = "";
 
-					for ($j = $i; $j < count($nimet); $j++) {
-						$nimi .= $nimet[$j]."/";
-					}
+						for ($j = $i; $j < count($nimet); $j++) {
+							$nimi .= $nimet[$j]."/";
+						}
 
-					$nimi = substr($nimi,0,-1);
+						$nimi = substr($nimi,0,-1);
 
-					$query = "	SELECT nimitys
-								FROM oikeu
-								WHERE yhtio 	= '$kukarow[yhtio]'
-								and kuka 		= ''
-								and nimi		= '$nimi'
-								and alanimi		= '$alanimi[1]'
-								LIMIT 1";
-					$res = pupe_query($query);
+						$query = "	SELECT nimitys
+									FROM oikeu
+									WHERE yhtio 	= '$kukarow[yhtio]'
+									and kuka 		= ''
+									and nimi		= '$nimi'
+									and alanimi		= '$alanimi[1]'
+									LIMIT 1";
+						$res = pupe_query($query);
 
-					if (mysql_num_rows($res) > 0) {
-						$row = mysql_fetch_assoc($res);
-						break;
+						if (mysql_num_rows($res) > 0) {
+							$row = mysql_fetch_assoc($res);
+							break;
+						}
 					}
 				}
 
@@ -445,7 +540,6 @@ if (!function_exists("lopetus")) {
 
 				if ($lask > 0) {
 					if (strrpos($lopetus, "#") !== FALSE) {
-
 						preg_match("/(#.*?)[&\?\/$]/", $lopetus, $ankkurimatchi);
 
 						$lopetus = str_replace($ankkurimatchi[1], "", $lopetus).$ankkurimatchi[1];
@@ -1233,12 +1327,12 @@ if (!function_exists("saldo_myytavissa")) {
 			if ($tyyppi == "E") {
 				$valinta1 = " varastopaikat.tyyppi = 'E' and ";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 			elseif ($tyyppi == "V") {
 				$valinta1 = " varastopaikat.tyyppi = 'V' and ";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 			elseif ($tyyppi == "KAIKKI") {
 				$valinta1 = "";
@@ -1248,19 +1342,19 @@ if (!function_exists("saldo_myytavissa")) {
 			elseif ($tyyppi == "ORVOT") {
 				$valinta1 = "";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is null ";
+				$valinta3 = " varastopaikat.tyyppi is null ";
 			}
 			else {
 				$valinta1 = " (varastopaikat.tyyppi = '' or (varastopaikat.tyyppi = 'E' and varastopaikat.erikoistoimitus_alarajasumma > 0 and '$tuote[myyntihinta]' >= varastopaikat.erikoistoimitus_alarajasumma)) and ";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 
 			// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
 			if ((is_numeric($varasto) and $varasto > 0) or (!is_numeric($varasto) and $varasto != "")) {
 				$valinta1 = " varastopaikat.tunnus in ($varasto) and ";
 				$valinta2 = "";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 
 			// Katotaan halutaanko saldo vaan joltain tietyltä varasopaikalta, silloinkin unohdetaan edellä annettu tyyppi kokonaan
@@ -1270,7 +1364,7 @@ if (!function_exists("saldo_myytavissa")) {
 								and tuotepaikat.hyllynro  = '$hyllynro'
 								and tuotepaikat.hyllyvali = '$hyllyvali'
 								and tuotepaikat.hyllytaso = '$hyllytaso' ";
-				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
+				$valinta3 = " varastopaikat.tyyppi is not null ";
 			}
 
 			if ($maa != "") {
@@ -1285,6 +1379,10 @@ if (!function_exists("saldo_myytavissa")) {
 
 			// Saldo varastoista
 			if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {
+				if ($valinta3 != '') {
+					$valinta3 = "HAVING {$valinta3}";
+				}
+
 				$query = "	SELECT sum(sarjanumeroseuranta.era_kpl) saldo, tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi
 							FROM tuotepaikat
 							LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
@@ -1308,6 +1406,10 @@ if (!function_exists("saldo_myytavissa")) {
 							$valinta3";
 			}
 			else {
+				if ($valinta3 != '') {
+					$valinta3 = "AND {$valinta3}";
+				}
+
 				$query = "	SELECT tuotepaikat.saldo, tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi
 							FROM tuotepaikat
 							LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
@@ -3410,7 +3512,7 @@ if (!function_exists("hae_alehinta_minkpl")) {
 }
 
 if (!function_exists("alehinta")) {
-	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="", $onlapsi="") {
+	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="", $onlapsi="", $asiakasryhma = '') {
 		global $yhtiorow, $kukarow;
 
 		// Tämä rutiini määrittelee riville hinnan ja alennuksen
@@ -3538,7 +3640,9 @@ if (!function_exists("alehinta")) {
 			$alehi_asrow = mysql_fetch_assoc($alhire);
 		}
 		else {
-			$alehi_asrow = array();
+			$alehi_asrow = array(
+				'ryhma' => $asiakasryhma,
+			);
 			$aperuste .= t("Asiakasta ei löytynyt").". ";
 		}
 
@@ -3734,7 +3838,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
 				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_tuoteno)
+							FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
@@ -3745,7 +3849,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 							UNION
 							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_tuoteno)
+							FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
@@ -3808,7 +3912,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0) {
 
 				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
-							FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_tuoteno)
+							FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
@@ -3819,7 +3923,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 							UNION
 							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
-							FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_tuoteno)
+							FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
@@ -3881,7 +3985,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0 and isset($alehi_assegmenttirow["tunnukset"]) and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
 				$query = "	SELECT hinta, laji
-							FROM asiakashinta
+							FROM asiakashinta USE INDEX (yhtio_asiakas_segmentti_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 						    and asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
 							and asiakas_segmentti != ''
@@ -3946,7 +4050,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0 and isset($alehi_assegmenttirow["tunnukset"])) {
 
 				$query = "	SELECT hinta, laji
-							FROM asiakashinta
+							FROM asiakashinta USE INDEX (yhtio_asiakas_segmentti_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
 							and asiakas_segmentti !=''
@@ -4010,7 +4114,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
 				$query = "	SELECT hinta, laji
-							FROM asiakashinta
+							FROM asiakashinta USE INDEX (yhtio_asiakasryhma_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_ryhma = '$alehi_asrow[ryhma]'
 							and asiakas_ryhma != ''
@@ -4073,9 +4177,8 @@ if (!function_exists("alehinta")) {
 
 			// 5B. asiakas.ryhmä tuote.tuoteno nettohinta (asiakasaleryhmän tuotteen hinta) yhtiön valuutassa
 			if ($hinta == 0) {
-
 				$query = "	SELECT hinta, laji
-							FROM asiakashinta
+							FROM asiakashinta USE INDEX (yhtio_asiakasryhma_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_ryhma = '$alehi_asrow[ryhma]'
 							and asiakas_ryhma != ''
@@ -4139,7 +4242,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
 				$query = "	SELECT hinta, laji
-							FROM asiakashinta
+							FROM asiakashinta USE INDEX (yhtio_piiri_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and piiri = '$alehi_asrow[piiri]'
 							and piiri != ''
@@ -4204,7 +4307,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0) {
 
 				$query = "	SELECT hinta, laji
-							FROM asiakashinta
+							FROM asiakashinta USE INDEX (yhtio_piiri_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and piiri = '$alehi_asrow[piiri]'
 							and piiri != ''
@@ -4268,7 +4371,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and isset($alehi_assegmenttirow["tunnukset"])) {
 
 				$query = "	SELECT hinta, laji
-							FROM asiakashinta
+							FROM asiakashinta USE INDEX (yhtio_asiakas_segmentti_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
 							and asiakas_segmentti != ''
@@ -4333,7 +4436,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0 and isset($alehi_assegmenttirow["tunnukset"])) {
 
 				$query = "	SELECT hinta, laji
-							FROM asiakashinta
+							FROM asiakashinta USE INDEX (yhtio_asiakas_segmentti_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
 							and asiakas_segmentti != ''
@@ -4397,7 +4500,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
 				$query = "	SELECT hinta, laji
-							FROM asiakashinta
+							FROM asiakashinta USE INDEX (yhtio_asiakasryhma_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_ryhma = '$alehi_asrow[ryhma]'
 							and asiakas_ryhma != ''
@@ -4462,7 +4565,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0) {
 
 				$query = "	SELECT hinta, laji
-							FROM asiakashinta
+							FROM asiakashinta USE INDEX (yhtio_asiakasryhma_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_ryhma = '$alehi_asrow[ryhma]'
 							and asiakas_ryhma != ''
@@ -4526,7 +4629,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
 				$query = "	SELECT hinta, laji
-							FROM asiakashinta
+							FROM asiakashinta USE INDEX (yhtio_piiri_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and piiri = '$alehi_asrow[piiri]'
 							and piiri != ''
@@ -4591,7 +4694,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0) {
 
 				$query = "	SELECT hinta, laji
-							FROM asiakashinta
+							FROM asiakashinta USE INDEX (yhtio_piiri_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and piiri = '$alehi_asrow[piiri]'
 							and piiri != ''
@@ -4655,7 +4758,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0) {
 
 				$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_tuoteno)
+							FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
@@ -4667,7 +4770,7 @@ if (!function_exists("alehinta")) {
 							and (alennus < 0 or left(alennus,1) = '-'))
 							UNION
 							(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_tuoteno)
+							FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
@@ -4727,7 +4830,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0 and isset($alehi_assegmenttirow["tunnukset"])) {
 
 				$query = "	SELECT alennus
-							FROM asiakasalennus
+							FROM asiakasalennus USE INDEX (yhtio_asiakas_segmentti_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
 							and asiakas_segmentti != ''
@@ -4788,7 +4891,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0) {
 
 				$query = "	SELECT alennus
-							FROM asiakasalennus
+							FROM asiakasalennus USE INDEX (yhtio_asiakasryhma_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_ryhma = '$alehi_asrow[ryhma]'
 							and asiakas_ryhma != ''
@@ -4849,7 +4952,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0) {
 
 				$query = "	SELECT alennus
-							FROM asiakasalennus
+							FROM asiakasalennus USE INDEX (yhtio_piiri_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and piiri = '$alehi_asrow[piiri]'
 							and piiri != ''
@@ -4909,7 +5012,7 @@ if (!function_exists("alehinta")) {
 			// 14. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä aleprosentti == 999.99 (asiakkaan myymälähinta)
 			if ($hinta == 0) {
 				$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_tuoteno)
+							FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
@@ -4920,7 +5023,7 @@ if (!function_exists("alehinta")) {
 							and alennus = 999.99)
 							UNION
 							(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_tuoteno)
+							FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
@@ -5204,7 +5307,7 @@ if (!function_exists("alehinta")) {
 			// 6. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus)
 			if (jatka_ale($ale)) {
 				$query = "	(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-							FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_tuoteno)
+							FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
@@ -5216,7 +5319,7 @@ if (!function_exists("alehinta")) {
 							and alennus <= 100)
 							UNION
 							(SELECT '2' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-							FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_tuoteno)
+							FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
@@ -5235,7 +5338,7 @@ if (!function_exists("alehinta")) {
 			// 7. asiakas.segmentti tuote.tuoteno aleprosentti (asiakassegmentin tuotteen alennus)
 			if (jatka_ale($ale) and isset($alehi_assegmenttirow["tunnukset"])) {
 				$query = "	SELECT alennus, alennuslaji
-							FROM asiakasalennus
+							FROM asiakasalennus USE INDEX (yhtio_asiakas_segmentti_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
 							and asiakas_segmentti != ''
@@ -5256,7 +5359,7 @@ if (!function_exists("alehinta")) {
 			// 8. asiakas.ryhmä tuote.tuoteno aleprosentti (asiakasryhmän tuotteen alennus)
 			if (jatka_ale($ale)) {
 				$query = "	SELECT alennus, alennuslaji
-							FROM asiakasalennus
+							FROM asiakasalennus USE INDEX (yhtio_asiakasryhma_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_ryhma = '$alehi_asrow[ryhma]'
 							and asiakas_ryhma != ''
@@ -5277,7 +5380,7 @@ if (!function_exists("alehinta")) {
 			// 9. asiakas.piiri tuote.tuoteno aleprosentti (asiakaspiirin tuotteen alennus)
 			if (jatka_ale($ale)) {
 				$query = "	SELECT alennus, alennuslaji
-							FROM asiakasalennus
+							FROM asiakasalennus USE INDEX (yhtio_piiri_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and piiri = '$alehi_asrow[piiri]'
 							and piiri != ''
@@ -5298,7 +5401,7 @@ if (!function_exists("alehinta")) {
 			// 10. asiakas.segmentti tuote.aleryhmä aleprosentti (asiakassegmentin tuotealeryhmän alennus)
 			if (jatka_ale($ale) and isset($alehi_assegmenttirow["tunnukset"])) {
 				$query = "	SELECT alennus, alennuslaji
-							FROM asiakasalennus
+							FROM asiakasalennus USE INDEX (yhtio_asiakas_segmentti_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
 							and asiakas_segmentti != ''
@@ -5319,7 +5422,7 @@ if (!function_exists("alehinta")) {
 			// 11. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasryhmän tuotealeryhmän alennus)
 			if (jatka_ale($ale)) {
 				$query = "	SELECT alennus, alennuslaji
-							FROM asiakasalennus
+							FROM asiakasalennus USE INDEX (yhtio_asiakasryhma_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_ryhma = '$alehi_asrow[ryhma]'
 							and asiakas_ryhma != ''
@@ -5340,7 +5443,7 @@ if (!function_exists("alehinta")) {
 			// 12. asiakas.piiri tuote.aleryhmä aleprosentti (asiakaspiirin tuotealeryhmän alennus)
 			if (jatka_ale($ale)) {
 				$query = "	SELECT alennus, alennuslaji
-							FROM asiakasalennus
+							FROM asiakasalennus USE INDEX (yhtio_piiri_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and piiri = '$alehi_asrow[piiri]'
 							and piiri != ''
@@ -5751,8 +5854,8 @@ if (!function_exists("alehinta_osto")) {
 						}
 					}
 
-					$hinta         	= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste     	.= "Toimittajan tuotteen nettohinta laskun valuutassa. ";
+					$hinta 			= $hrow['hinta'];
+					$aperuste     	.= "Toimittajan tuotteen nettohinta laskun valuutassa.";
 					$valuutta		= $laskurow["valkoodi"];
 					$hintaperuste	= 2;
 				}
@@ -5853,8 +5956,8 @@ if (!function_exists("alehinta_osto")) {
 						}
 					}
 
-					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-					$aperuste    .= "Toimittajan tuotealeryhmän nettohinta laskun valuutassa. ";
+					$hinta		= $hrow["hinta"];
+					$aperuste	.= "Toimittajan tuotealeryhmän nettohinta laskun valuutassa. ";
 					$valuutta	= $laskurow["valkoodi"];
 					$hintaperuste = 3;
 				}
@@ -8784,6 +8887,87 @@ if (!function_exists('livesearch_tuotekategoriahaku')) {
 	}
 }
 
+if (!function_exists('livesearch_tuoteryhmahaku')) {
+	function livesearch_tuoteryhmahaku() {
+		global $yhtiorow, $kukarow, $palvelin2;
+
+		$tee = $_REQUEST["livesearch_tee"];
+		$nimi = $_REQUEST["livesearch_nimi"];
+		$formi = $_REQUEST["livesearch_form"];
+		$hakuid = $_REQUEST["livesearch_hakuid"];
+		$submit = $_REQUEST["livesearch_submit"];
+		$haku = trim($_REQUEST["livesearch_haku"]);
+
+		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+			</script>";
+
+			if (empty($kukarow['kieli'])) {
+				$kieli = $yhtiorow['kieli'];
+			}
+			else {
+				$kieli = $kukarow['kieli'];
+			}
+
+			$query = "	SELECT selite,
+						selitetark
+						FROM avainsana
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji = 'TRY'
+						AND kieli = '{$kieli}'
+						AND selitetark LIKE '%{$haku}%'";
+			$result = pupe_query($query);
+
+			$limit = 0;
+			if (mysql_num_rows($result) > 0) {
+				while ($row = mysql_fetch_assoc($result)) {
+					echo "	<div id='tuoteryhma_valinta_$row[selite]'
+								name='selectOptions$hakuid'
+								onmouseover=\"this.className='liveSearchSelectedItem';
+									keyStrokeIndex = -1;
+									var aEls = document.getElementsByName('selectOptions$hakuid');
+									for (var iEl = 0; iEl < aEls.length; iEl++) {
+										if (aEls[iEl].id.substring(0,14) == 'tuoteryhma_valinta_' && aEls[iEl].id != 'tuoteryhma_valinta_$row[selite]') {
+											document.getElementById(aEls[iEl].id).className='';
+										}
+									} \"
+								onmouseout=\"this.className='';\"
+								onclick=\"document.getElementById('$hakuid').value='$row[selite]';";
+								if ($submit == "") {
+									echo "document.$formi.submit();";
+								}
+								else {
+									echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+								}
+								echo "\"
+								style='padding:2px;'>
+								<font style='font-weight:bold'>{$row['selite']} - {$row['selitetark']}</font>
+							</div><div name='selectValues$hakuid' id='$row[selite]'></div>";
+					$limit++;
+
+					if ($limit > 49) {
+						break;
+					}
+				}
+
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("tuoteryhmää"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+			}
+			else {
+				echo "<div style='padding:2px'><font class='message'>".t("Ei tuoteryhmiä").".</font></div>";
+			}
+		}
+		else {
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+			</script>";
+		}
+	}
+}
+
 if (!function_exists("livesearch_kayttajahaku")) {
 	function livesearch_kayttajahaku($toim = '') {
 		global $yhtiorow, $kukarow, $palvelin2;
@@ -10529,7 +10713,6 @@ if (!function_exists("hae_kukarow")) {
 	}
 }
 
-
 if (!function_exists("hae_yhtion_parametrit")) {
 	function hae_yhtion_parametrit($yhtio) {
 		global $kukarow, $konserni_yhtiot, $konsernivarasto_yhtiot;
@@ -11273,7 +11456,8 @@ if (!function_exists("hae_kaikki_alvit")) {
 					selitetark,
 					selitetark_2
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv'";
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv'
+					ORDER BY jarjestys, selite";
 		$vresult = pupe_query($query);
 
 		$alvit = array();
@@ -11447,6 +11631,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 				}
 
 				$placement = $pdf->image_place($image, $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]), $lasku_logo_positio_x, $thispage, $logoparam);
+				return $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]);
 			}
 		}
 		else {
@@ -11466,6 +11651,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 			}
 
 			$pdf->draw_text($lasku_logo_positio_x, $lasku_logo_positio_y, $ff_string, $thispage, $ff_font);
+			return $lasku_logo_positio_y;
 		}
 	}
 }
@@ -14331,6 +14517,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 			if ($rakirkilot > 0) {
 				$vaktuotetiedot[] = "TOTAL GROSS MASS: {$rakirkilot} kg";
+				$vaktuotetiedot[] = "TOTAL NET MASS: {$tuotepainot_yht} kg";
 			}
 		}
 
@@ -14346,14 +14533,7 @@ if (!function_exists('tulosta_sscc')) {
 			$sscc = $sscc_kopio;
 		}
 		else {
-			$query = "	SELECT selite
-						FROM avainsana
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND laji	= 'SSCC'";
-			$result = pupe_query($query);
-			$row = mysql_fetch_assoc($result);
-
-			$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
+			$sscc = uusi_sscc_nro();
 		}
 
 		$nimi = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['nimi']);
@@ -14397,34 +14577,6 @@ if (!function_exists('tulosta_sscc')) {
 		}
 		else {
 			$line = exec("echo \"$sivu\" | $komento");
-		}
-
-		if (!$sscc_kopio) {
-			if (trim($row['selite']) == '') {
-				$query = "	INSERT INTO avainsana SET
-							yhtio 			= '{$kukarow['yhtio']}',
-							perhe 			= '',
-							kieli 			= '{$kukarow['kieli']}',
-							laji 			= 'SSCC',
-							nakyvyys 		= '',
-							selite 			= '{$sscc}',
-							selitetark 		= '',
-							selitetark_2 	= '',
-							selitetark_3 	= '',
-							jarjestys 		= 0,
-							laatija 		= '{$kukarow['kuka']}',
-							luontiaika 		= now(),
-							muutospvm 		= now(),
-							muuttaja 		= '{$kukarow['kuka']}'";
-				$insert_res = pupe_query($query);
-			}
-			else {
-				$query = "	UPDATE avainsana
-							SET selite = '{$sscc}'
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND laji	= 'SSCC'";
-				$update_res = pupe_query($query);
-			}
 		}
 
 		return $sscc;
@@ -15539,7 +15691,7 @@ if (!function_exists("splittaa_tilaus")) {
 						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus = '{$otun}'
-						AND tilausrivi.var NOT IN ('P','J')
+						AND tilausrivi.var not in ('P','J','O')
 						AND tilausrivi.tyyppi != 'D'
 						AND tilausrivi.varattu > 0";
 			$tilausrivires = pupe_query($query);
@@ -16248,7 +16400,7 @@ if (!function_exists("tee_keraysera")) {
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus IN ({$row['tunnus']})
 						AND tilausrivi.varattu > 0
-						AND tilausrivi.var NOT IN ('P','J')
+						AND tilausrivi.var not in ('P','J','O')
 						AND tilausrivi.tyyppi != 'D'
 						ORDER BY vh.indeksi";
 			$indeksi_res = pupe_query($query);
@@ -17410,6 +17562,9 @@ if (!function_exists("tee_keraysera")) {
 								break;
 							}
 							else {
+
+								$fail = $fail != "" ? "{$fail}|||{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}" : "{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}";
+
 								// Yhtään erää ei mahtunut....
 								unset($kaytettavat_pakkaukset[$kaytettava_pakkaus][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']]);
 								$ii--;
@@ -17937,10 +18092,11 @@ if (!function_exists("pupesoft_lahetetyyppi")) {
 
 		if ((int) $asiakastunnus != 0) {
 			# Jos tilauksella ei ollut lähetetyyppiä, haetaan asiakkaan oletuslähettyyppi
-			$query = "	SELECT lahetetyyppi
+			$query = "	SELECT asiakas.lahetetyyppi
 						FROM asiakas
-						WHERE tunnus = '$asiakastunnus'
-						AND yhtio = '$kukarow[yhtio]'";
+						JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.selite = asiakas.lahetetyyppi AND avainsana.laji = 'LAHETETYYPPI')
+						WHERE asiakas.tunnus = '$asiakastunnus'
+						AND asiakas.yhtio    = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
@@ -18005,6 +18161,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		#$lahetetyyppi = "tulosta_lahete_brutto.inc"; 			# Näytetään tuotteen myymälähinta/(asiakkaan hinta)
 		#$lahetetyyppi = "tulosta_lahete_eialeja.inc"; 			# Näytetään tuotteen myyntihinta ja alennusryhmä
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc"; 		# Ei näytetä hintoja eikä alennuksia, EAN-koodi tulostetaan viivakoodina
+		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # Näytetään asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
+		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # Näytetään asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
 		#$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
 		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
@@ -18101,13 +18259,19 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			$kvaktuotteet = ",'{$toimitustapa_row['kuljetusvakuutus_tuotenumerot']}'";
 		}
 
+		$jtsort_lisa = "if (tilausrivi.tuoteno in ('$yhtiorow[rahti_tuotenumero]' $kvaktuotteet), 2, if(tilausrivi.var='J', 1, 0)) jtsort,";
+
+		if (substr($lahetetyyppi, 0, 6) != "perhe_" and (hae_base_lahetetyyppi($lahetetyyppi) == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' or hae_base_lahetetyyppi($lahetetyyppi) == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc')) {
+			$jtsort_lisa = "0 as jtsort,";
+		}
+
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot
 		$query = "  SELECT tilausrivi.*, {$koontiselect}
 					round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 					{$koontirivihinta}
 					$sorttauskentta,
-					if (tilausrivi.tuoteno in ('$yhtiorow[rahti_tuotenumero]' $kvaktuotteet), 2, if(tilausrivi.var='J', 1, 0)) jtsort,
+					{$jtsort_lisa}
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 					tuote.sarjanumeroseuranta
@@ -18120,6 +18284,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					AND tilausrivi.yhtio = '$kukarow[yhtio]'
 					$tyyppilisa
 					{$koontilisa}
+					and tilausrivi.var != 'O'
 					AND (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 					ORDER BY jtsort, $koontisort $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$riresult = pupe_query($query);
@@ -18240,6 +18405,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							$tyyppilisa
 							$toimitettulisa
+							and tilausrivi.var != 'O'
 							and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 							ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 				$riresult = pupe_query($query);
@@ -18413,7 +18579,8 @@ if (!function_exists("pupeFileReader")) {
         }
         else {
         	/** PHPExcel kirjasto **/
-        	require_once "PHPExcel/PHPExcel/IOFactory.php";
+        	if (@include("PHPExcel/Classes/PHPExcel/IOFactory.php"));
+			elseif (@include("PHPExcel/PHPExcel/IOFactory.php"));
 
         	/** Tunnistetaan tiedostomuoto **/
         	$inputFileType = PHPExcel_IOFactory::identify($file);
@@ -18686,7 +18853,7 @@ if (!function_exists('gauge')) {
 
 // Lasketaan moneenko valmisteeseen raaka-aineet riittää
 if (!function_exists('raaka_aineiden_riitto')) {
-	function raaka_aineiden_riitto($tuoteno, $varasto = 0) {
+	function raaka_aineiden_riitto($tuoteno, $varasto = 0, $return_type = '') {
 
 		global $kukarow;
 
@@ -18694,6 +18861,7 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		$join_lisa = "";
 		$varasto = (int) $varasto;
 		$tuoteno = mysql_real_escape_string($tuoteno);
+		$return = array();
 
 		// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
 		if ($varasto != 0) {
@@ -18706,7 +18874,8 @@ if (!function_exists('raaka_aineiden_riitto')) {
 
 		// Loopataan lapsituotteet läpi
 		$query = "	SELECT tuoteperhe.tuoteno,
-					tuoteperhe.kerroin
+					tuoteperhe.kerroin,
+					tuote.nimitys
 					FROM tuoteperhe
 					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
 						AND tuote.tuoteno = tuoteperhe.tuoteno
@@ -18727,7 +18896,14 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		while ($row = mysql_fetch_assoc($result)) {
 			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($row["tuoteno"], '', $varasto);
 
-			$riitto = $myytavissa / $row["kerroin"];
+			$riitto = round($myytavissa / $row["kerroin"], 2);
+
+			$return[] = array(
+				'tuoteno'	 => $row['tuoteno'],
+				'nimitys'	 => $row['nimitys'],
+				'saldo'		 => $myytavissa,
+				'riitto'	 => $riitto,
+			);
 
 			// Otetaan telteen pienin riitto
 			if ($riitto < $voidaan_valmistaa) {
@@ -18738,7 +18914,14 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		// Näytetään alle nollat nollana ja pyöristetään desimaalit alas
 		$voidaan_valmistaa = $voidaan_valmistaa < 0 ? 0 : floor($voidaan_valmistaa);
 
-		return $voidaan_valmistaa;
+		//Jos return_type != '',
+		//palautetaan kaikki raaka-aineet ja niiden saldot sekä riitot array:ssä
+		if ($return_type != "") {
+			return $return;
+		}
+		else {
+			return $voidaan_valmistaa;
+		}
 	}
 }
 
@@ -19950,14 +20133,24 @@ if (!function_exists('saako_vieda_varastoon')) {
 
 		$varastoerror = 0;
 
-		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
+		$lock_params = array(
+		    "locktime" => 0,
+			"lockfile" => "$kukarow[yhtio]-keikka.lock",
+			"return"   => TRUE
+		);
+
+		if (!pupesoft_flock($lock_params)) {
+
 			if ($palautus != '') {
-				echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".t("Varastoonvienti on kesken!")."</font><br>";
+				list($keikkakesken, $_kuka, $_timestamp) = explode(";", file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock"));
+
+				echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".t("Varastoonvienti on kesken!")." ".t("Käyttäjä")." {$_kuka} @ {$_timestamp}</font><br>";
 			}
+
 			$varastoerror = 1;
 		}
 		elseif (mysql_num_rows($result) != 0){
-			while ($rivi = mysql_fetch_array($result)) {
+			while ($rivi = mysql_fetch_assoc($result)) {
 				if ($palautus != '') {
 					echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".sprintf(t("Käyttäjällä %s on kohdistus kesken!"), $rivi["nimi"])."</font><br>";
 				}
@@ -19981,7 +20174,6 @@ if (!function_exists('saako_vieda_varastoon')) {
 				$varastoerror = 1;
 			}
 		}
-
 
 		return $varastoerror;
 	}
@@ -20037,7 +20229,7 @@ if (!function_exists('paivita_tilausrivin_hylly')) {
 }
 
 if (!function_exists('paivita_oletuspaikka')) {
-	function paivita_oletuspaikka($tuoteno, Array $hylly) {
+	function paivita_oletuspaikka($tuoteno, Array $hylly, $tultiin_mobiilista = false) {
 		global $kukarow, $yhtiorow;
 
 		// Palautusmuuttuja
@@ -20051,7 +20243,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 							and oletus != ''";
 		$oletusresult = pupe_query($oletusquery);
 		$oletusrow = mysql_fetch_assoc($oletusresult);
-		
+
 		# Poistetaan kaikilta tuotteen tuotepaikoilta oletus
 		# ostorivienvarastopaikat.inc, rivi 281
 		$query = "	UPDATE tuotepaikat
@@ -20088,6 +20280,7 @@ if (!function_exists('paivita_oletuspaikka')) {
 
 		# Jos oletuspaikkaa ei löytynyt, asetetaan ensimmäinen oletuspaikaksi.
 		if (mysql_num_rows($upresult) == 0) {
+
 			$query = "	UPDATE tuotepaikat
 						SET oletus 	= 'X',
 						muuttaja	= '$kukarow[kuka]',
@@ -20098,30 +20291,39 @@ if (!function_exists('paivita_oletuspaikka')) {
 						ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";
 			$upresult = pupe_query($query);
 
-			$return["error"] = "Oletuspaikkaa ei löytynyt, tehtiin ensimmäisestä paikasta oletuspaikka";			
+			$return["error"] = "Oletuspaikkaa ei löytynyt, tehtiin ensimmäisestä paikasta oletuspaikka";
 		}
-		elseif (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
+		elseif (mysql_num_rows($upresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
+
+			$wherelisa = $yhtiorow['paivita_oletuspaikka'] == 'S' ? "" : "AND t.uusiotunnus = '0'";
+			$joinlisa = "";
+
+			if ($tultiin_mobiilista) $joinlisa = "JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila IN ('N','O') and lasku.alatila != 'X')";
+
+			$tyyppilisa = $tultiin_mobiilista ? "AND t.tyyppi IN ('O','L','G')" : "AND t.tyyppi = 'O'";
+
 			// Päivitetään uusi oletuspaikka myös avoimille keskeneräisille ostotilauksille (jos uusi paikka on samassa varastossa kun vanha)
-			$query = "	UPDATE tilausrivi
-						SET hyllyalue	= '$hylly[hyllyalue]',
-						hyllynro	= '$hylly[hyllynro]',
-						hyllyvali	= '$hylly[hyllyvali]',
-						hyllytaso	= '$hylly[hyllytaso]'
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND tuoteno = '$tuoteno'
-						AND hyllyalue = '$oletusrow[hyllyalue]'
-						AND hyllynro = '$oletusrow[hyllynro]'
-						AND hyllytaso = '$oletusrow[hyllytaso]'
-						AND hyllyvali = '$oletusrow[hyllyvali]'
-						AND tyyppi = 'O'
-						AND uusiotunnus = '0'
-						AND kpl = '0'
-						AND varattu != '0'";
+			$query = "	UPDATE tilausrivi AS t
+						{$joinlisa}
+						SET t.hyllyalue	= '{$hylly['hyllyalue']}',
+						t.hyllynro	= '{$hylly['hyllynro']}',
+						t.hyllyvali	= '{$hylly['hyllyvali']}',
+						t.hyllytaso	= '{$hylly['hyllytaso']}'
+						WHERE t.yhtio = '{$kukarow['yhtio']}'
+						AND t.tuoteno = '{$tuoteno}'
+						AND t.hyllyalue = '{$oletusrow['hyllyalue']}'
+						AND t.hyllynro = '{$oletusrow['hyllynro']}'
+						AND t.hyllytaso = '{$oletusrow['hyllytaso']}'
+						AND t.hyllyvali = '{$oletusrow['hyllyvali']}'
+						{$tyyppilisa}
+						{$wherelisa}
+						AND t.kpl = '0'
+						AND t.varattu != '0'";
 			$result = pupe_query($query);
 
-			$return["paivitetyt_ostorivit"] = mysql_affected_rows();			
+			$return["paivitetyt_ostorivit"] = mysql_affected_rows();
 		}
-		
+
 		return $return;
 	}
 }
@@ -20254,9 +20456,73 @@ if (!function_exists('tarkiste')) {
 	}
 }
 
+if (!function_exists('uusi_sscc_nro')) {
+	function uusi_sscc_nro() {
+		global $kukarow;
+
+		$query = "	SELECT selite
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laji 	= 'SSCC'";
+		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
+
+		$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
+
+		if (trim($row['selite']) == '') {
+
+			$query = "	INSERT INTO avainsana SET
+						yhtio 			= '{$kukarow['yhtio']}',
+						perhe 			= '666',
+						kieli 			= '{$kukarow['kieli']}',
+						laji 			= 'SSCC',
+						nakyvyys 		= '',
+						selite 			= '{$sscc}',
+						selitetark	 	= '',
+						selitetark_2 	= '',
+						selitetark_3 	= '',
+						jarjestys 		= 0,
+						laatija 		= '{$kukarow['kuka']}',
+						luontiaika 		= now(),
+						muutospvm 		= now(),
+						muuttaja 		= '{$kukarow['kuka']}'";
+			$insert_res = pupe_query($query);
+		}
+		else {
+			$query = "	UPDATE avainsana
+						SET selite  = '{$sscc}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji	= 'SSCC'";
+			$update_res = pupe_query($query);
+		}
+
+		return $sscc;
+	}
+}
+
+if (!function_exists('uusi_gs1_sscc_nro')) {
+	function uusi_gs1_sscc_nro($sscc_sisainen) {
+		global $kukarow, $yhtiorow;
+
+		// Rakennetaan GS1 SSCC -numero
+		$sscc_sovellustunnus = "00";
+		$sscc_gs1_laajennustunnus = "0";
+
+		$sscc_gs1_yritystunnus = str_pad($yhtiorow['ean'], 7, 0, STR_PAD_LEFT);
+		$sscc_sisainen = str_pad($sscc_sisainen, 7, 0, STR_PAD_LEFT);
+
+		$sscc = $sscc_sovellustunnus.$sscc_gs1_laajennustunnus.$sscc_gs1_yritystunnus.$sscc_sisainen;
+
+		$sscc_tarkiste = tarkiste($sscc);
+
+		$sscc = $sscc.$sscc_tarkiste;
+
+		return $sscc;
+	}
+}
+
 if (!function_exists('tee_keraysera_painon_perusteella')) {
 	function tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita, $_pakkaus = 0) {
-
 		global $kukarow, $yhtiorow;
 
 		$_pakkaus = (int) $_pakkaus;
@@ -20269,7 +20535,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-						AND tilausrivi.var NOT IN ('J','P')
+						AND tilausrivi.var not in ('P','J','O')
 						AND tilausrivi.otunnus IN ($tilausnumeroita)";
 			$paino_chk_res = pupe_query($query);
 			$paino_chk_row = mysql_fetch_assoc($paino_chk_res);
@@ -20288,7 +20554,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 		$pakkausres = pupe_query($query);
 		$pakkausrow = mysql_fetch_assoc($pakkausres);
 
-		$valittu_pakkaus = $pakkausrow['tunnus'];
+		$valittu_pakkaus  = $pakkausrow['tunnus'];
 		$pakkaukset_paino = $pakkausrow['paino'];
 		$pakkauksen_kaytetty_paino = 0;
 		$pakkausnro = 0;
@@ -20301,7 +20567,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivi.var NOT IN ('J','P')
+					AND tilausrivi.var not in ('P','J','O')
 					AND tilausrivi.otunnus IN ($tilausnumeroita)
 					ORDER BY sorttauskentta {$order_sorttaus}";
 		$keraysera_res = pupe_query($query);
@@ -20311,6 +20577,9 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 		while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
 			$kerayseran_rivit[]['data'] = $keraysera_row;
 		}
+
+		$sscc = 0;
+		$sscc_ulkoinen = 0;
 
 		for ($i = 0; $i < count($kerayseran_rivit); $i++) {
 
@@ -20323,9 +20592,12 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 					$pakkauksen_kaytetty_paino = 0;
 
-					if ($_pakkaus != 0) {
+					if ($_pakkaus != 0 or count($kerayseran_rivit) > 1) {
 						$pakkausnro++;
 						$pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era']);
+
+						$sscc          = uusi_sscc_nro();
+						$sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
 					}
 
 					break;
@@ -20339,7 +20611,12 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				if ($jaljella <= 0) break;
 			}
 
-			if ($pakkausnro == 0) $pakkausnro++;
+			if ($pakkausnro == 0) {
+				$pakkausnro++;
+
+				$sscc          = uusi_sscc_nro();
+				$sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
+			}
 
 			$keraysera_kpl = $kerayseran_rivit[$i]['data']['varattu'] - $jaljella;
 
@@ -20347,6 +20624,8 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 			$kerayseran_rivit[$i]['data']['paino'] = $kerayseran_rivit[$i]['data']['tuotemassa'] * $keraysera_kpl;
 
 			$kerayseran_rivit[$i]['data']['pakkausnro'] = $pakkausnro;
+			$kerayseran_rivit[$i]['data']['sscc'] = $sscc;
+			$kerayseran_rivit[$i]['data']['sscc_ulkoinen'] = $sscc_ulkoinen;
 
 			if ($keraysera_kpl > 0 and $jaljella > 0) {
 
@@ -20357,6 +20636,8 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				$uusi_row['data']['varattu'] = $jaljella;
 				$uusi_row['data']['paino'] = $uusi_row['data']['tuotemassa'] * $jaljella;
 				$uusi_row['data']['uusirivi'] = true;
+				$uusi_row['data']['sscc'] = $sscc = uusi_sscc_nro();
+				$uusi_row['data']['sscc_ulkoinen'] = $sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
 
 				// splitataan array
 				// halutaan lisätä uusi_row arrayn keskelle, joten joudutaan käyttämään array_slicea.
@@ -20397,8 +20678,8 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 							nro 			= {$keraysera_nro},
 							keraysvyohyke 	= 0,
 							tila 			= '',
-							sscc 			= 0,
-							sscc_ulkoinen 	= '',
+							sscc 			= '{$rivi['data']['sscc']}',
+							sscc_ulkoinen 	= '{$rivi['data']['sscc_ulkoinen']}',
 							otunnus 		= '{$rivi['data']['otunnus']}',
 							tilausrivi 		= '{$rivi['data']['tunnus']}',
 							pakkaus 		= '{$valittu_pakkaus}',
@@ -20412,7 +20693,6 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 							muutospvm 		= now(),
 							muuttaja 		= ''";
 				$keraysera_ins = pupe_query($query);
-
 			}
 			elseif ($rivi['data']['upd_varattu'] != 0 and $rivi['data']['varattu'] != $rivi['data']['upd_varattu']) {
 
@@ -20429,8 +20709,8 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 							nro 			= {$keraysera_nro},
 							keraysvyohyke 	= 0,
 							tila 			= '',
-							sscc 			= 0,
-							sscc_ulkoinen 	= '',
+							sscc 			= '{$rivi['data']['sscc']}',
+							sscc_ulkoinen 	= '{$rivi['data']['sscc_ulkoinen']}',
 							otunnus 		= '{$rivi['data']['otunnus']}',
 							tilausrivi 		= '{$rivi['data']['tunnus']}',
 							pakkaus 		= '{$valittu_pakkaus}',
@@ -20444,7 +20724,6 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 							muutospvm 		= now(),
 							muuttaja 		= ''";
 				$keraysera_ins = pupe_query($query);
-
 			}
 			else {
 				$kappalemaara = $rivi['data']['varattu'];
@@ -20452,19 +20731,22 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				if ($_pakkaus != 0) {
 					$query = "	UPDATE kerayserat SET
 								pakkaus = '{$valittu_pakkaus}',
-								pakkausnro = '{$rivi['data']['pakkausnro']}'
+								pakkausnro = '{$rivi['data']['pakkausnro']}',
+								sscc = '{$rivi['data']['sscc']}',
+								sscc_ulkoinen = '{$rivi['data']['sscc_ulkoinen']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi = '{$rivi['data']['tunnus']}'";
 					$upd_res = pupe_query($query);
 				}
 				else {
+
 					$query = "	INSERT INTO kerayserat SET
 								yhtio 			= '{$kukarow['yhtio']}',
 								nro 			= {$keraysera_nro},
 								keraysvyohyke 	= 0,
 								tila 			= '',
-								sscc 			= 0,
-								sscc_ulkoinen 	= '',
+								sscc 			= '{$rivi['data']['sscc']}',
+								sscc_ulkoinen 	= '{$rivi['data']['sscc_ulkoinen']}',
 								otunnus 		= '{$rivi['data']['otunnus']}',
 								tilausrivi 		= '{$rivi['data']['tunnus']}',
 								pakkaus 		= '{$valittu_pakkaus}',
@@ -20638,7 +20920,7 @@ if (!function_exists('koontilahete_check')) {
 			// Onko kaikki rivit kerätty?
 			$query = "	SELECT lasku.tunnus
 						FROM lasku
-						JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.keratty = '' AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
+						JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.keratty = '' AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J','O'))
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
 						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 						WHERE lasku.yhtio	  = '{$kukarow['yhtio']}'
@@ -20925,6 +21207,11 @@ if (!function_exists('_xls_jarjestetty_rivit')) {
 			foreach($header_values as $column_name => $value) {
 				if (!stristr($column_name, 'tunnus') and isset($rivi[$column_name]) and !in_array($column_name, $sulje_pois)) {
 					_kirjoita_solu($xls, $column_name, $rivi[$column_name], $rivi_numero, $sarake_numero, $force_to_string);
+				}
+				else if (!isset($rivi[$column_name])) {
+					//jos aineisto on viallinen,
+					//lisätään tyhjä solu jotta solujen järjestys pysyy oikeana
+					_kirjoita_solu($xls, $column_name, '', $rivi_numero, $sarake_numero, $force_to_string);
 				}
 			}
 			$rivi_numero++;
@@ -21519,7 +21806,7 @@ if (!function_exists('search_array_key_for_value_recursive')) {
 
 if (!function_exists('pupesoft_lisaa_valmisteen_rekursiiviset_reseptit')) {
 	function pupesoft_lisaa_valmisteen_rekursiiviset_reseptit() {
-		global $kukarow, $yhtiorow, $tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array;
+		global $kukarow, $yhtiorow, $tuoteno_array, $riikoko, $kpl_array, $kommentti_array, $lapsenlap_array;
 
 		$kommentti_array = array();
 		$lapsenlap_array = array();
@@ -21533,7 +21820,7 @@ if (!function_exists('pupesoft_lisaa_valmisteen_rekursiiviset_reseptit')) {
 
 if (!function_exists('rekursiivinen_resepti')) {
 	function rekursiivinen_resepti($pertuoteno, $perkpl) {
-		global $kukarow, $tuoteno_array, $riikoko, $kpl_array, $kommentti_array, $lapsenlap_array;
+		global $kukarow, $yhtiorow, $tuoteno_array, $riikoko, $kpl_array, $kommentti_array, $lapsenlap_array;
 
 		$query = "	SELECT tuoteno, kerroin
 					FROM tuoteperhe
@@ -21598,21 +21885,23 @@ if (!function_exists('hae_laskun_tilausrivit')) {
 		global $kukarow, $yhtiorow;
 
 		if (!empty($tyypit)) {
-			$tilausrivi_where = " AND tyyppi IN ('".implode("','", $tyypit)."') ";
+			$tilausrivi_where = " AND tilausrivi.tyyppi IN ('".implode("','", $tyypit)."') ";
 		}
 		else {
-			$tilausrivi_where = " AND tyyppi != 'D' ";
+			$tilausrivi_where = " AND tilausrivi.tyyppi != 'D' ";
 		}
 
 		if ($sorttauskentta == "") $sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
 		$query = "	SELECT tilausrivi.*,
+					tilausrivin_lisatiedot.rekisterinumero,
 					$sorttauskentta
 					FROM tilausrivi
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND otunnus = '{$otunnus}'
+					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.otunnus = '{$otunnus}'
 					{$tilausrivi_where}
-					ORDER BY sorttauskentta {$sorttaussuunta}, tunnus";
+					ORDER BY sorttauskentta {$sorttaussuunta}, tilausrivi.tunnus";
 		$result = pupe_query($query);
 		$tilausrivit = array();
 
@@ -22200,6 +22489,52 @@ if (!function_exists('hae_toimittajat')) {
 	}
 }
 
+/*
+ * Poistaa tyhjät välit vastaavat tuoteketjusta muuttamatta ketjun hallitsevaa järjestystä.
+ *
+ * @param 	int $ketju_id    Tiivistettävän ketjun id
+ */
+if (!function_exists('tiivista_vastaavat_tuoteketju')) {
+	function tiivista_vastaavat_tuoteketju($ketju_id) {
+	    global $kukarow;
+
+	    // Haetaan tiivistettävä ketju
+	    $query = "SELECT *
+	                FROM vastaavat
+	                WHERE yhtio   = '{$kukarow['yhtio']}'
+	                AND id        = '$ketju_id'
+	                AND jarjestys != 0
+	                ORDER BY jarjestys";
+	    $result = pupe_query($query);
+
+	    // Loopataan ketjun tuotteet läpi
+	    while ($tuote = mysql_fetch_assoc($result)) {
+
+	        // Aloitetaan pienimmästä ei nollasta (useimmiten 1)
+	        // Pienimpään ei kosketa ja muut järkätään siitä eteenpäin
+	        if (!isset($edellinen)) {
+	            $edellinen = $tuote['jarjestys'];
+	            continue;
+	        }
+
+	        // Päivitetään järjestykseksi edellinen+1
+	        $uusi_jarjestys = ($edellinen + 1);
+
+	        // Ei päivitetä järjestystä turhaan. Jos järjestys on sama
+	        if ($tuote['jarjestys'] <> $uusi_jarjestys) {
+	            $query = "UPDATE vastaavat
+	                        SET jarjestys = $uusi_jarjestys, muutospvm = now()
+	                        WHERE yhtio='{$kukarow['yhtio']}' AND tunnus={$tuote['tunnus']}";
+	            if( ! pupe_query($query) ) {
+	                exit("Virhe ketjujen uudelleenjärjestelyssä");
+	            }
+	        }
+
+	        $edellinen = $uusi_jarjestys;
+	    }
+	}
+}
+
 if (!function_exists('hae_toimittaja')) {
 	/**
 	 * Hakee toimittajan tunnuksen perusteella
@@ -22558,7 +22893,6 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 
 if (!function_exists("lisaa_rivi")) {
 	function lisaa_rivi($parametrit) {
-
 		global $kukarow, $yhtiorow;
 
 		if (empty($kukarow['kesken'])) {
@@ -22581,7 +22915,7 @@ if (!function_exists("lisaa_rivi")) {
 		$tuoteno            = (!empty($parametrit['tuoteno']))            ? $parametrit['tuoteno'] : '';             // --> tilattava tuotenumero
 		$toimaika           = (!empty($parametrit['toimaika']))           ? $parametrit['toimaika'] : '';            // --> arvioitu toimitusaika
 		$kerayspvm          = (!empty($parametrit['kerayspvm']))          ? $parametrit['kerayspvm'] : '';           // --> toivottu keräysaika
-		$hinta              = (!empty($parametrit['hinta']))              ? $parametrit['hinta'] : '';                // --> käyttäjän syöttämä hinta
+		$hinta              = (!empty($parametrit['hinta']))              ? $parametrit['hinta'] : '';               // --> käyttäjän syöttämä hinta
 		$netto              = (!empty($parametrit['netto']))              ? $parametrit['netto'] : '';               // --> käyttäjän syöttämä netto
 		$var                = (!empty($parametrit['var']))                ? $parametrit['var'] : '';                 // H,J,P varrit
 		$varasto            = (!empty($parametrit['varasto']))            ? $parametrit['varasto'] : '';             // myydään vain tästä/näistä varastosta
@@ -22604,7 +22938,10 @@ if (!function_exists("lisaa_rivi")) {
 		$tuotenimitys       = (!empty($parametrit['tuotenimitys']))       ? $parametrit['tuotenimitys'] : '';        // tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
 		$tuotenimitys_force = (!empty($parametrit['tuotenimitys_force'])) ? $parametrit['tuotenimitys_force'] : '';  // tuotteen nimitys muutetaan systemitasolla
 		$kommentti          = (!empty($parametrit['kommentti']))          ? $parametrit['kommentti'] : '';           // rivikommentti
-		$alv				= (!empty($parametrit['alv']))		          ? $parametrit['alv'] : '';				// rivi alv
+		$valmistuslinja     = (!empty($parametrit['valmistuslinja']))     ? $parametrit['valmistuslinja'] : '';      // valmistuslinja
+		$alv				= (!empty($parametrit['alv']))		          ? $parametrit['alv'] : '';				 // rivi alv
+		$toim				= (!empty($parametrit['toim']))		          ? $parametrit['toim'] : '';				 // toim
+		$rekisterinumero	= (!empty($parametrit['rekisterinumero']))	  ? $parametrit['rekisterinumero'] : '';	 // rekisterinumero
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			$ale_temp = str_replace(',', '.', $parametrit{'ale'.$alepostfix});
@@ -22618,15 +22955,13 @@ if (!function_exists("lisaa_rivi")) {
 			exit;
 		}
 
-		return array(
-			'lisatyt_rivit1' => $lisatyt_rivit1,
-			'lisatyt_rivit2' => $lisatyt_rivit2,
-		);
+		return array($lisatyt_rivit1, $lisatyt_rivit2);
 
 		// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi myyntihaarassa
 		// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
 	}
 }
+
 if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
     function hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset($oletus_asiakas) {
         global $kukarow, $yhtiorow;
@@ -22637,18 +22972,37 @@ if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset")) {
 
         $query = "  SELECT count(*) as luku
                     FROM lasku
-                    JOIN asiakas
-					ON ( asiakas.yhtio = lasku.yhtio
-						AND asiakas.tunnus = lasku.liitostunnus
-						AND asiakas.tunnus = '{$oletus_asiakas}' )
-                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                    AND lasku.tila = 'T'
-                    AND lasku.alatila = ''
-					AND lasku.clearing = 'EXTTARJOUS'";
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tila = 'T'
+                    AND alatila = ''
+					AND liitostunnus = '{$oletus_asiakas}'
+					AND clearing = 'EXTTARJOUS'";
         $result = pupe_query($query);
 
         $tarjousten_lukumaara = mysql_fetch_assoc($result);
         return $tarjousten_lukumaara['luku'];
+    }
+}
+
+if (!function_exists("hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot")) {
+    function hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot($oletus_asiakas) {
+        global $kukarow, $yhtiorow;
+
+		if (empty($oletus_asiakas)) {
+			return 0;
+		}
+
+        $query = "  SELECT count(*) as luku
+                    FROM lasku
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tila = 'N'
+                    AND alatila = ''
+					AND liitostunnus = '{$oletus_asiakas}'
+					AND clearing = 'EXTENNAKKO'";
+        $result = pupe_query($query);
+
+        $ennakoiden_lukumaara = mysql_fetch_assoc($result);
+        return $ennakoiden_lukumaara['luku'];
     }
 }
 
@@ -22737,6 +23091,62 @@ if (!function_exists("tuotteen_toimittajat_tuotenumerot_haku")) {
 	}
 }
 
+if (!function_exists('hae_kaikki_oletuspaikat_try_tai_status')) {
+	function hae_kaikki_oletuspaikat_try_tai_status($try, $status) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	/*Haetaan kaikki oletuspaikat joissa on mikä tahansa status ja mikä tahansa try*/
+					(SELECT *
+					FROM   avainsana as a1
+					WHERE  yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'OLETUSPAIKKA'
+					AND selitetark = 'X'
+					AND selitetark_2 = '')
+
+					UNION
+
+					/*Haetaan kaikki oletuspaikat joissa status täsmää ja try on mitä tahansa*/
+					(SELECT *
+					FROM   avainsana as a2
+					WHERE  yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'OLETUSPAIKKA'
+					AND selitetark = '{$status}'
+					AND selitetark_2 = '')
+
+					UNION
+
+					/*Haetaan kaikki oletuspaikat joissa status on mitä tahansa ja try täsmää*/
+					(SELECT *
+					FROM   avainsana as a3
+					WHERE  yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'OLETUSPAIKKA'
+					AND selitetark = 'X'
+					AND selitetark_2 = '{$try}')
+
+					UNION
+
+					/*Haetaan kaikki oletuspaikat joissa status ja try täsmää*/
+					(SELECT *
+					FROM   avainsana as a4
+					WHERE  yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'OLETUSPAIKKA'
+					AND selitetark = '{$status}'
+					AND selitetark_2 = '{$try}')";
+		$result = pupe_query($query);
+
+		$oletuspaikat = array();
+		while($oletuspaikka = mysql_fetch_assoc($result)) {
+			$oletuspaikat[] = $oletuspaikka['selite'];
+		}
+
+		$yhtiorow["tuotteen_oletuspaikka"] = str_replace(' ', '', $yhtiorow["tuotteen_oletuspaikka"]);
+		$yhtion_tuotteen_oletuspaikat = explode(",", $yhtiorow["tuotteen_oletuspaikka"]);
+		$kaikki_oletuspaikat = array_merge($oletuspaikat, $yhtion_tuotteen_oletuspaikat);
+
+		return $kaikki_oletuspaikat;
+	}
+}
+
 if (!function_exists("hae_viivakoodilla")) {
 	function hae_viivakoodilla($viivakoodi) {
 		global $kukarow, $yhtiorow;
@@ -22766,5 +23176,1304 @@ if (!function_exists("hae_viivakoodilla")) {
 		}
 
 		return $viivakoodit;
+	}
+}
+
+if (!function_exists("splittaa_valmistukset")) {
+	function splittaa_valmistukset($laskurow) {
+		global $yhtiorow, $kukarow;
+
+		// Otetaan laskurow talteen, ja nollataan sieltä kentät jota ei monisteta
+		$laskurow_temp = $laskurow;
+		unset($laskurow_temp['tunnus']);
+		unset($laskurow_temp['muutospvm']);
+		unset($laskurow_temp['muuttaja']);
+		unset($laskurow_temp['luontiaika']);
+		unset($laskurow_temp['laatija']);
+		unset($laskurow_temp['toimaika']);
+		unset($laskurow_temp['kerayspvm']);
+		unset($laskurow_temp['kohde']);
+		unset($laskurow_temp['alatila']);
+
+		// Haetaan kaikki valmisteet
+		$query = "	SELECT tilausrivi.*,
+					tilausrivin_lisatiedot.positio
+					FROM tilausrivi
+					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+					AND tilausrivi.tyyppi in ('W','M')
+					ORDER BY tilausrivi.tunnus";
+		$tilausrivi_split_result = pupe_query($query);
+
+		$valmistuksen_splittaus_rivi = 0;
+		$valmistus_tunnukset = array();
+
+		while ($tilausrivi_split_row = mysql_fetch_assoc($tilausrivi_split_result)) {
+
+			$_toimaika = ($tilausrivi_split_row['toimaika'] == '0000-00-00') ? $laskurow['toimaika'] : $tilausrivi_split_row['toimaika'];
+			$_kerayspvm = ($tilausrivi_split_row['kerayspvm'] == '0000-00-00') ? $laskurow['kerayspvm'] : $tilausrivi_split_row['kerayspvm'];
+			$_kohde = ($tilausrivi_split_row['positio'] == '') ? $laskurow['kohde'] : $tilausrivi_split_row['positio'];
+
+			// Jätetään ensimmäinen rivi alkuperäiselle otsikolle
+			if ($valmistuksen_splittaus_rivi == 0) {
+				$valmistus_tunnukset[] = $tilausrivi_split_row['otunnus'];
+				$query = "	UPDATE lasku
+							SET kohde = '{$_kohde}',
+							toimaika = '{$_toimaika}',
+							kerayspvm = '{$_kerayspvm}',
+							muutospvm = now(),
+							muuttaja = '{$kukarow['kuka']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$tilausrivi_split_row['otunnus']}'";
+				pupe_query($query);
+
+				$valmistuksen_splittaus_rivi++;
+				continue;
+			}
+
+			$query = "	INSERT INTO lasku (
+								".implode(", ", array_keys($laskurow_temp)).",
+								luontiaika,
+								laatija,
+								muutospvm,
+								muuttaja,
+								toimaika,
+								kerayspvm,
+								kohde,
+								alatila)
+								VALUES (
+								'".implode("', '", array_values($laskurow_temp))."',
+								now(),
+								'{$kukarow['kuka']}',
+								now(),
+								'{$kukarow['kuka']}',
+								'{$_toimaika}',
+								'{$_kerayspvm}',
+								'{$_kohde}',
+								'J')";
+			pupe_query($query);
+			$valmistus_tunnus = mysql_insert_id();
+			$valmistus_tunnukset[] = $valmistus_tunnus;
+
+			// Siirretään koko perhe uudelle otsikolle
+			if (!empty($valmistus_tunnus)) {
+				$query = "	UPDATE tilausrivi SET otunnus = '{$valmistus_tunnus}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND otunnus = '{$laskurow['tunnus']}'
+							AND perheid = '{$tilausrivi_split_row['tunnus']}'
+							AND perheid != 0";
+				pupe_query($query);
+			}
+		}
+
+		return $valmistus_tunnukset;
+	}
+}
+
+if (!function_exists('laske_ext_ennakko_hinta')) {
+	function laske_ext_ennakko_hinta($trow, $laskurow) {
+		global $kukarow, $yhtiorow;
+
+		$kielilisa = "FI";
+
+		if (strtoupper($laskurow["maa"]) == "SE") {
+			$kielilisa = "SE";
+		}
+
+		$query = "  SELECT selite AS ennakko_pros_a
+					FROM tuotteen_avainsanat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tuoteno = '{$trow['tuoteno']}'
+					AND laji 	= 'parametri_ennakkoale_a'
+					AND kieli 	= '{$kielilisa}'
+					AND selite != ''
+					ORDER BY ennakko_pros_a DESC
+					LIMIT 1";
+		$result = pupe_query($query);
+
+		// Haetaanko ruotsihinnat
+		if (strtoupper($laskurow["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
+			$query = "	SELECT alv
+						FROM tuotteen_alv
+						WHERE tuoteno = '{$trow['tuoteno']}'
+						AND maa = '{$laskurow['maa']}'";
+			$tuotteen_alv_resu = pupe_query($query);
+			$tuotteen_alv_rivi = mysql_fetch_assoc($tuotteen_alv_resu);
+
+			$alv = $tuotteen_alv_rivi['alv'];
+
+			$trow['myyntihinta'] = tuotteen_myyntihinta($laskurow, $trow, $trow['varattu']);
+		}
+
+		$hinta = "";
+
+		if (mysql_num_rows($result) == 1) {
+			$tuotteen_hinta = mysql_fetch_assoc($result);
+			$hinta = $trow['myyntihinta'] * (1 - ($tuotteen_hinta['ennakko_pros_a'] / 100));
+		}
+
+		return $hinta;
+	}
+}
+
+if (!function_exists('vapauta_kateistasmaytys')) {
+	function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
+		global $kukarow, $yhtiorow;
+
+		// Katsotaan onko kassalippaan tämän päivän kassa jo täsmäytetty
+		$tasmays_query = "	SELECT group_concat(distinct lasku.tunnus) ltunnukset,
+							group_concat(distinct tiliointi.selite) selite
+							FROM lasku
+							JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.selite LIKE '$kassalipasrow[nimi] %' AND tiliointi.korjattu = '')
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							AND lasku.tila 	  = 'X'
+							AND lasku.alatila = 'K'
+							AND lasku.tapvm   = '$paiva'";
+		$tasmays_result = pupe_query($tasmays_query);
+		$tasmaysrow = mysql_fetch_assoc($tasmays_result);
+
+		// Jos on, niin poistetaan täsmäytys
+		if ($tasmaysrow["ltunnukset"] != "") {
+			$query = "	UPDATE tiliointi
+						SET korjattu = '{$kukarow['kuka']}',
+						korjausaika  = NOW()
+						WHERE yhtio  = '{$kukarow['yhtio']}'
+						AND ltunnus IN ({$tasmaysrow['ltunnukset']})
+						AND korjattu = ''";
+			$result = pupe_query($query);
+
+			$query = "	UPDATE lasku
+						SET tila = 'D',
+						alatila  = 'X',
+						comments = CONCAT(comments, ' {$kukarow['kuka']} mitätöi tositteen eikateinen.php ohjelmassa')
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus IN ({$tasmaysrow['ltunnukset']})";
+			$result = pupe_query($query);
+
+			echo "<font class='error'>".t("Vapautettiin kassojen %s päivän %s tosite.", '', $kassalipasrow['nimi'], $paiva)."<br/><br/>";
+			echo t("Sinun on täsmäytettävä päivän käteismyynnit uudelleen käteismyynnit ohjelmasta") . "</font>";
+
+			return true;
+		}
+
+		return false;
+	}
+}
+
+if (!function_exists('hyllysiirto')) {
+	function hyllysiirto($params) {
+		global $kukarow, $yhtiorow;
+
+		$error = false;
+
+		if (!isset($params['kappaleet']) or !is_numeric($params['kappaleet'])) $error = true;
+		else $kappaleet = $params['kappaleet'];
+
+		if (!isset($params['lisavaruste'])) $error = true;
+		else $lisavaruste = $params['lisavaruste'];
+
+		if (!isset($params['tuoteno']) or trim($params['tuoteno']) == '') $error = true;
+		else $tuoteno = $params['tuoteno'];
+
+		if (!isset($params['tuotepaikat_tunnus_otetaan']) or (int) $params['tuotepaikat_tunnus_otetaan'] == 0) $error = true;
+		else $tuotepaikat_tunnus_otetaan = (int) $params['tuotepaikat_tunnus_otetaan'];
+
+		if (!isset($params['tuotepaikat_tunnus_siirretaan']) or (int) $params['tuotepaikat_tunnus_siirretaan'] == 0) $error = true;
+		else $tuotepaikat_tunnus_siirretaan = (int) $params['tuotepaikat_tunnus_siirretaan'];
+
+		// $mistarow = Mistä varastosta otetaan? (tuotepaikat)
+		if (!isset($params['mistarow']) or !is_array($params['mistarow'])) $error = true;
+		else $mistarow = $params['mistarow'];
+
+		// $minnerow = Minne varastoon viedään? (tuotepaikat)
+		if (!isset($params['minnerow']) or !is_array($params['minnerow'])) $error = true;
+		else $minnerow = $params['minnerow'];
+
+		if (!isset($params['sarjano_array']) or !is_array($params['sarjano_array'])) $error = true;
+		else $sarjano_array = $params['sarjano_array'];
+
+		if (!isset($params['selite'])) $error = true;
+		else $selite = $params['selite'];
+
+		if (!isset($params['tun'])) $error = true;
+		else $tun = (int) $params['tun'];
+
+		if ($error) return false;
+
+		if ($lisavaruste == "LISAVARUSTE") {
+			$lisavarlisa1 = " saldo_varattu = saldo_varattu - {$kappaleet}, ";
+			$lisavarlisa2 = " saldo_varattu = saldo_varattu + {$kappaleet}, ";
+		}
+		else {
+			$lisavarlisa1 = "";
+			$lisavarlisa2 = "";
+		}
+
+		// Mistä varastosta otetaan?
+		$query = "	UPDATE tuotepaikat
+					set saldo 	= saldo - {$kappaleet},
+					{$lisavarlisa1}
+					saldoaika	= now(),
+					muuttaja	= '{$kukarow['kuka']}',
+					muutospvm	= now()
+                  	WHERE tuoteno 	= '{$tuoteno}'
+					and yhtio 		= '{$kukarow['yhtio']}'
+					and tunnus		= {$tuotepaikat_tunnus_otetaan}";
+		$result = pupe_query($query);
+
+		// Minne varastoon viedään?
+		$query = "	UPDATE tuotepaikat
+					set saldo 	= saldo + {$kappaleet},
+					{$lisavarlisa2}
+					saldoaika	= now(),
+					muuttaja	= '{$kukarow['kuka']}',
+					muutospvm	= now()
+					WHERE tuoteno 	= '{$tuoteno}'
+					and yhtio 		= '{$kukarow['yhtio']}'
+					and tunnus		= {$tuotepaikat_tunnus_siirretaan}";
+		$result = pupe_query($query);
+
+		if ($minnerow["hyllyalue"] == "!!M") {
+			$asiakkaan_tunnus = (int) $minnerow["hyllynro"].$minnerow["hyllyvali"].$minnerow["hyllytaso"];
+			$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
+						FROM asiakas
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$asiakkaan_tunnus}'";
+			$asiakasresult = pupe_query($query);
+			$asiakasrow = mysql_fetch_assoc($asiakasresult);
+			$minne_texti = t("Myyntitili")." ".$asiakasrow["asiakkaan_nimi"];
+		}
+		else {
+			$minne_texti = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
+		}
+
+		if ($mistarow["hyllyalue"] == "!!M") {
+			$asiakkaan_tunnus = (int) $mistarow["hyllynro"].$mistarow["hyllyvali"].$mistarow["hyllytaso"];
+			$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
+						FROM asiakas
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$asiakkaan_tunnus}'";
+			$asiakasresult = pupe_query($query);
+			$asiakasrow = mysql_fetch_assoc($asiakasresult);
+			$mista_texti = t("Myyntitili")." ".$asiakasrow["asiakkaan_nimi"];
+		}
+		else {
+			$mista_texti = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
+		}
+
+		$kehahin_query = "	SELECT tuote.sarjanumeroseuranta,
+							round(if (tuote.epakurantti100pvm = '0000-00-00',
+									if (tuote.epakurantti75pvm = '0000-00-00',
+										if (tuote.epakurantti50pvm = '0000-00-00',
+											if (tuote.epakurantti25pvm = '0000-00-00',
+												tuote.kehahin,
+											tuote.kehahin * 0.75),
+										tuote.kehahin * 0.5),
+									tuote.kehahin * 0.25),
+								0),
+							6) kehahin
+							FROM tuote
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							and tuoteno = '{$tuoteno}'";
+		$kehahin_result = pupe_query($kehahin_query);
+		$kehahin_row = mysql_fetch_array($kehahin_result);
+
+		$keskihankintahinta = $kehahin_row['kehahin'];
+
+		if ($kehahin_row['sarjanumeroseuranta'] == 'G') {
+			$keskihankintahinta = sarjanumeron_ostohinta("tunnus", $sarjano_array[0]);
+		}
+		elseif ($kehahin_row['sarjanumeroseuranta'] == 'S' or $kehahin_row['sarjanumeroseuranta'] == 'U') {
+			$keskihankintahinta = 0;
+
+			foreach ($sarjano_array as $sarjano) {
+				$keskihankintahinta +=	sarjanumeron_ostohinta("tunnus", $sarjano);
+			}
+
+			$keskihankintahinta = round($keskihankintahinta / count($sarjano_array), 6);
+		}
+
+		if ($selite != '') {
+			$selite = ": {$selite}";
+		}
+		else {
+			$selite = "";
+		}
+
+		$query = "	INSERT into tapahtuma set
+					yhtio 		= '{$kukarow['yhtio']}',
+					tuoteno 	= '{$tuoteno}',
+					kpl 		= {$kappaleet} * -1,
+					hinta 		= '{$keskihankintahinta}',
+					laji 		= 'siirto',
+					hyllyalue	= '{$mistarow['hyllyalue']}',
+					hyllynro 	= '{$mistarow['hyllynro']}',
+					hyllyvali	= '{$mistarow['hyllyvali']}',
+					hyllytaso	= '{$mistarow['hyllytaso']}',
+					rivitunnus	= {$tun},
+					selite 		= '".t("Paikasta")." {$mista_texti} ".t("vähennettiin")." {$kappaleet}{$selite}',
+					laatija 	= '{$kukarow['kuka']}',
+					laadittu 	= now()";
+		$result = pupe_query($query);
+
+		$query = "	INSERT into tapahtuma set
+					yhtio 		= '{$kukarow['yhtio']}',
+					tuoteno 	= '{$tuoteno}',
+					kpl 		= '{$kappaleet}',
+					hinta 		= '{$keskihankintahinta}',
+					laji 		= 'siirto',
+					hyllyalue	= '{$minnerow['hyllyalue']}',
+					hyllynro 	= '{$minnerow['hyllynro']}',
+					hyllyvali	= '{$minnerow['hyllyvali']}',
+					hyllytaso	= '{$minnerow['hyllytaso']}',
+					rivitunnus	= {$tun},
+					selite 		= '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." {$kappaleet}{$selite}',
+					laatija 	= '{$kukarow['kuka']}',
+					laadittu 	= now()";
+		$result = pupe_query($query);
+	}
+}
+
+if (!function_exists('laske_siirrettava_maara')) {
+	function laske_siirrettava_maara($row) {
+		global $kukarow, $yhtiorow;
+
+		$siirrettavat_rivit = array();
+
+		// Lets lock up
+		$query = "	LOCK TABLES
+					lasku READ,
+					lasku AS l1 READ,
+					tilausrivi READ,
+					tilausrivi AS t1 READ,
+					tilausrivi AS t2 READ,
+					tuote READ,
+					tuotepaikat READ,
+					varastopaikat READ";
+		$res = pupe_query($query);
+
+		list($saldo, $hyllyssa, $siirrettava_yht, $devnull) = saldo_myytavissa($row['tuoteno'], '', 0, '', $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso']);
+
+		$query = "	(SELECT t1.tunnus, t1.otunnus, t1.varattu
+					FROM lasku AS l1
+					JOIN tilausrivi AS t1 ON (
+						t1.yhtio = l1.yhtio AND
+						t1.otunnus = l1.tunnus AND
+						t1.tuoteno = '{$row['tuoteno']}' AND
+						t1.hyllyalue = '{$row['hyllyalue']}' AND
+						t1.hyllynro = '{$row['hyllynro']}' AND
+						t1.hyllyvali = '{$row['hyllyvali']}' AND
+						t1.hyllytaso = '{$row['hyllytaso']}' AND
+						t1.tyyppi IN ('L','G') AND
+						t1.var IN ('','H') AND
+						t1.keratty = '' AND
+						t1.uusiotunnus = 0 AND
+						t1.kpl = 0 AND
+						t1.varattu > 0
+					)
+					WHERE l1.yhtio = '{$kukarow['yhtio']}'
+					AND l1.tila = 'N'
+					AND l1.alatila != 'X')
+					UNION
+					(SELECT t2.tunnus, t2.otunnus, t2.jt + t2.varattu AS varattu
+					FROM tilausrivi AS t2
+					WHERE t2.yhtio = '{$kukarow['yhtio']}'
+					AND	t2.tuoteno = '{$row['tuoteno']}'
+					AND	t2.hyllyalue = '{$row['hyllyalue']}'
+					AND	t2.hyllynro = '{$row['hyllynro']}'
+					AND	t2.hyllyvali = '{$row['hyllyvali']}'
+					AND	t2.hyllytaso = '{$row['hyllytaso']}'
+					AND	t2.tyyppi IN ('L','G')
+					AND	t2.var = 'J'
+					AND	t2.keratty = ''
+					AND	t2.uusiotunnus = 0
+					AND	t2.kpl = 0
+					AND	t2.jt + t2.varattu > 0)";
+		$result = pupe_query($query);
+
+		while ($saldorow = mysql_fetch_assoc($result)) {
+
+			$siirrettava_yht += $saldorow['varattu'];
+			$siirrettavat_rivit[] = $saldorow['tunnus'];
+		}
+
+		// poistetaan lukko
+		$query = "UNLOCK TABLES";
+		$res   = pupe_query($query);
+
+		return array($siirrettava_yht, $siirrettavat_rivit);
+	}
+}
+
+if (!function_exists('hae_tilauksen_rekisterinumerot')) {
+	function hae_tilauksen_rekisterinumerot($tilausnumero) {
+		global $kukarow, $yhtiorow;
+
+		if ($tilausnumero == '') {
+			return array();
+		}
+
+		//Tilausrivi pitää joinaa, jottei tule poistettuja rekisterinumeroita
+		$query = "	SELECT tilausrivin_lisatiedot.rekisterinumero
+					FROM tilausrivin_lisatiedot
+					JOIN tilausrivi
+					ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+						AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus )
+					WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivin_lisatiedot.vanha_otunnus = '{$tilausnumero}'
+					ORDER BY tilausrivi.tunnus DESC";
+		$result = pupe_query($query);
+
+		$rekisterinumerot = array();
+		$onko_syotetty_muita_kuin_tyhjia = false;
+		while($rekisterinumero = mysql_fetch_assoc($result)) {
+			if ($rekisterinumero['rekisterinumero'] != '') {
+				$onko_syotetty_muita_kuin_tyhjia = true;
+			}
+			$rekisterinumerot[$rekisterinumero['rekisterinumero']] = $rekisterinumero;
+		}
+
+		if ($onko_syotetty_muita_kuin_tyhjia) {
+			return $rekisterinumerot;
+		}
+
+		return array();
+	}
+}
+
+if (!function_exists('paivita_ohjausmerkki')) {
+	function paivita_ohjausmerkki($laskurow) {
+		global $kukarow;
+
+		$query = "	SELECT tarkenne
+					FROM asiakkaan_avainsanat
+					WHERE yhtio 	 = '{$kukarow['yhtio']}'
+					AND laji 		 = 'OHJAUSMERKKI'
+					AND liitostunnus = '{$laskurow['liitostunnus']}'
+					AND avainsana 	 = '{$laskurow['toimitustapa']}'";
+		$ohjausmerkki_check_res = pupe_query($query);
+		$ohjausmerkki_check_row = mysql_fetch_assoc($ohjausmerkki_check_res);
+
+		if ($ohjausmerkki_check_row['tarkenne'] != "") {
+
+			// Tarkistetaan löytyykö kyseinen ohjausmerkkiteksti otsikolta
+			// Ei haluta lisätä tekstiä kahteen kertaan
+			if (stripos($laskurow['ohjausmerkki'], $ohjausmerkki_check_row['tarkenne']) === FALSE) {
+
+				if ($laskurow['ohjausmerkki'] != "") {
+					$updlisa = " ohjausmerkki = CONCAT('{$ohjausmerkki_check_row['tarkenne']}', ' / ', ohjausmerkki)";
+					$laskurow['ohjausmerkki'] = "{$ohjausmerkki_check_row['tarkenne']} / {$laskurow['ohjausmerkki']}";
+				}
+				else {
+					$updlisa = " ohjausmerkki = '{$ohjausmerkki_check_row['tarkenne']}'";
+					$laskurow['ohjausmerkki'] = $ohjausmerkki_check_row['tarkenne'];
+				}
+
+				$query = "	UPDATE lasku SET
+							{$updlisa}
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus  = '{$laskurow['tunnus']}'";
+				$updres = pupe_query($query);
+			}
+		}
+
+		return $laskurow['ohjausmerkki'];
+	}
+}
+
+if (!function_exists('hae_asiakas')) {
+	function hae_asiakas($liitostunnus) {
+		global $yhtiorow;
+
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$yhtiorow['yhtio']}'
+					AND tunnus = {$liitostunnus}";
+		$result = pupe_query($query);
+
+		return mysql_fetch_assoc($result);
+	}
+}
+
+if (!function_exists('hae_asiakasalennukset')) {
+	function hae_asiakasalennukset($asiakasrow, $alehi_assegmenttirow, $asiakas_yhtio, $tuotecols, $tuotejoin, $tuotewhere, $tuotegroup, $order, $poistuvat = TRUE) {
+		global $kukarow, $yhtiorow;
+
+		if ($poistuvat) {
+			$poislisa = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
+		}
+		else {
+			$poislisa = " and tuote.status not in ('P','X') ";
+		}
+
+		$query = "	/*	5. asiakas.tunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus) */
+						(	SELECT 1 prio,
+								asiakasalennus.alennus,
+								asiakasalennus.tuoteno,
+								asiakasalennus.alennuslaji,
+								tuote.nimitys tuoteno_nimi,
+								'' asiakasryhmä,
+								'' asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas / tuote' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.asiakas = '$asiakasrow[tunnus]'
+							and asiakasalennus.asiakas > 0
+							and asiakasalennus.tuoteno != ''
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							{$poislisa}
+						)
+						UNION
+						/*	5. asiakas.ytunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus) */
+						(	SELECT 2 prio,
+								asiakasalennus.alennus,
+								asiakasalennus.tuoteno,
+								asiakasalennus.alennuslaji,
+								tuote.nimitys tuoteno_nimi,
+								'' asiakasryhmä,
+								'' asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Ytunnus / tuote' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.ytunnus = '$asiakasrow[ytunnus]'
+							and asiakasalennus.ytunnus != ''
+							and asiakasalennus.tuoteno != ''
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							{$poislisa}
+						)
+						UNION
+						/* 6. asiakas.tunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus) */
+						(	SELECT 3 prio,
+								asiakasalennus.alennus,
+								'' tuoteno,
+								asiakasalennus.alennuslaji,
+								'' tuoteno_nimi,
+								'' asiakasryhmä,
+								'' asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas / aleryhmä' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							$tuotejoin
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.asiakas = '$asiakasrow[tunnus]'
+							and asiakasalennus.asiakas > 0
+							and asiakasalennus.ryhma != ''
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							$tuotewhere
+							$tuotegroup
+						)
+						UNION
+						/* 6. asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus) */
+						(	SELECT 4 prio,
+								asiakasalennus.alennus,
+								'' tuoteno,
+								asiakasalennus.alennuslaji,
+								'' tuoteno_nimi,
+								'' asiakasryhmä,
+								'' asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Ytunnus / aleryhmä' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							$tuotejoin
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.ytunnus = '$asiakasrow[ytunnus]'
+							and asiakasalennus.ytunnus != ''
+							and asiakasalennus.ryhma != ''
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							$tuotewhere
+							$tuotegroup
+						)
+						UNION
+						/* 7. asiakas.segmentti tuote.tuoteno aleprosentti (asiakassegmentin tuotteen alennus) */
+						(
+							SELECT 5 prio,
+									asiakasalennus.alennus,
+									asiakasalennus.tuoteno,
+									asiakasalennus.alennuslaji,
+									tuote.nimitys tuoteno_nimi,
+									'' asiakasryhmä,
+									'' asiakasryhmä_nimi,
+									asiakasalennus.ryhma alennusryhmä,
+									perusalennus.selite alennusryhmä_nimi,
+									if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+									if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+									'Asiakas-segmentti / tuote' tyyppi
+									$tuotecols
+								FROM asiakasalennus
+								LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+								LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+								JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
+								WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+								and asiakasalennus.asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
+								and asiakasalennus.asiakas_segmentti != ''
+								and asiakasalennus.tuoteno != ''
+								and asiakasalennus.ytunnus = ''
+								and asiakasalennus.asiakas = 0
+								and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+								and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+								and asiakasalennus.alennus >= 0
+								and asiakasalennus.alennus <= 100
+								{$poislisa}
+						)
+						UNION
+						/* 8. asiakas.ryhmä tuote.tuoteno aleprosentti (asiakasaleryhmän tuotteen alennus) */
+						(	SELECT 6 prio,
+								asiakasalennus.alennus,
+								asiakasalennus.tuoteno,
+								asiakasalennus.alennuslaji,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakasryhmä / tuote' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.asiakas_ryhma = '$asiakasrow[ryhma]'
+							and asiakasalennus.asiakas_ryhma != ''
+							and asiakasalennus.tuoteno != ''
+							and asiakasalennus.ytunnus = ''
+							and asiakasalennus.asiakas = 0
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							{$poislisa}
+						)
+						UNION
+						/* 9. asiakas.piiri tuote.tuoteno aleprosentti (asiakaspiirin tuotteen alennus) */
+						(	SELECT 7 prio,
+								asiakasalennus.alennus,
+								asiakasalennus.tuoteno,
+								asiakasalennus.alennuslaji,
+								tuote.nimitys tuoteno_nimi,
+								'' asiakasryhmä,
+								'' asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakaspiiri / tuote' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.piiri = '$asiakasrow[piiri]'
+							and asiakasalennus.piiri != ''
+							and asiakasalennus.tuoteno != ''
+							and asiakasalennus.ytunnus = ''
+							and asiakasalennus.asiakas = 0
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							{$poislisa}
+						)
+						UNION
+						/* 10. asiakas.segmentti tuote.aleryhmä aleprosentti (asiakassegmentin tuotealeryhmän alennus) */
+						(	SELECT 8 prio,
+								asiakasalennus.alennus,
+								'' tuoteno,
+								asiakasalennus.alennuslaji,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas-segmentti / aleryhmä' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							$tuotejoin
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
+							and asiakasalennus.asiakas_segmentti != ''
+							and asiakasalennus.ryhma != ''
+							and asiakasalennus.ytunnus = ''
+							and asiakasalennus.asiakas = 0
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							$tuotewhere
+							$tuotegroup
+						)
+						UNION
+						/* 11. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasaleryhmän tuotealeryhmän alennus) */
+						(	SELECT 9 prio,
+								asiakasalennus.alennus,
+								'' tuoteno,
+								asiakasalennus.alennuslaji,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakasryhmä / aleryhmä' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							$tuotejoin
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.asiakas_ryhma = '$asiakasrow[ryhma]'
+							and asiakasalennus.asiakas_ryhma != ''
+							and asiakasalennus.ryhma != ''
+							and asiakasalennus.ytunnus = ''
+							and asiakasalennus.asiakas = 0
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							$tuotewhere
+							$tuotegroup
+						)
+						UNION
+						/* 12. asiakas.piiri tuote.aleryhmä aleprosentti (asiakaspiirin tuotealeryhmän alennus) */
+						(	SELECT 10 prio,
+								asiakasalennus.alennus,
+								'' tuoteno,
+								asiakasalennus.alennuslaji,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakasalennus.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakaspiiri / aleryhmä' tyyppi
+								$tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							$tuotejoin
+							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
+							and asiakasalennus.piiri = '$asiakasrow[piiri]'
+							and asiakasalennus.piiri != ''
+							and asiakasalennus.ryhma != ''
+							and asiakasalennus.ytunnus = ''
+							and asiakasalennus.asiakas = 0
+							and (asiakasalennus.minkpl <= '1' or asiakasalennus.minkpl = 0)
+							and ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31',asiakasalennus.loppupvm) >= current_date) or (asiakasalennus.alkupvm='0000-00-00' and asiakasalennus.loppupvm='0000-00-00'))
+							and asiakasalennus.alennus >= 0
+							and asiakasalennus.alennus <= 100
+							$tuotewhere
+							$tuotegroup
+						)
+						UNION
+						/* 13. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus) */
+						(	SELECT 11 prio,
+								alennus,
+								'' tuoteno,
+								'1' alennuslaji,
+								'' tuoteno_nimi,
+								'' asiakasryhmä,
+								'' asiakasryhmä_nimi,
+								ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								'' alkupvm,
+								'' loppupvm,
+								'Perusalennus' tyyppi
+								$tuotecols
+							FROM perusalennus
+							$tuotejoin
+							WHERE perusalennus.yhtio = '$asiakas_yhtio'
+							and perusalennus.ryhma != ''
+							# Huom. perualennus > 0
+							and perusalennus.alennus > 0
+							and perusalennus.alennus <= 100
+							$tuotewhere
+							$tuotegroup
+						)
+						ORDER BY $order";
+		$result = pupe_query($query);
+
+		$asiakas_alennukset = array();
+		while($asiakas_alennus = mysql_fetch_assoc($result)) {
+			$asiakas_alennukset[] = $asiakas_alennus;
+		}
+
+		return $asiakas_alennukset;
+	}
+}
+
+if (!function_exists('hae_asiakashinnat')) {
+	function hae_asiakashinnat($asiakasrow, $alehi_assegmenttirow, $asiakas_yhtio, $poistuvat = TRUE) {
+		global $kukarow, $yhtiorow;
+
+		$segmentti_where = "";
+
+		if (!empty($alehi_assegmenttirow['tunnukset'])) {
+			$segmentti_where = " and asiakashinta.asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])";
+		}
+
+		if ($poistuvat) {
+			$poislisa = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
+		}
+		else {
+			$poislisa = " and tuote.status not in ('P','X') ";
+		}
+
+		$query = "	/* 2B. asiakas.tunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) yhtiön valuutassa */
+						(	SELECT 1 prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas / tuote' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.asiakas = '$asiakasrow[tunnus]'
+							and asiakashinta.asiakas > 0
+							and asiakashinta.tuoteno != ''
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 2B. asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) yhtiön valuutassa */
+						(	SELECT 2 prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Ytunnus / tuote' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.ytunnus = '$asiakasrow[ytunnus]'
+							and asiakashinta.ytunnus > 0
+							and asiakashinta.tuoteno != ''
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 3B. asiakas.tunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) yhtiön valuutassa */
+						(	SELECT 3 prio,
+								hinta,
+								'' tuoteno,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas / aleryhmä' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.asiakas = '$asiakasrow[tunnus]'
+							and asiakashinta.asiakas > 0
+							and asiakashinta.ryhma != ''
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 3B. asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) yhtiön valuutassa */
+						(	SELECT 4 prio,
+								hinta,
+								'' tuoteno,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Ytunnus / aleryhmä' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.ytunnus = '$asiakasrow[ytunnus]'
+							and asiakashinta.ytunnus != ''
+							and asiakashinta.ryhma != ''
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 4B. asiakas.segmentti tuote.tuoteno nettohinta (asiakassegmentin tuotteen hinta) yhtiön valuutassa */
+						(	SELECT 5 prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas-segmentti / tuote' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							{$segmentti_where}
+							and asiakashinta.asiakas_segmentti !=''
+							and asiakashinta.tuoteno != ''
+							and asiakashinta.ytunnus = ''
+							and asiakashinta.asiakas = 0
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 5B. asiakas.ryhmä tuote.tuoteno nettohinta (asiakasaleryhmän tuotteen hinta) yhtiön valuutassa */
+						(	SELECT 6 prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakasryhmä / tuote' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.asiakas_ryhma = '$asiakasrow[ryhma]'
+							and asiakashinta.asiakas_ryhma != ''
+							and asiakashinta.tuoteno != ''
+							and asiakashinta.ytunnus = ''
+							and asiakashinta.asiakas = 0
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 6B. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) yhtiön valuutassa */
+						(	SELECT 7 prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakaspiiri / tuote' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.piiri = '$asiakasrow[piiri]'
+							and asiakashinta.piiri != ''
+							and asiakashinta.tuoteno != ''
+							and asiakashinta.ytunnus = ''
+							and asiakashinta.asiakas = 0
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 7B. asiakas.segmentti tuote.aleryhma nettohinta (asiakassegmentin tuotealeryhmän hinta) yhtiön valuutassa */
+						(	SELECT 8 prio,
+								hinta,
+								'' tuoteno,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakas-segmentti / aleryhmä' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							{$segmentti_where}
+							and asiakashinta.asiakas_segmentti != ''
+							and asiakashinta.ryhma != ''
+							and asiakashinta.ytunnus = ''
+							and asiakashinta.asiakas = 0
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 8B. asiakas.ryhmä tuote.aleryhmä nettohinta (asiakasaleryhmän tuotealeryhmän hinta) yhtiön valuutassa */
+						(	SELECT 9 prio,
+								hinta,
+								'' tuoteno,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakasryhmä / aleryhmä' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.asiakas_ryhma = '$asiakasrow[ryhma]'
+							and asiakashinta.asiakas_ryhma != ''
+							and asiakashinta.ryhma != ''
+							and asiakashinta.ytunnus = ''
+							and asiakashinta.asiakas = 0
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						UNION
+						/* 9B. asiakas.piiri tuote.aleryhma nettohinta (asiakaspiirin tuotealeryhmän hinta) yhtiön valuutassa */
+						(	SELECT 10 prio,
+								hinta,
+								'' tuoteno,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhmä,
+								avainsana.selitetark asiakasryhmä_nimi,
+								asiakashinta.ryhma alennusryhmä,
+								perusalennus.selite alennusryhmä_nimi,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'Asiakaspiiri / aleryhmä' tyyppi
+							FROM asiakashinta
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
+							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
+							and asiakashinta.piiri = '$asiakasrow[piiri]'
+							and asiakashinta.piiri != ''
+							and asiakashinta.ryhma != ''
+							and asiakashinta.ytunnus = ''
+							and asiakashinta.asiakas = 0
+							and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
+							and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
+							and ((asiakashinta.alkupvm <= current_date and if (asiakashinta.loppupvm = '0000-00-00','9999-12-31',asiakashinta.loppupvm) >= current_date) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))
+							{$poislisa}
+						)
+						ORDER BY alennusryhmä+0, tuoteno, prio, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)";
+		$result = pupe_query($query);
+
+		$tuote_hinnat = array();
+
+		while ($tuote_hinta = mysql_fetch_assoc($result)) {
+			$tuote_hinnat[] = $tuote_hinta;
+		}
+
+		return $tuote_hinnat;
+	}
+}
+
+if (!function_exists("korvaavat_kiellot")) {
+	function korvaavat_kiellot($ytunnus, $osasto, $try, $laji='') {
+		global $kukarow;
+
+		$lajilisa = "";
+
+		if ($laji != "") {
+			$lajilisa = " AND laji = '$laji' ";
+		}
+
+		// ytunnus osasto try
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '$ytunnus'
+					AND osasto  = '$osasto'
+					AND try     = '$try'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// ytunnus * try
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '$ytunnus'
+					AND osasto  = '*'
+					AND try     = '$try'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// ytunnus osasto *
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '$ytunnus'
+					AND osasto  = '$osasto'
+					AND try     = '*'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// ytunnus * *
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '$ytunnus'
+					AND osasto  = '*'
+					AND try     = '*'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// * osasto try
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '*'
+					AND osasto  = '$osasto'
+					AND try     = '$try'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// * * try
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '*'
+					AND osasto  = '*'
+					AND try     = '$try'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// * osasto *
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '*'
+					AND osasto  = '$osasto'
+					AND try     = '*'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		// ***
+		$query = "	SELECT laji
+					FROM korvaavat_kiellot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '*'
+					AND osasto  = '*'
+					AND try     = '*'
+					{$lajilisa}";
+		$kkres = pupe_query($query);
+
+		if ($kk_row = mysql_fetch_assoc($kkres)) {
+			return $kk_row['laji'];
+		}
+
+		return "";
 	}
 }

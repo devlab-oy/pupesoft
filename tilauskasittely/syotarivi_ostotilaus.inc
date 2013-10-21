@@ -12,6 +12,7 @@
 			<input type='hidden' name='toiminto' 			value = '$toiminto'>
 			<input type='hidden' name='tee' 				value = 'TI'>
 			<input type='hidden' name='rivitunnus' 			value = '$rivitunnus'>
+			<input type='hidden' name='hinta_alkuperainen'	value = '{$hinta_alkuperainen}'>
 			<input type='hidden' name='perheid2' 			value = '$perheid2'>
 			<input type='hidden' name='muuta' 				value = '$muuta'>
 			<input type='hidden' name='otunnus' 			value = '$otunnus'>

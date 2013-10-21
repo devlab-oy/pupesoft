@@ -4,37 +4,45 @@ if (!function_exists("toimitarkista")) {
 	function toimitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $toimtyyppi;
 		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_nimi, $tmp_ultilno_maa, $ytunnus_ind, $hetuok;
+		static $tmp_edi_kuvaus, $tmp_edi_salasana, $tmp_edi_kayttaja, $tmp_edi_palvelin;
+		static $tmp_edi_kuvaus_i, $tmp_edi_salasana_i, $tmp_edi_kayttaja_i, $tmp_edi_palvelin_i;
 
-		if ((mysql_field_name($result, $i) == "nimi") or
-			(mysql_field_name($result, $i) == "maa") or
-			(mysql_field_name($result, $i) == "ytunnus") or
-			(mysql_field_name($result, $i) == "oletus_hyvak1") or
-			(mysql_field_name($result, $i) == "oletus_valkoodi")) {
+		$fieldname = mysql_field_name($result, $i);
 
-
-			if (mysql_field_name($result, $i) == "oletus_hyvak1" and $alias_set == "KAYTTAJA") {
-				$t[$i] = $tmp_nimi;
-			}
+		if (($fieldname == "nimi") or
+			($fieldname == "maa") or
+			($fieldname == "ytunnus") or
+			($fieldname == "oletus_valkoodi")) {
 
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
 
-			if (mysql_field_name($result, $i) == "maa") {
+			if ($fieldname == "maa") {
 				$t[$i] = strtoupper($t[$i]);
 				$tmp_maakoodi = $t[$i];
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "nimi") {
+		if ($fieldname == "oletus_hyvak1") {
+			if ($alias_set == "KAYTTAJA") {
+				$t[$i] = $tmp_nimi;
+			}
+
+			if (trim($t[$i]) == '' and ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS' or $alias_set == "KAYTTAJA")) {
+				$virhe[$i] = t("Tieto puuttuu");
+			}
+		}
+
+		if ($fieldname == "nimi") {
 			$tmp_nimi = $t[$i];
 		}
 
-		if (mysql_field_name($result, $i) == "ultilno_maa") {
+		if ($fieldname == "ultilno_maa") {
 			$tmp_ultilno_maa = $t[$i];
 		}
 
-		if (mysql_field_name($result, $i) == "tilino" and $t[$i] != "") {
+		if ($fieldname == "tilino" and $t[$i] != "") {
 			$query = "	SELECT yhtio
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -46,12 +54,11 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "tilinumero") {
+		if ($fieldname == "tilinumero") {
 			$t[$i] = trim($t[$i]);
 
 			if ($tmp_maakoodi == strtoupper($yhtiorow['maa'])) {
 				if ((int) trim($t[$i]) != 0) {
-
 					$pankkitili = $t[$i];
 
 					if ($tmp_maakoodi == 'FI') {
@@ -62,9 +69,9 @@ if (!function_exists("toimitarkista")) {
 							$virhe[$i] = t("Pankkitili %s on virheellinen", "", $t[$i]);
 						}
 						else {
-							$t[$i]=$pankkitili;
-							$vastaus = luoiban($t[$i]);
-							$tmp_iban = $vastaus['iban'];
+							$t[$i]     = $pankkitili;
+							$vastaus   = luoiban($t[$i]);
+							$tmp_iban  = $vastaus['iban'];
 							$tmp_swift = $vastaus['swift'];
 						}
 					}
@@ -72,13 +79,13 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "ultilno") {
-
-			if ($tmp_maakoodi != strtoupper($yhtiorow['maa']) and $t[$i] == '') {
-				$virhe[$i] = t("Tieto puuttuu");
-			}
+		if ($fieldname == "ultilno") {
 
 			if ($t[$i] == '') $t[$i] = $tmp_iban;
+
+			if ($tmp_maakoodi != strtoupper($yhtiorow['maa']) and $t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
+				$virhe[$i] = t("Tieto puuttuu");
+			}
 
 			// Vaaditaan isot kirjaimet
 			$t[$i] = strtoupper($t[$i]);
@@ -86,18 +93,24 @@ if (!function_exists("toimitarkista")) {
 			if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
 			else $ibanmaa = $tmp_maakoodi;
 
-			// Jos SEPA-maa, tarkistetaan IBAN
-			if (tarkista_sepa($ibanmaa) and tarkista_iban($t[$i]) != $t[$i]) {
-				$virhe[$i] = t("Virheellinen IBAN!")." $t[$i]";
-			}
-			elseif (tarkista_bban($t[$i]) === FALSE) {
-				$virhe[$i] = t("Virheellinen BBAN!")." $t[$i] ".t("Tilinumerossa saa olla vain kirjaimia A-Z ja/tai numeroita 0-9");
+			if ($t[$i] != '') {
+				// Jos SEPA-maa, tarkistetaan IBAN
+				if (tarkista_sepa($ibanmaa) and tarkista_iban($t[$i]) != $t[$i]) {
+					$virhe[$i] = t("Virheellinen IBAN!")." $t[$i]";
+				}
+				elseif (tarkista_bban($t[$i]) === FALSE) {
+					$virhe[$i] = t("Virheellinen BBAN!")." $t[$i] ".t("Tilinumerossa saa olla vain kirjaimia A-Z ja/tai numeroita 0-9");
+				}
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "swift") {
+		if ($fieldname == "swift") {
 
 			if ($t[$i] == '') $t[$i] = $tmp_swift;
+
+			if ($tmp_maakoodi != strtoupper($yhtiorow['maa']) and $t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
+				$virhe[$i] = t("Tieto puuttuu");
+			}
 
 			// Vaaditaan isot kirjaimet
 			$t[$i] = trim(strtoupper($t[$i]));
@@ -105,13 +118,15 @@ if (!function_exists("toimitarkista")) {
 			if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
 			else $ibanmaa = $tmp_maakoodi;
 
-			// Jos SEPA-maa, tarkistetaan BIC
-			if (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE) {
-				$virhe[$i] = t("Virheellinen BIC!")." $t[$i]";
+			if ($t[$i] != '') {
+				// Jos SEPA-maa, tarkistetaan BIC
+				if (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE) {
+					$virhe[$i] = t("Virheellinen BIC!")." $t[$i]";
+				}
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "ytunnus" and trim($t[$i]) != '') {
+		if ($fieldname == "ytunnus" and trim($t[$i]) != '') {
 			$ytunnus = trim($t[$i]);
 			$ytunnus_ind = $i;
 
@@ -156,7 +171,7 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "ohjeitapankille") {
+		if ($fieldname == "ohjeitapankille") {
 
 			if ($tmp_maakoodi=='FI' and strlen($t[$i]) != '') {
 				$virhe[$i] = t("Käytössä vain ulkomaisille toimittajille");
@@ -169,7 +184,7 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "ovttunnus") {
+		if ($fieldname == "ovttunnus") {
 			if ($tmp_maakoodi == 'FI') {
 
 				if (trim($t[$i]) == '' and !isset($hetuok)) {
@@ -192,7 +207,7 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "email" and trim($t[$i]) != '') {
+		if ($fieldname == "email" and trim($t[$i]) != '') {
 			// Tarkistetaan sähköpostiosoite
 			$email_virhe = tarkista_email($t[$i]);
 
@@ -201,11 +216,11 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "oletus_valkoodi") {
+		if ($fieldname == "oletus_valkoodi") {
 			$tmp_valkoodi = $t[$i];
 		}
 
-		if (mysql_field_name($result, $i) == "tyyppi") {
+		if ($fieldname == "tyyppi") {
 			$toimtyyppi = $t[$i]; // otetaan tää talteen
 
 			if ($toimtyyppi == "K") {
@@ -223,7 +238,7 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "tyyppi_tieto") {
+		if ($fieldname == "tyyppi_tieto") {
 
 			if ($toimtyyppi == "S") {
 				$query = "SELECT * from yhtio where konserni='$yhtiorow[konserni]' and yhtio='$t[$i]' and yhtio!='$kukarow[yhtio]'";
@@ -289,15 +304,46 @@ if (!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "edi_kuvaus") {
-			$tmp_asn = $t[$i];
+		if ($fieldname == "edi_palvelin") {
+			$tmp_edi_palvelin = trim($t[$i]);
+			$tmp_edi_palvelin_i = $i;
 		}
 
-		if (mysql_field_name($result, $i) == "asn_sanomat") {
-			$asn_tyyppi = trim($t[$i]);
-			if ($tmp_asn == "editilaus_out_teccom.inc" and $asn_tyyppi == "") {
-				$virhe[$i] = t("Toimittajalle on laitettu TecCom-editilaus. Mitä sanomia toimittaja lähettää")." ?";
+		if ($fieldname == "edi_kayttaja") {
+			$tmp_edi_kayttaja = trim($t[$i]);
+			$tmp_edi_kayttaja_i = $i;
+		}
+
+		if ($fieldname == "edi_salasana") {
+			$tmp_edi_salasana = trim($t[$i]);
+			$tmp_edi_salasana_i = $i;
+		}
+
+		if ($fieldname == "edi_kuvaus") {
+			$tmp_edi_kuvaus = trim($t[$i]);
+			$tmp_edi_kuvaus_i = $i;
+		}
+
+		if ($fieldname == "edi_polku") {
+			$tmp_edi_polku = trim($t[$i]);
+
+			if ($tmp_edi_kuvaus == 'editilaus_out_wabco.inc' or $tmp_edi_kuvaus == 'editilaus_out_excel.inc' or $tmp_edi_kuvaus == 'editilaus_out_xml.inc' or $tmp_edi_kuvaus == 'sendorder_out_futur') {
+				// Näissä tyypeissä ei tartte olle mitään kenttiä syötetty
+			}
+			elseif ($tmp_edi_kuvaus != "" and $tmp_edi_palvelin == "localhost" and ($tmp_edi_polku == "" or !is_writable($tmp_edi_polku))) {
+				$tmp_virhe = t("Paikallinen siirto ei onnistu, koska hakemistoon ei ole kirjoitusoikeutta")."!";
+				$virhe[$i] = $tmp_virhe;
+				$virhe[$tmp_edi_palvelin_i] = $tmp_virhe;
+			}
+			elseif ($tmp_edi_kuvaus != "" and $tmp_edi_palvelin != "localhost" and ($tmp_edi_palvelin == "" or $tmp_edi_kayttaja == "" or $tmp_edi_salasana == "" or $tmp_edi_polku == "")) {
+				$tmp_virhe = t("Edi-kuvaus valittu, mutta lähettämiseen tarvittavia kenttiä ei syötetty")."!";
+				$virhe[$i] = $tmp_virhe;
+				$virhe[$tmp_edi_palvelin_i] = $tmp_virhe;
+				$virhe[$tmp_edi_kayttaja_i] = $tmp_virhe;
+				$virhe[$tmp_edi_salasana_i] = $tmp_virhe;
+				$virhe[$tmp_edi_kuvaus_i] = $tmp_virhe;
 			}
 		}
+
 	}
 }

@@ -24,7 +24,9 @@
 		$toimires = pupe_query($query);
 		$toimirow = mysql_fetch_array($toimires);
 
-		if (!preg_match("/(excel|wabco|xml)/", $toimirow['edi_kuvaus']) and ($toimirow['edi_palvelin'] == '' or $toimirow['edi_kayttaja'] == '' or $toimirow['edi_salasana'] == '' or $toimirow['edi_kuvaus'] == '' or $toimirow['edi_polku'] == '')) {
+		if (!preg_match("/(excel|wabco|xml|sendorder)/", $toimirow['edi_kuvaus']) and
+				($toimirow['edi_palvelin'] == '' or $toimirow['edi_kayttaja'] == '' or $toimirow['edi_salasana'] == '' or $toimirow['edi_kuvaus'] == '' or $toimirow['edi_polku'] == '') and
+				($toimirow['edi_palvelin'] != "localhost" or $toimirow["edi_polku"] == '')) {
 			$tulosta_ostotilaus_ulos .= "<font class='error'>".t("Edi-tilauksen lähettämiseen tarvittavia tietoja ei ole syötetty")."! ".t("Tarkista toimittajan %s tiedot", "", trim("{$toimirow['nimi']} {$toimirow['nimitark']}"))."!</font><br />";
 		}
 		else {
@@ -33,7 +35,24 @@
 				list($toimirow['edi_palvelin'], $toimirow['edi_portti']) = explode(":", $toimirow['edi_palvelin']);
 			}
 
-			require($toimirow['edi_kuvaus']);
+			if ($toimirow['edi_kuvaus'] == 'editilaus_out_futur.inc') {
+				$myynti_vai_osto = 'O';
+
+				$ftphost_futur = $toimirow['edi_palvelin'];
+				$ftpuser_futur = $toimirow['edi_kayttaja'];
+				$ftppass_futur = $toimirow['edi_salasana'];
+				$ftppath_futur = $toimirow['edi_polku'];
+			}
+
+			if ($toimirow['edi_kuvaus'] == 'sendorder_out_futur') {
+				$luo = 'sendorder';
+
+				require("inc/sahkoinen_tilausliitanta.inc");
+			}
+			else {
+				require($toimirow['edi_kuvaus']);
+			}
+
 			$tee = '';
 		}
 	}
@@ -114,7 +133,7 @@
 				$pdf->draw_text(50, 624, $laskurow["toim_osoite"],	 	$thispage, $norm);
 				$pdf->draw_text(50, 614, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $thispage, $norm);
 
-				if ($yhtiorow['maa'] != $laskurow['toim_maa']) {
+				if ($laskurow['toim_maa'] != $laskurow['maa']) {
 					$maan_tiedot = hae_maa(array('maakoodi' => $laskurow['toim_maa']));
 					$pdf->draw_text(50, 604, $maan_tiedot["nimi"], 		$thispage, $norm);
 				}

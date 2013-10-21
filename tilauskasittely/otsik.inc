@@ -924,14 +924,14 @@
 				echo "<td>{$srow['ryhma']}</td>";
 				echo "</tr>";
 			}
-			
+
 			if (isset($srow['fakta']) and $srow['fakta'] != "") {
 				echo "<tr>";
 				echo "<td valign='top'>".t("Asiakasfakta").":</td>";
 				echo "<td><font class='asiakasfakta'>".str_replace("\n", "<br>", $srow['fakta'])."</font></td>";
 				echo "</tr>";
-			}	
-			
+			}
+
 
 			$query  = "	SELECT laji
 						FROM asiakas
@@ -2012,7 +2012,7 @@
 			$jtki = "";
 			$rahtivapaa_chk = '';
 
-			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I')) $eilah = 'CHECKED';
+			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I') or (!isset($srow['eilahetetta']) and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $srow['toimitustapa'] == 'Nouto' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K')) $eilah = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
@@ -3422,6 +3422,13 @@
 			echo "<br /><font class='info'>",t("HUOM: Vaihdoit toimipaikkaa. Vienti- ja ALV-tiedot haettiin asiakastiedoista"),"!</font><br /><br />";
 		}
 
+		if ($yhtiorow['nouto_suoraan_laskutukseen'] == 'K' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))) {
+			if (($kukarow['kesken'] == 0 and $toimitustapa == 'Nouto' and $eilahe == '') or
+				(isset($otsikon_laskurow['toimitustapa']) and $otsikon_laskurow['toimitustapa'] == 'Nouto' and $eilahe == '')) {
+				echo "<br /><font class='info'>",t("HUOM: Valitsit toimitustavaksi noudon, mutta ei valitannut Suoraan laskutukseen"),"!</font><br /><br />";
+			}
+		}
+
 		// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
 		if ($maksaja == "" and $rahtivapaa != "") {
 			$maksaja = "K";
@@ -3844,7 +3851,7 @@
 				if ($merkki2 != 'eimenu' and $merkki2 != '') {
 					$merkki = $merkki2;
 				}
-				
+
 				$query2 .= "tyomaarays SET
 							yhtio			= '$kukarow[yhtio]',
 							kotipuh 		= '$kotipuh',
@@ -3871,7 +3878,7 @@
 							tyokoodi		= '$tyokoodi',
 							hyvaksy			= '$hyvaksy',
 							otunnus 		= '$kukarow[kesken]'";
-				
+
 				//N‰m‰ kent‰t p‰ivitet‰‰n vain, jos p‰ivitet‰‰n sit‰ tyˆm‰‰r‰ykselt‰ tai muualta miss‰ nuo kaksi kentt‰‰ n‰kyy..
 				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
 					$query2 .= ",	tyojono			= '$tyojono',
@@ -3879,7 +3886,7 @@
 				}
 				$query2 .= $postquery2;
 				$result = pupe_query($query2);
-			}	
+			}
 
 			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "EXTTARJOUS", "ENNAKKO","EXTENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE", "WEBTILAUSTARJOUS","EXTRANET_REKLAMAATIO"))) {
 
@@ -3896,7 +3903,7 @@
 				else {
 					$sopimus_pp = "";
 				}
-				
+
 				$sopimus_info = '';
 				if($toim != 'EXTENNAKKO' and $toim != 'EXTTARJOUS') {
 					$sopimus_info = "sopimus_lisatietoja			= '$sopimus_lisatietoja',";

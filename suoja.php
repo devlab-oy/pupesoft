@@ -82,7 +82,15 @@
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$query = "UPDATE oikeu SET paivitys = '1' where yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
+					$query = "	UPDATE oikeu
+								SET paivitys = '1',
+								muutospvm 	 = now(),
+								muuttaja 	 = '{$kukarow['kuka']}'
+								WHERE yhtio		= '$kukarow[yhtio]'
+								AND kuka		= '$selkukarow[kuka]'
+								AND nimi		= '$nimi'
+								AND alanimi		= '$alanimi'
+								AND sovellus	= '$sov'";
 					$result = pupe_query($query);
 				}
 			}
@@ -94,11 +102,23 @@
 
 				$query = "	SELECT nimi
 							FROM oikeu
-							WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
+							WHERE yhtio		= '$kukarow[yhtio]'
+							AND kuka		= '$selkukarow[kuka]'
+							AND nimi		= '$nimi'
+							AND alanimi		= '$alanimi'
+							AND sovellus	= '$sov'";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$query = "UPDATE oikeu SET lukittu = '1' where yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
+					$query = "	UPDATE oikeu
+								SET lukittu = '1',
+								muutospvm 	= now(),
+								muuttaja 	= '{$kukarow['kuka']}'
+								WHERE yhtio		= '$kukarow[yhtio]'
+								AND kuka		= '$selkukarow[kuka]'
+								AND nimi		= '$nimi'
+								AND alanimi		= '$alanimi'
+								AND sovellus	= '$sov'";
 					$result = pupe_query($query);
 				}
 			}

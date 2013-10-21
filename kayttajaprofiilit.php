@@ -113,7 +113,9 @@
 
 				if (mysql_num_rows($result) == 1) {
 					$query = "	UPDATE oikeu
-								SET paivitys 	= '1'
+								SET paivitys 	= '1',
+								muutospvm 		= now(),
+								muuttaja 		= '{$kukarow['kuka']}'
 								WHERE yhtio		= '$kukarow[yhtio]'
 								AND kuka		= '$profiili'
 								AND sovellus	= '$sov'
@@ -197,8 +199,10 @@
 							}
 							elseif ($trow["paivitys"] == 1) {
 								// Meill‰ ei v‰ltt‰m‰tt‰ ollut p‰ivitysoikeutta, koska aiempi checki ei huomio sit‰. Lis‰t‰‰n p‰ivitysoikeus.
-								$query = "	UPDATE oikeu SET
-											paivitys = 1
+								$query = "	UPDATE oikeu
+											SET paivitys 	= 1,
+											muutospvm 		= now(),
+											muuttaja 		= '{$kukarow['kuka']}'
 											WHERE yhtio		= '$kukarow[yhtio]'
 											AND kuka		= '$krow[kuka]'
 											AND sovellus	= '$trow[sovellus]'

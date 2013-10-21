@@ -441,7 +441,10 @@
 							$rresult = pupe_query($query);
 						}
 						elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
-							$query = "	UPDATE oikeu SET paivitys = '1'
+							$query = "	UPDATE oikeu
+										SET paivitys = '1',
+										muutospvm 	 = now(),
+										muuttaja 	 = '{$kukarow['kuka']}'
 										WHERE kuka		= '{$ktunnus}'
 										AND sovellus	= '{$trow['sovellus']}'
 										AND nimi		= '{$trow['nimi']}'
@@ -659,7 +662,10 @@
 							$rresult = pupe_query($query);
 						}
 						elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
-							$query = "	UPDATE oikeu SET paivitys = '1'
+							$query = "	UPDATE oikeu
+										SET paivitys = '1',
+										muutospvm 	 = now(),
+										muuttaja 	 = '{$kukarow['kuka']}'
 										WHERE kuka		= '{$kuka}'
 										AND sovellus	= '{$trow['sovellus']}'
 										AND nimi		= '{$trow['nimi']}'

@@ -86,9 +86,11 @@
 
 				//p‰ivitett‰n k‰ytt‰jien oikeudet
 				$query = "	UPDATE oikeu
-							SET nimitys		= '$row[nimitys]',
-							jarjestys 		= '$jarj',
-							jarjestys2		= '$jarj2'
+							SET nimitys	= '$row[nimitys]',
+							jarjestys 	= '$jarj',
+							jarjestys2	= '$jarj2',
+							muutospvm 	= now(),
+							muuttaja 	= '{$kukarow['kuka']}'
 							WHERE yhtio 	= '$uusiyhtio'
 							and sovellus	= '$row[sovellus]'
 							and nimi 		= '$row[nimi]'
@@ -235,7 +237,9 @@
 					if (isset($synkronoireferenssialapaivita)) {
 						// Jos lis‰t‰‰n uusi v‰liin, niin loput pit‰‰ tyˆnt‰‰ v‰h‰n eteenp‰in
 						$query = "	UPDATE oikeu
-									SET jarjestys	= jarjestys+10
+									SET jarjestys	= jarjestys+10,
+									muutospvm 		= now(),
+									muuttaja 		= '{$kukarow['kuka']}'
 									WHERE yhtio 	= '$yhtio'
 									and sovellus	= '$row[sovellus]'
 									and jarjestys  >= $jarj
@@ -249,7 +253,9 @@
 					$query = "	UPDATE oikeu
 								SET nimitys	= '$row[nimitys]',
 								jarjestys	= '$jarj',
-								jarjestys2	= '$jarj2'
+								jarjestys2	= '$jarj2',
+								muutospvm 	= now(),
+								muuttaja 	= '{$kukarow['kuka']}'
 								WHERE yhtio 	= '$yhtio'
 								and sovellus	= '$row[sovellus]'
 								and nimi 		= '$row[nimi]'
@@ -279,7 +285,10 @@
 
 				//p‰ivitet‰‰n uudet menun tiedot kaikille k‰ytt‰jille
 				$query = "	UPDATE oikeu
-							SET jarjestys = '$jarj', jarjestys2 = '$jarjestys2[$tun]'
+							SET jarjestys	= '$jarj',
+							jarjestys2		= '$jarjestys2[$tun]',
+							muutospvm		= now(),
+							muuttaja		= '{$kukarow['kuka']}'
 							WHERE yhtio		= '$row[yhtio]'
 							and sovellus	= '$row[sovellus]'
 							and nimi		= '$row[nimi]'
@@ -327,7 +336,15 @@
 
 				//p‰ivitet‰‰n uudet menun tiedot kaikille k‰ytt‰jille
 				$query = "	UPDATE oikeu
-							SET sovellus='$sove', nimi='$nimi', alanimi='$alanimi', nimitys='$nimitys', jarjestys='$jarjestys', jarjestys2='$jarjestys2', hidden='$hidden'
+							SET sovellus = '$sove',
+							nimi		 = '$nimi',
+							alanimi		 = '$alanimi',
+							nimitys		 = '$nimitys',
+							jarjestys	 = '$jarjestys',
+							jarjestys2	 = '$jarjestys2',
+							hidden		 = '$hidden',
+							muutospvm 	 = now(),
+							muuttaja 	 = '{$kukarow['kuka']}'
 							WHERE
 							sovellus		= '$row[sovellus]'
 							and nimi		= '$row[nimi]'

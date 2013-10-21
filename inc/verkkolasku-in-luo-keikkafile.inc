@@ -1,7 +1,7 @@
 <?php
 
-// debuggia (1)
-$debug = 0;
+	// debuggia (1)
+	$debug = 0;
 
 	if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 		function teccom_kaytettavat_tilausrivit($checkres, $lajilisa, $debug = 0) {
@@ -882,7 +882,7 @@ $debug = 0;
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tunnus = '{$tunnus}'";
 	$osres = pupe_query($query);
-	$osrow = mysql_fetch_array($osres);
+	$osrow = mysql_fetch_assoc($osres);
 
 	$laskun_numero = $osrow["laskunro"]; // älä mene muuttaamaan tai poistamaan tätä muuttujaa.!!! Tai no joo... Ongelma..
 
@@ -893,14 +893,14 @@ $debug = 0;
 		$result = pupe_query($query);
 
 		// Haetaan seuraava vapaa keikkaid
-		$query  = "	SELECT MAX(laskunro) + 1
+		$query  = "	SELECT max(laskunro) + 1 as laskunro
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila = 'K'";
 		$result = pupe_query($query);
-		$row    = mysql_fetch_array($result);
+		$row    = mysql_fetch_assoc($result);
 
-		$id	= $row[0]; 			// tämä on meidän keikannumero
+		$id	= $row['laskunro'];	// tämä on meidän keikannumero
 		$keikkanumeroapu = $id; // talteen
 
 		// Haetaan laskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
@@ -991,7 +991,7 @@ $debug = 0;
 
 			if (mysql_num_rows($result) == 1) {
 
-				$rivirow = mysql_fetch_array($result);
+				$rivirow = mysql_fetch_assoc($result);
 				$kohdistettujariveja++;
 
 				// jos rivi löytyi ja sitä ei ole kohdistettu vielä, kohdistetaan saapumiseen ja päivitetään kpl
@@ -1596,7 +1596,7 @@ $debug = 0;
 						where yhtio = '$kukarow[yhtio]'
 						and tuoteno = '".$rtuoteno[$i]["tuoteno"]."'";
 			$result = pupe_query($query);
-			$rivirow = mysql_fetch_array($result);
+			$rivirow = mysql_fetch_assoc($result);
 
 			if ($rivirow["tuoteno"] == "" or $rivirow["ei_saldoa"] != "") {
 				// saldoton tai tuntematon tuote, viedään varastoon ja kauttalaskutetaan kuitenkin
@@ -1668,19 +1668,19 @@ $debug = 0;
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND nimi = '$trow[oletus_valkoodi]'";
 			$checkres = pupe_query($query);
-			$row = mysql_fetch_array($checkres);
+			$row = mysql_fetch_assoc($checkres);
 			$kurssi = $row["kurssi"];
 
 			$query  = "LOCK TABLE lasku WRITE, sanakirja WRITE";
 			$result = pupe_query($query);
 
-			$query = "	SELECT max(laskunro)
+			$query = "	SELECT max(laskunro) laskunro
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tila = 'K'";
 			$checkres = pupe_query($query);
-			$row = mysql_fetch_array($checkres);
-			$id = $row[0] + 1;
+			$row = mysql_fetch_assoc($checkres);
+			$id = $row['laskunro'] + 1;
 
 			$maa_lahetys = $row['maa_lahetys'] != '' ? $trow['maa_lahetys'] : $trow['maa'];
 
@@ -1766,19 +1766,19 @@ $debug = 0;
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND nimi = '$trow[oletus_valkoodi]'";
 				$checkres = pupe_query($query);
-				$row = mysql_fetch_array($checkres);
+				$row = mysql_fetch_assoc($checkres);
 				$kurssi = $row["kurssi"];
 
 				$query  = "LOCK TABLE lasku WRITE, sanakirja WRITE";
 				$result = pupe_query($query);
 
-				$query = "	SELECT max(laskunro)
+				$query = "	SELECT max(laskunro) laskunro
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tila = 'K'";
 				$checkres = pupe_query($query);
-				$row = mysql_fetch_array($checkres);
-				$id = $row[0] + 1;
+				$row = mysql_fetch_assoc($checkres);
+				$id = $row['laskunro'] + 1;
 
 				$maa_lahetys = $row['maa_lahetys'] != '' ? $trow['maa_lahetys'] : $trow['maa'];
 
@@ -2017,9 +2017,9 @@ $debug = 0;
 		function saapumisen_pyoristyserot($osrow, $laskurow, $otunnus, $alv_talteen = '') {
 			global $kukarow, $yhtiorow;
 
-			// $osrow = sähköisen laskun tiedot
+			// $osrow 	 = tavaralaskun laskun tiedot
 			// $laskurow = saapumisen otsikon tiedot
-			// $otunnus = saapumisen tunnus
+			// $otunnus  = saapumisen tunnus
 
 			$alvit = "tuote.alv";
 
@@ -2071,12 +2071,12 @@ $debug = 0;
 						AND tilausrivi.uusiotunnus = '{$otunnus}'
 						AND tilausrivi.tyyppi != 'D'";
 			$result   = pupe_query($query);
-			$hintarow = mysql_fetch_array($result);
+			$hintarow = mysql_fetch_assoc($result);
 
-			$valittusumma       = round($hintarow["hinta"], 2);
-			$laskunsumma        = round($osrow["summa"] - $valittusumma, 2);
-			$checksumma         = $osrow["summa"] - $hintarow["hinta"];
-			$kohdistettava_summa   = round($osrow["summa"], 2);
+			$valittusumma        = round($hintarow["hinta"], 2);
+			$laskunsumma         = round($osrow["summa"] - $valittusumma, 2);
+			$checksumma          = $osrow["summa"] - $hintarow["hinta"];
+			$kohdistettava_summa = round($osrow["summa"], 2);
 
 			if ($laskunsumma != 0.00 and $checksumma < 0.01 and $checksumma > -0.01 and $kohdistettava_summa == $valittusumma) {
 				$laskunsumma = 0.00;
@@ -2091,7 +2091,7 @@ $debug = 0;
 
 			$pyoristys_erot_alv = 0;
 
-			// Jos käyttäjä on syöttänyt alvillisen pyöristyksen niin lisätään alvi
+			// Jos käyttäjä on syöttänyt alvillisen pyöristyksen niin vähennetään alvi
 			if ($pyoristys_erot != 0 and isset($alv_talteen) and $alv_talteen != "") {
 				if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
 					$pyoristys_erot_alv = $alv_talteen;
@@ -2105,13 +2105,13 @@ $debug = 0;
 						pyoristys_erot_alv = '{$pyoristys_erot_alv}',
 						kohdistettu = 'K'
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$otunnus}'";
+						AND tunnus  = '{$otunnus}'";
 			$hinresu = pupe_query($query);
 
-			$laskurow['summa'] = $hintarow['hinta'];
-			$laskurow['pyoristys_erot'] = $pyoristys_erot;
-			$laskurow['pyoristys_erot_alv'] = $pyoristys_erot_alv;
-			$laskurow['kohdistettu'] = 'K';
+			$laskurow['summa']		 		= $hintarow['hinta'];
+			$laskurow['pyoristys_erot'] 	= $pyoristys_erot;
+			$laskurow['pyoristys_erot_alv']	= $pyoristys_erot_alv;
+			$laskurow['kohdistettu'] 		= 'K';
 
 			return $laskurow;
 		}

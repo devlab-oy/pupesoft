@@ -74,6 +74,8 @@
 	// Muuttujia
 	$ytunnus = isset($ytunnus) ? trim($ytunnus) : "";
 	$toimittajaid = isset($toimittajaid) ? trim($toimittajaid) : "";
+	$tilaustuotteiden_kasittely = isset($tilaustuotteiden_kasittely) ? $tilaustuotteiden_kasittely : 'A';
+	$multi_status = isset($multi_status) ? $multi_status : array();
 
 	// Tämä palauttaa yhden tuotteen ostosuosituksen tiedot
 	function teerivi($tuoteno, $valittu_toimittaja) {
@@ -285,9 +287,11 @@
 
 		if ($toimittajaid == 0) {
 			$tee = "ÄLÄMEEMIHINKÄÄN";
+			$ehdotusnappi = "";
 		}
 		else {
 			$tee = "";
+			$ehdotusnappi = "";
 		}
 	}
 
@@ -407,6 +411,13 @@
 
 		if (isset($mul_tme) and count($mul_tme) > 0) {
 			$tuote_where .= " and tuote.tuotemerkki in ('".implode("','", $mul_tme)."')";
+		}
+
+		if (isset($multi_status) and count($multi_status) > 0) {
+			$tuote_where .= "and tuote.status in ('".implode("','", $multi_status)."')";
+		}
+		else {
+			$tuote_where .= " and tuote.status != 'P'";
 		}
 
 		if ($toimittajaid != '') {
@@ -642,6 +653,23 @@
 		$monivalintalaatikot = array('OSASTO', 'TRY', 'TUOTEMERKKI');
 		$monivalintalaatikot_normaali = array();
 		require ("tilauskasittely/monivalintalaatikot.inc");
+
+		echo "</td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<th>".t("Tuotteen status")."</th>";
+		echo "<td>";
+		echo "<select multiple='multiple' name='multi_status[]' onchange='submit();'>";
+		echo "<option value=''>".t("Näytä kaikki")."</option>";
+
+		$result = t_avainsana("S");
+
+		while ($srow = mysql_fetch_array($result)) {
+			$sel = in_array($srow["selite"], $multi_status) ? " SELECTED" : "";
+			echo "<option value = '$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
+		}
+		echo "</select>";
 
 		echo "</td>";
 		echo "</tr>";

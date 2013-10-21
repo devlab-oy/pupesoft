@@ -2609,7 +2609,8 @@
 						foreach($checkbox_arvot as $i => $checkbox) {
 							if (($i+1) % 3 == 1) echo "<tr>";
 
-							$selec = ($srow[$kentta] == $checkbox) ? "CHECKED" : "";
+							$valinnat = explode('#', $srow[$kentta]);
+							$selec = (in_array(str_replace(" ", "", $checkbox), $valinnat)) ? "CHECKED" : "";
 							echo "<td><input type='checkbox' name='{$al_row['selite']}[]' value='" . str_replace(" ", "", $checkbox) . "' $selec>$checkbox</td>";
 
 							if (($i+1) % 3 == 0) echo "</tr>"; // Joka kolmanella rivillä break
@@ -3934,7 +3935,40 @@
 				if ($merkki2 != 'eimenu' and $merkki2 != '') {
 					$merkki = $merkki2;
 				}
-				
+
+				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
+					//Dynaamisen osion checkbox toiminnallisuutta varten. Kaikki tyomääräyksen requestista tulevat kentät
+					//pitää käydä läpi ja katsoa onko array (checkbox), paitsi date ja datetime tyyppiset kentät
+					$dynaamiset_kentat = array(
+						'kotipuh'		 => $kotipuh,
+						'tyopuh'		 => $tyopuh,
+						'myyjaliike'	 => $myyjaliike,
+						'rekno'			 => $rekno,
+						'mittarilukema'	 => $mittarilukema,
+						'merkki'		 => $merkki,
+						'mallivari'		 => $mallivari,
+						'valmnro'		 => $valmnro,
+						'komm1'			 => $komm1,
+						'komm2'			 => $komm2,
+						'suorittaja'	 => $suorittaja,
+						'viite'			 => $viite,
+						'prioriteetti'	 => $prioriteetti,
+						'jalleenmyyja'	 => $jalleenmyyja,
+						'tehdas'		 => $tehdas,
+						'tyoaika'		 => $tyoaika,
+						'vikakoodi'		 => $vikakoodi,
+						'takuunumero'	 => $takuunumero,
+						'tyokoodi'		 => $tyokoodi,
+						'hyvaksy'		 => $hyvaksy,
+					);
+
+					foreach ($dynaamiset_kentat as $kentan_nimi => $dynaaminen_kentta) {
+						if (is_array($dynaaminen_kentta)) {
+							${$kentan_nimi} = implode('#', $dynaaminen_kentta);
+						}
+					}
+				}
+
 				$query2 .= "tyomaarays SET
 							yhtio			= '$kukarow[yhtio]',
 							kotipuh 		= '$kotipuh',

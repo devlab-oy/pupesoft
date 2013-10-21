@@ -1645,11 +1645,11 @@
 
 								if ($prow['vahvistettu_kommentti'] != "") {
 									echo "<br />",t("Vahvistettu kommentti"),": {$prow['vahvistettu_kommentti']}";
-						}
+								}
 
 								echo "</font>";
 							}
-						else {
+							else {
 								echo "<font class='ok'>".t("Vahvistettu toimitusaika").": ".tv1dateconv($prow["toimaika"])."</font>";
 							}
 

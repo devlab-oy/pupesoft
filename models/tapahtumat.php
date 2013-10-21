@@ -7,7 +7,7 @@
 class Tapahtumat {
 
     /**
-     * Luo tapahtuman kun k√§ytt√§j√§ muokkaa ty√∂m√§√§r√§yst√§
+     * Luo tapahtuman kun k‰ytt‰j‰ muokkaa tyˆm‰‰r‰yst‰
      */
     public static function lasku($tyomaarayksen_numero) {
         global $kukarow;
@@ -15,19 +15,19 @@ class Tapahtumat {
         // Virheentarkistus
         $errors = array();
         if ($kukarow['kuka'] == '') {
-            $errors[] = "K√§ytt√§j√§√§ ei l√∂ydy";
+            $errors[] = "K‰ytt‰j‰‰ ei lˆydy";
         }
         if ($kukarow['yhtio'] == '') {
-            $errors[] = "Yhti√∂t√§ ei l√∂ydy";
+            $errors[] = "Yhtiˆt‰ ei lˆydy";
         }
 
-        // Lis√§t√§√§n tapahtuma
+        // Lis‰t‰‰n tapahtuma
         if (empty($errors)) {
             $query = "INSERT INTO laskun_tapahtumat
                     SET yhtio = '{$kukarow['yhtio']}',
                     tyomaarays_numero = '$tyomaarayksen_numero',
                     muuttaja = '{$kukarow['kuka']}',
-                    muutettu = now()";
+                    muutospvm = now()";
             pupe_query($query);
             return true;
         }

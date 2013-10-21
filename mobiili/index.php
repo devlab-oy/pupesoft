@@ -8,6 +8,8 @@ $mobile = true;
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
+if (empty($browkieli)) $browkieli = 'fi';
+
 # Index.php ei sisällytä parametrit incistä headereita
 echo "<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>\n";
 echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";
@@ -25,6 +27,10 @@ if (tarkista_oikeus("mobiili/tulouta.php")) {
 
 if (tarkista_oikeus("mobiili/inventointi.php")) {
 	echo "<p><a href='inventointi.php' class='button'>",t("Inventointi", $browkieli),"</a></p>";
+}
+
+if (tarkista_oikeus("mobiili/hyllysiirrot.php")) {
+	echo "<p><a href='hyllysiirrot.php' class='button'>",t("Hyllysiirrot", $browkieli),"</a></p>";
 }
 
 if (tarkista_oikeus("mobiili/tuki.php")) {

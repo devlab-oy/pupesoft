@@ -537,6 +537,12 @@
 				}
 			}
 
+			$onko_hyvityslasku_kerroin = 1;
+
+			if ($laskun_tyyppi_teksti == 'HYVITYSLASKU' and $laskun_summa_eur < 0) {
+				$onko_hyvityslasku_kerroin = -1;
+			}
+
 			if (@file_exists("inc/maventa.inc") and (($trow['asn_sanomat'] == "M" and $ebid == 'MAVENTAXML') or ($trow['asn_sanomat'] == 'F' and $ebid == 'FINVOICEXML'))) {
 				require("inc/maventa.inc");
 			}
@@ -783,7 +789,7 @@
 				$tilalk = explode("-", $yhtiorow["ostoreskontrakausi_alku"]);
 				$tillop = explode("-", $yhtiorow["ostoreskontrakausi_loppu"]);
 
-				// Verrataan vähän päivämääriä. onpa vittumaista PHP:ssä!
+				// Verrataan vähän päivämääriä. onpa ikävää PHP:ssä!
 				$ostoresktilalk = (int) date('Ymd', mktime(0,0,0, $tilalk[1], $tilalk[2], $tilalk[0]));
 				$ostoresktillop = (int) date('Ymd', mktime(0,0,0, $tillop[1], $tillop[2], $tillop[0]));
 				$syotettypvm 	= (int) date('Ymd', mktime(0,0,0, $tpk, $tpp, $tpv));
@@ -1152,7 +1158,7 @@
 
 					$kirjattava_summa 		  = $omasumma;
 					$summa_varasto 			  = round($omasumma / (1 + ($vero / 100)), 2);
-					$summa_varasto_valuutassa = $summa_varasto;
+					$summa_varasto_valuutassa = round($omasumma / (1 + ($vero / 100)) / $vrow['kurssi'], 2);
 
 					if ($yhtiorow['ostolaskun_kulutilit'] != ''
 						and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')
@@ -1173,6 +1179,7 @@
 					}
 
 					$summa			  		= $kirjattava_summa;
+					$summa_valuutassa		= round($summa / $vrow['kurssi'], 2);
 					$totsumma 				= $kirjattava_summa;
 					$totsumma_valuutassa 	= $summa;
 					$kustp            		= $oletuskust;
@@ -1365,11 +1372,12 @@
 								}
 							}
 
-							$summa						 	 = round($summa * (1+($vero/100)),2);
-							$totsumma						+= $summa;
-							$totsumma_valuutassa			+= $summa_valuutassa;
-							$kukarow['yhtio']				 = $yhtio;
-							$kukarow['kuka']				 = 'verkkolas';
+							$summa					= round($summa * (1+($vero/100)),2);
+							$summa_valuutassa		= round($summa * (1+($vero/100)) / $vrow['kurssi'], 2);
+							$totsumma				+= $summa;
+							$totsumma_valuutassa	+= $summa_valuutassa;
+							$kukarow['yhtio']		 = $yhtio;
+							$kukarow['kuka']		 = 'verkkolas';
 
 							require ("inc/teetiliointi.inc");
 
@@ -1533,9 +1541,10 @@
 						foreach ($_array as $key => $value) {
 							if ($value == 0) continue;
 
-							$tili      = $yhtiorow[$key];
-							$summa     = round($value, 2);
-							$totsumma += $summa;
+							$tili      			= $yhtiorow[$key];
+							$summa     			= round($value, 2);
+							$summa_valuutassa	= round($value / $vrow['kurssi'], 2);
+							$totsumma 		   += $summa;
 
 							// Laitetaan kustannuspaikaksi/kohteeksi/projektiksi aina ensimmäisen tiliöintirivin tiedot.
 							// Jos menevät nollana, funktio osaa ottaa oletuksen tilin takaa.

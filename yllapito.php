@@ -19,6 +19,10 @@
 		require ("inc/parametrit.inc");
 	}
 
+	if (function_exists("js_popup")) {
+		echo js_popup(-100);
+	}
+
 	if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana") {
 		enable_ajax();
 	}
@@ -359,9 +363,13 @@
 				// Taulun ensimmäinen kenttä on aina yhtiö
 				$query = "INSERT into $toim SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
+				if ($toim == 'tuotteen_toimittajat' and isset($paivita_tehdas_saldo_paivitetty) and is_array($paivita_tehdas_saldo_paivitetty) and count($paivita_tehdas_saldo_paivitetty) == 2) $query .= ", tehdas_saldo_paivitetty = now() ";
+
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
 					// Tuleeko tämä columni käyttöliittymästä
 					if (isset($t[$i])) {
+
+						if ($toim == 'tuotteen_toimittajat' and mysql_field_name($result,$i) == 'tehdas_saldo_paivitetty') continue;
 
 						if (is_array($_FILES["liite_$i"]) and $_FILES["liite_$i"]["size"] > 0) {
 							$id = tallenna_liite("liite_$i", "Yllapito", 0, "Yhtio", "$toim.".mysql_field_name($result,$i), $t[$i]);
@@ -419,8 +427,23 @@
 				// Taulun ensimmäinen kenttä on aina yhtiö
 				$query = "UPDATE $toim SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
+				if ($toim == 'tuotteen_toimittajat' and isset($paivita_tehdas_saldo_paivitetty) and is_array($paivita_tehdas_saldo_paivitetty) and count($paivita_tehdas_saldo_paivitetty) == 2) $query .= ", tehdas_saldo_paivitetty = now() ";
+
+				$tehdas_saldo_chk = 0;
+
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
 					if (isset($t[$i]) or (isset($_FILES["liite_$i"]) and is_array($_FILES["liite_$i"]))) {
+
+						if ($toim == 'tuotteen_toimittajat' and mysql_field_name($result,$i) == 'tehdas_saldo') $tehdas_saldo_chk = $t[$i];
+
+						if ($toim == 'tuotteen_toimittajat' and mysql_field_name($result,$i) == 'tehdas_saldo_paivitetty') {
+
+							if ($trow['tehdas_saldo'] != $tehdas_saldo_chk and (!isset($paivita_tehdas_saldo_paivitetty) or (is_array($paivita_tehdas_saldo_paivitetty) and count($paivita_tehdas_saldo_paivitetty) == 1))) {
+								$query .= ", tehdas_saldo_paivitetty = now() ";
+							}
+
+							continue;
+						}
 
 						if (isset($_FILES["liite_$i"]) and is_array($_FILES["liite_$i"]) and $_FILES["liite_$i"]["size"] > 0) {
 							$id = tallenna_liite("liite_$i", "Yllapito", 0, "Yhtio", "$toim.".mysql_field_name($result,$i), $t[$i]);
@@ -492,6 +515,9 @@
 					$tuote_chk_row = mysql_fetch_assoc($tuote_chk_res);
 					$toimi_chk_row = mysql_fetch_assoc($toimi_chk_res);
 
+					$toimittaja_liitos_ostohinta = pupesoft_cleannumber($toimittaja_liitos_ostohinta);
+					$toimittaja_liitos_tuoteno = pupesoft_cleanstring($toimittaja_liitos_tuoteno);
+
 					$query = "	INSERT INTO tuotteen_toimittajat SET
 								yhtio = '{$kukarow['yhtio']}',
 								tuoteno = '{$tuote_chk_row['tuoteno']}',
@@ -499,6 +525,8 @@
 								toimittaja = '{$toimi_chk_row['ytunnus']}',
 								alkuperamaa = '{$toimi_chk_row['maa']}',
 								laatija = '{$kukarow['kuka']}',
+								ostohinta = '$toimittaja_liitos_ostohinta',
+								toim_tuoteno = '$toimittaja_liitos_tuoteno',
 								luontiaika = now(),
 								muutospvm = now(),
 								muuttaja = '{$kukarow['kuka']}'";
@@ -1595,6 +1623,7 @@
 			$toimiresult = pupe_query($query);
 
 			echo "<input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='JOO'>";
+			echo "<tr>";
 			echo "<th align='left'>".t("Toimittaja")."</th>";
 			echo "<td>";
 			echo "<select name='liitostunnus' />";
@@ -1607,6 +1636,21 @@
 
 			echo "</select>";
 			echo "</td>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<th align='left'>".t("Ostohinta")."</th>";
+			echo "<td>";
+			echo "<input type='text' size='35' name='toimittaja_liitos_ostohinta'>";
+			echo "</td>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<th align='left'>".t("Toimittajan tuotenumero")."</th>";
+			echo "<td>";
+			echo "<input type='text' size='35' name='toimittaja_liitos_tuoteno'>";
+			echo "</td>";
+			echo "</tr>";
 		}
 
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
@@ -1702,7 +1746,12 @@
 						$otsikko = t("Reklamaatioiden ja siirtolistojen vastaanoton purkulista");
 						break;
 					default:
-						$otsikko = t(mysql_field_name($result, $i));
+						if (isset($mysqlaliasarraysetti) and isset($mysqlaliasarray[$mysqlaliasarraysetti][mysql_field_name($result, $i)])) {
+							$otsikko = t($mysqlaliasarray[$mysqlaliasarraysetti][mysql_field_name($result, $i)]);
+						}
+						else {
+							$otsikko = t(mysql_field_name($result, $i));
+						}
 				}
 			}
 
@@ -1735,7 +1784,18 @@
 				($tyyppi == 3 and $tunnus!="")  or
 				$tyyppi == 5) {
 				echo "<tr>";
-				echo "<th align='left'>$otsikko</th>";
+
+				$infolinkki = "";
+
+				// Jos riviltä löytyy selitetark_5 niin piirretään otsikon perään tooltip-kysymysmerkki
+				if ($al_row['selitetark_5'] != '') {
+					$siistiselite = str_replace('.','_', $al_row['selite']);
+					$infolinkki = "<div style='float: right;'><a class='tooltip' id='{$al_row['tunnus']}_{$siistiselite}'><img src='{$palvelin2}pics/lullacons/info.png'></a></div>";
+
+					// Tehdään helppi-popup
+					echo "<div id='div_{$al_row['tunnus']}_{$siistiselite}' class='popup'>{$al_row['selitetark']}<br><br>{$al_row['selitetark_5']}</div>";
+				}
+				echo "<th align='left'>$otsikko $infolinkki</th>";
 			}
 
 			if ($jatko == 0) {

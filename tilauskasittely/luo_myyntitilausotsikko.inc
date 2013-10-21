@@ -13,17 +13,17 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 		if (mysql_num_rows($result) == 1) {
 			$asiakasrow  = mysql_fetch_assoc($result);
 
-			if(empty($asiakasrow['maksuehto'])) {
-					$query = "	SELECT *
-								FROM maksuehto
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND kaytossa = ''
-								ORDER BY jarjestys ASC
-								LIMIT 1";
-					$result = pupe_query($query);
+			if (empty($asiakasrow['maksuehto'])) {
+				$query = "	SELECT *
+							FROM maksuehto
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND kaytossa = ''
+							ORDER BY jarjestys ASC
+							LIMIT 1";
+				$result = pupe_query($query);
 
-					$maksuehto_row = mysql_fetch_assoc($result);
-					$asiakasrow['maksuehto'] = $maksuehto_row['tunnus'];
+				$maksuehto_row = mysql_fetch_assoc($result);
+				$asiakasrow['maksuehto'] = $maksuehto_row['tunnus'];
 			}
 
 			$ytunnus 		   = $asiakasrow["ytunnus"];
@@ -55,6 +55,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			$verkkotunnus 	   = $asiakasrow["verkkotunnus"];
 			$piiri 			   = $asiakasrow["piiri"];
 			$laskutyyppi	   = $asiakasrow["laskutyyppi"];
+			$lahetetyyppi 	   = pupesoft_lahetetyyppi(0, $asiakasrow['tunnus']);
 
 			$kohde  = "";
 			$eilahe = "";
@@ -72,15 +73,6 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 				$asiakasid 				= $asiakasrow["spec_tunnus"];
 				$asiakasrow["tunnus"] 	= $asiakasrow["spec_tunnus"];
 			}
-
-			$toimvv = date("Y");
-			$toimkk = date("m");
-			$toimpp = date("d");
-
-			$kervv = date("Y");
-			$kerkk = date("m");
-			$kerpp = date("d");
-
 
 			if ($toim == "TARJOUS" or $asiakasrow["vienti"] =='K') {
 				$kolm_nimi 		= $asiakasrow["kolm_nimi"];
@@ -308,6 +300,14 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			}
 		}
 
+		$toimvv = date("Y");
+		$toimkk = date("m");
+		$toimpp = date("d");
+
+		$kervv = date("Y");
+		$kerkk = date("m");
+		$kerpp = date("d");
+
 		$alv_velvollisuus = "";
 
 		// jos meillä on lasku menossa ulkomaille
@@ -357,6 +357,11 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 		}
 		elseif ($toim == "TYOMAARAYS") {
 			$tilaustyyppi = "A";
+		}
+		elseif ($toim == "EXTENNAKKO") {
+			// Kun asiakas tekee ext-ennakkotilausta extranetissä
+			$tilaustyyppi = "E";
+			$clearing  = "EXTENNAKKO";
 		}
 
 		$jatka	= "JATKA";

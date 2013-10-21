@@ -35,28 +35,30 @@
 	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
 	// Ehdotetaan oletuksena ehdotusta ensikuun myynnille sek‰ siit‰ plus 3 kk
+	if (!isset($ppa1)) $ppa1 = date("d", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
 	if (!isset($kka1)) $kka1 = date("m", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
 	if (!isset($vva1)) $vva1 = date("Y", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
+	if (!isset($ppl1)) $ppl1 = date("d", mktime(0, 0, 0, date("m")+4, 1, date("Y")));
 	if (!isset($kkl1)) $kkl1 = date("m", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 	if (!isset($vvl1)) $vvl1 = date("Y", mktime(0, 0, 0, date("m")+4, 0, date("Y")));
 
 	// P‰iv‰m‰‰r‰tarkistus
-	if (!checkdate($kka1, 1, $vva1)) {
+	if (!checkdate($kka1, $ppa1, $vva1)) {
 		echo "<font class='error'>".t("Virheellinen alkup‰iv‰!")."</font><br>";
 		$tee = "";
 	}
 	else {
-		$nykyinen_alku  = date("Y-m-d", mktime(0, 0, 0, $kka1, 1, $vva1));
-		$edellinen_alku = date("Y-m-d", mktime(0, 0, 0, $kka1, 1, $vva1-1));
+		$nykyinen_alku  = date("Y-m-d", mktime(0, 0, 0, $kka1, $ppa1, $vva1));
+		$edellinen_alku = date("Y-m-d", mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
 	}
 
-	if (!checkdate($kkl1, 1, $vvl1)) {
+	if (!checkdate($kkl1, $ppl1, $vvl1)) {
 		echo "<font class='error'>".t("Virheellinen loppup‰iv‰!")."</font><br>";
 		$tee = "";
 	}
 	else {
-		$nykyinen_loppu  = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, 0, $vvl1));
-		$edellinen_loppu = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, 0, $vvl1-1));
+		$nykyinen_loppu  = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, $ppl1, $vvl1));
+		$edellinen_loppu = date("Y-m-d", mktime(0, 0, 0, $kkl1+1, $ppl1, $vvl1-1));
 	}
 
 	if ($nykyinen_alku > $nykyinen_loppu) {
@@ -75,8 +77,8 @@
 		global $kukarow, $edellinen_alku, $edellinen_loppu, $nykyinen_alku, $nykyinen_loppu;
 
 		// Tehd‰‰n kaudet p‰iv‰m‰‰rist‰
-		$alku_kausi = substr(str_replace("-", "", $nykyinen_alku), 0, 6);
-		$loppu_kausi = substr(str_replace("-", "", $nykyinen_loppu), 0, 6);
+		$alku_kausi = substr(str_replace("-", "", $nykyinen_alku), 0, 8);
+		$loppu_kausi = substr(str_replace("-", "", $nykyinen_loppu), 0, 8);
 
 		// Haetaan lapsituotteen varastosaldo
 		$query = "	SELECT ifnull(sum(saldo), 0) saldo
@@ -120,10 +122,14 @@
 		$query = "	SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimitusaika,
 					if(tuotteen_toimittajat.pakkauskoko > 0, tuotteen_toimittajat.pakkauskoko, 1) pakkauskoko,
 					tuotteen_toimittajat.toimittaja,
+					tuotteen_toimittajat.ostohinta,
 					toimi.nimi,
-					toimi.tunnus
+					toimi.tunnus,
+					tuote.tuotemassa,
+					tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys as tuotteen_tilavuus
 					FROM tuotteen_toimittajat
 					JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus and toimi.tunnus = '$valittu_toimittaja')
+					JOIN tuote ON ( tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno )
 					WHERE tuotteen_toimittajat.yhtio = '{$kukarow["yhtio"]}'
 					AND tuotteen_toimittajat.tuoteno = '$tuoteno'
 					ORDER BY if(jarjestys = 0, 9999, jarjestys)
@@ -141,6 +147,9 @@
 							"toimittaja" => "",
 							"nimi" => t("Ei toimittajaa"),
 							"tunnus" => 0,
+							"ostohinta" => 0,
+							"tuotemassa" => 0,
+							"tilavuus" => 0,
 							);
 		}
 
@@ -254,6 +263,10 @@
 		$tuoterivi['toimittajan_tunnus'] 	= $toimittajarow['tunnus'];
 		$tuoterivi['toimittajan_ytunnus'] 	= $toimittajarow['toimittaja'];
 		$tuoterivi['toimittajan_nimi'] 		= $toimittajarow['nimi'];
+		$tuoterivi['ostohinta']		 		= $toimittajarow['ostohinta'];
+		$tuoterivi['ostosuosituksen_arvo']	= $toimittajarow['ostohinta'] * $lapsi_ostosuositus;
+		$tuoterivi['ostosuosituksen_paino'] = $toimittajarow['tuotemassa'] * $lapsi_ostosuositus;
+		$tuoterivi['ostosuosituksen_tilavuus'] = $toimittajarow['tilavuus'] * $lapsi_ostosuositus;
 
 		return $tuoterivi;
 	}
@@ -432,6 +445,7 @@
 							AND tuote.tuoteno = tilausrivi.tuoteno
 							AND tuote.ei_saldoa = ''
 							AND tuote.status != 'P'
+							AND tuote.ostoehdotus != 'E'
 							$tuote_where)
 						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 						AND tilausrivi.tyyppi IN  ('L','G')
@@ -464,6 +478,7 @@
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.ei_saldoa = ''
 					AND tuote.status != 'P'
+					AND tuote.ostoehdotus != 'E'
 					$tuote_where
 					GROUP BY 1, 2, 3
 					ORDER BY toimittaja, tuote.try, tuote.tuoteno";
@@ -503,6 +518,10 @@
 					$toimittaja_header .= "<th>".t("Riitto Pv")."</th>";
 					$toimittaja_header .= "<th>".t("Reaalisaldo")."</th>";
 					$toimittaja_header .= "<th>".t("Ostosuositus")."</th>";
+					$toimittaja_header .= "<th>".t("Ostohinta")."</th>";
+					$toimittaja_header .= "<th>".t("Ostosuosituksen arvo")."</th>";
+					$toimittaja_header .= "<th>".t("Ostosuosituksen paino")."</th>";
+					$toimittaja_header .= "<th>".t("Ostosuosituksen tilavuus")."</th>";
 					$toimittaja_header .= "<th></th>";
 					$toimittaja_header .= "<th>".t("Ostoer‰m‰‰r‰")."</th>";
 					$toimittaja_header .= "</tr>";
@@ -534,6 +553,10 @@
 				echo "<td style='text-align: right;'>{$tuoterivi["riittopv"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["reaalisaldo"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["ostosuositus"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["ostohinta"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["ostosuosituksen_arvo"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["ostosuosituksen_paino"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["ostosuosituksen_tilavuus"]}</td>";
 
 				// Tehd‰‰n Toggle-nappi, jolla voidaan n‰ytt‰‰ matikkainfo alla
 				$toggle_counter++;
@@ -698,16 +721,18 @@
 		echo "</td></tr>";
 
 		echo "<tr>";
-		echo "<th>".t("Alkup‰iv‰m‰‰r‰ (kk-vvvv)")."</th>";
+		echo "<th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
 		echo "<td>";
+		echo "<input type='text' name='ppa1' value='$ppa1' size='5'>";
 		echo "<input type='text' name='kka1' value='$kka1' size='5'>";
 		echo "<input type='text' name='vva1' value='$vva1' size='5'>";
 		echo "</td>";
 		echo "</tr>";
 
 		echo "<tr>";
-		echo "<th>".t("Loppup‰iv‰m‰‰r‰ (kk-vvvv)")."</th>";
+		echo "<th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>";
 		echo "<td>";
+		echo "<input type='text' name='ppl1' value='$ppl1' size='5'>";
 		echo "<input type='text' name='kkl1' value='$kkl1' size='5'>";
 		echo "<input type='text' name='vvl1' value='$vvl1' size='5'>";
 		echo "</td>";

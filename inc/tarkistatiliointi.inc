@@ -4,6 +4,7 @@
 	$summa 	= (float) $summa;
 	$tili 	= trim($tili);
 	$ulos 	= "";
+	$asiakastoimittajavirhe = FALSE;
 
 	if (!isset($mistatullaan)) $mistatullaan = "";
 
@@ -57,14 +58,25 @@
 			}
 		}
 
+		if (isset($tiliasiakasid) and $tiliasiakasid > 0) {
+			$liitos = 'A';
+			$liitostunnus = $tiliasiakasid;
+		}
+
+		if (isset($tilitoimittajaid) and $tilitoimittajaid > 0) {
+			$liitos = 'T';
+			$liitostunnus = $tilitoimittajaid;
+		}
+
 		if ($ok == 0 and strlen($tili) > 0) {
 
 			$tili = $xrow['tilino'];
 
 			// Jos muistiotosite ja tilille on liitettävä asiakas tai toimittaja
-			if ($tositetila == "X" and $xrow["toimijaliitos"] != "" and (int) $tositeliit == 0 and (!isset($avaavatase) or $avaavatase != 'joo')) {
-				$virhe .= t("Tositteeseen on liitettävä asiakas tai toimittaja")."!";
+			if ($tositetila == "X" and $xrow["toimijaliitos"] != "" and (int) $liitostunnus == 0 and (!isset($avaavatase) or $avaavatase != 'joo')) {
+				$virhe .= t("Tositteeseen on liitettävä asiakas tai toimittaja")."!<br />";
 				$ok = 1;
+				$asiakastoimittajavirhe = TRUE;
 			}
 
 			/*
@@ -81,73 +93,73 @@
 			if ($xrow['tiliointi_tarkistus'] != 0 and (!isset($avaavatase) or $avaavatase != 'joo')) {
 
 				if ($xrow['tiliointi_tarkistus'] == 1) {
-					if ($kustp_tark == 0 or $kustp_tark == '' ){
-						$virhe .= t("Tositteeseen on liitettävä kustannuspaikka")."!";
+					if ($kustp_tark == 0 or $kustp_tark == '' ) {
+						$virhe .= t("Tositteeseen on liitettävä kustannuspaikka")."!<br />";
 						$ok = 1;
 					}
 				}
 
 				if ($xrow['tiliointi_tarkistus'] == 2) {
-					if (($kustp_tark == 0 or $kustp_tark == '' ) or ($kohde_tark == 0 or $kohde_tark == '')){
-						$virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja kohde")."!";
+					if (($kustp_tark == 0 or $kustp_tark == '' ) or ($kohde_tark == 0 or $kohde_tark == '')) {
+						$virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja kohde")."!<br />";
 						$ok = 1;
 					}
 				}
 
 				if ($xrow['tiliointi_tarkistus'] == 3) {
-					if (($kustp_tark == 0 or $kustp_tark == '' ) or ($projekti_tark == 0 or $projekti_tark == '')){
-						$virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja projekti")."!";
+					if (($kustp_tark == 0 or $kustp_tark == '' ) or ($projekti_tark == 0 or $projekti_tark == '')) {
+						$virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja projekti")."!<br />";
 						$ok = 1;
 					}
 				}
 
 				if ($xrow['tiliointi_tarkistus'] == 4) {
-					if (($kustp_tark == 0 or $kustp_tark == '' ) or ($kohde_tark == 0 or $kohde_tark == '') or ($projekti_tark == 0 or $projekti_tark == '')){
-						$virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja kohde sekä projekti")."!";
+					if (($kustp_tark == 0 or $kustp_tark == '' ) or ($kohde_tark == 0 or $kohde_tark == '') or ($projekti_tark == 0 or $projekti_tark == '')) {
+						$virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja kohde sekä projekti")."!<br />";
 						$ok = 1;
 					}
 				}
 
 				if ($xrow['tiliointi_tarkistus'] == 5) {
-					if ($kohde_tark == 0 or $kohde_tark == ''){
-						$virhe .= t("Tositteeseen on liitettävä kohde")."!";
+					if ($kohde_tark == 0 or $kohde_tark == '') {
+						$virhe .= t("Tositteeseen on liitettävä kohde")."!<br />";
 						$ok = 1;
 					}
 				}
 
 				if ($xrow['tiliointi_tarkistus'] == 6) {
-					if (($kohde_tark == 0 or $kohde_tark == '') or ($projekti_tark == 0 or $projekti_tark == '')){
-						$virhe .= t("Tositteeseen on liitettävä kohde sekä projekti")."!";
+					if (($kohde_tark == 0 or $kohde_tark == '') or ($projekti_tark == 0 or $projekti_tark == '')) {
+						$virhe .= t("Tositteeseen on liitettävä kohde sekä projekti")."!<br />";
 						$ok = 1;
 					}
 				}
 
 				if ($xrow['tiliointi_tarkistus'] == 7) {
-					if ($projekti_tark == 0 or $projekti_tark == ''){
-						$virhe .= t("Tositteeseen on liitettävä projekti")."!";
+					if ($projekti_tark == 0 or $projekti_tark == '') {
+						$virhe .= t("Tositteeseen on liitettävä projekti")."!<br />";
 						$ok = 1;
 					}
 				}
 			}
 
 			if ($xrow['kustp'] != 0 and isset($kustp) and $kustp == 0 and (!isset($avaavatase) or $avaavatase != 'joo')) {
-				$virhe .= t("Pakollinen kustannuspaikka puuttui")."!";
+				$virhe .= t("Pakollinen kustannuspaikka puuttui")."!<br />";
 				$ok = 1;
 				$kustp = $xrow['kustp'];
 			}
 
 			if ($xrow['kohde'] != 0 and isset($kohde) and $kohde == 0 and (!isset($avaavatase) or $avaavatase != 'joo')) {
-				$virhe .= t("Pakollinen kohde puuttui")."!";
+				$virhe .= t("Pakollinen kohde puuttui")."!<br />";
 				$ok = 1;
 				$kohde = $xrow['kohde'];
 			}
 
 			if ($xrow['projekti'] != 0 and isset($projekti) and $projekti == 0 and (!isset($avaavatase) or $avaavatase != 'joo')) {
-				$virhe .= t("Pakollinen projekti puuttui")."!";
+				$virhe .= t("Pakollinen projekti puuttui")."!<br />";
 				$ok = 1;
 				$projekti = $xrow['projekti'];
 			}
-			
+
 			if ($xrow['manuaali_esto'] != '' and (!isset($avaavatase) or $avaavatase != 'joo')) {
 				$virhe .= t("Tilille on asetettu manuaalisen lisäyksen/muokkauksen esto")."!";
 				$ok = 1;
@@ -156,13 +168,11 @@
 	}
 
 	if ($summa == 0 and $mistatullaan != 'ulask.php') {
-		$virhe .= t("Summa puuttuu")."!";
+		$virhe .= t("Summa puuttuu")."!<br />";
 		$ok = 1;
 	}
 
 	if (strlen($tili) == 0) {
-		$virhe .= t("Tili puuttuu")."!";
+		$virhe .= t("Tili puuttuu")."!<br />";
 		$ok = 1;
 	}
-
-?>

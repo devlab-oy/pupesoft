@@ -9,6 +9,7 @@ if (strpos($file, "maventa") !== false) $laskun_ebid = $ebid = "MAVENTAXML";
 $yhtio 					= $xml->BuyerOrganisationUnitNumber;
 $verkkotunnus_vas		= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
 $laskun_tyyppi 			= $xml->InvoiceDetails->InvoiceTypeCode;
+$laskun_tyyppi_teksti	= $xml->InvoiceDetails->InvoiceTypeText;
 $laskun_numero 			= $xml->InvoiceDetails->InvoiceNumber;
 $laskun_tapvm			= $xml->InvoiceDetails->InvoiceDate;
 $laskun_lapvm			= $xml->InvoiceDetails->InvoiceDate;

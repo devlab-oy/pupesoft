@@ -194,7 +194,7 @@
 		echo "<font class='head'>".sprintf(t("Tulosta %s kopioita"), $fuse).":</font><hr><br>";
 	}
 
-	if ($laskunro > 0 and $laskunroloppu > 0 and $laskunro < $laskunroloppu) {
+	if ($laskunro <> 0 and $laskunroloppu <> 0 and $laskunro < $laskunroloppu) {
 		$tee = "TULOSTA";
 
 		$tulostukseen = array();
@@ -817,7 +817,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'O')
 						 JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
 						 JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))";
 
@@ -826,7 +826,7 @@
 		}
 
 
-		if (strlen($laskunro) > 0 and strpos($laskunro, ",") !== FALSE) {
+		if (strlen($laskunro) <> 0 and strpos($laskunro, ",") !== FALSE) {
 			$where2 .= " and lasku.laskunro IN ('".str_replace(",", "','", $laskunro)."') ";
 
 			$where3 = "";
@@ -834,7 +834,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus ";
 			$use = " use index (lasno_index) ";
 		}
-		elseif ($laskunro > 0) {
+		elseif ($laskunro <> 0) {
 			$where2 .= " and lasku.laskunro = '$laskunro' ";
 
 			$where3 = "";
@@ -845,14 +845,17 @@
 
 		if ($otunnus > 0) {
 			//katotaan löytyykö lasku ja sen kaikki tilaukset
-			$query = "  SELECT laskunro
-						FROM lasku
-						WHERE tunnus = '$otunnus' and lasku.$logistiikka_yhtiolisa";
+			$query = "  SELECT l2.laskunro, l2.tapvm
+						FROM lasku l1
+						JOIN lasku l2 ON l1.yhtio=l2.yhtio and l2.tila='U' and l1.tapvm=l2.tapvm and l1.laskunro=l2.laskunro and l2.tunnus!='$otunnus'
+						WHERE l1.tunnus = '$otunnus'
+						and l1.$logistiikka_yhtiolisa
+						LIMIT 1";
 			$laresult = pupe_query($query);
 			$larow = mysql_fetch_assoc($laresult);
 
 			if ($larow["laskunro"] > 0 and $toim != 'DGD') {
-				$where2 .= " and lasku.laskunro = '$larow[laskunro]' ";
+				$where2 .= " and lasku.laskunro = '$larow[laskunro]' and lasku.tapvm='$larow[tapvm]' ";
 
 				$where3 = "";
 
@@ -873,24 +876,21 @@
 			//katotaan löytyykö lasku ja sen kaikki tilaukset
 			$query = "  SELECT group_concat(otunnus) tilaukset
 						FROM kerayserat
-						WHERE nro = '$kerayseran_numero' and kerayserat.$logistiikka_yhtiolisa";
+						WHERE nro = '$kerayseran_numero'
+						and kerayserat.$logistiikka_yhtiolisa";
 			$laresult = pupe_query($query);
 			$larow = mysql_fetch_assoc($laresult);
 
 			if ($larow["tilaukset"] != "") {
-
 				$kerayseran_tilaukset = $larow["tilaukset"];
 
 				$where2 .= " and lasku.tunnus in ({$larow["tilaukset"]}) ";
-
 				$joinlisa = " JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio and kerayserat.otunnus = lasku.tunnus) ";
 			}
 			else {
 				$where2 .= " and lasku.tunnus = 0 ";
+				$kerayseran_tilaukset = "";
 			}
-		}
-		else {
-			$kerayseran_tilaukset = $otunnus;
 		}
 
 		if (!isset($ascdesc)) $ascdesc = "desc";
@@ -909,7 +909,7 @@
 		}
 
 		if ($toim == "VASTAANOTTORAPORTTI") {
-			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')";
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'O')";
 			$where5 = " AND tilausrivi.kpl != 0 ";
 		}
 
@@ -1040,12 +1040,18 @@
 
 				echo "<tr>";
 				if ($logistiikka_yhtio != '') echo "<$ero valign='top'>$row[yhtio_nimi]</$ero>";
-				echo "<$ero valign='top'>$row[tunnus]<br>";
+
+				echo "<$ero valign='top'>";
+
+				if ($row['tila'] != "U") {
+					echo $row['tunnus'];
+				}
+
 				if ($row['tila'] == "U" and tarkista_oikeus("muutosite.php")) {
-					echo "<a href = '{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$PHP_SELF////asiakasid=$asiakasid//ytunnus=$ytunnus//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toim=$toim//tee=$tee//otunnus=$otunnus//laskunro=$laskunro//laskunroloppu=$laskunroloppu'>$row[laskunro]</a>";
+					echo "<br><a href = '{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$PHP_SELF////asiakasid=$asiakasid//ytunnus=$ytunnus//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toim=$toim//tee=$tee//otunnus=$otunnus//laskunro=$laskunro//laskunroloppu=$laskunroloppu'>$row[laskunro]</a>";
 				}
 				else {
-					echo "$row[laskunro]";
+					echo "<br>$row[laskunro]";
 				}
 				echo "</$ero>";
 				echo "<$ero valign='top'>$row[ytunnus]<br>$row[nimi]<br>$row[nimitark]</$ero>";
@@ -1073,6 +1079,7 @@
 									$kerroinlisa2
 									WHERE tilausrivi.yhtio = '$row[yhtio]'
 									and tilausrivi.otunnus = '$row[tunnus]'
+									and (tilausrivi.var != 'O' or tilausrivi.tyyppi='O')
 									and tilausrivi.tyyppi not in ('D','V')";
 						$sumres = pupe_query($query);
 						$sumrow = mysql_fetch_assoc($sumres);
@@ -1727,6 +1734,7 @@
 								and tilausrivi.tyyppi  != 'D'
 								and tilausrivi.yhtio 	= tuote.yhtio
 								and tilausrivi.tuoteno  = tuote.tuoteno
+								and tilausrivi.var != 'O'
 								ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 					$result = pupe_query($query);
 
@@ -2051,7 +2059,7 @@
 				}
 
 				// keräyslistan rivit
-				if (($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_tilaukset) and trim($kerayseran_tilaukset) != '') or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
+				if (isset($kerayseran_tilaukset) and trim($kerayseran_tilaukset) != '' and ($yhtiorow['kerayserat'] == 'K' or $yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
 					$query = "	SELECT tilausrivi.*,
 								tuote.sarjanumeroseuranta,
 								kerayserat.kpl as tilkpl,
@@ -2064,6 +2072,7 @@
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno {$lisa1})
 								WHERE kerayserat.otunnus IN ({$kerayseran_tilaukset})
+								and tilausrivi.var != 'O'
 								AND kerayserat.yhtio   = '{$kukarow['yhtio']}'
 								ORDER BY sorttauskentta";
 				}
@@ -2074,12 +2083,15 @@
 								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 								if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 								tuote.sarjanumeroseuranta,
-								tuote.eankoodi
+								tuote.eankoodi,
+								abs(tilausrivin_lisatiedot.asiakkaan_positio) asiakkaan_positio
 								FROM tilausrivi
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 								JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 								WHERE tilausrivi.otunnus in ($tilausnumeroita)
 								and tilausrivi.yhtio   = '$kukarow[yhtio]'
 								and tilausrivi.tyyppi  != 'D'
+								and tilausrivi.var != 'O'
 								$lisa1
 								$where_lisa
 								ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
@@ -2259,6 +2271,7 @@
 		}
 	}
 
-	if (@include("inc/footer.inc"));
-	elseif (@include("footer.inc"));
-	else exit;
+	if ($tee != 'NAYTATILAUS') {
+		if (@include("inc/footer.inc"));
+		elseif (@include("footer.inc"));
+	}

@@ -2424,16 +2424,30 @@
 
 		$like = "%{\"loppukassa\":{%\"" . $row["kassa"] . "\"%}%}%";
 
+		//katotaan eka löytyykö viimesen 4 viikkoon tapahtumia
 		$pk_query = "	SELECT tunnus, tapvm, sisviesti2
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tila 	= 'X'
 						AND alatila = 'K'
-						AND tapvm >= date_sub(current_date, interval 7 day)
+						AND tapvm >= date_sub(current_date, interval 28 day)
 						AND sisviesti2 LIKE '$like'
 						ORDER BY tapvm DESC
 						LIMIT 1";
 		$pk_result = pupe_query($pk_query);
+
+		//jos aikarajatulla haulla ei löytynyt mitään haetaan ilman aikarajausta
+		if (mysql_num_rows($pk_result) == 0) {
+			$pk_query = "	SELECT tunnus, tapvm, sisviesti2
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tila 	= 'X'
+							AND alatila = 'K'
+							AND sisviesti2 LIKE '$like'
+							ORDER BY tapvm DESC
+							LIMIT 1";
+			$pk_result = pupe_query($pk_query);
+		}
 
 		if (mysql_num_rows($pk_result) == 1) {
 			$pk_row = mysql_fetch_assoc($pk_result);

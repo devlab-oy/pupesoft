@@ -1816,7 +1816,7 @@ if ($tee == 'P' or $tee == 'E') {
 if ($tee == 'I') {
 
 	// Kurssiksi halutaan tämän päivän kurssi
-	if ($yhtiorow["ostolaskujen_kurssipaiva"] == 0) {
+	if ($yhtiorow["ostolaskujen_kurssipaiva"] == 0 or strtoupper($yhtiorow["valkoodi"]) == strtoupper($valkoodi)) {
 		$query = "SELECT kurssi FROM valuu WHERE nimi = '$valkoodi' AND yhtio = '$kukarow[yhtio]'";
 	}
 	else {

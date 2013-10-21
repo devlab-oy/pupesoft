@@ -600,6 +600,7 @@ $request = array(
 	'valitut_varastot'			 => $varastot,
 	'valitut_inventointilajit'	 => $inventointilajit,
 	'valittu_status'			 => $valittu_status,
+	'ei_huomioida_tuotepaikkoja_avainsanoista' => (!isset($ei_huomioida_tuotepaikkoja_avainsanoista) or (is_array($ei_huomioida_tuotepaikkoja_avainsanoista) and count($ei_huomioida_tuotepaikkoja_avainsanoista) == 2)) ? true : false,
 );
 
 echo "<div id='wrapper'>";
@@ -948,7 +949,7 @@ function echo_table_second_layer($rivi, $rivi_index) {
 
 function echo_table_third_layer($inventointilaji) {
 	global $kukarow;
-	
+
 	echo "<table class='tapahtumat_table'>";
 
 	echo "<tr>";
@@ -1043,7 +1044,26 @@ function echo_kayttoliittyma($request) {
 	}
 	echo "</select>";
 	echo "</td>";
-	echo "<tr>";
+
+	$invaste_tuotepaikat_result = t_avainsana("INVASTEPAIKKA");
+
+	if (mysql_num_rows($invaste_tuotepaikat_result) > 0) {
+
+		$chk = $request['ei_huomioida_tuotepaikkoja_avainsanoista'] ? 'checked' : '';
+
+		echo "<tr>";
+		echo "<th>",t("Ei huomioida avainsanoihin m‰‰riteltyj‰ tuotepaikkoja"),"</th>";
+		echo "<td>";
+		echo "<input type='hidden' name='ei_huomioida_tuotepaikkoja_avainsanoista[]' value='default' /><br />";
+		echo "<input type='checkbox' name='ei_huomioida_tuotepaikkoja_avainsanoista[]' {$chk} /><br />";
+
+		while ($invaste_tuotepaikat_row = mysql_fetch_assoc($invaste_tuotepaikat_result)) {
+			echo "{$invaste_tuotepaikat_row['selite']}<br />";
+		}
+
+		echo "</td>";
+		echo "</tr>";
+	}
 
 	echo "<tr>";
 	echo "<th>";
@@ -1181,6 +1201,31 @@ function parsi_paivat(&$request) {
 	}
 }
 
+function ei_huomioida_tuotepaikkoja_avainsanoista($huomioidaanko = false, $taulu) {
+
+	global $kukarow, $yhtiorow;
+
+	$ei_huomioida_lisa = "";
+
+	if ($huomioidaanko) {
+
+		$chk_res = t_avainsana('INVASTEPAIKKA');
+
+		if (mysql_num_rows($chk_res) > 0) {
+
+			$ei_huomioida_lisa = array();
+
+			while ($chk_row = mysql_fetch_assoc($chk_res)) {
+				$ei_huomioida_lisa[] = $chk_row['selite'];
+			}
+
+			$ei_huomioida_lisa = " AND CONCAT_WS('-', {$taulu}.hyllyalue, {$taulu}.hyllynro, {$taulu}.hyllyvali, {$taulu}.hyllytaso) NOT IN ('".implode("','", $ei_huomioida_lisa)."') ";
+		}
+	}
+
+	return $ei_huomioida_lisa;
+}
+
 function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
 	global $kukarow;
 
@@ -1208,6 +1253,8 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
 		$status_where = "AND tuote.status = '{$request['valittu_status']}'";
 	}
 
+	$ei_huomioida_lisa = ei_huomioida_tuotepaikkoja_avainsanoista($request['ei_huomioida_tuotepaikkoja_avainsanoista'], 'tapahtuma');
+
 	$query = "	SELECT tapahtuma.hyllyalue AS hyllyalue, tapahtuma.hyllynro AS hyllynro, COUNT(DISTINCT CONCAT(tapahtuma.tuoteno, tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso)) AS kpl
 				FROM tapahtuma USE INDEX (yhtio_laji_laadittu)
 				JOIN tuote
@@ -1218,6 +1265,7 @@ function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {
 				WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 				AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
 				AND tapahtuma.laji = 'Inventointi'
+				{$ei_huomioida_lisa}
 				GROUP BY 1,2";
 	$result = pupe_query($query);
 
@@ -1247,6 +1295,8 @@ function hae_tuotepaikkojen_lukumaara(&$request) {
 		$status_where = "AND tuote.status = '{$request['valittu_status']}'";
 	}
 
+	$ei_huomioida_lisa = ei_huomioida_tuotepaikkoja_avainsanoista($request['ei_huomioida_tuotepaikkoja_avainsanoista'], 'tuotepaikat');
+
 	$query = "	SELECT tuotepaikat.hyllyalue as hyllyalue, tuotepaikat.hyllynro as hyllynro, count(*) as kpl
 				FROM tuote
 				JOIN tuotepaikat
@@ -1254,6 +1304,7 @@ function hae_tuotepaikkojen_lukumaara(&$request) {
 				WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 				AND tuote.ei_saldoa = ''
 				{$status_where}
+				{$ei_huomioida_lisa}
 				GROUP BY 1,2";
 	$result = pupe_query($query);
 
@@ -1326,6 +1377,8 @@ function hae_inventoinnit(&$request) {
 		$tuote_join = "AND tuote.status = '{$request['valittu_status']}'";
 	}
 
+	$ei_huomioida_lisa = ei_huomioida_tuotepaikkoja_avainsanoista($request['ei_huomioida_tuotepaikkoja_avainsanoista'], 'tapahtuma');
+
 	$query = "	SELECT DATE(tapahtuma.laadittu) laadittu_pvm,
 				tapahtuma.laadittu,
 				YEAR(tapahtuma.laadittu) as vuosi,
@@ -1375,6 +1428,7 @@ function hae_inventoinnit(&$request) {
 				  AND tapahtuma.laji = 'Inventointi'
 				{$tapahtuma_where}
 				{$inventointilaji_rajaus}
+				{$ei_huomioida_lisa}
 				ORDER BY inventointilaji ASC
 				{$group}";
 	$result = pupe_query($query);

@@ -65,7 +65,7 @@
 					$pres = pupe_query($query);
 
 					//k‰yd‰‰n uudestaan profiili l‰pi
-					foreach($profiilit as $prof) {
+					foreach ($profiilit as $prof) {
 						$query = "	SELECT *
 									FROM oikeu
 									WHERE yhtio='$tokuka' and kuka='$prof' and profiili='$prof'";
@@ -76,15 +76,11 @@
 							//voi olla esim jos se on lukittuna annettu
 							$query = "	SELECT yhtio
 										FROM oikeu
-										WHERE kuka		= '$krow[kuka]'
-										and sovellus	= '$trow[sovellus]'
-										and nimi		= '$trow[nimi]'
-										and alanimi 	= '$trow[alanimi]'
-										and paivitys	= '$trow[paivitys]'
-										and nimitys		= '$trow[nimitys]'
-										and jarjestys 	= '$trow[jarjestys]'
-										and jarjestys2	= '$trow[jarjestys2]'
-										and yhtio		= '$tokuka'";
+										WHERE yhtio		= '$tokuka'
+										AND kuka		= '$krow[kuka]'
+										AND sovellus	= '$trow[sovellus]'
+										AND nimi		= '$trow[nimi]'
+										AND alanimi 	= '$trow[alanimi]'";
 							$tarkesult = pupe_query($query);
 
 							if (mysql_num_rows($tarkesult) == 0) {
@@ -98,7 +94,11 @@
 											nimitys		= '$trow[nimitys]',
 											jarjestys 	= '$trow[jarjestys]',
 											jarjestys2	= '$trow[jarjestys2]',
-											yhtio		= '$tokuka'";
+											yhtio		= '$tokuka'
+											laatija 	= '{$kukarow['kuka']}',
+											luontiaika 	= now(),
+											muutospvm 	= now(),
+											muuttaja 	= '{$kukarow['kuka']}'";
 								$rresult = pupe_query($query);
 							}
 						}

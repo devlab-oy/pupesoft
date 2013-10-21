@@ -20424,6 +20424,7 @@ if (!function_exists('uusi_saapuminen')) {
                     rahti           = '$toimittajarow[oletus_kulupros]',
                     swift           = '$toimittajarow[swift]',
                     liitostunnus    = '$toimittajarow[tunnus]',
+                    yhtio_toimipaikka = '{$kukarow['toimipaikka']}',
                     tila            = 'K',
                     luontiaika      = now(),
                     laatija         = '$kukarow[kuka]'";
@@ -20437,6 +20438,20 @@ if (!function_exists('uusi_saapuminen')) {
 
         return $return;
     }
+}
+
+if (!function_exists('hae_yhtion_toimipaikat')) {
+	function hae_yhtion_toimipaikat($yhtio) {
+
+		$yhtio = mysql_real_escape_string($yhtio);
+
+		$query = "	SELECT *
+					FROM yhtion_toimipaikat
+					WHERE yhtio = '{$yhtio}'
+					ORDER BY nimi";
+		$res = pupe_query($query);
+		return $res;
+	}
 }
 
 if (!function_exists('tarkiste')) {

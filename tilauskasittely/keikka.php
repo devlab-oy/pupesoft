@@ -747,6 +747,39 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	}
 
 	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>",t("Toimipaikka"),"</th>";
+	echo "<td>";
+	echo "<select name='toimipaikka'>";
+	echo "<option value=''>",t("Ei toimipaikkaa"),"</option>";
+
+	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+	while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+		$sel = '';
+
+		if (isset($toimipaikka)) {
+			if ($toimipaikka == $toimipaikat_row['tunnus']) {
+				$sel = ' selected';
+				$toimipaikka = $toimipaikat_row['tunnus'];
+			}
+		}
+		else {
+			if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
+				$sel = ' selected';
+				$toimipaikka = $toimipaikat_row['tunnus'];
+			}
+		}
+
+		echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+	}
+
+	echo "</select>";
+	echo "</td>";
+	echo "</tr>";
+
 	echo "<tr>";
 	echo "<th>",t("Lis‰rajaus"),"</th>";
 
@@ -844,6 +877,8 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		$havinglisa = "HAVING liitetty_lasku_kpl = 0";
 	}
 
+	$toimipaikkalisa = isset($toimipaikka) ? "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'" : "";
+
 	// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
 	$query = "	SELECT lasku.liitostunnus,
 				{$selectlisa}
@@ -871,6 +906,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				and lasku.mapvm 	  = '0000-00-00'
 				$laatijalisa
 				{$kohdistuslisa}
+				{$toimipaikkalisa}
 				GROUP BY lasku.liitostunnus
 				{$havinglisa}
 				ORDER BY lasku.nimi, lasku.nimitark, lasku.ytunnus";
@@ -1016,6 +1052,39 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		echo "<tr><td colspan='5'>".wordwrap($toimittajarow["fakta"], 100, "<br>")."</td></tr>";
 	}
 
+	echo "<form method='post'>";
+	echo "<tr>";
+	echo "<th>",t("Toimipaikka"),"</th>";
+	echo "<td colspan='4'>";
+	echo "<select name='toimipaikka' onchange='submit();'>";
+	echo "<option value=''>",t("Ei toimipaikkaa"),"</option>";
+
+	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+	while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+		$sel = '';
+
+		if (isset($toimipaikka)) {
+			if ($toimipaikka == $toimipaikat_row['tunnus']) {
+				$sel = ' selected';
+				$toimipaikka = $toimipaikat_row['tunnus'];
+			}
+		}
+		else {
+			if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
+				$sel = ' selected';
+				$toimipaikka = $toimipaikat_row['tunnus'];
+			}
+		}
+
+		echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+	}
+
+	echo "</select>";
+	echo "</td>";
+	echo "</tr>";
+
 	if (!isset($lisarajaus)) $lisarajaus = "";
 
 	$sel = array_fill_keys(array($lisarajaus), ' selected') + array_fill_keys(array('riveja_viematta_varastoon', 'liitetty_lasku', 'ei_liitetty_lasku', 'liitetty_lasku_rivitok_kohdistus_eiok', 'liitetty_lasku_rivitok_kohdistus_ok'), '');
@@ -1023,7 +1092,6 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 	echo "<tr>";
 	echo "<th>",t("Lis‰rajaus"),"</th>";
 	echo "<td colspan='4'>";
-	echo "<form method='post'>";
 	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 	echo "<select name='lisarajaus' ",js_alasvetoMaxWidth('lisarajaus', 250)," onchange='submit();'>";
@@ -1067,6 +1135,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		}
 	}
 
+	$toimipaikkalisa = isset($toimipaikka) ? "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'" : "";
+
 	// etsit‰‰n vanhoja keikkoja, vanhatunnus pit‰‰ olla tyhj‰‰ niin ei listata liitettyj‰ laskuja
 	$query = "	SELECT lasku.tunnus,
 				lasku.laskunro,
@@ -1086,6 +1156,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				and lasku.alatila 	   = ''
 				and lasku.vanhatunnus  = 0
 				and lasku.mapvm 	   = '0000-00-00'
+				{$toimipaikkalisa}
 				{$groupbylisa}
 				{$havinglisa}
 				ORDER BY lasku.laskunro DESC";

@@ -145,6 +145,9 @@ if ($Xtunnukset2 != "") {
 			$Xpdf->draw_text(30,  572, t("Nimike", $kieli),			$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(100, 572, t("Kohtelu", $kieli),		$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(150, 572, t("Tuote", $kieli),			$Xfirstpage, $Xpieni);
+
+			$Xpdf->draw_text(310, 572, t("VAK/UN", $kieli),		$Xfirstpage, $Xpieni);
+
 			$Xpdf->draw_text(370, 572, t("Määrä", $kieli),			$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(430, 572, t("Hinta", $kieli),			$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(470, 572, t("Paino", $kieli),			$Xfirstpage, $Xpieni);
@@ -171,8 +174,15 @@ if ($Xtunnukset2 != "") {
 			$Xpdf->draw_text(30,  $Xkala, $Xrow["tullinimike1"],	$Xfirstpage, $Xnorm);
 			$Xpdf->draw_text(100, $Xkala, $Xrow["tullikohtelu"], 	$Xfirstpage, $Xnorm);
 
-			list($ff_string, $ff_font) = pdf_fontfit($Xrow["tuoteno"], 200, $Xpdf, $Xnorm);
+			list($ff_string, $ff_font) = pdf_fontfit($Xrow["tuoteno"], 155, $Xpdf, $Xnorm);
 			$Xpdf->draw_text(150, $Xkala, $ff_string, 				$Xfirstpage, $ff_font);
+
+			$_vak_un = palauta_tuotteen_vak_koodi($Xrow["tuoteno"]);
+
+			if ($_vak_un != "") {
+				$oikpos = $Xpdf->strlen($_vak_un, $Xnorm);
+				$Xpdf->draw_text(340-$oikpos, $Xkala, $_vak_un, 	$Xfirstpage, $Xnorm);
+			}
 
 			$oikpos = $Xpdf->strlen($Xrow["kpl"], $Xnorm);
 			$Xpdf->draw_text(390-$oikpos, $Xkala, $Xrow["kpl"], 	$Xfirstpage, $Xnorm);

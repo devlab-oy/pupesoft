@@ -1846,6 +1846,12 @@ if (!function_exists('rivi_lahete')) {
 				$return = rivi_eialeja_lahete($return);
 			}
 			elseif ($base_lahetetyyppi == "tulosta_lahete_viivakoodi.inc" or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc") {
+
+				// Verollinen lähetetyyppi, lisätään alvit hintaan
+				if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc' and strpos($lahetetyyppi, "_verollinen") !== FALSE) {
+					$return['row']['hinta']	= hintapyoristys($row['hinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+				}
+
 				// tulosta_lahete_viivakoodi.inc
 				$return = rivi_viivakoodi_lahete($return);
 			}

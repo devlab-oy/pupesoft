@@ -62,8 +62,11 @@
 							jarjestys 	= '$trow[jarjestys]',
 							jarjestys2	= '$trow[jarjestys2]',
 							hidden		= '$trow[hidden]',
-							yhtio		= '$kukarow[yhtio]'";
-
+							yhtio		= '$kukarow[yhtio]',
+							laatija 	= '{$kukarow['kuka']}',
+							luontiaika 	= now(),
+							muutospvm 	= now(),
+							muuttaja 	= '{$kukarow['kuka']}'";
 				$result = pupe_query($query);
 			}
 			echo "<font class='message'>".t("Käyttöoikeudet päivitetty")."!</font><br>";

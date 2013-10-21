@@ -199,8 +199,12 @@
 
 	if ($tila == 'menut') {
 		if ($fromyhtio != '') {
-			$query = "	INSERT into oikeu (sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,yhtio)
-						SELECT sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,'$yhtio' FROM oikeu WHERE yhtio='$fromyhtio' and profiili='' and kuka=''";
+			$query = "	INSERT into oikeu (sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,yhtio,laatija,luontiaika,muutospvm,muuttaja)
+						SELECT sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,'$yhtio','{$kukarow['kuka']}',now(),now(),'{$kukarow['kuka']}'
+						FROM oikeu
+						WHERE yhtio  = '$fromyhtio'
+						and profiili = ''
+						and kuka     = ''";
 			$result = pupe_query($query);
 		}
 	}
@@ -210,7 +214,9 @@
 			foreach ($profiilit as $prof) {
 				$query = "	SELECT *
 							FROM oikeu
-							WHERE yhtio='$fromyhtio' and kuka='$prof' and profiili='$prof'";
+							WHERE yhtio  = '$fromyhtio'
+							and kuka	 = '$prof'
+							and profiili = '$prof'";
 				$pres = pupe_query($query);
 
 				while ($trow = mysql_fetch_array($pres)) {
@@ -226,7 +232,11 @@
 								jarjestys2	= '$trow[jarjestys2]',
 								profiili	= '$trow[profiili]',
 								yhtio		= '$yhtio',
-								hidden		= '$trow[hidden]'";
+								hidden		= '$trow[hidden]',
+								laatija 	= '{$kukarow['kuka']}',
+								luontiaika 	= now(),
+								muutospvm 	= now(),
+								muuttaja 	= '{$kukarow['kuka']}'";
 					$rresult = pupe_query($query);
 				}
 			}

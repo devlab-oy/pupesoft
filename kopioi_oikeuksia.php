@@ -10,16 +10,31 @@
 						FROM oikeu
 						WHERE kuka = '$fromkuka'
 						and yhtio = '$fromyhtio'";
-			$kukar = mysql_query($query) or pupe_error($query);
+			$kukar = pupe_query($query);
 
 			$query = "	DELETE FROM oikeu
 						WHERE kuka = '$tokuka'
 						AND yhtio = '$toyhtio'";
-			$delre = mysql_query($query) or pupe_error($query);
+			$delre = pupe_query($query);
 
 			while ($row = mysql_fetch_array($kukar)) {
-				$query = "INSERT INTO oikeu VALUES ('$tokuka','$row[sovellus]','$row[nimi]','$row[alanimi]','$row[paivitys]','$row[lukittu]','$row[nimitys]','$row[jarjestys]','$row[jarjestys2]','','$toyhtio','$row[hidden]',0)";
-				$upres = mysql_query($query) or pupe_error($query);
+
+				$query = "	INSERT into oikeu SET
+							kuka		= '{$tokuka}',
+							sovellus	= '{$row['sovellus']}',
+							nimi		= '{$row['nimi']}',
+							alanimi 	= '{$row['alanimi']}',
+							paivitys	= '{$row['paivitys']}',
+							nimitys		= '{$row['nimitys']}',
+							jarjestys 	= '{$row['jarjestys']}',
+							jarjestys2	= '{$row['jarjestys2']}',
+							hidden		= '{$row['hidden']}',
+							yhtio		= '{$toyhtio}',
+							laatija 	= '{$kukarow['kuka']}',
+							luontiaika 	= now(),
+							muutospvm 	= now(),
+							muuttaja 	= '{$kukarow['kuka']}'";
+				$upres = pupe_query($query);
 			}
 
 			$fromkuka	= '';
@@ -41,7 +56,7 @@
 					WHERE kuka.extranet = ''
 					AND ((yhtio.konserni = '$yhtiorow[konserni]' and yhtio.konserni != '') OR kuka.yhtio = '$kukarow[yhtio]')
 					ORDER BY nimi";
-		$kukar = mysql_query($query) or pupe_error($query);
+		$kukar = pupe_query($query);
 
 		echo "<table><tr><th align='left'>".t("Käyttäjä").":</th><td>
 		<select name='fromkuka' onchange='submit()'>
@@ -64,7 +79,7 @@
 						WHERE kuka.kuka = '$fromkuka'
 						AND kuka.extranet = ''
 						AND yhtio.yhtio = kuka.yhtio ";
-			$yhres = mysql_query($query) or pupe_error($query);
+			$yhres = pupe_query($query);
 
 			if (mysql_num_rows($yhres) > 1){
 				echo "<tr><th align='left'>".t("Yhtio").":</th><td><select name='fromyhtio'>";
@@ -103,7 +118,7 @@
 					WHERE kuka.extranet = ''
 					AND ((yhtio.konserni = '$yhtiorow[konserni]' and yhtio.konserni != '') OR kuka.yhtio = '$kukarow[yhtio]')
 					ORDER BY nimi";
-		$kukar = mysql_query($query) or pupe_error($query);
+		$kukar = pupe_query($query);
 
 		echo "<table><tr><th align='left'>".t("Käyttäjä").":</th><td>
 		<select name='tokuka' onchange='submit()'>
@@ -122,7 +137,7 @@
 			// tehdään yhtiolistaukset
 
 			$query = "select distinct kuka.yhtio, yhtio.nimi from kuka, yhtio where kuka.kuka='$tokuka' and kuka.extranet='' and yhtio.yhtio=kuka.yhtio ";
-			$yhres = mysql_query($query) or pupe_error($query);
+			$yhres = pupe_query($query);
 
 			if (mysql_num_rows($yhres) > 1) {
 				echo "<tr><th align='left'>".t("Yhtio").":</th><td><select name='toyhtio'>";

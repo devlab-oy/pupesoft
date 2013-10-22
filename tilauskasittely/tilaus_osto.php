@@ -1229,6 +1229,8 @@
 
 			$rivienmaara = mysql_num_rows($presult);
 
+			$sallitaanko_tarkista_nappi = false;
+
 			if ($rivienmaara > 0) {
 
 				echo "<table><tr>";
@@ -1259,7 +1261,6 @@
 				$erikoisale_summa	  = 0;
 				$myyntitilaus_lopetus = "{$palvelin2}tilauskasittely/tilaus_osto.php////tee=AKTIVOI//orig_tila={$laskurow['tila']}//orig_alatila={$laskurow['alatila']}//tilausnumero={$tilausnumero}//from=tilaus_myynti";
 				$oikeusostohintapaiv  = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat", "check");
-
 
 				while ($prow = mysql_fetch_assoc($presult)) {
 					$divnolla++;
@@ -1804,7 +1805,7 @@
 						</form>
 						</td>";
 
-				if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+				if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') and !empty($sallitaanko_tarkista_nappi)) {
 					$hae = 'nappi_kaikki';
 					require("inc/sahkoinen_tilausliitanta.inc");
 				}

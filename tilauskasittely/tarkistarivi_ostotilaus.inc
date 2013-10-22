@@ -304,6 +304,7 @@
 				$rivitunnus = $prow['tunnus'];
 				$_vastaavat_tunnus = $_tuote['vastaavat_tunnus'];
 				$_vastaavat_tuoteno = $tuotteen_toimittaja_row['toim_tuoteno'];
+				$sallitaanko_tarkista_nappi = true;
 
 				require("inc/sahkoinen_tilausliitanta.inc");
 			}

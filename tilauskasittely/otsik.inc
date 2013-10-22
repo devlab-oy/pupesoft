@@ -2012,7 +2012,7 @@
 			$jtki = "";
 			$rahtivapaa_chk = '';
 
-			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I') or (!isset($srow['eilahetetta']) and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $srow['toimitustapa'] == 'Nouto' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K')) $eilah = 'CHECKED';
+			if ($srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I') or (!isset($srow['eilahetetta']) and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K')) $eilah = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';

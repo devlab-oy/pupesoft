@@ -278,7 +278,6 @@
 				$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_password' value='{$tuotteen_toimittaja_row['selitetark_4']}' />";
 				$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_suppliernumber' value='{$tuotteen_toimittaja_row['selitetark_5']}' />";
 				$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tuotteen_toimittaja_row['tt_tunnus']}' />";
-				$vastaavat_table .= "<input type='hidden' id='toim' value='{$toim}' />";
 		 	}
 
 		 	if ($tuotteen_toimittaja_row['selitetark_2'] == "") {

@@ -1004,7 +1004,7 @@
 			echo "<tr>";
 			echo "<td class='back'>
 					<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
-					<input type='hidden' name='toim' 				value = '$toim'>
+					<input type='hidden' id='toim' name='toim'		value = '$toim'>
 					<input type='hidden' name='lopetus' 			value = '$lopetus'>
 					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
 					<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>

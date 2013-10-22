@@ -3122,7 +3122,6 @@
 			$toimkk	 = date("m",strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
 			$toimpp  = date("d",strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
 
-			$toimvko = $toimvkopva;
 		}
 		else {
 			$toimvko	= "";

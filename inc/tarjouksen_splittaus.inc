@@ -8,7 +8,7 @@ $query = "  SELECT laskun_lisatiedot.sopimus_lisatietoja,
 			lasku.clearing,
 			lasku.viesti,
 			lasku.toimvko,
-			lasku.toimaika,
+			lasku.toimaika as toimitusaika,
 			tilausrivi.*,
 			lasku.varasto,
 			lasku.tilaustyyppi
@@ -32,7 +32,7 @@ while ($tilausrivi = mysql_fetch_assoc($result)) {
 	$tilaustyyppi = $tilausrivi['tilaustyyppi'];
 	$viesti = $tilausrivi['viesti'];
 	$toimitusviikko = $tilausrivi['toimvko'];
-	$toimaika = $tilausrivi['toimaika'];
+	$toimaika = $tilausrivi['toimitusaika'];
 }
 
 $tarjouksen_asiakkaat = explode(',', $tarjouksen_asiakkaat);

@@ -1497,10 +1497,19 @@
 
 		//tablen sarakkeiden määrä riippuu $kukarow['taso']
 		$sarakkeet_base = 12;
+
 		if ($kukarow['taso'] == 1 or $kukarow['taso'] == 2 or $kukarow['taso'] == 3) {
 			$sarakkeet_base = 14;
 		}
-		pupe_DataTables(array(array('mur', 11, $sarakkeet_base)));
+
+		$sarakkeet_vis = 11;
+		
+		if ($liitetaanko_editilaus_laskulle_hakemisto != '') {
+			$sarakkeet_vis++;
+			$sarakkeet_base++;
+		}
+
+		pupe_DataTables(array(array('mur', $sarakkeet_vis, $sarakkeet_base)));
 
 		echo "<table class='display dataTable' id='mur'>";
 		echo "<thead>";

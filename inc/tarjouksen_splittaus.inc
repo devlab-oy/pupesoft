@@ -123,6 +123,7 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
 				'hinta'				 => $tilausrivi['hinta'],
 				'varataan_saldoa'	 => 'EI',
 				'var'				 => $tilausrivi['var'],
+				'toimaika'			 => $laskurow['toimaika']
 			);
 
 			lisaa_rivi($parametrit);

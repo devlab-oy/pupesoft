@@ -192,6 +192,10 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
 			$maksaja = $apuro['merahti'];
 
+			if ($yhtiorow['nouto_suoraan_laskutukseen'] == 'K' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $apuro['nouto'] != '') {
+				$eilahe = 'o';
+			}
+
 			// Onko toimitusehdon takana m‰‰ritelty rahdinmaksaja? T‰m‰ yliajaa toimitustavan takana olevan.
 			$toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = trim('$yhtiorow[oletus_toimitusehto]') ");
 

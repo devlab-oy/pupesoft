@@ -3072,8 +3072,8 @@
 		$sel = $trow[$i] == 'K' ? " selected" : "";
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
-					<option value = ''>".t("Noutotilauksia ei laiteta suoraan laskutukseen")."</option>
-					<option value = 'K' {$sel}>".t("Noutotilaukset aina suoraan laskutukseen")."</option>
+					<option value = ''>".t("Noutotilauksia ei laiteta suoraan laskutusjonoon")."</option>
+					<option value = 'K' {$sel}>".t("Noutotilaukset aina suoraan laskutusjonoon")."</option>
 				</select></td>";
 
 		$jatko = 0;
@@ -3664,9 +3664,12 @@
 			}
 
 			$ulos .= "</select></td>";
-		}
 
-		$jatko = 0;
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 0;
+		}
 	}
 
 	if (mysql_field_name($result, $i) == 'ostotilauksen_toimittajien_saldo_tarkistus') {

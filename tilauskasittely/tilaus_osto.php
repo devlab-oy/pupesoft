@@ -1229,8 +1229,6 @@
 
 			$rivienmaara = mysql_num_rows($presult);
 
-			$sallitaanko_tarkista_nappi = false;
-
 			if ($rivienmaara > 0) {
 
 				echo "<table><tr>";
@@ -1805,9 +1803,12 @@
 						</form>
 						</td>";
 
-				if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A') and !empty($sallitaanko_tarkista_nappi)) {
-					$hae = 'nappi_kaikki';
-					require("inc/sahkoinen_tilausliitanta.inc");
+				if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+
+					if (mysql_num_rows(t_avainsana('SAHKTILTUN', '', " AND selite = '{$laskurow['vanhatunnus']}' AND selitetark = '{$laskurow['liitostunnus']}' ")) > 0) {
+						$hae = 'nappi_kaikki';
+						require("inc/sahkoinen_tilausliitanta.inc");
+					}
 				}
 
 				if ($toim != "HAAMU") {

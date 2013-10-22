@@ -629,10 +629,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			if (file_exists("$pupe_root_polku/zhat.php") and !empty($kukarow['extranet'])) {
 				require_once("$pupe_root_polku/zhat.php");
 
-				echo livezhat_js_sources();
-
 				if (!stristr($phpnimi, 'indexvas')) {
-					echo add_livezhat();
+					echo livezhat_js_sources();
 				}
 			}
 

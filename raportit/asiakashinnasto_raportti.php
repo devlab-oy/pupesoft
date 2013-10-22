@@ -54,7 +54,14 @@ $request = array(
 $request['asiakasryhmat'] = hae_asiakasryhmat();
 $request['aleryhmat'] = hae_aleryhmat();
 
-if ($request['action'] == 'aja_raportti') {
+$valid = true;
+if (!empty($request['valittu_asiakas']) and !is_numeric($request['valittu_asiakas'])) {
+	echo "<font class='error'>".t('Käytä livesearch toiminnallisuutta')."</font>";
+	echo "<br/>";
+	$valid = false;
+}
+
+if ($request['action'] == 'aja_raportti' and $valid) {
 	echo "<font class='message'>".t("Raporttia ajetaan")."</font>";
 	echo "<br/>";
 
@@ -195,8 +202,8 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
 		$query = "	SELECT aleryhma, tuoteno
 					FROM tuote
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND status not in ('P','X')"
-					AND aleryhma != '';
+					AND status not in ('P','X')
+					AND aleryhma != ''";
 		$result = pupe_query($query);
 
 		while ($tuote = mysql_fetch_assoc($result)) {

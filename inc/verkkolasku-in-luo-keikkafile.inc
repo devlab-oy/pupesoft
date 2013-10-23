@@ -2089,7 +2089,7 @@
 
 			$liian_iso_pyoristysero = false;
 
-			if ($laskunsumma != 0.00 and $kohdistettava_summa == $valittusumma and abs($checksumma) <= $pyoristysero_raja) {
+			if ($kohdistettava_summa == $valittusumma and abs($checksumma) <= $pyoristysero_raja) {
 				$pyoristys_erot = $checksumma;
 			}
 			else {

@@ -1342,7 +1342,7 @@
 		echo "<th>".t('Valmistuslinja')."</th>";
 		echo "<td>";
 		echo "<select multiple='multiple' name='multi_valmistuslinja[]' onchange='submit();'>";
-		echo "<option value=''>".t('Kaikki valmistuslinjat')."</option>";
+		echo "<option value=''>".t('Ei valintaa')."</option>";
 		foreach ($valmistuslinjat as $_valmistuslinja) {
 			$sel = in_array($_valmistuslinja['selite'], $multi_valmistuslinja) ? " SELECTED" : "";
 			echo "<option value='{$_valmistuslinja['selite']}'{$sel}>{$_valmistuslinja['selitetark']}</option>";
@@ -1355,7 +1355,7 @@
 		echo "<th>".t("Tuotteen status")."</th>";
 		echo "<td>";
 		echo "<select multiple='multiple' name='multi_status[]' onchange='submit();'>";
-		echo "<option value=''>".t("Näytä kaikki")."</option>";
+		echo "<option value=''>".t("Ei valintaa")."</option>";
 
 		$result = t_avainsana("S");
 

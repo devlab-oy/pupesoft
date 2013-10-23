@@ -5014,7 +5014,7 @@ if ($tee == '') {
 				}
 			}
 
-			if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+			if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO','PIKATILAUS','TARJOUS','REKLAMAATIO'))) {
 				$headerit .= "<th>".t("Rekno")."</th>";
 				$sarakkeet++;
 			}
@@ -5838,7 +5838,7 @@ if ($tee == '') {
 					echo "<td $class valign='top'>$paltoimiulos</td>";
 				}
 
-				if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+				if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO','PIKATILAUS','TARJOUS','REKLAMAATIO'))) {
 					echo "<td $class align='left' valign='top'>";
 					echo $row['rekisterinumero'];
 					echo "</td>";

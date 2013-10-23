@@ -303,32 +303,50 @@
 				while ($trow = mysql_fetch_array($pres)) {
 					//joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
 					//voi olla jossain toisessa profiilissa
+					//jos oikeus on jo jostaan toisesta profiilista katotaan oisko eroja päivitysoikeus kohassa
 					$query = "	SELECT yhtio
 								FROM oikeu
 								WHERE kuka		= '$kuka'
-								and sovellus	= '$trow[sovellus]'
-								and nimi		= '$trow[nimi]'
-								and alanimi 	= '$trow[alanimi]'
-								and paivitys	= '$trow[paivitys]'
-								and nimitys		= '$trow[nimitys]'
-								and jarjestys 	= '$trow[jarjestys]'
-								and jarjestys2	= '$trow[jarjestys2]'
+								and sovellus	= '{$trow['sovellus']}'
+								and nimi		= '{$trow['nimi']}'
+								and alanimi 	= '{$trow['alanimi']}'
+								and nimitys		= '{$trow['nimitys']}'
+								and jarjestys 	= '{$trow['jarjestys']}'
+								and jarjestys2	= '{$trow['jarjestys2']}'
 								and yhtio		= '$yhtio'";
 					$tarkesult = pupe_query($query);
+					$tarkesultrow = mysql_fetch_assoc($tarkesult);
 
 					if (mysql_num_rows($tarkesult) == 0) {
 						$query = "	INSERT into oikeu
 									SET
 									kuka		= '$kuka',
-									sovellus	= '$trow[sovellus]',
-									nimi		= '$trow[nimi]',
-									alanimi 	= '$trow[alanimi]',
-									paivitys	= '$trow[paivitys]',
-									nimitys		= '$trow[nimitys]',
-									jarjestys 	= '$trow[jarjestys]',
-									jarjestys2	= '$trow[jarjestys2]',
+									sovellus	= '{$trow['sovellus']}',
+									nimi		= '{$trow['nimi']}',
+									alanimi 	= '{$trow['alanimi']}',
+									paivitys	= '{$trow['paivitys']}',
+									nimitys		= '{$trow['nimitys']}',
+									jarjestys 	= '{$trow['jarjestys']}',
+									jarjestys2	= '{$trow['jarjestys2']}',
 									yhtio		= '$yhtio',
-									hidden		= '$trow[hidden]'";
+									hidden		= '{$trow['hidden']}'";
+						$rresult = pupe_query($query);
+					}
+					elseif ($trow["paivitys"] == '1' AND $tarkesultrow["paivitys"] != '1') {
+						$query = "	UPDATE oikeu
+									SET
+									paivitys 		= '1',
+									muutospvm 	 	= now(),
+									muuttaja 	 	= '$kuka'
+									WHERE kuka		= '$kuka'
+									AND sovellus	= '{$trow['sovellus']}'
+									AND nimi		= '{$trow['nimi']}'
+									AND alanimi 	= '{$trow['alanimi']}'
+									AND nimitys		= '{$trow['nimitys']}'
+									AND jarjestys 	= '{$trow['jarjestys']}'
+									AND jarjestys2	= '{$trow['jarjestys2']}'
+									AND hidden		= '{$trow['hidden']}'
+									AND yhtio		= '$yhtio'";
 						$rresult = pupe_query($query);
 					}
 				}

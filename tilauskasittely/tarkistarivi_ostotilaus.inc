@@ -12,7 +12,7 @@
 				WHERE tuote.tuoteno	= '$prow[tuoteno]'
 				and tuote.yhtio		= '$kukarow[yhtio]'";
 	$rarresult = pupe_query($query);
-	$trow = mysql_fetch_array($rarresult);
+	$trow = mysql_fetch_assoc($rarresult);
 
 	if (mysql_num_rows($rarresult) == 0) {
 		$varaosavirhe .= t("VIRHE: Tuotetta ei löydy")."!<br>";
@@ -70,6 +70,8 @@
 							and tunnus	= '$prow[tunnus]'
 							and otunnus = '$kukarow[kesken]'";
 				$ishinr = pupe_query($oshinq);
+
+				$prow['var'] = "O";
 			}
 			else {
 				$paok = 'ok';
@@ -105,11 +107,7 @@
 
 		}
 
-		$varquery = "SELECT var FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tunnus	= '$prow[tunnus]'";
-		$varresult = pupe_query($varquery);
-		$varrow  = mysql_fetch_array($varresult);
-
-		if (($toiminto != 'kohdista' and ($varrow['var'] != 'O' or $prow['var'] != 'O') and ($prow["tunnus"] != $paiv_rivitunnus or $paiv_rivitunnus == '')) or (($toiminto == 'kohdista' and $paok == ''))) {
+		if (($toiminto != 'kohdista' and $prow['var'] != 'O' and ($prow["tunnus"] != $paiv_rivitunnus or $paiv_rivitunnus == '')) or (($toiminto == 'kohdista' and $paok == ''))) {
 			$varaosavirhe .= "	<form name='tilaus' action='$PHP_SELF#$rivitunnus' method='post' autocomplete='off'>
 								<input type='hidden' name='toim' 				value = '$toim'>
 								<input type='hidden' name='lopetus' 			value = '$lopetus'>

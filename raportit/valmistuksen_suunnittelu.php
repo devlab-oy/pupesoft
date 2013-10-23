@@ -275,7 +275,7 @@
 							);
 		}
 
-		// Haetaan budjetoitu myynti		
+		// Haetaan budjetoitu myynti
 		$params = array(
 			'tuoteno'                    => $tuoteno,
 			'pvm_alku'                   => $nykyinen_alku,
@@ -566,20 +566,28 @@
 	// Tehdään raportti
 	if (isset($ehdotusnappi) and $ehdotusnappi != "") {
 
-		$tuote_where       = ""; // tuote-rajauksia
-		$toimittaja_join   = ""; // toimittaja-rajauksia
-		$toimittaja_select = ""; // toimittaja-rajauksia
-		$abc_join          = ""; // abc-rajauksia
-		$toggle_counter    = 0;
+		$tuote_where                = ""; // tuote-rajauksia
+		$tuote_valmistuslinja_where = ""; // tuote valmistuslinja wherelle tarvitaan oma muuttuja
+		$toimittaja_join            = ""; // toimittaja-rajauksia
+		$toimittaja_select          = ""; // toimittaja-rajauksia
+		$lasku_where                = ""; // lasku-rajauksia
+		$abc_join                   = ""; // abc-rajauksia
+		$toggle_counter             = 0;
 
 		if ($ehdotetut_valmistukset == 'valmistuslinjoittain') {
 			$valmistukset_yhteensa = array();
 
 			foreach ($valmistuslinjat as $valmistuslinja) {
+
+				// Jos ollaan rajattu valmistuslinjoja, ei alusteta turhia linjoja arrayseen
+				if (isset($multi_valmistuslinja) and count($multi_valmistuslinja) > 0 and array_search($valmistuslinja['selite'], $multi_valmistuslinja) === FALSE) {
+					continue;
+				}
+
 				$valmistukset_yhteensa[$valmistuslinja['selite']] = array(
 					'valmistuksessa' => 0,
 					'valmistusmaara' => 0,
-					'yhteensa' => 0,
+					'yhteensa_kpl' => 0,
 					'valmistusaika_sekunneissa' => 0,
 				);
 			}
@@ -598,7 +606,8 @@
 		}
 
 		if (isset($multi_valmistuslinja) and count($multi_valmistuslinja) > 0) {
-			$tuote_where .= "and tuote.valmistuslinja in ('".implode("','", $multi_valmistuslinja)."')";
+			$tuote_valmistuslinja_where .= "and tuote.valmistuslinja in ('".implode("','", $multi_valmistuslinja)."')";
+			$lasku_where .= "and lasku.kohde in ('".implode("','", $multi_valmistuslinja)."')";
 		}
 
 		if (isset($multi_status) and count($multi_status) > 0) {
@@ -634,7 +643,8 @@
 							AND tuote.tuoteno = tilausrivi.tuoteno
 							AND tuote.ei_saldoa = ''
 							AND tuote.ostoehdotus != 'E'
-							{$tuote_where})
+							{$tuote_where}
+							{$tuote_valmistuslinja_where})
 						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 						AND tilausrivi.tyyppi IN ('L','G')
 						AND tilausrivi.var = 'J'
@@ -686,6 +696,7 @@
 					AND lasku.tila = 'V'
 					AND lasku.toimaika >= '{$nykyinen_alku}'
 					AND lasku.toimaika <= '{$nykyinen_loppu}'
+					{$lasku_where}
 					{$lisa}
 					ORDER BY lasku.kohde, lasku.toimaika, tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno";
 		$res = pupe_query($query);
@@ -799,6 +810,7 @@
 					AND tuote.ei_saldoa = ''
 					AND tuote.ostoehdotus != 'E'
 					{$tuote_where}
+					{$tuote_valmistuslinja_where}
 					GROUP BY 1, 2, 3";
 		$res = pupe_query($query);
 
@@ -838,7 +850,9 @@
 						JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
 							AND tuote.tuoteno = tuoteperhe.tuoteno
 							AND tuote.ei_saldoa = ''
-							AND tuote.ostoehdotus != 'E')
+							AND tuote.ostoehdotus != 'E'
+							{$tuote_where}
+							{$tuote_valmistuslinja_where})
 						WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
 						AND tuoteperhe.isatuoteno = '{$row["tuoteno"]}'
 						AND tuoteperhe.tyyppi = 'S'";

@@ -1070,19 +1070,41 @@
 		 	echo "<font class='error'>".t("Ei yht‰‰n poimittua laskua")."!</font><br>";
 		}
 		else {
-			// N‰ytet‰‰n valitut laskut
-			echo "<table><tr>";
-			echo "<th valign='top'>".t("Nimi")."</th>";
-			echo "<th valign='top'>".t("Tilinumero")."</th>";
-			echo "<th valign='top'>".t("Er‰pvm")." / ".t("Maksupvm")."</th>";
-			echo "<th valign='top' nowrap>".t("Kassa-ale")."</th>";
-			echo "<th valign='top'>".t("Summa")."</th>";
-			echo "<th valign='top'>".t("Laskunro")."</th>";
-			echo "<th valign='top'>".t("Maksutili")."</th>";
-			echo "<th valign='top'>".t("Viite")." / ".t("Viesti")."</th>";
-			echo "<th valign='top'>".t("Ebid")."</th>";
-			echo "<th valign='top'>".t("Maksatus")."</th></tr>";
 
+			pupe_DataTables(array(array($pupe_DataTables, 9, 10)));
+
+			// N‰ytet‰‰n valitut laskut
+			echo "<table class='display dataTable' id='$pupe_DataTables'>";
+
+			echo "<thead>
+					<tr>
+					<th valign='top'>".t("Nimi")."</th>
+					<th valign='top'>".t("Tilinumero")."</th>
+					<th valign='top'>".t("Er‰pvm")." / ".t("Maksupvm")."</th>
+					<th valign='top' nowrap>".t("Kassa-ale")."</th>
+					<th valign='top'>".t("Summa")."</th>
+					<th valign='top'>".t("Laskunro")."</th>
+					<th valign='top'>".t("Maksutili")."</th>
+					<th valign='top'>".t("Viite")." / ".t("Viesti")."</th>
+					<th valign='top'>".t("Ebid")."</th>
+					<th style='display:none;'></th>
+					</tr>
+					<tr>
+					<td><input type='text' class='search_field' name='search_nimi'></td>
+					<td><input type='text' class='search_field' name='search_tilinumero'></td>
+					<td><input type='text' class='search_field' name='search_erpcm'></td>
+					<td><input type='text' class='search_field' name='search_kassaale'></td>
+					<td><input type='text' class='search_field' name='search_summa'></td>
+					<td><input type='text' class='search_field' name='search_laskunro'></td>
+					<td><input type='text' class='search_field' name='search_maksutili'></td>
+					<td><input type='text' class='search_field' name='search_viite'></td>
+					<td></td>
+					<td class='back'></td>
+					</tr>
+				</thead>";
+			
+			echo "<tbody>";
+				
 			$summa = 0;
 			$valsumma = array();
 
@@ -1116,10 +1138,10 @@
 
 				echo "<td valign='top'>".tilinumero_print($trow["tilinumero"])."</td>";
 
-				echo "<td valign='top'>".tv1dateconv($trow['erpcm'])."<br>".tv1dateconv($trow['olmapvm'])."</td>";
+				echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['erpcm']).tv1dateconv($trow['erpcm'])."<br>".tv1dateconv($trow['olmapvm'])."</td>";
 
 				if ($trow['kapvm'] != '0000-00-00') {
-					echo "<td valign='top' align='right' nowrap>";
+					echo "<td valign='top' align='right' nowrap>".pupe_DataTablesEchoSort($trow['kapvm']);
 
 					if ($trow["kale"] != "") {
 						echo t("K‰ytet‰‰n")."<br>";
@@ -1195,7 +1217,7 @@
 
 				echo "</td>";
 
-				echo "<td valign='top'>
+				echo "<td class='back' valign='top'>
 						<form action = 'maksa.php' method='post'>
 						<input type='hidden' name = 'tee' value='DP'>
 						<input type='hidden' name = 'lasku' value='$trow[peru]'>
@@ -1204,7 +1226,9 @@
 
 				echo "</tr>";
 			}
-
+			
+			echo "</tbody>";
+			
 			echo "</table>";
 
 			echo "<br><font class='message'>".t("Poimitut laskut yhteens‰")."</font><hr>";
@@ -1343,19 +1367,21 @@
 				echo "</td>";
 				echo "<td valign='top'>".tilinumero_print($trow["tilinumero"])."</td>";
 
-				echo "<td valign='top'>";
+				echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['erpcm']);
 
 				// er‰p‰iv‰ punasella jos se on er‰‰ntynyt
 				if ((int) str_replace("-", "", $trow['erpcm']) < (int) date("Ymd")) {
-					echo "<font class='error'>{$trow['erpcm']}</font>";
+					echo "<font class='error'>".tv1dateconv($trow['erpcm'])."</font>";
 				}
 				else {
-					echo $trow['erpcm'];
+					echo tv1dateconv($trow['erpcm']);
 				}
-
+				
+				echo "</td>";
+				
 				if ($trow['kapvm'] != '0000-00-00') {
-					echo "<td valign='top' align='right' nowrap>";
-					echo $trow['kapvm']."<br>";
+					echo "<td valign='top' align='right' nowrap>".pupe_DataTablesEchoSort($trow['kapvm']);
+					echo tv1dateconv($trow['kapvm'])."<br>";
 					echo "$trow[ykasumma] $yhtiorow[valkoodi]<br>";
 					if (strtoupper($trow["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
 						echo "$trow[summa] $trow[valkoodi]";

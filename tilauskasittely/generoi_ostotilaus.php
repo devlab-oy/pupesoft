@@ -256,7 +256,7 @@
 			// Katotaan kohdepaikkojen tarvetta
 			$query = "	SELECT tuotepaikat.*,
 						if (tuotepaikat.tilausmaara = 0, 1, tuotepaikat.tilausmaara) tilausmaara,
-						tuotteen_toimittajat.osto_era
+						if (tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) osto_era
 						FROM tuotepaikat
 						JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno {$lisa})
 						JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$toimittajaid}')

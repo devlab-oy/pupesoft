@@ -104,7 +104,7 @@ while ($rekisterinumero_row = mysql_fetch_assoc($rekisterinumero_result)) {
 	if (!stristr($kommentti, $rekisterinumero_row['rekisterinumero'])) {
 		$kommentti .= $rekisterinumero_row['rekisterinumero'];
 	}
-	
+
 	$query = "	UPDATE tilausrivi
 				SET kommentti = '{$kommentti}'
 				WHERE yhtio = '{$kukarow['yhtio']}'
@@ -805,7 +805,7 @@ else {
 		elseif (($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') and $kateisohitus == "") {
 
 			// vaikka laitetaan sisäiseen laskutukseen tai ei haluttu lähetettä, mutta annetaan mahdollisuus lähettää tilausvahvistus omaan sähköpostiin
-			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
+			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE or (trim($laskurow['tilausvahvistus']) != "" or $yhtiorow['lahetteen_tulostustapa'] == "I")) {
 				$params_tilausvahvistus = array(
 				'tee'						=> $tee,
 				'toim'						=> $toim,
@@ -820,7 +820,7 @@ else {
 			}
 
 			// Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina
-			if ($yhtiorow['lahetteen_tulostustapa'] == "I" and $toim != "REKLAMAATIO") {
+			if ($yhtiorow['lahetteen_tulostustapa'] == "I") {
 
 				$query = "	UPDATE lasku
 							SET tila = 'N',
@@ -829,9 +829,11 @@ else {
 							AND tunnus = '{$laskurow['tunnus']}'";
 				pupe_query($query);
 
-				// Tulostetaan keräyslista
-				$tilausnumeroita = $laskurow["tunnus"];
-				require("tilaus-valmis-tulostus.inc");
+				if ($toim != "REKLAMAATIO") {
+					// Tulostetaan keräyslista
+					$tilausnumeroita = $laskurow["tunnus"];
+					require("tilaus-valmis-tulostus.inc");
+				}
 
 				// Tulostetaan lähete
 				$params = array(

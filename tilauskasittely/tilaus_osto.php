@@ -1260,7 +1260,6 @@
 				$myyntitilaus_lopetus = "{$palvelin2}tilauskasittely/tilaus_osto.php////tee=AKTIVOI//orig_tila={$laskurow['tila']}//orig_alatila={$laskurow['alatila']}//tilausnumero={$tilausnumero}//from=tilaus_myynti";
 				$oikeusostohintapaiv  = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat", "check");
 
-
 				while ($prow = mysql_fetch_assoc($presult)) {
 					$divnolla++;
 					$erikoisale_summa += (($prow['rivihinta'] * ($laskurow['erikoisale'] / 100)) * -1);
@@ -1645,11 +1644,11 @@
 
 								if ($prow['vahvistettu_kommentti'] != "") {
 									echo "<br />",t("Vahvistettu kommentti"),": {$prow['vahvistettu_kommentti']}";
-						}
+								}
 
 								echo "</font>";
 							}
-						else {
+							else {
 								echo "<font class='ok'>".t("Vahvistettu toimitusaika").": ".tv1dateconv($prow["toimaika"])."</font>";
 							}
 
@@ -1805,8 +1804,11 @@
 						</td>";
 
 				if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
-					$hae = 'nappi_kaikki';
-					require("inc/sahkoinen_tilausliitanta.inc");
+
+					if (mysql_num_rows(t_avainsana('SAHKTILTUN', '', " AND selite = '{$laskurow['vanhatunnus']}' AND selitetark = '{$laskurow['liitostunnus']}' ")) > 0) {
+						$hae = 'nappi_kaikki';
+						require("inc/sahkoinen_tilausliitanta.inc");
+					}
 				}
 
 				if ($toim != "HAAMU") {

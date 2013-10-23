@@ -14239,6 +14239,39 @@ if (!function_exists('piirra_vak_rivi_loppu')) {
 	}
 }
 
+if (!function_exists('palauta_tuotteen_vak_koodi')) {
+	function palauta_tuotteen_vak_koodi($tuoteno, $laji = '') {
+		global $kukarow, $yhtiorow;
+
+		$taulu = "vak";
+		$vak_kentta = "vakkoodi";
+
+		$vakselect = "tuote.vakkoodi";
+		$vakjoin   = "";
+
+		if ($yhtiorow["vak_kasittely"] != "" and trim($laji) != "" and strtolower($laji) == 'imdg') {
+			$taulu = "vak_imdg";
+			$vak_kentta = "vak_imdg_koodi";
+		}
+
+		if ($yhtiorow["vak_kasittely"] != "") {
+			$vakselect = "concat('UN', {$taulu}.yk_nro) vakkoodi";
+			$vakjoin   = "JOIN {$taulu} ON tuote.yhtio = {$taulu}.yhtio and tuote.{$vak_kentta} = {$taulu}.tunnus";
+		}
+
+		$query = "  SELECT {$vakselect}
+					FROM tuote
+					{$vakjoin}
+					WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+					AND tuote.tuoteno = '{$tuoteno}'
+					AND tuote.{$vak_kentta} not in ('','0')";
+		$res = pupe_query($query);
+		$row = mysql_fetch_assoc($res);
+
+		return $row['vakkoodi'];
+	}
+}
+
 if (!function_exists("palauta_vak_tiedot")) {
 	function palauta_vak_tiedot ($otunnus, $kieli = '', $tyyppi = '', $laji = '') {
 		global $kukarow, $yhtiorow;

@@ -184,7 +184,7 @@ if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukar
 	$valitsetoimitus = $toim;
 }
 
-if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and file_exists($pupe_root_polku . '/tilauskasittely/ostoskorin_haku.inc')) {
+if ($kukarow["extranet"] == "" and in_array($toim, array("PIKATILAUS","RIVISYOTTO","TARJOUS")) and file_exists($pupe_root_polku . '/tilauskasittely/ostoskorin_haku.inc')) {
 	require_once('tilauskasittely/ostoskorin_haku.inc');
 }
 
@@ -2317,7 +2317,7 @@ if ($tee == '') {
 					</form> ";
 		}
 
-		if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and file_exists($pupe_root_polku . '/tilauskasittely/varaosaselain_napit.inc')) {
+		if ($kukarow["extranet"] == "" and in_array($toim, array("PIKATILAUS","RIVISYOTTO","TARJOUS")) and file_exists($pupe_root_polku . '/tilauskasittely/varaosaselain_napit.inc')) {
 			require_once('tilauskasittely/varaosaselain_napit.inc');
 		}
 

@@ -284,7 +284,7 @@ function hae_asiakasalet($request) {
 			$kateprosentti = number_format(0, 2);
 		}
 		else {
-			$kateprosentti = number_format((1 - ($tuotteen_toimittaja_row['ostohinta'] / $alehinnat['hinta'])) * 100, 2);
+			$kateprosentti = number_format((1 - ($tuote['kehahin'] / $alehinnat['hinta'])) * 100, 2);
 		}
 
 		$tuote_temp = array(

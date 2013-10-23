@@ -16,9 +16,11 @@
 
 	require ("../inc/parametrit.inc");
 
+	$sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc") ? true : false;
+
 	if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot') {
 
-		if (@file_exists("../inc/sahkoinen_tilausliitanta.inc")) {
+		if ($sahkoinen_tilausliitanta) {
 
 			$hae = 'tarkista_tehtaan_saldot';
 			$tunnus = (int) $id;
@@ -42,7 +44,7 @@
 
 	if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot_kaikki') {
 
-		if (@file_exists("../inc/sahkoinen_tilausliitanta.inc")) {
+		if ($sahkoinen_tilausliitanta) {
 
 			$hae = 'tarkista_tehtaan_saldot_kaikki';
 			$otunnus = (int) $otunnus;
@@ -1164,7 +1166,7 @@
 				echo "</form>";
 			}
 
-			if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+			if ($sahkoinen_tilausliitanta AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
 
 				$style = "width: 15px; height: 15px; display: inline-table; border-radius: 50%; -webkit-border-radius: 50%; -moz-border-radius: 50%;";
 
@@ -1454,7 +1456,7 @@
 						echo "</td>";
 						echo "<td valign='top' $class align='right'>";
 
-						if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+						if ($sahkoinen_tilausliitanta AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
 							echo "<div class='availability {$prow['tunnus']}_availability' /> <span class='{$prow['tunnus']}_loading'></span></div>&nbsp;";
 						}
 
@@ -1803,7 +1805,7 @@
 						</form>
 						</td>";
 
-				if (@file_exists("../inc/sahkoinen_tilausliitanta.inc") AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+				if ($sahkoinen_tilausliitanta AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
 
 					if (mysql_num_rows(t_avainsana('SAHKTILTUN', '', " AND selite = '{$laskurow['vanhatunnus']}' AND selitetark = '{$laskurow['liitostunnus']}' ")) > 0) {
 						$hae = 'nappi_kaikki';

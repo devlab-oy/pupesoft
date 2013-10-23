@@ -6,8 +6,6 @@
 	$vastaavattuotteet	= 0;
 	$vastaavat_html		= "";
 
-	$sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc") ? true : false;
-
 	$query = "	SELECT *
 				FROM tuote
 				LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
@@ -298,7 +296,7 @@
 
 			$vastaavat_table .= "<td>";
 
-			if ($tuotteen_toimittaja_row['selitetark_2'] != "") {
+			if ($sahkoinen_tilausliitanta and $tuotteen_toimittaja_row['selitetark_2'] != "") {
 
 				$hae = 'nappi';
 				$rivitunnus = $prow['tunnus'];

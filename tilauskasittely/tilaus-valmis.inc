@@ -1639,7 +1639,14 @@ else {
 			// jos halutaan tilausvahvistus aluperäisestä tilauksesta
 			if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
 
-				if (trim($laskurow['tilausvahvistus']) != "") {
+				$lahetetaanko_tilausvahvistus = true;
+
+				// Jos JT-selauksen kautta osatoimituskieltoinen tilaus laitetaan valmiiksi niin ei tulosteta tilausvahvistusta MIKÄLI parametri lahetteen_tulostustapa on arvossa "I" (eli "Myyntitilausten keräyslistat ja lähetteet tulostetaan automaattisesti ja tilaus laitetaan toimitetuksi").
+				if ($laskurow['osatoimitus'] != '' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "JTSELAUS" and $yhtiorow['lahetteen_tulostustapa'] == "I") {
+					$lahetetaanko_tilausvahvistus = false;
+				}
+
+				if (trim($laskurow['tilausvahvistus']) != "" and $lahetetaanko_tilausvahvistus) {
 					//
 					// LÄHETETÄÄN TILAUSVAHVISTUS
 					//
@@ -1678,7 +1685,14 @@ else {
 					$result = pupe_query($query);
 					$laskurow = mysql_fetch_assoc($result);
 
-					if (trim($laskurow['tilausvahvistus']) != "") {
+					$lahetetaanko_tilausvahvistus = true;
+
+					// Jos JT-selauksen kautta osatoimituskieltoinen tilaus laitetaan valmiiksi niin ei tulosteta tilausvahvistusta MIKÄLI parametri lahetteen_tulostustapa on arvossa "I" (eli "Myyntitilausten keräyslistat ja lähetteet tulostetaan automaattisesti ja tilaus laitetaan toimitetuksi").
+					if ($laskurow['osatoimitus'] != '' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "JTSELAUS" and $yhtiorow['lahetteen_tulostustapa'] == "I") {
+						$lahetetaanko_tilausvahvistus = false;
+					}
+
+					if (trim($laskurow['tilausvahvistus']) != "" and $lahetetaanko_tilausvahvistus) {
 						//
 						// LÄHETETÄÄN TILAUSVAHVISTUS
 						//

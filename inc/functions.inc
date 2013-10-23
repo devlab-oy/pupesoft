@@ -6630,7 +6630,7 @@ if (!function_exists("ostolaskun_vienti")) {
 }
 
 if (!function_exists("verkkolasku_luo_keikkafile")) {
-	function verkkolasku_luo_keikkafile ($tunnus, $trow, $rtuoteno, $alv_talteen = "") {
+	function verkkolasku_luo_keikkafile ($tunnus, $trow, $rtuoteno, $alv_talteen = "", $rivikohtaiset_rahtikulut = 0) {
 		global $yhtiorow, $kukarow;
 
 		// Tarvitaan $tunnus jossa on ostoreskontralaskun tunnus

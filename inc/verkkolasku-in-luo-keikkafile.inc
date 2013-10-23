@@ -2014,7 +2014,7 @@
 	}
 
 	if (!function_exists('saapumisen_pyoristyserot')) {
-		function saapumisen_pyoristyserot($osrow, $laskurow, $otunnus, $alv_talteen = '') {
+		function saapumisen_pyoristyserot($osrow, $laskurow, $otunnus, $pyoristysero_raja = 0.01, $alv_talteen = '', $rivikohtaiset_rahtikulut = 0) {
 			global $kukarow, $yhtiorow;
 
 			// $osrow 	 = tavaralaskun laskun tiedot
@@ -2073,37 +2073,48 @@
 			$result   = pupe_query($query);
 			$hintarow = mysql_fetch_assoc($result);
 
+			// Laitetaan rivikohtaiset rahtikulut eturahtiin
+			$laskurow['rahti_etu'] += $rivikohtaiset_rahtikulut;
+
+			// Jos vanha saapuminen, vanhat pyöristyksen nollataan, että ne eivät kumuloidu
+			$laskurow['pyoristys_erot'] = 0;
+
 			$valittusumma        = round($hintarow["hinta"], 2);
 			$laskunsumma         = round($osrow["summa"] - $valittusumma, 2);
-			$checksumma          = $osrow["summa"] - $hintarow["hinta"];
+			$checksumma			 = $osrow["summa"] - $hintarow["hinta"] - $laskurow["rahti_etu"] - $laskurow['pyoristys_erot'] - $osrow['osto_kulut'];
 			$kohdistettava_summa = round($osrow["summa"], 2);
 
-			if ($laskunsumma != 0.00 and $checksumma < 0.01 and $checksumma > -0.01 and $kohdistettava_summa == $valittusumma) {
-				$laskunsumma = 0.00;
-			}
+			$pyoristys_erot_alv = 0;
+			$pyoristys_erot = 0;
 
-			if ($laskunsumma != 0) {
-				$pyoristys_erot = $laskunsumma;
+			$liian_iso_pyoristysero = false;
+
+			if ($laskunsumma != 0.00 and $kohdistettava_summa == $valittusumma and abs($checksumma) <= $pyoristysero_raja) {
+				$pyoristys_erot = $checksumma;
 			}
 			else {
-				$pyoristys_erot = 0;
+				$liian_iso_pyoristysero = true;
 			}
 
-			$pyoristys_erot_alv = 0;
+			if (isset($alv_talteen) and $alv_talteen != "" and $pyoristys_erot != 0 and ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J')) {
+				$pyoristys_erot_alv = $alv_talteen;
+				$pyoristys_erot = round($pyoristys_erot / (1 + $pyoristys_erot_alv / 100), $yhtiorow['hintapyoristys']);
+			}
 
-			// Jos käyttäjä on syöttänyt alvillisen pyöristyksen niin vähennetään alvi
-			if ($pyoristys_erot != 0 and isset($alv_talteen) and $alv_talteen != "") {
-				if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
-					$pyoristys_erot_alv = $alv_talteen;
-					$pyoristys_erot = round($pyoristys_erot / (1+$pyoristys_erot_alv/100), $yhtiorow['hintapyoristys']);
-				}
+			$set_lisa = "";
+
+			if (!$liian_iso_pyoristysero) {
+				$set_lisa = "	pyoristys_erot = '{$pyoristys_erot}',
+								pyoristys_erot_alv = '{$pyoristys_erot_alv}',
+								kohdistettu = 'K',";
+
+				$laskurow['kohdistettu'] = 'K';
 			}
 
 			$query   = "UPDATE lasku SET
+						{$set_lisa}
 						summa = '{$hintarow['hinta']}',
-						pyoristys_erot = '{$pyoristys_erot}',
-						pyoristys_erot_alv = '{$pyoristys_erot_alv}',
-						kohdistettu = 'K'
+						rahti_etu = '{$laskurow['rahti_etu']}'
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus  = '{$otunnus}'";
 			$hinresu = pupe_query($query);
@@ -2111,7 +2122,6 @@
 			$laskurow['summa']		 		= $hintarow['hinta'];
 			$laskurow['pyoristys_erot'] 	= $pyoristys_erot;
 			$laskurow['pyoristys_erot_alv']	= $pyoristys_erot_alv;
-			$laskurow['kohdistettu'] 		= 'K';
 
 			return $laskurow;
 		}
@@ -2341,32 +2351,36 @@
 		if ($automaattijalkilaskenta) {
 
 			if (!isset($alv_talteen)) $alv_talteen = "";
+			if (!isset($rivikohtaiset_rahtikulut)) $rivikohtaiset_rahtikulut = 0;
 
-			$laskurow = saapumisen_pyoristyserot($osrow, $laskurow, $otunnus, $alv_talteen);
+			$laskurow = saapumisen_pyoristyserot($osrow, $laskurow, $otunnus, 1, $alv_talteen, $rivikohtaiset_rahtikulut);
 
-			// laitetaan lasku suoraan maksuvalmiiksi
-			$query = "	UPDATE lasku set
-						tila 		  = 'M',
-						hyvak1 		  = 'verkkolas',
-						h1time 		  = now(),
-						hyvak2 		  = '',
-						hyvak3 		  = '',
-						hyvak4 		  = '',
-						hyvak5 		  = '',
-						hyvaksyja_nyt = '',
-						comments 	  = TRIM(CONCAT(comments, '\n Lasku siirrettiin suoraan maksuvalmiiksi, koska se täsmäsi ostotilaukseen.'))
-						WHERE tunnus = '{$tunnus}'";
-			$xresult = pupe_query($query);
+			if ($laskurow['kohdistettu'] == 'K') {
 
-			list($_kaikkivarastossayhteensa,$_kaikkiliitettyyhteensa,$_kohdistus,$_kohok,$_kplvarasto,$_kplyhteensa,$_lisatiedot,$_lisok,$_llrow,$_sarjanrook,$_sarjanrot,$_uusiot,$_varastopaikat,$_varastossaarvo,$_liitettyarvo,$_varok) = tsekit($laskurow, 0, 0);
+				// laitetaan lasku suoraan maksuvalmiiksi
+				$query = "	UPDATE lasku set
+							tila 		  = 'M',
+							hyvak1 		  = 'verkkolas',
+							h1time 		  = now(),
+							hyvak2 		  = '',
+							hyvak3 		  = '',
+							hyvak4 		  = '',
+							hyvak5 		  = '',
+							hyvaksyja_nyt = '',
+							comments 	  = TRIM(CONCAT(comments, '\n Lasku siirrettiin suoraan maksuvalmiiksi, koska se täsmäsi ostotilaukseen.'))
+							WHERE tunnus = '{$tunnus}'";
+				$xresult = pupe_query($query);
 
-			if ($_lisok == 1 and $_kohok == 1 and $_varok == 1 and $_kplyhteensa == $_kplvarasto and $_sarjanrook == 1 and $_llrow["volasku"] == $_llrow["volasku_ok"] and $_llrow["kulasku"] == $_llrow["kulasku_ok"]) {
+				list($_kaikkivarastossayhteensa,$_kaikkiliitettyyhteensa,$_kohdistus,$_kohok,$_kplvarasto,$_kplyhteensa,$_lisatiedot,$_lisok,$_llrow,$_sarjanrook,$_sarjanrot,$_uusiot,$_varastopaikat,$_varastossaarvo,$_liitettyarvo,$_varok) = tsekit($laskurow, 0, 0);
 
-				$toiminto = "kaikkiok";
-				$tee = "varma";
+				if ($_lisok == 1 and $_kohok == 1 and $_varok == 1 and $_kplyhteensa == $_kplvarasto and $_sarjanrook == 1 and $_llrow["volasku"] == $_llrow["volasku_ok"] and $_llrow["kulasku"] == $_llrow["kulasku_ok"]) {
 
-				// viedään varastoon TEHDÄÄN LOPPUKALKYYLI
-				require ("tilauskasittely/varastoon.inc");
+					$toiminto = "kaikkiok";
+					$tee = "varma";
+
+					// viedään varastoon TEHDÄÄN LOPPUKALKYYLI
+					require ("tilauskasittely/varastoon.inc");
+				}
 			}
 		}
 	}

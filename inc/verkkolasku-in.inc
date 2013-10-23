@@ -543,6 +543,8 @@
 				$onko_hyvityslasku_kerroin = -1;
 			}
 
+			$rivikohtaiset_rahtikulut = 0;
+
 			if (@file_exists("inc/maventa.inc") and (($trow['asn_sanomat'] == "M" and $ebid == 'MAVENTAXML') or ($trow['asn_sanomat'] == 'F' and $ebid == 'FINVOICEXML'))) {
 				require("inc/maventa.inc");
 			}

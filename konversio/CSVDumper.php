@@ -83,6 +83,10 @@ abstract class CSVDumper {
 		$this->konvertoi_rivit();
 
 		echo "<br/>";
+
+		$this->dump_data();
+
+		echo "<br/>";
 		
 		if (empty($this->errors)) {
 			echo t('Kaikki ok ajetaan data kantaan');
@@ -99,8 +103,6 @@ abstract class CSVDumper {
 				echo "<br/>";
 			}
 		}
-
-		$this->dump_data();
 	}
 
 	protected function lue_csv_tiedosto() {

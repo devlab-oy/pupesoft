@@ -568,6 +568,7 @@
 
 		$tuote_where                = ""; // tuote-rajauksia
 		$tuote_valmistuslinja_where = ""; // tuote valmistuslinja wherelle tarvitaan oma muuttuja
+		$tuote_samankaltainen_where = ""; // samankaltaisille tuotteille rajauksia
 		$toimittaja_join            = ""; // toimittaja-rajauksia
 		$toimittaja_select          = ""; // toimittaja-rajauksia
 		$lasku_where                = ""; // lasku-rajauksia
@@ -595,26 +596,32 @@
 
 		if (isset($mul_osasto) and count($mul_osasto) > 0) {
 			$tuote_where .= " and tuote.osasto in (".implode(",", $mul_osasto).")";
+			$tuote_samankaltainen_where .= " and samankaltainen_tuote.osasto in (".implode(",", $mul_osasto).")";
 		}
 
 		if (isset($mul_try) and count($mul_try) > 0) {
 			$tuote_where .= " and tuote.try in (".implode(",", $mul_try).")";
+			$tuote_samankaltainen_where .= " and samankaltainen_tuote.try in (".implode(",", $mul_try).")";
 		}
 
 		if (isset($mul_tme) and count($mul_tme) > 0) {
 			$tuote_where .= " and tuote.tuotemerkki in ('".implode("','", $mul_tme)."')";
+			$tuote_samankaltainen_where .= " and samankaltainen_tuote.tuotemerkki in ('".implode("','", $mul_tme)."')";
 		}
 
 		if (isset($multi_valmistuslinja) and count($multi_valmistuslinja) > 0) {
-			$tuote_valmistuslinja_where .= "and tuote.valmistuslinja in ('".implode("','", $multi_valmistuslinja)."')";
-			$lasku_where .= "and lasku.kohde in ('".implode("','", $multi_valmistuslinja)."')";
+			$tuote_valmistuslinja_where .= " and tuote.valmistuslinja in ('".implode("','", $multi_valmistuslinja)."')";
+			$tuote_samankaltainen_where .= " and samankaltainen_tuote.valmistuslinja in ('".implode("','", $multi_valmistuslinja)."')";
+			$lasku_where .= " and lasku.kohde in ('".implode("','", $multi_valmistuslinja)."')";
 		}
 
 		if (isset($multi_status) and count($multi_status) > 0) {
-			$tuote_where .= "and tuote.status in ('".implode("','", $multi_status)."')";
+			$tuote_where .= " and tuote.status in ('".implode("','", $multi_status)."')";
+			$tuote_samankaltainen_where .= " and samankaltainen_tuote.status in ('".implode("','", $multi_status)."')";
 		}
 		else {
 			$tuote_where .= " and tuote.status != 'P'";
+			$tuote_samankaltainen_where .= " and samankaltainen_tuote.status != 'P'";
 		}
 
 		if ($toimittajaid != '') {
@@ -789,11 +796,11 @@
 
 		// Haetaan valmistettavat is‰tuotteet, jotka osuvat hakuehtoihin
 		// Jos tuotteella on samankaltaisia tuotteita, haetaan vain "samankaltaisuuden" is‰tuotteet mukaan
-		$query = "	SELECT
-					ifnull(samankaltaiset.isatuoteno, tuote.tuoteno) tuoteno,
+		$query = "	SELECT DISTINCT
+					ifnull(samankaltainen_tuote.tuoteno, tuote.tuoteno) tuoteno,
 					ifnull(samankaltainen_tuote.nimitys, tuote.nimitys) nimitys,
 					ifnull(samankaltainen_tuote.valmistuslinja, tuote.valmistuslinja) valmistuslinja,
-					avg(tuote.valmistusaika_sekunneissa) valmistusaika_sekunneissa,
+					ifnull(samankaltainen_tuote.valmistusaika_sekunneissa, tuote.valmistusaika_sekunneissa) valmistuslinja,
 					{$toimittaja_select}
 					FROM tuote
 					JOIN tuoteperhe ON (tuoteperhe.yhtio = tuote.yhtio
@@ -803,15 +810,17 @@
 						AND samankaltaiset.tuoteno = tuote.tuoteno
 						AND samankaltaiset.tyyppi = 'S')
 					LEFT JOIN tuote AS samankaltainen_tuote ON (samankaltainen_tuote.yhtio = tuote.yhtio
-						AND samankaltainen_tuote.tuoteno = samankaltaiset.isatuoteno)
+						AND samankaltainen_tuote.tuoteno = samankaltaiset.isatuoteno
+						AND samankaltainen_tuote.ei_saldoa = ''
+						AND samankaltainen_tuote.ostoehdotus != 'E'
+						{$tuote_samankaltainen_where})
 					{$toimittaja_join}
 					{$abc_join}
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.ei_saldoa = ''
 					AND tuote.ostoehdotus != 'E'
 					{$tuote_where}
-					{$tuote_valmistuslinja_where}
-					GROUP BY 1, 2, 3";
+					{$tuote_valmistuslinja_where}";
 		$res = pupe_query($query);
 
 		// Jos yhteens‰n‰kym‰, ei ehcota mit‰‰n

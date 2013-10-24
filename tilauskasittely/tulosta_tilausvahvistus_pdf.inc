@@ -118,13 +118,20 @@
 
 	$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
+	$jtsort_lisa = "IF(tilausrivi.tuoteno='{$yhtiorow['rahti_tuotenumero']}', 2, IF(tilausrivi.var='J', 1, 0)) jtsort,";
+
+	// Jos halutaan PDF sähköpostiin (SP) ja löytyy myös J-kirjain, laitetaan JT-rivit näkymään normaaleina riveinä
+	if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE and strpos($laskurow['tilausvahvistus'], 'P') !== FALSE and strpos($laskurow['tilausvahvistus'], 'J') !== FALSE) {
+		$jtsort_lisa = "IF(tilausrivi.tuoteno='{$yhtiorow['rahti_tuotenumero']}', 2, 1) jtsort,";
+	}
+
 	// generoidaan lähetteelle ja keräyslistalle rivinumerot
 	// Rivit groupataan tilausvahvistukselle
 	if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
 		$query = "  SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kommentti, tilausrivi.tilaajanrivinro, tilausrivi.otunnus, tilausrivi.netto, {$ale_query_select_lisa}
 					tilausrivi.toimaika, tilausrivi.hinta, tilausrivi.keratty, tilausrivi.var, tilausrivi.yksikko,
 					$sorttauskentta,
-					if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
+					{$jtsort_lisa}
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 					tuote.sarjanumeroseuranta,
@@ -154,7 +161,7 @@
 					round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 					$sorttauskentta,
-					if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
+					{$jtsort_lisa}
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 					tuote.sarjanumeroseuranta

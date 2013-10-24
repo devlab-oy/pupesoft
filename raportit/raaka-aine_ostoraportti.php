@@ -81,7 +81,7 @@
 	function teerivi($tuoteno, $valittu_toimittaja) {
 
 		// Kukarow ja päivämäärät globaaleina
-		global $kukarow, $nykyinen_alku, $nykyinen_loppu, $tilaustuotteiden_kasittely;
+		global $kukarow, $nykyinen_alku, $nykyinen_loppu, $tilaustuotteiden_kasittely, $multi_status;
 
 		// Tehdään kaudet päivämääristä
 		$alku_kausi = substr(str_replace("-", "", $nykyinen_alku), 0, 8);
@@ -160,12 +160,19 @@
 							);
 		}
 
+		if (isset($multi_status) and count($multi_status) > 0) {
+			$tuote_where = " AND tuote.status in ('".implode("','", $multi_status)."')";
+		}
+		else {
+			$tuote_where = " AND tuote.status NOT IN ('P', 'T') ";
+		}
+
 		// Loopataan läpi lapsituotteen isätuotteet ja lasketaan osto ehdotukset
 		$query = "	SELECT isatuoteno, kerroin
 					FROM tuoteperhe
 					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
 						AND tuote.tuoteno = tuoteperhe.isatuoteno
-						AND tuote.status NOT IN ('P', 'T'))
+						{$tuote_where})
 					WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
 					AND tuoteperhe.tuoteno = '{$tuoteno}'
 					AND tuoteperhe.tyyppi = 'R'";
@@ -413,13 +420,6 @@
 			$tuote_where .= " and tuote.tuotemerkki in ('".implode("','", $mul_tme)."')";
 		}
 
-		if (isset($multi_status) and count($multi_status) > 0) {
-			$tuote_where .= "and tuote.status in ('".implode("','", $multi_status)."')";
-		}
-		else {
-			$tuote_where .= " and tuote.status != 'P'";
-		}
-
 		if ($toimittajaid != '') {
 			// Jos ollaan rajattu toimittaja, niin otetaan vain sen toimittajan tuotteet ja laitetaan mukaan selectiin
 			$toimittaja_join = "JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid')";
@@ -469,7 +469,8 @@
 		}
 
 		// Haetaan raaka-aineet, jotka osuvat hakuehtoihin
-		$query = "	SELECT tuote.tuoteno,
+		$query = "	SELECT DISTINCT
+					tuote.tuoteno,
 					tuote.nimitys,
 					$toimittaja_select
 					FROM tuote
@@ -481,7 +482,6 @@
 					AND tuote.status != 'P'
 					AND tuote.ostoehdotus != 'E'
 					$tuote_where
-					GROUP BY 1, 2, 3
 					ORDER BY toimittaja, tuote.try, tuote.tuoteno";
 		$res = pupe_query($query);
 
@@ -658,7 +658,7 @@
 		echo "</tr>";
 
 		echo "<tr>";
-		echo "<th>".t("Tuotteen status")."</th>";
+		echo "<th>".t("Valmisteen status")."</th>";
 		echo "<td>";
 		echo "<select multiple='multiple' name='multi_status[]' onchange='submit();'>";
 		echo "<option value=''>".t("Ei valintaa")."</option>";

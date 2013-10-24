@@ -2337,7 +2337,7 @@
 					$cnt_chk_res = pupe_query($query);
 					$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
 
-					if ($cnt_chk_row['kplrivit'] == count($tilausrivit[$suuntalavan_tunnus]) or $cnt_chk_row['hyllypaikat'] != count($tilausrivit[$suuntalavan_tunnus])) {
+					if ($cnt_chk_row['hyllypaikat'] != count($tilausrivit[$suuntalavan_tunnus])) {
 						continue;
 					}
 				}

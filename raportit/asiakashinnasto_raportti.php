@@ -20,7 +20,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
 	exit;
 }
 
-if ($tee == 'lataa_tiedosto') {
+if (isset($tee) and $tee == 'lataa_tiedosto') {
 	$filepath = "/tmp/".$tmpfilenimi;
 	if (file_exists($filepath)) {
 		readfile($filepath);
@@ -45,11 +45,11 @@ echo "<font class='head'>".t("Asiakashinnasto raportti")."</font><hr>";
 <?php
 
 $request = array(
-	'valittu_asiakas'		 => $valittu_asiakas,
-	'valittu_asiakasryhma'	 => $valittu_asiakasryhma,
-	'mitka_tuotteet'		 => $mitka_tuotteet,
-	'action'				 => $action,
-	'nayta_poistetut'		 => $nayta_poistetut,
+	'valittu_asiakas'		 => isset($valittu_asiakas) ? $valittu_asiakas : '',
+	'valittu_asiakasryhma'	 => isset($valittu_asiakasryhma) ? $valittu_asiakasryhma : '',
+	'mitka_tuotteet'		 => isset($mitka_tuotteet) ? $mitka_tuotteet : '',
+	'action'				 => isset($action) ? $action : '',
+	'nayta_poistetut'		 => isset($nayta_poistetut) ? $nayta_poistetut : '',
 );
 
 $request['asiakasryhmat'] = hae_asiakasryhmat();
@@ -212,8 +212,10 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
 	}
 
 	$tuote_where = "AND status IN ('A','T','')";
+	$poistuvat = '';
 	if (!empty($request['nayta_poistetut'])) {
-		$tuote_where = "AND status IN ('A','T','P','X','')";
+		$tuote_where = "";
+		$poistuvat = 'kaikki';
 	}
 
 	if ($request['mitka_tuotteet'] == 'kaikki') {
@@ -239,7 +241,8 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
 		$result = pupe_query($query);
 		$puun_tunnukset = mysql_fetch_assoc($result);
 
-		$tuotteet_joilla_asiakashinta = hae_asiakashinnat($request['asiakas'], $puun_tunnukset, $kukarow['yhtio'], FALSE);
+
+		$tuotteet_joilla_asiakashinta = hae_asiakashinnat($request['asiakas'], $puun_tunnukset, $kukarow['yhtio'], $poistuvat);
 
 		foreach ($tuotteet_joilla_asiakashinta as $tuote) {
 			$tuotteet[$tuote['tuoteno']] = 0;
@@ -256,7 +259,7 @@ function hae_asiakasalet($request) {
 
 	$tuote_where = "AND status IN ('A','T','')";
 	if (!empty($request['nayta_poistetut'])) {
-		$tuote_where = "AND status IN ('A','T','P','X','')";
+		$tuote_where = "";
 	}
 
 	$query = "	SELECT *

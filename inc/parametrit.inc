@@ -425,6 +425,12 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			}
 		}
 
+		if ($phpnimi == 'tilaus_myynti.php') {
+			if (isset($tilausrivi_alvillisuus)) {
+				setcookie('tilausrivi_alvillisuus', $tilausrivi_alvillisuus, time()+60*60*24*90, "/");
+			}
+		}
+
 		// Unohdetaan tallennettu state jos tullaan suoraan indexsvassista
 		if (isset($pupe_DataTables) and isset($indexvas) and $indexvas == 1) {
 

@@ -122,7 +122,7 @@
 
 	// Jos halutaan PDF sähköpostiin (SP) ja löytyy myös J-kirjain, laitetaan JT-rivit näkymään normaaleina riveinä
 	if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE and strpos($laskurow['tilausvahvistus'], 'P') !== FALSE and strpos($laskurow['tilausvahvistus'], 'J') !== FALSE) {
-		$jtsort_lisa = "IF(tilausrivi.tuoteno='{$yhtiorow['rahti_tuotenumero']}', 2, 1) jtsort,";
+		$jtsort_lisa = "IF(tilausrivi.tuoteno='{$yhtiorow['rahti_tuotenumero']}', 2, 0) jtsort,";
 	}
 
 	// generoidaan lähetteelle ja keräyslistalle rivinumerot

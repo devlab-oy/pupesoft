@@ -49,6 +49,7 @@ $request = array(
 	'valittu_asiakasryhma'	 => $valittu_asiakasryhma,
 	'mitka_tuotteet'		 => $mitka_tuotteet,
 	'action'				 => $action,
+	'nayta_poistetut'		 => $nayta_poistetut,
 );
 
 $request['asiakasryhmat'] = hae_asiakasryhmat();
@@ -141,6 +142,18 @@ function echo_kayttoliittyma($request = array()) {
 	echo "</td>";
 
 	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t('Näytä myös poistetut tuotteet')."</th>";
+	echo "<td>";
+	$chk = "";
+	if (!empty($request['nayta_poistetut'])) {
+		$chk = "CHECKED";
+	}
+	echo "<input type='checkbox' name='nayta_poistetut' {$chk}/>";
+	echo "</td>";
+	echo "</tr>";
+
 	echo "</table>";
 
 	echo "<input type='submit' value='".t('Hae')."' />";
@@ -198,11 +211,18 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
 		$request['asiakas']['ryhma'] = $request['valittu_asiakasryhma'];
 	}
 
+	if (empty($request['nayta_poistetut'])) {
+		$tuote_where = "AND status not in ('P','X')";
+	}
+	else {
+		$tuote_where = "AND status not in ('X')";
+	}
+
 	if ($request['mitka_tuotteet'] == 'kaikki') {
 		$query = "	SELECT aleryhma, tuoteno
 					FROM tuote
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND status not in ('P','X')
+					{$tuote_where}
 					AND aleryhma != ''";
 		$result = pupe_query($query);
 
@@ -236,31 +256,38 @@ function hae_asiakasalet($request) {
 
 	$tuotenumerot = array_keys($request['tuotteet']);
 
+	if (empty($request['nayta_poistetut'])) {
+		$tuote_where = "AND status not in ('P','X')";
+	}
+	else {
+		$tuote_where = "AND status not in ('X')";
+	}
+
 	$query = "	SELECT *
 				FROM tuote
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tuoteno IN ('".implode("','", $tuotenumerot)."')
-				AND status not in ('P','X')
+				{$tuote_where}
 				AND aleryhma != ''
 				ORDER BY tuote.aleryhma ASC, tuote.nimitys ASC";
 	$result = pupe_query($query);
 
 	$tuotteet = array();
 	$palautettavat_kentat = "hinta,netto,ale,hintaperuste";
-	
+
 	while ($tuote = mysql_fetch_assoc($result)) {
 		if (!empty($request['valittu_asiakas'])) {
 			$laskurow = array();
 			//haetaan asiakkaan oma hinta
-			$laskurow["ytunnus"] 		= $request['asiakas']["ytunnus"];
-			$laskurow["liitostunnus"] 	= $request['asiakas']["tunnus"];
-			$laskurow["vienti"] 		= $request['asiakas']["vienti"];
-			$laskurow["alv"] 			= $request['asiakas']["alv"];
-			$laskurow["valkoodi"]		= $request['asiakas']["valkoodi"];
-			$laskurow["maa"]			= $request['asiakas']["maa"];
+			$laskurow["ytunnus"] = $request['asiakas']["ytunnus"];
+			$laskurow["liitostunnus"] = $request['asiakas']["tunnus"];
+			$laskurow["vienti"] = $request['asiakas']["vienti"];
+			$laskurow["alv"] = $request['asiakas']["alv"];
+			$laskurow["valkoodi"] = $request['asiakas']["valkoodi"];
+			$laskurow["maa"] = $request['asiakas']["maa"];
 			$laskurow['toim_ovttunnus'] = $request['asiakas']["toim_ovttunnus"];
-			$laskurow['liitostunnus']	= $request['valittu_asiakas'];
-			
+			$laskurow['liitostunnus'] = $request['valittu_asiakas'];
+
 			$alehinnat = alehinta($laskurow, $tuote, 1, '', '', '', $palautettavat_kentat, '', '');
 		}
 		else {
@@ -303,6 +330,7 @@ function hae_asiakasalet($request) {
 			'tarjous_hinta'		 => '',
 			'alennus_prosentti'	 => '',
 			'kate_prosentti'	 => $kateprosentti,
+			'poistettu'			 => ($tuote['status'] == 'P' ? t('Poistettu') : ''),
 		);
 
 		$tuotteet[] = $tuote_temp;
@@ -340,6 +368,7 @@ function generoi_custom_excel($tuotteet) {
 		'tarjous_hinta'		 => t('Alennettu hinta'),
 		'alennus_prosentti'	 => t('Alennus prosentti'),
 		'kate_prosentti'	 => t('Kate prosentti'),
+		'poistettu'			 => t('Poistettu'),
 	);
 
 	foreach ($headerit as $header) {
@@ -386,6 +415,8 @@ function generoi_custom_excel($tuotteet) {
 		$xls->write($rivi, $sarake, $tuote['alennus_prosentti']);
 		$sarake++;
 		$xls->write($rivi, $sarake, $tuote['kate_prosentti']);
+		$sarake++;
+		$xls->write($rivi, $sarake, $tuote['poistettu']);
 		$sarake++;
 
 		$xls_progress_bar->increase();

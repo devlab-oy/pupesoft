@@ -2014,7 +2014,7 @@
 	}
 
 	if (!function_exists('saapumisen_pyoristyserot')) {
-		function saapumisen_pyoristyserot($osrow, $laskurow, $otunnus, $pyoristysero_raja = 0.01, $alv_talteen = '', $rivikohtaiset_rahtikulut = 0) {
+		function saapumisen_pyoristyserot($osrow, $laskurow, $otunnus, $pyoristysero_raja = 0.01, $alv_talteen = '') {
 			global $kukarow, $yhtiorow;
 
 			// $osrow 	 = tavaralaskun laskun tiedot
@@ -2072,9 +2072,6 @@
 						AND tilausrivi.tyyppi != 'D'";
 			$result   = pupe_query($query);
 			$hintarow = mysql_fetch_assoc($result);
-
-			// Laitetaan rivikohtaiset rahtikulut eturahtiin
-			$laskurow['rahti_etu'] += $rivikohtaiset_rahtikulut;
 
 			// Jos vanha saapuminen, vanhat pyˆristyksen nollataan, ett‰ ne eiv‰t kumuloidu
 			$laskurow['pyoristys_erot'] = 0;
@@ -2265,6 +2262,8 @@
 
 		if ($mennaanko_automaattituloutukseen) {
 
+			if (!isset($rivikohtaiset_rahtikulut)) $rivikohtaiset_rahtikulut = 0;
+
 			$query = "	SELECT *
 						FROM lasku
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -2277,6 +2276,8 @@
 			$toimittajaid = $laskurow['liitostunnus'];
 			$toiminto = "kalkyyli";
 			$tee = "varastoon";
+
+			$_go = true;
 
 			foreach ($tilausrivit as $suuntalavan_tunnus => $tilrivit) {
 
@@ -2344,6 +2345,20 @@
 
 				$tilausrivi = 0;
 
+				// P‰ivitet‰‰n vain kerran eturahti
+				if ($_go) {
+
+					// Laitetaan rivikohtaiset rahtikulut eturahtiin
+					$laskurow['rahti_etu'] += $rivikohtaiset_rahtikulut;
+
+					$query = "	UPDATE lasku SET
+								rahti_etu = rahti_etu + $rivikohtaiset_rahtikulut
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$laskurow['tunnus']}'";
+					$upd_res = pupe_query($query);
+					$_go = false;
+				}
+
 				require("tilauskasittely/varastoon.inc");
 			}
 		}
@@ -2351,9 +2366,8 @@
 		if ($automaattijalkilaskenta) {
 
 			if (!isset($alv_talteen)) $alv_talteen = "";
-			if (!isset($rivikohtaiset_rahtikulut)) $rivikohtaiset_rahtikulut = 0;
 
-			$laskurow = saapumisen_pyoristyserot($osrow, $laskurow, $otunnus, 1, $alv_talteen, $rivikohtaiset_rahtikulut);
+			$laskurow = saapumisen_pyoristyserot($osrow, $laskurow, $otunnus, 1, $alv_talteen);
 
 			if ($laskurow['kohdistettu'] == 'K') {
 

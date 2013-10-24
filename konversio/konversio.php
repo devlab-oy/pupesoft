@@ -28,6 +28,9 @@ $request['konversio_tyypit'] = array(
 );
 
 if ($request['action'] == 'aja_konversio') {
+	echo_kayttoliittyma($request);
+	echo "<br/>";
+	
 	switch ($request['konversio_tyyppi']) {
 		case 'tuote':
 			$dumper = new TuoteCSVDumper($request['kukarow']);
@@ -63,11 +66,8 @@ if ($request['action'] == 'aja_konversio') {
 	}
 
 	$dumper->aja();
-	
-	echo "<br/>";
 }
-
-if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
+else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
 	$query_array = array(
 		'DELETE FROM asiakas',
 		'DELETE FROM yhteyshenkilo',
@@ -83,9 +83,12 @@ if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
 
 	echo t('Poistettu');
 	echo "<br/>";
-}
 
-echo_kayttoliittyma($request);
+	echo_kayttoliittyma($request);
+}
+else {
+	echo_kayttoliittyma($request);
+}
 
 require('inc/footer.inc');
 

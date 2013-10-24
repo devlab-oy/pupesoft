@@ -326,7 +326,11 @@
 									jarjestys 	= '{$trow['jarjestys']}',
 									jarjestys2	= '{$trow['jarjestys2']}',
 									yhtio		= '$yhtio',
-									hidden		= '{$trow['hidden']}'";
+									hidden		= '{$trow['hidden']}'
+									laatija 	= '{$kukarow['kuka']}',
+									luontiaika 	= now(),
+									muutospvm 	= now(),
+									muuttaja 	= '{$kukarow['kuka']}'";
 						$rresult = pupe_query($query);
 					}
 					elseif ($trow["paivitys"] == '1' AND $tarkesultrow["paivitys"] != '1') {
@@ -334,7 +338,7 @@
 									SET
 									paivitys 		= '1',
 									muutospvm 	 	= now(),
-									muuttaja 	 	= '$kuka'
+									muuttaja 	 	= '{$kukarow['kuka']}'
 									WHERE kuka		= '$kuka'
 									AND sovellus	= '{$trow['sovellus']}'
 									AND nimi		= '{$trow['nimi']}'

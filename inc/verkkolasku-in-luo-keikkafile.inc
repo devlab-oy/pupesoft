@@ -2345,6 +2345,8 @@
 
 				$tilausrivi = 0;
 
+				echo "_go: $_go<br>";
+
 				// P‰ivitet‰‰n vain kerran eturahti
 				if ($_go) {
 
@@ -2356,6 +2358,9 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$laskurow['tunnus']}'";
 					$upd_res = pupe_query($query);
+
+					query_dump($query);
+
 					$_go = false;
 				}
 

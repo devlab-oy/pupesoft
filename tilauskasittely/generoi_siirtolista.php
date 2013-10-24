@@ -19,13 +19,15 @@
 			<table>";
 
 	echo "<tr><th>",t("Lähdevarasto, eli varasto josta kerätään"),":</th>";
-	echo "<td colspan='4'>";
+	echo "<td><table>";
 
 	$query  = "	SELECT tunnus, nimitys, maa
 				FROM varastopaikat
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				ORDER BY tyyppi, nimitys";
 	$vares = pupe_query($query);
+
+	$kala = 0;
 
 	while ($varow = mysql_fetch_assoc($vares)) {
 		$sel = '';
@@ -36,13 +38,66 @@
 			$varastomaa = '(' . maa(strtoupper($varow['maa'])) . ')';
 		}
 
-		echo "<input type='checkbox' name='lahdevarastot[]' value='{$varow['tunnus']}' {$sel} />{$varow['nimitys']} {$varastomaa}<br />";
+		if ($kala == 0) echo "<tr>";
+
+		echo "<td><input type='checkbox' name='lahdevarastot[]' value='{$varow['tunnus']}' {$sel} />{$varow['nimitys']} {$varastomaa}</td>";
+
+		if ($kala == 3) {
+			echo "</tr>";
+			$kala = -1;
+		}
+
+		$kala++;
 	}
 
-	echo "</td></tr>";
+	if ($kala != 0) {
+		echo "</tr>";
+	}
+
+	echo "</table></td></tr>";
+
+	if ($yhtiorow['kerayserat'] == 'K') {
+
+		$query = "	SELECT nimitys, tunnus
+					FROM keraysvyohyke
+					WHERE yhtio = '{$kukarow['yhtio']}'";
+		$keraysvyohyke_res = pupe_query($query);
+
+		if (mysql_num_rows($keraysvyohyke_res) > 0) {
+
+			echo "<tr><th>",t("Keräysvyöhyke"),"</th>";
+			echo "<td>";
+			echo "<input type='hidden' name='lahdekeraysvyohyke[]' value='default' />";
+			echo "<table>";
+
+			$kala = 0;
+
+			while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res)) {
+
+				$chk = in_array($keraysvyohyke_row['tunnus'], $keraysvyohyke) ? " checked" : "";
+
+				if ($kala == 0) echo "<tr>";
+
+				echo "<td><input type='checkbox' name='lahdekeraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$chk} /> {$keraysvyohyke_row['nimitys']}</td>";
+
+				if ($kala == 3) {
+					echo "</tr>";
+					$kala = -1;
+				}
+
+				$kala++;
+			}
+
+			if ($kala != 0) {
+				echo "</tr>";
+			}
+
+			echo "</table></td></tr>";
+		}
+	}
 
 	echo "<tr><th>",t("Kohdevarasto, eli varasto jonne lähetetään"),":</th>";
-	echo "<td colspan='4'><select name='kohdevarasto'><option value=''>",t("Valitse"),"</option>";
+	echo "<td><select name='kohdevarasto'><option value=''>",t("Valitse"),"</option>";
 
 	mysql_data_seek($vares, 0);
 
@@ -70,27 +125,36 @@
 	echo "</td></tr>";
 
 	if ($yhtiorow['kerayserat'] == 'K') {
-
-		$query = "	SELECT nimitys, tunnus
-					FROM keraysvyohyke
-					WHERE yhtio = '{$kukarow['yhtio']}'";
-		$keraysvyohyke_res = pupe_query($query);
-
 		if (mysql_num_rows($keraysvyohyke_res) > 0) {
+			mysql_data_seek($keraysvyohyke_res, 0);
 
 			echo "<tr><th>",t("Keräysvyöhyke"),"</th>";
 			echo "<td>";
+			echo "<table>";
 
-			echo "<input type='hidden' name='keraysvyohyke[]' value='default' />";
+			$kala = 0;
 
 			while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res)) {
 
 				$chk = in_array($keraysvyohyke_row['tunnus'], $keraysvyohyke) ? " checked" : "";
 
-				echo "<input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$chk} /> {$keraysvyohyke_row['nimitys']}<br />";
+				if ($kala == 0) echo "<tr>";
+
+				echo "<td><input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$chk} /> {$keraysvyohyke_row['nimitys']}</td>";
+
+				if ($kala == 3) {
+					echo "</tr>";
+					$kala = -1;
+				}
+
+				$kala++;
 			}
 
-			echo "</td></tr>";
+			if ($kala != 0) {
+				echo "</tr>";
+			}
+
+			echo "</table></td></tr>";
 		}
 	}
 

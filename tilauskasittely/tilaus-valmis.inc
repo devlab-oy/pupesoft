@@ -804,6 +804,11 @@ else {
 		// jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D
 		elseif (($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') and $kateisohitus == "") {
 
+			// Jos tullaan JT-selauksen kautta niin ei laiteta vahvistuksia jos yhtiöllä ei oo erikseen haluttu niitä
+			if (isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "JTSELAUS" and (($yhtiorow["tilausvahvistus_jttoimituksista"] == "" and $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] != "K") or $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] == "E")) {
+				$laskurow['tilausvahvistus'] = "";
+			}
+
 			// vaikka laitetaan sisäiseen laskutukseen tai ei haluttu lähetettä, mutta annetaan mahdollisuus lähettää tilausvahvistus omaan sähköpostiin
 			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE or (trim($laskurow['tilausvahvistus']) != "" or $yhtiorow['lahetteen_tulostustapa'] == "I")) {
 				$params_tilausvahvistus = array(
@@ -1639,14 +1644,12 @@ else {
 			// jos halutaan tilausvahvistus aluperäisestä tilauksesta
 			if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
 
-				$lahetetaanko_tilausvahvistus = true;
-
-				// Jos JT-selauksen kautta osatoimituskieltoinen tilaus laitetaan valmiiksi niin ei tulosteta tilausvahvistusta MIKÄLI parametri lahetteen_tulostustapa on arvossa "I" (eli "Myyntitilausten keräyslistat ja lähetteet tulostetaan automaattisesti ja tilaus laitetaan toimitetuksi").
-				if ($laskurow['osatoimitus'] != '' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "JTSELAUS" and $yhtiorow['lahetteen_tulostustapa'] == "I") {
-					$lahetetaanko_tilausvahvistus = false;
+				// Jos tullaan JT-selauksen kautta niin ei laiteta vahvistuksia jos yhtiöllä ei oo erikseen haluttu niitä
+				if (isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "JTSELAUS" and (($yhtiorow["tilausvahvistus_jttoimituksista"] == "" and $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] != "K") or $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] == "E")) {
+					$laskurow['tilausvahvistus'] = "";
 				}
 
-				if (trim($laskurow['tilausvahvistus']) != "" and $lahetetaanko_tilausvahvistus) {
+				if (trim($laskurow['tilausvahvistus']) != "") {
 					//
 					// LÄHETETÄÄN TILAUSVAHVISTUS
 					//
@@ -1685,14 +1688,12 @@ else {
 					$result = pupe_query($query);
 					$laskurow = mysql_fetch_assoc($result);
 
-					$lahetetaanko_tilausvahvistus = true;
-
-					// Jos JT-selauksen kautta osatoimituskieltoinen tilaus laitetaan valmiiksi niin ei tulosteta tilausvahvistusta MIKÄLI parametri lahetteen_tulostustapa on arvossa "I" (eli "Myyntitilausten keräyslistat ja lähetteet tulostetaan automaattisesti ja tilaus laitetaan toimitetuksi").
-					if ($laskurow['osatoimitus'] != '' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "JTSELAUS" and $yhtiorow['lahetteen_tulostustapa'] == "I") {
-						$lahetetaanko_tilausvahvistus = false;
+					// Jos tullaan JT-selauksen kautta niin ei laiteta vahvistuksia jos yhtiöllä ei oo erikseen haluttu niitä
+					if (isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "JTSELAUS" and (($yhtiorow["tilausvahvistus_jttoimituksista"] == "" and $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] != "K") or $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] == "E")) {
+						$laskurow['tilausvahvistus'] = "";
 					}
 
-					if (trim($laskurow['tilausvahvistus']) != "" and $lahetetaanko_tilausvahvistus) {
+					if (trim($laskurow['tilausvahvistus']) != "") {
 						//
 						// LÄHETETÄÄN TILAUSVAHVISTUS
 						//

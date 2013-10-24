@@ -4215,7 +4215,7 @@ if (!function_exists('print_pdf_lahete')) {
 					*/
 					if (strpos($laskurow['tilausvahvistus'], 'R') !== FALSE) {
 
-						$rekkarit_subject = array_slice(array_keys(hae_tilauksen_rekisterinumerot($laskurow['tunnus'], true)));
+						$rekkarit_subject = array_slice(array_keys(hae_tilauksen_rekisterinumerot($laskurow['tunnus'], true)), 0, 3);
 
 						if (count($rekkarit_subject) > 0) {
 

@@ -10144,6 +10144,7 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		//
 
 		$tuoteperheetyhdessa = FALSE;
+		$verollisethinnat = FALSE;
 
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
@@ -10195,6 +10196,10 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		}
 		else {
 			$naytatvale = 1; // halutaan nähä alet
+		}
+		
+		if (strpos($laskurow['tilausvahvistus'], 'V') !== FALSE) {
+			$verollisethinnat = TRUE;
 		}
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") !== FALSE) {

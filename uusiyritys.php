@@ -326,7 +326,7 @@
 									jarjestys 	= '{$trow['jarjestys']}',
 									jarjestys2	= '{$trow['jarjestys2']}',
 									yhtio		= '$yhtio',
-									hidden		= '{$trow['hidden']}'
+									hidden		= '{$trow['hidden']}',
 									laatija 	= '{$kukarow['kuka']}',
 									luontiaika 	= now(),
 									muutospvm 	= now(),

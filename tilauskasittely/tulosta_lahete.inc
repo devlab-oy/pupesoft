@@ -4221,7 +4221,7 @@ if (!function_exists('print_pdf_lahete')) {
 
 							if (isset($rekkarit_subject[2])) $rekkarit_subject[2] = '...';
 
-							$kutsu .= ", (".implode(", ", $rekkarit_subject).")";
+							$kutsu .= " (".implode(", ", $rekkarit_subject).")";
 						}
 					}
 

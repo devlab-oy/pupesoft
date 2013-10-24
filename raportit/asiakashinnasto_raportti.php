@@ -144,7 +144,7 @@ function echo_kayttoliittyma($request = array()) {
 	echo "</tr>";
 
 	echo "<tr>";
-	echo "<th>".t('Näytä myös poistetut tuotteet')."</th>";
+	echo "<th>".t('Listaa myös poistetut tuotteet')."</th>";
 	echo "<td>";
 	$chk = "";
 	if (!empty($request['nayta_poistetut'])) {
@@ -211,9 +211,9 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
 		$request['asiakas']['ryhma'] = $request['valittu_asiakasryhma'];
 	}
 
-	$tuote_where = "";
-	if (empty($request['nayta_poistetut'])) {
-		$tuote_where = "AND status not in ('P','X')";
+	$tuote_where = "AND status IN ('A','T','')";
+	if (!empty($request['nayta_poistetut'])) {
+		$tuote_where = "AND status IN ('A','T','P','X','')";
 	}
 
 	if ($request['mitka_tuotteet'] == 'kaikki') {
@@ -254,9 +254,9 @@ function hae_asiakasalet($request) {
 
 	$tuotenumerot = array_keys($request['tuotteet']);
 
-	$tuote_where = "";
-	if (empty($request['nayta_poistetut'])) {
-		$tuote_where = "AND status not in ('P','X')";
+	$tuote_where = "AND status IN ('A','T','')";
+	if (!empty($request['nayta_poistetut'])) {
+		$tuote_where = "AND status IN ('A','T','P','X','')";
 	}
 
 	$query = "	SELECT *
@@ -310,6 +310,12 @@ function hae_asiakasalet($request) {
 			$kateprosentti = number_format((1 - ($tuote['kehahin'] / $alehinnat['hinta'])) * 100, 2);
 		}
 
+		$status_array = array(
+			'A' => t('Aktiivi'),
+			'P' => t('Poistettu'),
+			'T' => t('Tilaustuote'),
+		);
+
 		$tuote_temp = array(
 			'aleryhma'			 => $alennusryhma[0],
 			'tuoteno'			 => $tuote['tuoteno'],
@@ -322,11 +328,11 @@ function hae_asiakasalet($request) {
 			'ovh_hinta'			 => number_format($tuote['myyntihinta'], 2),
 			'ryhman_ale'		 => number_format($alennettu_hinta, 2),
 			'hinnasto_hinta'	 => (($alehinnat['hintaperuste'] == 2 or $alehinnat['hintaperuste'] == 5) ? number_format($alehinnat['hinta'], 2) : ''),
+			'status'			 => $status_array[$tuote['status']],
 			'ale_prosentti'		 => '',
 			'tarjous_hinta'		 => '',
 			'alennus_prosentti'	 => '',
 			'kate_prosentti'	 => $kateprosentti,
-			'poistettu'			 => ($tuote['status'] == 'P' ? t('Poistettu') : ''),
 		);
 
 		$tuotteet[] = $tuote_temp;
@@ -360,11 +366,11 @@ function generoi_custom_excel($tuotteet) {
 		'ovh_hinta'			 => t('Ovh').'-'.t('Hinta'),
 		'ryhman_ale'		 => t('Ryhmän ale'),
 		'hinnasto_hinta'	 => t('Hinnasto hinta'),
+		'status'			 => t('Status'),
 		'ale_prosentti'		 => t('Ale prosentti'),
 		'tarjous_hinta'		 => t('Alennettu hinta'),
 		'alennus_prosentti'	 => t('Alennus prosentti'),
 		'kate_prosentti'	 => t('Kate prosentti'),
-		'poistettu'			 => t('Poistettu'),
 	);
 
 	foreach ($headerit as $header) {
@@ -404,6 +410,8 @@ function generoi_custom_excel($tuotteet) {
 		$sarake++;
 		$xls->write($rivi, $sarake, $tuote['hinnasto_hinta']);
 		$sarake++;
+		$xls->write($rivi, $sarake, $tuote['status']);
+		$sarake++;
 		$xls->write($rivi, $sarake, $tuote['ale_prosentti']);
 		$sarake++;
 		$xls->write($rivi, $sarake, $tuote['tarjous_hinta']);
@@ -411,8 +419,6 @@ function generoi_custom_excel($tuotteet) {
 		$xls->write($rivi, $sarake, $tuote['alennus_prosentti']);
 		$sarake++;
 		$xls->write($rivi, $sarake, $tuote['kate_prosentti']);
-		$sarake++;
-		$xls->write($rivi, $sarake, $tuote['poistettu']);
 		$sarake++;
 
 		$xls_progress_bar->increase();

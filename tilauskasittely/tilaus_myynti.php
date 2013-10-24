@@ -320,6 +320,26 @@ if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {
 	$tee = '';
 }
 
+if ($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' and $otunnus > 0) {
+
+	$otunnus = (int) $otunnus;
+
+	$query = "	UPDATE lasku SET
+				tila = 'T'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$otunnus}'";
+	$upd_res = pupe_query($query);
+
+	$query = "	UPDATE tilausrivi SET
+				tyyppi = 'T'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND otunnus = '{$otunnus}'";
+	$upd_res = pupe_query($query);
+
+	echo "<font class='message'>",t("Tilaus %d siirretty tarjoukseksi", "", $otunnus),"!</font><br /><br />";
+	$tee = "";
+}
+
 if ($tee == 'DELKESKEN') {
 	if (tarkista_oikeus("kayttajat.php", "", "1")) {
 		$query = "UPDATE kuka SET kesken = 0 WHERE kuka = '{$selkuka}' and yhtio = '{$kukarow['yhtio']}'";
@@ -7656,12 +7676,12 @@ if ($tee == '') {
 							<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'samewindow'); return false;\">
 							</form>";
 
-						if ($laskurow["tilaustyyppi"] == "T" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
+						if ($laskurow["tilaustyyppi"] == "T" and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
 							echo "	<form action='' method='post'>
 									<input type='hidden' name='otunnus' value='{$tilausnumero}'>
 									<input type='hidden' name='toim' value='{$toim}'>
 									<input type='hidden' name='tee' value='TEE_MYYNTITILAUKSESTA_TARJOUS'>
-									<input type='submit' value='".t("Tee tilauksesta tarjous")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'tulosta_myynti'); return false;\">
+									<input type='submit' value='",t("Tee tilauksesta tarjous"),"'>
 									</form>";
 						}
 

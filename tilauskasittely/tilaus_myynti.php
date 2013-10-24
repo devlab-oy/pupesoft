@@ -134,7 +134,7 @@ if (!isset($varaosakommentti)) 		$varaosakommentti = "";
 if (!isset($varasto)) 				$varasto = "";
 if (!isset($variaatio_tuoteno)) 	$variaatio_tuoteno = "";
 if (!isset($var_array)) 			$var_array = "";
-if (!isset($tilausrivi_alvillisuus)) $tilausrivi_alvillisuus = "";
+if (!isset($tilausrivi_alvillisuus)) $tilausrivi_alvillisuus = isset($_COOKIE["tilausrivi_alvillisuus"]) ? $_COOKIE["tilausrivi_alvillisuus"] : $tilausrivi_alvillisuus;
 if (!isset($valitsetoimitus_vaihdarivi)) $valitsetoimitus_vaihdarivi = "";
 if (!isset($saako_liitaa_laskuja_tilaukseen)) $saako_liitaa_laskuja_tilaukseen = "";
 if (!isset($omalle_tilaukselle)) 	$omalle_tilaukselle = '';
@@ -7654,8 +7654,18 @@ if ($tee == '') {
 						echo "</select>
 							<input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'tulosta_myynti'); return false;\">
 							<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'samewindow'); return false;\">
-							</form>
-							</td>";
+							</form>";
+
+						if ($laskurow["tilaustyyppi"] == "T" and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
+							echo "	<form action='' method='post'>
+									<input type='hidden' name='otunnus' value='{$tilausnumero}'>
+									<input type='hidden' name='toim' value='{$toim}'>
+									<input type='hidden' name='tee' value='TEE_MYYNTITILAUKSESTA_TARJOUS'>
+									<input type='submit' value='".t("Tee tilauksesta tarjous")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'tulosta_myynti'); return false;\">
+									</form>";
+						}
+
+						echo "</td>";
 
 						if ($sarakkeet_alku-9 > 0) {
 							echo "<td class='back' colspan='".($sarakkeet_alku-9)."'></td>";

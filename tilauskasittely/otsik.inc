@@ -3144,6 +3144,7 @@
 			$kerkk	= date("m",strtotime("$nyvuosi-W$keraysvko-$keraysvkopva"));
 			$kerpp  = date("d",strtotime("$nyvuosi-W$keraysvko-$keraysvkopva"));
 
+			$toimvko = $toimvkopva;
 			$keraysvko = $keraysvkopva;
 		}
 		else {

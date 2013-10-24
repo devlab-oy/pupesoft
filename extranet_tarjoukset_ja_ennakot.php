@@ -737,7 +737,8 @@ function echo_tarjouksen_otsikko($tarjous, $toim) {
 		echo "<td>".tv1dateconv($tarjous['olmapvm'])."</td>";
 	}
 	else {
-		echo "<td style='text-align: center;'>".tv1dateconv($tarjous['toimaika'])." / {$tarjous['toimvko']}</td>";
+		$toimviikko = date('W', strtotime($tarjous['toimaika']));
+		echo "<td style='text-align: center;'>".tv1dateconv($tarjous['toimaika'])." / {$toimviikko}</td>";
 		echo "<td style='text-align: right;'><input type='text' size='35' name='viesti' id='viesti' value='{$tarjous['viesti']}'></td>";
 		echo "<input type='hidden' id='viesti_puuttuu_message' value='".t("Toivottu toimituspäivä / viikko tieto on pakollinen")."'>";
 	}

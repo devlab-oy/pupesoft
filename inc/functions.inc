@@ -22812,26 +22812,45 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 		else {
 			// Normaalit saldolliset tuotteet (Normi)
 			if (($tuote_status == 'A' or $tuote_status == 'T') and (!$loytyko or $yhtiorow['haejaselaa_saapumispvm'] == "A" or ($yhtiorow['haejaselaa_saapumispvm'] == "B" and !$loytyko_normivarastosta))) {
-				$tulossa_query = " 	SELECT
-									t_myy.otunnus,
-									tli_myy.suoraan_laskutukseen,
-									l_myy.nimi,
-									tilausrivi.jaksotettu,
-									tilausrivi.toimaika paivamaara,
-									tuote.yksikko yksikko,
-									sum(tilausrivi.varattu) tilattu
-				 					FROM tilausrivi
-									JOIN tuote ON (tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno)
-									LEFT JOIN tilausrivin_lisatiedot tli_myy ON (tilausrivi.yhtio=tli_myy.yhtio AND tli_myy.tilausrivilinkki=tilausrivi.tunnus)
-									LEFT JOIN tilausrivi t_myy ON (t_myy.yhtio = tli_myy.yhtio and t_myy.tunnus = tli_myy.tilausrivitunnus)
-									LEFT JOIN lasku l_myy ON (t_myy.yhtio = l_myy.yhtio and t_myy.otunnus = l_myy.tunnus)
-									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-									AND tilausrivi.tuoteno = '$tuoteno'
-									AND tilausrivi.varattu > 0
-									AND tilausrivi.tyyppi = 'O'
-									AND tilausrivi.toimaika >= curdate()
-									GROUP BY 1,2,3,4,5,6
-									ORDER BY 1,2,3,4,5,6";
+
+				// Jos suortoimituksia ei tehdä, niin ei turhaan haeta niitten tietoja
+				if ($yhtiorow['tee_osto_myyntitilaukselta'] == "") {
+					$tulossa_query = " 	SELECT
+										tilausrivi.jaksotettu,
+										tilausrivi.toimaika paivamaara,
+										tilausrivi.yksikko yksikko,
+										sum(tilausrivi.varattu) tilattu
+					 					FROM tilausrivi
+										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+										AND tilausrivi.tuoteno = '$tuoteno'
+										AND tilausrivi.varattu > 0
+										AND tilausrivi.tyyppi = 'O'
+										AND tilausrivi.toimaika >= curdate()
+										GROUP BY 1,2,3
+										ORDER BY 1,2,3";
+				}
+				else {
+					$tulossa_query = " 	SELECT
+										t_myy.otunnus,
+										tli_myy.suoraan_laskutukseen,
+										l_myy.nimi,
+										tilausrivi.jaksotettu,
+										tilausrivi.toimaika paivamaara,
+										tilausrivi.yksikko yksikko,
+										sum(tilausrivi.varattu) tilattu
+					 					FROM tilausrivi
+										LEFT JOIN tilausrivin_lisatiedot tli_myy ON (tilausrivi.yhtio=tli_myy.yhtio AND tli_myy.tilausrivilinkki=tilausrivi.tunnus)
+										LEFT JOIN tilausrivi t_myy ON (t_myy.yhtio = tli_myy.yhtio and t_myy.tunnus = tli_myy.tilausrivitunnus)
+										LEFT JOIN lasku l_myy ON (t_myy.yhtio = l_myy.yhtio and t_myy.otunnus = l_myy.tunnus)
+										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+										AND tilausrivi.tuoteno = '$tuoteno'
+										AND tilausrivi.varattu > 0
+										AND tilausrivi.tyyppi = 'O'
+										AND tilausrivi.toimaika >= curdate()
+										GROUP BY 1,2,3,4,5,6
+										ORDER BY 1,2,3,4,5,6";
+				}
+
 				$tulossa_result = pupe_query($tulossa_query);
 
 				if (mysql_num_rows($tulossa_result) > 0) {
@@ -22839,7 +22858,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 
 						$tulind = "";
 
-						if ($tulossa_row["nimi"] != '') {
+						if (isset($tulossa_row["nimi"]) and $tulossa_row["nimi"] != '') {
 							if ($tulossa_row["suoraan_laskutukseen"] != "") {
 								$tulind = t("Suoratoimitus asiakkaalle").":<br>$tulossa_row[nimi]";
 							}

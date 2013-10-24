@@ -307,13 +307,10 @@
 					$query = "	SELECT yhtio
 								FROM oikeu
 								WHERE kuka		= '$kuka'
-								and sovellus	= '{$trow['sovellus']}'
-								and nimi		= '{$trow['nimi']}'
-								and alanimi 	= '{$trow['alanimi']}'
-								and nimitys		= '{$trow['nimitys']}'
-								and jarjestys 	= '{$trow['jarjestys']}'
-								and jarjestys2	= '{$trow['jarjestys2']}'
-								and yhtio		= '$yhtio'";
+								AND sovellus	= '{$trow['sovellus']}'
+								AND nimi		= '{$trow['nimi']}'
+								AND alanimi 	= '{$trow['alanimi']}'
+								AND yhtio		= '$yhtio'";
 					$tarkesult = pupe_query($query);
 					$tarkesultrow = mysql_fetch_assoc($tarkesult);
 

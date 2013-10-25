@@ -237,6 +237,9 @@ $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen
 mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (parametrit.inc)");
 mysql_set_charset("latin1");
 
+// pupesoft_cleanstring ALL THE COOKIES!!
+$_COOKIE = array_map(function ($data) { return pupesoft_cleanstring($data); }, $_COOKIE);
+
 // Palvelin-muuttujassa pitää olla lopussa kauttaviiva
 $palvelin = rtrim($palvelin, "/")."/";
 

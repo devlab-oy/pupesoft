@@ -211,7 +211,7 @@ function hae_tuotteet_joilla_on_asiakashinta_tai_hae_kaikki_tuotteet(&$request) 
 		$request['asiakas']['ryhma'] = $request['valittu_asiakasryhma'];
 	}
 
-	$tuote_where = "AND status IN ('A','T','')";
+	$tuote_where = "AND status NOT IN ('P','X')";
 	$poistuvat = '';
 	if (!empty($request['nayta_poistetut'])) {
 		$tuote_where = "";
@@ -257,7 +257,7 @@ function hae_asiakasalet($request) {
 
 	$tuotenumerot = array_keys($request['tuotteet']);
 
-	$tuote_where = "AND status IN ('A','T','')";
+	$tuote_where = "AND status NOT IN ('P','X')";
 	if (!empty($request['nayta_poistetut'])) {
 		$tuote_where = "";
 	}

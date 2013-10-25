@@ -36,6 +36,12 @@
 	elseif ($naytatvale == 8) {
 		$lahetetyyppi .= "tulosta_lahete_ean_eiale.inc";
 	}
+	elseif ($naytatvale == 10) {
+		$lahetetyyppi .= "tulosta_lahete_viivakoodi_ykshinta_normaali.inc";
+	}
+	elseif ($naytatvale == 11) {
+		$lahetetyyppi .= "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc";
+	}
 	else {
 		$lahetetyyppi .= "tulosta_lahete.inc";
 	}
@@ -123,9 +129,8 @@
 	$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
 	$jtsort_lisa = "IF(tilausrivi.tuoteno='{$yhtiorow['rahti_tuotenumero']}', 2, IF(tilausrivi.var='J', 1, 0)) jtsort,";
-
-	// Jos halutaan PDF sähköpostiin (SP) ja löytyy myös J-kirjain, laitetaan JT-rivit näkymään normaaleina riveinä
-	if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE and strpos($laskurow['tilausvahvistus'], 'P') !== FALSE and strpos($laskurow['tilausvahvistus'], 'J') !== FALSE) {
+	
+	if (in_array($naytatvale, array(10,11))) {
 		$jtsort_lisa = "IF(tilausrivi.tuoteno='{$yhtiorow['rahti_tuotenumero']}', 2, 0) jtsort,";
 	}
 

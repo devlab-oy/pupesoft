@@ -134,6 +134,18 @@
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 		}
+		elseif (strpos($row2['tilausvahvistus'], '11') !== FALSE) {
+			$naytatvale = 11; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
+			if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
+		}
+		elseif (strpos($row2['tilausvahvistus'], '10') !== FALSE) {
+			$naytatvale = 10; // jos meill‰ on tilausvahvistuksessa kymppi, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
+			if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
+		}
 		elseif (strpos($row2['tilausvahvistus'], '8') !== FALSE) {
 			$naytatvale = 8; // jos meill‰ on tilausvahvistuksessa kasi, niin tehd‰‰n EAN tilausvahvistus asiakashinnalla ja ei n‰ytet‰ alennuksia
 		}
@@ -198,6 +210,8 @@
 		echo "<option value = '6' $tvsel[6]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus, modifioitu tulostuspohja")."</option>";
 		echo "<option value = '7' $tvsel[7]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus sek‰ EAN-viivakoodi")."</option>";
 		echo "<option value = '8' $tvsel[8]>".t("N‰ytet‰‰n bruttorivihinta ja EAN-viivakoodi")."</option>";
+		echo "<option value = '10' $tvsel[10]>".t("N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina")."</option>";
+		echo "<option value = '11' $tvsel[11]>".t("N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia")."</option>";
 		echo "</select></td></tr>";
 	}
 

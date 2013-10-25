@@ -1556,7 +1556,7 @@ if (!function_exists('rivi_lahete')) {
 				$row['varattu_viivakoodi'] = $kpl_rivilla*1;
 			}
 			else {
-				if ($row["var"] == 'J' and $base_lahetetyyppi != 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' and $base_lahetetyyppi != 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc' and strpos($laskurow['tilausvahvistus'], 'R') === FALSE) { // jälkitoimitus
+				if ($row["var"] == 'J' and $base_lahetetyyppi != 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' and $base_lahetetyyppi != 'tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc') { // jälkitoimitus
 					$row['varattu'] = t("**JT**", $kieli);
 					$row['varattu_viivakoodi'] = 0;
 				}

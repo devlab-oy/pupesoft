@@ -21934,6 +21934,7 @@ if (!function_exists('hae_laskun_tilausrivit')) {
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.otunnus = '{$otunnus}'
+					AND tilausrivin_lisatiedot.laji != 'ei_edi_ostotilaukseen'
 					{$tilausrivi_where}
 					ORDER BY sorttauskentta {$sorttaussuunta}, tilausrivi.tunnus";
 		$result = pupe_query($query);

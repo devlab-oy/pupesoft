@@ -10149,6 +10149,18 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 		}
+		elseif (strpos($laskurow['tilausvahvistus'], '11') !== FALSE) {
+			$naytatvale = 11; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
+			if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
+		}
+		elseif (strpos($laskurow['tilausvahvistus'], '10') !== FALSE) {
+			$naytatvale = 10; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
+			if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
+		}
 		elseif (strpos($laskurow['tilausvahvistus'], '8') !== FALSE) {
 			$naytatvale = 8; // jos meill‰ on tilausvahvistuksessa kasi, niin tehd‰‰n EAN tilausvahvistus asiakashinnalla ja ei n‰ytet‰ alennuksia
 		}
@@ -23663,19 +23675,21 @@ if (!function_exists('laske_siirrettava_maara')) {
 }
 
 if (!function_exists('hae_tilauksen_rekisterinumerot')) {
-	function hae_tilauksen_rekisterinumerot($tilausnumero) {
+	function hae_tilauksen_rekisterinumerot($tilausnumero, $tyhjat_rekkarit_pois = false) {
 		global $kukarow, $yhtiorow;
 
 		if ($tilausnumero == '') {
 			return array();
 		}
 
+		$joinlisa = $tyhjat_rekkarit_pois ? "AND tilausrivin_lisatiedot.rekisterinumero != ''" : "";
+
 		//Tilausrivi pit‰‰ joinaa, jottei tule poistettuja rekisterinumeroita
 		$query = "	SELECT tilausrivin_lisatiedot.rekisterinumero
 					FROM tilausrivin_lisatiedot
 					JOIN tilausrivi
 					ON ( tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
-						AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus )
+						AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus {$joinlisa})
 					WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivin_lisatiedot.vanha_otunnus = '{$tilausnumero}'
 					ORDER BY tilausrivi.tunnus DESC";

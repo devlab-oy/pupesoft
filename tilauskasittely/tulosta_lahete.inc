@@ -4208,6 +4208,23 @@ if (!function_exists('print_pdf_lahete')) {
 						$kutsu .= ", ".trim($laskurow["nimi"]);
 					}
 
+					// Jos tilausvahvistuksessa on R, halutaan rekkarinumeroita otsikkoon
+					/*
+					Tsekataan rekisteritieto kentistä distinct rekkarit ja kirjoitetaan muutama niistä emailin subjektiin ihan loppuun sulkujen sisään.
+					Muutama = 2, ja jos on enemmänkin rekkareita niin sitten niistä info tyyliin näin: (ABC-123, EFG-456, ..). Ja jos esim yksi niin: (ABC-123).
+					*/
+					if (strpos($laskurow['tilausvahvistus'], 'R') !== FALSE) {
+
+						$rekkarit_subject = array_slice(array_keys(hae_tilauksen_rekisterinumerot($laskurow['tunnus'], true)), 0, 3);
+
+						if (count($rekkarit_subject) > 0) {
+
+							if (isset($rekkarit_subject[2])) $rekkarit_subject[2] = '...';
+
+							$kutsu .= " (".implode(", ", $rekkarit_subject).")";
+						}
+					}
+
 					$kutsu = "{$yhtiorow["nimi"]} - $kutsu";
 
 					// Sähköpostin lähetykseen parametrit

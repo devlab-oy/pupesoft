@@ -320,24 +320,30 @@ if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {
 	$tee = '';
 }
 
-if ($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' and $otunnus > 0) {
+if ($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' and $otunnus > 0 and $kukarow['kesken'] == $otunnus) {
 
 	$otunnus = (int) $otunnus;
 
 	$query = "	UPDATE lasku SET
 				tila = 'T'
 				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tila = 'N'
+				AND alatila = ''
 				AND tunnus = '{$otunnus}'";
 	$upd_res = pupe_query($query);
 
-	$query = "	UPDATE tilausrivi SET
-				tyyppi = 'T'
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND otunnus = '{$otunnus}'";
-	$upd_res = pupe_query($query);
+	if (mysql_affected_rows() != 0) {
 
-	echo "<font class='message'>",t("Tilaus %d siirretty tarjoukseksi", "", $otunnus),"!</font><br /><br />";
-	$tee = "";
+		$query = "	UPDATE tilausrivi SET
+					tyyppi = 'T'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tyyppi = 'L'
+					AND otunnus = '{$otunnus}'";
+		$upd_res = pupe_query($query);
+
+		echo "<font class='message'>",t("Tilaus %d siirretty tarjoukseksi", "", $otunnus),"!</font><br /><br />";
+		$tee = "";
+	}
 }
 
 if ($tee == 'DELKESKEN') {

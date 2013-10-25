@@ -659,8 +659,8 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
 			$pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
 
 			$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,  $thispage, 	$rectparam);
-			$pdf->draw_rectangle($kala+30, 40,  $kala+10, 120, $thispage, 	$rectparam);
-			$pdf->draw_rectangle($kala+30, 120, $kala+10, 320, $thispage, 	$rectparam);
+			$pdf->draw_rectangle($kala+30, 40,  $kala+10, 155, $thispage, 	$rectparam);
+			$pdf->draw_rectangle($kala+30, 155, $kala+10, 320, $thispage, 	$rectparam);
 			$pdf->draw_rectangle($kala+30, 320, $kala+10, 420, $thispage, 	$rectparam);
 			$pdf->draw_rectangle($kala+30, 420, $kala+10, 470, $thispage, 	$rectparam);
 			$pdf->draw_rectangle($kala+30, 470, $kala+10, 520, $thispage, 	$rectparam);
@@ -668,7 +668,7 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
 
 			$pdf->draw_text(25,  $kala+15, "#",									$thispage, $norm);
 			$pdf->draw_text(45,  $kala+15, t("Paikka", $kieli),					$thispage, $norm);
-			$pdf->draw_text(125, $kala+15, t("Tuotenumero/Tuotenimi", $kieli),	$thispage, $norm);
+			$pdf->draw_text(160, $kala+15, t("Tuotenumero/Tuotenimi", $kieli),	$thispage, $norm); //125
 			$pdf->draw_text(330, $kala+15, t("Toimittajan tuoteno", $kieli),	$thispage, $norm);
 			$pdf->draw_text(425, $kala+15, t("Hyllyssä", $kieli),				$thispage, $norm);
 			$pdf->draw_text(473, $kala+15, t("Tilattu", $kieli),				$thispage, $norm);
@@ -871,8 +871,10 @@ if (!function_exists('rivi_kerayslista')) {
 					$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$thispage, $pieni);
 				}
 
-				$pdf->draw_text(42,  $kala, $varastopaikka,					$thispage, $norm);
-				$pdf->draw_text(125,  $kala, $row["tuoteno"],				$thispage, $norm);
+				$pdf->draw_text(42,  $kala, $varastopaikka,	$thispage, $norm);
+
+				list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 170, $pdf, $norm);
+				$pdf->draw_text(160,  $kala, $ff_string, $thispage, $ff_font);
 
 				$query = "	SELECT tuote.*, group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno
 							FROM tuote
@@ -889,14 +891,14 @@ if (!function_exists('rivi_kerayslista')) {
 
 				// jos rekkulalla on suoraan toimittajalle palautettvia rivejä
 				if ($row['asiakkaan_positio'] > 0) {
-					
+
 					$query = "	SELECT nimi
 								FROM asiakas
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$row['asiakkaan_positio']}'";
 					$asiakas_check_res = pupe_query($query);
 					$asiakas_check_row	 = mysql_fetch_assoc($asiakas_check_res);
-					
+
 					$row['kommentti'] .= "\n".t("Palutetaan toimittajalle").": ".$asiakas_check_row['nimi'];
 				}
 
@@ -1027,8 +1029,8 @@ if (!function_exists('rivi_kerayslista')) {
 				$kala = $kala - $rivinkorkeus + 5;
 
 
-				list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 350, $pdf, $norm);
-				$pdf->draw_text(125, $kala, $ff_string, $thispage, $ff_font);
+				list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 170, $pdf, $norm);
+				$pdf->draw_text(160, $kala, $ff_string, $thispage, $ff_font);
 
 				if ($tyyppi == "SIIRTOLISTA" or $tyyppi == "MYYNTITILI") {
 					$pdf->draw_text(465-$oikpos, $kala, $kohde_hyllyssa, 	$thispage, $norm);

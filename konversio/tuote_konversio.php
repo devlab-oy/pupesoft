@@ -38,7 +38,7 @@ if (mysql_num_rows($result) == 0) {
 
 // Adminin oletus, mutta kuka konversio
 $kukarow = mysql_fetch_assoc($result);
-$filepath = "/tmp/turvanasi_tuote.csv";
+$filepath = "/tmp/tuote.csv";
 $separator = ';';
 $konversio_array = array(
 	'tuoteno'		 => 'KOODI',

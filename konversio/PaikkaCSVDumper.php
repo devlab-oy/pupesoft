@@ -25,7 +25,7 @@ class PaikkaCSVDumper extends CSVDumper {
 			'kuvaus',
 		);
 
-		$this->setFilepath("/tmp/turvanasi_laite.csv");
+		$this->setFilepath("/tmp/laite.csv");
 		$this->setSeparator(';');
 		$this->setKonversioArray($konversio_array);
 

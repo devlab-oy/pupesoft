@@ -36,7 +36,7 @@ class KohdeCSVDumper extends CSVDumper {
 			'kommentti',
 		);
 
-		$this->setFilepath("/tmp/turvanasi_kohde.csv");
+		$this->setFilepath("/tmp/kohde.csv");
 		$this->setSeparator(';');
 		$this->setKonversioArray($konversio_array);
 

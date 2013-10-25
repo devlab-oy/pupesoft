@@ -31,7 +31,7 @@ class AsiakasCSVDumper extends CSVDumper {
 			'kuljetusohje',
 		);
 
-		$this->setFilepath("/tmp/turvanasi_asiakas.csv");
+		$this->setFilepath("/tmp/asiakas.csv");
 		$this->setSeparator(';');
 		$this->setKonversioArray($konversio_array);
 

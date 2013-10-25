@@ -21,7 +21,7 @@ class AsiakasalennusCSVDumper extends CSVDumper {
 		);
 		$columns_to_be_utf8_decoded = array();
 
-		$this->setFilepath("/tmp/turvanasi_asiakasalennus.csv");
+		$this->setFilepath("/tmp/asiakasalennus.csv");
 		$this->setSeparator(';');
 		$this->setKonversioArray($konversio_array);
 

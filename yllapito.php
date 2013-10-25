@@ -545,7 +545,7 @@
 				if (mysql_num_rows($otsikres) == 1) {
 					$otsikrow = mysql_fetch_array($otsikres);
 
-					$query = "	SELECT tunnus, tila, alatila
+					$query = "	SELECT tunnus, tila, alatila, sisviesti1
 								FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
 								WHERE yhtio = '$kukarow[yhtio]'
 								and (
@@ -570,7 +570,12 @@
 							$otsikrow["toim_postitp"]	= $otsikrow["postitp"];
 							$otsikrow["toim_maa"]		= $otsikrow["maa"];
 						}
-
+						
+						$paivita_sisviesti1 = "";
+						if (strpos($otsikrow[sisviesti1],$laskuorow[sisviesti1]) == FALSE) {
+							$paivita_sisviesti1 = ", sisviesti1 = '$otsikrow[sisviesti1]' ";
+						}
+						
 						$paivita_myos_lisa = "";
 
 						// Ei päivitetää toimitettujen ja rahtikirjasyötettyjen myyntitilausten toimitustapoja
@@ -603,6 +608,7 @@
 									toim_maa    		= '$otsikrow[toim_maa]',
 									laskutusvkopv    	= '$otsikrow[laskutusvkopv]'
 									$paivita_myos_lisa
+									$paivita_sisviesti1
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and tunnus			= '$laskuorow[tunnus]'";
 						$updaresult = pupe_query($query);

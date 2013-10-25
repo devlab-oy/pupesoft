@@ -184,7 +184,7 @@ if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukar
 	$valitsetoimitus = $toim;
 }
 
-if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and file_exists($pupe_root_polku . '/tilauskasittely/ostoskorin_haku.inc')) {
+if ($kukarow["extranet"] == "" and in_array($toim, array("PIKATILAUS","RIVISYOTTO","TARJOUS")) and file_exists($pupe_root_polku . '/tilauskasittely/ostoskorin_haku.inc')) {
 	require_once('tilauskasittely/ostoskorin_haku.inc');
 }
 
@@ -2317,7 +2317,7 @@ if ($tee == '') {
 					</form> ";
 		}
 
-		if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and file_exists($pupe_root_polku . '/tilauskasittely/varaosaselain_napit.inc')) {
+		if ($kukarow["extranet"] == "" and in_array($toim, array("PIKATILAUS","RIVISYOTTO","TARJOUS")) and file_exists($pupe_root_polku . '/tilauskasittely/varaosaselain_napit.inc')) {
 			require_once('tilauskasittely/varaosaselain_napit.inc');
 		}
 
@@ -5014,7 +5014,7 @@ if ($tee == '') {
 				}
 			}
 
-			if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+			if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO','PIKATILAUS','TARJOUS','REKLAMAATIO'))) {
 				$headerit .= "<th>".t("Rekno")."</th>";
 				$sarakkeet++;
 			}
@@ -5838,7 +5838,7 @@ if ($tee == '') {
 					echo "<td $class valign='top'>$paltoimiulos</td>";
 				}
 
-				if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+				if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO','PIKATILAUS','TARJOUS','REKLAMAATIO'))) {
 					echo "<td $class align='left' valign='top'>";
 					echo $row['rekisterinumero'];
 					echo "</td>";

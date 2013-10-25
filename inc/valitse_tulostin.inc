@@ -129,6 +129,7 @@
 		}
 
 		$tuoteperheetyhdessa = FALSE;
+		$verollisethinnat = FALSE;
 
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
@@ -180,6 +181,10 @@
 		}
 		else {
 			$naytatvale = 1; // halutaan nähä alet
+		}
+		
+		if (strpos($laskurow['tilausvahvistus'], 'V') !== FALSE) {
+			$verollisethinnat = TRUE;
 		}
 
 		$tvsel[$naytatvale] = "SELECTED";

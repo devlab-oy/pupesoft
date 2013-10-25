@@ -40,6 +40,10 @@
 		$lahetetyyppi .= "tulosta_lahete.inc";
 	}
 
+	if ($verollisethinnat) {
+		$lahetetyyppi = substr($lahetetyyppi, 0, -4) . "_verollinen.inc";
+	}
+
 	#Testausta varten.....
 	#$lahetetyyppi = "tulosta_lahete.inc";
 	#$lahetetyyppi = "tulosta_lahete_ean.inc";

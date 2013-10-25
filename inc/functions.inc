@@ -10197,7 +10197,7 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		else {
 			$naytatvale = 1; // halutaan nähä alet
 		}
-		
+
 		if (strpos($laskurow['tilausvahvistus'], 'V') !== FALSE) {
 			$verollisethinnat = TRUE;
 		}
@@ -11193,7 +11193,7 @@ if (!function_exists("pupesoft_cleanstring")) {
 			$illegal = array_diff($illegal, $exclude);
 		}
 
-		return mysql_real_escape_string(str_replace($illegal, "", trim($string)));
+		return mysql_real_escape_string(trim(str_replace($illegal, "", $string)));
 	}
 }
 

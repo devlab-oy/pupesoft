@@ -1563,24 +1563,24 @@ function setYMD(date, y, m, d) {
 }
 
 
-function getWeek(d) {
-	var when = d;
-    var year = d.getFullYear();
-    var newYear = new Date(d.getFullYear(),0,1);
-    var offset = 7 + 1 - newYear.getDay();
-    if (offset == 8) offset = 1;
-    var daynum = ((Date.UTC(year,when.getMonth(),when.getDate(),0,0,0) - Date.UTC(year,0,1,0,0,0)) /1000/60/60/24) + 1;
-    var weeknum = Math.floor((daynum-offset+7)/7);
-    if (weeknum == 0) {
-        year--;
-        var prevNewYear = new Date(year,0,1);
-        var prevOffset = 7 + 1 - prevNewYear.getDay();
-        if (prevOffset == 2 || prevOffset == 8) weeknum = 53; else weeknum = 52;
-    }
-    return weeknum;
+/* thanks jQuery UI (https://github.com/jquery/jquery-ui/blob/master/ui/jquery.ui.datepicker.js)
+ *
+ * Set as calculateWeek to determine the week of the year based on the ISO 8601 definition.
+ * @param  date  Date - the date to get the week for
+ * @return  number - the number of the week within the year that contains this date
+ */
+function getWeek(date) {
+	var time;
+	var checkDate = new Date(date.getTime());
+
+	// Find Thursday of this week starting on Monday
+	checkDate.setDate(checkDate.getDate() + 4 - (checkDate.getDay() || 7));
+
+	time = checkDate.getTime();
+	checkDate.setMonth(0); // Compare with Jan 1
+	checkDate.setDate(1);
+	return Math.floor(Math.round((time - checkDate) / 86400000) / 7) + 1;
 }
-
-
 
 /* Date Parsing
 -----------------------------------------------------------------------------*/

@@ -91,9 +91,17 @@ $(document).ready(function() {
 
 
 function show_details(event, jsEvent) {
+	var x = null;
+	if (jsEvent.pageX > ($(document).width() - $('#bubble').width())) {
+		x = $(document).width() - $('#bubble').width();
+	}
+	else {
+		x = jsEvent.pageX;
+	}
+	var y = jsEvent.pageY;
 	// Info laatikko
-	$('#bubble').css('top', jsEvent.pageY);
-	$('#bubble').css('left', jsEvent.pageX);
+	$('#bubble').css('top', y);
+	$('#bubble').css('left', x);
 	$('#bubble').fadeIn('fast');
 
 	$('#valmistuksen_tunnus').val(event.tunnus);

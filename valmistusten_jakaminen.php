@@ -30,10 +30,11 @@ if (! $valmistukset) {
 // Loopataan valmistukset läpi
 foreach($valmistukset as $valmistus) {
 	// Näytetään vain ne valmistukset joilla on valmisteita ja ovat tilassa Odottaa valmistusta
-	if (count($valmistus->tuotteet()) > 0 and $valmistus->getTila() == Valmistus::ODOTTAA) {
+	if (count($valmistus->tuotteet()) > 0 and in_array($valmistus->getTila(), array(Valmistus::ODOTTAA, Valmistus::KESKEYTETTY))) {
 		echo "<table>";
 		echo "<tr>
 				<th>" . t("Valmistus") . "</th>
+				<th>" . t("Valmistuksen tila") . "</th>
 				<th>" . t("Nimitys") . "</th>
 				<th>" . t("Varattu") . "</th>
 				<th>" . t("Valmistettu") . "</th>
@@ -47,12 +48,13 @@ foreach($valmistukset as $valmistus) {
 		foreach ($valmistus->tuotteet() as $valmiste) {
 			echo "<tr>";
 			echo "<td>" . $valmistus->tunnus() . "</td>";
+			echo "<td>" . $valmistus->getTila() . "</td>";
 			echo "<td>" . $valmiste['nimitys'] . "</td>";
 			echo "<td>" . $valmiste['varattu'] . $valmiste['yksikko'] . "</td>";
 			echo "<td><input type='text' size='8' name='jaettavat_valmisteet[{$valmiste['tunnus']}]' value='" . $valmiste['varattu'] . "'></td>";
 			echo "</tr>";
 		}
-		echo "<tr><td colspan='4'><input type='submit' value='" . t("Jaa") . "'></td></tr>";
+		echo "<tr><td colspan='5'><input type='submit' value='" . t("Jaa") . "'></td></tr>";
 		echo "</form>";
 		echo "</table>";
 	}

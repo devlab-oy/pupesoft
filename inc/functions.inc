@@ -15073,6 +15073,15 @@ if (!function_exists("kopioi_tilausrivi")) {
 					case 'kate_korjattu':
 						$rvalues .= "NULL,";
 						break;
+					case 'poikkeava_tulliprosentti':
+					case 'vahvistettu_maara':
+						if (isset($poikkeukset["tilausrivi.".mysql_field_name($rivires,$i)])) {
+							$rvalues .= $poikkeukset["tilausrivi.".mysql_field_name($rivires,$i)];
+						}
+						else {
+							$rvalues .= "0.00,";
+						}
+						break;
 					default:
 						$rvalues .= "'";
 
@@ -15129,14 +15138,24 @@ if (!function_exists("kopioi_tilausrivi")) {
 
 					switch (mysql_field_name($lisrivires, $i)) {
 						case 'muuttaja':
-						case 'muutospvm':
 							$rvalues .= "'',";
+							break;
+						case 'muutospvm':
+							$rvalues .= "'0000-00-00 00:00:00',";
 							break;
 						case 'laatija':
 							$rvalues .= "'$kukarow[kuka]',";
 							break;
 						case 'luontiaika':
 							$rvalues .= "now(),";
+							break;
+						case 'poikkeava_tulliprosentti':
+							if (isset($poikkeukset["tilausrivi.".mysql_field_name($rivires,$i)])) {
+								$rvalues .= $poikkeukset["tilausrivi.".mysql_field_name($rivires,$i)];
+							}
+							else {
+								$rvalues .= "0.00,";
+							}
 							break;
 						case 'tilausrivitunnus':
 							$rvalues .= "'$insid',";

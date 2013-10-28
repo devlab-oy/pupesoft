@@ -91,21 +91,6 @@
 
 	$asiakasrow = mysql_fetch_assoc($asiakasres);
 
-	$query = "SET SESSION group_concat_max_len = 3000000";
-	$foo = pupe_query($query);
-
-	// Haetaan vain tuotteet mitkä vastaanottava yhtiö ostaa lähettävältä yhtiöltä
-	$query = "	SELECT GROUP_CONCAT(DISTINCT CONCAT('\'', tuoteno, '\'')) AS tuotteet
-				FROM tuotteen_toimittajat
-				WHERE yhtio = '{$mihin_yhtio}'
-				AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}";
-	$mihin_tuoteres = pupe_query($query);
-	$mihin_tuoterow = mysql_fetch_assoc($mihin_tuoteres);
-
-	if ($mihin_tuoterow['tuotteet'] === NULL) {
-		exit("VIRHE: Toimittajan tuotteita ei löydy!\n");
-	}
-
 	$laskurow = array(
 		'liitostunnus' => $mihin_yhtion_asiakkaan_tunnus,
 		'valkoodi' => $asiakasrow['valkoodi'],
@@ -136,7 +121,7 @@
 					OR (asiakas_ryhma = '{$asiakasrow['ryhma']}' and asiakas_ryhma != '')
 					OR (piiri = '{$asiakasrow['piiri']}' and piiri != '')
 					{$asiakkaan_puiden_tunnukset})
-			    AND tuoteno IN ('', {$mihin_tuoterow['tuotteet']})
+			    AND (tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}) or tuoteno = '')
 				AND minkpl < 2
 				AND (
 					(alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
@@ -163,7 +148,7 @@
 					OR (asiakas_ryhma = '{$asiakasrow['ryhma']}' and asiakas_ryhma != '')
 					OR (piiri = '{$asiakasrow['piiri']}' and piiri != '')
 					{$asiakkaan_puiden_tunnukset})
-			    AND tuoteno IN ('', {$mihin_tuoterow['tuotteet']})
+			    AND (tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus}) or tuoteno = '')
 				AND minkpl < 2
 				AND (
 					(alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
@@ -186,7 +171,7 @@
 				FROM hinnasto
 				WHERE yhtio = '{$mista_yhtio}'
 				AND minkpl < 2
-				AND tuoteno IN ({$mihin_tuoterow['tuotteet']})
+				AND tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
 				AND (
 					(alkupvm > LEFT('{$datetime_checkpoint}', 10) AND alkupvm <= CURRENT_DATE) OR
 					(loppupvm < CURRENT_DATE AND LEFT('{$datetime_checkpoint}', 10) <= loppupvm) OR
@@ -207,7 +192,7 @@
 					AND status != 'P'
 					AND tuotetyyppi NOT in ('A','B')
 					AND aleryhma = '{$ryhma}'
-					AND tuoteno IN ({$mihin_tuoterow['tuotteet']})";
+					AND tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})";
 		$ryhmares = pupe_query($query);
 
 		while ($ryhmarow = mysql_fetch_assoc($ryhmares)) {
@@ -225,7 +210,7 @@
 				AND status != 'P'
 				AND tuotetyyppi NOT in ('A','B')
 				AND muutospvm >= '{$datetime_checkpoint}'
-				AND tuoteno IN ({$mihin_tuoterow['tuotteet']})
+				AND tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
 				ORDER BY muutospvm, tuoteno";
 	$tuoteres = pupe_query($query);
 
@@ -298,7 +283,7 @@
 					AND tuote.tuoteno != ''
 					AND tuote.ei_saldoa = '')
 				WHERE tapahtuma.yhtio = '{$mista_yhtio}'
-				AND tapahtuma.tuoteno IN ({$mihin_tuoterow['tuotteet']})
+				AND tapahtuma.tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
 				AND tapahtuma.laadittu >= '{$datetime_checkpoint}')
 
 				UNION
@@ -313,7 +298,7 @@
 					AND tuote.ei_saldoa = '')
 				WHERE tilausrivi.yhtio = '{$mista_yhtio}'
 				AND tilausrivi.tyyppi NOT IN ('D','O')
-				AND tilausrivi.tuoteno IN ({$mihin_tuoterow['tuotteet']})
+				AND tilausrivi.tuoteno IN (SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$mihin_yhtio}' AND liitostunnus = {$mista_yhtion_toimittajan_tunnus})
 				AND tilausrivi.laadittu >= '{$datetime_checkpoint}')";
 	$result = pupe_query($query);
 

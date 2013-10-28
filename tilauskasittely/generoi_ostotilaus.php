@@ -256,7 +256,7 @@
 			// Katotaan kohdepaikkojen tarvetta
 			$query = "	SELECT tuotepaikat.*,
 						if (tuotepaikat.tilausmaara = 0, 1, tuotepaikat.tilausmaara) tilausmaara,
-						tuotteen_toimittajat.osto_era
+						if (tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) osto_era
 						FROM tuotepaikat
 						JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno {$lisa})
 						JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$toimittajaid}')
@@ -330,6 +330,26 @@
 					$delresult = pupe_query($query);
 
 					$kukarow["kesken"] = 0;
+
+					// Otetaan osoite toimipaikalta jos varaston tiedoissa sitä ei oo
+					if ($varow['osoite'] == "" and $varow['toimipaikka'] > 0) {
+						$query = "	SELECT nimi, osoite, postino, postitp, maa
+									FROM yhtion_toimipaikat
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus  = '{$varow['toimipaikka']}'";
+						$result = pupe_query($query);
+
+						if (mysql_num_rows($result) == 1) {
+							$yhtion_toimipaikkarow = mysql_fetch_assoc($result);
+
+							$varow["nimi"] 		= $yhtion_toimipaikkarow["nimi"];
+							$varow['nimitark']	= "";
+							$varow["osoite"] 	= $yhtion_toimipaikkarow["osoite"];
+							$varow["postino"] 	= $yhtion_toimipaikkarow["postino"];
+							$varow["postitp"] 	= $yhtion_toimipaikkarow["postitp"];
+							$varow["maa"] 		= $yhtion_toimipaikkarow["maa"];
+						}
+					}
 
 					$params = array(
 						'liitostunnus' 				=> $toimittajaid,

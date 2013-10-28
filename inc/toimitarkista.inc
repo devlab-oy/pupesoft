@@ -83,15 +83,15 @@ if (!function_exists("toimitarkista")) {
 
 			if ($t[$i] == '') $t[$i] = $tmp_iban;
 
-			if ($tmp_maakoodi != strtoupper($yhtiorow['maa']) and $t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
-				$virhe[$i] = t("Tieto puuttuu");
-			}
-
 			// Vaaditaan isot kirjaimet
-			$t[$i] = strtoupper($t[$i]);
+			$t[$i] = strtoupper(trim($t[$i]));
 
 			if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
 			else $ibanmaa = $tmp_maakoodi;
+
+			if ($t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
+				$virhe[$i] = t("Tieto puuttuu");
+			}
 
 			if ($t[$i] != '') {
 				// Jos SEPA-maa, tarkistetaan IBAN

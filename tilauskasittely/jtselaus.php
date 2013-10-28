@@ -57,7 +57,7 @@
 	// JT-selaus päivitysoikeus, joko JT-selaus päivitysoikeus tai tullaan keikalta ja kaikki saa toimittaa JT-rivejä
 	$jtselaus_paivitys_oikeus = FALSE;
 
-	if ($oikeurow['paivitys'] == '1' or (strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE and in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A')) )) {
+	if ($oikeurow['paivitys'] == '1' or ((strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "verkkolasku-in.php") !== FALSE) and in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A')) )) {
 		$jtselaus_paivitys_oikeus = TRUE;
 	}
 

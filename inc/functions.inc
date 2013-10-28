@@ -21932,9 +21932,10 @@ if (!function_exists('hae_laskun_tilausrivit')) {
 					$sorttauskentta
 					FROM tilausrivi
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.otunnus = '{$otunnus}'
-					AND tilausrivin_lisatiedot.laji != 'ei_edi_ostotilaukseen'
+					AND ta.tunnus IS NULL
 					{$tilausrivi_where}
 					ORDER BY sorttauskentta {$sorttaussuunta}, tilausrivi.tunnus";
 		$result = pupe_query($query);

@@ -9,7 +9,7 @@
 
 		$ytunnus = mysql_real_escape_string($ytunnus);
 
-		$muutparametrit = $tee."/".serialize($kohdevarastot)."/".$mul_osasto."/".$mul_try."/".$mul_tme."/".$abcrajaus."/".$generoi."/".$ohjausmerkki."/".$tilaustyyppi."/".$viesti;
+		$muutparametrit = $tee."/".serialize($kohdevarastot)."/".$mul_osasto."/".$mul_try."/".$mul_tme."/".$abcrajaus."/".$generoi."/".$ohjausmerkki."/".$tilaustyyppi."/".$viesti."/".$myytavissasummaus;
 
 		require ("inc/kevyt_toimittajahaku.inc");
 
@@ -18,7 +18,7 @@
 		}
 		else {
 			if ($muutparametrit != '') {
-				list($tee, $kohdevarastot, $mul_osasto, $mul_try, $mul_tme, $abcrajaus, $generoi, $ohjausmerkki, $tilaustyyppi, $viesti) = explode("/", $muutparametrit);
+				list($tee, $kohdevarastot, $mul_osasto, $mul_try, $mul_tme, $abcrajaus, $generoi, $ohjausmerkki, $tilaustyyppi, $viesti, $myytavissasummaus) = explode("/", $muutparametrit);
 				$kohdevarastot = unserialize($kohdevarastot);
 			}
 		}
@@ -170,9 +170,15 @@
 
 	echo "</select>";
 	echo "</td></tr>";
-	
-	echo "<tr><th>",t("Myynt‰viss‰oleva m‰‰r‰"),"</th>";
-	echo "<td></td></tr>";
+
+	echo "<tr><th>",t("Vastaavat"),"</th>";
+	echo "<td><select name='myytavissasummaus'>";
+
+	$sel = array($myytavissasummaus => "selected") + array("T" => '', "V" => '');
+
+	echo "<option value='T' {$sel['T']}>",t("Ostetaan tuotteittain"),"</option>";
+	echo "<option value='V' {$sel['V']}>",t("Ostetaan vastaavuusketjun p‰‰tuotetta"),"</option>";
+	echo "</select></td></tr>";
 
 	echo "<tr><td class='back'><br></td></tr>";
 
@@ -192,7 +198,6 @@
 		}
 	}
 	else {
-
 		$sel = array($tilaustyyppi => "selected") + array(1 => '', 2 => '');
 
 		echo "<option value='2' {$sel[2]}>",t("Normaalitilaus"),"</option>";
@@ -202,10 +207,11 @@
 	echo "</select></td>";
 	echo "</tr>";
 
-	echo "</table><br><input type = 'submit' name = 'generoi' value = '",t("Generoi ostotilaus"),"'></form>";
+	echo "</table><br><input type = 'submit' name = 'generoi' value = '",t("Generoi ostotilaus"),"'></form><br><br>";
 
 	if ($tee == 'M' and isset($generoi) and $toimittajaid > 0 and count($kohdevarastot) > 0) {
 
+		require ("vastaavat.class.php");
 		require ("inc/luo_ostotilausotsikko.inc");
 
 		$abcjoin = "";
@@ -242,9 +248,9 @@
 		}
 
 		// Otetaan luodut otsikot talteen
-		$otsikot = array();
+		$otsikot  = array();
 
-		// tehd‰‰n jokaiselle valitulle lahdevarastolle erikseen
+		// tehd‰‰n jokaiselle valitulle kohdevarastolle erikseen
 		foreach ($kohdevarastot as $kohdevarasto) {
 
 			$query = "	SELECT *
@@ -267,14 +273,16 @@
 						AND CONCAT(RPAD(UPPER('{$varow['alkuhyllyalue']}'),  5, '0'),LPAD(UPPER('{$varow['alkuhyllynro']}'),  5, '0')) <= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
 						AND CONCAT(RPAD(UPPER('{$varow['loppuhyllyalue']}'), 5, '0'),LPAD(UPPER('{$varow['loppuhyllynro']}'), 5, '0')) >= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
 						AND tuotepaikat.halytysraja > 0
+						AND tuote.tuoteno in ('0242235663-2','+1','WR7DC+')
 						ORDER BY tuotepaikat.tuoteno";
 			$resultti = pupe_query($query);
 
 			//	Varmistetaan ett‰ aloitetaan aina uusi otsikko uudelle varastolle
-			$tehtyriveja = 0;
+			$tehtyriveja 		= 0;
+			$tuotteet    		= array();
+			$kasitellyt_ketjut	= array();
 
 			while ($pairow = mysql_fetch_assoc($resultti)) {
-
 				//tilauksessa, ennakkopoistot ja jt	HUOM: varastolisa m‰‰ritelty jo aiemmin!
 				$query = "	SELECT
 							sum(if(tyyppi in ('W','M'), varattu, 0)) valmistuksessa,
@@ -295,7 +303,59 @@
 				$result = pupe_query($query);
 				$ennp   = mysql_fetch_assoc($result);
 
-				$ostettavahaly = ($pairow['halytysraja'] - ($pairow['saldo'] + $ennp['tilattu'] + $ennp['valmistuksessa'] - $ennp['ennpois'] - $ennp['jt'])) / $pairow['osto_era'];
+				$pairow['tilattu']        = $ennp['tilattu'];
+				$pairow['valmistuksessa'] = $ennp['valmistuksessa'];
+				$pairow['ennpois'] 		  = $ennp['ennpois'];
+				$pairow['jt'] 			  = $ennp['jt'];
+
+				$tuotteet[$pairow['tuoteno']] = $pairow;
+			}
+
+			if ($myytavissasummaus == "V") {
+				foreach ($tuotteet as $pairow) {
+
+					$vastaavat = new Vastaavat($pairow['tuoteno']);
+
+					$vastaavat_tuotteet = array();
+
+					if ($vastaavat->onkovastaavia()) {
+
+						// Loopataan kaikki tuotteen vastaavuusketjut
+						foreach (explode(",", $vastaavat->getIDt()) as $ketju) {
+
+							if (!isset($kasitellyt_ketjut[$ketju])) {
+
+								$kasitellyt_ketjut[$ketju] = $ketju;
+
+								// Haetaan tuotteet ketjukohtaisesti
+								$_tuotteet = $vastaavat->tuotteet($ketju);
+
+								// Lis‰t‰‰n lˆydetyt vastaavat mahdollisten myyt‰vien joukkoon
+								foreach ($_tuotteet as $_tuote) {
+									if (strtoupper($pairow['tuoteno']) != strtoupper($_tuote['tuoteno'])) {
+										// Siirret‰‰n kaikki luvut "p‰‰tuotteelle"
+										$tuotteet[$pairow['tuoteno']]["halytysraja"] 	+= $tuotteet[$_tuote["tuoteno"]]["halytysraja"];
+										$tuotteet[$pairow['tuoteno']]["saldo"] 			+= $tuotteet[$_tuote["tuoteno"]]["saldo"];
+										$tuotteet[$pairow['tuoteno']]["tilattu"] 		+= $tuotteet[$_tuote["tuoteno"]]["tilattu"];
+										$tuotteet[$pairow['tuoteno']]["valmistuksessa"] += $tuotteet[$_tuote["tuoteno"]]["valmistuksessa"];
+										$tuotteet[$pairow['tuoteno']]["ennpois"] 		+= $tuotteet[$_tuote["tuoteno"]]["ennpois"];
+										$tuotteet[$pairow['tuoteno']]["jt"] 			+= $tuotteet[$_tuote["tuoteno"]]["jt"];
+
+										#echo "TUOTE: $pairow[tuoteno], VASTAAVA: $_tuote[tuoteno], {$tuotteet[$_tuote["tuoteno"]]["halytysraja"]}<br>";
+
+										unset($tuotteet[$_tuote["tuoteno"]]);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+
+			foreach ($tuotteet as $pairow) {
+
+				$ostettavahaly = ($pairow['halytysraja'] - ($pairow['saldo'] + $pairow['tilattu'] + $pairow['valmistuksessa'] - $pairow['ennpois'] - $pairow['jt'])) / $pairow['osto_era'];
 
 				if ($ostettavahaly > 0)	$ostettavahaly = ceil($ostettavahaly) * $pairow['osto_era'];
 				else $ostettavahaly = 0;
@@ -308,18 +368,16 @@
 					continue;
 				}
 
-				/*
 				echo "<br>Tuoteno: $pairow[tuoteno]<br>";
 				echo "H‰lytysraja: {$pairow['halytysraja']}<br>";
 				echo "Saldo: {$pairow['saldo']}<br>";
-				echo "Tilattu: {$ennp['tilattu']}<br>";
-				echo "Valmistuksessa: {$ennp['valmistuksessa']}<br>";
-				echo "Varattu: {$ennp['ennpois']}<br>";
-				echo "Jt: {$ennp['jt']}<br>";
+				echo "Tilattu: {$pairow['tilattu']}<br>";
+				echo "Valmistuksessa: {$pairow['valmistuksessa']}<br>";
+				echo "Varattu: {$pairow['ennpois']}<br>";
+				echo "Jt: {$pairow['jt']}<br>";
 				echo "Osto_er‰: {$pairow['osto_era']}<br>";
 				echo "Tilausm‰‰r‰: {$pairow['tilausmaara']}<br>";
 				echo "Tarve: $ostettavahaly<br>";
-				*/
 
 				//	Onko meill‰ jo otsikko vai pit‰‰kˆ tehd‰ uusi?
 				if ($tehtyriveja == 0) {
@@ -404,7 +462,7 @@
 						${'ale'.$alepostfix} = "";
 					}
 
-					require ('lisaarivi.inc');
+					#require ('lisaarivi.inc');
 
 					$tuoteno	= '';
 					$kpl		= '';
@@ -427,9 +485,9 @@
 					echo t("VIRHE: Tuotetta ei lˆydy"),"!<br />";
 				}
 			}
-		}
 
-		echo "</table><br />";
+
+		}
 
 		if (count($otsikot) == 0) {
 			echo "<br><font class='error'>",t("Yht‰‰n ostotilausta ei luotu"),"!</font><br />";

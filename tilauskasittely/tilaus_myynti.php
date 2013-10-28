@@ -134,7 +134,7 @@ if (!isset($varaosakommentti)) 		$varaosakommentti = "";
 if (!isset($varasto)) 				$varasto = "";
 if (!isset($variaatio_tuoteno)) 	$variaatio_tuoteno = "";
 if (!isset($var_array)) 			$var_array = "";
-if (!isset($tilausrivi_alvillisuus)) $tilausrivi_alvillisuus = "";
+if (!isset($tilausrivi_alvillisuus)) $tilausrivi_alvillisuus = isset($_COOKIE["tilausrivi_alvillisuus"]) ? $_COOKIE["tilausrivi_alvillisuus"] : $tilausrivi_alvillisuus;
 if (!isset($valitsetoimitus_vaihdarivi)) $valitsetoimitus_vaihdarivi = "";
 if (!isset($saako_liitaa_laskuja_tilaukseen)) $saako_liitaa_laskuja_tilaukseen = "";
 if (!isset($omalle_tilaukselle)) 	$omalle_tilaukselle = '';
@@ -318,6 +318,32 @@ if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {
 	}
 
 	$tee = '';
+}
+
+if ($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' and $kukarow['kesken'] > 0) {
+
+	$kukarow['kesken'] = (int) $kukarow['kesken'];
+
+	$query = "	UPDATE lasku SET
+				tila = 'T'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tila = 'N'
+				AND alatila = ''
+				AND tunnus = '{$kukarow['kesken']}'";
+	$upd_res = pupe_query($query);
+
+	if (mysql_affected_rows() != 0) {
+
+		$query = "	UPDATE tilausrivi SET
+					tyyppi = 'T'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tyyppi = 'L'
+					AND otunnus = '{$kukarow['kesken']}'";
+		$upd_res = pupe_query($query);
+
+		echo "<font class='message'>",t("Tilaus %d siirretty tarjoukseksi", "", $kukarow['kesken']),"!</font><br /><br />";
+		$tee = "";
+	}
 }
 
 if ($tee == 'DELKESKEN') {
@@ -7654,8 +7680,17 @@ if ($tee == '') {
 						echo "</select>
 							<input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'tulosta_myynti'); return false;\">
 							<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'samewindow'); return false;\">
-							</form>
-							</td>";
+							</form>";
+
+						if ($laskurow["tilaustyyppi"] == "T" and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
+							echo "	<form action='' method='post'>
+									<input type='hidden' name='toim' value='{$toim}'>
+									<input type='hidden' name='tee' value='TEE_MYYNTITILAUKSESTA_TARJOUS'>
+									<input type='submit' value='",t("Tee tilauksesta tarjous"),"'>
+									</form>";
+						}
+
+						echo "</td>";
 
 						if ($sarakkeet_alku-9 > 0) {
 							echo "<td class='back' colspan='".($sarakkeet_alku-9)."'></td>";

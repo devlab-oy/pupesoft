@@ -238,7 +238,7 @@ mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $d
 mysql_set_charset("latin1");
 
 // pupesoft_cleanstring ALL THE COOKIES!!
-$_COOKIE = array_map(function ($data) { return pupesoft_cleanstring($data); }, $_COOKIE);
+$_COOKIE = array_map("pupesoft_cleanstring", $_COOKIE);
 
 // Palvelin-muuttujassa pitää olla lopussa kauttaviiva
 $palvelin = rtrim($palvelin, "/")."/";

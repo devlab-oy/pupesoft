@@ -170,6 +170,9 @@
 
 	echo "</select>";
 	echo "</td></tr>";
+	
+	echo "<tr><th>",t("Myynt‰viss‰oleva m‰‰r‰"),"</th>";
+	echo "<td></td></tr>";
 
 	echo "<tr><td class='back'><br></td></tr>";
 
@@ -197,8 +200,6 @@
 	}
 
 	echo "</select></td>";
-
-
 	echo "</tr>";
 
 	echo "</table><br><input type = 'submit' name = 'generoi' value = '",t("Generoi ostotilaus"),"'></form>";

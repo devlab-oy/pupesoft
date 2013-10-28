@@ -2357,7 +2357,10 @@
 						$rahti_etu_alv = (float) $alv_talteen;
 					}
 
-					$rivikohtaiset_rahtikulut = round($rivikohtaiset_rahtikulut / (1 + $rahti_etu_alv / 100), $yhtiorow['hintapyoristys']);
+					// $rivikohtaiset_rahtikulut tulee xml:st‰ ja on aina veroton hinta, joten tehd‰‰n muunnokset
+					if ($rahti_etu_alv != 0) {
+						$rivikohtaiset_rahtikulut = round($rivikohtaiset_rahtikulut * (1 + $rahti_etu_alv / 100), $yhtiorow['hintapyoristys']);
+					}
 
 					// Laitetaan rivikohtaiset rahtikulut eturahtiin
 					$laskurow['rahti_etu'] += $rivikohtaiset_rahtikulut;

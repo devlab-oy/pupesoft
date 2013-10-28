@@ -148,6 +148,7 @@ if(!function_exists("tuotetarkista")) {
 					}
 				}
 			}
+			}
 		}
 
 		if ($fieldname == "kehahin" and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
@@ -501,7 +502,7 @@ if(!function_exists("tuotetarkista")) {
 				$virhe[$i] = t("Ostoehdotus arvo tulee olla joko E tai tyhj‰! (E = ei n‰ytet‰ ja tyhj‰ = n‰ytet‰‰n)");
 			}
 		}
-	}
+}
 	
 		
-}
+

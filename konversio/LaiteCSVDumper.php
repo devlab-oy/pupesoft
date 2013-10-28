@@ -64,7 +64,7 @@ class LaiteCSVDumper extends CSVDumper {
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
 				if ($konvertoitu_header == 'paikka') {
-					$paikka_tunnus = $this->hae_paikka_tunnus($rivi[$csv_header]);
+					$paikka_tunnus = $this->hae_paikka_tunnus(utf8_decode($rivi[$csv_header]));
 					if ($paikka_tunnus == 0) {
 						$this->errors[$index][] = t('Paikkaa')." <b>".utf8_decode($rivi[$csv_header])."</b> ".t('ei löydy');
 					}

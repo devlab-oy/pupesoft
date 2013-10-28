@@ -2350,11 +2350,21 @@
 				// P‰ivitet‰‰n vain kerran eturahti
 				if ($_go) {
 
+					if (!empty($laskurow['rahti_etu_alv'])) {
+						$rahti_etu_alv = (float) $laskurow['rahti_etu_alv'];
+					}
+					else {
+						$rahti_etu_alv = (float) $alv_talteen;
+					}
+
+					$rivikohtaiset_rahtikulut = round($rivikohtaiset_rahtikulut / (1 + $rahti_etu_alv / 100), $yhtiorow['hintapyoristys']);
+
 					// Laitetaan rivikohtaiset rahtikulut eturahtiin
 					$laskurow['rahti_etu'] += $rivikohtaiset_rahtikulut;
 
 					$query = "	UPDATE lasku SET
-								rahti_etu = rahti_etu + $rivikohtaiset_rahtikulut
+								rahti_etu = rahti_etu + $rivikohtaiset_rahtikulut,
+								rahti_etu_alv = $rahti_etu_alv
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$laskurow['tunnus']}'";
 					$upd_res = pupe_query($query);

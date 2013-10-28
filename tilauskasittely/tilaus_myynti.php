@@ -343,6 +343,8 @@ if ($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' and $kukarow['kesken'] > 0 and tarki
 
 		echo "<font class='message'>",t("Tilaus %d siirretty tarjoukseksi", "", $kukarow['kesken']),"!</font><br /><br />";
 		$tee = "";
+		$tilausnumero = 0;
+		$kukarow['kesken'] = 0;
 	}
 }
 
@@ -7685,6 +7687,7 @@ if ($tee == '') {
 						if (tarkista_oikeus("tilaus_myynti.php", "TARJOUS") and $laskurow["tilaustyyppi"] == "T" and in_array($toim, array('RIVISYOTTO','PIKATILAUS')) and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
 							echo "	<form action='' method='post'>
 									<input type='hidden' name='toim' value='{$toim}'>
+									<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
 									<input type='hidden' name='tee' value='TEE_MYYNTITILAUKSESTA_TARJOUS'>
 									<input type='submit' value='",t("Tee tilauksesta tarjous"),"'>
 									</form>";

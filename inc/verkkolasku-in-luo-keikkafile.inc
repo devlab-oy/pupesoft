@@ -2345,23 +2345,11 @@
 
 				$tilausrivi = 0;
 
-				echo "_go: $_go<br>";
-
 				// P‰ivitet‰‰n vain kerran eturahti
 				if ($_go) {
-
-					if (!empty($laskurow['rahti_etu_alv'])) {
-						$rahti_etu_alv = (float) $laskurow['rahti_etu_alv'];
-					}
-					else {
-						$rahti_etu_alv = (float) $alv_talteen;
-					}
-
-					// $rivikohtaiset_rahtikulut tulee xml:st‰ ja on aina veroton hinta, joten tehd‰‰n muunnokset
-					if ($rahti_etu_alv != 0) {
-						$rivikohtaiset_rahtikulut = round($rivikohtaiset_rahtikulut * (1 + $rahti_etu_alv / 100), $yhtiorow['hintapyoristys']);
-					}
-
+					
+					$rahti_etu_alv = (float) $alv_talteen;
+					
 					// Laitetaan rivikohtaiset rahtikulut eturahtiin
 					$laskurow['rahti_etu'] += $rivikohtaiset_rahtikulut;
 
@@ -2371,8 +2359,6 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$laskurow['tunnus']}'";
 					$upd_res = pupe_query($query);
-
-					query_dump($query);
 
 					$_go = false;
 				}

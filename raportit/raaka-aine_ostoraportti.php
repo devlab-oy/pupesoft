@@ -87,7 +87,7 @@
 		$alku_kausi = substr(str_replace("-", "", $nykyinen_alku), 0, 8);
 		$loppu_kausi = substr(str_replace("-", "", $nykyinen_loppu), 0, 8);
 
-		// Haetaan lapsituotteen varastosaldo
+		// Haetaan raaka-aineen varastosaldo
 		$query = "	SELECT ifnull(sum(saldo), 0) saldo
 					FROM tuotepaikat
 					WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
@@ -96,7 +96,7 @@
 		$row = mysql_fetch_assoc($result);
 		$lapsi_saldo = $row['saldo'];
 
-		// Haetaan lapsituotteen vuosikulutus (rullaava 12 kk)
+		// Haetaan raaka-aineen vuosikulutus (rullaava 12 kk)
 		$query = "	SELECT ifnull(sum(tilausrivi.kpl), 0) vuosikulutus
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
@@ -107,7 +107,7 @@
 		$row = mysql_fetch_assoc($result);
 		$lapsi_vuosikulutus = $row['vuosikulutus'];
 
-		// Haetaan lapsituotteen ostettu, varattu sek‰ ennakkotilattu m‰‰r‰
+		// Haetaan raaka-aineen ostettu, varattu, ennakkotilattu sek‰ valmistuksessa oleva m‰‰r‰
 		$query = "	SELECT
 					ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
 					ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
@@ -125,7 +125,7 @@
 		$lapsi_ennakko = $row['ennakko'];
 		$lapsi_valmistuksessa = $row['valmistuksessa'];
 
-		// Haetaan lapsituotteen toimittajatiedot
+		// Haetaan raaka-aineen toimittajatiedot
 		$query = "	SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimitusaika,
 					if(tuotteen_toimittajat.pakkauskoko > 0, tuotteen_toimittajat.pakkauskoko, 1) pakkauskoko,
 					tuotteen_toimittajat.toimittaja,
@@ -167,7 +167,7 @@
 			$tuote_where = " AND tuote.status NOT IN ('P', 'T') ";
 		}
 
-		// Loopataan l‰pi lapsituotteen is‰tuotteet ja lasketaan osto ehdotukset
+		// Loopataan l‰pi raaka-aineen is‰tuotteet ja lasketaan ostoehdotukset
 		$query = "	SELECT isatuoteno, kerroin
 					FROM tuoteperhe
 					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
@@ -202,7 +202,7 @@
 			$row = mysql_fetch_assoc($result);
 			$isa_saldo = $row['saldo'];
 
-			// Haetaan is‰tuotteen ostettu, varattu sek‰ ennakkotilattu m‰‰r‰
+			// Haetaan is‰tuotteen ostettu, varattu, ennakkotilattu sek‰ valmistuksessa m‰‰r‰
 			$query = "	SELECT
 						ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
 						ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
@@ -220,8 +220,10 @@
 			$isa_ennakko = $row['ennakko'];
 			$isa_valmistuksessa = $row['valmistuksessa'];
 
-			// Is‰tuotteen myyntiennuste
+			// Is‰tuotteen reaalisaldo
 			$isa_reaalisaldo = $isa_saldo + $isa_tilattu - $isa_varattu - $isa_ennakko - $isa_valmistuksessa;
+
+			// Is‰tuotteen myyntiennuste
 			$isa_myyntiennuste = $isa_budjetoitu_myynti - $isa_reaalisaldo;
 
 			// Jos myyntiennuste on miinusta, nollataan ennuste, ettei se v‰henn‰ raaka-aine tarvetta (jo valmistetuista tuotteista ei voida k‰ytt‰‰ raaka-aineita)
@@ -232,14 +234,22 @@
 			$lapsi_kulutus += ($isa_myyntiennuste * $lapsi_kerroin);
 		}
 
-		// Lasketaan lapsituotteen ostosuositus
+		// Lasketaan raaka-aineen reaalisaldo
 		$lapsi_reaalisaldo = $lapsi_saldo + $lapsi_tilattu - $lapsi_varattu - $lapsi_ennakko - $lapsi_valmistuksessa;
 
+		// Lasketaan raaka-aineen p‰iv‰kulutus
 		$lapsi_paivakulutus = round($lapsi_vuosikulutus / 240, 6);
+		
+		// Lasketaan raaka-aineen riittop‰iv‰t
 		$lapsi_riittopv = ($lapsi_paivakulutus == 0) ? t("Ei tiedossa") : floor($lapsi_reaalisaldo / $lapsi_paivakulutus);
 
+		// Lasketaan raaka-aineen kulutusennuste
 		$lapsi_kulutusennuste = $lapsi_kulutus + ($lapsi_paivakulutus * $toimittajarow['toimitusaika']);
+		
+		// Lasketaan raaka-aineen ostosuositus
 		$lapsi_ostosuositus = round($lapsi_kulutusennuste - $lapsi_reaalisaldo);
+		
+		// Pyˆristet‰‰n raaka-aineen ostosuositus toimittajan pakkauskokoon
 		$lapsi_ostettavamaara = round($lapsi_ostosuositus / $toimittajarow['pakkauskoko']) * $toimittajarow['pakkauskoko'];
 
 		// Palautettava array

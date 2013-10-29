@@ -20644,7 +20644,11 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 			echo "loop: $i --> kerayseran_paino: $kerayseran_paino --> jaljella: $jaljella<br>";
 
+			$lisatty_kol_maara = 0;
+
 			while (($pakkaukset_paino > $pakkauksen_kaytetty_paino)) {
+
+				echo "while j‰ljell‰ kpl: $jaljella<br>";
 
 				echo "while ($pakkaukset_paino > $pakkauksen_kaytetty_paino) <br>";
 
@@ -20656,23 +20660,17 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 					echo "$_pakkaus != 0 or ".count($kerayseran_rivit)." > 1<br>";
 
-					if ($_pakkaus != 0 or count($kerayseran_rivit) > 1) {
+					if ($_pakkaus != 0 or (count($kerayseran_rivit) > 1 and $lisatty_kol_maara == 0)) {
 
 						echo "isset: ".(int) isset($kerayseran_rivit[$i-1])." and ".(int) $kerayseran_rivit[$i-1]['data']['uusirivi']." == true and $pakkausnro == ".$kerayseran_rivit[$i-1]['data']['pakkausnro']."<br>";
 
-						if (isset($kerayseran_rivit[$i-1]) and $kerayseran_rivit[$i-1]['data']['uusirivi'] == true and $pakkausnro == $kerayseran_rivit[$i-1]['data']['pakkausnro']) {
-							break;
-						}
-						elseif ($kerayseran_rivit[$i]['data']['uusirivi'] == true) {
-							break;
-						}
-						else {
-							$pakkausnro++;
-							$pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era']);
+						$pakkausnro++;
+						$pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era']);
 
-							$sscc          = uusi_sscc_nro();
-							$sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
-						}
+						echo "uusi sscc tehty ja uusi pakkauksen_kaytetty_paino = $pakkauksen_kaytetty_paino<br>";
+
+						$sscc          = uusi_sscc_nro();
+						$sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
 					}
 
 					break;
@@ -20682,6 +20680,8 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				$kerayseran_paino -= $kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era'];
 
 				$pakkauksen_kaytetty_paino += ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era']);
+
+ 				$lisatty_kol_maara += $kerayseran_rivit[$i]['data']['myynti_era'];
 
 				if ($jaljella <= 0) break;
 			}
@@ -20694,6 +20694,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 			}
 
 			echo "pakkausnro: $pakkausnro --> sscc: $sscc --> sscc_ulkoinen: $sscc_ulkoinen<br>";
+			echo "pakkauksen_kaytetty_paino = $pakkauksen_kaytetty_paino<br>";
 
 			$keraysera_kpl = $kerayseran_rivit[$i]['data']['varattu'] - $jaljella;
 
@@ -20721,8 +20722,6 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				$uusi_row['data']['uusirivi'] = true;
 				$uusi_row['data']['sscc'] = $sscc = uusi_sscc_nro();
 				$uusi_row['data']['sscc_ulkoinen'] = $sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
-
-				echo "<pre>",var_dump($uusi_row['data']),"</pre>";
 
 				// splitataan array
 				// halutaan lis‰t‰ uusi_row arrayn keskelle, joten joudutaan k‰ytt‰m‰‰n array_slicea.

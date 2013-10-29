@@ -613,7 +613,7 @@
 				echo "<tr><td>".t("Pakkauskoko")."			</td><td>{$tuoterivi['pakkauskoko']}		</td></tr>";
 				echo "</table>";
 
-				echo "</td><td colspan='7'>";
+				echo "</td><td colspan='10'>";
 
 				echo t("Reaalisaldo")." = ".t("Varastosaldo")." + ".t("Tilattu")." - ".t("Varattu")." - ".t("Ennakkotilaukset")." - ".t("Valmistuksessa")."<br>";
 				echo "{$tuoterivi["reaalisaldo"]} = {$tuoterivi["varastosaldo"]} + {$tuoterivi["tilattu"]} - {$tuoterivi["varattu"]} - {$tuoterivi["ennakko"]} - {$tuoterivi["valmistuksessa"]}<br><br>";

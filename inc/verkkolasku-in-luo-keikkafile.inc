@@ -919,6 +919,7 @@ $debug = 0;
 		// Tehd‰‰n itse keikkaotsikko
 		$query = "	INSERT INTO lasku SET
 					yhtio        = '{$kukarow['yhtio']}',
+					yhtio_toimipaikka = '{$osrow['yhtio_toimipaikka']}',
 					laskunro     = '{$id}',
 					ytunnus	     = '{$trow['ytunnus']}',
 					nimi         = '{$trow['nimi']}',
@@ -1785,6 +1786,7 @@ $debug = 0;
 				// meill‰ on $trow tullut parametrin‰
 				$query = "	INSERT into lasku set
 							yhtio        			= '$kukarow[yhtio]',
+							yhtio_toimipaikka		= '$osrow[yhtio_toimipaikka]',
 							laskunro     			= '$id',
 							ytunnus	     			= '$trow[ytunnus]',
 							nimi         			= '$trow[nimi]',

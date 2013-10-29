@@ -355,8 +355,6 @@
 										$tuotteet[$pairow['tuoteno']]["ennpois"] 		+= $tuotteet[$_tuote["tuoteno"]]["ennpois"];
 										$tuotteet[$pairow['tuoteno']]["jt"] 			+= $tuotteet[$_tuote["tuoteno"]]["jt"];
 
-										#echo "TUOTE: $pairow[tuoteno], VASTAAVA: $_tuote[tuoteno], {$tuotteet[$_tuote["tuoteno"]]["halytysraja"]}<br>";
-
 										unset($tuotteet[$_tuote["tuoteno"]]);
 									}
 								}
@@ -382,6 +380,7 @@
 					continue;
 				}
 
+				/*
 				echo "<br>Tuoteno: $pairow[tuoteno]<br>";
 				echo "Hälytysraja: {$pairow['halytysraja']}<br>";
 				echo "Saldo: {$pairow['saldo']}<br>";
@@ -392,6 +391,7 @@
 				echo "Osto_erä: {$pairow['osto_era']}<br>";
 				echo "Tilausmäärä: {$pairow['tilausmaara']}<br>";
 				echo "Tarve: $ostettavahaly<br>";
+				*/
 
 				//	Onko meillä jo otsikko vai pitääkö tehdä uusi?
 				if ($tehtyriveja == 0) {
@@ -476,7 +476,7 @@
 						${'ale'.$alepostfix} = "";
 					}
 
-					#require ('lisaarivi.inc');
+					require ('lisaarivi.inc');
 
 					$tuoteno	= '';
 					$kpl		= '';
@@ -499,8 +499,6 @@
 					echo t("VIRHE: Tuotetta ei löydy"),"!<br />";
 				}
 			}
-
-
 		}
 
 		if (count($otsikot) == 0) {

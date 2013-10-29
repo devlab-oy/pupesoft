@@ -1613,7 +1613,7 @@
 
 		if ($uusi == '1' and $toim == 'tuote') {
 
-			$query = "	SELECT tunnus, nimi
+			$query = "	SELECT tunnus, nimi, toimittajanro
 						FROM toimi
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND oletus_vienti IN ('C', 'F', 'J', 'K', 'I', 'L')
@@ -1631,7 +1631,8 @@
 
 			while ($toimirow = mysql_fetch_assoc($toimiresult)) {
 				$selected = (isset($liitostunnus) and $toimirow['tunnus'] == $liitostunnus) ? 'SELECTED': '';
-				echo "<option value='{$toimirow['tunnus']}' {$selected}> {$toimirow['nimi']}</option>";
+				$toimittajanrolisa = (trim($toimirow['toimittajanro']) != '') ? "(".$toimirow['toimittajanro'].")" : '';
+				echo "<option value='{$toimirow['tunnus']}' {$selected}> {$toimirow['nimi']} $toimittajanrolisa</option>";
 			}
 
 			echo "</select>";

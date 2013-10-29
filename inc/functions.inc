@@ -21944,13 +21944,18 @@ if (!function_exists('hae_laskun_tilausrivit')) {
 
 		if ($sorttauskentta == "") $sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
+		$ta_lisa_join = in_array('O', $tyypit) ? "LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')" : "";
+		$ta_lisa_where = $ta_lisa_join != "" ? "AND ta.tunnus IS NULL" : "";
+
 		$query = "	SELECT tilausrivi.*,
 					tilausrivin_lisatiedot.rekisterinumero,
 					$sorttauskentta
 					FROM tilausrivi
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					{$ta_lisa_join}
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.otunnus = '{$otunnus}'
+					{$ta_lisa_where}
 					{$tilausrivi_where}
 					ORDER BY sorttauskentta {$sorttaussuunta}, tilausrivi.tunnus";
 		$result = pupe_query($query);

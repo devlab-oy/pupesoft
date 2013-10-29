@@ -1286,6 +1286,12 @@ if (!function_exists("saldo_myytavissa")) {
 		if (is_array($varasto) and count($varasto) > 0) {
 			$varasto = implode(",", $varasto);
 		}
+		elseif (strpos($varasto, "##") !== FALSE) {
+			list($varasto, $keraysvyohyke) = explode("##", $varasto);
+
+			$varasto 	   = (int) $varasto;
+			$keraysvyohyke = (int) $keraysvyohyke;
+		}
 		else {
 			$varasto = (int) $varasto;
 
@@ -1294,7 +1300,10 @@ if (!function_exists("saldo_myytavissa")) {
 			}
 		}
 
-		$query  = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+		$query  = "	SELECT *
+					FROM tuote
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tuoteno = '$tuoteno'";
 		$result = pupe_query($query);
 		$tuote  = mysql_fetch_assoc($result);
 
@@ -1322,6 +1331,7 @@ if (!function_exists("saldo_myytavissa")) {
 			$valinta1 = ""; // varaston tyyppi
 			$valinta2 = ""; // tietty varastopaikka special case
 			$valinta3 = ""; // päätetään joinin stricteys
+			$kvjoini  = ""; // joinataanko keräysvyöhyke
 
 			// katotaan ollaanko annettu parametriksi joku tietty varastotyyppi
 			if ($tyyppi == "E") {
@@ -1352,6 +1362,18 @@ if (!function_exists("saldo_myytavissa")) {
 
 			// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
 			if ((is_numeric($varasto) and $varasto > 0) or (!is_numeric($varasto) and $varasto != "")) {
+
+				if ($keraysvyohyke > 0) {
+					$kvjoini = " JOIN varaston_hyllypaikat AS vh ON (
+									vh.yhtio = tuotepaikat.yhtio
+									AND vh.hyllyalue = tuotepaikat.hyllyalue
+									AND vh.hyllynro = tuotepaikat.hyllynro
+									AND vh.hyllytaso = tuotepaikat.hyllytaso
+									AND vh.hyllyvali = tuotepaikat.hyllyvali
+									AND vh.keraysvyohyke = '$keraysvyohyke') ";
+
+				}
+
 				$valinta1 = " varastopaikat.tunnus in ($varasto) and ";
 				$valinta2 = "";
 				$valinta3 = " varastopaikat.tyyppi is not null ";
@@ -1385,6 +1407,7 @@ if (!function_exists("saldo_myytavissa")) {
 
 				$query = "	SELECT sum(sarjanumeroseuranta.era_kpl) saldo, tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi
 							FROM tuotepaikat
+							{$kvjoini}
 							LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
 							and $valinta1
 							concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
@@ -1412,6 +1435,7 @@ if (!function_exists("saldo_myytavissa")) {
 
 				$query = "	SELECT tuotepaikat.saldo, tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi
 							FROM tuotepaikat
+							{$kvjoini}
 							LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
 							and $valinta1
 							concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
@@ -1437,7 +1461,6 @@ if (!function_exists("saldo_myytavissa")) {
 
 					// Saldot
 					$saldo += $row["saldo"];
-
 
 					// Myyntirivien, varastosiirtojen ja valmistusten ennakkopoistot ja kerätyt rivit (Hyllytetyt reklamaatiot näkyvät myös myytävissä/hyllyssä)
 					if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {

@@ -8,7 +8,6 @@ abstract class CSVDumper {
 	protected $separator = "";
 	protected $konversio_array = array();
 	protected $required_fields = array();
-	protected $columns_to_be_utf8_decoded = array();
 	protected $table = "";
 	protected $rivit = array();
 	protected $kukarow = array();
@@ -31,10 +30,6 @@ abstract class CSVDumper {
 
 	protected function setRequiredFields($required_fields) {
 		$this->required_fields = $required_fields;
-	}
-
-	protected function setColumnsToBeUtf8Decoded($columns_to_be_utf8_decoded) {
-		$this->columns_to_be_utf8_decoded = $columns_to_be_utf8_decoded;
 	}
 
 	protected function setTable($table) {
@@ -174,12 +169,8 @@ abstract class CSVDumper {
 	}
 
 	protected function decode_to_utf8($rivi) {
-		//@TODO Decode_to_utf8 pitää koodata niin, että columns_to_be_utf8_decoded on csv:ltä löytyvät headerit. Tällöin Decode_to_utf8 funkkaria voidaan kutsua ennen konvertoi_rivi funkkaria
-		//Toistaiseksi paikan konvertoi_rivi kutsuu manuaalisesti utf8_decodea, että kustannuspaikka haku toimii (rivi 59)
 		foreach ($rivi as $header => &$value) {
-			if (in_array($header, $this->columns_to_be_utf8_decoded)) {
-				$value = utf8_decode($value);
-			}
+			$value = utf8_decode($value);
 		}
 
 		return $rivi;
@@ -195,7 +186,7 @@ abstract class CSVDumper {
 
 	abstract protected function konvertoi_rivit();
 
-	abstract protected function konvertoi_rivi($rivi, $index);
+	abstract protected function konvertoi_rivi($rivi);
 
-	abstract protected function validoi_rivi($rivi, $index);
+	abstract protected function validoi_rivi(&$rivi, $index);
 }

@@ -23,21 +23,11 @@ class AsiakasCSVDumper extends CSVDumper {
 			'asiakasnro',
 			'nimi',
 		);
-		$columns_to_be_utf8_decoded = array(
-			'nimi',
-			'osoite',
-			'postitp',
-			'myynti_kommentti1',
-			'kuljetusohje',
-		);
 
 		$this->setFilepath("/tmp/asiakas.csv");
 		$this->setSeparator(';');
 		$this->setKonversioArray($konversio_array);
-
-
 		$this->setRequiredFields($required_fields);
-		$this->setColumnsToBeUtf8Decoded($columns_to_be_utf8_decoded);
 		$this->setTable('asiakas');
 	}
 
@@ -46,8 +36,8 @@ class AsiakasCSVDumper extends CSVDumper {
 		$progressbar->initialize(count($this->rivit));
 
 		foreach ($this->rivit as $index => &$rivi) {
-			$rivi = $this->konvertoi_rivi($rivi, $index);
 			$rivi = $this->decode_to_utf8($rivi);
+			$rivi = $this->konvertoi_rivi($rivi);
 			$rivi = $this->lisaa_pakolliset_kentat($rivi);
 
 			//index + 2, koska eka rivi on header ja laskenta alkaa riviltä 0
@@ -61,7 +51,7 @@ class AsiakasCSVDumper extends CSVDumper {
 		}
 	}
 
-	protected function konvertoi_rivi($rivi, $index) {
+	protected function konvertoi_rivi($rivi) {
 		$rivi_temp = array();
 
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
@@ -73,11 +63,11 @@ class AsiakasCSVDumper extends CSVDumper {
 		return $rivi_temp;
 	}
 
-	protected function validoi_rivi($rivi, $index) {
+	protected function validoi_rivi(&$rivi, $index) {
 		$valid = true;
-		foreach ($this->required_fields as $required_field) {
-			if ($rivi[$required_field] == '') {
-				$this->errors[$index][] = t('Pakollinen kenttä')." <b>$required_field</b> ".t('puuttuu');
+		foreach ($rivi as $key => $value) {
+			if (in_array($key, $this->required_fields) and $value == '') {
+				$this->errors[$index][] = t('Pakollinen kenttä')." <b>{$key}</b> ".t('puuttuu');
 				$valid = false;
 			}
 		}

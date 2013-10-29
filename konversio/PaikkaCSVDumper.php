@@ -18,20 +18,11 @@ class PaikkaCSVDumper extends CSVDumper {
 		$required_fields = array(
 			'kohde',
 		);
-		$columns_to_be_utf8_decoded = array(
-			'kohde',
-			'nimi',
-			'osoite',
-			'kuvaus',
-		);
 
 		$this->setFilepath("/tmp/laite.csv");
 		$this->setSeparator(';');
 		$this->setKonversioArray($konversio_array);
-
-
 		$this->setRequiredFields($required_fields);
-		$this->setColumnsToBeUtf8Decoded($columns_to_be_utf8_decoded);
 		$this->setTable('paikka');
 	}
 
@@ -40,8 +31,8 @@ class PaikkaCSVDumper extends CSVDumper {
 		$progressbar->initialize(count($this->rivit));
 
 		foreach ($this->rivit as $index => &$rivi) {
-			$rivi = $this->konvertoi_rivi($rivi, $index);
 			$rivi = $this->decode_to_utf8($rivi);
+			$rivi = $this->konvertoi_rivi($rivi);
 			$rivi = $this->lisaa_pakolliset_kentat($rivi);
 
 			//index + 2, koska eka rivi on header ja laskenta alkaa riviltä 0
@@ -55,37 +46,35 @@ class PaikkaCSVDumper extends CSVDumper {
 		}
 	}
 
-	protected function konvertoi_rivi($rivi, $index) {
+	protected function konvertoi_rivi($rivi) {
 		$rivi_temp = array();
 
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
-				if ($konvertoitu_header == 'kohde') {
-					$kohde_tunnus = $this->hae_kohde_tunnus(utf8_decode($rivi['KUSTPAIKKA']));
-					if ($kohde_tunnus == 0) {
-						$this->errors[$index][] = t('Kohdetta')." <b>".utf8_decode($rivi['KUSTPAIKKA'])."</b> ".t('ei löydy');
-					}
-					$rivi_temp[$konvertoitu_header] = $kohde_tunnus;
-				}
-				else {
-					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
-				}
+				$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
 			}
 		}
 
 		return $rivi_temp;
 	}
 
-	protected function validoi_rivi($rivi, $index) {
+	protected function validoi_rivi(&$rivi, $index) {
 		$valid = true;
-		foreach ($this->required_fields as $required_field) {
-			if ($rivi[$required_field] == '' and $required_field != 'kohde') {
-				$this->errors[$index][] = t('Pakollinen kenttä')." <b>$required_field</b> ".t('puuttuu');
-				$valid = false;
+		foreach ($rivi as $key => $value) {
+			if ($key == 'kohde') {
+				$kohde_tunnus = $this->hae_kohde_tunnus($value);
+				if ($kohde_tunnus == 0 and in_array($key, $this->required_fields)) {
+					$this->errors[$index][] = t('Kohdetta')." <b>{$value}</b> ".t('ei löydy');
+					$valid = false;
+				}
+				else {
+					$rivi[$key] = $kohde_tunnus;
+				}
 			}
-			else if ($required_field == 'kohde' and $rivi[$required_field] == 0) {
-//				$this->errors[$index][] = t('Pakollinen kenttä')." $required_field ".t('kohdetta ei löydy');
-				$valid = false;
+			else {
+				if (in_array($key, $this->required_fields) and $value == '') {
+					$valid = false;
+				}
 			}
 		}
 

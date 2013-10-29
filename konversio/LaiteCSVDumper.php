@@ -23,18 +23,11 @@ class LaiteCSVDumper extends CSVDumper {
 			'tuoteno',
 			'paikka',
 		);
-		$columns_to_be_utf8_decoded = array(
-			'paikka',
-			'sijainti',
-		);
 
 		$this->setFilepath("/tmp/laite.csv");
 		$this->setSeparator(';');
 		$this->setKonversioArray($konversio_array);
-
-
 		$this->setRequiredFields($required_fields);
-		$this->setColumnsToBeUtf8Decoded($columns_to_be_utf8_decoded);
 		$this->setTable('laite');
 	}
 
@@ -43,8 +36,8 @@ class LaiteCSVDumper extends CSVDumper {
 		$progressbar->initialize(count($this->rivit));
 
 		foreach ($this->rivit as $index => &$rivi) {
-			$rivi = $this->konvertoi_rivi($rivi, $index);
 			$rivi = $this->decode_to_utf8($rivi);
+			$rivi = $this->konvertoi_rivi($rivi);
 			$rivi = $this->lisaa_pakolliset_kentat($rivi);
 
 			//index + 2, koska eka rivi on header ja laskenta alkaa riviltä 0
@@ -58,44 +51,41 @@ class LaiteCSVDumper extends CSVDumper {
 		}
 	}
 
-	protected function konvertoi_rivi($rivi, $index) {
+	protected function konvertoi_rivi($rivi) {
 		$rivi_temp = array();
 
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
-				if ($konvertoitu_header == 'paikka') {
-					$paikka_tunnus = $this->hae_paikka_tunnus(utf8_decode($rivi[$csv_header]));
-					if ($paikka_tunnus == 0) {
-						$this->errors[$index][] = t('Paikkaa')." <b>".utf8_decode($rivi[$csv_header])."</b> ".t('ei löydy');
-					}
-					$rivi_temp[$konvertoitu_header] = $paikka_tunnus;
-				}
-				else {
-					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
-				}
+				$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
 			}
 		}
 
 		return $rivi_temp;
 	}
 
-	protected function validoi_rivi($rivi, $index) {
+	protected function validoi_rivi(&$rivi, $index) {
 		$valid = true;
-		foreach ($this->required_fields as $required_field) {
-			if ($rivi[$required_field] == '') {
-				$this->errors[$index][] = t('Pakollinen kenttä')." <b>$required_field</b> ".t('puuttuu');
-				$valid = false;
+		foreach ($rivi as $key => $value) {
+			if ($key == 'paikka') {
+				$paikka_tunnus = $this->hae_paikka_tunnus($value);
+				if ($paikka_tunnus == 0 and in_array($key, $this->required_fields)) {
+					$this->errors[$index][] = t('Paikkaa')." <b>{$value}</b> ".t('ei löydy');
+					$valid = false;
+				}
+				else {
+					$rivi[$key] = $paikka_tunnus;
+				}
 			}
-		}
-
-		if ($valid) {
-			$valid = $this->loytyyko_tuote($rivi['tuoteno']);
-			if (!$valid) {
-				$this->errors[$index][] = t('Tuote')." {$rivi['tuoteno']} ".t('puuttuu');
+			else if ($key == 'tuoteno') {
+				if ($valid) {
+					$valid = $this->loytyyko_tuote($rivi[$key]);
+					if (!$valid) {
+						$this->errors[$index][] = t('Tuote')." {$rivi[$key]} ".t('puuttuu');
+					}
+				}
 			}
 			else {
-				if ($rivi['paikka'] == 0) {
-//					$this->errors[$index][] = t('Paikkaa')." {$rivi['paikka']} ".t('ei löydy');
+				if (in_array($key, $this->required_fields) and $value == '') {
 					$valid = false;
 				}
 			}

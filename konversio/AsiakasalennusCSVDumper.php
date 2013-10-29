@@ -19,15 +19,11 @@ class AsiakasalennusCSVDumper extends CSVDumper {
 			'ryhma',
 			'alennus'
 		);
-		$columns_to_be_utf8_decoded = array();
 
 		$this->setFilepath("/tmp/asiakasalennus.csv");
 		$this->setSeparator(';');
 		$this->setKonversioArray($konversio_array);
-
-
 		$this->setRequiredFields($required_fields);
-		$this->setColumnsToBeUtf8Decoded($columns_to_be_utf8_decoded);
 		$this->setTable('asiakasalennus');
 	}
 
@@ -36,8 +32,8 @@ class AsiakasalennusCSVDumper extends CSVDumper {
 		$progressbar->initialize(count($this->rivit));
 
 		foreach ($this->rivit as $index => &$rivi) {
-			$rivi = $this->konvertoi_rivi($rivi, $index);
 			$rivi = $this->decode_to_utf8($rivi);
+			$rivi = $this->konvertoi_rivi($rivi);
 			$rivi = $this->lisaa_pakolliset_kentat($rivi);
 
 			//index + 2, koska eka rivi on header ja laskenta alkaa riviltä 0
@@ -51,19 +47,12 @@ class AsiakasalennusCSVDumper extends CSVDumper {
 		}
 	}
 
-	protected function konvertoi_rivi($rivi, $index) {
+	protected function konvertoi_rivi($rivi) {
 		$rivi_temp = array();
 
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
-				if ($konvertoitu_header == 'asiakas') {
-					$asiakas_tunnus = $this->hae_asiakas_tunnus($rivi['ASIAKAS']);
-					if ($asiakas_tunnus == 0) {
-						$this->errors[$index][] = t('Asiakasta')." <b>{$rivi['ASIAKAS']}</b> ".t('ei löydy');
-					}
-					$rivi_temp[$konvertoitu_header] = $asiakas_tunnus;
-				}
-				else if ($konvertoitu_header == 'ryhma') {
+				if ($konvertoitu_header == 'ryhma') {
 					//Oletetaan, että solusta löytyy vain yksi luku jolloin siihen voidaan viitata 0 indeksillä
 					$matches = array();
 					preg_match('/\d+/', $rivi[$csv_header], $matches);
@@ -78,17 +67,23 @@ class AsiakasalennusCSVDumper extends CSVDumper {
 		return $rivi_temp;
 	}
 
-	protected function validoi_rivi($rivi, $index) {
+	protected function validoi_rivi(&$rivi, $index) {
 		$valid = true;
-		foreach ($this->required_fields as $required_field) {
-			if ($rivi[$required_field] == '' and $required_field != 'asiakas') {
-				$this->errors[$index][] = t('Pakollinen kenttä')." $required_field ".t('puuttuu');
-				$valid = false;
+		foreach ($rivi as $key => $value) {
+			if ($key == 'asiakas') {
+				$asiakas_tunnus = $this->hae_asiakas_tunnus($value);
+				if ($asiakas_tunnus == 0 and in_array($key, $this->required_fields)) {
+					$this->errors[$index][] = t('Asiakasta')." <b>{$value}</b> ".t('ei löydy');
+					$valid = false;
+				}
+				else {
+					$rivi[$key] = $asiakas_tunnus;
+				}
 			}
-			else if ($required_field == 'asiakas' and $rivi[$required_field] == 0) {
-//				Asiakkaan validointi tapahtuu konvertoi_rivi funktiossa @TODO konvertoi_rivit() järjestys pitää refaktoroida
-//				$this->errors[$index][] = t('Pakollinen kenttä')." $required_field ".t('asiakasta ei löydy');
-				$valid = false;
+			else {
+				if (in_array($key, $this->required_fields) and $value == '') {
+					$valid = false;
+				}
 			}
 		}
 

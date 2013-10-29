@@ -18,17 +18,11 @@ class YhteyshenkiloCSVDumper extends CSVDumper {
 			'nimi',
 			'liitostunnus'
 		);
-		$columns_to_be_utf8_decoded = array(
-			'nimi',
-		);
 
 		$this->setFilepath("/tmp/asiakas.csv");
 		$this->setSeparator(';');
 		$this->setKonversioArray($konversio_array);
-
-
 		$this->setRequiredFields($required_fields);
-		$this->setColumnsToBeUtf8Decoded($columns_to_be_utf8_decoded);
 		$this->setTable('yhteyshenkilo');
 	}
 
@@ -40,8 +34,8 @@ class YhteyshenkiloCSVDumper extends CSVDumper {
 			if ($rivi['YHTHENK1'] != '') {
 				//Asiakas aineistossa on kahta data. Asiakkaita sekä yhteyshenkilöitä.
 				//$rivi['YHTEYSHENK1'] == '' niin kyseessä on asiakas
-				$rivi = $this->konvertoi_rivi($rivi, $index);
 				$rivi = $this->decode_to_utf8($rivi);
+				$rivi = $this->konvertoi_rivi($rivi);
 				$rivi = $this->lisaa_pakolliset_kentat($rivi);
 
 				//index + 2, koska eka rivi on header ja laskenta alkaa riviltä 0
@@ -59,20 +53,13 @@ class YhteyshenkiloCSVDumper extends CSVDumper {
 		}
 	}
 
-	protected function konvertoi_rivi($rivi, $index) {
+	protected function konvertoi_rivi($rivi) {
 		$rivi_temp = array();
 
 		foreach ($this->konversio_array as $konvertoitu_header => $csv_header) {
 			if (array_key_exists($csv_header, $rivi)) {
 				if ($konvertoitu_header == 'tyyppi') {
 					$rivi_temp[$konvertoitu_header] = 'A';
-				}
-				else if ($konvertoitu_header == 'liitostunnus') {
-					$asiakas_tunnus = $this->hae_asiakas_tunnus($rivi['KOODI']);
-					if ($asiakas_tunnus == 0) {
-						$this->errors[$index][] = t('Asiakasta')." {$rivi['KOODI']} ".t('ei löydy');
-					}
-					$rivi_temp[$konvertoitu_header] = $asiakas_tunnus;
 				}
 				else {
 					$rivi_temp[$konvertoitu_header] = $rivi[$csv_header];
@@ -83,16 +70,23 @@ class YhteyshenkiloCSVDumper extends CSVDumper {
 		return $rivi_temp;
 	}
 
-	protected function validoi_rivi($rivi, $index) {
+	protected function validoi_rivi(&$rivi, $index) {
 		$valid = true;
-		foreach ($this->required_fields as $required_field) {
-			if ($rivi[$required_field] == '' and $required_field != 'liitostunnus') {
-				$this->errors[$index][] = t('Pakollinen kenttä')." $required_field ".t('puuttuu');
-				$valid = false;
+		foreach ($rivi as $key => $value) {
+			if ($key == 'liitostunnus') {
+				$asiakas_tunnus = $this->hae_asiakas_tunnus($value);
+				if ($asiakas_tunnus == 0 and in_array($key, $this->required_fields)) {
+					$this->errors[$index][] = t('Asiakasta')." {$value} ".t('ei löydy');
+					$valid = false;
+				}
+				else {
+					$rivi[$key] = $asiakas_tunnus;
+				}
 			}
-			else if ($required_field == 'liitostunnus' and $rivi[$required_field] == 0) {
-//				$this->errors[$index][] = t('Pakollinen kenttä')." $required_field ".t('asiakasta ei löydy');
-				$valid = false;
+			else {
+				if (in_array($key, $this->required_fields) and $value == '') {
+					$valid = false;
+				}
 			}
 		}
 

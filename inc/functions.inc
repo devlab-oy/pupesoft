@@ -20665,7 +20665,8 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 						echo "isset: ".(int) isset($kerayseran_rivit[$i-1])." and ".(int) $kerayseran_rivit[$i-1]['data']['uusirivi']." == true and $pakkausnro == ".$kerayseran_rivit[$i-1]['data']['pakkausnro']."<br>";
 
 						$pakkausnro++;
-						$pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era']);
+						// $pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era']);
+						$pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $jaljella);
 
 						echo "uusi sscc tehty ja uusi pakkauksen_kaytetty_paino = $pakkauksen_kaytetty_paino<br>";
 

@@ -24459,10 +24459,18 @@ if (!function_exists("tuotteen_budjetoitu_myynti")) {
 
 		// Tämä palautetaan, lasketaan budjetoitu myynti
 		$budjetoitu_myynti = 0;
+		$budjetin_peruste = array();
 
 		// Status P budjetoitu myynti aina nolla
 		if ($tuote_status == "P") {
-			return $budjetoitu_myynti;
+			$budjetin_peruste[] = array(
+				"tuote" => $tuoteno,
+				"status" => $tuote_status,
+				"budjetoitu_myynti" => $budjetoitu_myynti,
+				"syy" => "Puute"
+			);
+
+			return array($budjetoitu_myynti, $budjetin_peruste);
 		}
 
 		// Status T, eli tilaustuote, niin budjetoitu myynti on tuotteen JT-rivit
@@ -24481,6 +24489,14 @@ if (!function_exists("tuotteen_budjetoitu_myynti")) {
 			$result = pupe_query($query);
 			$row = mysql_fetch_assoc($result);
 			$budjetoitu_myynti += $row['jt'];
+
+			$budjetin_peruste[] = array(
+				"tuote" => $tuoteno,
+				"status" => $tuote_status,
+				"budjetoitu_myynti" => $row['jt'],
+				"syy" => "JT-rivit"
+			);
+
 		}
 
 		// Kaikki muut, katsotaan joko budjetti tai myynti
@@ -24497,6 +24513,8 @@ if (!function_exists("tuotteen_budjetoitu_myynti")) {
 						AND budjetti_tuote.tuoteno = '{$tuoteno}'
 						GROUP BY 1";
 			$result = pupe_query($query);
+
+			$budjetti_erikseen = 0;
 
 			// Jos budjetti löytyi, lasketaan budjetoitu myynti
 			if (mysql_num_rows($result) >= 0) {
@@ -24516,7 +24534,16 @@ if (!function_exists("tuotteen_budjetoitu_myynti")) {
 					}
 
 					$budjetoitu_myynti += $paivien_maara * $row['paivabudjetti'];
+					$budjetti_erikseen += $paivien_maara * $row['paivabudjetti'];
 				}
+
+				$budjetin_peruste[] = array(
+					"tuote" => $tuoteno,
+					"status" => $tuote_status,
+					"budjetoitu_myynti" => $budjetti_erikseen,
+					"syy" => "Budjetti {$alku_kausi}{$alku_kausi_pp} - {$loppu_kausi}{$loppu_kausi_pp}"
+				);
+
 			}
 			else {
 				// Jos ei ole budjettia, otetaan edellisen kauden myynti ja käytetään sitä
@@ -24530,10 +24557,17 @@ if (!function_exists("tuotteen_budjetoitu_myynti")) {
 				$result = pupe_query($query);
 				$row = mysql_fetch_assoc($result);
 				$budjetoitu_myynti += $row['myynti'];
+
+				$budjetin_peruste[] = array(
+					"tuote" => $tuoteno,
+					"status" => $tuote_status,
+					"budjetoitu_myynti" => $row['myynti'],
+					"syy" => "Edellinen kausi {$edellinen_alku} - {$edellinen_loppu}",
+				);
 			}
 		}
 
-		return $budjetoitu_myynti;
+		return array($budjetoitu_myynti, $budjetin_peruste);
 	}
 }
 

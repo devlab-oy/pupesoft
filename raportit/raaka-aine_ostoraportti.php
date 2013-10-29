@@ -164,7 +164,7 @@
 			$tuote_where = " AND tuote.status in ('".implode("','", $multi_status)."')";
 		}
 		else {
-			$tuote_where = " AND tuote.status NOT IN ('P', 'T') ";
+			$tuote_where = " ";
 		}
 
 		// Loopataan läpi raaka-aineen isätuotteet ja lasketaan ostoehdotukset
@@ -180,6 +180,7 @@
 
 		// While loopissa käytettävät muuttujat
 		$lapsi_kulutus = 0;
+		$budjetin_peruste = array();
 
 		while ($isatuote_row = mysql_fetch_assoc($isatuote_result)) {
 
@@ -191,7 +192,7 @@
 				'tilaustuotteiden_kasittely' => $tilaustuotteiden_kasittely,
 			);
 
-			$isa_budjetoitu_myynti = tuotteen_budjetoitu_myynti($params);
+			list($isa_budjetoitu_myynti, $budjetin_peruste[]) = tuotteen_budjetoitu_myynti($params);
 
 			// Haetaan isätuotteiden varastosaldo
 			$query = "	SELECT ifnull(sum(saldo), 0) saldo
@@ -239,43 +240,44 @@
 
 		// Lasketaan raaka-aineen päiväkulutus
 		$lapsi_paivakulutus = round($lapsi_vuosikulutus / 240, 6);
-		
+
 		// Lasketaan raaka-aineen riittopäivät
 		$lapsi_riittopv = ($lapsi_paivakulutus == 0) ? t("Ei tiedossa") : floor($lapsi_reaalisaldo / $lapsi_paivakulutus);
 
 		// Lasketaan raaka-aineen kulutusennuste
 		$lapsi_kulutusennuste = $lapsi_kulutus + ($lapsi_paivakulutus * $toimittajarow['toimitusaika']);
-		
+
 		// Lasketaan raaka-aineen ostosuositus
 		$lapsi_ostosuositus = round($lapsi_kulutusennuste - $lapsi_reaalisaldo);
-		
+
 		// Pyöristetään raaka-aineen ostosuositus toimittajan pakkauskokoon
 		$lapsi_ostettavamaara = round($lapsi_ostosuositus / $toimittajarow['pakkauskoko']) * $toimittajarow['pakkauskoko'];
 
 		// Palautettava array
 		$tuoterivi = array();
-		$tuoterivi['reaalisaldo'] 			= $lapsi_reaalisaldo;
-		$tuoterivi['varastosaldo']			= $lapsi_saldo;
-		$tuoterivi['tilattu']				= $lapsi_tilattu;
-		$tuoterivi['varattu']				= $lapsi_varattu;
-		$tuoterivi['ennakko']				= $lapsi_ennakko;
-		$tuoterivi['valmistuksessa']		= $lapsi_valmistuksessa;
-		$tuoterivi['paivakulutus']			= $lapsi_paivakulutus;
-		$tuoterivi['vuosikulutus']			= $lapsi_vuosikulutus;
-		$tuoterivi['riittopv'] 				= $lapsi_riittopv;
-		$tuoterivi['kulutusennuste'] 		= $lapsi_kulutusennuste;
-		$tuoterivi['kulutus'] 				= $lapsi_kulutus;
-		$tuoterivi['toimitusaika']			= $toimittajarow['toimitusaika'];
-		$tuoterivi['ostosuositus'] 			= $lapsi_ostosuositus;
-		$tuoterivi['ostoeramaara']			= $lapsi_ostettavamaara;
-		$tuoterivi['pakkauskoko']			= $toimittajarow['pakkauskoko'];
-		$tuoterivi['toimittajan_tunnus'] 	= $toimittajarow['tunnus'];
-		$tuoterivi['toimittajan_ytunnus'] 	= $toimittajarow['toimittaja'];
-		$tuoterivi['toimittajan_nimi'] 		= $toimittajarow['nimi'];
-		$tuoterivi['ostohinta']		 		= $toimittajarow['ostohinta'];
-		$tuoterivi['ostosuosituksen_arvo']	= $toimittajarow['ostohinta'] * $lapsi_ostosuositus;
-		$tuoterivi['ostosuosituksen_paino'] = $toimittajarow['tuotemassa'] * $lapsi_ostosuositus;
+		$tuoterivi['reaalisaldo']              = $lapsi_reaalisaldo;
+		$tuoterivi['varastosaldo']             = $lapsi_saldo;
+		$tuoterivi['tilattu']                  = $lapsi_tilattu;
+		$tuoterivi['varattu']                  = $lapsi_varattu;
+		$tuoterivi['ennakko']                  = $lapsi_ennakko;
+		$tuoterivi['valmistuksessa']           = $lapsi_valmistuksessa;
+		$tuoterivi['paivakulutus']             = $lapsi_paivakulutus;
+		$tuoterivi['vuosikulutus']             = $lapsi_vuosikulutus;
+		$tuoterivi['riittopv']                 = $lapsi_riittopv;
+		$tuoterivi['kulutusennuste']           = $lapsi_kulutusennuste;
+		$tuoterivi['kulutus']                  = $lapsi_kulutus;
+		$tuoterivi['toimitusaika']             = $toimittajarow['toimitusaika'];
+		$tuoterivi['ostosuositus']             = $lapsi_ostosuositus;
+		$tuoterivi['ostoeramaara']             = $lapsi_ostettavamaara;
+		$tuoterivi['pakkauskoko']              = $toimittajarow['pakkauskoko'];
+		$tuoterivi['toimittajan_tunnus']       = $toimittajarow['tunnus'];
+		$tuoterivi['toimittajan_ytunnus']      = $toimittajarow['toimittaja'];
+		$tuoterivi['toimittajan_nimi']         = $toimittajarow['nimi'];
+		$tuoterivi['ostohinta']                = $toimittajarow['ostohinta'];
+		$tuoterivi['ostosuosituksen_arvo']     = $toimittajarow['ostohinta'] * $lapsi_ostosuositus;
+		$tuoterivi['ostosuosituksen_paino']    = $toimittajarow['tuotemassa'] * $lapsi_ostosuositus;
 		$tuoterivi['ostosuosituksen_tilavuus'] = $toimittajarow['tilavuus'] * $lapsi_ostosuositus;
+		$tuoterivi['budjetin_peruste']         = $budjetin_peruste;
 
 		return $tuoterivi;
 	}
@@ -619,6 +621,21 @@
 				echo "{$tuoterivi['paivakulutus']} = round({$tuoterivi['vuosikulutus']} / 240)<br><br>";
 				echo t("Riitto Päivät")." = floor(".t("Reaalisaldo")." / ".t("Päiväkulutus").")<br>";
 				echo "{$tuoterivi['riittopv']} = floor({$tuoterivi['reaalisaldo']} / {$tuoterivi['paivakulutus']})<br><br>";
+
+				echo "<font class='info'>";
+				echo t("Budjetoitu kulutus").":<br><br>";
+
+				foreach ($tuoterivi['budjetin_peruste'] as $budjetin_perusteet) {
+					foreach($budjetin_perusteet as $budjetin_peruste) {
+						echo "Valmiste: ".$budjetin_peruste['tuote']."<br>";
+						echo "Tuotteen status: ".$budjetin_peruste['status']."<br>";
+						echo "Budjetin peruste: ".$budjetin_peruste['syy']."<br>";
+						echo "Budjetoitu kulutus: ".$budjetin_peruste['budjetoitu_myynti']."<br><br>";
+					}
+				}
+
+				echo "</font>";
+
 				echo t("Kulutusennuste")." = ".t("Budjetoitu kulutus")." + (".t("Päiväkulutus")." * ".t("Toimitusaika").")<br>";
 				echo "{$tuoterivi['kulutusennuste']} = {$tuoterivi['kulutus']} + ({$tuoterivi['paivakulutus']} * {$tuoterivi['toimitusaika']})<br><br>";
 				echo t("Ostosuositus")." = round(".t("Kulutusennuste")." - ".t("Reaalisaldo").")<br>";
@@ -787,5 +804,3 @@
 	}
 
 	require ("inc/footer.inc");
-
-?>

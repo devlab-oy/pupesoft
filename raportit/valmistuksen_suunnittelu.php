@@ -283,7 +283,7 @@
 			'tilaustuotteiden_kasittely' => $tilaustuotteiden_kasittely,
 		);
 
-		$budjetoitu_myynti = tuotteen_budjetoitu_myynti($params);
+		list($budjetoitu_myynti, $budjetin_peruste) = tuotteen_budjetoitu_myynti($params);
 
 		// Lasketaan reaalisaldo
 		$reaalisaldo = $varastosaldo + $tilattu + $valmistuksessa - $varattu - $ennakko;

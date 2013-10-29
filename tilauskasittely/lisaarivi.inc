@@ -548,7 +548,7 @@
 		if ($lisaarivi_debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
 
 		// Etsit‰‰n korvaavia tuotteita
-		if ($tuoteno != "" and $trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L' and $tapa != "MYYVASTAAVA") {
+		if ($tuoteno != "" and $trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L' and $tapa != "MYYVASTAAVA" and $laskurow['tilaustyyppi'] != '9') {
 			$korvaavat_kiellot 	= ""; // Korvaavia tuotteita myyd‰‰n, vastaavia ei
 			$krkaikkimyytavissa	= 0;
 

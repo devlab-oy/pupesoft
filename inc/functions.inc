@@ -24522,7 +24522,7 @@ if (!function_exists("tuotteen_budjetoitu_myynti")) {
 			$budjetti_erikseen = 0;
 
 			// Jos budjetti löytyi, lasketaan budjetoitu myynti
-			if (mysql_num_rows($result) >= 0) {
+			if (mysql_num_rows($result) > 0) {
 
 				// Loopataan kaudet läpi
 				while ($row = mysql_fetch_assoc($result)) {

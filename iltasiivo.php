@@ -354,9 +354,10 @@
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tila = 'N'
 						AND lasku.alatila = ''
+						AND lasku.clearing NOT IN ('EXTENNAKKO','EXTTARJOUS')
 						AND lasku.luontiaika < DATE_SUB(now(), INTERVAL $aikaraja HOUR)";
 			$result = pupe_query($query);
-
+			
 			while ($row = mysql_fetch_assoc($result)) {
 				// laitetaan kaikki poimitut extranet jt-rivit takaisin omille vanhoille tilauksille
 				$query = "	SELECT tilausrivi.tunnus, tilausrivin_lisatiedot.vanha_otunnus

@@ -10,6 +10,8 @@
 
 	if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 	if (!isset($keraysvyohyke)) $keraysvyohyke = array();
+	if (!isset($lahdekeraysvyohyke)) $lahdekeraysvyohyke = array();
+
 
 	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
@@ -65,7 +67,7 @@
 
 		if (mysql_num_rows($keraysvyohyke_res) > 0) {
 
-			echo "<tr><th>",t("Ker‰ysvyˆhyke"),"</th>";
+			echo "<tr><th>",t("Ker‰ysvyˆhyke josta ker‰t‰‰n"),"</th>";
 			echo "<td>";
 			echo "<input type='hidden' name='lahdekeraysvyohyke[]' value='default' />";
 			echo "<table>";
@@ -74,7 +76,7 @@
 
 			while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res)) {
 
-				$chk = in_array($keraysvyohyke_row['tunnus'], $keraysvyohyke) ? " checked" : "";
+				$chk = in_array($keraysvyohyke_row['tunnus'], $lahdekeraysvyohyke) ? " checked" : "";
 
 				if ($kala == 0) echo "<tr>";
 
@@ -245,6 +247,7 @@
 		if ($kohdevarasto > 0 and count($lahdevarastot) > 0) {
 
 			$abcjoin = "";
+			$lahdevyohykkeet = FALSE;
 
 			if ($abcrajaus != "") {
 				// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
@@ -254,18 +257,42 @@
 							(abc_aputaulu.luokka <= '{$abcrajaus}' OR abc_aputaulu.luokka_osasto <= '{$abcrajaus}' OR abc_aputaulu.luokka_try <= '{$abcrajaus}'))";
 			}
 
+			if (count($lahdekeraysvyohyke) > 1) {
+
+				// ensimm‰inen alkio on 'default' ja se otetaan pois
+				array_shift($lahdekeraysvyohyke);
+
+				$query = "	SELECT distinct concat(varastopaikat.tunnus, '##', keraysvyohyke.tunnus) tunnari
+							FROM varastopaikat
+							JOIN keraysvyohyke ON (keraysvyohyke.yhtio = varastopaikat.yhtio AND keraysvyohyke.varasto = varastopaikat.tunnus AND keraysvyohyke.tunnus IN (".implode(",", $lahdekeraysvyohyke)."))
+							WHERE varastopaikat.yhtio = '{$kukarow['yhtio']}'
+							AND varastopaikat.tunnus IN (".implode(",", $lahdevarastot).")";
+				$result = pupe_query($query);
+
+				// Ylikirjataan $lahdevarastot-array
+				$lahdevarastot = array();
+
+				if (mysql_num_rows($result) > 0) {
+					$lahdevyohykkeet = TRUE;
+					
+					while ($kvrow = mysql_fetch_assoc($result)) {
+						$lahdevarastot[] = $kvrow['tunnari'];
+					}
+				}
+			}
+
 			if (count($keraysvyohyke) > 1) {
 
 				// ensimm‰inen alkio on 'default' ja se otetaan pois
 				array_shift($keraysvyohyke);
 
 				$keraysvyohykelisa = "	JOIN varaston_hyllypaikat AS vh ON (
-											vh.yhtio = tuotepaikat.yhtio AND
-											vh.hyllyalue = tuotepaikat.hyllyalue AND
-											vh.hyllynro = tuotepaikat.hyllynro AND
-											vh.hyllytaso = tuotepaikat.hyllytaso AND
-											vh.hyllyvali = tuotepaikat.hyllyvali AND
-											vh.keraysvyohyke IN (".implode(",", $keraysvyohyke)."))
+										vh.yhtio = tuotepaikat.yhtio AND
+										vh.hyllyalue = tuotepaikat.hyllyalue AND
+										vh.hyllynro = tuotepaikat.hyllynro AND
+										vh.hyllytaso = tuotepaikat.hyllytaso AND
+										vh.hyllyvali = tuotepaikat.hyllyvali AND
+										vh.keraysvyohyke IN (".implode(",", $keraysvyohyke)."))
 										JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)";
 			}
 
@@ -326,6 +353,16 @@
 
 			// tehd‰‰n jokaiselle valitulle lahdevarastolle erikseen
 			foreach ($lahdevarastot as $lahdevarasto) {
+
+				$lahdevyohyke = 0;
+
+				if ($lahdevyohykkeet) {
+					list($lahdevarasto, $lahdevyohyke) = explode("##", $lahdevarasto);
+				}
+
+				$lahdevarasto = (int) $lahdevarasto;
+				$lahdevyohyke = (int) $lahdevyohyke;
+
 				//	Varmistetaan ett‰ aloitetaan aina uusi otsikko uudelle varastolle
 				$tehtyriveja = 0;
 
@@ -398,9 +435,14 @@
 					}
 
 					// L‰hdevaraston myyt‰viss‰m‰‰r‰
-					list( , , $saldo_myytavissa_lahde) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto);
+					if ($lahdevyohykkeet) {
+						list( , , $saldo_myytavissa_lahde) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto."##".$lahdevyohyke);						
+					}
+					else {
+						list( , , $saldo_myytavissa_lahde) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto);						
+					}
 
-					// jos l‰hdevarasto on sama kuin kohdevarasto, niin silloin kohdepaikka on aina oletupaikka, joten poistetaan sen myyt‰viss‰m‰‰r‰ l‰hdepuolelta
+					// jos l‰hdevarasto on sama kuin kohdevarasto, niin silloin kohdepaikka on aina oletuspaikka, joten poistetaan sen myyt‰viss‰m‰‰r‰ l‰hdepuolelta
 					if ($kohdevarasto == $lahdevarasto) {
 						$saldo_myytavissa_lahde = (float) $saldo_myytavissa_lahde - $saldo_myytavissa_kohde;
 					}

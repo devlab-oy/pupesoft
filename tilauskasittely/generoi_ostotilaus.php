@@ -287,7 +287,6 @@
 						AND CONCAT(RPAD(UPPER('{$varow['alkuhyllyalue']}'),  5, '0'),LPAD(UPPER('{$varow['alkuhyllynro']}'),  5, '0')) <= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
 						AND CONCAT(RPAD(UPPER('{$varow['loppuhyllyalue']}'), 5, '0'),LPAD(UPPER('{$varow['loppuhyllynro']}'), 5, '0')) >= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
 						AND tuotepaikat.halytysraja > 0
-						AND tuote.tuoteno in ('0242235663-2','+1','WR7DC+')
 						ORDER BY tuotepaikat.tuoteno";
 			$resultti = pupe_query($query);
 
@@ -344,16 +343,26 @@
 								// Haetaan tuotteet ketjukohtaisesti
 								$_tuotteet = $vastaavat->tuotteet($ketju);
 
+								$paras_vastaava = "";
+
+								foreach ($_tuotteet as $_tuote) {
+									// Otetaan p‰‰tuote, tai jos se ei oo setattu, niin otetaan se tuote joka on l‰himp‰n‰ p‰‰tuotetta
+									if (isset($tuotteet[$_tuote["tuoteno"]])) {
+										$paras_vastaava = $_tuote["tuoteno"];
+										break;
+									}
+								}
+
 								// Lis‰t‰‰n lˆydetyt vastaavat mahdollisten myyt‰vien joukkoon
 								foreach ($_tuotteet as $_tuote) {
-									if (strtoupper($pairow['tuoteno']) != strtoupper($_tuote['tuoteno'])) {
+									if (strtoupper($paras_vastaava) != strtoupper($_tuote['tuoteno'])) {
 										// Siirret‰‰n kaikki luvut "p‰‰tuotteelle"
-										$tuotteet[$pairow['tuoteno']]["halytysraja"] 	+= $tuotteet[$_tuote["tuoteno"]]["halytysraja"];
-										$tuotteet[$pairow['tuoteno']]["saldo"] 			+= $tuotteet[$_tuote["tuoteno"]]["saldo"];
-										$tuotteet[$pairow['tuoteno']]["tilattu"] 		+= $tuotteet[$_tuote["tuoteno"]]["tilattu"];
-										$tuotteet[$pairow['tuoteno']]["valmistuksessa"] += $tuotteet[$_tuote["tuoteno"]]["valmistuksessa"];
-										$tuotteet[$pairow['tuoteno']]["ennpois"] 		+= $tuotteet[$_tuote["tuoteno"]]["ennpois"];
-										$tuotteet[$pairow['tuoteno']]["jt"] 			+= $tuotteet[$_tuote["tuoteno"]]["jt"];
+										$tuotteet[$paras_vastaava]["halytysraja"] 	+= $tuotteet[$_tuote["tuoteno"]]["halytysraja"];
+										$tuotteet[$paras_vastaava]["saldo"] 			+= $tuotteet[$_tuote["tuoteno"]]["saldo"];
+										$tuotteet[$paras_vastaava]["tilattu"] 		+= $tuotteet[$_tuote["tuoteno"]]["tilattu"];
+										$tuotteet[$paras_vastaava]["valmistuksessa"] += $tuotteet[$_tuote["tuoteno"]]["valmistuksessa"];
+										$tuotteet[$paras_vastaava]["ennpois"] 		+= $tuotteet[$_tuote["tuoteno"]]["ennpois"];
+										$tuotteet[$paras_vastaava]["jt"] 			+= $tuotteet[$_tuote["tuoteno"]]["jt"];
 
 										unset($tuotteet[$_tuote["tuoteno"]]);
 									}

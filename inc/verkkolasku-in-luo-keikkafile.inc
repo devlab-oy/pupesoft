@@ -2086,7 +2086,7 @@
 
 			$liian_iso_pyoristysero = false;
 
-			if ($kohdistettava_summa == $valittusumma and abs($checksumma) <= $pyoristysero_raja) {
+			if (abs($checksumma) <= $pyoristysero_raja) {
 				$pyoristys_erot = $checksumma;
 			}
 			else {

@@ -603,7 +603,7 @@
 				echo "<tr><td>".t("Ennakkotilaukset")."		</td><td>{$tuoterivi['ennakko']}			</td></tr>";
 				echo "<tr><td>".t("Valmistuksessa")."		</td><td>{$tuoterivi['valmistuksessa']}		</td></tr>";
 				echo "<tr><td>".t("Päiväkulutus")."			</td><td>{$tuoterivi['paivakulutus']}		</td></tr>";
-				echo "<tr><td>".t("Vuosikulutus")."			</td><td>{$tuoterivi['vuosikulutus']}		</td></tr>";
+				echo "<tr><td>".t("Vuosikulutus")."         </td><td>{$tuoterivi['vuosikulutus']} (".t("rullaava 12kk").")</td></tr>";
 				echo "<tr><td>".t("Riitto päivät")."		</td><td>{$tuoterivi['riittopv']}			</td></tr>";
 				echo "<tr><td>".t("Kulutusennuste")."		</td><td>{$tuoterivi['kulutusennuste']}		</td></tr>";
 				echo "<tr><td>".t("Budjetoitu kulutus")."	</td><td>{$tuoterivi['kulutus']}			</td></tr>";

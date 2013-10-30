@@ -63,6 +63,9 @@ if(!function_exists("tuotetarkista")) {
 					if (mysql_num_rows($sdtres) == 0) {
 						$poistolukko = "";
 					}
+					else {
+						$poistolukko = "LUEDATA";
+					}
 				}
 			}
 
@@ -147,7 +150,6 @@ if(!function_exists("tuotetarkista")) {
 						require("muuvarastopaikka.php");
 					}
 				}
-			}
 			}
 		}
 
@@ -502,6 +504,7 @@ if(!function_exists("tuotetarkista")) {
 				$virhe[$i] = t("Ostoehdotus arvo tulee olla joko E tai tyhj‰! (E = ei n‰ytet‰ ja tyhj‰ = n‰ytet‰‰n)");
 			}
 		}
+	}
 }
 	
 		

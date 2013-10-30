@@ -2003,6 +2003,44 @@
 				unset($pointteri);
 			}
 
+			$query = "	SELECT varastopaikat.maa, count(*) kpl
+						FROM lasku
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
+						JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
+							AND varastopaikat.maa != ''
+							AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+							AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))
+						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+						AND lasku.tunnus = '{$_uusiotunnus}'
+						GROUP BY varastopaikat.maa
+						ORDER BY kpl DESC
+						LIMIT 1";
+			$maaresult = pupe_query($query);
+
+			if ($maarow = mysql_fetch_array($maaresult)) {
+				$maa_maara = $maarow["maa"];
+			}
+			elseif ($osrow['yhtio_toimipaikka'] != 0) {
+
+				$query = "	SELECT maa
+							FROM yhtion_toimipaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$osrow['yhtio_toimipaikka']}'";
+				$chk_maa_res = pupe_query($query);
+				$chk_maa_row = mysql_fetch_assoc($chk_maa_res);
+
+				$maa_maara = $chk_maa_row["maa"];
+			}
+			else {
+				$maa_maara = $yhtiorow["maa"];
+			}
+
+			$query = "	UPDATE lasku SET
+						maa_maara = '{$maa_maara}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$_uusiotunnus}'";
+			$upd_res = pupe_query($query);
+
 			$tee_kululaskut = "liita";
  			$silent = "SILENT";
  			$keikanalatila = "";
@@ -2347,9 +2385,9 @@
 
 				// P‰ivitet‰‰n vain kerran eturahti
 				if ($_go) {
-					
+
 					$rahti_etu_alv = (float) $alv_talteen;
-					
+
 					// Laitetaan rivikohtaiset rahtikulut eturahtiin
 					$laskurow['rahti_etu'] += $rivikohtaiset_rahtikulut;
 

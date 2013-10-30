@@ -24441,6 +24441,9 @@ if (!function_exists("tuotteen_budjetoitu_myynti")) {
 		// Tilaustuotteiden k‰sittely, jos ei anneta oletetaan ett‰ huomioidaan vaan JT rivit
 		$tilaustuotteiden_kasittely = isset($parametrit['tilaustuotteiden_kasittely']) ? $parametrit['tilaustuotteiden_kasittely'] : 'A';
 
+		// Tuotteen status, t‰m‰n voi v‰litt‰‰. Jos ei tule parametriss‰ niin haetaan
+		$tuote_status = isset($parametrit['tuote_status']) ? trim($parametrit['tuote_status']) : null;
+
 		// Tehd‰‰n kaudet p‰iv‰m‰‰rist‰
 		$alku_kausi  = substr(str_replace("-", "", $nykyinen_alku), 0, 6);
 		$loppu_kausi = substr(str_replace("-", "", $nykyinen_loppu), 0, 6);
@@ -24453,14 +24456,17 @@ if (!function_exists("tuotteen_budjetoitu_myynti")) {
 		$edellinen_alku  = date("Y-m-d", strtotime("-1 year", strtotime($nykyinen_alku)));
 		$edellinen_loppu = date("Y-m-d", strtotime("-1 year", strtotime($nykyinen_loppu)));
 
-		// Haetaan tuotteen status
-		$query = "	SELECT tuote.status
-					FROM tuote
-					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-					AND tuote.tuoteno = '{$tuoteno}'";
-		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);
-		$tuote_status = $row['status'];
+		// Haetaan status jos sit‰ ei ole passattu
+		if (!isset($tuote_status)) {
+			// Haetaan tuotteen status
+			$query = "	SELECT tuote.status
+						FROM tuote
+						WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+						AND tuote.tuoteno = '{$tuoteno}'";
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
+			$tuote_status = $row['status'];
+		}
 
 		// T‰m‰ palautetaan, lasketaan budjetoitu myynti
 		$budjetoitu_myynti = 0;

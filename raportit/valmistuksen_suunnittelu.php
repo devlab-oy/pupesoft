@@ -275,12 +275,22 @@
 							);
 		}
 
+		// Haetaan tuotteen status
+		$query = "	SELECT tuote.status
+					FROM tuote
+					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+					AND tuote.tuoteno = '{$tuoteno}'";
+		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
+		$tuote_status = $row['status'];
+
 		// Haetaan budjetoitu myynti
 		$params = array(
 			'tuoteno'                    => $tuoteno,
 			'pvm_alku'                   => $nykyinen_alku,
 			'pvm_loppu'                  => $nykyinen_loppu,
 			'tilaustuotteiden_kasittely' => $tilaustuotteiden_kasittely,
+			'tuote_status'               => $tuote_status,
 		);
 
 		list($budjetoitu_myynti, $budjetin_peruste) = tuotteen_budjetoitu_myynti($params);
@@ -292,8 +302,20 @@
 		$paivakulutus = round($vuosikulutus / 240, 6);
 		$riittopv = ($paivakulutus == 0) ? t("Ei tiedossa") : floor($reaalisaldo / $paivakulutus);
 
-		// Lasketaan m‰‰r‰ennuste (paljon kuluu toimittajan toimitusajan aikana + arvioitu myynti)
-		$maaraennuste = ($paivakulutus * $toimittajarow['toimitusaika']) + $budjetoitu_myynti;
+		// Toimitustuotteilla m‰‰r‰ennuste on suoraan budjetoitu myynti
+		// Mutta vain jos ollaan valittu: A tai C
+		// 'A' - "Tilaustuotteiden m‰‰r‰ennuste on j‰lkitoimitusrivit"
+		// 'B' - "Tilaustuotteiden m‰‰r‰ennuste on budjetti/myynti"
+		// 'C' - "Tilaustuotteiden m‰‰r‰ennuste on j‰lkitoimitusrivit + budjetti/myynti"
+		if ($tuote_status == 'T' and ($tilaustuotteiden_kasittely == 'A' or $tilaustuotteiden_kasittely == 'C')) {
+			$maaraennuste = $budjetoitu_myynti;
+			$paivakulutus = t("ei k‰ytˆss‰");
+			$toimittajarow['toimitusaika'] = t("ei k‰ytˆss‰");
+		}
+		else {
+			// Lasketaan m‰‰r‰ennuste (paljon kuluu toimittajan toimitusajan aikana + arvioitu myynti)
+			$maaraennuste = ($paivakulutus * $toimittajarow['toimitusaika']) + $budjetoitu_myynti;
+		}
 
 		// Lasketaan paljon kannattaisi valmistaa
 		$valmistussuositus = round($maaraennuste - $reaalisaldo);
@@ -319,6 +341,7 @@
 		$tuoterivi['pakkauskoko']		= $toimittajarow['pakkauskoko'];
 		$tuoterivi['valmistusmaara'] 	= $valmistusmaara;
 		$tuoterivi['abcluokka']			= $abcluokka;
+		$tuoterivi['budjetin_peruste']  = $budjetin_peruste;
 
 		return $tuoterivi;
 	}
@@ -626,7 +649,7 @@
 
 		if ($toimittajaid != '') {
 			// Jos ollaan rajattu toimittaja, niin otetaan vain sen toimittajan tuotteet ja laitetaan mukaan selectiin
-			$toimittaja_join = "JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid')";
+			$toimittaja_join = "JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$toimittajaid')";
 			$toimittaja_select = "tuotteen_toimittajat.liitostunnus toimittaja, tuotteen_toimittajat.pakkauskoko";
 		}
 		else {
@@ -1166,6 +1189,17 @@
 				echo "{$tuoterivi["paivakulutus"]} = round({$tuoterivi["vuosikulutus"]} / 240)<br><br>";
 				echo t("Riitto p‰iv‰t")." = floor(".t("Reaalisaldo")." / ".t("P‰iv‰kulutus").")<br>";
 				echo "{$tuoterivi["riittopv"]} = floor({$tuoterivi["reaalisaldo"]} / {$tuoterivi["paivakulutus"]})<br><br>";
+				
+				echo "<font class='info'>";
+				echo t("Myyntitavoite").":<br>";
+
+				foreach ($tuoterivi['budjetin_peruste'] as $budjetin_peruste) {
+					echo "Tuotteen status: ".$budjetin_peruste['status']."<br>";
+					echo "Budjetin peruste: ".$budjetin_peruste['syy']."<br>";
+					echo "Myyntitavoite: ".$budjetin_peruste['budjetoitu_myynti']."<br><br>";
+				}
+				echo "</font>";
+
 				echo t("M‰‰r‰ennuste")." = (".t("P‰iv‰kulutus")." * ".t("Toimitusaika").") + ".t("Myyntitavoite")."<br>";
 				echo "{$tuoterivi["maaraennuste"]} = ({$tuoterivi["paivakulutus"]} * {$tuoterivi["toimitusaika"]}) + {$tuoterivi["budjetoitu_myynti"]}<br><br>";
 				echo t("Valmistussuositus")." = round(".t("M‰‰r‰ennuste")." - ".t("Reaalisaldo").")<br>";

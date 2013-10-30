@@ -20659,15 +20659,18 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 			$kerayseran_paino = $kerayseran_rivit[$i]['data']['paino'];
 			$jaljella = $kerayseran_rivit[$i]['data']['varattu'];
 
+			$lisatty_kol_maara = 0;
+
 			while (($pakkaukset_paino > $pakkauksen_kaytetty_paino)) {
 
 				if (($pakkauksen_kaytetty_paino + ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era'])) > $pakkaukset_paino) {
 
 					$pakkauksen_kaytetty_paino = 0;
 
-					if ($_pakkaus != 0 or count($kerayseran_rivit) > 1) {
+					if ($_pakkaus != 0 or (count($kerayseran_rivit) > 1 and $lisatty_kol_maara == 0)) {
+
 						$pakkausnro++;
-						$pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era']);
+						$pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $jaljella);
 
 						$sscc          = uusi_sscc_nro();
 						$sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
@@ -20680,6 +20683,8 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				$kerayseran_paino -= $kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era'];
 
 				$pakkauksen_kaytetty_paino += ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era']);
+
+ 				$lisatty_kol_maara += $kerayseran_rivit[$i]['data']['myynti_era'];
 
 				if ($jaljella <= 0) break;
 			}

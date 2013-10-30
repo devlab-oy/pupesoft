@@ -767,7 +767,7 @@ if (!function_exists('rivi_kerayslista')) {
 				$varastopaikka = hyllyalue('', $row['hyllyalue'], 'riisuttu') . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
 
 				if (strpos($varastopaikka, "!!M") !== FALSE) {
-					$varastopaikka = "Myyntitili";
+					$varastopaikka = t("Myyntitili", $kieli);
 				}
 
 				$row["perhe_kommentti1"] = "";

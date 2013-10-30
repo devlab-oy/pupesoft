@@ -1885,21 +1885,23 @@
 					'N' => '',
 					'S' => '',
 					'T' => '',
+					'U' => '',
 					2 => '',
 					7 => '',
 					8 => '',
 					9 => '',
 				);
 
-				$vasen_sarake[$vasen] .= "<option value='N' $sel[N]>".t("Normaalitilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='E' $sel[E]>".t("Ennakkotilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='T' $sel[T]>".t("Tarjoustilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='2' $sel[2]>".t("Varastotäydennys")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='7' $sel[7]>".t("Tehdastilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='S' $sel[S]>".t("Sarjatilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='8' $sel[8]>".t("Muiden mukana")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='A' $sel[A]>".t("Työmääräys")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='9' $sel[9]>".t("Tehdaspalautus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='N' {$sel['N']}>".t("Normaalitilaus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='E' {$sel['E']}>".t("Ennakkotilaus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='8' {$sel[8]}>".t("Muiden mukana")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='S' {$sel['S']}>".t("Sarjatilaus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='U' {$sel['U']}>".t("Takuutilaus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='T' {$sel['T']}>".t("Tarjoustilaus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='9' {$sel[9]}>".t("Tehdaspalautus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='7' {$sel[7]}>".t("Tehdastilaus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='A' {$sel['A']}>".t("Työmääräys")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='2' {$sel[2]}>".t("Varastotäydennys")."</option>";
 				$vasen_sarake[$vasen] .= "</select></td>";
 				$vasen++;
 			}

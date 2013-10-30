@@ -175,12 +175,10 @@
 							AND tunnus 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
-				if ($yhtiorow["kerayserat"] == 'A' OR $yhtiorow["kerayserat"] == 'K' OR $yhtiorow["kerayserat"] == 'P') {
-					$query = "	DELETE FROM kerayserat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND otunnus = '{$tunnus}'";
-					$tila_result = pupe_query($query);
-				}
+				$query = "	DELETE FROM kerayserat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND otunnus = '{$tunnus}'";
+				$tila_result = pupe_query($query);
 
 				$query = "	DELETE FROM rahtikirjat
 							WHERE yhtio 	= '{$kukarow['yhtio']}'
@@ -219,12 +217,10 @@
 							AND tunnus 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
-				if ($yhtiorow["kerayserat"] == 'A' OR $yhtiorow["kerayserat"] == 'K' OR $yhtiorow["kerayserat"] == 'P') {
-					$query = "	DELETE FROM kerayserat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND otunnus = '{$tunnus}'";
-					$tila_result = pupe_query($query);
-				}
+				$query = "	DELETE FROM kerayserat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND otunnus = '{$tunnus}'";
+				$tila_result = pupe_query($query);
 
 				$query = "	DELETE FROM rahtikirjat
 							WHERE yhtio 	= '{$kukarow['yhtio']}'

@@ -1232,8 +1232,14 @@ if ($tila == '') {
 	}
 
 	if (isset($toimipaikka)) {
-		$toimipaikka = (int) $toimipaikka;
-		$toimipaikkalisa = "AND (lasku.vanhatunnus = '{$toimipaikka}' or lasku.vanhatunnus = 0)";
+
+		if ($toimipaikka == 'kaikki') {
+			$toimipaikkalisa = "";
+		}
+		else {
+			$toimipaikka = (int) $toimipaikka;
+			$toimipaikkalisa = "AND (lasku.vanhatunnus = '{$toimipaikka}' or lasku.vanhatunnus = 0)";
+		}
 	}
 	else {
 		$toimipaikkalisa = "AND (lasku.vanhatunnus = '{$laskurow['yhtio_toimipaikka']}' or lasku.vanhatunnus = 0)";
@@ -1387,8 +1393,11 @@ if ($tila == '') {
 	echo "<th>",t("Näytä toimipaikan rivejä"),"</th>";
 	echo "<td>";
 
+	$sel = (isset($toimipaikka) and $toimipaikka === 'kaikki') ? "selected" : "";
+
 	echo "<select name='toimipaikka' onchange='submit();'>";
-	echo "<option value=''>",t("Ei toimipaikkaa"),"</option>";
+	echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+	echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
 
 	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
 

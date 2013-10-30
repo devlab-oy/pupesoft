@@ -201,7 +201,7 @@
 			$kentta = "nimi";
 		}
 		else {
-			
+
 			echo "<td colspan = '2'><table>";
 			echo "<tr><th colspan='2' align='left' valign='top'>&nbsp; ".t("Toimitusosoite").":</td></tr>";
 			echo "<tr><td valign='top'> ".t("Nimi").": </td><td><input type='text' name='tnimi' size='35' maxlength='31' value='$srow[toim_nimi]'></td></tr>";
@@ -351,10 +351,14 @@
 			$toimtapares = t_avainsana("TOIMITUSTAPA_OS");
 
 			if (mysql_num_rows($toimtapares) > 0) {
+
 				echo "<select name = 'kuljetus'>";
+
 				while($toimtaparow  = mysql_fetch_array($toimtapares)) {
-					echo "<option value='$toimtaparow[selite]'>$toimtaparow[selite]</option>";
+					$sel = $srow['kuljetus'] == $toimtaparow['selite'] ? "selected" : "";
+					echo "<option value='{$toimtaparow['selite']}' {$sel}>",trim("{$toimtaparow['selite']} {$toimtaparow['selitetark']}"),"</option>";
 				}
+
 				echo "</select>";
 			}
 			else {
@@ -456,8 +460,8 @@
 				<input type='text' size='61' name='viesti' value='$srow[viesti]'> (".t("Ostotilaus").")</td>";
 			echo "</tr>";
 			echo "<tr><td>".t("Viesti").":</td><td colspan='3'><textarea name='sisviesti1' rows='2' cols='60'>$srow[sisviesti1]</textarea> (".t("Ostotilaus").")</td></tr>";
-			echo "<tr><td>".t("Kommentit").":</td><td colspan='3'><textarea name='comments' rows='2' cols='60'>$srow[comments]</textarea> (".t("Sisäinen").")</td></tr>";		
-			echo "<tr><td>".t("Ohjausmerkki").":</td><td colspan='3'><input type='text' size='61' name='ohjausmerkki' value='$srow[ohjausmerkki]'>(".t("Sähköinen ostotilaus").")</td></tr>";								
+			echo "<tr><td>".t("Kommentit").":</td><td colspan='3'><textarea name='comments' rows='2' cols='60'>$srow[comments]</textarea> (".t("Sisäinen").")</td></tr>";
+			echo "<tr><td>".t("Ohjausmerkki").":</td><td colspan='3'><input type='text' size='61' name='ohjausmerkki' value='$srow[ohjausmerkki]'>(".t("Sähköinen ostotilaus").")</td></tr>";
 			echo "</table>";
 			echo "<input type='hidden' name='from' value='$from'><br>";
 			echo "<br><br>";

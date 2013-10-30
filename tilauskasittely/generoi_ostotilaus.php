@@ -99,17 +99,31 @@
 
 			echo "<tr><th>",t("Keräysvyöhyke"),"</th>";
 			echo "<td>";
+			echo "<table>";
 
-			echo "<input type='hidden' name='keraysvyohyke[]' value='default' />";
+			$kala = 0;
 
 			while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res)) {
 
 				$chk = in_array($keraysvyohyke_row['tunnus'], $keraysvyohyke) ? " checked" : "";
 
-				echo "<input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$chk} /> {$keraysvyohyke_row['nimitys']}<br />";
+				if ($kala == 0) echo "<tr>";
+
+				echo "<td><input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$chk} /> {$keraysvyohyke_row['nimitys']}</td>";
+
+				if ($kala == 3) {
+					echo "</tr>";
+					$kala = -1;
+				}
+
+				$kala++;
 			}
 
-			echo "</td></tr>";
+			if ($kala != 0) {
+				echo "</tr>";
+			}
+
+			echo "</table></td></tr>";
 		}
 	}
 

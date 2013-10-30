@@ -145,9 +145,10 @@ if ($tee == '') {
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<th colspan=5>" . t("Valmistuslinja") . ": " . $linja['selitetark']."</th>";
+		echo "<th colspan=6>" . t("Valmistuslinja") . ": " . $linja['selitetark']."</th>";
 		echo "</tr>";
 		echo "<tr>
+			<th>" . t("Valmistus") . " </th>
 			<th>" . t("Tila") . " </th>
 			<th>" . t("Nimitys") . "</th>
 			<th>" . t("Viite") . "</th>
@@ -156,7 +157,7 @@ if ($tee == '') {
 			</tr>";
 
 		// Haetaan linjan 4 uusinta kalenterimerkinnät
-		$tyojono_query = "SELECT kalenteri.kuka, kalenteri.henkilo, nimitys, varattu, yksikko, pvmalku, pvmloppu, kalenteri.tunnus, lasku.valmistuksen_tila, lasku.viesti, kalenteri.otunnus
+		$tyojono_query = "SELECT kalenteri.kuka, kalenteri.henkilo, nimitys, varattu, yksikko, pvmalku, pvmloppu, kalenteri.tunnus, lasku.valmistuksen_tila, lasku.viesti, lasku.tunnus as valmistusnumero, kalenteri.otunnus
 						FROM kalenteri
 						JOIN tilausrivi on (tilausrivi.yhtio=kalenteri.yhtio and tilausrivi.otunnus=kalenteri.otunnus)
 						JOIN lasku on (lasku.yhtio=kalenteri.yhtio and lasku.tunnus=kalenteri.otunnus)
@@ -171,7 +172,7 @@ if ($tee == '') {
 		// Jos työjono on tyhjä
 		if (mysql_num_rows($tyojono_result) == 0) {
 			echo "<tr>";
-			echo "<td colspan=4>";
+			echo "<td colspan=5>";
 			echo t("Ei valmistuksia jonossa.");
 			echo "</td>";
 			echo "</tr>";
@@ -180,6 +181,7 @@ if ($tee == '') {
 			// Työjonon työt
 			while($tyojono = mysql_fetch_assoc($tyojono_result)) {
 				echo "<tr>";
+				echo "<td>" . $tyojono['valmistusnumero'] . "</td>";
 				echo "<td>" . strtoupper($tilat[$tyojono['valmistuksen_tila']]) . "</td>";
 				echo "<td>" . $tyojono['nimitys'] . "</td>";
 				echo "<td>" . $tyojono['viesti'] ."</td>";
@@ -223,3 +225,5 @@ if ($tee == '') {
 	if (isset($errors)) echo "<font class='error'>$errors</font>";
 
 }
+
+require('inc/footer.inc');

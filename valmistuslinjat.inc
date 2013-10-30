@@ -293,6 +293,10 @@ function laske_loppuaika($alkuaika, $minuutit = 0, $valmistuslinja) {
 		$loppuaika = mktime(date('H', $loppuaika), date('i', $loppuaika) + INTERVALLI, date('s', $loppuaika), date('m', $loppuaika), date('d', $loppuaika), date('Y', $loppuaika));
 	}
 
+	if ($loppuaika < strtotime('now')) {
+		$loppuaika = strtotime('now');
+	}
+
 	return $loppuaika;
 }
 
@@ -320,7 +324,6 @@ function rebuild_valmistuslinjat($from = 'now') {
                         JOIN lasku ON (kalenteri.yhtio=lasku.yhtio AND kalenteri.otunnus=lasku.tunnus)
                         WHERE kalenteri.yhtio = '{$kukarow['yhtio']}'
                         AND henkilo           = '{$linja['selite']}'
-                        AND pvmloppu          > '$from'
                         AND valmistuksen_tila not in('VT', 'TA')
                         ORDER BY pvmalku";
 		$result = pupe_query($query);
@@ -391,8 +394,8 @@ function rebuild_valmistuslinjat($from = 'now') {
 			$result = pupe_query($lasku_query);
 
 			$tilausrivi_query = "UPDATE tilausrivi SET
-                                          kerayspvm   = '{$current['pvmloppu']}',
-                                          toimaika    = '{$current['pvmloppu']}'
+                                          kerayspvm   = '{$current['pvmalku']}',
+                                          toimaika    = '{$current['pvmalku']}'
                                           WHERE yhtio = '{$kukarow['yhtio']}'
                                           AND otunnus = {$current['otunnus']}";
 			$result = pupe_query($tilausrivi_query);

@@ -89,16 +89,29 @@ $(document).ready(function() {
 	});
 });
 
-
 function show_details(event, jsEvent) {
 	var x = null;
 	if (jsEvent.pageX > ($(document).width() - $('#bubble').width())) {
-		x = $(document).width() - $('#bubble').width();
+		x = $(document).width() - ($('#bubble').width() + 50);
 	}
 	else {
 		x = jsEvent.pageX;
 	}
-	var y = jsEvent.pageY;
+
+	var body = document.body;
+	var html = document.documentElement;
+	var height = Math.min(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
+	var y = null;
+	if (jsEvent.pageY > (height - $('#bubble').height())) {
+
+		y = height - ($('#bubble').height() + 50);
+	}
+	else {
+		y = jsEvent.pageY;
+	}
+	var scrollTop = $(window).scrollTop(); //how much user has scrolled
+	y = y - scrollTop;
+
 	// Info laatikko
 	$('#bubble').css('top', y);
 	$('#bubble').css('left', x);
@@ -113,12 +126,12 @@ function show_details(event, jsEvent) {
 	// Lis‰t‰‰n valmistuksen tiedot kalenteriin
 	// Korvataan \n -rivivaihto <br> -rivivaihdolla
 	var content = event.title.replace(/\n/g, "<br>") + "<br>";
-		content += start + " - " + end + "<br>";
+	content += start + " - " + end + "<br>";
 
 	// Jos on puutteita
-	if(!$.isEmptyObject(event.puutteet)) {
+	if (!$.isEmptyObject(event.puutteet)) {
 		content += "Puutteet:<br>";
-		for(var tuote in event.puutteet) {
+		for (var tuote in event.puutteet) {
 			content += tuote + " " + event.puutteet[tuote] + "<br>";
 		}
 	}

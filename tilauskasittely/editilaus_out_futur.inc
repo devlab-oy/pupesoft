@@ -55,6 +55,9 @@
 	   	$edi_order .= "*MS {$laskurow['tunnus']}\n";
 	   	$edi_order .= "*RS OSTOTIL\n";
 
+	   	if ($myynti_vai_osto == 'O') $_toimitustapa = $laskurow['kuljetus'];
+	   	else $_toimitustapa = $laskurow['toimitustapa'];
+
 	   	$edi_order .= "OSTOTIL.OT_NRO:{$laskurow['tunnus']}\n";
 		// 0 = Örum
 	   	$edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:0\n";
@@ -62,7 +65,7 @@
 		$edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
 		$edi_order .= "OSTOTIL.OT_KASITTELIJA:\n";
 		$edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:\n";
-		$edi_order .= "OSTOTIL.OT_TOIMITUSTAPA:{$laskurow['toimitustapa']}\n";
+		$edi_order .= "OSTOTIL.OT_TOIMITUSTAPA:{$_toimitustapa}\n";
 		$edi_order .= "OSTOTIL.OT_TOIMITUSEHTO:{$laskurow['toimitusehto']}\n";
 		$edi_order .= "OSTOTIL.OT_MAKSUEHTO:{$laskurow['maksuehto']}\n";
 		$edi_order .= "OSTOTIL.OT_VIITTEEMME:{$laskurow['viesti']}\n";

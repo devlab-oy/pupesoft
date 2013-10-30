@@ -1016,6 +1016,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			echo "<br><form name='toimi' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 			echo "<input type='hidden' name='naytalaskelma' value='JOO'>";
+			echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
 			echo "<input type='submit' value='".t("Näytä varastonarvolaskelma")."'>";
 			echo "</form>";
 		}
@@ -1438,6 +1439,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 			echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
 			echo "<input type='hidden' name='naytalaskelma' value='JOO'>";
+			echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
 			echo "<input type='submit' value='".t("Näytä varastonarvolaskelma")."'>";
 			echo "</form>";
 		}

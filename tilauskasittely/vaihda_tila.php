@@ -218,8 +218,8 @@
 				$tila_result = pupe_query($query);
 
 				$query = "	DELETE FROM kerayserat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND otunnus = '{$tunnus}'";
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND otunnus = '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
 				$query = "	DELETE FROM rahtikirjat

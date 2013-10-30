@@ -494,6 +494,9 @@
 		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 			echo "<font class='head'>".t("Työmääräyksen otsikko")."</font><hr>";
 		}
+		elseif ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U')) {
+			echo "<font class='head'>".t("Takuu otsikko")."</font><hr>";
+		}
 		elseif ($toim == "REKLAMAATIO") {
 			echo "<font class='head'>".t("Reklamaatio otsikko")."</font><hr>";
 		}
@@ -1174,6 +1177,9 @@
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 				echo "<tr><th colspan='4'>".t("Työmääräyksen tiedot").":</th></tr>";
 			}
+			elseif ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U')) {
+				echo "<tr><th colspan='4'>".t("Takuun tiedot").":</th></tr>";
+			}
 			elseif ($toim == "REKLAMAATIO") {
 				echo "<tr><th colspan='4'>".t("Reklamaation tiedot").":</th></tr>";
 			}
@@ -1775,10 +1781,15 @@
 			elseif ($toim == "REKLAMAATIO") {
 				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 
-				//Jos kyseessä on työmääräys
-				echo "<input type='hidden' name='tilaustyyppi' value='R'>";
+				if ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') {
+					echo "<input type='hidden' name='tilaustyyppi' value='U'>";
+					$vasen_sarake[$vasen] .= "<td>".t("Takuu")."</td>";
+				}
+				else {
+					echo "<input type='hidden' name='tilaustyyppi' value='R'>";
+					$vasen_sarake[$vasen] .= "<td>".t("Reklamaatio")."</td>";
+				}
 
-				$vasen_sarake[$vasen] .= "<td>".t("Reklamaatio")."</td>";
 				$vasen++;
 			}
 

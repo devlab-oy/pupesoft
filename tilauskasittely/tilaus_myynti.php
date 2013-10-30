@@ -606,7 +606,12 @@ elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 	$otsikko = t("Työmääräys");
 }
 elseif ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") {
-	$otsikko = $laskurow['tilaustyyppi'] == 'U' ? t("Takuu") : t("Reklamaatio");
+	if ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U') {
+		$otsikko = t("Takuu");
+	}
+	else {
+		$otsikko = t("Reklamaatio");
+	}
 }
 elseif ($toim == "VALMISTAVARASTOON") {
 	$otsikko = t("Varastoonvalmistus");
@@ -8480,6 +8485,7 @@ if ($tee == '') {
 					<input type='hidden' name='mista' value = '$mista'>
 					<input type='hidden' name='orig_tila' value = '$orig_tila'>
 					<input type='hidden' name='orig_alatila' value = '$orig_alatila'>
+					<input type='hidden' name='tilaustyyppi' value = '$laskurow[tilaustyyppi]'>
 					<input type='submit' value='* ".t("Mitätöi koko")." $otsikko *'>
 					</form></td>";
 		}

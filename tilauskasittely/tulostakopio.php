@@ -178,6 +178,9 @@
 	if ($toim == "REKLAMAATIO") {
 		$fuse = t("Reklamaatio/Purkulista");
 	}
+	if ($toim == "TAKUU") {
+		$fuse = t("Takuu");
+	}
 
 	if (isset($muutparametrit) and $muutparametrit != '') {
 		$muut = explode('/',$muutparametrit);
@@ -435,7 +438,7 @@
 					 	 	and lasku.toim_postitp	= '$asiakasrow[toim_postitp]' ";
 		}
 
-		if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'U') {
+		if (($toim == "REKLAMAATIO" or $toim == "TAKUU") and $yhtiorow['reklamaation_kasittely'] == 'U') {
 			$where1 .= " lasku.tila in ('C','L') ";
 
 			$where2 .= " and lasku.alatila in('C','D','X')";
@@ -448,8 +451,14 @@
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
-		if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == '') {
-			$where1 .= " lasku.tila in ('L','N','C') and lasku.tilaustyyppi = 'R' ";
+		if (($toim == "REKLAMAATIO" or $toim == "TAKUU") and $yhtiorow['reklamaation_kasittely'] == '') {
+
+			if ($toim == "TAKUU") {
+				$where1 .= " lasku.tila in ('L','N','C') and lasku.tilaustyyppi = 'U' ";
+			}
+			else {
+				$where1 .= " lasku.tila in ('L','N','C') and lasku.tilaustyyppi = 'R' ";
+			}
 
 			$where2 .= " and lasku.alatila in ('','A','B','C','J','D') ";
 
@@ -1357,7 +1366,7 @@
 				$komento["Työmääräys"] .= " -# $kappaleet ";
 			}
 		}
-		elseif ($toim == "REKLAMAATIO") {
+		elseif ($toim == "REKLAMAATIO" or $toim == "TAKUU") {
 			$tulostimet[0] = 'Keräyslista';
 			if ($kappaleet > 0 and $komento["Keräyslista"] != 'email') {
 				$komento["Keräyslista"] .= " -# $kappaleet ";
@@ -1989,7 +1998,7 @@
 				$tee = '';
 			}
 
-			if ($toim == "KERAYSLISTA" or $toim == "SIIRTOLISTA" or $toim == "REKLAMAATIO") {
+			if ($toim == "KERAYSLISTA" or $toim == "SIIRTOLISTA" or $toim == "REKLAMAATIO" or $toim == "TAKUU") {
 
 				require_once ("tulosta_lahete_kerayslista.inc");
 
@@ -2120,6 +2129,9 @@
 				}
 				elseif ($toim == "REKLAMAATIO") {
 					$tyyppi = "REKLAMAATIO";
+				}
+				elseif ($toim == "TAKUU") {
+					$tyyppi = "TAKUU";
 				}
 				else {
 					$tyyppi = "";

@@ -63,6 +63,9 @@ if(!function_exists("tuotetarkista")) {
 					if (mysql_num_rows($sdtres) == 0) {
 						$poistolukko = "";
 					}
+					else {
+						$poistolukko = "LUEDATA";
+					}
 				}
 			}
 
@@ -502,6 +505,7 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 	}
+}
 	
 		
-}
+

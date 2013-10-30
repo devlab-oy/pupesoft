@@ -537,9 +537,18 @@
 								ORDER BY kerayserat.pakkausnro";
 					$pnresult = pupe_query($query0);
 
+					$pakkaustal = 0;
+					$las = 0;
+
 					while ($prow = mysql_fetch_assoc($pnresult)) {
 						$pakkaus = array('pakkausnro' => $prow['pakkausnro'], 'sscc' => $prow['sscc'], 'sscc_ulkoinen' => $prow['sscc_ulkoinen'], 'pakkaus' => $prow['pakkaus'], 'tunnus' => $prow['tunnus']);
 						$pakkaukset[] = $pakkaus;
+
+						//otetaan pakkaus talteen, koska on mahdollista tehäd uusia pakkauksia -> saadaan nekin sit oikeen
+						if ($pakkaustal == 0) {
+							$pakkaustal = $pakkaukset[$las]['pakkaus'];
+						}
+						$las++;
 					}
 
 			for ($i=0; $i < count($kerivi); $i++) {
@@ -1171,11 +1180,18 @@
 								}
 							}
 
+							//tehhään uuet pakkaukset jos ollaan koetettu lisää niit
+							if (!isset($pakkaukset[$monesko]['sscc'])) {
+								$monesko = $pakkauskirjain - 1;
+								$pakkaukset[$monesko]['sscc'] = uusi_sscc_nro();
+								$pakkaukset[$monesko]['sscc_ulkoinen'] = uusi_gs1_sscc_nro($pakkaukset[$monesko]['sscc']);
+							}
+
 							$query_ins = "	UPDATE kerayserat SET
 											pakkausnro = '{$pakkauskirjain}',
 											sscc = '{$pakkaukset[$monesko]['sscc']}',
 											sscc_ulkoinen = '{$pakkaukset[$monesko]['sscc_ulkoinen']}',
-											pakkaus = '{$pakkaukset[$monesko]['pakkaus']}'
+											pakkaus = '$pakkaustal'
 											{$kerattylisa}
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tilausrivi = '{$kerivi[$i]}'";

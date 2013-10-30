@@ -24150,7 +24150,7 @@ if (!function_exists('hae_asiakasalennukset')) {
 }
 
 if (!function_exists('hae_asiakashinnat')) {
-	function hae_asiakashinnat($asiakasrow, $alehi_assegmenttirow, $asiakas_yhtio, $poistuvat = TRUE) {
+	function hae_asiakashinnat($asiakasrow, $alehi_assegmenttirow, $asiakas_yhtio, $tyyppi = 'poistuvat') {
 		global $kukarow, $yhtiorow;
 
 		$segmentti_where = "";
@@ -24159,8 +24159,11 @@ if (!function_exists('hae_asiakashinnat')) {
 			$segmentti_where = " and asiakashinta.asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])";
 		}
 
-		if ($poistuvat) {
+		if ($tyyppi == 'poistuvat') {
 			$poislisa = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
+		}
+		else if ($tyyppi == 'kaikki') {
+			$poislisa = "";
 		}
 		else {
 			$poislisa = " and tuote.status not in ('P','X') ";

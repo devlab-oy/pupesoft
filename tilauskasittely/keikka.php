@@ -968,6 +968,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			echo "<td class='back'><form method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$row[liitostunnus]'>";
 			echo "<input type='hidden' name='lisarajaus' value='{$lisarajaus}' />";
+			echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
 
 			if ($keikkarajaus == '' and $row['keikat'] != '' and strpos($row['keikat'], ',') === FALSE) {
 				echo "<input type='hidden' name='keikkarajaus' value='{$row['keikat']}' />";
@@ -991,7 +992,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 					$laskut_viety,
 					$laskut_osittain_viety,
 					$row_vaihto
-					) = hae_yhteenveto_tiedot($toimittajaid);
+					) = hae_yhteenveto_tiedot($toimittajaid, $toimipaikka);
 
 			$params = array(
 				'kaikkivarastossayhteensa'				 => $kaikkivarastossayhteensa,
@@ -1414,7 +1415,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 					$laskut_viety,
 					$laskut_osittain_viety,
 					$row_vaihto
-					) = hae_yhteenveto_tiedot($toimittajaid);
+					) = hae_yhteenveto_tiedot($toimittajaid, $toimipaikka);
 
 			$params = array(
 				'kaikkivarastossayhteensa'				 => $kaikkivarastossayhteensa,
@@ -1605,7 +1606,7 @@ function echo_yhteenveto_table($params) {
 	echo "</table>";
 }
 
-function hae_yhteenveto_tiedot($toimittajaid = null) {
+function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0) {
 	global $kukarow, $yhtiorow;
 
 	if ($toimittajaid == null) {
@@ -1614,6 +1615,8 @@ function hae_yhteenveto_tiedot($toimittajaid = null) {
 	else {
 		$toimittaja_where = "AND lasku.liitostunnus = '{$toimittajaid}'";
 	}
+
+	$toimipaikka = $toimipaikka != 'kaikki' ? (int) $toimipaikka : 0;
 
 	// haetaan vaihto-omaisuus- ja huolinta/rahti- laskut joita ei oo liitetty saapumisiin
 	$query = "	SELECT
@@ -1701,6 +1704,7 @@ function hae_yhteenveto_tiedot($toimittajaid = null) {
 				AND lasku.alatila 	  = ''
 				AND lasku.mapvm 	  = '0000-00-00'
 				AND lasku.vanhatunnus = 0
+				AND lasku.yhtio_toimipaikka = '{$toimipaikka}'
 				{$toimittaja_where}
 				GROUP BY 1,2,3,4";
 	$result = pupe_query($query);

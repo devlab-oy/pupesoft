@@ -748,11 +748,14 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 	echo "</tr>";
 
+	$sel = (isset($toimipaikka) and $toimipaikka === 'kaikki') ? "selected" : "";
+
 	echo "<tr>";
 	echo "<th>",t("Toimipaikka"),"</th>";
 	echo "<td>";
 	echo "<select name='toimipaikka'>";
-	echo "<option value=''>",t("Ei toimipaikkaa"),"</option>";
+	echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+	echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
 
 	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
@@ -877,7 +880,12 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		$havinglisa = "HAVING liitetty_lasku_kpl = 0";
 	}
 
-	$toimipaikkalisa = isset($toimipaikka) ? "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'" : "";
+	if (isset($toimipaikka) and $toimipaikka != 'kaikki') {
+		$toimipaikkalisa = "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'";
+	}
+	else {
+		$toimipaikkalisa = "";
+	}
 
 	// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
 	$query = "	SELECT lasku.liitostunnus,
@@ -1052,12 +1060,15 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		echo "<tr><td colspan='5'>".wordwrap($toimittajarow["fakta"], 100, "<br>")."</td></tr>";
 	}
 
+	$sel = (isset($toimipaikka) and $toimipaikka === 'kaikki') ? "selected" : "";
+
 	echo "<form method='post'>";
 	echo "<tr>";
 	echo "<th>",t("Toimipaikka"),"</th>";
 	echo "<td colspan='4'>";
 	echo "<select name='toimipaikka' onchange='submit();'>";
-	echo "<option value=''>",t("Ei toimipaikkaa"),"</option>";
+	echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+	echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
 
 	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
@@ -1135,7 +1146,12 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		}
 	}
 
-	$toimipaikkalisa = isset($toimipaikka) ? "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'" : "";
+	if (isset($toimipaikka) and $toimipaikka != 'kaikki') {
+		$toimipaikkalisa = "AND lasku.yhtio_toimipaikka = '{$toimipaikka}'";
+	}
+	else {
+		$toimipaikkalisa = "";
+	}
 
 	// etsit‰‰n vanhoja keikkoja, vanhatunnus pit‰‰ olla tyhj‰‰ niin ei listata liitettyj‰ laskuja
 	$query = "	SELECT lasku.tunnus,

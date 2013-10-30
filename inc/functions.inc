@@ -20604,14 +20604,10 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 		$pakkausres = pupe_query($query);
 		$pakkausrow = mysql_fetch_assoc($pakkausres);
 
-		query_dump($query);
-
 		$valittu_pakkaus  = $pakkausrow['tunnus'];
 		$pakkaukset_paino = $pakkausrow['paino'];
 		$pakkauksen_kaytetty_paino = 0;
 		$pakkausnro = 0;
-
-		echo "valittu pakkaus: $valittu_pakkaus --> pakkaukset_paino: $pakkaukset_paino<br>";
 
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
 		$order_sorttaus = $yhtiorow["kerayslistan_jarjestys_suunta"];
@@ -20632,8 +20628,6 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 			$kerayseran_rivit[]['data'] = $keraysera_row;
 		}
 
-		echo "<pre>",var_dump($kerayseran_rivit),"</pre>";
-
 		$sscc = 0;
 		$sscc_ulkoinen = 0;
 
@@ -20642,33 +20636,18 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 			$kerayseran_paino = $kerayseran_rivit[$i]['data']['paino'];
 			$jaljella = $kerayseran_rivit[$i]['data']['varattu'];
 
-			echo "loop: $i --> kerayseran_paino: $kerayseran_paino --> jaljella: $jaljella<br>";
-
 			$lisatty_kol_maara = 0;
 
 			while (($pakkaukset_paino > $pakkauksen_kaytetty_paino)) {
-
-				echo "while jäljellä kpl: $jaljella<br>";
-
-				echo "while ($pakkaukset_paino > $pakkauksen_kaytetty_paino) <br>";
-
-				echo "if (($pakkauksen_kaytetty_paino + ({$kerayseran_rivit[$i]['data']['tuotemassa']} * {$kerayseran_rivit[$i]['data']['myynti_era']})) > $pakkaukset_paino)<br>";
 
 				if (($pakkauksen_kaytetty_paino + ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era'])) > $pakkaukset_paino) {
 
 					$pakkauksen_kaytetty_paino = 0;
 
-					echo "$_pakkaus != 0 or ".count($kerayseran_rivit)." > 1<br>";
-
 					if ($_pakkaus != 0 or (count($kerayseran_rivit) > 1 and $lisatty_kol_maara == 0)) {
 
-						echo "isset: ".(int) isset($kerayseran_rivit[$i-1])." and ".(int) $kerayseran_rivit[$i-1]['data']['uusirivi']." == true and $pakkausnro == ".$kerayseran_rivit[$i-1]['data']['pakkausnro']."<br>";
-
 						$pakkausnro++;
-						// $pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era']);
 						$pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $jaljella);
-
-						echo "uusi sscc tehty ja uusi pakkauksen_kaytetty_paino = $pakkauksen_kaytetty_paino<br>";
 
 						$sscc          = uusi_sscc_nro();
 						$sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
@@ -20694,12 +20673,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				$sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
 			}
 
-			echo "pakkausnro: $pakkausnro --> sscc: $sscc --> sscc_ulkoinen: $sscc_ulkoinen<br>";
-			echo "pakkauksen_kaytetty_paino = $pakkauksen_kaytetty_paino<br>";
-
 			$keraysera_kpl = $kerayseran_rivit[$i]['data']['varattu'] - $jaljella;
-
-			echo "$keraysera_kpl = {$kerayseran_rivit[$i]['data']['varattu']} - $jaljella<br>";
 
 			$kerayseran_rivit[$i]['data']['upd_varattu'] = $jaljella == 0 ? 0 : $keraysera_kpl;
 			$kerayseran_rivit[$i]['data']['paino'] = $kerayseran_rivit[$i]['data']['tuotemassa'] * $keraysera_kpl;
@@ -20708,11 +20682,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 			$kerayseran_rivit[$i]['data']['sscc'] = $sscc;
 			$kerayseran_rivit[$i]['data']['sscc_ulkoinen'] = $sscc_ulkoinen;
 
-			echo "<pre>",var_dump($kerayseran_rivit[$i]),"</pre>";
-
 			if ($keraysera_kpl > 0 and $jaljella > 0) {
-
-				echo "if ($keraysera_kpl > 0 and $jaljella > 0)<br>";
 
 				$pakkausnro++;
 
@@ -20737,7 +20707,6 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				if (count($loppupaan_rivit) > 0) $kerayseran_rivit = array_merge($alkupaan_rivit, $loppupaan_rivit);
 				else $kerayseran_rivit = $alkupaan_rivit;
 			}
-			echo "<br><br>";
 		}
 
 		reset($kerayseran_rivit);

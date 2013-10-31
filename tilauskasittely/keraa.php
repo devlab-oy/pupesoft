@@ -537,18 +537,9 @@
 								ORDER BY kerayserat.pakkausnro";
 					$pnresult = pupe_query($query0);
 
-					$pakkaustal = 0;
-					$las = 0;
-
 					while ($prow = mysql_fetch_assoc($pnresult)) {
 						$pakkaus = array('pakkausnro' => $prow['pakkausnro'], 'sscc' => $prow['sscc'], 'sscc_ulkoinen' => $prow['sscc_ulkoinen'], 'pakkaus' => $prow['pakkaus'], 'tunnus' => $prow['tunnus']);
 						$pakkaukset[] = $pakkaus;
-
-						//otetaan pakkaus talteen, koska on mahdollista tehäd uusia pakkauksia -> saadaan nekin sit oikeen
-						if ($pakkaustal == 0) {
-							$pakkaustal = $pakkaukset[$las]['pakkaus'];
-						}
-						$las++;
 					}
 
 			for ($i=0; $i < count($kerivi); $i++) {
@@ -1173,25 +1164,32 @@
 							$pakkauskirjain = (int) abs(ord($keraysera_pakkaus[$kerivi[$i]]) - 64);
 							$monesko = -1;
 
+							//varmistetaan, että haetaan pakkauskirjaimen mukaiset tiedot, jos kyseessä on uusi pakkaus niin se käsitellään seuraavassa ($monesko = -1)
+							//tämä siksi, koska pakkauskirjaimien järjestystä on voitu muuttaa
 							for ($x = 0; $x < count($pakkaukset); $x++){
 								if ($pakkaukset[$x]['pakkausnro'] == $pakkauskirjain){
 									$monesko = $x;
 									break;
+
 								}
 							}
 
-							//tehhään uuet pakkaukset jos ollaan koetettu lisää niit
-							if (!isset($pakkaukset[$monesko]['sscc'])) {
+							//tehhään uuelle pakkaukselle sscc:t jos ollaan koetettu lisää niit ja tälle pakkauskirjaimelle ei ole vielä tehty sscc:tä
+							//pakkausten tiedot on järjestetty pakkaukset muuttujaan siten, että paikalla 0 = A numerona 1, paikalla 1 = B numerona 2 jne.
+							//jos ollaan jo tehty jo sscc tälle pakkauskirjaimelle niin ei tehdä sille uusia sscc:tä vaan setataan vain $monesko muuttuja oikeaks et saadaan haettua oikean pakkauksen tiedot
+							if ($monesko == -1) {
 								$monesko = $pakkauskirjain - 1;
-								$pakkaukset[$monesko]['sscc'] = uusi_sscc_nro();
-								$pakkaukset[$monesko]['sscc_ulkoinen'] = uusi_gs1_sscc_nro($pakkaukset[$monesko]['sscc']);
+
+								if (!isset($pakkaukset[$monesko]['sscc'])){
+									$pakkaukset[$monesko]['sscc'] = uusi_sscc_nro();
+									$pakkaukset[$monesko]['sscc_ulkoinen'] = uusi_gs1_sscc_nro($pakkaukset[$monesko]['sscc']);
+								}
 							}
 
 							$query_ins = "	UPDATE kerayserat SET
 											pakkausnro = '{$pakkauskirjain}',
 											sscc = '{$pakkaukset[$monesko]['sscc']}',
-											sscc_ulkoinen = '{$pakkaukset[$monesko]['sscc_ulkoinen']}',
-											pakkaus = '$pakkaustal'
+											sscc_ulkoinen = '{$pakkaukset[$monesko]['sscc_ulkoinen']}'
 											{$kerattylisa}
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tilausrivi = '{$kerivi[$i]}'";

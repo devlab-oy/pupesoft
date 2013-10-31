@@ -382,7 +382,6 @@
 															tuotepaikat.hyllytaso
 															FROM tuotepaikat
 															JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno {$lisa})
-															JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$toimittajaid}')
 															{$abcjoin}
 															{$keraysvyohykelisa}
 															WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'

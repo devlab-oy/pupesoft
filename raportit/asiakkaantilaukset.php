@@ -666,6 +666,10 @@
 					$fn2 = "";
 				}
 
+				if (($row["tila"] == "N" or $row["tila"] == "L" or $row['tila'] == 'C') and $cleantoim == "TAKUU") {
+					$fn2 = " (".t("Takuu").") {$fn2}";
+				}
+
 				echo "<td valign='top' $classloppu>$fn1".t($laskutyyppi)." ".t($alatila)."$fn2</td>";
 
 				echo "<td class='back' valign='top'>

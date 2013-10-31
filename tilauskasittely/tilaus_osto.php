@@ -517,7 +517,7 @@
 						tilausrivin_lisatiedot.tilausrivitunnus
 						FROM tilausrivi use index (PRIMARY)
 						LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-						LEFT JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
+						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki > 0 AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
 						WHERE tilausrivi.tunnus = '$rivitunnus'
 						and tilausrivi.yhtio	= '$kukarow[yhtio]'
 						and tilausrivi.otunnus	= '$kukarow[kesken]'";
@@ -1228,7 +1228,7 @@
 						FROM tilausrivi
 						LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-						LEFT JOIN tilausrivin_lisatiedot ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
+						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki > 0 AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
 						LEFT JOIN tuotteen_avainsanat as ta1 on (ta1.yhtio=tuote.yhtio and ta1.tuoteno=tuote.tuoteno and ta1.laji='pakkauskoko2' )
 						LEFT JOIN tuotteen_avainsanat as ta2 on (ta2.yhtio=tuote.yhtio and ta2.tuoteno=tuote.tuoteno and ta2.laji='pakkauskoko3')
 						WHERE tilausrivi.otunnus = '$kukarow[kesken]'

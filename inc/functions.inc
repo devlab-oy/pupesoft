@@ -22893,7 +22893,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 										tilausrivi.yksikko yksikko,
 										sum(tilausrivi.varattu) tilattu
 					 					FROM tilausrivi
-										LEFT JOIN tilausrivin_lisatiedot tli_myy ON (tilausrivi.yhtio=tli_myy.yhtio AND tli_myy.tilausrivilinkki=tilausrivi.tunnus)
+										LEFT JOIN tilausrivin_lisatiedot tli_myy ON (tilausrivi.yhtio=tli_myy.yhtio AND tli_myy.tilausrivilinkki > 0 AND tli_myy.tilausrivilinkki=tilausrivi.tunnus)
 										LEFT JOIN tilausrivi t_myy ON (t_myy.yhtio = tli_myy.yhtio and t_myy.tunnus = tli_myy.tilausrivitunnus)
 										LEFT JOIN lasku l_myy ON (t_myy.yhtio = l_myy.yhtio and t_myy.otunnus = l_myy.tunnus)
 										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'

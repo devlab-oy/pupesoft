@@ -2284,7 +2284,7 @@
 						elseif (($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "R") {
 							$tarkenne = " (".t("Reklamaatio").") ";
 						}
-						elseif (($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "U") {
+						elseif (($row["tila"] == "N" or $row["tila"] == "L" or $row['tila'] == 'C') and $row["tilaustyyppi"] == "U") {
 							$tarkenne = " (".t("Takuu").") ";
 						}
 						elseif (($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "A") {

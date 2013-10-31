@@ -10,6 +10,7 @@ require_once('YhteyshenkiloCSVDumper.php');
 require_once('KohdeCSVDumper.php');
 require_once('PaikkaCSVDumper.php');
 require_once('LaiteCSVDumper.php');
+require_once('TuotteenavainsanaCSVDumper.php');
 
 $request = array(
 	'action'			 => $action,
@@ -18,22 +19,27 @@ $request = array(
 );
 
 $request['konversio_tyypit'] = array(
-	'tuote'			 => t('Tuote'),
-	'asiakas'		 => t('Asiakas'),
-	'kohde'			 => t('Kohde'),
-	'paikka'		 => t('Paikka'),
-	'laite'			 => t('Laite'),
-	'yhteyshenkilo'	 => t('Yhteyshenkilö'),
-	'asiakasalennus' => t('Asiakasalennus'),
+	'tuote'					 => t('Tuote'),
+	'tuotteen_avainsanat'	 => t('Tuotteen avainsanat'),
+	'asiakas'				 => t('Asiakas'),
+	'kohde'					 => t('Kohde'),
+	'paikka'				 => t('Paikka'),
+	'laite'					 => t('Laite'),
+	'yhteyshenkilo'			 => t('Yhteyshenkilö'),
+	'asiakasalennus'		 => t('Asiakasalennus'),
 );
 
 if ($request['action'] == 'aja_konversio') {
 	echo_kayttoliittyma($request);
 	echo "<br/>";
-	
+
 	switch ($request['konversio_tyyppi']) {
 		case 'tuote':
 			$dumper = new TuoteCSVDumper($request['kukarow']);
+			break;
+
+		case 'tuotteen_avainsanat':
+			$dumper = new TuotteenavainsanaCSVDumper($request['kukarow']);
 			break;
 
 		case 'asiakas':

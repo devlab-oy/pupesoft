@@ -1643,7 +1643,7 @@ if ($tila == '') {
 
 	echo "<input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
 
-	echo "<td></td>";
+	echo "<td><input type='hidden' name='toimipaikka' value='{$toimipaikka}' /></td>";
 	echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td>";
 	echo "</tr></form>";
 
@@ -1662,6 +1662,7 @@ if ($tila == '') {
 
 	echo "<form name='paaformi' method='post'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+	echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
 	echo "<input type='hidden' name='toiminto' value='kohdista'>";
 
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") {

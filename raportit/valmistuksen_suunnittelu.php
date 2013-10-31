@@ -1420,7 +1420,7 @@
 		echo "<tr><th>".t("Tilaustuotteiden k‰sittely")."</th><td>";
 		echo "<select name='tilaustuotteiden_kasittely'>";
         echo "<option value='A' {$sel['A']}>".t("Tilaustuotteiden m‰‰r‰ennuste on j‰lkitoimitusrivit")."</option>";
-        echo "<option value='B' {$sel['B']}>".t("Tilaustuotteiden m‰‰r‰ennuste on budjetti/myynti")."</option>";
+        echo "<option value='B' {$sel['B']}>".t("Tilaustuotteiden m‰‰r‰ennuste on budjetti/myynti/toimitusaika")."</option>";
         echo "<option value='C' {$sel['C']}>".t("Tilaustuotteiden m‰‰r‰ennuste on j‰lkitoimitusrivit + budjetti/myynti")."</option>";
 		echo "</select>";
 		echo "</td>";

@@ -75,7 +75,7 @@
 				$line->addChild('Unit1', substr($row['yksikko'], 0, 10));
 				$line->addChild('Unit2', 0);
 				$line->addChild('Relation', 0);
-				$line->addChild('Weight', 0);
+				$line->addChild('Weight', $row['tuotemassa']);
 				$line->addChild('NetWeight', 0);
 				$line->addChild('Volume', 0);
 				$line->addChild('Height', 0);

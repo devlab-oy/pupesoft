@@ -17,6 +17,48 @@ function bind_tarkista_tehtaan_saldot_click() {
 
 	var bgcolors = ['#E66','#FCF300','#5D2'];
 
+	$('.tarkista_tehtaan_saldot_kaikki').on('click', function() {
+
+		$id = $(this).attr('id');
+		$toim = $('#toim').val();
+
+		$.post('',
+			{
+			otunnus: $id,
+			ajax_toiminto: 'tarkista_tehtaan_saldot_kaikki',
+			toim: $toim,
+			no_head: 'yes',
+			ohje: 'off'
+			},
+			function(return_value) {
+				var data = jQuery.parseJSON(return_value);
+
+				for (var tun in data.id) {
+
+					if (data.error) {
+						$('.'+tun+'_availability')
+						.css({'background-image': 'url(../pics/lullacons/alert.png)'});
+
+						alert(data.error_msg);
+						return;
+					}
+
+					if (data.saldo[tun] < 0) {
+						$('.'+tun+'_availability')
+						.css({'background-image': 'url(../pics/lullacons/alert.png)'});
+					}
+					else {
+						$('.'+tun+'_availability')
+						.css({
+							'background-image': 'none',
+							'background-color': bgcolors[data.saldo[tun]]})
+						.show();
+					}
+				}
+			}
+		);
+	});
+
 	$('.tarkista_tehtaan_saldot').on('click', function() {
 
 		$id = $(this).attr('id');
@@ -31,6 +73,8 @@ function bind_tarkista_tehtaan_saldot_click() {
 
 		$tt_tunnus = $('.'+$id+'_tt_tunnus').val();
 
+		$toim = $('#toim').val();
+
 		$('.'+$id+'_'+$myytavissa+'_loading').html("<img class='"+$id+"_"+$myytavissa+"_image' src='../pics/loading_blue_small.gif' />");
 
 		$.post('',
@@ -44,6 +88,7 @@ function bind_tarkista_tehtaan_saldot_click() {
 			password: $password,
 			suppliernumber: $suppliernumber,
 			tt_tunnus: $tt_tunnus,
+			toim: $toim,
 			ajax_toiminto: 'tarkista_tehtaan_saldot',
 			no_head: 'yes',
 			ohje: 'off'

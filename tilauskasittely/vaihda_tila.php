@@ -29,6 +29,7 @@
 						rahtikirjat WRITE,
 						tuote WRITE,
 						sarjanumeroseuranta WRITE,
+						kerayserat WRITE,
 						sarjanumeroseuranta_arvomuutos READ,
 						avainsana as avainsana_kieli READ";
 			$locre = pupe_query($query);
@@ -174,6 +175,11 @@
 							AND tunnus 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
+				$query = "	DELETE FROM kerayserat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND otunnus = '{$tunnus}'";
+				$tila_result = pupe_query($query);
+
 				$query = "	DELETE FROM rahtikirjat
 							WHERE yhtio 	= '{$kukarow['yhtio']}'
 							AND otsikkonro 	= '{$tunnus}'";
@@ -209,6 +215,11 @@
 							alatila = '{$uusalatila}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus 	= '{$tunnus}'";
+				$tila_result = pupe_query($query);
+
+				$query = "	DELETE FROM kerayserat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND otunnus = '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
 				$query = "	DELETE FROM rahtikirjat

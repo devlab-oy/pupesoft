@@ -543,6 +543,8 @@
 				$onko_hyvityslasku_kerroin = -1;
 			}
 
+			$rivikohtaiset_rahtikulut = 0;
+
 			if (@file_exists("inc/maventa.inc") and (($trow['asn_sanomat'] == "M" and $ebid == 'MAVENTAXML') or ($trow['asn_sanomat'] == 'F' and $ebid == 'FINVOICEXML'))) {
 				require("inc/maventa.inc");
 			}
@@ -1465,7 +1467,8 @@
 				}
 
 				// Tehd‰‰n ASN Insertit
-				if (($ebid == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
+				// Pit‰‰ olla vaihto-omaisuuslasku
+				if (in_array($trow['oletus_vienti'], array('C','F','I','J','K','L')) and ($ebid == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) and !$onko_dupli_asn and (!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1)) {
 
 					$saapumispvm_chk = trim($laskun_tapvm) != '' ? substr($laskun_tapvm, 0, 4).'-'.substr($laskun_tapvm, 4, 2).'-'.substr($laskun_tapvm, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
 					$count_rtuoteno  = count($rtuoteno);
@@ -1572,10 +1575,12 @@
 					require ("inc/teetiliointi.inc");
 				}
 
-
 				// jos kyseess‰ on tavaraa
 				if ((!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and in_array($trow['oletus_vienti'], array('C','F','I','J','K','L'))) {
-					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+
+					if (!isset($alv_talteen)) $alv_talteen = '';
+
+					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno, $alv_talteen, $rivikohtaiset_rahtikulut);
 				}
 
 				// Lis‰t‰‰n viel‰ ostovelkatiliˆinnin tarkenteet

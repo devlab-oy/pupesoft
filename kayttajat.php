@@ -400,10 +400,8 @@
 			$pres = pupe_query($query);
 
 			if (count($profiilit) > 0 and $profiilit[0] !='') {
-
 				//k‰yd‰‰n uudestaan profiili l‰pi
-				foreach($profiilit as $prof) {
-
+				foreach ($profiilit as $prof) {
 					$query = "	SELECT *
 								FROM oikeu
 								WHERE yhtio = '{$yhtio}'
@@ -417,10 +415,10 @@
 						$query = "	SELECT yhtio, paivitys
 									FROM oikeu
 									WHERE yhtio		= '{$yhtio}'
-									and kuka		= '{$ktunnus}'
-									and sovellus	= '{$trow['sovellus']}'
-									and nimi		= '{$trow['nimi']}'
-									and alanimi 	= '{$trow['alanimi']}'";
+									AND kuka		= '{$ktunnus}'
+									AND sovellus	= '{$trow['sovellus']}'
+									AND nimi		= '{$trow['nimi']}'
+									AND alanimi 	= '{$trow['alanimi']}'";
 						$tarkesult = pupe_query($query);
 						$tarkesultrow = mysql_fetch_assoc($tarkesult);
 
@@ -435,11 +433,18 @@
 										jarjestys 	= '{$trow['jarjestys']}',
 										jarjestys2	= '{$trow['jarjestys2']}',
 										hidden		= '{$trow['hidden']}',
-										yhtio		= '{$yhtio}'";
+										yhtio		= '{$yhtio}',
+										laatija 	= '{$kukarow['kuka']}',
+										luontiaika 	= now(),
+										muutospvm 	= now(),
+										muuttaja 	= '{$kukarow['kuka']}'";
 							$rresult = pupe_query($query);
 						}
 						elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
-							$query = "	UPDATE oikeu SET paivitys = '1'
+							$query = "	UPDATE oikeu
+										SET paivitys = '1',
+										muutospvm 	 = now(),
+										muuttaja 	 = '{$kukarow['kuka']}'
 										WHERE kuka		= '{$ktunnus}'
 										AND sovellus	= '{$trow['sovellus']}'
 										AND nimi		= '{$trow['nimi']}'
@@ -617,7 +622,7 @@
 
 			if (count($profiilit) > 0 and $profiilit[0] != '') {
 				//k‰yd‰‰n uudestaan profiili l‰pi
-				foreach($profiilit as $prof) {
+				foreach ($profiilit as $prof) {
 					$query = "	SELECT *
 								FROM oikeu
 								WHERE yhtio = '{$kukarow['yhtio']}'
@@ -649,11 +654,18 @@
 										jarjestys 	= '{$trow['jarjestys']}',
 										jarjestys2	= '{$trow['jarjestys2']}',
 										hidden		= '{$trow['hidden']}',
-										yhtio		= '{$kukarow['yhtio']}'";
+										yhtio		= '{$kukarow['yhtio']}',
+										laatija 	= '{$kukarow['kuka']}',
+										luontiaika 	= now(),
+										muutospvm 	= now(),
+										muuttaja 	= '{$kukarow['kuka']}'";
 							$rresult = pupe_query($query);
 						}
 						elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
-							$query = "	UPDATE oikeu SET paivitys = '1'
+							$query = "	UPDATE oikeu
+										SET paivitys = '1',
+										muutospvm 	 = now(),
+										muuttaja 	 = '{$kukarow['kuka']}'
 										WHERE kuka		= '{$kuka}'
 										AND sovellus	= '{$trow['sovellus']}'
 										AND nimi		= '{$trow['nimi']}'

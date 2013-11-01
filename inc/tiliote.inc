@@ -241,7 +241,7 @@
 
 							if (mysql_num_rows($result) != 1) {
 								// poistetaan oy:t ja ab:t
-								$maksaatemp = trim(preg_replace('/\b(OY|AB)\b/i', '', strtoupper($maksaa)));
+								$maksaatemp = trim(preg_replace('/\b(OY|AB|OU)\b/i', '', strtoupper($maksaa)));
 
 								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 											FROM lasku

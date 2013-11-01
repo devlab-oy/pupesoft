@@ -391,9 +391,9 @@ if ($kasitellaan_tiedosto) {
 									echo t("Tuotetta")," {$rivi[$j]} ",t("ei voida päivittää, koska se ei löydy tästä ketjusta"),"! ";
 								}
 								else {
-									
+
 									$jupdate = "";
-									
+
 									if ($jarjestys > 0) {
 										// Korjataan muut järjestykset ja tehdään tilaa päivitettävälle tuotteelle
 										$kquery = "	SELECT tunnus, if(jarjestys=0, 999, jarjestys) jarj
@@ -471,7 +471,8 @@ if ($kasitellaan_tiedosto) {
 								AND tuoteno = '{$rivi[$r]}'";
 					$result = pupe_query($query);
 
-					if (mysql_num_rows($result) == 0) {
+					//kun poistetaan tuoteperheitä ei oo niin väliä vaikka tuotteita ei oiskaan olemassa
+					if (mysql_num_rows($result) == 0 AND strtoupper(trim($rivi[$postoiminto])) != 'POISTA') {
 						echo t("tuotetta")," {$rivi[$r]} ",t("ei löydy! rivi hylätty"),"<br>";
 						$virhe++;
 					}
@@ -494,9 +495,13 @@ if ($kasitellaan_tiedosto) {
 						echo t("tuoteperhe on jo olemassa! ei voida lisätä"),"<br>";
 						$virhe++;
 					}
+					elseif (mysql_num_rows($result) == 0 AND strtoupper(trim($rivi[$postoiminto])) == 'POISTA'){
+						echo t("tuoteperhettä ei löydy! ei voida poistaa"),"<br>";
+						$virhe++;
+					}
 				}
 
-				if (strtoupper(trim($headers[$r])) == "TUOTENO") {
+				if (strtoupper(trim($headers[$r])) == "TUOTENO" AND strtoupper(trim($rivi[$postoiminto])) != 'POISTA') {
 					$query = "	SELECT tunnus
 								FROM tuote
 								WHERE yhtio = '{$kukarow['yhtio']}'
@@ -522,21 +527,27 @@ if ($kasitellaan_tiedosto) {
 							AND tyyppi = '$tyyppi'";
 				$result = pupe_query($query);
 
-				for ($r = 0; $r < count($headers); $r++) {
+				//jos ollaan poistamassa niitä tuotteita niin lisätään vaan päivitettävien rivien laskuriin yks tuolla elsessä
+				if (strtoupper(trim($rivi[$postoiminto])) != 'POISTA') {
+					for ($r = 0; $r < count($headers); $r++) {
 
-					if (strtoupper(trim($headers[$r])) == "TUOTENO") {
-						$query  = "	INSERT INTO tuoteperhe SET
-									yhtio 		= '{$kukarow['yhtio']}',
-									isatuoteno 	= '$isatuote',
-									tuoteno 	= '{$rivi[$r]}',
-									tyyppi 		= '$tyyppi',
-									laatija 	= '$kukarow[kuka]',
-									luontiaika 	= now(),
-									muuttaja 	= '$kukarow[kuka]',
-									muutospvm 	= now()";
-						$result = pupe_query($query);
-						$lask++;
+						if (strtoupper(trim($headers[$r])) == "TUOTENO") {
+							$query  = "	INSERT INTO tuoteperhe SET
+										yhtio 		= '{$kukarow['yhtio']}',
+										isatuoteno 	= '$isatuote',
+										tuoteno 	= '{$rivi[$r]}',
+										tyyppi 		= '$tyyppi',
+										laatija 	= '$kukarow[kuka]',
+										luontiaika 	= now(),
+										muuttaja 	= '$kukarow[kuka]',
+										muutospvm 	= now()";
+							$result = pupe_query($query);
+							$lask++;
+						}
 					}
+				}
+				else {
+					$lask++;
 				}
 			}
 		}

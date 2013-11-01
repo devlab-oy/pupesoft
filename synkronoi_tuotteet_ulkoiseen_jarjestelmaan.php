@@ -13,7 +13,7 @@
 				AND tuote.status != 'P'
 				AND tuote.ei_saldoa = ''
 				AND tuote.eankoodi != ''
-				AND tuote.tuoteno like 'FW13%'
+				AND tuote.tuoteno like 'FW12%'
 				AND ta.selite IS NULL";
 	$res = pupe_query($query);
 
@@ -75,7 +75,7 @@
 				$line->addChild('Unit1', substr($row['yksikko'], 0, 10));
 				$line->addChild('Unit2', 0);
 				$line->addChild('Relation', 0);
-				$line->addChild('Weight', $row['tuotemassa']);
+				$line->addChild('Weight', round($row['tuotemassa'], 3));
 				$line->addChild('NetWeight', 0);
 				$line->addChild('Volume', 0);
 				$line->addChild('Height', 0);

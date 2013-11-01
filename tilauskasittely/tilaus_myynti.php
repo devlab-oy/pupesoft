@@ -8049,6 +8049,7 @@ if ($tee == '') {
 					<input type='hidden' name='tee' value='LEPAA'>
 					<input type='hidden' name='orig_tila' value='$orig_tila'>
 					<input type='hidden' name='orig_alatila' value='$orig_alatila'>
+					<input type='hidden' name='tilaustyyppi' value='{$laskurow['tilaustyyppi']}'>
 					<input type='submit' value='* ".t("{$napin_teksti} lepäämään")." *'>
 					</form></td>";
 		}

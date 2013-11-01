@@ -642,6 +642,7 @@
 						'myytil_toimaika' => $laskurow['toimaika'],
 						'toimipaikka' => $laskurow['vanhatunnus'],
 						'ostotilauksen_kasittely' => $ostotilauksen_kasittely,
+						'tilaustyyppi' => $laskurow['tilaustyyppi'],
 					);
 
 					if (!empty($tilausrivirow['tilausrivilinkki'])) {

@@ -748,40 +748,43 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 	echo "</tr>";
 
-	$sel = (isset($toimipaikka) and $toimipaikka === 'kaikki') ? "selected" : "";
-
-	echo "<tr>";
-	echo "<th>",t("Toimipaikka"),"</th>";
-	echo "<td>";
-	echo "<select name='toimipaikka'>";
-	echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
-	echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
-
 	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
-	while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+	if (mysql_num_rows($toimipaikat_res) != 0) {
 
-		$sel = '';
+		$sel = (isset($toimipaikka) and $toimipaikka === 'kaikki') ? "selected" : "";
 
-		if (isset($toimipaikka)) {
-			if ($toimipaikka == $toimipaikat_row['tunnus']) {
-				$sel = ' selected';
-				$toimipaikka = $toimipaikat_row['tunnus'];
+		echo "<tr>";
+		echo "<th>",t("Toimipaikka"),"</th>";
+		echo "<td>";
+		echo "<select name='toimipaikka'>";
+		echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+		echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
+
+		while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+			$sel = '';
+
+			if (isset($toimipaikka)) {
+				if ($toimipaikka == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
 			}
-		}
-		else {
-			if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
-				$sel = ' selected';
-				$toimipaikka = $toimipaikat_row['tunnus'];
+			else {
+				if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
 			}
+
+			echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
 		}
 
-		echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+		echo "</select>";
+		echo "</td>";
+		echo "</tr>";
 	}
-
-	echo "</select>";
-	echo "</td>";
-	echo "</tr>";
 
 	echo "<tr>";
 	echo "<th>",t("Lisärajaus"),"</th>";
@@ -927,6 +930,8 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		echo "<table>";
 		echo "<tr><th>".t("ytunnus")."</th><th>&nbsp;</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("saapumisnumerot")."</th><th>".t("kpl")."</th><th>".t("varastonarvo")."</th><td class='back'></td></tr>";
 
+		$toimipaikka = isset($toimipaikka) ? $toimipaikka : 0;
+
 		while ($row = mysql_fetch_assoc($result)) {
 
 			$query = "	SELECT count(*) num,
@@ -1062,41 +1067,45 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		echo "<tr><td colspan='5'>".wordwrap($toimittajarow["fakta"], 100, "<br>")."</td></tr>";
 	}
 
-	$sel = (isset($toimipaikka) and $toimipaikka === 'kaikki') ? "selected" : "";
-
 	echo "<form method='post'>";
-	echo "<tr>";
-	echo "<th>",t("Toimipaikka"),"</th>";
-	echo "<td colspan='4'>";
-	echo "<select name='toimipaikka' onchange='submit();'>";
-	echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
-	echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
 
 	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
-	while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+	if (mysql_num_rows($toimipaikat_res) != 0) {
 
-		$sel = '';
+		$sel = (isset($toimipaikka) and $toimipaikka === 'kaikki') ? "selected" : "";
 
-		if (isset($toimipaikka)) {
-			if ($toimipaikka == $toimipaikat_row['tunnus']) {
-				$sel = ' selected';
-				$toimipaikka = $toimipaikat_row['tunnus'];
+		echo "<tr>";
+		echo "<th>",t("Toimipaikka"),"</th>";
+		echo "<td colspan='4'>";
+		echo "<select name='toimipaikka' onchange='submit();'>";
+		echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+		echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
+
+		while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+			$sel = '';
+
+			if (isset($toimipaikka)) {
+				if ($toimipaikka == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
 			}
-		}
-		else {
-			if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
-				$sel = ' selected';
-				$toimipaikka = $toimipaikat_row['tunnus'];
+			else {
+				if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
 			}
+
+			echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
 		}
 
-		echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+		echo "</select>";
+		echo "</td>";
+		echo "</tr>";
 	}
-
-	echo "</select>";
-	echo "</td>";
-	echo "</tr>";
 
 	if (!isset($lisarajaus)) $lisarajaus = "";
 
@@ -1403,6 +1412,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 		echo "</tbody>";
 		echo "</table>";
+
+		$toimipaikka = isset($toimipaikka) ? $toimipaikka : 0;
 
 		if (isset($naytalaskelma) and $naytalaskelma != "") {
 			list (	$liitetty_lasku_viety_summa,

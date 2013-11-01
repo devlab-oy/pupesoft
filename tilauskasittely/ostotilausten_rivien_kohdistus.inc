@@ -1393,35 +1393,38 @@ if ($tila == '') {
 	echo "<th>",t("Näytä toimipaikan rivejä"),"</th>";
 	echo "<td>";
 
-	$sel = (isset($toimipaikka) and $toimipaikka === 'kaikki') ? "selected" : "";
-
-	echo "<select name='toimipaikka' onchange='submit();'>";
-	echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
-	echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
-
 	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
-	while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+	if (mysql_num_rows($toimipaikat_res) != 0) {
 
-		$sel = '';
+		$sel = (isset($toimipaikka) and $toimipaikka === 'kaikki') ? "selected" : "";
 
-		if (isset($toimipaikka)) {
-			if ($toimipaikka == $toimipaikat_row['tunnus']) {
-				$sel = ' selected';
-				$toimipaikka = $toimipaikat_row['tunnus'];
+		echo "<select name='toimipaikka' onchange='submit();'>";
+		echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+		echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
+
+		while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+			$sel = '';
+
+			if (isset($toimipaikka)) {
+				if ($toimipaikka == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
 			}
-		}
-		else {
-			if ($laskurow['yhtio_toimipaikka'] == $toimipaikat_row['tunnus']) {
-				$sel = ' selected';
-				$toimipaikka = $toimipaikat_row['tunnus'];
+			else {
+				if ($laskurow['yhtio_toimipaikka'] == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
 			}
+
+			echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
 		}
 
-		echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+		echo "</select>";
 	}
-
-	echo "</select>";
 
 	echo "</td>";
 	echo "</tr>";
@@ -1642,6 +1645,8 @@ if ($tila == '') {
 	$pointteri++;
 
 	echo "<input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
+
+	$toimipaikka = isset($toimipaikka) ? $toimipaikka : 0;
 
 	echo "<td><input type='hidden' name='toimipaikka' value='{$toimipaikka}' /></td>";
 	echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td>";

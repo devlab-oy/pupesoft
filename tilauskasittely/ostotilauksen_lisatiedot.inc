@@ -94,6 +94,8 @@ if ($tee == "update") {
 	$toimaika 		= $vv."-".$kk."-".$pp;
 	$ultilno 		= tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
+	$toimipaikka = isset($toimipaikka) ? $toimipaikka : 0;
+
 	$query = "	UPDATE lasku
 				SET maa_lahetys			= '$maa_lahetys',
 				maa_maara				= '$maa_maara',
@@ -343,22 +345,25 @@ if ($tee == "") {
 		$pyoristusero_lisatiedot .= "<font class='message'>".t("VIRHE: Pyöristysero ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br>";
 	}
 
-	echo "<tr>";
-	echo "<th valign='top'>",t("Toimipaikka"),"</th>";
-	echo "<td valign='top' colspan='3'>";
-	echo "<select name='toimipaikka'>";
-	echo "<option value=''>",t("Ei toimipaikkaa"),"</option>";
-
 	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
-	while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
-		$sel = $laskurow['yhtio_toimipaikka'] == $toimipaikat_row['tunnus'] ? ' selected' : '';
-		echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
-	}
+	if (mysql_num_rows($toimipaikat_res) != 0) {
 
-	echo "</select>";
-	echo "</td>";
-	echo "</tr>";
+		echo "<tr>";
+		echo "<th valign='top'>",t("Toimipaikka"),"</th>";
+		echo "<td valign='top' colspan='3'>";
+		echo "<select name='toimipaikka'>";
+		echo "<option value=''>",t("Ei toimipaikkaa"),"</option>";
+
+		while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+			$sel = $laskurow['yhtio_toimipaikka'] == $toimipaikat_row['tunnus'] ? ' selected' : '';
+			echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+		}
+
+		echo "</select>";
+		echo "</td>";
+		echo "</tr>";
+	}
 
 	echo "<tr><th valign='top'>".t("Nettopaino").":</th><td valign='top' colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td><td valign='top' class='back' width='450'>$lisamassa</td></tr>";
 

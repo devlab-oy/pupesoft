@@ -745,7 +745,7 @@
 					)
 				) {
 					// piirretäänkö oletukseksi tilata suoratoimituksena varastoon? ...
-					if ($row["toimittajan_tunnus"] == $krow["liitostunnus"] and $row["hyllyalue"] == "" and $row["hyllynro"] == "" ) {
+					if ($row["toimittajan_tunnus"] == $krow["liitostunnus"] and $row["hyllyalue"] == "" and $row["hyllynro"] == "") {
 
 						if (($row["var"] == 'T' or ($row["var"] == "J" and $row["suoraan_laskutukseen"] == "")) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1) {
 							$sel1 				 = "SELECTED";

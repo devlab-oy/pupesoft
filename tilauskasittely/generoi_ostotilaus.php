@@ -217,7 +217,7 @@
 	$sel = array($myytavissasummaus => "selected") + array("T" => '', "V" => '');
 
 	echo "<option value='T' {$sel['T']}>",t("Ostetaan tuotteittain"),"</option>";
-	echo "<option value='V' {$sel['V']}>",t("Ostetaan vastaavuusketjun päätuotetta"),"</option>";
+	echo "<option value='V' {$sel['V']}>",t("Ostetaan vastaavuusketjuittain"),"</option>";
 	echo "</select></td></tr>";
 
 	echo "<tr><td class='back'><br></td></tr>";

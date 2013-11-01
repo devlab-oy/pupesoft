@@ -7,7 +7,7 @@ if(!function_exists("tuoteperhetarkista")) {
 		$fieldname = mysql_field_name($result, $i);
 
 		//tarkistetaan, että tuotenumerot on olemassa ennenkuin yritetään lisätä ne tuoteperheet sinne kantaan!
-		if ($fieldname == "tuoteno" OR $fieldname == "isatuoteno") {
+		if (($fieldname == "tuoteno" OR $fieldname == "isatuoteno") AND $trow["luedata_toiminto"] != "POISTA") {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
 			}

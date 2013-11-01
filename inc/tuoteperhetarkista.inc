@@ -11,7 +11,7 @@ if(!function_exists("tuoteperhetarkista")) {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
-			else {
+			elseif ($trow["luedata_toiminto"] != "POISTA") {
 				$olemassa = hae_tuote(trim($t[$i]));
 				if (empty($olemassa)) {
 					$virhe[$i] = t("Tuotenumeroa ei ole olemassa");

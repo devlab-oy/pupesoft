@@ -14,7 +14,17 @@
 		}
 
 		if (count($komento) == 0) {
-			echo "<font class='head'>$tulostimet[0]:</font><hr>";
+
+			if ($tulostimet[0] == 'REKLAMAATIO' and (isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U') {
+
+				$tilaustyyppi = 'U';
+
+				echo "<font class='head'>",t("Takuu"),":</font><hr>";
+			}
+			else {
+				echo "<font class='head'>",t($tulostimet[0]),":</font><hr>";
+			}
+
 			require("inc/valitse_tulostin.inc");
 		}
 		elseif ($kappaleet > 0) {
@@ -321,7 +331,7 @@
 
 					$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], $rivitlisa, '', '', '', 'KOPSAAPAIKAT', "REKLAMAATIO#$asiakas");
 					if ($tilauksesta_myyntitilaus != '') echo "$tilauksesta_myyntitilaus<br><br>";
-					
+
 					// P‰ivitet‰‰n rivit tilatuiksi
 					$query  = "	UPDATE tilausrivin_lisatiedot
 								SET asiakkaan_positio = asiakkaan_positio*-1

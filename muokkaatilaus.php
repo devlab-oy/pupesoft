@@ -1336,7 +1336,7 @@
 
 			$miinus = 4;
 		}
-		elseif ($toim == "REKLAMAATIO" or $toim == "VASTAANOTA_REKLAMAATIO" or $toim == "REKLAMAATIOSUPER" or $toim == "TAKUU" or $takuu = "TAKUUSUPER") {
+		elseif ($toim == "REKLAMAATIO" or $toim == "VASTAANOTA_REKLAMAATIO" or $toim == "REKLAMAATIOSUPER" or $toim == "TAKUU" or $toim == "TAKUUSUPER") {
 
 			if ($toim == "REKLAMAATIOSUPER" or $toim == "TAKUUSUPER") {
 				$rekla_tila = " and lasku.tila in ('N','C','L') and lasku.alatila in ('','A','B','C','J','D') ";

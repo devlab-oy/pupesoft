@@ -24,14 +24,18 @@ function tarkasta_ostotilauksen_tilausrivien_toimittajien_saldot(tilausnumero, a
 
 	var viesti = '';
 	saldot_request_obj.done(function(saldot) {
-		$.each(saldot, function(index, saldo) {
-			alert_viesti_temp = alert_viesti.replace('*tuote*', saldo.tuoteno);
-			alert_viesti_temp = alert_viesti_temp.replace('*kpl*', saldo.tehdas_saldo);
-			viesti += alert_viesti_temp + '\n';
-		});
+		if (saldot.length > 0) {
+			$.each(saldot, function(index, saldo) {
+				alert_viesti_temp = alert_viesti.replace('*tuote*', saldo.tuoteno);
+				alert_viesti_temp = alert_viesti_temp.replace('*kpl*', saldo.tehdas_saldo);
+				viesti += alert_viesti_temp + '\n';
+			});
+		}
 	});
 
-	return confirm(viesti);
+	if (viesti) return confirm(viesti);
+
+	return;
 }
 
 function hae_ostotilauksen_tilausrivien_toimittajien_saldot(tilausnumero) {

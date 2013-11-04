@@ -109,7 +109,9 @@ if (!function_exists('luo_ostotilausotsikko')) {
 					and toim_postitp	= '{$toim_postitp}'
 					and toim_maa		= '{$toim_maa}'
 					and varasto 		= '{$params['varasto']}'
-					and ohjausmerkki 	= '{$params['ohjausmerkki']}'";
+					and ohjausmerkki 	= '{$params['ohjausmerkki']}'
+					and chn				= '$chn'
+					and tilaustyyppi	= '{$params['tilaustyyppi']}'";
 				break;
 			case '2':
 			case '3':
@@ -119,12 +121,10 @@ if (!function_exists('luo_ostotilausotsikko')) {
 					and toim_osoite		= '{$toim_osoite}'
 					and toim_postino	= '{$toim_postino}'
 					and toim_postitp	= '{$toim_postitp}'
-					and toim_maa		= '{$toim_maa}'";
+					and toim_maa		= '{$toim_maa}'
+					and chn				= '$chn'
+					and tilaustyyppi	= '{$params['tilaustyyppi']}'";
 				break;
-			case 'GEN':
-				$ostotilauksen_kasittely_wherelisa .= "
-				and chn					= 'GEN'";
-				#Ei breikkiä. Mennään myös default-haaraan.
 			case '1':
 			case '0':
 			default:
@@ -136,7 +136,9 @@ if (!function_exists('luo_ostotilausotsikko')) {
 					and toim_postitp	= '{$toim_postitp}'
 					and toim_maa		= '{$toim_maa}'
 					and left(luontiaika,10) = left(now(),10)
-					and laatija 		= '{$kukarow['kuka']}'";
+					and laatija 		= '{$kukarow['kuka']}'
+					and chn				= '$chn'
+					and tilaustyyppi	= '{$params['tilaustyyppi']}'";
 				break;
 		}
 

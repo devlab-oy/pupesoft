@@ -31,6 +31,9 @@ if ($php_cli) {
 
 	// ja toinen parametri komentoriviltä
 	$edi_tyyppi	= $argv[2];
+
+	// Pupeasennuksen root
+	$pupe_root_polku = dirname(dirname(__FILE__));
 }
 
 if (!function_exists('jt_toimita_editilaus')) {

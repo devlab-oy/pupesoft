@@ -8,8 +8,6 @@
 	$varaosavirhe 			= "";
 	$vastaavat_html			= "";
 
-	$sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc");
-
 	$tquery	= "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 	$tres	= pupe_query($tquery);
 	$trow 	= mysql_fetch_assoc($tres); // haetaan tuotteen tiedot..
@@ -150,6 +148,19 @@
 			$riviok++;
 			$tilausok++;
 		}
+	}
+
+	if (in_array($row['var'], array('U','T')) and $meapurow['kateinen'] != '') {
+
+		if ($row['var'] == 'U') {
+			$varaosavirhe .= t("VIRHE: Et voi tilata toimittajalta asiakkaalle, koska maksuehto on käteinen!")."<br>";
+		}
+		else {
+			$varaosavirhe .= t("VIRHE: Et voi tilata toimittajalta varastoon, koska maksuehto on käteinen!")."<br>";
+		}
+
+		$riviok++;
+		$tilausok++;
 	}
 
 	if ($row["hinta"] < 0) {

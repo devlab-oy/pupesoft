@@ -27,13 +27,15 @@
 
 	require ("tilauskasittely/monivalintalaatikot.inc");
 
-	$chk = "";
+	if ($yhtiorow['konserni'] != "") {
+		$chk = "";
 
-	if (trim($konserni) != '') {
-		$chk = "CHECKED";
+		if (trim($konserni) != '') {
+			$chk = "CHECKED";
+		}
+
+		echo "<br>".t("Näytä konsernin kaikki asiakkaat").": <input type='checkbox' name='konserni' $chk onclick='submit();'><br>";
 	}
-
-	echo "<br>".t("Näytä konsernin kaikki asiakkaat").": <input type='checkbox' name='konserni' $chk onclick='submit();'><br>";
 
 	if ($yhtiorow['viikkosuunnitelma'] == '') {
 		$kentat = "asiakas.tunnus::asiakas.nimi::asiakas.asiakasnro::asiakas.ytunnus::if (asiakas.toim_postitp!='',asiakas.toim_postitp,asiakas.postitp)::asiakas.postino::asiakas.yhtio::asiakas.myyjanro::asiakas.email";

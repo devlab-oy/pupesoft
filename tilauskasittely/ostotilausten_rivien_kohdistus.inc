@@ -303,7 +303,12 @@ if ($tee == 'TI' or $tee == "Y") {
 		$prow["hinta"] = $hinta;
 	}
 
-	$prow["hinta"] = round($prow["hinta"] / $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
+	if ($trow["myyntihinta_maara"] != 0){
+		$prow["hinta"] = round($prow["hinta"] / $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
+	}
+	else {
+		$prow["hinta"] = round($prow["hinta"], $yhtiorow["hintapyoristys"]);
+	}
 
 	$multi = "";
 	require("../inc/tuotehaku.inc");

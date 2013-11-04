@@ -2001,17 +2001,9 @@
 
 					$sel = '';
 
-					if (isset($toimipaikka)) {
-						if ($toimipaikka == $toimipaikat_row['tunnus']) {
-							$sel = ' selected';
-							$toimipaikka = $toimipaikat_row['tunnus'];
-						}
-					}
-					else {
-						if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
-							$sel = ' selected';
-							$toimipaikka = $toimipaikat_row['tunnus'];
-						}
+					if ($trow['yhtio_toimipaikka'] == $toimipaikat_row['tunnus']) {
+						$sel = ' selected';
+						$toimipaikka = $toimipaikat_row['tunnus'];
 					}
 
 					echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";

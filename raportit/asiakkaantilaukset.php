@@ -80,6 +80,11 @@
 
 		$til = " tila in ('L','N','C','D') and tilaustyyppi='R' ";
 	}
+	if ($cleantoim == 'TAKUU') {
+		echo "<font class='head'>".t("Asiakkaan takuut").":</font><hr>";
+
+		$til = " tila in ('L','N','C','D') and tilaustyyppi='U' ";
+	}
 
 	if ($til == "" or $cleantoim == "") {
 		echo "<p><font class='error'>".t("Järjestelmävirhe, tämän modulin suorittaminen suoralla urlilla on kielletty")." !!!</font></p>";
@@ -126,7 +131,7 @@
 
 		require ("naytatilaus.inc");
 
-		if ($cleantoim == "MYYNTI" or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI') {
+		if ($cleantoim == "MYYNTI" or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI' or $cleantoim == "TAKUU") {
 			$query = "	SELECT *
 						FROM rahtikirjat
 						WHERE otsikkonro='$tunnus'
@@ -183,7 +188,7 @@
 	}
 
 	if ($ytunnus != '' and ($otunnus == '' and $laskunro == '' and $sopimus == '')) {
-		if ($cleantoim == 'MYYNTI' or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI') {
+		if ($cleantoim == 'MYYNTI' or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI' or $cleantoim == "TAKUU") {
 			require ("inc/asiakashaku.inc");
 		}
 
@@ -382,7 +387,7 @@
 		if ($kukarow['resoluutio'] == 'I') {
 			$summaselli .= " lasku.viesti tilausviite, ";
 		}
-		
+
 		if ($kukarow['resoluutio'] == 'I') {
 			$summaselli .= " lasku.asiakkaan_tilausnumero astilno, ";
 		}
@@ -659,6 +664,10 @@
 				else {
 					$fn1 = "";
 					$fn2 = "";
+				}
+
+				if (($row["tila"] == "N" or $row["tila"] == "L" or $row['tila'] == 'C') and $cleantoim == "TAKUU") {
+					$fn2 = " (".t("Takuu").") {$fn2}";
 				}
 
 				echo "<td valign='top' $classloppu>$fn1".t($laskutyyppi)." ".t($alatila)."$fn2</td>";

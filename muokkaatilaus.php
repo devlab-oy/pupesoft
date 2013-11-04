@@ -286,6 +286,9 @@
 		elseif ($toim == 'TEHDASPALAUTUKSET' or $toim == 'SUPERTEHDASPALAUTUKSET') {
 			$otsikko = t("tehdaspalautuksia");
 		}
+		elseif ($toim == 'TAKUU' or $toim == 'TAKUUSUPER') {
+			$otsikko = t("takuita");
+		}
 		else {
 			$otsikko = t("myyntitilausta");
 			$toim = "";
@@ -361,7 +364,7 @@
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]') and tila = 'C' and alatila in ('A','B') and tilaustyyppi='R'";
 				$eresult = pupe_query($query);
 			}
-			elseif ($toim == "REKLAMAATIO" or $toim == "REKLAMAATIOSUPER") {
+			elseif ($toim == "REKLAMAATIO" or $toim == "REKLAMAATIOSUPER" OR $toim == "TAKUU" or $toim == "TAKUUSUPER") {
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila = 'C' and alatila = '' and tilaustyyppi = 'R'";
@@ -733,7 +736,7 @@
 			}
 
 			// Myyntitilauksia voidaan etsiä myös asiakkaan tilausnumerolla
-			if ($etsi != "" and $haku != "" and ($toim == '' or $toim == 'SUPER' or $toim == 'KESKEN' or $toim == 'HYPER' or $toim == 'TOSI_KESKEN' or $toim == 'ODOTTAA_SUORITUSTA' or $toim == "TEHDASPALAUTUKSET" or $toim == "SUPERTEHDASPALAUTUKSET")) {
+			if ($etsi != "" and $haku != "" and ($toim == '' or $toim == 'SUPER' or $toim == 'KESKEN' or $toim == 'HYPER' or $toim == 'TOSI_KESKEN' or $toim == 'ODOTTAA_SUORITUSTA' or $toim == "TEHDASPALAUTUKSET" or $toim == "SUPERTEHDASPALAUTUKSET" or $toim == "TAKUU" or $toim == "TAKUUSUPER")) {
 				$haku = substr($haku, 0, -2); // Poistetaan vika sulku $hausta
 				$haku .= " or (lasku.asiakkaan_tilausnumero like '%$etsi%' and lasku.asiakkaan_tilausnumero != '')) ";
 			}
@@ -849,10 +852,14 @@
 
 		$query_ale_lisa = generoi_alekentta('M');
 
-		$tepalisa = " AND tilaustyyppi != '9' ";
-
 		if (strpos($toim, "TEHDASPALAUTUKSET") !== FALSE) {
 			$tepalisa = " AND tilaustyyppi = '9' ";
+		}
+		elseif (strpos($toim, "TAKUU") !== FALSE) {
+			$tepalisa = " AND tilaustyyppi = 'U' ";
+		}
+		else {
+			$tepalisa = " AND tilaustyyppi != '9' ";
 		}
 
 		// Etsitään muutettavaa tilausta
@@ -1329,9 +1336,9 @@
 
 			$miinus = 4;
 		}
-		elseif ($toim == "REKLAMAATIO" or $toim == "VASTAANOTA_REKLAMAATIO" or $toim == "REKLAMAATIOSUPER") {
+		elseif ($toim == "REKLAMAATIO" or $toim == "VASTAANOTA_REKLAMAATIO" or $toim == "REKLAMAATIOSUPER" or $toim == "TAKUU" or $toim == "TAKUUSUPER") {
 
-			if ($toim == "REKLAMAATIOSUPER") {
+			if ($toim == "REKLAMAATIOSUPER" or $toim == "TAKUUSUPER") {
 				$rekla_tila = " and lasku.tila in ('N','C','L') and lasku.alatila in ('','A','B','C','J','D') ";
 			}
 			elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
@@ -1346,12 +1353,14 @@
 				}
 			}
 
+			$tilaustyyppilisa = ($toim == "TAKUU" or $toim == "TAKUUSUPER") ? "U" : "R";
+
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.tilaustyyppi = 'R'
+						and lasku.tilaustyyppi = '{$tilaustyyppilisa}'
 						$rekla_tila
 						$haku
 						$mt_order_by
@@ -1366,7 +1375,7 @@
 						    	FROM lasku use index (tila_index)
 						    	JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 						    	WHERE lasku.yhtio = '$kukarow[yhtio]'
-								and lasku.tilaustyyppi = 'R'
+								and lasku.tilaustyyppi = '{$tilaustyyppilisa}'
 								$rekla_tila";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
@@ -1968,7 +1977,7 @@
 						$whiletoim = 'PROJEKTI';
 					}
 				}
-				elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
+				elseif ($toim == "VASTAANOTA_REKLAMAATIO" or $toim == "TAKUU" or $toim == "TAKUUSUPER") {
 					$whiletoim = "REKLAMAATIO";
 				}
 				elseif ($toim == "TEHDASPALAUTUKSET" or $toim == "SUPERTEHDASPALAUTUKSET") {
@@ -2070,7 +2079,7 @@
 						if ($fieldname == 'luontiaika' or $fieldname == 'toimaika') {
 							echo "<td class='{$class}' valign='top' align='right'>";
 
-							if (($whiletoim == '' or $whiletoim == 'SUPER' or $whiletoim == 'KESKEN' or $whiletoim == 'HYPER' or $whiletoim == 'TOSI_KESKEN' or $whiletoim == 'ODOTTAA_SUORITUSTA' or $whiletoim == 'TEHDASPALAUTUKSET' or $whiletoim == 'SUPERTEHDASPALAUTUKSET') and $fieldname == 'toimaika' and $row['toimaika'] == '0000-00-00') echo t("Avoin");
+							if (($whiletoim == '' or $whiletoim == 'SUPER' or $whiletoim == 'KESKEN' or $whiletoim == 'HYPER' or $whiletoim == 'TOSI_KESKEN' or $whiletoim == 'ODOTTAA_SUORITUSTA' or $whiletoim == 'TEHDASPALAUTUKSET' or $whiletoim == 'SUPERTEHDASPALAUTUKSET' or $whiletoim == "TAKUU" or $whiletoim == "TAKUUSUPER") and $fieldname == 'toimaika' and $row['toimaika'] == '0000-00-00') echo t("Avoin");
 							else echo tv1dateconv($row[$fieldname], "PITKA", "LYHYT");
 
 							echo "</td>";
@@ -2275,6 +2284,9 @@
 						elseif (($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "R") {
 							$tarkenne = " (".t("Reklamaatio").") ";
 						}
+						elseif (($row["tila"] == "N" or $row["tila"] == "L" or $row['tila'] == 'C') and $row["tilaustyyppi"] == "U") {
+							$tarkenne = " (".t("Takuu").") ";
+						}
 						elseif (($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "A") {
 							$laskutyyppi = "Työmääräys";
 						}
@@ -2386,7 +2398,7 @@
 
 						$lisa1 = t("Rivisyöttöön");
 					}
-					elseif ($whiletoim == "REKLAMAATIO" or $whiletoim == "REKLAMAATIOSUPER") {
+					elseif ($whiletoim == "REKLAMAATIO" or $whiletoim == "REKLAMAATIOSUPER" or $whiletoim == "TAKUU" or $whiletoim == "TAKUUSUPER") {
 						$aputoim1 = "REKLAMAATIO";
 						$lisa1 = t("Muokkaa");
 

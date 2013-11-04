@@ -494,6 +494,9 @@
 		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 			echo "<font class='head'>".t("Työmääräyksen otsikko")."</font><hr>";
 		}
+		elseif ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U')) {
+			echo "<font class='head'>".t("Takuu otsikko")."</font><hr>";
+		}
 		elseif ($toim == "REKLAMAATIO") {
 			echo "<font class='head'>".t("Reklamaatio otsikko")."</font><hr>";
 		}
@@ -1174,6 +1177,9 @@
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 				echo "<tr><th colspan='4'>".t("Työmääräyksen tiedot").":</th></tr>";
 			}
+			elseif ($toim == "REKLAMAATIO" and ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U')) {
+				echo "<tr><th colspan='4'>".t("Takuun tiedot").":</th></tr>";
+			}
 			elseif ($toim == "REKLAMAATIO") {
 				echo "<tr><th colspan='4'>".t("Reklamaation tiedot").":</th></tr>";
 			}
@@ -1775,10 +1781,15 @@
 			elseif ($toim == "REKLAMAATIO") {
 				$vasen_sarake[$vasen] = "<td>".t("Tilaustyyppi").":</td>";
 
-				//Jos kyseessä on työmääräys
-				echo "<input type='hidden' name='tilaustyyppi' value='R'>";
+				if ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $srow['tilaustyyppi'] == 'U') {
+					echo "<input type='hidden' name='tilaustyyppi' value='U'>";
+					$vasen_sarake[$vasen] .= "<td>".t("Takuu")."</td>";
+				}
+				else {
+					echo "<input type='hidden' name='tilaustyyppi' value='R'>";
+					$vasen_sarake[$vasen] .= "<td>".t("Reklamaatio")."</td>";
+				}
 
-				$vasen_sarake[$vasen] .= "<td>".t("Reklamaatio")."</td>";
 				$vasen++;
 			}
 
@@ -1885,21 +1896,23 @@
 					'N' => '',
 					'S' => '',
 					'T' => '',
+					'U' => '',
 					2 => '',
 					7 => '',
 					8 => '',
 					9 => '',
 				);
 
-				$vasen_sarake[$vasen] .= "<option value='N' $sel[N]>".t("Normaalitilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='E' $sel[E]>".t("Ennakkotilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='T' $sel[T]>".t("Tarjoustilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='2' $sel[2]>".t("Varastotäydennys")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='7' $sel[7]>".t("Tehdastilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='S' $sel[S]>".t("Sarjatilaus")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='8' $sel[8]>".t("Muiden mukana")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='A' $sel[A]>".t("Työmääräys")."</option>";
-				$vasen_sarake[$vasen] .= "<option value='9' $sel[9]>".t("Tehdaspalautus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='N' {$sel['N']}>".t("Normaalitilaus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='E' {$sel['E']}>".t("Ennakkotilaus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='8' {$sel[8]}>".t("Muiden mukana")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='S' {$sel['S']}>".t("Sarjatilaus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='U' {$sel['U']}>".t("Takuutilaus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='T' {$sel['T']}>".t("Tarjoustilaus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='9' {$sel[9]}>".t("Tehdaspalautus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='7' {$sel[7]}>".t("Tehdastilaus")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='A' {$sel['A']}>".t("Työmääräys")."</option>";
+				$vasen_sarake[$vasen] .= "<option value='2' {$sel[2]}>".t("Varastotäydennys")."</option>";
 				$vasen_sarake[$vasen] .= "</select></td>";
 				$vasen++;
 			}

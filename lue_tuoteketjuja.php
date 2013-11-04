@@ -293,8 +293,18 @@ if ($kasitellaan_tiedosto) {
 					$toiminto 	= "MUUTA";
 				}
 				elseif (strtoupper(trim($rivi[$postoiminto])) == 'POISTA') {
+					if ($table == "vastaavat") {
+						if ($vastaava_paatuote == '') {
+							$loppu 		= " and id='$id' and tuoteno=$haku";
+						}
+						else  {
+							$loppu 		= " and id='$id'";
+						}	
+					}
+					else  {
+						$loppu 		= " and id='$id'";
+					}
 					$alku 		= "DELETE from $table where yhtio = '{$kukarow['yhtio']}' ";
-					$loppu 		= " and id='$id' ";
 					$toiminto 	= "POISTA";
 				}
 				else {
@@ -372,7 +382,7 @@ if ($kasitellaan_tiedosto) {
 									echo t("Lisättiin ketjuun")," $id {$rivi[$j]}! ";
 								}
 							}
-							elseif ($toiminto == 'POISTA') {
+ 							elseif ($toiminto == 'POISTA' and (($table == 'vastaavat' and $j > 0) or $table != 'vastaavat')) {
 
 								if (mysql_num_rows($kresult) == 0) {
 									echo t("Tuotetta")," {$rivi[$j]} ",t("ei voida poistaa, koska se ei löydy tästä ketjusta"),"! ";

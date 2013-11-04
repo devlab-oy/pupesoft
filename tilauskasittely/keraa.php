@@ -1837,6 +1837,17 @@
 						) {
 
 							list($komento, $koontilahete, $koontilahete_tilausrivit) = koontilahete_check($laskurow, $komento);
+							
+							if ((!is_array($komento) and $komento != $lahetekpl) AND $lahetekpl != 0){
+								$kom = $komento;
+								$komento = array();
+								for ($x = 1; $x <= $lahetekpl; $x++){
+									$komento[] = $kom;
+								}
+							}
+							else {
+								$komento = "";
+							}
 
 							if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {
 

@@ -1679,11 +1679,13 @@
 							$linkattu_myyntitilaus_result = pupe_query($query);
 							$linkattu_myyntitilaus_row = mysql_fetch_assoc($linkattu_myyntitilaus_result);
 
-							echo " <a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=RIVISYOTTO&tilausnumero={$linkattu_myyntitilaus_row['otunnus']}&lopetus={$myyntitilaus_lopetus}'>".t('Näytä myyntitilaus').": {$linkattu_myyntitilaus_row['nimi']}</a>";
+							if (trim($prow["kommentti"]) != "") echo "<br>";
+							echo "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=RIVISYOTTO&tilausnumero={$linkattu_myyntitilaus_row['otunnus']}&lopetus={$myyntitilaus_lopetus}'>".t('Näytä myyntitilaus').": {$linkattu_myyntitilaus_row['nimi']}</a>";
 						}
 
 						if (isset($vastaavat_html) and $vastaavat_html != "") {
-							echo " <a href='#' class='toggle_korvaavat_vastaavat' rivitunnus='{$prow['tunnus']}'>".t("Näytä korvaavat & vastaavat")."</a>";
+							if (trim($prow["kommentti"]) != "" or !empty($prow['tilausrivilinkki'])) echo "<br>";
+							echo "<a href=\"javascript:return false;\" class='toggle_korvaavat_vastaavat' rivitunnus='{$prow['tunnus']}'>".t("Näytä korvaavat & vastaavat")."</a>";
 						}
 
 						echo "</td></tr>";

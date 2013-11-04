@@ -2011,6 +2011,7 @@
 
 				echo "</select>";
 				echo "</td>";
+				echo "<td class='back'><input type='submit' value='".t("Päivitä")."'></td>";
 				echo "</tr>";
 				echo "</form>";
 			}

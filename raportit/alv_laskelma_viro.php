@@ -203,11 +203,9 @@
 		}
 		elseif ($ryhma == '3.1') {
 			$taso = "ee310";
-			$tiliointilisa = "AND lasku.tilaustyyppi != '9'";
 		}
 		elseif ($ryhma == '3.1.1') {
 			$tuotetyyppilisa = " AND tuote.tuotetyyppi != 'K' ";
-			$tiliointilisa = "AND lasku.tilaustyyppi != '9'";
 			$taso = 'ee310';
 		}
 		elseif ($ryhma == '3.2') {
@@ -425,7 +423,7 @@
 						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) $kerroin verot_valuutassa,
 						count(*) kpl
 						FROM tiliointi
-						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus AND lasku.tilaustyyppi != '9')
 						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						AND tiliointi.korjattu = ''

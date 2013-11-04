@@ -2718,7 +2718,7 @@ if ($tee == '') {
 	echo "<form name='tilaus' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
 			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 			<input type='hidden' name='mista' value='$mista'>
-			<input type='hidden' name='toim' value='$toim'>
+			<input type='hidden' id='toim' name='toim' value='$toim'>
 			<input type='hidden' name='lopetus' value='$lopetus'>
 			<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
 			<input type='hidden' name='tilaustyyppi' value='{$tilaustyyppi}'>

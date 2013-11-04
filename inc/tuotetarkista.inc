@@ -441,7 +441,7 @@ if(!function_exists("tuotetarkista")) {
 					$_counter = 0;
 
 					foreach ($kaikki_oletuspaikat as $_tuotepaikka) {
-						echo "<font class='message'>".t("Lisättiin varastopaikka")." {$_tuotepaikka}</font><br/>";
+						echo "<br><font class='message'>".t("Lisättiin varastopaikka")." {$_tuotepaikka}</font><br>";
 						list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", trim($_tuotepaikka));
 
 						if ($hyllyalue == "" or !isset($hyllyalue)) {
@@ -502,6 +502,6 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 	}
-	
-		
+
+
 }

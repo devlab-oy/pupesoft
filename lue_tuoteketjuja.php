@@ -220,7 +220,12 @@ if ($kasitellaan_tiedosto) {
 			for ($j = 0; $j < count($rivi); $j++) {
 				//otetaan rivin kaikki tuotenumerot talteen
 				if ($headers[$j] == "TUOTENO" and $rivi[$j] != "") {
-					$haku .= "'$rivi[$j]',";
+					if ($table == "vastaavat" and $j > 0) {
+						$haku = "'$rivi[$j]',";
+					}	
+					else {
+						$haku .= "'$rivi[$j]',";
+					}
 				}
 
 				// Vastaavien sis‰‰nluvussa otetaan haettava tuoteno talteen
@@ -305,7 +310,7 @@ if ($kasitellaan_tiedosto) {
 				}
 
 				for ($j = 0; $j < count($rivi); $j++) {
-					if ($headers[$j] == "TUOTENO" and trim($rivi[$j]) != '') {
+					if ($headers[$j] == "TUOTENO" and trim($rivi[$j]) != '' and $haku != '') {
 
 						$jarjestys      = 0;
 						$vaihtoehtoinen = '';
@@ -373,17 +378,31 @@ if ($kasitellaan_tiedosto) {
 								}
 							}
 							elseif ($toiminto == 'POISTA') {
+								if ($table == 'vastaavat') {
+									if (mysql_num_rows($kresult) == 0) {
+										echo t("Tuotetta")," $haku ",t("ei voida poistaa, koska se ei lˆydy t‰st‰ ketjusta"),"! ";
+									}
+									else {
+										$kysely = " and tuoteno=$haku ";
+										$query = $alku.$kysely.$loppu;
+										$iresult = pupe_query($query);
 
-								if (mysql_num_rows($kresult) == 0) {
-									echo t("Tuotetta")," {$rivi[$j]} ",t("ei voida poistaa, koska se ei lˆydy t‰st‰ ketjusta"),"! ";
+										echo t("Poistettiin ketjusta")," $id $haku! ";
+										$haku = '';
+									}
 								}
-								else {
-									$kysely = " and tuoteno='$rivi[$j]' ";
-									$query = $alku.$kysely.$loppu;
-									$iresult = pupe_query($query);
+								else {	
+									if (mysql_num_rows($kresult) == 0) {
+										echo t("Tuotetta")," {$rivi[$j]} ",t("ei voida poistaa, koska se ei lˆydy t‰st‰ ketjusta"),"! ";
+									}
+									else {
+										$kysely = " and tuoteno='$rivi[$j]' ";
+										$query = $alku.$kysely.$loppu;
+										$iresult = pupe_query($query);
 
-									echo t("Poistettiin ketjusta")," $id {$rivi[$j]}! ";
-								}
+										echo t("Poistettiin ketjusta")," $id {$rivi[$j]}! ";
+									}
+								}	
 							}
 							elseif ($toiminto == "MUUTA" and ($jarjestys > 0 or $vaihtoehtoinen_lisa)) {
 

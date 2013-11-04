@@ -136,6 +136,9 @@
 							$valkoodi = $yhtiorow["valkoodi"];
 						}
 
+						// Pikatilaus menee aina omalle otsikolle per myyntitilaus
+						$tunnusnippu = ($myytilrow['ostotilauksen_kasittely'] == 5) ? $myytilrow['tunnus'] : 0;
+
 						$vquery = "	SELECT nimi, kurssi, tunnus
 									FROM valuu
 									WHERE yhtio = '$kukarow[yhtio]'
@@ -145,11 +148,29 @@
 
 						$commentsit = trim(t("Myyntitilaus").": $myytilrow[tunnus] \n".t("Myyntitilauksen toimitustapa").": $myytilrow[toimitustapa] \n".$tiltoi["comments"]);
 
+						$ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP");
+
+						if (mysql_num_rows($ostotil_tiltyyp_res) > 0) {
+							// Otetaan eka...
+							$ostotil_tiltyyp_row = mysql_fetch_assoc($ostotil_tiltyyp_res);
+							$tilaustyyppi = $ostotil_tiltyyp_row['selite'];
+						}
+						else {
+							// oletuksena normaali
+							$tilaustyyppi = 2;
+						}
+
+						$ostotilauksen_kasittely_wherelisa = "";
+
 						// K‰sitell‰‰n myyntitilauksen otsikolla setattu "ostotilauksen k‰sittely"
 						switch($myytilrow['ostotilauksen_kasittely']) {
-							case '4':
 							case '5':
-								$ostotilauksen_kasittely_wherelisa = "
+								# Pikaostotilaus aina omalle otsikolle
+								$ostotilauksen_kasittely_wherelisa .= "
+								and tunnusnippu = '{$tunnusnippu}'";
+								#Ei breikki‰. Menn‰‰n myˆs 4-haaraan.
+							case '4':
+								$ostotilauksen_kasittely_wherelisa .= "
 								and toim_nimi		= '{$toim_nimi}'
 								and toim_nimitark	= '{$toim_nimitark}'
 								and toim_osoite		= '{$toim_osoite}'
@@ -157,22 +178,24 @@
 								and toim_postitp	= '{$toim_postitp}'
 								and toim_maa		= '{$toim_maa}'
 								and varasto 		= '{$kukarow['oletus_ostovarasto']}'
-								and ohjausmerkki 	= '{$myytilrow['ohjausmerkki']}'";
+								and ohjausmerkki 	= '{$myytilrow['ohjausmerkki']}'
+								and tilaustyyppi	= '$tilaustyyppi'";
 								break;
 							case '2':
 							case '3':
-								$ostotilauksen_kasittely_wherelisa = "
+								$ostotilauksen_kasittely_wherelisa .= "
 								and toim_nimi		= '{$toim_nimi}'
 								and toim_nimitark	= '{$toim_nimitark}'
 								and toim_osoite		= '{$toim_osoite}'
 								and toim_postino	= '{$toim_postino}'
 								and toim_postitp	= '{$toim_postitp}'
-								and toim_maa		= '{$toim_maa}'";
+								and toim_maa		= '{$toim_maa}'
+								and tilaustyyppi	= '$tilaustyyppi'";
 								break;
 							case '1':
 							case '0':
 							default:
-								$ostotilauksen_kasittely_wherelisa = "
+								$ostotilauksen_kasittely_wherelisa .= "
 								and toim_nimi		= '{$toim_nimi}'
 								and toim_nimitark	= '{$toim_nimitark}'
 								and toim_osoite		= '{$toim_osoite}'
@@ -180,16 +203,18 @@
 								and toim_postitp	= '{$toim_postitp}'
 								and toim_maa		= '{$toim_maa}'
 								and left(luontiaika,10) = left(now(),10)
-								and laatija 		= '{$kukarow['kuka']}'";
+								and laatija 		= '{$kukarow['kuka']}'
+								and tilaustyyppi	= '$tilaustyyppi'";
 								break;
 						}
 
 						$query = "	SELECT *
-									from lasku
-									where yhtio 		= '$kukarow[yhtio]'
-									and liitostunnus 	= '$tiltoi[tunnus]'
-									and tila 			= 'O'
-									and alatila 		= ''
+									FROM lasku
+									WHERE yhtio 		= '$kukarow[yhtio]'
+									AND liitostunnus 	= '$tiltoi[tunnus]'
+									AND tila 			= 'O'
+									AND chn 		   != 'GEN'
+									AND alatila 		= ''
 									{$ostotilauksen_kasittely_wherelisa}";
 						$jtsre = pupe_query($query);
 
@@ -197,7 +222,6 @@
 						if (mysql_num_rows($jtsre) == 0) {
 
 							// Vanhatunnus-kentt‰‰n laitetaan ostotilauksella toimipaikan tunnus
-
 							$query = "	INSERT INTO lasku SET
 										alatila 			= '',
 										comments 			= '$commentsit',
@@ -220,7 +244,7 @@
 										postitp 			= '$tiltoi[postitp]',
 										sisviesti1			= '$myytilrow[sisviesti1]',
 										tila 				= 'O',
-										tilaustyyppi		= '',
+										tilaustyyppi		= '$tilaustyyppi',
 										tilausyhteyshenkilo	= '$kukarow[nimi]',
 										toimaika 			= '$myytilrow[toimaika]',
 										toimitusehto 		= '$tiltoi[toimitusehto]',
@@ -232,6 +256,7 @@
 										toim_ovttunnus		= '$tiltoi[ovttunnus]',
 										toim_postino 		= '$toim_postino',
 										toim_postitp 		= '$toim_postitp',
+										tunnusnippu			= '{$tunnusnippu}',
 										valkoodi 			= '$valkoodi',
 										vanhatunnus			= '{$myytilrow['yhtio_toimipaikka']}',
 										varasto 			= '{$kukarow['oletus_ostovarasto']}',

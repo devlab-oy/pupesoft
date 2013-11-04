@@ -924,14 +924,14 @@
 				echo "<td>{$srow['ryhma']}</td>";
 				echo "</tr>";
 			}
-			
+
 			if (isset($srow['fakta']) and $srow['fakta'] != "") {
 				echo "<tr>";
 				echo "<td valign='top'>".t("Asiakasfakta").":</td>";
-				echo "<td>".str_replace("\n", "<br>", $srow['fakta'])."</td>";
+				echo "<td><font class='asiakasfakta'>".str_replace("\n", "<br>", $srow['fakta'])."</font></td>";
 				echo "</tr>";
-			}	
-			
+			}
+
 
 			$query  = "	SELECT laji
 						FROM asiakas
@@ -1964,44 +1964,41 @@
 			$vasen_sarake[$vasen] .= "</select></td>";
 			$vasen++;
 
-			if ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") {
+			$query = "	SELECT tunnus, nimi
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'";
+			$yht_toimpaik_res = pupe_query($query);
 
-				$query = "	SELECT tunnus, nimi
-							FROM yhtion_toimipaikat
-							WHERE yhtio = '{$kukarow['yhtio']}'";
-				$yht_toimpaik_res = pupe_query($query);
+			if (mysql_num_rows($yht_toimpaik_res) > 0) {
 
-				if (mysql_num_rows($yht_toimpaik_res) > 0) {
+				$oikea_sarake[$oikea] = "<td>".t("Yhtiön toimipaikka")."</td>";
 
-					$oikea_sarake[$oikea] = "<td>".t("Yhtiön toimipaikka")."</td>";
+				$predefined_yhtiotoimipaikka = 0;
 
-					$predefined_yhtiotoimipaikka = 0;
+				$oikea_sarake[$oikea] .= "<td><select name='yhtiotoimipaikka'>";
+				$oikea_sarake[$oikea] .= "<option value='0'>".t("Yhtiön perustiedot")."</option>";
 
-					$oikea_sarake[$oikea] .= "<td><select name='yhtiotoimipaikka'>";
-					$oikea_sarake[$oikea] .= "<option value='0'>".t("Yhtiön perustiedot")."</option>";
+				while ($yht_toimpaik_row = mysql_fetch_assoc($yht_toimpaik_res)) {
 
-					while ($yht_toimpaik_row = mysql_fetch_assoc($yht_toimpaik_res)) {
+					$sel = "";
 
-						$sel = "";
-
-						if (!isset($srow['yhtio_toimipaikka'])) {
-							if ($alv_velvollisuus != "" and $yht_toimpaik_row['tunnus'] == $alhiro['tunnus']) $sel = "selected";
-							if ($sel == "" and $kukarow['toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
-						}
-						else {
-							if ($srow['yhtio_toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
-						}
-
-						if ($sel != "") $predefined_yhtiotoimipaikka = $yht_toimpaik_row['tunnus'];
-
-						$oikea_sarake[$oikea] .= "<option value='{$yht_toimpaik_row['tunnus']}' {$sel}>{$yht_toimpaik_row['nimi']}</option>";
+					if (!isset($srow['yhtio_toimipaikka'])) {
+						if ($alv_velvollisuus != "" and $yht_toimpaik_row['tunnus'] == $alhiro['tunnus']) $sel = "selected";
+						if ($sel == "" and $kukarow['toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
+					}
+					else {
+						if ($srow['yhtio_toimipaikka'] == $yht_toimpaik_row['tunnus']) $sel = "selected";
 					}
 
-					$oikea_sarake[$oikea] .= "</select>";
-					echo "<input type='hidden' name='predefined_yhtiotoimipaikka' value='{$predefined_yhtiotoimipaikka}' />";
-					$oikea_sarake[$oikea] .= "</td>";
-					$oikea++;
+					if ($sel != "") $predefined_yhtiotoimipaikka = $yht_toimpaik_row['tunnus'];
+
+					$oikea_sarake[$oikea] .= "<option value='{$yht_toimpaik_row['tunnus']}' {$sel}>{$yht_toimpaik_row['nimi']}</option>";
 				}
+
+				$oikea_sarake[$oikea] .= "</select>";
+				echo "<input type='hidden' name='predefined_yhtiotoimipaikka' value='{$predefined_yhtiotoimipaikka}' />";
+				$oikea_sarake[$oikea] .= "</td>";
+				$oikea++;
 			}
 
 			$eilah = '';
@@ -3844,7 +3841,7 @@
 				if ($merkki2 != 'eimenu' and $merkki2 != '') {
 					$merkki = $merkki2;
 				}
-				
+
 				$query2 .= "tyomaarays SET
 							yhtio			= '$kukarow[yhtio]',
 							kotipuh 		= '$kotipuh',
@@ -3871,7 +3868,7 @@
 							tyokoodi		= '$tyokoodi',
 							hyvaksy			= '$hyvaksy',
 							otunnus 		= '$kukarow[kesken]'";
-				
+
 				//Nämä kentät päivitetään vain, jos päivitetään sitä työmääräykseltä tai muualta missä nuo kaksi kenttää näkyy..
 				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
 					$query2 .= ",	tyojono			= '$tyojono',
@@ -3879,7 +3876,7 @@
 				}
 				$query2 .= $postquery2;
 				$result = pupe_query($query2);
-			}	
+			}
 
 			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "EXTTARJOUS", "ENNAKKO","EXTENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE", "WEBTILAUSTARJOUS","EXTRANET_REKLAMAATIO"))) {
 
@@ -3896,7 +3893,7 @@
 				else {
 					$sopimus_pp = "";
 				}
-				
+
 				$sopimus_info = '';
 				if($toim != 'EXTENNAKKO' and $toim != 'EXTTARJOUS') {
 					$sopimus_info = "sopimus_lisatietoja			= '$sopimus_lisatietoja',";

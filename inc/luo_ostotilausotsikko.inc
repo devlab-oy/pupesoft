@@ -22,6 +22,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
 		 * 	$params['myyntitil_kerayspvm']
 		 * 	$params['myytil_myyja']
 		 * 	$params['myytil_sisviesti1']
+		 *  $params['myytil_viesti']
 		 * 	$params['myytil_toimaika']
 		 * 	$params['myytil_toimitustapa']
 		 * 	$params['myytil_liitostunnus']
@@ -39,9 +40,27 @@ if (!function_exists('luo_ostotilausotsikko')) {
 		$params['myyntitil_kerayspvm'] = (!empty($params['myyntitil_kerayspvm'])) ? $params['myyntitil_kerayspvm'] : '';
 		$params['myytil_myyja'] = (!empty($params['myytil_myyja'])) ? $params['myytil_myyja'] : '';
 		$params['myytil_sisviesti1'] = (!empty($params['myytil_sisviesti1'])) ? $params['myytil_sisviesti1'] : '';
+		$params['myytil_viesti'] = (!empty($params['myytil_viesti'])) ? $params['myytil_viesti'] : '';
 		$params['myytil_toimaika'] = (!empty($params['myytil_toimaika'])) ? $params['myytil_toimaika'] : '';
 		$params['myytil_toimitustapa'] = (!empty($params['myytil_toimitustapa'])) ? $params['myytil_toimitustapa'] : '';
 		$params['myytil_liitostunnus'] = (!empty($params['myytil_liitostunnus'])) ? $params['myytil_liitostunnus'] : '';
+		$params['varasto'] = (!empty($params['varasto'])) ? $params['varasto'] : $kukarow['oletus_ostovarasto'];
+
+		$chn = (!empty($params['ostotilauksen_kasittely']) and $params['ostotilauksen_kasittely'] == "GEN") ? "GEN" : "";
+
+		$ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP");
+
+		if (mysql_num_rows($ostotil_tiltyyp_res) > 0) {
+			// Otetaan eka...
+			$ostotil_tiltyyp_row = mysql_fetch_assoc($ostotil_tiltyyp_res);
+			$tilaustyyppi = $ostotil_tiltyyp_row['selite'];
+		}
+		else {
+			// oletuksena normaali
+			$tilaustyyppi = 2;
+		}
+
+		$params['tilaustyyppi'] = (!empty($params['tilaustyyppi'])) ? $params['tilaustyyppi'] : $tilaustyyppi;
 
 		$tiltoi = hae_toimittaja($params['liitostunnus']);
 
@@ -76,34 +95,40 @@ if (!function_exists('luo_ostotilausotsikko')) {
 		$vresult = pupe_query($vquery);
 		$vrow = mysql_fetch_array($vresult);
 
+		$ostotilauksen_kasittely_wherelisa = "";
+
 		// K‰sitell‰‰n myyntitilauksen otsikolla setattu "ostotilauksen k‰sittely"
 		switch ($params['ostotilauksen_kasittely']) {
-			case '4':
 			case '5':
-				$ostotilauksen_kasittely_wherelisa = "
+			case '4':
+				$ostotilauksen_kasittely_wherelisa .= "
 					and toim_nimi		= '{$toim_nimi}'
 					and toim_nimitark	= '{$toim_nimitark}'
 					and toim_osoite		= '{$toim_osoite}'
 					and toim_postino	= '{$toim_postino}'
 					and toim_postitp	= '{$toim_postitp}'
 					and toim_maa		= '{$toim_maa}'
-					and varasto 		= '{$kukarow['oletus_ostovarasto']}'
-					and ohjausmerkki 	= '{$params['ohjausmerkki']}'";
+					and varasto 		= '{$params['varasto']}'
+					and ohjausmerkki 	= '{$params['ohjausmerkki']}'
+					and chn				= '$chn'
+					and tilaustyyppi	= '{$params['tilaustyyppi']}'";
 				break;
 			case '2':
 			case '3':
-				$ostotilauksen_kasittely_wherelisa = "
+				$ostotilauksen_kasittely_wherelisa .= "
 					and toim_nimi		= '{$toim_nimi}'
 					and toim_nimitark	= '{$toim_nimitark}'
 					and toim_osoite		= '{$toim_osoite}'
 					and toim_postino	= '{$toim_postino}'
 					and toim_postitp	= '{$toim_postitp}'
-					and toim_maa		= '{$toim_maa}'";
+					and toim_maa		= '{$toim_maa}'
+					and chn				= '$chn'
+					and tilaustyyppi	= '{$params['tilaustyyppi']}'";
 				break;
 			case '1':
 			case '0':
 			default:
-				$ostotilauksen_kasittely_wherelisa = "
+				$ostotilauksen_kasittely_wherelisa .= "
 					and toim_nimi		= '{$toim_nimi}'
 					and toim_nimitark	= '{$toim_nimitark}'
 					and toim_osoite		= '{$toim_osoite}'
@@ -111,7 +136,9 @@ if (!function_exists('luo_ostotilausotsikko')) {
 					and toim_postitp	= '{$toim_postitp}'
 					and toim_maa		= '{$toim_maa}'
 					and left(luontiaika,10) = left(now(),10)
-					and laatija 		= '{$kukarow['kuka']}'";
+					and laatija 		= '{$kukarow['kuka']}'
+					and chn				= '$chn'
+					and tilaustyyppi	= '{$params['tilaustyyppi']}'";
 				break;
 		}
 
@@ -129,6 +156,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
 
 			$query = "	INSERT INTO lasku SET
 						alatila 			= '',
+						chn					= '$chn',
 						huolitsija 			= '{$tiltoi['huolitsija']}',
 						jakelu 				= '{$params['jakelu']}',
 						kerayspvm 			= '{$params['myyntitil_kerayspvm']}',
@@ -148,7 +176,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
 						postitp 			= '{$tiltoi['postitp']}',
 						sisviesti1			= '{$params['myytil_sisviesti1']}',
 						tila 				= 'O',
-						tilaustyyppi		= '',
+						tilaustyyppi		= '{$params['tilaustyyppi']}',
 						tilausyhteyshenkilo	= '{$kukarow['nimi']}',
 						toimaika 			= '{$params['myytil_toimaika']}',
 						toimitusehto 		= '{$tiltoi['toimitusehto']}',
@@ -162,7 +190,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
 						toim_postitp 		= '{$toim_postitp}',
 						valkoodi 			= '{$valkoodi}',
 						vanhatunnus			= {$params['toimipaikka']},
-						varasto 			= '{$kukarow['oletus_ostovarasto']}',
+						varasto 			= '{$params['varasto']}',
 						verkkotunnus		= '{$params['myytil_liitostunnus']}',
 						vienti_kurssi 		= '{$vrow['kurssi']}',
 						viesti 				= '{$params['myytil_viesti']}',

@@ -580,9 +580,10 @@
 					FROM tiliointi AS tiliointi2
 					WHERE tiliointi2.yhtio = lasku.yhtio and tiliointi2.ltunnus = lasku.tunnus and tiliointi2.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and tiliointi2.korjattu = ''
 				) summa2,
-				(SELECT sum(summa)
-					FROM tiliointi AS tiliointi2
-					WHERE tiliointi2.yhtio = lasku.yhtio and tiliointi2.ltunnus = lasku.tunnus and tiliointi2.tilino in ('$yhtiorow[alv]') and tiliointi2.korjattu = ''
+				(SELECT sum(tiliointi3.summa)
+					FROM tiliointi AS tiliointi3
+					join tiliointi as tili_alet on (tili_alet.yhtio = tiliointi3.yhtio and tili_alet.ltunnus = tiliointi3.ltunnus and tili_alet.tunnus=tiliointi3.aputunnus and tili_alet.tilino!='$yhtiorow[kassaale]' and tili_alet.korjattu = '')
+					WHERE tiliointi3.yhtio = lasku.yhtio and tiliointi3.ltunnus = lasku.tunnus and tiliointi3.tilino in ('$yhtiorow[alv]') and tiliointi3.korjattu = ''
 				) summa3
 				FROM lasku
 				WHERE lasku.yhtio = '$kukarow[yhtio]'

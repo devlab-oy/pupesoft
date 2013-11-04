@@ -646,7 +646,7 @@
 			$valid = true;
 			$haku .= " and lasku.kerayspvm<=date_add(now(), INTERVAL $karajaus day)";
 		}
-		elseif (isset($vva) and isset($kka) and isset($ppa) and isset($vvl) and isset($kkl) and isset($ppl)) {
+		elseif($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != '') {
 			$valid = true;
 			$alku_paiva = "{$vva}-{$kka}-{$ppa}";
 			$loppu_paiva = "{$vvl}-{$kkl}-{$ppl}";
@@ -1142,6 +1142,12 @@
 					echo "<input type='hidden' name='tutyyppi' 		value='$tutyyppi'>";
 					echo "<input type='hidden' name='tutoimtapa' 	value='$tutoimtapa'>";
 					echo "<input type='hidden' name='karajaus' 		value='$karajaus'>";
+					echo "<input type='hidden' name='vva'			value='$vva'>";
+					echo "<input type='hidden' name='kka'			value='$kka'>";
+					echo "<input type='hidden' name='ppa'			value='$ppa'>";
+					echo "<input type='hidden' name='vvl'			value='$vvl'>";
+					echo "<input type='hidden' name='kkl'			value='$kkl'>";
+					echo "<input type='hidden' name='ppl'			value='$ppl'>";
 					echo "<input type='hidden' name='lasku_yhtio' 	value='$tilrow[yhtio]'>";
 					echo "<input type='hidden' name='tee2' 			value='VALITSE'>";
 					echo "<input type='hidden' name='tilaukset'		value='$tilrow[otunnus]'>";
@@ -1223,6 +1229,12 @@
 					echo "<input type='hidden' name='tutyyppi'		value='$tutyyppi'>";
 					echo "<input type='hidden' name='tutoimtapa'	value='$tutoimtapa'>";
 					echo "<input type='hidden' name='karajaus'		value='$karajaus'>";
+					echo "<input type='hidden' name='vva'			value='$vva'>";
+					echo "<input type='hidden' name='kka'			value='$kka'>";
+					echo "<input type='hidden' name='ppa'			value='$ppa'>";
+					echo "<input type='hidden' name='vvl'			value='$vvl'>";
+					echo "<input type='hidden' name='kkl'			value='$kkl'>";
+					echo "<input type='hidden' name='ppl'			value='$ppl'>";
 					echo "<input type='hidden' name='tee2' 			value='TULOSTA'>";
 					echo "<input type='hidden' name='tulostukseen[]' value='$tilrow[otunnus]'>";
 					echo "<input type='hidden' name='lasku_yhtio' 	value='$tilrow[yhtio]'>";
@@ -1236,6 +1248,12 @@
 					echo "<input type='hidden' name='tutyyppi' 		value='$tutyyppi'>";
 					echo "<input type='hidden' name='tutoimtapa'	value='$tutoimtapa'>";
 					echo "<input type='hidden' name='karajaus' 		value='$karajaus'>";
+					echo "<input type='hidden' name='vva'			value='$vva'>";
+					echo "<input type='hidden' name='kka'			value='$kka'>";
+					echo "<input type='hidden' name='ppa'			value='$ppa'>";
+					echo "<input type='hidden' name='vvl'			value='$vvl'>";
+					echo "<input type='hidden' name='kkl'			value='$kkl'>";
+					echo "<input type='hidden' name='ppl'			value='$ppl'>";
 					echo "<input type='hidden' name='etsi' 			value='$etsi'>";
 					echo "<input type='hidden' name='tee2' 			value='NAYTATILAUS'>";
 					echo "<input type='hidden' name='vanha_tee2' 	value=''>";

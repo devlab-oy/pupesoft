@@ -55,6 +55,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			$verkkotunnus 	   = $asiakasrow["verkkotunnus"];
 			$piiri 			   = $asiakasrow["piiri"];
 			$laskutyyppi	   = $asiakasrow["laskutyyppi"];
+			$lahetetyyppi 	   = pupesoft_lahetetyyppi(0, $asiakasrow['tunnus']);
 
 			$kohde  = "";
 			$eilahe = "";
@@ -72,15 +73,6 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 				$asiakasid 				= $asiakasrow["spec_tunnus"];
 				$asiakasrow["tunnus"] 	= $asiakasrow["spec_tunnus"];
 			}
-
-			$toimvv = date("Y");
-			$toimkk = date("m");
-			$toimpp = date("d");
-
-			$kervv = date("Y");
-			$kerkk = date("m");
-			$kerpp = date("d");
-
 
 			if ($toim == "TARJOUS" or $asiakasrow["vienti"] =='K') {
 				$kolm_nimi 		= $asiakasrow["kolm_nimi"];
@@ -308,6 +300,14 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 			}
 		}
 
+		$toimvv = date("Y");
+		$toimkk = date("m");
+		$toimpp = date("d");
+
+		$kervv = date("Y");
+		$kerkk = date("m");
+		$kerpp = date("d");
+
 		$alv_velvollisuus = "";
 
 		// jos meill‰ on lasku menossa ulkomaille
@@ -385,12 +385,13 @@ if (!function_exists("luo_tarjouspohja")) {
 		global $kukarow, $yhtiorow, $session;
 
 		// valitut_asiakastunnukset on special case tapaus. valitut_asiakastunnukset on setattu ainoastaan silloin kun dummytarjoukselle halutaan liitt‰‰ asiakkaita.
-		// clearing on special case, kun dummy tarjoukselta halutaan luoda asiakkaille oikeat tarjoukset, niin cleargin pit‰‰ setata n‰ihin tarjouksiin
+		// clearing on special case, kun dummy tarjoukselta halutaan luoda asiakkaille oikeat tarjoukset, niin clearing pit‰‰ setata n‰ihin tarjouksiin
 		$toim = $params['toim'];
 		$asiakasid = $params['asiakasid'];
 		$tilausnumero = $params['tilausnumero'];
 		$valitut_asiakastunnukset = $params['valitut_asiakastunnukset'];
 		$alv = $params['alv'];
+		$viesti = $params['viesti'];
 
 		//Jos asiakasid < 0 niin kyseess‰ on special case. T‰ss‰ tapauksessa luodaan Extranet Dummytarjousta.
 		$query = "  SELECT *

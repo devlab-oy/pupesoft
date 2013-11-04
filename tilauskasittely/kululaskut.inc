@@ -515,7 +515,7 @@ if ($silent == "") {
 								FROM lasku matkalasku
 								JOIN tilausrivi matkarivi ON matkarivi.yhtio=matkalasku.yhtio and matkarivi.otunnus=matkalasku.tunnus and matkarivi.kpl > 0 and matkarivi.tyyppi  != 'D'
 								LEFT JOIN tilausrivi tilrivi ON tilrivi.yhtio=matkalasku.yhtio and tilrivi.otunnus = '$kukarow[kesken]' and tilrivi.tyyppi  != 'D'
-								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilrivi.tunnus and tilausrivin_lisatiedot.tilausrivilinkki = matkarivi.tunnus
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilrivi.tunnus and tilausrivin_lisatiedot.tilausrivilinkki > 0 and tilausrivin_lisatiedot.tilausrivilinkki = matkarivi.tunnus
 								WHERE matkalasku.yhtio	= '$kukarow[yhtio]'
 								and matkalasku.tunnus	= $osresrow[tunnus]";
 					$mlrivires = pupe_query($query);

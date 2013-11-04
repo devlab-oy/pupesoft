@@ -1311,7 +1311,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 				}
 			}
 			else {
-				echo "<font class='error'>".t("En löytänyt matkallaolevat kirjausta!")." $kulurow[tunnus] $yhtiorow[matkalla_olevat]</font><br>";
+				if (!$tullaan_automaattikohdistuksesta) echo "<font class='error'>".t("En löytänyt matkallaolevat kirjausta!")." $kulurow[tunnus] $yhtiorow[matkalla_olevat]</font><br>";
 			}
 
 			// tarkistetaan onko lasku Teccom-lasku ja onko laskulla asn_sanomat -taulussa rivejä, joita ei ole käsitelty
@@ -1345,7 +1345,9 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("HUOM: Saapumiseen ei ole liitetty yhtään vaihto-omaisuuslaskua!")."<br><br></font>";
+		if ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
+			echo "<font class='error'>".t("HUOM: Saapumiseen ei ole liitetty yhtään vaihto-omaisuuslaskua!")."<br><br></font>";
+		}
 	}
 }
 
@@ -1444,11 +1446,13 @@ if ($mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tullaan_automaattik
 if ($toiminto == "kaikkiok" and $tee == "varma" and count($korjattavat_valmistukset) > 0) {
 	$rekurkoko = count($korjattavat_valmistukset);
 
-	echo "<table>";
+	if (!$tullaan_automaattikohdistuksesta) {
+		echo "<table>";
 
-	echo "<tr>";
-	echo "<th colspan='6'>".t("Korjataan valmistukset joihin tämä varastoonvienti vaikuttaa")."</td>";
-	echo "</tr>";
+		echo "<tr>";
+		echo "<th colspan='6'>".t("Korjataan valmistukset joihin tämä varastoonvienti vaikuttaa")."</td>";
+		echo "</tr>";
+	}
 
 
 	// Tässä on rekursiivista toimintaa $korjattavat_valmistukset-array voi kasvaa matkan varrella
@@ -1458,14 +1462,16 @@ if ($toiminto == "kaikkiok" and $tee == "varma" and count($korjattavat_valmistuk
 		$rekurkoko = count($korjattavat_valmistukset);
 	}
 
-	echo "</table>";
+	if (!$tullaan_automaattikohdistuksesta) {
+		echo "</table>";
+	}
 }
 
 if ($toiminto == "kaikkiok" and $tee == "varma" and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
 	echo "<br><font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("riviä").".</font><br><br>";
 }
-elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '' and !$tullaan_automaattikohdistuksesta) {
-	if ($mobiili_keikka != "yes") {
+elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '') {
+	if ($mobiili_keikka != "yes" and !$tullaan_automaattikohdistuksesta) {
 		echo "<font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("riviä").".</font><br><br>";
 	}
 
@@ -1564,7 +1570,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 		}
 
 		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A','S','V')) and count($jtrivit) > 0) {
-			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "vakisin", "JATKA", '', '', $jt_huomioi_pvm);
+			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "vakisin", "JATKA", '', '', $jt_huomioi_pvm, 'TULOUTUS');
 		}
 
 		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A'))) {

@@ -83,6 +83,35 @@ if ($luottoraja_chk or $erapaiva_chk) {
     if ($erapaiva_chk   == 0) { $ylivito         = 0; }
 }
 
+$query = "	SELECT tilausrivi.tunnus as tilausrivitunnus,
+			tilausrivi.kommentti,
+			tilausrivin_lisatiedot.rekisterinumero
+			FROM tilausrivi
+			JOIN tilausrivin_lisatiedot
+			ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+				AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+				AND tilausrivin_lisatiedot.rekisterinumero != '' )
+			WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+			AND tilausrivi.otunnus = '{$laskurow['tunnus']}'";
+$rekisterinumero_result = pupe_query($query);
+
+while ($rekisterinumero_row = mysql_fetch_assoc($rekisterinumero_result)) {
+	$kommentti = "";
+	if ($rekisterinumero_row['kommentti'] != ""){
+		$kommentti .= "{$rekisterinumero_row['kommentti']}\n";
+	}
+
+	if (!stristr($kommentti, $rekisterinumero_row['rekisterinumero'])) {
+		$kommentti .= $rekisterinumero_row['rekisterinumero'];
+	}
+
+	$query = "	UPDATE tilausrivi
+				SET kommentti = '{$kommentti}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$rekisterinumero_row['tilausrivitunnus']}'";
+	pupe_query($query);
+}
+
 // otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
 $query = "	SELECT *
 			FROM maksuehto
@@ -775,8 +804,13 @@ else {
 		// jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D
 		elseif (($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') and $kateisohitus == "") {
 
+			// Jos tullaan JT-selauksen kautta niin ei laiteta vahvistuksia jos yhtiöllä ei oo erikseen haluttu niitä
+			if (isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "JTSELAUS" and (($yhtiorow["tilausvahvistus_jttoimituksista"] == "" and $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] != "K") or $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] == "E")) {
+				$laskurow['tilausvahvistus'] = "";
+			}
+
 			// vaikka laitetaan sisäiseen laskutukseen tai ei haluttu lähetettä, mutta annetaan mahdollisuus lähettää tilausvahvistus omaan sähköpostiin
-			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
+			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE or (trim($laskurow['tilausvahvistus']) != "" or $yhtiorow['lahetteen_tulostustapa'] == "I")) {
 				$params_tilausvahvistus = array(
 				'tee'						=> $tee,
 				'toim'						=> $toim,
@@ -800,9 +834,11 @@ else {
 							AND tunnus = '{$laskurow['tunnus']}'";
 				pupe_query($query);
 
-				// Tulostetaan keräyslista
-				$tilausnumeroita = $laskurow["tunnus"];
-				require("tilaus-valmis-tulostus.inc");
+				if ($toim != "REKLAMAATIO") {
+					// Tulostetaan keräyslista
+					$tilausnumeroita = $laskurow["tunnus"];
+					require("tilaus-valmis-tulostus.inc");
+				}
 
 				// Tulostetaan lähete
 				$params = array(
@@ -1608,6 +1644,11 @@ else {
 			// jos halutaan tilausvahvistus aluperäisestä tilauksesta
 			if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
 
+				// Jos tullaan JT-selauksen kautta niin ei laiteta vahvistuksia jos yhtiöllä ei oo erikseen haluttu niitä
+				if (isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "JTSELAUS" and (($yhtiorow["tilausvahvistus_jttoimituksista"] == "" and $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] != "K") or $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] == "E")) {
+					$laskurow['tilausvahvistus'] = "";
+				}
+
 				if (trim($laskurow['tilausvahvistus']) != "") {
 					//
 					// LÄHETETÄÄN TILAUSVAHVISTUS
@@ -1646,6 +1687,11 @@ else {
 					$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 					$result = pupe_query($query);
 					$laskurow = mysql_fetch_assoc($result);
+
+					// Jos tullaan JT-selauksen kautta niin ei laiteta vahvistuksia jos yhtiöllä ei oo erikseen haluttu niitä
+					if (isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "JTSELAUS" and (($yhtiorow["tilausvahvistus_jttoimituksista"] == "" and $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] != "K") or $tilausvalmis_asiakas_row["tilausvahvistus_jttoimituksista"] == "E")) {
+						$laskurow['tilausvahvistus'] = "";
+					}
 
 					if (trim($laskurow['tilausvahvistus']) != "") {
 						//

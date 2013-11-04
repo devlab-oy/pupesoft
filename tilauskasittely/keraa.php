@@ -838,6 +838,16 @@
 										if ($maara[$apui] == 0) {
 											// Mitätöidään nollarivi koska poikkeamalle kuitenkin tehdään jotain fiksua
 											$query .= ", tyyppi = 'D', kommentti=trim(concat(kommentti, ' Mitätöitiin koska keräyspoikkeamasta tehtiin: ".$poikkeama_kasittely[$apui]."'))";
+
+											//vapautetaan tämän tilausrivi sarjanumero(t)
+											$queryv = " SELECT otunnus
+														FROM tilausrivi
+														WHERE yhtio = '{$kukarow['yhtio']}'
+														AND tunnus = '{$apui}'";
+											$vapaut = pupe_query($queryv);
+											$vapaurow = mysql_fetch_assoc($vapaut);
+
+											vapauta_sarjanumerot($toim, $vapaurow["otunnus"], "AND tilausrivi.tunnus = '{$apui}'");
 										}
 
 										$rotunnus	= $tilrivirow['otunnus'];
@@ -1154,18 +1164,32 @@
 							$pakkauskirjain = (int) abs(ord($keraysera_pakkaus[$kerivi[$i]]) - 64);
 							$monesko = -1;
 
+							//varmistetaan, että haetaan pakkauskirjaimen mukaiset tiedot, jos kyseessä on uusi pakkaus niin se käsitellään seuraavassa ($monesko = -1)
+							//tämä siksi, koska pakkauskirjaimien järjestystä on voitu muuttaa
 							for ($x = 0; $x < count($pakkaukset); $x++){
 								if ($pakkaukset[$x]['pakkausnro'] == $pakkauskirjain){
 									$monesko = $x;
 									break;
+
+								}
+							}
+
+							//tehhään uuelle pakkaukselle sscc:t jos ollaan koetettu lisää niit ja tälle pakkauskirjaimelle ei ole vielä tehty sscc:tä
+							//pakkausten tiedot on järjestetty pakkaukset muuttujaan siten, että paikalla 0 = A numerona 1, paikalla 1 = B numerona 2 jne.
+							//jos ollaan jo tehty jo sscc tälle pakkauskirjaimelle niin ei tehdä sille uusia sscc:tä vaan setataan vain $monesko muuttuja oikeaks et saadaan haettua oikean pakkauksen tiedot
+							if ($monesko == -1) {
+								$monesko = $pakkauskirjain - 1;
+
+								if (!isset($pakkaukset[$monesko]['sscc'])){
+									$pakkaukset[$monesko]['sscc'] = uusi_sscc_nro();
+									$pakkaukset[$monesko]['sscc_ulkoinen'] = uusi_gs1_sscc_nro($pakkaukset[$monesko]['sscc']);
 								}
 							}
 
 							$query_ins = "	UPDATE kerayserat SET
 											pakkausnro = '{$pakkauskirjain}',
 											sscc = '{$pakkaukset[$monesko]['sscc']}',
-											sscc_ulkoinen = '{$pakkaukset[$monesko]['sscc_ulkoinen']}',
-											pakkaus = '{$pakkaukset[$monesko]['pakkaus']}'
+											sscc_ulkoinen = '{$pakkaukset[$monesko]['sscc_ulkoinen']}'
 											{$kerattylisa}
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tilausrivi = '{$kerivi[$i]}'";

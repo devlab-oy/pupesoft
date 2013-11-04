@@ -196,16 +196,15 @@
 						// Valmistukset aina tyyppiä kolme
 						$filetyyppi = "KOLMONE";
 
-						$ind_Tuoteno 	= 0;
-						$ind_Maara 		= 1;
-						$ind_Arvioitu 	= 2;
-						$ind_Hinta 		= 3;
-						$ind_Ale 		= 4;
-						$ind_Netto 		= 5;
-						$ind_Var 		= 6;
-						$ind_Kommentti	= 7;
-
-						$ind_Valmistuslinja	= 8;
+						$ind_Tuoteno                 = 0;
+						$ind_Maara                   = 1;
+						$ind_Arvioitu                = 2;
+						$ind_Hinta                   = 3;
+						$ind_Ale                     = 4;
+						$ind_Netto                   = 5;
+						$ind_Var                     = 6;
+						$ind_Kommentti               = 7;
+						$ind_Valmistuslinja          = 8;
 						$ind_ToivottuKeraysajankohta = 9;
 
 						// Jos ensimmäisestä solusta löytyy sana "tuote", niin käyttäjä on antanu sarakeotsikot
@@ -374,8 +373,8 @@
 								elseif ($laskurow["tila"] == "V") {
 									// Valmistuksilla pitää huomioida rekursiiviset reseptit
 									// funktio populoi globaalit muuttujat $tuoteno_array $kpl_array $kommentti_array $lapsenlap_array
-									$tuoteno_array = array($tuoteno);
-									$kpl_array     = array($tuoteno => $kpl);
+									$tuoteno_array   = array($tuoteno);
+									$kpl_array       = array($tuoteno => $kpl);
 
 									pupesoft_lisaa_valmisteen_rekursiiviset_reseptit();
 
@@ -388,6 +387,10 @@
 										$tuotearray_result = pupe_query($query);
 										$tuotearray_row = mysql_fetch_array($tuotearray_result);
 
+										if (isset($kommentti_array[$tuoteno_temp])) {
+											$kommentti = $kommentti_array[$tuoteno_temp];
+										}
+
 										$params = array(
 											"trow"              => $tuotearray_row,
 											"laskurow"          => $laskurow,
@@ -396,7 +399,7 @@
 											"hinta"             => 0,
 											"varasto"           => $varasto,
 											"varataan_saldoa"   => "EI",
-											"kommentti"         => $kommentti_array[$tuoteno_temp],
+											"kommentti"         => $kommentti,
 											'valmistuslinja'	=> $valmistuslinja,
 											'toimaika'			=> $toimaika,
 											'kerayspvm'			=> $kerayspvm,

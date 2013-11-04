@@ -100,9 +100,10 @@ if ($tee == '') {
 
 	echo "	</select></td></tr>";
 
-	$chk = trim($konserni) != '' ? "CHECKED" : "";
-
-	echo "<tr><th>",t("Näytä konsernin kaikki asiakkaat"),":</th><td colspan='3'><input type='checkbox' name='konserni' {$chk}></td></tr>";
+	if ($yhtiorow['konserni'] != "") {
+		$chk = trim($konserni) != '' ? "CHECKED" : "";
+		echo "<tr><th>",t("Näytä konsernin kaikki asiakkaat"),":</th><td colspan='3'><input type='checkbox' name='konserni' {$chk}></td></tr>";
+	}
 
 	$chk = trim($piilota_matkasarakkeet) != '' ? "CHECKED" : "";
 

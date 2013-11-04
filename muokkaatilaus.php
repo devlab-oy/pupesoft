@@ -283,6 +283,9 @@
 		elseif ($toim == 'ODOTTAA_SUORITUSTA') {
 			$otsikko = t("suoritusta odottavia tilauksia");
 		}
+		elseif ($toim == 'TEHDASPALAUTUKSET' or $toim == 'SUPERTEHDASPALAUTUKSET') {
+			$otsikko = t("tehdaspalautuksia");
+		}
 		else {
 			$otsikko = t("myyntitilausta");
 			$toim = "";
@@ -730,7 +733,7 @@
 			}
 
 			// Myyntitilauksia voidaan etsiä myös asiakkaan tilausnumerolla
-			if ($etsi != "" and $haku != "" and ($toim == '' or $toim == 'SUPER' or $toim == 'KESKEN' or $toim == 'HYPER' or $toim == 'TOSI_KESKEN' or $toim == 'ODOTTAA_SUORITUSTA')) {
+			if ($etsi != "" and $haku != "" and ($toim == '' or $toim == 'SUPER' or $toim == 'KESKEN' or $toim == 'HYPER' or $toim == 'TOSI_KESKEN' or $toim == 'ODOTTAA_SUORITUSTA' or $toim == "TEHDASPALAUTUKSET" or $toim == "SUPERTEHDASPALAUTUKSET")) {
 				$haku = substr($haku, 0, -2); // Poistetaan vika sulku $hausta
 				$haku .= " or (lasku.asiakkaan_tilausnumero like '%$etsi%' and lasku.asiakkaan_tilausnumero != '')) ";
 			}
@@ -846,6 +849,12 @@
 
 		$query_ale_lisa = generoi_alekentta('M');
 
+		$tepalisa = " AND tilaustyyppi != '9' ";
+
+		if (strpos($toim, "TEHDASPALAUTUKSET") !== FALSE) {
+			$tepalisa = " AND tilaustyyppi = '9' ";
+		}
+
 		// Etsitään muutettavaa tilausta
 		if ($toim == 'HYPER') {
 
@@ -903,7 +912,7 @@
 
 			$miinus = 5;
 		}
-		elseif ($toim == 'SUPER') {
+		elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET') {
 
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, ";
 
@@ -916,6 +925,7 @@
 						LEFT JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X' and lasku.clearing != 'EXTENNAKKO'
 						$haku
+						$tepalisa
 						GROUP BY lasku.tunnus
 						$mt_order_by
 						$rajaus";
@@ -1543,7 +1553,7 @@
 						GROUP BY 1,2,3,4,5,6,7,8
 						$mt_order_by
 						$rajaus";
-			$miinus = 6;
+			$miinus = 7;
 		}
 		elseif ($toim == 'OSTOSUPER') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext,
@@ -1562,7 +1572,7 @@
 						GROUP BY 1,2,3,4,5,6,7,8
 						$mt_order_by
 						$rajaus";
-			$miinus = 6;
+			$miinus = 7;
 		}
 		elseif ($toim == 'HAAMU') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus
@@ -1649,6 +1659,7 @@
 						and lasku.alatila in ('A','','T','U','G')
 						and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')
 						$haku
+						$tepalisa
 						HAVING extra = '' or extra is null
 						$mt_order_by
 						$rajaus";
@@ -1684,6 +1695,7 @@
 						and lasku.alatila in ('','G')
 						and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')
 						$haku
+						$tepalisa
 						HAVING extra = '' or extra is null
 						$mt_order_by
 						$rajaus";
@@ -1750,6 +1762,7 @@
 						and lasku.alatila in ('A','','T','U','G')
 						and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')
 						$haku
+						$tepalisa
 						HAVING extra = '' or extra is null
 						$mt_order_by
 						$rajaus";
@@ -1765,7 +1778,8 @@
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.tila in ('L','N')
 								and lasku.alatila in ('A','','T','U','G')
-								and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')";
+								and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')
+								$tepalisa";
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
@@ -1945,6 +1959,8 @@
 					elseif (in_array($row["tila"], array('L','N')) and in_array($row["alatila"], array('A',''))) {
 						$whiletoim = '';
 					}
+
+
 					if (in_array($row["tila"], array('L','N')) and $row["alatila"] != 'X') {
 						$whiletoim = 'SUPER';
 					}
@@ -1954,6 +1970,9 @@
 				}
 				elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
 					$whiletoim = "REKLAMAATIO";
+				}
+				elseif ($toim == "TEHDASPALAUTUKSET" or $toim == "SUPERTEHDASPALAUTUKSET") {
+					$whiletoim = "RIVISYOTTO";
 				}
 				else {
 					$whiletoim = $toim;
@@ -2051,7 +2070,7 @@
 						if ($fieldname == 'luontiaika' or $fieldname == 'toimaika') {
 							echo "<td class='{$class}' valign='top' align='right'>";
 
-							if (($whiletoim == '' or $whiletoim == 'SUPER' or $whiletoim == 'KESKEN' or $whiletoim == 'HYPER' or $whiletoim == 'TOSI_KESKEN' or $whiletoim == 'ODOTTAA_SUORITUSTA') and $fieldname == 'toimaika' and $row['toimaika'] == '0000-00-00') echo t("Avoin");
+							if (($whiletoim == '' or $whiletoim == 'SUPER' or $whiletoim == 'KESKEN' or $whiletoim == 'HYPER' or $whiletoim == 'TOSI_KESKEN' or $whiletoim == 'ODOTTAA_SUORITUSTA' or $whiletoim == 'TEHDASPALAUTUKSET' or $whiletoim == 'SUPERTEHDASPALAUTUKSET') and $fieldname == 'toimaika' and $row['toimaika'] == '0000-00-00') echo t("Avoin");
 							else echo tv1dateconv($row[$fieldname], "PITKA", "LYHYT");
 
 							echo "</td>";
@@ -2382,6 +2401,13 @@
 						$lisa2 = "";
 					}
 					elseif ($toim == "ODOTTAA_SUORITUSTA") {
+						$aputoim1 = "RIVISYOTTO";
+						$lisa1 = t("Muokkaa");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					elseif ($toim == "TEHDASPALAUTUKSET" or $toim == 'SUPERTEHDASPALAUTUKSET') {
 						$aputoim1 = "RIVISYOTTO";
 						$lisa1 = t("Muokkaa");
 

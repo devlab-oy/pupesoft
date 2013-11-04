@@ -445,6 +445,7 @@
 							AND tuote.tuoteno = tilausrivi.tuoteno
 							AND tuote.ei_saldoa = ''
 							AND tuote.status != 'P'
+							AND tuote.ostoehdotus != 'E'
 							$tuote_where)
 						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 						AND tilausrivi.tyyppi IN  ('L','G')
@@ -477,6 +478,7 @@
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.ei_saldoa = ''
 					AND tuote.status != 'P'
+					AND tuote.ostoehdotus != 'E'
 					$tuote_where
 					GROUP BY 1, 2, 3
 					ORDER BY toimittaja, tuote.try, tuote.tuoteno";

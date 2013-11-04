@@ -1236,6 +1236,34 @@
 		$tila = 'X';
 	}
 
+	if ($tila == 'vaihdatoimipaikka' and isset($toimipaikka)) {
+
+		$toimipaikka = mysql_escape_string($toimipaikka);
+
+		$query = "	UPDATE lasku SET
+					yhtio_toimipaikka = '{$toimipaikka}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tila in ('H','Y','M','P','Q')
+					and tunnus = '$tunnus'";
+		$result = pupe_query($query);
+
+		// haetaan laskun tiedot uudestaan
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus = '{$tunnus}'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) != 1) {
+			echo t("Lasku")." {$tunnus} ".t("ei löytynytkään")."!";
+			exit;
+		}
+
+		$trow = mysql_fetch_assoc($result);
+		$tee = 'E';
+		$tila = 'X';
+	}
+
 	if ($tila == 'viikorkomuuta') {
 		$query = "	UPDATE lasku SET
 					viikorkopros = '$viikorkoprossa'
@@ -1953,6 +1981,47 @@
 			echo "<td class='back'><input type='submit' value='".t("Päivitä")."'></td>";
 			echo "</tr>";
 			echo "</form>";
+
+			if (mysql_num_rows(hae_yhtion_toimipaikat($kukarow['yhtio'])) != 0) {
+				echo "<form method='post'>";
+				echo "<input type = 'hidden' name='lopetus' value='{$lopetus}'>";
+				echo "<input type = 'hidden' name='tila' value='vaihdatoimipaikka'>";
+				echo "<input type = 'hidden' name='tee' value='M'>";
+				echo "<input type = 'hidden' name='tunnus' value='{$tunnus}'>";
+
+				$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+				echo "<tr>";
+				echo "<th>",t("Toimipaikka"),"</th>";
+				echo "<td>";
+				echo "<select name='toimipaikka'>";
+				echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+
+				while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+					$sel = '';
+
+					if (isset($toimipaikka)) {
+						if ($toimipaikka == $toimipaikat_row['tunnus']) {
+							$sel = ' selected';
+							$toimipaikka = $toimipaikat_row['tunnus'];
+						}
+					}
+					else {
+						if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
+							$sel = ' selected';
+							$toimipaikka = $toimipaikat_row['tunnus'];
+						}
+					}
+
+					echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+				}
+
+				echo "</select>";
+				echo "</td>";
+				echo "</tr>";
+				echo "</form>";
+			}
 		}
 
 		if (($trow['tila'] == 'M' or $trow['tila'] == 'H' or $trow['tila'] == 'Y' or $trow['tila'] == 'Q') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {

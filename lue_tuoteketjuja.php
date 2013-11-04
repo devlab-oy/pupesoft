@@ -520,17 +520,18 @@ if ($kasitellaan_tiedosto) {
 
 				$lask = 0;
 
-				// poistetaan eka kaikki.. heh
-				$query = "	DELETE FROM tuoteperhe
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND isatuoteno = '$isatuote'
-							AND tyyppi = '$tyyppi'";
-				$result = pupe_query($query);
-
-				//jos ollaan poistamassa niit‰ tuotteita niin lis‰t‰‰n vaan p‰ivitett‰vien rivien laskuriin yks tuolla elsess‰
 				if (strtoupper(trim($rivi[$postoiminto])) != 'POISTA') {
-					for ($r = 0; $r < count($headers); $r++) {
+					// poistetaan eka kaikki.. heh, jos ei olla poistamassa tuotteita!
+					$query = "	DELETE FROM tuoteperhe
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND isatuoteno = '$isatuote'
+								AND tyyppi = '$tyyppi'";
+					$result = pupe_query($query);
+				}
 
+				for ($r = 0; $r < count($headers); $r++) {
+
+					if (strtoupper(trim($rivi[$postoiminto])) != 'POISTA') {
 						if (strtoupper(trim($headers[$r])) == "TUOTENO") {
 							$query  = "	INSERT INTO tuoteperhe SET
 										yhtio 		= '{$kukarow['yhtio']}',
@@ -545,9 +546,17 @@ if ($kasitellaan_tiedosto) {
 							$lask++;
 						}
 					}
-				}
-				else {
-					$lask++;
+					else {
+						if (strtoupper(trim($headers[$r])) == "TUOTENO") {
+							$query  = "	DELETE FROM tuoteperhe
+										WHERE yhtio		= '{$kukarow['yhtio']}'
+										AND isatuoteno 	= '$isatuote'
+										AND tuoteno 	= '{$rivi[$r]}'
+										AND tyyppi 		= '$tyyppi'";
+							$result = pupe_query($query);
+							$lask++;
+						}
+					}
 				}
 			}
 		}

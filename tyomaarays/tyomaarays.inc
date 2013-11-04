@@ -9,13 +9,19 @@
 			require_once ("tyomaarays/tulosta_tyomaarays.inc");
 		}
 		else {
-			$tulostimet[0] = "Reklamaatio";
+			if ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U') {
+				$tulostimet[0] = "Takuu";
+			}
+			else {
+				$tulostimet[0] = "Reklamaatio";
+			}
+
 			require_once ("tilauskasittely/tulosta_lahete_kerayslista.inc");
 		}
 
 		if (count($komento) == 0) {
 
-			if ($tulostimet[0] == 'REKLAMAATIO' and (isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U') {
+			if (strtolower($tulostimet[0]) == 'takuu' and (isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U') {
 
 				$tilaustyyppi = 'U';
 
@@ -31,8 +37,11 @@
 			if ($toim != "REKLAMAATIO" and $komento["Työmääräys"] != "email" and $tyomtyyppi != 'Z') {
 				$komento["Työmääräys"] .= " -# $kappaleet ";
 			}
-			elseif ($komento["Reklamaatio"] != "email") {
+			elseif (isset($komento["Reklamaatio"]) and $komento["Reklamaatio"] != "email") {
 				$komento["Reklamaatio"] .= " -# $kappaleet ";
+			}
+			elseif (isset($komento["Takuu"]) and $komento["Takuu"] != "email") {
+				$komento["Takuu"] .= " -# $kappaleet ";
 			}
 		}
 
@@ -192,7 +201,13 @@
 			}
 		}
 		else {
-			$tyyppi = "REKLAMAATIO";
+
+			if (strtolower($tulostimet[0]) == 'takuu') {
+				$tyyppi = "TAKUU";
+			}
+			else {
+				$tyyppi = "REKLAMAATIO";
+			}
 
 			$params_kerayslista = array(
 			'asrow'           	=> $asrow,

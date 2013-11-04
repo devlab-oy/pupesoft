@@ -1055,6 +1055,7 @@ if ($tila == '') {
 	$kentat_array[] = "tilausrivi.tuoteno tuoteno";
 	$kentat_array[] = "GROUP_CONCAT(DISTINCT tuotteen_toimittajat.toim_tuoteno ORDER BY toim_tuoteno SEPARATOR ',') toim_tuoteno";
 	$kentat_array[] = "tilausrivi.nimitys nimitys";
+	$kentat_array[] = "lasku.vanhatunnus toimipaikka";
 	$kentat_array[] = "tilausrivi.varattu+tilausrivi.kpl siskpl";
 	$kentat_array[] = "round((tilausrivi.varattu+tilausrivi.kpl)*if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkkpl";
 	$kentat_array[] = "tilausrivi.hinta hinta";
@@ -1082,6 +1083,7 @@ if ($tila == '') {
 	$kennim_array[] = t('Tuoteno');
 	$kennim_array[] = t('Toim_tuoteno');
 	$kennim_array[] = t('Nimitys');
+	$kennim_array[] = t('Toimipaikka');
 	$kennim_array[] = t('Määrä');
 	$kennim_array[] = t('Määrä/Ulk');
 	$kennim_array[] = t('Hinta');
@@ -1104,6 +1106,7 @@ if ($tila == '') {
 	$kenhak_array[] = 'tuoteno';
 	$kenhak_array[] = 'toim_tuoteno';
 	$kenhak_array[] = 'nimitys';
+	$kenhak_array[] = 'toimipaikka';
 	$kenhak_array[] = 'siskpl';
 	$kenhak_array[] = 'ulkkpl';
 	$kenhak_array[] = 'hinta';
@@ -1125,6 +1128,7 @@ if ($tila == '') {
 	$kenkok_array[] = 6;
 	$kenkok_array[] = 15;
 	$kenkok_array[] = 15;
+	$kenkok_array[] = 17;
 	$kenkok_array[] = 17;
 	$kenkok_array[] = 7;
 	$kenkok_array[] = 7;
@@ -1227,6 +1231,20 @@ if ($tila == '') {
 		$alku = 0;
 	}
 
+	if (isset($toimipaikka)) {
+
+		if ($toimipaikka == 'kaikki') {
+			$toimipaikkalisa = "";
+		}
+		else {
+			$toimipaikka = (int) $toimipaikka;
+			$toimipaikkalisa = "AND (lasku.vanhatunnus = '{$toimipaikka}' or lasku.vanhatunnus = 0)";
+		}
+	}
+	else {
+		$toimipaikkalisa = "AND (lasku.vanhatunnus = '{$laskurow['yhtio_toimipaikka']}' or lasku.vanhatunnus = 0)";
+	}
+
 	$query = "	SELECT $kentat
 				varattu,
 				tilausrivi.perheid,
@@ -1253,7 +1271,8 @@ if ($tila == '') {
 				LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 				LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
-				and lasku.liitostunnus = '$laskurow[liitostunnus]'";
+				and lasku.liitostunnus = '$laskurow[liitostunnus]'
+				{$toimipaikkalisa}";
 
 	// Tehdään unionilla niin saadaan sekä keikat että osotilaukset nopsasti haettua suoraan indeksistä
 	if ($unionwhere2 != "") {
@@ -1370,9 +1389,45 @@ if ($tila == '') {
 	}
 
  	echo "<td>{$alku} - {$loppu}  ",t("Sivu"),": {$sivu}</td>";
-	echo "<th>".t("Kohdistettava summa").":</th><td style='text-align:right'><span id='kohdistettava_summa'>$kohdistettava_summa</span> $kulurow[valkoodi]</td>
-		<th></th><td></td>
-		</tr>";
+	echo "<th>".t("Kohdistettava summa").":</th><td style='text-align:right'><span id='kohdistettava_summa'>$kohdistettava_summa</span> $kulurow[valkoodi]</td>";
+	echo "<th>",t("Näytä toimipaikan rivejä"),"</th>";
+	echo "<td>";
+
+	$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+	if (mysql_num_rows($toimipaikat_res) != 0) {
+
+		$sel = (isset($toimipaikka) and $toimipaikka === 'kaikki') ? "selected" : "";
+
+		echo "<select name='toimipaikka' onchange='submit();'>";
+		echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+		echo "<option value='kaikki' {$sel}>",t("Kaikki toimipaikat"),"</option>";
+
+		while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
+
+			$sel = '';
+
+			if (isset($toimipaikka)) {
+				if ($toimipaikka == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
+			}
+			else {
+				if ($laskurow['yhtio_toimipaikka'] == $toimipaikat_row['tunnus']) {
+					$sel = ' selected';
+					$toimipaikka = $toimipaikat_row['tunnus'];
+				}
+			}
+
+			echo "<option value='{$toimipaikat_row['tunnus']}'{$sel}>{$toimipaikat_row['nimi']}</option>";
+		}
+
+		echo "</select>";
+	}
+
+	echo "</td>";
+	echo "</tr>";
 
 	echo "<tr>";
 	echo "<th></th><td></td>";
@@ -1505,13 +1560,16 @@ if ($tila == '') {
 	echo "<th nowrap valign='top'><a href='$href=1".$ulisa."'>$kennim_array[1]</a><br><a href='$href=2".$ulisa."'>$kennim_array[2]</a></th>";
 
 	if ($kukarow["resoluutio"] == 'I') {
-		echo "<th nowrap valign='top'><a href='$href=3".$ulisa."'>$kennim_array[3]</a></th>";
+		echo "<th nowrap valign='top'>";
+		echo "<a href='$href=3".$ulisa."'>$kennim_array[3]</a><br />";
+		echo "<a href='{$href}=4{$ulisa}'>{$kennim_array[4]}</a><br />";
+		echo "</th>";
 	}
 
-	echo "<th nowrap valign='top'><a href='$href=4".$ulisa."'>$kennim_array[4]</a><br><a href='$href=5".$ulisa."'>$kennim_array[5]</a></th>";
-	echo "<th nowrap valign='top'><a href='$href=6".$ulisa."'>$kennim_array[6]</a><br><a href='$href=6".$ulisa."'>".t("Valuutta")."</a></th>";
+	echo "<th nowrap valign='top'><a href='$href=5".$ulisa."'>$kennim_array[5]</a><br><a href='$href=6".$ulisa."'>$kennim_array[6]</a></th>";
+	echo "<th nowrap valign='top'><a href='$href=7".$ulisa."'>$kennim_array[7]</a><br><a href='$href=8".$ulisa."'>".t("Valuutta")."</a></th>";
 
-	$pointteri = 7;
+	$pointteri = 8;
 
 	for ($alepostfix=1; $alepostfix <= $yhtiorow["oston_alekentat"]; $alepostfix++) {
 		echo "<th nowrap valign='top'>$kennim_array[$pointteri]";
@@ -1552,13 +1610,16 @@ if ($tila == '') {
 	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[1]' name='haku[1]' value='$haku[1]'><br><input type='text' size='$kenkok_array[2]' name='haku[2]' value='$haku[2]'></td>";
 
 	if ($kukarow["resoluutio"] == 'I') {
-		echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[3]' name='haku[3]' value='$haku[3]'></td>";
+		echo "<td nowrap valign='top'>";
+		echo "<input type='text' size='$kenkok_array[3]' name='haku[3]' value='$haku[3]'><br />";
+		echo "<input type='text' size='$kenkok_array[4]' name='haku[4]' value='$haku[4]'>";
+		echo "</td>";
 	}
 
-	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[4]' name='haku[4]' value='$haku[4]'><br><input type='text' size='$kenkok_array[5]' name='haku[5]' value='$haku[5]'></td>";
-	echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[6]' name='haku[6]' value='$haku[6]'></td>";
+	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[5]' name='haku[5]' value='$haku[5]'><br><input type='text' size='$kenkok_array[6]' name='haku[6]' value='$haku[6]'></td>";
+	echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[7]' name='haku[7]' value='$haku[7]'></td>";
 
-	$pointteri = 7;
+	$pointteri = 8;
 
 	for ($alepostfix=1; $alepostfix <= $yhtiorow["oston_alekentat"]; $alepostfix++) {
 		echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'>";
@@ -1585,7 +1646,9 @@ if ($tila == '') {
 
 	echo "<input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
 
-	echo "<td></td>";
+	$toimipaikka = isset($toimipaikka) ? $toimipaikka : 0;
+
+	echo "<td><input type='hidden' name='toimipaikka' value='{$toimipaikka}' /></td>";
 	echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td>";
 	echo "</tr></form>";
 
@@ -1604,6 +1667,7 @@ if ($tila == '') {
 
 	echo "<form name='paaformi' method='post'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+	echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
 	echo "<input type='hidden' name='toiminto' value='kohdista'>";
 
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") {
@@ -1867,12 +1931,30 @@ if ($tila == '') {
 		echo "</$td>";
 
 		if ($kukarow["resoluutio"] == 'I') {
+
+			echo "<{$td} {$class} valign='top'>";
+
 			if ($sarjarow["sarjanumeroseuranta"] == "U" and (!isset($nayta_siirrettavat) or $nayta_siirrettavat == "")) {
-				echo "<$td $class valign='top'><input size='15' type='text' name='rivi_nimitys[$rivirow[rivitunnus]]' value='$rivirow[nimitys]'></$td>";
+				echo "<input size='15' type='text' name='rivi_nimitys[$rivirow[rivitunnus]]' value='$rivirow[nimitys]'>";
 			}
 			else {
-				echo "<$td $class valign='top'>".t_tuotteen_avainsanat($rivirow, 'nimitys')."</$td>";
+				echo t_tuotteen_avainsanat($rivirow, 'nimitys');
 			}
+
+			if ($rivirow['toimipaikka'] != 0) {
+				echo "<br />";
+
+				$query = "	SELECT nimi
+							FROM yhtion_toimipaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$rivirow['toimipaikka']}'";
+				$toimipaikka_nimi_res = pupe_query($query);
+				$toimipaikka_nimi_row = mysql_fetch_assoc($toimipaikka_nimi_res);
+
+				echo $toimipaikka_nimi_row['nimi'];
+			}
+
+			echo "</{$td}>";
 		}
 
 		// jos riviä ei ole vielä viety varastoon, voidaan muuttaa kappaleita

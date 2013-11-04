@@ -150,6 +150,19 @@
 		}
 	}
 
+	if (in_array($row['var'], array('U','T')) and $meapurow['kateinen'] != '') {
+
+		if ($row['var'] == 'U') {
+			$varaosavirhe .= t("VIRHE: Et voi tilata toimittajalta asiakkaalle, koska maksuehto on käteinen!")."<br>";
+		}
+		else {
+			$varaosavirhe .= t("VIRHE: Et voi tilata toimittajalta varastoon, koska maksuehto on käteinen!")."<br>";
+		}
+
+		$riviok++;
+		$tilausok++;
+	}
+
 	if ($row["hinta"] < 0) {
 		$varaosavirhe .= t("VIRHE: Hinta ei voi olla negatiivinen!")."<br>";
 		$riviok++;

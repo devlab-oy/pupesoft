@@ -543,6 +543,8 @@
 				$onko_hyvityslasku_kerroin = -1;
 			}
 
+			$rivikohtaiset_rahtikulut = 0;
+
 			if (@file_exists("inc/maventa.inc") and (($trow['asn_sanomat'] == "M" and $ebid == 'MAVENTAXML') or ($trow['asn_sanomat'] == 'F' and $ebid == 'FINVOICEXML'))) {
 				require("inc/maventa.inc");
 			}
@@ -1575,7 +1577,10 @@
 
 				// jos kyseessä on tavaraa
 				if ((!isset($onko_hyvityslasku_kerroin) or $onko_hyvityslasku_kerroin == 1) and in_array($trow['oletus_vienti'], array('C','F','I','J','K','L'))) {
-					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+
+					if (!isset($alv_talteen)) $alv_talteen = '';
+
+					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno, $alv_talteen, $rivikohtaiset_rahtikulut);
 				}
 
 				// Lisätään vielä ostovelkatiliöinnin tarkenteet

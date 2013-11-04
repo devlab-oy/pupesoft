@@ -2731,7 +2731,7 @@
 			if ($suoratoimitus_splittaus and $rivitunnus == $lisatty_tun) {
 				// Päivitetään suoratoimitus-myyntitilausrivin määrät
 				$query = "	UPDATE tilausrivi
-							JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.tilausrivilinkki = '$lisatty_tun')
+							JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.tilausrivilinkki > 0 and tilausrivin_lisatiedot.tilausrivilinkki = '$lisatty_tun')
 							SET tilausrivi.tilkpl	= '$varattu',
 							tilausrivi.varattu 		= if(tilausrivi.varattu != 0, $varattu, 0),
 							tilausrivi.jt 			= if(tilausrivi.jt != 0, $varattu, 0)

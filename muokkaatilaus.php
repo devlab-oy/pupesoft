@@ -286,7 +286,7 @@
 		elseif ($toim == 'TEHDASPALAUTUKSET' or $toim == 'SUPERTEHDASPALAUTUKSET') {
 			$otsikko = t("tehdaspalautuksia");
 		}
-		elseif ($toim == 'TAKUU') {
+		elseif ($toim == 'TAKUU' or $toim == 'TAKUUSUPER') {
 			$otsikko = t("takuita");
 		}
 		else {
@@ -364,7 +364,7 @@
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]') and tila = 'C' and alatila in ('A','B') and tilaustyyppi='R'";
 				$eresult = pupe_query($query);
 			}
-			elseif ($toim == "REKLAMAATIO" or $toim == "REKLAMAATIOSUPER") {
+			elseif ($toim == "REKLAMAATIO" or $toim == "REKLAMAATIOSUPER" OR $toim == "TAKUU" or $toim == "TAKUUSUPER") {
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila = 'C' and alatila = '' and tilaustyyppi = 'R'";
@@ -1336,9 +1336,9 @@
 
 			$miinus = 4;
 		}
-		elseif ($toim == "REKLAMAATIO" or $toim == "VASTAANOTA_REKLAMAATIO" or $toim == "REKLAMAATIOSUPER" or $toim == "TAKUU") {
+		elseif ($toim == "REKLAMAATIO" or $toim == "VASTAANOTA_REKLAMAATIO" or $toim == "REKLAMAATIOSUPER" or $toim == "TAKUU" or $takuu = "TAKUUSUPER") {
 
-			if ($toim == "REKLAMAATIOSUPER") {
+			if ($toim == "REKLAMAATIOSUPER" or $toim == "TAKUUSUPER") {
 				$rekla_tila = " and lasku.tila in ('N','C','L') and lasku.alatila in ('','A','B','C','J','D') ";
 			}
 			elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
@@ -1353,7 +1353,7 @@
 				}
 			}
 
-			$tilaustyyppilisa = $toim == "TAKUU" ? "U" : "R";
+			$tilaustyyppilisa = ($toim == "TAKUU" or $toim == "TAKUUSUPER") ? "U" : "R";
 
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
@@ -1977,7 +1977,7 @@
 						$whiletoim = 'PROJEKTI';
 					}
 				}
-				elseif ($toim == "VASTAANOTA_REKLAMAATIO" or $toim == "TAKUU") {
+				elseif ($toim == "VASTAANOTA_REKLAMAATIO" or $toim == "TAKUU" or $toim == "TAKUUSUPER") {
 					$whiletoim = "REKLAMAATIO";
 				}
 				elseif ($toim == "TEHDASPALAUTUKSET" or $toim == "SUPERTEHDASPALAUTUKSET") {
@@ -2079,7 +2079,7 @@
 						if ($fieldname == 'luontiaika' or $fieldname == 'toimaika') {
 							echo "<td class='{$class}' valign='top' align='right'>";
 
-							if (($whiletoim == '' or $whiletoim == 'SUPER' or $whiletoim == 'KESKEN' or $whiletoim == 'HYPER' or $whiletoim == 'TOSI_KESKEN' or $whiletoim == 'ODOTTAA_SUORITUSTA' or $whiletoim == 'TEHDASPALAUTUKSET' or $whiletoim == 'SUPERTEHDASPALAUTUKSET' or $whiletoim == "TAKUU") and $fieldname == 'toimaika' and $row['toimaika'] == '0000-00-00') echo t("Avoin");
+							if (($whiletoim == '' or $whiletoim == 'SUPER' or $whiletoim == 'KESKEN' or $whiletoim == 'HYPER' or $whiletoim == 'TOSI_KESKEN' or $whiletoim == 'ODOTTAA_SUORITUSTA' or $whiletoim == 'TEHDASPALAUTUKSET' or $whiletoim == 'SUPERTEHDASPALAUTUKSET' or $whiletoim == "TAKUU" or $whiletoim == "TAKUUSUPER") and $fieldname == 'toimaika' and $row['toimaika'] == '0000-00-00') echo t("Avoin");
 							else echo tv1dateconv($row[$fieldname], "PITKA", "LYHYT");
 
 							echo "</td>";
@@ -2398,7 +2398,7 @@
 
 						$lisa1 = t("Rivisyöttöön");
 					}
-					elseif ($whiletoim == "REKLAMAATIO" or $whiletoim == "REKLAMAATIOSUPER" or $whiletoim == "TAKUU") {
+					elseif ($whiletoim == "REKLAMAATIO" or $whiletoim == "REKLAMAATIOSUPER" or $whiletoim == "TAKUU" or $whiletoim == "TAKUUSUPER") {
 						$aputoim1 = "REKLAMAATIO";
 						$lisa1 = t("Muokkaa");
 

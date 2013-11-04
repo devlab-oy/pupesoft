@@ -8300,6 +8300,20 @@ if ($tee == '') {
 					echo "<br/><br />";
 					echo t("Tulosta lähete uudestaan")," <input type='checkbox' name='tulosta_lahete_uudestaan' value='tulostetaan' checked /> ";
 
+					$query = "	SELECT *
+								FROM varastopaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus  = '{$laskurow['varasto']}'";
+					$prires = pupe_query($query);
+
+					if (mysql_num_rows($prires) > 0) {
+						$prirow = mysql_fetch_array($prires);
+						$apuprintteri = $prirow['printteri1']; // läheteprintteri
+					}
+					else {
+						$apuprintteri = 0;
+					}
+
 					echo "<select name='komento[Lähete]'>";
 					echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
@@ -8312,7 +8326,15 @@ if ($tee == '') {
 
 					while ($kirow = mysql_fetch_assoc($kires)) {
 
-						$sel = $kirow["tunnus"] == $kukarow["kirjoitin"] ? "selected" : "";
+						if ($apuprintteri != 0) {
+							$sel = $kirow["tunnus"] == $apuprintteri ? "selected" : "";
+						}
+						elseif ($kirow["tunnus"] == $kukarow["kirjoitin"]) {
+							$sel = "selected";
+						}
+						else {
+							$sel = "";
+						}
 
 						echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
 					}

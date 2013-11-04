@@ -530,32 +530,27 @@ if ($kasitellaan_tiedosto) {
 				}
 
 				for ($r = 0; $r < count($headers); $r++) {
-
-					if (strtoupper(trim($rivi[$postoiminto])) != 'POISTA') {
-						if (strtoupper(trim($headers[$r])) == "TUOTENO") {
-							$query  = "	INSERT INTO tuoteperhe SET
-										yhtio 		= '{$kukarow['yhtio']}',
-										isatuoteno 	= '$isatuote',
-										tuoteno 	= '{$rivi[$r]}',
-										tyyppi 		= '$tyyppi',
-										laatija 	= '$kukarow[kuka]',
-										luontiaika 	= now(),
-										muuttaja 	= '$kukarow[kuka]',
-										muutospvm 	= now()";
-							$result = pupe_query($query);
-							$lask++;
-						}
+					if (strtoupper(trim($rivi[$postoiminto])) != 'POISTA' and strtoupper(trim($headers[$r])) == "TUOTENO") {
+						$query  = "	INSERT INTO tuoteperhe SET
+									yhtio 		= '{$kukarow['yhtio']}',
+									isatuoteno 	= '$isatuote',
+									tuoteno 	= '{$rivi[$r]}',
+									tyyppi 		= '$tyyppi',
+									laatija 	= '$kukarow[kuka]',
+									luontiaika 	= now(),
+									muuttaja 	= '$kukarow[kuka]',
+									muutospvm 	= now()";
+						$result = pupe_query($query);
+						$lask++;
 					}
-					else {
-						if (strtoupper(trim($headers[$r])) == "TUOTENO") {
-							$query  = "	DELETE FROM tuoteperhe
-										WHERE yhtio		= '{$kukarow['yhtio']}'
-										AND isatuoteno 	= '$isatuote'
-										AND tuoteno 	= '{$rivi[$r]}'
-										AND tyyppi 		= '$tyyppi'";
-							$result = pupe_query($query);
-							$lask++;
-						}
+					elseif (strtoupper(trim($headers[$r])) == "TUOTENO") {
+						$query  = "	DELETE FROM tuoteperhe
+									WHERE yhtio		= '{$kukarow['yhtio']}'
+									AND isatuoteno 	= '$isatuote'
+									AND tuoteno 	= '{$rivi[$r]}'
+									AND tyyppi 		= '$tyyppi'";
+						$result = pupe_query($query);
+						$lask++;
 					}
 				}
 			}

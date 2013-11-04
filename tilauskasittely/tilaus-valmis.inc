@@ -453,6 +453,25 @@ else {
 
 		$tilaus_valmis_ulos .= "<font class='message'>".t("HUOM: Tilaus oli jo kerätty! Jos tarvitset keräyslistan, tulosta keräyslistan kopio").".</font><br><br>";
 
+		// Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina
+		if (isset($tulosta_lahete_uudestaan) and trim($tulosta_lahete_uudestaan) != '' and isset($komento) and isset($komento['Lähete']) and trim($komento['Lähete'] != "")) {
+
+			// Tulostetaan lähete
+			$params = array(
+				'laskurow'					=> $laskurow,
+				'sellahetetyyppi' 			=> "",
+				'extranet_tilausvahvistus' 	=> "",
+				'naytetaanko_rivihinta'		=> "",
+				'tee'						=> "",
+				'toim'						=> $toim,
+				'komento' 					=> $komento,
+				'lahetekpl'					=> "",
+				'kieli' 					=> ""
+				);
+
+			pupesoft_tulosta_lahete($params);
+		}
+
 		// jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D
 		if ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') {
 			if ($laskurow['sisainen'] == '' and ($kateinen == 'X' or $itsetulostus == "X" or $laskurow["vienti"] != '')) {

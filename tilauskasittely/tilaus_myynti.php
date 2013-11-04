@@ -8290,6 +8290,36 @@ if ($tee == '') {
 					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." $lisateksti' $tilausjavalisa> ";
 				}
 
+				if (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO")) and
+					(
+						($yhtiorow['lahetteen_tulostustapa'] == "I" and (($laskurow['tila'] == 'N' and $laskurow['alatila'] != '') or ($laskurow['tila'] == 'C' and $laskurow['alatila'] != ''))) or
+						($laskurow['tila'] == 'L' and in_array($laskurow['alatila'], array('B','C','D'))) or
+						($laskurow['tila'] == 'C' and in_array($laskurow['alatila'], array('B','C')))
+					)
+				) {
+					echo "<br/><br />";
+					echo t("Tulosta lähete uudestaan")," <input type='checkbox' name='tulosta_lahete_uudestaan' value='tulostetaan' checked /> ";
+
+					echo "<select name='komento[Lähete]'>";
+					echo "<option value=''>".t("Ei kirjoitinta")."</option>";
+
+					$querykieli = "	SELECT *
+									FROM kirjoittimet
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND komento != 'edi'
+									ORDER BY kirjoitin";
+					$kires = pupe_query($querykieli);
+
+					while ($kirow = mysql_fetch_assoc($kires)) {
+
+						$sel = $kirow["tunnus"] == $kukarow["kirjoitin"] ? "selected" : "";
+
+						echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
+					}
+
+					echo "</select>";
+				}
+
 				if (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {
 
 					if (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {

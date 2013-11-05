@@ -423,7 +423,9 @@
 						}
 					}
 				}
-
+				
+				
+				if ($toim == 'asiakas') $sisviesti1_chk = $trow["sisviesti1"];
 				// Taulun ensimmäinen kenttä on aina yhtiö
 				$query = "UPDATE $toim SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
@@ -572,8 +574,11 @@
 						}
 						
 						$paivita_sisviesti1 = "";
-						if (strpos($otsikrow[sisviesti1],$laskuorow[sisviesti1]) == FALSE) {
+						if (strpos($sisviesti1_chk,$laskuorow[sisviesti1]) !== FALSE and $otsikrow[sisviesti1] != '') {
 							$paivita_sisviesti1 = ", sisviesti1 = '$otsikrow[sisviesti1]' ";
+						}
+						elseif (strpos($otsikrow[sisviesti1],$laskuorow[sisviesti1]) == FALSE and $otsikrow[sisviesti1] != '') {
+							$paivita_sisviesti1 = ", sisviesti1 = '$laskuorow[sisviesti1]' ' ' '$otsikrow[sisviesti1]'  ";
 						}
 						
 						$paivita_myos_lisa = "";

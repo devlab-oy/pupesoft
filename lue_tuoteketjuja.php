@@ -203,7 +203,6 @@ if ($kasitellaan_tiedosto) {
 	}
 
 	echo "</table><br>";
-	#exit;
 
 	$vastaava_paatuote = "";
 
@@ -296,10 +295,10 @@ if ($kasitellaan_tiedosto) {
 					$alku 		= "DELETE from $table where yhtio = '{$kukarow['yhtio']}' ";
 					$loppu 		= " and id='$id' ";
 					$toiminto 	= "POISTA";
-					
+
 					if ($table == "vastaavat") {
 						$loppu 	.= " and jarjestys != 1 ";
-					}	
+					}
 				}
 				else {
 					//tuntematon toiminto
@@ -378,11 +377,9 @@ if ($kasitellaan_tiedosto) {
 							}
 							elseif ($toiminto == 'POISTA') {
 								if (mysql_num_rows($kresult) == 0 and !($table == "vastaavat" and $vastaava_paatuote == $rivi[$j])) {
-									
 									echo t("Tuotetta")," {$rivi[$j]} ",t("ei voida poistaa, koska se ei löydy tästä ketjusta"),"! ";
 								}
 								elseif (!($table == "vastaavat" and $vastaava_paatuote == $rivi[$j])) {
-
 									$kysely = " and tuoteno='$rivi[$j]' ";
 									$query = $alku.$kysely.$loppu;
 									$iresult = pupe_query($query);
@@ -393,13 +390,15 @@ if ($kasitellaan_tiedosto) {
 									$fquery = "	SELECT id
 												FROM $table
 												WHERE id = '$id'
-												and yhtio = '{$kukarow['yhtio']}'";
+												AND yhtio = '{$kukarow['yhtio']}'";
 									$hresult = pupe_query($fquery);
+
 									if (mysql_num_rows($hresult) == 1) {
-										$query = "	DELETE from $table 
-													where yhtio = '{$kukarow['yhtio']}'
-										 			and id = '$id' ";
+										$query = "	DELETE FROM $table
+													WHERE yhtio = '{$kukarow['yhtio']}'
+										 			AND id = '$id' ";
 										$presult = pupe_query($query);
+
 										echo t("Poistettiin ketju")," $id ",t("päätuote:"),"{$rivi[$j]}! ";
 									}
 								}

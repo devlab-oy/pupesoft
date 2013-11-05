@@ -184,7 +184,7 @@
 							and maksaja 	= '$kukarow[kuka]'
 							and maksu_tili 	= '$tili'
 							and maa 		= 'FI'
-							and tilinumero 	= '$trow[tilinumero]'";
+							and ultilno 	= '$trow[ultilno]'";
 			}
 			else {
 				$query = "	SELECT sum(if(alatila='K' and summa > 0, summa - kasumma, summa)) summa
@@ -283,7 +283,7 @@
 						and maksaja 	= '$kukarow[kuka]'
 						and maksu_tili 	= '$tili'
 						and maa 		= 'FI'
-						and tilinumero 	= '$trow[tilinumero]'
+						and ultilno 	= '$trow[ultilno]'
 						ORDER BY tapvm desc";
 		}
 		else {
@@ -665,7 +665,7 @@
 								and olmapvm = '$trow[olmapvm]'
 								and maksu_tili = '$trow[maksu_tili]'
 								and maa = 'fi'
-								and tilinumero='$trow[tilinumero]'
+								and ultilno='$trow[ultilno]'
 								and maksaja = '$kukarow[kuka]'
 								and tunnus != '$lasku'";
 				}
@@ -1039,7 +1039,7 @@
 					round((lasku.summa - lasku.kasumma) * valuu.kurssi,2) ykasumma,
 					round(lasku.summa * valuu.kurssi,2) ysumma,
 					lasku.ebid, lasku.tunnus, lasku.olmapvm,
-					if(lasku.maa='$yhtiorow[maa]', lasku.tilinumero, lasku.ultilno) tilinumero,
+					lasku.ultilno,
 					if(alatila = 'K' and summa > 0, summa - kasumma, summa) maksettava_summa,
 					if(alatila = 'K' and summa > 0, round(lasku.summa * valuu.kurssi,2) - kasumma, round(lasku.summa * valuu.kurssi,2)) maksettava_ysumma,
 					h1time,
@@ -1117,7 +1117,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tila = 'M'
 							and summa < 0
-							and if(lasku.maa='$yhtiorow[maa]',lasku.tilinumero, lasku.ultilno) = '$trow[tilinumero]'";
+							and lasku.ultilno = '$trow[ultilno]'";
 				$hyvitysresult = pupe_query($query);
 				$hyvitysrow = mysql_fetch_assoc ($hyvitysresult);
 
@@ -1136,7 +1136,7 @@
 
 				echo "</td>";
 
-				echo "<td valign='top'>".tilinumero_print($trow["tilinumero"])."</td>";
+				echo "<td valign='top'>".tilinumero_print($trow["ultilno"])."</td>";
 
 				echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['erpcm']).tv1dateconv($trow['erpcm'])."<br>".tv1dateconv($trow['olmapvm'])."</td>";
 
@@ -1275,7 +1275,7 @@
 					round((lasku.summa - lasku.kasumma) * valuu.kurssi,2) ykasumma,
 					round(lasku.summa * valuu.kurssi,2) ysumma,
 					lasku.ebid, lasku.tunnus, lasku.olmapvm,
-					if(lasku.maa='$yhtiorow[maa]',lasku.tilinumero, lasku.ultilno) tilinumero,
+					lasku.ultilno,
 					h1time,
 					h2time,
 					h3time,
@@ -1347,7 +1347,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tila = 'M'
 							and summa < 0
-							and if(lasku.maa='$yhtiorow[maa]',lasku.tilinumero, lasku.ultilno) = '$trow[tilinumero]'";
+							and lasku.ultilno = '$trow[ultilno]'";
 				$hyvitysresult = pupe_query($query);
 				$hyvitysrow = mysql_fetch_assoc ($hyvitysresult);
 
@@ -1365,7 +1365,7 @@
 				}
 
 				echo "</td>";
-				echo "<td valign='top'>".tilinumero_print($trow["tilinumero"])."</td>";
+				echo "<td valign='top'>".tilinumero_print($trow["ultilno"])."</td>";
 
 				echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['erpcm']);
 

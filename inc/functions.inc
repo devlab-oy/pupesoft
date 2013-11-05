@@ -20461,7 +20461,7 @@ if (!function_exists('hyllyalue')) {
 }
 
 if (!function_exists('uusi_saapuminen')) {
-    function uusi_saapuminen($toimittajarow) {
+    function uusi_saapuminen($toimittajarow, $toimipaikka = 0) {
         global $kukarow;
 
         # Lock table
@@ -20482,6 +20482,8 @@ if (!function_exists('uusi_saapuminen')) {
 
         $maa_lahetys = $toimittajarow['maa_lahetys'] != '' ? $toimittajarow['maa_lahetys'] : $toimittajarow['maa'];
 
+        $toimipaikka = $toimipaikka != 0 ? $toimipaikka : $kukarow['toimipaikka'];
+
         // meill‰ on $toimittajarow haettuna ylh‰‰ll‰
         $query = "  INSERT into lasku set
                     yhtio           = '$kukarow[yhtio]',
@@ -20501,7 +20503,7 @@ if (!function_exists('uusi_saapuminen')) {
                     rahti           = '$toimittajarow[oletus_kulupros]',
                     swift           = '$toimittajarow[swift]',
                     liitostunnus    = '$toimittajarow[tunnus]',
-                    yhtio_toimipaikka = '{$kukarow['toimipaikka']}',
+                    yhtio_toimipaikka = '{$toimipaikka}',
                     tila            = 'K',
                     luontiaika      = now(),
                     laatija         = '$kukarow[kuka]'";

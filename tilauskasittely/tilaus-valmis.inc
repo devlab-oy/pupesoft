@@ -1291,7 +1291,7 @@ else {
 						($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $edomalle_tilaukselle == 0 and $yhtiorow["splittauskielto"] == "K") or
 						($omalle_tilaukselle != $edomalle_tilaukselle and $edomalle_tilaukselle != 'x')
 					)
-					and $laskurow["osatoimitus"] == '' ) {
+					and $laskurow["osatoimitus"] == '') {
 
 					$tilaus_splitattu = TRUE;
 

@@ -675,7 +675,7 @@
 				echo "</td>";
 			}
 
-			if ($toim == 'KESKEN' or $toim == 'SUPER' or $toim == 'OSTO' or $toim == 'OSTOSUPER') {
+			if (in_array($toim, array('KESKEN','SUPER','OSTO','OSTOSUPER','TARJOUS','TARJOUSSUPER','REKLAMAATIO','REKLAMAATIOSUPER','VASTAANOTA_REKLAMAATIO'))) {
 
 				$query = "	SELECT *
 							FROM yhtion_toimipaikat
@@ -772,7 +772,7 @@
 
 				$toimipaikka = (int) $toimipaikka;
 
-				if ($toim == 'KESKEN' or $toim == 'SUPER') {
+				if (in_array($toim, array('KESKEN','SUPER','TARJOUS','TARJOUSSUPER','REKLAMAATIO','REKLAMAATIOSUPER','VASTAANOTA_REKLAMAATIO'))) {
 					$haku .= " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
 					$sumhaku = " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
 				}

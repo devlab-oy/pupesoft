@@ -1342,7 +1342,7 @@ else {
 
 						switch ($fieldname) {
 							case 'alatila':
-								$values .= ", 'A'";
+								$values .= ", ''";
 								break;
 							case 'tila':
 								$values .= ", 'N'";
@@ -1391,7 +1391,7 @@ else {
 
 					$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 					$uusires = pupe_query($kysely);
-
+					
 					$laskurow['tunnus'] = mysql_insert_id();
 
 					// Laitetaan uuden tilauksen varaston "ulkoinen_jarjestelma"-tieto talteen

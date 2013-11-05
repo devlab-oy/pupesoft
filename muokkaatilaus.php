@@ -662,39 +662,36 @@
 				echo "</td>";
 			}
 
-			if ($toim == 'KESKEN' or $toim == 'SUPER' or $toim == 'OSTO' or $toim == 'OSTOSUPER') {
-
 				$query = "	SELECT *
 							FROM yhtion_toimipaikat
 							WHERE yhtio = '{$kukarow['yhtio']}'";
 				$toimipaikkares = pupe_query($query);
 
-				if (mysql_num_rows($toimipaikkares) > 0)  {
+			if (mysql_num_rows($toimipaikkares) > 0)  {
 
-					echo "</tr><tr>";
+				echo "</tr><tr>";
 
-					echo "<th>",t("Toimipaikka"),"</th>";
+				echo "<th>",t("Toimipaikka"),"</th>";
 
-					echo "<td><select name='toimipaikka' onchange='submit();'>";
-					echo "<option value=''>",t("Valitse"),"</option>";
+				echo "<td><select name='toimipaikka' onchange='submit();'>";
+				echo "<option value=''>",t("Valitse"),"</option>";
 
-					while ($toimipaikkarow = mysql_fetch_assoc($toimipaikkares)) {
-						if (!isset($toimipaikka) and $kukarow['toimipaikka'] == $toimipaikkarow['tunnus']) {
-							$sel = ' selected';
-							$toimipaikka = $kukarow['toimipaikka'];
-						}
-						elseif (isset($toimipaikka) and $toimipaikka == $toimipaikkarow['tunnus']) {
-							$sel = ' selected';
-						}
-						else {
-							$sel = '';
-						}
-
-						echo "<option value='{$toimipaikkarow['tunnus']}'{$sel}>{$toimipaikkarow['nimi']}</option>";
+				while ($toimipaikkarow = mysql_fetch_assoc($toimipaikkares)) {
+					if (!isset($toimipaikka) and $kukarow['toimipaikka'] == $toimipaikkarow['tunnus']) {
+						$sel = ' selected';
+						$toimipaikka = $kukarow['toimipaikka'];
+					}
+					elseif (isset($toimipaikka) and $toimipaikka == $toimipaikkarow['tunnus']) {
+						$sel = ' selected';
+					}
+					else {
+						$sel = '';
 					}
 
-					echo "</select></td><td class='back'>&nbsp;</td>";
+					echo "<option value='{$toimipaikkarow['tunnus']}'{$sel}>{$toimipaikkarow['nimi']}</option>";
 				}
+
+				echo "</select></td><td class='back'>&nbsp;</td>";
 			}
 
 			echo "<td class='back'><input type='Submit' value = '".t("Etsi")."'></td></tr>";
@@ -747,12 +744,12 @@
 
 				$toimipaikka = (int) $toimipaikka;
 
-				if ($toim == 'KESKEN' or $toim == 'SUPER') {
+				if ($toim == 'OSTO' or $toim == 'OSTOSUPER') {
+					$haku .= " and lasku.vanhatunnus = '{$toimipaikka}' ";
+				}
+				else {
 					$haku .= " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
 					$sumhaku = " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
-				}
-				elseif ($toim == 'OSTO' or $toim == 'OSTOSUPER') {
-					$haku .= " and lasku.vanhatunnus = '{$toimipaikka}' ";
 				}
 			}
 

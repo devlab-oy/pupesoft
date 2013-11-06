@@ -850,7 +850,7 @@ else {
 			}
 
 			// vaikka laitetaan sisäiseen laskutukseen tai ei haluttu lähetettä, mutta annetaan mahdollisuus lähettää tilausvahvistus omaan sähköpostiin
-			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE or (trim($laskurow['tilausvahvistus']) != "" or $yhtiorow['lahetteen_tulostustapa'] == "I")) {
+			if (trim($laskurow['tilausvahvistus']) != "" and ($yhtiorow['tilausvahvistus_sisaisista'] == "S" or ($yhtiorow['tilausvahvistus_sisaisista'] == "U" and $laskurow['sisainen'] == '') or strpos($laskurow['tilausvahvistus'], 'O') !== FALSE or $yhtiorow['lahetteen_tulostustapa'] == "I")) {
 				$params_tilausvahvistus = array(
 				'tee'						=> $tee,
 				'toim'						=> $toim,
@@ -1431,7 +1431,7 @@ else {
 
 					$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 					$uusires = pupe_query($kysely);
-					
+
 					$laskurow['tunnus'] = mysql_insert_id();
 
 					// Laitetaan uuden tilauksen varaston "ulkoinen_jarjestelma"-tieto talteen

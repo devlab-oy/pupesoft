@@ -649,7 +649,13 @@ if ($silent == "") {
 					}
 				}
 				else {
-					if ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
+					if ($laskurow['yhtio_toimipaikka'] != 0) {
+						if ($laskurow['yhtio_toimipaikka'] == $toimipaikat_row['tunnus']) {
+							$sel = ' selected';
+							$toimipaikka = $toimipaikat_row['tunnus'];
+						}
+					}
+					elseif ($kukarow['toimipaikka'] == $toimipaikat_row['tunnus']) {
 						$sel = ' selected';
 						$toimipaikka = $toimipaikat_row['tunnus'];
 					}

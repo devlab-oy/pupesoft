@@ -8298,7 +8298,7 @@ if ($tee == '') {
 					)
 				) {
 					echo "<br/><br />";
-					echo t("Tulosta lähete uudestaan")," <input type='checkbox' name='tulosta_lahete_uudestaan' value='tulostetaan' /> ";
+					echo t("Tulosta uusi lähete")," <input type='checkbox' name='tulosta_lahete_uudestaan' value='tulostetaan' /> ";
 
 					$query = "	SELECT *
 								FROM varastopaikat

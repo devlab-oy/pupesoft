@@ -1982,14 +1982,14 @@
 			echo "</tr>";
 			echo "</form>";
 
-			if (mysql_num_rows(hae_yhtion_toimipaikat($kukarow['yhtio'])) != 0) {
+			$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+			if (mysql_num_rows($toimipaikat_res) != 0) {
 				echo "<form method='post'>";
 				echo "<input type = 'hidden' name='lopetus' value='{$lopetus}'>";
 				echo "<input type = 'hidden' name='tila' value='vaihdatoimipaikka'>";
 				echo "<input type = 'hidden' name='tee' value='M'>";
 				echo "<input type = 'hidden' name='tunnus' value='{$tunnus}'>";
-
-				$toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
 				echo "<tr>";
 				echo "<th>",t("Toimipaikka"),"</th>";

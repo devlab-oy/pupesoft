@@ -1688,6 +1688,7 @@
 			// meillä on $trow tullut parametrinä
 			$query = "	INSERT into lasku set
 						yhtio        			= '$kukarow[yhtio]',
+						yhtio_toimipaikka 		= '{$osrow['yhtio_toimipaikka']}',
 						laskunro     			= '$id',
 						ytunnus	     			= '$trow[ytunnus]',
 						nimi         			= '$trow[nimi]',
@@ -2173,12 +2174,12 @@
 			$automaattituloutus = true;
 		}
 
-		if ($trow['sahkoinen_automaattituloutus'] == 'J') {
+		elseif ($trow['sahkoinen_automaattituloutus'] == 'J') {
 			$automaattituloutus = true;
 			$automaattijalkilaskenta = true;
 		}
 
-		if ($osrow['yhtio_toimipaikka'] != 0) {
+		if ($osrow['yhtio_toimipaikka'] != 0 and $trow['sahkoinen_automaattituloutus'] == '') {
 
 			$query = "	SELECT sahkoinen_automaattituloutus
 						FROM yhtion_toimipaikat

@@ -423,9 +423,7 @@
 						}
 					}
 				}
-				
-				
-				if ($toim == 'asiakas') $sisviesti1_chk = $trow["sisviesti1"];
+
 				// Taulun ensimmäinen kenttä on aina yhtiö
 				$query = "UPDATE $toim SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
@@ -572,15 +570,19 @@
 							$otsikrow["toim_postitp"]	= $otsikrow["postitp"];
 							$otsikrow["toim_maa"]		= $otsikrow["maa"];
 						}
-						
+
 						$paivita_sisviesti1 = "";
-						if (strpos($sisviesti1_chk,$laskuorow[sisviesti1]) !== FALSE and $otsikrow[sisviesti1] != '') {
-							$paivita_sisviesti1 = ", sisviesti1 = '$otsikrow[sisviesti1]' ";
+
+						// Päivitetäänkö sisviesti1?
+						if ($trow["sisviesti1"] != "" and $otsikrow["sisviesti1"] != $trow["sisviesti1"] and strpos($laskuorow["sisviesti1"], $trow["sisviesti1"]) !== FALSE) {
+							$paivita_sisviesti1 = ", sisviesti1 = replace(sisviesti1, '{$trow["sisviesti1"]}', '{$otsikrow["sisviesti1"]}') ";
+
 						}
-						elseif (strpos($otsikrow[sisviesti1],$laskuorow[sisviesti1]) == FALSE and $otsikrow[sisviesti1] != '') {
-							$paivita_sisviesti1 = ", sisviesti1 = '$laskuorow[sisviesti1]' ' ' '$otsikrow[sisviesti1]'  ";
+						// Lisätään uusi sisviesti1, jos sitä ei vielä ole laskulla
+						elseif (strpos($laskuorow["sisviesti1"], $otsikrow["sisviesti1"]) === FALSE) {
+							$paivita_sisviesti1 = ", sisviesti1 = trim(concat(sisviesti1,' ', '{$otsikrow["sisviesti1"]}')) ";
 						}
-						
+
 						$paivita_myos_lisa = "";
 
 						// Ei päivitetää toimitettujen ja rahtikirjasyötettyjen myyntitilausten toimitustapoja

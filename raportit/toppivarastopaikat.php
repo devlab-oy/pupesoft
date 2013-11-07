@@ -603,7 +603,6 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 						AND tilausrivi.tuoteno   = tuotepaikat.tuoteno )
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.tyyppi = 'L'
-					AND tilausrivi.var != 'P'
 					{$tuotepaikka_where}
 					{$_date}
 					GROUP BY 1, {$group}

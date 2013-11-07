@@ -327,7 +327,8 @@
 	if (is_string($kassavalinnat)) {
 		$kassakone = unserialize(base64_decode($kassavalinnat));
 	}
-	$lisakenttialinkkiin = "&myyjanro=$myyjanro&myyja=$myyja&tilityskpl=$tilityskpl&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&koti=$koti&printteri=$printteri&kassavalinnat=".base64_encode(serialize($kassakone));
+
+	$lisakenttialinkkiin = "&lopetus=$PHP_SELF////myyjanro=$myyjanro//myyja=$myyja//tilityskpl=$tilityskpl//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//koti=$koti//printteri=$printteri//tee=KAIKKI//kassavalinnat=".base64_encode(serialize($kassakone));
 
 	// Lockdown-funktio, joka tarkistaa onko kyseinen kassalipas jo täsmätty.
 	function lockdown($vv, $kk, $pp, $tasmayskassa) {

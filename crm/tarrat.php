@@ -107,24 +107,13 @@
 			}
 		}
 		else {
-			if (include('Spreadsheet/Excel/Writer.php')) {
+			if (include('inc/pupeExcel.inc')) {
 
-				//keksit‰‰n failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-				$workbook->setVersion(8);
-				$worksheet = $workbook->addWorksheet('Sheet 1');
-
-				$format_bold = $workbook->addFormat();
-				$format_bold->setBold();
-
-				$excelrivi = 0;
+				$worksheet 	 = new pupeExcel();
+				$format_bold = array("bold" => TRUE);
+				$excelrivi 	 = 0;
+				$excelhist   = 0;
 			}
-
-			if (isset($workbook)) {
 
 				$excelsarake = 0;
 
@@ -286,21 +275,20 @@
 			}
 		}
 
-		if ($raportti == "EX" and isset($workbook)) {
+		if ($raportti == "EX") {
 
-			// We need to explicitly close the workbook
-			$workbook->close();
+			$excelnimi = $worksheet->close();
 
 			echo "<form method='post' class='multisubmit'>";
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='Osoitetiedot.xls'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Osoitetiedot.xlsx'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
 			echo "</table></form><br>";
 		}
-		else {
+		elseif ($tee!='') {
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
 			mt_srand((float) $sec + ((float) $usec * 100000));
@@ -334,7 +322,6 @@
 		}
 
 		$tee='';
-	}
 
 	// Nyt selataan
 	if ($tee == '') {

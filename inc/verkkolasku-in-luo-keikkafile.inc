@@ -2173,7 +2173,6 @@
 		if ($trow['sahkoinen_automaattituloutus'] == 'K') {
 			$automaattituloutus = true;
 		}
-
 		elseif ($trow['sahkoinen_automaattituloutus'] == 'J') {
 			$automaattituloutus = true;
 			$automaattijalkilaskenta = true;

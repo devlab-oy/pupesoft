@@ -138,7 +138,7 @@
 
 		$query = "	SELECT valuu.kurssi, round($maksettava * valuu.kurssi,2) summa,
 					$maksettava summa_valuutassa,
-					maksuaika, olmapvm, tilinumero, maa, kapvm, erpcm,
+					maksuaika, olmapvm, maa, kapvm, erpcm,
 					ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1, valkoodi
 					FROM lasku
 					JOIN valuu ON (valuu.yhtio = lasku.yhtio and valuu.nimi = lasku.valkoodi)
@@ -184,7 +184,8 @@
 							and maksaja 	= '$kukarow[kuka]'
 							and maksu_tili 	= '$tili'
 							and maa 		= 'FI'
-							and ultilno 	= '$trow[ultilno]'";
+							and ultilno 	= '$trow[ultilno]'
+							and swift 		= '$trow[swift]'";
 			}
 			else {
 				$query = "	SELECT sum(if(alatila='K' and summa > 0, summa - kasumma, summa)) summa
@@ -284,6 +285,7 @@
 						and maksu_tili 	= '$tili'
 						and maa 		= 'FI'
 						and ultilno 	= '$trow[ultilno]'
+						and swift 		= '$trow[swift]'
 						ORDER BY tapvm desc";
 		}
 		else {
@@ -660,33 +662,34 @@
 				if (strtoupper($trow['maa']) == 'FI') {
 					$query = "	SELECT sum(if(alatila='K' and summa > 0, summa - kasumma, summa)) summa
 								FROM lasku
-								WHERE yhtio='$kukarow[yhtio]'
-								and tila='P'
-								and olmapvm = '$trow[olmapvm]'
-								and maksu_tili = '$trow[maksu_tili]'
-								and maa = 'fi'
-								and ultilno='$trow[ultilno]'
-								and maksaja = '$kukarow[kuka]'
-								and tunnus != '$lasku'";
+								WHERE yhtio		= '$kukarow[yhtio]'
+								and tila		= 'P'
+								and olmapvm 	= '$trow[olmapvm]'
+								and maksu_tili 	= '$trow[maksu_tili]'
+								and maa 		= 'fi'
+								and ultilno		= '$trow[ultilno]'
+								and swift 		= '$trow[swift]'
+								and maksaja 	= '$kukarow[kuka]'
+								and tunnus 	   != '$lasku'";
 				}
 				else {
 					$query = "	SELECT sum(if(alatila='K' and summa > 0, summa - kasumma, summa)) summa
 								FROM lasku
-								WHERE yhtio='$kukarow[yhtio]'
-								and tila='P'
-								and olmapvm = '$trow[olmapvm]'
-								and maksu_tili = '$trow[maksu_tili]'
-								and maa <> 'fi'
-								and valkoodi = '$trow[valkoodi]'
-								and ultilno = '$trow[ultilno]'
-								and swift = '$trow[swift]'
-								and pankki1 = '$trow[pankki1]'
-								and pankki2 = '$trow[pankki2]'
-								and pankki3 = '$trow[pankki3]'
-								and pankki4 = '$trow[pankki4]'
-								and sisviesti1 = '$trow[sisviesti1]'
-								and maksaja = '$kukarow[kuka]'
-								and tunnus != '$lasku'";
+								WHERE yhtio		= '$kukarow[yhtio]'
+								and tila		= 'P'
+								and olmapvm 	= '$trow[olmapvm]'
+								and maksu_tili 	= '$trow[maksu_tili]'
+								and maa 	   <> 'fi'
+								and valkoodi 	= '$trow[valkoodi]'
+								and ultilno 	= '$trow[ultilno]'
+								and swift 		= '$trow[swift]'
+								and pankki1 	= '$trow[pankki1]'
+								and pankki2 	= '$trow[pankki2]'
+								and pankki3 	= '$trow[pankki3]'
+								and pankki4 	= '$trow[pankki4]'
+								and sisviesti1 	= '$trow[sisviesti1]'
+								and maksaja 	= '$kukarow[kuka]'
+								and tunnus 	   != '$lasku'";
 				}
 
 				$result = pupe_query($query);
@@ -1040,6 +1043,7 @@
 					round(lasku.summa * valuu.kurssi,2) ysumma,
 					lasku.ebid, lasku.tunnus, lasku.olmapvm,
 					lasku.ultilno,
+					lasku.swift,
 					if(alatila = 'K' and summa > 0, summa - kasumma, summa) maksettava_summa,
 					if(alatila = 'K' and summa > 0, round(lasku.summa * valuu.kurssi,2) - kasumma, round(lasku.summa * valuu.kurssi,2)) maksettava_ysumma,
 					h1time,
@@ -1102,9 +1106,9 @@
 					<td class='back'></td>
 					</tr>
 				</thead>";
-			
+
 			echo "<tbody>";
-				
+
 			$summa = 0;
 			$valsumma = array();
 
@@ -1113,11 +1117,12 @@
 
 				$query = "	SELECT count(*) maara,
 							group_concat(concat(lasku.summa, ' ', lasku.valkoodi) separator '<br>') summa
-							from lasku use index (yhtio_tila_summa)
+							FROM lasku use index (yhtio_tila_summa)
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tila = 'M'
-							and summa < 0
-							and lasku.ultilno = '$trow[ultilno]'";
+							and tila 	= 'M'
+							and summa 	< 0
+							and ultilno = '$trow[ultilno]'
+							and swift 	= '$trow[swift]'";
 				$hyvitysresult = pupe_query($query);
 				$hyvitysrow = mysql_fetch_assoc ($hyvitysresult);
 
@@ -1226,9 +1231,9 @@
 
 				echo "</tr>";
 			}
-			
+
 			echo "</tbody>";
-			
+
 			echo "</table>";
 
 			echo "<br><font class='message'>".t("Poimitut laskut yhteensä")."</font><hr>";
@@ -1276,6 +1281,7 @@
 					round(lasku.summa * valuu.kurssi,2) ysumma,
 					lasku.ebid, lasku.tunnus, lasku.olmapvm,
 					lasku.ultilno,
+					lasku.swift,
 					h1time,
 					h2time,
 					h3time,
@@ -1343,11 +1349,12 @@
 
 				$query = "	SELECT count(*) maara,
 							group_concat(concat(lasku.summa, ' ', lasku.valkoodi) separator '<br>') summa
-							from lasku use index (yhtio_tila_summa)
+							FROM lasku use index (yhtio_tila_summa)
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tila = 'M'
-							and summa < 0
-							and lasku.ultilno = '$trow[ultilno]'";
+							and tila 	= 'M'
+							and summa 	< 0
+							and ultilno = '$trow[ultilno]'
+							and swift 	= '$trow[swift]'";
 				$hyvitysresult = pupe_query($query);
 				$hyvitysrow = mysql_fetch_assoc ($hyvitysresult);
 
@@ -1376,9 +1383,9 @@
 				else {
 					echo tv1dateconv($trow['erpcm']);
 				}
-				
+
 				echo "</td>";
-				
+
 				if ($trow['kapvm'] != '0000-00-00') {
 					echo "<td valign='top' align='right' nowrap>".pupe_DataTablesEchoSort($trow['kapvm']);
 					echo tv1dateconv($trow['kapvm'])."<br>";

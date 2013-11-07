@@ -891,6 +891,13 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 	$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var<>'P'";
 	$result = pupe_query($query);
 
+	if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $yhtiorow['liiketunnus'] != '') {
+
+		require("inc/sahkoinen_lahete.class.inc");
+
+		sahkoinen_lahete($laskurow);
+	}
+
 	//Nollataan sarjanumerolinkit ja dellataan ostorivit
 	vapauta_sarjanumerot($toim, $kukarow["kesken"]);
 

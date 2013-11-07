@@ -436,8 +436,8 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 	);
 
 	if (strtotime("$vva-$kka-$ppa") < strtotime('now - 12 months')) {
-		$_date = "AND tilausrivi.kerattyaika >= '$vva-$kka-$ppa'
-				  AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl'";
+		$_date = "AND tilausrivi.kerattyaika >= '$vva-$kka-$ppa 00:00:00'
+				  AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl 23:59:59'";
 	}
 	else {
 		$_date = "AND tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month)";
@@ -545,8 +545,8 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 		$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
 					{$keraysvyohyke_select}
 					{$kerayksettomat_tuote_select}
-					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
-					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl+tilausrivi.varattu, 0)) tuokpl_valittu_aika,
+					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa 00:00:00' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl 23:59:59', 1, 0)) kpl_valittu_aika,
+					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa 00:00:00' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl 23:59:59', tilausrivi.kpl+tilausrivi.varattu, 0)) tuokpl_valittu_aika,
 					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), 1, 0)) kpl_6,
 					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), tilausrivi.kpl+tilausrivi.varattu, 0)) tuo_kpl_6,
 					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), 1, 0)) kpl_12,
@@ -579,8 +579,8 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 		$query = "	SELECT varastopaikat.nimitys as varaston_nimitys,
 					{$keraysvyohyke_select}
 					{$tuote_select}
-					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
-					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl+tilausrivi.varattu, 0)) tuokpl_valittu_aika,
+					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa 00:00:00' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl 23:59:59', 1, 0)) kpl_valittu_aika,
+					sum(if (tilausrivi.kerattyaika >= '$vva-$kka-$ppa 00:00:00' AND tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl 23:59:59', tilausrivi.kpl+tilausrivi.varattu, 0)) tuokpl_valittu_aika,
 					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), 1, 0)) kpl_6,
 					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 6 month), tilausrivi.kpl+tilausrivi.varattu, 0)) tuo_kpl_6,
 					sum(if (tilausrivi.kerattyaika >= Date_sub(CURRENT_DATE, INTERVAL 12 month), 1, 0)) kpl_12,
@@ -603,6 +603,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
 						AND tilausrivi.tuoteno   = tuotepaikat.tuoteno )
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.tyyppi = 'L'
+					AND tilausrivi.var != 'P'
 					{$tuotepaikka_where}
 					{$_date}
 					GROUP BY 1, {$group}

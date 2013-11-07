@@ -107,55 +107,40 @@
 			}
 		}
 		else {
-			if (include('Spreadsheet/Excel/Writer.php')) {
+			include('inc/pupeExcel.inc');
 
-				//keksitään failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+			$worksheet 	 = new pupeExcel();
+			$format_bold = array("bold" => TRUE);
+			$excelrivi 	 = 0;
+			$excelsarake = 0;
 
-				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-				$workbook->setVersion(8);
-				$worksheet = $workbook->addWorksheet('Sheet 1');
+			$worksheet->writeString($excelrivi, $excelsarake, t("Nimi"), $format_bold);
+			$excelsarake++;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Nimitarkenne"), $format_bold);
+			$excelsarake++;
 
-				$format_bold = $workbook->addFormat();
-				$format_bold->setBold();
-
-				$excelrivi = 0;
+			if ($as_yht_tiedot == 'on') {
+				$worksheet->writeString($excelrivi, $excelsarake, t("Yhteyshenkilö"), $format_bold);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, t("Titteli"), $format_bold);
+				$excelsarake++;
 			}
 
-			if (isset($workbook)) {
+			$worksheet->writeString($excelrivi, $excelsarake, t("Osoite"), $format_bold);
+			$excelsarake++;
 
-				$excelsarake = 0;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Postino"), $format_bold);
+			$excelsarake++;
 
-				$worksheet->writeString($excelrivi, $excelsarake, t("Nimi"), $format_bold);
-				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Nimitarkenne"), $format_bold);
-				$excelsarake++;
+			$worksheet->writeString($excelrivi, $excelsarake, t("Postitp"), $format_bold);
+			$excelsarake++;
 
-				if ($as_yht_tiedot == 'on') {
-					$worksheet->writeString($excelrivi, $excelsarake, t("Yhteyshenkilö"), $format_bold);
-					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Titteli"), $format_bold);
-					$excelsarake++;
-				}
+			$worksheet->writeString($excelrivi, $excelsarake, t("Maa"), $format_bold);
+			$excelsarake++;
 
-				$worksheet->writeString($excelrivi, $excelsarake, t("Osoite"), $format_bold);
-				$excelsarake++;
-
-				$worksheet->writeString($excelrivi, $excelsarake, t("Postino"), $format_bold);
-				$excelsarake++;
-
-				$worksheet->writeString($excelrivi, $excelsarake, t("Postitp"), $format_bold);
-				$excelsarake++;
-
-				$worksheet->writeString($excelrivi, $excelsarake, t("Maa"), $format_bold);
-				$excelsarake++;
-
-				$worksheet->writeString($excelrivi, $excelsarake, t("Sähköpostiosoite"), $format_bold);
-				$excelsarake++;
-				$excelrivi++;
-			}
+			$worksheet->writeString($excelrivi, $excelsarake, t("Sähköpostiosoite"), $format_bold);
+			$excelsarake++;
+			$excelrivi++;
 		}
 
 		while ($row = mysql_fetch_array($res)) {
@@ -286,16 +271,15 @@
 			}
 		}
 
-		if ($raportti == "EX" and isset($workbook)) {
+		if ($raportti == "EX") {
 
-			// We need to explicitly close the workbook
-			$workbook->close();
+			$excelnimi = $worksheet->close();
 
 			echo "<form method='post' class='multisubmit'>";
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='Osoitetiedot.xls'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Osoitetiedot.xlsx'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
 			echo "</table></form><br>";

@@ -828,8 +828,10 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 // perustetaan uusi keikka toimittajalle $ytunnus
 if ($toiminto == "uusi" and $toimittajaid > 0) {
 
+	$toimipaikka = isset($toimipaikka) ? $toimipaikka : 0;
+
 	# Toiminta funktioitu
-	$result = uusi_saapuminen($toimittajarow);
+	$result = uusi_saapuminen($toimittajarow, $toimipaikka);
 
 	// selaukseen
 	$toiminto = "";
@@ -849,11 +851,14 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 	echo "<td>$toimittajarow[postino]</td>";
 	echo "<td>$toimittajarow[postitp]</td>";
 
+	$toimipaikka = isset($toimipaikka) ? $toimipaikka : 0;
+
 	echo "<td class='back' style='vertical-align:bottom;'>";
 	echo "<form method='post'>";
 	echo "<input type='hidden' name='toiminto' value='uusi'>";
-	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-	echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
+	echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
+	echo "<input type='hidden' name='ytunnus' value='{$ytunnus}'>";
+	echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
 	echo "<input type='submit' value='".t("Perusta uusi saapuminen")."'>";
 	echo "</form>";
 	echo "</td>";

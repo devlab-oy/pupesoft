@@ -658,7 +658,7 @@
 
 				if (in_array($toim, array('','SUPER','KESKEN','HYPER','TOSI_KESKEN','ODOTTAA_SUORITUSTA','TEHDASPALAUTUKSET','SUPERTEHDASPALAUTUKSET','TAKUU','TAKUUSUPER','TARJOUS','TARJOUSSUPER','OSTO','OSTOSUPER','ENNAKKO','SIIRTOLISTA','SIIRTOLISTASUPER','REKLAMAATIO','REKLAMAATIOSUPER','VASTAANOTA_REKLAMAATIO'))) {
 					$teksti .= ", tuotenumeron";
-				}
+			}
 
 				if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('','SUPER','KESKEN','HYPER','TOSI_KESKEN','TARJOUS','TARJOUSSUPER','REKLAMAATIO','REKLAMAATIOSUPER','VASTAANOTA_REKLAMAATIO'))) {
 					$teksti .= ", rekisterinumeron";
@@ -675,39 +675,36 @@
 				echo "</td>";
 			}
 
-			if (in_array($toim, array('KESKEN','SUPER','OSTO','OSTOSUPER','TARJOUS','TARJOUSSUPER','REKLAMAATIO','REKLAMAATIOSUPER','VASTAANOTA_REKLAMAATIO'))) {
-
 				$query = "	SELECT *
 							FROM yhtion_toimipaikat
 							WHERE yhtio = '{$kukarow['yhtio']}'";
 				$toimipaikkares = pupe_query($query);
 
-				if (mysql_num_rows($toimipaikkares) > 0)  {
+			if (mysql_num_rows($toimipaikkares) > 0)  {
 
-					echo "</tr><tr>";
+				echo "</tr><tr>";
 
-					echo "<th>",t("Toimipaikka"),"</th>";
+				echo "<th>",t("Toimipaikka"),"</th>";
 
-					echo "<td><select name='toimipaikka' onchange='submit();'>";
-					echo "<option value=''>",t("Valitse"),"</option>";
+				echo "<td><select name='toimipaikka' onchange='submit();'>";
+				echo "<option value=''>",t("Valitse"),"</option>";
 
-					while ($toimipaikkarow = mysql_fetch_assoc($toimipaikkares)) {
-						if (!isset($toimipaikka) and $kukarow['toimipaikka'] == $toimipaikkarow['tunnus']) {
-							$sel = ' selected';
-							$toimipaikka = $kukarow['toimipaikka'];
-						}
-						elseif (isset($toimipaikka) and $toimipaikka == $toimipaikkarow['tunnus']) {
-							$sel = ' selected';
-						}
-						else {
-							$sel = '';
-						}
-
-						echo "<option value='{$toimipaikkarow['tunnus']}'{$sel}>{$toimipaikkarow['nimi']}</option>";
+				while ($toimipaikkarow = mysql_fetch_assoc($toimipaikkares)) {
+					if (!isset($toimipaikka) and $kukarow['toimipaikka'] == $toimipaikkarow['tunnus']) {
+						$sel = ' selected';
+						$toimipaikka = $kukarow['toimipaikka'];
+					}
+					elseif (isset($toimipaikka) and $toimipaikka == $toimipaikkarow['tunnus']) {
+						$sel = ' selected';
+					}
+					else {
+						$sel = '';
 					}
 
-					echo "</select></td><td class='back'>&nbsp;</td>";
+					echo "<option value='{$toimipaikkarow['tunnus']}'{$sel}>{$toimipaikkarow['nimi']}</option>";
 				}
+
+				echo "</select></td><td class='back'>&nbsp;</td>";
 			}
 
 			echo "<td class='back'><input type='Submit' value = '".t("Etsi")."'></td></tr>";
@@ -772,12 +769,12 @@
 
 				$toimipaikka = (int) $toimipaikka;
 
-				if (in_array($toim, array('KESKEN','SUPER','TARJOUS','TARJOUSSUPER','REKLAMAATIO','REKLAMAATIOSUPER','VASTAANOTA_REKLAMAATIO'))) {
+				if ($toim == 'OSTO' or $toim == 'OSTOSUPER') {
+					$haku .= " and lasku.vanhatunnus = '{$toimipaikka}' ";
+				}
+				else {
 					$haku .= " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
 					$sumhaku = " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
-				}
-				elseif ($toim == 'OSTO' or $toim == 'OSTOSUPER') {
-					$haku .= " and lasku.vanhatunnus = '{$toimipaikka}' ";
 				}
 			}
 

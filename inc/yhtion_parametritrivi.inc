@@ -339,6 +339,23 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tilausvahvistus_sisaisista") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tilausvahvistusta ei l‰hetet‰ asiakkaalle sis‰isist‰ laskuista eik‰ suoraan laskutusjonoon laitetuista tilauksista");
+		$ulos .= "<option value = 'U' $sel[U]>".t("Tilausvahvistus l‰hetet‰‰n asiakkaalle suoraan laskutusjonoon laitetuista tilauksista");
+		$ulos .= "<option value = 'S' $sel[S]>".t("Tilausvahvistus l‰hetet‰‰n asiakkaalle sis‰isist‰ laskuista sek‰ suoraan laskutusjonoon laitetuista tilauksista");
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "varastosiirto_tilausvahvistus") {
 		$apu = $trow[$i];
 		$sel = array();

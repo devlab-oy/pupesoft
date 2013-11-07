@@ -658,7 +658,7 @@
 
 				if (in_array($toim, array('','SUPER','KESKEN','HYPER','TOSI_KESKEN','ODOTTAA_SUORITUSTA','TEHDASPALAUTUKSET','SUPERTEHDASPALAUTUKSET','TAKUU','TAKUUSUPER','TARJOUS','TARJOUSSUPER','OSTO','OSTOSUPER','ENNAKKO','SIIRTOLISTA','SIIRTOLISTASUPER','REKLAMAATIO','REKLAMAATIOSUPER','VASTAANOTA_REKLAMAATIO'))) {
 					$teksti .= ", tuotenumeron";
-			}
+				}
 
 				if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('','SUPER','KESKEN','HYPER','TOSI_KESKEN','TARJOUS','TARJOUSSUPER','REKLAMAATIO','REKLAMAATIOSUPER','VASTAANOTA_REKLAMAATIO'))) {
 					$teksti .= ", rekisterinumeron";
@@ -675,10 +675,10 @@
 				echo "</td>";
 			}
 
-				$query = "	SELECT *
-							FROM yhtion_toimipaikat
-							WHERE yhtio = '{$kukarow['yhtio']}'";
-				$toimipaikkares = pupe_query($query);
+			$query = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'";
+			$toimipaikkares = pupe_query($query);
 
 			if (mysql_num_rows($toimipaikkares) > 0)  {
 

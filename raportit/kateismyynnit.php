@@ -323,6 +323,12 @@
 			-->
 	</script>";
 
+	// Jos tullaan takaisin muutosite.phpn lopeta:sta
+	if (is_string($kassavalinnat)) {
+		$kassakone = unserialize(base64_decode($kassavalinnat));
+	}
+	$lisakenttialinkkiin = "&myyjanro=$myyjanro&myyja=$myyja&tilityskpl=$tilityskpl&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&koti=$koti&printteri=$printteri&kassavalinnat=".base64_encode(serialize($kassakone));
+
 	// Lockdown-funktio, joka tarkistaa onko kyseinen kassalipas jo täsmätty.
 	function lockdown($vv, $kk, $pp, $tasmayskassa) {
 		global $kukarow, $kassakone, $yhtiorow;
@@ -1125,7 +1131,7 @@
 
 			if (count($ltunnukset) > 0) {
 				tosite_print($vv, $kk, $pp, $ltunnukset);
-				echo "$ltunnukset[kassalipas] ".t("on jo täsmätty. Tosite löytyy myös")." <a href='".$palvelin2."muutosite.php?tee=E&tunnus=$ltunnukset[ltunnukset]'>".t("täältä")."</a><br>";
+				echo "$ltunnukset[kassalipas] ".t("on jo täsmätty. Tosite löytyy myös")." <a href='".$palvelin2."muutosite.php?tee=E&tunnus=$ltunnukset[ltunnukset]$lisakenttialinkkiin'>".t("täältä")."</a><br>";
 			}
 		}
 
@@ -1494,7 +1500,7 @@
 						echo "<td>$row[kassanimi]</td>";
 						echo "<td>".substr($row["nimi"],0,23)."</td>";
 						echo "<td>$row[ytunnus]</td>";
-						echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
+						echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 						echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
 						echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
@@ -1736,7 +1742,7 @@
 							echo "<td>$row[kassanimi]</td>";
 							echo "<td>".substr($row["nimi"],0,23)."</td>";
 							echo "<td>$row[ytunnus]</td>";
-							echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
+							echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 							echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
 							echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
@@ -1827,7 +1833,7 @@
 							echo "<td>$row[kassanimi]</td>";
 							echo "<td>".substr($row["nimi"],0,23)."</td>";
 							echo "<td>$row[ytunnus]</td>";
-							echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
+							echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 							echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
 							echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
@@ -1963,7 +1969,7 @@
 					echo "<td>$row[kassanimi]</td>";
 					echo "<td>".substr($row["nimi"],0,23)."</td>";
 					echo "<td>$row[ytunnus]</td>";
-					echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
+					echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 					echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
 					echo "<td align='right'>".sprintf('%.2f',$row['tilsumma'])."</td></tr>";
 
@@ -2074,7 +2080,7 @@
 						echo "<td>".t("Käteissuoritus")."</td>";
 						echo "<td>".substr($row["nimi"],0,23)."</td>";
 						echo "<td>$row[ytunnus]</td>";
-						echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]'>$row[laskunro]</a></td>";
+						echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
 						echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
 						echo "<td align='right'>".sprintf('%.2f', $row['summa'])."</td></tr>";
 

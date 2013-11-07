@@ -63,6 +63,9 @@ if (isset($livesearch_tee) and $livesearch_tee == "TOIMITTAJAHAKU") {
 // ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 js_openFormInNewWindow();
 
+lopetus("{$palvelin2}raportit/kateismyynnit.php////myyjanro=$myyjanro//myyja=$myyja//tilityskpl=$tilityskpl//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//koti=$koti//printteri=$printteri//tee=KAIKKI//kassavalinnat=$kassavalinnat");
+echo "<br>";
+
 echo "<font class='head'>".t("Tiliöintien muutos/selailu")."</font><hr>";
 
 if (($tee == 'U' or $tee == 'P' or $tee == 'M' or $tee == 'J') and ($oikeurow['paivitys'] != 1)) {

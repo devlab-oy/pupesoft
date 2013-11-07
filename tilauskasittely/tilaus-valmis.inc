@@ -834,6 +834,13 @@ else {
 							AND tunnus = '{$laskurow['tunnus']}'";
 				pupe_query($query);
 
+				if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $yhtiorow['liiketunnus'] != '') {
+
+					require("inc/sahkoinen_lahete.class.inc");
+
+					sahkoinen_lahete($laskurow);
+				}
+
 				if ($toim != "REKLAMAATIO") {
 					// Tulostetaan ker‰yslista
 					$tilausnumeroita = $laskurow["tunnus"];
@@ -1391,7 +1398,7 @@ else {
 
 					$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 					$uusires = pupe_query($kysely);
-					
+
 					$laskurow['tunnus'] = mysql_insert_id();
 
 					// Laitetaan uuden tilauksen varaston "ulkoinen_jarjestelma"-tieto talteen
@@ -1676,6 +1683,13 @@ else {
 					$result = pupe_query($query);
 					$laskurow = mysql_fetch_assoc($result);
 
+					if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $yhtiorow['liiketunnus'] != '') {
+
+						require("inc/sahkoinen_lahete.class.inc");
+
+						sahkoinen_lahete($laskurow);
+					}
+
 					$kutsuja = "tilaus-valmis.inc";
 
 					require("tilaus-valmis-valitsetila.inc");
@@ -1709,6 +1723,13 @@ else {
 						);
 
 						laheta_tilausvahvistus($params_tilausvahvistus);
+					}
+
+					if ($sahkoinen_lahete and isset($generoi_sahkoinen_lahete) and trim($generoi_sahkoinen_lahete) != "" and $kukarow["extranet"] == "" and in_array($toim, array('RIVISYOTTO','PIKATILAUS','REKLAMAATIO')) and $yhtiorow['liiketunnus'] != '') {
+
+						require("inc/sahkoinen_lahete.class.inc");
+
+						sahkoinen_lahete($laskurow);
 					}
 
 					///* T‰ss‰ katotaan onko l‰hetteell‰ tosiaan mit‰‰n ker‰tt‰v‰‰ *///

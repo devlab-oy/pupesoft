@@ -8394,68 +8394,14 @@ if ($tee == '') {
 					$query = "	SELECT asiakkaan_avainsanat.*
 								FROM asiakkaan_avainsanat
 								WHERE asiakkaan_avainsanat.yhtio = '{$kukarow['yhtio']}'
-								and asiakkaan_avainsanat.laji = 'liiketunnus'
+								and asiakkaan_avainsanat.laji = 'futur_sahkoinen_lahete'
 								and asiakkaan_avainsanat.avainsana != ''
 								AND asiakkaan_avainsanat.liitostunnus = '{$laskurow['liitostunnus']}'";
 					$as_avain_chk_res = pupe_query($query);
 
 					if (mysql_num_rows($as_avain_chk_res) > 0) {
-
-						$as_avain_chk_row = mysql_fetch_assoc($as_avain_chk_res);
-
-						$args = array(
-							'ytunnus' => $laskurow['ytunnus'],
-							'asiakasnro' => $as_avain_chk_row['avainsana'],
-							'lahetenro_toim' => $laskurow['tunnus']
-						);
-
-						$_lahete_class = new SahkoinenLahete($args);
-
-						while ($_lahete_class::getState()) {
-
-							$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.rekisterinumero, tuote.myyntihinta
-										FROM tilausrivi
-										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-										AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-										AND tilausrivi.tyyppi != 'D'";
-							$tilriv_res = pupe_query($query);
-
-							while ($tilriv_row = mysql_fetch_assoc($tilriv_res)) {
-
-								$query = "	SELECT toimi.toimittajanro, if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
-											FROM tuotteen_toimittajat
-											JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-											WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-											AND tuotteen_toimittajat.tuoteno = '{$tilriv_row['tuoteno']}'
-											ORDER BY sorttaus";
-								$toimittajanro_chk_res = pupe_query($query);
-								$toimittajanro_chk_row = mysql_fetch_assoc($toimittajanro_chk_res);
-
-								$ale = generoi_alekentta_php($tilriv_row, 'M', 'plain');
-
-								$args = array(
-									'tuoteno' => $tilriv_row['tuoteno'],
-									'toimittajanro' => $toimittajanro_chk_row['toimittajanro'],
-									'nimitys' => $tilriv_row['nimitys'],
-									'myyntihinta' => $tilriv_row['myyntihinta'],
-									'alennus' => $ale,
-									'kpl' => $tilriv_row['varattu'],
-									'rivisumma' => ($tilriv_row['varattu'] * $tilriv_row['myyntihinta']),
-									'alv' => $tilriv_row['alv'],
-									'reknro' => $tilriv_row['rekisterinumero'],
-								);
-
-								$_lahete_class->setRow($args);
-							}
-						}
-
-						if ($_lahete_class::getState()) {
-							$xml = $_lahete_class->generateXML();
-						}
+						echo "<br><br>",t("Lähetä sähköinen lähete")," <input type='checkbox' name='generoi_sahkoinen_lahete' value='true' checked />";
 					}
-
 				}
 
 				echo "</form>";

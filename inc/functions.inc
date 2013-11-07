@@ -23611,7 +23611,7 @@ if (!function_exists('hyllysiirto')) {
 					hyllyvali	= '{$mistarow['hyllyvali']}',
 					hyllytaso	= '{$mistarow['hyllytaso']}',
 					rivitunnus	= {$tun},
-					selite 		= '".t("Paikasta")." {$mista_texti} ".t("vähennettiin")." {$kappaleet}{$selite}',
+					selite 		= '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." {$kappaleet}{$selite}',
 					laatija 	= '{$kukarow['kuka']}',
 					laadittu 	= now()";
 		$result = pupe_query($query);
@@ -23631,6 +23631,151 @@ if (!function_exists('hyllysiirto')) {
 					laatija 	= '{$kukarow['kuka']}',
 					laadittu 	= now()";
 		$result = pupe_query($query);
+
+		// Tehdään kirjanpito
+		if ($yhtiorow['varastosiirto_kirjanpito'] == "K") {
+			// Lähettävä varasto
+			$mistavarasto = kuuluukovarastoon($mistarow['hyllyalue'], $mistarow['hyllynro']);
+			$minnevarasto = kuuluukovarastoon($minnerow['hyllyalue'], $minnerow['hyllynro']);
+
+			$query = "	SELECT kustp, kohde, projekti, toimipaikka
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$mistavarasto}'";
+			$mistavarasto_res = pupe_query($query);
+			$mistavarasto_row = mysql_fetch_assoc($mistavarasto_res);
+
+			$mista_kustp    = $mistavarasto_row['kustp'];
+			$mista_kohde    = $mistavarasto_row['kohde'];
+			$mista_projekti = $mistavarasto_row['projekti'];
+
+			if ($mistavarasto_row['toimipaikka'] > 0) {
+				$query = "	SELECT kustp, kohde, projekti
+							FROM yhtion_toimipaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$mistavarasto_row['toimipaikka']}'";
+				$mistatoimipaikka_res = pupe_query($query);
+				$mistatoimipaikka_row = mysql_fetch_assoc($mistatoimipaikka_res);
+
+				if ($mista_kustp == 0)    $mista_kustp    = $mistatoimipaikka_row['kustp'];
+				if ($mista_kohde == 0)    $mista_kohde    = $mistatoimipaikka_row['kohde'];
+				if ($mista_projekti == 0) $mista_projekti = $mistatoimipaikka_row['projekti'];
+			}
+
+			if ($mista_kustp > 0 or $mista_kohde > 0 or $mista_projekti > 0) {
+				$query = "	SELECT kustp, kohde, projekti, toimipaikka
+							FROM varastopaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$minnevarasto}'";
+				$minnevarasto_res = pupe_query($query);
+				$minnevarasto_row = mysql_fetch_assoc($minnevarasto_res);
+
+				$minne_kustp    = $minnevarasto_row['kustp'];
+				$minne_kohde    = $minnevarasto_row['kohde'];
+				$minne_projekti = $minnevarasto_row['projekti'];
+
+				if ($minnevarasto_row['toimipaikka'] > 0) {
+					$query = "	SELECT kustp, kohde, projekti
+								FROM varastopaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$minnevarasto_row['toimipaikka']}'";
+					$minnetoimipaikka_res = pupe_query($query);
+					$minnetoimipaikka_row = mysql_fetch_assoc($minnetoimipaikka_res);
+
+					if ($minne_kustp == 0)    $minne_kustp    = $minnetoimipaikka_row['kustp'];
+					if ($minne_kohde == 0)    $minne_kohde    = $minnetoimipaikka_row['kohde'];
+					if ($minne_projekti == 0) $minne_projekti = $minnetoimipaikka_row['projekti'];
+				}
+
+				$mennaanko = FALSE;
+
+				if ($mista_kustp > 0 and $minne_kustp > 0 and $mista_kustp != $minne_kustp) {
+					$mennaanko = TRUE;
+				}
+				if ($mista_kohde > 0 and $minne_kohde > 0 and $mista_kohde != $minne_kohde) {
+					$mennaanko = TRUE;
+				}
+				if ($mista_projekti > 0 and $minne_projekti > 0 and $mista_projekti != $minne_projekti) {
+					$mennaanko = TRUE;
+				}
+
+				$varastonmuutos = round($kappaleet * $keskihankintahinta, 2);
+				$varastonmuutos_neg = round(-1 * $kappaleet * $keskihankintahinta, 2);
+
+				if ($varastonmuutos != 0 and $mennaanko) {
+					
+					$laskuid = 123;
+					
+					// Mistä varasto
+					$query = "	INSERT into tiliointi set
+								yhtio    = '$kukarow[yhtio]',
+								ltunnus  = '$laskuid',
+								tilino   = '$yhtiorow[varasto]',
+								kustp    = '{$mista_kustp}',
+								kohde	 = '{$mista_kohde}',
+								projekti = '{$mista_projekti}',
+								tapvm    = now(),
+								summa    = {$varastonmuutos_neg},
+								vero     = 0,
+								lukko    = '',
+								selite   = '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+								laatija  = '$kukarow[kuka]',
+								laadittu = now()";
+					$result = pupe_query($query);
+
+					// Mistä varastonmuutos
+					$query = "	INSERT into tiliointi set
+								yhtio    = '$kukarow[yhtio]',
+								ltunnus  = '$laskuid',
+								tilino   = '$yhtiorow[varastonmuutos]',
+								kustp    = '{$mista_kustp}',
+								kohde	 = '{$mista_kohde}',
+								projekti = '{$mista_projekti}',
+								tapvm    = now(),
+								summa    = {$varastonmuutos},
+								vero     = 0,
+								lukko    = '',
+								selite   = '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+								laatija  = '$kukarow[kuka]',
+								laadittu = now()";
+					$result = pupe_query($query);
+
+					// Minne varasto
+					$query = "	INSERT into tiliointi set
+								yhtio    = '$kukarow[yhtio]',
+								ltunnus  = '$laskuid',
+								tilino   = '$yhtiorow[varasto]',
+								kustp    = '{$minne_kustp}',
+								kohde	 = '{$minne_kohde}',
+								projekti = '{$minne_projekti}',
+								tapvm    = now(),
+								summa    = {$varastonmuutos},
+								vero     = 0,
+								lukko    = '',
+								selite   = '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+								laatija  = '$kukarow[kuka]',
+								laadittu = now()";
+					$result = pupe_query($query);
+
+					// Minne varastonmuutos
+					$query = "	INSERT into tiliointi set
+								yhtio    = '$kukarow[yhtio]',
+								ltunnus  = '$laskuid',
+								tilino   = '$yhtiorow[varastonmuutos]',
+								kustp    = '{$minne_kustp}',
+								kohde	 = '{$minne_kohde}',
+								projekti = '{$minne_projekti}',
+								tapvm    = now(),
+								summa    = {$varastonmuutos_neg},
+								vero     = 0,
+								lukko    = '',
+								selite   = '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+								laatija  = '$kukarow[kuka]',
+								laadittu = now()";
+					$result = pupe_query($query);
+				}
+			}
+		}
 	}
 }
 

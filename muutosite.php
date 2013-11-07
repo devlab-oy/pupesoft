@@ -1207,13 +1207,7 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<tr><th>".t("Osoite")."</th><td>$trow[osoite]</td></tr>";
 		if ($trow["osoitetark"] != "") echo "<tr><th>".t("Osoitetark")."</th><td>$trow[osoitetark]</td></tr>";
 		echo "<tr><th>".t("Postino")."</th><td>$trow[postino], $trow[postitp], $trow[maa]</td></tr>";
-
-		echo "<tr><th>".t("Tilinumero")."</th><td>";
-
-		if ($trow["ultilno"] != "") echo $trow['ultilno'];
-		else echo $trow['tilinumero'];
-
-		echo "</td></tr>";
+		echo "<tr><th>".t("Tilinumero")."</th><td>$trow[ultilno]</td></tr>";
 
 		//Ulkomaan ostolaskuille
 		if (strtoupper($trow["maa"]) != strtoupper($yhtiorow["maa"])) {

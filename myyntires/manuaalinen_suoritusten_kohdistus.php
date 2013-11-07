@@ -1936,7 +1936,7 @@ if ($tila == '') {
 	while ($row = mysql_fetch_assoc($result)) {
 		$sel = '';
 		if ($tilino == $row["tilino"]) $sel = 'selected';
-		echo "<option value='$row[tilino]' $sel>$row[nimi] ".tilinumero_print($row['tilino'])." $row[valkoodi]</option>\n";
+		echo "<option value='$row[tilino]' $sel>$row[nimi] $row[tilino] $row[valkoodi]</option>\n";
 	}
 	echo "</select></td></tr>";
 

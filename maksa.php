@@ -1178,7 +1178,7 @@
 
 				echo "</td>";
 				echo "<td valign='top'>$trow[laskunro]</td>";
-				echo "<td valign='top'>$trow[tilinimi]<br>".tilinumero_print($trow["tilino"])."</td>";
+				echo "<td valign='top'>$trow[tilinimi]<br>$trow[tilino]</td>";
 				echo "<td valign='top'>$trow[viite] $trow[viesti]";
 
 				if ($trow["vanhatunnus"] != 0) {

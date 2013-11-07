@@ -1141,7 +1141,7 @@
 
 				echo "</td>";
 
-				echo "<td valign='top'>".tilinumero_print($trow["ultilno"])."</td>";
+				echo "<td valign='top'>$trow[ultilno]</td>";
 
 				echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['erpcm']).tv1dateconv($trow['erpcm'])."<br>".tv1dateconv($trow['olmapvm'])."</td>";
 
@@ -1372,7 +1372,7 @@
 				}
 
 				echo "</td>";
-				echo "<td valign='top'>".tilinumero_print($trow["ultilno"])."</td>";
+				echo "<td valign='top'>$trow[ultilno]</td>";
 
 				echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['erpcm']);
 

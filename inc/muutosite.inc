@@ -112,7 +112,7 @@
 		// Jaaha p‰ivit‰mme maksutilin!
 		if ($tila == 'T') {
 
-			$kommentti = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ". sprintf(t('Laskun maksutili muutettiin. Vanha oli %s.'), tilinumero_print($trow['tilinumero'])." ".$ultilno) ."<br>" . $trow['comments'];
+			$kommentti = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t('Laskun maksutili muutettiin. Vanha oli %s.', '', $ultilno)."<br>" . $trow['comments'];
 
 			//P‰ivitet‰‰n lasku
 			$query = "	UPDATE lasku
@@ -2109,7 +2109,7 @@
 						<input type = 'hidden' name='tunnus' value='{$tunnus}'>
 						<tr>
 						<th>".t("Toimittajan tilinumero (kotimainen)")."</th>
-						<td><input type = 'text' name = 'tili' size='40' value = '".tilinumero_print($trow['tilinumero'])."'></td>
+						<td><input type = 'text' name = 'tili' size='40' value = '$trow[tilinumero]'></td>
 						<td  class='back' rowspan='3'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 						<td class='back'>".t("Lasku siirtyy takaisin hyv‰ksynt‰‰n")."</td>
 						</tr>

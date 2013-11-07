@@ -4123,7 +4123,7 @@ if ($tee == '') {
 				}
 
 				if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
-					$kerayspvm = $laskurow["kerayspvm"];
+					$kerayspvm = substr($laskurow["kerayspvm"], 0, 10);
 				}
 			}
 

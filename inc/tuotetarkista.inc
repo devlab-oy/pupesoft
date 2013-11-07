@@ -38,7 +38,7 @@ if(!function_exists("tuotetarkista")) {
 				}
 			}
 
-			if ($poistolukko != "LUEDATA") {
+ 			if ($poistolukko != "") {
 				// Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa
 				$query = "	SELECT yhtio
 							FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
@@ -62,9 +62,6 @@ if(!function_exists("tuotetarkista")) {
 
 					if (mysql_num_rows($sdtres) == 0) {
 						$poistolukko = "";
-					}
-					else {
-						$poistolukko = "LUEDATA";
 					}
 				}
 			}

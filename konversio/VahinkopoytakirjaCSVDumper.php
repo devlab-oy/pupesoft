@@ -15,11 +15,11 @@ class VahinkopoytakirjaCSVDumper extends CSVDumper {
 			'takuunumero'	 => 1, //nippunro: char(10)
 			'prioriteetti'	 => 2, //kiireellisyysluokka: char(1)
 			'valmis'		 => 3, //valmistumispvm (työ päättyi): char(12) vvvvkkpphhmi
-			'viite'			 => 5, //teleliikennealue (TLA): char(3)
-			'suorittaja'	 => 6, //työalue: char(10) selvityksen antaja/urakoitsija
-			'jalleenmyyja'	 => 7, //verkostoalue: char(6)
-			'poistui'		 => 8, //aloitettupvm: char(12) työ alkoi
-			'vpk_valmis'	 => 9, //valmistumispvm (tekn. valmis, työ päättyi): char(12) vvvvkkpphhmi
+			'viite'			 => 4, //teleliikennealue (TLA): char(3)
+			'suorittaja'	 => 5, //työalue: char(10) selvityksen antaja/urakoitsija
+			'jalleenmyyja'	 => 6, //verkostoalue: char(6)
+			'poistui'		 => 7, //aloitettupvm: char(12) työ alkoi
+			'vpk_valmis'	 => 8, //valmistumispvm (tekn. valmis, työ päättyi): char(12) vvvvkkpphhmi
 			'komm1'			 => 10, //lisatieto: char(80) lisätietoja soneralla ja tapahtumapaikka
 		);
 		$required_fields = array(

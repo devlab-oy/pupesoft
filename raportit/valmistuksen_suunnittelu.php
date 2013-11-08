@@ -615,6 +615,16 @@
 					'valmistusaika_sekunneissa' => 0,
 				);
 			}
+			
+			// Jos ei olla rajattu valmistuslinjoja, tehdään myös "ei valmistuslinjaa" initialize
+			if (!isset($multi_valmistuslinja) or count($multi_valmistuslinja) == 0) {			
+				$valmistukset_yhteensa[''] = array(
+					'valmistuksessa' => 0,
+					'valmistusmaara' => 0,
+					'yhteensa_kpl' => 0,
+					'valmistusaika_sekunneissa' => 0,
+				);
+			}
 		}
 
 		if (isset($mul_osasto) and count($mul_osasto) > 0) {
@@ -706,8 +716,10 @@
 					tilausrivi.tuoteno,
 					tilausrivi.osasto,
 					tilausrivi.try,
-					tilausrivi.varattu maara,
-					tilausrivi.varattu * tuote.valmistusaika_sekunneissa valmistusaika,
+					if (lasku.toimaika >= '{$nykyinen_alku}' AND lasku.toimaika <= '{$nykyinen_loppu}', varattu, 0) maara,
+					if (lasku.toimaika >= '{$nykyinen_alku}' AND lasku.toimaika <= '{$nykyinen_loppu}', varattu, 0) * tuote.valmistusaika_sekunneissa valmistusaika,
+					tilausrivi.varattu valmistuksessa_nyt,
+					tilausrivi.varattu * tuote.valmistusaika_sekunneissa valmistusaika_nyt,
 					DATE_FORMAT(lasku.luontiaika, GET_FORMAT(DATE, 'EUR')) pvm,
 					lasku.alatila tila
 					FROM lasku
@@ -724,8 +736,7 @@
 					{$abc_join}
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila = 'V'
-					AND lasku.toimaika >= '{$nykyinen_alku}'
-					AND lasku.toimaika <= '{$nykyinen_loppu}'
+					AND lasku.alatila != 'V'
 					{$lasku_where}
 					{$lisa}
 					ORDER BY lasku.kohde, lasku.toimaika, tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno";
@@ -749,9 +760,14 @@
 
 				// Jos yhteensänäkymä, kerätään vaan data ja continue
 				if ($ehdotetut_valmistukset == 'valmistuslinjoittain') {
-					$valmistukset_yhteensa[$row['valmistuslinja']]['valmistuksessa'] += $row["maara"];
-					$valmistukset_yhteensa[$row['valmistuslinja']]['yhteensa_kpl'] += $row["maara"];
-					$valmistukset_yhteensa[$row['valmistuslinja']]['valmistusaika_sekunneissa'] += $row["valmistusaika"];
+					$valmistukset_yhteensa[$row['valmistuslinja']]['valmistuksessa'] += $row["valmistuksessa_nyt"];
+					$valmistukset_yhteensa[$row['valmistuslinja']]['yhteensa_kpl'] += $row["valmistuksessa_nyt"];
+					$valmistukset_yhteensa[$row['valmistuslinja']]['valmistusaika_sekunneissa'] += $row["valmistusaika_nyt"];
+					continue;
+				}
+
+				// Jos tuotteittain-näkymä ei näytetä nolla rivejä
+				if ($ehdotetut_valmistukset != 'valmistuslinjoittain' and $row["maara"] == 0) {
 					continue;
 				}
 
@@ -804,7 +820,7 @@
 			}
 
 			// Ei ehcoteta, jos on yhteensänäkymä
-			if ($ehdotetut_valmistukset != 'valmistuslinjoittain') {
+			if ($ehdotetut_valmistukset != 'valmistuslinjoittain' and $valmistettu_yhteensa != 0) {
 				echo "<tr>";
 				echo "<th colspan='3'>".t("Yhteensä")."</th>";
 				echo "<th colspan='3' style='text-align: right;'>$valmistettu_yhteensa</th>";

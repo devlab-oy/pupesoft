@@ -347,6 +347,7 @@ if ($tee == '') {
 	echo "<th>".t("Valmistus")."</th>";
 	echo "<th>".t("Tila")."</th>";
 	echo "<th>".t("Nimitys")."</th>";
+	echo "<th>".t("Viite")."</th>";
 	echo "<th>".t("M‰‰r‰")."</th>";
 	echo "<th>".t("Kesto")."</th>";
 	echo "<th></th>";
@@ -374,6 +375,10 @@ if ($tee == '') {
 			$kpl .= $tuote['varattu'] . " " . $tuote['yksikko'] . "<br>";
 		}
 
+		echo "</td>";
+
+		echo "<td>";
+		echo $valmistus->viesti();
 		echo "</td>";
 
 		echo "<td>{$kpl}</td>";

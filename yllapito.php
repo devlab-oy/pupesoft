@@ -545,7 +545,7 @@
 				if (mysql_num_rows($otsikres) == 1) {
 					$otsikrow = mysql_fetch_array($otsikres);
 
-					$query = "	SELECT tunnus, tila, alatila
+					$query = "	SELECT tunnus, tila, alatila, sisviesti1
 								FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
 								WHERE yhtio = '$kukarow[yhtio]'
 								and (
@@ -569,6 +569,18 @@
 							$otsikrow["toim_postino"]	= $otsikrow["postino"];
 							$otsikrow["toim_postitp"]	= $otsikrow["postitp"];
 							$otsikrow["toim_maa"]		= $otsikrow["maa"];
+						}
+
+						$paivita_sisviesti1 = "";
+
+						// Päivitetäänkö sisviesti1?
+						if ($trow["sisviesti1"] != "" and $otsikrow["sisviesti1"] != $trow["sisviesti1"] and strpos($laskuorow["sisviesti1"], $trow["sisviesti1"]) !== FALSE) {
+							$paivita_sisviesti1 = ", sisviesti1 = replace(sisviesti1, '{$trow["sisviesti1"]}', '{$otsikrow["sisviesti1"]}') ";
+
+						}
+						// Lisätään uusi sisviesti1, jos sitä ei vielä ole laskulla
+						elseif (strpos($laskuorow["sisviesti1"], $otsikrow["sisviesti1"]) === FALSE) {
+							$paivita_sisviesti1 = ", sisviesti1 = trim(concat(sisviesti1,' ', '{$otsikrow["sisviesti1"]}')) ";
 						}
 
 						$paivita_myos_lisa = "";
@@ -603,6 +615,7 @@
 									toim_maa    		= '$otsikrow[toim_maa]',
 									laskutusvkopv    	= '$otsikrow[laskutusvkopv]'
 									$paivita_myos_lisa
+									$paivita_sisviesti1
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and tunnus			= '$laskuorow[tunnus]'";
 						$updaresult = pupe_query($query);

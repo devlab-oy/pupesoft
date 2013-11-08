@@ -150,6 +150,19 @@
 		}
 	}
 
+	if (in_array($row['var'], array('U','T')) and $meapurow['kateinen'] != '') {
+
+		if ($row['var'] == 'U') {
+			$varaosavirhe .= t("VIRHE: Et voi tilata toimittajalta asiakkaalle, koska maksuehto on käteinen!")."<br>";
+		}
+		else {
+			$varaosavirhe .= t("VIRHE: Et voi tilata toimittajalta varastoon, koska maksuehto on käteinen!")."<br>";
+		}
+
+		$riviok++;
+		$tilausok++;
+	}
+
 	if ($row["hinta"] < 0) {
 		$varaosavirhe .= t("VIRHE: Hinta ei voi olla negatiivinen!")."<br>";
 		$riviok++;
@@ -1178,7 +1191,6 @@
 									$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_password' value='{$tehdas_saldo_row['selitetark_4']}' />";
 									$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_suppliernumber' value='{$tehdas_saldo_row['selitetark_5']}' />";
 									$vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tehdas_saldo_row['tt_tunnus']}' />";
-									$vastaavat_table .= "<input type='hidden' id='toim' value='{$toim}' />";
 							 	}
 
 							 	if ($tehdas_saldo_row['selitetark_2'] == '') {

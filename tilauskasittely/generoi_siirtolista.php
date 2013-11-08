@@ -97,6 +97,8 @@
 			echo "</table></td></tr>";
 		}
 	}
+	
+	echo "<tr><td class='back' colspan='2'><br></td></tr>";
 
 	echo "<tr><th>",t("Kohdevarasto, eli varasto jonne l‰hetet‰‰n"),":</th>";
 	echo "<td><select name='kohdevarasto'><option value=''>",t("Valitse"),"</option>";
@@ -116,22 +118,14 @@
 	}
 
 	echo "</select></td></tr>";
-
-	echo "<tr><th>",t("Lis‰rajaukset"),"</th><td>";
-
-	$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
-	$monivalintalaatikot_normaali = array();
-
-	require ("tilauskasittely/monivalintalaatikot.inc");
-
-	echo "</td></tr>";
-
+	
 	if ($yhtiorow['kerayserat'] == 'K') {
 		if (mysql_num_rows($keraysvyohyke_res) > 0) {
 			mysql_data_seek($keraysvyohyke_res, 0);
 
 			echo "<tr><th>",t("Ker‰ysvyˆhyke"),"</th>";
 			echo "<td>";
+			echo "<input type='hidden' name='keraysvyohyke[]' value='default' />";
 			echo "<table>";
 
 			$kala = 0;
@@ -159,7 +153,17 @@
 			echo "</table></td></tr>";
 		}
 	}
+	
+	echo "<tr><td class='back' colspan='2'><br></td></tr>";
 
+	echo "<tr><th>",t("Lis‰rajaukset"),"</th><td>";
+
+	$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
+	$monivalintalaatikot_normaali = array();
+
+	require ("tilauskasittely/monivalintalaatikot.inc");
+
+	echo "</td></tr>";
 	echo "<tr><th>",t("Toimittaja"),"</th><td><input type='text' size='20' name='toimittaja' value='{$toimittaja}'></td></tr>";
 
 	echo "<tr><th>",t("ABC-luokkarajaus ja rajausperuste"),"</th><td>";
@@ -274,7 +278,7 @@
 
 				if (mysql_num_rows($result) > 0) {
 					$lahdevyohykkeet = TRUE;
-					
+
 					while ($kvrow = mysql_fetch_assoc($result)) {
 						$lahdevarastot[] = $kvrow['tunnari'];
 					}
@@ -343,7 +347,7 @@
 						{$kohdepaikkalisa}
 						ORDER BY tuotepaikat.tuoteno";
 			$resultti = pupe_query($query);
-
+			
 			if ((int) $olliriveja == 0 or $olliriveja == '') {
 				$olliriveja = 20;
 			}
@@ -436,10 +440,10 @@
 
 					// L‰hdevaraston myyt‰viss‰m‰‰r‰
 					if ($lahdevyohykkeet) {
-						list( , , $saldo_myytavissa_lahde) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto."##".$lahdevyohyke);						
+						list( , , $saldo_myytavissa_lahde) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto."##".$lahdevyohyke);
 					}
 					else {
-						list( , , $saldo_myytavissa_lahde) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto);						
+						list( , , $saldo_myytavissa_lahde) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto);
 					}
 
 					// jos l‰hdevarasto on sama kuin kohdevarasto, niin silloin kohdepaikka on aina oletuspaikka, joten poistetaan sen myyt‰viss‰m‰‰r‰ l‰hdepuolelta

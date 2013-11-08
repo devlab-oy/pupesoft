@@ -21,6 +21,9 @@ class Valmistus {
 	// Valmistuksen kesto, tuotteiden kestot summattuna
 	private $kesto;
 
+	//Valmistuksen viesti
+	private $viesti;
+
 	// Valmistuksen tilat
 	const ODOTTAA 				= 'OV';
 	const VALMISTUKSESSA 		= 'VA';
@@ -172,6 +175,21 @@ class Valmistus {
 		return $this->kesto;
 	}
 
+	function viesti() {
+		if (empty($this->viesti)) {
+			$query = "	SELECT viesti
+						FROM lasku
+						WHERE yhtio = '{$this->yhtio}'
+						AND tunnus = '{$this->tunnus}'";
+			$result = pupe_query($query);
+			$valmistus = mysql_fetch_assoc($result);
+
+			$this->viesti = $valmistus['viesti'];
+		}
+
+		return $this->viesti;
+	}
+
 	/**
 	 * Valmistukseen jo käytetyt tunnit
 	 */
@@ -259,8 +277,8 @@ class Valmistus {
 					// Jos työ on keskeytetty ja siirretään takaisin parkkiin
 					// nollataan kalenterista valmistuslinja (kalenteri.henkilo)
 					elseif($this->getTila() == 'TK') {
-						$query = "UPDATE kalenteri SET
-									henkilo=''
+						$query = "	UPDATE kalenteri SET
+									henkilo = 0
 									WHERE yhtio='{$kukarow['yhtio']}'
 									AND otunnus='{$this->tunnus}'";
 						if (!pupe_query($query)) {
@@ -382,6 +400,7 @@ class Valmistus {
 						lasku.yhtio,
 						lasku.tunnus,
 						lasku.valmistuksen_tila as tila,
+						lasku.viesti,
 						kalenteri.henkilo as valmistuslinja
 					FROM lasku
 					LEFT JOIN kalenteri ON (lasku.yhtio=kalenteri.yhtio AND lasku.tunnus=kalenteri.otunnus)
@@ -389,7 +408,8 @@ class Valmistus {
 					AND lasku.valmistuksen_tila in ('OV', 'TK')
 					AND lasku.tila='V'
 					AND lasku.alatila in ('J', 'C')
-					ORDER by pvmalku";
+					ORDER BY lasku.tunnus ASC,
+					pvmalku ASC";
 		$result = pupe_query($query);
 
 		$valmistukset = array();

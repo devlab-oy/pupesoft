@@ -175,7 +175,7 @@
 				$kerayspvm = $laskurow["kerayspvm"];
 			}
 
-			if ($toimaika == "" or $toimaika == "0000-00-00") {
+			if ($toimaika == "" ) {
 				$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -186,7 +186,7 @@
 				$toimppa = substr($toimaika, 8, 2);
 			}
 
-			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+			if ($kerayspvm == "") {
 				$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -507,7 +507,7 @@
 				$kerayspvm = $laskurow["kerayspvm"];
 			}
 
-			if ($toimaika == "" or $toimaika == "0000-00-00") {
+			if ($toimaika == "" ) {
 				$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -518,7 +518,7 @@
 				$toimppa = substr($toimaika, 8, 2);
 			}
 
-			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+			if ($kerayspvm == "" ) {
 				$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 				$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -716,7 +716,7 @@
 			$kerayspvm = $laskurow["kerayspvm"];
 		}
 
-		if ($toimaika == "" or $toimaika == "0000-00-00") {
+		if ($toimaika == "") {
 			$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 			$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 			$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -727,7 +727,7 @@
 			$toimppa = substr($toimaika, 8, 2);
 		}
 
-		if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+		if ($kerayspvm == "") {
 			$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 			$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 			$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));

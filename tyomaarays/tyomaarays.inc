@@ -9,20 +9,39 @@
 			require_once ("tyomaarays/tulosta_tyomaarays.inc");
 		}
 		else {
-			$tulostimet[0] = "Reklamaatio";
+			if ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U') {
+				$tulostimet[0] = "Takuu";
+			}
+			else {
+				$tulostimet[0] = "Reklamaatio";
+			}
+
 			require_once ("tilauskasittely/tulosta_lahete_kerayslista.inc");
 		}
 
 		if (count($komento) == 0) {
-			echo "<font class='head'>$tulostimet[0]:</font><hr>";
+
+			if (strtolower($tulostimet[0]) == 'takuu' and (isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U') {
+
+				$tilaustyyppi = 'U';
+
+				echo "<font class='head'>",t("Takuu"),":</font><hr>";
+			}
+			else {
+				echo "<font class='head'>",t($tulostimet[0]),":</font><hr>";
+			}
+
 			require("inc/valitse_tulostin.inc");
 		}
 		elseif ($kappaleet > 0) {
 			if ($toim != "REKLAMAATIO" and $komento["Tyˆm‰‰r‰ys"] != "email" and $tyomtyyppi != 'Z') {
 				$komento["Tyˆm‰‰r‰ys"] .= " -# $kappaleet ";
 			}
-			elseif ($komento["Reklamaatio"] != "email") {
+			elseif (isset($komento["Reklamaatio"]) and $komento["Reklamaatio"] != "email") {
 				$komento["Reklamaatio"] .= " -# $kappaleet ";
+			}
+			elseif (isset($komento["Takuu"]) and $komento["Takuu"] != "email") {
+				$komento["Takuu"] .= " -# $kappaleet ";
 			}
 		}
 
@@ -182,7 +201,13 @@
 			}
 		}
 		else {
-			$tyyppi = "REKLAMAATIO";
+
+			if (strtolower($tulostimet[0]) == 'takuu') {
+				$tyyppi = "TAKUU";
+			}
+			else {
+				$tyyppi = "REKLAMAATIO";
+			}
 
 			$params_kerayslista = array(
 			'asrow'           	=> $asrow,
@@ -321,7 +346,7 @@
 
 					$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], $rivitlisa, '', '', '', 'KOPSAAPAIKAT', "REKLAMAATIO#$asiakas");
 					if ($tilauksesta_myyntitilaus != '') echo "$tilauksesta_myyntitilaus<br><br>";
-					
+
 					// P‰ivitet‰‰n rivit tilatuiksi
 					$query  = "	UPDATE tilausrivin_lisatiedot
 								SET asiakkaan_positio = asiakkaan_positio*-1

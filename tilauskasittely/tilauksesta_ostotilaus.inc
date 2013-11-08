@@ -148,6 +148,18 @@
 
 						$commentsit = trim(t("Myyntitilaus").": $myytilrow[tunnus] \n".t("Myyntitilauksen toimitustapa").": $myytilrow[toimitustapa] \n".$tiltoi["comments"]);
 
+						$ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP");
+
+						if (mysql_num_rows($ostotil_tiltyyp_res) > 0) {
+							// Otetaan eka...
+							$ostotil_tiltyyp_row = mysql_fetch_assoc($ostotil_tiltyyp_res);
+							$tilaustyyppi = $ostotil_tiltyyp_row['selite'];
+						}
+						else {
+							// oletuksena normaali
+							$tilaustyyppi = 2;
+						}
+
 						$ostotilauksen_kasittely_wherelisa = "";
 
 						// K‰sitell‰‰n myyntitilauksen otsikolla setattu "ostotilauksen k‰sittely"
@@ -166,7 +178,8 @@
 								and toim_postitp	= '{$toim_postitp}'
 								and toim_maa		= '{$toim_maa}'
 								and varasto 		= '{$kukarow['oletus_ostovarasto']}'
-								and ohjausmerkki 	= '{$myytilrow['ohjausmerkki']}'";
+								and ohjausmerkki 	= '{$myytilrow['ohjausmerkki']}'
+								and tilaustyyppi	= '$tilaustyyppi'";
 								break;
 							case '2':
 							case '3':
@@ -176,7 +189,8 @@
 								and toim_osoite		= '{$toim_osoite}'
 								and toim_postino	= '{$toim_postino}'
 								and toim_postitp	= '{$toim_postitp}'
-								and toim_maa		= '{$toim_maa}'";
+								and toim_maa		= '{$toim_maa}'
+								and tilaustyyppi	= '$tilaustyyppi'";
 								break;
 							case '1':
 							case '0':
@@ -189,7 +203,8 @@
 								and toim_postitp	= '{$toim_postitp}'
 								and toim_maa		= '{$toim_maa}'
 								and left(luontiaika,10) = left(now(),10)
-								and laatija 		= '{$kukarow['kuka']}'";
+								and laatija 		= '{$kukarow['kuka']}'
+								and tilaustyyppi	= '$tilaustyyppi'";
 								break;
 						}
 
@@ -229,7 +244,7 @@
 										postitp 			= '$tiltoi[postitp]',
 										sisviesti1			= '$myytilrow[sisviesti1]',
 										tila 				= 'O',
-										tilaustyyppi		= '',
+										tilaustyyppi		= '$tilaustyyppi',
 										tilausyhteyshenkilo	= '$kukarow[nimi]',
 										toimaika 			= '$myytilrow[toimaika]',
 										toimitusehto 		= '$tiltoi[toimitusehto]',

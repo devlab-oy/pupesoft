@@ -1888,48 +1888,6 @@ if (!function_exists("laskuval")) {
 	}
 }
 
-if (!function_exists("tilinumero_print")) {
-	function tilinumero_print($tilino_data) {
-
-		global $yhtiorow;
-
-		if (strtoupper($yhtiorow["maa"]) != "FI") {
-			return $tilino_data;
-		}
-
-		if (trim($tilino_data) == '') {
-			return "";
-		}
-		else {
-			if (substr($tilino_data, 0, 1) >= 0 and substr($tilino_data, 0, 1) <= '9') {
-				$alkuosa = substr($tilino_data, 0, 6);
-
-				# WHAT ???
-				#if ($tilino_print[0] == "4" or $tilino_print[0] == "5") {
-				#	$loppuosa = substr($tilino_data, 6, 1);
-				#	$loppuindex = 7;
-				#}
-				#else {
-					$loppuosa = "";
-					$loppuindex = 6;
-		  		#}
-
-				while ($tilino_data[$loppuindex] == "0") {
-					$loppuindex++;
-				}
-
-		  		$loppuosa .= substr($tilino_data, $loppuindex);
-
-		  		return "$alkuosa-$loppuosa";
-		  	}
-		  	else {
-				return $tilino_data;
-		  	}
-		}
-
-	}
-}
-
 if (!function_exists("pankkipvm")) {
 	function pankkipvm($pvm) {
 		return substr($pvm, 4, 2).".".substr($pvm, 2, 2).".20".substr($pvm, 0, 2);
@@ -15117,6 +15075,15 @@ if (!function_exists("kopioi_tilausrivi")) {
 					case 'kate_korjattu':
 						$rvalues .= "NULL,";
 						break;
+					case 'poikkeava_tulliprosentti':
+					case 'vahvistettu_maara':
+						if (isset($poikkeukset["tilausrivi.".mysql_field_name($rivires,$i)])) {
+							$rvalues .= $poikkeukset["tilausrivi.".mysql_field_name($rivires,$i)];
+						}
+						else {
+							$rvalues .= "0.00,";
+						}
+						break;
 					default:
 						$rvalues .= "'";
 
@@ -15173,14 +15140,24 @@ if (!function_exists("kopioi_tilausrivi")) {
 
 					switch (mysql_field_name($lisrivires, $i)) {
 						case 'muuttaja':
-						case 'muutospvm':
 							$rvalues .= "'',";
+							break;
+						case 'muutospvm':
+							$rvalues .= "'0000-00-00 00:00:00',";
 							break;
 						case 'laatija':
 							$rvalues .= "'$kukarow[kuka]',";
 							break;
 						case 'luontiaika':
 							$rvalues .= "now(),";
+							break;
+						case 'poikkeava_tulliprosentti':
+							if (isset($poikkeukset["tilausrivi.".mysql_field_name($rivires,$i)])) {
+								$rvalues .= $poikkeukset["tilausrivi.".mysql_field_name($rivires,$i)];
+							}
+							else {
+								$rvalues .= "0.00,";
+							}
 							break;
 						case 'tilausrivitunnus':
 							$rvalues .= "'$insid',";
@@ -20461,7 +20438,7 @@ if (!function_exists('hyllyalue')) {
 }
 
 if (!function_exists('uusi_saapuminen')) {
-    function uusi_saapuminen($toimittajarow) {
+    function uusi_saapuminen($toimittajarow, $toimipaikka = 0) {
         global $kukarow;
 
         # Lock table
@@ -20482,6 +20459,8 @@ if (!function_exists('uusi_saapuminen')) {
 
         $maa_lahetys = $toimittajarow['maa_lahetys'] != '' ? $toimittajarow['maa_lahetys'] : $toimittajarow['maa'];
 
+        $toimipaikka = $toimipaikka != 0 ? $toimipaikka : $kukarow['toimipaikka'];
+
         // meillä on $toimittajarow haettuna ylhäällä
         $query = "  INSERT into lasku set
                     yhtio           = '$kukarow[yhtio]',
@@ -20501,6 +20480,7 @@ if (!function_exists('uusi_saapuminen')) {
                     rahti           = '$toimittajarow[oletus_kulupros]',
                     swift           = '$toimittajarow[swift]',
                     liitostunnus    = '$toimittajarow[tunnus]',
+                    yhtio_toimipaikka = '{$toimipaikka}',
                     tila            = 'K',
                     luontiaika      = now(),
                     laatija         = '$kukarow[kuka]'";
@@ -20514,6 +20494,20 @@ if (!function_exists('uusi_saapuminen')) {
 
         return $return;
     }
+}
+
+if (!function_exists('hae_yhtion_toimipaikat')) {
+	function hae_yhtion_toimipaikat($yhtio) {
+
+		$yhtio = mysql_real_escape_string($yhtio);
+
+		$query = "	SELECT *
+					FROM yhtion_toimipaikat
+					WHERE yhtio = '{$yhtio}'
+					ORDER BY nimi";
+		$res = pupe_query($query);
+		return $res;
+	}
 }
 
 if (!function_exists('tarkiste')) {

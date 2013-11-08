@@ -147,6 +147,31 @@ function lisaa_valmistus($valmistus, $linja) {
                         pvmalku     = '$pvmalku',
                         pvmloppu    = '$pvmloppu',
                         tyyppi      = 'valmistus',
+						konserni	= '',
+						myyntipaallikko = '',
+						laatija		= '{$kukarow['kuka']}',
+						luontiaika	= NOW(),
+						muutospvm	= '0000-00-00 00:00:00',
+						muuttaja	= '',
+						asiakas		= '',
+						tapa		= '',
+						kuittaus	= '',
+						aikaalku	= '0000-00-00 00:00:00',
+						aikaloppu	= '0000-00-00 00:00:00',
+						kieli		= '',
+						kokopaiva	= '',
+						kentta01	= '',
+						kentta02	= '',
+						kentta03	= '',
+						kentta04	= '',
+						kentta05	= '',
+						kentta06	= '',
+						kentta07	= '',
+						kentta08	= '',
+						kentta09	= '',
+						kentta10	= '',
+						liitostunnus= 0,
+						perheid		= 0,
                         otunnus     = $valmistus[tunnus]";
 		$result = pupe_query($query);
 	}
@@ -158,7 +183,8 @@ function valmistuksen_kesto($valmistus) {
 	global $kukarow;
 
 	// Lasketaan valmistuksen kokoonpanotyöt yheen
-	$query = "SELECT sum(varattu) as kesto, kalenteri.kentta03 as kaytetyttunnit
+	$query = "	  SELECT sum(varattu) as kesto,
+		          sum(kalenteri.kentta03) as kaytetyttunnit
                   FROM tilausrivi
                   LEFT JOIN kalenteri on (kalenteri.yhtio=tilausrivi.yhtio and kalenteri.otunnus=tilausrivi.otunnus)
                   WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -267,6 +293,10 @@ function laske_loppuaika($alkuaika, $minuutit = 0, $valmistuslinja) {
 		$loppuaika = mktime(date('H', $loppuaika), date('i', $loppuaika) + INTERVALLI, date('s', $loppuaika), date('m', $loppuaika), date('d', $loppuaika), date('Y', $loppuaika));
 	}
 
+	if ($loppuaika < strtotime('now')) {
+		$loppuaika = strtotime('now');
+	}
+
 	return $loppuaika;
 }
 
@@ -294,7 +324,6 @@ function rebuild_valmistuslinjat($from = 'now') {
                         JOIN lasku ON (kalenteri.yhtio=lasku.yhtio AND kalenteri.otunnus=lasku.tunnus)
                         WHERE kalenteri.yhtio = '{$kukarow['yhtio']}'
                         AND henkilo           = '{$linja['selite']}'
-                        AND pvmloppu          > '$from'
                         AND valmistuksen_tila not in('VT', 'TA')
                         ORDER BY pvmalku";
 		$result = pupe_query($query);
@@ -365,8 +394,8 @@ function rebuild_valmistuslinjat($from = 'now') {
 			$result = pupe_query($lasku_query);
 
 			$tilausrivi_query = "UPDATE tilausrivi SET
-                                          kerayspvm   = '{$current['pvmloppu']}',
-                                          toimaika    = '{$current['pvmloppu']}'
+                                          kerayspvm   = '{$current['pvmalku']}',
+                                          toimaika    = '{$current['pvmalku']}'
                                           WHERE yhtio = '{$kukarow['yhtio']}'
                                           AND otunnus = {$current['otunnus']}";
 			$result = pupe_query($tilausrivi_query);
@@ -420,19 +449,19 @@ function puuttuvat_raaka_aineet($tunnus, $aloitus_pvm = 'now') {
 		// Varatut kappaleet valmistuksilta jotka ovat jo valmistuslinjalla.
 		// Valmistuslinjalla olevat valmistukset varaavat saldoa ja uuden valmistuksen on
 		// tarkistettava paljon ne vähentävät raaka-aineiden saldoa.
-		$query = "SELECT COALESCE(sum(tilausrivi.varattu), 0) AS varattu
-                        FROM kalenteri
-                              JOIN lasku ON (kalenteri.yhtio=lasku.yhtio AND kalenteri.otunnus=lasku.tunnus)
-                              JOIN tilausrivi ON (lasku.yhtio=tilausrivi.yhtio AND lasku.tunnus=tilausrivi.otunnus)
-                        WHERE kalenteri.yhtio='{$kukarow['yhtio']}'
-                              AND kalenteri.tyyppi   = 'valmistus'
-                              AND tilausrivi.tyyppi  = 'V'
-                              AND tilausrivi.tuoteno = '{$raaka_aine['tuoteno']}'
-                              AND kalenteri.pvmalku  <= '$aloitus_pvm'
-                              AND kalenteri.henkilo  != {$lasku['henkilo']}";
-
-		$muut_valmistukset_result = pupe_query($query);
-		$muut_valmistukset = mysql_fetch_assoc($muut_valmistukset_result);
+		$query = "	SELECT IFNULL(sum(tilausrivi.varattu), 0) AS varattu
+					FROM kalenteri
+					JOIN tilausrivi ON (tilausrivi.yhtio = kalenteri.yhtio
+					  AND tilausrivi.otunnus = kalenteri.otunnus
+					  AND tilausrivi.tyyppi  = 'V'
+					  AND tilausrivi.varattu != 0
+					  AND tilausrivi.tuoteno = '{$raaka_aine['tuoteno']}')
+					WHERE kalenteri.yhtio = '{$kukarow['yhtio']}'
+					AND kalenteri.tyyppi = 'valmistus'
+					AND kalenteri.pvmalku <= '$aloitus_pvm'
+					AND kalenteri.henkilo != {$lasku['henkilo']}";
+//		$muut_valmistukset_result = pupe_query($query);
+//		$muut_valmistukset = mysql_fetch_assoc($muut_valmistukset_result);
 
 		// Haetaan raaka-aineen ostotilauksia, jotka vaikuttavat valmistuksen aloitukseen
 		$query = "SELECT COALESCE(sum(varattu), 0) AS varattu
@@ -443,8 +472,8 @@ function puuttuvat_raaka_aineet($tunnus, $aloitus_pvm = 'now') {
                         # AND kerattyaika != '0000-00-00 00:00:00'
                         AND kerattyaika   < '$aloitus_pvm'";
 
-		$ostotilaukset_result = pupe_query($query);
-		$ostotilaukset = mysql_fetch_assoc($ostotilaukset_result);
+//		$ostotilaukset_result = pupe_query($query);
+//		$ostotilaukset = mysql_fetch_assoc($ostotilaukset_result);
 
 		/**
 		  Raaka-aineen riiton laskentakaava:
@@ -635,7 +664,15 @@ function jaa_valmistus($tunnus, $params) {
 				$copy['laatija'] = $kukarow['kuka'];
 				unset($copy['luontiaika']); // now() ilman hipsukoita, setataan viimeisenä
 				$copy['muutospvm'] = '';
-				$copy['tunnus'] = '';
+				unset($copy['tunnus']);
+
+				if ((isset($copy['kate_korjattu']) and $copy['kate_korjattu'] == '') or !isset($copy['kate_korjattu'])) {
+					$copy['kate_korjattu'] = 0.00;
+				}
+
+				if ((isset($copy['muutospvm']) and $copy['muutospvm'] == '') or !isset($copy['muutospvm'])) {
+					$copy['muutospvm'] = '0000-00-00 00:00:00';
+				}
 
 				// Luodaan otsikon kopio
 				$copy_query = "INSERT INTO

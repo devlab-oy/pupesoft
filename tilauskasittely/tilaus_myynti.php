@@ -8328,7 +8328,7 @@ if ($tee == '') {
 					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." $lisateksti' $tilausjavalisa> ";
 				}
 
-				if (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO")) and
+				if ($yhtiorow['lahetteen_tulostustapa'] == "I" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO")) and
 					(
 						($yhtiorow['lahetteen_tulostustapa'] == "I" and (($laskurow['tila'] == 'N' and $laskurow['alatila'] != '') or ($laskurow['tila'] == 'C' and $laskurow['alatila'] != ''))) or
 						($laskurow['tila'] == 'L' and in_array($laskurow['alatila'], array('B','C','D'))) or

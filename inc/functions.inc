@@ -23615,6 +23615,7 @@ if (!function_exists('hyllysiirto')) {
 					laatija 	= '{$kukarow['kuka']}',
 					laadittu 	= now()";
 		$result = pupe_query($query);
+		$mista_tapa_tunnus = mysql_insert_id();
 
 		$query = "	INSERT into tapahtuma set
 					yhtio 		= '{$kukarow['yhtio']}',
@@ -23631,6 +23632,7 @@ if (!function_exists('hyllysiirto')) {
 					laatija 	= '{$kukarow['kuka']}',
 					laadittu 	= now()";
 		$result = pupe_query($query);
+		$minne_tapa_tunnus = mysql_insert_id();
 
 		// Tehdään kirjanpito
 		if ($yhtiorow['varastosiirto_kirjanpito'] == "K") {
@@ -23703,75 +23705,126 @@ if (!function_exists('hyllysiirto')) {
 				$varastonmuutos_neg = round(-1 * $kappaleet * $keskihankintahinta, 2);
 
 				if ($varastonmuutos != 0 and $mennaanko) {
-					
-					$laskuid = 123;
-					
+
+					$laskuid = 0;
+
+					// Löytyykö sopiva tosite
+					if ((int) $tun > 0) {
+						$query = "	SELECT lasku.tunnus
+									FROM tilausrivi
+									JOIN lasku ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila = 'G')
+									WHERE tilausrivi.tunnus = '$tun'
+									and tilausrivi.tyyppi   = 'G'
+									and tilausrivi.yhtio    = '$kukarow[yhtio]'";
+						$result = pupe_query($query);
+
+						echo "$query<br>";
+
+						if (mysql_num_rows($result) == 1) {
+							$lasrow = mysql_fetch_assoc($result);
+							$laskuid = $lasrow['tunnus'];
+						}
+					}
+
+					if ($laskuid == 0) {
+						$query = "	SELECT tunnus
+									FROM lasku
+									WHERE tila = 'X'
+									and tila   = 'G'
+									and tapvm  = current_date
+									and yhtio  = '$kukarow[yhtio]'";
+						$result = pupe_query($query);
+
+						echo "$query<br>";
+
+						if (mysql_num_rows($result) == 1) {
+							$lasrow = mysql_fetch_assoc($result);
+							$laskuid = $lasrow['tunnus'];
+						}
+					}
+
+					if ($laskuid == 0) {
+						$query = "	INSERT into lasku set
+									yhtio      = '$kukarow[yhtio]',
+									tapvm      = now(),
+									tila       = 'X',
+									alatila    = 'G',
+									laatija    = '$kukarow[kuka]',
+									luontiaika = current_date";
+						$result = pupe_query($query);
+						$laskuid = mysql_insert_id();
+					}
+
 					// Mistä varasto
 					$query = "	INSERT into tiliointi set
-								yhtio    = '$kukarow[yhtio]',
-								ltunnus  = '$laskuid',
-								tilino   = '$yhtiorow[varasto]',
-								kustp    = '{$mista_kustp}',
-								kohde	 = '{$mista_kohde}',
-								projekti = '{$mista_projekti}',
-								tapvm    = now(),
-								summa    = {$varastonmuutos_neg},
-								vero     = 0,
-								lukko    = '',
-								selite   = '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
-								laatija  = '$kukarow[kuka]',
-								laadittu = now()";
+								yhtio    		= '$kukarow[yhtio]',
+								ltunnus  		= '$laskuid',
+								tilino   		= '$yhtiorow[varasto]',
+								kustp    		= '{$mista_kustp}',
+								kohde	 		= '{$mista_kohde}',
+								projekti 		= '{$mista_projekti}',
+								tapvm    		= current_date,
+								summa    		= {$varastonmuutos_neg},
+								vero     		= 0,
+								lukko    		= '',
+								tapahtumatunnus = $mista_tapa_tunnus,
+								selite   		= '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+								laatija  		= '$kukarow[kuka]',
+								laadittu 		= now()";
 					$result = pupe_query($query);
 
 					// Mistä varastonmuutos
 					$query = "	INSERT into tiliointi set
-								yhtio    = '$kukarow[yhtio]',
-								ltunnus  = '$laskuid',
-								tilino   = '$yhtiorow[varastonmuutos]',
-								kustp    = '{$mista_kustp}',
-								kohde	 = '{$mista_kohde}',
-								projekti = '{$mista_projekti}',
-								tapvm    = now(),
-								summa    = {$varastonmuutos},
-								vero     = 0,
-								lukko    = '',
-								selite   = '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
-								laatija  = '$kukarow[kuka]',
-								laadittu = now()";
+								yhtio    		= '$kukarow[yhtio]',
+								ltunnus  		= '$laskuid',
+								tilino   		= '$yhtiorow[varastonmuutos]',
+								kustp    		= '{$mista_kustp}',
+								kohde	 		= '{$mista_kohde}',
+								projekti 		= '{$mista_projekti}',
+								tapvm    		= current_date,
+								summa    		= {$varastonmuutos},
+								vero     		= 0,
+								lukko    		= '',
+								tapahtumatunnus = $mista_tapa_tunnus,
+								selite   		= '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+								laatija  		= '$kukarow[kuka]',
+								laadittu 		= now()";
 					$result = pupe_query($query);
 
 					// Minne varasto
 					$query = "	INSERT into tiliointi set
-								yhtio    = '$kukarow[yhtio]',
-								ltunnus  = '$laskuid',
-								tilino   = '$yhtiorow[varasto]',
-								kustp    = '{$minne_kustp}',
-								kohde	 = '{$minne_kohde}',
-								projekti = '{$minne_projekti}',
-								tapvm    = now(),
-								summa    = {$varastonmuutos},
-								vero     = 0,
-								lukko    = '',
-								selite   = '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
-								laatija  = '$kukarow[kuka]',
-								laadittu = now()";
+								yhtio    		= '$kukarow[yhtio]',
+								ltunnus  		= '$laskuid',
+								tilino   		= '$yhtiorow[varasto]',
+								kustp    		= '{$minne_kustp}',
+								kohde	 		= '{$minne_kohde}',
+								projekti 		= '{$minne_projekti}',
+								tapvm    		= current_date,
+								summa    		= {$varastonmuutos},
+								vero     		= 0,
+								lukko    		= '',
+								tapahtumatunnus = $minne_tapa_tunnus,
+								selite   		= '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+								laatija  		= '$kukarow[kuka]',
+								laadittu 		= now()";
 					$result = pupe_query($query);
 
 					// Minne varastonmuutos
 					$query = "	INSERT into tiliointi set
-								yhtio    = '$kukarow[yhtio]',
-								ltunnus  = '$laskuid',
-								tilino   = '$yhtiorow[varastonmuutos]',
-								kustp    = '{$minne_kustp}',
-								kohde	 = '{$minne_kohde}',
-								projekti = '{$minne_projekti}',
-								tapvm    = now(),
-								summa    = {$varastonmuutos_neg},
-								vero     = 0,
-								lukko    = '',
-								selite   = '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
-								laatija  = '$kukarow[kuka]',
-								laadittu = now()";
+								yhtio    		= '$kukarow[yhtio]',
+								ltunnus  		= '$laskuid',
+								tilino   		= '$yhtiorow[varastonmuutos]',
+								kustp    		= '{$minne_kustp}',
+								kohde	 		= '{$minne_kohde}',
+								projekti 		= '{$minne_projekti}',
+								tapvm    		= current_date,
+								summa    		= {$varastonmuutos_neg},
+								vero     		= 0,
+								lukko    		= '',
+								tapahtumatunnus = $minne_tapa_tunnus,
+								selite   		= '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
+								laatija  		= '$kukarow[kuka]',
+								laadittu 		= now()";
 					$result = pupe_query($query);
 				}
 			}

@@ -462,7 +462,7 @@ if (!function_exists('korjaatapahtuma')) {
 		if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 		// Inventoinnissa korjaustapahtuman rivitunnus on alkuperäisen inventointitapahtuman tunnus (kaikissa muissa keisseissä rivitunnus pointtaa tilausriviin)
-		if ($tun_chk_row['laji'] == 'Inventointi') $tun_chk_row['rivitunnus'] = $tun_chk_row['tunnus'];
+		if ($tun_chk_row['laji'] == 'Inventointi' or $tun_chk_row['laji'] == 'siirto') $tun_chk_row['rivitunnus'] = $tun_chk_row['tunnus'];
 
 		// Poistetaan vanhat korjaustapahtumat
 		// Tämä keissi on tärkeä, jos tilikauden alkua ollaan siirretty taaksepäin historiaan
@@ -511,7 +511,7 @@ if (!function_exists('korjaatapahtuma')) {
 			if ($upd_kplhinta !== FALSE) $params['kplhinta'] = $hinta_chk_row['kplhinta'];
 
 			// Laitetaan inventoinnin korjaustapahtumassa alkuperäisen tapahtuman tunnus rivitunnukseksi
-			if ($tun_chk_row['laji'] == 'Inventointi') $params['rivitunnus'] = $tun_chk_row['tunnus'];
+			if ($tun_chk_row['laji'] == 'Inventointi' or $tun_chk_row['laji'] == 'siirto') $params['rivitunnus'] = $tun_chk_row['tunnus'];
 
 			kopioitapahtuma($tapahtuma_tunnus, $params);
 
@@ -523,7 +523,7 @@ if (!function_exists('korjaatapahtuma')) {
 			);
 
 			// Laitetaan inventoinnin korjaustapahtumassa alkuperäisen tapahtuman tunnus rivitunnukseksi
-			if ($tun_chk_row['laji'] == 'Inventointi') $params['rivitunnus'] = $tun_chk_row['tunnus'];
+			if ($tun_chk_row['laji'] == 'Inventointi' or $tun_chk_row['laji'] == 'siirto') $params['rivitunnus'] = $tun_chk_row['tunnus'];
 
 			$params['hinta'] = $upd_hinta;
 			if ($upd_kplhinta !== FALSE) $params['kplhinta'] = $upd_kplhinta;
@@ -837,7 +837,7 @@ if ($tuoteno != '') {
 							$uusihinta = $alkuperainen_hinta_ostotilaukselta;
 
 							// Inventoinnissa korjaustapahtuman rivitunnus on alkuperäisen inventointitapahtuman tunnus (kaikissa muissa keisseissä rivitunnus pointtaa tilausriviin)
-							$rivitunnuslisa = $trow['laji'] == 'Inventointi' ? $trow['tunnus'] : $trow['rivitunnus'];
+							$rivitunnuslisa = ($trow['laji'] == 'Inventointi' or $trow['laji'] == 'siirto') ? $trow['tunnus'] : $trow['rivitunnus'];
 
 							// Nollataan selite
 							$selite_txt = "";
@@ -936,6 +936,11 @@ if ($tuoteno != '') {
 
 								// summaillaan uutta saldoa
 								$uusisaldo = round($uusisaldo+$trow['kpl'], 2);
+							}
+
+							// jos kyseessä on varastosiirto ja ollaan löydetty jo eka tulo
+							if ($trow['laji'] == 'siirto' and $eka == 0) {
+
 							}
 
 							// jos kyseessä on inventointi ja ollaan löydetty jo eka tulo

@@ -18,7 +18,7 @@
 					tilausrivi as tilausrivi_osto READ,
 					sarjanumeroseuranta WRITE,
 					sarjanumeroseuranta_arvomuutos READ,
-					lasku READ,
+					lasku WRITE,
 					asiakas READ,
 					avainsana as a1 READ,
 					avainsana as a2 READ,

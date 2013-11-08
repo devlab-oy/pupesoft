@@ -46,8 +46,10 @@ else {
 $errors = array();
 if (!isset($tuotepaikka)) $tuotepaikka = '';
 
+$onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa();
+
 // Suuntalavan kanssa
-if (!empty($alusta_tunnus)) {
+if (!empty($alusta_tunnus) and $yhtiorow['suuntalavat'] != "") {
 	$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
 	$row = mysql_fetch_assoc($res);
 }
@@ -128,7 +130,7 @@ if (isset($submit) and trim($submit) != '') {
 			}
 
 			// Tarkistetaan että tuotepaikka on olemassa
-			if (count($errors) == 0 and ! tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
+			if ($onko_varaston_hyllypaikat_kaytossa and $count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
 				$errors[] = t("Varaston tuotepaikkaa ($hyllyalue-$hyllynro-$hyllyvali-$hyllytaso) ei ole perustettu").'.';
 			}
 

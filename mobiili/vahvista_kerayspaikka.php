@@ -11,6 +11,8 @@ elseif (@include_once("inc/parametrit.inc"));
 # N‰m‰ on pakollisia
 if (!isset($alusta_tunnus, $liitostunnus, $tilausrivi)) exit;
 
+$onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa();
+
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
 $tilausrivi = (int) $tilausrivi;
@@ -66,22 +68,28 @@ if (isset($submit) and trim($submit) != '') {
 			exit;
 			break;
 		case 'submit':
+
 			# Tarkistetaan m‰‰r‰
 			if (!is_numeric($maara) or $maara < 1) {
 				$errors[] = t("Virheellinen m‰‰r‰");
 			}
-			# Tarkistetaan koodi
-			$options = array('varmistuskoodi' => $koodi);
-			if (!is_numeric($koodi) or !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $options)) {
-				$errors[] = t("Virheellinen varmistuskoodi");
+
+			if ($onko_varaston_hyllypaikat_kaytossa) {
+
+				# Tarkistetaan koodi
+				$options = array('varmistuskoodi' => $koodi);
+				if (!is_numeric($koodi) or !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $options)) {
+					$errors[] = t("Virheellinen varmistuskoodi");
+				}
+
+				# Setataan viimeinen muuttuja jos lavalla vain yksi rivi j‰jell‰
+				if (!empty($alusta_tunnus)) {
+					$query = "SELECT * FROM tilausrivi WHERE suuntalava = '{$alusta_tunnus}' AND yhtio='{$kukarow['yhtio']}'";
+					$rivit_result = pupe_query($query);
+					$rivit = mysql_num_rows($rivit_result);
+				}
 			}
 
-			# Setataan viimeinen muuttuja jos lavalla vain yksi rivi j‰jell‰
-			if (!empty($alusta_tunnus)) {
-				$query = "SELECT * FROM tilausrivi WHERE suuntalava = '{$alusta_tunnus}' AND yhtio='{$kukarow['yhtio']}'";
-				$rivit_result = pupe_query($query);
-				$rivit = mysql_num_rows($rivit_result);
-			}
 			$viimeinen = (isset($rivit) and $rivit == 1) ? true : false;
 
 			# Jos ei virheit‰
@@ -121,8 +129,9 @@ if (isset($submit) and trim($submit) != '') {
 				}
 
 				$temppi_lava = false;
+
 				# Vied‰‰n varastoon temppi lavalla
-				if (($alusta_tunnus == 0 && $saapuminen != 0) || ($alusta_tunnus != 0 && $row['uusiotunnus'] == 0)) {
+				if ($yhtiorow['suuntalavat'] != "" and (($alusta_tunnus == 0 && $saapuminen != 0) || ($alusta_tunnus != 0 && $row['uusiotunnus'] == 0))) {
 					$temppi_lava = true;
 					# Tarkottaa ett‰ on tultu ostotilauksen tuloutuksesta ilman ett‰ kyseisell‰
 					# tilauksella on suuntalavaa. Ratkaisuna tehd‰‰n v‰liaikainen lava.
@@ -196,6 +205,7 @@ if (isset($submit) and trim($submit) != '') {
 						vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly, $rivi);
 					}
 				}
+
 				# Jos temppi lava niin merkataan suoraan puretuksi
 				if ($temppi_lava) {
 					$query = "	UPDATE suuntalavat SET
@@ -324,12 +334,16 @@ echo "<div class='main'>
 	<tr>
 		<th>",t("Ker‰yspaikka"),"</th>
 		<td colspan='2'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
-	</tr>
-	<tr>
-		<th>",t("Koodi"),"</th>
-		<td colspan='2'><input type='text' name='koodi' id='koodi' value='' size='7' />
-	</tr>
-	<tr>
+	</tr>";
+
+if ($onko_varaston_hyllypaikat_kaytossa) {
+	echo "<tr>
+			<th>",t("Koodi"),"</th>
+			<td colspan='2'><input type='text' name='koodi' id='koodi' value='' size='7' />
+		</tr>";
+}
+
+echo "<tr>
 		<td><input type='hidden' name='saapuminen' value='{$saapuminen}' /></td>
 	</tr>
 </table>

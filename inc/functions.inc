@@ -23718,8 +23718,6 @@ if (!function_exists('hyllysiirto')) {
 									and tilausrivi.yhtio    = '$kukarow[yhtio]'";
 						$result = pupe_query($query);
 
-						echo "$query<br>";
-
 						if (mysql_num_rows($result) == 1) {
 							$lasrow = mysql_fetch_assoc($result);
 							$laskuid = $lasrow['tunnus'];
@@ -23734,8 +23732,6 @@ if (!function_exists('hyllysiirto')) {
 									and tapvm  = current_date
 									and yhtio  = '$kukarow[yhtio]'";
 						$result = pupe_query($query);
-
-						echo "$query<br>";
 
 						if (mysql_num_rows($result) == 1) {
 							$lasrow = mysql_fetch_assoc($result);

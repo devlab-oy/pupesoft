@@ -342,6 +342,14 @@
 			//-->
 			</script>";
 
+		echo "<form method = 'post'>
+		<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>";
+
+		$monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "ASIAKASMYYJA", "ASIAKASTILA", "<br>DYNAAMINEN_ASIAKAS");
+		$monivalintalaatikot_normaali = array();
+
+		require ("tilauskasittely/monivalintalaatikot.inc");
+
 		$kentat = "nimi, osoite, postino, postitp, maa, osasto, ryhma, piiri, flag_1, flag_2, flag_3, flag_4";
 
 		$array = explode(",", $kentat);
@@ -393,9 +401,6 @@
 
 		$lim = "";
 		$lim[$limitti] = "SELECTED";
-
-		echo "<form method = 'post'>
-			<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>";
 
 		echo "<table>";
 		echo "<tr><th>".t("Rivim‰‰r‰rajaus").":</th>

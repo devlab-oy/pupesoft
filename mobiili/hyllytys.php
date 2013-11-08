@@ -192,13 +192,17 @@ echo "<td><input type='hidden' name='saapuminen' value='$saapuminen'></td>
 $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=".urlencode($tuotenumero);
 
 # Napit
-echo "
-<div class='controls'>
-<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys{$url}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}&ostotilaus={$ostotilaus}'\">",t("OK"),"</button>
-<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI KERÄYSPAIKKA"),"</button>
-<button type='submit' class='button right' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}{$url}&saapuminen={$saapuminen}'\">",t("SUUNTALAVALLE"),"</button>
-</div>
-</form>";
+echo "<div class='controls'>";
+echo "<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys{$url}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}&ostotilaus={$ostotilaus}'\">",t("OK"),"</button>";
+echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>",t("UUSI KERÄYSPAIKKA"),"</button>";
+
+if ($yhtiorow['suuntalavat'] != "") {
+    echo "<button type='submit' class='button right' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}{$url}&saapuminen={$saapuminen}'\">",t("SUUNTALAVALLE"),"</button>";
+
+}
+
+echo "</div>";
+echo "</form>";
 
 echo "<div class='error'>";
     foreach($errors as $virhe) {

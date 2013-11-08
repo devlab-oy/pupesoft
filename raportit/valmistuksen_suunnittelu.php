@@ -823,7 +823,8 @@
 			if ($ehdotetut_valmistukset != 'valmistuslinjoittain' and $valmistettu_yhteensa != 0) {
 				echo "<tr>";
 				echo "<th colspan='3'>".t("Yhteensä")."</th>";
-				echo "<th colspan='3' style='text-align: right;'>$valmistettu_yhteensa</th>";
+				echo "<th style='text-align: right;'>$valmistettu_yhteensa</th>";
+				echo "<th colspan='2'></th>";
 				echo "</tr>";
 
 				echo "</table>";
@@ -1297,11 +1298,11 @@
 			echo "<table>";
 			echo "<thead>";
 			echo "<tr>";
-			echo "<th>".t('Valmistuslinja')."</th>";
-			echo "<th>".t('Valmistuksessa kpl')."</th>";
-			echo "<th>".t('Valmistussuositus kpl')."</th>";
-			echo "<th>".t('Yhteensä kpl')."</th>";
-			echo "<th>".t('Valmistusaika yhteensä')."</th>";
+			echo "<th style='text-align:right;'>".t('Valmistuslinja')."</th>";
+			echo "<th style='text-align:right;'>".t('Valmistuksessa kpl')."<br>".t('nyt')."</th>";
+			echo "<th style='text-align:right;'>".t('Valmistussuositus kpl')."<br>".t('ajanjaksolle')."</th>";
+			echo "<th style='text-align:right;'>".t('Yhteensä kpl')."</th>";
+			echo "<th style='text-align:right;'>".t('Valmistusaika yhteensä')."</th>";
 			echo "</tr>";
 			echo "</thead>";
 
@@ -1544,5 +1545,3 @@
 	}
 
 	require ("inc/footer.inc");
-
-?>

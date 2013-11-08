@@ -1033,7 +1033,6 @@ while ($tietue = fgets($fd)) {
 				if ($edi_tyyppi == "magento" and strpos($verkkokauppa, "Prebook")) {
 					// Tyyppi E, ennakko
 					$editilaus_tilaustyyppi = "E";
-					//$editilaus_tila = "E";
 					$tilaustyyppilisa = "E";
 				}
 				// jos tilauksella on tullut lopullisen asikkaan tiedot, laitetaan ne talteen sisviesti ykköseen

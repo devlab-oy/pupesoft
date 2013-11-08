@@ -104,7 +104,7 @@
 				$(this).parent().find('.exceliin').removeAttr('name');
 			}
 			else {
-				var tuoteno = $(this).parent().parent().find('td:first').html();
+				var tuoteno = $(this).val();
 				$(this).parent().find('.exceliin').attr('name', 'exceliin['+tuoteno+']');
 			}
 		});
@@ -556,9 +556,13 @@
 				'header' => t('Pakkauskoko'),
 				'order'	 => 110
 			),
+			'valmistussuositus'			 => array(
+				'header' => t('Valmistussuositus'),
+				'order'	 => 120
+			),
 			'valmistusmaara'			 => array(
 				'header' => t('Valmistusmaara'),
-				'order'	 => 120
+				'order'	 => 125
 			),
 			'valmistusaika_sekunneissa'	 => array(
 				'header' => t('Valmistusaika (sek)'),
@@ -584,6 +588,7 @@
 		$excel_filename = generoi_excel_tiedosto($excel_rivit, $header_values, $force_to_string);
 
 		echo_tallennus_formi($excel_filename, 'Valmistusraportti');
+		unset($ehdotusnappi);
 	}
 
 	// Tehdään raportti
@@ -615,9 +620,9 @@
 					'valmistusaika_sekunneissa' => 0,
 				);
 			}
-			
+
 			// Jos ei olla rajattu valmistuslinjoja, tehdään myös "ei valmistuslinjaa" initialize
-			if (!isset($multi_valmistuslinja) or count($multi_valmistuslinja) == 0) {			
+			if (!isset($multi_valmistuslinja) or count($multi_valmistuslinja) == 0) {
 				$valmistukset_yhteensa[''] = array(
 					'valmistuksessa' => 0,
 					'valmistusmaara' => 0,
@@ -1167,8 +1172,8 @@
 				}
 
 				if ($toim == 'EXCEL') {
-					echo "<input type='hidden' class='exceliin' name='exceliin[{$tuoterivi['tuoteno']}]' value='".base64_encode(serialize($tuoterivi))."'>";
-					echo "<input type='checkbox' class='ei_exceliin'>";
+					echo "<input type='hidden' class='exceliin' name='exceliin[$formin_pointteri]' value='".base64_encode(serialize($tuoterivi))."'>";
+					echo "<input type='checkbox' class='ei_exceliin' value='$formin_pointteri'>";
 					echo "<font class='errir'> ".t("Ei valmisteta")."</font><br>";
 				}
 
@@ -1206,7 +1211,7 @@
 				echo "{$tuoterivi["paivakulutus"]} = round({$tuoterivi["vuosikulutus"]} / 240)<br><br>";
 				echo t("Riitto päivät")." = floor(".t("Reaalisaldo")." / ".t("Päiväkulutus").")<br>";
 				echo "{$tuoterivi["riittopv"]} = floor({$tuoterivi["reaalisaldo"]} / {$tuoterivi["paivakulutus"]})<br><br>";
-				
+
 				echo "<font class='info'>";
 				echo t("Myyntitavoite").":<br>";
 

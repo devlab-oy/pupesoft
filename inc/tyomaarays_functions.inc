@@ -1,46 +1,50 @@
 <?php
-/**
- * TyÃ¶mÃ¤Ã¤rÃ¤yksen funktioita
- */
 
-if ( ! function_exists('tyomaarays_toimintavarmuus')) {
+/**
+ * Työmääräyksen funktioita
+ */
+if (!function_exists('tyomaarays_toimintavarmuus')) {
 
 	/**
 	 * Toimintavarmuuden laskenta
 	 *
 	 * @param  string 	$kiireellisyys	Kiireellisyys
-	 * @param  int		$paivat			HÃ¤iriÃ¶n poistumiseen kuluneet pÃ¤ivÃ¤t
+	 * @param  int		$paivat			Häiriön poistumiseen kuluneet päivät
 	 * @return float
 	 */
 	function tyomaarays_toimintavarmuus($kiireellisyys, $paivat) {
 		$toimvar = '-';
 
-		switch($kiireellisyys) {
+		switch ($kiireellisyys) {
 			case 'A1':
 				if ($paivat <= 1.5) {
 					$toimvar = 1;
-				} else {
+				}
+				else {
 					$toimvar = 1.5 / $paivat;
 				}
 				break;
 			case 'A2':
 				if ($paivat <= 3) {
 					$toimvar = 1;
-				} else {
+				}
+				else {
 					$toimvar = 3 / $paivat;
 				}
 				break;
 			case 'A3':
 				if ($paivat <= 5) {
 					$toimvar = 1;
-				} else {
+				}
+				else {
 					$toimvar = 5 / $paivat;
 				}
 				break;
 			case 'A4':
 				if ($paivat <= 7) {
 					$toimvar = 1;
-				} else {
+				}
+				else {
 					$toimvar = 7 / $paivat;
 				}
 				break;
@@ -51,16 +55,17 @@ if ( ! function_exists('tyomaarays_toimintavarmuus')) {
 		// Palautetaan toimintavarmuusprosentti
 		return $toimvar;
 	}
+
 }
 
-if ( ! function_exists('tyomaarays_palautusvarmuus')) {
+if (!function_exists('tyomaarays_palautusvarmuus')) {
 
 	/**
 	 * Palautusvarmuus laskenta
-	 * Jos palautus on alle 7 pÃ¤ivÃ¤ssÃ¤ niin palautusvarmuus on 100%
-	 * muuten prosentti lasketaan kaavalla 7 / palautus-pÃ¤ivÃ¤t.
+	 * Jos palautus on alle 7 päivässä niin palautusvarmuus on 100%
+	 * muuten prosentti lasketaan kaavalla 7 / palautus-päivät.
 	 *
-	 * @param int		$palautus_pvm		PÃ¤ivien lukumÃ¤Ã¤rÃ¤ (vpk_valmis-hÃ¤iriÃ¶_pÃ¤Ã¤ttyi)
+	 * @param int		$palautus_pvm		Päivien lukumäärä (vpk_valmis-häiriö_päättyi)
 	 * @return float
 	 */
 	function tyomaarays_palautusvarmuus($palautus_pvm) {
@@ -75,4 +80,5 @@ if ( ! function_exists('tyomaarays_palautusvarmuus')) {
 
 		return $palautusvarmuus;
 	}
+
 }

@@ -133,6 +133,8 @@ $verkkokauppavarasto	= "";
 $verkkokauppavarasto_li	= "";
 $editilaus_loppuhinta	= "";
 $kieltolisa				= "";
+$verkkokauppa			= "";
+$ot_verkkokauppa_asiakasnro = "";
 $OT_ASIAKASNRO			= "";
 $merkkitieto			= "";
 
@@ -368,6 +370,15 @@ while ($tietue = fgets($fd)) {
 			$editilaus_tilaustyyppi = trim($tieto);
 			break;
 
+		// Verkkokaupan nimi
+		case 'OSTOTIL.VERKKOKAUPPA' :
+			$verkkokauppa = $tieto;
+			break;
+			
+		case 'OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO' :
+			$ot_verkkokauppa_asiakasnro = $tieto;
+			break;
+			
 		case 'OBGMIACKR' :
 		//Edivastaus
 			if ($tieto == "AB") {
@@ -516,6 +527,7 @@ while ($tietue = fgets($fd)) {
 			$type = explode("@", $tieto);
 			$lopnumero = trim($type[0]);
 		case 'ONADBY_PC' :
+		case 'OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO' :
 		case 'OSTOTIL.OT_ASIAKASNRO' :
 		case 'ONADDP_PC' :
 		case 'NADBY' :
@@ -535,8 +547,10 @@ while ($tietue = fgets($fd)) {
 				break;
 			}
 
-			// Otetaan talteen
-			$OT_ASIAKASNRO = $tieto;
+			// Käytetään magenton asiakasnumeroa jos sellainen löytyy varastotilauskaupasta tai ennakkotilauskaupasta tulevilla tilauksilla
+			if ($edi_tyyppi == "magento" and (strpos($verkkokauppa, "stock") or strpos($verkkokauppa, "Prebook")) and $ot_verkkokauppa_asiakasnro != '') {
+				$tieto = $ot_verkkokauppa_asiakasnro;
+			}			
 
 			// Örum häkki
 			if (!isset($yhtiorow) and strpos($palvelin, "orum.devlab.fi") !== FALSE) {
@@ -631,7 +645,7 @@ while ($tietue = fgets($fd)) {
 
 		case 'OSTOTIL.OT_YRITYS':
 			$lnimitark = trim($tieto);
-			break;
+			break;	
 
 		case 'OSTOTIL.OT_KATUOSOITE':
 			$losoite = trim($tieto);
@@ -1009,6 +1023,19 @@ while ($tietue = fgets($fd)) {
 					}
 				}
 
+				$tilaustyyppilisa = '';
+
+				if ($edi_tyyppi == "magento" and strpos($verkkokauppa, "stock")) {
+					// Tyyppi 2, varaston täydennys
+					$tilaustyyppilisa = 2;
+				}
+
+				if ($edi_tyyppi == "magento" and strpos($verkkokauppa, "Prebook")) {
+					// Tyyppi E, ennakko
+					$editilaus_tilaustyyppi = "E";
+					//$editilaus_tila = "E";
+					$tilaustyyppilisa = "E";
+				}
 				// jos tilauksella on tullut lopullisen asikkaan tiedot, laitetaan ne talteen sisviesti ykköseen
 				if ($lopnimi != "") {
 					$arow["sisviesti1"] = "$lopnumero\n$lopnimi\n$loposoite\n$loppostino\n$loppostitp";
@@ -1058,8 +1085,6 @@ while ($tietue = fgets($fd)) {
 				}
 
 				$til_vienti = $arow["vienti"];
-
-				$tilaustyyppilisa = '';
 
 				if ($edi_tyyppi == 'futursoft' and ($editilaus_tilaustyyppi == 2 or $editilaus_tilaustyyppi == 3)) {
 					$tilaustyyppilisa = $editilaus_tilaustyyppi;
@@ -1524,6 +1549,10 @@ while ($tietue = fgets($fd)) {
 				if ($yhtiorow["alv_kasittely"] == '' and !isset($verkkokauppa_hinnatedifailistaverollisina)) {
 					$editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
 				}
+			}
+			// Tullaan varastotilauskaupasta tai ennakkotilauskaupasta 
+			if (strpos($verkkokauppa, "stock") or strpos($verkkokauppa, "Prebook")) {
+				$editilaus_hinta = 0;
 			}
 			break;
 

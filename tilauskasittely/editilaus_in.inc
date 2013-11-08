@@ -645,7 +645,7 @@ while ($tietue = fgets($fd)) {
 
 		case 'OSTOTIL.OT_YRITYS':
 			$lnimitark = trim($tieto);
-			break;	
+			break;
 
 		case 'OSTOTIL.OT_KATUOSOITE':
 			$losoite = trim($tieto);

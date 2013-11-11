@@ -358,6 +358,9 @@
 
 				echo "<tr><tdclass='back'><br><br></td></tr>";
 			}
+			else {
+				echo t("Virheellisiä oletuspaikkoja on yli %s. Niitä ei näytetä ruudulla.", "", 500)."<br>";
+			}
 
 			echo "</table><br><br>";
 			echo "<input type='submit' value='".t("Korjaa oletuspaikat")."'></form>";

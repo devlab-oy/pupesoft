@@ -6292,7 +6292,14 @@ if ($tee == '') {
 						}
 					}
 					elseif (in_array($toim, array('VALMISTAVARASTOON','VALMISTAASIAKKAALLE','RIVISYOTTO','PIKATILAUS'))) {
-						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle ".strtolower($row["yksikko"])."</td>";
+						echo "<td {$class} align='right' valign='top' nowrap>";
+						echo "{$kpl_ruudulle} ".strtolower($row["yksikko"]);
+
+						if ($sahkoinen_tilausliitanta and isset($vastaavat_html) and trim($vastaavat_html) != '' and isset($vastaavat_table2) and trim($vastaavat_table2) != '' and isset($paarivin_saldokysely) and $paarivin_saldokysely and in_array($row['var'], array('U','T'))) {
+							echo "<br />",$vastaavat_table2;
+						}
+
+						echo "</td>";
 					}
 					else {
 						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle</td>";

@@ -1313,7 +1313,7 @@
 
 		if ($tehdas_saldo_row['selitetark_2'] != "") {
 
-			$vastaavat_html = "<table width='100%'><tr style='width: 100%;'><th style='text-align: right;'>";
+			$vastaavat_html = "<table width='100%'><tr style='width: 100%;'><th style='text-align: center;'>";
 			$vastaavat_table = "";
 
 			$hae = 'nappi';
@@ -1324,12 +1324,12 @@
 
 			$th_rivi = true;
 
-			$vastaavat_table .= "<div class='availability {$_vastaavat_tunnus}_{$_tilattu}_availability' /><span class='{$_vastaavat_tunnus}_{$_tilattu}_loading'></span></div>&nbsp;";
- 			$vastaavat_table .= "<input type='hidden' class='{$_vastaavat_tunnus}_custid' value='{$tehdas_saldo_row['selitetark_2']}' />";
-	 		$vastaavat_table .= "<input type='hidden' class='{$_vastaavat_tunnus}_username' value='{$tehdas_saldo_row['selitetark_3']}' />";
-			$vastaavat_table .= "<input type='hidden' class='{$_vastaavat_tunnus}_password' value='{$tehdas_saldo_row['selitetark_4']}' />";
-			$vastaavat_table .= "<input type='hidden' class='{$_vastaavat_tunnus}_suppliernumber' value='{$tehdas_saldo_row['selitetark_5']}' />";
-			$vastaavat_table .= "<input type='hidden' class='{$_vastaavat_tunnus}_tt_tunnus' value='{$tehdas_saldo_row['tt_tunnus']}' />";
+			$vastaavat_table2 = "<div class='availability {$_vastaavat_tunnus}_{$_tilattu}_availability' /><span class='{$_vastaavat_tunnus}_{$_tilattu}_loading'></span></div>&nbsp;";
+ 			$vastaavat_table2 .= "<input type='hidden' class='{$_vastaavat_tunnus}_custid' value='{$tehdas_saldo_row['selitetark_2']}' />";
+	 		$vastaavat_table2 .= "<input type='hidden' class='{$_vastaavat_tunnus}_username' value='{$tehdas_saldo_row['selitetark_3']}' />";
+			$vastaavat_table2 .= "<input type='hidden' class='{$_vastaavat_tunnus}_password' value='{$tehdas_saldo_row['selitetark_4']}' />";
+			$vastaavat_table2 .= "<input type='hidden' class='{$_vastaavat_tunnus}_suppliernumber' value='{$tehdas_saldo_row['selitetark_5']}' />";
+			$vastaavat_table2 .= "<input type='hidden' class='{$_vastaavat_tunnus}_tt_tunnus' value='{$tehdas_saldo_row['tt_tunnus']}' />";
 
 			require("inc/sahkoinen_tilausliitanta.inc");
 
@@ -1338,5 +1338,7 @@
 			$vastaavat_html .= "</th></tr></table>";
 
 			$vastaavattuotteet = 1;
+
+			$paarivin_saldokysely = true;
 		}
 	}

@@ -194,10 +194,15 @@ if (isset($submit) and trim($submit) != '') {
 					"hyllytaso" => $row['hyllytaso']);
 
 				# Saapumiset
-				$saapumiset = hae_saapumiset($alusta_tunnus);
+				if ($yhtiorow['suuntalavat'] != "") {
+					$saapumiset = hae_saapumiset($alusta_tunnus);
+				}
+				else {
+					$saapumiset = array($saapuminen);
+				}
 
 				# Viimeisellä rivillä viedään koko suuntalava, jolloin lava merkataan puretuksi
-				if($viimeinen) {
+				if ($viimeinen) {
 					vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly);
 				}
 				else {

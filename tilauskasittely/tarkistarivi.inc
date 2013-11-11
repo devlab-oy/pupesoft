@@ -1288,7 +1288,9 @@
 		}
 	}
 
-	if ($sahkoinen_tilausliitanta and trim($vastaavat_html) == '' and (!isset($vastaavat_table) or trim($vastaavat_table) == '') and in_array($row['var'], array('U','T'))) {
+	$paarivin_saldokysely = false;
+
+	if ($sahkoinen_tilausliitanta and (!isset($vastaavat_html) or trim($vastaavat_html) == '') and (!isset($vastaavat_table) or trim($vastaavat_table) == '') and in_array($row['var'], array('U','T'))) {
 
 		$query = "	SELECT tt.tehdas_saldo,
 					tt.tehdas_saldo_paivitetty,

@@ -1580,7 +1580,7 @@
 
 					if (!isset($alv_talteen)) $alv_talteen = '';
 
-					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno, $alv_talteen, $rivikohtaiset_rahtikulut);
+					verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno, $alv_talteen, $rivikohtaiset_rahtikulut, $_yhtion_toimipaikka);
 				}
 
 				// Lisätään vielä ostovelkatiliöinnin tarkenteet

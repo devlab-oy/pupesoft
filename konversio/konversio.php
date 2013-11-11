@@ -3,7 +3,7 @@
 ini_set("memory_limit", "5G");
 
 require("../inc/parametrit.inc");
-require_once('VahinkopoytakirjaCSVDumper.php');
+require_once('VauriopoytakirjaCSVDumper.php');
 
 $request = array(
 	'action'			 => $action,
@@ -12,7 +12,7 @@ $request = array(
 );
 
 $request['konversio_tyypit'] = array(
-	'vahinkopoytakirja' => t('Vahinkopoytakirja'),
+	'vauriopoytakirja' => t('Vauriopoytakirja'),
 );
 
 if ($request['action'] == 'aja_konversio') {
@@ -20,8 +20,8 @@ if ($request['action'] == 'aja_konversio') {
 	echo "<br/>";
 
 	switch ($request['konversio_tyyppi']) {
-		case 'vahinkopoytakirja':
-			$dumper = new VahinkopoytakirjaCSVDumper($kukarow);
+		case 'vauriopoytakirja':
+			$dumper = new VauriopoytakirjaCSVDumper($kukarow);
 			break;
 
 		default:

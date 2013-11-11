@@ -3,7 +3,7 @@
 require_once('CSVDumper.php');
 require_once('tilauskasittely/luo_myyntitilausotsikko.inc');
 
-class VahinkopoytakirjaCSVDumper extends CSVDumper {
+class VauriopoytakirjaCSVDumper extends CSVDumper {
 
 	protected $unique_values = array();
 

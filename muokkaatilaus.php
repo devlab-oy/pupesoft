@@ -2150,7 +2150,7 @@
 										$row_ticket = preg_replace("/[^0-9]/", "", $row_ticket);
 
 										if ($row_ticket != "") {
-											echo "<br><a target='_blank' href='https://devlab.zendesk.com/agent/#/tickets/{$row_ticket}'>{$row_ticket}</a>";
+											echo "<br><a target='_blank' href='https://devlab.zendesk.com/tickets/{$row_ticket}'>{$row_ticket}</a>";
 										}
 									}
 								}

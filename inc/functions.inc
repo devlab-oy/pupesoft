@@ -9561,6 +9561,78 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
 	}
 }
 
+if (!function_exists('livesearch_vauriopoytakirjahaku')) {
+	function livesearch_vauriopoytakirjahaku($toim = '') {
+		global $yhtiorow, $kukarow, $palvelin2;
+
+		$tee = $_REQUEST["livesearch_tee"];
+		$nimi = $_REQUEST["livesearch_nimi"];
+		$formi = $_REQUEST["livesearch_form"];
+		$hakuid = $_REQUEST["livesearch_hakuid"];
+		$submit = $_REQUEST["livesearch_submit"];
+		$haku = trim($_REQUEST["livesearch_haku"]);
+
+		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+			</script>";
+
+			$query = "	SELECT DISTINCT takuunumero
+						FROM tyomaarays
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND takuunumero LIKE '%{$haku}%'
+						GROUP BY takuunumero";
+			$result = pupe_query($query);
+
+			$limit = 0;
+			if (mysql_num_rows($result) > 0) {
+				while ($row = mysql_fetch_assoc($result)) {
+					echo "	<div id='vauriopoytakirja_valinta_{$row['takuunumero']}'
+								name='selectOptions{$hakuid}'
+								onmouseover=\"this.className='liveSearchSelectedItem';
+									keyStrokeIndex = -1;
+									var aEls = document.getElementsByName('selectOptions{$hakuid}');
+									for (var iEl = 0; iEl < aEls.length; iEl++) {
+										if (aEls[iEl].id.substring(0,14) == 'kayttaja_valinta_' && aEls[iEl].id != 'vauriopoytakirja_valinta_{$row['takuunumero']}') {
+											document.getElementById(aEls[iEl].id).className='';
+										}
+									} \"
+								onmouseout=\"this.className='';\"
+								onclick=\"document.getElementById('{$hakuid}').value='{$row['takuunumero']}';";
+					if ($submit == "") {
+						echo "document.{$formi}.submit();";
+					}
+					else {
+						echo "document.getElementById('livesearch_{$hakuid}').style.visibility = 'hidden';";
+					}
+					echo "\"
+								style='padding:2px;'>
+								<font style='font-weight:bold'>{$row['takuunumero']}</font>
+							</div><div name='selectValues{$hakuid}' id='{$row['takuunumero']}'></div>";
+					$limit++;
+
+					if ($limit > 49) {
+						break;
+					}
+				}
+
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>", t("Haulla löytyi"), " ".mysql_num_rows($result)." ", t("Vauriopöytäkirjaa"), ", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+			}
+			else {
+				echo "<div style='padding:2px'><font class='message'>".t("Ei vauriopöytäkirjoja").".</font></div>";
+			}
+		}
+		else {
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+			</script>";
+		}
+	}
+}
+
 if (!function_exists("livesearch_kentta")) {
 	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $vero_field = '', $class = '', $break_all_div = '') {
 		global $kukarow, $toim;

@@ -616,7 +616,7 @@
 
 		if ($toimittajaid != '') {
 			// Jos ollaan rajattu toimittaja, niin otetaan vain sen toimittajan tuotteet ja laitetaan mukaan selectiin
-			$toimittaja_join = "JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid')";
+			$toimittaja_join = "JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$toimittajaid')";
 			$toimittaja_select = "tuotteen_toimittajat.liitostunnus toimittaja, tuotteen_toimittajat.pakkauskoko";
 		}
 		else {

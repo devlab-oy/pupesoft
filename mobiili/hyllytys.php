@@ -85,7 +85,7 @@ if (isset($submit)) {
     switch($submit) {
         case 'ok':
             # Vahvista keräyspaikka
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?hyllytys&".http_build_query($url_array)."{$url}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?hyllytys&".http_build_query($url_array)."{$url}&saapuminen={$saapuminen}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
             break;
         case 'suuntalavalle':
             if (!is_numeric($hyllytetty) or $hyllytetty < 0) {

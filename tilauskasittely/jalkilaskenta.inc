@@ -941,6 +941,87 @@ if ($tuoteno != '') {
 							// jos kyseessä on varastosiirto ja ollaan löydetty jo eka tulo
 							if ($trow['laji'] == 'siirto' and $eka == 0) {
 
+								// katotaan saadaanko tehdä tiliöintejä
+								// tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
+								$tilikausi_alku = (int) str_replace("-", "", $yhtiorow["tilikausi_alku"]);
+								$korjaus_alku   = (int) str_replace("-", "", substr($trow["laadittu"], 0, 10));
+
+								// Haetaan tiliöinnit, näitä on kaksi (varasto ja varastonmuutos)
+								$query = "	SELECT *
+											FROM tiliointi
+											WHERE yhtio  		= '{$kukarow['yhtio']}'
+											AND tapahtumatunnus = '{$trow['tunnus']}'
+											AND tapahtumatunnus > 0
+											AND korjattu = ''
+											LIMIT 2";
+								$sum_chk_res = pupe_query($query);
+
+								while ($sum_chk_row = mysql_fetch_assoc($sum_chk_res)) {
+
+									if ($sum_chk_row["summa"] > 0) {
+										$vasisum = round(abs($trow["kpl"] * $uusikehahin), 2);
+									}
+									else {
+										$vasisum = round(abs($trow["kpl"] * $uusikehahin) * -1, 2);
+									}
+
+									$pvm_chk = $tilikausi_alku > $korjaus_alku ? $yhtiorow['tilikausi_alku'] : "";
+
+									if ($pvm_chk == "") {
+
+										$params = array(
+											'summa' 			=> $vasisum,
+											'summa_valuutassa' 	=> $vasisum,
+											'laatija' 			=> $kukarow['kuka'],
+											'laadittu' 			=> date('Y-m-d H:i:s'),
+										);
+
+										// Tehdään uusi tiliöinti
+										kopioitiliointi($sum_chk_row['tunnus'], "", $params);
+
+										// yliviivataan alkuperäinen tiliöinti
+										$query = "	UPDATE tiliointi
+													SET korjattu = '$kukarow[kuka]',
+													korjausaika  = now()
+													WHERE yhtio  = '$kukarow[yhtio]'
+													AND tunnus   = '$sum_chk_row[tunnus]'";
+										$invupd = pupe_query($query);
+
+										if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+									}
+									else {
+
+										$params = array(
+											'tapvm' 			=> $yhtiorow['tilikausi_alku'],
+											'tapahtumatunnus'	=> 0,
+											'summa' 			=> round($sum_chk_row["summa"] * -1, 2),
+											'summa_valuutassa' 	=> round($sum_chk_row["summa"] * -1, 2),
+											'laatija' 			=> $kukarow['kuka'],
+											'laadittu' 			=> date('Y-m-d H:i:s'),
+										);
+
+										// Tehdään vastakirjaus tilikauden ensimmäiselle päivälle
+										kopioitiliointi($sum_chk_row['tunnus'], "", $params);
+
+										$params = array(
+											'tapvm' 			=> $yhtiorow['tilikausi_alku'],
+											'summa' 			=> $vasisum,
+											'summa_valuutassa' 	=> $vasisum,
+											'laatija' 			=> $kukarow['kuka'],
+											'laadittu' 			=> date('Y-m-d H:i:s'),
+										);
+
+										// Tehdään uusi kirjaus oikeilla hinnoilla tilikauden ensimmäiselle päivälle
+										kopioitiliointi($sum_chk_row['tunnus'], "", $params);
+
+										// Nollataan alkuperäisen tiliöinnin tapahtumatunnus, ku se ei oo enää "voimassa"
+										$query = "	UPDATE tiliointi
+													SET tapahtumatunnus  = 0
+													WHERE yhtio  = '$kukarow[yhtio]'
+													AND tunnus   = '$sum_chk_row[tunnus]'";
+										$invupd = pupe_query($query);
+									}
+								}
 							}
 
 							// jos kyseessä on inventointi ja ollaan löydetty jo eka tulo

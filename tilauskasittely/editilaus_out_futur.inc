@@ -209,10 +209,10 @@
 
 		while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
 
-			$kpl = round(($tilausrivi_row['jt'] + $tilausrivi_row['varattu']), 0);
+			$kpl = round(($tilausrivi_row['jt'] + $tilausrivi_row['varattu']));
 
 			if ($tilausrivi_row['var'] == 'P') {
-				$kpl = round($tilausrivi_row['tilkpl'] * 1, 0);
+				$kpl = round($tilausrivi_row['tilkpl'] * 1);
 			}
 
 			// HUOM: Reklamaatioissa laitetaan nettohyvitysyksikköhinta
@@ -227,6 +227,26 @@
 			$edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
 			$edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:{$tilausrivi_row['tuoteno']}\n";
 			$edi_order .= "OSTOTILRIV.OTR_NIMI:{$tilausrivi_row['nimitys']}\n";
+
+			if ($myynti_vai_osto == 'O') {
+
+				// Haetaan tuotteen toimittajan tuotekerroin
+				$query = "	SELECT tuotekerroin, if(jarjestys = 0, 9999, jarjestys) sorttauskentta
+							FROM tuotteen_toimittajat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$tilausrivi_row['tuoteno']}'
+							AND liitostunnus = '{$laskurow['liitostunnus']}'
+							AND tuotekerroin != 0
+							AND tuotekerroin != 1
+							ORDER BY sorttauskentta";
+				$tt_tuotekerroin_chk_res = mysql_fetch_assoc($query);
+
+				if (mysql_num_rows($tt_tuotekerroin_chk_res) != 0) {
+					$tt_tuotekerroin_chk_row = mysql_fetch_assoc($tt_tuotekerroin_chk_res);
+
+					$kpl = round($tt_tuotekerroin_chk_row['tuotekerroin'] * $kpl);
+				}
+			}
 
 			$edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:{$kpl}\n";
 
